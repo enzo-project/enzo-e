@@ -94,35 +94,9 @@ void EnzoComputeTemperature::compute_(Block * block,
   if (enzo::config()->method_grackle_use_grackle){
 
 #ifdef CONFIG_USE_GRACKLE
-    code_units grackle_units_;
-    grackle_field_data grackle_fields_;
-
-    // setup grackle units if they are not already provided
-    if (!grackle_units){
-      grackle_units = &grackle_units_;
-      EnzoMethodGrackle::setup_grackle_units(enzo_block, grackle_units, i_hist_);
-    }
-
-    // if grackle fields are not provided, define them
-    bool delete_grackle_fields = false;
-    if (!grackle_fields){
-      grackle_fields  = &grackle_fields_;
-      EnzoMethodGrackle::setup_grackle_fields(enzo_block, grackle_fields, i_hist_);
-      delete_grackle_fields = true;
-    }
-
-    // Note: compute pressure is handled internally in Grackle.
-    //       Do not need to recompute this here
-
-    // temperature is returned in units of K
-    if (calculate_temperature(grackle_units, grackle_fields, t) == ENZO_FAIL){
-      ERROR("EnzoComputeTemperature::compute_()",
-            "Error in call to Grackle's compute_temperature routine.\n");
-    }
-
-    if (delete_grackle_fields){
-      EnzoMethodGrackle::delete_grackle_fields(grackle_fields);
-    }
+    const EnzoMethodGrackle* grackle_method = enzo::grackle_method();
+    grackle_method->calculate_temperature(block, t, grackle_units,
+					  grackle_fields, i_hist_);
 #else
     ERROR("EnzoComputeTemperature::compute_()",
           "Attempting to compute temperature with method Grackle "

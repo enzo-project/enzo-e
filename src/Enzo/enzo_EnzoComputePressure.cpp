@@ -87,36 +87,9 @@ void EnzoComputePressure::compute_(Block * block,
 
   if (enzo::config()->method_grackle_use_grackle){
 #ifdef CONFIG_USE_GRACKLE
-    code_units grackle_units_;
-    grackle_field_data grackle_fields_;
-
-    // setup grackle units if they are not already provided
-    if (!grackle_units){
-      grackle_units = &grackle_units_;
-      EnzoMethodGrackle::setup_grackle_units(enzo_block, grackle_units, i_hist_);
-    }
-
-    // if grackle fields are not provided, define them
-    bool delete_grackle_fields = false;
-    if (!grackle_fields){
-      grackle_fields  = &grackle_fields_;
-  		// NOTE: Add option here to pass history index to setup to
-		//       allow for computation of old baryon fields ....
-		//       this way we can facilitate computation of
-		//       interpolated (in time) fields
-      EnzoMethodGrackle::setup_grackle_fields(enzo_block, grackle_fields, i_hist_);
-      delete_grackle_fields = true;
-    }
-
-    // Compute pressure in Grackle
-    if (calculate_pressure(grackle_units, grackle_fields, p) == ENZO_FAIL){
- 		  ERROR("EnzoComputePressure::compute_()",
-	          "Error in call to Grackle's calculate_pressure routine.\n");
-    }
-
-    if (delete_grackle_fields){
-      EnzoMethodGrackle::delete_grackle_fields(grackle_fields);
-    }
+    const EnzoMethodGrackle* grackle_method = enzo::grackle_method();
+    grackle_method->calculate_pressure(block, p, grackle_units,
+				       grackle_fields, i_hist_);
 #else
     ERROR("EnzoComputePressure::compute_()",
           "Attempting to compute pressure with method Grackle " 

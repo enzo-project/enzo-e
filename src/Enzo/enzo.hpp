@@ -58,6 +58,7 @@ namespace enzo {
   EnzoProblem * problem();
   EnzoSimulation * simulation();
   EnzoPhysicsCosmology * cosmology();
+  const EnzoMethodGrackle * grackle_method();
   EnzoUnits * units();
   const EnzoConfig * config();
   CProxy_EnzoBlock block_array();
