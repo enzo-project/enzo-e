@@ -322,24 +322,29 @@ function summary_incomplete_output ( $test_output, $executables, $state, $dir,$v
   global $types;
   global $num_types;
 
-  for ($i = 0; $i<$num_types; ++$i) {
+  if ($valid == false) {
+    printf ("<td></td>");
+    return false; 
+  } else {
+    for ($i = 0; $i<$num_types; ++$i) {
 
-    $output_files = "";
-    $num_output_files = 0;
-    for ($test = 0; $test<sizeof($test_output); ++$test) {
-      $output = "../$dir/test_$test_output[$test].unit";
-      $output_files = "$output_files $output";
-      ++$num_output_files;
+      $output_files = "";
+      $num_output_files = 0;
+      for ($test = 0; $test<sizeof($test_output); ++$test) {
+        $output = "../$dir/test_$test_output[$test].unit";
+        $output_files = "$output_files $output";
+        ++$num_output_files;
+      }
+
+      /* if (! $valid) { */
+      /*   printf ("<td></td>"); */
+      /* } else { */
+      passthru("cat $output_files | awk 'BEGIN{e=0;}; /END CELLO/ {e=e+1};END{if ($num_output_files==e) {print \"<td></td>\"} else {print \"<td class=incomplete>\"$num_output_files - e\"</td>\";}}'");
+      /* } */
+
     }
-
-    /* if (! $valid) { */
-    /*   printf ("<td></td>"); */
-    /* } else { */
-    passthru("cat $output_files | awk 'BEGIN{e=0;}; /END CELLO/ {e=e+1};END{if ($num_output_files==e) {print \"<td></td>\"} else {print \"<td class=incomplete>\"$num_output_files - e\"</td>\";}}'");
-    /* } */
-
+    return $valid;
   }
-  return $valid;
 }
 
 //----------------------------------------------------------------------

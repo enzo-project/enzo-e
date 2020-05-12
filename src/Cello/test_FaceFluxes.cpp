@@ -126,7 +126,7 @@ PARALLEL_MAIN_BEGIN
       CkPrintf ("DEBUG_LIMITS %d %d %d  %d %d %d\n",
                 (ixu-ixl),(iyu-iyl),(izu-izl) ,mx,my,mz);
 
-      //      unit_assert ( (ixu-ixl)*(iyu-iyl)*(izu-izl) == mx*my*mz);
+      // unit_assert ( (ixu-ixl)*(iyu-iyl)*(izu-izl) == mx*my*mz);
       unit_assert ( unit_incomplete );
     }
                                    
@@ -433,7 +433,7 @@ PARALLEL_MAIN_BEGIN
         }
       }
 
-      //      unit_assert (sum_1_post == (sum_1_pre + sum_2_pre));
+      // unit_assert (sum_1_post == (sum_1_pre + sum_2_pre));
       unit_assert ( unit_incomplete );
 #ifdef DEBUG_FACE_FLUXES
       CkPrintf ("sum_1 %ld =?= %ld (sum_1_pre %ld + sum_2_pre %ld)\n",
