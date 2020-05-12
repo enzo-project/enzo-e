@@ -20,7 +20,7 @@ public: // interface
   /// Constructor
   ItFace(int rank,
 	 int rank_limit,
-	 bool periodic[3][2],
+	 bool periodic[3],
 	 int n3[3],
 	 Index index,
 	 const int * ic3=0,
@@ -39,9 +39,7 @@ public: // interface
     p | ipf3_;
     p | rank_;
     p | rank_limit_;
-    for (int i=0; i<3; i++) {
-      PUParray (p,periodicity_[i],2);
-    }
+    PUParray (p,periodicity_,3);
     PUParray (p,n3_,3);
     p | index_;
   }
@@ -99,7 +97,7 @@ private: // attributes
   int rank_limit_;
 
   /// Periodicity
-  int periodicity_[3][2];
+  int periodicity_[3];
 
   /// Size of the octree array
   int n3_[3];

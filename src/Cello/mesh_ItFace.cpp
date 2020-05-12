@@ -11,7 +11,7 @@
 
 ItFace::ItFace(int rank, 
 	       int rank_limit,
-	       bool periodic[3][2],
+	       bool periodic[3],
 	       int n3[3],
 	       Index index,
 	       const int * ic3,
@@ -36,9 +36,7 @@ ItFace::ItFace(int rank,
   }
   for (int axis=0; axis<3; axis++) {
     n3_[axis] = n3[axis];
-    for (int face=0; face<2; face++) {
-      periodicity_[axis][face] = periodic[axis][face];
-    }
+    periodicity_[axis] = periodic[axis];
   }
 }
 
@@ -156,10 +154,14 @@ bool ItFace::valid_() const
 
   bool l_periodic = true;
   // Return false if on boundary and not periodic
-  if (index_.is_on_boundary(if3_,n3_)) {
-    for (int axis=0; axis<rank_; axis++) {
-      if (if3_[axis] == -1 && ! periodicity_[axis][0]) l_periodic = false;
-      if (if3_[axis] == +1 && ! periodicity_[axis][1]) l_periodic = false;
+  for (int axis=0; axis<rank_; axis++) {
+    for (int face=0; face < 2; face++) {
+      const bool is_on_boundary =
+	index_.is_on_boundary(axis,if3_[axis],n3_[axis]);
+      const bool is_face =
+	(face==0 && if3_[axis] == -1) || (face==1 && if3_[axis] == 1);
+      const bool is_periodic = periodicity_[axis];
+      if ( (! is_periodic) && is_on_boundary && is_face ) l_periodic = false;
     }
   }
   return (l_face && l_range && l_parent && l_periodic);
