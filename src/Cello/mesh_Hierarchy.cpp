@@ -94,6 +94,7 @@ void Hierarchy::pup (PUP::er &p)
   PUParray(p,upper_,3);
 
   PUParray(p,blocking_,3);
+  PUParray(p,periodicity_,3);
 
 }
 

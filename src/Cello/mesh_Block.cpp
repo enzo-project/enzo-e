@@ -439,7 +439,7 @@ ItFace Block::it_face
   int rank = cello::rank();
   int n3[3];
   size_array(n3,n3+1,n3+2);
-  bool periodic[3][2];
+  bool periodic[3];
   periodicity(periodic);
   return ItFace (rank,min_face_rank,periodic,n3,index,ic3,if3);
 }
@@ -452,7 +452,7 @@ ItNeighbor Block::it_neighbor (int min_face_rank, Index index,
 {
   int n3[3];
   size_array(&n3[0],&n3[1],&n3[2]);
-  bool periodic[3][2];
+  bool periodic[3];
   periodicity(periodic);
 
   return ItNeighbor
@@ -480,18 +480,16 @@ Solver * Block::solver () throw ()
 
 //----------------------------------------------------------------------
 
-void Block::periodicity (bool p32[3][2]) const
+void Block::periodicity (bool p3[3]) const
 {
   for (int axis=0; axis<3; axis++) {
-    for (int face=0; face<2; face++) {
-      p32[axis][face] = false;
-    }
+    p3[axis] = false;
   }
   int index_boundary = 0;
   Problem * problem = cello::problem();
   Boundary * boundary;
   while ( (boundary = problem->boundary(index_boundary++)) ) {
-    boundary->periodicity(p32);
+    boundary->periodicity(p3);
   }
 }
 

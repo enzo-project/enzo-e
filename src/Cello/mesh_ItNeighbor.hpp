@@ -22,7 +22,7 @@ public: // interface
   (
    Block * block,
    int min_face_rank,
-   bool periodic[3][2],
+   bool periodic[3],
    int n3[3],
    Index index,
    int neighbor_type,
@@ -45,9 +45,7 @@ public: // interface
     PUParray(p,ipf3_,3);
     p | rank_;
     p | min_face_rank_;
-    for (int i=0; i<3; i++) {
-      PUParray (p,periodic_[i],2);
-    }
+    PUParray (p,periodic_,3);
     PUParray (p,n3_,3);
     p | index_;
     p | level_;
@@ -128,7 +126,7 @@ private: // attributes
   int min_face_rank_;
 
   /// Whether domain is periodic along each face & axis
-  bool periodic_[3][2];
+  bool periodic_[3];
 
   /// Size of the block array
   int n3_[3];
