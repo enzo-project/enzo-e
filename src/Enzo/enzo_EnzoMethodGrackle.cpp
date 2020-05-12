@@ -17,7 +17,8 @@ EnzoMethodGrackle::EnzoMethodGrackle
   const double physics_cosmology_initial_redshift,
   const double time
 )
-  : Method()
+  : Method(),
+    grackle_units_(), grackle_chemistry_data_defined_(false)
 {
 #ifdef CONFIG_USE_GRACKLE
 
@@ -156,12 +157,12 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
 
     this->compute_(enzo_block);
 
-    enzo_block->compute_done();
-
     if (simulation)
       simulation->performance()->stop_region(perf_grackle,__FILE__,__LINE__);
   #endif
   }
+
+  block->compute_done();
 
   return;
 
