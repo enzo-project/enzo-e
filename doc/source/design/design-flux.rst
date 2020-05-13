@@ -506,22 +506,22 @@ indeed conforming.
 
 .. glossary::
 
-  ``void get_dimensions (int *mx, int *my, int *mz)``
-   *Return the array dimensions of the flux array, including adjustments for centering.  Indexing is ix + mx*(iy +my*iz).*
+  ``void get_dimensions (int * mx, int * my, int * mz)``
+   *Return the array dimensions of the flux array, including adjustments for centering.  Indexing is ix + mx\*(iy +my\*iz).*
    
 ----
 
 .. glossary::
 
   ``void set_flux_array ( std::vector<double> array, int dx, int dy, int dz)``
-   *Copy flux values from an array to the FluxFaces flux array. Array element array[ix*dx + iy*dy + iz*dz] should correspond to flux value (ix,iy,iz), where (0,0,0) <= (ix,iy,iz) < (mx,my,mz).*
+   *Copy flux values from an array to the FluxFaces flux array. Array element array[ix\*dx + iy\*dy + iz\*dz] should correspond to flux value (ix,iy,iz), where (0,0,0) <= (ix,iy,iz) < (mx,my,mz).*
   
 ----
 
 .. glossary::
 
   ``std::vector<double> & flux_array (int * dx=0, int * dy=0, int * dz=0)``
-   *Return the array of fluxes and associated strides (dx,dy,dz) such that the (ix,iy,iz) flux value is fluxes[ix*dx + iy*dy + iz*dz], where (0,0,0) <= (ix,iy,iz) < (mx,my,mz).*
+   *Return the array of fluxes and associated strides (dx,dy,dz) such that the (ix,iy,iz) flux value is fluxes[ix\*dx + iy\*dy + iz\*dz], where (0,0,0) <= (ix,iy,iz) < (mx,my,mz).*
   
 ----
 
@@ -549,7 +549,7 @@ indeed conforming.
 .. glossary::
 
   ``FaceFluxes & operator += (const FaceFluxes & ff)``
-   *Add the face fluxes object ff to this one. Used for accumulating fluxes with finer time steps until they match the coarser time step. Updates dt_fluxes accordingly. Assumes spacially-conforming FaceFluxes objects: FaceFluxes must be associated with the same face, and ratio of cell volumes must be 1.0
+   *Add the face fluxes object ff to this one. Used for accumulating fluxes with finer time steps until they match the coarser time step. Updates dt_fluxes accordingly. Assumes spacially-conforming FaceFluxes objects: FaceFluxes must be associated with the same face, and ratio of cell volumes must be 1.0*
   
 ----
 
