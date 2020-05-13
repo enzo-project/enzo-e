@@ -154,7 +154,7 @@ Adapt {
  }
 
  Output {
-     list = [ "de", "depa", "ax", "dark", "mesh", "po"];
+     list = [ "de", "depa", "ax", "dark", "mesh", "po" ];
      de {
          dir = [ "COSMO_CG_%04d", "cycle" ];
          field_list = [ "density" ];
@@ -281,7 +281,7 @@ Adapt {
      };
      hdf5 {
          dir = [ "COSMO_CG_%04d", "cycle" ];
-         field_list = [ "density", "velocity_x", "velocity_y", "velocity_z", "acceleration_x", "acceleration_y", "acceleration_z", "total_energy", "internal_energy", "pressure", "density" ];
+         field_list = [ "density", "velocity_x", "velocity_y", "velocity_z", "acceleration_x", "acceleration_y", "acceleration_z", "total_energy", "internal_energy", "pressure" ];
          name = [ "data-%02d-%02d.h5", "count", "proc" ];
          particle_list = [ "dark" ];
          schedule {

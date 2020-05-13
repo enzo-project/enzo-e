@@ -355,226 +355,223 @@ perform flux correction
 Face class
 ----------
 
-A :p:`Face` is defined as the intersection of two Blocks.  For flux
-correction in hydrodynamics, it is sufficient for faces to be defined
-by two Block indices where the Blocks share a (d-1)-dimensional face
-(facet).  For MHD where area averages are used, the fluxes may
-additionally be along a strict subset of a facet, and can be specified
-using an integer tuple :p:`(fx,fy,fz)` where :p:`-1 <= fx,fy,fz <= 1`.  The
-default :p:`(fx,fy,fz) == (0,0,0)` represents the entire face.
+A block :p:`Face` is any facet, edge, or corner of a block.  For flux
+correction in hydrodynamics, one typically only deals with facets, or
+(d-1)-dimensional faces; however, for MHD, edge faces may be used as
+well.
 
-The Block indices are ordered, with the first defining on which Block
-the fluxes were computed.  For flux correction, both
-:p:`face(index_block, index_neighbor)` and :p:`face (index_neighbor,
-index_block)` fluxes are required for flux correction on the coarser
-Block.
+A face is determined by its "center" (ix,iy,iz), -1 <= ix,iy,iz <= +1,
+assuming the block corners are at (+/-1,+/-1,+/-1).  As
+examples, the positive Y-axis facit is (0,+1,0), the edge along X=+1
+and Z=-1 is (+1,0,-1), and the entire block as a 3-D "face" is
+(0,0,0).
 
-----
+Each Face is associated with a (unit) normal vector (rx,ry,rz).  For
+facets the normal vector (assuming the positive direction) is implied,
+but for edge-faces the normal vector is ambiguous, so it needs to be
+represented explicitly.  (Note the terminology (rx,ry,rz) is used
+instead of (nx,ny,nz) because the later is already used to represent
+a block's size).
 
-.. glossary::
-
-   ``Face::Face (Index index_block, Index index_neighbor, int fx=0, int fy=0, int fz=0);``
-    *Create a Face object at the interface between two Blocks and     associated with the first Block.  Face must have rank d-1.  A "face     of a Face" is defined using integer tuple (fx,fy,fz) where -1 <=     fx,fy,fz <= 1.  The default (fx,fy,fz) = (0,0,0) reverts to the     entire face.*
-
-
-----
-
-.. glossary::
-
-   ``bool Face::operator == (Face f1, Face f2) const;``
-    *Compare   whether two faces are equal.  Note that face(f1,f2) == face(f2,f1),   since the face itself is defined by the unordered pair (f1,f2)--the   ordering only indicates on which Block the corresponding face is   associated with.*
-
-
+Additionally, the block's location (cx,cy,cz), 0 <= cx,cy,cz <= +1, as
+a child block within its parent is also stored in the Face object.
+This is used for determining the relationship between the block's face
+and the corresponding face of the adjacent neighbor, which will be
+required when the block and its neighbor are in different mesh
+refinement levels.  Blocks in the coarsest (root) level have no
+parent, so this location is not accessed.
 
 ----
 
 .. glossary::
 
-   ``int Face::index_block () const;``
-    *Return the index of the Block for which the face is associated.*
-
-
-----
-
-.. glossary::
-
-   ``int Face::index_neighbor() const;``
-    *Return the corresponding neighbor Block index.*
-
+   ``Face::Face (int ix, int iy, int iz,  int rx, int ry, int rz,  int cx, int cy, int cz)``
+    *Create a Face object for a Block associated with face (ix,iy,iz),  -1 <= ix,iy,iz <= +1, with unit normal (rx,ry,rz), -1 <= (rx,ry,rz) <= 1 and sum |rx|+|ry|+|rz| = 1, and where the Block is child (cx,cy,cz), 0 <= (cx,cy,cz) <= 1, in its parent block.*
 
 ----
 
 .. glossary::
 
-   ``void Face::get_subface (int *fx, int *fy, int *fz);``
-    *Return the tuple (fx,fy,fz) identifying a subface of the intersection between two Blocks.  Default is (fx,fy,fz) = (0,0,0)*
-
+   ``void Face::get_face (int *ix, int *iy, int *iz)``
+    *Return the tuple (ix,iy,iz), -1 <= ix,iy,iz <= 1, identifying the block's face, which may be a corner, edge, facet, or the entire block.*
 
 ----
 
 .. glossary::
 
-   ``bool Face::is_facet() const;``
-    *Return whether the intersection between Blocks is a facet, that is     has rank d-1.  Must be true to be a valid face for flux correction.     WARNING: ignores domain boundary and boundary conditions.  Needs     domain array size and whether axis othogonal to the shared face is     periodic or not.*
+   ``void Face::get_normal (int *rx, int *ry, int *rz)``
+    *Return the tuple (rx,ry,rz), -1 <= rx,ry,rz <= 1 and |rx|+|ry|+|rz| = 1, identifying the unit normal to the face.*
+
+----
+
+.. glossary::
+
+   ``void Face::get_child (int *cx, int *cy, int *cz)``
+    *Return the tuple (cx,cy,cz), 0 <= cx,cy,cz <= 1, identifying the block's location in its parent Block, if any.*
 
 ----------------     
 FaceFluxes class
 ----------------     
 
-Face fluxes represent an array of fluxes of a conserved Field through
-a Block's face or subset of a face.  Components of :p:`FaceFluxes` are
-the following:
-
-  * **face**: *The intersection between two Blocks for hydrodynamics;             for MHD, axis and direction may also be provided to             represent a "face within a face".  Defined using a pair             of Block indices, the first of which is the "owner" of             the fluxes.  See the :p:`Face` class discussion for more             details.*
-
-  * **field**: *Field for which the fluxes are associated*
-
-  * **dimensions**: *The dimensions defines how the face is discretized                   in space into surface elements.  This is :p:`(nx,ny,nz)` where one (or more) of :p:`nx,ny,nz`, equals 1.  If ghost zones are required for                   fluxes, a corresponding :p:`(gx,gy,gz)` is                   added, where the same one (or more) of :p:`gx,gy,gz` equals 0.  For non-centered zones, a                   centering offset may be needed :p:`(cx,cy,cz)`                   where one or more of :p:`cx,cy,cz` = 1 and                   others are 0.*
-
-  * **volume**: *Physical size :p:`(hx,hy,hz,dt)` defining the               volume or area element and time step through which the               flux is moving.  One (or more) of :p:`h[xyz] = 1.0`,               corresponding to :p:`n[xyz] = 1`.  Note unused :p:`h[xyz]`               are 1.0 not 0.0 so that spatial area can be computed as               :p:`hx*hy*hz`.*
-
-  * **fluxes**: *Floating-point array of fluxes.  Array size is               determined by :p:`(nx,ny,nz)` + :p:`2*(gx,gy,gz)` +               :p:`(cx,cy,cz)`.  May be extended precision to mitigate               effects of floating-point cancellation when subtracting               fluxes, though ideally should use extended precision               when computing them in the first place.*
+Face fluxes represent an array of fluxes of a given conserved Field
+through a Block's face or subset of a face.  Operations available for
+fluxes including *coarsening*, for summing fluxes in a finer block to
+match the resolution of a neighboring coarser block, and *summing*,
+for accumulating a sequence of fluxes associated with a block with a
+finer time step to match a neighboring block's coarser time step.  The
+mesh resolution level and time step size are maintained for each
+Fluxes object, both for the original block and for the current array
+of fluxes.  This is to help ensure that operations that require fluxes
+to be conforming (correct mesh levels and/or matching time steps) are
+indeed conforming.
 
 ----
 
 .. glossary::
 
-   ``void FaceFluxes::FaceFluxes (Face face, int index_field, int nx, int ny, int nz, double hx, double hy, double hz, double dt);``
-     *Create a FaceFluxes object for the given face, field, and time     interval.*
-
-----
-
-.. glossary::
-
-   ``void FaceFluxes::set_ghost(int gx, int gy, int gz);``
-     *Set ghost zones if any.*
-
-----
-
-.. glossary::
-
-   ``void FaceFluxes::set_centering(int cx, int cy, int cz);``
-     *Set centering if non-centered.*
-
-
-----
-
-.. glossary::
-
-   ``void FaceFluxes::allocate ();``
-     *Allocate the flux array.*
-
-----
-
-.. glossary::
-
-   ``void FaceFluxes::deallocate();``
-     *Deallocate the flux array.*
-
-----
-
-.. glossary::
-
-   ``Face FaceFluxes::face () const;``
-     *Return the face associated with the FaceFluxes.*
-
-----
-
-.. glossary::
-
-   ``void FaceFluxes::get_element_size (double *hx, double *hy, double * hz) const;``
-     *Return the volume size of the fluxes.  May differ from Block cell     width if coarsening operations have been performed.*
-
-----
-
-.. glossary::
-
-   ``double FaceFluxes::time_step () const;``
-     *Return the time step dt of the accumulated fluxes.  May differ from      Block time step if multiple time steps have been accumulated.*
-
-----
-
-.. glossary::
-
-   ``void FaceFluxes::get_dimensions (int *mx, int *my, int *mz) const;``
-     *Return the array dimensions, including adjustments for ghost or      centering.  One or more of mx,my,mz will be 1.*
-
-----
-
-.. glossary::
-
-   ``void FaceFluxes::set_fluxes ( T * array, int dx, int dy, int dz);``
-     *Copy flux values from an array to the FluxFaces.  Array element     array[ix*dx + iy*dy + iz*dz] should correspond to flux value     (ix,iy,iz), where (0,0,0) <= (ix,iy,iz) < (mx,my,mz).*
-
-----
-
-.. glossary::
-
-   ``T * FaceFluxes::get_fluxes (int * dx, int * dy, int *dz);``
-     *Return the array of fluxes and associated strides (dx,dy,dz) such     that the (ix,iy,iz) flux value is fluxes[ix*dx + iy*dy + iz*dz],     where (0,0,0) <= (ix,iy,iz) < (mx,my,mz).*
-
-----
-
-.. glossary::
-
-   ``friend float ratio_cell_width (FaceFluxes ff_1, FaceFluxes ff_2) const;``
-     *Return the ratio of volume element resolutions h(ff_1) / h(ff_2) =     {0.5, 1.0, 2.0} along each dimension between stored fluxes in two     FaceFluxes objects.  FaceFluxes are assumed to be associated with     the same face.  Must be 1.0 to compute sum or difference.*
-
-----
-
-.. glossary::
-
-   ``friend float ratio_time_step (FaceFluxes ff_1, FaceFluxes ff_2) const;``
-     *Return the ratio of time steps dt(ff_1) / dt(ff_2) = {0.5, 1.0,      2.0} of fluxes between two FaceFluxes objects.  FaceFluxes are      assumed to be associated with the same face.  Ratio must be 1.0 to      compute difference.*
-
-----
-
-.. glossary::
-
-   ``void FaceFluxes::coarsen ();``
-      *Coarsen a FaceFluxes object by reducing dimensions by two along      each face dimension, and summing fine elements contained in each      coarse flux element.  Updates volume element resolution (hx,hy,hz)      accordingly.  Used for coarsening fine-level fluxes to match coarse      level fluxes.*
-
-----
-
-.. glossary::
-
-   ``FaceFluxes & FaceFluxes::operator += (FaceFluxes face_flux);``
-     *Add FaceFluxes object to this one. FaceFluxes are assumed to be      associated with the same face.  Used for accumulating fluxes with      finer time steps until they match the coarser time step.  Updates      dt accordingly.  Assumes spacially-conforming FaceFlux objects:      FaceFluxes must be associated with the same face, and ratio of      cell_widths must be 1.0*
-
-----
-
-.. glossary::
-
-   ``FaceFluxes & FaceFluxes::operator *= (double weight);``
-     *Scale the fluxes array by a scalar constant.*
-
-
-----
-
-.. glossary::
-
-   ``friend FaceFluxes operator - (FaceFluxes ff_1, FaceFluxes ff_2);``
-     *Return a FaceFluxes object containing the difference (ff_1 - ff_2)      between the two FaceFluxes.  Used to compute flux correction      factors.  Assumes fully-conforming FaceFlux objects: FaceFluxes must be      associated with the same face, and ratios of both cell_widths and      time_steps must be 1.0.*
-
-        
+   ``FaceFluxes (Face face, int index_field, int nx, int ny, int nz, int level, double dt, int cx, int cy, int cz)``
+    *Create a FaceFluxes object for the given Face* **face,** *block size* **(nx,ny,nz),** *mesh refinement level* **level** *, time step* **dt,** *and optional face-centering* **(cx,cy,cz).** *(Note that centering (cx,cy,cz) here is different from the location in parent (cx,cy,cz) for the Face object.)*
    
+----
+
+.. glossary::
+
+   ``void allocate ()``
+    *Allocate the flux array and clear values.*
+
+----
+
+.. glossary::
+
+  ``void deallocate()``
+   *Deallocate the flux array.*
+
+----
+
+.. glossary::
+
+  ``void clear()``
+   *Clear flux array values.*
+
+----
+
+.. glossary::
+
+  ``Face face ()``
+   *Return the face associated with the FaceFluxes.*
+
+----
+
+.. glossary::
+
+  ``int level_fluxes ()``
+   *Return the mesh level associated with the fluxes (may change e.g. if fluxes are coarsened.)*
+
+----
+
+.. glossary::
+
+  ``int level_block ()``
+   *Return the mesh level associated with with the block on which the fluxes are originally defined.  Will not change.*
+  
+----
+
+.. glossary::
+
+  ``double time_step_fluxes ()``
+   *Return the time step associated with the fluxes (may change e.g. if multiple time steps accumulated.)*
+  
+----
+
+.. glossary::
+
+  ``double time_step_block ()``
+   *Return the time step associated with the fluxes.  Will not change.*
+  
+----
+
+.. glossary::
+
+  ``void get_start(int * ix0, int * iy0, int * iz0, FaceFluxes & ff)``
+   *Return the beginning loop limits on this face relative to the given neighbor face fluxes.  Fluxes must be conforming in terms of mesh level.  May be non-zero if the neighboring fluxes are associated with a block in a finer mesh level.*  
+
+----
+
+.. glossary::
+
+   ``void get_size(int * nx, int * ny, int * nz, FaceFluxes & ff)``
+    *Return the size of the flux array that intersects the given neighboring face fluxes object.  Will be smaller than the flux array size if the neighboring fluxes are in a finer level block.*
+  
+----
+
+.. glossary::
+
+  ``void get_dimensions (int *mx, int *my, int *mz)``
+   *Return the array dimensions of the flux array, including adjustments for centering.  Indexing is ix + mx*(iy +my*iz).*
+   
+----
+
+.. glossary::
+
+  ``void set_flux_array ( std::vector<double> array, int dx, int dy, int dz)``
+   *Copy flux values from an array to the FluxFaces flux array. Array element array[ix*dx + iy*dy + iz*dz] should correspond to flux value (ix,iy,iz), where (0,0,0) <= (ix,iy,iz) < (mx,my,mz).*
+  
+----
+
+.. glossary::
+
+  ``std::vector<double> & flux_array (int * dx=0, int * dy=0, int * dz=0)``
+   *Return the array of fluxes and associated strides (dx,dy,dz) such that the (ix,iy,iz) flux value is fluxes[ix*dx + iy*dy + iz*dz], where (0,0,0) <= (ix,iy,iz) < (mx,my,mz).*
+  
+----
+
+.. glossary::
+
+  ``friend float ratio_cell_volume (FaceFluxes & ff_1, FaceFluxes & ff_2, int rank)``
+   *Return the ratio of volume elements for fluxes defined in face fluxes ff_1 and ff_2.  Must be 1.0 to compute sum.*
+
+----
+
+.. glossary::
+
+  ``friend float ratio_time_step (FaceFluxes & ff_1, FaceFluxes & ff_2)``
+   *Return the ratio of time steps of fluxes between face fluxes ff_1 and ff_2.  Should be 1.0 before any flux correction is computed.*
+  
+----
+
+.. glossary::
+
+  ``void coarsen ()``
+   *Coarsen a FaceFluxes object by reducing dimensions by two along each face dimension, and summing fine elements contained in each coarse flux element. Updates level_fluxes_ accordingly. Used for coarsening fine-level fluxes to match coarse level fluxes.  Increases the value returned by level_fluxes() by one.*
+  
+----
+
+.. glossary::
+
+  ``FaceFluxes & operator += (const FaceFluxes & ff)``
+   *Add the face fluxes object ff to this one. Used for accumulating fluxes with finer time steps until they match the coarser time step. Updates dt_fluxes accordingly. Assumes spacially-conforming FaceFluxes objects: FaceFluxes must be associated with the same face, and ratio of cell volumes must be 1.0
+  
+----
+
+.. glossary::
+
+  ``FaceFluxes & operator *= (double weight)``
+   *Scale the fluxes array by a scalar constant.*
+  
 --------------
 FluxData class
 --------------
 
-The :p:`FluxData` class defines a collection of all :p:`FluxFaces` required
-by a Block to perform flux corrections.  This includes all :p:`FluxFaces`
-on :p:`Faces` whose neighboring Block differs either in either mesh
-refinement or time step.  :p:`FluxFaces` are expected to come in pairs,
-one corresponding to the Block, and one corresponding to the
-neighboring Block.  FaceFluxes in the :p:`FluxData` object may be in a
-non-conforming state, that is the volume elements may not match,
-either spatial area or time step.  Coarsening and summing over
-time steps of :p:`FluxData` objects are used to create fully-conforming
-:p:`FluxFaces`, after which differencing is permitted for computing the
-flux-correction factors.  Support for coarsening, adding, and
-differencing fluxes is the responsibility of the :p:`FaceFluxes` class;
-:p:`FluxData` is primarily a container.
+The :p:`FluxData` class defines a collection of all :p:`FluxFaces`
+required by a Block to perform flux corrections.  This includes all
+:p:`FluxFaces` on :p:`Faces` whose neighboring Block differs either in
+either mesh refinement or time step.  :p:`FluxFaces` for faces that
+require flux-correction come in conforming pairs, one set of fluxes
+corresponding to the Block, and one corresponding to the neighboring
+Blocks.  Flux arrays for the neighboring block are received in the
+flux refresh operation.  Support for coarsening, adding, and
+differencing fluxes is the responsibility of the :p:`FaceFluxes`
+class; :p:`FluxData` is primarily a container.
 
 
 .. glossary::      
@@ -586,44 +583,29 @@ differencing fluxes is the responsibility of the :p:`FaceFluxes` class;
 
 .. glossary::      
 
-   ``void FluxData::insert_fluxes(FaceFluxes * face_fluxes)``
-    *Insert the given FaceFluxes object into the FluxData.  Must be   dynamically allocated, and responsibility for deleting face_fluxes   is transfered to the FluxData object.*
+   ``void FluxData::fluxes_block(int ix, int iy, int iz)``
+    *Return the face fluxes object associated with the Block's (ix,iy,iz) face.*
 
 ----
 
 .. glossary::      
 
-   ``void FluxData::remove_fluxes(FaceFluxes * face_fluxes)``
-    *Remove the FaceFluxes object from the FluxData object, but do not    delete it.*
+   ``void FluxData::set_fluxes_block(FaceFluxes * ff, int ix, int iy, int iz)``
+    *Set the Block's face fluxes object for the (ix,iy,iz) face.*
 
 ----
 
 .. glossary::      
 
-   ``void FluxData::delete_fluxes(FaceFluxes * face_fluxes)``
-    *Remove the FaceFluxes object from the FluxData object and delete    it.*
+   ``void FluxData::fluxes_neighbor(int ix, int iy, int iz)``
+    *Return the face fluxes object associated with the block's neighbors on the (ix,iy,iz) face.*
 
 ----
 
 .. glossary::      
 
-   ``FaceFluxes FluxData::face_fluxes (Face face, Index index_block, int index_field)``
-    *Return the FaceFluxes object for the given Face, Block index, and    Field index.  Block index must match one of defining Block indices    for Face.*
-
-----
-
-.. glossary::      
-
-   ``int FluxData::num_face_fluxes()``
-    *Return the number of FaceFluxes in the FluxData object.*
-
-----
-
-.. glossary::      
-
-   ``FaceFluxes FluxData::face_fluxes (int i)``
-    *Return the ith FaceFluxes object.*
-
+   ``void FluxData::set_fluxes_neighbor(FaceFluxes * ff, int ix, int iy, int iz)``
+    *Set the face fluxes object associated with the block's neighbors on the (ix,iy,iz) face.*
 
 Flux Communication
 ==================

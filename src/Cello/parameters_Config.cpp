@@ -234,7 +234,6 @@ void Config::pup (PUP::er &p)
 void Config::read(Parameters * p) throw()
 {
   TRACE("BEGIN Config::read()");
-
   read_adapt_(p);
   read_balance_(p);
   read_boundary_(p);

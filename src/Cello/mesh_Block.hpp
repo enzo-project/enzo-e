@@ -236,8 +236,8 @@ public: // interface
 
   ItNeighbor it_neighbor(int min_face_rank, Index index,
 			 int neighbor_type,
-			 int min_level,
-			 int root_level) throw();
+			 int min_level = 0,
+			 int root_level = 0) throw();
 
   //--------------------------------------------------
   // Charm++ virtual

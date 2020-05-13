@@ -54,7 +54,7 @@ printf ("%s",$dir);
      //----------------------------------------------------------------------
 
    function test_group($testgroup) {
-     printf ("<hr><a name=\"$testgroup\"><h2>$testgroup</h2>");
+     printf ("<hr class=section><a name=\"$testgroup\"><h2>$testgroup</h2>");
      }
 
      //----------------------------------------------------------------------
@@ -221,9 +221,9 @@ function tests($component,$testrun,$output,$test_name,$dir) {
 
       echo "</tr>\n";
     }
-    echo "</tr></table></br/>\n";
+    echo "</tr></table></br>\n";
 
-    echo "<table><tr>";
+    echo "<table>";
     for ($i = 0; $i<$num_types; ++$i) {
       $type = $types[$i];
       $output_file = "../test/$dir/$output.unit";
@@ -231,7 +231,7 @@ function tests($component,$testrun,$output,$test_name,$dir) {
 	test($output_file,"FAIL");
       }
     }
-    echo "</tr></table>";
+    echo "</table>";
   }
 };
 
@@ -254,7 +254,7 @@ function test($output,$type) {
 
 ?>
 
-<hr>
+<hr class=section>
 
 <?php
 

@@ -32,7 +32,8 @@ public: // interface
     : PUP::able(m),
     schedule_(NULL),
     courant_(1.0),
-    ir_post_(-1)
+    ir_post_(-1),
+    neighbor_type_(neighbor_leaf)
    
   { }
       
@@ -60,7 +61,7 @@ public: // virtual functions
   }
 
   /// Add a new refresh object
-  int add_new_refresh_ ();
+  int add_new_refresh_ (int neighbor_type = neighbor_leaf);
 
   /// Return the index for the main post-refresh object
   int refresh_id_post() const;
@@ -106,6 +107,8 @@ protected: // attributes
   /// Index for main refresh after Method is called
   int ir_post_;
 
+  /// Default refresh type
+  int neighbor_type_;
 };
 
 #endif /* PROBLEM_METHOD_HPP */
