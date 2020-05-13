@@ -567,8 +567,8 @@ void Block::particle_determine_periodic_update_
   cello::hierarchy()->upper(&dxp,&dyp,&dzp);
 
   //     ... periodicity
-  bool p32[3][2];
-  periodicity(p32);
+  bool p3[3];
+  periodicity(p3);
 
   //     ... boundary
   bool b32[3][2];
@@ -580,16 +580,16 @@ void Block::particle_determine_periodic_update_
   // boundary is crossed
 
   if (rank >= 1) {
-    if (index_lower[0]==0 && b32[0][0] && p32[0][0]) (*dpx) = +(dxp - dxm);
-    if (index_upper[0]==4 && b32[0][1] && p32[0][1]) (*dpx) = -(dxp - dxm);
+    if (index_lower[0]==0 && b32[0][0] && p3[0]) (*dpx) = +(dxp - dxm);
+    if (index_upper[0]==4 && b32[0][1] && p3[0]) (*dpx) = -(dxp - dxm);
   }
   if (rank >= 2) {
-    if (index_lower[1]==0 && b32[1][0] && p32[1][0]) (*dpy) = +(dyp - dym);
-    if (index_upper[1]==4 && b32[1][1] && p32[1][1]) (*dpy) = -(dyp - dym);
+    if (index_lower[1]==0 && b32[1][0] && p3[1]) (*dpy) = +(dyp - dym);
+    if (index_upper[1]==4 && b32[1][1] && p3[1]) (*dpy) = -(dyp - dym);
   }
   if (rank >= 3) {
-    if (index_lower[2]==0 && b32[2][0] && p32[2][0]) (*dpz) = +(dzp - dzm);
-    if (index_upper[2]==4 && b32[2][1] && p32[2][1]) (*dpz) = -(dzp - dzm);
+    if (index_lower[2]==0 && b32[2][0] && p3[2]) (*dpz) = +(dzp - dzm);
+    if (index_upper[2]==4 && b32[2][1] && p3[2]) (*dpz) = -(dzp - dzm);
   }
 }
 
