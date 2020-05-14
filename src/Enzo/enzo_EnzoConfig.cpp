@@ -168,7 +168,7 @@ EnzoConfig::EnzoConfig() throw ()
 EnzoConfig::~EnzoConfig() throw ()
 {
 #ifdef CONFIG_USE_GRACKLE
-  free(method_grackle_chemistry->grackle_data_file);
+  delete[] method_grackle_chemistry->grackle_data_file;
   delete method_grackle_chemistry;
 #endif // CONFIG_USE_GRACKLE
 }
@@ -329,25 +329,11 @@ void EnzoConfig::pup (PUP::er &p)
   p  | method_grackle_use_cooling_timestep;
   p  | method_grackle_radiation_redshift;
 
-  int is_null = (method_grackle_chemistry==NULL);
-  p | is_null;
-
-  if (is_null){
-    method_grackle_chemistry = NULL;
-  } else {
-
-    if (p.isUnpacking()) {
-      method_grackle_chemistry = new chemistry_data;
-      method_grackle_chemistry->use_grackle = method_grackle_use_grackle;
-
-      if(method_grackle_chemistry->use_grackle){
-        *method_grackle_chemistry = _set_default_chemistry_parameters();
-      }
-    }
-  }
-
   if (method_grackle_use_grackle){
+    if (p.isUnpacking()) { method_grackle_chemistry = new chemistry_data; }
     p | *method_grackle_chemistry;
+  } else {
+    method_grackle_chemistry = NULL;
   }
 
 #endif /* CONFIG_USE_GRACKLE */
@@ -847,9 +833,16 @@ void EnzoConfig::read(Parameters * p) throw()
       ("Method:grackle:cmb_temperature_floor",
         method_grackle_chemistry->cmb_temperature_floor);
 
-    method_grackle_chemistry->grackle_data_file = strdup(p->value_string
-      ("Method:grackle:data_file",
-        method_grackle_chemistry->grackle_data_file).c_str());
+    std::string grackle_data_file_ = p->value_string
+      ("Method:grackle:data_file", "");
+    ASSERT("EnzoConfig::read",
+	   "no value specified for \"Method:grackle:data_file\"",
+	   grackle_data_file_.length() > 0);
+
+    method_grackle_chemistry->grackle_data_file
+      = new char[grackle_data_file_.length() + 1];
+    strcpy(method_grackle_chemistry->grackle_data_file,
+	   grackle_data_file_.c_str());
 
     method_grackle_chemistry->cie_cooling = p->value_integer
       ("Method:grackle:cie_cooling",
