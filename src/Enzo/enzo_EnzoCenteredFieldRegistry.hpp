@@ -151,6 +151,18 @@ public:
   bool is_actively_advected_vector_component(std::string name,
 					     bool ijk_suffix) const noexcept;
 
+  /// Determine the actively advected quantity associated with the given name
+  /// If there is not an associated quantity, `""` is returned.
+  ///
+  /// There are 2 ways that a name can be associated with a quantity
+  ///   1. They can exactly match the name of the quantity.
+  ///   2. For VECTOR quantities, they can be composed of the quantity name
+  ///      followed by a 2 character suffix. If ijk_suffix is true, then the
+  ///      suffixes are {'_i', '_j', '_k'}. Otherwise they are
+  ///      {'_x', '_y', '_z'}.
+  std::string get_actively_advected_quantity_name
+  (std::string name, bool ijk_suffix) const noexcept;
+
   // more important methods:
   
   /// Constructs a Grouping of fields and yields a pointer to it from a vector

@@ -60,14 +60,18 @@ namespace LUTIndexForward_ {
 
   // forward number of equations
   CREATE_ENUM_VALUE_FORWARDER(NEQ);
+
+  // forward the first index holding specific quantities
+  CREATE_ENUM_VALUE_FORWARDER(specific_start);
 };
 
 //----------------------------------------------------------------------
 
 /// @def      WRAPPED_LUT_INDEX_VALUE_T_SCALAR
 /// @brief    Part of the WRAPPED_LUT_INDEX_VALUE group of macros that define
-///           structs for forwarding for defining the enum members of
-///           EnzoLUTWrapper for each of the actively advected quantities from
+///           is used for defining that values of enum members in
+///           `EnzoRiemannLUTWrapper` by forwarding the enum member values from
+///           a separate LUT for each of the actively advected quantities from
 ///           FIELD_TABLE
 #define WRAPPED_LUT_INDEX_VALUE_T_SCALAR(name, LUT)                           \
   name = LUTIndexForward_::COMBINE(forward_, name)<LUT>::value,
@@ -107,18 +111,38 @@ struct EnzoRiemannLUTWrapper{
   ///      EnzoLUTQuantityInfo<LUT>::velocity;
   /// @endcode
 
-  enum quantites {
+public:
+  /// initialize the lookup table entries for ever actively advected scalar
+  /// quantity and component of a vector quantity in FIELD_TABLE by forwarding
+  /// values from LUT (entries not included in LUT default to -1)
+  enum quantities {
     #define ENTRY(name, math_type, category, if_advection)                 \
       WRAPPED_LUT_INDEX_VALUE_ ## if_advection ## _ ## math_type (name, LUT)
     FIELD_TABLE
     #undef ENTRY
   };
 
-  // TODO: calculate the following automatically
-  static constexpr std::size_t specific_start = LUT::specific_start;
+  /// The entry with the minimum (non-negative) index corresponding to a
+  /// specific quantity. All conserved quantity entries must have smaller
+  /// indices (defaults to -1 if not explicitly specified in LUT)
+  static constexpr std::size_t specific_start =
+    LUTIndexForward_::forward_specific_start<LUT>::value;
 
-  // TODO: calculate the following automatically
-  static constexpr std::size_t NEQ=LUTIndexForward_::forward_NEQ<LUT>::value;
+  /// The total number of entries in the LUT (with non-negative indices).
+  /// (defaults to -1 if not explicitly set in LUT)
+  static constexpr std::size_t NEQ = LUTIndexForward_::forward_NEQ<LUT>::value;
+
+  // perform some sanity checks:
+  static_assert(quantities::density >= 0,
+                "LUT must have an entry corresponding to density");
+  static_assert((quantities::velocity_i >= 0 &&
+                 quantities::velocity_j >= 0 &&
+                 quantities::velocity_k >= 0),
+                "LUT must have entries for each velocity component.");
+  static_assert(specific_start > 0,
+                "specific_start was not set to a be positive value in LUT");
+  static_assert(specific_start < NEQ,
+                "NEQ was not set to a value exceeding specific_start in LUT");
 
 public: //associated static functions
 
@@ -128,10 +152,23 @@ public: //associated static functions
 
   /// returns whether the LUT has any bfields
   static constexpr bool has_bfields(){
-    return ( (quantites::bfield_i >= 0) ||
-             (quantites::bfield_j >= 0) ||
-             (quantites::bfield_k >= 0) );
+    return ( (quantities::bfield_i >= 0) ||
+             (quantities::bfield_j >= 0) ||
+             (quantities::bfield_k >= 0) );
   }
+
+  /// for each quantity in FIELD_TABLE, this passes the associated passes the
+  /// associated name and index from the wrapped LUT to the function `fn`
+  ///
+  /// The function should expect (std::string name, int index). In cases where
+  /// quantites in FIELD_TABLE do not appear in the wrapped LUT, an index of -1
+  /// is passed.
+  template<class Function>
+  static void for_each_entry(Function fn) noexcept;
+
+  /// a function that performs a check to make sure that the LUT satisfies all
+  /// all assumptions. If it doesn't, an error is raised
+  static void validate(EnzoCenteredFieldRegistry &reg) noexcept;
 };
 
 //----------------------------------------------------------------------
@@ -155,10 +192,13 @@ public: //associated static functions
 /// @param fn Unary function or that accepts the name of the  member and the
 /// value of the member as arguments
 
-template<class LUT, class Function>
-void unary_lut_for_each_(Function fn){
+template<class LUT>
+template<class Function>
+void EnzoRiemannLUTWrapper<LUT>::for_each_entry(Function fn) noexcept{
   #define ENTRY(name, math_type, category, if_advection)                      \
-    LUT_UNARY_FUNC_ ## if_advection ## _ ## math_type (fn, LUT, name);
+    LUT_UNARY_FUNC_##if_advection##_##math_type (fn,                          \
+                                                 EnzoRiemannLUTWrapper<LUT>,  \
+                                                 name);
   FIELD_TABLE
   #undef ENTRY
 }
@@ -172,19 +212,99 @@ std::set<std::string> EnzoRiemannLUTWrapper<LUT>::quantity_names
   std::set<std::string> set;
 
   auto fn = [&](std::string name, int index)
-    {
-      if (index >= 0){
-        if (reg.quantity_properties(name)){
-          // current element is a SCALAR QUANTITY
-          set.insert(name);
-        } else if (reg.is_actively_advected_vector_component(name, true)){
-          // current element is a VECTOR QUANTITY
-          set.insert(name.substr(0,name.length()-2));
-        }
+    {   
+      if (index >= 0) {
+        set.insert(reg.get_actively_advected_quantity_name(name, true));
       }
     };
-  unary_lut_for_each_<EnzoRiemannLUTWrapper<LUT>>(fn);
+  EnzoRiemannLUTWrapper<LUT>::for_each_entry(fn);
   return set;
+}
+
+//----------------------------------------------------------------------
+
+template <class LUT>
+void EnzoRiemannLUTWrapper<LUT>::validate(EnzoCenteredFieldRegistry &reg)
+  noexcept
+{ 
+  // the elements in the array are default-initialized (they are each "")
+  std::array<std::string, EnzoRiemannLUTWrapper<LUT>::NEQ> entry_names;
+
+  // define a lambda function to execute for every member of lut
+  auto fn = [&](std::string name, int index)
+    {
+      if ((index >= 0) && (index >= EnzoRiemannLUTWrapper<LUT>::NEQ)) {
+        ERROR3("EnzoRiemannLUTWrapper<LUT>::validate",
+               "The value of %s, %d, is greater than or equal to LUT::NEQ, %d",
+               name.c_str(), index, EnzoRiemannLUTWrapper<LUT>::NEQ);
+      } else if (index >= 0) {
+        if (entry_names[index] != ""){
+          ERROR3("EnzoRiemannLUTWrapper<LUT>::validate",
+                 "%s and %s both have values of %d",
+                 name.c_str(), entry_names[index], index);
+        }
+        entry_names[index] = name;
+      }
+    };
+  
+
+  EnzoRiemannLUTWrapper<LUT>::for_each_entry(fn);
+
+  std::size_t max_conserved =  0;
+  std::size_t min_specific =  EnzoRiemannLUTWrapper<LUT>::NEQ;
+
+  for (std::size_t i = 0; i < entry_names.size(); i++){
+    std::string name = entry_names[i];
+    if (name == ""){
+      ERROR2("EnzoRiemannLUTWrapper<LUT>::validate",
+             "The value of NEQ, %d, is wrong. There is no entry for index %d",
+             (int)EnzoRiemannLUTWrapper<LUT>::NEQ, (int)i);
+    }
+    // check that name != ''
+    std::string quantity = reg.get_actively_advected_quantity_name(name, true);
+    FieldCat category;
+    reg.quantity_properties(quantity, NULL, &category, NULL);
+
+    if ((i == 0) && (category != FieldCat::conserved)) {
+      ERROR("EnzoRiemannLUTWrapper<LUT>::validate",
+            ("the lookup table's entry for index 0 should correspond to a "
+             "conserved quantity"));
+    } else if (((i+1) == entry_names.size()) &&
+               (category != FieldCat::specific)) {
+      ERROR("EnzoRiemannLUTWrapper<LUT>::validate",
+            ("the lookup table's entry for the index LUT::NEQ-1 should "
+             "correspond to a specific quantity"));
+    }
+
+    switch(category){
+      case FieldCat::conserved : { max_conserved = std::max(max_conserved, i);
+                                   break;
+      }
+      case FieldCat::specific  : { min_specific  = std::min(min_specific,  i);
+                                   break;
+      }
+      case FieldCat::other : {
+        ERROR1("EnzoRiemannLUTWrapper<LUT>::validate",
+               ("%s corresponds to a quantity with FieldCat::other. Quantities "
+                "of this category should not be included in a lookup table."),
+               name.c_str());
+      }
+    }
+  }
+   
+
+  // The assumption is that all LUTs contain at least 1 conserved quantity
+  // (nominally density) and at least 1 specific quantity (nominally velocity)
+  if ((max_conserved+1) != min_specific){
+    ERROR("EnzoRiemannLUTWrapper<LUT>::validate",
+          ("The LUT's entries corresponding to conserved quantities are not "
+           "all grouped together at indices smaller than those corresponding "
+           "to specific quantities"));
+  } else if (min_specific != EnzoRiemannLUTWrapper<LUT>::specific_start) {
+    ERROR2("EnzoRiemannLUTWrapper<LUT>::validate",
+           "The LUT's specfic_start value should be set to %d, not %d.",
+           (int)min_specific, (int)EnzoRiemannLUTWrapper<LUT>::specific_start);
+  }
 }
 
 #endif /* ENZO_ENZO_RIEMANN_LUT_WRAPPER_HPP */

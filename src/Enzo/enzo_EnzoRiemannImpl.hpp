@@ -240,7 +240,7 @@ EnzoRiemannImpl<ImplStruct>::EnzoRiemannImpl
 (std::vector<std::string> integrable_groups,
  std::vector<std::string> passive_groups)
   : EnzoRiemann()
-{
+{ 
   // Quick sanity check - integrable_groups must have density and velocity
   ASSERT("EnzoRiemannImpl","integrable_groups must contain \"density\"",
 	 std::find(integrable_groups.begin(), integrable_groups.end(),
@@ -249,8 +249,11 @@ EnzoRiemannImpl<ImplStruct>::EnzoRiemannImpl
 	 std::find(integrable_groups.begin(), integrable_groups.end(),
 		   "velocity") != integrable_groups.end());
 
-  // Determine all quantities used by LUT
   EnzoCenteredFieldRegistry registry;
+  // Quick sanity check - validate that LUT has the expected properties
+  LUT::validate(registry);
+
+  // Determine all quantities used by LUT
   std::set<std::string> lut_groups = LUT::quantity_names(registry);
 
   // TODO: add special treatment of total energy for cases with barotropic
@@ -448,6 +451,8 @@ void EnzoRiemannImpl<ImplStruct>::solve
   delete[] wl_arrays; delete[] wr_arrays; delete[] flux_arrays;
 }
 
+//----------------------------------------------------------------------
+
 inline void compute_unity_sum_passive_fluxes_(const enzo_float dens_flux,
 					      EFlt3DArray *flux_arrays,
 					      EFlt3DArray *reconstructed,
@@ -465,6 +470,8 @@ inline void compute_unity_sum_passive_fluxes_(const enzo_float dens_flux,
 					* dens_flux / sum);
   }
 }
+
+//----------------------------------------------------------------------
 
 inline void passive_advection_helper_
 (std::string group_name, Grouping &priml_group, Grouping &primr_group,
@@ -517,6 +524,7 @@ inline void passive_advection_helper_
   delete[] wl_arrays; delete[] wr_arrays; delete[] flux_arrays;
 }
 
+//----------------------------------------------------------------------
 
 template <class ImplStruct>
 void EnzoRiemannImpl<ImplStruct>::solve_passive_advection_

@@ -130,6 +130,21 @@ bool EnzoCenteredFieldRegistry::is_actively_advected_vector_component
 
 //----------------------------------------------------------------------
 
+std::string EnzoCenteredFieldRegistry::get_actively_advected_quantity_name
+(std::string name, bool ijk_suffix) const noexcept
+{
+  std::string out = "";
+  if (quantity_properties(name)){
+    out = name;
+  } else if (is_actively_advected_vector_component(name, true)){
+    // current element is a VECTOR QUANTITY
+    out = name.substr(0,name.length()-2);
+  }
+  return out;
+}
+
+//----------------------------------------------------------------------
+
 Grouping* EnzoCenteredFieldRegistry::build_grouping
 (const std::vector<std::string> quantity_names,
  const std::string leading_prefix) const

@@ -200,6 +200,23 @@ namespace enzo_riemann_utils{
 
   //----------------------------------------------------------------------
 
+  /// Constructs an array of instances of EFlt3DArray where each instance holds
+  /// the field data of the corresponding field in the LUT
+  ///
+  /// @param block The mesh block from which data will be loaded
+  /// @param grouping Reference to a grouping that with groups named after the
+  ///   relevant quantities specified in the generation of lut. The data is
+  ///   actually loaded from the fields in block with names matching the
+  ///   relevant field names specified in this object.
+  /// @param dim Optional integer specifying which dimension is the ith
+  ///   direction. This is used for mapping the i,j,k vector components listed
+  ///   in lut to the x,y,z field components. Values of 0, 1, and 2 correspond
+  ///   the ith direction pointing parallel to the x, y, and z directions,
+  ///   respectively. Note that each of the fields in grouping are assumed to
+  ///   be face-centered along this dimension (excluding the exterior faces of
+  ///   the mesh). This allows for appropriate loading of reconstructed fields.
+  /// @param stale_depth indicates the current stale_depth for the loaded
+  ///   quanties.
   template<class LUT>
   EFlt3DArray* load_array_of_fields(Block *block, Grouping &grouping,
                                     int dim, int stale_depth) noexcept
@@ -243,7 +260,7 @@ namespace enzo_riemann_utils{
         }
       };
 
-    unary_lut_for_each_<LUT>(fn);
+    LUT::for_each_entry(fn);
 
     return arr;
   }
