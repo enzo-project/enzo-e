@@ -64,7 +64,7 @@ def analyze_tests():
     # slices along the active axis). Also check that standard deviations
     # directions perpendicular to the axis of evolution are zero
 
-    expected_err = 0.0260586121634096
+    expected_err = 0.02605861216339738
 
     r.append(analyze_shock(expected_err, 'z', **kwargs))
     r.append(analyze_shock(0.0, 'z', std_dev = True, **kwargs))

@@ -67,17 +67,17 @@ def analyze_tests():
     # convergence (originally we were looking at the slope of convergence but
     # that allows the errors to be larger)
 
-    r.append(err_compare(1.3704436742050718e-07, 'sound',                1,16))
-    r.append(err_compare(2.348494550513397e-08,  'sound',                1,32))
+    r.append(err_compare(1.3704437788774914e-07, 'sound',                1,16))
+    r.append(err_compare(2.348494680480983e-08,  'sound',                1,32))
 
-    r.append(err_compare(8.736217524396572e-08,  'hd_entropy',           1,16))
-    r.append(err_compare(2.2383945391668557e-08, 'hd_entropy',           1,32))
+    r.append(err_compare(8.736217559091042e-08,  'hd_entropy',           1,16))
+    r.append(err_compare(2.2383944940640457e-08, 'hd_entropy',           1,32))
 
-    r.append(err_compare(7.671004045911309e-08,  'hd_transv_entropy_v1', 1,16))
-    r.append(err_compare(1.6725790982772753e-08, 'hd_transv_entropy_v1', 1,32))
+    r.append(err_compare(7.671004076383043e-08,  'hd_transv_entropy_v1', 1,16))
+    r.append(err_compare(1.6725791096099574e-08, 'hd_transv_entropy_v1', 1,32))
 
-    r.append(err_compare(8.640730357227329e-08,  'hd_transv_entropy_v2', 1,16))
-    r.append(err_compare(1.696003006491704e-08,  'hd_transv_entropy_v2', 1,32))
+    r.append(err_compare(8.64073017675657e-08,   'hd_transv_entropy_v2', 1,16))
+    r.append(err_compare(1.6960029746329912e-08, 'hd_transv_entropy_v2', 1,32))
 
     # Check error between left and right propagating waves. As in Athena++ only
     # check to 6 decimal places

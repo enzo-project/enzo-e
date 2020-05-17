@@ -63,7 +63,7 @@ def analyze_tests():
 
     # These errors were all obtained from parallel runs with the domain split
     # between processes
-    ref_l1_error = 6.918011602177191e-08
+    ref_l1_error = 6.918011605252798e-08
     r = []
     r.append(passive_sound_l1_analyze('x', ref_l1_error))
     r.append(passive_sound_l1_analyze('y', ref_l1_error))
