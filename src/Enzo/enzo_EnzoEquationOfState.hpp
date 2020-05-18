@@ -223,9 +223,10 @@ public: // interface
   /// returns the thermal pressure floor
   virtual enzo_float get_pressure_floor() const = 0;
 
-  /// apply the pressure floor to the specific total energy field and (if using
-  /// the dual-energy formalism) synchronize the internal energy and total
-  /// energy fields. If the EOS is barotropic, this does nothing.
+  /// applies the pressure floor to the specific total energy field. If using
+  /// the dual-energy formalism, it is also applied to the internal energy
+  /// and it synchronize the internal energy and total energy fields. If the
+  /// EOS is barotropic, this does nothing.
   ///
   /// @param block holds data to be processed
   /// @param integrable_group holds field names of integrable primitives to be

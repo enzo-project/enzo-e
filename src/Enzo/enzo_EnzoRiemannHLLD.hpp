@@ -25,21 +25,21 @@ struct HLLDImpl
   /// Solver
 public:
 
-  using LUT = EnzoRiemannLUTWrapper<MHDLUT>;
+  using LUT = EnzoRiemannLUT<MHDLUT>;
 
-  earray<LUT> operator() (const earray<LUT> flux_l, const earray<LUT> flux_r,
-			  const earray<LUT> prim_l, const earray<LUT> prim_r,
-			  const earray<LUT> cons_l, const earray<LUT> cons_r,
-			  enzo_float pressure_l, enzo_float pressure_r,
-			  bool barotropic_eos, enzo_float gamma,
-			  enzo_float isothermal_cs,
-			  enzo_float &vi_bar) const noexcept
+  lutarray<LUT> operator()
+  (const lutarray<LUT> flux_l, const lutarray<LUT> flux_r,
+   const lutarray<LUT> prim_l, const lutarray<LUT> prim_r,
+   const lutarray<LUT> cons_l, const lutarray<LUT> cons_r,
+   enzo_float pressure_l, enzo_float pressure_r,
+   bool barotropic_eos, enzo_float gamma, enzo_float isothermal_cs,
+   enzo_float &vi_bar) const noexcept
   {
     // This method makes use of the member variables Us and Uss
     // Note that ETA_TOLERANCE is bigger than the tolerance was for the
     // original implementation.
 
-    earray<LUT> Us, Uss, fluxes;
+    lutarray<LUT> Us, Uss, fluxes;
 
     enzo_float etot_l,etot_r, rho_l, rho_r;
     enzo_float vx_l, vy_l, vz_l, vx_r, vy_r, vz_r;
@@ -287,7 +287,7 @@ public:
     return fluxes;
   }
 
-  earray<LUT> setup_cons_ast_( const enzo_float speed,
+  lutarray<LUT> setup_cons_ast_( const enzo_float speed,
 			       const enzo_float rho, const enzo_float vy,
 			       const enzo_float vz, const enzo_float etot,
 			       const enzo_float Bx, const enzo_float By,
@@ -297,7 +297,7 @@ public:
     // Helper function that factors out the filling of the of the asterisked
     // and double asterisked conserved quantities
     // The dual energy formalism is explicitly handled outside of this function
-    earray<LUT> out;
+    lutarray<LUT> out;
     out[LUT::density] = rho;
     out[LUT::velocity_i] = rho * speed;
     out[LUT::velocity_j] = rho * vy;

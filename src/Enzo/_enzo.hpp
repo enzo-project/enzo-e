@@ -211,7 +211,7 @@ extern "C" {
 #include "enzo_EnzoReconstructorNN.hpp"
 #include "enzo_EnzoReconstructorPLM.hpp"
 #include "enzo_EnzoRiemann.hpp"
-#include "enzo_EnzoRiemannLUTWrapper.hpp"
+#include "enzo_EnzoRiemannLUT.hpp"
 #include "enzo_EnzoRiemannUtils.hpp"
 #include "enzo_EnzoRiemannImpl.hpp"
 #include "enzo_EnzoRiemannHLL.hpp"

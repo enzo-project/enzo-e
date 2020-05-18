@@ -9,20 +9,12 @@
 ///
 /// Many of these functions could conceivably be methods of EnzoRiemannImpl,
 /// but doing so would cause the compiler to generate unnecessary duplicate
-/// versions of of template functions for the different ImplStructs that use
+/// versions of of template functions for the different ImplFunctors that use
 /// the same underlying LUT. It might be worth considering making these
-/// functions into static methods of EnzoRiemannLUTWrapper.
+/// functions into static methods of EnzoRiemannLUT.
 
 #ifndef ENZO_ENZO_RIEMANN_UTILS_HPP
 #define ENZO_ENZO_RIEMANN_UTILS_HPP
-
-//----------------------------------------------------------------------
-
-/// @typedef earray
-/// @brief   Specialization of std::array to be used to hold enzo_floats for
-///          use with Riemann solvers
-template<class lut>
-using earray = std::array<enzo_float, lut::NEQ>;
 
 //----------------------------------------------------------------------
 
@@ -40,9 +32,9 @@ namespace enzo_riemann_utils{
   /// template functions created when the same LUT is reused
   
   template <class LUT>
-  earray<LUT> compute_conserved(const earray<LUT> prim) noexcept
+  lutarray<LUT> compute_conserved(const lutarray<LUT> prim) noexcept
   {
-    earray<LUT> cons;
+    lutarray<LUT> cons;
 
     // the values held in prim at index 0 up to (but not including)
     // LUT::specific_start are already conserved quantities.
@@ -60,7 +52,7 @@ namespace enzo_riemann_utils{
   //----------------------------------------------------------------------
 
   template <class LUT>
-  enzo_float mag_pressure(const earray<LUT> prim) noexcept
+  enzo_float mag_pressure(const lutarray<LUT> prim) noexcept
   {
     enzo_float bi = (LUT::bfield_i >= 0) ? prim[LUT::bfield_i] : 0;
     enzo_float bj = (LUT::bfield_j >= 0) ? prim[LUT::bfield_j] : 0;
@@ -71,14 +63,14 @@ namespace enzo_riemann_utils{
   //----------------------------------------------------------------------
 
   template <class LUT>
-  enzo_float sound_speed(const earray<LUT> prim_vals,
+  enzo_float sound_speed(const lutarray<LUT> prim_vals,
                          enzo_float pressure, enzo_float gamma) noexcept
   { return std::sqrt(gamma * pressure / prim_vals[LUT::density]); }
 
   //----------------------------------------------------------------------
 
   template <class LUT>
-  enzo_float fast_magnetosonic_speed(const earray<LUT> prim_vals,
+  enzo_float fast_magnetosonic_speed(const lutarray<LUT> prim_vals,
                                      enzo_float pressure,
                                      enzo_float gamma) noexcept
   {
@@ -106,7 +98,7 @@ namespace enzo_riemann_utils{
   /// This function should be called when we to fix cos2 to some predetermined
   /// value
   template <class LUT>
-  enzo_float fast_magnetosonic_speed(const earray<LUT> prim_vals,
+  enzo_float fast_magnetosonic_speed(const lutarray<LUT> prim_vals,
                                      enzo_float pressure,
                                      enzo_float gamma,
                                      enzo_float cos2) noexcept
@@ -134,10 +126,11 @@ namespace enzo_riemann_utils{
   /// momentum, energy, magnetic fields
 
   template <class LUT>
-  earray<LUT> active_fluxes(const earray<LUT> prim, const earray<LUT> cons,
-                            enzo_float pressure) noexcept
+  lutarray<LUT> active_fluxes(const lutarray<LUT> prim,
+                              const lutarray<LUT> cons,
+                              enzo_float pressure) noexcept
   {
-    earray<LUT> fluxes;
+    lutarray<LUT> fluxes;
     enzo_float vi, vj, vk, p, Bi, Bj, Bk, etot, magnetic_pressure;
     vi = prim[LUT::velocity_i];
     vj = prim[LUT::velocity_j];

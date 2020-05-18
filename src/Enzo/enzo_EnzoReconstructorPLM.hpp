@@ -117,7 +117,7 @@ class EnzoReconstructorPLM : public EnzoReconstructor
   /// To implement a new type of slope limiter:
   ///   1. Define a new `Limiter` functor (e.g. `PLM_EnzoRKLimiter`).
   ///   2. It might be useful to define an alias name for the specialization of
-  ///      `EnzoReconstructorPLM` that uses the new `ImplStruct`
+  ///      `EnzoReconstructorPLM` that uses the new `Limiter`
   ///      (e.g. `using EnzoReconstructorPLMEnzoRKLim)
   ///   3. Then add the particlular specialization to enzo.CI (e.g. add the
   ///      line: `PUPable EnzoReconstructorPLM<PLM_EnzoRKLimiter>;`)

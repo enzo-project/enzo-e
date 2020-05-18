@@ -25,13 +25,13 @@ public:
   using WaveSpeedFunctor = EinfeldtWavespeed<HydroLUT>;
   using LUT = typename WaveSpeedFunctor::LUT;
 
-  earray<LUT> operator() (const earray<LUT> flux_l, const earray<LUT> flux_r,
-			  const earray<LUT> prim_l, const earray<LUT> prim_r,
-			  const earray<LUT> cons_l, const earray<LUT> cons_r,
-			  enzo_float pressure_l, enzo_float pressure_r,
-			  bool barotropic_eos, enzo_float gamma,
-			  enzo_float isothermal_cs,
-			  enzo_float &vi_bar) const noexcept
+  lutarray<LUT> operator()
+  (const lutarray<LUT> flux_l, const lutarray<LUT> flux_r,
+   const lutarray<LUT> prim_l, const lutarray<LUT> prim_r,
+   const lutarray<LUT> cons_l, const lutarray<LUT> cons_r,
+   enzo_float pressure_l, enzo_float pressure_r,
+   bool barotropic_eos, enzo_float gamma, enzo_float isothermal_cs,
+   enzo_float &vi_bar) const noexcept
   {
 
     ASSERT("HLLCImpl::calc_riemann_fluxes",
@@ -123,7 +123,7 @@ public:
     vi_bar = (sl * (prim_l[LUT::velocity_i] - bm) +
 	      sr * (prim_r[LUT::velocity_i] - bp));
 
-    earray<LUT> fluxes;
+    lutarray<LUT> fluxes;
     // compute HLLC Flux at interface (without diffusion)
     fluxes[LUT::density] = sl*dfl + sr*dfr;
     fluxes[LUT::velocity_i] = sl*ufl + sr*ufr;

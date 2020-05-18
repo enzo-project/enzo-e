@@ -38,10 +38,10 @@ struct EinfeldtWavespeed
   /// waves in the Riemann Fan is a shock. Nevertheless, they find this is a
   /// robust method and recommend it in most cases
 
-  using LUT = EnzoRiemannLUTWrapper<inputLUT>;
+  using LUT = EnzoRiemannLUT<inputLUT>;
 
-  void operator()(const earray<LUT> wl, const earray<LUT> wr,
-                  const earray<LUT> Ul, const earray<LUT> Ur,
+  void operator()(const lutarray<LUT> wl, const lutarray<LUT> wr,
+                  const lutarray<LUT> Ul, const lutarray<LUT> Ur,
                   enzo_float pressure_l, enzo_float pressure_r,
                   const enzo_float gamma,
                   enzo_float *bp, enzo_float *bm) const noexcept
@@ -126,7 +126,7 @@ struct EinfeldtWavespeed
 
   /// Return the fast magnetosonic speed needed to get the max and min
   /// eigenvalues for Roe's matrix for adiabatic Magnetohydrodynamics
-  enzo_float roe_cfast_(const earray<LUT> wl, const earray<LUT> wr,
+  enzo_float roe_cfast_(const lutarray<LUT> wl, const lutarray<LUT> wr,
                         const enzo_float sqrtrho_l, const enzo_float sqrtrho_r,
                         const enzo_float inv_sqrtrho_tot,
                         const enzo_float v_roe2, const enzo_float h_roe,
@@ -179,10 +179,10 @@ struct DavisWavespeed
   /// practical calculations. He attributes this to the scheme from Davis 1988
 public:
 
-  using LUT = EnzoRiemannLUTWrapper<inputLUT>;
+  using LUT = EnzoRiemannLUT<inputLUT>;
 
-  void operator()(const earray<LUT> wl, const earray<LUT> wr,
-                  const earray<LUT> Ul, const earray<LUT> Ur,
+  void operator()(const lutarray<LUT> wl, const lutarray<LUT> wr,
+                  const lutarray<LUT> Ul, const lutarray<LUT> Ur,
                   enzo_float pressure_l, enzo_float pressure_r,
                   const enzo_float gamma,
                   enzo_float *bp, enzo_float *bm) const noexcept
@@ -221,13 +221,13 @@ public:
 
   using LUT = typename WaveSpeedFunctor::LUT;
 
-  earray<LUT> operator() (const earray<LUT> flux_l, const earray<LUT> flux_r,
-                          const earray<LUT> prim_l, const earray<LUT> prim_r,
-                          const earray<LUT> cons_l, const earray<LUT> cons_r,
-                          enzo_float pressure_l, enzo_float pressure_r,
-                          bool barotropic_eos, enzo_float gamma,
-                          enzo_float isothermal_cs,
-                          enzo_float &vi_bar) const noexcept
+  lutarray<LUT> operator()
+  (const lutarray<LUT> flux_l, const lutarray<LUT> flux_r,
+   const lutarray<LUT> prim_l, const lutarray<LUT> prim_r,
+   const lutarray<LUT> cons_l, const lutarray<LUT> cons_r,
+   enzo_float pressure_l, enzo_float pressure_r,
+   bool barotropic_eos, enzo_float gamma, enzo_float isothermal_cs,
+   enzo_float &vi_bar) const noexcept
   { 
     // there is no scratch_space
     WaveSpeedFunctor wave_speeds;
@@ -242,7 +242,7 @@ public:
 
     // Compute the actual riemann fluxes (value of dual_energy_formalism is
     // irrelevant)
-    earray<LUT> fluxes;
+    lutarray<LUT> fluxes;
     for (std::size_t field = 0; field < LUT::NEQ; field++){
       fluxes[field] = ((bp*flux_l[field] - bm*flux_r[field] +
                         (cons_r[field] - cons_l[field])*bp*bm)
