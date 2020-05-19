@@ -139,6 +139,8 @@ fields
 
 PPML ideal MHD solver
 
+.. _vlct_overview:
+
 ``"mhd_vlct"``: MHD
 ===================
 
@@ -205,6 +207,14 @@ parameters
      - `1.5`
      - `controls dissipation of the "plm"/"plm_enzo" reconstruction
        method.`
+   * - ``"dual_energy"``
+     - `logical`
+     - `false`
+     - `Whether to use dual-energy formalism`
+   * - ``"dual_energy_eta"``
+     - `float`
+     - `0.001`
+     - `Dual energy parameter eta`
 
 
 fields
@@ -265,7 +275,11 @@ fields
    * - ``"pressure"``
      - ``enzo_float``
      - [w]
-     - computed from ``total_energy``
+     - computed from ``total_energy`` (``internal_energy`` if dual-energy)
+   * - ``internal_energy``
+     - ``enzo_float``
+     - [rw]
+     - if dual-energy
        
 At initialization the face-centered magnetic fields should be
 divergence free. Trivial configurations (e.g. a constant magnetic
@@ -275,6 +289,49 @@ initializer. For non-trivial configurations, we have provide the
 (face-centered and cell-centered) from expression(s) given in the
 parameter file for component(s) of the magnetic vector potential.
 
+.. _using-vlct-de:
+
+dual-energy formalism
+---------------------
+
+The implementation of the dual-energy more closely resembles the
+implementation employed in Enzo's Runge–Kutta integrator than the original
+conception used by Enzo's ppm integrator, (for a description of that
+implementation, see `Bryan et al (1995)
+<https://ui.adsabs.harvard.edu/abs/1995CoPhC..89..149B>`_ ). There are 3
+main differences from the original conception:
+
+  1. internal energy is always used to compute pressure. In the original
+     conception, pressure could be computed from ``total_energy`` or
+     ``internal_energy`` (the decision was independent of synchronization).
+  2. ``pressure`` and ``internal_energy`` are not separately reconstructed.
+     Instead, just the pressure is reconstructed. The ``internal_energy``
+     is computed at the left and right interfaces from the reconstructed
+     quantities.
+  3. Synchronization of the total and internal energies is a local
+     operation that doesn't require knowledge cell neighbors. In the
+     original conception, knowledge of the immediate neighbors had been
+     required (each synchronization incremented the stale depth - 3 extra
+     ghost zones would have been required).
+
+For clarity, the conditions for synchronization are provided below. The
+specific ``internal_energy``, :math:`e`, is set to
+:math:`e'= E - (v^2 + B^2/\rho)/2` (where :math:`E` is the specific
+``total_energy``) when the following conditions are met:
+
+  * :math:`c_s'^2 > \eta v^2`, where :math:`c_s'^2=\gamma(\gamma - 1) e'`.
+  * :math:`c_s'^2 > \eta B^2/\rho`
+  * :math:`e' > e /2`
+
+If the above condition is not met, then ``total_energy`` is set to
+:math:`e + (v^2 + B^2/\rho)/2`.
+    
+When ``"dual_energy_eta"``, is set to ``0``, :math:`e` is always set to
+``e'``. This is done to provide support for Grackle (in the future)
+without the dual-energy formalism.
+
+*Note: in the future, the behavior described in difference 2, may change
+to achieve better compatibility with Grackle.*
 
 .. _using-vlct-reconstruction:
 
@@ -385,10 +442,35 @@ them:
     `Stone et al. (2008)
     <http://adsabs.harvard.edu/abs/2008ApJS..178..137S>`_ .
     If using an HLL Riemann Solver, this is the recommended choice.
+  * ``"hllc"`` **[EXPERIMENTAL]** The HLLC approximate Riemann solver.
+    For an overview see Toro, 2009, *Riemann Solvers and Numerical
+    Methods for Fluid Dynamics*, Springer-Verlag. This is a solver for
+    hydrodynamical problems that models contact and shear waves. The
+    wavespeed bounds are estimated according to the Einfeldt approach.
+
+    .. warning::
+
+      In the current version, the HLLC solver is experimental. Do **NOT**
+      use it unless all magnetic fields are intialized to be uniformly zero
+      everywhere.
+    
   * ``"hlld"`` The HLLD approximate Riemann solver described in
     Miyoshi & Kusano, 2005. JCP, 315, 344. The wavespeed bounds
     are estimated according to eqn 67 from the paper.
 
+
+.. note::
+
+      When the dual-energy formalism is in use, all of the solvers treat
+      the internal energy as a passively advected scalar.
+
+      This is not completely self-consistent with the assumptions made by the
+      HLLD solver. Unlike the other HLL-solvers which assume constant
+      pressure in the intermediate regions of the Riemann Fan the HLLD solver
+      assumes constant total pressure. It is unclear whether this causes any
+      problems.
+
+   
 
 
 ``"pm_deposit"``: particle-mesh

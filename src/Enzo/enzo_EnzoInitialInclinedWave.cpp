@@ -881,7 +881,7 @@ void EnzoInitialInclinedWave::prepare_HD_initializers_
   } else if (wave_type_ != "sound"){
     // For all types of entropy waves, if parallel_vel_ is not specified ,
     // pos_vel_ is used to initialize the wave to 1 or -1. But if parallel_vel_
-    // is specified, then parallel_vel_ is ignored
+    // is specified, then pos_vel_ is ignored
     v0_back = wsign;
   }
 

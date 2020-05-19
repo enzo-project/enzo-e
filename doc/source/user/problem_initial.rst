@@ -28,7 +28,8 @@ a 3D array of Sedov blast waves.
    Initialize an "implosion" test problem.
 
 ``"inclined_wave``
-   Initialize an inclined wave test problem for the VL+CT MHD solver.
+   Initialize an inclined wave test problem. (Primarily used for
+   testing the VL+CT MHD solver).
   
 ``"pm"``
    Initialize ``"dark"`` matter particles in either a regular uniform
@@ -59,7 +60,8 @@ a 3D array of Sedov blast waves.
    parallel-scaling studies with load balancing.
 
 ``"shock_tube"``
-   Initialize an axis-aligned shocktube test problem for the VL+CT MHD solver.
+   Initialize an axis-aligned shock tube test problem (Primarily used for
+   testing the VL+CT MHD solver).
 
 ``"soup"``
    

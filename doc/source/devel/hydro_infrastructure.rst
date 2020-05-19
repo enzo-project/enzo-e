@@ -9,14 +9,13 @@ the Enzo Layer that can be optionally used to implement other
 hydro/MHD methods. The infrastructure was used to implement other the
 VL + CT MHD solver.
 
-*Note: Currently, barotropic equations of state, compatibility with
-Grackle, and the dual energy formalism are not yet implemented within
-the infrastucture. However they are mentioned throughout this guide
-and slots have been explicitly left open for them to be implemented
-within the framework. Additionally note that while passively advected
-scalars are mostly supported, there is not yet support for
-renomralizing the specific values of multiple passively advected
-scalars to have a sum of 1.*
+*Note: Currently, barotropic equations of state and compatibility with
+Grackle are not yet implemented within the infrastucture. However they
+are mentioned throughout this guide and slots have been explicitly left
+open for them to be implemented within the framework. Additionally note
+that while passively advected scalars are mostly supported, there is
+not yet support for renomralizing the specific values of multiple
+passively advected scalars to have a sum of 1.*
 
 *Note: Currently brief summaries of the interfaces of each of the
 objects are provided below. More detailed descriptions are provided
@@ -70,7 +69,7 @@ introduce the concept of "stale depth". At the start of a time-step,
 there are never any "stale" values ("stale depth" is zero). However,
 every time the flux divergence get's added to any quantities, the
 outermost layer of up-to-date quantities (in the ghost zone) becomes
-invalid; this happens because on the fluxes on the exterior faces of
+invalid; this happens because the fluxes on the exterior faces of
 that layer are not accurately known. We refer to these invalid values
 as "stale" and say that the stale depth increased by 1. The stale
 depth can also be incremented by other operations (e.g. piecewise
@@ -127,9 +126,7 @@ Centered Field Registry
 The Hydro/MHD infrastructure helped motivate the creation of
 ``EnzoCenteredFieldRegistry``, to encapsulate a static (at runtime)
 registry of all known fields used by the Enzo section of the
-codebase and track some basic meta-data about the fields. The registry
-was primarily created to help manage instances of the
-``EnzoAdvectionFieldLUT`` struct (see below). Although it's
+codebase and track some basic meta-data about the fields. Although it's
 functionallity is presently limited, the ``EnzoCenteredFieldRegistry``
 has the potential to be a general purpose tool that can be used for
 other purposes in the Enzo layer of the codebase.
@@ -151,98 +148,17 @@ At present, the registry currently provides operations:
 
   * for building ``Grouping`` objects that contain registered quantity
     fields.
-  * related to the ``EnzoAdvectionFieldLUT`` struct (see below).
+  * to access quantity properties registerred in ``FIELD_TABLE`` at
+    runtime
   * provide a list of known groups that can be used in the input file
     to identify fields as passively advected scalars (as of now, the
     only such group is ``"colour"``).
 
-.. _EnzoAdvectionFieldLUT-section:
-
-EnzoAdvectionFieldLUT
----------------------
-
-Motivation
-~~~~~~~~~~
-
-The ``EnzoAdvectionFieldLUT`` class was primarily motivated by
-algorithms for solving the Riemann problem. In several approximate
-solvers, most of the actively advected quantities need to be known all
-at a given cell-interface to help compute the wave speeds.
-
-Unlike many hydro codes (including Enzo) we wanted to avoid statically
-declaring which indices of an array correspond to specific
-quantities. Doing so complicates situations where different combinations
-of fields can be optionally used (e.g. like optional magnetic fields,
-dropping total energy for barotropics equations of state, optionally
-advecting internal energy for dual energy formalism or tracking cosmic
-ray energy density and cosmic ray energy fluxes).
-
-It's also useful to be able to iterate over all of values at a given
-interface after computing the wavespeeds to reduce the code necessary
-to compute the Riemann Fluxes (and make it easier to add new fields).
-We found that standard hash tables are too slow for these operations.
-
-Description
-~~~~~~~~~~~
-
-The above requirements motivated the creation of the
-``EnzoAdvectionFieldLUT`` class. Its a barebones class designed to
-be as close as possible to a C-style struct, with members named for
-each quantity registered in ``FIELD_TABLE`` that is actively advected
-in Enzo in some context. Scalar quantities have members named
-directly after them and vector quantities have 3 members named after
-them: ``{qname}_i``, ``{qname}_j``, ``{qname}_k``, where ``qname``
-is the name of the quantity (e.g. defining the velocity quantity in
-``FIELD_TABLE`` causes the creation of the ``velocity_i``,
-``velocity_j``, and ``velocity_k`` members). 
-
-``EnzoCenteredFieldRegistry::prepare_advection_lut`` is provided to
-prepare an instance of ``EnzoAdvectionFieldLUT`` for a set of
-specified integrable quantities. The function determines the length
-of an array large enough to hold all of the relevant fields and
-initializes each relevant struct member to have an integer value
-corresponding to a unique index in the aforementioned array.
-Any memebers of the class that don't correspond to one of the
-specified integrable quantity has its value set to -1.
-
-After being setup, instances of ``EnzoAdvectionFieldLUT`` can be
-used as a lookup table. As an example, imagine ``wl`` is an array of
-reconstructed integrable primitives at a given cell interface
-where the values are ordered according to a properly initialized
-instance of ``EnzoAdvectionFieldLUT`` called ``lut``. In this case,
-``wl[prim_lut.density]`` and ``wl[prim_lut.total_energy]`` give the
-values of the density and (specific) total energy. 
-
-As an added bonus, ``EnzoCenteredFieldRegistry::prepare_advection_lut``
-orders the quantities based on whether they are "conserved",
-"specific", or "other" (note: there shouldn't be any actively advected
-quantities classified as "other"), and yields sets of iteration
-limits. These iteration limits specify the ranges of indices in an
-array hold quantities of a particular class of value. This simplifies
-the conversion of all integrable quantities to "conserved" form in a
-Riemann solver or when the integrable quantities are updated.
-
-Additionally, ``EnzoCenteredFieldRegistry::prepare_advection_lut``,
-allows for the specification of "flagged" quantities. When a quantity
-is "flagged" the ordering of the indices assigned to the the members
-of ``EnzoAdvectionFieldLUT`` and the iteration limits returned by the
-function are modified such that the iteration limits don't include
-the "flagged" quantities. This is useful when updating integrable
-quantities in certain cases (e.g. if the dual energy formalism is in
-use or if magnetic fields get updated by constrained transport).
-
-``EnzoCenteredFieldRegistry::load_array_of_fields`` is
-provided to assist with the loading of instances arrays of
-``CelloArray`` encapsulating field data that are ordered according to
-the ordering specified in an instance of ``EnzoAdvectionFieldLUT``.
-
-*Note: Currently, the usage of this class is confined to the
-implementation of the* ``EnzoRiemannImpl`` *and*
-``EnzoIntegrableUpdate`` *classes.*
-
 ==============
 General Design
 ==============
+
+    .. _GeneralDesignOverview-section:
 
 Overview
 --------
@@ -298,10 +214,23 @@ from the ``EnzoCenteredFieldRegistry`` class. For more information
 about ``EnzoCenteredFieldRegistry`` and ``FIELD_TABLE`` see
 :ref:`Centered-Field-Registry`
 
+The implementation of these operation classes largely aims to avoid
+employing following the traditional approach in which most field
+data is directly accessed from a large array using macros or
+globally defined unscoped enums that maps quantity component names
+to indices. This traditional approach makes the introuduction of
+optional fields that are related to active advection somewhat
+difficult (e.g. cosmic ray energy/fluxes, internal energy for
+dual energy formalism, phi for dedner divergence cleaning). In
+place of this traditional approach leans heavily on Cello's
+provided infrastructure for field data and make heavy usage of
+of the ``Grouping`` class.
 
-Groupings
----------
+Use of ``Grouping``
+-------------------
 
+Overview
+~~~~~~~~
 The basic unit that get's operated on by these operation classes
 are instances of Cello's ``Grouping`` class. We essentially use
 them as containers of quantities (they hold the names of fields
@@ -326,6 +255,23 @@ each spatial component of the quantity. Instances of ``Grouping``
 can also include groups that contain field names representing
 passively advected scalars (e.g. you might have a collection of
 fields for passively advected scalars in a group called "colour").
+
+This described usage of ``Grouping`` objects amounts to crude
+associative arrays (aka maps or dictionaries) that effectively maps
+grop names to field data. Although they technically map the group
+names to field names, frequently the field names are immediately
+used to load the field data.
+
+*Note: It would probably be beneficial to replace this usage of*
+``Grouping`` *with an actual associative array* (*e.g.* ``std::map`` )
+*that directly maps names to data. Doing so would reduce the
+complexity of the code (and the amount of required documentation),
+would reduce coupling of the hydro machinery to the cello block and
+field machinery (making its usage moreflexible), and may even carry
+some performance benefits.*
+
+Specific Usage
+~~~~~~~~~~~~~~
 
 The names of groups expected in an instance of ``Grouping``
 are the names of the quantities (and groups of passive scalars)
@@ -366,7 +312,18 @@ types of ``Groupings`` required for the provided operation classes:
        hydro/MHD solvers) having different assumptions about the
        stored field history and to reduce the memory footprint.
 
-  3. Groupings of reconstructed left/right quantites
+  3. Grouping of temporary cell-centered for tracking the total change
+     in a quantity over a timestep.
+
+     * This grouping holds groups named for all integrable quantities and
+       groups of passively advected scalars. For each (partial) timestep,
+       the fields in the grouping are used to accumulate the total change
+       in the conserved form of each quantity. This includes the flux
+       divergence and the contributions from source terms. At the end of
+       the (partial) timestep, these are used to actually update the
+       values of the integrable quantities
+
+  4. Groupings of reconstructed left/right quantites
 
      * 2 instances of groupings of this kind are used to respectively hold
        the reconstructed left and right interface quantities. This should
@@ -390,7 +347,7 @@ types of ``Groupings`` required for the provided operation classes:
        ``CelloArray`` instances with the appropriate face-centered
        dimensions.
 
-  4. Grouping of Riemann Flux fields
+  5. Grouping of Riemann Flux fields
 
      * An instance of this kind of grouping is required for each
        dimension and is used to hold the face-centered fluxes along
@@ -417,13 +374,6 @@ cell-centered field associated with "density" is used to compute the
 reconstruct values that are stored in the fields of the "density"
 group in the reconstructed grouping).
 
-*Note: The use of the* ``Grouping`` *objects over a more traditional
-approach where an array of pointers (to the field data), where
-macros/enums are statically defined that map array indices to quantity
-names was originally motivated by the greater flexibility of adding
-new,optional quantities to the integrator (e.g. cosmic ray
-energy/fluxes).*
-
 =================
 Equation Of State
 =================
@@ -432,7 +382,10 @@ All of the operations related to the equation of state are handled by
 subclasses of the abstract base class, ``EnzoEquationOfState``. The
 class has a number of responsibilities. Currently the only concrete
 subclass of ``EnzoEquationOfState`` is the ``EnzoEOSIdeal`` class
-which encapsulates the properties of an ideal, adiabatic gas.
+which encapsulates the properties of an ideal, adiabatic gas. This
+class can optionally support use of the dual-energy formalism (For
+details about the currently expected implementation of the
+dual-energy formalism see :ref:`using-vlct-de` ).
 
 The ``EnzoEquationOfState`` has the following interface:
 
@@ -451,8 +404,6 @@ support barotropic equations of state.*
    bool uses_dual_energy_formalism();
 
 Returns whether the dual energy formalism is in use.
-
-*Currently, the dual energy formalism is not supported.*
 
 .. code-block:: c++
 
@@ -486,13 +437,15 @@ Returns the thermal pressure floor.
 
 .. code-block:: c++
 
-   void apply_floor_to_total_energy(Block *block,
-                                    Grouping &integrable_group,
-				    int stale_depth);
+   apply_floor_to_energy_and_sync(Block *block,
+                                  Grouping &integrable_group,
+                                  int stale_depth);
 
-This method makes sure that the field in the total_energy grouping of
-the integrable group satisfies the pressure floor. This should do
-nothing for a barotropic equation of state.
+This method applies the applies the pressure floor to the total_energy
+field specified by ``integrable_group``. If using the dual-energy formalism
+the floor is also applied to the internal energy (also specified by the
+``integrable_group``) and synchronizes the internal energy with the total
+energy. If the equation of state is barotropic, this should do nothing.
 
 .. code-block:: c++
 
@@ -507,13 +460,15 @@ This method computes the pressure from the integrable quantities
 specified by ``pressure_name``. The ``conserved_passive_group`` should
 include the fields of passive scalars in conserved form.  This
 currently doesn't do anything and will only be important if
-Grackle is in use.
+Grackle is in use. 
 
 *In principle this should wrap* ``EnzoComputePressure``, *but
 currently that is not the case. Some minor refactoring is needed to
 allow EnzoComputePressure to compute Pressure based on fields
 specified in a* ``Grouping`` *object and we are holding off on this
-until we implement support for Grackle.*
+until we implement full support for Grackle. Currently, when the
+dual-energy_formalism is in use, pressure is simply computed from
+internal energy.*
 
 .. code-block:: c++
 
@@ -580,7 +535,13 @@ x, y, or z faces of the mesh block.
 
 For a barotropic equation of state, this nominally does nothing, while
 for a non-barotropic equation of state, this nominally just computes
-specific total energy.
+specific total energy. If the dual-energy formalism is in use this
+also computes the internal energy.
+
+*In the future, it might be worth considering making this into a subclass
+of Cello's ``Physics`` class. If that is done, it may be advisable to
+allow for switching between different dual-energy formalism
+implementations.*
 
 
 How to extend
@@ -676,8 +637,8 @@ function call operation must have a signature matching:
                                   enzo_float theta_limiter);
 
 Give three contiguous primitive values along the axis of
-interpolation, (`vm1`, `v`, and `vp1`) the method should compute the
-limited slope. The `theta_limiter` parameter that can be optionally
+interpolation, (``vm1``, ``v``, and ``vp1``) the method should compute the
+limited slope. The ``theta_limiter`` parameter that can be optionally
 used to tune the limiter (or ignored).
 
 When a new a ``Limiter`` functor is defined to be used to specialize
@@ -722,8 +683,8 @@ quantities (with ``integrable_groups``), register the names of the groups
 containing the passively advected quantities (with ``passive_groups``)
 and requires that we specify the name of the solver ``solver``. Note that
 the names of the integrable quantites should match quantities specified in
-``FIELD_TABLE`` that are identified as being actively advected in some
-context. For more details about ``FIELD_TABLE``, see
+``FIELD_TABLE`` that are identified as being actively advected. For more
+details about ``FIELD_TABLE``, see
 :ref:`Centered-Field-Registry`
 
 The main interface function of ``EnzoRiemann`` is:
@@ -736,7 +697,7 @@ The main interface function of ``EnzoRiemann`` is:
                std::string pressure_name_r,
                Grouping &flux_group, int dim,
                EnzoEquationOfState *eos,
-               int stale_depth);
+               int stale_depth, std::string interface_velocity_name = "");
 
 In this function, the ``priml_group`` and ``primr_group`` arguments
 are references to the ``Grouping`` objects holding the reconstructed
@@ -747,145 +708,292 @@ hold the names of the left/right reconstructed pressure. The
 computed fluxes for each integrable quantity and passively advected
 scalar will be stored. ``dim`` indicates the dimension along which the
 flux should be computed (0,1,2 corresponds to x,y,z).
+``interface_velocity_name`` is an optional argument used to specify
+the name of a field that can be used to store interface velocity
+values computed by the Riemann Solver (this is primarily used for
+computing internal energy source terms when the dual energy formalism
+is in use).
 
 
-Implementation Notes
---------------------
+Implementation Notes: ``EnzoRiemannImpl``
+-----------------------------------------
 
-Historically, many codes (including Enzo) that have implemented
-multiple Riemann Solvers, have had large amounts of code duplication
+Historically, in many hydro codes (including Enzo) there is a lot of code
+duplication between implementations of different types of Riemann Solvers
 (e.g. converting left/right primitives to left/right conserved quantities
-and computing left/right fluxes). To try to reduce some of the code
+and computing left/right fluxes). To try to reduce some of this
 duplication without sacrificing speed, we have defined the
-``EnzoRiemannImpl<ImplStruct>`` class template (which is a subclass of
+``EnzoRiemannImpl<ImplFunctor>`` class template (which is a subclass of
 ``EnzoRiemann``).
 
-Basically, the idea is that ``EnzoRiemannImpl<ImplStruct>`` class
-template factors out duplicate code shared by many approximate Riemann
-Solvers (e.g. HLLE, HLLC, HLLD and possibly LLF & Roe solvers). The
-``ImplStruct`` is a simple struct/class that actually implements a
-method that is responsible for the different code in each type of
-solver and that gets called to compute the flux at every cell
-interface. The more traditional object-oriented approach would have
-been to make ``EnzoRiemannImpl`` an abstract class with a virtual
-method reponsible for the solver-specific code. However, the act of
-looking up the virtual method causes a performance hit and prevents
-the code from being inlined within the main loop.
+The class template factors out common code shared by many approximate
+Riemann Solvers (e.g. HLLE, HLLC, HLLD and possibly LLF & Roe solvers).
+The template argument, ``ImplFunctor``, is a functor that implements
+solver-specific calculations and is called at every cell-interface.
+Additionally, the functor also specifies a specialization of the
+template class ``EnzoRiemannLUT<InputLUT>`` that primarily
 
-EnzoRiemannImpl Control flow
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  * Specifies the exact set of actively advected integrable quantities
+    that a given solver expects
+  * Serves as a compile-time lookup table. It statically maps the names
+    of the all of the components of the relevant actively advected fields
+    to unique array indices.
 
-At each cell-interface where flux is to be computed, arrays are filled
-with the integrable quantities at the location and an instance of the
-``EnzoAdvectionFieldLUT`` class is used as a lookup table.
-Basically, the class has members named after all potential
-advectable, integrable quantities (that are listed in ``FIELD_TABLE``)
-and the members corresponding to the registered integrable quantities
-assigned values that correspond to indices in an array.
-See :ref:`EnzoAdvectionFieldLUT-section`
-for a more detailed description of the class. We found that using
-one of the built-in hash tables as a lookup table had a significant
-performance penalty.
+See :ref:`EnzoRiemannLUT-section`
+for a more detailed description of ``EnzoRiemannLUT<InputLUT>`` and
+examples of how it is used.
 
-Below, a brief overview of the ``EnzoRiemannImpl::solve`` control flow
-is provided. Basically the function loops over all cell interfaces,
-along a given dimension, where the flux should be computed. At each
-location, the following sequence of operations are performed:
+*Note: a more traditional inheritance-based approach that uses a
+virtual method to implement solver-specific code. Calling a virtual
+method in the main loop introduces overhead and prevents inlining.*
+
+``EnzoRiemannImpl`` Control flow
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A brief overview of the ``EnzoRiemannImpl<ImplFunctor>::solve``
+control flow is provided below. Basically the function loops over all
+cell interfaces, along a given dimension, where the flux should be
+computed. At each location, the following sequence of operations are
+performed:
 
   1. Retrieve the left and right primitives at the given location from
-     the fields and stores them in arrays of ``enzo_float`` elements
-     called ``wl`` and ``wr``. The elements are ordered based on a
-     preconfigured instance of ``EnzoAdvectionFieldLUT`` called
-     ``lut_``.
+     the fields and stores them in stack-allocated arrays of
+     ``enzo_float`` elements called ``wl`` and ``wr``. As mentioned
+     above, the values are organized according to the specialization
+     of ``EnzoRiemannLUT<InputLUT>`` provided by the ``ImplFunctor``
+     (hereafter, ``ImplFunctor::LUT``)
   2. The left and right pressure values are retrieved from the
      temporary fields holding the values that were precomputed from
      the reconstructed quantities (presumably using a concrete
      subclass of ``EnzoEquationOfState``). The values are stored in
-     ``pressure_l`` and ``pressure_r``.
+     local variables ``pressure_l`` and ``pressure_r``.
   3. The conserved forms of the left and right reconstructed
      primitives and stored in the arrays called ``Ul`` and
-     ``Ur``. Note that the primitives that are always in conserved
-     form (e.g. density or magnetic field) are simply copied over. The
-     elements of ``Ul`` / ``Ur`` maintain the same ordering as those
-     of ``wl`` / ``wr`` (e.g. the index for a given component of the
-     velocity in ``wl`` / ``wr`` is the index for the same component
-     of the momentum in ``Ul`` / ``Ur``).
+     ``Ur``. Primitives that are always in conserved form (e.g.
+     density or magnetic field). The elements of ``Ul`` / ``Ur``
+     are also ordered by ``ImplFunctor::LUT`` (e.g. the index for a
+     given component of the velocity in ``wl`` / ``wr`` matches the
+     index for the same component of the momentum in ``Ul`` / ``Ur``).
   4. The standard left and right hydro/MHD fluxes are computed using
-     the above quantities and stored in ``Fl`` and ``Fr``; the
-     elements are again ordered by ``lut_``.
-  5. In principle, non-standard fluxes are then computed and stored in
-     ``Fl`` and ``Fr`` (this might include quantities like cosmic ray
-     energy density and flux density OR internal energy for the dual
-     energy formalism)
-  6. These quantities are all passed to the static public
-     ``calc_riemann_fluxes`` method provided by ``ImplStruct``. This
-     method then directly updates the fields provided to hold each
-     Riemann Flux.
+     the above quantities and stored in ``Fl`` and ``Fr`` (organized by
+     ``ImplFunctor::LUT``)
+  5. These quantities are all passed to the static public
+     ``operator()`` method provided by ``ImplFunctor`` that returns the
+     array of interface fluxes in the array, ``fluxes``. (It also
+     computes the interface velocity)
+  6. The interface fluxes and interface velocity are then copied into the
+     output fields.
 
 A separate method is provided to compute the fluxes for the passively
-advected quantities.
+advected quantities. This method will also be compute the fluxes of any
+specified quantities that are nominally actively advected, but can fall
+back to using passive advection when the solver doesn't explictly support
+it (the main example is ``"internal_energy"``)
      
-*Currently EnzoRiemannImpl has only been tested and known to work for
-3D problems. Additionally, no solvers (or more specifically,
+*Note: Currently EnzoRiemannImpl has only been tested and known to
+work for 3D problems. Additionally, no solvers (or more specifically,
 wavespeed calculations) are currently implemented that explicitly
 support barotropic equations of state (however, all of the machinery
 is in place to support them).*
 
-ImplStruct Class
-~~~~~~~~~~~~~~~~
+*Note: It might make sense to move calculation of conserved quantities
+and fluxes into* ``ImplFunctor`` *. For some solvers, it may not be
+necessary to compute all of this information. The template functions
+that perform these operations have already been factored out into the*
+``enzo_riemann_impl`` *namespace - so the transition would be easy to
+accomplish.*
 
-This subsection provides a brief description of the ``ImplStruct``
-classes used to specialize ``EnzoRiemannImpl<ImplStruct>`` to
-implement specific Riemann solvers. Basically an ``ImplStruct`` must
-provide two static public methods ``calc_riemann_fluxes`` and
-``scratch_space_length``.
+ImplFunctor template argument
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``calc_riemann_fluxes`` static method computes the Riemann Flux at
-a given cell interface. The expected function signature should looks
-like:
+This subsection provides a brief description of the ``ImplFunctor``
+template argument used to specialize ``EnzoRiemannImpl<ImplFunctor>``.
+The class is expected to:
+
+    * be default constructible
+
+    * publically define the ``LUT`` type, which should be a specialization
+      of the ``EnzoRiemannLUT<InputLUT>`` template class.
+      ``ImplFunctor::LUT`` should indicate which actively advected
+      quantities are expected by ``ImplFunctor`` and how they organized.
+      For more details about how how ``EnzoRiemannLUT<InputLUT>`` is used,
+      see :ref:`EnzoRiemannLUT-section`
+           
+    * provide the const-qualified function call method, ``operator()``.
+
+The expected function signature of the ``operator()`` method is as follows:
 
 .. code-block:: c++
 
-   void ImplStruct::calc_riemann_fluxes
-     (const enzo_float flux_l[], const enzo_float flux_r[],
-      const enzo_float prim_l[], const enzo_float prim_r[],
-      const enzo_float cons_l[], const enzo_float cons_r[],
-      const enzo_float pressure_l, const enzo_float pressure_r,
-      const EnzoAdvectionFieldLUT lut, const int n_keys,
-      const bool barotropic_eos, const enzo_float gamma,
-      const enzo_float isothermal_cs,
-      const int iz, const int iy, const int ix,
-      EFlt3DArray flux_arrays[], enzo_float scratch_space[]);
+   lutarray<ImplFunctor::LUT> ImplFunctor::operator()
+     (const lutarray<ImplFunctor::LUT> flux_l,
+      const lutarray<ImplFunctor::LUT> flux_r,
+      const lutarray<ImplFunctor::LUT> prim_l,
+      const lutarray<ImplFunctor::LUT> prim_r,
+      const lutarray<ImplFunctor::LUT> cons_l,
+      const lutarray<ImplFunctor::LUT> cons_r,
+      enzo_float pressure_l, enzo_float pressure_r, bool barotropic_eos,
+      enzo_float gamma, enzo_float isothermal_cs, enzo_float &vi_bar) const;
+
+This function is called at every cell-interface and returns an array
+holding the Riemann Flux at a given cell-interface. Note that
+``lutarray<ImplFunctor::LUT>`` is actually an alias for
+``std::array<enzo_float, ImplFunctor::LUT::NEQ>``. Each of these
+arrays hold values associated with the components of each relevant
+actively advected quantity and are organized according to
+``ImplFunctor::LUT`` (again, see :ref:`EnzoRiemannLUT-section` for
+more details about the ``LUT`` type).
 
 ``flux_l``/ ``flux_r``, ``prim_l``/ ``prim_r``, and ``cons_l``/
 ``cons_r`` store the left/right interface fluxes values, primitive
 quantities, and conserved quantities (they are passed ``Fl``/ ``Fr``,
-``wl``/ ``wr``, and ``Ul``/ ``Ur``, respectively). The left and right
-reconstructed pressure values are passed as ``pressure_l`` and
-``pressure_r``. The ``lut`` maps the names of different quantities to
-indices for each array and ``n_keys`` specifies the number of elements
-in each array.
+``wl``/ ``wr``, and ``Ul``/ ``Ur``, respectively).
 
-``barotropic_eos`` indicates whether the fluid equation of state is
-barotropic. If ``true``, then ``isothermal_cs`` is expected to be
-non-zero and if ``false``, then ``gamma`` is expected to be positive.
+The left and right reconstructed pressure values are passed as
+``pressure_l`` and ``pressure_r``. ``barotropic_eos`` indicates
+whether the fluid's equation of state is barotropic. If ``true``,
+then ``isothermal_cs`` is expected to be non-zero and if ``false``,
+then ``gamma`` is expected to be positive.
 
-The computed Riemann Flux, for an integrable quantity associated with
-index ``i`` of the above arrays, get's stored at
-``flux_arrays[j](iz,iy,ix)``. Finally, the ``scratch_space`` array
-serves as a place to temporarily save quantites during the
-calculation.
+*Note: in the future, it would be worth experimenting with annotating the *
+``operator()`` *method of ``ImplFunctor`` classes with the compiler
+directive * ``__attribute__((always_inline))`` * to force inlining (this
+works on g++, icc and clang).*
 
-The length of ``scratch_space`` array used for a given ``ImplStruct``
-is calculated by its other required static method
-``scratch_space_length``. The function signature for this method is:
+    .. _EnzoRiemannLUT-section:
+
+EnzoAdvectionFieldLUT
+~~~~~~~~~~~~~~~~~~~~~
+
+As described above in the :ref:`GeneralDesignOverview-section` of the
+General Design section, we sought to avoid the common approach of
+hydro codes that map actively advected quantities indices with macros
+or globally defined unscoped enums. The ``EnzoRiemannLUT<InputLUT>``
+template class basically serves as a compromise between this traditional
+approach approach and using a hash table (which introduce unacceptable
+overhead) for organizing quantities in the main loop of
+``EnzoRiemannImpl<ImplFunctor>``. Alternatively it can be thought of as a
+scoped version of the traditional approach.
+
+This is a template class that provides the following features at compile
+time:
+
+    * a lookup table (LUT) that maps the names of components of a subset
+      of the actively advected quantities defined in ``FIELD_TABLE`` to
+      unique, contiguous indices.
+
+    * the number of quantity components included in the table
+
+    * a way to iterate over just the conserved quantities or specific
+      quantities values that are stored in an array using these mapping
+
+    * a way to query which of the actively advected quantities in
+      FIELD_TABLE are not included in the LUT
+
+These feature are provided via the definition of publicly accessible
+integer constants in every specialization of the template class. All
+specializations have:
+
+    * a constant called ``NEQ`` equal to the number of quantity components
+      included in the lookup table
+
+    * a constant called ``specific_start`` equal to the number of components
+      of conserved quantities included in the lookup table
+
+    * ``qkey`` constants, which include constants named for the components
+      of ALL actively advected quantities in FIELD_TABLE. A constant
+      associated with a SCALAR quantity, ``{qname}``, is simply called
+      ``{qname}`` while constants associated with a vector quantity
+      ``{qname}`` are called ``{qname}_i``, ``{qname}_j``, and ``{qname}_k``.
+
+The `qkey` constants serve as both the keys of the lookup table and a
+way to check whether a component of an actively advected quantity is
+included in the table. Their values are satisfy the following conditions:
+
+    * All constants named for values corresponding to quantities included
+      in the table have values of ``-1``
+
+    * All constants named for conserved quantities have unique integer
+      values in the internal ``[0,specific_start)``
+
+    * All constants named for specific quantities have unique integer
+      values in the interval ``[specific_start, NEQ)``
+
+The lookup table is always expected to include density and the 3 velocity
+components. Although it may not be strictly enforced (yet), the lookup
+table is also expected to include either all 3 components of a vector
+quantity or None of them.
+
+This template class also provides a handful of helpful static methods to
+programmatically probe the table's contents at runtime and validate that
+the above requirements are specified.
+
+For the sake of providing some concrete examples about how the code works,
+let's assume that we have a class ``MyInputLUT`` that is defined as:
 
 .. code-block:: c++
 
-   int ImplStruct::scratch_space_length(const int n_keys);
+   struct MyIntLUT {
+     enum vals { density=0, velocity_i, velocity_j, velocity_k,
+                 total_energy, NEQ, specific_start = 1};
+   };
 
-Here, ``n_keys`` is the number of elements that arrays like ``prim_l``
-and ``prim_r`` hold.
+The template specialization ``EnzoRiemannLUT<MyIntLUT>`` assumes that
+all undefined `qkey` constants omitted from ``MyIntLUT`` are not included
+in the lookup table and will define them within the template specialization
+to have values of ``-1``.
+
+To access the index associated with density or the jth component of
+velocity, one would evaluate:
+
+.. code-block:: c++
+
+   int density_index = EnzoRiemannLUT<MyInLUT>::density; //=0
+   int vj_index = EnzoRiemannLUT<MyInLUT>::velocity_j;   //=2
+
+
+It makes more sense to talk about the use of this template class when we
+have a companion array. For convenience, the alias template
+``lutarray<LUT>`` type is defined. The type,
+``lutarray<EnzoRiemannLUT<InputLUT>>`` is an alias of the type
+``std::array<enzo_float, EnzoRiemannLUT<InputLUT>::NEQ>;``.
+
+As an example, imagine that the total kinetic energy density needs to be
+computed at a single location from an values stored in an array, ``prim``,
+of type ``lutarray<EnzoRiemannLUT<MyInLUT>>``:
+
+.. code-block:: c++
+
+   using LUT = EnzoRiemannLUT<MyInLUT>;
+   enzo_float v2 = (prim[LUT::velocity_i] * prim[LUT::velocity_i] +
+                    prim[LUT::velocity_j] * prim[LUT::velocity_j] +
+   prim[LUT::velocity_k] * prim[LUT::velocity_k]);
+   enzo_float kinetic = 0.5 * prim[LUT::density] * v2;
+
+
+``EnzoRiemannLUT<InputLUT>``, makes it very easy to
+write generic code that can be reused for multiple different lookup table
+by using by passing its concrete specializations as a template argument
+to other template functions/classes. Consider the case where a single
+template function is desired to compute the total non-thermal energy
+density at a single location for an arbitrary lookup table:
+
+.. code-block:: c++
+
+   template <class LUT>
+   enzo_float calc_nonthermal_edens(lutarray<LUT> prim)
+   {
+     enzo_float v2 = (prim[LUT::velocity_i] * prim[LUT::velocity_i] +
+     prim[LUT::velocity_j] * prim[LUT::velocity_j] +
+     prim[LUT::velocity_k] * prim[LUT::velocity_k]);
+
+     enzo_float bi = (LUT::bfield_i >= 0) ? prim[LUT::bfield_i] : 0;
+     enzo_float bj = (LUT::bfield_j >= 0) ? prim[LUT::bfield_j] : 0;
+     enzo_float bk = (LUT::bfield_k >= 0) ? prim[LUT::bfield_k] : 0;
+     enzo_float b2 = bi*bi + bj*bj + bk*bk;
+
+     return 0.5(v2*prim[LUT::density] + b2);
+   }
 
 
 Adding new quantites
@@ -915,23 +1023,23 @@ Adding new solvers
 
 New Riemann Solvers can currently be added to the infrastructure by
 either subclasseding ``EnzoRiemann`` or defining a new specialization
-of ``EnzoRiemannImpl<ImplStruct>``. In either case, the
+of ``EnzoRiemannImpl<ImplFunctor>``. In either case, the
 ``EnzoRiemann::construct_riemann`` factory method must be modified to
 return the new solver and :ref:`using-vlct-riemann-solver`
 should be updated.
 
 The additional steps for implementing a new Riemann solver by speciallizing
-``EnzoRiemannImpl<ImplStruct>`` are as follows:
+``EnzoRiemannImpl<ImplFunctor>`` are as follows:
 
-  1. Define a new ``ImplStruct`` class (e.g. ``HLLDImpl``)
+  1. Define a new ``ImplFunctor`` class (e.g. ``HLLDImpl``)
 
-  2. Add the new particlular specialization of ``EnzoRiemannImpl`` to enzo.CI
-     (e.g. add the line: ``PUPable EnzoRiemannImpl<HLLDImpl>;``)
+  2. Add the new particlular specialization of ``EnzoRiemannImpl`` to
+     enzo.CI (e.g. add the line:
+     ``PUPable EnzoRiemannImpl<HLLDImpl>;``)
 
   3. *(optional)* define an alias name for the specialization of
-     ``EnzoRiemannImpl`` that uses the new ``ImplStruct`` class
+     ``EnzoRiemannImpl`` that uses the new ``ImplFunctor`` class
      (e.g. ``using EnzoRiemannHLLD = EnzoRiemannImpl<HLLDImpl>;``).
-
 
 ==============================
 Updating integrable quantities
@@ -949,7 +1057,6 @@ signature:
 
    EnzoIntegrableUpdate(std::vector<std::string> integrable_groups,
 		        bool skip_B_update,
-		        bool dual_energy_formalism,
 		        std::vector<std::string> passive_groups)
 
 The function requires that we:
@@ -957,8 +1064,7 @@ The function requires that we:
   * register the names of the integrable quantities (with
     ``integrable_groups``)
   * indicate whether the update to the magnetic field should
-    be skipped
-  * indicate whether the dual energy formalism is in use
+    be skipped.
   * register the names of the groups containing the passively
     advected quantities (with ``passive_groups``).
 
@@ -970,31 +1076,44 @@ field update is handled separately). If the magnetic field is not
 specified as an integrable quantity, then the value specified for
 ``skip_B_update`` is unimportant
 
-*Note that the* ``dual_energy_formalism`` *argument is
-purely for demonstration purposes. It is not yet implemented and if a
-true value is specified, then an error will be raised.*
+The following method is used to compute the change in (the conserved
+form of) the integrable and passively advected quantites due to the
+flux divergence along dimension ``dim`` over the (partial) imestep
+``dt``. These values are added to the the fields used to accumulate
+the total changes in these quantities (specified by ``dUCons_group``).
 
-The main interface function has the signature 
+.. code-block:: c++
+
+   void accumulate_flux_component(Block *block, int dim, double dt,
+                                  Grouping &flux_group, Grouping &dUcons_group,
+                                  int stale_depth) const;
+
+The method used to clear the values of the fields for accumulation is
+provided below. This sanitization should be performed before starting
+to accumulate flux divergence or source terms.
+
+.. code-block:: c++
+
+    void clear_dUcons_group(Block *block, Grouping &dUcons_group,
+                            enzo_float value) const;
+
+The method used to actually add the accumulated change in the integrable
+(specified in ``dUcons_group``) to the values of the
+integrable quantities from the start of the timestep (specificed by
+``initial_integrable_group``) has the following signature:
 
 .. code-block:: c++
 
    void update_quantities(Block *block, Grouping &initial_integrable_group,
-			  Grouping &xflux_group, Grouping &yflux_group,
-			  Grouping &zflux_group,
-			  Grouping &out_integrable_group,
-			  Grouping &out_conserved_passive_scalar,
-			  EnzoEquationOfState *eos,
-			  double dt, int stale_depth);
+                          Grouping &dUcons_group,
+                          Grouping &out_integrable_group,
+                          Grouping &out_conserved_passive_scalar,
+                          EnzoEquationOfState *eos, int stale_depth) const;
 
-This function adds the flux divergence (computed from ``xflux_group``,
-``yflux_group``, ``zflux_group``) to the values of the both the
-actively and passively advected integrable quantities (from
-``initial_integrable_group``). The results for the actively advected
-quanties are stored in ``out_integrable_group`` and the results for
-the passively advected scalars are stored in conserved form in the
-fields held by ``out_conserved_passive_scalar`` (note that the initial
-values of the passive scalars specified in ``initial_integrable_group``
-are in specific form).
-
-*Once source terms need to be added it may make sense to make the
-consolidation of the fluxes and source terms into a separate step.*
+The fields included in ``dUcons_group`` should include contributions from
+both the flux divergence AND source terms. The results for the actively
+advected quanties are stored in ``out_integrable_group`` and the results for
+the passively advected scalars are stored in conserved form in the fields
+held by ``out_conserved_passive_scalar`` (note that the initial values of
+the passive scalars specified in ``initial_integrable_group`` are in
+specific form).

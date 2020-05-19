@@ -71,3 +71,24 @@ primitives for the full timestep. For a list of options, see`
 :e:`Modifies the disipation of the slope limiter of the`
 ``"plm"``/``plm_enzo`` :e:`piecewise linear reconstruction algorithm.
 For more details, see` :ref:`using-vlct-reconstruction`
+
+----
+
+:Parameter:  :p:`Method` : :p:`mhd_vlct` : :p:`dual_energy`
+:Summary: :s:`Whether to use dual-energy formalism`
+:Type:   :t:`logical`
+:Default: :d:`false`
+:Scope:     :z:`Enzo`
+
+:e:`Whether to use the dual-energy formalism.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`mhd_vlct` : :p:`dual_energy_eta`
+:Summary: :s:`Dual energy parameter eta`
+:Type:   :t:`float`
+:Default: :d:`0.001`
+:Scope:     :z:`Enzo`
+
+:e:`Dual-energy formalism parameter. For more details, see`
+:ref:`using-vlct-de`

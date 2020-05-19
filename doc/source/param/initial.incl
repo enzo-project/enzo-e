@@ -54,6 +54,17 @@ cell-centered values should be initialized by another Initial subgroup (e.g.
 value) prior to call of this subgroup. If magnetic fields are initialized, they
 must be constant across the entire domain.
 
+The initial density of a cell (from a uniform-resolution mesh) is
+initialized to
+:math:`f_{V} \rho_{\rm cl} \delta + (1 - f_{\rm V})\rho_{\rm w}`,
+where :math:`f_{V}` is the fraction of the cell's volume enclosed
+by the cloud (estimated by subsampling) and :math:`\delta` is
+nominally `1`. Machinery is provided to optionally produce
+perturbations to break symmetries in the initial density
+distribution. When this machinery is used, :math:`\delta` is
+randomly drawn from a truncated Gaussian with :math:`\mu=1`.
+Pressure equilibria is maintained when this machinery is used.
+
 :Parameter:  :p:`Initial` : :p:`cloud` : :p:`subsample_n`
 :Summary: :s:`Determines the subsampling resolution`
 :Type:    :t:`integer`
@@ -173,13 +184,71 @@ with the cloud.  However, if the` ``"internal_energy"`` :e:`field is
 not defined, then this must not have a specified value (i.e. it must
 have a value of 0).`
 
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`perturb_standard_deviation`
+:Summary: :s:`standard deviation used for perturbations`
+:Type:    :t:`float`
+:Default: :d:`0`
+:Scope:   Enzo
+
+:e:`This must be either 0 or a positive value. In the former case, the
+perturbation machinery is not used. In the latter case, it gives the
+standard deviation of the truncated gaussian for truncation (technically,
+it's the standard deviation of the gaussian before truncation).`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`perturb_truncation_deviation`
+:Summary: :s:`number of deviation where perturbation gaussian is truncated`
+:Type:    :t:`float`
+:Default: :d:`0`
+:Scope:   Enzo
+
+:e:`Meaningless unless Initial:cloud:perturb_standard_deviation is
+positive. This must be either 0 or a positive value. In the former
+case, the gaussian is not truncated (nominally allowing the
+possibility of negative values). In the latter case, this determines
+the number of standard deviations from the mean at which the gaussian
+should be truncated.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`perturb_seed`
+:Summary: :s:`Seeds the perturbations to cloud density`
+:Type:    :t:`integer`
+:Default: :d:`0`
+:Scope:   Enzo
+
+:e:`This must be a zero or larger. Meaningless unless
+Initial:cloud:perturb_standard_deviation is positive.`
+
+   .. warning::
+
+      Due to reliance on ``std::normal_distribution`` the perturbations are
+      not currently guaranteed to be the same (when the seed is the same) for
+      different compilers or versions of the c++ standard library.
+
+      Changes in the grid resolution, domain size, way that mesh is divided
+      across root blocks, or ghost depth will also affect the perturbations.
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`wind_total_energy`
+:Summary: :s:`initial specific total energy of the wind`
+:Type:    :t:`float`
+:Default: :d:`none`
+:Scope:   Enzo
+
+:e:`This must be a positive value.`
+
 inclined_wave
 -------------
 
-The :p:`inclined_wave` Initial subgroup is used to setup a MHD wave
-at an angle inclined to the simulation domain for testing the VL
-+ CT MHD integration method. This method can also be used for setting
-up an inclined sound wave (the magnetic fields are all set to zero).
+The :p:`inclined_wave` Initial subgroup is used to setup a HD or
+MHD wave at an angle inclined to the simulation domain for testing
+HD/MHD integrators. If applicable, magnetic fields fields are set
+to zero when a HD wave is initialized.
 
 The procedure to addopted from
 `Gardiner & Stone (2008) <http://adsabs.harvard.edu/abs/2008JCoPh.227.4123G>`_ .
@@ -194,12 +263,8 @@ wave is initialized to travel along "x0". The transformation between
    y &= x_0\cos\alpha\sin\beta + x_1\cos\beta - x_2\sin \alpha \sin \beta \\
    z &= x_0\sin\alpha + x_2 \cos\alpha
 
-As in that paper, we initialize the magnetic fields using the vector
-potential to ensure that the magnetic fields are divergence-free.
-
-*This could be easily extended to setup other hydrodynamical waves and
-could be generalized to initialize fields for hydrodynamic methods
-(without magnetic fields) or MHD methods without face-centered B-fields*
+As in that paper, non-zero magnetic fields are initialized using the
+vector potential to ensure that they are divergence-free.
 
 :Parameter:  :p:`Initial` : :p:`inclined_wave` : :p:`alpha`
 :Summary: :s:`Angle used to help determine wave inclination`
@@ -227,19 +292,35 @@ could be generalized to initialize fields for hydrodynamic methods
 :Default: :d:`alfven`
 :Scope:   :z:`Enzo`
 
-:e:`Most waves are described in`
+:e:`The values used to initialize hydrodynamical linear waves are taken from
+the columns of the matrix given in equation B3 of`
+`Stone et al. (2008) <http://adsabs.harvard.edu/abs/2008ApJS..178..137S>`_
+:e:`. Valid hydrodynamical waves include:`
+
+  * ``"sound"`` :e:`A linear sound wave.`
+
+  * ``"hd_entropy"`` :e:`A linear HD entropy wave with perturbations
+    in v0 (velocity along the "x0"-axis).`
+
+  * ``"hd_transv_entropy_v1"`` :e:`A linear HD entropy wave with
+    perturbations in velocity component v1 (transverse to the direction
+    of bulk motion).`
+
+  * ``"hd_transv_entropy_v2"`` :e:`A linear HD entropy wave with
+    perturbations in velocity component v2 (transverse to the direction of
+    bulk motion).`
+
+:e:`Each of the valid MHD waves are described in`
 `Gardiner & Stone (2008) <http://adsabs.harvard.edu/abs/2008JCoPh.227.4123G>`_
-:e:`. Valid wave types include:`
+:e:`. Valid MHD wave types include:`
 
   * ``"alfven"`` :e:`A linear Alfven wave with perturbations to the
     magnetic field along the "x2"-axis.`
   * ``"circ_alfven"`` :e:`A traveling circularly polarized Alfven
     wave.`
-  * ``"entropy"`` :e:`A linear MHD entropy wave.`
+  * ``"mhd_entropy"`` :e:`A linear MHD entropy wave.`
   * ``"fast"`` :e:`A linear fast magnetosonic wave.`
   * ``"slow"`` :e:`A linear slow magnetosonic wave.`
-  * ``"sound"`` :e:`A linear sound wave (not from Gardiner & Stone
-    2008) - Currently this sets the magnetic fields to zero.`
 
 ----
 
@@ -270,8 +351,20 @@ polarized Alfven wave (for that case, amplitude is fixed at 0.1).`
 :Default: :d:`true`
 :Scope:   :z:`Enzo`
 
-:e:`This has no effect for the circularly polarized Alfven wave.`
+:e:`This has no effect for the circularly polarized Alfven wave. This is
+ignored for linear HD entropy waves when Initial:inclined_wave:parallel_vel
+is specified.`
 
+----
+
+:Parameter:  :p:`Initial` : :p:`inclined_wave` : :p:`parallel_vel`
+:Summary: :s:`optionally sets the background velocity for HD waves`
+:Type:    :t:`float`
+:Default: :d:`none`
+:Scope:   Enzo
+
+:e:`This can be used to specify a background velocity along v0 for
+HD linear waves.`
 
 music
 -----
@@ -435,16 +528,11 @@ shock_tube
 ----------
 
 The :p:`shock_tube` Initial subgroup is used to setup axis-aligned
-shock tube test problems for testing the VL + CT MHD integration
-method.
+shock tube test problems.
 
 Generically, a shock tube get's set up to evolve along an axis given by
 the value of :p:`aligned_ax`. The discontinuity is always placed at
 0.5 along that axis (typically the domain should extend from 0.0 to 1.0).
-
-*This could be easily extended to setup additional shock tube setups,
-and to be used to initial conditions for hydrodynamical methods or MHD
-methods without face-centered B-fields*
 
 :Parameter:  :p:`Initial` : :p:`shock_tube` : :p:`setup_name`
 :Summary: :s:`Specifies the name of the shock tube problem to setup.`
@@ -492,6 +580,20 @@ methods without face-centered B-fields*
 ``"x"`` :e:`,`  ``"y"`` :e:`, or` ``"z"`` :e:`, then this value is added to
 the` ``"velocity_y"`` :e:`,`  ``"velocity_z"`` :e:`, or` ``"velocity_z"``
 :e:`field.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`shock_tube` : :p:`flip_initialize`
+:Summary: :s:`Whether to mirror the initial condition across the discontinuity`
+:Type:    :t:`logical`
+:Default: :d:`false`
+:Scope:   Enzo
+
+:e:`When this is` ``"true"`` :e:`the entire setup is mirrored across
+the discontinuity. Basically the left and right states are swapped AND
+all components of the magnetic field and velocity (including
+contributions from axis_velocity and transverse_velocity) are
+multiplied by -1.`
 
 turbulence
 ----------
