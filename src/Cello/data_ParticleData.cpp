@@ -135,7 +135,7 @@ int ParticleData::insert_particles
   } else {
     ib_last = nb - 1;
     ip_last = num_particles(particle_descr,it,ib_last);
-    if (ip_last % mb == 0) {
+    if (ip_last == mb) {
       ib_last++;
       ip_last = 0;
     }
