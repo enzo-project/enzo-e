@@ -75,7 +75,7 @@ public:
     }
 
     // apply floor to contact pressure
-    cp = std::max(cp, 0.);
+    cp = std::max(cp, (enzo_float)0.);
     // The following was commented out in the original code:
     // if ((sm > 0.0) && (cp < 0.0)){
     //   WARNING4("HLLCImpl::calc_riemann_fluxes",

@@ -121,7 +121,8 @@ struct EinfeldtWavespeed
                      const enzo_float gamma) const throw()
   {
     enzo_float tiny2 = 0.;
-    return std::sqrt((gamma - 1) * std::max(h_roe - 0.5 * v_roe2, tiny2));
+    enzo_float temp = h_roe - 0.5 * v_roe2;
+    return std::sqrt((gamma - 1) * std::max(temp, tiny2));
   }
 
   /// Return the fast magnetosonic speed needed to get the max and min
