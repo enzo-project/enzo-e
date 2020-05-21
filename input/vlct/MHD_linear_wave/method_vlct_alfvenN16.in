@@ -1,11 +1,11 @@
-# Problem: 3D Slow LinearWave test problem for VLCT
+# Problem: 3D Alfven LinearWave test problem for VLCT
 # Author: Matthew Abruzzo (matthewabruzzo@gmail.com)
 
 # This problem is taken from Gardiner & Stone (2008).
 # Specifically this version handles a fast magnetosonic wave
 # wave speeds for fast, slow and alfven waves are 2., 1/2., and 1.
 
-   include "input/vlct/linear_wave/initial_slow.in"
+   include "input/vlct/MHD_linear_wave/initial_alfven.in"
 
    Mesh {
       root_rank = 3; # 3D
@@ -15,7 +15,7 @@
 
    Output {
       data {
-        dir = ["method_vlct-1-slowN16_%.1f","time"];
-      	name = ["slow-data-%03d.h5", "proc"];
+        dir = ["method_vlct-1-alfvenN16_%.1f","time"];
+      	name = ["alfven-data-%03d.h5", "proc"];
       };
    }

@@ -1,8 +1,8 @@
 
-# Initial Conditions and Stopping Condition for Linear Alfven Wave
+# Initial Conditions and Stopping Condition for Linear Fast Wave
 
    # Domain is the 3D  box 0 < x < 3, 0 < y,z < 1.5
-   include "input/vlct/linear_wave/domain-lw.incl"
+   include "input/vlct/MHD_linear_wave/domain-lw.incl"
    include "input/vlct/vlct.incl"
 
    Initial{
@@ -18,7 +18,7 @@
          alpha = 0.7297276562269663; # sin(alpha) = 2/3
 	 beta  = 1.1071487177940904; # sin(beta) =  2/sqrt(5)
 
-	 lambda = 1.; #wavelength
+         lambda = 1.; #wavelength
 
          # amplitude of the linear wave (has no effect on circularly
 	 # polarized alfven wave)
@@ -30,23 +30,22 @@
 	 positive_vel = true;
 
 	 # set the type of wave. Allowed choices are "alfven" (Alfven wave),
-	 # "fast" (fast magnetosonic wave), "slow" (slow magnetosonic wave),
 	 # "entropy" (entropy wave), or "circ_alfven" (circularly polarized
 	 # traveling Alfven wave). Default is "alfven"
-	 wave_type = "alfven";
+	 wave_type = "fast";
       };
       
    }
 
    Stopping{
-      time = 1.0;
+      time = 0.5;
    }
 
    Output {
       data {
          schedule {
             var = "time";
-	    list = [0.0,1.0];
+	    list = [0.0,0.5];
          };
       };
    }

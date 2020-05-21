@@ -33,7 +33,7 @@ l1_norm_calc_template = ("python tools/l1_error_norm.py sim {:s} {:s} -n {:d}"
 data_dir_template = "method_vlct-{:d}-{:s}N{:d}_{:.1f}"
 
 def run_tests(executable):
-    temp = 'input/vlct/linear_wave/method_vlct_{}N{:d}{}.in'
+    temp = 'input/vlct/MHD_linear_wave/method_vlct_{}N{:d}{}.in'
     call_test = EnzoEWrapper(executable,temp)
 
     call_test("fast",16,'')
