@@ -142,7 +142,8 @@
       list = [ "grackle", "null"];
 
      grackle {
-        courant = 0.40;
+        courant = 0.40; # meaningless unless use_cooling_timestep = true;
+
         data_file = "CloudyData_UVB=HM2012_shielded.h5";
 
         with_radiative_cooling = 1;
@@ -152,11 +153,15 @@
         self_shielding_method  = 3;  # 0 - 3 (0 or 3 recommended)
 
         HydrogenFractionByMass = 0.73;
+
+        # set this to true to limit the maximum timestep to the product of the
+        # minimum cooling/heating time and courant.
+        use_cooling_timestep = false; # default is false
      }
 
-     # use this to limit maximum timestep if
-     # Grackle crashes due to max iteration limit - this is not
-     # needed generally in a real simulation as hydro timestep will
+     # use this to limit maximum timestep if grackle::use_cooling_timestep is
+     # set to false and Grackle crashes due to max iteration limit - this is
+     # not needed generally in a real simulation as hydro timestep will
      # be small (usually)
      null { dt = 100.0; }
 

@@ -43,8 +43,7 @@ public: // interface
       lower_[axis] = 0.0;
       upper_[axis] = 0.0;
       blocking_[axis] = 0.0;
-      periodicity_[axis][0] = false;
-      periodicity_[axis][1] = false;
+      periodicity_[axis] = false;
     }
   }
   
@@ -93,30 +92,20 @@ public: // interface
   /// Return root-level grid size
   void root_size(int * nx, int * ny = 0, int * nz = 0) const throw ();
 
-  /// Set the periodicity of boundary conditions for domain faces
-  inline void set_periodicity (int pxm,   int pxp, 
-			       int pym=0, int pyp=0, 
-			       int pzm=0, int pzp=0)
+  /// Set the periodicity of boundary conditions for domain axes
+  inline void set_periodicity (int px, int py=0, int pz=0)
   {
-    periodicity_[0][0] = pxm;
-    periodicity_[0][1] = pxp;
-    periodicity_[1][0] = pym;
-    periodicity_[1][1] = pyp;
-    periodicity_[2][0] = pzm;
-    periodicity_[2][1] = pzp;
+    periodicity_[0] = px;
+    periodicity_[1] = py;
+    periodicity_[2] = pz;
   }
 
-  /// Return the periodicity of the boundary conditions for domain faces
-  void periodicity (int * pxm,   int * pxp, 
-		    int * pym=0, int * pyp=0, 
-		    int * pzm=0, int * pzp=0)
+  /// Return the periodicity of the boundary conditions for domain axes
+  void get_periodicity (int * px, int * py=0, int * pz=0)
   {
-    if (pxm) (*pxm) = periodicity_[0][0];
-    if (pxp) (*pxp) = periodicity_[0][1];
-    if (pym) (*pym) = periodicity_[1][0];
-    if (pyp) (*pyp) = periodicity_[1][1];
-    if (pzm) (*pzm) = periodicity_[2][0];
-    if (pzp) (*pzp) = periodicity_[2][1];
+    if (px) (*px) = periodicity_[0];
+    if (py) (*py) = periodicity_[1];
+    if (pz) (*pz) = periodicity_[2];
   }
 
   //----------------------------------------------------------------------
@@ -262,7 +251,7 @@ protected: // attributes
   int blocking_[3];
 
   /// Periodicity of boundary conditions on faces
-  bool periodicity_[3][2];
+  bool periodicity_[3];
 
 public: // static attributes
 

@@ -17,7 +17,8 @@ EnzoMethodGrackle::EnzoMethodGrackle
   const double physics_cosmology_initial_redshift,
   const double time
 )
-  : Method()
+  : Method(),
+    grackle_units_(), grackle_chemistry_data_defined_(false)
 {
 #ifdef CONFIG_USE_GRACKLE
 
@@ -156,12 +157,12 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
 
     this->compute_(enzo_block);
 
-    enzo_block->compute_done();
-
     if (simulation)
       simulation->performance()->stop_region(perf_grackle,__FILE__,__LINE__);
   #endif
   }
+
+  block->compute_done();
 
   return;
 
@@ -512,17 +513,30 @@ double EnzoMethodGrackle::timestep ( Block * block ) const throw()
       delete_cooling_time = true;
     }
 
+    // the grackle_units_ member can't be used here since this method MUST be
+    // const-qualified (i.e. the values of member variables can't be changed)
+    code_units temp_grackle_units;
     grackle_field_data grackle_fields_;
 
-    setup_grackle_units(enzo_block,  &grackle_units_);
+    setup_grackle_units(enzo_block,  &temp_grackle_units);
     setup_grackle_fields(enzo_block, &grackle_fields_);
 
-    if (calculate_cooling_time(&grackle_units_, &grackle_fields_, cooling_time) == ENZO_FAIL) {
+    if (calculate_cooling_time(&temp_grackle_units, &grackle_fields_, cooling_time) == ENZO_FAIL) {
       ERROR("EnzoMethodGrackle::compute()",
       "Error in calculate_cooling_time.\n");
     }
 
-    for (int i = 0; i < size; i++) dt = std::min(enzo_float(dt), std::abs(cooling_time[i]));
+    // make sure to exclude the ghost zone. Because there is no refresh before
+    // this method is called (at least during the very first cycle) - this can
+    // including ghost zones can lead to timesteps of 0
+    for (int iz = gz; iz < ngz - gz; iz++) {   // if rank < 3: gz = 0, ngz = 1
+      for (int iy = gy; iy < ngy - gy; iy++) { // if rank < 2: gy = 0, ngy = 1
+        for (int ix = gx; ix < ngx - gx; ix++) {
+	  int i = INDEX(ix, iy, iz, ngx, ngy);
+          dt = std::min(enzo_float(dt), std::abs(cooling_time[i]));
+        }
+      }
+    }
 
     if (delete_cooling_time){
       delete [] cooling_time;
@@ -534,7 +548,7 @@ double EnzoMethodGrackle::timestep ( Block * block ) const throw()
   }
 #endif
 
-  return dt;
+  return dt * courant_;
 }
 
 //----------------------------------------------------------------------
