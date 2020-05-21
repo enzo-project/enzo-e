@@ -87,7 +87,6 @@ void EnzoMethodGrackle::define_required_grackle_fields()
   // (e.g. to set up a refresh object), can ensure that the fields are defined
 
   if (!enzo::config()->method_grackle_use_grackle) {return;}
-#ifdef CONFIG_USE_GRACKLE
 
   FieldDescr * field_descr = cello::field_descr();
 
@@ -180,7 +179,6 @@ void EnzoMethodGrackle::define_required_grackle_fields()
     }
   }
 
-#endif /* CONFIG_USE_GRACKLE */
 }
 
 //----------------------------------------------------------------------
