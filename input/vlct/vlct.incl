@@ -83,11 +83,19 @@
       };
    }
 
+   Group {
+      list = ["derived"];
+      derived {
+         field_list = ["pressure"];
+      }
+   }
+
    Output {
       list = ["data"];
       data {
 	 type = "data";
 	 field_list = ["density", "velocity_x", "velocity_y", "velocity_z",
-		       "total_energy", "bfield_x", "bfield_y", "bfield_z"];
+                       "pressure", "total_energy", "bfield_x", "bfield_y",
+                       "bfield_z"];
       };
    }
