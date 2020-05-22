@@ -142,7 +142,7 @@ void OutputData::write_block ( const  Block * block ) throw()
     // output block list and parameters to work directory
     name_dir  = ".";
     // strip extension, use this for name
-    name_file = name_out_file.substr(0, name_out_file.find("."));
+    name_file = name_out_file.substr(0, name_out_file.rfind("."));
   } else {
     // output block list and parameters to subdirectory
     name_file = name_dir;
