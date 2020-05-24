@@ -15,8 +15,7 @@ Stopping { cycle = 20; }
 
 Testing {
    cycle_final = 20;
-   time_final = [0.00137275213641413,  # OLD_PPM
-                 0.00138207812051405]; # NEW_PPM
+   time_final = [0.00138345198840702]; # only applies to NEW_PPM
 }
 
 Mesh    { 

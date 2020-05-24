@@ -107,7 +107,7 @@ void InitialValue::enforce_block ( Block * block,
 	  data->field_cells (xc, yc, zc, gx, gy, gz);
 
 	  // set val_array as array of 0s big enough for corner centered fields
-	  val_array = new double[(nx+2*gx+1)*(ny+2*gy+1)*(nz+2*gy+1)]();
+	  val_array = new double[(nx+2*gx+1)*(ny+2*gy+1)*(nz+2*gz+1)]();
 	}
 
 	if (xf == NULL && (cx!=0 || cy!=0 ||cz != 0) ){
