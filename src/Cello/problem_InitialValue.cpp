@@ -13,14 +13,13 @@
 
 InitialValue::InitialValue
 (Parameters * parameters,
- int cycle, double time) throw ()
-  : Initial(cycle, time),
-    parameters_(parameters),
-    num_fields_(cello::field_descr()->field_count()),
-    values_(NULL)
-{
-  initialize_values_();
-}
+ int cycle, double time) throw()
+    : Initial(cycle, time),
+      parameters_(parameters),
+      num_fields_(cello::field_descr()->field_count()),
+      initialized_values_(false),
+      values_(NULL)
+{ }
 
 //----------------------------------------------------------------------
 
@@ -35,9 +34,13 @@ void InitialValue::pup (PUP::er &p)
   p | *parameters_;
   p | num_fields_;
 
-  // Initialize values_ - we would just pup each instance but the pup method is
-  // not implemented
-  initialize_values_();
+  // The Value class cannot currently be pupped. The values_ attribute also
+  // can't be initialized while unpacking because it depends on field_descr
+  // which gets unpacked afterwards
+  if (up) {
+    values_ = NULL;
+    initialized_values_ = false;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -45,9 +48,11 @@ void InitialValue::pup (PUP::er &p)
 void InitialValue::enforce_block ( Block * block,
 				   const Hierarchy  * hierarchy ) throw()
 {
+  // make sure values_ is initialized
+  initialize_values_();
 
   Initial::enforce_block(block,hierarchy);
-  
+
   // Initialize Fields according to parameters
 
   ASSERT("InitialValue::enforce_block",
@@ -231,6 +236,9 @@ void InitialValue::copy_precision_
 void InitialValue::initialize_values_()
 {
 
+  // skip, if values_ has already been initialized
+  if (initialized_values_){return;}
+
   parameters_->group_set(0,"Initial");
   parameters_->group_set(1,"value");
 
@@ -249,6 +257,5 @@ void InitialValue::initialize_values_()
     }
   }
 
-  
-
+  initialized_values_ = true;
 }
