@@ -233,7 +233,7 @@ public: // interface
   void is_on_boundary (bool boundary[3][2]) const throw();
 
   /// Return which faces are periodic
-  void periodicity (bool periodic[3][2]) const;
+  void periodicity (bool periodic[3]) const;
 
   void update_levels_ ()
   {
@@ -870,7 +870,7 @@ protected: // functions
   /// Boundary is a boundary face
   bool is_boundary_face_(int of3[3],
 			 bool boundary[3][2],
-			 bool periodic[3][2],
+			 bool periodic[3],
 			 bool update[3][2]) const 
   {
 
@@ -878,7 +878,7 @@ protected: // functions
     for (int axis=0; axis<3; axis++) {
       if (of3[axis] != 0) {
 	int face=(of3[axis]+1)/2;
-	if ( (! periodic[axis][face]) && 
+	if ( (! periodic[axis]) && 
 	     update[axis][face] &&
 	     boundary[axis][face]) skip = true;
       }

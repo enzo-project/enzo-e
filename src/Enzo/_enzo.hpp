@@ -114,35 +114,6 @@ enum enzo_sync_id {
 
 //----------------------------------------------------------------------
 
-enum bc_enum 
-  { // explicitly enumerated to match what Enzo expects
-    bc_unknown    = 0, 
-    bc_reflecting = 1, 
-    bc_outflow    = 2, 
-    bc_inflow     = 3, 
-    bc_periodic   = 4 
-  };
-
-//----------------------------------------------------------------------
-
-enum hydro_type 
-  {
-    hydro_unknown,
-    hydro_ppm,
-    hydro_ppml
-  };
-
-//----------------------------------------------------------------------
-
-enum pm_type {
-  pm_type_unknown,
-  pm_type_cic,  // cloud-in-cell
-  pm_type_ngp,  // nearest grid point
-  pm_type_tsc   // triangular shape cloud
-};
-  
-//----------------------------------------------------------------------
-
 enum return_enum {
   return_unknown,
   return_converged,

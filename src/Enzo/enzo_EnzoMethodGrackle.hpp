@@ -93,7 +93,7 @@ public: // interface
   { return "grackle"; }
 
   /// Compute maximum timestep for this method
-  virtual double timestep ( Block * block) throw();
+  virtual double timestep ( Block * block) const throw();
 
 #ifdef CONFIG_USE_GRACKLE
 
