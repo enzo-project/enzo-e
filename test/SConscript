@@ -19,7 +19,6 @@ env['RMIN'] = 'rm -f parameters.out parameters.libconfig'
 
 
 charm_args = os.getenv('CHARM_ARGS','')
-print("CHARM ARGS ARE ", charm_args)
 # Define a test for running unit tests
 
 date_cmd = 'echo "-------------------"; date +"%Y-%m-%d %H:%M:%S";'
