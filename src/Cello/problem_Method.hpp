@@ -22,6 +22,7 @@ public: // interface
   /// Create a new Method
   Method (double courant = 1.0) throw()
     : refresh_list_(),
+      field_centering_(),
       schedule_(NULL),
       courant_(courant)
   { }
@@ -132,6 +133,8 @@ protected: // attributes
   /// List of fields required for the Method
   std::vector<std::string> required_fields_;
 
+  /// Specifies centering of required fields that are not cell-centered
+  std::map<std::string, std::array<int,3>> field_centering_;
 };
 
 #endif /* PROBLEM_METHOD_HPP */
