@@ -60,13 +60,22 @@ void Method::define_fields () throw()
   /* Ensure required fields are defined for this method */
 
   FieldDescr * field_descr = cello::field_descr();
+  Config   * config  = (Config *) cello::config();
+
+  bool added_fields = false; 
 
   for (int ifield = 0; ifield < required_fields_.size(); ifield++){
     if( ! field_descr->is_field( required_fields_[ifield] )){
       field_descr->insert_permanent( required_fields_[ifield] );
+
+      field_descr->set_precision(ifield, config->field_precision);
+
+      added_fields = true;
     }
   }
 
+  // Need to reconstruct history if new fields added
+  if (added_fields) field_descr->reset_history(config->field_history);
 }
 
 //----------------------------------------------------------------------
