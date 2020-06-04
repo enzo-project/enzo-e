@@ -198,7 +198,7 @@ def analyze_tests():
     n_tests = len(r)
     success = (n_passed == n_tests)
     print("{:d} Tests passed out of {:d} Tests.".format(n_passed,n_tests))
-    if (np.sum(r[1:]) == (n_tests-1)):
+    if (np.sum(r) == (n_tests-1)):
         print("All tests that the this VL+CT implementation has ever passed, "
               "have suceeded")
         success = True

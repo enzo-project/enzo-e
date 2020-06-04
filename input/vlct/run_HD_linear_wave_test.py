@@ -23,9 +23,10 @@ from functools import partial
 import numpy as np
 
 from testing_utils import \
-  CalcSimL1Norm, EnzoEWrapper, isclose, standard_analyze, prep_cur_dir
+    CalcSimL1Norm, EnzoEWrapper, isclose, standard_analyze, prep_cur_dir
 
-from run_linear_wave_test import analyze_linwave, identical_l1_error_linwave
+from run_MHD_linear_wave_test import \
+    analyze_linwave, identical_l1_error_linwave
 
 def run_tests(executable):
     temp = 'input/vlct/HD_linear_wave/method_vlct_{}N{:d}{}.in'
