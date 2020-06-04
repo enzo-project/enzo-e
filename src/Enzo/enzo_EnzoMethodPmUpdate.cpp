@@ -29,14 +29,13 @@ EnzoMethodPmUpdate::EnzoMethodPmUpdate
   TRACE_PM("EnzoMethodPmUpdate()");
   // Initialize default Refresh object
 
-  Refresh & refresh = new_refresh(ir_post_);
   cello::simulation()->new_refresh_set_name(ir_post_,name());
   
   const int rank = cello::rank();
-  
-  if (rank >= 1) refresh.add_field("acceleration_x");
-  if (rank >= 2) refresh.add_field("acceleration_y");
-  if (rank >= 3) refresh.add_field("acceleration_z");
+  Refresh * refresh = cello::refresh(ir_post_);
+  if (rank >= 1) refresh->add_field("acceleration_x");
+  if (rank >= 2) refresh->add_field("acceleration_y");
+  if (rank >= 3) refresh->add_field("acceleration_z");
 
   ParticleDescr * particle_descr = cello::particle_descr();
   Grouping * particle_groups = particle_descr->groups();
@@ -44,7 +43,7 @@ EnzoMethodPmUpdate::EnzoMethodPmUpdate
   int num_mass = particle_groups->size("has_mass");
 
   for (int ipt = 0; ipt < num_mass; ipt++)
-    refresh.add_particle(particle_descr->type_index(
+    refresh->add_particle(particle_descr->type_index(
                                 particle_groups->item("has_mass",ipt)
                                                         ));
 

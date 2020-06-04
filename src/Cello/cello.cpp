@@ -295,6 +295,11 @@ namespace cello {
 
   //---------------------------------------------------------------------- 
 
+  Grouping * field_groups()
+  { return field_descr()->groups(); }
+    
+  //---------------------------------------------------------------------- 
+
   Monitor * monitor()
   {
     return simulation() ? simulation()->monitor() : Monitor::instance();
@@ -315,6 +320,11 @@ namespace cello {
 
   //---------------------------------------------------------------------- 
 
+  Grouping * particle_groups()
+  { return particle_descr()->groups(); }
+    
+  //---------------------------------------------------------------------- 
+
   Output * output(int index)
   {
     return problem() ? problem()->output(index) : NULL;
@@ -332,6 +342,13 @@ namespace cello {
   Units * units()
   {
     return problem() ? problem()->units() : NULL;
+  }
+
+  //----------------------------------------------------------------------
+
+  Refresh * refresh(int ir)
+  {
+    return simulation() ? &simulation()->new_refresh_list(ir) : NULL;
   }
 
   //----------------------------------------------------------------------

@@ -16,18 +16,17 @@ EnzoMethodComovingExpansion::EnzoMethodComovingExpansion
   : Method(),
     comoving_coordinates_(comoving_coordinates)
 {
-  Refresh & refresh = new_refresh(ir_post_);
   cello::simulation()->new_refresh_set_name(ir_post_,name());
-
-  refresh.add_field("density");
-  refresh.add_field("total_energy");
-  refresh.add_field("internal_energy");
 
   const int rank = cello::rank();
 
-  if (rank >= 1) refresh.add_field("velocity_x");
-  if (rank >= 2) refresh.add_field("velocity_y");
-  if (rank >= 3) refresh.add_field("velocity_z");
+  Refresh * refresh = cello::refresh(ir_post_);
+  refresh->add_field("density");
+  refresh->add_field("total_energy");
+  refresh->add_field("internal_energy");
+  if (rank >= 1) refresh->add_field("velocity_x");
+  if (rank >= 2) refresh->add_field("velocity_y");
+  if (rank >= 3) refresh->add_field("velocity_z");
 					
   if ( ! comoving_coordinates_ ) {
     WARNING

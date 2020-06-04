@@ -171,6 +171,14 @@ public: // interface
       initial_pm_field(""),
       initial_pm_mpp(0.0),
       initial_pm_level(0),
+      initial_burkertbodenheimer_rank(0),
+      initial_burkertbodenheimer_radius_relative(0.0),
+      initial_burkertbodenheimer_particle_ratio(0.0),
+      initial_burkertbodenheimer_mass(0.0),
+      initial_burkertbodenheimer_temperature(0.0),
+      initial_burkertbodenheimer_densityprofile(1),
+      initial_burkertbodenheimer_rotating(true),
+      initial_burkertbodenheimer_outer_velocity(-1),
       // EnzoInitialSedovArray[23]
       initial_sedov_rank(0),
       initial_sedov_radius_relative(0.0),
@@ -245,12 +253,13 @@ public: // interface
       method_feedback_shift_cell_center(true),
       method_feedback_ke_fraction(0.0),
       method_feedback_use_ionization_feedback(false),
+      method_feedback_time_first_sn(-1.0), // in Myr
       /// EnzoMethodStarMaker
       method_star_maker_type(""),
       method_star_maker_use_density_threshold(true),           // check above density threshold before SF
       method_star_maker_use_velocity_divergence(true),         // check for converging flow before SF
       method_star_maker_use_dynamical_time(true),              //
-      method_star_maker_use_self_gravitating(false),           // 
+      method_star_maker_use_self_gravitating(false),           //
       method_star_maker_use_h2_self_shielding(false),
       method_star_maker_use_jeans_mass(false),
       method_star_maker_number_density_threshold(0.0),      // Number density threshold in cgs
@@ -421,6 +430,17 @@ public: // attributes
   double                     initial_pm_mpp;
   int                        initial_pm_level;
 
+   /// EnzoInitialBurkertBodenheimer
+  int                        initial_burkertbodenheimer_rank;
+  int                        initial_burkertbodenheimer_array[3];
+  double                     initial_burkertbodenheimer_radius_relative;
+  double                     initial_burkertbodenheimer_particle_ratio;
+  double                     initial_burkertbodenheimer_mass;
+  double                     initial_burkertbodenheimer_temperature;
+  int                        initial_burkertbodenheimer_densityprofile;
+  bool                       initial_burkertbodenheimer_rotating;
+  double                     initial_burkertbodenheimer_outer_velocity;
+
   /// EnzoInitialSedovArray[23]
   int                        initial_sedov_rank;
   int                        initial_sedov_array[3];
@@ -496,7 +516,7 @@ public: // attributes
 
   /// EnzoMethodCheckGravity
   std::string                method_check_gravity_particle_type;
-  
+
   /// EnzoMethodHydro
   std::string                method_hydro_method;
   bool                       method_hydro_dual_energy;
@@ -513,6 +533,7 @@ public: // attributes
   double                    method_feedback_supernova_energy;
   double                    method_feedback_ejecta_metal_fraction;
   double                    method_feedback_ke_fraction;
+  double                    method_feedback_time_first_sn;
   int                       method_feedback_stencil;
   bool                      method_feedback_shift_cell_center;
   bool                      method_feedback_use_ionization_feedback;

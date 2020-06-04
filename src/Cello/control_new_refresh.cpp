@@ -23,12 +23,12 @@ void Block::new_refresh_start (int id_refresh, int callback)
   CHECK_ID(id_refresh);
 
   RefreshState & state = new_refresh_state_list_[id_refresh];
-  Refresh & refresh    = new_refresh(id_refresh);
+  Refresh * refresh    = cello::refresh(id_refresh);
 
   // Send field and/or particle data associated with the given refresh
   // object to corresponding neighbors
 
-  if ( refresh.active() ) {
+  if ( refresh->is_active() ) {
 
     ASSERT1 ("Block::new_refresh_start()",
 	     "refresh[%d] state is not inactive",
@@ -41,13 +41,13 @@ void Block::new_refresh_start (int id_refresh, int callback)
 
     // send Field face data
     
-    if (refresh.any_fields()) {
-      count += new_refresh_load_field_faces_ (refresh);
+    if (refresh->any_fields()) {
+      count += new_refresh_load_field_faces_ (*refresh);
     }
 
     // send Particle face data
-    if (refresh.any_particles()){
-      count += new_refresh_load_particle_faces_(refresh);
+    if (refresh->any_particles()){
+      count += new_refresh_load_particle_faces_(*refresh);
     }
 
     Sync & sync = new_refresh_sync_list_[id_refresh];
@@ -65,8 +65,7 @@ void Block::new_refresh_start (int id_refresh, int callback)
       new_refresh_wait(id_refresh,callback);
     }
   } else {
-    if (callback != 0) 
-      new_refresh_exit(refresh);
+    if (callback != 0) new_refresh_exit(*refresh);
   }
 }
 
@@ -75,16 +74,16 @@ void Block::new_refresh_wait (int id_refresh, int callback)
 {
   CHECK_ID(id_refresh);
 
-  Refresh & refresh = new_refresh(id_refresh);
+  Refresh * refresh = cello::refresh(id_refresh);
 
-  if (refresh.active()) {
+  if (refresh->is_active()) {
 
     // make sure the callback parameter matches that in the refresh object
 
     ASSERT3("Block::new_refresh_wait()",
 	   "Refresh[%d] mismatch between refresh callback %d and parameter callback %d",
-	    id_refresh,callback, refresh.callback(),
-	    (callback == refresh.callback()) );
+	    id_refresh,callback, refresh->callback(),
+	    (callback == refresh->callback()) );
 
     // make sure we aren't already in a "ready" state
 
@@ -131,7 +130,7 @@ void Block::new_refresh_check_done (int id_refresh)
 {
   CHECK_ID(id_refresh);
 
-  Refresh & refresh    = new_refresh(id_refresh);
+  Refresh * refresh    = cello::refresh(id_refresh);
   RefreshState & state = new_refresh_state_list_[id_refresh];
   Sync & sync          = new_refresh_sync_list_[id_refresh];
   
@@ -159,7 +158,7 @@ void Block::new_refresh_check_done (int id_refresh)
 
     // Call callback
 
-    new_refresh_exit(refresh);
+    new_refresh_exit(*refresh);
   }
 }
 
@@ -568,8 +567,8 @@ void Block::particle_determine_periodic_update_
   cello::hierarchy()->upper(&dxp,&dyp,&dzp);
 
   //     ... periodicity
-  bool p32[3][2];
-  periodicity(p32);
+  bool p3[3];
+  periodicity(p3);
 
   //     ... boundary
   bool b32[3][2];
@@ -581,16 +580,16 @@ void Block::particle_determine_periodic_update_
   // boundary is crossed
 
   if (rank >= 1) {
-    if (index_lower[0]==0 && b32[0][0] && p32[0][0]) (*dpx) = +(dxp - dxm);
-    if (index_upper[0]==4 && b32[0][1] && p32[0][1]) (*dpx) = -(dxp - dxm);
+    if (index_lower[0]==0 && b32[0][0] && p3[0]) (*dpx) = +(dxp - dxm);
+    if (index_upper[0]==4 && b32[0][1] && p3[0]) (*dpx) = -(dxp - dxm);
   }
   if (rank >= 2) {
-    if (index_lower[1]==0 && b32[1][0] && p32[1][0]) (*dpy) = +(dyp - dym);
-    if (index_upper[1]==4 && b32[1][1] && p32[1][1]) (*dpy) = -(dyp - dym);
+    if (index_lower[1]==0 && b32[1][0] && p3[1]) (*dpy) = +(dyp - dym);
+    if (index_upper[1]==4 && b32[1][1] && p3[1]) (*dpy) = -(dyp - dym);
   }
   if (rank >= 3) {
-    if (index_lower[2]==0 && b32[2][0] && p32[2][0]) (*dpz) = +(dzp - dzm);
-    if (index_upper[2]==4 && b32[2][1] && p32[2][1]) (*dpz) = -(dzp - dzm);
+    if (index_lower[2]==0 && b32[2][0] && p3[2]) (*dpz) = +(dzp - dzm);
+    if (index_upper[2]==4 && b32[2][1] && p3[2]) (*dpz) = -(dzp - dzm);
   }
 }
 

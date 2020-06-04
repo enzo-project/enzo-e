@@ -13,7 +13,7 @@ ItNeighbor::ItNeighbor
 (
  Block * block,
  int min_face_rank,
- bool periodic[3][2],
+ bool periodic[3],
  int n3[3],
  Index index,
  int neighbor_type,
@@ -36,9 +36,7 @@ ItNeighbor::ItNeighbor
   reset();
   for (int axis=0; axis<3; axis++) {
     n3_[axis] = n3[axis];
-    for (int face=0; face<2; face++) {
-      periodic_[axis][face] = periodic[axis][face];
-    }
+    periodic_[axis] = periodic[axis];
   }
 }
 
@@ -230,20 +228,23 @@ bool ItNeighbor::valid_()
       (! index().is_in_same_subtree(index_,min_level_,root_level_))) {
       return false;
   }
+
+  // return false if neighbor_flux and in same level
+  if ((neighbor_type_ == neighbor_flux)
+      && (face_level() == level_)) {
+    return false;
+  }
   
   // Return false if on boundary and not periodic
 
-  if (index_.is_on_boundary(of3_,n3_)) {
-
-    for (int axis=0; axis<rank_; axis++) {
-
-      const bool is_lower_face     = (of3_[axis] == -1);
-      const bool is_upper_face     = (of3_[axis] == +1);
-      const bool is_lower_periodic = periodic_[axis][0];
-      const bool is_upper_periodic = periodic_[axis][1];
-      if (is_lower_face && (! is_lower_periodic) ) return false;
-      if (is_upper_face && (! is_upper_periodic) ) return false;
-
+  for (int axis=0; axis<rank_; axis++) {
+    for (int face=0; face < 2; face++) {
+      const bool is_on_boundary =
+	index_.is_on_boundary(axis,of3_[axis],n3_[axis]);
+      const bool is_face =
+	(face==0 && of3_[axis] == -1) || (face==1 && of3_[axis] == 1);
+      const bool is_periodic = periodic_[axis];
+      if ( (! is_periodic) && is_on_boundary && is_face ) return false;
     }    
   }
 

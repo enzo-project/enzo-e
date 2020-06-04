@@ -22,10 +22,9 @@ EnzoMethodFeedback::EnzoMethodFeedback
   //                           enzo_sync_id_method_feedback);
   // refresh(ir)->add_all_fields();
 
-  Refresh & refresh = new_refresh(ir_post_);
   cello::simulation()->new_refresh_set_name(ir_post_,name());
-
-  refresh.add_all_fields();
+  Refresh * refresh = cello::refresh(ir_post_);
+  refresh->add_all_fields();
 
   ejecta_mass_   = enzo_config->method_feedback_ejecta_mass * cello::mass_solar /
                       enzo_units->mass();
@@ -193,7 +192,7 @@ void EnzoMethodFeedback::compute_ (Block * block) throw()
 
         // inject energy
         te[i] += ejecta_energy_ * inv_vol;
-        if (enzo_config->ppm_dual_energy) ge[i] += ejecta_energy_ * inv_vol;
+        if (ge) ge[i] += ejecta_energy_ * inv_vol;
 
         count++;
       } // end loop over particles

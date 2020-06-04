@@ -201,7 +201,7 @@ public: // interface
   void is_on_boundary (bool boundary[3][2]) const throw();
 
   /// Return which faces are periodic
-  void periodicity (bool periodic[3][2]) const;
+  void periodicity (bool periodic[3]) const;
 
   void update_levels_ ()
   {
@@ -566,8 +566,6 @@ public:
   void new_particle_send_(Refresh & refresh, int nl,Index index_list[], 
 			  ParticleData * particle_list[]);
 
-  Refresh & new_refresh (int id_refresh);
-
   void new_refresh_exit (Refresh & refresh);
 
   /// Enter the refresh phase after synchronizing
@@ -604,6 +602,9 @@ public:
   /// Get restricted data from child when it is deleted
   void p_refresh_child (int n, char a[],int ic3[3]);
 
+  void p_method_flux_correct_refresh();
+  void r_method_flux_correct_sum_fields(CkReductionMsg * msg);
+
 protected:
 
   //--------------------------------------------------
@@ -621,7 +622,7 @@ protected:
   (int refresh_type, Index index, int if3[3], int ic3[3]);
   void refresh_load_particle_face_
   (int refresh_type, Index index, int if3[3], int ic3[3]);
-
+ 
   //--------------------------------------------------
   // PARTICLES
   //--------------------------------------------------
@@ -879,7 +880,7 @@ protected: // functions
   /// Boundary is a boundary face
   bool is_boundary_face_(int of3[3],
 			 bool boundary[3][2],
-			 bool periodic[3][2],
+			 bool periodic[3],
 			 bool update[3][2]) const 
   {
 
@@ -887,7 +888,7 @@ protected: // functions
     for (int axis=0; axis<3; axis++) {
       if (of3[axis] != 0) {
 	int face=(of3[axis]+1)/2;
-	if ( (! periodic[axis][face]) && 
+	if ( (! periodic[axis]) && 
 	     update[axis][face] &&
 	     boundary[axis][face]) skip = true;
       }

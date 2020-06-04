@@ -102,11 +102,8 @@ public:
 
 protected:
 
-  double ejecta_metal_fraction_;
   double kinetic_fraction_;
-
-  double total_ejecta_mass_;
-  double total_ejecta_energy_;
+  double time_first_sn_;
 
   int stencil_;
   int stencil_rad_;

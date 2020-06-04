@@ -43,7 +43,8 @@ public: // interface
   Data()
     : num_field_data_(0),
       field_data_(),
-      particle_data_(NULL),
+      particle_data_(nullptr),
+      flux_data_(nullptr),
       scalar_data_long_double_(),
       scalar_data_double_(),
       scalar_data_int_(),
@@ -74,6 +75,10 @@ public: // interface
       particle_data_ = new ParticleData;
     }
     p | *particle_data_;
+    if (up) {
+      flux_data_ = new FluxData;
+    }
+    p | *flux_data_;
     p | scalar_data_long_double_;
     p | scalar_data_double_;
     p | scalar_data_int_;
@@ -111,6 +116,10 @@ public: // interface
     if (y) *y = upper_[1];
     if (z) *z = upper_[2];
   }
+
+  //----------------------------------------------------------------------
+
+  void allocate () throw();
 
   //----------------------------------------------------------------------
   // fields
@@ -162,7 +171,17 @@ public: // interface
   { return Particle(cello::particle_descr(),
 		    particle_data_); }
 
-  void allocate () throw();
+  //----------------------------------------------------------------------
+  // fluxes
+  //----------------------------------------------------------------------
+
+  /// Return the constant Flux data
+  const FluxData * flux_data () const throw()
+  { return flux_data_; }
+
+  /// Return the Flux data
+  FluxData * flux_data () throw()
+  { return flux_data_; }
 
   //----------------------------------------------------------------------
   // scalars
@@ -214,6 +233,9 @@ private: // attributes
 
   /// Particle data
   ParticleData * particle_data_;
+
+  /// Flux data
+  FluxData * flux_data_;
 
   /// Scalar data
   ScalarData<long double> scalar_data_long_double_;

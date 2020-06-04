@@ -85,6 +85,15 @@ EnzoConfig::EnzoConfig() throw ()
   initial_pm_field(""),
   initial_pm_mpp(0.0),
   initial_pm_level(0),
+  // EnzoInitialBurkertBodenheimer
+  initial_burkertbodenheimer_rank(0),
+  initial_burkertbodenheimer_radius_relative(0.0),
+  initial_burkertbodenheimer_particle_ratio(0.0),
+  initial_burkertbodenheimer_mass(0.0),
+  initial_burkertbodenheimer_temperature(0.0),
+  initial_burkertbodenheimer_densityprofile(1),
+  initial_burkertbodenheimer_rotating(true),
+  initial_burkertbodenheimer_outer_velocity(-1),
   // EnzoInitialSedov[23]
   initial_sedov_rank(0),
   initial_sedov_radius_relative(0.0),
@@ -159,6 +168,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_shift_cell_center(true),
   method_feedback_ke_fraction(0.0),
   method_feedback_use_ionization_feedback(false),
+  method_feedback_time_first_sn(-1), // in Myr
   // EnzoMethodStarMaker,
   method_star_maker_type(""),                              // star maker type to use
   method_star_maker_use_density_threshold(true),           // check above density threshold before SF
@@ -354,6 +364,16 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_pm_mpp;
   p | initial_pm_level;
 
+  p | initial_burkertbodenheimer_rank;
+  PUParray(p,initial_burkertbodenheimer_array,3);
+  p | initial_burkertbodenheimer_radius_relative;
+  p | initial_burkertbodenheimer_particle_ratio;
+  p | initial_burkertbodenheimer_mass;
+  p | initial_burkertbodenheimer_temperature;
+  p | initial_burkertbodenheimer_densityprofile;
+  p | initial_burkertbodenheimer_rotating;
+  p | initial_burkertbodenheimer_outer_velocity;
+
   PUParray(p, initial_feedback_test_position,3);
   p | initial_feedback_test_density;
   p | initial_feedback_test_star_mass;
@@ -417,6 +437,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_feedback_shift_cell_center;
   p | method_feedback_ke_fraction;
   p | method_feedback_use_ionization_feedback;
+  p | method_feedback_time_first_sn;
 
   p | method_star_maker_type;
   p | method_star_maker_use_density_threshold;
@@ -488,7 +509,7 @@ void EnzoConfig::pup (PUP::er &p)
     if (is_null) {
 
       method_grackle_chemistry = NULL;
-      
+
     } else {
 
       if (p.isUnpacking()) {
@@ -505,7 +526,7 @@ void EnzoConfig::pup (PUP::er &p)
       ASSERT("EnzoConfig::pup",
              "method_grackle_chemistry is expected to be non-null",
              (method_grackle_chemistry != NULL));
-      
+
       p | *method_grackle_chemistry;
     }
 
@@ -635,6 +656,31 @@ void EnzoConfig::read(Parameters * p) throw()
   initial_pm_field        = p->value_string  ("Initial:pm:field","density");
   initial_pm_mpp          = p->value_float   ("Initial:pm:mpp",-1.0);
   initial_pm_level        = p->value_integer ("Initial:pm:level",-1);
+
+  // Burkert Bodenheimer initialization
+
+  initial_burkertbodenheimer_rank =  p->value_integer("Initial:burkertbodenheimer:rank",0);
+  for (int i=0; i<initial_burkertbodenheimer_rank; i++) {
+    initial_burkertbodenheimer_array[i] =
+      p->list_value_integer (i,"Initial:burkertbodenheimer:array",1);
+  }
+  for (int i=initial_burkertbodenheimer_rank; i<3; i++) {
+    initial_burkertbodenheimer_array[i] = 1;
+  }
+  initial_burkertbodenheimer_radius_relative =
+    p->value_float("Initial:burkertbodenheimer:radius_relative",0.1);
+  initial_burkertbodenheimer_particle_ratio =
+    p->value_float("Initial:burkertbodenheimer:particle_ratio",0.0);
+  initial_burkertbodenheimer_mass =
+    p->value_float("Initial:burkertbodenheimer:mass",cello::mass_solar);
+  initial_burkertbodenheimer_temperature =
+    p->value_float("Initial:burkertbodenheimer:temperature",10.0);
+  initial_burkertbodenheimer_densityprofile =
+    p->value_integer ("Initial:burkertbodenheimer:densityprofile",2);
+  initial_burkertbodenheimer_rotating =
+   p->value_logical ("Initial:burkertbodenheimer:rotating",true);
+  initial_burkertbodenheimer_outer_velocity =
+   p->value_float ("Initial:burkertbodenheimer:outer_velocity",-1.0);
 
   field_gamma = p->value_float ("Field:gamma",5.0/3.0);
   field_uniform_density = p->value_float ("Field:uniform_density",1.0);
@@ -889,6 +935,9 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_feedback_ke_fraction = p->value_float
     ("Method:feedback:ke_fraction", 0.0);
+
+  method_feedback_time_first_sn = p->value_float
+    ("Method:feedback:time_first_sn", -1.0);
 
   method_feedback_use_ionization_feedback = p->value_logical
     ("Method:feedback:use_ionization_feedback", false);

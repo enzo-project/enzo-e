@@ -32,10 +32,11 @@ EnzoMethodStarMaker::EnzoMethodStarMaker
   //                           enzo_sync_id_method_star_maker);
   // refresh(ir)->add_all_fields();
 
-  Refresh & refresh = new_refresh(ir_post_);
   cello::simulation()->new_refresh_set_name(ir_post_,name());
 
-  refresh.add_all_fields();
+  Refresh * refresh = cello::refresh(ir_post_);
+
+  refresh->add_all_fields();
 
   // Copy over parameters from config to local names here for convenience
   use_density_threshold_     = enzo_config->method_star_maker_use_density_threshold;

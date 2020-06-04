@@ -120,35 +120,6 @@ enum enzo_sync_id {
 
 //----------------------------------------------------------------------
 
-enum bc_enum 
-  { // explicitly enumerated to match what Enzo expects
-    bc_unknown    = 0, 
-    bc_reflecting = 1, 
-    bc_outflow    = 2, 
-    bc_inflow     = 3, 
-    bc_periodic   = 4 
-  };
-
-//----------------------------------------------------------------------
-
-enum hydro_type 
-  {
-    hydro_unknown,
-    hydro_ppm,
-    hydro_ppml
-  };
-
-//----------------------------------------------------------------------
-
-enum pm_type {
-  pm_type_unknown,
-  pm_type_cic,  // cloud-in-cell
-  pm_type_ngp,  // nearest grid point
-  pm_type_tsc   // triangular shape cloud
-};
-  
-//----------------------------------------------------------------------
-
 enum return_enum {
   return_unknown,
   return_converged,
@@ -162,7 +133,7 @@ const int field_undefined = -1;
 
 //----------------------------------------------------------------------
 
-struct fluxes
+struct enzo_fluxes
 {
   long_int LeftFluxStartGlobalIndex [MAX_DIMENSION][MAX_DIMENSION];
   long_int LeftFluxEndGlobalIndex   [MAX_DIMENSION][MAX_DIMENSION];
@@ -229,6 +200,7 @@ extern "C" {
 #include "enzo_EnzoInitialSoup.hpp"
 #include "enzo_EnzoInitialTurbulence.hpp"
 #include "enzo_EnzoInitialIsolatedGalaxy.hpp"
+#include "enzo_EnzoInitialBurkertBodenheimer.hpp"
 
 #include "enzo_EnzoRefineShock.hpp"
 #include "enzo_EnzoRefineParticleMass.hpp"

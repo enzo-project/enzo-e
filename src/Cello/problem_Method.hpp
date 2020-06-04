@@ -62,14 +62,8 @@ public: // virtual functions
   /// Add a new refresh object
   int add_new_refresh_ ();
 
-  /// Return the specified Refresh object
-  Refresh & new_refresh(int ir);
-  
   /// Return the index for the main post-refresh object
-  int refresh_post_id() const;
-
-  /// Return the main post-refresh object for the solver
-  Refresh & refresh_post();
+  int refresh_id_post() const;
 
   /// Return the Schedule object pointer
   Schedule * schedule() throw() 

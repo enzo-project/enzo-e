@@ -66,5 +66,6 @@ namespace enzo {
 
 extern CProxy_EnzoSimulation proxy_enzo_simulation;
 extern void mutex_init();
+extern void mutex_init_bcg_iter();
 #endif /* ENZO_HPP */
 

@@ -262,3 +262,13 @@ epub_copyright = u'2019, James Bordner'
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'http://docs.python.org/': None}
+
+# taken from https://github.com/readthedocs/sphinx_rtd_theme/issues/117
+# to solve the issue related to the tables not wrapping
+html_static_path = ['_static']
+
+html_context = {
+    'css_files': [
+        '_static/theme_overrides.css',  # overrides for wide tables in RTD theme
+        ],
+    }

@@ -580,9 +580,8 @@ Boundary * Problem::create_boundary_
   } else if (type == "periodic") {
 
     axis_enum axis = (axis_enum) config->boundary_axis[index];
-    face_enum face = (face_enum) config->boundary_face[index];
 
-    return new BoundaryPeriodic(axis,face);
+    return new BoundaryPeriodic(axis);
 
   }
   return NULL;
@@ -819,6 +818,11 @@ Method * Problem::create_method_
 
     method = new MethodNull
       (config->method_null_dt);
+
+  } else if (name == "flux_correct") {
+
+    method = new MethodFluxCorrect
+      (config->method_flux_correct_group[index_method]);
 
   } else if (name == "close_files") {
 

@@ -37,14 +37,14 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
 {
   // Initialize default Refresh object
 
-
-  Refresh & refresh = new_refresh(ir_post_);
   cello::simulation()->new_refresh_set_name(ir_post_,name());
-  
-  refresh.add_field("density");
-  refresh.add_field("velocity_x");
-  refresh.add_field("velocity_y");
-  refresh.add_field("velocity_z");
+
+  Refresh * refresh = cello::refresh(ir_post_);
+
+  refresh->add_field("density");
+  refresh->add_field("velocity_x");
+  refresh->add_field("velocity_y");
+  refresh->add_field("velocity_z");
 }
 
 //----------------------------------------------------------------------
@@ -118,13 +118,12 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     enzo_float cosmo_dadt=0.0;
     EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
-    
     if (cosmology) {
 
       double time = block->time();
       double dt   = block->dt();
       cosmology->compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+alpha_*dt);
-      
+
     }
     if (rank >= 1) hx *= cosmo_a;
     if (rank >= 2) hy *= cosmo_a;
@@ -360,7 +359,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
       } // end loop over batches
     } // end loop over particle types
-
 
     //--------------------------------------------------
     // Add gas density

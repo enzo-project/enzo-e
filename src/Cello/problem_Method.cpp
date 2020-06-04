@@ -16,7 +16,7 @@ Method::Method (double courant) throw()
     courant_(courant)
 {
   ir_post_ = add_new_refresh_();
-  new_refresh(ir_post_).set_callback(CkIndex_Block::p_compute_continue());
+  cello::refresh(ir_post_)->set_callback(CkIndex_Block::p_compute_continue());
 }
 
 //----------------------------------------------------------------------
@@ -56,23 +56,9 @@ int Method::add_new_refresh_ ()
 
 //----------------------------------------------------------------------
 
-Refresh & Method::new_refresh(int ir)
-{
-  return cello::simulation()->new_refresh_list(ir);
-}
-
-//----------------------------------------------------------------------
-
-int Method::refresh_post_id() const
+int Method::refresh_id_post() const
 {
   return ir_post_;
-}
-
-//----------------------------------------------------------------------
-
-Refresh & Method::refresh_post()
-{
-  return cello::simulation()->new_refresh_list(ir_post_);
 }
 
 //----------------------------------------------------------------------

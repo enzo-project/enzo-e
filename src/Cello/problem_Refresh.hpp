@@ -151,9 +151,7 @@ public: // interface
   void add_field_src_dst(std::string field_src, std::string field_dst);
   
   /// All fields are refreshed
-  void add_all_fields() {
-    all_fields_ = true;
-  }
+  void add_all_fields(std::string field_group = "");
 
   /// Add specified fields
   void set_field_list (std::vector<int> field_list)
@@ -222,7 +220,7 @@ public: // interface
   void set_active (bool active) 
   { active_ = active; }
 
-  bool active () const 
+  bool is_active () const
   { return active_; }
 
   /// Callback function after refresh is completed

@@ -12,16 +12,16 @@ Requirements
 Flux correction involves updating field values along faces between
 neighboring blocks to ensure that conserved quantities are indeed
 conserved.  This correction step isn't required at all block faces: if
-both mesh refinement levels and time-steps are the same between two
+both mesh refinement levels and time steps are the same between two
 adjacent blocks, then fluxes along the interfaces are expected to
 already match to machine precision.  However, if neighboring blocks
 have different spacial or temporal resolution, the computed solution
 will not in general be conservative, so some type of correction due to
 the inconsistent fluxes will be required.
 
-.. note:: We will henceforth use the term "resolution jump" to include
-          a difference in time steps as well as in mesh resolution,
-          "coarse" and "fine" to include relatively long and short
+.. note:: We use the term "resolution jump" to include a difference in
+          *time steps* as well as in mesh resolution; similarly, we
+          use "coarse" and "fine" to include relatively long and short
           time steps as well as relativly large and small block cell
           widths.
 
@@ -31,7 +31,7 @@ factor is computed using the coarse and fine fluxes across the
 interface.  While the basic update is straightforward, care must be
 taken to ensure that the correction factors are computed correctly,
 especially for non-centered field variables or when adaptive
-time-stepping is used.  Additional corrections will be required for
+time stepping is used.  Additional corrections will be required for
 MHD, and expansion terms in cosmological problems may also need to be
 considered.
 
@@ -43,58 +43,56 @@ Basic operations involved include the following:
 #. computing correction factors given coarse and fine fluxes
 #. correcting coarse-level field values given correction factors
 
-.. note:: Relative to ENZO's structured AMR grids, flux correction for
-          Enzo-E / Cello is simpler due to Cello's array-of-octree
-          refinement: blocks only share fluxes at block faces (Enzo-E
-          blocks do not contain sub-blocks), and the topology of fine-
-          and coarse-level block intersections is simpler (Enzo-E
-          coarse-level block faces are adjacent to exactly four
-          fine-level block faces).  The first simplification removes
-          the need to loop over sub-grids or store fluxes internal to
-          a block (i.e. the "projection step" in ENZO), and the second
-          simplifies loop indexing.
+Relative to ENZO's structured AMR grids, flux correction for Enzo-E /
+Cello is simpler due to Cello's array-of-octree refinement: blocks
+only share fluxes at block faces (Enzo-E blocks do not contain
+sub-blocks), and the topology of fine- and coarse-level block
+intersections is simpler (Enzo-E coarse-level block faces are adjacent
+to exactly four fine-level block faces).  The first simplification
+removes the need to loop over sub-grids or store fluxes internal to a
+block (i.e. the "projection step" in ENZO), and the second removes the
+need to explicitly store loop indices for flux arrays.
 
-As a precondition we assume fluxes for all conserved fields are
-provided by the hydrodynamics solver on all required block faces at
-each time-step.
 
-Below we discuss the software requirements specific to the Enzo-E and
-Cello layers.
+We assume fluxes for all conserved fields are provided by the
+hydrodynamics solver along all required block faces at each time step.
 
 .. note:: As this is a working document, specific requirements are
           expected to be added, modified, or shifted between layers as
           needed.
    
      
-Enzo-E requirements
+Method requirements
 ===================
 
-Enzo-E is responsible for storing, accessing, communicating, and
-operating with fluxes, to implement flux correction, with support
-provided by Cello.  Specific requirements are listed below:
+The Method component is responsible for storing, accessing,
+communicating, and operating with fluxes, to implement flux correction
+using support provided by Cello flux classes.  Specific requirements
+are listed below:
 
 - **RE-1.** Initialize and store fluxes, provided by the hydro solver,
-  at each time-step for all conserved fields across all Block faces
-  that lie along a resolution jump
+  at each time step for all conserved fields across all coarse-fine
+  interfaces
 - **RE-2.** Request required fluxes from neighboring Blocks
-- **RE-3.** Compute correction factors for all required conserved field
-  face values given block face and neighbor block fluxes
+- **RE-3.** Compute correction factors for all required conserved
+  field face values given a block face and fluxes from both the block
+  and its face-sharing neighbor
 - **RE-4.** Correct conserved field face values given computed
   correction factors
 - **RE-5.** Identify which fields require flux correction
-- **RE-6.** Support adaptive time-stepping
+- **RE-6.** Support adaptive time stepping
 - **RE-7.** Support MHD
 - **RE-8.** Ensure conservation is not lost through any other operation, e.g. interpolation
 
-Cello requirements
-==================
+Flux Classes requirements
+=========================
 
-Cello's primary responsibilities are to provide Enzo-E with sufficient
-support for storing fluxes, computing flux correction factors, and
-applying the flux correction to conserved field values.  Technical
-details, especially those involving parallel computing and data
-communication, should be isolated from the Enzo-E software layer as
-much as possible.
+Cello's flux classes primary responsibilities are to provide the
+flux-correction method with sufficient support for storing fluxes,
+computing flux correction factors, and applying the flux correction to
+conserved field values.  Technical details, especially those involving
+parallel computing and data communication, should be isolated from the
+Enzo-E software layer as much as possible.
 
 Specific requirements include the following:
    
@@ -103,7 +101,7 @@ Specific requirements include the following:
 - **RC-3.** Communicate fluxes between adjacent blocks when (and ideally only when) needed
 - **RC-4.** Store the time interval along with each collection of fluxes
 - **RC-5.** Allow multiple fluxes to be stored for the same field but
-  different time-steps
+  different time steps
 - **RC-6.** Provide support for a block to compute correction factors
   along a block face given the block's fluxes and the corresponding
   neighboring block fluxes
@@ -117,15 +115,15 @@ Design
 ======
 
 Our design is developed top-down, starting with a Cello Method for
-implementing flux correction in Enzo-E, *EnzoMethodFluxCorrect*.
+implementing flux correction, *MethodFluxCorrect*.
 Using a Cello Method to implement flux correction is a natural
-approach, since Methods in Enzo-E are analagous to steps in the
+approach, since Methods are analagous to steps in the
 high-level :p:`EvolveLevel()` function in ENZO, and flux correction is
 one such step.  (Specifically, flux correction is performed in
 ENZO---along with communication and a projection substep---in
 :p:`UpdateFromFinerGrids()`, which is called by :p:`EvolveLevel()`).
 
-To support coding :p:`EnzoMethodFluxCorrect`, our design introduces a
+To support coding :p:`MethodFluxCorrect`, our design introduces a
 Cello class *FluxData*, whose responsibility is to collect together
 all flux data required for flux correction on a block into a single
 object.  This :p:`FluxData` class will be analagous to the existing
@@ -148,28 +146,28 @@ Interfaces
 ==========
 
 We develop the interfaces for the flux-related classes below, starting
-with the top-level :p:`EnzoMethodFluxCorrect`, then the progressively
+with the top-level :p:`MethodFluxCorrect`, then the progressively
 higher-level :p:`Face`, :p:`FaceFluxes`, and :p:`FluxData` classes.
 
 
 ---------------------------
-EnzoMethodFluxCorrect class
+MethodFluxCorrect class
 ---------------------------
 
-The :p:`EnzoMethodFluxCorrect` class is a Cello :p:`Method`, whose
+The :p:`MethodFluxCorrect` class is a Cello :p:`Method`, whose
 main virtual method is :p:`compute(Block)`.  This operates on some
 subset of Fields and Particle types on a Block, and will include new
-operations on fluxes as well.  The :p:`EnzoMethodFluxCorrect` method
+operations on fluxes as well.  The :p:`MethodFluxCorrect` method
 communicates fluxes between neighboring blocks to ensure consistency
 between processes, and computes and applies appropriate
 flux-correction operations to required Fields values along block
 interfaces.
 
-Since the :p:`EnzoMethodFluxCorrect` class is inherited from the Cello
+Since the :p:`MethodFluxCorrect` class is inherited from the Cello
 :p:`Method` class, the public interface for this class is already
 prescribed.  The two methods in the interface are the constructor
-:p:`EnzoMethodFluxCorrect()` used to initialize the required
-communication, and :p:`EnzoMethodFluxCorrect::compute(Block)` which
+:p:`MethodFluxCorrect()` used to initialize the required
+communication, and :p:`MethodFluxCorrect::compute(Block)` which
 implements flux correction on a given Block.  (The other virtual
 function in the :p:`Method` interface is :p:`timestep()`, which is not
 required for flux-correction.)
@@ -178,9 +176,9 @@ required for flux-correction.)
 
 .. glossary::
 
-   ``EnzoMethodFluxCorrect()``
+   ``MethodFluxCorrect()``
    
-      *Create a new EnzoMethodFluxCorrect object, and define its refresh communication requirements*
+      *Create a new MethodFluxCorrect object, and define its refresh communication requirements*
   
 ----
 
@@ -206,14 +204,14 @@ While most Methods require Field and/or Particle data to be consistent
 between neighboring blocks, the flux correction step requires fluxes
 to be consistent.  Refresh phases in Methods are typically registered
 in the Method's constructor, so we register a refresh phase with all
-:p:`FluxData` block data in :p:`EnzoMethodFluxCorrect()`.  Although
+:p:`FluxData` block data in :p:`MethodFluxCorrect()`.  Although
 code will need to be updated in the Cello layer to support refreshing
 flux data between blocks, the prototype code below should be
 relatively complete.
 
 .. code-block:: C++
 
-   EnzoMethodFluxCorrect::EnzoMethodFluxCorrect()
+   MethodFluxCorrect::MethodFluxCorrect()
    {
       // Register a refresh phase to update fluxes
       
@@ -229,15 +227,15 @@ perform fluxes refresh
 ----------------------
 
 Performing the communication step to refresh fluxes between adjacent
-blocks is analagous to similar code in other Enzo-E Methods used to
-refresh field and particle data along faces.  Again, while code will
-need to be updated in the Cello layer to support refreshing flux data
-between blocks, the prototype code below should be relatively
-complete.
+blocks is analagous to similar code in other Enzo-E / Cello Methods
+used to refresh field and particle data along faces.  Again, while
+code will need to be updated in the Cello layer to support refreshing
+flux data between blocks, the prototype code below should be
+relatively complete.
 
 .. code-block:: C++
 
-   void EnzoMethodFluxCorrect::compute(Block * block)
+   void MethodFluxCorrect::compute(Block * block)
    {
    
       // Start refresh phase to update fluxes
@@ -249,9 +247,9 @@ complete.
    }                           
 
    void EnzoBlock::p_method_flux_correct()
-   {  static_cast<EnzoMethodFluxCorrect*> (solver())->update_field_faces(this);   }  
+   {  static_cast<MethodFluxCorrect*> (solver())->update_field_faces(this);   }  
 
-   void EnzoMethodFluxCorrect::update_field_faces(Block* block) throw()
+   void MethodFluxCorrect::update_field_faces(Block* block) throw()
    {
        // continue with updated fluxes
 
@@ -266,7 +264,7 @@ perform flux correction
 
    // WARNING: USES OUTDATED FaceFluxes and FluxData API's
    
-   void EnzoMethodFluxCorrect::update_field_faces(EnzoBlock* block) throw()
+   void MethodFluxCorrect::update_field_faces(EnzoBlock* block) throw()
    {
        // Get this block's Field and FluxData objects
 
@@ -315,19 +313,19 @@ perform flux correction
        }
    }
 
-.. note:: When adaptive time-stepping is used, multiple time intervals
+.. note:: When adaptive time stepping is used, multiple time intervals
           of "fine-grid" fluxes will be required for a given face.  To
           avoid issues with comparing floating-point values, we assume
           an integer-valued "finest-grid" cycle number is available.
-          However, until adaptive time-stepping is implemented, this
+          However, until adaptive time stepping is implemented, this
           reverts to the block's current cycle for non-adaptive
-          (constant over all blocks per cycle) time-stepping.
+          (constant over all blocks per cycle) time stepping.
 
 .. code-block:: C++
 
    // WARNING: USES OUTDATED FaceFluxes and FluxData API's
 
-   EnzoMethodFluxCorrect::update_field_face_
+   MethodFluxCorrect::update_field_face_
       (Block, index_field, axis,face,child,
        fluxes_coarse,fluxes_fine_sum);
    {
@@ -418,8 +416,6 @@ Block.
 
    ``bool Face::is_facet() const;``
     *Return whether the intersection between Blocks is a facet, that is     has rank d-1.  Must be true to be a valid face for flux correction.     WARNING: ignores domain boundary and boundary conditions.  Needs     domain array size and whether axis othogonal to the shared face is     periodic or not.*
-
-
 
 ----------------     
 FaceFluxes class
@@ -574,7 +570,7 @@ one corresponding to the Block, and one corresponding to the
 neighboring Block.  FaceFluxes in the :p:`FluxData` object may be in a
 non-conforming state, that is the volume elements may not match,
 either spatial area or time step.  Coarsening and summing over
-time-steps of :p:`FluxData` objects are used to create fully-conforming
+time steps of :p:`FluxData` objects are used to create fully-conforming
 :p:`FluxFaces`, after which differencing is permitted for computing the
 flux-correction factors.  Support for coarsening, adding, and
 differencing fluxes is the responsibility of the :p:`FaceFluxes` class;
@@ -629,8 +625,8 @@ differencing fluxes is the responsibility of the :p:`FaceFluxes` class;
     *Return the ith FaceFluxes object.*
 
 
-Communication
-=============
+Flux Communication
+==================
 
 Communicating fluxes between adjacent blocks is similar to communicating
 field face data and migrating particles, so it makes sense to
@@ -683,7 +679,7 @@ accumulating untested code.
 
 We will include unit tests for the lower level :p:`FaceFluxes` and
 :p:`FluxData` classes, and use application testing for
-:p:`EnzoMethodFluxCorrect`.
+:p:`MethodFluxCorrect`.
 
 Hydrodynamics application tests will include increasingly difficult
 test problems, with the easiest being a 2D two-level AMR (L=2)
@@ -712,15 +708,15 @@ Documentation
 =============
 
 - **DD-1.** *Design*: add flux correction design to :p:`design/design-flux.rst` 
-- **DD-2.** *Method*: add :p:`EnzoMethodFluxCorrect` method documentation to :p:`user/problem_method.rst`
+- **DD-2.** *Method*: add :p:`MethodFluxCorrect` method documentation to :p:`user/problem_method.rst`
 - **DD-3.** *Testing*: add :p:`testing/testing_flux.rst` test documentation
    
 ==========
 Milestones
 ==========
 
-- **M-1.** :p:`EnzoMethodFluxCorrect` demonstrated  working for hydrodynamics
-- **M-2.** :p:`EnzoMethodFluxCorrect` demonstrated  working for MHD
+- **M-1.** :p:`MethodFluxCorrect` demonstrated  working for hydrodynamics
+- **M-2.** :p:`MethodFluxCorrect` demonstrated  working for MHD
 
 =====
 Tasks
@@ -728,8 +724,66 @@ Tasks
 
 - **T-1.** :p:`FaceFluxes` class design and implementation
 - **T-2.** :p:`FluxData` class design and implementation
-- **T-3.** :p:`EnzoMethodFluxCorrect` class design and implementation
+- **T-3.** :p:`MethodFluxCorrect` class design and implementation
 
 =====
 Notes
 =====
+
+Progress notes 2020-04-08
+=========================
+
+   A. **Data**: Flux-related data classes and unit tests (95%)
+
+     - Face: 100% complete
+     
+     - FaceFluxes: 90% complete
+
+       - TODO: get_limits () (compute loop limits of Block values for face)
+       - TODO: operator += () (a few unit tests fail)
+
+     - FluxData: 90% complete (unit tests)
+
+   B. **Method**: Started implementing MethodFluxCorrect (50%)
+
+     - sum conserved fields and compare with initial
+
+       - quad-precision
+       - main difficulty in writing application tests
+       
+   C. **Communication**: Started on flux-refresh (50%)
+     
+     - added FluxData object to Block's Data object
+     - added support for refresh only across level jumps
+     - incorporating FluxData in DataMsg (50%)
+
+       - TODO: implement serializing and deserializing Flux data objects
+       
+   D. **Initialization**: Started on copying fluxes from PPM to FluxData (50%)
+
+     - ENZO "fluxes" struct exists in Enzo-E
+     - mainly copying ENZO flux-related code to Enzo-E
+     - using old "M16" version of ENZO (Enzo-E uses "ppm_de" et al)
+     - copying "fluxes" to FaceFluxes in FluxData is straightforward
+
+   E. **Testing** (95%)
+
+     - Unit tests almost done
+       
+       - just FluxData remaining
+         
+     - Application tests straightforward
+
+       - summing conserved quantities is the "hard" part
+       - just need to run different problems and monitor "conserved" quantities
+
+   F. **Debugging** (???)
+
+     - Initialization: run same problem in ENZO and Enzo-E and compare
+     - Communication: check that what's sent is what's received
+     - Method
+
+       - application test results
+       - compare same problem in ENZO and Enzo-E
+         
+       

@@ -46,6 +46,7 @@ module mesh {
   PUPable MaskPng;
   PUPable MaskExpr;
   PUPable MethodCloseFiles;
+  PUPable MethodFluxCorrect;
   PUPable MethodNull;
   PUPable MethodTrace;
   PUPable OutputCheckpoint;
@@ -70,7 +71,7 @@ module mesh {
   PUPable Units;
 
   message FieldMsg {
-      char a[];
+    char a[];
   };
 
   message MsgCoarsen;
@@ -116,7 +117,10 @@ module mesh {
     entry void p_compute_exit();
     entry void r_compute_exit(CkReductionMsg *);
 
-    //--------------------------------------------------
+    entry void p_method_flux_correct_refresh();
+    entry void r_method_flux_correct_sum_fields(CkReductionMsg * msg);
+
+  //--------------------------------------------------
     // *** STOPPING ***
     //--------------------------------------------------
 

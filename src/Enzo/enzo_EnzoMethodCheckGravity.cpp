@@ -13,10 +13,10 @@ EnzoMethodCheckGravity::EnzoMethodCheckGravity ( std::string particle_type ) thr
   : Method (),
     particle_type_(particle_type)
 {
-  Refresh & refresh = new_refresh(ir_post_);
   cello::simulation()->new_refresh_set_name(ir_post_,name());
-  
-  refresh.add_all_particles();
+
+  Refresh * refresh = cello::refresh(ir_post_);
+  refresh->add_all_particles();
 }
 
 //----------------------------------------------------------------------

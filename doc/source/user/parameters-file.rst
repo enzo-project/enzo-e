@@ -82,7 +82,7 @@ Below, ``Initial`` is a group, ``value`` is a subgroup, and
 
 The shorthand used for naming parameters in the documentation is
 <group> : <subgroup> : <parameter>, e.g. "``Mesh : root_size``" or
-"``Initial : density : value``".  Note that This shorthand is used
+"``Initial : value : density``".  Note that This shorthand is used
 only for documentation--it is not valid syntax within the parameter file.
 
 Parameters
@@ -310,3 +310,8 @@ underlying grammar and syntax are relatively fixed.
          cycle = 100;
          time = 2.50;
      }
+
+----
+
+2020-04-10: Updated with corrections from Joshua Smith.
+     
