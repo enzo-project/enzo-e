@@ -14,15 +14,15 @@
 #ifdef DEBUG_UPDATE
 #  define TRACE_PM(MESSAGE)						\
   CkPrintf ("%s:%d %s\n",						\
-	    __FILE__,__LINE__,MESSAGE);				
+	    __FILE__,__LINE__,MESSAGE);
 #else
 #  define TRACE_PM(MESSAGE) /* ... */
 #endif
 
 //----------------------------------------------------------------------
 
-EnzoMethodPmUpdate::EnzoMethodPmUpdate 
-( double max_dt ) 
+EnzoMethodPmUpdate::EnzoMethodPmUpdate
+( double max_dt )
   : Method(),
     max_dt_(max_dt)
 {
@@ -30,7 +30,7 @@ EnzoMethodPmUpdate::EnzoMethodPmUpdate
   // Initialize default Refresh object
 
   cello::simulation()->new_refresh_set_name(ir_post_,name());
-  
+
   const int rank = cello::rank();
   Refresh * refresh = cello::refresh(ir_post_);
   if (rank >= 1) refresh->add_field("acceleration_x");
@@ -40,7 +40,7 @@ EnzoMethodPmUpdate::EnzoMethodPmUpdate
   ParticleDescr * particle_descr = cello::particle_descr();
   Grouping * particle_groups = particle_descr->groups();
 
-  int num_mass = particle_groups->size("has_mass");
+  const int num_mass = particle_groups->size("has_mass");
 
   for (int ipt = 0; ipt < num_mass; ipt++)
     refresh->add_particle(particle_descr->type_index(
@@ -69,21 +69,24 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 {
   TRACE_PM("compute()");
 
-  Particle particle = block->data()->particle();
-  
-  if (block->is_leaf() && particle.type_exists("dark")) {
+  ParticleDescr * particle_descr = cello::particle_descr();
+  Grouping * particle_groups     = particle_descr->groups();
 
-#ifdef DEBUG_UPDATE    
+  const int num_mass = particle_groups->size("has_mass");
+
+  if (block->is_leaf() && num_mass > 0) {
+
+#ifdef DEBUG_UPDATE
     double a3sum[3]={0.0};
     double v3sum[3]={0.0};
     double a3sum2[3]={0.0};
     double v3sum2[3]={0.0};
-#endif    
-    
+#endif
+
     EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
     enzo_float cosmo_a=1.0,cosmo_dadt=0.0;
-    
+
     if (cosmology) {
       double time = block->time();
       double dt   = block->dt();
@@ -104,10 +107,6 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 
 
     Particle particle = block->data()->particle();
-    ParticleDescr * particle_descr = cello::particle_descr();
-    Grouping * particle_groups     = particle_descr->groups();
-
-    int num_mass = particle_groups->size("has_mass");
 
     for (int ipt = 0; ipt < num_mass; ipt++){
 
@@ -131,28 +130,28 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
       }
 
 
-      int ia_x  = (rank >= 1) ? particle.attribute_index (it, "x") : -1;
-      int ia_y  = (rank >= 2) ? particle.attribute_index (it, "y") : -1;
-      int ia_z  = (rank >= 3) ? particle.attribute_index (it, "z") : -1;
+      const int ia_x  = (rank >= 1) ? particle.attribute_index (it, "x") : -1;
+      const int ia_y  = (rank >= 2) ? particle.attribute_index (it, "y") : -1;
+      const int ia_z  = (rank >= 3) ? particle.attribute_index (it, "z") : -1;
 
-      int ia_vx = (rank >= 1) ? particle.attribute_index (it, "vx") : -1;
-      int ia_vy = (rank >= 2) ? particle.attribute_index (it, "vy") : -1;
-      int ia_vz = (rank >= 3) ? particle.attribute_index (it, "vz") : -1;
+      const int ia_vx = (rank >= 1) ? particle.attribute_index (it, "vx") : -1;
+      const int ia_vy = (rank >= 2) ? particle.attribute_index (it, "vy") : -1;
+      const int ia_vz = (rank >= 3) ? particle.attribute_index (it, "vz") : -1;
 
-      int ia_ax = (rank >= 1) ? particle.attribute_index (it, "ax") : -1;
-      int ia_ay = (rank >= 2) ? particle.attribute_index (it, "ay") : -1;
-      int ia_az = (rank >= 3) ? particle.attribute_index (it, "az") : -1;
+      const int ia_ax = (rank >= 1) ? particle.attribute_index (it, "ax") : -1;
+      const int ia_ay = (rank >= 2) ? particle.attribute_index (it, "ay") : -1;
+      const int ia_az = (rank >= 3) ? particle.attribute_index (it, "az") : -1;
 
-      int dp = particle.stride(it, ia_x);
-      int dv = particle.stride(it, ia_vx);
-      int da = particle.stride(it, ia_ax);
+      const int dp = particle.stride(it, ia_x);
+      const int dv = particle.stride(it, ia_vx);
+      const int da = particle.stride(it, ia_ax);
 
-      int nb = particle.num_batches (it);
+      const int nb = particle.num_batches (it);
 
       // check precisions match
 
-      int ba = particle.attribute_bytes(it,ia_x); // "bytes (actual)"
-      int be = sizeof(enzo_float);                // "bytes (expected)"
+      const int ba = particle.attribute_bytes(it,ia_x); // "bytes (actual)"
+      const int be = sizeof(enzo_float);                // "bytes (expected)"
 
       ASSERT4 ("EnzoMethodPmUpdate::compute()",
 	       "Particle type %s attribute %s defined as %s but expecting %s",
@@ -171,101 +170,102 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
         enzo_float *ax=0, *ay=0, *az=0;
 
         if (rank >= 1) {
-	  x  = (enzo_float *) particle.attribute_array (it, ia_x,  ib);
-	  vx = (enzo_float *) particle.attribute_array (it, ia_vx, ib);
-	  ax = (enzo_float *) particle.attribute_array (it, ia_ax, ib);
+      	  x  = (enzo_float *) particle.attribute_array (it, ia_x,  ib);
+      	  vx = (enzo_float *) particle.attribute_array (it, ia_vx, ib);
+      	  ax = (enzo_float *) particle.attribute_array (it, ia_ax, ib);
         }
         if (rank >= 2) {
-	  y  = (enzo_float *) particle.attribute_array (it, ia_y,  ib);
-	  vy = (enzo_float *) particle.attribute_array (it, ia_vy, ib);
-	  ay = (enzo_float *) particle.attribute_array (it, ia_ay, ib);
+      	  y  = (enzo_float *) particle.attribute_array (it, ia_y,  ib);
+      	  vy = (enzo_float *) particle.attribute_array (it, ia_vy, ib);
+      	  ay = (enzo_float *) particle.attribute_array (it, ia_ay, ib);
         }
         if (rank >= 3) {
- 	  z  = (enzo_float *) particle.attribute_array (it, ia_z,  ib);
-	  vz = (enzo_float *) particle.attribute_array (it, ia_vz, ib);
-	  az = (enzo_float *) particle.attribute_array (it, ia_az, ib);
+       	  z  = (enzo_float *) particle.attribute_array (it, ia_z,  ib);
+      	  vz = (enzo_float *) particle.attribute_array (it, ia_vz, ib);
+      	  az = (enzo_float *) particle.attribute_array (it, ia_az, ib);
         }
 
-        int np = particle.num_particles(it,ib);
+        const int np = particle.num_particles(it,ib);
 
         if (rank >= 1) {
 
-	  for (int ip=0; ip<np; ip++) {
+	        for (int ip=0; ip<np; ip++) {
 
-	    int ipdv = ip*dv;
-	    int ipdp = ip*dp;
-	    int ipda = ip*da;
+	          const int ipdv = ip*dv;
+	          const int ipdp = ip*dp;
+	          const int ipda = ip*da;
 
-#ifdef DEBUG_UPDATE    
-	    v3sum[0]+=std::abs(vx[ipdv]);
-	    a3sum[0]+=std::abs(ax[ipda]);
-	    v3sum2[0]+=vx[ipdv]*vx[ipdv];
-	    a3sum2[0]+=ax[ipda]*ax[ipda];
-	    CkPrintf ("DEBUG_UPDATE x %g v %g a %g\n",x[ipdp],vx[ipdv],ax[ipda]);
-#endif	  
-	    vx[ipdv] = cvv*vx[ipdv] + cva*ax[ipda];
-	    x [ipdp] += cp*vx[ipdv];
-	    vx[ipdv] = cvv*vx[ipdv] + cva*ax[ipda];
+#ifdef DEBUG_UPDATE
+      	    v3sum[0]+=std::abs(vx[ipdv]);
+      	    a3sum[0]+=std::abs(ax[ipda]);
+      	    v3sum2[0]+=vx[ipdv]*vx[ipdv];
+      	    a3sum2[0]+=ax[ipda]*ax[ipda];
+      	    CkPrintf ("DEBUG_UPDATE x %g v %g a %g\n",x[ipdp],vx[ipdv],ax[ipda]);
+#endif
+      	    vx[ipdv] = cvv*vx[ipdv] + cva*ax[ipda];
+      	    x [ipdp] += cp*vx[ipdv];
+      	    vx[ipdv] = cvv*vx[ipdv] + cva*ax[ipda];
 
-	  }
+	        } // ip
         }
+
         if (rank >= 2) {
 
-	  for (int ip=0; ip<np; ip++) {
+	         for (int ip=0; ip<np; ip++) {
 
-	    int ipdv = ip*dv;
-	    int ipdp = ip*dp;
-	    int ipda = ip*da;
+        	   const int ipdv = ip*dv;
+        	   const int ipdp = ip*dp;
+        	   const int ipda = ip*da;
 
-#ifdef DEBUG_UPDATE    
-	    v3sum[1]+=std::abs(vy[ipdv]);
-	    a3sum[1]+=std::abs(ay[ipda]);
-	    v3sum2[1]+=vy[ipdv]*vy[ipdv];
-	    a3sum2[1]+=ay[ipda]*ay[ipda];
-#endif	  
-	    vy[ipdv] = cvv*vy[ipdv] + cva*ay[ipda];
-	    y [ipdp] += cp*vy[ipdv];
-	    vy[ipdv] = cvv*vy[ipdv] + cva*ay[ipda];
+#ifdef DEBUG_UPDATE
+      	     v3sum[1]+=std::abs(vy[ipdv]);
+      	     a3sum[1]+=std::abs(ay[ipda]);
+      	     v3sum2[1]+=vy[ipdv]*vy[ipdv];
+      	     a3sum2[1]+=ay[ipda]*ay[ipda];
+#endif
+             vy[ipdv] = cvv*vy[ipdv] + cva*ay[ipda];
+             y [ipdp] += cp*vy[ipdv];
+             vy[ipdv] = cvv*vy[ipdv] + cva*ay[ipda];
 
-	  }
-	
+	         } // ip
         }
+
         if (rank >= 3) {
 
-	  for (int ip=0; ip<np; ip++) {
+	        for (int ip=0; ip<np; ip++) {
 
-	    int ipdv = ip*dv;
-	    int ipdp = ip*dp;
-	    int ipda = ip*da;
+	          const int ipdv = ip*dv;
+	          const int ipdp = ip*dp;
+	          const int ipda = ip*da;
 
-#ifdef DEBUG_UPDATE    
-	    v3sum[2]+=std::abs(vz[ipdv]);
-	    a3sum[2]+=std::abs(az[ipda]);
-	    v3sum2[2]+=vz[ipdv]*vz[ipdv];
-	    a3sum2[2]+=az[ipda]*az[ipda];
-#endif	  
+#ifdef DEBUG_UPDATE
+      	    v3sum[2]+=std::abs(vz[ipdv]);
+      	    a3sum[2]+=std::abs(az[ipda]);
+      	    v3sum2[2]+=vz[ipdv]*vz[ipdv];
+      	    a3sum2[2]+=az[ipda]*az[ipda];
+#endif
 
-	    vz[ipdv] = cvv*vz[ipdv] + cva*az[ipda];
-	    z [ipdp] += cp*vz[ipdv];
-	    vz[ipdv] = cvv*vz[ipdv] + cva*az[ipda];
+      	    vz[ipdv] = cvv*vz[ipdv] + cva*az[ipda];
+      	    z [ipdp] += cp*vz[ipdv];
+      	    vz[ipdv] = cvv*vz[ipdv] + cva*az[ipda];
 
-	  }
-        }
-      }
+	        } // ip
+        } // rank 3
+      } // ib loop
     } // end loop over particle types
-    
-#ifdef DEBUG_UPDATE    
+
+#ifdef DEBUG_UPDATE
     CkPrintf ("DEBUG_UPDATE asum %g %g %g vsum %g %g %g\n",
 	      a3sum[0],a3sum[1],a3sum[2],
 	      v3sum[0],v3sum[1],v3sum[2]);
     CkPrintf ("DEBUG_UPDATE asum2 %g %g %g vsum2 %g %g %g\n",
 	      a3sum2[0],a3sum2[1],a3sum2[2],
 	      v3sum2[0],v3sum2[1],v3sum2[2]);
-#endif    
+#endif
   }
 
-  block->compute_done(); 
-  
+  block->compute_done();
+
 }
 
 //----------------------------------------------------------------------
@@ -278,13 +278,15 @@ double EnzoMethodPmUpdate::timestep ( Block * block ) const throw()
 
   double dt = std::numeric_limits<double>::max();
 
-  Particle particle = block->data()->particle();
-  
-  if (block->is_leaf() && particle.type_exists("dark")) {
+  ParticleDescr * particle_descr = cello::particle_descr();
+  Grouping * particle_groups = particle_descr->groups();
+
+  const int num_mass = particle_groups->size("has_mass");
+
+  if (block->is_leaf() && num_mass > 0) {
 
     Particle particle = block->data()->particle();
-    ParticleDescr * particle_descr = cello::particle_descr();
-    Grouping * particle_groups = particle_descr->groups();
+
     Field    field    = block->data()->field();
 
     double xm,ym,zm;
@@ -298,10 +300,10 @@ double EnzoMethodPmUpdate::timestep ( Block * block ) const throw()
     double hx = (xp-xm)/nx;
     double hy = (yp-ym)/ny;
     double hz = (zp-zm)/nz;
-    
+
     // Adjust for expansion terms if any
     EnzoPhysicsCosmology * cosmology = enzo::cosmology();
-    
+
     if (cosmology) {
       enzo_float cosmo_a=1.0,cosmo_dadt=0.0;
       double time = block->time();
@@ -312,79 +314,76 @@ double EnzoMethodPmUpdate::timestep ( Block * block ) const throw()
       hz *= cosmo_a;
     }
 
-
-    int num_mass = particle_groups->size("has_mass");
-
     for (int ipt = 0; ipt < num_mass; ipt++){
 
       std::string particle_type = particle_groups->item("has_mass",ipt);
-      int it = particle.type_index (particle_type);
-      int nb = particle.num_batches (it);
+      const int it = particle.type_index (particle_type);
+      const int nb = particle.num_batches (it);
 
-      int ia_vx = particle.attribute_index (it, "vx");
-      int ia_vy = particle.attribute_index (it, "vy");
-      int ia_vz = particle.attribute_index (it, "vz");
+      const int ia_vx = particle.attribute_index (it, "vx");
+      const int ia_vy = particle.attribute_index (it, "vy");
+      const int ia_vz = particle.attribute_index (it, "vz");
 
-      int ia_ax = particle.attribute_index (it, "ax");
-      int ia_ay = particle.attribute_index (it, "ay");
-      int ia_az = particle.attribute_index (it, "az");
+      const int ia_ax = particle.attribute_index (it, "ax");
+      const int ia_ay = particle.attribute_index (it, "ay");
+      const int ia_az = particle.attribute_index (it, "az");
 
-      int dv = particle.stride(it, ia_vx);
-      int da = particle.stride(it, ia_ax);
+      const int dv = particle.stride(it, ia_vx);
+      const int da = particle.stride(it, ia_ax);
 
 
       for (int ib=0; ib<nb; ib++) {
-        int np = particle.num_particles(it,ib);
+        const int np = particle.num_particles(it,ib);
 
         if (rank >= 1) {
-	  enzo_float * vx = (enzo_float *) 
-	    particle.attribute_array (it, ia_vx, ib); 
-	  enzo_float * ax = (enzo_float *) 
-	    particle.attribute_array (it, ia_ax, ib); 
-	  for (int ip=0; ip<np; ip++) {
-	    double v = fabs(vx[ip*dv]);
-	    double a = fabs(ax[ip*da]);
-	    double dt_v = hx /MAX(v,1e-6);
-	    double dt_a = sqrt(2.0*hx/MAX(a,1e-6));
-	    dt = MIN(dt,dt_v);
-	    dt = MIN(dt,dt_a);
-	  }
-        }
+	        enzo_float * vx = (enzo_float *)
+	          particle.attribute_array (it, ia_vx, ib);
+	        enzo_float * ax = (enzo_float *)
+	          particle.attribute_array (it, ia_ax, ib);
+	        for (int ip=0; ip<np; ip++) {
+      	    double v = fabs(vx[ip*dv]);
+      	    double a = fabs(ax[ip*da]);
+      	    double dt_v = hx /MAX(v,1e-6);
+      	    double dt_a = sqrt(2.0*hx/MAX(a,1e-6));
+      	    dt = MIN(dt,dt_v);
+      	    dt = MIN(dt,dt_a);
+	        } // ip
+        } // rank 1
 
         if (rank >= 2) {
-	  enzo_float * vy = (enzo_float *) 
-	    particle.attribute_array (it, ia_vy, ib); 
-	  enzo_float * ay = (enzo_float *) 
-	    particle.attribute_array (it, ia_ay, ib); 
-	  for (int ip=0; ip<np; ip++) {
-	    double v = fabs(vy[ip*dv]);
-  	    double a = fabs(ay[ip*da]);
-	    double dt_v = hy /MAX(v,1e-6);
-	    double dt_a = sqrt(2.0*hy/MAX(a,1e-6));
-	    dt = MIN(dt,dt_v);
-	    dt = MIN(dt,dt_a);
-	  }
-        }
+      	  enzo_float * vy = (enzo_float *)
+      	    particle.attribute_array (it, ia_vy, ib);
+      	  enzo_float * ay = (enzo_float *)
+      	    particle.attribute_array (it, ia_ay, ib);
+      	  for (int ip=0; ip<np; ip++) {
+      	    double v = fabs(vy[ip*dv]);
+        	  double a = fabs(ay[ip*da]);
+      	    double dt_v = hy /MAX(v,1e-6);
+      	    double dt_a = sqrt(2.0*hy/MAX(a,1e-6));
+      	    dt = MIN(dt,dt_v);
+      	    dt = MIN(dt,dt_a);
+  	      } // ip
+        } // rank 2
 
         if (rank >= 3) {
-	  enzo_float * vz = (enzo_float *) 
-	    particle.attribute_array (it, ia_vz, ib); 
-	  enzo_float * az = (enzo_float *) 
-	    particle.attribute_array (it, ia_az, ib); 
-	  for (int ip=0; ip<np; ip++) {
-	    double v = fabs(vz[ip*dv]);
-	    double a = fabs(az[ip*da]);
-	    double dt_v = hz/MAX(v,1e-6);
-	    double dt_a = sqrt(2.0*hz/MAX(a,1e-6));
-	    dt = MIN(dt,dt_v);
-	    dt = MIN(dt,dt_a);
-	  }
-        }
+      	  enzo_float * vz = (enzo_float *)
+      	    particle.attribute_array (it, ia_vz, ib);
+      	  enzo_float * az = (enzo_float *)
+      	    particle.attribute_array (it, ia_az, ib);
+      	  for (int ip=0; ip<np; ip++) {
+      	    double v = fabs(vz[ip*dv]);
+      	    double a = fabs(az[ip*da]);
+      	    double dt_v = hz/MAX(v,1e-6);
+      	    double dt_a = sqrt(2.0*hz/MAX(a,1e-6));
+      	    dt = MIN(dt,dt_v);
+      	    dt = MIN(dt,dt_a);
+      	  } // ip
+        } // rank 3
 
-      }
+      } // ib
     } // end loop over particle types
-  }
-  
+  } // if leaf
+
   dt = MIN(dt,max_dt_);
   return dt;
 }
