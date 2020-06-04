@@ -13,29 +13,34 @@
 
 InitialValue::InitialValue
 (Parameters * parameters,
- int cycle, double time) throw ()
-  : Initial (cycle, time),
-    parameters_(parameters)
-{
-  parameters_->group_set(0,"Initial");
-  parameters_->group_set(1,"value");
-}
+ int cycle, double time) throw()
+    : Initial(cycle, time),
+      parameters_(parameters),
+      num_fields_(cello::field_descr()->field_count()),
+      initialized_values_(false),
+      values_(NULL)
+{ }
 
 //----------------------------------------------------------------------
 
 void InitialValue::pup (PUP::er &p)
 {
   // NOTE: update whenever attributes change
-
   TRACEPUP;
-
   Initial::pup(p);
 
   bool up = p.isUnpacking();
-
-  // I'm not clear why the following does not create some kind of memory leak
   if (up) parameters_ = new Parameters;
   p | *parameters_;
+  p | num_fields_;
+
+  // The Value class cannot currently be pupped. The values_ attribute also
+  // can't be initialized while unpacking because it depends on field_descr
+  // which gets unpacked afterwards
+  if (up) {
+    values_ = NULL;
+    initialized_values_ = false;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -43,9 +48,11 @@ void InitialValue::pup (PUP::er &p)
 void InitialValue::enforce_block ( Block * block,
 				   const Hierarchy  * hierarchy ) throw()
 {
+  // make sure values_ is initialized
+  initialize_values_();
 
   Initial::enforce_block(block,hierarchy);
-  
+
   // Initialize Fields according to parameters
 
   ASSERT("InitialValue::enforce_block",
@@ -77,72 +84,68 @@ void InitialValue::enforce_block ( Block * block,
        index_field++) {
     
     std::string field_name = field_descr->field_name(index_field);
-
-    // If Initial:<field_name>:value is a list, try parsing it
-
-    // parameter: Initial : <field> : value
-
     parameter_type parameter_type = parameters_->type(field_name);
 
-    if (parameter_type == parameter_float) {
+    if ((index_field>=num_fields_) && (parameter_type != parameter_unknown)){
+      // It is possiblefor a permanent field to be initialized after
+      // construction of InitialValue. An error will be raised if this
+      // happens and an InitialValue expression was specified
+      // notifying the user to include such fields in the input file
+      ERROR1("InitialValue::enforce_block",
+	     ("Field %s had a specified initial value but the field was not "
+	      "declared in the input file."), field_name.c_str());
 
-      field_data->clear(field_descr,parameters_->value_float(field_name,0.0), 
-			 index_field);
+    } else if (index_field < num_fields_) {
 
-    } else if (parameter_type == parameter_list) {
+      if (parameter_type == parameter_float) {
+	field_data->clear(field_descr,
+			  parameters_->value_float(field_name,0.0), 
+			  index_field);
+      } else if (parameter_type != parameter_unknown){
+	int cx,cy,cz;
+	field.centering(index_field, &cx,&cy,&cz);
 
-      Value value(parameters_, field_name);
+	if (val_array == NULL){
+	  xc = new double [nx+2*gx];
+	  yc = new double [ny+2*gy];
+	  zc = new double [nz+2*gz];
+	  data->field_cells (xc, yc, zc, gx, gy, gz);
 
-      int cx,cy,cz;
-      field.centering(index_field, &cx,&cy,&cz);
+	  // set val_array as array of 0s big enough for corner centered fields
+	  val_array = new double[(nx+2*gx+1)*(ny+2*gy+1)*(nz+2*gz+1)]();
+	}
 
-      if (val_array == NULL){
-	xc = new double [nx+2*gx];
-	yc = new double [ny+2*gy];
-	zc = new double [nz+2*gx];
-	data->field_cells (xc, yc, zc, gx, gy, gz);
+	if (xf == NULL && (cx!=0 || cy!=0 ||cz != 0) ){
+	  xf = new double [nx+2*gx+1];
+	  yf = new double [ny+2*gy+1];
+	  zf = new double [nz+2*gz+1];
+	  data->field_cell_faces (xf, yf, zf, gx, gy, gz);
+	}
 
-	// set val_array as array of 0s big enough for corner centered fields
-	val_array = new double[(nx+2*gx+1)*(ny+2*gy+1)*(nz+2*gy+1)]();
-      }
+	double *x = (cx == 0) ? xc : xf;
+	double *y = (cy == 0) ? yc : yf;
+	double *z = (cz == 0) ? zc : zf;
 
-      if (xf == NULL && (cx!=0 || cy!=0 ||cz != 0) ){
-	xf = new double [nx+2*gx+1];
-	yf = new double [ny+2*gy+1];
-	zf = new double [nz+2*gz+1]; 
-	data->field_cell_faces (xf, yf, zf, gx, gy, gz);
-      }
+	int ndx=nx+2*gx+cx;
+	int ndy=ny+2*gy+cy;
+	int ndz=nz+2*gz+cz;
 
-      double *x = (cx == 0) ? xc : xf;
-      double *y = (cy == 0) ? yc : yf;
-      double *z = (cz == 0) ? zc : zf;
+	// Following convention of earlier version: initializing values in a
+	// temporary array of doubles. Then the values are copied into the
+	// field and casted to the appropriate value.
 
-      int ndx=nx+2*gx+cx;
-      int ndy=ny+2*gy+cy;
-      int ndz=nz+2*gz+cz;
+	// The cast to double * in the following line is redundant
+	values_[index_field]->evaluate((double *)val_array, t,
+				       ndx,ndx,x, 
+				       ndy,ndy,y,
+				       ndz,ndz,z);
 
-      // Following convention of earlier version: initializing values in a
-      // temporary array of doubles. Then the values are copied into the field
-      // and casted to the appropriate value.
-
-      // The cast to double * in the following line is redundant
-      value.evaluate((double *)val_array, t,
-		     ndx,ndx,x, 
-		     ndy,ndy,y,
-		     ndz,ndz,z);
-
-      copy_values_(field_data,val_array,index_field,ndx,ndy,ndz);
-
-    } else if (parameter_type == parameter_unknown) {
-      if (block->index().is_root()) {
+	copy_values_(field_data,val_array,index_field,ndx,ndy,ndz);
+      } else if (block->index().is_root()) {
 	WARNING1("InitialValue::enforce_block",  
 		 "Uninitialized field %s",
 		 field_name.c_str());
       }
-    } else {
-      ERROR2("InitialValue::enforce_block",
-	     "Illegal parameter type %s when initializing field %s",
-	     parameter_type_name[parameter_type],field_name.c_str());
     }
   }
   // Deallocate arrays if needed
@@ -226,4 +229,33 @@ void InitialValue::copy_precision_
       }
     }
   }
+}
+
+//----------------------------------------------------------------------
+
+void InitialValue::initialize_values_()
+{
+
+  // skip, if values_ has already been initialized
+  if (initialized_values_){return;}
+
+  parameters_->group_set(0,"Initial");
+  parameters_->group_set(1,"value");
+
+  values_ = new Value*[num_fields_];
+
+  // Initialize Value objects
+  for (int index_field = 0; index_field < num_fields_; index_field++) {
+    std::string field_name = cello::field_descr()->field_name(index_field);
+    parameter_type parameter_type = parameters_->type(field_name);
+
+    if ((parameter_type != parameter_unknown) &&
+	(parameter_type != parameter_float)){
+      values_[index_field] = new Value(parameters_, field_name);
+    } else {
+      values_[index_field] = NULL;
+    }
+  }
+
+  initialized_values_ = true;
 }
