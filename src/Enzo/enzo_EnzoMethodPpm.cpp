@@ -31,7 +31,7 @@ EnzoMethodPpm::EnzoMethodPpm ()
   			       enzo_sync_id_method_ppm);
 
   FieldDescr * field_descr = cello::field_descr();
-  
+
   refresh(ir)->add_field(field_descr->field_id("density"));
   refresh(ir)->add_field(field_descr->field_id("velocity_x"));
   refresh(ir)->add_field(field_descr->field_id("velocity_y"));
@@ -41,6 +41,14 @@ EnzoMethodPpm::EnzoMethodPpm ()
   refresh(ir)->add_field(field_descr->field_id("acceleration_x"));
   refresh(ir)->add_field(field_descr->field_id("acceleration_y"));
   refresh(ir)->add_field(field_descr->field_id("acceleration_z"));
+
+  // add all colour fields to refresh
+  for (int i = 0; i < field_descr->field_count(); i++){
+    std::string name = field_descr->field_name(i);
+    if (field_descr->groups()->is_in(name,"colour")){
+      refresh(ir)->add_field(field_descr->field_id(name));
+    }
+  }
 
   // PPM parameters initialized in EnzoBlock::initialize()
 }
