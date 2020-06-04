@@ -168,8 +168,10 @@ EnzoConfig::EnzoConfig() throw ()
 EnzoConfig::~EnzoConfig() throw ()
 {
 #ifdef CONFIG_USE_GRACKLE
-  delete[] method_grackle_chemistry->grackle_data_file;
-  delete method_grackle_chemistry;
+  if (method_grackle_chemistry){
+    delete[] method_grackle_chemistry->grackle_data_file;
+    delete method_grackle_chemistry;
+  }
 #endif // CONFIG_USE_GRACKLE
 }
 
