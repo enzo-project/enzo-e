@@ -11,7 +11,7 @@
 
 //----------------------------------------------------------------------
 
-EnzoComputeAcceleration::EnzoComputeAcceleration 
+EnzoComputeAcceleration::EnzoComputeAcceleration
 (int         rank,
  int         order)
   : Compute(),
@@ -19,7 +19,7 @@ EnzoComputeAcceleration::EnzoComputeAcceleration
     order_(order)
 {
   FieldDescr * field_descr = cello::field_descr();
-  
+
   i_ax_ = (rank_ >= 1) ? field_descr->field_id("acceleration_x") : -1;
   i_ay_ = (rank_ >= 2) ? field_descr->field_id("acceleration_y") : -1;
   i_az_ = (rank_ >= 3) ? field_descr->field_id("acceleration_z") : -1;
@@ -80,7 +80,7 @@ void EnzoComputeAcceleration::compute_(Block * block)
   field.ghost_depth (0,&gx,&gy,&gz);
 
   int dx,dy,dz;
-  dx = 1; 
+  dx = 1;
   dy = mx;
   dz = mx*my;
 
@@ -107,9 +107,9 @@ void EnzoComputeAcceleration::compute_(Block * block)
   enzo_float cosmo_dadt = 0.0;
   double time = block->time();
   double dt   = block->dt();
-  
+
   if (cosmology) {
-   
+
     cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*dt);
 
     hx *= cosmo_a;
@@ -207,27 +207,35 @@ void EnzoComputeAcceleration::compute_(Block * block)
 
   Particle particle = block->data()->particle();
 
-  int it_dark = particle.type_index("dark");
+  ParticleDescr * particle_descr = cello::particle_descr();
+  Grouping * particle_groups = particle_descr->groups();
 
-  if (particle.num_particles(it_dark) > 0) {
+  const int num_mass = particle_groups->size("has_mass");
 
-    double dt_shift = 0.5*block->dt() / cosmo_a;
-    //  double dt_shift = 0.0;
-    if (rank_ >= 1) {
-      EnzoComputeCicInterp interp_x
-	("acceleration_x", "dark", "ax",dt_shift);
-      interp_x.compute(block);
+  for (int ipt = 0; ipt < num_mass; ipt++){
+
+    std::string particle_type = particle_groups->item("has_mass",ipt);
+    const int it = particle.type_index(particle_type);
+
+    if (particle.num_particles(it) > 0) {
+
+      double dt_shift = 0.5*block->dt() / cosmo_a;
+      //  double dt_shift = 0.0;
+      if (rank_ >= 1) {
+        EnzoComputeCicInterp interp_x
+        	("acceleration_x", particle_type, "ax",dt_shift);
+        interp_x.compute(block);
+      }
+      if (rank_ >= 2) {
+        EnzoComputeCicInterp interp_y
+          ("acceleration_y", particle_type, "ay",dt_shift);
+        interp_y.compute(block);
+      }
+      if (rank_ >= 3) {
+        EnzoComputeCicInterp interp_z
+          ("acceleration_z", particle_type, "az",dt_shift);
+        interp_z.compute(block);
+      }
     }
-    if (rank_ >= 2) {
-      EnzoComputeCicInterp interp_y
-	("acceleration_y", "dark", "ay",dt_shift);
-      interp_y.compute(block);
-    }
-    if (rank_ >= 3) {
-      EnzoComputeCicInterp interp_z
-	("acceleration_z", "dark", "az",dt_shift);
-      interp_z.compute(block);
-    }
-  }
+  } // partilce type loop
 }
-
