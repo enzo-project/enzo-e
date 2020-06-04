@@ -19,42 +19,133 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("FluxData");
 
-  Index index_block(3,1,2);
-  Index index_neighbor(3,2,2);
-  const int ax=4, ay=4, az=4;
-  Face face_1(index_block,index_neighbor,3,ax,ay,az);
-  Face face_2(index_neighbor,index_block,3,ax,ay,az);
+  const int ax=4, ay=4, az=4; // array size
+  const int tx=3, ty=1, tz=2; // tree in array
 
   int index_field = 3;
   const int nx = 16;
   const int ny = 16;
   const int nz = 16;
-  const double hx = 0.25;
-  const double hy = 1.00;
-  const double hz = 0.25;
   const double dt = 0.125;
-  auto face_fluxes_1 = new FaceFluxes (face_1,index_field,
-                                       nx,ny,nz,
-                                       hx,hy,hz,dt);
-  auto face_fluxes_2 = new FaceFluxes (face_2,index_field,
-                                       nx,ny,nz,
-                                       hx,hy,hz,dt);
+  int cx=1, cy=0, cz=1;
+  FaceFluxes * ff27_blk[3][3][3];
+  FaceFluxes * ff27_nbr[3][3][3];
 
-  FluxData * flux_data = new FluxData;
 
-  unit_assert (flux_data != nullptr);
+  unit_func ("deallocate_fluxes()");
+  FluxData flux_data;
+  for (int iz=-1; iz<=1; iz++) {
+    for (int iy=-1; iy<=1; iy++) {
+      for (int ix=-1; ix<=1; ix++) {
+        ff27_blk[ix+1][iy+1][iz+1] = nullptr;
+        ff27_nbr[ix+1][iy+1][iz+1] = nullptr;
+      }
+    }
+  }
+  // create face fluxes
+  const int level = 3;
+  const Face f011(0,1,1,1,0,0,cx,cy,cz);
+  const Face f211(2,1,1,1,0,0,cx,cy,cz);
+  const Face f101(1,0,1,0,1,0,cx,cy,cz);
+  const Face f121(1,2,1,0,1,0,cx,cy,cz);
+  const Face f110(1,1,0,0,0,1,cx,cy,cz);
+  const Face f112(1,1,2,0,0,1,cx,cy,cz);
 
-  flux_data->insert_fluxes(face_1,face_fluxes_1);
-  flux_data->insert_fluxes(face_2,face_fluxes_2);
+  unit_func("fluxes_blk");
 
-  //--------------------------------------------------
+  ff27_blk[0][1][1] = new FaceFluxes (f011,index_field,nx,ny,nz,level,dt);
+  ff27_blk[2][1][1] = new FaceFluxes (f211,index_field,nx,ny,nz,level,dt);
+  ff27_blk[1][0][1] = new FaceFluxes (f101,index_field,nx,ny,nz,level,dt);
+  ff27_blk[1][2][1] = new FaceFluxes (f121,index_field,nx,ny,nz,level,dt);
+  ff27_blk[1][1][0] = new FaceFluxes (f110,index_field,nx,ny,nz,level,dt);
+  ff27_blk[1][1][2] = new FaceFluxes (f112,index_field,nx,ny,nz,level,dt);
 
-  unit_func ("function()");
+  ff27_nbr[0][1][1] = new FaceFluxes (f011,index_field,nx,ny,nz,level,dt);
+  ff27_nbr[2][1][1] = new FaceFluxes (f211,index_field,nx,ny,nz,level,dt);
+  ff27_nbr[1][0][1] = new FaceFluxes (f101,index_field,nx,ny,nz,level,dt);
+  ff27_nbr[1][2][1] = new FaceFluxes (f121,index_field,nx,ny,nz,level,dt);
+  ff27_nbr[1][1][0] = new FaceFluxes (f110,index_field,nx,ny,nz,level,dt);
+  ff27_nbr[1][1][2] = new FaceFluxes (f112,index_field,nx,ny,nz,level,dt);
 
-  //--------------------------------------------------
+  unit_func ("FluxData::fluxes_block()");
 
-  delete face_fluxes_1;
-  delete face_fluxes_2;
+  unit_assert(flux_data.fluxes_block(-1,0,0) == nullptr);
+  unit_assert(flux_data.fluxes_block(+1,0,0) == nullptr);
+  unit_assert(flux_data.fluxes_block(0,-1,0) == nullptr);
+  unit_assert(flux_data.fluxes_block(0,+1,0) == nullptr);
+  unit_assert(flux_data.fluxes_block(0,0,-1) == nullptr);
+  unit_assert(flux_data.fluxes_block(0,0,+1) == nullptr);
+  
+  unit_assert(flux_data.fluxes_neighbor(-1,0,0) == nullptr);
+  unit_assert(flux_data.fluxes_neighbor(+1,0,0) == nullptr);
+  unit_assert(flux_data.fluxes_neighbor(0,-1,0) == nullptr);
+  unit_assert(flux_data.fluxes_neighbor(0,+1,0) == nullptr);
+  unit_assert(flux_data.fluxes_neighbor(0,0,-1) == nullptr);
+  unit_assert(flux_data.fluxes_neighbor(0,0,+1) == nullptr);
+
+  unit_func ("FluxData::set_fluxes_block()");
+  
+  flux_data.set_fluxes_block(ff27_blk[0][1][1],-1,0,0);
+  flux_data.set_fluxes_block(ff27_blk[2][1][1],+1,0,0);
+  flux_data.set_fluxes_block(ff27_blk[1][0][1],0,-1,0);
+  flux_data.set_fluxes_block(ff27_blk[1][2][1],0,+1,0);
+  flux_data.set_fluxes_block(ff27_blk[1][1][0],0,0,-1);
+  flux_data.set_fluxes_block(ff27_blk[1][1][2],0,0,+1);
+
+  unit_assert(flux_data.fluxes_block(-1,0,0) == ff27_blk[0][1][1]);
+  unit_assert(flux_data.fluxes_block(+1,0,0) == ff27_blk[2][1][1]);
+  unit_assert(flux_data.fluxes_block(0,-1,0) == ff27_blk[1][0][1]);
+  unit_assert(flux_data.fluxes_block(0,+1,0) == ff27_blk[1][2][1]);
+  unit_assert(flux_data.fluxes_block(0,0,-1) == ff27_blk[1][1][0]);
+  unit_assert(flux_data.fluxes_block(0,0,+1) == ff27_blk[1][1][2]);
+  
+  unit_func ("FluxData::set_fluxes_neighbor()");
+  
+  flux_data.set_fluxes_neighbor(ff27_nbr[0][1][1],-1,0,0);
+  flux_data.set_fluxes_neighbor(ff27_nbr[2][1][1],+1,0,0);
+  flux_data.set_fluxes_neighbor(ff27_nbr[1][0][1],0,-1,0);
+  flux_data.set_fluxes_neighbor(ff27_nbr[1][2][1],0,+1,0);
+  flux_data.set_fluxes_neighbor(ff27_nbr[1][1][0],0,0,-1);
+  flux_data.set_fluxes_neighbor(ff27_nbr[1][1][2],0,0,+1);
+
+  unit_assert(flux_data.fluxes_neighbor(-1,0,0) == ff27_nbr[0][1][1]);
+  unit_assert(flux_data.fluxes_neighbor(+1,0,0) == ff27_nbr[2][1][1]);
+  unit_assert(flux_data.fluxes_neighbor(0,-1,0) == ff27_nbr[1][0][1]);
+  unit_assert(flux_data.fluxes_neighbor(0,+1,0) == ff27_nbr[1][2][1]);
+  unit_assert(flux_data.fluxes_neighbor(0,0,-1) == ff27_nbr[1][1][0]);
+  unit_assert(flux_data.fluxes_neighbor(0,0,+1) == ff27_nbr[1][1][2]);
+
+  unit_func ("FluxData::delete_fluxes_block()");
+
+  flux_data.delete_fluxes_block (-1,0,0);
+  flux_data.delete_fluxes_block (+1,0,0);
+  flux_data.delete_fluxes_block (0,-1,0);
+  flux_data.delete_fluxes_block (0,+1,0);
+  flux_data.delete_fluxes_block (0,0,-1);
+  flux_data.delete_fluxes_block (0,0,+1);
+  
+  unit_assert(flux_data.fluxes_block(-1,0,0) == nullptr);
+  unit_assert(flux_data.fluxes_block(+1,0,0) == nullptr);
+  unit_assert(flux_data.fluxes_block(0,-1,0) == nullptr);
+  unit_assert(flux_data.fluxes_block(0,+1,0) == nullptr);
+  unit_assert(flux_data.fluxes_block(0,0,-1) == nullptr);
+  unit_assert(flux_data.fluxes_block(0,0,+1) == nullptr);
+  
+  unit_func ("FluxData::delete_fluxes_neighbor()");
+
+  flux_data.delete_fluxes_neighbor (-1,0,0);
+  flux_data.delete_fluxes_neighbor (+1,0,0);
+  flux_data.delete_fluxes_neighbor (0,-1,0);
+  flux_data.delete_fluxes_neighbor (0,+1,0);
+  flux_data.delete_fluxes_neighbor (0,0,-1);
+  flux_data.delete_fluxes_neighbor (0,0,+1);
+  
+  unit_assert(flux_data.fluxes_neighbor(-1,0,0) == nullptr);
+  unit_assert(flux_data.fluxes_neighbor(+1,0,0) == nullptr);
+  unit_assert(flux_data.fluxes_neighbor(0,-1,0) == nullptr);
+  unit_assert(flux_data.fluxes_neighbor(0,+1,0) == nullptr);
+  unit_assert(flux_data.fluxes_neighbor(0,0,-1) == nullptr);
+  unit_assert(flux_data.fluxes_neighbor(0,0,+1) == nullptr);
 
   unit_finalize();
 

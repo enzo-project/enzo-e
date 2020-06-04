@@ -22,15 +22,23 @@ a {
  color: black;
 }
 
-hr {
+ hr.section {
     border: 0;
-    height: 10px;
+    height: 4px;
+    background-color: #000;
+ }
+ hr.test {
+    border: 0;
+    height: 4px;
+    background-color: #000;
+ }
+ /*
     background-image: -webkit-linear-gradient(left, rgba(0,0,0,0), rgba(0,0,0,0.75), rgba(0,0,0,0));
     background-image: -moz-linear-gradient(left, rgba(0,0,0,0), rgba(0,0,0,0.75), rgba(0,0,0,0));
     background-image: -ms-linear-gradient(left, rgba(0,0,0,0), rgba(0,0,0,0.75), rgba(0,0,0,0));
     background-image: -o-linear-gradient(left, rgba(0,0,0,0), rgba(0,0,0,0.75), rgba(0,0,0,0));
  }
-
+ */
 
 tr {
     background-color: #aaa;

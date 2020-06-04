@@ -135,7 +135,7 @@ int ParticleData::insert_particles
   } else {
     ib_last = nb - 1;
     ip_last = num_particles(particle_descr,it,ib_last);
-    if (ip_last % mb == 0) {
+    if (ip_last == mb) {
       ib_last++;
       ip_last = 0;
     }
@@ -834,6 +834,11 @@ char * ParticleData::save_data (ParticleDescr * particle_descr,
     }
   }
 
+  ASSERT2("ParticleData::save_data()",
+	  "Buffer has size %ld but expecting size %d",
+	  (pc-buffer),data_size(particle_descr),
+	  ((pc-buffer) == data_size(particle_descr)));
+  
   return pc;
 }
 
@@ -930,6 +935,10 @@ char * ParticleData::load_data (ParticleDescr * particle_descr,
     }
   }
 
+  ASSERT2("ParticleData::load_data()",
+	  "Buffer has size %ld but expecting size %d",
+	  (pc-buffer),data_size(particle_descr),
+	  ((pc-buffer) == data_size(particle_descr)));
   return pc;
 }
 

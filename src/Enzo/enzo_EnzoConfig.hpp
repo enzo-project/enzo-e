@@ -511,11 +511,11 @@ public: // attributes
   /// EnzoProlong
   std::string                interpolation_method;
 
-  /// EnzoMethodHeat
-  double                     method_heat_alpha;
-
   /// EnzoMethodCheckGravity
   std::string                method_check_gravity_particle_type;
+
+  /// EnzoMethodHeat
+  double                     method_heat_alpha;
 
   /// EnzoMethodHydro
   std::string                method_hydro_method;

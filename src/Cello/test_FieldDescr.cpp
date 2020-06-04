@@ -31,19 +31,19 @@ PARALLEL_MAIN_BEGIN
   //----------------------------------------------------------------------
 
   unit_class("FieldDescr");
-  FieldDescr * field_descr = 0;
+  FieldDescr * fd = 0;
   struct field_info_type info;
 
   unit_func ("FieldDescr");
-  field_descr = new FieldDescr;
-  unit_assert(field_descr != 0);
+  fd = new FieldDescr;
+  unit_assert(fd != 0);
   printf ("sizeof(FieldDescr) = %lud\n",sizeof(FieldDescr));
 
   unit_func("~FieldDescr");
-  delete field_descr;
+  delete fd;
   unit_assert(true);
 
-  field_descr = new FieldDescr;
+  fd = new FieldDescr;
 
   // Fields
 
@@ -51,66 +51,66 @@ PARALLEL_MAIN_BEGIN
 
   int id;
 
-  unit_assert(field_descr->field_count()==0);
+  unit_assert(fd->field_count()==0);
 
-  id = field_descr->insert_permanent("density");
+  id = fd->insert_permanent("density");
   unit_func("field_count");
-  unit_assert(field_descr->field_count()==1);
-  field_descr->insert_permanent("velocity_x");
+  unit_assert(fd->field_count()==1);
+  fd->insert_permanent("velocity_x");
   unit_func("field_count");
-  unit_assert(field_descr->field_count()==2);
-  field_descr->insert_permanent("velocity_y");
+  unit_assert(fd->field_count()==2);
+  fd->insert_permanent("velocity_y");
   unit_func("field_count");
-  unit_assert(field_descr->field_count()==3);
-  field_descr->insert_permanent("velocity_z");
+  unit_assert(fd->field_count()==3);
+  fd->insert_permanent("velocity_z");
   unit_func("field_count");
-  unit_assert(field_descr->field_count()==4);
-
-  unit_func("is_permanent");
-  id = field_descr->insert_permanent("total_energy");
-  unit_assert(field_descr->is_permanent(id));
-  unit_func("field_count");
-  unit_assert(field_descr->field_count()==5);
+  unit_assert(fd->field_count()==4);
 
   unit_func("is_permanent");
-  id = field_descr->insert_temporary("temporary_1");
-  unit_assert(! field_descr->is_permanent(id));
+  id = fd->insert_permanent("total_energy");
+  unit_assert(fd->is_permanent(id));
   unit_func("field_count");
-  unit_assert(field_descr->field_count()==6);
-  id = field_descr->insert_temporary("temporary_2");
-  unit_assert(! field_descr->is_permanent(id));
+  unit_assert(fd->field_count()==5);
+
+  unit_func("is_permanent");
+  id = fd->insert_temporary("temporary_1");
+  unit_assert(! fd->is_permanent(id));
   unit_func("field_count");
-  unit_assert(field_descr->field_count()==7);
+  unit_assert(fd->field_count()==6);
+  id = fd->insert_temporary("temporary_2");
+  unit_assert(! fd->is_permanent(id));
+  unit_func("field_count");
+  unit_assert(fd->field_count()==7);
 
   
 
 
   unit_func("field_id");
 
-  info.field_density      = field_descr->field_id("density");
-  info.field_velocity_x   = field_descr->field_id("velocity_x");
-  info.field_velocity_y   = field_descr->field_id("velocity_y");
-  info.field_velocity_z   = field_descr->field_id("velocity_z");
-  info.field_total_energy = field_descr->field_id("total_energy");
+  info.field_density      = fd->field_id("density");
+  info.field_velocity_x   = fd->field_id("velocity_x");
+  info.field_velocity_y   = fd->field_id("velocity_y");
+  info.field_velocity_z   = fd->field_id("velocity_z");
+  info.field_total_energy = fd->field_id("total_energy");
 
-  unit_assert(field_descr->field_id("density")      == info.field_density);
-  unit_assert(field_descr->field_id("velocity_x")   == info.field_velocity_x);
-  unit_assert(field_descr->field_id("velocity_y")   == info.field_velocity_y);
-  unit_assert(field_descr->field_id("velocity_z")   == info.field_velocity_z);
-  unit_assert(field_descr->field_id("total_energy") == info.field_total_energy);
+  unit_assert(fd->field_id("density")      == info.field_density);
+  unit_assert(fd->field_id("velocity_x")   == info.field_velocity_x);
+  unit_assert(fd->field_id("velocity_y")   == info.field_velocity_y);
+  unit_assert(fd->field_id("velocity_z")   == info.field_velocity_z);
+  unit_assert(fd->field_id("total_energy") == info.field_total_energy);
 
   unit_func("is_field");
 
-  unit_assert(field_descr->is_field("density"));
-  unit_assert(! field_descr->is_field("not_a_field"));
+  unit_assert(fd->is_field("density"));
+  unit_assert(! fd->is_field("not_a_field"));
 
   unit_func("field_name");
 
-  unit_assert(field_descr->field_name(info.field_density)      == "density");
-  unit_assert(field_descr->field_name(info.field_velocity_x)   == "velocity_x");
-  unit_assert(field_descr->field_name(info.field_velocity_y)   == "velocity_y");
-  unit_assert(field_descr->field_name(info.field_velocity_z)   == "velocity_z");
-  unit_assert(field_descr->field_name(info.field_total_energy) == "total_energy");
+  unit_assert(fd->field_name(info.field_density)      == "density");
+  unit_assert(fd->field_name(info.field_velocity_x)   == "velocity_x");
+  unit_assert(fd->field_name(info.field_velocity_y)   == "velocity_y");
+  unit_assert(fd->field_name(info.field_velocity_z)   == "velocity_z");
+  unit_assert(fd->field_name(info.field_total_energy) == "total_energy");
 
   //----------------------------------------------------------------------
   // Global attributes
@@ -118,21 +118,21 @@ PARALLEL_MAIN_BEGIN
 
   // (set and reset in case test value is a default)
 
-  field_descr->set_alignment(8);
-  field_descr->set_padding(64);
+  fd->set_alignment(8);
+  fd->set_padding(64);
   
   unit_func("alignment");
-  unit_assert(field_descr->alignment() == 8);
+  unit_assert(fd->alignment() == 8);
   unit_func("padding");
-  unit_assert(field_descr->padding() == 64);
+  unit_assert(fd->padding() == 64);
 
-  field_descr->set_alignment(4);
-  field_descr->set_padding(32);
+  fd->set_alignment(4);
+  fd->set_padding(32);
   
   unit_func("alignment");
-  unit_assert(field_descr->alignment() == 4);
+  unit_assert(fd->alignment() == 4);
   unit_func("padding");
-  unit_assert(field_descr->padding() == 32);
+  unit_assert(fd->padding() == 32);
   
   //----------------------------------------------------------------------
   // Field attributes
@@ -142,58 +142,58 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("precision");
 
-  field_descr->set_precision(info.field_density,    precision_single);
-  field_descr->set_precision(info.field_velocity_x, precision_double);
-  field_descr->set_precision(info.field_velocity_y, precision_double);
-  field_descr->set_precision(info.field_velocity_z, precision_double);
+  fd->set_precision(info.field_density,    precision_single);
+  fd->set_precision(info.field_velocity_x, precision_double);
+  fd->set_precision(info.field_velocity_y, precision_double);
+  fd->set_precision(info.field_velocity_z, precision_double);
 
-  unit_assert(field_descr->precision(info.field_density)      == precision_single);
-  unit_assert(field_descr->precision(info.field_velocity_x)   == precision_double);
-  unit_assert(field_descr->precision(info.field_velocity_y)   == precision_double);
-  unit_assert(field_descr->precision(info.field_velocity_z)   == precision_double);
-  unit_assert(field_descr->precision(info.field_total_energy) == default_precision);
+  unit_assert(fd->precision(info.field_density)      == precision_single);
+  unit_assert(fd->precision(info.field_velocity_x)   == precision_double);
+  unit_assert(fd->precision(info.field_velocity_y)   == precision_double);
+  unit_assert(fd->precision(info.field_velocity_z)   == precision_double);
+  unit_assert(fd->precision(info.field_total_energy) == default_precision);
   
 
   unit_func("bytes_per_element");
-  unit_assert(field_descr->bytes_per_element(info.field_density)==4);
+  unit_assert(fd->bytes_per_element(info.field_density)==4);
 
   // Centering
 
   unit_func("centering");
 
-  field_descr->set_centering(info.field_velocity_x, 1, 0, 0);
-  field_descr->set_centering(info.field_velocity_y, 0, 1, 0);
-  field_descr->set_centering(info.field_velocity_z, 0, 0, 1);
+  fd->set_centering(info.field_velocity_x, 1, 0, 0);
+  fd->set_centering(info.field_velocity_y, 0, 1, 0);
+  fd->set_centering(info.field_velocity_z, 0, 0, 1);
 
 
-  field_descr->centering(info.field_density, &info.cx, &info.cy, &info.cz);
+  fd->centering(info.field_density, &info.cx, &info.cy, &info.cz);
   unit_assert(info.cx==0 && info.cy==0 && info.cz==0);
 
-  field_descr->centering(info.field_velocity_x, &info.cx, &info.cy, &info.cz);
+  fd->centering(info.field_velocity_x, &info.cx, &info.cy, &info.cz);
   unit_assert(info.cx==1 && info.cy==0 && info.cz==0);
 
-  field_descr->centering(info.field_velocity_y, &info.cx, &info.cy, &info.cz);
+  fd->centering(info.field_velocity_y, &info.cx, &info.cy, &info.cz);
   unit_assert(info.cx==0 && info.cy==1 && info.cz==0);
 
-  field_descr->centering(info.field_velocity_z, &info.cx, &info.cy, &info.cz);
+  fd->centering(info.field_velocity_z, &info.cx, &info.cy, &info.cz);
   unit_assert(info.cx==0 && info.cy==0 && info.cz==1);
   
   // Ghost zone depth
 
   unit_func("ghosts");
 
-  field_descr->set_ghost_depth(info.field_density, 3, 3, 3);
-  field_descr->set_ghost_depth(info.field_velocity_x, 1, 0, 0);
-  field_descr->set_ghost_depth(info.field_velocity_y, 0, 1, 0);
-  field_descr->set_ghost_depth(info.field_velocity_z, 0, 0, 1);
+  fd->set_ghost_depth(info.field_density, 3, 3, 3);
+  fd->set_ghost_depth(info.field_velocity_x, 1, 0, 0);
+  fd->set_ghost_depth(info.field_velocity_y, 0, 1, 0);
+  fd->set_ghost_depth(info.field_velocity_z, 0, 0, 1);
 
-  field_descr->ghost_depth(info.field_density, &info.gx, &info.gy, &info.gz);
+  fd->ghost_depth(info.field_density, &info.gx, &info.gy, &info.gz);
   unit_assert(info.gx==3 && info.gy==3 && info.gz==3);
-  field_descr->ghost_depth(info.field_velocity_x, &info.gx, &info.gy, &info.gz);
+  fd->ghost_depth(info.field_velocity_x, &info.gx, &info.gy, &info.gz);
   unit_assert(info.gx==1 && info.gy==0 && info.gz==0);
-  field_descr->ghost_depth(info.field_velocity_y, &info.gx, &info.gy, &info.gz);
+  fd->ghost_depth(info.field_velocity_y, &info.gx, &info.gy, &info.gz);
   unit_assert(info.gx==0 && info.gy==1 && info.gz==0);
-  field_descr->ghost_depth(info.field_velocity_z, &info.gx, &info.gy, &info.gz);
+  fd->ghost_depth(info.field_velocity_z, &info.gx, &info.gy, &info.gz);
   unit_assert(info.gx==0 && info.gy==0 && info.gz==1);
 
 
@@ -202,130 +202,130 @@ PARALLEL_MAIN_BEGIN
   //======================================================================
 
   // Assign
-  FieldDescr field_descr_assign;
-  field_descr_assign = *field_descr;
+  FieldDescr fd_assign;
+  fd_assign = *fd;
 
   // Copy
-  FieldDescr field_descr_copy (*field_descr);
+  FieldDescr fd_copy (*fd);
 
   // Delete original to check for deep copy
 
   unit_func("~FieldDescr");
-  delete field_descr;
-  field_descr = 0;
+  delete fd;
+  fd = 0;
 
   unit_func("assign:field_count");
-  unit_assert(field_descr_assign.field_count()==7);
+  unit_assert(fd_assign.field_count()==7);
 
   unit_func("assign:field_id");
-  unit_assert(field_descr_assign.field_id("density")      == info.field_density);
-  unit_assert(field_descr_assign.field_id("velocity_x")   == info.field_velocity_x);
-  unit_assert(field_descr_assign.field_id("velocity_y")   == info.field_velocity_y);
-  unit_assert(field_descr_assign.field_id("velocity_z")   == info.field_velocity_z);
-  unit_assert(field_descr_assign.field_id("total_energy") == info.field_total_energy);
+  unit_assert(fd_assign.field_id("density")      == info.field_density);
+  unit_assert(fd_assign.field_id("velocity_x")   == info.field_velocity_x);
+  unit_assert(fd_assign.field_id("velocity_y")   == info.field_velocity_y);
+  unit_assert(fd_assign.field_id("velocity_z")   == info.field_velocity_z);
+  unit_assert(fd_assign.field_id("total_energy") == info.field_total_energy);
 
   unit_func("assign:field_name");
-  unit_assert(field_descr_assign.field_name(info.field_density)      == "density");
-  unit_assert(field_descr_assign.field_name(info.field_velocity_x)   == "velocity_x");
-  unit_assert(field_descr_assign.field_name(info.field_velocity_y)   == "velocity_y");
-  unit_assert(field_descr_assign.field_name(info.field_velocity_z)   == "velocity_z");
-  unit_assert(field_descr_assign.field_name(info.field_total_energy) == "total_energy");
+  unit_assert(fd_assign.field_name(info.field_density)      == "density");
+  unit_assert(fd_assign.field_name(info.field_velocity_x)   == "velocity_x");
+  unit_assert(fd_assign.field_name(info.field_velocity_y)   == "velocity_y");
+  unit_assert(fd_assign.field_name(info.field_velocity_z)   == "velocity_z");
+  unit_assert(fd_assign.field_name(info.field_total_energy) == "total_energy");
 
 
   unit_func("assign:alignment");
-  unit_assert(field_descr_assign.alignment() == 4);
+  unit_assert(fd_assign.alignment() == 4);
   unit_func("assign:padding");
-  unit_assert(field_descr_assign.padding() == 32);
+  unit_assert(fd_assign.padding() == 32);
 
   unit_func("assign:precision");
 
-  unit_assert(field_descr_assign.precision(info.field_density)      == precision_single);
-  unit_assert(field_descr_assign.precision(info.field_velocity_x)   == precision_double);
-  unit_assert(field_descr_assign.precision(info.field_velocity_y)   == precision_double);
-  unit_assert(field_descr_assign.precision(info.field_velocity_z)   == precision_double);
-  unit_assert(field_descr_assign.precision(info.field_total_energy) == default_precision);
+  unit_assert(fd_assign.precision(info.field_density)      == precision_single);
+  unit_assert(fd_assign.precision(info.field_velocity_x)   == precision_double);
+  unit_assert(fd_assign.precision(info.field_velocity_y)   == precision_double);
+  unit_assert(fd_assign.precision(info.field_velocity_z)   == precision_double);
+  unit_assert(fd_assign.precision(info.field_total_energy) == default_precision);
 
   unit_func("assign:centering");
-  field_descr_assign.centering(info.field_density, &info.cx, &info.cy, &info.cz);
+  fd_assign.centering(info.field_density, &info.cx, &info.cy, &info.cz);
   unit_assert(info.cx==0 && info.cy==0 && info.cz==0);
 
-  field_descr_assign.centering(info.field_velocity_x, &info.cx, &info.cy, &info.cz);
+  fd_assign.centering(info.field_velocity_x, &info.cx, &info.cy, &info.cz);
   unit_assert(info.cx==1 && info.cy==0 && info.cz==0);
 
-  field_descr_assign.centering(info.field_velocity_y, &info.cx, &info.cy, &info.cz);
+  fd_assign.centering(info.field_velocity_y, &info.cx, &info.cy, &info.cz);
   unit_assert(info.cx==0 && info.cy==1 && info.cz==0);
 
-  field_descr_assign.centering(info.field_velocity_z, &info.cx, &info.cy, &info.cz);
+  fd_assign.centering(info.field_velocity_z, &info.cx, &info.cy, &info.cz);
   unit_assert(info.cx==0 && info.cy==0 && info.cz==1);
 
   unit_func("assign:ghosts");
 
-  field_descr_assign.ghost_depth(info.field_density, &info.gx, &info.gy, &info.gz);
+  fd_assign.ghost_depth(info.field_density, &info.gx, &info.gy, &info.gz);
   unit_assert(info.gx==3 && info.gy==3 && info.gz==3);
-  field_descr_assign.ghost_depth(info.field_velocity_x, &info.gx, &info.gy, &info.gz);
+  fd_assign.ghost_depth(info.field_velocity_x, &info.gx, &info.gy, &info.gz);
   unit_assert(info.gx==1 && info.gy==0 && info.gz==0);
-  field_descr_assign.ghost_depth(info.field_velocity_y, &info.gx, &info.gy, &info.gz);
+  fd_assign.ghost_depth(info.field_velocity_y, &info.gx, &info.gy, &info.gz);
   unit_assert(info.gx==0 && info.gy==1 && info.gz==0);
-  field_descr_assign.ghost_depth(info.field_velocity_z, &info.gx, &info.gy, &info.gz);
+  fd_assign.ghost_depth(info.field_velocity_z, &info.gx, &info.gy, &info.gz);
   unit_assert(info.gx==0 && info.gy==0 && info.gz==1);
 
 
   unit_func("copy:FieldDescr(FieldDescr)");
-  unit_assert(field_descr_copy.field_count()==7);
-  printf ("%s:%d num_permanent = %d",__FILE__,__LINE__,field_descr_copy.num_permanent());
-  unit_assert(field_descr_copy.num_permanent()==5);
+  unit_assert(fd_copy.field_count()==7);
+  printf ("%s:%d num_permanent = %d",__FILE__,__LINE__,fd_copy.num_permanent());
+  unit_assert(fd_copy.num_permanent()==5);
 
   unit_func("copy:field_id");
-  unit_assert(field_descr_copy.field_id("density")      == info.field_density);
-  unit_assert(field_descr_copy.field_id("velocity_x")   == info.field_velocity_x);
-  unit_assert(field_descr_copy.field_id("velocity_y")   == info.field_velocity_y);
-  unit_assert(field_descr_copy.field_id("velocity_z")   == info.field_velocity_z);
-  unit_assert(field_descr_copy.field_id("total_energy") == info.field_total_energy);
+  unit_assert(fd_copy.field_id("density")      == info.field_density);
+  unit_assert(fd_copy.field_id("velocity_x")   == info.field_velocity_x);
+  unit_assert(fd_copy.field_id("velocity_y")   == info.field_velocity_y);
+  unit_assert(fd_copy.field_id("velocity_z")   == info.field_velocity_z);
+  unit_assert(fd_copy.field_id("total_energy") == info.field_total_energy);
 
   unit_func("copy:field_name");
-  unit_assert(field_descr_copy.field_name(info.field_density)      == "density");
-  unit_assert(field_descr_copy.field_name(info.field_velocity_x)   == "velocity_x");
-  unit_assert(field_descr_copy.field_name(info.field_velocity_y)   == "velocity_y");
-  unit_assert(field_descr_copy.field_name(info.field_velocity_z)   == "velocity_z");
-  unit_assert(field_descr_copy.field_name(info.field_total_energy) == "total_energy");
+  unit_assert(fd_copy.field_name(info.field_density)      == "density");
+  unit_assert(fd_copy.field_name(info.field_velocity_x)   == "velocity_x");
+  unit_assert(fd_copy.field_name(info.field_velocity_y)   == "velocity_y");
+  unit_assert(fd_copy.field_name(info.field_velocity_z)   == "velocity_z");
+  unit_assert(fd_copy.field_name(info.field_total_energy) == "total_energy");
 
 
   unit_func("copy:alignment");
-  unit_assert(field_descr_copy.alignment() == 4);
+  unit_assert(fd_copy.alignment() == 4);
   unit_func("copy:padding");
-  unit_assert(field_descr_copy.padding() == 32);
+  unit_assert(fd_copy.padding() == 32);
 
   unit_func("copy:precision");
 
-  unit_assert(field_descr_copy.precision(info.field_density)      == precision_single);
-  unit_assert(field_descr_copy.precision(info.field_velocity_x)   == precision_double);
-  unit_assert(field_descr_copy.precision(info.field_velocity_y)   == precision_double);
-  unit_assert(field_descr_copy.precision(info.field_velocity_z)   == precision_double);
-  unit_assert(field_descr_copy.precision(info.field_total_energy) == default_precision);
+  unit_assert(fd_copy.precision(info.field_density)      == precision_single);
+  unit_assert(fd_copy.precision(info.field_velocity_x)   == precision_double);
+  unit_assert(fd_copy.precision(info.field_velocity_y)   == precision_double);
+  unit_assert(fd_copy.precision(info.field_velocity_z)   == precision_double);
+  unit_assert(fd_copy.precision(info.field_total_energy) == default_precision);
 
   unit_func("copy:centering");
 
-  field_descr_copy.centering(info.field_density, &info.cx, &info.cy, &info.cz);
+  fd_copy.centering(info.field_density, &info.cx, &info.cy, &info.cz);
   unit_assert(info.cx==0 && info.cy==0 && info.cz==0);
 
-  field_descr_copy.centering(info.field_velocity_x, &info.cx, &info.cy, &info.cz);
+  fd_copy.centering(info.field_velocity_x, &info.cx, &info.cy, &info.cz);
   unit_assert(info.cx==1 && info.cy==0 && info.cz==0);
 
-  field_descr_copy.centering(info.field_velocity_y, &info.cx, &info.cy, &info.cz);
+  fd_copy.centering(info.field_velocity_y, &info.cx, &info.cy, &info.cz);
   unit_assert(info.cx==0 && info.cy==1 && info.cz==0);
 
-  field_descr_copy.centering(info.field_velocity_z, &info.cx, &info.cy, &info.cz);
+  fd_copy.centering(info.field_velocity_z, &info.cx, &info.cy, &info.cz);
   unit_assert(info.cx==0 && info.cy==0 && info.cz==1);
 
   unit_func("copy:ghosts");
 
-  field_descr_copy.ghost_depth(info.field_density, &info.gx, &info.gy, &info.gz);
+  fd_copy.ghost_depth(info.field_density, &info.gx, &info.gy, &info.gz);
   unit_assert(info.gx==3 && info.gy==3 && info.gz==3);
-  field_descr_copy.ghost_depth(info.field_velocity_x, &info.gx, &info.gy, &info.gz);
+  fd_copy.ghost_depth(info.field_velocity_x, &info.gx, &info.gy, &info.gz);
   unit_assert(info.gx==1 && info.gy==0 && info.gz==0);
-  field_descr_copy.ghost_depth(info.field_velocity_y, &info.gx, &info.gy, &info.gz);
+  fd_copy.ghost_depth(info.field_velocity_y, &info.gx, &info.gy, &info.gz);
   unit_assert(info.gx==0 && info.gy==1 && info.gz==0);
-  field_descr_copy.ghost_depth(info.field_velocity_z, &info.gx, &info.gy, &info.gz);
+  fd_copy.ghost_depth(info.field_velocity_z, &info.gx, &info.gy, &info.gz);
   unit_assert(info.gx==0 && info.gy==0 && info.gz==1);
 
 
