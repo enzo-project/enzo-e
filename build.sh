@@ -275,6 +275,7 @@ fi
 if [ $target = "test" ] && [ "$CELLO_PREC" = "double" ]; then
     # the vl+ct tests should be consolidated with the rest of the tests
     echo ""
+    echo "--------------------"
     echo "Attempting to run VL+CT tests (only defined for double Precision)"
     ./test/run_vlct_test.sh
     result_code=$?

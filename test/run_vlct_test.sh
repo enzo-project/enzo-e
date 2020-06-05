@@ -33,6 +33,7 @@ if [[ ! -z "$PYTHON_VL_TEST_PREP" ]]; then
     eval "$PYTHON_VL_TEST_PREP"
 fi
 
+echo "Checking that the python installation roughly matches test requirements"
 # One last set of crude checks to make sure that environment is not obviously
 # unfit for running the tests
 USING_PY3=$(python -c "exec(\"import sys\nprint(int(sys.version_info.major==3))\")")
@@ -54,13 +55,13 @@ fi
 SERIAL_FAILED=0
 
 echo ""
-echo "Starting serial tests"
+echo "Executing serial tests"
 for i in ${!serialTests[@]}; do
     test_path="${testPrefix}/${serialTests[$i]}.py"
-    fname_test="${testPrefix}/${serialTests[$i]}.test-log"
+    fname_test="test/${serialTests[$i]}.test-log"
     echo ""
     echo "Beginning to run ${test_path}"
-    python ${test_path} > "$fname_test" 2>&1
+    python ${test_path} > $fname_test 2>&1
     ERR_CODE=$?
     if [ $ERR_CODE -gt 0 ]; then
         ((SERIAL_FAILED++))
@@ -80,10 +81,10 @@ echo ""
 echo "Starting parallel tests"
 for i in ${!parallelTests[@]}; do
     test_path="${testPrefix}/${parallelTests[$i]}.py"
-    fname_test="${testPrefix}/${parallelTests[$i]}.test-log"
+    fname_test="test/${parallelTests[$i]}.test-log"
     echo ""
     echo "Beginning to run ${test_path}"
-    python $test_path $N_PE_PARALLEL > "$fname_test" 2>&1
+    python $test_path $N_PE_PARALLEL > $fname_test 2>&1
     ERR_CODE=$?
     if [ $ERR_CODE -gt 0 ]; then
         ((PARALLEL_FAILED++))
