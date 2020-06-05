@@ -84,6 +84,7 @@ commands:
             git checkout << parameters.tag >>
             export CELLO_PREC=<< parameters.prec >>
             make
+            source $HOME/venv/bin/activate
             make test
           fi
 
