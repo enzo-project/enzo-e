@@ -34,6 +34,13 @@ commands:
             cd charm-6.9.0
             ./build charm++ netlrts-linux-x86_64 -j4 --with-production
           fi
+          # prepare testing dependencies
+          python3 -m venv $HOME/venv
+          source $HOME/venv/bin/activate
+          pip install --upgrade pip
+          pip install --upgrade wheel
+          pip install --upgrade setuptools
+          pip install Cython numpy h5py matplotlib libconf yt
 
   install-grackle:
     description: "Install grackle."
