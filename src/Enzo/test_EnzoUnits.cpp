@@ -1,13 +1,17 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_Particle.cpp
+/// @file     test_EnzoUnits.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2015-10-12
-/// @brief    Test program for the Particle class
+/// @brief    Test program for the EnzoUnits class
 
 #include "test.hpp"
 #include "main.hpp"
 #include "enzo.hpp"
+
+#define CK_TEMPLATES_ONLY
+#include "enzo.def.h"
+#undef CK_TEMPLATES_ONLY
 
 PARALLEL_MAIN_BEGIN
 {
