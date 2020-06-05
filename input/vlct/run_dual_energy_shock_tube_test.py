@@ -117,7 +117,13 @@ if __name__ == '__main__':
     elif nproc == 1:
         executable = 'bin/enzo-p'
     else:
-        executable = 'charmrun +p{:d} bin/enzo-p'.format(nproc)
+        charm_args = os.environ.get('CHARM_ARGS')
+        if charm_args is None:
+            executable_template = 'charmrun +p{:d} bin/enzo-p'
+        else:
+            executable_template \
+                = ' '.join(['charmrun', charm_args, '+p{:d}', 'bin/enzo-p'])
+        executable = executable_template.format(nproc)
 
     # this script can either be called from the base repository or from
     # the subdirectory: input/vlct
