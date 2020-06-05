@@ -85,6 +85,9 @@ commands:
             export CELLO_PREC=<< parameters.prec >>
             make
             source $HOME/venv/bin/activate
+            # the following environment variable indicates that the parallel
+            # vlct test(s) are to be skipped
+            export VL_PARALLEL_TEST_IP_CHARM=0
             make test
           fi
 

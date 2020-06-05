@@ -18,6 +18,8 @@ else
     exit 1
 fi
 
+
+
 echo ""
 echo "Determining number of processes to use for parallel tests"
 if [ -z "$VL_PARALLEL_TEST_IP_CHARM" ]; then
@@ -25,7 +27,14 @@ if [ -z "$VL_PARALLEL_TEST_IP_CHARM" ]; then
 else
     N_PE_PARALLEL=$VL_PARALLEL_TEST_IP_CHARM
 fi
-echo "Using $N_PE_PARALLEL processes"
+
+if [[ "$N_PE_PARALLEL" -lt 1 ]]; then
+    echo "VL_PARALLEL_TEST_IP_CHARM is less than 1. Parallel tests will be skipped."
+else
+    echo "Using $N_PE_PARALLEL processes"
+fi
+
+
 
 if [[ ! -z "$PYTHON_VL_TEST_PREP" ]]; then
     echo ""
@@ -70,43 +79,55 @@ for i in ${!serialTests[@]}; do
         echo "PASSED"
     fi
 done
+N_SERIAL_TESTS="${#serialTests[@]}"
 echo ""
 echo "Finished running serial tests"
-echo "${SERIAL_FAILED} set(s) of serial tests failed of ${#serialTests[@]}"
+echo "${SERIAL_FAILED} set(s) of serial tests failed of ${N_SERIAL_TESTS}"
 echo ""
 
 PARALLEL_FAILED=0
-
-echo ""
-echo "Starting parallel tests"
-for i in ${!parallelTests[@]}; do
-    test_path="${testPrefix}/${parallelTests[$i]}.py"
-    fname_test="test/${parallelTests[$i]}.test-log"
-    echo ""
-    echo "Beginning to run ${test_path}"
-    python $test_path $N_PE_PARALLEL > $fname_test 2>&1
-    ERR_CODE=$?
-    if [ $ERR_CODE -gt 0 ]; then
-        ((PARALLEL_FAILED++))
-        echo "FAILED"
-    else
-        echo "PASSED"
-    fi
-done
-echo ""
-echo "Finished running parallel tests"
-echo "${PARALLEL_FAILED} set(s) of parallel tests failed of ${#parallelTests[@]}"
-echo ""
-
-if [[ "$SERIAL_FAILED" -eq 0 && "$PARALLEL_FAILED" -eq 0 ]]; then
-    echo "All sets of serial and parallel tests passed"
-    exit 0
-elif [[ "$PARALLEL_FAILED" -eq 0 ]]; then
-    echo "All sets of parallel tests passed, but at least 1 serial test failed"
-elif [[ "$SERIAL_FAILED" -eq 0 ]]; then
-    echo "All sets of serial tests passed, but at least 1 parallel failed"
+if [[ "$N_PE_PARALLEL" -lt 1 ]]; then
+    echo "SKIPPING PARALLEL TESTS"
+    N_PARALLEL_TESTS=0
 else
-    echo "At least 1 serial and 1 parallel test failed."
+    echo ""
+    echo "Starting parallel tests"
+    for i in ${!parallelTests[@]}; do
+        test_path="${testPrefix}/${parallelTests[$i]}.py"
+        fname_test="test/${parallelTests[$i]}.test-log"
+        echo ""
+        echo "Beginning to run ${test_path}"
+        python $test_path $N_PE_PARALLEL > $fname_test 2>&1
+        ERR_CODE=$?
+        if [ $ERR_CODE -gt 0 ]; then
+            ((PARALLEL_FAILED++))
+            echo "FAILED"
+        else
+            echo "PASSED"
+        fi
+    done
+    N_PARALLEL_TESTS="${#parallelTests[@]}"
+    echo ""
+    echo "Finished running parallel tests"
+    echo "${PARALLEL_FAILED} set(s) of parallel tests failed of $N_PARALLEL_TESTS"
+    echo ""
 fi
 
-exit 1
+SERIAL_PASSED="$(($N_SERIAL_TESTS-$SERIAL_FAILED))"
+PARALLEL_PASSED="$(($N_PARALLEL_TESTS-$PARALLEL_FAILED))"
+
+echo ""
+echo "VLCT test summary:"
+echo "$SERIAL_PASSED set(s) of serial tests PASSED of $N_SERIAL_TESTS"
+if [[ N_PARALLEL_TESTS -eq 0 ]]; then
+    echo "No parallel tests were run"
+else
+    echo "$PARALLEL_PASSED set(s) of parallel tests PASSED of $N_PARALLEL_TESTS"
+fi
+
+if [[ "$SERIAL_FAILED" -eq 0 && "$PARALLEL_FAILED" -eq 0 ]]; then
+    echo "All executed sets of VLCT tests have passed"
+    exit 0
+else
+    exit 1
+fi

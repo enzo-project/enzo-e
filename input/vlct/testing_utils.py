@@ -225,7 +225,7 @@ def isclose(a,b,abs_tol = False):
     if abs_tol:
         # slow wave requires slightly bigger tolerance (since it includes more
         # timesteps which allows the floating point errors to grow more)
-        atol = 2.e-14
+        atol = 5.e-14
     else:
         atol = 0
     return np.isclose(a,b,rtol=err,atol=atol)
