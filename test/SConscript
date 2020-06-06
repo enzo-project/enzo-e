@@ -71,31 +71,31 @@ env.RunSerial('test_Error.unit',       bin_path + '/test_Error')
 #----------------------------------------------------------------------
 # INITIAL COMPONENT
 #----------------------------------------------------------------------
-Clean(env_mv_out.RunSerial ('test_initial_music-111.unit',bin_path + '/enzo-p', 
+Clean(env_mv_out.RunSerial ('test_initial_music-111.unit',bin_path + '/enzo-e', 
 		ARGS='input/initial_music-111.in'),
       [Glob('#/' + test_path + '/*-111.png')])
-Clean(env_mv_out.RunSerial ('test_initial_music-222.unit',bin_path + '/enzo-p', 
+Clean(env_mv_out.RunSerial ('test_initial_music-222.unit',bin_path + '/enzo-e', 
 		ARGS='input/initial_music-222.in'),
       [Glob('#/' + test_path + '/*-222.png')])
-Clean(env_mv_out.RunSerial ('test_initial_music-444.unit',bin_path + '/enzo-p', 
+Clean(env_mv_out.RunSerial ('test_initial_music-444.unit',bin_path + '/enzo-e', 
 		ARGS='input/initial_music-444.in'),
       [Glob('#/' + test_path + '/*-444.png')])
-Clean(env_mv_out.RunSerial ('test_initial_music-211.unit',bin_path + '/enzo-p', 
+Clean(env_mv_out.RunSerial ('test_initial_music-211.unit',bin_path + '/enzo-e', 
 		ARGS='input/initial_music-211.in'),
       [Glob('#/' + test_path + '/*-211.png')])
-Clean(env_mv_out.RunSerial ('test_initial_music-121.unit',bin_path + '/enzo-p', 
+Clean(env_mv_out.RunSerial ('test_initial_music-121.unit',bin_path + '/enzo-e', 
 		ARGS='input/initial_music-121.in'),
       [Glob('#/' + test_path + '/*-121.png')])
-Clean(env_mv_out.RunSerial ('test_initial_music-112.unit',bin_path + '/enzo-p', 
+Clean(env_mv_out.RunSerial ('test_initial_music-112.unit',bin_path + '/enzo-e', 
 		ARGS='input/initial_music-112.in'),
       [Glob('#/' + test_path + '/*-112.png')])
-Clean(env_mv_out.RunSerial ('test_initial_music-411.unit',bin_path + '/enzo-p', 
+Clean(env_mv_out.RunSerial ('test_initial_music-411.unit',bin_path + '/enzo-e', 
 		ARGS='input/initial_music-411.in'),
       [Glob('#/' + test_path + '/*-411.png')])
-Clean(env_mv_out.RunSerial ('test_initial_music-141.unit',bin_path + '/enzo-p', 
+Clean(env_mv_out.RunSerial ('test_initial_music-141.unit',bin_path + '/enzo-e', 
 		ARGS='input/initial_music-141.in'),
       [Glob('#/' + test_path + '/*-141.png')])
-Clean(env_mv_out.RunSerial ('test_initial_music-114.unit',bin_path + '/enzo-p', 
+Clean(env_mv_out.RunSerial ('test_initial_music-114.unit',bin_path + '/enzo-e', 
 		ARGS='input/initial_music-114.in'),
       [Glob('#/' + test_path + '/*-114.png')])
 #----------------------------------------------------------------------
@@ -207,7 +207,7 @@ env.RunSerial('test_prolong_linear.unit',  bin_path + '/test_ProlongLinear')
 #----------------------------------------------------------------------
 
 # serial
-Clean(env_mv_out.RunSerial ('test_method_ppm-1.unit',bin_path + '/enzo-p', 
+Clean(env_mv_out.RunSerial ('test_method_ppm-1.unit',bin_path + '/enzo-e', 
 		ARGS='input/method_ppm-1.in'),
       [Glob('#/' + test_path + '/method_ppm-1*.png'),
        Glob('#/' + test_path + '/method_ppm-1*.h5')])
@@ -220,7 +220,7 @@ env.PngToGif ("method_ppm-1.gif", "test_method_ppm-1.unit", \
 
 # parallel
 
-Clean(env_mv_out.RunParallel ('test_method_ppm-8.unit',bin_path + '/enzo-p', 
+Clean(env_mv_out.RunParallel ('test_method_ppm-8.unit',bin_path + '/enzo-e', 
 		ARGS='input/method_ppm-8.in'),
       [Glob('#/' + test_path + '/method_ppm-8*.png'),
       Glob('#/' + test_path + '/method_ppm-8*.h5')])
@@ -235,7 +235,7 @@ env.PngToGif ("method_ppm-8.gif", "test_method_ppm-8.unit", \
 #----------------------------------------------------------------------
 
 # serial
-Clean(env_mv_out.RunSerial ('test_method_gravity_cg-1.unit',bin_path + '/enzo-p', 
+Clean(env_mv_out.RunSerial ('test_method_gravity_cg-1.unit',bin_path + '/enzo-e', 
 		ARGS='input/method_gravity_cg-1.in'),
       [Glob('#/' + test_path + '/method_gravity_cg-1*.png'),
        Glob('#/' + test_path + '/method_gravity_cg-1*.h5')])
@@ -247,7 +247,7 @@ env.PngToGif ("method_gravity_cg-1.gif", "test_method_gravity_cg-1.unit", \
 
 # parallel
 
-Clean(env_mv_out.RunParallel ('test_method_gravity_cg-8.unit',bin_path + '/enzo-p', 
+Clean(env_mv_out.RunParallel ('test_method_gravity_cg-8.unit',bin_path + '/enzo-e', 
 		ARGS='input/method_gravity_cg-8.in'),
       [Glob('#/' + test_path + '/method_gravity_cg-8*.png'),
       Glob('#/' + test_path + '/method_gravity_cg-8*.h5')])
@@ -262,7 +262,7 @@ env.PngToGif ("method_gravity_cg-8.gif", "test_method_gravity_cg-8.unit", \
 #----------------------------------------------------------------------
 
 # serial
-Clean(env_mv_out.RunSerial ('test_method_cosmology-1.unit',bin_path + '/enzo-p', 
+Clean(env_mv_out.RunSerial ('test_method_cosmology-1.unit',bin_path + '/enzo-e', 
 		ARGS='input/method_cosmology-1.in'),
       [Glob('#/' + test_path + '/Dir_COSMO-1'),
        Glob('#/' + test_path + '/Dir_COSMO-1')])
@@ -275,7 +275,7 @@ Clean(env_mv_out.RunSerial ('test_method_cosmology-1.unit',bin_path + '/enzo-p',
 
 # parallel
 
-Clean(env_mv_out.RunParallel ('test_method_cosmology-8.unit',bin_path + '/enzo-p', 
+Clean(env_mv_out.RunParallel ('test_method_cosmology-8.unit',bin_path + '/enzo-e', 
 		ARGS='input/method_cosmology-8.in'),
       [Glob('#/' + test_path + '/Dir_COSMO-8'),
       Glob('#/' + test_path + '/Dir_COSMO-8')])
@@ -290,7 +290,7 @@ Clean(env_mv_out.RunParallel ('test_method_cosmology-8.unit',bin_path + '/enzo-p
 #----------------------------------------------------------------------
 
 # serial
-Clean(env_mv_out.RunSerial ('test_method_heat-1.unit',bin_path + '/enzo-p', 
+Clean(env_mv_out.RunSerial ('test_method_heat-1.unit',bin_path + '/enzo-e', 
 		ARGS='input/method_heat-1.in'),
       [Glob('#/' + test_path + '/method_heat*-1*.png'),
        Glob('#/' + test_path + '/method_heat*-1*.h5')])
@@ -302,7 +302,7 @@ env.PngToGif ("method_heat-1.gif", "test_method_heat-1.unit", \
 
 # parallel
 
-Clean(env_mv_out.RunParallel ('test_method_heat-8.unit',bin_path + '/enzo-p', 
+Clean(env_mv_out.RunParallel ('test_method_heat-8.unit',bin_path + '/enzo-e', 
 		ARGS='input/method_heat-8.in'),
       [Glob('#/' + test_path + '/method_heat*-8*.png'),
        Glob('#/' + test_path + '/method_heat*-8*.h5')])
@@ -319,12 +319,12 @@ env.PngToGif ("method_heat-8.gif", "test_method_heat-8.unit", \
 
 checkpoint_ppm_1 = env_rm_png.RunSerial (
   'test_checkpoint_ppm-1.unit',
-  bin_path + '/enzo-p', 
+  bin_path + '/enzo-e', 
   ARGS='input/checkpoint_ppm-1.in')
 
 restart_ppm_1 = env_mv_out.RunSerial (
    'test_restart_ppm-1.unit',
-   bin_path + '/enzo-p',
+   bin_path + '/enzo-e',
    ARGS='+restart checkpoint_ppm-1-10')
 
 
@@ -343,12 +343,12 @@ env.Requires(restart_ppm_1,checkpoint_ppm_1)
 
 checkpoint_ppm_8 = env_rm_png.RunParallel (
    'test_checkpoint_ppm-8.unit',
-   bin_path + '/enzo-p', 
+   bin_path + '/enzo-e', 
    ARGS='input/checkpoint_ppm-8.in')
 
 restart_ppm_8 = env_mv_out.RunParallel (
    'test_restart_ppm-8.unit',
-   bin_path + '/enzo-p',
+   bin_path + '/enzo-e',
    ARGS='+restart checkpoint_ppm-8-10')
 
 
@@ -364,7 +364,7 @@ env.Requires(restart_ppm_8,checkpoint_ppm_8)
 
 # MethodPpml tests
 
-Clean(env_mv_out.RunSerial ('test_method_ppml-1.unit',bin_path + '/enzo-p', 
+Clean(env_mv_out.RunSerial ('test_method_ppml-1.unit',bin_path + '/enzo-e', 
 		ARGS='input/method_ppml-1.in'),
       [Glob('#/' + test_path + '/method_ppml-1-?-????-*.png'),
        Glob('#/' + test_path + '/method_ppml-1-??-????-*.h5')])
@@ -382,7 +382,7 @@ env.MakeMovie ("method_ppml-1-z.swf", "test_method_ppml-1.unit", \
 env.PngToGif ("method_ppml-1-z.gif", "test_method_ppml-1.unit", \
                 ARGS= test_path + "/method_ppml-1-z-????.png");
 
-Clean(env_mv_out.RunParallel ('test_method_ppml-8.unit',bin_path + '/enzo-p', 
+Clean(env_mv_out.RunParallel ('test_method_ppml-8.unit',bin_path + '/enzo-e', 
 		ARGS='input/method_ppml-8.in'),
       [Glob('#/' + test_path + '/method_ppml-8-?-????-*.png'),
        Glob('#/' + test_path + '/method_ppml-8-??-????-*.h5')])
@@ -402,11 +402,11 @@ env.PngToGif ("method_ppml-8-z.gif", "test_method_ppml-8.unit", \
 
 # Updated PPML test using EnzoInitialPpmlTest for multi-nodes
 
-Clean(env_mv_out.RunSerial ('test_method_ppml-test-1.unit',bin_path + '/enzo-p',
+Clean(env_mv_out.RunSerial ('test_method_ppml-test-1.unit',bin_path + '/enzo-e',
                             ARGS='input/method_ppml-test-1.in'),
       [Glob('#/' + test_path + '/PPML1_*')])
 
-Clean(env_mv_out.RunSerial ('test_method_ppml-test-8.unit',bin_path + '/enzo-p',
+Clean(env_mv_out.RunSerial ('test_method_ppml-test-8.unit',bin_path + '/enzo-e',
                             ARGS='input/method_ppml-test-8.in'),
       [Glob('#/' + test_path + '/PPML8_*')])
 
@@ -417,25 +417,25 @@ Clean(env_mv_out.RunSerial ('test_method_ppml-test-8.unit',bin_path + '/enzo-p',
 # 2D boundary condition tests
 
 Clean(env_mv_out.RunParallel ('test_boundary_reflecting-2d.unit',
-                bin_path + '/enzo-p', 
+                bin_path + '/enzo-e', 
                 ARGS='input/boundary_reflecting-2d.in'),
       [Glob('#/' + test_path + '/boundary_reflecting-2d.png'),
        'test_boundary_reflecting-2d.unit'])
 
 Clean(env_mv_out.RunParallel ('test_boundary_periodic-2d.unit',
-		bin_path + '/enzo-p', 
+		bin_path + '/enzo-e', 
 		ARGS='input/boundary_periodic-2d.in'),
       [Glob('#/' + test_path + '/boundary_periodic-2d.png'),
        'test_boundary_periodic-2d.unit'])
 
 # Clean(env_mv_out.RunParallel ('test_boundary_inflow-2d.unit',
-# 		bin_path + '/enzo-p', 
+# 		bin_path + '/enzo-e', 
 # 		ARGS='input/boundary_inflow-2d.in'),
 #       [Glob('#/' + test_path + '/boundary_inflow-2d.png'),
 #        'test_boundary_inflow-2d.unit'])
 
 Clean(env_mv_out.RunParallel ('test_boundary_outflow-2d.unit',
-		bin_path + '/enzo-p', 
+		bin_path + '/enzo-e', 
 		ARGS='input/boundary_outflow-2d.in'),
       [Glob('#/' + test_path + '/boundary_outflow-2d.png'),
        'test_boundary_outflow-2d.unit'])
@@ -457,25 +457,25 @@ env.PngToGif ("boundary_outflow-2d.gif","test_boundary_outflow-2d.unit", \
 # 3D boundary condition tests
 
 Clean(env_mv_out.RunParallel ('test_boundary_reflecting-3d.unit',
-		bin_path + '/enzo-p', 
+		bin_path + '/enzo-e', 
 		ARGS='input/boundary_reflecting-3d.in'),
       [Glob('#/' + test_path + '/boundary_reflecting-3d.png'),
        'test_boundary_reflecting-3d.unit'])
 
 Clean(env_mv_out.RunParallel ('test_boundary_periodic-3d.unit',
-		bin_path + '/enzo-p', 
+		bin_path + '/enzo-e', 
 		ARGS='input/boundary_periodic-3d.in'),
       [Glob('#/' + test_path + '/boundary_periodic-3d.png'),
        'test_boundary_periodic-3d.unit'])
 
 # Clean(env_mv_out.RunParallel ('test_boundary_inflow-3d.unit',
-# 		bin_path + '/enzo-p', 
+# 		bin_path + '/enzo-e', 
 # 		ARGS='input/boundary_inflow-3d.in'),
 #       [Glob('#/' + test_path + '/boundary_inflow-3d.png'),
 #        'test_boundary_inflow-3d.unit'])
 
 Clean(env_mv_out.RunParallel ('test_boundary_outflow-3d.unit',
-		bin_path + '/enzo-p', 
+		bin_path + '/enzo-e', 
 		ARGS='input/boundary_outflow-3d.in'),
       [Glob('#/' + test_path + '/boundary_outflow-3d.png'),
        'test_boundary_outflow-3d.unit'])
@@ -499,11 +499,11 @@ env.PngToGif ("boundary_outflow-3d.gif","test_boundary_outflow-3d.unit", \
 # Mesh generation
 #----------------------------------------------------------------------
 
-Clean(env_mv_out.RunSerial ('test_mesh-balanced.unit',bin_path + '/enzo-p', 
+Clean(env_mv_out.RunSerial ('test_mesh-balanced.unit',bin_path + '/enzo-e', 
 		ARGS='input/mesh-balanced.in'),
       [Glob('#/' + test_path + '/mesh-balanced*.png')])
 
-# Clean(env_mv_out.RunSerial ('test_mesh-unbalanced.unit',bin_path + '/enzo-p', 
+# Clean(env_mv_out.RunSerial ('test_mesh-unbalanced.unit',bin_path + '/enzo-e', 
 # 		ARGS='input/mesh-unbalanced.in'),
 #       [Glob('#/' + test_path + '/mesh-unbalanced*.png')])
 
@@ -514,7 +514,7 @@ Clean(env_mv_out.RunSerial ('test_mesh-balanced.unit',bin_path + '/enzo-p',
 
 # serial
 
-# Clean(env_mv_out.RunParallel ('test_adapt-L1-P1.unit',bin_path + '/enzo-p', 
+# Clean(env_mv_out.RunParallel ('test_adapt-L1-P1.unit',bin_path + '/enzo-e', 
 # 		ARGS='input/adapt-L1-P1.in'),
 #       [Glob('#/' + test_path + '/adapt-L1-P1*.png')])
 # env.MakeMovie ("adapt-L1-P1-mesh.swf", "test_adapt-L1-P1-mesh.unit", \
@@ -522,7 +522,7 @@ Clean(env_mv_out.RunSerial ('test_mesh-balanced.unit',bin_path + '/enzo-p',
 # env.MakeMovie ("adapt-L1-P1-density.swf", "test_adapt-L1-P1-density.unit", \
 #                 ARGS= test_path + "/adapt-L1-P1-density-*.png");
 # 
-# Clean(env_mv_out.RunParallel ('test_adapt-L2-P1.unit',bin_path + '/enzo-p', 
+# Clean(env_mv_out.RunParallel ('test_adapt-L2-P1.unit',bin_path + '/enzo-e', 
 # 		ARGS='input/adapt-L2-P1.in'),
 #       [Glob('#/' + test_path + '/adapt-L2-P1*.png')])
 # env.MakeMovie ("adapt-L2-P1-mesh.swf", "test_adapt-L2-P1-mesh.unit", \
@@ -530,7 +530,7 @@ Clean(env_mv_out.RunSerial ('test_mesh-balanced.unit',bin_path + '/enzo-p',
 # env.MakeMovie ("adapt-L2-P1-density.swf", "test_adapt-L2-P1-density.unit", \
 #                 ARGS= test_path + "/adapt-L2-P1-density-*.png");
 # 
-# Clean(env_mv_out.RunParallel ('test_adapt-L3-P1.unit',bin_path + '/enzo-p', 
+# Clean(env_mv_out.RunParallel ('test_adapt-L3-P1.unit',bin_path + '/enzo-e', 
 # 		ARGS='input/adapt-L3-P1.in'),
 #       [Glob('#/' + test_path + '/adapt-L3-P1*.png')])
 # env.MakeMovie ("adapt-L3-P1-mesh.swf", "test_adapt-L3-P1-mesh.unit", \
@@ -538,7 +538,7 @@ Clean(env_mv_out.RunSerial ('test_mesh-balanced.unit',bin_path + '/enzo-p',
 # env.MakeMovie ("adapt-L3-P1-density.swf", "test_adapt-L3-P1-density.unit", \
 #                 ARGS= test_path + "/adapt-L3-P1-density-*.png");
 # 
-# Clean(env_mv_out.RunParallel ('test_adapt-L4-P1.unit',bin_path + '/enzo-p', 
+# Clean(env_mv_out.RunParallel ('test_adapt-L4-P1.unit',bin_path + '/enzo-e', 
 # 		ARGS='input/adapt-L4-P1.in'),
 #       [Glob('#/' + test_path + '/adapt-L4-P1*.png')])
 # env.MakeMovie ("adapt-L4-P1-mesh.swf", "test_adapt-L4-P1-mesh.unit", \
@@ -546,7 +546,7 @@ Clean(env_mv_out.RunSerial ('test_mesh-balanced.unit',bin_path + '/enzo-p',
 # env.MakeMovie ("adapt-L4-P1-density.swf", "test_adapt-L4-P1-density.unit", \
 #                 ARGS= test_path + "/adapt-L4-P1-density-*.png");
 
-Clean(env_mv_out.RunParallel ('test_adapt-L5-P1.unit',bin_path + '/enzo-p', 
+Clean(env_mv_out.RunParallel ('test_adapt-L5-P1.unit',bin_path + '/enzo-e', 
 		ARGS='input/adapt-L5-P1.in'),
       [Glob('#/' + test_path + '/adapt-L5-P1*.png')])
 env.MakeMovie ("adapt-L5-P1-mesh.swf", "test_adapt-L5-P1.unit", \
@@ -565,12 +565,12 @@ env.PngToGif ("adapt-L5-P1-density.gif", "test_adapt-L5-P1.unit", \
 #----------------------------------------------------------------------
 
 # env.RunParallel ('test_performance-papi.unit',
-#                 bin_path + '/enzo-p', 
+#                 bin_path + '/enzo-e', 
 #                 ARGS='input/performance-papi.in')
 
 
 Clean(env_mv_out.RunParallel ('test_initial_png.unit',
-		bin_path + '/enzo-p', 
+		bin_path + '/enzo-e', 
 		ARGS='input/initial_png.in'),
       [Glob('#/' + test_path + '/initial_png.png'),
        'test_initial_png.unit'])
@@ -590,7 +590,7 @@ env.PngToGif ("initial_png.gif","test_initial_png.unit", \
 
 output_stride_1_RUN = env.RunParallel (
    'test_output-stride-1.unit',
-   bin_path + '/enzo-p', 
+   bin_path + '/enzo-e', 
    ARGS='input/output-stride-1.in')
 
 output_stride_1_C00 = env_mv_out.Hdf5ToPng (
@@ -620,7 +620,7 @@ Clean(output_stride_1,
 
 output_stride_2_RUN = env.RunParallel (
    'test_output-stride-2.unit',
-   bin_path + '/enzo-p', 
+   bin_path + '/enzo-e', 
    ARGS='input/output-stride-2.in')
 
 output_stride_2_C00 = env_mv_out.Hdf5ToPng (
@@ -650,7 +650,7 @@ Clean(output_stride_2,
 
 output_stride_4_RUN = env.RunParallel (
    'test_output-stride-4.unit',
-   bin_path + '/enzo-p', 
+   bin_path + '/enzo-e', 
    ARGS='input/output-stride-4.in')
 
 output_stride_4_C00 = env_mv_out.Hdf5ToPng (
@@ -679,7 +679,7 @@ Clean(output_stride_4,
 #----------------------------------------------------------------------
 
 Clean(env_mv_out.RunParallel ('test_output-headers.unit',
-                bin_path + '/enzo-p', 
+                bin_path + '/enzo-e', 
                 ARGS='input/output-headers.in'),
 		[Glob('#/' + test_path + '/Dir_*')])
 
@@ -687,7 +687,7 @@ Clean(env_mv_out.RunParallel ('test_output-headers.unit',
 # PARTICLES
 #----------------------------------------------------------------------
 Clean(env_mv_out.RunParallel ('test_particle-x.unit',
-                bin_path + '/enzo-p', 
+                bin_path + '/enzo-e', 
                 ARGS='input/test_particle-x.in'),
 		[Glob('#/' + test_path + '/particle-x.png')])
 
@@ -696,7 +696,7 @@ env.PngToGif("particle-x.gif", "test_particle-x.unit", \
 
 
 Clean(env_mv_out.RunParallel ('test_particle-y.unit',
-                bin_path + '/enzo-p', 
+                bin_path + '/enzo-e', 
                 ARGS='input/test_particle-y.in'),
 		[Glob('#/' + test_path + '/particle-y.png')])
 
@@ -704,28 +704,28 @@ env.PngToGif("particle-y.gif", "test_particle-y.unit", \
              ARGS = test_path + "/particle-y*.png")			       
 
 Clean(env_mv_out.RunParallel ('test_particle-xy.unit',
-                bin_path + '/enzo-p', 
+                bin_path + '/enzo-e', 
                 ARGS='input/test_particle-xy.in'),
 		[Glob('#/' + test_path + '/particle-xy.png')])
 env.PngToGif("particle-xy.gif", "test_particle-xy.unit", \
              ARGS = test_path + "/particle-xy*.png")			       
 
 Clean(env_mv_out.RunParallel ('test_particle-circle.unit',
-                bin_path + '/enzo-p', 
+                bin_path + '/enzo-e', 
                 ARGS='input/test_particle-circle.in'),
 		[Glob('#/' + test_path + '/particle-circle.png')])
 env.PngToGif("particle-circle.gif", "test_particle-circle.unit", \
              ARGS = test_path + "/particle-circle*.png")
 
 Clean(env_mv_out.RunParallel ('test_particle-amr-static.unit',
-                bin_path + '/enzo-p', 
+                bin_path + '/enzo-e', 
                 ARGS='input/test_particle-amr-static.in'),
 		[Glob('#/' + test_path + '/particle-amr-static.png')])
 env.PngToGif("particle-amr-static.gif", "test_particle-amr-static.unit", \
              ARGS = test_path + "/particle-amr-static*.png")
 
 Clean(env_mv_out.RunParallel ('test_particle-amr-dynamic.unit',
-                bin_path + '/enzo-p', 
+                bin_path + '/enzo-e', 
                 ARGS='input/test_particle-amr-dynamic.in'),
 		[Glob('#/' + test_path + '/particle-amr-dynamic.png')])
 env.PngToGif("particle-amr-dynamic.gif", "test_particle-amr-dynamic.unit", \

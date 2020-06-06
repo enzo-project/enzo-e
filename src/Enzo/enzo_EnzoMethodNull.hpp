@@ -14,7 +14,7 @@ class EnzoMethodNull : public Method {
   /// @ingroup  Enzo
   ///
   /// @brief [\ref Enzo] Null placeholder method, used for testing
-  /// non-method aspects of Enzo-P and Cello, such as mesh adapting
+  /// non-method aspects of Enzo-E and Cello, such as mesh adapting
 
 public: // interface
 

@@ -30,7 +30,7 @@
 :Default: :d:`"undefined"`
 :Scope:     :c:`Cello`
 
-:e:`Boundary conditions in Enzo-P include` :t:`"reflecting"` :e:`,` :t:`"outflow"` :e:`,` :t:`"inflow"` :e:`, and` :t:`"periodic"`.  :e:`Other boundary condition types can be implemented by either a) modifying the existing` :p:`EnzoBoundary` :e:`class or b) creating a new class inherited from the` :p:`Boundary` :e:`base class.`  :t:`"inflow"` :e:`boundary conditions additionally require` :p:`value` :e:`and` :p:`field_list` :e:`parameters.`
+:e:`Boundary conditions in Enzo-E include` :t:`"reflecting"` :e:`,` :t:`"outflow"` :e:`,` :t:`"inflow"` :e:`, and` :t:`"periodic"`.  :e:`Other boundary condition types can be implemented by either a) modifying the existing` :p:`EnzoBoundary` :e:`class or b) creating a new class inherited from the` :p:`Boundary` :e:`base class.`  :t:`"inflow"` :e:`boundary conditions additionally require` :p:`value` :e:`and` :p:`field_list` :e:`parameters.`
 
 ----
 

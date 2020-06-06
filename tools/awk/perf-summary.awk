@@ -1,6 +1,6 @@
 #!/usr/bin/awk -f
 
-# parses Enzo-p output and prints the following
+# parses Enzo-E output and prints the following
 #
 #   number of solver iterations
 #   time per iteration

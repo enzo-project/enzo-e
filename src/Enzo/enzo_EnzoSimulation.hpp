@@ -18,7 +18,7 @@ class EnzoSimulation : public BASE_ENZO_SIMULATION
 
   /// @class    EnzoSimulation
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] Simulation class for CHARM++ Enzo-P
+  /// @brief    [\ref Enzo] Simulation class for CHARM++ Enzo-E
 
 public: // functions
 

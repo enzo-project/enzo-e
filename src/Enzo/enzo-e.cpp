@@ -2,12 +2,12 @@
 
 //----------------------------------------------------------------------
 
-/// @file      enzo-p.cpp
+/// @file      enzo-e.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Mon Oct  5 15:10:56 PDT 2009
 /// @brief     Cello main
 ///
-/// \mainpage Enzo-P / Cello
+/// \mainpage Enzo-E / Cello
 ///
 /// <a href="http://cello-project.org/">Cello</a> is an
 /// object-oriented adaptive mesh refinement (AMR) software framework
@@ -25,7 +25,7 @@
 /// map Enzo's multi-resolution multi-physics capabilities onto large
 /// parallel computers with potentially millions of computational
 /// units. This "petascale" incarnation of Enzo being built on the
-/// Cello framework is called Enzo-P.
+/// Cello framework is called Enzo-E.
 
 //----------------------------------------------------------------------
 
@@ -93,7 +93,7 @@ PARALLEL_MAIN_BEGIN
   monitor_ = Monitor::instance();
   monitor_->set_mode (monitor_mode_root);
   monitor_->header();
-  monitor_->print ("","BEGIN ENZO-P");
+  monitor_->print ("","BEGIN ENZO-E");
 
   // Print initial baseline memory usage
 

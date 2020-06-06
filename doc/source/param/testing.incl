@@ -1,20 +1,20 @@
 :Parameter:  :p:`Testing` : :p:`cycle_final`
-:Summary: :s:`Enzo-P unit test parameter for expected final cycle number`
+:Summary: :s:`Enzo-E unit test parameter for expected final cycle number`
 :Type:    :t:`integer`
 :Default: :d:`0`
 :Scope:     :c:`Cello`
 
-:e:`Enzo-P unit test parameter for expected final cycle number.`
+:e:`Enzo-E unit test parameter for expected final cycle number.`
 
 ----
 
 :Parameter:  :p:`Testing` : :p:`time_final`
-:Summary: :s:`Enzo-P unit test parameter for expected final time`
+:Summary: :s:`Enzo-E unit test parameter for expected final time`
 :Type:    :t:`float`
 :Default: :d:`0.0`
 :Scope:     :c:`Cello`
 
-:e:`Enzo-P unit test parameter for expected final time.`
+:e:`Enzo-E unit test parameter for expected final time.`
 
 ----
 
@@ -24,5 +24,5 @@
 :Default: :d:`1.0e-6`
 :Scope:     :c:`Cello`
 
-:e:`Enzo-P unit test parameter for tolerance on the expected final time.`
+:e:`Enzo-E unit test parameter for tolerance on the expected final time.`
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# This script compares Enzo-P's "new" PPM with that in ENZO's "week of code"
+# This script compares Enzo-E's "new" PPM with that in ENZO's "week of code"
 # development branch.  ENZOPSRC and ENZOSRC should be set appropriately.
 # Output is a set of files, one per Fortran source file, with differences
 # between source files (ignoring spacing or newlines)

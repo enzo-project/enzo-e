@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ -z $1 ]; then
-    echo "Usage: $0 <enzo-p output>"
+    echo "Usage: $0 <enzo-e output>"
     exit 1
 fi
 

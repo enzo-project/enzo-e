@@ -50,7 +50,7 @@
 :Default: :d:`[ ]`
 :Scope:     :c:`Cello`
 
-:e:`Different Fields may belong to any number of different "groups".  For example, Enzo uses "color fields", which Enzo-P implements as defining color fields to belong to the group "color".`
+:e:`Different Fields may belong to any number of different "groups".  For example, Enzo uses "color fields", which Enzo-E implements as defining color fields to belong to the group "color".`
 
 ----
 

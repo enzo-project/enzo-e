@@ -566,7 +566,7 @@ template<class T> size_t FieldFace::store_
 #ifdef FORTRAN_STORE
 
   // This is to get around a bug on SDSC Comet where this function
-  // crashes with -O3 (See Enzo-P / Cello bug report #90)
+  // crashes with -O3 (See Enzo-E / Cello bug report #90)
   // http://client64-249.sdsc.edu/cello-bug/show_bug.cgi?id=90
 
   union {

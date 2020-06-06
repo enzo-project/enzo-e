@@ -10,5 +10,5 @@ The development of Cello is driven by Enzo, a parallel astrophysics
 and cosmology application.  The primary goal is to efficiently map
 Enzo's multi-resolution multi-physics capabilities onto large parallel
 computers with millions of computational units. We refer to this next
-generation "petascale" branch of Enzo built using the Cello framework
-as "Enzo-P".
+generation "exascale" branch of Enzo built using the Cello framework
+as "Enzo-E", previously known as a "petascale" version, or "Enzo-P".

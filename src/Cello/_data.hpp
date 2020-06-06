@@ -139,9 +139,9 @@ class FieldFace;
     CkPrintf ("DEBUG_FIELD %s %20.18g %20.18g %20.18g\n",  NAME,sum_abs,sum_mean,sum_var); \
     fflush(stdout);							\
     char filename[80];						\
-    sprintf (filename,"renzo-p-%s.png",NAME);				\
+    sprintf (filename,"renzo-e-%s.png",NAME);				\
     png_array (filename,(float*)(FIELD),gx,gy,gz,mx,my,mz,__FILE__,__LINE__,2,16,16,SCALE); \
-    sprintf (filename,"enzo-p-%s.png",NAME);				\
+    sprintf (filename,"enzo-e-%s.png",NAME);				\
     png_array (filename,(float*)(FIELD),0,0,0,mx,my,mz,__FILE__,__LINE__,2,16,16,SCALE); \
   }
 #   define TRACE_FIELD_(NAME,FIELD,SCALE) TRACE_FIELD_GM(NAME,FIELD,SCALE,gx_,gy_,gz_,mx_,my_,mz_,false)

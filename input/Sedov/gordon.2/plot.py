@@ -82,7 +82,7 @@ plot_refresh   = plt.bar(x,time_refresh,color='m',bottom=top)
 top = [sum(pair) for pair in zip(top,time_refresh)]
 plot_prepare   = plt.bar(x,time_prepare,color='y',bottom=top)
 
-plt.title("Enzo-P Scaling")
+plt.title("Enzo-E Scaling")
 plt.legend( (plot_wallclock[0], 
              plot_cycle[0],
              plot_compute[0],

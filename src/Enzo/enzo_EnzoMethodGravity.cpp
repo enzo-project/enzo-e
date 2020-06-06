@@ -67,9 +67,9 @@
     CkPrintf ("DEBUG_FIELD %s %20.18g %20.18g %20.18g\n",  NAME,sum_abs,sum_mean,sum_var); \
     fflush(stdout);							\
     char filename[80];						\
-    sprintf (filename,"renzo-p-%s.png",NAME);				\
+    sprintf (filename,"renzo-e-%s.png",NAME);				\
     png_array (filename,(float*)(FIELD),gx,gy,gz,mx,my,mz,__FILE__,__LINE__,2,16,16,SCALE); \
-    sprintf (filename,"enzo-p-%s.png",NAME);				\
+    sprintf (filename,"enzo-e-%s.png",NAME);				\
     png_array (filename,(float*)(FIELD),0,0,0,mx,my,mz,__FILE__,__LINE__,2,16,16,SCALE); \
   }
 #   define TRACE_FIELD_(NAME,FIELD,SCALE) TRACE_FIELD_GM(NAME,FIELD,SCALE,gx_,gy_,gz_,mx_,my_,mz_,false)
@@ -256,7 +256,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
   {
     enzo_float * dt = (enzo_float*) field.values("density_total");
     enzo_float * dt_enzo = (enzo_float*) field.values("density_total_enzo");
-    // save Enzo-p's computed density_total first
+    // save Enzo-E's computed density_total first
     char buffer[80];
     sprintf (buffer,"dt-enzo-%03d.data",block->cycle());
     printf ("DEBUG_DENSITY_TOTAL cycle=%d\n",block->cycle());
@@ -418,7 +418,7 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
     enzo_float * po = (enzo_float*) field.values("potential");
     enzo_float * po_enzo = (enzo_float*) field.values("potential_enzo");
     enzo_float * po_diff = (enzo_float*) field.values("potential_diff");
-    // save Enzo-p's computed potential first
+    // save Enzo-E's computed potential first
     char buffer[80];
     sprintf (buffer,"po-enzo-%03d.data",cycle_);
     printf ("DEBUG_POTENTIAL cycle=%d\n",cycle_);

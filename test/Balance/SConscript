@@ -48,7 +48,7 @@ env_mv_rotate  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/Rotate; mv
 
 balance_none = env_mv_none.RunBalanceNone (
    'test_balance_none.unit',
-   bin_path + '/enzo-p', 
+   bin_path + '/enzo-e', 
    ARGS='input/load-balance-4.in')
 
 Clean(balance_none,
@@ -59,7 +59,7 @@ Clean(balance_none,
 
 balance_greedy = env_mv_greedy.RunBalanceGreedy (
    'test_balance_greedy.unit',
-   bin_path + '/enzo-p', 
+   bin_path + '/enzo-e', 
    ARGS='input/load-balance-4.in')
 
 Clean(balance_greedy,
@@ -70,7 +70,7 @@ Clean(balance_greedy,
 
 # balance_hybrid = env_mv_hybrid.RunBalanceHybrid (
 #    'test_balance_hybrid.unit',
-#    bin_path + '/enzo-p', 
+#    bin_path + '/enzo-e', 
 #    ARGS='input/load-balance-4.in')
 
 # Clean(balance_hybrid,
@@ -82,7 +82,7 @@ Clean(balance_greedy,
 # DOES NOTHING?
 # balance_neighbor = env_mv_neighbor.RunBalanceNeighbor (
 #    'test_balance_neighbor.unit',
-#    bin_path + '/enzo-p', 
+#    bin_path + '/enzo-e', 
 #    ARGS='input/load-balance-4.in')
 # 
 # Clean(balance_neighbor,
@@ -93,7 +93,7 @@ Clean(balance_greedy,
 
 balance_rand_cent = env_mv_rand_cent.RunBalanceRandCent (
    'test_balance_rand_cent.unit',
-   bin_path + '/enzo-p', 
+   bin_path + '/enzo-e', 
    ARGS='input/load-balance-4.in')
 
 Clean(balance_rand_cent,
@@ -104,7 +104,7 @@ Clean(balance_rand_cent,
 
 # balance_refine_comm = env_mv_refine_comm.RunBalanceRefineComm (
 #    'test_balance_refine_comm.unit',
-#    bin_path + '/enzo-p', 
+#    bin_path + '/enzo-e', 
 #    ARGS='input/load-balance-4.in')
 
 # Clean(balance_refine_comm,
@@ -115,7 +115,7 @@ Clean(balance_rand_cent,
 
 balance_refine = env_mv_refine.RunBalanceRefine (
    'test_balance_refine.unit',
-   bin_path + '/enzo-p', 
+   bin_path + '/enzo-e', 
    ARGS='input/load-balance-4.in')
 
 Clean(balance_refine,
@@ -126,7 +126,7 @@ Clean(balance_refine,
 
 balance_rotate = env_mv_rotate.RunBalanceRotate (
    'test_balance_rotate.unit',
-   bin_path + '/enzo-p', 
+   bin_path + '/enzo-e', 
    ARGS='input/load-balance-4.in')
 
 Clean(balance_rotate,

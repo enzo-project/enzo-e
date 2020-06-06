@@ -214,7 +214,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'enzo-pcello', u'Enzo-E / Cello Documentation',
+    ('index', 'enzo-ecello', u'Enzo-E / Cello Documentation',
      [u'James Bordner'], 1)
 ]
 

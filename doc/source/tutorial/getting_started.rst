@@ -201,7 +201,7 @@ regression tests, and running code analysis tools.
 
         ==================  ===============================================================
         ==================  ===============================================================
-	``make``            *Compile Enzo-E as* ``./bin/enzo-p``
+	``make``            *Compile Enzo-E as* ``./bin/enzo-e``
 	``make clean``      *Remove object and test files*
 	``make reset``      *Clear any settings from an incomplete build*
 	``make doc``        *Generate doxygen documentation from source in* ``src-html`` *(requires* ``doxygen`` *)*
@@ -225,12 +225,12 @@ and take a look at Enzo-E's output.
 An included "Hello World" problem can be run using the following
 from the ``$CELLO_HOME`` directory:
 
-     ``charmrun +p4 bin/enzo-p input/Hi.in``
+     ``charmrun +p4 bin/enzo-e input/Hi.in``
 
 This assumes that the ``charmrun`` command is in your path.  If it
 is not, then you will need to include the path name as well, e.g.:
 
-     ``~/Charm/bin/charmrun +p4 bin/enzo-p input/Hi.in``
+     ``~/Charm/bin/charmrun +p4 bin/enzo-e input/Hi.in``
 
 If all goes well, Enzo-E will run the Hello World problem.  Below are
 some of the generated images from the longer-running "HelloWorld.in"

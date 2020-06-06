@@ -1,4 +1,4 @@
-The following are steps for preparing to run Enzo-P / Cello on NCSA
+The following are steps for preparing to run Enzo-E / Cello on NCSA
 Blue Waters.     
 
 1. Run the following commands, and also put them in your shell startup
@@ -25,7 +25,7 @@ Blue Waters.
    cd charm
    ./build charm++ gni-crayxe   smp  -j16  --with-production
 
-3. Download and install Enzo-P in your home directory
+3. Download and install Enzo-E in your home directory
 
    mkdir ~/Cello
    cd ~/Cello
@@ -33,17 +33,17 @@ Blue Waters.
    cd cello-src
    hg update solver
 
-4. Compile Enzo-P (bin/enzo-p)
+4. Compile Enzo-E (bin/enzo-e)
 
    cd ~/Cello
    make
 
-5. Run Enzo-P
+5. Run Enzo-E
 
    Below is a sample batch script for running on 4 nodes, with 15 (out
    of 16) floating-point cores per node.  (This is recommended when
    using Charm++ compiled with the SMP mode).  It is assumed the
-   executable is ./enzo-p, and the input parameter file is
+   executable is ./enzo-e, and the input parameter file is
    test-problem.in.  If you have multiple accounts, you may also need
    a "#PBS -A <project>" header line.
 
@@ -67,6 +67,6 @@ Blue Waters.
    charmrun="aprun -n 4 -N 1"
    charmarg="+ppn15 +pemap 2-30:2"
 
-   $charmrun ./enzo-p $charmarg $input >& $output
+   $charmrun ./enzo-e $charmarg $input >& $output
    ==================================================
 

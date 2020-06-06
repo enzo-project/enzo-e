@@ -12,7 +12,6 @@ test/START
 test/STOP
 include
 build
-bin/enzo-p
 charmrun
 config.log
 errors.org
@@ -27,5 +26,5 @@ build-*/External/*
 build-*/SConscript
 
 # ignore the binaries
-bin/enzo-p
-bin/enzo-p.prev
+bin/enzo-e
+bin/enzo-e.prev

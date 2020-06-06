@@ -1,15 +1,15 @@
 #----------------------------------------------------------------------
-.PHONY: bin/enzo-p
-bin/enzo-p:
-	./build.sh bin/enzo-p
+.PHONY: bin/enzo-e
+bin/enzo-e:
+	./build.sh bin/enzo-e
 #----------------------------------------------------------------------
 .PHONY: help
 help:
 	@echo 
-	@echo "make [compile]  Compile Enzo-P as ./bin/enzo-p"
+	@echo "make [compile]  Compile Enzo-E as ./bin/enzo-e"
 	@echo "make cccc       Compute code quality metrics in src/.cccc/cccc.html"
 	@echo "make clean      Remove object and test files"
-	@echo "make coverity   Compile enzo-p using the coverity static analysis tool"
+	@echo "make coverity   Compile enzo-e using the coverity static analysis tool"
 	@echo "make diff       Generate org-mode 'diff.org' file from 'git diff' output"
 	@echo "make gdb        Generate org-mode 'gdb.org' from gdb 'where' output in gdb.out"
 	@echo "make doc        Generate html documentation from Sphinx in doc/build/html"

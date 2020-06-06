@@ -111,7 +111,7 @@ parameter file (``input/method_ppm-8.in``) accordingly.
 
 ..  code-block:: bash
 		 
-    $ ./charmrun ++runscript ./run-enzoe.sh +p8 bin/enzo-p input/method_ppm-8.in
+    $ ./charmrun ++runscript ./run-enzoe.sh +p8 bin/enzo-e input/method_ppm-8.in
 
 
 This assumes that the charmrun command is in your path--if it is not,
