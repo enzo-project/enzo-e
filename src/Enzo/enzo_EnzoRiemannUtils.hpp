@@ -211,19 +211,20 @@ namespace enzo_riemann_utils{
   /// @param stale_depth indicates the current stale_depth for the loaded
   ///   quanties.
   template<class LUT>
-  EFlt3DArray* load_array_of_fields(Block *block, Grouping &grouping,
-                                    int dim, int stale_depth) noexcept
+  std::array<EFlt3DArray,LUT::NEQ> load_array_of_fields
+  (Block *block, Grouping &grouping,
+   int dim, int stale_depth) noexcept
   {
+    std::array<EFlt3DArray,LUT::NEQ> arr;
     std::size_t nfields = LUT::NEQ;
-    EFlt3DArray* arr = new EFlt3DArray[nfields];
     // in the case where we don't have reconstructed values (dim = -1) we assume
     // that the that i-axis is aligned with the x-axis
     EnzoPermutedCoordinates coord( (dim == -1) ? 0 : dim);
     EnzoFieldArrayFactory array_factory(block, stale_depth);
 
     // define a lambda function to execute for every member of lut
-    auto fn = [arr, coord, dim, &array_factory, &grouping](std::string name,
-                                                           int index)
+    auto fn = [coord, dim, &arr, &array_factory, &grouping](std::string name,
+                                                            int index)
       {
         // name is the name of a given member of the lut
         // index is the value associated with the member

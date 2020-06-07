@@ -199,7 +199,7 @@ protected : //methods
   /// Computes the fluxes for the passively advected quantites.
   void solve_passive_advection_(Block* block, Grouping &priml_group,
 				Grouping &primr_group, Grouping &flux_group,
-				EFlt3DArray &density_flux, int dim,
+				const EFlt3DArray &density_flux, int dim,
 				int stale_depth) const throw();
 
 protected: //attributes
@@ -376,9 +376,7 @@ void EnzoRiemannImpl<ImplFunctor>::solve
       array_factory.assigned_center_from_name(interface_velocity_name, dim);
   }
 
-  // TODO: transition from heap-allocated old-style arrays to std::array (this
-  // requires changed to EFlt3DArray)
-  EFlt3DArray *wl_arrays, *wr_arrays, *flux_arrays;
+  std::array<EFlt3DArray,LUT::NEQ> wl_arrays, wr_arrays, flux_arrays;
   using enzo_riemann_utils::load_array_of_fields;
   wl_arrays = load_array_of_fields<LUT>(block, priml_group, dim, stale_depth);
   wr_arrays = load_array_of_fields<LUT>(block, primr_group, dim, stale_depth);
@@ -447,8 +445,6 @@ void EnzoRiemannImpl<ImplFunctor>::solve
       set_bfield_fluxes_to_zero_(array_factory, flux_group);
     }
   }
-
-  delete[] wl_arrays; delete[] wr_arrays; delete[] flux_arrays;
 }
 
 //----------------------------------------------------------------------
@@ -475,7 +471,7 @@ inline void compute_unity_sum_passive_fluxes_(const enzo_float dens_flux,
 
 inline void passive_advection_helper_
 (std::string group_name, Grouping &priml_group, Grouping &primr_group,
- Grouping &flux_group, EFlt3DArray &density_flux, int dim,
+ Grouping &flux_group, const EFlt3DArray &density_flux, int dim,
  EnzoFieldArrayFactory array_factory, const bool unity_sum) noexcept
 {
   int num_fields = priml_group.size(group_name);
@@ -529,7 +525,8 @@ inline void passive_advection_helper_
 template <class ImplFunctor>
 void EnzoRiemannImpl<ImplFunctor>::solve_passive_advection_
 (Block* block, Grouping &priml_group, Grouping &primr_group,
- Grouping &flux_group, EFlt3DArray &density_flux, int dim, int stale_depth)
+ Grouping &flux_group, const EFlt3DArray &density_flux, int dim,
+ int stale_depth)
   const throw()
 {
 

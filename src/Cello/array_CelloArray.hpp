@@ -145,30 +145,6 @@ private:
 
 //----------------------------------------------------------------------
 
-template<typename T>
-class dataWrapper
-{
-  /// @class    dataWrapper
-  /// @ingroup  Array
-  /// @brief    [\ref Array] used to help track ownership of the underlying
-  ///           memory used by CelloArray
-  ///
-  /// The main idea is to track this object as a shared pointer. Starting in
-  /// C++17, this might not be necessary - in that standard, shared pointers
-  /// gained the ability provide index access to the stored pointer
-public:
-
-  dataWrapper(T* data, bool owns_ptr) : data_(data), owns_ptr_(owns_ptr) { };
-  ~dataWrapper() {if (owns_ptr_) { delete[] data_; }}
-  T* get() const noexcept { return data_; }
-
-private:
-  T *data_;
-  bool owns_ptr_;
-};
-
-//----------------------------------------------------------------------
-
 /// This serves as the terminating function call in the tail recursion to check
 /// the validity of the indicies passed to CelloArray
 ///
@@ -274,6 +250,20 @@ template <bool... vals> using all_true = std::is_same<bool_pack<true, vals...>,
 
 //----------------------------------------------------------------------
 
+/// This serves as the terminal tail recursion function call used to convert
+/// multi-dimensional indices to a single index of the underlying pointer
+/// wrapped by FixedDimArray_
+template<typename T>
+intp calc_index_(intp* stride, T first, T last){
+  // last element in stride is alway 1
+  return (*stride)*first + last;
+}
+
+/// This is a function overload for calc_index that handles the edge case where
+/// the array is 1 dimensional
+template<typename T>
+intp calc_index_(intp* stride, T first){return first;}
+
 /// a helper function template that helps convert multi-dimensional indices to
 /// a single index (or address) of the appropriate element in the underlying
 /// pointer wrapped by FixedDimArray_
@@ -296,22 +286,8 @@ template <bool... vals> using all_true = std::is_same<bool_pack<true, vals...>,
 template<typename T, typename... Rest>
 intp calc_index_(intp* stride, T first, Rest... rest){
   // gets unrolled at compile time
-  return (*stride)*first + calc_index_(++stride, rest...);
+  return (*stride)*first + calc_index_(stride+1, rest...);
 }
-
-/// This serves as the terminal tail recursion function call used to convert
-/// multi-dimensional indices to a single index of the underlying pointer
-/// wrapped by FixedDimArray_
-template<typename T>
-intp calc_index_(intp* stride, T first, T last){
-  // last element in stride is alway 1
-  return (*stride)*first + last;
-}
-
-/// This is a function overload for calc_index that handles the edge case where
-/// the array is 1 dimensional
-template<typename T>
-intp calc_index_(intp* stride, T first){return first;}
 
 //----------------------------------------------------------------------
 
@@ -403,39 +379,39 @@ public: // interface
   /// @param args The indices for each dimension of the array. The number of
   ///     provided indices must match the number of array dimensions, D.
   template<typename... Args, REQUIRE_INT(Args)>
-  T &operator() (Args... args) {
+  T &operator() (Args... args) noexcept {
     static_assert(D==sizeof...(args),
 		  "Number of indices don't match number of dimensions");
     CHECK_BOUNDND(shape_, args)
-    CHECK_IF_FINITE(data_[offset_ + calc_index_(stride_,args...)]);
-    return data_[offset_ + calc_index_(stride_,args...)];
+    CHECK_IF_FINITE(shared_data_.get()[offset_ + calc_index_(stride_,args...)]);
+    return shared_data_.get()[offset_ + calc_index_(stride_,args...)];
   }
   template<typename... Args, REQUIRE_INT(Args)>
-  T operator() (Args... args) const {
+  T operator() (Args... args) const noexcept {
     static_assert(D==sizeof...(args),
 		  "Number of indices don't match number of dimensions");
     CHECK_BOUNDND(shape_, args)
-    CHECK_IF_FINITE(data_[offset_ + calc_index_(stride_,args...)]);
-    return data_[offset_ + calc_index_(stride_,args...)];
+    CHECK_IF_FINITE(shared_data_.get()[offset_ + calc_index_(stride_,args...)]);
+    return shared_data_.get()[offset_ + calc_index_(stride_,args...)];
   }
 
   // Specialized implementation for 3D arrays (to reduce compile time)
-  T &operator() (const int k, const int j, const int i){
+  T &operator() (const int k, const int j, const int i) noexcept {
     static_assert(D==3, "3 indices should only be specified for 3D arrays");
     CHECK_BOUND3D(shape_, k, j, i)
-    CHECK_IF_FINITE(data_[offset_ + k*stride_[0] + j*stride_[1] + i])
-    return data_[offset_ + k*stride_[0] + j*stride_[1] + i];
+    CHECK_IF_FINITE(shared_data_.get()[offset_ + k*stride_[0] + j*stride_[1] + i])
+    return shared_data_.get()[offset_ + k*stride_[0] + j*stride_[1] + i];
   }
-  T operator() (const int k, const int j, const int i) const{
+  T operator() (const int k, const int j, const int i) const noexcept {
     static_assert(D==3, "3 indices should only be specified for 3D arrays");
     CHECK_BOUND3D(shape_, k, j, i)
-    CHECK_IF_FINITE(data_[offset_ + k*stride_[0] + j*stride_[1] + i])
-    return data_[offset_ + k*stride_[0] + j*stride_[1] + i];
+    CHECK_IF_FINITE(shared_data_.get()[offset_ + k*stride_[0] + j*stride_[1] + i])
+    return shared_data_.get()[offset_ + k*stride_[0] + j*stride_[1] + i];
   }
 
 
   /// Produce a deepcopy of the array.
-  TempArray_<T,D> deepcopy();
+  TempArray_<T,D> deepcopy() const noexcept;
 
   /// Return a subarray with the same number of dimensions, D.
   ///
@@ -456,19 +432,19 @@ public: // interface
   /// the result of this method is first assigned to another variable and the
   /// variable is placed on the LHS, then different behavior will occur.
   template<typename... Args, REQUIRE_TYPE(Args,CSlice)>
-  TempArray_<T,D> subarray(Args... args);
+  TempArray_<T,D> subarray(Args... args) noexcept;
 
   /// Returns the length of a given dimension
   ///
   /// @param dim Indicates the dimension for which we want the shape
-  int shape(unsigned int dim){
+  int shape(unsigned int dim) const noexcept{
     ASSERT1("FixedDimArray_", "%ui is greater than the number of dimensions",
 	    dim, dim<D);
     return (int)shape_[dim];
   }
 
   /// Returns the total number of elements held by the array
-  intp size(){
+  intp size() const noexcept{
     intp out = 1;
     for (std::size_t i=0; i<D; i++){
       out*=shape_[i];
@@ -479,8 +455,7 @@ public: // interface
   /// Swaps the contents of this array with the contents of a different array.
   /// This is only defined for arrays with the same numbers of dimensions D
   friend void swap(FixedDimArray_<T,D> &first, FixedDimArray_<T,D> &second){
-    std::swap(first.dataMgr_, second.dataMgr_);
-    std::swap(first.data_, second.data_);
+    std::swap(first.shared_data_, second.shared_data_);
     std::swap(first.offset_, second.offset_);
     std::swap(first.shape_, second.shape_);
     std::swap(first.stride_, second.stride_);
@@ -492,8 +467,7 @@ protected: // methods to be reused by subclasses
   ///
   /// Not public to prevent initialization of instances of FixedDimArray_
   FixedDimArray_()
-    : dataMgr_(),
-      data_(NULL),
+    : shared_data_(),
       offset_(0),
       shape_(),
       stride_()
@@ -520,24 +494,21 @@ protected: // methods to be reused by subclasses
   FixedDimArray_(T* array, Args... args);
 
   /// Assists with the initialization of the FixedDimArray_ objects
-  void init_helper_(const std::shared_ptr<dataWrapper<T>> &dataMgr,
-		    const intp shape[D], const intp offset){
-    if (dataMgr){
-      data_ = dataMgr->get();
-    } else {
-      // If we allowed copy from an uninitialized array, then the relevant
-      // data_ objects would not be linked as expected
+  void init_helper_(const std::shared_ptr<T> &shared_data,
+		    const intp shape_arr[D], const intp offset){
+    if ((shared_data.get() == nullptr) || (shared_data.use_count() == 0)){
       ERROR("FixedDimArray_::init_helper_",
-	    "dataMgr must own a pointer. This probably means that the current "
-	    "array is being moved/copied from an uninitialized array.");
+	    "shared_data must not hold a NULL pointer or be empty. The "
+            "current array is probably being moved/copied from an "
+            "uninitialized array.");
     }
-    dataMgr_ = dataMgr;
+    shared_data_ = shared_data;
     offset_ = offset;
 
     std::size_t i = D;
     while (i>0){
       --i;
-      shape_[i] = shape[i];
+      shape_[i] = shape_arr[i];
       if (i + 1 == D){
 	stride_[i] = 1;
       } else {
@@ -547,22 +518,19 @@ protected: // methods to be reused by subclasses
   }
 
   /// Assists with the destruction of FixedDimArray_
-  void cleanup_helper_(){ data_ = NULL; }
+  void cleanup_helper_(){ }
 
   /// this method is provided to assist with the optional debugging mode that
   /// checks if provided wrapped arrays contain NaNs or infs
   ///
   /// this is implicitly called, so it is not made available to users
-  void assert_all_entries_finite_();
+  void assert_all_entries_finite_() const noexcept;
 
 public: // attributes
   // (these are only public so that various subclasses can access these)
 
-  /// manages ownership of data_
-  std::shared_ptr<dataWrapper<T>> dataMgr_;
-
-  /// pointer to data (copied from dataMgr for faster access to elements)
-  T* data_;
+  /// shared pointer to data
+  std::shared_ptr<T> shared_data_;
 
   /// offset of the address of the first array element from the address of the
   /// start of the underlying pointer
@@ -611,11 +579,10 @@ FixedDimArray_<T,D>::FixedDimArray_(Args... args)
   for (std::size_t i=0; i < D; i++){
     size *= shape[i];
   }
-  T* data = new T[size](); // allocate and set entries to 0
 
-  std::shared_ptr<dataWrapper<T>> dataMgr;
-  dataMgr = std::make_shared<dataWrapper<T>>(data,true);
-  init_helper_(dataMgr, shape, 0);
+  std::shared_ptr<T> shared_data(new T[size](), // allocate & set entries to 0
+                                 std::default_delete<T[]>());
+  init_helper_(shared_data, shape, 0);
 }
 
 //----------------------------------------------------------------------
@@ -629,9 +596,10 @@ FixedDimArray_<T,D>::FixedDimArray_(T* array, Args... args)
   intp shape[D] = {((intp)args)...};
   check_array_shape_(shape, D);
 
-  std::shared_ptr<dataWrapper<T>> dataMgr;
-  dataMgr = std::make_shared<dataWrapper<T>>(array,false);
-  init_helper_(dataMgr, shape, 0);
+  // specify a dummy deleter functor so that the array is not actually deleted
+  // when reference counts go to zero
+  std::shared_ptr<T> shared_data(array, [](T* p) { /* dummy deleter */ });
+  init_helper_(shared_data, shape, 0);
   CHECK_IF_ARRAY_FINITE(value)
 }
 
@@ -680,12 +648,14 @@ inline void prep_slices_(const CSlice* slices, const intp shape[],
 // Returnd TempArray_ representing a view of a subarray of the current instance
 template<typename T, std::size_t D>
 template<typename... Args, class>
-TempArray_<T,D> FixedDimArray_<T,D>::subarray(Args... args){
+TempArray_<T,D> FixedDimArray_<T,D>::subarray(Args... args) noexcept{
+  // TODO: put some thought into creating a const-qualified version of this
+  // function
   static_assert(D == sizeof...(args) || 0 == sizeof...(args),
 		"Number of slices don't match number of dimensions");
   TempArray_<T,D> subarray;
   if (sizeof...(args) == 0) {
-    subarray.init_helper_(dataMgr_,shape_,offset_);
+    subarray.init_helper_(shared_data_,shape_,offset_);
   } else {
     CSlice in_slices[] = {args...};
     CSlice slices[D];
@@ -698,7 +668,7 @@ TempArray_<T,D> FixedDimArray_<T,D>::subarray(Args... args){
       new_offset += slices[dim].get_start() * stride_[dim];
     }
 
-    subarray.init_helper_(dataMgr_,new_shape,new_offset);
+    subarray.init_helper_(shared_data_,new_shape,new_offset);
     for (std::size_t dim=0; dim<D; dim++){
       subarray.stride_[dim] = stride_[dim];
     }
@@ -709,13 +679,13 @@ TempArray_<T,D> FixedDimArray_<T,D>::subarray(Args... args){
 //----------------------------------------------------------------------
 
 template<typename T, std::size_t D>
-TempArray_<T,D> FixedDimArray_<T,D>::deepcopy()
+TempArray_<T,D> FixedDimArray_<T,D>::deepcopy() const noexcept
 {
-  T* data = new T[size()]; // allocate but don't initialize values
-  std::shared_ptr<dataWrapper<T>> dataMgr;
-  dataMgr = std::make_shared<dataWrapper<T>>(data,true);
+  std::shared_ptr<T> new_data(new T[size()], std::default_delete<T[]>());
   TempArray_<T,D> out;
-  out.init_helper_(dataMgr, shape_, 0);
+  out.init_helper_(new_data, shape_, 0);
+  // Take advantage of how TempArray_'s assignment operator performs
+  // elementwise assignment
   out = *this;
   return out;
 }
@@ -723,7 +693,7 @@ TempArray_<T,D> FixedDimArray_<T,D>::deepcopy()
 //----------------------------------------------------------------------
 
 template<typename T, std::size_t D>
-void FixedDimArray_<T,D>::assert_all_entries_finite_()
+void FixedDimArray_<T,D>::assert_all_entries_finite_() const noexcept
 {
   bool continue_outer_iter = true;
   intp indices[D] = {}; // all elements to 0
@@ -731,7 +701,7 @@ void FixedDimArray_<T,D>::assert_all_entries_finite_()
     intp index = calc_index_(D, this->offset_, this->stride_, indices);
     for (intp i = 0; i<this->shape_[D-1]; i++){
 
-      if (!check_if_finite_(this->data_[index])){
+      if (!check_if_finite_(this->shared_data_.get()[index])){
 	//  let's get the indices as a string
 	std::string str_indices = "";
 	for (std::size_t j=0; j+1<D; j++){
@@ -739,7 +709,8 @@ void FixedDimArray_<T,D>::assert_all_entries_finite_()
 	}
 	str_indices += std::to_string(i);
 
-	ASSERT1("FixedDimArray_", "The element at (%s) has a non_NaN value.",
+	ASSERT1("FixedDimArray_::assert_all_entries_finite_()",
+                "The element at (%s) has a non-finite value.",
 		str_indices.c_str(),false);
 
       }
@@ -770,12 +741,14 @@ public: // interface
   /// Assigns to each element of *this the value of the corresponding element in
   /// other. Shapes must match
   TempArray_<T,D>& operator=(const TempArray_<T,D>& other){
-    assign_helper_(other.offset_,other.stride_,other.shape_, other.data_);
+    assign_helper_(other.offset_,other.stride_,other.shape_,
+                   other.shared_data_.get());
     return *this;
   }
 
   TempArray_<T,D>& operator=(const CelloArray<T,D>& other){
-    assign_helper_(other.offset_,other.stride_, other.shape_, other.data_);
+    assign_helper_(other.offset_,other.stride_, other.shape_,
+                   other.shared_data_.get());
     return *this;
   }
 
@@ -799,7 +772,7 @@ private:
       intp index = calc_index_(D, this->offset_, this->stride_, indices);
       intp o_index = calc_index_(D, o_offset, o_stride, indices);
       for (intp i = 0; i<this->shape_[D-1]; i++){
-	this->data_[index] = o_data[o_index];
+	this->shared_data_.get()[index] = o_data[o_index];
 	index++; o_index++;
       }
       continue_outer_iter = increment_outer_indices_(D, indices, this->shape_);
@@ -818,7 +791,7 @@ TempArray_<T,D>& TempArray_<T,D>::operator=(const T& val)
   while (continue_outer_iter){
     intp index = calc_index_(D, this->offset_, this->stride_, indices);
     for (intp i = 0; i<this->shape_[D-1]; i++){
-      this->data_[index] = val;
+      this->shared_data_.get()[index] = val;
       index++;
     }
     continue_outer_iter = increment_outer_indices_(D, indices, this->shape_);
@@ -865,7 +838,7 @@ public: // interface
 
   /// Copy constructor. Makes *this a shallow copy of other.
   CelloArray(const CelloArray<T,D>& other){
-    this->init_helper_(other.dataMgr_, other.shape_, other.offset_);
+    this->init_helper_(other.shared_data_, other.shape_, other.offset_);
   }
 
   /// Move constructor. Constructs the array with the contents of other
@@ -878,7 +851,7 @@ public: // interface
   /// *this are unaffected by this method)
   CelloArray<T,D>& operator=(const CelloArray<T,D>& other){
     this->cleanup_helper_();
-    this->init_helper_(other.dataMgr_, other.shape_, other.offset_);
+    this->init_helper_(other.shared_data_, other.shape_, other.offset_);
     return *this;
   }
 
