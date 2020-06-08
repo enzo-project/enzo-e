@@ -341,7 +341,7 @@ EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
 
   // Time of first SN (input in Myr, stored in yr)
   //     Forces a fixed delay time for all SNe
-  time_first_sn_ = enzo_config->method_feedback_time_first_sn * 1000.0;
+  time_first_sn_ = enzo_config->method_feedback_time_first_sn * 1.0E6;
 
 
 
