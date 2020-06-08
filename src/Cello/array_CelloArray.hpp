@@ -656,6 +656,13 @@ TempArray_<T,D> FixedDimArray_<T,D>::subarray(Args... args) noexcept{
   TempArray_<T,D> subarray;
   if (sizeof...(args) == 0) {
     subarray.init_helper_(shared_data_,shape_,offset_);
+    //print_index_<D>(this->stride_,std::string("original array strides"));
+    //print_index_<D>(subarray.stride_,std::string("subarray strides"));
+    // the following is essential for cases where the array being subclassed
+    // is already a subarray
+    for (std::size_t dim=0; dim<D; dim++){
+      subarray.stride_[dim] = this->stride_[dim];
+    }
   } else {
     CSlice in_slices[] = {args...};
     CSlice slices[D];
