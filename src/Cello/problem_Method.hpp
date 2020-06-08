@@ -116,6 +116,8 @@ protected: // attributes
   /// List of fields required for the Method
   std::vector<std::string> required_fields_;
 
+  /// Specifies centering of required fields that are not cell-centered
+  std::map<std::string, std::array<int,3>> field_centering_;
 };
 
 #endif /* PROBLEM_METHOD_HPP */

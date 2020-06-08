@@ -169,7 +169,9 @@ EnzoMethodGravity::EnzoMethodGravity
 #ifdef DEBUG_COPY_DENSITY
   this->required_fields_.push_back("density_total_copy");
 #endif
-
+#ifdef READ_ENZO_POTENTIAL
+  this->required_fields_.push_back({"potential_enzo","potential_dff"});
+#endif
 
   if (accumulate){
     this->required_fields_.insert(this->required_fields_.end(),
