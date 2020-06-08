@@ -226,7 +226,8 @@ int EnzoBlock::SolveHydroEquations
       jend[axis] = u3[axis_j];
 
       for (int face = 0; face < 2; face++) {
-        flux_index[axis*2+face] = &flux_array[axis][face][i_f][0] - standard;
+        flux_index[axis*2+face] =
+          ( ( enzo_float * ) flux_array[axis][face][i_f].data()) - standard;
       }
     }
   }
