@@ -47,7 +47,7 @@
       list += ["dark"];
 
       dark {
-          groups = ["has_mass"];
+          group_list = ["has_mass"];
 
 	  attributes = ["x", "default",
                         "y", "default",
