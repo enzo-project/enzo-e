@@ -64,6 +64,7 @@ EnzoConfig::EnzoConfig() throw ()
 #endif /* CONFIG_USE_GRACKLE */
   initial_feedback_test_density(),
   initial_feedback_test_star_mass(),
+  initial_feedback_test_temperature(),
   // EnzoInitialMusic
   initial_music_field_files(),
   initial_music_field_datasets(),
@@ -380,6 +381,7 @@ void EnzoConfig::pup (PUP::er &p)
   PUParray(p, initial_feedback_test_position,3);
   p | initial_feedback_test_density;
   p | initial_feedback_test_star_mass;
+  p | initial_feedback_test_temperature;
 
   PUParray(p, initial_IG_center_position,3);
   PUParray(p, initial_IG_bfield,3);
@@ -868,6 +870,9 @@ void EnzoConfig::read(Parameters * p) throw()
 
   initial_feedback_test_star_mass = p->value_float
     ("Initial:feedback_test:star_mass", 1000.0);
+
+  initial_feedback_test_temperature = p->value_float
+    ("Initial:feedback_test:temperature", 1.0E4);
 
   method_check_gravity_particle_type = p->value_string
     ("Method:check_gravity:particle_type","dark");

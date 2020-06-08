@@ -89,7 +89,7 @@ void EnzoInitialFeedbackTest::enforce_block
 
          for (int dim = 0; dim < 3; dim++) v3[dim][i] = 0.0;
 
-         ge[i] = 1.0E4 / enzo_config->ppm_mol_weight / enzo_units->temperature() /
+         ge[i] = enzo_config->initial_feedback_test_temperature / enzo_config->ppm_mol_weight / enzo_units->temperature() /
                          (enzo_config->field_gamma - 1.0);
 
          for (int dim = 0; dim < 3; dim ++)
