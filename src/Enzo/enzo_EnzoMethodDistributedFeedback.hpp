@@ -50,7 +50,7 @@ public:
 
   void inject_feedback(Block * block,
                        double xpos, double ypos, double zpos,
-                       double m_eject, double E_51, double ke_fraction,
+                       double m_eject, double E_51, double ke_f,
                        double metal_fraction,
                        enzo_float pvx = -9999.0, enzo_float pvy = -9999.0,
                        enzo_float pvz = -9999.0);
