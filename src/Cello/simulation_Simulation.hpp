@@ -19,6 +19,8 @@ class Performance;
 class Problem;
 class Schedule;
 
+// #define DEBUG_NEW_REFRESH
+
 #include <errno.h>
 #include "mesh.decl.h"
 #include "simulation.decl.h"

@@ -16,9 +16,9 @@ FaceFluxes::FaceFluxes (Face face, int index_field,
                         int cx, int cy, int cz)
   : face_(face),
     level_block_(level),
-    level_fluxes_(level),
+    level_neighbor_(level),
     dt_block_(dt),
-    dt_fluxes_(dt),
+    dt_neighbor_(dt),
     fluxes_(),
     index_field_(index_field),
     nx_(nx),ny_(ny),nz_(nz),
@@ -48,9 +48,9 @@ void FaceFluxes::pup (PUP::er &p)
   p | face_;
 
   p | level_block_;
-  p | level_fluxes_;
+  p | level_neighbor_;
   p | dt_block_;
-  p | dt_fluxes_;
+  p | dt_neighbor_;
 
   p | fluxes_;
 
@@ -86,7 +86,6 @@ void FaceFluxes::set_flux_array ( std::vector<double> array,
           fluxes_.size(),mx*my*mz,mx,my,mz,
           (fluxes_.size() >= mx*my*mz) );
 
-    
   for (int iz=0; iz<mz; iz++) {
     for (int iy=0; iy<my; iy++) {
       for (int ix=0; ix<mx; ix++) {
@@ -116,8 +115,8 @@ std::vector<double> & FaceFluxes::flux_array (int * dx, int * dy, int *dz)
 float ratio_cell_volume
 (const FaceFluxes & ff_1, const FaceFluxes & ff_2, const int rank)
 {
-  const int L_1 = ff_1.level_fluxes();
-  const int L_2 = ff_2.level_fluxes();
+  const int L_1 = ff_1.level_neighbor();
+  const int L_2 = ff_2.level_neighbor();
   if (L_1 <= L_2) {
     const int shift = (1 << (L_2 - L_1)*rank);
     return 1.0 * shift;
@@ -131,7 +130,7 @@ float ratio_cell_volume
 
 float ratio_time_step (const FaceFluxes & ff_1, const FaceFluxes & ff_2)
 {
-  return ff_1.time_step_fluxes() / ff_2.time_step_fluxes();
+  return ff_1.time_step_block() / ff_2.time_step_block();
 }
   
 //----------------------------------------------------------------------
@@ -168,13 +167,6 @@ void FaceFluxes::coarsen ()
         fluxes_[iycm*dyc + izcp*dzc] += fluxes_fine[i_f];
         fluxes_[iycp*dyc + izcm*dzc] += fluxes_fine[i_f];
         fluxes_[iycp*dyc + izcp*dzc] += fluxes_fine[i_f];
-#ifdef DEBUG_FACE_FLUXES        
-        CkPrintf ("coarsen x-face fluxes_c[%d %d %d %d] += fluxes_f[%d] \n",
-                  iycm*dyc + izcm*dzc,
-                  iycm*dyc + izcp*dzc,
-                  iycp*dyc + izcm*dzc,
-                  iycp*dyc + izcp*dzc,i_f);
-#endif        
       }
     }
   } else if (myf == 1) {
@@ -190,13 +182,6 @@ void FaceFluxes::coarsen ()
         fluxes_[izcp*dzc + ixcm*dxc] += fluxes_fine[i_f];
         fluxes_[izcm*dzc + ixcp*dxc] += fluxes_fine[i_f];
         fluxes_[izcp*dzc + ixcp*dxc] += fluxes_fine[i_f];
-#ifdef DEBUG_FACE_FLUXES        
-        CkPrintf ("coarsen y-face fluxes_c[%d %d %d %d] += fluxes_f[%d] \n",
-                  ixcm*dxc + izcm*dzc,
-                  ixcm*dxc + izcp*dzc,
-                  ixcp*dxc + izcm*dzc,
-                  ixcp*dxc + izcp*dzc,i_f);
-#endif        
       }
     }
   } else if (mzf == 1) {
@@ -212,25 +197,18 @@ void FaceFluxes::coarsen ()
         fluxes_[ixcp*dxc + iycm*dyc] += fluxes_fine[i_f];
         fluxes_[ixcm*dxc + iycp*dyc] += fluxes_fine[i_f];
         fluxes_[ixcp*dxc + iycp*dyc] += fluxes_fine[i_f];
-#ifdef DEBUG_FACE_FLUXES        
-        CkPrintf ("coarsen z-face fluxes_c[%d %d %d %d] += fluxes_f[%d] \n",
-                  iycm*dyc + ixcm*dxc,
-                  iycm*dyc + ixcp*dxc,
-                  iycp*dyc + ixcm*dxc,
-                  iycp*dyc + ixcp*dxc,i_f);
-#endif
       }
     }
   }
   nx_ = (nx_ != 1) ? nx_>>1 : 1;
   ny_ = (ny_ != 1) ? ny_>>1 : 1;
   nz_ = (nz_ != 1) ? nz_>>1 : 1;
-  --level_fluxes_;
+  --level_neighbor_;
 }
   
 //----------------------------------------------------------------------
 
-FaceFluxes & FaceFluxes::operator += (const FaceFluxes & ff_2)
+void FaceFluxes::accumulate (const FaceFluxes & ff_2, int cx,int cy, int cz)
 {
   FaceFluxes & ff_1 = *this;
 
@@ -238,14 +216,14 @@ FaceFluxes & FaceFluxes::operator += (const FaceFluxes & ff_2)
   int nx1,ny1,nz1;
   int mx1,my1,mz1;
   
-  ff_1.get_start(&ix01,&iy01,&iz01,ff_2);
+  ff_1.get_start(&ix01,&iy01,&iz01,cx,cy,cz,ff_2);
   ff_1.get_size(&nx1,&ny1,&nz1,ff_2);
   ff_1.get_dimensions(&mx1,&my1,&mz1);
   
   int ix02,iy02,iz02;
   int nx2,ny2,nz2;
   int mx2,my2,mz2;
-  ff_2.get_start(&ix02,&iy02,&iz02,ff_1);
+  ff_2.get_start(&ix02,&iy02,&iz02,cx,cy,cz,ff_1);
   ff_2.get_size(&nx2,&ny2,&nz2,ff_1);
   ff_2.get_dimensions(&mx2,&my2,&mz2);
 
@@ -263,8 +241,6 @@ FaceFluxes & FaceFluxes::operator += (const FaceFluxes & ff_2)
       }
     }
   }
-  
-  return *this;
 }
   
 //----------------------------------------------------------------------
@@ -294,9 +270,9 @@ int FaceFluxes::data_size () const
   int n = fluxes_.size();
   size += n*sizeof(double);
   size += sizeof(int);    // int level_block_;
-  size += sizeof(int);    // int level_fluxes_;
+  size += sizeof(int);    // int level_neighbor_;
   size += sizeof(double);    // double dt_block_;
-  size += sizeof(double);    // double dt_fluxes_;
+  size += sizeof(double);    // double dt_neighbor_;
   size += sizeof(int);    // int index_field_;
   size += 3*sizeof(int);  // int nx_,ny_,nz_;
   size += 3*sizeof(int);  // int cx_,cy_,cz_;
@@ -326,9 +302,9 @@ char * FaceFluxes::save_data (char * buffer) const
     (*pd++) = fluxes_[i];
   }
   (*pi++) = level_block_;
-  (*pi++) = level_fluxes_;
+  (*pi++) = level_neighbor_;
   (*pd++) = dt_block_;
-  (*pd++) = dt_fluxes_;
+  (*pd++) = dt_neighbor_;
   (*pi++) = index_field_;
   (*pi++) = nx_;
   (*pi++) = ny_;
@@ -367,9 +343,9 @@ char * FaceFluxes::load_data (char * buffer)
     fluxes_[i] = (*pd++);
   }
   level_block_ = (*pi++);
-  level_fluxes_ = (*pi++);
+  level_neighbor_ = (*pi++);
   dt_block_ = (*pd++);
-  dt_fluxes_ = (*pd++);
+  dt_neighbor_ = (*pd++);
   index_field_ = (*pi++);
   nx_ = (*pi++);
   ny_ = (*pi++);

@@ -8,6 +8,17 @@
 #include "problem.hpp"
 #include "charm_simulation.hpp"
 
+// #define DEBUG_METHOD_FLUX_CORRECT
+
+#ifdef DEBUG_METHOD_FLUX_CORRECT
+#   define TRACE_FLUX_CORRECT(BLOCK,MSG)                                \
+  CkPrintf ("DEBUG_METHOD_FLUX_CORRECT level-%d %s %d %s MethodFluxCorrect::compute()\n", \
+            BLOCK->level(),MSG,CkMyPe(),BLOCK->name().c_str());         \
+  fflush(stdout);
+#else
+#   define TRACE_FLUX_CORRECT(BLOCK,MSG)  /* ... */  
+#endif
+
 //----------------------------------------------------------------------
 
 MethodFluxCorrect::MethodFluxCorrect (std::string group) throw() 
@@ -35,19 +46,39 @@ MethodFluxCorrect::MethodFluxCorrect (std::string group) throw()
 
 void MethodFluxCorrect::compute ( Block * block) throw()
 {
+  TRACE_FLUX_CORRECT(block,"1 ENTER");
   cello::refresh(ir_pre_)->set_active(block->is_leaf());
+  TRACE_FLUX_CORRECT(block,"1 EXIT  ");
+  
   block->new_refresh_start
     (ir_pre_, CkIndex_Block::p_method_flux_correct_refresh());
+  //  block->debug_new_refresh(__FILE__,__LINE__);
 }
+
+//----------------------------------------------------------------------
 
 void Block::Block::p_method_flux_correct_refresh()
 {
+  //  this->debug_new_refresh(__FILE__,__LINE__);
+  TRACE_FLUX_CORRECT(this,"2 ENTER");
   static_cast<MethodFluxCorrect*>
     (this->method())->compute_continue_refresh(this);
+  TRACE_FLUX_CORRECT(this,"2 EXIT ");
 }
+
+//----------------------------------------------------------------------
 
 void MethodFluxCorrect::compute_continue_refresh( Block * block ) throw()
 {
+  //   block->debug_new_refresh(__FILE__,__LINE__);
+  TRACE_FLUX_CORRECT(block,"3 ENTER");
+
+  // @@@@@ TEMPORARY @@@@@
+  //  TRACE_FLUX_CORRECT(block,"3 EXIT ");
+  //  block->compute_done();
+  //  return;
+  // @@@@@ TEMPORARY @@@@@
+
   // block sum mass, momentum, energy
   long double reduce[3] = {0.0, 0.0, 0.0};
 
@@ -110,17 +141,27 @@ void MethodFluxCorrect::compute_continue_refresh( Block * block ) throw()
 
   block->contribute
     (2*sizeof(long double), &reduce, sum_long_double_n_type, callback);
+  TRACE_FLUX_CORRECT(block,"3 EXIT ");
 }
+
+//----------------------------------------------------------------------
 
 void Block::Block::r_method_flux_correct_sum_fields(CkReductionMsg * msg)
 {
+  //   this->debug_new_refresh(__FILE__,__LINE__);
+  TRACE_FLUX_CORRECT(this,"4 ENTER");
   static_cast<MethodFluxCorrect*>
     (this->method())->compute_continue_sum_fields(this,msg);
+  TRACE_FLUX_CORRECT(this,"4 EXIT ");
 }
+
+//----------------------------------------------------------------------
 
 void MethodFluxCorrect::compute_continue_sum_fields
 ( Block * block, CkReductionMsg * msg) throw()
 {
+  //   block->debug_new_refresh(__FILE__,__LINE__);
+  TRACE_FLUX_CORRECT(block,"5 ENTER");
 
   long double * data = (long double *) msg->getData();
 
@@ -150,6 +191,13 @@ void MethodFluxCorrect::compute_continue_sum_fields
 
   if (block->is_leaf()) {
 
+    FluxData * flux_data = block->data()->flux_data();
+
+    auto field_names = block->data()->field().groups()->group_list("conserved");
+    
+    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    
+    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     // Loop over neighbors in different levels
 
     // ... only include facet neighbors, not edges or corners
@@ -169,5 +217,6 @@ void MethodFluxCorrect::compute_continue_sum_fields
       }
     }
   }  
+  TRACE_FLUX_CORRECT(block,"5 EXIT ");
   block->compute_done();
 }

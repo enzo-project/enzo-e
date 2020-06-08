@@ -366,6 +366,32 @@ c
                 array(colindex(n*6+6,ic)+offset) = 
      &                                       colf(rface(n*3+3)+2, i, ic)
              enddo
+c@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+c     FOR DEBUGGING ONLY
+c@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+             array(dindex(n*6+5)+offset) = 3000.0
+             array(dindex(n*6+6)+offset) = 3001.0
+             array(eindex(n*6+5)+offset) = 3010.
+             array(eindex(n*6+6)+offset) = 3011.
+             array(uindex(n*6+5)+offset) = 3020.
+             array(uindex(n*6+6)+offset) = 3021.
+             if (nyz .gt. 1) then
+                array(vindex(n*6+5)+offset) = 3030.
+                array(vindex(n*6+6)+offset) = 3031.
+             endif
+             if (nzz .gt. 1) then
+                array(windex(n*6+5)+offset) = 3040.
+                array(windex(n*6+6)+offset) = 3041.
+             endif
+             if (idual .eq. 1) then
+                array(geindex(n*6+5)+offset) = 3050.
+                array(geindex(n*6+6)+offset) = 3051.
+             endif
+             do ic=1, ncolor
+                array(colindex(n*6+5,ic)+offset) = 3100.+10*(ic-1)
+                array(colindex(n*6+6,ic)+offset) = 3101.+10*(ic-1)
+             enddo
+c@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
           enddo
         endif
       enddo

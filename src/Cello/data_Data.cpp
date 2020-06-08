@@ -142,6 +142,8 @@ void Data::allocate () throw()
     field_data_[i]->set_history_(cello::field_descr());
     field_data_[i]->allocate_permanent(cello::field_descr(),true);
   }
+  // initialize Flux field list
+  
 }
 
 //======================================================================

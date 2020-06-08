@@ -55,20 +55,20 @@ public: // interface
   Face face () const
   { return face_; }
 
-  /// Return the mesh level associated with the fluxes (may change if
-  /// fluxes are coarsened)
-  int level_fluxes () const
-  { return level_fluxes_; }
+  /// Return the mesh level associated with the neighbor block (may
+  /// change if fluxes are coarsened)
+  int level_neighbor () const
+  { return level_neighbor_; }
 
   /// Return the mesh level associated with the block on which the
   /// fluxes were originally defined
   int level_block () const
   { return level_block_; }
   
-  /// Return the time step associated with the fluxes (may change if
-  /// multiple time steps accumulated)
-  double time_step_fluxes () const
-  { return dt_fluxes_; }
+  /// Return the time step associated with the neighbor block (may
+  /// change if multiple time steps accumulated)
+  double time_step_neighbor () const
+  { return dt_neighbor_; }
     
   /// Return the time step associated with the block on which the
   /// fluxes were originally defined
@@ -77,8 +77,8 @@ public: // interface
   
   /// Return loop limits on this face relative to given neighbor
   /// face fluxes.  Must be conforming.
-
   void get_start(int * ix0, int * iy0, int * iz0,
+                 int cx, int cy, int cz,
                  const FaceFluxes & ff) const
   {
     if (level_block() >= ff.level_block()) {
@@ -89,9 +89,7 @@ public: // interface
     } else {
       // neighbor block is finer, use neighbor child array for start
       int ix,iy,iz;
-      int cx,cy,cz;
       face_.get_face(&ix,&iy,&iz);
-      face_.get_child(&cx,&cy,&cz);
       (*ix0) = (ix != 0) ? 0 : cx*nx_/2;
       (*iy0) = (iy != 0) ? 0 : cy*ny_/2;
       (*iz0) = (iz != 0) ? 0 : cz*nz_/2;
@@ -153,17 +151,16 @@ public: // interface
   
   /// Coarsen a FaceFluxes object by reducing dimensions by two along
   /// each face dimension, and summing fine elements contained in each
-  /// coarse flux element. Updates level_fluxes_ accordingly. Used for
+  /// coarse flux element. Updates level_neighbor_ accordingly. Used for
   /// coarsening fine-level fluxes to match coarse level fluxes.
   void coarsen ();
   
   /// Add FaceFluxes object to this one. FaceFluxes are assumed to be
   /// associated with the same face. Used for accumulating fluxes with
   /// finer time steps until they match the coarser time step. Updates
-  /// dt_fluxes accordingly. Assumes spacially-conforming FaceFlux
+  /// dt_neighbor accordingly. Assumes spacially-conforming FaceFlux
   /// objects: FaceFluxes must be associated with the same face, and
-  /// ratio of cell volumes must be 1.0
-  FaceFluxes & operator += (const FaceFluxes & face_fluxes);
+  void accumulate (const FaceFluxes & face_fluxes, int cx, int cy, int cz);
   
   /// Scale the fluxes array by a scalar constant.
   FaceFluxes & operator *= (double weight);
@@ -196,14 +193,14 @@ private: // attributes
   // Original mesh refinement level
   int level_block_;
 
-  // Mesh refinement level associated with fluxes
-  int level_fluxes_;
+  // Mesh refinement level associated with neighbor block
+  int level_neighbor_;
   
   // Original time step 
   double dt_block_;
 
-  // Time step associated with fluxes
-  double dt_fluxes_;
+  // Time step associated with neighbor block
+  double dt_neighbor_;
 
   // Index of the conserved field the fluxes are associated with
   int index_field_;

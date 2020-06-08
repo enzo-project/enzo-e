@@ -275,6 +275,11 @@ public: // interface
   int sync_type() const 
   { return sync_type_; }
 
+  // Return the id of the synchronization object (used for debugging
+  // only)
+  int sync_id() const
+  { return sync_id_; }
+  
   int sync_exit() const
   { return 3*sync_id_+2; }
 

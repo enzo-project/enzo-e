@@ -41,13 +41,13 @@ PARALLEL_MAIN_BEGIN
     const int cy = test.child[1];
     const int cz = test.child[2];
 
-    Face * face_1 = new Face (ix,iy,iz,rx,ry,rz,cx,cy,cz);
+    Face * face_1 = new Face (ix,iy,iz,rx,ry,rz);
     
     if (rx) ix = -ix;
     if (ry) iy = -iy;
     if (rz) iz = -iz;
 
-    Face * face_2 = new Face (ix,iy,iz,rx,ry,rz,cx,cy,cz);
+    Face * face_2 = new Face (ix,iy,iz,rx,ry,rz);
 
     unit_assert (face_1 != nullptr);
     unit_assert (face_2 != nullptr);
@@ -83,20 +83,6 @@ PARALLEL_MAIN_BEGIN
     unit_assert(rx1 == rx2);
     unit_assert(ry1 == ry2);
     unit_assert(rz1 == rz2);
-
-    //--------------------------------------------------
-
-    unit_func("child()");
-
-    int cx1,cy1,cz1;
-    int cx2,cy2,cz2;
-
-    face_1->get_child(&cx1,&cy1,&cz1);
-    face_2->get_child(&cx2,&cy2,&cz2);
-    
-    unit_assert(cx1 == cx2);
-    unit_assert(cy1 == cy2);
-    unit_assert(cz1 == cz2);
 
     //--------------------------------------------------
 

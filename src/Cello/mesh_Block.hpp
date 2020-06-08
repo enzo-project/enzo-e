@@ -797,6 +797,21 @@ public: // virtual functions
 
   void print () const;
 
+  void debug_new_refresh(const char * file, int line)
+  {
+    CkPrintf ("DEBUG_NEW_REFRESH %s:%d\n",file,line);
+    const int n = new_refresh_sync_list_.size();
+    for (int i=0; i<n; i++) {
+      Sync & sync = new_refresh_sync_list_[i];
+      CkPrintf ("DEBUG_NEW_REFRESH   sync %p %d/%u\n",&sync,sync.value(),sync.stop());
+      CkPrintf ("DEBUG_NEW_REFRESH   state %s\n",
+                (new_refresh_state_list_[i]==RefreshState::INACTIVE) ? "INACTIVE" :
+                ((new_refresh_state_list_[i]==RefreshState::ACTIVE) ? "ACTIVE" : "READY"));
+      CkPrintf ("DEBUG_NEW_REFRESH   mesg %lu\n",new_refresh_msg_list_[i].size());
+    }
+    fflush(stdout);
+  }
+
 protected: // functions
 
   /// Return the child adjacent to the given child in the direction of

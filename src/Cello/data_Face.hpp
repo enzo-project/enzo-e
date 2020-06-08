@@ -21,11 +21,9 @@ public: // interface
   
   /// Constructor
   Face(int ix, int iy, int iz,
-       int rx, int ry, int rz,
-       int cx, int cy, int cz) throw()
+       int rx, int ry, int rz) throw()
     :  ix_(ix),iy_(iy),iz_(iz),
-       rx_(rx),ry_(ry),rz_(rz),
-       cx_(cx),cy_(cy),cz_(cz)
+       rx_(rx),ry_(ry),rz_(rz)
   {
   }
 
@@ -40,9 +38,6 @@ public: // interface
     p | rx_;
     p | ry_;
     p | rz_;
-    p | cx_;
-    p | cy_;
-    p | cz_;
   }
 
   inline bool operator==(const Face& f)
@@ -52,10 +47,7 @@ public: // interface
       &&   (iz_ == f.iz_)
       &&   (rx_ == f.rx_)
       &&   (ry_ == f.ry_)
-      &&   (rz_ == f.rz_)
-      &&   (cx_ == f.cx_)
-      &&   (cy_ == f.cy_)
-      &&   (cz_ == f.cz_);
+      &&   (rz_ == f.rz_);
   }
 
   void get_face (int *ix, int *iy, int *iz) const
@@ -70,13 +62,6 @@ public: // interface
     if (rx) (*rx) = rx_;
     if (ry) (*ry) = ry_;
     if (rz) (*rz) = rz_;
-  }
-
-  void get_child (int *cx, int *cy, int *cz) const
-  {
-    if (cx) (*cx) = cx_;
-    if (cy) (*cy) = cy_;
-    if (cz) (*cz) = cz_;
   }
 
   //--------------------------------------------------
@@ -105,8 +90,6 @@ private: // attributes
   int ix_,iy_,iz_;
   /// Normal direction
   int rx_,ry_,rz_;
-  /// Location of block as child in parent
-  int cx_,cy_,cz_;
 };
 
 #endif /* DATA_FACE_HPP */

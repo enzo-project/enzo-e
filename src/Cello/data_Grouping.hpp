@@ -27,18 +27,6 @@ class Grouping {
 
 public: // interface
 
-  // /// Constructor
-  // Grouping() throw();
-
-  // /// Copy constructor
-  // Grouping(const Grouping & Grouping) throw();
-
-  // /// Assignment operator
-  // Grouping & operator= (const Grouping & Grouping) throw();
-
-  // /// Destructor
-  // ~Grouping() throw();
-
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   { p | groups_; }
@@ -83,6 +71,28 @@ public: // interface
       }
     }
     return "";
+  }
+
+  /// Return a vector of all elements of a group
+  std::vector<std::string> group_list (std::string group)
+  {
+    int count = 0;
+
+    for (auto it=groups_.begin(); it != groups_.end(); it++) {
+      if (it->second == group) {
+	++count;
+      }
+    }
+    std::vector<std::string> list;
+    list.resize(count);
+    count = 0;
+    for (auto it=groups_.begin(); it != groups_.end(); it++) {
+      if (it->second == group) {
+        list[count] = it->first;
+	++count;
+      }
+    }
+    return list;
   }
 protected: // functions
 

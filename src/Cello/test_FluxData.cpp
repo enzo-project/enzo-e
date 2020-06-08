@@ -19,134 +19,252 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("FluxData");
 
-  const int ax=4, ay=4, az=4; // array size
-  const int tx=3, ty=1, tz=2; // tree in array
-
-  int index_field = 3;
-  const int nx = 16;
-  const int ny = 16;
-  const int nz = 16;
+  // e.g. de vx vy vz
+  std::vector<int> field_list = {9,3,4,5};
+  std::vector<int> cx_list = {0,1,0,0};
+  std::vector<int> cy_list = {0,0,1,0};
+  std::vector<int> cz_list = {0,0,0,1};
+  const int nf = field_list.size();
+  const int n3[3] = {16, 24, 20};
   const double dt = 0.125;
-  int cx=1, cy=0, cz=1;
-  FaceFluxes * ff27_blk[3][3][3];
-  FaceFluxes * ff27_nbr[3][3][3];
+  const int level = 7;
 
-
-  unit_func ("deallocate_fluxes()");
   FluxData flux_data;
-  for (int iz=-1; iz<=1; iz++) {
-    for (int iy=-1; iy<=1; iy++) {
-      for (int ix=-1; ix<=1; ix++) {
-        ff27_blk[ix+1][iy+1][iz+1] = nullptr;
-        ff27_nbr[ix+1][iy+1][iz+1] = nullptr;
+
+  std::vector<double> array_blk[3][2][nf];
+  std::vector<double> array_nbr[3][2][nf];
+
+  for (int i_f=0; i_f<nf; i_f++) {
+
+    const int index_field = field_list[i_f];
+
+    for (int axis=0; axis<3; axis++) {
+
+      const int a1 = (axis+1) % 3;
+      const int a2 = (axis+2) % 3;
+
+      const int n1=n3[a1];
+      const int n2=n3[a2];
+
+      for (int face=0; face<2; face++) {
+
+        FaceFluxes * ff_blk = flux_data.block_fluxes(axis,face,index_field);
+        FaceFluxes * ff_nbr = flux_data.neighbor_fluxes(axis,face,index_field);
+        
+        unit_assert (ff_blk == nullptr);
+        unit_assert (ff_nbr == nullptr);
+
+        double value = 7.0 + (axis + 3*(face + 2*(i_f)));
+
+        array_blk[axis][face][i_f].resize(n1*n2);
+        array_nbr[axis][face][i_f].resize(n1*n2);
+
+        auto & b = array_blk[axis][face][i_f];
+        auto & n = array_nbr[axis][face][i_f];
+
+        for (int i1=0; i1<n1; i1++) {
+          for (int i2=0; i2<n2; i2++) {
+            int i=i2+n2*(i1);
+            b[i] = value + i;
+            n[i] = value + i;
+          }
+        }
       }
     }
   }
-  // create face fluxes
-  const int level = 3;
-  const Face f011(0,1,1,1,0,0,cx,cy,cz);
-  const Face f211(2,1,1,1,0,0,cx,cy,cz);
-  const Face f101(1,0,1,0,1,0,cx,cy,cz);
-  const Face f121(1,2,1,0,1,0,cx,cy,cz);
-  const Face f110(1,1,0,0,0,1,cx,cy,cz);
-  const Face f112(1,1,2,0,0,1,cx,cy,cz);
 
-  unit_func("fluxes_blk");
-
-  ff27_blk[0][1][1] = new FaceFluxes (f011,index_field,nx,ny,nz,level,dt);
-  ff27_blk[2][1][1] = new FaceFluxes (f211,index_field,nx,ny,nz,level,dt);
-  ff27_blk[1][0][1] = new FaceFluxes (f101,index_field,nx,ny,nz,level,dt);
-  ff27_blk[1][2][1] = new FaceFluxes (f121,index_field,nx,ny,nz,level,dt);
-  ff27_blk[1][1][0] = new FaceFluxes (f110,index_field,nx,ny,nz,level,dt);
-  ff27_blk[1][1][2] = new FaceFluxes (f112,index_field,nx,ny,nz,level,dt);
-
-  ff27_nbr[0][1][1] = new FaceFluxes (f011,index_field,nx,ny,nz,level,dt);
-  ff27_nbr[2][1][1] = new FaceFluxes (f211,index_field,nx,ny,nz,level,dt);
-  ff27_nbr[1][0][1] = new FaceFluxes (f101,index_field,nx,ny,nz,level,dt);
-  ff27_nbr[1][2][1] = new FaceFluxes (f121,index_field,nx,ny,nz,level,dt);
-  ff27_nbr[1][1][0] = new FaceFluxes (f110,index_field,nx,ny,nz,level,dt);
-  ff27_nbr[1][1][2] = new FaceFluxes (f112,index_field,nx,ny,nz,level,dt);
-
-  unit_func ("FluxData::fluxes_block()");
-
-  unit_assert(flux_data.fluxes_block(-1,0,0) == nullptr);
-  unit_assert(flux_data.fluxes_block(+1,0,0) == nullptr);
-  unit_assert(flux_data.fluxes_block(0,-1,0) == nullptr);
-  unit_assert(flux_data.fluxes_block(0,+1,0) == nullptr);
-  unit_assert(flux_data.fluxes_block(0,0,-1) == nullptr);
-  unit_assert(flux_data.fluxes_block(0,0,+1) == nullptr);
+  const int n_f = field_list.size();
   
-  unit_assert(flux_data.fluxes_neighbor(-1,0,0) == nullptr);
-  unit_assert(flux_data.fluxes_neighbor(+1,0,0) == nullptr);
-  unit_assert(flux_data.fluxes_neighbor(0,-1,0) == nullptr);
-  unit_assert(flux_data.fluxes_neighbor(0,+1,0) == nullptr);
-  unit_assert(flux_data.fluxes_neighbor(0,0,-1) == nullptr);
-  unit_assert(flux_data.fluxes_neighbor(0,0,+1) == nullptr);
+  unit_func ("allocate()");
 
-  unit_func ("FluxData::set_fluxes_block()");
+  flux_data.allocate(n3[0],n3[1],n3[2],level,dt,field_list);
   
-  flux_data.set_fluxes_block(ff27_blk[0][1][1],-1,0,0);
-  flux_data.set_fluxes_block(ff27_blk[2][1][1],+1,0,0);
-  flux_data.set_fluxes_block(ff27_blk[1][0][1],0,-1,0);
-  flux_data.set_fluxes_block(ff27_blk[1][2][1],0,+1,0);
-  flux_data.set_fluxes_block(ff27_blk[1][1][0],0,0,-1);
-  flux_data.set_fluxes_block(ff27_blk[1][1][2],0,0,+1);
+  unit_func ("FluxData::set_block_fluxes()");
 
-  unit_assert(flux_data.fluxes_block(-1,0,0) == ff27_blk[0][1][1]);
-  unit_assert(flux_data.fluxes_block(+1,0,0) == ff27_blk[2][1][1]);
-  unit_assert(flux_data.fluxes_block(0,-1,0) == ff27_blk[1][0][1]);
-  unit_assert(flux_data.fluxes_block(0,+1,0) == ff27_blk[1][2][1]);
-  unit_assert(flux_data.fluxes_block(0,0,-1) == ff27_blk[1][1][0]);
-  unit_assert(flux_data.fluxes_block(0,0,+1) == ff27_blk[1][1][2]);
+  for (int i_f=0; i_f<n_f; i_f++) {
+
+    const int index_field = field_list[i_f];
+
+    for (int axis=0; axis<3; axis++) {
+      const int n1=n3[(axis+1)%3];
+      const int n2=n3[(axis+2)%3];
+      for (int face=0; face<2; face++) {
+
+        FaceFluxes * ff_blk = flux_data.block_fluxes(axis,face,index_field);
+        FaceFluxes * ff_nbr = flux_data.neighbor_fluxes(axis,face,index_field);
+
+        auto & b = array_blk[axis][face][i_f];
+        auto & n = array_nbr[axis][face][i_f];
+
+        unit_assert (ff_blk != nullptr);
+        unit_assert (ff_nbr != nullptr);
+        
+        int mx,my,mz;
+        ff_blk->get_dimensions(&mx,&my,&mz);
+        unit_func ("get_dimensions()");
+        unit_assert(mx*my*mz == n1*n2);
+
+        if (axis==0) {
+          ff_blk->set_flux_array (b,0,n3[2],1);
+          ff_nbr->set_flux_array (array_nbr[axis][face][i_f],0,n3[2],1);
+        } else if (axis==1) {
+          ff_blk->set_flux_array (b,1,0,n3[0]);
+          ff_nbr->set_flux_array (array_nbr[axis][face][i_f],1,0,n3[0]);
+        } else if (axis==2) {
+          ff_blk->set_flux_array (b,n3[1],1,0);
+          ff_nbr->set_flux_array (array_nbr[axis][face][i_f],n3[1],1,0);
+        }
+
+        int dbx,dby,dbz;
+        int dnx,dny,dnz;
+        std::vector<double> & fluxes_blk = ff_blk->flux_array(&dbx,&dby,&dbz);
+        std::vector<double> & fluxes_nbr = ff_nbr->flux_array(&dnx,&dny,&dnz);
+        
+        int count = 0;
+        unit_func ("array_blk()");
+        double sum1=0.0,sum2=0.0;
+        if (axis==0) {
+          for (int iz=0; iz<mz; iz++) {
+            for (int iy=0; iy<my; iy++) {
+              for (int ix=0; ix<mx; ix++) {
+                const int i1 = iy;
+                const int i2 = iz;
+                const int id = ix*dbx+iy*dby+iz*dbz;
+                const int ib = i2 + n2*i1;
+                sum1+=b[ib];
+                sum2+=fluxes_blk[id];
+                if (fluxes_blk[id] != b[ib]) count++;
+              }
+            }
+          }
+          unit_func("array_blk x-axis");
+          unit_assert (count==0);
+        } else if (axis==1) {
+          for (int iz=0; iz<mz; iz++) {
+            for (int iy=0; iy<my; iy++) {
+              for (int ix=0; ix<mx; ix++) {
+                const int i1 = iz;
+                const int i2 = ix;
+                const int id = ix*dbx+iy*dby+iz*dbz;
+                const int ib = i2 + n2*i1;
+                sum1+=b[ib];
+                sum2+=fluxes_blk[id];
+                if (fluxes_blk[id] != b[ib]) count++;
+              }
+            }
+          }
+          unit_func("array_blk y-axis");
+          unit_assert (count==0);
+        } else if (axis==2) {
+          for (int iz=0; iz<mz; iz++) {
+            for (int iy=0; iy<my; iy++) {
+              for (int ix=0; ix<mx; ix++) {
+                const int i1 = ix;
+                const int i2 = iy;
+                const int id = ix*dbx+iy*dby+iz*dbz;
+                const int ib = i2 + n2*i1;
+                sum1+=b[ib];
+                sum2+=fluxes_blk[id];
+                if (fluxes_blk[id] != b[ib]) count++;
+              }
+            }
+          }
+          unit_func("array_blk z-axis");
+          unit_assert (count==0);
+        }
+        unit_func ("array_nbr()");
+        count = 0;
+        sum1=0.0,sum2=0.0;
+        if (axis==0) {
+          for (int iz=0; iz<mz; iz++) {
+            for (int iy=0; iy<my; iy++) {
+              for (int ix=0; ix<mx; ix++) {
+                const int i1 = iy;
+                const int i2 = iz;
+                const int id = ix*dbx+iy*dby+iz*dbz;
+                const int ib = i2 + n2*i1;
+                sum1+=n[ib];
+                sum2+=fluxes_nbr[id];
+                if (fluxes_nbr[id] != n[ib]) count++;
+              }
+            }
+          }
+          unit_func("array_nbr x-axis");
+          unit_assert (count==0);
+        } else if (axis==1) {
+          for (int iz=0; iz<mz; iz++) {
+            for (int iy=0; iy<my; iy++) {
+              for (int ix=0; ix<mx; ix++) {
+                const int i1 = iz;
+                const int i2 = ix;
+                const int id = ix*dbx+iy*dby+iz*dbz;
+                const int ib = i2 + n2*i1;
+                sum1+=n[ib];
+                sum2+=fluxes_nbr[id];
+                if (fluxes_nbr[id] != n[ib]) count++;
+              }
+            }
+          }
+          unit_func("array_nbr y-axis");
+          unit_assert (count==0);
+        } else if (axis==2) {
+          for (int iz=0; iz<mz; iz++) {
+            for (int iy=0; iy<my; iy++) {
+              for (int ix=0; ix<mx; ix++) {
+                const int i1 = ix;
+                const int i2 = iy;
+                const int id = ix*dbx+iy*dby+iz*dbz;
+                const int ib = i2 + n2*i1;
+                sum1+=n[ib];
+                sum2+=fluxes_nbr[id];
+                if (fluxes_nbr[id] != n[ib]) count++;
+              }
+            }
+          }
+          unit_func("array_nbr z-axis");
+          unit_assert (count==0);
+        }
+        
+        unit_assert(dbx==dnx && dby==dny && dbz==dnz);
+
+      }
+    }
+    unit_assert(unit_incomplete);
+    
+    unit_func ("FluxData::set_neighbor_fluxes()");
   
-  unit_func ("FluxData::set_fluxes_neighbor()");
+    unit_assert(unit_incomplete);
+
+    unit_func ("FluxData::delete_block_fluxes()");
+
+    for (int axis=0; axis<3; axis++) {
+      for (int face=0; face<2; face++) {
+        flux_data.delete_block_fluxes (axis,face,index_field);
+      }
+    }
   
-  flux_data.set_fluxes_neighbor(ff27_nbr[0][1][1],-1,0,0);
-  flux_data.set_fluxes_neighbor(ff27_nbr[2][1][1],+1,0,0);
-  flux_data.set_fluxes_neighbor(ff27_nbr[1][0][1],0,-1,0);
-  flux_data.set_fluxes_neighbor(ff27_nbr[1][2][1],0,+1,0);
-  flux_data.set_fluxes_neighbor(ff27_nbr[1][1][0],0,0,-1);
-  flux_data.set_fluxes_neighbor(ff27_nbr[1][1][2],0,0,+1);
-
-  unit_assert(flux_data.fluxes_neighbor(-1,0,0) == ff27_nbr[0][1][1]);
-  unit_assert(flux_data.fluxes_neighbor(+1,0,0) == ff27_nbr[2][1][1]);
-  unit_assert(flux_data.fluxes_neighbor(0,-1,0) == ff27_nbr[1][0][1]);
-  unit_assert(flux_data.fluxes_neighbor(0,+1,0) == ff27_nbr[1][2][1]);
-  unit_assert(flux_data.fluxes_neighbor(0,0,-1) == ff27_nbr[1][1][0]);
-  unit_assert(flux_data.fluxes_neighbor(0,0,+1) == ff27_nbr[1][1][2]);
-
-  unit_func ("FluxData::delete_fluxes_block()");
-
-  flux_data.delete_fluxes_block (-1,0,0);
-  flux_data.delete_fluxes_block (+1,0,0);
-  flux_data.delete_fluxes_block (0,-1,0);
-  flux_data.delete_fluxes_block (0,+1,0);
-  flux_data.delete_fluxes_block (0,0,-1);
-  flux_data.delete_fluxes_block (0,0,+1);
+    for (int axis=0; axis<3; axis++) {
+      for (int face=0; face<2; face++) {
+        unit_assert(flux_data.block_fluxes(axis,face,index_field) == nullptr);
+      }
+    }
   
-  unit_assert(flux_data.fluxes_block(-1,0,0) == nullptr);
-  unit_assert(flux_data.fluxes_block(+1,0,0) == nullptr);
-  unit_assert(flux_data.fluxes_block(0,-1,0) == nullptr);
-  unit_assert(flux_data.fluxes_block(0,+1,0) == nullptr);
-  unit_assert(flux_data.fluxes_block(0,0,-1) == nullptr);
-  unit_assert(flux_data.fluxes_block(0,0,+1) == nullptr);
-  
-  unit_func ("FluxData::delete_fluxes_neighbor()");
+    unit_func ("FluxData::delete_neighbor_fluxes()");
 
-  flux_data.delete_fluxes_neighbor (-1,0,0);
-  flux_data.delete_fluxes_neighbor (+1,0,0);
-  flux_data.delete_fluxes_neighbor (0,-1,0);
-  flux_data.delete_fluxes_neighbor (0,+1,0);
-  flux_data.delete_fluxes_neighbor (0,0,-1);
-  flux_data.delete_fluxes_neighbor (0,0,+1);
+    for (int axis=0; axis<3; axis++) {
+      for (int face=0; face<2; face++) {
+        flux_data.delete_neighbor_fluxes (axis,face,index_field);
+      }
+    }
   
-  unit_assert(flux_data.fluxes_neighbor(-1,0,0) == nullptr);
-  unit_assert(flux_data.fluxes_neighbor(+1,0,0) == nullptr);
-  unit_assert(flux_data.fluxes_neighbor(0,-1,0) == nullptr);
-  unit_assert(flux_data.fluxes_neighbor(0,+1,0) == nullptr);
-  unit_assert(flux_data.fluxes_neighbor(0,0,-1) == nullptr);
-  unit_assert(flux_data.fluxes_neighbor(0,0,+1) == nullptr);
+    for (int axis=0; axis<3; axis++) {
+      for (int face=0; face<2; face++) {
+        unit_assert
+          (flux_data.neighbor_fluxes(axis,face,index_field) == nullptr);
+      }
+    }
 
+  }
   unit_finalize();
 
   exit_();

@@ -48,26 +48,27 @@ PARALLEL_MAIN_BEGIN
     const int * c3 = test.centered;
     const double * h3_1 = test.cell_width;
     double h3_2[3] = {h3_1[0],h3_1[1],h3_1[2]};
-    double dt1 =  test.time_step_1;
+    const double dt1 =  test.time_step_1;
     double dt2 =  test.time_step_2;
+    const int cx = test.child[0];
+    const int cy = test.child[1];
+    const int cz = test.child[2];
+
     if (L_1 < L_2) { h3_2[0]*=0.5; h3_2[1]*=0.5; h3_2[2]*=0.5; dt2*=0.5;}
     if (L_1 > L_2) { h3_2[0]*=2.0; h3_2[1]*=2.0; h3_2[2]*=2.0; dt2*=2.0;}
     const int rx = test::face_test[index_test].normal[0];
     const int ry = test::face_test[index_test].normal[1];
     const int rz = test::face_test[index_test].normal[2];
 
-    const int cx = test.child[0];
-    const int cy = test.child[1];
-    const int cz = test.child[2];
     int fx = face[0];
     int fy = face[1];
     int fz = face[2];
 
-    Face face_1(fx,fy,fz,rx,ry,rz,cx,cy,cz);
+    Face face_1(fx,fy,fz,rx,ry,rz);
     if (rx != 0) fx = -fx;
     if (ry != 0) fy = -fy;
     if (rz != 0) fz = -fz;
-    Face face_2(fx,fy,fz,rx,ry,rz,cx,cy,cz);
+    Face face_2(fx,fy,fz,rx,ry,rz);
   
     int index_field = 3;
     auto face_fluxes_1 = new FaceFluxes
@@ -97,7 +98,7 @@ PARALLEL_MAIN_BEGIN
     // face_fluxes_1 -> get_limits (&i0x1,&nx1,&i0y1,&ny1,&i0z1,&nz1,
     //                              *face_fluxes_2,child3);
 
-    face_fluxes_1 -> get_start (&i0x1,&i0y1,&i0z1, *face_fluxes_2);
+    face_fluxes_1 -> get_start (&i0x1,&i0y1,&i0z1, cx,cy,cz, *face_fluxes_2);
     face_fluxes_1 -> get_size  (&nx1, &ny1, &nz1,  *face_fluxes_2);
     
     const int a0 = rx ? 0 : (ry ? 1 : 2);
@@ -132,7 +133,7 @@ PARALLEL_MAIN_BEGIN
     int nx2,ny2,nz2;
     // face_fluxes_2 -> get_limits (&i0x2,&nx2,&i0y2,&ny2,&i0z2,&nz2,
     //                              *face_fluxes_1,child3);
-    face_fluxes_2 -> get_start (&i0x2,&i0y2,&i0z2, *face_fluxes_1);
+    face_fluxes_2 -> get_start (&i0x2,&i0y2,&i0z2, cx,cy,cz, *face_fluxes_1);
     face_fluxes_2 -> get_size  (&nx2, &ny2, &nz2,  *face_fluxes_1);
 
     if (L_2 >= L_1) {
@@ -246,15 +247,15 @@ PARALLEL_MAIN_BEGIN
 
     unit_func("level()"); 
 
-    unit_assert (face_fluxes_1->level_fluxes() == L_1);
+    unit_assert (face_fluxes_1->level_neighbor() == L_1);
     unit_assert (face_fluxes_1->level_block()  == L_1);
-    unit_assert (face_fluxes_2->level_fluxes() == L_2);
+    unit_assert (face_fluxes_2->level_neighbor() == L_2);
     unit_assert (face_fluxes_2->level_block()  == L_2);
 
     unit_func("time_step()"); 
 
-    unit_assert (dt1 == face_fluxes_1->time_step_fluxes());
-    unit_assert (dt2 == face_fluxes_2->time_step_fluxes());
+    unit_assert (dt1 == face_fluxes_1->time_step_neighbor());
+    unit_assert (dt2 == face_fluxes_2->time_step_neighbor());
     unit_assert (dt1 == face_fluxes_1->time_step_block());
     unit_assert (dt2 == face_fluxes_2->time_step_block());
     unit_assert (((L_1 == L_2) && (dt1 == dt2)) ||
@@ -346,13 +347,13 @@ PARALLEL_MAIN_BEGIN
 
     unit_assert (ratio_cell_volume(*face_fluxes_1,*face_fluxes_2,rank) == 1.0);
 
-    unit_assert (face_fluxes_1->level_fluxes() ==
-                 face_fluxes_2->level_fluxes());
+    unit_assert (face_fluxes_1->level_neighbor() ==
+                 face_fluxes_2->level_neighbor());
     int L_min = std::min(L_1,L_2);
     unit_assert (face_fluxes_1->level_block()  == L_1);
-    unit_assert (face_fluxes_1->level_fluxes() == L_min);
+    unit_assert (face_fluxes_1->level_neighbor() == L_min);
     unit_assert (face_fluxes_2->level_block()  == L_2);
-    unit_assert (face_fluxes_2->level_fluxes() == L_min);
+    unit_assert (face_fluxes_2->level_neighbor() == L_min);
 
     //--------------------------------------------------
 
@@ -431,7 +432,7 @@ PARALLEL_MAIN_BEGIN
       long sum_2_post = 0;
       if (L_1 <= L_2) {
 
-        (*face_fluxes_1) += (*face_fluxes_2);
+        face_fluxes_1 -> accumulate(*face_fluxes_2,cx,cy,cz);
 
         for (int iz=0; iz<mz1; iz++) {
           for (int iy=0; iy<my1; iy++) {
@@ -444,7 +445,7 @@ PARALLEL_MAIN_BEGIN
       }
       if (L_1 >= L_2) {
 
-        (*face_fluxes_2) += (*face_fluxes_1);
+        face_fluxes_2->accumulate(*face_fluxes_1,cx,cy,cz);
 
         for (int iz=0; iz<mz2; iz++) {
           for (int iy=0; iy<my2; iy++) {

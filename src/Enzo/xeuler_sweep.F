@@ -171,7 +171,7 @@ c
      &     uslice(in,jn), vslice(in,jn),  wslice(in,jn), 
      &    geslice(in,jn)
       ENZO_REAL colslice(in,jn,ncolor),  colf(in,jn,ncolor),
-     &        colls(in,jn,ncolor), colrs(in,jn,ncolor)
+     &     colls(in,jn,ncolor), colrs(in,jn,ncolor)
 c
 c  parameters
 c
@@ -347,8 +347,8 @@ c  Check this slice against the list of subgrids
 c     (all subgrid quantities are zero based)
 c
       do n=0, nsubgrids-1
-        if (k .ge. fjstart(n*3+1)+1 .and. k .le. fjend(n*3+1)+1) then
-          idim = fiend(n*3+1) - fistart(n*3+1) + 1
+         if (k .ge. fjstart(n*3+1)+1 .and. k .le. fjend(n*3+1)+1) then
+            idim = fiend(n*3+1) - fistart(n*3+1) + 1
           do j=fistart(n*3+1)+1, fiend(n*3+1)+1
              offset = j-fistart(n*3+1) + (k-fjstart(n*3+1)-1)*idim
              array(dindex(n*6+1)+offset) = df(lface(n*3+1)+1, j)
@@ -371,10 +371,36 @@ c
              endif
              do ic=1, ncolor
                 array(colindex(n*6+1,ic)+offset) = 
-     &                                       colf(lface(n*3+1)+1, j, ic)
+     &               colf(lface(n*3+1)+1, j, ic)
                 array(colindex(n*6+2,ic)+offset) = 
-     &                                       colf(rface(n*3+1)+2, j, ic)
+     &               colf(rface(n*3+1)+2, j, ic)
              enddo
+c@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+c     FOR DEBUGGING ONLY
+c@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+             array(dindex(n*6+1)+offset) = 1000.0
+             array(dindex(n*6+2)+offset) = 1001.0
+             array(eindex(n*6+1)+offset) = 1010.
+             array(eindex(n*6+2)+offset) = 1011.
+             array(uindex(n*6+1)+offset) = 1020.
+             array(uindex(n*6+2)+offset) = 1021.
+             if (nyz .gt. 1) then
+                array(vindex(n*6+1)+offset) = 1030.
+                array(vindex(n*6+2)+offset) = 1031.
+             endif
+             if (nzz .gt. 1) then
+                array(windex(n*6+1)+offset) = 1040.
+                array(windex(n*6+2)+offset) = 1041.
+             endif
+             if (idual .eq. 1) then
+                array(geindex(n*6+1)+offset) = 1050.
+                array(geindex(n*6+2)+offset) = 1051.
+             endif
+             do ic=1, ncolor
+                array(colindex(n*6+1,ic)+offset) = 1100.+10*(ic-1)
+                array(colindex(n*6+2,ic)+offset) = 1101.+10*(ic-1)
+             enddo
+c@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
           enddo
         endif
       enddo

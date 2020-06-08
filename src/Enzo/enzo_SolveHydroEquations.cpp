@@ -8,82 +8,9 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 #include <stdio.h>
-// #define DEBUG_TRACE_PPM
-// #define DEBUG_READ_FIELDS
-// #define DEBUG_WRITE_FIELDS
 
-#ifdef DEBUG_TRACE_PPM
-#  define TRACE_PPM(MESSAGE)						\
-  CkPrintf ("%s:%d %s %s\n",						\
-	    __FILE__,__LINE__,block->name().c_str(),MESSAGE);				
-#else
-#  define TRACE_PPM(MESSAGE) /* ... */
-#endif
-
-#ifdef DEBUG_READ_FIELDS
-#   define READ_FIELD(FIELD,NAME,CYCLE,field,gx,gy,gz,mx,my,mz)	\
-  {								\
-    if (CYCLE==0) {						\
-      enzo_float * array = (enzo_float*) field.values(FIELD);	\
-      char buffer[80];						\
-      sprintf (buffer,NAME,CYCLE);				\
-      printf ("READ_FIELD %s cycle=%d\n",FIELD,CYCLE);		\
-      FILE * fp = fopen(buffer,"r");				\
-      for (int iz=gz; iz<mz-gz; iz++) {				\
-	for (int iy=gy; iy<my-gy; iy++) {			\
-	  for (int ix=gx; ix<mx-gx; ix++) {			\
-	    int i=ix+mx*(iy+my*iz);				\
-	    int jx,jy,jz;					\
-	    double value;					\
-	    fscanf (fp,"%d %d %d %lf\n",&jx,&jy,&jz,&value);	\
-	    array[i] = value;					\
-	  }							\
-	}							\
-      }								\
-      fclose(fp);						\
-      fp=NULL;							\
-    }								\
-  }
-#  define READ_STATE(NAME,CYCLE,TIME,DT,DX)		\
-  {							\
-    char buffer[80];					\
-    sprintf (buffer,NAME,CYCLE);			\
-    FILE * fp = fopen(buffer,"r");			\
-    printf ("fscanf returned %d\n",fscanf (fp,"%f %f %f",&TIME,&DT,&DX)); \
-    printf ("DEBUG_TIME %20.15f %20.15f %20.15f\n",TIME,DT,DX);		\
-    fclose(fp);								\
-}
-#else
-#   define READ_FIELD(FIELD,NAME,CYCLE,field,gx,gy,gz,mx,my,mz)	\
-  /* EMPTY */
-#  define READ_STATE(NAME,CYCLE,TIME,DT,DX)	\
-  /* EMPTY */
-#endif
-
-#ifdef DEBUG_WRITE_FIELDS
-#   define WRITE_FIELD(FIELD,NAME,CYCLE,field,gx,gy,gz,mx,my,mz)	\
-  {								\
-    enzo_float * array = (enzo_float*) field.values(FIELD);	\
-    char buffer[80];						\
-    sprintf (buffer,NAME,CYCLE);				\
-    printf ("WRITE_FIELD %s cycle=%d\n",FIELD,CYCLE);		\
-    FILE * fp = fopen(buffer,"w");				\
-    for (int iz=gz; iz<mz-gz; iz++) {				\
-      for (int iy=gy; iy<my-gy; iy++) {				\
-  	for (int ix=gx; ix<mx-gx; ix++) {			\
-  	  int i=ix+mx*(iy+my*iz);				\
-  	  fprintf (fp,"%d %d %d %20.16g\n",ix-gx,iy-gy,iz-gz,array[i]);	\
-  	}							\
-      }								\
-    }								\
-    fclose(fp);							\
-    fp=NULL;							\
-  }
-#else
-#   define WRITE_FIELD(FIELD,FILE,CYCLE,field,gx,gy,gz,mx,my,mz)	\
-  /* EMPTY */
-#endif
-
+#define NEW_FLUX
+// #define DEBUG_NEW_FLUX
 //----------------------------------------------------------------------
 
 int EnzoBlock::SolveHydroEquations 
@@ -98,6 +25,10 @@ int EnzoBlock::SolveHydroEquations
   int dim, size;
 
   Field field = data()->field();
+  int gx,gy,gz;
+  int mx,my,mz;
+  field.ghost_depth(0,&gx,&gy,&gz);
+  field.dimensions(0,&mx,&my,&mz);
 
   //------------------------------
   // Prepare colour field parameters
@@ -186,63 +117,7 @@ int EnzoBlock::SolveHydroEquations
   }
   /* allocate space for fluxes */
 
-  int NumberOfSubgrids = 0;
-
-  //  SubgridFluxes = new fluxes *[NumberOfSubgrids];
-  // SubgridFluxes = NULL;
-
-  // for (i = 0; i < NumberOfSubgrids; i++) {
-  //   SubgridFluxes[i] = new fluxes;
-      
-  //   for (dim = 0; dim < rank; dim++)  {
-
-  //     /* compute size (in enzo_floats) of flux storage */
-
-  //     size = 1;
-  //     for (j = 0; j < rank; j++)
-  // 	size *= SubgridFluxes[i]->LeftFluxEndGlobalIndex[dim][j] -
-  // 	  SubgridFluxes[i]->LeftFluxStartGlobalIndex[dim][j] + 1;
-
-  //     /* set unused dims (for the solver, which is hardwired for 3d). */
-
-  //     for (j = rank; j < 3; j++) {
-  // 	SubgridFluxes[i]->LeftFluxStartGlobalIndex[dim][j] = 0;
-  // 	SubgridFluxes[i]->LeftFluxEndGlobalIndex[dim][j] = 0;
-  // 	SubgridFluxes[i]->RightFluxStartGlobalIndex[dim][j] = 0;
-  // 	SubgridFluxes[i]->RightFluxEndGlobalIndex[dim][j] = 0;
-  //     }
-
-  //     /* Allocate space (if necessary). */
-
-  //     for (int field = 0; field < NumberOfBaryonFields[in]; field++) {
-  // 	if (SubgridFluxes[i]->LeftFluxes[field][dim] == NULL)
-  // 	  SubgridFluxes[i]->LeftFluxes[field][dim]  = new enzo_float[size];
-  // 	if (SubgridFluxes[i]->RightFluxes[field][dim] == NULL)
-  // 	  SubgridFluxes[i]->RightFluxes[field][dim] = new enzo_float[size];
-  // 	for (int n = 0; n < size; n++) {
-  // 	  SubgridFluxes[i]->LeftFluxes[field][dim][n] = 0;
-  // 	  SubgridFluxes[i]->RightFluxes[field][dim][n] = 0;
-  // 	}
-  //     }
-
-  //     for (int field = NumberOfBaryonFields[in]; 
-  // 	   field < MAX_NUMBER_OF_BARYON_FIELDS;
-  // 	   field++) {
-  // 	SubgridFluxes[i]->LeftFluxes[field][dim] = NULL;
-  // 	SubgridFluxes[i]->RightFluxes[field][dim] = NULL;
-  //     }
-
-  //   }  // next dimension
-
-  //   /* make things pretty */
-
-  //   for (dim = rank; dim < 3; dim++)
-  //     for (int field = 0; field < MAX_NUMBER_OF_BARYON_FIELDS; field++) {
-  // 	SubgridFluxes[i]->LeftFluxes[field][dim] = NULL;
-  // 	SubgridFluxes[i]->RightFluxes[field][dim] = NULL;
-  //     }
-
-  // } // end of loop over subgrids
+  int NumberOfSubgrids = 1;
 
   /* fix grid quantities so they are defined to at least 3 dims */
 
@@ -269,20 +144,114 @@ int EnzoBlock::SolveHydroEquations
   int * array = new int[size];
   for (int i=0; i<size; i++) array[i] = 0;
 
-  int *leftface  = array + NumberOfSubgrids*3*0;
-  int *rightface = array + NumberOfSubgrids*3*1;
-  int *istart    = array + NumberOfSubgrids*3*2;
-  int *jstart    = array + NumberOfSubgrids*3*3;
-  int *iend      = array + NumberOfSubgrids*3*4;
-  int *jend      = array + NumberOfSubgrids*3*5;
-  int *dindex    = array + NumberOfSubgrids*3*6;
-  int *Eindex    = array + NumberOfSubgrids*3*8;
-  int *uindex    = array + NumberOfSubgrids*3*10;
-  int *vindex    = array + NumberOfSubgrids*3*12;
-  int *windex    = array + NumberOfSubgrids*3*14;
-  int *geindex   = array + NumberOfSubgrids*3*16;
+  int * p = array;
+  int *leftface  = p; p+=3;
+  int *rightface = p; p+=3;
+  int *istart    = p; p+=3;
+  int *jstart    = p; p+=3;
+  int *iend      = p; p+=3;
+  int *jend      = p; p+=3;
+  int *dindex    = p; p+=3*2; // 3 axes 2 faces
+  int *Eindex    = p; p+=3*2;
+  int *uindex    = p; p+=3*2;
+  int *vindex    = p; p+=3*2;
+  int *windex    = p; p+=3*2;
+  int *geindex   = p; p+=3*2;
 
-  enzo_float standard[1];
+  // Offsets computed from the "standard" pointer to the start of each
+  // flux data
+
+#ifdef NEW_FLUX
+  //==================================================
+  
+  FluxData * flux_data = data()->flux_data();
+
+  const int nx = mx - 2*gx;
+  const int ny = my - 2*gy;
+  const int nz = mz - 2*gz;
+  auto field_names = field.groups()->group_list("conserved");
+  const int nf = field_names.size();
+  std::vector<int> field_list;
+  field_list.resize(nf);
+  for (int i=0; i<nf; i++) {
+    field_list[i] = field.field_id(field_names[i]);
+  }
+  flux_data->allocate (nx,ny,nz,this->level(),dt,field_list);
+  
+  std::vector<double> flux_array[3][2][nf];
+
+  for (int i_f=0; i_f <nf; i_f++) {
+    const int index_field = field_list[i_f];
+    for (int axis=0; axis<rank; axis++) {
+      for (int face=0; face<2; face++) {
+        int mx,my,mz;
+        int dx,dy,dz;
+        FaceFluxes * ff = flux_data->block_fluxes(axis,face,index_field);
+        ff->get_dimensions(&mx,&my,&mz);
+        flux_array[axis][face][i_f] = ff->flux_array(&dx,&dy,&dz);
+      }
+    }
+  }
+
+  //==================================================
+
+  enzo_float * standard = temp;
+
+  // int l3[3] = {gx,gy,gz};
+  // int u3[3] = {mx-gx,my-gy,mz-gz};
+  int l3[3] = {gx,gy,gz};
+  int u3[3] = {mx-gx-1,my-gy-1,mz-gz-1};
+  for (int i_f=0; i_f<nf; i_f++) {
+
+    int * flux_index = 0;
+    std::string field_name = field_names[i_f];
+    
+    if (field_name == "density") flux_index = dindex;
+    if (field_name == "velocity_x") flux_index = uindex;
+    if (field_name == "velocity_y") flux_index = vindex;
+    if (field_name == "velocity_z") flux_index = windex;
+    if (field_name == "total_energy") flux_index = Eindex;
+    if (field_name == "internal_energy") flux_index = geindex;
+    
+    for (int axis=0; axis<rank; axis++) {
+    
+      leftface[axis] = l3[axis];
+      rightface[axis] = u3[axis];
+
+      const int axis_i = (axis == 0) ? 1 : 0;
+      const int axis_j = (axis == 2) ? 1 : 2;
+      istart[axis] = l3[axis_i];
+      jstart[axis] = l3[axis_j];
+      iend[axis] = u3[axis_i];
+      jend[axis] = u3[axis_j];
+
+      for (int face = 0; face < 2; face++) {
+        flux_index[axis*2+face] = &flux_array[axis][face][i_f][0] - standard;
+      }
+    }
+  }
+
+  int n3[3] = {nx,ny,nz};
+  for (int i_f=0; i_f<nf; i_f++) {
+    for (int axis=0; axis<rank; axis++) {
+      const int n1 = n3[(axis+1)%3];
+      const int n2 = n3[(axis+2)%3];
+      for (int face=0; face<2; face++) {
+        auto & fa = flux_array[axis][face][i_f];
+        double sumabs=0.0;
+        for (int i1=0; i1<n1; i1++) {
+          for (int i2=0; i2<n2; i2++) {
+            const int i = i1 + n1*i2;
+            sumabs += std::abs(fa[i]);
+          }
+        }
+      }
+    }
+  }
+  
+#endif    
+
+  //==================================================
   //    enzo_float *standard = SubgridFluxes[0]->LeftFluxes[0][0];
 
   /* If using comoving coordinates, multiply dx by a(n+1/2).
@@ -316,19 +285,6 @@ int EnzoBlock::SolveHydroEquations
     }
   }
 
-#ifdef DEBUG_READ_FIELDS
-  if (cycle_ == 0) {
-    enzo_float dx;
-    READ_STATE("state-enzo-0-%03d.data",cycle_,time,dt,dx);
-    for (dim = 0; dim < MAX_DIMENSION; dim++) {
-      if (dim < rank) {
-	for (int i=0; i<GridDimension[dim]; i++) 
-	  CellWidthTemp[dim][i] = dx;
-      }
-    }
-  }
-#endif  
-
   /* call a Fortran routine to actually compute the hydro equations
      on this grid.
      Notice that it is hard-wired for three dimensions, but it does
@@ -337,57 +293,6 @@ int EnzoBlock::SolveHydroEquations
 
   int gravity_on = (acceleration_x != NULL) ? 1 : 0;
 
-#ifdef DEBUG_PPM  
-  int mx,my,mz;
-  int gx=0,gy=0,gz=0;
-  field.dimensions(0,&mx,&my,&mz);
-
-  READ_FIELD("density","de-enzo-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  READ_FIELD("velocity_x","vx-enzo-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  READ_FIELD("velocity_y","vy-enzo-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  READ_FIELD("velocity_z","vz-enzo-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  READ_FIELD("acceleration_x","ax-enzo-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  READ_FIELD("acceleration_y","ay-enzo-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  READ_FIELD("acceleration_z","az-enzo-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  READ_FIELD("total_energy","te-enzo-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  READ_FIELD("internal_energy","ie-enzo-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  
-  WRITE_FIELD("density","de-enzop-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  WRITE_FIELD("velocity_x","vx-enzop-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  WRITE_FIELD("velocity_y","vy-enzop-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  WRITE_FIELD("velocity_z","vz-enzop-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  WRITE_FIELD("acceleration_x","ax-enzop-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  WRITE_FIELD("acceleration_y","ay-enzop-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  WRITE_FIELD("acceleration_z","az-enzop-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  WRITE_FIELD("total_energy","te-enzop-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  WRITE_FIELD("internal_energy","ie-enzop-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-
-  enzo_float * potential = (enzo_float *) field.values("potential_temp");
-  enzo_float * density_total = (enzo_float *) field.values("B_temp");
-
-  gx=gy=gz=3;
-  TRACE_FIELD("ppm-0-density",density,1.0);
-  TRACE_FIELD("ppm-0-potential",potential,1.0);
-  TRACE_FIELD("ppm-0-density-total",density_total,1.0);
-  TRACE_FIELD("ppm-0-total_energy",total_energy,1.0);
-  TRACE_FIELD("ppm-0-velocity_x",velocity_x,1.0);
-  TRACE_FIELD("ppm-0-velocity_y",velocity_y,1.0);
-  TRACE_FIELD("ppm-0-velocity_z",velocity_z,1.0);
-  PRINT_FIELD("ppm-0-acceleration_x",acceleration_x,1.0);
-  TRACE_FIELD("ppm-0-acceleration_y",acceleration_y,1.0);
-  TRACE_FIELD("ppm-0-acceleration_z",acceleration_z,1.0);
-  TRACE_FIELD("ppm-0-internal_energy",internal_energy,1.0);
-
-
-  Particle particle = data()->particle();
-  TRACE_PARTICLE("ppm-0-velocity_x",particle,"dark","vx");
-  TRACE_PARTICLE("ppm-0-velocity_y",particle,"dark","vy");
-  TRACE_PARTICLE("ppm-0-velocity_z",particle,"dark","vz");
-  TRACE_PARTICLE("ppm-0-acceleration_x",particle,"dark","ax");
-  TRACE_PARTICLE("ppm-0-acceleration_y",particle,"dark","ay");
-  TRACE_PARTICLE("ppm-0-acceleration_z",particle,"dark","az");
-#endif
-  
   int iconsrec = 0;
   int iposrec = 0;
 
@@ -420,66 +325,28 @@ int EnzoBlock::SolveHydroEquations
     delete [] CellWidthTemp[dim];
   }
 
-#ifdef DEBUG_READ_FIELDS
-  READ_FIELD("density_diff","de-enzo-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  READ_FIELD("velocity_x_diff","vx-enzo-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  READ_FIELD("velocity_y_diff","vy-enzo-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  READ_FIELD("velocity_z_diff","vz-enzo-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  READ_FIELD("acceleration_x_diff","ax-enzo-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  READ_FIELD("acceleration_y_diff","ay-enzo-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  READ_FIELD("acceleration_z_diff","az-enzo-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  READ_FIELD("total_energy_diff","te-enzo-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  READ_FIELD("internal_energy_diff","ie-enzo-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-
-  enzo_float * density_diff    = (enzo_float *) field.values("density_diff");
-  enzo_float * total_energy_diff    = (enzo_float *) field.values("total_energy_diff");
-  enzo_float * internal_energy_diff = (enzo_float *) field.values("internal_energy_diff");
-  enzo_float * velocity_x_diff = (enzo_float *) field.values("velocity_x_diff");
-  enzo_float * velocity_y_diff = (enzo_float *) field.values("velocity_y_diff");
-  enzo_float * velocity_z_diff = (enzo_float *) field.values("velocity_z_diff");
-  enzo_float * acceleration_x_diff = (enzo_float *) field.values("acceleration_x_diff");
-  enzo_float * acceleration_y_diff = (enzo_float *) field.values("acceleration_y_diff");
-  enzo_float * acceleration_z_diff = (enzo_float *) field.values("acceleration_z_diff");
-
-  for (int iz=0; iz<mz; iz++) {
-    for (int iy=0; iy<my; iy++) {
-      for (int ix=0; ix<mx; ix++) {
-	const int i=ix+mx*(iy+my*iz);
-	density_diff[i] -= density[i];
-	total_energy_diff[i] -= total_energy[i];
-	internal_energy_diff[i] -= internal_energy[i];
-	velocity_x_diff[i] -= velocity_x[i];
-	velocity_y_diff[i] -= velocity_y[i];
-	velocity_z_diff[i] -= velocity_z[i];
-	acceleration_x_diff[i] -= acceleration_x[i];
-	acceleration_y_diff[i] -= acceleration_y[i];
-	acceleration_z_diff[i] -= acceleration_z[i];
+#ifdef NEW_FLUX  
+#ifdef DEBUG_NEW_FLUX
+  for (int i_f=0; i_f<nf; i_f++) {
+    for (int axis=0; axis<rank; axis++) {
+      const int n1 = n3[(axis+1)%3];
+      const int n2 = n3[(axis+2)%3];
+      for (int face=0; face<2; face++) {
+        auto & fa = flux_array[axis][face][i_f];
+        double sumabs=0.0;
+        for (int i2=0; i2<n2; i2++) {
+          for (int i1=0; i1<n1; i1++) {
+            const int i = i1 + n1*i2;
+            CkPrintf ("DEBUG_FLUX %s  %d %d %d  (%d %d) %g\n",
+                      name().c_str(),axis,face,i_f,i1,i2,fa[i]);
+            sumabs += std::abs(fa[i]);
+          }
+        }
       }
     }
   }
 #endif
-  
-  WRITE_FIELD("density","de-enzop-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  WRITE_FIELD("velocity_x","vx-enzop-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  WRITE_FIELD("velocity_y","vy-enzop-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  WRITE_FIELD("velocity_z","vz-enzop-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  WRITE_FIELD("acceleration_x","ax-enzop-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  WRITE_FIELD("acceleration_y","ay-enzop-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  WRITE_FIELD("acceleration_z","az-enzop-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  WRITE_FIELD("total_energy","te-enzop-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-  WRITE_FIELD("internal_energy","ie-enzop-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
-
-  int mx,my,mz;
-  field.dimensions(0,&mx,&my,&mz);
-  TRACE_FIELD("ppm-1-density",density,1.0);
-  TRACE_FIELD("ppm-1-total_energy",total_energy,1.0);
-  TRACE_FIELD("ppm-1-velocity_x",velocity_x,1.0);
-  TRACE_FIELD("ppm-1-velocity_y",velocity_y,1.0);
-  TRACE_FIELD("ppm-1-velocity_z",velocity_z,1.0);
-  TRACE_FIELD("ppm-1-acceleration_x",acceleration_x,1.0);
-  TRACE_FIELD("ppm-1-acceleration_y",acceleration_y,1.0);
-  TRACE_FIELD("ppm-1-acceleration_z",acceleration_z,1.0);
-  TRACE_FIELD("ppm-1-internal_energy",internal_energy,1.0);
+#endif
   
   /* deallocate temporary space for solver */
 

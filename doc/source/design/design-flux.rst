@@ -373,20 +373,12 @@ represented explicitly.  (Note the terminology (rx,ry,rz) is used
 instead of (nx,ny,nz) because the later is already used to represent
 a block's size).
 
-Additionally, the block's location (cx,cy,cz), 0 <= cx,cy,cz <= +1, as
-a child block within its parent is also stored in the Face object.
-This is used for determining the relationship between the block's face
-and the corresponding face of the adjacent neighbor, which will be
-required when the block and its neighbor are in different mesh
-refinement levels.  Blocks in the coarsest (root) level have no
-parent, so this location is not accessed.
-
 ----
 
 .. glossary::
 
-   ``Face::Face (int ix, int iy, int iz,  int rx, int ry, int rz,  int cx, int cy, int cz)``
-    *Create a Face object for a Block associated with face (ix,iy,iz),  -1 <= ix,iy,iz <= +1, with unit normal (rx,ry,rz), -1 <= (rx,ry,rz) <= 1 and sum |rx|+|ry|+|rz| = 1, and where the Block is child (cx,cy,cz), 0 <= (cx,cy,cz) <= 1, in its parent block.*
+   ``Face::Face (int ix, int iy, int iz,  int rx, int ry, int rz)``
+    *Create a Face object for a Block associated with face (ix,iy,iz),  -1 <= ix,iy,iz <= +1, with unit normal (rx,ry,rz), -1 <= (rx,ry,rz) <= 1 and sum |rx|+|ry|+|rz| = 1.*
 
 ----
 
@@ -401,13 +393,6 @@ parent, so this location is not accessed.
 
    ``void Face::get_normal (int *rx, int *ry, int *rz)``
     *Return the tuple (rx,ry,rz), -1 <= rx,ry,rz <= 1 and |rx|+|ry|+|rz| = 1, identifying the unit normal to the face.*
-
-----
-
-.. glossary::
-
-   ``void Face::get_child (int *cx, int *cy, int *cz)``
-    *Return the tuple (cx,cy,cz), 0 <= cx,cy,cz <= 1, identifying the block's location in its parent Block, if any.*
 
 ----------------     
 FaceFluxes class
@@ -430,7 +415,7 @@ indeed conforming.
 .. glossary::
 
    ``FaceFluxes (Face face, int index_field, int nx, int ny, int nz, int level, double dt, int cx, int cy, int cz)``
-    *Create a FaceFluxes object for the given Face* **face,** *block size* **(nx,ny,nz),** *mesh refinement level* **level** *, time step* **dt,** *and optional face-centering* **(cx,cy,cz).** *(Note that centering (cx,cy,cz) here is different from the location in parent (cx,cy,cz) for the Face object.)*
+    *Create a FaceFluxes object for the given Face* **face,** *block size* **(nx,ny,nz),** *mesh refinement level* **level** *, time step* **dt,** *and optional face-centering* **(cx,cy,cz).**
    
 ----
 

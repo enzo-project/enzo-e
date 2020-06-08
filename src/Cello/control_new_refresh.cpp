@@ -13,10 +13,24 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
+// #define DEBUG_NEW_REFRESH
+// #define DEBUG_NEW_REFRESH_SYNC
+
+#ifdef DEBUG_NEW_REFRESH
+#   define TRACE_NEW_REFRESH(BLOCK,REFRESH,MSG)                         \
+  CkPrintf ("DEBUG_NEW_REFRESH %s %d: %s: sync %d  type %d \n", BLOCK->name().c_str(),CkMyPe(),MSG,REFRESH->sync_id(),REFRESH->neighbor_type()); \
+  fflush(stdout);
+#else
+#   define TRACE_NEW_REFRESH(BLOCK,REFRESH,MSG)  /* ... */
+#endif
+                                                \
+    
 #define CHECK_ID(ID)				\
   ASSERT1 ("CHECK_ID",				\
 	   "Invalid id %d",ID,			\
 	   ID>=0);				\
+
+//----------------------------------------------------------------------
 
 void Block::new_refresh_start (int id_refresh, int callback)
 {
@@ -61,6 +75,12 @@ void Block::new_refresh_start (int id_refresh, int callback)
     // Initialize sync counter
     sync.set_stop(count);
 
+#ifdef DEBUG_NEW_REFRESH_SYNC    
+    CkPrintf ("DEBUG_NEW_REFRESH_SYNC %s %d sync %p A start %s:%d refresh %d stop %d\n",
+              name().c_str(),CkMyPe(),&sync,__FILE__,__LINE__,id_refresh,sync.stop());
+    fflush(stdout);
+#endif    
+
     if (callback != 0) {
       new_refresh_wait(id_refresh,callback);
     }
@@ -101,6 +121,11 @@ void Block::new_refresh_wait (int id_refresh, int callback)
     // process any existing messages in the refresh message list
 
     Sync & sync = new_refresh_sync_list_[id_refresh];
+#ifdef DEBUG_NEW_REFRESH_SYNC    
+    CkPrintf ("DEBUG_NEW_REFRESH_SYNC %s %d sync %p B wait %s:%d refresh %d stop %d\n",
+              name().c_str(),CkMyPe(),&sync,__FILE__,__LINE__,id_refresh,sync.stop());
+    fflush(stdout);
+#endif    
     for (auto id_msg=0;
 	 id_msg<new_refresh_msg_list_[id_refresh].size();
 	 id_msg++) {
@@ -133,6 +158,11 @@ void Block::new_refresh_check_done (int id_refresh)
   Refresh * refresh    = cello::refresh(id_refresh);
   RefreshState & state = new_refresh_state_list_[id_refresh];
   Sync & sync          = new_refresh_sync_list_[id_refresh];
+#ifdef DEBUG_NEW_REFRESH_SYNC    
+  CkPrintf ("DEBUG_NEW_REFRESH_SYNC %s %d sync %p C check %s:%d refresh %d stop %d\n",
+              name().c_str(),CkMyPe(),&sync,__FILE__,__LINE__,id_refresh,sync.stop());
+    fflush(stdout);
+#endif    
   
   ASSERT1("Block::new_refresh_check_done()",
 	  "Refresh[%d] must not be in inactive state",
@@ -169,10 +199,17 @@ void Block::p_new_refresh_recv (MsgRefresh * msg)
 
   const int id_refresh = msg->id_refresh();
   CHECK_ID(id_refresh);
+  TRACE_NEW_REFRESH(this,cello::refresh(id_refresh),"recv");
 
   RefreshState & state = new_refresh_state_list_[id_refresh];
   Sync & sync          = new_refresh_sync_list_[id_refresh];
 
+#ifdef DEBUG_NEW_REFRESH_SYNC    
+  CkPrintf ("DEBUG_NEW_REFRESH_SYNC %s %d sync %p D recv %s:%d refresh %d stop %d\n",
+              name().c_str(),CkMyPe(),&sync,__FILE__,__LINE__,id_refresh,sync.stop());
+    fflush(stdout);
+#endif    
+  
   if (state == RefreshState::READY) {
     // unpack message data into Block data if ready
     msg->update(data());
@@ -220,7 +257,8 @@ int Block::new_refresh_load_field_faces_ (Refresh & refresh)
   const int neighbor_type = refresh.neighbor_type();
 
   if (neighbor_type == neighbor_leaf ||
-      neighbor_type == neighbor_tree) {
+      neighbor_type == neighbor_tree |
+      neighbor_type == neighbor_flux) {
 
     // Loop over neighbor leaf Blocks (not necessarily same level)
 
@@ -316,6 +354,7 @@ void Block::new_refresh_load_field_face_
   msg_refresh->set_new_refresh_id (id_refresh);
   msg_refresh->set_data_msg (data_msg);
 
+  TRACE_NEW_REFRESH(this,cello::refresh(id_refresh),"send");
   thisProxy[index_neighbor].p_new_refresh_recv (msg_refresh);
 
 }
