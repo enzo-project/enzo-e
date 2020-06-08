@@ -3,7 +3,7 @@
 /// @file     problem_Method.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2015-09-04
-/// @brief    
+/// @brief
 
 #include "problem.hpp"
 
@@ -35,6 +35,7 @@ void Method::pup (PUP::er &p)
   p | schedule_; // pupable
   p | courant_;
   p | ir_post_;
+  p | required_fields_; // std::vector<str> required fields
 
 }
 
@@ -64,10 +65,50 @@ int Method::refresh_id_post() const
 //----------------------------------------------------------------------
 
 void Method::set_schedule (Schedule * schedule) throw()
-{ 
+{
   if (schedule_) delete schedule_;
   schedule_ = schedule;
 }
 
-//======================================================================
+//----------------------------------------------------------------------
 
+void Method::define_fields () throw()
+{
+  /* Ensure required fields are defined for this method */
+
+  FieldDescr * field_descr = cello::field_descr();
+
+  for (int ifield = 0; ifield < required_fields_.size(); ifield++){
+    if( ! field_descr->is_field( required_fields_[ifield] )){
+      field_descr->insert_permanent( required_fields_[ifield] );
+    }
+  }
+
+}
+
+//----------------------------------------------------------------------
+
+void Method::define_group_fields (std::vector<std::string> group_fields,
+                                  std::string groupname) throw()
+{
+  /* Ensure fields are grouped correctly */
+
+  FieldDescr * field_descr = cello::field_descr();
+
+  for (int ifield = 0; ifield < group_fields.size(); ifield++){
+
+    // Maybe just throw error here to keep this fully separate from above
+    if( ! field_descr->is_field( required_fields_[ifield] )){
+      field_descr->insert_permanent( required_fields_[ifield] );
+    }
+
+    if (!(field_descr->groups()->is_in( group_fields[ifield], groupname)) ){
+      field_descr->groups()->add( group_fields[ifield], groupname);
+    }
+
+  }
+
+
+}
+
+//======================================================================

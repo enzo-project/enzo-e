@@ -32,94 +32,54 @@ EnzoMethodGrackle::EnzoMethodGrackle
   // Method function that can be called to obtain a list of
   // needed field
 
-  std::vector<std::string> fields_to_define;
+  // special container for ensuring colour fields are properly grouped
+  const int rank = cello::rank();
   std::vector<std::string> colour_fields;
 
-  if (grackle_data->metal_cooling > 0){
-    std::string metal_name = "metal_density";
 
-    if (! (field_descr->is_field(metal_name))){
-      fields_to_define.push_back(metal_name);
-    }
-    colour_fields.push_back(metal_name);
+  this->required_fields_ = std::vector<std::string> {"density","internal_energy",
+                                                     "total_energy"};
+  if (rank>=0) this->required_fields_.push_back("velocity_x");
+  if (rank>=1) this->required_fields_.push_back("velocity_y");
+  if (rank>=2) this->required_fields_.push_back("velocity_z");
+
+  if (grackle_data->metal_cooling > 0){
+    this->required_fields_.push_back("metal_density");
+    colour_fields.push_back("metal_density");
   }
 
   // Define primordial chemistry fields
   if (grackle_data->primordial_chemistry > 0){
-    std::string pc1_fields[6] = {"HI_density","HII_density",
-                                  "HeI_density","HeII_density","HeIII_density",
-                                  "e_density"};
-    int numfields = 6;
+    std::vector<std::string> pc1_fields {"HI_density","HII_density",
+                                         "HeI_density","HeII_density","HeIII_density",
+                                         "e_density"};
 
-    for(int ifield = 0; ifield < numfields; ifield++){
-      if (! (field_descr->is_field( pc1_fields[ifield] ))){
-        fields_to_define.push_back( pc1_fields[ifield] );
-      }
-      colour_fields.push_back( pc1_fields[ifield] );
-    }
+    this->required_fields_.insert(this->required_fields_.end(), pc1_fields.begin(), pc1_fields.end());
+    colour_fields.insert(colour_fields.end(), pc1_fields.begin(), pc1_fields.end());
 
     if(grackle_data->primordial_chemistry > 1){
 
-      std::string pc2_fields[3] = {"HM_density", "H2I_density", "H2II_density"};
-      numfields = 3;
-
-      for (int ifield = 0; ifield < numfields; ifield++){
-        if (! (field_descr->is_field( pc2_fields[ifield] ))){
-          fields_to_define.push_back( pc2_fields[ifield] );
-        }
-        colour_fields.push_back( pc2_fields[ifield] );
-      }
+      std::vector<std::string> pc2_fields {"HM_density", "H2I_density", "H2II_density"};
+      this->required_fields_.insert(this->required_fields_.end(), pc2_fields.begin(), pc2_fields.end());
+      colour_fields.insert(colour_fields.end(), pc2_fields.begin(), pc2_fields.end());
 
       if(grackle_data->primordial_chemistry > 2){
-        std::string pc3_fields[3] = {"DI_density", "DII_density", "HDI_density"};
-        numfields = 3;
-
-        for(int ifield = 0; ifield < numfields; ifield++){
-          if (! (field_descr->is_field( pc3_fields[ifield] ))){
-            fields_to_define.push_back( pc3_fields[ifield] );
-          }
-
-          colour_fields.push_back( pc3_fields[ifield] );
-        }
-
+        std::vector<std::string> pc3_fields {"DI_density", "DII_density", "HDI_density"};
+        this->required_fields_.insert(this->required_fields_.end(), pc3_fields.begin(), pc3_fields.end());
+        colour_fields.insert(colour_fields.end(), pc3_fields.begin(), pc3_fields.end());
       } // endif primordial_chemistry > 2
-
     } // endif primordial_chemistry > 1
-
   } // endif primordial chemistry is on
 
-  if (grackle_data->use_specific_heating_rate){
-    if ( !(field_descr->is_field("specific_heating_rate"))){
-      fields_to_define.push_back("specific_heating_rate");
-    }
-  }
+  if (grackle_data->use_specific_heating_rate)
+      this->required_fields_.push_back("specific_heating_rate");
 
-  if (grackle_data->use_volumetric_heating_rate){
-    if ( !(field_descr->is_field("volumetric_heating_rate"))){
-      fields_to_define.push_back("volumetric_heating_rate");
-    }
-  }
+  if (grackle_data->use_volumetric_heating_rate)
+      this->required_fields_.push_back("volumetric_heating_rate");
 
-  // Define fields
-
-//  WARNING("EnzoMethodGrackle: ",
-//          "Not all fields needed for current Grackle settings are defined. Attempting to define:");
-
-  for (int ifield = 0; ifield < fields_to_define.size(); ifield++){
-//    WARNING(fields_to_define[ifield].c_str() );
-    field_descr->insert_permanent( fields_to_define[ifield] );
-  }
-
-  // Set these fields to colour if they exist
-  //    list of fields belonging to this method that are colour
-  for (int ifield=0; ifield < colour_fields.size(); ifield++){
-    if (   field_descr->is_permanent(  colour_fields[ifield] ) &&
-         !(field_descr->groups()->is_in( colour_fields[ifield], "colour")) ){
-
-
-      field_descr->groups()->add( colour_fields[ifield] ,"colour");
-    }
-  }
+  // Define fields and assign fields to correct
+  this->define_fields();
+  this->define_group_fields(colour_fields, "colour");
 
   /// Initialize default Refresh
   cello::simulation()->new_refresh_set_name(ir_post_,name());
@@ -576,25 +536,36 @@ void EnzoMethodGrackle::ResetEnergies ( EnzoBlock * enzo_block) throw()
    enzo_float * internal_energy = (enzo_float*) field.values("internal_energy");
    enzo_float * total_energy    = (enzo_float*) field.values("total_energy");
 
-   enzo_float * pressure    = (enzo_float*) field.values("pressure");
-   enzo_float * temperature = (enzo_float*) field.values("temperature");
+   enzo_float * HI_density    = field.is_field("HI_density") ?
+                                (enzo_float*) field.values("HI_density")    : NULL;
+   enzo_float * HII_density   = field.is_field("HII_density") ?
+                                (enzo_float*) field.values("HII_density")   : NULL;
+   enzo_float * HeI_density   = field.is_field("HeI_density") ?
+                                (enzo_float*) field.values("HeI_density")   : NULL;
+   enzo_float * HeII_density  = field.is_field("HeII_density") ?
+                                (enzo_float*) field.values("HeII_density")  : NULL;
+   enzo_float * HeIII_density = field.is_field("HeIII_density") ?
+                                (enzo_float*) field.values("HeIII_density") : NULL;
+   enzo_float * e_density     = field.is_field("e_density") ?
+                                (enzo_float*) field.values("e_density")     : NULL;
 
-   enzo_float * HI_density    = (enzo_float*) field.values("HI_density");
-   enzo_float * HII_density   = (enzo_float*) field.values("HII_density");
-   enzo_float * HeI_density   = (enzo_float*) field.values("HeI_density");
-   enzo_float * HeII_density  = (enzo_float*) field.values("HeII_density");
-   enzo_float * HeIII_density = (enzo_float*) field.values("HeIII_density");
-   enzo_float * e_density     = (enzo_float*) field.values("e_density");
+   enzo_float * H2I_density   = field.is_field("H2I_density") ?
+                                (enzo_float*) field.values("H2I_density")   : NULL;
+   enzo_float * H2II_density  = field.is_field("H2II_density") ?
+                                (enzo_float*) field.values("H2II_density")  : NULL;
+   enzo_float * HM_density    = field.is_field("HM_density") ?
+                                (enzo_float*) field.values("HM_density")    : NULL;
 
-   enzo_float * H2I_density   = (enzo_float*) field.values("H2I_density");
-   enzo_float * H2II_density  = (enzo_float*) field.values("H2II_density");
-   enzo_float * HM_density    = (enzo_float*) field.values("HM_density");
+   enzo_float * DI_density    = field.is_field("DI_density") ?
+                               (enzo_float *) field.values("DI_density")    : NULL;
+   enzo_float * DII_density   = field.is_field("DII_density") ?
+                               (enzo_float *) field.values("DII_density")   : NULL;
+   enzo_float * HDI_density   = field.is_field("HDI_density") ?
+                               (enzo_float *) field.values("HDI_density")   : NULL;
 
-   enzo_float * DI_density    = (enzo_float *) field.values("DI_density");
-   enzo_float * DII_density   = (enzo_float *) field.values("DII_density");
-   enzo_float * HDI_density   = (enzo_float *) field.values("HDI_density");
 
-   enzo_float * metal_density = (enzo_float*) field.values("metal_density");
+   enzo_float * metal_density = field.is_field("metal_density") ?
+                                (enzo_float*) field.values("metal_density") : NULL;
 
    // Field size
    int nx,ny,nz;

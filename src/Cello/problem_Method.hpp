@@ -1,8 +1,8 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     problem_Method.hpp 
-/// @author   James Bordner (jobordner@ucsd.edu) 
-/// @date     Mon Jul 13 11:11:47 PDT 2009 
+/// @file     problem_Method.hpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     Mon Jul 13 11:11:47 PDT 2009
 /// @brief    [\ref Problem] Declaration for the Method class
 
 #ifndef PROBLEM_METHOD_HPP
@@ -11,7 +11,7 @@
 class Refresh;
 class Schedule;
 
-class Method : public PUP::able 
+class Method : public PUP::able
 {
   /// @class    Method
   /// @ingroup  Method
@@ -27,29 +27,29 @@ public: // interface
 
   /// Charm++ PUP::able declarations
   PUPable_abstract(Method);
-  
+
   Method (CkMigrateMessage *m)
     : PUP::able(m),
     schedule_(NULL),
     courant_(1.0),
     ir_post_(-1)
-   
+
   { }
-      
+
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
 public: // virtual functions
 
-  /// Apply the method to advance a block one timestep 
+  /// Apply the method to advance a block one timestep
 
-  virtual void compute ( Block * block) throw() = 0; 
+  virtual void compute ( Block * block) throw() = 0;
 
   /// Return the name of this Method
   virtual std::string name () throw () = 0;
 
   /// Compute maximum timestep for this method
-  virtual double timestep (Block * block) const throw() 
+  virtual double timestep (Block * block) const throw()
   { return std::numeric_limits<double>::max(); }
 
   /// Resume computation after a reduction
@@ -66,11 +66,18 @@ public: // virtual functions
   int refresh_id_post() const;
 
   /// Return the Schedule object pointer
-  Schedule * schedule() throw() 
+  Schedule * schedule() throw()
   { return schedule_; };
 
   /// Set schedule
   void set_schedule (Schedule * schedule) throw();
+
+  /// Define required fields for method
+  void define_fields () throw();
+
+  /// Define certain field groupings if necessary
+  void define_group_fields (std::vector<std::string> group_fields,
+                            std::string groupname) throw();
 
   double courant() const throw ()
   { return courant_; }
@@ -105,6 +112,9 @@ protected: // attributes
 
   /// Index for main refresh after Method is called
   int ir_post_;
+  
+  /// List of fields required for the Method
+  std::vector<std::string> required_fields_;
 
 };
 

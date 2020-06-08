@@ -41,10 +41,10 @@ void Simulation::initialize() throw()
   problem_->initialize_units (config_);
   problem_->initialize_physics (config_,parameters_);
   problem_->initialize_boundary(config_,parameters_);
-  problem_->initialize_initial (config_,parameters_);
+  problem_->initialize_method(config_);
+  problem_->initialize_initial(config_,parameters_);
   problem_->initialize_refine  (config_,parameters_);
   problem_->initialize_stopping(config_);
-  problem_->initialize_method(config_);
   problem_->initialize_output  (config_,factory());
   problem_->initialize_solver  (config_);
   problem_->initialize_prolong (config_);

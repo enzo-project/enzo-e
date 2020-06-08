@@ -22,7 +22,7 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodTurbulence::EnzoMethodTurbulence 
+EnzoMethodTurbulence::EnzoMethodTurbulence
 (double edot,
  double density_initial,
  double temperature_initial,
@@ -35,13 +35,26 @@ EnzoMethodTurbulence::EnzoMethodTurbulence
     mach_number_(mach_number),
     comoving_coordinates_(comoving_coordinates)
 {
-  TRACE_TURBULENCE;  
+  TRACE_TURBULENCE;
+
+  const int rank = cello::rank();
+
+  this->required_fields_ = std::vector<std::string> {"density",
+                                                     "temperature","total_energy"};
+
+  if (rank >= 0) this->required_fields_.insert(this->required_fields_.end(),{"velocity_x","driving_x"});
+  if (rank >= 1) this->required_fields_.insert(this->required_fields_.end(),{"velocity_y","driving_y"});
+  if (rank >= 2) this->required_fields_.insert(this->required_fields_.end(),{"velocity_z","driving_z"});
+
+  this->define_fields();
+
+  // Initialize default Refresh object
 
   cello::simulation()->new_refresh_set_name(ir_post_,name());
 
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
-  
+
   // TURBULENCE parameters initialized in EnzoBlock::initialize()
 }
 
@@ -68,10 +81,10 @@ void EnzoMethodTurbulence::pup (PUP::er &p)
 
 void EnzoMethodTurbulence::compute ( Block * block) throw()
 {
-  TRACE_TURBULENCE;  
+  TRACE_TURBULENCE;
 
   EnzoBlock * enzo_block = enzo::block(block);
-  
+
   Field field = block->data()->field();
 
   const EnzoConfig * enzo_config = enzo::config();
@@ -104,7 +117,7 @@ void EnzoMethodTurbulence::compute ( Block * block) throw()
 
   const int n = max_turbulence_array;
   double g[n];
-  
+
   for (int i=0; i<max_turbulence_array-2; i++) g[i] = 0.0;
 
   g[index_turbulence_mind] = std::numeric_limits<double>::max();
@@ -181,9 +194,9 @@ CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs)
     for (int ig=0; ig<max_turbulence_array-2; ig++) {
       accum [ig] += values[ig];
     }
-    accum [index_turbulence_mind] = 
+    accum [index_turbulence_mind] =
       std::min(accum[index_turbulence_mind],values[index_turbulence_mind]);
-    accum [index_turbulence_maxd] = 
+    accum [index_turbulence_maxd] =
       std::max(accum[index_turbulence_maxd],values[index_turbulence_maxd]);
   }
   return CkReductionMsg::buildNew(max_turbulence_array*sizeof(double),accum);
@@ -193,7 +206,7 @@ CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs)
 
 void EnzoBlock::p_method_turbulence_end(CkReductionMsg * msg)
 {
-  TRACE_TURBULENCE;  
+  TRACE_TURBULENCE;
   performance_start_(perf_compute,__FILE__,__LINE__);
   method()->compute_resume (this,msg);
   performance_stop_(perf_compute,__FILE__,__LINE__);
@@ -201,17 +214,17 @@ void EnzoBlock::p_method_turbulence_end(CkReductionMsg * msg)
 
 //----------------------------------------------------------------------
 
-void EnzoMethodTurbulence::compute_resume 
+void EnzoMethodTurbulence::compute_resume
 (Block * block,
  CkReductionMsg * msg) throw()
 {
-  TRACE_TURBULENCE;  
+  TRACE_TURBULENCE;
 
   double * g = (double *)msg->getData();
 
   Data * data = block->data();
   Field field = data->field();
- 
+
 
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
@@ -248,7 +261,7 @@ void EnzoMethodTurbulence::compute_resume
     float v_rms = mach_number_ * sqrt(temperature_initial_);
 
     edot_ = 0.81/box_size*box_mass*v_rms*v_rms*v_rms;
- 
+
     // Approximate correction to the MacLow's factor (see eqs (7) - (8))
     // for **this PPM implementation**. Seems to be OK for 64^3, 128^3
     // and 256^3 Mach=3,6,10 simulations of **solenoidally** driven
@@ -262,9 +275,9 @@ void EnzoMethodTurbulence::compute_resume
     // (8) $\dot{E}_{\textsf{\scriptsize{kin}}} = - \eta_{e} m^{-1/2}
     //      \tilde{k} E^{3/2}_{\textsf{\scriptsize{kin}}}$
     //
- 
+
     edot_  *= 0.8;
- 
+
   }
 
   // compute norm (ComputeRandomForcingNormalization.C)
@@ -276,19 +289,19 @@ void EnzoMethodTurbulence::compute_resume
     // Original code in ComputeRandomForcingNormalization.C:
     //
     //   float gv0 = GlobVal[0];
-    //   if (gv0 < 1e-30 && gv0 > -1e-30 && MetaData->TopGridRank == 3) {ERROR_MESSAGE} 
+    //   if (gv0 < 1e-30 && gv0 > -1e-30 && MetaData->TopGridRank == 3) {ERROR_MESSAGE}
     //      else    *norm = 1.25*dt*RandomForcingEdot*numberOfGridZones/gv0;
     //  //  small push at the start, when gv0==0 due to zero initial velocities
     //   if (gv0 < 1e-30 && gv0 > -1e-30 && MetaData->TopGridRank == 2) *norm = 0.0001;
     //     else    *norm = 1.25*dt*RandomForcingEdot*numberOfGridZones/gv0;
 
-    
+
     double vad = g[index_turbulence_vad];
 
     const bool small_g0 = std::abs(vad) < 1e-30;
 
     norm = small_g0 ? 0.0001 : 1.25*dt*edot_*n/vad;
-      
+
       // OLD COMPUTATION:
       //
       //      norm = ( sqrt(g[0]*g[0] + 2.0*n*g[1]*dt*edot_) - g[0] ) / g[1];
@@ -303,7 +316,7 @@ void EnzoMethodTurbulence::compute_resume
   if (block->index().is_root()) {
 
     Monitor * monitor = cello::monitor();
-    
+
     monitor->print ("Method","sum v*a*d    " "%.17g", g[index_turbulence_vad]);
     monitor->print ("Method","sum a*a*d    " "%.17g",g[index_turbulence_aad]);
     monitor->print ("Method","sum v*v*d/t  " "%.17g",g[index_turbulence_vvdot]);
@@ -322,7 +335,7 @@ void EnzoMethodTurbulence::compute_resume
 
     monitor->print ("Method","sum d*ln(d)  " "%.17g",g[index_turbulence_dlnd]);
     monitor->print ("Method","sum zones    " "%.17g",g[index_turbulence_zones]);
-    
+
     monitor->print ("Method","min d        " "%.17g",g[index_turbulence_mind]);
     monitor->print ("Method","max d        " "%.17g",g[index_turbulence_maxd]);
     monitor->print ("Method","sum d        " "%.17g",g[index_turbulence_d]);
@@ -340,7 +353,7 @@ void EnzoMethodTurbulence::compute_resume
 		    sqrt(g[index_turbulence_dd]/n));
     monitor->print ("Method","min/max Density         " "%.17g",
 		    g[index_turbulence_mind] /
-		    g[index_turbulence_maxd]);                  
+		    g[index_turbulence_maxd]);
   }
 
   if (block->is_leaf()) {
@@ -354,11 +367,11 @@ void EnzoMethodTurbulence::compute_resume
 
 //----------------------------------------------------------------------
 
-void EnzoMethodTurbulence::compute_resume_ 
+void EnzoMethodTurbulence::compute_resume_
 (Block * block, CkReductionMsg * msg) throw()
 {
-  
-  TRACE_TURBULENCE;  
+
+  TRACE_TURBULENCE;
   // Compute normalization
 
   Field field = block->data()->field();
@@ -397,7 +410,7 @@ void EnzoMethodTurbulence::compute_resume_
     (enzo_float*) field.values ("driving_z") };
 
   // compute bulk momentum
-  const enzo_float bm[3] = 
+  const enzo_float bm[3] =
     { enzo_float(g[index_turbulence_dax]/n),
       enzo_float(g[index_turbulence_day]/n),
       enzo_float(g[index_turbulence_daz]/n)};
@@ -414,12 +427,12 @@ void EnzoMethodTurbulence::compute_resume_
 	  //	  	  v3[id][i] += a3[id][i]*norm;
 	  te[i] += (v3[id][i]*(a3[id][i]-bm[id]))*norm;
 	  v3[id][i] += (a3[id][i]-bm[id])*norm;
-		    
+
 	}
       }
     }
   }
 
-  TRACE_TURBULENCE;  
-  
+  TRACE_TURBULENCE;
+
 }
