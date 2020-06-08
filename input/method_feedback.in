@@ -102,11 +102,14 @@ Method {
   };
 
   feedback {
+     shift_cell_center = true;       # kick fb injection when close to grid boundary
+     # time_first_sn     = 1.0;      # for testing - set time of first SN (in Myr) to not have to go through random number draws also triggers hard-coded progenitor mass and SN energy values (20 Msun star explosion)
      #  ejecta_mass      = 10.0;     # solar masses - OLD PARAM - NOT USED 
      #  supernova_energy = 1.0;      # in 10^51 erg - OLD PARAM - NOT USED
      ke_fraction      = 0.5;      # fraction of kinetic energy (otherwise thermal) - < 0 computes it self-consistently
      # ejecta_metal_fraction = 0.5;  # OLD PARAM - NOT USED
      feedback_stencil      = 3;      # deposit feedback in a NxN CIC stencil centered on the particle - should work with any odd ineger, but not tested for anything other than 3 
+     use_ionization_feedback = true;    # local (one zone) rad heating
   };
 
   ppm {
@@ -123,6 +126,9 @@ Method {
         temperature_floor = 1.0E-20;
       };
 
+#
+#  add 'grackle' to list above to use and uncomment
+#
 #  #grackle {
 #    data_file = "CloudyData_UVB=HM2012.h5";
 #    with_radiative_cooling = 1;
@@ -166,12 +172,21 @@ Initial {
   list = ["feedback_test"]; # name of IC problem
 
   feedback_test {
-    density    = 1.2E-23;             # uniform mass density for ICs
+    density    = 1.2E-24;             # uniform mass density for ICs
     position   = [0.425, 0.425, 0.5]; # off-center to avoid block boundary
+    temperature = 100.0;              # in K
                                       #   particles are still local to each block and are kicked away from
                                       #   boundaries if NxN feedback zone crosses a block boundary
     star_mass  = 1000;                # particle mass in Msun
   }
+
+#
+# use this to test with some KE on the grid to make (add 'value' to list above)
+# sure momentum and KE energy injection work in a flow
+# value {
+#    velocity_x = 0.1;
+#  }
+
 }
 
 Output {
