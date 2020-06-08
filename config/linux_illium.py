@@ -7,14 +7,14 @@ is_arch_valid = 1
 #flags_arch = '-g -fprofile-arcs -ftest-coverage' # gcov
 
 # opt with debug comments
-#flags_arch = '-Wall -O0 -g -ggdb'
+flags_arch = '-Wall -O0 -g -ggdb'
 
 # full debug
 #flags_arch = '-Wall -g -O0 -ggdb'
 #
 
 #flags_arch = '-Wall -g'
-flags_arch = '-g -ggdb -O2'
+#flags_arch = '-g -ggdb -O2'
 #flags_arch = '-fprofile-arcs -ftest-coverage'
 #flags_arch = '-Wall -g -fsanitize=address -fno-omit-frame-pointer'
 #flags_arch = '-Wall -O3 -pg'
