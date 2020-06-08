@@ -645,7 +645,8 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
         double tsoon7      = soonest_explosion * enzo_units->time() / (1.0E7 * cello::yr_s);
         double wind_energy = 0.0;
         if (time_first_sn_ > 0){
-          wind_energy = 1.0E48; // non zero erg
+          // --- for testing ---
+          wind_energy = 1.0E48 / (8.0 * cello::mass_solar); // non zero erg
         } else{
           wind_energy = s99_wind_energy(td7, tsoon7); // in cm^2/s^2 (i.e. per unit mass in cgs)
         }
@@ -926,15 +927,16 @@ void EnzoMethodDistributedFeedback::inject_feedback(
   //
   // Set explosion properties
   //
-  double energy_per_cell = E_51 * 1.0E51 / enzo_units->mass() /
-                            (enzo_units->velocity() * enzo_units->velocity());
+  const double energy_units = enzo_units->mass() * enzo_units->velocity() * enzo_units->velocity();
+  CkPrintf("Injecting feedback in %i cells at mass (Msun) %g and energy (E51) %g\n",number_of_feedback_cells_, m_eject, E_51);
+  double energy_per_cell = E_51 * 1.0E51 / energy_units;
   double mass_per_cell   = m_eject * cello::mass_solar / enzo_units->mass();
+
   mass_per_cell /= ((double) number_of_feedback_cells_);
   energy_per_cell /= ((double) number_of_feedback_cells_);
 
   double density_per_cell = mass_per_cell * inv_vol;
   double energy_density_per_cell = energy_per_cell * inv_vol;
-
 
   //  stencil_rad_ is integer separation from cell center
   //  and edge of injection region (i.e. 1 for 3x3 injection grid)
