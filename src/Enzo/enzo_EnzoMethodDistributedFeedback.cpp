@@ -314,7 +314,19 @@ EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
 
+  ParticleDescr * particle_descr = cello::particle_descr();
+
+  //
+  // Refresh copies of all star particles on neighboring grids
+  //
+  const int it = particle_descr->type_index("star");
+  const bool copy = true;
+  refresh->add_particle(it,
+                        true // copy all neighboring particles of this type (default false)
+                        );
+
   FieldDescr * field_descr = cello::field_descr();
+
 
   dual_energy_         = field_descr->is_field("internal_energy") &&
                          field_descr->is_field("total_energy");
@@ -432,6 +444,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
     const int ia_l = particle.attribute_index (it, "lifetime");
     const int ia_c = particle.attribute_index (it, "creation_time");
     const int ia_mf = particle.attribute_index (it, "metal_fraction");
+    const int ia_loc = particle.attribute_index (it, "is_local");
 
     const int dm = particle.stride(it, ia_m);
     const int dp = particle.stride(it, ia_x);
@@ -439,12 +452,14 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
     const int dl = particle.stride(it, ia_l);
     const int dc = particle.stride(it, ia_c);
     const int dmf = particle.stride(it, ia_mf);
+    const int dloc = particle.stride(it, ia_loc);
 
     const int nb = particle.num_batches(it);
 
     for (int ib=0; ib<nb; ib++){
       enzo_float *px=0, *py=0, *pz=0, *pvx=0, *pvy=0, *pvz=0;
       enzo_float *plifetime=0, *pcreation=0, *pmass=0, *pmetal=0;
+      int *is_local=0;
 
       pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib);
       pmetal = (enzo_float *) particle.attribute_array(it, ia_mf, ib);
@@ -459,18 +474,26 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
       plifetime = (enzo_float *) particle.attribute_array(it, ia_l, ib);
       pcreation = (enzo_float *) particle.attribute_array(it, ia_c, ib);
 
+      is_local = (int *) particle.attribute_array(it, ia_loc, ib);
+
       int np = particle.num_particles(it,ib);
 
       for (int ip=0; ip<np; ip++){
         // AE: Check and see if these differ....
-        int ipdp = ip*dp;
-        int ipdm = ip*dm;
-        int ipdv = ip*dv;
-        int ipdl = ip*dl;
-        int ipdc = ip*dc;
-        int ipdmf = ip*dmf;
+        const int ipdp = ip*dp;
+        const int ipdm = ip*dm;
+        const int ipdv = ip*dv;
+        const int ipdl = ip*dl;
+        const int ipdc = ip*dc;
+        const int ipdmf = ip*dmf;
+        const int ipdloc = ip*dloc;
 
+        int vals3[3];
+        enzo_block->index().values(vals3);
 
+        CkPrintf("DistributedFeedback (%s -- (%d;%d;%d)): Is particle %i of %i particles in batch %i local? : %i\n", enzo_block->name().c_str(), vals3[0],vals3[1],vals3[2],
+                                                                                           ip, np, ib,
+                                                                                           is_local[ipdloc]);
 /*
         // negative lifetime are particles that have alreahy gone SN
         // creation time must be > 0

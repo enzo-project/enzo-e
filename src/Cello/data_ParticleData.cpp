@@ -998,11 +998,16 @@ void ParticleData::write_ifrite (ParticleDescr * particle_descr,
   const int d = particle_descr->stride(it,ia_x);
   for (int ib=0; ib<nb; ib++) {
     const int np = num_particles(particle_descr,it,ib);
-    double x[np], y[np], z[np];
+    double * x = new double [np];
+    double * y = new double [np];
+    double * z = new double [np];
     position (particle_descr,it,ib,x,y,z);
     for (int ip=0; ip<np; ip++) {
       fprintf (fp,"%f %f %f\n",x[ip*d],y[ip*d],z[ip*d]);
     }
+    delete [] x;
+    delete [] y;
+    delete [] z;
   }
   fflush(fp);
   fclose (fp);
