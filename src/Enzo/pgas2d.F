@@ -1,13 +1,12 @@
-c     See LICENSE_ENZO file for license and copyright information
-
 #include "fortran.h"
-
+#define FORTRAN
 c=======================================================================
 c////////////////////////  SUBROUTINE PGAS2D  \\\\\\\\\\\\\\\\\\\\\\\\\\
 c
-      subroutine pgas2d(dslice, eslice, pslice, uslice, vslice,
-     &                  wslice, idim, jdim, i1, i2, j1, j2,
-     &                  gamma, pmin)
+      subroutine pgas2d(
+     &     dslice, eslice, pslice, uslice, vslice,
+     &     wslice, idim, jdim, i1, i2, j1, j2,
+     &     gamma, pmin)
 c
 c  COMPUTES GAS PRESSURE ON A SLICE
 c
@@ -44,19 +43,20 @@ c
 c-----------------------------------------------------------------------
 c
       implicit NONE
+#include "fortran_types.h"
 c
 c-----------------------------------------------------------------------
 c
 c  argument declarations
 c
-      integer i1, i2, idim, j1, j2, jdim
-      ENZO_REAL gamma, pmin
-      ENZO_REAL dslice(idim,jdim), eslice(idim,jdim), pslice(idim,jdim),
+      INTG_PREC i1, i2, idim, j1, j2, jdim
+      R_PREC    gamma, pmin
+      R_PREC dslice(idim,jdim), eslice(idim,jdim), pslice(idim,jdim),
      &     uslice(idim,jdim), vslice(idim,jdim), wslice(idim,jdim)
 c
 c  locals
 c
-      integer i, j
+      INTG_PREC i, j
 c
 c\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////
 c=======================================================================
@@ -66,10 +66,10 @@ c
       do j=j1,j2
          do i=i1,i2
             pslice(i,j) =
-     &           (gamma-1.0)*dslice(i,j)*(
-     &              eslice(i,j) - 0.5*(uslice(i,j)**2 +
-     &                                 vslice(i,j)**2 +
-     &                                 wslice(i,j)**2  )
+     &           (gamma-1._RKIND)*dslice(i,j)*(
+     &              eslice(i,j) - 0.5_RKIND*(uslice(i,j)**2 +
+     &                                   vslice(i,j)**2 +
+     &                                   wslice(i,j)**2  )
      &                                   )
             if (pslice(i,j) .lt. pmin) pslice(i,j) = pmin
          enddo

@@ -3,7 +3,7 @@
 c=======================================================================
 c////////////////////////  SUBROUTINE FLUX_HLL \\\\\\\\\\\\\\\\\\\\\\\\
 
-      subroutine flux_hll_dev(
+      subroutine flux_hll(
      &     dslice, eslice, geslice, uslice, vslice, wslice, dx,diffcoef,
      &     idim, jdim, i1, i2, j1, j2, dt, gamma,
      &     idiff, idual, eta1, ifallback,
