@@ -289,6 +289,9 @@ test_timer = env.Program('test_Timer.cpp',
 test_papi        = env.Program('test_Papi.cpp',          
                                LIBS=[libs_performance,libs_test])
 
+test_celloarray  = env.Program('test_CelloArray.cpp',
+                               LIBS=[libs_array,libs_test])
+
 libraries_charm   = env.Library ('charm',   objs_charm)
 libraries_control = env.Library ('control', objs_control)
 libraries_disk   = env.Library ('disk',   objs_disk)
@@ -312,6 +315,7 @@ libraries_test  = env.Library ('test', objs_test)
 
 binaries_cello = [test_type, test_class_size]
 
+binaries_array = [test_celloarray]
 binaries_disk  = [test_FileHdf5]
 binaries_error = [test_error]
 binaries_data = [test_scalar_data,
@@ -349,6 +353,10 @@ env.Alias('install-lib',env.Install (lib_path,libraries_charm))
 
 env.Alias('install-inc',env.Install (inc_path,includes_control))
 env.Alias('install-lib',env.Install (lib_path,libraries_control))
+
+env.Alias('install-bin',env.Install (bin_path,binaries_array))
+env.Alias('install-inc',env.Install (inc_path,includes_array))
+env.Alias('install-lib',env.Install (lib_path,libraries_array))
 
 env.Alias('install-bin',env.Install (bin_path,binaries_disk))
 env.Alias('install-inc',env.Install (inc_path,includes_disk))
@@ -398,9 +406,6 @@ env.Alias('install-lib',env.Install (lib_path,libraries_problem))
 
 env.Alias('install-inc',env.Install (inc_path,includes_compute))
 env.Alias('install-lib',env.Install (lib_path,libraries_compute))
-
-env.Alias('install-inc',env.Install (inc_path,includes_array))
-env.Alias('install-lib',env.Install (lib_path,libraries_array))
 
 env.Alias('install-inc',env.Install (inc_path,includes_simulation))
 env.Alias('install-lib',env.Install (lib_path,libraries_simulation))
