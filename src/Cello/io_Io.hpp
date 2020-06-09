@@ -8,7 +8,7 @@
 #ifndef IO_IO_HPP
 #define IO_IO_HPP
 
-class Io {
+class Io : public PUP::able {
 
   /// @class    Io
   /// @ingroup  Io
@@ -23,10 +23,20 @@ public: // interface
   virtual ~Io () throw ()
   {}
 
+  /// CHARM++ PUP::able declaration
+  PUPable_decl(Io);
+
+  /// CHARM++ migration constructor for PUP::able
+  Io (CkMigrateMessage *m)
+    : PUP::able(m),
+    data_count_(0),
+    meta_name_()
+  {  }
+
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
-
+    PUP::able::pup(p);
     TRACEPUP;
 
     p | meta_name_;

@@ -19,10 +19,15 @@ Output {
 
   # NOTE: checkpoint must come first as workaround for bug #55
 
-  list = ["checkpoint","density"];
+  list = ["checkpoint","density","data"];
 
   density {
      name = ["checkpoint_ppm-1-%06d.png", "cycle"];
+  }
+
+  data {
+    name = ["checkpoint_ppm-1_%1d_%06d.h5","proc","cycle"];
+    schedule { step = 10; }
   }
 
   checkpoint {

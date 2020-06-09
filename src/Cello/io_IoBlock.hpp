@@ -25,10 +25,18 @@ public: // interface
   virtual ~IoBlock() throw()
   {}
 
+  /// CHARM++ PUP::able declaration
+  PUPable_decl(IoBlock);
+
+  /// CHARM++ migration constructor for PUP::able
+  IoBlock (CkMigrateMessage *m)
+    : Io(m)
+  {  }
+
+  
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
-
     TRACEPUP;
 
     // NOTE: change this function whenever attributes change

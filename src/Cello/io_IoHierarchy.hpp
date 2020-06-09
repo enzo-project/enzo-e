@@ -21,6 +21,12 @@ public: // interface
   /// Constructor
   IoHierarchy(const Hierarchy * hierarchy) throw();
 
+  /// CHARM++ PUP::able declaration
+  PUPable_decl(IoHierarchy);
+
+  /// CHARM++ migration constructor
+  IoHierarchy(CkMigrateMessage *m) : Io(m) {}
+
   /// Destructor
   virtual ~IoHierarchy () throw()
   {}

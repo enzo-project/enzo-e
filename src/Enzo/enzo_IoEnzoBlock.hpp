@@ -21,6 +21,12 @@ public: // interface
   /// Constructor
   IoEnzoBlock() throw();
 
+  /// CHARM++ PUP::able declaration
+  PUPable_decl(IoEnzoBlock);
+
+  /// CHARM++ migration constructor
+  IoEnzoBlock(CkMigrateMessage *m) : IoBlock(m) {}
+
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
