@@ -24,7 +24,7 @@ from testing_utils import \
 
 def run_tests(executable):
 
-    temp = 'input/vlct/shock_tube/method_vlct_{:s}_rj2a_N{:d}.in'
+    temp = 'input/vlct/MHD_shock_tube/method_vlct_{:s}_rj2a_N{:d}.in'
     call_test = EnzoEWrapper(executable,temp)
 
     # can't actually run the serial vs parallel test from this script (not sure
@@ -61,7 +61,7 @@ def analyze_shock(ref_val, axis, target_template, name_template,
 
 def analyze_tests():
     # define the functor for evaluating the norm of the L1 error vector
-    ref_table = "input/vlct/shock_tube/rj2a_shock_tube_t0.2_res256.csv"
+    ref_table = "input/vlct/MHD_shock_tube/rj2a_shock_tube_t0.2_res256.csv"
     l1_func= CalcTableL1Norm("tools/l1_error_norm.py",
                              ["density","velocity_x","velocity_y","velocity_z",
                               "pressure","bfield_x","bfield_y","bfield_z"],

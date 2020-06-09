@@ -4,7 +4,7 @@
 
 # these tests should be integrated with the rest of the tests.
 
-serialTests=("run_shock_tube_test" "run_MHD_linear_wave_test"
+serialTests=("run_MHD_shock_tube_test" "run_MHD_linear_wave_test"
              "run_HD_linear_wave_test" "run_passive_advect_sound_test"
              "run_dual_energy_cloud_test")
 # The parallelTests typically just take too long to run serially

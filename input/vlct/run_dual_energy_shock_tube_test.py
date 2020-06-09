@@ -31,7 +31,7 @@ import subprocess
 import math
 
 from testing_utils import prep_cur_dir, EnzoEWrapper, CalcTableL1Norm
-from run_shock_tube_test import analyze_shock
+from run_MHD_shock_tube_test import analyze_shock
 
 def run_tests(executable):
 

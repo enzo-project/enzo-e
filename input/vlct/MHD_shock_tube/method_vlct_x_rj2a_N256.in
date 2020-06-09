@@ -1,48 +1,48 @@
-# Problem: y-axis aligned Shock Tube test problem for VLCT
+# Problem: x-axis aligned Shock Tube test problem for VLCT
 # Author: Matthew Abruzzo (matthewabruzzo@gmail.com)
 
-   include "input/vlct/shock_tube/initial_rj2a.in"
+   include "input/vlct/MHD_shock_tube/initial_rj2a.in"
 
    # only needs to extend from 0.0 to 1.0 with 256 blocks with outflow boundary
    # but there is a bug forcing us to use periodic boundary for all axes 
    Domain {
-      lower = [0.0, 0.0, 0.0];
-      upper = [1.0, 1.0, 1.0];
+      lower = [0.0,0.0,0.0];
+      upper = [1.0,1.0,1.0];
    }
 
    Mesh {
       root_rank = 3; # 3D
       root_blocks = [1,1,1];
-      root_size = [4,256,4]; # number of cells per axis
+      root_size = [256,4,4]; # number of cells per axis
    }
 
    # there are some problems with specifying an outflow condition along 1 axis
    # and not along the other axes
    Boundary {
-      list = ["one", "two", "three"];
-      one{
-         type = "periodic";
-   	 axis = "x";
-      }
+      list = ["two", "three","one"];
       two{
-         type = "outflow";
+         type = "periodic";
    	 axis = "y";
       }
       three{
          type = "periodic";
    	 axis = "z";
       }
+      one{
+         type = "outflow";
+   	 axis = "x";
+      }
    }
 
    Initial{
       shock_tube{
-         aligned_ax = "y";
+         aligned_ax = "x";
       };
    }
 
    Output {
       data {
-	 dir = ["method_vlct-1-y_rj2a_N256_%.1f","time"];
+	 dir = ["method_vlct-1-x_rj2a_N256_%.1f","time"];
 	 name = ["data-%03d.h5", "proc"];
       };
    }
