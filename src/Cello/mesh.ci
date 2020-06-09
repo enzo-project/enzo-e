@@ -31,8 +31,8 @@ module mesh {
 
   PUPable BoundaryPeriodic;
   PUPable BoundaryValue;
-  PUPable Config;
   PUPable ColormapRGB;
+  PUPable Config;
   PUPable Factory;
   PUPable Initial;
   PUPable InitialFile;
@@ -46,8 +46,8 @@ module mesh {
   PUPable IoParticleData;
   PUPable ItIndexList;
   PUPable ItIndexRange;
-  PUPable MaskPng;
   PUPable MaskExpr;
+  PUPable MaskPng;
   PUPable MethodTrace;
   PUPable OutputCheckpoint;
   PUPable OutputData;
