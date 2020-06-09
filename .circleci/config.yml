@@ -28,6 +28,11 @@ commands:
             sudo apt-get install -y bc csh libhdf5-serial-dev gfortran libtool-bin libpapi-dev libpng-dev libboost-all-dev
             # apt-get installs hdf5 libraries with _serial
             sudo ln -s /usr/lib/x86_64-linux-gnu/libhdf5_serial.so /usr/lib/x86_64-linux-gnu/libhdf5.so
+            # install scons
+            python3 -m venv $HOME/venv
+            source $HOME/venv/bin/activate
+            pip install --upgrade pip
+            pip install scons
             # Install charm++
             mkdir -p $HOME/local
             if [ ! -f $HOME/local/charm-6.9.0/bin/charmrun ]; then
@@ -117,13 +122,13 @@ jobs:
 
       - restore_cache:
           name: "Restore dependencies cache."
-          key: dependencies-v1
+          key: dependencies-v2
 
       - install-dependencies
 
       - save_cache:
           name: "Save dependencies cache"
-          key: dependencies-v1
+          key: dependencies-v2
           paths:
             - ~/local
 
