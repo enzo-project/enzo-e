@@ -22,6 +22,12 @@ namespace enzo {
     return (EnzoPhysicsCosmology *) problem()->physics("cosmology");
   }
 
+  const EnzoMethodGrackle * grackle_method()
+  {
+    if (!enzo::config()->method_grackle_use_grackle) {return NULL;}
+    return (const EnzoMethodGrackle *) problem()->method("grackle");
+  }
+
   EnzoUnits * units()
   {
     return (EnzoUnits *) problem()->units();

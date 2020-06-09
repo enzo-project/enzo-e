@@ -783,6 +783,16 @@ Physics * Problem::physics (std::string type) const throw()
 
 //----------------------------------------------------------------------
 
+Method * Problem::method (std::string name) const throw()
+{
+  for (size_t i=0; i<method_list_.size(); i++) {
+    if (method_list_[i]->name() == name) return method_list_[i];
+  }
+  return NULL;
+}
+
+//----------------------------------------------------------------------
+
 Compute * Problem::create_compute
   ( std::string name,
     Config * config ) throw ()
