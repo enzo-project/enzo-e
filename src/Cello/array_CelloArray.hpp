@@ -510,11 +510,19 @@ protected: // methods to be reused by subclasses
       --i;
       shape_[i] = shape_arr[i];
       if (i + 1 == D){
-	stride_[i] = 1;
+        stride_[i] = 1;
       } else {
-	stride_[i] = shape_[i+1] * stride_[i+1];
+        stride_[i] = shape_[i+1] * stride_[i+1];
       }
     }
+  }
+
+  /// helps initialize FixedDimArray_ objects by shallow copy
+  void shallow_copy_init_helper_(const FixedDimArray_<T,D> &other){
+    init_helper_(other.shared_data_, other.shape_, other.offset_);
+    // stride_ is copied from other, not initialized from shape_, in order to
+    // appropriately handle cases where other is a subarray
+    for (std::size_t i = 0; i<D; i++){ stride_[i] = other.stride_[i]; }
   }
 
   /// Assists with the destruction of FixedDimArray_
@@ -655,14 +663,7 @@ TempArray_<T,D> FixedDimArray_<T,D>::subarray(Args... args) noexcept{
 		"Number of slices don't match number of dimensions");
   TempArray_<T,D> subarray;
   if (sizeof...(args) == 0) {
-    subarray.init_helper_(shared_data_,shape_,offset_);
-    //print_index_<D>(this->stride_,std::string("original array strides"));
-    //print_index_<D>(subarray.stride_,std::string("subarray strides"));
-    // the following is essential for cases where the array being subclassed
-    // is already a subarray
-    for (std::size_t dim=0; dim<D; dim++){
-      subarray.stride_[dim] = this->stride_[dim];
-    }
+    subarray.shallow_copy_init_helper_(*this);
   } else {
     CSlice in_slices[] = {args...};
     CSlice slices[D];
@@ -744,7 +745,7 @@ public: // interface
 
   /// Assigns to each element of *this the value of val
   TempArray_<T,D>& operator=(const T& val);
-  
+
   /// Assigns to each element of *this the value of the corresponding element in
   /// other. Shapes must match
   TempArray_<T,D>& operator=(const TempArray_<T,D>& other){
@@ -816,6 +817,15 @@ class CelloArray : public FixedDimArray_<T,D>
   /// @brief    [\ref Array] class template that encapsulates a
   ///           multidimensional numeric array with a fixed number of
   ///           dimensions.
+  ///
+  /// The semantics of this template class resemble those of numpy arrays and
+  /// pointers instead of those c++ standard library containers (like vectors).
+  /// The class effectively acts as an address to the underlying data. The
+  /// copy constructor and copy assignment operation effectively make shallow
+  /// copies and deepcopies must be explicitly created. Note that a consequnce
+  /// of this behavior is that when instances are passed to functions by value,
+  /// any modifications to the array within the function will be reflected
+  /// everywhere.
 
 public: // interface
 
@@ -844,8 +854,12 @@ public: // interface
   CelloArray(T* array, Args... args) : FixedDimArray_<T,D>(array, args...) { }
 
   /// Copy constructor. Makes *this a shallow copy of other.
-  CelloArray(const CelloArray<T,D>& other){
-    this->init_helper_(other.shared_data_, other.shape_, other.offset_);
+  ///
+  /// @note Note that allowing this constructor to accept a const reference
+  ///     would enable the creation of mutatable shallow copies of
+  ///     const-qualified CelloArrays.
+  CelloArray(CelloArray<T,D>& other) : CelloArray() {
+    this->shallow_copy_init_helper_(other);
   }
 
   /// Move constructor. Constructs the array with the contents of other
@@ -856,9 +870,9 @@ public: // interface
   ///
   /// (The contents of any previously created shallow copies or subarrays of
   /// *this are unaffected by this method)
-  CelloArray<T,D>& operator=(const CelloArray<T,D>& other){
+  CelloArray<T,D>& operator=(CelloArray<T,D>& other){
     this->cleanup_helper_();
-    this->init_helper_(other.shared_data_, other.shape_, other.offset_);
+    this->shallow_copy_init_helper_(other);
     return *this;
   }
 

@@ -61,12 +61,22 @@ User Interface
 
 The class template is formally defined as ``CelloArray<T,D>`` where
 ``T`` is the contained type (frequently ``enzo_float``) and ``D`` is
-the number of dimensionsions of the array. The interface is inspired
-by numpy’s ``ndarray`` .
+the number of dimensionsions of the array.
 
-It is more straightforward to describe the user interface for
-``CelloArray<T,D>`` by describing different operations with examples
-rather than providing a detailed API.
+At a high level, the semantics of this template class resemble
+those of pointers and numpy's ``ndarray`` and differ from those of
+idiomatic C++ standard library containers (e.g. ``std::vector``).
+In other words, ``CelloArray<T,D>`` acts as an address
+for the underlying data. The copy constructor and copy
+assignment operation effectively make shallow copies and
+deepcopies are made by explicitly invoking special methods. A
+consequnce of this is that any modifications made to the elements of
+an array within a function, where the array had been passed by value,
+will affect the value of the array outside of the function.
+
+To provide a more detailed description of ``CelloArray<T,D>``'s
+user interface it is most straightforward to describe the different
+operations with examples (rather than providing a detailed API).
 
 Array Creation
 --------------
