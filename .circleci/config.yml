@@ -88,6 +88,7 @@ commands:
           name: "Compile enzo-e and run tests."
           command: |
             source $BASH_ENV
+            source $HOME/venv/bin/activate
             if [ ! -f << parameters.skipfile >> ]; then
               git checkout << parameters.tag >>
               export CELLO_PREC=<< parameters.prec >>
