@@ -15,7 +15,8 @@
 arch=$CELLO_ARCH
 prec=$CELLO_PREC
 
-python="python2"
+scons=`which scons`
+
 # initialize time
 
 H0=`date +"%H"`
@@ -39,7 +40,7 @@ if [ "$#" -ge 1 ]; then
        d=`date +"%Y-%m-%d %H:%M:%S"`
       printf "$d %-14s cleaning..."
       for prec in single double; do
-         $python scons.py arch=$arch -c >& /dev/null
+         $scons arch=$arch -c >& /dev/null
          rm -rf bin >& /dev/null
          rm -rf lib >& /dev/null
       done
@@ -141,8 +142,8 @@ if [ $target == "test" ]; then
 fi    
 
 
-$python scons.py install-inc    &>  $dir/out.scons
-$python scons.py $k_switch -j $proc -Q $target  2>&1 | tee $dir/out.scons
+$scons install-inc    &>  $dir/out.scons
+$scons $k_switch -j $proc -Q $target  2>&1 | tee $dir/out.scons
 
 ./tools/awk/error-org.awk   < $dir/out.scons >  errors.org
 ./tools/awk/warning-org.awk < $dir/out.scons >  warnings.org

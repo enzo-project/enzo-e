@@ -178,10 +178,10 @@ if (arch == 'unknown' and "CELLO_ARCH" in os.environ):
 if (prec == 'unknown' and "CELLO_PREC" in os.environ):
      prec = os.environ["CELLO_PREC"]
 
-print 
-print "    CELLO_ARCH scons arch=",arch
-print "    CELLO_PREC scons prec=",prec
-print 
+print ()
+print ("    CELLO_ARCH scons arch=",arch)
+print ("    CELLO_PREC scons prec=",prec)
+print ()
 
 #----------------------------------------------------------------------
 # CONFIGURATION DEFINES
@@ -310,7 +310,7 @@ elif (arch == "darwin_homebrew"):   from darwin_homebrew   import *
 #======================================================================
 
 if (not is_arch_valid):
-   print "Unrecognized architecture ",arch
+   print ("Unrecognized architecture ",arch)
    sys.exit(1)
 
 #----------------------------------------------------------------------
@@ -324,12 +324,12 @@ defines     = []
 if (prec == 'single' or prec == 'double'):
      defines = defines + define[prec]
 else:
-     print "Unrecognized precision ",prec
-     print
-     print "Valid precisions are 'single' and 'double'"
-     print
-     print "The precision is set using the environment variable $CELLO_PREC"
-     print "or by using 'scons prec=<precision>"
+     print ("Unrecognized precision ",prec)
+     print ()
+     print ("Valid precisions are 'single' and 'double'")
+     print ()
+     print ("The precision is set using the environment variable $CELLO_PREC")
+     print ("or by using 'scons prec=<precision>")
      sys.exit(1)
 
 defines = defines + define_int_size
@@ -564,10 +564,10 @@ cello_def.write ("#define CELLO_TIME "
 
 if (python_lt_27 == 0):
      charm_version =  subprocess.check_output (["cat", charm_path + "/VERSION"]).rstrip();
-     cello_def.write ("#define CELLO_CHARM_VERSION "+charm_version+"\n" )
+     cello_def.write ("#define CELLO_CHARM_VERSION "+charm_version.decode('utf-8')+"\n" )
      
      fp_charm_version = open ("test/CHARM_VERSION", "w")
-     fp_charm_version.write(charm_version + "\n");
+     fp_charm_version.write(charm_version.decode('utf-8') + "\n");
      fp_charm_version.close()
      		      
 else:
@@ -585,18 +585,11 @@ cello_def.write ("#define CELLO_CHARM_PATH \"" + charm_path + "\"\n" )
 
 if (python_lt_27 == 0 and have_git):
 
-     cello_def.write ("#define CELLO_CHANGESET "
-		      "\""+subprocess.check_output
-		      (["git", "rev-parse", "HEAD"]).rstrip()+"\"\n" )
-
-elif (python_lt_27 == 0 and have_mercurial):
-
-     cello_def.write ("#define CELLO_CHANGESET "
-                      "\""+subprocess.check_output
-                      (["hg","id","-n"]).rstrip()+"\"\n" )
-
+     cello_changeset = subprocess.check_output(["git", "rev-parse", "HEAD"]).rstrip().decode('utf-8')
 else:
-     cello_def.write ("#define CELLO_CHANGESET \"unknown\"\n" )
+     cello_changeset = 'unknown'
+
+cello_def.write ('#define CELLO_CHANGESET "%s"\n' % cello_changeset)
 
 #----------
 
@@ -633,7 +626,7 @@ Export('use_papi')
 
 if (have_git == 1):
    branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).rstrip()
-   build_dir = 'build-' + branch
+   build_dir = 'build-' + branch.decode('utf-8')
 else:     
    build_dir = 'build'
    
