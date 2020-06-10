@@ -12,7 +12,7 @@ class ParticleData {
 
   /// @class    ParticleData
   /// @ingroup  Data
-  /// @brief    [\ref Data] 
+  /// @brief    [\ref Data]
 
   friend class Particle;
 
@@ -38,7 +38,7 @@ public: // interface
     attribute_align_ = particle_data.attribute_align_;
     particle_count_  = particle_data.particle_count_;
   }
-  
+
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
@@ -66,7 +66,7 @@ public: // interface
   /// particle spaces in earlier batches, to ease initialization via
   /// index()
 
-  int insert_particles (ParticleDescr *, int it, int np);
+  int insert_particles (ParticleDescr *, int it, int np, const bool copy = false);
 
   /// Delete the given particles in the batch according to mask
   /// attribute.  Compresses the batch if particles deleted, so batch
@@ -82,8 +82,8 @@ public: // interface
 
   void scatter (ParticleDescr *, int it, int ib,
 		int np, const bool * mask, const int * index,
-		int n,  ParticleData * particle_array[]);
-  
+		int n,  ParticleData * particle_array[], const bool copy = false);
+
   /// Gather particles from an array of other Particle structures.
   /// Typically used after receiving particles from neighboring blocks
   /// that have entered this block.  Return the total number of particles
@@ -141,10 +141,10 @@ public: // interface
 
   /// Update positions in a batch a given amount.  Only used in refresh for
   /// updating positions in periodic boundary conditions
-  void position_update 
-  (ParticleDescr * particle_descr,int it, int ib, 
+  void position_update
+  (ParticleDescr * particle_descr,int it, int ib,
    long double dx, long double dy, long double dz);
-			 
+
   /// Fill a vector of velocity coordinates for the given type and batch
   bool velocity (ParticleDescr * particle_descr,
 		 int it, int ib,
@@ -186,13 +186,13 @@ private: /// functions
   /// Copy the given floating point attribute of given type (float,
   /// double, quad, etc.) to the given coordinate double position
   /// array.
-  void copy_attribute_float_ 
+  void copy_attribute_float_
   (ParticleDescr * particle_descr,
    int type, int it, int ib, int ia, double * coord);
 
   /// Increment the given floating point attribute of given float type
   /// (float, double, quad, etc.) by the given double long constant value.
-  void update_attribute_float_ 
+  void update_attribute_float_
   (ParticleDescr * particle_descr,
    int type, int it, int ib, int ia, long double da);
 
@@ -202,12 +202,12 @@ private: /// functions
   /// [-1.0, 1.0).  Conversion to double may involve floating-point
   /// errors, especially if position is defined using large ints,
   /// e.g. int64_t
-  void copy_position_int_ 
+  void copy_position_int_
   (ParticleDescr * particle_descr,
    int type, int it, int ib, int ia, double * coord);
 
   /// Update version of copy_position_int_()
-  void update_position_int_ 
+  void update_position_int_
   (ParticleDescr * particle_descr,
    int type, int it, int ib, int ia, int64_t da);
 
@@ -232,4 +232,3 @@ private: /// attributes
 };
 
 #endif /* DATA_PARTICLE_DATA_HPP */
-

@@ -491,8 +491,9 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
         int vals3[3];
         enzo_block->index().values(vals3);
 
-        CkPrintf("DistributedFeedback (%s -- (%d;%d;%d)): Is particle %i of %i particles in batch %i local? : %i\n", enzo_block->name().c_str(), vals3[0],vals3[1],vals3[2],
+        CkPrintf("DistributedFeedback (%s) -- Particle %i of %i particles in batch %i local at pos (%g, %g, %g) - local = %i\n", enzo_block->name().c_str(),
                                                                                            ip, np, ib,
+                                                                                           px[ipdp],py[ipdp],pz[ipdp],
                                                                                            is_local[ipdloc]);
 /*
         // negative lifetime are particles that have alreahy gone SN
@@ -562,7 +563,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
           // Now k-1 is approx Poisson(lambda)
           int number_of_sn = k - 1;
 
-          CkPrintf("xyz - This particle has %i supernova \n",number_of_sn);
+          CkPrintf("DistributedFeedback (%s) - This particle has %i supernova \n",enzo_block->name().c_str(), number_of_sn);
 
           if (number_of_sn == 0){
             explosion_flag = 0;
@@ -571,7 +572,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
             ERROR("EnzoMethodDistributedFeedback",
                   "Number of SN in distributed feedback is negative \n");
           } else {
-            CkPrintf("xyz - DistributedFeedback ========== Number of SNe %d\n", number_of_sn);
+            CkPrintf("DistributedFeedback (%s) ========== Number of SNe %d\n", enzo_block->name().c_str(), number_of_sn);
           }
 
           // If there are explosions, we need to check the ionizing luminosity
@@ -613,7 +614,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
             //      was within a time range and not a one-sided check: ---
             //         MUCH LESS CONFUSED NOW: because fixed random number gen will work
             //                                 if there are unique particle IDs
-            CkPrintf("xyz - DistributedFeedback: %d of %d - delay: %f  age+dt: %g  pm: %g \n", kk+1, number_of_sn, delay_time, star_age, progenitor_mass);
+            CkPrintf("DistributedFeedback (%s): %d of %d - delay: %f  age+dt: %g  pm: %g \n", enzo_block->name().c_str(), kk+1, number_of_sn, delay_time, star_age, progenitor_mass);
             // if ( delay_time < star_age + enzo_block->dt  ) {
 
               if (explosion_flag == -1){
@@ -655,7 +656,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
           if (explosion_flag == -1) explosion_flag = 0;
         } // end lifetime check
 
-       CkPrintf("xyz - DistributedFeedback ---- Explosion Flag = %d \n", explosion_flag);
+       CkPrintf("DistributedFeedback (%s) ---- Explosion Flag = %d \n", enzo_block->name().c_str(), explosion_flag);
 
 
      // ----------------------------------------
@@ -694,7 +695,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
             sn_metal_fraction = s99_sn_metallicity(td7); // sn metal fraction in fraction (not solar)
           }
           sn_energy = 1.0 * 1.0E51 * explosion_flag;         // sn energy in erg
-          CkPrintf("xyz - DistributedFeedback ---- Explosion!! = %g %g %g \n", sn_mass, sn_energy, sn_metal_fraction);
+          CkPrintf("DistributedFeedback (%s) ---- Explosion!! = %g %g %g \n", enzo_block->name().c_str(), sn_mass, sn_energy, sn_metal_fraction);
         }
 
         double m_eject = wind_mass + sn_mass;          // total mass in Msun
@@ -746,10 +747,14 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
     } // end loop over batches
 
     if (count > 0){
-      CkPrintf("xyz - Number of feedback particles:   %i \n",count);
+      CkPrintf("DistributedFeedback (%s) - Number of feedback particles:   %i \n",enzo_block->name().c_str(),count);
     }
 
+
+    enzo_block->delete_particle_copies_(it);
   } // end particle check
+
+
 
   return;
 }
@@ -848,6 +853,13 @@ void EnzoMethodDistributedFeedback::add_ionization_feedback(
   int iy       = ((int) floor(ycell + 0.5));
   int iz       = ((int) floor(zcell + 0.5));
 
+  if (( (ix < 0) || (ix > nx) ||
+       (iy < 0) || (iy > ny) ||
+       (iz < 0) || (iz > nz) ) && (!shift_cell_center_)){
+      // particle is off grid!
+      return;
+  }
+
   int index =  INDEX(ix,iy,iz,mx,my);
 
   // Case B recombination, assuming T = 10^4 K
@@ -869,7 +881,7 @@ void EnzoMethodDistributedFeedback::add_ionization_feedback(
     ionized = ionized * stromgren_volume * inv_volume;
   }
 
-  CkPrintf("DistributedFeedback: This cell should be getting ionized with radius = %g (pc). volume ratio = %g. will_explode = %i ge = %g ionized = %g\n", stromgren_radius / cello::pc_cm, stromgren_volume * inv_volume, will_explode, ge[index], ionized);
+  CkPrintf("DistributedFeedback (%s): This cell should be getting ionized with radius = %g (pc). volume ratio = %g. will_explode = %i ge = %g ionized = %g\n", enzo_block->name().c_str(), stromgren_radius / cello::pc_cm, stromgren_volume * inv_volume, will_explode, ge[index], ionized);
 
 
   if ((will_explode == 1) && (ge[index] < ionized)){

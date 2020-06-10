@@ -345,28 +345,40 @@ int Block::new_refresh_delete_particle_copies_ (Refresh * refresh){
   for (auto it_type=type_list.begin(); it_type != type_list.end(); it_type++){
     int it = *it_type;
 
-    const int ia_c = particle.attribute_index(it,"is_local");
-    const int cd   = particle.stride(it, ia_c);
+    count += delete_particle_copies_(it);
+  }
 
-    const int nb = particle.num_batches(it);
+  cello::simulation()->data_delete_particles(count);
 
-    int * is_local=0;
+  return count;
+}
 
-    for (int ib = 0; ib<nb; ib++){
-      const int np = particle.num_particles(it,ib);
-      is_local = (int *) particle.attribute_array(it, ia_c, ib);
+//----------------------------------------------------------------------
 
-      bool * mask = new bool[np];
-      for( int ip=0; ip<np; ip++){
-        mask[ip] = !(is_local[ip*cd]);
-      }
+int Block::delete_particle_copies_ (int it){
 
-      count += particle.delete_particles(it,ib,mask);
+  Particle particle (cello::particle_descr(),
+		     data()->particle_data());
 
-      delete [] mask;
+  const int ia_c = particle.attribute_index(it,"is_local");
+  const int cd   = particle.stride(it, ia_c);
 
+  const int nb = particle.num_batches(it);
 
+  int * is_local=0;
+  int count = 0;
+  for (int ib = 0; ib<nb; ib++){
+    const int np = particle.num_particles(it,ib);
+    is_local = (int *) particle.attribute_array(it, ia_c, ib);
+
+    bool * mask = new bool[np];
+    for( int ip=0; ip<np; ip++){
+      mask[ip] = ! (is_local[ip*cd]);
     }
+
+    count += particle.delete_particles(it,ib,mask);
+
+    delete [] mask;
   }
 
   return count;
@@ -903,7 +915,7 @@ void Block::particle_scatter_neighbors_
 	mask[ip] = ! in_block;
   if (copy){  // only copy particles that are not getting moved
     mask[ip] = in_block;
-    is_local[ip*cd] = 0; // will not be local
+    //is_local[ip*cd] = 0; // will not be local
 
     // hack - pretend partcles are closer to face
     ix = ix <= 1 ? 0 : 3;
@@ -913,7 +925,7 @@ void Block::particle_scatter_neighbors_
 
   } else {    // only move particles that leave the block
     mask[ip] = ! in_block;
-    is_local[ip*cd] = 1; // will be local once moved
+    //is_local[ip*cd] = 1; // will be local once moved
   }
       }
 
@@ -922,7 +934,7 @@ void Block::particle_scatter_neighbors_
       delete [] za;
 
       // ...scatter particles to particle array
-      particle.scatter (it,ib, np, mask, index, npa, particle_array);
+      particle.scatter (it,ib, np, mask, index, npa, particle_array, copy);
       // ... delete scattered particles if moved
       if (!copy) count += particle.delete_particles (it,ib,mask);
 
@@ -933,5 +945,26 @@ void Block::particle_scatter_neighbors_
   }
 
   if (!copy) cello::simulation()->data_delete_particles(count);
+
+  /*
+  if (copy){
+    // reset locality of partilces
+    for (auto it_type=type_list.begin(); it_type!=type_list.end(); it_type++) {
+      int it = *it_type;
+      const int ia_c  = particle.attribute_index(it, "is_local");
+      const int cd = particle.stride(it, ia_c);
+      // ...for each batch of particles
+      const int nb = particle.num_batches(it);
+      int * is_local=0;
+      for (int ib=0; ib<nb; ib++) {
+        const int np = particle.num_particles(it,ib);
+        if (np == 0) continue;
+        is_local = (int *) particle.attribute_array(it, ia_c, ib);
+        for (int ip=0;ip<np;ip++) is_local[ip*cd] = !(is_local[ip*cd]);
+
+      }
+    }
+
+  } */
 
 }

@@ -141,7 +141,7 @@ void EnzoInitialFeedbackTest::enforce_block
   enzo_float * pmetal = 0;
   enzo_float * plifetime = 0;
   enzo_float * pform     = 0;
-  bool * is_local = 0;
+  int * is_local = 0;
 
   // just one particle for now
 
@@ -161,7 +161,7 @@ void EnzoInitialFeedbackTest::enforce_block
     pmetal      = (enzo_float *) particle.attribute_array(it, ia_metal, ib);
     plifetime  = (enzo_float *) particle.attribute_array(it, ia_l, ib);
     pform      = (enzo_float *) particle.attribute_array(it, ia_to, ib);
-    is_local   = (bool *) particle.attribute_array(it, ia_loc, ib);
+    is_local   = (int *) particle.attribute_array(it, ia_loc, ib);
 
     pmass[ipp] = enzo_config->initial_feedback_test_star_mass * cello::mass_solar / enzo_units->mass();
     px[ipp]    = enzo_config->initial_feedback_test_position[0];
@@ -175,7 +175,7 @@ void EnzoInitialFeedbackTest::enforce_block
     plifetime[ipp] = 1.00E9* cello::yr_s / enzo_units->time();
     pform[ipp]     = 1.0E-10 * cello::yr_s / enzo_units->time(); // really just needs to be non-zero
 
-    is_local[ipp] = true;
+    is_local[ipp] = 1;
 
 
   }

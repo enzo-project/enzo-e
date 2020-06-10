@@ -563,6 +563,8 @@ public:
   int new_refresh_load_particle_copy_ (Refresh & refresh);
   int new_refresh_delete_particle_copies_   (Refresh * refresh);
 
+  int delete_particle_copies_ (int it);
+
   void new_refresh_load_field_face_
   (Refresh & refresh, int refresh_type, Index index, int if3[3], int ic3[3]);
   /// Send particles in list to corresponding indices
