@@ -853,9 +853,9 @@ void EnzoMethodDistributedFeedback::add_ionization_feedback(
   int iy       = ((int) floor(ycell + 0.5));
   int iz       = ((int) floor(zcell + 0.5));
 
-  if (( (ix < 0) || (ix > nx) ||
-       (iy < 0) || (iy > ny) ||
-       (iz < 0) || (iz > nz) ) && (!shift_cell_center_)){
+  if (( (ix < 0) || (ix > mx) ||
+       (iy < 0) || (iy > my) ||
+       (iz < 0) || (iz > mz) ) && (!shift_cell_center_)){
       // particle is off grid!
       return;
   }
