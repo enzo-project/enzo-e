@@ -3,7 +3,7 @@
 c=======================================================================
 c///////////////////////  SUBROUTINE INTPOS  \\\\\\\\\\\\\\\\\\\\\\\\\\\
 c
-      subroutine intpos_dev(
+      subroutine intpos(
      $     dslice, uslice, pslice, idim, i1, i2,
      $     dxdt2, gamma,
      $     drho, rhol, rhor, dla, dra, dl0, dr0,

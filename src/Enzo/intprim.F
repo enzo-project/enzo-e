@@ -3,7 +3,7 @@
 c=======================================================================
 c///////////////////////  SUBROUTINE INTPRIM  \\\\\\\\\\\\\\\\\\\\\\\\\\\
 c
-      subroutine intprim_dev(
+      subroutine intprim(
      &     dslice, uslice, vslice, wslice, pslice, 
      &     idim, i1, i2, isteep, steepen, iflatten, flatten, 
      &     iposrec, c1, c2, c3, c4, c5, c6, char1, char2, c0, 
@@ -93,15 +93,15 @@ c
 c     Compute average linear slopes (eqn 1.7)
 c      JHW (June 2010): Added van Leer slopes (idea taken ATHENA)
 c
-      call linslope_dev(dslice, c1, c2, i1, i2, idim, qplus(1,1),
+      call linslope(dslice, c1, c2, i1, i2, idim, qplus(1,1),
      $     qmnus(1,1), qcent(1,1), qvanl(1,1))
-      call linslope_dev(uslice, c1, c2, i1, i2, idim, qplus(1,2),
+      call linslope(uslice, c1, c2, i1, i2, idim, qplus(1,2),
      $     qmnus(1,2), qcent(1,2), qvanl(1,2))
-      call linslope_dev(vslice, c1, c2, i1, i2, idim, qplus(1,3),
+      call linslope(vslice, c1, c2, i1, i2, idim, qplus(1,3),
      $     qmnus(1,3), qcent(1,3), qvanl(1,3))
-      call linslope_dev(wslice, c1, c2, i1, i2, idim, qplus(1,4),
+      call linslope(wslice, c1, c2, i1, i2, idim, qplus(1,4),
      $     qmnus(1,4), qcent(1,4), qvanl(1,4))
-      call linslope_dev(pslice, c1, c2, i1, i2, idim, qplus(1,5),
+      call linslope(pslice, c1, c2, i1, i2, idim, qplus(1,5),
      $     qmnus(1,5), qcent(1,5), qvanl(1,5))
 c
 c     Project primitive variable differences along characteristics
@@ -185,19 +185,19 @@ c
 c
 c     Project monotonized slopes back to the primitive variables
 c
-      call char2prim_dev(1_IKIND, dqc, rem, i1, i2, idim, dd)
-      call char2prim_dev(2_IKIND, dqc, rem, i1, i2, idim, du)
-      call char2prim_dev(3_IKIND, dqc, rem, i1, i2, idim, dv)
-      call char2prim_dev(4_IKIND, dqc, rem, i1, i2, idim, dw)
-      call char2prim_dev(5_IKIND, dqc, rem, i1, i2, idim, dp)
+      call char2prim(1_IKIND, dqc, rem, i1, i2, idim, dd)
+      call char2prim(2_IKIND, dqc, rem, i1, i2, idim, du)
+      call char2prim(3_IKIND, dqc, rem, i1, i2, idim, dv)
+      call char2prim(4_IKIND, dqc, rem, i1, i2, idim, dw)
+      call char2prim(5_IKIND, dqc, rem, i1, i2, idim, dp)
 c
 c     Construct left and right values (eqn 1.6)
 c
-      call lr_states_dev(dslice,c3,c4,c5,c6, dd, i1, i2, idim, dl, dr)
-      call lr_states_dev(uslice,c3,c4,c5,c6, du, i1, i2, idim, ul, ur)
-      call lr_states_dev(vslice,c3,c4,c5,c6, dv, i1, i2, idim, vl, vr)
-      call lr_states_dev(wslice,c3,c4,c5,c6, dw, i1, i2, idim, wl, wr)
-      call lr_states_dev(pslice,c3,c4,c5,c6, dp, i1, i2, idim, pl, pr)
+      call lr_states(dslice,c3,c4,c5,c6, dd, i1, i2, idim, dl, dr)
+      call lr_states(uslice,c3,c4,c5,c6, du, i1, i2, idim, ul, ur)
+      call lr_states(vslice,c3,c4,c5,c6, dv, i1, i2, idim, vl, vr)
+      call lr_states(wslice,c3,c4,c5,c6, dw, i1, i2, idim, wl, wr)
+      call lr_states(pslice,c3,c4,c5,c6, dp, i1, i2, idim, pl, pr)
 c
 c     Steepen density if asked for (use precomputed steepening parameter)
 c
@@ -212,23 +212,23 @@ c
 c
 c     Monotonize again, flatten, and check for boundness
 c
-      call mono_n_flat_dev(dslice, dl, dr,iflatten, flatten,i1,i2,idim)
-      call mono_n_flat_dev(uslice, ul, ur,iflatten, flatten,i1,i2,idim)
-      call mono_n_flat_dev(vslice, vl, vr,iflatten, flatten,i1,i2,idim)
-      call mono_n_flat_dev(wslice, wl, wr,iflatten, flatten,i1,i2,idim)
-      call mono_n_flat_dev(pslice, pl, pr,iflatten, flatten,i1,i2,idim)
+      call mono_n_flat(dslice, dl, dr,iflatten, flatten,i1,i2,idim)
+      call mono_n_flat(uslice, ul, ur,iflatten, flatten,i1,i2,idim)
+      call mono_n_flat(vslice, vl, vr,iflatten, flatten,i1,i2,idim)
+      call mono_n_flat(wslice, wl, wr,iflatten, flatten,i1,i2,idim)
+      call mono_n_flat(pslice, pl, pr,iflatten, flatten,i1,i2,idim)
 c
 c    Now construct left and right interface values (eqn 1.12 and 3.3)
 c
-      call lr_interface_dev(dslice, dl, dr, char1, char2, c0,i1,i2,idim,
+      call lr_interface(dslice, dl, dr, char1, char2, c0,i1,i2,idim,
      $     dd, d6, dla, dra, dl0, dr0)
-      call lr_interface_dev(uslice, ul, ur, char1, char2, c0,i1,i2,idim,
+      call lr_interface(uslice, ul, ur, char1, char2, c0,i1,i2,idim,
      $     du, u6, ula, ura, ul0, ur0)
-      call lr_interface_dev(vslice, vl, vr, char1, char2, c0,i1,i2,idim,
+      call lr_interface(vslice, vl, vr, char1, char2, c0,i1,i2,idim,
      $     dv, v6, vla, vra, vl0, vr0)
-      call lr_interface_dev(wslice, wl, wr, char1, char2, c0,i1,i2,idim,
+      call lr_interface(wslice, wl, wr, char1, char2, c0,i1,i2,idim,
      $     dw, w6, wla, wra, wl0, wr0)
-      call lr_interface_dev(pslice, pl, pr, char1, char2, c0,i1,i2,idim,
+      call lr_interface(pslice, pl, pr, char1, char2, c0,i1,i2,idim,
      $     dp, p6, pla, pra, pl0, pr0)
 c
       return
@@ -236,7 +236,7 @@ c
 
 c-----------------------------------------------------------------------
 
-      subroutine linslope_dev
+      subroutine linslope
      $     (qslice, c1, c2, i1, i2, idim, qplus, qmnus, 
      $     qcent, qvanl)
 c      
@@ -264,7 +264,7 @@ c
 
 c-----------------------------------------------------------------------
 
-      subroutine char2prim_dev
+      subroutine char2prim
      $     (n, dqc, rem, i1, i2, idim, dq)
 c      
       implicit none
@@ -286,7 +286,7 @@ c
 
 c-----------------------------------------------------------------------
 
-      subroutine lr_states_dev
+      subroutine lr_states
      $     (qslice, c3, c4, c5, c6, dq, i1, i2, idim, 
      $     ql, qr)
 c      
@@ -309,7 +309,7 @@ c
 
 c-----------------------------------------------------------------------
 
-      subroutine mono_n_flat_dev
+      subroutine mono_n_flat
      $     (qslice, ql, qr, iflatten, flatten, 
      $     i1, i2, idim)
 c
@@ -366,7 +366,7 @@ c
 
 c-----------------------------------------------------------------------
 
-      subroutine lr_interface_dev
+      subroutine lr_interface
      $     (qslice, ql, qr, char1, char2, c0,
      $     i1, i2, idim, dq, q6, qla, qra, ql0, qr0)
 c
