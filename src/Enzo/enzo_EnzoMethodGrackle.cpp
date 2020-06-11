@@ -35,7 +35,7 @@ EnzoMethodGrackle::EnzoMethodGrackle
   refresh(ir)->add_all_fields();
 
   /// Define Grackle's internal data structures
-  grackle_chemistry_data_defined_ = false;
+  time_grackle_data_initialized_ = ENZO_FLOAT_UNDEFINED;
   this->initialize_grackle_chemistry_data(time);
 
 #endif /* CONFIG_USE_GRACKLE */
@@ -62,8 +62,6 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
     Simulation * simulation = cello::simulation();
     if (simulation)
       simulation->performance()->start_region(perf_grackle,__FILE__,__LINE__);
-
-    this->initialize_grackle_chemistry_data(block->time());
 
     this->compute_(enzo_block);
 
@@ -188,8 +186,7 @@ void EnzoMethodGrackle::define_required_grackle_fields()
 
 //----------------------------------------------------------------------
 
-void EnzoMethodGrackle::initialize_grackle_chemistry_data(
-                                                   const double& current_time)
+void EnzoMethodGrackle::initialize_grackle_chemistry_data(double current_time)
 {
 
   /* Define Grackle's chemistry data if not yet defined */
