@@ -1,15 +1,13 @@
-c     See LICENSE_ENZO file for license and copyright information
-
 #include "fortran.h"
-
-C #define DEBUG_PPM
-
+#define FORTRAN
 c=======================================================================
 c///////////////////////  SUBROUTINE INTVAR  \\\\\\\\\\\\\\\\\\\\\\\\\\\
 c
-      subroutine intvar(qslice, idim, i1, i2, isteep, steepen, iflatten,
-     &                  flatten, c1, c2, c3, c4, c5, c6, char1, char2,
-     &                  c0, dq, ql, qr, q6, qla, qra, ql0, qr0)
+      subroutine intvar(
+     &     qslice, idim, i1, i2, isteep, steepen,
+     &     iflatten, 
+     &     flatten, c1, c2, c3, c4, c5, c6, char1, char2,
+     &     c0, dq, ql, qr, q6, qla, qra, ql0, qr0)
 c
 c  COMPUTES LEFT AND RIGHT EULERIAN INTERFACE VALUES FOR RIEMANN SOLVER
 c
@@ -51,204 +49,137 @@ c
 c-----------------------------------------------------------------------
 c
       implicit NONE
+#include "fortran_types.h"
 c
 c  argument declarations
 c
-      integer idim, i1, i2, iflatten, isteep
-      ENZO_REAL c1,c2,c3,c4,c5,c6
-      ENZO_REAL
+      INTG_PREC idim, i1, i2, iflatten, isteep
+      R_PREC c1(idim), c2(idim), c3(idim), c4(idim), c5(idim), c6(idim),
      &     char1(idim), char2(idim), c0(idim),
      &     qla(idim), qra(idim), ql0(idim), qr0(idim)
-      ENZO_REAL qslice(idim), steepen(idim), flatten(idim)
+      R_PREC qslice(idim), steepen(idim), flatten(idim)
 c
 c  parameters
 c
-      ENZO_REAL ft
-      parameter(ft = 4.0/3.0)
+      R_PREC ft, one
+      parameter(ft = 4._RKIND/3._RKIND, one=1._RKIND)
 c
 c  local declarations (arrays passed as temps)
 c
-      integer i
-      ENZO_REAL qplus, qmnus
-
-c  note that in Matt Turk's version of intvar temp1, temp2, temp3
-c  are all promoted to real*8 to avoid overflow.  I avoid this here,
-c  but note that this may be necessary.  If so, uncomment the next 
-c  two lines and then comment out the following line. [BWO v1_1_6]
-c <OLD>
-c      real*8 temp1, temp2, temp3
-c </OLD>
-c <NEW>
-      ENZO_REAL temp1, temp2, temp3
-c </NEW>
-
-      ENZO_REAL dq(idim), ql(idim), qr(idim), q6(idim)
-
-      ENZO_REAL one
-      parameter (one=1.0)
+      INTG_PREC i
+      R_PREC qplus, qmnus, qcent, qvanl
+      R_PREC temp1, temp2, temp3, temp22, temp23
+      R_PREC dq(idim), ql(idim), qr(idim), q6(idim)
+      dq(:) = 0._RKIND
+      ql(:) = 0._RKIND
+      qr(:) = 0._RKIND
+      q6(:) = 0._RKIND
 c
 c\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\/////////////////////////////////////
 c=======================================================================
 c
 c     Compute average linear slopes (eqn 1.7)
 c      Monotonize (eqn 1.8)
+c      JHW (June 2010): Added van Leer slopes (idea taken ATHENA)
 c
       do i = i1-2, i2+2
          qplus = qslice(i+1)-qslice(i  )
          qmnus = qslice(i  )-qslice(i-1)
-         dq(i) = c1*qplus + c2*qmnus
-         temp1 = min(abs(dq(i)), 2.0*abs(qmnus), 2.0*abs(qplus))
          if (qplus*qmnus .gt. 0) then
-            dq(i) = temp1*sign(one, dq(i))
+            qcent = c1(i)*qplus + c2(i)*qmnus
+            qvanl = 2._RKIND*qplus*qmnus/(qmnus+qplus)
+            temp1 = min(abs(qcent), abs(qvanl), 2._RKIND*abs(qmnus), 
+     $           2._RKIND*abs(qplus))
+            dq(i) = temp1*sign(one, qcent)
          else
-            dq(i) = 0.0
+            dq(i) = 0._RKIND
          endif
       enddo
 c     
 c     Construct left and right values (eqn 1.6)
 c
       do i = i1-1, i2+2
-         ql(i) = c3*qslice(i-1) + c4*qslice(i) +
-     &           c5*    dq(i-1) + c6*dq(i)
+         ql(i) = c3(i)*qslice(i-1) + c4(i)*qslice(i) +
+     &           c5(i)*    dq(i-1)   + c6(i)*dq(i)
          qr(i-1) = ql(i)
       enddo
 c
 c     Steepen if asked for (use precomputed steepening parameter)
-c     
+c
       if (isteep .ne. 0) then
-#ifdef DEBUG_PPM
-         do i = i1, i2+1
-            if (abs(ql(i)-qr(i-1))/abs(ql(i)+qr(i-1)).gt.1e-5) then
-               write (6,*) __FILE__
-               write (6,*) __LINE__,i,'ql(i) = ',ql(i)
-               write (6,*) __LINE__,i,'qr(i-1)=',qr(i-1)
-               write (6,*) 'c3 = ',c3
-               write (6,*) 'c4 = ',c4
-               write (6,*) 'c5 = ',c5
-               write (6,*) 'c6 = ',c6
-               write (6,*) 'qslice(i-1) = ',qslice(i-1)
-               write (6,*) 'qslice(i) = ',qslice(i)
-               write (6,*) 'dq(i-1) = ',dq(i-1)
-               write (6,*) 'dq(i) = ',dq(i)
-            endif
-         enddo
-#endif
          do i = i1-1, i2+1
-            ql(i) = (1.0-steepen(i))*ql(i) + 
-     &           steepen(i)*(qslice(i-1)+0.5*dq(i-1))
-            qr(i) = (1.0-steepen(i))*qr(i) + 
-     &           steepen(i)*(qslice(i+1)-0.5*dq(i+1))
+            ql(i) = (1._RKIND-steepen(i))*ql(i) + 
+     &              steepen(i)*(qslice(i-1)+0.5_RKIND*dq(i-1))
+            qr(i) = (1._RKIND-steepen(i))*qr(i) + 
+     &              steepen(i)*(qslice(i+1)-0.5_RKIND*dq(i+1))
          enddo
-#ifdef DEBUG_PPM
-         do i = i1, i2+1
-            if (abs(ql(i)-qr(i-1))/abs(ql(i)+qr(i-1)).gt.1e-5) then
-               write (6,*) __FILE__
-               write (6,*) __LINE__,i,'ql(i) = ',ql(i)
-               write (6,*) __LINE__,i,'qr(i-1)=',qr(i-1)
-               write (6,*) 'steepen(i) = ',steepen(i)
-               write (6,*) 'qslice(i-1) = ',qslice(i-1)
-               write (6,*) 'qslice(i+1) = ',qslice(i+1)
-               write (6,*) 'dq(i-1) = ',dq(i-1)
-               write (6,*) 'dq(i+1) = ',dq(i+1)
-            endif
-         enddo
-#endif
       endif
-c     
+c
 c     Monotonize again (eqn 1.10)
-c     
+c
       do i=i1-1,i2+1
          temp1 = (qr(i)-qslice(i))*(qslice(i)-ql(i))
          temp2 = qr(i)-ql(i)
-         temp3 = 6.0*(qslice(i)-0.5*(qr(i)+ql(i)))
-         if (temp1 .le. 0.0) then
+         temp3 = 6._RKIND*(qslice(i)-0.5_RKIND*(qr(i)+ql(i)))
+         if (temp1 .le. 0._RKIND) then
             ql(i) = qslice(i)
             qr(i) = qslice(i)
          endif
-c     Factored out temp2 [JOB v1_1_6]
-         if (temp2*(temp2-temp3) .lt. 0.0) then
-            ql(i) = 3.0*qslice(i) - 2.0*qr(i)
-         endif
-         if (temp2*(temp2+temp3) .lt. 0.0) then
-            qr(i) = 3.0*qslice(i) - 2.0*ql(i)
-         endif
+         temp22 = temp2**2
+         temp23 = temp2*temp3
+         if (temp22 .lt. temp23)
+     &        ql(i) = 3._RKIND*qslice(i) - 2._RKIND*qr(i)
+         if (temp22 .lt. -temp23)
+     &        qr(i) = 3._RKIND*qslice(i) - 2._RKIND*ql(i)
       enddo
-#ifdef DEBUG_PPM
-      do i = i1, i2+1
-         if (abs(ql(i)-qr(i-1))/abs(ql(i)+qr(i-1)).gt.1e-5) then
-            write (6,*) __FILE__
-            write (6,*) __LINE__,i,'ql(i)',ql(i)
-            write (6,*) __LINE__,i,'qr(i-1)',qr(i-1)
-            write (6,*) 'qslice(i) = ',qslice(i)
-            write (6,*) 'temp2 = ',temp2
-            write (6,*) 'temp3 = ',temp3
-         endif
-      enddo
-#endif
 c
 c     If requested, flatten slopes with flatteners calculated in calcdiss (4.1)
 c
       if (iflatten .ne. 0) then
          do i = i1-1, i2+1
-            ql(i) = qslice(i)*flatten(i) + ql(i)*(1.0-flatten(i))
-            qr(i) = qslice(i)*flatten(i) + qr(i)*(1.0-flatten(i))
+            ql(i) = qslice(i)*flatten(i) + ql(i)*(1._RKIND-flatten(i))
+            qr(i) = qslice(i)*flatten(i) + qr(i)*(1._RKIND-flatten(i))
          enddo
-#ifdef DEBUG_PPM
-         do i = i1, i2+1
-            if (abs(ql(i)-qr(i-1))/abs(ql(i)+qr(i-1)).gt.1e-5) then
-               write (6,*) __FILE__
-               write (6,*) __LINE__,i,'ql(i) = ',ql(i)
-               write (6,*) __LINE__,i,'qr(i-1)=',qr(i-1)
-               write (6,*) 'qslice(i) = ',qslice(i)
-               write (6,*) 'flatten(i) = ',flatten(i)
-            endif
-         end do
-#endif
       endif
+c
+c     Ensure that the L/R values lie between neighboring cell-centered 
+c     values (Taken from ATHENA, lr_states)
+c
+#define CHECK_LR
+#ifdef CHECK_LR
+      do i = i1-1, i2+2
+         ql(i) = max(min(qslice(i), qslice(i-1)), ql(i))
+         ql(i) = min(max(qslice(i), qslice(i-1)), ql(i))
+         qr(i) = max(min(qslice(i), qslice(i+1)), qr(i))
+         qr(i) = min(max(qslice(i), qslice(i+1)), qr(i))
+      enddo
+#endif
 c
 c    Now construct left and right interface values (eqn 1.12 and 3.3)
 c
       do i = i1-1, i2+1
-         q6(i) = 6.0*(qslice(i)-0.5*(ql(i)+qr(i)))
+         q6(i) = 6._RKIND*(qslice(i)-0.5_RKIND*(ql(i)+qr(i)))
          dq(i) = qr(i) - ql(i)
-         if(q6(i).lt.-1e30)then
-           write(6,*) 'intvar: q60a',q6(i),qslice(i)
-           write(6,*) 'intvar: q60b',ql(i),qr(i)
-         endif
       enddo
 c
       do i = i1, i2+1
-        qla(i)= qr(i-1)-char1(i-1)*(dq(i-1)-(1.0-ft*char1(i-1))*q6(i-1))
-        qra(i)= ql(i  )+char2(i  )*(dq(i  )+(1.0-ft*char2(i  ))*q6(i  ))
-#ifdef DEBUG_PPM
-        if (qla(i) .ne. qra(i)) then
-           write (6,*) __FILE__
-           write (6,*) __LINE__,i,'qla',qla(i)
-           write (6,*) __LINE__,i,'qra',qra(i)
-           write (6,*) 'ql(i) = ',ql(i)
-           write (6,*) 'qr(i-1) = ',qr(i-1)
-           write (6,*) 'char1(i-1) = ',char1(i-1)
-           write (6,*) 'char1(i) = ',char1(i)
-           write (6,*) 'char2(i-1) = ',char2(i-1)
-           write (6,*) 'char2(i) = ',char2(i)
-           write (6,*) 'dq(i-1) = ',dq(i-1)
-           write (6,*) 'dq(i) = ',dq(i)
-           write (6,*) 'q6(i-1) = ',q6(i-1)
-           write (6,*) 'q6(i) = ',q6(i)
-           write (6,*) 'ft = ',ft
-        endif
-#endif        
-#ifdef DEBUG_PPM
-        if (qra(i).lt.-1e30)then
-          write(6,*)  'intvar: qra0a',qra(i),ql(i),char2(i)
-          write(6,*)  'intvar: qra0b',dq(i),ft,q6(i)
-        endif
-#endif
+        qla(i) = qr(i-1)-char1(i-1)*(dq(i-1) - 
+     .        (1._RKIND-ft*char1(i-1))*q6(i-1))
+        qra(i) = ql(i  )+char2(i  )*(dq(i  ) + 
+     .       (1._RKIND-ft*char2(i  ))*q6(i  ))
       enddo
 c
+C      print*, 'DEBUG_VAR ft',i,ft
       do i=i1,i2+1
-         ql0(i) = qr(i-1)-c0(i-1)*(dq(i-1)-(1.0-ft*c0(i-1))*q6(i-1))
-         qr0(i) = ql(i  )-c0(i  )*(dq(i  )+(1.0+ft*c0(i  ))*q6(i  ))
+         ql0(i) = qr(i-1)-c0(i-1)*(dq(i-1) - 
+     .        (1._RKIND-ft*c0(i-1))*q6(i-1))
+C         print*, 'DEBUG_VAR ql0',i,ql0(i-1)
+C         print*, 'DEBUG_VAR qr',i,qr(i-1)
+C         print*, 'DEBUG_VAR c0',i,c0(i-1)
+C         print*, 'DEBUG_VAR dq',i,dq(i-1)
+C         print*, 'DEBUG_VAR q6',i,q6(i-1)
+         qr0(i) = ql(i  )-c0(i  )*(dq(i  ) +
+     .        (1._RKIND+ft*c0(i  ))*q6(i  ))
       enddo
 c
 c
