@@ -80,54 +80,75 @@ private:
 
 //----------------------------------------------------------------------
 
-
-void pointer_compare(double vals[], double ref[], std::size_t length,
-                     std::string func_name){
-    for(std::size_t i = 0; i < length; i++){
-      ASSERT3(func_name.c_str(), "at %u expected: %e. Got: %e",
-              i, ref[i], vals[i], ref[i] == vals[i]);
-    }
-}
-
-//----------------------------------------------------------------------
-
-void pointer_compare(double vals[], std::vector<double> ref,
-                     std::string func_name){
+void pointer_compare_(double vals[], std::vector<double> ref,
+                      std::string func_name, const char* file, int line){
+  bool all_match = true;
   for(std::size_t i = 0; i < ref.size(); i++){
-    ASSERT3(func_name.c_str(), "at %u expected: %e. Got: %e",
-            i, ref[i], vals[i], ref[i] == vals[i]);
+    bool match = (ref[i] == vals[i]);
+    if (!match){
+      if (all_match){
+        CkPrintf("\nUnequal Pointer Element Error in %s:\n",
+                 func_name.c_str());
+      }
+      CkPrintf("Expected %e at index %lu. Got: %e\n", ref[i], i, vals[i]);
+      all_match = false;
+    }
   }
+  Unit::instance()->assertion(all_match, file, line, true);
 }
 
 //----------------------------------------------------------------------
 
 void compare_against_arr_(CelloArray<double, 2> &arr2d,
                           std::vector<double> ref,
-                          std::string func_name){
+                          std::string func_name,
+                          const char* file, int line){
 
   int my = arr2d.shape(0);
   int mx = arr2d.shape(1);
 
+  bool all_match = true;
+
   for(int iy=0; iy<my; iy++){
     for(int ix=0; ix<mx; ix++){
       int index = ix + mx*iy;
-      ASSERT4(func_name.c_str(), "at (%d, %d) expected: %e. Got: %e",
-              iy, ix, ref[index], arr2d(iy,ix),
-              arr2d(iy,ix) == ref[index]);
+      bool match = (arr2d(iy,ix) == ref[index]);
+      if (!match){
+        if (all_match){
+          CkPrintf("\nUnequal Array Element Error in %s:\n",
+                   func_name.c_str());
+        }
+        all_match = false;
+        CkPrintf("Expected %e at (%d, %d). Got: %e\n",
+                 ref[index], iy, ix, arr2d(iy,ix));
+      }
     }
   }
+  Unit::instance()->assertion(all_match, file, line, true);
 }
 
 //----------------------------------------------------------------------
 
 template<typename Builder>
-void compare_builder_arr(Builder &builder, std::vector<double> ref,
-                          std::string func_name){
-  compare_against_arr_(*builder.get_arr(), ref, func_name);
+void compare_builder_arr_(Builder &builder, std::vector<double> ref,
+                          std::string func_name,
+                          const char* file, int line){
+  compare_against_arr_(*builder.get_arr(), ref, func_name, file, line);
   if (builder.get_wrapped_ptr() != nullptr){
-    pointer_compare(builder.get_wrapped_ptr(), ref, func_name);
+    pointer_compare_(builder.get_wrapped_ptr(), ref, func_name, file, line);
   }
 }
+
+//----------------------------------------------------------------------
+
+#define check_pointer_vals(VALS, REF, FUNC_NAME)                     \
+  pointer_compare_(VALS, REF, FUNC_NAME, __FILE__, __LINE__);
+
+#define check_arr_vals(VALS, REF, FUNC_NAME)                         \
+  compare_against_arr_(VALS, REF, FUNC_NAME, __FILE__, __LINE__);
+
+#define check_builder_arr(BUILDER, REF, FUNC_NAME)                   \
+  compare_builder_arr_(BUILDER, REF, FUNC_NAME, __FILE__, __LINE__);
 
 //----------------------------------------------------------------------
 
@@ -594,13 +615,13 @@ class VariableAssignmentTests{
                                &wrapped_ptr_vec, &expected_wrapped_ptr_vals]()
       {
         for (CelloArray<double,2>* cur_arr_ptr : array_ptr_vec){
-          compare_against_arr_
-            (*cur_arr_ptr, expected,
-             "VariableAssignmentTests::compare_against_arr_");
+          check_arr_vals(*cur_arr_ptr, expected,
+                         "VariableAssignmentTests::test_assignment_");
         }
         for (std::size_t i =0; i<wrapped_ptr_vec.size(); i++){
-          pointer_compare(wrapped_ptr_vec[i],*(expected_wrapped_ptr_vals[i]),
-                          "VariableAssignmentTests::compare_against_arr_");
+          check_pointer_vals(wrapped_ptr_vec[i],
+                             *(expected_wrapped_ptr_vals[i]),
+                             "VariableAssignmentTests::test_assignment_");
         }
       };
 
@@ -728,19 +749,22 @@ class VariableAssignmentTests{
     (*arr_ptr_a)(2,3) = -42;
     (*arr_ptr_b)(3,2) = 42;
 
-    compare_against_arr_(*arr_ptr_a, {0,  0, 0,   0,
-                                      0, 15, 0,   0,
-                                      0,  0, 0, -42,
-                                      0,  0, 0,   0}, func_name);
+    check_arr_vals(*arr_ptr_a, std::vector<double>({0,  0, 0,   0,
+                                                    0, 15, 0,   0,
+                                                    0,  0, 0, -42,
+                                                    0,  0, 0,   0}),
+                   func_name);
     if (builder_a.get_wrapped_ptr() != nullptr){
-      pointer_compare(builder_a.get_wrapped_ptr(), {0,0,97.25,
-                                                    0, 0,   0}, func_name);
+      check_pointer_vals(builder_a.get_wrapped_ptr(),
+                         std::vector<double>({0,0,97.25, 0, 0,   0}),
+                         func_name);
     }
     
-    compare_builder_arr(builder_b, {0,  0,  0, 0,
-                                    0, 15,  0, 0,
-                                    0,  0,  0, 0,
-                                    0,  0, 42, 0}, func_name);
+    check_builder_arr(builder_b,
+                      std::vector<double>({0,  0,  0, 0,
+                                           0, 15,  0, 0,
+                                           0,  0,  0, 0,
+                                           0,  0, 42, 0}), func_name);
   }
 
 public:
@@ -764,6 +788,7 @@ public:
 
   template<template<typename, std::size_t> typename Builder>
   void test_assign_from_scalar_(){
+    std::string func_name = "BulkAssignmentTest::test_assign_from_scalar_";
 
     Builder<double, 2> builder(2,3);
     CelloArray<double, 2> *arr_ptr = builder.get_arr();
@@ -771,23 +796,21 @@ public:
 
     (*arr_ptr).subarray() = 57.24;
 
-    compare_builder_arr(builder, {57.24, 57.24, 57.24, 57.24,57.24, 57.24},
-                        "BulkAssignmentTest::test_assign_from_scalar_");
+    check_builder_arr(builder, std::vector<double>({57.24, 57.24, 57.24,
+                                                    57.24, 57.24, 57.24}),
+                      func_name);
 
     (*arr_ptr).subarray(CSlice(0,2), CSlice(0,-1)) = -3;
-    compare_builder_arr(builder, {-3, -3, 57.24,
-                                  -3, -3, 57.24},
-                        "BulkAssignmentTest::test_assign_from_scalar_");
+    check_builder_arr(builder, std::vector<double>({-3, -3, 57.24,
+                                                    -3, -3, 57.24}),
+                      func_name);
 
     CelloArray<double, 2> subarray = arr_ptr->subarray(CSlice(0,2),
                                                        CSlice(1,3));
     subarray.subarray() = 15;
-    compare_against_arr_(subarray,  {15,15,15,15},
-                         "BulkAssignmentTest::test_assign_from_scalar_");
-    compare_builder_arr(builder, {-3, 15, 15,
-                                  -3, 15, 15},
-                        "BulkAssignmentTest::test_assign_from_scalar_");
-    
+    check_arr_vals(subarray,  std::vector<double>({15,15,15,15}), func_name);
+    check_builder_arr(builder, std::vector<double>({-3, 15, 15,
+                                                    -3, 15, 15}), func_name);
   }
   
 
@@ -819,28 +842,30 @@ public:
     }
 
     // sanity checks!
-    compare_builder_arr(builder_2a,  {0, 1, 2,
-                                      3, 4, 5}, func_name.c_str());
-    compare_builder_arr(builder_2b,  {-1, -2, -3,
-                                      -4, -5, -6}, func_name.c_str());
+    check_builder_arr(builder_2a, std::vector<double>({0, 1, 2,
+                                                       3, 4, 5}), func_name);
+    check_builder_arr(builder_2b, std::vector<double>({-1, -2, -3,
+                                                       -4, -5, -6}),
+                      func_name);
 
     // now lets try an assignment of a full array
     (*arr_ptr_a).subarray() = *arr_ptr_2a;
     (*arr_ptr_a)(1,1)= -36;
-    compare_builder_arr(builder_1,  {0,   1, 2,
-                                     3, -36, 5}, func_name.c_str());
+    check_builder_arr(builder_1, std::vector<double>({0,   1, 2,
+                                                      3, -36, 5}), func_name);
     // make sure array_2a is unaffected
-    compare_builder_arr(builder_2a,  {0, 1, 2,
-                                      3, 4, 5}, func_name.c_str());
+    check_builder_arr(builder_2a, std::vector<double>({0, 1, 2,
+                                                       3, 4, 5}), func_name);
 
     // now lets try another assignment
     (*arr_ptr_a).subarray() = *arr_ptr_2b;
     (*arr_ptr_a)(0,0)= 5;
-    compare_builder_arr(builder_1,  { 5, -2, -3,
-                                     -4, -5, -6}, func_name.c_str());
+    check_builder_arr(builder_1, std::vector<double>({ 5, -2, -3,
+                                                      -4, -5, -6}), func_name);
     // make sure array_2a is unaffected
-    compare_builder_arr(builder_2b,  {-1, -2, -3,
-                                      -4, -5, -6}, func_name.c_str());
+    check_builder_arr(builder_2b, std::vector<double>({-1, -2, -3,
+                                                       -4, -5, -6}),
+                      func_name);
   }
 
 
@@ -860,12 +885,13 @@ public:
     subarray_1(0,1) = 5;
 
     // sanity check:
-    compare_against_arr_(subarray_1,  {0,     5,
-                                       0, 97.25}, func_name.c_str());
-    compare_builder_arr(builder_1,  {0, 0,     0, 0,
-                                     0, 0,     5, 0,
-                                     0, 0, 97.25, 0,
-                                     0, 0,     0, 0}, func_name.c_str());
+    check_arr_vals(subarray_1, std::vector<double>({0,     5,
+                                                    0, 97.25}), func_name);
+    check_builder_arr(builder_1,  std::vector<double>({0, 0,     0, 0,
+                                                       0, 0,     5, 0,
+                                                       0, 0, 97.25, 0,
+                                                       0, 0,     0, 0}),
+                      func_name);
 
     Builder2<double, 2> builder_2(4,5);
     CelloArray<double, 2> *arr_ptr_2 = builder_2.get_arr();
@@ -880,48 +906,53 @@ public:
     }
 
     // sanity check:
-    compare_builder_arr(builder_2,  { 0,  1,  2,  3,  4,
-                                      5,  6,  7,  8,  9,
-                                     10, 11, 12, 13, 14,
-                                     15, 16, 17, 18, 19}, func_name.c_str());
-    compare_against_arr_(subarray_2,  { 6,  7,  8,
-                                       11, 12, 13}, func_name.c_str());
+    check_builder_arr(builder_2,  std::vector<double>({ 0,  1,  2,  3,  4,
+                                                        5,  6,  7,  8,  9,
+                                                        10, 11, 12, 13, 14,
+                                                        15, 16, 17, 18, 19}),
+                      func_name);
+    check_arr_vals(subarray_2, std::vector<double>({ 6,  7,  8,
+                                                    11, 12, 13}), func_name);
 
     // NOW TO ACTUALLY PERFORM A TEST
     subarray_1.subarray() = subarray_2.subarray(CSlice(0,2),
                                                 CSlice(0,2));
 
-    compare_against_arr_(subarray_1,  { 6,  7,
-                                        11, 12}, func_name.c_str());
-    compare_builder_arr(builder_1,  {0,  0,  0, 0,
-                                     0,  6,  7, 0,
-                                     0, 11, 12, 0,
-                                     0,  0,  0, 0}, func_name.c_str());
+    check_arr_vals(subarray_1,  std::vector<double>({ 6,  7,
+                                                     11, 12}), func_name);
+    check_builder_arr(builder_1, std::vector<double>({0,  0,  0, 0,
+                                                      0,  6,  7, 0,
+                                                      0, 11, 12, 0,
+                                                      0,  0,  0, 0}),
+                      func_name);
     // extra sanity checks!
     subarray_1(0,0) = 97;
-    compare_against_arr_(subarray_1,  {97,  7,
-                                       11, 12}, func_name.c_str());
-    compare_builder_arr(builder_1,  {0,  0,  0, 0,
-                                     0, 97,  7, 0,
-                                     0, 11, 12, 0,
-                                     0,  0,  0, 0}, func_name.c_str());
-    compare_builder_arr(builder_2,  { 0,  1,  2,  3,  4,
-                                      5,  6,  7,  8,  9,
-                                     10, 11, 12, 13, 14,
-                                     15, 16, 17, 18, 19}, func_name.c_str());
-    compare_against_arr_(subarray_2,  { 6,  7,  8,
-                                       11, 12, 13}, func_name.c_str());
+    check_arr_vals(subarray_1,  std::vector<double>({97,  7,
+                                                     11, 12}), func_name);
+    check_builder_arr(builder_1, std::vector<double>({0,  0,  0, 0,
+                                                      0, 97,  7, 0,
+                                                      0, 11, 12, 0,
+                                                      0,  0,  0, 0}),
+                      func_name);
+    check_builder_arr(builder_2, std::vector<double>({ 0,  1,  2,  3,  4,
+                                                       5,  6,  7,  8,  9,
+                                                       10, 11, 12, 13, 14,
+                                                       15, 16, 17, 18, 19}),
+                     func_name);
+    check_arr_vals(subarray_2,  std::vector<double>({ 6,  7,  8,
+                                                     11, 12, 13}), func_name);
 
     // SECOND TEST:
     subarray_1.subarray(CSlice(0,2),
                         CSlice(0,2)) = subarray_2.subarray(CSlice(0,2),
                                                            CSlice(1,3));
-    compare_against_arr_(subarray_1,  { 7,  8,
-                                       12, 13}, func_name.c_str());
-    compare_builder_arr(builder_1,  {0,  0,  0, 0,
-                                     0,  7,  8, 0,
-                                     0, 12, 13, 0,
-                                     0,  0,  0, 0}, func_name.c_str());
+    check_arr_vals(subarray_1, std::vector<double>({ 7,  8,
+                                                    12, 13}), func_name);
+    check_builder_arr(builder_1, std::vector<double>({0,  0,  0, 0,
+                                                      0,  7,  8, 0,
+                                                      0, 12, 13, 0,
+                                                      0,  0,  0, 0}),
+                      func_name);
     
   }
 
@@ -950,11 +981,11 @@ private:
   // an array of 0 should be passed to this function
   void pass_by_val(CelloArray<double,2> arr,std::string func_name){
     // sanity check:
-    compare_against_arr_(arr,  { 0, 0, 0,
-                                 0, 0, 0}, func_name.c_str());
+    check_arr_vals(arr, std::vector<double>({ 0, 0, 0,
+                                              0, 0, 0}), func_name.c_str());
     arr(0,1) = 1;
-    compare_against_arr_(arr,  { 0, 1, 0,
-                                 0, 0, 0}, func_name.c_str());
+    check_arr_vals(arr, std::vector<double>({ 0, 1, 0,
+                                              0, 0, 0}), func_name.c_str());
   }
 public:
 
@@ -964,8 +995,8 @@ public:
     CelloArray<double, 2> *arr_ptr = builder.get_arr();
 
     pass_by_val(*arr_ptr, "PassByValueTests::test_pass_by_val");
-    compare_builder_arr(builder,  { 0, 1, 0,
-                                    0, 0, 0},
+    check_builder_arr(builder, std::vector<double>({ 0, 1, 0,
+                                                     0, 0, 0}),
       "PassByValueTests::test_pass_by_val");
     
   }

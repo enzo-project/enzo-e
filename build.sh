@@ -52,7 +52,7 @@ if [ "$#" -ge 1 ]; then
       rm -rf config.log warnings.org errors.org log.build out.scons.*
       rm -rf config/*.pyc
       rm -rf test/fail.* test/pass.* test/incomplete.*
-      rm -rf test/*.test_log
+      rm -rf test/*.test-log
       rm -rf scons-local-2.2.0/SCons/*.pyc scons-local-2.2.0/SCons/*/*.pyc
       rm -rf charmrun parameters.out checkpoint_ppm* output-stride*.h5
       rm -rf `find test -name "*.png"`
