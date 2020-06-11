@@ -199,7 +199,7 @@ extern "C" {
 #include "enzo_EnzoMethodCosmology.hpp"
 #include "enzo_EnzoMethodGrackle.hpp"
 #include "enzo_EnzoMethodGravity.hpp"
-#include "enzo_EnzoMethodHydro.hpp"
+//#include "enzo_EnzoMethodHydro.hpp"
 #include "enzo_EnzoMethodHeat.hpp"
 #include "enzo_EnzoMethodNull.hpp"
 #include "enzo_EnzoMethodPmDeposit.hpp"

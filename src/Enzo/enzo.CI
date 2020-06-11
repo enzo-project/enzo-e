@@ -75,7 +75,7 @@ module enzo {
   PUPable EnzoMethodHeat;
   PUPable EnzoMethodNull;
   PUPable EnzoMethodPpm;
-  PUPable EnzoMethodHydro;
+//  PUPable EnzoMethodHydro;
   PUPable EnzoMethodPpml;
   PUPable EnzoMethodPmDeposit;
   PUPable EnzoMethodPmUpdate;

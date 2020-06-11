@@ -1,9 +1,18 @@
+//
+// This is not used, but is a starting point to refactor current
+// hydro methods ported from enzo - (June 2020)
+//
+
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoMethodHydro.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed Oct 18 12:35:40 PDT 2017
 /// @brief    Implements the EnzoMethodHydro class
+
+#define NO_ENZOMETHODHYDRO
+
+#ifdef USE_ENZOMETHODHYDRO
 
 #include "cello.hpp"
 #include "enzo.hpp"
@@ -501,7 +510,7 @@ void EnzoMethodHydro::compute ( Block * block) throw()
   //                     break;
   //                 case CT_Biermann:      //4
   // #ifdef BIERMANN
-  //                     FORTRAN_NAME(woc_create_e_biermann)(MagneticFlux[0][0], MagneticFlux[1][0], MagneticFlux[2][0],
+  //                     FORTRAN_NAME(create_e_biermann)(MagneticFlux[0][0], MagneticFlux[1][0], MagneticFlux[2][0],
   //                                  MagneticFlux[0][1], MagneticFlux[1][1], MagneticFlux[2][1],
   //                                  ElectricField[0], ElectricField[1], ElectricField[2],
   //                                  hxa, CellWidthTemp[1], CellWidthTemp[2],
@@ -542,7 +551,7 @@ void EnzoMethodHydro::compute ( Block * block) throw()
 
   //     if (HydroMethod == PPM_LagrangeRemap) {
   // #ifdef PPM_LR
-  //       FORTRAN_NAME(woc_ppm_lr)(
+  //       FORTRAN_NAME(ppm_lr)(
   // 			density, totalenergy, velocity1, velocity2, velocity3,
   //                           gasenergy,
   // 			&gravity_, AccelerationField[0],
@@ -919,7 +928,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
 
   if (dual_energy_) {
 
-    FORTRAN_NAME(woc_pgas2d_dual)
+    FORTRAN_NAME(pgas2d_dual)
       (dslice, eslice, geslice, pslice, uslice, vslice, 
        wslice, &dual_energy_eta1_,
        &dual_energy_eta2_,
@@ -928,7 +937,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
 
   } else {
 
-    FORTRAN_NAME(woc_pgas2d)
+    FORTRAN_NAME(pgas2d)
       (dslice, eslice, pslice, uslice, vslice, 
        wslice, &mx, &my,
        &is, &ie, &js, &je, &gamma_, &ppm_pressure_floor_);
@@ -966,7 +975,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
 
     int dim_p1 = 1;
 
-    FORTRAN_NAME(woc_calcdiss)(dslice, eslice, uslice,
+    FORTRAN_NAME(calcdiss)(dslice, eslice, uslice,
 			   vy, vz,
 			   pslice,
 			   &hxa, &hya, &hza,
@@ -982,7 +991,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
 
   if (reconstruct_method_ == "ppm") {
 
-    FORTRAN_NAME(woc_inteuler)
+    FORTRAN_NAME(inteuler)
       (dslice, pslice, &gravity_, grslice, geslice, uslice,
        vslice, wslice, &hxa, flatten,
        &mx, &my,
@@ -999,7 +1008,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
 
   if (riemann_solver_ == "two_shock") {
 
-    FORTRAN_NAME(woc_twoshock)
+    FORTRAN_NAME(twoshock)
       (dls, drs, pls, prs, uls, urs,
        &mx, &my,
        &is, &ie_p1, &js, &je,
@@ -1007,7 +1016,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
        pbar, ubar, &gravity_, grslice,
        &dual_energy_, &dual_energy_eta1_);
     
-    FORTRAN_NAME(woc_flux_twoshock)
+    FORTRAN_NAME(flux_twoshock)
       (dslice, eslice, geslice, uslice, vslice, wslice,
        &hxa, diffcoef, 
        &mx, &my,
@@ -1022,7 +1031,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
     
   } else if (riemann_solver_ == "hll") {
 
-    FORTRAN_NAME(woc_flux_hll)
+    FORTRAN_NAME(flux_hll)
       (dslice, eslice, geslice, uslice, vslice, wslice,
        &hxa, diffcoef, 
        &mx, &my,
@@ -1037,7 +1046,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
 
   } else if (riemann_solver_ == "hllc") {
 
-    FORTRAN_NAME(woc_flux_hllc)
+    FORTRAN_NAME(flux_hllc)
       (dslice, eslice, geslice, uslice, vslice, wslice,
        &hxa, diffcoef, 
        &mx, &my,
@@ -1066,7 +1075,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
 
   // Compute Eulerian fluxes and update zone-centered quantities
 
-  FORTRAN_NAME(woc_euler)
+  FORTRAN_NAME(euler)
     (dslice, eslice, grslice, geslice, uslice, vslice, wslice,
      &hxa, diffcoef, 
      &mx, &my, 
@@ -1079,7 +1088,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
   // /* If necessary, recompute the pressure to correctly set ge and e */
 
   // if (dual_energy_)
-  //   FORTRAN_NAME(woc_pgas2d_dual)(dslice, eslice, geslice, pslice, uslice, vslice, 
+  //   FORTRAN_NAME(pgas2d_dual)(dslice, eslice, geslice, pslice, uslice, vslice, 
   // 			      wslice, &dual_energy_eta1_, 
   // 			      &dual_energy_eta2_, &mx, 
   // 			      &my, &is_m3, &ie_p3, &js, &je, 
@@ -1354,20 +1363,20 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
 
   // /*
   // if (dual_energy_)
-  //   FORTRAN_NAME(woc_pgas2d_dual)(dslice, eslice, geslice, pslice, uslice, vslice, 
+  //   FORTRAN_NAME(pgas2d_dual)(dslice, eslice, geslice, pslice, uslice, vslice, 
   // 			      wslice, &dual_energy_eta1_, 
   // 			      &dual_energy_eta2_, &my, 
   // 			      &mz, &is_m3, &ie_p3, &js, &je, 
   // 			      &gamma_, &ppm_pressure_floor_);
   // else
-  //   FORTRAN_NAME(woc_pgas2d)(dslice, eslice, pslice, uslice, vslice,
+  //   FORTRAN_NAME(pgas2d)(dslice, eslice, pslice, uslice, vslice,
   // 			 wslice, &my, &mz, 
   // 			 &is_m3, &ie_p3, &js, &je, &gamma_, &ppm_pressure_floor_);
   // */
   // /* If requested, compute diffusion and slope flattening coefficients */
 
   // if (ppm_diffusion_ != 0 || PPMFlatteningParameter != 0)
-  //   FORTRAN_NAME(woc_calcdiss)(dslice, eslice, uslice, vz,
+  //   FORTRAN_NAME(calcdiss)(dslice, eslice, uslice, vz,
   // 			   vx, pslice, CellWidthTemp[1],
   // 			   CellWidthTemp[2], hxa, 
   // 			   &my, &mz,
@@ -1380,7 +1389,7 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
   // /* Compute Eulerian left and right states at zone edges via interpolation */
 
   // if (ReconstructionMethod == PPM)
-  //   FORTRAN_NAME(woc_inteuler)(dslice, pslice, &gravity_, grslice, geslice, uslice,
+  //   FORTRAN_NAME(inteuler)(dslice, pslice, &gravity_, grslice, geslice, uslice,
   // 			   vslice, wslice, CellWidthTemp[1], flatten,
   // 			   &my, &mz,
   // 			   &is, &ie, &js, &je, &dual_energy_, 
@@ -1395,14 +1404,14 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
 
   // switch (RiemannSolver) {
   // case TwoShock:
-  //   FORTRAN_NAME(woc_twoshock)(dls, drs, pls, prs, uls, urs,
+  //   FORTRAN_NAME(twoshock)(dls, drs, pls, prs, uls, urs,
   // 			   &my, &mz,
   // 			   &is, &ie_p1, &js, &je,
   // 			   &dt, &gamma_, &ppm_pressure_floor_, &ppm_pressure_free_,
   // 			   pbar, ubar, &gravity_, grslice,
   // 			   &dual_energy_, &dual_energy_eta1_);
     
-  //   FORTRAN_NAME(woc_flux_twoshock)(dslice, eslice, geslice, uslice, vslice, wslice,
+  //   FORTRAN_NAME(flux_twoshock)(dslice, eslice, geslice, uslice, vslice, wslice,
   // 				CellWidthTemp[1], diffcoef, 
   // 				&my, &mz,
   // 				&is, &ie, &js, &je, &dt, &gamma_,
@@ -1416,7 +1425,7 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
   //   break;
 
   // case HLL:
-  //   FORTRAN_NAME(woc_flux_hll)(dslice, eslice, geslice, uslice, vslice, wslice,
+  //   FORTRAN_NAME(flux_hll)(dslice, eslice, geslice, uslice, vslice, wslice,
   // 			   CellWidthTemp[1], diffcoef, 
   // 			   &my, &mz,
   // 			   &is, &ie, &js, &je, &dt, &gamma_,
@@ -1430,7 +1439,7 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
   //   break;
 
   // case HLLC:
-  //   FORTRAN_NAME(woc_flux_hllc)(dslice, eslice, geslice, uslice, vslice, wslice,
+  //   FORTRAN_NAME(flux_hllc)(dslice, eslice, geslice, uslice, vslice, wslice,
   // 			    CellWidthTemp[1], diffcoef, 
   // 			    &my, &mz,
   // 			    &is, &ie, &js, &je, &dt, &gamma_,
@@ -1460,7 +1469,7 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
 
   // /* Compute Eulerian fluxes and update zone-centered quantities */
 
-  // FORTRAN_NAME(woc_euler)(dslice, eslice, grslice, geslice, uslice, vslice, wslice,
+  // FORTRAN_NAME(euler)(dslice, eslice, grslice, geslice, uslice, vslice, wslice,
   // 		      CellWidthTemp[1], diffcoef, 
   // 		      &my, &mz, 
   // 		      &is, &ie, &js, &je, &dt, &gamma_, 
@@ -1472,7 +1481,7 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
   // /* If necessary, recompute the pressure to correctly set ge and e */
 
   // if (dual_energy_)
-  //   FORTRAN_NAME(woc_pgas2d_dual)(dslice, eslice, geslice, pslice, uslice, vslice, 
+  //   FORTRAN_NAME(pgas2d_dual)(dslice, eslice, geslice, pslice, uslice, vslice, 
   // 			      wslice, &dual_energy_eta1_, 
   // 			      &dual_energy_eta2_, &my, 
   // 			      &mz, &is_m3, &ie_p3, &js, &je, 
@@ -1784,20 +1793,20 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   // /* Compute the pressure on a slice */
   // /*
   // if (dual_energy_)
-  //   FORTRAN_NAME(woc_pgas2d_dual)(dslice, eslice, geslice, pslice, uslice, vslice, 
+  //   FORTRAN_NAME(pgas2d_dual)(dslice, eslice, geslice, pslice, uslice, vslice, 
   // 			      wslice, &dual_energy_eta1_, 
   // 			      &dual_energy_eta2_, &mz, 
   // 			      &mx, &is_m3, &ie_p3, &js, &je, 
   // 			      &gamma_, &ppm_pressure_floor_);
   // else
-  //   FORTRAN_NAME(woc_pgas2d)(dslice, eslice, pslice, uslice, vslice, 
+  //   FORTRAN_NAME(pgas2d)(dslice, eslice, pslice, uslice, vslice, 
   // 			 wslice, &mz, &mx, 
   // 			 &is_m3, &ie_p3, &js, &je, &gamma_, &ppm_pressure_floor_);
   // */
   // /* If requested, compute diffusion and slope flattening coefficients */
 
   // if (ppm_diffusion_ != 0 || PPMFlatteningParameter != 0)
-  //   FORTRAN_NAME(woc_calcdiss)(dslice, eslice, uslice, vx,
+  //   FORTRAN_NAME(calcdiss)(dslice, eslice, uslice, vx,
   // 			   vy, pslice, CellWidthTemp[2],
   // 			   hxa, CellWidthTemp[1], 
   // 			   &mz, &mx, 
@@ -1810,7 +1819,7 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   // /* Compute Eulerian left and right states at zone edges via interpolation */
 
   // if (ReconstructionMethod == PPM)
-  //   FORTRAN_NAME(woc_inteuler)(dslice, pslice, &gravity_, grslice, geslice, uslice,
+  //   FORTRAN_NAME(inteuler)(dslice, pslice, &gravity_, grslice, geslice, uslice,
   // 			   vslice, wslice, CellWidthTemp[2], flatten,
   // 			   &mz, &mx,
   // 			   &is, &ie, &js, &je, &dual_energy_, 
@@ -1825,14 +1834,14 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
 
   // switch (RiemannSolver) {
   // case TwoShock:
-  //   FORTRAN_NAME(woc_twoshock)(dls, drs, pls, prs, uls, urs,
+  //   FORTRAN_NAME(twoshock)(dls, drs, pls, prs, uls, urs,
   // 			   &mz, &mx,
   // 			   &is, &ie_p1, &js, &je,
   // 			   &dt, &gamma_, &ppm_pressure_floor_, &ppm_pressure_free_,
   // 			   pbar, ubar, &gravity_, grslice,
   // 			   &dual_energy_, &dual_energy_eta1_);
     
-  //   FORTRAN_NAME(woc_flux_twoshock)(dslice, eslice, geslice, uslice, vslice, wslice,
+  //   FORTRAN_NAME(flux_twoshock)(dslice, eslice, geslice, uslice, vslice, wslice,
   // 				CellWidthTemp[2], diffcoef, 
   // 				&mz, &mx,
   // 				&is, &ie, &js, &je, &dt, &gamma_,
@@ -1846,7 +1855,7 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   //   break;
 
   // case HLL:
-  //   FORTRAN_NAME(woc_flux_hll)(dslice, eslice, geslice, uslice, vslice, wslice,
+  //   FORTRAN_NAME(flux_hll)(dslice, eslice, geslice, uslice, vslice, wslice,
   // 			   CellWidthTemp[2], diffcoef, 
   // 			   &mz, &mx,
   // 			   &is, &ie, &js, &je, &dt, &gamma_,
@@ -1860,7 +1869,7 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   //   break;
 
   // case HLLC:
-  //   FORTRAN_NAME(woc_flux_hllc)(dslice, eslice, geslice, uslice, vslice, wslice,
+  //   FORTRAN_NAME(flux_hllc)(dslice, eslice, geslice, uslice, vslice, wslice,
   // 			    CellWidthTemp[2], diffcoef, 
   // 			    &mz, &mx,
   // 			    &is, &ie, &js, &je, &dt, &gamma_,
@@ -1889,7 +1898,7 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
 
   // /* Compute Eulerian fluxes and update zone-centered quantities */
 
-  // FORTRAN_NAME(woc_euler)(dslice, eslice, grslice, geslice, uslice, vslice, wslice,
+  // FORTRAN_NAME(euler)(dslice, eslice, grslice, geslice, uslice, vslice, wslice,
   // 		      CellWidthTemp[2], diffcoef, 
   // 		      &mz, &mx, 
   // 		      &is, &ie, &js, &je, &dt, &gamma_, 
@@ -1901,7 +1910,7 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   // /* If necessary, recompute the pressure to correctly set ge and e */
 
   // if (dual_energy_)
-  //   FORTRAN_NAME(woc_pgas2d_dual)(dslice, eslice, geslice, pslice, uslice, vslice, 
+  //   FORTRAN_NAME(pgas2d_dual)(dslice, eslice, geslice, pslice, uslice, vslice, 
   // 			      wslice, &dual_energy_eta1_, 
   // 			      &dual_energy_eta2_, &mz, 
   // 			      &mx, &is_m3, &ie_p3, &js, &je, 
@@ -2075,3 +2084,5 @@ double EnzoMethodHydro::timestep ( Block * block ) const throw()
   
   return dt;
 }
+
+#endif

@@ -192,6 +192,7 @@ public: // interface
       interpolation_method(""),
       // EnzoMethodHeat
       method_heat_alpha(0.0),
+/*
       // EnzoMethodHydro
       method_hydro_method(""),
       method_hydro_dual_energy(false),
@@ -201,6 +202,7 @@ public: // interface
       method_hydro_reconstruct_conservative(false),
       method_hydro_reconstruct_positive(false),
       method_hydro_riemann_solver(""),
+*/
       // EnzoMethodNull
       method_null_dt(0.0),
       // EnzoMethodTurbulence
@@ -377,7 +379,7 @@ public: // attributes
 
   /// EnzoMethodHeat
   double                     method_heat_alpha;
-
+/*
   /// EnzoMethodHydro
   std::string                method_hydro_method;
   bool                       method_hydro_dual_energy;
@@ -387,7 +389,7 @@ public: // attributes
   bool                       method_hydro_reconstruct_conservative;
   bool                       method_hydro_reconstruct_positive;
   std::string                method_hydro_riemann_solver;
-
+*/
   /// EnzoMethodNull
   double                     method_null_dt;
 

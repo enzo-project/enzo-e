@@ -1,3 +1,8 @@
+//
+// This is not used, but is a starting point to refactor current 
+// hydro methods ported from enzo (June 2020)
+//
+
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoMethodHydro.hpp
@@ -5,10 +10,15 @@
 /// @date     Thu Apr  1 16:14:38 PDT 2010
 /// @brief    [\ref Enzo] Implementation of EnzoMethodHydro class
 
+#define NO_ENZOMETHODHYDRO
+
+#ifdef USE_ENZOMETHODHYDRO
+
+
 #ifndef ENZO_ENZO_METHOD_HYDRO_HPP
 #define ENZO_ENZO_METHOD_HYDRO_HPP
 
-extern "C" void FORTRAN_NAME(woc_pgas2d_dual)
+extern "C" void FORTRAN_NAME(pgas2d_dual)
   (
    enzo_float *dslice, enzo_float *eslice, enzo_float *geslice,
    enzo_float *pslice,
@@ -18,7 +28,7 @@ extern "C" void FORTRAN_NAME(woc_pgas2d_dual)
    int *i1, int *i2, int *j1, int *j2,
    enzo_float *gamma, enzo_float *pmin);
 
-extern "C" void FORTRAN_NAME(woc_pgas2d)
+extern "C" void FORTRAN_NAME(pgas2d)
   (
    enzo_float *dslice, enzo_float *eslice, enzo_float *pslice,
    enzo_float *uslice, enzo_float *vslice, enzo_float *wslice,
@@ -26,7 +36,7 @@ extern "C" void FORTRAN_NAME(woc_pgas2d)
    int *i1, int *i2, int *j1, int *j2,
    enzo_float *gamma, enzo_float *pmin);
 
-extern "C" void FORTRAN_NAME(woc_calcdiss)
+extern "C" void FORTRAN_NAME(calcdiss)
   (
    enzo_float *dslice, enzo_float *eslice, enzo_float *uslice, enzo_float *v, 
    enzo_float *w, enzo_float *pslice,
@@ -36,7 +46,7 @@ extern "C" void FORTRAN_NAME(woc_calcdiss)
    int *dimz, enzo_float *dt, enzo_float *gamma, int *idiff, int *iflatten, 
    enzo_float *diffcoef, enzo_float *flatten);
 
-extern "C" void FORTRAN_NAME(woc_inteuler)
+extern "C" void FORTRAN_NAME(inteuler)
   (
    enzo_float *dslice, enzo_float *pslice, int *gravity, enzo_float *grslice, 
    enzo_float *geslice, enzo_float *uslice, enzo_float *vslice, enzo_float *wslice, 
@@ -49,7 +59,7 @@ extern "C" void FORTRAN_NAME(woc_inteuler)
    enzo_float *urs, enzo_float *vls, enzo_float *vrs, enzo_float *wls, enzo_float *wrs, 
    int *ncolor, enzo_float *colslice, enzo_float *colls, enzo_float *colrs);
 
-extern "C" void FORTRAN_NAME(woc_twoshock)
+extern "C" void FORTRAN_NAME(twoshock)
   (
    enzo_float *dls, enzo_float *drs, enzo_float *pls, enzo_float *prs, 
    enzo_float *uls, enzo_float *urs, int *idim, int *jdim, int *i1,
@@ -57,7 +67,7 @@ extern "C" void FORTRAN_NAME(woc_twoshock)
    enzo_float *pmin, int *ipresfree, enzo_float *pbar, enzo_float *ubar,
    int *gravity, enzo_float *grslice, int *idual, enzo_float *eta1);
 
-extern "C" void FORTRAN_NAME(woc_flux_twoshock)
+extern "C" void FORTRAN_NAME(flux_twoshock)
   (
    enzo_float *dslice, enzo_float *eslice, enzo_float *geslice, enzo_float *uslice, 
    enzo_float *vslice, enzo_float *wslice, enzo_float *dx,
@@ -72,7 +82,7 @@ extern "C" void FORTRAN_NAME(woc_flux_twoshock)
    enzo_float *ges,
    int *ncolor, enzo_float *colslice, enzo_float *colls, enzo_float *colrs, enzo_float *colf);
 
-extern "C" void FORTRAN_NAME(woc_flux_hll)
+extern "C" void FORTRAN_NAME(flux_hll)
   (
    enzo_float *dslice, enzo_float *eslice, enzo_float *geslice, enzo_float *uslice, 
    enzo_float *vslice, enzo_float *wslice, enzo_float *dx,
@@ -86,7 +96,7 @@ extern "C" void FORTRAN_NAME(woc_flux_hll)
    enzo_float *ges,
    int *ncolor, enzo_float *colslice, enzo_float *colls, enzo_float *colrs, enzo_float *colf);
 
-extern "C" void FORTRAN_NAME(woc_flux_hllc)
+extern "C" void FORTRAN_NAME(flux_hllc)
   (
    enzo_float *dslice, enzo_float *eslice, enzo_float *geslice, enzo_float *uslice, 
    enzo_float *vslice, enzo_float *wslice, enzo_float *dx,
@@ -100,7 +110,7 @@ extern "C" void FORTRAN_NAME(woc_flux_hllc)
    enzo_float *ges,
    int *ncolor, enzo_float *colslice, enzo_float *colls, enzo_float *colrs, enzo_float *colf);
 
-extern "C" void FORTRAN_NAME(woc_euler)
+extern "C" void FORTRAN_NAME(euler)
   (
    enzo_float *dslice, enzo_float *pslice, enzo_float *grslice, 
    enzo_float *geslice, enzo_float *uslice, enzo_float *vslice, enzo_float *wslice, 
@@ -239,3 +249,4 @@ protected: // attributes
 };
   
 #endif /* ENZO_ENZO_METHOD_HYDRO_HPP */
+#endif

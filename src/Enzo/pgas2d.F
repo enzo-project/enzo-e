@@ -1,12 +1,10 @@
-#include "fortran.h"
 #define FORTRAN
 c=======================================================================
 c////////////////////////  SUBROUTINE PGAS2D  \\\\\\\\\\\\\\\\\\\\\\\\\\
 c
-      subroutine pgas2d(
-     &     dslice, eslice, pslice, uslice, vslice,
-     &     wslice, idim, jdim, i1, i2, j1, j2,
-     &     gamma, pmin)
+      subroutine pgas2d(dslice, eslice, pslice, uslice, vslice,
+     &                  wslice, idim, jdim, i1, i2, j1, j2,
+     &                  gamma, pmin)
 c
 c  COMPUTES GAS PRESSURE ON A SLICE
 c

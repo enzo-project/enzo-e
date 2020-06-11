@@ -1,5 +1,6 @@
-#include "fortran.h"
 #define FORTRAN
+#include "fortran.h"
+
 c=======================================================================
 c//////////////////////////  SUBROUTINE EULER  \\\\\\\\\\\\\\\\\\\\\\\\\
 c
@@ -75,9 +76,8 @@ c
 c-----------------------------------------------------------------------
 c
       implicit NONE
-c
 #include "fortran_types.h"
-
+c
       INTG_PREC ijkn
       parameter (ijkn=MAX_ANY_SINGLE_DIRECTION)
 c-----------------------------------------------------------------------
@@ -201,6 +201,7 @@ c
      $            ,0.5_RKIND*geslice(i,j))
 c             if (geslice(i,j) .lt. tiny) geslice(i,j) = tiny
              if (geslice(i,j) .lt. 0._RKIND) then
+                print*, 'ERROR'
                 write(6,*) i,j,dslice(i,j),dnu(i),pcent(i),eslice(i,j),
      &               gef(i,j), gef(i+1,j), ges(i,j),
      &               geslice(i,j)*dslice(i,j),
@@ -211,7 +212,7 @@ c     &               pls(i,j),prs(i,j),pls(i+1,j),prs(i+1,j)
 c                write(6,*) ub(i),ub(i+1),geb(i),geb(i+1),
 c     &               db(i),db(i+1),dub(i),dub(i+1)
                 write(0,*) 'stop in euler with geslice < 0'
-                print*, 'ERROR_MESSAGE'
+C                ERROR_MESSAGE
              endif
           enddo
        endif

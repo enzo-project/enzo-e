@@ -105,6 +105,7 @@ EnzoConfig::EnzoConfig() throw ()
   interpolation_method(""),
   // EnzoMethodHeat
   method_heat_alpha(0.0),
+/*
   // EnzoMethodHydro
   method_hydro_method(""),
   method_hydro_dual_energy(false),
@@ -114,6 +115,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_hydro_reconstruct_conservative(0),
   method_hydro_reconstruct_positive(0),
   method_hydro_riemann_solver(""),
+*/
   // EnzoMethodNull
   method_null_dt(0.0),
   // EnzoMethodTurbulence
@@ -286,7 +288,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | interpolation_method;
 
   p | method_heat_alpha;
-
+/*
   p | method_hydro_method;
   p | method_hydro_dual_energy;
   p | method_hydro_dual_energy_eta_1;
@@ -295,7 +297,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_hydro_reconstruct_conservative;
   p | method_hydro_reconstruct_positive;
   p | method_hydro_riemann_solver;
-
+*/
   p | method_null_dt;
   p | method_turbulence_edot;
 
@@ -593,7 +595,7 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_heat_alpha = p->value_float
     ("Method:heat:alpha",1.0);
-
+/*
   method_hydro_method = p->value_string
     ("Method:hydro:method","ppm");
 
@@ -615,7 +617,7 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_hydro_riemann_solver = p->value_string
     ("Method:hydro:riemann_solver","ppm");
-
+*/
   method_null_dt = p->value_float
     ("Method:null:dt",std::numeric_limits<double>::max());
 

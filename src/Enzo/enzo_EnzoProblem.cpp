@@ -471,7 +471,7 @@ Method * EnzoProblem::create_method_
   if (name == "ppm") {
 
     method = new EnzoMethodPpm;
-
+/*
   } else if (name == "hydro") {
 
     method = new EnzoMethodHydro
@@ -493,7 +493,7 @@ Method * EnzoProblem::create_method_
        enzo_config->ppm_steepening,
        enzo_config->method_hydro_riemann_solver
        );
-
+*/
   } else if (name == "ppml") {
 
     method = new EnzoMethodPpml;
