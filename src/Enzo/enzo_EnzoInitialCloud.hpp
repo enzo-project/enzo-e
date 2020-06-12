@@ -29,6 +29,8 @@ public: // interface
 		   double density_cloud, double density_wind,
 		   double etot_wind, double eint_wind,
 		   double velocity_wind, double metal_mass_frac,
+		   bool initialize_uniform_bfield,
+		   const double uniform_bfield[3],
 		   double perturb_stddev, double truncate_dev,
 		   unsigned int perturb_seed)
     : Initial(cycle,time),
@@ -43,10 +45,13 @@ public: // interface
       eint_wind_(eint_wind),
       velocity_wind_(velocity_wind),
       metal_mass_frac_(metal_mass_frac),
+      initialize_uniform_bfield_(initialize_uniform_bfield),
       perturb_stddev_(perturb_stddev),
       truncate_dev_(truncate_dev),
       perturb_seed_(perturb_seed)
   {
+    for (int i = 0; i < 3; i++){ uniform_bfield_[i] = uniform_bfield[i]; }
+
     ASSERT("EnzoInitialCloud", "subsample_n must be >=0", subsample_n>=0);
     ASSERT("EnzoInitialCloud", "cloud_radius must be positive",
 	   cloud_radius>0);
@@ -54,8 +59,17 @@ public: // interface
            density_wind_>0);
     ASSERT("EnzoInitialCloud", "density_cloud must be positive",
            density_cloud_>0);
+    double ke_w = 0.5*velocity_wind_*velocity_wind_;
     ASSERT("EnzoInitialCloud", "etot_wind must exceed wind kinetic energy",
-	   etot_wind>0.5*velocity_wind_*velocity_wind_);
+	   etot_wind>ke_w);
+    if (initialize_uniform_bfield_) {
+      double me_w = 0.5*(uniform_bfield_[0]*uniform_bfield_[0]+
+			 uniform_bfield_[1]*uniform_bfield_[1]+
+			 uniform_bfield_[2]*uniform_bfield_[2])/density_wind_;
+      ASSERT("EnzoInitialCloud",
+	     "etot_wind must exceed wind specific kinetic and magnetic energy",
+	     etot_wind>(ke_w+me_w));
+    }
     ASSERT("EnzoInitialCloud", "eint_wind must be zero or positive.",
 	   eint_wind>=0.);
     ASSERT("EnzoInitialCloud", "metal_mass_frac must be in [0,1]",
@@ -80,8 +94,14 @@ public: // interface
       density_wind_(0.),
       etot_wind_(0.),
       velocity_wind_(0.),
-      metal_mass_frac_(0.)
-  { }
+      metal_mass_frac_(0.),
+      initialize_uniform_bfield_(false),
+      perturb_stddev_(0),
+      truncate_dev_(0),
+      perturb_seed_(0)
+  {
+    for (int i = 0; i < 3; i++){ uniform_bfield_[i] = 0.; }
+  }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
@@ -101,6 +121,8 @@ public: // interface
     p | etot_wind_;
     p | velocity_wind_;
     p | metal_mass_frac_;
+    p | initialize_uniform_bfield_;
+    PUParray(p, uniform_bfield_, 3);
     p | perturb_stddev_;
     p | truncate_dev_;
     p | perturb_seed_;
@@ -139,6 +161,12 @@ private: // attributes
   double velocity_wind_;
 
   double metal_mass_frac_;
+
+  /// indicates whether to initialize a uniform bfield
+  bool initialize_uniform_bfield_;
+
+  /// values of the uniform bfield
+  double uniform_bfield_[3];
 
   /// The stddev for normal distribution used to perturb cloud density
   double perturb_stddev_;

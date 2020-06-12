@@ -49,10 +49,21 @@ cloud
 The :p:`cloud` Initial subgroup is used to setup a Spherical cloud embedded in
 a hot wind. The cloud and wind are assumed to be in pressure equilibrium with one another.
 
-Currently magnetic fields are not initialized by this method. Currently, the
-cell-centered values should be initialized by another Initial subgroup (e.g.
-value) prior to call of this subgroup. If magnetic fields are initialized, they
-must be constant across the entire domain.
+The presence of (or lack thereof) the "bfield_x", "bfield_y", and "bfield_z"
+fields indicate whether the setup is purely hydrodynamic or involves magnetic
+fields. Presently, only uniform magnetic fields are supported if they are
+constant across the entire domain. The values of the magnetic fields are
+specified in one of 2 ways:
+
+1. If the :p:`uniform_bfield` parameter is passed a list of 3 floats, the
+   first, second, and third entries are used to initilize the x, y, and z
+   componentents of a uniform magnetic field. If the "bfieldi_x",
+   "bfieldi_y", and "bfieldi_z" face-centered fields are defined, then they
+   will be correctly initialized for use with the VL+CT integrator.
+2. (Deprecated) If the :p:`uniform_bfield` parameter is not specified (or is
+   passed a list containing 0 entries), then the cell-centered magnetic
+   fields are assumed to have been initialized by another Initial subgroup
+   (e.g. value) prior to the call of this subgroup.
 
 :Parameter:  :p:`Initial` : :p:`cloud` : :p:`subsample_n`
 :Summary: :s:`Determines the subsampling resolution`
@@ -129,6 +140,16 @@ is initialized by multiplying this value by the` ``"density"``
 :e:`field (this is done everywhere, regardless of proximity to the
 cloud center). Under these circumstances, this must have a positive
 value.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`uniform_bfield`
+:Summary: :s:`initial uniform magnetic field values`
+:Type:    :t:`list` ( :t:`float` )
+:Default: :d:`[ ]`
+:Scope:   :z:`Enzo`
+
+:e:`If specified, provides the values of the components of the initial magnetic field that are uniform throughout the entire domain. When employed this MUST have 3 entries. This will also initialize the face-centered fields magnetic fields (in addition to the cell-centered fields) if the appropriate fields have been defined. When this is not specified (i.e., when this has a list of 0 entries), the magnetic fields are assumed to have been pre-initialized by a separate problem initializer prior to the execution of the cloud initializer.`
 
 ----
 

@@ -57,6 +57,7 @@ EnzoConfig::EnzoConfig() throw ()
   initial_cloud_etot_wind(0.0),
   initial_cloud_eint_wind(0.0),
   initial_cloud_metal_mass_frac(0.0),
+  initial_cloud_initialize_uniform_bfield(false),
   initial_cloud_perturb_stddev(0.0),
   initial_cloud_trunc_dev(0.0),
   initial_cloud_perturb_seed(0),
@@ -191,6 +192,7 @@ EnzoConfig::EnzoConfig() throw ()
 
 {
   for (int i=0; i<3; i++) {
+    initial_cloud_uniform_bfield[i] = 0;
     initial_sedov_array[i] = 0;
     initial_soup_array[i]  = 0;
     initial_soup_d_pos[i]  = 0.0;
@@ -268,6 +270,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_cloud_etot_wind;
   p | initial_cloud_eint_wind;
   p | initial_cloud_metal_mass_frac;
+  p | initial_cloud_initialize_uniform_bfield;
+  PUParray(p,initial_cloud_uniform_bfield,3);
   p | initial_cloud_perturb_stddev;
   p | initial_cloud_trunc_dev;
   p | initial_cloud_perturb_seed;
@@ -676,6 +680,21 @@ void EnzoConfig::read(Parameters * p) throw()
   ASSERT("EnzoConfig::read()", "Initial:cloud:perturb_seed must be >=0",
 	 init_cloud_perturb_seed_ >= 0);
   initial_cloud_perturb_seed = (unsigned int) init_cloud_perturb_seed_;
+
+  int initial_cloud_uniform_bfield_length = p->list_length
+    ("Initial:cloud:uniform_bfield");
+  if (initial_cloud_uniform_bfield_length == 0){
+    initial_cloud_initialize_uniform_bfield = false;
+  } else if (initial_cloud_uniform_bfield_length == 3){
+    initial_cloud_initialize_uniform_bfield = true;
+    for (int i = 0; i <3; i++){
+      initial_cloud_uniform_bfield[i] = p->list_value_float
+	(i,"Initial:cloud:uniform_bfield");
+    }
+  } else {
+    ERROR("EnzoConfig::read",
+	  "Initial:cloud:uniform_bfield must contain 0 or 3 entries.");
+  }
 
   // Cosmology initialization
   initial_cosmology_temperature = p->value_float("Initial:cosmology:temperature",0.0);
