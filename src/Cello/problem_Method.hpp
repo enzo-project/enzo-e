@@ -32,7 +32,7 @@ public: // interface
     : PUP::able(m),
     schedule_(NULL),
     courant_(1.0),
-    ir_post_(-1)
+    ir_post_(-1),
     neighbor_type_(neighbor_leaf)
 
   { }
