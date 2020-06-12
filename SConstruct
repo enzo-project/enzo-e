@@ -213,7 +213,11 @@ define_papi  =        'CONFIG_USE_PAPI','PAPI3'
 
 # Experimental code defines
 
+<<<<<<< HEAD
 define_new_output   = 'NEW_OUTPUT'
+=======
+define_new_output      = ['NEW_OUTPUT']
+>>>>>>> 7e7272564b95d7c7d7ef7cab1c1a4a6b5af1e2fd
 
 # Debugging defines
 
@@ -354,6 +358,7 @@ if (use_gprof == 1):
      flags_config = flags_config + ' -pg'
 
 if (use_jemalloc == 1):
+<<<<<<< HEAD
    defines.append(define_jemalloc)
 
 if (use_papi != 0):      defines.append( define_papi )
@@ -376,6 +381,30 @@ if (python_lt_27 != 0):  defines.append( define_python_lt_27 )
 if (have_git != 0 or have_mercurial != 0 ):
    defines.append( define_have_version_control )
 if (smp != 0):           defines.append( define_smp )
+=======
+   defines = defines + define_jemalloc
+
+if (use_papi != 0):      defines = defines + define_papi
+if (use_grackle != 0):   defines = defines + define_grackle
+
+if (new_output != 0):    defines = defines + define_new_output
+
+if (trace != 0):         defines = defines + define_trace
+if (verbose != 0):       defines = defines + define_verbose
+if (trace_charm != 0):   defines = defines + define_trace_charm
+if (debug != 0):         defines = defines + define_debug
+if (debug_field != 0):   defines = defines + define_debug_field
+if (debug_field_face != 0): defines = defines + define_debug_field_face
+if (check != 0):         defines = defines + define_check
+if (debug_verbose != 0): defines = defines + define_debug_verbose
+if (memory != 0):        defines = defines + define_memory
+if (new_charm != 0):     defines = defines + define_new_charm
+if (python_lt_27 != 0):  defines = defines + define_python_lt_27
+if (have_git != 0 or have_mercurial != 0 ):defines = defines + define_have_version_control
+
+defines = defines + define_charm
+defines = defines + define_cello
+>>>>>>> 7e7272564b95d7c7d7ef7cab1c1a4a6b5af1e2fd
 
 #======================================================================
 # FINAL CHARM SETUP

@@ -32,9 +32,9 @@ EnzoMethodGrackle::EnzoMethodGrackle
   // Method function that can be called to obtain a list of
   // needed field
 
-  // special container for ensuring colour fields are properly grouped
+  // special container for ensuring color fields are properly grouped
   const int rank = cello::rank();
-  std::vector<std::string> colour_fields;
+  std::vector<std::string> color_fields;
   chemistry_data * grackle_chemistry =
       enzo::config()->method_grackle_chemistry;
 
@@ -46,7 +46,7 @@ EnzoMethodGrackle::EnzoMethodGrackle
 
   if (grackle_chemistry->metal_cooling > 0){
     this->required_fields_.push_back("metal_density");
-    colour_fields.push_back("metal_density");
+    color_fields.push_back("metal_density");
   }
 
   // Define primordial chemistry fields
@@ -56,18 +56,18 @@ EnzoMethodGrackle::EnzoMethodGrackle
                                          "e_density"};
 
     this->required_fields_.insert(this->required_fields_.end(), pc1_fields.begin(), pc1_fields.end());
-    colour_fields.insert(colour_fields.end(), pc1_fields.begin(), pc1_fields.end());
+    color_fields.insert(color_fields.end(), pc1_fields.begin(), pc1_fields.end());
 
     if(grackle_chemistry->primordial_chemistry > 1){
 
       std::vector<std::string> pc2_fields {"HM_density", "H2I_density", "H2II_density"};
       this->required_fields_.insert(this->required_fields_.end(), pc2_fields.begin(), pc2_fields.end());
-      colour_fields.insert(colour_fields.end(), pc2_fields.begin(), pc2_fields.end());
+      color_fields.insert(color_fields.end(), pc2_fields.begin(), pc2_fields.end());
 
       if(grackle_chemistry->primordial_chemistry > 2){
         std::vector<std::string> pc3_fields {"DI_density", "DII_density", "HDI_density"};
         this->required_fields_.insert(this->required_fields_.end(), pc3_fields.begin(), pc3_fields.end());
-        colour_fields.insert(colour_fields.end(), pc3_fields.begin(), pc3_fields.end());
+        color_fields.insert(color_fields.end(), pc3_fields.begin(), pc3_fields.end());
       } // endif primordial_chemistry > 2
     } // endif primordial_chemistry > 1
   } // endif primordial chemistry is on
@@ -80,7 +80,7 @@ EnzoMethodGrackle::EnzoMethodGrackle
 
   // Define fields and assign fields to correct
   this->define_fields();
-  this->define_group_fields(colour_fields, "colour");
+  this->define_group_fields(color_fields, "color");
 
   /// Initialize default Refresh
   cello::simulation()->new_refresh_set_name(ir_post_,name());
