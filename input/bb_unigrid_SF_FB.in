@@ -63,9 +63,9 @@
  }
 
   Group {
-    list = ["colour","derived"];
+    list = ["color","derived"];
 
-    colour {
+    color {
       field_list = ["metal_density"]; # needed for proper advection (should get auto flagged as such if not specified here)
     }
     

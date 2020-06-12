@@ -133,6 +133,7 @@ void OutputData::write_block ( const  Block * block ) throw()
 
   std::string name_dir = expand_name_(&dir_name_,&dir_args_);
 
+
   // Write blocks text file
   std::string name_file;
   std::string name_out_file  = expand_name_(&file_name_,&file_args_);
@@ -141,7 +142,7 @@ void OutputData::write_block ( const  Block * block ) throw()
     // output block list and parameters to work directory
     name_dir  = ".";
     // strip extension, use this for name
-    name_file = name_out_file.substr(0, name_out_file.find("."));
+    name_file = name_out_file.substr(0, name_out_file.rfind("."));
   } else {
     // output block list and parameters to subdirectory
     name_file = name_dir;
@@ -162,15 +163,16 @@ void OutputData::write_block ( const  Block * block ) throw()
   // Contribute to DIR.block_list file
     
   count = (text_block_count_ == 0) ? num_blocks : 0;
-    
+
   sprintf (file,"%s.block_list",name_file.c_str());
   sprintf (dir, "%s",           name_dir.c_str());
   sprintf (line,"%s %s\n",      block->name().c_str(),name_out_file.c_str());
     
-  proxy_main.p_text_file_write(strlen(dir)+1, dir,
-				 strlen(file)+1, file,
-				 strlen(line)+1,line,
-				 count);
+  proxy_main.p_text_file_write(strlen(dir)+1,  dir,
+			       strlen(file)+1, file,
+			       strlen(line)+1, line,
+			       count);
+
     
   // Contribute to DIR.file_list file
 
@@ -182,10 +184,10 @@ void OutputData::write_block ( const  Block * block ) throw()
     sprintf (dir, "%s",          name_dir.c_str());
     sprintf (line,"%s\n",        name_out_file.c_str());
     
-    proxy_main.p_text_file_write(strlen(dir)+1, dir,
-				   strlen(file)+1, file,
-				   strlen(line)+1,line,
-				   count);
+    proxy_main.p_text_file_write(strlen(dir)+1,  dir,
+				 strlen(file)+1, file,
+				 strlen(line)+1, line,
+				 count);
   }    
 
   // Increment block counter

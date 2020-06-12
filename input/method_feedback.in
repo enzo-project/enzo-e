@@ -65,9 +65,9 @@ Field {
 }
 
 Group {
-  list = ["colour","derived"];
+  list = ["color","derived"];
   
-  colour {
+  color {
     field_list = ["metal_density"];
   }
   derived {

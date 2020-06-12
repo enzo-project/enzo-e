@@ -100,13 +100,13 @@ void EnzoMethodStarMaker::rescale_densities(EnzoBlock * enzo_block,
                                             const int index,
                                             const double density_ratio) throw() {
 
-  // Loop through all passive scalars (colour fields)
+  // Loop through all passive scalars (color fields)
   // which are mass fractions stored as densities, and rescale
   // to the new density after star formation.
   //
   // AE: NOTE: Change this routine if / whenever there needs to be
-  //           fraction fields that are not labelled as colour
-  //           Obviously requires these fields to be declared as colour
+  //           fraction fields that are not labelled as color
+  //           Obviously requires these fields to be declared as color
   //           in input file to work.
   //           This can / should likely get moved to be a more general
   //           function of the block / data / field class (one of those)
@@ -117,11 +117,11 @@ void EnzoMethodStarMaker::rescale_densities(EnzoBlock * enzo_block,
   Field field = enzo_block->data()->field();
 
   Grouping * field_groups = field.groups();
-  int nc = field_groups->size("colour");
+  int nc = field_groups->size("color");
 
   for (int ic = 0; ic < nc; ic++){
     enzo_float * cfield = (enzo_float *)
-      field.values(field_groups->item("colour",ic));
+      field.values(field_groups->item("color",ic));
 
     cfield[index] *= density_ratio;
 

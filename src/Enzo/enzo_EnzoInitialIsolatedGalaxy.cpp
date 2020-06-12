@@ -102,7 +102,7 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
   //           but is apparently not - hard coding this for now
   //
   //           This likely means this will need to be done for
-  //           colour fields as well, but maybe that is taken care of
+  //           color fields as well, but maybe that is taken care of
   //           properly
   ParticleDescr * particle_descr = cello::particle_descr();
   if (this-stellar_disk_ || this->stellar_bulge_)
