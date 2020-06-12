@@ -268,7 +268,6 @@ void EnzoConfig::pup (PUP::er &p)
 {
 
   Config::pup(p);
-
   TRACEPUP;
 
   // NOTE: change this function whenever attributes change

@@ -21,7 +21,7 @@ MethodFluxCorrect::MethodFluxCorrect (std::string group) throw()
   Refresh * refresh_post = cello::refresh(ir_post_);
   refresh_post->add_all_fields();
 
-  ir_pre_ = add_new_refresh_();
+  ir_pre_ = add_new_refresh_(neighbor_flux);
   Refresh * refresh_pre = cello::refresh(ir_pre_);
   refresh_pre->set_callback(CkIndex_Block::p_method_flux_correct_refresh());
   refresh_pre->add_all_fields();
@@ -59,8 +59,12 @@ void MethodFluxCorrect::compute_continue_refresh( Block * block ) throw()
 
   int precision = field.precision (field.field_id("density"));
 
-  union {  char * d_c; float * d_s; double * d_d; long double * d_q; };
-
+  union {
+    char        * d_c;
+    float       * d_s;
+    double      * d_d;
+    long double * d_q;
+  };
   
   d_c  = field.values("density");
 
@@ -97,12 +101,12 @@ void MethodFluxCorrect::compute_continue_refresh( Block * block ) throw()
     }
   }
 
-  // scale by relative mesh width
+  // scale by relative mesh cell volume/area
   const int w = (1 << block->level())*rank;
   reduce[1] /= w;
 
-  CkCallback callback(CkIndex_Block::r_method_flux_correct_sum_fields(NULL), 
-		      block->proxy_array());
+  CkCallback callback (CkIndex_Block::r_method_flux_correct_sum_fields(NULL), 
+                       block->proxy_array());
 
   block->contribute
     (2*sizeof(long double), &reduce, sum_long_double_n_type, callback);
@@ -149,21 +153,17 @@ void MethodFluxCorrect::compute_continue_sum_fields
     // Loop over neighbors in different levels
 
     // ... only include facet neighbors, not edges or corners
-    const int min_face_rank = rank - 1;
-    Index index = block->index();
-    int neighbor_type = neighbor_flux;
-    int min_level = 0;
-    int root_level = 0;
-    ItNeighbor it_neighbor = block->it_neighbor
-      (min_face_rank,index, neighbor_type,min_level,root_level);
+
+    ItNeighbor it_neighbor =
+      block->it_neighbor (cello::rank() - 1,block->index(), neighbor_flux);
     
     Grouping * groups = cello::field_groups();
     int ng=groups->size(group_);
-    int of3[3];
+    
     // Loop over each face with a level jump
+    int of3[3];
     while (it_neighbor.next(of3)) {
       Index index_neighbor = it_neighbor.index();
-
       for (int ig=0; ig<ng; ig++) {
         std::string field_name = groups->item(group_,ig);
       }

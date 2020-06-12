@@ -13,7 +13,8 @@ double Method::courant_global = 1.0;
 
 Method::Method (double courant) throw()
   : schedule_(NULL),
-    courant_(courant)
+    courant_(courant),
+    neighbor_type_(neighbor_leaf)
 {
   ir_post_ = add_new_refresh_();
   cello::refresh(ir_post_)->set_callback(CkIndex_Block::p_compute_continue());
@@ -35,6 +36,7 @@ void Method::pup (PUP::er &p)
   p | schedule_; // pupable
   p | courant_;
   p | ir_post_;
+  p | neighbor_type_;
   p | required_fields_; // std::vector<str> required fields
   p | field_centering_; // std::map<std::string, std::array<int,3>>
 
@@ -42,7 +44,7 @@ void Method::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-int Method::add_new_refresh_ ()
+int Method::add_new_refresh_ (int neighbor_type)
 {
   // set Method::ir_post_
 
@@ -51,7 +53,7 @@ int Method::add_new_refresh_ ()
 
   // Set default refresh object
   Refresh refresh_default
-    (ghost_depth,min_face_rank, neighbor_leaf, sync_neighbor, 0);
+    (ghost_depth,min_face_rank, neighbor_type, sync_neighbor, 0);
 
   return cello::simulation()->new_register_refresh(refresh_default);
 }

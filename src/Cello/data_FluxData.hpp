@@ -16,87 +16,124 @@ class FluxData {
 
 public: // interface
 
+  //  friend FaceFluxes;
   /// Create an empty FluxData() object
 
   FluxData()
-    : face_flux_map_()
-  { }
+  {
+    
+    face_fluxes_block_.resize(27);
+    face_fluxes_neighbor_.resize(27);
+    std::fill_n(&face_fluxes_block_[0],27,nullptr);
+    std::fill_n(&face_fluxes_neighbor_[0],27,nullptr);
+  }
 
-  /// Insert the given FaceFluxes object into the FluxData. Must be
-  /// dynamically allocated, and responsibility for deleting
-  /// face_fluxes is transfered to the FluxData object.
+  virtual ~FluxData()
+  {
+    for (int i=0; i<27; i++) {
+      delete face_fluxes_block_[i];
+      delete face_fluxes_neighbor_[i];
+      face_fluxes_block_[i] = nullptr;
+      face_fluxes_neighbor_[i] = nullptr;
+    }
+  }
 
+  FluxData( const FluxData & fd )
+  {
+    face_fluxes_block_.resize(27);
+    face_fluxes_neighbor_.resize(27);
+    // deep-copy fd
+    for (int i=0; i<27; i++) {
+      if (fd.fluxes_block(i) != nullptr)
+        face_fluxes_block_[i] = new FaceFluxes(*fd.fluxes_block(i));
+      if (fd.fluxes_neighbor(i) != nullptr)
+        face_fluxes_neighbor_[i] = new FaceFluxes(*fd.fluxes_neighbor(i));
+    }
+  }
+    
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   {
     TRACEPUP;
     // NOTE: change this function whenever attributes change
 
-    //p | face_flux_map_;
+    const bool pk = p.isPacking();
 
-  }
-
-  /// Insert the FaceFluxes object indexed by face
-  
-  void insert_fluxes(Face face, FaceFluxes * face_fluxes)
-  {
-    auto it = face_flux_map_.find(face);
-    if (it == face_flux_map_.end()) {
-      face_flux_map_.insert
-        (std::pair<Face,FaceFluxes*>(face,face_fluxes));
+    int n;
+    if (pk) {
+      n=face_fluxes_block_.size();
+      for (int i=0; i<n; i++) {
+        ASSERT2("FluxData::pup()",
+                "face_fluxes_block_ should be empty but [%d] = %p",
+                i,face_fluxes_block_[i],
+                (face_fluxes_block_[i] == nullptr));
+      }
+      n=face_fluxes_neighbor_.size();
+      // should be empty
+      for (int i=0; i<n; i++) {
+        ASSERT2("FluxData::pup()",
+                "face_fluxes_neighbor_ should be empty but [%d] = %p",
+                i,face_fluxes_neighbor_[i],
+                (face_fluxes_neighbor_[i] == nullptr));
+      }
     }
   }
+  /// Return the block's ith flux data object
+  FaceFluxes * fluxes_block (int i)
+  { return face_fluxes_block_[i]; }
+  const FaceFluxes * fluxes_block (int i) const
+  { return face_fluxes_block_[i]; }
 
-  /// Remove the FaceFluxes object indexd by face from the FluxData object,
-  /// but do not delete it.
-
-  void remove_fluxes(Face face, FaceFluxes * face_fluxes)
+  /// Return the block's fluxes for the given face
+  FaceFluxes * fluxes_block (int ix, int iy, int iz)
   {
-    auto it = face_flux_map_.find(face);
-    if (it != face_flux_map_.end()) {
-      face_flux_map_.erase(it);
-    }
+    const int i = ++ix+3*(++iy+3*++iz);
+    return face_fluxes_block_[i];
   }
 
-  /// Remove the FaceFluxes object indexed by face from the FluxData
-  /// object and delete it.
+  /// Return the neighbor block's ith flux data object
+  FaceFluxes * fluxes_neighbor (int i)
+  { return face_fluxes_neighbor_[i]; }
+  const FaceFluxes * fluxes_neighbor (int i) const
+  { return face_fluxes_neighbor_[i]; }
 
-  void delete_fluxes(Face face, FaceFluxes * face_fluxes)
+  /// Return the neighbor block's fluxes for the given face
+  FaceFluxes * fluxes_neighbor (int ix, int iy, int iz)
   {
-    auto it = face_flux_map_.find(face);
-    if (it != face_flux_map_.end()) {
-      face_flux_map_.erase(it);
-      delete it->second;
-    }
+    const int i = ++ix+3*(++iy+3*++iz);
+    return face_fluxes_neighbor_[i]; 
   }
 
-  /// Return the FaceFluxes object for the given Face, Block index,
-  /// and Field index. Block index must match one of defining Block
-  /// indices for Face.
-
-  FaceFluxes face_fluxes (Face face, Index index_block, int index_field)
+  /// Set the block's fluxes for the given face
+  void set_fluxes_block (FaceFluxes * fluxes, int ix, int iy, int iz)
   {
-    auto it = face_flux_map_.find(face);
-    if (it != face_flux_map_.end()) {
-      return *it->second;
-    }
+    const int i = ++ix+3*(++iy+3*++iz);
+    delete face_fluxes_block_[i];
+    face_fluxes_block_[i] = fluxes;
   }
 
-  /// Return the number of FaceFluxes in the FluxData object.
-  size_t num_face_fluxes()
+  /// Set the block's fluxes for the given face
+  void set_fluxes_neighbor (FaceFluxes * fluxes, int ix, int iy, int iz)
   {
-    return face_flux_map_.size();
+    const int i = ++ix+3*(++iy+3*++iz);
+    delete face_fluxes_neighbor_[i];
+    face_fluxes_neighbor_[i] = fluxes; 
   }
 
-  /// Return the ith FaceFluxes object.
-  FaceFluxes * face_fluxes (int n)
+  /// Delete the block's face fluxes object for the given face
+  void delete_fluxes_block (int ix, int iy, int iz)
   {
-    std::map<Face, FaceFluxes * >::iterator it;
-    for (it=face_flux_map_.begin() ;
-           (it != face_flux_map_.end()) && --n>=0;
-           it++)
-      ;
-    return it == face_flux_map_.end() ? nullptr : it->second;
+    const int i = ++ix+3*(++iy+3*++iz);
+    delete face_fluxes_block_[i];
+    face_fluxes_block_[i] = nullptr;
+  }
+
+  /// Delete the block's face fluxes object for the given face
+  void delete_fluxes_neighbor (int ix, int iy, int iz)
+  {
+    const int i = ++ix+3*(++iy+3*++iz);
+    delete face_fluxes_neighbor_[i];
+    face_fluxes_neighbor_[i] = nullptr;
   }
 
   //--------------------------------------------------
@@ -123,8 +160,11 @@ private: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
-  /// FaceFluxes indexed by Face objects
-  std::map<Face, FaceFluxes * > face_flux_map_;
+  /// Face fluxes for this block on each face
+  std::vector<FaceFluxes *> face_fluxes_block_;
+  
+  /// Face fluxes for neighboring blocks on each face
+  std::vector<FaceFluxes *> face_fluxes_neighbor_;
 };
 
 #endif /* DATA_FLUX_DATA_HPP */

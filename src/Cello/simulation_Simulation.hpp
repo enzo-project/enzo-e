@@ -336,14 +336,14 @@ public: // virtual functions
 
   int get_solver_num_iter(int is)
   {
-    if (num_solver_iter_.size() < is+1) {
+    if (num_solver_iter_.size() < size_t(is+1)) {
       num_solver_iter_.resize(is+1);
     }
     return num_solver_iter_[is];
   }
   int get_solver_max_iter(int is)
   {
-    if (max_solver_iter_.size() < is+1) {
+    if (max_solver_iter_.size() < size_t(is+1)) {
       max_solver_iter_.resize(is+1);
     }
     return max_solver_iter_[is];

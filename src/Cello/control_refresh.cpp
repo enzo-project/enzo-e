@@ -248,6 +248,7 @@ int Block::refresh_load_particle_faces_ (Refresh * refresh)
 
   return nl;
 }
+
 //----------------------------------------------------------------------
 
 void Block::particle_send_
