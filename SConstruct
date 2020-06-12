@@ -369,7 +369,6 @@ if (check != 0):         defines.append( define_check )
 if (debug_verbose != 0): defines.append( define_debug_verbose )
 if (memory != 0):        defines.append( define_memory )
 if (new_charm != 0):     defines.append( define_new_charm )
-if (new_ppm != 0):       defines.append( define_new_ppm )
 if (python_lt_27 != 0):  defines.append( define_python_lt_27 )
 if (have_git != 0 or have_mercurial != 0 ):
    defines.append( define_have_version_control )

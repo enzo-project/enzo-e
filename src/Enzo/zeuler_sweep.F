@@ -24,9 +24,7 @@ c
      &     eslice, uslice, vslice, wslice,
      &     df, ef, uf, vf,
      &     wf, grslice, geslice, gef,
-#ifdef NEW_PPM
      &     ges,
-#endif      
      &     colslice, colf, colls, colrs
      &     )
 c     
@@ -138,9 +136,7 @@ c
      &        windex(nsubgrids*6),geindex(nsubgrids*6),
      &        colindex(nsubgrids*6,ncolor)
       ENZO_REAL    array(1), colorpt(1)
-#ifdef NEW_PPM
       integer iriemannfallback
-#endif      
 c
 c  define local slices (passed as temps)
 c
@@ -152,9 +148,7 @@ c
      &     diffcoef(kn,in), dslice(kn,in), eslice(kn,in),
      &       uslice(kn,in), vslice(kn,in), wslice(kn,in),
      &     geslice(kn,in),    gef(kn,in)
-#ifdef NEW_PPM
       ENZO_REAL ges(kn,in)
-#endif      
       ENZO_REAL gels(kn,in),   gers(kn,in),
      &     df(kn,in),     ef(kn,in),grslice(kn,in),
      &     uf(kn,in),     vf(kn,in),     wf(kn,in)
@@ -216,20 +210,12 @@ c
 c  Compute the pressure on a slice
 c
       if (idual .eq. 1) then
-#ifdef NEW_PPM
-         call pgas2d_dual_dev(
-#else
          call pgas2d_dual(
-#endif
      &        dslice, eslice, geslice, pslice, 
      &        uslice, vslice, wslice, eta1, eta2,
      &        kn, in, ks-3, ke+3, i1, i2, gamma, pmin)
       else
-#ifdef NEW_PPM
-         call pgas2d_dev(
-#else
          call pgas2d(
-#endif
      &        dslice, eslice, pslice, uslice, vslice, wslice,
      &        kn, in, ks-3, ke+3, i1, i2, gamma, pmin)
       endif
@@ -237,11 +223,7 @@ c
 c  If requested, compute diffusion and slope flattening coefficients
 c
       if (idiff .ne. 0 .or. iflatten .ne. 0)
-#ifdef NEW_PPM
-     &     call calcdiss_dev(
-#else
      &     call calcdiss(
-#endif
      &     dslice, eslice, uslice, u, v, pslice, dz, dx, dy,
      &     kn, in, jn, ks, ke, i1, i2, j, nyz, zsweep,
      &     in, jn, kn, dt, gamma, idiff, iflatten,
@@ -250,18 +232,12 @@ c
 c     
 c  Compute Eulerian left and right states at zone edges via interpolation
 c
-#ifdef NEW_PPM      
-      call inteuler_dev(
-#else
       call inteuler(
-#endif      
      &     dslice, pslice, gravity, grslice, geslice,
      &     uslice, vslice, wslice, dz, flatten,
      &     kn, in, ks, ke, i1, i2, idual, eta1, eta2,
      &     isteepen, iflatten,
-#ifdef NEW_PPM      
      &     iconsrec, iposrec,
-#endif      
      &     dt, gamma, ipresfree,
      &     dls, drs, pls, prs, gels, gers,
      &     uls, urs, vls, vrs, wls, wrs,
@@ -270,11 +246,7 @@ c
 c
 c  Compute (Lagrangian part of the) Riemann problem at each zone boundary
 c
-#ifdef NEW_PPM
-      call twoshock_dev
-#else
       call twoshock
-#endif
      &     (
      &            dls, drs, pls, prs, uls, urs, 
      &            kn, in, ks, ke+1, i1, i2, 
@@ -282,11 +254,10 @@ c
      &            pbar, ubar, gravity, grslice, idual, eta1
      &             )
 
-#ifdef NEW_PPM
 
       iriemannfallback = 1
       
-      CALL flux_twoshock_dev (
+      CALL flux_twoshock (
      &     dslice, eslice, geslice, uslice, vslice, wslice,
      &     dz, diffcoef, 
      &     kn,in,
@@ -297,38 +268,21 @@ c
      &     vls, vrs, wls, wrs, pbar, ubar,
      &     df, ef, uf, vf, wf, gef, ges,
      &     ncolor, colslice, colls, colrs, colf)
-#endif                                
 c
 c  Compute Eulerian fluxes and update zones-centered quantities
 c
-#ifdef NEW_PPM      
-      call euler_dev   (
-#else
       call euler   (
-#endif
      &     dslice, eslice, grslice, geslice,
      &     uslice, vslice, wslice, dz, diffcoef,
      &     kn, in, ks, ke, i1, i2, dt, 
      &     gamma, idiff, gravity, idual, eta1, eta2,
-#ifdef NEW_PPM
      &     df, ef, uf, vf, wf, gef, ges,
      &     ncolor, colslice, colf, SmallRho)
-#else
-     &     dls, drs, pls, prs, gels, gers,
-     &     uls, urs, vls, vrs, wls, wrs,
-     &     pbar, ubar,
-     &     df, ef, uf, vf, wf, gef,
-     &     ncolor, colslice, colls, colrs, colf)
-#endif
 c     
 c  If necessary, recompute the pressure to correctly set ge and e
 c
       if (idual .eq. 1)
-#ifdef NEW_PPM
-     &     call pgas2d_dual_dev
-#else
      &     call pgas2d_dual
-#endif
      &     (dslice, eslice, geslice, pslice, 
      &     uslice, vslice, wslice, eta1, eta2,
      &     kn, in, ks-3, ke+3, i1, i2, gamma, pmin)

@@ -134,6 +134,9 @@ public: // interface
   Method * method(size_t i) const throw() 
   { return (i < method_list_.size()) ? method_list_[i] : NULL; }
 
+  /// Return the named method object if present
+  Method * method (std::string name) const throw();
+
   /// Return the prolong object
   Prolong * prolong() const throw()  { return prolong_; }
 
