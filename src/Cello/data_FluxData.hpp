@@ -20,6 +20,9 @@ public: // interface
   /// Create an empty FluxData() object
 
   FluxData()
+    : block_fluxes_(),
+      neighbor_fluxes_(),
+      field_list_()
   {
   }
 
@@ -47,7 +50,6 @@ public: // interface
         neighbor_fluxes_[i] = new FaceFluxes(*fd.neighbor_fluxes(i));
     }
     field_list_ = fd.field_list_;
-    field_index_map_ = fd.field_index_map_;
   }
     
   /// CHARM++ Pack / Unpack function
@@ -77,30 +79,8 @@ public: // interface
       }
     }
     p | field_list_;
-    p | field_index_map_;
   }
   
-  /// Return the block's ith flux data object
-  FaceFluxes * block_fluxes (int i)
-  {
-    return block_fluxes_[i]; }
-  
-  const FaceFluxes * block_fluxes (int i) const
-  { return block_fluxes_[i]; }
-
-  /// Return the block's fluxes for the given face
-  FaceFluxes * block_fluxes (int axis, int face, int index_field)
-  {
-    auto it = field_index_map_.find(index_field);
-    if (it != field_index_map_.end()) {
-      const int i_f = field_index_map_[index_field];
-      const int i = index_ (axis,face,i_f);
-      return block_fluxes_[i];
-    } else {
-      return nullptr;
-    }
-  }
-
   /// Allocate all facet fluxes for all fields
   void allocate
   (int nx, int ny, int nz,
@@ -110,75 +90,90 @@ public: // interface
    std::vector<int> * cy_list=nullptr,
    std::vector<int> * cz_list=nullptr);
                  
+  /// Return the block's ith flux data object
+  FaceFluxes * block_fluxes (int i)
+  {
+    return (0 <= i && i < block_fluxes_.size()) ?
+      block_fluxes_[i] : nullptr;
+  }
+  
+  const FaceFluxes * block_fluxes (int i) const
+  {
+    return (0 <= i && i < block_fluxes_.size()) ?
+      block_fluxes_[i] : nullptr;
+  }
+
+  /// Return the block's fluxes for the given face
+  FaceFluxes * block_fluxes (int axis, int face, int i_f)
+  {  return block_fluxes(index_ (axis,face,i_f)); }
+
   /// Return the neighbor block's ith flux data object
   FaceFluxes * neighbor_fluxes (int i)
-  { return neighbor_fluxes_[i]; }
+  {
+    return (0 <= i && i < neighbor_fluxes_.size()) ?
+      neighbor_fluxes_[i] : nullptr;
+  }
   const FaceFluxes * neighbor_fluxes (int i) const
-  { return neighbor_fluxes_[i]; }
+  {
+    return (0 <= i && i < neighbor_fluxes_.size()) ?
+      neighbor_fluxes_[i] : nullptr;
+  }
 
   /// Return the neighbor block's fluxes for the given face
-  FaceFluxes * neighbor_fluxes (int axis, int face, int index_field)
-  {
-    auto it = field_index_map_.find(index_field);
-    if (it != field_index_map_.end()) {
-      const int i_f = field_index_map_[index_field];
-      const int i = index_ (axis,face,i_f);
-      return neighbor_fluxes_[i];
-    } else {
-      return nullptr;
-    }
-  }
+  FaceFluxes * neighbor_fluxes (int axis, int face, int i_f)
+  { return neighbor_fluxes(index_(axis,face,i_f)); }
 
   /// Set the block's fluxes for the given face
   void set_block_fluxes
-  (FaceFluxes * fluxes, int axis, int face, int index_field)
+  (FaceFluxes * fluxes, int axis, int face, int i_f)
+  { set_block_fluxes(fluxes,index_(axis,face,i_f)); }
+
+  void set_block_fluxes (FaceFluxes * fluxes, int i)
   {
-    auto it = field_index_map_.find(index_field);
-    if (it != field_index_map_.end()) {
-      const int i_f = field_index_map_[index_field];
-      const int i = index_ (axis,face,i_f);
-      block_fluxes_[i] = fluxes;
-    }
+    ASSERT2 ("FluxData::set_block_fluxes",
+             "Trying to assign to block_fluxes_[%d] vector of size %ud",
+             i,block_fluxes_.size(),
+             (0 <= i && i < block_fluxes_.size()));
+    block_fluxes_[i] = fluxes;
   }
 
   /// Set the block's fluxes for the given face
   void set_neighbor_fluxes
-  (FaceFluxes * fluxes, int axis, int face, int index_field)
+  (FaceFluxes * fluxes, int axis, int face, int i_f)
+  { set_neighbor_fluxes(fluxes,index_(axis,face,i_f)); }
+
+  void set_neighbor_fluxes (FaceFluxes * fluxes, int i)
   {
-    auto it = field_index_map_.find(index_field);
-    if (it != field_index_map_.end()) {
-      const int i_f = field_index_map_[index_field];
-      const int i = index_ (axis,face,i_f);
-      neighbor_fluxes_[i] = fluxes;
-    }
+    ASSERT2 ("FluxData::set_neighbor_fluxes",
+             "Trying to assign to neighbor_fluxes_[%d] vector of size %ud",
+             i,neighbor_fluxes_.size(),
+             (0 <= i && i < neighbor_fluxes_.size()));
+    neighbor_fluxes_[i] = fluxes;
   }
 
   /// Delete the block's face fluxes object for the given face
-  void delete_block_fluxes (int axis, int face, int index_field)
+  void delete_block_fluxes (int axis, int face, int i_f)
   {
-    auto it = field_index_map_.find(index_field);
-    if (it != field_index_map_.end()) {
-      const int i_f = field_index_map_[index_field];
-      const int i = index_ (axis,face,i_f);
-      delete block_fluxes_[i];
-      block_fluxes_[i] = nullptr;
-    }
+    const int i = index_ (axis,face,i_f);
+    delete block_fluxes(i);
+    block_fluxes_[i] = nullptr;
   }
 
   /// Delete the block's face fluxes object for the given face
-  void delete_neighbor_fluxes (int axis, int face, int index_field)
+  void delete_neighbor_fluxes (int axis, int face, int i_f)
   {
-    auto it = field_index_map_.find(index_field);
-    if (it != field_index_map_.end()) {
-      const int i_f = field_index_map_[index_field];
-      const int i = index_ (axis,face,i_f);
-      delete neighbor_fluxes_[i];
-      neighbor_fluxes_[i] = nullptr;
-    }
+    const int i = index_ (axis,face,i_f);
+    delete neighbor_fluxes(i);
+    neighbor_fluxes_[i] = nullptr;
   }
 
-  int field_index (int index_field)
-  { return field_index_map_[index_field]; }
+  int index_field (int i_f) const
+  {
+    return (0 <= i_f && i_f < field_list_.size()) ?
+      field_list_[i_f] : -1; }
+
+  int num_fields () const
+  { return field_list_.size(); }
 
   //--------------------------------------------------
 
@@ -199,6 +194,7 @@ public: // interface
 
 private: // functions
 
+  /// Index for fluxes in block_fluxes_ and neighbor_fluxes_ vectors
   inline int index_ (int axis, int face, int i_f)
   { return axis + 3*(face + 2*i_f); }
 private: // attributes
@@ -213,9 +209,6 @@ private: // attributes
 
   /// List of field indices for fluxes
   std::vector<int> field_list_;
-
-  /// Map of field indices for fluxes (inverse of field_list_)
-  std::map<int,int> field_index_map_;
 
 };
 

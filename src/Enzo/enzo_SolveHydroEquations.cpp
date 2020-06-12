@@ -178,31 +178,13 @@ int EnzoBlock::SolveHydroEquations
   }
   flux_data->allocate (nx,ny,nz,this->level(),dt,field_list);
   
-  std::vector<double> flux_array[3][2][nf];
-
-  for (int i_f=0; i_f <nf; i_f++) {
-    const int index_field = field_list[i_f];
-    for (int axis=0; axis<rank; axis++) {
-      for (int face=0; face<2; face++) {
-        int mx,my,mz;
-        int dx,dy,dz;
-        FaceFluxes * ff = flux_data->block_fluxes(axis,face,index_field);
-        ff->get_dimensions(&mx,&my,&mz);
-        flux_array[axis][face][i_f] = ff->flux_array(&dx,&dy,&dz);
-      }
-    }
-  }
-
-  //==================================================
-
   enzo_float * standard = temp;
 
   // int l3[3] = {gx,gy,gz};
   // int u3[3] = {mx-gx,my-gy,mz-gz};
   int l3[3] = {gx,gy,gz};
   int u3[3] = {mx-gx-1,my-gy-1,mz-gz-1};
-  for (int i_f=0; i_f<nf; i_f++) {
-
+  for (int i_f=0; i_f <nf; i_f++) {
     int * flux_index = 0;
     std::string field_name = field_names[i_f];
     
@@ -214,7 +196,6 @@ int EnzoBlock::SolveHydroEquations
     if (field_name == "internal_energy") flux_index = geindex;
     
     for (int axis=0; axis<rank; axis++) {
-    
       leftface[axis] = l3[axis];
       rightface[axis] = u3[axis];
 
@@ -224,32 +205,15 @@ int EnzoBlock::SolveHydroEquations
       jstart[axis] = l3[axis_j];
       iend[axis] = u3[axis_i];
       jend[axis] = u3[axis_j];
-
-      for (int face = 0; face < 2; face++) {
-        flux_index[axis*2+face] =
-          ( ( enzo_float * ) flux_array[axis][face][i_f].data()) - standard;
-      }
-    }
-  }
-
-  int n3[3] = {nx,ny,nz};
-  for (int i_f=0; i_f<nf; i_f++) {
-    for (int axis=0; axis<rank; axis++) {
-      const int n1 = n3[(axis+1)%3];
-      const int n2 = n3[(axis+2)%3];
       for (int face=0; face<2; face++) {
-        auto & fa = flux_array[axis][face][i_f];
-        double sumabs=0.0;
-        for (int i1=0; i1<n1; i1++) {
-          for (int i2=0; i2<n2; i2++) {
-            const int i = i1 + n1*i2;
-            sumabs += std::abs(fa[i]);
-          }
-        }
+        FaceFluxes * ff_b = flux_data->block_fluxes(axis,face,i_f);
+        int dx,dy,dz;
+        flux_index[axis*2+face] =
+          ((double *)ff_b->flux_array(&dx,&dy,&dz).data()) - standard;
       }
     }
   }
-  
+
 #endif    
 
   //==================================================
@@ -328,19 +292,20 @@ int EnzoBlock::SolveHydroEquations
 
 #ifdef NEW_FLUX  
 #ifdef DEBUG_NEW_FLUX
+  const int n3[3] = {nx,ny,nz};
   for (int i_f=0; i_f<nf; i_f++) {
     for (int axis=0; axis<rank; axis++) {
       const int n1 = n3[(axis+1)%3];
       const int n2 = n3[(axis+2)%3];
       for (int face=0; face<2; face++) {
-        auto & fa = flux_array[axis][face][i_f];
-        double sumabs=0.0;
+        FaceFluxes * ff_b = flux_data->block_fluxes(axis,face,i_f);
+        int dx,dy,dz;
+        double * fa = ff_b->flux_array(&dx,&dy,&dz).data();
         for (int i2=0; i2<n2; i2++) {
           for (int i1=0; i1<n1; i1++) {
             const int i = i1 + n1*i2;
-            CkPrintf ("DEBUG_FLUX %s  %d %d %d  (%d %d) %g\n",
+            CkPrintf ("DEBUG_FLUX %s SolveHydroEquations %d %d %d  (%d %d) %g\n",
                       name().c_str(),axis,face,i_f,i1,i2,fa[i]);
-            sumabs += std::abs(fa[i]);
           }
         }
       }

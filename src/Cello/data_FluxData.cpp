@@ -20,9 +20,9 @@ void FluxData::allocate
   std::vector<int> * cz_list)
 {
   field_list_ = field_list;
-  int n_f = field_list.size();
-  block_fluxes_.resize(6*n_f,nullptr);
-  neighbor_fluxes_.resize(6*n_f,nullptr);
+  int nf = field_list.size();
+  block_fluxes_.resize(6*nf,nullptr);
+  neighbor_fluxes_.resize(6*nf,nullptr);
 
   const int ixm = -1;
   const int ixp = +1;
@@ -35,11 +35,9 @@ void FluxData::allocate
   const int ry32[3][2] = { { 0,  0}, {-1, +1}, {0,  0} };
   const int rz32[3][2] = { { 0,  0},  {0, 0}, {-1, +1} };
   
-  for (int i_f=0; i_f<n_f; i_f++) {
+  for (int i_f=0; i_f<nf; i_f++) {
         
     const int index_field = field_list[i_f];
-
-    field_index_map_[index_field] = i_f;
 
     const int cx = cx_list ? (*cx_list)[i_f] : 0;
     const int cy = cy_list ? (*cy_list)[i_f] : 0;
@@ -88,8 +86,6 @@ int FluxData::data_size () const
     size += sizeof(int);
     size += n;
   }
-
-  // field_list_ (field map constructed from list)
 
   size += sizeof(int);
   const int n = (field_list_.size());
@@ -184,13 +180,12 @@ char * FluxData::load_data (char * buffer)
     }
   }
 
-  // field_list_ (and reconstruct field_index_map_)
+  // field_list_
 
   int n = (*pi++);
   field_list_.resize(n);
   for (int i=0; i<field_list_.size(); i++) {
     field_list_[i] = (*pi++);
-    field_index_map_[field_list_[i]] = i;
   }
 
   ASSERT2("FluxData::load_data()",

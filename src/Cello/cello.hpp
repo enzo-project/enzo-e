@@ -138,6 +138,16 @@ enum precision_enum {
 };
 typedef int precision_type;
 
+#ifdef CONFIG_PRECISION_SINGLE
+   typedef float       cello_float;
+#elif  CONFIG_PRECISION_DOUBLE
+   typedef double      cello_float;
+#elif  CONFIG_PRECISION_QUAD
+   typedef long double cello_float;
+#else
+#  error "Must define one of CONFIG_PRECISION_[SINGLE|DOUBLE|QUAD]"
+#endif
+
 /// @enum type_enum
 /// @brief list of known scalar types, including ints as well as floats, used for Field types and Particle attributes
 enum type_enum {

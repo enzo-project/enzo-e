@@ -67,7 +67,7 @@ void FaceFluxes::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void FaceFluxes::set_flux_array ( std::vector<double> array,
+void FaceFluxes::set_flux_array ( std::vector<cello_float> array,
                                   int dx, int dy, int dz)
 {
   int mx,my,mz;
@@ -99,7 +99,7 @@ void FaceFluxes::set_flux_array ( std::vector<double> array,
   
 //----------------------------------------------------------------------
 
-std::vector<double> & FaceFluxes::flux_array (int * dx, int * dy, int *dz)
+std::vector<cello_float> & FaceFluxes::flux_array (int * dx, int * dy, int *dz)
 {
   int mx,my,mz;
   get_dimensions(&mx,&my,&mz);
@@ -137,7 +137,7 @@ float ratio_time_step (const FaceFluxes & ff_1, const FaceFluxes & ff_2)
 
 void FaceFluxes::coarsen ()
 {
-  std::vector<double> fluxes_fine = fluxes_;
+  std::vector<cello_float> fluxes_fine = fluxes_;
   int mxf,myf,mzf;
   get_dimensions(&mxf,&myf,&mzf);
   // not correct??  need nxf/2 for ghost and centering
@@ -266,9 +266,9 @@ int FaceFluxes::data_size () const
   int size = 0;
 
   size += face_.data_size();
-  size += sizeof(int);    // std::vector<double> fluxes_;
+  size += sizeof(int);    // std::vector<cello_float> fluxes_;
   int n = fluxes_.size();
-  size += n*sizeof(double);
+  size += n*sizeof(cello_float);
   size += sizeof(int);    // int level_block_;
   size += sizeof(int);    // int level_neighbor_;
   size += sizeof(double);    // double dt_block_;
@@ -291,6 +291,7 @@ char * FaceFluxes::save_data (char * buffer) const
     int  * pi;
     char * pc;
     double * pd;
+    cello_float * pcf;
   };
 
   pc = (char *) buffer;
@@ -299,7 +300,7 @@ char * FaceFluxes::save_data (char * buffer) const
   int n = fluxes_.size();
   (*pi++) = n;
   for (int i=0; i<n; i++) {
-    (*pd++) = fluxes_[i];
+    (*pcf++) = fluxes_[i];
   }
   (*pi++) = level_block_;
   (*pi++) = level_neighbor_;
@@ -332,6 +333,7 @@ char * FaceFluxes::load_data (char * buffer)
     int  * pi;
     char * pc;
     double * pd;
+    cello_float * pcf;
   };
 
   pc = (char *) buffer;
@@ -340,7 +342,7 @@ char * FaceFluxes::load_data (char * buffer)
   int n = (*pi++);
   fluxes_.resize(n);
   for (int i=0; i<n; i++) {
-    fluxes_[i] = (*pd++);
+    fluxes_[i] = (*pcf++);
   }
   level_block_ = (*pi++);
   level_neighbor_ = (*pi++);

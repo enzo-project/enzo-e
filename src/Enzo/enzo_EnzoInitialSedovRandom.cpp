@@ -187,7 +187,13 @@ void EnzoInitialSedovRandom::enforce_block
   // debugging
   // max_blasts_ = 1;
 
-  int rn_array[kxp][kyp][kzp][max_blasts_+1];
+  // Was [kxp][kyp][kzp][max_blasts_+1]; reverting to
+  // single-dimensional dynamic array to avoid violating ISO C++
+  // forbidding variable length arrays
+
+#define INDEX_RN(ix,iy,iz,ib) ((ix) + kxp*((iy) + kyp*((iz) + kzp*(ib))))
+
+  int * rn_array = new int [kxp*kyp*kzp*(max_blasts_+1)];
 
   int alternate = 0;
 
@@ -209,13 +215,13 @@ void EnzoInitialSedovRandom::enforce_block
           rnum = 0;
         }
 
-        rn_array[ix][iy][iz][0] = rnum;
+        rn_array[INDEX_RN(ix,iy,iz,0)] = rnum;
 
         // debugging
         // std::cout << "rnum: " << rnum << "\n";
 
         for(int rnbeg = 1; rnbeg<=rnum; rnbeg++){
-          rn_array[ix][iy][iz][rnbeg] = rand_te_mult(rd);  // adding te multiplier
+          rn_array[INDEX_RN(ix,iy,iz,rnbeg)] = rand_te_mult(rd);  // adding te multiplier
         }
 
         alternate++;
@@ -246,7 +252,7 @@ void EnzoInitialSedovRandom::enforce_block
 
         // so now (xc, yc, zc) is set to center of block
 
-        int blasts_current_box = rn_array[kx][ky][kz][0];
+        int blasts_current_box = rn_array[INDEX_RN(kx,ky,kz,0)];
 
         for (int blast_num = 1; blast_num <= blasts_current_box; blast_num++){
 
@@ -288,7 +294,10 @@ void EnzoInitialSedovRandom::enforce_block
                 int i = INDEX(ix,iy,iz,mx,my);
 
                 if (r2 < sedov_radius_2) {
-                  te[i] = pow(2,rn_array[kx][kz][ky][blast_num]) * sedov_te_in;
+                  // NOTE: indexing was previously kx,kz,ky, assuming
+                  // that was incorrect
+                  te[i] = pow(2,rn_array[INDEX_RN(kx,ky,kz,blast_num)])
+                    * sedov_te_in;
                 }
 
               }
@@ -300,7 +309,7 @@ void EnzoInitialSedovRandom::enforce_block
     }
   }
 
-  //delete [] rn_array;
+  delete [] rn_array;
   
 }
 

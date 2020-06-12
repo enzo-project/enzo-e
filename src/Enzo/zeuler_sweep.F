@@ -2,6 +2,8 @@ c     See LICENSE_ENZO file for license and copyright information
 
 #include "fortran.h"
 
+c #define DEBUG_FLUXES
+
 c=======================================================================
 c/////////////////////  SUBROUTINE ZEULER_SWEEP  \\\\\\\\\\\\\\\\\\\\\\\
 c     
@@ -323,6 +325,7 @@ c
 c@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 c     FOR DEBUGGING ONLY
 c@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+#ifdef DEBUG_FLUXES             
              array(dindex(n*6+5)+offset) = 3000.0
              array(dindex(n*6+6)+offset) = 3001.0
              array(eindex(n*6+5)+offset) = 3010.
@@ -345,6 +348,7 @@ c@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
                 array(colindex(n*6+5,ic)+offset) = 3100.+10*(ic-1)
                 array(colindex(n*6+6,ic)+offset) = 3101.+10*(ic-1)
              enddo
+#endif             
 c@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
           enddo
         endif

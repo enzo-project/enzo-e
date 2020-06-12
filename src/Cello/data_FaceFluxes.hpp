@@ -128,12 +128,12 @@ public: // interface
   /// Copy flux values from an array to the FluxFaces. Array element
   /// array[ix*dx + iy*dy + iz*dz] should correspond to flux value
   /// (ix,iy,iz), where (0,0,0) <= (ix,iy,iz) < (mx,my,mz).
-  void set_flux_array ( std::vector<double> array, int dx, int dy, int dz);
+  void set_flux_array ( std::vector<cello_float> array, int dx, int dy, int dz);
   
   /// Return the array of fluxes and associated strides (dx,dy,dz)
   /// such that the (ix,iy,iz) flux value is fluxes[ix*dx + iy*dy +
   /// iz*dz], where (0,0,0) <= (ix,iy,iz) < (mx,my,mz).
-  std::vector<double> & flux_array (int * dx=0, int * dy=0, int * dz=0);
+  std::vector<cello_float> & flux_array (int * dx=0, int * dy=0, int * dz=0);
   
   /// Return the ratio of volume element resolutions h(ff_1) / h(ff_2)
   /// = {0.5, 1.0, 2.0} along each dimension between stored fluxes in
@@ -188,7 +188,7 @@ private: // attributes
   Face face_;
 
   // Array of fluxes ix + mx*(iy+my*iz)
-  std::vector<double> fluxes_;
+  std::vector<cello_float> fluxes_;
 
   // Original mesh refinement level
   int level_block_;

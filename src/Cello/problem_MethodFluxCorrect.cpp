@@ -8,6 +8,10 @@
 #include "problem.hpp"
 #include "charm_simulation.hpp"
 
+#define NEW_FLUX
+#define NEW_FLUX_ERROR
+
+// #define DEBUG_NEW_FLUX
 // #define DEBUG_METHOD_FLUX_CORRECT
 
 #ifdef DEBUG_METHOD_FLUX_CORRECT
@@ -28,6 +32,14 @@ MethodFluxCorrect::MethodFluxCorrect (std::string group) throw()
     field_sum_0_(),
     ir_pre_(-1)
 {
+#ifdef NEW_FLUX_ERROR  
+  ERROR("MethodFluxCorrect()",
+          "Flux-correction is not fully implemented yet!");
+#else  
+  WARNING("MethodFluxCorrect()",
+          "Flux-correction is not fully implemented yet!");
+#endif
+  
   cello::simulation()->new_refresh_set_name(ir_post_,name());
   Refresh * refresh_post = cello::refresh(ir_post_);
   refresh_post->add_all_fields();
@@ -193,10 +205,6 @@ void MethodFluxCorrect::compute_continue_sum_fields
 
     FluxData * flux_data = block->data()->flux_data();
 
-    auto field_names = block->data()->field().groups()->group_list("conserved");
-    
-    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-    
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     // Loop over neighbors in different levels
 
@@ -206,16 +214,42 @@ void MethodFluxCorrect::compute_continue_sum_fields
       block->it_neighbor (cello::rank() - 1,block->index(), neighbor_flux);
     
     Grouping * groups = cello::field_groups();
-    int ng=groups->size(group_);
+    int nf=groups->size(group_);
     
-    // Loop over each face with a level jump
-    int of3[3];
-    while (it_neighbor.next(of3)) {
-      Index index_neighbor = it_neighbor.index();
-      for (int ig=0; ig<ng; ig++) {
-        std::string field_name = groups->item(group_,ig);
+    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+#ifdef NEW_FLUX  
+#ifdef DEBUG_NEW_FLUX
+    
+    for (int i_f=0; i_f<nf; i_f++) {
+      for (int axis=0; axis<rank; axis++) {
+        for (int face=0; face<2; face++) {
+          int mx,my,mz;
+          int dx,dy,dz;
+          FaceFluxes * ff_b = flux_data->block_fluxes(axis,face,i_f);
+          ff_b->get_dimensions(&mx,&my,&mz);
+          std::vector<double> & fa_b = ff_b->flux_array(&dx,&dy,&dz);
+
+          FaceFluxes * ff_n = flux_data->neighbor_fluxes(axis,face,i_f);
+          ff_n->get_dimensions(&mx,&my,&mz);
+          std::vector<double> & fa_n = ff_n->flux_array(&dx,&dy,&dz);
+          for (int iz=0; iz<mz; iz++) {
+            for (int iy=0; iy<my; iy++) {
+              for (int ix=0; ix<mx; ix++) {
+                const int i = ix*dx + iy*dy + iz*dz;
+                CkPrintf ("DEBUG_FLUX %s %p MethodFluxCorrect Block %d %d %d  (%d %d %d) %g\n",
+                          block->name().c_str(),&fa_b[0],
+                          axis,face,i_f,ix,iy,iz,fa_b[i]);
+                CkPrintf ("DEBUG_FLUX %s %p MethodFluxCorrect Neighbor %d %d %d  (%d %d %d) %g\n",
+                          block->name().c_str(),&fa_n[0],
+                          axis,face,i_f,ix,iy,iz,fa_n[i]);
+              }
+            }
+          }
+        }
       }
     }
+#endif
+#endif
   }  
   TRACE_FLUX_CORRECT(block,"5 EXIT ");
   block->compute_done();

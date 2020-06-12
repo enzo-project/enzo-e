@@ -64,8 +64,8 @@ void Param::pup (PUP::er &p)
       n=strlen(value_string_);
     }
     p | n;
-    if (p.isUnpacking()) value_string_ = new char [n];
-    if (n > 0) PUParray(p,value_string_,n);
+    if (p.isUnpacking()) value_string_ = new char [n+1];
+    PUParray(p,value_string_,n+1);
   } else if (type_ == parameter_list) {
     int n = 0;
     if (! p.isUnpacking()) {

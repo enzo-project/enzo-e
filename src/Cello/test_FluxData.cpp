@@ -36,8 +36,6 @@ PARALLEL_MAIN_BEGIN
 
   for (int i_f=0; i_f<nf; i_f++) {
 
-    const int index_field = field_list[i_f];
-
     for (int axis=0; axis<3; axis++) {
 
       const int a1 = (axis+1) % 3;
@@ -48,8 +46,8 @@ PARALLEL_MAIN_BEGIN
 
       for (int face=0; face<2; face++) {
 
-        FaceFluxes * ff_blk = flux_data.block_fluxes(axis,face,index_field);
-        FaceFluxes * ff_nbr = flux_data.neighbor_fluxes(axis,face,index_field);
+        FaceFluxes * ff_blk = flux_data.block_fluxes(axis,face,i_f);
+        FaceFluxes * ff_nbr = flux_data.neighbor_fluxes(axis,face,i_f);
         
         unit_assert (ff_blk == nullptr);
         unit_assert (ff_nbr == nullptr);
@@ -83,15 +81,13 @@ PARALLEL_MAIN_BEGIN
 
   for (int i_f=0; i_f<n_f; i_f++) {
 
-    const int index_field = field_list[i_f];
-
     for (int axis=0; axis<3; axis++) {
       const int n1=n3[(axis+1)%3];
       const int n2=n3[(axis+2)%3];
       for (int face=0; face<2; face++) {
 
-        FaceFluxes * ff_blk = flux_data.block_fluxes(axis,face,index_field);
-        FaceFluxes * ff_nbr = flux_data.neighbor_fluxes(axis,face,index_field);
+        FaceFluxes * ff_blk = flux_data.block_fluxes(axis,face,i_f);
+        FaceFluxes * ff_nbr = flux_data.neighbor_fluxes(axis,face,i_f);
 
         auto & b = array_blk[axis][face][i_f];
         auto & n = array_nbr[axis][face][i_f];
@@ -239,13 +235,13 @@ PARALLEL_MAIN_BEGIN
 
     for (int axis=0; axis<3; axis++) {
       for (int face=0; face<2; face++) {
-        flux_data.delete_block_fluxes (axis,face,index_field);
+        flux_data.delete_block_fluxes (axis,face,i_f);
       }
     }
   
     for (int axis=0; axis<3; axis++) {
       for (int face=0; face<2; face++) {
-        unit_assert(flux_data.block_fluxes(axis,face,index_field) == nullptr);
+        unit_assert(flux_data.block_fluxes(axis,face,i_f) == nullptr);
       }
     }
   
@@ -253,14 +249,13 @@ PARALLEL_MAIN_BEGIN
 
     for (int axis=0; axis<3; axis++) {
       for (int face=0; face<2; face++) {
-        flux_data.delete_neighbor_fluxes (axis,face,index_field);
+        flux_data.delete_neighbor_fluxes (axis,face,i_f);
       }
     }
   
     for (int axis=0; axis<3; axis++) {
       for (int face=0; face<2; face++) {
-        unit_assert
-          (flux_data.neighbor_fluxes(axis,face,index_field) == nullptr);
+        unit_assert (flux_data.neighbor_fluxes(axis,face,i_f) == nullptr);
       }
     }
 

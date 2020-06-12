@@ -254,7 +254,6 @@ void EnzoBlock::pup(PUP::er &p)
 
   p | redshift;
   TRACE ("END EnzoBlock::pup()");
-
 }
 
 //======================================================================
