@@ -109,13 +109,6 @@ int determineSN(float age, int* nSNII, int* nSNIA,
 
 int determineWinds(float age, float* eWinds, float* mWinds, float* zWinds,
                    float massMsun, float zZsun, float TimeUnits, float dt){
-    /* AJE: Disclaimer!!!
-       The version of this function implemented by Azton matches the rates given
-       in the FIRE2 method paper but does not seem to match up with the rates
-       given in the actual FIRE code... below is the latter, but this might be
-       an issue to use if its non-pubic (unless this is a mistake in the publication?)
-    */
-
 
     // age in Myr
 

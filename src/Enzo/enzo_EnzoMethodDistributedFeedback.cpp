@@ -341,7 +341,7 @@ EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
 
   // Time of first SN (input in Myr, stored in yr)
   //     Forces a fixed delay time for all SNe
-  time_first_sn_ = enzo_config->method_feedback_time_first_sn * 1000.0;
+  time_first_sn_ = enzo_config->method_feedback_time_first_sn * 1.0E6;
 
 
 
@@ -488,7 +488,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
 // --------------------------------------- start checking if explosion occurs ---
 
         int explosion_flag = -1, will_explode = -1;
-        double soonest_explosion = -1.0, s49_tot = -1.0, td7 = -1.0;
+        double soonest_explosion = -1.0, s49_tot = 0.0, td7 = -1.0;
         double star_age = 0.0;
         unsigned long long int rand_int;
 
@@ -578,6 +578,11 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
                                     p_mass[9]*td7*td7*td7*td7*td7*td7*td7*td7*td7;
             progenitor_mass = std::pow(10.0, progenitor_mass); // in Msun
 
+            if (time_first_sn_ > 0.0){
+              // hack for testing
+              progenitor_mass = 20.0;
+            }
+
             delay_time   *=  cello::yr_s / enzo_units->time(); // code units
             star_age = current_time - pcreation[ipdc]; // code units
             if ((delay_time > star_age) && (delay_time < star_age + enzo_block->dt  )) {
@@ -645,7 +650,8 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
         double tsoon7      = soonest_explosion * enzo_units->time() / (1.0E7 * cello::yr_s);
         double wind_energy = 0.0;
         if (time_first_sn_ > 0){
-          wind_energy = 1.0E48; // non zero erg
+          // --- for testing ---
+          wind_energy = 1.0E48 / (8.0 * cello::mass_solar); // non zero erg
         } else{
           wind_energy = s99_wind_energy(td7, tsoon7); // in cm^2/s^2 (i.e. per unit mass in cgs)
         }
@@ -825,19 +831,23 @@ void EnzoMethodDistributedFeedback::add_ionization_feedback(
   const float alpha = 2.60E-13; // cm^3 / s
 
   // AE: possibly actually compute mu from species fields
-  double ndens = d[index] / enzo_config->ppm_mol_weight / cello::mass_hydrogen;
+  double ndens = d[index] * enzo_units->density() / enzo_config->ppm_mol_weight / cello::mass_hydrogen;
 
   double stromgren_radius = std::pow( (3.0 * s49_tot * 1.0E49) /
                             (4.0 * cello::pi * alpha * ndens*ndens),1.0/3.0);
   double stromgren_volume = (4.0/3.0)*cello::pi*stromgren_radius*stromgren_radius*stromgren_radius;
-
-  double ionized          = cello::kboltz * 1.0E4 / enzo_config->ppm_mol_weight /
+  stromgren_volume        /= (enzo_units->length()*enzo_units->length()*enzo_units->length());
+  double ionized          = cello::kboltz * 1.0E4 / std::min(0.6,enzo_config->ppm_mol_weight) /
                             cello::mass_hydrogen / (enzo_units->length()*enzo_units->length()) *
                             enzo_units->time() * enzo_units->time();
+
 
   if (stromgren_volume <= cell_volume){
     ionized = ionized * stromgren_volume * inv_volume;
   }
+
+  CkPrintf("DistributedFeedback: This cell should be getting ionized with radius = %g (pc). volume ratio = %g. will_explode = %i ge = %g ionized = %g\n", stromgren_radius / cello::pc_cm, stromgren_volume * inv_volume, will_explode, ge[index], ionized);
+
 
   if ((will_explode == 1) && (ge[index] < ionized)){
     double diff = ionized - ge[index];
@@ -853,7 +863,7 @@ void EnzoMethodDistributedFeedback::inject_feedback(
                                           double xpos, double ypos, double zpos,
                                           double m_eject,  // in Msun
                                           double E_51, // in 10^51 erg
-                                          double ke_fraction, double metal_fraction, // for now leave as single value
+                                          double ke_f, double metal_fraction, // for now leave as single value
                                           enzo_float pvx,    //default -9999
                                           enzo_float pvy,    //default -9999
                                           enzo_float pvz){   //default -9999
@@ -926,15 +936,16 @@ void EnzoMethodDistributedFeedback::inject_feedback(
   //
   // Set explosion properties
   //
-  double energy_per_cell = E_51 * 1.0E51 / enzo_units->mass() /
-                            (enzo_units->velocity() * enzo_units->velocity());
+  const double energy_units = enzo_units->mass() * enzo_units->velocity() * enzo_units->velocity();
+  CkPrintf("Injecting feedback in %i cells at mass (Msun) %g and energy (E51) %g\n",number_of_feedback_cells_, m_eject, E_51);
+  double energy_per_cell = E_51 * 1.0E51 / energy_units;
   double mass_per_cell   = m_eject * cello::mass_solar / enzo_units->mass();
+
   mass_per_cell /= ((double) number_of_feedback_cells_);
   energy_per_cell /= ((double) number_of_feedback_cells_);
 
   double density_per_cell = mass_per_cell * inv_vol;
   double energy_density_per_cell = energy_per_cell * inv_vol;
-
 
   //  stencil_rad_ is integer separation from cell center
   //  and edge of injection region (i.e. 1 for 3x3 injection grid)
@@ -1013,9 +1024,7 @@ int iz       = ((int) floor(zcell + 0.5));
     ke_before[i] = 0.0; metal_local[i] = 0.0;
   }
 
-  double ke_f = 0.0;
-
-  if (ke_fraction < 0){
+  if (ke_f < 0){
 
     // calculate variable kinetic energy fraction
 
@@ -1086,10 +1095,7 @@ int iz       = ((int) floor(zcell + 0.5));
 
     } // end resolved check
 
-  } else {
-    ke_f = kinetic_fraction_;
-
-  }// end kinetic energy fraction check
+  }
 
   // apply kinetic energy fraction floor
   ke_f = ke_f < 1.0E-10 ? 0.0 : ke_f;
@@ -1244,15 +1250,15 @@ void EnzoMethodDistributedFeedback::convert_momentum(
   zo = (mx * my);
 
   for (int k = -stencil_rad_; k <= stencil_rad_ + 1; k++){
-    if ( (k < 0) || (k >= mz))continue;
+    if ( (k + iz < 0) || (k + iz >= mz))continue;
     for (int j = -stencil_rad_; j <= stencil_rad_ + 1; j++){
-      if ((j<0) || (j >= my)) continue;
+      if (( j + iy <0) || (j + iy >= my)) continue;
       for (int i = -stencil_rad_; i <= stencil_rad_ + 1; i++){
-        if ((i<0) || (i>=mx)) continue;
+        if ((i + ix < 0) || (i + ix >= mx)) continue;
 
-        int index = (ix + i) + ( (iy + j) + (iz + k)*my)*mx;
+        int index = INDEX(i+ix,j+iy,k+iz,mx,my);
 
-        if ( (index < 0) || (index >= mx*my*mz)) continue;
+        if ( (index < 0) || (index >= mx*my*mz)) continue; // redundant
 
         if (idir >= 1){ // velocity -> momentum
 
@@ -1286,13 +1292,13 @@ void EnzoMethodDistributedFeedback::sum_mass_energy(
   sum_mass = 0; sum_energy = 0; sum_ke = 0;
 
   for (int k = -stencil_rad_;  k <= stencil_rad_ + 1; k++){
-    if ((k<0) || (k>=mz)) continue;
+    if ((k+iz<0) || (k+iz>=mz)) continue;
     for (int j = -stencil_rad_; j <= stencil_rad_ + 1; j++){
-      if ((j<0) || (j>=my)) continue;
+      if ((j+iy<0) || (j+iy>=my)) continue;
       for (int i = -stencil_rad_; i <= stencil_rad_ + 1; i++){
-        if ((i<0) || (i>=mx)) continue;
+        if ((i+ix<0) || (i+ix>=mx)) continue;
 
-        int index = (ix + i) + ( (iy + j) + (iz + k)*my)*mx;
+        int index = INDEX(i+ix,j+iy,k+iz,mx,my);
 
         if ( (index < 0) || (index >= mx*my*mz)) continue;
 
@@ -1364,7 +1370,8 @@ void EnzoMethodDistributedFeedback::add_feedback_to_grid(
 
               double delta_therm = therm_per_cell * dxc1 * dyc1 * dzc1;
 
-              int index = ( ix + i1 ) + ( (iy + j1) + (iz + k1)*my)*mx;
+              int index = INDEX(i1+ix,j1+iy,k1+iz,mx,my);
+
               //CkPrintf("xyz - add_FB_loop: %d %e %e", index, delta_therm, delta_mass);
 
               //if ( (index < 0) || (index >= mx*my*mz)) continue;
@@ -1436,7 +1443,8 @@ void EnzoMethodDistributedFeedback::compute_coefficients(
       for (int i = ix - stencil_rad_ ; i <= ix + stencil_rad_ + 1; i++){
         if ((i<0) || (i>=mx)) {loc_index++; continue;}
 
-        int index = (ix + i) + ( (iy + j) + (iz + k)*my)*mx;
+        // int index = (ix + i) + ( (iy + j) + (iz + k)*my)*mx;
+        int index = INDEX(i,j,k,mx,my);
 
         if ( (index < 0) || (index >= mx*my*mz)){
           loc_index++;

@@ -25,7 +25,8 @@ inline void operator|(PUP::er &p, chemistry_data &c){
  p | c.metal_cooling;
  p | c.UVbackground;
 
- int length = (c.grackle_data_file == NULL) ? 0 : strlen(c.grackle_data_file);
+ bool skip_strlen = (p.isUnpacking() || c.grackle_data_file == NULL);
+ int length = (skip_strlen) ? 0 : strlen(c.grackle_data_file);
  p | length;
  if (length > 0){
    if (p.isUnpacking()){
@@ -150,6 +151,7 @@ public: // interface
 #endif /* CONFIG_USE_GRACKLE */
       initial_feedback_test_density(),
       initial_feedback_test_star_mass(),
+      initial_feedback_test_temperature(),
       // EnzoInitialMusic
       initial_music_field_files(),
       initial_music_field_datasets(),
@@ -481,6 +483,7 @@ public: // attributes
   double                     initial_feedback_test_position[3];
   double                     initial_feedback_test_density;
   double                     initial_feedback_test_star_mass;
+  double                     initial_feedback_test_temperature;
 
   /// EnzoInitialIsolatedGalaxy
   double                     initial_IG_center_position[3];

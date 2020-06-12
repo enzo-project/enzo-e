@@ -14,13 +14,6 @@
 #define MAX_DATA_RANK 4
 #define MAX_ATTR_RANK 4
 
-//#define DEBUG_OUTPUT
-#ifdef DEBUG_OUTPUT
-#  define TRACE_OUTPUT(M) CkPrintf ("%d TRACE_OUTPUT %s\n", CkMyPe(), M); fflush(stdout);
-#else
-#  define TRACE_OUTPUT(M) /*  */
-#endif
-
 //----------------------------------------------------------------------
 
 std::map<const std::string,FileHdf5 *> FileHdf5::file_list;
@@ -77,8 +70,6 @@ FileHdf5::~FileHdf5() throw()
 void FileHdf5::file_open () throw()
 {
 
-  TRACE_OUTPUT("FileHdf5::file_open()");
-
   // check file closed
   std::string file_name = path_ + "/" + name_;
   
@@ -122,7 +113,6 @@ int FileHdf5::data_size (int * m4_int) throw()
 void FileHdf5::file_create () throw()
 {
 
-  TRACE_OUTPUT("FileHdf5::file_create()");
   // create file
 
   std::string file_name = path_ + "/" + name_;
@@ -151,8 +141,6 @@ void FileHdf5::file_create () throw()
 
 void FileHdf5::file_close () throw()
 {
-
-  TRACE_OUTPUT("FileHdf5::file_close");
 
   // error check file open
 
@@ -190,7 +178,6 @@ void FileHdf5::data_open
 {
 
  // error check file closed
-  TRACE_OUTPUT("FileHdf5::data_open()");
   std::string file_name = path_ + "/" + name_;
 
   ASSERT1("FileHdf5::data_open", "Trying to read from unopened file %s",
@@ -262,8 +249,6 @@ void FileHdf5::data_create
   int n1, int n2, int n3, int n4,
   int o1, int o2, int o3, int o4) throw()
 {
-
-  TRACE_OUTPUT("FileHdf5::data_create()");
 
   if (n1==0) n1=m1;
   if (n2==0) n2=m2;
@@ -353,7 +338,6 @@ void FileHdf5::data_read
 
 void FileHdf5::data_write ( const void * buffer ) throw()
 {
-  TRACE_OUTPUT("FileHdf5::data_write()");
 
   // error check file open
   std::string file_name = path_ + "/" + name_;
@@ -391,9 +375,7 @@ void FileHdf5::data_write ( const void * buffer ) throw()
 void FileHdf5::data_close() throw()
 {
 
-  TRACE_OUTPUT("FileHdf5::data_close() - checking");
   if (is_data_open_) {
-    TRACE_OUTPUT("FileHdf5::data_close() - closing");
     // close the dataspace
 
     space_close_(data_space_id_);
@@ -416,7 +398,6 @@ void FileHdf5::file_read_meta
     int * n1, int * n2, int * n3, int * n4) throw()
 {
 
-  TRACE_OUTPUT("FileHdf5::file_read_meta()");
 
   std::string file_name = path_ + "/" + name_;
 
@@ -471,7 +452,6 @@ void FileHdf5::data_read_meta
     int * n1, int * n2, int * n3, int * n4) throw()
 {
 
-  TRACE_OUTPUT("FileHdf5::data_read_meta()");
 
   // error check file open
   std::string file_name = path_ + "/" + name_;
@@ -575,8 +555,8 @@ void FileHdf5::group_chdir (std::string group_path) throw()
 void FileHdf5::group_open () throw()
 {
 
-  TRACE_OUTPUT("FileHdf5::group_open()");
   // close current group if open
+
   group_close();
 
   // open group
@@ -602,7 +582,6 @@ void FileHdf5::group_open () throw()
 
 void FileHdf5::group_create () throw()
 {
-  TRACE_OUTPUT("FileHdf5::group_create()");
 
   // close current group if open
   group_close();
@@ -696,7 +675,6 @@ void FileHdf5::group_create () throw()
 
 void FileHdf5::group_close () throw()
 {
-  TRACE_OUTPUT("FileHdf5::group_close() - checking");
   if (is_group_open_) {
 
 #ifdef TRACE_DISK  
@@ -719,8 +697,6 @@ void FileHdf5::group_read_meta
   ( void * buffer, std::string name,  int * type,
     int * n1, int * n2, int * n3, int * n4) throw()
 {
-
-  TRACE_OUTPUT("FileHdf5::group_read_meta()");
 
   // error check file open
   std::string file_name = path_ + "/" + name_;
@@ -796,8 +772,6 @@ void FileHdf5::write_meta_
   const void * buffer, std::string name, int type,
   int n1, int n2, int n3, int n4) throw()
 {
-
-  TRACE_OUTPUT("FileHdf5::write_meta_()");
 
   // error check file open
   std::string file_name = path_ + "/" + name_;

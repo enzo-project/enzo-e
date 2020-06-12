@@ -28,7 +28,13 @@ inline void operator|(PUP::er &p, code_units &c){
   p | c.a_value;
 
 }
+
+typedef int (*grackle_local_property_func)(chemistry_data*,
+					   chemistry_data_storage *,
+					   code_units*, grackle_field_data*,
+					   enzo_float*);
 #endif
+
 
 
 class EnzoMethodGrackle : public Method {
@@ -47,7 +53,7 @@ public: // interface
                     const double time);
 
   // Destructor
-  virtual ~EnzoMethodGrackle() throw() {}
+  virtual ~EnzoMethodGrackle() throw() { deallocate_grackle_rates_(); }
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodGrackle);
@@ -57,7 +63,8 @@ public: // interface
     : Method (m)
 #ifdef CONFIG_USE_GRACKLE
       , grackle_units_()
-      , grackle_chemistry_data_defined_(false)
+      , grackle_rates_()
+      , time_grackle_data_initialized_(ENZO_FLOAT_UNDEFINED)
 #endif
     {  }
 
@@ -74,13 +81,13 @@ public: // interface
     Method::pup(p);
 
     p | grackle_units_;
+    p | time_grackle_data_initialized_;
 
-//    DO NOT PUP THIS VARIABLE:
-//                ensures that Grackle's internal chemistry data
-//                structures are defined on each processor. This
-//                avoids having to write pup methods for all
-//                of Grackle's data structures.
-//    p | grackle_chemistry_data_defined_;
+    if (p.isUnpacking()) {
+      // the following recomputes grackle_rates_. This avoids having to write
+      // pup methods for all of Grackle's internal data structures
+      initialize_grackle_chemistry_data(time_grackle_data_initialized_);
+    }
 
   #endif /* CONFIG_USE_GRACKLE */
 
@@ -97,7 +104,7 @@ public: // interface
 
 #ifdef CONFIG_USE_GRACKLE
 
-  void initialize_grackle_chemistry_data(const double& current_time);
+  void initialize_grackle_chemistry_data(double current_time);
 
   static void setup_grackle_units(EnzoBlock * enzo_block,
                                   code_units * grackle_units,
@@ -139,6 +146,51 @@ public: // interface
       return;
  }
 
+  void calculate_cooling_time(Block * block, enzo_float* ct,
+			      code_units* grackle_units = NULL,
+			      grackle_field_data* grackle_fields = NULL,
+			      int i_hist = 0) const throw()
+  {
+    compute_local_property_(block, ct, grackle_units, grackle_fields, i_hist,
+			    &local_calculate_cooling_time,
+			    "local_calculate_cooling_time");
+  }
+
+  void calculate_pressure(Block * block, enzo_float* pressure,
+			  code_units* grackle_units = NULL,
+			  grackle_field_data* grackle_fields = NULL,
+			  int i_hist = 0) const throw()
+  {
+    compute_local_property_(block, pressure, grackle_units, grackle_fields,
+			    i_hist, &local_calculate_pressure,
+			    "local_calculate_pressure");
+  }
+
+  void calculate_temperature(Block * block, enzo_float* temperature,
+			     code_units* grackle_units = NULL,
+			     grackle_field_data* grackle_fields = NULL,
+			     int i_hist = 0) const throw()
+  {
+    compute_local_property_(block, temperature, grackle_units, grackle_fields,
+			    i_hist, &local_calculate_temperature,
+			    "local_calculate_temperature");
+  }
+
+#endif
+
+protected: // methods
+
+  void deallocate_grackle_rates_() throw();
+
+#ifdef CONFIG_USE_GRACKLE
+
+  // when grackle_units is NULL, new values are temporarily allocated
+  void compute_local_property_(Block * block, enzo_float* values,
+			       code_units* grackle_units,
+			       grackle_field_data* grackle_fields, int i_hist,
+			       grackle_local_property_func func,
+			       std::string func_name) const throw();
+
 #endif
 
 protected: // methods
@@ -150,8 +202,9 @@ protected: // methods
 
 // protected: // attributes
 
-  mutable code_units grackle_units_;
-  bool grackle_chemistry_data_defined_;
+  code_units grackle_units_;
+  chemistry_data_storage grackle_rates_;
+  double time_grackle_data_initialized_;
 #endif
 
 };

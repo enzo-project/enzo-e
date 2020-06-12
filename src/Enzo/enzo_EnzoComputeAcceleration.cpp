@@ -11,7 +11,7 @@
 
 //----------------------------------------------------------------------
 
-EnzoComputeAcceleration::EnzoComputeAcceleration 
+EnzoComputeAcceleration::EnzoComputeAcceleration
 (int         rank,
  int         order)
   : Compute(),
@@ -19,7 +19,7 @@ EnzoComputeAcceleration::EnzoComputeAcceleration
     order_(order)
 {
   FieldDescr * field_descr = cello::field_descr();
-  
+
   i_ax_ = (rank_ >= 1) ? field_descr->field_id("acceleration_x") : -1;
   i_ay_ = (rank_ >= 2) ? field_descr->field_id("acceleration_y") : -1;
   i_az_ = (rank_ >= 3) ? field_descr->field_id("acceleration_z") : -1;
@@ -80,7 +80,7 @@ void EnzoComputeAcceleration::compute_(Block * block)
   field.ghost_depth (0,&gx,&gy,&gz);
 
   int dx,dy,dz;
-  dx = 1; 
+  dx = 1;
   dy = mx;
   dz = mx*my;
 
@@ -107,9 +107,9 @@ void EnzoComputeAcceleration::compute_(Block * block)
   enzo_float cosmo_dadt = 0.0;
   double time = block->time();
   double dt   = block->dt();
-  
+
   if (cosmology) {
-   
+
     cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*dt);
 
     hx *= cosmo_a;
@@ -210,12 +210,12 @@ void EnzoComputeAcceleration::compute_(Block * block)
   ParticleDescr * particle_descr = cello::particle_descr();
   Grouping * particle_groups = particle_descr->groups();
 
-  int num_mass = particle_groups->size("has_mass");
+  const int num_mass = particle_groups->size("has_mass");
 
   for (int ipt = 0; ipt < num_mass; ipt++){
 
     std::string particle_type = particle_groups->item("has_mass",ipt);
-    int it = particle.type_index(particle_type);
+    const int it = particle.type_index(particle_type);
 
     if (particle.num_particles(it) > 0) {
 
@@ -237,6 +237,5 @@ void EnzoComputeAcceleration::compute_(Block * block)
         interp_z.compute(block);
       }
     }
-  }
+  } // partilce type loop
 }
-
