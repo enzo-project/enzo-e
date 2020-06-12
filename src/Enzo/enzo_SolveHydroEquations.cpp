@@ -209,7 +209,7 @@ int EnzoBlock::SolveHydroEquations
         FaceFluxes * ff_b = flux_data->block_fluxes(axis,face,i_f);
         int dx,dy,dz;
         flux_index[axis*2+face] =
-          ((double *)ff_b->flux_array(&dx,&dy,&dz).data()) - standard;
+          ((enzo_float *)ff_b->flux_array(&dx,&dy,&dz).data()) - standard;
       }
     }
   }
