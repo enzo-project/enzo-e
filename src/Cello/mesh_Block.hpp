@@ -640,7 +640,7 @@ protected:
   (Refresh * refresh,
    ParticleData * particle_array[],
    ParticleData * particle_list[],
-   Index index_list[]);
+   Index index_list[], const bool copy = false);
 
   /// Computes updates to positions (dpx[i],dpy[i],dpz[i]) for faces that
   /// cross periodic domain boundaries
@@ -654,7 +654,10 @@ protected:
   void particle_scatter_neighbors_
   (int npa, ParticleData * particle_array[],
    std::vector<int> & type_list, Particle particle_src, const bool copy = false);
-
+   void particle_scatter_neighbors_copy_
+   (int npa, ParticleData * particle_array[],
+    std::vector<int> & type_list, Particle particle_src);
+    
   /// Scatter particles to appropriate partictle_list elements
   void particle_scatter_children_ (ParticleData * particle_list[],
 				   Particle particle_src);
