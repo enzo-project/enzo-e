@@ -227,11 +227,111 @@ int ParticleData::delete_particles
 
 //----------------------------------------------------------------------
 
+void ParticleData::scatter_copy
+(ParticleDescr * particle_descr,
+ int it, int ib,
+ int np, const bool * mask, const int * index,
+ int n, ParticleData * particle_array[])
+{
+  // count number of particles in each particle_array element
+
+  // const int npa = 64; // same as n
+
+
+  int * np_array = new int[n];
+  for (int i=0; i<n; i++) np_array[i] = 0;
+
+  if (mask == NULL) {
+    for (int ip=0; ip<np; ip++) {
+      for (int k = 0; k < n; k++){
+          if (particle_array[k] != NULL) ++np_array[k];
+      }
+    }
+  } else {
+    for (int ip=0; ip<np; ip++) {
+      if (mask[ip]) {
+        for(int k = 0; k < n; k++){
+          if (particle_array[k] != NULL)  ++np_array[k];
+        }
+      }
+    }
+  }
+
+  // insert uninitialized particles
+  std::map<ParticleData *, int>  i_array;
+  std::map<ParticleData *, bool> is_first;
+  for (int k=0; k<n; k++) {
+    ParticleData * pd = particle_array[k];
+    is_first[pd] = true;
+    i_array[pd] = 0;
+  }
+
+  for (int k=0; k<n; k++) {
+    ParticleData * pd = particle_array[k];
+    if (np_array[k]>0 && pd) {
+      int i0 = pd->insert_particles (particle_descr,it,np_array[k]);
+      if (is_first[pd]) i_array[pd] = i0;
+      is_first[pd] = false;
+    }
+  }
+
+  delete [] np_array;
+
+  const bool interleaved = particle_descr->interleaved(it);
+  const int na = particle_descr->num_attributes(it);
+  int mp = particle_descr->particle_bytes(it);
+  const int ib_src = ib;
+
+  const int ia_loc = particle_descr->attribute_index(it,"is_local");
+  const int dloc = particle_descr->stride(it,ia_loc);
+  int *is_local=NULL;
+  int count=0;
+  for (int ip_src=0; ip_src<np; ip_src++) {
+
+    if ((mask == NULL) || mask[ip_src]) {
+      ++count;
+      // maybe issue is here... need to select ALLL indexes and
+      // not just the one?
+
+          for (int k = 0; k < n; k++){
+          //int k = index[ip_src];
+              ParticleData * pd = particle_array[k];
+
+              if (pd == NULL) continue;
+
+              int i_dst = i_array[pd]++;
+              int ib_dst,ip_dst;
+              particle_descr->index(i_dst,&ib_dst,&ip_dst);
+              is_local = (int *) pd->attribute_array(particle_descr,it,ia_loc,ib_dst);
+
+              for (int ia=0; ia<na; ia++) {
+    	           if (!interleaved)
+    	             mp = particle_descr->attribute_bytes(it,ia);
+    	             int ny = particle_descr->attribute_bytes(it,ia);
+    	             char * a_src = attribute_array
+    	               (particle_descr,it,ia,ib_src);
+    	             char * a_dst = pd->attribute_array
+    	                 (particle_descr,it,ia,ib_dst);
+    	             for (int iy=0; iy<ny; iy++) {
+    	                 a_dst [iy + mp*ip_dst] = a_src [iy + mp*ip_src];
+    	              }
+              }
+
+            // if (copy){ is_local[ip_dst*ib_dst] = 0;}
+            is_local[ip_dst*ib_dst] = false;
+
+         }
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
 void ParticleData::scatter
 (ParticleDescr * particle_descr,
  int it, int ib,
  int np, const bool * mask, const int * index,
- int n, ParticleData * particle_array[], const bool copy)
+ int n, ParticleData * particle_array[])
 {
   // count number of particles in each particle_array element
 
@@ -281,30 +381,37 @@ void ParticleData::scatter
 
     if ((mask == NULL) || mask[ip_src]) {
       ++count;
-      int k = index[ip_src];
-      ParticleData * pd = particle_array[k];
-      int i_dst = i_array[pd]++;
-      int ib_dst,ip_dst;
-      particle_descr->index(i_dst,&ib_dst,&ip_dst);
-      is_local = (int *) pd->attribute_array(particle_descr,it,ia_loc,ib_dst);
+      // maybe issue is here... need to select ALLL indexes and
+      // not just the one?
 
-      for (int ia=0; ia<na; ia++) {
-	if (!interleaved)
-	  mp = particle_descr->attribute_bytes(it,ia);
-	int ny = particle_descr->attribute_bytes(it,ia);
-	char * a_src = attribute_array
-	  (particle_descr,it,ia,ib_src);
-	char * a_dst = pd->attribute_array
-	  (particle_descr,it,ia,ib_dst);
-	for (int iy=0; iy<ny; iy++) {
-	  a_dst [iy + mp*ip_dst] = a_src [iy + mp*ip_src];
-	}
-      }
-      // if (copy){ is_local[ip_dst*ib_dst] = 0;}
-      is_local[ip_dst*ib_dst] = !copy;
-    }
+        int k = index[ip_src];
+            ParticleData * pd = particle_array[k];
+            int i_dst = i_array[pd]++;
+            int ib_dst,ip_dst;
+            particle_descr->index(i_dst,&ib_dst,&ip_dst);
+            is_local = (int *) pd->attribute_array(particle_descr,it,ia_loc,ib_dst);
+
+            for (int ia=0; ia<na; ia++) {
+        if (!interleaved)
+          mp = particle_descr->attribute_bytes(it,ia);
+        int ny = particle_descr->attribute_bytes(it,ia);
+        char * a_src = attribute_array
+          (particle_descr,it,ia,ib_src);
+        char * a_dst = pd->attribute_array
+          (particle_descr,it,ia,ib_dst);
+        for (int iy=0; iy<ny; iy++) {
+          a_dst [iy + mp*ip_dst] = a_src [iy + mp*ip_src];
+        }
+            }
+
+        // if (copy){ is_local[ip_dst*ib_dst] = 0;}
+        is_local[ip_dst*ib_dst] = true;
+
 
   }
+}
+
+
 }
 
 //----------------------------------------------------------------------
@@ -847,7 +954,7 @@ char * ParticleData::save_data (ParticleDescr * particle_descr,
 	  "Buffer has size %ld but expecting size %d",
 	  (pc-buffer),data_size(particle_descr),
 	  ((pc-buffer) == data_size(particle_descr)));
-  
+
   return pc;
 }
 

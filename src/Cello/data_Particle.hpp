@@ -324,9 +324,15 @@ public: // interface
 
   void scatter (int it, int ib,
 		int np, const bool * mask, const int * index,
-		int n, ParticleData ** particle_array, const bool copy = false)
+		int n, ParticleData ** particle_array)
   { particle_data_->scatter
-      (particle_descr_,it,ib,np,mask,index,n,particle_array, copy);  }
+      (particle_descr_,it,ib,np,mask,index,n,particle_array);  }
+
+      void scatter_copy (int it, int ib,
+    		int np, const bool * mask, const int * index,
+    		int n, ParticleData ** particle_array)
+      { particle_data_->scatter_copy
+          (particle_descr_,it,ib,np,mask,index,n,particle_array);  }
 
   /// Gather particles from an array of other Particle structures.
   /// Typically used after receiving particles from neighboring blocks

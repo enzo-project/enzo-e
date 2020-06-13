@@ -82,7 +82,11 @@ public: // interface
 
   void scatter (ParticleDescr *, int it, int ib,
 		int np, const bool * mask, const int * index,
-		int n,  ParticleData * particle_array[], const bool copy = false);
+		int n,  ParticleData * particle_array[]);
+
+    void scatter_copy (ParticleDescr *, int it, int ib,
+  		int np, const bool * mask, const int * index,
+  		int n,  ParticleData * particle_array[]);
 
   /// Gather particles from an array of other Particle structures.
   /// Typically used after receiving particles from neighboring blocks

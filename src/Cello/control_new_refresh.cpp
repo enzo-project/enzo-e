@@ -390,9 +390,11 @@ int Block::delete_particle_copies_ (int it){
 int Block::new_refresh_load_particle_copy_ (Refresh & refresh)
 {
   const int rank = cello::rank();
-  const int npa = 1;
-  //const int npa3[3] = { 4, 4*4, 4*4*4 };
-  //const int npa = npa3[rank-1];
+  //const int npa = 1;
+
+  /* try to just have one per block */
+  const int npa3[3] = { 3, 3*3, 3*3*3 };
+  const int npa = npa3[rank-1];
 
   ParticleData * particle_array[npa];
   ParticleData * particle_list [npa];
@@ -408,7 +410,6 @@ int Block::new_refresh_load_particle_copy_ (Refresh & refresh)
 
   int nl = particle_load_copy_
     (npa,particle_list,particle_array, index_list, &refresh);
-  nl = 1;
 
   // Send particle data to neighbors
 
@@ -673,7 +674,7 @@ int Block::particle_create_array_neighbors_
     index_list[il] = it_neighbor.index();
 
     if (copy){
-      particle_array[0] = pd;
+      if (il != (std::pow(rank,3)-1)/2) particle_array[il] = pd;
     } else {
     for (int iz=index_lower[2]; iz<index_upper[2]; iz++) {
       for (int iy=index_lower[1]; iy<index_upper[1]; iy++) {
@@ -883,12 +884,15 @@ void Block::particle_scatter_neighbors_
       bool * mask = new bool[np];
       int  * index = new int[np];
       for (int ip=0; ip<np; ip++) {
+
 // AJE - issue is here since in copying partilces arent on the grid boundaries
 //    so mismatch between here and get_particle_bin_limits
 //    which is called elsewhere in control_new_refresh
 //    and now I realize this will currently only push copies of particles
 //    fomr adjacent 1/2 of sibling grids. this is probably OK assuming
 //    feedback region < 1/2 of grid size (probably?)
+
+// look at block scatter children for help?
 	double x = is_float ? 2.0*(xa[ip*d]-x0)/xl : xa[ip*d];
 	double y = is_float ? 2.0*(ya[ip*d]-y0)/yl : ya[ip*d];
 	double z = is_float ? 2.0*(za[ip*d]-z0)/zl : za[ip*d];
@@ -939,7 +943,7 @@ void Block::particle_scatter_neighbors_
       delete [] za;
 
       // ...scatter particles to particle array
-      particle.scatter (it,ib, np, mask, index, npa, particle_array, copy);
+      particle.scatter (it,ib, np, mask, index, npa, particle_array);
       // ... delete scattered particles if moved
       if (!copy) count += particle.delete_particles (it,ib,mask);
 
@@ -1051,17 +1055,18 @@ void Block::particle_scatter_neighbors_copy_
 //    and now I realize this will currently only push copies of particles
 //    fomr adjacent 1/2 of sibling grids. this is probably OK assuming
 //    feedback region < 1/2 of grid size (probably?)
+
 	double x = is_float ? 2.0*(xa[ip*d]-x0)/xl : xa[ip*d];
 	double y = is_float ? 2.0*(ya[ip*d]-y0)/yl : ya[ip*d];
 	double z = is_float ? 2.0*(za[ip*d]-z0)/zl : za[ip*d];
 
-	int ix = (rank >= 1) ? (x + 2) : 0;
-	int iy = (rank >= 2) ? (y + 2) : 0;
-	int iz = (rank >= 3) ? (z + 2) : 0;
+	int ix = (rank >= 1) ? (x + 1) : 0;
+	int iy = (rank >= 2) ? (y + 1) : 0;
+	int iz = (rank >= 3) ? (z + 1) : 0;
 
-	if (! (0 <= ix && ix < 4) ||
-	    ! (0 <= iy && iy < 4) ||
-	    ! (0 <= iz && iz < 4)) {
+	if (! (0 <= ix && ix < 3) ||
+	    ! (0 <= iy && iy < 3) ||
+	    ! (0 <= iz && iz < 3)) {
 
 	  CkPrintf ("%d ix iy iz %d %d %d\n",CkMyPe(),ix,iy,iz);
 	  CkPrintf ("%d x y z %f %f %f\n",CkMyPe(),x,y,z);
@@ -1073,15 +1078,15 @@ void Block::particle_scatter_neighbors_copy_
 		  ix,iy,iz);
 	}
 
-	const int i = ix + 4*(iy + 4*iz);
-	index[ip] = 0;
+	const int i = ix + 3*(iy + 3*iz);
 	bool in_block = true;
-	in_block = in_block && (!(rank >= 1) || (1 <= ix && ix <= 2));
-	in_block = in_block && (!(rank >= 2) || (1 <= iy && iy <= 2));
-	in_block = in_block && (!(rank >= 3) || (1 <= iz && iz <= 2));
-	mask[ip] = ! in_block;
+	in_block = in_block && (!(rank >= 1) || ((xa[ip*d] > xm) && (xa[ip*d] < xp)));
+	in_block = in_block && (!(rank >= 2) || ((ya[ip*d] > ym) && (ya[ip*d] < yp)));
+	in_block = in_block && (!(rank >= 3) || ((za[ip*d] > zm) && (za[ip*d] < zp)));
 
-  mask[ip] = in_block;
+
+
+  mask[ip]  = in_block;
   index[ip] = 0;
 
       }
@@ -1091,7 +1096,7 @@ void Block::particle_scatter_neighbors_copy_
       delete [] za;
 
       // ...scatter particles to particle array
-      particle.scatter (it,ib, np, mask, index, npa, particle_array, true);
+      particle.scatter_copy (it,ib, np, mask, index, npa, particle_array);
       // ... delete scattered particles if moved
 
 
