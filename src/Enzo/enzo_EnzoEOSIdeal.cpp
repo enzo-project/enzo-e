@@ -27,7 +27,7 @@ void EnzoEOSIdeal::pup (PUP::er &p)
 bool grackle_variable_gamma_(){
 #ifdef CONFIG_USE_GRACKLE
   if (enzo::config()->method_grackle_use_grackle){
-    if (grackle_data->primordial_chemistry > 1) {
+    if (enzo::config()->method_grackle_chemistry->primordial_chemistry > 1) {
       return true;
     }
   }
