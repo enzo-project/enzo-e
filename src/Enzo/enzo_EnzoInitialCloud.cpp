@@ -290,6 +290,142 @@ void check_uniform_bfield_(EFlt3DArray bfield,
 
 //----------------------------------------------------------------------
 
+class MHDHandler
+{
+  // at the moment this only supports uniform bfields
+  //
+  // this currently supports 2 means of initialization:
+  //   1. This handler can initialize the bfields uniform bfields
+  //   2. (Deprecated) bfields can be pre-initialized. This is the historic
+  //      approach - but doing this usually involves invoking InitialValue
+  //      which is not thread-safe. We may choose to drop this.
+  //
+  // Note: Testing indicates that these approaches may cause slightly different
+  // values to be initialized for non-trivial bfield values (non-zero and
+  // not-easily rounded). It appears that values initialized by this class
+  // have the exact expected value whereas the values initialized by the value
+  // initializer are slightly offset (there could potentially be a cast to
+  // float causing round-off errors)
+
+public:
+  MHDHandler(Block *block, bool has_bfield, bool has_interface_bfield,
+             bool initialize_uniform_bfield, double uniform_bfield[3])
+    : has_bfield_(has_bfield),
+      has_interface_bfield_(has_interface_bfield),
+      initialize_uniform_bfield_(initialize_uniform_bfield)
+  {
+    for (int i = 0; i < 3; i++){
+      uniform_bfield_[i] = (enzo_float) uniform_bfield[i];
+    }
+    EnzoFieldArrayFactory array_factory(block);
+    if (has_bfield_){
+      bfield_x = array_factory.from_name("bfield_x");
+      bfield_y = array_factory.from_name("bfield_y");
+      bfield_z = array_factory.from_name("bfield_z");
+    }
+    if (has_interface_bfield_){
+      bfieldi_x = array_factory.from_name("bfieldi_x");
+      bfieldi_y = array_factory.from_name("bfieldi_y");
+      bfieldi_z = array_factory.from_name("bfieldi_z");
+    }
+
+    if (initialize_uniform_bfield_){
+      ASSERT("MHDHandler::MHDHandler",
+             ("to initialize uniform bfields, the \"bfield_x\", \"bfield_y\", "
+              "and \"bfield_z\" fields must be defined"), has_bfield_);
+      magnetic_edens_wind_ = 0.5 * (uniform_bfield_[0] * uniform_bfield_[0] +
+                                    uniform_bfield_[1] * uniform_bfield_[1] +
+                                    uniform_bfield_[2] * uniform_bfield_[2]);
+      this->initialize_bfields();
+    } else if (has_bfield_) {
+      // compute the specific magnetic energy of the wind in the lower left
+      // corner of the active zone
+      Field field = block->data()->field();
+      int gx,gy,gz;
+      field.ghost_depth(field.field_id("bfield_x"),&gx,&gy,&gz);
+
+      // Currently bfields are assumed to be constant throughout the active zone
+      // We check this assumption below:
+      check_uniform_bfield_(bfield_x, "bfield_x", gx, gy, gz);
+      check_uniform_bfield_(bfield_y, "bfield_y", gx, gy, gz);
+      check_uniform_bfield_(bfield_z, "bfield_z", gx, gy, gz);
+
+      // now compute specific magnetic energy of the wind
+      magnetic_edens_wind_ = 0.5 * (bfield_x(gz,gy,gx) * bfield_x(gz,gy,gx) +
+                                    bfield_y(gz,gy,gx) * bfield_y(gz,gy,gx) +
+                                    bfield_z(gz,gy,gx) * bfield_z(gz,gy,gx));
+    } else {
+      magnetic_edens_wind_ = 0;
+    }
+  }
+
+  enzo_float magnetic_edens_wind() const { return magnetic_edens_wind_; }
+
+  enzo_float magnetic_edens(int iz, int iy, int ix){
+    if (!has_bfield_) { return 0;}
+    return 0.5*(bfield_x(iz,iy,ix)*bfield_x(iz,iy,ix)+
+                bfield_y(iz,iy,ix)*bfield_y(iz,iy,ix)+
+                bfield_z(iz,iy,ix)*bfield_z(iz,iy,ix));
+  }
+
+  void initialize_bfields()
+  {
+    // in the future, this may need to be refactorred
+    if (initialize_uniform_bfield_) {
+      if (has_bfield_){ // always true
+        initialize_uniform_bfield_helper_(bfield_x, bfield_y, bfield_z);
+      }
+      if (has_interface_bfield_) {
+        initialize_uniform_bfield_helper_(bfieldi_x, bfieldi_y, bfieldi_z);
+      }
+    }
+
+  }
+
+  static MHDHandler construct_MHDHandler(Block *block,
+                                         bool initialize_uniform_bfield,
+                                         double uniform_bfield[3])
+  {
+    Field field = block->data()->field();
+    bool has_bfield = (field.is_field("bfield_x") ||
+                       field.is_field("bfield_y") ||
+                       field.is_field("bfield_z"));
+    bool has_interface_bfield = (field.is_field("bfieldi_x") ||
+                                 field.is_field("bfieldi_y") ||
+                                 field.is_field("bfieldi_z"));
+    return MHDHandler(block, has_bfield, has_interface_bfield,
+                      initialize_uniform_bfield, uniform_bfield);
+  }
+
+private:
+
+  void initialize_uniform_bfield_helper_(EFlt3DArray &bx, EFlt3DArray &by,
+                                         EFlt3DArray &bz)
+  {
+    for (int iz = 0; iz<bx.shape(0); iz++){
+      for (int iy = 0; iy<by.shape(1); iy++){
+        for (int ix = 0; ix<bz.shape(2); ix++){
+          bx(iz,iy,ix) = uniform_bfield_[0];
+          by(iz,iy,ix) = uniform_bfield_[1];
+          bz(iz,iy,ix) = uniform_bfield_[2];
+        }
+      }
+    }
+  }
+
+private: // atributes
+  const bool has_bfield_;
+  const bool has_interface_bfield_;
+  const bool initialize_uniform_bfield_;
+  enzo_float uniform_bfield_[3];
+
+  enzo_float magnetic_edens_wind_;
+  EFlt3DArray bfield_x, bfield_y, bfield_z;
+  EFlt3DArray bfieldi_x, bfieldi_y, bfieldi_z;
+};
+
+//----------------------------------------------------------------------
+
 void EnzoInitialCloud::enforce_block
 (Block * block, const Hierarchy * hierarchy) throw()
 {
@@ -331,33 +467,8 @@ void EnzoInitialCloud::enforce_block
   Field field = block->data()->field();
   
   // Handle magnetic fields (mhd indicates whether the fields are present)
-  const bool mhd = (field.is_field("bfield_x") || field.is_field("bfield_y") ||
-		    field.is_field("bfield_z")); 
-  EFlt3DArray bfield_x, bfield_y, bfield_z; // Cell-centered bfields
-  enzo_float magnetic_edens_wind = 0.0; // magnetic energy density of the wind
-
-  if (mhd){
-    // initialize bfields
-    bfield_x = array_factory.from_name("bfield_x");
-    bfield_y = array_factory.from_name("bfield_y");
-    bfield_z = array_factory.from_name("bfield_z");
-
-    // compute the specific magnetic energy of the wind in the lower left
-    // corner of the active zone
-    int gx,gy,gz;
-    field.ghost_depth(field.field_id("bfield_x"),&gx,&gy,&gz);
-
-    // Currently bfields are assumed to be constant throughout the active zone
-    // We check this assumption below:
-    check_uniform_bfield_(bfield_x, "bfield_x", gx, gy, gz);
-    check_uniform_bfield_(bfield_y, "bfield_y", gx, gy, gz);
-    check_uniform_bfield_(bfield_z, "bfield_z", gx, gy, gz);
-
-    // now compute specific magnetic energy of the wind
-    magnetic_edens_wind = 0.5*(bfield_x(gz,gy,gx)*bfield_x(gz,gy,gx)+
-			       bfield_y(gz,gy,gx)*bfield_y(gz,gy,gx)+
-			       bfield_z(gz,gy,gx)*bfield_z(gz,gy,gx));
-  }
+  MHDHandler mhd_handler = MHDHandler::construct_MHDHandler
+    (block, initialize_uniform_bfield_, uniform_bfield_);
 
   // Handle internal_energy & compute eint_density
   // dual_energy indicates if there is an internal_energy to initialize
@@ -374,7 +485,7 @@ void EnzoInitialCloud::enforce_block
   if (dual_energy){
     internal_energy = array_factory.from_name("internal_energy");
     double temp = (eint_wind_ + 0.5*velocity_wind_*velocity_wind_ +
-		   magnetic_edens_wind / density_wind_);
+		   mhd_handler.magnetic_edens_wind() / density_wind_);
     ASSERT2("EnzoInitialCloud::enforce_block",
 	    ("Relative error of the wind's specific etot computed from "
 	     "specified eint, velocity, density & preinitialized B-fields, "
@@ -388,7 +499,7 @@ void EnzoInitialCloud::enforce_block
 	    "is no \"internal_energy\" field."),
 	   eint_wind_ == 0);
     eint_density = ((etot_wind_ - 0.5 * velocity_wind_ * velocity_wind_)
-		    * density_wind_ - magnetic_edens_wind);
+		    * density_wind_ - mhd_handler.magnetic_edens_wind());
   }
 
   ASSERT("EnzoInitialCloud::enforce_block",
@@ -451,13 +562,7 @@ void EnzoInitialCloud::enforce_block
 	if (frac_enclosed == 0){
 	  total_energy(iz,iy,ix) = etot_wind_;
 	} else {
-
-	  double magnetic_edens = 0;
-	  if (mhd){
-	    magnetic_edens = 0.5*(bfield_x(iz,iy,ix)*bfield_x(iz,iy,ix)+
-				  bfield_y(iz,iy,ix)*bfield_y(iz,iy,ix)+
-				  bfield_z(iz,iy,ix)*bfield_z(iz,iy,ix));
-	  }
+	  double magnetic_edens = mhd_handler.magnetic_edens(iz,iy,ix);
 
 	  total_energy(iz,iy,ix)
 	    = ((eint_density + magnetic_edens) / avg_density +
