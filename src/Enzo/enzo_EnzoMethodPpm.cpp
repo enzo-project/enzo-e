@@ -69,12 +69,7 @@ EnzoMethodPpm::EnzoMethodPpm ()
   FieldDescr * field_descr = cello::field_descr();
 
   // add all color fields to refresh
-  for (int i = 0; i < field_descr->field_count(); i++){
-    std::string name = field_descr->field_name(i);
-    if (field_descr->groups()->is_in(name,"color")){
-      refresh->add_field(name);
-    }
-  }
+  refresh->add_all_fields("color");
 
    // PPM parameters initialized in EnzoBlock::initialize()
 }
