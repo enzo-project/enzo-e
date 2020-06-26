@@ -192,10 +192,10 @@ public: // interface
     CkPrintf (" prolong_ = %p\n",prolong_);
     CkPrintf (" iter_max_ = %d\n",iter_max_);
     CkPrintf (" res_tol_ = %g\n",res_tol_);
-    CkPrintf (" i_sync_restrict_ = %g\n",i_sync_restrict_);
-    CkPrintf (" i_sync_prolong_ = %g\n",i_sync_prolong_);
-    CkPrintf (" i_iter_ = %g\n",i_iter_);
-    CkPrintf (" i_msg_ = %g\n",i_msg_);
+    CkPrintf (" i_sync_restrict_ = %d\n",i_sync_restrict_);
+    CkPrintf (" i_sync_prolong_ = %d\n",i_sync_prolong_);
+    CkPrintf (" i_iter_ = %d\n",i_iter_);
+    CkPrintf (" i_msg_ = %d\n",i_msg_);
     CkPrintf (" ib_ = %d\n",ib_);
     CkPrintf (" ic_ = %d\n",ic_);
     CkPrintf (" ir_ = %d\n",ir_);

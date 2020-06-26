@@ -314,10 +314,10 @@ public: /// entry methods
 
   void print() {
     Block::print();
-    CkPrintf ("dt = %d\n",dt);
-    CkPrintf ("redshift = %d\n",redshift);
-    CkPrintf ("SubgridFluxes = %d\n",SubgridFluxes);
-    CkPrintf ("GridLeftEdge[] = %d %d %d\n",GridLeftEdge[0],GridLeftEdge[1],GridLeftEdge[2]);
+    CkPrintf ("dt = %g\n",dt);
+    CkPrintf ("redshift = %g\n",redshift);
+    CkPrintf ("SubgridFluxes = %p\n",SubgridFluxes);
+    CkPrintf ("GridLeftEdge[] = %g %g %g\n",GridLeftEdge[0],GridLeftEdge[1],GridLeftEdge[2]);
     CkPrintf ("GridDimension[] = %d %d %d\n",GridDimension[0],GridDimension[1],GridDimension[2]);
     CkPrintf ("GridStartIndex[] = %d %d %d\n",GridStartIndex[0],GridStartIndex[1],GridStartIndex[2]);
     CkPrintf ("GridEndIndex[] = %d %d %d\n",GridEndIndex[0],GridEndIndex[1],GridEndIndex[2]);
