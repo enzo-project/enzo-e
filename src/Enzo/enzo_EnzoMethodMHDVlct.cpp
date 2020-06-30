@@ -284,18 +284,39 @@ void EnzoMethodMHDVlct::pup (PUP::er &p)
   TRACEPUP;
 
   Method::pup(p);
+  const bool up = p.isUnpacking();
 
   p|eos_;
   p|integrable_group_names_;
   p|reconstructable_group_names_;
   p|passive_group_names_;
 
-  if (p.isUnpacking()){
-    // a bug prevents us from pupping the groupings
-    // instead, we just set them up again
-    setup_groupings_(integrable_group_names_, reconstructable_group_names_,
-		     passive_group_names_);
+  int has_prim_group = (primitive_group_ != nullptr);
+  p|has_prim_group;
+  if (has_prim_group){
+    if (up){
+      primitive_group_ = new Grouping;
+    }
+    p|*primitive_group_;
+  } else {
+    primitive_group_ = nullptr;
   }
+
+  int has_bfieldi_group = (bfieldi_group_ != nullptr);
+  p|has_bfieldi_group;
+  if (has_bfieldi_group){
+    if (up){
+      bfieldi_group_ = new Grouping;
+    }
+    p|*bfieldi_group_;
+  } else {
+    bfieldi_group_ = nullptr;
+  }
+
+  // sanity check:
+  ASSERT("EnzoMethodMHDVlct::pup",
+         "primitive_group_ and bfieldi_group_ should not be NULL",
+         ((primitive_group_ != nullptr) && (bfieldi_group_ != nullptr)));
 
   p|half_dt_recon_;
   p|full_dt_recon_;
