@@ -1,0 +1,119 @@
+Import('env')
+Import('parallel_run')
+Import('serial_run')
+Import('ip_charm')
+
+Import('bin_path')
+Import('test_path')
+
+#---------------------------------------------------------------
+# Defines
+#---------------------------------------------------------------
+
+env['CPIN'] = 'touch parameters.out; mv parameters.out ${TARGET}.in'
+env['RMIN'] = 'rm -f parameters.out'
+
+date_cmd = 'echo $TARGET > test/STATUS; echo "-------------------"; date +"%Y-%m-%d %H:%M:%S";'
+
+run_data = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunData' : run_data } )
+env_mv_data = env.Clone(COPY = 'mkdir -p ' + test_path + '/MeshComponent/Data; mv `ls *.png *.h5` ' + test_path + '/MeshComponent/Data')
+
+
+run_index = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunIndex' : run_index } )
+env_mv_index = env.Clone(COPY = 'mkdir -p ' + test_path + '/MeshComponent/Index; mv `ls *.png *.h5` ' + test_path + '/MeshComponent/Index')
+
+run_it_face = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunItFace' : run_it_face } )
+env_mv_it_face = env.Clone(COPY = 'mkdir -p ' + test_path + '/MeshComponent/ItFace; mv `ls *.png *.h5` ' + test_path + '/MeshComponent/ItFace')
+
+run_it_child = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunItChild' : run_it_child } )
+env_mv_it_child = env.Clone(COPY = 'mkdir -p ' + test_path + '/MeshComponent/ItChild; mv `ls *.png *.h5` ' + test_path + '/MeshComponent/ItChild')
+
+run_node = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunNode' : run_node } )
+env_mv_node = env.Clone(COPY = 'mkdir -p ' + test_path + '/MeshComponent/Node; mv `ls *.png *.h5` ' + test_path + '/MeshComponent/Node')
+
+run_node_trace = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunNodeTrace' : run_node_trace } )
+env_mv_node_trace = env.Clone(COPY = 'mkdir -p ' + test_path + '/MeshComponent/NodeTrace; mv `ls *.png *.h5` ' + test_path + '/MeshComponent/NodeTrace')
+
+run_it_node = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunItNode' : run_it_node } )
+env_mv_it_node = env.Clone(COPY = 'mkdir -p ' + test_path + '/MeshComponent/ItNode; mv `ls *.png *.h5` ' + test_path + '/MeshComponent/ItNode')
+
+run_tree = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunTree' : run_tree } )
+env_mv_tree = env.Clone(COPY = 'mkdir -p ' + test_path + '/MeshComponent/Tree; mv `ls *.png *.h5` ' + test_path + '/MeshComponent/Tree')
+
+run_tree_density = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunTreeDensity' : run_tree_density } )
+env_mv_tree_density = env.Clone(COPY = 'mkdir -p ' + test_path + '/MeshComponent/TreeDensity; mv `ls *.png *.h5` ' + test_path + '/MeshComponent/TreeDensity')
+
+
+#--------------------------------------------------------------------------------
+# Load Balancing
+#--------------------------------------------------------------------------------
+
+# DataLB
+balance_data = env_mv_data.RunData(
+    'test_Data.unit',
+    bin_path + '/test_Data')
+
+# IndexLB
+balance_index = env_mv_index.RunIndex(
+    'test_Index.unit',
+    bin_path + '/test_Index')
+
+# ItFaceLB
+balance_it_face = env_mv_it_face.RunItFace(
+    'test_ItFace.unit',
+    bin_path + '/test_ItFace')
+
+# ItChildLB
+balance_it_child = env_mv_it_child.RunItChild(
+    'test_ItChild.unit',
+    bin_path + '/test_ItChild')
+    
+# NodeLB
+balance_node = env_mv_node.RunNode(
+    'test_Node.unit',
+    bin_path + '/test_Node')
+    
+# NodeTraceLB
+balance_node_trace = env_mv_node_trace.RunNodeTrace(
+    'test_NodeTrace.unit',
+    bin_path + '/test_NodeTrace')
+
+# ItNodeLB
+balance_it_node = env_mv_it_node.RunItNode(
+    'test_ItNode.unit',
+    bin_path + '/test_ItNode')
+
+# TreeLB
+balance_tree = env_mv_tree.RunTree(
+    'test_Tree.unit',
+    bin_path + '/test_Tree')
+
+Clean(balance_tree,  
+      ['#/test_Tree.unit.in',
+       '#/test_tree_1-initial.png',
+       '#/test_tree_2-balanced.png',
+       '#/test_tree_3-merged.png'])
+
+# TreeDensityLB
+balance_tree_density = env_mv_tree_density.RunTreeDensity(
+    'test_TreeDensity.unit',
+    bin_path + '/test_TreeDensity',
+    ARGS='input/density_128.h5 Density 0 10')
+
+Clean(balance_tree_density,  
+      ['#/density_3d_1-initial.png',
+       '#/density_x_1-initial.png',
+       '#/density_3d_2-balanced.png',
+       '#/density_x_2-balanced.png',
+       '#/density_3d_3-coalesced.png',
+       '#/density_x_3-coalesced.png'] )
+       
