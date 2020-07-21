@@ -80,8 +80,6 @@ memory = 1
 
 new_charm = 1
 
-new_ppm = 1
-
 #----------------------------------------------------------------------
 # Enable charm++ dynamic load balancing
 #----------------------------------------------------------------------
@@ -175,8 +173,8 @@ if (prec == 'unknown' and "CELLO_PREC" in os.environ):
      prec = os.environ["CELLO_PREC"]
 
 print 
-print "    CELLO_ARCH scons arch=",arch
-print "    CELLO_PREC scons prec=",prec
+print("    CELLO_ARCH scons arch=",arch)
+print("    CELLO_PREC scons prec=",prec)
 print 
 
 #----------------------------------------------------------------------
@@ -205,7 +203,6 @@ define_jemalloc  = 'CONFIG_USE_JEMALLOC'
 
 define_memory =       'CONFIG_USE_MEMORY'
 define_new_charm =    'CONFIG_NEW_CHARM'
-define_new_ppm =      'NEW_PPM'
 define_projections =  'CONFIG_USE_PROJECTIONS'
 define_performance =  'CONFIG_USE_PERFORMANCE'
 define_papi  =        'CONFIG_USE_PAPI','PAPI3'
@@ -284,6 +281,7 @@ elif (arch == "gordon_intel"): from gordon_intel import *
 elif (arch == "gordon_pgi"):   from gordon_pgi   import *
 elif (arch == "comet_gnu"):    from comet_gnu    import *
 elif (arch == "linux_gnu"):    from linux_gnu    import *
+elif (arch == "linux_gcc_9"):  from linux_gcc_9  import *
 elif (arch == "linux_intel"):  from linux_intel  import *
 elif (arch == "linux_yt"):     from linux_yt     import *
 elif (arch == "linux_gprof"):  from linux_gprof  import *
@@ -310,7 +308,7 @@ elif (arch == "darwin_homebrew"):   from darwin_homebrew   import *
 #======================================================================
 
 if (not is_arch_valid):
-   print "Unrecognized architecture ",arch
+   print("Unrecognized architecture ",arch)
    sys.exit(1)
 
 #----------------------------------------------------------------------
@@ -324,12 +322,12 @@ defines = []
 if (prec == 'single' or prec == 'double'):
      defines.append(define[prec])
 else:
-     print "Unrecognized precision ",prec
+     print("Unrecognized precision ",prec)
      print
-     print "Valid precisions are 'single' and 'double'"
+     print("Valid precisions are 'single' and 'double'")
      print
-     print "The precision is set using the environment variable $CELLO_PREC"
-     print "or by using 'scons prec=<precision>"
+     print("The precision is set using the environment variable $CELLO_PREC")
+     print("or by using 'scons prec=<precision>")
      sys.exit(1)
 
 defines.append(define_int_size)
@@ -565,11 +563,11 @@ cello_def.write ("#define CELLO_TIME "
 # Python version >= 2.7 is required for subprocess.check_output()
 
 if (python_lt_27 == 0):
-     charm_version =  subprocess.check_output (["cat", charm_path + "/VERSION"]).rstrip();
+     charm_version = str(subprocess.check_output (["cat", charm_path + "/VERSION"]).rstrip());
      cello_def.write ("#define CELLO_CHARM_VERSION "+charm_version+"\n" )
      
      fp_charm_version = open ("test/CHARM_VERSION", "w")
-     fp_charm_version.write(charm_version + "\n");
+     fp_charm_version.write(charm_version + str("\n"));
      fp_charm_version.close()
      		      
 else:
@@ -587,9 +585,8 @@ cello_def.write ("#define CELLO_CHARM_PATH \"" + charm_path + "\"\n" )
 
 if (python_lt_27 == 0 and have_git):
 
-     cello_def.write ("#define CELLO_CHANGESET "
-		      "\""+subprocess.check_output
-		      (["git", "rev-parse", "HEAD"]).rstrip()+"\"\n" )
+   git_changeset = str(subprocess.check_output(["git", "rev-parse", "HEAD"]).rstrip())
+   cello_def.write ("#define CELLO_CHANGESET \""+git_changeset+"\"\n" )
 
 elif (python_lt_27 == 0 and have_mercurial):
 

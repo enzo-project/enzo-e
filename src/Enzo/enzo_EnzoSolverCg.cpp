@@ -329,8 +329,8 @@ void EnzoSolverCg::loop_0a
   
   refresh->set_active(is_finest_(enzo_block));
 
-  enzo_block->new_refresh_start(ir_matvec_,
-				CkIndex_EnzoBlock::p_solver_cg_matvec());
+  enzo_block->new_refresh_start
+    (ir_matvec_, CkIndex_EnzoBlock::p_solver_cg_matvec());
 }
 
 //----------------------------------------------------------------------
@@ -364,7 +364,7 @@ void EnzoSolverCg::loop_0b
   refresh->set_active(is_finest_(enzo_block));
 
   enzo_block->new_refresh_start
-    (ir_matvec_,CkIndex_EnzoBlock::p_solver_cg_matvec());
+    (ir_matvec_, CkIndex_EnzoBlock::p_solver_cg_matvec());
 }
 
 //----------------------------------------------------------------------
@@ -479,7 +479,7 @@ void EnzoSolverCg::loop_2a (EnzoBlock * enzo_block) throw()
   refresh->set_active(is_finest_(enzo_block));
 
   enzo_block->new_refresh_start
-    (ir_loop_2_,CkIndex_EnzoBlock::p_solver_cg_loop_2());
+    (ir_loop_2_, CkIndex_EnzoBlock::p_solver_cg_loop_2());
 }
 
 //----------------------------------------------------------------------

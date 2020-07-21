@@ -72,8 +72,6 @@ enum phase_type {
 ///         RefreshState::active   (start() called),
 ///         RefreshState::ready    (wait() called)
 
-enum class RefreshState { INACTIVE, ACTIVE, READY };
-
 // #define PHASE_COUNT (phase_exit + 1)
 // #define PHASE_COUNT 100
 extern const char * phase_name[];

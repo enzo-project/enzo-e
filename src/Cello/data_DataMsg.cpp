@@ -17,7 +17,9 @@ int DataMsg::data_size () const
 {
   FieldFace    * ff = field_face_;
   ParticleData * pd = particle_data_;
-  FluxData     * fd = flux_data_;
+  auto & fd = face_fluxes_list_;
+
+  bool any_fluxes = fd.size() > 0;
 
   //--------------------------------------------------
   //  1. determine buffer size (must be consistent with #3)
@@ -28,7 +30,7 @@ int DataMsg::data_size () const
   const int n_ff = (ff) ? ff->data_size() : 0;
   const int n_fa = (ff) ? ff->num_bytes_array(field) : 0;
   const int n_pd = (pd) ? pd->data_size(cello::particle_descr()) : 0;
-  const int n_fd = (fd) ? fd->data_size() : 0;
+  const int n_fd = fd.size();
 
   int size = 0;
 
@@ -37,10 +39,17 @@ int DataMsg::data_size () const
   size += sizeof(int); // n_pd_
   size += sizeof(int); // n_fd_
 
-  size += n_ff*sizeof(char);
-  size += n_fa*sizeof(char);
-  size += n_pd*sizeof(char);
-  size += n_fd*sizeof(char);
+  size += n_ff;
+  size += n_fa;
+  size += n_pd;
+#ifdef DEBUG_DATA_MSG
+  CkPrintf ("%d %p DEBUG_FLUX_REFRESH DataMsg::data_size() n_fd=%d\n",
+            CkMyPe(),(void*)this,n_fd);
+#endif
+  for (int i=0; i<n_fd; i++) {
+    size += sizeof(int); // face_fluxes_delete_[i] 
+    size += fd[i]->data_size();
+  }
 
   return size;
 }
@@ -51,7 +60,7 @@ char * DataMsg::save_data (char * buffer) const
 {
 
 #ifdef DEBUG_DATA_MSG
-  CkPrintf ("%d %s:%d DEBUG_DATA_MSG save_data %p\n",
+  CkPrintf ("%d %s:%d DEBUG_DATA_MSG DataMsg::save_data %p\n",
 	    CkMyPe(),__FILE__,__LINE__,this);
   fflush(stdout);
 #endif
@@ -67,12 +76,12 @@ char * DataMsg::save_data (char * buffer) const
 
   FieldFace    * ff = field_face_;
   ParticleData * pd = particle_data_;
-  FluxData     * fd = flux_data_;
+  auto & fd = face_fluxes_list_;
 
   const int n_ff = (ff) ? ff->data_size() : 0;
   const int n_fa = (ff) ? ff->num_bytes_array(field) : 0;
   const int n_pa = (pd) ? pd->data_size(cello::particle_descr()) : 0;
-  const int n_fd = (fd) ? fd->data_size() : 0;
+  const int n_fd = fd.size();
 
   (*pi++) = n_ff;
   (*pi++) = n_fa;
@@ -94,7 +103,13 @@ char * DataMsg::save_data (char * buffer) const
   }
   // save fluxes
   if (n_fd > 0) {
-    pc = fd->save_data(pc);
+    for (int i=0; i<n_fd; i++) {
+      (*pi++) = face_fluxes_delete_[i];
+      pc = fd[i]->save_data(pc);
+#ifdef DEBUG_DATA_MSG
+      fd[i]->print("BLOCK","save");
+#endif      
+    }
   }
 
   ASSERT2 ("DataMsg::save_data()",
@@ -107,18 +122,14 @@ char * DataMsg::save_data (char * buffer) const
 }
 
 //----------------------------------------------------------------------
-
+// #define TRACE CkPrintf ("%d TRACE %s:%d\n",CkMyPe(),__FILE__,__LINE__); fflush(stdout);
+#define TRACE /*...*/
 char * DataMsg::load_data (char * buffer)
 {
-#ifdef DEBUG_DATA_MSG
-  CkPrintf ("%d %s:%d DEBUG_DATA_MSG load_data %p\n",
-	    CkMyPe(),__FILE__,__LINE__,this);
-  fflush(stdout);
-#endif
-
   // 2. De-serialize message data from input buffer into the allocated
   // message (must be consistent with pack())
- 
+
+  TRACE;
   union {
     char * pc;
     int  * pi;
@@ -128,7 +139,7 @@ char * DataMsg::load_data (char * buffer)
 
   field_face_ = new FieldFace;
 #ifdef DEBUG_FIELD_FACE
-  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face_);
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE DataMsg::load_data creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face_);
 #endif  
 
   const int n_ff = (*pi++);
@@ -142,6 +153,7 @@ char * DataMsg::load_data (char * buffer)
   }
 
   // load field array
+  TRACE;
   if (n_fa > 0) {
     field_array_ = pc;
     pc += n_fa;
@@ -150,6 +162,7 @@ char * DataMsg::load_data (char * buffer)
   }
 
   // load particle data
+  TRACE;
   if (n_pa > 0) {
     ParticleData * pd = particle_data_ = new ParticleData;
     pd->allocate(cello::particle_descr());
@@ -159,16 +172,38 @@ char * DataMsg::load_data (char * buffer)
   }
 
   // load flux data
+#ifdef DEBUG_DATA_MSG
+  CkPrintf ("%d %s:%d DEBUG_FLUX_REFRESH %d\n",
+            CkMyPe(),__FILE__,__LINE__,n_fd);
+  TRACE;
+  CkPrintf ("DEBUG_FLUX_REFRESH face_fluxes_list_.size = %d\n",face_fluxes_list_.size()); fflush(stdout);
+#endif  
   if (n_fd > 0) {
-    FluxData * fd = flux_data_ = new FluxData;
-    pc = fd->load_data(pc);
+    face_fluxes_list_.resize(n_fd);
+    face_fluxes_delete_.resize(n_fd);
+    for (int i=0; i<n_fd; i++) {
+      face_fluxes_delete_[i] = (*pi++);
+      FaceFluxes * ff = new FaceFluxes;
+      face_fluxes_list_[i] = ff;
+      pc = ff->load_data(pc);
+#ifdef DEBUG_DATA_MSG
+      ff->print("BLOCK","load");
+#endif      
+    }
   }
+  TRACE;
 
+#ifdef DEBUG_DATA_MSG
+  CkPrintf ("%d %p DEBUG_DATA_MSG DataMsg::load_data %p %d n_fd=%d\n",
+	    CkMyPe(),(void*)this,this,pc-buffer,n_fd);
+  fflush(stdout);
+#endif
   // ASSERT2 ("DataMsg::load_data()",
   //  	   "Expecting buffer size %d actual size %d",
   //  	   data_size(),(pc-buffer),
   //  	   (data_size() == (pc-buffer)));
 
+  TRACE;
   return pc;
 }
 
@@ -181,12 +216,13 @@ void DataMsg::update (Data * data, bool is_local)
   char         * fa = field_array_;
 
 #ifdef DEBUG_DATA_MSG
-  CkPrintf ("%d %s:%d DEBUG_DATA_MSG update %p (fd:%p pd:%p ff:%p fa:%p local:%d)\n",
-	    CkMyPe(),__FILE__,__LINE__,this,field_data_,pd,ff,fa,is_local);
+  CkPrintf ("%d %s:%d DEBUG_DATA_MSG DataMsg::update %p (fd:%p pd:%p ff:%p fa:%p local:%d)\n",
+	    CkMyPe(),__FILE__,__LINE__,(void*)this,field_data_,pd,ff,fa,is_local);
   fflush(stdout);
 #endif
 
-
+  // Update particles
+  
   if (pd != NULL) {
 
     // Insert new particles 
@@ -203,7 +239,8 @@ void DataMsg::update (Data * data, bool is_local)
     particle_data_ = NULL; 
   }
   
-
+  // Update fields
+  
   if (ff != NULL && fa != NULL) {
 
     Field field_dst = data->field();
@@ -216,7 +253,7 @@ void DataMsg::update (Data * data, bool is_local)
 
     } else { // ! is_local
 
-      // Invert face since incoming not outgoing
+      // invert face since incoming not outgoing
 
       ff->invert_face();
 
@@ -225,12 +262,27 @@ void DataMsg::update (Data * data, bool is_local)
     }
   }
 
-#ifdef DEBUG_DATA_MSG
-  CkPrintf ("%d %s:%d DEBUG_DATA_MSG delete? %p (%p %d)\n",
-	    CkMyPe(),__FILE__,__LINE__,this,ff,field_face_delete_);
-  fflush(stdout);
-#endif
+  // Update fluxes
 
+  FluxData * flux_data = data->flux_data();
+  if (face_fluxes_list_.size() > 0) {
+    for (int i=0; i<face_fluxes_list_.size(); i++) {
+      FaceFluxes * face_fluxes = face_fluxes_list_[i];
+      Face face = face_fluxes->face();
+#ifdef DEBUG_DATA_MSG
+      face_fluxes->print("BLOCK","update");
+#endif      
+      //           flux_data->set_neighbor_fluxes
+      //             (face_fluxes,face.axis(), 1 - face.face(), i);
+      flux_data->add_neighbor_fluxes
+        (face_fluxes,face.axis(), 1 - face.face(), i);
+#ifdef DEBUG_DATA_MSG      
+      CkPrintf ("DEBUG_FLUX_REFRESH DataMsg::update data %p flux_data %p axis %d face %d field %d\n",
+                (void *)data,(void*)flux_data,face.axis(),face.face(),i);
+#endif      
+    }
+    face_fluxes_list_.clear();
+  }
   if (ff != NULL) {
     delete field_face_;
     field_face_ = NULL;

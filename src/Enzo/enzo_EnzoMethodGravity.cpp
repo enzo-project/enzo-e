@@ -364,8 +364,8 @@ void EnzoBlock::p_method_gravity_continue()
 void EnzoMethodGravity::refresh_potential (EnzoBlock * enzo_block) throw()
 {
   cello::refresh(ir_exit_)->set_active(enzo_block->is_leaf());
-  enzo_block->new_refresh_start(ir_exit_,
-			   CkIndex_EnzoBlock::p_method_gravity_end());
+  enzo_block->new_refresh_start
+    (ir_exit_, CkIndex_EnzoBlock::p_method_gravity_end());
 }
 //----------------------------------------------------------------------
 

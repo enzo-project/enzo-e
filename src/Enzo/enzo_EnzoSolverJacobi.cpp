@@ -280,8 +280,8 @@ void EnzoSolverJacobi::do_refresh_(Block * block)
 #ifdef DEBUG_NEW_REFRESH  
   CkPrintf ("DEBUG_NEW_REFRESH %s:%d ir_smooth=%d\n",__FILE__,__LINE__,ir_smooth_);
 #endif  
-  block->new_refresh_start (ir_smooth_,
-			    CkIndex_EnzoBlock::p_solver_jacobi_continue());
+  block->new_refresh_start
+    (ir_smooth_, CkIndex_EnzoBlock::p_solver_jacobi_continue());
 }
 
 //----------------------------------------------------------------------

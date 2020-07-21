@@ -440,11 +440,6 @@ void Block::pup(PUP::er &p)
   }
   p | new_refresh_sync_list_;
   //  p | new_refresh_msg_list_;
-
-  // Skip if Charm++ version <= 60701 (for Coverity analysis only!)
-#if CHARM_VERSION > 60701
-  p | new_refresh_state_list_;
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -807,10 +802,8 @@ void Block::init_new_refresh_()
 #endif  
   new_refresh_sync_list_.resize(count);
   new_refresh_msg_list_.resize(count);
-  new_refresh_state_list_.resize(count);
   for (int i=0; i<count; i++) {
     new_refresh_sync_list_[i].reset();
-    new_refresh_state_list_[i] = RefreshState::INACTIVE;
   }
 }
 

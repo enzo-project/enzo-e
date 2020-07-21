@@ -169,14 +169,6 @@ int EnzoBlock::SolveHydroEquations
   const int nx = mx - 2*gx;
   const int ny = my - 2*gy;
   const int nz = mz - 2*gz;
-  auto field_names = field.groups()->group_list("conserved");
-  const int nf = field_names.size();
-  std::vector<int> field_list;
-  field_list.resize(nf);
-  for (int i=0; i<nf; i++) {
-    field_list[i] = field.field_id(field_names[i]);
-  }
-  flux_data->allocate (nx,ny,nz,this->level(),dt,field_list);
   
   enzo_float * standard = temp;
 
@@ -184,9 +176,11 @@ int EnzoBlock::SolveHydroEquations
   // int u3[3] = {mx-gx,my-gy,mz-gz};
   int l3[3] = {gx,gy,gz};
   int u3[3] = {mx-gx-1,my-gy-1,mz-gz-1};
+  const int nf = flux_data->num_fields();
   for (int i_f=0; i_f <nf; i_f++) {
     int * flux_index = 0;
-    std::string field_name = field_names[i_f];
+    const int index_field = flux_data->index_field(i_f);
+    const std::string field_name = field.field_name(index_field);
     
     if (field_name == "density") flux_index = dindex;
     if (field_name == "velocity_x") flux_index = uindex;
@@ -215,7 +209,7 @@ int EnzoBlock::SolveHydroEquations
   }
 
 #endif    
-
+ 
   //==================================================
   //    enzo_float *standard = SubgridFluxes[0]->LeftFluxes[0][0];
 
@@ -261,6 +255,7 @@ int EnzoBlock::SolveHydroEquations
   int iconsrec = 0;
   int iposrec = 0;
 
+  
   FORTRAN_NAME(ppm_de)
     (
      density, total_energy, velocity_x, velocity_y, velocity_z,

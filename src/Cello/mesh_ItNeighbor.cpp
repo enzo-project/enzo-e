@@ -229,12 +229,6 @@ bool ItNeighbor::valid_()
       return false;
   }
 
-  // return false if neighbor_flux and in same level
-  if ((neighbor_type_ == neighbor_flux)
-      && (face_level() == level_)) {
-    return false;
-  }
-  
   // Return false if on boundary and not periodic
 
   for (int axis=0; axis<rank_; axis++) {

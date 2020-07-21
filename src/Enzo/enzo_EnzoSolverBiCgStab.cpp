@@ -181,7 +181,6 @@ void mutex_init_bcg_iter()
 #  define TRACE_DOT(BLOCK,msg,ifunction) /* ... */
 #endif
 
-
 //----------------------------------------------------------------------
 
 EnzoSolverBiCgStab::EnzoSolverBiCgStab
@@ -849,8 +848,8 @@ void EnzoSolverBiCgStab::loop_25 (EnzoBlock * block) throw() {
 	    is_finest_(block),cello::refresh(ir_loop_3_)->is_active());
     fflush(stdout);
 #endif  
-  block->new_refresh_start(ir_loop_3_,
-			   CkIndex_EnzoBlock::p_solver_bicgstab_loop_3());
+  block->new_refresh_start
+    (ir_loop_3_, CkIndex_EnzoBlock::p_solver_bicgstab_loop_3());
 }
 
 //----------------------------------------------------------------------

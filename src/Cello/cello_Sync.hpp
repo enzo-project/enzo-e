@@ -12,6 +12,8 @@
 #ifndef CELLO_SYNC_HPP
 #define CELLO_SYNC_HPP
 
+enum class RefreshState { INACTIVE, ACTIVE, READY };
+
 class Sync {
 
   /// @class    Sync
@@ -67,6 +69,11 @@ public:
   inline int operator += (int count) 
   { index_stop_ += count; return index_stop_; }
 
+  inline RefreshState state () const
+  { return state_; }
+  inline void set_state (RefreshState state)
+  { state_ = state; }
+  
 private: // methods
 
   /// Increment counter
@@ -84,6 +91,9 @@ private: // attributes
 
   /// Current value of the parallel sync index
   int index_curr_;
+
+  /// Current state
+  RefreshState state_;
 };
 
 #endif /* CELLO_SYNC_HPP */

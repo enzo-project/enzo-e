@@ -294,7 +294,9 @@ CkReductionMsg * sum_long_double_n(int n, CkReductionMsg ** msgs)
 {
 
   const int N = int(*((long double *) msgs[0]->getData()));
-  long double accum[N+1];
+  
+  long double * accum = new long double [N+1];
+  
   std::fill_n(accum,N+1,0.0);
 
   for (int i=0; i<n; i++) {
@@ -311,7 +313,10 @@ CkReductionMsg * sum_long_double_n(int n, CkReductionMsg ** msgs)
       accum[i] += values[i];
     }
   }
-  return CkReductionMsg::buildNew((N+1)*sizeof(long double),accum);
+  CkReductionMsg * msg = CkReductionMsg::buildNew
+    ((N+1)*sizeof(long double),accum);
+  delete [] accum;
+  return msg;
 }
 
 //======================================================================

@@ -2,7 +2,7 @@ c     See LICENSE_ENZO file for license and copyright information
 
 #include "fortran.h"
 
-c #define DEBUG_FLUXES
+C #define DEBUG_FLUXES
 
 c=======================================================================
 c/////////////////////  SUBROUTINE ZEULER_SWEEP  \\\\\\\\\\\\\\\\\\\\\\\
@@ -326,27 +326,45 @@ c@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 c     FOR DEBUGGING ONLY
 c@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #ifdef DEBUG_FLUXES             
-             array(dindex(n*6+5)+offset) = 3000.0
-             array(dindex(n*6+6)+offset) = 3001.0
-             array(eindex(n*6+5)+offset) = 3010.
-             array(eindex(n*6+6)+offset) = 3011.
-             array(uindex(n*6+5)+offset) = 3020.
-             array(uindex(n*6+6)+offset) = 3021.
+
+#   define AREA (dx(1)*dy(1))
+#   define FLUX_DE 100.
+#   define FLUX_U  200.
+#   define FLUX_V  300.
+#   define FLUX_W  400.
+#   define FLUX_E  500.
+#   define FLUX_GE 600.
+#   define FLUX_COLOR(ic) (1000. + 100.*(ic))
+#   define FACE_XM 00.0
+#   define FACE_XP 01.0
+#   define FACE_YM 10.0
+#   define FACE_YP 11.0
+#   define FACE_ZM 20.0
+#   define FACE_ZP 21.0
+             
+             array(dindex(n*6+5)+offset) = AREA*(FLUX_DE + FACE_ZM)
+             array(dindex(n*6+6)+offset) = AREA*(FLUX_DE + FACE_ZP)
+             array(uindex(n*6+5)+offset) = AREA*(FLUX_U + FACE_ZM)
+             array(uindex(n*6+6)+offset) = AREA*(FLUX_U + FACE_ZP)
              if (nyz .gt. 1) then
-                array(vindex(n*6+5)+offset) = 3030.
-                array(vindex(n*6+6)+offset) = 3031.
+                array(vindex(n*6+5)+offset) = AREA*(FLUX_V + FACE_ZM)
+                array(vindex(n*6+6)+offset) = AREA*(FLUX_V + FACE_ZP)
              endif
              if (nzz .gt. 1) then
-                array(windex(n*6+5)+offset) = 3040.
-                array(windex(n*6+6)+offset) = 3041.
+                array(windex(n*6+5)+offset) = AREA*(FLUX_W + FACE_ZM)
+                array(windex(n*6+6)+offset) = AREA*(FLUX_W + FACE_ZP)
              endif
+             array(eindex(n*6+5)+offset) = AREA*(FLUX_E + FACE_ZM)
+             array(eindex(n*6+6)+offset) = AREA*(FLUX_E + FACE_ZP)
              if (idual .eq. 1) then
-                array(geindex(n*6+5)+offset) = 3050.
-                array(geindex(n*6+6)+offset) = 3051.
+                array(geindex(n*6+5)+offset) = AREA*(FLUX_GE + FACE_ZM)
+                array(geindex(n*6+6)+offset) = AREA*(FLUX_GE + FACE_ZP)
              endif
              do ic=1, ncolor
-                array(colindex(n*6+5,ic)+offset) = 3100.+10*(ic-1)
-                array(colindex(n*6+6,ic)+offset) = 3101.+10*(ic-1)
+                array(colindex(n*6+5,ic)+offset) =
+     $               AREA*(FLUX_COLOR(ic) + FACE_ZM)
+                array(colindex(n*6+6,ic)+offset) =
+     $               AREA*(FLUX_COLOR(ic) + FACE_ZP)
              enddo
 #endif             
 c@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

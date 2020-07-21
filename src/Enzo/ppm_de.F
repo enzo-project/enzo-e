@@ -152,7 +152,6 @@ c
       do ii=1,ntmp
          tmp(ii)=0.0
       end do
-      
       do n=ixyz,ixyz+rank-1
 c
 c  Update in x-direction

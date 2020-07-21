@@ -299,6 +299,9 @@ protected: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
+  /// Matrix
+  std::shared_ptr<Matrix> A_;
+
   /// Corresponding ScalarData id's for solve_type == solve_tree
   int is_alpha_;
   int is_beta_n_;
@@ -331,9 +334,6 @@ protected: // attributes
   
   /// Convergence tolerance on the relative residual
   long double res_tol_;
-
-  /// Matrix
-  std::shared_ptr<Matrix> A_;
 
   /// Preconditioner (-1 if none)
   int index_precon_;

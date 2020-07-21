@@ -87,7 +87,22 @@ void EnzoMethodPpm::compute ( Block * block) throw()
   COPY_FIELD(block,"acceleration_x","acceleration_x_in");
   COPY_FIELD(block,"acceleration_y","acceleration_y_in");
   if (rank >= 3) COPY_FIELD(block,"acceleration_z","acceleration_z_in");
-#endif  
+#endif
+
+  Field field = block->data()->field();
+  auto field_names = field.groups()->group_list("conserved");
+  const int nf = field_names.size();
+  std::vector<int> field_list;
+  field_list.resize(nf);
+  for (int i=0; i<nf; i++) {
+    field_list[i] = field.field_id(field_names[i]);
+  }
+
+  int nx,ny,nz;
+  field.size(&nx,&ny,&nz);
+  block->data()->flux_data()->allocate
+    (nx,ny,nz,block->level(),block->dt(),field_list);
+  
   if (block->is_leaf()) {
     EnzoBlock * enzo_block = enzo::block(block);
     TRACE_PPM ("BEGIN SolveHydroEquations");

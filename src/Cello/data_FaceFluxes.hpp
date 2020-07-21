@@ -45,7 +45,7 @@ public: // interface
 
   /// Deallocate the flux array.
   void deallocate()
-  { fluxes_.resize(0); }
+  { fluxes_.clear(); }
 
   /// Clear flux array values
   void clear()
@@ -55,6 +55,10 @@ public: // interface
   Face face () const
   { return face_; }
 
+  /// Return the associated Field index
+  int index_field () const
+  { return index_field_; }
+  
   /// Return the mesh level associated with the neighbor block (may
   /// change if fluxes are coarsened)
   int level_neighbor () const
@@ -75,46 +79,7 @@ public: // interface
   double time_step_block () const
   { return dt_block_; }
   
-  /// Return loop limits on this face relative to given neighbor
-  /// face fluxes.  Must be conforming.
-  void get_start(int * ix0, int * iy0, int * iz0,
-                 int cx, int cy, int cz,
-                 const FaceFluxes & ff) const
-  {
-    if (level_block() >= ff.level_block()) {
-      // neighbor block is not in finer level
-      (*ix0) = 0;
-      (*iy0) = 0;
-      (*iz0) = 0;
-    } else {
-      // neighbor block is finer, use neighbor child array for start
-      int ix,iy,iz;
-      face_.get_face(&ix,&iy,&iz);
-      (*ix0) = (ix != 0) ? 0 : cx*nx_/2;
-      (*iy0) = (iy != 0) ? 0 : cy*ny_/2;
-      (*iz0) = (iz != 0) ? 0 : cz*nz_/2;
-    }
-  }
-
-  void get_size(int * nx, int * ny, int * nz,
-                const FaceFluxes & ff) const
-  {
-    int ix,iy,iz;
-    face_.get_face(&ix,&iy,&iz);
-    int mx,my,mz;
-    get_dimensions (&mx,&my,&mz);
-    if (level_block() >= ff.level_block()) {
-      // neighbor block is not in finer level
-      (*nx) = mx;
-      (*ny) = my;
-      (*nz) = mz;
-    } else {
-      // neighbor block is finer, size is halved
-      (*nx) = (ix != 0) ? 1 : (mx+cx_) / 2;
-      (*ny) = (iy != 0) ? 1 : (my+cy_) / 2;
-      (*nz) = (iz != 0) ? 1 : (mz+cz_) / 2;
-    }
-  }
+  void get_size(int * nx, int * ny, int * nz, int rank, int level_neighbor) const;
   
   /// Return the array dimensions of the flux array, including
   /// adjustments for centering.  Indexing is ix + mx*(iy + my*iz).
@@ -151,19 +116,26 @@ public: // interface
   
   /// Coarsen a FaceFluxes object by reducing dimensions by two along
   /// each face dimension, and summing fine elements contained in each
-  /// coarse flux element. Updates level_neighbor_ accordingly. Used for
-  /// coarsening fine-level fluxes to match coarse level fluxes.
-  void coarsen ();
+  /// coarse flux element. Updates level_neighbor_ accordingly. Used
+  /// for coarsening fine-level fluxes to match coarse level fluxes.
+  /// Arguments (cx,cy,cz) specify the child indices of the block
+  /// within its parent (not to be confused with centering
+  /// (cx_,cy_,cz_); flux array size is kept the same, with
+  /// zero-padding determined by child indices
+  void coarsen (int cx, int cy, int cz, int rank);
   
   /// Add FaceFluxes object to this one. FaceFluxes are assumed to be
   /// associated with the same face. Used for accumulating fluxes with
   /// finer time steps until they match the coarser time step. Updates
   /// dt_neighbor accordingly. Assumes spacially-conforming FaceFlux
   /// objects: FaceFluxes must be associated with the same face, and
-  void accumulate (const FaceFluxes & face_fluxes, int cx, int cy, int cz);
+  void accumulate
+  (const FaceFluxes & face_fluxes, int cx, int cy, int cz, int rank);
   
   /// Scale the fluxes array by a scalar constant.
   FaceFluxes & operator *= (double weight);
+
+  void print(const std::string block_name, const char * msg) const;
   
   //--------------------------------------------------
 

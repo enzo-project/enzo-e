@@ -832,7 +832,8 @@ Method * Problem::create_method_
   } else if (name == "flux_correct") {
 
     method = new MethodFluxCorrect
-      (config->method_flux_correct_group[index_method]);
+      (config->method_flux_correct_group[index_method],
+       config->method_flux_correct_sign[index_method]);
 
   } else if (name == "close_files") {
 

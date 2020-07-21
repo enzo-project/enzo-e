@@ -89,45 +89,38 @@ public: // interface
    std::vector<int> * cx_list=nullptr,
    std::vector<int> * cy_list=nullptr,
    std::vector<int> * cz_list=nullptr);
-                 
+
+  /// Deallocate all face fluxes for all fields
+  void deallocate();
+
   /// Return the block's ith flux data object
-  FaceFluxes * block_fluxes (int i)
-  {
-    return (0 <= i && i < block_fluxes_.size()) ?
-      block_fluxes_[i] : nullptr;
-  }
-  
-  const FaceFluxes * block_fluxes (int i) const
-  {
-    return (0 <= i && i < block_fluxes_.size()) ?
-      block_fluxes_[i] : nullptr;
-  }
-
-  /// Return the block's fluxes for the given face
-  FaceFluxes * block_fluxes (int axis, int face, int i_f)
+  const FaceFluxes * block_fluxes (int axis, int face, int i_f) const
   {  return block_fluxes(index_ (axis,face,i_f)); }
-
-  /// Return the neighbor block's ith flux data object
-  FaceFluxes * neighbor_fluxes (int i)
-  {
-    return (0 <= i && i < neighbor_fluxes_.size()) ?
-      neighbor_fluxes_[i] : nullptr;
-  }
-  const FaceFluxes * neighbor_fluxes (int i) const
-  {
-    return (0 <= i && i < neighbor_fluxes_.size()) ?
-      neighbor_fluxes_[i] : nullptr;
-  }
-
+  FaceFluxes * block_fluxes (int axis, int face, int i_f) 
+  {  return block_fluxes(index_ (axis,face,i_f)); }
+  /// Return the block's fluxes for the given face
+  const FaceFluxes * block_fluxes (int i) const
+  { return (0 <= i && i < block_fluxes_.size()) ?
+      block_fluxes_.at(i) : nullptr; }
+  FaceFluxes * block_fluxes (int i) 
+  { return (0 <= i && i < block_fluxes_.size()) ?
+      block_fluxes_.at(i) : nullptr; }
   /// Return the neighbor block's fluxes for the given face
-  FaceFluxes * neighbor_fluxes (int axis, int face, int i_f)
+  const FaceFluxes * neighbor_fluxes (int axis, int face, int i_f) const
   { return neighbor_fluxes(index_(axis,face,i_f)); }
+  FaceFluxes * neighbor_fluxes (int axis, int face, int i_f) 
+  { return neighbor_fluxes(index_(axis,face,i_f)); }
+  /// Return the neighbor block's ith flux data object
+  const FaceFluxes * neighbor_fluxes (int i) const
+  { return (0 <= i && i < neighbor_fluxes_.size()) ?
+      neighbor_fluxes_.at(i) : nullptr;  }
+  FaceFluxes * neighbor_fluxes (int i) 
+  { return (0 <= i && i < neighbor_fluxes_.size()) ?
+      neighbor_fluxes_.at(i) : nullptr;  }
 
   /// Set the block's fluxes for the given face
-  void set_block_fluxes
-  (FaceFluxes * fluxes, int axis, int face, int i_f)
+  void set_block_fluxes (FaceFluxes * fluxes, int axis, int face, int i_f)
   { set_block_fluxes(fluxes,index_(axis,face,i_f)); }
-
   void set_block_fluxes (FaceFluxes * fluxes, int i)
   {
     ASSERT2 ("FluxData::set_block_fluxes",
@@ -137,11 +130,31 @@ public: // interface
     block_fluxes_[i] = fluxes;
   }
 
-  /// Set the block's fluxes for the given face
-  void set_neighbor_fluxes
-  (FaceFluxes * fluxes, int axis, int face, int i_f)
-  { set_neighbor_fluxes(fluxes,index_(axis,face,i_f)); }
+  /// Add the block's fluxes for the given face
+  void add_block_fluxes (FaceFluxes * fluxes, int axis, int face, int i_f)
+  { add_block_fluxes(fluxes,index_(axis,face,i_f)); }
+  void add_block_fluxes (FaceFluxes * fluxes, int index)
+  {
+    ASSERT2 ("FluxData::add_block_fluxes",
+             "Trying to assign to block_fluxes_[%d] vector of size %ud",
+             index,block_fluxes_.size(),
+             (0 <= index && index < block_fluxes_.size()));
+    ASSERT1 ("FluxData::add_block_fluxes",
+             "Trying to add to unallocated block_fluxes_[%d]",
+             index,
+             (block_fluxes_[index] != nullptr));
+    int mx,my,mz;
+    block_fluxes_[index]->get_dimensions(&mx,&my,&mz);
+    auto & flux_array       = fluxes->flux_array();
+    auto & block_flux_array = block_fluxes_[index]->flux_array();
+    for (int i=0; i<mx*my*mz; i++) {
+      block_flux_array[i] += flux_array[i];
+    }
+  }
 
+  /// Set the neighbor block's fluxes for the given face
+  void set_neighbor_fluxes (FaceFluxes * fluxes, int axis, int face, int i_f)
+  { set_neighbor_fluxes(fluxes,index_(axis,face,i_f)); }
   void set_neighbor_fluxes (FaceFluxes * fluxes, int i)
   {
     ASSERT2 ("FluxData::set_neighbor_fluxes",
@@ -149,6 +162,28 @@ public: // interface
              i,neighbor_fluxes_.size(),
              (0 <= i && i < neighbor_fluxes_.size()));
     neighbor_fluxes_[i] = fluxes;
+  }
+
+  /// Add the neighborblock's fluxes for the given face
+  void add_neighbor_fluxes (FaceFluxes * fluxes, int axis, int face, int i_f)
+  { add_neighbor_fluxes(fluxes,index_(axis,face,i_f)); }
+  void add_neighbor_fluxes (FaceFluxes * fluxes, int index)
+  {
+    ASSERT2 ("FluxData::add_neighbor_fluxes",
+             "Trying to assign to neighbor_fluxes_[%d] vector of size %ud",
+             index,neighbor_fluxes_.size(),
+             (0 <= index && index < neighbor_fluxes_.size()));
+    ASSERT1 ("FluxData::add_neighbor_fluxes",
+             "Trying to add to unallocated neighbor_fluxes_[%d]",
+             index,
+             (neighbor_fluxes_[index] != nullptr));
+    int mx,my,mz;
+    neighbor_fluxes_[index]->get_dimensions(&mx,&my,&mz);
+    auto & flux_array = fluxes->flux_array();
+    auto & neighbor_flux_array = neighbor_fluxes_[index]->flux_array();
+    for (int i=0; i<mx*my*mz; i++) {
+      neighbor_flux_array[i] += flux_array[i];
+    }
   }
 
   /// Delete the block's face fluxes object for the given face
@@ -195,7 +230,7 @@ public: // interface
 private: // functions
 
   /// Index for fluxes in block_fluxes_ and neighbor_fluxes_ vectors
-  inline int index_ (int axis, int face, int i_f)
+  inline int index_ (int axis, int face, int i_f) const
   { return axis + 3*(face + 2*i_f); }
 private: // attributes
 

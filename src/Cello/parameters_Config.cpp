@@ -114,6 +114,7 @@ void Config::pup (PUP::er &p)
   p | method_close_files_group_size;
   p | method_courant;
   p | method_flux_correct_group;
+  p | method_flux_correct_sign;
   p | method_timestep;
   p | method_trace_name;
   p | method_null_dt;
@@ -706,6 +707,7 @@ void Config::read_method_ (Parameters * p) throw()
   method_list.   resize(num_method);
   method_courant.resize(num_method);
   method_flux_correct_group.resize(num_method);
+  method_flux_correct_sign.resize(num_method);
   method_timestep.resize(num_method);
   method_schedule_index.resize(num_method);
   method_close_files_seconds_stagger.resize(num_method);
@@ -752,7 +754,9 @@ void Config::read_method_ (Parameters * p) throw()
 
     // Read field group for flux correction
     method_flux_correct_group[index_method] =
-      p->value_string (full_name + ":flux_correct:group","conserved");
+      p->value_string (full_name + ":group","conserved");
+    method_flux_correct_sign[index_method] =
+      p->value_integer (full_name + ":sign",1);
 
     // Read specified timestep, if any (for MethodTrace)
     method_timestep[index_method] = p->value_float  

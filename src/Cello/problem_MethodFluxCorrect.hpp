@@ -19,7 +19,7 @@ class MethodFluxCorrect : public Method
 public: // interface
 
   /// Create a new MethodFluxCorrect
-  MethodFluxCorrect (const std::string group) throw() ;
+  MethodFluxCorrect (const std::string group, int sign) throw() ;
 
   /// Destructor
   virtual ~MethodFluxCorrect() throw()
@@ -40,6 +40,7 @@ public: // interface
     Method::pup(p);
     p | ir_pre_;
     p | group_;
+    p | sign_;
     p | field_sum_;
     p | field_sum_0_;
   };
@@ -59,12 +60,17 @@ public: // virtual functions
 
 protected: // functions
 
+  void flux_correct_ (Block * block);
+  
 protected: // attributes
 
   /// Refresh id
   int ir_pre_;
   /// Field group to apply flux-correction to
   std::string group_;
+
+  /// Temporary attribute to test sign for correction (may be 0 to disable)
+  int sign_;
 
   std::vector<long double> field_sum_;
   std::vector<long double> field_sum_0_;

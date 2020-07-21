@@ -22,6 +22,8 @@ int Face::data_size () const
 
   size += 3*sizeof(int);  // int ix_,iy_,iz_;
   size += 3*sizeof(int);  // int rx_, ry_, rz_;
+
+  return size;
 }
 
 //----------------------------------------------------------------------

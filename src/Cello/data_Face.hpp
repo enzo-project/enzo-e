@@ -64,6 +64,11 @@ public: // interface
     if (rz) (*rz) = rz_;
   }
 
+  int axis() const 
+  { return (rx_!=0) ? 0 : (ry_!=0) ? 1 : 2; }
+  int face() const 
+  { return (rx_+ry_+rz_) < 0 ? 0 : 1; }
+  
   //--------------------------------------------------
 
   /// Return the number of bytes required to serialize the data object

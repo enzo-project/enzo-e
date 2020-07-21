@@ -64,6 +64,20 @@ void FluxData::allocate
 
 //----------------------------------------------------------------------
 
+void FluxData::deallocate()
+{
+  for (int i=0; i<block_fluxes_.size(); i++) {
+    delete block_fluxes_[i];
+  }
+  block_fluxes_.clear();
+  for (int i=0; i<neighbor_fluxes_.size(); i++) {
+    delete neighbor_fluxes_[i];
+  }
+  neighbor_fluxes_.clear();
+}
+
+//----------------------------------------------------------------------
+
 int FluxData::data_size () const
 {
 #ifdef DEBUG_REFRESH
