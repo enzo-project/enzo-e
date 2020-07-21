@@ -390,10 +390,8 @@ int Block::delete_particle_copies_ (int it){
 int Block::new_refresh_load_particle_copy_ (Refresh & refresh)
 {
   const int rank = cello::rank();
-  //const int npa = 1;
 
-  /* try to just have one per block */
-  const int npa3[3] = { 3, 3*3, 3*3*3 };
+  const int npa3[3] = { 4, 4*4, 4*4*4 };
   const int npa = npa3[rank-1];
 
   ParticleData * particle_array[npa];
@@ -612,6 +610,8 @@ int Block::particle_load_copy_ (int npa,
 
   const bool copy = true;
   particle_scatter_neighbors_copy_(npa,particle_array,type_list, particle);
+
+  particle_apply_periodic_update_  (nl,particle_list,refresh);
 
 
   return nl;
@@ -927,9 +927,10 @@ void Block::particle_scatter_neighbors_
     //is_local[ip*cd] = 0; // will not be local
 
     // hack - pretend partcles are closer to face
-    ix = ix <= 1 ? 0 : 3;
-    iy = iy <= 1 ? 0 : 3;
-    iz = iz <= 1 ? 0 : 3;
+    // AJE-adapt: maybe remove below?
+    //ix = ix <= 1 ? 0 : 3;
+    //iy = iy <= 1 ? 0 : 3;
+    //iz = iz <= 1 ? 0 : 3;
     index[ip] = ix + 4 * (iy + 4 * iz);
 
   } else {    // only move particles that leave the block
