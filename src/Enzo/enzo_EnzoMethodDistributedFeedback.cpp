@@ -430,7 +430,10 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
     0.0618795946119,      -0.00284352366041
   };
 
+  
   if (particle.num_particles(it) > 0 ){
+    CkPrintf("DistributedFeedback (%s) -- XYZXYZ Number of Particles %i\n", enzo_block->name().c_str(), particle.num_particles(it));
+
 
     const int ia_m = particle.attribute_index (it, "mass");
 
@@ -829,22 +832,13 @@ void EnzoMethodDistributedFeedback::add_ionization_feedback(
                        yp - (stencil_rad_ + 1 + 0.5)*hy);
       zpos = std::min(  std::max(zpos, zm + (stencil_rad_ + 1 + 0.5)*hz),
                        zp - (stencil_rad_ + 1 + 0.5)*hz);
+
     }
+
   }
 
   // compute coordinates of central feedback cell
   // this must account for ghost zones
-  // OLD vs new
-/*
-  double xcell = (xpos - xm) / hx + gx;// - 0.5;
-  double ycell = (ypos - ym) / hy + gy;// - 0.5;
-  double zcell = (zpos - zm) / hz + gz;// - 0.5;
-
-  int ix       = ((int) floor(xcell));// + 0.5));
-  int iy       = ((int) floor(ycell));// + 0.5));
-  int iz       = ((int) floor(zcell));// + 0.5));
-
-*/
   double xcell = (xpos - xm) / hx + gx - 0.5;
   double ycell = (ypos - ym) / hy + gy - 0.5;
   double zcell = (zpos - zm) / hz + gz - 0.5;
@@ -853,12 +847,15 @@ void EnzoMethodDistributedFeedback::add_ionization_feedback(
   int iy       = ((int) floor(ycell + 0.5));
   int iz       = ((int) floor(zcell + 0.5));
 
+  // since ionization FB is in particle zone only, skip if particle is
+  // off grid and NOT shifting cell center
   if (( (ix < 0) || (ix > mx) ||
-       (iy < 0) || (iy > my) ||
-       (iz < 0) || (iz > mz) ) && (!shift_cell_center_)){
-      // particle is off grid!
-      return;
+        (iy < 0) || (iy > my) ||
+        (iz < 0) || (iz > mz) ) && (!shift_cell_center_)){
+        // particle is off grid!
+        return;
   }
+
 
   int index =  INDEX(ix,iy,iz,mx,my);
 
@@ -1000,28 +997,30 @@ void EnzoMethodDistributedFeedback::inject_feedback(
       zpos = std::min(  std::max(zpos, zm + (stencil_rad_ + 1 + 0.5)*hz),
                        zp - (stencil_rad_ + 1 + 0.5)*hz);
     }
+  }  else {
+    // If using distributed feedback, just do a check to make sure
+    // some FB overlaps, otherwise we can skip this particle entirely
+
+    if ( ((xpos - (stencil_rad_+1)*hx) > xp) ||
+         ((xpos + (stencil_rad_+1)*hx) < xm) ||
+         ((ypos - (stencil_rad_+1)*hy) > yp) ||
+         ((ypos + (stencil_rad_+1)*hy) < ym) ||
+         ((zpos - (stencil_rad_+1)*hz) > zp) ||
+         ((zpos + (stencil_rad_+1)*hz) < zm)    ) {
+
+      return;
+    }
   }
 
   // compute coordinates of central feedback cell
   // this must account for ghost zones
+  double xcell = (xpos - xm) / hx + gx - 0.5;
+  double ycell = (ypos - ym) / hy + gy - 0.5;
+  double zcell = (zpos - zm) / hz + gz - 0.5;
 
-  // OLD vs NEW
-/*
-  double xcell = (xpos - xm) / hx + gx; //- 0.5;
-  double ycell = (ypos - ym) / hy + gy; //- 0.5;
-  double zcell = (zpos - zm) / hz + gz; //- 0.5;
-
-  int ix       = ((int) floor(xcell)); // + 0.5));
-  int iy       = ((int) floor(ycell)); // + 0.5));
-  int iz       = ((int) floor(zcell)); // + 0.5));
-*/
-double xcell = (xpos - xm) / hx + gx - 0.5;
-double ycell = (ypos - ym) / hy + gy - 0.5;
-double zcell = (zpos - zm) / hz + gz - 0.5;
-
-int ix       = ((int) floor(xcell + 0.5));
-int iy       = ((int) floor(ycell + 0.5));
-int iz       = ((int) floor(zcell + 0.5));
+  int ix       = ((int) floor(xcell + 0.5));
+  int iy       = ((int) floor(ycell + 0.5));
+  int iz       = ((int) floor(zcell + 0.5));
 
 
   double dxc   = ix + 0.5 - (xcell);// - 0.5);
@@ -1068,21 +1067,14 @@ int iz       = ((int) floor(zcell + 0.5));
     for (int k = iz - stencil_rad_; k<= iz + stencil_rad_; k++){
       if ( (k<0) || (k>=mz) ) continue;
       for (int j = iy - stencil_rad_; j <= iy + stencil_rad_; j++){
-        if ( (j<0) || (k>=my) ) continue;
+        if ( (j<0) || (j>=my) ) continue;
         for (int i = ix - stencil_rad_; i <= ix + stencil_rad_; i++){
           if ( (i<0) || (i>=mx)) continue;
 
-//      AE TO DO: Actually calculate number density here with species
+//      TO DO: Actually calculate number density here with species
 
           int index = INDEX(i,j,k,mx,my);
 
-          // NOTE: The presence of these statements throughout this routine
-          //       is to generalize for situations where we don't have to
-          //       kick particles away from grid edges once non-local
-          //       blocks / processors know about particles that deposit
-          //       feedback on their grids (this allows the loops to be
-          //       simple - otherwise will have to continually recalc
-          //       the min / max bounds of the loops to avoid edges )
           if ( (index < 0) || (index >= mx*my*mz)) continue;
 
           double mu_cell  = enzo_config->ppm_mol_weight;
