@@ -10,10 +10,46 @@
 
 //----------------------------------------------------------------------
 
+int nlines(std::string fname);
+
+
 EnzoInitialFeedbackTest::EnzoInitialFeedbackTest
 (const EnzoConfig * config) throw ()
   : Initial(config->initial_cycle, config->initial_time)
 {
+
+  if (config->initial_feedback_test_from_file){
+    this->num_particles = nlines("initial_feedback_stars.in");
+
+    for (int dim = 0; dim < 3; dim++){
+      this->position[dim].resize(this->num_particles);
+    }
+    this->mass.resize(this->num_particles);
+
+    std::fstream inFile;
+    inFile.open("initial_feedback_stars.in", std::ios::in);
+
+    ASSERT("EnzoInitialFeedbackTest", "initial_feedback_stars.in failed to open",
+           inFile.is_open());
+
+    int i = 0;
+    while(inFile >> this->mass[i] >> this->position[0][i] >> this->position[1][i] >> this->position[2][i]){
+      i++;
+    }
+
+    inFile.close();
+
+  } else {
+    this->num_particles = 1;
+    this->mass.resize(this->num_particles);
+
+    for (int dim = 0; dim < 3; dim++){
+      this->position[dim].resize(this->num_particles);
+
+      this->position[dim][0] = config->initial_feedback_test_position[dim];
+    }
+    this->mass[0] = config->initial_feedback_test_star_mass;
+  }
 
   return;
 }
@@ -27,6 +63,10 @@ void EnzoInitialFeedbackTest::pup (PUP::er &p)
   TRACEPUP;
 
   Initial::pup(p);
+
+  p | num_particles;
+  for (int dim = 0; dim < 3; dim++) p | position[dim];
+  p | mass;
 
   return;
 }
@@ -143,42 +183,56 @@ void EnzoInitialFeedbackTest::enforce_block
   enzo_float * pform     = 0;
   int * is_local = 0;
 
-  // just one particle for now
 
-  if (   block->check_position_in_block(enzo_config->initial_feedback_test_position[0],
-                                        enzo_config->initial_feedback_test_position[1],
-                                        enzo_config->initial_feedback_test_position[2]) ){
-    int new_particle = particle.insert_particles(it, 1);
-    particle.index(new_particle,&ib,&ipp);
-
-    pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib);
-    px    = (enzo_float *) particle.attribute_array(it, ia_x, ib);
-    py    = (enzo_float *) particle.attribute_array(it, ia_y, ib);
-    pz    = (enzo_float *) particle.attribute_array(it, ia_z, ib);
-    pvx   = (enzo_float *) particle.attribute_array(it, ia_vx, ib);
-    pvy   = (enzo_float *) particle.attribute_array(it, ia_vy, ib);
-    pvz   = (enzo_float *) particle.attribute_array(it, ia_vz, ib);
-    pmetal      = (enzo_float *) particle.attribute_array(it, ia_metal, ib);
-    plifetime  = (enzo_float *) particle.attribute_array(it, ia_l, ib);
-    pform      = (enzo_float *) particle.attribute_array(it, ia_to, ib);
-    is_local   = (int *) particle.attribute_array(it, ia_loc, ib);
-
-    pmass[ipp] = enzo_config->initial_feedback_test_star_mass * cello::mass_solar / enzo_units->mass();
-    px[ipp]    = enzo_config->initial_feedback_test_position[0];
-    py[ipp]    = enzo_config->initial_feedback_test_position[1];
-    pz[ipp]    = enzo_config->initial_feedback_test_position[2];
-    pvx[ipp]   = 0.0;
-    pvy[ipp]   = 0.0;
-    pvz[ipp]   = 0.0;
-
-    pmetal[ipp]    = 0.01;
-    plifetime[ipp] = 1.00E9* cello::yr_s / enzo_units->time();
-    pform[ipp]     = 1.0E-10 * cello::yr_s / enzo_units->time(); // really just needs to be non-zero
-
-    is_local[ipp] = 1;
-
-
+  // from global particle list, figure out which ones go on this block
+  int * mask = new int [this->num_particles];
+  int num_local_particles = 0;
+  for (int i = 0; i < this->num_particles; i++){
+    mask[i] =  block->check_position_in_block(this->position[0][i],
+                                              this->position[1][i],
+                                              this->position[2][i]);
+    if(mask[i]) num_local_particles++;
   }
+
+
+  int new_particle = particle.insert_particles(it, num_local_particles);
+  particle.index(new_particle,&ib,&ipp);
+
+  pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib);
+  px    = (enzo_float *) particle.attribute_array(it, ia_x, ib);
+  py    = (enzo_float *) particle.attribute_array(it, ia_y, ib);
+  pz    = (enzo_float *) particle.attribute_array(it, ia_z, ib);
+  pvx   = (enzo_float *) particle.attribute_array(it, ia_vx, ib);
+  pvy   = (enzo_float *) particle.attribute_array(it, ia_vy, ib);
+  pvz   = (enzo_float *) particle.attribute_array(it, ia_vz, ib);
+  pmetal      = (enzo_float *) particle.attribute_array(it, ia_metal, ib);
+  plifetime  = (enzo_float *) particle.attribute_array(it, ia_l, ib);
+  pform      = (enzo_float *) particle.attribute_array(it, ia_to, ib);
+  is_local   = (int *) particle.attribute_array(it, ia_loc, ib);
+
+  ipp = 0;
+  for (int i = 0; i < this->num_particles; i++){
+    if (mask[i]){
+      pmass[ipp] = this->mass[i] * cello::mass_solar / enzo_units->mass();
+      px[ipp]    = this->position[0][i];
+      py[ipp]    = this->position[1][i];
+      pz[ipp]    = this->position[2][i];
+      pvx[ipp]   = 0.0;
+      pvy[ipp]   = 0.0;
+      pvz[ipp]   = 0.0;
+
+      pmetal[ipp]    = 0.01;
+      plifetime[ipp] = 1.00E9* cello::yr_s / enzo_units->time();
+      pform[ipp]     = 1.0E-10 * cello::yr_s / enzo_units->time(); // really just needs to be non-zero
+
+      is_local[ipp] = 1;
+
+      ipp++;
+    }
+  }
+
+
+  
 
   return;
 }

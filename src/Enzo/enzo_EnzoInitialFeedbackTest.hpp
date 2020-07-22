@@ -40,6 +40,10 @@ public:  // interface
 
 private:
 
+  int num_particles;
+  std::vector<double> position[3];
+  std::vector<double> mass;
+
 };
 
 #endif /* ENZO_ENZO_INITIAL_FEEDBACK_TEST_HPP */

@@ -152,6 +152,7 @@ public: // interface
       initial_feedback_test_density(),
       initial_feedback_test_star_mass(),
       initial_feedback_test_temperature(),
+      initial_feedback_test_from_file(),
       // EnzoInitialMusic
       initial_music_field_files(),
       initial_music_field_datasets(),
@@ -485,6 +486,7 @@ public: // attributes
   double                     initial_feedback_test_density;
   double                     initial_feedback_test_star_mass;
   double                     initial_feedback_test_temperature;
+  bool                       initial_feedback_test_from_file;
 
   /// EnzoInitialIsolatedGalaxy
   double                     initial_IG_center_position[3];
