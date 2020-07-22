@@ -533,17 +533,12 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
 
           soonest_explosion = -1.0;
 
-          // seed random number generator
-          // using function to generate unique number:
-          //     (a,b) = { a*a + a + b, a >= b;
-          //                   a + b*b, a  < b}
-          // where b is batch number (keeps vals smaller... since np > nb usually)
-          //  WARNGING - THIS DOESN'T ACTUALLY WORK SINCE PARTICLES MOVE AROUND
-          srand(id[ipid]);
-          //srand(0);
 
-          //srand(( (ip >= ib) ? (ip*ip+ip+ib) : (ip+ib*ib) ));
-          //srand(0);
+          // Assign seed for stochastic sampling using unique particle IDs
+          //
+          //  WARNING : This may not work for completley unique IDs if
+          //            number of processors used changes!!!  
+          srand(id[ipid]);
 
           explosion_flag = -1;
           will_explode   =  0;
