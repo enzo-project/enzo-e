@@ -61,6 +61,10 @@ public: // interface
   int num_particles (ParticleDescr *, int it) const;
   int num_particles (ParticleDescr *, int it, int ib) const;
 
+  int num_local_particles (ParticleDescr *) const;
+  int num_local_particles (ParticleDescr *, int it) const;
+  int num_local_particles (ParticleDescr *, int it, int ib) const;  
+
   /// Create the given number of particles of the given type.  Always
   /// creates them at the end instead of filling up any unused
   /// particle spaces in earlier batches, to ease initialization via

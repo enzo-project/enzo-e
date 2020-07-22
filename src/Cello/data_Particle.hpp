@@ -302,6 +302,13 @@ public: // interface
   int num_particles () const
   { return particle_data_->num_particles(particle_descr_); }
 
+  int num_local_particles (int it, int ib) const
+  { return particle_data_->num_local_particles(particle_descr_,it,ib); }
+  int num_local_particles (int it) const
+  { return particle_data_->num_local_particles(particle_descr_,it); }
+  int num_local_particles () const
+  { return particle_data_->num_local_particles(particle_descr_); }
+
   /// Create the given number of particles of the given type.  Always
   /// creates them at the end instead of filling up any unused
   /// particle spaces in earlier batches, to ease initialization via

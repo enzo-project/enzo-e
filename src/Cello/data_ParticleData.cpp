@@ -114,6 +114,63 @@ int ParticleData::num_particles
 
 //----------------------------------------------------------------------
 
+int ParticleData::num_local_particles
+(ParticleDescr * particle_descr) const
+{
+  const int nt = particle_descr->num_types();
+  int np = 0;
+  for (int it=0; it<nt; it++) {
+    np += num_local_particles(particle_descr,it);
+  }
+  return np;
+}
+
+//----------------------------------------------------------------------
+
+int ParticleData::num_local_particles
+(ParticleDescr * particle_descr,int it) const
+{
+  int nb = num_batches(it);
+  int np = 0;
+  for (int ib=0; ib<nb; ib++) {
+    np += num_local_particles(particle_descr,it,ib);
+  }
+  return np;
+}
+
+//----------------------------------------------------------------------
+
+int ParticleData::num_local_particles
+(ParticleDescr * particle_descr, int it, int ib) const
+{
+  if ( !(0 <= it && it < particle_descr->num_types()) ) return 0;
+  if ( !(0 <= ib && ib < num_batches(it)) ) return 0;
+
+  int count = 0;
+
+  for (int it = 0; it < particle_descr->num_types(); it++){
+    const int ia_c = particle_descr->attribute_index(it, "is_local");
+    const int cd   = particle_descr->stride(it, ia_c);
+    const int nb   = num_batches(it);
+
+    int * is_local = 0;
+
+    for (int ib=0; ib<nb; ib++){
+      const int np = num_particles(particle_descr,it,ib);
+      if (np==0) continue;
+      is_local = (int *) attribute_array(particle_descr,it, ia_c, ib);
+      for (int ip = 0; ip < np; ip++){
+        if (is_local[ip*cd]) count++;
+      }
+    }
+
+  }
+
+  return count;
+}
+
+//----------------------------------------------------------------------
+
 int ParticleData::insert_particles
 (ParticleDescr * particle_descr,
  int it, int np,
@@ -315,47 +372,46 @@ void ParticleData::scatter
               for (int ia=0; ia<na; ia++) {
     	           if (!interleaved)
     	             mp = particle_descr->attribute_bytes(it,ia);
-    	             int ny = particle_descr->attribute_bytes(it,ia);
-    	             char * a_src = attribute_array
-    	               (particle_descr,it,ia,ib_src);
-    	             char * a_dst = pd->attribute_array
-    	                 (particle_descr,it,ia,ib_dst);
-    	             for (int iy=0; iy<ny; iy++) {
-    	                 a_dst [iy + mp*ip_dst] = a_src [iy + mp*ip_src];
-    	              }
+    	           int ny = particle_descr->attribute_bytes(it,ia);
+    	           char * a_src = attribute_array
+    	             (particle_descr,it,ia,ib_src);
+    	           char * a_dst = pd->attribute_array
+    	               (particle_descr,it,ia,ib_dst);
+    	           for (int iy=0; iy<ny; iy++) {
+    	               a_dst [iy + mp*ip_dst] = a_src [iy + mp*ip_src];
+    	           }
               }
 
-            is_local[ip_dst*ib_dst] = false;
+              is_local[ip_dst*dloc] = false;
 
-         }
+          }
 
         } else {
           int k = index[ip_src];
-              ParticleData * pd = particle_array[k];
-              int i_dst = i_array[pd]++;
-              int ib_dst,ip_dst;
-              particle_descr->index(i_dst,&ib_dst,&ip_dst);
-              is_local = (int *) pd->attribute_array(particle_descr,it,ia_loc,ib_dst);
+          ParticleData * pd = particle_array[k];
+          int i_dst = i_array[pd]++;
+          int ib_dst,ip_dst;
+          particle_descr->index(i_dst,&ib_dst,&ip_dst);
+          is_local = (int *) pd->attribute_array(particle_descr,it,ia_loc,ib_dst);
 
-              for (int ia=0; ia<na; ia++) {
-          if (!interleaved)
-            mp = particle_descr->attribute_bytes(it,ia);
-          int ny = particle_descr->attribute_bytes(it,ia);
-          char * a_src = attribute_array
-            (particle_descr,it,ia,ib_src);
-          char * a_dst = pd->attribute_array
-            (particle_descr,it,ia,ib_dst);
-          for (int iy=0; iy<ny; iy++) {
-            a_dst [iy + mp*ip_dst] = a_src [iy + mp*ip_src];
+          for (int ia=0; ia<na; ia++) {
+            if (!interleaved)
+              mp = particle_descr->attribute_bytes(it,ia);
+            int ny = particle_descr->attribute_bytes(it,ia);
+            char * a_src = attribute_array
+              (particle_descr,it,ia,ib_src);
+            char * a_dst = pd->attribute_array
+              (particle_descr,it,ia,ib_dst);
+            for (int iy=0; iy<ny; iy++) {
+              a_dst [iy + mp*ip_dst] = a_src [iy + mp*ip_src];
+            }
           }
-              }
 
-          is_local[ip_dst*ib_dst] = true;
+          is_local[ip_dst*dloc] = true;
         }
 
-
+    }
   }
-}
 
 
 }
