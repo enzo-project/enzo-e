@@ -423,7 +423,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
 
   // Polynomial coefficients for the fit to the stellar mass distribution
   // as a function of delay time.
-  const double p_mass[10] = {
+  const double poly_mass[10] = {
     4.42035634891,        -13.2890466089,        26.1103296098,        -30.1876007562,
     21.8976126631,        -10.2544493943,        3.09621304958,        -0.581870413299,
     0.0618795946119,      -0.00284352366041
@@ -434,6 +434,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
 #ifdef DEBUG_FEEDBACK
     CkPrintf("DistributedFeedback (%s) -- XYZXYZ Number of Particles %i\n", enzo_block->name().c_str(), particle.num_particles(it));
 #endif
+    const int ia_id = particle.attribute_index (it, "id");
 
     const int ia_m = particle.attribute_index (it, "mass");
 
@@ -449,6 +450,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
     const int ia_mf = particle.attribute_index (it, "metal_fraction");
     const int ia_loc = particle.attribute_index (it, "is_local");
 
+    const int did = particle.stride(it, ia_id);
     const int dm = particle.stride(it, ia_m);
     const int dp = particle.stride(it, ia_x);
     const int dv = particle.stride(it, ia_vx);
@@ -462,7 +464,9 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
     for (int ib=0; ib<nb; ib++){
       enzo_float *px=0, *py=0, *pz=0, *pvx=0, *pvy=0, *pvz=0;
       enzo_float *plifetime=0, *pcreation=0, *pmass=0, *pmetal=0;
-      int *is_local=0;
+      int64_t *id=0, *is_local=0;
+
+      id = (int64_t * ) particle.attribute_array(it, ia_id, ib);
 
       pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib);
       pmetal = (enzo_float *) particle.attribute_array(it, ia_mf, ib);
@@ -477,12 +481,13 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
       plifetime = (enzo_float *) particle.attribute_array(it, ia_l, ib);
       pcreation = (enzo_float *) particle.attribute_array(it, ia_c, ib);
 
-      is_local = (int *) particle.attribute_array(it, ia_loc, ib);
+      is_local = (int64_t *) particle.attribute_array(it, ia_loc, ib);
 
       int np = particle.num_particles(it,ib);
 
       for (int ip=0; ip<np; ip++){
         // AE: Check and see if these differ....
+        const int ipid = ip*did;
         const int ipdp = ip*dp;
         const int ipdm = ip*dm;
         const int ipdv = ip*dv;
@@ -534,8 +539,11 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
           //                   a + b*b, a  < b}
           // where b is batch number (keeps vals smaller... since np > nb usually)
           //  WARNGING - THIS DOESN'T ACTUALLY WORK SINCE PARTICLES MOVE AROUND
-          srand(( (ip >= ib) ? (ip*ip+ip+ib) : (ip+ib*ib) ));
-          srand(0);
+          srand(id[ipid]);
+          //srand(0);
+
+          //srand(( (ip >= ib) ? (ip*ip+ip+ib) : (ip+ib*ib) ));
+          //srand(0);
 
           explosion_flag = -1;
           will_explode   =  0;
@@ -570,7 +578,9 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
           int number_of_sn = k - 1;
 
 #ifdef DEBUG_FEEDBACK
-           CkPrintf("DistributedFeedback (%s) - This particle has %i supernova \n",enzo_block->name().c_str(), number_of_sn);
+           CkPrintf("DistributedFeedback (%s) - This particle with m %f and id %d has %d supernova \n",enzo_block->name().c_str(),
+                                                                                   pmass[ipdm], id[ipid],
+                                                                                   number_of_sn);
 #endif
           if (number_of_sn == 0){
             explosion_flag = 0;
@@ -602,13 +612,13 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
             }
 
             td7 = delay_time*1.0E7;
-            double progenitor_mass = p_mass[0] + pmass[1]*td7 + pmass[2]*td7*td7 +
-                                    p_mass[3]*td7*td7*td7 + p_mass[4]*td7*td7*td7*td7 +
-                                    p_mass[5]*td7*td7*td7*td7*td7 +
-                                    p_mass[6]*td7*td7*td7*td7*td7*td7 +
-                                    p_mass[7]*td7*td7*td7*td7*td7*td7*td7 +
-                                    p_mass[8]*td7*td7*td7*td7*td7*td7*td7*td7 +
-                                    p_mass[9]*td7*td7*td7*td7*td7*td7*td7*td7*td7;
+            double progenitor_mass = poly_mass[0] + pmass[1]*td7 + pmass[2]*td7*td7 +
+                                     poly_mass[3]*td7*td7*td7 + poly_mass[4]*td7*td7*td7*td7 +
+                                     poly_mass[5]*td7*td7*td7*td7*td7 +
+                                     poly_mass[6]*td7*td7*td7*td7*td7*td7 +
+                                     poly_mass[7]*td7*td7*td7*td7*td7*td7*td7 +
+                                     poly_mass[8]*td7*td7*td7*td7*td7*td7*td7*td7 +
+                                     poly_mass[9]*td7*td7*td7*td7*td7*td7*td7*td7*td7;
             progenitor_mass = std::pow(10.0, progenitor_mass); // in Msun
 
             if (time_first_sn_ > 0.0){
@@ -624,7 +634,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
             //         MUCH LESS CONFUSED NOW: because fixed random number gen will work
             //                                 if there are unique particle IDs
 #ifdef DEBUG_FEEDBACK
-            CkPrintf("DistributedFeedback (%s): %d of %d - delay: %f  age+dt: %g  pm: %g \n", enzo_block->name().c_str(), kk+1, number_of_sn, delay_time, star_age, progenitor_mass);
+            CkPrintf("DistributedFeedback (%18s): %d of %d - delay: %f  age+dt: %g  pm: %g \n", enzo_block->name().c_str(), kk+1, number_of_sn, delay_time, star_age, progenitor_mass);
 #endif
             // if ( delay_time < star_age + enzo_block->dt  ) {
 
@@ -764,11 +774,14 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
     if (count > 0){
       CkPrintf("DistributedFeedback (%s) - Number of feedback particles:   %i \n",enzo_block->name().c_str(),count);
     }
+#endif
 
-
+#ifdef DEBUG_FEEDBACK
     CkPrintf("DistributedFeedback (%s) ------------1------------ Number of local / total particles : %i %i\n",enzo_block->name().c_str(),particle.num_local_particles(it), particle.num_particles(it));
+#endif
     int delete_count = enzo_block->delete_particle_copies_(it);
     cello::simulation()->data_delete_particles(delete_count);
+#ifdef DEBUG_FEEDBACK
     CkPrintf("DistributedFeedback (%s) ------------2------------ Number of local / total particles : %i %i\n",enzo_block->name().c_str(),particle.num_local_particles(it), particle.num_particles(it));
 #endif
   } // end particle check

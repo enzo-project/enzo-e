@@ -10,6 +10,8 @@
 
 //----------------------------------------------------------------------
 
+// #define DEBUG_INITIALFB
+
 int nlines(std::string fname);
 
 
@@ -143,6 +145,8 @@ void EnzoInitialFeedbackTest::enforce_block
 
   // drop in a particle
 
+  if (enzo_block->level() != 0) return; // don't do particles below root grid
+
   ParticleDescr * particle_descr = cello::particle_descr();
   Particle particle              = block->data()->particle();
 
@@ -156,6 +160,7 @@ void EnzoInitialFeedbackTest::enforce_block
   int ia_vy = particle.attribute_index (it, "vy");
   int ia_vz = particle.attribute_index (it, "vz");
   int ia_loc  = particle.attribute_index (it, "is_local");
+  int ia_id   = particle.attribute_index (it, "id");
 
   int ia_to    = particle.is_attribute(it,"creation_time") ?
                  particle.attribute_index(it,"creation_time") : -1;
@@ -181,7 +186,8 @@ void EnzoInitialFeedbackTest::enforce_block
   enzo_float * pmetal = 0;
   enzo_float * plifetime = 0;
   enzo_float * pform     = 0;
-  int * is_local = 0;
+  int64_t * is_local = 0;
+  int64_t * id = 0;
 
 
   // from global particle list, figure out which ones go on this block
@@ -198,6 +204,7 @@ void EnzoInitialFeedbackTest::enforce_block
   int new_particle = particle.insert_particles(it, num_local_particles);
   particle.index(new_particle,&ib,&ipp);
 
+  id   = (int64_t *) particle.attribute_array(it, ia_id, ib);
   pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib);
   px    = (enzo_float *) particle.attribute_array(it, ia_x, ib);
   py    = (enzo_float *) particle.attribute_array(it, ia_y, ib);
@@ -208,11 +215,19 @@ void EnzoInitialFeedbackTest::enforce_block
   pmetal      = (enzo_float *) particle.attribute_array(it, ia_metal, ib);
   plifetime  = (enzo_float *) particle.attribute_array(it, ia_l, ib);
   pform      = (enzo_float *) particle.attribute_array(it, ia_to, ib);
-  is_local   = (int *) particle.attribute_array(it, ia_loc, ib);
+  is_local   = (int64_t *) particle.attribute_array(it, ia_loc, ib);
 
   ipp = 0;
   for (int i = 0; i < this->num_particles; i++){
     if (mask[i]){
+
+#ifdef DEBUG_INITIALFB
+      CkPrintf("EnzoInitialFeedbackTest (%s): Mass MyPe id_counter istatic id %f %d %d %d %d\n", enzo_block->name().c_str(),
+                                                                        this->mass[i],
+                                                                        cello::index_static(), ParticleData::id_counter[cello::index_static()],
+                                                                        CkNumPes(), CkMyPe() + (ParticleData::id_counter[cello::index_static()]) * CkNumPes());
+#endif
+      id[ipp] = CkMyPe() + (ParticleData::id_counter[cello::index_static()]++) * CkNumPes();
       pmass[ipp] = this->mass[i] * cello::mass_solar / enzo_units->mass();
       px[ipp]    = this->position[0][i];
       py[ipp]    = this->position[1][i];
@@ -232,7 +247,7 @@ void EnzoInitialFeedbackTest::enforce_block
   }
 
 
-  
+
 
   return;
 }

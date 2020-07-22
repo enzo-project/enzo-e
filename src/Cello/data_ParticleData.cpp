@@ -11,6 +11,7 @@
 // #define DEBUG_PARTICLES
 
 int64_t ParticleData::counter[CONFIG_NODE_SIZE] = {0};
+int64_t ParticleData::id_counter[CONFIG_NODE_SIZE] = {0};
 
 //----------------------------------------------------------------------
 
@@ -153,12 +154,12 @@ int ParticleData::num_local_particles
     const int cd   = particle_descr->stride(it, ia_c);
     const int nb   = num_batches(it);
 
-    int * is_local = 0;
+    int64_t * is_local = 0;
 
     for (int ib=0; ib<nb; ib++){
       const int np = num_particles(particle_descr,it,ib);
       if (np==0) continue;
-      is_local = (int *) attribute_array(particle_descr,it, ia_c, ib);
+      is_local = (int64_t *) attribute_array(particle_descr,it, ia_c, ib);
       for (int ip = 0; ip < np; ip++){
         if (is_local[ip*cd]) count++;
       }
@@ -351,7 +352,7 @@ void ParticleData::scatter
 
   const int ia_loc = particle_descr->attribute_index(it,"is_local");
   const int dloc = particle_descr->stride(it,ia_loc);
-  int *is_local=NULL;
+  int64_t *is_local=NULL;
   int count=0;
   for (int ip_src=0; ip_src<np; ip_src++) {
 
@@ -367,7 +368,7 @@ void ParticleData::scatter
               int i_dst = i_array[pd]++;
               int ib_dst,ip_dst;
               particle_descr->index(i_dst,&ib_dst,&ip_dst);
-              is_local = (int *) pd->attribute_array(particle_descr,it,ia_loc,ib_dst);
+              is_local = (int64_t *) pd->attribute_array(particle_descr,it,ia_loc,ib_dst);
 
               for (int ia=0; ia<na; ia++) {
     	           if (!interleaved)
@@ -392,7 +393,7 @@ void ParticleData::scatter
           int i_dst = i_array[pd]++;
           int ib_dst,ip_dst;
           particle_descr->index(i_dst,&ib_dst,&ip_dst);
-          is_local = (int *) pd->attribute_array(particle_descr,it,ia_loc,ib_dst);
+          is_local = (int64_t *) pd->attribute_array(particle_descr,it,ia_loc,ib_dst);
 
           for (int ia=0; ia<na; ia++) {
             if (!interleaved)

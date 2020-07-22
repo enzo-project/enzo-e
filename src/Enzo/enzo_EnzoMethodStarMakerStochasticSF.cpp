@@ -73,12 +73,13 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
   // declare particle position arrays
   //  default particle type is "star", but this will default
   //  to subclass particle_type
-  const int it   = particle.type_index (this->particle_type());
+  const int it    = particle.type_index (this->particle_type());
 
-  const int ia_m = particle.attribute_index (it, "mass");
-  const int ia_x = particle.attribute_index (it, "x");
-  const int ia_y = particle.attribute_index (it, "y");
-  const int ia_z = particle.attribute_index (it, "z");
+  const int ia_id = particle.attribute_index (it, "id");
+  const int ia_m  = particle.attribute_index (it, "mass");
+  const int ia_x  = particle.attribute_index (it, "x");
+  const int ia_y  = particle.attribute_index (it, "y");
+  const int ia_z  = particle.attribute_index (it, "z");
   const int ia_vx = particle.attribute_index (it, "vx");
   const int ia_vy = particle.attribute_index (it, "vy");
   const int ia_vz = particle.attribute_index (it, "vz");
@@ -103,6 +104,8 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
   enzo_float * pmetal = 0;
   enzo_float * pform  = 0;
   enzo_float * plifetime = 0;
+
+  int64_t * id = 0;
 
   // obtain the particle stride length
   const int ps = particle.stride(it, ia_m);
@@ -253,6 +256,10 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
         int io = ipp; // ipp*ps
         // pointer to mass array in block
         pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib);
+
+        id = (int64_t * ) particle.attribute_array(it, ia_id, ib);
+
+        id[io] = CkMyPe() + (ParticleData::id_counter[cello::index_static()]++) * CkNumPes();
 
         pmass[io] = star_fraction * (density[i] * dx * dy * dz);
         px = (enzo_float *) particle.attribute_array(it, ia_x, ib);

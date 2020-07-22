@@ -19,6 +19,7 @@ class ParticleData {
 public: // interface
 
   static int64_t counter[CONFIG_NODE_SIZE];
+  static int64_t id_counter[CONFIG_NODE_SIZE];
 
   /// Constructor
   ParticleData();
@@ -37,6 +38,9 @@ public: // interface
     attribute_array_ = particle_data.attribute_array_;
     attribute_align_ = particle_data.attribute_align_;
     particle_count_  = particle_data.particle_count_;
+
+    ParticleDescr * particle_descr = cello::particle_descr();
+    id_counter[cello::index_static()] = num_particles(particle_descr);
   }
 
   /// CHARM++ Pack / Unpack function

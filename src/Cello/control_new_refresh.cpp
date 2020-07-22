@@ -365,11 +365,11 @@ int Block::delete_particle_copies_ (int it){
 
   const int nb = particle.num_batches(it);
 
-  int * is_local=0;
+  int64_t * is_local=0;
   int count = 0;
   for (int ib = 0; ib<nb; ib++){
     const int np = particle.num_particles(it,ib);
-    is_local = (int *) particle.attribute_array(it, ia_c, ib);
+    is_local = (int64_t *) particle.attribute_array(it, ia_c, ib);
 
     bool * mask = new bool[np];
     for( int ip=0; ip<np; ip++){
@@ -793,7 +793,7 @@ void Block::particle_scatter_neighbors_
 
     const int nb = particle.num_batches(it);
 
-    int * is_local=0;
+    int64_t * is_local=0;
 
     for (int ib=0; ib<nb; ib++) {
 
@@ -809,7 +809,7 @@ void Block::particle_scatter_neighbors_
 
       particle.position(it,ib,xa,ya,za);
 
-      is_local = (int *) particle.attribute_array(it, ia_c, ib);
+      is_local = (int64_t *) particle.attribute_array(it, ia_c, ib);
 
       // ...initialize mask used for scatter and delete
       // ...and corresponding particle indices
