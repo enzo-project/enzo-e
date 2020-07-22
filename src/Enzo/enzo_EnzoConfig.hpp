@@ -152,6 +152,7 @@ public: // interface
       initial_feedback_test_density(),
       initial_feedback_test_star_mass(),
       initial_feedback_test_temperature(),
+      initial_feedback_test_from_file(),
       // EnzoInitialMusic
       initial_music_field_files(),
       initial_music_field_datasets(),
@@ -252,6 +253,7 @@ public: // interface
       method_feedback_supernova_energy(1.0),
       method_feedback_ejecta_metal_fraction(0.0),
       method_feedback_stencil(3),
+      method_feedback_radius(-1.0),
       method_feedback_shift_cell_center(true),
       method_feedback_ke_fraction(0.0),
       method_feedback_use_ionization_feedback(false),
@@ -484,6 +486,7 @@ public: // attributes
   double                     initial_feedback_test_density;
   double                     initial_feedback_test_star_mass;
   double                     initial_feedback_test_temperature;
+  bool                       initial_feedback_test_from_file;
 
   /// EnzoInitialIsolatedGalaxy
   double                     initial_IG_center_position[3];
@@ -538,6 +541,7 @@ public: // attributes
   double                    method_feedback_ke_fraction;
   double                    method_feedback_time_first_sn;
   int                       method_feedback_stencil;
+  double                    method_feedback_radius;
   bool                      method_feedback_shift_cell_center;
   bool                      method_feedback_use_ionization_feedback;
 

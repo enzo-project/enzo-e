@@ -502,7 +502,8 @@ void OutputImage::write_block ( const Block *  block ) throw()
     for (int ib=0; ib<nb; ib++) {
 
       const int np = particle.num_particles(it,ib);
-      double position[3][np];
+      double **position = new double *[3];
+      for (int dim = 0; dim < 3; dim++) position[dim] = new double [np];
       particle.position(it,ib, position[0], position[1], position[2]);
       const double * xa = position[IX];
       const double * ya = position[IY];
@@ -529,6 +530,8 @@ void OutputImage::write_block ( const Block *  block ) throw()
 	reduce_point_(image_data_,ix1,iy1,value,ax1*ay1);
 
       }
+      for (int dim = 0; dim < 3; dim++) delete [] position[dim];
+      delete [] position;
     }
   }
 }

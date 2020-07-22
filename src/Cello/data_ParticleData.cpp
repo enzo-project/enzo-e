@@ -19,14 +19,14 @@ ParticleData::ParticleData()
     attribute_align_(),
     particle_count_()
 {
-  ++counter[cello::index_static()]; 
+  ++counter[cello::index_static()];
 }
 
 //----------------------------------------------------------------------
 
 bool ParticleData::operator== (const ParticleData & particle_data) throw ()
 {
-  return 
+  return
     (attribute_array_ == particle_data.attribute_array_) &&
     (attribute_align_ == particle_data.attribute_align_) &&
     (particle_count_  == particle_data.particle_count_);
@@ -45,7 +45,7 @@ void ParticleData::pup (PUP::er &p)
 
 ParticleData::~ParticleData()
 {
-  --counter[cello::index_static()]; 
+  --counter[cello::index_static()];
 }
 //----------------------------------------------------------------------
 
@@ -77,7 +77,7 @@ int ParticleData::num_batches (int it) const
 
 //----------------------------------------------------------------------
 
-int ParticleData::num_particles 
+int ParticleData::num_particles
 (ParticleDescr * particle_descr) const
 {
   const int nt = particle_descr->num_types();
@@ -90,7 +90,7 @@ int ParticleData::num_particles
 
 //----------------------------------------------------------------------
 
-int ParticleData::num_particles 
+int ParticleData::num_particles
 (ParticleDescr * particle_descr,int it) const
 {
   int nb = num_batches(it);
@@ -103,7 +103,7 @@ int ParticleData::num_particles
 
 //----------------------------------------------------------------------
 
-int ParticleData::num_particles 
+int ParticleData::num_particles
 (ParticleDescr * particle_descr, int it, int ib) const
 {
   if ( !(0 <= it && it < particle_descr->num_types()) ) return 0;
@@ -114,9 +114,68 @@ int ParticleData::num_particles
 
 //----------------------------------------------------------------------
 
-int ParticleData::insert_particles 
+int ParticleData::num_local_particles
+(ParticleDescr * particle_descr) const
+{
+  const int nt = particle_descr->num_types();
+  int np = 0;
+  for (int it=0; it<nt; it++) {
+    np += num_local_particles(particle_descr,it);
+  }
+  return np;
+}
+
+//----------------------------------------------------------------------
+
+int ParticleData::num_local_particles
+(ParticleDescr * particle_descr,int it) const
+{
+  int nb = num_batches(it);
+  int np = 0;
+  for (int ib=0; ib<nb; ib++) {
+    np += num_local_particles(particle_descr,it,ib);
+  }
+  return np;
+}
+
+//----------------------------------------------------------------------
+
+int ParticleData::num_local_particles
+(ParticleDescr * particle_descr, int it, int ib) const
+{
+  if ( !(0 <= it && it < particle_descr->num_types()) ) return 0;
+  if ( !(0 <= ib && ib < num_batches(it)) ) return 0;
+
+  int count = 0;
+
+  for (int it = 0; it < particle_descr->num_types(); it++){
+    const int ia_c = particle_descr->attribute_index(it, "is_local");
+    const int cd   = particle_descr->stride(it, ia_c);
+    const int nb   = num_batches(it);
+
+    int * is_local = 0;
+
+    for (int ib=0; ib<nb; ib++){
+      const int np = num_particles(particle_descr,it,ib);
+      if (np==0) continue;
+      is_local = (int *) attribute_array(particle_descr,it, ia_c, ib);
+      for (int ip = 0; ip < np; ip++){
+        if (is_local[ip*cd]) count++;
+      }
+    }
+
+  }
+
+  return count;
+}
+
+//----------------------------------------------------------------------
+
+int ParticleData::insert_particles
 (ParticleDescr * particle_descr,
- int it, int np)
+ int it, int np,
+ const bool copy  // default = false
+)
 {
   if (np==0) return 0;
 
@@ -164,7 +223,7 @@ int ParticleData::insert_particles
     }
 
     // allocate particles
-    
+
     resize_attribute_array_(particle_descr,it,ib_this,ip_start+np_this);
 
     // prepare for next batch
@@ -180,7 +239,7 @@ int ParticleData::insert_particles
 
 //----------------------------------------------------------------------
 
-int ParticleData::delete_particles 
+int ParticleData::delete_particles
 (ParticleDescr * particle_descr,
  int it, int ib, const bool * mask)
 {
@@ -203,7 +262,7 @@ int ParticleData::delete_particles
     } else if (npd>0) {
       // ... else copy the particle attributes back to first opening
       for (int ia=0; ia<na; ia++) {
-	if (!interleaved) 
+	if (!interleaved)
 	  mp = particle_descr->attribute_bytes(it,ia);
 	const int ny = particle_descr->attribute_bytes(it,ia);
 	char * a = attribute_array(particle_descr,it,ia,ib);
@@ -225,11 +284,12 @@ int ParticleData::delete_particles
 
 //----------------------------------------------------------------------
 
-void ParticleData::scatter 
+void ParticleData::scatter
 (ParticleDescr * particle_descr,
  int it, int ib,
  int np, const bool * mask, const int * index,
- int n, ParticleData * particle_array[])
+ int n, ParticleData * particle_array[],
+ const bool copy)
 {
   // count number of particles in each particle_array element
 
@@ -237,15 +297,33 @@ void ParticleData::scatter
   for (int i=0; i<n; i++) np_array[i] = 0;
 
   if (mask == NULL) {
-    for (int ip=0; ip<np; ip++) {
-      ++np_array[index[ip]];
+    if (copy) {
+      for (int ip=0; ip<np; ip++) {
+        for (int k = 0; k < n; k++){
+            if (particle_array[k] != NULL) ++np_array[k];
+        }
+      }
+    } else {
+      for (int ip=0; ip<np; ip++) {
+        ++np_array[index[ip]];
+      }
     }
   } else {
-    for (int ip=0; ip<np; ip++) {
-      if (mask[ip]) ++np_array[index[ip]];
+    if (copy){
+      for (int ip=0; ip<np; ip++) {
+        if (mask[ip]) {
+          for(int k = 0; k < n; k++){
+            if (particle_array[k] != NULL)  ++np_array[k];
+          }
+        }
+      }
+    } else {
+      for (int ip=0; ip<np; ip++) {
+        if (mask[ip]) ++np_array[index[ip]];
+      }
     }
   }
-  
+
   // insert uninitialized particles
   std::map<ParticleData *, int>  i_array;
   std::map<ParticleData *, bool> is_first;
@@ -265,47 +343,87 @@ void ParticleData::scatter
   }
 
   delete [] np_array;
-  
+
   const bool interleaved = particle_descr->interleaved(it);
   const int na = particle_descr->num_attributes(it);
   int mp = particle_descr->particle_bytes(it);
   const int ib_src = ib;
 
+  const int ia_loc = particle_descr->attribute_index(it,"is_local");
+  const int dloc = particle_descr->stride(it,ia_loc);
+  int *is_local=NULL;
   int count=0;
   for (int ip_src=0; ip_src<np; ip_src++) {
 
     if ((mask == NULL) || mask[ip_src]) {
       ++count;
-      int k = index[ip_src];
-      ParticleData * pd = particle_array[k];
-      int i_dst = i_array[pd]++;
-      int ib_dst,ip_dst;
-      particle_descr->index(i_dst,&ib_dst,&ip_dst);
-      for (int ia=0; ia<na; ia++) {
-	if (!interleaved) 
-	  mp = particle_descr->attribute_bytes(it,ia);
-	int ny = particle_descr->attribute_bytes(it,ia);
-	char * a_src = attribute_array
-	  (particle_descr,it,ia,ib_src);
-	char * a_dst = pd->attribute_array
-	  (particle_descr,it,ia,ib_dst);
-	for (int iy=0; iy<ny; iy++) {
-	  a_dst [iy + mp*ip_dst] = a_src [iy + mp*ip_src];
-	}
-      }
-    }
 
+        if (copy){
+          for (int k = 0; k < n; k++){
+              ParticleData * pd = particle_array[k];
+
+              if (pd == NULL) continue;
+
+              int i_dst = i_array[pd]++;
+              int ib_dst,ip_dst;
+              particle_descr->index(i_dst,&ib_dst,&ip_dst);
+              is_local = (int *) pd->attribute_array(particle_descr,it,ia_loc,ib_dst);
+
+              for (int ia=0; ia<na; ia++) {
+    	           if (!interleaved)
+    	             mp = particle_descr->attribute_bytes(it,ia);
+    	           int ny = particle_descr->attribute_bytes(it,ia);
+    	           char * a_src = attribute_array
+    	             (particle_descr,it,ia,ib_src);
+    	           char * a_dst = pd->attribute_array
+    	               (particle_descr,it,ia,ib_dst);
+    	           for (int iy=0; iy<ny; iy++) {
+    	               a_dst [iy + mp*ip_dst] = a_src [iy + mp*ip_src];
+    	           }
+              }
+
+              is_local[ip_dst*dloc] = false;
+
+          }
+
+        } else {
+          int k = index[ip_src];
+          ParticleData * pd = particle_array[k];
+          int i_dst = i_array[pd]++;
+          int ib_dst,ip_dst;
+          particle_descr->index(i_dst,&ib_dst,&ip_dst);
+          is_local = (int *) pd->attribute_array(particle_descr,it,ia_loc,ib_dst);
+
+          for (int ia=0; ia<na; ia++) {
+            if (!interleaved)
+              mp = particle_descr->attribute_bytes(it,ia);
+            int ny = particle_descr->attribute_bytes(it,ia);
+            char * a_src = attribute_array
+              (particle_descr,it,ia,ib_src);
+            char * a_dst = pd->attribute_array
+              (particle_descr,it,ia,ib_dst);
+            for (int iy=0; iy<ny; iy++) {
+              a_dst [iy + mp*ip_dst] = a_src [iy + mp*ip_src];
+            }
+          }
+
+          is_local[ip_dst*dloc] = true;
+        }
+
+    }
   }
+
+
 }
 
 //----------------------------------------------------------------------
 
-int ParticleData::gather 
-(ParticleDescr * particle_descr, int it, 
+int ParticleData::gather
+(ParticleDescr * particle_descr, int it,
  int n, ParticleData * particle_array[])
 {
   int count = 0;
-  
+
   // Sort particle array to simplify skipping duplicates
   ParticleData * particle_array_sorted[n];
   for (int i=0; i<n; i++) particle_array_sorted[i] = particle_array[i];
@@ -316,7 +434,7 @@ int ParticleData::gather
   int np = 0;
   for (int k=0; k<n; k++) {
     // ... skipping duplicate ParticleData objects
-    if (k>0 && (particle_array_sorted[k] == 
+    if (k>0 && (particle_array_sorted[k] ==
 		particle_array_sorted[k-1])) continue;
     ParticleData * pd = particle_array_sorted[k];
     np += pd ? pd->num_particles(particle_descr,it) : 0;
@@ -337,7 +455,7 @@ int ParticleData::gather
 
   for (int k=0; k<n; k++) {
     // ...skip duplicate ParticleData objects
-    if (k>0 && (particle_array_sorted[k] == 
+    if (k>0 && (particle_array_sorted[k] ==
 		particle_array_sorted[k-1])) continue;
     ParticleData * pd = particle_array_sorted[k];
     const int nb = pd ? pd->num_batches(it) : 0;
@@ -346,7 +464,7 @@ int ParticleData::gather
       count += np;
       for (int ip=0; ip<np; ip++) {
 	for (int ia=0; ia<na; ia++) {
-	  if (!interleaved) 
+	  if (!interleaved)
 	    mp = particle_descr->attribute_bytes(it,ia);
 	  int ny = particle_descr->attribute_bytes(it,ia);
 	  char * a_src = pd->attribute_array
@@ -392,7 +510,7 @@ void ParticleData::compress (ParticleDescr * particle_descr, int it)
   int np_dst; // number of particles in ib_dst batch
   int np_src; // number of particles in ib_src batch
 
-  // find destination: first empty spot 
+  // find destination: first empty spot
 
   ib_dst=0;
   np_dst=(ib_dst<nb) ? num_particles(particle_descr,it,ib_dst) : 0;
@@ -444,7 +562,7 @@ void ParticleData::compress (ParticleDescr * particle_descr, int it)
 
   // deallocate empty batches?
 }
-  
+
 
 //----------------------------------------------------------------------
 
@@ -497,12 +615,12 @@ float ParticleData::efficiency (ParticleDescr * particle_descr, int it, int ib)
   const int64_t bytes_used = (int64_t)mb*mp;
 
   return (bytes_used) ? 1.0*bytes_min/bytes_used : -1.0;
-  
+
 }
 
 //----------------------------------------------------------------------
 
-bool ParticleData::position 
+bool ParticleData::position
 (
  ParticleDescr * particle_descr,
  int it, int ib,
@@ -548,7 +666,7 @@ bool ParticleData::position
 
 //----------------------------------------------------------------------
 
-bool ParticleData::velocity 
+bool ParticleData::velocity
 (
  ParticleDescr * particle_descr,
  int it, int ib,
@@ -582,8 +700,8 @@ bool ParticleData::velocity
 
 //----------------------------------------------------------------------
 
-void ParticleData::position_update 
-(ParticleDescr * particle_descr,int it, int ib, 
+void ParticleData::position_update
+(ParticleDescr * particle_descr,int it, int ib,
  long double dx, long double dy, long double dz)
 {
   const int ia_x = particle_descr->attribute_position(it,0);
@@ -614,12 +732,12 @@ void ParticleData::position_update
       update_position_int_ (particle_descr,type_z,it,ib,ia_z,dz);
     }
   }
-  
+
 }
 
 //----------------------------------------------------------------------
 
-void ParticleData::copy_attribute_float_ 
+void ParticleData::copy_attribute_float_
 (ParticleDescr * particle_descr,
  int type, int it, int ib, int ia, double * coord)
 {
@@ -644,7 +762,7 @@ void ParticleData::copy_attribute_float_
 
 //----------------------------------------------------------------------
 
-void ParticleData::update_attribute_float_ 
+void ParticleData::update_attribute_float_
 (ParticleDescr * particle_descr,
  int type, int it, int ib, int ia, long double da)
 {
@@ -669,7 +787,7 @@ void ParticleData::update_attribute_float_
 
 //----------------------------------------------------------------------
 
-void ParticleData::copy_position_int_ 
+void ParticleData::copy_position_int_
 (ParticleDescr * particle_descr,
  int type, int it, int ib, int ia, double * coord)
 {
@@ -698,7 +816,7 @@ void ParticleData::copy_position_int_
 
 //----------------------------------------------------------------------
 
-void ParticleData::update_position_int_ 
+void ParticleData::update_position_int_
 (ParticleDescr * particle_descr,
  int type, int it, int ib, int ia, int64_t da)
 {
@@ -738,13 +856,13 @@ int ParticleData::data_size (ParticleDescr * particle_descr) const
 
   // array lengths
 
-  size += sizeof(int); 
+  size += sizeof(int);
 
   for (int it=0; it<nt; it++) {
 
     // array[it] lengths
 
-    size += sizeof(int); 
+    size += sizeof(int);
 
     const int nb = num_batches(it);
 
@@ -757,7 +875,7 @@ int ParticleData::data_size (ParticleDescr * particle_descr) const
     for (int ib=0; ib<nb; ib++) {
 
       // array[it][ib] length
-      size += sizeof(int); 
+      size += sizeof(int);
 
       // attribute_array_[it][ib] values
       const int mp = attribute_array_[it][ib].size();
@@ -800,7 +918,7 @@ char * ParticleData::save_data (ParticleDescr * particle_descr,
       // ...store particle attribute array lengths
 
       (*pi++) = attribute_array_[it][ib].size();
-      
+
     }
   }
 
@@ -838,7 +956,7 @@ char * ParticleData::save_data (ParticleDescr * particle_descr,
 	  "Buffer has size %ld but expecting size %d",
 	  (pc-buffer),data_size(particle_descr),
 	  ((pc-buffer) == data_size(particle_descr)));
-  
+
   return pc;
 }
 
@@ -869,7 +987,7 @@ char * ParticleData::load_data (ParticleDescr * particle_descr,
   ASSERT1("ParticleData::load_data",
 	  "Trying to allocate negative particle types: nt = %d",
 	  nt, nt >= 0);
-  
+
   attribute_array_.resize(nt);
   attribute_align_.resize(nt);
   particle_count_.resize(nt);
@@ -899,9 +1017,9 @@ char * ParticleData::load_data (ParticleDescr * particle_descr,
       ASSERT1("ParticleData::load_data",
 	      "Trying to allocate negative particles: np = %d",
 	      np, np >= 0);
-      
+
       attribute_array_[it][ib].resize(np);
-      
+
     }
   }
 
@@ -985,9 +1103,9 @@ void ParticleData::debug (ParticleDescr * particle_descr)
 	printf ("\n");
       }
     }
-    
+
   }
-  
+
 }
 
 
@@ -1007,11 +1125,16 @@ void ParticleData::write_ifrite (ParticleDescr * particle_descr,
   const int d = particle_descr->stride(it,ia_x);
   for (int ib=0; ib<nb; ib++) {
     const int np = num_particles(particle_descr,it,ib);
-    double x[np], y[np], z[np];
+    double * x = new double [np];
+    double * y = new double [np];
+    double * z = new double [np];
     position (particle_descr,it,ib,x,y,z);
     for (int ip=0; ip<np; ip++) {
       fprintf (fp,"%f %f %f\n",x[ip*d],y[ip*d],z[ip*d]);
     }
+    delete [] x;
+    delete [] y;
+    delete [] z;
   }
   fflush(fp);
   fclose (fp);
@@ -1039,7 +1162,7 @@ void ParticleData::resize_attribute_array_
     ASSERT1("ParticleData::resize_attribute_array_",
 	    "Trying to allocate negative particles: new_size = %ld",
 	    new_size, new_size >= 0);
-      
+
     attribute_array_[it][ib].resize(new_size);
     char * array = &attribute_array_[it][ib][0];
     uintptr_t iarray = (uintptr_t) array;
