@@ -252,6 +252,7 @@ public: // interface
       method_feedback_supernova_energy(1.0),
       method_feedback_ejecta_metal_fraction(0.0),
       method_feedback_stencil(3),
+      method_feedback_radius(-1.0),
       method_feedback_shift_cell_center(true),
       method_feedback_ke_fraction(0.0),
       method_feedback_use_ionization_feedback(false),
@@ -538,6 +539,7 @@ public: // attributes
   double                    method_feedback_ke_fraction;
   double                    method_feedback_time_first_sn;
   int                       method_feedback_stencil;
+  double                    method_feedback_radius;
   bool                      method_feedback_shift_cell_center;
   bool                      method_feedback_use_ionization_feedback;
 
