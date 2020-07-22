@@ -108,13 +108,13 @@ Block::Block ( MsgRefine * msg )
   index_.array(array_,array_+1,array_+2);
 
   if (! is_first_cycle) {
-    msg->update(data()); // AJE: my version of this only did this if level > 0... make sure this works with particle ICs
-    delete msg;
+    msg->update(data());
   } else {
-    delete msg;
     apply_initial_();
+    if (this->level() > 0) msg->update(data()); // AJE: needed to get root grid particles in IC to lower grids
   }
 
+  delete msg;
   performance_stop_(perf_block);
 
 
@@ -206,12 +206,12 @@ void Block::p_set_msg_refine(MsgRefine * msg)
 
   if (! is_first_cycle) {
     msg->update(data());
-    delete msg;
   } else {
-    delete msg;
     apply_initial_();
-  } 
-  
+    if (this->level() > 0) msg->update(data());
+  }
+
+  delete msg;
   performance_stop_(perf_block);
 
 }
