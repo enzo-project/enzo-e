@@ -52,7 +52,7 @@ void Block::new_refresh_start (int id_refresh, int callback)
 
     if (refresh->any_particles_copy()){
       new_refresh_delete_particle_copies_(refresh);
-      count += new_refresh_load_particle_copy_(*refresh);
+      count += new_refresh_load_particle_faces_(*refresh, true);
     }
 
     Sync & sync = new_refresh_sync_list_[id_refresh];
@@ -386,42 +386,7 @@ int Block::delete_particle_copies_ (int it){
 
 //----------------------------------------------------------------------
 
-
-int Block::new_refresh_load_particle_copy_ (Refresh & refresh)
-{
-  const int rank = cello::rank();
-
-  const int npa3[3] = { 4, 4*4, 4*4*4 };
-  const int npa = npa3[rank-1];
-
-  ParticleData * particle_array[npa];
-  ParticleData * particle_list [npa];
-  Index * index_list = new Index[npa];
-
-  for (int i=0; i<npa; i++) {
-    particle_list[i]  = NULL;
-    particle_array[i] = NULL;
-  }
-
-  // Sort particles that have left the Block into 4x4x4 array
-  // corresponding to neighbors
-
-  int nl = particle_load_copy_
-    (npa,particle_list,particle_array, index_list, &refresh);
-
-  // Send particle data to neighbors
-
-  new_particle_send_(refresh,nl,index_list,particle_list);
-
-  delete [] index_list;
-
-
-  return nl;
-}
-
-//----------------------------------------------------------------------
-
-int Block::new_refresh_load_particle_faces_ (Refresh & refresh)
+int Block::new_refresh_load_particle_faces_ (Refresh & refresh, const bool copy)
 {
   const int rank = cello::rank();
 
@@ -441,7 +406,9 @@ int Block::new_refresh_load_particle_faces_ (Refresh & refresh)
   // corresponding to neighbors
 
   int nl = particle_load_faces_
-    (npa,particle_list,particle_array, index_list, &refresh);
+    (npa,particle_list,particle_array, index_list, &refresh, copy);
+
+
 
   // Send particle data to neighbors
 
@@ -508,7 +475,8 @@ int Block::particle_load_faces_ (int npa,
 				 ParticleData * particle_list[],
 				 ParticleData * particle_array[],
 				 Index index_list[],
-				 Refresh *refresh)
+				 Refresh *refresh,
+         const bool copy)
 {
   // Array elements correspond to child-sized blocks to
   // the left, inside, and right of the main Block.  Particles
@@ -557,7 +525,7 @@ int Block::particle_load_faces_ (int npa,
   // periodic boundaries
 
   int nl = particle_create_array_neighbors_
-    (refresh, particle_array,particle_list,index_list);
+    (refresh, particle_array,particle_list,index_list, copy);
 
   // Scatter particles among particle_data array
 
@@ -573,46 +541,11 @@ int Block::particle_load_faces_ (int npa,
     type_list = refresh->particle_list();
   }
 
-  particle_scatter_neighbors_(npa,particle_array,type_list, particle);
+  particle_scatter_neighbors_(npa, particle_array, type_list, particle, copy);
 
   // Update positions particles crossing periodic boundaries
 
   particle_apply_periodic_update_  (nl,particle_list,refresh);
-
-  return nl;
-}
-
-//----------------------------------------------------------------------
-
-int Block::particle_load_copy_ (int npa,
-				 ParticleData * particle_list[],
-				 ParticleData * particle_array[],
-				 Index index_list[],
-				 Refresh *refresh)
-{
-
-  int nl = particle_create_array_neighbors_
-    (refresh, particle_array,particle_list,index_list, true);
-
-  // Scatter particles among particle_data array
-
-  Particle particle (cello::particle_descr(),
-		     data()->particle_data());
-
-  std::vector<int> type_list;
-  if (refresh->all_particles_copy()) {
-    const int nt = particle.num_types();
-    type_list.resize(nt);
-    for (int i=0; i<nt; i++) type_list[i] = i;
-  } else {
-    type_list = refresh->particle_list_copy();
-  }
-
-  const bool copy = true;
-  particle_scatter_neighbors_copy_(npa,particle_array,type_list, particle);
-
-  particle_apply_periodic_update_  (nl,particle_list,refresh);
-
 
   return nl;
 }
@@ -885,58 +818,41 @@ void Block::particle_scatter_neighbors_
       int  * index = new int[np];
       for (int ip=0; ip<np; ip++) {
 
-// AJE - issue is here since in copying partilces arent on the grid boundaries
-//    so mismatch between here and get_particle_bin_limits
-//    which is called elsewhere in control_new_refresh
-//    and now I realize this will currently only push copies of particles
-//    fomr adjacent 1/2 of sibling grids. this is probably OK assuming
-//    feedback region < 1/2 of grid size (probably?)
+        // look at block scatter children for help?
+      	double x = is_float ? 2.0*(xa[ip*d]-x0)/xl : xa[ip*d];
+      	double y = is_float ? 2.0*(ya[ip*d]-y0)/yl : ya[ip*d];
+      	double z = is_float ? 2.0*(za[ip*d]-z0)/zl : za[ip*d];
 
-// look at block scatter children for help?
-	double x = is_float ? 2.0*(xa[ip*d]-x0)/xl : xa[ip*d];
-	double y = is_float ? 2.0*(ya[ip*d]-y0)/yl : ya[ip*d];
-	double z = is_float ? 2.0*(za[ip*d]-z0)/zl : za[ip*d];
+      	int ix = (rank >= 1) ? (x + 2) : 0;
+      	int iy = (rank >= 2) ? (y + 2) : 0;
+      	int iz = (rank >= 3) ? (z + 2) : 0;
 
-	int ix = (rank >= 1) ? (x + 2) : 0;
-	int iy = (rank >= 2) ? (y + 2) : 0;
-	int iz = (rank >= 3) ? (z + 2) : 0;
+      	if (! (0 <= ix && ix < 4) ||
+      	    ! (0 <= iy && iy < 4) ||
+      	    ! (0 <= iz && iz < 4)) {
 
-	if (! (0 <= ix && ix < 4) ||
-	    ! (0 <= iy && iy < 4) ||
-	    ! (0 <= iz && iz < 4)) {
+      	  CkPrintf ("%d ix iy iz %d %d %d\n",CkMyPe(),ix,iy,iz);
+      	  CkPrintf ("%d x y z %f %f %f\n",CkMyPe(),x,y,z);
+      	  CkPrintf ("%d xa ya za %f %f %f\n",CkMyPe(),xa[ip*d],ya[ip*d],za[ip*d]);
+      	  CkPrintf ("%d xm ym zm %f %f %f\n",CkMyPe(),xm,ym,zm);
+      	  CkPrintf ("%d xp yp zp %f %f %f\n",CkMyPe(),xp,yp,zp);
+      	  ERROR3 ("Block::particle_scatter_neighbors_",
+      		  "particle indices (ix,iy,iz) = (%d,%d,%d) out of bounds",
+      		  ix,iy,iz);
+      	}
 
-	  CkPrintf ("%d ix iy iz %d %d %d\n",CkMyPe(),ix,iy,iz);
-	  CkPrintf ("%d x y z %f %f %f\n",CkMyPe(),x,y,z);
-	  CkPrintf ("%d xa ya za %f %f %f\n",CkMyPe(),xa[ip*d],ya[ip*d],za[ip*d]);
-	  CkPrintf ("%d xm ym zm %f %f %f\n",CkMyPe(),xm,ym,zm);
-	  CkPrintf ("%d xp yp zp %f %f %f\n",CkMyPe(),xp,yp,zp);
-	  ERROR3 ("Block::particle_scatter_neighbors_",
-		  "particle indices (ix,iy,iz) = (%d,%d,%d) out of bounds",
-		  ix,iy,iz);
-	}
-
-	const int i = ix + 4*(iy + 4*iz);
-	index[ip] = i;
-	bool in_block = true;
-	in_block = in_block && (!(rank >= 1) || (1 <= ix && ix <= 2));
-	in_block = in_block && (!(rank >= 2) || (1 <= iy && iy <= 2));
-	in_block = in_block && (!(rank >= 3) || (1 <= iz && iz <= 2));
-	mask[ip] = ! in_block;
-  if (copy){  // only copy particles that are not getting moved
-    mask[ip] = in_block;
-    //is_local[ip*cd] = 0; // will not be local
-
-    // hack - pretend partcles are closer to face
-    // AJE-adapt: maybe remove below?
-    //ix = ix <= 1 ? 0 : 3;
-    //iy = iy <= 1 ? 0 : 3;
-    //iz = iz <= 1 ? 0 : 3;
-    index[ip] = ix + 4 * (iy + 4 * iz);
-
-  } else {    // only move particles that leave the block
-    mask[ip] = ! in_block;
-    //is_local[ip*cd] = 1; // will be local once moved
-  }
+      	const int i = ix + 4*(iy + 4*iz);
+      	index[ip] = i;
+      	bool in_block = true;
+      	in_block = in_block && (!(rank >= 1) || (1 <= ix && ix <= 2));
+      	in_block = in_block && (!(rank >= 2) || (1 <= iy && iy <= 2));
+      	in_block = in_block && (!(rank >= 3) || (1 <= iz && iz <= 2));
+      	mask[ip] = ! in_block;
+        if (copy){  // only copy particles that are not getting moved
+          mask[ip] = in_block;
+        } else {    // only move particles that leave the block
+          mask[ip] = ! in_block;
+        }
       }
 
       delete [] xa;
@@ -944,7 +860,8 @@ void Block::particle_scatter_neighbors_
       delete [] za;
 
       // ...scatter particles to particle array
-      particle.scatter (it,ib, np, mask, index, npa, particle_array);
+      particle.scatter  (it,ib,np,mask,index,npa,particle_array, copy);
+
       // ... delete scattered particles if moved
       if (!copy) count += particle.delete_particles (it,ib,mask);
 
@@ -956,155 +873,5 @@ void Block::particle_scatter_neighbors_
 
   if (!copy) cello::simulation()->data_delete_particles(count);
 
-  /*
-  if (copy){
-    // reset locality of partilces
-    for (auto it_type=type_list.begin(); it_type!=type_list.end(); it_type++) {
-      int it = *it_type;
-      const int ia_c  = particle.attribute_index(it, "is_local");
-      const int cd = particle.stride(it, ia_c);
-      // ...for each batch of particles
-      const int nb = particle.num_batches(it);
-      int * is_local=0;
-      for (int ib=0; ib<nb; ib++) {
-        const int np = particle.num_particles(it,ib);
-        if (np == 0) continue;
-        is_local = (int *) particle.attribute_array(it, ia_c, ib);
-        for (int ip=0;ip<np;ip++) is_local[ip*cd] = !(is_local[ip*cd]);
-
-      }
-    }
-
-  } */
-
-}
-
-void Block::particle_scatter_neighbors_copy_
-(int npa,
- ParticleData * particle_array[],
- std::vector<int> & type_list,
- Particle particle )
-{
-  const int rank = cello::rank();
-
-  //     ... get Block bounds
-  double xm,ym,zm;
-  double xp,yp,zp;
-  lower(&xm,&ym,&zm);
-  upper(&xp,&yp,&zp);
-
-  // find block center (x0,y0,z0) and width (xl,yl,zl)
-  const double x0 = 0.5*(xm+xp);
-  const double y0 = 0.5*(ym+yp);
-  const double z0 = 0.5*(zm+zp);
-  const double xl = xp-xm;
-  const double yl = yp-ym;
-  const double zl = zp-zm;
-
-  int count = 0;
-  // ...for each particle type to be moved
-
-  for (auto it_type=type_list.begin(); it_type!=type_list.end(); it_type++) {
-
-    int it = *it_type;
-
-    const int ia_x  = particle.attribute_position(it,0);
-    const int ia_c  = particle.attribute_index(it, "is_local");
-
-    // (...positions may use absolute coordinates (float) or
-    // block-local coordinates (int))
-    const bool is_float =
-      (cello::type_is_float(particle.attribute_type(it,ia_x)));
-
-    // (...stride may be != 1 if particle attributes are interleaved)
-    const int d  = particle.stride(it,ia_x);
-
-    //
-    const int cd = particle.stride(it, ia_c);
-
-    // ...for each batch of particles
-
-    const int nb = particle.num_batches(it);
-
-    int * is_local=0;
-
-    for (int ib=0; ib<nb; ib++) {
-
-      const int np = particle.num_particles(it,ib);
-
-      if (np == 0) continue;
-
-      // ...extract particle position arrays
-
-      double * xa = new double [np];
-      double * ya = new double [np];
-      double * za = new double [np];
-
-      particle.position(it,ib,xa,ya,za);
-
-      is_local = (int *) particle.attribute_array(it, ia_c, ib);
-
-      // ...initialize mask used for scatter and delete
-      // ...and corresponding particle indices
-
-      bool * mask = new bool[np];
-      int  * index = new int[np];
-      for (int ip=0; ip<np; ip++) {
-// AJE - issue is here since in copying partilces arent on the grid boundaries
-//    so mismatch between here and get_particle_bin_limits
-//    which is called elsewhere in control_new_refresh
-//    and now I realize this will currently only push copies of particles
-//    fomr adjacent 1/2 of sibling grids. this is probably OK assuming
-//    feedback region < 1/2 of grid size (probably?)
-
-	double x = is_float ? 2.0*(xa[ip*d]-x0)/xl : xa[ip*d];
-	double y = is_float ? 2.0*(ya[ip*d]-y0)/yl : ya[ip*d];
-	double z = is_float ? 2.0*(za[ip*d]-z0)/zl : za[ip*d];
-
-	int ix = (rank >= 1) ? (x + 1) : 0;
-	int iy = (rank >= 2) ? (y + 1) : 0;
-	int iz = (rank >= 3) ? (z + 1) : 0;
-
-	if (! (0 <= ix && ix < 3) ||
-	    ! (0 <= iy && iy < 3) ||
-	    ! (0 <= iz && iz < 3)) {
-
-	  CkPrintf ("%d ix iy iz %d %d %d\n",CkMyPe(),ix,iy,iz);
-	  CkPrintf ("%d x y z %f %f %f\n",CkMyPe(),x,y,z);
-	  CkPrintf ("%d xa ya za %f %f %f\n",CkMyPe(),xa[ip*d],ya[ip*d],za[ip*d]);
-	  CkPrintf ("%d xm ym zm %f %f %f\n",CkMyPe(),xm,ym,zm);
-	  CkPrintf ("%d xp yp zp %f %f %f\n",CkMyPe(),xp,yp,zp);
-	  ERROR3 ("Block::particle_scatter_neighbors_",
-		  "particle indices (ix,iy,iz) = (%d,%d,%d) out of bounds",
-		  ix,iy,iz);
-	}
-
-	const int i = ix + 3*(iy + 3*iz);
-	bool in_block = true;
-	in_block = in_block && (!(rank >= 1) || ((xa[ip*d] > xm) && (xa[ip*d] < xp)));
-	in_block = in_block && (!(rank >= 2) || ((ya[ip*d] > ym) && (ya[ip*d] < yp)));
-	in_block = in_block && (!(rank >= 3) || ((za[ip*d] > zm) && (za[ip*d] < zp)));
-
-
-
-  mask[ip]  = in_block;
-  index[ip] = 0;
-
-      }
-
-      delete [] xa;
-      delete [] ya;
-      delete [] za;
-
-      // ...scatter particles to particle array
-      particle.scatter_copy (it,ib, np, mask, index, npa, particle_array);
-      // ... delete scattered particles if moved
-
-
-      delete [] mask;
-      delete [] index;
-    }
-  }
-
-
+  return;
 }

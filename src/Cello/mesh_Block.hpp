@@ -559,8 +559,7 @@ public:
 
   int new_refresh_load_field_faces_ (Refresh & refresh);
   /// Scatter particles in ghost zones to neighbors
-  int new_refresh_load_particle_faces_ (Refresh & refresh);
-  int new_refresh_load_particle_copy_ (Refresh & refresh);
+  int new_refresh_load_particle_faces_ (Refresh & refresh, const bool copy = false);
   int new_refresh_delete_particle_copies_   (Refresh * refresh);
 
   int delete_particle_copies_ (int it);
@@ -654,10 +653,7 @@ protected:
   void particle_scatter_neighbors_
   (int npa, ParticleData * particle_array[],
    std::vector<int> & type_list, Particle particle_src, const bool copy = false);
-   void particle_scatter_neighbors_copy_
-   (int npa, ParticleData * particle_array[],
-    std::vector<int> & type_list, Particle particle_src);
-    
+
   /// Scatter particles to appropriate partictle_list elements
   void particle_scatter_children_ (ParticleData * particle_list[],
 				   Particle particle_src);
@@ -671,14 +667,8 @@ protected:
 			    ParticleData * particle_list[],
 			    ParticleData * particle_array[],
 			    Index index_list[],
-			    Refresh * refresh);
-
-  /// Pack particle type data into arrays and send to neighbors
-  int particle_load_copy_ (int npa,
-  		    ParticleData * particle_list[],
-  		    ParticleData * particle_array[],
-  		    Index index_list[],
-  		    Refresh * refresh);
+			    Refresh * refresh,
+          const bool copy = false);
 
   //--------------------------------------------------
   // STOPPING
