@@ -831,6 +831,7 @@ void Block::particle_scatter_neighbors_
       	    ! (0 <= iy && iy < 4) ||
       	    ! (0 <= iz && iz < 4)) {
 
+          CkPrintf("%d ip is_local %d %d\n",CkMyPe(), ip, is_local[ip*cd]);
       	  CkPrintf ("%d ix iy iz %d %d %d\n",CkMyPe(),ix,iy,iz);
       	  CkPrintf ("%d x y z %f %f %f\n",CkMyPe(),x,y,z);
       	  CkPrintf ("%d xa ya za %f %f %f\n",CkMyPe(),xa[ip*d],ya[ip*d],za[ip*d]);
