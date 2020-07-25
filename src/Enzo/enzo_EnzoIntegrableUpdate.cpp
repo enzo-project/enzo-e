@@ -10,15 +10,15 @@
 
 void append_grouping_pairs_(std::vector<std::string> integrable_groups,
 			    FieldCat target_cat, std::size_t *density_index,
-			    EnzoCenteredFieldRegistry &registry,
 			    std::vector<std::pair<std::string,int>> &pair_vec)
 {
   int rank = cello::rank();
   for (std::string name : integrable_groups){
     bool vector_quantity, actively_advected;
     FieldCat category;
-    registry.quantity_properties(name, &vector_quantity, &category,
-				 &actively_advected);
+    EnzoCenteredFieldRegistry::quantity_properties(name, &vector_quantity,
+                                                   &category,
+                                                   &actively_advected);
     // Sanity Check
     ASSERT1("append_grouping_pairs_",
 	    ("\"%s\" should not be listed as an integrable quantity because "
@@ -89,12 +89,11 @@ EnzoIntegrableUpdate::EnzoIntegrableUpdate
 	 ("\"density\" must be a registered integrable group."),
 	 contains(integrable_groups, "density"));
   // First, add conserved quantities to integrable_grouping_items_
-  EnzoCenteredFieldRegistry reg;
   append_grouping_pairs_(integrable_groups, FieldCat::conserved,
-			 &density_index_, reg, integrable_grouping_items_);
+			 &density_index_, integrable_grouping_items_);
   first_specific_index_ = integrable_grouping_items_.size();
   append_grouping_pairs_(integrable_groups, FieldCat::specific,
-			 NULL, reg, integrable_grouping_items_);
+			 NULL, integrable_grouping_items_);
 }
 
 //----------------------------------------------------------------------
@@ -209,7 +208,6 @@ void EnzoIntegrableUpdate::update_quantities
   // For now, not having density floor affect momentum or total energy density
   enzo_float density_floor = eos->get_density_floor();
 
-  EnzoCenteredFieldRegistry registry;
   EFlt3DArray *cur_prim, *dU, *out_prim;
   cur_prim = load_integrable_quantites_(block, initial_integrable_group,
 					stale_depth);

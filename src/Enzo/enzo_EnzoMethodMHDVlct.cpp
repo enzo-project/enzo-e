@@ -200,8 +200,7 @@ void EnzoMethodMHDVlct::setup_groupings_
   groups = unique_combination_(integrable_groups,reconstructable_groups);
 
   // now setup primitive_group_ using the names in groups
-  EnzoCenteredFieldRegistry registry;
-  primitive_group_ = registry.build_grouping(groups, "");
+  primitive_group_ = EnzoCenteredFieldRegistry::build_grouping(groups, "");
 
   // We should check that all the fields in integrable groups are real
   // permenant fields

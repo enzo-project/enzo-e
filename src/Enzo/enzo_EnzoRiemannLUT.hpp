@@ -281,8 +281,7 @@ private:
 public: //associated static functions
 
   /// returns a set of integrable quantities included in the InputLUT
-  static std::set<std::string> quantity_names(EnzoCenteredFieldRegistry &reg)
-    noexcept;
+  static std::set<std::string> quantity_names() noexcept;
 
   /// returns whether the LUT has any bfields
   static constexpr bool has_bfields(){
@@ -300,7 +299,7 @@ public: //associated static functions
 
   /// a function that performs a check to make sure that the InputLUT satisfies
   /// all assumptions. If it doesn't, an error is raised
-  static void validate(EnzoCenteredFieldRegistry &reg) noexcept;
+  static void validate() noexcept;
 };
 
 //----------------------------------------------------------------------
@@ -338,16 +337,15 @@ void EnzoRiemannLUT<LUT>::for_each_entry(Function fn) noexcept{
 //----------------------------------------------------------------------
 
 template <class InputLUT>
-std::set<std::string> EnzoRiemannLUT<InputLUT>::quantity_names
-(EnzoCenteredFieldRegistry &reg) noexcept
+std::set<std::string> EnzoRiemannLUT<InputLUT>::quantity_names() noexcept
 {
   std::set<std::string> set;
 
   auto fn = [&](std::string name, int index)
     {   
-      if (index >= 0) {
-        set.insert(reg.get_actively_advected_quantity_name(name, true));
-      }
+      if (index < 0) {return;}
+      set.insert(EnzoCenteredFieldRegistry::get_actively_advected_quantity_name
+                 (name,true));
     };
   EnzoRiemannLUT<InputLUT>::for_each_entry(fn);
   return set;
@@ -356,7 +354,7 @@ std::set<std::string> EnzoRiemannLUT<InputLUT>::quantity_names
 //----------------------------------------------------------------------
 
 template <class InputLUT>
-void EnzoRiemannLUT<InputLUT>::validate(EnzoCenteredFieldRegistry &reg)
+void EnzoRiemannLUT<InputLUT>::validate()
   noexcept
 { 
   // the elements in the array are default-initialized (they are each "")
@@ -389,15 +387,23 @@ void EnzoRiemannLUT<InputLUT>::validate(EnzoCenteredFieldRegistry &reg)
   for (std::size_t i = 0; i < entry_names.size(); i++){
     std::string name = entry_names[i];
     if (name == ""){
-      ERROR2("EnzoRiemannLUT<LUT>::validate",
+      ERROR2("EnzoRiemannLUT<InputLUT>::validate",
              "The value of NEQ, %d, is wrong. There is no entry for index %d",
              (int)EnzoRiemannLUT<InputLUT>::NEQ, (int)i);
     }
-    // check that name != ''
-    std::string quantity = reg.get_actively_advected_quantity_name(name, true);
-    FieldCat category;
-    reg.quantity_properties(quantity, NULL, &category, NULL);
 
+    std::string quantity =
+      EnzoCenteredFieldRegistry::get_actively_advected_quantity_name(name,
+                                                                     true);
+    if (quantity == ""){
+      ERROR2("EnzoRiemannLUT<InputLUT>::validate",
+             "\"%s\" (at index %d) isn't an actively advected quantity",
+             name.c_str(), (int)i);
+    }
+
+    FieldCat category;
+    EnzoCenteredFieldRegistry::quantity_properties(quantity, NULL, &category,
+                                                   NULL);
     if ((i == 0) && (category != FieldCat::conserved)) {
       ERROR("EnzoRiemannLUT<InputLUT>::validate",
             ("the lookup table's entry for index 0 should correspond to a "

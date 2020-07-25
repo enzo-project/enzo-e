@@ -11,103 +11,61 @@
 
 #include "enzo.hpp"
 #include <algorithm>
-#include <tuple>
-#include <map>
+
+//----------------------------------------------------------------------
+#define INIT_ROW_T_SCALAR(name, category) {#name , {false, category, true }},
+#define INIT_ROW_T_VECTOR(name, category) {#name , {true,  category, true }},
+#define INIT_ROW_F_SCALAR(name, category) {#name , {false, category, false}},
+#define INIT_ROW_F_VECTOR(name, category) {#name , {true,  category, false}},
+
+// initialize the static const map representing the field table
+const ft_map EnzoCenteredFieldRegistry::field_table_ = {
+    #define ENTRY(name, math_type, category, if_advection) \
+    INIT_ROW_ ## if_advection ## _ ## math_type (name, category)
+    FIELD_TABLE
+    #undef ENTRY
+};
 
 //----------------------------------------------------------------------
 
-// Helper function used to check if a vector of strings contains an item
-bool contains_item_(std::vector<std::string> names, std::string item)
-{
-  return (std::find(names.begin(), names.end(), item) != names.end());
-}
-
-//----------------------------------------------------------------------
-
-// Runtime function to construct a dynamic version of FIELD_TABLE
-// It may make sense down the road to cache this
-std::map<std::string,FT_row> get_dynamic_table_(std::vector<std::string> &keys)
-{
-  std::map<std::string,FT_row> out;
-  #define ENTRY(name, math_type, category, if_advection)                      \
-    if (std::string( #if_advection) == "T"){                                  \
-      out[#name] = std::make_tuple( #math_type , category,  true);            \
-      keys.push_back(#name);                                                  \
-    } else {                                                                  \
-      out[#name] = std::make_tuple( #math_type , category, false);            \
-      keys.push_back(#name);                                                  \
-    }
-  FIELD_TABLE
-  #undef ENTRY
-  return out;
-}
-
-//----------------------------------------------------------------------
-
-EnzoCenteredFieldRegistry::EnzoCenteredFieldRegistry()
-{
-  field_table_ = get_dynamic_table_(table_keys_);
-}
-
-//----------------------------------------------------------------------
-
-std::vector<std::string> EnzoCenteredFieldRegistry::get_registered_fields()
-  const
+std::vector<std::string> EnzoCenteredFieldRegistry::get_registered_quantities
+(bool enumerate_components)
 {
   std::vector<std::string> out;
-  for(auto const& key: table_keys_) {
-    std::string quantity_name = key;
-    if (std::get<0>(field_table_.at(key)) == "SCALAR"){
-      out.push_back(quantity_name);
-    } else{
-      out.push_back(quantity_name + std::string("_x"));
-      out.push_back(quantity_name + std::string("_y"));
-      out.push_back(quantity_name + std::string("_z"));
+  for (auto const &key_item_pair : EnzoCenteredFieldRegistry::field_table_) {
+    if (enumerate_components && (key_item_pair.second).vector_quantity){
+      out.push_back(key_item_pair.first + std::string("_x"));
+      out.push_back(key_item_pair.first + std::string("_y"));
+      out.push_back(key_item_pair.first + std::string("_z"));
+    } else {
+      out.push_back(key_item_pair.first);
     }
   }
   return out;
-}
-
-//----------------------------------------------------------------------
-
-void EnzoCenteredFieldRegistry::check_known_quantity_names
-(const std::vector<std::string> names) const
-{
-  for(auto const& name: names) {
-    if (!contains_item_(table_keys_, name)){
-      ERROR1("EnzoCenteredFieldRegistry::check_known_names",
-	     "%s is not a registered name", name.c_str());
-    }
-  }
 }
 
 //----------------------------------------------------------------------
 
 bool EnzoCenteredFieldRegistry::quantity_properties
-(std::string name, bool *vector_quantity, FieldCat *category,
- bool *actively_advected) const
+(const std::string &name, bool *vector_quantity, FieldCat *category,
+ bool *actively_advected) noexcept
 {
-  if (contains_item_(table_keys_, name)){
-    FT_row row = field_table_.at(name);
-    if (vector_quantity){
-      *vector_quantity = ("VECTOR" == std::get<0>(row));
-    }
-    if (category){
-      *category = std::get<1>(row);
-    }
-    if (actively_advected){
-      *actively_advected = std::get<2>(row);
-    }
-    return true;
-  } else {
+  auto search = EnzoCenteredFieldRegistry::field_table_.find(name);
+  if (search == EnzoCenteredFieldRegistry::field_table_.cend()){
     return false;
+  } else {
+    const ft_row &row = search->second;
+    if (vector_quantity){ *vector_quantity = row.vector_quantity; }
+    if (category){ *category = row.category; }
+    if (actively_advected){ *actively_advected = row.actively_advected; }
+    return true;
   }
 }
 
 //----------------------------------------------------------------------
 
-bool EnzoCenteredFieldRegistry::is_actively_advected_vector_component
-(std::string name, bool ijk_suffix) const noexcept
+bool is_actively_advected_vector_component_
+(std::string name, bool ijk_suffix) noexcept
 {
   const std::array<std::string,3> suffixes =  {ijk_suffix ? "_i" : "_x",
 					       ijk_suffix ? "_j" : "_y",
@@ -120,8 +78,8 @@ bool EnzoCenteredFieldRegistry::is_actively_advected_vector_component
       std::string prefix = name.substr(0,length-2);
       bool is_vector, actively_advected;
       FieldCat category;
-      bool success = quantity_properties(prefix, &is_vector, &category,
-					 &actively_advected);
+      bool success = EnzoCenteredFieldRegistry::quantity_properties
+        (prefix, &is_vector, &category, &actively_advected);
       return success && is_vector && actively_advected;
     }
   }
@@ -131,12 +89,12 @@ bool EnzoCenteredFieldRegistry::is_actively_advected_vector_component
 //----------------------------------------------------------------------
 
 std::string EnzoCenteredFieldRegistry::get_actively_advected_quantity_name
-(std::string name, bool ijk_suffix) const noexcept
+(std::string name, bool ijk_suffix) noexcept
 {
   std::string out = "";
-  if (quantity_properties(name)){
+  if (EnzoCenteredFieldRegistry::quantity_properties(name)){
     out = name;
-  } else if (is_actively_advected_vector_component(name, true)){
+  } else if (is_actively_advected_vector_component_(name, true)){
     // current element is a VECTOR QUANTITY
     out = name.substr(0,name.length()-2);
   }
@@ -146,34 +104,23 @@ std::string EnzoCenteredFieldRegistry::get_actively_advected_quantity_name
 //----------------------------------------------------------------------
 
 Grouping* EnzoCenteredFieldRegistry::build_grouping
-(const std::vector<std::string> quantity_names,
- const std::string leading_prefix) const
+(const std::vector<std::string> quan_names,
+ const std::string leading_prefix)
 {
-  check_known_quantity_names(quantity_names);
   Grouping *out = new Grouping;
-  #define ENTRY(name, math_type, category, if_advection)                      \
-    if (contains_item_(quantity_names, std::string(#name))){                  \
-      add_group_fields_(out, std::string( #name ), std::string( #math_type ), \
-			category, leading_prefix);                            \
+  for (const std::string& name : quan_names){
+    auto search = EnzoCenteredFieldRegistry::field_table_.find(name);
+
+    if (search == EnzoCenteredFieldRegistry::field_table_.cend()){
+      ERROR1("EnzoCenteredFieldRegistry::build_grouping",
+	     "%s is not a registered name", name.c_str());
+    } else if ((search->second).vector_quantity){
+        out->add(leading_prefix + name + std::string("_x"), name);
+        out->add(leading_prefix + name + std::string("_y"), name);
+        out->add(leading_prefix + name + std::string("_z"), name);
+    } else {
+        out->add(leading_prefix + name, name);
     }
-  FIELD_TABLE
-  #undef ENTRY
-  return out;
-}
-
-//----------------------------------------------------------------------
-
-void EnzoCenteredFieldRegistry::add_group_fields_
-(Grouping *grouping, const std::string group_name,
- const std::string quantity_type, FieldCat category,
- const std::string leading_prefix) const
-{
-
-  if (quantity_type == "SCALAR"){
-    grouping->add(leading_prefix + group_name, group_name);
-  } else {
-    grouping->add(leading_prefix + group_name + std::string("_x"), group_name);
-    grouping->add(leading_prefix + group_name + std::string("_y"), group_name);
-    grouping->add(leading_prefix + group_name + std::string("_z"), group_name);
   }
+  return out;
 }

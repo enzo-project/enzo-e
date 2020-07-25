@@ -249,15 +249,12 @@ EnzoRiemannImpl<ImplFunctor>::EnzoRiemannImpl
 	 std::find(integrable_groups.begin(), integrable_groups.end(),
 		   "velocity") != integrable_groups.end());
 
-  EnzoCenteredFieldRegistry registry;
-  // Quick sanity check - validate that LUT has the expected properties
-  LUT::validate(registry);
+  LUT::validate(); // sanity check - validate LUT's expected properties
 
   // Determine all quantities used by LUT
-  std::set<std::string> lut_groups = LUT::quantity_names(registry);
+  std::set<std::string> lut_groups = LUT::quantity_names();
 
-  // TODO: add special treatment of total energy for cases with barotropic
-  // equations of state
+  // TODO: add special treatment of total energy for cases with barotropic EOS
 
   // Check that all quantities in lut_groups are in integrable_groups
   for (std::string group : lut_groups){
@@ -293,7 +290,8 @@ EnzoRiemannImpl<ImplFunctor>::EnzoRiemannImpl
   // determine the categories of each passive integrable group
   for (std::string group : passive_integrable_groups_){
     FieldCat category;
-    registry.quantity_properties(group, nullptr, &category, nullptr);
+    EnzoCenteredFieldRegistry::quantity_properties(group, nullptr,
+                                                   &category, nullptr);
     passive_integrable_categories_.push_back(category);
   }
 

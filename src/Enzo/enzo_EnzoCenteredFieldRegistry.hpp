@@ -5,31 +5,32 @@
 /// @date     Thurs March 28 2019
 /// @brief    [\ref Enzo] Declaration of the EnzoCenteredFieldRegistry class.
 ///
-/// This class serves to track all cell-centered MHD quantities that are not
-/// passively advected scalars. The class also tracks the group names of
-/// passively advected scalars. The API supports constructing Groupings of
-/// fields (with names matching the the names of registered names) and
-/// determining which quantities are conserved, specific, or other.
+/// FIELD_TABLE is a table (defined as a macro) that lists the names and
+/// properties of all physical quantities that the code represented as fields.
+/// It also tracks which fields play an active role in MHD integration (It is
+/// used in the definition of Riemann Solvers).
+///
+/// EnzoCenteredFieldRegistry is effectively a glorified namespace that
+/// group functions that provide an API for accessing information listed
+/// in FIELD_TABLE at runtime. It also
+///  - supports the use of this information to construct a Groupings of fields
+///    (with names matching the registered names quantites)
+///  - provides a list of groupings of passively advected scalars.
 
 #ifndef ENZO_ENZO_CENTERED_FIELD_REGISTRY_HPP
 #define ENZO_ENZO_CENTERED_FIELD_REGISTRY_HPP
 
 
-#include <type_traits> // std::is_arithmetic
-#include <string>      // std::string, std::to_string
-
-#include <cstdio> // For help with nicely printing values
-
-
 //----------------------------------------------------------------------
+
 /// @var      passive_group_names
 /// @brief    vector of passively advected group names
 ///
 /// This should be updated as new groups are added
 const std::vector<std::string> passive_group_names = {"colour"};
 
-
 //----------------------------------------------------------------------
+
 /// @def      FieldCat
 /// @brief    Categorizes a field as conserved, specific, or other
 ///
@@ -40,8 +41,8 @@ const std::vector<std::string> passive_group_names = {"colour"};
 ///  - other - anything else (e.g. temperature, pressure)
 enum class FieldCat{conserved, specific, other};
 
-
 //----------------------------------------------------------------------
+
 /// @def      FIELD_TABLE
 /// @brief    xmacro table of cell-centered registered (non-passive) fields
 ///
@@ -99,9 +100,19 @@ enum class FieldCat{conserved, specific, other};
 
 //----------------------------------------------------------------------
 
-/// @typedef FT_row
-/// @brief The type of the of the tuple holding the FIELD_TABLE in memory
-typedef std::tuple<std::string, FieldCat, bool> FT_row;
+/// @typedef ft_row
+/// @brief Holds the data associated with a single row of FIELD_TABLE
+struct ft_row{
+  bool vector_quantity;
+  FieldCat category;
+  bool actively_advected;
+};
+
+//----------------------------------------------------------------------
+
+/// @typedef ft_map
+/// @brief The map type used to hold FIELD_TABLE in memory
+typedef std::map<std::string, ft_row> ft_map;
 
 //----------------------------------------------------------------------
 
@@ -112,10 +123,9 @@ class EnzoCenteredFieldRegistry
   /// @brief    [\ref Enzo] Serves as a registry for non-passively advected
   ///           cell-centered fields
   ///
-  /// Specifically, the registered fields are given by the entries of
-  /// FIELD_TABLE. The name of the field(s) that correspond to an entry in the
-  /// table are dependent on the mathematical type of the quantity and on the
-  /// name given in column 1.
+  /// The registered fields are given by the entries of FIELD_TABLE. The name
+  /// of the field(s) that correspond to an entry in the table are dependent on
+  /// the mathematical type of the quantity and on the name given in column 1.
   ///  - A SCALAR simply corresponds to a field with a name given in column 1.
   ///  - A VECTOR corresponds to 3 fields. The fields are named {column_1}_x,
   ///    {column_1}_y, {column_2}_z
@@ -123,33 +133,33 @@ class EnzoCenteredFieldRegistry
 
 public:
 
-  EnzoCenteredFieldRegistry();
+  EnzoCenteredFieldRegistry() = delete;
 
-  // some utility methods - some of these are called in more important methods
-  // These are not particularly well optimized
+  /// Returns a vector of passive scalar group names
+  ///
+  /// To register new names add entry to the static constant vector variable
+  /// called passive_group_names
+  static std::vector<std::string> passive_scalar_group_names()
+  { return passive_group_names; }
 
   /// Returns a vector of registered quantities.
-  std::vector<std::string> get_registered_quantities() const
-  { return table_keys_; }
-
-  /// Returns the vector of registered field names
-  std::vector<std::string> get_registered_fields() const;
-
-  /// Checks that that the quantity names are in FIELD_TABLE. If not then,
-  /// raises an error.
-  void check_known_quantity_names(const std::vector<std::string> names) const;
+  ///
+  /// @param enumerate_components Determines whether the individual vector
+  ///     components are listed or the just the vector component is listed.
+  ///     When true, the function effectively returns a vector containing all
+  ///     registered fields. Otherwise, the returned vector containing the
+  ///     names of all quantities listed in FIELD_TABLE.
+  static std::vector<std::string> get_registered_quantities
+  (bool enumerate_components);
 
   /// provides the quantity properties listed in FIELD_TABLE (if present)
   ///
   /// returns true when successful (i.e. quantity is actually included in the
   /// table) and false when unsuccesful
-  bool quantity_properties(std::string name, bool* vector_quantity = 0,
-			   FieldCat* category = 0,
-			   bool* actively_advected = 0) const;
-
-  /// Checks is the name of an actively advected vector component
-  bool is_actively_advected_vector_component(std::string name,
-					     bool ijk_suffix) const noexcept;
+  static bool quantity_properties(const std::string &name,
+                                  bool* vector_quantity = 0,
+                                  FieldCat* category = 0,
+                                  bool* actively_advected = 0) noexcept;
 
   /// Determine the actively advected quantity associated with the given name
   /// If there is not an associated quantity, `""` is returned.
@@ -160,10 +170,8 @@ public:
   ///      followed by a 2 character suffix. If ijk_suffix is true, then the
   ///      suffixes are {'_i', '_j', '_k'}. Otherwise they are
   ///      {'_x', '_y', '_z'}.
-  std::string get_actively_advected_quantity_name
-  (std::string name, bool ijk_suffix) const noexcept;
-
-  // more important methods:
+  static std::string get_actively_advected_quantity_name
+  (std::string name, bool ijk_suffix) noexcept;
   
   /// Constructs a Grouping of fields and yields a pointer to it from a vector
   /// of quantity names. The quantity names must match entries of FIELD_TABLE.
@@ -176,39 +184,13 @@ public:
   ///   - leading_prefix + group_name + "_x"
   ///   - leading_prefix + group_name + "_y"
   ///   - leading_prefix + group_name + "_z"
-  Grouping* build_grouping(const std::vector<std::string> quantity_names,
-			   const std::string leading_prefix = "") const;
-  
-  /// Returns a vector of passive scalar group names
-  ///
-  /// To register new names add entry to the static constant vector variable
-  /// called passive_group_names
-  static std::vector<std::string> passive_scalar_group_names()
-  { return passive_group_names; }
-
-private:
-
-  /// Helper method of build_grouping. Adds a fields to the grouping
-  void add_group_fields_(Grouping *grouping, const std::string group_name,
-			 const std::string quantity_type, FieldCat category,
-			 const std::string leading_prefix) const;
-
-
-  /// Helper method of prepare_lut. Determines conserved_start, conserved_stop,
-  /// specific_start, specific_stop, other_start, other_stop, nfields
-  void prepare_lut_(const std::vector<std::string> quantity_names,
-		    int &conserved_start, int &conserved_stop,
-		    int &specific_start, int &specific_stop,
-		    int &other_start, int &other_stop, int &nfields,
-		    const std::vector<std::string> flagged_quantities) const;
+  static Grouping* build_grouping(const std::vector<std::string> quan_names,
+                                  const std::string leading_prefix = "");
 
 private: // attributes
 
   /// representation of FIELD_TABLE in memory
-  std::map<std::string, FT_row> field_table_;
-
-  /// vector of keys for field_table_;
-  std::vector<std::string> table_keys_;
+  static const ft_map field_table_;
 };
 
 #endif /* ENZO_ENZO_CENTERED_FIELD_REGISTRY_HPP */
