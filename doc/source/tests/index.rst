@@ -1,10 +1,11 @@
-------------
-Testing Docs
-------------
+--------------------------
+The Testing Infrastructure
+--------------------------
 
 This testing section describes tests on enzo-e program
 
 .. toctree::
+   testing_enviroment
    new_test
    adapt
    balance

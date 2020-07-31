@@ -10,7 +10,7 @@ When adding a new function to the enzo-e project there is a possiblity that it m
 Design input parameters that test new function.
 ===============================================
 
-Create new ``.in`` file that contains these input parameters in relevent input subdirectory. :doc: `example <input/Balance/load-balance-4.in>`
+Create new ``.in`` file that contains these input parameters in relevent input subdirectory. As an example of a parameter file see load-balance-4.in in the enzo-e/input/Balance directory. This file will be used later on to set the parameters of the test in the running the test section
 
 Defines for new test
 ====================
