@@ -44,7 +44,9 @@ commands:
             pip install --upgrade pip
             pip install --upgrade wheel
             pip install --upgrade setuptools
-            pip install Cython numpy h5py matplotlib libconf yt
+            # matplotlib 3.3.0 breaks yt 3.6.0 (latest stable version at this
+            # time), this has been patched in yt's dev branch
+            pip install Cython numpy h5py matplotlib==3.2.2 libconf yt
 
   install-grackle:
     description: "Install grackle."
