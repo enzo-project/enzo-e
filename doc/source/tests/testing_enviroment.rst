@@ -1,9 +1,53 @@
-----------------------
-The Testing Enviroment
-----------------------
+-----------------------
+The Testing Environment
+-----------------------
 
-The testing enviroment is does both unit and integration testing. In order to build a new test follow how to build a new test instructions and then call make test. In order to run the new test separately write ``charmrun +p4 bin/enzo-p input/NewTestDirectory/new_test.in`` in the main enzo directory. If charmrun command is not in your path charmrun's path must also be included:  ``~/Charm/bin/charmrun +p4 bin/enzo-p input/NewTestDirectory/new_test.in``.
+The testing infrastructure in Enzo-e is comprised of unit tests (which test individual functions and functionality) and integration tests which test a more holistic portion of the codebase. In this documentationwe detail the layout of the testing infrastructure.
 
-The testing infrastructure does both unit and integration testing. Unit testing tests the components of enzo-e and integration testing tests the functionality of units working together.
+How to Run Tests
+================
 
-The make test outputs first the unit test results in a count of passes and fails, and then a count of the passes and fails of the integration tests.
+To run all the tests currently in the testing infrastructure run ``make test``. In order to run the a test separately write ``charmrun +p4 bin/enzo-p input/TestDirectory/test.in`` in the main enzo directory. If charmrun command is not in your path charmrun's path must also be included:  ``~/Charm/bin/charmrun +p4 bin/enzo-p input/TestDirectory/test.in``.
+
+How Analyse Test Results
+========================
+
+``make test`` outputs first the unit test results in a count of passes and fails, and then a count of number of integration tests, the number of tests that start sucessfully and the number of tests that complete.
+
+The unit test results count all times a unit test returns a fail, including when this happens during an integration test. 
+
+If an integration test fails in start up this implies that there is something wrong with how the test is set up either as an error in the SConscript file that calls the test or that the test has an undefined parameter. In order to see what happened during the test, the test is recorded in the tests .unit file.
+
+If a test fails while running this indicates that the feature being tested does not work.
+
+
+What Tests are Currently Included
+=================================
+
+Currently the Enzo-e testing infrastructure tests:
+.. toctree::
+   adapt
+   balance
+   boundary
+   checkpoint
+   collapse
+   cosmology
+   gravity
+   heat
+   helloworld
+   hierarchy
+   hydro
+   initialmusic
+   methods
+   output
+   particle
+   performance
+   ppm
+   ppml
+   sedov
+  
+How to Add Your Own Test
+========================
+
+See create new test
+Create New Test:ref:`new_test`
