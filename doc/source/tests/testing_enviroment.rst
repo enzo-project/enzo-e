@@ -52,4 +52,4 @@ How to Add Your Own Test
 
 See create new test
 
-:ref:`new_test <Create New Test>`
+:ref:`new-test`.

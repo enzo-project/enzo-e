@@ -1,4 +1,4 @@
-.. parameter_file:
+.. _parameter-file:
 
 Parameter files
 ---------------
