@@ -1,4 +1,4 @@
-#-----------------------
+-----------------------
 The Testing Environment
 -----------------------
 
@@ -52,4 +52,4 @@ How to Add Your Own Test
 
 See create new test
 
-Create New Test :ref:`new_test`
+:ref:`new_test <Create New Test>`

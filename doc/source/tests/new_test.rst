@@ -1,8 +1,8 @@
-.. _new_test:
-
 ----------------------
 How to create new test
 ----------------------
+
+.. _new_test:
 
 Introduction
 ============
@@ -19,7 +19,7 @@ Create input parameters.
 ========================
 
 
-Create a new subdirectory for the new tests in the input directory. Create new ``.in`` file that contains input parameters for testing the new feature. This should be a simple problem such as a 2D implosion problem (See enzo-e/input/Hydro/test_implosion.in). More details on how to set input parameters see :ref:`parameter_file`. As an example of a parameter file see load-balance-4.in in the enzo-e/input/Balance directory. This file will be used later on to set the parameters of the test in the running the test section
+Create a new subdirectory for the new tests in the input directory. Create new ``.in`` file that contains input parameters for testing the new feature. This should be a simple problem such as a 2D implosion problem (See enzo-e/input/Hydro/test_implosion.in). More details on how to set input parameters see :ref:`parameter_file<Parameters>` . As an example of a parameter file see load-balance-4.in in the enzo-e/input/Balance directory. This file will be used later on to set the parameters of the test in the running the test section
 
 New Directory
 =============
