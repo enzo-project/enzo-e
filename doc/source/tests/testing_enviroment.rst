@@ -1,8 +1,8 @@
------------------------
+#-----------------------
 The Testing Environment
 -----------------------
 
-The testing infrastructure in Enzo-e is comprised of unit tests (which test individual functions and functionality) and integration tests which test a more holistic portion of the codebase. In this documentationwe detail the layout of the testing infrastructure.
+The testing infrastructure in Enzo-e is comprised of unit tests (which test individual functions and functionality) and integration tests which test a more holistic portion of the codebase. In this documentation, we detail the layout of the testing infrastructure.
 
 How to Run Tests
 ================
@@ -25,6 +25,7 @@ What Tests are Currently Included
 =================================
 
 Currently the Enzo-e testing infrastructure tests:
+
 .. toctree::
    adapt
    balance
@@ -50,4 +51,5 @@ How to Add Your Own Test
 ========================
 
 See create new test
-Create New Test:ref:`new_test`
+
+Create New Test :ref:`new_test`

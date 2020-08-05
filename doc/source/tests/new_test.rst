@@ -1,3 +1,5 @@
+.. _new_test:
+
 ----------------------
 How to create new test
 ----------------------
@@ -5,13 +7,19 @@ How to create new test
 Introduction
 ============
 
-When adding a new function to the enzo-e project there is a possibility that it may affect the rest of the code, for this reason new code must be able to pass all existing tests as well as tests built for the new code. This means that integration tests are required. These tests are designed to stress the system. 
+When adding a new function to the enzo-e project there is a possibility that it may affect the rest of the code, for this reason new code must be able to pass all existing tests as well as tests built for the new code. This means that integration tests are required. These tests are designed to stress the system. When making a new test these steps must be followed:
+
+* Create input parameters
+* Create a new test subdirectory
+* Integrate the test into test infrastructure
+* Running your new test
+
 
 Create input parameters.
 ========================
 
 
-Create a new subdirectory for the new tests in the input directory. Create new ``.in`` file that contains input parameters for testing the new feature. This should be a simple problem such as a 2D implosion problem (See enzo-e/input/Hydro/test_implosion.in). More details on how to set input parameters see :ref:`param`. As an example of a parameter file see load-balance-4.in in the enzo-e/input/Balance directory. This file will be used later on to set the parameters of the test in the running the test section
+Create a new subdirectory for the new tests in the input directory. Create new ``.in`` file that contains input parameters for testing the new feature. This should be a simple problem such as a 2D implosion problem (See enzo-e/input/Hydro/test_implosion.in). More details on how to set input parameters see :ref:`parameter_file`. As an example of a parameter file see load-balance-4.in in the enzo-e/input/Balance directory. This file will be used later on to set the parameters of the test in the running the test section
 
 New Directory
 =============
@@ -20,11 +28,15 @@ When creating a new test you must first create a new subdirectory where that tes
 
 SConscript files start by importing necessary components ::
   Import('env')
+
   Import('parallel_run')
+
   Import('serial_run')
+
   Import('ip_charm')
 
   Import('bin_path')
+
   Import('test_path')
 
 This imports the construction environment, the two ways to run tests and the paths needed for storing the files as exported from SConstruct (the main SCons file)
@@ -35,6 +47,7 @@ Integrate the Test into Test Infrastructure
 
 In the defines section three variables are defined ::
   env['CPIN'] = 'touch parameters.out; mv parameters.out ${TARGET}.in'
+
   env['RMIN'] = 'rm -f parameters.out'
 
   date_cmd = 'echo $TARGET > test/STATUS; echo "----------------"; date +"%Y-%m-%d %H:%M:%S";'
@@ -44,7 +57,9 @@ This sets ``CPIN`` up to create the parameters.out files and ``RMIN`` to remove 
 
 The builders and paths are then defined as follows ::
   run_balance_none = Builder(action = "$RMIN; " + date_cmd + parallel_run + "$SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+
   env.Append(BUILDERS = { 'RunBalanceNone' : run_balance_none } )
+
   env_mv_none = env.Clone(COPY = 'mkdir -p ' test_path + '/Balance/None; mv `ls *.png *.h5`' + test_path +'/Balance/None')
 
 
@@ -60,8 +75,11 @@ Running Your New Test
 
 Use the created builder in conjunction with the clone to create test run variable. This variable will require the test result name(test_WhatsTested.unit), the version of enzo-e to compile and run and the ARGS set to the directory of the previously created ``.in`` file as the input parameters to be run. ::
   balance_none = env_mv_none.RunBalanceNone(
-     'test_balance_none.unit',
+
+    'test_balance_none.unit',
+
      bin_path + '/enzo-p',
+
      ARGS='input/Balance/load-balance-4.in')
 
 This runs the test in the environment specified above (in Clone). It makes the target ``test_balance_none.unit`` which is created by compiling and running enzo-e as bin/enzo-p using ``input/Balance/load-balance-4.in`` as the input file.

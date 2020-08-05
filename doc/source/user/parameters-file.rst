@@ -1,3 +1,5 @@
+.. parameter_file:
+
 Parameter files
 ---------------
 
