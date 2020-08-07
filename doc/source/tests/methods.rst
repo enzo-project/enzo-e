@@ -7,4 +7,4 @@ Tests for general methods
 test_null
 =========
 
-Test for null method
+Runs null method. This tests AMR meshing infrastructure without having a specific method.

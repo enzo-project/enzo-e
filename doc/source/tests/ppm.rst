@@ -2,7 +2,7 @@
 PPM tests
 ---------
 
-Tests for PPM methods
+Tests for PPM method. Runs a 2D implosion problem using ppm method and outputs density image file and a density data file.
 
 method_ppm-1
 ============

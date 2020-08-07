@@ -3,7 +3,7 @@
 Adapt Tests
 -----------
 
-Tests adapt ``max_level`` on 2D implosion problem
+Tests run 2D implosion problem on a slope mesh refinement with square initial values at different ``max_level``. This specifies the most highly defined block in the mesh hierarchy. 
 
 adapt-L0-P1
 ===========

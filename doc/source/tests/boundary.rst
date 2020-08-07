@@ -2,13 +2,13 @@
 Boundary Condition Tests
 ------------------------
 
-These tests check the various boundary conditions of the enzo-e code
+Runs an implosion problem on various boundary conditions in 2D and 3D. 
 
 
 boundary_mixed-2d
 =================
 
-Tests boundary ``type=mixed`` in a 2D enviroment
+Tests boundary set to list of different boundary condition subgroups in a 2D enviroment. Boundary set to periodic on the x-axis and reflecting on the y-axis.
 
 
 boundary_outflow-2d

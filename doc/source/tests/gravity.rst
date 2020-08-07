@@ -2,7 +2,7 @@
 Gravity Tests
 -------------
 
-Tests for gravity methods
+Tests for gravity methods. Runs gravity method using cg solver. Outputs mesh, phi, rho, x acceleration, y acceleration image files.
 
 method_gravity_cg-1
 ===================

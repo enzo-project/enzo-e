@@ -5,7 +5,7 @@ The Testing Infrastructure
 This testing section describes tests on enzo-e program
 
 .. toctree::
-   testing_enviroment
+   testing_environment
    new_test
    adapt
    balance

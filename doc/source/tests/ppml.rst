@@ -2,7 +2,7 @@
 PPML Tests
 ----------
 
-Tests for PPML methods
+Tests for PPML methods. Each test outputs density image files for each axis and a data dump file.
 
 method_ppml-1
 =============

@@ -2,7 +2,7 @@
 HelloWorld
 ----------
 
-Tests of full code to demonstrate functionality
+Tests of full code to demonstrate functionality. These are done as a demostration of enzo's capabilities.
 
 HelloWorld
 ==========

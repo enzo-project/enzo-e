@@ -8,4 +8,4 @@ Tests of Collapse methods
 collapse-pm-2d
 ==============
 
-Test of collapse of a particle mesh in 2D enviroment.
+Tests 2D DM collapse problem using particle mesh method. Uses gravity solver type bicgstab. Outputs nine image files and one data file.

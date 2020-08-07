@@ -2,7 +2,7 @@
 Particle Tests
 --------------
 
-Tests on particle motion
+Tests on particle motion. Uses tracer particles.
 
 
 test_particle-x

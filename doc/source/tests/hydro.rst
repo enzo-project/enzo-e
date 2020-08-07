@@ -20,12 +20,12 @@ From `broken link <http://ww.astro.virginia.edu/VITA/ATHENA/dmr.html>_`
 test_implosion
 ==============
 
-Tests a 2D implosion problem
+Runs a 2D implosion problem. Tests Initial:<field>:value. Test outputs density image file and mesh image file. 
 
 test_kelvin_helmholtz
 =====================
 
-Sample Kelvin Helmholtz instability test
+Sample Kelvin Helmholtz instability test. Test outputs density image file and mesh image file.
 
 test_turbulence3d
 =================
