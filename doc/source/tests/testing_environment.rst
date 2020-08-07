@@ -7,7 +7,7 @@ The testing infrastructure in Enzo-e is comprised of unit tests (which test indi
 How to Run Tests
 ================
 
-To run all the tests currently in the testing infrastructure run ``make test``. In order to run a test separate from the main script write ``charmrun +p4 bin/enzo-p`` followed be the location of the test to be run in the main enzo directory. For example ``charmrun +p4 bin/enzo-p input/Cosmology/method_cosmology-1.in`` runs the method_cosmology-1 test. If charmrun command is not in your path charmrun's path must also be included:  ``~/Charm/bin/charmrun +p4 bin/enzo-p input/Cosmology/method_cosmology-1.in``.
+To run all the tests currently in the testing infrastructure run ``make test``. In order to run a test separate from the main script write ``charmrun +p4 bin/enzo-p`` followed be the location of the test to be run in the main enzo directory. For example, ``charmrun +p4 bin/enzo-p input/Cosmology/method_cosmology-1.in`` runs the method_cosmology-1 test. If charmrun command is not in your path charmrun's path must also be included:  ``~/Charm/bin/charmrun +p4 bin/enzo-p input/Cosmology/method_cosmology-1.in``.
 
 How to Analyse the Test Results
 ===============================
@@ -51,6 +51,5 @@ Currently the Enzo-e testing infrastructure tests:
 How to Add Your Own Test
 ========================
 
-See create new test
 
 :ref:`new-test`.

@@ -1,8 +1,8 @@
-----------------------
-How to create new test
-----------------------
-
 .. _new-test:
+
+----------------------
+How to create a new test
+----------------------
 
 Introduction
 ============
@@ -15,16 +15,16 @@ When adding a new function to the enzo-e project there is a possibility that it 
 * Running your new test
 
 
-Create input parameters.
-========================
+Create Input Parameters for the New Test.
+=========================================
 
 
 Create a new subdirectory for the new tests in the input directory. Create new ``.in`` file that contains input parameters for testing the new feature. This should be a simple problem such as a 2D implosion problem (See enzo-e/input/Hydro/test_implosion.in). More details on how to set input parameters see :ref:`parameter-file` . As an example of a parameter file see load-balance-4.in in the enzo-e/input/Balance directory. This file will be used later on to set the parameters of the test in the running the test section
 
-New Directory
-=============
+Create a New Directory
+======================
 
-When creating a new test you must first create a new subdirectory where that test will live. In this subdirectory you will need to place an SConscript file. For an example SConscript file see test/Balance/SConscript. You can copy this file into your new subdirectory. You will then need to make edits in that file as follows
+When creating a new test, you must first create a new subdirectory where that test will live. In this subdirectory you will need to place an SConscript file. For an example SConscript file see test/Balance/SConscript. You can copy this file into your new subdirectory. You will then need to make edits in that file as follows
 
 SConscript files start by importing necessary components ::
   Import('env')
@@ -39,11 +39,11 @@ SConscript files start by importing necessary components ::
 
   Import('test_path')
 
-This imports the construction environment, the two ways to run tests and the paths needed for storing the files as exported from SConstruct (the main SCons file)
+This imports the construction environment, the two ways to run the tests and the paths needed for storing the files as exported from SConstruct (the main SCons file)
 
 
-Integrate the Test into Test Infrastructure
-===========================================
+Integrating the Test into Test Infrastructure
+=============================================
 
 In the defines section three variables are defined ::
   env['CPIN'] = 'touch parameters.out; mv parameters.out ${TARGET}.in'
@@ -68,12 +68,12 @@ A Builder is an SConscript object called from an SConscript file. It is used to 
 env is the construction environment. By using append the user defined builder is added to the list of builders within the construction environment.
 Clone returns a copy of the construction environment with new specifications added to the copy. In this example to make a new directory ``/Balance/None`` and store any ``.png`` or ``.h5`` files created in the test there.
 
-This will need to be edited so that the builder has an approiate variable name, it is running the correct way (parallel/serial) and the clone needs to have the new directory be made in the new subdiectory and any expected outputs be moved there.
+This will need to be edited so that the builder has an appropriate variable name, it is running the correct way (parallel/serial) and the clone needs to have the new directory be made in the new subdirectory and any expected outputs be moved there.
 
 Running Your New Test
 =====================
 
-Use the created builder in conjunction with the clone to create test run variable. This variable will require the test result name(test_WhatsTested.unit), the version of enzo-e to compile and run and the ARGS set to the directory of the previously created ``.in`` file as the input parameters to be run. ::
+Use the created builder in conjunction with the clone to create the test run variable. This variable will require the test result name(test_WhatsTested.unit), the version of enzo-e to compile and run and the ARGS set to the directory of the previously created ``.in`` file as the input parameters to be run. ::
   balance_none = env_mv_none.RunBalanceNone(
 
     'test_balance_none.unit',
@@ -89,11 +89,11 @@ Clean the test ::
         [Glob('#/' + test_path + '/Balance/balance*png'),
 	 '#/input/parameters.out',])
 	 
-This adds the files to the clean list where on calling make clean the files specified in the Glob(i.e matching the pattern) will be removed. 
+This adds the files to the clean list where on calling ``make clean`` the files specified in the Glob(i.e. matching the pattern) will be removed. 
 
 Then in the test directory SConscript link the newly made SConscript ::
   SConscript(Balance/SConscript)
 
 This allows the test to be seen in the main testing framework.  
   
-To run all the tests use make test in the main enzo directory.
+To run all the tests use ``make test`` in the main enzo directory.
