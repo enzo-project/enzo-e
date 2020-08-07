@@ -7,20 +7,10 @@
 
 #include "data.hpp"
 
-// #define DEBUG_REFRESH
-
-// #define TRACE CkPrintf ("%d TRACE %s:%d\n",CkMyPe(),__FILE__,__LINE__); fflush(stdout);
-#define TRACE /*...*/
-
 FaceFluxes::FaceFluxes (Face face, int index_field,
                         int nx, int ny, int nz,
-                        int level, double dt,
                         int cx, int cy, int cz)
   : face_(face),
-    level_block_(level),
-    level_neighbor_(level),
-    dt_block_(dt),
-    dt_neighbor_(dt),
     fluxes_(),
     index_field_(index_field),
     nx_(nx),ny_(ny),nz_(nz),
@@ -49,11 +39,6 @@ void FaceFluxes::pup (PUP::er &p)
 
   p | face_;
 
-  p | level_block_;
-  p | level_neighbor_;
-  p | dt_block_;
-  p | dt_neighbor_;
-
   p | fluxes_;
 
   p | index_field_;
@@ -69,25 +54,11 @@ void FaceFluxes::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void FaceFluxes::get_size
-(int * nx, int * ny, int * nz, int rank, int level_neighbor) const
-{
-  int ix,iy,iz;
-  face_.get_face(&ix,&iy,&iz);
-  int mx,my,mz;
-  get_dimensions (&mx,&my,&mz);
-  (*nx) = mx;
-  (*ny) = (rank >= 2) ? my : 1;
-  (*nz) = (rank >= 3) ? mz : 1;
-}
-
-//----------------------------------------------------------------------
-
 void FaceFluxes::set_flux_array ( std::vector<cello_float> array,
                                   int dx, int dy, int dz)
 {
   int mx,my,mz;
-  get_dimensions(&mx,&my,&mz);
+  get_size(&mx,&my,&mz);
   ASSERT5("FaceFluxes::set_flux_array",
           "Input array size %lu is smaller than required %d = %d * %d *%d",
           array.size(),mx*my*mz,mx,my,mz,
@@ -118,35 +89,12 @@ void FaceFluxes::set_flux_array ( std::vector<cello_float> array,
 std::vector<cello_float> & FaceFluxes::flux_array (int * dx, int * dy, int *dz)
 {
   int mx,my,mz;
-  get_dimensions(&mx,&my,&mz);
+  get_size(&mx,&my,&mz);
   if (dx) (*dx) = 1;
   if (dy) (*dy) = mx;
   if (dz) (*dz) = mx*my;
 
   return fluxes_;
-}
-  
-//----------------------------------------------------------------------
-
-float ratio_cell_volume
-(const FaceFluxes & ff_1, const FaceFluxes & ff_2, const int rank)
-{
-  const int L_1 = ff_1.level_neighbor();
-  const int L_2 = ff_2.level_neighbor();
-  if (L_1 <= L_2) {
-    const int shift = (1 << (L_2 - L_1)*rank);
-    return 1.0 * shift;
-  } else if (L_1 > L_2) {
-    const int shift = (1 << (L_1 - L_2)*rank);
-    return 1.0 / shift;
-  }
-}
-
-//----------------------------------------------------------------------
-
-float ratio_time_step (const FaceFluxes & ff_1, const FaceFluxes & ff_2)
-{
-  return ff_1.time_step_block() / ff_2.time_step_block();
 }
   
 //----------------------------------------------------------------------
@@ -157,7 +105,7 @@ void FaceFluxes::coarsen (int cx, int cy, int cz, int rank)
   std::fill(fluxes_.begin(),fluxes_.end(),0.0);
 
   int mxf,myf,mzf;
-  get_dimensions(&mxf,&myf,&mzf);
+  get_size(&mxf,&myf,&mzf);
 
   const int mxc = (nx_ > 1) ? (nx_/2 + cx_) : 1;
   const int myc = (ny_ > 1) ? (ny_/2 + cy_) : 1;
@@ -166,13 +114,12 @@ void FaceFluxes::coarsen (int cx, int cy, int cz, int rank)
   if (rank == 2) {
 
     const int dxc = 1;
-    const int dyc = mxc;
+    const int dyc = nx_;
     
     const int ixc0 = cx*mxc*dxc;
     const int iyc0 = cy*myc*dyc;
     
-    // Ratio of flux areas
-    const cello_float ratio = 0.5;
+    const cello_float dArea = 0.25;
     if (mxf == 1) {
 
       const int ixf = 0;
@@ -181,8 +128,8 @@ void FaceFluxes::coarsen (int cx, int cy, int cz, int rank)
         int i_f = ixf + mxf*iyf;
         int iycm = dyc*(iyf>>1);
         int iycp = dyc*((iyf+cy_)>>1);
-        fluxes_[ic0+iycm] += ratio*fluxes_fine[i_f];
-        fluxes_[ic0+iycp] += ratio*fluxes_fine[i_f];
+        fluxes_[ic0+iycm] += 0.5*dArea*fluxes_fine[i_f];
+        fluxes_[ic0+iycp] += 0.5*dArea*fluxes_fine[i_f];
       }
 
     } else if (myf == 1) {
@@ -193,23 +140,22 @@ void FaceFluxes::coarsen (int cx, int cy, int cz, int rank)
         int i_f = ixf + mxf*iyf;
         int ixcm = dxc*(ixf>>1);
         int ixcp = dxc*((ixf+cx_)>>1);
-        fluxes_[ic0+ixcm] += ratio*fluxes_fine[i_f];
-        fluxes_[ic0+ixcp] += ratio*fluxes_fine[i_f];
+        fluxes_[ic0+ixcm] += 0.5*dArea*fluxes_fine[i_f];
+        fluxes_[ic0+ixcp] += 0.5*dArea*fluxes_fine[i_f];
       }
     }
 
   } else if (rank == 3) {
     
     const int dxc = 1;
-    const int dyc = mxc;
-    const int dzc = mxc*myc;
+    const int dyc = nx_;
+    const int dzc = nx_*ny_;
     
-    const int ixc0 = cx*mxc;
-    const int iyc0 = cy*myc;
-    const int izc0 = cz*mzc;
+    const int ixc0 = cx*mxc*dxc;
+    const int iyc0 = cy*myc*dyc;
+    const int izc0 = cz*mzc*dzc;
 
-    // Ratio of flux areas
-    const cello_float ratio = 0.25;
+    const cello_float dArea = 0.125;
     
     if (mxf == 1) {
       
@@ -219,14 +165,13 @@ void FaceFluxes::coarsen (int cx, int cy, int cz, int rank)
         int izcm = dzc*(izf>>1);
         int izcp = dzc*((izf+cz_)>>1);
         for (int iyf=0; iyf<myf; iyf++) {
-          int i_f = ixf + mxf*(iyf + myf*izf);
           int iycm = dyc*(iyf>>1);
           int iycp = dyc*((iyf+cy_)>>1);
-
-          fluxes_[ic0+iycm+izcm] += ratio*fluxes_fine[i_f];
-          fluxes_[ic0+iycm+izcp] += ratio*fluxes_fine[i_f];
-          fluxes_[ic0+iycp+izcm] += ratio*fluxes_fine[i_f];
-          fluxes_[ic0+iycp+izcp] += ratio*fluxes_fine[i_f];
+          int i_f = ixf + mxf*(iyf + myf*izf);
+          fluxes_[ic0+izcm+iycm] += 0.25*dArea*fluxes_fine[i_f];
+          fluxes_[ic0+izcm+iycp] += 0.25*dArea*fluxes_fine[i_f];
+          fluxes_[ic0+izcp+iycm] += 0.25*dArea*fluxes_fine[i_f];
+          fluxes_[ic0+izcp+iycp] += 0.25*dArea*fluxes_fine[i_f];
         }
       }
     } else if (myf == 1) {
@@ -238,12 +183,12 @@ void FaceFluxes::coarsen (int cx, int cy, int cz, int rank)
         int izcp = dzc*((izf+cz_)>>1);
         for (int ixf=0; ixf<mxf; ixf++) {
           int ixcm = dxc*(ixf>>1);
-          int ixcp = dzc*((ixf+cx_)>>1);
+          int ixcp = dxc*((ixf+cx_)>>1);
           int i_f = ixf + mxf*(iyf + myf*izf);
-          fluxes_[ic0+izcm+ixcm] += ratio*fluxes_fine[i_f];
-          fluxes_[ic0+izcp+ixcm] += ratio*fluxes_fine[i_f];
-          fluxes_[ic0+izcm+ixcp] += ratio*fluxes_fine[i_f];
-          fluxes_[ic0+izcp+ixcp] += ratio*fluxes_fine[i_f];
+          fluxes_[ic0+izcm+ixcm] += 0.25*dArea*fluxes_fine[i_f];
+          fluxes_[ic0+izcm+ixcp] += 0.25*dArea*fluxes_fine[i_f];
+          fluxes_[ic0+izcp+ixcm] += 0.25*dArea*fluxes_fine[i_f];
+          fluxes_[ic0+izcp+ixcp] += 0.25*dArea*fluxes_fine[i_f];
         }
       }
     } else if (mzf == 1) {
@@ -257,10 +202,10 @@ void FaceFluxes::coarsen (int cx, int cy, int cz, int rank)
           int ixcm = dxc*(ixf>>1);
           int ixcp = dxc*((ixf+cx_)>>1);
           int i_f = ixf + mxf*(iyf + myf*izf);
-          fluxes_[ic0+ixcm+iycm] += ratio*fluxes_fine[i_f];
-          fluxes_[ic0+ixcp+iycm] += ratio*fluxes_fine[i_f];
-          fluxes_[ic0+ixcm+iycp] += ratio*fluxes_fine[i_f];
-          fluxes_[ic0+ixcp+iycp] += ratio*fluxes_fine[i_f];
+          fluxes_[ic0+iycm+ixcm] += 0.25*dArea*fluxes_fine[i_f];
+          fluxes_[ic0+iycm+ixcp] += 0.25*dArea*fluxes_fine[i_f];
+          fluxes_[ic0+iycp+ixcm] += 0.25*dArea*fluxes_fine[i_f];
+          fluxes_[ic0+iycp+ixcp] += 0.25*dArea*fluxes_fine[i_f];
         }
       }
     }
@@ -273,7 +218,6 @@ void FaceFluxes::coarsen (int cx, int cy, int cz, int rank)
 
   }
   
-  --level_neighbor_;
 }
   
 //----------------------------------------------------------------------
@@ -283,26 +227,15 @@ void FaceFluxes::accumulate
 {
   FaceFluxes & ff_1 = *this;
 
-  int nx1,ny1,nz1;
   int mx1,my1,mz1;
-  
-  ff_1.get_size(&nx1,&ny1,&nz1,rank,ff_2.level_block());
-  ff_1.get_dimensions(&mx1,&my1,&mz1);
-  
-  int nx2,ny2,nz2;
   int mx2,my2,mz2;
-  ff_2.get_size(&nx2,&ny2,&nz2,rank,ff_1.level_block());
-  ff_2.get_dimensions(&mx2,&my2,&mz2);
+  
+  ff_1.get_size(&mx1,&my1,&mz1);
+  ff_2.get_size(&mx2,&my2,&mz2);
 
-  ASSERT8 ("FaceFluxes::operator +=()",
-          "Flux array sizes level %d (%d %d %d) and level %d (%d %d %d) must be conforming",
-           ff_1.level_block(),nx1,ny1,nz1,
-           ff_2.level_block(),nx2,ny2,nz2,
-           ((nx1==nx2) && (ny1==ny2) && (nz1==nz2)));
-
-  for (int iz=0; iz<nz1; iz++) {
-    for (int iy=0; iy<ny1; iy++) {
-      for (int ix=0; ix<nx1; ix++) {
+  for (int iz=0; iz<mz1; iz++) {
+    for (int iy=0; iy<my1; iy++) {
+      for (int ix=0; ix<mx1; ix++) {
         int i1=ix + mx1*(iy + my1*iz);
         int i2=ix + mx2*(iy + my2*iz);
         ff_1.fluxes_[i1] += ff_2.fluxes_[i2];
@@ -317,7 +250,7 @@ void FaceFluxes::accumulate
 FaceFluxes & FaceFluxes::operator *= (double weight)
 {
   int mx,my,mz;
-  get_dimensions(&mx,&my,&mz);
+  get_size(&mx,&my,&mz);
   const int m=mx*my*mz;
 
   for (int i=0; i<m; i++) fluxes_[i] *= weight;
@@ -331,24 +264,13 @@ int FaceFluxes::data_size () const
 {
   int size = 0;
 
-#ifdef DEBUG_REFRESH
-  CkPrintf ("%d DEBUG_REFRESH FaceFluxes::data_size()\n",CkMyPe());
-  fflush(stdout);
-#endif  
   size += face_.data_size();
   size += sizeof(int);    // std::vector<cello_float> fluxes_;
   int n = fluxes_.size();
   size += n*sizeof(cello_float);
-  size += sizeof(int);    // int level_block_;
-  size += sizeof(int);    // int level_neighbor_;
-  size += sizeof(double);    // double dt_block_;
-  size += sizeof(double);    // double dt_neighbor_;
   size += sizeof(int);    // int index_field_;
   size += 3*sizeof(int);  // int nx_,ny_,nz_;
   size += 3*sizeof(int);  // int cx_,cy_,cz_;
-#ifdef DEBUG_REFRESH
-  CkPrintf ("%d DEBUG_REFRESH FaceFluxes::data_size() %d\n",CkMyPe(),size);
-#endif  
 
   return size;
 }
@@ -357,10 +279,6 @@ int FaceFluxes::data_size () const
 
 char * FaceFluxes::save_data (char * buffer) const
 {
-#ifdef DEBUG_REFRESH
-  CkPrintf ("%d DEBUG_REFRESH FaceFluxes::save_data()\n",CkMyPe());
-  fflush(stdout);
-#endif  
   union {
     int  * pi;
     char * pc;
@@ -376,10 +294,6 @@ char * FaceFluxes::save_data (char * buffer) const
   for (int i=0; i<n; i++) {
     (*pcf++) = fluxes_[i];
   }
-  (*pi++) = level_block_;
-  (*pi++) = level_neighbor_;
-  (*pd++) = dt_block_;
-  (*pd++) = dt_neighbor_;
   (*pi++) = index_field_;
   (*pi++) = nx_;
   (*pi++) = ny_;
@@ -394,9 +308,6 @@ char * FaceFluxes::save_data (char * buffer) const
 	  (pc-buffer),data_size(),
 	  ((pc-buffer) == data_size()));
 
-#ifdef DEBUG_REFRESH
-  CkPrintf ("%d DEBUG_REFRESH FaceFluxes::save_data() %d\n",CkMyPe(),pc-buffer);
-#endif  
   return pc;
 }
 
@@ -404,11 +315,6 @@ char * FaceFluxes::save_data (char * buffer) const
 
 char * FaceFluxes::load_data (char * buffer)
 {
-  TRACE;
-#ifdef DEBUG_REFRESH
-  CkPrintf ("%d DEBUG_REFRESH FaceFluxes::load_data()\n",CkMyPe());
-  fflush(stdout);
-#endif  
   union {
     int  * pi;
     char * pc;
@@ -418,19 +324,12 @@ char * FaceFluxes::load_data (char * buffer)
 
   pc = (char *) buffer;
 
-  TRACE;
   pc = face_.load_data(pc);
   int n = (*pi++);
-  TRACE;
   fluxes_.resize(n);
   for (int i=0; i<n; i++) {
     fluxes_[i] = (*pcf++);
   }
-  TRACE;
-  level_block_ = (*pi++);
-  level_neighbor_ = (*pi++);
-  dt_block_ = (*pd++);
-  dt_neighbor_ = (*pd++);
   index_field_ = (*pi++);
   nx_ = (*pi++);
   ny_ = (*pi++);
@@ -438,44 +337,11 @@ char * FaceFluxes::load_data (char * buffer)
   cx_ = (*pi++);
   cy_ = (*pi++);
   cz_ = (*pi++);
-  TRACE;
 
-#ifdef DEBUG_REFRESH
-  CkPrintf ("%d DEBUG_REFRESH FaceFluxes::load_data() %d\n",CkMyPe(),pc-buffer);
-#endif  
   ASSERT2("FaceFluxes::load_data()",
 	  "Buffer has size %ld but expecting size %d",
 	  (pc-buffer),data_size(),
 	  ((pc-buffer) == data_size()));
-#ifdef DEBUG_REFRESH
-  print("BLOCK","FaceFluxes::load_data()");
-#endif  
 
-  TRACE;
   return pc;
-}
-
-void FaceFluxes::print(const std::string block_name,const char * msg) const
-{
-  const int ip=CkMyPe();
-  int ix,iy,iz;
-  face().get_face(&ix,&iy,&iz);
-  int rx,ry,rz;
-  face().get_normal(&rx,&ry,&rz);
-  int mx,my,mz;
-  get_dimensions(&mx,&my,&mz);
-  const int m=mx*my*mz;
-  double sum=0.0;
-  for (int i=0; i<m; i++) sum += std::abs(fluxes_[i]);
-  CkPrintf ("%d FFP: %s FaceFluxes %s %p size %d level %d field %d face %d %d %d avg %g\n",
-            ip,block_name.c_str(),msg,(void*)this,m,level_block_,index_field_,ix,iy,iz,sum/m);
-  //  CkPrintf ("%d FFP:       index_field  %d\n",ip,index_field_);
-  //  CkPrintf ("%d FFP:          ix,iy,iz  %d %d %d\n",ip,ix,iy,iz);
-  //  CkPrintf ("%d FFP:          rx,ry,rz  %d %d %d\n",ip,rx,ry,rz);
-  //  CkPrintf ("%d FFP:          nx,ny,nz  %d %d %d\n",ip,nx_,ny_,nz_);
-  //  CkPrintf ("%d FFP:          cx,cy,cz  %d %d %d\n",ip,cx_,cy_,cz_);
-  //  CkPrintf ("%d FFP:    block level dt  %d %g\n",ip,level_block_,dt_block_);
-  //  CkPrintf ("%d FFP: neighbor level dt  %d %g\n",
-  //            ip,level_neighbor_,dt_neighbor_);
-  //  CkPrintf ("%d FFP:        avg fluxes  %g\n",ip,sum/m);
 }

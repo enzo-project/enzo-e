@@ -255,7 +255,7 @@ int EnzoBlock::SolveHydroEquations
   int iconsrec = 0;
   int iposrec = 0;
 
-  
+  int error = 0;
   FORTRAN_NAME(ppm_de)
     (
      density, total_energy, velocity_x, velocity_y, velocity_z,
@@ -278,9 +278,16 @@ int EnzoBlock::SolveHydroEquations
      istart, iend, jstart, jend,
      standard, dindex, Eindex, uindex, vindex, windex,
      geindex, temp,
-     &ncolor, colorpt, coloff, colindex
+     &ncolor, colorpt, coloff, colindex,
+     &error
      );
 
+  if (error != 0) {
+    char buffer[256];
+    snprintf (buffer,255,"Error in call to ppm_de block %s",name().c_str());
+    ERROR ("SolveHydroEquations()",buffer);
+  }
+  
   for (dim = 0; dim < MAX_DIMENSION; dim++) {
     delete [] CellWidthTemp[dim];
   }

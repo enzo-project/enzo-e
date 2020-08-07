@@ -7,8 +7,6 @@
 
 #include "data.hpp"
 
-// #define DEBUG_DATA_MSG
-
 long DataMsg::counter[CONFIG_NODE_SIZE] = {0};
 
 //----------------------------------------------------------------------
@@ -42,10 +40,6 @@ int DataMsg::data_size () const
   size += n_ff;
   size += n_fa;
   size += n_pd;
-#ifdef DEBUG_DATA_MSG
-  CkPrintf ("%d %p DEBUG_FLUX_REFRESH DataMsg::data_size() n_fd=%d\n",
-            CkMyPe(),(void*)this,n_fd);
-#endif
   for (int i=0; i<n_fd; i++) {
     size += sizeof(int); // face_fluxes_delete_[i] 
     size += fd[i]->data_size();
@@ -58,13 +52,6 @@ int DataMsg::data_size () const
 
 char * DataMsg::save_data (char * buffer) const
 {
-
-#ifdef DEBUG_DATA_MSG
-  CkPrintf ("%d %s:%d DEBUG_DATA_MSG DataMsg::save_data %p\n",
-	    CkMyPe(),__FILE__,__LINE__,this);
-  fflush(stdout);
-#endif
-
   union {
     char * pc;
     int  * pi;
@@ -106,9 +93,6 @@ char * DataMsg::save_data (char * buffer) const
     for (int i=0; i<n_fd; i++) {
       (*pi++) = face_fluxes_delete_[i];
       pc = fd[i]->save_data(pc);
-#ifdef DEBUG_DATA_MSG
-      fd[i]->print("BLOCK","save");
-#endif      
     }
   }
 
@@ -122,14 +106,12 @@ char * DataMsg::save_data (char * buffer) const
 }
 
 //----------------------------------------------------------------------
-// #define TRACE CkPrintf ("%d TRACE %s:%d\n",CkMyPe(),__FILE__,__LINE__); fflush(stdout);
-#define TRACE /*...*/
+
 char * DataMsg::load_data (char * buffer)
 {
   // 2. De-serialize message data from input buffer into the allocated
   // message (must be consistent with pack())
 
-  TRACE;
   union {
     char * pc;
     int  * pi;
@@ -138,9 +120,6 @@ char * DataMsg::load_data (char * buffer)
   pc = buffer;
 
   field_face_ = new FieldFace;
-#ifdef DEBUG_FIELD_FACE
-  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE DataMsg::load_data creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face_);
-#endif  
 
   const int n_ff = (*pi++);
   const int n_fa = (*pi++);
@@ -153,7 +132,6 @@ char * DataMsg::load_data (char * buffer)
   }
 
   // load field array
-  TRACE;
   if (n_fa > 0) {
     field_array_ = pc;
     pc += n_fa;
@@ -162,7 +140,6 @@ char * DataMsg::load_data (char * buffer)
   }
 
   // load particle data
-  TRACE;
   if (n_pa > 0) {
     ParticleData * pd = particle_data_ = new ParticleData;
     pd->allocate(cello::particle_descr());
@@ -172,12 +149,6 @@ char * DataMsg::load_data (char * buffer)
   }
 
   // load flux data
-#ifdef DEBUG_DATA_MSG
-  CkPrintf ("%d %s:%d DEBUG_FLUX_REFRESH %d\n",
-            CkMyPe(),__FILE__,__LINE__,n_fd);
-  TRACE;
-  CkPrintf ("DEBUG_FLUX_REFRESH face_fluxes_list_.size = %d\n",face_fluxes_list_.size()); fflush(stdout);
-#endif  
   if (n_fd > 0) {
     face_fluxes_list_.resize(n_fd);
     face_fluxes_delete_.resize(n_fd);
@@ -186,24 +157,9 @@ char * DataMsg::load_data (char * buffer)
       FaceFluxes * ff = new FaceFluxes;
       face_fluxes_list_[i] = ff;
       pc = ff->load_data(pc);
-#ifdef DEBUG_DATA_MSG
-      ff->print("BLOCK","load");
-#endif      
     }
   }
-  TRACE;
 
-#ifdef DEBUG_DATA_MSG
-  CkPrintf ("%d %p DEBUG_DATA_MSG DataMsg::load_data %p %d n_fd=%d\n",
-	    CkMyPe(),(void*)this,this,pc-buffer,n_fd);
-  fflush(stdout);
-#endif
-  // ASSERT2 ("DataMsg::load_data()",
-  //  	   "Expecting buffer size %d actual size %d",
-  //  	   data_size(),(pc-buffer),
-  //  	   (data_size() == (pc-buffer)));
-
-  TRACE;
   return pc;
 }
 
@@ -214,12 +170,6 @@ void DataMsg::update (Data * data, bool is_local)
   ParticleData * pd = particle_data_;
   FieldFace    * ff = field_face_;
   char         * fa = field_array_;
-
-#ifdef DEBUG_DATA_MSG
-  CkPrintf ("%d %s:%d DEBUG_DATA_MSG DataMsg::update %p (fd:%p pd:%p ff:%p fa:%p local:%d)\n",
-	    CkMyPe(),__FILE__,__LINE__,(void*)this,field_data_,pd,ff,fa,is_local);
-  fflush(stdout);
-#endif
 
   // Update particles
   
@@ -269,17 +219,8 @@ void DataMsg::update (Data * data, bool is_local)
     for (int i=0; i<face_fluxes_list_.size(); i++) {
       FaceFluxes * face_fluxes = face_fluxes_list_[i];
       Face face = face_fluxes->face();
-#ifdef DEBUG_DATA_MSG
-      face_fluxes->print("BLOCK","update");
-#endif      
-      //           flux_data->set_neighbor_fluxes
-      //             (face_fluxes,face.axis(), 1 - face.face(), i);
-      flux_data->add_neighbor_fluxes
+      flux_data->sum_neighbor_fluxes
         (face_fluxes,face.axis(), 1 - face.face(), i);
-#ifdef DEBUG_DATA_MSG      
-      CkPrintf ("DEBUG_FLUX_REFRESH DataMsg::update data %p flux_data %p axis %d face %d field %d\n",
-                (void *)data,(void*)flux_data,face.axis(),face.face(),i);
-#endif      
     }
     face_fluxes_list_.clear();
   }

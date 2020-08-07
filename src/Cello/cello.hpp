@@ -317,6 +317,8 @@ namespace cello {
   T err_abs (const T & a, const T & b)
   {  return fabs(a-b);  }
 
+  int digits_max(int precision);
+
   // type_enum functions (prefered)
   int sizeof_type (int);
   int is_type_supported (int);

@@ -12,12 +12,12 @@
 
 #include "test_setup_face.hpp"
 
-double init_1(int ix, int iy, int iz, int mx, int my, int mz)
+cello_float init_1(int ix, int iy, int iz, int mx, int my, int mz)
 {
   return 7.0+3.0*(ix+mx*(iy+my*iz));
 }
 
-double init_2(int ix, int iy, int iz, int mx, int my, int mz)
+cello_float init_2(int ix, int iy, int iz, int mx, int my, int mz)
 {
   return 1.0+2.0*(ix+mx*(iy+my*iz));
 }
@@ -31,15 +31,6 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("FaceFluxes");
 
-  const int num_face[2] = {4,6};
-  const int face[][3] =
-    {{+1,0,0},
-     {-1,0,0},
-     {0,+1,0},
-     {0,-1,0},
-     {0,0,+1},
-     {0,0,-1}};
-
   const int num_normal=2;
   const int normal[] = {+1,-1};
 
@@ -47,13 +38,12 @@ PARALLEL_MAIN_BEGIN
   const int level_1[] = {1,2,3};
   const int level_2[] = {1,3,2};
 
-  int index_test = 0;
-
-  auto test = test::face_test[index_test];
-
+  auto test = test::face_test[0];
+  const int rvol[4] = {1, 2, 4, 8};
+  
   for (int rank = 2; rank <=3; ++rank) {
-    for (int iface=0; iface<num_face[rank-2]; ++iface) {
-      for (int inormal=0; inormal<num_normal; ++inormal) {
+    for (int iaxis=0; iaxis<rank; iaxis++) {
+      for (int iface=0; iface<2; ++iface) {
         for (int ilevel=0; ilevel<num_level; ++ilevel) {
         
           const int L_1 = level_1[ilevel];
@@ -79,32 +69,26 @@ PARALLEL_MAIN_BEGIN
 
           if (L_1 < L_2) { h3_2[0]*=0.5; h3_2[1]*=0.5; h3_2[2]*=0.5; dt2*=0.5;}
           if (L_1 > L_2) { h3_2[0]*=2.0; h3_2[1]*=2.0; h3_2[2]*=2.0; dt2*=2.0;}
-          int fx = face[iface][0];
-          int fy = face[iface][1];
-          int fz = face[iface][2];
-          const int rx = normal[inormal]*fx;
-          const int ry = normal[inormal]*fy;
-          const int rz = normal[inormal]*fz;
+          int fx = iaxis==0 ? iface*2-1 : 0;
+          int fy = iaxis==1 ? iface*2-1 : 0;
+          int fz = iaxis==2 ? iface*2-1 : 0;
 
-          Face face_1(fx,fy,fz,rx,ry,rz);
-          if (rx != 0) fx = -fx;
-          if (ry != 0) fy = -fy;
-          if (rz != 0) fz = -fz;
-          Face face_2(fx,fy,fz,rx,ry,rz);
+          Face face_1( fx, fy, fz,iaxis,iface);
+          Face face_2(-fx,-fy,-fz,iaxis,iface);
   
           int index_field = 3;
           auto face_fluxes_1 = new FaceFluxes
-            (face_1,index_field, n3[0],n3[1],n3[2], L_1,dt1, c3[0],c3[1],c3[2]);
+            (face_1,index_field, n3[0],n3[1],n3[2], c3[0],c3[1],c3[2]);
           auto face_fluxes_2 = new FaceFluxes
-            (face_2,index_field, n3[0],n3[1],n3[2], L_2,dt2, c3[0],c3[1],c3[2]);
+            (face_2,index_field, n3[0],n3[1],n3[2], c3[0],c3[1],c3[2]);
 
           unit_assert (face_fluxes_1 != NULL);
           unit_assert (face_fluxes_2 != NULL);
 
-          unit_func ("get_dimensions()");
+          unit_func ("get_size()");
     
           int mx,my,mz;
-          face_fluxes_1->get_dimensions (&mx,&my,&mz);
+          face_fluxes_1->get_size (&mx,&my,&mz);
 
           unit_assert (mx == ((fx!=0) ? 1 : n3[0]));
           if (rank >= 2) unit_assert (my == ((fy!=0) ? 1 : n3[1]));
@@ -112,42 +96,41 @@ PARALLEL_MAIN_BEGIN
 
           int nx1,ny1,nz1;
 
-          face_fluxes_1 -> get_size  (&nx1, &ny1, &nz1, rank, L_2);
+          face_fluxes_1 -> get_size  (&nx1, &ny1, &nz1);
     
-          const int a0 = rx ? 0 : (ry ? 1 : 2);
     
           if (rank == 3) {
             // 3D
-            int a1 = (a0+1) % 3;
-            int a2 = (a0+2) % 3;
+            int a1 = (iaxis+1) % 3;
+            int a2 = (iaxis+2) % 3;
             unit_assert ( nx1*ny1*nz1 == n3[a1]*n3[a2]);
           } else if (rank == 2) {
             // 2D
-            int a1 = (a0+1) % 2;
+            int a1 = (iaxis+1) % 2;
             unit_assert ( nx1*ny1*nz1 == n3[a1] );
           }
 
           //--------------------------------------------------
 
           int nx2,ny2,nz2;
-          face_fluxes_2 -> get_size  (&nx2, &ny2, &nz2, rank, L_1);
+          face_fluxes_2 -> get_size  (&nx2, &ny2, &nz2);
 
           if (rank >= 3) {
-            int a1 = (a0+1) % 3;
-            int a2 = (a0+2) % 3;
+            int a1 = (iaxis+1) % 3;
+            int a2 = (iaxis+2) % 3;
             unit_assert ( nx2*ny2*nz2 == n3[a1]*n3[a2]);
           } else if (rank >= 2) {
-            int a1 = (a0+1) % 2;
+            int a1 = (iaxis+1) % 2;
             unit_assert ( nx2*ny2*nz2 == n3[a1]);
           }
 
-          face_fluxes_1->get_dimensions (&mx,&my,&mz);
+          face_fluxes_1->get_size(&mx,&my,&mz);
 
           unit_assert (mx == ((fx!=0) ? 1 : n3[0]));
           unit_assert (my == ((fy!=0) ? 1 : (rank>=2)?n3[1] : 1));
           unit_assert (mz == ((fz!=0) ? 1 : (rank>=3)?n3[2] : 1));
 
-          face_fluxes_1->get_dimensions (&mx,&my,&mz);
+          face_fluxes_1->get_size(&mx,&my,&mz);
 
           unit_assert (mx == ((fx!=0) ? 1 : n3[0] + c3[0]));
           unit_assert (my == ((fy!=0) ? 1 : (rank>=2)?(n3[1] + c3[1]):1));
@@ -165,7 +148,7 @@ PARALLEL_MAIN_BEGIN
 
           unit_func("set_flux_array()"); 
 
-          std::vector<double> array_1;
+          std::vector<cello_float> array_1;
           double sum_1 = 0;
           array_1.resize(mx*my*mz);
           for (int iz=0; iz<mz; iz++) {
@@ -179,7 +162,7 @@ PARALLEL_MAIN_BEGIN
           }
           face_fluxes_1->set_flux_array(array_1,my*mz,mz,1);
     
-          std::vector<double> array_2;
+          std::vector<cello_float> array_2;
           double sum_2 = 0;
           array_2.resize(mx*my*mz);
           for (int iz=0; iz<mz; iz++) {
@@ -222,47 +205,6 @@ PARALLEL_MAIN_BEGIN
           unit_assert (match_1);
           unit_assert (match_2);
 
-          // void set_centering(int c3[0], int c3[1], int c3[2])
-
-          unit_func("face()");
-          unit_assert (face_fluxes_1->face() == face_1);
-          unit_assert (face_fluxes_2->face() == face_2);
-
-          unit_func("level()"); 
-
-          unit_assert (face_fluxes_1->level_neighbor() == L_1);
-          unit_assert (face_fluxes_1->level_block()  == L_1);
-          unit_assert (face_fluxes_2->level_neighbor() == L_2);
-          unit_assert (face_fluxes_2->level_block()  == L_2);
-
-          unit_func("time_step()"); 
-
-          unit_assert (dt1 == face_fluxes_1->time_step_neighbor());
-          unit_assert (dt2 == face_fluxes_2->time_step_neighbor());
-          unit_assert (dt1 == face_fluxes_1->time_step_block());
-          unit_assert (dt2 == face_fluxes_2->time_step_block());
-          unit_assert (((L_1 == L_2) && (dt1 == dt2)) ||
-                       ((L_1 != L_2) && (dt1 != dt2)));
-          unit_assert (((L_1 == L_2) && (h3_1[0] == h3_2[0])) ||
-                       ((L_1 != L_2) && (h3_1[0] != h3_2[0])));
-          unit_assert (rank < 2 ||
-                       (((L_1 == L_2) && (h3_1[1] == h3_2[1])) ||
-                        ((L_1 != L_2) && (h3_1[1] != h3_2[1]))));
-          unit_assert (rank < 3 ||
-                       (((L_1 == L_2) && (h3_1[2] == h3_2[2])) ||
-                        ((L_1 != L_2) && (h3_1[2] != h3_2[2]))));
-
-          unit_func("float ratio_cell_volume()");
-
-          double v_1 = (rank == 2) ? h3_1[0]*h3_1[1] : h3_1[0]*h3_1[1]*h3_1[2];
-          double v_2 = (rank == 2) ? h3_2[0]*h3_2[1] : h3_2[0]*h3_2[1]*h3_2[2];
-          float ratio = ratio_cell_volume(*face_fluxes_1,*face_fluxes_2,rank);
-          unit_assert (ratio == v_1/v_2);
-  
-          unit_func("float ratio_time_step()");
-  
-          unit_assert (ratio_time_step(*face_fluxes_1,*face_fluxes_2) == dt1/dt2);
-
           // --------------------------------------------------
     
           //  void coarsen ()
@@ -273,7 +215,7 @@ PARALLEL_MAIN_BEGIN
 
             face_fluxes_1->coarsen(cx,cy,cz,rank);
 
-            face_fluxes_1->get_dimensions (&mx,&my,&mz);
+            face_fluxes_1->get_size (&mx,&my,&mz);
 
             int dxc,dyc,dzc;
             auto fluxes_coarse_1 = face_fluxes_1->flux_array(&dxc,&dyc,&dzc);
@@ -287,16 +229,12 @@ PARALLEL_MAIN_BEGIN
               }
             }
 
-            unit_assert (sum_1 == sum_1_coarse);
-      
-      
+            unit_assert (sum_1 == sum_1_coarse*rvol[rank]);
+
           } else if (L_2 > L_1) {
 
-            face_fluxes_2->get_dimensions (&mx,&my,&mz);
-
+            face_fluxes_2->get_size(&mx,&my,&mz);
             face_fluxes_2->coarsen(cx,cy,cz,rank);
-
-            face_fluxes_2->get_dimensions (&mx,&my,&mz);
 
             int dxc,dyc,dzc;
             auto fluxes_coarse_2 = face_fluxes_2->flux_array(&dxc,&dyc,&dzc);
@@ -310,21 +248,9 @@ PARALLEL_MAIN_BEGIN
               }
             }
 
-            unit_assert (sum_2 == sum_2_coarse);
+            unit_assert (sum_2 == sum_2_coarse*rvol[rank]);
       
           }
-
-          unit_assert (ratio_cell_volume(*face_fluxes_1,*face_fluxes_2,rank) == 1.0);
-
-          unit_assert (face_fluxes_1->level_neighbor() ==
-                       face_fluxes_2->level_neighbor());
-          int L_min = std::min(L_1,L_2);
-          unit_assert (face_fluxes_1->level_block()  == L_1);
-          unit_assert (face_fluxes_1->level_neighbor() == L_min);
-          unit_assert (face_fluxes_2->level_block()  == L_2);
-          unit_assert (face_fluxes_2->level_neighbor() == L_min);
-
-          //--------------------------------------------------
 
           //  FaceFluxes & operator *= (double)
 
@@ -333,7 +259,7 @@ PARALLEL_MAIN_BEGIN
 
             auto & fluxes_1 = face_fluxes_1->flux_array(&dx1,&dy1,&dz1);
             int mx1,my1,mz1;
-            face_fluxes_1->get_dimensions (&mx1,&my1,&mz1);
+            face_fluxes_1->get_size (&mx1,&my1,&mz1);
   
             double sum_1_pre = 0;
             for (int iz=0; iz<mz1; iz++) {
@@ -373,8 +299,8 @@ PARALLEL_MAIN_BEGIN
 
             int mx1,my1,mz1;
             int mx2,my2,mz2;
-            face_fluxes_1->get_dimensions (&mx1,&my1,&mz1);
-            face_fluxes_2->get_dimensions (&mx2,&my2,&mz2);
+            face_fluxes_1->get_size (&mx1,&my1,&mz1);
+            face_fluxes_2->get_size (&mx2,&my2,&mz2);
 
             unit_func("operator +=");      
 
@@ -445,8 +371,8 @@ PARALLEL_MAIN_BEGIN
 
             int mx1,my1,mz1;
             int mx2,my2,mz2;
-            face_fluxes_1->get_dimensions (&mx1,&my1,&mz1);
-            face_fluxes_2->get_dimensions (&mx2,&my2,&mz2);
+            face_fluxes_1->get_size (&mx1,&my1,&mz1);
+            face_fluxes_2->get_size (&mx2,&my2,&mz2);
 
             {
               double sum_abs = 0.0;
@@ -519,12 +445,11 @@ PARALLEL_MAIN_BEGIN
           delete face_fluxes_1;
           delete face_fluxes_2;
 
-          ++index_test ;
         } // ilevel
-      } // inormal
-    } // iface
+      } // iface
+    } // iaxis
   } // rank
-  
+
   unit_finalize();
 
   exit_();

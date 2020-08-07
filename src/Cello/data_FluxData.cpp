@@ -13,7 +13,6 @@
 
 void FluxData::allocate
 ( int nx, int ny, int nz,
-  int level, double dt,
   std::vector<int> field_list,
   std::vector<int> * cx_list,
   std::vector<int> * cy_list,
@@ -31,9 +30,9 @@ void FluxData::allocate
   const int izm = (nz == 1) ? 0 : -1;
   const int izp = (nz == 1) ? 0 : +1;
 
-  const int rx32[3][2] = { {-1, +1},  {0,  0}, {0,  0} };
-  const int ry32[3][2] = { { 0,  0}, {-1, +1}, {0,  0} };
-  const int rz32[3][2] = { { 0,  0},  {0, 0}, {-1, +1} };
+  const int ix32[3][2] = { {-1, +1},  {0,  0}, {0,  0} };
+  const int iy32[3][2] = { { 0,  0}, {-1, +1}, {0,  0} };
+  const int iz32[3][2] = { { 0,  0},  {0, 0}, {-1, +1} };
   
   for (int i_f=0; i_f<nf; i_f++) {
         
@@ -45,16 +44,16 @@ void FluxData::allocate
 
     for (int axis=0; axis<3; axis++) {
       for (int face=0; face<2; face++) {
-        int rx = rx32[axis][face];
-        int ry = ry32[axis][face];
-        int rz = rz32[axis][face];
+        int ix = ix32[axis][face];
+        int iy = iy32[axis][face];
+        int iz = iz32[axis][face];
         FaceFluxes * ff;
         ff = new FaceFluxes
-          (Face(rx,ry,rz,rx,ry,rz),index_field,nx,ny,nz,level,dt,cx,cy,cz);
+          (Face(ix,iy,iz,axis,face),index_field,nx,ny,nz,cx,cy,cz);
         ff->allocate();
         block_fluxes_[index_(axis,face,i_f)] = ff;
         ff = new FaceFluxes
-          (Face(rx,ry,rz,rx,ry,rz),index_field,nx,ny,nz,level,dt,cx,cy,cz);
+          (Face(ix,iy,iz,axis,face),index_field,nx,ny,nz,cx,cy,cz);
         ff->allocate();
         neighbor_fluxes_[index_(axis,face,i_f)] = ff;
       }

@@ -50,6 +50,7 @@ Method {
       dual_energy = false;
    }
 }
+ include "input/flux_correct.incl"
 
 # Define initial conditions
 

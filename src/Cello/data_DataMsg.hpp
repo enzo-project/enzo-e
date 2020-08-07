@@ -81,10 +81,6 @@ public: // interface
   /// Return the FieldFace
   FieldFace * field_face () 
   {
-#ifdef DEBUG_DATA_MSG
-    CkPrintf ("%d %s:%d DEBUG_DATA_MSG %p get_field_face(%p,%d)\n",
-	      CkMyPe(),__FILE__,__LINE__,field_face_,field_face_delete_);
-#endif    
     return field_face_;
   }
 
@@ -93,10 +89,6 @@ public: // interface
   {
     field_face_ = field_face; 
     field_face_delete_ = is_new;
-#ifdef DEBUG_DATA_MSG
-    CkPrintf ("%d %s:%d DEBUG_DATA_MSG %p set_field_face(%p,%d)\n",
-	      CkMyPe(),__FILE__,__LINE__,field_face_,field_face_delete_);
-#endif    
   }
 
   /// Return the serialized FieldFace array
@@ -190,15 +182,18 @@ public: // interface
   {
     const int ip=CkMyPe();
     char buf[81];
-    snprintf (buf,80,"%d %p TRACE_DATA_MSG TRACE_DATA_MSG",ip,this);
-    CkPrintf ("%s field_face_    = %p\n",buf,field_face_);
-    CkPrintf ("%s field_data_    = %p\n",buf,field_data_);
-    CkPrintf ("%s particle_data_ = %p\n",buf,particle_data_);
-    CkPrintf ("%s particle_data_delete_ = %d\n",buf,particle_data_delete_);
-    CkPrintf ("%s |face_fluxes_list_| = %d\n",buf,face_fluxes_list_.size());
-    CkPrintf ("%s |face_fluxes_delete_| = %d\n",buf,face_fluxes_delete_.size());
-    CkPrintf ("%s field_face_delete_ = %d\n",buf,field_face_delete_);
-    CkPrintf ("%s field_data_delete_ = %d\n",buf,field_data_delete_);
+    
+    snprintf (buf,80,"%d %p TRACE_DATA_MSG TRACE_DATA_MSG",ip,(void*)this);
+    CkPrintf ("%s field_face_    = %p\n",buf,(void*)field_face_);
+    CkPrintf ("%s field_data_    = %p\n",buf,(void*)field_data_);
+    CkPrintf ("%s particle_data_ = %p\n",buf,(void*)particle_data_);
+    CkPrintf ("%s particle_data_delete_ = %d\n",buf,particle_data_delete_?1:0);
+    CkPrintf ("%s |face_fluxes_list_| = %lu\n",
+              buf,face_fluxes_list_.size());
+    CkPrintf ("%s |face_fluxes_delete_| = %lu\n",
+              buf,face_fluxes_delete_.size());
+    CkPrintf ("%s field_face_delete_ = %d\n",buf,field_face_delete_?1:0);
+    CkPrintf ("%s field_data_delete_ = %d\n",buf,field_data_delete_?1:0);
     fflush(stdout);
 
   }

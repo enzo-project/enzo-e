@@ -161,6 +161,10 @@ namespace cello {
     return epsilon;
   }
 
+  int digits_max(int precision)
+  { return (precision==precision_single)?7 :
+      ( (precision=precision_double) ? 16 : 34);
+  }
   //----------------------------------------------------------------------
 
   void backtrace(const char * msg)

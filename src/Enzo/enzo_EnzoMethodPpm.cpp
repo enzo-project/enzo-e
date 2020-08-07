@@ -100,8 +100,7 @@ void EnzoMethodPpm::compute ( Block * block) throw()
 
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
-  block->data()->flux_data()->allocate
-    (nx,ny,nz,block->level(),block->dt(),field_list);
+  block->data()->flux_data()->allocate (nx,ny,nz,field_list);
   
   if (block->is_leaf()) {
     EnzoBlock * enzo_block = enzo::block(block);

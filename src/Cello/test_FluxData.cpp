@@ -26,8 +26,6 @@ PARALLEL_MAIN_BEGIN
   std::vector<int> cz_list = {0,0,0,1};
   const int nf = field_list.size();
   const int n3[3] = {16, 24, 20};
-  const double dt = 0.125;
-  const int level = 7;
 
   FluxData flux_data;
 
@@ -75,7 +73,7 @@ PARALLEL_MAIN_BEGIN
   
   unit_func ("allocate()");
 
-  flux_data.allocate(n3[0],n3[1],n3[2],level,dt,field_list);
+  flux_data.allocate(n3[0],n3[1],n3[2],field_list);
   
   unit_func ("FluxData::set_block_fluxes()");
 
@@ -96,8 +94,8 @@ PARALLEL_MAIN_BEGIN
         unit_assert (ff_nbr != nullptr);
         
         int mx,my,mz;
-        ff_blk->get_dimensions(&mx,&my,&mz);
-        unit_func ("get_dimensions()");
+        ff_blk->get_size(&mx,&my,&mz);
+        unit_func ("get_size()");
         unit_assert(mx*my*mz == n1*n2);
 
         if (axis==0) {
@@ -231,25 +229,16 @@ PARALLEL_MAIN_BEGIN
   
     unit_assert(unit_incomplete);
 
-    unit_func ("FluxData::delete_block_fluxes()");
+  }
 
-    for (int axis=0; axis<3; axis++) {
-      for (int face=0; face<2; face++) {
-        flux_data.delete_block_fluxes (axis,face,i_f);
-      }
-    }
-  
+  unit_func ("deallocate()");
+
+  flux_data.deallocate();
+
+  for (int i_f=0; i_f<n_f; i_f++) {
     for (int axis=0; axis<3; axis++) {
       for (int face=0; face<2; face++) {
         unit_assert(flux_data.block_fluxes(axis,face,i_f) == nullptr);
-      }
-    }
-  
-    unit_func ("FluxData::delete_neighbor_fluxes()");
-
-    for (int axis=0; axis<3; axis++) {
-      for (int face=0; face<2; face++) {
-        flux_data.delete_neighbor_fluxes (axis,face,i_f);
       }
     }
   
@@ -258,8 +247,8 @@ PARALLEL_MAIN_BEGIN
         unit_assert (flux_data.neighbor_fluxes(axis,face,i_f) == nullptr);
       }
     }
-
   }
+  
   unit_finalize();
 
   exit_();

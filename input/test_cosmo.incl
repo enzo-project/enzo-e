@@ -18,7 +18,7 @@ Adapt {
      };
      max_initial_level = 0;
      max_level = 4;
-     min_level = -2;
+     min_level = 0;
  }
 
  Boundary {

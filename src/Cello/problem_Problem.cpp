@@ -833,7 +833,8 @@ Method * Problem::create_method_
 
     method = new MethodFluxCorrect
       (config->method_flux_correct_group[index_method],
-       config->method_flux_correct_sign[index_method]);
+       config->method_flux_correct_enable[index_method],
+       config->method_flux_correct_min_digits[index_method]);
 
   } else if (name == "close_files") {
 

@@ -46,6 +46,7 @@ Method {
    list = ["ppm"];
    courant = 0.5;
 }
+ include "input/flux_correct.incl"
 
 Field {
    ghost_depth = 4;

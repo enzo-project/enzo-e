@@ -7,20 +7,19 @@
 
 #include "problem.hpp"
 #include "charm_simulation.hpp"
-
-// #define DEBUG_FLUX_CORRECT
-
+#include "test.hpp"
 //----------------------------------------------------------------------
 
-MethodFluxCorrect::MethodFluxCorrect (std::string group, int sign) throw() 
+MethodFluxCorrect::MethodFluxCorrect
+(std::string group, bool enable, double min_digits) throw() 
   : Method (),
     group_(group),
-    sign_(sign),
+    enable_(enable),
+    min_digits_(min_digits),
     field_sum_(),
     field_sum_0_(),
     ir_pre_(-1)
 {
-
   // Set up post-refresh to refresh all conserved fields in group_
   cello::simulation()->new_refresh_set_name(ir_post_,name());
   Grouping * groups = cello::field_groups();
@@ -35,8 +34,10 @@ MethodFluxCorrect::MethodFluxCorrect (std::string group, int sign) throw()
   cello::simulation()->new_refresh_set_name(ir_pre_,name()+"_fluxes");
   refresh_pre->set_callback(CkIndex_Block::p_method_flux_correct_refresh());
   refresh_pre->add_all_fluxes();
-  // BUG WORKAROUND: also add a dummy field to prevent refresh hang
-  refresh_pre->add_field("density");
+  // Also ensure conserved fields are themselves refreshed
+  for (int i_f=0; i_f<nf; i_f++) {
+    refresh_pre->add_field(groups->item(group_,i_f));
+  }
   // sum mass, momentum, energy
 
   field_sum_.resize(nf);
@@ -137,12 +138,6 @@ void MethodFluxCorrect::compute_continue_refresh( Block * block ) throw()
       
       const int w = 1 << level*cello::rank();
       reduce[i_f+1] /= w;
-#ifdef DEBUG_FLUX_CORRECT      
-      CkPrintf ("DEBUG_FLUX_CORRECT weight = %d\n",w);
-
-      CkPrintf ("DEBUG_FLUX_CORRECT %s %d field %d field_sum %Lg\n",
-                block->name().c_str(),block->cycle(),index_field,reduce[i_f+1]);
-#endif      
     }
   }
   
@@ -190,17 +185,17 @@ void MethodFluxCorrect::compute_continue_sum_fields
       if (block->cycle() == 0) {
         field_sum_0_[i_f] = field_sum_[i_f];
       }
-      int precision = field.precision (index_field);
-      const int digits_max =
-        (precision == precision_single) ? 7 :
-        (precision == precision_double) ? 16 : 34;
+      const int precision = field.precision (index_field);
+      const double digits =
+        -log10(cello::err_rel(field_sum_0_[i_f],field_sum_[i_f]));
       cello::monitor()->print
-        ("Method", "Field %s sum %Lg conserved to %Lg digits of %d",
+        ("Method", "Field %s sum %20.16Le conserved to %g digits of %d",
          field.field_name(index_field).c_str(),
          field_sum_[i_f],
-         -log10(std::min(cello::err_abs(field_sum_[i_f],field_sum_0_[i_f]),
-                         cello::err_rel(field_sum_[i_f],field_sum_0_[i_f]))),
-         digits_max);
+         digits,
+         cello::digits_max(precision));
+      unit_func("MethodFluxCorrect precision (density)");
+      unit_assert (digits >= min_digits_);
     }
   }
 
@@ -219,9 +214,7 @@ void MethodFluxCorrect::flux_correct_(Block * block)
   const int nf = flux_data->num_fields();
 
   // Perform flux-correction
-  int c3[3]={0,0,0};
-  double s3[3] = {0,0,0};
-  if (block->is_leaf()) {
+  if (enable_ && block->is_leaf()) {
 
     const int level = block->level();
 
@@ -242,10 +235,8 @@ void MethodFluxCorrect::flux_correct_(Block * block)
 
       int axis,face,level_face;
 
-      long double sum = 0.0;
       axis=0;
       // X axis
-      long double sum_block,sum_neighbor;
       for (face=0; face<2; face++) {
         level_face = block->face_level(axis,face);
         if (level_face > level) {
@@ -259,26 +250,16 @@ void MethodFluxCorrect::flux_correct_(Block * block)
             neighbor_fluxes->flux_array(&dnx,&dny,&dnz);
           
           ix = (face == 0) ? 0 : nx-1;
-          int sign = sign_*(1 - face*2);
-          sum_block = sum_neighbor = 0.0;
           for (iz=0; iz<nz; iz++) {
             for (iy=0; iy<ny; iy++) {
               int i=ix+mx*(iy+my*iz);
               int ib = iy*dby+iz*dbz;
               int in = iy*dny+iz*dnz;
-              sum_block += block_flux_array[ib];
-              sum_neighbor += neighbor_flux_array[in];
-              double update = sign*
-                (block_flux_array[ib] - neighbor_flux_array[in]);
-              field_array[i] += update;
-              ++c3[axis];
-              s3[axis]+=update*update;
+                
+              field_array[i] +=
+                (2*face-1)*(block_flux_array[ib] - neighbor_flux_array[in]);
             }
           }
-#ifdef DEBUG_FLUX_CORRECT      
-          CkPrintf ("DEBUG_FLUX_CORRECT %s %d field %d axis %d face %d flux_sum %Lg %Lg\n",
-                    block->name().c_str(),block->cycle(),index_field,axis,face,sum_block,sum_neighbor);
-#endif
         }
       }
       
@@ -298,26 +279,15 @@ void MethodFluxCorrect::flux_correct_(Block * block)
               neighbor_fluxes->flux_array(&dnx,&dny,&dnz);
           
             iy = (face == 0) ? 0 : ny-1;
-            int sign = sign_*(1 - face*2);
-            sum_block = sum_neighbor = 0.0;
             for (iz=0; iz<nz; iz++) {
               for (ix=0; ix<nx; ix++) {
                 int i=ix+mx*(iy+my*iz);
                 int ib = ix*dbx+iz*dbz;
                 int in = ix*dnx+iz*dnz;
-                sum_block += block_flux_array[ib];
-                sum_neighbor += neighbor_flux_array[in];
-                double update = sign*
-                  (block_flux_array[ib] - neighbor_flux_array[in]);
-                field_array[i] += update;
-                ++c3[axis];
-                s3[axis]+=update*update;
+                field_array[i] +=
+                  (2*face-1)*(block_flux_array[ib] - neighbor_flux_array[in]);
               }
             }
-#ifdef DEBUG_FLUX_CORRECT      
-            CkPrintf ("DEBUG_FLUX_CORRECT %s %d field %d axis %d face %d flux_sum %Lg %Lg\n",
-                      block->name().c_str(),block->cycle(),index_field,axis,face,sum_block,sum_neighbor);
-#endif
           }
         }
 
@@ -338,30 +308,18 @@ void MethodFluxCorrect::flux_correct_(Block * block)
               neighbor_fluxes->flux_array(&dnx,&dny,&dnz);
           
             iz = (face == 0) ? 0 : nz-1;
-            int sign = sign_*(1 - face*2);
-            sum_block = sum_neighbor = 0.0;
             for (iy=0; iy<ny; iy++) {
               for (ix=0; ix<nx; ix++) {
                 int i=ix+mx*(iy+my*iz);
                 int ib = ix*dbx+iy*dby;
                 int in = ix*dnx+iy*dny;
-                sum_block += block_flux_array[ib];
-                sum_neighbor += neighbor_flux_array[in];
-                double update = sign*
-                  (block_flux_array[ib] - neighbor_flux_array[in]);
-                field_array[i] += update;
-                ++c3[axis];
-                s3[axis]+=update*update;
+                field_array[i] +=
+                  (2*face-1)*(block_flux_array[ib] - neighbor_flux_array[in]);
               }
             }
-#ifdef DEBUG_FLUX_CORRECT      
-            CkPrintf ("DEBUG_FLUX_CORRECT %s %d field %d axis %d face %d flux_sum %Lg %Lg\n",
-                      block->name().c_str(),block->cycle(),index_field,axis,face,sum_block,sum_neighbor);
-#endif
           } // level_face > level
         } // face
       } // rank >= 3
     }
   }
-
 }

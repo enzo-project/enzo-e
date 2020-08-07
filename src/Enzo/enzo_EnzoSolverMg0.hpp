@@ -188,8 +188,8 @@ public: // interface
     CkPrintf (" index_solve_coarse_ = %d\n",index_solve_coarse_);
     CkPrintf (" index_smooth_post_ = %d\n",index_smooth_post_);
     CkPrintf (" index_smooth_last_ = %d\n",index_smooth_last_);
-    CkPrintf (" restrict_ = %p\n",restrict_);
-    CkPrintf (" prolong_ = %p\n",prolong_);
+    CkPrintf (" restrict_ = %p\n",(void *)restrict_);
+    CkPrintf (" prolong_ = %p\n",(void *)prolong_);
     CkPrintf (" iter_max_ = %d\n",iter_max_);
     CkPrintf (" res_tol_ = %g\n",res_tol_);
     CkPrintf (" i_sync_restrict_ = %d\n",i_sync_restrict_);

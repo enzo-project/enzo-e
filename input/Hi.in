@@ -45,7 +45,7 @@
 
    Method {
 
-     list = ["ppm"];
+     list = ["ppm", "flux_correct"];
 
      ppm {
          courant = 0.8;
@@ -56,6 +56,12 @@
      }
    }
 
+   Group {
+     list = [ "conserved" ];
+     conserved {
+         field_list = [ "density" ];
+     }
+  }
 
    Initial {
 

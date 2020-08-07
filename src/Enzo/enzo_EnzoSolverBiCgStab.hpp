@@ -43,6 +43,7 @@ public: // interface
   /// default constructor
   EnzoSolverBiCgStab()
     : Solver(),
+      A_(nullptr),
       is_alpha_(-1),  is_beta_n_(-1),  is_beta_d_(-1),   is_rho0_(-1),
       is_err_(-1),    is_err0_(-1),    is_err_min_(-1),  is_err_max_(-1),
       is_omega_(-1),  is_omega_n_(-1), is_omega_d_(-1),  is_rr_(-1),     
@@ -51,7 +52,6 @@ public: // interface
       is_us_(-1),     is_qs_(-1),      is_dot_sync_(-1), is_iter_(-1),
       function_(),
       res_tol_(0),
-      A_(nullptr),
       index_precon_(-1),
       iter_max_(-1),
       ir_(-1),
@@ -75,6 +75,7 @@ public: // interface
   /// Charm++ PUP::able migration constructor
   EnzoSolverBiCgStab(CkMigrateMessage* m)
     : Solver(m),
+      A_(NULL),
       is_alpha_(-1),  is_beta_n_(-1),  is_beta_d_(-1),   is_rho0_(-1),
       is_err_(-1),    is_err0_(-1),    is_err_min_(-1),  is_err_max_(-1),
       is_omega_(-1),  is_omega_n_(-1), is_omega_d_(-1),  is_rr_(-1),     
@@ -83,7 +84,6 @@ public: // interface
       is_us_(-1),     is_qs_(-1),      is_dot_sync_(-1), is_iter_(-1),
       function_(),
       res_tol_(0.0),
-      A_(NULL),
       index_precon_(-1),
       iter_max_(0), 
       ir_(-1), ir0_(-1), ip_(-1), 

@@ -37,13 +37,11 @@ PARALLEL_MAIN_BEGIN
   const int level_1[] = {1,2,3};
   const int level_2[] = {1,3,2};
   
-
-  int index_test = 0;
-
-  auto test = test::face_test[index_test];
+  auto test = test::face_test[0];
+  
   for (int rank = 2; rank <=3; ++rank) {
-    for (int iface=0; iface<num_face[rank-2]; ++iface) {
-      for (int inormal=0; inormal<num_normal; ++inormal) {
+    for (int iaxis=0; iaxis<rank; iaxis++) {
+      for (int iface=0; iface<2; ++iface) {
         for (int ilevel=0; ilevel<num_level; ++ilevel) {
         
           const int L_1 = level_1[ilevel];
@@ -70,24 +68,16 @@ PARALLEL_MAIN_BEGIN
 
           if (L_1 < L_2) { h3_2[0]*=0.5; h3_2[1]*=0.5; h3_2[2]*=0.5; dt2*=0.5;}
           if (L_1 > L_2) { h3_2[0]*=2.0; h3_2[1]*=2.0; h3_2[2]*=2.0; dt2*=2.0;}
-          int fx = face[iface][0];
-          int fy = face[iface][1];
-          int fz = face[iface][2];
-          const int rx = normal[inormal]*fx;
-          const int ry = normal[inormal]*fy;
-          const int rz = normal[inormal]*fz;
+          int fx = iaxis==0 ? iface*2-1 : 0;
+          int fy = iaxis==1 ? iface*2-1 : 0;
+          int fz = iaxis==2 ? iface*2-1 : 0;
+          
+          Face * face_1 = new Face( fx, fy, fz,iaxis,iface);
+          Face * face_2 = new Face(-fx,-fy,-fz,iaxis,iface);
           //--------------------------------------------------
     
           unit_func ("Face()");
     
-          Face * face_1 = new Face (fx,fy,fz,rx,ry,rz);
-    
-          if (rx) fx = -fx;
-          if (ry) fy = -fy;
-          if (rz) fz = -fz;
-
-          Face * face_2 = new Face (fx,fy,fz,rx,ry,rz);
-
           unit_assert (face_1 != nullptr);
           unit_assert (face_2 != nullptr);
     
@@ -101,36 +91,22 @@ PARALLEL_MAIN_BEGIN
           face_1->get_face(&ix1,&iy1,&iz1);
           face_2->get_face(&ix2,&iy2,&iz2);
 
-          unit_assert(rx ? (ix1 == -ix2) : (ix1 == 0 && ix2 == 0));
-          unit_assert(ry ? (iy1 == -iy2) : (iy1 == 0 && iy2 == 0));
-          unit_assert(rz ? (iz1 == -iz2) : (iz1 == 0 && iz2 == 0));
+          unit_assert((ix1 == -ix2));
+          unit_assert((iy1 == -iy2));
+          unit_assert((iz1 == -iz2));
 
-          if (rx) unit_assert(std::abs(ix1) + std::abs(ix2) == 2);
-          if (ry) unit_assert(std::abs(iy1) + std::abs(iy2) == 2);
-          if (rz) unit_assert(std::abs(iz1) + std::abs(iz2) == 2);
-
-          //--------------------------------------------------
-
-          unit_func("normal()");
-
-          int rx1,ry1,rz1;
-          int rx2,ry2,rz2;
-
-          face_1->get_normal(&rx1,&ry1,&rz1);
-          face_2->get_normal(&rx2,&ry2,&rz2);
-    
-          unit_assert(rx1 == rx2);
-          unit_assert(ry1 == ry2);
-          unit_assert(rz1 == rz2);
+          unit_assert(std::abs(ix1) + std::abs(ix2) == 2*(iaxis==0)?1:0);
+          unit_assert(std::abs(iy1) + std::abs(iy2) == 2*(iaxis==1)?1:0);
+          unit_assert(std::abs(iz1) + std::abs(iz2) == 2*(iaxis==2)?1:0);
 
           //--------------------------------------------------
 
           delete face_1;
           delete face_2;
-          ++index_test ;
+
         } // ilevel
-      } // inormal
-    } // iface
+      } // iface
+    } // iaxis
   } // rank
 
   unit_finalize();

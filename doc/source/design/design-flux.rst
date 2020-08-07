@@ -1,8 +1,8 @@
 .. include:: ../roles.incl
   
-***********************************
-Flux Correction Design [INCOMPLETE]
-***********************************
+**********************
+Flux Correction Design
+**********************
 .. toctree::
      
 ============
@@ -10,24 +10,11 @@ Requirements
 ============
 
 Flux correction involves updating field values along faces between
-neighboring blocks to ensure that conserved quantities are indeed
-conserved.  This correction step isn't required at all block faces: if
-both mesh refinement levels and time steps are the same between two
-adjacent blocks, then fluxes along the interfaces are expected to
-already match to machine precision.  However, if neighboring blocks
-have different spacial or temporal resolution, the computed solution
-will not in general be conservative, so some type of correction due to
-the inconsistent fluxes will be required.
-
-.. note:: We use the term "resolution jump" to include a difference in
-          *time steps* as well as in mesh resolution; similarly, we
-          use "coarse" and "fine" to include relatively long and short
-          time steps as well as relativly large and small block cell
-          widths.
-
-The basic update involves adding correction factors to all coarse
+neighboring blocks to ensure that conserved quantities are 
+conserved across jumps in spacial and temporal resolution.
+The update involves adding correction factors to all coarse
 values that lie along coarse-fine interfaces, where the correction
-factor is computed using the coarse and fine fluxes across the
+factors are computed using the coarse and fine fluxes across the
 interface.  While the basic update is straightforward, care must be
 taken to ensure that the correction factors are computed correctly,
 especially for non-centered field variables or when adaptive
@@ -57,11 +44,6 @@ need to explicitly store loop indices for flux arrays.
 We assume fluxes for all conserved fields are provided by the
 hydrodynamics solver along all required block faces at each time step.
 
-.. note:: As this is a working document, specific requirements are
-          expected to be added, modified, or shifted between layers as
-          needed.
-   
-     
 Method requirements
 ===================
 
@@ -84,15 +66,12 @@ are listed below:
 - **RE-7.** Support MHD
 - **RE-8.** Ensure conservation is not lost through any other operation, e.g. interpolation
 
-Flux Classes requirements
-=========================
+Data requirements
+=================
 
-Cello's flux classes primary responsibilities are to provide the
-flux-correction method with sufficient support for storing fluxes,
-computing flux correction factors, and applying the flux correction to
-conserved field values.  Technical details, especially those involving
-parallel computing and data communication, should be isolated from the
-Enzo-E software layer as much as possible.
+Cello's flux data classes provide the flux-correction method with
+sufficient support for storing fluxes, computing flux correction
+factors, and applying the flux correction to conserved field values.
 
 Specific requirements include the following:
    
@@ -116,21 +95,13 @@ Design
 
 Our design is developed top-down, starting with a Cello Method for
 implementing flux correction, *MethodFluxCorrect*.
-Using a Cello Method to implement flux correction is a natural
-approach, since Methods are analagous to steps in the
-high-level :p:`EvolveLevel()` function in ENZO, and flux correction is
-one such step.  (Specifically, flux correction is performed in
-ENZO---along with communication and a projection substep---in
-:p:`UpdateFromFinerGrids()`, which is called by :p:`EvolveLevel()`).
 
-To support coding :p:`MethodFluxCorrect`, our design introduces a
-Cello class *FluxData*, whose responsibility is to collect together
-all flux data required for flux correction on a block into a single
-object.  This :p:`FluxData` class will be analagous to the existing
-:p:`FieldData` and :p:`ParticleData` classes, which contain all field
-data and particle data associated with a Block.  Like :p:`FieldData`
-and :p:`ParticleData` objects, :p:`FluxData` will be contained in the
-Blocks :p:`Data` object.  Communication will be handled by the refresh
+To support coding :p:`MethodFluxCorrect`, our design uses a *FluxData*
+class, whose responsibility is to manage all flux data on a block.
+This :p:`FluxData` class is analagous to the existing
+:p:`FieldData` and :p:`ParticleData` classes.  Like :p:`FieldData`
+and :p:`ParticleData` objects, :p:`FluxData` is contained in the
+Blocks :p:`Data` object.  Communication is handled by the refresh
 mechanism by augmenting the existing communication of field and
 particle data between Blocks to include communicating fluxes.
 
@@ -138,9 +109,11 @@ While flux data could be implemented directly as arrays
 (e.g. std::vector, :p:`EnzoArray`, etc.) other attributes need to be
 associated with each collection of flux data, specifically the Block
 the fluxes were computed on, which Block face the fluxes are
-associated with, the time interval for the fluxes, etc.  Thus, we
+associated with, the time interval for the fluxes, etc.  For this we
 introduce a lower-level class *FaceFluxes* to store the array of flux
 data for an individual face, along with its defining attributes.
+The :p:`FaceFluxes` class is in turn implemented usingt a simple *Face*
+class that defines the block face on which the fluxes are defined.
 
 Interfaces
 ==========
@@ -156,11 +129,10 @@ MethodFluxCorrect class
 
 The :p:`MethodFluxCorrect` class is a Cello :p:`Method`, whose
 main virtual method is :p:`compute(Block)`.  This operates on some
-subset of Fields and Particle types on a Block, and will include new
-operations on fluxes as well.  The :p:`MethodFluxCorrect` method
-communicates fluxes between neighboring blocks to ensure consistency
+subset of data types on a Block.  The :p:`MethodFluxCorrect` method
+initiates communication 
 between processes, and computes and applies appropriate
-flux-correction operations to required Fields values along block
+flux-correction operations on required Field values along block
 interfaces.
 
 Since the :p:`MethodFluxCorrect` class is inherited from the Cello
@@ -190,167 +162,6 @@ required for flux-correction.)
 
       * **block**: *Block that flux correction is being applied to*
    
-----
-
-Below is prototype code for various steps of flux-correction needed,
-including initializing for the communication step to refresh fluxes
-between adjacent blocks, performing the refresh communication, and
-performing the flux correction given the refreshed fluxes.
-
-register fluxes refresh
------------------------
-
-While most Methods require Field and/or Particle data to be consistent
-between neighboring blocks, the flux correction step requires fluxes
-to be consistent.  Refresh phases in Methods are typically registered
-in the Method's constructor, so we register a refresh phase with all
-:p:`FluxData` block data in :p:`MethodFluxCorrect()`.  Although
-code will need to be updated in the Cello layer to support refreshing
-flux data between blocks, the prototype code below should be
-relatively complete.
-
-.. code-block:: C++
-
-   MethodFluxCorrect::MethodFluxCorrect()
-   {
-      // Register a refresh phase to update fluxes
-      
-      ir_flux_ = add_new_refresh_();
-      Refresh & refresh = new_refresh(ir_flux_);
-      refresh.add_all_fluxes ();
-
-      refresh.set_callback(CkIndex_EnzoBlock::p_method_flux_correct());
-   }
-   
-
-perform fluxes refresh
-----------------------
-
-Performing the communication step to refresh fluxes between adjacent
-blocks is analagous to similar code in other Enzo-E / Cello Methods
-used to refresh field and particle data along faces.  Again, while
-code will need to be updated in the Cello layer to support refreshing
-flux data between blocks, the prototype code below should be
-relatively complete.
-
-.. code-block:: C++
-
-   void MethodFluxCorrect::compute(Block * block)
-   {
-   
-      // Start refresh phase to update fluxes
-      
-      block->new_refresh(ir_flux_).set_active(is_finest_(block));
-
-      block->new_refresh_start
-           (ir_flux_, CkIndex_EnzoBlock::p_method_flux_correct());
-   }                           
-
-   void EnzoBlock::p_method_flux_correct()
-   {  static_cast<MethodFluxCorrect*> (solver())->update_field_faces(this);   }  
-
-   void MethodFluxCorrect::update_field_faces(Block* block) throw()
-   {
-       // continue with updated fluxes
-
-       // ...
-   }
-
-
-perform flux correction
------------------------
-
-.. code-block:: C++
-
-   // WARNING: USES OUTDATED FaceFluxes and FluxData API's
-   
-   void MethodFluxCorrect::update_field_faces(EnzoBlock* block) throw()
-   {
-       // Get this block's Field and FluxData objects
-
-       Index index        = block->index();
-       FluxData flux_data = block->data()->flux_data();
-       
-       // Loop over all fields in the "conservative" field group
-
-       for (int index_field = ...) {
-
-          // Loop over all faces of this block
-          
-          for (int axis=0; axis<rank; axis++) {
-             for (int face=-1; face<=1; face+=2) {
-
-                // get "coarse" fluxes
-                   
-                FaceFluxes fluxes_coarse = flux_data.face_fluxes
-                    (index_field,axis,face,cycle_start,cycle_stop,
-                    flux_type_mine);
-
-                if (face_requires_correction_(block,axis,face)) {
-
-                   // Loop over all adjacent fine-level faces
-                   
-                   for (std::pair child = ...) {
-
-                      // Loop over fine-grid time steps
-
-                      FaceFluxes fluxes_fine;
-                      for (int cycle=cycle_begin; cycle<cycle_end; cycle++) {
-                      
-                         fluxes_fine += flux_data.face_fluxes
-                            (index_field,axis,face,cycle_start,cycle_stop,
-                             flux_type_neighbor,child);
-                      }
-
-                      // Compute and apply flux correction on a face
-
-                      update_field_face_
-                         (Block, index_field, axis,face,child,
-                          fluxes_coarse,fluxes_fine);
-                }
-             }
-          }
-       }
-   }
-
-.. note:: When adaptive time stepping is used, multiple time intervals
-          of "fine-grid" fluxes will be required for a given face.  To
-          avoid issues with comparing floating-point values, we assume
-          an integer-valued "finest-grid" cycle number is available.
-          However, until adaptive time stepping is implemented, this
-          reverts to the block's current cycle for non-adaptive
-          (constant over all blocks per cycle) time stepping.
-
-.. code-block:: C++
-
-   // WARNING: USES OUTDATED FaceFluxes and FluxData API's
-
-   MethodFluxCorrect::update_field_face_
-      (Block, index_field, axis,face,child,
-       fluxes_coarse,fluxes_fine_sum);
-   {
-   
-      // "attach" face_values to the Field's face (like subview of multiarray)
-      
-      FieldFace field_face = FieldFace(field,axis,face,child);
-
-      int i_start[2],i_stop[2];
-      fluxes_coarse.get_loop_limits(i_start,i_stop);
-      
-      for (int i1=i_start[1]; i1<i_stop[1]; i1++) {
-         for (int i0=i_start[0]; i0<i_stop[0]; i0++) {
-
-            // Apply flux correction at (i0,i1)
-
-            field_face[i0][i1] += (fluxes_fine[i0][i1] - fluxes_coarse[i0][i1]);
-         }
-      }
-   }
-
-.. note:: The update is over-simplified, e.g. the field will have to
-          be multiplied by density to get conservative form, fine-grid
-          fluxes need to be weighted by relative volume, etc.
-
 ----------
 Face class
 ----------
@@ -362,37 +173,41 @@ well.
 
 A face is determined by its "center" (ix,iy,iz), -1 <= ix,iy,iz <= +1,
 assuming the block corners are at (+/-1,+/-1,+/-1).  As
-examples, the positive Y-axis facit is (0,+1,0), the edge along X=+1
+examples, the positive Y-axis facet is (0,+1,0), the edge along X=+1
 and Z=-1 is (+1,0,-1), and the entire block as a 3-D "face" is
 (0,0,0).
 
-Each Face is associated with a (unit) normal vector (rx,ry,rz).  For
-facets the normal vector (assuming the positive direction) is implied,
-but for edge-faces the normal vector is ambiguous, so it needs to be
-represented explicitly.  (Note the terminology (rx,ry,rz) is used
-instead of (nx,ny,nz) because the later is already used to represent
-a block's size).
+Each Face is associated with a normal vector defining
+the direction of the fluxes.  This direction is given by the axis (x=0,
+y=1, z=2), and face (lower=0, upper=1).
 
 ----
 
 .. glossary::
 
-   ``Face::Face (int ix, int iy, int iz,  int rx, int ry, int rz)``
-    *Create a Face object for a Block associated with face (ix,iy,iz),  -1 <= ix,iy,iz <= +1, with unit normal (rx,ry,rz), -1 <= (rx,ry,rz) <= 1 and sum |rx|+|ry|+|rz| = 1.*
+   ``Face::Face (int ix, int iy, int iz,  int axis, int face)``
+    *Create a Face object for a Block associated with face (ix,iy,iz),  -1 <= ix,iy,iz <= +1, with fluxes in the direction (axis, face), 0 <= axis < rank, 0 <= face <= 1.*
 
 ----
 
 .. glossary::
 
-   ``void Face::get_face (int *ix, int *iy, int *iz)``
+   ``void face::get_face (int *ix, int *iy, int *iz)``
     *Return the tuple (ix,iy,iz), -1 <= ix,iy,iz <= 1, identifying the block's face, which may be a corner, edge, facet, or the entire block.*
 
 ----
 
 .. glossary::
 
-   ``void Face::get_normal (int *rx, int *ry, int *rz)``
-    *Return the tuple (rx,ry,rz), -1 <= rx,ry,rz <= 1 and |rx|+|ry|+|rz| = 1, identifying the unit normal to the face.*
+   ``int face::axis()``
+    *Return the axis associated with the normal direction: x=0, y=1, or z=2.*
+
+----
+
+.. glossary::
+
+   ``int face::face()``
+    *Return whether the normal direction is towards the lower (0) or upper (1) face direction.*
 
 ----------------     
 FaceFluxes class
@@ -403,26 +218,24 @@ through a Block's face or subset of a face.  Operations available for
 fluxes including *coarsening*, for summing fluxes in a finer block to
 match the resolution of a neighboring coarser block, and *summing*,
 for accumulating a sequence of fluxes associated with a block with a
-finer time step to match a neighboring block's coarser time step.  The
-mesh resolution level and time step size are maintained for each
-Fluxes object, both for the original block and for the current array
-of fluxes.  This is to help ensure that operations that require fluxes
-to be conforming (correct mesh levels and/or matching time steps) are
-indeed conforming.
+finer time step to match a neighboring block's coarser time step.
 
 ----
 
-.. glossary::
+..
+   comment # [*]
 
-   ``FaceFluxes (Face face, int index_field, int nx, int ny, int nz, int level, double dt, int cx, int cy, int cz)``
-    *Create a FaceFluxes object for the given Face* **face,** *block size* **(nx,ny,nz),** *mesh refinement level* **level** *, time step* **dt,** *and optional face-centering* **(cx,cy,cz).**
+.. glossary::
+   
+   ``FaceFluxes (Face face, int index_field, int nx, int ny, int nz, int cx, int cy, int cz)``
+    *Create a FaceFluxes object for the given face, field, and block size. Optionally include centering adjustment (0 <= cx,cy,cz <= 1) for facet-, edge-, or corner-located field values*
    
 ----
 
 .. glossary::
 
-   ``void allocate ()``
-    *Allocate the flux array and clear values.*
+   ``void allocate()``
+    *Allocate the flux array and initialize values to 0.0.*
 
 ----
 
@@ -436,63 +249,29 @@ indeed conforming.
 .. glossary::
 
   ``void clear()``
-   *Clear flux array values.*
+   *Set flux array values to 0.0.*
 
 ----
 
 .. glossary::
 
-  ``Face face ()``
+  ``Face face()``
    *Return the face associated with the FaceFluxes.*
 
 ----
 
 .. glossary::
 
-  ``int level_fluxes ()``
-   *Return the mesh level associated with the fluxes (may change e.g. if fluxes are coarsened.)*
+  ``int index_field()``
+   *Return the associated field index.*
+
 
 ----
 
 .. glossary::
 
-  ``int level_block ()``
-   *Return the mesh level associated with with the block on which the fluxes are originally defined.  Will not change.*
-  
-----
-
-.. glossary::
-
-  ``double time_step_fluxes ()``
-   *Return the time step associated with the fluxes (may change e.g. if multiple time steps accumulated.)*
-  
-----
-
-.. glossary::
-
-  ``double time_step_block ()``
-   *Return the time step associated with the fluxes.  Will not change.*
-  
-----
-
-.. glossary::
-
-  ``void get_start(int * ix0, int * iy0, int * iz0, FaceFluxes & ff)``
-   *Return the beginning loop limits on this face relative to the given neighbor face fluxes.  Fluxes must be conforming in terms of mesh level.  May be non-zero if the neighboring fluxes are associated with a block in a finer mesh level.*  
-
-----
-
-.. glossary::
-
-   ``void get_size(int * nx, int * ny, int * nz, FaceFluxes & ff)``
-    *Return the size of the flux array that intersects the given neighboring face fluxes object.  Will be smaller than the flux array size if the neighboring fluxes are in a finer level block.*
-  
-----
-
-.. glossary::
-
-  ``void get_dimensions (int * mx, int * my, int * mz)``
-   *Return the array dimensions of the flux array, including adjustments for centering.  Indexing is ix + mx\*(iy +my\*iz).*
+  ``void get_size (int * mx, int * my, int * mz)``
+   *Return the array dimensions of the flux array, including any adjustments for centering.  Indexing is ix + mx\*(iy +my\*iz).*
    
 ----
 
@@ -512,29 +291,15 @@ indeed conforming.
 
 .. glossary::
 
-  ``friend float ratio_cell_volume (FaceFluxes & ff_1, FaceFluxes & ff_2, int rank)``
-   *Return the ratio of volume elements for fluxes defined in face fluxes ff_1 and ff_2.  Must be 1.0 to compute sum.*
-
-----
-
-.. glossary::
-
-  ``friend float ratio_time_step (FaceFluxes & ff_1, FaceFluxes & ff_2)``
-   *Return the ratio of time steps of fluxes between face fluxes ff_1 and ff_2.  Should be 1.0 before any flux correction is computed.*
+  ``void coarsen(int cx, int cy, int cz, int rank)``
+   *Used for coarsening fine-level fluxes to match coarse level fluxes. Arguments (cx,cy,cz) specify the child indices of the block within its parent (not to be confused with centering (cx_,cy_,cz_); flux array size is kept the same, with offset determined by child indices.*
   
 ----
 
 .. glossary::
 
-  ``void coarsen ()``
-   *Coarsen a FaceFluxes object by reducing dimensions by two along each face dimension, and summing fine elements contained in each coarse flux element. Updates level_fluxes_ accordingly. Used for coarsening fine-level fluxes to match coarse level fluxes.  Increases the value returned by level_fluxes() by one.*
-  
-----
-
-.. glossary::
-
-  ``FaceFluxes & operator += (const FaceFluxes & ff)``
-   *Add the face fluxes object ff to this one. Used for accumulating fluxes with finer time steps until they match the coarser time step. Updates dt_fluxes accordingly. Assumes spacially-conforming FaceFluxes objects: FaceFluxes must be associated with the same face, and ratio of cell volumes must be 1.0*
+  ``void accumulate (FaceFluxes & ff, int cx, int cy, int cz, rank)``
+   *Add the FaceFluxes object to this one. Used for accumulating fluxes with finer time steps until they match the coarser time step. Assumes spacially-conforming FaceFluxes objects.*
   
 ----
 
@@ -549,11 +314,11 @@ FluxData class
 
 The :p:`FluxData` class defines a collection of all :p:`FluxFaces`
 required by a Block to perform flux corrections.  This includes all
-:p:`FluxFaces` on :p:`Faces` whose neighboring Block differs either in
-either mesh refinement or time step.  :p:`FluxFaces` for faces that
+flux arrays on :p:`Faces` whose neighboring Block differs in either
+mesh refinement level or time step.  :p:`FluxFaces` for faces that
 require flux-correction come in conforming pairs, one set of fluxes
-corresponding to the Block, and one corresponding to the neighboring
-Blocks.  Flux arrays for the neighboring block are received in the
+corresponding to the Block, and one corresponding to the block's
+neighbors. Flux arrays for the neighboring block are received in the
 flux refresh operation.  Support for coarsening, adding, and
 differencing fluxes is the responsibility of the :p:`FaceFluxes`
 class; :p:`FluxData` is primarily a container.
@@ -566,31 +331,66 @@ class; :p:`FluxData` is primarily a container.
 
 ----
 
-.. glossary::      
+.. glossary::
 
-   ``void FluxData::fluxes_block(int ix, int iy, int iz)``
-    *Return the face fluxes object associated with the Block's (ix,iy,iz) face.*
+   ``void allocate(int nx, int ny, int nz,  std::vector<int> field_list, std::vector<int> * cx_list=nullptr, std::vector<int> * cy_list=nullptr, std::vector<int> * cz_list=nullptr)``
+    *Allocate all flux arrays for each field in the list of field indices.  Optional arrays to indicate the centering of fields may also be provided.*
+
+----
+
+.. glossary::
+
+  ``void deallocate()``
+   *Deallocate all face fluxes for all faces and all fields.*
+
+----
+
+.. glossary::
+
+  ``int num_fields()``
+   *Return the number of field indices.*
+
+----
+
+.. glossary::
+
+  ``int index_field(int i_f)``
+   *Return the i'th field index.*
 
 ----
 
 .. glossary::      
 
-   ``void FluxData::set_fluxes_block(FaceFluxes * ff, int ix, int iy, int iz)``
-    *Set the Block's face fluxes object for the (ix,iy,iz) face.*
+   ``void FluxData::block_fluxes(int axis, int face, int i_f)``
+    *Return the face fluxes object associated with the given facet and field. Note 0 <= i_f  < num_fields() is an index into the field_list vector, not the field index itself.*
 
 ----
 
 .. glossary::      
 
-   ``void FluxData::fluxes_neighbor(int ix, int iy, int iz)``
-    *Return the face fluxes object associated with the block's neighbors on the (ix,iy,iz) face.*
+   ``void FluxData::neighbor_fluxes(int axis, int face, int i_f)``
+    *Return the neighboring block's face fluxes associated with the given facet and field. Note 0 <= i_f  < num_fields() is an index into the field_list vector, not the field index itself.*
 
 ----
 
 .. glossary::      
 
-   ``void FluxData::set_fluxes_neighbor(FaceFluxes * ff, int ix, int iy, int iz)``
-    *Set the face fluxes object associated with the block's neighbors on the (ix,iy,iz) face.*
+   ``void FluxData::set_block_fluxes(FaceFluxes * ff, int axis, int face, int i_f)``
+    *Set the block's face fluxes associated with the given facet and field. Note 0 <= i_f  < num_fields() is an index into the field_list vector, not the field index itself.*
+
+----
+
+.. glossary::      
+
+   ``void FluxData::set_neighbor_fluxes(FaceFluxes * ff, int axis, int face, int i_f)``
+    *Set the neighboring block's face fluxes associated with the given facet and field. Note 0 <= i_f  < num_fields() is an index into the field_list vector, not the field index itself.*
+
+----
+
+.. glossary::      
+
+   ``void FluxData::sum_neighbor_fluxes(FaceFluxes * ff, int axis, int face, int i_f)``
+    *Accumulate (sum) the neighboring block's face fluxes associated with the given facet and field. Note 0 <= i_f  < num_fields() is an index into the field_list vector, not the field index itself.*
 
 Flux Communication
 ==================
@@ -642,13 +442,11 @@ Testing
 
 In Enzo-E / Cello we strive to use test-driven development, which
 helps keep development cycles short and helps keep the code base from
-accumulating untested code.
+accumulating untested code.  We include unit tests for the lower level
+:p:`Face`, :p:`FaceFluxes`, and :p:`FluxData` classes, and use
+application testing for :p:`MethodFluxCorrect`.
 
-We will include unit tests for the lower level :p:`FaceFluxes` and
-:p:`FluxData` classes, and use application testing for
-:p:`MethodFluxCorrect`.
-
-Hydrodynamics application tests will include increasingly difficult
+Hydrodynamics application tests include increasingly difficult
 test problems, with the easiest being a 2D two-level AMR (L=2)
 single-processor (P=1) single-cycle (C=1) problem.  This should be
 simple enough to allow a debuggable problem, where the count of
@@ -706,7 +504,7 @@ Progress notes 2020-04-08
      
      - FaceFluxes: 90% complete
 
-       - TODO: get_limits () (compute loop limits of Block values for face)
+       - TODO: get_limits() (compute loop limits of Block values for face)
        - TODO: operator += () (a few unit tests fail)
 
      - FluxData: 90% complete (unit tests)

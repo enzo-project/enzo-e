@@ -85,7 +85,7 @@ extern "C" void FORTRAN_NAME(ppm_de)
    int uindex[], int vindex[], int windex[],
    int geindex[], enzo_float *temp,
    int *ncolor, enzo_float *colorpt, int *coloff,
-   int colindex[]);
+   int colindex[], int *error);
 
 extern "C" void FORTRAN_NAME(ppml)
   (enzo_float *dn,   enzo_float *vx,   enzo_float *vy,   enzo_float *vz,

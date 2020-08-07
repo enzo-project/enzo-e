@@ -16,7 +16,7 @@ c
      &     fistart, fiend, fjstart, fjend,
      &     array, dindex, eindex,
      &     uindex, vindex, windex, geindex, tmp,
-     &     ncolor, colorpt, coloff, colindex)
+     &     ncolor, colorpt, coloff, colindex, error)
 c     
 c  PERFORMS PPM (DIRECT EULERIAN) UPDATE FOR ONE TIMESTEP (WRAPPER)
 c
@@ -87,7 +87,8 @@ c
       integer dindex(nsubgrids*6), eindex(nsubgrids*6),
      &        uindex(nsubgrids*6), vindex(nsubgrids*6),
      &        windex(nsubgrids*6),geindex(nsubgrids*6),
-     &        colindex(nsubgrids*6,ncolor)
+     &     colindex(nsubgrids*6,ncolor)
+      integer error
       ENZO_REAL d(in,jn,kn), e(in,jn,kn), u(in,jn,kn),
      &     v(in,jn,kn), w(in,jn,kn),ge(in,jn,jn),
      &     gr_xacc(in,jn,kn), gr_yacc(in,jn,kn), gr_zacc(in,jn,kn),
@@ -184,7 +185,8 @@ c$DOACROSS LOCAL(k)
      &             tmp(1+ms*24),tmp(1+ms*25),tmp(1+ms*26),tmp(1+ms*27),
      &             tmp(1+ms*28),tmp(1+ms*29),tmp(1+ms*30),
      &             tmp(1+ms*(31+0*ncolor)),tmp(1+ms*(31+1*ncolor)), 
-     &             tmp(1+ms*(31+2*ncolor)),tmp(1+ms*(31+3*ncolor))
+     &             tmp(1+ms*(31+2*ncolor)),tmp(1+ms*(31+3*ncolor)),
+     &             error
      &             )
            enddo
         endif
@@ -220,7 +222,8 @@ c$DOACROSS LOCAL(i)
      &             tmp(1+ms*24),tmp(1+ms*25),tmp(1+ms*26),tmp(1+ms*27),
      &             tmp(1+ms*28),tmp(1+ms*29),tmp(1+ms*30),
      &             tmp(1+ms*(31+0*ncolor)),tmp(1+ms*(31+1*ncolor)), 
-     &             tmp(1+ms*(31+2*ncolor)),tmp(1+ms*(31+3*ncolor))
+     &             tmp(1+ms*(31+2*ncolor)),tmp(1+ms*(31+3*ncolor)),
+     &             error
      &             )
            enddo
 c     
@@ -257,7 +260,8 @@ c$DOACROSS LOCAL(j)
      &             tmp(1+ms*24),tmp(1+ms*25),tmp(1+ms*26),tmp(1+ms*27),
      &             tmp(1+ms*28),tmp(1+ms*29),tmp(1+ms*30),
      &             tmp(1+ms*(31+0*ncolor)),tmp(1+ms*(31+1*ncolor)), 
-     &             tmp(1+ms*(31+2*ncolor)),tmp(1+ms*(31+3*ncolor))
+     &             tmp(1+ms*(31+2*ncolor)),tmp(1+ms*(31+3*ncolor)),
+     &             error
      &             )
            enddo
         endif
