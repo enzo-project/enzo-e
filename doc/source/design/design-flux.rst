@@ -148,7 +148,7 @@ required for flux-correction.)
 
 .. glossary::
 
-   ``MethodFluxCorrect()``
+   ``MethodFluxCorrect::MethodFluxCorrect()``
    
       *Create a new MethodFluxCorrect object, and define its refresh communication requirements*
   
@@ -156,7 +156,7 @@ required for flux-correction.)
 
 .. glossary::
 
-   ``virtual void compute (Block * block)``
+   ``virtual void MethodFluxCorrect::compute (Block * block)``
    
       *Request Cello to refresh its flux data, then apply flux correction*
 
@@ -192,21 +192,21 @@ y=1, z=2), and face (lower=0, upper=1).
 
 .. glossary::
 
-   ``void face::get_face (int *ix, int *iy, int *iz)``
+   ``void Face::get_face (int *ix, int *iy, int *iz)``
     *Return the tuple (ix,iy,iz), -1 <= ix,iy,iz <= 1, identifying the block's face, which may be a corner, edge, facet, or the entire block.*
 
 ----
 
 .. glossary::
 
-   ``int face::axis()``
+   ``int Face::axis()``
     *Return the axis associated with the normal direction: x=0, y=1, or z=2.*
 
 ----
 
 .. glossary::
 
-   ``int face::face()``
+   ``int Face::face()``
     *Return whether the normal direction is towards the lower (0) or upper (1) face direction.*
 
 ----------------     
@@ -227,42 +227,42 @@ finer time step to match a neighboring block's coarser time step.
 
 .. glossary::
    
-   ``FaceFluxes (Face face, int index_field, int nx, int ny, int nz, int cx, int cy, int cz)``
+   ``FaceFluxes::FaceFluxes (Face face, int index_field, int nx, int ny, int nz, int cx, int cy, int cz)``
     *Create a FaceFluxes object for the given face, field, and block size. Optionally include centering adjustment (0 <= cx,cy,cz <= 1) for facet-, edge-, or corner-located field values*
    
 ----
 
 .. glossary::
 
-   ``void allocate()``
+   ``void FaceFluxes::allocate()``
     *Allocate the flux array and initialize values to 0.0.*
 
 ----
 
 .. glossary::
 
-  ``void deallocate()``
+  ``void FaceFluxes::deallocate()``
    *Deallocate the flux array.*
 
 ----
 
 .. glossary::
 
-  ``void clear()``
+  ``void FaceFluxes::clear()``
    *Set flux array values to 0.0.*
 
 ----
 
 .. glossary::
 
-  ``Face face()``
+  ``Face FaceFluxes::face()``
    *Return the face associated with the FaceFluxes.*
 
 ----
 
 .. glossary::
 
-  ``int index_field()``
+  ``int FaceFluxes::index_field()``
    *Return the associated field index.*
 
 
@@ -270,42 +270,42 @@ finer time step to match a neighboring block's coarser time step.
 
 .. glossary::
 
-  ``void get_size (int * mx, int * my, int * mz)``
+  ``void FaceFluxes::get_size (int * mx, int * my, int * mz)``
    *Return the array dimensions of the flux array, including any adjustments for centering.  Indexing is ix + mx\*(iy +my\*iz).*
    
 ----
 
 .. glossary::
 
-  ``void set_flux_array ( std::vector<double> array, int dx, int dy, int dz)``
+  ``void FaceFluxes::set_flux_array ( std::vector<double> array, int dx, int dy, int dz)``
    *Copy flux values from an array to the FluxFaces flux array. Array element array[ix\*dx + iy\*dy + iz\*dz] should correspond to flux value (ix,iy,iz), where (0,0,0) <= (ix,iy,iz) < (mx,my,mz).*
   
 ----
 
 .. glossary::
 
-  ``std::vector<double> & flux_array (int * dx=0, int * dy=0, int * dz=0)``
+  ``std::vector<double> & FaceFluxes::flux_array (int * dx=0, int * dy=0, int * dz=0)``
    *Return the array of fluxes and associated strides (dx,dy,dz) such that the (ix,iy,iz) flux value is fluxes[ix\*dx + iy\*dy + iz\*dz], where (0,0,0) <= (ix,iy,iz) < (mx,my,mz).*
   
 ----
 
 .. glossary::
 
-  ``void coarsen(int cx, int cy, int cz, int rank)``
+  ``void FaceFluxes::coarsen(int cx, int cy, int cz, int rank)``
    *Used for coarsening fine-level fluxes to match coarse level fluxes. Arguments (cx,cy,cz) specify the child indices of the block within its parent (not to be confused with centering (cx_,cy_,cz_); flux array size is kept the same, with offset determined by child indices.*
   
 ----
 
 .. glossary::
 
-  ``void accumulate (FaceFluxes & ff, int cx, int cy, int cz, rank)``
+  ``void FaceFluxes::accumulate (FaceFluxes & ff, int cx, int cy, int cz, rank)``
    *Add the FaceFluxes object to this one. Used for accumulating fluxes with finer time steps until they match the coarser time step. Assumes spacially-conforming FaceFluxes objects.*
   
 ----
 
 .. glossary::
 
-  ``FaceFluxes & operator *= (double weight)``
+  ``FaceFluxes & FaceFluxes::operator *= (double weight)``
    *Scale the fluxes array by a scalar constant.*
   
 --------------
@@ -333,28 +333,28 @@ class; :p:`FluxData` is primarily a container.
 
 .. glossary::
 
-   ``void allocate(int nx, int ny, int nz,  std::vector<int> field_list, std::vector<int> * cx_list=nullptr, std::vector<int> * cy_list=nullptr, std::vector<int> * cz_list=nullptr)``
+   ``void FluxData::allocate(int nx, int ny, int nz,  std::vector<int> field_list, std::vector<int> * cx_list=nullptr, std::vector<int> * cy_list=nullptr, std::vector<int> * cz_list=nullptr)``
     *Allocate all flux arrays for each field in the list of field indices.  Optional arrays to indicate the centering of fields may also be provided.*
 
 ----
 
 .. glossary::
 
-  ``void deallocate()``
+  ``void FluxData::deallocate()``
    *Deallocate all face fluxes for all faces and all fields.*
 
 ----
 
 .. glossary::
 
-  ``int num_fields()``
+  ``int FluxData::num_fields()``
    *Return the number of field indices.*
 
 ----
 
 .. glossary::
 
-  ``int index_field(int i_f)``
+  ``int FluxData::index_field(int i_f)``
    *Return the i'th field index.*
 
 ----
@@ -440,34 +440,43 @@ type, which by definition includes
 Testing
 =======
 
-In Enzo-E / Cello we strive to use test-driven development, which
-helps keep development cycles short and helps keep the code base from
-accumulating untested code.  We include unit tests for the lower level
-:p:`Face`, :p:`FaceFluxes`, and :p:`FluxData` classes, and use
+Multiple levels of testing are used, including unit tests for the lower level
+:p:`Face`, :p:`FaceFluxes`, and :p:`FluxData` classes, and 
 application testing for :p:`MethodFluxCorrect`.
 
-Hydrodynamics application tests include increasingly difficult
-test problems, with the easiest being a 2D two-level AMR (L=2)
-single-processor (P=1) single-cycle (C=1) problem.  This should be
-simple enough to allow a debuggable problem, where the count of
-flux-correction steps is finite.  A similar progression of
-increasingly difficult problems will be used for MHD.  The "hardest"
-problem should be many levels, many processes (multi-node at the
-least) and long-duration.
+Application tests include varying difficulties of meshes, physics,
+boundary conditions, and floating-point precision.  Different levels
+are summarized below:
 
-Similar series of tests including self-gravity and cosmolgy will be
-developed.
+*  **Mesh**
 
-- **DT-1.** :p:`FaceFluxes` unit tests
-- **DT-2.** :p:`FluxData` unit tests
-- **DT-H.** Hydrodynamics application tests
-- **DT-H1.** 2D L=2 P=1 C=1 hydro (easiest hydro)
-- **DT-H2.** 3D L=2 P=1 C=1 hydro
-- **DT-H3.** 3D L>2 P=1 C=1 hydro
-- **DT-H4.** 3D L>2 P>1 C=1 hydro
-- **DT-H5.** 3D L>2 P>1 C>1 hydro (hardest hydro)
-- **DT-G.** Self-gravity application tests
-- **DT-C.** Cosmology application tests
+   * **M0** single block
+   * **M1** unigrid
+   * **M2** one additional refinement level
+   * **M3** two additional refinement level
+     
+* **Physics**
+
+  * **PH** hydro
+  * **PG** gravity
+  * **PP** gravitating particles
+  * **PC** cosmological expansion
+
+* **Boundary**
+
+  * **BP** periodic
+  * **BR** reflecting
+
+* **Floating-point precision**
+
+  * **F4** single
+  * **F8** double
+
+* **Parallelism**
+  
+  * **p1**: single processor
+  * **pc**: parallel across cores
+  * **pn**: parallel across nodes
 
 Documentation
 =============
@@ -475,6 +484,7 @@ Documentation
 - **DD-1.** *Design*: add flux correction design to :p:`design/design-flux.rst` 
 - **DD-2.** *Method*: add :p:`MethodFluxCorrect` method documentation to :p:`user/problem_method.rst`
 - **DD-3.** *Testing*: add :p:`testing/testing_flux.rst` test documentation
+- **DD-4.** *Parameters*: update :p:`doc/source/param/`  parameter documentation
    
 ==========
 Milestones
@@ -490,65 +500,3 @@ Tasks
 - **T-1.** :p:`FaceFluxes` class design and implementation
 - **T-2.** :p:`FluxData` class design and implementation
 - **T-3.** :p:`MethodFluxCorrect` class design and implementation
-
-=====
-Notes
-=====
-
-Progress notes 2020-04-08
-=========================
-
-   A. **Data**: Flux-related data classes and unit tests (95%)
-
-     - Face: 100% complete
-     
-     - FaceFluxes: 90% complete
-
-       - TODO: get_limits() (compute loop limits of Block values for face)
-       - TODO: operator += () (a few unit tests fail)
-
-     - FluxData: 90% complete (unit tests)
-
-   B. **Method**: Started implementing MethodFluxCorrect (50%)
-
-     - sum conserved fields and compare with initial
-
-       - quad-precision
-       - main difficulty in writing application tests
-       
-   C. **Communication**: Started on flux-refresh (50%)
-     
-     - added FluxData object to Block's Data object
-     - added support for refresh only across level jumps
-     - incorporating FluxData in DataMsg (50%)
-
-       - TODO: implement serializing and deserializing Flux data objects
-       
-   D. **Initialization**: Started on copying fluxes from PPM to FluxData (50%)
-
-     - ENZO "fluxes" struct exists in Enzo-E
-     - mainly copying ENZO flux-related code to Enzo-E
-     - using old "M16" version of ENZO (Enzo-E uses "ppm_de" et al)
-     - copying "fluxes" to FaceFluxes in FluxData is straightforward
-
-   E. **Testing** (95%)
-
-     - Unit tests almost done
-       
-       - just FluxData remaining
-         
-     - Application tests straightforward
-
-       - summing conserved quantities is the "hard" part
-       - just need to run different problems and monitor "conserved" quantities
-
-   F. **Debugging** (???)
-
-     - Initialization: run same problem in ENZO and Enzo-E and compare
-     - Communication: check that what's sent is what's received
-     - Method
-
-       - application test results
-       - compare same problem in ENZO and Enzo-E
-         
-       

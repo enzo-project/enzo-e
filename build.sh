@@ -263,7 +263,7 @@ if [ $target == "test" ]; then
     if [ $f -gt 0 ]; then
 	echo "Exiting testing with failures:"
 	echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
-	cat $dir/fail.$configure | awk '{print gensub(".*/","","g",$1),gensub(".*/","","g",$4) ":" $5,$6,$7,$8,$9,$10;}'
+	cat $dir/fail.$configure | gawk '{print gensub(".*/","","g",$1),gensub(".*/","","g",$4) ":" $5,$6,$7,$8,$9,$10;}'
 	echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 	exit_status=1
     else
