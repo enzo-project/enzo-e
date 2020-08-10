@@ -1,6 +1,6 @@
 
 
-include "input/parse_include.incl"
+include "input/Parse/parse_include.incl"
 
    Group1 {
       new = "new";
