@@ -989,7 +989,8 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
        &dt, &gamma_, &ppm_pressure_floor_, &ppm_pressure_free_,
        pbar, ubar, &gravity_, grslice,
        &dual_energy_, &dual_energy_eta1_);
-    
+
+    int axis=-1;
     FORTRAN_NAME(woc_flux_twoshock)
       (dslice, eslice, geslice, uslice, vslice, wslice,
        &hxa, diffcoef, 
@@ -1001,7 +1002,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
        dls, drs, pls, prs, gels, gers, uls, urs,
        vls, vrs, wls, wrs, pbar, ubar,
        df, ef, uf, vf, wf, gef, ges,
-       &nc, colslice, colls, colrs, colf);
+       &nc, colslice, colls, colrs, colf,&axis);
     
   } else if (riemann_solver_ == "hll") {
 

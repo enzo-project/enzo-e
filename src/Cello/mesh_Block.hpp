@@ -616,6 +616,7 @@ public:
 
   void p_method_flux_correct_refresh();
   void r_method_flux_correct_sum_fields(CkReductionMsg * msg);
+  void r_method_debug_sum_fields(CkReductionMsg * msg);
 
 protected:
 

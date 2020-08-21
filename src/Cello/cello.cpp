@@ -378,6 +378,12 @@ namespace cello {
     return hierarchy() ? hierarchy()->num_blocks() : 0;
   }
   
+  //----------------------------------------------------------------------
+
+  double relative_cell_volume (int level)
+  {
+    return (1.0/pow(1.0*num_children(),1.0*level));
+  }
   
 
 }

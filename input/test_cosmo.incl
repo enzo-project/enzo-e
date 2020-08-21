@@ -145,7 +145,7 @@ Adapt {
          order = 2;
          solver = "cg";
      };
-     list = ["pm_deposit", "gravity", "pm_update", "comoving_expansion" ];
+     list = ["pm_deposit", "gravity", "pm_update", "comoving_expansion", "debug" ];
      ppm {
          courant = 0.5000000000000000;
          diffusion = false;

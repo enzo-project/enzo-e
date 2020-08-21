@@ -100,14 +100,14 @@ void EnzoComputePressure::compute_(Block * block,
 
     const int rank = cello::rank();
 
-    enzo_float * d = (enzo_float*) field.values("density", i_hist_);
+    const enzo_float * d = (enzo_float*) field.values("density", i_hist_);
 
-    enzo_float * v3[3] =
-      { (enzo_float*) (              field.values("velocity_x", i_hist_)),
-        (enzo_float*) ((rank >= 2) ? field.values("velocity_y", i_hist_) : NULL),
-        (enzo_float*) ((rank >= 3) ? field.values("velocity_z", i_hist_) : NULL) };
+    const enzo_float * vx = (enzo_float*) field.values("velocity_x", i_hist_);
+    const enzo_float * vy = (enzo_float*) field.values("velocity_y", i_hist_);
+    const enzo_float * vz = (enzo_float*) field.values("velocity_z", i_hist_);
 
-    enzo_float * te = (enzo_float*) field.values("total_energy", i_hist_);
+    const enzo_float * te = (enzo_float*) field.values("total_energy", i_hist_);
+    const enzo_float * ie = (enzo_float*) field.values("internal_energy", i_hist_);
 
     int nx,ny,nz;
     field.size(&nx,&ny,&nz);
@@ -119,12 +119,31 @@ void EnzoComputePressure::compute_(Block * block,
 
     int m = (nx+2*gx) * (ny+2*gy) * (nz+2*gz);
     enzo_float gm1 = gamma_ - 1.0;
-    for (int i=0; i<m; i++) {
-      enzo_float e= te[i];
-      e -= 0.5*v3[0][i]*v3[0][i];
-      if (rank >= 2) e -= 0.5*v3[1][i]*v3[1][i];
-      if (rank >= 3) e -= 0.5*v3[2][i]*v3[2][i];
-      p[i] = gm1 * d[i] * e;
+
+    if (enzo::config()->ppm_dual_energy) {
+
+      for (int i=0; i<m; i++) {
+        p[i] = gm1 * d[i] * ie[i];
+      }
+
+    } else {
+
+      if (rank == 1) {
+        for (int i=0; i<m; i++) {
+          p[i] = gm1 * d[i] *
+            (te[i] - 0.5*vx[i]*vx[i]);
+        }
+      } else if (rank == 2) {
+        for (int i=0; i<m; i++) {
+          p[i] = gm1 * d[i] *
+            (te[i] - 0.5*(vx[i]*vx[i] + vy[i]*vy[i]));
+        }
+      } else if (rank == 3) {
+        for (int i=0; i<m; i++) {
+          p[i] = gm1 * d[i] *
+            (te[i] - 0.5*(vx[i]*vx[i] + vy[i]*vy[i] + vz[i]*vz[i]));
+        }
+      }
     }
   }
 

@@ -777,8 +777,9 @@ void Block::particle_scatter_neighbors_
       // ...initialize mask used for scatter and delete
       // ...and corresponding particle indices
 
-      bool mask[np];
-      int index[np];
+      bool * mask = new bool[np];
+      int * index = new int[np];
+      
       for (int ip=0; ip<np; ip++) {
 
 	double x = is_float ? 2.0*(xa[ip*d]-x0)/xl : xa[ip*d];
@@ -816,6 +817,9 @@ void Block::particle_scatter_neighbors_
       particle.scatter (it,ib, np, mask, index, npa, particle_array);
       // ... delete scattered particles
       count += particle.delete_particles (it,ib,mask);
+
+      delete [] mask;
+      delete [] index;
     }
   }
 

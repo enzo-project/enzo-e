@@ -50,7 +50,7 @@ c
       integer imethod, iposflag, ndim, ierror
       integer pdims(ndim), pstart(ndim), pend(ndim), refine(ndim),
      &        gdims(ndim), gstart(ndim)
-      real    grid(1), parent(1), work(1)
+      ENZO_REAL    grid(1), parent(1), work(1)
 c
 c  locals
 c

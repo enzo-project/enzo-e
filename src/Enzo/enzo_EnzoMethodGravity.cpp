@@ -108,7 +108,7 @@
 
 // #define DEBUG_FIELD_FACE
 // #define DEBUG_COPY_DENSITY
-#define DEBUG_COPY_POTENTIAL
+// #define DEBUG_COPY_POTENTIAL
 // #define DEBUG_COPY_B
 
 // #define DEBUG_METHOD
@@ -160,7 +160,6 @@ EnzoMethodGravity::EnzoMethodGravity
   refresh->add_field("acceleration_y");
   refresh->add_field("acceleration_z");
   refresh->add_field("density");
-
   // Accumulate is used when particles are deposited into density_total
   
   if (accumulate) {
@@ -219,11 +218,11 @@ void EnzoMethodGravity::compute(Block * block) throw()
 #ifdef WRITE_ACCUM_DENSITY
   {
     char buffer[80];
-    sprintf (buffer,"bc-enzop-%03d.data",block->cycle());
+    sprintf (buffer,"bc-enzop-%s-%03d.data",block->name().c_str(),block->cycle());
     printf ("DEBUG_ACCUM cycle=%d\n",block->cycle());
     FILE * fp = fopen(buffer,"w");
     field.ghost_depth(0,&gx,&gy,&gz);
-    gx=gy=gz=1;
+    gx=gy=gz=0;
     for (int iz=gz; iz<mz-gz; iz++) {
       for (int iy=gy; iy<my-gy; iy++) {
   	for (int ix=gx; ix<mx-gx; ix++) {
@@ -287,7 +286,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
       enzo_float * dt_diff = (enzo_float*) field.values("density_total_diff");
       enzo_float * dt_enzo = (enzo_float*) field.values("density_total_enzo");
 #endif    
-      gx=gy=gz=1;
+      gx=gy=gz=0;
       for (int iz=gz; iz<mz-gz; iz++) {
 	for (int iy=gy; iy<my-gy; iy++) {
 	  for (int ix=gx; ix<mx-gx; ix++) {

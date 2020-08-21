@@ -56,7 +56,7 @@ Field {
 
 Method {
 
-   list = ["gravity_bicgstab", "ppm"];
+   list = ["debug", "gravity_bicgstab", "ppm"];
 
    ppm {
       courant   = 0.8;

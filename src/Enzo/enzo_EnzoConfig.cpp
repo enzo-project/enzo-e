@@ -141,6 +141,9 @@ EnzoConfig::EnzoConfig() throw ()
   method_pm_deposit_alpha(0.5),
   /// EnzoMethodPmUpdate
   method_pm_update_max_dt(std::numeric_limits<double>::max()),
+  /// EnzoProlong
+  prolong_enzo_type(),
+  prolong_enzo_positive(true),
   /// EnzoSolverMg0
   solver_pre_smooth(),
   solver_post_smooth(),
@@ -320,6 +323,9 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_pm_deposit_alpha;
   p | method_pm_update_max_dt;
 
+  p | prolong_enzo_type;
+  p | prolong_enzo_positive;
+
   p | solver_pre_smooth;
   p | solver_post_smooth;
   p | solver_last_smooth;
@@ -344,41 +350,10 @@ void EnzoConfig::pup (PUP::er &p)
   if (method_grackle_use_grackle) {
     p  | method_grackle_use_cooling_timestep;
     p  | method_grackle_radiation_redshift;
-
-    //    int is_null = (method_grackle_chemistry==NULL);
-    //
-    //    p | is_null;
-    //
-    //    if (is_null) {
-    //
-    //      method_grackle_chemistry = NULL;
-    //      
-    //    } else {
-    //
-    //      if (p.isUnpacking()) {
-    //        method_grackle_chemistry = new chemistry_data;
-    //        method_grackle_chemistry->use_grackle = method_grackle_use_grackle;
-
-    //        if(method_grackle_chemistry->use_grackle){
-    //          if (set_default_chemistry_parameters(method_grackle_chemistry) == ENZO_FAIL){
-    //            ERROR("EnzoMethodConfig::pup()",
-    //                  "Error in Grackle set_default_chemistry_parameters");
-    //          }
-    //        }
-    //      }
-    //      ASSERT("EnzoConfig::pup",
-    //             "method_grackle_chemistry is expected to be non-null",
-    //             (method_grackle_chemistry != NULL));
-    //      
-    //      p | *method_grackle_chemistry;
-    //    }
-
-    if (method_grackle_use_grackle){
-      if (p.isUnpacking()) { method_grackle_chemistry = new chemistry_data; }
-      p | *method_grackle_chemistry;
-    } else {
-      method_grackle_chemistry = NULL;
-    }
+    if (p.isUnpacking()) { method_grackle_chemistry = new chemistry_data; }
+    p | *method_grackle_chemistry;
+  } else {
+    method_grackle_chemistry = nullptr;
   }
 #endif /* CONFIG_USE_GRACKLE */
 
@@ -500,7 +475,11 @@ void EnzoConfig::read(Parameters * p) throw()
   method_pm_update_max_dt = p->value_float
     ("Method:pm_update:max_dt", std::numeric_limits<double>::max());
 
+  // ENZO interpolation
+  prolong_enzo_type     = p->value_logical ("Prolong:enzo:type","2A");
+  prolong_enzo_positive = p->value_logical ("Prolong:enzo:positive",true);
 
+  // Particle method initialization
   initial_pm_field        = p->value_string  ("Initial:pm:field","density");
   initial_pm_mpp          = p->value_float   ("Initial:pm:mpp",-1.0);
   initial_pm_level        = p->value_integer ("Initial:pm:level",-1);

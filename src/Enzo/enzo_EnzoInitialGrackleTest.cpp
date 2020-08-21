@@ -202,7 +202,6 @@ void EnzoInitialGrackleTest::enforce_block
   // for output
   const int in = cello::index_static();
   int comoving_coordinates = enzo_config->physics_cosmology;
-
   if (pressure){
     EnzoComputePressure compute_pressure (EnzoBlock::Gamma[in],
                                           comoving_coordinates);

@@ -204,6 +204,18 @@ private: // functions
   std::vector<int> field_list_dst_(Field field) const;
   bool accumulate_(int index_src, int index_dst) const;
 
+  /// Multiply the given field by density to convert to conservative
+  /// form if needed
+  void mul_by_density_
+  (Field field, int index_field,
+   const int i3[3], const int n3[3], const int m3[3]);
+
+  /// Divide the given field by density to convert back to original
+  /// form if needed
+  void div_by_density_
+  (Field field, int index_field,
+   const int i3[3], const int n3[3], const int m3[3]);
+
 private: // attributes
 
   /// Select face, including edges and corners (-1,-1,-1) to (1,1,1)
