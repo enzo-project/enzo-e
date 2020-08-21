@@ -25,7 +25,8 @@ c
      &     df, ef, uf, vf,
      &     wf, grslice, geslice, gef,
      &     ges,
-     &     colslice, colf, colls, colrs
+     &     colslice, colf, colls, colrs,
+     &     error
      &     )
 c     
 c  CONTROL ROUTINE FOR Y-SWEEP DIRECT EULER VERSION OF PPM
@@ -154,7 +155,8 @@ c
      &      uslice(jn,kn), vslice(jn,kn), wslice(jn,kn),
      &     geslice(jn,kn)
       ENZO_REAL colslice(jn,kn,ncolor),  colf(jn,kn,ncolor),
-     &        colls(jn,kn,ncolor), colrs(jn,kn,ncolor)
+     &     colls(jn,kn,ncolor), colrs(jn,kn,ncolor)
+      integer error
 c
 c  parameters
 c

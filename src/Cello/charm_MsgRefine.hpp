@@ -11,9 +11,6 @@
 #include "cello.hpp"
 
 class Block;
-class ParticleData;
-class FieldData;
-class FieldFace;
 class Data;
 class DataMsg;
 
@@ -67,7 +64,7 @@ public: // interface
     CkPrintf ("bool is_local_ = %d\n", is_local_);
     CkPrintf ("double time_ = %g\n", time_);
     CkPrintf ("double dt_ = %g\n", dt_);
-    CkPrintf ("DataMsg * data_msg_ = %p\n", data_msg_);
+    CkPrintf ("DataMsg * data_msg_ = %p\n", (void*)data_msg_);
     CkPrintf ("void * buffer_ = %p\n",buffer_);
     CkPrintf ("\n");
     CkPrintf ("int nx_, ny_, nz_ = %d %d %d\n",nx_, ny_, nz_);
@@ -76,7 +73,7 @@ public: // interface
     CkPrintf ("int cycle_ = %d\n",cycle_);
     CkPrintf ("int refresh_type_ = %d\n",refresh_type_);
     CkPrintf ("int num_face_level_ = %d\n",num_face_level_);
-    CkPrintf ("int * face_level_ = %p\n",face_level_);
+    CkPrintf ("int * face_level_ = %p\n",(void*)face_level_);
   }
 public: // static methods
 

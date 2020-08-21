@@ -1,0 +1,15 @@
+Method {
+   list += ["ppm","flux_correct"];
+   flux_correct { enable=true; }
+}
+ Group {
+     conserved {
+         field_list = [ "density" ];
+     };
+     make_field_conservative {
+         field_list = [ "velocity_x", "velocity_y", "velocity_z" ];
+     }
+     list = [ "conserved", "make_field_conservative" ];
+ }
+
+Stopping { cycle = 120; }

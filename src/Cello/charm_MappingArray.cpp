@@ -6,7 +6,7 @@
 /// @brief    Mapping of Charm++ array Index to processors
 
 #include "charm.hpp"
-
+#define NEW_MAPPING
 //======================================================================
 
 MappingArray::MappingArray(int nx, int ny, int nz)
@@ -33,8 +33,12 @@ int MappingArray::procNum(int, const CkArrayIndex &idx) {
   int ix,iy,iz;
   in.array    (&ix,&iy,&iz);
 
+#ifdef NEW_MAPPING  
+  int index = CkNumPes()*(ix + nx_*(iy + ny_*iz)) / (nx_*ny_*nz_);
+#else  
   int index = (ix + nx_*(iy + ny_*iz)) % CkNumPes();
-
+#endif
+  
   return index;
 }
 

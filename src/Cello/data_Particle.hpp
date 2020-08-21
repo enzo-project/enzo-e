@@ -101,6 +101,11 @@ public: // interface
   int type_index (std::string type) const
   { return particle_descr_->type_index(type); }
 
+  /// Return whether the particle type exists
+  
+  bool type_exists (std::string type) const
+  { return particle_descr_->type_exists(type); }
+
   /// Return the name of the given particle type given its index
 
   std::string type_name (int index) const
@@ -373,7 +378,6 @@ public: // interface
   { return particle_data_->velocity(particle_descr_,it,ib,vx,vy,vz); }
 
   //--------------------------------------------------
-
   /// Return the number of bytes required to serialize the data object
   int data_size () const
   { return particle_data_->data_size (particle_descr_); }

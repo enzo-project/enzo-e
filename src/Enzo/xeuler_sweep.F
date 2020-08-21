@@ -25,7 +25,8 @@ c
      &     df, ef, uf, vf,
      &     wf, grslice, geslice, gef,
      &     ges,
-     &     colslice, colf, colls, colrs
+     &     colslice, colf, colls, colrs,
+     &     error
      &     )
 c     
 c     CONTROL ROUTINE FOR X-SWEEP DIRECT EULER VERSION OF PPM
@@ -165,7 +166,8 @@ c
      &     uslice(in,jn), vslice(in,jn),  wslice(in,jn), 
      &    geslice(in,jn)
       ENZO_REAL colslice(in,jn,ncolor),  colf(in,jn,ncolor),
-     &        colls(in,jn,ncolor), colrs(in,jn,ncolor)
+     &     colls(in,jn,ncolor), colrs(in,jn,ncolor)
+      integer error
 c
 c  parameters
 c
@@ -301,8 +303,8 @@ c  Check this slice against the list of subgrids
 c     (all subgrid quantities are zero based)
 c
       do n=0, nsubgrids-1
-        if (k .ge. fjstart(n*3+1)+1 .and. k .le. fjend(n*3+1)+1) then
-          idim = fiend(n*3+1) - fistart(n*3+1) + 1
+         if (k .ge. fjstart(n*3+1)+1 .and. k .le. fjend(n*3+1)+1) then
+            idim = fiend(n*3+1) - fistart(n*3+1) + 1
           do j=fistart(n*3+1)+1, fiend(n*3+1)+1
              offset = j-fistart(n*3+1) + (k-fjstart(n*3+1)-1)*idim
              array(dindex(n*6+1)+offset) = df(lface(n*3+1)+1, j)
@@ -325,9 +327,9 @@ c
              endif
              do ic=1, ncolor
                 array(colindex(n*6+1,ic)+offset) = 
-     &                                       colf(lface(n*3+1)+1, j, ic)
+     &               colf(lface(n*3+1)+1, j, ic)
                 array(colindex(n*6+2,ic)+offset) = 
-     &                                       colf(rface(n*3+1)+2, j, ic)
+     &               colf(rface(n*3+1)+2, j, ic)
              enddo
           enddo
         endif

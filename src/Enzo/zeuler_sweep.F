@@ -25,7 +25,8 @@ c
      &     df, ef, uf, vf,
      &     wf, grslice, geslice, gef,
      &     ges,
-     &     colslice, colf, colls, colrs
+     &     colslice, colf, colls, colrs,
+     &     error
      &     )
 c     
 c     CONTROL ROUTINE FOR Z-SWEEP DIRECT EULER VERSION OF PPM
@@ -154,7 +155,8 @@ c
      &     uf(kn,in),     vf(kn,in),     wf(kn,in)
       ENZO_REAL
      &     colslice(kn,in,ncolor),  colf(kn,in,ncolor),
-     &        colls(kn,in,ncolor), colrs(kn,in,ncolor)
+     &     colls(kn,in,ncolor), colrs(kn,in,ncolor)
+      integer error
 c
 c  parameters
 c
@@ -241,7 +243,7 @@ c
      &     dt, gamma, ipresfree,
      &     dls, drs, pls, prs, gels, gers,
      &     uls, urs, vls, vrs, wls, wrs,
-     &     ncolor, colslice, colls, colrs
+     &     ncolor, colslice, colls, colrs, error
      &     )
 c
 c  Compute (Lagrangian part of the) Riemann problem at each zone boundary
@@ -277,7 +279,7 @@ c
      &     kn, in, ks, ke, i1, i2, dt, 
      &     gamma, idiff, gravity, idual, eta1, eta2,
      &     df, ef, uf, vf, wf, gef, ges,
-     &     ncolor, colslice, colf, SmallRho)
+     &     ncolor, colslice, colf, SmallRho, error)
 c     
 c  If necessary, recompute the pressure to correctly set ge and e
 c

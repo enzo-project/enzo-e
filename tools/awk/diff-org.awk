@@ -9,7 +9,6 @@
 
 BEGIN{
     p=1;
-    print "* TODO [/] [C-u C-c # to update stats]"
 }
 /^diff --git/ { # git
    file=$NF; p=0;
@@ -23,7 +22,7 @@ BEGIN{
 /^@@/ {
     line=$3;
     line=substr(line,2,index(line,",")-2);
-    print "** TODO [[file:" file"::"line"]["shortfile ":" line "]]"};
+    print "*** TODO [[file:" file"::"line"]["shortfile ":" line "]]"};
 {
     if (p==1)
 	print;

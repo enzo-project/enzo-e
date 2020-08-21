@@ -53,6 +53,7 @@ Method {
         steepening = true;
      };
  }
+ include "input/flux_correct.incl"
 
 Output {
     list = [ "data", "mesh", "de", "te" ];

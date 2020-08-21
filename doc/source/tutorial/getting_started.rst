@@ -82,12 +82,17 @@ If ``libboost-dev`` is not already installed on your machine, it may be
 available through your operating system distribution, otherwise it can
 be downloaded from the `libboost <https://www.boost.org/>`_ website.
 
+By default Enzo-E requires the Grackle chemistry and cooling library.
+If you do not need to use Grackle, you can change the line
+``use_grackle = 1`` in the ``SConstruct`` file to ``use_grackle = 0``.
+
 Configuring
 ===========
 
 There are currently two configuration settings that must be set before
 building Enzo-E and Cello: ``CELLO_ARCH`` to specify the computer platform,
-and ``CELLO_PREC`` to specify the floating-point precision.
+and ``CELLO_PREC`` to specify the floating-point precision.  Additionally,
+some configurations require ``CHARM_HOME`` to be specified.
 
 Other optional settings are available as well.  These are initialized
 in the top-level SConstruct file under the "USER CONFIGURATION"
@@ -106,7 +111,7 @@ following:
    ===========================  ========================================================
    ``CELLO_ARCH=linux_gnu``     *compile for a generic GNU Linux system*
    ``CELLO_ARCH=ncsa_bw``       *compile for NCSA's Blue Waters Petascale Platform*
-   ``CELLO_ARCH=gordon_gnu``    *compile for SDSC's Gordon (Or Comet) cluster using GNU compilers*
+   ``CELLO_ARCH=comet_gnu``     *compile for SDSC's Comet cluster using GNU compilers*
    ===========================  ========================================================
 
 Note that some machines, including Blue Waters and Comet, will
@@ -130,6 +135,16 @@ double-precision.  To specify the precision to use in Enzo-E, set the
   ``CELLO_PREC=double``  *64-bit Enzo field data*
   =====================  ======================
 
+3. Specify Charm++ directory
+----------------------------
+
+The location of the Charm++ installation directory should be specified
+using the ``CHARM_HOME`` environment variable.
+
+  =====================================  =============================
+  =====================================  =============================
+  ``CELLO_PREC=$HOME/Charm/charm.6.10``  Set directory of Charm++ used
+  =====================================  =============================
 
 Porting
 =======
@@ -176,18 +191,18 @@ and editing it.  Configuration variables include the following:
 
 To incorporate your new machine configuration file into the ``Enzo-E /
 Cello`` build system, insert a new line to the following list in the
-``SConstruct`` file in the top-level ``Enzo-E / Cello`` directory:
+``SConstruct`` file in the top-level ``Enzo-E / Cello`` directory.
+(Specific names in the ``SConstruct`` file and those in the list
+fragment below may differ due to the file being updated.)
 
   ::   
 
      if   (arch == "gordon_gnu"):   from gordon_gnu   import *
      elif (arch == "gordon_intel"): from gordon_intel import *
      elif (arch == "gordon_pgi"):   from gordon_pgi   import *
+     elif (arch == "comet_gnu"):    from comet_gnu    import *
      elif (arch == "linux_gnu"):    from linux_gnu    import *
-     elif (arch == "linux_gprof"):  from linux_gprof  import *
-     elif (arch == "linux_mpe"):    from linux_mpe    import *
-     elif (arch == "linux_tau"):    from linux_tau    import *
-     elif (arch == "ncsa_bw"):      from ncsa_bw      import *
+     ...
 
 Building
 ========
@@ -285,4 +300,6 @@ If you encounter any problems in getting Enzo-E to compile or run,
 please contact the Enzo-E / Cello community at cello-l@ucsd.edu, and
 someone will be happy to help resolve the problems.
 
-	   
+----
+
+2020-04-10: Updated with corrections from Joshua Smith.

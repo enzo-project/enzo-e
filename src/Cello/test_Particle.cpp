@@ -487,7 +487,6 @@ PARALLEL_MAIN_BEGIN
     const int np = particle.num_particles(it_trace,ib);
     for (int ip=0; ip<np; ip++) {
       index = ip + ib*mp;
-      CkPrintf ("position %lg %ld\n",xp[ip], 3*index);
       if (xp[ip] != 3*index) error_position++;
       if (yp[ip] != 4*index+1) error_position++;
       if (zp[ip] != 1*index+2) error_position++;

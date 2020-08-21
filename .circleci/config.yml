@@ -12,7 +12,7 @@ commands:
             echo 'export CHARM_ARGS=++local' >> $BASH_ENV
             echo 'export HDF5_INC=/usr/include/hdf5/serial' >> $BASH_ENV
             echo 'export HDF5_LIB=/usr/lib/x86_64-linux-gnu' >> $BASH_ENV
-            echo 'export CHARM_HOME=$HOME/local/charm-6.9.0' >> $BASH_ENV
+            echo 'export CHARM_HOME=$HOME/local/charm-v6.10.2' >> $BASH_ENV
             echo 'export GRACKLE_HOME=$HOME/local' >> $BASH_ENV
             # tag the tip so we can go back to it
             git tag tip
@@ -30,12 +30,12 @@ commands:
             sudo ln -s /usr/lib/x86_64-linux-gnu/libhdf5_serial.so /usr/lib/x86_64-linux-gnu/libhdf5.so
             # Install charm++
             mkdir -p $HOME/local
-            if [ ! -f $HOME/local/charm-6.9.0/bin/charmrun ]; then
+            if [ ! -f $HOME/local/charm-v6.10.2/bin/charmrun ]; then
               cd $HOME/local
-              wget http://charm.cs.illinois.edu/distrib/charm-6.9.0.tar.gz
-              tar xvfz charm-6.9.0.tar.gz
-              rm charm-6.9.0.tar.gz
-              cd charm-6.9.0
+              wget http://charm.cs.illinois.edu/distrib/charm-6.10.2.tar.gz
+              tar xvfz charm-6.10.2.tar.gz
+              rm charm-6.10.2.tar.gz
+              cd charm-v6.10.2
               ./build charm++ netlrts-linux-x86_64 -j4 --with-production
             fi
             # prepare testing dependencies

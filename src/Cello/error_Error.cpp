@@ -83,4 +83,5 @@ void t_()
     m2_(stderr,"EXIT","",0,"",symbols[i]);
   }
   CmiAbort("EXITING");
+  exit(1); 
 }

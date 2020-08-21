@@ -18,10 +18,8 @@ Import('lib_path')
 
 components = []
 
-components.append(['enzo','charm','simulation', 'data','problem', 'array',
-	      'compute',
-	      'control', 'mesh', 
-	      'io', 'disk','memory',
+components.append(['enzo','charm','simulation','problem', 'compute',
+	      'array', 'control', 'mesh', 'data', 'io', 'disk', 'memory', 
 	      'parameters', 
 	      'error', 'monitor', 'parallel','performance',
 	      'test','cello','external'])

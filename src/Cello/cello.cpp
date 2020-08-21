@@ -161,6 +161,10 @@ namespace cello {
     return epsilon;
   }
 
+  int digits_max(int precision)
+  { return (precision==precision_single)?7 :
+      ( (precision=precision_double) ? 16 : 34);
+  }
   //----------------------------------------------------------------------
 
   void backtrace(const char * msg)
@@ -197,28 +201,53 @@ namespace cello {
   //---------------------------------------------------------------------- 
   ScalarDescr * scalar_descr_double()
   {
-    return simulation() ?
-      simulation()->scalar_descr_double() : new ScalarDescr;
+    static ScalarDescr * scalar_descr_double_[CONFIG_NODE_SIZE] = {nullptr};
+    const int in = cello::index_static();
+    if (scalar_descr_double_[in] == nullptr) {
+      scalar_descr_double_[in] = simulation() ?
+        simulation()->scalar_descr_double() : new ScalarDescr;
+    }
+    return scalar_descr_double_[in];
   }
   ScalarDescr * scalar_descr_long_double()
   {
-    return simulation() ?
-      simulation()->scalar_descr_long_double() : new ScalarDescr;
+    static ScalarDescr * scalar_descr_long_double_[CONFIG_NODE_SIZE] = {nullptr};
+    const int in = cello::index_static();
+    if (scalar_descr_long_double_[in] == nullptr) {
+      scalar_descr_long_double_[in] = simulation() ?
+        simulation()->scalar_descr_long_double() : new ScalarDescr;
+    }
+    return scalar_descr_long_double_[in];
   }
   ScalarDescr * scalar_descr_int()
   {
-    return simulation() ?
-      simulation()->scalar_descr_int() : new ScalarDescr;
+    static ScalarDescr * scalar_descr_int_[CONFIG_NODE_SIZE] = {nullptr};
+    const int in = cello::index_static();
+    if (scalar_descr_int_[in] == nullptr) {
+      scalar_descr_int_[in] = simulation() ?
+        simulation()->scalar_descr_int() : new ScalarDescr;
+    }
+    return scalar_descr_int_[in];
   }
   ScalarDescr * scalar_descr_sync()
   {
-    return simulation() ?
-      simulation()->scalar_descr_sync() : new ScalarDescr;
+    static ScalarDescr * scalar_descr_sync_[CONFIG_NODE_SIZE] = {nullptr};
+    const int in = cello::index_static();
+    if (scalar_descr_sync_[in] == nullptr) {
+      scalar_descr_sync_[in] = simulation() ?
+        simulation()->scalar_descr_sync() : new ScalarDescr;
+    }
+    return scalar_descr_sync_[in];
   }
   ScalarDescr * scalar_descr_void()
   {
-    return simulation() ?
-      simulation()->scalar_descr_void() : new ScalarDescr;
+    static ScalarDescr * scalar_descr_void_[CONFIG_NODE_SIZE] = {nullptr};
+    const int in = cello::index_static();
+    if (scalar_descr_void_[in] == nullptr) {
+      scalar_descr_void_[in] = simulation() ?
+        simulation()->scalar_descr_void() : new ScalarDescr;
+    }
+    return scalar_descr_void_[in];
   }
   //---------------------------------------------------------------------- 
 
@@ -232,6 +261,13 @@ namespace cello {
   const Config * config()
   {
     return simulation() ? simulation()->config() : NULL;
+  }
+
+  //---------------------------------------------------------------------- 
+
+  const Parameters * parameters()
+  {
+    return simulation() ? simulation()->parameters() : NULL;
   }
 
   //---------------------------------------------------------------------- 
@@ -252,9 +288,20 @@ namespace cello {
 
   FieldDescr * field_descr()
   {
-    return simulation() ? simulation()->field_descr() : new FieldDescr;
+    static FieldDescr * field_descr_[CONFIG_NODE_SIZE] = {nullptr};
+    const int in = cello::index_static();
+    if (field_descr_[in] == nullptr) {
+      field_descr_[in] = simulation() ?
+        simulation()->field_descr() : new FieldDescr;
+    }
+    return field_descr_[in];
   }
 
+  //---------------------------------------------------------------------- 
+
+  Grouping * field_groups()
+  { return field_descr()->groups(); }
+    
   //---------------------------------------------------------------------- 
 
   Monitor * monitor()
@@ -266,9 +313,20 @@ namespace cello {
 
   ParticleDescr * particle_descr()
   {
-    return simulation() ? simulation()->particle_descr() : new ParticleDescr;
+    static ParticleDescr * particle_descr_[CONFIG_NODE_SIZE] = {nullptr};
+    const int in = cello::index_static();
+    if (particle_descr_[in] == nullptr) {
+      particle_descr_[in] = simulation() ?
+        simulation()->particle_descr() : new ParticleDescr;
+    }
+    return particle_descr_[in];
   }
 
+  //---------------------------------------------------------------------- 
+
+  Grouping * particle_groups()
+  { return particle_descr()->groups(); }
+    
   //---------------------------------------------------------------------- 
 
   Output * output(int index)
@@ -292,9 +350,16 @@ namespace cello {
 
   //----------------------------------------------------------------------
 
+  Refresh * refresh(int ir)
+  {
+    return simulation() ? &simulation()->new_refresh_list(ir) : NULL;
+  }
+
+  //----------------------------------------------------------------------
+
   int rank()
   {
-    return simulation() ? simulation()->rank() : 0;
+    return simulation() ? simulation()->rank() : 1;
   }
 
   //----------------------------------------------------------------------
@@ -304,6 +369,15 @@ namespace cello {
     int r = rank();
     return (r==1) ? 2 : ( (r==2) ? 4 : 8 );
   }
+  
+
+  //----------------------------------------------------------------------
+
+  size_t num_blocks_process()
+  {
+    return hierarchy() ? hierarchy()->num_blocks() : 0;
+  }
+  
   
 
 }

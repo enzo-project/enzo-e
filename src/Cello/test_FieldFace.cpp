@@ -10,6 +10,13 @@
 
 #include "data.hpp"
 
+typedef long double *field_0_type;
+typedef double *field_1_type;
+typedef float *field_2_type;
+
+#define precision_field_0 precision_quadruple
+#define precision_field_1 precision_double
+#define precision_field_2 precision_single
 //----------------------------------------------------------------------
 
 bool is_ghost(int ix,int iy,int iz,
@@ -185,17 +192,17 @@ void init_fields
 
 	// field 0
 	field_descr->ghost_depth(0, &gx, &gy, &gz);
-	float * v1 = (float *) (data->values(field_descr,0));
+	field_0_type v1 = (field_0_type) (data->values(field_descr,0));
 	init_field(v1,ibx,iby,ibz,nbx,nby,nbz,0,mx,my,mz,gx,gy,gz,ND3);
 
 	// field 1
 	field_descr->ghost_depth(1, &gx, &gy, &gz);
-	double * v2 = (double *) (data->values(field_descr,1));
+	field_1_type v2 = (field_1_type) (data->values(field_descr,1));
 	init_field(v2,ibx,iby,ibz,nbx,nby,nbz,1,mx,my,mz,gx,gy,gz,ND3);
 
 	// field 2
 	field_descr->ghost_depth(2, &gx, &gy, &gz);
-	long double * v3 = (long double *) (data->values(field_descr,2));
+	field_2_type v3 = (field_2_type) (data->values(field_descr,2));
 	init_field(v3,ibx,iby,ibz,nbx,nby,nbz,2,mx,my,mz,gx,gy,gz,ND3);
  
       }
@@ -230,7 +237,7 @@ bool test_fields
 
 	// field 0
 	field_descr->ghost_depth(0, &gx, &gy, &gz);
-	float * v1 = (float *) (data->values(field_descr,0));
+	field_0_type v1 = (field_0_type) (data->values(field_descr,0));
 	test_result = test_field(v1,ibx,iby,ibz,nbx,nby,nbz,0,
 				 mx,my,mz,gx,gy,gz,ND3);
 	unit_assert(test_result);
@@ -238,7 +245,7 @@ bool test_fields
 
 	// field 1
 	field_descr->ghost_depth(1, &gx, &gy, &gz);
-	double * v2 = (double *) (data->values(field_descr,1));
+	field_1_type v2 = (field_1_type) (data->values(field_descr,1));
 	test_result = test_field(v2,ibx,iby,ibz,nbx,nby,nbz,1,
 				 mx,my,mz,gx,gy,gz,ND3);
 	unit_assert(test_result);
@@ -246,7 +253,7 @@ bool test_fields
 
 	// field 2
 	field_descr->ghost_depth(2, &gx, &gy, &gz);
-	long double * v3 = (long double *) (data->values(field_descr,2));
+	field_2_type v3 = (field_2_type) (data->values(field_descr,2));
 	test_result = test_field(v3,ibx,iby,ibz,nbx,nby,nbz,2,
 				 mx,my,mz,gx,gy,gz,ND3);
 	unit_assert(test_result);
@@ -282,9 +289,9 @@ PARALLEL_MAIN_BEGIN
 
   // initialize field precisions
 
-  field_descr->set_precision(0, precision_single);
-  field_descr->set_precision(1, precision_double);
-  field_descr->set_precision(2, precision_quadruple);
+  field_descr->set_precision(0, precision_field_0);
+  field_descr->set_precision(1, precision_field_1);
+  field_descr->set_precision(2, precision_field_2);
 
   // initialize field ghost zone depths
 

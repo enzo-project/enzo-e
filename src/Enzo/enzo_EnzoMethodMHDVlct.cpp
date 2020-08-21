@@ -49,18 +49,19 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
 
   // Initialize the default Refresh object - May want to adjust
   // number of ghost zones based on reconstructor choice.
-  const int ir = add_refresh(4, 0, neighbor_leaf, sync_barrier,
-  			     enzo_sync_id_method_vlct);
+  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  Refresh * refresh = cello::refresh(ir_post_);
   // Add cell-centered fields holding actively advected integrable quantities
-  add_group_fields_to_refresh_(ir, *primitive_group_, integrable_group_names_);
+  add_group_fields_to_refresh_(refresh, *primitive_group_,
+                               integrable_group_names_);
   // Add cell-centered fields holding the conserved form of the passively
   // advected quantities
-  add_group_fields_to_refresh_(ir, *(field_descr->groups()),
+  add_group_fields_to_refresh_(refresh, *(field_descr->groups()),
 			       passive_group_names_);
 
-  refresh(ir)->add_field(field_descr->field_id("bfieldi_x"));
-  refresh(ir)->add_field(field_descr->field_id("bfieldi_y"));
-  refresh(ir)->add_field(field_descr->field_id("bfieldi_z"));
+  refresh->add_field(field_descr->field_id("bfieldi_x"));
+  refresh->add_field(field_descr->field_id("bfieldi_y"));
+  refresh->add_field(field_descr->field_id("bfieldi_z"));
 
   // Initialize the remaining component objects
   half_dt_recon_ = EnzoReconstructor::construct_reconstructor
@@ -239,7 +240,7 @@ void EnzoMethodMHDVlct::setup_groupings_
 //----------------------------------------------------------------------
 
 void EnzoMethodMHDVlct::add_group_fields_to_refresh_
-(const int ir, Grouping &grouping, std::vector<std::string> group_names)
+(Refresh * refresh, Grouping &grouping, std::vector<std::string> group_names)
 {
   FieldDescr * field_descr = cello::field_descr();
 
@@ -256,7 +257,7 @@ void EnzoMethodMHDVlct::add_group_fields_to_refresh_
 	      field_descr->is_permanent(field_name))
 
       // add the field to the refresh object
-      refresh(ir)->add_field(field_descr->field_id(field_name));
+      refresh->add_field(field_descr->field_id(field_name));
     }
   }
 }

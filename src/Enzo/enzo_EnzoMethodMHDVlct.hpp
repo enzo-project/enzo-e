@@ -169,7 +169,7 @@ protected: // methods
 
   /// Adds all of the fields in grouping (that belong to a group listed in
   /// group names) to the refresh object
-  void add_group_fields_to_refresh_(const int ir, Grouping &grouping,
+  void add_group_fields_to_refresh_(Refresh *refresh, Grouping &grouping,
 				    std::vector<std::string> group_names);
 
   /// Checks that the mesh size is big enough given the ghost depth and checks

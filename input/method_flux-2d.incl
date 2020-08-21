@@ -1,0 +1,31 @@
+include "input/method_flux.incl"
+
+Adapt {
+  mask {
+     value = [10.0, x>0.5 && y > 0.5, 0.0];
+  }
+  max_level = 2;
+}
+
+Domain {
+     lower = [ 0.000, 0.000 ];
+     upper = [ 1.000, 1.000 ];
+ }
+ Initial {
+     value {
+         density = [ 1.000, (x - 0.75)*(x - 0.75) + (y - 0.75)*(y - 0.75) < 0.02,
+                     0.125 ];
+         total_energy = [ 2.500,  (x - 0.75)*(x - 0.75) + (y - 0.75)*(y - 0.75) < 0.02,
+                          3.5 ];
+
+         velocity_x = 0.0;
+         velocity_y = 0.0;
+    }
+ }
+
+ Mesh {
+     root_rank = 2;
+     root_blocks = [ 2, 2 ];
+     root_size = [ 48, 48 ];
+ }
+

@@ -44,7 +44,7 @@ FieldData::FieldData
 FieldData::~FieldData() throw()
 {  
   deallocate_permanent();
-  for (int i=0; i<array_temporary_.size(); i++) {
+  for (size_t i=0; i<array_temporary_.size(); i++) {
     delete [] array_temporary_[i];
     array_temporary_[i] = NULL;
     temporary_size_[i] = 0;
@@ -134,7 +134,7 @@ char * FieldData::values
 (const FieldDescr * field_descr,
  int id_field, int index_history ) throw ()
 {
-  char * values = 0;
+  char * values = nullptr;
 
   if (id_field >= 0) {
 
