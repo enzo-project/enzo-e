@@ -670,13 +670,17 @@ template<class T> void FieldFace::copy_
   const T * vs, int ms3[3],int ns3[3],int is3[3],
   bool accumulate) throw()
 {
+  const int is0 = is3[0] + ms3[0]*(is3[1] + ms3[1]*is3[2]);
+  const int id0 = id3[0] + md3[0]*(id3[1] + md3[1]*id3[2]);
+  T * vd0 = vd + id0;
+  const T * vs0 = vs + is0;
   if (accumulate) {
     for (int iz=0; iz <ns3[2]; iz++)  {
       for (int iy=0; iy < ns3[1]; iy++) {
 	for (int ix=0; ix < ns3[0]; ix++) {
-	  int i_src = (ix+is3[0]) + ms3[0]*((iy+is3[1]) + ms3[1] * (iz+is3[2]));
-	  int i_dst = (ix+id3[0]) + md3[0]*((iy+id3[1]) + md3[1] * (iz+id3[2]));
-	  vd[i_dst] += vs[i_src];
+	  int i_src = ix + ms3[0]*(iy + ms3[1]*iz);
+	  int i_dst = ix + md3[0]*(iy + md3[1]*iz);
+	  vd0[i_dst] += vs0[i_src];
 	}
       }
     }
@@ -684,9 +688,9 @@ template<class T> void FieldFace::copy_
     for (int iz=0; iz <ns3[2]; iz++)  {
       for (int iy=0; iy < ns3[1]; iy++) {
 	for (int ix=0; ix < ns3[0]; ix++) {
-	  int i_src = (ix+is3[0]) + ms3[0]*((iy+is3[1]) + ms3[1] * (iz+is3[2]));
-	  int i_dst = (ix+id3[0]) + md3[0]*((iy+id3[1]) + md3[1] * (iz+id3[2]));
-	  vd[i_dst] = vs[i_src];
+	  int i_src = ix + ms3[0]*(iy + ms3[1]*iz);
+	  int i_dst = ix + md3[0]*(iy + md3[1]*iz);
+	  vd0[i_dst] = vs0[i_src];
 	}
       }
     }
