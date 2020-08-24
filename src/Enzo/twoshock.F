@@ -1,18 +1,13 @@
-c     See LICENSE_ENZO file for license and copyright information
-
 #include "fortran.h"
-
-/* #define DEBUG_PPM  */
-
-#define V_MAX 10000
+#define FORTRAN
 c=======================================================================
 c///////////////////////  SUBROUTINE TWOSHOCK  \\\\\\\\\\\\\\\\\\\\\\\\\
 
-      subroutine twoshock(
-     &           dls, drs, pls, prs, uls, urs, 
-     &           idim, jdim, i1, i2, j1, j2, dt, gamma, pmin, ipresfree,
-     &           pbar, ubar, gravity, grslice, idual, eta1
-     &                   )
+      subroutine twoshock (
+     &     dls, drs, pls, prs, uls, urs, 
+     &     idim, jdim, i1, i2, j1, j2, dt, gamma, pmin, ipresfree,
+     &     pbar, ubar, gravity, grslice, idual, eta1
+     &     )
 
 c  RIEMANN SOLVER USING TWO-SHOCK APPROXIMATION
 c
@@ -64,56 +59,51 @@ c    numiter - max number of Newton iterations to perform [8]
 c
 c-----------------------------------------------------------------------
       implicit NONE
+#include "fortran_types.h"
 c
-      integer ijkn
+      INTG_PREC ijkn
       parameter (ijkn=MAX_ANY_SINGLE_DIRECTION)
 c-----------------------------------------------------------------------
 c
 c  argument declarations
 c
-c     UNUSED only: eta1
-      integer gravity, i1, i2, idim, idual, ipresfree, j1, j2, jdim
-      ENZO_REAL dt, eta1, gamma, pmin
-      ENZO_REAL dls(idim,jdim),     drs(idim,jdim),    pbar(idim,jdim),
+      INTG_PREC gravity, i1, i2, idim, idual, ipresfree, j1, j2, jdim
+      R_PREC    dt, eta1, gamma, pmin
+      R_PREC    dls(idim,jdim),     drs(idim,jdim),    pbar(idim,jdim),
      &          pls(idim,jdim),     prs(idim,jdim),    ubar(idim,jdim),
      &          uls(idim,jdim),     urs(idim,jdim), grslice(idim,jdim)
 c
 c  local declarations
 c
-      integer i, j, n
-
-c  NOTE: mturk promotes the following declarations explicitly to real*8 in
-c  order to prevent overflows.  I do not do this here because it is not in 
-c  accordance with our general good programming practices.  However, if you
-c  are getting PPM over/underflow problems and are compiling with 32-bit 
-c  internal precision, it may be necessary to explicitly promote this to
-c  real*8.  [BWO v1_1_6]
-
-      ENZO_REAL cl(ijkn),    cr(ijkn), dpdul(ijkn), dpdur(ijkn),
+      INTG_PREC i, j, n
+      R_PREC     cl(ijkn),    cr(ijkn), dpdul(ijkn), dpdur(ijkn),
      &         ps(ijkn),    ubl(ijkn),   ubr(ijkn),
      &         qa      ,     zl(ijkn),    zr(ijkn)
 
-      integer mask(ijkn)
-      ENZO_REAL    old_ps(ijkn), delta_ps(ijkn)
+      INTG_PREC itok, jjj
+      INTG_PREC mask(ijkn), jfail(ijkn)
+      R_PREC    old_ps(ijkn), delta_ps(ijkn)
+      R_PREC    fails(ijkn)
 
 !     To reduce this to the old fixed iteration count method
 !     simply set tolerance = 1.0e-50
 
 !     Tolerance can be relaxed to reduce the cost of this routine
 
-      ENZO_REAL tolerance
-
-#ifdef CONFIG_PRECISION_SINGLE
-      parameter (tolerance = 1.0e-07)
+#ifdef CONFIG_BFLOAT_4
+      R_PREC tolerance
+      parameter (tolerance = 1.0e-7_RKIND)
 #endif
-#ifdef CONFIG_PRECISION_DOUBLE
-      parameter (tolerance = 1.0e-14)
+
+#ifdef CONFIG_BFLOAT_8
+      R_PREC tolerance
+      parameter (tolerance = 1.e-14_RKIND)
 #endif
 
 c
 c  parameters
 c
-      integer numiter
+      INTG_PREC numiter
       parameter( numiter = 8 )
 c
 c\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\//////////////////////////////////
@@ -123,7 +113,7 @@ c     write(6,*) 'TWOSHOCK: dt =',dt,'  idim =',idim,'  jdim=',jdim
 c     write(6,*) 'TWOSHOCK: i1 =',i1,'  i2   =',i2
 c     write(6,*) 'TWOSHOCK: j1 =',j1,'  j2   =',j2
 
-      qa = (gamma + 1.0)/(2.0*gamma)
+      qa = (gamma + 1._RKIND)/(2._RKIND*gamma)
 c
 c  Loop through this slice, doing 1 sweep at a time
 c
@@ -135,20 +125,10 @@ c
        if (ipresfree .eq. 1) then
         do i=i1, i2
            pbar(i,j) = pmin
-           ubar(i,j) = 0.5*(uls(i,j)+urs(i,j))
+           ubar(i,j) = 0.5_RKIND*(uls(i,j)+urs(i,j))
            pls(i,j)  = pmin
            prs(i,j)  = pmin
         enddo
-#ifdef DEBUG_PPM
-        do i=i1, i2
-            if (ubar(i,j).gt.V_MAX .or.
-     *          ubar(i,j).lt.-V_MAX) then
-               write (6,*) __LINE__,'DEBUG',i,j,'ubar',ubar(i,j)
-               write (6,*) 'uls(i,j) =',uls(i,j)
-               write (6,*) 'urs(i,j) =',urs(i,j)
-            endif
-         enddo
-#endif
 c
 c  Otherwise, solve Riemann problem
 c
@@ -164,9 +144,9 @@ c       if (gravity .eq. 1) then
           cl  (i) = sqrt(gamma*pls(i,j)*dls(i,j))
           cr  (i) = sqrt(gamma*prs(i,j)*drs(i,j))
           ps(i) = (cr(i)*pls(i,j) + cl(i)*prs(i,j)
-     &          +  cr(i)*cl(i)*(uls(i,j) - urs(i,j)
-     &                        + 0.5*dt*(grslice(i-1,j)-grslice(i,j)) 
-     &                                           ) )/(cr(i)+cl(i))
+     &         +  cr(i)*cl(i)*(uls(i,j) - urs(i,j)
+     &         + 0.5_RKIND*dt*(grslice(i-1,j)-grslice(i,j)) 
+     &         ) )/(cr(i)+cl(i))
 
 !               ^
 !               changed to + June 2003
@@ -175,17 +155,14 @@ c       if (gravity .eq. 1) then
         enddo
        else
         do i=i1,i2
-
-c     Changed order of operations to avoid overflow [BWO v1_1_6]
-
-          cl  (i) = sqrt(gamma*pls(i,j)) * sqrt(dls(i,j))
-          cr  (i) = sqrt(gamma*prs(i,j)) * sqrt(drs(i,j))
-
+          cl  (i) = sqrt(gamma*pls(i,j)*dls(i,j))
+          cr  (i) = sqrt(gamma*prs(i,j)*drs(i,j))
           ps(i) = (cr(i)*pls(i,j) + cl(i)*prs(i,j)
      &          +  cr(i)*cl(i)*(uls(i,j) - urs(i,j) 
      &                                           ) )/(cr(i)+cl(i))
-c               ^
-c               changed to + June 2003
+
+!               ^
+!               changed to + June 2003
 
             if (ps(i) .lt. pmin) ps(i) = pmin
 c          if (ps(i) .lt. pmin) ps(i) = min(pls(i,j),prs(i,j))
@@ -199,93 +176,55 @@ c    (there are some gravity changes in here but they have not really
 c     been worked out yet).
 c
 
-       do i=i1,i2
+        do i=i1,i2
           old_ps(i) = ps(i)
           delta_ps(i) = ps(i)
           mask(i) = 1
-       end do
+        end do
 
-       do n=2, numiter
+        do n=2, numiter
 
-                                !       zl, zr depend on ps only
-                                !       ubl, ubr depend on ps only
-                                !       dpdul, dpdur depend on ps only
+!       zl, zr depend on ps only
+!       ubl, ubr depend on ps only
+!       dpdul, dpdur depend on ps only
 
           do i=i1,i2
-             if ( mask(i) .gt. 0 ) then
-                zl (i) = cl(i)*sqrt((1.0+qa*(ps(i)/pls(i,j)-1.0)))
-                zr (i) = cr(i)*sqrt((1.0+qa*(ps(i)/prs(i,j)-1.0)))
-                ubl(i) = uls(i,j) - (ps(i)-pls(i,j))/zl(i)
-                ubr(i) = urs(i,j) + (ps(i)-prs(i,j))/zr(i)
-
-#ifdef DEBUG_PPM
-                if (ubl(i).gt.V_MAX .or. ubl(i) .lt. -V_MAX) then
-               write (6,*) __LINE__,i,j,'ubl',ubl(i)
-               write (6,*) 'uls(i,j) = ',uls(i,j)
-               write (6,*) 'pls(i,j) = ',pls(i,j)
-               write (6,*) 'ps(i) = ',ps(i)
-               write (6,*) 'zl(i) = ',zl(i)
-            endif
-            if (ubr(i).gt.V_MAX .or. ubr(i) .lt. -V_MAX) then
-               write (6,*) __LINE__,i,j,'ubr',ubr(i)
-               write (6,*) 'urs(i,j) = ',urs(i,j)
-               write (6,*) 'prs(i,j) = ',prs(i,j)
-               write (6,*) 'ps(i) = ',ps(i)
-               write (6,*) 'zr(i) = ',zr(i)
-            endif
-#endif
-             end if
+            if ( mask(i) .gt. 0 ) then
+            zl (i) = cl(i)*sqrt((1._RKIND+qa*(ps(i)/pls(i,j)-1._RKIND)))
+            zr (i) = cr(i)*sqrt((1._RKIND+qa*(ps(i)/prs(i,j)-1._RKIND)))
+            ubl(i) = uls(i,j) - (ps(i)-pls(i,j))/zl(i)
+            ubr(i) = urs(i,j) + (ps(i)-prs(i,j))/zr(i)
+            end if
           enddo
 
           do i=i1,i2
-             if ( mask(i) .gt. 0 ) then
-                dpdul(i) = ((-4.0*zl(i)/dls(i,j))*zl(i)**2)
-     &               /      ( 4.0*zl(i)*(zl(i)/dls(i,j))
-     &               -   (gamma+1.0)*(ps(i)-pls(i,j)))
-                dpdur(i) = (( 4.0*zr(i)/drs(i,j))*zr(i)**2)
-     &               /      ( 4.0*zr(i)*(zr(i)/drs(i,j))
-     &               -   (gamma+1.0)*(ps(i)-prs(i,j)))
-#ifdef DEBUG_PPM
-C            if (     abs(dpdul(i)+dpdur(i))/
-C     &               abs(dpdul(i)-dpdur(i)).ge.1e-5) then
-C               write (6,*) __FILE__
-C               write (6,*) __LINE__,i,j,'dpdul',dpdul(i)
-C               write (6,*) __LINE__,i,j,'dpdur',dpdur(i)
-C               write (6,*) 'zl(i) = ',zl(i)
-C               write (6,*) 'dls(i,j) = ',dls(i,j)
-C               write (6,*) 'pls(i) = ',pls(i,j)
-C               write (6,*) 'zr(i) = ',zr(i)
-C               write (6,*) 'drs(i,j) = ',drs(i,j)
-C               write (6,*) 'prs(i) = ',prs(i,j)
-C               write (6,*) 'ps(i) = ',ps(i)
-C            endif
-#endif
-                ps (i) = ps(i) + (ubr(i)-ubl(i))*(dpdur(i)*(dpdul(i)
-     &               /(dpdur(i)-dpdul(i))))
+            if ( mask(i) .gt. 0 ) then
+            dpdul(i) = -4._RKIND*zl(i)**3/dls(i,j)
+     &              /(4._RKIND*zl(i)**2/dls(i,j) 
+     &              - (gamma+1._RKIND)*(ps(i)-pls(i,j)))
+            dpdur(i) =  4._RKIND*zr(i)**3/drs(i,j)
+     &           /(4._RKIND*zr(i)**2/drs(i,j) 
+     &           - (gamma+1._RKIND)*(ps(i)-prs(i,j)))
+            ps (i) = ps(i) + (ubr(i)-ubl(i))*dpdur(i)*dpdul(i)
+     &                      /(dpdur(i)-dpdul(i))
+c            if (ps(i) .lt. pmin) ps(i) = min(pls(i,j),prs(i,j))
+            if (ps(i) .lt. pmin) ps(i) = pmin
 
-                if (dpdur(i).gt.1e30)then
-                   write(6,*) 'twoshock: dpdur:',zr(i),drs(i,j),
-     &                  ps(i),prs(i,j)
-                endif
-
-c     if (ps(i) .lt. pmin) ps(i) = min(pls(i,j),prs(i,j))
-
-                if (ps(i) .lt. pmin) ps(i) = pmin
-
-                delta_ps(i) = ps(i) - old_ps(i)
-                old_ps(i) = ps(i)
-                if ( abs(delta_ps(i) / ps(i)) .lt. tolerance ) then
-                   mask(i) = 0
-                end if
-             end if
+            delta_ps(i) = ps(i) - old_ps(i)
+            old_ps(i) = ps(i)
+            if ( abs(delta_ps(i) / ps(i)) .lt. tolerance ) then
+              mask(i) = 0
+            end if
+            end if
           enddo
-       enddo
+
+        enddo
 
 !       itok = 0
 
 !       do i=i1,i2
-!       if ( mask(i) .gt. 0 ) then
-!         if ( abs(delta_ps(i) / ps(i)) .gt. 10.0 * tolerance ) then
+!       if ( mask(i) > 0 ) then
+!         if ( abs(delta_ps(i) / ps(i)) > 10.0 * tolerance ) then
 !           itok = itok+1
 !         end if
 !       end if
@@ -296,7 +235,7 @@ c     if (ps(i) .lt. pmin) ps(i) = min(pls(i,j),prs(i,j))
 !       if ( itok /= 0 ) then
 !         write(0,'("Riemann failed ",i4," times")') itok
 !         do i=i1,i2
-!           if( mask(i) .gt. 0 ) then
+!           if( mask(i) > 0 ) then
 !             jjj = jjj + 1
 !             fails(jjj) = delta_ps(i) / ps(i)
 !             jfail(jjj) = i
@@ -313,16 +252,6 @@ c
           pbar(i,j) = ps(i)
           ubar(i,j) = ubl(i) + (ubr(i)-ubl(i))*dpdur(i)/
      &                         (dpdur(i)-dpdul(i))
-#ifdef DEBUG_PPM
-          if (ubar(i,j).gt.V_MAX .or.
-     *         ubar(i,j).lt.-V_MAX) then
-             write (6,*) __LINE__,i,j,'ubar',ubar(i,j)
-             write (6,*) 'ubl(i) = ',ubl(i)
-             write (6,*) 'ubr(i) = ',ubr(i)
-             write (6,*) 'dpdul(i) = ',dpdul(i)
-             write (6,*) 'dpdur(i) = ',dpdur(i)
-          endif
-#endif
         enddo
 c
 c  Dual energy formalism: if sound speed squared from pbar is less than 
@@ -333,8 +262,8 @@ c
            do i=i1, i2
               if (gamma*ps(i)/min(dls(i,j),drs(i,j)) .lt.
      &             eta1*ubar(i,j)**2) then
-                 pbar(i,j) = 0.5*(pls(i,j) + prs(i,j))
-                 ubar(i,j) = 0.5*(uls(i,j) + urs(i,j))
+                 pbar(i,j) = 0.5_RKIND*(pls(i,j) + prs(i,j))
+                 ubar(i,j) = 0.5_RKIND*(uls(i,j) + urs(i,j))
               endif
            enddo
         endif
