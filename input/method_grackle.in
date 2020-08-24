@@ -59,13 +59,13 @@
  }
 
  Group {
-   list = ["colour", "derived"];
+   list = ["color", "derived"];
    
    # fields that should be advected by hydro MUST be defined
-   # as colour here. This is handled automatically in 
+   # as color here. This is handled automatically in 
    # EnzoMethodGrackle for the Grackle-specific fields (species)
    # but not everything
-    colour {
+    color {
        field_list = [
               "HI_density",
               "HII_density",

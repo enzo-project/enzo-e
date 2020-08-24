@@ -4,7 +4,7 @@
 c=======================================================================
 c//////////////////////  SUBROUTINE FLUX_TWOSHOCK \\\\\\\\\\\\\\\\\\\\\\
 c
-      subroutine flux_twoshock_dev(
+      subroutine flux_twoshock(
      $     dslice, eslice, geslice, uslice, vslice, wslice, dx,
      $     diffcoef, idim, jdim, i1, i2, j1, j2, dt, gamma, idiff,
      $     idual, eta1, ifallback,
@@ -116,7 +116,7 @@ c             geb(i) = gers(i,j)
 c          write(24,*) i, u0(i), uls(i,j), urs(i,j), c0(i)
        enddo
 c
-c      Repeat for colour variables (now moved below)
+c      Repeat for color variables (now moved below)
 c
 #ifdef UNUSED
        do n=1,ncolor
@@ -254,7 +254,7 @@ c
           endif
        enddo
 c
-c      Repeat for colour variables
+c      Repeat for color variables
 c
        do n=1,ncolor
           do i=i1, i2+1
@@ -452,7 +452,7 @@ c     &        write (6,*) grslice(i-1,j), grslice(i,j), grslice(i+1,j)
                 write(0,*) 'Falling back to a more diffusive Riemann',
      $               'solver, HLL'
                 print*, 'WARNING_MESSAGE'
-                call flux_hll_dev(dslice, eslice, geslice, 
+                call flux_hll(dslice, eslice, geslice, 
      $               uslice, vslice, wslice,
      $               dx, diffcoef, idim, jdim, i, i, j, j, dt, gamma,
      $               idiff, idual, eta1, ifallback,

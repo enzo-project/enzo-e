@@ -6,8 +6,8 @@
 /// @brief    [\ref Data] Declaration of the Grouping class
 ///
 /// This class serves to define groups of Fields, Particles, etc. into
-/// named categories.  For example, one can define a "colour" group
-/// for fields, and add all colour fields to the "colour" grouping.  The
+/// named categories.  For example, one can define a "color" group
+/// for fields, and add all color fields to the "color" grouping.  The
 /// API supports adding groups, adding "items" (field names, particle
 /// set names, etc.) to groups, testing whether an item is included
 /// in a group, returning the size of the group, and returning an

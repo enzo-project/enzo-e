@@ -168,7 +168,10 @@ EnzoConfig::EnzoConfig() throw ()
 EnzoConfig::~EnzoConfig() throw ()
 {
 #ifdef CONFIG_USE_GRACKLE
-  delete method_grackle_chemistry;
+  if (method_grackle_chemistry){
+    delete[] method_grackle_chemistry->grackle_data_file;
+    delete method_grackle_chemistry;
+  }
 #endif // CONFIG_USE_GRACKLE
 }
 
@@ -328,28 +331,11 @@ void EnzoConfig::pup (PUP::er &p)
   p  | method_grackle_use_cooling_timestep;
   p  | method_grackle_radiation_redshift;
 
-  int is_null = (method_grackle_chemistry==NULL);
-  p | is_null;
-
-  if (is_null){
-    method_grackle_chemistry = NULL;
-  } else {
-
-    if (p.isUnpacking()) {
-      method_grackle_chemistry = new chemistry_data;
-      method_grackle_chemistry->use_grackle = method_grackle_use_grackle;
-
-      if(method_grackle_chemistry->use_grackle){
-        if (set_default_chemistry_parameters(method_grackle_chemistry) == ENZO_FAIL){
-          ERROR("EnzoMethodConfig::pup()",
-                "Error in Grackle set_default_chemistry_parameters");
-        }
-      }
-    }
-  }
-
   if (method_grackle_use_grackle){
+    if (p.isUnpacking()) { method_grackle_chemistry = new chemistry_data; }
     p | *method_grackle_chemistry;
+  } else {
+    method_grackle_chemistry = NULL;
   }
 
 #endif /* CONFIG_USE_GRACKLE */
@@ -808,17 +794,13 @@ void EnzoConfig::read(Parameters * p) throw()
   if (method_grackle_use_grackle) {
 
     method_grackle_chemistry = new chemistry_data;
-
-    if (set_default_chemistry_parameters(method_grackle_chemistry) == ENZO_FAIL) {
-      ERROR("EnzoMethodGrackle::EnzoMethodGrackle()",
-      "Error in set_default_chemistry_parameters");
-    }
+    *method_grackle_chemistry = _set_default_chemistry_parameters();
 
     /* this must be set AFTER default values are set */
     method_grackle_chemistry->use_grackle = method_grackle_use_grackle;
 
     // Copy over parameters from Enzo-P to Grackle
-    grackle_data->Gamma = field_gamma;
+    method_grackle_chemistry->Gamma = field_gamma;
 
     //
     method_grackle_use_cooling_timestep = p->value_logical
@@ -829,118 +811,125 @@ void EnzoConfig::read(Parameters * p) throw()
       ("Method:grackle:radiation_redshift", -1.0);
 
     // Set Grackle parameters from parameter file
-    grackle_data->with_radiative_cooling = p->value_integer
+    method_grackle_chemistry->with_radiative_cooling = p->value_integer
       ("Method:grackle:with_radiative_cooling",
-        grackle_data->with_radiative_cooling);
+        method_grackle_chemistry->with_radiative_cooling);
 
-    grackle_data->primordial_chemistry = p->value_integer
+    method_grackle_chemistry->primordial_chemistry = p->value_integer
       ("Method:grackle:primordial_chemistry",
-        grackle_data->primordial_chemistry);
+        method_grackle_chemistry->primordial_chemistry);
 
-    grackle_data->metal_cooling = p->value_integer
+    method_grackle_chemistry->metal_cooling = p->value_integer
       ("Method:grackle:metal_cooling",
-        grackle_data->metal_cooling);
+        method_grackle_chemistry->metal_cooling);
 
-    grackle_data->h2_on_dust = p->value_integer
+    method_grackle_chemistry->h2_on_dust = p->value_integer
       ("Method:grackle:h2_on_dust",
-        grackle_data->h2_on_dust);
+        method_grackle_chemistry->h2_on_dust);
 
-    grackle_data->three_body_rate = p->value_integer
+    method_grackle_chemistry->three_body_rate = p->value_integer
       ("Method:grackle:three_body_rate",
-        grackle_data->three_body_rate);
+        method_grackle_chemistry->three_body_rate);
 
-    grackle_data->cmb_temperature_floor = p->value_integer
+    method_grackle_chemistry->cmb_temperature_floor = p->value_integer
       ("Method:grackle:cmb_temperature_floor",
-        grackle_data->cmb_temperature_floor);
+        method_grackle_chemistry->cmb_temperature_floor);
 
-    grackle_data->grackle_data_file = strdup(p->value_string
-      ("Method:grackle:data_file",
-        grackle_data->grackle_data_file).c_str());
+    std::string grackle_data_file_ = p->value_string
+      ("Method:grackle:data_file", "");
+    ASSERT("EnzoConfig::read",
+	   "no value specified for \"Method:grackle:data_file\"",
+	   grackle_data_file_.length() > 0);
 
-    grackle_data->cie_cooling = p->value_integer
+    method_grackle_chemistry->grackle_data_file
+      = new char[grackle_data_file_.length() + 1];
+    strcpy(method_grackle_chemistry->grackle_data_file,
+	   grackle_data_file_.c_str());
+
+    method_grackle_chemistry->cie_cooling = p->value_integer
       ("Method:grackle:cie_cooling",
-        grackle_data->cie_cooling);
+        method_grackle_chemistry->cie_cooling);
 
-    grackle_data->h2_optical_depth_approximation = p->value_integer
+    method_grackle_chemistry->h2_optical_depth_approximation = p->value_integer
       ("Method:grackle:h2_optical_depth_approximation",
-        grackle_data->h2_optical_depth_approximation);
+        method_grackle_chemistry->h2_optical_depth_approximation);
 
-    grackle_data->photoelectric_heating = p->value_integer
+    method_grackle_chemistry->photoelectric_heating = p->value_integer
       ("Method:grackle:photoelectric_heating",
-        grackle_data->photoelectric_heating);
+        method_grackle_chemistry->photoelectric_heating);
 
-    grackle_data->photoelectric_heating_rate = p->value_float
+    method_grackle_chemistry->photoelectric_heating_rate = p->value_float
       ("Method:grackle:photoelectric_heating_rate",
-        grackle_data->photoelectric_heating_rate);
+        method_grackle_chemistry->photoelectric_heating_rate);
 
-    grackle_data->CaseBRecombination = p->value_integer
+    method_grackle_chemistry->CaseBRecombination = p->value_integer
       ("Method:grackle:CaseBRecombination",
-       grackle_data->CaseBRecombination);
+       method_grackle_chemistry->CaseBRecombination);
 
-    grackle_data->UVbackground = p->value_integer
+    method_grackle_chemistry->UVbackground = p->value_integer
       ("Method:grackle:UVbackground",
-        grackle_data->UVbackground);
+        method_grackle_chemistry->UVbackground);
 
-    grackle_data->use_volumetric_heating_rate = p->value_integer
+    method_grackle_chemistry->use_volumetric_heating_rate = p->value_integer
       ("Method:grackle:use_volumetric_heating_rate",
-      grackle_data->use_volumetric_heating_rate);
+      method_grackle_chemistry->use_volumetric_heating_rate);
 
-    grackle_data->use_specific_heating_rate = p->value_integer
+    method_grackle_chemistry->use_specific_heating_rate = p->value_integer
       ("Method:grackle:use_specific_heating_rate",
-       grackle_data->use_specific_heating_rate);
+       method_grackle_chemistry->use_specific_heating_rate);
 
-    grackle_data->self_shielding_method = p->value_integer
+    method_grackle_chemistry->self_shielding_method = p->value_integer
       ("Method:grackle:self_shielding_method",
-       grackle_data->self_shielding_method);
+       method_grackle_chemistry->self_shielding_method);
 
-    grackle_data->H2_self_shielding = p->value_integer
+    method_grackle_chemistry->H2_self_shielding = p->value_integer
       ("Method:grackle:H2_self_shielding",
-       grackle_data->H2_self_shielding);
+       method_grackle_chemistry->H2_self_shielding);
 
-    grackle_data->HydrogenFractionByMass = p->value_float
+    method_grackle_chemistry->HydrogenFractionByMass = p->value_float
       ("Method:grackle:HydrogenFractionByMass",
-        grackle_data->HydrogenFractionByMass);
+        method_grackle_chemistry->HydrogenFractionByMass);
 
-    grackle_data->DeuteriumToHydrogenRatio = p->value_float
+    method_grackle_chemistry->DeuteriumToHydrogenRatio = p->value_float
       ("Method:grackle:DeuteriumToHydrogenRatio",
-       grackle_data->DeuteriumToHydrogenRatio);
+       method_grackle_chemistry->DeuteriumToHydrogenRatio);
 
-    grackle_data->SolarMetalFractionByMass = p->value_float
+    method_grackle_chemistry->SolarMetalFractionByMass = p->value_float
       ("Method:grackle:SolarMetalFractionByMass",
-       grackle_data->SolarMetalFractionByMass);
+       method_grackle_chemistry->SolarMetalFractionByMass);
 
-    grackle_data->Compton_xray_heating = p->value_integer
+    method_grackle_chemistry->Compton_xray_heating = p->value_integer
       ("Method:grackle:Compton_xray_heating",
-       grackle_data->Compton_xray_heating);
+       method_grackle_chemistry->Compton_xray_heating);
 
-    grackle_data->LWbackground_sawtooth_suppression = p->value_integer
+    method_grackle_chemistry->LWbackground_sawtooth_suppression = p->value_integer
       ("Method:grackle:LWbackground_sawtooth_suppression",
-       grackle_data->LWbackground_sawtooth_suppression);
+       method_grackle_chemistry->LWbackground_sawtooth_suppression);
 
-    grackle_data->LWbackground_intensity = p->value_float
+    method_grackle_chemistry->LWbackground_intensity = p->value_float
       ("Method:grackle:LWbackground_intensity",
-       grackle_data->LWbackground_intensity);
+       method_grackle_chemistry->LWbackground_intensity);
 
-    grackle_data->UVbackground_redshift_on = p->value_float
+    method_grackle_chemistry->UVbackground_redshift_on = p->value_float
       ("Method:grackle:UVbackground_redshift_on",
-       grackle_data->UVbackground_redshift_on);
+       method_grackle_chemistry->UVbackground_redshift_on);
 
-    grackle_data->UVbackground_redshift_off = p->value_float
+    method_grackle_chemistry->UVbackground_redshift_off = p->value_float
       ("Method:grackle:UVbackground_redshift_off",
-       grackle_data->UVbackground_redshift_off);
+       method_grackle_chemistry->UVbackground_redshift_off);
 
-    grackle_data->UVbackground_redshift_fullon = p->value_float
+    method_grackle_chemistry->UVbackground_redshift_fullon = p->value_float
       ("Method:grackle:UVbackground_redshift_fullon",
-        grackle_data->UVbackground_redshift_fullon);
+        method_grackle_chemistry->UVbackground_redshift_fullon);
 
-    grackle_data->UVbackground_redshift_drop = p->value_float
+    method_grackle_chemistry->UVbackground_redshift_drop = p->value_float
      ("Method:grackle:UVbackground_redshift_drop",
-      grackle_data->UVbackground_redshift_drop);
+      method_grackle_chemistry->UVbackground_redshift_drop);
 
     // When radiative transfer is eventually included, make
     // sure to set the below parameter to match the Enzo-P
     // parameter for turning RT on / off:
-    //   grackle_data->use_radiative_transfer = ENZO_P_PARAMETER_NAME;
+    //   method_grackle_chemistry->use_radiative_transfer = ENZO_P_PARAMETER_NAME;
 
   }
 #endif /* CONFIG_USE_GRACKLE */

@@ -1,21 +1,19 @@
-c     See LICENSE_ENZO file for license and copyright information
-
 #include "fortran.h"
-
-C #define DEBUG_PPM
-
+#define FORTRAN
 c=======================================================================
 c///////////////////////  SUBROUTINE INTEULER  \\\\\\\\\\\\\\\\\\\\\\\\\
 c
       subroutine inteuler(
-     &            dslice, pslice, gravity, grslice, geslice,
-     &            uslice, vslice, wslice, dxi, flatten,
-     &            idim, jdim, i1, i2, j1, j2, idual, eta1, eta2,
-     &            isteep, iflatten, dt, gamma, ipresfree,
-     &            dls, drs, pls, prs, gels, gers,
-     &            uls, urs, vls, vrs, wls, wrs,
-     &            ncolor, colslice, colls, colrs
-     &                    )
+     &     dslice, pslice, gravity, grslice, geslice,
+     &     uslice, vslice, wslice, dxi, flatten,
+     &     idim, jdim, i1, i2, j1, j2, idual, eta1, eta2,
+     &     isteep, iflatten,
+     &     iconsrec, iposrec,
+     &     dt, gamma, ipresfree,
+     &     dls, drs, pls, prs, gels, gers,
+     &     uls, urs, vls, vrs, wls, wrs,
+     &     ncolor, colslice, colls, colrs
+     &     )
 c
 c  COMPUTES LEFT AND RIGHT EULERIAN INTERFACE VALUES FOR RIEMANN SOLVER
 c
@@ -44,8 +42,9 @@ c    grslice - acceleration in this direction in this slice
 c    i1,i2  - starting and ending addresses for dimension 1
 c    idim   - declared leading dimension of slices
 c    idual  - dual energy formalism flag (0 = off)
-c    iflatten - integer flag for flattener (eq. A1, A2) (0 = off)
-c    isteep - integer flag for steepener (eq. 1.14,1.17,3.2) (0 = off)
+c    iflatten - INTG_PREC flag for flattener (eq. A1, A2) (0 = off)
+c    iconsrec - INTG_PREC flag for conservative reconstruction (0 = off)
+c    isteep - INTG_PREC flag for steepener (eq. 1.14,1.17,3.2) (0 = off)
 c    ipresfree - pressure free flag (0 = off, 1 = on, i.e. p=0)
 c    j1,j2  - starting and ending addresses for dimension 2
 c    jdim   - declared second dimension of slices
@@ -71,84 +70,205 @@ c
 c-----------------------------------------------------------------------
 c
       implicit NONE
+#include "fortran_types.h"
 c
-      integer ijkn
+      INTG_PREC ijkn
       parameter (ijkn=MAX_ANY_SINGLE_DIRECTION)
 c
 c-----------------------------------------------------------------------
 c
 c  argument declarations
 c
-c     NOT ACCESSED: eta1
-      integer gravity, i1, i2, idim, idual, iflatten, ipresfree, isteep,
-     &        j1, j2, jdim, ncolor
-      ENZO_REAL dt, eta1, eta2, gamma
-      ENZO_REAL dslice(idim,jdim),     dxi,  pslice(idim,jdim),
-     &       uslice(idim,jdim),  vslice(idim,jdim),  wslice(idim,jdim),
-     &      grslice(idim,jdim), geslice(idim,jdim)
-      ENZO_REAL
-     &          dls(idim,jdim),     drs(idim,jdim), flatten(idim,jdim),
-     &          pls(idim,jdim),
-     &          prs(idim,jdim),    gels(idim,jdim),    gers(idim,jdim),
-     &          uls(idim,jdim),     urs(idim,jdim),     vls(idim,jdim),
-     &          vrs(idim,jdim),     wls(idim,jdim),     wrs(idim,jdim)
-      ENZO_REAL colslice(idim,jdim,ncolor),   colls(idim,jdim,ncolor),
+      INTG_PREC gravity, i1, i2, idim, idual, iflatten, ipresfree, 
+     &        isteep, j1, j2, jdim, ncolor, iconsrec, iposrec
+      R_PREC  dt, eta1, eta2, gamma
+      R_PREC  dslice(idim,jdim),     dxi(idim     ),  pslice(idim,jdim),
+     &        uslice(idim,jdim),  vslice(idim,jdim),  wslice(idim,jdim),
+     &        grslice(idim,jdim), geslice(idim,jdim)
+      R_PREC  dls(idim,jdim),     drs(idim,jdim), flatten(idim,jdim),
+     &        pls(idim,jdim),
+     &        prs(idim,jdim),    gels(idim,jdim),    gers(idim,jdim),
+     &        uls(idim,jdim),     urs(idim,jdim),     vls(idim,jdim),
+     &        vrs(idim,jdim),     wls(idim,jdim),     wrs(idim,jdim)
+      R_PREC  colslice(idim,jdim,ncolor),   colls(idim,jdim,ncolor),
      &        colrs(idim,jdim,ncolor)
 c
 c  local declarations
 c
-      integer iii,jjj
-      integer i, j, ic
-      ENZO_REAL steepen(ijkn),
-     &     tmp1(ijkn),tmp2(ijkn),tmp3(ijkn),tmp4(ijkn)
-      ENZO_REAL qa,qb,qc,qd,s1,s2      
-      ENZO_REAL  c1, c2, c3, c4, c5, c6
+      INTG_PREC i, j, k, n, m, ic,jj
+      R_PREC steepen(ijkn),tmp1(ijkn),tmp2(ijkn),tmp3(ijkn),tmp4(ijkn)
+      R_PREC qa,qb,qc,qd,qe,s1,s2,f1
+      R_PREC  c1(ijkn), c2(ijkn), c3(ijkn), c4(ijkn), c5(ijkn), c6(ijkn)
+     &    ,c7(ijkn), c8(ijkn)
+     &    ,dd(ijkn),dl(ijkn),dr(ijkn),d6(ijkn)
      &    ,dp(ijkn),pl(ijkn),pr(ijkn),p6(ijkn)
      &    ,du(ijkn),ul(ijkn),ur(ijkn),u6(ijkn)
+     &    ,dv(ijkn),vl(ijkn),vr(ijkn),v6(ijkn)
+     &    ,dw(ijkn),wl(ijkn),wr(ijkn),w6(ijkn)
+     &    ,dge(ijkn),gel(ijkn),ger(ijkn),ge6(ijkn)
      &    ,dla(ijkn),dra(ijkn),pla(ijkn),pra(ijkn),ula(ijkn),ura(ijkn)
      &    ,vla(ijkn),vra(ijkn),wla(ijkn),wra(ijkn)
      &    ,plm(ijkn),prm(ijkn),ulm(ijkn),urm(ijkn)
      &    ,dl0(ijkn),dr0(ijkn),pl0(ijkn),pr0(ijkn)
      &    ,plp(ijkn),prp(ijkn),ulp(ijkn),urp(ijkn),ul0(ijkn),ur0(ijkn)
      &    ,vl0(ijkn),vr0(ijkn),wl0(ijkn),wr0(ijkn)
-     &    , cs(ijkn),d2d(ijkn),dxb(ijkn)
+     &    , cs(ijkn),d2d(ijkn),dxb(ijkn), dx2i(ijkn)
      &    , cm(ijkn), c0(ijkn), cp(ijkn),char1(ijkn),char2(ijkn)
      &    ,betalp(ijkn),betalm(ijkn),betal0(ijkn),cla(ijkn)
      &    ,betarp(ijkn),betarm(ijkn),betar0(ijkn),cra(ijkn)
      &    ,gela(ijkn),gera(ijkn),gel0(ijkn),ger0(ijkn)
      &    ,colla(ijkn,MAX_COLOR),colra(ijkn,MAX_COLOR)
-     &     ,coll0(ijkn,MAX_COLOR),colr0(ijkn,MAX_COLOR)
-c     
-c     parameters
-c     
-      ENZO_REAL ft
-      parameter(ft = 4.0/3.0)
-c     
+     &    ,coll0(ijkn,MAX_COLOR),colr0(ijkn,MAX_COLOR)
+     &    ,dcol(ijkn,MAX_COLOR),coll(ijkn,MAX_COLOR)
+     &    ,colr(ijkn,MAX_COLOR),col6(ijkn,MAX_COLOR)
+      R_PREC lem(idim,5,5),rem(idim,5,5), dxdt2(ijkn),TEMP(ijkn)
+      double precision sum
+c
+c  parameters
+c
+      R_PREC ft
+      parameter(ft = 4._RKIND/3._RKIND)
+c
 c\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\/////////////////////////////////////
 c=======================================================================
-c     
+c
 c     write(6,*) 'INTEULER: dt =',dt,' isteep =',isteep
 c     write(6,*) 'INTEULER: iflatten =',iflatten
 c     write(6,*) 'INTEULER: idim =',idim,' jdim =',jdim
 c     write(6,*) 'INTEULER: i1   =',i1,  ' i2   =',i2
 c     write(6,*) 'INTEULER: j1   =',j1,  ' j2   =',j2
-c     
+c
 c     Compute coefficients used in interpolation formulae (from eq. 1.6)
-c     
+c
+C      do i=1,ijkn
+C         steepen(i)=0.0D0
+C         tmp1(i)=0.0D0
+C         tmp2(i)=0.0D0
+C         tmp3(i)=0.0D0
+C         tmp4(i)=0.0D0
+C         c1(i)=0.0D0
+C         c2(i)=0.0D0
+C         c3(i)=0.0D0
+C         c4(i)=0.0D0
+C         c5(i)=0.0D0
+C         c6(i)=0.0D0
+C         c7(i)=0.0D0
+C         c8(i)=0.0D0
+C         dd(i)=0.0D0
+C         dl(i)=0.0D0
+C         dr(i)=0.0D0
+C         d6(i)=0.0D0
+C         dp(i)=0.0D0
+C         pl(i)=0.0D0
+C         pr(i)=0.0D0
+C         p6(i)=0.0D0
+C         du(i)=0.0D0
+C         ul(i)=0.0D0
+C         ur(i)=0.0D0
+C         u6(i)=0.0D0
+C         dv(i)=0.0D0
+C         vl(i)=0.0D0
+C         vr(i)=0.0D0
+C         v6(i)=0.0D0
+C         dw(i)=0.0D0
+C         wl(i)=0.0D0
+C         wr(i)=0.0D0
+C         w6(i)=0.0D0
+C         dge(i)=0.0D0
+C         gel(i)=0.0D0
+C         ger(i)=0.0D0
+C         ge6(i)=0.0D0
+C         dla(i)=0.0D0
+C         dra(i)=0.0D0
+C         pla(i)=0.0D0
+C         pra(i)=0.0D0
+C         ula(i)=0.0D0
+C         ura(i)=0.0D0
+C         vla(i)=0.0D0
+C         vra(i)=0.0D0
+C         wla(i)=0.0D0
+C         wra(i)=0.0D0
+C         plm(i)=0.0D0
+C         prm(i)=0.0D0
+C         ulm(i)=0.0D0
+C         urm(i)=0.0D0
+C         dl0(i)=0.0D0
+C         dr0(i)=0.0D0
+C         pl0(i)=0.0D0
+C         pr0(i)=0.0D0
+C         plp(i)=0.0D0
+C         prp(i)=0.0D0
+C         ulp(i)=0.0D0
+C         urp(i)=0.0D0
+C         ul0(i)=0.0D0
+C         ur0(i)=0.0D0
+C         vl0(i)=0.0D0
+C         vr0(i)=0.0D0
+C         wl0(i)=0.0D0
+C         wr0(i)=0.0D0
+C         cs(i)=0.0D0
+C         d2d(i)=0.0D0
+C         dxb(i)=0.0D0
+C         dx2i(i)=0.0D0
+C         cm(i)=0.0D0
+C         c0(i)=0.0D0
+C         cp(i)=0.0D0
+C         char1(i)=0.0D0
+C         char2(i)=0.0D0
+C         betalp(i)=0.0D0
+C         betalm(i)=0.0D0
+C         betal0(i)=0.0D0
+C         cla(i)=0.0D0
+C         betarp(i)=0.0D0
+C         betarm(i)=0.0D0
+C         betar0(i)=0.0D0
+C         cra(i)=0.0D0
+C         gela(i)=0.0D0
+C         gera(i)=0.0D0
+C         gel0(i)=0.0D0
+C         ger0(i)=0.0D0
+C         TEMP(i)=0.0D0
+C         do j=1,MAX_COLOR
+C            colla(i,j)=0.0D0
+C            colra(i,j)=0.0D0
+C            coll0(i,j)=0.0D0
+C            colr0(i,j)=0.0D0
+C            dcol(i,j)=0.0D0
+C            coll(i,j)=0.0D0
+C            colr(i,j)=0.0D0
+C            col6(i,j)=0.0D0
+C         end do
+C      end do
+C
+C      do i=1,idim
+C         do j=1,5
+C            do k=1,5
+C               lem(i,j,k)=0.0D0
+C               rem(i,j,k)=0.0D0
+C               dxdt2(i)=0.0D0
+C            end do
+C         end do
+C      end do
 
-      qa    = dxi/(dxi + dxi + dxi)
-      c1 = qa*(2.0*dxi + dxi)/(dxi + dxi)
-      c2 = qa*(2.0*dxi + dxi)/(dxi + dxi)
-c     
-      qa    = dxi + dxi + dxi + dxi
-      qb    = dxi/(dxi + dxi)
-      qc    = (dxi + dxi)/(2.0*dxi + dxi)
-      qd    = (dxi + dxi)/(2.0*dxi + dxi)
-      qb    = qb + 2.0*dxi*qb/qa*(qc-qd)
-      c3 = 1.0 - qb
-      c4 = qb
-      c5 =  dxi/qa*qd
-      c6 = -dxi/qa*qc
+      do i=i1-2,i2+2
+         qa    = dxi(i)/(dxi(i-1) + dxi(i) + dxi(i+1))
+         c1(i) = qa*(2._RKIND*dxi(i-1) + dxi(i))/(dxi(i+1) + dxi(i))
+         c2(i) = qa*(2._RKIND*dxi(i+1) + dxi(i))/(dxi(i-1) + dxi(i))
+         dxdt2(i) = 0.5_RKIND*dt/dxi(i)
+      enddo
+c
+      do i=i1-1,i2+2
+         qa    = dxi(i-2) + dxi(i-1) + dxi(i) + dxi(i+1)
+         qb    = dxi(i-1)/(dxi(i-1) + dxi(i))
+         qc    = (dxi(i-2) + dxi(i-1))/(2._RKIND*dxi(i-1) + dxi(i  ))
+         qd    = (dxi(i+1) + dxi(i  ))/(2._RKIND*dxi(i  ) + dxi(i-1))
+         qb    = qb + 2._RKIND*dxi(i)*qb/qa*(qc-qd)
+         c3(i) = 1._RKIND - qb
+         c4(i) = qb
+         c5(i) =  dxi(i  )/qa*qd
+         c6(i) = -dxi(i-1)/qa*qc
+         dx2i(i) = 0.5_RKIND/dxi(i)
+      enddo
 c
 c    Loop over sweep lines (in this slice)
 c
@@ -158,98 +278,129 @@ c     Precompute steepening coefficients if needed (eqns 1.14-1.17, plus 3.2)
 c
       if (isteep .ne. 0) then
          do i=i1-2,i2+2
-            qa     = dxi + dxi + dxi
-            d2d(i) = (dslice(i+1,j) - dslice(i,j))/(dxi + dxi)
+            qa     = dxi(i-1) + dxi(i) + dxi(i+1)
+            d2d(i) = (dslice(i+1,j) - dslice(i,j))/(dxi(i+1) + dxi(i))
             d2d(i) = (d2d(i) - (dslice(i,j)-dslice(i-1,j))
-     &               /(dxi+dxi))/qa
-            dxb(i) = 0.5*(dxi + dxi)
+     &               /(dxi(i)+dxi(i-1)))/qa
+            dxb(i) = 0.5_RKIND*(dxi(i) + dxi(i+1))
          enddo
          do i=i1-1,i2+1
             qc = abs(dslice(i+1,j) - dslice(i-1,j))
-     &           - 0.01*min(abs(dslice(i+1,j)),abs(dslice(i-1,j)))
+     &           - 0.01_RKIND*min(abs(dslice(i+1,j)),abs(dslice(i-1,j)))
             s1 = (d2d(i-1) - d2d(i+1))*(dxb(i-1)**3 + dxb(i)**3)
      &           /((dxb(i) + dxb(i-1))*
      &           (dslice(i+1,j) - dslice(i-1,j) + tiny))
-            if (d2d(i+1)*d2d(i-1) .gt. 0.0) s1 = 0.0
-            if (qc .le. 0.0) s1 = 0.0
-            s2 = max(0.0, min(20.0*(s1-0.05), 1.0))
+            if (d2d(i+1)*d2d(i-1) .gt. 0._RKIND) s1 = 0._RKIND
+            if (qc .le. 0._RKIND) s1 = 0._RKIND
+            s2 = max(0._RKIND, min(20._RKIND*(s1-0.05_RKIND), 1._RKIND))
             qa = abs(dslice(i+1,j) - dslice(i-1,j))/
      &           min(dslice(i+1,j),  dslice(i-1,j))
             qb = abs(pslice(i+1,j) - pslice(i-1,j))/
      &           min(pslice(i+1,j),  pslice(i-1,j))
-            if (gamma*0.1*qa .ge. qb) then
+            if (gamma*0.1_RKIND*qa .ge. qb) then
                steepen(i) = s2
             else
-               steepen(i) = 0.0
+               steepen(i) = 0._RKIND
             endif
          enddo
       endif
 c
 c     Precompute left and right characteristic distances
 c
-      do i=i1-1,i2+1
+      do i=1,idim
          cs(i) = sqrt(gamma*pslice(i,j)/dslice(i,j))
          if (ipresfree .eq. 1) cs(i) = tiny
-         char1(i) = max(0.0, dt*(uslice(i,j)+cs(i)))/(2.0*dxi)
-         char2(i) = max(0.0,-dt*(uslice(i,j)-cs(i)))/(2.0*dxi)
-#ifdef DEBUG_PPM
-         if (abs(char1(i)-1.0e-2)/1.0e-2 .gt. 1e-5) then
-            write (6,*) __FILE__
-            write (6,*) __LINE__,i,'char1(i) = ',char1(i)
-            write (6,*) 'dt = ',dt
-            write (6,*) 'uslice(i,j) = ',uslice(i,j)
-            write (6,*) 'cs(i) = ',cs(i)
-            write (6,*) 'dxi = ',dxi
-         endif
-#endif
+         char1(i) = max(0._RKIND, dt*(uslice(i,j)+cs(i)))*dx2i(i)
+         char2(i) = max(0._RKIND,-dt*(uslice(i,j)-cs(i)))*dx2i(i)
       enddo
 c
-c Brought dt and dx terms here to avoid possible overflows [BWO v1_1_6]
-c
-      do i=i1-1,i2+1
-         cm(i) = (uslice(i,j)-cs(i))*(dt/(2.0*dxi))
-         c0(i) = (uslice(i,j)      )*(dt/(2.0*dxi))
-         cp(i) = (uslice(i,j)+cs(i))*(dt/(2.0*dxi))
+      do i=i1-2,i2+2
+        cm(i) = dt*(uslice(i,j)-cs(i))*dx2i(i)
+        c0(i) = dt*(uslice(i,j)      )*dx2i(i)
+C        print*, 'DEBUG_C0 c0 ',i,c0(i)
+C        print*, 'DEBUG_C0 dt ',i,dt
+C        print*, 'DEBUG_C0 us ',i,uslice(i,j)
+C        print*, 'DEBUG_C0 dx ',i,dx2i(i)
+        cp(i) = dt*(uslice(i,j)+cs(i))*dx2i(i)
       enddo
+c
+c     Compute the left and right eigenmatrices in order to calculate the
+c     differences in the characteristic variables.  This causes the
+c     reconstruction to be total variation diminishing (TVD; LeVeque
+c     2002).
+c
+      if (iconsrec .eq. 1) then
+
+         call calc_eigen(dslice(1,j), cs, i1, i2, idim, lem, rem)
 c
 c     Compute left and right states for each variable
 c       (steepening, if requested, is only applied to density)
 c
-      call intvar(dslice(1,j), idim, i1, i2, isteep, steepen, iflatten, 
-     &            flatten, c1, c2, c3, c4, c5, c6, char1, char2, c0,
-     &            tmp1, tmp2, tmp3, tmp4, dla, dra, dl0, dr0)
+ 
+         call intprim(dslice(1,j), uslice(1,j), vslice(1,j), 
+     &        wslice(1,j), pslice(1,j), 
+     &        idim, i1, i2, isteep, steepen, iflatten, flatten, 
+     &        iposrec, c1, c2, c3, c4, c5, c6, char1, char2, c0,
+     &        tmp1, tmp2, tmp3, tmp4, dla, dra, dl0, dr0, 
+     &        du, ul, ur, u6, ula, ura, ul0, ur0,
+     &        dv, vl, vr, v6, vla, vra, vl0, vr0,
+     &        dw, wl, wr, w6, wla, wra, wl0, wr0,
+     &        dp, pl, pr, p6, pla, pra, pl0, pr0,
+     &        lem, rem, dxdt2, gamma)
+
+      else                      ! iconsrec
+
+         call intvar(dslice(1,j), idim, i1, i2, isteep, steepen, 
+     &        iflatten, flatten, c1, c2, c3, c4, c5, c6, 
+     &        char1, char2, c0,
+     &        tmp1, tmp2, tmp3, tmp4, dla, dra, dl0, dr0)
 c
-      call intvar(pslice(1,j), idim, i1, i2, 0     , steepen, iflatten, 
-     &            flatten, c1, c2, c3, c4, c5, c6, char1, char2, c0,
-     &            dp, pl, pr, p6, pla, pra, pl0, pr0)
+         call intvar(pslice(1,j), idim, i1, i2, 0_IKIND, steepen, 
+     &        iflatten, flatten, c1, c2, c3, c4, c5, c6, 
+     &        char1, char2, c0,
+     &        dp, pl, pr, p6, pla, pra, pl0, pr0)
 c
-      call intvar(uslice(1,j), idim, i1, i2, 0     , steepen, iflatten, 
-     &            flatten, c1, c2, c3, c4, c5, c6, char1, char2, c0,
-     &            du, ul, ur, u6, ula, ura, ul0, ur0)
+         call intvar(uslice(1,j), idim, i1, i2, 0_IKIND, steepen, 
+     &        iflatten, flatten, c1, c2, c3, c4, c5, c6, 
+     &        char1, char2, c0,
+     &        du, ul, ur, u6, ula, ura, ul0, ur0)
 c
-      call intvar(vslice(1,j), idim, i1, i2, 0     , steepen, iflatten, 
-     &            flatten, c1, c2, c3, c4, c5, c6, char1, char2, c0,
-     &            tmp1, tmp2, tmp3, tmp4, vla, vra, vl0, vr0)
+         call intvar(vslice(1,j), idim, i1, i2, 0_IKIND, steepen, 
+     &        iflatten, flatten, c1, c2, c3, c4, c5, c6, 
+     &        char1, char2, c0,
+     &        dv, vl, vr, v6, vla, vra, vl0, vr0)
 c
-      call intvar(wslice(1,j), idim, i1, i2, 0     , steepen, iflatten, 
-     &            flatten, c1, c2, c3, c4, c5, c6, char1, char2, c0,
-     &            tmp1, tmp2, tmp3, tmp4, wla, wra, wl0, wr0)
+         call intvar(wslice(1,j), idim, i1, i2, 0_IKIND, steepen, 
+     &        iflatten, flatten, c1, c2, c3, c4, c5, c6, 
+     &        char1, char2, c0,
+     &        dw, wl, wr, w6, wla, wra, wl0, wr0)
+
+         if (iposrec .eq. 1) then
+            call intpos(dslice(1,j), uslice(1,j), pslice(1,j), 
+     &           idim, i1, i2, dxdt2, gamma,
+     &           tmp1, tmp2, tmp3, dla, dra, dl0, dr0,
+     &           du, ul, ur, ula, ura, ul0, ur0,
+     &           dp, pl, pr, pla, pra, pl0, pr0)
+         endif
+
+      endif                     ! iconsrec
 c
       if (idual .eq. 1)
-     & call intvar(geslice(1,j), idim, i1, i2, 0   , steepen, iflatten, 
-     &            flatten, c1, c2, c3, c4, c5, c6, char1, char2, c0,
-     &            tmp1, tmp2, tmp3, tmp4, gela, gera, gel0, ger0)
+     & call intvar(geslice(1,j), idim, i1, i2, 0_IKIND, steepen, 
+     &            iflatten, flatten, c1, c2, c3, c4, c5, c6, char1, 
+     &            char2, c0,dge, gel, ger, ge6, gela, gera, gel0, ger0)
 c
       do ic=1,ncolor
-        call intvar(colslice(1,j,ic), idim, i1,i2, 0, steepen, iflatten,
-     &            flatten, c1, c2, c3, c4, c5, c6, char1, char2, c0,
-     &            tmp1, tmp2, tmp3, tmp4, colla(1,ic), colra(1,ic),
-     &            coll0(1,ic), colr0(1,ic))
+        call intvar(colslice(1,j,ic), idim, i1,i2, 0_IKIND, steepen, 
+     &            iflatten, flatten, c1, c2, c3, c4, c5, c6, char1, 
+     &            char2, c0,dcol(1,ic), coll(1,ic), colr(1,ic), 
+     &            col6(1,ic), colla(1,ic), colra(1,ic), coll0(1,ic), 
+     &            colr0(1,ic))
       enddo
 c
 #ifdef UNUSED
       do i=i1,i2+1
-         if (dla(i)/dslice(i-1,j) .gt. 4.0) then
+         if (dla(i)/dslice(i-1,j) .gt. 4._RKIND) then
             write(6,*) 'inteuler left:',i,j
             write(6,*) dla(i-1),dla(i),dla(i+1)
             write(6,*) dslice(i-1,j),dslice(i,j),dslice(i+1,j)
@@ -268,53 +419,34 @@ c     First, compute averge over characteristic domain of dependance (3.5)
 c
 c
       do i=i1,i2+1
-        plm(i)= pr(i-1)-cm(i-1)*(dp(i-1)-(1.0-ft*cm(i-1))*p6(i-1))
-        prm(i)= pl(i  )-cm(i  )*(dp(i  )+(1.0+ft*cm(i  ))*p6(i  ))
-        plp(i)= pr(i-1)-cp(i-1)*(dp(i-1)-(1.0-ft*cp(i-1))*p6(i-1))
-        prp(i)= pl(i  )-cp(i  )*(dp(i  )+(1.0+ft*cp(i  ))*p6(i  ))
+        plm(i)= pr(i-1)-cm(i-1)*(dp(i-1)-(1._RKIND-ft*cm(i-1))*p6(i-1))
+        prm(i)= pl(i  )-cm(i  )*(dp(i  )+(1._RKIND+ft*cm(i  ))*p6(i  ))
+        plp(i)= pr(i-1)-cp(i-1)*(dp(i-1)-(1._RKIND-ft*cp(i-1))*p6(i-1))
+        prp(i)= pl(i  )-cp(i  )*(dp(i  )+(1._RKIND+ft*cp(i  ))*p6(i  ))
       enddo
 c
       do i=i1,i2+1
-        ulm(i)= ur(i-1)-cm(i-1)*(du(i-1)-(1.0-ft*cm(i-1))*u6(i-1))
-        urm(i)= ul(i  )-cm(i  )*(du(i  )+(1.0+ft*cm(i  ))*u6(i  ))
-        ulp(i)= ur(i-1)-cp(i-1)*(du(i-1)-(1.0-ft*cp(i-1))*u6(i-1))
-        urp(i)= ul(i  )-cp(i  )*(du(i  )+(1.0+ft*cp(i  ))*u6(i  ))
+        ulm(i)= ur(i-1)-cm(i-1)*(du(i-1)-(1._RKIND-ft*cm(i-1))*u6(i-1))
+        urm(i)= ul(i  )-cm(i  )*(du(i  )+(1._RKIND+ft*cm(i  ))*u6(i  ))
+        ulp(i)= ur(i-1)-cp(i-1)*(du(i-1)-(1._RKIND-ft*cp(i-1))*u6(i-1))
+        urp(i)= ul(i  )-cp(i  )*(du(i  )+(1._RKIND+ft*cp(i  ))*u6(i  ))
       enddo
 c
 c     Compute correction terms (3.7)
 c
-c     Changed the order of operations here to prevent overflow [BWO v1_1_6]
-
       do i = i1, i2+1
-c     cla(i) = sqrt(max(gamma*pla(i)*dla(i), 0.0))
-c     cra(i) = sqrt(max(gamma*pra(i)*dra(i), 0.0))
-         cla(i) = sqrt(max(gamma*pla(i),0.0)) * sqrt(max(dla(i),0.0))
-         cra(i) = sqrt(max(gamma*pra(i),0.0)) * sqrt(max(dra(i),0.0))
-         if ( (cla(i) .gt. huge) .or.
-     &        (cla(i) .eq.0)) then
-            write(6,*) 'inteuler: cla', i,cla(i), pla(i),dla(i)
-            write(6,*) 'inteuler: i1,i2',i1,i2
-            do iii=1,idim
-            do jjj=1,jdim
-               write(6,*) 'dslice ',iii,jjj,dslice(iii,jjj)
-            end do
-            end do
-            stop
-         endif
-         if ( (cra(i) .gt. huge) .or.
-     &        (cra(i).eq.0)) then
-            write(6,*) 'inteuler: cra', i,j,cra(i), pra(i),dra(i)
-            stop
-         endif
+         cla(i) = sqrt(max(gamma*pla(i)*dla(i), 0._RKIND))
+         cra(i) = sqrt(max(gamma*pra(i)*dra(i), 0._RKIND))
       enddo
 c
 c     a) left side
 c
       do i = i1, i2+1
-         betalp(i) = (ula(i)-ulp(i)) + (pla(i)-plp(i))/cla(i)
-         betalm(i) = (ula(i)-ulm(i)) - (pla(i)-plm(i))/cla(i)
-         betal0(i) = ((pla(i)-pl0(i))/cla(i))/cla(i) + 
-     &               1.0/dla(i) - 1.0/dl0(i)
+         f1 = 1._RKIND/cla(i)
+         betalp(i) = (ula(i)-ulp(i)) + (pla(i)-plp(i))*f1
+         betalm(i) = (ula(i)-ulm(i)) - (pla(i)-plm(i))*f1
+         betal0(i) = (pla(i)-pl0(i))*f1**2 + 1._RKIND/dla(i) 
+     &        - 1._RKIND/dl0(i)
       enddo
 c
 c     Add gravity component
@@ -323,30 +455,34 @@ c
         do i = i1, i2+1
 c          if (cla(i) .gt. 0.3*ula(i)) then
 c          if (gamma*pla(i)/dla(i) .gt. eta2*ula(i)**2) then
-           betalp(i) = betalp(i) - 0.25*dt*(grslice(i-1,j)+grslice(i,j))
-           betalm(i) = betalm(i) - 0.25*dt*(grslice(i-1,j)+grslice(i,j))
+           betalp(i) = betalp(i)-0.25_RKIND*dt*(grslice(i-1,j) 
+     &          + grslice(i,j))
+           betalm(i) = betalm(i)-0.25_RKIND*dt*(grslice(i-1,j) 
+     &          + grslice(i,j))
 c          endif
         enddo
       endif
 c
       do i = i1, i2+1
-         betalp(i) = -betalp(i)/(2.0*cla(i))
-         betalm(i) = +betalm(i)/(2.0*cla(i))
+         f1 = 0.5_RKIND/cla(i)
+         betalp(i) = -betalp(i)*f1
+         betalm(i) = +betalm(i)*f1
       enddo
 c
       do i = i1, i2+1
-         if (cp(i-1) .le. 0) betalp(i) = 0
-         if (cm(i-1) .le. 0) betalm(i) = 0
-         if (c0(i-1) .le. 0) betal0(i) = 0
+         if (cp(i-1) .le. 0._RKIND) betalp(i) = 0._RKIND
+         if (cm(i-1) .le. 0._RKIND) betalm(i) = 0._RKIND
+         if (c0(i-1) .le. 0._RKIND) betal0(i) = 0._RKIND
       enddo
 c
 c     b) right side
 c
       do i = i1, i2+1
-         betarp(i) = (ura(i)-urp(i)) + (pra(i)-prp(i))/cra(i)
-         betarm(i) = (ura(i)-urm(i)) - (pra(i)-prm(i))/cra(i)
-         betar0(i) = ((pra(i)-pr0(i))/cra(i))/cra(i) + 
-     &               1.0/dra(i) - 1.0/dr0(i)
+         f1 = 1._RKIND/cra(i)
+         betarp(i) = (ura(i)-urp(i)) + (pra(i)-prp(i))*f1
+         betarm(i) = (ura(i)-urm(i)) - (pra(i)-prm(i))*f1
+         betar0(i) = (pra(i)-pr0(i))*f1**2 + 1._RKIND/dra(i) - 
+     &        1._RKIND/dr0(i)
       enddo
 c
 c     Add gravity component
@@ -355,56 +491,45 @@ c
         do i = i1, i2+1
 c          if (cra(i) .gt. 0.3*ura(i)) then
 c           if (gamma*pra(i)/dra(i) .gt. eta2*ura(i)**2) then
-           betarp(i) = betarp(i) - 0.25*dt*(grslice(i-1,j)+grslice(i,j))
-           betarm(i) = betarm(i) - 0.25*dt*(grslice(i-1,j)+grslice(i,j))
+           betarp(i) = betarp(i)-0.25_RKIND*dt*(grslice(i-1,j)
+     &          + grslice(i,j))
+           betarm(i) = betarm(i)-0.25_RKIND*dt*(grslice(i-1,j)
+     &          + grslice(i,j))
 c          endif
         enddo
       endif
 c
       do i = i1, i2+1
-         betarp(i) = -betarp(i)/(2.0*cra(i))
-         betarm(i) = +betarm(i)/(2.0*cra(i))
+         f1 = 0.5_RKIND/cra(i)
+         betarp(i) = -betarp(i)*f1
+         betarm(i) = +betarm(i)*f1
       enddo
 c
       do i = i1, i2+1
-         if (cp(i) .ge. 0) betarp(i) = 0
-         if (cm(i) .ge. 0) betarm(i) = 0
-         if (c0(i) .ge. 0) betar0(i) = 0
+         if (cp(i) .ge. 0) betarp(i) = 0._RKIND
+         if (cm(i) .ge. 0) betarm(i) = 0._RKIND
+         if (c0(i) .ge. 0) betar0(i) = 0._RKIND
       enddo
 c
 c     Finally, combine to create corrected left/right states (eq. 3.6)
 c
       do i=i1,i2+1
-c   Changed order of operations to avoid overflow in 32 bits [BWO v1_1_6]
-         pls(i,j) = pla(i) + ((betalp(i)+betalm(i))*cla(i))*cla(i)
-         prs(i,j) = pra(i) + ((betarp(i)+betarm(i))*cra(i))*cra(i)
-#ifdef DEBUG_PPM
-         if (pls(i,j) .ne. prs(i,j)) then
-            write (6,*) __FILE__
-            write (6,*) __LINE__,i,j,'pls',pls(i,j)
-            write (6,*) __LINE__,i,j,'prs',prs(i,j)
-            write (6,*) 'betalp(i) = ',betalp(i)
-            write (6,*) 'betalm(i) = ',betalm(i)
-            write (6,*) 'betarp(i) = ',betarp(i)
-            write (6,*) 'betarm(i) = ',betarm(i)
-            write (6,*) 'cla(i) = ',cla(i)
-            write (6,*) 'cra(i) = ',cra(i)
-            write (6,*) 'pla(i) = ',pla(i)
-            write (6,*) 'pra(i) = ',pra(i)
-         endif
-#endif         
+         pls(i,j) = pla(i) + (betalp(i)+betalm(i))*cla(i)**2
+         prs(i,j) = pra(i) + (betarp(i)+betarm(i))*cra(i)**2
 c
          uls(i,j) = ula(i) + (betalp(i)-betalm(i))*cla(i)
          urs(i,j) = ura(i) + (betarp(i)-betarm(i))*cra(i)
 c
-         dls(i,j) = 1.0/(1.0/dla(i) - (betal0(i)+betalp(i)+betalm(i)))
-         drs(i,j) = 1.0/(1.0/dra(i) - (betar0(i)+betarp(i)+betarm(i)))
+         dls(i,j) = 1._RKIND/(1._RKIND/dla(i) - 
+     &        (betal0(i)+betalp(i)+betalm(i)))
+         drs(i,j) = 1._RKIND/(1._RKIND/dra(i) - 
+     &        (betar0(i)+betarp(i)+betarm(i)))
       enddo
 c
 c     Take the appropriate state from the advected variables
 c
       do i=i1,i2+1
-         if (uslice(i-1,j) .le. 0.0) then
+         if (uslice(i-1,j) .le. 0._RKIND) then
             vls(i,j)  = vla(i)
             wls(i,j)  = wla(i)
             gels(i,j) = gela(i)
@@ -414,7 +539,7 @@ c
             gels(i,j) = gel0(i)
          endif
 c
-         if (uslice(i  ,j) .ge. 0.0) then
+         if (uslice(i  ,j) .ge. 0._RKIND) then
             vrs(i,j)  = vra(i)
             wrs(i,j)  = wra(i)
             gers(i,j) = gera(i)
@@ -427,19 +552,54 @@ c
 c
       do ic=1,ncolor
          do i=i1,i2+1
-            if (uslice(i-1,j) .le. 0.0) then
-               colls(i,j,ic) = colla(i,ic)
+            if (uslice(i-1,j) .le. 0._RKIND) then
+               colls(i,j,ic) = colla(i,ic) * dls(i,j)/dla(i)
             else
-               colls(i,j,ic) = coll0(i,ic)
+               colls(i,j,ic) = coll0(i,ic) * dls(i,j)/dl0(i)
             endif
 c
-            if (uslice(i  ,j) .ge. 0.0) then
-               colrs(i,j,ic) = colra(i,ic)
+            if (uslice(i  ,j) .ge. 0._RKIND) then
+               colrs(i,j,ic) = colra(i,ic) * drs(i,j)/dra(i)
             else
-               colrs(i,j,ic) = colr0(i,ic)
+               colrs(i,j,ic) = colr0(i,ic) * drs(i,j)/dr0(i)
             endif
          enddo
       enddo
+c
+c     Correct advected quantities for wave subtraction (similar as d,p,u
+c     correction above).
+c
+#ifdef UNUSED
+      do i = i1,i2+1
+         if (uslice(i,j) .gt. 0._RKIND) then
+            c7(i) = dt*dx2i(i) * cs(i)
+            c8(i) = 0.5_RKIND*ft*(dt*dx2i(i))**2 * 
+     $           (cs(i)**2 + 2._RKIND*uslice(i,j)*cs(i))
+            vls(i,j) = vls(i,j) + c7(i)*(dv(i)-v6(i)) + c8(i)*v6(i)
+            wls(i,j) = wls(i,j) + c7(i)*(dw(i)-w6(i)) + c8(i)*w6(i)
+            gels(i,j) = gels(i,j) + c7(i)*(dge(i)-ge6(i)) + c8(i)*ge6(i)
+         else if (uslice(i,j) .lt. 0._RKIND) then
+            c7(i) = -dt*dx2i(i) * cs(i)
+            c8(i) = 0.5_RKIND*ft*(dt*dx2i(i))**2 *
+     $           (cs(i)**2 - 2._RKIND*uslice(i,j)*cs(i))
+            vrs(i,j) = vrs(i,j) + c7(i)*(dv(i)+v6(i)) + c8(i)*v6(i)
+            wrs(i,j) = wrs(i,j) + c7(i)*(dw(i)+w6(i)) + c8(i)*w6(i)
+            gers(i,j) = gers(i,j) + c7(i)*(dge(i)+ge6(i)) + c8(i)*ge6(i)
+         endif
+      enddo
+ 
+      do ic = 1,ncolor
+         do i = i1,i2+1
+            if (uslice(i,j) .gt. 0._RKIND) then
+               colls(i,j,ic) = colls(i,j,ic) + 
+     $              c7(i)*(dcol(i,ic)-col6(i,ic)) + c8(i)*col6(i,ic)
+            else if (uslice(i,j) .lt. 0._RKIND) then
+               colrs(i,j,ic) = colrs(i,j,ic) + 
+     $              c7(i)*(dcol(i,ic)+col6(i,ic)) + c8(i)*col6(i,ic)
+            endif
+         enddo
+      enddo
+#endif
 c
 c  Dual energy formalism: if sound speed squared is less than eta1*v^2 
 c    then discard the corrections and use pla, ula, dla.  This amounts
@@ -449,17 +609,27 @@ c     corrections are inaccurate for hypersonic flows.
 c
       if (idual .eq. 1) then
          do i=i1, i2+1
-            if (gamma*pla(i)/dla(i) .lt. (eta2*ula(i))*ula(i) .or.
+c            if (gamma*pla(i)/dla(i) .lt. eta1*ula(i)**2) then
+            if (gamma*pla(i)/dla(i) .lt. eta2*ula(i)**2 .or.
      &          max(abs(cm(i-1)),abs(c0(i-1)),abs(cp(i-1))) .lt. 
-     &          1.0e-3
-     &          .or. dls(i,j)/dla(i) .gt. 5.0) then
+     &          1.0e-3_RKIND
+     &          .or. dls(i,j)/dla(i) .gt. 5._RKIND) then
+               do ic = 1,ncolor
+c                cols *= new/old
+                 colls(i,j,ic) = colls(i,j,ic) * dla(i)/dls(i,j)
+               enddo
                pls(i,j) = pla(i)
                uls(i,j) = ula(i)
                dls(i,j) = dla(i)
             endif
-            if (gamma*pra(i)/dra(i) .lt. (eta2*ura(i))*ura(i) .or.
-     &          max(abs(cm(i)),abs(c0(i)),abs(cp(i))) .lt. 1.0e-3
-     &          .or. drs(i,j)/dra(i) .gt. 5.0) then
+c            if (gamma*pra(i)/dra(i) .lt. eta1*ura(i)**2) then
+            if (gamma*pra(i)/dra(i) .lt. eta2*ura(i)**2 .or.
+     &          max(abs(cm(i)),abs(c0(i)),abs(cp(i))) .lt. 1.0e-3_RKIND
+     &          .or. drs(i,j)/dra(i) .gt. 5._RKIND) then
+               do ic = 1,ncolor
+c                colrs *= new/old
+                 colrs(i,j,ic) = colrs(i,j,ic) * dra(i)/drs(i,j)
+               enddo
                prs(i,j) = pra(i)
                urs(i,j) = ura(i)
                drs(i,j) = dra(i)
@@ -490,6 +660,12 @@ c
          dls(i,j) = max(dls(i,j), tiny)
          drs(i,j) = max(drs(i,j), tiny)
       enddo
+      do ic = 1,ncolor
+         do i = i1,i2+1
+            colls(i,j,ic) = max(colls(i,j,ic), COLOR_FLOOR)
+            colrs(i,j,ic) = max(colrs(i,j,ic), COLOR_FLOOR)
+         enddo
+      enddo
 c
 c     If approximating pressure free conditions, then the density should be
 c       reset to the pre-corrected state.
@@ -501,7 +677,7 @@ c
          enddo
       endif
 c
-400   continue
+ 400  continue
 c
       return
       end

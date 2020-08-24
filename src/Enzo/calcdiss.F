@@ -1,6 +1,17 @@
-c     See LICENSE_ENZO file for license and copyright information
-
 #include "fortran.h"
+#define FORTRAN
+*****************************************************************************
+*                                                                           *
+* Copyright 2004 Greg Bryan                                                 *
+* Copyright 2004 Laboratory for Computational Astrophysics                  *
+* Copyright 2004 Board of Trustees of the University of Illinois            *
+* Copyright 2004 Regents of the University of California                    *
+*                                                                           *
+* This software is released under the terms of the "Enzo Public License"    *
+* in the accompanying LICENSE file.                                         *
+*                                                                           *
+*****************************************************************************
+
 c=======================================================================
 c/////////////////////////  SUBROUTINE CALCDIFF  \\\\\\\\\\\\\\\\\\\\\\\
 c
@@ -62,7 +73,7 @@ c        for each direction (i.e. call with dx,dy,dz,... for x-dir, dy,dz,dx
 c        for y-dir, and dz,dx,dy for z-dir).  Also, insure idir is set
 c        correctly, since a few calculation must know which sweep
 c        direction this is.  
-c           permute: v,w,dx,DY,dz,i1,i2,j1,j2,k,nzz,idim,jdim,kdim
+c           permute: v,w,dx,dy,dz,i1,i2,j1,j2,k,nzz,idim,jdim,kdim
 c           do not permute: dimx,dimy,dimz
 c
 c  INPUT ARGUMENTS:
@@ -101,44 +112,44 @@ c     (for other parameters see CW84)
 c
 c-----------------------------------------------------------------------
       implicit NONE
+#include "fortran_types.h"
 c
-      integer ijkn
+      INTG_PREC ijkn
       parameter (ijkn=MAX_ANY_SINGLE_DIRECTION)
 c-----------------------------------------------------------------------
 c
 c  argument declarations
 c
-      integer dimx, dimy, dimz, i1, i2, idiff, idim, idir, iflatten, 
+      INTG_PREC dimx, dimy, dimz, i1, i2, idiff, idim, idir, iflatten, 
      &        j1, j2, jdim, k, kdim, nzz
-      ENZO_REAL gamma, dt, dx, dy, dz
-      ENZO_REAL dslice(idim,jdim), eslice(idim,jdim), uslice(idim,jdim),
+      R_PREC    gamma, dt, dx(idim), dy(jdim), dz(kdim)
+      R_PREC    dslice(idim,jdim), eslice(idim,jdim), uslice(idim,jdim),
      &        diffcoef(idim,jdim), flatten(idim,jdim), pslice(idim,jdim)
-      ENZO_REAL v(dimx,dimy,dimz), w(dimx,dimy,dimz)
+      R_PREC    v(dimx,dimy,dimz), w(dimx,dimy,dimz)
 c
 c  locals
 c
-      integer i, j, nyz, is, isp, ism
-      ENZO_REAL cj2s, qa, qb, s, Z, ZE,sigma_tilde
-      ENZO_REAL di(ijkn), difftemp(ijkn), flattemp(ijkn),
-     &     kappa(ijkn), kappa_tilde, omega(ijkn),
-     &     sigma(ijkn),
-     &     vdiff1(ijkn), vdiff2(ijkn), wdiff1(ijkn),
-     &     wdiff2(ijkn), wflag(ijkn)
-      logical ljx1,ljy1,ljz1,ljx2,ljy2,ljz2,lj1,lj2
-      logical lkx1,lky1,lkz1,lkx2,lky2,lkz2,lk1,lk2
-      ENZO_REAL dp1,dp2,de1,de2,dee,dpp,omega_tilde
+      INTG_PREC i, j, nyz, is, isp, ism
+      R_PREC    cj2s, di(ijkn), difftemp(ijkn), flattemp(ijkn),
+     &        kappa(ijkn), kappa_tilde, omega(ijkn),
+     &        qa, qb, qc, s, sigma(ijkn),
+     &        sigma_tilde, vdiff1(ijkn), vdiff2(ijkn), wdiff1(ijkn),
+     &        wdiff2(ijkn), wflag(ijkn), Z, ZE
+      LOGIC_PREC ljx1,ljy1,ljz1,ljx2,ljy2,ljz2,lj1,lj2
+      LOGIC_PREC lkx1,lky1,lkz1,lkx2,lky2,lkz2,lk1,lk2
+      R_PREC dp1,dp2,de1,de2,dee,dpp,omega_tilde
 c
 c  parameters
 c
-      ENZO_REAL epsilon, kappa1, kappa2, Kparam, nu1, nu2, nu3,
-     &        omega1, omega2, sigma1, sigma2
-      parameter (epsilon = 0.33  , kappa1 = 2.0 , kappa2 =  0.01,
-     &            Kparam = 0.1   ,    nu1 = 2.0 , nu2    =  0.1 ,
-     &               nu3 = 0.2333, omega1 = 0.75, omega2 = 10.0 ,
-     &            sigma1 = 0.5   , sigma2 = 1.0)
-
-      ENZO_REAL one,two
-      parameter (one = 1.0, two = 2.0)
+      R_PREC    epsilon, kappa1, kappa2, Kparam, nu1, nu2, nu3,
+     &        omega1, omega2, sigma1, sigma2, one, two
+      parameter (epsilon = 0.33_RKIND,    kappa1 = 2._RKIND, 
+     &           kappa2  = 0.01_RKIND,    Kparam = 0.1_RKIND,    
+     &           nu1     = 2._RKIND,      nu2    = 0.1_RKIND,
+     &           nu3     = 0.2333_RKIND,  omega1 = 0.75_RKIND, 
+     &           omega2  = 10._RKIND,     sigma1 = 0.5_RKIND, 
+     &           sigma2  = 1._RKIND,      one    = 1._RKIND,
+     &           two     = 2._RKIND)
 c
 c Notice, for 1D calculations nu2 = 0 and nu3 = 0.3333, see CW84, p. 200.
 c
@@ -148,7 +159,6 @@ c=======================================================================
 c
 c  Compute number of active zones in transverse direction
 c
-
       nyz = j2 - j1 + 1
 c
 c  Precompute logical masks for k loop bounds
@@ -186,9 +196,9 @@ c
      &           / min(pslice(i+1,j),  pslice(i-1,j))
             if ( qb.gt.epsilon .and.
      &          uslice(i-1,j).gt.uslice(i+1,j) ) then
-               wflag(i) = 1.0
+               wflag(i) = 1._RKIND
             else
-               wflag(i) = 0.0
+               wflag(i) = 0._RKIND
             endif
          end do
 c
@@ -206,7 +216,7 @@ c
                   end do
                else
                   do i = i1-2, i2+2
-                     vdiff1(i) = 0.0
+                     vdiff1(i) = 0._RKIND
                   end do
                end if
 c     
@@ -217,7 +227,7 @@ c
                   end do
                else 
                   do i = i1-2, i2+2
-                     wdiff1(i) = 0.0
+                     wdiff1(i) = 0._RKIND
                   end do
                end if
 c     
@@ -232,7 +242,7 @@ c
                   end do
                else
                   do i = i1-2, i2+2
-                     vdiff1(i) = 0.0
+                     vdiff1(i) = 0._RKIND
                   end do
                endif
 c     
@@ -243,7 +253,7 @@ c
                   end do
                else
                   do i = i1-2, i2+2
-                     wdiff1(i) = 0.0
+                     wdiff1(i) = 0._RKIND
                   end do
                endif
 c
@@ -259,7 +269,7 @@ c
                   end do
                else
                   do i = i1-2, i2+2
-                     vdiff1(i) = 0.0
+                     vdiff1(i) = 0._RKIND
                   end do
                end if
 c     
@@ -270,7 +280,7 @@ c
                   end do
                else
                   do i = i1-2, i2+2
-                     wdiff1(i) = 0.0
+                     wdiff1(i) = 0._RKIND
                   end do
                endif
 c     
@@ -292,7 +302,7 @@ c
                   end do
                else
                   do i=i1-2, i2+2
-                     vdiff2(i) = 0.0
+                     vdiff2(i) = 0._RKIND
                   end do
                endif
 c     
@@ -303,7 +313,7 @@ c
                   end do
                else
                   do i=i1-2, i2+2
-                     wdiff2(i) = 0.0
+                     wdiff2(i) = 0._RKIND
                   end do
                endif
 c     
@@ -317,7 +327,7 @@ c
                   end do
                else
                   do i=i1-2, i2+2
-                     vdiff2(i) = 0.0
+                     vdiff2(i) = 0._RKIND
                   end do
                endif
 c     
@@ -328,7 +338,7 @@ c
                   end do
                else
                   do i=i1-2, i2+2
-                     wdiff2(i) = 0.0
+                     wdiff2(i) = 0._RKIND
                   end do
                endif
 c     
@@ -342,7 +352,7 @@ c
                   end do
                else
                   do i = i1-2, i2+2
-                     vdiff2(i) = 0.0
+                     vdiff2(i) = 0._RKIND
                   end do
                end if
 c     
@@ -353,7 +363,7 @@ c
                   end do
                else
                   do i = i1-2, i2+2
-                     wdiff2(i) = 0.0
+                     wdiff2(i) = 0._RKIND
                   end do
                end if
 c     
@@ -374,20 +384,22 @@ c
 c
             if (nyz.gt.1 .and. lj1) then
                do i=i1, i2+1
-                  diffcoef(i,j) = diffcoef(i,j) + (0.25*(dx+dx)
-     &                 /   (0.5*(dy+dy) + dy))*vdiff1(i)
+                  diffcoef(i,j) = diffcoef(i,j) +
+     &                 (0.25_RKIND*(dx(i)+dx(i-1)) / 
+     &                 (0.5_RKIND*(dy(j+1)+dy(j-1)) + dy(j)))*vdiff1(i)
                end do
             endif
 c     
             if (nzz.gt.1 .and. lk1) then
                do i=i1, i2+1
-                  diffcoef(i,j) = diffcoef(i,j) + (0.25*(dx+dx)
-     &                 /   (0.5*(dz+dz) + dz))*wdiff1(i)
+                  diffcoef(i,j) = diffcoef(i,j) +
+     &                 (0.25_RKIND*(dx(i)+dx(i-1)) /
+     &                 (0.5_RKIND*(dz(k+1)+dz(k-1)) + dz(k)))*wdiff1(i)
                end do
             endif
 c     
             do i=i1, i2+1
-               diffcoef(i,j) = Kparam*max(0.0, diffcoef(i,j))
+               diffcoef(i,j) = Kparam*max(0._RKIND, diffcoef(i,j))
             end do
 c
          endif
@@ -400,15 +412,15 @@ c
             do i=i1-1, i2+1
                if (abs(pslice(i+2,j) - pslice(i-2,j))/
      &            min(pslice(i+2,j),pslice(i-2,j)) .lt. epsilon) then
-                 qa = 1.0
+                 qa = 1._RKIND
                else
                  qa =     ( pslice(i+1,j) - pslice(i-1,j) )
      &                /   ( pslice(i+2,j) - pslice(i-2,j) )
                endif
-               flattemp(i) = min( 1.0, (qa-omega1)*omega2*wflag(i) )
+               flattemp(i) = min(1._RKIND, (qa-omega1)*omega2*wflag(i))
 c               flattemp(i) = wflag(i) !AK: Svetsov 2001, ShockWaves 11, 229
-               flattemp(i) = max(0.0, flattemp(i))
-c              flattemp(i) = 1.0-flattemp(i)  !AK: typo in CW84 eq. (A.2)
+               flattemp(i) = max(0._RKIND, flattemp(i))
+c              flattemp(i) = 1._RKIND-flattemp(i)  !AK: typo in CW84 eq. (A.2)
              end do
 
             flattemp(i1-2) = flattemp(i1-1)
@@ -417,7 +429,7 @@ c              flattemp(i) = 1.0-flattemp(i)  !AK: typo in CW84 eq. (A.2)
 c     Now, choose the maximum (eq. A2, first part)
 
             do i=i1-1, i2+1
-               if (pslice(i+1,j) - pslice(i-1,j) .lt. 0.0) then
+               if (pslice(i+1,j) - pslice(i-1,j) .lt. 0._RKIND) then
                   flatten(i,j) = max(flattemp(i),flattemp(i+1))
                else
                   flatten(i,j) = max(flattemp(i),flattemp(i-1))
@@ -436,26 +448,26 @@ c
          if (iflatten .eq. 2) then
 
             do i=i1-3, i2+3
-               di(i) = 1.0/dslice(i,j)
+               di(i) = 1._RKIND/dslice(i,j)
             end do
 
             do i=i1-1, i2+1
 
-               is = i + nint(sign(two, pslice(i+1,j) - pslice(i-1,j)))
+               is = i + sign(two, pslice(i+1,j) - pslice(i-1,j))
 
-               omega(i) = max(0.0, omega1 * (omega2 
+               omega(i) = max(0._RKIND, omega1 * (omega2 
      &              - (pslice(i+1,j) - pslice(i-1,j))
      &              / (pslice(i+2,j) - pslice(i-2,j)) ))
 
                Z = sqrt(( max(pslice(i+2,j),pslice(i-2,j)) +
-     &              0.5*(pslice(i+2,j)+pslice(i-2,j))*(gamma-1.0))
-     &              / max(di(i+2),di(i-2)))
+     &              0.5_RKIND*(pslice(i+2,j)+pslice(i-2,j))
+     &              * (gamma-1._RKIND)) / max(di(i+2),di(i-2)))
 
                kappa_tilde = 
      &              (Z + sqrt(gamma*pslice(is,j)*dslice(is,j))) / Z
 
-               kappa(i)   = max(0.0, (kappa_tilde - kappa1)
-     &              /                (kappa_tilde + kappa2))
+               kappa(i)   = max(0._RKIND, (kappa_tilde - kappa1)
+     &              /                 (kappa_tilde + kappa2))
 
                flattemp(i) = min(wflag(i)*omega(i), kappa(i))
 
@@ -478,7 +490,7 @@ c
          if (iflatten .eq. 3 .or. idiff .eq. 2) then
 c     
             do i=i1-3, i2+3
-               di(i) = 1.0/dslice(i,j)
+               di(i) = 1._RKIND/dslice(i,j)
             end do
 c     
             do i=i1-1, i2+1
@@ -488,47 +500,47 @@ c
                de1 = eslice(i+1,j) - eslice(i-1,j)
                de2 = eslice(i+2,j) - eslice(i-2,j)
 c
-               dpp = 0.0
-               dee = 0.0
-               if (dp2 .ne. 0.0) dpp = dp1/dp2
-               if (de2 .ne. 0.0) dee = de1/de2
+               dpp = 0._RKIND
+               dee = 0._RKIND
+               if (dp2 .ne. 0._RKIND) dpp = dp1/dp2
+               if (de2 .ne. 0._RKIND) dee = de1/de2
                omega_tilde = max( dpp , dee )
 c
-               ism = i + nint(sign(two, dp1))        ! post-shock
-               isp = i - nint(sign(two, dp1))        ! upstream
+               ism = i + sign(two, dp1)        ! post-shock
+               isp = i - sign(two, dp1)        ! upstream
                s   =   - sign(one, dp1)        ! i+s - zone upstream from i
-               if (dp1 .eq. 0.0) s = 0.0
+               if (dp1 .eq. 0._RKIND)  s = 0._RKIND
 c
 c              Compute sigma(i): strength of a shock near zone i
 c     
                sigma_tilde = 
      &              wflag(i)*abs(dp2)/min(pslice(i+2,j),pslice(i-2,j))
-               sigma(i) = max( 0.0, (sigma_tilde - sigma1)
-     &              /               (sigma_tilde + sigma2) )
+               sigma(i) = max( 0._RKIND, (sigma_tilde - sigma1)
+     &              /                (sigma_tilde + sigma2) )
 c
 c              Compute omega(i): steepness of a shock near zone i 
 c
                omega(i) = 
-     &              max(0.0, omega2*(omega_tilde - omega1)) ! as in Prometheus
+     &              max(0._RKIND, omega2*(omega_tilde - omega1)) ! as in Prometheus
 c     &              max(0.0, omega1*(omega2 - omega_tilde)) !AK: a CW84 typo?
 c     
 c              Compute an estimate of the Lagrangean shock speed W_j
 c
                Z = sqrt(( max(pslice(i+2,j),pslice(i-2,j)) +
-     &              0.5*(pslice(i+2,j)+pslice(i-2,j))*(gamma-1.0))
-     &              / max(di(i+2),di(i-2)))
+     &              0.5_RKIND*(pslice(i+2,j)+pslice(i-2,j))
+     &              * (gamma-1._RKIND)) / max(di(i+2),di(i-2)))
 c
 c              Compute W_j^E; Possible typos in kappa_tilda definition in 
 c              CW84 (A.9). !AK
 c
-               ZE    = s*Z/dslice(ism,j) + uslice(ism,j) + tiny
+               ZE   = s*Z/dslice(ism,j) + uslice(ism,j) + tiny
                cj2s = sqrt(gamma*pslice(isp,j)/dslice(isp,j))
 c
 c              Compute kappa(i): the wavelength of the noise
 c
                kappa_tilde = abs((ZE - uslice(isp,j) + s*cj2s)/ZE)
-               kappa(i) = max(0.0, (kappa_tilde - kappa1)
-     &              /              (kappa_tilde + kappa2))
+               kappa(i) = max(0._RKIND, (kappa_tilde - kappa1)
+     &              /               (kappa_tilde + kappa2))
 c     
                flattemp(i) =
      &              min(kappa(i),wflag(i)*omega(i),wflag(i)*sigma(i))
@@ -545,7 +557,7 @@ c
 c     Now, choose the maximum (eq. A.2, first part; also A.10)
 c     
             do i=i1-1, i2+1
-               if (pslice(i+1,j) - pslice(i-1,j) .lt. 0.0) then
+               if (pslice(i+1,j) - pslice(i-1,j) .lt. 0._RKIND) then
                   flatten(i,j) = max(flattemp(i),flattemp(i+1))
                else
                   flatten(i,j) = max(flattemp(i),flattemp(i-1))
@@ -555,7 +567,7 @@ c
          endif
 c     
 c-----------------------------------------------------------------------
-c (C)  Compute complex diffusion coefficient
+c (C)  Compute CMPLX_PREC diffusion coefficient
 c     
 
          if (idiff .eq. 2) then
@@ -566,22 +578,26 @@ c
             
             if (nyz.ne.1 .and. lj2) then
                do i=i1-1, i2+1
-                  qa = 0.5*(0.5*(dx+dx)+dx+dx)
-     &                 / (0.5*(dy+dy) + dy+dy+dy)
+                  qa = 0.5_RKIND
+     &                 * (0.5_RKIND*(dx(i+1)+dx(i-2))+dx(i)+dx(i-1))
+     &                 / (0.5_RKIND*(dy(j+2)+dy(j-2)) 
+     &                 + dy(j+1)+dy(j)+dy(j-1))
                   difftemp(i) = difftemp(i) + qa*vdiff2(i)
                end do
             end if
 
             if (nzz.ne.1 .and. lk2) then
                do i=i1-1, i2+1
-                  qb = 0.5*(0.5*(dx+dx)+dx+dx)
-     &                 / (0.5*(dz+dz) + dz+dz+dz)
+                  qb = 0.5_RKIND 
+     &                 * (0.5_RKIND*(dx(i+1)+dx(i-2))+dx(i)+dx(i-1))
+     &                 / (0.5_RKIND*(dz(k+2)+dz(k-2)) 
+     &                 + dz(k+1)+dz(k)+dz(k-1))
                   difftemp(i) = difftemp(i) + qb*wdiff2(i)
                end do
             end if
 
             do i=i1-1, i2+1
-               difftemp(i) = max(0.0, nu1*difftemp(i))
+               difftemp(i) = max(0._RKIND, nu1*difftemp(i))
             end do
 
             difftemp(i1-2) = difftemp(i1-1)
@@ -594,7 +610,7 @@ c
      &              max(difftemp(i-1),difftemp(i),difftemp(i+1)),
      &              (nu2 + nu3*max(sigma(i-1)*kappa(i-1)**2
      &              ,              sigma(i  )*kappa(i  )**2 ))
-     &              * dx*s/dt)
+     &              * dx(i+1)*s/dt)
 
             end do
 

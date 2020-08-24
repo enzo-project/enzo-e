@@ -131,7 +131,14 @@ public: // interface
 
   /// Return the x,y,z,t coordinates of field cell centers
   void field_cells (double * x, double * y, double * z,
-		    int gx = 0, int gy = 0, int gz = 0) const;
+		    int gx = 0, int gy = 0, int gz = 0) const
+  { return field_cell_faces(x,y,z,gx,gy,gz,0,0,0); }
+
+  /// Return the x,y,z,t coordinates of field cell faces (if there are n cell
+  /// centers, then there are n+1 cell faces)
+  void field_cell_faces (double * x, double * y, double * z,
+			 int gx = 0, int gy = 0, int gz = 0,
+			 int cx = 1, int cy = 1, int cz = 1) const;
 
   /// Return the cell widths of Fields
   void field_cell_width (double * hx, 
