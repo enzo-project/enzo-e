@@ -43,6 +43,9 @@ EnzoMethodGrackle::EnzoMethodGrackle
   if (rank >= 2) this->required_fields_.push_back("velocity_y");
   if (rank >= 3) this->required_fields_.push_back("velocity_z");
 
+  chemistry_data * grackle_chemistry =
+    enzo::config()->method_grackle_chemistry;
+
   if (grackle_chemistry->metal_cooling > 0){
     this->required_fields_.push_back("metal_density");
     color_fields.push_back("metal_density");
@@ -67,8 +70,6 @@ EnzoMethodGrackle::EnzoMethodGrackle
         std::vector<std::string> pc3_fields {"DI_density", "DII_density", "HDI_density"};
         this->required_fields_.insert(this->required_fields_.end(), pc3_fields.begin(), pc3_fields.end());
         color_fields.insert(color_fields.end(), pc3_fields.begin(), pc3_fields.end());
-      }
-
       } // endif primordial_chemistry > 2
     } // endif primordial_chemistry > 1
   } // endif primordial chemistry is on
