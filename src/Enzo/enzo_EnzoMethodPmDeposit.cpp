@@ -40,9 +40,9 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
                               "density_particle_accumulate"};
   const int rank = cello::rank();
                                 
-  if (rank >= 0) this->required_fields_.push_back("velocity_x");
-  if (rank >= 1) this->required_fields_.push_back("velocity_y");
-  if (rank >= 2) this->required_fields_.push_back("velocity_z");
+  if (rank >= 1) this->required_fields_.push_back("velocity_x");
+  if (rank >= 2) this->required_fields_.push_back("velocity_y");
+  if (rank >= 3) this->required_fields_.push_back("velocity_z");
 
   this->define_fields();
 

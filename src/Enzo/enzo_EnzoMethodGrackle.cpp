@@ -39,9 +39,9 @@ EnzoMethodGrackle::EnzoMethodGrackle
 
   this->required_fields_ = std::vector<std::string> {"density","internal_energy",
                                                      "total_energy"};
-  if (rank>=0) this->required_fields_.push_back("velocity_x");
-  if (rank>=1) this->required_fields_.push_back("velocity_y");
-  if (rank>=2) this->required_fields_.push_back("velocity_z");
+  if (rank >= 1) this->required_fields_.push_back("velocity_x");
+  if (rank >= 2) this->required_fields_.push_back("velocity_y");
+  if (rank >= 3) this->required_fields_.push_back("velocity_z");
 
   if (grackle_chemistry->metal_cooling > 0){
     this->required_fields_.push_back("metal_density");

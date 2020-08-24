@@ -42,9 +42,9 @@ EnzoMethodTurbulence::EnzoMethodTurbulence
   this->required_fields_ = std::vector<std::string> {"density",
                                                      "temperature","total_energy"};
 
-  if (rank >= 0) this->required_fields_.insert(this->required_fields_.end(),{"velocity_x","driving_x"});
-  if (rank >= 1) this->required_fields_.insert(this->required_fields_.end(),{"velocity_y","driving_y"});
-  if (rank >= 2) this->required_fields_.insert(this->required_fields_.end(),{"velocity_z","driving_z"});
+  if (rank >= 1) this->required_fields_.insert(this->required_fields_.end(),{"velocity_x","driving_x"});
+  if (rank >= 2) this->required_fields_.insert(this->required_fields_.end(),{"velocity_y","driving_y"});
+  if (rank >= 3) this->required_fields_.insert(this->required_fields_.end(),{"velocity_z","driving_z"});
 
   this->define_fields();
 
