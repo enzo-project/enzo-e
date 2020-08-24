@@ -45,7 +45,7 @@ EnzoMethodGrackle::EnzoMethodGrackle
 
   if (grackle_chemistry->metal_cooling > 0){
     this->required_fields_.push_back("metal_density");
-    colour_fields.push_back("metal_density");
+    color_fields.push_back("metal_density");
   }
 
   // Define primordial chemistry fields
@@ -55,18 +55,18 @@ EnzoMethodGrackle::EnzoMethodGrackle
                                          "e_density"};
 
     this->required_fields_.insert(this->required_fields_.end(), pc1_fields.begin(), pc1_fields.end());
-    colour_fields.insert(colour_fields.end(), pc1_fields.begin(), pc1_fields.end());
+    color_fields.insert(color_fields.end(), pc1_fields.begin(), pc1_fields.end());
 
     if(grackle_chemistry->primordial_chemistry > 1){
 
       std::vector<std::string> pc2_fields {"HM_density", "H2I_density", "H2II_density"};
       this->required_fields_.insert(this->required_fields_.end(), pc2_fields.begin(), pc2_fields.end());
-      colour_fields.insert(colour_fields.end(), pc2_fields.begin(), pc2_fields.end());
+      color_fields.insert(color_fields.end(), pc2_fields.begin(), pc2_fields.end());
 
       if(grackle_chemistry->primordial_chemistry > 2){
         std::vector<std::string> pc3_fields {"DI_density", "DII_density", "HDI_density"};
         this->required_fields_.insert(this->required_fields_.end(), pc3_fields.begin(), pc3_fields.end());
-        colour_fields.insert(colour_fields.end(), pc3_fields.begin(), pc3_fields.end());
+        color_fields.insert(color_fields.end(), pc3_fields.begin(), pc3_fields.end());
       }
 
       } // endif primordial_chemistry > 2
@@ -81,7 +81,7 @@ EnzoMethodGrackle::EnzoMethodGrackle
 
   // Define fields and assign fields to correct
   this->define_fields();
-  this->define_group_fields(colour_fields, "color");
+  this->define_group_fields(color_fields, "color");
 
   /// Initialize default Refresh
   int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
