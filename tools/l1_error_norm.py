@@ -302,7 +302,7 @@ def _find_boundary_index(val, cell_width, domain_left_edge,ax_num):
         
     index = int((start-domain_left_edge.value) /cell_width.value + 0.5)
     if not np.isclose((domain_left_edge+index*cell_width).value,
-                       val, atol=_ATOL, rtol=0):
+                       start, atol=_ATOL, rtol=0):
         raise ValueError("{} does not lie at a cell boundary".format(val)
                          + " along axis {}".format(ax_num))
     return index
@@ -327,7 +327,6 @@ def build_3D_grid(ds, dim_edges):
     if len(dim_edges) != 3:
         raise ValueError("dim_edges must have 3 elements")
     grid_dim = ds.domain_dimensions
-    
     cell_widths = ds.domain_width/ds.domain_dimensions
     
     iter_tuple = zip(dim_edges, ds.domain_left_edge,
@@ -346,8 +345,8 @@ def build_3D_grid(ds, dim_edges):
         start_ind = _find_boundary_index(elem[0], width, 
                                          domain_left_edge, i)
         grid_left_edge.append(elem[0])
-        stop_ind = _find_boundary_index(elem[1], width, 
-                                         domain_left_edge, i)
+        stop_ind = _find_boundary_index(elem[1], width,
+                                        domain_left_edge, i)
         dims.append(stop_ind-start_ind)
     return ds.covering_grid(0,left_edge = grid_left_edge, dims = dims)
         
@@ -473,8 +472,8 @@ def compare_to_1D_reference(ds, tab_fname, problem_ax, verbose, op_func = None,
         ref_data["pos"] += offset_soln
 
     # compute left_edge and right_edge
-    left_edge = (pos[0] - cell_width*0.5)
-    right_edge = (pos[-1] + cell_width*0.5)
+    left_edge  = ds.quan((pos[ 0] - cell_width*0.5), 'code_length')
+    right_edge = ds.quan((pos[-1] + cell_width*0.5), 'code_length')
 
     if reverse:
         reverse_1D_soln(ref_data)
@@ -516,6 +515,7 @@ def compare_to_1D_reference(ds, tab_fname, problem_ax, verbose, op_func = None,
         else:
             temp.append(slice(None,None))
             sub_grid_edges.append([left_edge,right_edge])
+
     idx = tuple(temp)
     ref = {}
     for field,arr in ref_data.items():

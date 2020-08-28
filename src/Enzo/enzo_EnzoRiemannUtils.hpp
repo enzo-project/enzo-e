@@ -216,7 +216,6 @@ namespace enzo_riemann_utils{
    int dim, int stale_depth) noexcept
   {
     std::array<EFlt3DArray,LUT::NEQ> arr;
-    std::size_t nfields = LUT::NEQ;
     // in the case where we don't have reconstructed values (dim = -1) we assume
     // that the that i-axis is aligned with the x-axis
     EnzoPermutedCoordinates coord( (dim == -1) ? 0 : dim);
