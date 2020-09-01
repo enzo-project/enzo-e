@@ -130,6 +130,7 @@ public: // interface
     p | is_alpha_;
     p | is_beta_n_;
     p | is_beta_d_;
+    p | is_rho0_;
     p | is_omega_;
     p | is_omega_n_;
     p | is_omega_d_;
