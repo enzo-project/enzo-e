@@ -12,7 +12,7 @@ c
      &     dt, gamma, ipresfree,
      &     dls, drs, pls, prs, gels, gers,
      &     uls, urs, vls, vrs, wls, wrs,
-     &     ncolor, colslice, colls, colrs
+     &     ncolor, colslice, colls, colrs, ierror
      &     )
 c
 c  COMPUTES LEFT AND RIGHT EULERIAN INTERFACE VALUES FOR RIEMANN SOLVER
@@ -91,7 +91,8 @@ c
      &        uls(idim,jdim),     urs(idim,jdim),     vls(idim,jdim),
      &        vrs(idim,jdim),     wls(idim,jdim),     wrs(idim,jdim)
       R_PREC  colslice(idim,jdim,ncolor),   colls(idim,jdim,ncolor),
-     &        colrs(idim,jdim,ncolor)
+     &     colrs(idim,jdim,ncolor)
+      INTG_PREC ierror
 c
 c  local declarations
 c

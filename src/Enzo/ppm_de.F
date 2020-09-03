@@ -16,7 +16,8 @@ c
      &     fistart, fiend, fjstart, fjend,
      &     array, dindex, eindex,
      &     uindex, vindex, windex, geindex, tmp,
-     &     ncolor, colorpt, coloff, colindex, error)
+     &     ncolor, colorpt, coloff, colindex, error,
+     &     ie_error_x,ie_error_y,ie_error_z,num_ie_error)
 c     
 c  PERFORMS PPM (DIRECT EULERIAN) UPDATE FOR ONE TIMESTEP (WRAPPER)
 c
@@ -89,6 +90,8 @@ c
      &        windex(nsubgrids*6),geindex(nsubgrids*6),
      &     colindex(nsubgrids*6,ncolor)
       integer error
+      integer ie_error_x(*),ie_error_y(*),ie_error_z(*)
+      integer num_ie_error
       ENZO_REAL d(in,jn,kn), e(in,jn,kn), u(in,jn,kn),
      &     v(in,jn,kn), w(in,jn,kn),ge(in,jn,jn),
      &     gr_xacc(in,jn,kn), gr_yacc(in,jn,kn), gr_zacc(in,jn,kn),
@@ -157,7 +160,7 @@ c
 c
 c  Update in x-direction
 c
-        if (mod(n,rank) .eq. 0 .and. nxz .gt. 1) then
+         if (mod(n,rank) .eq. 0 .and. nxz .gt. 1) then
 c
 c*$* ASSERT CONCURRENT CALL
 c$DOACROSS LOCAL(k)
@@ -186,7 +189,8 @@ c$DOACROSS LOCAL(k)
      &             tmp(1+ms*28),tmp(1+ms*29),tmp(1+ms*30),
      &             tmp(1+ms*(31+0*ncolor)),tmp(1+ms*(31+1*ncolor)), 
      &             tmp(1+ms*(31+2*ncolor)),tmp(1+ms*(31+3*ncolor)),
-     &             error
+     &             error,
+     &             ie_error_x,ie_error_y,ie_error_z,num_ie_error
      &             )
            enddo
         endif
@@ -223,7 +227,8 @@ c$DOACROSS LOCAL(i)
      &             tmp(1+ms*28),tmp(1+ms*29),tmp(1+ms*30),
      &             tmp(1+ms*(31+0*ncolor)),tmp(1+ms*(31+1*ncolor)), 
      &             tmp(1+ms*(31+2*ncolor)),tmp(1+ms*(31+3*ncolor)),
-     &             error
+     &             error,
+     &             ie_error_x,ie_error_y,ie_error_z,num_ie_error
      &             )
            enddo
 c     
@@ -261,7 +266,8 @@ c$DOACROSS LOCAL(j)
      &             tmp(1+ms*28),tmp(1+ms*29),tmp(1+ms*30),
      &             tmp(1+ms*(31+0*ncolor)),tmp(1+ms*(31+1*ncolor)), 
      &             tmp(1+ms*(31+2*ncolor)),tmp(1+ms*(31+3*ncolor)),
-     &             error
+     &             error,
+     &             ie_error_x,ie_error_y,ie_error_z,num_ie_error
      &             )
            enddo
         endif

@@ -422,6 +422,8 @@ namespace cello {
   int             num_children();
   /// Return the number of Blocks on this process
   size_t          num_blocks_process();
+  /// Return the cell volume at the given level relative to the root level
+  double          relative_cell_volume (int level);
 }
 
 #endif /* CELLO_HPP */

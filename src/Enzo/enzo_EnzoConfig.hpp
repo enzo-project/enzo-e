@@ -270,6 +270,9 @@ public: // interface
       method_vlct_pressure_floor(0.0),
       method_vlct_dual_energy(false),
       method_vlct_dual_energy_eta(0.0),
+      // EnzoProlong
+      prolong_enzo_type(),
+      prolong_enzo_positive(true),
       // EnzoSolverMg0
       solver_pre_smooth(),
       solver_post_smooth(),
@@ -522,6 +525,9 @@ public: // attributes
   double                     method_vlct_dual_energy_eta;
 
 
+  std::string                prolong_enzo_type;
+  bool                       prolong_enzo_positive;
+  
   ///==============
   /// EnzoSolverMg0
   ///==============

@@ -29,8 +29,8 @@ PARALLEL_MAIN_BEGIN
 
   FluxData flux_data;
 
-  std::vector<double> array_blk[3][2][nf];
-  std::vector<double> array_nbr[3][2][nf];
+  std::vector<cello_float> array_blk[3][2][nf];
+  std::vector<cello_float> array_nbr[3][2][nf];
 
   for (int i_f=0; i_f<nf; i_f++) {
 
@@ -111,8 +111,8 @@ PARALLEL_MAIN_BEGIN
 
         int dbx,dby,dbz;
         int dnx,dny,dnz;
-        std::vector<double> & fluxes_blk = ff_blk->flux_array(&dbx,&dby,&dbz);
-        std::vector<double> & fluxes_nbr = ff_nbr->flux_array(&dnx,&dny,&dnz);
+        std::vector<cello_float> & fluxes_blk = ff_blk->flux_array(&dbx,&dby,&dbz);
+        std::vector<cello_float> & fluxes_nbr = ff_nbr->flux_array(&dnx,&dny,&dnz);
         
         int count = 0;
         unit_func ("array_blk()");

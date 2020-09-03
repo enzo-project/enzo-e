@@ -453,7 +453,7 @@ are summarized below:
    * **M0** single block
    * **M1** unigrid
    * **M2** one additional refinement level
-   * **M3** two additional refinement level
+   * **M3** two additional refinement levels
      
 * **Physics**
 

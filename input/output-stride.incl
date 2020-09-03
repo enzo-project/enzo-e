@@ -22,8 +22,7 @@ Output {
 Stopping {  cycle = 20; }
 Testing {   cycle_final = 20; }
 Testing {
-   time_final  = [0.0506399682687848, # OLD_PPM
-                  0.0507272430695593]; # NEW_PPM
+   time_final  = [0.0507272430695593];
 }
 
 # Output { density      { name = ["method_ppm-8-%06d.png", "cycle"]; } }

@@ -10,6 +10,16 @@
 #include <stdio.h>
 
 #define NEW_FLUX
+
+// #define IE_ERROR_FIELD
+// #define DEBUG_PPM
+
+#ifdef DEBUG_PPM
+#   define TRACE(MSG,BLOCK) CkPrintf ("DEBUG_PPM: %s %s\n",BLOCK->name().c_str(),MSG); fflush(stdout);
+#else
+#   define TRACE(MSG,BLOCK) /* ... */
+#endif
+
 // #define DEBUG_NEW_FLUX
 //----------------------------------------------------------------------
 
@@ -30,6 +40,19 @@ int EnzoBlock::SolveHydroEquations
   field.ghost_depth(0,&gx,&gy,&gz);
   field.dimensions(0,&mx,&my,&mz);
 
+#ifdef IE_ERROR_FIELD  
+  int num_ie_error = 0;
+  int *ie_error_x = new int [mx*my*mz];
+  int *ie_error_y = new int [mx*my*mz];
+  int *ie_error_z = new int [mx*my*mz];
+#else
+  int num_ie_error = -1;
+  int *ie_error_x = nullptr;
+  int *ie_error_y = nullptr;
+  int *ie_error_z = nullptr;
+#endif
+  
+  
   //------------------------------
   // Prepare color field parameters
   //------------------------------
@@ -256,6 +279,7 @@ int EnzoBlock::SolveHydroEquations
   int iposrec = 0;
 
   int error = 0;
+  TRACE("ppm_de",this);
   FORTRAN_NAME(ppm_de)
     (
      density, total_energy, velocity_x, velocity_y, velocity_z,
@@ -279,43 +303,35 @@ int EnzoBlock::SolveHydroEquations
      standard, dindex, Eindex, uindex, vindex, windex,
      geindex, temp,
      &ncolor, colorpt, coloff, colindex,
-     &error
+     &error, ie_error_x,ie_error_y,ie_error_z,&num_ie_error
      );
 
   if (error != 0) {
     char buffer[256];
-    snprintf (buffer,255,"Error in call to ppm_de block %s",name().c_str());
-    ERROR ("SolveHydroEquations()",buffer);
+    snprintf (buffer,255,"Error %d in call to ppm_de block %s",error,name().c_str());
   }
+
+#ifdef IE_ERROR_FIELD  
+  if (num_ie_error > 0) {
+    CkPrintf ("DEBUG_IE_ERROR num_ie_error = %d\n",num_ie_error);
+
+    enzo_float * error_ie  = (enzo_float*)field.values("internal_energy_error");
+    for (int i=0; i<mx*my*mz; i++) {
+      error_ie[i] = 0.0;
+    }
+    for (int k=0; k<num_ie_error; k++) {
+      int i = ie_error_x[k] + mx*(ie_error_y[k] + my*ie_error_z[k]);
+      CkPrintf ("DEBUG_IE_ERROR setting error_ie[%d (%d %d %d)]\n",
+                i,ie_error_x[k],ie_error_y[k],ie_error_z[k]);
+      error_ie[i] = 1.0;
+    }
+  }
+#endif
   
   for (dim = 0; dim < MAX_DIMENSION; dim++) {
     delete [] CellWidthTemp[dim];
   }
 
-#ifdef NEW_FLUX  
-#ifdef DEBUG_NEW_FLUX
-  const int n3[3] = {nx,ny,nz};
-  for (int i_f=0; i_f<nf; i_f++) {
-    for (int axis=0; axis<rank; axis++) {
-      const int n1 = n3[(axis+1)%3];
-      const int n2 = n3[(axis+2)%3];
-      for (int face=0; face<2; face++) {
-        FaceFluxes * ff_b = flux_data->block_fluxes(axis,face,i_f);
-        int dx,dy,dz;
-        double * fa = ff_b->flux_array(&dx,&dy,&dz).data();
-        for (int i2=0; i2<n2; i2++) {
-          for (int i1=0; i1<n1; i1++) {
-            const int i = i1 + n1*i2;
-            CkPrintf ("DEBUG_FLUX %s SolveHydroEquations %d %d %d  (%d %d) %g\n",
-                      name().c_str(),axis,face,i_f,i1,i2,fa[i]);
-          }
-        }
-      }
-    }
-  }
-#endif
-#endif
-  
   /* deallocate temporary space for solver */
 
   delete [] temp;
@@ -325,7 +341,12 @@ int EnzoBlock::SolveHydroEquations
   delete [] array;
 
   delete [] coloff;
-
+#ifdef IE_ERROR_FIELD  
+  delete [] ie_error_x;
+  delete [] ie_error_y;
+  delete [] ie_error_z;
+#endif  
+  
   return ENZO_SUCCESS;
 
 }

@@ -101,22 +101,21 @@ void EnzoComputePressure::compute_(Block * block,
 
     const int rank = cello::rank();
 
-    enzo_float * d = (enzo_float*) field.values("density", i_hist_);
+    const enzo_float * d = (enzo_float*) field.values("density", i_hist_);
 
-    enzo_float * v3[3] =
-      { (enzo_float*) (              field.values("velocity_x", i_hist_)),
-        (enzo_float*) ((rank >= 2) ? field.values("velocity_y", i_hist_) : NULL),
-        (enzo_float*) ((rank >= 3) ? field.values("velocity_z", i_hist_) : NULL) };
+    const enzo_float * vx = (enzo_float*) field.values("velocity_x", i_hist_);
+    const enzo_float * vy = (enzo_float*) field.values("velocity_y", i_hist_);
+    const enzo_float * vz = (enzo_float*) field.values("velocity_z", i_hist_);
 
-    enzo_float * b3[3] = {NULL, NULL, NULL};
-    if (mhd) {
-      b3[0]                = (enzo_float*) field.values("bfield_x", i_hist_);
-      if (rank >= 2) b3[1] = (enzo_float*) field.values("bfield_y", i_hist_);
-      if (rank >= 3) b3[2] = (enzo_float*) field.values("bfield_z", i_hist_);
-    }
- 
+    const enzo_float * bx = mhd ?
+      (enzo_float*) field.values("bfield_x", i_hist_) : NULL;
+    const enzo_float * by = mhd ?
+      (enzo_float*) field.values("bfield_y", i_hist_) : NULL;
+    const enzo_float * bz = mhd ?
+      (enzo_float*) field.values("bfield_z", i_hist_) : NULL;
 
-    enzo_float * te = (enzo_float*) field.values("total_energy", i_hist_);
+    const enzo_float * te = (enzo_float*) field.values("total_energy", i_hist_);
+    const enzo_float * ie = (enzo_float*) field.values("internal_energy", i_hist_);
 
     int nx,ny,nz;
     field.size(&nx,&ny,&nz);
@@ -128,17 +127,48 @@ void EnzoComputePressure::compute_(Block * block,
 
     int m = (nx+2*gx) * (ny+2*gy) * (nz+2*gz);
     enzo_float gm1 = gamma_ - 1.0;
-    for (int i=0; i<m; i++) {
-      enzo_float e= te[i];
-      e -= 0.5*v3[0][i]*v3[0][i];
-      if (rank >= 2) e -= 0.5*v3[1][i]*v3[1][i];
-      if (rank >= 3) e -= 0.5*v3[2][i]*v3[2][i];
 
-      if (mhd)              e -= 0.5*b3[0][i]*b3[0][i]/d[i];
-      if (mhd && rank >= 2) e -= 0.5*b3[1][i]*b3[1][i]/d[i];
-      if (mhd && rank >= 2) e -= 0.5*b3[2][i]*b3[2][i]/d[i];
-      
-      p[i] = gm1 * d[i] * e;
+    if (enzo::config()->ppm_dual_energy) {
+
+      for (int i=0; i<m; i++) {
+        p[i] = gm1 * d[i] * ie[i];
+      }
+
+    } else {
+      /*
+      if (rank == 1) {
+        for (int i=0; i<m; i++) {
+          enzo_float ke = 0.5*vx[i]*vx[i];
+          enzo_float me_den = mhd ? 0.5*bx[i]*bx[i] : 0.;
+          p[i] = gm1 * (d[i] * (te[i] - ke) - me_den);
+        }
+      } else if (rank == 2) {
+        for (int i=0; i<m; i++) {
+          enzo_float ke = 0.5*(vx[i]*vx[i] + vy[i]*vy[i]);
+          enzo_float me_den = mhd ? 0.5*(bx[i]*bx[i] + by[i]*by[i]) : 0.;
+          p[i] = gm1 * (d[i] * (te[i] - ke) - me_den);
+        }
+      } else if (rank == 3) {
+        for (int i=0; i<m; i++) {
+          enzo_float ke = 0.5*(vx[i]*vx[i] + vy[i]*vy[i] + vz[i]*vz[i]);
+          enzo_float me_den = mhd ?
+            0.5*(bx[i]*bx[i] + by[i]*by[i] + bz[i]*bz[i]) : 0.;
+          p[i] = gm1 * (d[i] * (te[i] - ke) - me_den);
+        }
+      }
+      */
+      for (int i=0; i<m; i++) {
+        enzo_float e= te[i];
+        e -= 0.5*vx[i]*vx[i];
+        if (rank >= 2) e -= 0.5*vy[i]*vy[i];
+        if (rank >= 3) e -= 0.5*vz[i]*vz[i];
+
+        if (mhd)              e -= 0.5*bx[i]*bx[i]/d[i];
+        if (mhd && rank >= 2) e -= 0.5*by[i]*by[i]/d[i];
+        if (mhd && rank >= 3) e -= 0.5*bz[i]*bz[i]/d[i];
+
+        p[i] = gm1 * d[i] * e;
+      }
     }
   }
 

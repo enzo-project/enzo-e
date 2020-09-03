@@ -527,10 +527,6 @@ void FieldData::print
  bool use_file) const throw()
 {
 
-#ifndef CELLO_DEBUG
-  return;
-#else
-
   int ip=0;
 
   ip=CkMyPe();
@@ -634,7 +630,6 @@ void FieldData::print
     free ((void *)field_name);
   }
 
-#endif /* ifndef CELLO_DEBUG */
 }
 
 //----------------------------------------------------------------------

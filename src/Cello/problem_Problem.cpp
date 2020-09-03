@@ -836,6 +836,10 @@ Method * Problem::create_method_
        config->method_flux_correct_enable[index_method],
        config->method_flux_correct_min_digits[index_method]);
 
+  } else if (name == "debug") {
+
+    method = new MethodDebug (config->num_fields);
+
   } else if (name == "close_files") {
 
     method = new MethodCloseFiles

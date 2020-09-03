@@ -1,9 +1,11 @@
  Group {
      conserved {
-         field_list = [ "density" ];
+         field_list = [ "density", "velocity_x", "velocity_y",
+                        "internal_energy", "total_energy" ];
      };
      make_field_conservative {
-         field_list = [ "velocity_x", "velocity_y" ];
+         field_list = [ "velocity_x", "velocity_y",
+                        "internal_energy", "total_energy" ];
      }
      list = [ "conserved", "make_field_conservative" ];
  }

@@ -26,7 +26,8 @@ c
      &     wf, grslice, geslice, gef,
      &     ges,
      &     colslice, colf, colls, colrs,
-     &     error
+     &     ierror,
+     &     ie_error_x,ie_error_y,ie_error_z,num_ie_error
      &     )
 c     
 c  CONTROL ROUTINE FOR Y-SWEEP DIRECT EULER VERSION OF PPM
@@ -156,7 +157,9 @@ c
      &     geslice(jn,kn)
       ENZO_REAL colslice(jn,kn,ncolor),  colf(jn,kn,ncolor),
      &     colls(jn,kn,ncolor), colrs(jn,kn,ncolor)
-      integer error
+      integer ierror
+      integer ie_error_x(*),ie_error_y(*),ie_error_z(*)
+      integer num_ie_error
 c
 c  parameters
 c
@@ -190,6 +193,24 @@ c
             uslice(j,k) = v(i,j,k)
             vslice(j,k) = w(i,j,k)
             wslice(j,k) = u(i,j,k)
+            if (dslice(j,k) < 0.0) then
+               print*, 'yeuler_sweep dslice ',i,j,k,dslice(j,k)
+               if (num_ie_error .ge. 0) then
+                  num_ie_error = num_ie_error + 1
+                  ie_error_x(num_ie_error) = i
+                  ie_error_y(num_ie_error) = j
+                  ie_error_z(num_ie_error) = k
+               endif
+            end if
+            if (eslice(j,k) < 0.0) then
+               print*, 'yeuler_sweep eslice ',i,j,k,eslice(j,k)
+               if (num_ie_error .ge. 0) then
+                  num_ie_error = num_ie_error + 1
+                  ie_error_x(num_ie_error) = i
+                  ie_error_y(num_ie_error) = j
+                  ie_error_z(num_ie_error) = k
+               endif
+            end if
          enddo
          if (gravity .eq. 1) then
             do j=1, jn
@@ -199,6 +220,15 @@ c
          if (idual .eq. 1) then
             do j=1, jn
                geslice(j,k) = ge(i,j,k)
+               if (geslice(j,k) < 0.0) then
+                  print*, 'yeuler_sweep geslice ',i,j,k,geslice(j,k)
+                  if (num_ie_error .ge. 0) then
+                     num_ie_error = num_ie_error + 1
+                     ie_error_x(num_ie_error) = i
+                     ie_error_y(num_ie_error) = j
+                     ie_error_z(num_ie_error) = k
+                  endif
+               end if
             enddo
          endif
          do ic=1, ncolor
@@ -213,14 +243,15 @@ c
 c  Compute the pressure on a slice
 c
       if (idual .eq. 1) then
+         ierror = 2
          call pgas2d_dual(
      &        dslice, eslice, geslice, pslice, 
      &        uslice, vslice, wslice, eta1, eta2,
-     &        jn, kn, js-3, je+3, k1, k2, gamma, pmin)
+     &        jn, kn, js-3, je+3, k1, k2, gamma, pmin, ierror)
       else
          call pgas2d(
      &        dslice, eslice, pslice, uslice, vslice, wslice,
-     &        jn, kn, js-3, je+3, k1, k2, gamma, pmin)
+     &        jn, kn, js-3, je+3, k1, k2, gamma, pmin, ierror)
       endif
 
 c  If requested, compute diffusion and slope flattening coefficients
@@ -244,7 +275,7 @@ c
      &     dt, gamma, ipresfree,
      &     dls, drs, pls, prs, gels, gers,
      &     uls, urs, vls, vrs, wls, wrs,
-     &     ncolor, colslice, colls, colrs
+     &     ncolor, colslice, colls, colrs, ierror
      &     )
 c
 c  Compute (Lagrangian part of the) Riemann problem at each zone boundary
@@ -256,7 +287,6 @@ c
      &     pbar, ubar, gravity, grslice, idual, eta1
      &     )
       
-
       iriemannfallback = 1
       
       CALL flux_twoshock
@@ -269,7 +299,7 @@ c
      &     dls, drs, pls, prs, gels, gers, uls, urs,
      &     vls, vrs, wls, wrs, pbar, ubar,
      &     df, ef, uf, vf, wf, gef, ges,
-     &     ncolor, colslice, colls, colrs, colf)
+     &     ncolor, colslice, colls, colrs, colf,1)
 c
 c  Compute Eulerian fluxes and update zones-centered quantities
 c
@@ -283,11 +313,13 @@ c
 c
 c  If necessary, recompute the pressure to correctly set ge and e
 c
-      if (idual .eq. 1)
-     &     call pgas2d_dual
+      if (idual .eq. 1) then
+         ierror = 20
+         call pgas2d_dual
      &     (dslice, eslice, geslice, pslice, 
      &     uslice, vslice, wslice, eta1, eta2,
-     &     jn, kn, js-3, je+3, k1, k2, gamma, pmin)
+     &        jn, kn, js-3, je+3, k1, k2, gamma, pmin, ierror)
+      endif
 c
 c  Check this slice against the list of subgrids 
 c     (all subgrid quantities are zero based)

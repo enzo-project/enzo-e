@@ -30,9 +30,6 @@
     for (int i=0; i<mx*my*mz; i++) f_copy[i]=f[i];              \
   }
 
-#define DEBUG_BLOCK "B00:1_00:0_00:1"
-#define DEBUG_CYCLE 101
-
 //----------------------------------------------------------------------
 
 EnzoMethodPpm::EnzoMethodPpm ()
@@ -90,6 +87,7 @@ void EnzoMethodPpm::compute ( Block * block) throw()
 #endif
 
   Field field = block->data()->field();
+
   auto field_names = field.groups()->group_list("conserved");
   const int nf = field_names.size();
   std::vector<int> field_list;
@@ -103,10 +101,49 @@ void EnzoMethodPpm::compute ( Block * block) throw()
   block->data()->flux_data()->allocate (nx,ny,nz,field_list);
   
   if (block->is_leaf()) {
+
     EnzoBlock * enzo_block = enzo::block(block);
+
+    // (this should go in interpolation / restriction not here)
+    //
+    // // restore energy consistency if dual energy formalism used
+    //
+    // if (enzo::config()->ppm_dual_energy) {
+    //   int mx,my,mz;
+    //   field.dimensions(0,&mx,&my,&mz);
+    //   const int m = mx*my*mz;
+    //   enzo_float * ie = (enzo_float*) field.values("internal_energy");
+    //   enzo_float * te = (enzo_float*) field.values("total_energy");
+    //   enzo_float * vxa = (enzo_float*) field.values("velocity_x");
+    //   enzo_float * vya = (enzo_float*) field.values("velocity_y");
+    //   enzo_float * vza = (enzo_float*) field.values("velocity_z");
+    //   const int rank = cello::rank();
+    //   if (rank == 1) {
+    //     for (int i=0; i<m; i++) {
+    //       const enzo_float vx = vxa[i]*vxa[i];
+    //       te[i] = ie[i] + 0.5*(vx*vx);
+    //     }
+    //   } else if (rank == 2) {
+    //     for (int i=0; i<m; i++) {
+    //       const enzo_float vx = vxa[i]*vxa[i];
+    //       const enzo_float vy = vya[i]*vya[i];
+    //       te[i] = ie[i] + 0.5*(vx*vx+vy*vy);
+    //     }
+    //   } else if (rank == 3) {
+    //     for (int i=0; i<m; i++) {
+    //       const enzo_float vx = vxa[i]*vxa[i];
+    //       const enzo_float vy = vya[i]*vya[i];
+    //       const enzo_float vz = vza[i]*vza[i];
+    //       te[i] = ie[i] + 0.5*(vx*vx+vy*vy+vz*vz);
+    //     }
+    //   }
+    // }
+
     TRACE_PPM ("BEGIN SolveHydroEquations");
+
     enzo_block->SolveHydroEquations 
       ( block->time(), block->dt(), comoving_coordinates_ );
+
     TRACE_PPM ("END SolveHydroEquations");
 
   }
@@ -124,6 +161,7 @@ void EnzoMethodPpm::compute ( Block * block) throw()
   if (rank >= 3) COPY_FIELD(block,"acceleration_z","acceleration_z_out");
 #endif  
   TRACE_PPM("END compute()");
+
   block->compute_done(); 
   
 }

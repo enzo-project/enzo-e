@@ -26,7 +26,8 @@ c
      &     wf, grslice, geslice, gef,
      &     ges,
      &     colslice, colf, colls, colrs,
-     &     error
+     &     ierror,
+     &     ie_error_x,ie_error_y,ie_error_z,num_ie_error
      &     )
 c     
 c     CONTROL ROUTINE FOR X-SWEEP DIRECT EULER VERSION OF PPM
@@ -167,7 +168,9 @@ c
      &    geslice(in,jn)
       ENZO_REAL colslice(in,jn,ncolor),  colf(in,jn,ncolor),
      &     colls(in,jn,ncolor), colrs(in,jn,ncolor)
-      integer error
+      integer ierror
+      integer ie_error_x(*),ie_error_y(*),ie_error_z(*)
+      integer num_ie_error
 c
 c  parameters
 c
@@ -200,6 +203,24 @@ c
             uslice(i,j) = u(i,j,k)
             vslice(i,j) = v(i,j,k)
             wslice(i,j) = w(i,j,k)
+            if (dslice(i,j) < 0.0) then
+               print*, 'xeuler_sweep dslice ',i,j,k,dslice(i,j)
+               if (num_ie_error .ge. 0) then
+                  num_ie_error = num_ie_error + 1
+                  ie_error_x(num_ie_error) = i
+                  ie_error_y(num_ie_error) = j
+                  ie_error_z(num_ie_error) = k
+               endif
+            end if
+            if (eslice(i,j) < 0.0) then
+               print*, 'xeuler_sweep eslice ',i,j,k,eslice(i,j)
+               if (num_ie_error .ge. 0) then
+                  num_ie_error = num_ie_error + 1
+                  ie_error_x(num_ie_error) = i
+                  ie_error_y(num_ie_error) = j
+                  ie_error_z(num_ie_error) = k
+               endif
+            end if
          enddo
          if (gravity .eq. 1) then
             do i=1, in
@@ -209,6 +230,15 @@ c
          if (idual .eq. 1) then
             do i=1, in
                geslice(i,j) = ge(i,j,k)
+               if (geslice(i,j) < 0.0) then
+                  if (num_ie_error .ge. 0) then
+                     print*, 'xeuler_sweep geslice ',i,j,k,geslice(i,j)
+                     num_ie_error = num_ie_error + 1
+                     ie_error_x(num_ie_error) = i
+                     ie_error_y(num_ie_error) = j
+                     ie_error_z(num_ie_error) = k
+                  endif
+               end if
             enddo
          endif
          do ic=1, ncolor
@@ -223,14 +253,15 @@ c  Compute the pressure on a slice
 c
       
       if (idual .eq. 1) then
+         ierror = 1
          call pgas2d_dual
      &        (dslice, eslice, geslice, pslice,
      &        uslice, vslice, wslice, eta1, eta2,
-     &        in, jn, is-3, ie+3, j1, j2, gamma, pmin)
+     &        in, jn, is-3, ie+3, j1, j2, gamma, pmin, ierror)
       else
          call pgas2d(
      &        dslice, eslice, pslice, uslice, vslice, wslice,
-     &               in, jn, is-3, ie+3, j1, j2, gamma, pmin)
+     &               in, jn, is-3, ie+3, j1, j2, gamma, pmin, ierror)
       endif
 c
 c  If requested, compute diffusion and slope flattening coefficients
@@ -254,7 +285,7 @@ c
      &     dt, gamma, ipresfree,
      &     dls, drs, pls, prs, gels, gers,
      &     uls, urs, vls, vrs, wls, wrs,
-     &     ncolor, colslice, colls, colrs
+     &     ncolor, colslice, colls, colrs, ierror
      &     )
 c     
 c     Compute (Lagrangian part of the) Riemann problem at each zone boundary
@@ -279,7 +310,7 @@ c
      &     dls, drs, pls, prs, gels, gers, uls, urs,
      &     vls, vrs, wls, wrs, pbar, ubar,
      &     df, ef, uf, vf, wf, gef, ges,
-     &     ncolor, colslice, colls, colrs, colf)
+     &     ncolor, colslice, colls, colrs, colf,0)
 c
 c  Compute Eulerian fluxes and update zones-centered quantities
 c
@@ -293,11 +324,13 @@ c
 c     
 c  If necessary, recompute the pressure to correctly set ge and e
 c
-      if (idual .eq. 1)
-     &     call pgas2d_dual
+      if (idual .eq. 1) then
+         ierror = 10
+         call pgas2d_dual
      &     (dslice, eslice, geslice, pslice,
      &     uslice, vslice, wslice, eta1, eta2,
-     &     in, jn, is-3, ie+3, j1, j2, gamma, pmin)
+     &        in, jn, is-3, ie+3, j1, j2, gamma, pmin, ierror)
+      end if
 c     
 c  Check this slice against the list of subgrids 
 c     (all subgrid quantities are zero based)
