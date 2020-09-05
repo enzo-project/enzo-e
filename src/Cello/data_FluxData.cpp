@@ -19,7 +19,7 @@ void FluxData::allocate
   std::vector<int> * cz_list)
 {
   field_list_ = field_list;
-  int nf = field_list.size();
+  unsigned nf = field_list.size();
   block_fluxes_.resize(6*nf,nullptr);
   neighbor_fluxes_.resize(6*nf,nullptr);
 
@@ -34,7 +34,7 @@ void FluxData::allocate
   const int iy32[3][2] = { { 0,  0}, {-1, +1}, {0,  0} };
   const int iz32[3][2] = { { 0,  0},  {0, 0}, {-1, +1} };
   
-  for (int i_f=0; i_f<nf; i_f++) {
+  for (unsigned i_f=0; i_f<nf; i_f++) {
         
     const int index_field = field_list[i_f];
 
@@ -65,11 +65,11 @@ void FluxData::allocate
 
 void FluxData::deallocate()
 {
-  for (int i=0; i<block_fluxes_.size(); i++) {
+  for (unsigned i=0; i<block_fluxes_.size(); i++) {
     delete block_fluxes_[i];
   }
   block_fluxes_.clear();
-  for (int i=0; i<neighbor_fluxes_.size(); i++) {
+  for (unsigned i=0; i<neighbor_fluxes_.size(); i++) {
     delete neighbor_fluxes_[i];
   }
   neighbor_fluxes_.clear();
@@ -85,24 +85,24 @@ int FluxData::data_size () const
   int size = 0;
 
   size += sizeof(int);
-  for (int i=0; i<block_fluxes_.size(); i++) {
+  for (unsigned i=0; i<block_fluxes_.size(); i++) {
     FaceFluxes * face_fluxes = block_fluxes_[i];
-    int n = (face_fluxes==nullptr) ? 0 : face_fluxes->data_size();
-    size += sizeof(int);
+    unsigned n = (face_fluxes==nullptr) ? 0 : face_fluxes->data_size();
+    size += sizeof(unsigned);
     size += n;
   }
 
-  size += sizeof(int);
-  for (int i=0; i<neighbor_fluxes_.size(); i++) {
+  size += sizeof(unsigned);
+  for (unsigned i=0; i<neighbor_fluxes_.size(); i++) {
     FaceFluxes * face_fluxes = neighbor_fluxes_[i];
-    int n = (face_fluxes==nullptr) ? 0 : face_fluxes->data_size();
-    size += sizeof(int);
+    unsigned n = (face_fluxes==nullptr) ? 0 : face_fluxes->data_size();
+    size += sizeof(unsigned);
     size += n;
   }
 
-  size += sizeof(int);
-  const int n = (field_list_.size());
-  size += n*sizeof(int);
+  size += sizeof(unsigned);
+  const unsigned n = (field_list_.size());
+  size += n*sizeof(unsigned);
   
   return size;
 }
@@ -115,34 +115,34 @@ char * FluxData::save_data (char * buffer) const
   CkPrintf ("%d DEBUG_REFRESH FluxData::save_data()\n",CkMyPe());
 #endif  
   union {
-    int  * pi;
-    char * pc;
+    unsigned *pu;
+    char *    pc;
   };
 
   pc = (char *) buffer;
 
-  (*pi++) = block_fluxes_.size();
+  (*pu++) = block_fluxes_.size();
 
-  for (int i=0; i<block_fluxes_.size(); i++) {
+  for (unsigned i=0; i<block_fluxes_.size(); i++) {
     FaceFluxes * face_fluxes = block_fluxes_[i];
-    int n = (face_fluxes==nullptr) ? 0 : face_fluxes->data_size();
-    (*pi++) = n;
+    unsigned n = (face_fluxes==nullptr) ? 0 : face_fluxes->data_size();
+    (*pu++) = n;
     pc = face_fluxes->save_data(pc);
   }
 
-  (*pi++) = neighbor_fluxes_.size();
+  (*pu++) = neighbor_fluxes_.size();
 
-  for (int i=0; i<neighbor_fluxes_.size(); i++) {
+  for (unsigned i=0; i<neighbor_fluxes_.size(); i++) {
     FaceFluxes * face_fluxes = neighbor_fluxes_[i];
-    int n = (face_fluxes==nullptr) ? 0 : face_fluxes->data_size();
-    (*pi++) = n;
+    unsigned n = (face_fluxes==nullptr) ? 0 : face_fluxes->data_size();
+    (*pu++) = n;
     pc = face_fluxes->save_data(pc);
   }
 
-  (*pi++) = field_list_.size();
+  (*pu++) = field_list_.size();
   
-  for (int i=0; i<field_list_.size(); i++) {
-    (*pi++) = field_list_[i];
+  for (unsigned i=0; i<field_list_.size(); i++) {
+    (*pu++) = field_list_[i];
   }
   
   ASSERT2("FluxData::save_data()",
@@ -161,18 +161,18 @@ char * FluxData::load_data (char * buffer)
   CkPrintf ("%d DEBUG_REFRESH FluxData::load_data()\n",CkMyPe());
 #endif  
   union {
-    int  * pi;
-    char * pc;
+    unsigned * pu;
+    char *     pc;
   };
 
   pc = (char *) buffer;
 
   // block_fluxes_
 
-  block_fluxes_.resize(*pi++);
+  block_fluxes_.resize(*pu++);
 
-  for (int i=0; i<block_fluxes_.size(); i++) {
-    int n = (*pi++);
+  for (unsigned i=0; i<block_fluxes_.size(); i++) {
+    int n = (*pu++);
     FaceFluxes * face_fluxes = (n==0) ? nullptr : new FaceFluxes;
     block_fluxes_[i] = face_fluxes;
     if (face_fluxes != nullptr) {
@@ -182,10 +182,10 @@ char * FluxData::load_data (char * buffer)
 
   // neighbor_fluxes_
 
-  neighbor_fluxes_.resize(*pi++);
+  neighbor_fluxes_.resize(*pu++);
 
-  for (int i=0; i<neighbor_fluxes_.size(); i++) {
-    int n = (*pi++);
+  for (unsigned i=0; i<neighbor_fluxes_.size(); i++) {
+    int n = (*pu++);
     FaceFluxes * face_fluxes = (n==0) ? nullptr : new FaceFluxes;
     neighbor_fluxes_[i] = face_fluxes;
     if (face_fluxes != nullptr) {
@@ -195,10 +195,10 @@ char * FluxData::load_data (char * buffer)
 
   // field_list_
 
-  int n = (*pi++);
+  int n = (*pu++);
   field_list_.resize(n);
-  for (int i=0; i<field_list_.size(); i++) {
-    field_list_[i] = (*pi++);
+  for (unsigned i=0; i<field_list_.size(); i++) {
+    field_list_[i] = (*pu++);
   }
 
   ASSERT2("FluxData::load_data()",

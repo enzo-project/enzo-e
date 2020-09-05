@@ -557,6 +557,6 @@ void Param::dealloc_node_expr_ (struct node_expr * p)
   if (p->right != NULL) dealloc_node_expr_(p->right);
   free (p->function_name);
   free (p);
-};
+}
 
 //----------------------------------------------------------------------

@@ -20,17 +20,17 @@ PARALLEL_MAIN_BEGIN
   unit_class("FluxData");
 
   // e.g. de vx vy vz
+  const int nf = 4;
   std::vector<int> field_list = {9,3,4,5};
   std::vector<int> cx_list = {0,1,0,0};
   std::vector<int> cy_list = {0,0,1,0};
   std::vector<int> cz_list = {0,0,0,1};
-  const int nf = field_list.size();
   const int n3[3] = {16, 24, 20};
 
   FluxData flux_data;
 
-  std::vector<cello_float> array_blk[3][2][nf];
-  std::vector<cello_float> array_nbr[3][2][nf];
+  std::vector<cello_float> array_blk[3][2][4];
+  std::vector<cello_float> array_nbr[3][2][4];
 
   for (int i_f=0; i_f<nf; i_f++) {
 

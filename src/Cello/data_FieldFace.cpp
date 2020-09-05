@@ -52,7 +52,7 @@ FieldFace::FieldFace
 FieldFace::~FieldFace() throw ()
 {
 #ifdef DEBUG_FIELD_FACE  
-  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE deleting %p\n",CkMyPe(),__FILE__,__LINE__,this);
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE deleting %p\n",CkMyPe(),__FILE__,__LINE__,(void*)this);
 #endif
   --counter[cello::index_static()];
 
@@ -73,7 +73,8 @@ FieldFace::FieldFace(const FieldFace & field_face) throw ()
 
 {
 #ifdef DEBUG_FIELD_FACE  
-  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p(%p)\n",CkMyPe(),__FILE__,__LINE__,this,&field_face);
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p(%p)\n",
+            CkMyPe(),__FILE__,__LINE__,(void*)this,(void*)&field_face);
 #endif  
   ++counter[cello::index_static()];
 
@@ -88,7 +89,8 @@ FieldFace & FieldFace::operator= (const FieldFace & field_face) throw ()
 /// @return    The target assigned object
 {
 #ifdef DEBUG_FIELD_FACE  
-  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE assigning %p(%p)\n",CkMyPe(),__FILE__,__LINE__,this,&field_face);
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE assigning %p(%p)\n",
+            CkMyPe(),__FILE__,__LINE__,(void*)this,(void*&field_face);
 #endif  
   copy_(field_face);
   return *this;
@@ -400,7 +402,7 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
       // Copy faces to ghosts
 
       union { float * fs4; double * fs8; long double * fs16; };
-      union { float * fd4; double * fd8;long double * fd16;  };
+      union { float * fd4; double * fd8; long double * fd16; };
       fs4 = (float *) values_src;
       fd4 = (float *) values_dst;
       
@@ -674,12 +676,16 @@ template<class T> void FieldFace::copy_
   const int id0 = id3[0] + md3[0]*(id3[1] + md3[1]*id3[2]);
   T * vd0 = vd + id0;
   const T * vs0 = vs + is0;
+  const int msx = ms3[0];
+  const int msy = ms3[1];
+  const int mdx = md3[0];
+  const int mdy = md3[1];
   if (accumulate) {
     for (int iz=0; iz <ns3[2]; iz++)  {
       for (int iy=0; iy < ns3[1]; iy++) {
 	for (int ix=0; ix < ns3[0]; ix++) {
-	  int i_src = ix + ms3[0]*(iy + ms3[1]*iz);
-	  int i_dst = ix + md3[0]*(iy + md3[1]*iz);
+	  int i_src = ix + msx*(iy + msy*iz);
+	  int i_dst = ix + msx*(iy + mdy*iz);
 	  vd0[i_dst] += vs0[i_src];
 	}
       }
@@ -688,8 +694,8 @@ template<class T> void FieldFace::copy_
     for (int iz=0; iz <ns3[2]; iz++)  {
       for (int iy=0; iy < ns3[1]; iy++) {
 	for (int ix=0; ix < ns3[0]; ix++) {
-	  int i_src = ix + ms3[0]*(iy + ms3[1]*iz);
-	  int i_dst = ix + md3[0]*(iy + md3[1]*iz);
+	  int i_src = ix + msx*(iy + msy*iz);
+	  int i_dst = ix + mdx*(iy + mdy*iz);
 	  vd0[i_dst] = vs0[i_src];
 	}
       }
@@ -960,7 +966,7 @@ void FieldFace::loop_limits
 
 void FieldFace::print(const char * message)
 {
-  CkPrintf (" FieldFace %s %p\n",message,this);
+  CkPrintf (" FieldFace %s %p\n",message,(void*)this);
   CkPrintf ("    face_  %d %d %d\n",face_[0],face_[1],face_[2]);
   CkPrintf ("    ghost_  %d %d %d\n",ghost_[0],ghost_[1],ghost_[2]);
   CkPrintf ("    child_  %d %d %d\n",child_[0],child_[1],child_[2]);

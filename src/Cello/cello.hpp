@@ -362,8 +362,6 @@ namespace cello {
 #endif    
   }
 
-  void backtrace(const char * msg);
-
   inline int index_static()
   { return CkMyPe() % CONFIG_NODE_SIZE; }
 

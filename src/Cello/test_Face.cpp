@@ -10,8 +10,6 @@
 
 #include "mesh.hpp"
 
-#include "test_setup_face.hpp"
-
 PARALLEL_MAIN_BEGIN
 {
 
@@ -20,6 +18,22 @@ PARALLEL_MAIN_BEGIN
   unit_init(0,1);
 
   unit_class("FaceFluxes");
+
+  struct face_test_type {
+    int child[3];
+    int size[3];
+    int centered[3];
+    double cell_width[3];
+    double time_step_1;
+    double time_step_2;
+  } test =
+      {
+       { 0, 0, 0},
+       {10, 6, 8 },
+       { 0, 0, 0},
+       { 0.25, 0.5, 1.0},
+       0.125, 0.125
+      };
 
   const int num_face[2] = {4,6};
   const int face[][3] =
@@ -36,8 +50,6 @@ PARALLEL_MAIN_BEGIN
   const int num_level = 3;
   const int level_1[] = {1,2,3};
   const int level_2[] = {1,3,2};
-  
-  auto test = test::face_test[0];
   
   for (int rank = 2; rank <=3; ++rank) {
     for (int iaxis=0; iaxis<rank; iaxis++) {

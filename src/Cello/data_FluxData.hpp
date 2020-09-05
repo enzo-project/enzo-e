@@ -94,11 +94,11 @@ public: // interface
   void deallocate();
 
   /// Return the number of field indices
-  inline int num_fields () const
+  inline unsigned num_fields () const
   { return field_list_.size(); }
 
   /// Return the i'th field index
-  inline int index_field (int i_f) const
+  inline int index_field (unsigned i_f) const
   {
     return (0 <= i_f && i_f < field_list_.size()) ?
       field_list_[i_f] : -1;
@@ -107,49 +107,49 @@ public: // interface
   /// Return the face fluxes object associated with the given facet
   /// and field.  Note 0 <= i_f < num_fields() is an index into the
   /// field_list vector, not the field index itself.
-  inline const FaceFluxes * block_fluxes (int axis, int face, int i_f) const
+  inline const FaceFluxes * block_fluxes (int axis, int face, unsigned i_f) const
   {  return get_block_fluxes_ (index_(axis,face,i_f)); }
 
-  inline FaceFluxes * block_fluxes (int axis, int face, int i_f) 
+  inline FaceFluxes * block_fluxes (int axis, int face, unsigned i_f) 
   {  return get_block_fluxes_ (index_(axis,face,i_f)); }
 
   /// Return the neighboring block's face fluxes associated with the
   /// given facet and field.  Note 0 <= i_f < num_fields() is an index
   /// into the field_list vector, not the field index itself.
-  inline const FaceFluxes * neighbor_fluxes (int axis, int face, int i_f) const
+  inline const FaceFluxes * neighbor_fluxes (int axis, int face, unsigned i_f) const
   { return get_neighbor_fluxes_ (index_(axis,face,i_f)); }
 
-  inline FaceFluxes * neighbor_fluxes (int axis, int face, int i_f) 
+  inline FaceFluxes * neighbor_fluxes (int axis, int face, unsigned i_f) 
   { return get_neighbor_fluxes_ (index_(axis,face,i_f)); }
 
   /// Set the block's face fluxes associated with the given facet and
   /// field. Note 0 <= i_f < num_fields() is an index into the
   /// field_list vector, not the field index itself.
   inline void set_block_fluxes
-  (FaceFluxes * fluxes, int axis, int face, int i_f)
+  (FaceFluxes * fluxes, int axis, int face, unsigned i_f)
   { set_block_fluxes(fluxes,index_(axis,face,i_f)); }
 
-  inline void set_block_fluxes (FaceFluxes * fluxes, int i)
+  inline void set_block_fluxes (FaceFluxes * fluxes, unsigned i)
   {  block_fluxes_[i] = fluxes; }
 
   /// Set the neighboring block's face fluxes associated with the
   /// given facet and field. Note 0 <= i_f < num_fields() is an index
   /// into the field_list vector, not the field index itself.
   inline void set_neighbor_fluxes
-  (FaceFluxes * fluxes, int axis, int face, int i_f)
+  (FaceFluxes * fluxes, int axis, int face, unsigned i_f)
   { set_neighbor_fluxes(fluxes,index_(axis,face,i_f)); }
 
-  inline void set_neighbor_fluxes (FaceFluxes * fluxes, int i)
+  inline void set_neighbor_fluxes (FaceFluxes * fluxes, unsigned i)
   { neighbor_fluxes_[i] = fluxes; }
 
   /// Accumulate (sum) the neighboring block's face fluxes associated
   /// with the given facet and field. Note 0 <= i_f < num_fields() is
   /// an index into the field_list vector, not the field index itself.
   inline void sum_neighbor_fluxes
-  (FaceFluxes * fluxes, int axis, int face, int i_f)
+  (FaceFluxes * fluxes, int axis, int face, unsigned i_f)
   { sum_neighbor_fluxes(fluxes,index_(axis,face,i_f)); }
 
-  void sum_neighbor_fluxes (FaceFluxes * fluxes, int index)
+  void sum_neighbor_fluxes (FaceFluxes * fluxes, unsigned index)
   {
     int mx,my,mz;
     neighbor_fluxes_[index]->get_size(&mx,&my,&mz);
@@ -180,23 +180,23 @@ public: // interface
 protected: // functions
 
   /// Return the block's ith flux data object
-  inline const FaceFluxes * get_block_fluxes_ (int i) const
+  inline const FaceFluxes * get_block_fluxes_ (unsigned i) const
   { return (0 <= i && i < block_fluxes_.size()) ?
       block_fluxes_.at(i) : nullptr; }
-  inline FaceFluxes * get_block_fluxes_ (int i) 
+  inline FaceFluxes * get_block_fluxes_ (unsigned i) 
   { return (0 <= i && i < block_fluxes_.size()) ?
       block_fluxes_.at(i) : nullptr; }
 
   /// Return the neighbor block's ith flux data object
-  inline const FaceFluxes * get_neighbor_fluxes_ (int i) const
+  inline const FaceFluxes * get_neighbor_fluxes_ (unsigned i) const
   { return (0 <= i && i < neighbor_fluxes_.size()) ?
       neighbor_fluxes_.at(i) : nullptr;  }
-  inline FaceFluxes * get_neighbor_fluxes_ (int i) 
+  inline FaceFluxes * get_neighbor_fluxes_ (unsigned i) 
   { return (0 <= i && i < neighbor_fluxes_.size()) ?
       neighbor_fluxes_.at(i) : nullptr;  }
 
   /// Index for fluxes in block_fluxes_ and neighbor_fluxes_ vectors
-  inline int index_ (int axis, int face, int i_f) const
+  inline int index_ (int axis, int face, unsigned i_f) const
   { return axis + 3*(face + 2*i_f); }
 
 protected: // attributes

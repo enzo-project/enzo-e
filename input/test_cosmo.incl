@@ -145,7 +145,7 @@ Adapt {
          order = 2;
          solver = "cg";
      };
-     list = ["pm_deposit", "gravity", "pm_update", "comoving_expansion", "debug" ];
+     list = ["pm_deposit", "gravity", "pm_update", "comoving_expansion" ];
      ppm {
          courant = 0.5000000000000000;
          diffusion = false;
@@ -154,7 +154,7 @@ Adapt {
  }
 
  Output {
-     list = [ "de", "depa", "ax", "dark", "mesh", "po" ];
+     list = [ "de", "depa", "ax", "dark", "mesh", "po", "check" ];
      de {
          dir = [ "COSMO_CG_%04d", "cycle" ];
          field_list = [ "density" ];
@@ -260,7 +260,7 @@ Adapt {
      check {
          dir = [ "checkpoint_cosmo_cg-%02d", "count" ];
          schedule {
-             start = 50;
+             start = 100;
              step = 200;
              var = "cycle";
          };

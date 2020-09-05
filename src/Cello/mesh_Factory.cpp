@@ -172,7 +172,7 @@ void Factory::create_subblock_array
 	  index.set_level(level);
 
 	  TRACE3 ("inserting %d %d %d",ix,iy,iz);
-
+  
 	  MsgRefine * msg = new MsgRefine 
 	    (index,
 	     nx,ny,nz,
@@ -185,7 +185,8 @@ void Factory::create_subblock_array
 	  msg->set_data_msg(data_msg);
 
 	  cello::simulation()->set_msg_refine (index,msg);
-	  block_array[index].insert (process_type(CkMyPe()));
+
+          block_array[index].insert (process_type(CkMyPe()));
 
 	  // --------------------------------------------------
 
@@ -234,6 +235,7 @@ void Factory::create_block
   msg->set_data_msg (data_msg);
 
   cello::simulation()->set_msg_refine (index,msg);
+
   block_array[index].insert (process_type(CkMyPe()));
 }
 

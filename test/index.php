@@ -464,14 +464,12 @@ function end_hidden ($id)
 
 function test_table ($separator,$file_root,$size_array, $types)
 {
-  $show_flash = 0;
   $show_gif = 0;
 
   echo "<table>";
   echo "<tr>";
   //  echo "<th>$file_root</th>";
   if ($show_gif) echo "<th>gif</th>";
-  if ($show_flash) echo "<th>animation</th>";
   for ($j = 0; $j < sizeof($size_array); ++$j) {
     $size = $size_array[$j];
     printf ("<th>$size</th>");
@@ -485,16 +483,6 @@ function test_table ($separator,$file_root,$size_array, $types)
     // Show movie file if available
     if ($show_gif) {
       echo "<td> <img width=120 src=$file_root.gif></img></td>";
-    }
-    if ($show_flash) {
-      echo "<td>";
-      $swf_file = "$type/$file_root.swf"; 
-      $size_last = $size_array[sizeof($size_array)-1]; 
-      $png_file_last = "$file_root$separator$size_last.png"; 
-      swf_movie($swf_file, 
-		$png_file_last, 
-		160); 
-      echo "</td>";
     }
     // Show available image frames
     for ($j = 0; $j < sizeof($size_array); ++$j) {
@@ -510,13 +498,11 @@ function test_table ($separator,$file_root,$size_array, $types)
 
 function test_table_dir ($dir,$size_array, $types)
 {
-  $show_flash = 0;
   $show_gif = 0;
 
   echo "<table>";
   echo "<tr>";
   if ($show_gif) echo "<th>gif</th>";
-  if ($show_flash) echo "<th>animation</th>";
   for ($j = 0; $j < sizeof($size_array); ++$j) {
     $size = $size_array[$j];
     printf ("<th>$size</th>");
@@ -597,30 +583,6 @@ function row_divider($num_types)
   printf ("</tr>\n");
 }
 
-function swf_movie ($filename, $last_image, $image_size)
-{
-  global $types;
-  global $num_types;
-  if (file_exists($last_image)) {
-    printf ("<OBJECT classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\"\n");
-    printf ("codebase=\"http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,0,0\"\n");
-    printf ("WIDTH=\"$image_size\" HEIGHT=\"$image_size\"\n");
-    printf ("        id=\"implosion\" ALIGN=\"\">\n");
-    printf ("     <PARAM NAME=$filename\n");
-    printf ("            VALUE=\"$filename\">\n");
-    printf ("     <PARAM NAME=quality VALUE=high>\n");
-    printf ("     <PARAM NAME=bgcolor VALUE=#333399>\n");
-    printf ("     <EMBED src=\"$filename\"\n");
-    printf ("          quality=high\n");
-    printf ("          bgcolor=#333399\n");
-    printf ("          WIDTH=\"$image_size\" HEIGHT=\"$image_size\"\n");
-    printf ("          NAME=\"$filename\" ALIGN=\"\"\n");
-    printf ("          TYPE=\"application/x-shockwave-flash\"\n");
-    printf ("          PLUGINSPAGE=\"http://www.macromedia.com/go/getflashplayer\">\n");
-    printf ("       </EMBED>\n");
-    printf ("      </OBJECT> \n");
-  }  
-}
 printf ("<table>\n");
 printf ("<tr>\n");
 

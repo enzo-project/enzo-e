@@ -150,7 +150,7 @@ const char * op_name[] = {
     for (i=0; i<MAX_GROUP_DEPTH; i++) {
       groups[i] = 0; 
     }
-  };
+  }
 
   void copy_groups (char * group_dest[], char * group_src[]) {
     int i;
@@ -158,7 +158,7 @@ const char * op_name[] = {
       /* MEMORY LEAK */
       group_dest[i] = (group_src[i]) ? strdup(group_src[i]) : 0;
     }
-  };
+  }
 
   /* Insert a parameter into the list */
 

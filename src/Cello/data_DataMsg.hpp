@@ -134,14 +134,14 @@ public: // interface
   /// --------------------
   
   /// Return the ith FaceFluxes
-  FaceFluxes * face_fluxes (int i) 
+  FaceFluxes * face_fluxes (unsigned i) 
   { return face_fluxes_list_[i]; }
 
   /// Return the number of FaceFluxes
-  int num_face_fluxes() const
+  unsigned num_face_fluxes() const
   { return face_fluxes_list_.size(); }
 
-  void set_num_face_fluxes(int i)
+  void set_num_face_fluxes(unsigned i)
   {
     if (i > face_fluxes_list_.size()) {
       face_fluxes_list_.resize(i);
@@ -150,7 +150,7 @@ public: // interface
   }
   
   /// Set the FaceFluxes object
-  void set_face_fluxes  (int i, FaceFluxes * face_fluxes, bool is_new) 
+  void set_face_fluxes  (unsigned i, FaceFluxes * face_fluxes, bool is_new) 
   {
     set_num_face_fluxes(i+1);
     face_fluxes_list_[i] = face_fluxes; 

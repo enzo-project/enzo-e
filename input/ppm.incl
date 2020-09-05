@@ -39,7 +39,7 @@
 
       # list of methods to apply and in what order
  
-      list = ["debug","ppm"];
+      list = ["ppm"];
 
       ppm {
 

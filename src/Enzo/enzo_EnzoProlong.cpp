@@ -57,8 +57,7 @@ int EnzoProlong::apply_
  bool accumulate)
 {
 
-  WARNING("EnzoProlong::apply()",
-          "Not Implemented yet");
+  INCOMPLETE("EnzoProlong::apply()");
 
   int rank = cello::rank();
 
@@ -80,5 +79,6 @@ int EnzoProlong::apply_
 
   ASSERT1("EnzoProlong::apply",
           "apply() returned error %d",
-          error, ! error);
+          error, (! error) );
+  return 0;
 }  

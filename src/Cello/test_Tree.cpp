@@ -268,7 +268,7 @@ PARALLEL_MAIN_BEGIN
 
     tree_to_png (tree, file_root + "_1-initial.png",width,height);
 
-    int count_level[max_depth];
+    std::vector<int> count_level(max_depth);
     
     for (int level = 0; level < max_depth; level ++)
     {
@@ -283,7 +283,7 @@ PARALLEL_MAIN_BEGIN
 	      count_level[level],level,timer.value());
     }
 
-    int count_tree[max_depth];
+    std::vector<int> count_tree(max_depth);
     for (int level = 0; level < max_depth; level ++)
     {
       count_tree[level] = 0;

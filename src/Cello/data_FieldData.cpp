@@ -522,8 +522,6 @@ void FieldData::print
 (
  const FieldDescr * field_descr,
  const char * message,
- // double lower[3],
- // double upper[3],
  bool use_file) const throw()
 {
 
@@ -582,12 +580,6 @@ void FieldData::print
     ny = (iyp-iym);
     nz = (izp-izm);
 
-    //     double hx,hy,hz;
-
-    // hx = (upper[0]-lower[0])/(nxd-2*gx);
-    // hy = (upper[1]-lower[1])/(nyd-2*gy);
-    // hz = (upper[2]-lower[2])/(nzd-2*gz);
-
     const char * array_offset = &array_permanent_[0]+offsets_[index_field];
     switch (field_descr->precision(index_field)) {
     case precision_single:
@@ -598,7 +590,6 @@ void FieldData::print
 	     ixp,iyp,izp,
 	     nx, ny, nz,
 	     gx, gy ,gz,
-	     //	      hx, hy ,hz,
 	     nxd,nyd);
       break;
     case precision_double:
@@ -609,7 +600,6 @@ void FieldData::print
 	     ixp,iyp,izp,
 	     nx, ny, nz,
 	     gx, gy ,gz,
-	     //	      hx, hy ,hz,
 	     nxd,nyd);
       break;
     case precision_quadruple:
@@ -620,7 +610,6 @@ void FieldData::print
 	     ixp,iyp,izp,
 	     nx, ny, nz,
 	     gx, gy ,gz,
-	     //	      hx, hy ,hz,
 	     nxd,nyd);
       break;
     default:
@@ -629,7 +618,7 @@ void FieldData::print
 
     free ((void *)field_name);
   }
-
+  fclose (fp);
 }
 
 //----------------------------------------------------------------------
@@ -964,8 +953,11 @@ void FieldData::print_
   }
   double avg = sum / (nx*ny*nz);
   fprintf
-    (fp,"%s [%s] %18.14g %18.14g %18.14g\n",
-     message ? message : "", field_name, min,avg,max);
+    (fp,"%s [%s] %18.14Lg %18.14Lg %18.14Lg\n",
+     message ? message : "", field_name,
+     (long double)(min),
+     (long double)(avg),
+     (long double)(max));
 
 }
 

@@ -9,18 +9,8 @@
 #include "enzo.hpp"
 #include <stdio.h>
 
-#define NEW_FLUX
-
 // #define IE_ERROR_FIELD
 // #define DEBUG_PPM
-
-#ifdef DEBUG_PPM
-#   define TRACE(MSG,BLOCK) CkPrintf ("DEBUG_PPM: %s %s\n",BLOCK->name().c_str(),MSG); fflush(stdout);
-#else
-#   define TRACE(MSG,BLOCK) /* ... */
-#endif
-
-// #define DEBUG_NEW_FLUX
 //----------------------------------------------------------------------
 
 int EnzoBlock::SolveHydroEquations 
@@ -184,9 +174,6 @@ int EnzoBlock::SolveHydroEquations
   // Offsets computed from the "standard" pointer to the start of each
   // flux data
 
-#ifdef NEW_FLUX
-  //==================================================
-  
   FluxData * flux_data = data()->flux_data();
 
   const int nx = mx - 2*gx;
@@ -205,11 +192,11 @@ int EnzoBlock::SolveHydroEquations
     const int index_field = flux_data->index_field(i_f);
     const std::string field_name = field.field_name(index_field);
     
-    if (field_name == "density") flux_index = dindex;
-    if (field_name == "velocity_x") flux_index = uindex;
-    if (field_name == "velocity_y") flux_index = vindex;
-    if (field_name == "velocity_z") flux_index = windex;
-    if (field_name == "total_energy") flux_index = Eindex;
+    if (field_name == "density")         flux_index = dindex;
+    if (field_name == "velocity_x")      flux_index = uindex;
+    if (field_name == "velocity_y")      flux_index = vindex;
+    if (field_name == "velocity_z")      flux_index = windex;
+    if (field_name == "total_energy")    flux_index = Eindex;
     if (field_name == "internal_energy") flux_index = geindex;
     
     for (int axis=0; axis<rank; axis++) {
@@ -231,8 +218,6 @@ int EnzoBlock::SolveHydroEquations
     }
   }
 
-#endif    
- 
   //==================================================
   //    enzo_float *standard = SubgridFluxes[0]->LeftFluxes[0][0];
 
@@ -279,7 +264,7 @@ int EnzoBlock::SolveHydroEquations
   int iposrec = 0;
 
   int error = 0;
-  TRACE("ppm_de",this);
+
   FORTRAN_NAME(ppm_de)
     (
      density, total_energy, velocity_x, velocity_y, velocity_z,

@@ -76,6 +76,7 @@ c-----------------------------------------------------------------------
 c
       implicit NONE
 c
+#define FORTRAN
 #include "fortran_types.h"
 
       INTG_PREC ijkn

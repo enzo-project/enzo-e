@@ -10,8 +10,6 @@
 
 #include "data.hpp"
 
-#include "test_setup_face.hpp"
-
 cello_float init_1(int ix, int iy, int iz, int mx, int my, int mz)
 {
   return 7.0+3.0*(ix+mx*(iy+my*iz));
@@ -38,7 +36,22 @@ PARALLEL_MAIN_BEGIN
   const int level_1[] = {1,2,3};
   const int level_2[] = {1,3,2};
 
-  auto test = test::face_test[0];
+  struct face_test_type {
+    int child[3];
+    int size[3];
+    int centered[3];
+    double cell_width[3];
+    double time_step_1;
+    double time_step_2;
+  } test =
+      {
+       { 0, 0, 0},
+       {10, 6, 8 },
+       { 0, 0, 0},
+       { 0.25, 0.5, 1.0},
+       0.125, 0.125
+      };
+
   const int rvol[4] = {1, 2, 4, 8};
   
   for (int rank = 2; rank <=3; ++rank) {

@@ -225,14 +225,13 @@ int Block::refresh_load_particle_faces_ (Refresh * refresh)
 
   const int npa = (rank == 1) ? 4 : ((rank == 2) ? 4*4 : 4*4*4);
 
-  ParticleData * particle_array[npa];
-  ParticleData * particle_list [npa];
-  Index * index_list = new Index[npa];
+  ParticleData ** particle_array = new ParticleData *[npa];
+  ParticleData ** particle_list  = new ParticleData *[npa];
+
+  std::fill_n(particle_array,npa,nullptr);
+  std::fill_n(particle_list ,npa,nullptr);
   
-  for (int i=0; i<npa; i++) {
-    particle_list[i]  = NULL;
-    particle_array[i] = NULL;
-  }
+  Index * index_list = new Index[npa];
 
   // Sort particles that have left the Block into 4x4x4 array
   // corresponding to neighbors
@@ -244,8 +243,10 @@ int Block::refresh_load_particle_faces_ (Refresh * refresh)
 
   particle_send_(nl,index_list,particle_list);
 
+  delete [] particle_array;
+  delete [] particle_list;
   delete [] index_list;
-
+  
   return nl;
 }
 

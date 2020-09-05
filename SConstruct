@@ -75,12 +75,6 @@ debug_verbose = 0
 memory = 1
 
 #----------------------------------------------------------------------
-# Set to 1 if Charm++ version is >= 6.7.0
-#----------------------------------------------------------------------
-
-new_charm = 1
-
-#----------------------------------------------------------------------
 # Enable charm++ dynamic load balancing
 #----------------------------------------------------------------------
 
@@ -134,12 +128,6 @@ ip_charm = '4'
 #----------------------------------------------------------------------
 
 have_git = 1
-
-#----------------------------------------------------------------------
-# Whether this is a Mercurial repository
-#----------------------------------------------------------------------
-
-have_mercurial = 0
 
 #----------------------------------------------------------------------
 # Whether to use the jemalloc library for memory allocation
@@ -202,7 +190,6 @@ define_jemalloc  = 'CONFIG_USE_JEMALLOC'
 # Performance defines
 
 define_memory =       'CONFIG_USE_MEMORY'
-define_new_charm =    'CONFIG_NEW_CHARM'
 define_projections =  'CONFIG_USE_PROJECTIONS'
 define_performance =  'CONFIG_USE_PERFORMANCE'
 define_papi  =        'CONFIG_USE_PAPI','PAPI3'
@@ -227,33 +214,19 @@ define_debug_verbose = 'CELLO_DEBUG_VERBOSE'
 
 define_png   =        'NO_FREETYPE'
 
-# Python version defines
-
-define_python_lt_27 = 'CONFIG_PYTHON_LT_27'
-
 # SMP mode define for safety checking against IO throttling
 
-define_smp = 'CONFIG_SMP_MODE'
+define_smp =          'CONFIG_SMP_MODE'
 
-# Version control defines (Git or Mercurial)
+# Version control defines
 
 define_have_version_control = 'CONFIG_HAVE_VERSION_CONTROL'
-
 
 #======================================================================
 # ARCHITECTURE SETTINGS
 #======================================================================
 
 is_arch_valid = 0
-
-# Assume Python is new, but may be overridden in machine configuration
-# files if needed.  For example, gordon and comet have Python 2.6
-# installed, but subprocess.check_output() used below requires 2.7, so
-# we set python_lt_27 = 1 in those configuration files to avoid
-# calling check_output()
-
-python_lt_27 = 0
-
 
 sys.path.append("./config");
 
@@ -366,10 +339,7 @@ if (debug_field_face != 0): defines.append( define_debug_field_face )
 if (check != 0):         defines.append( define_check )
 if (debug_verbose != 0): defines.append( define_debug_verbose )
 if (memory != 0):        defines.append( define_memory )
-if (new_charm != 0):     defines.append( define_new_charm )
-if (python_lt_27 != 0):  defines.append( define_python_lt_27 )
-if (have_git != 0 or have_mercurial != 0 ):
-   defines.append( define_have_version_control )
+if (have_git != 0):      defines.append( define_have_version_control )
 if (smp != 0):           defines.append( define_smp )
 
 #======================================================================
@@ -560,42 +530,27 @@ cello_def.write ("#define CELLO_TIME "
 		"\""+time.strftime("%H:%M:%S",time.gmtime())+"\"\n" )
 
 #----------
-# Python version >= 2.7 is required for subprocess.check_output()
-
-if (python_lt_27 == 0):
-     charm_version = str(subprocess.check_output (["cat", charm_path + "/VERSION"]).rstrip());
-     cello_def.write ("#define CELLO_CHARM_VERSION "+charm_version+"\n" )
+charm_version = str(subprocess.check_output (["cat", charm_path + "/VERSION"]).rstrip());
+cello_def.write ("#define CHARM_VERSION "+charm_version+"\n" )
      
-     fp_charm_version = open ("test/CHARM_VERSION", "w")
-     fp_charm_version.write(charm_version + str("\n"));
-     fp_charm_version.close()
-     		      
-else:
-     cello_def.write ("#define CELLO_CHARM_VERSION 0\n")	
-     fp_charm_version = open ("test/CHARM_VERSION", "w")
-     fp_charm_version.write("unknown\n");
-     fp_charm_version.close()
+fp_charm_version = open ("test/CHARM_VERSION", "w")
+fp_charm_version.write(charm_version + str("\n"));
+fp_charm_version.close()
 
 Clean('.','test/CHARM_VERSION')
 
-cello_def.write ("#define CELLO_CHARM_PATH \"" + charm_path + "\"\n" )
+cello_def.write ("#define CHARM_PATH \"" + charm_path + "\"\n" )
 
 #----------
-# Both Python version 2.7 is required, and git must be installed
 
-if (python_lt_27 == 0 and have_git):
-
+if (have_git):
+      
    git_changeset = str(subprocess.check_output(["git", "rev-parse", "HEAD"]).rstrip())
    cello_def.write ("#define CELLO_CHANGESET \""+git_changeset+"\"\n" )
 
-elif (python_lt_27 == 0 and have_mercurial):
-
-     cello_def.write ("#define CELLO_CHANGESET "
-                      "\""+subprocess.check_output
-                      (["hg","id","-n"]).rstrip()+"\"\n" )
-
 else:
-     cello_def.write ("#define CELLO_CHANGESET \"unknown\"\n" )
+        
+   cello_def.write ("#define CELLO_CHANGESET \"unknown\"\n" )
 
 #----------
 
