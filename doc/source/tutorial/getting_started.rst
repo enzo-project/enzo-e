@@ -131,8 +131,8 @@ double-precision.  To specify the precision to use in Enzo-E, set the
 
   ===================================  ======================
   ===================================  ======================
-  ``export CELLO_PREC=single``  *32-bit Enzo field data*
-  ``export CELLO_PREC=double``  *64-bit Enzo field data*
+  ``export CELLO_PREC=single``         *32-bit Enzo field data*
+  ``export CELLO_PREC=double``         *64-bit Enzo field data*
   ===================================  ======================
 
 3. Specify Charm++ directory
