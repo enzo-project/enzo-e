@@ -362,8 +362,7 @@ public: // interface
   /// Fill a vector of position coordinates for the given type and batch
   /// Bounds is used when positions are stored relative to the local block
   /// (e.g. as integers) and used to convert local to global coordinates
-  bool position (int it, int ib,
-		 double * x, double * y = 0, double * z = 0)
+  bool position (int it, int ib, double * x, double * y, double * z)
   { return particle_data_->position(particle_descr_,it,ib,x,y,z); }
 
   /// Update positions in a batch a given amount.  Only used in refresh for
@@ -373,8 +372,7 @@ public: // interface
   { particle_data_->position_update (particle_descr_,it,ib,dx,dy,dz);  }
 
   /// Fill a vector of velocity coordinates for the given type and batch
-  bool velocity (int it, int ib,
-		 double * vx, double * vy = 0, double * vz = 0)
+  bool velocity (int it, int ib, double * vx, double * vy, double * vz)
   { return particle_data_->velocity(particle_descr_,it,ib,vx,vy,vz); }
 
   //--------------------------------------------------

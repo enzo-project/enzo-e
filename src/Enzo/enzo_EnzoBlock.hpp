@@ -12,7 +12,7 @@
 
 #include "enzo.decl.h"
 
-class EnzoBlock : public BASE_ENZO_BLOCK
+class EnzoBlock : public CBase_EnzoBlock
 
 {
 
@@ -110,7 +110,7 @@ public: // interface
 
   /// Initialize an empty EnzoBlock
   EnzoBlock()
-    :  BASE_ENZO_BLOCK(),
+    :  CBase_EnzoBlock(),
        dt(0.0),
        redshift(0.0)
   {
@@ -127,7 +127,7 @@ public: // interface
 
   /// Initialize a migrated EnzoBlock
   EnzoBlock (CkMigrateMessage *m) 
-    : BASE_ENZO_BLOCK (m),
+    : CBase_EnzoBlock (m),
       dt(0.0),
       redshift(0.0)
   {

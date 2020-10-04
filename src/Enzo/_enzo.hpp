@@ -58,14 +58,6 @@ enum {
   index_turbulence_maxd,
   max_turbulence_array };
 
-#ifdef CONFIG_NEW_CHARM
-#   define BASE_ENZO_BLOCK      CBase_EnzoBlock
-#   define BASE_ENZO_SIMULATION CBase_EnzoSimulation
-#else
-#   define BASE_ENZO_BLOCK      Block
-#   define BASE_ENZO_SIMULATION Simulation
-#endif
-
 //----------------------------------------------------------------------
 
 enum enzo_sync_id {

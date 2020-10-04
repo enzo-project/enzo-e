@@ -454,7 +454,8 @@ inline void compute_unity_sum_passive_fluxes_(const enzo_float dens_flux,
 					      const int iz, const int iy,
 					      const int ix) noexcept
 {
-  UNTESTED("compute_unity_sum_passive_fluxes_");
+  ERROR("EnzoRiemannImpl::solve_passive_advection_",
+        "This codepath is untested");
   enzo_float sum = 0.;
   for (int field_ind=0; field_ind<num_fields; field_ind++){
     sum += reconstructed[field_ind](iz,iy,ix);
@@ -553,9 +554,8 @@ void EnzoRiemannImpl<ImplFunctor>::solve_passive_advection_
 
     if (passive_integrable_categories_[i] != FieldCat::specific){
       // this is here to indicate that FieldCat::conserved should be allowed
-      INCOMPLETE1("passive_advection_helper_",
-		  "support for calculation of conserved passive scalars does "
-		  "not currently exist");
+      INCOMPLETE("passive_advection_helper_ doesn't currently support "
+                 "conserved passive scalars");
     }
     passive_advection_helper_(group_name, priml_group,primr_group, flux_group,
 			      density_flux, dim, array_factory, false);

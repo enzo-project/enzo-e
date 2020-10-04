@@ -56,6 +56,7 @@ if [ "$#" -ge 1 ]; then
       rm -rf test/*.test-log
       rm -rf scons-local-2.2.0/SCons/*.pyc scons-local-2.2.0/SCons/*/*.pyc
       rm -rf charmrun parameters.out checkpoint_ppm* output-stride*.h5
+      rm -rf cov-int.tgz cov-int
       rm -rf `find test -name "*.png"`
       rm -rf `find test -name "*.h5"`
       rm -rf src/.cccc

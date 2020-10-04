@@ -8,12 +8,8 @@
 #include "problem.hpp"
 #include "charm_simulation.hpp"
 #include "test.hpp"
+
 //----------------------------------------------------------------------
-#ifdef TRACE_FLUX_CORRECT
-#   define TRACE(BLOCK,MSG) CkPrintf ("DEBUG_METHOD_FLUX_CORRECT %d %s %s\n",__LINE__,BLOCK->name().c_str(),MSG); fflush(stdout);
-#else
-#   define TRACE(BLOCK,MSG) /* ... */
-#endif
 
 MethodFluxCorrect::MethodFluxCorrect
 (std::string group, bool enable, double min_digits) throw() 
@@ -57,7 +53,6 @@ MethodFluxCorrect::MethodFluxCorrect
 
 void MethodFluxCorrect::compute ( Block * block) throw()
 {
-  TRACE(block,"compute");
   cello::refresh(ir_pre_)->set_active(block->is_leaf());
 
   block->new_refresh_start
@@ -69,7 +64,6 @@ void MethodFluxCorrect::compute ( Block * block) throw()
 
 void Block::Block::p_method_flux_correct_refresh()
 {
-  TRACE(this,"p_method_flux_correct_refresh");
   static_cast<MethodFluxCorrect*>
     (this->method())->compute_continue_refresh(this);
 }
@@ -78,7 +72,6 @@ void Block::Block::p_method_flux_correct_refresh()
 
 void MethodFluxCorrect::compute_continue_refresh( Block * block ) throw()
 {
-  TRACE(block,"compute_continue_refresh");
   // accumulate local sums of conserved fields for global sum reduction
 
   flux_correct_ (block);
@@ -143,7 +136,7 @@ void MethodFluxCorrect::compute_continue_refresh( Block * block ) throw()
     }
   }
   
-  CkCallback callback (CkIndex_Block::r_method_flux_correct_sum_fields(NULL), 
+  CkCallback callback (CkIndex_Block::r_method_flux_correct_sum_fields(nullptr), 
                        block->proxy_array());
 
   block->contribute
@@ -156,7 +149,6 @@ void MethodFluxCorrect::compute_continue_refresh( Block * block ) throw()
 
 void Block::Block::r_method_flux_correct_sum_fields(CkReductionMsg * msg)
 {
-  TRACE(this,"r_method_flux_correct_sum_fields");
   static_cast<MethodFluxCorrect*>
     (this->method())->compute_continue_sum_fields(this,msg);
 }
@@ -166,8 +158,6 @@ void Block::Block::r_method_flux_correct_sum_fields(CkReductionMsg * msg)
 void MethodFluxCorrect::compute_continue_sum_fields
 ( Block * block, CkReductionMsg * msg) throw()
 {
-  TRACE(this,"compute_continue_sum_fields");
-
   FluxData * flux_data = block->data()->flux_data();
   const int nf = flux_data->num_fields();
   long double * data = (long double *) msg->getData();
@@ -208,8 +198,6 @@ void MethodFluxCorrect::compute_continue_sum_fields
 
   block->data()->flux_data()->deallocate();
 
-  TRACE(this,"compute done");
-  
   block->compute_done();
 }
 

@@ -112,6 +112,7 @@ c     (for other parameters see CW84)
 c
 c-----------------------------------------------------------------------
       implicit NONE
+#define FORTRAN
 #include "fortran_types.h"
 c
       INTG_PREC ijkn

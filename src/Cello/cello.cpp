@@ -162,33 +162,17 @@ namespace cello {
   }
 
   int digits_max(int precision)
-  { return (precision==precision_single)?7 :
-      ( (precision=precision_double) ? 16 : 34);
-  }
-  //----------------------------------------------------------------------
-
-  void backtrace(const char * msg)
   {
-    int j, nptrs;
-#define SIZE 100
-    void *buffer[100];
-    char **strings;
-
-    nptrs = ::backtrace(buffer, SIZE);
-
-    /* The call backtrace_symbols_fd(buffer, nptrs, STDOUT_FILENO)
-       would produce similar output to the following: */
-
-    strings = backtrace_symbols(buffer, nptrs);
-    if (strings == NULL) {
-      perror("backtrace_symbols");
-      exit(EXIT_FAILURE);
+    switch (precision) {
+    case precision_single:
+      return std::numeric_limits<float>::digits;
+    case precision_double:
+      return std::numeric_limits<double>::digits;
+    case precision_quadruple:
+      return std::numeric_limits<long double>::digits;
+    default:
+      return 0;
     }
-
-    for (j = 0; j < nptrs; j++)
-      printf("%s\n", strings[j]);
-
-    free(strings);
   }
 
   //---------------------------------------------------------------------- 

@@ -815,7 +815,7 @@ public: // virtual functions
     const int n = new_refresh_sync_list_.size();
     for (int i=0; i<n; i++) {
       Sync & sync = new_refresh_sync_list_[i];
-      CkPrintf ("DEBUG_NEW_REFRESH   sync %p %d/%u\n",&sync,sync.value(),sync.stop());
+      CkPrintf ("DEBUG_NEW_REFRESH   sync %p %d/%u\n",(void*)&sync,sync.value(),sync.stop());
       CkPrintf ("DEBUG_NEW_REFRESH   state %s\n",
                 (sync.state()==RefreshState::INACTIVE) ? "INACTIVE" :
                 ((sync.state()==RefreshState::ACTIVE) ? "ACTIVE" : "READY"));

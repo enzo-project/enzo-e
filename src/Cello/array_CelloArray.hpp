@@ -665,9 +665,11 @@ TempArray_<T,D> FixedDimArray_<T,D>::subarray(Args... args) noexcept{
   if (sizeof...(args) == 0) {
     subarray.shallow_copy_init_helper_(*this);
   } else {
-    CSlice in_slices[] = {args...};
+    // the dummy value at the end of input_slices keeps the compiler from
+    // freaking out when no arguments are passed
+    CSlice input_slices[1+sizeof...(args)] = {args...,CSlice()};
     CSlice slices[D];
-    prep_slices_(in_slices, shape_, D, slices);
+    prep_slices_(input_slices, shape_, D, slices);
 
     intp new_shape[D];
     intp new_offset = offset_;

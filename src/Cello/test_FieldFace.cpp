@@ -301,11 +301,11 @@ PARALLEL_MAIN_BEGIN
 
 
   int nbx=2, nby=3, nbz=4;
-  FieldData * field_data[nbx*nby*nbz];
+  std::vector<FieldData *> field_data(nbx*nby*nbz);
 
   int mx=5, my=6, mz=7;
 
-  init_fields(field_descr,field_data,nbx,nby,nbz,mx,my,mz);
+  init_fields(field_descr,field_data.data(),nbx,nby,nbz,mx,my,mz);
 
   //----------------------------------------------------------------------
   // Refresh ghosts
@@ -397,7 +397,7 @@ PARALLEL_MAIN_BEGIN
   }
 
   unit_func("face_to_array / array_to_face");
-  unit_assert(test_fields(field_descr,field_data,nbx,nby,nbz,mx,my,mz));
+  unit_assert(test_fields(field_descr,field_data.data(),nbx,nby,nbz,mx,my,mz));
 
   //----------------------------------------------------------------------	
   // clean up

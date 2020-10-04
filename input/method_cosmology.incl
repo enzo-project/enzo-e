@@ -125,8 +125,7 @@
  }
 
  Method {
-     list = [ "debug",
-              "comoving_expansion",
+     list = [ "comoving_expansion",
               "cosmology",
               "pm_deposit",
 	      "gravity",

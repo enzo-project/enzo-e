@@ -181,21 +181,23 @@ private: // functions
   /// Precision-agnostic function for loading field block face into
   /// the field_face array; returns number of bytes copied
   template<class T>
-  size_t load_ (T * array_face,  const T * field_face,
+  size_t load_ (      T * array_face,
+                const T * field_face,
 		int nd3[3], int nf3[3], int im3[3],
 		bool accumulate) throw();
 
   /// Precision-agnostic function for copying the field_face array into
   /// the field block ghosts; returns number of bytes copied
   template<class T>
-  size_t store_ (T * field_ghosts,  const T * array_ghosts, 
+  size_t store_ (      T * field_ghosts,
+                 const T * array_ghosts, 
 		 int nd3[3], int nf3[3], int im3[3],
 		 bool accumulate) throw();
 
   /// Precision-agnostic function for copying a field block face
   /// into another block's ghost zones
   template<class T>
-  void copy_ (T       * vd, int md3[3], int nd3[3], int id3[3],
+  void copy_ (      T * vd, int md3[3], int nd3[3], int id3[3],
 	      const T * vs, int ms3[3], int ns3[3], int is3[3],
 	      bool accumulate) throw();
 

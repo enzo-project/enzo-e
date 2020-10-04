@@ -10,57 +10,6 @@
 /// array of octrees.
 
 //--------------------------------------------------
-// #define DEBUG_ADAPT
-//--------------------------------------------------
-
-//#define BLOCK_A "B0:10_0:00"
-// #define TRACE_BLOCK(BLOCK) { if (BLOCK->name() == BLOCK_A) CkPrintf ("%s:%d TRACE_BLOCK %d\n",__FILE__,__LINE__,BLOCK->level_next_); }
-
-#define TRACE_BLOCK(BLOCK) /* ... */
-
-#ifdef DEBUG_ADAPT
-
-#define CELLO_TRACE
-
-#   define PUT_LEVEL(INDEX_SEND,INDEX_RECV,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG) \
-  {									\
-    char buffer [256];							\
-    int nb3[3] = {2,2,2};						\
-    CkPrintf ("%s %s -> B%s"						\
-	     " [%d => %d] if3 %2d %2d %2d  ic3 %d %d %d\n",		\
-	      name().c_str(),MSG,INDEX_RECV.bit_string(INDEX_RECV.level(),cello::rank(),nb3).c_str(),LEVEL_NOW,LEVEL_NEW, \
-	     IF3[0],IF3[1],IF3[2],IC3[0],IC3[1],IC3[2]);		\
-    check_child_(IC3,"PUT_LEVEL",__FILE__,__LINE__);			\
-    check_face_(IF3,"PUT_LEVEL",__FILE__,__LINE__);			\
-    thisProxy[INDEX_RECV].p_adapt_recv_level				\
-      (INDEX_SEND,IC3,IF3,LEVEL_NOW,LEVEL_NEW);				\
-  }
-#else /* DEBUG_ADAPT */
-#   define PUT_LEVEL(INDEX_SEND,INDEX_RECV,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG) \
-  {									\
-    thisProxy[INDEX_RECV].p_adapt_recv_level				\
-      (INDEX_SEND,IC3,IF3,LEVEL_NOW,LEVEL_NEW);				\
-  }
-#endif /* DEBUG_ADAPT */
-
-#ifdef DEBUG_ADAPT
-
-#   ifdef CELLO_TRACE
-#      define trace(A) \
-  CkPrintf ("%s %s DEBUG_ADAPT %s\n",				\
-	    __FILE__,name_.c_str(),A);				\
-  fflush(stdout)
-#   else
-#      define trace(A) /*  NULL */
-#   endif
-
-#else
-
-#   define trace(A) /*  NULL */
-
-#endif
-
-//--------------------------------------------------
 
 #include "simulation.hpp"
 #include "mesh.hpp"
@@ -68,6 +17,10 @@
 
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
+
+//--------------------------------------------------
+// #define DEBUG_ADAPT
+//--------------------------------------------------
 
 //======================================================================
 
@@ -95,14 +48,11 @@ void Block::adapt_enter_()
 void Block::adapt_begin_()
 
 {
-  trace("adapt_begin 1");
-
   cello::simulation()->set_phase(phase_adapt);
 
   const int level_maximum = cello::config()->mesh_max_level;
 
   level_next_ = adapt_compute_desired_level_(level_maximum);
-  TRACE_BLOCK(this);
 
   const int min_face_rank = cello::config()->adapt_min_face_rank;
   
@@ -121,8 +71,6 @@ void Block::adapt_begin_()
 /// detection.
 void Block::adapt_called_()
 {
-  trace("adapt_called 2");
-
   adapt_send_level();
 
   control_sync_quiescence (CkIndex_Main::p_adapt_next());
@@ -139,21 +87,8 @@ void Block::adapt_called_()
 /// adapt_end_().
 void Block::adapt_next_()
 {
-  trace("adapt_next 3");
-
-#ifdef DEBUG_ADAPT
-  {
-    char buffer[255];
-    if (level() != level_next_) {
-      CkPrintf ("%s is leaf %d level %d -> %d\n",
-		name().c_str(),is_leaf(),level(),level_next_);
-    }
-  }
-#endif
-
   update_levels_();
 
-  TRACE_BLOCK(this);
   if (is_leaf()) {
     if (level() < level_next_) adapt_refine_();
     if (level() > level_next_) adapt_coarsen_();
@@ -174,15 +109,9 @@ void Block::adapt_next_()
 /// been deleted.  
 void Block::adapt_end_()
 {
-  trace("adapt_end 4");
-
   if (index_.is_root()) thisProxy.doneInserting();
 
   if (delete_) {
-#ifdef DEBUG_ADAPT
-  CkPrintf ("%s DESTROY\n",name().c_str());
-  fflush(stdout);
-#endif
     ckDestroy();
     return;
   }
@@ -443,20 +372,17 @@ void Block::particle_scatter_children_ (ParticleData * particle_list[],
       const int np = particle.num_particles(it,ib);
 
       // ...all particles will be moved
-      bool mask[np];
-      for (int ip=0; ip<np; ip++) {
-	mask[ip] = true;
-      }
+      const bool * mask = nullptr;
 
       // ...extract particle position arrays
+      std::vector<double> xa(np);
+      std::vector<double> ya(np);
+      std::vector<double> za(np);
+      
+      particle.position(it,ib,xa.data(),ya.data(),za.data());
 
-      double xa[np],ya[np],za[np];
-      particle.position(it,ib,xa,ya,za);
-
-      // ...initialize mask used for scatter and delete
       // ...and corresponding particle indices
-
-      int index[np];
+      std::vector<int> index(np);
 
       if (is_float) {
 
@@ -464,9 +390,9 @@ void Block::particle_scatter_children_ (ParticleData * particle_list[],
 
 	for (int ip=0; ip<np; ip++) {
 
-	  double x = xa[ip*d];
-	  double y = ya[ip*d];
-	  double z = za[ip*d];
+	  const double x = xa[ip*d];
+	  const double y = ya[ip*d];
+	  const double z = za[ip*d];
 
 	  const int rank = cello::rank();
 	  int ix = (rank >= 1) ? ( (x < x0) ? 0 : 1) : 0;
@@ -481,9 +407,8 @@ void Block::particle_scatter_children_ (ParticleData * particle_list[],
 	ERROR("Block::particle_scatter_children_",
 	      "Relative (integer) positions not supported");
       }
-
       // ...scatter particles to particle array
-      particle.scatter (it,ib, np, mask, index, npa, particle_list);
+      particle.scatter (it,ib, np, mask, index.data(), npa, particle_list);
       // ... delete scattered particles
       count += particle.delete_particles (it,ib,mask);
     }
@@ -498,7 +423,9 @@ void Block::adapt_delete_child_(Index index_child)
 #ifdef DEBUG_ADAPT
   int nb3[3] = {2,2,2};
   CkPrintf ("%s deleting child %s\n",
-	    name().c_str(), index_child.bit_string(index_child.level(),cello::rank(),nb3).c_str());
+	    name().c_str(),
+            index_child.bit_string
+            (index_child.level(),cello::rank(),nb3).c_str());
   fflush(stdout);
 #endif
   thisProxy[index_child].p_adapt_delete();
@@ -527,7 +454,9 @@ void Block::adapt_send_level()
     Index index_neighbor = it_neighbor.index();
     int ic3[3];
     it_neighbor.child(ic3);
-    PUT_LEVEL (index_,index_neighbor,ic3,of3,level,level_next_,"send");
+
+    thisProxy[index_neighbor].p_adapt_recv_level
+      (index_,ic3,of3,level,level_next_);
   }
 }
 
@@ -690,7 +619,6 @@ void Block::p_adapt_recv_level
 	  
   // notify neighbors if level_next has changed
 
-  TRACE_BLOCK(this);
   if (level_next != level_next_) {
     ASSERT2 ("Block::p_adapt_recv_level()",
 	     "level_next %d level_next_ %d\n", level_next,level_next_,
@@ -698,7 +626,6 @@ void Block::p_adapt_recv_level
     level_next_ = level_next;
     adapt_send_level();
   }
-  TRACE_BLOCK(this);
   performance_stop_(perf_adapt_update);
   performance_start_(perf_adapt_update_sync);
 }

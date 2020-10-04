@@ -314,7 +314,7 @@ bool
 Performance::is_region_active(int index_region) throw()
 {
   return (region_started_[index_region]);
-};
+}
 
 //----------------------------------------------------------------------
 

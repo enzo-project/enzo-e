@@ -370,15 +370,13 @@ int Block::new_refresh_load_particle_faces_ (Refresh & refresh)
   const int npa3[3] = { 4, 4*4, 4*4*4 };
   const int npa = npa3[rank-1];
 
-  ParticleData * particle_array[npa];
-  ParticleData * particle_list [npa];
+  ParticleData ** particle_array = new ParticleData*[npa];
+  ParticleData ** particle_list = new ParticleData*[npa];
+  std::fill_n (particle_array,npa,nullptr);
+  std::fill_n (particle_list,npa,nullptr);
+
   Index * index_list = new Index[npa];
   
-  for (int i=0; i<npa; i++) {
-    particle_list[i]  = NULL;
-    particle_array[i] = NULL;
-  }
-
   // Sort particles that have left the Block into 4x4x4 array
   // corresponding to neighbors
 
@@ -389,6 +387,8 @@ int Block::new_refresh_load_particle_faces_ (Refresh & refresh)
 
   new_particle_send_(refresh,nl,index_list,particle_list);
 
+  delete [] particle_array;
+  delete [] particle_list;
   delete [] index_list;
 
   return nl;
@@ -651,13 +651,9 @@ void Block::particle_apply_periodic_update_
   const int level = this->level();
   const int min_face_rank = refresh->min_face_rank();
 
-  double dpx[nl],dpy[nl],dpz[nl];
-
-  for (int i=0; i<nl; i++) {
-    dpx[i]=0.0;
-    dpy[i]=0.0;
-    dpz[i]=0.0; 
-  }
+  std::vector<double> dpx(nl,0.0);
+  std::vector<double> dpy(nl,0.0);
+  std::vector<double> dpz(nl,0.0);
 
   // Compute position updates for particles crossing periodic boundaries
 
@@ -771,8 +767,11 @@ void Block::particle_scatter_neighbors_
 
       // ...extract particle position arrays
 
-      double xa[np],ya[np],za[np];
-      particle.position(it,ib,xa,ya,za);
+      std::vector<double> xa(np,0.0);
+      std::vector<double> ya(np,0.0);
+      std::vector<double> za(np,0.0);
+
+      particle.position(it,ib,xa.data(),ya.data(),za.data());
 
       // ...initialize mask used for scatter and delete
       // ...and corresponding particle indices

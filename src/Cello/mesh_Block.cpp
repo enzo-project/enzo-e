@@ -319,7 +319,7 @@ void Block::init
   if (level > 0) index_.child(level,ic3,ic3+1,ic3+2);
 
 #ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p narray = %d\n",this,narray);
+  CkPrintf ("%p narray = %d\n",(void*)this,narray);
 #endif
   if (narray != 0) {
 
@@ -332,7 +332,8 @@ void Block::init
     FieldFace * field_face = create_face
       (if3, ic3, lg3, refresh_fine, refresh, true);
 #ifdef DEBUG_FIELD_FACE  
-  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",
+            CkMyPe(),__FILE__,__LINE__,(void*)field_face);
 #endif
 
     // Copy refined field data
@@ -512,8 +513,8 @@ void Block::periodicity (bool p3[3]) const
 void Block::print () const
   
 {
-  CkPrintf ("data_ = %p\n",data_);
-  CkPrintf ("child_data_ = %p\n",child_data_);
+  CkPrintf ("data_ = %p\n",(void*)data_);
+  CkPrintf ("child_data_ = %p\n",(void*)child_data_);
   int v3[3];index().values(v3);
   CkPrintf ("index_ = %0x %0x %0x\n",v3[0],v3[1],v3[2]);
   CkPrintf ("level_next_ = %d\n",level_next_);
@@ -650,7 +651,8 @@ Block::~Block()
     FieldFace * field_face = create_face
       ( if3,ic3,lg3,refresh_coarse,refresh,true);
 #ifdef DEBUG_FIELD_FACE  
-    CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
+    CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",
+              CkMyPe(),__FILE__,__LINE__,(void*)field_face);
 #endif
 
     field_face->face_to_array(data()->field(),&n,&array);
@@ -696,7 +698,8 @@ void Block::p_refresh_child
   FieldFace * field_face = create_face
     (if3, ic3, lg3, refresh_coarse,refresh,true);
 #ifdef DEBUG_FIELD_FACE  
-  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",
+            CkMyPe(),__FILE__,__LINE__,(void*)field_face);
 #endif
   
   field_face -> array_to_face (buffer, data()->field());
@@ -788,7 +791,7 @@ Block::Block (CkMigrateMessage *m)
   fflush(stdout);
 #endif  
   
-};
+}
 
 //----------------------------------------------------------------------
 
@@ -960,7 +963,8 @@ FieldFace * Block::create_face
 {
   FieldFace  * field_face = new FieldFace;
 #ifdef DEBUG_FIELD_FACE  
-  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",
+            CkMyPe(),__FILE__,__LINE__,(void*)field_face);
 #endif
 
   field_face -> set_refresh_type (refresh_type);

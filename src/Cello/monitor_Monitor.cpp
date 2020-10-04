@@ -99,34 +99,25 @@ void Monitor::header () const
   print ("Define","BUILD DIR           %s",CELLO_DIR);
   print ("Define","BUILD DATE (UTC)    %s",CELLO_DATE);
   print ("Define","BUILD TIME (UTC)    %s",CELLO_TIME);
-  print ("Define","CELLO_CHARM_PATH    %s",CELLO_CHARM_PATH);
+#ifdef CONFIG_HAVE_VERSION_CONTROL
+  print ("Define","CHANGESET           %s",CELLO_CHANGESET);
+#endif
 #ifdef NEW_OUTPUT  
   print ("Define","NEW_OUTPUT          %s","Yes");
 #else
   print ("Define","NEW_OUTPUT          %s","no");
 #endif  
-#ifndef CONFIG_PYTHON_LT_27
-  print ("Define","CHARM_VERSION %d",CELLO_CHARM_VERSION);
-#   ifdef CONFIG_HAVE_VERSION_CONTROL
-  print ("Define","CHANGESET     %s",CELLO_CHANGESET);
-#   endif
-#endif
+  print ("Define","CHARM_PATH          %s",CHARM_PATH);
+  print ("Define","CHARM_VERSION       %d",CHARM_VERSION);
   print ("Define","CHARM_BUILD         %s",CHARM_BUILD);
-#ifdef CONFIG_NEW_CHARM
-  print ("Define","CHARM_NEW_CHARM     %s","Yes");
-#else
-  print ("Define","CHARM_NEW_CHARM     %s","no");
-#endif
   print ("Define","CONFIG_NODE_SIZE    %d",CONFIG_NODE_SIZE);
 #ifdef CONFIG_SMP_MODE
   print ("Define","CONFIG_SMP_MODE     %s","Yes");
 #else
   print ("Define","CONFIG_SMP_MODE     %s","no");
 #endif  
-
   print ("CHARM","CkNumPes()           %d",CkNumPes());
   print ("CHARM","CkNumNodes()         %d",CkNumNodes());
-
 }
 
 //----------------------------------------------------------------------
