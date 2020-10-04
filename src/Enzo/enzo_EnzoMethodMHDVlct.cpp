@@ -903,7 +903,7 @@ void EnzoMethodMHDVlct::allocate_temp_fields_
   prep_temp_field_grouping_(field, *primitive_group_, combined_integrable_names,
 			    zflux_group, "zflux_",0,0,-1);
 
-  // Prepare fields used to accumulate all changes to the activel advected and
+  // Prepare fields used to accumulate all changes to the actively advected and
   // passively advected quantities. If CT is in use, dUcons_group should not
   // have storage for magnetic fields since CT independently updates magnetic
   // fields (this exlusion is implicitly handled integrable_updater_)
@@ -976,7 +976,7 @@ void EnzoMethodMHDVlct::allocate_temp_fields_
 
 // Helper function that deallocates the temporary fields of a grouping
 void deallocate_grouping_fields_(Field &field,
-				 std::vector<std::string> &group_names,
+				 const std::vector<std::string> &group_names,
 				 Grouping &grouping)
 {
   for (unsigned int i=0;i<group_names.size();i++){
@@ -1021,6 +1021,11 @@ void EnzoMethodMHDVlct::deallocate_temp_fields_
   deallocate_grouping_fields_(field, prim_group_names, temp_primitive_group);
   deallocate_grouping_fields_(field, prim_group_names, priml_group);
   deallocate_grouping_fields_(field, prim_group_names, primr_group);
+
+  // deallocate fields used to accumulate all changes to the actively and
+  // passively advected quantities.
+  deallocate_grouping_fields_
+    (field, integrable_updater_->combined_integrable_groups(), dUcons_group);
 
   // deallocate face-centered flux fields
   deallocate_grouping_fields_(field, combined_integrable_names, xflux_group);
