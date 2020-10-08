@@ -85,7 +85,8 @@ typedef enzo_float (*limiter_function_call_signature)
       };                                                                    \
     public:                                                                 \
       static constexpr bool value = inner_helper_<T, signature>::value;     \
-  };
+  }
+// omit trailing semicolon to avoid -Wpedantic warning
 
 //----------------------------------------------------------------------
 

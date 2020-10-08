@@ -300,7 +300,7 @@ void EnzoConstrainedTransport::compute_edge_efield
 		Ec.shape(2) - 1, Ec.shape(1) - 1, Ec.shape(0) - 1,
 		Eedge, Wj, Wj_kp1, Wk, Wk_jp1, Ec, Ec_jkp1, Ec_jp1, Ec_kp1,
 		Ej, Ej_kp1, Ek, Ek_jp1);
-};
+}
 
 //----------------------------------------------------------------------
 

@@ -258,6 +258,6 @@ namespace enzo_riemann_utils{
     return arr;
   }
 
-};
+}
 
 #endif /* ENZO_ENZO_RIEMANN_UTILS_HPP */

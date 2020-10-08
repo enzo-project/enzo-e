@@ -44,7 +44,8 @@ using lutarray = std::array<enzo_float, LUT::NEQ>;
   /* Specialized case: */                                                     \
   template <typename T>                                                       \
   struct COMBINE(forward_, name) <T, decltype((void) T::name, 0)>             \
-  { static constexpr int value = T::name; };
+  { static constexpr int value = T::name; }
+// omit trailing semicolon to avoid -Wpedantic warning
 
 //----------------------------------------------------------------------
 /// @def      LUT_INDEX_FORWARDER_T_SCALAR
@@ -62,7 +63,7 @@ using lutarray = std::array<enzo_float, LUT::NEQ>;
 
 namespace LUTIndexForward_ {
   #define ENTRY(name, math_type, category, if_advection)                      \
-    LUT_INDEX_FORWARDER_##if_advection ## _ ## math_type (name);
+    LUT_INDEX_FORWARDER_##if_advection ## _ ## math_type (name)
   FIELD_TABLE
   #undef ENTRY
 
@@ -71,7 +72,7 @@ namespace LUTIndexForward_ {
 
   // forward the first index holding specific quantities
   CREATE_ENUM_VALUE_FORWARDER(specific_start);
-};
+}
 
 //----------------------------------------------------------------------
 
