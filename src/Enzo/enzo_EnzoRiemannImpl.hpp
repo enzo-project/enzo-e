@@ -189,6 +189,10 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
+  ///TEMPORARY
+  /// This is to assist with helping the transition from Groupings to maps
+  const std::vector<std::string> combined_integrable_groups() const throw();
+
   void solve (Block *block, Grouping &priml_group, Grouping &primr_group,
 	      std::string pressure_name_l, std::string pressure_name_r,
 	      Grouping &flux_group, int dim, EnzoEquationOfState *eos,
@@ -304,7 +308,6 @@ void EnzoRiemannImpl<ImplFunctor>::pup (PUP::er &p)
 }
 
 //----------------------------------------------------------------------
-
 template <class ImplFunctor>
 void EnzoRiemannImpl<ImplFunctor>::solve
 (Block *block, Grouping &priml_group, Grouping &primr_group,

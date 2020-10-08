@@ -57,6 +57,11 @@ public: // interface
     PUP::able::pup(p);
   }
 
+  ///TEMPORARY
+  /// This is to assist with helping the transition from Groupings to maps
+  virtual const std::vector<std::string> combined_integrable_groups()
+    const throw() = 0;
+
   /// Computes the Riemann Fluxes for each conserved field along a given
   /// dimension, dim
   /// @param block holds data to be processed

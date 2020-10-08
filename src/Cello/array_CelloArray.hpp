@@ -435,7 +435,7 @@ public: // interface
   /// the result of this method is first assigned to another variable and the
   /// variable is placed on the LHS, then different behavior will occur.
   template<typename... Args, REQUIRE_TYPE(Args,CSlice)>
-  TempArray_<T,D> subarray(Args... args) noexcept;
+  TempArray_<T,D> subarray(Args... args) const noexcept;
 
   /// Returns the length of a given dimension
   ///
@@ -659,7 +659,7 @@ inline void prep_slices_(const CSlice* slices, const intp shape[],
 // Returnd TempArray_ representing a view of a subarray of the current instance
 template<typename T, std::size_t D>
 template<typename... Args, class>
-TempArray_<T,D> FixedDimArray_<T,D>::subarray(Args... args) noexcept{
+TempArray_<T,D> FixedDimArray_<T,D>::subarray(Args... args) const noexcept{
   // TODO: put some thought into creating a const-qualified version of this
   // function
   static_assert(D == sizeof...(args) || 0 == sizeof...(args),
@@ -814,6 +814,24 @@ TempArray_<T,D>& TempArray_<T,D>::operator=(const T& val)
 
 //----------------------------------------------------------------------
 
+// helper function
+inline bool is_alias_(void* ptr1, intp offset1, const intp* shape1,
+                      const intp* stride1, void* ptr2, intp offset2,
+                      const intp* shape2, const intp* stride2,
+                      std::size_t nDim)
+{
+  if ((ptr1 == NULL) || (ptr2 == NULL) || (ptr1 != ptr2)) { return false; }
+  if (offset1 != offset2) { return false; }
+  for (std::size_t i = 0; i < nDim; i++){
+    if ((shape1[i] != shape2[i]) || (stride1[i] != stride2[i])){
+      return false;
+    }
+  }
+  return true;
+}
+
+//----------------------------------------------------------------------
+
 template<typename T, std::size_t D>
 class CelloArray : public FixedDimArray_<T,D>
 {
@@ -863,7 +881,7 @@ public: // interface
   /// @note Note that allowing this constructor to accept a const reference
   ///     would enable the creation of mutatable shallow copies of
   ///     const-qualified CelloArrays.
-  CelloArray(CelloArray<T,D>& other) : CelloArray() {
+  CelloArray(const CelloArray<T,D>& other) : CelloArray() {
     this->shallow_copy_init_helper_(other);
   }
 
@@ -894,6 +912,24 @@ public: // interface
     swap(*this,other);
     return *this;
   }
+
+  /// Returns whether CelloArray is a perfect alias of other.
+  ///
+  /// Returns False if there is just partial overlap or either array is
+  /// uninitialized.
+  bool is_alias(const CelloArray<T,D>& other) const{
+    return is_alias_((void*)this->shared_data_.get(), this->offset_,
+                     this->shape_, this->stride_,
+                     (void*)other.shared_data_.get(), other.offset_,
+                     other.shape_, other.stride_, D);
+  }
+  bool is_alias(const TempArray_<T,D>& other) const{
+    return is_alias_((void*)this->shared_data_.get(), this->offset_,
+                     this->shape_, this->stride_,
+                     (void*)other.shared_data_.get(), other.offset_,
+                     other.shape_, other.stride_, D);
+  }
+  
 };
 
 #endif /* ARRAY_CELLO_ARRAY_HPP */
