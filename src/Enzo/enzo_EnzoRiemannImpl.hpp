@@ -189,22 +189,24 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
-  ///TEMPORARY
-  /// This is to assist with helping the transition from Groupings to maps
-  const std::vector<std::string> combined_integrable_groups() const throw();
-
-  void solve (Block *block, Grouping &priml_group, Grouping &primr_group,
-	      std::string pressure_name_l, std::string pressure_name_r,
-	      Grouping &flux_group, int dim, EnzoEquationOfState *eos,
-	      int stale_depth, std::string interface_velocity_name) const;
+  void solve (EnzoEFltArrayMap &prim_map_l, EnzoEFltArrayMap &prim_map_r,
+              const EFlt3DArray &pressure_array_l,
+              const EFlt3DArray &pressure_array_r,
+              EnzoEFltArrayMap &flux_map, int dim, EnzoEquationOfState *eos,
+              int stale_depth,
+              const std::vector<std::vector<std::string>> &passive_lists,
+              EFlt3DArray *interface_velocity) const;
 
 protected : //methods
   
   /// Computes the fluxes for the passively advected quantites.
-  void solve_passive_advection_(Block* block, Grouping &priml_group,
-				Grouping &primr_group, Grouping &flux_group,
-				const EFlt3DArray &density_flux, int dim,
-				int stale_depth) const throw();
+  void solve_passive_advection_(EnzoEFltArrayMap &prim_map_l,
+                                EnzoEFltArrayMap &prim_map_r,
+                                EnzoEFltArrayMap &flux_map,
+				const EFlt3DArray &density_flux,
+				int stale_depth,
+                                const std::vector<std::vector<std::string>> &passive_lists)
+    const throw();
 
 protected: //attributes
 
@@ -310,10 +312,11 @@ void EnzoRiemannImpl<ImplFunctor>::pup (PUP::er &p)
 //----------------------------------------------------------------------
 template <class ImplFunctor>
 void EnzoRiemannImpl<ImplFunctor>::solve
-(Block *block, Grouping &priml_group, Grouping &primr_group,
- std::string pressure_name_l, std::string pressure_name_r,
- Grouping &flux_group, int dim, EnzoEquationOfState *eos, int stale_depth,
- std::string interface_velocity_name) const
+(EnzoEFltArrayMap &prim_map_l, EnzoEFltArrayMap &prim_map_r,
+ const EFlt3DArray &pressure_array_l, const EFlt3DArray &pressure_array_r,
+ EnzoEFltArrayMap &flux_map, int dim, EnzoEquationOfState *eos,
+ int stale_depth, const std::vector<std::vector<std::string>> &passive_lists,
+ EFlt3DArray *interface_velocity) const
 {
 
   const bool barotropic = eos->is_barotropic();
@@ -328,40 +331,24 @@ void EnzoRiemannImpl<ImplFunctor>::solve
   ASSERT("EnzoRiemannImpl::solve", "currently no support for barotropic eos",
 	 !barotropic);
 
-  // Load arrays:
-  EnzoFieldArrayFactory array_factory(block, stale_depth);
-  // First, load in the precomputed pressure 
-  EFlt3DArray pressure_array_l, pressure_array_r;
-  pressure_array_l = array_factory.assigned_center_from_name(pressure_name_l,
-							     dim);
-  pressure_array_r = array_factory.assigned_center_from_name(pressure_name_r,
-							     dim);
-
-  // Second, load field to store interface velocity (if applicable)
-  Field field = block->data()->field();
+  // Check if the interface velocity must be stored
+  const bool store_interface_vel = (interface_velocity != nullptr);
   EFlt3DArray velocity_i_bar_array;
-  const bool store_interface_vel =((interface_velocity_name != "") ||
-				   (field.is_field(interface_velocity_name)));
-
-  if (store_interface_vel) {
-    velocity_i_bar_array =
-      array_factory.assigned_center_from_name(interface_velocity_name, dim);
-  }
+  if (store_interface_vel) { velocity_i_bar_array = *interface_velocity; }
 
   std::array<EFlt3DArray,LUT::NEQ> wl_arrays, wr_arrays, flux_arrays;
   using enzo_riemann_utils::load_array_of_fields;
-  wl_arrays = load_array_of_fields<LUT>(block, priml_group, dim, stale_depth);
-  wr_arrays = load_array_of_fields<LUT>(block, primr_group, dim, stale_depth);
-  flux_arrays = load_array_of_fields<LUT>(block, flux_group, dim,
-					  stale_depth);
+  wl_arrays = load_array_of_fields<LUT>(prim_map_l, dim);
+  wr_arrays = load_array_of_fields<LUT>(prim_map_r, dim);
+  flux_arrays = load_array_of_fields<LUT>(flux_map, dim);
 
   ImplFunctor func;
 
-  // For Nearest-Neighbor, we care about interfaces starting at i+1/2. Thanks
-  // to use of stale_depth, we can treat every case like this
-  for (int iz=0; iz<flux_arrays[0].shape(0); iz++) {
-    for (int iy=0; iy<flux_arrays[0].shape(1); iy++) {
-      for (int ix=0; ix<flux_arrays[0].shape(2); ix++) {
+  // compute the flux at all non-stale cell interfaces
+  const int sd = stale_depth;
+  for (int iz = sd; iz < flux_arrays[0].shape(0) - sd; iz++) {
+    for (int iy = sd; iy < flux_arrays[0].shape(1) - sd; iy++) {
+      for (int ix = sd; ix < flux_arrays[0].shape(2) - sd; ix++) {
 
 	lutarray<LUT> wl, wr;
 	// get the fluid fields
@@ -380,9 +367,9 @@ void EnzoRiemannImpl<ImplFunctor>::solve
 
 	// compute the interface fluxes
 	lutarray<LUT> Fl = enzo_riemann_utils::active_fluxes<LUT>(wl, Ul,
-                                                                pressure_l);
+                                                                  pressure_l);
 	lutarray<LUT> Fr = enzo_riemann_utils::active_fluxes<LUT>(wr, Ur,
-                                                                pressure_r);
+                                                                  pressure_r);
 
 	enzo_float interface_velocity_i;
 	// Now compute the Riemann Fluxes
@@ -402,8 +389,9 @@ void EnzoRiemannImpl<ImplFunctor>::solve
     }
   }
 
-  solve_passive_advection_(block, priml_group, primr_group, flux_group,
-  			   flux_arrays[LUT::density], dim, stale_depth);
+  solve_passive_advection_(prim_map_l, prim_map_r, flux_map,
+  			   flux_arrays[LUT::density], stale_depth,
+                           passive_lists);
 
   if (LUT::has_bfields()){
     // If Dedner Fluxes are required, they might get handled here
@@ -437,47 +425,40 @@ inline void compute_unity_sum_passive_fluxes_(const enzo_float dens_flux,
 //----------------------------------------------------------------------
 
 inline void passive_advection_helper_
-(std::string group_name, Grouping &priml_group, Grouping &primr_group,
- Grouping &flux_group, const EFlt3DArray &density_flux, int dim,
- EnzoFieldArrayFactory array_factory, const bool unity_sum) noexcept
+(const std::vector<std::string>& passive_keys,
+ EnzoEFltArrayMap& prim_map_l, EnzoEFltArrayMap& prim_map_r,
+ EnzoEFltArrayMap& flux_map, const EFlt3DArray &density_flux,
+ int stale_depth, const bool unity_sum) noexcept
 {
-  int num_fields = priml_group.size(group_name);
-  if (num_fields == 0) {return;}
-  EnzoPermutedCoordinates coord(dim);
+  std::size_t num_keys = passive_keys.size();
+  if (num_keys == 0) {return;}
 
-  // This was basically transcribed from hydro_rk in Enzo:
+  // This was essentially transcribed from hydro_rk in Enzo:
 
   // load array of fields
-  EFlt3DArray *wl_arrays = new EFlt3DArray[num_fields];
-  EFlt3DArray *wr_arrays = new EFlt3DArray[num_fields];
-  EFlt3DArray *flux_arrays = new EFlt3DArray[num_fields];
-  
-  for (int field_ind=0; field_ind<num_fields; field_ind++){
-    wl_arrays[field_ind] = array_factory.reconstructed_field(priml_group,
-							     group_name,
-							     field_ind, dim);
-    wr_arrays[field_ind] = array_factory.reconstructed_field(primr_group,
-							     group_name,
-							     field_ind, dim);
-    flux_arrays[field_ind] = array_factory.from_grouping(flux_group,
-							 group_name,
-							 field_ind);
-  }
+  EFlt3DArray *wl_arrays = new EFlt3DArray[num_keys];
+  EFlt3DArray *wr_arrays = new EFlt3DArray[num_keys];
+  EFlt3DArray *flux_arrays = new EFlt3DArray[num_keys];
 
-  for (int iz=0; iz<density_flux.shape(0); iz++) {
-    for (int iy=0; iy<density_flux.shape(1); iy++) {
-      for (int ix=0; ix<density_flux.shape(2); ix++) {
+  for (std::size_t ind=0; ind<num_keys; ind++){
+    wl_arrays[ind] = prim_map_l.at(passive_keys[ind]);
+    wr_arrays[ind] = prim_map_r.at(passive_keys[ind]);
+    flux_arrays[ind] = flux_map.at(passive_keys[ind]);
+  }
+  const int sd = stale_depth;
+  for (int iz = sd; iz < density_flux.shape(0) - sd; iz++) {
+    for (int iy = sd; iy < density_flux.shape(1) - sd; iy++) {
+      for (int ix = sd; ix < density_flux.shape(2) - sd; ix++) {
 
 	enzo_float dens_flux = density_flux(iz,iy,ix);
 	EFlt3DArray *reconstr = (dens_flux>0) ? wl_arrays : wr_arrays;
 
 	if (unity_sum) {
 	  compute_unity_sum_passive_fluxes_(dens_flux, flux_arrays, reconstr,
-					     num_fields, iz, iy, ix);
+	  				    num_keys, iz, iy, ix);
 	} else {
-	  for (int field_ind=0; field_ind<num_fields; field_ind++){
-	    flux_arrays[field_ind](iz,iy,ix) = (reconstr[field_ind](iz,iy,ix)
-						* dens_flux);
+	  for (int ind=0; ind<num_keys; ind++){
+	    flux_arrays[ind](iz,iy,ix) = reconstr[ind](iz,iy,ix) * dens_flux;
 	  }
 	}
 
@@ -491,43 +472,45 @@ inline void passive_advection_helper_
 
 template <class ImplFunctor>
 void EnzoRiemannImpl<ImplFunctor>::solve_passive_advection_
-(Block* block, Grouping &priml_group, Grouping &primr_group,
- Grouping &flux_group, const EFlt3DArray &density_flux, int dim,
- int stale_depth)
+(EnzoEFltArrayMap &prim_map_l, EnzoEFltArrayMap &prim_map_r,
+ EnzoEFltArrayMap &flux_map, const EFlt3DArray &density_flux,
+ int stale_depth, const std::vector<std::vector<std::string>> &passive_lists)
   const throw()
 {
+  // First address passive scalars:
+  // passive_lists holds different lists of passive scalar quantities
+  // - The first entry in passive_lists (even if it's empty) provides a set of
+  //   keys for quantities that are simply passively advected
+  // - Later entries specify keys for groups of passive scalars that need to
+  //   sum to 1 (when in specific form).
 
-  EnzoFieldArrayFactory array_factory(block, stale_depth);
-
-  for (std::string group_name : passive_scalar_groups_){
+  bool first_list = true;
+  for (std::size_t i = 0; i < passive_lists.size(); i++){
     // If we know of group_name that must always sum to 1, we should check for
     // that now! (The easiest way to facillitate that would be to separate
     // species from colours)
-    bool unity_sum = false;
-
-    // it's OK if no fields were included in a given group because the included
-    // fields may be entirely determined by the methods unrelated to the hydro
-    // integration method
-    passive_advection_helper_(group_name, priml_group,primr_group, flux_group,
-			      density_flux, dim, array_factory, unity_sum);
+    const bool unity_sum = (i != 0);
+    passive_advection_helper_(passive_lists[i], prim_map_l, prim_map_r,
+                              flux_map, density_flux, stale_depth, unity_sum);
   }
 
+  // Next address integrable quantites that have passively advected fluxes
   for (std::size_t i=0; i<passive_integrable_groups_.size(); i++){
-    std::string group_name = passive_integrable_groups_[i];
+    std::string key = passive_integrable_groups_[i];
 
     ASSERT1("EnzoRiemannImpl::solve_passive_advection_",
 	    "Passive advection fluxes were to be computed for the integrable "
-	    "quantity, \"%s\", but no fields were provided.",
-	    group_name.c_str(),  priml_group.size(group_name) != 0);
+	    "quantity, \"%s\", but it was not provided.",
+	    key.c_str(),  prim_map_l.contains(key));
 
     if (passive_integrable_categories_[i] != FieldCat::specific){
       // this is here to indicate that FieldCat::conserved should be allowed
       INCOMPLETE("passive_advection_helper_ doesn't currently support "
                  "conserved passive scalars");
     }
-    passive_advection_helper_(group_name, priml_group,primr_group, flux_group,
-			      density_flux, dim, array_factory, false);
   }
+  passive_advection_helper_(passive_integrable_groups_, prim_map_l, prim_map_r,
+                            flux_map, density_flux, stale_depth, false);
 }
 
 #endif /* ENZO_ENZO_RIEMANN_IMPL_HPP */

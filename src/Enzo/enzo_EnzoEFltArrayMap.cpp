@@ -15,7 +15,7 @@ const EFlt3DArray& EnzoEFltArrayMap::at(const std::string& key) const noexcept
 
 //----------------------------------------------------------------------
 
-const EFlt3DArray exclude_stale_cells_(const EFlt3DArray &arr, int stale_depth)
+EFlt3DArray exclude_stale_cells_(const EFlt3DArray &arr, int stale_depth)
 {
   ASSERT("exclude_stale_cells_","each dim of arr must exceed 2*stale_depth.",
 	 2*stale_depth < arr.shape(0) && 2*stale_depth < arr.shape(1) &&
@@ -27,8 +27,8 @@ const EFlt3DArray exclude_stale_cells_(const EFlt3DArray &arr, int stale_depth)
 }
 
 
-const EFlt3DArray EnzoEFltArrayMap::get(const std::string& key,
-                                        int stale_depth) const noexcept
+EFlt3DArray EnzoEFltArrayMap::get(const std::string& key,
+                                  int stale_depth) const noexcept
 {
   ASSERT("EnzoEFltArrayMap::get", "stale_depth must be >= 0",
          stale_depth >= 0);
@@ -70,4 +70,32 @@ EnzoEFltArrayMap EnzoEFltArrayMap::from_grouping
     }
   }
   return out;
+}
+
+//----------------------------------------------------------------------
+
+void EnzoEFltArrayMap::print_summary() const noexcept
+{
+  std::size_t my_size = size();
+  if (my_size == 0){
+    CkPrintf("Empty array");
+    return;
+  }
+
+  int i = 0;
+  CkPrintf("{");
+  
+  for ( const auto &pair : map_ ) {
+    if (i != 0){
+      CkPrintf(",\n ");
+    }
+    CkPrintf("\"%s\" : EFlt3DArray(%p, %d, %d, %d)", pair.first.c_str(),
+             (void*)pair.second.shared_data_.get(),
+             (int)pair.second.shape(0),
+             (int)pair.second.shape(1),
+             (int)pair.second.shape(2));
+    i++;
+  }
+  CkPrintf("}\n");
+  fflush(stdout);
 }

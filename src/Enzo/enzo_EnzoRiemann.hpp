@@ -57,45 +57,48 @@ public: // interface
     PUP::able::pup(p);
   }
 
-  ///TEMPORARY
-  /// This is to assist with helping the transition from Groupings to maps
-  virtual const std::vector<std::string> combined_integrable_groups()
-    const throw() = 0;
-
   /// Computes the Riemann Fluxes for each conserved field along a given
   /// dimension, dim
-  /// @param block holds data to be processed
-  /// @param priml_group,primr_group holds field names where the left/right
-  ///     reconstructed face-centered integrable primitives are stored. The
-  ///     relevant fields should be formally defined as cell-centered (to allow
-  ///     for reuse). During the calculation, they are treated as face-centered
-  ///     (without having values on the exterior faces of the block). As a
-  ///     result, there is some unused space at the end of the arrays.
-  /// @param pressure_name_l,pressure_name_r are the names of the fields
-  ///     storing the left/right pressure values that have already been
-  ///     computed from the reconstructed values. The face-centering is expected
-  ///     to match fields contained by priml_group, primr_group
-  /// @param flux_group holds field names where the calculated fluxes will be
-  ///     stored. The relevant fields should be face-centered along the
-  ///     dimension of the calculation (without having values on the exterior
-  ///     faces of the block)
-  /// @param dim Dimension along which to compute Riemann fluxes. Values of 0,
-  ///     1, and 2 correspond to the x, y, and z directions, respectively.
-  /// @param eos Instance of the fluid's EnzoEquationOfState object
-  /// @param stale_depth indicates the number of field entries from the
-  ///     outermost field value that the region including "stale" values (need
-  ///     to be refreshed) extends over (0 means there are no "stale" values).
-  /// @param interface_velocity_name indicates the name of field where the
-  ///     value of the interface velocity along dimension `dim` should be
-  ///     stored. This quantity is used to compute the internal energy source
-  ///     term (needed under the dual energy formalism). If the value is `""`
-  ///     (the default) then the interface velocity is not stored.
-  virtual void solve (Block *block,
-		      Grouping &priml_group, Grouping &primr_group, 
-		      std::string pressure_name_l, std::string pressure_name_r,
-		      Grouping &flux_group, int dim, EnzoEquationOfState *eos,
-		      int stale_depth,
-		      std::string interface_velocity_name = "") const = 0;
+  /// @param[in]     priml_map,primr_map Maps of arrays holding the left/right
+  ///     reconstructed face-centered integrable primitives. This should be
+  ///     face-centered along `dim` (without having values on the exterior
+  ///     faces of the block) and cell-centered along the other dimensions.
+  /// @param[in]     pressure_array_l,pressure_array_r Arrays holding the
+  ///     precomputed left/right reconstructed pressure values. These should
+  ///     have the same face-centering as the arrays in priml_map/primr_map.
+  /// @param[out]    flux_map Holds arrays where the calculated fluxes
+  ///     will be stored. The arrays should be face-centered along `dim`
+  ///     (without having values on the exterior faces of the block)
+  /// @param[in]     dim Dimension along which to compute Riemann fluxes.
+  ///     Values of 0, 1, and 2 correspond to the x, y, and z directions.
+  /// @param[in]     eos Instance of the fluid's EnzoEquationOfState object
+  /// @param[in]     stale_depth indicates the current stale_depth.
+  /// @param[in]     passive_lists A list of lists of keys for passively
+  ///     advected scalars. The first list holds the keys for quantities that
+  ///     are normally passively advected. Subsequent lists group together
+  ///     collections of passively advected scalars whose specific value
+  ///     (before and after advection) must sum to 1. Keys must not be
+  ///     duplicated across more than one list.
+  /// @param[in,out] interface_velocity Pointer to an array to hold the
+  ///     computed component of the velocity at the cell interfaces along
+  ///     `dim` (the array should not include exterior faces of the block and
+  ///     should be cell-centered along other dimensions). This quantity is
+  ///     used to compute the internal energy source term (needed under the
+  ///     dual energy formalism). If the value is `NULL`, then the interface
+  ///     velocity is not stored in the array.
+  ///
+  /// @note It's alright for arrays in `priml_map` and `primr_map` to have the
+  /// shapes of cell-centered arrays. In this case, the function effectively
+  /// treats such arrays as if their `subarray` method were invoked, where
+  /// `CSlice(0,-1)` is specified for the `dim` axis and
+  /// `CSlice(nullptr,nullptr)` is specified for other axes. This logic also
+  /// applies to the other arrays passed as arguments.
+  virtual void solve
+  (EnzoEFltArrayMap &prim_map_l, EnzoEFltArrayMap &prim_map_r,
+   const EFlt3DArray &pressure_array_l, const EFlt3DArray &pressure_array_r,
+   EnzoEFltArrayMap &flux_map, int dim, EnzoEquationOfState *eos,
+   int stale_depth, const std::vector<std::vector<std::string>> &passive_lists,
+   EFlt3DArray *interface_velocity) const = 0;
 
 };
 

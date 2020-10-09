@@ -596,6 +596,57 @@ void EnzoMethodMHDVlct::compute_specific_passive_scalars_
 
 //----------------------------------------------------------------------
 
+void add_arrays_to_map_(Block * block,
+                        Grouping& grouping,
+                        const std::vector<std::string>& group_names,
+                        int dim, EnzoEFltArrayMap& map,
+                        bool enforce_num_Groups,
+                        Grouping* ref_grouping)
+{
+
+  char suffixes[3] = {'x','y','z'};
+  EnzoFieldArrayFactory array_factory(block,0);
+  
+  for (std::string group_name : group_names){
+    int num_fields = grouping.size(group_name);
+
+    ASSERT("EnzoMethodMHDVlct::compute_flux_",
+           "all groups must have 1 or 3 fields.",
+           !enforce_num_Groups || ((num_fields == 1) || (num_fields == 3)));
+
+    for (int field_ind=0; field_ind<num_fields; field_ind++){
+      std::string field_name = grouping.item(group_name,field_ind);
+
+      std::string key;
+      if (ref_grouping != nullptr){
+        key = ref_grouping->item(group_name, field_ind);
+      } else if (num_fields == 3){
+        key = group_name;
+        key.push_back('_');
+        key.push_back(suffixes[field_ind]);
+      } else {
+        key = group_name;
+      }
+
+      if (map.contains(key)){
+        ERROR1("EnzoEFltArrayMap::from_grouping",
+               "EnzoEFltArrayMap can't hold more than one field called \"%s\"",
+               key.c_str());
+      }
+
+      if (dim == -1){
+        map[key] = array_factory.from_name(field_name);
+      } else {
+        map[key] = array_factory.assigned_center_from_name(field_name, dim);
+      }
+
+    }
+
+  }
+}
+
+//----------------------------------------------------------------------
+
 void EnzoMethodMHDVlct::compute_flux_
 (Block *block, int dim, double cur_dt, Grouping &reconstructable_group,
  Grouping &priml_group, Grouping &primr_group, std::string pressure_name_l,
@@ -647,12 +698,60 @@ void EnzoMethodMHDVlct::compute_flux_
 				      cur_stale_depth, dim);
 
   // Next, compute the fluxes
-  riemann_solver_->solve(block, *integrable_group_l, *integrable_group_r,
-			 pressure_name_l, pressure_name_r, flux_group,
-			 dim, eos_, cur_stale_depth, interface_velocity_name);
+  EnzoEFltArrayMap integrable_l, integrable_r, fluxes;
+  add_arrays_to_map_(block, *integrable_group_l, integrable_group_names_, dim,
+                     integrable_l, true, NULL);
+  add_arrays_to_map_(block, *integrable_group_l, passive_group_names_, dim,
+                     integrable_l, false, primitive_group_);
+
+  add_arrays_to_map_(block, *integrable_group_r, integrable_group_names_, dim,
+                     integrable_r, true, NULL);
+  add_arrays_to_map_(block, *integrable_group_r, passive_group_names_, dim,
+                     integrable_r, false, primitive_group_);
+
+  add_arrays_to_map_(block, flux_group, integrable_group_names_, dim,
+                     fluxes, true, NULL);
+  add_arrays_to_map_(block, flux_group, passive_group_names_, dim,
+                     fluxes, false, primitive_group_);
+
+  /*
+  CkPrintf("Dim = %d\n", dim);
+  CkPrintf("Left Integrable:\n"); 
+  integrable_l.print_summary();
+  CkPrintf("Right Integrable:\n"); 
+  integrable_r.print_summary();
+  CkPrintf("Fluxes:\n"); 
+  fluxes.print_summary();
+  CkPrintf("\n\n");
+  */
+
+  std::vector<std::vector<std::string>> passive_lists {{}};
+  for (std::string group_name : passive_group_names_){
+    int num_fields = primitive_group_->size(group_name);
+    for (int field_ind=0; field_ind<num_fields; field_ind++){
+      std::string field_name = primitive_group_->item(group_name,field_ind);
+      passive_lists[0].push_back(field_name);
+    }
+  }
+
+  EnzoFieldArrayFactory array_factory(block, 0);
+  EFlt3DArray pressure_l, pressure_r, interface_velocity_arr;
+  pressure_l = array_factory.assigned_center_from_name(pressure_name_l, dim);
+  pressure_r = array_factory.assigned_center_from_name(pressure_name_r, dim);
+  EFlt3DArray* interface_velocity_ptr=NULL;
+  if (interface_velocity_name != ""){
+    interface_velocity_arr = array_factory.assigned_center_from_name
+      (interface_velocity_name, dim);
+    interface_velocity_ptr = &interface_velocity_arr;
+  }
+  riemann_solver_->solve(integrable_l, integrable_r, pressure_l, pressure_r,
+                         fluxes, dim, eos_, cur_stale_depth, passive_lists,
+                         interface_velocity_ptr);
 
   // Accumulate the change in integrable quantities from these fluxes in
   // dUcons_group
+  //const std::vector<std::string> updater_group_names =
+  //  integrable_updater_->combined_integrable_groups();
   integrable_updater_->accumulate_flux_component(block, dim, cur_dt,
 						 flux_group, dUcons_group,
 						 cur_stale_depth);

@@ -30,8 +30,8 @@ public: // interface
 
   // This is a crutch for transitioning from groupings. Should get rid of this
   // eventually.
-  const EFlt3DArray get(const std::string& key,
-                        int stale_depth = 0) const noexcept;
+  EFlt3DArray get(const std::string& key,
+                  int stale_depth = 0) const noexcept;
 
   // This is also crutch for transitioning from groupings. Should get rid of
   // this eventually.
@@ -40,6 +40,10 @@ public: // interface
                                         const std::vector<std::string>& groups,
                                         int dim = -1)
     noexcept;
+
+  void print_summary() const noexcept;
+
+  std::size_t size() const noexcept { return map_.size(); }
 
 private: // attributes
   std::map<std::string, EFlt3DArray> map_;

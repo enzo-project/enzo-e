@@ -878,9 +878,8 @@ public: // interface
 
   /// Copy constructor. Makes *this a shallow copy of other.
   ///
-  /// @note Note that allowing this constructor to accept a const reference
-  ///     would enable the creation of mutatable shallow copies of
-  ///     const-qualified CelloArrays.
+  /// @note The fact that this accepts const reference reflects the fact that
+  ///     CelloArray has pointer-like semantics
   CelloArray(const CelloArray<T,D>& other) : CelloArray() {
     this->shallow_copy_init_helper_(other);
   }
@@ -893,7 +892,7 @@ public: // interface
   ///
   /// (The contents of any previously created shallow copies or subarrays of
   /// *this are unaffected by this method)
-  CelloArray<T,D>& operator=(CelloArray<T,D>& other){
+  CelloArray<T,D>& operator=(const CelloArray<T,D>& other){
     this->cleanup_helper_();
     this->shallow_copy_init_helper_(other);
     return *this;
