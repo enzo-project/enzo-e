@@ -336,6 +336,59 @@ void EnzoMethodMHDVlct::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
+void add_arrays_to_map_(Block * block,
+                        Grouping& grouping,
+                        const std::vector<std::string>& group_names,
+                        int dim, EnzoEFltArrayMap& map,
+                        bool allow_missing_group, bool enforce_num_Groups,
+                        Grouping* ref_grouping)
+{
+
+  char suffixes[3] = {'x','y','z'};
+  EnzoFieldArrayFactory array_factory(block,0);
+
+  for (std::string group_name : group_names){
+    int num_fields = grouping.size(group_name);
+
+    if ((num_fields == 0) && allow_missing_group){ continue; }
+
+    ASSERT("EnzoMethodMHDVlct::compute_flux_",
+           "all groups must have 1 or 3 fields.",
+           !enforce_num_Groups || ((num_fields == 1) || (num_fields == 3)));
+
+    for (int field_ind=0; field_ind<num_fields; field_ind++){
+      std::string field_name = grouping.item(group_name,field_ind);
+
+      std::string key;
+      if (ref_grouping != nullptr){
+        key = ref_grouping->item(group_name, field_ind);
+      } else if (num_fields == 3){
+        key = group_name;
+        key.push_back('_');
+        key.push_back(suffixes[field_ind]);
+      } else {
+        key = group_name;
+      }
+
+      if (map.contains(key)){
+        ERROR1("EnzoEFltArrayMap::from_grouping",
+               "EnzoEFltArrayMap can't hold more than one field called \"%s\"",
+               key.c_str());
+      }
+
+      if (dim == -1){
+        map[key] = array_factory.from_name(field_name);
+      } else {
+        map[key] = array_factory.assigned_center_from_name(field_name, dim);
+      }
+
+    }
+
+  }
+}
+
+//----------------------------------------------------------------------
+
 void EnzoMethodMHDVlct::compute ( Block * block) throw()
 {
   if (block->is_leaf()) {
@@ -448,10 +501,44 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 					  *cur_integrable_group, stale_depth);
       }
 
-      // set the all values of fields in dUcons_group to 0 (throughout the rest
-      // of the current loop, flux divergence and source terms will be
-      // accumulated by these fields)
-      integrable_updater_->clear_dUcons_group(block, dUcons_group, 0.);
+      EnzoEFltArrayMap primitive_map, out_integrable_map, dUcons_map;
+      add_arrays_to_map_(block, *primitive_group_, integrable_group_names_,
+                         -1, primitive_map, false, true, NULL);
+      add_arrays_to_map_(block, *primitive_group_, passive_group_names_,
+                         -1, primitive_map, false, false,
+                         conserved_passive_scalars);
+
+      add_arrays_to_map_(block, *out_integrable_group, integrable_group_names_,
+                         -1, out_integrable_map, false, true, NULL);
+      add_arrays_to_map_(block, *out_integrable_group, passive_group_names_,
+                         -1, out_integrable_map, false, false,
+                         conserved_passive_scalars);
+
+      add_arrays_to_map_(block, dUcons_group, integrable_group_names_, -1,
+                         dUcons_map, true, // dUcons_group may omit B-fields
+                         true, NULL);
+      add_arrays_to_map_(block, dUcons_group, passive_group_names_, -1,
+                         dUcons_map, false, false, conserved_passive_scalars);
+      EnzoEFltArrayMap conserved_passive_scalar_map;
+      add_arrays_to_map_(block, *conserved_passive_scalars,
+                         passive_group_names_, -1,
+                         conserved_passive_scalar_map, false, false,
+                         conserved_passive_scalars);
+
+      std::vector<std::vector<std::string>> passive_lists {{}};
+      for (std::string group_name : passive_group_names_){
+        int num_fields = conserved_passive_scalars->size(group_name);
+        for (int field_ind=0; field_ind<num_fields; field_ind++){
+          std::string field_name =
+            conserved_passive_scalars->item(group_name,field_ind);
+          passive_lists[0].push_back(field_name);
+        }
+      }
+
+      // set all elements of the arrays in dUcons_group to 0 (throughout the
+      // rest of the current loop, flux divergence and source terms will be
+      // accumulated in these arrays)
+      integrable_updater_->clear_dUcons_map(dUcons_map, 0., passive_lists);
 
       // Compute the reconstructable quantities from the integrable quantites
       // Although cur_integrable_group holds the passive scalars in integrable
@@ -502,15 +589,19 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // Note: updated passive scalars are NOT saved in out_integrable_group in
       //     specific form. Instead they are saved in conserved_passive_scalars
       //     in conserved form.
-      integrable_updater_->update_quantities(block, *primitive_group_,
-					     dUcons_group,
-					     *out_integrable_group,
-					     *conserved_passive_scalars,
-					     eos_, stale_depth);
+      integrable_updater_->update_quantities(primitive_map, dUcons_map,
+                                             out_integrable_map,
+                                             conserved_passive_scalar_map,
+                                             eos_, stale_depth, passive_lists);
 
       // increment stale_depth since the inner values have been updated
       // but the outer values have not
       stale_depth+=reconstructor->delayed_staling_rate();
+
+      // apply floor to energy and sync the internal energy with total energy
+      // (the latter only occurs if the dual energy formalism is in use)
+      eos_->apply_floor_to_energy_and_sync(block, *out_integrable_group,
+                                           stale_depth);
     }
 
     // Deallocate Temporary Fields
@@ -596,57 +687,6 @@ void EnzoMethodMHDVlct::compute_specific_passive_scalars_
 
 //----------------------------------------------------------------------
 
-void add_arrays_to_map_(Block * block,
-                        Grouping& grouping,
-                        const std::vector<std::string>& group_names,
-                        int dim, EnzoEFltArrayMap& map,
-                        bool enforce_num_Groups,
-                        Grouping* ref_grouping)
-{
-
-  char suffixes[3] = {'x','y','z'};
-  EnzoFieldArrayFactory array_factory(block,0);
-  
-  for (std::string group_name : group_names){
-    int num_fields = grouping.size(group_name);
-
-    ASSERT("EnzoMethodMHDVlct::compute_flux_",
-           "all groups must have 1 or 3 fields.",
-           !enforce_num_Groups || ((num_fields == 1) || (num_fields == 3)));
-
-    for (int field_ind=0; field_ind<num_fields; field_ind++){
-      std::string field_name = grouping.item(group_name,field_ind);
-
-      std::string key;
-      if (ref_grouping != nullptr){
-        key = ref_grouping->item(group_name, field_ind);
-      } else if (num_fields == 3){
-        key = group_name;
-        key.push_back('_');
-        key.push_back(suffixes[field_ind]);
-      } else {
-        key = group_name;
-      }
-
-      if (map.contains(key)){
-        ERROR1("EnzoEFltArrayMap::from_grouping",
-               "EnzoEFltArrayMap can't hold more than one field called \"%s\"",
-               key.c_str());
-      }
-
-      if (dim == -1){
-        map[key] = array_factory.from_name(field_name);
-      } else {
-        map[key] = array_factory.assigned_center_from_name(field_name, dim);
-      }
-
-    }
-
-  }
-}
-
-//----------------------------------------------------------------------
-
 void EnzoMethodMHDVlct::compute_flux_
 (Block *block, int dim, double cur_dt, Grouping &reconstructable_group,
  Grouping &priml_group, Grouping &primr_group, std::string pressure_name_l,
@@ -698,21 +738,21 @@ void EnzoMethodMHDVlct::compute_flux_
 				      cur_stale_depth, dim);
 
   // Next, compute the fluxes
-  EnzoEFltArrayMap integrable_l, integrable_r, fluxes;
+  EnzoEFltArrayMap integrable_l, integrable_r, flux_map;
   add_arrays_to_map_(block, *integrable_group_l, integrable_group_names_, dim,
-                     integrable_l, true, NULL);
+                     integrable_l, false, true, NULL);
   add_arrays_to_map_(block, *integrable_group_l, passive_group_names_, dim,
-                     integrable_l, false, primitive_group_);
+                     integrable_l, false, false, primitive_group_);
 
   add_arrays_to_map_(block, *integrable_group_r, integrable_group_names_, dim,
-                     integrable_r, true, NULL);
+                     integrable_r, false, true, NULL);
   add_arrays_to_map_(block, *integrable_group_r, passive_group_names_, dim,
-                     integrable_r, false, primitive_group_);
+                     integrable_r, false, false, primitive_group_);
 
   add_arrays_to_map_(block, flux_group, integrable_group_names_, dim,
-                     fluxes, true, NULL);
+                     flux_map, false, true, NULL);
   add_arrays_to_map_(block, flux_group, passive_group_names_, dim,
-                     fluxes, false, primitive_group_);
+                     flux_map, false, false, primitive_group_);
 
   /*
   CkPrintf("Dim = %d\n", dim);
@@ -720,8 +760,8 @@ void EnzoMethodMHDVlct::compute_flux_
   integrable_l.print_summary();
   CkPrintf("Right Integrable:\n"); 
   integrable_r.print_summary();
-  CkPrintf("Fluxes:\n"); 
-  fluxes.print_summary();
+  CkPrintf("Flux_Map:\n"); 
+  flux_map.print_summary();
   CkPrintf("\n\n");
   */
 
@@ -745,16 +785,23 @@ void EnzoMethodMHDVlct::compute_flux_
     interface_velocity_ptr = &interface_velocity_arr;
   }
   riemann_solver_->solve(integrable_l, integrable_r, pressure_l, pressure_r,
-                         fluxes, dim, eos_, cur_stale_depth, passive_lists,
+                         flux_map, dim, eos_, cur_stale_depth, passive_lists,
                          interface_velocity_ptr);
 
-  // Accumulate the change in integrable quantities from these fluxes in
-  // dUcons_group
-  //const std::vector<std::string> updater_group_names =
-  //  integrable_updater_->combined_integrable_groups();
-  integrable_updater_->accumulate_flux_component(block, dim, cur_dt,
-						 flux_group, dUcons_group,
-						 cur_stale_depth);
+  // Accumulate the change in integrable quantities from these flux_map in
+  // dUcons_map
+  EnzoEFltArrayMap dUcons_map;
+  add_arrays_to_map_(block, dUcons_group, integrable_group_names_, -1,
+                     dUcons_map, true, // dUcons_group may omit B-fields
+                     true, NULL);
+  add_arrays_to_map_(block, dUcons_group, passive_group_names_, -1,
+                     dUcons_map, false, false, primitive_group_);
+
+  double cell_width = enzo::block(block)->CellWidth[dim];
+  integrable_updater_->accumulate_flux_component(dim, cur_dt, cell_width,
+                                                 flux_map, dUcons_map,
+                                                 cur_stale_depth,
+                                                 passive_lists);
 
   // if using dual energy formalism, compute the dual energy formalism
   if (eos_->uses_dual_energy_formalism()){
