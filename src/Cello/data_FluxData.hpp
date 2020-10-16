@@ -122,26 +122,6 @@ public: // interface
   inline FaceFluxes * neighbor_fluxes (int axis, int face, unsigned i_f) 
   { return get_neighbor_fluxes_ (index_(axis,face,i_f)); }
 
-  /// Set the block's face fluxes associated with the given facet and
-  /// field. Note 0 <= i_f < num_fields() is an index into the
-  /// field_list vector, not the field index itself.
-  inline void set_block_fluxes
-  (FaceFluxes * fluxes, int axis, int face, unsigned i_f)
-  { set_block_fluxes(fluxes,index_(axis,face,i_f)); }
-
-  inline void set_block_fluxes (FaceFluxes * fluxes, unsigned i)
-  {  block_fluxes_[i] = fluxes; }
-
-  /// Set the neighboring block's face fluxes associated with the
-  /// given facet and field. Note 0 <= i_f < num_fields() is an index
-  /// into the field_list vector, not the field index itself.
-  inline void set_neighbor_fluxes
-  (FaceFluxes * fluxes, int axis, int face, unsigned i_f)
-  { set_neighbor_fluxes(fluxes,index_(axis,face,i_f)); }
-
-  inline void set_neighbor_fluxes (FaceFluxes * fluxes, unsigned i)
-  { neighbor_fluxes_[i] = fluxes; }
-
   /// Accumulate (sum) the neighboring block's face fluxes associated
   /// with the given facet and field. Note 0 <= i_f < num_fields() is
   /// an index into the field_list vector, not the field index itself.

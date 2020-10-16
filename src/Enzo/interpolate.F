@@ -4,6 +4,8 @@ c     See LICENSE_ENZO file for license and copyright information
 c=======================================================================
 c//////////////////////  SUBROUTINE INTERPOLATE  \\\\\\\\\\\\\\\\\\\\\\\
 c
+c #define DEBUG_INTERP
+      
       subroutine interpolate(ndim, parent, pdims, pstart, pend, refine,
      &                       grid, gdims, gstart, work, imethod,
      &                       iposflag, ierror)
@@ -63,6 +65,21 @@ c=======================================================================
 c
 c  Error check for number of dimensions
 c
+#ifdef DEBUG_INTERP      
+      print*, 'ENZO_DEBUG interpolate'
+      print*, 'ENZO_DEBUG ndim = ',ndim
+      print*, 'ENZO_DEBUG parent = ',parent(1)
+      print*, 'ENZO_DEBUG pdims = ', pdims(1),pdims(2),pdims(3)
+      print*, 'ENZO_DEBUG pstart = ', pstart(1),pstart(2),pstart(3)
+      print*, 'ENZO_DEBUG pend = ', pend(1),pend(2),pend(3)
+      print*, 'ENZO_DEBUG refine, = ', refine(1),refine(2),refine(3)
+      print*, 'ENZO_DEBUG grid = ', grid(1)
+      print*, 'ENZO_DEBUG gdims = ', gdims(1),gdims(2),gdims(3)
+      print*, 'ENZO_DEBUG gstart = ', gstart(1),gstart(2),gstart(3)
+      print*, 'ENZO_DEBUG imethod = ', imethod
+      print*, 'ENZO_DEBUG iposflag = ', iposflag
+      flush(6)
+#endif      
       if (ndim .lt. 1 .or. ndim .gt. 3) then
          write (6,*) "INTERPOLATE: ERROR ndim =", ndim
 c         ERROR_MESSAGE

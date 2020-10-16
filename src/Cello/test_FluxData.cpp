@@ -75,7 +75,7 @@ PARALLEL_MAIN_BEGIN
 
   flux_data.allocate(n3[0],n3[1],n3[2],field_list);
   
-  unit_func ("FluxData::set_block_fluxes()");
+  unit_func ("FluxData::set_flux_array()");
 
   for (int i_f=0; i_f<n_f; i_f++) {
 
@@ -223,12 +223,6 @@ PARALLEL_MAIN_BEGIN
 
       }
     }
-    unit_assert(unit_incomplete);
-    
-    unit_func ("FluxData::set_neighbor_fluxes()");
-  
-    unit_assert(unit_incomplete);
-
   }
 
   unit_func ("deallocate()");

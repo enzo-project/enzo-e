@@ -25,12 +25,14 @@ public: // interface
 
   /// Constructor of uninitialized FieldFace
 
-  FieldFace () throw()
-  : refresh_type_(refresh_unknown),
-    prolong_(NULL),
-    restrict_(NULL),
-    refresh_(NULL),
-    new_refresh_(false)
+  FieldFace (int rank) throw()
+    : rank_(rank),
+      refresh_type_(refresh_unknown),
+      prolong_(NULL),
+      restrict_(NULL),
+      refresh_(NULL),
+      new_refresh_(false),
+      box_()
   {
 #ifdef DEBUG_FIELD_FACE    
     CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",
@@ -46,7 +48,7 @@ public: // interface
   }
 
   /// Constructor of initialized FieldFace
-  FieldFace (const Field & field) throw();
+  FieldFace (int rank, const Field & field) throw();
      
   /// Destructor
   ~FieldFace() throw();
@@ -58,7 +60,7 @@ public: // interface
   FieldFace & operator= (const FieldFace & FieldFace) throw();
 
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p);
+  void pup (PUP::er &p);
 
   //----------------------------------------------------------------------
 
@@ -144,16 +146,6 @@ public: // interface
 
   int num_bytes_array (Field field) throw();
 
-  /// Compute loop limits for copy, load, or store if accumulate == false
-  void loop_limits
-  (int i3[3], int n3[3], const int m3[3], const int g3[3], const int c3[3],
-   int refresh_type);
-
-  /// Compute loop limits for copy, load, or store if accumulate == true
-  void loop_limits_accumulate
-  (int i3[3], int n3[3], const int m3[3], const int g3[3], const int c3[3],
-   int refresh_type);
-
   //--------------------------------------------------
 
   /// Return the number of bytes required to serialize the data object
@@ -218,8 +210,14 @@ private: // functions
   (Field field, int index_field,
    const int i3[3], const int n3[3], const int m3[3]);
 
+  /// Initialize the associated Box object box_ using current attributes
+  void set_box_();
+
 private: // attributes
 
+  /// Rank of the problem
+  int rank_;
+  
   /// Select face, including edges and corners (-1,-1,-1) to (1,1,1)
   int face_[3];
 
@@ -244,6 +242,8 @@ private: // attributes
 
   /// Whether refresh object should be deleted in destructor
   bool new_refresh_;
+
+  Box box_;
 };
 
 #endif /* DATA_FIELD_FACE_HPP */

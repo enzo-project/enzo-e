@@ -165,11 +165,11 @@ namespace cello {
   {
     switch (precision) {
     case precision_single:
-      return std::numeric_limits<float>::digits;
+      return std::numeric_limits<float>::digits10;
     case precision_double:
-      return std::numeric_limits<double>::digits;
+      return std::numeric_limits<double>::digits10;
     case precision_quadruple:
-      return std::numeric_limits<long double>::digits;
+      return std::numeric_limits<long double>::digits10;
     default:
       return 0;
     }

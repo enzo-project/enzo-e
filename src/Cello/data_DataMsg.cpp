@@ -119,7 +119,7 @@ char * DataMsg::load_data (char * buffer)
 
   pc = buffer;
 
-  field_face_ = new FieldFace;
+  field_face_ = new FieldFace(cello::rank());
 
   const int n_ff = (*pi++);
   const int n_fa = (*pi++);

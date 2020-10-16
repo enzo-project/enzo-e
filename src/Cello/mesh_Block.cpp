@@ -961,7 +961,7 @@ FieldFace * Block::create_face
 (int if3[3], int ic3[3], bool lg3[3],
  int refresh_type, Refresh * refresh, bool new_refresh) const
 {
-  FieldFace  * field_face = new FieldFace;
+  FieldFace  * field_face = new FieldFace(cello::rank());
 #ifdef DEBUG_FIELD_FACE  
   CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",
             CkMyPe(),__FILE__,__LINE__,(void*)field_face);

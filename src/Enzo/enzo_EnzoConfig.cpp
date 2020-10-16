@@ -476,7 +476,7 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Method:pm_update:max_dt", std::numeric_limits<double>::max());
 
   // ENZO interpolation
-  prolong_enzo_type     = p->value_logical ("Prolong:enzo:type","2A");
+  prolong_enzo_type     = p->value_string  ("Prolong:enzo:type","2A");
   prolong_enzo_positive = p->value_logical ("Prolong:enzo:positive",true);
 
   // Particle method initialization

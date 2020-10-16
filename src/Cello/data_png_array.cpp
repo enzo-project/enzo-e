@@ -23,8 +23,6 @@ void png_array (const char * filename,
 
   double colormap[2][3] = {{ 0.0, 0.0, 0.0},
 			   { 1.0, 1.0, 1.0} };
-  const int nc = 2;
-
 #ifdef PLOT  
   pngwriter * png;
   if (px==0) px = 1;
@@ -75,9 +73,9 @@ void png_array (const char * filename,
   printf ("DEBUG_PNG %s: sum_abs %20.15g\n",filename,sum_abs);
   printf ("DEBUG_PNG %s: sum2_real %20.15g sum2_ghost %20.15g\n",filename,sum2_real,sum2_ghost);
 #endif
+#ifdef PLOT  
   int nx=mx-2*gx;
   int ny=my-2*gy;
-#ifdef PLOT  
   for (int ky=0; ky<py; ky++) {
     int iy = 1.0*ky*ny/py+gy;
     for (int kx=0; kx<px; kx++) {

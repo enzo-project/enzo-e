@@ -29,9 +29,6 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("FaceFluxes");
 
-  const int num_normal=2;
-  const int normal[] = {+1,-1};
-
   const int num_level = 3;
   const int level_1[] = {1,2,3};
   const int level_2[] = {1,3,2};
@@ -74,14 +71,12 @@ PARALLEL_MAIN_BEGIN
           h3_1[1] = (rank >= 2) ? test.cell_width[1] : 0;
           h3_1[2] = (rank >= 3) ? test.cell_width[2] : 0;
           double h3_2[3] = {h3_1[0],h3_1[1],h3_1[2]};
-          const double dt1 =  test.time_step_1;
-          double dt2 =  test.time_step_2;
           const int cx = test.child[0];
           const int cy = (rank >= 2) ? test.child[1] : 0;
           const int cz = (rank >= 3) ? test.child[2] : 0;
 
-          if (L_1 < L_2) { h3_2[0]*=0.5; h3_2[1]*=0.5; h3_2[2]*=0.5; dt2*=0.5;}
-          if (L_1 > L_2) { h3_2[0]*=2.0; h3_2[1]*=2.0; h3_2[2]*=2.0; dt2*=2.0;}
+          if (L_1 < L_2) { h3_2[0]*=0.5; h3_2[1]*=0.5; h3_2[2]*=0.5;}
+          if (L_1 > L_2) { h3_2[0]*=2.0; h3_2[1]*=2.0; h3_2[2]*=2.0;}
           int fx = iaxis==0 ? iface*2-1 : 0;
           int fy = iaxis==1 ? iface*2-1 : 0;
           int fz = iaxis==2 ? iface*2-1 : 0;

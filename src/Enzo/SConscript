@@ -19,7 +19,7 @@ Import('lib_path')
 components = []
 
 components.append(['enzo','charm','simulation','problem', 'compute',
-	      'control', 'mesh', 'data',
+	      'control', 'data', 'mesh',
 	      'io', 'disk','memory',
 	      'parameters', 
 	      'error', 'monitor', 'parallel','performance',

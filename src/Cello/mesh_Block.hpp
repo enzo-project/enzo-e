@@ -273,6 +273,7 @@ public: // interface
 
   void r_end_initialize(CkReductionMsg * msg)
   {  initial_exit_();  delete msg;  }
+  
   void initial_exit_();
   void p_initial_exit()
   {      initial_exit_();  }

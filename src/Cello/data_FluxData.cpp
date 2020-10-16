@@ -23,13 +23,6 @@ void FluxData::allocate
   block_fluxes_.resize(6*nf,nullptr);
   neighbor_fluxes_.resize(6*nf,nullptr);
 
-  const int ixm = -1;
-  const int ixp = +1;
-  const int iym = (ny == 1) ? 0 : -1;
-  const int iyp = (ny == 1) ? 0 : +1;
-  const int izm = (nz == 1) ? 0 : -1;
-  const int izp = (nz == 1) ? 0 : +1;
-
   const int ix32[3][2] = { {-1, +1},  {0,  0}, {0,  0} };
   const int iy32[3][2] = { { 0,  0}, {-1, +1}, {0,  0} };
   const int iz32[3][2] = { { 0,  0},  {0, 0}, {-1, +1} };

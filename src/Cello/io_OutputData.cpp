@@ -225,8 +225,6 @@ void OutputData::write_field_data
   io_field_data()->set_field_data((FieldData*)field_data);
   io_field_data()->set_field_index(index_field);
 
-  FieldDescr * field_descr = cello::field_descr();
-  
   for (size_t i=0; i<io_field_data()->data_count(); i++) {
 
     void * buffer;

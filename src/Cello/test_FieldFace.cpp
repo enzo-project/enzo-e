@@ -132,26 +132,6 @@ bool test_field(T * values,
       }
     }
   }
-  if (! result) {
-    PARALLEL_PRINTF ("mismatch block   (%d %d %d)\n", ibx,iby,ibz);
-    PARALLEL_PRINTF ("mismatch field    %d\n",        index_field);
-    PARALLEL_PRINTF ("mismatch size    (%d %d %d)\n", mdx,mdy,mdz);
-    for (int iz = 0; iz < mdz; iz++) {
-      for (int iy = 0; iy < mdy; iy++) {
-	for (int ix = 0; ix < mdx; ix++) {
-	  int i = ix + mdx * (iy + mdy * iz);
-	  double value = test_value(ix,iy,iz,
-				    gx,gy,gz,
-				    mdx,mdy,mdz,
-				    ibx,iby,ibz,
-				    nbx,nby,nbz,
-				    index_field,
-				    MD3,ND3);
-	}
-      }
-    }
-  }
-
   return result;
 }
 
@@ -299,7 +279,6 @@ PARALLEL_MAIN_BEGIN
   field_descr->set_ghost_depth(1, 1,2,3);
   field_descr->set_ghost_depth(2, 3,2,1);
 
-
   int nbx=2, nby=3, nbz=4;
   std::vector<FieldData *> field_data(nbx*nby*nbz);
 
@@ -341,8 +320,8 @@ PARALLEL_MAIN_BEGIN
 	  Field field_lower (field_descr,data_lower);
 	  Field field_upper (field_descr,data_upper);
 
-	  FieldFace face_lower (field_lower);
-	  FieldFace face_upper (field_upper);
+	  FieldFace face_lower (3,field_lower);
+	  FieldFace face_upper (3,field_upper);
 
 	  face_lower.set_refresh_type(refresh_same);
 	  face_upper.set_refresh_type(refresh_same);
@@ -387,7 +366,7 @@ PARALLEL_MAIN_BEGIN
 	  unit_assert (buffer_next - buffer == nm);
 
 	  unit_func("load_data()");
-	  FieldFace new_face_lower;
+	  FieldFace new_face_lower (3);
 	  buffer_next = new_face_lower.load_data(buffer);
 	  unit_assert (buffer_next - buffer == nm);
 

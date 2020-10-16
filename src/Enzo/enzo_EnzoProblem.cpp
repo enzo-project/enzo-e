@@ -598,7 +598,7 @@ Prolong * EnzoProblem::create_prolong_
   Prolong * prolong = 0;
 
   const EnzoConfig * enzo_config = enzo::config();
-  
+
   if (type == "enzo") {
     prolong = new EnzoProlong
       (enzo_config->prolong_enzo_type,
