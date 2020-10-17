@@ -69,11 +69,9 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
 
   // Initialize the remaining component objects
   half_dt_recon_ = EnzoReconstructor::construct_reconstructor
-    (reconstructable_group_names_, passive_group_names_, half_recon_name,
-     (enzo_float)theta_limiter);
+    (reconstructable_group_names_, half_recon_name, (enzo_float)theta_limiter);
   full_dt_recon_ = EnzoReconstructor::construct_reconstructor
-    (reconstructable_group_names_, passive_group_names_, full_recon_name,
-     (enzo_float)theta_limiter);
+    (reconstructable_group_names_, full_recon_name, (enzo_float)theta_limiter);
   riemann_solver_ = EnzoRiemann::construct_riemann
     (integrable_group_names_,      passive_group_names_, rsolver);
   integrable_updater_ = new EnzoIntegrableUpdate(integrable_group_names_,
@@ -694,18 +692,57 @@ void EnzoMethodMHDVlct::compute_flux_
  std::string interface_velocity_name, EnzoReconstructor &reconstructor,
  EnzoConstrainedTransport *ct_handler, int stale_depth)
 {
+
+  std::vector<std::vector<std::string>> passive_lists {{}};
+  for (std::string group_name : passive_group_names_){
+    int num_fields = primitive_group_->size(group_name);
+    for (int field_ind=0; field_ind<num_fields; field_ind++){
+      std::string field_name = primitive_group_->item(group_name,field_ind);
+      passive_lists[0].push_back(field_name);
+    }
+  }
+
   // purely for the purposes of making the caluclation more explicit, we define
   // the following aliases for priml_group/primr_group
   Grouping *integrable_group_l, *integrable_group_r;
   Grouping *reconstructable_group_l, *reconstructable_group_r;
   integrable_group_l = &priml_group;  reconstructable_group_l = &priml_group;
   integrable_group_r = &primr_group;  reconstructable_group_r = &primr_group;
+
+  EnzoEFltArrayMap reconstructable_map, reconstructable_l, reconstructable_r;
+  add_arrays_to_map_(block, reconstructable_group,
+                     reconstructable_group_names_,
+                     -1, reconstructable_map, false, true, NULL);
+  add_arrays_to_map_(block, reconstructable_group, passive_group_names_,
+                     -1, reconstructable_map, false, false,
+                     primitive_group_);
+
+  add_arrays_to_map_(block, *reconstructable_group_l,
+                     reconstructable_group_names_, dim,
+                     reconstructable_l, false, true, NULL);
+  add_arrays_to_map_(block, *reconstructable_group_l, passive_group_names_,
+                     dim, reconstructable_l, false, false, primitive_group_);
+
+  add_arrays_to_map_(block, *reconstructable_group_r,
+                     reconstructable_group_names_, dim,
+                     reconstructable_r, false, true, NULL);
+  add_arrays_to_map_(block, *reconstructable_group_r, passive_group_names_,
+                     dim, reconstructable_r, false, false, primitive_group_);
+
+  //CkPrintf("Dim = %d\n", dim);
+  //CkPrintf("Centered Reconstructable:\n"); 
+  //reconstructable_map.print_summary();
+  //CkPrintf("Reconstructable_l:\n"); 
+  //reconstructable_l.print_summary();
+  //CkPrintf("Reconstructable_r:\n"); 
+  //reconstructable_r.print_summary();
+  //CkPrintf("\n\n");
   
   // First, reconstruct the left and right interface values
-  reconstructor.reconstruct_interface(block, reconstructable_group,
-				      *reconstructable_group_l,
-				      *reconstructable_group_r,
-				      dim, eos_, stale_depth);
+  reconstructor.reconstruct_interface(reconstructable_map,
+                                      reconstructable_l, reconstructable_r,
+				      dim, eos_, stale_depth,
+                                      passive_lists);
 
   // We temporarily increment the stale_depth for the rest of this calculation
   // here. We can't fully increment otherwise it will screw up the
@@ -764,15 +801,6 @@ void EnzoMethodMHDVlct::compute_flux_
   flux_map.print_summary();
   CkPrintf("\n\n");
   */
-
-  std::vector<std::vector<std::string>> passive_lists {{}};
-  for (std::string group_name : passive_group_names_){
-    int num_fields = primitive_group_->size(group_name);
-    for (int field_ind=0; field_ind<num_fields; field_ind++){
-      std::string field_name = primitive_group_->item(group_name,field_ind);
-      passive_lists[0].push_back(field_name);
-    }
-  }
 
   EnzoFieldArrayFactory array_factory(block, 0);
   EFlt3DArray pressure_l, pressure_r, interface_velocity_arr;
