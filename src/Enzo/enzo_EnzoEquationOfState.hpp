@@ -128,42 +128,25 @@ public: // interface
 
   /// Converts reconstructable primitives to integrable primitives
   ///
-  /// @param block holds data to be processed
-  /// @param reconstructable_group holds field names of reconstructable
-  ///     primitive values to convert
-  /// @param integrable_group holds field names of integrable primitives where
-  ///     the converted values will be stored. There is expected to be
-  ///     significant overlap with the fields stored in reconstructable_group
-  /// @param stale_depth indicates the number of field entries from the
-  ///     outermost field value that the region including "stale" values (need
-  ///     to be refreshed) extends over (0 means there are no "stale" values).
-  /// @param reconstructed_axis - parameter that optionally indicates that the
-  ///     reconstructable primitives have been reconstructed at face-centers (if
-  ///     the same grouping is used for multiple axes, then the fields are
-  ///     internally stored as cell-centered rather than an array of
-  ///     face-centered quantites). A value of -1 means that they are
-  ///     cell-centered. A value of 0, 1, or 2 means that the fields were
-  ///     reconstructed and they only contain valid values at x, y, or z faces
+  /// @param[in] reconstructable Map holding reconstructable primitive values
+  ///     that are to be converted
+  /// @param[out] integrable Map holding arrays where the computed integrable
+  ///     data is to be stored. Due to the large degree of overlap between
+  ///     integrable and reconstructable quantities, several arrays held in
+  ///     this array and reconstructable are expected to be aliases.
+  /// @param[in] stale_depth indicates the current stale_depth for the
+  ///     supplied cell-centered quantities
+  /// @param[in]  passive_lists A list of lists of keys for passive scalars. In
+  ///     this method, this is effectively concatenated into one list of keys.
   ///
   /// For a barotropic EOS, this nominally does nothing
   /// For a non-barotropic EOS, this computes specific total energy from
   /// pressure. If using the dual energy formalism, it will also compute the
   /// internal energy from the pressure
-  virtual void integrable_from_reconstructable(Block *block,
-					       Grouping &reconstructable_group,
-					       Grouping &integrable_group,
-					       int stale_depth,
-					       int reconstructed_axis) const =0;
-
-  /// @overload
-  ///
-  /// Provides stale_depth with the default value of 0 and assumes that the
-  /// fields are cell-centered
-  void integrable_from_reconstructable(Block *block,
-				       Grouping &reconstructable_group,
-				       Grouping &integrable_group) const
-  { integrable_from_reconstructable(block, reconstructable_group,
-				    integrable_group, 0, -1); }
+  virtual void integrable_from_reconstructable
+  (EnzoEFltArrayMap &reconstructable, EnzoEFltArrayMap &integrable,
+   int stale_depth,
+   const std::vector<std::vector<std::string>> &passive_lists) const =0;
 
   /// Computes thermal pressure from integrable quantities
   /// 
@@ -192,31 +175,19 @@ public: // interface
   /// Computes thermal pressure from reconstructable quantities (nominally
   /// after reconstruction)
   ///
-  /// @param block holds data to be processed
-  /// @param reconstructable_group holds field names of reconstructable
-  ///     primitives to be used to compute thermal pressure
-  /// @param pressure_name field name where the computed pressure will be
-  ///     stored
-  /// @param stale_depth indicates the number of field entries from the
-  ///     outermost field value that the region including "stale" values (need
-  ///     to be refreshed) extends over (0 means there are no "stale" values).
-  /// @param reconstructed_axis - parameter that optionally indicates that the
-  ///     reconstructable primitives have been reconstructed at face-centers (if
-  ///     the same grouping is used for multiple axes, then the fields are
-  ///     internally stored as cell-centered rather than an array of
-  ///     face-centered quantites). A value of -1 means that they are
-  ///     cell-centered. A value of 0, 1, or 2 means that the fields were
-  ///     reconstructed and they only contain valid values at x, y, or z faces
+  /// @param[in] reconstructable Map holding reconstructable primitive values
+  ///     that are used to compute the pressure
+  /// @param[out] pressure Array where the thermal pressure is to be stored
+  /// @param[in] stale_depth indicates the current stale_depth for the
+  ///     supplied cell-centered quantities
   ///
   /// For a non-barotropic EOS, pressure is considered a reconstructable
-  /// quantity. In that case, if the pressure field in reconstructable_group
-  /// matches pressure_name, nothing happens. If the field names do not match,
-  /// then values are simply copied
-  virtual void pressure_from_reconstructable(Block *block,
-					     Grouping &reconstructable_group,
-					     std::string pressure_name,
-					     int stale_depth,
-					     int reconstructed_axis) const = 0;
+  /// quantity. In that case, if the pressure array in reconstructable is an
+  /// alias of the pressure array argument, nothing happens. If they aren't
+  /// aliases values are copied between arrays.
+  virtual void pressure_from_reconstructable(EnzoEFltArrayMap &reconstructable,
+                                             EFlt3DArray &pressure,
+                                             int stale_depth) const = 0;
 
   /// returns the density floor
   virtual enzo_float get_density_floor() const = 0;

@@ -693,6 +693,19 @@ void EnzoMethodMHDVlct::compute_flux_
  EnzoConstrainedTransport *ct_handler, int stale_depth)
 {
 
+  // purely for the purposes of making the caluclation more explicit, we define
+  // the following aliases for priml_group/primr_group
+  Grouping *integrable_group_l, *integrable_group_r;
+  Grouping *reconstructable_group_l, *reconstructable_group_r;
+  integrable_group_l = &priml_group;  reconstructable_group_l = &priml_group;
+  integrable_group_r = &primr_group;  reconstructable_group_r = &primr_group;
+
+
+  // NOW, AN ASIDE
+  // First, setup passive_lists. It's a list of lists of passive scalar names.
+  // The first sublist holds all names that are normally passively advected.
+  // Subsequent lists hold sets of names for scalars whose values must sum to 1
+  // (like species).
   std::vector<std::vector<std::string>> passive_lists {{}};
   for (std::string group_name : passive_group_names_){
     int num_fields = primitive_group_->size(group_name);
@@ -702,13 +715,19 @@ void EnzoMethodMHDVlct::compute_flux_
     }
   }
 
-  // purely for the purposes of making the caluclation more explicit, we define
-  // the following aliases for priml_group/primr_group
-  Grouping *integrable_group_l, *integrable_group_r;
-  Grouping *reconstructable_group_l, *reconstructable_group_r;
-  integrable_group_l = &priml_group;  reconstructable_group_l = &priml_group;
-  integrable_group_r = &primr_group;  reconstructable_group_r = &primr_group;
+  // setup the plain arrays that we need.
+  EnzoFieldArrayFactory array_factory(block, 0);
+  EFlt3DArray pressure_l, pressure_r, interface_velocity_arr;
+  pressure_l = array_factory.assigned_center_from_name(pressure_name_l, dim);
+  pressure_r = array_factory.assigned_center_from_name(pressure_name_r, dim);
+  EFlt3DArray* interface_velocity_ptr=NULL;
+  if (interface_velocity_name != ""){
+    interface_velocity_arr = array_factory.assigned_center_from_name
+      (interface_velocity_name, dim);
+    interface_velocity_ptr = &interface_velocity_arr;
+  }
 
+  // Now, setup the maps that hold reconstructable quantities
   EnzoEFltArrayMap reconstructable_map, reconstructable_l, reconstructable_r;
   add_arrays_to_map_(block, reconstructable_group,
                      reconstructable_group_names_,
@@ -729,15 +748,32 @@ void EnzoMethodMHDVlct::compute_flux_
   add_arrays_to_map_(block, *reconstructable_group_r, passive_group_names_,
                      dim, reconstructable_r, false, false, primitive_group_);
 
-  //CkPrintf("Dim = %d\n", dim);
-  //CkPrintf("Centered Reconstructable:\n"); 
-  //reconstructable_map.print_summary();
-  //CkPrintf("Reconstructable_l:\n"); 
-  //reconstructable_l.print_summary();
-  //CkPrintf("Reconstructable_r:\n"); 
-  //reconstructable_r.print_summary();
-  //CkPrintf("\n\n");
-  
+  // Now, setup the maps that hold the remaining values
+  EnzoEFltArrayMap integrable_l, integrable_r, flux_map;
+  add_arrays_to_map_(block, *integrable_group_l, integrable_group_names_, dim,
+                     integrable_l, false, true, NULL);
+  add_arrays_to_map_(block, *integrable_group_l, passive_group_names_, dim,
+                     integrable_l, false, false, primitive_group_);
+
+  add_arrays_to_map_(block, *integrable_group_r, integrable_group_names_, dim,
+                     integrable_r, false, true, NULL);
+  add_arrays_to_map_(block, *integrable_group_r, passive_group_names_, dim,
+                     integrable_r, false, false, primitive_group_);
+
+  add_arrays_to_map_(block, flux_group, integrable_group_names_, dim,
+                     flux_map, false, true, NULL);
+  add_arrays_to_map_(block, flux_group, passive_group_names_, dim,
+                     flux_map, false, false, primitive_group_);
+
+  EnzoEFltArrayMap dUcons_map;
+  add_arrays_to_map_(block, dUcons_group, integrable_group_names_, -1,
+                     dUcons_map, true, // dUcons_group may omit B-fields
+                     true, NULL);
+  add_arrays_to_map_(block, dUcons_group, passive_group_names_, -1,
+                     dUcons_map, false, false, primitive_group_);
+
+  // From here return to normal calculation
+
   // First, reconstruct the left and right interface values
   reconstructor.reconstruct_interface(reconstructable_map,
                                       reconstructable_l, reconstructable_r,
@@ -759,72 +795,24 @@ void EnzoMethodMHDVlct::compute_flux_
   }
 
   // Calculate integrable values on left and right faces:
-  eos_->integrable_from_reconstructable(block, *reconstructable_group_l,
-					*integrable_group_l,
-					cur_stale_depth, dim);
-  eos_->integrable_from_reconstructable(block, *reconstructable_group_r,
-					*integrable_group_r,
-					cur_stale_depth, dim);
+  eos_->integrable_from_reconstructable(reconstructable_l, integrable_l,
+					cur_stale_depth, passive_lists);
+  eos_->integrable_from_reconstructable(reconstructable_r, integrable_r,
+					cur_stale_depth, passive_lists);
 
   // Calculate pressure on left and right faces:
-  eos_->pressure_from_reconstructable(block, *reconstructable_group_l,
-				      pressure_name_l,
-				      cur_stale_depth, dim);
-  eos_->pressure_from_reconstructable(block, *reconstructable_group_r,
-				      pressure_name_r,
-				      cur_stale_depth, dim);
+  eos_->pressure_from_reconstructable(reconstructable_l, pressure_l,
+                                      cur_stale_depth);
+  eos_->pressure_from_reconstructable(reconstructable_r, pressure_r,
+                                      cur_stale_depth);
 
   // Next, compute the fluxes
-  EnzoEFltArrayMap integrable_l, integrable_r, flux_map;
-  add_arrays_to_map_(block, *integrable_group_l, integrable_group_names_, dim,
-                     integrable_l, false, true, NULL);
-  add_arrays_to_map_(block, *integrable_group_l, passive_group_names_, dim,
-                     integrable_l, false, false, primitive_group_);
-
-  add_arrays_to_map_(block, *integrable_group_r, integrable_group_names_, dim,
-                     integrable_r, false, true, NULL);
-  add_arrays_to_map_(block, *integrable_group_r, passive_group_names_, dim,
-                     integrable_r, false, false, primitive_group_);
-
-  add_arrays_to_map_(block, flux_group, integrable_group_names_, dim,
-                     flux_map, false, true, NULL);
-  add_arrays_to_map_(block, flux_group, passive_group_names_, dim,
-                     flux_map, false, false, primitive_group_);
-
-  /*
-  CkPrintf("Dim = %d\n", dim);
-  CkPrintf("Left Integrable:\n"); 
-  integrable_l.print_summary();
-  CkPrintf("Right Integrable:\n"); 
-  integrable_r.print_summary();
-  CkPrintf("Flux_Map:\n"); 
-  flux_map.print_summary();
-  CkPrintf("\n\n");
-  */
-
-  EnzoFieldArrayFactory array_factory(block, 0);
-  EFlt3DArray pressure_l, pressure_r, interface_velocity_arr;
-  pressure_l = array_factory.assigned_center_from_name(pressure_name_l, dim);
-  pressure_r = array_factory.assigned_center_from_name(pressure_name_r, dim);
-  EFlt3DArray* interface_velocity_ptr=NULL;
-  if (interface_velocity_name != ""){
-    interface_velocity_arr = array_factory.assigned_center_from_name
-      (interface_velocity_name, dim);
-    interface_velocity_ptr = &interface_velocity_arr;
-  }
   riemann_solver_->solve(integrable_l, integrable_r, pressure_l, pressure_r,
                          flux_map, dim, eos_, cur_stale_depth, passive_lists,
                          interface_velocity_ptr);
 
   // Accumulate the change in integrable quantities from these flux_map in
   // dUcons_map
-  EnzoEFltArrayMap dUcons_map;
-  add_arrays_to_map_(block, dUcons_group, integrable_group_names_, -1,
-                     dUcons_map, true, // dUcons_group may omit B-fields
-                     true, NULL);
-  add_arrays_to_map_(block, dUcons_group, passive_group_names_, -1,
-                     dUcons_map, false, false, primitive_group_);
-
   double cell_width = enzo::block(block)->CellWidth[dim];
   integrable_updater_->accumulate_flux_component(dim, cur_dt, cell_width,
                                                  flux_map, dUcons_map,

@@ -56,22 +56,19 @@ public: // interface
 				       Grouping &conserved_passive_group,
 				       int stale_depth) const;
 
-  void integrable_from_reconstructable(Block *block,
-				       Grouping &reconstructable_group,
-				       Grouping &integrable_group,
-				       int stale_depth,
-				       int reconstructed_axis) const;
+  void integrable_from_reconstructable
+  (EnzoEFltArrayMap &reconstructable, EnzoEFltArrayMap &integrable,
+   int stale_depth,
+   const std::vector<std::vector<std::string>> &passive_lists) const;
 
   void pressure_from_integrable(Block *block, Grouping &integrable_group,
 				std::string pressure_name,
 				Grouping &conserved_passive_group,
 				int stale_depth) const;
 
-  void pressure_from_reconstructable(Block *block,
-				     Grouping &reconstructable_group,
-				     std::string pressure_name,
-				     int reconstructed_axis,
-				     int stale_depth) const;
+  void pressure_from_reconstructable(EnzoEFltArrayMap &reconstructable,
+                                     EFlt3DArray &pressure,
+                                     int stale_depth) const;
 
 inline  enzo_float get_density_floor() const { return density_floor_; }
 
