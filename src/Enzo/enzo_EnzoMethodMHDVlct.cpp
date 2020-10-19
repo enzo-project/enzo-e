@@ -728,14 +728,17 @@ void EnzoMethodMHDVlct::compute_flux_
   }
 
   // Now, setup the maps that hold reconstructable quantities
-  EnzoEFltArrayMap reconstructable_map, reconstructable_l, reconstructable_r;
-  add_arrays_to_map_(block, reconstructable_group,
-                     reconstructable_group_names_,
+  EnzoEFltArrayMap reconstructable_map;
+  // need to combine group_names to handle the internal energy source term
+  std::vector<std::string> group_names =
+    unique_combination_(reconstructable_group_names_, integrable_group_names_);
+  add_arrays_to_map_(block, reconstructable_group, group_names,
                      -1, reconstructable_map, false, true, NULL);
   add_arrays_to_map_(block, reconstructable_group, passive_group_names_,
                      -1, reconstructable_map, false, false,
                      primitive_group_);
 
+  EnzoEFltArrayMap reconstructable_l, reconstructable_r;
   add_arrays_to_map_(block, *reconstructable_group_l,
                      reconstructable_group_names_, dim,
                      reconstructable_l, false, true, NULL);
@@ -822,9 +825,9 @@ void EnzoMethodMHDVlct::compute_flux_
   // if using dual energy formalism, compute the dual energy formalism
   if (eos_->uses_dual_energy_formalism()){
     EnzoSourceInternalEnergy eint_src;
-    eint_src.calculate_source(block, cur_dt, reconstructable_group,
-			      dUcons_group, interface_velocity_name, dim, eos_,
-			      cur_stale_depth);
+    eint_src.calculate_source(dim, cur_dt, cell_width, reconstructable_map,
+                              dUcons_map, *interface_velocity_ptr, eos_,
+                              cur_stale_depth);
   }
 
   // Finally, have the ct handler record the upwind direction
