@@ -71,29 +71,28 @@ public: // interface
   /// reconstruction with given dimension with corresponding face-centerd
   /// bfield values (which is tracked internally).
   ///
-  /// @param l_group, r_group These should each contain a group called "bfield"
-  ///     that holds the names of the fields which store the components of the
-  ///     left/right reconstructed face-centered magnetic fields. The relevant
-  ///     fields should be formally defined as cell-centered. During the
-  ///     calculation, they are treated as face-centered (without having values
-  ///     on the exterior faces of the block).
-  ///     holding the hold the 
-  /// @param dim The dimension along which the values were reconstructed.
-  /// @param stale_depth The current staling depth. This is the stale depth
-  ///     from just before reconstruction plus the reconstructor's immediate
-  ///     staling rate.
-  void correct_reconstructed_bfield(Grouping &l_group, Grouping &r_group,
-				    int dim, int stale_depth);
+  /// @param[in,out] l_map, r_map These maps should hold the left/right
+  ///     reconstructed face-centered magnetic fields. These arrays hold
+  ///     face-centered values excluding the exterior faces. The components
+  ///     should be associated with the "bfield_x", "bfield_y", and "bfield_z"
+  ///     keys.
+  /// @param[in]     dim The dimension along which the values were
+  ///     reconstructed.
+  /// @param[in]     stale_depth The current staling depth. This is the stale
+  ///     depth from just before reconstruction plus the reconstructor's
+  ///     immediate staling rate.
+  void correct_reconstructed_bfield(EnzoEFltArrayMap &l_map,
+                                    EnzoEFltArrayMap &r_map, int dim,
+                                    int stale_depth);
 
   /// identifies and stores the upwind direction
   ///
-  /// @param flux_group this must have a "density" group that contains one name
-  ///     that refers to the field holding the "density" flux along the
-  ///     specified dimemsion.
-  /// @param dim The dimension to identify the upwind direction along.
-  /// @param stale_depth The current staling depth. This should match the
+  /// @param[in] flux_map Map holding the that holds the density flux along the
+  ///     specified dimension in at the "density" key.
+  /// @param[in] dim The dimension to identify the upwind direction along.
+  /// @param[in] stale_depth The current staling depth. This should match the
   ///     staling depth used to compute the flux_group.
-  void identify_upwind(Grouping &flux_group, int dim, int stale_depth);
+  void identify_upwind(EnzoEFltArrayMap &flux_map, int dim, int stale_depth);
 
   /// Updates all components of the face-centered and the cell-centered bfields
   ///

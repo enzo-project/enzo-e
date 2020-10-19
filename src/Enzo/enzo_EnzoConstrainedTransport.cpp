@@ -195,7 +195,7 @@ void EnzoConstrainedTransport::increment_partial_timestep() throw()
 //----------------------------------------------------------------------
 
 void EnzoConstrainedTransport::correct_reconstructed_bfield
-(Grouping &l_group, Grouping &r_group, int dim, int stale_depth)
+(EnzoEFltArrayMap &l_map, EnzoEFltArrayMap &r_map, int dim, int stale_depth)
 {
   Grouping *cur_bfieldi_group;
   if (partial_timestep_index_== 0){
@@ -209,28 +209,33 @@ void EnzoConstrainedTransport::correct_reconstructed_bfield
   }
 
   EnzoFieldArrayFactory array_factory(block_, stale_depth);
-  EFlt3DArray bfield, l_bfield,r_bfield;
-  bfield = array_factory.interior_bfieldi(*cur_bfieldi_group, dim);
-  l_bfield = array_factory.reconstructed_field(l_group, "bfield", dim, dim);
-  r_bfield = array_factory.reconstructed_field(r_group,"bfield", dim, dim);
+  EFlt3DArray bfield = array_factory.interior_bfieldi(*cur_bfieldi_group, dim);
+  if ((dim < 0) || (dim > 2)){
+    ERROR("EnzoConstrainedTransport::correct_reconstructed_bfield",
+          "dim has an invalid value");
+  } else {
+    const char* names[3] = {"bfield_x", "bfield_y", "bfield_z"};
+    EFlt3DArray l_bfield = l_map.get(names[dim], stale_depth);
+    EFlt3DArray r_bfield = r_map.get(names[dim], stale_depth);
 
-  // All 3 array objects are the same shape
-  for (int iz=0; iz<bfield.shape(0); iz++) {
-    for (int iy=0; iy<bfield.shape(1); iy++) {
-      for (int ix=0; ix<bfield.shape(2); ix++) {
-	l_bfield(iz,iy,ix) = bfield(iz,iy,ix);
-	r_bfield(iz,iy,ix) = bfield(iz,iy,ix);
+    // All 3 array objects are the same shape
+    for (int iz=0; iz<bfield.shape(0); iz++) {
+      for (int iy=0; iy<bfield.shape(1); iy++) {
+        for (int ix=0; ix<bfield.shape(2); ix++) {
+          l_bfield(iz,iy,ix) = bfield(iz,iy,ix);
+          r_bfield(iz,iy,ix) = bfield(iz,iy,ix);
+        }
       }
     }
+    // Equivalently: l_bfield.subarray() = bfield;
+    //               r_bfield.subarray() = bfield;
   }
-  // Equivalently: l_bfield.subarray() = bfield;
-  //               r_bfield.subarray() = bfield;
 }
 
 //----------------------------------------------------------------------
 
-void EnzoConstrainedTransport::identify_upwind(Grouping &flux_group, int dim,
-					       int stale_depth)
+void EnzoConstrainedTransport::identify_upwind(EnzoEFltArrayMap &flux_map,
+                                               int dim, int stale_depth)
 {
   EnzoFieldArrayFactory array_factory(block_, stale_depth);
 
@@ -243,9 +248,10 @@ void EnzoConstrainedTransport::identify_upwind(Grouping &flux_group, int dim,
   //    scheme from Athena++, which requires knowledge of the reconstructed
   //    densities.
 
-  EFlt3DArray density_flux, weight_field;
-  density_flux = array_factory.from_grouping(flux_group, "density", 0);
-  weight_field = array_factory.from_grouping(weight_group_, "weight", dim);
+  
+  EFlt3DArray density_flux = flux_map.get("density", stale_depth);
+  EFlt3DArray weight_field = array_factory.from_grouping(weight_group_,
+                                                         "weight", dim);
 
   // Iteration limits compatible with both 2D and 3D grids
   for (int iz=0; iz<density_flux.shape(0); iz++) {

@@ -790,10 +790,10 @@ void EnzoMethodMHDVlct::compute_flux_
 
   // Need to set the component of reconstructed B-field along dim, equal to
   // the corresponding longitudinal component of the B-field tracked at cell
-  // interfaces (should probably be handled internally by reconstructor)
+  // interfaces (should potentially be handled internally by reconstructor)
   if (ct_handler != NULL) {
-    ct_handler->correct_reconstructed_bfield(*reconstructable_group_l,
-					     *reconstructable_group_r,
+    ct_handler->correct_reconstructed_bfield(reconstructable_l,
+                                             reconstructable_r,
 					     dim, cur_stale_depth);
   }
 
@@ -832,7 +832,8 @@ void EnzoMethodMHDVlct::compute_flux_
 
   // Finally, have the ct handler record the upwind direction
   if (ct_handler != NULL){
-    ct_handler->identify_upwind(flux_group, dim, cur_stale_depth);
+    //ct_handler->identify_upwind(flux_group, dim, cur_stale_depth);
+    ct_handler->identify_upwind(flux_map, dim, cur_stale_depth);
   }
 }
 
