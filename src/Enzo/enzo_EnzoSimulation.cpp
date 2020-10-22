@@ -31,7 +31,7 @@ EnzoSimulation::EnzoSimulation
 (
  const char         parameter_file[],
  int                n)
-  : BASE_ENZO_SIMULATION(parameter_file, n)
+  : CBase_EnzoSimulation(parameter_file, n)
 {
 #ifdef CHECK_MEMORY
   mtrace();
@@ -70,7 +70,7 @@ void EnzoSimulation::pup (PUP::er &p)
 #endif  
   // NOTE: change this function whenever attributes change
 
-  BASE_ENZO_SIMULATION::pup(p);
+  CBase_EnzoSimulation::pup(p);
 
   TRACEPUP;
 

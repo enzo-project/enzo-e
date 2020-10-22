@@ -32,7 +32,8 @@ public: // interface
   EnzoMethodGravity()
     : index_solver_(-1),
       grav_const_(0.0),
-      order_(4)
+      order_(4),
+      ir_exit_(-1)
   {};
 
   /// Destructor
@@ -46,7 +47,9 @@ public: // interface
     : Method (m),
       index_solver_(-1),
       grav_const_(0.0),
-      order_(4)
+      order_(4),
+      ir_exit_(-1)
+      
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -64,6 +67,7 @@ public: // interface
     p | index_solver_;
     p | grav_const_;
     p | order_;
+    p | ir_exit_;
 
   }
 
@@ -78,8 +82,10 @@ public: // interface
 
   /// Compute accelerations from potential and exit solver
   void compute_accelerations (EnzoBlock * enzo_block) throw();
-  
-protected: // methods
+
+  void refresh_potential (EnzoBlock * enzo_block) throw();
+
+  protected: // methods
 
   void compute_ (EnzoBlock * enzo_block) throw();
 
@@ -98,6 +104,8 @@ protected: // attributes
   /// (Note EnzoMatrixLaplacian supports order=6 as well)
   int order_;
 
+  /// Refresh id's
+  int ir_exit_;
 };
 
 

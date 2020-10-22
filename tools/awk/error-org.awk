@@ -39,7 +39,8 @@ BEGIN {
     c=c+1; 
     split($1,a,":"); 
     b="";  
-    sub(/build/, "src",a[1]); 
+    t=match ($1,"/");
+    a[1] = "src"substr(a[1],t);
     sub(/include/,"src/Cello",a[1]);
     for (i=3; i<=NF; i++) {
 	sub(/\[/,"(",$i);
@@ -55,7 +56,8 @@ BEGIN {
 	    c=c+1; 
 	    split($1,a,":"); 
 	    b="";  
-	    sub(/build/, "src",a[1]); 
+            t=match ($1,"/");
+            a[1] = "src"substr(a[1],t);
 	    sub(/include/,"src/Cello",a[1]);
 	    for (i=3; i<=NF; i++) {
 		sub(/\[/,"(",$i);

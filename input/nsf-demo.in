@@ -61,6 +61,8 @@ Method {
    }
 }
 
+ include "input/flux_correct.incl"
+
 # Define initial conditions
 
 include "input/initial-cello.incl"

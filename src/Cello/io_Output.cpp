@@ -162,9 +162,9 @@ std::string Output::expand_name_
   }
 
   ASSERT3 ("Output::expand_name_",
-	   "The number of format conversion specifiers %d "
+	   "The number of format conversion specifiers %lu "
 	   "associated with file name %s "
-	   "must equal the number of variables %d",
+	   "must equal the number of variables %lu",
 	    count, name.c_str(),args.size(),
 	   args.size() == count);
 

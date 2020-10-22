@@ -9,7 +9,7 @@ c
      &            idim, jdim, i1, i2, j1, j2, dt, 
      &            gamma, idiff, gravity, idual, eta1, eta2,
      &            df, ef, uf, vf, wf, gef, ges,
-     &            ncolor, colslice, colf, dfloor
+     &            ncolor, colslice, colf, dfloor, error
      &                 )
 c
 c  SOLVES THE EULERIAN CONSERVATION LAWS USING FLUXES FROM THE RIEMANN SOLVER
@@ -76,6 +76,7 @@ c-----------------------------------------------------------------------
 c
       implicit NONE
 c
+#define FORTRAN
 #include "fortran_types.h"
 
       INTG_PREC ijkn
@@ -102,6 +103,7 @@ c
       R_PREC dnu(ijkn), dnuinv(ijkn), uold(ijkn), pcent(ijkn), 
      &     eratio(ijkn), dadx(ijkn),  dddx(ijkn)
       R_PREC min_color
+      INTG_PREC error
       parameter(min_color=1e-5_RKIND*tiny)
 c
 c\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\/////////////////////////////////
@@ -211,6 +213,7 @@ c     &               pls(i,j),prs(i,j),pls(i+1,j),prs(i+1,j)
 c                write(6,*) ub(i),ub(i+1),geb(i),geb(i+1),
 c     &               db(i),db(i+1),dub(i),dub(i+1)
                 write(0,*) 'stop in euler with geslice < 0'
+                error = 1
                 print*, 'ERROR_MESSAGE'
              endif
           enddo

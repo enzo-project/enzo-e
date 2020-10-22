@@ -15,7 +15,8 @@ Stopping { cycle = 20; }
 
 Testing {
    cycle_final = 20;
-   time_final = [0.00138345198840702]; # only applies to NEW_PPM
+
+   time_final = [0.00138340515331947];
 }
 
 Mesh    { 
@@ -33,17 +34,17 @@ Boundary { type = "periodic"; }
 
 Output {
      list = ["mesh","de"];
-
+#     list = [];
       de {
            name = ["balance-de-%05d.png", "cycle"]; 
-           include "input/schedule_cycle_2.incl"
+           schedule { var =  "cycle"; step = 20; }
            image_reduce_type = "max";
 	   image_type = "data";
            image_size = [1024,1024];
           }
       mesh {
            name = ["balance-mesh-%05d.png", "cycle"]; 
-           include "input/schedule_cycle_2.incl"
+           schedule { var =  "cycle"; step = 20; }
 	   image_type = "mesh";
 	   image_size = [1025,1025];
            image_min = 0.0;

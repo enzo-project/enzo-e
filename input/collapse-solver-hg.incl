@@ -1,0 +1,57 @@
+ Adapt {
+     min_level = -2;
+}
+Method {
+     gravity {
+         solver = "hg";
+     }
+ }     
+
+ Solver {
+     coarse {
+         iter_max = 100;
+         res_tol = 0.01000000000000000;
+         solve_type = "block";
+         type = "cg";
+     };
+     hg {
+         coarse_level = 0;
+         iter_max = 100;
+         monitor_iter = 1;
+         precondition = "mg";
+         res_tol = 0.01000000000000000;
+#         restart_cycle = 1000;
+         type = "bicgstab";
+     };
+     last {
+         iter_max = 5;
+         monitor_iter = 0;
+         type = "jacobi";
+         solve_type = "leaf";
+     };
+     list = [ "hg", "mg", "coarse", "last", "pre", "post" ];
+     mg {
+         coarse_level = -2;
+         coarse_solve = "coarse";
+         iter_max = 1;
+         res_tol = 0.01;
+         last_smooth = "last";
+         max_level = 4;
+         min_level = -2;
+         monitor_iter = 0;
+         post_smooth = "post";
+         pre_smooth = "pre";
+         solve_type = "leaf";
+         type = "mg0";
+     };
+     post {
+         iter_max = 0;
+         type = "jacobi";
+         solve_type = "level";
+     };
+     pre {
+         iter_max = 0;
+         type = "jacobi";
+         solve_type = "level";
+     };
+ }

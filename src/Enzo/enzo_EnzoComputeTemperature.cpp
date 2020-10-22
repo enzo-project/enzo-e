@@ -16,7 +16,7 @@ EnzoComputeTemperature::EnzoComputeTemperature
 (double density_floor,
  double temperature_floor,
  double mol_weight,
- bool comoving_coordinates )
+ bool comoving_coordinates)
   : Compute(),
     density_floor_(density_floor),
     temperature_floor_(temperature_floor),
@@ -116,7 +116,7 @@ void EnzoComputeTemperature::compute_(Block * block,
     enzo_float * p = (enzo_float*) field.values("pressure", i_hist_);
 
     EnzoComputePressure compute_pressure(EnzoBlock::Gamma[in],
-                                       comoving_coordinates_);
+                                         comoving_coordinates_);
     compute_pressure.set_history(i_hist_);
 
     if (recompute_pressure) compute_pressure.compute(block, p);

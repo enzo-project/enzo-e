@@ -41,6 +41,7 @@ include "input/domain-2d-01.incl"
          dual_energy = false;
      }
    }
+   include "input/flux_correct.incl"
 
    Initial {
        list = ["value"];

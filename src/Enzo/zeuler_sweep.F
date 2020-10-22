@@ -25,7 +25,9 @@ c
      &     df, ef, uf, vf,
      &     wf, grslice, geslice, gef,
      &     ges,
-     &     colslice, colf, colls, colrs
+     &     colslice, colf, colls, colrs,
+     &     ierror,
+     &     ie_error_x,ie_error_y,ie_error_z,num_ie_error
      &     )
 c     
 c     CONTROL ROUTINE FOR Z-SWEEP DIRECT EULER VERSION OF PPM
@@ -113,6 +115,8 @@ c    calcdiss - Calculate dissiptation and flattening coefficients
 c
 c-----------------------------------------------------------------------
       implicit NONE
+#define FORTRAN
+#include "fortran_types.h"
 c
 c-----------------------------------------------------------------------
 c
@@ -154,7 +158,10 @@ c
      &     uf(kn,in),     vf(kn,in),     wf(kn,in)
       ENZO_REAL
      &     colslice(kn,in,ncolor),  colf(kn,in,ncolor),
-     &        colls(kn,in,ncolor), colrs(kn,in,ncolor)
+     &     colls(kn,in,ncolor), colrs(kn,in,ncolor)
+      integer ierror
+      integer ie_error_x(*),ie_error_y(*),ie_error_z(*)
+      integer num_ie_error
 c
 c  parameters
 c
@@ -188,6 +195,24 @@ c
             uslice(k,i) = w(i,j,k)
             vslice(k,i) = u(i,j,k)
             wslice(k,i) = v(i,j,k)
+            if (dslice(k,i) < 0.0) then
+               print*, 'zeuler_sweep dslice ',i,j,k,dslice(k,i)
+               if (num_ie_error .ge. 0) then
+                  num_ie_error = num_ie_error + 1
+                  ie_error_x(num_ie_error) = i
+                  ie_error_y(num_ie_error) = j
+                  ie_error_z(num_ie_error) = k
+               endif
+            end if
+            if (eslice(k,i) < 0.0) then
+               print*, 'zeuler_sweep eslice ',i,j,k,eslice(k,i)
+               if (num_ie_error .ge. 0) then
+                  num_ie_error = num_ie_error + 1
+                  ie_error_x(num_ie_error) = i
+                  ie_error_y(num_ie_error) = j
+                  ie_error_z(num_ie_error) = k
+               endif
+            end if
          enddo
          if (gravity .eq. 1) then
             do k=1, kn
@@ -197,6 +222,15 @@ c
          if (idual .eq. 1) then
             do k=1, kn
                geslice(k,i) = ge(i,j,k)
+               if (geslice(k,i) < 0.0) then
+                  print*, 'xeuler_sweep geslice ',i,j,k,geslice(k,i)
+                  if (num_ie_error .ge. 0) then
+                     num_ie_error = num_ie_error + 1
+                     ie_error_x(num_ie_error) = i
+                     ie_error_y(num_ie_error) = j
+                     ie_error_z(num_ie_error) = k
+                  endif
+               end if
             enddo
          endif
          do ic=1, ncolor
@@ -210,14 +244,15 @@ c
 c  Compute the pressure on a slice
 c
       if (idual .eq. 1) then
+         ierror = 3
          call pgas2d_dual(
      &        dslice, eslice, geslice, pslice, 
      &        uslice, vslice, wslice, eta1, eta2,
-     &        kn, in, ks-3, ke+3, i1, i2, gamma, pmin)
+     &        kn, in, ks-3, ke+3, i1, i2, gamma, pmin, ierror)
       else
          call pgas2d(
      &        dslice, eslice, pslice, uslice, vslice, wslice,
-     &        kn, in, ks-3, ke+3, i1, i2, gamma, pmin)
+     &        kn, in, ks-3, ke+3, i1, i2, gamma, pmin, ierror)
       endif
 c
 c  If requested, compute diffusion and slope flattening coefficients
@@ -241,7 +276,7 @@ c
      &     dt, gamma, ipresfree,
      &     dls, drs, pls, prs, gels, gers,
      &     uls, urs, vls, vrs, wls, wrs,
-     &     ncolor, colslice, colls, colrs
+     &     ncolor, colslice, colls, colrs, ierror
      &     )
 c
 c  Compute (Lagrangian part of the) Riemann problem at each zone boundary
@@ -253,7 +288,6 @@ c
      &            dt, gamma, pmin, ipresfree,
      &            pbar, ubar, gravity, grslice, idual, eta1
      &             )
-
 
       iriemannfallback = 1
       
@@ -267,7 +301,7 @@ c
      &     dls, drs, pls, prs, gels, gers, uls, urs,
      &     vls, vrs, wls, wrs, pbar, ubar,
      &     df, ef, uf, vf, wf, gef, ges,
-     &     ncolor, colslice, colls, colrs, colf)
+     &     ncolor, colslice, colls, colrs, colf,2)
 c
 c  Compute Eulerian fluxes and update zones-centered quantities
 c
@@ -277,15 +311,17 @@ c
      &     kn, in, ks, ke, i1, i2, dt, 
      &     gamma, idiff, gravity, idual, eta1, eta2,
      &     df, ef, uf, vf, wf, gef, ges,
-     &     ncolor, colslice, colf, SmallRho)
+     &     ncolor, colslice, colf, SmallRho, ierror)
 c     
 c  If necessary, recompute the pressure to correctly set ge and e
 c
-      if (idual .eq. 1)
-     &     call pgas2d_dual
+      if (idual .eq. 1) then
+         ierror = 3
+         call pgas2d_dual
      &     (dslice, eslice, geslice, pslice, 
      &     uslice, vslice, wslice, eta1, eta2,
-     &     kn, in, ks-3, ke+3, i1, i2, gamma, pmin)
+     &        kn, in, ks-3, ke+3, i1, i2, gamma, pmin, ierror)
+      endif
 c
 c  Check this slice against the list of subgrids 
 c     (all subgrid quantities are zero based)

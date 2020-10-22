@@ -48,6 +48,8 @@ c
 c  LOCALS:
 c-----------------------------------------------------------------------
       implicit NONE
+#define FORTRAN
+#include "fortran_types.h"
 c
       integer MAX_REFINE
       parameter (MAX_REFINE = 32)

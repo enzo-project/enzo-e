@@ -8,16 +8,6 @@
 #include "cello.hpp"
 #include "io.hpp"
 
-// #define DEBUG_OUTPUT
-
-#ifdef DEBUG_OUTPUT
-#  define TRACE_OUTPUT(M)						\
-  CkPrintf ("%d TRACE_OUTPUT %s\n",CkMyPe(),M);				\
-  fflush(stdout);
-#else
-#  define TRACE_OUTPUT(M) /* ... */
-#endif
-
 //----------------------------------------------------------------------
 
 OutputImage::OutputImage(int index,
@@ -79,8 +69,6 @@ OutputImage::OutputImage(int index,
 	    image_mesh_color.c_str());
   }
 
-  TRACE1 ("OutputImage reduce %d",op_reduce_);
-
   int nl = image_block_size * (1 << max_level_); // image size factor
 
   if (ghost_) {
@@ -136,10 +124,6 @@ OutputImage::~OutputImage() throw ()
   image_data_ = NULL;
   delete [] image_mesh_;
   image_mesh_ = NULL;
-#ifdef DEBUG_OUTPUT
-  CkPrintf ("%d TRACE_OUTPUT ~OutputImage %p %p\n",
-	    CkMyPe(),image_data_,image_mesh_); fflush(stdout);
-#endif  
 }
 
 //----------------------------------------------------------------------
@@ -177,10 +161,6 @@ void OutputImage::pup (PUP::er &p)
   } else {
     image_mesh_ = NULL;
   }
-#ifdef DEBUG_OUTPUT
-  CkPrintf ("%d TRACE_OUTPUT pup %p %p\n",
-	    CkMyPe(),image_data_,image_mesh_); fflush(stdout);
-#endif  
   
   WARNING("OutputImage::pup","skipping png");
   // p | *png_;
@@ -220,7 +200,6 @@ void OutputImage::set_colormap
 
 void OutputImage::init () throw()
 {
-  TRACE_OUTPUT("OutputImage::init()");
   image_create_();
 }
 
@@ -228,7 +207,6 @@ void OutputImage::init () throw()
 
 void OutputImage::open () throw()
 {
-  TRACE_OUTPUT("OutputImage::open()");
   // Open file if writing a single block
 
   if (is_writer()) {
@@ -253,7 +231,6 @@ void OutputImage::open () throw()
 
 void OutputImage::close () throw()
 {
-  TRACE_OUTPUT("OutputImage::close()");
   if (is_writer()) image_write_();
   image_close_();
   png_close_();
@@ -275,8 +252,6 @@ void OutputImage::write_block ( const Block *  block ) throw()
   // Exit if Block is not participating in output
 
   if (! is_active_(block) ) return;
-
-  TRACE("OutputImage::write_block()");
 
   Field field = ((Data *)block->data())->field();
   
@@ -502,10 +477,14 @@ void OutputImage::write_block ( const Block *  block ) throw()
     for (int ib=0; ib<nb; ib++) {
 
       const int np = particle.num_particles(it,ib);
-      double position[3][np];
-      particle.position(it,ib, position[0], position[1], position[2]);
-      const double * xa = position[IX];
-      const double * ya = position[IY];
+      std::vector<double> position[3];
+      position[0].resize(np);
+      position[1].resize(np);
+      position[2].resize(np);
+      particle.position
+        (it,ib, position[0].data(),position[1].data(), position[2].data());
+      const double * xa = position[IX].data();
+      const double * ya = position[IY].data();
       double * pa = (double *) particle.attribute_array (it,ia_color,ib);
       for (int ip=0; ip<np; ip++) {
 
@@ -559,9 +538,6 @@ void OutputImage::write_particle_data
 
 void OutputImage::prepare_remote (int * n, char ** buffer) throw()
 {
-  TRACE("OutputImage::prepare_remote()");
-  DEBUG("prepare_remote");
-
   int size = 0;
   int nx = nxi_;
   int ny = nyi_;
@@ -596,9 +572,6 @@ void OutputImage::prepare_remote (int * n, char ** buffer) throw()
 
 void OutputImage::update_remote  ( int m, char * buffer) throw()
 {
-  TRACE("OutputImage::update_remote()");
-  DEBUG("update_remote");
-
   union {
     char   * c;
     double * d;
@@ -635,8 +608,6 @@ void OutputImage::update_remote  ( int m, char * buffer) throw()
 
 void OutputImage::cleanup_remote  (int * n, char ** buffer) throw()
 {
-  TRACE("OutputImage::cleanup_remote()");
-  DEBUG("cleanup_remote");
   delete [] (*buffer);
   (*buffer) = NULL;
 }
@@ -707,11 +678,6 @@ void OutputImage::image_create_ () throw()
 
   image_data_  = new double [nxi_*nyi_];
   image_mesh_  = new double [nxi_*nyi_];
-  TRACE2("new image_data_ = %p image_mesh_ = %p",image_data_,image_mesh_);
-#ifdef DEBUG_OUTPUT
-  CkPrintf ("%d TRACE_OUTPUT image_create_ %p %p\n",
-	    CkMyPe(),image_data_,image_mesh_); fflush(stdout);
-#endif  
 
   const double min = std::numeric_limits<double>::max();
   const double max = -min;
@@ -858,17 +824,11 @@ void OutputImage::image_close_ () throw()
 	 "image_ already created",
 	 image_data_ != NULL || image_mesh_ != NULL);
 
-  TRACE1("delete image_data_ = %p",image_data_);
   delete [] image_data_;
-  image_data_ = 0;
+  image_data_ = nullptr;
 
-  TRACE1("delete image_mesh_ = %p",image_mesh_)
   delete [] image_mesh_;
-  image_mesh_ = 0;
-#ifdef DEBUG_OUTPUT
-  CkPrintf ("%d TRACE_OUTPUT image_close_ %p %p\n",
-	    CkMyPe(),image_data_,image_mesh_); fflush(stdout);
-#endif  
+  image_mesh_ = nullptr;
 }
 
 //----------------------------------------------------------------------
@@ -956,7 +916,8 @@ void OutputImage::reduce_line_x_
  int iy,
  double value, double alpha)
 {
-  ASSERT2("OutputImage::reduce_line_x","! (ixm (%d) <= ixp (%d)",ixm,ixp,ixm<=ixp);
+  ASSERT2("OutputImage::reduce_line_x","! (ixm (%d) <= ixp (%d)",ixm,ixp,
+          ( ixm <= ixp) );
   if (ixp < ixm) { int t = ixp; ixp = ixm; ixm = t; }
 
   for (int ix=ixm; ix<=ixp; ++ix) {
@@ -972,7 +933,8 @@ void OutputImage::reduce_line_y_
  int iym, int iyp,
  double value, double alpha)
 {
-  ASSERT2("OutputImage::reduce_line_y","! (iym (%d) <= iyp (%d)",iym,iyp,iym<=iyp);
+  ASSERT2("OutputImage::reduce_line_y","! (iym (%d) <= iyp (%d)",iym,iyp,
+          ( iym <= iyp ) );
   if (iyp < iym) { int t = iyp; iyp = iym; iym = t; }
   for (int iy=iym; iy<=iyp; ++iy) {
     reduce_point_(data,ix,iy,value,alpha);
@@ -987,7 +949,6 @@ void OutputImage::reduce_box_
  int iym, int iyp, 
  double value, reduce_type reduce, double alpha)
 {
-  TRACE6("reduce_box %d %d %d %d %f %f",ixm,ixp,iym,iyp,value,alpha);
   reduce_type reduce_save = op_reduce_;
   op_reduce_ = reduce;
   reduce_line_x_(data,ixm,ixp,iym,value,alpha);

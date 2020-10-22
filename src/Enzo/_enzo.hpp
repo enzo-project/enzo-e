@@ -58,14 +58,6 @@ enum {
   index_turbulence_maxd,
   max_turbulence_array };
 
-#ifdef CONFIG_NEW_CHARM
-#   define BASE_ENZO_BLOCK      CBase_EnzoBlock
-#   define BASE_ENZO_SIMULATION CBase_EnzoSimulation
-#else
-#   define BASE_ENZO_BLOCK      Block
-#   define BASE_ENZO_SIMULATION Simulation
-#endif
-
 //----------------------------------------------------------------------
 
 enum enzo_sync_id {
@@ -85,6 +77,8 @@ enum enzo_sync_id {
   enzo_sync_id_method_ppml,
   enzo_sync_id_method_turbulence,
   enzo_sync_id_solver_bicgstab,
+  enzo_sync_id_solver_bicgstab_precon_1,
+  enzo_sync_id_solver_bicgstab_precon_2,
   enzo_sync_id_solver_bicgstab_loop_25,
   enzo_sync_id_solver_bicgstab_loop_85,
   enzo_sync_id_solver_cg,
@@ -101,7 +95,8 @@ enum enzo_sync_id {
   enzo_sync_id_solver_mg0_post,
   enzo_sync_id_solver_mg0_pre,
   enzo_sync_id_solver_jacobi_1,
-  enzo_sync_id_solver_jacobi_2
+  enzo_sync_id_solver_jacobi_2,
+  enzo_sync_id_solver_jacobi_3
 };
   
 //----------------------------------------------------------------------
@@ -127,7 +122,7 @@ const int field_undefined = -1;
 
 //----------------------------------------------------------------------
 
-struct fluxes
+struct enzo_fluxes
 {
   long_int LeftFluxStartGlobalIndex [MAX_DIMENSION][MAX_DIMENSION];
   long_int LeftFluxEndGlobalIndex   [MAX_DIMENSION][MAX_DIMENSION];
@@ -195,13 +190,13 @@ extern "C" {
 #include "enzo_EnzoRefineParticleMass.hpp"
 #include "enzo_EnzoRefineMass.hpp"
 
+#include "enzo_EnzoMethodCheckGravity.hpp"
 #include "enzo_EnzoMethodComovingExpansion.hpp"
 #include "enzo_EnzoMethodCosmology.hpp"
 #include "enzo_EnzoMethodGrackle.hpp"
 #include "enzo_EnzoMethodGravity.hpp"
-#include "enzo_EnzoMethodHydro.hpp"
 #include "enzo_EnzoMethodHeat.hpp"
-#include "enzo_EnzoMethodNull.hpp"
+#include "enzo_EnzoMethodHydro.hpp"
 #include "enzo_EnzoMethodPmDeposit.hpp"
 #include "enzo_EnzoMethodPmUpdate.hpp"
 #include "enzo_EnzoMethodPpm.hpp"

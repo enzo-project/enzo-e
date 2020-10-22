@@ -47,6 +47,8 @@ c
 c  LOCALS:
 c-----------------------------------------------------------------------
       implicit NONE
+#define FORTRAN
+#include "fortran_types.h"
 c
       integer MAX_REFINE, ijkn
       parameter (MAX_REFINE = 32, ijkn = MAX_ANY_SINGLE_DIRECTION)
@@ -80,14 +82,14 @@ c=======================================================================
 c
 c     Error check
 c
-      print*, '------------------------'
-      print*, 'dim',dim1,dim2,dim3
-      print*, 'start',start1,start2,start3
-      print*, 'end',end1,end2,end3
-      print*, 'refine',refine1,refine2,refine3
-      print*, 'gdim',gdim1,gdim2,gdim3
-      print*, 'gstart',gstart1,gstart2,gstart3
-      print*, 'wdim',wdim1,wdim2,wdim3
+C      print*, 'interp3d: ------------------------'
+C      print*, 'interp3d: dim',dim1,dim2,dim3
+C      print*, 'interp3d: start',start1,start2,start3
+C      print*, 'interp3d: end',end1,end2,end3
+C      print*, 'interp3d: refine',refine1,refine2,refine3
+C      print*, 'interp3d: gdim',gdim1,gdim2,gdim3
+C      print*, 'interp3d: gstart',gstart1,gstart2,gstart3
+C      print*, 'interp3d: wdim',wdim1,wdim2,wdim3
       if (refine1 .gt. MAX_REFINE .or. refine2 .gt. MAX_REFINE .or.
      &    refine2 .gt. MAX_REFINE) then
          write (6,*) "interp3d: Error: refine1,2 or 3 > MAX_REFINE"
@@ -185,11 +187,12 @@ c              Determine s, the resulting scaled value of delf0 and contain
 c                sprime within the range 0 to 1
 c
                if (delf0 .eq. 0.0) then
-                  delf0 = 1.d-5*sign(tiny, delf1 + delf2 + delf3)
+                  delf0 = 1.d-5*sign
+     &                 (tiny, (delf1 + delf2 + delf3))
                   sprime = 1.d0
                else
                   s = (delf1 + delf2 + delf3) / delf0
-                  sprime = min(max(s, 0.d0), 1.d0)
+                  sprime = min(max(1.d0*s, 0.d0), 1.d0)
                endif
 c
 c              Compute the chi# flags which are 1 if delf# can contribute
@@ -308,15 +311,17 @@ c
                   jc = gstart2+(j-1)*refine2+j1
                   do i1 = 0, refine1-1
                      do i = 1, pdim1
-                        print*, fbar_save(i)
                         ic = gstart1+(i-1)*refine1+i1
                         grid(ic,jc,kc) = (fbar_save(i) +
      &                       (real(i1) + 0.5d0 - 
-     &                       0.5d0*real(refine1))/real(refine1)*fx(i) +
+     &                       0.5d0*real(refine1))/
+     &                       real(refine1)*fx(i) +
      &                       (real(j1) + 0.5d0 - 
-     &                       0.5d0*real(refine2))/real(refine2)*fy(i) +
+     &                       0.5d0*real(refine2))/
+     &                       real(refine2)*fy(i) +
      &                       (real(k1) + 0.5d0 - 
-     &                       0.5d0*real(refine3))/real(refine3)*fz(i) )
+     &                       0.5d0*real(refine3))/
+     &                       real(refine3)*fz(i) )
                      enddo
                   enddo
                enddo

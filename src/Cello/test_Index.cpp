@@ -94,11 +94,13 @@ PARALLEL_MAIN_BEGIN
       // positive direction
       if3[axis] = 1;
       index = i8[i];
+      bool l_neighbor = true;
       for (int j=0; j<w3[axis]; j++) {
 	index_neighbor = index.index_neighbor(if3,na3);
-	unit_assert (index_neighbor != index);
+	l_neighbor = l_neighbor && (index_neighbor != index);
 	index = index_neighbor;
       }
+      unit_assert (l_neighbor);
       unit_assert (index_neighbor == i8[i]);
       if (index_neighbor != i8[i]) {
 	int a3[3];
@@ -112,11 +114,13 @@ PARALLEL_MAIN_BEGIN
       // negative direction
       if3[axis] = -1;
       index = i8[i];
+      l_neighbor = true;
       for (int j=0; j<w3[axis]; j++) {
 	index_neighbor = index.index_neighbor(if3,na3);
-	unit_assert (index_neighbor != index);
+	l_neighbor = l_neighbor && (index_neighbor != index);
 	index = index_neighbor;
       }
+      unit_assert (l_neighbor);
       unit_assert (index_neighbor == i8[i]);
       if (index_neighbor != i8[i]) {
 	int a3[3];
@@ -137,10 +141,13 @@ PARALLEL_MAIN_BEGIN
   // Array
   // ==================================================
 
+  unit_func ("array");
+
   int nx = na3[0];
   int ny = na3[1];
   int nz = na3[2];
   Index * index_root = new Index [nx*ny*nz];
+  bool l_equal = true;
   for (int iz=0; iz<nz; iz++) {
     for (int iy=0; iy<ny; iy++) {
       for (int ix=0; ix<nx; ix++) {
@@ -149,13 +156,12 @@ PARALLEL_MAIN_BEGIN
 	index_root[i].set_array(ix,iy,iz);
 	int a3[3];
 	index_root[i].array(a3,a3+1,a3+2);
-	unit_func ("array");
-	unit_assert (a3[0] == ix);
-	unit_assert (a3[1] == iy);
-	unit_assert (a3[2] == iz);
+  
+	l_equal = l_equal && (a3[0] == ix) && (a3[1] == iy) && (a3[2] == iz);
       }
     }
   }
+  unit_assert (l_equal);
   
   // ==================================================
   // Parent (negative levels)
@@ -166,46 +172,51 @@ PARALLEL_MAIN_BEGIN
   int dy=nx;
   int dz=nx*ny;
   unit_func ("index_parent (level < 0)");
+  l_equal = true;
   for (int iz=0; iz<nz; iz+=2) {
     for (int iy=0; iy<ny; iy+=2) {
       for (int ix=0; ix<nx; ix+=2) {
 	int i=ix + nx*(iy + ny*iz);
 	Index p = index_root[i].index_parent(-2);
-	unit_assert (p == index_root[i+dx].index_parent(-2));
-	unit_assert (p == index_root[i+dy].index_parent(-2));
-	unit_assert (p == index_root[i+dz].index_parent(-2));
-	unit_assert (p == index_root[i+dx+dy].index_parent(-2));
-	unit_assert (p == index_root[i+dy+dz].index_parent(-2));
-	unit_assert (p == index_root[i+dz+dx].index_parent(-2));
-	unit_assert (p == index_root[i+dx+dy+dz].index_parent(-2));
+	l_equal = l_equal && (p == index_root[i+dx].index_parent(-2));
+	l_equal = l_equal && (p == index_root[i+dy].index_parent(-2));
+	l_equal = l_equal && (p == index_root[i+dz].index_parent(-2));
+	l_equal = l_equal && (p == index_root[i+dx+dy].index_parent(-2));
+	l_equal = l_equal && (p == index_root[i+dy+dz].index_parent(-2));
+	l_equal = l_equal && (p == index_root[i+dz+dx].index_parent(-2));
+	l_equal = l_equal && (p == index_root[i+dx+dy+dz].index_parent(-2));
 
-	unit_assert (p != index_root[i+2*dx].index_parent(-2));
-	unit_assert (p != index_root[i+2*dy].index_parent(-2));
-	unit_assert (p != index_root[i+2*dz].index_parent(-2));
-	unit_assert (p != index_root[i+2*dx+dy].index_parent(-2));
-	unit_assert (p != index_root[i+2*dx+dz].index_parent(-2));
-	unit_assert (p != index_root[i+2*dz+dy].index_parent(-2));
+	l_equal = l_equal && (p != index_root[i+2*dx].index_parent(-2));
+	l_equal = l_equal && (p != index_root[i+2*dy].index_parent(-2));
+	l_equal = l_equal && (p != index_root[i+2*dz].index_parent(-2));
+	l_equal = l_equal && (p != index_root[i+2*dx+dy].index_parent(-2));
+	l_equal = l_equal && (p != index_root[i+2*dx+dz].index_parent(-2));
+	l_equal = l_equal && (p != index_root[i+2*dz+dy].index_parent(-2));
       }
     }
   }
+  unit_assert (l_equal);
+
+  l_equal = true;
   for (int iz=0; iz<nz; iz+=4) {
     for (int iy=0; iy<ny; iy+=4) {
       for (int ix=0; ix<nx; ix+=4) {
 	int i=ix + nx*(iy + ny*iz);
 	Index p = index_root[i].index_parent(-2).index_parent(-2);
-	unit_assert (p == index_root[i+dx].index_parent(-2).index_parent(-2));
-	unit_assert (p == index_root[i+2*dx].index_parent(-2).index_parent(-2));
-	unit_assert (p == index_root[i+3*dx].index_parent(-2).index_parent(-2));
-	unit_assert (p == index_root[i+2*dy].index_parent(-2).index_parent(-2));
-	unit_assert (p == index_root[i+3*dy].index_parent(-2).index_parent(-2));
-	unit_assert (p == index_root[i+2*dz].index_parent(-2).index_parent(-2));
-	unit_assert (p == index_root[i+3*dz].index_parent(-2).index_parent(-2));
-	unit_assert (p != index_root[i+4*dx].index_parent(-2).index_parent(-2));
-	unit_assert (p != index_root[i+4*dy].index_parent(-2).index_parent(-2));
-	unit_assert (p != index_root[i+4*dz].index_parent(-2).index_parent(-2));
+	l_equal = l_equal && (p == index_root[i+dx].index_parent(-2).index_parent(-2));
+	l_equal = l_equal && (p == index_root[i+2*dx].index_parent(-2).index_parent(-2));
+	l_equal = l_equal && (p == index_root[i+3*dx].index_parent(-2).index_parent(-2));
+	l_equal = l_equal && (p == index_root[i+2*dy].index_parent(-2).index_parent(-2));
+	l_equal = l_equal && (p == index_root[i+3*dy].index_parent(-2).index_parent(-2));
+	l_equal = l_equal && (p == index_root[i+2*dz].index_parent(-2).index_parent(-2));
+	l_equal = l_equal && (p == index_root[i+3*dz].index_parent(-2).index_parent(-2));
+	l_equal = l_equal && (p != index_root[i+4*dx].index_parent(-2).index_parent(-2));
+	l_equal = l_equal && (p != index_root[i+4*dy].index_parent(-2).index_parent(-2));
+	l_equal = l_equal && (p != index_root[i+4*dz].index_parent(-2).index_parent(-2));
       }
     }
   }
+  unit_assert (l_equal);
 
   //==================================================
   // Neighbor (negative levels)
@@ -288,6 +299,11 @@ PARALLEL_MAIN_BEGIN
 
     int f1[3]; // outward face
 
+    bool l_neighbor = true;
+    bool l_parent = true;
+    bool l_child = true;
+    bool l_uncle = true;
+    
     for (f1[0]=-1; f1[0]<=1; f1[0]++) {
       for (f1[1]=-1; f1[1]<=1; f1[1]++) {
 	for (f1[2]=-1; f1[2]<=1; f1[2]++) {
@@ -299,15 +315,15 @@ PARALLEL_MAIN_BEGIN
 
 	  // neighbor is not the same as self
 	  Index n1 = i1.index_neighbor(f1,na3);
-	  unit_assert(n1 != i1);
 
-	  unit_assert(n1.level() == level);
+	  l_neighbor = l_neighbor &&(n1 != i1);
+	  l_neighbor = l_neighbor &&(n1.level() == level);
 
 	  // neighbor's corresponding neighbor is self
 	  int f2[3] = { -f1[0], -f1[1], -f1[2] };
 	  Index n2 = n1.index_neighbor(f2, na3);
 
-	  unit_assert(n2 == i1);
+	  l_equal = l_equal &&(n2 == i1);
 
 	  //--------------------------------------------------
 
@@ -315,13 +331,13 @@ PARALLEL_MAIN_BEGIN
 
 	    unit_func ("index_parent");
 	    Index p1 = i1.index_parent();
-	    unit_assert (p1.level() == i1.level() - 1);
+	    l_parent = l_parent && (p1.level() == i1.level() - 1);
 
 	    unit_func ("index_child");
 	    int c1[3]; // child in parent
 	    i1.child(level,&c1[0],&c1[1],&c1[2]);
 	    Index i2 = p1.index_child(c1);
-	    unit_assert (i1 == i2);
+	    l_child = l_child &&  (i1 == i2);
 
 	    unit_func ("uncle");
 
@@ -332,14 +348,20 @@ PARALLEL_MAIN_BEGIN
 
 	    Index u1 = i1.index_neighbor(f1,na3).index_parent();
 	    Index u2 = i1.index_parent().index_neighbor(fp,na3);
-	    unit_assert(i1 != u1);
-	    unit_assert(u1.level() == level - 1);
-	    unit_assert(u1 == u2);
+
+            l_uncle = l_uncle && (i1 != u1);
+            l_uncle = l_uncle && (u1.level() == level - 1);
+            l_uncle = l_uncle && (u1 == u2);
 
 	  }
 	}
       }
     }
+
+    unit_assert (l_neighbor);
+    unit_assert (l_parent);
+    unit_assert (l_child);
+    unit_assert (l_uncle);
   }
 
   //==================================================

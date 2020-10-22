@@ -44,6 +44,8 @@ c
 c-----------------------------------------------------------------------
 c
       implicit NONE
+#define FORTRAN
+#include "fortran_types.h"
 c
 c     Arguments
 c
@@ -129,7 +131,7 @@ c
                if (ipfree .eq. 1) cs = tiny
 
 c
-c 	Here is Godunov's formula (to make sure ppm works with 0.8)
+c     Here is Godunov's formula (to make sure ppm works with 0.8)
 c
                dt = min(dt, real(aye/((cs + abs(u(i,j,1)))/dx+
      &                       (cs + abs(v(i,j,1)))/dy) ))

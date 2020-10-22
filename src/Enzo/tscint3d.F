@@ -45,6 +45,8 @@ c
 c  LOCALS:
 c-----------------------------------------------------------------------
       implicit NONE
+#define FORTRAN
+#include "fortran_types.h"
 c
       integer ijkn, MAX_REFINE, num_iter
       parameter (ijkn = MAX_ANY_SINGLE_DIRECTION, num_iter = 2)

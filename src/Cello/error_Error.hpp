@@ -18,60 +18,79 @@
 //----------------------------------------------------------------------
 /// @def      WARNING
 /// @brief    Handle a (non-lethal) warning message
-#define WARNING(F,M)					\
-  { m2_(stdout,"WARNING",__FILE__,__LINE__,F,M); }
-#define WARNING1(F,M,A1)				\
-  { m2_(stdout,"WARNING",__FILE__,__LINE__,F,M,A1); }
-#define WARNING2(F,M,A1,A2)					\
-  { m2_(stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2);  }
-#define WARNING3(F,M,A1,A2,A3)					\
-  { m2_(stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2,A3);  }
-#define WARNING4(F,M,A1,A2,A3,A4)				\
-  { m2_(stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2,A3,A4);  }
-#define WARNING5(F,M,A1,A2,A3,A4,A5)					\
-  { m2_(stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5);  }
-#define WARNING6(F,M,A1,A2,A3,A4,A5,A6)					\
-  { m2_(stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6);  }
-#define WARNING7(F,M,A1,A2,A3,A4,A5,A6,A7)				\
-  { m2_(stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7);  }
-#define WARNING8(F,M,A1,A2,A3,A4,A5,A6,A7,A8)				\
-  { m2_(stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7,A8); }
-
-//----------------------------------------------------------------------
-/// @def      UNTESTED
-/// @brief    Handle a (non-lethal) untested message
-#define UNTESTED(F)					\
-  { m2_(stdout,"UNTESTED",__FILE__,__LINE__,F,""); }
+#define WARNING(F,M)                                    \
+  { cello::message                                      \
+      (stdout,"WARNING",__FILE__,__LINE__,F,M); }
+#define WARNING1(F,M,A1)                                \
+  { cello::message                                      \
+      (stdout,"WARNING",__FILE__,__LINE__,F,M,A1); }
+#define WARNING2(F,M,A1,A2)                                     \
+  { cello::message                                              \
+      (stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2);  }
+#define WARNING3(F,M,A1,A2,A3)                                  \
+  { cello::message                                              \
+      (stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2,A3);  }
+#define WARNING4(F,M,A1,A2,A3,A4)                               \
+  { cello::message                                              \
+      (stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2,A3,A4);  }
+#define WARNING5(F,M,A1,A2,A3,A4,A5)                                    \
+  { cello::message                                                      \
+      (stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5);  }
+#define WARNING6(F,M,A1,A2,A3,A4,A5,A6)                                 \
+  { cello::message                                                      \
+      (stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6);  }
+#define WARNING7(F,M,A1,A2,A3,A4,A5,A6,A7)                              \
+  { cello::message                                                      \
+      (stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7);  }
+#define WARNING8(F,M,A1,A2,A3,A4,A5,A6,A7,A8)                           \
+  { cello::message                                                      \
+      (stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7,A8); }
 
 //----------------------------------------------------------------------
 /// @def      ERROR
 /// @brief    Handle a (lethal) error message
-#define ERROR(F,M)					\
-  { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M); t_(); }
-#define ERROR1(F,M,A1)						\
-  { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1); t_(); }
-#define ERROR2(F,M,A1,A2)					\
-  { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2); t_(); }
-#define ERROR3(F,M,A1,A2,A3)					\
-  { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3); t_(); }
-#define ERROR4(F,M,A1,A2,A3,A4)						\
-  { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4); t_(); }
-#define ERROR5(F,M,A1,A2,A3,A4,A5)					\
-  { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5); t_(); }
-#define ERROR6(F,M,A1,A2,A3,A4,A5,A6)					\
-  { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6); t_(); }
-#define ERROR7(F,M,A1,A2,A3,A4,A5,A6,A7)				\
-  { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7); t_(); }
+#define ERROR(F,M)                              \
+  { cello::message                              \
+      (stderr,"ERROR",__FILE__,__LINE__,F,M);   \
+    cello::error(); }
+#define ERROR1(F,M,A1)                                  \
+  { cello::message                                      \
+      (stderr,"ERROR",__FILE__,__LINE__,F,M,A1);        \
+    cello::error(); }
+#define ERROR2(F,M,A1,A2)                               \
+  { cello::message                                      \
+      (stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2);     \
+    cello::error(); }
+#define ERROR3(F,M,A1,A2,A3)                            \
+  { cello::message                                      \
+      (stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3);  \
+    cello::error(); }
+#define ERROR4(F,M,A1,A2,A3,A4)                                 \
+  { cello::message                                              \
+      (stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4);       \
+    cello::error(); }
+#define ERROR5(F,M,A1,A2,A3,A4,A5)                              \
+  { cello::message                                              \
+      (stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5);    \
+    cello::error(); }
+#define ERROR6(F,M,A1,A2,A3,A4,A5,A6)                           \
+  { cello::message                                              \
+      (stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6); \
+    cello::error(); }
+#define ERROR7(F,M,A1,A2,A3,A4,A5,A6,A7)                                \
+  { cello::message                                                      \
+      (stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7);      \
+    cello::error(); }
 #define ERROR8(F,M,A1,A2,A3,A4,A5,A6,A7,A8)				\
-  { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7,A8); t_(); }
+  { cello::message                                                      \
+      (stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7,A8);   \
+    cello::error(); }
 
 //----------------------------------------------------------------------
 /// @def      INCOMPLETE
 /// @brief    Placeholder for code that is incomplete
-#define INCOMPLETE(M)					\
-  { m2_(stdout,"INCOMPLETE",__FILE__,__LINE__,"",M);  }
-#define INCOMPLETE1(M,A1)					\
-  { m2_(stdout,"INCOMPLETE",__FILE__,__LINE__,"",M,A1);  }
+#define INCOMPLETE(M)                                                   \
+  { cello::message(stdout,"INCOMPLETE",__FILE__,__LINE__,"",M);  }
 
 //----------------------------------------------------------------------
 /// @def      TRACE
@@ -79,28 +98,39 @@
 
 #ifdef CELLO_TRACE
 
-#   define TRACE(M)					\
-  { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M); }
-#   define TRACE0						\
-  { m2_(stdout,"TRACE",__FILE__,__LINE__,"", ""); }
-#   define TRACE1(M,A1)					\
-  { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1); }
-#   define TRACE2(M,A1,A2)					\
-  { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2); }
-#   define TRACE3(M,A1,A2,A3)					\
-  { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3); }
-#   define TRACE4(M,A1,A2,A3,A4)				\
-  { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4); }
+#   define TRACE(M)                                     \
+  { cello::message                                      \
+      (stdout,"TRACE",__FILE__,__LINE__,"", M); }
+#   define TRACE0                                       \
+  { cello::message                                      \
+      (stdout,"TRACE",__FILE__,__LINE__,"", ""); }
+#   define TRACE1(M,A1)                                 \
+  { cello::message                                      \
+      (stdout,"TRACE",__FILE__,__LINE__,"", M,A1); }
+#   define TRACE2(M,A1,A2)                              \
+  { cello::message                                      \
+      (stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2); }
+#   define TRACE3(M,A1,A2,A3)                                   \
+  { cello::message                                              \
+      (stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3); }
+#   define TRACE4(M,A1,A2,A3,A4)                                \
+  { cello::message                                              \
+      (stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4); }
 #   define TRACE5(M,A1,A2,A3,A4,A5)					\
-  { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5); }
+  { cello::message                                                      \
+      (stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5); }
 #   define TRACE6(M,A1,A2,A3,A4,A5,A6)					\
-  { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6); }
+  { cello::message                                                      \
+      (stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6); }
 #   define TRACE7(M,A1,A2,A3,A4,A5,A6,A7)				\
-  { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7); }
+  { cello::message                                                      \
+      (stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7); }
 #   define TRACE8(M,A1,A2,A3,A4,A5,A6,A7,A8)				\
-  { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7,A8); }
+  { cello::message                                                      \
+      (stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7,A8); }
 #   define TRACE9(M,A1,A2,A3,A4,A5,A6,A7,A8,A9)				\
-  { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7,A8,A9); }
+  { cello::message                                                      \
+      (stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7,A8,A9); }
 
 #else /* CELLO_TRACE */
 
@@ -124,7 +154,7 @@
   /* This space intentionally left blank */
 #   define TRACE8(M,A1,A2,A3,A4,A5,A6,A7,A8)	\
   /* This space intentionally left blank */
-#   define TRACE9(M,A1,A2,A3,A4,A5,A6,A7,A8,A9)				\
+#   define TRACE9(M,A1,A2,A3,A4,A5,A6,A7,A8,A9) \
   /* This space intentionally left blank */
 
 
@@ -132,38 +162,21 @@
 
 #ifdef CELLO_TRACE_CHARM
 
-// #   define TRACE_CHARM(M)				
-//   { m2_(stdout,"TRACE_CHARM",__FILE__,__LINE__,"",M); }
-// #   define TRACEPUP				
-//   { m2_(stderr,"TRACEPUP",__FILE__,__LINE__,"",	
-// 	"%p %s %s %s %s",				
-// 	this ,						
-// 	p.isPacking()   ?"Packing"   : "",		
-// 	p.isUnpacking() ?"Unpacking" : "",		
-// 	p.isSizing()    ?"Sizing"    : "",		
-// 	p.isDeleting()  ?"Deleting"  : "");		
-//   }
-
-#   define TRACE_CHARM(M)						\
-  { CkPrintf("%d TRACE_CHARM %s:%d\n",CkMyPe(),__FILE__,__LINE__);	\
-  fflush(stdout);						\
-}
-#   define TRACEPUP						\
-  {								\
-    CkPrintf("%d TRACEPUP %s:%d\n",CkMyPe(),__FILE__,__LINE__);	\
-    CkPrintf("%d TRACEPUP %p [%s]\n",CkMyPe(),this,		\
-	     p.isPacking()   ?"Packing"   :			\
-	     (p.isUnpacking() ?"Unpacking" :			\
-	      (p.isSizing()    ?"Sizing"    :			\
-	       (p.isDeleting()  ?"Deleting"  : ""))));		\
-    fflush(stdout);						\
-  }
+#   define TRACEPUP                                             \
+  {                                                             \
+    CkPrintf("%d TRACEPUP %s:%d %p [%s] [%s]\n",       \
+             CkMyPe(),__FILE__,__LINE__,                        \
+             (void*)this,                                       \
+             p.isPacking()   ? "Packing"   :                    \
+             (p.isUnpacking() ? "Unpacking" :                   \
+              (p.isSizing()    ? "Sizing"    :"UNKNOWN")),      \
+             (p.isDeleting()  ? "Deleting" : "Not deleting"));  \
+           fflush(stdout);                                      \
+           }
 
 
 #else
-#   define TRACE_CHARM(M)			\
-  /* This space intentionally left blank */
-#   define TRACEPUP							\
+#   define TRACEPUP                             \
   /* This space intentionally left blank */
 #endif
 
@@ -173,28 +186,39 @@
 /// @brief    Write debug statements to stderr
 #ifdef CELLO_DEBUG
 
-#   define DEBUG(M)					\
-  {  m2_(stderr,"DEBUG",__FILE__,__LINE__,"", M); }
-#   define DEBUG0						\
-  { m2_(stderr,"DEBUG",__FILE__,__LINE__,"", ""); }
-#   define DEBUG1(M,A1)					\
-  { m2_(stderr,"DEBUG",__FILE__,__LINE__,"", M,A1); }
-#   define DEBUG2(M,A1,A2)					\
-  { m2_(stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2); }
-#   define DEBUG3(M,A1,A2,A3)					\
-  { m2_(stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3); }
-#   define DEBUG4(M,A1,A2,A3,A4)				\
-  { m2_(stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4); }
+#   define DEBUG(M)                                     \
+  {  cello::message                                     \
+      (stderr,"DEBUG",__FILE__,__LINE__,"", M); }
+#   define DEBUG0                                       \
+  { cello::message                                      \
+      (stderr,"DEBUG",__FILE__,__LINE__,"", ""); }
+#   define DEBUG1(M,A1)                                 \
+  { cello::message                                      \
+      (stderr,"DEBUG",__FILE__,__LINE__,"", M,A1); }
+#   define DEBUG2(M,A1,A2)                              \
+  { cello::message                                      \
+      (stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2); }
+#   define DEBUG3(M,A1,A2,A3)                                   \
+  { cello::message                                              \
+      (stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3); }
+#   define DEBUG4(M,A1,A2,A3,A4)                                \
+  { cello::message                                              \
+      (stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4); }
 #   define DEBUG5(M,A1,A2,A3,A4,A5)					\
-  { m2_(stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5); }
+  { cello::message                                                      \
+      (stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5); }
 #   define DEBUG6(M,A1,A2,A3,A4,A5,A6)					\
-  { m2_(stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6); }
+  { cello::message                                                      \
+      (stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6); }
 #   define DEBUG7(M,A1,A2,A3,A4,A5,A6,A7)				\
-  { m2_(stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7); }
+  { cello::message                                                      \
+      (stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7); }
 #   define DEBUG8(M,A1,A2,A3,A4,A5,A6,A7,A8)				\
-  { m2_(stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7,A8); }
+  { cello::message                                                      \
+      (stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7,A8); }
 #   define DEBUG9(M,A1,A2,A3,A4,A5,A6,A7,A8,A9)				\
-  { m2_(stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7,A8,A9); }
+  { cello::message                                                      \
+      (stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7,A8,A9); }
 
 #else /* CELLO_DEBUG */
 
@@ -229,44 +253,65 @@
 
 // #ifdef CELLO_DEBUG
 
-#define ASSERT(F,M,A)							\
-  {  if (!(A)) { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M); t_(); } }
-#define ASSERT1(F,M,A1,A)						\
-  {  if (!(A)) { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1); t_(); } }
-#define ASSERT2(F,M,A1,A2,A)						\
-  {  if (!(A)) { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2); t_(); } }
-#define ASSERT3(F,M,A1,A2,A3,A)						\
-  {  if (!(A)) { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3); t_(); } }
-#define ASSERT4(F,M,A1,A2,A3,A4,A)					\
-  {  if (!(A)) { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4); t_(); } }
-#define ASSERT5(F,M,A1,A2,A3,A4,A5,A)					\
-  {  if (!(A)) { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5); t_(); } }
+#define ASSERT(F,M,A)                           \
+  {  if (!(A))                                  \
+      { cello::message                          \
+        (stderr,"ERROR",__FILE__,__LINE__,F,M); \
+        cello::error(); } }
+#define ASSERT1(F,M,A1,A)                               \
+  {  if (!(A))                                          \
+      { cello::message                                  \
+        (stderr,"ERROR",__FILE__,__LINE__,F,M,A1);      \
+        cello::error(); } }
+#define ASSERT2(F,M,A1,A2,A)                            \
+  {  if (!(A))                                          \
+      { cello::message                                  \
+        (stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2);   \
+        cello::error(); } }
+#define ASSERT3(F,M,A1,A2,A3,A)                                 \
+  {  if (!(A))                                                  \
+      { cello::message                                          \
+        (stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3);        \
+        cello::error(); } }
+#define ASSERT4(F,M,A1,A2,A3,A4,A)                              \
+  {  if (!(A))                                                  \
+      { cello::message                                          \
+        (stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4);     \
+        cello::error(); } }
+#define ASSERT5(F,M,A1,A2,A3,A4,A5,A)                           \
+  {  if (!(A))                                                  \
+      { cello::message                                          \
+        (stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5);  \
+        cello::error(); } }
 #define ASSERT6(F,M,A1,A2,A3,A4,A5,A6,A)				\
-  {  if (!(A)) { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6); t_(); } }
+  {  if (!(A))                                                          \
+      { cello::message                                                  \
+        (stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6);       \
+        cello::error(); } }
 #define ASSERT7(F,M,A1,A2,A3,A4,A5,A6,A7,A)				\
-  {  if (!(A)) { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7); t_(); } }
+  {  if (!(A))                                                          \
+      { cello::message                                                  \
+        (stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7);    \
+        cello::error(); } }
+#define ASSERT8(F,M,A1,A2,A3,A4,A5,A6,A7,A8,A)				\
+  {  if (!(A))                                                          \
+      { cello::message                                                  \
+        (stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7,A8); \
+        cello::error(); } }
 
-// #else  /* CELLO_DEBUG */
 
-// #define ASSERT(F,M,A) /* NULL */
-// #define ASSERT1(F,M,A1,A)  /* NULL */
-// #define ASSERT2(F,M,A1,A2,A) /* NULL */
-// #define ASSERT3(F,M,A1,A2,A3,A) /* NULL */
-// #define ASSERT4(F,M,A1,A2,A3,A4,A) /* NULL */
-// #define ASSERT5(F,M,A1,A2,A3,A4,A5,A) /* NULL */
+namespace cello {
+  extern void message
+  (FILE * fp,
+   const char * type, 
+   const char * file, 
+   int line, 
+   const char * function, 
+   const char * message,
+   ...);
 
-// #endif /* CELLO_DEBUG */
-
-extern void m2_
-(FILE * fp,
- const char * type, 
- const char * file, 
- int line, 
- const char * function, 
- const char * message,
- ...);
-
-void t_();
+  void error();
+}
 
 #endif /* ERROR_ERROR_HPP */
 
