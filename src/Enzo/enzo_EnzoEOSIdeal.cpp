@@ -144,19 +144,20 @@ void check_recon_integ_overlap_
 //----------------------------------------------------------------------
 
 void EnzoEOSIdeal::reconstructable_from_integrable
-  (Block *block, Grouping &integrable_group, Grouping &reconstructable_group,
-   Grouping &conserved_passive_group, int stale_depth) const
+(EnzoEFltArrayMap &integrable, EnzoEFltArrayMap &reconstructable,
+ EnzoEFltArrayMap &conserved_passive_map, int stale_depth,
+ const std::vector<std::vector<std::string>> &passive_lists) const
 {
 
   // Confirm that the expected fields (e.g. density, vx, vy, vz, bx, by, bz)
   // are the same in reconstructable_group and integrable_group
-  check_recon_integ_overlap_(reconstructable_group, integrable_group,
-			     "EnzoEOSIdeal::reconstructable_from_integrable");
+  check_recon_integ_overlap_(reconstructable, integrable,
+			     "EnzoEOSIdeal::reconstructable_from_integrable",
+                             passive_lists);
 
   // Simply compute the pressure
-  std::string pressure_name = reconstructable_group.item("pressure",0);
-  pressure_from_integrable(block, integrable_group, pressure_name,
-			   conserved_passive_group, stale_depth);
+  pressure_from_integrable(integrable, reconstructable.at("pressure"),
+                           conserved_passive_map, stale_depth);
 }
 
 //----------------------------------------------------------------------
@@ -226,26 +227,21 @@ void EnzoEOSIdeal::integrable_from_reconstructable
   }
 }
 
+
+
 //----------------------------------------------------------------------
 
-void EnzoEOSIdeal::pressure_from_integrable(Block *block,
-					    Grouping &integrable_group,
-					    std::string pressure_name,
-					    Grouping &conserved_passive_group,
-					    int stale_depth) const
+void EnzoEOSIdeal::pressure_from_integrable
+(EnzoEFltArrayMap &integrable_map, const EFlt3DArray &pressure,
+ EnzoEFltArrayMap &conserved_passive_map, int stale_depth) const
 {
 
   // For now, we are not actually wrapping ComputePressure
-  // To use EnzoComputePressure, we need to do some minor refactoring to allow
-  // for optionally computing Pressure from fields specified in a Grouping.
+  // To use EnzoComputePressure, we need to do some minor refactoring of it to
+  // allow for optionally computing Pressure arrays specified in a Mapping.
   // This also requires making a modification to EnzoMethodGrackle's static
   // setup_grackle_fields method to also allow for specification of
   // relevant fields. Holding off on this for now
-  //
-  // As it stands, EnzoComputePressure (without Grackle) ALWAYS uses the
-  // following fields to compute pressure 
-  //   "density", "velocity_x", "velocity_y", "velocity_z", "total_energy",
-  //   "bfield_x", "bfield_y", "bfield_z"
 
   if (grackle_variable_gamma_()){
     // we don't actually need to have grackle compute the pressure unless
@@ -255,27 +251,32 @@ void EnzoEOSIdeal::pressure_from_integrable(Block *block,
   }
 
   const bool idual = this->uses_dual_energy_formalism();
-  const bool mag = integrable_group.size("bfield") > 0;
+  const bool mag = (integrable_map.contains("bfield_x") ||
+                    integrable_map.contains("bfield_y") ||
+                    integrable_map.contains("bfield_z"));
 
-  EnzoFieldArrayFactory array_factory(block, stale_depth);
-  EFlt3DArray density, vx, vy, vz, eint, etot, bx, by, bz, pressure;
-  density = array_factory.from_grouping(integrable_group, "density", 0);
+  // rather than slicing out the unstaled regions, we may want use the full
+  // array and adjust the iteration limits accordingly.
+
+  EFlt3DArray density, vx, vy, vz, eint, etot, bx, by, bz;
+  density = integrable_map.get("density", stale_depth);
 
   if (idual){
-    eint = array_factory.from_grouping(integrable_group, "internal_energy", 0);
+    eint = integrable_map.get("internal_energy", stale_depth);
   } else {
-    etot = array_factory.from_grouping(integrable_group, "total_energy", 0);
-    vx = array_factory.from_grouping(integrable_group, "velocity", 0);
-    vy = array_factory.from_grouping(integrable_group, "velocity", 1);
-    vz = array_factory.from_grouping(integrable_group, "velocity", 2);
+    etot = integrable_map.get("total_energy", stale_depth);
+    vx = integrable_map.get("velocity_x", stale_depth);
+    vy = integrable_map.get("velocity_y", stale_depth);
+    vz = integrable_map.get("velocity_z", stale_depth);
     if (mag){
-      bx = array_factory.from_grouping(integrable_group, "bfield", 0);
-      by = array_factory.from_grouping(integrable_group, "bfield", 1);
-      bz = array_factory.from_grouping(integrable_group, "bfield", 2);
+      bx = integrable_map.get("bfield_x", stale_depth);
+      by = integrable_map.get("bfield_y", stale_depth);
+      bz = integrable_map.get("bfield_z", stale_depth);
     }
   }
 
-  pressure = array_factory.from_name(pressure_name);
+  CSlice unstaled(stale_depth,-stale_depth);
+  EFlt3DArray p = pressure.subarray(unstaled, unstaled, unstaled);
   enzo_float gm1 = get_gamma() - 1.;
 
   for (int iz=0; iz<density.shape(0); iz++) {
@@ -283,7 +284,7 @@ void EnzoEOSIdeal::pressure_from_integrable(Block *block,
       for (int ix=0; ix<density.shape(2); ix++) {
 
 	if (idual){
-	  pressure(iz,iy,ix) = gm1 * density(iz,iy,ix) * eint(iz,iy,ix);
+	  p(iz,iy,ix) = gm1 * density(iz,iy,ix) * eint(iz,iy,ix);
 	} else {
           enzo_float v2 = (vx(iz,iy,ix) * vx(iz,iy,ix) +
 			   vy(iz,iy,ix) * vy(iz,iy,ix) +
@@ -295,7 +296,7 @@ void EnzoEOSIdeal::pressure_from_integrable(Block *block,
                              bz(iz,iy,ix) * bz(iz,iy,ix));
             temp -= 0.5*b2;
           }
-          pressure(iz,iy,ix) = gm1 * temp;
+          p(iz,iy,ix) = gm1 * temp;
 	}
 
       }
@@ -349,36 +350,34 @@ void EnzoEOSIdeal::pressure_from_reconstructable
 
 // based on the enzo's hydro_rk implementation of synchronization (found in the
 // Grid_UpdateMHD.C file)
-void EnzoEOSIdeal::apply_floor_to_energy_and_sync(Block *block,
-						  Grouping &integrable_group,
-						  int stale_depth) const
+void EnzoEOSIdeal::apply_floor_to_energy_and_sync
+(EnzoEFltArrayMap &integrable_map, int stale_depth) const
 {
-  if (grackle_variable_gamma_()){ 
+  if (grackle_variable_gamma_()){
     ERROR("EnzoEOSIdeal::apply_floor_to_energy_and_sync",
 	  "Not equipped to handle grackle and spatially variable gamma");
   }
 
   const bool idual = this->uses_dual_energy_formalism();
-  const bool mag = integrable_group.size("bfield");
+  const bool mag = (integrable_map.contains("bfield_x") ||
+                    integrable_map.contains("bfield_y") ||
+                    integrable_map.contains("bfield_z"));
   // in hydro_rk, eta was set equal to eta1 (it didn't use eta2 at all)
   const double eta = dual_energy_formalism_eta_;
 
-  EnzoFieldArrayFactory array_factory(block, stale_depth);
   EFlt3DArray density, vx, vy, vz, etot, eint, bx, by, bz;
-
-  // We are going to check that these are the specified fields
-  density = array_factory.from_grouping(integrable_group, "density", 0);
-  vx = array_factory.from_grouping(integrable_group, "velocity", 0);
-  vy = array_factory.from_grouping(integrable_group, "velocity", 1);
-  vz = array_factory.from_grouping(integrable_group, "velocity", 2);
-  etot = array_factory.from_grouping(integrable_group, "total_energy", 0);
+  density = integrable_map.get("density", stale_depth);
+  vx = integrable_map.get("velocity_x", stale_depth);
+  vy = integrable_map.get("velocity_y", stale_depth);
+  vz = integrable_map.get("velocity_z", stale_depth);
+  etot = integrable_map.get("total_energy", stale_depth);
   if (idual){
-    eint = array_factory.from_grouping(integrable_group, "internal_energy", 0);
+    eint = integrable_map.get("internal_energy", stale_depth);
   }
   if (mag){
-    bx = array_factory.from_grouping(integrable_group, "bfield", 0);
-    by = array_factory.from_grouping(integrable_group, "bfield", 1);
-    bz = array_factory.from_grouping(integrable_group, "bfield", 2);
+    bx = integrable_map.get("bfield_x", stale_depth);
+    by = integrable_map.get("bfield_y", stale_depth);
+    bz = integrable_map.get("bfield_z", stale_depth);
   }
 
   float ggm1 = get_gamma()*(get_gamma() - 1.);
@@ -389,7 +388,7 @@ void EnzoEOSIdeal::apply_floor_to_energy_and_sync(Block *block,
   // to be updated to the value computed from the total energy field, eint_1,
   // is that cur_eint > half_factor * cur_eint, where half_factor is 0.5. To
   // allow eta = 0, to specify that this update should always occur, we set
-  // half_factor = 0 when eta = 0. 
+  // half_factor = 0 when eta = 0.
   const double half_factor = (eta != 0.) ? 0.5 : 0.;
 
   for (int iz=0; iz<density.shape(0); iz++) {
@@ -437,20 +436,5 @@ void EnzoEOSIdeal::apply_floor_to_energy_and_sync(Block *block,
 	}
       }
     }
-  }
-}
-
-//----------------------------------------------------------------------
-
-EFlt3DArray EnzoEOSIdeal::retrieve_field_(EnzoFieldArrayFactory &array_factory,
-					  Grouping &group,
-					  std::string group_name, int index,
-					  int reconstructed_axis) const
-{
-  if (reconstructed_axis == -1){
-    return array_factory.from_grouping(group, group_name, index);
-  } else {
-    return array_factory.reconstructed_field(group, group_name, index,
-					     reconstructed_axis);
   }
 }

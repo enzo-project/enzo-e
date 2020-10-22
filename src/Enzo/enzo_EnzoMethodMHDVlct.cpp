@@ -387,6 +387,33 @@ void add_arrays_to_map_(Block * block,
 
 //----------------------------------------------------------------------
 
+EnzoEFltArrayMap EnzoMethodMHDVlct::nonpassive_primitive_map_(Block * block)
+  const throw ()
+{
+  EnzoEFltArrayMap primitive_map;
+  add_arrays_to_map_(block, *primitive_group_, integrable_group_names_,
+                     -1, primitive_map, false, true, NULL);
+  return primitive_map;
+}
+
+//----------------------------------------------------------------------
+
+EnzoEFltArrayMap EnzoMethodMHDVlct::conserved_passive_scalar_map_
+(Block * block) const throw ()
+{
+  // get Grouping of field names that store passively advected scalars in
+  // conserved-form
+  Grouping *conserved_passive_scalars = cello::field_descr()->groups();
+  EnzoEFltArrayMap conserved_passive_scalar_map;
+  add_arrays_to_map_(block, *conserved_passive_scalars,
+                     passive_group_names_, -1,
+                     conserved_passive_scalar_map, false, false,
+                     conserved_passive_scalars);
+  return conserved_passive_scalar_map;
+}
+
+//----------------------------------------------------------------------
+
 void EnzoMethodMHDVlct::compute ( Block * block) throw()
 {
   if (block->is_leaf()) {
@@ -438,8 +465,6 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // values get written to here)
     Grouping *conserved_passive_scalars = cello::field_descr()->groups();
 
-    // if allocation/deallocation of EnzoConstrainedTransport is too expensive
-    
     // allocate constrained transport object
     EnzoConstrainedTransport *ct = NULL;
     if (mhd_choice_ == bfield_choice::constrained_transport) {
@@ -458,6 +483,30 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     compute_specific_passive_scalars_(block, passive_group_names_,
 				      *conserved_passive_scalars,
 				      *primitive_group_, stale_depth);
+
+    // ASIDE SETUP SOME MAPS:
+    EnzoEFltArrayMap conserved_passive_scalar_map =
+      conserved_passive_scalar_map_(block);
+    EnzoEFltArrayMap primitive_map = nonpassive_primitive_map_(block);
+    add_arrays_to_map_(block, *primitive_group_, passive_group_names_,
+                       -1, primitive_map, false, false,
+                       conserved_passive_scalars);
+    EnzoEFltArrayMap dUcons_map;
+    add_arrays_to_map_(block, dUcons_group, integrable_group_names_, -1,
+                       dUcons_map, true, // dUcons_group may omit B-fields
+                       true, NULL);
+    add_arrays_to_map_(block, dUcons_group, passive_group_names_, -1,
+                       dUcons_map, false, false, conserved_passive_scalars);
+
+    std::vector<std::vector<std::string>> passive_lists {{}};
+    for (std::string group_name : passive_group_names_){
+      int num_fields = conserved_passive_scalars->size(group_name);
+      for (int field_ind=0; field_ind<num_fields; field_ind++){
+        std::string field_name =
+          conserved_passive_scalars->item(group_name,field_ind);
+        passive_lists[0].push_back(field_name);
+      }
+    }
 
     // repeat the following loop twice (for half time-step and full time-step)
 
@@ -499,11 +548,11 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 					  *cur_integrable_group, stale_depth);
       }
 
-      EnzoEFltArrayMap primitive_map, out_integrable_map, dUcons_map;
-      add_arrays_to_map_(block, *primitive_group_, integrable_group_names_,
-                         -1, primitive_map, false, true, NULL);
-      add_arrays_to_map_(block, *primitive_group_, passive_group_names_,
-                         -1, primitive_map, false, false,
+      EnzoEFltArrayMap cur_integrable_map, out_integrable_map;
+      add_arrays_to_map_(block, *cur_integrable_group, integrable_group_names_,
+                         -1, cur_integrable_map, false, true, NULL);
+      add_arrays_to_map_(block, *cur_integrable_group, passive_group_names_,
+                         -1, cur_integrable_map, false, false,
                          conserved_passive_scalars);
 
       add_arrays_to_map_(block, *out_integrable_group, integrable_group_names_,
@@ -512,26 +561,16 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
                          -1, out_integrable_map, false, false,
                          conserved_passive_scalars);
 
-      add_arrays_to_map_(block, dUcons_group, integrable_group_names_, -1,
-                         dUcons_map, true, // dUcons_group may omit B-fields
-                         true, NULL);
-      add_arrays_to_map_(block, dUcons_group, passive_group_names_, -1,
-                         dUcons_map, false, false, conserved_passive_scalars);
-      EnzoEFltArrayMap conserved_passive_scalar_map;
-      add_arrays_to_map_(block, *conserved_passive_scalars,
+      EnzoEFltArrayMap cur_reconstructable_map;
+      add_arrays_to_map_(block, *cur_reconstructable_group,
+                         reconstructable_group_names_, -1,
+                         cur_reconstructable_map, false, true, NULL);
+      add_arrays_to_map_(block, *cur_reconstructable_group,
                          passive_group_names_, -1,
-                         conserved_passive_scalar_map, false, false,
+                         cur_reconstructable_map, false, false,
                          conserved_passive_scalars);
 
-      std::vector<std::vector<std::string>> passive_lists {{}};
-      for (std::string group_name : passive_group_names_){
-        int num_fields = conserved_passive_scalars->size(group_name);
-        for (int field_ind=0; field_ind<num_fields; field_ind++){
-          std::string field_name =
-            conserved_passive_scalars->item(group_name,field_ind);
-          passive_lists[0].push_back(field_name);
-        }
-      }
+      
 
       // set all elements of the arrays in dUcons_group to 0 (throughout the
       // rest of the current loop, flux divergence and source terms will be
@@ -549,10 +588,10 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       //
       // For a barotropic gas, the following nominally does nothing
       // For a non-barotropic gas, the following nominally computes pressure
-      eos_->reconstructable_from_integrable(block, *cur_integrable_group,
-					    *cur_reconstructable_group,
-					    *conserved_passive_scalars,
-					    stale_depth);
+      eos_->reconstructable_from_integrable(cur_integrable_map,
+                                            cur_reconstructable_map,
+                                            conserved_passive_scalar_map,
+                                            stale_depth, passive_lists);
 
       // Compute flux along each dimension
       compute_flux_(block, 0, cur_dt, *cur_reconstructable_group,
@@ -595,11 +634,6 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // increment stale_depth since the inner values have been updated
       // but the outer values have not
       stale_depth+=reconstructor->delayed_staling_rate();
-
-      // apply floor to energy and sync the internal energy with total energy
-      // (the latter only occurs if the dual energy formalism is in use)
-      eos_->apply_floor_to_energy_and_sync(block, *out_integrable_group,
-                                           stale_depth);
     }
 
     // Deallocate Temporary Fields
@@ -1046,42 +1080,43 @@ double EnzoMethodMHDVlct::timestep ( Block * block ) const throw()
   // analogous to ppm timestep calulation, probably want to require that cfast
   // is no smaller than some tiny positive number.
 
-  // Compute the pressure (requires that "pressure" is a permanent field)
-  FieldDescr * field_descr = cello::field_descr();
+  // Construct a map holding the field data for each of the (non-passive)
+  // primitive quantities.
+  EnzoEFltArrayMap primitive_map = nonpassive_primitive_map_(block);
 
   if (eos_->uses_dual_energy_formalism()){
     // synchronize eint and etot.
     // This is only strictly necessary after problem initialization and when
     // there is an inflow boundary condition
-    eos_->apply_floor_to_energy_and_sync(block, *primitive_group_, 0);
+    eos_->apply_floor_to_energy_and_sync(primitive_map, 0);
   }
 
-  eos_->pressure_from_integrable(block, *primitive_group_, "pressure",
-				 *(field_descr->groups()), 0);
-  enzo_float gamma = eos_->get_gamma();
-
+  // Compute thermal pressure (this presently requires that "pressure" is a
+  // permanent field)
   EnzoFieldArrayFactory array_factory(block);
-  EFlt3DArray density, velocity_x, velocity_y, velocity_z;
-  density = array_factory.from_grouping(*primitive_group_, "density", 0);
-  velocity_x = array_factory.from_grouping(*primitive_group_, "velocity", 0);
-  velocity_y = array_factory.from_grouping(*primitive_group_, "velocity", 1);
-  velocity_z = array_factory.from_grouping(*primitive_group_, "velocity", 2);
-
   EFlt3DArray pressure = array_factory.from_name("pressure");
+  EnzoEFltArrayMap conserved_passive_scalar_map =
+      conserved_passive_scalar_map_(block);
+  eos_->pressure_from_integrable(primitive_map, pressure,
+				 conserved_passive_scalar_map, 0);
+
+  // Now load other necessary quantities
+  enzo_float gamma = eos_->get_gamma();
+  EFlt3DArray density = primitive_map.at("density");
+  EFlt3DArray velocity_x = primitive_map.at("velocity_x");
+  EFlt3DArray velocity_y = primitive_map.at("velocity_y");
+  EFlt3DArray velocity_z = primitive_map.at("velocity_z");
 
   const bool mhd = (mhd_choice_ != bfield_choice::no_bfield);
   EFlt3DArray bfieldc_x, bfieldc_y, bfieldc_z;
   if (mhd) {
-    bfieldc_x = array_factory.from_grouping(*primitive_group_, "bfield", 0);
-    bfieldc_y = array_factory.from_grouping(*primitive_group_, "bfield", 1);
-    bfieldc_z = array_factory.from_grouping(*primitive_group_, "bfield", 2);
+    bfieldc_x = primitive_map.at("bfield_x");
+    bfieldc_y = primitive_map.at("bfield_y");
+    bfieldc_z = primitive_map.at("bfield_z");
   }
 
-  // Get iteration limits
-  // Like ppm and ppml, access active region info from enzo_block attributes
-  EnzoBlock * enzo_block = enzo::block(block);
-
   // widths of cells
+  EnzoBlock * enzo_block = enzo::block(block);
   double dx = enzo_block->CellWidth[0];
   double dy = enzo_block->CellWidth[1];
   double dz = enzo_block->CellWidth[2];

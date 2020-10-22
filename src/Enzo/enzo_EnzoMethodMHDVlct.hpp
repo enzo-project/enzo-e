@@ -210,6 +210,14 @@ protected: // methods
    Grouping &conserved_passive_scalars,
    Grouping &primitive_group, int stale_depth);
 
+  /// Constructs a map containing the field data for each primitive (except for
+  /// the passively advected scalars).
+  EnzoEFltArrayMap nonpassive_primitive_map_(Block * block) const throw ();
+  
+  /// Constructs a map containing the field data for each passively advected
+  /// scalar (in conserved form).
+  EnzoEFltArrayMap conserved_passive_scalar_map_(Block * block) const throw ();
+
   /// Computes the fluxes along a given dimension, `dim`, and accumulate the
   /// changes to the integrable quantities in `dUcons_group`
   ///

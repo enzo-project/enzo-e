@@ -243,6 +243,10 @@ void EnzoIntegrableUpdate::update_quantities
     }
   }
 
+  // apply floor to energy and sync the internal energy with total energy
+  // (the latter only occurs if the dual energy formalism is in use)
+  eos->apply_floor_to_energy_and_sync(out_integrable_map, stale_depth + 1);
+
   delete[] cur_prim;  delete[] dU;  delete[] out_prim;
 }
 
