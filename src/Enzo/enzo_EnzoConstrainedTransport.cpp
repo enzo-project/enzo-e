@@ -10,64 +10,6 @@
 
 //----------------------------------------------------------------------
 
-// Helper function used to prepare groupings of temporary fields. These
-// groupings only contain 3 fields - corresponding to vector components
-//  - These vectors are all expected to be face-centered or edge centered.
-//    (with the direction of centering depending on the dimension of the
-//     component)
-//  - face-centered: [face_center = True] fields are all centered on the face
-//    corresponding to the direction of the vector component (e.g. x component
-//    of weights is centered on the faces along the x dimension)
-//  - edge-centered: [face_center = False] fields are centered on the edge
-//    corresponding to the direction not pointed to by the vector component
-//    (e.g. z-component of edge E-field is centered on the x and y edges)
-//  - If exterior_faces is true, then the field will include space for the
-//    exterior faces. If it is false, then the field will not include space for
-//    the exterior faces.
-//  - the names of the temporary fields are given by field_prefix + x,
-//    field_prefix + y and field_prefix + z
-
-void prep_temp_vector_grouping_(Field &field, std::string group_name,
-				Grouping &grouping, std::string field_prefix,
-				bool face_center, bool exterior_faces)
-{
-  for (int i=0;i<3;i++){
-    // prepare field name
-    std::string field_name;
-    int cx, cy, cz, delta;
-    if (face_center) {
-      cx = 0; cy = 0; cz = 0;
-      delta = (exterior_faces) ? 1 : -1;
-    } else {
-      if (exterior_faces){
-	cx = 1; cy = 1; cz = 1;
-	delta = -1;
-      } else {
-	cx = -1; cy = -1; cz = -1;
-	delta = 1;
-      }
-    }
-
-    if (i == 0){
-      cx += delta;
-      field_name = field_prefix + "x";
-    } else if (i == 1) {
-      cy += delta;
-      field_name = field_prefix + "y";
-    } else {
-      cz += delta;
-      field_name = field_prefix + "z";
-    }
-
-    // reserve/allocate field
-    EnzoTempFieldUtils::prep_reused_temp_field(field, field_name, cx, cy, cz);
-
-    grouping.add(field_name,group_name);
-  }
-}
-
-//----------------------------------------------------------------------
-
 EnzoConstrainedTransport::EnzoConstrainedTransport(Block *block,
 						   int num_partial_timesteps)
   : block_(block),
@@ -83,58 +25,49 @@ EnzoConstrainedTransport::EnzoConstrainedTransport(Block *block,
           "num_partial_timesteps!=2.");
   }
 
-  // setup the group of permanent magnetic fields
-  bfieldi_group_.add("bfieldi_x", "bfield");
-  bfieldi_group_.add("bfieldi_y", "bfield");
-  bfieldi_group_.add("bfieldi_z", "bfield");
+  const char* field_names[] = {"bfieldi_x", "bfieldi_y", "bfieldi_z"};
+  EnzoFieldArrayFactory array_factory(block, 0); // stale_depth = 0
+
+  // setup bfieldi_l_ and if num_partial_timesteps_ > 1, also setup
+  // temp_bfieldi_l_
+  //   - For bfieldi_l_, initialize arrays that wrap the fields holding each
+  //     component of the interface centered magnetic field.
+  //   - For temp_bfieldi_l_, initialize new arrays that have the same shape as
+  //     each component of bfieldi_l_. These arrays manage their own memory
+  for (std::size_t i = 0; i<3; i++){
+    bfieldi_l_[i] = array_factory.from_name(field_names[i]);
+    if (num_partial_timesteps_ > 1){
+      temp_bfieldi_l_[i] = EFlt3DArray(bfieldi_l_[i].shape(0),
+                                       bfieldi_l_[i].shape(1),
+                                       bfieldi_l_[i].shape(2));
+    }
+  }
+
+  // get the standard size of cell-centered fields
+  int mz = bfieldi_l_[0].shape(0); // interface bfield_x cell-centered along z
+  int my = bfieldi_l_[0].shape(1); // interface bfield_x cell-centered along y
+  // interface bfield_x is face-centered along x (and the array includes values
+  // on external faces of the grid)
+  int mx = bfieldi_l_[0].shape(2) - 1;
 
   Field field = block->data()->field();
 
-  // reserve/allocate fields for weight fields
-  // these are face-centered fields that store the upwind/downwind direction
-  prep_temp_vector_grouping_(field, "weight", weight_group_,
-			     "temp_weight_", true, false);
+  // allocate arrays to hold weight values for each dimension. For a given
+  // dimension, the array tracks the upwind/downwind direction on the cell
+  // interfaces for that dimension (they exclude exterior faces of the block)
+  weight_l_[0] = EFlt3DArray(  mz,   my, mx-1);
+  weight_l_[1] = EFlt3DArray(  mz, my-1,   mx);
+  weight_l_[2] = EFlt3DArray(mz-1,   my,   mx);
 
-  // allocate temporary efield fields
-  // reserve/allocate fields for edge-centered electric fields
-  prep_temp_vector_grouping_(field, "efield", efield_group_,
-			     "temp_efield_",false,false);
+  // allocate arrays to hold for each component of the edge-centered electric
+  // fields. The array for component i is cell-centered along i and face
+  // centered along j and k.
+  edge_efield_l_[0] = EFlt3DArray(mz-1, my-1,   mx);
+  edge_efield_l_[1] = EFlt3DArray(mz-1,   my, mx-1);
+  edge_efield_l_[2] = EFlt3DArray(  mz, my-1, mx-1);
 
-  // reserve/allocate cell-centered e-field
-  center_efield_name_ = "center_efield";
-  EnzoTempFieldUtils::prep_reused_temp_field(field, center_efield_name_,
-					     0, 0, 0);
-
-  if (num_partial_timesteps_ > 1){
-    // reserve allocate temporary interface bfields fields (includes the
-    // exterior faces of the grid)
-    prep_temp_vector_grouping_(field, "bfield", temp_bfieldi_group_,
-			       "temp_bfieldi_",true, true);
-  }
-}
-
-//----------------------------------------------------------------------
-
-EnzoConstrainedTransport::~EnzoConstrainedTransport()
-{
-  using EnzoTempFieldUtils::deallocate_grouping_fields;
-
-  Field field = block_->data()->field();
-  // deallocate electric fields
-  std::vector<std::string> efield_group_names{"efield"};
-  deallocate_grouping_fields(field, efield_group_names, efield_group_);
-  field.deallocate_temporary(field.field_id(center_efield_name_));
-
-  // deallocate weights
-  std::vector<std::string> weight_group_names{"weight"};
-  deallocate_grouping_fields(field, weight_group_names, weight_group_);
-
-  if (num_partial_timesteps_ > 1){
-    // deallocate the temporary longitudinal bfields
-    std::vector<std::string> bfieldi_group_names{"bfield"};
-    deallocate_grouping_fields(field, bfieldi_group_names,
-			       temp_bfieldi_group_);
-  }
+  // allocate array to temporarily store cell-centered e-field
+  center_efield_ = EFlt3DArray(mz,my,mx);
 }
 
 //----------------------------------------------------------------------
@@ -197,31 +130,37 @@ void EnzoConstrainedTransport::increment_partial_timestep() throw()
 void EnzoConstrainedTransport::correct_reconstructed_bfield
 (EnzoEFltArrayMap &l_map, EnzoEFltArrayMap &r_map, int dim, int stale_depth)
 {
-  Grouping *cur_bfieldi_group;
+  std::array<EFlt3DArray,3> *cur_bfieldi_l;
   if (partial_timestep_index_== 0){
-    cur_bfieldi_group = &bfieldi_group_;
+    cur_bfieldi_l = &bfieldi_l_;
   } else if (partial_timestep_index_== 1){
-    cur_bfieldi_group = &temp_bfieldi_group_;
+    cur_bfieldi_l = &temp_bfieldi_l_;
   } else {
     ERROR1("EnzoConstrainedTransport::correct_reconstructed_bfield",
 	   "Unsure how to handle current partial_timestep_index_ of %d",
 	   partial_timestep_index_);
   }
 
-  EnzoFieldArrayFactory array_factory(block_, stale_depth);
-  EFlt3DArray bfield = array_factory.interior_bfieldi(*cur_bfieldi_group, dim);
   if ((dim < 0) || (dim > 2)){
     ERROR("EnzoConstrainedTransport::correct_reconstructed_bfield",
           "dim has an invalid value");
   } else {
+    // the interface bfield values held in *cur_bfieldi_l[dim] includes values
+    // on the exterior faces of the block. We only need the values on the
+    // interior faces.
+    EnzoPermutedCoordinates coord(dim);
+    CSlice full_ax(nullptr,nullptr);
+    EFlt3DArray bfield = coord.get_subarray((*cur_bfieldi_l)[dim],
+                                            full_ax, full_ax, CSlice(1,-1));
+
     const char* names[3] = {"bfield_x", "bfield_y", "bfield_z"};
-    EFlt3DArray l_bfield = l_map.get(names[dim], stale_depth);
-    EFlt3DArray r_bfield = r_map.get(names[dim], stale_depth);
+    EFlt3DArray l_bfield = l_map.at(names[dim]);
+    EFlt3DArray r_bfield = r_map.at(names[dim]);
 
     // All 3 array objects are the same shape
-    for (int iz=0; iz<bfield.shape(0); iz++) {
-      for (int iy=0; iy<bfield.shape(1); iy++) {
-        for (int ix=0; ix<bfield.shape(2); ix++) {
+    for (int iz = stale_depth; iz< bfield.shape(0) - stale_depth; iz++) {
+      for (int iy = stale_depth; iy< bfield.shape(1) - stale_depth; iy++) {
+        for (int ix = stale_depth; ix < bfield.shape(2) - stale_depth; ix++) {
           l_bfield(iz,iy,ix) = bfield(iz,iy,ix);
           r_bfield(iz,iy,ix) = bfield(iz,iy,ix);
         }
@@ -237,8 +176,6 @@ void EnzoConstrainedTransport::correct_reconstructed_bfield
 void EnzoConstrainedTransport::identify_upwind(EnzoEFltArrayMap &flux_map,
                                                int dim, int stale_depth)
 {
-  EnzoFieldArrayFactory array_factory(block_, stale_depth);
-
   //  - Currently, weight is set to 1.0 if upwind is in positive direction of
   //    the current dimension, 0 if upwind is in the negative direction of the
   //    current dimension, or 0.5 if there is no upwind direction
@@ -248,43 +185,57 @@ void EnzoConstrainedTransport::identify_upwind(EnzoEFltArrayMap &flux_map,
   //    scheme from Athena++, which requires knowledge of the reconstructed
   //    densities.
 
-  
-  EFlt3DArray density_flux = flux_map.get("density", stale_depth);
-  EFlt3DArray weight_field = array_factory.from_grouping(weight_group_,
-                                                         "weight", dim);
+  if ((dim < 0) || (dim > 2)){
+    ERROR("EnzoConstrainedTransport::identify_upwind",
+          "dim has an invalid value");
+  } else {
+    EnzoFieldArrayFactory array_factory(block_, stale_depth);
+    EFlt3DArray density_flux = flux_map.get("density", stale_depth);
 
-  // Iteration limits compatible with both 2D and 3D grids
-  for (int iz=0; iz<density_flux.shape(0); iz++) {
-    for (int iy=0; iy<density_flux.shape(1); iy++) {
-      for (int ix=0; ix<density_flux.shape(2); ix++) {
-	// density flux is the face-centered density times the face-centered
-	// velocity along dim
+    CSlice stale_slc = (stale_depth > 0) ?
+      CSlice(stale_depth,-stale_depth) : CSlice(nullptr, nullptr);
 
-	if ( density_flux(iz,iy,ix) > 0){
-	  weight_field(iz,iy,ix) = 1.0;
-	} else if ( density_flux(iz,iy,ix) < 0){
-	  weight_field(iz,iy,ix) = 0.0;
-	} else {
-	  weight_field(iz,iy,ix) = 0.5;
-	}
+    EFlt3DArray weight_field = weight_l_[dim].subarray(stale_slc, stale_slc,
+                                                       stale_slc);
+
+    // Iteration limits compatible with both 2D and 3D grids
+    for (int iz=0; iz<density_flux.shape(0); iz++) {
+      for (int iy=0; iy<density_flux.shape(1); iy++) {
+        for (int ix=0; ix<density_flux.shape(2); ix++) {
+          // density flux is the face-centered density times the face-centered
+          // velocity along dim
+
+          if ( density_flux(iz,iy,ix) > 0){
+            weight_field(iz,iy,ix) = 1.0;
+          } else if ( density_flux(iz,iy,ix) < 0){
+            weight_field(iz,iy,ix) = 0.0;
+          } else {
+            weight_field(iz,iy,ix) = 0.5;
+          }
+        }
       }
     }
-  }
 
+  }
 }
 
 //----------------------------------------------------------------------
 
 void EnzoConstrainedTransport::update_all_bfield_components
-(Grouping &cur_prim_group, Grouping &xflux_group, Grouping &yflux_group,
- Grouping &zflux_group, Grouping &out_centered_bfield_group, enzo_float dt,
- int stale_depth)
+(EnzoEFltArrayMap &cur_prim_map, EnzoEFltArrayMap &xflux_map,
+ EnzoEFltArrayMap &yflux_map, EnzoEFltArrayMap &zflux_map,
+ EnzoEFltArrayMap &out_centered_bfield_map, enzo_float dt, int stale_depth)
 {
-  Grouping *out_bfieldi_group;
+  // The current interface values of the interface magnetic fields that are to
+  // be updated are always the values from the start of the timestep
+  std::array<EFlt3DArray,3> *cur_bfieldi_l = &bfieldi_l_;
+  // Now determine the set of arrays where the updated interface bfields are to
+  // be stored:
+  std::array<EFlt3DArray,3> *out_bfieldi_l;
   if ((partial_timestep_index_== 1) || (num_partial_timesteps_ == 1)){
-    out_bfieldi_group = &bfieldi_group_;
+    out_bfieldi_l = &bfieldi_l_; // the same as cur_bfieldi_l
   } else if (partial_timestep_index_== 0){
-    out_bfieldi_group = &temp_bfieldi_group_;
+    out_bfieldi_l = &temp_bfieldi_l_;
   } else {
     ERROR1("EnzoConstrainedTransport::correct_reconstructed_bfield",
 	   "Unsure how to handle current partial_timestep_index_ of %d",
@@ -292,22 +243,31 @@ void EnzoConstrainedTransport::update_all_bfield_components
   }
 
   // First, compute the edge-centered Electric fields (each time, it uses
-  // the current integrable quantities
-  EnzoConstrainedTransport::compute_all_edge_efields
-    (block_, cur_prim_group, xflux_group, yflux_group, zflux_group,
-     center_efield_name_, efield_group_, weight_group_, stale_depth);
+  // the current integrable quantities)
+  EnzoConstrainedTransport::compute_all_edge_efields(cur_prim_map, xflux_map,
+                                                     yflux_map, zflux_map,
+                                                     center_efield_,
+                                                     edge_efield_l_, weight_l_,
+                                                     stale_depth);
+
+  EnzoBlock *enzo_block = enzo::block(block_);
+  std::array<enzo_float,3> cell_widths;
+  for (std::size_t i=0; i < 3; i++){
+    cell_widths[i] = enzo_block->CellWidth[i];
+  }
 
   // Update longitudinal B-field (add source terms of constrained transport)
   for (int dim = 0; dim<3; dim++){
     EnzoConstrainedTransport::update_bfield
-      (block_, dim, efield_group_, bfieldi_group_, *out_bfieldi_group,
-       dt, stale_depth);
+      (cell_widths, dim, edge_efield_l_, (*cur_bfieldi_l)[dim],
+       (*out_bfieldi_l)[dim], dt, stale_depth);
   }
 
   // Finally, update cell-centered B-field
+  const char* names[3] = {"bfield_x", "bfield_y", "bfield_z"};
   for (int dim = 0; dim<3; dim++){
     EnzoConstrainedTransport::compute_center_bfield
-      (block_, dim, out_centered_bfield_group, *out_bfieldi_group,
+      (dim, out_centered_bfield_map[names[dim]], (*out_bfieldi_l)[dim],
        stale_depth);
   }
 }
@@ -315,29 +275,26 @@ void EnzoConstrainedTransport::update_all_bfield_components
 //----------------------------------------------------------------------
 
 void EnzoConstrainedTransport::compute_center_efield
-(Block *block, int dim, std::string center_efield_name, Grouping &prim_group,
- int stale_depth)
+(int dim, EFlt3DArray &efield, EnzoEFltArrayMap &prim_map, int stale_depth)
 {
-  // Load the E-field
-  EnzoFieldArrayFactory array_factory(block,stale_depth);
-  EFlt3DArray efield = array_factory.from_name(center_efield_name);
+  const char* v_names[3] = {"velocity_x", "velocity_y", "velocity_z"};
+  const char* b_names[3] = {"bfield_x", "bfield_y", "bfield_z"};
 
   EnzoPermutedCoordinates coord(dim);
   int j = coord.j_axis();
   int k = coord.k_axis();
 
   // Load the jth and kth components of the velocity and cell-centered bfield
-  EFlt3DArray velocity_j, velocity_k, bfield_j, bfield_k;
-  velocity_j = array_factory.from_grouping(prim_group, "velocity", j);
-  velocity_k = array_factory.from_grouping(prim_group, "velocity", k);
-  bfield_j = array_factory.from_grouping(prim_group, "bfield", j);
-  bfield_k = array_factory.from_grouping(prim_group, "bfield", k);
+  EFlt3DArray velocity_j = prim_map.at(v_names[j]);
+  EFlt3DArray velocity_k = prim_map.at(v_names[k]);
+  EFlt3DArray bfield_j = prim_map.at(b_names[j]);
+  EFlt3DArray bfield_k = prim_map.at(b_names[k]);
 
-  for (int iz=0; iz<efield.shape(0); iz++) {
-    for (int iy=0; iy<efield.shape(1); iy++) {
-      for (int ix=0; ix<efield.shape(2); ix++) {
+  for (int iz=stale_depth; iz<efield.shape(0)-stale_depth; iz++) {
+    for (int iy=stale_depth; iy<efield.shape(1)-stale_depth; iy++) {
+      for (int ix=stale_depth; ix<efield.shape(2)-stale_depth; ix++) {
 	efield(iz,iy,ix) = (-velocity_j(iz,iy,ix) * bfield_k(iz,iy,ix) +
-			    velocity_k(iz,iy,ix) * bfield_j(iz,iy,ix));
+                            velocity_k(iz,iy,ix) * bfield_j(iz,iy,ix));
       }
     }
   }
@@ -508,21 +465,20 @@ void inplace_entry_multiply_(EFlt3DArray &array, enzo_float val){
 //
 // This Method is applicable for:
 //    - 2D array (z-axis only has 1 entry), with dim = 2
-// 
 //
 // The Athena++ code calculates a quantity they refer to as v_over_c at all
 // cell-faces.
 //   - Basically, this tells them how much to weight derivatives while
 //     computing the edge_efield. If deemed necessary, these values can be
-//     passed as weight_group
-//   - Weight_group includes 3 temporary fields centered on the faces looking
+//     passed as weight_l
+//   - Weight_l includes 3 temporary arrays centered on the faces looking
 //     down the x, y, and z direction. Currently, it expects values of 1 and 0
 //     to indicate that the upwind direction is in positive and negative
 //     direction, or 0 to indicate no upwind direction.
 void EnzoConstrainedTransport::compute_edge_efield
-(Block *block, int dim, std::string center_efield_name, Grouping &efield_group,
- Grouping &jflux_group, Grouping &kflux_group, Grouping &weight_group,
- int stale_depth)
+(int dim, EFlt3DArray &center_efield, EFlt3DArray &edge_efield,
+ EnzoEFltArrayMap &jflux_map, EnzoEFltArrayMap &kflux_map,
+ std::array<EFlt3DArray,3> &weight_l, int stale_depth)
 {
 
   EnzoPermutedCoordinates coord(dim);
@@ -531,35 +487,37 @@ void EnzoConstrainedTransport::compute_edge_efield
   coord.j_unit_vector(j_z, j_y, j_x);
   coord.k_unit_vector(k_z, k_y, k_x);
 
+  CSlice stale_slc = (stale_depth > 0) ?
+      CSlice(stale_depth,-stale_depth) : CSlice(nullptr, nullptr);
+
   // Initialize Cell-Centered E-fields
   EFlt3DArray Ec, Ec_jp1, Ec_kp1, Ec_jkp1;
-  EnzoFieldArrayFactory array_factory(block,stale_depth);
-  Ec = array_factory.from_name(center_efield_name);
+  Ec = center_efield.subarray(stale_slc, stale_slc, stale_slc);
   Ec_jp1  = coord.left_edge_offset(Ec, 0, 1, 0);
   Ec_kp1  = coord.left_edge_offset(Ec, 1, 0, 0);
   Ec_jkp1 = coord.left_edge_offset(Ec, 1, 1, 0);
 
   // Initialize edge-centered Efield [it maps (k,j,i) -> (k+1/2,j+1/2,i)]
-  EFlt3DArray Eedge = array_factory.from_grouping(efield_group, "efield", dim);
+  EFlt3DArray Eedge = edge_efield.subarray(stale_slc, stale_slc, stale_slc);
 
   // Initialize face-centered E-fields
-  EFlt3DArray Ej, Ej_kp1, Ek, Ek_jp1;
+  const char* keys[] = {"bfield_x", "bfield_y", "bfield_z"};
 
   // Ex(k,j+1/2,i) = -1.*yflux(Bz)
-  Ej = array_factory.from_grouping(jflux_group, "bfield", coord.k_axis());
+  EFlt3DArray Ej = jflux_map.get(keys[coord.k_axis()],stale_depth);
   inplace_entry_multiply_(Ej,-1.);
-  Ej_kp1 = coord.left_edge_offset(Ej, 1, 0, 0);
+  EFlt3DArray Ej_kp1 = coord.left_edge_offset(Ej, 1, 0, 0);
 
   // Ex(k+1/2,j,i) = zflux(By)
-  Ek = array_factory.from_grouping(kflux_group, "bfield", coord.j_axis());
+  EFlt3DArray Ek = kflux_map.get(keys[coord.j_axis()],stale_depth);
   // No need to multiply entries by minus 1
-  Ek_jp1 = coord.left_edge_offset(Ek, 0, 1, 0);
+  EFlt3DArray Ek_jp1 = coord.left_edge_offset(Ek, 0, 1, 0);
 
   // Initialize the weight arrays
   EFlt3DArray Wj, Wj_kp1, Wk, Wk_jp1;
-  Wj = array_factory.from_grouping(weight_group, "weight", coord.j_axis());
+  Wj = weight_l[coord.j_axis()].subarray(stale_slc, stale_slc, stale_slc);
   Wj_kp1 = coord.left_edge_offset(Wj, 1, 0, 0);
-  Wk = array_factory.from_grouping(weight_group, "weight", coord.k_axis());
+  Wk = weight_l[coord.k_axis()].subarray(stale_slc, stale_slc, stale_slc);
   Wk_jp1 = coord.left_edge_offset(Wk, 0, 1, 0);
 
   // Integration limits
@@ -596,31 +554,33 @@ void EnzoConstrainedTransport::compute_edge_efield
 //----------------------------------------------------------------------
 
 void EnzoConstrainedTransport::compute_all_edge_efields
-  (Block *block, Grouping &prim_group, Grouping &xflux_group,
-   Grouping &yflux_group, Grouping &zflux_group, std::string center_efield_name,
-   Grouping &efield_group, Grouping &weight_group, int stale_depth)
+  (EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &xflux_map,
+   EnzoEFltArrayMap &yflux_map, EnzoEFltArrayMap &zflux_map,
+   EFlt3DArray &center_efield, std::array<EFlt3DArray,3> &edge_efield_l,
+   std::array<EFlt3DArray,3> &weight_l, int stale_depth)
 {
 
   for (int i = 0; i < 3; i++){
-    EnzoConstrainedTransport::compute_center_efield
-      (block, i, center_efield_name, prim_group, stale_depth);
+    EnzoConstrainedTransport::compute_center_efield(i, center_efield, prim_map,
+                                                    stale_depth);
 
-    Grouping *jflux_group;
-    Grouping *kflux_group;
+    EnzoEFltArrayMap *jflux_map;
+    EnzoEFltArrayMap *kflux_map;
     if (i == 0){
-      jflux_group = &yflux_group;
-      kflux_group = &zflux_group;
+      jflux_map = &yflux_map;
+      kflux_map = &zflux_map;
     } else if (i==1){
-      jflux_group = &zflux_group;
-      kflux_group = &xflux_group;
+      jflux_map = &zflux_map;
+      kflux_map = &xflux_map;
     } else {
-      jflux_group = &xflux_group;
-      kflux_group = &yflux_group;
+      jflux_map = &xflux_map;
+      kflux_map = &yflux_map;
     }
 
-    EnzoConstrainedTransport::compute_edge_efield
-      (block, i, center_efield_name, efield_group, *jflux_group, *kflux_group,
-       weight_group, stale_depth);
+    EnzoConstrainedTransport::compute_edge_efield(i, center_efield,
+                                                  edge_efield_l[i], *jflux_map,
+                                                  *kflux_map, weight_l,
+                                                  stale_depth);
   }
 }
 
@@ -649,32 +609,33 @@ void EnzoConstrainedTransport::compute_all_edge_efields
 // Then:
 //   E_k_term(k,j,i+1/2) = dt/dj*(ek_Rj(k,j,i) - ek_Lj(k,j,i))
 //   E_j_term(k,j,i+1/2) = dt/dk*(ej_Rk(k,j,i) - ej_Lk(k,j,i))
-void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
-					     Grouping &efield_group,
-					     Grouping &cur_bfieldi_group,
-					     Grouping &out_bfieldi_group,
-					     enzo_float dt, int stale_depth)
+void EnzoConstrainedTransport::update_bfield
+(const std::array<enzo_float,3> &cell_widths, int dim,
+ const std::array<EFlt3DArray,3> &efield_l,
+ EFlt3DArray &cur_interface_bfield, EFlt3DArray &out_interface_bfield,
+ enzo_float dt, int stale_depth)
 {
   EnzoPermutedCoordinates coord(dim);
 
   // compute the ratios of dt to the widths of cells along j and k directions
-  EnzoBlock *enzo_block = enzo::block(block);
-  enzo_float dtdj = dt/enzo_block->CellWidth[coord.j_axis()];
-  enzo_float dtdk = dt/enzo_block->CellWidth[coord.k_axis()];
+  enzo_float dtdj = dt/cell_widths[coord.j_axis()];
+  enzo_float dtdk = dt/cell_widths[coord.k_axis()];
 
-  // The following comments all assume that we are talking about unstaled
-  // region (and that we have dropped all staled cells)
-  EnzoFieldArrayFactory array_factory(block,stale_depth);
-  
+  CSlice stale_slc = (stale_depth > 0) ?
+      CSlice(stale_depth,-stale_depth) : CSlice(nullptr, nullptr);
+
   // Load edge centered efields 
   EFlt3DArray E_j, ej_Lk, ej_Rk, E_k, ek_Lj, ek_Rj;
-  E_j = array_factory.from_grouping(efield_group, "efield", coord.j_axis());
-  E_k = array_factory.from_grouping(efield_group, "efield", coord.k_axis());
+  E_j = efield_l[coord.j_axis()].subarray(stale_slc, stale_slc, stale_slc);
+  E_k = efield_l[coord.k_axis()].subarray(stale_slc, stale_slc, stale_slc);
 
-  // Load interface bfields field (includes exterior faces)
+  // Load interface bfields (includes exterior faces)
   EFlt3DArray cur_bfield, bcur, out_bfield, bout;
-  cur_bfield = array_factory.from_grouping(cur_bfieldi_group, "bfield", dim);
-  out_bfield = array_factory.from_grouping(out_bfieldi_group, "bfield", dim);
+  cur_bfield = cur_interface_bfield.subarray(stale_slc, stale_slc, stale_slc);
+  out_bfield = out_interface_bfield.subarray(stale_slc, stale_slc, stale_slc);
+
+  // The following all assume that we are talking about the unstaled region
+  // (i.e. we have dropped all staled cells)
 
   // Now to take slices. If the unstaled region of the grid has shape
   // (mk, mj, mi) then:
@@ -732,21 +693,20 @@ void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
 //   B_center(k,j,i)   ->  B_i(k,j,i+1)
 //   Bi_left(k,j,i)    ->  B_i(k,j,i+1/2)
 //   Bi_right(k,j,i)   ->  B_i(k,j,i+3/2)
-void EnzoConstrainedTransport::compute_center_bfield(Block *block, int dim,
-						     Grouping &bfieldc_group,
-						     Grouping &bfieldi_group,
+void EnzoConstrainedTransport::compute_center_bfield(int dim,
+                                                     EFlt3DArray &bfieldc_comp,
+						     EFlt3DArray &bfieldi_comp,
 						     int stale_depth)
 {
   EnzoPermutedCoordinates coord(dim);
-  EnzoFieldArrayFactory array_factory(block,stale_depth);
+  CSlice stale_slc = (stale_depth > 0) ?
+      CSlice(stale_depth,-stale_depth) : CSlice(nullptr, nullptr);
 
-  // Load cell-centerd field
-  EFlt3DArray b_center = array_factory.from_grouping(bfieldc_group, "bfield",
-						     coord.i_axis());
+  // Load Cell-centered fields
+  EFlt3DArray b_center = bfieldc_comp.subarray(stale_slc,stale_slc,stale_slc);
   // Load Face-centered fields
-  EFlt3DArray bi_left = array_factory.from_grouping(bfieldi_group, "bfield",
-						    coord.i_axis());
-  // Get the view of the Face-center field that starting from i=1
+  EFlt3DArray bi_left = bfieldi_comp.subarray(stale_slc,stale_slc,stale_slc);
+  // Get the view of the Face-center B-field that starting from i=1
   EFlt3DArray bi_right = coord.left_edge_offset(bi_left,0,0,1);
 
   // iteration limits are compatible with a 2D grid and 3D grid

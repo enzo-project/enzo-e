@@ -46,13 +46,10 @@ public: // interface
 
   /// Create a new EnzoConstrainedTransport (allocates scratch space)
   ///
-  /// @param block holds data to be processed
-  /// @param num_partial_timesteps The number of partial timesteps over which
-  ///     the constructed instance will update the magnetic fields.
+  /// @param[in] block holds data to be processed
+  /// @param[in] num_partial_timesteps The number of partial timesteps over
+  ///     which the constructed instance will update the magnetic fields.
   EnzoConstrainedTransport(Block *block, int num_partial_timesteps);
-
-  /// Destructor (deallocates the scratch space)
-  ~EnzoConstrainedTransport();
 
   /// adds the interface bfields to the refresh list (and makes sure that they
   /// exist)
@@ -96,71 +93,68 @@ public: // interface
 
   /// Updates all components of the face-centered and the cell-centered bfields
   ///
-  /// @param cur_prim_group Grouping of the fields containing the current
-  ///     values of the cell-centered integrable quantities (before dt is
-  ///     applied). The cell-centered E-field is computed from the stored
-  ///     bfield and velocity fields (which should be stored in the "bfield"
-  ///     and "velocity" group).
-  /// @param xflux_group,yflux_group,zflux_group holds field names where the
-  ///     fluxes along the x, y, and z directions are stored. These should
-  ///     include fluxes computed for the magnetic fields
-  /// @param bfieldc_group this must have a group called "bfield" holding 3
-  ///     cell-centered fields (one for each B-field component). This can be
-  ///     the same as cur_prim_group
-  /// @param dt The (partial) time-step over which to apply the fluxes
-  /// @param stale_depth indicates the current stale_depth for the supplied
-  ///     quantities. This should nominally be the same stale depth as the
-  ///     value used to compute the fluxes and passed to
+  /// @param[in]  cur_prim_map Map containing the current values of the
+  ///     cell-centered integrable quantities (before they have been updated
+  ///     over the current timestep). Specifically, the velocity and bfield
+  ///     components stored in this mapping are used to compute the
+  ///     cell-centered E-field.
+  /// @param[in]  xflux_map,yflux_map,zflux_map Maps containing the values of
+  ///     the fluxes computed along the x, y, and z directions. The function
+  ///     namely makes use of the various magnetic field fluxes
+  /// @param[out] bfieldc_map Map holding the arrays where the updated values
+  ///     for each cell-centered magnetic fields component should be stored.
+  ///     This can contain the same arrays as `cur_prim_map` (or even be the
+  ///     same array).
+  /// @param[in]  dt The (partial) time-step over which to update the magnetic
+  ///     fields.
+  /// @param[in]  stale_depth indicates the current stale_depth for the
+  ///     supplied quantities. This should nominally be the same as the stale
+  ///     depth used to compute the fluxes and that is passed to
   ///     EnzoIntegrableUpdate::update_quantities.
-  void update_all_bfield_components(Grouping &cur_prim_group,
-				    Grouping &xflux_group,
-				    Grouping &yflux_group,
-				    Grouping &zflux_group,
-				    Grouping &out_centered_bfield_group,
-				    enzo_float dt, int stale_depth);
+  void update_all_bfield_components(EnzoEFltArrayMap &cur_prim_map,
+                                    EnzoEFltArrayMap &xflux_map,
+                                    EnzoEFltArrayMap &yflux_map,
+                                    EnzoEFltArrayMap &zflux_map,
+                                    EnzoEFltArrayMap &out_centered_bfield_map,
+                                    enzo_float dt, int stale_depth);
 
   /// Computes a component of the cell-centered magnetic by averaging the
   /// face-centered values of that component of the magnetic field.
   ///
-  /// @param block holds data to be processed
-  /// @param dim The component of the cell-centered B-field to compute. Values
-  ///     of 0, 1 and 2 correspond to the x, y and z directions, respectively.
-  /// @param bfieldc_group this must have a group called "bfield" holding 3
-  ///     cell-centered fields (one for each B-field component). The field
-  ///     holding the data for the component corresponding to dim will have its
-  ///     values updated by this method.
-  /// @param bfieldi_group contains the interface B-field used to update the
-  ///     cell-centered value. This must have a group called "bfield" holding 3
-  ///     face-centered fields (one for each B-field component). A given
-  ///     component should be cell-centered for the dimensions that don't match
-  ///     the name of the component and face-centered (including space for
-  ///     values located on exterior faces of the block) along the dimension
-  ///     that matches the name of the component (e.g. the y-component should
-  ///     be cell-centered along x and z, but face-centered along y).
-  /// @param stale_depth indicates the current stale_depth for the supplied
-  ///     quantities
-  static void compute_center_bfield(Block *block, int dim,
-				    Grouping &bfieldc_group,
-				    Grouping &bfieldi_group,
-				    int stale_depth = 0);
+  /// @param[in]  dim The component of the cell-centered B-field to compute.
+  ///     Values of 0, 1 and 2 correspond to the x, y and z directions.
+  /// @param[out] bfieldc_comp Array where the calculated cell centered values
+  ///     of the magnetic field are written.
+  /// @param[in]  bfieldi_comp Array containing the interface B-field for the
+  ///     `dim` component that are used to compute the cell-centered values.
+  ///     This must have the same shape as `bfieldc_comp`, except along
+  ///     dimension `dim`. Along that dimension, this array must include one
+  ///     more value.
+  /// @param[in]  stale_depth indicates the current stale_depth for the
+  ///     supplied quantities.
+  ///
+  /// @note this function is called in `update_all_bfield_components`
+  static void compute_center_bfield(int dim, EFlt3DArray &bfieldc_comp,
+				    EFlt3DArray &bfieldi_comp,
+                                    int stale_depth = 0);
+
 
 protected: // methods
   /// Computes component i of the cell-centered E-field.
   ///
-  /// @param block holds data to be processed
-  /// @param dim The component of the cell-centered E-field to compute. Values
-  ///     of 0, 1 and 2 correspond to the x, y and z directions, respectively.
-  /// @param center_efield_name The name of the field that will store the
-  ///     calculated values of the cell-centered E-field
-  /// @param prim_group holds the fields containing the current values of the
-  ///     cell-centered integrable quantities (E-field is computed from the
-  ///     stored bfield and velocity)
-  /// @param stale_depth the stale depth at the time of this function call
+  /// @param[in]  dim The component of the cell-centered E-field to compute.
+  ///     Values of 0, 1 and 2 correspond to the x, y and z directions.
+  /// @param[out] center_efield The array where the computed cell-centered
+  ///     values of the E-field are written.
+  /// @param[in]  prim_map Map containing the current values of the
+  ///     cell-centered integrable quantities. Specifically, the velocity and
+  ///     bfield entries are used to compute the cell-centered E-field.
+  /// @param[in]  stale_depth the stale depth at the time of this function call
   ///
-  /// @note this function is called in compute_all_edge_efields
-  static void compute_center_efield (Block *block, int dim,
-				     std::string center_efield_name,
-				     Grouping &prim_group, int stale_depth);
+  /// @note this function is called in `compute_all_edge_efields`
+  static void compute_center_efield(int dim, EFlt3DArray &center_efield,
+                                    EnzoEFltArrayMap &prim_map,
+                                    int stale_depth = 0);
 
   /// Computes component i of the edge-centered E-field that sits on the faces
   /// of dimensions j and k (i, j, and k are any cyclic permutation of x, y, z).
@@ -169,148 +163,147 @@ protected: // methods
   /// B-field stored in jflux_group and kflux_group). Additionally, it requires
   /// knowledge of the upwind direction on the j and k faces.
   ///
-  /// @param block holds data to be processed
-  /// @param dim The component of the edge-centered E-field to compute. Values
-  ///     of 0, 1 and 2 correspond to the x, y and z directions, respectively.
-  /// @param center_efield_name The name of the field containing component i of
-  ///     the cell-centered E-field
-  /// @param efield_group This contains the name of the field that will hold
-  ///     the values of the computed edge-centered E-field. This must have a
-  ///     group called "efield" which contains 3 edge-centered fields (one for
-  ///     each component). A given component should be face-centered (should not
-  ///     include space for values on the exterior face of the grid) for the
-  ///     dimensions that don't match the name of the component and
-  ///     cell-centered along the other dimension (e.g. the y-component should
-  ///     be face-centered along x and z, but cell-centered along y).
-  /// @param jflux_group,kflux_group These contain the fields holding fluxes
-  ///     computed along the jth and kth dimensions. The relevant fields are
-  ///     face-centered along the j and k dimensions.
-  /// @param weight_group holds the temporary weight fields (in a group called
-  ///     "weight"). There is a weight field for each spatial direction and
-  ///     the field is face-centered along that direction (without including
-  ///     values on the exterior faces of the block). The weight fields
-  ///     corresponding to j and k indicate the upwind direction along those
-  ///     dimensions (this is included to optionally implement the weighting
-  ///     scheme used by Athena++ at a later date)
-  /// @param stale_depth indicates the current stale_depth for the supplied
-  ///     quantities
+  /// @param[in]  dim The component of the edge-centered E-field to compute.
+  ///     Values of 0, 1 and 2 correspond to the x, y and z directions.
+  /// @param[in]  center_efield The array holding the cell-centered values for
+  ///     component `dim` of the E-field.
+  /// @param[out] edge_efield The array where the edge centered values for
+  ///     component `dim` of the E-field are to be written. The array should
+  ///     have the same number of elements as `center_efield` along dimensions
+  ///     `dim` and one more element along the other dimensions (e.g. The
+  ///     x-component is cell-centered along the x-direction an face-centered
+  ///     along the y- and z-axes).
+  /// @param[in]  jflux_map,kflux_map Maps containing the values of the fluxes
+  ///     along the j- and k- dimensions (where the dimension i is aligned with
+  ///     `dim`). The function namely makes use of the magnetic field fluxes.
+  /// @param[in]  weight_l Set of arrays that hold "weight" values. Entries 0,
+  ///     1, and 2 are used to hold the x, y, and z components. For a given
+  ///     dimension, the array tracks the upwind/downwind direction on the cell
+  ///     interfaces for that dimension, without including values on the
+  ///     exterior faces of the block (This is included to optionally implement
+  ///     the weighting scheme used by Athena++ at a later date).
+  /// @param[in]  stale_depth the stale depth at the time of this function call
   ///
   /// @note this function is called in compute_all_edge_efields
-  void static compute_edge_efield (Block *block, int dim,
-				   std::string center_efield_name,
-				   Grouping &efield_group,
-				   Grouping &jflux_group,
-				   Grouping &kflux_group,
-				   Grouping &weight_group,
+  void static compute_edge_efield (int dim, EFlt3DArray &center_efield,
+				   EFlt3DArray &edge_efield,
+                                   EnzoEFltArrayMap &jflux_map,
+                                   EnzoEFltArrayMap &kflux_map,
+				   std::array<EFlt3DArray,3> &weight_l,
 				   int stale_depth);
 
   /// Compute the all of the edge-centered electric fields using the current
   /// fluxes and current cell-centered integrable quantities .
   ///
-  /// @param block holds data to be processed
-  /// @param prim_group holds the fields containing the current values of the
-  ///     cell-centered integrable quantities (cell-centered E-field is
-  ///     computed from the stored bfield and velocity)
-  /// @param xflux_group,yflux_group,zflux_group holds field names where the
-  ///     fluxes along the x, y, and z directions are stored. These should
-  ///     include fluxes computed for the magnetic fields
-  /// @param center_efield_name name of the fields where components of the
-  ///     cell-centered electric field can be temporarily stored.
-  /// @param efield_group holds field names where the computed edge-centered
-  ///     electric fields will be stored. This must have a group called
-  ///     "efield" which contains 3 edge-centered fields (one for each
-  ///     component). A given component should be face-centered (shouldn't
-  ///     include space for values on the exterior faces of the grid) for the
-  ///     dimensions that don't match the name of the component and
-  ///     cell-centered along the other dimension (e.g. the y-component should
-  ///     be face-centered along x and z, but cell-centered along y)
-  /// @param weight_group holds the temporary weight fields (in a group called
-  ///     "weight"). There is a weight field for each spatial direction and
-  ///     the field is face-centered along that direction (without including
-  ///     values on the exterior faces of the block). The weight fields for a
-  ///     given dimension indicate the upwind direction along that dimension
-  ///     (this is included to optionally implement the weighting scheme used
-  ///     by Athena++ at a later date)
-  /// @param stale_depth the stale depth at the time of this function call
-  static void compute_all_edge_efields(Block *block, Grouping &prim_group,
-				       Grouping &xflux_group,
-				       Grouping &yflux_group,
-				       Grouping &zflux_group,
-				       std::string center_efield_name,
-				       Grouping &efield_group,
-				       Grouping &weight_group,
-				       int stale_depth);
+  /// @param[in]  cur_prim_map Map containing the current values of the
+  ///     cell-centered integrable quantities (before they have been updated
+  ///     over the current timestep). Specifically, the velocity and bfield
+  ///     components stored in this mapping are used to compute the
+  ///     cell-centered E-field.
+  /// @param[in]  xflux_map,yflux_map,zflux_map Maps containing the values of
+  ///     the fluxes computed along the x, y, and z directions. The function
+  ///     namely makes use of the various magnetic field fluxes
+  /// @param[in] center_efield The array where the computed cell-centered
+  ///     values of different components of the E-field are temporarily written
+  ///     (and then possibly overwritten). This is effectively a preallocated
+  ///     scratch buffer whose input values are insignificant.
+  /// @param[out] edge_efield_l A set of arrays where the values for each
+  ///     component of the edge-centered E-field are to be written. Each entry
+  ///     corresponds to a different component. Entries 0, 1, and 2 are used to
+  ///     hold the x, y, and z components. If a cell-centered array has shape
+  ///     (mz,my,mx), then the arrays should have shapes (mz-1,my-1,mx),
+  ///     (mz-1,my,mx-1) and (mz,my-1,mx-1), respectively.
+  /// @param[in]  weight_l Set of arrays that hold "weight" values. Entries 0,
+  ///     1, and 2 are used to hold the x, y, and z components. For a given
+  ///     dimension, the array tracks the upwind/downwind direction on the cell
+  ///     interfaces for that dimension, without including values on the
+  ///     exterior faces of the block (This is included to optionally implement
+  ///     the weighting scheme used by Athena++ at a later date).
+  /// @param[in] stale_depth the stale depth at the time of this function call
+  static void compute_all_edge_efields
+  (EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &xflux_map,
+   EnzoEFltArrayMap &yflux_map, EnzoEFltArrayMap &zflux_map,
+   EFlt3DArray &center_efield, std::array<EFlt3DArray,3> &edge_efield_l,
+   std::array<EFlt3DArray,3> &weight_l, int stale_depth);
 
   /// Updates the face-centered B-field component along the ith dimension using
   /// the jth and kth components of the edge-centered E-field
   ///
-  /// @param block holds data to be processed
-  /// @param dim The component of the interface B-field to update. Values of 0,
-  ///     1 and 2 correspond to the x, y and z directions, respectively.
-  /// @param efield_group this contains the edge-centered electric fields used
-  ///     to update the interface bfield. This must have a group called
-  ///     "efield" which contains 3 edge-centered fields (one for each
-  ///     component). A given component should be face-centered (shouldn't
-  ///     include space for values on the exterior face of the grid) for the
-  ///     dimensions that don't match the name of the component and
-  ///     cell-centered along the other dimension (e.g. the y-component
-  ///     should be face-centered along x and z, but cell-centered along y).
-  /// @param cur_bfieldi_group this contains the current interface B-fields.
-  ///     It must have a group called "bfield" holding 3 face-centered fields
-  ///     (one for each B-field component). A given component should be
-  ///     cell-centered for the dimensions that don't match the name of the
-  ///     component and face-centered (including space for values located on
-  ///     exterior faces of the block) along the dimension that matches the
-  ///     name of the component (e.g. the y-component should be cell-centered
-  ///     along x and z, but face-centered along y).
-  /// @param out_bfieldi_group this contains the field where the updated
-  ///     interface bfield should be stored. The requirements of the contained
-  ///     groups are the same as for cur_bfieldi_group. (Note, this can be
-  ///     the same Grouping as cur_bfieldi_group.
-  /// @param dt The time time-step over which to apply the fluxes
-  /// @param stale_depth indicates the current stale_depth for the supplied
+  /// @param[in]  dim The component of the interface B-field to update.
+  ///     Values of 0, 1 and 2 correspond to the x, y and z directions.
+  /// @param[in]  edge_efield_l A set of arrays holding the values for each
+  ///     component of the edge-centered E-field. Each entry corresponds to a
+  ///     different component. Entries 0, 1, and 2 are used to hold the x, y,
+  ///     and z components. If a cell-centered array has shape (mz,my,mx), then
+  ///     the arrays should have shapes (mz-1,my-1,mx), (mz-1,my,mx-1) and
+  ///     (mz,my-1,mx-1), respectively.
+  /// @param[in] cur_interface_bfield Array containing the current value of the
+  ///     `dim` component of the interface B-field. These values are the values
+  ///     from the start of the timestep that are used to compute the updated
+  ///     values. Along dimension `dim`, this array should hold one more entry
+  ///     than a cell-centered array (it contains values on all faces,
+  ///     including the external cell faces). Along the other dimensions, this
+  ///     should have the same number of entries as a cell-centered array (e.g.
+  ///     the y-component should be cell-centered along x and z, but
+  ///     face-centered along y).
+  /// @param[out] out_interface_bfield Array where the updated interface value
+  ///     of the `dim` component of the interface B-field is written. This
+  ///     should have the same shape as `cur_interface_bfield`. This can either
+  ///     be the same array passed to `cur_interface_bfield`, or a completely
+  ///     different array.
+  /// @param[in] dt The time time-step over which to apply the fluxes
+  /// @param[in] stale_depth indicates the current stale_depth for the supplied
   ///     quantities
-  static void update_bfield(Block *block, int dim, Grouping &efield_group,
-			    Grouping &cur_bfieldi_group,
-			    Grouping &out_bfieldi_group,
+  static void update_bfield(const std::array<enzo_float,3> &cell_widths,
+                            int dim, const std::array<EFlt3DArray,3> &efield_l,
+                            EFlt3DArray &cur_interface_bfield,
+                            EFlt3DArray &out_interface_bfield,
 			    enzo_float dt, int stale_depth);
 
 protected: // attributes
 
-  /// Grouping that holds a group called "bfield". Within that group, there are
-  /// three fields. Each field holds a component of the bfield that is
-  /// face-centered along the dimension of the component (hence they are
-  /// interface bfields)
-  Grouping bfieldi_group_;
+  /// Contains the relevant current data. This is not strictly necessary, but
+  /// it's presence that this class must be separately initialized for
+  /// different blocks.
+  Block *const block_;
 
-  /// Contains the relevant current data
-  Block* block_;
+  /// Set of arrays wrapping the Cello fields that contain the interface
+  /// magnetic field components. A given component is face-centered along the
+  /// face-centered along the dimension of the component. These arrays include
+  /// values on the exterior faces of the block.
+  ///
+  /// If a cell-centered array has shape (mz,my,mx), the entries in this list
+  /// have shapes (mz,my,mx+1), (mz,my+1,mx), and (mz+1,my,mx), respectively.
+  std::array<EFlt3DArray,3> bfieldi_l_;
 
-  /// Grouping of temporary interface bfields identical to all the fields held
-  /// by bfieldi_group_. These hold the values of the face-centered fields
-  /// computed at the half time-step
-  Grouping temp_bfieldi_group_;
+  /// Set of arrays to temporarily hold the values of the face-centered fields
+  /// computed at the half time-step. Each entry should have the same shape as
+  /// the corresponding entry in bfieldi_l_
+  std::array<EFlt3DArray,3> temp_bfieldi_l_;
 
-  /// Grouping that holds temporary fields inside of a single group called
-  /// "weight". "weight" holds three fields, one for each spatial direction.
-  /// The weight field for a given direction is face-centered along that
-  /// direction (but the field exclude exterior faces of the grid) and keeps
-  /// track of the upwind direction.
-  Grouping weight_group_;
+  /// Set of arrays that hold "weight" values. For a given dimension, the array
+  /// tracks the upwind/downwind direction on the cell interfaces for that
+  /// dimension. The arrays exclude values on the exterior faces of the block.
+  ///
+  /// If a cell-centered array has shape (mz,my,mx), the entries in this list
+  /// have shapes (mz,my,mx-1), (mz,my-1,mx), and (mz-1,my,mx), respectively.
+  std::array<EFlt3DArray,3> weight_l_;
 
-  /// Grouping of temporary edge-centered fields where the calculated electric
-  /// fields get stored. This has one group called "efield" which contains
-  /// temporary fields used to store the electric field along the x, y, and z
-  /// components. The temporary field will be cell centered along the dimension
-  /// of the electric field component and face-centered along the other
-  /// components, excluding exterior faces of the mesh (e.g. The x-component
-  /// will be cell-centered along the x-direction, but face-centered along the
-  /// y- and z- axes)
-  Grouping efield_group_;
+  /// Set of arrays used to temporarily store the calculated edge-centered
+  /// components of the electric field. For a given electric field component,
+  /// the corresponding array is cell-centered along that component's dimension
+  /// and face-centered along the other dimensions. (e.g. The x-component is
+  /// cell-centered along the x-direction an face-centered along the y- and z-
+  /// axes)
+  ///
+  /// If a cell-centered array has shape (mz,my,mx), the entries in this list
+  /// have shapes (mz-1,my-1,mx), (mz-1,my,mx-1), and (mz,my-1,mx-1),
+  /// respectively.
+  std::array<EFlt3DArray,3> edge_efield_l_;
 
-  /// Holds the name of the temporary field used to store the cell-centered
-  /// electric field. This field gets reused for each dimension.
-  std::string center_efield_name_;
+  /// Array used to temporarily store cell-centered values of different
+  /// electric field components. This array is reused for each component.
+  EFlt3DArray center_efield_;
 
   /// Number of partial timesteps in a cycle. A value of 1 would means that
   /// there is only a single update over the full timestep. A value of 2 means

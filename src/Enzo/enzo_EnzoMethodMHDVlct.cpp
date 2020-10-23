@@ -498,6 +498,22 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     add_arrays_to_map_(block, dUcons_group, passive_group_names_, -1,
                        dUcons_map, false, false, conserved_passive_scalars);
 
+    EnzoEFltArrayMap xflux_map, yflux_map, zflux_map;
+    add_arrays_to_map_(block, xflux_group, integrable_group_names_, 0,
+                       xflux_map, false, true, NULL);
+    add_arrays_to_map_(block, xflux_group, passive_group_names_, 0,
+                       xflux_map, false, false, primitive_group_);
+
+    add_arrays_to_map_(block, yflux_group, integrable_group_names_, 1,
+                       yflux_map, false, true, NULL);
+    add_arrays_to_map_(block, yflux_group, passive_group_names_, 1,
+                       yflux_map, false, false, primitive_group_);
+
+    add_arrays_to_map_(block, zflux_group, integrable_group_names_, 2,
+                       zflux_map, false, true, NULL);
+    add_arrays_to_map_(block, zflux_group, passive_group_names_, 2,
+                       zflux_map, false, false, primitive_group_);
+
     std::vector<std::vector<std::string>> passive_lists {{}};
     for (std::string group_name : passive_group_names_){
       int num_fields = conserved_passive_scalars->size(group_name);
@@ -613,9 +629,10 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 
       // Update Bfields
       if (ct != NULL) {
-	ct->update_all_bfield_components
-	  (*cur_integrable_group, xflux_group,yflux_group, zflux_group,
-	   *out_integrable_group, cur_dt, stale_depth);
+	ct->update_all_bfield_components(cur_integrable_map, xflux_map,
+                                         yflux_map, zflux_map,
+                                         out_integrable_map, cur_dt,
+                                         stale_depth);
       }
 
       // Update quantities - (includes flux divergence and source terms) 
