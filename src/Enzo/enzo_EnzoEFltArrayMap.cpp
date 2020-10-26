@@ -1,3 +1,10 @@
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     enzo_EnzoEFltArrayMap.cpp
+/// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
+/// @date     Mon Oct 26 2020
+/// @brief    [\ref Enzo] Implementation of the EnzoEFltArrayMap class
+
 #include "cello.hpp"
 #include "enzo.hpp"
 
@@ -42,58 +49,39 @@ EFlt3DArray EnzoEFltArrayMap::get(const std::string& key,
 
 //----------------------------------------------------------------------
 
-EnzoEFltArrayMap EnzoEFltArrayMap::from_grouping
-(Block * block, Grouping& grouping, const std::vector<std::string>& groups,
- int dim) noexcept
-{
-  EnzoEFltArrayMap out;
-
-  EnzoFieldArrayFactory array_factory(block,0);
-
-  for (const std::string& group_name : groups){
-    int num_fields = grouping.size(group_name);
-    for (int field_ind=0; field_ind<num_fields; field_ind++){
-      std::string field_name = grouping.item(group_name,field_ind);
-
-      if (out.contains(field_name)){
-        ERROR1("EnzoEFltArrayMap::from_grouping",
-               "EnzoEFltArrayMap can't hold more than one field called \"%s\"",
-               field_name.c_str());
-      }
-
-      if (dim == -1){
-        out[field_name] = array_factory.from_name(field_name);
-      } else {
-        out[field_name] = array_factory.assigned_center_from_name(field_name,
-                                                                  dim);
-      }
-    }
-  }
-  return out;
-}
-
-//----------------------------------------------------------------------
-
 void EnzoEFltArrayMap::print_summary() const noexcept
 {
   std::size_t my_size = size();
   if (my_size == 0){
-    CkPrintf("Empty array");
+    if (name_ == ""){
+      CkPrintf("Nameless Empty Array Map\n");
+    } else {
+      CkPrintf("\"%s\" Empty Array Map\n", name_.c_str());
+    }
     return;
+  }
+
+
+  if (name_ == ""){
+    CkPrintf("Nameless Array Map\n");
+  } else {
+    CkPrintf("\"%s\" Array Map\n", name_.c_str());
   }
 
   int i = 0;
   CkPrintf("{");
-  
+
   for ( const auto &pair : map_ ) {
     if (i != 0){
       CkPrintf(",\n ");
     }
-    CkPrintf("\"%s\" : EFlt3DArray(%p, %d, %d, %d)", pair.first.c_str(),
+    CkPrintf("\"%s\" : EFlt3DArray(%p, %d, %d, %d), owners: %ld",
+             pair.first.c_str(),
              (void*)pair.second.shared_data_.get(),
              (int)pair.second.shape(0),
              (int)pair.second.shape(1),
-             (int)pair.second.shape(2));
+             (int)pair.second.shape(2),
+             pair.second.shared_data_.use_count());
     i++;
   }
   CkPrintf("}\n");

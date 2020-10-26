@@ -390,7 +390,7 @@ void add_arrays_to_map_(Block * block,
 EnzoEFltArrayMap EnzoMethodMHDVlct::nonpassive_primitive_map_(Block * block)
   const throw ()
 {
-  EnzoEFltArrayMap primitive_map;
+  EnzoEFltArrayMap primitive_map("primitive");
   // need to combine group_names to handle the internal energy source term
   std::vector<std::string> all_prim_group_names =
     unique_combination_(reconstructable_group_names_,
@@ -408,7 +408,7 @@ EnzoEFltArrayMap EnzoMethodMHDVlct::conserved_passive_scalar_map_
   // get Grouping of field names that store passively advected scalars in
   // conserved-form
   Grouping *conserved_passive_scalars = cello::field_descr()->groups();
-  EnzoEFltArrayMap conserved_passive_scalar_map;
+  EnzoEFltArrayMap conserved_passive_scalar_map("conserved_passive_scalar");
   add_arrays_to_map_(block, *conserved_passive_scalars,
                      passive_group_names_, -1,
                      conserved_passive_scalar_map, false, false,
@@ -423,26 +423,27 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
   if (block->is_leaf()) {
     // Check that the mesh size and ghost depths are appropriate
     check_mesh_and_ghost_size_(block);
-    
+
     // declaring Maps of arrays and stand-alone arrays that wrap existing
     // fields and/or serve as scratch space.
 
     // map that holds arrays wrapping the Cello Fields holding each of the
     // primitive quantities. Additionally, this also includes temporary arrays
     // used to hold the specific form of the passive scalar
-    EnzoEFltArrayMap primitive_map;
+    EnzoEFltArrayMap primitive_map; // this will be overwritten
 
     // map used for storing primitive values at the half time-step. This
     // includes key,array pairs for each entry in primitive_map (there should
     // be no aliased fields shared between maps)
-    EnzoEFltArrayMap temp_primitive_map;
+    EnzoEFltArrayMap temp_primitive_map("temp_primitive");
 
     // map holding the arrays wrapping each fields corresponding to a passively
     // advected scalar. The scalar is in conserved form.
-    EnzoEFltArrayMap conserved_passive_scalar_map;
+    EnzoEFltArrayMap conserved_passive_scalar_map; // this will be overwritten
 
     // holds left and right reconstructed primitives (scratch-space)
-    EnzoEFltArrayMap priml_map, primr_map;
+    EnzoEFltArrayMap priml_map("priml");
+    EnzoEFltArrayMap primr_map("primr");
 
     // Arrays used to store the pressure computed from the reconstructed left
     // and right primitives
@@ -454,14 +455,16 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 
     // maps used to store fluxes (in the future, these will wrap FluxData
     // entries)
-    EnzoEFltArrayMap xflux_map, yflux_map, zflux_map;
+    EnzoEFltArrayMap xflux_map("xflux");
+    EnzoEFltArrayMap yflux_map("yflux");
+    EnzoEFltArrayMap zflux_map("zflux");
 
     // map of arrays  used to accumulate the changes to the conserved forms of
     // the integrable quantities and passively advected scalars. In other
     // words, at the start of the (partial) timestep, the fields are all set to
     // zero and are used to accumulate the flux divergence and source terms. If
     // CT is used, it won't have space to store changes in the magnetic fields.
-    EnzoEFltArrayMap dUcons_map;
+    EnzoEFltArrayMap dUcons_map("dUcons");
 
     // This is a list of lists of passive scalar names (or keys). The first
     // sublist holds the names of all quantities that undergo normal passive
