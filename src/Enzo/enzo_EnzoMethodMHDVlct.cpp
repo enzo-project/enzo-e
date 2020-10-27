@@ -216,7 +216,7 @@ std::vector<std::string> unique_combination_(const std::vector<std::string> &a,
   }
   return out;
 }
-  
+
 //----------------------------------------------------------------------
 
 void EnzoMethodMHDVlct::setup_groupings_
@@ -391,7 +391,11 @@ EnzoEFltArrayMap EnzoMethodMHDVlct::nonpassive_primitive_map_(Block * block)
   const throw ()
 {
   EnzoEFltArrayMap primitive_map;
-  add_arrays_to_map_(block, *primitive_group_, integrable_group_names_,
+  // need to combine group_names to handle the internal energy source term
+  std::vector<std::string> all_prim_group_names =
+    unique_combination_(reconstructable_group_names_,
+                        integrable_group_names_);
+  add_arrays_to_map_(block, *primitive_group_, all_prim_group_names,
                      -1, primitive_map, false, true, NULL);
   return primitive_map;
 }
@@ -420,56 +424,77 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // Check that the mesh size and ghost depths are appropriate
     check_mesh_and_ghost_size_(block);
     
-    // declaring Groupings that track temporary fields used for scratch space
-    // left and right reconstructed primitives
-    Grouping priml_group, primr_group;
+    // declaring Maps of arrays and stand-alone arrays that wrap existing
+    // fields and/or serve as scratch space.
 
-    // Names of temporary fields used to store the pressure computed from the
-    // reconstructed left and right primitives
+    // map that holds arrays wrapping the Cello Fields holding each of the
+    // primitive quantities. Additionally, this also includes temporary arrays
+    // used to hold the specific form of the passive scalar
+    EnzoEFltArrayMap primitive_map;
+
+    // map used for storing primitive values at the half time-step. This
+    // includes key,array pairs for each entry in primitive_map (there should
+    // be no aliased fields shared between maps)
+    EnzoEFltArrayMap temp_primitive_map;
+
+    // map holding the arrays wrapping each fields corresponding to a passively
+    // advected scalar. The scalar is in conserved form.
+    EnzoEFltArrayMap conserved_passive_scalar_map;
+
+    // holds left and right reconstructed primitives (scratch-space)
+    EnzoEFltArrayMap priml_map, primr_map;
+
+    // Arrays used to store the pressure computed from the reconstructed left
+    // and right primitives
     // Note: in the case of adiabatic fluids, pressure is a reconstructable
-    //       quantity and fields are included for it in priml_group and
-    //       primr_group. In that case, those field names are also asigned to
-    //       pressure_name_l and pressure_name_r (this is not strictly,
-    //       necessary - EnzoEOSIdeal is smart enough to copy values if the
-    //       field names don't match)
-    std::string pressure_name_l, pressure_name_r;
+    //       quantity and entries are included for it in priml_map and
+    //       primr_map. In that case, pressure_l and pressure_r are aliases of
+    //       those arrays.
+    EFlt3DArray pressure_l, pressure_r;
 
-    // Name of fields use to store interface velocity field from the Riemann
-    // Solver to compute internal energy source term. It won't be allocated
-    // unless the dual energy formalism is in use
-    std::string interface_velocity_name;
+    // maps used to store fluxes (in the future, these will wrap FluxData
+    // entries)
+    EnzoEFltArrayMap xflux_map, yflux_map, zflux_map;
 
-    // flux fields
-    Grouping xflux_group, yflux_group, zflux_group;
+    // map of arrays  used to accumulate the changes to the conserved forms of
+    // the integrable quantities and passively advected scalars. In other
+    // words, at the start of the (partial) timestep, the fields are all set to
+    // zero and are used to accumulate the flux divergence and source terms. If
+    // CT is used, it won't have space to store changes in the magnetic fields.
+    EnzoEFltArrayMap dUcons_map;
 
-    // fields used to accumulate the changes to the conserved forms of the
-    // integrable quantities and passively advected scalars (i.e. at the start
-    // of the (partial) timestep, the fields are all set to zero and are used
-    // to accumulate the flux divergence and source terms). If CT is used, it
-    // won't have space to store changes in the magnetic fields.
-    Grouping dUcons_group;
+    // This is a list of lists of passive scalar names (or keys). The first
+    // sublist holds the names of all quantities that undergo normal passive
+    // advection. Subsequent lists hold sets of names for scalars whose values
+    // must sum to 1.0 (like species).
+    std::vector<std::vector<std::string>> passive_lists {{}};
 
-    // temp primitive group for storing values at the half time-step
-    Grouping temp_primitive_group;
+    setup_arrays_(block, primitive_map, temp_primitive_map,
+                  conserved_passive_scalar_map, priml_map, primr_map,
+		  pressure_l, pressure_r, xflux_map, yflux_map, zflux_map,
+                  dUcons_map, passive_lists);
 
-
-    // allocate the temporary fields (as necessary) and fill the field groupings
-    allocate_temp_fields_(block, priml_group, primr_group,
-			  pressure_name_l, pressure_name_r,
-			  interface_velocity_name,
-			  xflux_group, yflux_group, zflux_group, dUcons_group,
-			  temp_primitive_group);
-
-    // conserved-form of passively advected scalars (the initial values are
-    // taken from here and converted to specific form. Intermediate and final
-    // values get written to here)
-    Grouping *conserved_passive_scalars = cello::field_descr()->groups();
+    // Setup a pointer to an array that used to store interface velocity fields
+    // from computed by the Riemann Solver (to use in the calculation of the
+    // internal energy source term). If the dual energy formalism is not in
+    // use, don't actually allocate the array and set the pointer to NULL.
+    EFlt3DArray interface_velocity_arr, *interface_velocity_arr_ptr;
+    if (eos_->uses_dual_energy_formalism()){
+      EFlt3DArray density = primitive_map.at("density");
+      interface_velocity_arr = EFlt3DArray(density.shape(0), density.shape(1),
+                                           density.shape(2));
+      interface_velocity_arr_ptr = &interface_velocity_arr;
+    } else {
+      interface_velocity_arr_ptr = NULL;
+    }
 
     // allocate constrained transport object
     EnzoConstrainedTransport *ct = NULL;
     if (mhd_choice_ == bfield_choice::constrained_transport) {
       ct = new EnzoConstrainedTransport(block, 2);
     }
+
+    const double* const cell_widths = enzo::block(block)->CellWidth;
 
     double dt = block->dt();
 
@@ -480,127 +505,58 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 
     // convert the passive scalars from conserved form to specific form
     // (outside the integrator, they are treated like conserved densities)
-    compute_specific_passive_scalars_(block, passive_group_names_,
-				      *conserved_passive_scalars,
-				      *primitive_group_, stale_depth);
-
-    // ASIDE SETUP SOME MAPS:
-    EnzoEFltArrayMap conserved_passive_scalar_map =
-      conserved_passive_scalar_map_(block);
-    EnzoEFltArrayMap primitive_map = nonpassive_primitive_map_(block);
-    add_arrays_to_map_(block, *primitive_group_, passive_group_names_,
-                       -1, primitive_map, false, false,
-                       conserved_passive_scalars);
-    EnzoEFltArrayMap dUcons_map;
-    add_arrays_to_map_(block, dUcons_group, integrable_group_names_, -1,
-                       dUcons_map, true, // dUcons_group may omit B-fields
-                       true, NULL);
-    add_arrays_to_map_(block, dUcons_group, passive_group_names_, -1,
-                       dUcons_map, false, false, conserved_passive_scalars);
-
-    EnzoEFltArrayMap xflux_map, yflux_map, zflux_map;
-    add_arrays_to_map_(block, xflux_group, integrable_group_names_, 0,
-                       xflux_map, false, true, NULL);
-    add_arrays_to_map_(block, xflux_group, passive_group_names_, 0,
-                       xflux_map, false, false, primitive_group_);
-
-    add_arrays_to_map_(block, yflux_group, integrable_group_names_, 1,
-                       yflux_map, false, true, NULL);
-    add_arrays_to_map_(block, yflux_group, passive_group_names_, 1,
-                       yflux_map, false, false, primitive_group_);
-
-    add_arrays_to_map_(block, zflux_group, integrable_group_names_, 2,
-                       zflux_map, false, true, NULL);
-    add_arrays_to_map_(block, zflux_group, passive_group_names_, 2,
-                       zflux_map, false, false, primitive_group_);
-
-    std::vector<std::vector<std::string>> passive_lists {{}};
-    for (std::string group_name : passive_group_names_){
-      int num_fields = conserved_passive_scalars->size(group_name);
-      for (int field_ind=0; field_ind<num_fields; field_ind++){
-        std::string field_name =
-          conserved_passive_scalars->item(group_name,field_ind);
-        passive_lists[0].push_back(field_name);
-      }
-    }
+    compute_specific_passive_scalars_(passive_lists, primitive_map["density"],
+                                      conserved_passive_scalar_map,
+                                      primitive_map, stale_depth);
 
     // repeat the following loop twice (for half time-step and full time-step)
 
     for (int i=0;i<2;i++){
-      double cur_dt;
+      double cur_dt = (i == 0) ? dt/2. : dt;
+      EnzoEFltArrayMap& cur_integrable_map =
+        (i == 0) ? primitive_map      : temp_primitive_map;
+      EnzoEFltArrayMap& out_integrable_map =
+        (i == 0) ? temp_primitive_map :      primitive_map;
       // For the purposes of making the calculation procedure slightly more
       // more explicit, we distinguish between cur_integrable_group and
       // cur_reconstructable_group. Due to the high level of overlap between
       // these, they are simply aliases of the same underlying Grouping that
       // holds groups for both of them
-      Grouping* cur_reconstructable_group;
-      Grouping* cur_integrable_group;
-      Grouping* out_integrable_group;
+      EnzoEFltArrayMap& cur_reconstructable_map = cur_integrable_map;
 
       EnzoReconstructor *reconstructor;
 
       if (i == 0){
-	cur_dt = dt/2.;
-	out_integrable_group = &temp_primitive_group;
-	cur_integrable_group = primitive_group_;
-	cur_reconstructable_group = cur_integrable_group;
-	reconstructor = half_dt_recon_;
-	// ct does NOT need to be incremented
+        reconstructor = half_dt_recon_;
+        // ct does NOT need to be incremented
       } else {
-	cur_dt = dt;
-	out_integrable_group = primitive_group_;
-	cur_integrable_group = &temp_primitive_group;
-	cur_reconstructable_group = cur_integrable_group;
-	reconstructor = full_dt_recon_;
+        reconstructor = full_dt_recon_;
 
-	if (ct != NULL){ ct->increment_partial_timestep(); }
+        if (ct != NULL){ ct->increment_partial_timestep(); }
 
-	// After the fluxes were added to the passive scalar in the first half
-	// timestep, the values were stored in conserved form in the fields
-	// held by conserved_passive_scalars.
-	// Need to convert them to specific form
-	compute_specific_passive_scalars_(block, passive_group_names_,
-					  *conserved_passive_scalars,
-					  *cur_integrable_group, stale_depth);
+        // After the fluxes were added to the passive scalar in the first half
+        // timestep, the values were stored in conserved form in the fields
+        // held by conserved_passive_scalar_map.
+        // Need to convert them to specific form
+        compute_specific_passive_scalars_(passive_lists,
+                                          cur_integrable_map["density"],
+                                          conserved_passive_scalar_map,
+                                          cur_integrable_map, stale_depth);
       }
 
-      EnzoEFltArrayMap cur_integrable_map, out_integrable_map;
-      add_arrays_to_map_(block, *cur_integrable_group, integrable_group_names_,
-                         -1, cur_integrable_map, false, true, NULL);
-      add_arrays_to_map_(block, *cur_integrable_group, passive_group_names_,
-                         -1, cur_integrable_map, false, false,
-                         conserved_passive_scalars);
-
-      add_arrays_to_map_(block, *out_integrable_group, integrable_group_names_,
-                         -1, out_integrable_map, false, true, NULL);
-      add_arrays_to_map_(block, *out_integrable_group, passive_group_names_,
-                         -1, out_integrable_map, false, false,
-                         conserved_passive_scalars);
-
-      EnzoEFltArrayMap cur_reconstructable_map;
-      add_arrays_to_map_(block, *cur_reconstructable_group,
-                         reconstructable_group_names_, -1,
-                         cur_reconstructable_map, false, true, NULL);
-      add_arrays_to_map_(block, *cur_reconstructable_group,
-                         passive_group_names_, -1,
-                         cur_reconstructable_map, false, false,
-                         conserved_passive_scalars);
-
-      
-
-      // set all elements of the arrays in dUcons_group to 0 (throughout the
-      // rest of the current loop, flux divergence and source terms will be
+      // set all elements of the arrays in dUcons_map to 0 (throughout the rest
+      // of the current loop, flux divergence and source terms will be
       // accumulated in these arrays)
       integrable_updater_->clear_dUcons_map(dUcons_map, 0., passive_lists);
 
       // Compute the reconstructable quantities from the integrable quantites
-      // Although cur_integrable_group holds the passive scalars in integrable
+      // Although cur_integrable_map holds the passive scalars in integrable
       // form, the conserved form of the values is required in case Grackle is
       // being used.
       //
-      // Note: cur_integrable_group and cur_reconstructable_group refer to the
-      // same underlying grouping since there is such a large degree of overlap
-      // between reconstructable and integrable quantities
+      // Note: cur_integrable_map and cur_reconstructable_map are aliases of
+      // the same map since there is such a large degree of overlap between
+      // reconstructable and integrable quantities
       //
       // For a barotropic gas, the following nominally does nothing
       // For a non-barotropic gas, the following nominally computes pressure
@@ -610,18 +566,19 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
                                             stale_depth, passive_lists);
 
       // Compute flux along each dimension
-      compute_flux_(block, 0, cur_dt, *cur_reconstructable_group,
-		    priml_group, primr_group, pressure_name_l, pressure_name_r,
-		    xflux_group, dUcons_group, interface_velocity_name,
-		    *reconstructor, ct, stale_depth);
-      compute_flux_(block, 1, cur_dt, *cur_reconstructable_group,
-		    priml_group, primr_group, pressure_name_l, pressure_name_r,
-		    yflux_group, dUcons_group, interface_velocity_name,
-		    *reconstructor, ct, stale_depth);
-      compute_flux_(block, 2, cur_dt, *cur_reconstructable_group,
-		    priml_group, primr_group, pressure_name_l, pressure_name_r,
-		    zflux_group, dUcons_group, interface_velocity_name,
-		    *reconstructor, ct, stale_depth);
+      compute_flux_(0, cur_dt, cell_widths[0], cur_reconstructable_map,
+                    priml_map, primr_map, pressure_l, pressure_r,
+                    xflux_map, dUcons_map, interface_velocity_arr_ptr,
+                    *reconstructor, ct, stale_depth, passive_lists);
+      compute_flux_(1, cur_dt, cell_widths[1], cur_reconstructable_map,
+                    priml_map, primr_map, pressure_l, pressure_r,
+                    yflux_map, dUcons_map, interface_velocity_arr_ptr,
+                    *reconstructor, ct, stale_depth, passive_lists);
+      compute_flux_(2, cur_dt, cell_widths[2], cur_reconstructable_map,
+                    priml_map, primr_map, pressure_l, pressure_r,
+                    zflux_map, dUcons_map, interface_velocity_arr_ptr,
+                    *reconstructor, ct, stale_depth, passive_lists);
+
       // increment the stale_depth
       stale_depth+=reconstructor->immediate_staling_rate();
 
@@ -629,14 +586,14 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 
       // Update Bfields
       if (ct != NULL) {
-	ct->update_all_bfield_components(cur_integrable_map, xflux_map,
+        ct->update_all_bfield_components(cur_integrable_map, xflux_map,
                                          yflux_map, zflux_map,
                                          out_integrable_map, cur_dt,
                                          stale_depth);
       }
 
-      // Update quantities - (includes flux divergence and source terms) 
-      // (this needs to happen after updating the cell-centered B-field so that
+      // Update quantities (includes flux divergence and source terms) 
+      // This needs to happen after updating the cell-centered B-field so that
       // the pressure floor can be applied to the total energy (and if
       // necessary the total energy can be synchronized with internal energy)
       //
@@ -652,13 +609,6 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // but the outer values have not
       stale_depth+=reconstructor->delayed_staling_rate();
     }
-
-    // Deallocate Temporary Fields
-    deallocate_temp_fields_(block, priml_group, primr_group,
-			    pressure_name_l, pressure_name_r,
-			    interface_velocity_name, xflux_group,
-			    yflux_group, zflux_group, dUcons_group,
-			    temp_primitive_group);
 
     if (ct != NULL){delete ct;}
   }
@@ -692,39 +642,23 @@ void EnzoMethodMHDVlct::check_mesh_and_ghost_size_(Block *block) const
 //----------------------------------------------------------------------
 
 void EnzoMethodMHDVlct::compute_specific_passive_scalars_
-  (Block *block, const std::vector<std::string> passive_groups,
-   Grouping &conserved_passive_scalars,
-   Grouping &primitive_group, int stale_depth)
+(const std::vector<std::vector<std::string>> passive_lists,
+ EFlt3DArray& density, EnzoEFltArrayMap& conserved_passive_scalar_map,
+ EnzoEFltArrayMap& specific_passive_scalar_map, int stale_depth) const noexcept
 {
-  EnzoFieldArrayFactory array_factory(block, stale_depth);
+  int mz = density.shape(0);
+  int my = density.shape(1);
+  int mx = density.shape(2);
 
-  EFlt3DArray density = array_factory.from_grouping(primitive_group, "density",
-						    0);
+  for (const std::vector<std::string> cur_l : passive_lists){
+    for (const std::string& key : cur_l){
 
-  std::vector<std::string> group_names = this->passive_group_names_;
+      EFlt3DArray cur_conserved = conserved_passive_scalar_map.at(key);
+      EFlt3DArray out_specific = specific_passive_scalar_map.at(key);
 
-  for (std::size_t group_ind = 0; group_ind<group_names.size(); group_ind++){
-
-    // load group name and number of fields in the group
-    std::string group_name = group_names[group_ind];
-    int num_fields = conserved_passive_scalars.size(group_name);
-
-    ASSERT("EnzoMethodMHDVlct::compute_specific_passive_scalars_",
-	   "There shouldn't be any passive groups without any fields.",
-	   num_fields != 0);
-
-    // iterate over the fields in the group
-    for (int field_ind=0; field_ind<num_fields; field_ind++){
-      // load values
-      EFlt3DArray cur_conserved, out_specific;
-      cur_conserved = array_factory.from_grouping(conserved_passive_scalars,
-						  group_name, field_ind);
-      out_specific = array_factory.from_grouping(primitive_group, group_name,
-						 field_ind);
-
-      for (int iz=0; iz<density.shape(0); iz++) {
-	for (int iy=0; iy<density.shape(1); iy++) {
-	  for (int ix=0; ix<density.shape(2); ix++) {
+      for (int iz = stale_depth; iz < mz - stale_depth; iz++) {
+	for (int iy = stale_depth; iy < my - stale_depth; iy++) {
+	  for (int ix = stale_depth; ix < mx - stale_depth; ix++) {
 	    out_specific(iz,iy,ix) = cur_conserved(iz,iy,ix)/density(iz,iy,ix);
 	  }
 	}
@@ -737,96 +671,22 @@ void EnzoMethodMHDVlct::compute_specific_passive_scalars_
 //----------------------------------------------------------------------
 
 void EnzoMethodMHDVlct::compute_flux_
-(Block *block, int dim, double cur_dt, Grouping &reconstructable_group,
- Grouping &priml_group, Grouping &primr_group, std::string pressure_name_l,
- std::string pressure_name_r, Grouping &flux_group, Grouping &dUcons_group,
- std::string interface_velocity_name, EnzoReconstructor &reconstructor,
- EnzoConstrainedTransport *ct_handler, int stale_depth)
+(int dim, double cur_dt, enzo_float cell_width,
+ EnzoEFltArrayMap &reconstructable_map,
+ EnzoEFltArrayMap &priml_map, EnzoEFltArrayMap &primr_map,
+ EFlt3DArray &pressure_l, EFlt3DArray &pressure_r,
+ EnzoEFltArrayMap &flux_map, EnzoEFltArrayMap &dUcons_map,
+ EFlt3DArray *interface_velocity_arr_ptr, EnzoReconstructor &reconstructor,
+ EnzoConstrainedTransport *ct_handler, int stale_depth,
+ const std::vector<std::vector<std::string>>& passive_lists) const noexcept
 {
 
   // purely for the purposes of making the caluclation more explicit, we define
-  // the following aliases for priml_group/primr_group
-  Grouping *integrable_group_l, *integrable_group_r;
-  Grouping *reconstructable_group_l, *reconstructable_group_r;
-  integrable_group_l = &priml_group;  reconstructable_group_l = &priml_group;
-  integrable_group_r = &primr_group;  reconstructable_group_r = &primr_group;
-
-
-  // NOW, AN ASIDE
-  // First, setup passive_lists. It's a list of lists of passive scalar names.
-  // The first sublist holds all names that are normally passively advected.
-  // Subsequent lists hold sets of names for scalars whose values must sum to 1
-  // (like species).
-  std::vector<std::vector<std::string>> passive_lists {{}};
-  for (std::string group_name : passive_group_names_){
-    int num_fields = primitive_group_->size(group_name);
-    for (int field_ind=0; field_ind<num_fields; field_ind++){
-      std::string field_name = primitive_group_->item(group_name,field_ind);
-      passive_lists[0].push_back(field_name);
-    }
-  }
-
-  // setup the plain arrays that we need.
-  EnzoFieldArrayFactory array_factory(block, 0);
-  EFlt3DArray pressure_l, pressure_r, interface_velocity_arr;
-  pressure_l = array_factory.assigned_center_from_name(pressure_name_l, dim);
-  pressure_r = array_factory.assigned_center_from_name(pressure_name_r, dim);
-  EFlt3DArray* interface_velocity_ptr=NULL;
-  if (interface_velocity_name != ""){
-    interface_velocity_arr = array_factory.assigned_center_from_name
-      (interface_velocity_name, dim);
-    interface_velocity_ptr = &interface_velocity_arr;
-  }
-
-  // Now, setup the maps that hold reconstructable quantities
-  EnzoEFltArrayMap reconstructable_map;
-  // need to combine group_names to handle the internal energy source term
-  std::vector<std::string> group_names =
-    unique_combination_(reconstructable_group_names_, integrable_group_names_);
-  add_arrays_to_map_(block, reconstructable_group, group_names,
-                     -1, reconstructable_map, false, true, NULL);
-  add_arrays_to_map_(block, reconstructable_group, passive_group_names_,
-                     -1, reconstructable_map, false, false,
-                     primitive_group_);
-
-  EnzoEFltArrayMap reconstructable_l, reconstructable_r;
-  add_arrays_to_map_(block, *reconstructable_group_l,
-                     reconstructable_group_names_, dim,
-                     reconstructable_l, false, true, NULL);
-  add_arrays_to_map_(block, *reconstructable_group_l, passive_group_names_,
-                     dim, reconstructable_l, false, false, primitive_group_);
-
-  add_arrays_to_map_(block, *reconstructable_group_r,
-                     reconstructable_group_names_, dim,
-                     reconstructable_r, false, true, NULL);
-  add_arrays_to_map_(block, *reconstructable_group_r, passive_group_names_,
-                     dim, reconstructable_r, false, false, primitive_group_);
-
-  // Now, setup the maps that hold the remaining values
-  EnzoEFltArrayMap integrable_l, integrable_r, flux_map;
-  add_arrays_to_map_(block, *integrable_group_l, integrable_group_names_, dim,
-                     integrable_l, false, true, NULL);
-  add_arrays_to_map_(block, *integrable_group_l, passive_group_names_, dim,
-                     integrable_l, false, false, primitive_group_);
-
-  add_arrays_to_map_(block, *integrable_group_r, integrable_group_names_, dim,
-                     integrable_r, false, true, NULL);
-  add_arrays_to_map_(block, *integrable_group_r, passive_group_names_, dim,
-                     integrable_r, false, false, primitive_group_);
-
-  add_arrays_to_map_(block, flux_group, integrable_group_names_, dim,
-                     flux_map, false, true, NULL);
-  add_arrays_to_map_(block, flux_group, passive_group_names_, dim,
-                     flux_map, false, false, primitive_group_);
-
-  EnzoEFltArrayMap dUcons_map;
-  add_arrays_to_map_(block, dUcons_group, integrable_group_names_, -1,
-                     dUcons_map, true, // dUcons_group may omit B-fields
-                     true, NULL);
-  add_arrays_to_map_(block, dUcons_group, passive_group_names_, -1,
-                     dUcons_map, false, false, primitive_group_);
-
-  // From here return to normal calculation
+  // the following aliases for priml_map and primr_map
+  EnzoEFltArrayMap &reconstructable_l = priml_map;
+  EnzoEFltArrayMap &reconstructable_r = primr_map;
+  EnzoEFltArrayMap &integrable_l = priml_map;
+  EnzoEFltArrayMap &integrable_r = primr_map;
 
   // First, reconstruct the left and right interface values
   reconstructor.reconstruct_interface(reconstructable_map,
@@ -863,11 +723,10 @@ void EnzoMethodMHDVlct::compute_flux_
   // Next, compute the fluxes
   riemann_solver_->solve(integrable_l, integrable_r, pressure_l, pressure_r,
                          flux_map, dim, eos_, cur_stale_depth, passive_lists,
-                         interface_velocity_ptr);
+                         interface_velocity_arr_ptr);
 
   // Accumulate the change in integrable quantities from these flux_map in
   // dUcons_map
-  double cell_width = enzo::block(block)->CellWidth[dim];
   integrable_updater_->accumulate_flux_component(dim, cur_dt, cell_width,
                                                  flux_map, dUcons_map,
                                                  cur_stale_depth,
@@ -877,217 +736,150 @@ void EnzoMethodMHDVlct::compute_flux_
   if (eos_->uses_dual_energy_formalism()){
     EnzoSourceInternalEnergy eint_src;
     eint_src.calculate_source(dim, cur_dt, cell_width, reconstructable_map,
-                              dUcons_map, *interface_velocity_ptr, eos_,
+                              dUcons_map, *interface_velocity_arr_ptr, eos_,
                               cur_stale_depth);
   }
 
   // Finally, have the ct handler record the upwind direction
   if (ct_handler != NULL){
-    //ct_handler->identify_upwind(flux_group, dim, cur_stale_depth);
     ct_handler->identify_upwind(flux_map, dim, cur_stale_depth);
   }
 }
 
 //----------------------------------------------------------------------
 
-// helper function that allocates the temporary fields in grouping
-void allocate_temp_group_fields_(Field &field, Grouping &grouping,
-				 std::vector<std::string> &group_names,
-				 int cx, int cy, int cz)
+void add_temporary_arrays_to_map_
+(EnzoEFltArrayMap &map, std::array<int,3> &shape,
+ const std::vector<std::string>* const names,
+ const std::vector<std::vector<std::string>>* const passive_lists,
+ bool skip_unregisterred_names = false)
 {
-  
-  for (std::size_t i = 0; i < group_names.size(); i++){
-    std::string group_name = group_names[i];
-    int num_fields = grouping.size(group_name);
-    for (int j = 0; j < num_fields; j++){
-      EnzoTempFieldUtils::prep_reused_temp_field(field,
-						 grouping.item(group_name,j),
-						 cx, cy, cz);
+
+  if (names != nullptr){
+    for (const std::string& name : (*names)){
+      bool success, is_vector;
+      success = EnzoCenteredFieldRegistry::quantity_properties (name,
+                                                                &is_vector);
+      if (skip_unregisterred_names & (!success)){
+        continue;
+      } else {
+        ASSERT1("add_temporary_arrays_to_map_",
+                ("\"%s\" is not registered in EnzoCenteredFieldRegistry"),
+                name.c_str(), success);
+      }
+
+      if (is_vector){
+        map[name + "_x"] = EFlt3DArray(shape[0], shape[1], shape[2]);
+        map[name + "_y"] = EFlt3DArray(shape[0], shape[1], shape[2]);
+        map[name + "_z"] = EFlt3DArray(shape[0], shape[1], shape[2]);
+      } else {
+        map[name] = EFlt3DArray(shape[0], shape[1], shape[2]);
+      }
     }
   }
+
+  if (passive_lists != nullptr){
+    for (const std::vector<std::string>& cur_list : (*passive_lists)){
+      for (const std::string& key : cur_list){
+        map[key] = EFlt3DArray(shape[0], shape[1], shape[2]);
+      }
+    }
+  }
+
 }
 
 //----------------------------------------------------------------------
 
-/// Creates a frequently reusued temporary field for each specified field-group
-/// pair in a reference Grouping object AND places the new
-/// temporary field into a new Grouping object with the same group name.
-///
-/// If the name of a potential temporary field matches the name of an
-/// existing temporary/permanent fields, the name is still added to the
-/// output Grouping.
-///
-/// @param[in] field The Field object that will hold the newly allocated
-///     temporary field.
-/// @param[in] ref_grouping The grouping object which contains the reference
-///     set of group-field pairs that can be matched by the pairs of groups
-///     and (new) temporary fields added to the output grouping.
-/// @param[in] group_names Groups listed in this vector specify which
-///     group-field pairs should be matched from ref_grouping.
-/// @param[out] grouping The grouping object where the new pairs of groups
-///     and temporary fields are stored.
-/// @param[in] field_prefix The names of the new allocated temporary fields
-///     are determined by appending the name of the existing field after this
-///     prefix.
-/// @param[in] cx,cy,cz The centering of the temporary field that are
-///     allocated.
-void prep_temp_field_grouping_(Field &field, Grouping &ref_grouping,
-			       const std::vector<std::string> &group_names,
-			       Grouping &grouping, std::string field_prefix,
-			       int cx, int cy, int cz)
+void EnzoMethodMHDVlct::setup_arrays_
+(Block *block, EnzoEFltArrayMap &primitive_map,
+ EnzoEFltArrayMap &temp_primitive_map,
+ EnzoEFltArrayMap &conserved_passive_scalar_map,
+ EnzoEFltArrayMap &priml_map, EnzoEFltArrayMap &primr_map,
+ EFlt3DArray &pressure_l, EFlt3DArray &pressure_r,
+ EnzoEFltArrayMap &xflux_map, EnzoEFltArrayMap &yflux_map,
+ EnzoEFltArrayMap &zflux_map, EnzoEFltArrayMap &dUcons_map,
+ std::vector<std::vector<std::string>> &passive_lists) noexcept
 {
-  // we can totally come up with an iterator to factor out the following nested
-  // for loop (it appears a lot!)
-  for (unsigned int i=0;i<group_names.size();i++){
-    std::string group_name = group_names[i];
-    int num_fields = ref_grouping.size(group_name);
-    if (num_fields == 0) {
-      continue; // This group is not tracked by ref_grouping
-    }
 
-    for (int j=0;j<num_fields;j++){
-      // Determine field_name
-      std::string field_name = field_prefix + (ref_grouping.item(group_name,j));
-      // reserve/allocate field
-      EnzoTempFieldUtils::prep_reused_temp_field(field, field_name, cx, cy, cz);
+  // allocate stuff! Make sure to do it in a way such that we don't have to
+  // separately deallocate it!
 
-      // add the temporary field to grouping
-      grouping.add(field_name,group_name);
+  // setup passive_lists. It's a list of lists of passive scalar names. The
+  // first sublist holds all names that are normally passively advected.
+  // Subsequent lists hold sets of names for scalars whose values must sum to
+  // 1 (like species).
+  Grouping *conserved_passive_scalar_grouping = cello::field_descr()->groups();
+  for (std::string group_name : passive_group_names_){
+    int num_fields = conserved_passive_scalar_grouping->size(group_name);
+    for (int field_ind=0; field_ind<num_fields; field_ind++){
+      std::string field_name =
+        conserved_passive_scalar_grouping->item(group_name, field_ind);
+      passive_lists[0].push_back(field_name);
     }
   }
-}
 
-//----------------------------------------------------------------------
+  // To assist with setting up arrays, let's create a list of ALL primitive
+  // keys (including passive scalars) and all integrable keys. These are the
+  // same thing except the latter excludes quantities (like pressure) that we
+  // don't compute pressure for.
+  std::vector<std::string> combined_key_list = unique_combination_
+    (reconstructable_group_names_, integrable_group_names_);
 
-void EnzoMethodMHDVlct::allocate_temp_fields_
-(Block *block, Grouping &priml_group, Grouping &primr_group,
- std::string &pressure_name_l, std::string &pressure_name_r,
- std::string &interface_velocity_name,
- Grouping &xflux_group, Grouping &yflux_group, Grouping &zflux_group,
- Grouping &dUcons_group, Grouping &temp_primitive_group)
-{
-  using EnzoTempFieldUtils::prep_reused_temp_field;
-  
-  EnzoBlock * enzo_block = enzo::block(block);
-  Field field = enzo_block->data()->field();
-  
-  // First, reserve/allocate temporary fields for any relevant reconstructable
-  // primitives that have not yet been allocated (i.e. they are not also
-  // integrable primitives)
-  allocate_temp_group_fields_(field, *primitive_group_,
-			      reconstructable_group_names_, 0, 0, 0);
-  // Next, reserve/allocate temporary fields to hold the specific form of all
-  // passively advected primitives
-  allocate_temp_group_fields_(field, *primitive_group_, passive_group_names_,
-			      0, 0, 0);
+  // First, setup conserved_passive_scalar_map
+  conserved_passive_scalar_map = conserved_passive_scalar_map_(block);
 
-  // Prepare temporary flux fields (it should include groups for all actively
+  // Next, setup nonpassive components of primitive_map
+  primitive_map = nonpassive_primitive_map_(block);
+  std::array<int,3> shape = {primitive_map.at("density").shape(0),
+                             primitive_map.at("density").shape(1),
+                             primitive_map.at("density").shape(2)};
+
+  add_temporary_arrays_to_map_(primitive_map, shape, nullptr, &passive_lists);
+
+  // Then, setup temp_primitive_map
+  add_temporary_arrays_to_map_(temp_primitive_map, shape, &combined_key_list,
+                               &passive_lists);
+
+  // Prepare arrays to hold fluxes (it should include groups for all actively
   // and passively advected quantities)
-  std::vector<std::string> combined_integrable_names;
-  combined_integrable_names = unique_combination_(integrable_group_names_,
-						  passive_group_names_);
-  prep_temp_field_grouping_(field, *primitive_group_, combined_integrable_names,
-			    xflux_group, "xflux_",-1,0,0);
-  prep_temp_field_grouping_(field, *primitive_group_, combined_integrable_names,
-			    yflux_group, "yflux_",0,-1,0);
-  prep_temp_field_grouping_(field, *primitive_group_, combined_integrable_names,
-			    zflux_group, "zflux_",0,0,-1);
+  EnzoEFltArrayMap* flux_maps[3] = {&zflux_map, &yflux_map, &xflux_map};
+  for (std::size_t i = 0; i < 3; i++){
+    std::array<int,3> cur_shape = shape; // makes a deep copy
+    cur_shape[i] -= 1;
+    add_temporary_arrays_to_map_(*(flux_maps[i]), cur_shape,
+                                 &combined_key_list, &passive_lists);
+  }
 
   // Prepare fields used to accumulate all changes to the actively advected and
   // passively advected quantities. If CT is in use, dUcons_group should not
   // have storage for magnetic fields since CT independently updates magnetic
-  // fields (this exlusion is implicitly handled integrable_updater_)
-  prep_temp_field_grouping_
-    (field, *primitive_group_,
-     integrable_updater_->combined_integrable_groups(),
-     dUcons_group, "dUcons_",0,0,0);
-
-  // Prepare the temporary primitive fields (used to store values at half dt)
-  std::vector<std::string> prim_group_names;
-  prim_group_names = unique_combination_(combined_integrable_names,
-					 reconstructable_group_names_);
-  prep_temp_field_grouping_(field, *primitive_group_, prim_group_names,
-			    temp_primitive_group, "temp_",0,0,0);
+  // fields (this exclusion is implicitly handled integrable_updater_)
+  const std::vector<std::string> temp_l =
+    integrable_updater_->combined_integrable_groups();
+  add_temporary_arrays_to_map_(dUcons_map, shape, &temp_l, &passive_lists,
+                               true);
 
   // Prepare temporary fields for priml and primr
   // As necessary, we pretend that these are centered along:
   //   - z and have shape (mz-1,  my,  mx)
   //   - y and have shape (  mz,my-1,  mx)
   //   - x and have shape (  mz,  my,mx-1)
-  prep_temp_field_grouping_(field, *primitive_group_, prim_group_names,
-			    priml_group, "left_",0,0,0);
-  prep_temp_field_grouping_(field, *primitive_group_, prim_group_names,
-			    primr_group, "right_",0,0,0);
+  add_temporary_arrays_to_map_(priml_map, shape, &combined_key_list,
+                               &passive_lists);
+  add_temporary_arrays_to_map_(primr_map, shape, &combined_key_list,
+                               &passive_lists);
 
-  // If there are pressure fields in priml_group and primr_group (depends on 
-  // the equation of state), set pressure_name_l and pressure_name_r equal to
+  // If there are pressure entries in priml_map and primr_map (depends on the
+  // EOS), set pressure_l and pressure_name_r equal to
   // those field names. Otherwise, reserve/allocate left/right pressure fields
-  if (priml_group.size("pressure") != 0){
-    pressure_name_l = priml_group.item("pressure",0);
-    pressure_name_r = primr_group.item("pressure",0);
+  if (priml_map.contains("pressure")) {
+    pressure_l = priml_map.at("pressure");
+    pressure_r = primr_map.at("pressure");
   } else {
-    pressure_name_l = "left_single_pressure";
-    pressure_name_r = "right_single_pressure";
-    prep_reused_temp_field(field, pressure_name_l, 0, 0, 0);
-    prep_reused_temp_field(field, pressure_name_r, 0, 0, 0);
+    pressure_l = EFlt3DArray(shape[0], shape[1], shape[2]);
+    pressure_r = EFlt3DArray(shape[0], shape[1], shape[2]);
   }
 
-  // if the dual energy formalism is in use, allocate a fields to temporarily
-  // store velocity normal to the cell interface at the cell interface. The
-  // interface velocities are used to compute the internal energy source term.
-  if (eos_->uses_dual_energy_formalism()){
-    interface_velocity_name = "temp_cell_interface_velocity";
-    prep_reused_temp_field(field, interface_velocity_name, 0, 0, 0);
-  } else {
-    interface_velocity_name = "";
-  }
-}
-
-//----------------------------------------------------------------------
-void EnzoMethodMHDVlct::deallocate_temp_fields_
-(Block *block, Grouping &priml_group, Grouping &primr_group,
- std::string pressure_name_l, std::string pressure_name_r,
- std::string interface_velocity_name,
- Grouping &xflux_group, Grouping &yflux_group, Grouping &zflux_group,
- Grouping &dUcons_group, Grouping &temp_primitive_group)
-{
-  using EnzoTempFieldUtils::deallocate_grouping_fields;
-  
-  EnzoBlock * enzo_block = enzo::block(block);
-  Field field = enzo_block->data()->field();
-
-  // Prepare the temporary primitive fields (used to store values at half dt)
-  std::vector<std::string> combined_integrable_names, prim_group_names;
-  combined_integrable_names = unique_combination_(integrable_group_names_,
-						  passive_group_names_);
-  prim_group_names = unique_combination_(combined_integrable_names,
-					 reconstructable_group_names_);
-
-  // deallocate cell-centered primitive groups
-  deallocate_grouping_fields(field, prim_group_names, *primitive_group_);
-  deallocate_grouping_fields(field, prim_group_names, temp_primitive_group);
-  deallocate_grouping_fields(field, prim_group_names, priml_group);
-  deallocate_grouping_fields(field, prim_group_names, primr_group);
-
-  // deallocate fields used to accumulate all changes to the actively and
-  // passively advected quantities.
-  deallocate_grouping_fields(field,
-                             integrable_updater_->combined_integrable_groups(),
-                             dUcons_group);
-
-  // deallocate face-centered flux fields
-  deallocate_grouping_fields(field, combined_integrable_names, xflux_group);
-  deallocate_grouping_fields(field, combined_integrable_names, yflux_group);
-  deallocate_grouping_fields(field, combined_integrable_names, zflux_group);
-
-  // deallocate left/right pressure fields
-  field.deallocate_temporary(field.field_id(pressure_name_l));
-  field.deallocate_temporary(field.field_id(pressure_name_r));
-
-  // deallocate fields used to hold interace velocities (if it was allocated)
-  if (interface_velocity_name!=""){
-    field.deallocate_temporary(field.field_id(interface_velocity_name));
-  }
 }
 
 //----------------------------------------------------------------------

@@ -200,7 +200,6 @@ extern "C" {
 #include "enzo_EnzoRefineParticleMass.hpp"
 #include "enzo_EnzoRefineMass.hpp"
 
-#include "enzo_EnzoTempFieldUtils.hpp"
 #include "enzo_EnzoEquationOfState.hpp"
 #include "enzo_EnzoEOSIdeal.hpp"
 #include "enzo_EnzoIntegrableUpdate.hpp"

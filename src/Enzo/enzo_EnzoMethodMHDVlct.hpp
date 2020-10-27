@@ -206,9 +206,10 @@ protected: // methods
   ///     specific form (mass fraction) of the passive scalars will be saved.
   /// @param stale_depth indicates the current stale depth
   void compute_specific_passive_scalars_
-  (Block *block, const std::vector<std::string> passive_groups,
-   Grouping &conserved_passive_scalars,
-   Grouping &primitive_group, int stale_depth);
+  (const std::vector<std::vector<std::string>> passive_lists,
+   EFlt3DArray& density, EnzoEFltArrayMap& conserved_passive_scalar_map,
+   EnzoEFltArrayMap& specific_passive_scalar_map,
+   int stale_depth) const noexcept;
 
   /// Constructs a map containing the field data for each primitive (except for
   /// the passively advected scalars).
@@ -284,15 +285,15 @@ protected: // methods
   /// handles the reconstruction of the fields and calculation of the flux and
   /// the other additionally handles the accumulation of values in flux_group
   /// and calculates any relevant source terms.
-  void compute_flux_(Block *block, int dim, double dt,
-		     Grouping &reconstructable_group,
-		     Grouping &priml_group, Grouping &primr_group,
-		     std::string pressure_name_l,  std::string pressure_name_r,
-		     Grouping &flux_group, Grouping &dUcons_group,
-		     std::string interface_velocity_name,
-		     EnzoReconstructor &reconstructor,
-		     EnzoConstrainedTransport *ct_handler,
-		     int stale_depth);
+  void compute_flux_
+  (int dim, double cur_dt, enzo_float cell_width,
+   EnzoEFltArrayMap &reconstructable_map,
+   EnzoEFltArrayMap &priml_map, EnzoEFltArrayMap &primr_map,
+   EFlt3DArray &pressure_l, EFlt3DArray &pressure_r,
+   EnzoEFltArrayMap &flux_map, EnzoEFltArrayMap &dUcons_map,
+   EFlt3DArray *interface_velocity_arr_ptr, EnzoReconstructor &reconstructor,
+   EnzoConstrainedTransport *ct_handler, int stale_depth,
+   const std::vector<std::vector<std::string>>& passive_lists) const noexcept;
 
   /// Allocate temporary fields needed for scratch space and store their names
   /// in the corresponding groupings or return the names. Also allocates all
@@ -333,29 +334,15 @@ protected: // methods
   /// @param temp_primitive_group will hold temporary fields identical to all
   ///     the fields held by primitive_group_. Basically these fields hold the
   ///     values computed at the half time-step
-  void allocate_temp_fields_(Block *block,
-			     Grouping &priml_group,
-			     Grouping &primr_group,
-			     std::string &pressure_name_l,
-			     std::string &pressure_name_r,
-			     std::string &interface_velocity_name,
-			     Grouping &xflux_group,
-			     Grouping &yflux_group,
-			     Grouping &zflux_group,
-			     Grouping &dUcons_group,
-			     Grouping &temp_primitive_group);
-
-  /// Deallocates the temporary fields used for scratch space
-  void deallocate_temp_fields_(Block *block, Grouping &priml_group,
-			       Grouping &primr_group,
-			       std::string pressure_name_l,
-			       std::string pressure_name_r,
-			       std::string interface_velocity_name,
-			       Grouping &xflux_group,
-			       Grouping &yflux_group,
-			       Grouping &zflux_group,
-			       Grouping &dUcons_group,
-			       Grouping &temp_primitive_group);
+  void setup_arrays_
+  (Block *block, EnzoEFltArrayMap &primitive_map,
+   EnzoEFltArrayMap &temp_primitive_map,
+   EnzoEFltArrayMap &conserved_passive_scalar_map,
+   EnzoEFltArrayMap &priml_map, EnzoEFltArrayMap &primr_map,
+   EFlt3DArray &pressure_l, EFlt3DArray &pressure_r,
+   EnzoEFltArrayMap &xflux_map, EnzoEFltArrayMap &yflux_map,
+   EnzoEFltArrayMap &zflux_map, EnzoEFltArrayMap &dUcons_map,
+   std::vector<std::vector<std::string>> &passive_lists) noexcept;
 
 protected: // attributes
 
