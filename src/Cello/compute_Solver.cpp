@@ -48,8 +48,7 @@ Solver::Solver (std::string name,
   FieldDescr * field_descr = cello::field_descr();
   ix_ = field_descr->field_id(field_x);
   ib_ = field_descr->field_id(field_b);
-  ir_post_ = add_new_refresh_();
-  cello::refresh(ir_post_)->set_callback(CkIndex_Block::p_refresh_exit());
+  ir_post_ = add_refresh_();
 }
 
 //----------------------------------------------------------------------
@@ -68,13 +67,12 @@ Solver::Solver () throw()
   solve_type_(solve_leaf),
   ir_post_(-1)
 {
-  ir_post_ = add_new_refresh_();
-  cello::refresh(ir_post_)->set_callback(CkIndex_Block::p_refresh_exit());
+  ir_post_ = add_refresh_();
 }
 
 //----------------------------------------------------------------------
 
-int Solver::add_new_refresh_ ()
+int Solver::add_refresh_ ()
 {
   // set Solver::ir_post_
 

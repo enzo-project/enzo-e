@@ -36,7 +36,7 @@ EnzoMethodGravity::EnzoMethodGravity
   // zones to "B" field
 
 
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_field("acceleration_x");
   refresh->add_field("acceleration_y");
@@ -51,8 +51,8 @@ EnzoMethodGravity::EnzoMethodGravity
     refresh->add_field_src_dst("density_total","B");
   }
 
-  ir_exit_ = add_new_refresh_();
-  cello::simulation()->new_refresh_set_name(ir_post_,name()+":exit");
+  ir_exit_ = add_refresh_();
+  cello::simulation()->refresh_set_name(ir_post_,name()+":exit");
   Refresh * refresh_exit = cello::refresh(ir_exit_);
   
   refresh_exit->add_field("potential");
@@ -157,7 +157,7 @@ void EnzoBlock::p_method_gravity_continue()
 void EnzoMethodGravity::refresh_potential (EnzoBlock * enzo_block) throw()
 {
   cello::refresh(ir_exit_)->set_active(enzo_block->is_leaf());
-  enzo_block->new_refresh_start
+  enzo_block->refresh_start
     (ir_exit_, CkIndex_EnzoBlock::p_method_gravity_end());
 }
 //----------------------------------------------------------------------

@@ -117,39 +117,6 @@ void Block::compute_exit_ ()
   TRACE_CONTROL("compute_exit");
 
   control_sync_barrier(CkIndex_Block::r_adapt_enter(NULL));
-  //  adapt_enter_();
-}
-
-//----------------------------------------------------------------------
-
-void Block::refresh_exit_()
-{
-  TRACE_CONTROL("refresh_exit");
-
-  update_boundary_();
-
-  Refresh * refresh = refresh_.back();
-
-  // control_sync (refresh->callback(),
-  // 		refresh->sync_type(),
-  // 		refresh->sync_exit(),
-  // 		refresh->min_face_rank(),
-  // 		refresh->neighbor_type(),
-  // 		refresh->root_level());
-  ERROR1 ("Block::refresh_exit_",
-	  "%s Should not be called with NEW_REFRESH",this->name().c_str());
-  
-  if (index().is_root()) {
-    WARNING("Block::refresh_exit_()",
-  	    "remove sync from refresh_exit_() callback with NEW_REFRESH");
-  }
-  CkCallback
-    (refresh->callback(),
-     CkArrayIndexIndex(index_),thisProxy).send(NULL);
-   
-  // WARNING: BREAKS Charm++ with random queueing on some regression tests
-  //  delete refresh;
-  //  refresh_.pop_back();
 }
 
 //----------------------------------------------------------------------

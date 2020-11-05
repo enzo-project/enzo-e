@@ -15,8 +15,6 @@
 // #define DEBUG_ADAPT
 // #define DEBUG_FACE
 
-// #define DEBUG_NEW_REFRESH
-
 #ifdef DEBUG_FACE
 #   define DEBUG_FACES(MSG) debug_faces_(MSG)
 #else
@@ -81,10 +79,7 @@ Block::Block ( MsgRefine * msg )
     refresh_()
 {
   performance_start_(perf_block);
-#ifdef DEBUG_NEW_REFRESH  
-  CkPrintf ("Block(msg)\n"); fflush(stdout);
-#endif  
-  init_new_refresh_();
+  init_refresh_();
 
   usesAtSync = true;
   init (msg->index_,
@@ -155,10 +150,7 @@ Block::Block ( process_type ip_source )
     refresh_()
 {
 
-#ifdef DEBUG_NEW_REFRESH  
-  CkPrintf ("Block(%d)\n",ip_source); fflush(stdout);
-#endif  
-  init_new_refresh_();
+  init_refresh_();
 
   usesAtSync = true;
 #ifdef TRACE_BLOCK
@@ -318,9 +310,6 @@ void Block::init
   int ic3[3] = {0,0,0};
   if (level > 0) index_.child(level,ic3,ic3+1,ic3+2);
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p narray = %d\n",(void*)this,narray);
-#endif
   if (narray != 0) {
 
     // Create field face of refined data from parent
@@ -439,8 +428,7 @@ void Block::pup(PUP::er &p)
     Simulation * simulation = cello::simulation();
     if (simulation != NULL) simulation->data_insert_block(this);    
   }
-  p | new_refresh_sync_list_;
-  //  p | new_refresh_msg_list_;
+  p | refresh_sync_list_;
 }
 
 //----------------------------------------------------------------------
@@ -742,7 +730,7 @@ Block::Block ()
     refresh_()
 {
 
-  init_new_refresh_();
+  init_refresh_();
   
   for (int i=0; i<3; i++) array_[i]=0;
 }
@@ -781,10 +769,7 @@ Block::Block (CkMigrateMessage *m)
     
 {
 
-#ifdef DEBUG_NEW_REFRESH  
-  CkPrintf ("Block(m)\n"); fflush(stdout);
-#endif  
-  init_new_refresh_();
+  init_refresh_();
   
 #ifdef TRACE_BLOCK
   CkPrintf ("TRACE_BLOCK Block(CkMigrateMessage*)\n");
@@ -795,18 +780,13 @@ Block::Block (CkMigrateMessage *m)
 
 //----------------------------------------------------------------------
 
-void Block::init_new_refresh_()
+void Block::init_refresh_()
 {
-  const int count = cello::simulation()->new_refresh_count();
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("DEBUG_NEW_REFRESH init_new_refresh count = %d\n",
-	    count);
-  fflush(stdout);
-#endif  
-  new_refresh_sync_list_.resize(count);
-  new_refresh_msg_list_.resize(count);
+  const int count = cello::simulation()->refresh_count();
+  refresh_sync_list_.resize(count);
+  refresh_msg_list_.resize(count);
   for (int i=0; i<count; i++) {
-    new_refresh_sync_list_[i].reset();
+    refresh_sync_list_[i].reset();
   }
 }
 
@@ -961,7 +941,7 @@ FieldFace * Block::create_face
 (int if3[3], int ic3[3], bool lg3[3],
  int refresh_type, Refresh * refresh, bool new_refresh) const
 {
-  FieldFace  * field_face = new FieldFace;
+  FieldFace * field_face = new FieldFace;
 #ifdef DEBUG_FIELD_FACE  
   CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",
             CkMyPe(),__FILE__,__LINE__,(void*)field_face);

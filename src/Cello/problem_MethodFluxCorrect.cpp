@@ -22,17 +22,18 @@ MethodFluxCorrect::MethodFluxCorrect
     ir_pre_(-1)
 {
   // Set up post-refresh to refresh all conserved fields in group_
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
   Grouping * groups = cello::field_groups();
   const int nf=groups->size(group_);
   for (int i_f=0; i_f<nf; i_f++) {
     cello::refresh(ir_post_)->add_field(groups->item(group_,i_f));
   }
-  
-  //  ir_pre_ = add_new_refresh_(neighbor_flux);
-  ir_pre_ = add_new_refresh_(neighbor_leaf);
+
+  //  neighbor_flux causes synchronization errors; using neighbor_leaf:
+  //  ir_pre_ = add_refresh_(neighbor_flux);
+  ir_pre_ = add_refresh_(neighbor_leaf);
   Refresh * refresh_pre = cello::refresh(ir_pre_);
-  cello::simulation()->new_refresh_set_name(ir_pre_,name()+"_fluxes");
+  cello::simulation()->refresh_set_name(ir_pre_,name()+"_fluxes");
   refresh_pre->set_callback(CkIndex_Block::p_method_flux_correct_refresh());
   refresh_pre->add_all_fluxes();
   // Also ensure conserved fields are themselves refreshed
@@ -55,7 +56,7 @@ void MethodFluxCorrect::compute ( Block * block) throw()
 {
   cello::refresh(ir_pre_)->set_active(block->is_leaf());
 
-  block->new_refresh_start
+  block->refresh_start
     (ir_pre_, CkIndex_Block::p_method_flux_correct_refresh());
  
 }

@@ -16,7 +16,7 @@ Method::Method (double courant) throw()
     courant_(courant),
     neighbor_type_(neighbor_leaf)
 {
-  ir_post_ = add_new_refresh_();
+  ir_post_ = add_refresh_();
   cello::refresh(ir_post_)->set_callback(CkIndex_Block::p_compute_continue());
 }
 
@@ -42,7 +42,7 @@ void Method::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-int Method::add_new_refresh_ (int neighbor_type)
+int Method::add_refresh_ (int neighbor_type)
 {
   // set Method::ir_post_
 

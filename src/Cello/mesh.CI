@@ -12,11 +12,6 @@ module mesh {
   initnode void register_sum_long_double(void);
   initnode void register_sum_long_double_2(void);
   initnode void register_sum_long_double_3(void);
-  initnode void register_sum_long_double_4(void);
-  initnode void register_sum_long_double_5(void);
-  initnode void register_sum_long_double_6(void);
-  initnode void register_sum_long_double_7(void);
-  initnode void register_sum_long_double_8(void);
   initnode void register_sum_long_double_n(void);
 
   initnode void mutex_init_hierarchy();
@@ -178,12 +173,7 @@ module mesh {
     // *** REFRESH
     //--------------------------------------------------
 
-    entry void p_refresh_store (MsgRefresh * msg);
-    entry void p_refresh_continue();
-    entry void p_refresh_exit();
-    entry void r_refresh_exit(CkReductionMsg *);
-
-    entry void p_new_refresh_recv (MsgRefresh * msg);
+    entry void p_refresh_recv (MsgRefresh * msg);
 
     entry void p_refresh_child
       (int n, char a[n], int ic3[3]);

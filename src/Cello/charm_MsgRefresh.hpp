@@ -34,7 +34,7 @@ public: // interface
   { return *this; }
 
   // Set the new refresh object id
-  void set_new_refresh_id(int id_refresh)
+  void set_refresh_id(int id_refresh)
   { id_refresh_ = id_refresh; }
 
   int id_refresh() const

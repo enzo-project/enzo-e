@@ -283,16 +283,6 @@ void Main::p_adapt_exit()
 
 //----------------------------------------------------------------------
 
-void Main::p_refresh_exit()
-{
-  TRACE_MAIN("p_refresh_exit");
-#ifdef CHARM_ENZO
-  cello::block_array().p_refresh_exit();
-#endif
-}
-
-//----------------------------------------------------------------------
-
 #if defined(CHARM_ENZO)
 #  include "main_enzo.def.h"
 #elif defined(CHARM_SIMULATION)

@@ -14,7 +14,8 @@
 int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
 				 bool comoving_coordinates)
 {
-  if (NumberOfBaryonFields > 0) {
+  const int in = cello::index_static();
+  if (NumberOfBaryonFields[in] > 0) {
  
     const enzo_float pi = 3.14159;
  

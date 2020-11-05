@@ -66,7 +66,7 @@ EnzoSolverDd::EnzoSolverDd
   /// Initialize default Refresh
 
   Refresh * refresh = cello::refresh(ir_post_);
-  cello::simulation()->new_refresh_set_name(ir_post_,name);
+  cello::simulation()->refresh_set_name(ir_post_,name);
 
   refresh->add_field (ix_);
   
