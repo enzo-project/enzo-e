@@ -8,58 +8,88 @@
 #include "mesh.hpp"
 //----------------------------------------------------------------------
 
-void Box::get_send_limits (int * ixm, int * ixp,
-                           int * iym, int * iyp,
-                           int * izm, int * izp)
+bool Box::get_limits (int * im3, int * ip3, BlockType block_type)
 {
+  bool l_intersect = true;
 
-  (*ixm) = (rank_ >= 1) ? ixm_ + gx_ : 0;
-  (*ixp) = (rank_ >= 1) ? ixp_ + gx_ : 1;
-  (*iym) = (rank_ >= 2) ? iym_ + gy_ : 0;
-  (*iyp) = (rank_ >= 2) ? iyp_ + gy_ : 1;
-  (*izm) = (rank_ >= 3) ? izm_ + gz_ : 0;
-  (*izp) = (rank_ >= 3) ? izp_ + gz_ : 1;
-}
+  if (block_type == BlockType::send) {
 
-//----------------------------------------------------------------------
+    for (int i=0; i<rank_; i++) {
+      im3[i] = im3_[i] + g3_[i];
+      ip3[i] = ip3_[i] + g3_[i];
+    }
+    for (int i=rank_; i<3; i++) {
+      im3[i] = 0;
+      ip3[i] = 1;
+    }
 
-void Box::get_recv_limits (int * ixm, int * ixp,
-                           int * iym, int * iyp,
-                           int * izm, int * izp)
-{
-  (*ixm) = (rank_ >= 1) ? (ixm_ - ix0_)/r_ + gx_ : 0;
-  (*ixp) = (rank_ >= 1) ? (ixp_ - ix0_)/r_ + gx_ : 1;
-  (*iym) = (rank_ >= 2) ? (iym_ - iy0_)/r_ + gy_ : 0;
-  (*iyp) = (rank_ >= 2) ? (iyp_ - iy0_)/r_ + gy_ : 1;
-  (*izm) = (rank_ >= 3) ? (izm_ - iz0_)/r_ + gz_ : 0;
-  (*izp) = (rank_ >= 3) ? (izp_ - iz0_)/r_ + gz_ : 1;
+  } else if (block_type == BlockType::receive) {
+
+    const float r = std::pow(2.0,1.0*level_);
+  
+    for (int i=0; i<rank_; i++) {
+      im3[i] = r*(im3_[i] - i03_[i]) + g3_[i];
+      ip3[i] = r*(ip3_[i] - i03_[i]) + g3_[i];
+    }
+    for (int i=rank_; i<3; i++) {
+      im3[i] = 0;
+      ip3[i] = 1;
+    }
+
+  } else if (block_type == BlockType::extra) {
+
+    const float ri = std::pow(2.0,-1.0*level_);
+
+    for (int i=0; i<rank_; i++) {
+      im3[i] = std::max(im3_[i],i03_[i]);
+      ip3[i] = std::min(ip3_[i],int(i03_[i]+ri*n3_[i]));
+      l_intersect = l_intersect && (im3[i] < ip3[i]); 
+    }
+
+  }
+
+  return l_intersect;
 }
 
 //----------------------------------------------------------------------
   
 void Box::compute_region()
-                      
 {
-  if (level_ == -1) {
-    ix0_ = nx_*(2.0*fx_ - cx_);
-    iy0_ = ny_*(2.0*fy_ - cy_);
-    iz0_ = nz_*(2.0*fz_ - cz_);
-  } else if (level_ == 0) {
-    ix0_ = nx_*fx_;
-    iy0_ = ny_*fy_;
-    iz0_ = nz_*fz_;
-  } else if (level_ == +1) {
-    ix0_ = nx_*(fx_ + 0.5*cx_);
-    iy0_ = ny_*(fy_ + 0.5*cy_);
-    iz0_ = nz_*(fz_ + 0.5*cz_);
+  compute_block_start();
+
+  const float ri = std::pow(2.0,-1.0*level_);
+  
+  for (int i=0; i<rank_; i++) {
+    im3_[i] = std::max
+      (-gs3_[i], int(floor(i03_[i] - ri*gr3_[i])));
+    ip3_[i] = std::min
+      (n3_[i] + gs3_[i], int(ceil(i03_[i] + ri*(n3_[i]+gr3_[i]))));
+    if (level_ == +1 && pad_ > 0) {
+      im3_[i] -= pad_;
+      ip3_[i] += pad_;
+    }
   }
+}
 
-  ixm_ = std::max(-gxs_, int(floor(ix0_ - r_*gxr_)));
-  iym_ = std::max(-gys_, int(floor(iy0_ - r_*gyr_)));
-  izm_ = std::max(-gzs_, int(floor(iz0_ - r_*gzr_)));
+//======================================================================
 
-  ixp_ = std::min(nx_ + gxs_, int(ceil(ix0_ + r_*(nx_+gxr_))));
-  iyp_ = std::min(ny_ + gys_, int(ceil(iy0_ + r_*(ny_+gyr_))));
-  izp_ = std::min(nz_ + gzs_, int(ceil(iz0_ + r_*(nz_+gzr_))));
+void Box::compute_block_start()
+{
+  // compute start i03_[] of the receive (or extra) block given
+  // relative level_, f3_[], and c3_[], defining the block, relative
+  // to the sending block
+  if (level_ == -1) {
+    for (int i=0; i<rank_; i++) {
+      i03_[i] = n3_[i]*(2.0*f3_[i] - c3_[i]);
+    }
+  } else if (level_ == 0) {
+    for (int i=0; i<rank_; i++) {
+      i03_[i] = n3_[i]*f3_[i];
+    }
+  } else if (level_ == +1) {
+    for (int i=0; i<rank_; i++) {
+      i03_[i] = n3_[i]*(f3_[i] + 0.5*c3_[i]);
+    }
+  }
 }
 

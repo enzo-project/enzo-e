@@ -43,6 +43,8 @@ public: // interface
 
   /// Prolong fine Field values in the child block (icx,icy,icz) to parent
 
+public: // virtual methods
+  
   virtual int apply 
   ( precision_type precision,
     void *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
@@ -52,6 +54,12 @@ public: // interface
   /// Return the name identifying the prolongation operator
   virtual std::string name () const = 0;
 
+  /// Amount of padding required in coarse region (default 0)
+  virtual int padding() const
+  { return 0; }
+
+public: // methods
+  
   /// Set whether interpolation should be monotonic
   void set_monotonic (bool monotonic) 
   { monotonic_ = monotonic; }
@@ -67,7 +75,6 @@ public: // interface
   /// Return positivity setting
   bool positive (bool positive) const
   { return positive_; }
-
 protected: // functions
 
 

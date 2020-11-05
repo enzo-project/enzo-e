@@ -254,6 +254,7 @@ elif (arch == "gordon_intel"): from gordon_intel import *
 elif (arch == "gordon_pgi"):   from gordon_pgi   import *
 elif (arch == "comet_gnu"):    from comet_gnu    import *
 elif (arch == "linux_gnu"):    from linux_gnu    import *
+elif (arch == "linux_clang"):  from linux_clang  import *
 elif (arch == "linux_gcc_9"):  from linux_gcc_9  import *
 elif (arch == "linux_intel"):  from linux_intel  import *
 elif (arch == "linux_yt"):     from linux_yt     import *

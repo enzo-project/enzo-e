@@ -15,6 +15,7 @@
 
 // #define DEBUG_NEW_REFRESH
 // #define DEBUG_NEW_REFRESH_SYNC
+#define DEBUG_ENZO_PROLONG
 
 #ifdef DEBUG_NEW_REFRESH
 #   define TRACE_NEW_REFRESH(BLOCK,REFRESH,MSG)                         \
@@ -273,17 +274,32 @@ int Block::new_refresh_load_field_faces_ (Refresh & refresh)
       Index index_neighbor = it_neighbor.index();
 
       int ic3[3];
-      it_neighbor.child(ic3);
 
       const int level = this->level();
       const int level_face = it_neighbor.face_level();
 
+      if (level_face > level) {
+        index_neighbor.child(level_face,ic3,ic3+1,ic3+2);
+      } else if (level > level_face) {
+        index_.child(level,ic3,ic3+1,ic3+2);
+      }
       const int refresh_type = 
 	(level_face == level - 1) ? refresh_coarse :
 	(level_face == level)     ? refresh_same :
 	(level_face == level + 1) ? refresh_fine : refresh_unknown;
 
-      new_refresh_load_field_face_ (refresh,refresh_type,index_neighbor,if3,ic3);
+      // handle padded interpolation special case
+      Prolong * prolong = cello::problem()->prolong();
+
+      const int padding = prolong->padding();
+      if (padding > 0) {
+        count += refresh_extra_field_faces_
+          (padding,refresh,index_neighbor, level,level_face,if3,ic3);
+      }
+
+      new_refresh_load_field_face_
+        (refresh,refresh_type,index_neighbor,if3,ic3);
+      
       ++count;
     }
 
@@ -361,6 +377,87 @@ void Block::new_refresh_load_field_face_
 
 }
 
+//----------------------------------------------------------------------
+
+int Block::refresh_extra_field_faces_
+(int padding,
+ Refresh refresh,
+ Index index_neighbor,
+ int level, int level_face,
+ int if3[3],
+ int ic3[3])
+{
+  int count = 0;
+  if (level != level_face) {
+    const int rank = cello::rank();
+    int  g3[3],n3[3];
+    Field field = data()->field();
+    int g= refresh.ghost_depth();
+    g3[0] = (rank >= 1) ? g : 0;
+    g3[1] = (rank >= 2) ? g : 0;
+    g3[2] = (rank >= 3) ? g : 0;
+    field.size(n3,n3+1,n3+2);
+    Box box_face (rank,n3,g3);
+    
+    box_face.set_rank(rank);
+    box_face.set_level (+1);
+    box_face.set_face (if3);
+    box_face.set_child(ic3);
+    box_face.set_padding(padding);
+
+    box_face.compute_region();
+    if (level < level_face) {
+      ItNeighbor it_extra =
+        this->it_neighbor(refresh.min_face_rank(),index_,
+                          refresh.neighbor_type(),
+                          cello::config()->mesh_min_level,
+                          refresh.root_level());
+      int ef3[3];
+
+#ifdef DEBUG_ENZO_PROLONG          
+      CkPrintf ("DEBUG_ENZO_PROLONG computed:\n");
+      box_face.print();
+#endif
+      while (it_extra.next(ef3)) {
+        Index index_extra = it_extra.index();
+        const int level_extra = it_extra.face_level();
+        int ec3[3] = {0,0,0};
+        if (level_extra > level) {
+          index_extra.child(level_extra,ec3,ec3+1,ec3+2);
+        } else if (level > level_extra) {
+          // ERROR: assumes fully balanced to min_face_rank = 0
+          index_.child(level,ec3,ec3+1,ec3+2);
+        }
+        bool l_face_match = (if3[0]==ef3[0])
+          &&                (if3[1]==ef3[1])
+          &&                (if3[2]==ef3[2]);
+        bool l_child_match = (ic3[0]==ec3[0])
+          &&                (ic3[1]==ec3[1])
+          &&                (ic3[2]==ec3[2]);
+
+        if (! l_face_match || ! l_child_match) {
+          // handle extra uniq block
+          box_face.set_level(level_extra - level);
+          box_face.set_face(ef3);
+          box_face.set_child(ec3);
+          box_face.compute_block_start();
+          int im3[3],ip3[3];
+          bool overlap = box_face.get_limits(im3,ip3,Box::BlockType::extra);
+#ifdef DEBUG_ENZO_PROLONG          
+          box_face.print();
+          CkPrintf ("DEBUG_ENZO_PROLONG %+2d %+2d %+2d [%d %d %d] -  %+2d %+2d %+2d [%d %d %d] %+2d  %s\n",
+                    if3[0],if3[1],if3[2],
+                    ic3[0],ic3[1],ic3[2],
+                    ef3[0],ef3[1],ef3[2],
+                    ec3[0],ec3[1],ec3[2],
+                    level_extra - level, overlap ? "true" : "false");
+#endif            
+        }
+      }
+    }
+  }
+  return count;
+}
 //----------------------------------------------------------------------
 
 int Block::new_refresh_load_particle_faces_ (Refresh & refresh)

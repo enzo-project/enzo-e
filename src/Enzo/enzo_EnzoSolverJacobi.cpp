@@ -107,7 +107,6 @@ EnzoSolverJacobi::EnzoSolverJacobi
   cello::simulation()->new_refresh_set_name(ir_smooth_,name+":smooth");
   
   refresh_smooth->add_field (ix_);
-  refresh_smooth->set_solver_id(index());
 #ifdef DEBUG_NEW_REFRESH  
   CkPrintf ("DEBUG_NEW_REFRESH %s:%d id_solver=%d\n",__FILE__,__LINE__,index());
 #endif  

@@ -42,6 +42,10 @@ public: // interface
   /// Return the name identifying the prolongation operator
   virtual std::string name () const { return "enzo"; }
 
+  /// Amount of padding required in coarse region (default 0)
+  virtual int padding() const
+  { return 1; }
+
 private: // functions
 
   int apply_

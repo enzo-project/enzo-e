@@ -30,7 +30,9 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
   //  if (GridRank != 3) 
   //    my_exit(EXIT_ENZO_FAILURE);
 
-  if (NumberOfBaryonFields > 0) {
+  const int in = cello::index_static();
+
+  if (NumberOfBaryonFields[in] > 0) {
  
     /* initialize */
  

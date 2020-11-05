@@ -185,21 +185,21 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
     int i3[3], n3[3];
     field.size(n3,n3+1,n3+2);
     set_box_();
-    box_.set_block_size (n3[0],n3[1],n3[2]);
-    box_.set_ghost_depth(g3[0],g3[1],g3[2]);
+    box_.set_block_size (n3);
+    box_.set_ghost_depth(g3);
     if (accumulate) {
-      box_.set_send_ghosts((face_[0]!=0)?g3[0]:0,
-                           (face_[1]!=0)?g3[1]:0,
-                           (face_[2]!=0)?g3[2]:0);
+      int gs3[3] = {(face_[0]!=0)?g3[0]:0,
+                    (face_[1]!=0)?g3[1]:0,
+                    (face_[2]!=0)?g3[2]:0};
+      box_.set_send_ghosts(gs3);
     } else {
-      box_.set_send_ghosts ((ghost_[0]&&face_[0]==0)?g3[0]:0,
-                            (ghost_[1]&&face_[1]==0)?g3[1]:0,
-                            (ghost_[2]&&face_[2]==0)?g3[2]:0);
+      int gs3[3] = {(ghost_[0]&&face_[0]==0)?g3[0]:0,
+                    (ghost_[1]&&face_[1]==0)?g3[1]:0,
+                    (ghost_[2]&&face_[2]==0)?g3[2]:0};
+      box_.set_send_ghosts (gs3);
     }
     box_.compute_region();
-    box_.get_send_limits(&i3[0],&n3[0],
-                         &i3[1],&n3[1],
-                         &i3[2],&n3[2]);
+    box_.get_limits(i3,n3,Box::BlockType::send);
     n3[0] -= i3[0];
     n3[1] -= i3[1];
     n3[2] -= i3[2];
@@ -282,21 +282,22 @@ void FieldFace::array_to_face (char * array, Field field) throw()
     invert_face();
     set_box_();
     invert_face();
-    box_.set_block_size(m3[0]-2*g3[0],m3[1]-2*g3[1],m3[2]-2*g3[2]);
-    box_.set_ghost_depth(g3[0],g3[1],g3[2]);
+    field.size(n3,n3+1,n3+2);
+    box_.set_block_size(n3);
+    box_.set_ghost_depth(g3);
     if (accumulate) {
-      box_.set_send_ghosts((face_[0]!=0)?g3[0]:0,
-                           (face_[1]!=0)?g3[1]:0,
-                           (face_[2]!=0)?g3[2]:0);
+      int gs3[3] = {(face_[0]!=0)?g3[0]:0,
+                    (face_[1]!=0)?g3[1]:0,
+                    (face_[2]!=0)?g3[2]:0};
+      box_.set_send_ghosts(gs3);
     } else {
-      box_.set_send_ghosts ((ghost_[0]&&face_[0]==0)?g3[0]:0,
-                            (ghost_[1]&&face_[1]==0)?g3[1]:0,
-                            (ghost_[2]&&face_[2]==0)?g3[2]:0);
+      int gs3[3] = {(ghost_[0]&&face_[0]==0)?g3[0]:0,
+                    (ghost_[1]&&face_[1]==0)?g3[1]:0,
+                    (ghost_[2]&&face_[2]==0)?g3[2]:0};
+      box_.set_send_ghosts (gs3);
     }
     box_.compute_region();
-    box_.get_recv_limits(&i3[0],&n3[0],
-                         &i3[1],&n3[1],
-                         &i3[2],&n3[2]);
+    box_.get_limits(i3,n3,Box::BlockType::receive);
     n3[0] -= i3[0];
     n3[1] -= i3[1];
     n3[2] -= i3[2];
@@ -319,33 +320,14 @@ void FieldFace::array_to_face (char * array, Field field) throw()
 
       Prolong * prolong = prolong_ ? prolong_ : problem->prolong();
 
+      const int padding = prolong->padding();
+
       index_array += prolong->apply
 	(precision, 
 	 field_ghost,m3,i3,       n3,
 	 array_ghost,nc3,i3_array, nc3,
 	 accumulate);
 
-#ifdef DEBUG_ENZO_PROLONG      
-      for (int iz=0; iz<nc3[2]; iz++) {
-        for (int iy=0; iy<nc3[1]; iy++) {
-          for (int ix=0; ix<nc3[0]; ix++) {
-            int i=ic0 + ix+nc3[0]*(iy+nc3[1]*iz);
-            CkPrintf ("DEBUG_ENZO_PROLONG FieldFace a2f coarse %d %d %d %g\n",
-                      ix,iy,iz,((cello_float*)array_ghost)[i]);
-          }
-        }
-      }
-
-      for (int iz=0; iz<n3[2]; iz++) {
-        for (int iy=0; iy<n3[1]; iy++) {
-          for (int ix=0; ix<n3[0]; ix++) {
-            int i=if0 + ix+m3[0]*(iy+m3[1]*iz);
-            CkPrintf ("DEBUG_ENZO_PROLONG FieldFace a2f fine  %d %d %d %g\n",
-                      ix,iy,iz,((cello_float*)field_ghost)[i]);
-          }
-        }
-      }
-#endif      
     } else {
 
       // Copy array to field
@@ -397,22 +379,24 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
     int is3[3], ns3[3];
 
     set_box_();
-    box_.set_block_size(m3[0]-2*g3[0],m3[1]-2*g3[1],m3[2]-2*g3[2]);
-    box_.set_ghost_depth(g3[0],g3[1],g3[2]);
+    int n3[3];
+    field_src.size(n3,n3+1,n3+2);
+    box_.set_block_size(n3);
+    box_.set_ghost_depth(g3);
     if (accumulate) {
-      box_.set_send_ghosts((face_[0]!=0)?g3[0]:0,
-                           (face_[1]!=0)?g3[1]:0,
-                           (face_[2]!=0)?g3[2]:0);
+      int gs3[3] = {(face_[0]!=0)?g3[0]:0,
+                    (face_[1]!=0)?g3[1]:0,
+                    (face_[2]!=0)?g3[2]:0};
+      box_.set_send_ghosts(gs3);
                            
     } else {
-      box_.set_send_ghosts ((ghost_[0]&&face_[0]==0)?g3[0]:0,
-                            (ghost_[1]&&face_[1]==0)?g3[1]:0,
-                            (ghost_[2]&&face_[2]==0)?g3[2]:0);
+      int gs3[3] = {(ghost_[0]&&face_[0]==0)?g3[0]:0,
+                    (ghost_[1]&&face_[1]==0)?g3[1]:0,
+                    (ghost_[2]&&face_[2]==0)?g3[2]:0};
+      box_.set_send_ghosts (gs3);
     }
     box_.compute_region();
-    box_.get_send_limits(&is3[0],&ns3[0],
-                         &is3[1],&ns3[1],
-                         &is3[2],&ns3[2]);
+    box_.get_limits(is3,ns3,Box::BlockType::send);
     ns3[0] -= is3[0];
     ns3[1] -= is3[1];
     ns3[2] -= is3[2];
@@ -421,9 +405,7 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
 
     int id3[3], nd3[3];
 
-    box_.get_recv_limits(&id3[0],&nd3[0],
-                         &id3[1],&nd3[1],
-                         &id3[2],&nd3[2]);
+    box_.get_limits(id3,nd3,Box::BlockType::receive);
     nd3[0] -= id3[0];
     nd3[1] -= id3[1];
     nd3[2] -= id3[2];
@@ -455,53 +437,13 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
 
       Prolong * prolong = prolong_ ? prolong_ : problem->prolong();
 
+      const int padding = prolong->padding();
+
       prolong->apply (precision, 
 		      values_dst,m3,id3, nd3,
 		      values_src,m3,is3, ns3,
 		      accumulate);
 
-#ifdef DEBUG_ENZO_PROLONG      
-      CkPrintf ("DEBUG_ENZO_PROLONG FieldFace %d coarse %d %d %d  %d %d %d  %d %d %d\n",
-                __LINE__,
-                is3[0],is3[1],is3[2],
-                ns3[0],ns3[1],ns3[2],
-                m3[0],m3[1],m3[2]);
-      CkPrintf ("DEBUG_ENZO_PROLONG FieldFace %d fine  %d %d %d  %d %d %d  %d %d %d\n",
-                __LINE__,
-                id3[0],id3[1],id3[2],
-                nd3[0],nd3[1],nd3[2],
-                m3[0],m3[1],m3[2]);
-
-      cello_float avg_c=0.0;
-      
-      for (int iz=0; iz<ns3[2]; iz++) {
-        for (int iy=0; iy<ns3[1]; iy++) {
-          for (int ix=0; ix<ns3[0]; ix++) {
-            int i=is0 + ix+m3[0]*(iy+m3[1]*iz);
-            CkPrintf ("DEBUG_ENZO_PROLONG FieldFace %d f2f coarse %d %d %d %g\n",
-                      __LINE__,ix,iy,iz,((cello_float*)values_src)[i]);
-            avg_c+=((cello_float*)values_src)[i];
-          }
-        }
-      }
-
-      cello_float avg_f=0.0;
-      for (int iz=0; iz<nd3[2]; iz++) {
-        for (int iy=0; iy<nd3[1]; iy++) {
-          for (int ix=0; ix<nd3[0]; ix++) {
-            int i=id0 + ix+m3[0]*(iy+m3[1]*iz);
-            CkPrintf ("DEBUG_ENZO_PROLONG FieldFace %d f2f fine  %d %d %d %g\n",
-                      __LINE__,ix,iy,iz,((cello_float*)values_dst)[i]);
-            avg_f+=((cello_float*)values_dst)[i];
-          }
-        }
-      }
-
-      CkPrintf ("DEBUG_ENZO_PROLONG FieldFace %d avg_c = %g\n",
-                __LINE__,avg_c/(ns3[0]*ns3[1]*ns3[2]));
-      CkPrintf ("DEBUG_ENZO_PROLONG FieldFace %d avg_f = %g\n",
-                __LINE__,avg_f/(nd3[0]*nd3[1]*nd3[2]));
-#endif
     } else if (refresh_type_ == refresh_coarse) {
 
       // Restrict field
@@ -568,22 +510,22 @@ int FieldFace::num_bytes_array(Field field) throw()
     int i3[3], n3[3];
     field.size(n3,n3+1,n3+2);
     set_box_();
-    box_.set_block_size (n3[0],n3[1],n3[2]);
-    box_.set_ghost_depth(g3[0],g3[1],g3[2]);
+    box_.set_block_size (n3);
+    box_.set_ghost_depth(g3);
     
     if (accumulate) {
-      box_.set_send_ghosts((face_[0]!=0)?g3[0]:0,
-                           (face_[1]!=0)?g3[1]:0,
-                           (face_[2]!=0)?g3[2]:0);
+      int gs3[3] = {(face_[0]!=0)?g3[0]:0,
+                    (face_[1]!=0)?g3[1]:0,
+                    (face_[2]!=0)?g3[2]:0};
+      box_.set_send_ghosts(gs3);
     } else {
-      box_.set_send_ghosts ((ghost_[0]&&face_[0]==0)?g3[0]:0,
-                            (ghost_[1]&&face_[1]==0)?g3[1]:0,
-                            (ghost_[2]&&face_[2]==0)?g3[2]:0);
+      int gs3[3] = {(ghost_[0]&&face_[0]==0)?g3[0]:0,
+                    (ghost_[1]&&face_[1]==0)?g3[1]:0,
+                    (ghost_[2]&&face_[2]==0)?g3[2]:0};
+      box_.set_send_ghosts (gs3);
     }
     box_.compute_region();
-    box_.get_send_limits(&i3[0],&n3[0],
-                         &i3[1],&n3[1],
-                         &i3[2],&n3[2]);
+    box_.get_limits(i3,n3,Box::BlockType::send);
     n3[0] -= i3[0];
     n3[1] -= i3[1];
     n3[2] -= i3[2];
@@ -816,7 +758,7 @@ template<class T> void FieldFace::copy_
       for (int iy=0; iy < ns3[1]; iy++) {
 	for (int ix=0; ix < ns3[0]; ix++) {
 	  int i_src = ix + msx*(iy + msy*iz);
-	  int i_dst = ix + msx*(iy + mdy*iz);
+	  int i_dst = ix + mdx*(iy + mdy*iz);
 	  vd0[i_dst] += vs0[i_src];
 	}
       }
@@ -1011,9 +953,10 @@ void FieldFace::set_box_()
 {
   const int level = (refresh_type_==refresh_coarse) ? -1
     : (refresh_type_==refresh_same) ?  0 : +1;
+  if (prolong_ && prolong_->padding() > 0) box_.set_padding(prolong_->padding());
   box_.set_rank(rank_);
   box_.set_level (level);
-  box_.set_face(face_[0],face_[1],face_[2]);
-  box_.set_child(child_[0],child_[1],child_[2]);
+  box_.set_face(face_);
+  box_.set_child(child_);
 }
 

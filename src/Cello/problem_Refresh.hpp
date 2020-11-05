@@ -34,8 +34,7 @@ public: // interface
     active_(true),
     callback_(0) ,
     root_level_(0),
-    id_refresh_(-1),
-    id_solver_(-1)
+    id_refresh_(-1)
   {
   }
 
@@ -62,8 +61,7 @@ public: // interface
       active_(active),
       callback_(0),
       root_level_(0),
-      id_refresh_(-1),
-      id_solver_(-1)
+      id_refresh_(-1)
   {
   }
 
@@ -88,8 +86,7 @@ public: // interface
     active_(true),
     callback_(0),
     root_level_(0),
-    id_refresh_(-1),
-    id_solver_(-1)
+    id_refresh_(-1)
   {
   }
 
@@ -115,7 +112,6 @@ public: // interface
     p | callback_;
     p | root_level_;
     p | id_refresh_;
-    p | id_solver_;
   }
 
   //--------------------------------------------------
@@ -370,14 +366,6 @@ public: // interface
   int id() const
   { return id_refresh_; }
 
-  /// Set the solver id in Problem::solver(id)
-  void set_solver_id(int id_solver)
-  { id_solver_ = id_solver; }
-
-  /// return the solver id (-1 if not initialized)
-  int solver_id() const
-  { return id_solver_; }
-  
   //--------------------------------------------------
 
   /// Return the number of bytes required to serialize the data object
@@ -451,8 +439,6 @@ private: // attributes
   /// ID in new_refresh_list_[]
   int id_refresh_;
 
-  /// ID of calling Solver
-  int id_solver_;
 };
 
 #endif /* PROBLEM_REFRESH_HPP */
