@@ -135,7 +135,6 @@ void EnzoComputePressure::compute_(Block * block,
       }
 
     } else {
-      /*
       if (rank == 1) {
         for (int i=0; i<m; i++) {
           enzo_float ke = 0.5*vx[i]*vx[i];
@@ -155,19 +154,6 @@ void EnzoComputePressure::compute_(Block * block,
             0.5*(bx[i]*bx[i] + by[i]*by[i] + bz[i]*bz[i]) : 0.;
           p[i] = gm1 * (d[i] * (te[i] - ke) - me_den);
         }
-      }
-      */
-      for (int i=0; i<m; i++) {
-        enzo_float e= te[i];
-        e -= 0.5*vx[i]*vx[i];
-        if (rank >= 2) e -= 0.5*vy[i]*vy[i];
-        if (rank >= 3) e -= 0.5*vz[i]*vz[i];
-
-        if (mhd)              e -= 0.5*bx[i]*bx[i]/d[i];
-        if (mhd && rank >= 2) e -= 0.5*by[i]*by[i]/d[i];
-        if (mhd && rank >= 3) e -= 0.5*bz[i]*bz[i]/d[i];
-
-        p[i] = gm1 * d[i] * e;
       }
     }
   }
