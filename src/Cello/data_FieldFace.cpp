@@ -685,7 +685,7 @@ template<class T> void FieldFace::copy_
       for (int iy=0; iy < ns3[1]; iy++) {
 	for (int ix=0; ix < ns3[0]; ix++) {
 	  int i_src = ix + msx*(iy + msy*iz);
-	  int i_dst = ix + msx*(iy + mdy*iz);
+	  int i_dst = ix + mdx*(iy + mdy*iz);
 	  vd0[i_dst] += vs0[i_src];
 	}
       }
