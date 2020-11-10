@@ -16,7 +16,7 @@ class Box {
   
 public: // interface
 
-  enum class BlockType { send, receive, extra };
+  enum class BlockType { send, receive, extra, array };
   
   /// Constructor
   Box() throw()
@@ -53,6 +53,7 @@ public: // interface
     for (int i=0; i<rank_; i++) {
       n3_[i] = n3[i];
       g3_[i] = g3[i];
+      gr3_[i] = g3[i];
     }
   }
   
@@ -107,11 +108,15 @@ public: // interface
   inline void set_block (int level, int f3[3], int c3[3])
   {
     level_ = level;
-    for (int i=0; i<rank_; i++) {
-      f3_[i] = f3[i];
-      c3_[i] = c3[i];
-    }
+    f3_[0] = f3[0];
+    f3_[1] = f3[1];
+    f3_[2] = f3[2];
+    c3_[0] = c3[0];
+    c3_[1] = c3[1];
+    c3_[2] = c3[2];
+    compute_block_start();
   }
+  
   /// Set size of blocks
   inline void set_block_size (int n3[3])
   {
@@ -154,9 +159,6 @@ public: // interface
     pad_ = pad;
   }
   
-  /// Get recv-send intersection loop limits for send-block
-  bool get_limits (int * im3, int * ip3, BlockType block_type);
-
   /// Determine the start of the currently defined receive or extra
   /// block
   void compute_block_start();
@@ -164,9 +166,15 @@ public: // interface
   /// Determine intersection region
   void compute_region();
 
-  void print()
+  /// Get recv-send intersection loop limits for send-block
+  bool get_limits (int im3[3], int ip3[3], BlockType block_type);
+
+  /// Restrict limits to block, including or excluding ghosts
+  void restrict_limits (int im3[3], int ip3[3], bool include_ghosts);
+
+  void print(const char * mesg)
   {
-    CkPrintf ("BOX-----------------\n");
+    CkPrintf ("BOX------ %s -------\n",mesg);
     CkPrintf ("BOX: rank %d\n",rank_);
     CkPrintf ("BOX: n3_ %d %d %d\n", n3_[0],n3_[1],n3_[2]);
     CkPrintf ("BOX: g3_ %d %d %d\n", g3_[0],g3_[1],g3_[2]);
@@ -181,6 +189,7 @@ public: // interface
     CkPrintf ("BOX\n");
     CkPrintf ("BOX: im3_ %d %d %d\n", im3_[0],im3_[1],im3_[2]);
     CkPrintf ("BOX: ip3_ %d %d %d\n", ip3_[0],ip3_[1],ip3_[2]);
+    CkPrintf ("Box----------------\n");
   }
   
 private: // attributes

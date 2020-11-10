@@ -631,7 +631,7 @@ protected:
   /// Handle the special case of refresh on interpolated faces
   /// requiring extra padding
   int refresh_extra_field_faces_
-  (int padding, Refresh refresh, Index index_neighbor,
+  (Refresh refresh, Index index_neighbor,
    int level, int level_face, int if3[3],int ic3[3]);
   /// Scatter particles in ghost zones to neighbors
   int refresh_load_particle_faces_ (Refresh * refresh);

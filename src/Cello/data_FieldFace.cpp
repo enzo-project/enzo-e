@@ -198,6 +198,7 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
                     (ghost_[2]&&face_[2]==0)?g3[2]:0};
       box_.set_send_ghosts (gs3);
     }
+    box_.compute_block_start();
     box_.compute_region();
     box_.get_limits(i3,n3,Box::BlockType::send);
     n3[0] -= i3[0];
@@ -296,6 +297,7 @@ void FieldFace::array_to_face (char * array, Field field) throw()
                     (ghost_[2]&&face_[2]==0)?g3[2]:0};
       box_.set_send_ghosts (gs3);
     }
+    box_.compute_block_start();
     box_.compute_region();
     box_.get_limits(i3,n3,Box::BlockType::receive);
     n3[0] -= i3[0];
@@ -395,6 +397,7 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
                     (ghost_[2]&&face_[2]==0)?g3[2]:0};
       box_.set_send_ghosts (gs3);
     }
+    box_.compute_block_start();
     box_.compute_region();
     box_.get_limits(is3,ns3,Box::BlockType::send);
     ns3[0] -= is3[0];
@@ -524,6 +527,7 @@ int FieldFace::num_bytes_array(Field field) throw()
                     (ghost_[2]&&face_[2]==0)?g3[2]:0};
       box_.set_send_ghosts (gs3);
     }
+    box_.compute_block_start();
     box_.compute_region();
     box_.get_limits(i3,n3,Box::BlockType::send);
     n3[0] -= i3[0];

@@ -288,14 +288,10 @@ int Block::new_refresh_load_field_faces_ (Refresh & refresh)
 	(level_face == level)     ? refresh_same :
 	(level_face == level + 1) ? refresh_fine : refresh_unknown;
 
-      // handle padded interpolation special case
-      Prolong * prolong = cello::problem()->prolong();
+      // handle padded interpolation special case if needed
 
-      const int padding = prolong->padding();
-      if (padding > 0) {
-        count += refresh_extra_field_faces_
-          (padding,refresh,index_neighbor, level,level_face,if3,ic3);
-      }
+      count += refresh_extra_field_faces_
+        (refresh,index_neighbor, level,level_face,if3,ic3);
 
       new_refresh_load_field_face_
         (refresh,refresh_type,index_neighbor,if3,ic3);
@@ -340,7 +336,6 @@ void Block::new_refresh_load_field_face_
 
 {
   // ... coarse neighbor requires child index of self in parent
-
   if (refresh_type == refresh_coarse) {
     index_.child(index_.level(),ic3,ic3+1,ic3+2);
   }
@@ -355,10 +350,6 @@ void Block::new_refresh_load_field_face_
     (if3, ic3, lg3, refresh_type, &refresh,false);
 
   DataMsg * data_msg = new DataMsg;
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%d %s:%d DEBUG_REFRESH %p new DataMsg\n",
-            CkMyPe(),__FILE__,__LINE__,data_msg);
-#endif  
   data_msg -> set_field_face (field_face,true);
   data_msg -> set_field_data (data()->field_data(),false);
 
@@ -380,84 +371,216 @@ void Block::new_refresh_load_field_face_
 //----------------------------------------------------------------------
 
 int Block::refresh_extra_field_faces_
-(int padding,
- Refresh refresh,
+(Refresh refresh,
  Index index_neighbor,
  int level, int level_face,
  int if3[3],
  int ic3[3])
 {
   int count = 0;
-  if (level != level_face) {
-    const int rank = cello::rank();
-    int  g3[3],n3[3];
-    Field field = data()->field();
-    int g= refresh.ghost_depth();
-    g3[0] = (rank >= 1) ? g : 0;
-    g3[1] = (rank >= 2) ? g : 0;
-    g3[2] = (rank >= 3) ? g : 0;
-    field.size(n3,n3+1,n3+2);
-    Box box_face (rank,n3,g3);
+
+  const int padding = cello::problem()->prolong()->padding();
+
+  if ((padding > 0) && (level != level_face)) {
+
+    // Create box_face
     
-    box_face.set_rank(rank);
-    box_face.set_level (+1);
-    box_face.set_face (if3);
-    box_face.set_child(ic3);
+    const int rank = cello::rank();
+    int n3[3];
+    data()->field().size(n3,n3+1,n3+2);
+    const int g = refresh.ghost_depth();
+    int g3[3] = {g3[0] = (rank >= 1) ? g : 0,
+                 g3[1] = (rank >= 2) ? g : 0,
+                 g3[2] = (rank >= 3) ? g : 0};
+
+    // Boxes used Bs -> br, Be -> br, Bs -> be
+    Box box_face (rank,n3,g3);
+    Box box_Bsbe (rank,n3,g3);
+    Box box_Bebr (rank,n3,g3);
+    
+    // Create iterator over extra blocks
+    
+    ItNeighbor it_extra =
+      this->it_neighbor(refresh.min_face_rank(),index_,
+                        refresh.neighbor_type(),
+                        cello::config()->mesh_min_level,
+                        refresh.root_level());
+    
+      // ... determine intersection region
+
+    const bool l_send = (level < level_face);
+    const bool l_recv = (level > level_face);
+
+    int jf3[3] = { l_send ? if3[0] : -if3[0],
+                   l_send ? if3[1] : -if3[1],
+                   l_send ? if3[2] : -if3[2] };
+    
+    box_face.set_block(+1,jf3,ic3);
     box_face.set_padding(padding);
 
     box_face.compute_region();
-    if (level < level_face) {
-      ItNeighbor it_extra =
-        this->it_neighbor(refresh.min_face_rank(),index_,
-                          refresh.neighbor_type(),
-                          cello::config()->mesh_min_level,
-                          refresh.root_level());
-      int ef3[3];
 
-#ifdef DEBUG_ENZO_PROLONG          
-      CkPrintf ("DEBUG_ENZO_PROLONG computed:\n");
-      box_face.print();
-#endif
+    if (l_send) {
+
+      // SENDER LOOP OVER EXTRA BLOCKS
+      
+      int ef3[3];
       while (it_extra.next(ef3)) {
-        Index index_extra = it_extra.index();
-        const int level_extra = it_extra.face_level();
+
+        const Index index_extra = it_extra.index();
+        const int   level_extra = it_extra.face_level();
+        
         int ec3[3] = {0,0,0};
         if (level_extra > level) {
           index_extra.child(level_extra,ec3,ec3+1,ec3+2);
-        } else if (level > level_extra) {
-          // ERROR: assumes fully balanced to min_face_rank = 0
-          index_.child(level,ec3,ec3+1,ec3+2);
         }
-        bool l_face_match = (if3[0]==ef3[0])
-          &&                (if3[1]==ef3[1])
-          &&                (if3[2]==ef3[2]);
-        bool l_child_match = (ic3[0]==ec3[0])
-          &&                (ic3[1]==ec3[1])
-          &&                (ic3[2]==ec3[2]);
+        
+        const bool l_face_match =
+          (if3[0]==ef3[0]) && (if3[1]==ef3[1]) && (if3[2]==ef3[2]);
+        const bool l_child_match =
+          (ic3[0]==ec3[0]) && (ic3[1]==ec3[1]) && (ic3[2]==ec3[2]);
 
-        if (! l_face_match || ! l_child_match) {
-          // handle extra uniq block
-          box_face.set_level(level_extra - level);
-          box_face.set_face(ef3);
-          box_face.set_child(ec3);
+        const bool l_match = l_face_match && l_child_match;
+
+        // ... skip extra block if it's the same as the face block
+        if (! l_match) {
+
+          // ... determine overlap of extra block with intersection region
+          const int level_send = level;
+          box_face.set_block ((level_extra-level_send), ef3,ec3);
           box_face.compute_block_start();
+        
           int im3[3],ip3[3];
-          bool overlap = box_face.get_limits(im3,ip3,Box::BlockType::extra);
-#ifdef DEBUG_ENZO_PROLONG          
-          box_face.print();
-          CkPrintf ("DEBUG_ENZO_PROLONG %+2d %+2d %+2d [%d %d %d] -  %+2d %+2d %+2d [%d %d %d] %+2d  %s\n",
-                    if3[0],if3[1],if3[2],
-                    ic3[0],ic3[1],ic3[2],
-                    ef3[0],ef3[1],ef3[2],
-                    ec3[0],ec3[1],ec3[2],
-                    level_extra - level, overlap ? "true" : "false");
-#endif            
+          bool overlap = box_face.get_limits (im3,ip3,Box::BlockType::extra);
+          
+          if (overlap) {
+
+            if (level_extra == level) {
+          
+              // this block sends; extra block is coarse
+          
+              // handle contribution of this block Bs to Be -> br
+
+              int tf3[3] =
+                { if3[0]-ef3[0], if3[1]-ef3[1], if3[2]-ef3[2] };
+
+              // Box Bs | Be -> br
+              box_Bebr.set_block(+1,tf3,ic3);
+              box_Bebr.set_padding(padding);
+              box_Bebr.compute_region();
+
+              tf3[0] = -ef3[0];
+              tf3[1] = -ef3[1];
+              tf3[2] = -ef3[2];
+              box_Bebr.set_block(0,tf3,ic3); // ic3 ignored
+              box_Bebr.compute_block_start();
+
+              bool overlap = box_Bebr.get_limits
+                (im3,ip3,Box::BlockType::extra);
+
+              ASSERT3 ("Block::refresh_extra_field_faces_",
+                       "Face tf3 %d %d %d out of bounds",
+                       tf3[0],tf3[1],tf3[2],
+                       (-1 <= tf3[0] && tf3[0] <= 1) &&
+                       (-1 <= tf3[1] && tf3[1] <= 1) &&
+                       (-1 <= tf3[2] && tf3[2] <= 1));
+              ASSERT6 ("Block::refresh_extra_field_faces_",
+                       "Face tf3 %d %d %d does not overlap region for face %d %d %d",
+                       tf3[0],tf3[1],tf3[2],ef3[0],ef3[1],ef3[2],
+                       overlap);
+            } // level_extra == level
+          } // overlap
+        } // ! match
+      } // while (it_extra.next())
+      
+    } else if (l_recv) {
+
+      // RECEIVER LOOP OVER EXTRA BLOCKS
+
+      int ef3[3];
+      while (it_extra.next(ef3)) {
+        
+        const Index index_extra = it_extra.index();
+        const int   level_extra = it_extra.face_level();
+        
+        int ec3[3] = {0,0,0};
+        if (level_extra > level_face) {
+          index_extra.child(level_extra,ec3,ec3+1,ec3+2);
         }
-      }
-    }
-  }
+
+        const bool l_face_match =
+          (if3[0]==ef3[0]) && (if3[1]==ef3[1]) && (if3[2]==ef3[2]);
+        const bool l_child_match =
+          (ic3[0]==ec3[0]) && (ic3[1]==ec3[1]) && (ic3[2]==ec3[2]);
+
+        const bool l_match = l_face_match && l_child_match;
+
+        // ... skip extra block if it's the same as the face block
+
+        if (!l_match) {
+
+          // *** count expected receive from Be or be ***
+
+          // ... determine overlap of extra block with intersection region
+          const int level_send = level_face;
+          box_face.set_block ((level_extra-level_send), ef3,ec3);
+          box_face.compute_block_start();
+        
+          int im3[3],ip3[3];
+          bool overlap = box_face.get_limits
+            (im3,ip3,Box::BlockType::extra);
+
+          if (overlap) {
+
+#ifndef DEBUG_ENZO_PROLONG
+            ++count;
+#endif        
+        
+            if (level_extra == level) {
+
+              // this block receives; extra block is fine
+
+              // handle contribution of this block br to Bs -> be
+
+              int tf3[3] =
+                { ef3[0]-if3[0], ef3[1]-if3[1], ef3[2]-if3[2] };
+            
+              // Box br | Bs -> be
+              box_Bsbe.set_block(+1,tf3,ec3);
+              box_Bsbe.set_padding(padding);
+              box_Bsbe.compute_region();
+
+              tf3[0] = -if3[0];
+              tf3[1] = -if3[1];
+              tf3[2] = -if3[2];
+
+              box_Bsbe.set_block(0,tf3,ic3);
+              box_Bsbe.compute_block_start();
+
+              bool overlap = box_Bsbe.get_limits
+                (im3,ip3,Box::BlockType::extra);
+              
+              ASSERT3 ("Block::refresh_extra_field_faces_",
+                       "Face tf3 %d %d %d out of bounds",
+                       tf3[0],tf3[1],tf3[2],
+                       ((-1 <= tf3[0] && tf3[0] <= 1) &&
+                        (-1 <= tf3[1] && tf3[1] <= 1) &&
+                        (-1 <= tf3[2] && tf3[2] <= 1)));
+
+              ASSERT6 ("Block::refresh_extra_field_faces_",
+                       "Face %d %d %d does not overlap region for face %d %d %d",
+                       tf3[0],tf3[1],tf3[2],ef3[0],ef3[1],ef3[2],
+                       overlap);
+
+            } // level_extra == level
+          } // if (overlap)
+        } // if (! match)
+      } // while (it_extra.next())
+    } // (level > level_face)
+  } // (level != level_face)
   return count;
 }
+
 //----------------------------------------------------------------------
 
 int Block::new_refresh_load_particle_faces_ (Refresh & refresh)
