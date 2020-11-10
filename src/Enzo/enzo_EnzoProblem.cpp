@@ -286,10 +286,6 @@ Solver * EnzoProblem::create_solver_
     solve_type = solve_unknown;
   }
 
-#ifdef DEBUG_NEW_REFRESH  
-  CkPrintf ("DEBUG_NEW_REFRESH create solver %s\n",
-	    enzo_config->solver_list[index_solver].c_str());
-#endif  
   if (solver_type == "cg") {
 
     solver = new EnzoSolverCg

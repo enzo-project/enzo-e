@@ -19,8 +19,6 @@ class Performance;
 class Problem;
 class Schedule;
 
-// #define DEBUG_NEW_REFRESH
-
 #include <errno.h>
 #include "mesh.decl.h"
 #include "simulation.decl.h"
@@ -366,40 +364,34 @@ public: // virtual functions
   /// refresh_register
   int new_register_refresh (const Refresh & refresh)
   {
-    const int id_refresh = new_refresh_list_.size();
+    const int id_refresh = refresh_list_.size();
     ASSERT("Simulation::new_register_refresh()",
 	   "id_refresh must be >= 0",
 	   (id_refresh >= 0));
-    new_refresh_list_.push_back(refresh);
-    new_refresh_list_[id_refresh].set_id(id_refresh);
-#ifdef DEBUG_NEW_REFRESH  
-    CkPrintf ("DEBUG_NEW_REFRESH register id %d\n",id_refresh);
-#endif    
+    refresh_list_.push_back(refresh);
+    refresh_list_[id_refresh].set_id(id_refresh);
     return id_refresh;
   }
-  void new_refresh_set_name (int id, std::string name)
+  void refresh_set_name (int id, std::string name)
   {
-    if (id >= int(new_refresh_name_.size()))
-      new_refresh_name_.resize(id+1);
-    new_refresh_name_[id] = name;
-#ifdef DEBUG_NEW_REFRESH  
-    CkPrintf ("DEBUG_NEW_REFRESH register name %d %s\n",id,name.c_str());
-#endif    
+    if (id >= int(refresh_name_.size()))
+      refresh_name_.resize(id+1);
+    refresh_name_[id] = name;
   }
   
-  std::string new_refresh_name (int id) const
+  std::string refresh_name (int id) const
   {
-    return (0 <= id && id < int(new_refresh_name_.size())) ?
-      new_refresh_name_[id] : "UNKNOWN";
+    return (0 <= id && id < int(refresh_name_.size())) ?
+      refresh_name_[id] : "UNKNOWN";
   }
 
   /// Return the given refresh object
-  Refresh & new_refresh_list (int id_refresh)
-  { return new_refresh_list_[id_refresh]; }
+  Refresh & refresh_list (int id_refresh)
+  { return refresh_list_[id_refresh]; }
 
   /// Return the number of refresh objects registered
-  int new_refresh_count() const
-  { return new_refresh_list_.size(); }
+  int refresh_count() const
+  { return refresh_list_.size(); }
 
 protected: // functions
 
@@ -550,8 +542,8 @@ protected: // attributes
 
   /// Refresh phase lists
 
-  std::vector < Refresh >     new_refresh_list_;
-  std::vector < std::string > new_refresh_name_;
+  std::vector < Refresh >     refresh_list_;
+  std::vector < std::string > refresh_name_;
 
   /// Saved latest checkpoint directory for creating symlink
   char dir_checkpoint_[256];

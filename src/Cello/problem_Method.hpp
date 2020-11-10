@@ -61,7 +61,7 @@ public: // virtual functions
   }
 
   /// Add a new refresh object
-  int add_new_refresh_ (int neighbor_type = neighbor_leaf);
+  int add_refresh_ (int neighbor_type = neighbor_leaf);
 
   /// Return the index for the main post-refresh object
   int refresh_id_post() const;

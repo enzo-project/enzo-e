@@ -41,16 +41,6 @@ void mutex_init_bcg_iter()
 }
 
 
-// #define DEBUG_NEW_REFRESH
-
-#ifdef DEBUG_NEW_REFRESH
-#   define TRACE_NEW_REFRESH(BLOCK,MSG) \
-  CkPrintf ("TRACE_NEW_REFRESH %s %s\n",BLOCK->name().c_str(),MSG); \
-  fflush(stdout);
-#else
-#   define TRACE_NEW_REFRESH(BLOCK,MSG) /* ... */
-#endif
-
 // #define TRACE_SOLVER_BCG
 
 // #define DEBUG_CALLBACK
@@ -894,15 +884,8 @@ void EnzoSolverBiCgStab::loop_25 (EnzoBlock * block) throw() {
   TRACE_BCG(block,this,"loop_25");
 
 
-  TRACE_NEW_REFRESH(block,"EnzoSolverBiCgStab::loop_25");
   cello::refresh(ir_loop_3_)->set_active(is_finest_(block));
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("DEBUG_NEW_REFRESH %s is_active %d %d\n",
-	    block->name().c_str(),
-	    is_finest_(block),cello::refresh(ir_loop_3_)->is_active());
-    fflush(stdout);
-#endif  
-  block->new_refresh_start
+  block->refresh_start
     (ir_loop_3_, CkIndex_EnzoBlock::p_solver_bicgstab_loop_3());
 }
 
@@ -1199,16 +1182,9 @@ void EnzoSolverBiCgStab::loop_85 (EnzoBlock * block) throw() {
   
   TRACE_BCG(block,this,"loop_85");
 
-
-  TRACE_NEW_REFRESH(block,"EnzoSolverBiCgStab::loop_85");
   cello::refresh(ir_loop_9_)->set_active(is_finest_(block));
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("DEBUG_NEW_REFRESH %s is_active %d\n",block->name().c_str(),
-	    cello::refresh(ir_loop_9_)->is_active());
-  fflush(stdout);
-#endif  
-  block->new_refresh_start
+  block->refresh_start
     (ir_loop_9_, CkIndex_EnzoBlock::p_solver_bicgstab_loop_9());
 }
 
@@ -1845,7 +1821,7 @@ void EnzoSolverBiCgStab::dot_done_(EnzoBlock * block,
 void EnzoSolverBiCgStab::new_register_refresh_()
 {
   Refresh * refresh_post = cello::refresh(ir_post_);
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
   
   if (solve_type_ == solve_tree)
     refresh_post->set_root_level (coarse_level_);
@@ -1861,8 +1837,8 @@ void EnzoSolverBiCgStab::new_register_refresh_()
 
   //--------------------------------------------------
 
-  ir_loop_3_ = add_new_refresh_();
-  cello::simulation()->new_refresh_set_name(ir_post_,name()+":loop_3");
+  ir_loop_3_ = add_refresh_();
+  cello::simulation()->refresh_set_name(ir_post_,name()+":loop_3");
 
   Refresh * refresh_loop_3 = cello::refresh(ir_loop_3_);
   
@@ -1883,8 +1859,8 @@ void EnzoSolverBiCgStab::new_register_refresh_()
   
   //--------------------------------------------------
 
-  ir_loop_9_ = add_new_refresh_();
-  cello::simulation()->new_refresh_set_name(ir_post_,name()+":loop_9");
+  ir_loop_9_ = add_refresh_();
+  cello::simulation()->refresh_set_name(ir_post_,name()+":loop_9");
 
   Refresh * refresh_loop_9 = cello::refresh(ir_loop_9_);
   

@@ -358,11 +358,11 @@ public: // interface
     }
   }
 
-  /// Set the new refresh id in new_refresh_list_[]
+  /// Set the new refresh id in refresh_list_[]
   void set_id(int id_refresh)
   { id_refresh_ = id_refresh; }
 
-  /// return the new refresh id in new_refresh_list_[]
+  /// return the new refresh id in refresh_list_[]
   int id() const
   { return id_refresh_; }
 
@@ -436,7 +436,7 @@ private: // attributes
   /// Coarse level for neighbor_tree type
   int root_level_;
 
-  /// ID in new_refresh_list_[]
+  /// ID in refresh_list_[]
   int id_refresh_;
 
 };

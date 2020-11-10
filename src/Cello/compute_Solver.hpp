@@ -184,7 +184,7 @@ protected: // functions
 		       double rr_min=0.0, double rr=0.0, double rr_max=0.0,
 		       bool final = false) throw();
   /// Add a new refresh object
-  int add_new_refresh_ ();
+  int add_refresh_ ();
 
   /// Perform vector copy X <- Y
   template <class T>

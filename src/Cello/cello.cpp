@@ -336,7 +336,7 @@ namespace cello {
 
   Refresh * refresh(int ir)
   {
-    return simulation() ? &simulation()->new_refresh_list(ir) : NULL;
+    return simulation() ? &simulation()->refresh_list(ir) : NULL;
   }
 
   //----------------------------------------------------------------------

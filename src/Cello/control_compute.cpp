@@ -62,7 +62,7 @@ void Block::compute_next_ ()
     
     cello::refresh(ir_post)->set_active (is_leaf());
     
-    new_refresh_start (ir_post,CkIndex_Block::p_compute_continue());
+    refresh_start (ir_post,CkIndex_Block::p_compute_continue());
     
   } else {
 
@@ -75,7 +75,6 @@ void Block::compute_next_ ()
 
 void Block::compute_continue_ ()
 {
-  //  this->debug_new_refresh(__FILE__,__LINE__);
   performance_start_(perf_compute,__FILE__,__LINE__);
 #ifdef DEBUG_COMPUTE
   if (cycle() >= CYCLE)

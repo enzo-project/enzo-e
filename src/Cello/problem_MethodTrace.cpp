@@ -20,7 +20,7 @@ MethodTrace::MethodTrace
     timestep_(timestep),
     name_(name)
 {
-  cello::simulation()->new_refresh_set_name(ir_post_,name);
+  cello::simulation()->refresh_set_name(ir_post_,name);
   
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_particles();

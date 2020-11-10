@@ -58,7 +58,7 @@ Simulation::Simulation
   sync_output_write_(),
   sync_new_output_start_(),
   sync_new_output_next_(),
-  new_refresh_list_(),
+  refresh_list_(),
   index_output_(-1),
   num_solver_iter_(),
   max_solver_iter_()
@@ -123,7 +123,7 @@ Simulation::Simulation()
   sync_output_write_(),
   sync_new_output_start_(),
   sync_new_output_next_(),
-  new_refresh_list_(),
+  refresh_list_(),
   index_output_(-1),
   num_solver_iter_(),
   max_solver_iter_()
@@ -176,7 +176,7 @@ Simulation::Simulation (CkMigrateMessage *m)
     sync_output_write_(),
     sync_new_output_start_(),
     sync_new_output_next_(),
-    new_refresh_list_(),
+    refresh_list_(),
     index_output_(-1),
     num_solver_iter_(),
     max_solver_iter_()
@@ -281,8 +281,8 @@ void Simulation::pup (PUP::er &p)
 
   p | schedule_balance_;
 
-  p | new_refresh_list_;
-  p | new_refresh_name_;
+  p | refresh_list_;
+  p | refresh_name_;
 
   PUParray(p,dir_checkpoint_,256);
 

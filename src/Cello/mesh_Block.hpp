@@ -230,7 +230,7 @@ public: // interface
   void initialize_child_face_levels_();
 
   /// Initialize arrays for refresh
-  void init_new_refresh_();
+  void init_refresh_();
 
   /// Return an iterator over faces
 
@@ -553,64 +553,33 @@ public:
   //--------------------------------------------------
 
   /// Begin a refresh operation, optionally waiting then invoking callback
-  void new_refresh_start (int id_refresh, int callback);
+  void refresh_start (int id_refresh, int callback);
 
   /// Wait for a refresh operation to complete, then continue with the callback
-  void new_refresh_wait (int id_refresh, int callback);
+  void refresh_wait (int id_refresh, int callback);
 
   /// Check whether a refresh operation is finished, and invoke the associated
   /// callback if it is
-  void new_refresh_check_done (int id_refresh);
+  void refresh_check_done (int id_refresh);
 
   /// Receive a Refresh data message from an adjacent Block
-  void p_new_refresh_recv (MsgRefresh * msg);
+  void p_refresh_recv (MsgRefresh * msg);
 
-  int new_refresh_load_field_faces_ (Refresh & refresh);
+  int refresh_load_field_faces_ (Refresh & refresh);
   /// Scatter particles in ghost zones to neighbors
-  int new_refresh_load_particle_faces_ (Refresh & refresh);
+  int refresh_load_particle_faces_ (Refresh & refresh);
   /// Send flux data to neighbors
-  int new_refresh_load_flux_faces_ (Refresh & refresh);
+  int refresh_load_flux_faces_ (Refresh & refresh);
   
-  void new_refresh_load_field_face_
+  void refresh_load_field_face_
   (Refresh & refresh, int refresh_type, Index index, int if3[3], int ic3[3]);
   /// Send particles in list to corresponding indices
-  void new_particle_send_(Refresh & refresh, int nl,Index index_list[], 
+  void particle_send_(Refresh & refresh, int nl,Index index_list[], 
 			  ParticleData * particle_list[]);
-  void new_refresh_load_flux_face_
+  void refresh_load_flux_face_
   (Refresh & refresh, int refresh_type, Index index, int if3[3], int ic3[3]);
 
-  void new_refresh_exit (Refresh & refresh);
-
-  /// Enter the refresh phase after synchronizing
-  void p_refresh_continue ()
-  {
-    refresh_continue();
-  }
-
-  void refresh_continue();
-
-  /// Exit the refresh phase after synchronizing
-  void p_refresh_exit () 
-  {
-    performance_start_(perf_refresh_exit);
-    refresh_exit_();
-    performance_stop_(perf_refresh_exit);
-    performance_start_(perf_refresh_exit_sync);
-  }
-  void r_refresh_exit (CkReductionMsg * msg) 
-  {
-    performance_start_(perf_refresh_exit);
-    delete msg;    
-    refresh_exit_();
-    performance_stop_(perf_refresh_exit);
-    performance_start_(perf_refresh_exit_sync);
-  }
-protected:
-  void refresh_exit_ ();
-  /// Pack field face data into arrays and send to neighbors
-public:
-
-  void p_refresh_store (MsgRefresh * msg);
+  void refresh_exit (Refresh & refresh);
 
   /// Get restricted data from child when it is deleted
   void p_refresh_child (int n, char a[],int ic3[3]);
@@ -800,9 +769,6 @@ public: // virtual functions
   /// Initialize Block
   virtual void initialize ();
 
-  // /// Return the rank of the Simulation
-  // int rank() const;
-
   //  int count_neighbors() const;
 
   void ResumeFromSync();
@@ -814,21 +780,6 @@ public: // virtual functions
    bool new_refresh) const;
 
   void print () const;
-
-  void debug_new_refresh(const char * file, int line)
-  {
-    CkPrintf ("DEBUG_NEW_REFRESH %s:%d\n",file,line);
-    const int n = new_refresh_sync_list_.size();
-    for (int i=0; i<n; i++) {
-      Sync & sync = new_refresh_sync_list_[i];
-      CkPrintf ("DEBUG_NEW_REFRESH   sync %p %d/%u\n",(void*)&sync,sync.value(),sync.stop());
-      CkPrintf ("DEBUG_NEW_REFRESH   state %s\n",
-                (sync.state()==RefreshState::INACTIVE) ? "INACTIVE" :
-                ((sync.state()==RefreshState::ACTIVE) ? "ACTIVE" : "READY"));
-      CkPrintf ("DEBUG_NEW_REFRESH   mesg %lu\n",new_refresh_msg_list_[i].size());
-    }
-    fflush(stdout);
-  }
 
 protected: // functions
 
@@ -938,7 +889,7 @@ protected: // functions
 
   /// Return the synchronization object for the given Refresh object id
   Sync * sync_ (int id_refresh) throw()
-  { return &new_refresh_sync_list_[id_refresh]; }
+  { return &refresh_sync_list_[id_refresh]; }
 
 protected: // attributes
 
@@ -1041,8 +992,8 @@ protected: // attributes
   /// (Not a pointer since must be one per Block for synchronization counters)
   std::vector<Refresh*> refresh_;
 
-  std::vector < Sync > new_refresh_sync_list_;
-  std::vector < std::vector <MsgRefresh * > > new_refresh_msg_list_;
+  std::vector < Sync > refresh_sync_list_;
+  std::vector < std::vector <MsgRefresh * > > refresh_msg_list_;
 
 };
 

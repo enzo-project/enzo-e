@@ -24,7 +24,7 @@ MethodDebug::MethodDebug (int num_fields) throw()
 {
   // Set up post-refresh to refresh all conserved fields in group_
 
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
   cello::refresh(ir_post_)->add_all_fields();
 
   field_sum_.resize(num_fields);

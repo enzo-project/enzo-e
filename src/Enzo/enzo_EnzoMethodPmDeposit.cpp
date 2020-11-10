@@ -37,7 +37,7 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
 {
   // Initialize default Refresh object
 
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
 
   Refresh * refresh = cello::refresh(ir_post_);
 
@@ -374,6 +374,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     if (rank >= 3) for (int i=0; i<m; i++) vz[i] = vzf[i];
     else           for (int i=0; i<m; i++) vz[i] = 0.0;
 
+    
     FORTRAN_NAME(dep_grid_cic)(de,de_gas,temp,
 			       vx, vy, vz, 
 			       &dtf, rfield, &rank,
