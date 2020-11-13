@@ -41,6 +41,38 @@ void Refresh::add_all_fields(std::string field_group)
 
 //----------------------------------------------------------------------
 
+std::vector<int> Refresh::field_list_src() const
+{
+  std::vector<int> field_list;
+  if (all_fields_) {
+    int nf = cello::field_descr()->field_count();
+    for (int i=0; i<nf; i++) {
+      field_list.push_back(i);
+    }
+    return field_list;
+  } else {
+    return field_list_src_;
+  }
+}
+
+//----------------------------------------------------------------------
+
+std::vector<int> Refresh::field_list_dst() const
+{
+  std::vector<int> field_list;
+  if (all_fields_) {
+    int nf = cello::field_descr()->field_count();
+    for (int i=0; i<nf; i++) {
+      field_list.push_back(i);
+    }
+    return field_list;
+  } else {
+    return field_list_dst_;
+  }
+}
+
+//----------------------------------------------------------------------
+
 int Refresh::data_size () const
 {
   int count = 0;

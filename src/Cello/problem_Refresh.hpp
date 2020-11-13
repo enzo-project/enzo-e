@@ -159,6 +159,9 @@ public: // interface
     field_list_src_ = field_list;
     field_list_dst_ = field_list;
   }
+
+  /// Return the field list as a list, even if all_fields is set
+  std::vector<int> field_list() const;
   
   /// Return whether all fields are refreshed
   bool all_fields() const
@@ -169,13 +172,11 @@ public: // interface
   { return (all_fields_ || (field_list_src_.size() > 0)); }
 
   /// Return the list of source fields participating in the Refresh operation
-  std::vector<int> & field_list_src()
-  { return field_list_src_; }
+  std::vector<int> field_list_src() const;
 
   /// Return the list of destination fields participating in the
   /// Refresh operation
-  std::vector<int> & field_list_dst()
-  { return field_list_dst_; }
+  std::vector<int> field_list_dst() const;
 
   //--------------------------------------------------
   // PARTICLE METHODS

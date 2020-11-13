@@ -8,6 +8,8 @@
 #ifndef CHARM_MSG_REFRESH_HPP
 #define CHARM_MSG_REFRESH_HPP
 
+// #define TRACE_MSG_REFRESH /* include name_block and name_type */
+
 #include "cello.hpp"
 
 class Data;
@@ -46,6 +48,27 @@ public: // interface
   /// Update the Data with data stored in this message
   void update (Data * data);
 
+  void set_block_type(std::string block, std::string type)
+  {
+#ifdef TRACE_MSG_REFRESH      
+    free(name_block_);
+    name_block_ = strdup(block.c_str());
+    free(name_type_);
+    name_type_ = strdup(type.c_str());
+#endif    
+  }
+
+#ifdef TRACE_MSG_REFRESH      
+  std::string block_name ()
+  {
+    return std::string(name_block_);
+  }
+  std::string type_name()
+  {
+    return std::string(name_type_);
+  }
+#endif    
+  
 public: // static methods
 
   /// Pack data to serialize
@@ -66,6 +89,11 @@ protected: // attributes
 
   /// Saved Charm++ buffer for deleting after unpack()
   void * buffer_;
+
+#ifdef TRACE_MSG_REFRESH      
+  char * name_block_;
+  char * name_type_;
+#endif  
 
 };
 

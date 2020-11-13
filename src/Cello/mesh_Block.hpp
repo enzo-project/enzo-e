@@ -190,7 +190,9 @@ public: // interface
 
   /// Return the name of the block
   std::string name () const throw();
-
+  /// Return the name of the block with the given index
+  std::string name(Index index) const throw();
+  
   /// Return the size the Block array
   void size_array (int * nx, int * ny = 0, int * nz = 0) const throw();
 
@@ -597,11 +599,20 @@ protected:
 
   /// Pack field face data into arrays and send to neighbors
   int refresh_load_field_faces_ (Refresh * refresh);
+
   /// Handle the special case of refresh on interpolated faces
   /// requiring extra padding
-  int refresh_extra_field_faces_
+  int refresh_load_extra_face_
   (Refresh refresh, Index index_neighbor,
    int level, int level_face, int if3[3],int ic3[3]);
+
+  /// Send padded array of fields to neighbor for interpolations whose
+  /// domains overlap multiple blocks
+  void refresh_extra_send_
+  (Refresh & refresh, Index index_neighbor, int if3[3],
+   int ma3[3], int iam3[3], int iap3[3], int ifm3[3], int ifp3[3],
+   Field field);
+
   /// Scatter particles in ghost zones to neighbors
   int refresh_load_particle_faces_ (Refresh * refresh);
 

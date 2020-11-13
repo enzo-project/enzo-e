@@ -796,29 +796,36 @@ std::string Block::name() const throw()
 {
   if (name_ == "") {
 
-    const int rank = cello::rank();
-    int blocking[3] = {1,1,1};
-    cello::hierarchy()->root_blocks(blocking,blocking+1,blocking+2);
-    const int level = this->level();
-    for (int i=-1; i>=level; i--) {
-      blocking[0] /= 2;
-      blocking[1] /= 2;
-      blocking[2] /= 2;
-    }
-
-    int bits[3] = {0,0,0};
-    
-    blocking[0]--;
-    blocking[1]--;
-    blocking[2]--;
-
-    if (blocking[0]) do { ++bits[0]; } while (blocking[0]/=2);
-    if (blocking[1]) do { ++bits[1]; } while (blocking[1]/=2);
-    if (blocking[2]) do { ++bits[2]; } while (blocking[2]/=2);
-
-    name_ = "B" + index_.bit_string(level,rank,bits);
+    name_ = name(index_);
   }
   return name_;
+}
+
+//----------------------------------------------------------------------
+
+std::string Block::name(Index index) const throw()
+{
+  int blocking[3] = {1,1,1};
+  cello::hierarchy()->root_blocks(blocking,blocking+1,blocking+2);
+  
+  const int level = index.level();
+  for (int i=-1; i>=level; i--) {
+    blocking[0] /= 2;
+    blocking[1] /= 2;
+    blocking[2] /= 2;
+  }
+
+  int bits[3] = {0,0,0};
+    
+  blocking[0]--;
+  blocking[1]--;
+  blocking[2]--;
+
+  if (blocking[0]) do { ++bits[0]; } while (blocking[0]/=2);
+  if (blocking[1]) do { ++bits[1]; } while (blocking[1]/=2);
+  if (blocking[2]) do { ++bits[2]; } while (blocking[2]/=2);
+
+  return std::string("B" + index.bit_string(level,cello::rank(),bits));
 }
 
 //----------------------------------------------------------------------

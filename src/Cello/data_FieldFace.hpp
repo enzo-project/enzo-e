@@ -47,9 +47,6 @@ public: // interface
 
   }
 
-  /// Constructor of initialized FieldFace
-  FieldFace (int rank, const Field & field) throw();
-     
   /// Destructor
   ~FieldFace() throw();
 
@@ -194,8 +191,6 @@ private: // functions
 	      bool accumulate) throw();
 
 
-  std::vector<int> field_list_src_(Field field) const;
-  std::vector<int> field_list_dst_(Field field) const;
   bool accumulate_(int index_src, int index_dst) const;
 
   /// Multiply the given field by density to convert to conservative

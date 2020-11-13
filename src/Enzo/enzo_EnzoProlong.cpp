@@ -108,7 +108,28 @@ int EnzoProlong::apply_
       }
     }
   } else if (rank == 3) {
-    ERROR("EnzoProlong","3D not implemented yet");
+    // copy array
+    int ixc,iyc,izc;
+    int ixbc,iybc,izbc;
+    const int ic0 = o3_c[0] + m3_c[0]*(o3_c[1] + m3_c[1]*o3_c[2]);
+    for (izbc=0; izbc<mzbc; izbc++) {
+      izc = izbc-1;
+      izc = std::max(izc,0);
+      izc = std::min(izc,nzc-1);
+      for (iybc=0; iybc<mybc; iybc++) {
+        iyc = iybc-1;
+        iyc = std::max(iyc,0);
+        iyc = std::min(iyc,nyc-1);
+        for (ixbc=0; ixbc<mxbc; ixbc++) {
+          ixc = ixbc-1;
+          ixc = std::max(ixc,0);
+          ixc = std::min(ixc,nxc-1);
+          const int ibc=ixbc + mxbc*(iybc + mybc*izbc);
+          const int ic =ixc  +  mxc*(iyc  +  myc*izc);
+          values_bc[ibc] = values_c[ic+ic0];
+        }
+      }
+    }
   }
   int ndim;
   enzo_float * parent;

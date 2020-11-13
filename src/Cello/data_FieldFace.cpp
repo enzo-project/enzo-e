@@ -31,27 +31,6 @@ enum enum_op_type {
 
 //----------------------------------------------------------------------
 
-FieldFace::FieldFace 
-( int rank, const Field & field ) throw()
-  :  rank_(rank),          
-     refresh_type_(refresh_unknown),
-     prolong_(NULL),
-     restrict_(NULL),
-     refresh_(NULL),
-     new_refresh_(false),
-     box_()
-{
-  ++counter[cello::index_static()];
-
-  for (int i=0; i<3; i++) {
-    ghost_[i] = false;
-    face_[i]  = 0;
-    child_[i] = 0;
-  }
-}
-
-//----------------------------------------------------------------------
-
 FieldFace::~FieldFace() throw ()
 {
 #ifdef DEBUG_FIELD_FACE  
@@ -160,11 +139,12 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
 {
   size_t index_array = 0;
 
-  std::vector <int> field_list = field_list_src_(field);
+  auto field_list_src = refresh_->field_list_src();
+  auto field_list_dst = refresh_->field_list_dst();
 
-  for (size_t i_f=0; i_f < field_list.size(); i_f++) {
+  for (size_t i_f=0; i_f < field_list_src.size(); i_f++) {
 
-    const size_t index_field = field_list[i_f];
+    const size_t index_field = field_list_src[i_f];
     
     precision_type precision = field.precision(index_field);
 
@@ -178,8 +158,9 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
     field.ghost_depth(index_field,&g3[0],&g3[1],&g3[2]);
     field.centering(index_field,&c3[0],&c3[1],&c3[2]);
 
-    int index_src = field_list_src_(field)[i_f];
-    int index_dst = field_list_dst_(field)[i_f];
+    int index_src = field_list_src[i_f];
+    int index_dst = field_list_dst[i_f];
+    
     const bool accumulate = accumulate_(index_src,index_dst);
 
     int i3[3], n3[3];
@@ -256,11 +237,12 @@ void FieldFace::array_to_face (char * array, Field field) throw()
 {
   size_t index_array = 0;
 
-  std::vector<int> field_list = field_list_dst_(field);
+  auto field_list_src = refresh_->field_list_src();
+  auto field_list_dst = refresh_->field_list_dst();
   
-  for (size_t i_f=0; i_f < field_list.size(); i_f++) {
+  for (size_t i_f=0; i_f < field_list_dst.size(); i_f++) {
 
-    size_t index_field = field_list[i_f];
+    size_t index_field = field_list_dst[i_f];
 
     precision_type precision = field.precision(index_field);
 
@@ -274,8 +256,8 @@ void FieldFace::array_to_face (char * array, Field field) throw()
     field.ghost_depth(index_field,&g3[0],&g3[1],&g3[2]);
     field.centering(index_field,&c3[0],&c3[1],&c3[2]);
 
-    int index_src = field_list_src_(field)[i_f];
-    int index_dst = field_list_dst_(field)[i_f];
+    int index_src = field_list_src[i_f];
+    int index_dst = field_list_dst[i_f];
     const bool accumulate = accumulate_(index_src,index_dst);
 
     int i3[3], n3[3];
@@ -324,11 +306,20 @@ void FieldFace::array_to_face (char * array, Field field) throw()
 
       const int padding = prolong->padding();
 
-      index_array += prolong->apply
-	(precision, 
-	 field_ghost,m3,i3,       n3,
-	 array_ghost,nc3,i3_array, nc3,
-	 accumulate);
+      if (padding == 0) {
+        index_array += prolong->apply
+          (precision, 
+           field_ghost,m3,i3,       n3,
+           array_ghost,nc3,i3_array, nc3,
+           accumulate);
+      } else {
+        //        CkPrintf ("DEBUG_PADDING array_to_face\n");
+        index_array += prolong->apply
+          (precision, 
+           field_ghost,m3,i3,       n3,
+           array_ghost,nc3,i3_array, nc3,
+           accumulate);
+      }
 
     } else {
 
@@ -362,8 +353,8 @@ void FieldFace::array_to_face (char * array, Field field) throw()
 void FieldFace::face_to_face (Field field_src, Field field_dst)
 {
   
-  std::vector<int> field_list_src = field_list_src_(field_src);
-  std::vector<int> field_list_dst = field_list_dst_(field_dst);
+  auto field_list_src = refresh_->field_list_src();
+  auto field_list_dst = refresh_->field_list_dst();
   
   for (size_t i_f=0; i_f < field_list_src.size(); i_f++) {
 
@@ -442,10 +433,18 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
 
       const int padding = prolong->padding();
 
-      prolong->apply (precision, 
-		      values_dst,m3,id3, nd3,
-		      values_src,m3,is3, ns3,
-		      accumulate);
+      if (padding == 0) {
+        prolong->apply (precision, 
+                        values_dst,m3,id3, nd3,
+                        values_src,m3,is3, ns3,
+                        accumulate);
+      } else {
+        //        CkPrintf ("DEBUG_PADDING face_to_face\n");
+        prolong->apply (precision, 
+                        values_dst,m3,id3, nd3,
+                        values_src,m3,is3, ns3,
+                        accumulate);
+      }
 
     } else if (refresh_type_ == refresh_coarse) {
 
@@ -491,11 +490,12 @@ int FieldFace::num_bytes_array(Field field) throw()
 {
   int array_size = 0;
 
-  std::vector<int> field_list = field_list_src_(field);
+  auto field_list_src = refresh_->field_list_src();
+  auto field_list_dst = refresh_->field_list_dst();
 
-  for (size_t i_f=0; i_f < field_list.size(); i_f++) {
+  for (size_t i_f=0; i_f < field_list_src.size(); i_f++) {
 
-    size_t index_field = field_list[i_f];
+    size_t index_field = field_list_src[i_f];
 
     precision_type precision = field.precision(index_field);
     int bytes_per_element = cello::sizeof_precision (precision);
@@ -506,8 +506,8 @@ int FieldFace::num_bytes_array(Field field) throw()
     field.ghost_depth(index_field,&g3[0],&g3[1],&g3[2]);
     field.centering(index_field,&c3[0],&c3[1],&c3[2]);
 
-    int index_src = field_list_src_(field)[i_f];
-    int index_dst = field_list_dst_(field)[i_f];
+    int index_src = field_list_src[i_f];
+    int index_dst = field_list_dst[i_f];
     const bool accumulate = accumulate_(index_src,index_dst);
 
     int i3[3], n3[3];
@@ -797,32 +797,6 @@ void FieldFace::print(const char * message)
 void FieldFace::set_field_list(std::vector<int> field_list)
 {
   refresh_->set_field_list(field_list);
-}
-
-//======================================================================
-
-std::vector<int> FieldFace::field_list_src_(Field field) const 
-{
-  std::vector<int> field_list = refresh_->field_list_src();
-  if (refresh_->all_fields()) {
-    for (int i=0; i<field.field_count(); i++) {
-      field_list.push_back(i);
-    }
-  }
-  return field_list;
-}
-
-//----------------------------------------------------------------------
-
-std::vector<int> FieldFace::field_list_dst_(Field field) const 
-{
-  std::vector<int> field_list = refresh_->field_list_dst();
-  if (refresh_->all_fields()) {
-    for (int i=0; i<field.field_count(); i++) {
-      field_list.push_back(i);
-    }
-  }
-  return field_list;
 }
 
 //----------------------------------------------------------------------

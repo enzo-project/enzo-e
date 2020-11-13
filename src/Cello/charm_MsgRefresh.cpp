@@ -23,8 +23,19 @@ MsgRefresh::MsgRefresh()
       id_refresh_(-1),
       data_msg_(nullptr),
       buffer_(nullptr)
+#ifdef TRACE_MSG_REFRESH      
+    ,
+      name_block_(nullptr),
+      name_type_(nullptr)
+#endif      
 {
-  ++counter[cello::index_static()]; 
+  ++counter[cello::index_static()];
+#ifdef TRACE_MSG_REFRESH      
+  name_block_=(char *)malloc(1);
+  name_block_[0] = '\0';
+  name_type_=(char *)malloc(1);
+  name_type_[0] = '\0';
+#endif  
 }
 
 //----------------------------------------------------------------------
@@ -63,6 +74,12 @@ void * MsgRefresh::pack (MsgRefresh * msg)
   int size = 0;
 
   size += sizeof(int); // id_refresh
+  
+#ifdef TRACE_MSG_REFRESH      
+  size += sizeof(int) + strlen(msg->name_block_)*sizeof(char);
+  size += sizeof(int) + strlen(msg->name_type_)*sizeof(char);
+#endif
+  
   size += sizeof(int);  // have_data
   int have_data = (msg->data_msg_ != nullptr);
   
@@ -89,6 +106,16 @@ void * MsgRefresh::pack (MsgRefresh * msg)
   pc = buffer;
 
   (*pi++) = msg->id_refresh_;
+
+#ifdef TRACE_MSG_REFRESH      
+  int n=strlen(msg->name_block_);
+  (*pi++) = n;
+  for (int i=0; i<n; i++) (*pc++) = msg->name_block_[i];
+  n=strlen(msg->name_type_);
+  (*pi++) = n;
+  for (int i=0; i<n; i++) (*pc++) = msg->name_type_[i];
+#endif  
+  
 #ifdef DEBUG_MSG_REFRESH
   CkPrintf ("DEBUG_MSG_REFRESH MsgRefresh::pack id_refresh=%d\n",msg->id_refresh_);
 #endif  
@@ -141,6 +168,19 @@ MsgRefresh * MsgRefresh::unpack(void * buffer)
   pc = (char *) buffer;
 
   msg->id_refresh_ = (*pi++) ;
+
+#ifdef TRACE_MSG_REFRESH      
+  int n = (*pi++);
+  msg->name_block_=(char *)malloc(n+1);
+  for (int i=0; i<n; i++) msg->name_block_[i] = (*pc++);
+  msg->name_block_[n] = '\0';
+
+  n = (*pi++);
+  msg->name_type_=(char *)malloc(n+1);
+  for (int i=0; i<n; i++) msg->name_type_[i] = (*pc++);
+  msg->name_type_[n] = '\0';
+#endif  
+  
 #ifdef DEBUG_MSG_REFRESH
   CkPrintf ("DEBUG_MSG_REFRESH MsgRefresh::pack id_refresh=%d\n",msg->id_refresh_);
 #endif  

@@ -27,8 +27,16 @@ public: // interface
       particle_data_(nullptr),
       particle_data_delete_(false),
       face_fluxes_list_(),
-      face_fluxes_delete_()
+      face_fluxes_delete_(),
+      padded_face_(),
+      padded_face_field_list_()
   {
+    for (int i=0; i<3; i++) {
+      m3_pf_[i]=0;
+      if3_pf_[i]=0;
+      im3_pf_[i]=0;
+      ip3_pf_[i]=0;
+    }
     ++counter[cello::index_static()]; 
   }
 
@@ -56,6 +64,8 @@ public: // interface
     }
     face_fluxes_list_.clear();
     face_fluxes_delete_.clear();
+    padded_face_.clear();
+    padded_face_field_list_.clear();
   }
 
   /// Copy constructor
@@ -157,6 +167,17 @@ public: // interface
     face_fluxes_delete_[i] = is_new;
   }
 
+  /// ------------------
+  /// PADDED FACE ARRAYS
+  /// ------------------
+
+  /// Initialize the padded face arrays to send to neighbors
+  void set_padded_face
+  (int if3[3],int m3[3],
+   int iam3[3], int iap3[3],
+   int ifm3[3], int ifp3[3],
+   std::vector<int> padded_face_field_list_, Field field);
+   
   ///--------------------
   /// PACKING / UNPACKING
   ///--------------------
@@ -227,9 +248,24 @@ protected: // attributes
 
   /// Flux faces (array for each field)
   std::vector<FaceFluxes *> face_fluxes_list_;
-  
+
   /// Whether Flux data should be deleted in destructor
   std::vector<bool> face_fluxes_delete_;
+
+  /// Padded face array (for interpolation that requires extra layer
+  /// of cells around FieldFace that intersects multiple Blocks)
+  /// This stores padded faces for all fields in
+  std::vector<cello_float> padded_face_;
+  /// List of field indices for padded face
+  std::vector<int> padded_face_field_list_;
+  /// dimensions of the padded face array
+  int m3_pf_[3];
+  /// face associated with the padded face (from the receiver's perspective)
+  int if3_pf_[3];
+  /// lower loop limits for the padded face
+  int im3_pf_[3];
+  /// upper loop limits for the padded face
+  int ip3_pf_[3];
 
 };
 

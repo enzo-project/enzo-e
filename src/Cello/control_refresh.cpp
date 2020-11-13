@@ -15,6 +15,42 @@
 
 #define CHECK_ID(ID) ASSERT1 ("CHECK_ID","Invalid id %d",ID,(ID>=0));
 
+// #define DEBUG_ENZO_PROLONG
+// #define TRACE_COMM
+
+//----------------------------------------------------------------------
+
+#ifdef TRACE_COMM
+
+#   define TRACE_COMM_SEND(TYPE,BLOCK,NAME_RECV,ID)                     \
+  {                                                                     \
+    CkPrintf ("TRACE_COMM %s send %s >> %s send %d\n",   \
+              TYPE,BLOCK->name().c_str(),NAME_RECV.c_str(),ID);         \
+  }
+#   define TRACE_COMM_RECV(BLOCK,ID,MSG_REFRESH)                        \
+  {                                                                     \
+    CkPrintf ("TRACE_COMM %s recv %s << %s recv %d\n",   \
+              MSG_REFRESH->type_name().c_str(),                         \
+              BLOCK->name().c_str(),                                    \
+              MSG_REFRESH->block_name().c_str(), ID);                   \
+  }
+
+#   define TRACE_COMM_XPCT(TYPE,NAME_RECV,ID,NAME_SEND)                 \
+  {                                                                     \
+    CkPrintf ("TRACE_COMM %s xpct %s << %s xpct %d\n",   \
+              TYPE,                                                     \
+              NAME_RECV.c_str(),                                        \
+              NAME_SEND.c_str(), ID);                                   \
+  }
+
+#else
+
+#   define TRACE_COMM_SEND(MSG,BLOCK,NAME_RECV,ID) /* ... */
+#   define TRACE_COMM_RECV(BLOCK,ID,MSG_REFRESH) /* ... */
+#   define TRACE_COMM_XPCT(TYPE,BLOCK,ID,NAME_RECV) /* ... */
+
+#endif
+
 //----------------------------------------------------------------------
 
 void Block::refresh_start (int id_refresh, int callback)
@@ -64,6 +100,9 @@ void Block::refresh_start (int id_refresh, int callback)
 
     // Initialize sync counter
     sync->set_stop(count);
+#ifdef TRACE_COMM    
+    CkPrintf ("TRACE_COMM %s %d count %d\n",name().c_str(),id_refresh,count);
+#endif    
 
     refresh_wait(id_refresh,callback);
 
@@ -116,6 +155,7 @@ void Block::refresh_wait (int id_refresh, int callback)
     // unpack message data into Block data
     msg->update(data());
       
+    TRACE_COMM_RECV(this,id_refresh,msg);
     delete msg;
     sync->advance();
   }
@@ -178,12 +218,14 @@ void Block::p_refresh_recv (MsgRefresh * msg)
   Sync * sync = sync_(id_refresh);
 
   if (sync->state() == RefreshState::READY) {
+
     // unpack message data into Block data if ready
     msg->update(data());
       
     delete msg;
 
     sync->advance();
+    TRACE_COMM_RECV(this,id_refresh,msg);
 
     // check if it's the last message processed
     refresh_check_done(id_refresh);
@@ -249,11 +291,12 @@ int Block::refresh_load_field_faces_ (Refresh & refresh)
 
       // handle padded interpolation special case if needed
 
-      count += refresh_extra_field_faces_
+      count += refresh_load_extra_face_
         (refresh,index_neighbor, level,level_face,if3,ic3);
 
       refresh_load_field_face_ (refresh,refresh_type,index_neighbor,if3,ic3);
       ++count;
+      TRACE_COMM_XPCT("field",name(),refresh.id(),name(index_neighbor));
     }
 
   } else if (neighbor_type == neighbor_level) {
@@ -274,6 +317,8 @@ int Block::refresh_load_field_faces_ (Refresh & refresh)
 	int ic3[3] = {0,0,0};
 	refresh_load_field_face_ (refresh,refresh_same,index_face,if3,ic3);
 	++count;
+        TRACE_COMM_XPCT("field",name(),refresh.id(),name(index_face));
+
       }
 
     }
@@ -301,7 +346,9 @@ void Block::refresh_load_field_face_
   // ... copy field ghosts to array using FieldFace object
 
   MsgRefresh * msg_refresh = new MsgRefresh;
-
+#ifdef TRACE_MSG_REFRESH  
+  msg_refresh->set_block_type(name(),"field");
+#endif
   bool lg3[3] = {false,false,false};
 
   FieldFace * field_face = create_face
@@ -314,21 +361,18 @@ void Block::refresh_load_field_face_
 
   const int id_refresh = refresh.id();
   CHECK_ID(id_refresh);
-  
-  ASSERT1 ("Block::refresh_load_field_face_()",
-	  "id_refresh %d of refresh object is out of range",
-	   id_refresh,
-	   (0 <= id_refresh));
+
   msg_refresh->set_refresh_id (id_refresh);
   msg_refresh->set_data_msg (data_msg);
 
+  TRACE_COMM_SEND("field",this,name(index_neighbor),id_refresh);
   thisProxy[index_neighbor].p_refresh_recv (msg_refresh);
 
 }
 
 //----------------------------------------------------------------------
 
-int Block::refresh_extra_field_faces_
+int Block::refresh_load_extra_face_
 (Refresh refresh,
  Index index_neighbor,
  int level, int level_face,
@@ -352,9 +396,10 @@ int Block::refresh_extra_field_faces_
                  g3[2] = (rank >= 3) ? g : 0};
 
     // Boxes used Bs -> br, Be -> br, Bs -> be
-    Box box_face (rank,n3,g3);
-    Box box_Bsbe (rank,n3,g3);
-    Box box_Bebr (rank,n3,g3);
+    // (s send, r receive, e extra)
+    Box box_sr (rank,n3,g3);
+    Box box_se (rank,n3,g3);
+    Box box_er (rank,n3,g3);
     
     // Create iterator over extra blocks
     
@@ -373,10 +418,14 @@ int Block::refresh_extra_field_faces_
                    l_send ? if3[1] : -if3[1],
                    l_send ? if3[2] : -if3[2] };
     
-    box_face.set_block(+1,jf3,ic3);
-    box_face.set_padding(padding);
+    box_sr.set_block(+1,jf3,ic3);
+    box_sr.set_padding(padding);
 
-    box_face.compute_region();
+    box_sr.compute_region();
+#ifdef DEBUG_ENZO_PROLONG    
+    if (l_send) box_sr.print("sr region send");
+    if (l_recv) box_sr.print("sr region recv");
+#endif    
 
     if (l_send) {
 
@@ -392,60 +441,115 @@ int Block::refresh_extra_field_faces_
         if (level_extra > level) {
           index_extra.child(level_extra,ec3,ec3+1,ec3+2);
         }
+#ifdef DEBUG_ENZO_PROLONG        
+        CkPrintf ("DEBUG_EXTRA %s send loop: if3 %d %d %d ic3 %d %d %d\n",
+                  name().c_str(),
+                  if3[0],if3[1],if3[2],
+                  ic3[0],ic3[1],ic3[2]);
+        CkPrintf ("DEBUG_EXTRA %s send loop: ef3 %d %d %d ic3 %d %d %d\n",
+                  name().c_str(),
+                  ef3[0],ef3[1],ef3[2],
+                  ec3[0],ec3[1],ec3[2]);
+        CkPrintf ("DEBUG_EXTRA %s send loop: Ls Lr Le %d %d %d\n",
+                  name().c_str(),
+                  level,level_face,level_extra);
+#endif        
         
-        const bool l_face_match =
-          (if3[0]==ef3[0]) && (if3[1]==ef3[1]) && (if3[2]==ef3[2]);
-        const bool l_child_match =
-          (ic3[0]==ec3[0]) && (ic3[1]==ec3[1]) && (ic3[2]==ec3[2]);
+        // ... skip extra block if it's the same as the neighbor
+        
+        bool l_valid_level = (std::abs(level_extra - level) <= 1);
 
-        const bool l_match = l_face_match && l_child_match;
+        if (index_extra != index_neighbor && l_valid_level) {
 
-        // ... skip extra block if it's the same as the face block
-        if (! l_match) {
-
+#ifdef DEBUG_ENZO_PROLONG
+          CkPrintf ("DEBUG_EXTRA %s send uniq\n",name().c_str());
+#endif          
           // ... determine overlap of extra block with intersection region
           const int level_send = level;
-          box_face.set_block ((level_extra-level_send), ef3,ec3);
-          box_face.compute_block_start();
+          box_sr.set_block ((level_extra-level_send), ef3,ec3);
+          box_sr.compute_block_start();
+#ifdef DEBUG_ENZO_PROLONG
+          box_sr.print("sr overlap send");
+#endif          
         
           int im3[3],ip3[3];
-          bool overlap = box_face.get_limits (im3,ip3,Box::BlockType::extra);
+          bool overlap = box_sr.get_limits (im3,ip3,Box::BlockType::extra);
           
+#ifdef DEBUG_ENZO_PROLONG
+          CkPrintf ("DEBUG_PROLONG send overlap %d if3 %d %d ef3 %d %d im3 %d %d ip3 %d %d\n",
+                    overlap?1:0,
+                    if3[0],if3[1],
+                    ef3[0],ef3[1],
+                    im3[0],im3[1],
+                    ip3[0],ip3[1]);
+#endif          
           if (overlap) {
 
+#ifdef DEBUG_ENZO_PROLONG
+            CkPrintf ("DEBUG_EXTRA %s send overlap\n",name().c_str());
+#endif            
             if (level_extra == level) {
           
+#ifdef DEBUG_ENZO_PROLONG
+              CkPrintf ("DEBUG_EXTRA %s send extra\n",name().c_str());
+#endif              
               // this block sends; extra block is coarse
           
               // handle contribution of this block Bs to Be -> br
 
-              int tf3[3] =
-                { if3[0]-ef3[0], if3[1]-ef3[1], if3[2]-ef3[2] };
+              int if3_er[3] = { if3[0]-ef3[0], if3[1]-ef3[1], if3[2]-ef3[2] };
+                                    
 
               // Box Bs | Be -> br
-              box_Bebr.set_block(+1,tf3,ic3);
-              box_Bebr.set_padding(padding);
-              box_Bebr.compute_region();
+              box_er.set_block(+1,if3_er,ic3);
+              box_er.set_padding(padding);
+              box_er.compute_region();
 
-              tf3[0] = -ef3[0];
-              tf3[1] = -ef3[1];
-              tf3[2] = -ef3[2];
-              box_Bebr.set_block(0,tf3,ic3); // ic3 ignored
-              box_Bebr.compute_block_start();
+              int itm3[3],itp3[3];
+              box_er.get_limits (itm3,itp3,Box::BlockType::send);
 
-              bool overlap = box_Bebr.get_limits
-                (im3,ip3,Box::BlockType::extra);
+              int if3_es[3] = {-ef3[0], -ef3[1], -ef3[2] };
+              
+              box_er.set_block(0,if3_es,ic3); // ic3 ignored
+              box_er.compute_block_start();
 
-              ASSERT3 ("Block::refresh_extra_field_faces_",
-                       "Face tf3 %d %d %d out of bounds",
-                       tf3[0],tf3[1],tf3[2],
-                       (-1 <= tf3[0] && tf3[0] <= 1) &&
-                       (-1 <= tf3[1] && tf3[1] <= 1) &&
-                       (-1 <= tf3[2] && tf3[2] <= 1));
-              ASSERT6 ("Block::refresh_extra_field_faces_",
-                       "Face tf3 %d %d %d does not overlap region for face %d %d %d",
-                       tf3[0],tf3[1],tf3[2],ef3[0],ef3[1],ef3[2],
-                       overlap);
+              int ifm3[3],ifp3[3];
+              int iam3[3],iap3[3];
+              box_er.get_limits (ifm3,ifp3,Box::BlockType::extra);
+              box_er.get_limits (iam3,iap3,Box::BlockType::array);
+
+              int ma3[3] =
+                { itp3[0]-itm3[0], itp3[1]-itm3[1], itp3[2]-itm3[2]};
+
+              refresh_extra_send_
+                (refresh, index_neighbor, if3_er,
+                 ma3, iam3,iap3, ifm3,ifp3, data()->field());
+
+              ASSERT9 ("Block::refresh_load_extra_face_",
+                       "Array limits %d %d %d - %d %d %d not within array size %d %d %d\n",
+                       iam3[0],iam3[1],iam3[2],
+                       iap3[0],iap3[1],iap3[2],
+                       ma3[0], ma3[1], ma3[2],
+                       (0 <= iam3[0] && iap3[0] <= ma3[0]) &&
+                       (0 <= iam3[1] && iap3[1] <= ma3[1]) &&
+                       (0 <= iam3[2] && iap3[2] <= ma3[2]));
+                       
+#ifdef DEBUG_ENZO_PROLONG
+              CkPrintf ("DEBUG_PROLONG send array size  %d %d %d\n",
+                        ma3[0],ma3[1],ma3[2]);
+              CkPrintf ("DEBUG_PROLONG send limits ifm3 %d %d %d ifp3 %d %d %d\n",
+                        ifm3[0],ifm3[1],ifm3[2],ifp3[0],ifp3[1],ifp3[2]);
+              CkPrintf ("DEBUG_PROLONG send limits iam3 %d %d %d iap3 %d %d %d\n\n",
+                        iam3[0],iam3[1],iam3[2],iap3[0],iap3[1],iap3[2]);
+#endif              
+
+              ASSERT3 ("Block::refresh_load_extra_face_",
+                       "Face if3_er %d %d %d out of bounds",
+                       if3_er[0],if3_er[1],if3_er[2],
+                       (-1 <= if3_er[0] && if3_er[0] <= 1) &&
+                       (-1 <= if3_er[1] && if3_er[1] <= 1) &&
+                       (-1 <= if3_er[2] && if3_er[2] <= 1));
+
             } // level_extra == level
           } // overlap
         } // ! match
@@ -458,6 +562,10 @@ int Block::refresh_extra_field_faces_
       int ef3[3];
       while (it_extra.next(ef3)) {
         
+#ifdef DEBUG_ENZO_PROLONG
+        CkPrintf ("DEBUG_EXTRA %s recv loop\n",
+                  name().c_str());
+#endif        
         const Index index_extra = it_extra.index();
         const int   level_extra = it_extra.face_level();
         
@@ -466,69 +574,132 @@ int Block::refresh_extra_field_faces_
           index_extra.child(level_extra,ec3,ec3+1,ec3+2);
         }
 
-        const bool l_face_match =
-          (if3[0]==ef3[0]) && (if3[1]==ef3[1]) && (if3[2]==ef3[2]);
-        const bool l_child_match =
-          (ic3[0]==ec3[0]) && (ic3[1]==ec3[1]) && (ic3[2]==ec3[2]);
+#ifdef DEBUG_ENZO_PROLONG
+        CkPrintf ("DEBUG_EXTRA %s recv loop: if3 %d %d %d ic3 %d %d %d\n",
+                  name().c_str(),
+                  if3[0],if3[1],if3[2],
+                  ic3[0],ic3[1],ic3[2]);
+        CkPrintf ("DEBUG_EXTRA %s recv loop: ef3 %d %d %d ic3 %d %d %d\n",
+                  name().c_str(),
+                  ef3[0],ef3[1],ef3[2],
+                  ec3[0],ec3[1],ec3[2]);
+        CkPrintf ("DEBUG_EXTRA %s recv loop: Ls Lr Le %d %d %d\n",
+                  name().c_str(),
+                  level_face,level,level_extra);
+#endif
 
-        const bool l_match = l_face_match && l_child_match;
+        // ... skip extra block if it's the same as the neighbor
 
-        // ... skip extra block if it's the same as the face block
+        bool l_valid_level = (std::abs(level_extra - level_face) <= 1);
 
-        if (!l_match) {
+        if (index_extra != index_neighbor && l_valid_level) {
 
+        
+#ifdef DEBUG_ENZO_PROLONG
+          CkPrintf ("DEBUG_EXTRA %s recv unique\n",name().c_str());
+#endif          
+          
           // *** count expected receive from Be or be ***
 
           // ... determine overlap of extra block with intersection region
           const int level_send = level_face;
-          box_face.set_block ((level_extra-level_send), ef3,ec3);
-          box_face.compute_block_start();
+          int if3_se[3] = {ef3[0]-if3[0],ef3[1]-if3[1],ef3[2]-if3[2] };
+          // adjust for fine blocks pointing to neighboring fine block in same parent
+          for (int i=0; i<3; i++) {
+            if (if3[i] == 0) {
+              if (ef3[i] == -1 && ec3[i] == 0) if3_se[i] = 0;
+              if (ef3[i] == +1 && ec3[i] == 1) if3_se[i] = 0;
+            }
+          }
+#ifdef DEBUG_ENZO_PROLONG
+          CkPrintf ("DEBUG_RECV sr %d %d   %d %d - %d %d\n",
+                    if3_se[0],if3_se[1],
+                    ef3[0],ef3[1],
+                    if3[0],if3[1]);
+#endif          
+          box_sr.set_block ((level_extra-level_send), if3_se,ec3);
+          box_sr.compute_block_start();
         
           int im3[3],ip3[3];
-          bool overlap = box_face.get_limits
-            (im3,ip3,Box::BlockType::extra);
+          bool overlap = box_sr.get_limits (im3,ip3,Box::BlockType::extra);
+#ifdef DEBUG_ENZO_PROLONG
+          box_sr.print("sr overlap recv");
+#endif          
 
+#ifdef DEBUG_ENZO_PROLONG
+          CkPrintf ("DEBUG_PROLONG recv overlap %d if3 %d %d ef3 %d %d im3 %d %d ip3 %d %d\n",
+                    overlap?1:0,
+                    if3[0],if3[1],
+                    ef3[0],ef3[1],
+                    im3[0],im3[1],
+                    ip3[0],ip3[1]);
+#endif          
           if (overlap) {
 
-#ifndef DEBUG_ENZO_PROLONG
             ++count;
-#endif        
+            TRACE_COMM_XPCT("extra",name(),refresh.id(),name(index_extra));
+            
+#ifdef DEBUG_ENZO_PROLONG
+            CkPrintf ("DEBUG_EXTRA %s recv overlap count %d\n",
+                      name().c_str(),count);
+#endif            
         
             if (level_extra == level) {
 
+#ifdef DEBUG_ENZO_PROLONG
+              CkPrintf ("DEBUG_EXTRA %s recv extra\n",name().c_str());
+#endif              
               // this block receives; extra block is fine
 
               // handle contribution of this block br to Bs -> be
 
-              int tf3[3] =
-                { ef3[0]-if3[0], ef3[1]-if3[1], ef3[2]-if3[2] };
+              // if3 rs
+              // ef3 re
+              // se = ef3 -
+              // int if3_se[3] = { ef3[0]+0.5*ec3[0]-(if3[0]+0.5*ic3[0]),
+              //                   ef3[1]+0.5*ec3[1]-(if3[1]+0.5*ic3[1]),
+              //                   ef3[2]+0.5*ec3[2]-(if3[2]+0.5*ic3[2])};
             
               // Box br | Bs -> be
-              box_Bsbe.set_block(+1,tf3,ec3);
-              box_Bsbe.set_padding(padding);
-              box_Bsbe.compute_region();
+              box_se.set_block(+1,if3_se,ec3);
+              box_se.set_padding(padding);
+              box_se.compute_region();
 
-              tf3[0] = -if3[0];
-              tf3[1] = -if3[1];
-              tf3[2] = -if3[2];
+              int itm3[3],itp3[3];
+              box_se.get_limits (itm3,itp3,Box::BlockType::send);
 
-              box_Bsbe.set_block(0,tf3,ic3);
-              box_Bsbe.compute_block_start();
+              int if3_sr[3] = { -if3[0], -if3[1], -if3[2] };
 
-              bool overlap = box_Bsbe.get_limits
-                (im3,ip3,Box::BlockType::extra);
+              box_se.set_block(0,if3_sr,ic3);
+              box_se.compute_block_start();
+
+              int ifm3[3],ifp3[3];
+              int iam3[3],iap3[3];
+              box_se.get_limits (ifm3,ifp3,Box::BlockType::extra);
+              box_se.get_limits (iam3,iap3,Box::BlockType::array);
+
+              int ma3[3] =
+                { itp3[0]-itm3[0], itp3[1]-itm3[1], itp3[2]-itm3[2]};
+
+              refresh_extra_send_
+                (refresh, index_extra, if3_se,
+                 ma3, iam3,iap3, ifm3,ifp3, data()->field());
+
+#ifdef DEBUG_ENZO_PROLONG
+              CkPrintf ("DEBUG_PROLONG recv array size  %d %d %d\n",
+                        itp3[0]-itm3[0],itp3[1]-itm3[1],itp3[2]-itm3[2]);
+              CkPrintf ("DEBUG_PROLONG recv limits ifm3 %d %d %d ifp3 %d %d %d\n",
+                        ifm3[0],ifm3[1],ifm3[2],ifp3[0],ifp3[1],ifp3[2]);
+              CkPrintf ("DEBUG_PROLONG recv limits iam3 %d %d %d iap3 %d %d %d\n\n",
+                        iam3[0],iam3[1],iam3[2],iap3[0],iap3[1],iap3[2]);
+#endif              
               
-              ASSERT3 ("Block::refresh_extra_field_faces_",
-                       "Face tf3 %d %d %d out of bounds",
-                       tf3[0],tf3[1],tf3[2],
-                       ((-1 <= tf3[0] && tf3[0] <= 1) &&
-                        (-1 <= tf3[1] && tf3[1] <= 1) &&
-                        (-1 <= tf3[2] && tf3[2] <= 1)));
-
-              ASSERT6 ("Block::refresh_extra_field_faces_",
-                       "Face %d %d %d does not overlap region for face %d %d %d",
-                       tf3[0],tf3[1],tf3[2],ef3[0],ef3[1],ef3[2],
-                       overlap);
+              ASSERT3 ("Block::refresh_load_extra_face_",
+                       "Face if3_se %d %d %d out of bounds",
+                       if3_se[0],if3_se[1],if3_se[2],
+                       ((-1 <= if3_se[0] && if3_se[0] <= 1) &&
+                        (-1 <= if3_se[1] && if3_se[1] <= 1) &&
+                        (-1 <= if3_se[2] && if3_se[2] <= 1)));
 
             } // level_extra == level
           } // if (overlap)
@@ -536,8 +707,43 @@ int Block::refresh_extra_field_faces_
       } // while (it_extra.next())
     } // (level > level_face)
   } // (level != level_face)
+
+#ifdef DEBUG_ENZO_PROLONG
+  CkPrintf ("DEBUG_PROLONG %s extra count %d\n",name().c_str(),count);
+#endif  
+
   return count;
 }
+
+//----------------------------------------------------------------------
+
+void Block::refresh_extra_send_
+(Refresh & refresh, Index index_neighbor, int if3[3],
+ int m3[3], int iam3[3], int iap3[3], int ifm3[3], int ifp3[3],
+ Field field)
+{
+
+  MsgRefresh * msg_refresh = new MsgRefresh;
+#ifdef TRACE_MSG_REFRESH  
+  msg_refresh->set_block_type(name(),"extra");
+#endif  
+
+  DataMsg * data_msg = new DataMsg;
+
+
+  const int id_refresh = refresh.id();
+  CHECK_ID(id_refresh);
+
+  data_msg->set_padded_face (if3,m3,iam3,iap3,ifm3, ifp3,
+                             refresh.field_list_src(),field);
+
+  msg_refresh->set_refresh_id (id_refresh);
+  msg_refresh->set_data_msg (data_msg);
+
+  TRACE_COMM_SEND("extra",this,name(index_neighbor),id_refresh);
+  thisProxy[index_neighbor].p_refresh_recv (msg_refresh);
+}
+
 
 //----------------------------------------------------------------------
 
@@ -600,18 +806,25 @@ void Block::particle_send_
       data_msg ->set_particle_data(p_data,true);
 
       MsgRefresh * msg_refresh = new MsgRefresh;
+#ifdef TRACE_MSG_REFRESH  
+      msg_refresh->set_block_type(name(),"particle");
+#endif      
       msg_refresh->set_data_msg (data_msg);
       msg_refresh->set_refresh_id (id_refresh);
 
+      TRACE_COMM_SEND("particle",this,name(index),id_refresh);
       thisProxy[index].p_refresh_recv (msg_refresh);
 
     } else if (p_data) {
       
       MsgRefresh * msg_refresh = new MsgRefresh;
-
+#ifdef TRACE_MSG_REFRESH  
+      msg_refresh->set_block_type(name(),"particle");
+#endif      
       msg_refresh->set_data_msg (nullptr);
       msg_refresh->set_refresh_id (id_refresh);
 
+      TRACE_COMM_SEND("particle",this,name(index),id_refresh);
       thisProxy[index].p_refresh_recv (msg_refresh);
 
       // assert ParticleData object exits but has no particles
@@ -722,6 +935,7 @@ int Block::particle_create_array_neighbors_
   for (il=0; it_neighbor.next(if3); il++) {
 
     const int level_face = it_neighbor.face_level();
+    TRACE_COMM_XPCT("particle",name(),refresh->id(),name(it_neighbor.index()));
 
     int ic3[3] = {0,0,0};
 
@@ -1027,6 +1241,7 @@ int Block::refresh_load_flux_faces_ (Refresh & refresh)
     refresh_load_flux_face_
       (refresh,refresh_type,index_neighbor,if3,ic3);
 
+    TRACE_COMM_XPCT("fluxes",name(),refresh.id(),name(index_neighbor));
     ++count;
 
   }
@@ -1083,10 +1298,13 @@ void Block::refresh_load_flux_face_
            (0 <= id_refresh));
 
   MsgRefresh * msg_refresh = new MsgRefresh;
-
+#ifdef TRACE_MSG_REFRESH  
+  msg_refresh->set_block_type(name(),"fluxes");
+#endif  
   msg_refresh->set_data_msg (data_msg);
   msg_refresh->set_refresh_id (id_refresh);
 
+  TRACE_COMM_SEND("fluxes",this,name(index_neighbor),id_refresh);
   thisProxy[index_neighbor].p_refresh_recv (msg_refresh);
 
 }

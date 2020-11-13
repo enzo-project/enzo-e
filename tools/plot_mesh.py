@@ -61,7 +61,7 @@ for line in fileinput.input():
       lines.append(line)
 max_level = 10
 
-for plotlevel in xrange(0,max_level):
+for plotlevel in range(0,max_level):
 
 
       for line in lines:
