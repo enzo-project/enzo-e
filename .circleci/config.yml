@@ -121,7 +121,7 @@ jobs:
         type: string
 
     docker:
-      - image: cimg/python:3.7.2
+      - image: cimg/python:3.7
 
     working_directory: ~/enzo-e
 
