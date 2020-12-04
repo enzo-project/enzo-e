@@ -17,10 +17,12 @@ EnzoMethodGrackle::EnzoMethodGrackle
   const double physics_cosmology_initial_redshift,
   const double time
 )
-  : Method(),
-    grackle_units_(),
+  : Method()
+#ifdef CONFIG_USE_GRACKLE
+    , grackle_units_(),
     grackle_rates_(),
     time_grackle_data_initialized_(ENZO_FLOAT_UNDEFINED)
+#endif
 {
 #ifdef CONFIG_USE_GRACKLE
 
