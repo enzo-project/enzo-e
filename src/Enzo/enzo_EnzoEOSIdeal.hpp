@@ -73,7 +73,7 @@ public: // interface
 				     int reconstructed_axis,
 				     int stale_depth) const;
 
-  enzo_float get_density_floor() const { return density_floor_; }
+inline  enzo_float get_density_floor() const { return density_floor_; }
 
   enzo_float get_pressure_floor() const { return pressure_floor_; }
 

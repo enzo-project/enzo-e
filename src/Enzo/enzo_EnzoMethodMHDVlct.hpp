@@ -19,7 +19,7 @@
 ///      Nearly every field overlaps between the two cases. Examples of the
 ///      primitives for adiabatic, ideal gas (without dual energy formalism):
 ///        - density         (both integrable and reconstructable)
-///        - velocitiy       (both integrable and reconstructable)
+///        - velocity       (both integrable and reconstructable)
 ///        - pressure        (just reconstructable)
 ///        - total_energy    (just integrable)
 ///        - bfield          (both integrable and reconstructable)
@@ -73,8 +73,8 @@
 ///          for values on the exterior of the grid.
 ///        - All reconstructed fields are not technically registered as
 ///          cell-centered fields. They are reused to store reconstructed values
-///          along different axes. Consequently, they are formally registerred
-///          as cell-centered fields (to guaruntee that they have enough space).
+///          along different axes. Consequently, they are formally registered
+///          as cell-centered fields (to guarantee that they have enough space).
 ///        - All reconstructable and integrable primitive quantities have
 ///          groupings named for them in Groupings 1, 3, 4, 11. We don't
 ///          construct separate groupings due to the high degree of overlap. To

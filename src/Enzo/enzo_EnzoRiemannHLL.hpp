@@ -40,7 +40,7 @@ struct EinfeldtWavespeed
 
   using LUT = EnzoRiemannLUT<inputLUT>;
 
-  void operator()(const lutarray<LUT> wl, const lutarray<LUT> wr,
+  inline void operator()(const lutarray<LUT> wl, const lutarray<LUT> wr,
                   const lutarray<LUT> Ul, const lutarray<LUT> Ur,
                   enzo_float pressure_l, enzo_float pressure_r,
                   const enzo_float gamma,
@@ -117,7 +117,7 @@ struct EinfeldtWavespeed
   /// @param v_roe2 The squared magnitude of the roe averaged velocity
   /// @param h_roe The Roe averaged specific enthalpy.
   /// @param gamma The adiabatic index
-  enzo_float roe_cs_(const enzo_float v_roe2, const enzo_float h_roe,
+  inline enzo_float roe_cs_(const enzo_float v_roe2, const enzo_float h_roe,
                      const enzo_float gamma) const throw()
   {
     enzo_float tiny2 = 0.;
@@ -127,7 +127,7 @@ struct EinfeldtWavespeed
 
   /// Return the fast magnetosonic speed needed to get the max and min
   /// eigenvalues for Roe's matrix for adiabatic Magnetohydrodynamics
-  enzo_float roe_cfast_(const lutarray<LUT> wl, const lutarray<LUT> wr,
+  inline enzo_float roe_cfast_(const lutarray<LUT> wl, const lutarray<LUT> wr,
                         const enzo_float sqrtrho_l, const enzo_float sqrtrho_r,
                         const enzo_float inv_sqrtrho_tot,
                         const enzo_float v_roe2, const enzo_float h_roe,
