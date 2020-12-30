@@ -3,7 +3,7 @@ import os
 def _check_dirs(search_paths):
         for search_path in search_paths:
                 if os.path.isdir(search_path):
-                        return path
+                        return search_path
         return None
 
 def charm_path_search(home):
