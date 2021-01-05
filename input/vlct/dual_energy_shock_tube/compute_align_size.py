@@ -32,7 +32,7 @@ _DT = 0.25
 # designates that x-axis must have a total number of cells divisable by 4:
 _TOTCELLS_REQ_FACTOR = 4
 
-# adiabatic index
+# adiabatic index (NOTE: this is explicitly set in initial_sod_shock_tube.incl)
 _GAMMA = 1.4
 
 if __name__ == '__main__':

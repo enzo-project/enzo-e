@@ -30,9 +30,8 @@ namespace enzo_riemann_utils{
   ///
   /// This has been factored out EnzoRiemannImpl to reduce the number of
   /// template functions created when the same LUT is reused
-  
   template <class LUT>
-  lutarray<LUT> compute_conserved(const lutarray<LUT> prim) noexcept
+  inline lutarray<LUT> compute_conserved(const lutarray<LUT> prim) noexcept
   {
     lutarray<LUT> cons;
 
@@ -52,7 +51,7 @@ namespace enzo_riemann_utils{
   //----------------------------------------------------------------------
 
   template <class LUT>
-  enzo_float mag_pressure(const lutarray<LUT> prim) noexcept
+  inline enzo_float mag_pressure(const lutarray<LUT> prim) noexcept
   {
     enzo_float bi = (LUT::bfield_i >= 0) ? prim[LUT::bfield_i] : 0;
     enzo_float bj = (LUT::bfield_j >= 0) ? prim[LUT::bfield_j] : 0;
@@ -63,16 +62,16 @@ namespace enzo_riemann_utils{
   //----------------------------------------------------------------------
 
   template <class LUT>
-  enzo_float sound_speed(const lutarray<LUT> prim_vals,
-                         enzo_float pressure, enzo_float gamma) noexcept
+  inline enzo_float sound_speed(const lutarray<LUT> prim_vals,
+                                enzo_float pressure, enzo_float gamma) noexcept
   { return std::sqrt(gamma * pressure / prim_vals[LUT::density]); }
 
   //----------------------------------------------------------------------
 
   template <class LUT>
-  enzo_float fast_magnetosonic_speed(const lutarray<LUT> prim_vals,
-                                     enzo_float pressure,
-                                     enzo_float gamma) noexcept
+  inline enzo_float fast_magnetosonic_speed(const lutarray<LUT> prim_vals,
+                                            enzo_float pressure,
+                                            enzo_float gamma) noexcept
   {
     enzo_float bi = (LUT::bfield_i >= 0) ? prim_vals[LUT::bfield_i] : 0;
     enzo_float bj = (LUT::bfield_j >= 0) ? prim_vals[LUT::bfield_j] : 0;
@@ -98,10 +97,10 @@ namespace enzo_riemann_utils{
   /// This function should be called when we to fix cos2 to some predetermined
   /// value
   template <class LUT>
-  enzo_float fast_magnetosonic_speed(const lutarray<LUT> prim_vals,
-                                     enzo_float pressure,
-                                     enzo_float gamma,
-                                     enzo_float cos2) noexcept
+  inline enzo_float fast_magnetosonic_speed(const lutarray<LUT> prim_vals,
+                                            enzo_float pressure,
+                                            enzo_float gamma,
+                                            enzo_float cos2) noexcept
   {
     enzo_float bi = (LUT::bfield_i >= 0) ? prim_vals[LUT::bfield_i] : 0;
     enzo_float bj = (LUT::bfield_j >= 0) ? prim_vals[LUT::bfield_j] : 0;
@@ -124,11 +123,10 @@ namespace enzo_riemann_utils{
 
   /// computes fluxes for the basic mhd conserved quantities - density,
   /// momentum, energy, magnetic fields
-
   template <class LUT>
-  lutarray<LUT> active_fluxes(const lutarray<LUT> prim,
-                              const lutarray<LUT> cons,
-                              enzo_float pressure) noexcept
+  inline lutarray<LUT> active_fluxes(const lutarray<LUT> prim,
+                                     const lutarray<LUT> cons,
+                                     enzo_float pressure) noexcept
   {
     lutarray<LUT> fluxes;
     enzo_float vi, vj, vk, p, Bi, Bj, Bk, etot, magnetic_pressure;
@@ -146,13 +144,13 @@ namespace enzo_riemann_utils{
     magnetic_pressure = mag_pressure<LUT>(prim);
 
     // Compute Fluxes
-    enzo_float pi = cons[LUT::velocity_i];
-    fluxes[LUT::density] = pi;
+    enzo_float mom_i = cons[LUT::velocity_i];
+    fluxes[LUT::density] = mom_i;
 
     // Fluxes for Mx, My, Mz
-    fluxes[LUT::velocity_i] = pi*vi - Bi*Bi + p + magnetic_pressure;
-    fluxes[LUT::velocity_j] = pi*vj - Bj*Bi;
-    fluxes[LUT::velocity_k] = pi*vk - Bk*Bi;
+    fluxes[LUT::velocity_i] = mom_i*vi - Bi*Bi + p + magnetic_pressure;
+    fluxes[LUT::velocity_j] = mom_i*vj - Bj*Bi;
+    fluxes[LUT::velocity_k] = mom_i*vk - Bk*Bi;
 
     // Flux for etot
     fluxes[LUT::total_energy] = ((etot + p + magnetic_pressure)*vi
@@ -211,7 +209,7 @@ namespace enzo_riemann_utils{
   /// @param stale_depth indicates the current stale_depth for the loaded
   ///   quanties.
   template<class LUT>
-  std::array<EFlt3DArray,LUT::NEQ> load_array_of_fields
+  inline std::array<EFlt3DArray,LUT::NEQ> load_array_of_fields
   (Block *block, Grouping &grouping,
    int dim, int stale_depth) noexcept
   {

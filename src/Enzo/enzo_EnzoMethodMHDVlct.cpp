@@ -517,7 +517,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // necessary the total energy can be synchronized with internal energy)
       //
       // Note: updated passive scalars are NOT saved in out_integrable_group in
-      //     specific form. Instead they are saved inconserved_passive_scalars
+      //     specific form. Instead they are saved in conserved_passive_scalars
       //     in conserved form.
       integrable_updater_->update_quantities(block, *primitive_group_,
 					     dUcons_group,

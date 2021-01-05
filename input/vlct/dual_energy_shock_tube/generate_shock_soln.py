@@ -1,6 +1,10 @@
 # this produces a tables of solutions to test against the Sod Shock
 # it's a little over-engineered but can be reused to prepare solutions to other
 # shock tube test problems
+#
+# References:
+# - E.F. Toro, "Riemann Solvers and numerical methods for fluid dynamics", 3rd
+#   ed., Springer-Verlag, Berlin, (2009) chpt. 4.
 
 # I have confirmed that the wavespeeds are consistent with the ones used in
 # Athena for the Sod Shock Tube test Problem

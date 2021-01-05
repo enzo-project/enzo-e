@@ -27,8 +27,6 @@ def run_tests(executable):
     temp = 'input/vlct/MHD_shock_tube/method_vlct_{:s}_rj2a_N{:d}.in'
     call_test = EnzoEWrapper(executable,temp)
 
-    # can't actually run the serial vs parallel test from this script (not sure
-    # how to get around request for password)
     call_test("x",256)
     call_test("y",256)
     call_test("z",256)

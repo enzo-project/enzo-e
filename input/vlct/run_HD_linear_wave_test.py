@@ -9,8 +9,6 @@
 # Specifically, this script:
 #   1.) Checks if that L1-norm of the error is appropriate for the inclined
 #       sound wave and 3 variants of the entropy wave for N=16 and N=32
-#       [Unlike Athena++, we are compare L1-norms to precise expected values - 
-#        therefore it probably isn't necessary to use 2 different resolutions]
 #   2.) Check that the L1-norm error is the same for left propagating and right
 #       propagating sound waves
 

@@ -59,7 +59,6 @@
 	      "bfield_x", "bfield_y", "bfield_z",
 	      "pressure"];
 
-      courant_=0.4;
       gamma = 1.6666666666666667;
 
       # The VL+CT method reconstructs interface values (to compute fluxes) twice

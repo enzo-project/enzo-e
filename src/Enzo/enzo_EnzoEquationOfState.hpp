@@ -61,7 +61,8 @@ public: // interface
 
   /// Applies primitive floor. This function has been factored out to allow for
   /// more easily debugging cases when the floor is unnecesarily applied.
-  static enzo_float apply_floor(const enzo_float value, const enzo_float floor){
+  inline static enzo_float apply_floor(const enzo_float value,
+                                       const enzo_float floor){
     enzo_float out;
     #ifdef RAISE_FLOOR_ERROR
     ASSERT("EnzoEquationOfState", "Should not need to apply primitive floor.",

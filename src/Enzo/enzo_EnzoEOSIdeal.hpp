@@ -96,16 +96,6 @@ private:
   EFlt3DArray retrieve_field_(EnzoFieldArrayFactory &array_factory,
 			      Grouping &group, std::string group_name,
 			      int index, int reconstructed_axis) const;
-  
-  /// Copies entries of the passively advected fields included by origin_group
-  /// to the corresponding entries of the fields included in destination_group
-  /// reconstructed_axis = -1 means that internal field shape data can be
-  /// truested. Values of 0, 1, or 2 mean that the field stores reconstructed
-  /// values along the x, y, or z axis and that it is actually face-centered
-  void copy_passively_advected_fields_(EnzoFieldArrayFactory &array_factory,
-				       Grouping &origin_group,
-				       Grouping &destination_group,
-				       int reconstructed_axis = -1) const;
 
 protected: // attributes
   enzo_float gamma_; // adiabatic index

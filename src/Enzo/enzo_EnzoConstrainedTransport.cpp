@@ -115,7 +115,7 @@ void EnzoConstrainedTransport::compute_center_efield
 //
 //   Cell-Centered Efield (i-component):
 //     Ec(k,j,i)       =     E(    k,    j,i)
-//     Ec_jp1(k,j,i)   =     E(    1,  j+1,i)
+//     Ec_jp1(k,j,i)   =     E(    k,  j+1,i)
 //     Ec_kp1(k,j,i)   =     E(  k+1,    j,i)
 //     Ec_jkp1(k,j,i)  =     E(  k+1,  j+1,i)
 //
@@ -176,19 +176,6 @@ void compute_edge_(int xstart, int ystart, int zstart,
 				Ek(iz,iy,ix) + Ek_jp1(iz,iy,ix) +
 				(dEdj_l-dEdj_r) + (dEdk_l - dEdk_r));
 
-	//if (iy == 4 && iz == 4 && ix == 4){
-	//  CkPrintf("Wj = %.15g, Wk = %.15g\n",
-	//	    Wj(iz,iy,ix), Wk(iz,iy,ix));
-	//  CkPrintf(("dEdk_l = %.15g, dEdk_r = %.15g\n"
-	//	    "dEdj_l = %.15g, dEdj_r = %.15g\n"),
-	//	    dEdk_l, dEdk_r, dEdj_l,dEdj_r);
-	//  CkPrintf(("Ek = %.15g, Ek_jp1 = %.15g\n"
-	//	    "Ej = %.15g, Ej_kp1 = %.15g\n"),
-	//	   Ek(iz,iy,ix), Ek_jp1(iz,iy,ix),
-	//	   Ej(iz,iy,ix),Ej_kp1(iz,iy,ix));
-	//  CkPrintf("Eedge = %.15g\n", Eedge(iz,iy,ix));
-	//  fflush(stdout);
-	//}
       }
     }
   }

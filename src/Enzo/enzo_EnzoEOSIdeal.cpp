@@ -384,26 +384,3 @@ EFlt3DArray EnzoEOSIdeal::retrieve_field_(EnzoFieldArrayFactory &array_factory,
 					     reconstructed_axis);
   }
 }
-
-//----------------------------------------------------------------------
-
-void EnzoEOSIdeal::copy_passively_advected_fields_
-(EnzoFieldArrayFactory &array_factory, Grouping &origin_group,
- Grouping &destination_group, int reconstruction_axis) const
-{
-  std::vector<std::string> group_names =
-    EnzoCenteredFieldRegistry::passive_scalar_group_names();
-  for (unsigned int i=0;i<group_names.size();i++){
-    std::string group_name = group_names[i];
-    int num_fields = origin_group.size(group_name);
-    for (int j=0;j<num_fields;j++){
-
-      EFlt3DArray src = retrieve_field_(array_factory, origin_group,
-					group_name, j, reconstruction_axis);
-      EFlt3DArray dest = retrieve_field_(array_factory, destination_group,
-					 group_name, j, reconstruction_axis);
-      dest.subarray() = src;
-    }
-  }
-}
-

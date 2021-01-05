@@ -34,18 +34,18 @@ public: // interface
 
   /// Returns the code of the axis id associated with each direction
   /// 0 <--> x, 1 <--> y, 2 <--> z 
-  int i_axis() const { return i_axis_; }
-  int j_axis() const { return (i_axis_+1)%3; }
-  int k_axis() const { return (i_axis_+2)%3; }
+  inline int i_axis() const { return i_axis_; }
+  inline int j_axis() const { return (i_axis_+1)%3; }
+  inline int k_axis() const { return (i_axis_+2)%3; }
 
   /// calculates the components of the i, j, and k unit vectors
-  void i_unit_vector(int &i_x, int &i_y, int &i_z) const {
+  inline void i_unit_vector(int &i_x, int &i_y, int &i_z) const {
     unit_vector_comp_(i_axis(), i_x, i_y, i_z);
   }
-  void j_unit_vector(int &j_x, int &j_y, int &j_z) const {
+  inline void j_unit_vector(int &j_x, int &j_y, int &j_z) const {
     unit_vector_comp_(j_axis(), j_x, j_y, j_z);
   }
-  void k_unit_vector(int &k_x, int &k_y, int &k_z) const {
+  inline void k_unit_vector(int &k_x, int &k_y, int &k_z) const {
     unit_vector_comp_(k_axis(), k_x, k_y, k_z);
   }
 
@@ -66,8 +66,8 @@ public: // interface
   ///     array.subarray(CSlice(2, array.shape(0)),
   ///                    CSlice(0, array.shape(1)),
   ///                    CSlice(1, array.shape(2)))
-  EFlt3DArray left_edge_offset(EFlt3DArray &array, int kstart, int jstart,
-			       int istart) const
+  inline EFlt3DArray left_edge_offset(EFlt3DArray &array, int kstart,
+                                      int jstart, int istart) const
   {
     return get_subarray(array, CSlice(kstart, nullptr), CSlice(jstart, nullptr),
 			CSlice(istart,nullptr));
@@ -75,8 +75,8 @@ public: // interface
 
   /// Returns the subarray of array for slices specified along the k-, j-,
   /// and i- axes using the i,j,k coordinate system represented by this instance
-  EFlt3DArray get_subarray(EFlt3DArray &array, CSlice k_slice, CSlice j_slice,
-			   CSlice i_slice) const
+  inline EFlt3DArray get_subarray(EFlt3DArray &array, CSlice k_slice,
+                                  CSlice j_slice, CSlice i_slice) const
   {
     CSlice slices[3];
     slices[2 - i_axis()] = i_slice;
@@ -88,7 +88,7 @@ public: // interface
 private:
 
   // helper_function
-  void unit_vector_comp_(int v_axis, int &v_i, int &v_j, int &v_k) const
+  inline void unit_vector_comp_(int v_axis, int &v_i, int &v_j, int &v_k) const
   {
     v_i = (v_axis == 0) ? 1 : 0;
     v_j = (v_axis == 1) ? 1 : 0;
