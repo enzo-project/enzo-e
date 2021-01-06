@@ -508,8 +508,6 @@ void OutputImage::write_block ( const Block *  block ) throw()
 	reduce_point_(image_data_,ix1,iy1,value,ax1*ay1);
 
       }
-      for (int dim = 0; dim < 3; dim++) delete [] position[dim];
-      delete [] position;
     }
   }
 }
