@@ -58,6 +58,7 @@
      }
    }
 
+ include "input/flux_correct.incl"
 
    Initial {
 

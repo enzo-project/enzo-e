@@ -81,6 +81,10 @@ class FieldFace;
 #include "data_ParticleData.hpp"
 #include "data_Particle.hpp"
 
+#include "data_Face.hpp"
+#include "data_FaceFluxes.hpp"
+#include "data_FluxData.hpp"
+
 #include "data_Data.hpp"
 
 #include "data_DataMsg.hpp"
@@ -170,7 +174,7 @@ class FieldFace;
 
 #   define TRACE_FIELD(NAME,FIELD,SCALE) /* ... */
 #   define PRINT_FIELD(NAME,FIELD,SCALE) /* ... */
-#   define TRACE_FIELD_GM(NAME,FIELD,SCALE,gx,gy,gz,mx,my,mz) /* ... */
+#   define TRACE_FIELD_GM(NAME,FIELD,SCALE,gx,gy,gz,mx,my,mz,PLOT) /* ... */
 #   define TRACE_FIELD_(NAME,FIELD,SCALE) /* ... */
 #   define TRACE_PARTICLE(ATTRIBUTE,particle,TYPE_NAME,ATTR_NAME) /* ... */
 

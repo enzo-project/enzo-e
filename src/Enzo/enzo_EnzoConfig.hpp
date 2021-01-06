@@ -140,12 +140,12 @@ public: // interface
       initial_collapse_temperature(0.0),
       // EnzoGrackleTest
 #ifdef CONFIG_USE_GRACKLE
-      initial_grackle_test_minimum_H_number_density(0.1),
       initial_grackle_test_maximum_H_number_density(1000.0),
-      initial_grackle_test_minimum_metallicity(1.0E-4),
       initial_grackle_test_maximum_metallicity(1.0),
-      initial_grackle_test_minimum_temperature(10.0),
       initial_grackle_test_maximum_temperature(1.0E8),
+      initial_grackle_test_minimum_H_number_density(0.1),
+      initial_grackle_test_minimum_metallicity(1.0E-4),
+      initial_grackle_test_minimum_temperature(10.0),
       initial_grackle_test_reset_energies(0),
 #endif /* CONFIG_USE_GRACKLE */
       // EnzoInitialMusic
@@ -158,6 +158,13 @@ public: // interface
       initial_music_particle_coords(),
       initial_music_particle_types(),
       initial_music_particle_attributes(),
+      initial_music_throttle_internode(),
+      initial_music_throttle_intranode(),
+      initial_music_throttle_node_files(),
+      initial_music_throttle_close_count(),
+      initial_music_throttle_group_size(),
+      initial_music_throttle_seconds_stagger(),
+      initial_music_throttle_seconds_delay(),
       // EnzoInitialPm
       initial_pm_field(""),
       initial_pm_mpp(0.0),
@@ -190,6 +197,8 @@ public: // interface
       initial_turbulence_temperature(0.0),
       // EnzoProlong
       interpolation_method(""),
+      // EnzoMethodCheckGravity
+      method_check_gravity_particle_type(),
       // EnzoMethodHeat
       method_heat_alpha(0.0),
       // EnzoMethodHydro
@@ -201,8 +210,6 @@ public: // interface
       method_hydro_reconstruct_conservative(false),
       method_hydro_reconstruct_positive(false),
       method_hydro_riemann_solver(""),
-      // EnzoMethodNull
-      method_null_dt(0.0),
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
@@ -222,6 +229,9 @@ public: // interface
       method_pm_deposit_alpha(0.5),
       // EnzoMethodPmUpdate
       method_pm_update_max_dt(0.0),
+      // EnzoProlong
+      prolong_enzo_type(),
+      prolong_enzo_positive(true),
       // EnzoSolverMg0
       solver_pre_smooth(),
       solver_post_smooth(),
@@ -232,7 +242,6 @@ public: // interface
       solver_restart_cycle(),
       // EnzoSolver<Krylov>
       solver_precondition(),
-      solver_local(),
       solver_coarse_level(),
       solver_is_unigrid(),
       // EnzoStopping
@@ -310,12 +319,12 @@ public: // attributes
 
   /// EnzoGrackleTest
 #ifdef CONFIG_USE_GRACKLE
-  double                     initial_grackle_test_minimum_H_number_density;
   double                     initial_grackle_test_maximum_H_number_density;
-  double                     initial_grackle_test_minimum_temperature;
-  double                     initial_grackle_test_maximum_temperature;
-  double                     initial_grackle_test_minimum_metallicity;
   double                     initial_grackle_test_maximum_metallicity;
+  double                     initial_grackle_test_maximum_temperature;
+  double                     initial_grackle_test_minimum_H_number_density;
+  double                     initial_grackle_test_minimum_metallicity;
+  double                     initial_grackle_test_minimum_temperature;
   int                        initial_grackle_test_reset_energies;
 #endif /* CONFIG_USE_GRACKLE */
 
@@ -331,6 +340,13 @@ public: // attributes
   std::vector < std::string > initial_music_particle_coords;
   std::vector < std::string > initial_music_particle_types;
   std::vector < std::string > initial_music_particle_attributes;
+  bool                        initial_music_throttle_internode;
+  bool                        initial_music_throttle_intranode;
+  bool                        initial_music_throttle_node_files;
+  int                         initial_music_throttle_close_count;
+  int                         initial_music_throttle_group_size;
+  double                      initial_music_throttle_seconds_stagger;
+  double                      initial_music_throttle_seconds_delay;
 
   /// EnzoInitialPm
   std::string                initial_pm_field;
@@ -375,6 +391,9 @@ public: // attributes
   /// EnzoProlong
   std::string                interpolation_method;
 
+  /// EnzoMethodCheckGravity
+  std::string                method_check_gravity_particle_type;
+  
   /// EnzoMethodHeat
   double                     method_heat_alpha;
 
@@ -387,9 +406,6 @@ public: // attributes
   bool                       method_hydro_reconstruct_conservative;
   bool                       method_hydro_reconstruct_positive;
   std::string                method_hydro_riemann_solver;
-
-  /// EnzoMethodNull
-  double                     method_null_dt;
 
   /// EnzoMethodTurbulence
   double                     method_turbulence_edot;
@@ -417,6 +433,9 @@ public: // attributes
 
   double                     method_pm_update_max_dt;
 
+  std::string                prolong_enzo_type;
+  bool                       prolong_enzo_positive;
+  
   ///==============
   /// EnzoSolverMg0
   ///==============
@@ -454,9 +473,7 @@ public: // attributes
   /// Solver index for Krylov solver preconditioner
   std::vector<int>           solver_precondition;
 
-  /// Whether the solver is for an isolated Block, e.g. for
   /// Mg0 coarse grid solver
-  std::vector<int>           solver_local;
 
   std::vector<int>           solver_coarse_level;
   std::vector<int>           solver_is_unigrid;

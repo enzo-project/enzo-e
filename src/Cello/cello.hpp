@@ -37,16 +37,21 @@
 
 #include "pup_stl.h"
 
+#include "cello_Sync.hpp"
+
 // #define DEBUG_CHECK
 
 class Config;
 class CProxy_Block;
 class FieldDescr;
+class Grouping;
 class Hierarchy;
 class Monitor;
 class Output;
+class Parameters;
 class ParticleDescr;
 class Problem;
+class Refresh;
 class ScalarDescr;
 class Simulation;
 class Solver;
@@ -133,6 +138,16 @@ enum precision_enum {
 };
 typedef int precision_type;
 
+#ifdef CONFIG_PRECISION_SINGLE
+   typedef float       cello_float;
+#elif  CONFIG_PRECISION_DOUBLE
+   typedef double      cello_float;
+#elif  CONFIG_PRECISION_QUAD
+   typedef long double cello_float;
+#else
+#  error "Must define one of CONFIG_PRECISION_[SINGLE|DOUBLE|QUAD]"
+#endif
+
 /// @enum type_enum
 /// @brief list of known scalar types, including ints as well as floats, used for Field types and Particle attributes
 enum type_enum {
@@ -160,6 +175,7 @@ enum type_enum {
 #   define default_precision precision_single
 #   define default_type      type_single
 #   define SCALAR_DEFINED
+#   define default_precision_string "single"
 #endif
 #ifdef CONFIG_PRECISION_DOUBLE
 #   ifdef SCALAR_DEFINED
@@ -168,6 +184,7 @@ enum type_enum {
 #   define default_precision precision_double
 #   define default_type      type_double
 #   define SCALAR_DEFINED
+#   define default_precision_string "double"
 #endif
 #ifdef CONFIG_PRECISION_QUAD
 #   ifdef SCALAR_DEFINED
@@ -176,6 +193,7 @@ enum type_enum {
 #   define default_precision precision_quad
 #   define default_type      type_quad
 #   define SCALAR_DEFINED
+#   define default_precision_string "quadruple"
 #endif
 
 #ifndef SCALAR_DEFINED
@@ -188,17 +206,17 @@ enum type_enum {
 
 /// Macros for sizing, saving, and restoring data from buffers
 
-#define SIZE_ARRAY(COUNT,LIST)			\
+#define SIZE_INT_ARRAY(COUNT,LIST)			\
   {						\
     (*COUNT) += sizeof(int);			\
     (*COUNT) += sizeof(int)*LIST.size();	\
   }
-#define SIZE_VALUE(COUNT,VALUE)			\
+#define SIZE_INT(COUNT,VALUE)			\
   {						\
     (*COUNT) += sizeof(int);			\
   }
 
-#define SAVE_ARRAY(PTR,LIST)				\
+#define SAVE_INT_ARRAY(PTR,LIST)				\
   {							\
     int length = LIST.size();				\
     int n;						\
@@ -207,14 +225,14 @@ enum type_enum {
     memcpy((*PTR),&LIST[0],n=length*sizeof(int));	\
     (*PTR)+=n;						\
   }
-#define SAVE_VALUE(PTR,VALUE)			\
+#define SAVE_INT(PTR,VALUE)			\
   {						\
     int n;					\
     memcpy((*PTR),&VALUE,n=sizeof(int));	\
     (*PTR)+=n;					\
   }
 
-#define LOAD_ARRAY(PTR,LIST)				\
+#define LOAD_INT_ARRAY(PTR,LIST)				\
   {							\
     int length;						\
     int n;						\
@@ -224,7 +242,7 @@ enum type_enum {
     memcpy(&LIST[0],(*PTR),n=length*sizeof(int));	\
     (*PTR)+=n;						\
   }
-#define LOAD_VALUE(PTR,VALUE)			\
+#define LOAD_INT(PTR,VALUE)			\
   {						\
     int n;					\
     memcpy(&VALUE,(*PTR),n=sizeof(int));	\
@@ -299,6 +317,8 @@ namespace cello {
   T err_abs (const T & a, const T & b)
   {  return fabs(a-b);  }
 
+  int digits_max(int precision);
+
   // type_enum functions (prefered)
   int sizeof_type (int);
   int is_type_supported (int);
@@ -342,10 +362,15 @@ namespace cello {
 #endif    
   }
 
-  void backtrace(const char * msg);
-
   inline int index_static()
   { return CkMyPe() % CONFIG_NODE_SIZE; }
+
+  inline void af_to_xyz (int axis, int face, int r3[3])
+  {
+    r3[0] = (axis==0) ? 2*face-1 : 0;
+    r3[1] = (axis==1) ? 2*face-1 : 0;
+    r3[2] = (axis==2) ? 2*face-1 : 0;
+  }
 
   /// Return a pointer to the Simulation object on this process
   Simulation *    simulation();
@@ -357,14 +382,22 @@ namespace cello {
   Hierarchy *     hierarchy();
   /// Return a pointer to the Config object containing user parameters values
   const Config *  config();
+  /// Return a pointer to the Parameters object
+  const Parameters *  parameters();
   /// Return a pointer to the FieldDescr object defining fields on Blocks
   FieldDescr *    field_descr();
+  /// Return a pointer to the Groupings object defining field groups
+  Grouping *      field_groups();
   /// Return a pointer to the ParticledDescr object defining particles on Blocks
   ParticleDescr * particle_descr();
+  /// Return a pointer to the Groupings object defining particle groups
+  Grouping *      particle_groups();
   /// Return a pointer to the Monitor object for writing output to stdout
   Monitor *       monitor();
   /// Return a pointer to the Units object
   Units *         units();
+  /// Return reference to in indexed Refresh object
+  Refresh *       refresh(int ir);
 
   /// Return the ScalarDescr object defining Block long double Scalar data values
   ScalarDescr *   scalar_descr_long_double();
@@ -385,6 +418,10 @@ namespace cello {
   int             rank ();
   /// Return the number of children each Block may have
   int             num_children();
+  /// Return the number of Blocks on this process
+  size_t          num_blocks_process();
+  /// Return the cell volume at the given level relative to the root level
+  double          relative_cell_volume (int level);
 }
 
 #endif /* CELLO_HPP */

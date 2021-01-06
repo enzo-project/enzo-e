@@ -181,21 +181,23 @@ private: // functions
   /// Precision-agnostic function for loading field block face into
   /// the field_face array; returns number of bytes copied
   template<class T>
-  size_t load_ (T * array_face,  const T * field_face,
+  size_t load_ (      T * array_face,
+                const T * field_face,
 		int nd3[3], int nf3[3], int im3[3],
 		bool accumulate) throw();
 
   /// Precision-agnostic function for copying the field_face array into
   /// the field block ghosts; returns number of bytes copied
   template<class T>
-  size_t store_ (T * field_ghosts,  const T * array_ghosts, 
+  size_t store_ (      T * field_ghosts,
+                 const T * array_ghosts, 
 		 int nd3[3], int nf3[3], int im3[3],
 		 bool accumulate) throw();
 
   /// Precision-agnostic function for copying a field block face
   /// into another block's ghost zones
   template<class T>
-  void copy_ (T       * vd, int md3[3], int nd3[3], int id3[3],
+  void copy_ (      T * vd, int md3[3], int nd3[3], int id3[3],
 	      const T * vs, int ms3[3], int ns3[3], int is3[3],
 	      bool accumulate) throw();
 
@@ -203,6 +205,18 @@ private: // functions
   std::vector<int> field_list_src_(Field field) const;
   std::vector<int> field_list_dst_(Field field) const;
   bool accumulate_(int index_src, int index_dst) const;
+
+  /// Multiply the given field by density to convert to conservative
+  /// form if needed
+  void mul_by_density_
+  (Field field, int index_field,
+   const int i3[3], const int n3[3], const int m3[3]);
+
+  /// Divide the given field by density to convert back to original
+  /// form if needed
+  void div_by_density_
+  (Field field, int index_field,
+   const int i3[3], const int n3[3], const int m3[3]);
 
 private: // attributes
 

@@ -57,7 +57,7 @@ Node * NodeTrace::node_level(int level) const
 	   level,level_,
 	   0 <= level && level <= level_);
   return node_[level];
-};
+}
 
 //----------------------------------------------------------------------
 

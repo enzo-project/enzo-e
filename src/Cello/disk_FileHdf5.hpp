@@ -168,7 +168,6 @@ public: // functions
   /// Return the compression level
   int compress () throw () {return compress_level_; }
 
-
 protected: // functions
 
   virtual void write_meta_
@@ -223,6 +222,11 @@ private: // functions
 
   /// Close the dataset
   void close_dataset_ () throw();
+
+public: // static attributes
+
+  /// Nodal list of files opened
+  static std::map<const std::string,FileHdf5 *> file_list;
 
 private: // attributes
 

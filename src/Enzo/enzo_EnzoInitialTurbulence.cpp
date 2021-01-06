@@ -226,7 +226,7 @@ void EnzoInitialTurbulence::enforce_block
     }
   } else {
     bool comoving_coordinates = false;
-    EnzoComputePressure compute_pressure(gamma_,comoving_coordinates);
+    EnzoComputePressure compute_pressure (gamma_,comoving_coordinates);
     compute_pressure.compute(block);
   }
 

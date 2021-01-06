@@ -74,6 +74,7 @@ Method {
 #      diag_precon = true;
   }
 }
+ include "input/flux_correct.incl"
 
 Initial {
 

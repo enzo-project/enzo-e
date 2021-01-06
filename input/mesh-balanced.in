@@ -44,7 +44,7 @@ Initial {
 
 Stopping { cycle = 100; }
 Testing  { cycle_final = 100; 
-	   time_final = [0.0151017935905518]; # only applies to PPM_NEW
+           time_final  = [0.0151004312488712];
 	   }
 
 Output {

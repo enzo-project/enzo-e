@@ -57,7 +57,7 @@ public: // virtual functions
 
 protected: // methods
 
-  void compute_ (std::shared_ptr<Matrix> A, Block * block) throw();
+  void compute_ ( std::shared_ptr<Matrix> A, Block * block) throw();
 
 protected: // attributes
 

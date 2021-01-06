@@ -7,6 +7,25 @@
 
 #include "compute.hpp"
 
+SolverNull::SolverNull (std::string name,
+			std::string field_x,
+			std::string field_b,
+			int monitor_iter,
+			int restart_cycle,
+			int solve_type,
+			int min_level,
+			int max_level) throw()
+  : Solver(name,
+	   field_x,
+	   field_b,
+	   monitor_iter,
+	   restart_cycle,
+	   solve_type,
+	   min_level,
+	   max_level)
+{
+  cello::simulation()->new_refresh_set_name(ir_post_,name);
+}
 //----------------------------------------------------------------------
 
 void SolverNull::pup (PUP::er &p)
@@ -22,10 +41,6 @@ void SolverNull::apply ( std::shared_ptr<Matrix> A, Block * block) throw()
 {
   Solver::begin_(block);
   Solver::end_(block);
-  
-  CkCallback(callback_,
-	     CkArrayIndexIndex(block->index()),
-	     cello::block_array()).send();
 }
 
 //======================================================================

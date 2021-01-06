@@ -163,20 +163,12 @@ public: // interface
   { return field_descr_->bytes_per_element(id); }
 
   /// Whether the field is permanent
-  bool is_permanent (std::string field) const throw()
-  { return field_descr_->is_permanent(field_descr_->field_id(field)); }
-
-  /// Whether the field is permanent
   bool is_permanent (int id_field) const throw()
   { return field_descr_->is_permanent(id_field); }
 
   /// Return the number of permanent fields
   int num_permanent() const throw()
   { return field_descr_->num_permanent(); }
-
-  /// Whether the field is temporary
-  bool is_temporary (std::string field) const throw()
-  { return field_descr_->is_temporary(field_descr_->field_id(field)); }
 
   /// Whether the field is temporary
   bool is_temporary (int id_field) const throw()

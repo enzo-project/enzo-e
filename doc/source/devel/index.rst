@@ -9,10 +9,9 @@ applications to use Cello's scalable adaptive mesh refinement,
 including adding new computational methods, initial conditions,
 refinement criteria, etc.
 
-
-
 .. toctree::
+      
    coding-guidelines
-   method
    initial
    adapt
+   method

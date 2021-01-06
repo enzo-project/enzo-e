@@ -123,7 +123,7 @@
 :Default: :d:`""`
 :Scope:     :c:`Cello`
 
-:e:`In addition to evolved field values, one may also output the refinement criteria.  This may be  useful for example for debugging or for finding appropriate values for max_coarsen and min_refine.  A value of -1 specifies coarsening, +1 for refining, and 0 for staying the same.`
+:e:`In addition to evolved field values, one may also output the refinement criteria.  This may be  useful for example for debugging or for finding appropriate values for :p:`max_coarsen` and :p:`min_refine`.  A value of -1 specifies coarsening, +1 for refining, and 0 for staying the same.`
 
 ----
 

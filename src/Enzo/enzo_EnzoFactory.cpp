@@ -9,9 +9,6 @@
 
 #include "charm_enzo.hpp"
 
-// #define CELLO_TRACE
-// #define DEBUG_ENZO_FACTORY
-
 //----------------------------------------------------------------------
 
 void EnzoFactory::pup (PUP::er &p)
@@ -45,7 +42,7 @@ CProxy_Block EnzoFactory::new_block_proxy
 
   CkArrayOptions opts;
   opts.setMap(array_map);
-  TRACE_CHARM("ckNew(nbx,nby,nbz)");
+
   enzo_block_array = CProxy_EnzoBlock::ckNew(opts);
 
   return enzo_block_array;
@@ -135,7 +132,6 @@ void EnzoFactory::create_subblock_array
 
     CkArrayOptions opts;
     opts.setMap(array_map);
-    TRACE_CHARM("ckNew(nbx,nby,nbz)");
 
     int count_adapt;
 
@@ -197,29 +193,12 @@ void EnzoFactory::create_block
  Simulation * simulation
  ) const throw()
 {
-#ifdef DEBUG_ENZO_FACTORY
-  CkPrintf ("%d EnzoFactory::create_block %d %d %d)\n",CkMyPe(), nx,ny,nz);
-  CkPrintf ("%d EnzoFactory::create_block() num_field_blocks %d  count_adapt %d\n",
-	    CkMyPe(), num_field_blocks,count_adapt);
-  fflush(stdout);
-#endif
 
   TRACE3("EnzoFactory::create_block(%d %d %d)",nx,ny,nz);
   TRACE2("EnzoFactory::create_block() num_field_blocks %d  count_adapt %d",
 	 num_field_blocks,count_adapt);
 
   CProxy_EnzoBlock enzo_block_array = (CProxy_EnzoBlock) block_array;
-
-#ifdef CELLO_DEBUG
-  index.print("DEBUG insert()",-1,2,false,simulation);
-  fflush(stdout);
-#endif
-
-
-#ifdef CELLO_TRACE
-  index.print("ADAPT REFINE insert()",-1,2,false,simulation);
-  fflush(stdout);
-#endif
 
   MsgRefine * msg = new MsgRefine 
     (index,
@@ -233,6 +212,7 @@ void EnzoFactory::create_block
   msg->set_data_msg(data_msg);
 
   enzo::simulation()->set_msg_refine (index,msg);
+
   enzo_block_array[index].insert ( process_type(CkMyPe()) );
 }
 
