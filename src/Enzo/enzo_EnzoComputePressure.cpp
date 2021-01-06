@@ -108,11 +108,11 @@ void EnzoComputePressure::compute_(Block * block,
     const enzo_float * vz = (enzo_float*) field.values("velocity_z", i_hist_);
 
     const enzo_float * bx = mhd ?
-      (enzo_float*) field.values("bfield_x", i_hist_) : NULL;
+      (enzo_float*) field.values("bfield_x", i_hist_) : nullptr;
     const enzo_float * by = mhd ?
-      (enzo_float*) field.values("bfield_y", i_hist_) : NULL;
+      (enzo_float*) field.values("bfield_y", i_hist_) : nullptr;
     const enzo_float * bz = mhd ?
-      (enzo_float*) field.values("bfield_z", i_hist_) : NULL;
+      (enzo_float*) field.values("bfield_z", i_hist_) : nullptr;
 
     const enzo_float * te = (enzo_float*) field.values("total_energy", i_hist_);
     const enzo_float * ie = (enzo_float*) field.values("internal_energy", i_hist_);

@@ -48,7 +48,7 @@ public: // interface
   /// CHARM++ migration constructor
   EnzoInitialBCenter(CkMigrateMessage *m)
     : Initial (m),
-      parameters_(NULL),
+      parameters_(nullptr),
       values_(),
       update_etot_(false)
   {  }

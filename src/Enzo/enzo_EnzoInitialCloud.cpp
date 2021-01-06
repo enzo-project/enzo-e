@@ -40,12 +40,12 @@ public:
       center_z_(center_z),
       radius_(radius),
       sqr_radius_(radius*radius),
-      cell_xf_(NULL),
-      cell_yf_(NULL),
-      cell_zf_(NULL),
-      subcell_xoffsets_(NULL),
-      subcell_yoffsets_(NULL),
-      subcell_zoffsets_(NULL)
+      cell_xf_(nullptr),
+      cell_yf_(nullptr),
+      cell_zf_(nullptr),
+      subcell_xoffsets_(nullptr),
+      subcell_yoffsets_(nullptr),
+      subcell_zoffsets_(nullptr)
   {
     ASSERT("SphereRegion", "subsample_num must be >= 0", subsample_n>=0);
     ASSERT("SphereRegion", "radius must be >0", radius>0);

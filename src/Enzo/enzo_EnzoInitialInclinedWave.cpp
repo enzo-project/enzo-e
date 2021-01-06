@@ -694,10 +694,10 @@ void EnzoInitialInclinedWave::enforce_block(Block * block,
   // Only currently works on unigrid and only currently supports hydro methods
   // and VLCT (PPML initial conditions are much more complicated)
   
-  ScalarInit *density_init = NULL;
-  ScalarInit *total_energy_density_init = NULL;
-  VectorInit *momentum_init = NULL;
-  VectorInit *a_init = NULL;
+  ScalarInit *density_init = nullptr;
+  ScalarInit *total_energy_density_init = nullptr;
+  VectorInit *momentum_init = nullptr;
+  VectorInit *a_init = nullptr;
 
   Field field = block->data()->field();
   const bool mhd = field.is_field("bfield_x");
@@ -739,7 +739,7 @@ void EnzoInitialInclinedWave::enforce_block(Block * block,
   delete density_init;
   delete momentum_init;
   delete total_energy_density_init;
-  if (a_init != NULL) { delete a_init; }
+  if (a_init != nullptr) { delete a_init; }
 }
 
 //----------------------------------------------------------------------

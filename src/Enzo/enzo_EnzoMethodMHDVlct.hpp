@@ -112,13 +112,13 @@ public: // interface
   /// Charm++ PUP::able migration constructor
   EnzoMethodMHDVlct (CkMigrateMessage *m)
     : Method (m),
-      primitive_group_(NULL),
-      bfieldi_group_(NULL),
-      eos_(NULL),
-      half_dt_recon_(NULL),
-      full_dt_recon_(NULL),
-      riemann_solver_(NULL),
-      integrable_updater_(NULL),
+      primitive_group_(nullptr),
+      bfieldi_group_(nullptr),
+      eos_(nullptr),
+      half_dt_recon_(nullptr),
+      full_dt_recon_(nullptr),
+      riemann_solver_(nullptr),
+      integrable_updater_(nullptr),
       reconstructable_group_names_(),
       integrable_group_names_(),
       passive_group_names_()

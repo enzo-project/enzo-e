@@ -203,7 +203,7 @@ along a given dimension. The constructor standard is simply:
 Subarray Examples
 ~~~~~~~~~~~~~~~~~
 
-We present an extanded example below. We start by defining a subarray,
+We present an extended example below. We start by defining a subarray,
 ``sub`` of an array ``arr`` (which wraps an existing pointer of data
 and represents the array ``[[0,1,2],[3,4,5]]``).
 
@@ -599,7 +599,7 @@ This code assumes a mesh with shape ``(mz, my, mx)``. Suppose we have:
      } else if (dim == 1) {
        bi_r = bi.subarray(CSlice(0,NULL), CSlice(1,NULL), CSlice(0,NULL));
      } else {
-       bi_r = bi.subarray(CSlice(0,NULL), CSlice(1,NULL), CSlice(0,NULL));
+       bi_r = bi.subarray(CSlice(1,NULL), CSlice(0,NULL), CSlice(0,NULL));
      }
 
      for (int iz=0; iz<bc.shape(0); iz++) {
