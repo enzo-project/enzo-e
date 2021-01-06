@@ -76,8 +76,6 @@ void Block::new_refresh_start (int id_refresh, int callback)
       count += new_refresh_load_particle_faces_(*refresh, true);
     }
 
-    Sync & sync = new_refresh_sync_list_[id_refresh];
-
     // send Flux face data
     int count_flux=0;
     if (refresh->any_fluxes()){
