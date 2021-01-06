@@ -189,10 +189,6 @@ define_jemalloc  = 'CONFIG_USE_JEMALLOC'
 # Performance defines
 
 define_memory =       'CONFIG_USE_MEMORY'
-<<<<<<< HEAD
-define_new_charm =    'CONFIG_NEW_CHARM'
-=======
->>>>>>> master
 define_projections =  'CONFIG_USE_PROJECTIONS'
 define_performance =  'CONFIG_USE_PERFORMANCE'
 define_papi  =        'CONFIG_USE_PAPI','PAPI3'
