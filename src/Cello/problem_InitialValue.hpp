@@ -20,77 +20,40 @@ public: // interface
 
   /// CHARM++ constructor
   InitialValue() throw() { }
-  
+
   /// Constructor
-  InitialValue(Parameters * parameters, 
-	       int cycle, double time) throw();
+  InitialValue(Parameters * parameters,
+               int cycle, double time) throw();
 
   /// Destructor
-  virtual ~InitialValue() throw();
+  virtual ~InitialValue() throw()
+  { if (initialized_values_) { delete[] values_; } }
 
   PUPable_decl(InitialValue);
 
   InitialValue(CkMigrateMessage *m)
     : Initial (m),
-      parameters_(NULL),
       num_fields_(0),
-      num_masks_(NULL),
-      mask_(NULL),
-      nx_(NULL),
-      ny_(NULL)
+      initialized_values_(false),
+      values_(NULL)
   {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
   /// Read initialization values from Initial group in parameter file
-
   virtual void enforce_block (Block * block,
-			      const Hierarchy * hierarchy
-			      ) throw();
+                              const Hierarchy * hierarchy
+                              ) throw();
 
 private: // functions
-  
-  void allocate_xyzt_(Block * block,
-		      int index_field,
-		      const FieldData * field_data,
-		      int * mx, int * my, int * mz,
-		      double ** value, double ** vdeflt,
-		      bool ** mask, bool ** rdeflt,
-		      double ** x, double ** y, double ** z,
-		      double * t) throw();
 
   void copy_values_ (FieldData * field_data,
-		     double * value, bool * mask,
-		     int index_field,
+		     double * value, int index_field,
 		     int nx, int ny, int nz) throw();
 
-  void evaluate_float_ (FieldData * field_data, int index_field, 
-			std::string field_name,
-			int n, double * value, double * vdeflt,
-			double * x, double * y, double * z, double t) throw();
-
-  void evaluate_mask_ (const Hierarchy * hierarchy,
-		       const Block * block,
-		       FieldData * field_data,
-		       int index_field, int index_value,
-		       std::string field_name,
-		       int n, bool * value, bool * vdeflt,
-		       double * x, double * y, double * z, double t) throw();
-
-  /// Read in a PNG file and create an integer array using r + b + g values
-  void create_mask_png_ (bool ** mask, int * nx, int * ny ,
-			 std::string pngfile);
-
-  /// Create a mask for the block given mask_[][]
-  void evaluate_mask_png_ ( bool            * mask_block, int nxb, int nyb,
-			    bool            * mask_png,   int nx,  int ny,
-			    const Hierarchy * hierarchy,
-			    const Block     * block);
-
-  template<class T>
-  void copy_precision_
-  (T * field, bool * mask, int offset, double * value, int nx, int ny, int nz);
+  /// Helper function used to initialize values_
+  void initialize_values_();
 
   template<class T>
   void copy_precision_
@@ -103,17 +66,12 @@ private: // attributes
   /// number of fields
   int num_fields_;
 
-  /// number of masked values per field
-  int * num_masks_;
+  /// indicates whether or not values_ has been initialized
+  bool initialized_values_;
 
-  /// Masks for fields and values: mask_[index_field][index_value]
-  bool *** mask_;
-
-  /// Size of the masks
-  int **nx_;
-  int **ny_;
+  /// values for every field - this is lazily initialized
+  Value ** values_;
 
 };
 
 #endif /* PROBLEM_INITIAL_DEFAULT_HPP */
-

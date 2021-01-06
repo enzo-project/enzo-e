@@ -67,8 +67,7 @@ Stopping {
 
 Testing {
    cycle_final = 50;
-   time_final  = [0.0291794209107657,  # OLD_PPM
-                  0.0292418235330842]; # NEW_PPM
+   time_final = [0.0292738156844948]; # only applies to PPM_NEW
 }
 
 # Output image dumps every 10 cycles
