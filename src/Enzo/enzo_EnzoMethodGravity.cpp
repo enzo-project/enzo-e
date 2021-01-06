@@ -235,40 +235,13 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
   // Clear "B" and "density_total" fields for next call
   // Note density_total may not be defined
 
-<<<<<<< HEAD
-  enzo_float * B =         (enzo_float*) field.values("B");
-
-#ifdef DEBUG_COPY_DENSITY
-  enzo_float * B_copy =    (enzo_float*) field.values("B_copy");
-  for (int i=0; i<m; i++) B_copy[i] = B[i];
-#endif
-
-=======
   enzo_float * B = (enzo_float*) field.values("B");
->>>>>>> master
   for (int i=0; i<m; i++) B[i] = 0.0;
 
   enzo_float * de_t = (enzo_float*) field.values("density_total");
   if (de_t) for (int i=0; i<m; i++) de_t[i] = 0.0;
 
-<<<<<<< HEAD
-  if (de_t != NULL) {
-#ifdef DEBUG_COPY_DENSITY
-    enzo_float * de_t_copy = (enzo_float*) field.values("density_total_copy");
-    for (int i=0; i<m; i++) de_t_copy[i] = de_t[i];
-#endif
-    for (int i=0; i<m; i++) de_t[i] = 0.0;
-  }
   if (potential) {
-#ifdef DEBUG_COPY_POTENTIAL
-    enzo_float * po_copy = (enzo_float*) field.values("potential_copy");
-    if (po_copy != NULL) {
-      for (int i=0; i<m; i++) po_copy[i] = potential[i];
-    }
-#endif
-=======
-  if (potential) {
->>>>>>> master
     for (int i=0; i<m; i++) potential[i] = 0.0;
   }
 
