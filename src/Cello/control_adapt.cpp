@@ -413,10 +413,6 @@ void Block::particle_scatter_children_ (ParticleData * particle_list[],
       count += particle.delete_particles (it,ib,mask);
 
       delete [] mask;
-      delete [] index;
-      delete [] xa;
-      delete [] ya;
-      delete [] za;
     }
   }
   cello::simulation()->data_delete_particles(count);
