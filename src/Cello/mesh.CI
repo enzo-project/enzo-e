@@ -8,6 +8,7 @@
 module mesh {
 
   initnode void register_reduce_performance(void);
+  initnode void register_reduce_method_debug(void);
   initnode void register_sum_long_double(void);
   initnode void register_sum_long_double_2(void);
   initnode void register_sum_long_double_3(void);
@@ -46,6 +47,7 @@ module mesh {
   PUPable MaskPng;
   PUPable MaskExpr;
   PUPable MethodCloseFiles;
+  PUPable MethodDebug;
   PUPable MethodFluxCorrect;
   PUPable MethodNull;
   PUPable MethodTrace;
@@ -120,7 +122,9 @@ module mesh {
     entry void p_method_flux_correct_refresh();
     entry void r_method_flux_correct_sum_fields(CkReductionMsg * msg);
 
-  //--------------------------------------------------
+    entry void r_method_debug_sum_fields(CkReductionMsg * msg);
+
+    //--------------------------------------------------
     // *** STOPPING ***
     //--------------------------------------------------
 

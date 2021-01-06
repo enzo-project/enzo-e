@@ -12,7 +12,8 @@
 Sync::Sync (int index_stop)
   : is_done_(0),
     index_stop_(index_stop),
-    index_curr_(0)
+    index_curr_(0),
+    state_(RefreshState::INACTIVE)
 {}
 
 //----------------------------------------------------------------------
@@ -23,6 +24,7 @@ void Sync::pup(PUP::er &p)
   p | is_done_;
   p | index_stop_;
   p | index_curr_;
+  p | state_;
 }
 
 //----------------------------------------------------------------------

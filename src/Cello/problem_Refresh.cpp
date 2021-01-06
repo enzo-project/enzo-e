@@ -55,6 +55,7 @@ int Refresh::data_size () const
   
   SIZE_INT(&count,all_fields_);
   SIZE_INT(&count,all_particles_);
+  SIZE_INT(&count,all_fluxes_);
   SIZE_INT(&count,accumulate_);
 
   return count;
@@ -73,6 +74,7 @@ char * Refresh::save_data (char * buffer) const
   
   SAVE_INT(&p,all_fields_);
   SAVE_INT(&p,all_particles_);
+  SAVE_INT(&p,all_fluxes_);
   SAVE_INT(&p,accumulate_);
 
   ASSERT2 ("Refresh::save_data\n",
@@ -97,6 +99,7 @@ char * Refresh::load_data (char * buffer)
 
   LOAD_INT(&p,all_fields_);
   LOAD_INT(&p,all_particles_);
+  LOAD_INT(&p,all_fluxes_);
   LOAD_INT(&p,accumulate_);
 
   ASSERT2 ("Refresh::load_data\n",

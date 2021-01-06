@@ -26,6 +26,7 @@ public: // interface
     all_particles_copy_(false),
     particle_list_(),
     particle_list_copy_(),
+    all_fluxes_(false),
     ghost_depth_(0),
     min_face_rank_(0),
     neighbor_type_(neighbor_leaf),
@@ -55,6 +56,7 @@ public: // interface
       all_particles_copy_(false),
       particle_list_(),
       particle_list_copy_(),
+      all_fluxes_(false),
       ghost_depth_(ghost_depth),
       min_face_rank_(min_face_rank),
       neighbor_type_(neighbor_type),
@@ -82,6 +84,7 @@ public: // interface
     all_particles_copy_(false),
     particle_list_(),
     particle_list_copy_(),
+    all_fluxes_(false),
     ghost_depth_(0),
     min_face_rank_(0),
     neighbor_type_(0),
@@ -109,6 +112,7 @@ public: // interface
     p | all_particles_copy_;
     p | particle_list_;
     p | particle_list_copy_;
+    p | all_fluxes_;
     p | ghost_depth_;
     p | min_face_rank_;
     p | neighbor_type_;
@@ -229,15 +233,25 @@ public: // interface
   }
 
   /// Add all data
+  /// Add flux data
+  void add_all_fluxes()
+  { all_fluxes_ = true; }
+
+  /// Return whether any (all) fluxes
+  bool any_fluxes() const
+  { return all_fluxes_; }
+
+    /// Add all data
   void add_all_data()
   {
     add_all_fields();
     add_all_particles();
+    add_all_fluxes();
   }
 
   /// Return whether there are any data to be refreshed
-  bool any_data()
-  { return (any_fields() || any_particles()); }
+  bool any_data() const
+  { return (any_fields() || any_particles() || any_fluxes()); }
 
   /// Whether this particular Block is participating in the Refresh operation
   void set_active (bool active)
@@ -298,39 +312,42 @@ public: // interface
   int sync_type() const
   { return sync_type_; }
 
+  // Return the id of the synchronization object (used for debugging
+  // only)
+  int sync_id() const
+  { return sync_id_; }
+
   int sync_exit() const
   { return 3*sync_id_+2; }
 
   void print() const
   {
-    CkPrintf ("Refresh %p\n",this);
-    CkPrintf ("Refresh %p all_fields = %d\n",this,all_fields_);
-    CkPrintf ("Refresh %p src fields:",this);
+    CkPrintf ("Refresh %p\n",(void*)this);
+    CkPrintf ("     all_fields = %d\n",all_fields_);
+    CkPrintf ("     src fields:");
     for (size_t i=0; i<field_list_src_.size(); i++)
       CkPrintf (" %d",field_list_src_[i]);
     CkPrintf ("\n");
-    CkPrintf ("Refresh %p dst fields:",this);
+    CkPrintf ("     dst fields:");
     for (size_t i=0; i<field_list_dst_.size(); i++)
       CkPrintf (" %d",field_list_dst_[i]);
     CkPrintf ("\n");
-    CkPrintf ("Refresh %p all_particles = %d\n",this,all_particles_);
-    CkPrintf ("Refresh %p all_particles_copy = %d\n",this,all_particles_copy_);
-    CkPrintf ("Refresh %p particles:",this);
+    CkPrintf ("     all_particles = %d\n",all_particles_);
+    CkPrintf ("     particles:");
     for (size_t i=0; i<particle_list_.size(); i++)
       CkPrintf (" %d",particle_list_[i]);
     CkPrintf ("\n");
-    for (size_t i=0; i<particle_list_copy_.size(); i++)
-      CkPrintf (" %d",particle_list_copy_[i]);
+    CkPrintf ("     all_fluxes = %d\n",all_fluxes_);
     CkPrintf ("\n");
-    CkPrintf ("Refresh %p ghost_depth = %d\n",this,ghost_depth_);
-    CkPrintf ("Refresh %p min_face_rank: %d\n",this,min_face_rank_);
-    CkPrintf ("Refresh %p neighbor_type: %d\n",this,neighbor_type_);
-    CkPrintf ("Refresh %p accumulate: %d\n",this,accumulate_);
-    CkPrintf ("Refresh %p sync_type: %d\n",this,sync_type_);
-    CkPrintf ("Refresh %p sync_id: %d\n",this,sync_id_);
-    CkPrintf ("Refresh %p active: %d\n",this,active_);
-    CkPrintf ("Refresh %p callback: %d\n",this,callback_);
-    CkPrintf ("Refresh %p root_level: %d\n",this,root_level_);
+    CkPrintf ("     ghost_depth = %d\n",ghost_depth_);
+    CkPrintf ("     min_face_rank: %d\n",min_face_rank_);
+    CkPrintf ("     neighbor_type: %d\n",neighbor_type_);
+    CkPrintf ("     accumulate: %d\n",accumulate_);
+    CkPrintf ("     sync_type: %d\n",sync_type_);
+    CkPrintf ("     sync_id: %d\n",sync_id_);
+    CkPrintf ("     active: %d\n",active_);
+    CkPrintf ("     callback: %d\n",callback_);
+    CkPrintf ("     root_level: %d\n",root_level_);
     fflush(stdout);
   }
 
@@ -429,6 +446,9 @@ private: // attributes
 
   /// Indicies of particles to copy all to neighboring grids
   std::vector <int> particle_list_copy_;
+
+  /// Whether to refresh flux data
+  int all_fluxes_;
 
   /// Ghost zone depth
   int ghost_depth_;

@@ -14,6 +14,16 @@
 
 class EnzoSolverBiCgStab : public Solver {
 
+  enum bcg
+    {
+     bcg_undefined,
+     bcg_start_2,
+     bcg_loop_0a,
+     bcg_loop_6,
+     bcg_loop_12,
+     bcg_loop_14
+    };
+    
   /// @class    EnzoSolverBiCgStab
   /// @ingroup  Enzo
   ///
@@ -43,15 +53,14 @@ public: // interface
   /// default constructor
   EnzoSolverBiCgStab()
     : Solver(),
+      A_(nullptr),
       is_alpha_(-1),  is_beta_n_(-1),  is_beta_d_(-1),   is_rho0_(-1),
       is_err_(-1),    is_err0_(-1),    is_err_min_(-1),  is_err_max_(-1),
       is_omega_(-1),  is_omega_n_(-1), is_omega_d_(-1),  is_rr_(-1),     
       is_r0s_(-1),    is_c_(-1),       is_bs_(-1),       is_xs_(-1),
       is_bnorm_(-1),  is_vr0_(-1),     is_ys_(-1),       is_vs_(-1),
       is_us_(-1),     is_qs_(-1),      is_dot_sync_(-1), is_iter_(-1),
-      function_(),
       res_tol_(0),
-      A_(nullptr),
       index_precon_(-1),
       iter_max_(-1),
       ir_(-1),
@@ -75,15 +84,14 @@ public: // interface
   /// Charm++ PUP::able migration constructor
   EnzoSolverBiCgStab(CkMigrateMessage* m)
     : Solver(m),
+      A_(NULL),
       is_alpha_(-1),  is_beta_n_(-1),  is_beta_d_(-1),   is_rho0_(-1),
       is_err_(-1),    is_err0_(-1),    is_err_min_(-1),  is_err_max_(-1),
       is_omega_(-1),  is_omega_n_(-1), is_omega_d_(-1),  is_rr_(-1),     
       is_r0s_(-1),    is_c_(-1),       is_bs_(-1),       is_xs_(-1),
       is_bnorm_(-1),  is_vr0_(-1),     is_ys_(-1),       is_vs_(-1),
       is_us_(-1),     is_qs_(-1),      is_dot_sync_(-1), is_iter_(-1),
-      function_(),
       res_tol_(0.0),
-      A_(NULL),
       index_precon_(-1),
       iter_max_(0), 
       ir_(-1), ir0_(-1), ip_(-1), 
@@ -97,65 +105,7 @@ public: // interface
   {}
 
   /// Charm++ Pack / Unpack function
-  void pup(PUP::er& p) {
-
-    // JB NOTE: change this function whenever attributes change
-    TRACEPUP;
-
-    Solver::pup(p);
-
-    //    p | A_;
-    p | index_precon_;
-    
-    p | iter_max_;
-    p | res_tol_;
-
-    p | ir_;
-    p | ir0_;
-    p | ip_;
-    p | iy_;
-    p | iv_;
-    p | iq_;
-    p | iu_;
-
-    p | m_;
-    p | mx_;
-    p | my_;
-    p | mz_;
-
-    p | gx_;
-    p | gy_;
-    p | gz_;
-
-    p | is_alpha_;
-    p | is_beta_n_;
-    p | is_beta_d_;
-    p | is_omega_;
-    p | is_omega_n_;
-    p | is_omega_d_;
-    p | is_err_;
-    p | is_err0_;
-    p | is_err_min_;
-    p | is_err_max_;
-    p | is_rr_;
-    p | is_r0s_;
-    p | is_c_;
-    p | is_bs_;
-    p | is_xs_;
-    p | is_bnorm_;
-    p | is_vr0_;
-    p | is_ys_;
-    p | is_vs_;
-    p | is_us_;
-    p | is_qs_;
-    p | is_dot_sync_;
-    p | is_iter_;
-    p | coarse_level_;
-    p | ir_loop_3_;
-    p | ir_loop_9_;
-
-  }
-
+  void pup(PUP::er& p);
   
   /// Main solver entry routine
   virtual void apply (std::shared_ptr<Matrix> A, Block * block) throw();
@@ -299,6 +249,9 @@ protected: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
+  /// Matrix
+  std::shared_ptr<Matrix> A_;
+
   /// Corresponding ScalarData id's for solve_type == solve_tree
   int is_alpha_;
   int is_beta_n_;
@@ -327,13 +280,8 @@ protected: // attributes
 
   typedef void (EnzoSolverBiCgStab::*enzo_solver_bicgstab_member)(EnzoBlock *, CkReductionMsg *) ;
   
-  std::vector<enzo_solver_bicgstab_member> function_;
-  
   /// Convergence tolerance on the relative residual
   long double res_tol_;
-
-  /// Matrix
-  std::shared_ptr<Matrix> A_;
 
   /// Preconditioner (-1 if none)
   int index_precon_;

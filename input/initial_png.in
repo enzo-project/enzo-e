@@ -50,6 +50,7 @@ Method {
       dual_energy = false;
    }
 }
+ include "input/flux_correct.incl"
 
 # Define initial conditions
 
@@ -67,7 +68,8 @@ Stopping {
 
 Testing {
    cycle_final = 50;
-   time_final = [0.0292738156844948]; # only applies to PPM_NEW
+
+   time_final  = [0.0292738249991089];
 }
 
 # Output image dumps every 10 cycles

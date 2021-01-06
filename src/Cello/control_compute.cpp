@@ -75,6 +75,7 @@ void Block::compute_next_ ()
 
 void Block::compute_continue_ ()
 {
+  //  this->debug_new_refresh(__FILE__,__LINE__);
   performance_start_(perf_compute,__FILE__,__LINE__);
 #ifdef DEBUG_COMPUTE
   if (cycle() >= CYCLE)

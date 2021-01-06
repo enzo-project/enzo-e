@@ -205,6 +205,7 @@ protected: // methods
   code_units grackle_units_;
   chemistry_data_storage grackle_rates_;
   double time_grackle_data_initialized_;
+
 #endif
 
 };

@@ -107,12 +107,12 @@ available machine-dependent configuration settings to use via the
 ``CELLO_ARCH`` environment variable.  Some examples include the
 following:
 
-   ===========================  ========================================================
-   ===========================  ========================================================
-   ``CELLO_ARCH=linux_gnu``     *compile for a generic GNU Linux system*
-   ``CELLO_ARCH=ncsa_bw``       *compile for NCSA's Blue Waters Petascale Platform*
-   ``CELLO_ARCH=comet_gnu``     *compile for SDSC's Comet cluster using GNU compilers*
-   ===========================  ========================================================
+   ==================================  ========================================================
+   ==================================  ========================================================
+   ``export CELLO_ARCH=linux_gnu``     *compile for a generic GNU Linux system*
+   ``export CELLO_ARCH=ncsa_bw``       *compile for NCSA's Blue Waters Petascale Platform*
+   ``export CELLO_ARCH=comet_gnu``     *compile for SDSC's Comet cluster using GNU compilers*
+   ==================================  ========================================================
 
 Note that some machines, including Blue Waters and Comet, will
 additionally require certain modules to be loaded, including compilers
@@ -129,11 +129,11 @@ Enzo-E must be compiled either using single-precision or
 double-precision.  To specify the precision to use in Enzo-E, set the
 ``CELLO_PREC`` environment variable:
 
-  =====================  ======================
-  =====================  ======================
-  ``CELLO_PREC=single``  *32-bit Enzo field data*
-  ``CELLO_PREC=double``  *64-bit Enzo field data*
-  =====================  ======================
+  ===================================  ======================
+  ===================================  ======================
+  ``export CELLO_PREC=single``         *32-bit Enzo field data*
+  ``export CELLO_PREC=double``         *64-bit Enzo field data*
+  ===================================  ======================
 
 3. Specify Charm++ directory
 ----------------------------
@@ -141,10 +141,10 @@ double-precision.  To specify the precision to use in Enzo-E, set the
 The location of the Charm++ installation directory should be specified
 using the ``CHARM_HOME`` environment variable.
 
-  =====================================  =============================
-  =====================================  =============================
-  ``CELLO_PREC=$HOME/Charm/charm.6.10``  Set directory of Charm++ used
-  =====================================  =============================
+  ============================================  =============================
+  ============================================  =============================
+  ``export CHARM_HOME=$HOME/Charm/charm.6.10``  Set directory of Charm++ used
+  ============================================  =============================
 
 Porting
 =======

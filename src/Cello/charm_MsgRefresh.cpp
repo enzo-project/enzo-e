@@ -36,7 +36,6 @@ MsgRefresh::~MsgRefresh()
   data_msg_ = nullptr;
   CkFreeMsg (buffer_);
   buffer_=nullptr;
-
 }
 
 //----------------------------------------------------------------------

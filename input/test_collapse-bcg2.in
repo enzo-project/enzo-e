@@ -1,5 +1,6 @@
 include "input/collapse.incl"
 include "input/collapse-output.incl"
+
 Output {
    ax { dir = [ "Dir_Collapse-BCG2_%04d", "cycle" ];  }
  dark { dir = [ "Dir_Collapse-BCG2_%04d", "cycle" ];  }

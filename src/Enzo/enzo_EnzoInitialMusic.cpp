@@ -385,6 +385,7 @@ void EnzoInitialMusic::enforce_block
     if ( do_close ) {
       close_count[file_name] = 0;
       file->file_close();
+      delete file;
       throttle_delay_();
       FileHdf5::file_list.erase(file_name);
 #ifdef DEBUG_THROTTLE

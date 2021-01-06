@@ -10,8 +10,6 @@
 
 #include "mesh.hpp"
 
-#include "test_setup_face.hpp"
-
 PARALLEL_MAIN_BEGIN
 {
 
@@ -19,92 +17,110 @@ PARALLEL_MAIN_BEGIN
 
   unit_init(0,1);
 
-  for (int index_test=0; index_test<test::num_face_tests; index_test++) {
+  unit_class("FaceFluxes");
 
-    auto test = test::face_test[index_test];
+  struct face_test_type {
+    int child[3];
+    int size[3];
+    int centered[3];
+    double cell_width[3];
+    double time_step_1;
+    double time_step_2;
+  } test =
+      {
+       { 0, 0, 0},
+       {10, 6, 8 },
+       { 0, 0, 0},
+       { 0.25, 0.5, 1.0},
+       0.125, 0.125
+      };
 
-    const int rank = test.rank;
-    
-    //--------------------------------------------------
-    
-    unit_func ("Face()");
+  const int num_face[2] = {4,6};
+  const int face[][3] =
+    {{+1,0,0},
+     {-1,0,0},
+     {0,+1,0},
+     {0,-1,0},
+     {0,0,+1},
+     {0,0,-1}};
 
-    int ix = test.face[0];
-    int iy = test.face[1];
-    int iz = test.face[2];
+  const int num_normal=2;
+  const int normal[] = {+1,-1};
 
-    const int rx = test.normal[0];
-    const int ry = test.normal[1];
-    const int rz = test.normal[2];
-    
-    const int cx = test.child[0];
-    const int cy = test.child[1];
-    const int cz = test.child[2];
-
-    Face * face_1 = new Face (ix,iy,iz,rx,ry,rz,cx,cy,cz);
-    
-    if (rx) ix = -ix;
-    if (ry) iy = -iy;
-    if (rz) iz = -iz;
-
-    Face * face_2 = new Face (ix,iy,iz,rx,ry,rz,cx,cy,cz);
-
-    unit_assert (face_1 != nullptr);
-    unit_assert (face_2 != nullptr);
-    
-    //--------------------------------------------------
-
-    unit_func("face()");
-
-    int ix1,iy1,iz1;
-    int ix2,iy2,iz2;
-
-    face_1->get_face(&ix1,&iy1,&iz1);
-    face_2->get_face(&ix2,&iy2,&iz2);
-
-    unit_assert(rx ? (ix1 == -ix2) : (ix1 == 0 && ix2 == 0));
-    unit_assert(ry ? (iy1 == -iy2) : (iy1 == 0 && iy2 == 0));
-    unit_assert(rz ? (iz1 == -iz2) : (iz1 == 0 && iz2 == 0));
-
-    if (rx) unit_assert(std::abs(ix1) + std::abs(ix2) == 2);
-    if (ry) unit_assert(std::abs(iy1) + std::abs(iy2) == 2);
-    if (rz) unit_assert(std::abs(iz1) + std::abs(iz2) == 2);
-
-    //--------------------------------------------------
-
-    unit_func("normal()");
-
-    int rx1,ry1,rz1;
-    int rx2,ry2,rz2;
-
-    face_1->get_normal(&rx1,&ry1,&rz1);
-    face_2->get_normal(&rx2,&ry2,&rz2);
-    
-    unit_assert(rx1 == rx2);
-    unit_assert(ry1 == ry2);
-    unit_assert(rz1 == rz2);
-
-    //--------------------------------------------------
-
-    unit_func("child()");
-
-    int cx1,cy1,cz1;
-    int cx2,cy2,cz2;
-
-    face_1->get_child(&cx1,&cy1,&cz1);
-    face_2->get_child(&cx2,&cy2,&cz2);
-    
-    unit_assert(cx1 == cx2);
-    unit_assert(cy1 == cy2);
-    unit_assert(cz1 == cz2);
-
-    //--------------------------------------------------
-
-    delete face_1;
-    delete face_2;
-
-  }
+  const int num_level = 3;
+  const int level_1[] = {1,2,3};
+  const int level_2[] = {1,3,2};
   
+  for (int rank = 2; rank <=3; ++rank) {
+    for (int iaxis=0; iaxis<rank; iaxis++) {
+      for (int iface=0; iface<2; ++iface) {
+        for (int ilevel=0; ilevel<num_level; ++ilevel) {
+        
+          const int L_1 = level_1[ilevel];
+          const int L_2 = level_2[ilevel];
+          int n3[3];
+          n3[0] = test.size[0];
+          n3[1] = (rank >= 2) ? test.size[1]:1;
+          n3[2] = (rank >= 3) ? test.size[2]:1;
+          int c3[3];
+          c3[0] = test.centered[0];
+          c3[1] = (rank >= 2) ? test.centered[1] : 0;
+          c3[2] = (rank >= 3) ? test.centered[2] : 0;
+          double h3_1[3];
+          h3_1[0] = test.cell_width[0];
+          h3_1[1] = (rank >= 2) ? test.cell_width[1] : 0;
+          h3_1[2] = (rank >= 3) ? test.cell_width[2] : 0;
+          double h3_2[3] = {h3_1[0],h3_1[1],h3_1[2]};
+          
+          const double dt1 =  test.time_step_1;
+          double dt2 =  test.time_step_2;
+          const int cx = test.child[0];
+          const int cy = (rank >= 2) ? test.child[1] : 0;
+          const int cz = (rank >= 3) ? test.child[2] : 0;
+
+          if (L_1 < L_2) { h3_2[0]*=0.5; h3_2[1]*=0.5; h3_2[2]*=0.5; dt2*=0.5;}
+          if (L_1 > L_2) { h3_2[0]*=2.0; h3_2[1]*=2.0; h3_2[2]*=2.0; dt2*=2.0;}
+          int fx = iaxis==0 ? iface*2-1 : 0;
+          int fy = iaxis==1 ? iface*2-1 : 0;
+          int fz = iaxis==2 ? iface*2-1 : 0;
+          
+          Face * face_1 = new Face( fx, fy, fz,iaxis,iface);
+          Face * face_2 = new Face(-fx,-fy,-fz,iaxis,iface);
+          //--------------------------------------------------
+    
+          unit_func ("Face()");
+    
+          unit_assert (face_1 != nullptr);
+          unit_assert (face_2 != nullptr);
+    
+          //--------------------------------------------------
+
+          unit_func("face()");
+
+          int ix1,iy1,iz1;
+          int ix2,iy2,iz2;
+
+          face_1->get_face(&ix1,&iy1,&iz1);
+          face_2->get_face(&ix2,&iy2,&iz2);
+
+          unit_assert((ix1 == -ix2));
+          unit_assert((iy1 == -iy2));
+          unit_assert((iz1 == -iz2));
+
+          unit_assert(std::abs(ix1) + std::abs(ix2) == 2*(iaxis==0)?1:0);
+          unit_assert(std::abs(iy1) + std::abs(iy2) == 2*(iaxis==1)?1:0);
+          unit_assert(std::abs(iz1) + std::abs(iz2) == 2*(iaxis==2)?1:0);
+
+          //--------------------------------------------------
+
+          delete face_1;
+          delete face_2;
+
+        } // ilevel
+      } // iface
+    } // iaxis
+  } // rank
+
   unit_finalize();
 
   exit_();

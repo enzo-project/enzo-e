@@ -1,6 +1,6 @@
 #======================================================================
 #
-#  File        : debug.incl
+#  File        : initial_music.incl
 #  Author      : James Bordner (jobordner@ucsd.edu)
 #  Date        : 2017-06-29
 #  Brief       : Test file for reading MUSIC HDF5 initial conditions
@@ -97,6 +97,7 @@
         dual_energy = false;
     }
   }
+   include "input/flux_correct.incl"
 
 # Initial conditions as described in the header comment
 

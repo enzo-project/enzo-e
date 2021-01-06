@@ -25,16 +25,16 @@ public: // interface
     p | value_;
   }
 
-  /// Allocate scalars
-  void allocate(ScalarDescr * scalar_descr)
-  { value_.resize(scalar_descr->size()); }
-  
   /// Return the specified scalar value
   T * value (ScalarDescr * scalar_descr, int index)
   { if (index >= int(value_.size())) allocate(scalar_descr);
     return (index >= 0) ? & value_[index] : NULL;
   }
 
+  /// Allocate scalars
+  void allocate(ScalarDescr * scalar_descr)
+  { value_.resize(scalar_descr->size()); }
+  
 private: // attributes
 
   // NOTE: change pup() function whenever attributes change

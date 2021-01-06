@@ -41,6 +41,7 @@
          dual_energy = false;
      }
    }
+ include "input/flux_correct.incl"
 
 # Initial conditions deferred to test_implosion-code.in or
 # test_implosion.in

@@ -55,6 +55,7 @@ if [ "$#" -ge 1 ]; then
       rm -rf test/fail.* test/pass.* test/incomplete.*
       rm -rf scons-local-2.2.0/SCons/*.pyc scons-local-2.2.0/SCons/*/*.pyc
       rm -rf charmrun parameters.out checkpoint_ppm* output-stride*.h5
+      rm -rf cov-int.tgz cov-int
       rm -rf `find test -name "*.png"`
       rm -rf `find test -name "*.h5"`
       rm -rf src/.cccc
@@ -68,7 +69,6 @@ if [ "$#" -ge 1 ]; then
    elif [ "$1" == "compile" ]; then
       target=install-bin
    elif [ "$1" == "test" ]; then
-#      ./build.sh
       target="test"
       proc=1
       k_switch="-k"
@@ -264,7 +264,7 @@ if [ $target == "test" ]; then
     if [ $f -gt 0 ] || [ $crash -gt 0 ] ; then
 	echo "Exiting testing with failures:"
 	echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
-	cat $dir/fail.$configure | awk '{print gensub(".*/","","g",$1),gensub(".*/","","g",$4) ":" $5,$6,$7,$8,$9,$10;}'
+	cat "$dir/fail.$configure"
 	echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 	exit_status=1
     else

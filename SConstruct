@@ -74,12 +74,6 @@ debug_verbose = 0
 memory = 1
 
 #----------------------------------------------------------------------
-# Set to 1 if Charm++ version is >= 6.7.0
-#----------------------------------------------------------------------
-
-new_charm = 1
-
-#----------------------------------------------------------------------
 # Enable charm++ dynamic load balancing
 #----------------------------------------------------------------------
 
@@ -135,12 +129,6 @@ ip_charm = '4'
 have_git = 1
 
 #----------------------------------------------------------------------
-# Whether this is a Mercurial repository
-#----------------------------------------------------------------------
-
-have_mercurial = 0
-
-#----------------------------------------------------------------------
 # Whether to use the jemalloc library for memory allocation
 #----------------------------------------------------------------------
 
@@ -171,10 +159,10 @@ if (arch == 'unknown' and "CELLO_ARCH" in os.environ):
 if (prec == 'unknown' and "CELLO_PREC" in os.environ):
      prec = os.environ["CELLO_PREC"]
 
-print 
-print "    CELLO_ARCH scons arch=",arch
-print "    CELLO_PREC scons prec=",prec
-print 
+print
+print("    CELLO_ARCH scons arch=",arch)
+print("    CELLO_PREC scons prec=",prec)
+print
 
 #----------------------------------------------------------------------
 # CONFIGURATION DEFINES
@@ -201,7 +189,10 @@ define_jemalloc  = 'CONFIG_USE_JEMALLOC'
 # Performance defines
 
 define_memory =       'CONFIG_USE_MEMORY'
+<<<<<<< HEAD
 define_new_charm =    'CONFIG_NEW_CHARM'
+=======
+>>>>>>> master
 define_projections =  'CONFIG_USE_PROJECTIONS'
 define_performance =  'CONFIG_USE_PERFORMANCE'
 define_papi  =        'CONFIG_USE_PAPI','PAPI3'
@@ -226,33 +217,19 @@ define_debug_verbose = 'CELLO_DEBUG_VERBOSE'
 
 define_png   =        'NO_FREETYPE'
 
-# Python version defines
-
-define_python_lt_27 = 'CONFIG_PYTHON_LT_27'
-
 # SMP mode define for safety checking against IO throttling
 
-define_smp = 'CONFIG_SMP_MODE'
+define_smp =          'CONFIG_SMP_MODE'
 
-# Version control defines (Git or Mercurial)
+# Version control defines
 
 define_have_version_control = 'CONFIG_HAVE_VERSION_CONTROL'
-
 
 #======================================================================
 # ARCHITECTURE SETTINGS
 #======================================================================
 
 is_arch_valid = 0
-
-# Assume Python is new, but may be overridden in machine configuration
-# files if needed.  For example, gordon and comet have Python 2.6
-# installed, but subprocess.check_output() used below requires 2.7, so
-# we set python_lt_27 = 1 in those configuration files to avoid
-# calling check_output()
-
-python_lt_27 = 0
-
 
 sys.path.append("./config");
 
@@ -280,7 +257,7 @@ elif (arch == "gordon_intel"): from gordon_intel import *
 elif (arch == "gordon_pgi"):   from gordon_pgi   import *
 elif (arch == "comet_gnu"):    from comet_gnu    import *
 elif (arch == "linux_gnu"):    from linux_gnu    import *
-elif (arch == "linux_illium"): from linux_illium import *
+elif (arch == "linux_gcc_9"):  from linux_gcc_9  import *
 elif (arch == "linux_intel"):  from linux_intel  import *
 elif (arch == "linux_yt"):     from linux_yt     import *
 elif (arch == "linux_gprof"):  from linux_gprof  import *
@@ -307,7 +284,7 @@ elif (arch == "darwin_homebrew"):   from darwin_homebrew   import *
 #======================================================================
 
 if (not is_arch_valid):
-   print "Unrecognized architecture ",arch
+   print("Unrecognized architecture ",arch)
    sys.exit(1)
 
 #----------------------------------------------------------------------
@@ -321,12 +298,12 @@ defines = []
 if (prec == 'single' or prec == 'double'):
      defines.append(define[prec])
 else:
-     print "Unrecognized precision ",prec
+     print("Unrecognized precision ",prec)
      print
-     print "Valid precisions are 'single' and 'double'"
+     print("Valid precisions are 'single' and 'double'")
      print
-     print "The precision is set using the environment variable $CELLO_PREC"
-     print "or by using 'scons prec=<precision>"
+     print("The precision is set using the environment variable $CELLO_PREC")
+     print("or by using 'scons prec=<precision>")
      sys.exit(1)
 
 defines.append(define_int_size)
@@ -365,10 +342,7 @@ if (debug_field_face != 0): defines.append( define_debug_field_face )
 if (check != 0):         defines.append( define_check )
 if (debug_verbose != 0): defines.append( define_debug_verbose )
 if (memory != 0):        defines.append( define_memory )
-if (new_charm != 0):     defines.append( define_new_charm )
-if (python_lt_27 != 0):  defines.append( define_python_lt_27 )
-if (have_git != 0 or have_mercurial != 0 ):
-   defines.append( define_have_version_control )
+if (have_git != 0):      defines.append( define_have_version_control )
 if (smp != 0):           defines.append( define_smp )
 
 #======================================================================
@@ -526,7 +500,7 @@ cello_def.write ("#define CELLO_ARCH "
 cello_def.write ("#define CELLO_PREC "
 		"\""+prec+"\"\n")
 cello_def.write ("#define CELLO_CC "
-		"\""+cc+"\"\n")	
+		"\""+cc+"\"\n")
 cello_def.write ("#define CELLO_CFLAGS "
 		"\""+cflags+"\"\n")
 cello_def.write ("#define CELLO_CPPDEFINES "
@@ -534,7 +508,7 @@ cello_def.write ("#define CELLO_CPPDEFINES "
 cello_def.write ("#define CELLO_CPPPATH "
 		"\""+" ".join(map(str,cpppath))+"\"\n")
 cello_def.write ("#define CELLO_CXX "
-		"\""+cxx+"\"\n")	
+		"\""+cxx+"\"\n")
 cello_def.write ("#define CELLO_CXXFLAGS "
 		"\""+cxxflags+"\"\n")
 cello_def.write ("#define CELLO_FORTRANFLAGS "
@@ -559,43 +533,27 @@ cello_def.write ("#define CELLO_TIME "
 		"\""+time.strftime("%H:%M:%S",time.gmtime())+"\"\n" )
 
 #----------
-# Python version >= 2.7 is required for subprocess.check_output()
+charm_version = str(subprocess.check_output (["cat", charm_path + "/VERSION"]).rstrip());
+cello_def.write ("#define CHARM_VERSION "+charm_version+"\n" )
 
-if (python_lt_27 == 0):
-     charm_version =  subprocess.check_output (["cat", charm_path + "/VERSION"]).rstrip();
-     cello_def.write ("#define CELLO_CHARM_VERSION "+charm_version+"\n" )
-     
-     fp_charm_version = open ("test/CHARM_VERSION", "w")
-     fp_charm_version.write(charm_version + "\n");
-     fp_charm_version.close()
-     		      
-else:
-     cello_def.write ("#define CELLO_CHARM_VERSION 0\n")	
-     fp_charm_version = open ("test/CHARM_VERSION", "w")
-     fp_charm_version.write("unknown\n");
-     fp_charm_version.close()
+fp_charm_version = open ("test/CHARM_VERSION", "w")
+fp_charm_version.write(charm_version + str("\n"));
+fp_charm_version.close()
 
 Clean('.','test/CHARM_VERSION')
 
-cello_def.write ("#define CELLO_CHARM_PATH \"" + charm_path + "\"\n" )
+cello_def.write ("#define CHARM_PATH \"" + charm_path + "\"\n" )
 
 #----------
-# Both Python version 2.7 is required, and git must be installed
 
-if (python_lt_27 == 0 and have_git):
+if (have_git):
 
-     cello_def.write ("#define CELLO_CHANGESET "
-		      "\""+subprocess.check_output
-		      (["git", "rev-parse", "HEAD"]).rstrip()+"\"\n" )
-
-elif (python_lt_27 == 0 and have_mercurial):
-
-     cello_def.write ("#define CELLO_CHANGESET "
-                      "\""+subprocess.check_output
-                      (["hg","id","-n"]).rstrip()+"\"\n" )
+   git_changeset = str(subprocess.check_output(["git", "rev-parse", "HEAD"]).rstrip())
+   cello_def.write ("#define CELLO_CHANGESET \""+git_changeset+"\"\n" )
 
 else:
-     cello_def.write ("#define CELLO_CHANGESET \"unknown\"\n" )
+
+   cello_def.write ("#define CELLO_CHANGESET \"unknown\"\n" )
 
 #----------
 
@@ -636,7 +594,7 @@ if (have_git == 1):
    branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).rstrip()
 
 build_dir = 'build'
-   
+
 SConscript( 'src/SConscript',variant_dir=build_dir)
 SConscript('test/SConscript')
 

@@ -154,6 +154,13 @@ public: // interface
   int face_level (const int if3[3]) const
   { return face_level_curr_[IF3(if3)]; }
 
+  int face_level (int axis, int face) const
+  {
+    int if3[3];
+    cello::af_to_xyz(axis,face,if3);
+    return face_level_curr_[IF3(if3)];
+  }
+
   int face_level_next (const int if3[3]) const
   { return face_level_next_[IF3(if3)]; }
 
@@ -545,7 +552,7 @@ public:
   //--------------------------------------------------
 
   /// Begin a refresh operation, optionally waiting then invoking callback
-  void new_refresh_start (int id_refresh, int callback = 0);
+  void new_refresh_start (int id_refresh, int callback);
 
   /// Wait for a refresh operation to complete, then continue with the callback
   void new_refresh_wait (int id_refresh, int callback);
@@ -564,11 +571,16 @@ public:
 
   int delete_particle_copies_ (int it);
 
+  /// Send flux data to neighbors
+  int new_refresh_load_flux_faces_ (Refresh & refresh);
+
   void new_refresh_load_field_face_
   (Refresh & refresh, int refresh_type, Index index, int if3[3], int ic3[3]);
   /// Send particles in list to corresponding indices
   void new_particle_send_(Refresh & refresh, int nl,Index index_list[],
 			  ParticleData * particle_list[]);
+  void new_refresh_load_flux_face_
+  (Refresh & refresh, int refresh_type, Index index, int if3[3], int ic3[3]);
 
   void new_refresh_exit (Refresh & refresh);
 
@@ -608,6 +620,7 @@ public:
 
   void p_method_flux_correct_refresh();
   void r_method_flux_correct_sum_fields(CkReductionMsg * msg);
+  void r_method_debug_sum_fields(CkReductionMsg * msg);
 
 protected:
 
@@ -618,7 +631,6 @@ protected:
 
   /// Pack field face data into arrays and send to neighbors
   int refresh_load_field_faces_ (Refresh * refresh);
-
   /// Scatter particles in ghost zones to neighbors
   int refresh_load_particle_faces_ (Refresh * refresh);
 
@@ -806,6 +818,21 @@ public: // virtual functions
 
   void print () const;
 
+  void debug_new_refresh(const char * file, int line)
+  {
+    CkPrintf ("DEBUG_NEW_REFRESH %s:%d\n",file,line);
+    const int n = new_refresh_sync_list_.size();
+    for (int i=0; i<n; i++) {
+      Sync & sync = new_refresh_sync_list_[i];
+      CkPrintf ("DEBUG_NEW_REFRESH   sync %p %d/%u\n",(void*)&sync,sync.value(),sync.stop());
+      CkPrintf ("DEBUG_NEW_REFRESH   state %s\n",
+                (sync.state()==RefreshState::INACTIVE) ? "INACTIVE" :
+                ((sync.state()==RefreshState::ACTIVE) ? "ACTIVE" : "READY"));
+      CkPrintf ("DEBUG_NEW_REFRESH   mesg %lu\n",new_refresh_msg_list_[i].size());
+    }
+    fflush(stdout);
+  }
+
 protected: // functions
 
   /// Return the child adjacent to the given child in the direction of
@@ -912,6 +939,9 @@ protected: // functions
   Refresh * refresh () throw()
   {  return refresh_.back();  }
 
+  /// Return the synchronization object for the given Refresh object id
+  Sync * sync_ (int id_refresh) throw()
+  { return &new_refresh_sync_list_[id_refresh]; }
 
 protected: // attributes
 
@@ -1016,7 +1046,6 @@ protected: // attributes
 
   std::vector < Sync > new_refresh_sync_list_;
   std::vector < std::vector <MsgRefresh * > > new_refresh_msg_list_;
-  std::vector < RefreshState > new_refresh_state_list_;
 
 };
 

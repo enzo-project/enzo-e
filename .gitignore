@@ -1,10 +1,21 @@
 *~
-*.pyc
+bin/enzo-p
+bin/enzo-p.prev
+build
+build-*
+charmrun
+config.log
+errors.org
 gmon.out
+include
+lib
 log.build
 *out.scons*
-template_defs.de*.h
+*.pyc
 .scon*
+template_defs.de*.h
+test/CHARM_BUILD
+test/CHARM_VERSION
 test/START
 test/STOP
 include
@@ -16,15 +27,3 @@ charmrun
 config.log
 errors.org
 warnings.org
-test/CHARM_BUILD
-test/CHARM_VERSION
-
-# ignore directories used for building branches
-build-*/Cello/*
-build-*/Enzo/*
-build-*/External/*
-build-*/SConscript
-
-# ignore the binaries
-bin/enzo-p
-bin/enzo-p.prev

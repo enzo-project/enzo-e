@@ -832,7 +832,13 @@ Method * Problem::create_method_
   } else if (name == "flux_correct") {
 
     method = new MethodFluxCorrect
-      (config->method_flux_correct_group[index_method]);
+      (config->method_flux_correct_group[index_method],
+       config->method_flux_correct_enable[index_method],
+       config->method_flux_correct_min_digits[index_method]);
+
+  } else if (name == "debug") {
+
+    method = new MethodDebug (config->num_fields);
 
   } else if (name == "close_files") {
 

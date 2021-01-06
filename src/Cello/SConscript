@@ -139,6 +139,7 @@ sources_test =        [Glob('test_Unit*cpp')]
 # 3. cp build/Cello/lex.yy.c src/Cello
 # 4. cp build/Cello/parse.tab.? src/Cello
 # 5. Recomment below
+# NOTE: requires 'flex' and 'bison'
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # env.CFile(target = 'lex.yy.c', source = 'parse.l')
 # env.CFile(target = ['parse.tab.c', 'parse.tab.h'], source = 'parse.y', YACCFLAGS='-d -t')

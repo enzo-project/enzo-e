@@ -62,7 +62,7 @@ PARALLEL_MAIN_BEGIN
   fd->insert_permanent("velocity_y");
   unit_func("field_count");
   unit_assert(fd->field_count()==3);
-  fd->insert_permanent("velocity_z");
+  const int id_vz = fd->insert_permanent("velocity_z");
   unit_func("field_count");
   unit_assert(fd->field_count()==4);
 
@@ -75,12 +75,21 @@ PARALLEL_MAIN_BEGIN
   unit_func("is_permanent");
   id = fd->insert_temporary("temporary_1");
   unit_assert(! fd->is_permanent(id));
+  unit_func("is_temporary");
+  unit_assert(fd->is_temporary(id));
   unit_func("field_count");
   unit_assert(fd->field_count()==6);
   id = fd->insert_temporary("temporary_2");
+  unit_func("is_permanent");
   unit_assert(! fd->is_permanent(id));
+  unit_func("is_temporary");
+  unit_assert(fd->is_temporary(id));
   unit_func("field_count");
   unit_assert(fd->field_count()==7);
+  unit_func("is_permanent");
+  unit_assert(fd->is_permanent(id_vz));
+  unit_func("is_temporary");
+  unit_assert(!fd->is_temporary(id_vz));
 
   
 

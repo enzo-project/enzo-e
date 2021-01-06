@@ -52,7 +52,7 @@ FieldFace::FieldFace
 FieldFace::~FieldFace() throw ()
 {
 #ifdef DEBUG_FIELD_FACE  
-  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE deleting %p\n",CkMyPe(),__FILE__,__LINE__,this);
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE deleting %p\n",CkMyPe(),__FILE__,__LINE__,(void*)this);
 #endif
   --counter[cello::index_static()];
 
@@ -73,7 +73,8 @@ FieldFace::FieldFace(const FieldFace & field_face) throw ()
 
 {
 #ifdef DEBUG_FIELD_FACE  
-  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p(%p)\n",CkMyPe(),__FILE__,__LINE__,this,&field_face);
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p(%p)\n",
+            CkMyPe(),__FILE__,__LINE__,(void*)this,(void*)&field_face);
 #endif  
   ++counter[cello::index_static()];
 
@@ -88,7 +89,8 @@ FieldFace & FieldFace::operator= (const FieldFace & field_face) throw ()
 /// @return    The target assigned object
 {
 #ifdef DEBUG_FIELD_FACE  
-  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE assigning %p(%p)\n",CkMyPe(),__FILE__,__LINE__,this,&field_face);
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE assigning %p(%p)\n",
+            CkMyPe(),__FILE__,__LINE__,(void*)this,(void*&field_face);
 #endif  
   copy_(field_face);
   return *this;
@@ -159,11 +161,11 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
 
   for (size_t i_f=0; i_f < field_list.size(); i_f++) {
 
-    size_t index_field = field_list[i_f];
-  
+    const size_t index_field = field_list[i_f];
+    
     precision_type precision = field.precision(index_field);
 
-    const void * field_face = field.values(index_field);
+    void * field_face = field.values(index_field);
 
     char * array_face  = &array[index_array];
 
@@ -183,7 +185,10 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
     } else {
       loop_limits_accumulate (i3,n3,m3,g3,c3,op_load);
     }
-  
+
+    // scale by density if needed to convert to conservative form
+    mul_by_density_(field,index_field,i3,n3,m3);
+
     if (refresh_type_ == refresh_coarse) {
 
       // Restrict field to array
@@ -219,6 +224,9 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
 	ERROR("FieldFace::face_to_array", "Unsupported precision");
       }
     }
+
+    // unscale by density if needed to convert back from conservative form
+    div_by_density_(field,index_field,i3,n3,m3);
   }
 
 }
@@ -302,6 +310,10 @@ void FieldFace::array_to_face (char * array, Field field) throw()
 	ERROR("FieldFace::array_to_face()", "Unsupported precision");
       }
     }
+
+    // unscale by density if needed to convert back from conservative form
+    div_by_density_(field,index_field,i3,n3,m3);
+
   }
 }
 
@@ -354,6 +366,9 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
     
     Problem * problem = cello::problem();
 
+    // scale by density if needed to convert to conservative form
+    mul_by_density_(field_src,index_src,is3,ns3,m3);
+
     if (refresh_type_ == refresh_fine) {
 
       // Prolong field
@@ -387,7 +402,7 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
       // Copy faces to ghosts
 
       union { float * fs4; double * fs8; long double * fs16; };
-      union { float * fd4; double * fd8;long double * fd16;  };
+      union { float * fd4; double * fd8; long double * fd16; };
       fs4 = (float *) values_src;
       fd4 = (float *) values_dst;
       
@@ -403,6 +418,9 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
 	ERROR("FieldFace::face_to_face()", "Unsupported precision");
       }
     }
+    // unscale by density if needed to convert back from conservative form
+    div_by_density_(field_src,index_src,is3,ns3,m3);
+    div_by_density_(field_dst,index_dst,id3,nd3,m3);
   }
 }
 
@@ -654,13 +672,21 @@ template<class T> void FieldFace::copy_
   const T * vs, int ms3[3],int ns3[3],int is3[3],
   bool accumulate) throw()
 {
+  const int is0 = is3[0] + ms3[0]*(is3[1] + ms3[1]*is3[2]);
+  const int id0 = id3[0] + md3[0]*(id3[1] + md3[1]*id3[2]);
+  T * vd0 = vd + id0;
+  const T * vs0 = vs + is0;
+  const int msx = ms3[0];
+  const int msy = ms3[1];
+  const int mdx = md3[0];
+  const int mdy = md3[1];
   if (accumulate) {
     for (int iz=0; iz <ns3[2]; iz++)  {
       for (int iy=0; iy < ns3[1]; iy++) {
 	for (int ix=0; ix < ns3[0]; ix++) {
-	  int i_src = (ix+is3[0]) + ms3[0]*((iy+is3[1]) + ms3[1] * (iz+is3[2]));
-	  int i_dst = (ix+id3[0]) + md3[0]*((iy+id3[1]) + md3[1] * (iz+id3[2]));
-	  vd[i_dst] += vs[i_src];
+	  int i_src = ix + msx*(iy + msy*iz);
+	  int i_dst = ix + mdx*(iy + mdy*iz);
+	  vd0[i_dst] += vs0[i_src];
 	}
       }
     }
@@ -668,9 +694,9 @@ template<class T> void FieldFace::copy_
     for (int iz=0; iz <ns3[2]; iz++)  {
       for (int iy=0; iy < ns3[1]; iy++) {
 	for (int ix=0; ix < ns3[0]; ix++) {
-	  int i_src = (ix+is3[0]) + ms3[0]*((iy+is3[1]) + ms3[1] * (iz+is3[2]));
-	  int i_dst = (ix+id3[0]) + md3[0]*((iy+id3[1]) + md3[1] * (iz+id3[2]));
-	  vd[i_dst] = vs[i_src];
+	  int i_src = ix + msx*(iy + msy*iz);
+	  int i_dst = ix + mdx*(iy + mdy*iz);
+	  vd0[i_dst] = vs0[i_src];
 	}
       }
     }
@@ -940,7 +966,7 @@ void FieldFace::loop_limits
 
 void FieldFace::print(const char * message)
 {
-  CkPrintf (" FieldFace %s %p\n",message,this);
+  CkPrintf (" FieldFace %s %p\n",message,(void*)this);
   CkPrintf ("    face_  %d %d %d\n",face_[0],face_[1],face_[2]);
   CkPrintf ("    ghost_  %d %d %d\n",ghost_[0],ghost_[1],ghost_[2]);
   CkPrintf ("    child_  %d %d %d\n",child_[0],child_[1],child_[2]);
@@ -968,6 +994,8 @@ std::vector<int> FieldFace::field_list_src_(Field field) const
   return field_list;
 }
 
+//----------------------------------------------------------------------
+
 std::vector<int> FieldFace::field_list_dst_(Field field) const 
 {
   std::vector<int> field_list = refresh_->field_list_dst();
@@ -979,7 +1007,128 @@ std::vector<int> FieldFace::field_list_dst_(Field field) const
   return field_list;
 }
 
+//----------------------------------------------------------------------
+
 bool FieldFace::accumulate_(int index_src, int index_dst) const
 {
   return ((index_src != index_dst) && refresh_->accumulate());
+}
+
+//----------------------------------------------------------------------
+
+void FieldFace::mul_by_density_
+(Field field, int index_field,
+ const int i3[3], const int n3[3], const int m3[3])
+{
+  if (field.is_temporary(index_field)) return;
+  
+  precision_type precision = field.precision(index_field);
+  void * field_face = field.values(index_field);
+
+  Grouping * groups = cello::field_groups();
+
+  void * field_density = field.values("density");
+  
+  const std::string field_name = field.field_name(index_field);
+
+  const bool scale_by_density =
+    (refresh_type_ != refresh_same) &&
+    groups->is_in (field_name,"make_field_conservative");
+  if (scale_by_density) {
+    union { float * d4; double * d8; long double * d16; };
+    union { float * f4; double * f8;long double * f16;  };
+    d4 = (float *) field_density;
+    f4 = (float *) field_face;
+
+    if (precision == precision_single) {
+      for (int iz=i3[2]; iz<i3[2]+n3[2]; iz++) {
+        for (int iy=i3[1]; iy<i3[1]+n3[1]; iy++) {
+          for (int ix=i3[0]; ix<i3[0]+n3[0]; ix++) {
+            const int i=ix + m3[0]*(iy + m3[1]*iz);
+            f4[i] *= d4[i];
+          }
+        }
+      }
+    } else if (precision == precision_double) {
+      for (int iz=i3[2]; iz<i3[2]+n3[2]; iz++) {
+        for (int iy=i3[1]; iy<i3[1]+n3[1]; iy++) {
+          for (int ix=i3[0]; ix<i3[0]+n3[0]; ix++) {
+            const int i=ix + m3[0]*(iy + m3[1]*iz);
+            f8[i] *= d8[i];
+          }
+        }
+      }
+    } else if (precision == precision_quadruple) {
+      for (int iz=i3[2]; iz<i3[2]+n3[2]; iz++) {
+        for (int iy=i3[1]; iy<i3[1]+n3[1]; iy++) {
+          for (int ix=i3[0]; ix<i3[0]+n3[0]; ix++) {
+            const int i=ix + m3[0]*(iy + m3[1]*iz);
+            f16[i] *= d16[i];
+          }
+        }
+      }
+    } else {
+      ERROR("FieldFace::mul_by_density_()", "Unsupported precision");
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
+void FieldFace::div_by_density_
+(Field field, int index_field,
+ const int i3[3], const int n3[3], const int m3[3])
+{
+      
+  if (field.is_temporary(index_field)) return;
+
+  precision_type precision = field.precision(index_field);
+  void * field_face = field.values(index_field);
+
+  Grouping * groups = cello::field_groups();
+
+  void * field_density = field.values("density");
+  
+  const std::string field_name = field.field_name(index_field);
+
+  const bool scale_by_density =
+    (refresh_type_ != refresh_same) &&
+    groups->is_in (field_name,"make_field_conservative");
+  if (scale_by_density) {
+    union { float * d4; double * d8; long double * d16; };
+    union { float * f4; double * f8;long double * f16;  };
+    d4 = (float *) field_density;
+    f4 = (float *) field_face;
+
+    if (precision == precision_single) {
+      for (int iz=i3[2]; iz<i3[2]+n3[2]; iz++) {
+        for (int iy=i3[1]; iy<i3[1]+n3[1]; iy++) {
+          for (int ix=i3[0]; ix<i3[0]+n3[0]; ix++) {
+            const int i=ix + m3[0]*(iy + m3[1]*iz);
+            f4[i] /= d4[i];
+          }
+        }
+      }
+    } else if (precision == precision_double) {
+      for (int iz=i3[2]; iz<i3[2]+n3[2]; iz++) {
+        for (int iy=i3[1]; iy<i3[1]+n3[1]; iy++) {
+          for (int ix=i3[0]; ix<i3[0]+n3[0]; ix++) {
+            const int i=ix + m3[0]*(iy + m3[1]*iz);
+            f8[i] /= d8[i];
+          }
+        }
+      }
+    } else if (precision == precision_quadruple) {
+      for (int iz=i3[2]; iz<i3[2]+n3[2]; iz++) {
+        for (int iy=i3[1]; iy<i3[1]+n3[1]; iy++) {
+          for (int ix=i3[0]; ix<i3[0]+n3[0]; ix++) {
+            const int i=ix + m3[0]*(iy + m3[1]*iz);
+            f16[i] /= d16[i];
+          }
+        }
+      }
+    } else {
+      ERROR("FieldFace::div_by_density_()", "Unsupported precision");
+    }
+  }
 }

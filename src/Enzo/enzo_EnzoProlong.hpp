@@ -19,14 +19,14 @@ class EnzoProlong : public Prolong {
 public: // interface
 
   /// Constructor
-  EnzoProlong(std::string method) throw();
+  EnzoProlong(std::string method, int positive) throw();
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoProlong);
 
   /// CHARM++ migration constructor
   EnzoProlong(CkMigrateMessage *m)
-    : Prolong(m),method_(0) 
+    : Prolong(m),method_(-1), positive_(false)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -45,7 +45,7 @@ public: // interface
 private: // functions
 
   int apply_
-  ( enzo_float *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
+  ( enzo_float *  values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
     const enzo_float * values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
     bool accumulate = false);
   
@@ -55,6 +55,9 @@ private: // attributes
 
   /// Interpolation Method: see Enzo documenation
   int method_;
+
+  /// Positivity flag
+  int positive_;
 
 };
 

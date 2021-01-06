@@ -138,6 +138,16 @@ enum precision_enum {
 };
 typedef int precision_type;
 
+#ifdef CONFIG_PRECISION_SINGLE
+   typedef float       cello_float;
+#elif  CONFIG_PRECISION_DOUBLE
+   typedef double      cello_float;
+#elif  CONFIG_PRECISION_QUAD
+   typedef long double cello_float;
+#else
+#  error "Must define one of CONFIG_PRECISION_[SINGLE|DOUBLE|QUAD]"
+#endif
+
 /// @enum type_enum
 /// @brief list of known scalar types, including ints as well as floats, used for Field types and Particle attributes
 enum type_enum {
@@ -306,6 +316,8 @@ namespace cello {
   T err_abs (const T & a, const T & b)
   {  return fabs(a-b);  }
 
+  int digits_max(int precision);
+
   // type_enum functions (prefered)
   int sizeof_type (int);
   int is_type_supported (int);
@@ -349,10 +361,15 @@ namespace cello {
 #endif    
   }
 
-  void backtrace(const char * msg);
-
   inline int index_static()
   { return CkMyPe() % CONFIG_NODE_SIZE; }
+
+  inline void af_to_xyz (int axis, int face, int r3[3])
+  {
+    r3[0] = (axis==0) ? 2*face-1 : 0;
+    r3[1] = (axis==1) ? 2*face-1 : 0;
+    r3[2] = (axis==2) ? 2*face-1 : 0;
+  }
 
   /// Return a pointer to the Simulation object on this process
   Simulation *    simulation();
@@ -402,6 +419,8 @@ namespace cello {
   int             num_children();
   /// Return the number of Blocks on this process
   size_t          num_blocks_process();
+  /// Return the cell volume at the given level relative to the root level
+  double          relative_cell_volume (int level);
 }
 
 #endif /* CELLO_HPP */

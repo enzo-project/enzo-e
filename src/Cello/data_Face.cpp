@@ -21,8 +21,10 @@ int Face::data_size () const
   int size = 0;
 
   size += 3*sizeof(int);  // int ix_,iy_,iz_;
-  size += 3*sizeof(int);  // int rx_, ry_, rz_;
-  size += 3*sizeof(int);  // int cx_, cy_, cz_;
+  size += sizeof(int);    // int axis_;
+  size += sizeof(int);    // int face_;
+
+  return size;
 }
 
 //----------------------------------------------------------------------
@@ -44,13 +46,8 @@ char * Face::save_data (char * buffer) const
   (*pi++) = iy_;
   (*pi++) = iz_;
 
-  (*pi++) = rx_;
-  (*pi++) = ry_;
-  (*pi++) = rz_;
-  
-  (*pi++) = cx_;
-  (*pi++) = cy_;
-  (*pi++) = cz_;
+  (*pi++) = axis_;
+  (*pi++) = face_;
   
   ASSERT2("Face::save_data()",
 	  "Buffer has size %ld but expecting size %d",
@@ -79,13 +76,8 @@ char * Face::load_data (char * buffer)
   iy_ = (*pi++);
   iz_ = (*pi++);
 
-  rx_ = (*pi++);
-  ry_ = (*pi++);
-  rz_ = (*pi++);
-
-  cx_ = (*pi++);
-  cy_ = (*pi++);
-  cz_ = (*pi++);
+  axis_ = (*pi++);
+  face_ = (*pi++);
 
   ASSERT2("Face::load_data()",
 	  "Buffer has size %ld but expecting size %d",

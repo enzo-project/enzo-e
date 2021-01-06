@@ -2,11 +2,11 @@
 #define ENZO_FORTRAN_HPP
 
 extern "C" void FORTRAN_NAME(interpolate)
-                             (int *rank, enzo_float *pfield, int pdim[],
-                              int pis[], int pie[], int r[],
-                              enzo_float *field, int dim[], int is[], enzo_float *work,
-                              int *imethod, int *posflag,
-                              int *ierror);
+  (int *rank, enzo_float *pfield, int pdim[],
+   int pis[], int pie[], int r[],
+   enzo_float *field, int dim[], int is[], enzo_float *work,
+   int *imethod, int *posflag,
+   int *ierror);
 
 extern "C" void FORTRAN_NAME(interp3d)
   (enzo_float * parent, enzo_float * work, 
@@ -85,7 +85,12 @@ extern "C" void FORTRAN_NAME(ppm_de)
    int uindex[], int vindex[], int windex[],
    int geindex[], enzo_float *temp,
    int *ncolor, enzo_float *colorpt, int *coloff,
-   int colindex[]);
+   int colindex[], int *error,
+   int *ie_error_x,
+   int *ie_error_y,
+   int *ie_error_z,
+   int *num_ie_error
+   );
 
 extern "C" void FORTRAN_NAME(ppml)
   (enzo_float *dn,   enzo_float *vx,   enzo_float *vy,   enzo_float *vz,

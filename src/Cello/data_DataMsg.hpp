@@ -8,7 +8,7 @@
 #ifndef DATA_DATA_MSG_HPP
 #define DATA_DATA_MSG_HPP
 
-class FluxData;
+class FaceFluxes;
 class ParticleData;
 class FieldData;
 class FieldFace;
@@ -26,8 +26,8 @@ public: // interface
       field_data_delete_   (false),
       particle_data_(nullptr),
       particle_data_delete_(false),
-      flux_data_(nullptr),
-      flux_data_delete_(false)
+      face_fluxes_list_(),
+      face_fluxes_delete_()
   {
     ++counter[cello::index_static()]; 
   }
@@ -48,10 +48,14 @@ public: // interface
       delete particle_data_;
       particle_data_ = nullptr;
     }
-    if (flux_data_delete_) {
-      delete flux_data_;
-      flux_data_ = nullptr;
+    for (size_t i=0; i<face_fluxes_list_.size(); i++) {
+      if (face_fluxes_delete_[i]) {
+        delete face_fluxes_list_[i];
+        face_fluxes_list_[i] = nullptr;
+      }
     }
+    face_fluxes_list_.clear();
+    face_fluxes_delete_.clear();
   }
 
   /// Copy constructor
@@ -70,13 +74,13 @@ public: // interface
 	    "DataMsg::pup() should never be called!");
   }
 
+  /// --------------------
+  /// FIELD DATA
+  /// --------------------
+
   /// Return the FieldFace
   FieldFace * field_face () 
   {
-#ifdef DEBUG_DATA_MSG
-    CkPrintf ("%d %s:%d DEBUG_DATA_MSG %p get_field_face(%p,%d)\n",
-	      CkMyPe(),__FILE__,__LINE__,field_face_,field_face_delete_);
-#endif    
     return field_face_;
   }
 
@@ -85,16 +89,28 @@ public: // interface
   {
     field_face_ = field_face; 
     field_face_delete_ = is_new;
-#ifdef DEBUG_DATA_MSG
-    CkPrintf ("%d %s:%d DEBUG_DATA_MSG %p set_field_face(%p,%d)\n",
-	      CkMyPe(),__FILE__,__LINE__,field_face_,field_face_delete_);
-#endif    
   }
 
   /// Return the serialized FieldFace array
   char * field_array () 
   { return field_array_; }
 
+
+  /// Return the FieldData
+  FieldData * field_data () 
+  { return field_data_; }
+
+  /// Set the FieldData object
+  void set_field_data    (FieldData * field_data, bool is_new) 
+  {
+    field_data_ = field_data;
+    field_data_delete_ = is_new;
+  }
+
+  /// --------------------
+  /// PARTICLE DATA
+  /// --------------------
+  
   /// Return the ParticleData
   ParticleData * particle_data () 
   { return particle_data_; }
@@ -109,37 +125,42 @@ public: // interface
   /// Delete the ParticleData object
   void delete_particle_data  () 
   { 
-    delete particle_data_; particle_data_ = nullptr; 
+    delete particle_data_;
+    particle_data_ = nullptr; 
   }
 
-  /// Return the FluxData
-  FluxData * flux_data () 
-  { return flux_data_; }
+  /// --------------------
+  /// FLUX DATA
+  /// --------------------
+  
+  /// Return the ith FaceFluxes
+  FaceFluxes * face_fluxes (unsigned i) 
+  { return face_fluxes_list_[i]; }
 
-  /// Set the FluxData object
-  void set_flux_data  (FluxData * flux_data, bool is_new) 
+  /// Return the number of FaceFluxes
+  unsigned num_face_fluxes() const
+  { return face_fluxes_list_.size(); }
+
+  void set_num_face_fluxes(unsigned i)
   {
-    flux_data_ = flux_data; 
-    flux_data_delete_ = is_new;
+    if (i > face_fluxes_list_.size()) {
+      face_fluxes_list_.resize(i);
+      face_fluxes_delete_.resize(i);
+    }
   }
-
-  /// Delete the FluxData object
-  void delete_flux_data  () 
-  { 
-    delete flux_data_; flux_data_ = nullptr; 
-  }
-
-  /// Return the FieldData
-  FieldData * field_data () 
-  { return field_data_; }
-
-  /// Set the FieldData object
-  void set_field_data    (FieldData * field_data, bool is_new) 
+  
+  /// Set the FaceFluxes object
+  void set_face_fluxes  (unsigned i, FaceFluxes * face_fluxes, bool is_new) 
   {
-    field_data_ = field_data;
-    field_data_delete_ = is_new;
+    set_num_face_fluxes(i+1);
+    face_fluxes_list_[i] = face_fluxes; 
+    face_fluxes_delete_[i] = is_new;
   }
 
+  ///--------------------
+  /// PACKING / UNPACKING
+  ///--------------------
+  
   /// Return the number of bytes required to serialize the data object
   int data_size () const;
 
@@ -161,15 +182,18 @@ public: // interface
   {
     const int ip=CkMyPe();
     char buf[81];
-    snprintf (buf,80,"%d %p TRACE_DATA_MSG TRACE_DATA_MSG",ip,this);
-    CkPrintf ("%s field_face_    = %p\n",buf,field_face_);
-    CkPrintf ("%s field_data_    = %p\n",buf,field_data_);
-    CkPrintf ("%s particle_data_ = %p\n",buf,particle_data_);
-    CkPrintf ("%s particle_data_delete_ = %d\n",buf,particle_data_delete_);
-    CkPrintf ("%s flux_data_         = %p\n",buf,flux_data_);
-    CkPrintf ("%s flux_data_delete   = %d\n",buf,flux_data_delete_);
-    CkPrintf ("%s field_face_delete_ = %d\n",buf,field_face_delete_);
-    CkPrintf ("%s field_data_delete_ = %d\n",buf,field_data_delete_);
+    
+    snprintf (buf,80,"%d %p TRACE_DATA_MSG TRACE_DATA_MSG",ip,(void*)this);
+    CkPrintf ("%s field_face_    = %p\n",buf,(void*)field_face_);
+    CkPrintf ("%s field_data_    = %p\n",buf,(void*)field_data_);
+    CkPrintf ("%s particle_data_ = %p\n",buf,(void*)particle_data_);
+    CkPrintf ("%s particle_data_delete_ = %d\n",buf,particle_data_delete_?1:0);
+    CkPrintf ("%s |face_fluxes_list_| = %lu\n",
+              buf,face_fluxes_list_.size());
+    CkPrintf ("%s |face_fluxes_delete_| = %lu\n",
+              buf,face_fluxes_delete_.size());
+    CkPrintf ("%s field_face_delete_ = %d\n",buf,field_face_delete_?1:0);
+    CkPrintf ("%s field_data_delete_ = %d\n",buf,field_data_delete_?1:0);
     fflush(stdout);
 
   }
@@ -201,10 +225,11 @@ protected: // attributes
   /// Whethere Particle data should be deleted in destructor
   bool particle_data_delete_;
 
-  /// Flux data
-  FluxData * flux_data_;
+  /// Flux faces (array for each field)
+  std::vector<FaceFluxes *> face_fluxes_list_;
+  
   /// Whether Flux data should be deleted in destructor
-  bool flux_data_delete_;
+  std::vector<bool> face_fluxes_delete_;
 
 };
 

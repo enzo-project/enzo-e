@@ -18,7 +18,7 @@ Adapt {
      };
      max_initial_level = 0;
      max_level = 4;
-     min_level = -2;
+     min_level = 0;
  }
 
  Boundary {
@@ -154,7 +154,7 @@ Adapt {
  }
 
  Output {
-     list = [ "de", "depa", "ax", "dark", "mesh", "po" ];
+     list = [ "de", "depa", "ax", "dark", "mesh", "po", "check" ];
      de {
          dir = [ "COSMO_CG_%04d", "cycle" ];
          field_list = [ "density" ];
@@ -260,7 +260,7 @@ Adapt {
      check {
          dir = [ "checkpoint_cosmo_cg-%02d", "count" ];
          schedule {
-             start = 50;
+             start = 100;
              step = 200;
              var = "cycle";
          };

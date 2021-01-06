@@ -19,7 +19,7 @@ CkReductionMsg * r_reduce_performance(int n, CkReductionMsg ** msgs)
   ASSERT1 ("r_reduce_performance",
 	   "Sanity check failed on expected accumulator array %d",
 	   length, (length < 500));
-  accum.resize(2 + num_sum + num_max);
+  accum.resize(length);
   accum.clear();
 
   // save length
@@ -48,6 +48,56 @@ CkReductionMsg * r_reduce_performance(int n, CkReductionMsg ** msgs)
   return CkReductionMsg::buildNew(length*sizeof(long long),&accum[0]);
 }
 
+
+//======================================================================
+
+CkReduction::reducerType r_reduce_method_debug_type;
+
+void register_reduce_method_debug(void)
+{ r_reduce_method_debug_type = CkReduction::addReducer(r_reduce_method_debug); }
+
+CkReductionMsg * r_reduce_method_debug(int n, CkReductionMsg ** msgs)
+{
+  if (n <= 0) return NULL;
+
+  long double num_fields = ((long double*) (msgs[0]->getData()))[0];
+
+  const int length = 1 + 4*num_fields;
+  std::vector<long double> accum;
+  ASSERT1 ("r_reduce_method_debug",
+	   "Sanity check failed on expected accumulator array %d",
+	   length, (length < 500));
+  accum.resize(length);
+  accum.clear();
+
+  // save length
+  accum [0] = num_fields;
+
+  // initialize reductions min max sum count
+  int j=1;
+  for (int i_f=0; i_f < num_fields; i_f++) {
+    accum [j] = std::numeric_limits<long double>::max();
+    ++j;
+    accum [j] = -std::numeric_limits<long double>::max();
+    ++j;
+    accum [j] = 0.0;
+    ++j;
+    accum [j] = 0.0;
+    ++j;
+  }
+  for (int i=0; i<n; i++) {
+    long double * values = (long double *) msgs[i]->getData();
+    j = 1;
+    for (int i_f=0; i_f < num_fields; i_f++) {
+      accum [j] = std::min(accum[j],values[j]); ++j;
+      accum [j] = std::max(accum[j],values[j]); ++j;
+      accum [j] += values[j]; ++j;
+      accum [j] += values[j]; ++j;
+    }
+  }
+
+  return CkReductionMsg::buildNew(length*sizeof(long double),&accum[0]);
+}
 
 //======================================================================
 
@@ -294,7 +344,9 @@ CkReductionMsg * sum_long_double_n(int n, CkReductionMsg ** msgs)
 {
 
   const int N = int(*((long double *) msgs[0]->getData()));
-  long double accum[N+1];
+  
+  long double * accum = new long double [N+1];
+  
   std::fill_n(accum,N+1,0.0);
 
   for (int i=0; i<n; i++) {
@@ -311,7 +363,10 @@ CkReductionMsg * sum_long_double_n(int n, CkReductionMsg ** msgs)
       accum[i] += values[i];
     }
   }
-  return CkReductionMsg::buildNew((N+1)*sizeof(long double),accum);
+  CkReductionMsg * msg = CkReductionMsg::buildNew
+    ((N+1)*sizeof(long double),accum);
+  delete [] accum;
+  return msg;
 }
 
 //======================================================================

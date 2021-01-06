@@ -181,7 +181,6 @@ void mutex_init_bcg_iter()
 #  define TRACE_DOT(BLOCK,msg,ifunction) /* ... */
 #endif
 
-
 //----------------------------------------------------------------------
 
 EnzoSolverBiCgStab::EnzoSolverBiCgStab
@@ -202,8 +201,8 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
 	   solve_type,
 	   min_level,
 	   max_level),
+    A_(nullptr),
     res_tol_(res_tol),
-    A_(NULL),
     index_precon_(index_precon),
     iter_max_(iter_max), 
     ir_(0), ir0_(0), ip_(0), 
@@ -246,12 +245,6 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
 
   if (solve_type == solve_tree) {
    
-    function_.push_back(&EnzoSolverBiCgStab::start_2); // inner_product 0
-    function_.push_back(&EnzoSolverBiCgStab::loop_0a); // inner_product 1
-    function_.push_back(&EnzoSolverBiCgStab::loop_6);  // inner_product 2
-    function_.push_back(&EnzoSolverBiCgStab::loop_12); // inner_product 3
-    function_.push_back(&EnzoSolverBiCgStab::loop_14); // inner_product 4
-    
     ScalarDescr * scalar_descr_sync = cello::scalar_descr_sync();
     is_dot_sync_ = scalar_descr_sync->new_value("solver_bicgstab_dot_sync");
 
@@ -277,6 +270,66 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
   new_register_refresh_();
 
 }
+
+//----------------------------------------------------------------------
+
+void EnzoSolverBiCgStab::pup(PUP::er& p) {
+    
+    TRACEPUP;
+
+    Solver::pup(p);
+
+    //    p | A_;
+    p | is_alpha_;
+    p | is_beta_n_;
+    p | is_beta_d_;
+    p | is_rho0_;
+    p | is_err_;
+    p | is_err0_;
+    p | is_err_min_;
+    p | is_err_max_;
+    p | is_omega_;
+    p | is_omega_n_;
+    p | is_omega_d_;
+    p | is_rr_;
+    p | is_r0s_;
+    p | is_c_;
+    p | is_bs_;
+    p | is_xs_;
+    p | is_bnorm_;
+    p | is_vr0_;
+    p | is_ys_;
+    p | is_vs_;
+    p | is_us_;
+    p | is_qs_;
+    p | is_dot_sync_;
+    p | is_iter_;
+
+    p | res_tol_;
+    p | index_precon_;
+    p | iter_max_;
+
+    p | ir_;
+    p | ir0_;
+    p | ip_;
+    p | iy_;
+    p | iv_;
+    p | iq_;
+    p | iu_;
+
+    p | m_;
+    p | mx_;
+    p | my_;
+    p | mz_;
+
+    p | gx_;
+    p | gy_;
+    p | gz_;
+
+    p | coarse_level_;
+    p | ir_loop_3_;
+    p | ir_loop_9_;
+  }
 
 //----------------------------------------------------------------------
 
@@ -437,7 +490,7 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* block) throw() {
 #endif    
 
     TRACE_DOT(block,"start",0);
-    inner_product_(block,3,&reduce[0],is_array,callback,0); // start_2
+    inner_product_(block,3,&reduce[0],is_array,callback,bcg_start_2);
 
   } else {
 
@@ -560,7 +613,7 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* block,
 
 
   TRACE_DOT(block,"start",1);
-  inner_product_(block,3,&reduce[0],is_array,callback,1); // loop_0a
+  inner_product_(block,3,&reduce[0],is_array,callback,bcg_loop_0a);
 
 }
 
@@ -849,8 +902,8 @@ void EnzoSolverBiCgStab::loop_25 (EnzoBlock * block) throw() {
 	    is_finest_(block),cello::refresh(ir_loop_3_)->is_active());
     fflush(stdout);
 #endif  
-  block->new_refresh_start(ir_loop_3_,
-			   CkIndex_EnzoBlock::p_solver_bicgstab_loop_3());
+  block->new_refresh_start
+    (ir_loop_3_, CkIndex_EnzoBlock::p_solver_bicgstab_loop_3());
 }
 
 //----------------------------------------------------------------------
@@ -957,7 +1010,7 @@ void EnzoSolverBiCgStab::loop_4(EnzoBlock* block) throw() {
     fflush(stdout);
 #endif    
   TRACE_DOT(block,"start",2);
-  inner_product_(block,3,&reduce[0],is_array,callback,2); // loop_6
+  inner_product_(block,3,&reduce[0],is_array,callback,bcg_loop_6);
 }
 
 //----------------------------------------------------------------------
@@ -1271,7 +1324,7 @@ void EnzoSolverBiCgStab::loop_10(EnzoBlock* block) throw() {
 #endif    
 
   TRACE_DOT(block,"start",3);
-  inner_product_(block,5,&reduce[0],is_array,callback,3); // loop_12
+  inner_product_(block,5,&reduce[0],is_array,callback,bcg_loop_12);
     
 }
 
@@ -1438,7 +1491,7 @@ void EnzoSolverBiCgStab::loop_12(EnzoBlock* block,
 #endif    
 
   TRACE_DOT(block,"start",4);
-  inner_product_(block,2,&reduce[0],is_array,callback,4); // loop_14
+  inner_product_(block,2,&reduce[0],is_array,callback,bcg_loop_14);
     
 }
 
@@ -1774,7 +1827,17 @@ void EnzoSolverBiCgStab::dot_done_(EnzoBlock * block,
 				   const char * file, int line)
 {
   TRACE_DOT(block,"dot_done",i_function);
-  (this->*function_[i_function])(block,NULL);
+  switch (i_function) {
+  case bcg_start_2: start_2 (block,nullptr); break;
+  case bcg_loop_0a: loop_0a (block,nullptr); break;
+  case bcg_loop_6:  loop_6  (block,nullptr); break;
+  case bcg_loop_12: loop_12 (block,nullptr); break;
+  case bcg_loop_14: loop_14 (block,nullptr); break;
+  default:
+   ERROR1 ("EnzoSolverBiCgStab::dot_done()",
+           "Unknown i_function %d",
+           i_function);
+  }
 }
 
 //----------------------------------------------------------------------

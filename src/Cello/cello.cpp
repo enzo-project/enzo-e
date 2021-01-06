@@ -161,30 +161,18 @@ namespace cello {
     return epsilon;
   }
 
-  //----------------------------------------------------------------------
-
-  void backtrace(const char * msg)
+  int digits_max(int precision)
   {
-    int j, nptrs;
-#define SIZE 100
-    void *buffer[100];
-    char **strings;
-
-    nptrs = ::backtrace(buffer, SIZE);
-
-    /* The call backtrace_symbols_fd(buffer, nptrs, STDOUT_FILENO)
-       would produce similar output to the following: */
-
-    strings = backtrace_symbols(buffer, nptrs);
-    if (strings == NULL) {
-      perror("backtrace_symbols");
-      exit(EXIT_FAILURE);
+    switch (precision) {
+    case precision_single:
+      return std::numeric_limits<float>::digits;
+    case precision_double:
+      return std::numeric_limits<double>::digits;
+    case precision_quadruple:
+      return std::numeric_limits<long double>::digits;
+    default:
+      return 0;
     }
-
-    for (j = 0; j < nptrs; j++)
-      printf("%s\n", strings[j]);
-
-    free(strings);
   }
 
   //---------------------------------------------------------------------- 
@@ -374,6 +362,12 @@ namespace cello {
     return hierarchy() ? hierarchy()->num_blocks() : 0;
   }
   
+  //----------------------------------------------------------------------
+
+  double relative_cell_volume (int level)
+  {
+    return (1.0/pow(1.0*num_children(),1.0*level));
+  }
   
 
 }

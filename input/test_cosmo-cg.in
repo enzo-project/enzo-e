@@ -1,5 +1,4 @@
 include "input/test_cosmo.incl"
-
  Adapt { max_level = 0; }
  Stopping { cycle = 200; }
  Method {

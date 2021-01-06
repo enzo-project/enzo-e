@@ -464,14 +464,12 @@ function end_hidden ($id)
 
 function test_table ($separator,$file_root,$size_array, $types)
 {
-  $show_flash = 0;
   $show_gif = 0;
 
   echo "<table>";
   echo "<tr>";
   //  echo "<th>$file_root</th>";
   if ($show_gif) echo "<th>gif</th>";
-  if ($show_flash) echo "<th>animation</th>";
   for ($j = 0; $j < sizeof($size_array); ++$j) {
     $size = $size_array[$j];
     printf ("<th>$size</th>");
@@ -485,16 +483,6 @@ function test_table ($separator,$file_root,$size_array, $types)
     // Show movie file if available
     if ($show_gif) {
       echo "<td> <img width=120 src=$file_root.gif></img></td>";
-    }
-    if ($show_flash) {
-      echo "<td>";
-      $swf_file = "$type/$file_root.swf"; 
-      $size_last = $size_array[sizeof($size_array)-1]; 
-      $png_file_last = "$file_root$separator$size_last.png"; 
-      swf_movie($swf_file, 
-		$png_file_last, 
-		160); 
-      echo "</td>";
     }
     // Show available image frames
     for ($j = 0; $j < sizeof($size_array); ++$j) {
@@ -510,13 +498,11 @@ function test_table ($separator,$file_root,$size_array, $types)
 
 function test_table_dir ($dir,$size_array, $types)
 {
-  $show_flash = 0;
   $show_gif = 0;
 
   echo "<table>";
   echo "<tr>";
   if ($show_gif) echo "<th>gif</th>";
-  if ($show_flash) echo "<th>animation</th>";
   for ($j = 0; $j < sizeof($size_array); ++$j) {
     $size = $size_array[$j];
     printf ("<th>$size</th>");
@@ -597,30 +583,6 @@ function row_divider($num_types)
   printf ("</tr>\n");
 }
 
-function swf_movie ($filename, $last_image, $image_size)
-{
-  global $types;
-  global $num_types;
-  if (file_exists($last_image)) {
-    printf ("<OBJECT classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\"\n");
-    printf ("codebase=\"http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,0,0\"\n");
-    printf ("WIDTH=\"$image_size\" HEIGHT=\"$image_size\"\n");
-    printf ("        id=\"implosion\" ALIGN=\"\">\n");
-    printf ("     <PARAM NAME=$filename\n");
-    printf ("            VALUE=\"$filename\">\n");
-    printf ("     <PARAM NAME=quality VALUE=high>\n");
-    printf ("     <PARAM NAME=bgcolor VALUE=#333399>\n");
-    printf ("     <EMBED src=\"$filename\"\n");
-    printf ("          quality=high\n");
-    printf ("          bgcolor=#333399\n");
-    printf ("          WIDTH=\"$image_size\" HEIGHT=\"$image_size\"\n");
-    printf ("          NAME=\"$filename\" ALIGN=\"\"\n");
-    printf ("          TYPE=\"application/x-shockwave-flash\"\n");
-    printf ("          PLUGINSPAGE=\"http://www.macromedia.com/go/getflashplayer\">\n");
-    printf ("       </EMBED>\n");
-    printf ("      </OBJECT> \n");
-  }  
-}
 printf ("<table>\n");
 printf ("<tr>\n");
 
@@ -654,21 +616,34 @@ if (file_exists("STATUS"))  {
 printf ("</th><td class=center colspan=5><em><a href=\"#enzop\">Enzo-P application tests</a></em></td></tr>\n");
 
 test_summary("Method: ppm",
-	     array("method_ppm-1","method_ppm-8"),
-	     array("enzo-p",  "enzo-p"),'test');
+             array("method_ppm-1","method_ppm-8"),
+             array("enzo-p",  "enzo-p"),'test');
 
 test_summary("Method: ppml",
-         array("method_ppml-1","method_ppml-8",
-               "method_ppml-test-1","method_ppml-test-8"),
-         array("enzo-p",  "enzo-p", "enzo-p", "enzo-p"),'test');
+             array("method_ppml-1","method_ppml-8",
+                   "method_ppml-test-1","method_ppml-test-8"),
+             array("enzo-p",  "enzo-p", "enzo-p", "enzo-p"),'test');
 
 test_summary("Method: heat",
-	     array("method_heat-1","method_heat-8"),
-	     array("enzo-p",  "enzo-p"),'test');
+             array("method_heat-1","method_heat-8"),
+             array("enzo-p",  "enzo-p"),'test');
 
 test_summary("Method: gravity",
-	     array("method_gravity_cg-1","method_gravity_cg-8"),
-	     array("enzo-p",             "enzo-p"),'test');
+             array("method_gravity_cg-1","method_gravity_cg-8"),
+             array("enzo-p",             "enzo-p"),'test');
+
+test_summary("Method: flux_correct",
+             array("method_flux2-xm","method_flux2-xp",
+                   "method_flux2-ym","method_flux2-yp",
+                   "method_flux3-xm","method_flux3-xp",
+                   "method_flux3-ym","method_flux3-yp",
+                   "method_flux3-zm","method_flux3-zp"),
+             array("enzo-p","enzo-p",
+                   "enzo-p","enzo-p",
+                   "enzo-p","enzo-p",
+                   "enzo-p","enzo-p",
+                   "enzo-p","enzo-p"),
+             'test');
 
 test_summary("Problem: collapse",
          array("collapse-bcg2",    "collapse-dd2",    "collapse-hg2",
@@ -676,8 +651,12 @@ test_summary("Problem: collapse",
          array("enzo-p","enzo-p","enzo-p","enzo-p","enzo-p","enzo-p"),'test');
 
 test_summary("Problem: cosmology",
-         array("cosmo-cg","cosmo-bcg","cosmo-mg","cosmo-dd","cosmo-hg"),
-         array("enzo-p",  "enzo-p",   "enzo-p",  "enzo-p",  "enzo-p"),'test');
+             array("cosmo-cg","cosmo-bcg","cosmo-mg","cosmo-dd","cosmo-hg",
+                   "cosmo-cg","cosmo-bcg","cosmo-mg","cosmo-dd","cosmo-hg",
+                   "cosmo-cg","cosmo-bcg","cosmo-mg","cosmo-dd","cosmo-hg"),
+             array("enzo-p",  "enzo-p",   "enzo-p",  "enzo-p",  "enzo-p",
+                   "enzo-p",  "enzo-p",   "enzo-p",  "enzo-p",  "enzo-p",
+                   "enzo-p",  "enzo-p",   "enzo-p",  "enzo-p",  "enzo-p"),'test');
 
 test_summary("Checkpoint",
 	     array("checkpoint_ppm-1","checkpoint_ppm-8","restart_ppm-1","restart_ppm-8"),
@@ -999,6 +978,35 @@ test_table ("-","method_gravity_cg-8",
 	    array("ay-000000","ay-000010","ay-000020","ay-000030","ay-000040","ay-000050"), $types);
 
 end_hidden("method_gravity_cg-8");
+
+//======================================================================
+
+test_group("Method: flux_correct");
+
+?>
+
+Flux-correction tests check how effectively the flux-correction method maintains accuracy in conserving numerical quantities that are theoretically invariant.
+
+</p>
+
+<?php
+
+
+  begin_hidden("method_flux2", "FLUX_CORRECT 2D V=(-1,0)");
+  tests("Enzo","enzo-p","test_method_flux2-xm","FLUX_CORRECT 2D V=(-1,0)","");
+  tests("Enzo","enzo-p","test_method_flux2-xp","FLUX_CORRECT 2D V=(+1,0)","");
+  tests("Enzo","enzo-p","test_method_flux2-ym","FLUX_CORRECT 2D V=(0,-1)","");
+  tests("Enzo","enzo-p","test_method_flux2-yp","FLUX_CORRECT 2D V=(0,+1)","");
+  end_hidden("method_flux2");
+  begin_hidden("method_flux3", "FLUX_CORRECT 3D V=(-1,0)");
+  tests("Enzo","enzo-p","test_method_flux3-xm","FLUX_CORRECT 3D V=(-1,0,0)","");
+  tests("Enzo","enzo-p","test_method_flux3-xp","FLUX_CORRECT 3D V=(+1,0,0)","");
+  tests("Enzo","enzo-p","test_method_flux3-ym","FLUX_CORRECT 3D V=(0,-1,0)","");
+  tests("Enzo","enzo-p","test_method_flux3-yp","FLUX_CORRECT 3D V=(0,+1,0)","");
+  tests("Enzo","enzo-p","test_method_flux3-zm","FLUX_CORRECT 3D V=(0,0,-1)","");
+  tests("Enzo","enzo-p","test_method_flux3-zp","FLUX_CORRECT 3D V=(0,0,+1)","");
+  end_hidden("flux3");
+
 
 //======================================================================
 
@@ -1374,6 +1382,69 @@ test_table ("_","Dir_COSMO_CG",
             "0180/ax-09",
             "0200/ax-10"),$types);
 
+# tests("Enzo","enzo-p","test_cosmo-cg-fc0","COSMOLOGY + PPM (Unigrid CG FC off)","");
+
+// test_table ("_","Dir_COSMO_CG_FC0",
+//       array("0020/dark-01",
+//             "0040/dark-02",
+//             "0060/dark-03",
+//             "0080/dark-04",
+//             "0100/dark-05",
+//             "0120/dark-06"),$types);
+// test_table ("_","Dir_COSMO_CG_FC0",
+//       array("0020/po-01",
+//             "0040/po-02",
+//             "0060/po-03",
+//             "0080/po-04",
+//             "0100/po-05",
+//             "0120/po-06"),$types);
+// test_table ("_","Dir_COSMO_CG_FC0",
+//       array("0020/ax-01",
+//             "0040/ax-02",
+//             "0060/ax-03",
+//             "0080/ax-04",
+//             "0100/ax-05",
+//             "0120/ax-06"),$types);
+// test_table ("_","Dir_COSMO_CG_FC0",
+//       array("0020/de-01",
+//             "0040/de-02",
+//             "0060/de-03",
+//             "0080/de-04",
+//             "0100/de-05",
+//             "0120/de-06"),$types);
+
+
+// tests("Enzo","enzo-p","test_cosmo-cg-fc1","COSMOLOGY + PPM (Unigrid CG FC on)","");
+
+// test_table ("_","Dir_COSMO_CG_FC1",
+//       array("0020/dark-01",
+//             "0040/dark-02",
+//             "0060/dark-03",
+//             "0080/dark-04",
+//             "0100/dark-05",
+//             "0120/dark-06"),$types);
+// test_table ("_","Dir_COSMO_CG_FC1",
+//       array("0020/po-01",
+//             "0040/po-02",
+//             "0060/po-03",
+//             "0080/po-04",
+//             "0100/po-05",
+//             "0120/po-06"),$types);
+// test_table ("_","Dir_COSMO_CG_FC1",
+//       array("0020/ax-01",
+//             "0040/ax-02",
+//             "0060/ax-03",
+//             "0080/ax-04",
+//             "0100/ax-05",
+//             "0120/ax-06"),$types);
+// test_table ("_","Dir_COSMO_CG_FC1",
+//       array("0020/de-01",
+//             "0040/de-02",
+//             "0060/de-03",
+//             "0080/de-04",
+//             "0100/de-05",
+//             "0120/de-06"),$types);
+
 end_hidden("cosmo-cg");
 
 begin_hidden("cosmo-mg", "COSMOLOGY (MG solver)");
@@ -1414,6 +1485,68 @@ test_table ("_","Dir_COSMO_MG",
             "0180/ax-09",
             "0200/ax-10"),$types);
 
+// tests("Enzo","enzo-p","test_cosmo-mg-fc0","COSMOLOGY + PPM (Unigrid MG FC off)","");
+
+// test_table ("_","Dir_COSMO_MG_FC0",
+//       array("0020/dark-01",
+//             "0040/dark-02",
+//             "0060/dark-03",
+//             "0080/dark-04",
+//             "0100/dark-05",
+//             "0120/dark-06"),$types);
+// test_table ("_","Dir_COSMO_MG_FC0",
+//       array("0020/po-01",
+//             "0040/po-02",
+//             "0060/po-03",
+//             "0080/po-04",
+//             "0100/po-05",
+//             "0120/po-06"),$types);
+// test_table ("_","Dir_COSMO_MG_FC0",
+//       array("0020/ax-01",
+//             "0040/ax-02",
+//             "0060/ax-03",
+//             "0080/ax-04",
+//             "0100/ax-05",
+//             "0120/ax-06"),$types);
+// test_table ("_","Dir_COSMO_MG_FC0",
+//       array("0020/de-01",
+//             "0040/de-02",
+//             "0060/de-03",
+//             "0080/de-04",
+//             "0100/de-05",
+//             "0120/de-06"),$types);
+
+
+// tests("Enzo","enzo-p","test_cosmo-mg-fc1","COSMOLOGY + PPM (Unigrid MG FC on)","");
+
+// test_table ("_","Dir_COSMO_MG_FC1",
+//       array("0020/dark-01",
+//             "0040/dark-02",
+//             "0060/dark-03",
+//             "0080/dark-04",
+//             "0100/dark-05",
+//             "0120/dark-06"),$types);
+// test_table ("_","Dir_COSMO_MG_FC1",
+//       array("0020/po-01",
+//             "0040/po-02",
+//             "0060/po-03",
+//             "0080/po-04",
+//             "0100/po-05",
+//             "0120/po-06"),$types);
+// test_table ("_","Dir_COSMO_MG_FC1",
+//       array("0020/ax-01",
+//             "0040/ax-02",
+//             "0060/ax-03",
+//             "0080/ax-04",
+//             "0100/ax-05",
+//             "0120/ax-06"),$types);
+// test_table ("_","Dir_COSMO_MG_FC1",
+//       array("0020/de-01",
+//             "0040/de-02",
+//             "0060/de-03",
+//             "0080/de-04",
+//             "0100/de-05",
+//             "0120/de-06"),$types);
 end_hidden("cosmo-mg");
 
 
@@ -1460,6 +1593,82 @@ test_table ("_","Dir_COSMO_BCG",
             "0140/mesh-07",
             "0160/mesh-08"),$types);
 
+// tests("Enzo","enzo-p","test_cosmo-bcg-fc0","COSMOLOGY + PPM (AMR BCG FC off)","");
+
+// test_table ("_","Dir_COSMO_BCG_FC0",
+//       array("0020/dark-01",
+//             "0040/dark-02",
+//             "0060/dark-03",
+//             "0080/dark-04",
+//             "0100/dark-05",
+//             "0120/dark-06"),$types);
+// test_table ("_","Dir_COSMO_BCG_FC0",
+//       array("0020/po-01",
+//             "0040/po-02",
+//             "0060/po-03",
+//             "0080/po-04",
+//             "0100/po-05",
+//             "0120/po-06"),$types);
+// test_table ("_","Dir_COSMO_BCG_FC0",
+//       array("0020/ax-01",
+//             "0040/ax-02",
+//             "0060/ax-03",
+//             "0080/ax-04",
+//             "0100/ax-05",
+//             "0120/ax-06"),$types);
+// test_table ("_","Dir_COSMO_BCG_FC0",
+//       array("0020/de-01",
+//             "0040/de-02",
+//             "0060/de-03",
+//             "0080/de-04",
+//             "0100/de-05",
+//             "0120/de-06"),$types);
+// test_table ("_","Dir_COSMO_BCG_FC0",
+//       array("0020/mesh-01",
+//             "0040/mesh-02",
+//             "0060/mesh-03",
+//             "0080/mesh-04",
+//             "0100/mesh-05",
+//             "0120/mesh-06"),$types);
+
+
+// tests("Enzo","enzo-p","test_cosmo-bcg-fc1","COSMOLOGY + PPM (AMR BCG FC on)","");
+
+// test_table ("_","Dir_COSMO_BCG_FC1",
+//       array("0020/dark-01",
+//             "0040/dark-02",
+//             "0060/dark-03",
+//             "0080/dark-04",
+//             "0100/dark-05",
+//             "0120/dark-06"),$types);
+// test_table ("_","Dir_COSMO_BCG_FC1",
+//       array("0020/po-01",
+//             "0040/po-02",
+//             "0060/po-03",
+//             "0080/po-04",
+//             "0100/po-05",
+//             "0120/po-06"),$types);
+// test_table ("_","Dir_COSMO_BCG_FC1",
+//       array("0020/ax-01",
+//             "0040/ax-02",
+//             "0060/ax-03",
+//             "0080/ax-04",
+//             "0100/ax-05",
+//             "0120/ax-06"),$types);
+// test_table ("_","Dir_COSMO_BCG_FC1",
+//       array("0020/de-01",
+//             "0040/de-02",
+//             "0060/de-03",
+//             "0080/de-04",
+//             "0100/de-05",
+//             "0120/de-06"),$types);
+// test_table ("_","Dir_COSMO_BCG_FC1",
+//       array("0020/mesh-01",
+//             "0040/mesh-02",
+//             "0060/mesh-03",
+//             "0080/mesh-04",
+//             "0100/mesh-05",
+//             "0120/mesh-06"),$types);
 end_hidden("cosmo-bcg");
 
 begin_hidden("cosmo-dd", "COSMOLOGY (DD solver)");
@@ -1503,6 +1712,82 @@ test_table ("_","Dir_COSMO_DD",
             "0140/mesh-07",
             "0160/mesh-08"),$types);
 
+// tests("Enzo","enzo-p","test_cosmo-dd-fc0","COSMOLOGY + PPM (AMR DD FC off)","");
+
+// test_table ("_","Dir_COSMO_DD_FC0",
+//       array("0020/dark-01",
+//             "0040/dark-02",
+//             "0060/dark-03",
+//             "0080/dark-04",
+//             "0100/dark-05",
+//             "0120/dark-06"),$types);
+// test_table ("_","Dir_COSMO_DD_FC0",
+//       array("0020/po-01",
+//             "0040/po-02",
+//             "0060/po-03",
+//             "0080/po-04",
+//             "0100/po-05",
+//             "0120/po-06"),$types);
+// test_table ("_","Dir_COSMO_DD_FC0",
+//       array("0020/ax-01",
+//             "0040/ax-02",
+//             "0060/ax-03",
+//             "0080/ax-04",
+//             "0100/ax-05",
+//             "0120/ax-06"),$types);
+// test_table ("_","Dir_COSMO_DD_FC0",
+//       array("0020/de-01",
+//             "0040/de-02",
+//             "0060/de-03",
+//             "0080/de-04",
+//             "0100/de-05",
+//             "0120/de-06"),$types);
+// test_table ("_","Dir_COSMO_DD_FC0",
+//       array("0020/mesh-01",
+//             "0040/mesh-02",
+//             "0060/mesh-03",
+//             "0080/mesh-04",
+//             "0100/mesh-05",
+//             "0120/mesh-06"),$types);
+
+
+// tests("Enzo","enzo-p","test_cosmo-dd-fc1","COSMOLOGY + PPM (AMR DD FC on)","");
+
+// test_table ("_","Dir_COSMO_DD_FC1",
+//       array("0020/dark-01",
+//             "0040/dark-02",
+//             "0060/dark-03",
+//             "0080/dark-04",
+//             "0100/dark-05",
+//             "0120/dark-06"),$types);
+// test_table ("_","Dir_COSMO_DD_FC1",
+//       array("0020/po-01",
+//             "0040/po-02",
+//             "0060/po-03",
+//             "0080/po-04",
+//             "0100/po-05",
+//             "0120/po-06"),$types);
+// test_table ("_","Dir_COSMO_DD_FC1",
+//       array("0020/ax-01",
+//             "0040/ax-02",
+//             "0060/ax-03",
+//             "0080/ax-04",
+//             "0100/ax-05",
+//             "0120/ax-06"),$types);
+// test_table ("_","Dir_COSMO_DD_FC1",
+//       array("0020/de-01",
+//             "0040/de-02",
+//             "0060/de-03",
+//             "0080/de-04",
+//             "0100/de-05",
+//             "0120/de-06"),$types);
+// test_table ("_","Dir_COSMO_DD_FC1",
+//       array("0020/mesh-01",
+//             "0040/mesh-02",
+//             "0060/mesh-03",
+//             "0080/mesh-04",
+//             "0100/mesh-05",
+//             "0120/mesh-06"),$types);
 
 end_hidden("cosmo-dd");
 
@@ -1547,6 +1832,82 @@ test_table ("_","Dir_COSMO_HG",
             "0140/mesh-07",
             "0160/mesh-08"),$types);
 
+// tests("Enzo","enzo-p","test_cosmo-hg-fc0","COSMOLOGY + PPM (AMR HG FC off)","");
+
+// test_table ("_","Dir_COSMO_HG_FC0",
+//       array("0020/dark-01",
+//             "0040/dark-02",
+//             "0060/dark-03",
+//             "0080/dark-04",
+//             "0100/dark-05",
+//             "0120/dark-06"),$types);
+// test_table ("_","Dir_COSMO_HG_FC0",
+//       array("0020/po-01",
+//             "0040/po-02",
+//             "0060/po-03",
+//             "0080/po-04",
+//             "0100/po-05",
+//             "0120/po-06"),$types);
+// test_table ("_","Dir_COSMO_HG_FC0",
+//       array("0020/ax-01",
+//             "0040/ax-02",
+//             "0060/ax-03",
+//             "0080/ax-04",
+//             "0100/ax-05",
+//             "0120/ax-06"),$types);
+// test_table ("_","Dir_COSMO_HG_FC0",
+//       array("0020/de-01",
+//             "0040/de-02",
+//             "0060/de-03",
+//             "0080/de-04",
+//             "0100/de-05",
+//             "0120/de-06"),$types);
+// test_table ("_","Dir_COSMO_HG_FC0",
+//       array("0020/mesh-01",
+//             "0040/mesh-02",
+//             "0060/mesh-03",
+//             "0080/mesh-04",
+//             "0100/mesh-05",
+//             "0120/mesh-06"),$types);
+
+
+// tests("Enzo","enzo-p","test_cosmo-hg-fc1","COSMOLOGY + PPM (AMR HG FC on)","");
+
+// test_table ("_","Dir_COSMO_HG_FC1",
+//       array("0020/dark-01",
+//             "0040/dark-02",
+//             "0060/dark-03",
+//             "0080/dark-04",
+//             "0100/dark-05",
+//             "0120/dark-06"),$types);
+// test_table ("_","Dir_COSMO_HG_FC1",
+//       array("0020/po-01",
+//             "0040/po-02",
+//             "0060/po-03",
+//             "0080/po-04",
+//             "0100/po-05",
+//             "0120/po-06"),$types);
+// test_table ("_","Dir_COSMO_HG_FC1",
+//       array("0020/ax-01",
+//             "0040/ax-02",
+//             "0060/ax-03",
+//             "0080/ax-04",
+//             "0100/ax-05",
+//             "0120/ax-06"),$types);
+// test_table ("_","Dir_COSMO_HG_FC1",
+//       array("0020/de-01",
+//             "0040/de-02",
+//             "0060/de-03",
+//             "0080/de-04",
+//             "0100/de-05",
+//             "0120/de-06"),$types);
+// test_table ("_","Dir_COSMO_HG_FC1",
+//       array("0020/mesh-01",
+//             "0040/mesh-02",
+//             "0060/mesh-03",
+//             "0080/mesh-04",
+//             "0100/mesh-05",
+//             "0120/mesh-06"),$types);
 
 end_hidden("cosmo-hg");
 
@@ -1569,7 +1930,7 @@ begin_hidden("checkpoint_ppm-8","Checkpoint/Restart (parallel)");
 
 tests("Enzo","enzo-p","test_checkpoint_ppm-8","Checkpoint P=8","");
 tests("Enzo","enzo-p","test_restart_ppm-8","Restart P=8","");
-test_table ("-","checkpoint_ppm-1",  array("000010","000020"), $types);
+test_table ("-","checkpoint_ppm-8",  array("000010","000020"), $types);
 
 end_hidden("checkpoint_ppm-8");
 

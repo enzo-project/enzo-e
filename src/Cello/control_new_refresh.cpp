@@ -13,17 +13,38 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
-#define CHECK_ID(ID)				\
-  ASSERT1 ("CHECK_ID",				\
-	   "Invalid id %d",ID,			\
-	   ID>=0);				\
+// #define DEBUG_NEW_REFRESH
+// #define DEBUG_NEW_REFRESH_SYNC
+
+#ifdef DEBUG_NEW_REFRESH
+#   define TRACE_NEW_REFRESH(BLOCK,REFRESH,MSG)                         \
+      CkPrintf ("DEBUG_NEW_REFRESH %s %d: %s: sync %d  type %d \n",     \
+                BLOCK->name().c_str(),CkMyPe(),MSG,REFRESH->sync_id(),  \
+                REFRESH->neighbor_type());                              \
+      fflush(stdout);
+#   define TRACE_SYNC(MSG)                                              \
+      CkPrintf ("DEBUG_NEW_REFRESH_SYNC %s %d sync %s %s:%d refresh %d %d %d\n", \
+                name().c_str(),CkMyPe(),MSG,__FILE__,__LINE__,          \
+                id_refresh,sync->value(),sync->stop());                 \
+      fflush(stdout);
+#else
+#   define TRACE_NEW_REFRESH(BLOCK,REFRESH,MSG)  /* ... */
+#   define TRACE_SYNC(MSG) /* ... */
+#endif
+                                                \
+
+#define CHECK_ID(ID) ASSERT1 ("CHECK_ID","Invalid id %d",ID,(ID>=0));
+
+//----------------------------------------------------------------------
 
 void Block::new_refresh_start (int id_refresh, int callback)
 {
   CHECK_ID(id_refresh);
-
-  RefreshState & state = new_refresh_state_list_[id_refresh];
-  Refresh * refresh    = cello::refresh(id_refresh);
+  Refresh * refresh = cello::refresh(id_refresh);
+  Sync * sync = sync_(id_refresh);
+#ifdef DEBUG_NEW_REFRESH
+  refresh->print();
+#endif
 
   // Send field and/or particle data associated with the given refresh
   // object to corresponding neighbors
@@ -33,21 +54,21 @@ void Block::new_refresh_start (int id_refresh, int callback)
     ASSERT1 ("Block::new_refresh_start()",
 	     "refresh[%d] state is not inactive",
 	     id_refresh,
-	     (state == RefreshState::INACTIVE));
+	     (sync->state() == RefreshState::INACTIVE));
 
-    state = RefreshState::ACTIVE;
-
-    int count = 0;
+    sync->set_state(RefreshState::ACTIVE);
 
     // send Field face data
 
+    int count_field=0;
     if (refresh->any_fields()) {
-      count += new_refresh_load_field_faces_ (*refresh);
+      count_field = new_refresh_load_field_faces_ (*refresh);
     }
 
     // send Particle face data
+    int count_particle=0;
     if (refresh->any_particles()){
-      count += new_refresh_load_particle_faces_(*refresh);
+      count_particle = new_refresh_load_particle_faces_(*refresh);
     }
 
     if (refresh->any_particles_copy()){
@@ -57,20 +78,31 @@ void Block::new_refresh_start (int id_refresh, int callback)
 
     Sync & sync = new_refresh_sync_list_[id_refresh];
 
+    // send Flux face data
+    int count_flux=0;
+    if (refresh->any_fluxes()){
+      count_flux = new_refresh_load_flux_faces_(*refresh);
+    }
+
+    const int count = count_field + count_particle + count_flux;
+
     // Make sure sync counter is not active
     ASSERT4 ("Block::new_refresh_start()",
 	     "refresh[%d] sync object %p is active (%d/%d)",
-	     id_refresh, &sync, sync.value(), sync.stop(),
-	     (sync.value() == 0 && sync.stop() == 0));
+	     id_refresh, sync, sync->value(), sync->stop(),
+	     (sync->value() == 0 && sync->stop() == 0));
 
     // Initialize sync counter
-    sync.set_stop(count);
+    sync->set_stop(count);
 
-    if (callback != 0) {
-      new_refresh_wait(id_refresh,callback);
-    }
+    TRACE_SYNC("A start");
+
+    new_refresh_wait(id_refresh,callback);
+
   } else {
-    if (callback != 0) new_refresh_exit(*refresh);
+
+    new_refresh_exit(*refresh);
+
   }
 }
 
@@ -80,53 +112,55 @@ void Block::new_refresh_wait (int id_refresh, int callback)
   CHECK_ID(id_refresh);
 
   Refresh * refresh = cello::refresh(id_refresh);
+  Sync * sync = sync_(id_refresh);
 
-  if (refresh->is_active()) {
+  ASSERT1("Block::new_refresh_wait()",
+          "Wait called with inactive Refresh[%d]",
+          id_refresh,
+          (refresh->is_active()));
 
-    // make sure the callback parameter matches that in the refresh object
+  // make sure the callback parameter matches that in the refresh object
 
-    ASSERT3("Block::new_refresh_wait()",
-	   "Refresh[%d] mismatch between refresh callback %d and parameter callback %d",
-	    id_refresh,callback, refresh->callback(),
-	    (callback == refresh->callback()) );
+  ASSERT3("Block::new_refresh_wait()",
+          "Refresh[%d] mismatch between refresh callback %d and parameter callback %d",
+          id_refresh,callback, refresh->callback(),
+          (callback == refresh->callback()) );
 
-    // make sure we aren't already in a "ready" state
+  // make sure we aren't already in a "ready" state
 
-    RefreshState & state = new_refresh_state_list_[id_refresh];
+  ASSERT1("Block::new_refresh_wait()",
+          "Refresh[%d] not in 'active' state",
+          id_refresh,
+          (sync->state() == RefreshState::ACTIVE) );
 
-    ASSERT1("Block::new_refresh_wait()",
-	   "Refresh[%d] not in 'active' state",
-	    id_refresh,
-	    (state == RefreshState::ACTIVE) );
+  // tell refresh we're ready to start processing messages
 
-    // tell refresh we're ready to start processing messages
+  sync->set_state(RefreshState::READY);
 
-    state = RefreshState::READY;
+  // process any existing messages in the refresh message list
 
-    // process any existing messages in the refresh message list
+  TRACE_SYNC("B wait");
 
-    Sync & sync = new_refresh_sync_list_[id_refresh];
-    for (auto id_msg=0;
-	 id_msg<new_refresh_msg_list_[id_refresh].size();
-	 id_msg++) {
+  for (auto id_msg=0;
+       id_msg<new_refresh_msg_list_[id_refresh].size();
+       id_msg++) {
 
-      MsgRefresh * msg = new_refresh_msg_list_[id_refresh][id_msg];
+    MsgRefresh * msg = new_refresh_msg_list_[id_refresh][id_msg];
 
-      // unpack message data into Block data
-      msg->update(data());
+    // unpack message data into Block data
+    msg->update(data());
 
-      delete msg;
-      sync.advance();
-    }
-
-    // clear the message queue
-
-    new_refresh_msg_list_[id_refresh].resize(0);
-
-    // and check if we're finished
-
-    new_refresh_check_done(id_refresh);
+    delete msg;
+    sync->advance();
   }
+
+  // clear the message queue
+
+  new_refresh_msg_list_[id_refresh].resize(0);
+
+  // and check if we're finished
+
+  new_refresh_check_done(id_refresh);
 }
 
 //----------------------------------------------------------------------
@@ -135,16 +169,18 @@ void Block::new_refresh_check_done (int id_refresh)
 {
   CHECK_ID(id_refresh);
 
-  Refresh * refresh    = cello::refresh(id_refresh);
-  RefreshState & state = new_refresh_state_list_[id_refresh];
-  Sync & sync          = new_refresh_sync_list_[id_refresh];
+  Refresh * refresh = cello::refresh(id_refresh);
+  Sync * sync = sync_(id_refresh);
+
+  TRACE_SYNC("C check");
 
   ASSERT1("Block::new_refresh_check_done()",
 	  "Refresh[%d] must not be in inactive state",
 	  id_refresh,
-	  (state != RefreshState::INACTIVE) );
+	  (sync->state() != RefreshState::INACTIVE) );
 
-  if (sync.stop()==0 || state == RefreshState::READY && (sync.is_done())) {
+  if ( (sync->stop()==0) ||
+      (sync->is_done() && (sync->state() == RefreshState::READY))) {
 
     // Make sure incoming message queue is empty
 
@@ -154,12 +190,12 @@ void Block::new_refresh_check_done (int id_refresh)
 	    (new_refresh_msg_list_[id_refresh].size() == 0));
 
     // reset sync counter
-    sync.reset();
-    sync.set_stop(0);
+    sync->reset();
+    sync->set_stop(0);
 
     // reset refresh state to inactive
 
-    state = RefreshState::INACTIVE;
+    sync->set_state(RefreshState::INACTIVE);
 
     // Call callback
 
@@ -174,17 +210,20 @@ void Block::p_new_refresh_recv (MsgRefresh * msg)
 
   const int id_refresh = msg->id_refresh();
   CHECK_ID(id_refresh);
+  TRACE_NEW_REFRESH(this,cello::refresh(id_refresh),"recv");
 
-  RefreshState & state = new_refresh_state_list_[id_refresh];
-  Sync & sync          = new_refresh_sync_list_[id_refresh];
+  Sync * sync = sync_(id_refresh);
 
-  if (state == RefreshState::READY) {
+  TRACE_SYNC("D recv");
+
+  if (sync->state() == RefreshState::READY) {
     // unpack message data into Block data if ready
     msg->update(data());
 
     delete msg;
 
-    sync.advance();
+    sync->advance();
+    TRACE_SYNC("E advance");
 
     // check if it's the last message processed
     new_refresh_check_done(id_refresh);
@@ -301,13 +340,16 @@ void Block::new_refresh_load_field_face_
 
   MsgRefresh * msg_refresh = new MsgRefresh;
 
-  DataMsg * data_msg = new DataMsg;
-
   bool lg3[3] = {false,false,false};
 
   FieldFace * field_face = create_face
     (if3, ic3, lg3, refresh_type, &refresh,false);
 
+  DataMsg * data_msg = new DataMsg;
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("%d %s:%d DEBUG_REFRESH %p new DataMsg\n",
+            CkMyPe(),__FILE__,__LINE__,data_msg);
+#endif
   data_msg -> set_field_face (field_face,true);
   data_msg -> set_field_data (data()->field_data(),false);
 
@@ -321,6 +363,7 @@ void Block::new_refresh_load_field_face_
   msg_refresh->set_new_refresh_id (id_refresh);
   msg_refresh->set_data_msg (data_msg);
 
+  TRACE_NEW_REFRESH(this,cello::refresh(id_refresh),"send");
   thisProxy[index_neighbor].p_new_refresh_recv (msg_refresh);
 
 }
@@ -393,8 +436,11 @@ int Block::new_refresh_load_particle_faces_ (Refresh & refresh, const bool copy)
   const int npa3[3] = { 4, 4*4, 4*4*4 };
   const int npa = npa3[rank-1];
 
-  ParticleData * particle_array[npa];
-  ParticleData * particle_list [npa];
+  ParticleData ** particle_array = new ParticleData*[npa];
+  ParticleData ** particle_list = new ParticleData*[npa];
+  std::fill_n (particle_array,npa,nullptr);
+  std::fill_n (particle_list,npa,nullptr);
+
   Index * index_list = new Index[npa];
 
   for (int i=0; i<npa; i++) {
@@ -414,6 +460,8 @@ int Block::new_refresh_load_particle_faces_ (Refresh & refresh, const bool copy)
 
   new_particle_send_(refresh,nl,index_list,particle_list);
 
+  delete [] particle_array;
+  delete [] particle_list;
   delete [] index_list;
 
   return nl;
@@ -436,7 +484,7 @@ void Block::new_particle_send_
     const int id_refresh = refresh.id();
     CHECK_ID(id_refresh);
 
-    ASSERT1 ("Block::new_refresh_load_field_face_()",
+    ASSERT1 ("Block::new_particle_send_()",
 	     "id_refresh %d of refresh object is out of range",
 	     id_refresh,
 	     (0 <= id_refresh));
@@ -444,6 +492,10 @@ void Block::new_particle_send_
   if (p_data && p_data->num_particles(p_descr)>0) {
 
       DataMsg * data_msg = new DataMsg;
+#ifdef DEBUG_NEW_REFRESH
+      CkPrintf ("%d %s:%d DEBUG_REFRESH %p new DataMsg\n",
+                CkMyPe(),__FILE__,__LINE__,data_msg);
+#endif
       data_msg ->set_particle_data(p_data,true);
 
       MsgRefresh * msg_refresh = new MsgRefresh;
@@ -457,6 +509,10 @@ void Block::new_particle_send_
       MsgRefresh * msg_refresh = new MsgRefresh;
 
       msg_refresh->set_data_msg (nullptr);
+#ifdef DEBUG_NEW_REFRESH
+      CkPrintf ("%d %s:%d DEBUG_REFRESH set data_msg=NULL\n",
+                CkMyPe(),__FILE__,__LINE__);
+#endif
       msg_refresh->set_new_refresh_id (id_refresh);
 
       thisProxy[index].p_new_refresh_recv (msg_refresh);
@@ -673,13 +729,9 @@ void Block::particle_apply_periodic_update_
   const int level = this->level();
   const int min_face_rank = refresh->min_face_rank();
 
-  double dpx[nl],dpy[nl],dpz[nl];
-
-  for (int i=0; i<nl; i++) {
-    dpx[i]=0.0;
-    dpy[i]=0.0;
-    dpz[i]=0.0;
-  }
+  std::vector<double> dpx(nl,0.0);
+  std::vector<double> dpy(nl,0.0);
+  std::vector<double> dpz(nl,0.0);
 
   // Compute position updates for particles crossing periodic boundaries
 
@@ -803,11 +855,11 @@ void Block::particle_scatter_neighbors_
 
       // ...extract particle position arrays
 
-      double * xa = new double [np];
-      double * ya = new double [np];
-      double * za = new double [np];
+      std::vector<double> xa(np,0.0);
+      std::vector<double> ya(np,0.0);
+      std::vector<double> za(np,0.0);
 
-      particle.position(it,ib,xa,ya,za);
+      particle.position(it,ib,xa.data(),ya.data(),za.data());
 
       is_local = (int64_t *) particle.attribute_array(it, ia_c, ib);
 
@@ -815,7 +867,8 @@ void Block::particle_scatter_neighbors_
       // ...and corresponding particle indices
 
       bool * mask = new bool[np];
-      int  * index = new int[np];
+      int * index = new int[np];
+
       for (int ip=0; ip<np; ip++) {
 
         // look at block scatter children for help?
@@ -856,10 +909,6 @@ void Block::particle_scatter_neighbors_
         }
       }
 
-      delete [] xa;
-      delete [] ya;
-      delete [] za;
-
       // ...scatter particles to particle array
       particle.scatter  (it,ib,np,mask,index,npa,particle_array, copy);
 
@@ -875,4 +924,105 @@ void Block::particle_scatter_neighbors_
   if (!copy) cello::simulation()->data_delete_particles(count);
 
   return;
+}
+
+//----------------------------------------------------------------------
+
+int Block::new_refresh_load_flux_faces_ (Refresh & refresh)
+{
+  int count = 0;
+
+  const int min_face_rank = cello::rank() - 1;
+  const int neighbor_type = neighbor_leaf;
+
+  // Loop over neighbor leaf Blocks (not necessarily same level)
+
+  const int min_level = cello::config()->mesh_min_level;
+
+  ItNeighbor it_neighbor =
+    this->it_neighbor(min_face_rank,index_,
+                      neighbor_type,min_level,refresh.root_level());
+
+  int if3[3];
+  while (it_neighbor.next(if3)) {
+
+    Index index_neighbor = it_neighbor.index();
+
+    int ic3[3];
+    it_neighbor.child(ic3);
+
+    const int level = this->level();
+    const int level_face = it_neighbor.face_level();
+
+    const int refresh_type =
+      (level_face < level) ? refresh_coarse :
+      (level_face > level) ? refresh_fine : refresh_same;
+
+    new_refresh_load_flux_face_
+      (refresh,refresh_type,index_neighbor,if3,ic3);
+
+    ++count;
+
+  }
+
+  return count;
+}
+
+//----------------------------------------------------------------------
+
+void Block::new_refresh_load_flux_face_
+( Refresh & refresh,
+  int refresh_type,
+  Index index_neighbor,
+  int if3[3],
+  int ic3[3])
+
+{
+  // ... coarse neighbor requires child index of self in parent
+  TRACE_NEW_REFRESH(this,(&refresh),"load_flux_face");
+  if (refresh_type == refresh_coarse) {
+    index_.child(index_.level(),ic3,ic3+1,ic3+2);
+  }
+
+  // ... copy field ghosts to array using FieldFace object
+
+  const int axis = (if3[0]!=0) ? 0 : (if3[1]!=0) ? 1 : 2;
+  const int face = (if3[axis]==-1) ? 0 : 1;
+
+
+  // neighbor is coarser
+  DataMsg * data_msg = new DataMsg;
+  FluxData * flux_data = data()->flux_data();
+
+  const bool is_new = true;
+  if (refresh_type == refresh_coarse) {
+    // neighbor is coarser
+    const int nf = flux_data->num_fields();
+    data_msg -> set_num_face_fluxes(nf);
+    for (int i=0; i<nf; i++) {
+      FaceFluxes * face_fluxes = new FaceFluxes
+        (*flux_data->block_fluxes(axis,face,i));
+      face_fluxes->coarsen(ic3[0],ic3[1],ic3[2],cello::rank());
+      data_msg -> set_face_fluxes (i,face_fluxes, is_new);
+    }
+  } else {
+    data_msg -> set_num_face_fluxes(0);
+  }
+
+  const int id_refresh = refresh.id();
+  CHECK_ID(id_refresh);
+
+  ASSERT1 ("Block::new_refresh_load_flux_face_()",
+           "id_refresh %d of refresh object is out of range",
+           id_refresh,
+           (0 <= id_refresh));
+
+  MsgRefresh * msg_refresh = new MsgRefresh;
+
+  msg_refresh->set_data_msg (data_msg);
+  msg_refresh->set_new_refresh_id (id_refresh);
+
+  TRACE_NEW_REFRESH(this,cello::refresh(id_refresh),"send");
+  thisProxy[index_neighbor].p_new_refresh_recv (msg_refresh);
+
 }
