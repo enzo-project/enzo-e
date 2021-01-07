@@ -7,8 +7,9 @@ is_arch_valid = 1
 #flags_arch = '-g -fprofile-arcs -ftest-coverage' # gcov
 
 # opt with debug comments
-flags_arch = '-Wall -O0 -g -ggdb'
-
+flags_arch = '-O3 -g -ffast-math -funroll-loops -fPIC -pedantic'
+#flags_arch = '-Wall -O3 -g'
+flags_arch = '-Wall -O0 -g'
 # full debug
 #flags_arch = '-Wall -g -O0 -ggdb'
 #
@@ -20,15 +21,17 @@ flags_arch = '-Wall -O0 -g -ggdb'
 #flags_arch = '-Wall -O3 -pg'
 
 # rdynamic required for backtraces
-#flags_link_charm = '-rdynamic' 
+#flags_link_charm = '-rdynamic'
 #flags_link_charm = '-memory paranoid'
 #flags_link_charm = '-fprofile-arcs' # gcov
+
+flags_arch_fortran = '-ffixed-line-length-132'
 
 cc  = 'gcc '
 f90 = 'gfortran'
 
 flags_prec_single = ''
-flags_prec_double = '' #'-fdefault-real-8 -fdefault-double-8'
+flags_prec_double = '-fdefault-real-8 -fdefault-double-8'
 
 libpath_fortran = '.'
 libs_fortran    = ['gfortran']
