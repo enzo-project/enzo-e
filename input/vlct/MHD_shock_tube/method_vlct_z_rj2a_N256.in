@@ -1,0 +1,46 @@
+# Problem: z-axis aligned Shock Tube test problem for VLCT
+# Author: Matthew Abruzzo (matthewabruzzo@gmail.com)
+
+   include "input/vlct/MHD_shock_tube/initial_rj2a.in"
+
+   Domain {
+      lower = [0.0,0.0,0.0];
+      upper = [1.0,1.0,1.0];
+   }
+
+   Mesh {
+      root_rank = 3; # 3D
+      root_blocks = [1,1,1];
+      root_size = [4,4,256]; # number of cells per axis
+   }
+
+   # there are some problems with specifying an outflow condition along 1 axis
+   # and not along the other axes
+   Boundary {
+      list = ["one", "two", "three"];
+      one{
+         type = "periodic";
+   	 axis = "x";
+      }
+      two{
+         type = "periodic";
+   	 axis = "y";
+      }
+      three{
+         type = "outflow";
+   	 axis = "z";
+      }
+   }
+
+   Initial{
+      shock_tube{
+         aligned_ax = "z";
+      };
+   }
+
+   Output {
+      data {
+	 dir = ["method_vlct-1-z_rj2a_N256_%.1f","time"];
+	 name = ["data-%03d.h5", "proc"];
+      };
+   }

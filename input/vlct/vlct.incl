@@ -1,0 +1,100 @@
+# Problem VLCT test problems
+# Author: Matthew Abruzzo (matthewabruzzo@gmail.com)
+
+   Method {
+      list = ["mhd_vlct"];
+      mhd_vlct{
+         courant = 0.4;
+  
+        # default is hlle. Options are hll, hlle, hllc, and hlld
+        riemann_solver = "hlld";
+
+	# Reconstruction algorithms choices are:
+	# for full time step. Options are:
+        #    - "nn" Nearest Neighbor
+        #    - "plm"/"plm_enzo" Piecewise Linear Method with Enzo's slope
+	#      limiter. The "theta_limiter" value affects the diffusiveness
+	#      of the limiter. 
+	#    - "plm_athena" Piecewise Linear method with Athena's slope limiter
+
+	# Reconstructor algorithm for half time step. (default is "nn")
+        half_dt_reconstruct_method = "nn";
+
+	# Reconstructor algorithm for full time step (default is "plm")
+        full_dt_reconstruct_method = "plm";
+
+	# modifies the slope enzo slope limiter used in piecewise linear
+	# reconstruction. If "plm" or "plm_enzo" is not used, then this
+	# parameter is meainingless. This should have a value in the range
+	# [1.,2.]. A value of 1. is most dissipative and is the same as the
+	# minmod limiter. A value of 2. is least dissipative and is the same as
+	# the MC limiter. The default value is 1.5.
+	theta_limiter = 2.;
+
+        # density floor (default = 0.0)
+        density_floor = 1.e-200;
+
+        # pressure floor (default = 0.0)
+        pressure_floor = 1.e-200;
+	};
+   }
+
+   Field {
+      # The VL+CT method uses the following fields:
+      #    - velocity_x/y/z
+      #    - (specific) total_energy
+      #    - pressure (this is a field used to temporarily write data)
+      #    - bfieldi_x/y/z are interface magnetic fields (aka longitudinal).
+      #      The x/y/z component is the only component tracked at the faces
+      #      between cells along the x/y/z component
+      #    - bfield_x/y/z are the cell-centered magenetic fields. Each
+      #      component is the average value of the corresponding interface
+      #      values
+      #    - it uses (specific) internal_energy if the dual energy formalism is
+      #      is in use
+      list = ["density",
+              "velocity_x", "velocity_y", "velocity_z",
+	      "total_energy",
+	      "bfieldi_x", "bfieldi_y", "bfieldi_z",
+	      "bfield_x", "bfield_y", "bfield_z",
+	      "pressure"];
+
+      gamma = 1.6666666666666667;
+
+      # The VL+CT method reconstructs interface values (to compute fluxes) twice
+      # per timestep. Can perform nearest-neighbor or PLM. Each time
+      # nearest-neighbor is used, 1 ghost zone is needed. Each time PLM is used
+      # 2 ghost zones are needed. Presently use PLM twice, but in future, will
+      # use nearest-neighbor followed by PLM
+      
+      ghost_depth = 3;
+      padding = 0;
+      alignment = 8;
+
+      bfieldi_x{
+         centering = [false, true, true];
+      };
+      bfieldi_y{
+         centering = [true, false, true];
+      };
+      bfieldi_z{
+         centering = [true, true, false];
+      };
+   }
+
+   Group {
+      list = ["derived"];
+      derived {
+         field_list = ["pressure"];
+      }
+   }
+
+   Output {
+      list = ["data"];
+      data {
+	 type = "data";
+	 field_list = ["density", "velocity_x", "velocity_y", "velocity_z",
+                       "pressure", "total_energy", "bfield_x", "bfield_y",
+                       "bfield_z"];
+      };
+   }

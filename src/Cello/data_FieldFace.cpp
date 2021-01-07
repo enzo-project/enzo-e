@@ -988,7 +988,7 @@ std::vector<int> FieldFace::field_list_src_(Field field) const
   std::vector<int> field_list = refresh_->field_list_src();
   if (refresh_->all_fields()) {
     for (int i=0; i<field.field_count(); i++) {
-      field_list.push_back(i);
+      if (field.is_permanent(i)){ field_list.push_back(i); }
     }
   }
   return field_list;
@@ -1001,7 +1001,7 @@ std::vector<int> FieldFace::field_list_dst_(Field field) const
   std::vector<int> field_list = refresh_->field_list_dst();
   if (refresh_->all_fields()) {
     for (int i=0; i<field.field_count(); i++) {
-      field_list.push_back(i);
+      if (field.is_permanent(i)){ field_list.push_back(i); }
     }
   }
   return field_list;

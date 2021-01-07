@@ -1,0 +1,32 @@
+include "input/Particle/test_particle.incl"
+  Domain {
+     lower = [-1.0,-1.0 ];
+     upper = [ 1.0, 1.0 ];
+  }
+ Initial {
+     value {
+         velocity_x = [ -1.0*y ];
+         velocity_y = [ x ];
+     };
+     trace {
+         stride = [4,4];
+     }
+ }
+
+Mesh {
+   root_size = [32,32];
+}
+Method {
+   trace { timestep = 0.001; }
+}
+
+Stopping { cycle = 500; }
+Output {
+    list = ["trace"];
+    trace {
+        name = [ "particle-circle-%03d.png", "cycle" ];
+	include "input/Schedule/schedule_cycle_5.incl"
+        image_block_size = 3;
+    }
+}
+
