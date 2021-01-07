@@ -47,8 +47,11 @@ module enzo {
   PUPable EnzoConfig;
   PUPable EnzoFactory;
 
+  PUPable EnzoInitialBCenter;
+  PUPable EnzoInitialCloud;
   PUPable EnzoInitialCollapse;
   PUPable EnzoInitialCosmology;
+  PUPable EnzoInitialInclinedWave;
   PUPable EnzoInitialImplosion2;
   PUPable EnzoInitialMusic;
   PUPable EnzoInitialPm;
@@ -56,6 +59,7 @@ module enzo {
   PUPable EnzoInitialSedovArray2;
   PUPable EnzoInitialSedovArray3;
   PUPable EnzoInitialSedovRandom;
+  PUPable EnzoInitialShockTube;
   PUPable EnzoInitialSoup;  	  
   PUPable EnzoInitialTurbulence;
 
@@ -83,6 +87,24 @@ module enzo {
   PUPable EnzoMethodPpm;
   PUPable EnzoMethodPpml;
   PUPable EnzoMethodTurbulence;
+  PUPable EnzoMethodMHDVlct;
+
+  PUPable EnzoEOSIdeal;
+  PUPable EnzoIntegrableUpdate;
+  PUPable EnzoReconstructorNN;
+  // EnzoReconstructorPLMEnzoRKLim
+  PUPable EnzoReconstructorPLM<PLM_EnzoRKLimiter>;
+  // EnzoReconstructorPLMAthenaLim
+  PUPable EnzoReconstructorPLM<PLM_AthenaLimiter>;
+
+  // EnzoRiemannHLLMHD
+  PUPable EnzoRiemannImpl<HLLImpl<DavisWavespeed<MHDLUT>>>;
+  // EnzoRiemannHLLE
+  PUPable EnzoRiemannImpl<HLLImpl<EinfeldtWavespeed<HydroLUT>>>;
+  // EnzoRiemannHLLEMHD
+  PUPable EnzoRiemannImpl<HLLImpl<EinfeldtWavespeed<MHDLUT>>>;
+  PUPable EnzoRiemannImpl<HLLCImpl>; //EnzoRiemannHLLC
+  PUPable EnzoRiemannImpl<HLLDImpl>; //EnzoRiemannHLLD
 
   PUPable EnzoPhysicsCosmology;
 

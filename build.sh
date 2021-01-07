@@ -53,6 +53,7 @@ if [ "$#" -ge 1 ]; then
       rm -rf config.log diff.org log.org warnings.org errors.org log.build out.scons.*
       rm -rf config/*.pyc
       rm -rf test/fail.* test/pass.* test/incomplete.*
+      rm -rf test/*.test-log
       rm -rf scons-local-2.2.0/SCons/*.pyc scons-local-2.2.0/SCons/*/*.pyc
       rm -rf charmrun parameters.out checkpoint_ppm* output-stride*.h5
       rm -rf cov-int.tgz cov-int
@@ -272,5 +273,17 @@ if [ $target == "test" ]; then
 	exit_status=0
     fi
 fi
+
+if [ $target = "test" ] && [ "$CELLO_PREC" = "double" ]; then
+    # the vl+ct tests should be consolidated with the rest of the tests
+    echo ""
+    echo "--------------------"
+    echo "Attempting to run VL+CT tests (only defined for double Precision)"
+    ./test/run_vlct_test.sh
+    result_code=$?
+    if [ $result_code -gt 0 ]; then
+        exit_status=1
+    fi
+fi;
 echo "Done."
 exit $exit_status

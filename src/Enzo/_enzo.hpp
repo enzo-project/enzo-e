@@ -76,6 +76,7 @@ enum enzo_sync_id {
   enzo_sync_id_method_ppm,
   enzo_sync_id_method_ppml,
   enzo_sync_id_method_turbulence,
+  enzo_sync_id_method_vlct,
   enzo_sync_id_solver_bicgstab,
   enzo_sync_id_solver_bicgstab_precon_1,
   enzo_sync_id_solver_bicgstab_precon_2,
@@ -171,11 +172,18 @@ extern "C" {
 
 #include "enzo_IoEnzoBlock.hpp"
 
+#include "enzo_EnzoFieldArrayFactory.hpp"
+#include "enzo_EnzoPermutedCoordinates.hpp"
+#include "enzo_EnzoCenteredFieldRegistry.hpp"
+
 #include "enzo_EnzoBoundary.hpp"
 
+#include "enzo_EnzoInitialBCenter.hpp"
+#include "enzo_EnzoInitialCloud.hpp"
 #include "enzo_EnzoInitialCollapse.hpp"
 #include "enzo_EnzoInitialCosmology.hpp"
 #include "enzo_EnzoInitialGrackleTest.hpp"
+#include "enzo_EnzoInitialInclinedWave.hpp"
 #include "enzo_EnzoInitialImplosion2.hpp"
 #include "enzo_EnzoInitialMusic.hpp"
 #include "enzo_EnzoInitialPm.hpp"
@@ -183,12 +191,29 @@ extern "C" {
 #include "enzo_EnzoInitialSedovArray2.hpp"
 #include "enzo_EnzoInitialSedovArray3.hpp"
 #include "enzo_EnzoInitialSedovRandom.hpp"
+#include "enzo_EnzoInitialShockTube.hpp"
 #include "enzo_EnzoInitialSoup.hpp"
 #include "enzo_EnzoInitialTurbulence.hpp"
 
 #include "enzo_EnzoRefineShock.hpp"
 #include "enzo_EnzoRefineParticleMass.hpp"
 #include "enzo_EnzoRefineMass.hpp"
+
+#include "enzo_EnzoEquationOfState.hpp"
+#include "enzo_EnzoEOSIdeal.hpp"
+#include "enzo_EnzoIntegrableUpdate.hpp"
+#include "enzo_EnzoReconstructor.hpp"
+#include "enzo_EnzoReconstructorNN.hpp"
+#include "enzo_EnzoReconstructorPLM.hpp"
+#include "enzo_EnzoRiemann.hpp"
+#include "enzo_EnzoRiemannLUT.hpp"
+#include "enzo_EnzoRiemannUtils.hpp"
+#include "enzo_EnzoRiemannImpl.hpp"
+#include "enzo_EnzoRiemannHLL.hpp"
+#include "enzo_EnzoRiemannHLLC.hpp"
+#include "enzo_EnzoRiemannHLLD.hpp"
+#include "enzo_EnzoConstrainedTransport.hpp"
+#include "enzo_EnzoSourceInternalEnergy.hpp"
 
 #include "enzo_EnzoMethodCheckGravity.hpp"
 #include "enzo_EnzoMethodComovingExpansion.hpp"
@@ -202,6 +227,7 @@ extern "C" {
 #include "enzo_EnzoMethodPpm.hpp"
 #include "enzo_EnzoMethodPpml.hpp"
 #include "enzo_EnzoMethodTurbulence.hpp"
+#include "enzo_EnzoMethodMHDVlct.hpp"
 
 #include "enzo_EnzoMatrixDiagonal.hpp"
 #include "enzo_EnzoMatrixIdentity.hpp"

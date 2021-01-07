@@ -139,6 +139,340 @@ fields
 
 PPML ideal MHD solver
 
+.. _vlct_overview:
+
+``"mhd_vlct"``: MHD
+===================
+
+VL + CT (van Leer + Constrained Transport) MHD solver based on the
+unsplit Godunov method described by
+`Stone & Gardiner (2009) <http://adsabs.harvard.edu/abs/2009NewA...14..139S>`_
+.
+
+The algorithm combines attributes similar to the MUSCL-Hancock with
+the constrained transport method.  In short, the method includes two
+main steps. First the values are integrated to the half
+time-step. Then, the values at the half time-step are used to
+caluclate the change in the quantities over the full time-step. The
+primary representation of the magnetic fields are 3 face-centered
+fields (one for each component), which lie on the cell face matching
+the dimension of the component (e.g. the x component lies on the
+x-face). The method also tracks cell-centered components of the bfield
+which are just the averages of the face-centered components. The
+implementation has been modified to perform reconstruction using
+internal energy inplace of pressure (in typical Enzo fashion).
+
+This method can effectively function as a hydrodynamics method if
+the magnetic fields are all initialized to zero (if they start at
+zero, they will never be modified to non-zero values).
+
+Note that the courant factor should be less than 0.5.
+
+This method only support 3 dimensions.
+
+
+parameters
+----------
+
+.. list-table:: Method ``mhd_vlct`` parameters
+   :widths: 10 5 1 30
+   :header-rows: 1
+   
+   * - Parameter
+     - Type
+     - Default
+     - Description
+   * - ``"density_floor"``
+     - `float`
+     - `none`
+     - `Lower limit on density (must exceed 0)`
+   * - ``"pressure_floor"``
+     - `logical`
+     - `none`
+     - `Lower limit on thermal pressure (must exceed 0)`
+   * - ``"riemann_solver"``
+     - `string`
+     - `hlld`
+     - `name of the Riemann Solver to use`
+   * - ``"half_dt_reconstruct_method"``
+     - `string`
+     - `nn`
+     - `Reconstruction method for half timestep`
+   * - ``"full_dt_reconstruct_method"``
+     - `string`
+     - `plm`
+     - `Reconstruction method for full timestep`
+   * - ``"theta_limiter"``
+     - `float`
+     - `1.5`
+     - `controls dissipation of the "plm"/"plm_enzo" reconstruction
+       method.`
+   * - ``"dual_energy"``
+     - `logical`
+     - `false`
+     - `Whether to use dual-energy formalism`
+   * - ``"dual_energy_eta"``
+     - `float`
+     - `0.001`
+     - `Dual energy parameter eta`
+
+
+fields
+------
+
+.. list-table:: Method ``mhd_vlct`` fields
+   :widths: 5 5 1 30
+   :header-rows: 1
+
+   * - Field
+     - Type
+     - Read/Write
+     - Description   
+   * - ``"density"``
+     - ``enzo_float``
+     - [rw]
+     -    
+   * - ``"velocity_x"``
+     - ``enzo_float``
+     - [rw]
+     -
+   * - ``"velocity_y"``
+     - ``enzo_float``
+     - [rw]
+     -
+   * - ``"velocity_z"``
+     - ``enzo_float``
+     - [rw]
+     -
+   * - ``"total_energy"``
+     - ``enzo_float``
+     - [rw]
+     - specific total energy
+   * - ``"bfield_x"``
+     - ``enzo_float``
+     - [rw]
+     - Cell-centered bfield (average of the corresponding ``bfieldi_x``)
+   * - ``"bfield_y"``
+     - ``enzo_float``
+     - [rw]
+     - Cell-centered bfield (average of the corresponding ``bfieldi_y``)
+   * - ``"bfield_z"``
+     - ``enzo_float``
+     - [rw]
+     - Cell-centered bfield (average of the corresponding ``bfieldi_z``)
+   * - ``"bfieldi_x"``
+     - ``enzo_float``
+     - [rw]
+     - Primary representation of x-component of bfield (lies on x-faces).
+   * - ``"bfieldi_y"``
+     - ``enzo_float``
+     - [rw]
+     - Primary representation of y-component of bfield (lies on y-faces).
+   * - ``"bfieldi_z"``
+     - ``enzo_float``
+     - [rw]
+     - Primary representation of z-component of bfield (lies on z-faces).
+   * - ``"pressure"``
+     - ``enzo_float``
+     - [w]
+     - computed from ``total_energy`` (``internal_energy`` if dual-energy)
+   * - ``internal_energy``
+     - ``enzo_float``
+     - [rw]
+     - if dual-energy
+       
+At initialization the face-centered magnetic fields should be
+divergence free. Trivial configurations (e.g. a constant magnetic
+field everywhere) can be provided with the ``"value"``
+initializer. For non-trivial configurations, we have provide the
+``"vlct_bfield"`` initializer which can initialize the magnetic fields
+(face-centered and cell-centered) from expression(s) given in the
+parameter file for component(s) of the magnetic vector potential.
+
+.. _using-vlct-de:
+
+dual-energy formalism
+---------------------
+
+The implementation of the dual-energy more closely resembles the
+implementation employed in Enzo's Runge–Kutta integrator than the original
+conception used by Enzo's ppm integrator, (for a description of that
+implementation, see `Bryan et al (1995)
+<https://ui.adsabs.harvard.edu/abs/1995CoPhC..89..149B>`_ ). There are 3
+main differences from the original conception:
+
+  1. internal energy is always used to compute pressure. In the original
+     conception, pressure could be computed from ``total_energy`` or
+     ``internal_energy`` (the decision was independent of synchronization).
+  2. ``pressure`` and ``internal_energy`` are not separately reconstructed.
+     Instead, just the pressure is reconstructed. The ``internal_energy``
+     is computed at the left and right interfaces from the reconstructed
+     quantities.
+  3. Synchronization of the total and internal energies is a local
+     operation that doesn't require knowledge cell neighbors. In the
+     original conception, knowledge of the immediate neighbors had been
+     required (each synchronization incremented the stale depth - 3 extra
+     ghost zones would have been required).
+
+For clarity, the conditions for synchronization are provided below. The
+specific ``internal_energy``, :math:`e`, is set to
+:math:`e'= E - (v^2 + B^2/\rho)/2` (where :math:`E` is the specific
+``total_energy``) when the following conditions are met:
+
+  * :math:`c_s'^2 > \eta v^2`, where :math:`c_s'^2=\gamma(\gamma - 1) e'`.
+  * :math:`c_s'^2 > \eta B^2/\rho`
+  * :math:`e' > e /2`
+
+If the above condition is not met, then ``total_energy`` is set to
+:math:`e + (v^2 + B^2/\rho)/2`.
+    
+When ``"dual_energy_eta"``, is set to ``0``, :math:`e` is always set to
+``e'``. This is done to provide support for Grackle (in the future)
+without the dual-energy formalism.
+
+*Note: in the future, the behavior described in difference 2, may change
+to achieve better compatibility with Grackle.*
+
+.. _using-vlct-reconstruction:
+
+reconstruction
+--------------
+
+This subsection details the available interpolation methods for
+reconstructing the left and right states of the cell-centered
+interfaces. Presently, all available methods perform reconstruction
+on cell-centered primitive quantites,
+:math:`{\bf w} = (\rho, {\bf v}, p, {\bf B})`
+
+To simplify the determination of the necessary number of ghost
+zones for a given combination of reconstruction algorithms on
+a unigrid mesh, we define the concepts of "stale depth" and
+"staling rate". We define a "stale" value as a value that needs
+to be refreshed. "Stale depth" indicates the number of field
+entries, starting from the outermost field values on a block,
+that the region encompassing "stale" values extends over. Every
+time quantities are updated over a (partial/full) timestep,
+the stale depth increases. We define the amount by which it
+increases as the "staling rate" (which depends on the choice
+of interpolation method).
+
+For a unigrid simulation, the number of required ghost zones
+is given by the sum of the staling rates for each selected
+reconstruction method.
+
+We provide the names used to specify each available method in
+the input file, the associated staling depth, and a brief
+description.
+
+.. list-table:: Available ``mhd_vlct`` reconstructors (and slope
+		limiters)
+   :widths: 3 1 30
+   :header-rows: 1
+   
+   * - Name
+     - Staling Depth
+     - Description
+   * - ``"nn"``
+     - `1`
+     - `Nearest Neighbor - (1st order) reconstruction of primitives`
+   * - ``"plm"`` or ``"plm_enzo"``
+     - `2`
+     - `Piecwise Linear Method - (2nd order) reconstruction of
+       primitives using the slope limiter from Enzo's Runge–Kutta
+       integrator. This is tuned by the` ``"theta_limiter"``
+       `parameter, which must satisfy` ``1 <= "theta_limiter" <=
+       2``. `As in Enzo, the default value is 1.5. A value of 1 is the
+       most dissipative and it is equivalent to the traditional minmod
+       limiter. A value of 2 is the least dissipative and it
+       corresponds to an MC limiter (monotized central-difference
+       limiter).`
+   * - ``"plm_athena"``
+     - `2`
+     - `Piecwise Linear Method - (2nd order) reconstruction of
+       primitives using the slope limiter from Athena (& Athena++).
+       For some primitive variable`, :math:`{\bf w}_{i}`, `the limited
+       slope is defined in terms of the left- and right-differences:`
+       :math:`\delta{\bf w}_{L,i}={\bf w}_{i}-{\bf w}_{i-1}` `and`
+       :math:`\delta{\bf w}_{R,i}={\bf w}_{i-1}-{\bf w}_{i+1}`.  `If
+       the signs of the differences don't match (or at least 1 is 0),
+       then the limited slope is 0. Otherwise the limited slope is the
+       harmonic mean of the differences.`
+
+We provide a few notes about the choice of interpolator for this algorithm:
+
+   * The recommended choices of reconstruction algorithms are ``"nn"`` for the
+     half-timestep and then piecewise-linear reconstruction for the
+     full-timestep (most test problems have been run using ``plm`` with
+     ``theta_limiter=2``, matching the integrator description in
+     `Stone & Gardiner 2009
+     <http://adsabs.harvard.edu/abs/2009NewA...14..139S>`_ ). Using ``"nn"``
+     both times also works, however errors tests show that errors arise when
+     piecewise linear reconstruction is used both times.
+   * It is supposed to be possible to reconstruct the characteristic quantities
+     for this method or to use higher order reconstruction in place of ``"plm"``
+   * Reconstruction is always performed on the cell-centered magnetic fields.
+     After reconstructing values along a given axis, the values of the
+     reconstructed magnetic field component for that axis are replaced by the
+     face-centered magnetic field values.
+
+.. _using-vlct-riemann-solver:
+
+riemann solvers
+---------------
+
+This subsection details the available Riemann Solvers. Currently all
+available Riemann Solvers are defined to use magnetic fields, however,
+they all appropriately handle the cases where the magnetic fields are
+unformly 0. We provide a list of the names used to specify each
+Riemann Solver in the input file, and a brief description for each of
+them:
+
+  * ``"hll"`` The HLL approximate Riemann solver with wavespeeds
+    bounds estimated as :math:`S_L = \min(u_L - a_L, u_R - a_R)` and
+    :math:`S_R = \max(u_L + a_L, u_R + a_R)`. This is one of the
+    proposed methods from Davis, 1988, SIAM J. Sci. and Stat. Comput.,
+    9(3), 445–473. The same wavespeed estimator was used in MHD HLL
+    solver implemented for Enzo's Runge Kutta solver. Currently this
+    raises an error as it is not tested.
+  * ``"hlle"`` The HLLE approximate Riemann solver - the HLL solver
+    with wavespeed bounds estimated according to
+    Einfeldt, 1988, SJNA, 25(2), 294–318. This method allows the
+    min/max eigenvalues of Roe's matrix to be wavespeed estimates. For a
+    description of the procedure for MHD quantities, see
+    `Stone et al. (2008)
+    <http://adsabs.harvard.edu/abs/2008ApJS..178..137S>`_ .
+    If using an HLL Riemann Solver, this is the recommended choice.
+  * ``"hllc"`` **[EXPERIMENTAL]** The HLLC approximate Riemann solver.
+    For an overview see Toro, 2009, *Riemann Solvers and Numerical
+    Methods for Fluid Dynamics*, Springer-Verlag. This is a solver for
+    hydrodynamical problems that models contact and shear waves. The
+    wavespeed bounds are estimated according to the Einfeldt approach.
+
+    .. warning::
+
+      In the current version, the HLLC solver is experimental. Do **NOT**
+      use it unless all magnetic fields are intialized to be uniformly zero
+      everywhere.
+    
+  * ``"hlld"`` The HLLD approximate Riemann solver described in
+    Miyoshi & Kusano, 2005. JCP, 315, 344. The wavespeed bounds
+    are estimated according to eqn 67 from the paper.
+
+
+.. note::
+
+      When the dual-energy formalism is in use, all of the solvers treat
+      the internal energy as a passively advected scalar.
+
+      This is not completely self-consistent with the assumptions made by the
+      HLLD solver. Unlike the other HLL-solvers which assume constant
+      pressure in the intermediate regions of the Riemann Fan the HLLD solver
+      assumes constant total pressure. It is unclear whether this causes any
+      problems.
+
+   
+
+
 ``"pm_deposit"``: particle-mesh
 ===============================
 
