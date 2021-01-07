@@ -6,9 +6,9 @@
 // Coordinate basis. It has axes i, j, and k.
 //
 // Allowed permutations are:
-//   (i,j,k) = (x,y,z)
-//   (i,j,k) = (y,z,x)
-//   (i,j,k) = (z,x,y)
+//   (k,j,i) = (z,y,x)
+//   (k,j,i) = (x,z,y)
+//   (k,j,i) = (y,x,z)
 //
 // The class assumes that each cartesian axis has the following id:
 //    0 <--> x, 1 <--> y, 2 <--> z
