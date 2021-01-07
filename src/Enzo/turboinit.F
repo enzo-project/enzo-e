@@ -32,12 +32,14 @@ c  LOCALS:
 c
 c-----------------------------------------------------------------------
       implicit NONE
+#define FORTRAN
+#include "fortran_types.h"
 c-----------------------------------------------------------------------
 c
 c  Arguments
 c
-      ENZO_REAL u(in,jn,kn), v(in,jn,kn), w(in,jn,kn)
       integer rank, nbox, in, jn, kn, ig, jg, kg
+      ENZO_REAL u(in,jn,kn), v(in,jn,kn), w(in,jn,kn)
 c
 c  Locals
 c

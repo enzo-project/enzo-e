@@ -56,7 +56,9 @@
      };
  }
 
- Output {
+ include "input/flux_correct.incl"
+
+Output {
      data {
          field_list = [ "density" ];
          dir   = ["Dir_headers_%02d","cycle"];

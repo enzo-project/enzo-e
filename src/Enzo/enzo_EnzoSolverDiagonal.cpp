@@ -25,8 +25,7 @@
 
 //======================================================================
 
-void EnzoSolverDiagonal::apply
-( std::shared_ptr<Matrix> A, Block * block) throw()
+void EnzoSolverDiagonal::apply (std::shared_ptr<Matrix> A, Block * block) throw()
 {
   Solver::begin_(block);
 

@@ -86,39 +86,7 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Initialize an empty Block
-  Block() :
-    CBase_Block(),
-    data_(NULL),
-    child_data_(NULL),
-    level_next_(0),
-    cycle_(0),
-    time_(0.0),
-    dt_(0.0),
-    stop_(false),
-    index_initial_(0),
-    children_(),
-    sync_coarsen_(),
-    sync_count_(),
-    sync_max_(),
-    face_level_curr_(),
-    face_level_next_(),
-    child_face_level_curr_(),
-    child_face_level_next_(),
-    count_coarsen_(0),
-    adapt_step_(0),
-    adapt_(0),
-    coarsened_(false),
-    delete_(false),
-    is_leaf_(true),
-    age_(0),
-    face_level_last_(),
-    name_(""),
-    index_method_(-1),
-    index_solver_(),
-    refresh_()
-  {
-    for (int i=0; i<3; i++) array_[i]=0;
-  }
+  Block();
 
   /// Initialize a migrated Block
   Block (CkMigrateMessage *m);
@@ -186,6 +154,13 @@ public: // interface
   int face_level (const int if3[3]) const
   { return face_level_curr_[IF3(if3)]; }
 
+  int face_level (int axis, int face) const
+  {
+    int if3[3];
+    cello::af_to_xyz(axis,face,if3);
+    return face_level_curr_[IF3(if3)];
+  }
+  
   int face_level_next (const int if3[3]) const
   { return face_level_next_[IF3(if3)]; }
 
@@ -254,6 +229,9 @@ public: // interface
   /// Initialize child face levels given own face levels
   void initialize_child_face_levels_();
 
+  /// Initialize arrays for refresh
+  void init_new_refresh_();
+
   /// Return an iterator over faces
 
   ItFace it_face(int min_face_rank,
@@ -265,8 +243,8 @@ public: // interface
 
   ItNeighbor it_neighbor(int min_face_rank, Index index,
 			 int neighbor_type,
-			 int min_level,
-			 int root_level) throw();
+			 int min_level = 0,
+			 int root_level = 0) throw();
 
   //--------------------------------------------------
   // Charm++ virtual
@@ -281,6 +259,17 @@ public: // interface
   //--------------------------------------------------
   // INITIAL
   //--------------------------------------------------
+
+  /// Enter initial phase
+  void initial_enter_();
+  /// Initiate computing the sequence of Methods
+  void initial_begin_();
+  /// Initiate computing the next Method in the sequence
+  void initial_next_();
+  /// Return after performing any Refresh operations
+  void initial_continue_();
+  /// Cleanup after all Methods have been applied
+  void initial_end_();
 
   void r_end_initialize(CkReductionMsg * msg)
   {  initial_exit_();  delete msg;  }
@@ -299,13 +288,19 @@ public: // interface
 
   void p_compute_continue()
   {      compute_continue_();  }
-  void r_compute_continue()
-  {      compute_continue_();  }
+  void r_compute_continue(CkReductionMsg * msg)
+  {
+    delete msg;
+    compute_continue_();
+  }
 
   void p_compute_exit()
   {      compute_exit_();  }
   void r_compute_exit(CkReductionMsg * msg)
-  {      compute_exit_();    delete msg;  }
+  {
+    delete msg;
+    compute_exit_();
+  }
 
   /// Return the currently active Method
   int index_method() const throw()
@@ -316,7 +311,9 @@ public: // interface
 
   /// Start a new solver
   void push_solver(int index_solver) throw()
-  { index_solver_.push_back(index_solver); }
+  {
+    index_solver_.push_back(index_solver);
+  }
 
   /// Return from a solver
   int pop_solver() throw()
@@ -554,7 +551,34 @@ public:
   // REFRESH
   //--------------------------------------------------
 
-  void refresh_enter (int call, Refresh * refresh);
+  /// Begin a refresh operation, optionally waiting then invoking callback
+  void new_refresh_start (int id_refresh, int callback);
+
+  /// Wait for a refresh operation to complete, then continue with the callback
+  void new_refresh_wait (int id_refresh, int callback);
+
+  /// Check whether a refresh operation is finished, and invoke the associated
+  /// callback if it is
+  void new_refresh_check_done (int id_refresh);
+
+  /// Receive a Refresh data message from an adjacent Block
+  void p_new_refresh_recv (MsgRefresh * msg);
+
+  int new_refresh_load_field_faces_ (Refresh & refresh);
+  /// Scatter particles in ghost zones to neighbors
+  int new_refresh_load_particle_faces_ (Refresh & refresh);
+  /// Send flux data to neighbors
+  int new_refresh_load_flux_faces_ (Refresh & refresh);
+  
+  void new_refresh_load_field_face_
+  (Refresh & refresh, int refresh_type, Index index, int if3[3], int ic3[3]);
+  /// Send particles in list to corresponding indices
+  void new_particle_send_(Refresh & refresh, int nl,Index index_list[], 
+			  ParticleData * particle_list[]);
+  void new_refresh_load_flux_face_
+  (Refresh & refresh, int refresh_type, Index index, int if3[3], int ic3[3]);
+
+  void new_refresh_exit (Refresh & refresh);
 
   /// Enter the refresh phase after synchronizing
   void p_refresh_continue ()
@@ -582,22 +606,17 @@ public:
   }
 protected:
   void refresh_exit_ ();
-public:
-
-  /// Synchronize at start of refresh so that neighboring Blocks have
-  /// all reached this point before exchanging data
-  //  void p_refresh_sync()
-  //  { refresh_sync_(0); }
-protected:
-  //  void refresh_sync_(int count);
-  void refresh_load_faces_();
-
+  /// Pack field face data into arrays and send to neighbors
 public:
 
   void p_refresh_store (MsgRefresh * msg);
 
   /// Get restricted data from child when it is deleted
   void p_refresh_child (int n, char a[],int ic3[3]);
+
+  void p_method_flux_correct_refresh();
+  void r_method_flux_correct_sum_fields(CkReductionMsg * msg);
+  void r_method_debug_sum_fields(CkReductionMsg * msg);
 
 protected:
 
@@ -608,7 +627,6 @@ protected:
 
   /// Pack field face data into arrays and send to neighbors
   int refresh_load_field_faces_ (Refresh * refresh);
-
   /// Scatter particles in ghost zones to neighbors
   int refresh_load_particle_faces_ (Refresh * refresh);
 
@@ -616,7 +634,7 @@ protected:
   (int refresh_type, Index index, int if3[3], int ic3[3]);
   void refresh_load_particle_face_
   (int refresh_type, Index index, int if3[3], int ic3[3]);
-
+ 
   //--------------------------------------------------
   // PARTICLES
   //--------------------------------------------------
@@ -791,6 +809,21 @@ public: // virtual functions
 
   void print () const;
 
+  void debug_new_refresh(const char * file, int line)
+  {
+    CkPrintf ("DEBUG_NEW_REFRESH %s:%d\n",file,line);
+    const int n = new_refresh_sync_list_.size();
+    for (int i=0; i<n; i++) {
+      Sync & sync = new_refresh_sync_list_[i];
+      CkPrintf ("DEBUG_NEW_REFRESH   sync %p %d/%u\n",(void*)&sync,sync.value(),sync.stop());
+      CkPrintf ("DEBUG_NEW_REFRESH   state %s\n",
+                (sync.state()==RefreshState::INACTIVE) ? "INACTIVE" :
+                ((sync.state()==RefreshState::ACTIVE) ? "ACTIVE" : "READY"));
+      CkPrintf ("DEBUG_NEW_REFRESH   mesg %lu\n",new_refresh_msg_list_[i].size());
+    }
+    fflush(stdout);
+  }
+
 protected: // functions
 
   /// Return the child adjacent to the given child in the direction of
@@ -890,13 +923,16 @@ protected: // functions
   void set_refresh (Refresh * refresh) 
   {
     // WARNING: known memory leak (see bug # 133)
-    refresh_.push_back(new Refresh(*refresh));
+    refresh_.push_back(new Refresh (*refresh));
   };
 
   /// Return the currently-active Refresh object
   Refresh * refresh () throw()
   {  return refresh_.back();  }
 
+  /// Return the synchronization object for the given Refresh object id
+  Sync * sync_ (int id_refresh) throw()
+  { return &new_refresh_sync_list_[id_refresh]; }
 
 protected: // attributes
 
@@ -998,6 +1034,9 @@ protected: // attributes
   /// Refresh object associated with current refresh operation
   /// (Not a pointer since must be one per Block for synchronization counters)
   std::vector<Refresh*> refresh_;
+
+  std::vector < Sync > new_refresh_sync_list_;
+  std::vector < std::vector <MsgRefresh * > > new_refresh_msg_list_;
 
 };
 

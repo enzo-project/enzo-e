@@ -24,10 +24,10 @@ c
      &     eslice, uslice, vslice, wslice,
      &     df, ef, uf, vf,
      &     wf, grslice, geslice, gef,
-#ifdef NEW_PPM
      &     ges,
-#endif      
-     &     colslice, colf, colls, colrs
+     &     colslice, colf, colls, colrs,
+     &     ierror,
+     &     ie_error_x,ie_error_y,ie_error_z,num_ie_error
      &     )
 c     
 c     CONTROL ROUTINE FOR X-SWEEP DIRECT EULER VERSION OF PPM
@@ -125,6 +125,8 @@ c    calcdiss - Calculate dissiptation and flattening coefficients
 c
 c-----------------------------------------------------------------------
       implicit NONE
+#define FORTRAN
+#include "fortran_types.h"
 c
 c-----------------------------------------------------------------------
 c
@@ -150,9 +152,7 @@ c
      &        windex(nsubgrids*6),geindex(nsubgrids*6),
      &        colindex(nsubgrids*6,ncolor)
       ENZO_REAL array(1), colorpt(1)
-#ifdef NEW_PPM
       integer iriemannfallback
-#endif      
 c
 c  define local slices (passed as temps)
 c
@@ -164,14 +164,15 @@ c
      &   diffcoef(in,jn),     df(in,jn),     ef(in,jn),
      &         uf(in,jn),     vf(in,jn),     wf(in,jn),
      &     gef(in,jn),   gels(in,jn),   gers(in,jn)
-#ifdef NEW_PPM
       ENZO_REAL ges(in,jn)
-#endif      
       ENZO_REAL dslice(in,jn), eslice(in,jn), grslice(in,jn),
      &     uslice(in,jn), vslice(in,jn),  wslice(in,jn), 
      &    geslice(in,jn)
       ENZO_REAL colslice(in,jn,ncolor),  colf(in,jn,ncolor),
-     &        colls(in,jn,ncolor), colrs(in,jn,ncolor)
+     &     colls(in,jn,ncolor), colrs(in,jn,ncolor)
+      integer ierror
+      integer ie_error_x(*),ie_error_y(*),ie_error_z(*)
+      integer num_ie_error
 c
 c  parameters
 c
@@ -204,6 +205,24 @@ c
             uslice(i,j) = u(i,j,k)
             vslice(i,j) = v(i,j,k)
             wslice(i,j) = w(i,j,k)
+            if (dslice(i,j) < 0.0) then
+               print*, 'xeuler_sweep dslice ',i,j,k,dslice(i,j)
+               if (num_ie_error .ge. 0) then
+                  num_ie_error = num_ie_error + 1
+                  ie_error_x(num_ie_error) = i
+                  ie_error_y(num_ie_error) = j
+                  ie_error_z(num_ie_error) = k
+               endif
+            end if
+            if (eslice(i,j) < 0.0) then
+               print*, 'xeuler_sweep eslice ',i,j,k,eslice(i,j)
+               if (num_ie_error .ge. 0) then
+                  num_ie_error = num_ie_error + 1
+                  ie_error_x(num_ie_error) = i
+                  ie_error_y(num_ie_error) = j
+                  ie_error_z(num_ie_error) = k
+               endif
+            end if
          enddo
          if (gravity .eq. 1) then
             do i=1, in
@@ -213,6 +232,15 @@ c
          if (idual .eq. 1) then
             do i=1, in
                geslice(i,j) = ge(i,j,k)
+               if (geslice(i,j) < 0.0) then
+                  if (num_ie_error .ge. 0) then
+                     print*, 'xeuler_sweep geslice ',i,j,k,geslice(i,j)
+                     num_ie_error = num_ie_error + 1
+                     ie_error_x(num_ie_error) = i
+                     ie_error_y(num_ie_error) = j
+                     ie_error_z(num_ie_error) = k
+                  endif
+               end if
             enddo
          endif
          do ic=1, ncolor
@@ -227,32 +255,21 @@ c  Compute the pressure on a slice
 c
       
       if (idual .eq. 1) then
-#ifdef NEW_PPM
-         call pgas2d_dual_dev
-#else
+         ierror = 1
          call pgas2d_dual
-#endif         
      &        (dslice, eslice, geslice, pslice,
      &        uslice, vslice, wslice, eta1, eta2,
-     &        in, jn, is-3, ie+3, j1, j2, gamma, pmin)
+     &        in, jn, is-3, ie+3, j1, j2, gamma, pmin, ierror)
       else
-#ifdef NEW_PPM         
-         call pgas2d_dev(
-#else
          call pgas2d(
-#endif
      &        dslice, eslice, pslice, uslice, vslice, wslice,
-     &               in, jn, is-3, ie+3, j1, j2, gamma, pmin)
+     &               in, jn, is-3, ie+3, j1, j2, gamma, pmin, ierror)
       endif
 c
 c  If requested, compute diffusion and slope flattening coefficients
 c
       if (idiff .ne. 0 .or. iflatten .ne. 0)
-#ifdef NEW_PPM
-     &     call calcdiss_dev(
-#else
      &     call calcdiss(
-#endif
      &     dslice, eslice, uslice, v, w, pslice, dx, dy, dz,
      &     in, jn, kn, is, ie, j1, j2, k, nzz, xsweep,
      &     in, jn, kn, dt, gamma, idiff, iflatten,
@@ -261,42 +278,31 @@ c
 c
 c  Compute Eulerian left and right states at zone edges via interpolation
 c
-#ifdef NEW_PPM      
-      call inteuler_dev (
-#else
       call inteuler (
-#endif      
      &     dslice, pslice, gravity, grslice, geslice,
      &     uslice, vslice, wslice, dx, flatten,
      &     in, jn, is, ie, j1, j2, idual, eta1, eta2,
      &     isteepen, iflatten,
-#ifdef NEW_PPM      
      &     iconsrec, iposrec,
-#endif      
      &     dt, gamma, ipresfree,
      &     dls, drs, pls, prs, gels, gers,
      &     uls, urs, vls, vrs, wls, wrs,
-     &     ncolor, colslice, colls, colrs
+     &     ncolor, colslice, colls, colrs, ierror
      &     )
 c     
 c     Compute (Lagrangian part of the) Riemann problem at each zone boundary
 c
-#ifdef NEW_PPM
-      call twoshock_dev(
-#else
       call twoshock(
-#endif
      &     dls, drs, pls, prs, uls, urs, 
      &     in, jn, is, ie+1, j1, j2, 
      &     dt, gamma, pmin, ipresfree,
      &     pbar, ubar, gravity, grslice, idual, eta1
      &     )
 
-#ifdef NEW_PPM
 
       iriemannfallback = 1
       
-      CALL flux_twoshock_dev(
+      CALL flux_twoshock(
      &     dslice, eslice, geslice, uslice, vslice, wslice,
      &     dx, diffcoef, 
      &     in,jn,
@@ -306,49 +312,34 @@ c
      &     dls, drs, pls, prs, gels, gers, uls, urs,
      &     vls, vrs, wls, wrs, pbar, ubar,
      &     df, ef, uf, vf, wf, gef, ges,
-     &     ncolor, colslice, colls, colrs, colf)
-#endif                                
+     &     ncolor, colslice, colls, colrs, colf,0)
 c
 c  Compute Eulerian fluxes and update zones-centered quantities
 c
-#ifdef NEW_PPM      
-      call euler_dev   (
-#else
-      call euler (
-#endif      
+      call euler   (
      &     dslice, eslice, grslice, geslice,
      &     uslice, vslice, wslice, dx, diffcoef,
      &     in, jn, is, ie, j1, j2, dt, 
      &     gamma, idiff, gravity, idual, eta1, eta2,
-#ifdef NEW_PPM
      &     df, ef, uf, vf, wf, gef, ges,
      &     ncolor, colslice, colf, SmallRho)
-#else
-     &     dls, drs, pls, prs, gels, gers,
-     &     uls, urs, vls, vrs, wls, wrs,
-     &     pbar, ubar,
-     &     df, ef, uf, vf, wf, gef,
-     &     ncolor, colslice, colls, colrs, colf)
-#endif      
 c     
 c  If necessary, recompute the pressure to correctly set ge and e
 c
-      if (idual .eq. 1)
-#ifdef NEW_PPM
-     &     call pgas2d_dual_dev
-#else
-     &     call pgas2d_dual
-#endif
+      if (idual .eq. 1) then
+         ierror = 10
+         call pgas2d_dual
      &     (dslice, eslice, geslice, pslice,
      &     uslice, vslice, wslice, eta1, eta2,
-     &     in, jn, is-3, ie+3, j1, j2, gamma, pmin)
+     &        in, jn, is-3, ie+3, j1, j2, gamma, pmin, ierror)
+      end if
 c     
 c  Check this slice against the list of subgrids 
 c     (all subgrid quantities are zero based)
 c
       do n=0, nsubgrids-1
-        if (k .ge. fjstart(n*3+1)+1 .and. k .le. fjend(n*3+1)+1) then
-          idim = fiend(n*3+1) - fistart(n*3+1) + 1
+         if (k .ge. fjstart(n*3+1)+1 .and. k .le. fjend(n*3+1)+1) then
+            idim = fiend(n*3+1) - fistart(n*3+1) + 1
           do j=fistart(n*3+1)+1, fiend(n*3+1)+1
              offset = j-fistart(n*3+1) + (k-fjstart(n*3+1)-1)*idim
              array(dindex(n*6+1)+offset) = df(lface(n*3+1)+1, j)
@@ -371,9 +362,9 @@ c
              endif
              do ic=1, ncolor
                 array(colindex(n*6+1,ic)+offset) = 
-     &                                       colf(lface(n*3+1)+1, j, ic)
+     &               colf(lface(n*3+1)+1, j, ic)
                 array(colindex(n*6+2,ic)+offset) = 
-     &                                       colf(rface(n*3+1)+2, j, ic)
+     &               colf(rface(n*3+1)+2, j, ic)
              enddo
           enddo
         endif

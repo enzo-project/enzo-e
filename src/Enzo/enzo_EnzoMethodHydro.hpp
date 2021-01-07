@@ -70,7 +70,7 @@ extern "C" void FORTRAN_NAME(woc_flux_twoshock)
    enzo_float *wls, enzo_float *wrs, enzo_float *pbar, enzo_float *ubar,
    enzo_float *df, enzo_float *ef, enzo_float *uf, enzo_float *vf, enzo_float *wf, enzo_float *gef, 
    enzo_float *ges,
-   int *ncolor, enzo_float *colslice, enzo_float *colls, enzo_float *colrs, enzo_float *colf);
+   int *ncolor, enzo_float *colslice, enzo_float *colls, enzo_float *colrs, enzo_float *colf,int *axis);
 
 extern "C" void FORTRAN_NAME(woc_flux_hll)
   (

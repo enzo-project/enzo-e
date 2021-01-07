@@ -24,10 +24,10 @@ c
      &     eslice, uslice, vslice, wslice,
      &     df, ef, uf, vf,
      &     wf, grslice, geslice, gef,
-#ifdef NEW_PPM
      &     ges,
-#endif      
-     &     colslice, colf, colls, colrs
+     &     colslice, colf, colls, colrs,
+     &     ierror,
+     &     ie_error_x,ie_error_y,ie_error_z,num_ie_error
      &     )
 c     
 c  CONTROL ROUTINE FOR Y-SWEEP DIRECT EULER VERSION OF PPM
@@ -115,7 +115,9 @@ c    calcdiss - Calculate dissiptation and flattening coefficients
 c
 c-----------------------------------------------------------------------
       implicit NONE
-c
+#define FORTRAN
+#include "fortran_types.h"
+c     
 c-----------------------------------------------------------------------
 c
 c  argument declarations
@@ -139,9 +141,7 @@ c
      &        windex(nsubgrids*6),geindex(nsubgrids*6),
      &        colindex(nsubgrids*6,ncolor)
       ENZO_REAL array(1), colorpt(1)
-#ifdef NEW_PPM
       integer iriemannfallback
-#endif      
 c
 c  define local slices (passed as temps)
 c
@@ -153,14 +153,15 @@ c
      &    diffcoef(jn,kn),     df(jn,kn),     ef(jn,kn),
      &          uf(jn,kn),     vf(jn,kn),     wf(jn,kn),
      &     gef(jn,kn),   gels(jn,kn),   gers(jn,kn)
-#ifdef NEW_PPM
       ENZO_REAL ges(jn,kn)
-#endif      
       ENZO_REAL dslice(jn,kn), eslice(jn,kn),grslice(jn,kn),
      &      uslice(jn,kn), vslice(jn,kn), wslice(jn,kn),
      &     geslice(jn,kn)
       ENZO_REAL colslice(jn,kn,ncolor),  colf(jn,kn,ncolor),
-     &        colls(jn,kn,ncolor), colrs(jn,kn,ncolor)
+     &     colls(jn,kn,ncolor), colrs(jn,kn,ncolor)
+      integer ierror
+      integer ie_error_x(*),ie_error_y(*),ie_error_z(*)
+      integer num_ie_error
 c
 c  parameters
 c
@@ -194,6 +195,24 @@ c
             uslice(j,k) = v(i,j,k)
             vslice(j,k) = w(i,j,k)
             wslice(j,k) = u(i,j,k)
+            if (dslice(j,k) < 0.0) then
+               print*, 'yeuler_sweep dslice ',i,j,k,dslice(j,k)
+               if (num_ie_error .ge. 0) then
+                  num_ie_error = num_ie_error + 1
+                  ie_error_x(num_ie_error) = i
+                  ie_error_y(num_ie_error) = j
+                  ie_error_z(num_ie_error) = k
+               endif
+            end if
+            if (eslice(j,k) < 0.0) then
+               print*, 'yeuler_sweep eslice ',i,j,k,eslice(j,k)
+               if (num_ie_error .ge. 0) then
+                  num_ie_error = num_ie_error + 1
+                  ie_error_x(num_ie_error) = i
+                  ie_error_y(num_ie_error) = j
+                  ie_error_z(num_ie_error) = k
+               endif
+            end if
          enddo
          if (gravity .eq. 1) then
             do j=1, jn
@@ -203,6 +222,15 @@ c
          if (idual .eq. 1) then
             do j=1, jn
                geslice(j,k) = ge(i,j,k)
+               if (geslice(j,k) < 0.0) then
+                  print*, 'yeuler_sweep geslice ',i,j,k,geslice(j,k)
+                  if (num_ie_error .ge. 0) then
+                     num_ie_error = num_ie_error + 1
+                     ie_error_x(num_ie_error) = i
+                     ie_error_y(num_ie_error) = j
+                     ie_error_z(num_ie_error) = k
+                  endif
+               end if
             enddo
          endif
          do ic=1, ncolor
@@ -217,32 +245,21 @@ c
 c  Compute the pressure on a slice
 c
       if (idual .eq. 1) then
-#ifdef NEW_PPM         
-         call pgas2d_dual_dev(
-#else
+         ierror = 2
          call pgas2d_dual(
-#endif         
      &        dslice, eslice, geslice, pslice, 
      &        uslice, vslice, wslice, eta1, eta2,
-     &        jn, kn, js-3, je+3, k1, k2, gamma, pmin)
+     &        jn, kn, js-3, je+3, k1, k2, gamma, pmin, ierror)
       else
-#ifdef NEW_PPM         
-         call pgas2d_dev(
-#else
          call pgas2d(
-#endif
      &        dslice, eslice, pslice, uslice, vslice, wslice,
-     &        jn, kn, js-3, je+3, k1, k2, gamma, pmin)
+     &        jn, kn, js-3, je+3, k1, k2, gamma, pmin, ierror)
       endif
 
 c  If requested, compute diffusion and slope flattening coefficients
 c
       if (idiff .ne. 0 .or. iflatten .ne. 0)
-#ifdef NEW_PPM         
-     &     call calcdiss_dev(
-#else
      &     call calcdiss(
-#endif      
      &     dslice, eslice, uslice, w, u, pslice, dy, dz, dx,
      &     jn, kn, in, js, je, k1, k2, i, nxz, ysweep,
      &     in, jn, kn, dt, gamma, idiff, iflatten,
@@ -251,42 +268,30 @@ c
 c
 c  Compute Eulerian left and right states at zone edges via interpolation
 c
-#ifdef NEW_PPM      
-      call inteuler_dev(
-#else
       call inteuler(
-#endif      
      &     dslice, pslice, gravity, grslice, geslice,
      &     uslice, vslice, wslice, dy, flatten,
      &     jn, kn, js, je, k1, k2, idual, eta1, eta2,
      &     isteepen, iflatten,
-#ifdef NEW_PPM      
      &     iconsrec, iposrec,
-#endif      
      &     dt, gamma, ipresfree,
      &     dls, drs, pls, prs, gels, gers,
      &     uls, urs, vls, vrs, wls, wrs,
-     &     ncolor, colslice, colls, colrs
+     &     ncolor, colslice, colls, colrs, ierror
      &     )
 c
 c  Compute (Lagrangian part of the) Riemann problem at each zone boundary
 c
-#ifdef NEW_PPM
-      call twoshock_dev(
-#else      
       call twoshock(
-#endif      
      &     dls, drs, pls, prs, uls, urs, 
      &     jn, kn, js, je+1, k1, k2, 
      &     dt, gamma, pmin, ipresfree,
      &     pbar, ubar, gravity, grslice, idual, eta1
      &     )
       
-#ifdef NEW_PPM
-
       iriemannfallback = 1
       
-      CALL flux_twoshock_dev
+      CALL flux_twoshock
      &     (dslice, eslice, geslice, uslice, vslice, wslice,
      &     dy, diffcoef, 
      &     jn,kn,
@@ -296,42 +301,27 @@ c
      &     dls, drs, pls, prs, gels, gers, uls, urs,
      &     vls, vrs, wls, wrs, pbar, ubar,
      &     df, ef, uf, vf, wf, gef, ges,
-     &     ncolor, colslice, colls, colrs, colf)
-#endif                                
+     &     ncolor, colslice, colls, colrs, colf,1)
 c
 c  Compute Eulerian fluxes and update zones-centered quantities
 c
-#ifdef NEW_PPM
-      call euler_dev   (
-#else      
       call euler   (
-#endif
      &     dslice, eslice, grslice, geslice,
      &     uslice, vslice, wslice, dy, diffcoef,
      &     jn, kn, js, je, k1, k2, dt, 
      &     gamma, idiff, gravity, idual, eta1, eta2,
-#ifdef NEW_PPM
      &     df, ef, uf, vf, wf, gef, ges,
      &     ncolor, colslice, colf, SmallRho)
-#else
-     &     dls, drs, pls, prs, gels, gers,
-     &     uls, urs, vls, vrs, wls, wrs,
-     &     pbar, ubar,
-     &     df, ef, uf, vf, wf, gef,
-     &     ncolor, colslice, colls, colrs, colf)
-#endif      
 c
 c  If necessary, recompute the pressure to correctly set ge and e
 c
-      if (idual .eq. 1)
-#ifdef NEW_PPM
-     &     call pgas2d_dual_dev
-#else
-     &     call pgas2d_dual
-#endif
+      if (idual .eq. 1) then
+         ierror = 20
+         call pgas2d_dual
      &     (dslice, eslice, geslice, pslice, 
      &     uslice, vslice, wslice, eta1, eta2,
-     &     jn, kn, js-3, je+3, k1, k2, gamma, pmin)
+     &        jn, kn, js-3, je+3, k1, k2, gamma, pmin, ierror)
+      endif
 c
 c  Check this slice against the list of subgrids 
 c     (all subgrid quantities are zero based)

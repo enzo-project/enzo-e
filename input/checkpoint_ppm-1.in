@@ -8,8 +8,7 @@ Mesh { root_blocks    = [1,1]; }
 include "input/adapt_slope.incl"
 
 Testing {
-    time_final = [0.00632976560208544,  # OLD_PPM
-                  0.00634160320623778]; # NEW_PPM
+    time_final = [0.00634171914417667];
    cycle_final = 20;
 }
 

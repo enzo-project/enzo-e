@@ -33,8 +33,8 @@ int MappingArray::procNum(int, const CkArrayIndex &idx) {
   int ix,iy,iz;
   in.array    (&ix,&iy,&iz);
 
-  int index = (ix + nx_*(iy + ny_*iz)) % CkNumPes();
-
+  int index = CkNumPes()*(ix + nx_*(iy + ny_*iz)) / (nx_*ny_*nz_);
+  
   return index;
 }
 

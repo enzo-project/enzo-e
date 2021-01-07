@@ -61,6 +61,18 @@ list is applied in the order specified.  Possible methods include:`
 the time step applied on top of any Field or Particle specific Courant
 safety factors.`
 
+flux_correct
+------------
+
+:Parameter:  :p:`Method` : :p:`flux_correct` : :p:`group`
+:Summary: :s:`Name of group of fields to apply flux correction to`
+:Type:    :t:`string`
+:Default: :d:`"conserved"`
+:Scope:     :z:`Cello`
+
+:e:`Flux correction must be applied to conserved fields in AMR simulations to maintain conserved quantities across mesh resolution jumps.  This parameter selects the group of fields to which the "flux_correct" method will be applied.`
+
+
 gravity
 -------
 

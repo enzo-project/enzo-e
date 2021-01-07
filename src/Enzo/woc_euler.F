@@ -76,6 +76,7 @@ c
 c-----------------------------------------------------------------------
 c
       implicit NONE
+#define FORTRAN
 #include "fortran_types.h"
 c
       INTG_PREC ijkn
@@ -168,7 +169,7 @@ c          endif
      &         (ef(i,j) - ef(i+1,j))) * dnuinv(i))
        enddo
 c
-c      Colour variables (note: colf already multiplied by dt)
+c      Color variables (note: colf already multiplied by dt)
 c
        do n=1,ncolor
           do i=i1, i2+1

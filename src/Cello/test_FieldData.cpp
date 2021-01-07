@@ -181,11 +181,11 @@ PARALLEL_MAIN_BEGIN
   v4 = (double *)      field_data->values(field_descr,i4);
   v5 = (long double *) field_data->values(field_descr,i5);
 
-  printf ("%s:%d v1 = %p\n",__FILE__,__LINE__,v1);
-  printf ("%s:%d v2 = %p\n",__FILE__,__LINE__,v2);
-  printf ("%s:%d v3 = %p\n",__FILE__,__LINE__,v3);
-  printf ("%s:%d v4 = %p\n",__FILE__,__LINE__,v4);
-  printf ("%s:%d v5 = %p\n",__FILE__,__LINE__,v5);
+  printf ("%s:%d v1 = %p\n",__FILE__,__LINE__,(void *)v1);
+  printf ("%s:%d v2 = %p\n",__FILE__,__LINE__,(void *)v2);
+  printf ("%s:%d v3 = %p\n",__FILE__,__LINE__,(void *)v3);
+  printf ("%s:%d v4 = %p\n",__FILE__,__LINE__,(void *)v4);
+  printf ("%s:%d v5 = %p\n",__FILE__,__LINE__,(void *)v5);
   
   unit_func("temporary values");
 
@@ -234,9 +234,9 @@ PARALLEL_MAIN_BEGIN
   size_t nb4 = (char *) v5 - (char *) v4;
 
   unit_assert (nb1 == sizeof (float) * nu1);
-  printf("nb2,nu2 = %d %d",nb2,sizeof(double)*nu2);
+  printf("nb2,nu2 = %lu %lu",nb2,sizeof(double)*nu2);
   unit_assert (nb2 == sizeof (double)* nu2);
-  printf("nb3,nu3 = %d %d",nb3,sizeof(double)*nu3);
+  printf("nb3,nu3 = %lu %lu",nb3,sizeof(double)*nu3);
   unit_assert (nb3 == sizeof (double)* nu3);
   unit_assert (nb4 == sizeof (double)* nu4);
 
