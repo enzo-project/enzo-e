@@ -224,8 +224,8 @@ void EnzoConstrainedTransport::compute_edge_efield
   EnzoPermutedCoordinates coord(dim);
   // determine components of j and k unit vectors:
   int j_x, j_y, j_z, k_x, k_y, k_z;
-  coord.j_unit_vector(j_x, j_y, j_z);
-  coord.k_unit_vector(k_x, k_y, k_z);
+  coord.j_unit_vector(j_z, j_y, j_x);
+  coord.k_unit_vector(k_z, k_y, k_x);
 
   // Initialize Cell-Centered E-fields
   EFlt3DArray Ec, Ec_jp1, Ec_kp1, Ec_jkp1;

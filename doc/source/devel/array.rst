@@ -164,7 +164,7 @@ Shallow copies are produced via ordinary assignment.
 
    int data[] = {0,1,2,3,4,5};
    CelloArray<int,2> a(data,2,3);
-   CelloArray<int,2> b = a; // b is now a shallow copy of arr
+   CelloArray<int,2> b = a; // b is now a shallow copy of a
    CelloArray<int,2> c(2,2); // c represents [[0,0],[0,0]]
    CelloArray<int,2> d = c; // d is now a shallow copy of c
    c = a; // c is now a shallow copy of a
@@ -179,10 +179,7 @@ To perform a deepcopy, assign the the results of the ``deepcopy`` method.
 
    int data[] = {0,1,2,3,4,5};
    CelloArray<int,2> a(data,2,3);
-   CelloArray<int,2> b = a; // b is now a shallow copy of arr
-   CelloArray<int,2> c(2,2); // c represents [[0,0],[0,0]]
-   CelloArray<int,2> d = c; // d is now a shallow copy of c
-   c = a; // c is now a shallow copy of a
+   CelloArray<int,2> e = a.deepcopy(); // e is now a deep copy of a
    
 Modifications to the contents of ``e`` will not be reflected in ``a``
 or ``data`` (and vice-versa)
@@ -420,7 +417,9 @@ This example illustrates how ``CelloArray`` simplifies the code
 required to copy elements between arrays. (We illustrate how one might
 write Nearest Neighbor reconstruction along the x-direction).
 
-This code assumes a mesh with shape ``(mz, my, mx)``. Suppose we have:
+This code assumes a mesh with shape ``(mz, my, mx)``. These are the
+dimensions of the entire mesh, including the ghost zones. Suppose we
+have:
 
   * An ``(mz,my,mx)`` array of cell-centered primitives ``w``
 

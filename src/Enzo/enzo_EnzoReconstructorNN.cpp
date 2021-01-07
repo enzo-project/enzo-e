@@ -24,7 +24,7 @@ void EnzoReconstructorNN::reconstruct_interface (Block *block,
   // determine components of i unit vector
   EnzoPermutedCoordinates coord(dim);
   int i_x, i_y, i_z;
-  coord.i_unit_vector(i_x,i_y,i_z);
+  coord.i_unit_vector(i_z,i_y,i_x);
 
   for (unsigned int group_ind=0; group_ind<group_names.size(); group_ind++){
 

@@ -402,11 +402,26 @@ private:
   void initialize_uniform_bfield_helper_(EFlt3DArray &bx, EFlt3DArray &by,
                                          EFlt3DArray &bz)
   {
+    // Handle them separately because we might be handling face-centered fields
     for (int iz = 0; iz<bx.shape(0); iz++){
-      for (int iy = 0; iy<by.shape(1); iy++){
-        for (int ix = 0; ix<bz.shape(2); ix++){
+      for (int iy = 0; iy<bx.shape(1); iy++){
+        for (int ix = 0; ix<bx.shape(2); ix++){
           bx(iz,iy,ix) = uniform_bfield_[0];
+        }
+      }
+    }
+
+    for (int iz = 0; iz<by.shape(0); iz++){
+      for (int iy = 0; iy<by.shape(1); iy++){
+        for (int ix = 0; ix<by.shape(2); ix++){
           by(iz,iy,ix) = uniform_bfield_[1];
+        }
+      }
+    }
+
+    for (int iz = 0; iz<bz.shape(0); iz++){
+      for (int iy = 0; iy<bz.shape(1); iy++){
+        for (int ix = 0; ix<bz.shape(2); ix++){
           bz(iz,iy,ix) = uniform_bfield_[2];
         }
       }

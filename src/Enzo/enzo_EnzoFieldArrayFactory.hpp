@@ -73,9 +73,18 @@ public:
   { return assigned_center_from_grouping(grouping, group_name, index, dim); }
 
   /// Read in field from Grouping of face-centered interface B-fields. The
-  /// returned view doesn't include face-centered values on the exterior of
-  /// the grid.
-  EFlt3DArray interior_bfieldi(Grouping &grouping, int dim);
+  /// returned view doesn't include face-centered values on the outermost
+  /// faces of the grid
+  ///
+  /// For some additional clarity, if a cell-centered field has N elements
+  /// along dimension `dim`, then there are N+1 values along that same
+  /// dimension of the interface bfield component that is also face-centered
+  /// along that component. The reason that it has more more entries than a
+  /// face-centered field is because it has more values on the outermost
+  /// (exterior) faces of the grid. This method returns the bfield without
+  /// the values on those faces. 
+  EFlt3DArray bfieldi_without_outermost_block_faces(Grouping &grouping,
+                                                    int dim);
 protected: // methods
 
   /// Helper function that reads in the field without applying stale depth

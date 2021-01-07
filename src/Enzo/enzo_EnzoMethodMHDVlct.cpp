@@ -644,7 +644,8 @@ void EnzoMethodMHDVlct::compute_flux_
   // interfaces (should probably be handled internally by reconstructor)
   EnzoFieldArrayFactory array_factory(block, cur_stale_depth);
   EFlt3DArray bfield, l_bfield,r_bfield;
-  bfield = array_factory.interior_bfieldi(cur_bfieldi_group, dim);
+  bfield = array_factory.bfieldi_without_outermost_block_faces
+    (cur_bfieldi_group, dim);
   l_bfield = array_factory.reconstructed_field(*reconstructable_group_l,
 					       "bfield", dim, dim);
   r_bfield = array_factory.reconstructed_field(*reconstructable_group_r,

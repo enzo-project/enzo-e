@@ -333,8 +333,11 @@ intp calc_index_(const std::size_t D, const intp offset,
 /// @return Returns false if the increment caused the indices[0] to be equal to
 ///     to shape[0]. Otherwise returns true. This is used to help signal when
 ///     to stop dynamically iterating over an array.
-inline bool increment_outer_indices_(std::size_t D, intp *indices, intp *shape){
+static inline bool increment_outer_indices_(std::size_t D, intp *indices,
+                                            intp *shape){
   std::size_t i = D-1;
+  ASSERT("increment_out_indices", "the dimension must be positive",
+         D>0);
   while (0 != (i--)){
     indices[i]+=1;
     if (indices[i] != shape[i]){

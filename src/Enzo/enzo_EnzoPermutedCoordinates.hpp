@@ -39,14 +39,14 @@ public: // interface
   inline int k_axis() const { return (i_axis_+2)%3; }
 
   /// calculates the components of the i, j, and k unit vectors
-  inline void i_unit_vector(int &i_x, int &i_y, int &i_z) const {
-    unit_vector_comp_(i_axis(), i_x, i_y, i_z);
+  inline void i_unit_vector(int &i_z, int &i_y, int &i_x) const {
+    unit_vector_comp_(i_axis(), i_z, i_y, i_x);
   }
-  inline void j_unit_vector(int &j_x, int &j_y, int &j_z) const {
-    unit_vector_comp_(j_axis(), j_x, j_y, j_z);
+  inline void j_unit_vector(int &j_z, int &j_y, int &j_x) const {
+    unit_vector_comp_(j_axis(), j_z, j_y, j_x);
   }
-  inline void k_unit_vector(int &k_x, int &k_y, int &k_z) const {
-    unit_vector_comp_(k_axis(), k_x, k_y, k_z);
+  inline void k_unit_vector(int &k_z, int &k_y, int &k_x) const {
+    unit_vector_comp_(k_axis(), k_z, k_y, k_x);
   }
 
   /// Returns the subarray of array using the offset start values indicated
@@ -88,7 +88,7 @@ public: // interface
 private:
 
   // helper_function
-  inline void unit_vector_comp_(int v_axis, int &v_i, int &v_j, int &v_k) const
+  inline void unit_vector_comp_(int v_axis, int &v_k, int &v_j, int &v_i) const
   {
     v_i = (v_axis == 0) ? 1 : 0;
     v_j = (v_axis == 1) ? 1 : 0;

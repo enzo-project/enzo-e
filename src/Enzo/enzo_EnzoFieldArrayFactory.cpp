@@ -105,7 +105,8 @@ EFlt3DArray EnzoFieldArrayFactory::assigned_center_from_grouping
 
 //----------------------------------------------------------------------
 
-EFlt3DArray EnzoFieldArrayFactory::interior_bfieldi(Grouping &grouping, int dim)
+EFlt3DArray EnzoFieldArrayFactory::bfieldi_without_outermost_block_faces
+(Grouping &grouping, int dim)
 {
   check_grouping_details_(grouping, "bfield", dim);
   EFlt3DArray t = full_field_from_name_(grouping.item("bfield",dim));
