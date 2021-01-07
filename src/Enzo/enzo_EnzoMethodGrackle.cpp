@@ -29,67 +29,7 @@ EnzoMethodGrackle::EnzoMethodGrackle
   // Gather list of fields that MUST be defined for this
   // method and check that they are permanent. If not,
   // define them.
-  EnzoMethodGrackle::define_required_grackle_fields();
-
-  /// Initialize default Refresh
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
-  Refresh * refresh = cello::refresh(ir_post_);
-  refresh->add_all_fields();
-
-  /// Define Grackle's internal data structures
-  time_grackle_data_initialized_ = ENZO_FLOAT_UNDEFINED;
-  this->initialize_grackle_chemistry_data(time);
-
-#endif /* CONFIG_USE_GRACKLE */
-}
-
-//----------------------------------------------------------------------
-
-void EnzoMethodGrackle::compute ( Block * block) throw()
-{
-
-  if (block->is_leaf()){
-
-  #ifndef CONFIG_USE_GRACKLE
-
-    ERROR("EnzoMethodGrackle::compute()",
-    "Trying to use method 'grackle' with "
-    "Grackle configuration turned off!");
-
-  #else /* CONFIG_USE_GRACKLE */
-
-    EnzoBlock * enzo_block = enzo::block(block);
-
-    // Start timer
-    Simulation * simulation = cello::simulation();
-    if (simulation)
-      simulation->performance()->start_region(perf_grackle,__FILE__,__LINE__);
-
-    this->compute_(enzo_block);
-
-    enzo_block->compute_done();
-
-    if (simulation)
-      simulation->performance()->stop_region(perf_grackle,__FILE__,__LINE__);
-  #endif
-  }
-
-  return;
-
-}
-
-#ifdef CONFIG_USE_GRACKLE
-
-void EnzoMethodGrackle::define_required_grackle_fields()
-{
-  // Gather list of fields that MUST be defined for this method and
-  // check that they are permanent. If not, define them.
-
-  // This has been split off from the constructor so that other methods that
-  // are initialized first and need knowledge of these fields at initialization
-  // (e.g. to set up a refresh object), can ensure that the fields are defined
-
-  if (!enzo::config()->method_grackle_use_grackle) {return;}
+  // ----- EnzoMethodGrackle::define_required_grackle_fields();
 
   FieldDescr * field_descr = cello::field_descr();
 
@@ -150,11 +90,143 @@ void EnzoMethodGrackle::define_required_grackle_fields()
 
   /// Define Grackle's internal data structures
   time_grackle_data_initialized_ = ENZO_FLOAT_UNDEFINED;
-  this->initialize_grackle_chemistry_data(time);
+  initialize_grackle_chemistry_data(time);
+
+#endif /* CONFIG_USE_GRACKLE */
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodGrackle::compute ( Block * block) throw()
+{
+
+  if (block->is_leaf()){
+
+  #ifndef CONFIG_USE_GRACKLE
+
+    ERROR("EnzoMethodGrackle::compute()",
+    "Trying to use method 'grackle' with "
+    "Grackle configuration turned off!");
+
+  #else /* CONFIG_USE_GRACKLE */
+
+    EnzoBlock * enzo_block = enzo::block(block);
+
+    // Start timer
+    Simulation * simulation = cello::simulation();
+    if (simulation)
+      simulation->performance()->start_region(perf_grackle,__FILE__,__LINE__);
+
+    this->compute_(enzo_block);
+
+    enzo_block->compute_done();
+
+    if (simulation)
+      simulation->performance()->stop_region(perf_grackle,__FILE__,__LINE__);
+  #endif
+  }
+
+  return;
 
 }
-#endif /* CONFIG_USE_GRACKLE */
 
+#ifdef CONFIG_USE_GRACKLE
+
+void EnzoMethodGrackle::define_required_grackle_fields()
+{
+  // Gather list of fields that MUST be defined for this method and
+  // check that they are permanent. If not, define them.
+
+  // This has been split off from the constructor so that other methods that
+  // are initialized first and need knowledge of these fields at initialization
+  // (e.g. to set up a refresh object), can ensure that the fields are defined
+
+  if (!enzo::config()->method_grackle_use_grackle) {return;}
+
+  FieldDescr * field_descr = cello::field_descr();
+  Config   * config  = (Config *) cello::config();  
+
+  // special container for ensuring color fields are properly grouped
+  const int rank = cello::rank();
+  std::vector<std::string> color_fields;
+  chemistry_data * grackle_chemistry =
+      enzo::config()->method_grackle_chemistry;
+
+  std::vector<std::string> required_fields = std::vector<std::string> {"density","internal_energy",
+                                                     "total_energy"};
+  if (rank>=0) required_fields.push_back("velocity_x");
+  if (rank>=1) required_fields.push_back("velocity_y");
+  if (rank>=2) required_fields.push_back("velocity_z");
+
+  if (grackle_chemistry->metal_cooling > 0){
+    required_fields.push_back("metal_density");
+    color_fields.push_back("metal_density");
+  }
+
+  // Define primordial chemistry fields
+  if (grackle_chemistry->primordial_chemistry > 0){
+    std::vector<std::string> pc1_fields {"HI_density","HII_density",
+                                         "HeI_density","HeII_density","HeIII_density",
+                                         "e_density"};
+
+    required_fields.insert(required_fields.end(), pc1_fields.begin(), pc1_fields.end());
+    color_fields.insert(color_fields.end(), pc1_fields.begin(), pc1_fields.end());
+
+    if(grackle_chemistry->primordial_chemistry > 1){
+
+      std::vector<std::string> pc2_fields {"HM_density", "H2I_density", "H2II_density"};
+      required_fields.insert(required_fields.end(), pc2_fields.begin(), pc2_fields.end());
+      color_fields.insert(color_fields.end(), pc2_fields.begin(), pc2_fields.end());
+
+      if(grackle_chemistry->primordial_chemistry > 2){
+        std::vector<std::string> pc3_fields {"DI_density", "DII_density", "HDI_density"};
+        required_fields.insert(required_fields.end(), pc3_fields.begin(), pc3_fields.end());
+        color_fields.insert(color_fields.end(), pc3_fields.begin(), pc3_fields.end());
+      } // endif primordial_chemistry > 2
+    } // endif primordial_chemistry > 1
+  } // endif primordial chemistry is on
+
+  if (grackle_chemistry->use_specific_heating_rate)
+      required_fields.push_back("specific_heating_rate");
+
+  if (grackle_chemistry->use_volumetric_heating_rate)
+      required_fields.push_back("volumetric_heating_rate");
+
+  // Define fields and assign fields to correct
+  //this->define_fields();
+  bool added_fields = false;
+
+  for (int ifield = 0; ifield < required_fields.size(); ifield++){
+    std::string field = required_fields[ifield];
+    if( ! field_descr->is_field( field )){
+      int id_field = field_descr->insert_permanent( field );
+
+      field_descr->set_precision(id_field, config->field_precision);
+      added_fields = true;
+    }
+  }
+
+  //this->define_group_fields(color_fields, "color");
+  for (int ifield = 0; ifield < color_fields.size(); ifield++){
+
+    // Maybe just throw error here to keep this fully separate from above
+    if( ! field_descr->is_field( required_fields[ifield] )){
+      int field_id = field_descr->insert_permanent( required_fields[ifield] );
+      field_descr->set_precision(field_id, config->field_precision);
+      added_fields = true;
+    }
+
+    if (!(field_descr->groups()->is_in( color_fields[ifield], "color")) ){
+      field_descr->groups()->add( color_fields[ifield], "color");
+    }
+
+  }
+
+  // Need to reconstruct history if new fields added
+  if (added_fields) field_descr->reset_history(config->field_history);
+
+
+}
 
 //----------------------------------------------------------------------
 
