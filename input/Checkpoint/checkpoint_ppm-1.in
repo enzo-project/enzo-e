@@ -1,0 +1,40 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/PPM/ppm.incl"
+
+Mesh { root_blocks    = [1,1]; }
+
+include "input/Adapt/adapt_slope.incl"
+
+Testing {
+    time_final = [0.00634171914417667];
+   cycle_final = 20;
+}
+
+Stopping { cycle = 20; }
+
+Output {
+
+  # NOTE: checkpoint must come first as workaround for bug #55
+
+  list = ["checkpoint","density"];
+
+  density {
+     name = ["checkpoint_ppm-1-%06d.png", "cycle"];
+  }
+
+  checkpoint {
+
+     type  = "checkpoint";
+     dir   = ["checkpoint_ppm-1-%d","cycle"];
+     schedule { var = "cycle"; list=[10,20];}
+  }
+}
+
+Restart {
+
+   # file to read on restart only
+
+   file = "input/Checkpoint/restart.incl";
+}

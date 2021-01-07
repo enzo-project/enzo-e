@@ -168,9 +168,9 @@ if [ $target == "test" ]; then
 
    # count failures, incompletes, and passes
 
-   grep "^ FAIL"       $dir/*unit > $dir/fail.$configure
-   grep "^ incomplete" $dir/*unit > $dir/incomplete.$configure
-   grep "^ pass"       $dir/*unit > $dir/pass.$configure
+   grep "^ FAIL"       $dir/*/*unit > $dir/fail.$configure
+   grep "^ incomplete" $dir/*/*unit > $dir/incomplete.$configure
+   grep "^ pass"       $dir/*/*unit > $dir/pass.$configure
 
    f=`wc -l < $dir/fail.$configure`
    i=`wc -l < $dir/incomplete.$configure`
@@ -235,9 +235,9 @@ if [ $target == "test" ]; then
     file_started=test/runs_started.$configure
     file_completed=test/runs_completed.$configure
 
-    ls test/test_*.unit                   > $file_attempted
-    grep -l "BEGIN" test/test_*.unit      > $file_started
-    grep -l "END CELLO"  test/test_*.unit > $file_completed
+    ls test/*/test_*.unit                   > $file_attempted
+    grep -l "BEGIN" test/*/test_*.unit      > $file_started
+    grep -l "END CELLO"  test/*/test_*.unit > $file_completed
 
 
     count_attempted=`cat $file_attempted | wc -l `

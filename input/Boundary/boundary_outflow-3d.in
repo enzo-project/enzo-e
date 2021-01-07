@@ -1,0 +1,9 @@
+include "input/Boundary/sphere.incl"
+
+Boundary { type = "outflow"; }
+
+Output { 
+   cycle_step {  
+      name = ["boundary_outflow-3d-%04d.png","cycle"]; 
+   } 
+}

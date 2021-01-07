@@ -1,0 +1,31 @@
+Import('env')
+Import('serial_run')
+Import('parallel_run')
+Import('ip_charm')
+Import('bin_path')
+Import('test_path')
+
+
+#--------------------------------------------------
+# Defines
+#--------------------------------------------------
+
+env['CPIN'] = 'touch parameters.out; mv parameters.out ${TARGET}.in
+env['RMIN'] = 'rm -f parameters.out'
+
+date_cmd = 'echo $TARGET > test/STATUS; echo "------------------"; date +"%Y-%m-%d %H:%M:%S";'
+
+run_file_hdf5 = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunFileHdf5' : run_file_hdf5 })
+env_mv_file_hdf5 = env.Clone(COPY = 'mkdir -p ' + test_path + '/DiskComponent/FileHdf5; `ls *.png *.h5` ' + test_path + '/DiskComponent/FileHdf5')
+
+#--------------------------------------------------
+#
+#--------------------------------------------------
+
+balance_file_hdf5 = env_mv_file_hdf5.RunFileHdf5(
+    'test_FileHdf5.unit',
+    bin_path + '/test_FileHdf5')
+
+Clean(balance_file_hdf5,
+     '#test_disk.h5')

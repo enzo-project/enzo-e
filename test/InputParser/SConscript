@@ -1,0 +1,94 @@
+Import('env')
+Import('parallel_run')
+Import('serial_run')
+Import('ip_charm')
+
+Import('bin_path')
+Import('test_path')
+
+#----------------------------------------------------------
+#defines
+#----------------------------------------------------------
+
+env['CPIN'] = 'touch parameters.out; mv parameters.out ${TARGET}.in'
+env['RMIN'] = 'rm -f parameters.out'
+
+date_cmd = 'echo $TARGET > test/STATUS; echo "---------------------"; date +"%Y-%m-%d %H:%M:%S";'
+
+run_parse_groups = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunParseGroups' : run_parse_groups } )
+
+
+run_parse_integer = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunParseInteger' : run_parse_integer } )
+
+
+run_parse_list = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunParseList' : run_parse_list } )
+
+
+run_parse_logical = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunParseLogical' : run_parse_logical } )
+
+
+run_parse_scalar = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunParseScalar' : run_parse_scalar } )
+
+
+run_parse_include = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunParseInclude' : run_parse_include } )
+
+
+run_parse_implosion = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunParseImplosion' : run_parse_implosion } )
+env_mv_implosion = env.Clone(COPY = 'mkdir -p ' + test_path + '/InputParser/ParseImplosion; mv `ls *.png *.h5` ' + test_path + '/InputParser/ParseImplosion')
+
+
+
+
+
+#-------------------------------------------------------------
+#load balancing
+#-------------------------------------------------------------
+
+
+env.RunParseGroups (
+     'test_parse_groups.unit',
+     bin_path + '/test_Parse',
+     ARGS='input/Parse/parse_groups.in')
+
+env.RunParseInteger (
+     'test_parse_integer.unit',
+     bin_path + '/test_Parse',
+     ARGS='input/Parse/parse_integer.in')
+
+
+env.RunParseList (
+     'test_parse_list.unit',
+     bin_path + '/test_Parse',
+     ARGS='input/Parse/parse_list.in')
+
+env.RunParseLogical (
+     'test_parse_logical.unit',
+     bin_path + '/test_Parse',
+     ARGS='input/Parse/parse_logical.in')
+
+env.RunParseScalar (
+     'test_parse_scalar.unit',
+     bin_path + '/test_Parse',
+     ARGS='input/Parse/parse_scalar.in')
+
+env.RunParseInclude (
+     'test_parse_include.unit',
+     bin_path + '/test_Parse',
+     ARGS='input/Parse/parse_include.in')
+
+parse_implosion = env.RunParseImplosion (
+     'test_parse_implosion.unit',
+     bin_path + '/test_Parse',
+     ARGS='input/Hydro/test_implosion.in')
+
+
+
+
+
