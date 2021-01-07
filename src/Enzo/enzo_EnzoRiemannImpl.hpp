@@ -216,11 +216,6 @@ protected: //attributes
   /// Field categories of each quantity in passive_integrable_groups_
   std::vector<FieldCat> passive_integrable_categories_;
 
-  // TODO: Remove the following attribute. This is merely a stop-gap solution
-  //       to support the use of EnzoRiemannHLLC with VL+CT (in the future, it
-  //       will be possible to run CL integrator with magnetic fields).
-  /// Indicates whether the bfields should be forced to zero
-  bool force_bfield_fluxes_to_zero_;
 };
 
 //----------------------------------------------------------------------
@@ -264,8 +259,6 @@ EnzoRiemannImpl<ImplFunctor>::EnzoRiemannImpl
 		      group) != integrable_groups.end());
   }
 
-  force_bfield_fluxes_to_zero_ = false;
-
   // Check that all quantities in integrable_groups are in lut_groups or in
   // EnzoRiemannImpl<ImplFunctor>::PassiveFallbackAdvectionQuantities
   for (std::string group : integrable_groups){
@@ -277,10 +270,9 @@ EnzoRiemannImpl<ImplFunctor>::EnzoRiemannImpl
 			 group) != PassiveFallbackAdvectionQuantities.end()){
       passive_integrable_groups_.push_back(group);
     } else if (group == "bfield") {
-      WARNING("EnzoRiemannImpl",
-              "This solver isn't equipped to handle bfields. Their fluxes "
-              "will all be set to 0.");
-      force_bfield_fluxes_to_zero_ = true;
+      ERROR("EnzoRiemannImpl",
+            "This solver isn't equipped to handle bfields. Their fluxes "
+            "will all be set to 0.");
     } else {
       ERROR1("EnzoRiemannImpl", "can't handle the \"%s\" integrable group",
 	     group.c_str());
@@ -309,27 +301,6 @@ void EnzoRiemannImpl<ImplFunctor>::pup (PUP::er &p)
   p|passive_scalar_groups_;
   p|passive_integrable_groups_;
   p|passive_integrable_categories_;
-  p|force_bfield_fluxes_to_zero_;
-}
-
-//----------------------------------------------------------------------
-
-inline void set_bfield_fluxes_to_zero_(EnzoFieldArrayFactory array_factory,
-                                       Grouping &flux_group) noexcept
-{
-  int num_fields = flux_group.size("bfield");
-  for (int field_ind=0; field_ind<num_fields; field_ind++){
-    EFlt3DArray bfield_flux = array_factory.from_grouping(flux_group, "bfield",
-                                                          field_ind);
-    for (int iz=0; iz<bfield_flux.shape(0); iz++) {
-      for (int iy=0; iy<bfield_flux.shape(1); iy++) {
-        for (int ix=0; ix<bfield_flux.shape(2); ix++) {
-          bfield_flux(iz,iy,ix) = 0.;
-        }
-      }
-    }
-
-  }
 }
 
 //----------------------------------------------------------------------
@@ -436,12 +407,6 @@ void EnzoRiemannImpl<ImplFunctor>::solve
     //   - It would probably be better to handle this separately from the
     //     Riemann Solver since we already precompute L & R conserved
     //     AND it doesn't require wavespeed information.
-  } else {
-    // TODO: finish refactoring the VL+CT method so it can be ran entirely
-    //        without magnetic fields (so that we can remove the following):
-    if (force_bfield_fluxes_to_zero_){
-      set_bfield_fluxes_to_zero_(array_factory, flux_group);
-    }
   }
 }
 

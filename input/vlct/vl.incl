@@ -1,0 +1,90 @@
+# For VL integrator test problems
+# Author: Matthew Abruzzo (matthewabruzzo@gmail.com)
+
+   Method {
+      list = ["mhd_vlct"];
+      mhd_vlct{
+        courant = 0.4;
+
+        # options include "no_bfield" and "constrained_transport"
+        mhd_choice = "no_bfield";
+
+        # default is hlle. Options are hll, hlle, hllc, and hlld
+        riemann_solver = "hllc";
+
+	# Reconstruction algorithms choices are:
+	# for full time step. Options are:
+        #    - "nn" Nearest Neighbor
+        #    - "plm"/"plm_enzo" Piecewise Linear Method with Enzo's slope
+	#      limiter. The "theta_limiter" value affects the diffusiveness
+	#      of the limiter. 
+	#    - "plm_athena" Piecewise Linear method with Athena's slope limiter
+
+	# Reconstructor algorithm for half time step. (default is "nn")
+        half_dt_reconstruct_method = "nn";
+
+	# Reconstructor algorithm for full time step (default is "plm")
+        full_dt_reconstruct_method = "plm";
+
+	# modifies the slope enzo slope limiter used in piecewise linear
+	# reconstruction. If "plm" or "plm_enzo" is not used, then this
+	# parameter is meainingless. This should have a value in the range
+	# [1.,2.]. A value of 1. is most dissipative and is the same as the
+	# minmod limiter. A value of 2. is least dissipative and is the same as
+	# the MC limiter. The default value is 1.5.
+	theta_limiter = 2.;
+
+        # density floor
+        density_floor = 1.e-200;
+
+        # pressure floor
+        pressure_floor = 1.e-200;
+	};
+   }
+
+   Field {
+      # The VL method always uses the following fields:
+      #    - velocity_x/y/z
+      #    - (specific) total_energy
+      #    - pressure (this is a field used to temporarily write data)
+      # When the dual energy formalism is in use, it also requires:
+      #    - (specific) internal_energy
+      # When using VL+CT (i.e. mhd_choice = "constrained_transport";), the
+      # integrator further requires:
+      #    - bfieldi_x/y/z (The interface magnetic fields -- aka longitudinal.
+      #      The x/y/z component is the only component tracked at the faces
+      #      between cells along the x/y/z component)
+      #    - bfield_x/y/z (the cell-centered magenetic fields. Each component
+      #      is the average value of the corresponding interface values)
+      list = ["density", "velocity_x", "velocity_y", "velocity_z",
+	      "total_energy", "pressure"];
+
+      courant=0.4;
+      gamma = 1.6666666666666667;
+
+      # The VL method reconstructs interface values (to compute fluxes) twice
+      # per timestep. Can perform nearest-neighbor or PLM reconstruction. Each
+      # time a method is used, it requires a certain number of ghost zones:
+      # 1. Nearest-neighbor requires 1 ghost zone
+      # 2. PLM requires 2 ghost zones
+      # It's standard to use nearest-neighbor + PLM (requires 3 ghost zones)
+      ghost_depth = 3;
+      padding = 0;
+      alignment = 8;
+   }
+
+   Group {
+      list = ["derived"];
+      derived {
+         field_list = ["pressure"];
+      }
+   }
+
+   Output {
+      list = ["data"];
+      data {
+	 type = "data";
+	 field_list = ["density", "velocity_x", "velocity_y", "velocity_z",
+                       "pressure", "total_energy"];
+      };
+   }

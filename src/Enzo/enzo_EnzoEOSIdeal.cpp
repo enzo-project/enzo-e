@@ -76,7 +76,11 @@ void check_recon_integ_overlap_(Grouping &reconstructable_group,
 {
   // We assume that the following groups are represented by the same fields in
   // integrable and reconstructable
-  std::vector<std::string> common_groups = {"density", "velocity", "bfield"};
+  std::vector<std::string> common_groups = {"density", "velocity"};
+  if (integrable_group.size("bfield") > 0 ||
+      reconstructable_group.size("bfield") > 0){
+    common_groups.push_back("bfield");
+  }
 
   // we also expect overlap with the passive scalars
   std::vector<std::string> scalar_groups =
@@ -121,6 +125,7 @@ void EnzoEOSIdeal::integrable_from_reconstructable
   }
 
   const bool idual = this->uses_dual_energy_formalism();
+  const bool mag   = reconstructable_group.size("bfield") > 0;
   // Confirm that the expected fields (e.g. density, vx, vy, vz, bx, by, bz)
   // are the same in reconstructable_group and integrable_group 
   check_recon_integ_overlap_(reconstructable_group, integrable_group,
@@ -139,9 +144,12 @@ void EnzoEOSIdeal::integrable_from_reconstructable
   vz = retrieve_field_(array_factory, recon_group, "velocity", 2, rec_ax);
   pressure = retrieve_field_(array_factory, recon_group, "pressure", 0,
 			     rec_ax);
-  bx = retrieve_field_(array_factory, recon_group, "bfield", 0, rec_ax);
-  by = retrieve_field_(array_factory, recon_group, "bfield", 1, rec_ax);
-  bz = retrieve_field_(array_factory, recon_group, "bfield", 2, rec_ax);
+
+  if (mag){
+    bx = retrieve_field_(array_factory, recon_group, "bfield", 0, rec_ax);
+    by = retrieve_field_(array_factory, recon_group, "bfield", 1, rec_ax);
+    bz = retrieve_field_(array_factory, recon_group, "bfield", 2, rec_ax);
+  }
 
   EFlt3DArray eint, etot;
   if (idual){
@@ -160,15 +168,19 @@ void EnzoEOSIdeal::integrable_from_reconstructable
 	enzo_float v2 = (vx(iz,iy,ix) * vx(iz,iy,ix) +
 			 vy(iz,iy,ix) * vy(iz,iy,ix) +
 			 vz(iz,iy,ix) * vz(iz,iy,ix));
-	enzo_float b2 = (bx(iz,iy,ix) * bx(iz,iy,ix) +
-			 by(iz,iy,ix) * by(iz,iy,ix) +
-			 bz(iz,iy,ix) * bz(iz,iy,ix));
 	enzo_float inv_rho = 1./density(iz,iy,ix);
 	enzo_float eint_val = pressure(iz,iy,ix) * inv_gm1 * inv_rho;
 	if (idual){
 	  eint(iz,iy,ix) = eint_val;
 	}
-	etot(iz,iy,ix) = eint_val + (0.5 * v2) + (0.5 * b2 * inv_rho);
+        enzo_float etot_val = eint_val + (0.5 * v2);
+        if (mag){
+          enzo_float b2 = (bx(iz,iy,ix) * bx(iz,iy,ix) +
+                           by(iz,iy,ix) * by(iz,iy,ix) +
+                           bz(iz,iy,ix) * bz(iz,iy,ix));
+          etot_val += (0.5 * b2 * inv_rho);
+        }
+        etot(iz,iy,ix) = etot_val;
       }
     }
   }
@@ -203,6 +215,7 @@ void EnzoEOSIdeal::pressure_from_integrable(Block *block,
   }
 
   const bool idual = this->uses_dual_energy_formalism();
+  const bool mag = integrable_group.size("bfield") > 0;
 
   EnzoFieldArrayFactory array_factory(block, stale_depth);
   EFlt3DArray density, vx, vy, vz, eint, etot, bx, by, bz, pressure;
@@ -215,9 +228,11 @@ void EnzoEOSIdeal::pressure_from_integrable(Block *block,
     vx = array_factory.from_grouping(integrable_group, "velocity", 0);
     vy = array_factory.from_grouping(integrable_group, "velocity", 1);
     vz = array_factory.from_grouping(integrable_group, "velocity", 2);
-    bx = array_factory.from_grouping(integrable_group, "bfield", 0);
-    by = array_factory.from_grouping(integrable_group, "bfield", 1);
-    bz = array_factory.from_grouping(integrable_group, "bfield", 2);
+    if (mag){
+      bx = array_factory.from_grouping(integrable_group, "bfield", 0);
+      by = array_factory.from_grouping(integrable_group, "bfield", 1);
+      bz = array_factory.from_grouping(integrable_group, "bfield", 2);
+    }
   }
 
   pressure = array_factory.from_name(pressure_name);
@@ -230,14 +245,17 @@ void EnzoEOSIdeal::pressure_from_integrable(Block *block,
 	if (idual){
 	  pressure(iz,iy,ix) = gm1 * density(iz,iy,ix) * eint(iz,iy,ix);
 	} else {
-	  enzo_float b2 = (bx(iz,iy,ix) * bx(iz,iy,ix) +
-			   by(iz,iy,ix) * by(iz,iy,ix) +
-			   bz(iz,iy,ix) * bz(iz,iy,ix));
-	  enzo_float v2 = (vx(iz,iy,ix) * vx(iz,iy,ix) +
+          enzo_float v2 = (vx(iz,iy,ix) * vx(iz,iy,ix) +
 			   vy(iz,iy,ix) * vy(iz,iy,ix) +
 			   vz(iz,iy,ix) * vz(iz,iy,ix));
-	  pressure(iz,iy,ix) = 
-	    gm1 * ((etot(iz,iy,ix) - 0.5 * v2) * density(iz,iy,ix) - 0.5 * b2);
+          enzo_float temp = (etot(iz,iy,ix) - 0.5 * v2) * density(iz,iy,ix);
+          if (mag){
+            enzo_float b2 = (bx(iz,iy,ix) * bx(iz,iy,ix) +
+                             by(iz,iy,ix) * by(iz,iy,ix) +
+                             bz(iz,iy,ix) * bz(iz,iy,ix));
+            temp -= 0.5*b2;
+          }
+          pressure(iz,iy,ix) = gm1 * temp;
 	}
 
       }
@@ -295,6 +313,7 @@ void EnzoEOSIdeal::apply_floor_to_energy_and_sync(Block *block,
   }
 
   const bool idual = this->uses_dual_energy_formalism();
+  const bool mag = integrable_group.size("bfield");
   // in hydro_rk, eta was set equal to eta1 (it didn't use eta2 at all)
   const double eta = dual_energy_formalism_eta_;
 
@@ -310,9 +329,11 @@ void EnzoEOSIdeal::apply_floor_to_energy_and_sync(Block *block,
   if (idual){
     eint = array_factory.from_grouping(integrable_group, "internal_energy", 0);
   }
-  bx = array_factory.from_grouping(integrable_group, "bfield", 0);
-  by = array_factory.from_grouping(integrable_group, "bfield", 1);
-  bz = array_factory.from_grouping(integrable_group, "bfield", 2);
+  if (mag){
+    bx = array_factory.from_grouping(integrable_group, "bfield", 0);
+    by = array_factory.from_grouping(integrable_group, "bfield", 1);
+    bz = array_factory.from_grouping(integrable_group, "bfield", 2);
+  }
 
   float ggm1 = get_gamma()*(get_gamma() - 1.);
   enzo_float pressure_floor = get_pressure_floor();
@@ -335,14 +356,17 @@ void EnzoEOSIdeal::apply_floor_to_energy_and_sync(Block *block,
 	enzo_float v2 = (vx(iz,iy,ix) * vx(iz,iy,ix) +
 			 vy(iz,iy,ix) * vy(iz,iy,ix) +
 			 vz(iz,iy,ix) * vz(iz,iy,ix));
-	enzo_float b2 = (bx(iz,iy,ix) * bx(iz,iy,ix) +
-			 by(iz,iy,ix) * by(iz,iy,ix) +
-			 bz(iz,iy,ix) * bz(iz,iy,ix));
-	enzo_float kinetic = 0.5*v2;
-	enzo_float magnetic = 0.5 * b2 *inv_rho;
+        enzo_float non_thermal_e =  0.5*v2;
+        enzo_float b2 = 0;
+        if (mag){
+          b2 = (bx(iz,iy,ix) * bx(iz,iy,ix) +
+                by(iz,iy,ix) * by(iz,iy,ix) +
+                bz(iz,iy,ix) * bz(iz,iy,ix));
+          non_thermal_e += (0.5 * b2 *inv_rho);
+        }
 
 	if (idual){
-	  enzo_float eint_1 = etot(iz,iy,ix) - kinetic - magnetic;
+	  enzo_float eint_1 = etot(iz,iy,ix) - non_thermal_e;
 	  enzo_float cur_eint = eint(iz,iy,ix);
 
 	  // compute cs^2 with estimate of eint from etot
@@ -358,10 +382,10 @@ void EnzoEOSIdeal::apply_floor_to_energy_and_sync(Block *block,
 	  cur_eint = EnzoEquationOfState::apply_floor(cur_eint, eint_floor);
 
 	  eint(iz,iy,ix) = cur_eint;
-	  etot(iz,iy,ix) = cur_eint + kinetic + magnetic;
+	  etot(iz,iy,ix) = cur_eint + non_thermal_e;
 	} else {
 
-	  enzo_float etot_floor = eint_floor + kinetic + magnetic;
+	  enzo_float etot_floor = eint_floor + non_thermal_e;
 	  etot(iz,iy,ix) = EnzoEquationOfState::apply_floor(etot(iz,iy,ix),
 							    etot_floor);
 	}

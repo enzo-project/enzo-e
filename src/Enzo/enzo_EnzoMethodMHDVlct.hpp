@@ -94,6 +94,16 @@ class EnzoMethodMHDVlct : public Method {
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Encapsulate VL + CT MHD method
 
+  /// This is defined within the scope of EnzoMethodMHDVlct to avoid polluting
+  /// the global namespace
+  enum bfield_choice {
+    no_bfield = 0,         // pure hydrodynamics
+    unsafe_const_uniform,  // an unsafe mode where bfields are assumed to be
+                           // const (no interface bfields or CT). This is
+                           // provided primarily for debugging)
+    constrained_transport  // constrained transport (include interface bfields)
+  };
+
 public: // interface
 
   /// Create a new EnzoMethodMHDVlct object
@@ -103,6 +113,7 @@ public: // interface
 		    double gamma, double theta_limiter,
 		    double density_floor,
 		    double pressure_floor,
+		    std::string mhd_choice,
 		    bool dual_energy_formalism,
 		    double dual_energy_formalism_eta);
 
@@ -113,12 +124,12 @@ public: // interface
   EnzoMethodMHDVlct (CkMigrateMessage *m)
     : Method (m),
       primitive_group_(nullptr),
-      bfieldi_group_(nullptr),
       eos_(nullptr),
       half_dt_recon_(nullptr),
       full_dt_recon_(nullptr),
       riemann_solver_(nullptr),
       integrable_updater_(nullptr),
+      mhd_choice_(bfield_choice::no_bfield),
       reconstructable_group_names_(),
       integrable_group_names_(),
       passive_group_names_()
@@ -140,6 +151,9 @@ public: // interface
   virtual double timestep ( Block * block) const throw();
 
 protected: // methods
+
+  /// returns the bfield_choice enum that matches the input string
+  bfield_choice parse_bfield_choice_(std::string choice) const noexcept;
 
   /// Determines the quantities from (FIELD_TABLE) to be reconstructed and
   /// integrated and a list of group names that may or may not include passive
@@ -176,7 +190,7 @@ protected: // methods
   /// the ghost depths given the reconstructors
   ///
   /// @param block used to determine the current mesh size and ghost depth
-  void check_mesh_and_ghost_size_(Block *block);
+  void check_mesh_and_ghost_size_(Block *block) const;
 
   /// Converts conservative passive scalars (which are originally densities)
   /// to specific form (basically just divide by density)
@@ -264,13 +278,13 @@ protected: // methods
   /// and calculates any relevant source terms.
   void compute_flux_(Block *block, int dim, double dt,
 		     Grouping &reconstructable_group,
-		     Grouping &cur_bfieldi_group,
 		     Grouping &priml_group, Grouping &primr_group,
 		     std::string pressure_name_l,  std::string pressure_name_r,
-		     Grouping &flux_group, Grouping &weight_group,
-		     Grouping &dUcons_group,
+		     Grouping &flux_group, Grouping &dUcons_group,
 		     std::string interface_velocity_name,
-		     EnzoReconstructor &reconstructor, int stale_depth);
+		     EnzoReconstructor &reconstructor,
+		     EnzoConstrainedTransport *ct_handler,
+		     int stale_depth);
 
   /// Allocate temporary fields needed for scratch space and store their names
   /// in the corresponding groupings or return the names. Also allocates all
@@ -308,29 +322,9 @@ protected: // methods
   ///     advected scalars. If CT is used, this grouping won't have space to
   ///     store changes in the magnetic fields (that update is handled
   ///     separately).
-  /// @param efield_group Grouping of temporary edge-centered fields where the
-  ///     calculated electric fields get stored. Upon initialization, this will
-  ///     have one group called "efield". The group will store temporary fields
-  ///     to store the electric field along the x, y, and z components. The
-  ///     temporary field will be cell centered along the dimension of the
-  ///     component and face-centered along the other components, excluding
-  ///     exterior faces of the mesh (e.g. The x-component will be
-  ///     cell-centered along the x-direction, but face-centered along the y-
-  ///     and z- axes)
-  /// @param center_efield_name will be set equal to the names of the temporary
-  ///     fields where a component of cell-centered E-fields will be
-  ///     temporarily stored. This field will get reused for each dimension.
-  /// @param weight_group will hold temporary fields inside of a single group
-  ///     called "weight". "weight" holds three fields, one for each spatial
-  ///     direction. The weight field for a given direction is face-centered
-  ///     along that direction (but the field exclude exterior faces of the
-  ///     grid) and keeps track of the upwind direction.
   /// @param temp_primitive_group will hold temporary fields identical to all
   ///     the fields held by primitive_group_. Basically these fields hold the
   ///     values computed at the half time-step
-  /// @param temp_bfieldi_group will hold temporary fields identical to all
-  ///     the fields held by bfieldi_group_. These will hold the values of the
-  ///     face-centered fields computed at the half time-step
   void allocate_temp_fields_(Block *block,
 			     Grouping &priml_group,
 			     Grouping &primr_group,
@@ -341,11 +335,7 @@ protected: // methods
 			     Grouping &yflux_group,
 			     Grouping &zflux_group,
 			     Grouping &dUcons_group,
-			     Grouping &efield_group,
-			     std::string &center_efield_name,
-			     Grouping &weight_group,
-			     Grouping &temp_primitive_group,
-			     Grouping &temp_bfieldi_group);
+			     Grouping &temp_primitive_group);
 
   /// Deallocates the temporary fields used for scratch space
   void deallocate_temp_fields_(Block *block, Grouping &priml_group,
@@ -357,11 +347,7 @@ protected: // methods
 			       Grouping &yflux_group,
 			       Grouping &zflux_group,
 			       Grouping &dUcons_group,
-			       Grouping &efield_group,
-			       std::string center_efield_name,
-			       Grouping &weight_group,
-			       Grouping &temp_primitive_group,
-			       Grouping &temp_bfieldi_group);
+			       Grouping &temp_primitive_group);
 
 protected: // attributes
 
@@ -375,12 +361,6 @@ protected: // attributes
   /// fields that will be used to hold the passive scalars in specific form.
   Grouping *primitive_group_;
 
-  /// Grouping that holds a group called "bfield". Within that group, there are
-  /// three fields. Each field holds a component of the bfield that is
-  /// face-centered along the dimension of the component (hence they are
-  /// interface bfields)
-  Grouping *bfieldi_group_;
-
   /// Pointer to the equation of state of the fluid
   EnzoEquationOfState *eos_;
   /// Pointer to the reconstructor used to reconstruct the fluid during the
@@ -393,6 +373,9 @@ protected: // attributes
   EnzoRiemann *riemann_solver_;
   /// Pointer to the integrable quantity updater
   EnzoIntegrableUpdate *integrable_updater_;
+
+  /// Indicates how magnetic fields are handled
+  bfield_choice mhd_choice_;
 
   /// Names of the reconstructable primitive quantities
   std::vector<std::string> reconstructable_group_names_;
