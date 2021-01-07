@@ -32,7 +32,7 @@ repository `Enzo-E / Cello github repository
 
 
 Before compiling ``Enzo-E / Cello``, you may also need to download
-and install 1.``Charm++``, 2.``HDF5``, 3.``libpng``, and 3.``libboost``:
+and install 1.``Charm++``, 2.``HDF5``, 3.``libpng``, 3.``libboost``, and 4.``scons``:
 
 1. Install ``Charm++``
 ----------------------
@@ -81,6 +81,19 @@ be downloaded from the `libpng
 If ``libboost-dev`` is not already installed on your machine, it may be
 available through your operating system distribution, otherwise it can
 be downloaded from the `libboost <https://www.boost.org/>`_ website.
+
+5. Install ``scons``
+---------------------------
+
+"`SCons <https://www.scons.org/>`_" is a "software construction tool" that is
+used to build ``Enzo-E / Cello`` using scripts written in ``python``.
+
+``scons`` can be install via ``pip`` or if you are using Anaconda or Miniconda
+through ``conda``. It may also be pre-packed for installation for your operating system
+distribution. Building ``Enzo-E / Cello`` requires a version of ``scons`` built
+for Python 3. See `Installing SCons
+<https://scons.org/doc/production/HTML/scons-user/ch01s02.html>`_ for
+installation details.
 
 Configuring
 ===========
