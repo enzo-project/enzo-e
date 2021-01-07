@@ -1,0 +1,66 @@
+### File:    problem_implosion.incl
+### Problem: 2D Implosion problem
+### Author:  James Bordner (jobordner@ucsd.edu)
+
+   Domain { 
+      lower = [0.0, 0.0];
+      upper = [0.3, 0.3];
+   } 
+
+   Mesh { 
+      root_rank = 2;
+      root_size = [400,400];
+   }
+
+   Field {
+
+    ghost_depth = 3;
+    gamma = 1.4;
+
+      
+    list = [
+        "density",
+        "velocity_x",
+        "velocity_y",
+        "total_energy",
+        "internal_energy",
+	"pressure"
+      ] ;
+
+   }
+
+   Method {
+
+      list = ["ppm"];
+
+      ppm {
+         courant   = 0.8;
+         diffusion   = true;
+         flattening  = 3;
+         steepening  = true;
+         dual_energy = false;
+     }
+   }
+ include "input/flux_correct.incl"
+
+# Initial conditions deferred to test_implosion-code.in or
+# test_implosion.in
+
+   Boundary { type = "reflecting"; }
+
+   Stopping {
+      time  = 2.5;
+      cycle = 100000;
+   }
+
+   Output { 
+
+      list = ["cycle_step"];
+
+      cycle_step {
+         field_list = ["density"];
+         type     = "image";
+         name     = ["implosion-d-%05d.png","cycle"];
+         include "input/Schedule/schedule_cycle_10.incl"
+      }
+   }

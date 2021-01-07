@@ -13,6 +13,8 @@ import os
 SConscript('Balance/SConscript')
 #----------------------------------------------------------------------
 
+
+
 env['COPY'] = ''
 env['CPIN'] = 'touch parameters.out; mv parameters.out ${TARGET}.in'
 env['RMIN'] = 'rm -f parameters.out parameters.libconfig'
@@ -49,136 +51,66 @@ enzo_bin = bin_path + '/enzo-p'
 #----------------------------------------------------------------------
 # DATA COMPONENT         
 #----------------------------------------------------------------------
-env.RunSerial('test_Scalar.unit',    bin_path + '/test_Scalar')
-env.RunSerial('test_FieldData.unit',bin_path + '/test_FieldData')
-env.RunSerial('test_FieldDescr.unit',bin_path + '/test_FieldDescr')
-env.RunSerial('test_Field.unit',     bin_path + '/test_Field')
-env.RunSerial('test_FieldFace.unit', bin_path + '/test_FieldFace')
-env.RunSerial('test_ItIndex.unit',   bin_path + '/test_ItIndex')
-env.RunSerial('test_Grouping.unit',  bin_path + '/test_Grouping')
-env.RunSerial('test_Particle.unit',  bin_path + '/test_Particle')
-env.RunSerial('test_FaceFluxes.unit',bin_path + '/test_FaceFluxes')
-env.RunSerial('test_FluxData.unit',  bin_path + '/test_FluxData')
-#----------------------------------------------------------------------
-# DISK COMPONENT          
-#----------------------------------------------------------------------
-Clean(env.RunSerial
-      ('test_FileHdf5.unit',  bin_path + '/test_FileHdf5'),
-      '#test_disk.h5')
 
 #----------------------------------------------------------------------
-# ENZO COMPONENT          
-#----------------------------------------------------------------------
-#----------------------------------------------------------------------
-# ERROR COMPONENT         
-#----------------------------------------------------------------------
-env.RunSerial('test_Error.unit',       bin_path + '/test_Error')
-#----------------------------------------------------------------------
-# INITIAL COMPONENT
-#----------------------------------------------------------------------
-Clean(env_mv_out.RunSerial ('test_initial_music-111.unit',enzo_bin, 
-		            ARGS='input/initial_music-111.in'),
-      [Glob('#/' + test_path + '/*-111.png'),Glob('#/data-111-*')])
-Clean(env_mv_out.RunSerial ('test_initial_music-222.unit',enzo_bin, 
-		            ARGS='input/initial_music-222.in'),
-      [Glob('#/' + test_path + '/*-222.png'),Glob('#/data-222-*')])
-Clean(env_mv_out.RunSerial ('test_initial_music-444.unit',enzo_bin, 
-		            ARGS='input/initial_music-444.in'),
-      [Glob('#/' + test_path + '/*-444.png'),Glob('#/data-444-*')])
-Clean(env_mv_out.RunSerial ('test_initial_music-211.unit',enzo_bin, 
-		            ARGS='input/initial_music-211.in'),
-      [Glob('#/' + test_path + '/*-211.png'),Glob('#/data-211-*')])
-Clean(env_mv_out.RunSerial ('test_initial_music-121.unit',enzo_bin, 
-		            ARGS='input/initial_music-121.in'),
-      [Glob('#/' + test_path + '/*-121.png'),Glob('#/data-121-*')])
-Clean(env_mv_out.RunSerial ('test_initial_music-112.unit',enzo_bin, 
-		            ARGS='input/initial_music-112.in'),
-      [Glob('#/' + test_path + '/*-112.png'),Glob('#/data-112-*')])
-Clean(env_mv_out.RunSerial ('test_initial_music-411.unit',enzo_bin, 
-		            ARGS='input/initial_music-411.in'),
-      [Glob('#/' + test_path + '/*-411.png'),Glob('#/data-411-*')])
-Clean(env_mv_out.RunSerial ('test_initial_music-141.unit',enzo_bin, 
-		            ARGS='input/initial_music-141.in'),
-      [Glob('#/' + test_path + '/*-141.png'),Glob('#/data-141-*')])
-Clean(env_mv_out.RunSerial ('test_initial_music-114.unit',enzo_bin, 
-		            ARGS='input/initial_music-114.in'),
-      [Glob('#/' + test_path + '/*-114.png'),Glob('#/data-114-*')])
-#----------------------------------------------------------------------
-# IO COMPONENT        
-#----------------------------------------------------------------------
-env.RunSerial('test_Schedule.unit',     bin_path + '/test_Schedule')
-env.RunSerial('test_ItReduce.unit',     bin_path + '/test_ItReduce')
-env.RunSerial('test_Colormap.unit',     bin_path + '/test_Colormap')
-#----------------------------------------------------------------------
-#----------------------------------------------------------------------
-# MEMORY COMPONENT        
-#----------------------------------------------------------------------
-env.RunSerial('test_Memory.unit',      bin_path + '/test_Memory')
-#----------------------------------------------------------------------
-# METHOD COMPONENT
-#----------------------------------------------------------------------
-#----------------------------------------------------------------------
-# MESH COMPONENT          
-#----------------------------------------------------------------------
-env.RunSerial('test_Data.unit',     bin_path + '/test_Data')
-env.RunSerial('test_Index.unit',    bin_path + '/test_Index')
-env.RunSerial('test_Face.unit',     bin_path + '/test_Face')
-Clean(env_mv_out.RunSerial('test_Tree.unit', bin_path + '/test_Tree'),
-      ['#/test_Tree.unit.in',
-       '#/test_tree_1-initial.png',	
-       '#/test_tree_2-balanced.png',
-       '#/test_tree_3-merged.png' ])
-Clean(env_mv_out.RunSerial('test_TreeDensity.unit',
-	      bin_path + '/test_TreeDensity',
-              ARGS='input/density_128.h5 Density 0 10'),
-      ['#/density_3d_1-initial.png',
-       '#/density_x_1-initial.png',
-       '#/density_3d_2-balanced.png',
-       '#/density_x_2-balanced.png',
-       '#/density_3d_3-coalesced.png',
-       '#/density_x_3-coalesced.png'])
-
-env.RunSerial('test_ItFace.unit',    bin_path + '/test_ItFace')
-env.RunSerial('test_ItChild.unit',   bin_path + '/test_ItChild')
-
-env.RunSerial('test_Node.unit',      bin_path + '/test_Node')
-env.RunSerial('test_NodeTrace.unit', bin_path + '/test_NodeTrace')
-env.RunSerial('test_ItNode.unit',    bin_path + '/test_ItNode')
-#----------------------------------------------------------------------
-# MONITOR COMPONENT       
-#----------------------------------------------------------------------
-env.RunSerial('test_Monitor.unit',      bin_path + '/test_Monitor')
-#----------------------------------------------------------------------
-# PARAMETERS COMPONENT    
-#----------------------------------------------------------------------
-Clean(env_mv_test.RunSerial
-      ('test_Parameters.unit',  bin_path + '/test_Parameters'),
-      ['#/test.in','#/test/test.in','#/test/test1.out','#/test/test2.out'])
-#----------------------------------------------------------------------
-# PERFORMANCE COMPONENT   
-#----------------------------------------------------------------------
-env.RunSerial('test_Performance.unit', bin_path + '/test_Performance')
-env.RunSerial('test_Papi.unit',        bin_path + '/test_Papi')
-env.RunSerial('test_Timer.unit',       bin_path + '/test_Timer')
-
-#----------------------------------------------------------------------
-# PORTAL COMPONENT        
+SConscript('DataComponent/SConscript')
 #----------------------------------------------------------------------
 
 #----------------------------------------------------------------------
-# PROBLEM COMPONENT        
+# ERROR COMPONENT
+#----------------------------------------------------------------------
+#----------------------------------------------------------------------
+SConscript('ErrorComponent/SConscript')
 #----------------------------------------------------------------------
 
-env.RunSerial('test_Refresh.unit', bin_path + '/test_Refresh')
-env.RunSerial('test_Mask.unit',    bin_path + '/test_Mask')
-env.RunSerial('test_Value.unit',   bin_path + '/test_Value')
+#----------------------------------------------------------------------
+#INITIAL COMPONENT
+#----------------------------------------------------------------------
+SConscript('InitialComponent/SConscript')
+
+#----------------------------------------------------------------------
+# IOCOMPONENT
+#----------------------------------------------------------------------
+SConscript('IOComponent/SConscript')
+
+#----------------------------------------------------------------------
+# MEMORY COMPONENT
+#----------------------------------------------------------------------
+#----------------------------------------------------------------------
+SConscript('MemoryComponent/SConscript')
+#----------------------------------------------------------------------
 
 
 #----------------------------------------------------------------------
-# UNITS COMPONENT        
+# MESH COMPONENT
 #----------------------------------------------------------------------
+SConscript('MeshComponent/SConscript')
 
-env.RunSerial('test_EnzoUnits.unit',bin_path + '/test_EnzoUnits')
+#----------------------------------------------------------------------
+# MONITOR COMPONENT
+#----------------------------------------------------------------------
+SConscript('MonitorComponent/SConscript')
+
+#----------------------------------------------------------------------
+# PARAMETERS COMPONENT
+#----------------------------------------------------------------------
+SConscript('ParametersComponent/SConscript')
+
+
+#----------------------------------------------------------------------
+# PERFORMANCE COMPONENT
+#----------------------------------------------------------------------
+SConscript('PerformanceComponent/SConscript')
+
+#----------------------------------------------------------------------
+# PROBLEM COMPONENT
+#----------------------------------------------------------------------
+SConscript('ProblemComponent/SConscript')
+
+#----------------------------------------------------------------------
+# UNITS COMPONENT
+#----------------------------------------------------------------------
+SConscript('UnitsComponent/SConscript')
 
 #----------------------------------------------------------------------
 # SYNC COMPONENT        
@@ -189,621 +121,86 @@ env.RunSerial('test_Sync.unit',bin_path + '/test_Sync')
 #----------------------------------------------------------------------
 # CELLO
 #----------------------------------------------------------------------
-
-env.RunSerial('test_Type.unit', bin_path + '/test_Type')
+SConscript('Cello/SConscript')
 
 #----------------------------------------------------------------------
 # TEST INPUT PARAMETER PARSER
 #----------------------------------------------------------------------
-
-env.RunSerial('test_parse_groups.unit',     bin_path + '/test_Parse', ARGS='input/parse_groups.in')
-env.RunSerial('test_parse_integer.unit',    bin_path + '/test_Parse', ARGS='input/parse_integer.in')
-env.RunSerial('test_parse_list.unit',       bin_path + '/test_Parse', ARGS='input/parse_list.in')
-env.RunSerial('test_parse_logical.unit',    bin_path + '/test_Parse', ARGS='input/parse_logical.in')
-env.RunSerial('test_parse_scalar.unit',     bin_path + '/test_Parse', ARGS='input/parse_scalar.in')
-env.RunSerial('test_parse_include.unit',    bin_path + '/test_Parse', ARGS='input/parse_include.in')
-env.RunSerial('test_parse_implosion.unit',  bin_path + '/test_Parse', ARGS='input/test_implosion.in')
+SConscript('InputParser/SConscript')
 
 #----------------------------------------------------------------------
-# TEST PROLONG_LINEAR
+# TEST PROLONG LINEAR
 #----------------------------------------------------------------------
-
-env.RunSerial('test_prolong_linear.unit',  bin_path + '/test_ProlongLinear')
-
-#----------------------------------------------------------------------
-# TEST FULL APPLICATION
-#----------------------------------------------------------------------
+SConscript('ProlongLinear/SConscript')
 
 #----------------------------------------------------------------------
-# MethodPpm tests
+# METHOD PPM TESTS
 #----------------------------------------------------------------------
-
-# serial
-Clean(env_mv_out.RunSerial ('test_method_ppm-1.unit',enzo_bin, 
-		ARGS='input/method_ppm-1.in'),
-      [Glob('#/' + test_path + '/method_ppm-1*.png'),
-       Glob('#/' + test_path + '/method_ppm-1*.h5'),
-       Glob('#/method_ppm-1-*')])
-
-env.PngToGif ("method_ppm-1.gif", "test_method_ppm-1.unit", \
-                ARGS= test_path + "/method_ppm-1*.png");
-
-
-# parallel
-
-Clean(env_mv_out.RunParallel ('test_method_ppm-8.unit',enzo_bin, 
-		ARGS='input/method_ppm-8.in'),
-      [Glob('#/' + test_path + '/method_ppm-8*.png'),
-       Glob('#/' + test_path + '/method_ppm-8*.h5'),
-       Glob('#/method_ppm-8-*')])
-
-env.PngToGif ("method_ppm-8.gif", "test_method_ppm-8.unit", \
-                ARGS= test_path + "/method_ppm-8-*.png");
+SConscript('MethodPpm/SConscript')
 
 #----------------------------------------------------------------------
-# MethodGravity tests
+# METHOD GRAVITY TESTS
 #----------------------------------------------------------------------
 
-# serial
-Clean(env_mv_out.RunSerial ('test_method_gravity_cg-1.unit',enzo_bin, 
-		ARGS='input/method_gravity_cg-1.in'),
-      [Glob('#/' + test_path + '/method_gravity_cg-1*.png'),
-       Glob('#/' + test_path + '/method_gravity_cg-1*.h5')])
-
-env.PngToGif ("method_gravity_cg-1.gif", "test_method_gravity_cg-1.unit", \
-                ARGS= test_path + "/method_gravity_cg-1*.png");
-
-# parallel
-
-Clean(env_mv_out.RunParallel ('test_method_gravity_cg-8.unit',enzo_bin, 
-		ARGS='input/method_gravity_cg-8.in'),
-      [Glob('#/' + test_path + '/method_gravity_cg-8*.png'),
-      Glob('#/' + test_path + '/method_gravity_cg-8*.h5')])
-
-env.PngToGif ("method_gravity_cg-8.gif", "test_method_gravity_cg-8.unit", \
-                ARGS= test_path + "/method_gravity_cg-8-*.png");
+SConscript('MethodGravity/SConscript')
 
 #----------------------------------------------------------------------
-# MethodCosmology tests
+# METHOD COSMOLOGY TESTS
 #----------------------------------------------------------------------
 
-cosmo_cg = env_rm_png.RunParallel \
-      ('test_cosmo-cg.unit',enzo_bin, ARGS='input/test_cosmo-cg.in')
-
-cosmo_cg_restart = env_mv_out.RunParallel \
-      ('test_cosmo-cg-restart.unit',enzo_bin, ARGS='+restart Checkpoint')
-Clean(cosmo_cg,
-      [Glob('#/' + test_path + '/Dir_COSMO_CG_*'),
-       Glob('#/Dir_COSMO_CG_*')])
-env.Requires(cosmo_cg_restart,cosmo_cg)
-      
-#--------------------------------------------------
-
-cosmo_bcg = env_rm_png.RunParallel \
-      ('test_cosmo-bcg.unit',enzo_bin, ARGS='input/test_cosmo-bcg.in')
-
-Clean(cosmo_bcg,
-      [Glob('#/' + test_path + '/Dir_COSMO_BCG_*'),
-       Glob('#/Dir_COSMO_BCG_*')])
-
-### RESTART TEST DEACTIVATED PENDING RESOLUTION OF ISSUE #59
-
-### cosmo_bcg_restart = env_mv_out.RunParallel \
-###       ('test_cosmo-bcg-restart.unit',enzo_bin, ARGS='+restart Checkpoint')
-### Clean(cosmo_bcg_restart,
-###       [Glob('#/' + test_path + '/Dir_COSMO_BCG_*'),
-###        Glob('#/Dir_COSMO_BCG_*')])
-### env.Requires(cosmo_bcg_restart,cosmo_bcg)
-      
-#--------------------------------------------------
-
-cosmo_mg = env_rm_png.RunParallel \
-      ('test_cosmo-mg.unit',enzo_bin, ARGS='input/test_cosmo-mg.in')
-
-cosmo_mg_restart = env_mv_out.RunParallel \
-      ('test_cosmo-mg-restart.unit',enzo_bin, ARGS='+restart Checkpoint')
-Clean(cosmo_mg,
-      [Glob('#/' + test_path + '/Dir_COSMO_MG_*'),
-       Glob('#/Dir_COSMO_MG_*')])
-env.Requires(cosmo_mg_restart,cosmo_mg)
-      
-#--------------------------------------------------
-
-cosmo_dd = env_rm_png.RunParallel \
-      ('test_cosmo-dd.unit',enzo_bin, ARGS='input/test_cosmo-dd.in')
-Clean(cosmo_dd,
-      [Glob('#/' + test_path + '/Dir_COSMO_DD_*'),
-       Glob('#/Dir_COSMO_DD_*')])
-
-# RESTART TEST DEACTIVATED PENDING RESOLUTION OF ISSUE #59
-
-### cosmo_dd_restart = env_mv_out.RunParallel \
-###       ('test_cosmo-dd-restart.unit',enzo_bin, ARGS='+restart Checkpoint')
-### Clean(cosmo_dd,
-###       [Glob('#/' + test_path + '/Dir_COSMO_DD_*'),
-###        Glob('#/Dir_COSMO_DD_*')])
-### env.Requires(cosmo_dd_restart,cosmo_dd)
-      
-#--------------------------------------------------
-
-cosmo_hg = env_rm_png.RunParallel \
-      ('test_cosmo-hg.unit',enzo_bin, ARGS='input/test_cosmo-hg.in')
-
-Clean(cosmo_hg,
-      [Glob('#/' + test_path + '/Dir_COSMO_HG_*'),
-       Glob('#/Dir_COSMO_HG_*')])
-# RESTART TEST DEACTIVATED PENDING RESOLUTION OF ISSUE #59
-
-### cosmo_hg_restart = env_mv_out.RunParallel \
-###       ('test_cosmo-hg-restart.unit',enzo_bin, ARGS='+restart Checkpoint')
-### Clean(cosmo_hg,
-###       [Glob('#/' + test_path + '/Dir_COSMO_HG_*'),
-###        Glob('#/Dir_COSMO_HG_*')])
-### env.Requires(cosmo_hg_restart,cosmo_hg)
-
-#----------------------------------------------------------------------
-# MethodFluxCorrect tests
-#----------------------------------------------------------------------
-target_flux2_xm = env_mv_out.RunParallel \
-    ('test_method_flux2-xm.unit',enzo_bin, ARGS='input/test-flux2-xm.in')
-target_flux2_xp = env_mv_out.RunParallel \
-    ('test_method_flux2-xp.unit',enzo_bin, ARGS='input/test-flux2-xp.in')
-target_flux2_ym = env_mv_out.RunParallel \
-    ('test_method_flux2-ym.unit',enzo_bin, ARGS='input/test-flux2-ym.in')
-target_flux2_yp = env_mv_out.RunParallel \
-    ('test_method_flux2-yp.unit',enzo_bin, ARGS='input/test-flux2-yp.in')
-target_flux3_xm = env_mv_out.RunParallel \
-    ('test_method_flux3-xm.unit',enzo_bin, ARGS='input/test-flux3-xm.in')
-target_flux3_xp = env_mv_out.RunParallel \
-    ('test_method_flux3-xp.unit',enzo_bin, ARGS='input/test-flux3-xp.in')
-target_flux3_ym = env_mv_out.RunParallel \
-    ('test_method_flux3-ym.unit',enzo_bin, ARGS='input/test-flux3-ym.in')
-target_flux3_yp = env_mv_out.RunParallel \
-    ('test_method_flux3-yp.unit',enzo_bin, ARGS='input/test-flux3-yp.in')
-target_flux3_zm = env_mv_out.RunParallel \
-    ('test_method_flux3-zm.unit',enzo_bin, ARGS='input/test-flux3-zm.in')
-target_flux3_zp = env_mv_out.RunParallel \
-    ('test_method_flux3-zp.unit',enzo_bin, ARGS='input/test-flux3-zp.in')
-
-#----------------------------------------------------------------------
-# MethodCollapse tests
-#----------------------------------------------------------------------
-
-if (prec == "double"):
-    Clean(env_mv_out.RunParallel ('test_collapse-bcg2.unit',
-                                  enzo_bin, 
-		                  ARGS='input/test_collapse-bcg2.in'),
-          [Glob('#/' + test_path + '/Dir_COLLAPSE_BCG2_*'),
-                             Glob('#/Dir_COLLAPSE_BCG2_*')]);
-    Clean(env_mv_out.RunParallel ('test_collapse-dd2.unit',
-                                  enzo_bin, 
-		                  ARGS='input/test_collapse-dd2.in'),
-          [Glob('#/' + test_path + '/Dir_COLLAPSE_DD2_*'),
-                             Glob('#/Dir_COLLAPSE_DD2_*')]);
-    Clean(env_mv_out.RunParallel ('test_collapse-hg2.unit',
-                                  enzo_bin, 
-		                  ARGS='input/test_collapse-hg2.in'),
-          [Glob('#/' + test_path + '/Dir_COLLAPSE_HG2_*'),
-                             Glob('#/Dir_COLLAPSE_HG2_*')])
-    Clean(env_mv_out.RunParallel ('test_collapse-gas-bcg2.unit',
-                                  enzo_bin, 
-		                  ARGS='input/test_collapse-gas-bcg2.in'),
-          [Glob('#/' + test_path + '/Dir_COLLAPSE_GAS-BCG2_*'),
-                             Glob('#/Dir_COLLAPSE_GAS-BCG2_*')])
-    Clean(env_mv_out.RunParallel ('test_collapse-gas-dd2.unit',
-                                  enzo_bin, 
-		                  ARGS='input/test_collapse-gas-dd2.in'),
-          [Glob('#/' + test_path + '/Dir_COLLAPSE_GAS-DD2_*'),
-                             Glob('#/Dir_COLLAPSE_GAS-DD2_*')])
-    Clean(env_mv_out.RunParallel ('test_collapse-gas-hg2.unit',
-                                  enzo_bin, 
-		                  ARGS='input/test_collapse-gas-hg2.in'),
-          [Glob('#/' + test_path + '/Dir_COLLAPSE_GAS-HG2_*'),
-                             Glob('#/Dir_COLLAPSE_GAS-HG2_*')])
-
-#----------------------------------------------------------------------
-# MethodHeat tests
-#----------------------------------------------------------------------
-
-# serial
-Clean(env_mv_out.RunSerial ('test_method_heat-1.unit',enzo_bin, 
-		ARGS='input/method_heat-1.in'),
-      [Glob('#/' + test_path + '/method_heat*-1*.png'),
-       Glob('#/' + test_path + '/method_heat*-1*.h5')])
-
-env.PngToGif ("method_heat-1.gif", "test_method_heat-1.unit", \
-                ARGS= test_path + "/method_heat*-1*.png");
-
-# parallel
-
-Clean(env_mv_out.RunParallel ('test_method_heat-8.unit',enzo_bin, 
-		ARGS='input/method_heat-8.in'),
-      [Glob('#/' + test_path + '/method_heat*-8*.png'),
-       Glob('#/' + test_path + '/method_heat*-8*.h5')])
-
-env.PngToGif ("method_heat-8.gif", "test_method_heat-8.unit", \
-                ARGS= test_path + "/method_heat*-8-*.png");
+SConscript('MethodCosmology/SConscript')
 
 
 #----------------------------------------------------------------------
-# serial restart
+# METHOD HEAT TESTS
 #----------------------------------------------------------------------
 
-checkpoint_ppm_1 = env_rm_png.RunSerial (
-  'test_checkpoint_ppm-1.unit',
-  enzo_bin, 
-  ARGS='input/checkpoint_ppm-1.in')
+SConscript('MethodHeat/SConscript')
 
-restart_ppm_1 = env_mv_out.RunSerial (
-   'test_restart_ppm-1.unit',
-   enzo_bin,
-   ARGS='+restart checkpoint_ppm-1-10')
+#----------------------------------------------------------------------
+# SERIAL RESTART
+#----------------------------------------------------------------------
 
+SConscript('Restart/SConscript')
 
-# env.PngToGif ("restart_ppm-1.gif", "test_restart_ppm-1.unit", \
-#                   ARGS= test_path + "/checkpoint_ppm-1-*.png");
-
-Clean(restart_ppm_1,
-      [Glob('#/' + test_path + '/checkpoint_ppm-1*.png')])
-
-env.Requires(restart_ppm_1,checkpoint_ppm_1)
-
-# parallel restart
-
-
-checkpoint_ppm_8 = env_rm_png.RunParallel (
-   'test_checkpoint_ppm-8.unit',
-   enzo_bin, 
-   ARGS='input/checkpoint_ppm-8.in')
-
-restart_ppm_8 = env_mv_out.RunParallel (
-   'test_restart_ppm-8.unit',
-   enzo_bin,
-   ARGS='+restart checkpoint_ppm-8-10')
-
-
-env.PngToGif ("restart_ppm-8.gif", "test_restart_ppm-8.unit", \
-                 ARGS= test_path + "/checkpoint_ppm-8-*.png");
-
-Clean(restart_ppm_8,
-      [Glob('#/' + test_path + '/checkpoint_ppm-8*.png')])
-
-env.Requires(restart_ppm_8,checkpoint_ppm_8)
-
-# MethodPpml tests
-
-Clean(env_mv_out.RunSerial ('test_method_ppml-1.unit',enzo_bin, 
-		ARGS='input/method_ppml-1.in'),
-      [Glob('#/' + test_path + '/method_ppml-1-?-????-*.png'),
-       Glob('#/' + test_path + '/method_ppml-1-??-????-*.h5'),
-       Glob('#/method_ppml-1-*')])
-
-env.PngToGif ("method_ppml-1-x.gif", "test_method_ppml-1.unit", \
-                ARGS= test_path + "/method_ppml-1-x-????.png");
-env.PngToGif ("method_ppml-1-y.gif", "test_method_ppml-1.unit", \
-                ARGS= test_path + "/method_ppml-1-y-????.png");
-env.PngToGif ("method_ppml-1-z.gif", "test_method_ppml-1.unit", \
-                ARGS= test_path + "/method_ppml-1-z-????.png");
-
-Clean(env_mv_out.RunParallel ('test_method_ppml-8.unit',enzo_bin, 
-		ARGS='input/method_ppml-8.in'),
-      [Glob('#/' + test_path + '/method_ppml-8-?-????-*.png'),
-       Glob('#/' + test_path + '/method_ppml-8-??-????-*.h5'),
-       Glob('#/method_ppml-8-*')])
-
-env.PngToGif ("method_ppml-8-x.gif", "test_method_ppml-8.unit", \
-                ARGS= test_path + "/method_ppml-8-x-????.png");
-env.PngToGif ("method_ppml-8-y.gif", "test_method_ppml-8.unit", \
-                ARGS= test_path + "/method_ppml-8-y-????.png");
-env.PngToGif ("method_ppml-8-z.gif", "test_method_ppml-8.unit", \
-                ARGS= test_path + "/method_ppml-8-z-????.png");
-
-# Updated PPML test using EnzoInitialPpmlTest for multi-nodes
-
-Clean(env_mv_out.RunSerial ('test_method_ppml-test-1.unit',enzo_bin,
-                            ARGS='input/method_ppml-test-1.in'),
-      [Glob('#/' + test_path + '/PPML1_*')])
-
-Clean(env_mv_out.RunParallel ('test_method_ppml-test-8.unit',enzo_bin,
-                            ARGS='input/method_ppml-test-8.in'),
-      [Glob('#/' + test_path + '/PPML8_*')])
 
 #----------------------------------------------------------------------
 # BOUNDARY CONDITIONS
 #----------------------------------------------------------------------
 
-# 2D boundary condition tests
-
-Clean(env_mv_out.RunParallel ('test_boundary_reflecting-2d.unit',
-                enzo_bin, 
-                ARGS='input/boundary_reflecting-2d.in'),
-      [Glob('#/' + test_path + '/boundary_reflecting-2d.png'),
-       'test_boundary_reflecting-2d.unit'])
-
-Clean(env_mv_out.RunParallel ('test_boundary_periodic-2d.unit',
-		enzo_bin, 
-		ARGS='input/boundary_periodic-2d.in'),
-      [Glob('#/' + test_path + '/boundary_periodic-2d.png'),
-       'test_boundary_periodic-2d.unit'])
-
-# Clean(env_mv_out.RunParallel ('test_boundary_inflow-2d.unit',
-# 		enzo_bin, 
-# 		ARGS='input/boundary_inflow-2d.in'),
-#       [Glob('#/' + test_path + '/boundary_inflow-2d.png'),
-#        'test_boundary_inflow-2d.unit'])
-
-Clean(env_mv_out.RunParallel ('test_boundary_outflow-2d.unit',
-		enzo_bin, 
-		ARGS='input/boundary_outflow-2d.in'),
-      [Glob('#/' + test_path + '/boundary_outflow-2d.png'),
-       'test_boundary_outflow-2d.unit'])
-
-
-env.PngToGif ("boundary_reflecting-2d.gif", "test_boundary_reflecting-2d.unit", \
-                ARGS= test_path + "/boundary_reflecting-2d-????.png");
-env.PngToGif ("boundary_periodic-2d.gif","test_boundary_periodic-2d.unit", \
-                ARGS= test_path + "/boundary_periodic-2d-????.png");
-env.PngToGif ("boundary_outflow-2d.gif","test_boundary_outflow-2d.unit", \
-                ARGS= test_path + "/boundary_outflow-2d-????.png");
-
-# 3D boundary condition tests
-
-Clean(env_mv_out.RunParallel ('test_boundary_reflecting-3d.unit',
-		enzo_bin, 
-		ARGS='input/boundary_reflecting-3d.in'),
-      [Glob('#/' + test_path + '/boundary_reflecting-3d.png'),
-       'test_boundary_reflecting-3d.unit'])
-
-Clean(env_mv_out.RunParallel ('test_boundary_periodic-3d.unit',
-		enzo_bin, 
-		ARGS='input/boundary_periodic-3d.in'),
-      [Glob('#/' + test_path + '/boundary_periodic-3d.png'),
-       'test_boundary_periodic-3d.unit'])
-
-# Clean(env_mv_out.RunParallel ('test_boundary_inflow-3d.unit',
-# 		enzo_bin, 
-# 		ARGS='input/boundary_inflow-3d.in'),
-#       [Glob('#/' + test_path + '/boundary_inflow-3d.png'),
-#        'test_boundary_inflow-3d.unit'])
-
-Clean(env_mv_out.RunParallel ('test_boundary_outflow-3d.unit',
-		enzo_bin, 
-		ARGS='input/boundary_outflow-3d.in'),
-      [Glob('#/' + test_path + '/boundary_outflow-3d.png'),
-       'test_boundary_outflow-3d.unit'])
-
-env.PngToGif ("boundary_reflecting-3d.gif","test_boundary_reflecting-3d.unit",
-                ARGS= test_path + "/boundary_reflecting-3d-????.png");
-env.PngToGif ("boundary_periodic-3d.gif","test_boundary_periodic-3d.unit", \
-                ARGS= test_path + "/boundary_periodic-3d-????.png");
-env.PngToGif ("boundary_outflow-3d.gif","test_boundary_outflow-3d.unit", \
-                ARGS= test_path + "/boundary_outflow-3d-????.png");
+SConscript('BoundaryConditions/SConscript')
 
 #----------------------------------------------------------------------
-# Mesh generation
+# MESH GENERATION
 #----------------------------------------------------------------------
-
-Clean(env_mv_out.RunSerial ('test_mesh-balanced.unit',enzo_bin, 
-		ARGS='input/mesh-balanced.in'),
-      [Glob('#/' + test_path + '/mesh-balanced*.png')])
-
-# Clean(env_mv_out.RunSerial ('test_mesh-unbalanced.unit',enzo_bin, 
-# 		ARGS='input/mesh-unbalanced.in'),
-#       [Glob('#/' + test_path + '/mesh-unbalanced*.png')])
+SConscript('MeshGeneration/SConscript')
 
 #----------------------------------------------------------------------
-# AMR PPM
+# AMRPPM
 #----------------------------------------------------------------------
-
-
-# serial
-
-# Clean(env_mv_out.RunParallel ('test_adapt-L1-P1.unit',enzo_bin, 
-# 		ARGS='input/adapt-L1-P1.in'),
-#       [Glob('#/' + test_path + '/adapt-L1-P1*.png')])
-# 
-# Clean(env_mv_out.RunParallel ('test_adapt-L2-P1.unit',enzo_bin, 
-# 		ARGS='input/adapt-L2-P1.in'),
-#       [Glob('#/' + test_path + '/adapt-L2-P1*.png')])
-# 
-# Clean(env_mv_out.RunParallel ('test_adapt-L3-P1.unit',enzo_bin, 
-# 		ARGS='input/adapt-L3-P1.in'),
-#       [Glob('#/' + test_path + '/adapt-L3-P1*.png')])
-# 
-# Clean(env_mv_out.RunParallel ('test_adapt-L4-P1.unit',enzo_bin, 
-# 		ARGS='input/adapt-L4-P1.in'),
-#       [Glob('#/' + test_path + '/adapt-L4-P1*.png')])
-
-Clean(env_mv_out.RunParallel ('test_adapt-L5-P1.unit',enzo_bin, 
-		ARGS='input/adapt-L5-P1.in'),
-      [Glob('#/' + test_path + '/adapt-L5-P1*.png')])
-env.PngToGif ("adapt-L5-P1-mesh.gif", "test_adapt-L5-P1.unit", \
-                ARGS= test_path + "/adapt-L5-P1-mesh-*.png");
-env.PngToGif ("adapt-L5-P1-density.gif", "test_adapt-L5-P1.unit", \
-                ARGS= test_path + "/adapt-L5-P1-density-*.png");
-
-
+SConscript('AmrPpm/SConscript')
 
 #----------------------------------------------------------------------
-# PERFORMANCE
+#PERFORMANCE
 #----------------------------------------------------------------------
-
-# env.RunParallel ('test_performance-papi.unit',
-#                 enzo_bin, 
-#                 ARGS='input/performance-papi.in')
-
-
-Clean(env_mv_out.RunParallel ('test_initial_png.unit',
-		enzo_bin, 
-		ARGS='input/initial_png.in'),
-      [Glob('#/' + test_path + '/initial_png.png'),
-       'test_initial_png.unit'])
-env.PngToGif ("initial_png.gif","test_initial_png.unit", \
-                ARGS= test_path + "/initial_png-??.png");
-
-
-#----------------------------------------------------------------------
-# PROBLEM
-#----------------------------------------------------------------------
+SConscript('Performance/SConscript')
 
 #----------------------------------------------------------------------
 # OUTPUT
 #----------------------------------------------------------------------
-
-output_stride_1_RUN = env.RunParallel (
-   'test_output-stride-1.unit',
-   enzo_bin, 
-   ARGS='input/output-stride-1.in')
-
-output_stride_1_C00 = env_mv_out.Hdf5ToPng (
-   'test_output-stride-1-C00.unit',
-   'test_output-stride-1.unit',
-   ARGS='output-stride-1 00');
-
-output_stride_1_C10 = env_mv_out.Hdf5ToPng (
-   'test_output-stride-1-C10.unit',
-   'test_output-stride-1-C00.unit',
-   ARGS='output-stride-1 10');
-
-output_stride_1 = env_mv_out.Hdf5ToPng (
-   'test_output-stride-1-H5.unit',
-   'test_output-stride-1-C10.unit',
-   ARGS='output-stride-1 20');
-
-env.Requires(output_stride_1,    output_stride_1_C10)
-env.Requires(output_stride_1_C10,output_stride_1_C00)
-env.Requires(output_stride_1_C00,output_stride_1_RUN)
-
-Clean(output_stride_1,
-      [Glob('#/' + test_path + '/output-stride-1*.png'),
-       'test_output-stride-1.unit',
-       Glob('#/output-stride-1-*')])
-
-#----------------------------------------------------------------------
-
-output_stride_2_RUN = env.RunParallel (
-   'test_output-stride-2.unit',
-   enzo_bin, 
-   ARGS='input/output-stride-2.in')
-
-output_stride_2_C00 = env_mv_out.Hdf5ToPng (
-   'test_output-stride-2-C00.unit',
-   'test_output-stride-2.unit',
-   ARGS='output-stride-2 00');
-
-output_stride_2_C10 = env_mv_out.Hdf5ToPng (
-   'test_output-stride-2-C10.unit',
-   'test_output-stride-2-C00.unit',
-   ARGS='output-stride-2 10');
-
-output_stride_2 = env_mv_out.Hdf5ToPng (
-   'test_output-stride-2-H5.unit',
-   'test_output-stride-2-C10.unit',
-   ARGS='output-stride-2 20');
-
-env.Requires(output_stride_2,    output_stride_2_C10)
-env.Requires(output_stride_2_C10,output_stride_2_C00)
-env.Requires(output_stride_2_C00,output_stride_2_RUN)
-
-Clean(output_stride_2,
-      [Glob('#/' + test_path + '/output-stride-2*.png'),
-       'test_output-stride-2.unit',
-       Glob('#/output-stride-2-*')])
-
-#----------------------------------------------------------------------
-
-output_stride_4_RUN = env.RunParallel (
-   'test_output-stride-4.unit',
-   enzo_bin, 
-   ARGS='input/output-stride-4.in')
-
-output_stride_4_C00 = env_mv_out.Hdf5ToPng (
-   'test_output-stride-4-C00.unit',
-   'test_output-stride-4.unit',
-   ARGS='output-stride-4 00');
-
-output_stride_4_C10 = env_mv_out.Hdf5ToPng (
-   'test_output-stride-4-C10.unit',
-   'test_output-stride-4-C00.unit',
-   ARGS='output-stride-4 10');
-
-output_stride_4 = env_mv_out.Hdf5ToPng (
-   'test_output-stride-4-H5.unit',
-   'test_output-stride-4-C10.unit',
-   ARGS='output-stride-4 20');
-
-env.Requires(output_stride_4,    output_stride_4_C10)
-env.Requires(output_stride_4_C10,output_stride_4_C00)
-env.Requires(output_stride_4_C00,output_stride_4_RUN)
-
-Clean(output_stride_4,
-      [Glob('#/' + test_path + '/output-stride-4*.png'),
-       'test_output-stride-4.unit',
-       Glob('#/output-stride-4-*')])
-
-#----------------------------------------------------------------------
-
-Clean(env_mv_out.RunParallel ('test_output-headers.unit',
-                enzo_bin, 
-                ARGS='input/output-headers.in'),
-		[Glob('#/' + test_path + '/Dir_headers_*'),
-                                   Glob('#/Dir_headers_*')])
+SConscript('Output/SConscript')
 
 #----------------------------------------------------------------------
 # PARTICLES
 #----------------------------------------------------------------------
-Clean(env_mv_out.RunParallel ('test_particle-x.unit',
-                enzo_bin, 
-                ARGS='input/test_particle-x.in'),
-		[Glob('#/' + test_path + '/particle-x.png')])
+SConscript('Particles/SConscript')
 
-env.PngToGif("particle-x.gif", "test_particle-x.unit", \
-             ARGS = test_path + "/particle-x*.png")			       
+#prevent concurrent running of Parallel tests
 
+SideEffect('log.txt',
+     ['method_ppm-1.unit',
+      'method_ppm-8.unit'])
 
-Clean(env_mv_out.RunParallel ('test_particle-y.unit',
-                enzo_bin, 
-                ARGS='input/test_particle-y.in'),
-		[Glob('#/' + test_path + '/particle-y.png')])
-
-env.PngToGif("particle-y.gif", "test_particle-y.unit", \
-             ARGS = test_path + "/particle-y*.png")			       
-
-Clean(env_mv_out.RunParallel ('test_particle-xy.unit',
-                enzo_bin, 
-                ARGS='input/test_particle-xy.in'),
-		[Glob('#/' + test_path + '/particle-xy.png')])
-env.PngToGif("particle-xy.gif", "test_particle-xy.unit", \
-             ARGS = test_path + "/particle-xy*.png")			       
-
-Clean(env_mv_out.RunParallel ('test_particle-circle.unit',
-                enzo_bin, 
-                ARGS='input/test_particle-circle.in'),
-		[Glob('#/' + test_path + '/particle-circle.png')])
-env.PngToGif("particle-circle.gif", "test_particle-circle.unit", \
-             ARGS = test_path + "/particle-circle*.png")
-
-Clean(env_mv_out.RunParallel ('test_particle-amr-static.unit',
-                enzo_bin, 
-                ARGS='input/test_particle-amr-static.in'),
-		[Glob('#/' + test_path + '/particle-amr-static.png')])
-env.PngToGif("particle-amr-static.gif", "test_particle-amr-static.unit", \
-             ARGS = test_path + "/particle-amr-static*.png")
-
-Clean(env_mv_out.RunParallel ('test_particle-amr-dynamic.unit',
-                enzo_bin, 
-                ARGS='input/test_particle-amr-dynamic.in'),
-		[Glob('#/' + test_path + '/particle-amr-dynamic.png')])
-env.PngToGif("particle-amr-dynamic.gif", "test_particle-amr-dynamic.unit", \
-             ARGS = test_path + "/particle-amr-dynamic*.png")
-
-#----------------------------------------------------------------------
-
-# Prevent concurrent running of parallel jobs
-
-SideEffect('log.txt', 
-     [ 'method_ppm-1.unit',
-       'method_ppm-8.unit'])
 
 env.Clean('.',Glob('test_*.in'))
 env.Clean('.',Glob('*/test_*.in'))
