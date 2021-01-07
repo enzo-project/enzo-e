@@ -1,0 +1,48 @@
+Import('env')
+Import('parallel_run')
+Import('serial_run')
+Import('ip_charm')
+
+Import('bin_path')
+Import('test_path')
+
+#----------------------------------------------------------
+#defines
+#----------------------------------------------------------
+
+env['CPIN'] = 'touch parameters.out; mv parameters.out ${TARGET}.in'
+env['RMIN'] = 'rm -f parameters.out'
+
+date_cmd = 'echo $TARGET > test/STATUS; echo "---------------------"; date +"%Y-%m-%d %H:%M:%S";'
+
+run_performance = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunPerformance' : run_performance } )
+env_mv_performance = env.Clone(COPY = 'mkdir -p ' + test_path + '/PerformanceComponent/Performance; mv `ls *.png *.h5` ' + test_path + '/PerformanceComponent/Performance')
+
+run_papi = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunPapi' : run_papi } )
+env_mv_papi = env.Clone(COPY = 'mkdir -p ' + test_path + '/PerformanceComponent/Papi; mv `ls *.png *.h5` ' + test_path + '/PerformanceComponent/Papi')
+
+run_timer = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunTimer' : run_timer } )
+env_mv_timer = env.Clone(COPY = 'mkdir -p ' + test_path + '/PerformanceComponent/Timer; mv `ls *.png *.h5` ' + test_path + '/PerformanceComponent/Timer')
+
+
+
+#-------------------------------------------------------------
+#load balancing
+#-------------------------------------------------------------
+
+
+balance_performance = env_mv_performance.RunPerformance (
+     'test_Performance.unit',
+     bin_path + '/test_Performance')
+
+balance_papi = env_mv_papi.RunPapi (
+     'test_Papi.unit',
+     bin_path + '/test_Papi')
+     
+balance_timer = env_mv_timer.RunTimer (
+     'test_Timer.unit',
+     bin_path + '/test_Timer')
+

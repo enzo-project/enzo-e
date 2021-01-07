@@ -1,0 +1,51 @@
+Import('env')
+Import('parallel_run')
+Import('serial_run')
+Import('ip_charm')
+
+Import('bin_path')
+Import('test_path')
+
+#----------------------------------------------------------
+#defines
+#----------------------------------------------------------
+
+env['CPIN'] = 'touch parameters.out; mv parameters.out ${TARGET}.in'
+env['RMIN'] = 'rm -f parameters.out'
+
+date_cmd = 'echo $TARGET > test/STATUS; echo "---------------------"; date +"%Y-%m-%d %H:%M:%S";'
+
+run_refresh = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunRefresh' : run_refresh } )
+env_mv_refresh = env.Clone(COPY = 'mkdir -p ' + test_path + '/ProblemComponent/Refresh; mv `ls *.png *.h5` ' + test_path + '/ProblemComponent/Refresh')
+
+run_mask = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunMask' : run_mask } )
+env_mv_mask = env.Clone(COPY = 'mkdir -p ' + test_path + '/ProblemComponent/Mask; mv `ls *.png *.h5` ' + test_path + '/ProblemComponent/Mask')
+
+run_value = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunValue' : run_value } )
+env_mv_value = env.Clone(COPY = 'mkdir -p ' + test_path + '/ProblemComponent/Value; mv `ls *.png *.h5` ' + test_path + '/ProblemComponent/Value')
+
+
+
+
+
+
+#-------------------------------------------------------------
+#load balancing
+#-------------------------------------------------------------
+
+
+balance_refresh = env_mv_refresh.RunRefresh (
+     'test_Refresh.unit',
+     bin_path + '/test_Refresh')
+     
+balance_mask = env_mv_mask.RunMask (
+     'test_Mask.unit',
+     bin_path + '/test_Mask')
+     
+balance_value = env_mv_value.RunValue (
+     'test_Value.unit',
+     bin_path + '/test_Value')
+

@@ -1,0 +1,2 @@
+include "input/method_flux-2d.incl"
+Initial { value { velocity_x = 1.0;} }

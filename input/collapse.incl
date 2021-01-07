@@ -1,0 +1,12 @@
+ Field {
+     alignment = 8;
+     gamma = 1.666666666666700;
+     ghost_depth = 4;
+     history = 1;
+     list = [ "density", "velocity_x", "velocity_y", "acceleration_x", "acceleration_y", "temperature", "total_energy", "internal_energy", "pressure", "density_gas", "density_particle", "density_total", "density_particle_accumulate", "potential", "potential_temp", "potential_copy", "X", "B", "X_copy", "B_copy" ];
+     padding = 0;
+ }
+ Method {
+     list = [ "pm_deposit", "gravity", "pm_update" ];
+     check_gravity { particle_type = "dark"; }
+ }

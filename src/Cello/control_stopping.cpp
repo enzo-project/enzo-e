@@ -142,13 +142,11 @@ void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
   simulation->set_stop(stop_);
 
 #ifdef CONFIG_USE_PROJECTIONS
-  // COMMENTED OUT--BUGGY, projections_schedule_on() crashed with bad schedule_on object
-
   bool was_off = (simulation->projections_tracing() == false);
   bool was_on  = (simulation->projections_tracing() == true);
   Schedule * schedule_on = simulation->projections_schedule_on();
   Schedule * schedule_off = simulation->projections_schedule_off();
-  bool turn_on  = schedule_on ? schedule_on->write_this_cycle(cycle_,time_) : false;
+  bool turn_on  = schedule_on  ? schedule_on->write_this_cycle(cycle_,time_) : false;
   bool turn_off = schedule_off ? schedule_off->write_this_cycle(cycle_,time_) : false;
 
   static bool active = false;

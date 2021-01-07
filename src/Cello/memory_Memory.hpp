@@ -18,7 +18,7 @@ class Memory {
 public: // interface
 
 /// Get single instance of the Memory object
-  static Memory * instance() throw ()
+  static Memory * instance()
   {
 #ifdef CONFIG_USE_MEMORY
     return & instance_[cello::index_static()]; 
@@ -29,13 +29,13 @@ public: // interface
 
 private: // interface
   /// Create the (single) Memory object (singleton design pattern)
-  Memory() throw ()
+  Memory()
 #ifdef CONFIG_USE_MEMORY
   : is_active_(false),
     warning_mb_(0.0),
     limit_gb_ (0.0)
 #endif
-  { initialize_(); };
+  { initialize_(); }
 
   /// Copy the (single) Memory object (singleton design pattern)
   Memory (const Memory &);
@@ -44,7 +44,7 @@ private: // interface
   Memory & operator = (const Memory & memory);
 
   /// Delete the Memory object
-  ~Memory() throw ()
+  ~Memory()
   {}
 
 public: // interface
@@ -72,15 +72,15 @@ public: // interface
   }
 
   /// Allocate memory
-  void * allocate ( size_t size ) throw ();
+  void * allocate ( size_t size );
 
   /// De-allocate memory
-  void deallocate ( void * pointer ) throw ();
+  void deallocate ( void * pointer );
 
   /// Define a new group
-  void new_group ( std::string group_name ) throw ();
+  void new_group ( std::string group_name );
 
-  int index_group(std::string group_name = "") const throw()
+  int index_group(std::string group_name = "") const
   {
     int index_group = 0;
     for (size_t index=0; index<group_name_.size(); index++) {
@@ -90,60 +90,60 @@ public: // interface
   }
 
   /// Begin allocating/deallocating memory associated with the given group
-  void set_group ( std::string group_name ) throw ()
+  void set_group ( std::string group_name ) 
   {
     index_group_ = this->index_group(group_name);
   }
 
-  std::string group () const throw ()
+  std::string group () const 
   { return group_name_[index_group_]; }
 
   /// Current number of bytes allocated
-  int64_t bytes ( std::string group = "" ) throw ();
+  int64_t bytes ( std::string group = "" );
   
   /// Estimate of used / available memory
-  float efficiency ( std::string group = "" ) throw ();
+  float efficiency ( std::string group = "" );
 
   /// Maximum number of bytes allocated within an interval
-  int64_t bytes_high ( std::string group = "" ) throw ();
+  int64_t bytes_high ( std::string group = "" );
 
   /// Maximum number of bytes allocated during run
-  int64_t bytes_highest ( std::string group = "" ) throw ();
+  int64_t bytes_highest ( std::string group = "" );
 
   /// Specify the maximum number of bytes to use
   void set_bytes_limit ( int64_t size, 
-			 std::string group = "") throw ();
+			 std::string group = "");
 
   /// Return the limit on number of bytes to use
-  int64_t bytes_limit ( std::string group = "") throw ();
+  int64_t bytes_limit ( std::string group = "");
 
   /// Query the maximum number of bytes left to use, 0 if unknown
-  int64_t bytes_available ( std::string group = "" ) throw ();
+  int64_t bytes_available ( std::string group = "" );
 
   /// Return the number of calls to allocate for the group
-  int num_new ( std::string group = "" ) throw ();
+  int num_new ( std::string group = "" );
 
   /// Return the number of calls to deallocate for the group
-  int num_delete ( std::string group = "" ) throw ();
+  int num_delete ( std::string group = "" );
 
   /// Print memory summary
-  void print () throw ();
+  void print ();
 
   /// Reset memory counters for the current group
-  void reset () throw ();
+  void reset ();
 
   /// Reset bytes_high to current
-  void reset_high () throw ();
+  void reset_high ();
 
   /// Set whether memory tracking is active or not
-  void set_active (bool is_active) throw ()
+  void set_active (bool is_active) 
 #ifdef CONFIG_USE_MEMORY
-  { is_active_ = is_active; } ;
+  { is_active_ = is_active; }
 #else
-  { } ;
+  { }
 #endif
 
-  bool is_active () const throw()
+  bool is_active () const
   { 
 #ifdef CONFIG_USE_MEMORY
     return is_active_; 
@@ -153,20 +153,20 @@ public: // interface
   }
 
   /// Set whether to fill memory with a value after allocating
-  void set_fill_new (char value = 0)
+  void set_fill_new (unsigned char value = 0)
   {
 #ifdef CONFIG_USE_MEMORY
     fill_new_ = value;
 #endif
-  };
+  }
 
   /// Set whether to fill memory with a value before deallocating
-  void set_fill_delete (char value = 0)
+  void set_fill_delete (unsigned char value = 0)
   {
 #ifdef CONFIG_USE_MEMORY
     fill_delete_ = value;
 #endif
-  };
+  }
 
   void set_warning_mb (float value)
   { 
@@ -187,7 +187,7 @@ public: // interface
 private: // functions
 
   /// Initialize the memory component
-  void initialize_() throw ();
+  void initialize_();
 
   //======================================================================
 
@@ -204,10 +204,10 @@ private: // attributes
   bool is_active_;
 
   /// allocate clear value
-  char fill_new_;
+  unsigned char fill_new_;
 
   /// deallocate clear value
-  char fill_delete_;
+  unsigned char fill_delete_;
 
   /// Limit on number of bytes to allocate
   std::vector<int64_t> bytes_limit_;

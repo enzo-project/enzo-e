@@ -6,7 +6,7 @@ c
       subroutine pgas2d(
      &     dslice, eslice, pslice, uslice, vslice,
      &     wslice, idim, jdim, i1, i2, j1, j2,
-     &     gamma, pmin)
+     &     gamma, pmin, ierror)
 c
 c  COMPUTES GAS PRESSURE ON A SLICE
 c
@@ -43,6 +43,7 @@ c
 c-----------------------------------------------------------------------
 c
       implicit NONE
+#define FORTRAN
 #include "fortran_types.h"
 c
 c-----------------------------------------------------------------------
@@ -53,6 +54,7 @@ c
       R_PREC    gamma, pmin
       R_PREC dslice(idim,jdim), eslice(idim,jdim), pslice(idim,jdim),
      &     uslice(idim,jdim), vslice(idim,jdim), wslice(idim,jdim)
+      INTG_PREC ierror
 c
 c  locals
 c

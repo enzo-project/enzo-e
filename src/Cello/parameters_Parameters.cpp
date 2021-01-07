@@ -86,6 +86,10 @@ void Parameters::pup (PUP::er &p)
       p | name;
       int lparam = (param != NULL);
       p | lparam;
+      ASSERT("Parameters::pup",
+             "param is expected to be non-null",
+             ((! lparam) && (param == NULL)) ||
+             (  lparam  && (param != NULL)));
       if (lparam) p | *param;
     } 
   } else {
@@ -289,7 +293,7 @@ int Parameters::value_integer
 	   ( ! param || param->is_type(parameter_integer)));
 
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
-  sprintf (deflt_string,"%d",deflt);
+  snprintf (deflt_string,MAX_PARAMETER_FILE_WIDTH,"%d",deflt);
   monitor_access_(parameter,deflt_string);
   return (param != NULL) ? param->get_integer() : deflt;
 }
@@ -334,7 +338,7 @@ double Parameters::value_float
 
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   // '#' format character forces a decimal point
-  sprintf (deflt_string,FLOAT_FORMAT,deflt);
+  snprintf (deflt_string,MAX_PARAMETER_FILE_WIDTH,FLOAT_FORMAT,deflt);
   monitor_access_(parameter,deflt_string);
   return (param != NULL) ? param->get_float() : deflt;
 }
@@ -379,7 +383,8 @@ bool Parameters::value_logical
 	   ( ! param || param->is_type(parameter_logical)));
 
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
-  sprintf (deflt_string,"%s",deflt ? "true" : "false");
+  snprintf (deflt_string,MAX_PARAMETER_FILE_WIDTH,
+            "%s",deflt ? "true" : "false");
   monitor_access_(parameter,deflt_string);
   return (param != NULL) ? param->get_logical() : deflt;
 }
@@ -479,9 +484,6 @@ void Parameters::evaluate_float
   } else {
     for (int i=0; i<n; i++) result[i] = deflt[i];
   }
-  // char deflt_string[MAX_PARAMETER_FILE_WIDTH];
-  // sprintf_expression (param->value_expr_,deflt_string);
-  // monitor_access_(parameter,deflt_string);
 }
 
 //----------------------------------------------------------------------
@@ -516,9 +518,6 @@ void Parameters::evaluate_logical
 	    "param is NULL but deflt not set");
   //   for (int i=0; i<n; i++) result[i] = deflt[i];
   }
-  // char deflt_string[MAX_PARAMETER_FILE_WIDTH];
-  // sprintf_expression (param->value_expr_,deflt_string);
-  // monitor_access_(parameter,deflt_string);
 }
 
 //----------------------------------------------------------------------
@@ -550,7 +549,7 @@ int Parameters::list_value_integer
 	   parameter.c_str(),index,
 	   ( ! param || param->is_type(parameter_integer)));
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
-  sprintf (deflt_string,"%d",deflt);
+  snprintf (deflt_string,MAX_PARAMETER_FILE_WIDTH,"%d",deflt);
   monitor_access_(parameter,deflt_string,index);
   return (param != NULL) ? param->value_integer_ : deflt;
 }
@@ -573,7 +572,7 @@ double Parameters::list_value_float
 	   ( ! param || param->is_type(parameter_float)));
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   // '#' format character forces a decimal point
-  sprintf (deflt_string,FLOAT_FORMAT,deflt);
+  snprintf (deflt_string,MAX_PARAMETER_FILE_WIDTH,FLOAT_FORMAT,deflt);
   monitor_access_(parameter,deflt_string,index);
   return (param != NULL) ? param->value_float_ : deflt;
 }
@@ -595,7 +594,8 @@ bool Parameters::list_value_logical
 	   parameter.c_str(),index,
 	   ( ! param || param->is_type(parameter_logical)));
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
-  sprintf (deflt_string,"%s",deflt ? "true" : "false");
+  snprintf (deflt_string,MAX_PARAMETER_FILE_WIDTH,
+            "%s",deflt ? "true" : "false");
   monitor_access_(parameter,deflt_string,index);
   return (param != NULL) ? param->value_logical_ : deflt;
 }
@@ -763,9 +763,6 @@ void Parameters::list_evaluate_float
   // } else {
   //   for (int i=0; i<n; i++) result[i] = deflt[i];
   }
-  // char deflt_string[MAX_PARAMETER_FILE_WIDTH];
-  // sprintf_expression (param->value_expr_,deflt_string);
-  // monitor_access_(parameter,deflt_string,index);
 }
 
 //----------------------------------------------------------------------
@@ -803,9 +800,6 @@ void Parameters::list_evaluate_logical
 	    "param is NULL but deflt not set");
   //   for (int i=0; i<n; i++) result[i] = deflt[i];
   }
-  // char deflt_string[MAX_PARAMETER_FILE_WIDTH];
-  // sprintf_expression (param->value_expr_,deflt_string);
-  // monitor_access_(parameter,deflt_string,index);
 }
 
 //----------------------------------------------------------------------
@@ -956,18 +950,13 @@ void Parameters::monitor_access_
     value = deflt_string + " [default]";
   }
 
-  char index_string [MAX_PARAMETER_FILE_WIDTH] = "";
+  std::string index_string = 
+    std::string("[") + std::to_string(index) + std::string("]");
 
-  if (index != -1) {
-    sprintf (index_string,"[%d]",index);
-  }
+  std::string buffer = std::string("accessed ") +
+    parameter_name_(parameter) + index_string + " " + value;
 
-  char buffer[MAX_PARAMETER_FILE_WIDTH];
-  sprintf (buffer,"accessed %s%s %s",
-		  parameter_name_(parameter).c_str(),
-		  index_string,
-	   value.c_str());
-  if (lmonitor_) monitor_->print_verbatim("Parameters",buffer);
+  if (lmonitor_) monitor_->print_verbatim("Parameters",buffer.data());
 }
 
 //----------------------------------------------------------------------
@@ -976,7 +965,7 @@ void Parameters::monitor_write_ (std::string parameter) throw()
 {
   Param * param = this->param(parameter);
   char buffer[MONITOR_LENGTH];
-  sprintf (buffer,"Parameter write %s = %s",
+  snprintf (buffer,MONITOR_LENGTH,"Parameter write %s = %s",
 	   parameter_name_(parameter).c_str(),
 	   param ?
 	   param->value_to_string(param_write_monitor).c_str() : "[undefined]");

@@ -15,7 +15,7 @@ Memory Memory::instance_[CONFIG_NODE_SIZE]; // (singleton design pattern)
 
 //======================================================================
 
-void Memory::initialize_() throw ()
+void Memory::initialize_()
 {
 #ifdef CONFIG_USE_MEMORY
 
@@ -37,7 +37,7 @@ void Memory::initialize_() throw ()
 
 //----------------------------------------------------------------------
 
-void * Memory::allocate ( size_t bytes ) throw ()
+void * Memory::allocate ( size_t bytes )
 /// @param  bytes   Number of bytes to allocate
 /// @return        Pointer to the allocated memory
 {
@@ -46,7 +46,7 @@ void * Memory::allocate ( size_t bytes ) throw ()
   if (warning_mb_ != 0.0 && ( (bytes) >= (1e6)*warning_mb_)) {
     // WARNING: do not use WARNING since allocates memory, leading to
     //          recursive calls to overloaded operator new 
-    CkPrintf ("%d WARNING: Allocating %lld bytes > %f MB\n",
+    CkPrintf ("%d WARNING: Allocating %ld bytes > %f MB\n",
   	      CkMyPe(),bytes,warning_mb_);
   }
 
@@ -54,7 +54,7 @@ void * Memory::allocate ( size_t bytes ) throw ()
       ((bytes_curr_[0] + bytes) >= (1e9)*limit_gb_)) {
     // WARNING: do not use ERROR or ASSERT since allocates memory, leading to
     //          recursive calls to overloaded operator new 
-    CkPrintf ("%d ERROR: Cannot allocate %lld bytes: limit is %f GB\n",
+    CkPrintf ("%d ERROR: Cannot allocate %ld bytes: limit is %f GB\n",
 	      CkMyPe(), (bytes_curr_[0] + bytes),limit_gb_);
     void * array[10];
     size_t size = backtrace(array,10);
@@ -104,7 +104,7 @@ void * Memory::allocate ( size_t bytes ) throw ()
 
 //----------------------------------------------------------------------
 
-void Memory::deallocate ( void * pointer ) throw()
+void Memory::deallocate ( void * pointer )
 {
 #ifdef CONFIG_USE_MEMORY
 
@@ -138,7 +138,7 @@ void Memory::deallocate ( void * pointer ) throw()
 
 //----------------------------------------------------------------------
 
-void Memory::new_group ( std::string group_name ) throw ()
+void Memory::new_group ( std::string group_name )
 /// @param  group_name  Name of the group
 {
 #ifdef CONFIG_USE_MEMORY
@@ -156,7 +156,7 @@ void Memory::new_group ( std::string group_name ) throw ()
 
 //----------------------------------------------------------------------
 
-int64_t Memory::bytes ( std::string group_name ) throw ()
+int64_t Memory::bytes ( std::string group_name )
 {
 #ifdef CONFIG_USE_MEMORY
   return bytes_curr_[index_group(group_name)];
@@ -167,7 +167,7 @@ int64_t Memory::bytes ( std::string group_name ) throw ()
 
 //----------------------------------------------------------------------
 
-int64_t Memory::bytes_available ( std::string group_name ) throw ()
+int64_t Memory::bytes_available ( std::string group_name )
 {
 #ifdef CONFIG_USE_MEMORY
   int index_group = this->index_group(group_name);
@@ -183,7 +183,7 @@ int64_t Memory::bytes_available ( std::string group_name ) throw ()
 
 //----------------------------------------------------------------------
 
-float Memory::efficiency ( std::string group_name ) throw ()
+float Memory::efficiency ( std::string group_name )
 {
 #ifdef CONFIG_USE_MEMORY
   int index_group = this->index_group(group_name);
@@ -202,7 +202,7 @@ float Memory::efficiency ( std::string group_name ) throw ()
 
 //----------------------------------------------------------------------
 
-int64_t Memory::bytes_high ( std::string group_name ) throw ()
+int64_t Memory::bytes_high ( std::string group_name )
 {
 #ifdef CONFIG_USE_MEMORY
   int index_group = this->index_group(group_name);
@@ -215,7 +215,7 @@ int64_t Memory::bytes_high ( std::string group_name ) throw ()
 
 //----------------------------------------------------------------------
 
-int64_t Memory::bytes_highest ( std::string group_name ) throw ()
+int64_t Memory::bytes_highest ( std::string group_name )
 {
 #ifdef CONFIG_USE_MEMORY
   int index_group = this->index_group(group_name);
@@ -229,7 +229,6 @@ int64_t Memory::bytes_highest ( std::string group_name ) throw ()
 //----------------------------------------------------------------------
 
 void Memory::set_bytes_limit ( int64_t size, std::string group_name )
-  throw ()
 {
 #ifdef CONFIG_USE_MEMORY
   int index_group = this->index_group(group_name);
@@ -239,7 +238,7 @@ void Memory::set_bytes_limit ( int64_t size, std::string group_name )
 
 //----------------------------------------------------------------------
 
-int64_t Memory::bytes_limit ( std::string group_name ) throw ()
+int64_t Memory::bytes_limit ( std::string group_name )
 {
 #ifdef CONFIG_USE_MEMORY
   return bytes_limit_[index_group(group_name)];
@@ -250,7 +249,7 @@ int64_t Memory::bytes_limit ( std::string group_name ) throw ()
 
 //----------------------------------------------------------------------
 
-int Memory::num_new ( std::string group_name ) throw ()
+int Memory::num_new ( std::string group_name )
 {
 #ifdef CONFIG_USE_MEMORY
   return new_calls_[index_group(group_name)];
@@ -261,7 +260,7 @@ int Memory::num_new ( std::string group_name ) throw ()
 
 //----------------------------------------------------------------------
 
-int Memory::num_delete ( std::string group_name ) throw ()
+int Memory::num_delete ( std::string group_name )
 {
 #ifdef CONFIG_USE_MEMORY
   return delete_calls_[index_group(group_name)];
@@ -272,7 +271,7 @@ int Memory::num_delete ( std::string group_name ) throw ()
 
 //----------------------------------------------------------------------
 
-void Memory::print () throw ()
+void Memory::print ()
 {
 #ifdef CONFIG_USE_MEMORY
   for (size_t i=0; i< group_name_.size(); i++) {
@@ -292,7 +291,7 @@ void Memory::print () throw ()
 
 //----------------------------------------------------------------------
 
-void Memory::reset() throw()
+void Memory::reset()
 {
 #ifdef CONFIG_USE_MEMORY
   index_group_ = 0;
@@ -309,7 +308,7 @@ void Memory::reset() throw()
 
 //----------------------------------------------------------------------
 
-void Memory::reset_high() throw()
+void Memory::reset_high()
 {
 #ifdef CONFIG_USE_MEMORY
   TRACE("reset_high");
@@ -323,7 +322,7 @@ void Memory::reset_high() throw()
 
 #ifdef CONFIG_USE_MEMORY
 
-void *operator new (size_t bytes) throw (std::bad_alloc)
+void *operator new (size_t bytes)
 {
   size_t p = (size_t) Memory::instance()->allocate(bytes);
   return (void *) p;
@@ -335,7 +334,7 @@ void *operator new (size_t bytes) throw (std::bad_alloc)
 
 #ifdef CONFIG_USE_MEMORY
 
-void *operator new [] (size_t bytes) throw (std::bad_alloc)
+void *operator new [] (size_t bytes)
 {
   size_t p = (size_t) Memory::instance()->allocate(bytes);
   return (void *)(p);
@@ -347,7 +346,7 @@ void *operator new [] (size_t bytes) throw (std::bad_alloc)
 
 #ifdef CONFIG_USE_MEMORY
 
-void operator delete (void *p) throw ()
+void operator delete (void *p)
 {
   if (p==0) return;
   Memory::instance()->deallocate(p);
@@ -359,7 +358,7 @@ void operator delete (void *p) throw ()
 
 #ifdef CONFIG_USE_MEMORY
 
-void operator delete [] (void *p) throw ()
+void operator delete [] (void *p)
 {
   if (p==0) return;
   Memory::instance()->deallocate(p);

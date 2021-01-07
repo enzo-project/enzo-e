@@ -47,15 +47,19 @@ if [ "$#" -ge 1 ]; then
       rm -f input/*.in.out >& /dev/null
       rm -rf build build-*
       rm -rf test/*.h5
+      rm -rf test/runs_*
       rm -rf template_defs.def.h template_defs.decl.h
       rm -rf .sconf_temp/conftest_0.c .sconsign.dblite 
-      rm -rf config.log warnings.org errors.org log.build out.scons.*
+      rm -rf config.log diff.org log.org warnings.org errors.org log.build out.scons.*
       rm -rf config/*.pyc
       rm -rf test/fail.* test/pass.* test/incomplete.*
+      rm -rf test/*.test-log
       rm -rf scons-local-2.2.0/SCons/*.pyc scons-local-2.2.0/SCons/*/*.pyc
       rm -rf charmrun parameters.out checkpoint_ppm* output-stride*.h5
+      rm -rf cov-int.tgz cov-int
       rm -rf `find test -name "*.png"`
       rm -rf `find test -name "*.h5"`
+      rm -rf src/.cccc
       printf "done\n"
       rm -rf test/out.scons
    fi
@@ -66,7 +70,6 @@ if [ "$#" -ge 1 ]; then
    elif [ "$1" == "compile" ]; then
       target=install-bin
    elif [ "$1" == "test" ]; then
-      ./build.sh
       target="test"
       proc=1
       k_switch="-k"
@@ -166,9 +169,9 @@ if [ $target == "test" ]; then
 
    # count failures, incompletes, and passes
 
-   grep "^ FAIL"       $dir/*unit > $dir/fail.$configure
-   grep "^ incomplete" $dir/*unit > $dir/incomplete.$configure
-   grep "^ pass"       $dir/*unit > $dir/pass.$configure
+   grep "^ FAIL"       $dir/*/*unit > $dir/fail.$configure
+   grep "^ incomplete" $dir/*/*unit > $dir/incomplete.$configure
+   grep "^ pass"       $dir/*/*unit > $dir/pass.$configure
 
    f=`wc -l < $dir/fail.$configure`
    i=`wc -l < $dir/incomplete.$configure`
@@ -233,9 +236,9 @@ if [ $target == "test" ]; then
     file_started=test/runs_started.$configure
     file_completed=test/runs_completed.$configure
 
-    ls test/test_*.unit                   > $file_attempted
-    grep -l "BEGIN" test/test_*.unit      > $file_started
-    grep -l "END CELLO"  test/test_*.unit > $file_completed
+    ls test/*/test_*.unit                   > $file_attempted
+    grep -l "BEGIN" test/*/test_*.unit      > $file_started
+    grep -l "END CELLO"  test/*/test_*.unit > $file_completed
 
 
     count_attempted=`cat $file_attempted | wc -l `
@@ -262,7 +265,7 @@ if [ $target == "test" ]; then
     if [ $f -gt 0 ]; then
 	echo "Exiting testing with failures:"
 	echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
-	cat $dir/fail.$configure
+	cat "$dir/fail.$configure"
 	echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 	exit_status=1
     else
@@ -270,5 +273,17 @@ if [ $target == "test" ]; then
 	exit_status=0
     fi
 fi
+
+if [ $target = "test" ] && [ "$CELLO_PREC" = "double" ]; then
+    # the vl+ct tests should be consolidated with the rest of the tests
+    echo ""
+    echo "--------------------"
+    echo "Attempting to run VL+CT tests (only defined for double Precision)"
+    ./test/run_vlct_test.sh
+    result_code=$?
+    if [ $result_code -gt 0 ]; then
+        exit_status=1
+    fi
+fi;
 echo "Done."
 exit $exit_status

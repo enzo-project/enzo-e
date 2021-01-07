@@ -9,10 +9,13 @@
 #define INDEX_BITS_TREE   20
 #define INDEX_BITS_LEVEL   2
 
-struct BIndex {
+#define INDEX_UNDEFINED_LEVEL -999
+class NodeBits {
 
   // original order ATL crashed in Charm++ during load balancing
 
+public:
+  
   unsigned  tree : INDEX_BITS_TREE; 
   unsigned level : INDEX_BITS_LEVEL; 
   unsigned array : INDEX_BITS_ARRAY;
@@ -123,7 +126,8 @@ public:
   void set_array(int ix, int iy, int iz);
 
   /// Return the packed tree bits for each axis
-  void tree (int * bx = 0, int *by = 0, int *bz = 0) const;
+  void tree (int * bx = 0, int *by = 0, int *bz = 0,
+             int level=INDEX_UNDEFINED_LEVEL) const;
   
   /// child index of this node in parent
   void child (int level, int * ix, int * iy, int * iz, int min_level = 0) const;
@@ -131,11 +135,6 @@ public:
   /// Set the child indicies of this node in the parent
   void set_child(int level, int ix, int iy=0, int iz=0, int min_level = 0);
 
-
-  /// Return the lower or upper extent of the corresponding node relative to 0:1
-  void lower (double bm3[3], int a3[3], int max_level) const;
-  void upper (double bp3[3], int a3[3], int max_level) const;
-  
   void print (const char * msg,
 	      int max_level,
 	      int rank,
@@ -186,7 +185,7 @@ private: // methods
 private: // attributes
 
     union {
-      BIndex a_[3];
+      NodeBits a_[3];
       int v_[3];
     };
 };
@@ -200,34 +199,19 @@ private: // attributes
 //   void pup(PUP::er &p) {
     
 //   }
-PUPbytes(BIndex)
+PUPbytes(NodeBits)
 #endif
 
 //----------------------------------------------------------------------
 #ifndef TEST
 class CkArrayIndexIndex:public CkArrayIndex {
-  Index index_;
+  Index * index_;
 public:
   CkArrayIndexIndex(const Index &in)
   {
-    index_=in;
-    nInts=sizeof(index_)/sizeof(int);
-    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-    // ADDED SINCE OTHERWISE CkArrayIndex::index[] DOES NOT GET INITIALIZED
-    int v3[3];
-    in.values(v3);
-    index[0] = v3[0];
-    index[1] = v3[1];
-    index[2] = v3[2];
-    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    index_ = new (index) Index(in);
+    nInts=sizeof(Index)/sizeof(int);
   }
-  /// Not required, but convenient: cast-to-foo operators
-  operator Index &() {return index_;}
-  /// Return the Index
-  operator const Index &() const {return index_;}
-  /// Return the Index
-  Index & ind() { return index_; }
-  
 };
 #endif
 

@@ -10,7 +10,8 @@
 #include "cello.hpp"
 
 EnzoProlongMC1::EnzoProlongMC1(std::string type) throw()
-  : Prolong ()
+  : Prolong (),
+    method_(-1)
 {
   if      (type == "ThirdOrderA")  method_ = 0;
   else if (type == "SecondOrderA") method_ = 1;

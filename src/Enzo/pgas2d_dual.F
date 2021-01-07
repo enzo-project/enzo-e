@@ -6,7 +6,7 @@ c
       subroutine pgas2d_dual
      &     (dslice, eslice, geslice, pslice, 
      &     uslice, vslice, wslice, eta1, eta2,
-     &     idim, jdim, i1, i2, j1, j2, gamma, pmin)
+     &     idim, jdim, i1, i2, j1, j2, gamma, pmin, ierror)
 c
 c  COMPUTES GAS PRESSURE ON A SLICE (DUAL ENERGY VERSION)
 c
@@ -47,6 +47,7 @@ c
 c-----------------------------------------------------------------------
 c
       implicit NONE
+#define FORTRAN
 #include "fortran_types.h"
 c
 c-----------------------------------------------------------------------
@@ -58,12 +59,14 @@ c
       R_PREC    eta1, eta2, gamma, pmin
       R_PREC dslice(idim,jdim), eslice(idim,jdim), pslice(idim,jdim),
      &     uslice(idim,jdim), vslice(idim,jdim), wslice(idim,jdim),
-     &    geslice(idim,jdim)
+     &     geslice(idim,jdim)
+      INTG_PREC ierror
 c
 c  locals
 c
       INTG_PREC i, j, im1, ip1
       R_PREC    demax, ge1, ge2, ke
+      INTG_PREC icall
 c
 c\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////
 c=======================================================================
@@ -75,8 +78,9 @@ C      print*, 'DEBUG_PRESSURE i1 i2 ',i1,i2
 C      print*, 'DEBUG_PRESSURE j1 j2 ',j1,j2
 C      print*, 'DEBUG_PRESSURE idim jdim ',idim,jdim
 C      print*, 'DEBUG_PRESSURE eta ',eta1,eta2
-C      print*, 'DEBUG_PRESSURE pmin ',pmin
-
+C     print*, 'DEBUG_PRESSURE pmin ',pmin
+      icall = ierror
+      ierror = 0
       do j=1,10
          sum(j) = 0.0
       end do
@@ -102,11 +106,15 @@ c             is > eta2 then use the gas energy computed from the total energy
 c             to update the specific energy (total energy is better).
 c
             if (geslice(i,j) .le. 0._RKIND) write(6,*) 
-     &            'pga:',i,j,geslice(i,j),demax
+     &            'pga:',icall,i,j,geslice(i,j),demax
             if (ge1*dslice(i,j)/demax .gt. eta2) geslice(i,j) = ge1
             if (geslice(i,j) .le. 0._RKIND) write(6,*) 
-     &            'pgb:',i,j,geslice(i,j),dslice(i,j),demax,eslice(i,j)
-c
+     &           'pgb:',icall,i,j,
+     &           geslice(i,j),dslice(i,j),demax,eslice(i,j)
+            if (geslice(i,j) .le. 0._RKIND) 
+     &           ierror = ERROR_PGAS2D_DUAL_GE_LT_0
+
+c     
 c           If the ratio of the specific gas energy to specific total energy 
 c             (in this cell) is < eta1 then use the gas energy to update
 c             the specific energy (gas energy is better).

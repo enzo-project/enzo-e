@@ -20,11 +20,7 @@ class Method : public PUP::able
 public: // interface
 
   /// Create a new Method
-  Method (double courant = 1.0) throw()
-    : refresh_list_(),
-      schedule_(NULL),
-      courant_(courant)
-  { }
+  Method (double courant = 1.0) throw();
 
   /// Destructor
   virtual ~Method() throw();
@@ -34,9 +30,11 @@ public: // interface
   
   Method (CkMigrateMessage *m)
     : PUP::able(m),
-      refresh_list_(),
-      schedule_(NULL),
-      courant_(1.0)
+    schedule_(NULL),
+    courant_(1.0),
+    ir_post_(-1),
+    neighbor_type_(neighbor_leaf)
+   
   { }
       
   /// CHARM++ Pack / Unpack function
@@ -62,23 +60,11 @@ public: // virtual functions
     /* This function intentionally empty */
   }
 
-  int add_refresh (int ghost_depth, 
-		   int min_face_rank, 
-		   int neighbor_type, 
-		   int sync_type,
-		   int id)
-  {
-    int index=refresh_list_.size();
-    refresh_list_.resize(index+1);
-    refresh_list_[index] = new Refresh 
-      (ghost_depth,min_face_rank,neighbor_type,sync_type,id,true);
-    return index;
-  }
+  /// Add a new refresh object
+  int add_new_refresh_ (int neighbor_type = neighbor_leaf);
 
-  Refresh * refresh(size_t index=0) 
-  {
-    return (index < refresh_list_.size()) ? refresh_list_[index] : NULL;
-  }
+  /// Return the index for the main post-refresh object
+  int refresh_id_post() const;
 
   /// Return the Schedule object pointer
   Schedule * schedule() throw() 
@@ -112,16 +98,17 @@ public: // attributes (static)
 
 protected: // attributes
 
-  ///  Refresh object
-  std::vector<Refresh *> refresh_list_;
-
-
   /// Schedule object, if any (default is every cycle)
   Schedule * schedule_;
 
   /// Courant condition for the Method
   double courant_;
 
+  /// Index for main refresh after Method is called
+  int ir_post_;
+
+  /// Default refresh type
+  int neighbor_type_;
 };
 
 #endif /* PROBLEM_METHOD_HPP */

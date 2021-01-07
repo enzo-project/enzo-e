@@ -25,7 +25,10 @@ public: // interface
        int num_field_data,
        double xm, double xp,
        double ym, double yp,
-       double zm, double zp) throw();
+       double zm, double zp,
+       // specifying field_descr and particle_descr included for test code only
+       FieldDescr * field_descr = nullptr, 
+       ParticleDescr * particle_descr = nullptr) throw();
 
   /// Destructor
   ~Data() throw();
@@ -40,7 +43,8 @@ public: // interface
   Data()
     : num_field_data_(0),
       field_data_(),
-      particle_data_(NULL),
+      particle_data_(nullptr),
+      flux_data_(nullptr),
       scalar_data_long_double_(),
       scalar_data_double_(),
       scalar_data_int_(),
@@ -71,6 +75,10 @@ public: // interface
       particle_data_ = new ParticleData;
     }
     p | *particle_data_;
+    if (up) {
+      flux_data_ = new FluxData;
+    }
+    p | *flux_data_;
     p | scalar_data_long_double_;
     p | scalar_data_double_;
     p | scalar_data_int_;
@@ -110,6 +118,10 @@ public: // interface
   }
 
   //----------------------------------------------------------------------
+
+  void allocate () throw();
+
+  //----------------------------------------------------------------------
   // fields
   //----------------------------------------------------------------------
 
@@ -131,7 +143,14 @@ public: // interface
 
   /// Return the x,y,z,t coordinates of field cell centers
   void field_cells (double * x, double * y, double * z,
-		    int gx = 0, int gy = 0, int gz = 0) const;
+		    int gx = 0, int gy = 0, int gz = 0) const
+  { return field_cell_faces(x,y,z,gx,gy,gz,0,0,0); }
+
+  /// Return the x,y,z,t coordinates of field cell faces (if there are n cell
+  /// centers, then there are n+1 cell faces)
+  void field_cell_faces (double * x, double * y, double * z,
+			 int gx = 0, int gy = 0, int gz = 0,
+			 int cx = 1, int cy = 1, int cz = 1) const;
 
   /// Return the cell widths of Fields
   void field_cell_width (double * hx, 
@@ -159,7 +178,17 @@ public: // interface
   { return Particle(cello::particle_descr(),
 		    particle_data_); }
 
-  void allocate () throw();
+  //----------------------------------------------------------------------
+  // fluxes
+  //----------------------------------------------------------------------
+
+  /// Return the constant Flux data
+  const FluxData * flux_data () const throw()
+  { return flux_data_; }
+
+  /// Return the Flux data
+  FluxData * flux_data () throw()
+  { return flux_data_; }
 
   //----------------------------------------------------------------------
   // scalars
@@ -211,6 +240,9 @@ private: // attributes
 
   /// Particle data
   ParticleData * particle_data_;
+
+  /// Flux data
+  FluxData * flux_data_;
 
   /// Scalar data
   ScalarData<long double> scalar_data_long_double_;

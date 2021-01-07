@@ -83,7 +83,12 @@ PARALLEL_MAIN_BEGIN
   const double yp =  2.0;
   const double zp =  3.0;
   const double t =   7.0;
-  Data data(nx,ny,nz, 1,  xm,xp,ym,yp,zm,zp);
+
+  FieldDescr * field_descr = new FieldDescr;
+  ParticleDescr * particle_descr = new ParticleDescr;
+
+  Data data(nx,ny,nz, 1,  xm,xp,ym,yp,zm,zp,
+	    field_descr, particle_descr);
 
   double xv[nx], yv[ny], zv[nz];
   double dvalues[n];
@@ -107,6 +112,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_func ("evaluate(array) [expr]");
 
+  bool l_equal = true;
   for (int ix=0; ix<nx; ix++) {
     double x=xv[ix];
     for (int iy=0; iy<ny; iy++) {
@@ -114,10 +120,11 @@ PARALLEL_MAIN_BEGIN
       for (int iz=0; iz<nz; iz++) {
 	int i=ix+nx*(iy+ny*iz);
 	double z=zv[iz];
-	  unit_assert (dvalues[i] == EXPR1_VAL);
-	}
+        l_equal = l_equal &&  (dvalues[i] == EXPR1_VAL);
+      }
     }
   }
+  unit_assert (l_equal);
   
   
   //--------------------------------------------------
@@ -135,6 +142,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_func ("evaluate(array) [expr,mask,expr]");
 
+  l_equal = true;
   for (int ix=0; ix<nx; ix++) {
     double x=xv[ix];
     for (int iy=0; iy<ny; iy++) {
@@ -143,11 +151,12 @@ PARALLEL_MAIN_BEGIN
 	int i=ix+nx*(iy+ny*iz);
 	double z=zv[iz];
 	val2 = (MASK2_VAL1 ? (EXPR2_VAL1) : ( (MASK2_VAL2 ? (EXPR2_VAL2) : (EXPR2_VAL3))));
-	unit_assert (dvalues[i] == val2);
+        l_equal = l_equal &&  (dvalues[i] == val2);
       }
     }
   }
 
+  unit_assert (l_equal);
   //--------------------------------------------------
 
   unit_func ("evaluate(scalar) [expr,mask(png),expr] ");
@@ -163,6 +172,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_func ("evaluate(array) [expr,mask(png),expr]");
 
+  l_equal = true;
   for (int ix=0; ix<nx; ix++) {
     double x=xv[ix];
     for (int iy=0; iy<ny; iy++) {
@@ -171,10 +181,12 @@ PARALLEL_MAIN_BEGIN
 	int i=ix+nx*(iy+ny*iz);
 	double z=zv[iz];
 	val3 = (MASK3_VAL1 ? (EXPR3_VAL1) : (EXPR3_VAL2));
-	unit_assert (dvalues[i] == val3);
+	l_equal = l_equal &&  (dvalues[i] == val3);
       }
     }
   }
+
+  unit_assert (l_equal);
 
   //----------------------------------------------------------------------
 

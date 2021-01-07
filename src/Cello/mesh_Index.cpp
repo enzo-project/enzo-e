@@ -302,11 +302,18 @@ void Index::set_array(int ix, int iy, int iz)
 
 //----------------------------------------------------------------------
 
-void Index::tree (int * bx, int * by, int *bz) const
+void Index::tree (int * bx, int * by, int *bz, int level) const
 {
-  if (bx) (*bx) = a_[0].tree; 
-  if (by) (*by) = a_[1].tree; 
-  if (bz) (*bz) = a_[2].tree; 
+  if (level == INDEX_UNDEFINED_LEVEL) {
+    if (bx) (*bx) = a_[0].tree; 
+    if (by) (*by) = a_[1].tree; 
+    if (bz) (*bz) = a_[2].tree;
+  } else {
+    int shift = INDEX_BITS_TREE - level;
+    if (bx) (*bx) = a_[0].tree >> shift; 
+    if (by) (*by) = a_[1].tree >> shift; 
+    if (bz) (*bz) = a_[2].tree >> shift;
+  }
 }
   
 //----------------------------------------------------------------------
@@ -328,50 +335,6 @@ void Index::set_child(int level, int ix, int iy, int iz, int min_level)
     a_[1].array = (a_[1].array & mask) | (iy<<shift);
     a_[2].array = (a_[2].array & mask) | (iz<<shift);
   }
-}
-
-//----------------------------------------------------------------------
-void Index::lower (double v3[3], int array[3], int max_level) const
-{
-  const int shift_tree = (INDEX_BITS_TREE-max_level);
-  int ix = (a_[0].array << max_level) + (a_[0].tree >> shift_tree );
-  int iy = (a_[1].array << max_level) + (a_[1].tree >> shift_tree);
-  int iz = (a_[2].array << max_level) + (a_[2].tree >> shift_tree);
-
-  int kx = array[0] << max_level;
-  int ky = array[1] << max_level;
-  int kz = array[2] << max_level;
-
-  v3[0] = 1.0*ix/kx;
-  v3[1] = 1.0*iy/ky;
-  v3[2] = 1.0*iz/kz;
-}
-
-//----------------------------------------------------------------------
-
-void Index::upper (double v3[3], int a3[3], int max_level) const
-{
-
-  const int shift_tree = (INDEX_BITS_TREE-max_level);
-
-  int ix = (a_[0].array << max_level) + (a_[0].tree >> shift_tree);
-  int iy = (a_[1].array << max_level) + (a_[1].tree >> shift_tree);
-  int iz = (a_[2].array << max_level) + (a_[2].tree >> shift_tree);
-
-  const int ip = 1 << (max_level - level());
-
-  ix += ip;
-  iy += ip;
-  iz += ip;
-  
-  int kx = a3[0] << max_level;
-  int ky = a3[1] << max_level;
-  int kz = a3[2] << max_level;
-
-  v3[0] = 1.0*ix/kx;
-  v3[1] = 1.0*iy/ky;
-  v3[2] = 1.0*iz/kz;
-  
 }
 
 //----------------------------------------------------------------------

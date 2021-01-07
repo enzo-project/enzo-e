@@ -1,0 +1,11 @@
+# Problem: Heat diffusion in 2D
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/Heat/heat.incl"
+
+Mesh { root_blocks    = [4,4]; }
+
+Output {
+   temp { name = ["method_heat-temp-8-%06d.png", "cycle"]; }
+   mesh { name = ["method_heat-mesh-8-%06d.png", "cycle"]; }
+}
