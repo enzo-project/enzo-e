@@ -186,7 +186,7 @@ if [ $target == "test" ]; then
         $line | tee $log
 
    for test in $dir/*unit; do
-
+      exho $test
       test_begin=`grep "UNIT TEST BEGIN" $test | wc -l`
       test_end=`grep "UNIT TEST END"   $test | wc -l`
 
@@ -198,7 +198,7 @@ if [ $target == "test" ]; then
          printf "$line" >> $log
       fi
    done
-
+   
    echo "$stop" > test/STOP
 
 fi
