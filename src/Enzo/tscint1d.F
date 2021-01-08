@@ -38,6 +38,8 @@ c  LOCALS:
 c     fraction  - a work array of size gdim1/refine1
 c-----------------------------------------------------------------------
       implicit NONE
+#define FORTRAN
+#include "fortran_types.h"
 c
       integer ijkn, MAX_REFINE
       parameter (ijkn = MAX_ANY_SINGLE_DIRECTION)

@@ -10,60 +10,6 @@
 /// array of octrees.
 
 //--------------------------------------------------
-// #define DEBUG_FACE
-// #define DEBUG_ADAPT
-// #define DEBUG_NEW_REFRESH
-//--------------------------------------------------
-
-#ifdef DEBUG_FACE
-#   define DEBUG_FACES(MSG) /* ... */
-#else
-#   define DEBUG_FACES(MSG) debug_faces_(MSG)
-#endif
-
-#ifdef DEBUG_ADAPT
-
-#define CELLO_TRACE
-
-#   define PUT_LEVEL(INDEX_SEND,INDEX_RECV,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG) \
-  {									\
-    char buffer [256];							\
-    int nb3[3] = {2,2,2};						\
-    CkPrintf ("%s %s -> B%s"						\
-	     " [%d => %d] if3 %2d %2d %2d  ic3 %d %d %d\n",		\
-	      name().c_str(),MSG,INDEX_RECV.bit_string(INDEX_RECV.level(),rank(),nb3).c_str(),LEVEL_NOW,LEVEL_NEW, \
-	     IF3[0],IF3[1],IF3[2],IC3[0],IC3[1],IC3[2]);		\
-    check_child_(IC3,"PUT_LEVEL",__FILE__,__LINE__);			\
-    check_face_(IF3,"PUT_LEVEL",__FILE__,__LINE__);			\
-    thisProxy[INDEX_RECV].p_adapt_recv_level				\
-      (INDEX_SEND,IC3,IF3,LEVEL_NOW,LEVEL_NEW);				\
-  }
-#else /* DEBUG_ADAPT */
-#   define PUT_LEVEL(INDEX_SEND,INDEX_RECV,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG) \
-  {									\
-    thisProxy[INDEX_RECV].p_adapt_recv_level				\
-      (INDEX_SEND,IC3,IF3,LEVEL_NOW,LEVEL_NEW);				\
-  }
-#endif /* DEBUG_ADAPT */
-
-#ifdef DEBUG_ADAPT
-
-#   ifdef CELLO_TRACE
-#      define trace(A) \
-  CkPrintf ("%s:%d %s DEBUG_ADAPT %s\n",				\
-	    __FILE__,__LINE__,name_.c_str(),A);				\
-  fflush(stdout)
-#   else
-#      define trace(A) /*  NULL */
-#   endif
-
-#else
-
-#   define trace(A) /*  NULL */
-
-#endif
-
-//--------------------------------------------------
 
 #include "simulation.hpp"
 #include "mesh.hpp"
@@ -71,6 +17,10 @@
 
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
+
+//--------------------------------------------------
+// #define DEBUG_ADAPT
+//--------------------------------------------------
 
 //======================================================================
 
@@ -98,8 +48,6 @@ void Block::adapt_enter_()
 void Block::adapt_begin_()
 
 {
-  trace("adapt_begin 1");
-
   cello::simulation()->set_phase(phase_adapt);
 
   const int level_maximum = cello::config()->mesh_max_level;
@@ -123,8 +71,6 @@ void Block::adapt_begin_()
 /// detection.
 void Block::adapt_called_()
 {
-  trace("adapt_called 2");
-
   adapt_send_level();
 
   control_sync_quiescence (CkIndex_Main::p_adapt_next());
@@ -141,20 +87,6 @@ void Block::adapt_called_()
 /// adapt_end_().
 void Block::adapt_next_()
 {
-  DEBUG_FACES("adapt_next");
-
-  trace("adapt_next 3");
-
-#ifdef DEBUG_ADAPT
-  {
-    char buffer[255];
-    if (level() != level_next_) {
-      CkPrintf ("%s is leaf %d level %d -> %d\n",
-		name().c_str(),is_leaf(),level(),level_next_);
-    }
-  }
-#endif
-
   update_levels_();
 
   if (is_leaf()) {
@@ -177,15 +109,9 @@ void Block::adapt_next_()
 /// been deleted.  
 void Block::adapt_end_()
 {
-  trace("adapt_end 4");
-
   if (index_.is_root()) thisProxy.doneInserting();
 
   if (delete_) {
-#ifdef DEBUG_ADAPT
-  CkPrintf ("%s DESTROY\n",name().c_str());
-  fflush(stdout);
-#endif
     ckDestroy();
     return;
   }
@@ -193,9 +119,8 @@ void Block::adapt_end_()
   for (size_t i=0; i<face_level_last_.size(); i++)
     face_level_last_[i] = -1;
 
-  const int rank = cello::rank();
-  sync_coarsen_.set_stop(NUM_CHILDREN(rank));
   sync_coarsen_.reset();
+  sync_coarsen_.set_stop(cello::num_children());
 
   const int initial_cycle = cello::config()->initial_cycle;
   const bool is_first_cycle = (initial_cycle == cycle());
@@ -292,8 +217,6 @@ void Block::adapt_refine_()
 
   adapt_ = adapt_unknown;
 
-  const int rank = cello::rank();
-  
   int nx,ny,nz;
   data()->field_data()->size(&nx,&ny,&nz);
 
@@ -303,7 +226,7 @@ void Block::adapt_refine_()
 
   ParticleDescr * p_descr = cello::simulation()->particle_descr();
 
-  const int nc = NUM_CHILDREN(rank);
+  const int nc = cello::num_children();
 
   for (int i=0; i<nc; i++) {
     particle_list[i] = new ParticleData;
@@ -317,6 +240,8 @@ void Block::adapt_refine_()
   particle_scatter_children_ (particle_list,particle);
   
   // For each new child
+
+  const int rank = cello::rank();
 
   ItChild it_child (rank);
   int ic3[3];
@@ -408,12 +333,7 @@ void Block::adapt_refine_()
 void Block::particle_scatter_children_ (ParticleData * particle_list[],
 					Particle particle)
 {
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("DEBUG_NEW_REFRESH particle_scatter_children\n");
-#endif
-
-  const int rank = cello::rank();
-  const int npa = NUM_CHILDREN(rank);
+  const int npa = cello::num_children();
 
   // get Block bounds 
   double xm,ym,zm;
@@ -433,9 +353,6 @@ void Block::particle_scatter_children_ (ParticleData * particle_list[],
   int count = 0;
   for (int it=0; it<nt; it++) {
 
-#ifdef DEBUG_NEW_REFRESH
-    CkPrintf ("DEBUG_NEW_REFRESH scatter type %d\n",it);
-#endif
     const int ia_x  = particle.attribute_position(it,0);
 
     // (...positions may use absolute coordinates (float) or
@@ -455,20 +372,17 @@ void Block::particle_scatter_children_ (ParticleData * particle_list[],
       const int np = particle.num_particles(it,ib);
 
       // ...all particles will be moved
-      bool mask[np];
-      for (int ip=0; ip<np; ip++) {
-	mask[ip] = true;
-      }
+      const bool * mask = nullptr;
 
       // ...extract particle position arrays
+      std::vector<double> xa(np);
+      std::vector<double> ya(np);
+      std::vector<double> za(np);
+      
+      particle.position(it,ib,xa.data(),ya.data(),za.data());
 
-      double xa[np],ya[np],za[np];
-      particle.position(it,ib,xa,ya,za);
-
-      // ...initialize mask used for scatter and delete
       // ...and corresponding particle indices
-
-      int index[np];
+      std::vector<int> index(np);
 
       if (is_float) {
 
@@ -476,14 +390,11 @@ void Block::particle_scatter_children_ (ParticleData * particle_list[],
 
 	for (int ip=0; ip<np; ip++) {
 
-#ifdef DEBUG_NEW_REFRESH
-    CkPrintf ("DEBUG_NEW_REFRESH scatter particle %d\n",ip);
-#endif
+	  const double x = xa[ip*d];
+	  const double y = ya[ip*d];
+	  const double z = za[ip*d];
 
-	  double x = xa[ip*d];
-	  double y = ya[ip*d];
-	  double z = za[ip*d];
-
+	  const int rank = cello::rank();
 	  int ix = (rank >= 1) ? ( (x < x0) ? 0 : 1) : 0;
 	  int iy = (rank >= 2) ? ( (y < y0) ? 0 : 1) : 0;
 	  int iz = (rank >= 3) ? ( (z < z0) ? 0 : 1) : 0;
@@ -496,9 +407,8 @@ void Block::particle_scatter_children_ (ParticleData * particle_list[],
 	ERROR("Block::particle_scatter_children_",
 	      "Relative (integer) positions not supported");
       }
-
       // ...scatter particles to particle array
-      particle.scatter (it,ib, np, mask, index, npa, particle_list);
+      particle.scatter (it,ib, np, mask, index.data(), npa, particle_list);
       // ... delete scattered particles
       count += particle.delete_particles (it,ib,mask);
     }
@@ -513,12 +423,17 @@ void Block::adapt_delete_child_(Index index_child)
 #ifdef DEBUG_ADAPT
   int nb3[3] = {2,2,2};
   CkPrintf ("%s deleting child %s\n",
-	    name().c_str(), index_child.bit_string(index_child.level(),rank(),nb3).c_str());
+	    name().c_str(),
+            index_child.bit_string
+            (index_child.level(),cello::rank(),nb3).c_str());
   fflush(stdout);
 #endif
   thisProxy[index_child].p_adapt_delete();
 
   if (sync_coarsen_.next()) {
+#ifdef DEBUG_ADAPT
+    CkPrintf ("%s coarsen next\n",name().c_str());
+#endif
     children_.clear();
   }
 }
@@ -528,7 +443,6 @@ void Block::adapt_delete_child_(Index index_child)
 void Block::adapt_send_level()
 {
   if (!is_leaf()) return;
-
   const int level = this->level();
   const int min_face_rank = cello::config()->adapt_min_face_rank;
   const int min_level     = cello::config()->mesh_min_level;
@@ -540,7 +454,9 @@ void Block::adapt_send_level()
     Index index_neighbor = it_neighbor.index();
     int ic3[3];
     it_neighbor.child(ic3);
-    PUT_LEVEL (index_,index_neighbor,ic3,of3,level,level_next_,"send");
+
+    thisProxy[index_neighbor].p_adapt_recv_level
+      (index_,ic3,of3,level,level_next_);
   }
 }
 
@@ -590,7 +506,7 @@ void Block::p_adapt_recv_level
     CkPrintf ("%s %s <- B%s"
 	      " [%d => %d] if3 %2d %2d %2d  ic3 %d %d %d [%d] %s\n",
 	      name().c_str(),"recv",
-	      index_send.bit_string(index_send.level(),rank(),nb3).c_str(),
+	      index_send.bit_string(index_send.level(),cello::rank(),nb3).c_str(),
 	      level_face_curr,level_face_new,
 	      if3[0],if3[1],if3[2],				
 	      ic3[0],ic3[1],ic3[2], face_level_last_[ICF3(ic3,if3)],

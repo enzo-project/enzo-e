@@ -323,7 +323,7 @@ c
             dueb(i) = dub(i)*eb(i) + diffcoef(i,j)*
      &           (dslice(i-1,j)*eslice(i-1,j) - dslice(i,j)*eslice(i,j))
 c
-c	This update must be the last !AK
+c     This update must be the last !AK
 c
             dub(i)  =  dub(i) + diffcoef(i,j)*
      &           (dslice(i-1,j)               - dslice(i,j)            )

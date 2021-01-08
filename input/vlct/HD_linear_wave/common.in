@@ -1,0 +1,48 @@
+# common initial conditions to testing Inclined Linear Waves
+
+   # Domain is the 3D  box 0 < x < 3, 0 < y,z < 1.5
+   include "input/vlct/HD_linear_wave/domain-lw.incl"
+   include "input/vlct/vlct.incl"
+
+   Method{
+      mhd_vlct{ riemann_solver = "hllc"; };
+   }
+
+   Initial{
+      list = ["inclined_wave"];
+
+      inclined_wave{
+         # For coordinates x0, x1, x2 - a wave is initialized along x0
+	 # To transform x, y, z to x0, x1, x2:
+	 #    1. Rotate x-y axis about the z-axis by angle -beta (rotate
+	 #       clockwise). The rotated y-axis is now the x1-axis
+	 #    2. Rotate the z-axis and the rotated x axis about the x1-axis
+	 #       by angle -alpha (rotate clock-wise).
+         alpha = 0.7297276562269663; # sin(alpha) = 2/3
+	 beta  = 1.1071487177940904; # sin(beta) =  2/sqrt(5)
+
+         lambda = 1.; #wavelength
+
+         # amplitude of the linear wave (has no effect on circularly
+	 # polarized alfven wave)
+	 amplitude = 1.e-6;
+
+	 # set the sign of the wave speed. default is true
+	 # (doesn't accomplish anything for circularly polarized Alfven waves)
+	 positive_vel = true;
+      };
+   }
+
+   Stopping{
+      time = 1.0;
+   }
+
+   Output {
+      data {
+         schedule {
+            var = "time";
+	    list = [0.0, 1.0];
+         };
+	 name = ["data-%03d.h5", "proc"];
+      };
+   }

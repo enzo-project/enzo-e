@@ -20,7 +20,8 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("ParticleDescr");
   ParticleDescr * particle_descr = new ParticleDescr;
-  particle_descr -> set_batch_size (1024);
+  const int mb = 1024;
+  particle_descr -> set_batch_size (mb);
 
   unit_class("ParticleData");
   ParticleData * particle_data = new ParticleData;
@@ -214,7 +215,7 @@ PARALLEL_MAIN_BEGIN
   //   Batch
   //--------------------------------------------------
 
-  unit_assert (particle.batch_size() == 1024);
+  unit_assert (particle.batch_size() == mb);
 
   unit_func("index()");
   int ib,ip;
@@ -223,10 +224,10 @@ PARALLEL_MAIN_BEGIN
   unit_assert (ib==0 && ip==0);
   particle.index(1023,&ib,&ip);
   unit_assert (ib==0 && ip==1023);
-  particle.index(1024,&ib,&ip);
+  particle.index(mb,&ib,&ip);
   unit_assert (ib==1 && ip==0);
-  particle.index(1024*1024,&ib,&ip);
-  unit_assert (ib==1024 && ip==0);
+  particle.index(mb*mb,&ib,&ip);
+  unit_assert (ib==mb && ip==0);
   
   //--------------------------------------------------
   //   Type
@@ -325,22 +326,22 @@ PARALLEL_MAIN_BEGIN
   unit_func("num_particles()");
   unit_assert (particle.num_particles(it_dark) == 10000);
   unit_func("num_batches()");
-  unit_assert (particle.num_batches(it_dark) == 10000/1024 + 1);
+  unit_assert (particle.num_batches(it_dark) == 10000/mb + 1);
 
   unit_func("num_particles()");
   unit_assert (particle.num_particles(it_trace) == 20000);
   unit_func("num_batches()");
-  unit_assert (particle.num_batches(it_trace) == 20000/1024 + 1);
+  unit_assert (particle.num_batches(it_trace) == 20000/mb + 1);
 
   unit_func("index()");
   particle.index(10000,&ib,&ip);
-  unit_assert (ib == 10000/1024);
-  unit_assert (ip == 10000%1024);
+  unit_assert (ib == 10000/mb);
+  unit_assert (ip == 10000%mb);
 
   unit_func("index()");
   particle.index(20000,&ib,&ip);
-  unit_assert (ib == 20000/1024);
-  unit_assert (ip == 20000%1024);
+  unit_assert (ib == 20000/mb);
+  unit_assert (ip == 20000%mb);
   
   int i_dark_1 = particle.insert_particles (it_dark, 20000);
   int i_trace_1 = particle.insert_particles (it_trace, 10000);
@@ -351,17 +352,17 @@ PARALLEL_MAIN_BEGIN
   unit_func("num_particles()");
   unit_assert (particle.num_particles(it_dark) == 30000);
   unit_func("num_batches()");
-  unit_assert (particle.num_batches(it_dark) == 30000/1024 + 1);
+  unit_assert (particle.num_batches(it_dark) == 30000/mb + 1);
 
   unit_func("num_particles()");
   unit_assert (particle.num_particles(it_trace) == 30000);
   unit_func("num_batches()");
-  unit_assert (particle.num_batches(it_trace) == 30000/1024 + 1);
+  unit_assert (particle.num_batches(it_trace) == 30000/mb + 1);
 
   unit_func("index()");
   particle.index(30000,&ib,&ip);
-  unit_assert (ib == 30000/1024);
-  unit_assert (ip == 30000%1024);
+  unit_assert (ib == 30000/mb);
+  unit_assert (ip == 30000%mb);
 
   //--------------------------------------------------
   // dark assignment and compare
@@ -395,15 +396,17 @@ PARALLEL_MAIN_BEGIN
   unit_assert(count_particles == 30000);
 
   // test position() and velocity()
-  double xp[mp], yp[mp], zp[mp];
-  double vxp[mp],vyp[mp],vzp[mp];
+  std::vector<double> xp(mp), yp(mp), zp(mp);
+  std::vector<double> vxp(mp),vyp(mp),vzp(mp);
   int error_position=0;
   int error_velocity=0;
   for (int ib=0; ib<nb; ib++) {
     unit_func("position()");
-    unit_assert(particle.position(it_dark, ib, xp, yp, zp));
+    unit_assert(particle.position
+                (it_dark, ib, xp.data(), yp.data(), zp.data()));
     unit_func("velocity()");
-    unit_assert(particle.velocity(it_dark, ib, vxp,vyp,vzp));
+    unit_assert(particle.velocity
+                (it_dark, ib, vxp.data(),vyp.data(),vzp.data()));
     const int np = particle.num_particles(it_dark,ib);
     for (int ip=0; ip<np; ip++) {
       index = ip + ib*mp;
@@ -481,13 +484,14 @@ PARALLEL_MAIN_BEGIN
   error_position=0;
   for (int ib=0; ib<nb; ib++) {
     unit_func("position()");
-    unit_assert(particle.position(it_trace, ib, xp, yp, zp));
+    unit_assert(particle.position
+                (it_trace, ib, xp.data(), yp.data(), zp.data()));
     unit_func("velocity()");
-    unit_assert(!particle.velocity(it_trace, ib, vxp, vyp, vzp));
+    unit_assert(!particle.velocity
+                (it_trace, ib, vxp.data(), vyp.data(), vzp.data()));
     const int np = particle.num_particles(it_trace,ib);
     for (int ip=0; ip<np; ip++) {
       index = ip + ib*mp;
-      CkPrintf ("position %lg %ld\n",xp[ip], 3*index);
       if (xp[ip] != 3*index) error_position++;
       if (yp[ip] != 4*index+1) error_position++;
       if (zp[ip] != 1*index+2) error_position++;
@@ -536,10 +540,10 @@ PARALLEL_MAIN_BEGIN
 
 
   // initialize mask for particles to delete
-  bool mask[1024];
+  bool mask[mb];
   int count_delete;
 
-  for (int i=0; i<1024; i++) {
+  for (int i=0; i<mb; i++) {
     mask[i] = (i % 3 == 0);
   }
 
@@ -651,7 +655,7 @@ PARALLEL_MAIN_BEGIN
   nb = particle.num_batches(it_dark);
   ip0 = particle.num_particles(it_dark,nb-1);
   i2 = particle.insert_particles (it_dark, 10000);
-  unit_assert (i2 == 1024*(nb-1) + ip0);
+  unit_assert (i2 == mb*(nb-1) + ip0);
 
   unit_assert (particle.num_particles() == 10000 + 2*count_particles);
 
@@ -669,7 +673,7 @@ PARALLEL_MAIN_BEGIN
   nb = particle.num_batches(it_trace);
   ip0 = particle.num_particles(it_trace,nb-1);
   i2 = particle.insert_particles (it_trace, 10000);
-  unit_assert (i2 == 1024*(nb-1) + ip0);
+  unit_assert (i2 == mb*(nb-1) + ip0);
   unit_assert (particle.num_particles() == 20000 + 2*count_particles);
 
   unit_func("num_particles()");
@@ -691,7 +695,7 @@ PARALLEL_MAIN_BEGIN
   count_particles = particle.num_particles(it_dark);
 
   count_delete = 0;
-  for (int i=0; i<1024; i++) {
+  for (int i=0; i<mb; i++) {
     mask[i] = (i % 5 == 0);
   }
 
@@ -833,7 +837,7 @@ PARALLEL_MAIN_BEGIN
   nb = p_src.num_batches(it_dark);
 
   mp = particle.batch_size();
-  int index_array[mp];
+  int index_array[mb];
 
   for (int ib=0; ib<nb; ib++) {
     float * xa = (float *) p_src.attribute_array(it_dark,ia_dark_x,ib);

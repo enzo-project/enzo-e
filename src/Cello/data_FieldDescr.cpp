@@ -71,8 +71,11 @@ int FieldDescr::field_count() const throw()
 //----------------------------------------------------------------------
 
 std::string FieldDescr::field_name(int id_field) const throw()
-{ 
-  return name_.at(id_field);
+{
+  ASSERT1("FieldDescr::field_name",
+          "index %d is out of range for vector of field names.", id_field,
+          name_.size() > (std::vector<std::string>::size_type)id_field);
+  return name_[id_field];
 }
 
 //----------------------------------------------------------------------

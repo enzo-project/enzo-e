@@ -73,7 +73,6 @@ private: // attributes
   double mol_weight_;
 
   bool comoving_coordinates_;
-
 };
 
 #endif /* ENZO_ENZO_COMPUTE_TEMPERATURE_HPP */

@@ -12,11 +12,10 @@
 #include "_error.hpp"
 #include "mesh_Index.hpp"
 #include "charm_reductions.hpp"
-#include "charm_Sync.hpp"
 #include "charm_MappingArray.hpp"
 #include "charm_MappingTree.hpp"
 
 #include "charm_MsgRefresh.hpp"
 #include "charm_MsgCoarsen.hpp"
 #include "charm_MsgRefine.hpp"
-#include "mesh_FieldMsg.hpp"
+#include "charm_FieldMsg.hpp"

@@ -45,29 +45,25 @@ void Block::compute_begin_ ()
 
 void Block::compute_next_ ()
 {
+  Method * method = this->method();
+
 #ifdef DEBUG_COMPUTE
   if (cycle() >= CYCLE)
-    CkPrintf ("%d %s DEBUG_COMPUTE Block::compute_next_()\n",CkMyPe(), name().c_str());
+    CkPrintf ("%d %s DEBUG_COMPUTE Block::compute_next_(%s)\n",CkMyPe(), name().c_str(),method?method->name().c_str():"NULL");
 #endif
-
-  Method * method = this->method();
 
   if (method) {
 
-    Refresh * refresh = method->refresh();
+#ifdef DEBUG_COMPUTE
+    CkPrintf ("DEBUG_REFRESH %s:%d calling refresh_[enter|start]\n",__FILE__,__LINE__);
+#endif
 
-    if (refresh) {
-
-      refresh->set_active (is_leaf());
-
-      refresh_enter (CkIndex_Block::r_compute_continue(), refresh );
-
-    } else {
-
-      compute_continue_();
-
-    }
-
+    int ir_post = method->refresh_id_post();
+    
+    cello::refresh(ir_post)->set_active (is_leaf());
+    
+    new_refresh_start (ir_post,CkIndex_Block::p_compute_continue());
+    
   } else {
 
     compute_end_();
@@ -79,6 +75,7 @@ void Block::compute_next_ ()
 
 void Block::compute_continue_ ()
 {
+  //  this->debug_new_refresh(__FILE__,__LINE__);
   performance_start_(perf_compute,__FILE__,__LINE__);
 #ifdef DEBUG_COMPUTE
   if (cycle() >= CYCLE)
@@ -104,10 +101,12 @@ void Block::compute_continue_ ()
     if (cycle() >= CYCLE)
       CkPrintf ("%d %s DEBUG_COMPUTE applying Method %s\n",
 	      CkMyPe(),name().c_str(),method->name().c_str());
+    CkPrintf ("DEBUG_TRACE_REFRESH Method %s compute()\n",method->name().c_str());
 #endif
     // Apply the method to the Block
 
-    method -> compute (this);
+    method->compute (this);
+    
     performance_stop_(perf_compute,__FILE__,__LINE__);
 
   } else {

@@ -18,13 +18,13 @@
 
 #ifdef DEBUG_CONTROL
 # define TRACE_CONTROL(A)						\
-  CkPrintf ("%d %s:%d %s TRACE_CONTROL %s \n",				\
-	    CkMyPe(),__FILE__,__LINE__,					\
+  CkPrintf ("%d %s %s TRACE_CONTROL %s \n",				\
+	    CkMyPe(),__FILE__,					\
 	    name_.c_str(), A);						\
   fflush(stdout);						
 # define TRACE_SYNC(A)							\
-  CkPrintf ("%d %s:%d %s TRACE_CONTROL %s entry %d id %d\n",	\
-	    CkMyPe(),__FILE__,__LINE__,					\
+  CkPrintf ("%d %s %s TRACE_CONTROL %s entry %d id %d\n",	\
+	    CkMyPe(),__FILE__,					\
 	    name_.c_str(), A,entry_point,id_sync);			\
   fflush(stdout);						
 #else
@@ -65,8 +65,7 @@ void Block::output_exit_()
   TRACE_CONTROL("output_exit");
 
   if (index_.is_root()) {
-
-    proxy_simulation[0].p_monitor();
+    cello::simulation()->monitor_output();
   }
 
   performance_stop_(perf_output);
@@ -117,7 +116,8 @@ void Block::compute_exit_ ()
 {
   TRACE_CONTROL("compute_exit");
 
-  adapt_enter_();
+  control_sync_barrier(CkIndex_Block::r_adapt_enter(NULL));
+  //  adapt_enter_();
 }
 
 //----------------------------------------------------------------------
@@ -128,25 +128,28 @@ void Block::refresh_exit_()
 
   update_boundary_();
 
-  // CkCallback (refresh_.back()->callback(),thisProxy).send(NULL);
+  Refresh * refresh = refresh_.back();
 
-  control_sync (refresh_.back()->callback(),
-		refresh_.back()->sync_type(),
-		refresh_.back()->sync_exit(),
-		refresh_.back()->min_face_rank(),
-		refresh_.back()->neighbor_type(),
-		refresh_.back()->root_level());
-    
-#ifdef DEBUG_REFRESH 
- printf ("%d DEBUG_REFRESH Calling Block %s refresh_pop_back(%p)\n",
-	  CkMyPe(),name().c_str(),refresh());
-  fflush(stdout);
-      
-#endif
+  // control_sync (refresh->callback(),
+  // 		refresh->sync_type(),
+  // 		refresh->sync_exit(),
+  // 		refresh->min_face_rank(),
+  // 		refresh->neighbor_type(),
+  // 		refresh->root_level());
+  ERROR1 ("Block::refresh_exit_",
+	  "%s Should not be called with NEW_REFRESH",this->name().c_str());
   
-  //   Refresh * refresh = refresh_.back();
-  //   delete refresh;
-  //   refresh_.pop_back();
+  if (index().is_root()) {
+    WARNING("Block::refresh_exit_()",
+  	    "remove sync from refresh_exit_() callback with NEW_REFRESH");
+  }
+  CkCallback
+    (refresh->callback(),
+     CkArrayIndexIndex(index_),thisProxy).send(NULL);
+   
+  // WARNING: BREAKS Charm++ with random queueing on some regression tests
+  //  delete refresh;
+  //  refresh_.pop_back();
 }
 
 //----------------------------------------------------------------------
@@ -156,6 +159,10 @@ void Block::control_sync (int entry_point, int sync_type, int id_sync,
 {
   TRACE_CONTROL("control_sync()");
   TRACE_SYNC("control_sync()");
+#ifdef DEBUG_CONTROL
+  CkPrintf ("DEBUG_CONTROL %s entry_point = %d\n",name().c_str(),entry_point);
+  fflush(stdout);
+#endif  
 
   if (sync_type == sync_quiescence) {
 
@@ -249,7 +256,7 @@ void Block::control_sync_neighbor(int entry_point, int id_sync,
   }
 #ifdef DEBUG_CONTROL
     CkPrintf ("%s DEBUG_CONTROL calling p_control_sync_count count %d (%d %d 0)\n",
-	      name().c_str(), num_neighbors, entry_point,id_sync);
+	      name().c_str(),num_neighbors, entry_point,id_sync);
     fflush(stdout);
 #endif    
   control_sync_count (entry_point,id_sync,num_neighbors + 1);
@@ -288,15 +295,15 @@ void Block::control_sync_face(int entry_point, int id_sync, int min_face_rank)
 
 void Block::control_sync_count (int entry_point, int id_sync, int count)
 {
-  if (id_sync >= sync_max_.size()) {
-    sync_count_.resize(id_sync+1);
-    sync_max_.resize(id_sync+1);
-    sync_count_[id_sync] = 0;
-    sync_max_[id_sync] = 0;
+  const int n_new = id_sync + 1;
+  const int n_now = sync_max_.size();
+  if (n_new  > n_now) {
+    sync_count_.resize(n_new,0);
+    sync_max_.resize(n_new,0);
   }
 #ifdef DEBUG_CONTROL
   CkPrintf ("%s DEBUG_CONTROL control_sync_count %d %d %d/%d\n",
-	    name().c_str(),entry_point,id_sync,sync_count[id_sync],sync_max_[id_sync]);
+	    name().c_str(),entry_point,id_sync,sync_count_[id_sync],sync_max_[id_sync]);
   fflush(stdout);
 #endif
   

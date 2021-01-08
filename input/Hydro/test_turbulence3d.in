@@ -1,0 +1,6 @@
+include "input/Hydro/method_turbulence3d.incl"
+
+ Mesh {
+     root_blocks = [ 2, 2, 2 ];
+     root_size = [ 32, 32, 32 ];
+ }

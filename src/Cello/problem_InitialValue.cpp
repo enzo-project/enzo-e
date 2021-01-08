@@ -13,102 +13,34 @@
 
 InitialValue::InitialValue
 (Parameters * parameters,
- int cycle, double time) throw ()
-  : Initial (cycle, time),
-    parameters_(parameters),
-    num_fields_(cello::field_descr()->field_count()),
-    num_masks_(NULL),
-    mask_(NULL),
-    nx_(0),
-    ny_(0)
-{
-  parameters_->group_set(0,"Initial");
-  parameters_->group_set(1,"value");
+ int cycle, double time) throw()
+    : Initial(cycle, time),
+      parameters_(parameters),
+      num_fields_(cello::field_descr()->field_count()),
+      initialized_values_(false),
+      values_(NULL)
+{ }
 
-  mask_      = new bool ** [num_fields_];
-  nx_        = new int * [num_fields_];
-  ny_        = new int * [num_fields_];
-  num_masks_ = new int [num_fields_];
-  for (int i=0; i<num_fields_; i++) {
-    mask_[i] = 0;
-    nx_[i] = 0;
-    ny_[i] = 0;
-    num_masks_[i] = 0;
-  }
-  
-  // Initialize fields
-
-  for (int index_field = 0; index_field < num_fields_; index_field++) {
-
-    std::string field_name = cello::field_descr()->field_name(index_field);
-
-    //    parameters_->group_set(1,field_name);
-
-    if (parameters_->type(field_name) == parameter_list) {
-      int num_values = parameters_->list_length(field_name);
-      if (num_values > 1) {
-	num_masks_[index_field] =  num_values / 2;
-	mask_[index_field] = new bool * [num_masks_[index_field]];
-	nx_[index_field]   = new int [num_masks_[index_field]];
-	ny_[index_field]   = new int [num_masks_[index_field]];
-	// loop through value masks
-	for (int index_mask=0; 
-	     index_mask < num_masks_[index_field];
-	     index_mask++) {
-	  int index_value = index_mask*2+1;
-	  if (parameters_->list_type(index_value,field_name) == parameter_string) {
-	    std::string file 
-	      = parameters_->list_value_string(index_value,field_name,"default");
-	    create_mask_png_ (&mask_[index_field][index_mask],
-			      &nx_[index_field][index_mask],
-			      &ny_[index_field][index_mask],
-			      file);
-			   
-	  
-	  }
-	}
-      }
-    }
-  }
-}
-
-//----------------------------------------------------------------------
-
-InitialValue::~InitialValue() throw()
-{
-  for (int index_field = 0; index_field<num_fields_; index_field++) {
-    for (int index_mask = 0; index_mask<num_masks_[index_field]; index_mask++) {
-      if (mask_[index_field][index_mask]) {
-	delete [] mask_[index_field][index_mask];
-	mask_[index_field][index_mask] = NULL;
-      }
-    }
-    delete [] mask_[index_field]; mask_[index_field] = NULL;
-    delete [] nx_[index_field];   nx_[index_field]   = NULL;
-    delete [] ny_[index_field];   ny_[index_field]   = NULL;
-  }
-  delete [] mask_; mask_ = NULL;
-  delete [] nx_;   nx_   = NULL;
-  delete [] ny_;   ny_   = NULL;
-}
 //----------------------------------------------------------------------
 
 void InitialValue::pup (PUP::er &p)
 {
   // NOTE: update whenever attributes change
-
   TRACEPUP;
-
   Initial::pup(p);
 
   bool up = p.isUnpacking();
-
   if (up) parameters_ = new Parameters;
   p | *parameters_;
   p | num_fields_;
-  WARNING("InitialValue::pup","mask_[][] not pupped");
-  if (up) num_masks_ = new int[num_fields_];
-  PUParray(p,num_masks_,num_fields_);
+
+  // The Value class cannot currently be pupped. The values_ attribute also
+  // can't be initialized while unpacking because it depends on field_descr
+  // which gets unpacked afterwards
+  if (up) {
+    values_ = NULL;
+    initialized_values_ = false;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -116,9 +48,11 @@ void InitialValue::pup (PUP::er &p)
 void InitialValue::enforce_block ( Block * block,
 				   const Hierarchy  * hierarchy ) throw()
 {
+  // make sure values_ is initialized
+  initialize_values_();
 
   Initial::enforce_block(block,hierarchy);
-  
+
   // Initialize Fields according to parameters
 
   ASSERT("InitialValue::enforce_block",
@@ -130,11 +64,19 @@ void InitialValue::enforce_block ( Block * block,
   parameters_->group_set(1,"value");
   //--------------------------------------------------
 
-  FieldData *       field_data = block->data()->field_data();
+  Data *data = block->data();
 
-  double *value=NULL, *vdeflt=NULL, *x=NULL, *y=NULL, *z=NULL, t;
-  bool * mask=NULL, *rdeflt=NULL;
-  int n, nx=0,ny=0,nz=0;
+  FieldData *       field_data = data->field_data();
+
+  double *val_array = NULL;
+  double *xc=NULL, *yc=NULL, *zc=NULL, *xf=NULL, *yf=NULL, *zf=NULL; 
+  double t = block->time();
+
+  Field field = data->field();
+  int nx, ny, nz; // number of cells per axis in the active zone
+  field.size(&nx,&ny,&nz);
+  int gx, gy, gz;
+  field.ghost_depth(0,&gx,&gy,&gz);
 
   FieldDescr * field_descr = cello::field_descr();
   for (int index_field = 0;
@@ -142,162 +84,90 @@ void InitialValue::enforce_block ( Block * block,
        index_field++) {
     
     std::string field_name = field_descr->field_name(index_field);
-
-
-    // If Initial:<field_name>:value is a list, try parsing it
-
-    // parameter: Initial : <field> : value
-
     parameter_type parameter_type = parameters_->type(field_name);
 
-    if (parameter_type == parameter_float) {
+    if ((index_field>=num_fields_) && (parameter_type != parameter_unknown)){
+      // It is possiblefor a permanent field to be initialized after
+      // construction of InitialValue. An error will be raised if this
+      // happens and an InitialValue expression was specified
+      // notifying the user to include such fields in the input file
+      ERROR1("InitialValue::enforce_block",
+	     ("Field %s had a specified initial value but the field was not "
+	      "declared in the input file."), field_name.c_str());
 
-      field_data->clear(field_descr,parameters_->value_float(field_name,0.0), 
-			 index_field);
+    } else if (index_field < num_fields_) {
 
-    } else if (parameter_type == parameter_list) {
+      if (parameter_type == parameter_float) {
+	field_data->clear(field_descr,
+			  parameters_->value_float(field_name,0.0), 
+			  index_field);
+      } else if (parameter_type != parameter_unknown){
+	int cx,cy,cz;
+	field.centering(index_field, &cx,&cy,&cz);
 
-      // Check parameter length
+	if (val_array == NULL){
+	  xc = new double [nx+2*gx];
+	  yc = new double [ny+2*gy];
+	  zc = new double [nz+2*gz];
+	  data->field_cells (xc, yc, zc, gx, gy, gz);
 
-      int list_length = parameters_->list_length(field_name);
+	  // set val_array as array of 0s big enough for corner centered fields
+	  val_array = new double[(nx+2*gx+1)*(ny+2*gy+1)*(nz+2*gz+1)]();
+	}
 
-      ASSERT1("InitialValue::enforce_block",
-	     "Length of list parameter Initial:%s:value must be odd",
-	     field_name.c_str(),
-	     (list_length % 2) == 1);
+	if (xf == NULL && (cx!=0 || cy!=0 ||cz != 0) ){
+	  xf = new double [nx+2*gx+1];
+	  yf = new double [ny+2*gy+1];
+	  zf = new double [nz+2*gz+1];
+	  data->field_cell_faces (xf, yf, zf, gx, gy, gz);
+	}
 
-      // Allocate arrays if needed
-      if (value == NULL) {
-	allocate_xyzt_(block,index_field,
-		       field_data,
-		       &nx,&ny,&nz,
-		       &value, &vdeflt,
-		       &mask,  &rdeflt,
-		       &x,&y,&z,&t);
-      }
+	double *x = (cx == 0) ? xc : xf;
+	double *y = (cy == 0) ? yc : yf;
+	double *z = (cz == 0) ? zc : zf;
 
-      // Evaluate last non-conditional equation in list
+	int ndx=nx+2*gx+cx;
+	int ndy=ny+2*gy+cy;
+	int ndz=nz+2*gz+cz;
 
-      n = nx*ny*nz;
+	// Following convention of earlier version: initializing values in a
+	// temporary array of doubles. Then the values are copied into the
+	// field and casted to the appropriate value.
 
-      evaluate_float_ (field_data, list_length-1, field_name, 
-			n, value,vdeflt,x,y,z,t);
+	// The cast to double * in the following line is redundant
+	values_[index_field]->evaluate((double *)val_array, t,
+				       ndx,ndx,x, 
+				       ndy,ndy,y,
+				       ndz,ndz,z);
 
-      copy_values_ (field_data,value, NULL,index_field,nx,ny,nz);
-
-      // Evaluate conditional equations in list
-
-      for (int index_value=0; index_value < list_length-1; index_value+=2) {
-
-	evaluate_float_ (field_data, index_value, field_name, 
-			  n, value,vdeflt,x,y,z,t);
-
-	evaluate_mask_ 
-	  (hierarchy,block,field_data, index_field, index_value+1,
-	   field_name,  n, mask,rdeflt,x,y,z,t);
-
-	copy_values_ (field_data,value, mask,index_field,nx,ny,nz);
-
-      }
-
-    } else if (parameter_type == parameter_unknown) {
-      if (block->index().is_root()) {
+	copy_values_(field_data,val_array,index_field,ndx,ndy,ndz);
+      } else if (block->index().is_root()) {
 	WARNING1("InitialValue::enforce_block",  
 		 "Uninitialized field %s",
 		 field_name.c_str());
       }
-    } else {
-      ERROR2("InitialValue::enforce_block",
-	     "Illegal parameter type %s when initializing field %s",
-	     parameter_type_name[parameter_type],field_name.c_str());
     }
   }
   // Deallocate arrays if needed
-  if (value != NULL) {
-    delete [] value;
-    delete [] vdeflt;
-    delete [] mask;
-    delete [] rdeflt;
-    delete [] x;
-    delete [] y;
-    delete [] z;
+  if (val_array != NULL) {
+    delete [] val_array;
+    delete [] xc;
+    delete [] yc;
+    delete [] zc;
+  }
+  if (xf != NULL) {
+    delete [] xf;
+    delete [] yf;
+    delete [] zf;
   }
 }
 
 //======================================================================
 
-void InitialValue::allocate_xyzt_
-(
- Block * block,
- int index_field,
- const FieldData * field_data,
- int * nx, int * ny, int * nz,
- double ** value, double ** vdeflt,
- bool   ** mask,bool   ** rdeflt,
- double ** x, double ** y, double ** z, double * t
- ) throw()
-{
-
-  // Get field size
-
-  field_data->size(nx,ny,nz);
-
-  FieldDescr * field_descr = cello::field_descr();
-  
-  int gx,gy,gz;
-  field_descr->ghost_depth(index_field,&gx,&gy,&gz);
-  (*nx) += 2*gx;
-  (*ny) += 2*gy;
-  (*nz) += 2*gz;
-
-  int n = (*nx)*(*ny)*(*nz);
-
-  // Allocate double arrays
-
-  (*value)  = new double [n];
-  (*vdeflt) = new double [n];
-  (*mask)   = new bool [n];
-  (*rdeflt) = new bool [n];
-  (*x)      = new double [n];
-  (*y)      = new double [n];
-  (*z)      = new double [n];
-
-  double xm, xp, ym, yp, zm, zp;
-
-  block->data()->lower(&xm,&ym,&zm);
-  block->data()->upper(&xp,&yp,&zp);
-
-  double hx,hy,hz;
-  field_data->cell_width(xm,xp,&hx,
-			  ym,yp,&hy,
-			  zm,zp,&hz);
-
-  *t = block->time();
-
-  // Initialize arrays
-  for (int iz=0; iz<(*nz); iz++) {
-    for (int iy=0; iy<(*ny); iy++) {
-      for (int ix=0; ix<(*nx); ix++) {
-	int i=ix + (*nx)*(iy + (*ny)*iz);
-	(*value)[i]  = 0.0;
-	(*vdeflt)[i] = 0.0;
-	(*mask)[i]   = false;
-	(*rdeflt)[i] = false;
-	(*x)[i]      = xm + (ix-gx+0.5)*hx;
-	(*y)[i]      = ym + (iy-gy+0.5)*hy;
-	(*z)[i]      = zm + (iz-gz+0.5)*hz;
-      }
-    }
-  }
-}
-
-//----------------------------------------------------------------------
-
 void InitialValue::copy_values_ 
 (
  FieldData *       field_data,
- double *           value, 
- bool *             mask,
+ double *           value,
  int                index_field,
  int nx, int ny, int nz
  ) throw()
@@ -324,46 +194,23 @@ void InitialValue::copy_values_
   //  @@@@ IC's SHIFTED TO LOWER LEFT
   //  mask[0][0],[1][1],[2][2] == 1
 
+  // The above comment is from an earlier version
+
   precision_type precision = field_descr->precision(index_field);
   switch (precision) {
   case precision_single:
-    if (mask) copy_precision_((float *)array,mask,offset,value,nx,ny,nz);
-    else      copy_precision_((float *)array,     offset,value,nx,ny,nz);
+    copy_precision_((float *)array,offset,value,nx,ny,nz);
     break;
   case precision_double:
-    if (mask) copy_precision_((double *)array,mask,offset,value,nx,ny,nz);
-    else      copy_precision_((double *)array,     offset,value,nx,ny,nz);
+    copy_precision_((double *)array,offset,value,nx,ny,nz);
     break;
   case precision_quadruple:
-    if (mask) copy_precision_((long double *)array,mask,offset,value,nx,ny,nz);
-    else      copy_precision_((long double *)array,     offset,value,nx,ny,nz);
+    copy_precision_((long double *)array,offset,value,nx,ny,nz);
     break;
   default:
     break;
   }
 }
-
-//----------------------------------------------------------------------
-
-template<class T>
-void InitialValue::copy_precision_
-(T * array,
- bool * mask,
- int offset,
- double * value,
- int nx, int ny, int nz)
-{
-  for (int iz = 0; iz<nz; iz++) {
-    for (int iy = 0; iy<ny; iy++) {
-      for (int ix = 0; ix<nx; ix++) {
-	int i = ix + nx*(iy + ny*iz);
-	if (mask[i]) (array - offset)[i] = (T) value[i];
-      }
-    }
-  }
-}
-
-//----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
 
@@ -386,213 +233,29 @@ void InitialValue::copy_precision_
 
 //----------------------------------------------------------------------
 
-void InitialValue::evaluate_float_ 
-(FieldData * field_data, int index_value, std::string field_name, 
- int n, double * value, double * deflt,
- double * x, double * y, double * z, double t) throw ()
+void InitialValue::initialize_values_()
 {
 
-  // parameter: Initial : value : <field> 
+  // skip, if values_ has already been initialized
+  if (initialized_values_){return;}
 
-  parameter_type value_type = 
-    parameters_->list_type(index_value,field_name);
+  parameters_->group_set(0,"Initial");
+  parameters_->group_set(1,"value");
 
-  if (value_type != parameter_float_expr &&
-      value_type != parameter_float) {
-	  	      
-    ERROR1("InitialValue::evaluate_float_", 
-	   "Odd-index elements of %s must be floating-point expressions",
-	   field_name.c_str());
-  }
+  values_ = new Value*[num_fields_];
 
-  // Evaluate the floating-point expression
+  // Initialize Value objects
+  for (int index_field = 0; index_field < num_fields_; index_field++) {
+    std::string field_name = cello::field_descr()->field_name(index_field);
+    parameter_type parameter_type = parameters_->type(field_name);
 
-  if (value_type == parameter_float) {
-    double v = parameters_->list_value_float(index_value,field_name,0.0);
-    for (int i=0; i<n; i++) value[i] = v;
-  } else {
-    parameters_->list_evaluate_float
-      (index_value,field_name,n,value,deflt,x,y,z,t);
-  }
-}
-
-//----------------------------------------------------------------------
-
-void InitialValue::evaluate_mask_ 
-(const Hierarchy * hierarchy,
- const Block * block,
- FieldData * field_data, 
- int index_field,  int index_value,
- std::string field_name, 
- int n, bool * mask, bool * deflt,
- double * x, double * y, double * z, double t) throw ()
-{
-
-  // parameter: Initial : value : <field> 
-
-  int index_mask = index_value / 2;
-
-  parameter_type value_type = 
-    parameters_->list_type(index_value,field_name);
-
-  bool v;
-  std::string file;
-  int nxb,nyb,nzb;
-
-  switch (value_type) {
-  case parameter_logical:
-
-    // logical constant
-
-    v = parameters_->list_value_logical(index_value,field_name,false);
-    for (int i=0; i<n; i++) mask[i] = v;
-    break;
-
-  case parameter_logical_expr:
-
-    // logical expression
-
-    parameters_->list_evaluate_logical
-      (index_value,field_name,n,mask,deflt,x,y,z,t);
-    break;
-
-  case parameter_string:
-
-    {
-      field_data->size(&nxb,&nyb,&nzb);
-      ASSERT1("InitialValue::evaluate_logical",
-	      "mask file %s requires problem to be 2D",
-	      field_name.c_str(),
-	      nyb > 1 && nzb == 1);
-
-      bool * mask_png = mask_[index_field][index_mask];
-      int nx_png = nx_[index_field][index_mask];
-      int ny_png = ny_[index_field][index_mask];
-      evaluate_mask_png_
-	(mask,nxb,nyb,
-	 mask_png,nx_png, ny_png,
-	 hierarchy,block);
-    }
-    break;
-
-  default:
-    ERROR3("InitialValue::evaluate_mask",
-	   "Even-index element %d of %s is of illegal type %d",
-	   index_value,field_name.c_str(),value_type);
-    break;
-  }
-}
-
-//----------------------------------------------------------------------
-
-void InitialValue::evaluate_mask_png_
-( bool            * mask_block, int nxb, int nyb,
-  bool            * mask_png,   int nx,  int ny,
-  const Hierarchy * hierarchy,
-  const Block * block )
-{
-  const FieldDescr * field_descr = cello::field_descr();
-  
-  int gx,gy,gz;
-  field_descr->ghost_depth(0,&gx,&gy,&gz);
-  nxb += 2*gx;
-  nyb += 2*gy;
-
-  // Clear the block mask
-
-  int nb = nxb*nyb;
-  for (int i=0; i<nb; i++) mask_block[i] = false;
-
-  // Get the hierarchy's lower and upper extents
-
-  double lower_h[3];
-  hierarchy->lower(&lower_h[0],&lower_h[1],&lower_h[2]);
-  double upper_h[3];
-  hierarchy->upper(&upper_h[0],&upper_h[1],&upper_h[2]);
-
-  // Get the block's lower and upper extents
-
-  double lower_b[3];
-  block->data()->lower(&lower_b[0],&lower_b[1],&lower_b[2]);
-
-  double upper_b[3];
-  block->data()->upper(&upper_b[0],&upper_b[1],&upper_b[2]);
-
-  // get the block's cell width
-
-  double hb[3];
-  block->data()->field_data()->cell_width 
-    (lower_b[0],upper_b[0],&hb[0],
-     lower_b[1],upper_b[1],&hb[1],
-     lower_b[2],upper_b[2],&hb[2]);
-
-  // Get the hierarchy's size including ghosts
-
-  double size_h[3];
-  size_h[0] = upper_h[0]-lower_h[0] + 2*gx*hb[0];
-  size_h[1] = upper_h[1]-lower_h[1] + 2*gy*hb[1];
-
-  // get the offset between the block and the hierarchy
-
-  double offset_b[3];
-  offset_b[0] = lower_b[0]-lower_h[0];
-  offset_b[1] = lower_b[1]-lower_h[1];
-
-  for (int iy_b=0; iy_b<nyb; iy_b++) {
-    int iy_h = int(ny*(iy_b*hb[1]+offset_b[1])/(size_h[1]));
-    for (int ix_b=0; ix_b<nxb; ix_b++) {
-      int ix_h = int(nx*(ix_b*hb[0]+offset_b[0])/(size_h[0]));
-      
-      int i_b = ix_b + nxb*(iy_b);
-      int i_h = ix_h + nx*iy_h;
-
-      mask_block[i_b] = mask_png[i_h];
+    if ((parameter_type != parameter_unknown) &&
+	(parameter_type != parameter_float)){
+      values_[index_field] = new Value(parameters_, field_name);
+    } else {
+      values_[index_field] = NULL;
     }
   }
-  return;
-}
 
-//----------------------------------------------------------------------
-
-void InitialValue::create_mask_png_
-( bool ** mask,  int * nx, int * ny, std::string pngfile)
-{
-  pngwriter png;
-
-  // Open the PNG file
-
-  errno = 0;
-  png.readfromfile(pngfile.c_str());
-  ASSERT1 ("InitialValue::create_mash_png_()",
-	   "Cannot read PNG file %s",
-	   pngfile.c_str(),
-	   errno == 0);
-
-  // Get the PNG file size
-
-  (*nx) = png.getwidth();
-  (*ny) = png.getheight();
-
-  // Allocate and clear the mask
-
-  int n = (*nx)*(*ny);
-  (*mask) = new bool [n];
-  for (int i=0; i<n; i++) (*mask)[i] = false;
-
-  const int gray = 65536*3/2;
-
-  for (int iy=0; iy<(*ny); iy++) {
-    for (int ix=0; ix<(*nx); ix++) {
-
-      int i = ix + (*nx)*iy;
-
-      int r = png.read(ix+1,iy+1,1);
-      int g = png.read(ix+1,iy+1,2);
-      int b = png.read(ix+1,iy+1,3);
-
-      (*mask)[i] = (r+g+b > gray);
-    }
-  }
-  png.close();
-  return;
+  initialized_values_ = true;
 }

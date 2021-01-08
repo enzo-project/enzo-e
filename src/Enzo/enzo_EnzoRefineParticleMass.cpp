@@ -106,11 +106,11 @@ int EnzoRefineParticleMass::apply ( Block * block ) throw ()
 
   int adapt_result = 
     (ratio > mass_min_refine)   ? adapt_refine :
-    ((ratio < mass_max_coarsen) ? adapt_coarsen : adapt_same);
+    ((ratio <= mass_max_coarsen) ? adapt_coarsen : adapt_same);
 
   // Don't refine if already at maximum level
   adjust_for_level_( &adapt_result, level );
-  
+
   return adapt_result;
 
 }
