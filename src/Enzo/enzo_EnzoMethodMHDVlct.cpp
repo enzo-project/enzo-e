@@ -34,7 +34,7 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
 
   // determine integrable and reconstructable quantities (and passive scalars)
   determine_quantities_(eos_, integrable_group_names_,
-			reconstructable_group_names_, passive_group_names_);
+			reconstructable_group_names_);
 
   FieldDescr * field_descr = cello::field_descr();
 
@@ -42,40 +42,32 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   ASSERT("EnzoMethodMHDVlct", "\"pressure\" must be a permanent field",
 	 field_descr->is_field("pressure"));
 
-
   // setup primitive_group_, and bfieldi_group_
   // (also checks that the integrable fields of primitive_group_ and all the
   // fields of bfieldi_group_ exist and are permanent)
-  setup_groupings_(integrable_group_names_, reconstructable_group_names_,
-		   passive_group_names_);
+  setup_groupings_(integrable_group_names_, reconstructable_group_names_);
 
+  // Ensure that the required fields exist
+  // TODO: Add them if they don't exist
+  if (mhd_choice_ == bfield_choice::constrained_transport) {
+    EnzoConstrainedTransport::check_required_fields();
+  }
 
   // Initialize the default Refresh object - May want to adjust
   // number of ghost zones based on reconstructor choice.
   cello::simulation()->new_refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
-  // Add cell-centered fields holding actively advected integrable quantities
-  add_group_fields_to_refresh_(refresh, *primitive_group_,
-                               integrable_group_names_);
-  // Add cell-centered fields holding the conserved form of the passively
-  // advected quantities
-  add_group_fields_to_refresh_(refresh, *(field_descr->groups()),
-			       passive_group_names_);
-
-  /// Add interface fields (if necessary) to the refresh list
-  if (mhd_choice_ == bfield_choice::constrained_transport) {
-    EnzoConstrainedTransport::update_refresh(refresh);
-  }
+  refresh->add_all_fields();
 
   // Initialize the remaining component objects
   half_dt_recon_ = EnzoReconstructor::construct_reconstructor
     (reconstructable_group_names_, half_recon_name, (enzo_float)theta_limiter);
   full_dt_recon_ = EnzoReconstructor::construct_reconstructor
     (reconstructable_group_names_, full_recon_name, (enzo_float)theta_limiter);
-  riemann_solver_ = EnzoRiemann::construct_riemann
-    (integrable_group_names_,      passive_group_names_, rsolver);
+  riemann_solver_ = EnzoRiemann::construct_riemann(integrable_group_names_,
+                                                   rsolver);
   integrable_updater_ = new EnzoIntegrableUpdate(integrable_group_names_,
-						 true, passive_group_names_);
+                                                 true);
 }
 
 //----------------------------------------------------------------------
@@ -107,8 +99,7 @@ EnzoMethodMHDVlct::bfield_choice EnzoMethodMHDVlct::parse_bfield_choice_
 
 void EnzoMethodMHDVlct::determine_quantities_
 (EnzoEquationOfState *eos, std::vector<std::string> &integrable_quantities,
- std::vector<std::string> &reconstructable_quantities,
- std::vector<std::string> &passive_groups)
+ std::vector<std::string> &reconstructable_quantities)
 {
 #ifdef CONFIG_USE_GRACKLE
   if (enzo::config()->method_grackle_use_grackle){
@@ -145,52 +136,6 @@ void EnzoMethodMHDVlct::determine_quantities_
       integrable_quantities.push_back("internal_energy");
     }
   }
-
-  // Now to setup the list of passively advected group names
-  // retrieve list of all possible group names of passively advected scalars
-  std::vector<std::string> all_passive_group_names =
-    EnzoCenteredFieldRegistry::passive_scalar_group_names();
-
-  // We'll now iterate through all known possible groups names that could
-  // contain passive scalars and check to see if any fields were labelled as
-  // being a part of these groups in the input file (if so, then add the group
-  // name to the list of passively advected group names)
-  Grouping* reference_grouping = cello::field_descr()->groups();
-  for (std::size_t i=0; i < all_passive_group_names.size(); i++){
-    std::string group_name = all_passive_group_names[i];
-
-    if (reference_grouping->size(group_name) > 0){
-      passive_groups.push_back(group_name);
-    }
-  }
-
-}
-
-//----------------------------------------------------------------------
-
-void add_passive_groups_(Grouping &grouping, const std::string field_prefix,
-			 const std::vector<std::string> group_names)
-{
-  // Helper function that adds entries of passively advected groups (specified
-  // in the configuration file) to an existing Grouping object
-
-  // This includes the groups specified in the parameter file
-  Grouping* reference_grouping = cello::field_descr()->groups();
-
-  for (unsigned int i=0;i<group_names.size();i++){
-
-    std::string group_name = group_names[i];
-    int num_fields = reference_grouping->size(group_name);
-
-    for (int j=0; j < num_fields; j++){
-      // Determine field_name
-      std::string field_name = (field_prefix +
-				reference_grouping->item(group_name,j));
-
-      // add the field to the grouping
-      grouping.add(field_name, group_name);
-    }
-  }
 }
 
 //----------------------------------------------------------------------
@@ -221,8 +166,7 @@ std::vector<std::string> unique_combination_(const std::vector<std::string> &a,
 
 void EnzoMethodMHDVlct::setup_groupings_
 (std::vector<std::string> &integrable_groups,
- std::vector<std::string> &reconstructable_groups,
- std::vector<std::string> &passive_groups)
+ std::vector<std::string> &reconstructable_groups)
 {
 
   FieldDescr * field_descr = cello::field_descr();
@@ -247,37 +191,6 @@ void EnzoMethodMHDVlct::setup_groupings_
       ASSERT1("EnzoMethodMHDVlct::setup_groupings_",
 	      "\"%s\" must be the name of a permanent field",
 	      field_name.c_str(), field_descr->is_field(field_name));
-    }
-  }
-
-  // Add temporary fields to primitive_group_ to hold specific forms (mass
-  // fraction) of passively advected scalars. These get are used to hold the
-  // values after they are converted from conserved form (density) which are
-  // tracked in permanent fields
-  add_passive_groups_(*primitive_group_, "specific_passive_", passive_groups);
-}
-
-//----------------------------------------------------------------------
-
-void EnzoMethodMHDVlct::add_group_fields_to_refresh_
-(Refresh * refresh, Grouping &grouping, std::vector<std::string> group_names)
-{
-  FieldDescr * field_descr = cello::field_descr();
-
-  for (unsigned int i=0;i<group_names.size();i++){
-
-    std::string group_name = group_names[i];
-    int num_fields = grouping.size(group_name);
-
-    for (int j=0; j < num_fields; j++){
-      // Determine field_name
-      std::string field_name = grouping.item(group_name,j);
-      ASSERT1("EnzoMethodMHDVlct::add_group_fields_to_refresh_",
-	      "%s must be a permanent field",field_name.c_str(),
-	      field_descr->is_permanent(field_name))
-
-      // add the field to the refresh object
-      refresh->add_field(field_descr->field_id(field_name));
     }
   }
 }
@@ -308,7 +221,7 @@ void EnzoMethodMHDVlct::pup (PUP::er &p)
   p|eos_;
   p|integrable_group_names_;
   p|reconstructable_group_names_;
-  p|passive_group_names_;
+  p|nested_passive_list_;
 
   int has_prim_group = (primitive_group_ != nullptr);
   p|has_prim_group;
@@ -334,12 +247,33 @@ void EnzoMethodMHDVlct::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void add_arrays_to_map_(Block * block,
-                        Grouping& grouping,
-                        const std::vector<std::string>& group_names,
-                        int dim, EnzoEFltArrayMap& map,
-                        bool allow_missing_group, bool enforce_num_Groups,
-                        Grouping* ref_grouping)
+static inline void add_field_to_map_helper_(const std::string &field_name,
+                                            const std::string &key, int dim,
+                                            EnzoFieldArrayFactory& factory,
+                                            EnzoEFltArrayMap& map)
+{
+  if (map.contains(key)){
+    ERROR1("EnzoEFltArrayMap::from_grouping",
+           "EnzoEFltArrayMap can't hold more than one field called \"%s\"",
+           key.c_str());
+  }
+
+  if (dim == -1){
+    map[key] = factory.from_name(field_name);
+  } else {
+    map[key] = factory.assigned_center_from_name(field_name, dim);
+  }
+}
+
+//----------------------------------------------------------------------
+
+static void add_arrays_to_map_(Block * block,
+                               Grouping& grouping,
+                               const std::vector<std::string>& group_names,
+                               int dim, EnzoEFltArrayMap& map,
+                               bool allow_missing_group,
+                               bool enforce_num_Groups,
+                               Grouping* ref_grouping)
 {
 
   char suffixes[3] = {'x','y','z'};
@@ -368,20 +302,25 @@ void add_arrays_to_map_(Block * block,
         key = group_name;
       }
 
-      if (map.contains(key)){
-        ERROR1("EnzoEFltArrayMap::from_grouping",
-               "EnzoEFltArrayMap can't hold more than one field called \"%s\"",
-               key.c_str());
-      }
-
-      if (dim == -1){
-        map[key] = array_factory.from_name(field_name);
-      } else {
-        map[key] = array_factory.assigned_center_from_name(field_name, dim);
-      }
-
+      add_field_to_map_helper_(field_name, key, dim, array_factory, map);
     }
+  }
+}
 
+//----------------------------------------------------------------------
+
+/// Add cell-centered fields to map. This is primarily to be use with the
+/// nested list of passive scalar fields
+static void add_fields_to_array_map_
+(Block * block, const std::vector<std::vector<std::string>>& nested_list,
+ EnzoEFltArrayMap& map)
+{
+  EnzoFieldArrayFactory array_factory(block,0);
+  for (const std::vector<std::string> &cur_list : nested_list){
+    for (const std::string& field_name : cur_list){
+      add_field_to_map_helper_(field_name, field_name, -1,
+                               array_factory, map);
+    }
   }
 }
 
@@ -405,14 +344,9 @@ EnzoEFltArrayMap EnzoMethodMHDVlct::nonpassive_primitive_map_(Block * block)
 EnzoEFltArrayMap EnzoMethodMHDVlct::conserved_passive_scalar_map_
 (Block * block) const throw ()
 {
-  // get Grouping of field names that store passively advected scalars in
-  // conserved-form
-  Grouping *conserved_passive_scalars = cello::field_descr()->groups();
   EnzoEFltArrayMap conserved_passive_scalar_map("conserved_passive_scalar");
-  add_arrays_to_map_(block, *conserved_passive_scalars,
-                     passive_group_names_, -1,
-                     conserved_passive_scalar_map, false, false,
-                     conserved_passive_scalars);
+  add_fields_to_array_map_(block, *(nested_passive_list_.get_list()),
+                           conserved_passive_scalar_map);
   return conserved_passive_scalar_map;
 }
 
@@ -466,16 +400,10 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // CT is used, it won't have space to store changes in the magnetic fields.
     EnzoEFltArrayMap dUcons_map("dUcons");
 
-    // This is a list of lists of passive scalar names (or keys). The first
-    // sublist holds the names of all quantities that undergo normal passive
-    // advection. Subsequent lists hold sets of names for scalars whose values
-    // must sum to 1.0 (like species).
-    std::vector<std::vector<std::string>> passive_lists {{}};
-
     setup_arrays_(block, primitive_map, temp_primitive_map,
                   conserved_passive_scalar_map, priml_map, primr_map,
 		  pressure_l, pressure_r, xflux_map, yflux_map, zflux_map,
-                  dUcons_map, passive_lists);
+                  dUcons_map);
 
     // Setup a pointer to an array that used to store interface velocity fields
     // from computed by the Riemann Solver (to use in the calculation of the
@@ -508,7 +436,8 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 
     // convert the passive scalars from conserved form to specific form
     // (outside the integrator, they are treated like conserved densities)
-    compute_specific_passive_scalars_(passive_lists, primitive_map["density"],
+    compute_specific_passive_scalars_(*(nested_passive_list_.get_list()),
+                                      primitive_map["density"],
                                       conserved_passive_scalar_map,
                                       primitive_map, stale_depth);
 
@@ -541,7 +470,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
         // timestep, the values were stored in conserved form in the fields
         // held by conserved_passive_scalar_map.
         // Need to convert them to specific form
-        compute_specific_passive_scalars_(passive_lists,
+        compute_specific_passive_scalars_(*(nested_passive_list_.get_list()),
                                           cur_integrable_map["density"],
                                           conserved_passive_scalar_map,
                                           cur_integrable_map, stale_depth);
@@ -550,7 +479,8 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // set all elements of the arrays in dUcons_map to 0 (throughout the rest
       // of the current loop, flux divergence and source terms will be
       // accumulated in these arrays)
-      integrable_updater_->clear_dUcons_map(dUcons_map, 0., passive_lists);
+      integrable_updater_->clear_dUcons_map(dUcons_map, 0.,
+                                            *(nested_passive_list_.get_list()));
 
       // Compute the reconstructable quantities from the integrable quantites
       // Although cur_integrable_map holds the passive scalars in integrable
@@ -566,21 +496,25 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       eos_->reconstructable_from_integrable(cur_integrable_map,
                                             cur_reconstructable_map,
                                             conserved_passive_scalar_map,
-                                            stale_depth, passive_lists);
+                                            stale_depth,
+                                            *(nested_passive_list_.get_list()));
 
       // Compute flux along each dimension
       compute_flux_(0, cur_dt, cell_widths[0], cur_reconstructable_map,
                     priml_map, primr_map, pressure_l, pressure_r,
                     xflux_map, dUcons_map, interface_velocity_arr_ptr,
-                    *reconstructor, ct, stale_depth, passive_lists);
+                    *reconstructor, ct, stale_depth,
+                    *(nested_passive_list_.get_list()));
       compute_flux_(1, cur_dt, cell_widths[1], cur_reconstructable_map,
                     priml_map, primr_map, pressure_l, pressure_r,
                     yflux_map, dUcons_map, interface_velocity_arr_ptr,
-                    *reconstructor, ct, stale_depth, passive_lists);
+                    *reconstructor, ct, stale_depth,
+                    *(nested_passive_list_.get_list()));
       compute_flux_(2, cur_dt, cell_widths[2], cur_reconstructable_map,
                     priml_map, primr_map, pressure_l, pressure_r,
                     zflux_map, dUcons_map, interface_velocity_arr_ptr,
-                    *reconstructor, ct, stale_depth, passive_lists);
+                    *reconstructor, ct, stale_depth,
+                    *(nested_passive_list_.get_list()));
 
       // increment the stale_depth
       stale_depth+=reconstructor->immediate_staling_rate();
@@ -603,10 +537,10 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // Note: updated passive scalars are NOT saved in out_integrable_group in
       //     specific form. Instead they are saved in conserved_passive_scalars
       //     in conserved form.
-      integrable_updater_->update_quantities(primitive_map, dUcons_map,
-                                             out_integrable_map,
-                                             conserved_passive_scalar_map,
-                                             eos_, stale_depth, passive_lists);
+      integrable_updater_->update_quantities
+        (primitive_map, dUcons_map, out_integrable_map,
+         conserved_passive_scalar_map, eos_, stale_depth,
+         *(nested_passive_list_.get_list()));
 
       // increment stale_depth since the inner values have been updated
       // but the outer values have not
@@ -695,7 +629,7 @@ void EnzoMethodMHDVlct::compute_flux_
   reconstructor.reconstruct_interface(reconstructable_map,
                                       reconstructable_l, reconstructable_r,
 				      dim, eos_, stale_depth,
-                                      passive_lists);
+                                      *(nested_passive_list_.get_list()));
 
   // We temporarily increment the stale_depth for the rest of this calculation
   // here. We can't fully increment otherwise it will screw up the
@@ -713,9 +647,11 @@ void EnzoMethodMHDVlct::compute_flux_
 
   // Calculate integrable values on left and right faces:
   eos_->integrable_from_reconstructable(reconstructable_l, integrable_l,
-					cur_stale_depth, passive_lists);
+					cur_stale_depth,
+                                        *(nested_passive_list_.get_list()));
   eos_->integrable_from_reconstructable(reconstructable_r, integrable_r,
-					cur_stale_depth, passive_lists);
+					cur_stale_depth,
+                                        *(nested_passive_list_.get_list()));
 
   // Calculate pressure on left and right faces:
   eos_->pressure_from_reconstructable(reconstructable_l, pressure_l,
@@ -725,15 +661,15 @@ void EnzoMethodMHDVlct::compute_flux_
 
   // Next, compute the fluxes
   riemann_solver_->solve(integrable_l, integrable_r, pressure_l, pressure_r,
-                         flux_map, dim, eos_, cur_stale_depth, passive_lists,
+                         flux_map, dim, eos_, cur_stale_depth,
+                         *(nested_passive_list_.get_list()),
                          interface_velocity_arr_ptr);
 
   // Accumulate the change in integrable quantities from these flux_map in
   // dUcons_map
-  integrable_updater_->accumulate_flux_component(dim, cur_dt, cell_width,
-                                                 flux_map, dUcons_map,
-                                                 cur_stale_depth,
-                                                 passive_lists);
+  integrable_updater_->accumulate_flux_component
+    (dim, cur_dt, cell_width, flux_map, dUcons_map, cur_stale_depth,
+     *(nested_passive_list_.get_list()));
 
   // if using dual energy formalism, compute the dual energy formalism
   if (eos_->uses_dual_energy_formalism()){
@@ -800,26 +736,11 @@ void EnzoMethodMHDVlct::setup_arrays_
  EnzoEFltArrayMap &priml_map, EnzoEFltArrayMap &primr_map,
  EFlt3DArray &pressure_l, EFlt3DArray &pressure_r,
  EnzoEFltArrayMap &xflux_map, EnzoEFltArrayMap &yflux_map,
- EnzoEFltArrayMap &zflux_map, EnzoEFltArrayMap &dUcons_map,
- std::vector<std::vector<std::string>> &passive_lists) noexcept
+ EnzoEFltArrayMap &zflux_map, EnzoEFltArrayMap &dUcons_map) noexcept
 {
 
   // allocate stuff! Make sure to do it in a way such that we don't have to
   // separately deallocate it!
-
-  // setup passive_lists. It's a list of lists of passive scalar names. The
-  // first sublist holds all names that are normally passively advected.
-  // Subsequent lists hold sets of names for scalars whose values must sum to
-  // 1 (like species).
-  Grouping *conserved_passive_scalar_grouping = cello::field_descr()->groups();
-  for (std::string group_name : passive_group_names_){
-    int num_fields = conserved_passive_scalar_grouping->size(group_name);
-    for (int field_ind=0; field_ind<num_fields; field_ind++){
-      std::string field_name =
-        conserved_passive_scalar_grouping->item(group_name, field_ind);
-      passive_lists[0].push_back(field_name);
-    }
-  }
 
   // To assist with setting up arrays, let's create a list of ALL primitive
   // keys (including passive scalars) and all integrable keys. These are the
@@ -837,11 +758,12 @@ void EnzoMethodMHDVlct::setup_arrays_
                              primitive_map.at("density").shape(1),
                              primitive_map.at("density").shape(2)};
 
-  add_temporary_arrays_to_map_(primitive_map, shape, nullptr, &passive_lists);
+  add_temporary_arrays_to_map_(primitive_map, shape, nullptr,
+                               (nested_passive_list_.get_list()).get());
 
   // Then, setup temp_primitive_map
   add_temporary_arrays_to_map_(temp_primitive_map, shape, &combined_key_list,
-                               &passive_lists);
+                               (nested_passive_list_.get_list()).get());
 
   // Prepare arrays to hold fluxes (it should include groups for all actively
   // and passively advected quantities)
@@ -850,16 +772,17 @@ void EnzoMethodMHDVlct::setup_arrays_
     std::array<int,3> cur_shape = shape; // makes a deep copy
     cur_shape[i] -= 1;
     add_temporary_arrays_to_map_(*(flux_maps[i]), cur_shape,
-                                 &combined_key_list, &passive_lists);
+                                 &combined_key_list,
+                                 (nested_passive_list_.get_list()).get());
   }
 
   // Prepare fields used to accumulate all changes to the actively advected and
   // passively advected quantities. If CT is in use, dUcons_group should not
   // have storage for magnetic fields since CT independently updates magnetic
   // fields (this exclusion is implicitly handled integrable_updater_)
-  const std::vector<std::string> temp_l =
-    integrable_updater_->combined_integrable_groups();
-  add_temporary_arrays_to_map_(dUcons_map, shape, &temp_l, &passive_lists,
+  std::vector<std::string> tmp = integrable_updater_->integrable_quantities();
+  add_temporary_arrays_to_map_(dUcons_map, shape, &tmp,
+                               (nested_passive_list_.get_list()).get(),
                                true);
 
   // Prepare temporary fields for priml and primr
@@ -868,9 +791,9 @@ void EnzoMethodMHDVlct::setup_arrays_
   //   - y and have shape (  mz,my-1,  mx)
   //   - x and have shape (  mz,  my,mx-1)
   add_temporary_arrays_to_map_(priml_map, shape, &combined_key_list,
-                               &passive_lists);
+                               (nested_passive_list_.get_list()).get());
   add_temporary_arrays_to_map_(primr_map, shape, &combined_key_list,
-                               &passive_lists);
+                               (nested_passive_list_.get_list()).get());
 
   // If there are pressure entries in priml_map and primr_map (depends on the
   // EOS), set pressure_l and pressure_name_r equal to

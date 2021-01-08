@@ -72,15 +72,15 @@ EnzoConstrainedTransport::EnzoConstrainedTransport(Block *block,
 
 //----------------------------------------------------------------------
 
-void EnzoConstrainedTransport::update_refresh(Refresh* refresh)
+void EnzoConstrainedTransport::check_required_fields()
 {
   FieldDescr * field_descr = cello::field_descr();
   ASSERT("EnzoConstrainedTransport::update_refresh",
 	 ("There must be face-centered permanent fields called \"bfieldi_x\","
 	  "\"bfield_y\" and \"bfield_z\"."),
-	 (field_descr->is_field("bfieldi_x") &&
-	  field_descr->is_field("bfieldi_y") &&
-	  field_descr->is_field("bfieldi_z")));
+	 (field_descr->is_field("bfield_x") &&
+	  field_descr->is_field("bfield_y") &&
+	  field_descr->is_field("bfield_z")));
 
   std::vector<std::string> names = {"bfieldi_x", "bfieldi_y", "bfieldi_z"};
   std::vector<std::string> axes = {"x", "y", "z"};
@@ -108,8 +108,6 @@ void EnzoConstrainedTransport::update_refresh(Refresh* refresh)
       }
     }
 
-    // finally add the field to refresh
-    refresh->add_field(field_id);
   }
 }
 

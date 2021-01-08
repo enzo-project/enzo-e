@@ -168,12 +168,7 @@ public: // interface
   ///     advected quantities in FIELD_TABLE). These are used as group names in
   ///     the Grouping objects that store field names. In effect this is used
   ///     to register the quantities operated on by the Riemann Solver
-  /// @param passive_groups A vector with the names of the groups of passively
-  ///     advected scalars that may be included. (If a group is listed here but
-  ///     the Grouping object doesn't actually provide any fields in the group,
-  ///     no problems are caused
-  EnzoRiemannImpl(std::vector<std::string> integrable_groups,
-                   std::vector<std::string> passive_groups);
+  EnzoRiemannImpl(std::vector<std::string> integrable_groups);
 
   /// Virtual destructor
   virtual ~EnzoRiemannImpl(){ };
@@ -213,13 +208,10 @@ protected: //attributes
   /// Names of the quantities to advect
   std::vector<std::string> integrable_groups_;
 
-  /// Names of the passively advected groups of fields (e.g. colours)
-  std::vector<std::string> passive_scalar_groups_;
-
   /// Names of the integrable quantities that require passive fluxes
-  std::vector<std::string> passive_integrable_groups_;
+  std::vector<std::string> passive_integrable_quantities_;
 
-  /// Field categories of each quantity in passive_integrable_groups_
+  /// Field categories of each quantity in passive_integrable_quantities_
   std::vector<FieldCat> passive_integrable_categories_;
 
 };
@@ -238,8 +230,7 @@ EnzoRiemannImpl<ImplFunctor>::PassiveFallbackAdvectionQuantities =
 
 template <class ImplFunctor>
 EnzoRiemannImpl<ImplFunctor>::EnzoRiemannImpl
-(std::vector<std::string> integrable_groups,
- std::vector<std::string> passive_groups)
+(std::vector<std::string> integrable_groups)
   : EnzoRiemann()
 { 
   // Quick sanity check - integrable_groups must have density and velocity
@@ -274,7 +265,7 @@ EnzoRiemannImpl<ImplFunctor>::EnzoRiemannImpl
     } else if (std::find(PassiveFallbackAdvectionQuantities.begin(),
 			 PassiveFallbackAdvectionQuantities.end(),
 			 group) != PassiveFallbackAdvectionQuantities.end()){
-      passive_integrable_groups_.push_back(group);
+      passive_integrable_quantities_.push_back(group);
     } else if (group == "bfield") {
       ERROR("EnzoRiemannImpl",
             "This solver isn't equipped to handle bfields. Their fluxes "
@@ -286,14 +277,12 @@ EnzoRiemannImpl<ImplFunctor>::EnzoRiemannImpl
   }
 
   // determine the categories of each passive integrable group
-  for (std::string group : passive_integrable_groups_){
+  for (std::string group : passive_integrable_quantities_){
     FieldCat category;
     EnzoCenteredFieldRegistry::quantity_properties(group, nullptr,
                                                    &category, nullptr);
     passive_integrable_categories_.push_back(category);
   }
-
-  passive_scalar_groups_ = passive_groups;
 }
 
 //----------------------------------------------------------------------
@@ -304,8 +293,7 @@ void EnzoRiemannImpl<ImplFunctor>::pup (PUP::er &p)
   EnzoRiemann::pup(p);
 
   p|integrable_groups_;
-  p|passive_scalar_groups_;
-  p|passive_integrable_groups_;
+  p|passive_integrable_quantities_;
   p|passive_integrable_categories_;
 }
 
@@ -495,8 +483,8 @@ void EnzoRiemannImpl<ImplFunctor>::solve_passive_advection_
   }
 
   // Next address integrable quantites that have passively advected fluxes
-  for (std::size_t i=0; i<passive_integrable_groups_.size(); i++){
-    std::string key = passive_integrable_groups_[i];
+  for (std::size_t i=0; i<passive_integrable_quantities_.size(); i++){
+    std::string key = passive_integrable_quantities_[i];
 
     ASSERT1("EnzoRiemannImpl::solve_passive_advection_",
 	    "Passive advection fluxes were to be computed for the integrable "
@@ -509,8 +497,9 @@ void EnzoRiemannImpl<ImplFunctor>::solve_passive_advection_
                  "conserved passive scalars");
     }
   }
-  passive_advection_helper_(passive_integrable_groups_, prim_map_l, prim_map_r,
-                            flux_map, density_flux, stale_depth, false);
+  passive_advection_helper_(passive_integrable_quantities_, prim_map_l,
+                            prim_map_r, flux_map, density_flux, stale_depth,
+                            false);
 }
 
 #endif /* ENZO_ENZO_RIEMANN_IMPL_HPP */

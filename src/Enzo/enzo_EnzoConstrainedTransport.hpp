@@ -51,9 +51,8 @@ public: // interface
   ///     which the constructed instance will update the magnetic fields.
   EnzoConstrainedTransport(Block *block, int num_partial_timesteps);
 
-  /// adds the interface bfields to the refresh list (and makes sure that they
-  /// exist)
-  static void update_refresh(Refresh* refresh);
+  /// checks that the interface bfields exist and have the required shapes
+  static void check_required_fields();
 
   /// Returns the partial timestep index.
   ///

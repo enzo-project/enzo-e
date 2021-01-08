@@ -20,9 +20,8 @@ class EnzoIntegrableUpdate : public PUP::able
 public: // interface
 
   /// Create a new EnzoIntegrableUpdate instance
-  EnzoIntegrableUpdate(std::vector<std::string> integrable_groups,
-		       bool skip_B_update,
-		       std::vector<std::string> passive_groups) throw();
+  EnzoIntegrableUpdate(const std::vector<std::string> &integrable_quantities,
+		       bool skip_B_update) throw();
 
   /// Virtual destructor
   virtual ~EnzoIntegrableUpdate()
@@ -40,10 +39,10 @@ public: // interface
   void pup (PUP::er &p)
   {
     PUP::able::pup(p);
+    p|integrable_keys_;
     p|first_specific_index_;
     p|density_index_;
-    p|passive_groups_;
-    p|combined_integrable_groups_;
+    p|integrable_quantities_;
   }
 
   /// Iterates through all arrays in `dUcons_map` that are registered as
@@ -92,9 +91,9 @@ public: // interface
   ///
   /// @param[in] initial_integrable_map Map of arrays holding the values of
   ///     integrable quantities from the start of the timestep. The fluxes
-  ///     will be added to fields held in this grouping. This should also
-  ///     contain the passive scalars in specific form (as mass fractions) that
-  ///     are to be integrated.
+  ///     will be added to fields held in this map. This should also contain
+  ///     the passive scalars in specific form (as mass fractions) that are to
+  ///     be integrated.
   /// @param[in]  dUcons_map Map of arrays where the net changes to the
   ///     integrable quantities and passively advected quantites are stored.
   ///     If constrained transport is being used, this will not include arrays
@@ -122,9 +121,9 @@ public: // interface
    EnzoEquationOfState *eos, int stale_depth,
    const std::vector<std::vector<std::string>> &passive_lists) const;
 
-  /// provides a const vector of all integrable and passively advected scalars
-  const std::vector<std::string> combined_integrable_groups() const throw()
-  { return combined_integrable_groups_; }
+  /// provides a const vector of all integrable quantities
+  const std::vector<std::string> integrable_quantities() const throw()
+  { return integrable_quantities_; }
 
 private:
 
@@ -158,11 +157,8 @@ private: // attributes
   /// index of integrable_keys_ that holds the string "density"
   std::size_t density_index_;
 
-  /// Names of the passively advected groups of fields (e.g. colours)
-  std::vector<std::string> passive_groups_;
-
-  /// Name of all integrable quantities and passively advected scalars
-  std::vector<std::string> combined_integrable_groups_;
+  /// Name of all (non-passive scalar) integrable quantities
+  std::vector<std::string> integrable_quantities_;
 
 };
 

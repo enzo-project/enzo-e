@@ -7,34 +7,36 @@
 
 #include "cello.hpp"
 #include "enzo.hpp"
+#include <limits>
 
-void append_grouping_pairs_(std::vector<std::string> integrable_groups,
-			    FieldCat target_cat, std::size_t *density_index,
-                            std::vector<std::string> &key_vec)
+
+static void append_key_to_vec_(std::vector<std::string> integrable_quantities,
+                               FieldCat target_cat, std::size_t *density_index,
+                               std::vector<std::string> &key_vec)
 {
   int rank = cello::rank();
-  for (std::string name : integrable_groups){
+  for (std::string name : integrable_quantities){
     bool vector_quantity, actively_advected;
     FieldCat category;
     bool success = EnzoCenteredFieldRegistry::quantity_properties
       (name, &vector_quantity, &category, &actively_advected);
 
     // Sanity Checks:
-    ASSERT1("append_grouping_pairs_",
+    ASSERT1("append_key_to_vec_",
 	    ("\"%s\" is not registered in EnzoCenteredFieldRegistry"),
 	    name.c_str(), success);
-    ASSERT1("append_grouping_pairs_",
+    ASSERT1("append_key_to_vec_",
 	    ("\"%s\" should not be listed as an integrable quantity because "
 	     "it is not actively advected."),
 	    name.c_str(), actively_advected);
 
     if (category != target_cat){
-      ASSERT1("append_grouping_pairs_",
+      ASSERT1("append_key_to_vec_",
 	      ("Can't handle the integrable \"%s\" quantity because it has a "
 	       "field category of FieldCat::other"),
 	      name.c_str(), category != FieldCat::other);
       continue;
-    } else if ((density_index != NULL) && (name == "density")){
+    } else if ((density_index != nullptr) && (name == "density")){
       *density_index = key_vec.size();
     }
 
@@ -51,55 +53,26 @@ void append_grouping_pairs_(std::vector<std::string> integrable_groups,
 //----------------------------------------------------------------------
 
 EnzoIntegrableUpdate::EnzoIntegrableUpdate
-(std::vector<std::string> integrable_groups, bool skip_B_update,
- std::vector<std::string> passive_groups) throw()
+(const std::vector<std::string>& integrable_quantities,
+ bool skip_B_update) throw()
 {
-  passive_groups_ = passive_groups;
-
-  if (skip_B_update){
-    // remove bfield group from integrable_groups (if present)
-    std::string target("bfield");
-    integrable_groups.erase(std::remove(integrable_groups.begin(),
-					integrable_groups.end(), target),
-			    integrable_groups.end());
-  }
-
-  // assemble combined_integrable_groups_
-  auto contains = [](const std::vector<std::string> &vec,
-		     const std::string &value)
-  { return std::find(vec.cbegin(),vec.cend(), value) != vec.cend(); };
-
-  for (const std::string& elem : integrable_groups){
-    if (!contains(combined_integrable_groups_, elem)) {
-      combined_integrable_groups_.push_back(elem);
-    }
-  }
-  for (const std::string& elem : passive_groups_){
-    if (!contains(combined_integrable_groups_, elem)) {
-      combined_integrable_groups_.push_back(elem);
+  for (const std::string& val : integrable_quantities){
+    if ( (!skip_B_update) || (val != "bfield") ) {
+      integrable_quantities_.push_back(val);
     }
   }
 
-  // sanity check:
-  std::vector<std::string>::size_type num_unique_groups;
-  num_unique_groups = this->combined_integrable_groups().size();
-  ASSERT("EnzoIntegrableUpdate",
-	 ("group names appear more than once in integrable_groups or "
-	  "passive_groups"),
-	 num_unique_groups == (integrable_groups.size() +
-			       passive_groups_.size()) );
-
-  // prepare integrable_keys_
-  ASSERT("EnzoIntegrableUpdate",
-	 ("\"density\" must be a registered integrable group."),
-	 contains(integrable_groups, "density"));
   // First, add conserved quantities to integrable_keys_
-  append_grouping_pairs_(integrable_groups, FieldCat::conserved,
-			 &density_index_, integrable_keys_);
+  append_key_to_vec_(integrable_quantities_, FieldCat::conserved,
+                     &density_index_, integrable_keys_);
+  ASSERT("EnzoIntegrableUpdate",
+	 ("\"density\" must be a registered integrable quantity."),
+	 density_index_ != std::numeric_limits<std::size_t>::max());
   first_specific_index_ = integrable_keys_.size();
+
   // Then, add specific quantities to integrable_keys_
-  append_grouping_pairs_(integrable_groups, FieldCat::specific,
-			 NULL, integrable_keys_);
+  append_key_to_vec_(integrable_quantities_, FieldCat::specific,
+                     nullptr, integrable_keys_);
 }
 
 //----------------------------------------------------------------------
@@ -264,7 +237,6 @@ void EnzoIntegrableUpdate::update_passive_scalars_
   int mz, my, mx;
   mz = cur_rho.shape(0);    my = cur_rho.shape(1);    mx = cur_rho.shape(2);
 
-  std::vector<std::string> group_names = this->passive_groups_;
   for (std::size_t i = 0; i < passive_lists.size(); i++){
 
     const std::vector<std::string> &cur_list = passive_lists[i];

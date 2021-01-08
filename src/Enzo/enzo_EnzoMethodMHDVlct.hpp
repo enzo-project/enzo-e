@@ -132,7 +132,7 @@ public: // interface
       mhd_choice_(bfield_choice::no_bfield),
       reconstructable_group_names_(),
       integrable_group_names_(),
-      passive_group_names_()
+      nested_passive_list_()
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -167,24 +167,14 @@ protected: // methods
   /// @param reconstructable_quantities Reference to a vector that get's filled
   ///     by this function with the reconstructable quantities (matching names
   ///     in FIELD_TABLE) used by the integrator
-  /// @param passive_groups Reference to a vector that get's filled by this
-  ///     function with the names of groups of passively advected scalars that
-  ///     the integrator will advect
   void determine_quantities_
   (EnzoEquationOfState *eos,
    std::vector<std::string> &integrable_quantities,
-   std::vector<std::string> &reconstructable_quantities,
-   std::vector<std::string> &passive_groups);
+   std::vector<std::string> &reconstructable_quantities);
 
   /// Prepare the main groupings used by the integrator
   void setup_groupings_(std::vector<std::string> &integrable_groups,
-			std::vector<std::string> &reconstructable_groups,
-			std::vector<std::string> &passive_groups);
-
-  /// Adds all of the fields in grouping (that belong to a group listed in
-  /// group names) to the refresh object
-  void add_group_fields_to_refresh_(Refresh *refresh, Grouping &grouping,
-				    std::vector<std::string> group_names);
+                        std::vector<std::string> &reconstructable_groups);
 
   /// Checks that the mesh size is big enough given the ghost depth and checks
   /// the ghost depths given the reconstructors
@@ -341,8 +331,7 @@ protected: // methods
    EnzoEFltArrayMap &priml_map, EnzoEFltArrayMap &primr_map,
    EFlt3DArray &pressure_l, EFlt3DArray &pressure_r,
    EnzoEFltArrayMap &xflux_map, EnzoEFltArrayMap &yflux_map,
-   EnzoEFltArrayMap &zflux_map, EnzoEFltArrayMap &dUcons_map,
-   std::vector<std::vector<std::string>> &passive_lists) noexcept;
+   EnzoEFltArrayMap &zflux_map, EnzoEFltArrayMap &dUcons_map) noexcept;
 
 protected: // attributes
 
@@ -377,9 +366,12 @@ protected: // attributes
   /// Names of the integrable primitive quantities (only includes the group
   /// names for actively advected quantities)
   std::vector<std::string> integrable_group_names_;
-  /// Names of the groups of passively advected scalars
-  std::vector<std::string> passive_group_names_;
 
+  /// Lazy initializer of the nested list of fields holding passive scalars
+  /// The first sublist holds all field names of quantities that are normally
+  /// passively advected. Subsequent lists hold sets of names for scalars whose
+  /// total mass fraction must be 1 (like species).
+  EnzoNestedPassiveScalarFieldList nested_passive_list_;
 };
 
 #endif /* ENZO_ENZO_METHOD_VLCT_HPP */
