@@ -167,11 +167,13 @@ if [ $target == "test" ]; then
     rm -f              test/STOP
 
    # count failures, incompletes, and passes
-
-   grep -rI "^ FAIL"       $dir/*/*unit > $dir/fail.$configure
-   grep -rI "^ incomplete" $dir/*/*unit > $dir/incomplete.$configure
-   grep -rI "^ pass"       $dir/*/*unit > $dir/pass.$configure
-
+   subdir=test/*
+   grep -rI "^ FAIL"       $subdir/*.unit > $dir/fail.$configure
+   grep -rI "^ incomplete" $subdir/*.unit > $dir/incomplete.$configure
+   grep -rI "^ pass"       $subdir/*.unit > $dir/pass.$configure
+   echo $dir
+   echo $subdir
+   echo "done with greping...."
    f=`wc -l < $dir/fail.$configure`
    i=`wc -l < $dir/incomplete.$configure`
    p=`wc -l < $dir/pass.$configure`
