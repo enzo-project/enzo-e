@@ -28,7 +28,7 @@ env.Append(BUILDERS = { 'pngToGif'  : png_to_gif})
 
 run_adapt = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunAdapt' : run_adapt } )
-env_mv_adapt = env.Clone(COPY = 'mkdir -p ' + test_path + '/AmrPpm/Adapt-L5-P1; mv `ls *.png *.h5` ' + test_path + '/AmrPpm/Adapt-L5-P1')
+env_mv_adapt = env.Clone(COPY = 'mkdir -pv ' + test_path + '/AmrPpm/Adapt-L5-P1; mv `ls *.png *.h5` ' + test_path + '/AmrPpm/Adapt-L5-P1')
 
 
 #-------------------------------------------------------------
