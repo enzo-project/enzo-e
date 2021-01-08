@@ -168,9 +168,9 @@ if [ $target == "test" ]; then
 
    # count failures, incompletes, and passes
 
-   grep "^ FAIL"       $dir/*/*unit > $dir/fail.$configure
-   grep "^ incomplete" $dir/*/*unit > $dir/incomplete.$configure
-   grep "^ pass"       $dir/*/*unit > $dir/pass.$configure
+   grep -rI "^ FAIL"       $dir/*/*unit > $dir/fail.$configure
+   grep -rI "^ incomplete" $dir/*/*unit > $dir/incomplete.$configure
+   grep -rI "^ pass"       $dir/*/*unit > $dir/pass.$configure
 
    f=`wc -l < $dir/fail.$configure`
    i=`wc -l < $dir/incomplete.$configure`
