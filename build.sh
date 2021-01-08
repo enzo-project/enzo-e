@@ -185,7 +185,7 @@ if [ $target == "test" ]; then
    printf "%s %s %-12s %-6s %-6s %s %-2s %s %-2s %s %-4s %s %-2s\n" \
         $line | tee $log
 
-   for test in $dir/*unit; do
+   for test in $subdir/*.unit; do
       echo $test
       test_begin=`grep "UNIT TEST BEGIN" $test | wc -l`
       test_end=`grep "UNIT TEST END"   $test | wc -l`
