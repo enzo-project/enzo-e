@@ -42,7 +42,6 @@ public: // interface
     p|integrable_keys_;
     p|first_specific_index_;
     p|density_index_;
-    p|integrable_quantities_;
   }
 
   /// Iterates through all arrays in `dUcons_map` that are registered as
@@ -121,9 +120,9 @@ public: // interface
    EnzoEquationOfState *eos, int stale_depth,
    const std::vector<std::vector<std::string>> &passive_lists) const;
 
-  /// provides a const vector of all integrable quantities
-  const std::vector<std::string> integrable_quantities() const throw()
-  { return integrable_quantities_; }
+  /// provides a const vector of all registerred integrable keys
+  const std::vector<std::string> integrable_keys() const throw()
+  { return integrable_keys_; }
 
 private:
 
@@ -150,16 +149,12 @@ private: // attributes
 
   /// Holds key names used to load each integrable quantity component from a
   /// a mapping. Keys for conserved quantities are always listed before the
-  /// specfic quantities
+  /// specfic quantities. This excludes passively advected scalars.
   std::vector<std::string> integrable_keys_;
   /// index of the first specific quantity listed in integrable_keys_
   std::size_t first_specific_index_;
   /// index of integrable_keys_ that holds the string "density"
   std::size_t density_index_;
-
-  /// Name of all (non-passive scalar) integrable quantities
-  std::vector<std::string> integrable_quantities_;
-
 };
 
 #endif /* ENZO_ENZO_INTEGRABLE_UPDATE_HPP */

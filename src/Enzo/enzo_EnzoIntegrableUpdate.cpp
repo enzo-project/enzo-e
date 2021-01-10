@@ -9,12 +9,13 @@
 #include "enzo.hpp"
 #include <limits>
 
+//----------------------------------------------------------------------
 
-static void append_key_to_vec_(std::vector<std::string> integrable_quantities,
-                               FieldCat target_cat, std::size_t *density_index,
-                               std::vector<std::string> &key_vec)
+static void append_key_to_vec_
+(const std::vector<std::string> &integrable_quantities, FieldCat target_cat,
+ bool skip_bfield, std::size_t *density_index,
+ std::vector<std::string> &key_vec)
 {
-  int rank = cello::rank();
   for (std::string name : integrable_quantities){
     bool vector_quantity, actively_advected;
     FieldCat category;
@@ -36,6 +37,8 @@ static void append_key_to_vec_(std::vector<std::string> integrable_quantities,
 	       "field category of FieldCat::other"),
 	      name.c_str(), category != FieldCat::other);
       continue;
+    } else if (skip_bfield && (name == "bfield")){
+      continue;
     } else if ((density_index != nullptr) && (name == "density")){
       *density_index = key_vec.size();
     }
@@ -56,22 +59,19 @@ EnzoIntegrableUpdate::EnzoIntegrableUpdate
 (const std::vector<std::string>& integrable_quantities,
  bool skip_B_update) throw()
 {
-  for (const std::string& val : integrable_quantities){
-    if ( (!skip_B_update) || (val != "bfield") ) {
-      integrable_quantities_.push_back(val);
-    }
-  }
-
-  // First, add conserved quantities to integrable_keys_
-  append_key_to_vec_(integrable_quantities_, FieldCat::conserved,
+  // Add conserved quantities to integrable_keys_ and identify the index
+  // holding the density key
+  density_index_ = std::numeric_limits<std::size_t>::max();
+  append_key_to_vec_(integrable_quantities, FieldCat::conserved, skip_B_update,
                      &density_index_, integrable_keys_);
+  // Confirm that density is in fact a registered quantity
   ASSERT("EnzoIntegrableUpdate",
 	 ("\"density\" must be a registered integrable quantity."),
 	 density_index_ != std::numeric_limits<std::size_t>::max());
+  // Record the first index holding a key for a specific quantity
   first_specific_index_ = integrable_keys_.size();
-
-  // Then, add specific quantities to integrable_keys_
-  append_key_to_vec_(integrable_quantities_, FieldCat::specific,
+  // Add specific quantities to integrable_keys_
+  append_key_to_vec_(integrable_quantities, FieldCat::specific, skip_B_update,
                      nullptr, integrable_keys_);
 }
 

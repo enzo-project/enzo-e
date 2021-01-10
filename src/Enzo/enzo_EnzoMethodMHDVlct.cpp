@@ -12,6 +12,36 @@
 
 //----------------------------------------------------------------------
 
+static void build_field_l_(const std::vector<std::string> &quantity_l,
+                           std::vector<std::string> &field_l)
+{
+  for (const std::string& quantity : quantity_l){
+    bool success, is_vector;
+    success = EnzoCenteredFieldRegistry::quantity_properties (quantity,
+                                                              &is_vector);
+
+    ASSERT1("add_temporary_arrays_to_map_",
+            ("\"%s\" is not registered in EnzoCenteredFieldRegistry"),
+            quantity.c_str(), success);
+
+    if (is_vector){
+      field_l.push_back(quantity + "_x");
+      field_l.push_back(quantity + "_y");
+      field_l.push_back(quantity + "_z");
+    } else {
+      field_l.push_back(quantity);
+    }
+  }
+
+  FieldDescr * field_descr = cello::field_descr();
+  for (const std::string& field : field_l){
+    ASSERT1("EnzoMethodMHDVlct", "\"%s\" must be a permanent field",
+	    field.c_str(), field_descr->is_field(field));
+  }
+}
+
+//----------------------------------------------------------------------
+
 EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
 				      std::string half_recon_name,
 				      std::string full_recon_name,
@@ -32,42 +62,43 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   // Determine whether magnetic fields are to be used
   mhd_choice_ = parse_bfield_choice_(mhd_choice);
 
-  // determine integrable and reconstructable quantities (and passive scalars)
-  determine_quantities_(eos_, integrable_group_names_,
-			reconstructable_group_names_);
+  // determine integrable and reconstructable quantities
+  std::vector<std::string> integrable_quantities, reconstructable_quantities;
+  EnzoMethodMHDVlct::determine_quantities_(eos_, mhd_choice_,
+                                           integrable_quantities,
+                                           reconstructable_quantities);
 
+  // Initialize the remaining component objects
+  half_dt_recon_ = EnzoReconstructor::construct_reconstructor
+    (reconstructable_quantities, half_recon_name, (enzo_float)theta_limiter);
+  full_dt_recon_ = EnzoReconstructor::construct_reconstructor
+    (reconstructable_quantities, full_recon_name, (enzo_float)theta_limiter);
+  riemann_solver_ = EnzoRiemann::construct_riemann(integrable_quantities,
+                                                   rsolver);
+  integrable_updater_ = new EnzoIntegrableUpdate(integrable_quantities,
+                                                 true);
+
+  // Determine the list of integrable fields and reconstructable fields and
+  // then make sure all required fields are defined
+  build_field_l_(integrable_quantities, integrable_field_list_);
+  build_field_l_(reconstructable_quantities, reconstructable_field_list_);
+
+  // make sure "pressure" is defined (it's needed to compute the timestep)
   FieldDescr * field_descr = cello::field_descr();
-
-  // "pressure" is only used to compute the timestep
   ASSERT("EnzoMethodMHDVlct", "\"pressure\" must be a permanent field",
 	 field_descr->is_field("pressure"));
 
-  // setup primitive_group_, and bfieldi_group_
-  // (also checks that the integrable fields of primitive_group_ and all the
-  // fields of bfieldi_group_ exist and are permanent)
-  setup_groupings_(integrable_group_names_, reconstructable_group_names_);
-
-  // Ensure that the required fields exist
-  // TODO: Add them if they don't exist
   if (mhd_choice_ == bfield_choice::constrained_transport) {
     EnzoConstrainedTransport::check_required_fields();
   }
 
-  // Initialize the default Refresh object - May want to adjust
-  // number of ghost zones based on reconstructor choice.
+  // Finally, initialize the default Refresh object
   cello::simulation()->new_refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
+  // Need to refresh all fields because the fields holding passively advected
+  // scalars won't necessarily be known until after all Methods have been
+  // constructed and all intializers have been executed
   refresh->add_all_fields();
-
-  // Initialize the remaining component objects
-  half_dt_recon_ = EnzoReconstructor::construct_reconstructor
-    (reconstructable_group_names_, half_recon_name, (enzo_float)theta_limiter);
-  full_dt_recon_ = EnzoReconstructor::construct_reconstructor
-    (reconstructable_group_names_, full_recon_name, (enzo_float)theta_limiter);
-  riemann_solver_ = EnzoRiemann::construct_riemann(integrable_group_names_,
-                                                   rsolver);
-  integrable_updater_ = new EnzoIntegrableUpdate(integrable_group_names_,
-                                                 true);
 }
 
 //----------------------------------------------------------------------
@@ -98,18 +129,20 @@ EnzoMethodMHDVlct::bfield_choice EnzoMethodMHDVlct::parse_bfield_choice_
 //----------------------------------------------------------------------
 
 void EnzoMethodMHDVlct::determine_quantities_
-(EnzoEquationOfState *eos, std::vector<std::string> &integrable_quantities,
- std::vector<std::string> &reconstructable_quantities)
+(const EnzoEquationOfState *eos, EnzoMethodMHDVlct::bfield_choice mhd_choice,
+ std::vector<std::string> &integrable_quantities,
+ std::vector<std::string> &reconstructable_quantities) noexcept
 {
 #ifdef CONFIG_USE_GRACKLE
   if (enzo::config()->method_grackle_use_grackle){
-    // make sure all the required fields are defined so that the group of
-    // "colour" fields is accurate (needed for identifying passive scalars)
-    EnzoMethodGrackle::define_required_grackle_fields();
-    // Not quite ready to support a variable gamma
+    // we can remove the following once EnzoMethodGrackle no longer requires
+    // the internal_energy to be a permanent field
+    ASSERT("EnzoMethodMHDVlct::determine_quantities_",
+           ("Grackle cannot currently be used alongside this integrator "
+            "unless the dual-energy formalism is in use"),
+           eos->uses_dual_energy_formalism());
   }
-#endif
-
+#endif /* CONFIG_USE_GRACKLE */
 
   std::string common[] {"density", "velocity"};
   for (std::string quantity : common){
@@ -117,7 +150,7 @@ void EnzoMethodMHDVlct::determine_quantities_
     reconstructable_quantities.push_back(quantity);
   }
 
-  if (mhd_choice_ != bfield_choice::no_bfield){
+  if (mhd_choice != bfield_choice::no_bfield){
     integrable_quantities.push_back("bfield");
     reconstructable_quantities.push_back("bfield");
   }
@@ -136,6 +169,37 @@ void EnzoMethodMHDVlct::determine_quantities_
       integrable_quantities.push_back("internal_energy");
     }
   }
+}
+
+//----------------------------------------------------------------------
+
+EnzoMethodMHDVlct::~EnzoMethodMHDVlct()
+{
+  delete eos_;
+  delete half_dt_recon_;
+  delete full_dt_recon_;
+  delete riemann_solver_;
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodMHDVlct::pup (PUP::er &p)
+{
+  // NOTE: change this function whenever attributes change
+
+  TRACEPUP;
+
+  Method::pup(p);
+
+  p|eos_;
+  p|half_dt_recon_;
+  p|full_dt_recon_;
+  p|riemann_solver_;
+  p|integrable_updater_;
+  p|mhd_choice_;
+  p|integrable_field_list_;
+  p|reconstructable_field_list_;
+  p|nested_passive_list_;
 }
 
 //----------------------------------------------------------------------
@@ -164,179 +228,20 @@ std::vector<std::string> unique_combination_(const std::vector<std::string> &a,
 
 //----------------------------------------------------------------------
 
-void EnzoMethodMHDVlct::setup_groupings_
-(std::vector<std::string> &integrable_groups,
- std::vector<std::string> &reconstructable_groups)
-{
-
-  FieldDescr * field_descr = cello::field_descr();
-
-  // first come up with a vector group names that represents the union of
-  // integrable_groups and reconstructable_groups
-  std::vector<std::string> groups;
-  groups = unique_combination_(integrable_groups,reconstructable_groups);
-
-  // now setup primitive_group_ using the names in groups
-  primitive_group_ = EnzoCenteredFieldRegistry::build_grouping(groups, "");
-
-  // We should check that all the fields in integrable groups are real
-  // permenant fields
-  for (std::size_t i = 0; i<integrable_groups.size(); i++){
-    std::string group_name = integrable_groups[i];
-    int num_fields = primitive_group_->size(group_name);
-
-    for (int j = 0; j<num_fields; j++){
-      std::string field_name = primitive_group_->item(group_name,j);
-
-      ASSERT1("EnzoMethodMHDVlct::setup_groupings_",
-	      "\"%s\" must be the name of a permanent field",
-	      field_name.c_str(), field_descr->is_field(field_name));
-    }
-  }
-}
-
-//----------------------------------------------------------------------
-
-EnzoMethodMHDVlct::~EnzoMethodMHDVlct()
-{
-  delete primitive_group_;
-
-  delete eos_;
-  delete half_dt_recon_;
-  delete full_dt_recon_;
-  delete riemann_solver_;
-}
-
-//----------------------------------------------------------------------
-
-void EnzoMethodMHDVlct::pup (PUP::er &p)
-{
-  // NOTE: change this function whenever attributes change
-
-  TRACEPUP;
-
-  Method::pup(p);
-  const bool up = p.isUnpacking();
-
-  p|eos_;
-  p|integrable_group_names_;
-  p|reconstructable_group_names_;
-  p|nested_passive_list_;
-
-  int has_prim_group = (primitive_group_ != nullptr);
-  p|has_prim_group;
-  if (has_prim_group){
-    if (up){
-      primitive_group_ = new Grouping;
-    }
-    p|*primitive_group_;
-  } else {
-    primitive_group_ = nullptr;
-  }
-
-  // sanity check:
-  ASSERT("EnzoMethodMHDVlct::pup", "primitive_group_ should not be NULL",
-         primitive_group_ != nullptr);
-
-  p|half_dt_recon_;
-  p|full_dt_recon_;
-  p|riemann_solver_;
-  p|integrable_updater_;
-  p|mhd_choice_;
-}
-
-//----------------------------------------------------------------------
-
-static inline void add_field_to_map_helper_(const std::string &field_name,
-                                            const std::string &key, int dim,
-                                            EnzoFieldArrayFactory& factory,
-                                            EnzoEFltArrayMap& map)
-{
-  if (map.contains(key)){
-    ERROR1("EnzoEFltArrayMap::from_grouping",
-           "EnzoEFltArrayMap can't hold more than one field called \"%s\"",
-           key.c_str());
-  }
-
-  if (dim == -1){
-    map[key] = factory.from_name(field_name);
-  } else {
-    map[key] = factory.assigned_center_from_name(field_name, dim);
-  }
-}
-
-//----------------------------------------------------------------------
-
-static void add_arrays_to_map_(Block * block,
-                               Grouping& grouping,
-                               const std::vector<std::string>& group_names,
-                               int dim, EnzoEFltArrayMap& map,
-                               bool allow_missing_group,
-                               bool enforce_num_Groups,
-                               Grouping* ref_grouping)
-{
-
-  char suffixes[3] = {'x','y','z'};
-  EnzoFieldArrayFactory array_factory(block,0);
-
-  for (std::string group_name : group_names){
-    int num_fields = grouping.size(group_name);
-
-    if ((num_fields == 0) && allow_missing_group){ continue; }
-
-    ASSERT("EnzoMethodMHDVlct::compute_flux_",
-           "all groups must have 1 or 3 fields.",
-           !enforce_num_Groups || ((num_fields == 1) || (num_fields == 3)));
-
-    for (int field_ind=0; field_ind<num_fields; field_ind++){
-      std::string field_name = grouping.item(group_name,field_ind);
-
-      std::string key;
-      if (ref_grouping != nullptr){
-        key = ref_grouping->item(group_name, field_ind);
-      } else if (num_fields == 3){
-        key = group_name;
-        key.push_back('_');
-        key.push_back(suffixes[field_ind]);
-      } else {
-        key = group_name;
-      }
-
-      add_field_to_map_helper_(field_name, key, dim, array_factory, map);
-    }
-  }
-}
-
-//----------------------------------------------------------------------
-
-/// Add cell-centered fields to map. This is primarily to be use with the
-/// nested list of passive scalar fields
-static void add_fields_to_array_map_
-(Block * block, const std::vector<std::vector<std::string>>& nested_list,
- EnzoEFltArrayMap& map)
-{
-  EnzoFieldArrayFactory array_factory(block,0);
-  for (const std::vector<std::string> &cur_list : nested_list){
-    for (const std::string& field_name : cur_list){
-      add_field_to_map_helper_(field_name, field_name, -1,
-                               array_factory, map);
-    }
-  }
-}
-
-//----------------------------------------------------------------------
-
 EnzoEFltArrayMap EnzoMethodMHDVlct::nonpassive_primitive_map_(Block * block)
   const throw ()
 {
-  EnzoEFltArrayMap primitive_map("primitive");
-  // need to combine group_names to handle the internal energy source term
-  std::vector<std::string> all_prim_group_names =
-    unique_combination_(reconstructable_group_names_,
-                        integrable_group_names_);
-  add_arrays_to_map_(block, *primitive_group_, all_prim_group_names,
-                     -1, primitive_map, false, true, NULL);
-  return primitive_map;
+  EnzoEFltArrayMap map("primitive");
+  std::vector<std::string> all_prim_fields =
+    unique_combination_(integrable_field_list_, reconstructable_field_list_);
+  EnzoFieldArrayFactory array_factory(block,0);
+  for (const std::string& field_name : all_prim_fields){
+    ASSERT1("EnzoMethodMHDVlct::nonpassive_primitive_map_",
+            "EnzoEFltArrayMap can't hold more than one key called \"%s\"",
+            field_name.c_str(), !map.contains(field_name));
+    map[field_name] = array_factory.from_name(field_name);
+  }
+  return map;
 }
 
 //----------------------------------------------------------------------
@@ -344,10 +249,19 @@ EnzoEFltArrayMap EnzoMethodMHDVlct::nonpassive_primitive_map_(Block * block)
 EnzoEFltArrayMap EnzoMethodMHDVlct::conserved_passive_scalar_map_
 (Block * block) const throw ()
 {
-  EnzoEFltArrayMap conserved_passive_scalar_map("conserved_passive_scalar");
-  add_fields_to_array_map_(block, *(nested_passive_list_.get_list()),
-                           conserved_passive_scalar_map);
-  return conserved_passive_scalar_map;
+  EnzoEFltArrayMap map("conserved_passive_scalar");
+  std::shared_ptr<const std::vector<std::vector<std::string>>> nested_list
+    = nested_passive_list_.get_list();
+  EnzoFieldArrayFactory array_factory(block,0);
+  for (const std::vector<std::string> &cur_list : *nested_list){
+    for (const std::string& field_name : cur_list){
+      ASSERT1("EnzoMethodMHDVlct::conserved_passive_scalar_map_",
+              "EnzoEFltArrayMap can't hold more than one key called \"%s\"",
+              field_name.c_str(), !map.contains(field_name));
+      map[field_name] = array_factory.from_name(field_name);
+    }
+  }
+  return map;
 }
 
 //----------------------------------------------------------------------
@@ -687,33 +601,15 @@ void EnzoMethodMHDVlct::compute_flux_
 
 //----------------------------------------------------------------------
 
-void add_temporary_arrays_to_map_
+static void add_temporary_arrays_to_map_
 (EnzoEFltArrayMap &map, std::array<int,3> &shape,
- const std::vector<std::string>* const names,
- const std::vector<std::vector<std::string>>* const passive_lists,
- bool skip_unregisterred_names = false)
+ const std::vector<std::string>* const nonpassive_names,
+ const std::vector<std::vector<std::string>>* const passive_lists)
 {
 
-  if (names != nullptr){
-    for (const std::string& name : (*names)){
-      bool success, is_vector;
-      success = EnzoCenteredFieldRegistry::quantity_properties (name,
-                                                                &is_vector);
-      if (skip_unregisterred_names & (!success)){
-        continue;
-      } else {
-        ASSERT1("add_temporary_arrays_to_map_",
-                ("\"%s\" is not registered in EnzoCenteredFieldRegistry"),
-                name.c_str(), success);
-      }
-
-      if (is_vector){
-        map[name + "_x"] = EFlt3DArray(shape[0], shape[1], shape[2]);
-        map[name + "_y"] = EFlt3DArray(shape[0], shape[1], shape[2]);
-        map[name + "_z"] = EFlt3DArray(shape[0], shape[1], shape[2]);
-      } else {
-        map[name] = EFlt3DArray(shape[0], shape[1], shape[2]);
-      }
+  if (nonpassive_names != nullptr){
+    for (const std::string& name : (*nonpassive_names)){
+      map[name] = EFlt3DArray(shape[0], shape[1], shape[2]);
     }
   }
 
@@ -747,7 +643,7 @@ void EnzoMethodMHDVlct::setup_arrays_
   // same thing except the latter excludes quantities (like pressure) that we
   // don't compute pressure for.
   std::vector<std::string> combined_key_list = unique_combination_
-    (reconstructable_group_names_, integrable_group_names_);
+    (integrable_field_list_, reconstructable_field_list_);
 
   // First, setup conserved_passive_scalar_map
   conserved_passive_scalar_map = conserved_passive_scalar_map_(block);
@@ -757,12 +653,12 @@ void EnzoMethodMHDVlct::setup_arrays_
   std::array<int,3> shape = {primitive_map.at("density").shape(0),
                              primitive_map.at("density").shape(1),
                              primitive_map.at("density").shape(2)};
-
   add_temporary_arrays_to_map_(primitive_map, shape, nullptr,
                                (nested_passive_list_.get_list()).get());
 
   // Then, setup temp_primitive_map
-  add_temporary_arrays_to_map_(temp_primitive_map, shape, &combined_key_list,
+  add_temporary_arrays_to_map_(temp_primitive_map, shape,
+                               &combined_key_list,
                                (nested_passive_list_.get_list()).get());
 
   // Prepare arrays to hold fluxes (it should include groups for all actively
@@ -780,10 +676,9 @@ void EnzoMethodMHDVlct::setup_arrays_
   // passively advected quantities. If CT is in use, dUcons_group should not
   // have storage for magnetic fields since CT independently updates magnetic
   // fields (this exclusion is implicitly handled integrable_updater_)
-  std::vector<std::string> tmp = integrable_updater_->integrable_quantities();
+  std::vector<std::string> tmp = integrable_updater_->integrable_keys();
   add_temporary_arrays_to_map_(dUcons_map, shape, &tmp,
-                               (nested_passive_list_.get_list()).get(),
-                               true);
+                               (nested_passive_list_.get_list()).get());
 
   // Prepare temporary fields for priml and primr
   // As necessary, we pretend that these are centered along:

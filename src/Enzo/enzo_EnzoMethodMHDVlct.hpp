@@ -94,8 +94,12 @@ class EnzoMethodMHDVlct : public Method {
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Encapsulate VL + CT MHD method
 
+public:
   /// This is defined within the scope of EnzoMethodMHDVlct to avoid polluting
-  /// the global namespace
+  /// the global namespace.
+  ///
+  /// @note
+  /// This must be public so that it can be passed to helper methods by value
   enum bfield_choice {
     no_bfield = 0,         // pure hydrodynamics
     unsafe_const_uniform,  // an unsafe mode where bfields are assumed to be
@@ -123,15 +127,14 @@ public: // interface
   /// Charm++ PUP::able migration constructor
   EnzoMethodMHDVlct (CkMigrateMessage *m)
     : Method (m),
-      primitive_group_(nullptr),
       eos_(nullptr),
       half_dt_recon_(nullptr),
       full_dt_recon_(nullptr),
       riemann_solver_(nullptr),
       integrable_updater_(nullptr),
       mhd_choice_(bfield_choice::no_bfield),
-      reconstructable_group_names_(),
-      integrable_group_names_(),
+      integrable_field_list_(),
+      reconstructable_field_list_(),
       nested_passive_list_()
   { }
 
@@ -156,30 +159,27 @@ protected: // methods
   bfield_choice parse_bfield_choice_(std::string choice) const noexcept;
 
   /// Determines the quantities from (FIELD_TABLE) to be reconstructed and
-  /// integrated and a list of group names that may or may not include passive
-  /// scalars that will be integrated.
+  /// integrated and that will be integrated.
   ///
-  /// @param eos Pointer to the fluid's EquationOfState object. This is used to
-  ///     help determine which quantities are used by the integrator
-  /// @param integrable_quantities Reference to a vector that get's filled by
-  ///     this function with the integrable quantities (matching names in
+  /// @param[in]  eos Pointer to the fluid's EquationOfState object.
+  /// @param[in]  mhd_choice Encodes how the integrator will handle B-fields
+  /// @param[out] integrable_quantities Reference to a vector that get's filled
+  ///     by this function with the integrable quantities (matching names in
   ///     FIELD_TABLE) used by the integrator
-  /// @param reconstructable_quantities Reference to a vector that get's filled
-  ///     by this function with the reconstructable quantities (matching names
-  ///     in FIELD_TABLE) used by the integrator
-  void determine_quantities_
-  (EnzoEquationOfState *eos,
+  /// @param[out] reconstructable_quantities Reference to a vector that get's
+  ///     filled by this function with the names of quantities (matching
+  ///     names in FIELD_TABLE) that are used by the integrator for
+  ///     reconstruction
+  static void determine_quantities_
+  (const EnzoEquationOfState *eos, bfield_choice mhd_choice,
    std::vector<std::string> &integrable_quantities,
-   std::vector<std::string> &reconstructable_quantities);
+   std::vector<std::string> &reconstructable_quantities) noexcept;
 
-  /// Prepare the main groupings used by the integrator
-  void setup_groupings_(std::vector<std::string> &integrable_groups,
-                        std::vector<std::string> &reconstructable_groups);
-
-  /// Checks that the mesh size is big enough given the ghost depth and checks
-  /// the ghost depths given the reconstructors
+  /// Checks that the mesh size is sufficiently large to handle the given ghost
+  /// depth and confirms that the ghost depth is consistent with the
+  /// requirements of the reconstructors
   ///
-  /// @param block used to determine the current mesh size and ghost depth
+  /// @param[in] block used to determine the current mesh size and ghost depth
   void check_mesh_and_ghost_size_(Block *block) const;
 
   /// Converts conservative passive scalars (which are originally densities)
@@ -335,16 +335,6 @@ protected: // methods
 
 protected: // attributes
 
-  /// Pointer to a grouping that holds groups named for each of the
-  /// reconstructable and integrable quantities. Groups named for scalars hold
-  /// 1 field and Groups named for vectors hold 3 quantities (for each
-  /// spatial component). All fields related to integrable quantites are
-  /// permanent. All fields exclusively related to reconstructable quantities
-  /// can be permanent or temporary. Also holds groups named after all known
-  /// passive scalar groups. Within a passive scalar group, there are temporary
-  /// fields that will be used to hold the passive scalars in specific form.
-  Grouping *primitive_group_;
-
   /// Pointer to the equation of state of the fluid
   EnzoEquationOfState *eos_;
   /// Pointer to the reconstructor used to reconstruct the fluid during the
@@ -361,11 +351,13 @@ protected: // attributes
   /// Indicates how magnetic fields are handled
   bfield_choice mhd_choice_;
 
-  /// Names of the reconstructable primitive quantities
-  std::vector<std::string> reconstructable_group_names_;
-  /// Names of the integrable primitive quantities (only includes the group
-  /// names for actively advected quantities)
-  std::vector<std::string> integrable_group_names_;
+  /// Names of the integrable fields (only includes the field names for
+  /// actively advected quantities). These also serve as the keys to the
+  /// mappings of arrays used in the calculation
+  std::vector<std::string> integrable_field_list_;
+  /// Names of the reconstructable primitive fields. These also serve as the
+  /// keys to the mappings of arrays used in the calculation
+  std::vector<std::string> reconstructable_field_list_;
 
   /// Lazy initializer of the nested list of fields holding passive scalars
   /// The first sublist holds all field names of quantities that are normally
