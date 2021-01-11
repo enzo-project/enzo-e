@@ -19,7 +19,7 @@ def charm_path_search(home):
         charm_path = _check_dirs(['/usr/local/charm', '/opt/charm'])
     if charm_path is None:
         raise Exception("No Charm++ found at CHARM_HOME")
-	return charm_path
+    return charm_path
 
 def grackle_path_search(home):
     # function that searches for grackle_path in locations common across
