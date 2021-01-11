@@ -64,22 +64,23 @@ public: // interface
   /// `dim` over the timestep `dt`. These changes are added to the accumulator
   /// arrays contained by `dUcons_map`.
   ///
-  /// @param[in]  dim The dimension along which to compute the flux divergence.
-  /// @param[in]  dt The current timestep.
-  /// @param[in]  cell_width The cell with along dimension `dim`.
-  /// @param[in]  flux_map Map of arrays holding the fluxes computed for
+  /// @param[in]     dim The dimension along which to compute the flux
+  ///     divergence.
+  /// @param[in]     dt The current timestep.
+  /// @param[in]     cell_width The cell width along dimension `dim`.
+  /// @param[in]     flux_map Map of arrays holding the fluxes computed for
   ///     the current timestep. The values of these fields should be stored
   ///     on the cell faces along the `dim` dimension.
-  /// @param[out] dUcons_map Map of arrays where the flux divergence is added
+  /// @param[in,out] dUcons_map Map of arrays where the flux divergence is added
   ///     to. If constrained transport is being used, this will not include
   ///     arrays for the magnetic fields.
-  /// @param[in]  stale_depth The stale depth at the time of the function call.
-  ///     This should match the stale depth at the time the fluxes were
+  /// @param[in]     stale_depth The stale depth at the time of the function
+  ///     call. This should match the stale depth at the time the fluxes were
   ///     computed.
-  /// @param[in]  passive_lists A list of lists of keys for passively advected
-  ///     scalars. Keys must not be duplicated across more than one list. In
-  ///     this method, this is effectively concatenated into one list of
-  ///     passive scalar keys.
+  /// @param[in]     passive_lists A list of lists of keys for passively
+  ///     advected scalars. Keys must not be duplicated across more than one
+  ///     list. In this method, this is effectively concatenated into one list
+  ///     of passive scalar keys.
   void accumulate_flux_component
   (int dim, double dt, double cell_width, EnzoEFltArrayMap &flux_map,
    EnzoEFltArrayMap &dUcons_map, int stale_depth,
@@ -105,7 +106,7 @@ public: // interface
   ///     passive scalar quantities are stored in conserved form (as densities).
   /// @param[in]  eos Pointer to the fluid's equation of state object. When
   ///     applicable used for placing a density floor.
-  /// @param[in] stale_depth The stale depth at the time of the function call
+  /// @param[in]  stale_depth The stale depth at the time of the function call
   ///     (the stale_depth must be incremented after this function is called)
   /// @param[in]  passive_lists A list of lists of keys for passively advected
   ///     scalars. The first list holds the keys for quantities that are

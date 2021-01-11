@@ -22,14 +22,9 @@ public: // interface
   /// Factory method for constructing the EnzoRiemann object. (The signature
   /// may need to be modified as additional physics get added)
   ///
-  /// @param integrable_groups A vector of integrable quantities (listed as
-  ///     advected quantities in FIELD_TABLE). These are used as group names in
-  ///     the Grouping objects that store field names. In effect this is used
-  ///     to register the quantities operated on by the Riemann Solver
-  /// @param passive_groups A vector with the names of the groups of passively
-  ///     advected scalars that may be included. (If a group is listed here but
-  ///     the Grouping object doesn't actually provide any fields in the group,
-  ///     no problems are caused)
+  /// @param integrable_quantities A vector of integrable quantities (listed as
+  ///     advected quantities in FIELD_TABLE). This is used to register the
+  ///     quantities that the Riemann Solver operates on.
   /// @param solver The name of the Riemann solver to use. Valid names include
   ///     "hll", "hlle", and "hlld"
   static EnzoRiemann* construct_riemann

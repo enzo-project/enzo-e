@@ -229,7 +229,7 @@ std::vector<std::string> unique_combination_(const std::vector<std::string> &a,
 //----------------------------------------------------------------------
 
 EnzoEFltArrayMap EnzoMethodMHDVlct::nonpassive_primitive_map_(Block * block)
-  const throw ()
+  const noexcept
 {
   EnzoEFltArrayMap map("primitive");
   std::vector<std::string> all_prim_fields =
@@ -247,7 +247,7 @@ EnzoEFltArrayMap EnzoMethodMHDVlct::nonpassive_primitive_map_(Block * block)
 //----------------------------------------------------------------------
 
 EnzoEFltArrayMap EnzoMethodMHDVlct::conserved_passive_scalar_map_
-(Block * block) const throw ()
+(Block * block) const noexcept
 {
   EnzoEFltArrayMap map("conserved_passive_scalar");
   std::shared_ptr<const std::vector<std::vector<std::string>>> nested_list
@@ -469,7 +469,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------
 
-void EnzoMethodMHDVlct::check_mesh_and_ghost_size_(Block *block) const
+void EnzoMethodMHDVlct::check_mesh_and_ghost_size_(Block *block) const noexcept
 {
   Field field = block->data()->field();
 
