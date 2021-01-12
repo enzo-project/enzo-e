@@ -11,7 +11,7 @@
 //----------------------------------------------------------------------
 
 void EnzoSourceInternalEnergy::calculate_source
-(int dim, double dt, double cell_width, EnzoEFltArrayMap &prim_map,
+(int dim, double dt, enzo_float cell_width, EnzoEFltArrayMap &prim_map,
  EnzoEFltArrayMap &dUcons_map, EFlt3DArray &interface_velocity,
  EnzoEquationOfState *eos, int stale_depth) const throw()
 {

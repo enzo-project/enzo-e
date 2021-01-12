@@ -103,7 +103,7 @@ void EnzoIntegrableUpdate::clear_dUcons_map
 //----------------------------------------------------------------------
 
 void EnzoIntegrableUpdate::accumulate_flux_component
-(int dim, double dt, double cell_width, EnzoEFltArrayMap &flux_map,
+(int dim, double dt, enzo_float cell_width, EnzoEFltArrayMap &flux_map,
  EnzoEFltArrayMap &dUcons_map, int stale_depth,
  const std::vector<std::vector<std::string>> &passive_lists) const noexcept
 {

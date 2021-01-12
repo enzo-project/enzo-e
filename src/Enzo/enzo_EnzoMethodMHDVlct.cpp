@@ -339,7 +339,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       ct = new EnzoConstrainedTransport(block, 2);
     }
 
-    const double* const cell_widths = enzo::block(block)->CellWidth;
+    const enzo_float* const cell_widths = enzo::block(block)->CellWidth;
 
     double dt = block->dt();
 
