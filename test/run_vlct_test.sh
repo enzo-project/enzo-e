@@ -53,7 +53,7 @@ if [[ "$USING_PY3" != "1" ]]; then
 fi
 
 YT_INSTALLED=$(pip list | grep "^yt" | wc -l )
-if [[ "$YT_INSTALLED" != "1" ]]; then
+if [[ "$YT_INSTALLED" == "0" ]]; then
     echo "yt is not installed. It is required for testing VLCT tests."
     exit 1
 fi
