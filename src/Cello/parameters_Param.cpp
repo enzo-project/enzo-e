@@ -64,8 +64,8 @@ void Param::pup (PUP::er &p)
       n=strlen(value_string_);
     }
     p | n;
-    if (p.isUnpacking()) value_string_ = new char [n];
-    if (n > 0) PUParray(p,value_string_,n);
+    if (p.isUnpacking()) value_string_ = new char [n+1];
+    PUParray(p,value_string_,n+1);
   } else if (type_ == parameter_list) {
     int n = 0;
     if (! p.isUnpacking()) {
@@ -343,10 +343,13 @@ void Param::evaluate_float
   int i;
   switch (node->type) {
   case enum_node_operation:
+    ASSERT("Param::evaluate_float()",
+           "node is NULL",
+           (node != NULL));
     ASSERT3("Param::evaluate_float()",
 	    "Error in operation %d: left %p right %p",
 	    node ? node->op_value:-1,left,right,
-	    left != NULL && right != NULL);
+	    ((left != NULL) && (right != NULL)));
     switch (node->op_value) {
     case enum_op_add: for (i=0; i<n; i++) result[i] = left[i] + right[i]; break;
     case enum_op_sub: for (i=0; i<n; i++) result[i] = left[i] - right[i]; break;
@@ -376,10 +379,10 @@ void Param::evaluate_float
     break;
   case enum_node_variable:
     switch (node->var_value) {
-    case 'x':	for (i=0; i<n; i++) result[i] = x[i]; break;
-    case 'y':	for (i=0; i<n; i++) result[i] = y[i]; break;
-    case 'z':	for (i=0; i<n; i++) result[i] = z[i]; break;
-    case 't':	for (i=0; i<n; i++) result[i] = t;    break;
+    case 'x': if (x) for (i=0; i<n; i++) result[i] = x[i]; break;
+    case 'y': if (y) for (i=0; i<n; i++) result[i] = y[i]; break;
+    case 'z': if (z) for (i=0; i<n; i++) result[i] = z[i]; break;
+    case 't': for (i=0; i<n; i++) result[i] = t;    break;
     default:
       ERROR1("Param::evaluate_float",
 	     "unknown variable %c in floating-point expression",
@@ -554,6 +557,6 @@ void Param::dealloc_node_expr_ (struct node_expr * p)
   if (p->right != NULL) dealloc_node_expr_(p->right);
   free (p->function_name);
   free (p);
-};
+}
 
 //----------------------------------------------------------------------

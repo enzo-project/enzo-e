@@ -47,6 +47,7 @@ c
 c-----------------------------------------------------------------------
 c
       implicit NONE
+#define FORTRAN
 #include "fortran_types.h"
 c
 c  argument declarations

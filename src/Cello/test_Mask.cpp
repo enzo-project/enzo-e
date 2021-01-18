@@ -56,7 +56,8 @@ PARALLEL_MAIN_BEGIN
   FieldDescr * field_descr = new FieldDescr;
   ParticleDescr * particle_descr = new ParticleDescr;
 
-  Data data(nx,ny,nz, 1,  xm,xp,ym,yp,zm,zp);
+  Data data(nx,ny,nz, 1, xm,xp,ym,yp,zm,zp,
+	    field_descr, particle_descr);
 
   double x[nx], y[ny], z[nz];
 

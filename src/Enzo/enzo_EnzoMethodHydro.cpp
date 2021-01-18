@@ -59,23 +59,6 @@ EnzoMethodHydro::EnzoMethodHydro
     
 {
   // Initialize default Refresh object
-
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
-			     enzo_sync_id_method_ppm);
-
-  FieldDescr * field_descr = cello::field_descr();
-  
-  refresh(ir)->add_field(field_descr->field_id("density"));
-  refresh(ir)->add_field(field_descr->field_id("velocity_x"));
-  refresh(ir)->add_field(field_descr->field_id("velocity_y"));
-  refresh(ir)->add_field(field_descr->field_id("velocity_z"));
-  refresh(ir)->add_field(field_descr->field_id("acceleration_x"));
-  refresh(ir)->add_field(field_descr->field_id("acceleration_y"));
-  refresh(ir)->add_field(field_descr->field_id("acceleration_z"));
-  refresh(ir)->add_field(field_descr->field_id("internal_energy"));
-  refresh(ir)->add_field(field_descr->field_id("total_energy"));
-  refresh(ir)->add_field(field_descr->field_id("pressure"));
-
 }
 
 //----------------------------------------------------------------------
@@ -710,7 +693,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
 {
   // int dim = 0, idim = 1, jdim = 2;
   // int dim_p1 = dim+1;   // To match definition in calcdiss
-  // int ierr = 0;
+  int ierr = 0;
 
   // /* Find fields: density, total energy, velocity1-3. */
 
@@ -855,7 +838,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
   }
     
   ASSERT2("EnzoMethodHydro::ppm_xeuler_x",
-	  "temporary slice array actual size %d differs from expected size %d",
+	  "temporary slice array actual size %ld differs from expected size %d",
 	  (pa-slice_array), na,
 	  ((pa -slice_array) == na));
 
@@ -899,7 +882,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
   colrs    = pf; pf += nc*ns;
 
   ASSERT2("EnzoMethodHydro::ppm_xeuler_x",
-	  "temporary fluxes array actual size %d differs from expected size %d",
+	  "temporary fluxes array actual size %ld differs from expected size %d",
 	  (pf-fluxes_array), nf,
 	  ((pf -fluxes_array) == nf));
 
@@ -933,14 +916,14 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
        wslice, &dual_energy_eta1_,
        &dual_energy_eta2_,
        &mx,&my, &is, &ie, &js, &je, 
-       &gamma_, &ppm_pressure_floor_);
+       &gamma_, &ppm_pressure_floor_, &ierr);
 
   } else {
 
     FORTRAN_NAME(pgas2d)
       (dslice, eslice, pslice, uslice, vslice, 
        wslice, &mx, &my,
-       &is, &ie, &js, &je, &gamma_, &ppm_pressure_floor_);
+       &is, &ie, &js, &je, &gamma_, &ppm_pressure_floor_, &ierr);
   }
 
   
@@ -1001,7 +984,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
        &reconstruct_conservative_, &reconstruct_positive_,
        &dt, &gamma_, &ppm_pressure_free_, 
        dls, drs, pls, prs, gels, gers, uls, urs, vls, vrs,
-       wls, wrs, &nc, colslice, colls, colrs);
+       wls, wrs, &nc, colslice, colls, colrs, &ierr);
   }
 
   // Compute (Lagrangian part of the) Riemann problem at each zone boundary
@@ -1015,7 +998,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
        &dt, &gamma_, &ppm_pressure_floor_, &ppm_pressure_free_,
        pbar, ubar, &gravity_, grslice,
        &dual_energy_, &dual_energy_eta1_);
-    
+    int axis=-1;
     FORTRAN_NAME(flux_twoshock)
       (dslice, eslice, geslice, uslice, vslice, wslice,
        &hxa, diffcoef, 
@@ -1027,7 +1010,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
        dls, drs, pls, prs, gels, gers, uls, urs,
        vls, vrs, wls, wrs, pbar, ubar,
        df, ef, uf, vf, wf, gef, ges,
-       &nc, colslice, colls, colrs, colf);
+       &nc, colslice, colls, colrs, colf,&axis);
     
   } else if (riemann_solver_ == "hll") {
 

@@ -10,7 +10,7 @@ c
      $     dls, drs, pls, prs, gels, gers, 
      $     uls, urs, vls, vrs, wls, wrs, pbar, ubar,
      $     df, ef, uf, vf, wf, gef, ges,
-     $     ncolor, colslice, colls, colrs, colf
+     $     ncolor, colslice, colls, colrs, colf, axis
      $     )
 c
 c-----------------------------------------------------------------------
@@ -70,6 +70,7 @@ c
 c
 c-----------------------------------------------------------------------
 c
+      integer axis
       qa = (gamma + 1._RKIND)/(2._RKIND*gamma)
       qb = (gamma - 1._RKIND)/(gamma + 1._RKIND)
 
@@ -315,7 +316,7 @@ c
             dueb(i) = dub(i)*eb(i) + diffcoef(i,j)*
      &           (dslice(i-1,j)*eslice(i-1,j) - dslice(i,j)*eslice(i,j))
 c
-c	This update must be the last !AK
+c     This update must be the last !AK
 c
             dub(i)  =  dub(i) + diffcoef(i,j)*
      &           (dslice(i-1,j)               - dslice(i,j)            )
@@ -413,6 +414,7 @@ c
              endif
              write (6,*) 'a', df(i,j)-df(i+1,j), dslice(i,j), 
      $            dt/dx(i), dt, lbar(i),l0(i)
+             write (6,*) 'axis',axis
              write (6,*) 'b', db(i-1), db(i), db(i+1)
              write (6,*) 'c', ub(i-1), ub(i), ub(i+1)
              write (6,*) 'd', pb(i-1), pb(i), pb(i+1)

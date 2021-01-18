@@ -109,9 +109,16 @@ void Config::pup (PUP::er &p)
   p | method_courant_global;
   p | method_list;
   p | method_schedule_index;
+  p | method_close_files_seconds_stagger;
+  p | method_close_files_seconds_delay;
+  p | method_close_files_group_size;
   p | method_courant;
+  p | method_flux_correct_group;
+  p | method_flux_correct_enable;
+  p | method_flux_correct_min_digits;
   p | method_timestep;
   p | method_trace_name;
+  p | method_null_dt;
 
   // Monitor
 
@@ -177,6 +184,7 @@ void Config::pup (PUP::er &p)
   // Performance
 
   p | performance_papi_counters;
+  p | performance_projections_on_at_start;
   p | performance_warnings;
   p | performance_on_schedule_index;
   p | performance_off_schedule_index;
@@ -228,7 +236,6 @@ void Config::pup (PUP::er &p)
 void Config::read(Parameters * p) throw()
 {
   TRACE("BEGIN Config::read()");
-
   read_adapt_(p);
   read_balance_(p);
   read_boundary_(p);
@@ -700,8 +707,14 @@ void Config::read_method_ (Parameters * p) throw()
 
   method_list.   resize(num_method);
   method_courant.resize(num_method);
+  method_flux_correct_group.resize(num_method);
+  method_flux_correct_enable.resize(num_method);
+  method_flux_correct_min_digits.resize(num_method);
   method_timestep.resize(num_method);
   method_schedule_index.resize(num_method);
+  method_close_files_seconds_stagger.resize(num_method);
+  method_close_files_seconds_delay.resize(num_method);
+  method_close_files_group_size.resize(num_method);
   method_trace_name.resize(num_method);
   
   method_courant_global = p->value_float ("Method:courant",1.0);
@@ -730,8 +743,24 @@ void Config::read_method_ (Parameters * p) throw()
       method_schedule_index[index_method] = -1;
     }
 
+    // Read throttling parameters for MethodCloseFiles
+    method_close_files_seconds_stagger[index_method] = p->value_float
+      (full_name + ":seconds_stagger",0.0);
+    method_close_files_seconds_delay[index_method] = p->value_float
+      (full_name + ":seconds_delay",0.0);
+    method_close_files_group_size[index_method] = p->value_integer
+      (full_name + ":group_size",std::numeric_limits<int>::max());
+
     // Read courant condition if any
     method_courant[index_method] = p->value_float  (full_name + ":courant",1.0);
+
+    // Read field group for flux correction
+    method_flux_correct_group[index_method] =
+      p->value_string (full_name + ":group","conserved");
+    method_flux_correct_enable[index_method] =
+      p->value_logical (full_name + ":enable",true);
+    method_flux_correct_min_digits[index_method] =
+      p->value_float (full_name + ":min_digits",0.0);
 
     // Read specified timestep, if any (for MethodTrace)
     method_timestep[index_method] = p->value_float  
@@ -740,6 +769,9 @@ void Config::read_method_ (Parameters * p) throw()
     method_trace_name[index_method] = p->value_string
       (full_name + ":name", "trace");
   }
+  method_null_dt = p->value_float
+    ("Method:null:dt",std::numeric_limits<double>::max());
+
 }
 
 //----------------------------------------------------------------------
@@ -887,7 +919,7 @@ void Config::read_output_ (Parameters * p) throw()
       if (p->type("axis") != parameter_unknown) {
 	std::string axis = p->value_string("axis");
 	ASSERT2("Problem::initialize_output",
-		"Output %s axis %d must be \"x\", \"y\", or \"z\"",
+		"Output %s axis %s must be \"x\", \"y\", or \"z\"",
 		output_list[index_output].c_str(), axis.c_str(),
 		axis=="x" || axis=="y" || axis=="z");
 	output_axis[index_output] = axis;
@@ -1029,6 +1061,10 @@ void Config::read_particle_ (Parameters * p) throw()
 
       std::string name = p->list_value_string (3*ia,  const_str,"unknown");
       std::string type = p->list_value_string (3*ia+1,const_str,"unknown");
+
+      if (type == "default") {
+        type = default_precision_string;
+      }
 
       ASSERT3 ("read_particle_",
 	       "Particle type %d constant %d has unknown constant name %s",
@@ -1179,26 +1215,30 @@ void Config::read_performance_ (Parameters * p) throw()
   int i_on = -1;
   int i_off = -1;
   
-  if (p->type("Performance:projections_on:schedule:var") != parameter_unknown) {
+  if (p->type("Performance:projections:schedule_on:var") != parameter_unknown) {
     p->group_set(0,"Performance");
-    p->group_push("projections_on");
-    p->group_push("schedule");
+    p->group_push("projections");
+    p->group_push("schedule_on");
     i_on = read_schedule_(p,"projections_on");
   }
-  if (p->type("Performance:projections_off:schedule:var") != parameter_unknown) {
+  if (p->type("Performance:projections:schedule_off:var") != parameter_unknown) {
     p->group_set(0,"Performance");
-    p->group_push("projections_off");
-    p->group_push("schedule");
+    p->group_push("projections");
+    p->group_push("schedule_off");
     i_off = read_schedule_(p,"projections_off");
   }
+  p->group_clear();
 
+  performance_projections_on_at_start =  p->value_logical
+    ("Performance:projections:on_at_start",true);
+  
   // Check that both projections_on and off schedules are defined or undefined together
   if ((i_on == -1 && i_off == -1) || (i_on != -1 && i_off != -1)) {
     performance_on_schedule_index  = i_on;
     performance_off_schedule_index = i_off;
   } else {
     ERROR2("Config::read_performance-()",
-	   "Performance:projections_on:schedule [%d] and Performance:projections_off:schedule [%d]\n"
+	   "Performance:projections:schedule_on [%d] and Performance:projections:schedule_off [%d]\n"
 	   "must be both defined or both undefined",
 	   i_on,i_off);
   }

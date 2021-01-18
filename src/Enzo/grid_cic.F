@@ -11,7 +11,6 @@ c
      &     offset1, offset2, offset3,
      &     ddim1, ddim2, ddim3,
      &     refine1, refine2, refine3)
-      use, intrinsic :: iso_fortran_env
 c     
 c  DEPOSIT SOURCE GRID INTO DEST GRID USING CIC INTERPOLATION
 c
@@ -48,6 +47,8 @@ c
 c-----------------------------------------------------------------------
 c
       implicit NONE
+#define FORTRAN
+#include "fortran_types.h"
 c
 c-----------------------------------------------------------------------
 c

@@ -1,0 +1,107 @@
+# File:    scaling.incl
+
+# Problem: 3D Implosion-like problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+   # Domain is the three dimensional box 0 < x,y,z < 1.0
+
+   include "input/domain-3d-01.incl"
+
+   # The computational mesh is a single uniform grid
+
+   Mesh { 
+      root_rank = 3;
+      root_size = [64,64,64];
+      root_blocks = [2,2,2];
+   }
+
+   # Field parameters include those concerning fields as a group, as
+   # well as individual fields
+   
+   Field {
+
+      ghost_depth = 3;
+
+      list = [
+	"density",	
+	"velocity_x",
+	"velocity_y",
+	"velocity_z",
+	"total_energy",
+	"internal_energy",
+	"pressure"
+      ] ;
+
+      gamma = 1.4;
+
+      padding   = 0;
+      alignment = 1;
+   }
+
+   Method {
+
+      # list of methods to apply and in what order
+ 
+      list = ["ppm"];
+
+      ppm {
+
+         courant   = 0.8;
+         diffusion   = true;
+         flattening  = 3;
+         steepening  = true;
+         dual_energy = false;
+
+     }
+   }
+
+   include "input/flux_correct.incl"
+
+   Initial {
+
+       list = ["value"];
+
+       value {
+          density       = [ 0.125,                x + y + z< 0.5,
+                            1.0 ];
+          total_energy  = [ 0.14 / (0.4 * 0.125), x + y +z < 0.5,
+   	                    1.0  / (0.4 * 1.0) ];
+          velocity_x    = 0.0;
+          velocity_y    = 0.0;
+          velocity_z    = 0.0;
+          internal_energy = 0.0;
+       }
+   }
+
+   Boundary { type = "reflecting"; }
+
+   Stopping {        cycle = 100;   } 
+
+   Testing {   time_final = 0.176451946798; 
+               cycle_final = 100; }
+
+   Output { 
+
+      list = ["density","data"];
+
+      density {
+        name = ["density-%0d.png","cycle"];
+        field_list = ["density"];
+	type     = "image";
+	include "input/schedule_cycle_10.incl"
+        colormap = [0.00, 0.00, 0.50,  
+                    0.00, 1.00, 0.00, 
+                    1.00, 1.00, 0.00, 
+                    1.00, 0.00, 0.00];
+        
+      }
+
+      data {
+        name = ["scaling-%0d.h5","cycle"];
+        field_list = ["density"];
+	type     = "data";
+	include "input/schedule_cycle_100.incl"
+      }
+
+   }
+

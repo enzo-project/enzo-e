@@ -59,6 +59,7 @@ c    numiter - max number of Newton iterations to perform [8]
 c
 c-----------------------------------------------------------------------
       implicit NONE
+#define FORTRAN
 #include "fortran_types.h"
 c
       INTG_PREC ijkn

@@ -1,0 +1,49 @@
+
+include "input/PPM/ppm.incl"
+
+Adapt    {  max_level = 0; }
+
+Mesh { root_size      = [32,32]; }
+Mesh { root_blocks    = [2,2]; }
+Boundary { type = "periodic"; }
+Initial {
+
+   list = ["value"];
+
+   value {
+       density      = [ 1.0,
+                        (x - 0.25)*(x - 0.25) + (y - 0.25)*(y - 0.25) < 0.02,
+                        0.5 ];
+      total_energy  = [ 1.0 / (0.4 * 1.0), 
+                        (x - 0.25)*(x - 0.25) + (y - 0.25)*(y - 0.25) < 0.02,
+                         1.0  / (0.4 * 0.5) ];
+      velocity_x    = 1.0;
+      velocity_y    = 1.0;
+      internal_energy = 0.0;
+   }
+}
+
+Output { list = ["de","te","mesh"]; 
+   de {
+      type = "image";
+         name = ["advect2u-de-%03d.png", "cycle"]; 
+         include "input/Schedule/schedule_cycle_10.incl"
+   }
+   te { 
+     type = "image";
+     name = ["advect2u-te-%03d.png","cycle"];
+      include "input/Schedule/schedule_cycle_10.incl"
+     }
+   mesh {
+      type = "image";
+      name = ["advect2u-mesh-%03d.png", "cycle"]; 
+      include "input/Schedule/schedule_cycle_10.incl"
+   }
+}
+
+# Output{  mesh { image_mesh_color = "process"; }}
+
+Stopping { cycle = 100; }
+
+
+include "input/Hydro/tracer.incl"

@@ -51,7 +51,8 @@ solver.
    devel/index
    design/index
    project/index
-
+   tests/index
+   
 Getting started
 ---------------
 

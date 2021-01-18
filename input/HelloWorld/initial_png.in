@@ -1,0 +1,91 @@
+### Problem: Hello World
+### Summary: Evolve high-pressure region shaped as text Hello World
+###          using the accompanying Cello.png mask file
+###    Date: 2011-10-18
+###  Author: James Bordner (jobordner@ucsd.edu)
+
+# Define the problem domain to be 0.0 < x,y < 1.0
+
+Domain { 
+   lower = [ 0.0, 0.0 ];
+   upper = [ 1.0, 1.0 ];
+} 
+
+# Define the computational domain
+
+Mesh { 
+   root_rank   = 2;
+   root_size   = [ 256,256 ];
+   root_blocks = [   2,  4 ];
+}
+
+# Declare fields, ghost zone depth, and CFL condition
+
+Field {
+
+   ghost_depth  = 3;
+
+   list = [ 
+      "density",
+      "velocity_x",
+      "velocity_y",
+      "total_energy",
+      "internal_energy",
+      "pressure"
+    ];
+    gamma = 1.4;
+}
+
+# Define list of numerical methods
+
+Method {
+
+   list = [ "ppm" ];
+
+   ppm {
+      courant = 0.8;
+      diffusion   = true;
+      flattening  = 3;
+      steepening  = true;
+      dual_energy = false;
+   }
+}
+ include "input/flux_correct.incl"
+
+# Define initial conditions
+
+include "input/HelloWorld/initial-cello.incl"
+
+# Define boundary conditions
+
+Boundary { type = "reflecting"; }
+
+# Define stopping criteria
+
+Stopping {
+   cycle = 50;
+}
+
+Testing {
+   cycle_final = 50;
+
+   time_final  = [0.0292738249991089];
+}
+
+# Output image dumps every 10 cycles
+
+Output { 
+
+   list = [ "cycle_group" ];
+
+   cycle_group {
+      field_list = [ "density" ];
+      type       = "image";
+      name       = [ "initial_png-%02d.png","cycle" ];
+      include "input/Schedule/schedule_cycle_10.incl"
+      colormap = [0.00, 0.00, 0.00,  
+                  1.00, 0.00, 0.00, 
+                  1.00, 1.00, 0.00, 
+                  1.00, 1.00, 1.00];
+   }
+}

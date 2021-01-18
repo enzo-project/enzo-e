@@ -30,7 +30,7 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-  
+
 public: // virtual methods
 
   /// Apply the method to advance a block one timestep 

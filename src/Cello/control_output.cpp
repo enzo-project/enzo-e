@@ -25,6 +25,7 @@
 
 void Block::output_enter_ ()
 {
+  TRACE_OUTPUT("Block::output_enter_()");
   performance_start_(perf_output);
 #ifdef NEW_OUTPUT
   new_output_begin_();
