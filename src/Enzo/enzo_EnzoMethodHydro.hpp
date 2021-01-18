@@ -10,11 +10,6 @@
 /// @date     Thu Apr  1 16:14:38 PDT 2010
 /// @brief    [\ref Enzo] Implementation of EnzoMethodHydro class
 
-#define NO_ENZOMETHODHYDRO
-
-#ifdef USE_ENZOMETHODHYDRO
-
-
 #ifndef ENZO_ENZO_METHOD_HYDRO_HPP
 #define ENZO_ENZO_METHOD_HYDRO_HPP
 
@@ -26,7 +21,7 @@ extern "C" void FORTRAN_NAME(pgas2d_dual)
    enzo_float *eta1, enzo_float *eta2,
    int *idim, int *jdim,
    int *i1, int *i2, int *j1, int *j2,
-   enzo_float *gamma, enzo_float *pmin);
+   enzo_float *gamma, enzo_float *pmin, int *ierror);
 
 extern "C" void FORTRAN_NAME(pgas2d)
   (
@@ -34,7 +29,7 @@ extern "C" void FORTRAN_NAME(pgas2d)
    enzo_float *uslice, enzo_float *vslice, enzo_float *wslice,
    int *idim, int *jdim,
    int *i1, int *i2, int *j1, int *j2,
-   enzo_float *gamma, enzo_float *pmin);
+   enzo_float *gamma, enzo_float *pmin, int *ierror);
 
 extern "C" void FORTRAN_NAME(calcdiss)
   (
@@ -57,7 +52,7 @@ extern "C" void FORTRAN_NAME(inteuler)
    enzo_float *dt, enzo_float *gamma, int *ipresfree, enzo_float *dls, enzo_float *drs, 
    enzo_float *pls, enzo_float *prs, enzo_float *gels, enzo_float *gers, enzo_float *uls, 
    enzo_float *urs, enzo_float *vls, enzo_float *vrs, enzo_float *wls, enzo_float *wrs, 
-   int *ncolor, enzo_float *colslice, enzo_float *colls, enzo_float *colrs);
+   int *ncolor, enzo_float *colslice, enzo_float *colls, enzo_float *colrs, int *ierror);
 
 extern "C" void FORTRAN_NAME(twoshock)
   (
@@ -249,4 +244,3 @@ protected: // attributes
 };
   
 #endif /* ENZO_ENZO_METHOD_HYDRO_HPP */
-#endif

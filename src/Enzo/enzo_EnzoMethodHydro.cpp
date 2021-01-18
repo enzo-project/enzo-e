@@ -10,9 +10,6 @@
 /// @date     Wed Oct 18 12:35:40 PDT 2017
 /// @brief    Implements the EnzoMethodHydro class
 
-#define NO_ENZOMETHODHYDRO
-
-#ifdef USE_ENZOMETHODHYDRO
 
 #include "cello.hpp"
 #include "enzo.hpp"
@@ -2068,4 +2065,3 @@ double EnzoMethodHydro::timestep ( Block * block ) const throw()
   return dt;
 }
 
-#endif
