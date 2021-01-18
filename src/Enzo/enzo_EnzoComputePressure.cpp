@@ -84,6 +84,7 @@ void EnzoComputePressure::compute_(Block * block,
 
   Field field = enzo_block->data()->field();
 
+  bool mhd = field.is_field("bfield_x");
 
   if (enzo::config()->method_grackle_use_grackle){
 #ifdef CONFIG_USE_GRACKLE
@@ -106,6 +107,13 @@ void EnzoComputePressure::compute_(Block * block,
     const enzo_float * vy = (enzo_float*) field.values("velocity_y", i_hist_);
     const enzo_float * vz = (enzo_float*) field.values("velocity_z", i_hist_);
 
+    const enzo_float * bx = mhd ?
+      (enzo_float*) field.values("bfield_x", i_hist_) : nullptr;
+    const enzo_float * by = mhd ?
+      (enzo_float*) field.values("bfield_y", i_hist_) : nullptr;
+    const enzo_float * bz = mhd ?
+      (enzo_float*) field.values("bfield_z", i_hist_) : nullptr;
+
     const enzo_float * te = (enzo_float*) field.values("total_energy", i_hist_);
     const enzo_float * ie = (enzo_float*) field.values("internal_energy", i_hist_);
 
@@ -127,21 +135,24 @@ void EnzoComputePressure::compute_(Block * block,
       }
 
     } else {
-
       if (rank == 1) {
         for (int i=0; i<m; i++) {
-          p[i] = gm1 * d[i] *
-            (te[i] - 0.5*vx[i]*vx[i]);
+          enzo_float ke = 0.5*vx[i]*vx[i];
+          enzo_float me_den = mhd ? 0.5*bx[i]*bx[i] : 0.;
+          p[i] = gm1 * (d[i] * (te[i] - ke) - me_den);
         }
       } else if (rank == 2) {
         for (int i=0; i<m; i++) {
-          p[i] = gm1 * d[i] *
-            (te[i] - 0.5*(vx[i]*vx[i] + vy[i]*vy[i]));
+          enzo_float ke = 0.5*(vx[i]*vx[i] + vy[i]*vy[i]);
+          enzo_float me_den = mhd ? 0.5*(bx[i]*bx[i] + by[i]*by[i]) : 0.;
+          p[i] = gm1 * (d[i] * (te[i] - ke) - me_den);
         }
       } else if (rank == 3) {
         for (int i=0; i<m; i++) {
-          p[i] = gm1 * d[i] *
-            (te[i] - 0.5*(vx[i]*vx[i] + vy[i]*vy[i] + vz[i]*vz[i]));
+          enzo_float ke = 0.5*(vx[i]*vx[i] + vy[i]*vy[i] + vz[i]*vz[i]);
+          enzo_float me_den = mhd ?
+            0.5*(bx[i]*bx[i] + by[i]*by[i] + bz[i]*bz[i]) : 0.;
+          p[i] = gm1 * (d[i] * (te[i] - ke) - me_den);
         }
       }
     }

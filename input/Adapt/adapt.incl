@@ -1,0 +1,89 @@
+# File:    adapt.incl
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/PPM/method_ppm-1.in"
+
+Mesh {
+   root_blocks = [2,2];
+}
+
+include "input/Adapt/adapt_slope.incl"
+
+Stopping { 
+	 cycle = 10000; 
+	 time = 0.1;
+}
+
+Boundary { type = "periodic"; }
+
+Testing {
+   time_final  = 0.10;
+   cycle_final = 0;
+}
+
+include "input/Adapt/initial_square.incl"
+
+Field {
+    ghost_depth = 4; # must be even for ProlongLinear
+    prolong = "linear";
+}
+
+Output {
+
+    list = ["de", "mesh", "te", "vx", "vy"];
+
+    hdf {
+       field_list = ["density"];
+       type     = "data";
+       include "input/Schedule/schedule_time_0.02.incl"
+    }
+    de {
+       field_list = ["density"];
+       type     = "image";
+       include "input/Schedule/schedule_time_0.02.incl"
+       include "input/Colormap/colormap_blackbody.incl"
+    }
+    dl {
+       field_list = ["density"];
+       image_log = true;
+       type     = "image";
+       include "input/Schedule/schedule_time_0.02.incl"
+       include "input/Colormap/colormap_blackbody.incl"
+    }
+    te {
+
+       field_list = ["total_energy"];
+       type     = "image";
+       include "input/Schedule/schedule_time_0.02.incl"
+       colormap = [1.0,1.0,1.0, 1.0,0.0,0.0,  0.75,0.25,0.0,  1.0,1.0,0.0,   0.0,1.0,0.0,  0.0,0.0,1.0,  0.5,1.0,0.5];
+    }
+
+    vx {
+
+       field_list = ["velocity_x"];
+       type     = "image";
+       include "input/Schedule/schedule_time_0.02.incl"
+       colormap = [1.0,1.0,1.0, 1.0,0.0,0.0,  0.75,0.25,0.0,  1.0,1.0,0.0,   0.0,1.0,0.0,  0.0,0.0,1.0,  0.5,1.0,0.5];
+    }
+
+    vy {
+
+       field_list = ["velocity_y"];
+       type     = "image";
+       include "input/Schedule/schedule_time_0.02.incl"
+       colormap = [1.0,1.0,1.0, 1.0,0.0,0.0,  0.75,0.25,0.0,  1.0,1.0,0.0,   0.0,1.0,0.0,  0.0,0.0,1.0,  0.5,1.0,0.5];
+    }
+
+    mesh {
+	type     = "image";
+	image_type  = "mesh";
+	image_reduce_type = "max";
+        field_list = ["density"];
+	image_size = [513,513];
+        include "input/Schedule/schedule_time_0.02.incl"
+	image_min = 0.0;
+        include "input/Colormap/colormap_rainbow.incl"
+      }
+}
+

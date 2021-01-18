@@ -1,0 +1,61 @@
+# Problem: Axis aligned Sod Shock Tube test problem for VLCT
+# Author: Matthew Abruzzo (matthewabruzzo@gmail.com)
+
+# Sod Shock Tube Test Problem along x-axis (the problem is reversed)
+#  - tests the dual energy formalism by using a background velocity-x component
+#    with a Mach number of ~10 in the hot region.
+#  - See the compute_align_size.py script for details about how exactly the
+#    velocity has been selected.
+#  - at t = 0.25 (the final state), the mach number ranges from ~10 to ~12.6.
+#    dual_energy_eta is set to 0.00769 so that there are locations in which the
+#    dual energy formalism is used as well as locations where it is not used.
+
+   include "input/vlct/vlct_de.incl"
+   include "input/vlct/dual_energy_shock_tube/initial_sod_shock_tube.incl"
+
+   Method {
+      mhd_vlct{
+         dual_energy = true;
+	 dual_energy_eta = 0.00769;
+      };
+   }
+
+   Domain {
+      lower = [-2.96875, 0.0, 0.0];
+      upper = [1.0, 0.03125, 0.03125];
+   }
+
+   Mesh {
+      root_rank = 3; # 3D
+      root_blocks = [4,1,1];
+      root_size = [508,4,4]; # number of cells per axis
+   }
+
+   Initial{
+      shock_tube{
+	 axis_velocity = 11.875;
+	 flip_initialize = true;
+      };
+   }
+
+   Boundary {
+      list = ["two", "three","one"];
+      two{
+         type = "periodic";
+   	 axis = "y";
+      }
+      three{
+         type = "periodic";
+   	 axis = "z";
+      }
+      one{
+         type = "outflow";
+   	 axis = "x";
+      }
+   }
+
+   Output {
+      data {
+	 dir = ["method_vlct-1-sod_x_de_M10_reverse_%.2f","time"];
+      };
+   }
