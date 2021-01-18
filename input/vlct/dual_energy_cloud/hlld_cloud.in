@@ -1,0 +1,11 @@
+ include "input/vlct/dual_energy_cloud/initial_cloud.in"
+
+ Method {
+     mhd_vlct { riemann_solver = "hlld"; };
+ }
+
+ Output {
+     cycled { dir = ["hlld_cloud_%.4f","time"]; };
+ }
+     
+

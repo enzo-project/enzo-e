@@ -26,13 +26,72 @@ EnzoMethodGrackle::EnzoMethodGrackle
 {
 #ifdef CONFIG_USE_GRACKLE
 
-  FieldDescr * field_descr = cello::field_descr();
-
   // Gather list of fields that MUST be defined for this
   // method and check that they are permanent. If not,
-  // define them. In the future, maybe have this be a separate
-  // Method function that can be called to obtain a list of
-  // needed field
+  // define them.
+  EnzoMethodGrackle::define_required_grackle_fields();
+
+  /// Initialize default Refresh
+  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  Refresh * refresh = cello::refresh(ir_post_);
+  refresh->add_all_fields();
+
+  /// Define Grackle's internal data structures
+  time_grackle_data_initialized_ = ENZO_FLOAT_UNDEFINED;
+  this->initialize_grackle_chemistry_data(time);
+
+#endif /* CONFIG_USE_GRACKLE */
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodGrackle::compute ( Block * block) throw()
+{
+
+  if (block->is_leaf()){
+
+  #ifndef CONFIG_USE_GRACKLE
+
+    ERROR("EnzoMethodGrackle::compute()",
+    "Trying to use method 'grackle' with "
+    "Grackle configuration turned off!");
+
+  #else /* CONFIG_USE_GRACKLE */
+
+    EnzoBlock * enzo_block = enzo::block(block);
+
+    // Start timer
+    Simulation * simulation = cello::simulation();
+    if (simulation)
+      simulation->performance()->start_region(perf_grackle,__FILE__,__LINE__);
+
+    this->compute_(enzo_block);
+
+    enzo_block->compute_done();
+
+    if (simulation)
+      simulation->performance()->stop_region(perf_grackle,__FILE__,__LINE__);
+  #endif
+  }
+
+  return;
+
+}
+
+#ifdef CONFIG_USE_GRACKLE
+
+void EnzoMethodGrackle::define_required_grackle_fields()
+{
+  // Gather list of fields that MUST be defined for this method and
+  // check that they are permanent. If not, define them.
+
+  // This has been split off from the constructor so that other methods that
+  // are initialized first and need knowledge of these fields at initialization
+  // (e.g. to set up a refresh object), can ensure that the fields are defined
+
+  if (!enzo::config()->method_grackle_use_grackle) {return;}
+
+  FieldDescr * field_descr = cello::field_descr();
 
   std::vector<std::string> fields_to_define;
   std::vector<std::string> color_fields;
@@ -125,55 +184,9 @@ EnzoMethodGrackle::EnzoMethodGrackle
       field_descr->groups()->add( color_fields[ifield] ,"color");
     }
   }
-
-  /// Initialize default Refresh
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
-  Refresh * refresh = cello::refresh(ir_post_);
-  refresh->add_all_fields();
-
-  /// Define Grackle's internal data structures
-  time_grackle_data_initialized_ = ENZO_FLOAT_UNDEFINED;
-  this->initialize_grackle_chemistry_data(time);
-
-#endif /* CONFIG_USE_GRACKLE */
 }
 
 //----------------------------------------------------------------------
-
-void EnzoMethodGrackle::compute ( Block * block) throw()
-{
-
-  if (block->is_leaf()){
-
-  #ifndef CONFIG_USE_GRACKLE
-
-    ERROR("EnzoMethodGrackle::compute()",
-    "Trying to use method 'grackle' with "
-    "Grackle configuration turned off!");
-
-  #else /* CONFIG_USE_GRACKLE */
-
-    EnzoBlock * enzo_block = enzo::block(block);
-
-    // Start timer
-    Simulation * simulation = cello::simulation();
-    if (simulation)
-      simulation->performance()->start_region(perf_grackle,__FILE__,__LINE__);
-
-    this->compute_(enzo_block);
-
-    if (simulation)
-      simulation->performance()->stop_region(perf_grackle,__FILE__,__LINE__);
-  #endif
-  }
-
-  block->compute_done();
-
-  return;
-
-}
-
-#ifdef CONFIG_USE_GRACKLE
 
 void EnzoMethodGrackle::initialize_grackle_chemistry_data(double current_time)
 {
@@ -480,12 +493,29 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
   }
 
   /* Correct total energy for changes in internal energy */
+  gr_float * v3[3];
+  v3[0] = grackle_fields_.x_velocity;
+  v3[1] = grackle_fields_.y_velocity;
+  v3[2] = grackle_fields_.z_velocity;
+
+  const bool mhd = field.is_field("bfield_x");
+  enzo_float * b3[3] = {NULL, NULL, NULL};
+  if (mhd) {
+    b3[0]                = (enzo_float*) field.values("bfield_x");
+    if (rank >= 2) b3[1] = (enzo_float*) field.values("bfield_y");
+    if (rank >= 3) b3[2] = (enzo_float*) field.values("bfield_z");
+  }
+
   enzo_float * total_energy    = (enzo_float *) field.values("total_energy");
   for (int i = 0; i < ngx*ngy*ngz; i++){
-    total_energy[i] = grackle_fields_.internal_energy[i] +
-            0.5 * grackle_fields_.x_velocity[i] * grackle_fields_.x_velocity[i];
-    if (rank > 1) total_energy[i] += 0.5 * grackle_fields_.y_velocity[i] * grackle_fields_.y_velocity[i];
-    if (rank > 2) total_energy[i] += 0.5 * grackle_fields_.z_velocity[i] * grackle_fields_.z_velocity[i];
+    total_energy[i] = grackle_fields_.internal_energy[i];
+
+    enzo_float inv_density;
+    if (mhd) inv_density = 1.0 / grackle_fields_.density[i];
+    for (int dim = 0; dim < rank; dim++){
+      total_energy[i] += 0.5 * v3[dim][i] * v3[dim][i];
+      if (mhd) total_energy[i] += 0.5 * b3[dim][i] * b3[dim][i] * inv_density;
+    }
   }
 
   // For testing purposes - reset internal energies with changes in mu
