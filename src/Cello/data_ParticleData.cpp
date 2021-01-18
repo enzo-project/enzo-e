@@ -150,8 +150,10 @@ int ParticleData::num_local_particles
   int count = 0;
 
   for (int it = 0; it < particle_descr->num_types(); it++){
-    const int ia_c = particle_descr->attribute_index(it, "is_local");
-    const int cd   = particle_descr->stride(it, ia_c);
+    int ia_c = -1;
+    int cd = -1;
+    if (particle_descr->is_attribute(it, "is_local")) particle_descr->attribute_index(it, "is_local");
+    if (ia_c >= 0) cd   = particle_descr->stride(it, ia_c);
     const int nb   = num_batches(it);
 
     int64_t * is_local = 0;
@@ -159,9 +161,9 @@ int ParticleData::num_local_particles
     for (int ib=0; ib<nb; ib++){
       const int np = num_particles(particle_descr,it,ib);
       if (np==0) continue;
-      is_local = (int64_t *) attribute_array(particle_descr,it, ia_c, ib);
+      if (ia_c >= 0) is_local = (int64_t *) attribute_array(particle_descr,it, ia_c, ib);
       for (int ip = 0; ip < np; ip++){
-        if (is_local[ip*cd]) count++;
+        if (ia_c == -1 || is_local[ip*cd]) count++;
       }
     }
 
@@ -347,8 +349,10 @@ void ParticleData::scatter
   int mp = particle_descr->particle_bytes(it);
   const int ib_src = ib;
 
-  const int ia_loc = particle_descr->attribute_index(it,"is_local");
-  const int dloc = particle_descr->stride(it,ia_loc);
+  int ia_loc = -1;
+  int dloc   = -1;
+  if (particle_descr->is_attribute(it, "is_local")) ia_loc = particle_descr->attribute_index(it,"is_local");
+  if (ia_loc >= 0) dloc = particle_descr->stride(it, ia_loc);
   int64_t *is_local=NULL;
   int count=0;
   for (int ip_src=0; ip_src<np; ip_src++) {
@@ -365,7 +369,7 @@ void ParticleData::scatter
               int i_dst = i_array[pd]++;
               int ib_dst,ip_dst;
               particle_descr->index(i_dst,&ib_dst,&ip_dst);
-              is_local = (int64_t *) pd->attribute_array(particle_descr,it,ia_loc,ib_dst);
+              if (ia_loc >= 0) is_local = (int64_t *) pd->attribute_array(particle_descr,it,ia_loc,ib_dst);
 
               for (int ia=0; ia<na; ia++) {
     	           if (!interleaved)
@@ -380,7 +384,7 @@ void ParticleData::scatter
     	           }
               }
 
-              is_local[ip_dst*dloc] = false;
+              if (ia_loc >= 0) is_local[ip_dst*dloc] = false;
 
           }
 
@@ -390,7 +394,7 @@ void ParticleData::scatter
           int i_dst = i_array[pd]++;
           int ib_dst,ip_dst;
           particle_descr->index(i_dst,&ib_dst,&ip_dst);
-          is_local = (int64_t *) pd->attribute_array(particle_descr,it,ia_loc,ib_dst);
+          if (ia_loc >= 0) is_local = (int64_t *) pd->attribute_array(particle_descr,it,ia_loc,ib_dst);
 
           for (int ia=0; ia<na; ia++) {
             if (!interleaved)
@@ -405,7 +409,7 @@ void ParticleData::scatter
             }
           }
 
-          is_local[ip_dst*dloc] = true;
+          if (ia_loc >= 0) is_local[ip_dst*dloc] = true;
         }
 
     }

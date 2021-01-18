@@ -107,6 +107,7 @@ Particle {
                        "ax", "double",
                        "ay", "double",
                        "az", "double",
+                       "is_local", "double",
                        "mass", "double",
                        "creation_time", "double",
                        "lifetime", "double",

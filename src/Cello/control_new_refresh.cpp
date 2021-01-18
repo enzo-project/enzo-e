@@ -401,6 +401,8 @@ int Block::delete_particle_copies_ (int it){
   Particle particle (cello::particle_descr(),
 		     data()->particle_data());
 
+  if (!(particle.is_attribute(it, "is_local"))) return 0;
+
   const int ia_c = particle.attribute_index(it,"is_local");
   const int cd   = particle.stride(it, ia_c);
 
@@ -826,7 +828,8 @@ void Block::particle_scatter_neighbors_
     int it = *it_type;
 
     const int ia_x  = particle.attribute_position(it,0);
-    const int ia_c  = particle.attribute_index(it, "is_local");
+    int ia_c  = -1;
+    if (particle.is_attribute(it, "is_local")) ia_c = particle.attribute_index(it, "is_local");
 
     // (...positions may use absolute coordinates (float) or
     // block-local coordinates (int))
@@ -837,7 +840,8 @@ void Block::particle_scatter_neighbors_
     const int d  = particle.stride(it,ia_x);
 
     //
-    const int cd = particle.stride(it, ia_c);
+    int cd = -1;
+    if (ia_c >= 0) cd = particle.stride(it, ia_c);
 
     // ...for each batch of particles
 
@@ -859,7 +863,7 @@ void Block::particle_scatter_neighbors_
 
       particle.position(it,ib,xa.data(),ya.data(),za.data());
 
-      is_local = (int64_t *) particle.attribute_array(it, ia_c, ib);
+      if (ia_c >= 0) is_local = (int64_t *) particle.attribute_array(it, ia_c, ib);
 
       // ...initialize mask used for scatter and delete
       // ...and corresponding particle indices
@@ -882,7 +886,7 @@ void Block::particle_scatter_neighbors_
       	    ! (0 <= iy && iy < 4) ||
       	    ! (0 <= iz && iz < 4)) {
 
-          CkPrintf("%d ip is_local %d %d\n",CkMyPe(), ip, is_local[ip*cd]);
+          if (ia_c >=0) CkPrintf("%d ip is_local %d %d\n",CkMyPe(), ip, is_local[ip*cd]);
       	  CkPrintf ("%d ix iy iz %d %d %d\n",CkMyPe(),ix,iy,iz);
       	  CkPrintf ("%d x y z %f %f %f\n",CkMyPe(),x,y,z);
       	  CkPrintf ("%d xa ya za %f %f %f\n",CkMyPe(),xa[ip*d],ya[ip*d],za[ip*d]);

@@ -165,7 +165,7 @@ void EnzoMethodBackgroundAcceleration::PointMass(enzo_float * ax,
 
   double x = 0.0, y = 0.0, z = 0.0;
 
-  const double min_accel = mass / ((rcore*rcore*rcore)*cosmo_a;
+  const double min_accel = mass / ((rcore*rcore*rcore)*cosmo_a);
 
   for (int iz=0; iz<mz_; iz++){
     if (rank >= 3) z = zm_ + (iz - gz_ + 0.5)*hz_ - enzo_config->method_background_acceleration_center[2];

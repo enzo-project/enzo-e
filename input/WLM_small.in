@@ -171,7 +171,8 @@ Solver {
 #                        "vz", "single",
 #                        "ax", "single",
 #                        "ay", "single",
-#                        "az", "single" ];
+#                        "az", "single" ,
+#                        "is_local", "single"];
 #         position = [ "x", "y", "z" ];
 #         velocity = [ "vx", "vy", "vz" ];
 #         groups = ["has_mass"];
@@ -189,7 +190,8 @@ Solver {
                         "ax", "double",
                         "ay", "double",
                         "az", "double",
-                        "mass", "double" ];
+                        "mass", "double",
+                        "is_local","double"];
          position = [ "x", "y", "z" ];
          velocity = [ "vx", "vy", "vz" ];
 #

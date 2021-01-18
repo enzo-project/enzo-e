@@ -71,7 +71,8 @@
          attributes = [ "id", "int64", 
                         "x", "single", 
                         "y", "single",
-                        "z", "single" ];
+                        "z", "single",
+                        "is_local", "single"];
          position = [ "x", "y", "z" ];
      };
  }

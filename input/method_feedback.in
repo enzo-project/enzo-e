@@ -151,6 +151,7 @@ Particle {
                        "ay", "double",
                        "az", "double",
                        "mass", "double",
+                       "is_local", "double",
                        "creation_time", "double",
                        "lifetime", "double",
                        "metal_fraction", "double" ];
