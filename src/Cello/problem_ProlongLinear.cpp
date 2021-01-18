@@ -97,7 +97,7 @@ int ProlongLinear::apply_
   int gcy = (nf3[1]==2*nc3[1]) ? 1 : 0;
   int gcz = (nf3[2]==2*nc3[2]) ? 1 : 0;
 
-  if (nf3[1]==1) {
+  if (rank == 1) {
 
     const int ofx = of3[0];
     const int ocx = oc3[0];
@@ -157,7 +157,7 @@ int ProlongLinear::apply_
     return (sizeof(T) * nc3[0]);
 
 
-  } else if (nf3[2] == 1) {
+  } else if (rank == 2) {
 
     const int ofy = of3[1];
     const int ocy = oc3[1];
@@ -216,6 +216,7 @@ int ProlongLinear::apply_
 	    +             wx1*wy1*values_c[i_c + dcx + dcy ];
 	}
       }
+
     } else { // accumulate
 
       for (int ify = 0; ify<nfy; ify++) {
@@ -274,7 +275,7 @@ int ProlongLinear::apply_
 
     return (sizeof(T) * nc3[0]*nc3[1]);
 
-  } else {
+  } else { // rank == 3
 
     const int ofz = of3[2];
     const int ocz = oc3[2];

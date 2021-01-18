@@ -317,6 +317,51 @@ namespace cello {
   T err_abs (const T & a, const T & b)
   {  return fabs(a-b);  }
 
+  template <class T>
+  T sum (const T * array,
+         int mx, int my, int mz,
+         int ox, int oy, int oz,
+         int nx, int ny, int nz)
+  {
+    T s = 0.0;
+    int o = ox + mx*(oy + my*oz);
+    for (int iz=0; iz<nz; iz++) {
+      for (int iy=0; iy<ny; iy++) {
+        for (int ix=0; ix<nx; ix++) {
+          int i=ix+mx*(iy+my*iz) + o;
+          s += array[i];
+        }
+      }
+    }
+    return s;
+  }
+
+  template <class T>
+  void copy (T * array_d,
+          int mdx, int mdy, int mdz,
+          int odx, int ody, int odz,
+          const T * array_s,
+          int msx, int msy, int msz,
+          int osx, int osy, int osz,
+          int nx, int ny, int nz)
+  {
+    int os = osx + msx*(osy + msy*osz);
+    int od = odx + mdx*(ody + mdy*odz);
+    T sum = 0.0;
+    int count=0;
+    for (int iz=0; iz<nz; iz++) {
+      for (int iy=0; iy<ny; iy++) {
+        for (int ix=0; ix<nx; ix++) {
+          int is = os + ix+msx*(iy+msy*iz);
+          int id = od + ix+mdx*(iy+mdy*iz);
+          array_d[id] = array_s[is];
+          sum += array_d[id];
+          ++count ;
+        }
+      }
+    }
+  }
+
   int digits_max(int precision);
 
   // type_enum functions (prefered)
@@ -336,6 +381,18 @@ namespace cello {
   int is_precision_supported (precision_type);
   extern const char * precision_name[7];
 
+  inline void hex_string(char str[], int length)
+  {
+    //hexadecimal characters
+    char hex_characters[]={'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+
+    int i;
+    for(i=0;i<length;i++)
+      {
+        str[i]=hex_characters[rand()%16];
+      }
+    str[length]=0;
+  }
 
   /// Check a number for zero, NAN, and inf
 

@@ -264,7 +264,7 @@ void MethodTrace::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------
 
-double MethodTrace::timestep (Block * block) const throw()
+double MethodTrace::timestep (Block * block) throw()
 {
   const int rank = cello::rank();
 

@@ -2052,7 +2052,7 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
 
 //----------------------------------------------------------------------
 
-double EnzoMethodHydro::timestep ( Block * block ) const throw()
+double EnzoMethodHydro::timestep ( Block * block ) throw()
 {
 
   double dt = std::numeric_limits<double>::max();

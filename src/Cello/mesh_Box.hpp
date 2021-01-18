@@ -8,6 +8,8 @@
 #ifndef MESH_BOX_HPP
 #define MESH_BOX_HPP
 
+enum BoxType { BoxType_receive = 0, BoxType_extra = 1 };
+
 class Box {
 
   /// @class    Box
@@ -19,41 +21,26 @@ public: // interface
   enum class BlockType { send, receive, extra, array };
   
   /// Constructor
-  Box() throw()
-  : rank_(0),
-    n3_(),
-    g3_(),
-    f3_(),
-    c3_(),
-    level_(0),
-    i03_(),
-    im3_(),
-    ip3_(),
-    gr3_(),
-    gs3_(),
-    pad_(0)
-  {
-  }
-
-  /// Constructor
-  Box(int rank, int n3[3], int g3[3])
+  Box(int rank, int block_size[3], int ghost_depth[3])
     : rank_(rank),
-      n3_(),
-      g3_(),
-      f3_(),
-      c3_(),
-      level_(0),
-      i03_(),
-      im3_(),
-      ip3_(),
-      gr3_(),
-      gs3_(),
+      block_size_(),
+      ghost_depth_(),
+      face_(),
+      child_(),
+      block_start_(),
+      region_start_(),
+      region_stop_(),
+      ghost_depth_recv_(),
+      ghost_depth_send_(),
       pad_()
   {
+    for (int i=0; i<2; i++) {
+      level_[i] = 0;
+    }
     for (int i=0; i<rank_; i++) {
-      n3_[i] = n3[i];
-      g3_[i] = g3[i];
-      gr3_[i] = g3[i];
+      block_size_[i] = block_size[i];
+      ghost_depth_[i] = ghost_depth[i];
+      ghost_depth_recv_[i] = ghost_depth[i];
     }
   }
   
@@ -63,93 +50,51 @@ public: // interface
     TRACEPUP;
 
     p | rank_;
-    PUParray(p,n3_,3);
-    PUParray(p,g3_,3);
-    PUParray(p,f3_,3);
-    PUParray(p,c3_,3);
-    p | level_;
-    PUParray(p,i03_,3);
-    PUParray(p,im3_,3);
-    PUParray(p,ip3_,3);
-    PUParray(p,gr3_,3);
-    PUParray(p,gs3_,3);
+    PUParray(p,block_size_,3);
+    PUParray(p,ghost_depth_,3);
+    PUParray(p,level_,2);
+    for (int i=0; i<2; i++) {
+      PUParray(p,face_[i],3);
+      PUParray(p,child_[i],3);
+      PUParray(p,block_start_[i],3);
+    }
+    PUParray(p,region_start_,3);
+    PUParray(p,region_stop_,3);
+    PUParray(p,ghost_depth_recv_,3);
+    PUParray(p,ghost_depth_send_,3);
     p | pad_;
 
   }
 
-  /// Set the rank of the problem
-  inline void set_rank ( int rank)
-  { rank_ = rank; }
-  
-  /// Set the /relative/ level of the receive block
-  inline void set_level (int level)
-  {
-    level_ = level;
-  }
-  
-  /// Set the face adjacent to the receive-block
-  inline void set_face (int f3[3])
-  {
-    f3_[0] = f3[0];
-    f3_[1] = f3[1];
-    f3_[2] = f3[2];
-  }
-
-  /// Set the child associated with the send-block (if level==+1) or
-  /// recv-block (if level==-1)
-  inline void set_child (int c3[3])
-  {
-    c3_[0] = c3[0];
-    c3_[1] = c3[1];
-    c3_[2] = c3[2];
-  }
-
   /// Set Block face
-  inline void set_block (int level, int f3[3], int c3[3])
+  inline void set_block (BoxType bt, int level, int face[3], int child[3])
   {
-    level_ = level;
-    f3_[0] = f3[0];
-    f3_[1] = f3[1];
-    f3_[2] = f3[2];
-    c3_[0] = c3[0];
-    c3_[1] = c3[1];
-    c3_[2] = c3[2];
-    compute_block_start();
+    level_[bt] = level;
+    face_[bt][0] = face[0];
+    face_[bt][1] = face[1];
+    face_[bt][2] = face[2];
+    child_[bt][0] = child[0];
+    child_[bt][1] = child[1];
+    child_[bt][2] = child[2];
+    compute_block_start(bt);
   }
   
-  /// Set size of blocks
-  inline void set_block_size (int n3[3])
-  {
-    n3_[0] = n3[0];
-    n3_[1] = n3[1];
-    n3_[2] = n3[2];
-  }
-
-  /// Set allocated ghost zone depths
-  inline void set_ghost_depth (int g3[3])
-  {
-    g3_[0] = g3[0];
-    g3_[1] = g3[1];
-    g3_[2] = g3[2];
-    set_recv_ghosts(g3);
-  }
-
   /// Set number of ghost zones 0 < g <= ghost_depth to receive
   /// Default ghost_depth
-  inline void set_recv_ghosts (int gr3[3])
+  inline void set_recv_ghosts (int ghost_depth_recv[3])
   {
-    gr3_[0] = gr3[0];
-    gr3_[1] = gr3[1];
-    gr3_[2] = gr3[2];
+    ghost_depth_recv_[0] = ghost_depth_recv[0];
+    ghost_depth_recv_[1] = ghost_depth_recv[1];
+    ghost_depth_recv_[2] = ghost_depth_recv[2];
   }
   
   /// Set number of ghost zones 0 <= g <= ghost_depth to include from the
   /// send block, e.g. for accumulate.  Default 0.
-  inline void set_send_ghosts (int gs3[3])
+  inline void set_send_ghosts (int ghost_depth_send[3])
   {
-    gs3_[0] = gs3[0];
-    gs3_[1] = gs3[1];
-    gs3_[2] = gs3[2];
+    ghost_depth_send_[0] = ghost_depth_send[0];
+    ghost_depth_send_[1] = ghost_depth_send[1];
+    ghost_depth_send_[2] = ghost_depth_send[2];
   }
 
   /// Set coarse-zone padding around intersected region when
@@ -159,36 +104,54 @@ public: // interface
     pad_ = pad;
   }
   
-  /// Determine the start of the currently defined receive or extra
-  /// block
-  void compute_block_start();
+  /// Determine the start of the specified block
+  void compute_block_start(BoxType bt);
 
-  /// Determine intersection region
+  /// Determine send/recv intersection region
   void compute_region();
 
-  /// Get recv-send intersection loop limits for send-block
-  bool get_limits (int im3[3], int ip3[3], BlockType block_type);
+  /// Get send/box (recv/extra) intersection loop limits for the specified block
+  bool get_limits (BoxType bt, BlockType block_type, int region_start[3], int region_stop[3]);
 
+  void get_region_size (int ma3[3])
+  {
+    for (int i=0; i<rank_; i++) {
+      ma3[i] = region_stop_[i] - region_start_[i];
+    }
+    for (int i=rank_; i<3; i++) {
+      ma3[i] = 1;
+    }
+  }
   /// Restrict limits to block, including or excluding ghosts
-  void restrict_limits (int im3[3], int ip3[3], bool include_ghosts);
+  void restrict_limits (int region_start[3], int region_stop[3], bool include_ghosts);
 
   void print(const char * mesg)
   {
     CkPrintf ("BOX------ %s -------\n",mesg);
     CkPrintf ("BOX: rank %d\n",rank_);
-    CkPrintf ("BOX: n3_ %d %d %d\n", n3_[0],n3_[1],n3_[2]);
-    CkPrintf ("BOX: g3_ %d %d %d\n", g3_[0],g3_[1],g3_[2]);
-    CkPrintf ("BOX: gr3_ %d %d %d\n", gr3_[0],gr3_[1],gr3_[2]);
-    CkPrintf ("BOX: gs3_ %d %d %d\n", gs3_[0],gs3_[1],gs3_[2]);
+    CkPrintf ("BOX: block_size_ %d %d %d\n",
+              block_size_[0],block_size_[1],block_size_[2]);
+    CkPrintf ("BOX: ghost_depth_ %d %d %d\n",
+              ghost_depth_[0],ghost_depth_[1],ghost_depth_[2]);
+    CkPrintf ("BOX: ghost_depth_recv_ %d %d %d\n",
+              ghost_depth_recv_[0],ghost_depth_recv_[1],ghost_depth_recv_[2]);
+    CkPrintf ("BOX: ghost_depth_send_ %d %d %d\n",
+              ghost_depth_send_[0],ghost_depth_send_[1],ghost_depth_send_[2]);
     CkPrintf ("BOX: pad_ %d\n", pad_);
     CkPrintf ("BOX\n");
-    CkPrintf ("BOX: level_ %d\n", level_);
-    CkPrintf ("BOX: f3_ %d %d %d\n", f3_[0],f3_[1],f3_[2]);
-    CkPrintf ("BOX: c3_ %d %d %d\n", c3_[0],c3_[1],c3_[2]);
-    CkPrintf ("BOX: i03_ %d %d %d\n", i03_[0],i03_[1],i03_[2]);
+    for (int i=0; i<2; i++) {
+      CkPrintf ("BOX: level_[%d] %d\n", i,level_[i]);
+      CkPrintf ("BOX: face_[%d] %d %d %d\n", i,face_[i][0],face_[i][1],face_[i][2]);
+      CkPrintf ("BOX: child_[%d] %d %d %d\n", i,child_[i][0],child_[i][1],child_[i][2]);
+      CkPrintf ("BOX: block_start_[%d] %d %d %d\n",
+                i,block_start_[i][0],block_start_[i][1],block_start_[i][2]);
+    }
     CkPrintf ("BOX\n");
-    CkPrintf ("BOX: im3_ %d %d %d\n", im3_[0],im3_[1],im3_[2]);
-    CkPrintf ("BOX: ip3_ %d %d %d\n", ip3_[0],ip3_[1],ip3_[2]);
+    CkPrintf ("BOX: region_start_ %d %d %d\n",
+              region_start_[0],region_start_[1],region_start_[2]);
+    
+    CkPrintf ("BOX: region_stop_ %d %d %d\n",
+              region_stop_[0],region_stop_[1],region_stop_[2]);
     CkPrintf ("Box----------------\n");
   }
   
@@ -200,40 +163,45 @@ private: // attributes
   int rank_;
   
   /// Size of blocks
-  int n3_[3];
+  int block_size_[3];
 
   /// Depth of allocated ghost zones
-  int g3_[3];
+  int ghost_depth_[3];
 
-  /// Face along which the receive-block is located (-1,0,1)^3
-  int f3_[3];
-
-  /// Child index of send-block or receive block, whichever is finer
-  /// (not accessed if both in same level)
-  int c3_[3];
-
-  /// Relative refinement level of recv block relative to the send block
-  int level_;
-
-  /// Starting index of the neighbor (send) block relative to the
-  /// receive block
-  int i03_[3];
-  
-  /// Starting and stopping indices of the intersected region
-  int im3_[3];
-  int ip3_[3];
   
   /// Number of ghost zones receive block wants
-  int gr3_[3];
+  int ghost_depth_recv_[3];
 
   /// Number of extra send-block ghost zones to include, typically
   /// only used with "accumulate" refresh (default is 0) since otherwise
   /// will overwrite non-ghost zones in receiver
-  int gs3_[3];
+  int ghost_depth_send_[3];
 
   /// Number of extra coarse zones of padding for interpolation
   /// around the intersected region
   int pad_;
+
+
+  /// Relative refinement level of recv block relative to the send block
+  int level_[2];
+  
+  /// Face along which the receive-block is located (-1,0,1)^3
+  int face_[2][3];
+
+  /// Child index of send-block or receive block, whichever is finer
+  /// (not accessed if both in same level)
+  int child_[2][3];
+
+
+  
+  /// Starting index of the neighbor (send) block relative to the
+  /// receive block
+  int block_start_[2][3];
+
+  
+  /// Starting and stopping indices of the send-recv intersection region
+  int region_start_[3];
+  int region_stop_[3];
 
 };
 

@@ -207,7 +207,7 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodComovingExpansion::timestep( Block * block ) const throw()
+double EnzoMethodComovingExpansion::timestep( Block * block ) throw()
 {
 
   enzo_float dtExpansion = ENZO_HUGE_VAL;

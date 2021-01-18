@@ -226,33 +226,6 @@ public: // interface
        &scalar_data_void_); }
 
 
-  //----------------------------------------------------------------------
-  // padded face array
-  //----------------------------------------------------------------------
-
-  std::vector<cello_float> & padded_face_array_allocate
-  (int ifx, int ify, int ifz, int nx, int ny, int nz)
-  {
-    std::vector<cello_float> & pfa =
-      padded_face_array_[(ifx+1) + 3*((ify+1) + 3*(ifz+1))];
-    if (pfa.size() != nx*ny*nz) {
-      CkPrintf ("Sizing %d %d %d to %d %d %d (%lu -> %d)\n",
-                ifx,ify,ifz,nx,ny,nz,pfa.size(),nx*ny*nz);
-      pfa.resize(nx*ny*nz);
-      std::fill (pfa.begin(),pfa.end(),-1.0);
-    }
-    return pfa;
-  }
-  void padded_face_array_deallocate (int ifx, int ify, int ifz)
-  {
-    std::vector<cello_float> & pfa =
-      padded_face_array_[(ifx+1) + 3*((ify+1) + 3*(ifz+1))];
-    pfa.clear();
-  }
-  
-  std::vector<cello_float> padded_face_array (int ifx, int ify, int ifz)
-  { return padded_face_array_[(ifx+1) + 3*((ify+1) + 3*(ifz+1))]; }
-  
 private: // functions
 
   void copy_(const Data & data) throw();
@@ -271,9 +244,6 @@ private: // attributes
   /// Flux data
   FluxData * flux_data_;
 
-  /// Face padded array data indexed with if3[]
-  std::vector<cello_float> padded_face_array_[3*3*3];
-  
   /// Scalar data
   ScalarData<long double> scalar_data_long_double_;
   ScalarData<double>      scalar_data_double_;

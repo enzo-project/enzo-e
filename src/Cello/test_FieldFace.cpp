@@ -128,7 +128,10 @@ bool test_field(T * values,
 				  nbx,nby,nbz,
 				  index_field,
 				  MD3,ND3);
-	if (values[i] != value) result = false;
+	if (values[i] != value) {
+          CkPrintf ("MISMATCH %d %d %d  %g != %g\n",ix,iy,iz,values[i],value);
+          result = false;
+        }
       }
     }
   }

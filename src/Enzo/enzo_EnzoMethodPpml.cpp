@@ -53,7 +53,7 @@ void EnzoMethodPpml::compute ( Block * block ) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodPpml::timestep (Block * block) const throw()
+double EnzoMethodPpml::timestep (Block * block) throw()
 {
  
   EnzoBlock * enzo_block = enzo::block(block);

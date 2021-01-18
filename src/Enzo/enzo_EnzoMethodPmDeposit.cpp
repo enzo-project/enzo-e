@@ -420,7 +420,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodPmDeposit::timestep ( Block * block ) const throw()
+double EnzoMethodPmDeposit::timestep ( Block * block ) throw()
 {
   double dt = std::numeric_limits<double>::max();
 

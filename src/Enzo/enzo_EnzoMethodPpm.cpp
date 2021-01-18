@@ -168,7 +168,7 @@ void EnzoMethodPpm::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodPpm::timestep ( Block * block ) const throw()
+double EnzoMethodPpm::timestep ( Block * block ) throw()
 {
 
   TRACE_PPM("timestep()");

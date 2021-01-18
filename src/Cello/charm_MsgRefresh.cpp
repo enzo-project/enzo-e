@@ -8,7 +8,6 @@
 #include "data.hpp"
 #include "charm.hpp"
 #include "charm_simulation.hpp"
-
 // #define DEBUG_MSG_REFRESH
 
 //----------------------------------------------------------------------
@@ -25,17 +24,12 @@ MsgRefresh::MsgRefresh()
       buffer_(nullptr)
 #ifdef TRACE_MSG_REFRESH      
     ,
-      name_block_(nullptr),
-      name_type_(nullptr)
+      name_block_(),
+      name_type_()
 #endif      
 {
+  cello::hex_string(tag_,8);
   ++counter[cello::index_static()];
-#ifdef TRACE_MSG_REFRESH      
-  name_block_=(char *)malloc(1);
-  name_block_[0] = '\0';
-  name_type_=(char *)malloc(1);
-  name_type_[0] = '\0';
-#endif  
 }
 
 //----------------------------------------------------------------------
@@ -58,6 +52,9 @@ void MsgRefresh::set_data_msg  (DataMsg * data_msg)
 	     "overwriting existing data_msg_");
     delete data_msg_;
   }
+#ifdef DEBUG_MSG_REFRESH  
+  CkPrintf ("DEBUG_CHARM %p set_data_msg %p\n",this,data_msg_);
+#endif  
   data_msg_ = data_msg;
 }
 
@@ -76,8 +73,8 @@ void * MsgRefresh::pack (MsgRefresh * msg)
   size += sizeof(int); // id_refresh
   
 #ifdef TRACE_MSG_REFRESH      
-  size += sizeof(int) + strlen(msg->name_block_)*sizeof(char);
-  size += sizeof(int) + strlen(msg->name_type_)*sizeof(char);
+  size += sizeof(int) + msg->name_block_.size()*sizeof(char);
+  size += sizeof(int) + msg->name_type_.size()*sizeof(char);
 #endif
   
   size += sizeof(int);  // have_data
@@ -88,6 +85,8 @@ void * MsgRefresh::pack (MsgRefresh * msg)
     size += msg->data_msg_->data_size();
   }
 
+  size += 8*sizeof(char);
+  
   //--------------------------------------------------
   //  2. allocate buffer using CkAllocBuffer()
   //--------------------------------------------------
@@ -107,11 +106,11 @@ void * MsgRefresh::pack (MsgRefresh * msg)
 
   (*pi++) = msg->id_refresh_;
 
-#ifdef TRACE_MSG_REFRESH      
-  int n=strlen(msg->name_block_);
+#ifdef TRACE_MSG_REFRESH
+  int n=msg->name_block_.size();
   (*pi++) = n;
   for (int i=0; i<n; i++) (*pc++) = msg->name_block_[i];
-  n=strlen(msg->name_type_);
+  n=msg->name_type_.size();
   (*pi++) = n;
   for (int i=0; i<n; i++) (*pc++) = msg->name_type_[i];
 #endif  
@@ -125,6 +124,17 @@ void * MsgRefresh::pack (MsgRefresh * msg)
   if (have_data) {
     pc = msg->data_msg_->save_data(pc);
   }
+#ifdef DEBUG_MSG_REFRESH  
+  CkPrintf ("DEBUG_CHARM %p pack data_msg_ %p\n",msg,msg->data_msg_);
+#endif  
+
+  strncpy(pc,msg->tag_,8);
+  msg->tag_[8] = '\0';
+  pc += 8*sizeof(char);
+  
+#ifdef DEBUG_MSG_REFRESH  
+  msg->print(std::string(msg->tag_)+":pack");
+#endif
 
   delete msg;
 
@@ -171,14 +181,18 @@ MsgRefresh * MsgRefresh::unpack(void * buffer)
 
 #ifdef TRACE_MSG_REFRESH      
   int n = (*pi++);
-  msg->name_block_=(char *)malloc(n+1);
-  for (int i=0; i<n; i++) msg->name_block_[i] = (*pc++);
-  msg->name_block_[n] = '\0';
+  msg->name_block_="";
+  for (int i=0; i<n; i++) {
+    const std::string s(1,(*pc++));
+    msg->name_block_.append(s);
+  }
 
   n = (*pi++);
-  msg->name_type_=(char *)malloc(n+1);
-  for (int i=0; i<n; i++) msg->name_type_[i] = (*pc++);
-  msg->name_type_[n] = '\0';
+  msg->name_type_="";
+  for (int i=0; i<n; i++) {
+    const std::string s(1,(*pc++));
+    msg->name_type_.append(s);
+  }
 #endif  
   
 #ifdef DEBUG_MSG_REFRESH
@@ -192,10 +206,25 @@ MsgRefresh * MsgRefresh::unpack(void * buffer)
   } else {
     msg->data_msg_ = nullptr;
   }
+#ifdef DEBUG_MSG_REFRESH  
+  CkPrintf ("DEBUG_CHARM %p unpack data_msg_ %p\n",msg,msg->data_msg_);
+#endif
 
+  strncpy (msg->tag_,pc,8);
+  msg->tag_[8] = '\0';
+  pc+=8*sizeof(char);
+  
+#ifdef DEBUG_MSG_REFRESH  
+  CkPrintf ("DEBUG_CHARM %p unpack tag_ %s\n",msg,msg->tag_);
+#endif
+  
   // 3. Save the input buffer for freeing later
 
   msg->buffer_ = buffer;
+
+#ifdef DEBUG_MSG_REFRESH  
+  msg->print(std::string(msg->tag_)+":unpack");
+#endif
 
   return msg;
 }
@@ -205,15 +234,37 @@ MsgRefresh * MsgRefresh::unpack(void * buffer)
 void MsgRefresh::update (Data * data)
 {
 #ifdef DEBUG_MSG_REFRESH
-  CkPrintf ("%d %s:%d DEBUG_MSG_REFRESH updating %p\n",
-	    CkMyPe(),__FILE__,__LINE__,this);
+  CkPrintf ("%d %s:%d DEBUG_MSG_REFRESH updating %p %s\n",
+	    CkMyPe(),__FILE__,__LINE__,this,tag_);
 #endif  
+#ifdef DEBUG_MSG_REFRESH  
+  CkPrintf ("DEBUG_CHARM %p update data_msg_ %p\n",this,data_msg_);
+#endif
   if (data_msg_ == nullptr) return;
 
   data_msg_->update(data,is_local_);
+
+#ifdef DEBUG_MSG_REFRESH  
+  print(std::string(tag_)+":update");
+#endif
 
   if (!is_local_) {
       CkFreeMsg (buffer_);
       buffer_ = nullptr;
   }
+}
+
+//----------------------------------------------------------------------
+
+void MsgRefresh::print (std::string message)
+{
+#ifdef DEBUG_MSG_REFRESH  
+  CkPrintf ("%s MSG_REFRESH %d %s %p %s %s\n",
+            tag_,id_refresh_,message.c_str(),this,name_block_.c_str(),name_type_.c_str());
+  if (data_msg_) {
+    data_msg_->print((std::string(tag_) + ":" + message).c_str());
+  } else {
+    CkPrintf ("%s MSG_REFRESH data_msg_ = nil\n",tag_);
+  }
+#endif  
 }

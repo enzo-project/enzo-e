@@ -50,7 +50,7 @@ public: // virtual functions
   virtual std::string name () throw () = 0;
 
   /// Compute maximum timestep for this method
-  virtual double timestep (Block * block) const throw() 
+  virtual double timestep (Block * block) throw() 
   { return std::numeric_limits<double>::max(); }
 
   /// Resume computation after a reduction

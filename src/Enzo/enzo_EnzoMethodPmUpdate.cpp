@@ -252,7 +252,7 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodPmUpdate::timestep ( Block * block ) const throw()
+double EnzoMethodPmUpdate::timestep ( Block * block ) throw()
 {
   TRACE_PM("timestep()");
 

@@ -31,11 +31,12 @@ public: // interface
       padded_face_(),
       padded_face_field_list_()
   {
+    cello::hex_string(tag_,8);
     for (int i=0; i<3; i++) {
-      m3_pf_[i]=0;
-      if3_pf_[i]=0;
-      im3_pf_[i]=0;
-      ip3_pf_[i]=0;
+      ma3_pf_[i] =0;
+      n3_pf_[i]  =0;
+      if3_pf_[i] =0;
+      iam3_pf_[i]=0;
     }
     ++counter[cello::index_static()]; 
   }
@@ -173,11 +174,11 @@ public: // interface
 
   /// Initialize the padded face arrays to send to neighbors
   void set_padded_face
-  (int if3[3],int m3[3],
-   int iam3[3], int iap3[3],
-   int ifm3[3], int ifp3[3],
-   std::vector<int> padded_face_field_list_, Field field);
-   
+  (int ma3[3], int n3[3], int r, int v,
+   int iam3[3], int ifm3[3], int if3[3],
+   std::vector<int> padded_face_field_list_, Field field,
+   std::string block_name_temp);
+
   ///--------------------
   /// PACKING / UNPACKING
   ///--------------------
@@ -199,25 +200,8 @@ public: // interface
   void update (Data * data, bool is_local);
 
   /// Debugging
-  void print ()
-  {
-    const int ip=CkMyPe();
-    char buf[81];
-    
-    snprintf (buf,80,"%d %p TRACE_DATA_MSG TRACE_DATA_MSG",ip,(void*)this);
-    CkPrintf ("%s field_face_    = %p\n",buf,(void*)field_face_);
-    CkPrintf ("%s field_data_    = %p\n",buf,(void*)field_data_);
-    CkPrintf ("%s particle_data_ = %p\n",buf,(void*)particle_data_);
-    CkPrintf ("%s particle_data_delete_ = %d\n",buf,particle_data_delete_?1:0);
-    CkPrintf ("%s |face_fluxes_list_| = %lu\n",
-              buf,face_fluxes_list_.size());
-    CkPrintf ("%s |face_fluxes_delete_| = %lu\n",
-              buf,face_fluxes_delete_.size());
-    CkPrintf ("%s field_face_delete_ = %d\n",buf,field_face_delete_?1:0);
-    CkPrintf ("%s field_data_delete_ = %d\n",buf,field_data_delete_?1:0);
-    fflush(stdout);
+  void print (const char * message) const;
 
-  }
 public: // static methods
 
   
@@ -259,13 +243,15 @@ protected: // attributes
   /// List of field indices for padded face
   std::vector<int> padded_face_field_list_;
   /// dimensions of the padded face array
-  int m3_pf_[3];
+  int ma3_pf_[3];
+  /// size of the coarse-block array section
+  int n3_pf_[3];
+  /// lower loop limits for the padded array
+  int iam3_pf_[3];
   /// face associated with the padded face (from the receiver's perspective)
   int if3_pf_[3];
-  /// lower loop limits for the padded face
-  int im3_pf_[3];
-  /// upper loop limits for the padded face
-  int ip3_pf_[3];
+  /// hex tag identifying object to match sender and receiver
+  char tag_[9];
 
 };
 

@@ -51,23 +51,23 @@ public: // interface
   void set_block_type(std::string block, std::string type)
   {
 #ifdef TRACE_MSG_REFRESH      
-    free(name_block_);
-    name_block_ = strdup(block.c_str());
-    free(name_type_);
-    name_type_ = strdup(type.c_str());
+    name_block_ = block;
+    name_type_ = type;;
 #endif    
   }
 
 #ifdef TRACE_MSG_REFRESH      
   std::string block_name ()
   {
-    return std::string(name_block_);
+    return name_block_;
   }
   std::string type_name()
   {
-    return std::string(name_type_);
+    return name_type_;
   }
 #endif    
+
+  void print(std::string message);
   
 public: // static methods
 
@@ -91,10 +91,12 @@ protected: // attributes
   void * buffer_;
 
 #ifdef TRACE_MSG_REFRESH      
-  char * name_block_;
-  char * name_type_;
+  std::string name_block_;
+  std::string name_type_;
 #endif  
 
+  /// hex tag identifying object to match sender and receiver
+  char tag_[9];
 };
 
 #endif /* CHARM_MSG_HPP */

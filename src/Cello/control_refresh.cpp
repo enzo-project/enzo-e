@@ -16,12 +16,14 @@
 #define CHECK_ID(ID) ASSERT1 ("CHECK_ID","Invalid id %d",ID,(ID>=0));
 
 // #define DEBUG_ENZO_PROLONG
-// #define TRACE_COMM
+//#define DEBUG_PADDED_FACE
+//#define TRACE_EXTRA
+// #define TRACE_COMM /* uncomment TRACE_MSG_REFRESH in charm_MsgRefresh.hpp */
+// #define TRACE_EXTRA_SEND
 
 //----------------------------------------------------------------------
 
-#ifdef TRACE_COMM
-
+#if defined(TRACE_COMM) and defined(TRACE_MSG_REFRESH)
 #   define TRACE_COMM_SEND(TYPE,BLOCK,NAME_RECV,ID)                     \
   {                                                                     \
     CkPrintf ("TRACE_COMM %s send %s >> %s send %d\n",   \
@@ -51,6 +53,17 @@
 
 #endif
 
+#ifdef TRACE_EXTRA
+#  undef TRACE_EXTRA
+#  define TRACE_EXTRA(BLOCK,REFRESH,MSG)                        \
+  {                                                             \
+    CkPrintf ("TRACE_EXTRA %s id %d %s\n",                      \
+              BLOCK->name().c_str(),REFRESH->id(),MSG);         \
+  }
+#else
+#  undef TRACE_EXTRA
+#  define TRACE_EXTRA(BLOCK,REFRESH,MSG) /* ... */
+#endif
 //----------------------------------------------------------------------
 
 void Block::refresh_start (int id_refresh, int callback)
@@ -201,6 +214,11 @@ void Block::refresh_check_done (int id_refresh)
 
     sync->set_state(RefreshState::INACTIVE);
 
+    // complete any outstanding data operations (e.g. multi-block
+    // interpolations)
+
+    refresh_extra_apply_(refresh);
+      
     // Call callback
 
     refresh_exit(*refresh);
@@ -212,6 +230,10 @@ void Block::refresh_check_done (int id_refresh)
 void Block::p_refresh_recv (MsgRefresh * msg)
 {
 
+#ifdef TRACE_COMM
+  msg->print("p_refresh_recv");
+#endif  
+  
   const int id_refresh = msg->id_refresh();
   CHECK_ID(id_refresh);
 
@@ -222,10 +244,11 @@ void Block::p_refresh_recv (MsgRefresh * msg)
     // unpack message data into Block data if ready
     msg->update(data());
       
+    TRACE_COMM_RECV(this,id_refresh,msg);
+
     delete msg;
 
     sync->advance();
-    TRACE_COMM_RECV(this,id_refresh,msg);
 
     // check if it's the last message processed
     refresh_check_done(id_refresh);
@@ -292,7 +315,7 @@ int Block::refresh_load_field_faces_ (Refresh & refresh)
       // handle padded interpolation special case if needed
 
       count += refresh_load_extra_face_
-        (refresh,index_neighbor, level,level_face,if3,ic3);
+        (refresh,refresh_type,index_neighbor, level,level_face,if3,ic3);
 
       refresh_load_field_face_ (refresh,refresh_type,index_neighbor,if3,ic3);
       ++count;
@@ -366,6 +389,10 @@ void Block::refresh_load_field_face_
   msg_refresh->set_data_msg (data_msg);
 
   TRACE_COMM_SEND("field",this,name(index_neighbor),id_refresh);
+
+#ifdef TRACE_COMM
+  msg_refresh->print("refresh_load_field_face");
+#endif  
   thisProxy[index_neighbor].p_refresh_recv (msg_refresh);
 
 }
@@ -374,6 +401,7 @@ void Block::refresh_load_field_face_
 
 int Block::refresh_load_extra_face_
 (Refresh refresh,
+ int refresh_type,
  Index index_neighbor,
  int level, int level_face,
  int if3[3],
@@ -385,15 +413,17 @@ int Block::refresh_load_extra_face_
 
   if ((padding > 0) && (level != level_face)) {
 
+    TRACE_EXTRA(this,(&refresh),"refresh_load_extra_face_");
+    
     // Create box_face
     
     const int rank = cello::rank();
     int n3[3];
     data()->field().size(n3,n3+1,n3+2);
     const int g = refresh.ghost_depth();
-    int g3[3] = {g3[0] = (rank >= 1) ? g : 0,
-                 g3[1] = (rank >= 2) ? g : 0,
-                 g3[2] = (rank >= 3) ? g : 0};
+    int g3[3] = {(rank >= 1) ? g : 0,
+                 (rank >= 2) ? g : 0,
+                 (rank >= 3) ? g : 0};
 
     // Boxes used Bs -> br, Be -> br, Bs -> be
     // (s send, r receive, e extra)
@@ -418,7 +448,7 @@ int Block::refresh_load_extra_face_
                    l_send ? if3[1] : -if3[1],
                    l_send ? if3[2] : -if3[2] };
     
-    box_sr.set_block(+1,jf3,ic3);
+    box_sr.set_block(BoxType_receive,+1,jf3,ic3);
     box_sr.set_padding(padding);
 
     box_sr.compute_region();
@@ -466,14 +496,13 @@ int Block::refresh_load_extra_face_
 #endif          
           // ... determine overlap of extra block with intersection region
           const int level_send = level;
-          box_sr.set_block ((level_extra-level_send), ef3,ec3);
-          box_sr.compute_block_start();
+          box_sr.set_block (BoxType_extra,(level_extra-level_send), ef3,ec3);
 #ifdef DEBUG_ENZO_PROLONG
           box_sr.print("sr overlap send");
 #endif          
         
           int im3[3],ip3[3];
-          bool overlap = box_sr.get_limits (im3,ip3,Box::BlockType::extra);
+          bool overlap = box_sr.get_limits (BoxType_extra,Box::BlockType::extra,im3,ip3);
           
 #ifdef DEBUG_ENZO_PROLONG
           CkPrintf ("DEBUG_PROLONG send overlap %d if3 %d %d ef3 %d %d im3 %d %d ip3 %d %d\n",
@@ -501,28 +530,36 @@ int Block::refresh_load_extra_face_
                                     
 
               // Box Bs | Be -> br
-              box_er.set_block(+1,if3_er,ic3);
+              box_er.set_block(BoxType_receive,+1,if3_er,ic3);
               box_er.set_padding(padding);
               box_er.compute_region();
 
-              int itm3[3],itp3[3];
-              box_er.get_limits (itm3,itp3,Box::BlockType::send);
-
+              
               int if3_es[3] = {-ef3[0], -ef3[1], -ef3[2] };
               
-              box_er.set_block(0,if3_es,ic3); // ic3 ignored
-              box_er.compute_block_start();
+              box_er.set_block(BoxType_extra,0,if3_es,ic3); // ic3 ignored
 
               int ifm3[3],ifp3[3];
               int iam3[3],iap3[3];
-              box_er.get_limits (ifm3,ifp3,Box::BlockType::extra);
-              box_er.get_limits (iam3,iap3,Box::BlockType::array);
+              box_er.get_limits (BoxType_extra,Box::BlockType::extra,ifm3,ifp3);
+              box_er.get_limits (BoxType_extra,Box::BlockType::array,iam3,iap3);
 
-              int ma3[3] =
-                { itp3[0]-itm3[0], itp3[1]-itm3[1], itp3[2]-itm3[2]};
-
+              int ma3[3];
+              box_er.get_region_size (ma3);
+              
+#ifdef DEBUG_ENZO_PROLONG
+              CkPrintf ("DEBUG_PROLONG array %d %d %d  field %d %d %d\n",
+                        iap3[0]-iam3[0],iap3[1]-iam3[1],iap3[2]-iam3[2],
+                        ifp3[0]-ifm3[0],ifp3[1]-ifm3[1],ifp3[2]-ifm3[2]);
+#endif              
+#ifdef TRACE_EXTRA_SEND
+              CkPrintf ("TRACE_EXTRA_SEND sending S %s R %s E %s\n",
+                        name().c_str(),
+                        name(index_neighbor).c_str(),
+                        name(index_extra).c_str());
+#endif              
               refresh_extra_send_
-                (refresh, index_neighbor, if3_er,
+                (refresh, refresh_type, index_neighbor, if3_er,
                  ma3, iam3,iap3, ifm3,ifp3, data()->field());
 
               ASSERT9 ("Block::refresh_load_extra_face_",
@@ -617,11 +654,10 @@ int Block::refresh_load_extra_face_
                     ef3[0],ef3[1],
                     if3[0],if3[1]);
 #endif          
-          box_sr.set_block ((level_extra-level_send), if3_se,ec3);
-          box_sr.compute_block_start();
+          box_sr.set_block (BoxType_extra,(level_extra-level_send), if3_se,ec3);
         
           int im3[3],ip3[3];
-          bool overlap = box_sr.get_limits (im3,ip3,Box::BlockType::extra);
+          bool overlap = box_sr.get_limits (BoxType_extra,Box::BlockType::extra,im3,ip3);
 #ifdef DEBUG_ENZO_PROLONG
           box_sr.print("sr overlap recv");
 #endif          
@@ -649,45 +685,42 @@ int Block::refresh_load_extra_face_
 #ifdef DEBUG_ENZO_PROLONG
               CkPrintf ("DEBUG_EXTRA %s recv extra\n",name().c_str());
 #endif              
-              // this block receives; extra block is fine
 
               // handle contribution of this block br to Bs -> be
-
-              // if3 rs
-              // ef3 re
-              // se = ef3 -
-              // int if3_se[3] = { ef3[0]+0.5*ec3[0]-(if3[0]+0.5*ic3[0]),
-              //                   ef3[1]+0.5*ec3[1]-(if3[1]+0.5*ic3[1]),
-              //                   ef3[2]+0.5*ec3[2]-(if3[2]+0.5*ic3[2])};
-            
               // Box br | Bs -> be
-              box_se.set_block(+1,if3_se,ec3);
+              box_se.set_block(BoxType_receive,+1,if3_se,ec3);
               box_se.set_padding(padding);
               box_se.compute_region();
 
-              int itm3[3],itp3[3];
-              box_se.get_limits (itm3,itp3,Box::BlockType::send);
-
               int if3_sr[3] = { -if3[0], -if3[1], -if3[2] };
-
-              box_se.set_block(0,if3_sr,ic3);
-              box_se.compute_block_start();
+              box_se.set_block(BoxType_extra,+1,if3_sr,ic3);
 
               int ifm3[3],ifp3[3];
               int iam3[3],iap3[3];
-              box_se.get_limits (ifm3,ifp3,Box::BlockType::extra);
-              box_se.get_limits (iam3,iap3,Box::BlockType::array);
+              box_se.get_limits (BoxType_extra,Box::BlockType::extra,ifm3,ifp3);
+              box_se.get_limits (BoxType_extra,Box::BlockType::array,iam3,iap3);
 
-              int ma3[3] =
-                { itp3[0]-itm3[0], itp3[1]-itm3[1], itp3[2]-itm3[2]};
+              int ma3[3];
+              box_se.get_region_size(ma3);
 
+#ifdef DEBUG_ENZO_PROLONG
+              CkPrintf ("DEBUG_PROLONG array %d %d %d  field %d %d %d\n",
+                        iap3[0]-iam3[0],iap3[1]-iam3[1],iap3[2]-iam3[2],
+                        ifp3[0]-ifm3[0],ifp3[1]-ifm3[1],ifp3[2]-ifm3[2]);
+#endif
+#ifdef TRACE_EXTRA_SEND              
+              CkPrintf ("TRACE_EXTRA_SEND receiving R %s S %s E %s\n",
+                        name().c_str(),
+                        name(index_neighbor).c_str(),
+                        name(index_extra).c_str());
+#endif              
               refresh_extra_send_
-                (refresh, index_extra, if3_se,
+                (refresh, refresh_type, index_extra, if3_se,
                  ma3, iam3,iap3, ifm3,ifp3, data()->field());
 
 #ifdef DEBUG_ENZO_PROLONG
               CkPrintf ("DEBUG_PROLONG recv array size  %d %d %d\n",
-                        itp3[0]-itm3[0],itp3[1]-itm3[1],itp3[2]-itm3[2]);
+                        ma3[0],ma3[1],ma3[2]);
               CkPrintf ("DEBUG_PROLONG recv limits ifm3 %d %d %d ifp3 %d %d %d\n",
                         ifm3[0],ifm3[1],ifm3[2],ifp3[0],ifp3[1],ifp3[2]);
               CkPrintf ("DEBUG_PROLONG recv limits iam3 %d %d %d iap3 %d %d %d\n\n",
@@ -718,32 +751,231 @@ int Block::refresh_load_extra_face_
 //----------------------------------------------------------------------
 
 void Block::refresh_extra_send_
-(Refresh & refresh, Index index_neighbor, int if3[3],
+(Refresh & refresh,
+ int refresh_type,
+ Index index_neighbor, int if3[3],
  int m3[3], int iam3[3], int iap3[3], int ifm3[3], int ifp3[3],
  Field field)
 {
-
+  TRACE_EXTRA(this,(&refresh),"refresh_extra_send_");
+  
   MsgRefresh * msg_refresh = new MsgRefresh;
-#ifdef TRACE_MSG_REFRESH  
+#ifdef TRACE_MSG_REFRESH
+  CkPrintf ("DEBUG_VALGRIND name() %s\n",name().c_str());
   msg_refresh->set_block_type(name(),"extra");
 #endif  
 
   DataMsg * data_msg = new DataMsg;
 
+  // data_msg -> set_field_face (field_face,true);
+  // data_msg -> set_field_data (data()->field_data(),false);
 
   const int id_refresh = refresh.id();
   CHECK_ID(id_refresh);
+  int nf = (ifp3[0]-ifm3[0])*(ifp3[1]-ifm3[1])*(ifp3[2]-ifm3[2]);
+  int na = (iap3[0]-iam3[0])*(iap3[1]-iam3[1])*(iap3[2]-iam3[2]);
+  int v = nf/na;
+  int r = (ifp3[0]-ifm3[0]) / (iap3[0]-iam3[0]);
+  int n3[3] = { (iap3[0]-iam3[0]),
+                (iap3[1]-iam3[1]),
+                (iap3[2]-iam3[2]) };
 
-  data_msg->set_padded_face (if3,m3,iam3,iap3,ifm3, ifp3,
-                             refresh.field_list_src(),field);
+#ifdef TRACE_EXTRA_SEND
+  CkPrintf ("TRACE_EXTRA_SEND %s %s\n",name().c_str(),name(index_neighbor).c_str());
+  CkPrintf ("TRACE_EXTRA_SEND m3 %d %d %d\n",m3[0],m3[1],m3[2]);
+  CkPrintf ("TRACE_EXTRA_SEND n3 %d %d %d\n",n3[0],n3[1],n3[2]);
+  CkPrintf ("TRACE_EXTRA_SEND r %d\n",r);
+  // CkPrintf ("TRACE_EXTRA_SEND na %d\n",na);
+  // CkPrintf ("TRACE_EXTRA_SEND nf %d\n",nf);
+  CkPrintf ("TRACE_EXTRA_SEND iam3 %d %d %d\n",iam3[0],iam3[1],iam3[2]);
+  CkPrintf ("TRACE_EXTRA_SEND ifm3 %d %d %d\n",ifm3[0],ifm3[1],ifm3[2]);
+  CkPrintf ("TRACE_EXTRA_SEND if3 %d %d %d\n",if3[0],if3[1],if3[2]);
+  CkPrintf ("\n");
+#endif
+  data_msg->set_padded_face
+    (m3,n3,r,v,iam3,ifm3, if3,
+     refresh.field_list_src(),field,name(index_neighbor));
 
   msg_refresh->set_refresh_id (id_refresh);
   msg_refresh->set_data_msg (data_msg);
 
   TRACE_COMM_SEND("extra",this,name(index_neighbor),id_refresh);
+#   ifdef DEBUG_PADDED_FACE
+  msg_refresh->print("refresh_extra_send");
+#endif  
   thisProxy[index_neighbor].p_refresh_recv (msg_refresh);
 }
 
+//----------------------------------------------------------------------
+
+void Block::refresh_extra_apply_ (Refresh * refresh)
+{
+  Prolong * prolong = cello::problem()->prolong();
+  
+  const int padding = prolong->padding();
+
+  if (padding > 0) {
+  
+    TRACE_EXTRA(this,refresh,"refresh_extra_apply_");
+    
+    const int min_face_rank = refresh->min_face_rank();
+    const int neighbor_type = refresh->neighbor_type();
+    const int root_level    = refresh->root_level();
+    const int min_level     = cello::config()->mesh_min_level;
+
+    if ((padding > 0) &&
+        neighbor_type == neighbor_leaf ||
+        neighbor_type == neighbor_tree) {
+
+      ItNeighbor it_neighbor =
+        this->it_neighbor(min_face_rank,index_,neighbor_type,
+                          min_level,root_level);
+    
+      const int level = this->level();
+    
+      int if3[3];
+      while (it_neighbor.next(if3)) {
+
+        int of3[3] = {-if3[0],-if3[1],-if3[2]};
+      
+        const int level_face = it_neighbor.face_level();
+
+        if (level == level_face + 1) {
+          cello_float * padded_array =
+            this->data()->field_data()->padded_array(of3[0],of3[1],of3[2]);
+
+          FieldData * field_data = data()->field_data();
+          const int maf = field_data->padded_array_dimensions(of3[0],of3[1],of3[2]);
+          const int mf  = field_data->padded_array_fields(of3[0],of3[1],of3[2]);
+          const int mxa = field_data->padded_array_dimensions(0,of3[0],of3[1],of3[2]);
+          const int mya = field_data->padded_array_dimensions(1,of3[0],of3[1],of3[2]);
+          const int mza = field_data->padded_array_dimensions(2,of3[0],of3[1],of3[2]);
+          const int ma = maf / mf;
+          ASSERT3("Block::refresh_extra_apply_",
+                  "Padded array for face %d %d %d is not allocated",
+                  of3[0],of3[1],of3[2],
+                  maf > 0);
+          ASSERT2("Block::refresh_extra_apply_",
+                  "Padded array size %d does not match expected %d",
+                  ma,mxa*mya*mza,
+                  (ma == mxa*mya*mza) );
+          
+          const auto & field_list = refresh->field_list_src();
+          const int nf = field_list.size();
+          ASSERT2("Block::refresh_extra_apply_",
+                  "Expected padded array fields %d does not match Refresh %d",
+                  mf,nf,
+                  (mf == nf) );
+        
+          
+#ifdef DEBUG_PADDED_FACE
+          {
+            for (int i_f=0; i_f<nf; i_f++) {
+              int im=i_f*ma;
+              int ip=(i_f+1)*ma-1;
+              CkPrintf ("DEBUG_PADDED_ARRAY read %d %d %d [%d*%d] = %g\n",
+                        of3[0],of3[1],of3[2],i_f,ma,padded_array[im]);
+              CkPrintf ("DEBUG_PADDED_ARRAY read %d %d %d [%d*%d-1] = %g\n",
+                        of3[0],of3[1],of3[2],i_f+1,ma,padded_array[ip]);
+              CkPrintf ("DEBUG_PADDED_FACE padded_array address %p face %d %d %d field %d first %g last %g\n",
+                        (void*)padded_array,
+                        of3[0],of3[1],of3[2],i_f,padded_array[im],padded_array[ip]);
+            }
+          }
+#endif
+
+          // Create Box to find loop limits
+          int n3[3];
+          Field field = this->data()->field();
+          field.size(n3,n3+1,n3+2);
+          const int g = refresh->ghost_depth();
+          const int rank = cello::rank();
+          int g3[3] = {(rank >= 1) ? g : 0,
+                       (rank >= 2) ? g : 0,
+                       (rank >= 3) ? g : 0};
+          Box box (rank,n3,g3);
+          int ic3[3];
+          index_.child(level,ic3,ic3+1,ic3+2);
+          box.set_block (BoxType_receive,+1, of3,ic3);
+          box.set_padding(padding);
+          box.compute_region();
+          int i3_c[3] = {0,0,0};
+          int n3_c[3];
+          box.get_region_size(n3_c);
+#ifdef DEBUG_ENZO_PROLONG
+          CkPrintf ("DEBUG_PROLONG limits i3_c %d %d %d  n3_c %d %d %d\n",
+                    i3_c[0],i3_c[1],i3_c[2],
+                    n3_c[0],n3_c[1],n3_c[2]);
+#endif
+          box.set_padding(0);
+          box.compute_region();
+
+          int i3_f[3],n3_f[3];
+          bool overlap = box.get_limits (BoxType_receive,Box::BlockType::receive,i3_f,n3_f);
+          n3_f[0] -= i3_f[0];
+          n3_f[1] -= i3_f[1];
+          n3_f[2] -= i3_f[2];
+          
+#ifdef DEBUG_ENZO_PROLONG
+          CkPrintf ("DEBUG_PROLONG limits i3_f %d %d %d  n3_f %d %d %d\n",
+                    i3_f[0],i3_f[1],i3_f[2],
+                    n3_f[0],n3_f[1],n3_f[2]);
+#endif
+          const int nc = n3_c[0]*n3_c[1]*n3_c[2];
+
+          ASSERT6("refresh_extra_apply",
+                 "%s Expected padded_array size %d face %d %d %d does not match expected %d",
+                  name().c_str(),ma,
+                  of3[0],of3[1],of3[2],
+                  nf*nc,
+                  (ma == nf*nc));
+          for (int i_f=0; i_f<nf; i_f++) {
+            const int index_field = field_list[i_f];
+            int m3_f[3];
+#ifdef DEBUG_ENZO_PROLONG
+            CkPrintf ("DEBUG_PROLONG calling Prolong.apply\n");
+#endif          
+            field.dimensions(index_field,&m3_f[0],&m3_f[1],&m3_f[2]);
+            
+            precision_type precision = field.precision(index_field);
+            char * values_f = field.values(index_field);
+            //@@@
+            cello_float * values_c = &padded_array[i_f*nc];
+#ifdef DEBUG_ENZO_PROLONG
+            CkPrintf ("TRACE_PADDED_ARRAY %d Block::refresh_extra_apply i_f %d padded_array[%d] %p sum %g\n",
+                      refresh->id(),i_f,i_f*nc,(void*)&padded_array[i_f*nc],
+                      cello::sum
+                      (&padded_array[i_f*nc],
+                       n3_c[0],n3_c[1],n3_c[2],
+                       i3_c[0],i3_c[1],i3_c[2],
+                       n3_c[0],n3_c[1],n3_c[2]));
+            CkPrintf ("TRACE_PADDED_ARRAY %d Block::refresh_extra_apply i_f %d values_c %p sum %g\n",
+                      refresh->id(),i_f,(void*)values_c,
+                      cello::sum
+                      (values_c,
+                       n3_c[0],n3_c[1],n3_c[2],
+                       i3_c[0],i3_c[1],i3_c[2],
+                       n3_c[0],n3_c[1],n3_c[2]));
+#endif      
+
+#ifdef DEBUG_ENZO_PROLONG
+            CkPrintf ("DEBUG_PROLONG values_c[0] %p min %g\n",
+                      (void *)values_c,values_c[0]);
+            CkPrintf ("DEBUG_PROLONG values_c[0] max %g\n",
+                      values_c[n3_c[0]*n3_c[1]*n3_c[2]-1]);
+#endif            
+            // @@@@@ values_f invalid
+            prolong->apply(precision,
+                           values_f, m3_f, i3_f, n3_f,
+                           values_c, n3_c, i3_c, n3_c,
+                           refresh->accumulate());
+            //  bool accumulate)
+          }
+        }
+      }
+    }
+  }
+}
 
 //----------------------------------------------------------------------
 
@@ -813,6 +1045,9 @@ void Block::particle_send_
       msg_refresh->set_refresh_id (id_refresh);
 
       TRACE_COMM_SEND("particle",this,name(index),id_refresh);
+#ifdef TRACE_COMM      
+      msg_refresh->print("particle_send_1");
+#endif      
       thisProxy[index].p_refresh_recv (msg_refresh);
 
     } else if (p_data) {
@@ -825,6 +1060,9 @@ void Block::particle_send_
       msg_refresh->set_refresh_id (id_refresh);
 
       TRACE_COMM_SEND("particle",this,name(index),id_refresh);
+#ifdef TRACE_COMM      
+      msg_refresh->print("particle_send_2");
+#endif      
       thisProxy[index].p_refresh_recv (msg_refresh);
 
       // assert ParticleData object exits but has no particles
@@ -1305,6 +1543,9 @@ void Block::refresh_load_flux_face_
   msg_refresh->set_refresh_id (id_refresh);
 
   TRACE_COMM_SEND("fluxes",this,name(index_neighbor),id_refresh);
+#ifdef TRACE_COMM      
+  msg_refresh->print("refresh_load_flux_face");
+#endif  
   thisProxy[index_neighbor].p_refresh_recv (msg_refresh);
 
 }

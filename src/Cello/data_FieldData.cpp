@@ -37,6 +37,15 @@ FieldData::FieldData
   // Initialize history temporary fields
 
   if (field_descr) set_history_(field_descr);
+
+  for (int i=0; i<27; i++) {
+    padded_array_[i] = nullptr;
+    padded_array_fields_[i] = 0;
+    for (int axis=0; axis<3; axis++) {
+      padded_array_dimensions_[axis][i] = 0;
+    }
+  }
+
 }
 
 //----------------------------------------------------------------------
@@ -48,6 +57,14 @@ FieldData::~FieldData() throw()
     delete [] array_temporary_[i];
     array_temporary_[i] = NULL;
     temporary_size_[i] = 0;
+  }
+  for (int i=0; i<27; i++) {
+    delete [] padded_array_[i];
+    padded_array_[i] = nullptr;
+    padded_array_fields_[i] = 0;
+    for (int axis=0; axis<3; axis++) {
+      padded_array_dimensions_[axis][i] = 0;
+    }
   }
 }
 
@@ -81,6 +98,8 @@ void FieldData::pup(PUP::er &p)
   if (! warn[in]) {
     WARNING("FieldData::pup()",
   	    "Skipping array_temporary_");
+    WARNING("FieldData::pup()",
+            "Skipping padded_array");
     warn[in] = true;
   }
   p | offsets_;
@@ -88,6 +107,24 @@ void FieldData::pup(PUP::er &p)
   p | history_id_;
   p | history_time_;
   p | units_scaling_;
+
+  PUParray(p,padded_array_fields_,27);
+  PUParray(p,padded_array_dimensions_[0],27);
+  PUParray(p,padded_array_dimensions_[1],27);
+  PUParray(p,padded_array_dimensions_[2],27);
+  for (int i=0; i<27; i++) {
+    int mx = padded_array_dimensions_[0][i];
+    int my = padded_array_dimensions_[1][i];
+    int mz = padded_array_dimensions_[2][i];
+    int mf = padded_array_fields_[i];
+    int maf = mx*my*mz*mf;
+    if (maf) {
+      if (p.isUnpacking()) padded_array_[i]=new cello_float[maf];
+      PUParray(p,padded_array_[i],maf);
+    } else {
+      padded_array_[i]=NULL;
+    }
+  }
 }
 
 

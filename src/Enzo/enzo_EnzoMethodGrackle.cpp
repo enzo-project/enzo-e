@@ -497,7 +497,7 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodGrackle::timestep ( Block * block ) const throw()
+double EnzoMethodGrackle::timestep ( Block * block ) throw()
 {
   const EnzoConfig * config = enzo::config();
 

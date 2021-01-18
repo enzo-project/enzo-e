@@ -10,69 +10,147 @@
 long DataMsg::counter[CONFIG_NODE_SIZE] = {0};
 
 // #define DEBUG_PADDED_ARRAY
-//#define ACTIVATE_PADDED_ARRAY
+// #define DEBUG_TRACE_SUMS
+
+#define ACTIVATE_PADDED_ARRAY
+// #define TRACE_PADDED_ARRAY_VALUES
 #define CHECK
 
 //----------------------------------------------------------------------
 
 void DataMsg::set_padded_face
-(int if3[3],int ma3[3],
- int iam3[3], int iap3[3],
- int ifm3[3], int ifp3[3],
- std::vector<int> padded_face_field_list, Field field)
+(int ma3[3],int n3[3],int r, int v,
+ int iam3[3], int ifm3[3], int if3[3],
+ std::vector<int> padded_face_field_list, Field field,
+ std::string block_name)
 {
 #ifdef ACTIVATE_PADDED_ARRAY  
   for (int i=0; i<3; i++) {
-    if3_pf_[i] = if3[i];
-    m3_pf_[i] = ma3[i];
-    im3_pf_[i] = iam3[i];
-    ip3_pf_[i] = iap3[i];
+    ma3_pf_[i]  = ma3[i];
+    n3_pf_[i]   = n3[i];
+    iam3_pf_[i] = iam3[i];
+    if3_pf_[i]  = if3[i];
   }
-  ASSERT6("DataMsg::set_padded_face",
-          "field section vs array size discrepancy: field (%d %d %d) != array (%d %d %d)",
-          (ifp3[0]-ifm3[0]),(ifp3[1]-ifm3[1]),(ifp3[2]-ifm3[2]),
-          (iap3[0]-iam3[0]),(iap3[1]-iam3[1]),(iap3[2]-iam3[2]),
-          ((ifp3[0]-ifm3[0]) == (iap3[0] - iam3[0])) &&
-          ((ifp3[1]-ifm3[1]) == (iap3[1] - iam3[1])) &&
-          ((ifp3[2]-ifm3[2]) == (iap3[2] - iam3[2])));
-          
-  const int nx=(ifp3[0]-ifm3[0]);
-  const int ny=(ifp3[1]-ifm3[1]);
-  const int nz=(ifp3[2]-ifm3[2]);
-  
+#ifdef DEBUG_PADDED_ARRAY  
+    CkPrintf ("DEBUG DataMsg::set_padded_face %p ma3 %d %d %d\n",
+              (void *)this,ma3_pf_[0],ma3_pf_[1],ma3_pf_[2]);
+    CkPrintf ("DEBUG DataMsg::set_padded_face %p n3 %d %d %d\n",
+              (void *)this,n3_pf_[0],n3_pf_[1],n3_pf_[2]);
+    CkPrintf ("DEBUG DataMsg::set_padded_face %p iam3 %d %d %d\n",
+              (void *)this,iam3_pf_[0],iam3_pf_[1],iam3_pf_[2]);
+    CkPrintf ("DEBUG DataMsg::set_padded_face %p if3 %d %d %d\n",
+              (void *)this,if3_pf_[0],if3_pf_[1],if3_pf_[2]);
+#endif
   padded_face_field_list_ = padded_face_field_list;
-  const int ma = ma3[0]*ma3[1]*ma3[2];
+
+  const int nx(n3_pf_[0]), ny(n3_pf_[1]), nz(n3_pf_[2]);
   const int nf = padded_face_field_list.size();
-  padded_face_.resize(nf*ma);
+  const int na(nx*ny*nz);
+#ifdef DEBUG_PADDED_ARRAY  
+  CkPrintf ("DEBUG_PROLONG_DATA_MSG TRACE nf %s:%d %d\n",__FILE__,__LINE__,nf);
+  CkPrintf ("DEBUG_PROLONG_DATA_MSG TRACE na %s:%d %d\n",__FILE__,__LINE__,na);
+#endif  
+
+  padded_face_.resize(nf*na);
+  std::fill(padded_face_.begin(),padded_face_.end(),0.0);
+  cello_float * padded_field = padded_face_.data();
   for (int i_f=0; i_f<nf; i_f++) {
     const int index_field = padded_face_field_list[i_f];
-    int mf3[3];
-    field.dimensions(index_field,mf3,mf3+1,mf3+2);
-    const int mf = mf3[0]*mf3[1]*mf3[2];
+    const int ia0 = i_f*na;
+    // get Field dimensions
+    int mxf,myf,mzf;
+    field.dimensions(index_field,&mxf,&myf,&mzf);
+    const int mf = mxf*myf*mzf;
+    // get field values
     auto field_values = (cello_float *)field.values(index_field);
-    int ia0 = iam3[0] + ma3[0]*(iam3[1] + ma3[1]*iam3[2]);
-    int if0 = ifm3[0] + mf3[0]*(ifm3[1] + mf3[1]*ifm3[2]);
-    for (int kz=0; kz<nz; kz++) {
-      for (int ky=0; ky<ny; ky++) {
-        for (int kx=0; kx<nx; kx++) {
-          int ka=kx + ma3[0]*(ky + ma3[1]*kz) + ia0;
-          int kf=kx + mf3[0]*(ky + mf3[1]*kz) + if0;
+    // determine starting offset for array and field
+    int if0 = ifm3[0] + mxf*(ifm3[1] + myf*ifm3[2]);
+    // copy field values to array, looping over field elements
+    const int rank = cello::rank();
+    const int nxp = (rank >= 1) ? r*nx : 1;
+    const int nyp = (rank >= 2) ? r*ny : 1;
+    const int nzp = (rank >= 3) ? r*nz : 1;
+    //    const cello_float rr = 1.0/cello::num_children();
+    const cello_float rr = 1.0/v;
+    for (int kz=0; kz<nzp; kz++) {
+      for (int ky=0; ky<nyp; ky++) {
+        for (int kx=0; kx<nxp; kx++) {
+          int ka=ia0 + (kx/r) + nx*((ky/r) + ny*(kz/r));
+          int kf=if0 + kx + mxf*(ky + myf*kz);
 #ifdef CHECK
-          ASSERT6 ("DataMsg::set_padded_face",
-                  "padded_face_ array index (%d %d %d) out of range (%d %d %d)",
-                   kx+iam3[0],ky+iam3[1],kz+iam3[2],
-                   ma3[0],ma3[1],ma3[2],
-                   (0 <= ka && ka < ma));
+          ASSERT8 ("DataMsg::set_padded_face",
+                  "padded_face_ array index (%d %d %d) out of range (%d %d %d) %d %d",
+                   kx/r,ky/r,kz/r,
+                   nx,ny,nz,ka-ia0,na,
+                   (0 <= ka && ka < na*nf));
           ASSERT6 ("DataMsg::set_padded_face",
                   "Field index (%d %d %d) out of range (%d %d %d)",
                    kx+ifm3[0],ky+ifm3[1],kz+ifm3[2],
-                   mf3[0],mf3[1],mf3[2],
-                   (0 <= ka && ka < mf));
-#endif          
-          padded_face_[ka] = field_values[kf];
+                   mxf,myf,mzf,
+                   (0 <= kf && kf < mf));
+#endif
+          padded_field[ka] += rr*field_values[kf];
         }
       }
     }
+#ifdef DEBUG_TRACE_SUMS
+    {
+      int count = 0;
+      double sum = 0.0;
+      int zero = 0;
+      for (int iz=0; iz<nz; iz++) {
+        for (int iy=0; iy<ny; iy++) {
+          for (int ix=0; ix<nx; ix++) {
+            int i=ia0+ix+nx*(iy+ny*iz);
+            count++;
+            sum += padded_face_[i];
+            if (padded_face_[i] == 0) ++zero;
+          }
+        }
+      }
+      CkPrintf ("DEBUG_TRACE_SUM %s send buffer [%d %d %d] n3 %d %d %d i_f %d %s %d %d %8.4g\n",
+                block_name.c_str(), if3[0],if3[1],if3[2],
+                nx,ny,nz,i_f,tag_,zero,count,sum);
+    }
+#endif    
+#ifdef TRACE_PADDED_ARRAY_VALUES
+    if (i_f == 0) {
+      CkPrintf ("PADDED_ARRAY_VALUES %s:%d i_f %d set_padded_array field %p r %d\n",
+                __FILE__,__LINE__,i_f,(void*)&field_values[if0],r);
+      for (int iz=0; iz<nzp; iz++) {
+        for (int iy=0; iy<nyp; iy++) {
+          CkPrintf ("PADDED_ARRAY_VALUES set_padded_array field i_f %d %p %d %d %d: ",
+                    i_f,(void*)&field_values[if0],0,iy,iz);
+          for (int ix=0; ix<nxp; ix++) {
+            int i=if0 + ix + mxf*(iy + myf*iz);
+            CkPrintf (" %6.3g",field_values[i]);
+          }
+          CkPrintf ("\n");
+        }
+      }
+      CkPrintf ("PADDED_ARRAY_VALUES %s:%d i_f %d set_padded_array buffer %p\n",
+                __FILE__,__LINE__,i_f,(void*)&padded_face_[ia0]);
+      for (int iz=0; iz<nz; iz++) {
+        for (int iy=0; iy<ny; iy++) {
+          CkPrintf ("PADDED_ARRAY_VALUES set_padded_array buffer i_f %d %p %d %d %d: ",
+                    i_f,(void*)&padded_face_[ia0],0,iy,iz);
+          for (int ix=0; ix<nx; ix++) {
+            int i = ia0+ix+ nx*(iy+ ny*iz);
+            CkPrintf (" %6.3g",padded_face_[i]);
+          }
+          CkPrintf ("\n");
+        }
+      }
+    }
+#endif      
+
+#ifdef DEBUG_PADDED_ARRAY    
+    CkPrintf ("TRACE_PADDED_ARRAY DataMsg::set_padded_array i_f %d %p sum %g\n",
+              i_f,&padded_face_[ia0],
+              cello::sum(&padded_field[ia0],nx,ny,nz,0,0,0,nx,ny,nz));
+#endif    
+    // move to next field section in padded array
+    //    padded_field += na;
   }
 #endif  
 }
@@ -113,23 +191,37 @@ int DataMsg::data_size () const
 
   // Padded array for interpolation
   size += sizeof(int); // padded array size (0 if none)
-  const int m = (m3_pf_[0]*m3_pf_[1]*m3_pf_[2]);
-  if (m > 0) {
+  const int na = (n3_pf_[0]*n3_pf_[1]*n3_pf_[2]);
+#ifdef DEBUG_PADDED_ARRAY  
+  CkPrintf ("DEBUG_PROLONG_DATA_MSG TRACE na %s:%d %d\n",__FILE__,__LINE__,na);
+#endif  
+  if (na > 0) {
     size += sizeof(int); // padded_face_field_list_.size()
 
-    int n = padded_face_field_list_.size();
-    size += n*sizeof(int); // padded_face_field_list_
-    size += (n*m)*sizeof(cello_float); // padded_face_
-
-    size += 3*sizeof(int); // m3_pf_[3]
-    size += 3*sizeof(int); // if3_pf_[3]
-    size += 3*sizeof(int); // im3_pf_[3]
-    size += 3*sizeof(int); // ip3_pf_[3]
-  }
+    int nf = padded_face_field_list_.size();
 #ifdef DEBUG_PADDED_ARRAY  
-  CkPrintf ("DEBUG DataMsg::data_size m3 %d %d %d\n",
-            m3_pf_[0],m3_pf_[1],m3_pf_[2]);
+    CkPrintf ("DEBUG_PROLONG_DATA_MSG TRACE nf %s:%d %d\n",__FILE__,__LINE__,nf);
+#endif    
+    size += nf*sizeof(int); // padded_face_field_list_
+    size += (nf*na)*sizeof(cello_float); // padded_face_
+
+    size += 3*sizeof(int); // ma3_pf_[3]
+    size += 3*sizeof(int); // n3_pf_[3]
+    size += 3*sizeof(int); // iam3_pf_[3]
+    size += 3*sizeof(int); // if3_pf_[3]
+  }
+  size += 8*sizeof(char); // tag_
+#ifdef DEBUG_PADDED_ARRAY  
+  CkPrintf ("DEBUG %s DataMsg::data_size %p ma3 %d %d %d\n",
+            tag_,(void *)this,ma3_pf_[0],ma3_pf_[1],ma3_pf_[2]);
+  CkPrintf ("DEBUG %s DataMsg::data_size %p n3 %d %d %d\n",
+            tag_,(void *)this,n3_pf_[0],n3_pf_[1],n3_pf_[2]);
+  CkPrintf ("DEBUG %s DataMsg::data_size %p iam3 %d %d %d\n",
+            tag_,(void *)this,iam3_pf_[0],iam3_pf_[1],iam3_pf_[2]);
+  CkPrintf ("DEBUG %s DataMsg::data_size %p if3 %d %d %d\n",
+            tag_,(void *)this,if3_pf_[0],if3_pf_[1],if3_pf_[2]);
 #endif
+  
   return size;
 }
 
@@ -184,30 +276,48 @@ char * DataMsg::save_data (char * buffer) const
 
   // Padded face array for interpolation
 
-  const int m = (m3_pf_[0]*m3_pf_[1]*m3_pf_[2]);
-  (*pi++) = m;
-  if (m > 0) {
-    const int n = padded_face_field_list_.size();
-    (*pi++) = n;
-    for (int i=0; i<n; i++) {
+  const int na = (n3_pf_[0]*n3_pf_[1]*n3_pf_[2]);
+#ifdef DEBUG_PADDED_ARRAY  
+  CkPrintf ("DEBUG_PROLONG_DATA_MSG TRACE na %s:%d %d\n",__FILE__,__LINE__,na);
+#endif  
+  (*pi++) = na;
+  if (na > 0) {
+    const int nf = padded_face_field_list_.size();
+#ifdef DEBUG_PADDED_ARRAY  
+    CkPrintf ("DEBUG_PROLONG_DATA_MSG TRACE nf %s:%d %d\n",__FILE__,__LINE__,nf);
+#endif    
+    (*pi++) = nf;
+    for (int i=0; i<nf; i++) {
       (*pi++) = padded_face_field_list_[i];
     }
-    for (int i=0; i<(n*m); i++) {
+    for (int i=0; i<(nf*na); i++) {
       (*pcf++) = padded_face_[i];
     }
 
     for (int i=0; i<3; i++) {
-      (*pi++) = m3_pf_[i];
+      (*pi++) = ma3_pf_[i];
+      (*pi++) = n3_pf_[i];
+      (*pi++) = iam3_pf_[i];
       (*pi++) = if3_pf_[i];
-      (*pi++) = im3_pf_[i];
-      (*pi++) = ip3_pf_[i];
     }
+  
 #ifdef DEBUG_PADDED_ARRAY
-    CkPrintf ("DEBUG DataMsg::save_data m3 %d %d %d\n",
-              m3_pf_[0],m3_pf_[1],m3_pf_[2]);
+  CkPrintf ("DEBUG %s DataMsg::save_data %p ma3 %d %d %d\n",
+            tag_,(void *)this,ma3_pf_[0],ma3_pf_[1],ma3_pf_[2]);
+  CkPrintf ("DEBUG %s DataMsg::save_data %p n3 %d %d %d\n",
+            tag_,(void *)this,n3_pf_[0],n3_pf_[1],n3_pf_[2]);
+  CkPrintf ("DEBUG %s DataMsg::save_data %p iam3 %d %d %d\n",
+            tag_,(void *)this,iam3_pf_[0],iam3_pf_[1],iam3_pf_[2]);
+  CkPrintf ("DEBUG %s DataMsg::save_data %p if3 %d %d %d\n",
+            tag_,(void *)this,if3_pf_[0],if3_pf_[1],if3_pf_[2]);
 #endif
   }
+  strncpy (pc,tag_,8);
+  pc+=8*sizeof(char);
   
+#ifdef DEBUG_PADDED_ARRAY  
+  print("data_msg:save_data");
+#endif  
   ASSERT2 ("DataMsg::save_data()",
   	   "Expecting buffer size %d actual size %d",
   	   data_size(),(pc-buffer),
@@ -273,29 +383,53 @@ char * DataMsg::load_data (char * buffer)
     }
   }
 
-  const int m = (*pi++);
-  if (m > 0) {
-    const int n = (*pi++);
-    padded_face_field_list_.resize(n);
-    for (int i=0; i<n; i++) {
+  const int na = (*pi++);
+#ifdef DEBUG_PADDED_ARRAY  
+  CkPrintf ("DEBUG_PROLONG_DATA_MSG TRACE na %s:%d %d\n",__FILE__,__LINE__,na);
+#endif  
+  if (na > 0) {
+    const int nf = (*pi++);
+#ifdef DEBUG_PADDED_ARRAY  
+    CkPrintf ("DEBUG_PROLONG_DATA_MSG TRACE nf %s:%d %d\n",__FILE__,__LINE__,nf);
+#endif    
+    padded_face_field_list_.resize(nf);
+    for (int i=0; i<nf; i++) {
       padded_face_field_list_[i] = (*pi++);
     }
-    padded_face_.resize(n*m);
-    for (int i=0; i<(n*m); i++) {
+    padded_face_.resize(nf*na);
+    for (int i=0; i<(nf*na); i++) {
       padded_face_[i] = (*pcf++);
     }
 
     for (int i=0; i<3; i++) {
-      m3_pf_[i] = (*pi++);
-      if3_pf_[i] = (*pi++);
-      im3_pf_[i] = (*pi++);
-      ip3_pf_[i] = (*pi++);
+      ma3_pf_[i]  = (*pi++);
+      n3_pf_[i]   = (*pi++);
+      iam3_pf_[i] = (*pi++);
+      if3_pf_[i]  = (*pi++);
     }
+
 #ifdef DEBUG_PADDED_ARRAY  
-    CkPrintf ("DEBUG DataMsg::load_data m3 %d %d %d\n",
-              m3_pf_[0],m3_pf_[1],m3_pf_[2]);
+    CkPrintf ("DEBUG DataMsg::load_data %p ma3 %d %d %d\n",
+              (void *)this,ma3_pf_[0],ma3_pf_[1],ma3_pf_[2]);
+    CkPrintf ("DEBUG DataMsg::load_data %p n3 %d %d %d\n",
+              (void *)this,n3_pf_[0],n3_pf_[1],n3_pf_[2]);
+    CkPrintf ("DEBUG DataMsg::load_data %p iam3 %d %d %d\n",
+              (void *)this,iam3_pf_[0],iam3_pf_[1],iam3_pf_[2]);
+    CkPrintf ("DEBUG DataMsg::load_data %p if3 %d %d %d\n",
+              (void *)this,if3_pf_[0],if3_pf_[1],if3_pf_[2]);
 #endif
+    ASSERT2 ("DataMsg::load_data()",
+             "Expecting buffer size %d actual size %d",
+             data_size(),(pc-buffer),
+             (data_size() == (pc-buffer)));
   }
+  strncpy (tag_,pc,8);
+  tag_[8] = 0;
+  pc+=8*sizeof(char);
+    
+#ifdef DEBUG_PADDED_ARRAY  
+  print("data_msg:load_data");
+#endif  
   return pc;
 }
 
@@ -367,27 +501,227 @@ void DataMsg::update (Data * data, bool is_local)
 
   // Updated padded array
 
-  const int m = m3_pf_[0]*m3_pf_[1]*m3_pf_[2];
-  if (m>0) {
-    const int mx(m3_pf_[0]), my(m3_pf_[1]), mz(m3_pf_[2]);
-    const int ixm(im3_pf_[0]), iym(im3_pf_[1]), izm(im3_pf_[2]);
-    const int ixp(ip3_pf_[0]), iyp(ip3_pf_[1]), izp(ip3_pf_[2]);
-    const int ifx(if3_pf_[0]), ify(if3_pf_[1]), ifz(if3_pf_[2]);
-
-    auto array = data->padded_face_array_allocate (ifx,ify,ifz, mx,my,mz);
+  const int na = n3_pf_[0]*n3_pf_[1]*n3_pf_[2];
+#ifdef DEBUG_PADDED_ARRAY  
+  CkPrintf ("DEBUG_PROLONG_DATA_MSG TRACE na %s:%d %d\n",__FILE__,__LINE__,na);
+#endif  
+  if (na>0) {
+#ifdef DEBUG_PADDED_ARRAY  
+    CkPrintf ("DEBUG %s DataMsg::update %p ma3 %d %d %d\n",
+              tag_,(void *)this,ma3_pf_[0],ma3_pf_[1],ma3_pf_[2]);
+    CkPrintf ("DEBUG %s DataMsg::update %p n3 %d %d %d\n",
+              tag_,(void *)this,n3_pf_[0],n3_pf_[1],n3_pf_[2]);
+    CkPrintf ("DEBUG %s DataMsg::update %p iam3 %d %d %d\n",
+              tag_,(void *)this,iam3_pf_[0],iam3_pf_[1],iam3_pf_[2]);
+    CkPrintf ("DEBUG %s DataMsg::update %p if3 %d %d %d\n",
+              tag_,(void *)this,if3_pf_[0],if3_pf_[1],if3_pf_[2]);
+#endif
+    const int mx  ( ma3_pf_[0]),  my( ma3_pf_[1]),  mz( ma3_pf_[2]);
+    const int nx  (  n3_pf_[0]),  ny(  n3_pf_[1]),  nz(  n3_pf_[2]);
+    const int iaxm(iam3_pf_[0]),iaym(iam3_pf_[1]),iazm(iam3_pf_[2]);
+    const int ifx ( if3_pf_[0]), ify( if3_pf_[1]), ifz( if3_pf_[2]);
+    const int na(mx*my*mz);
+    const int nb(nx*ny*nz);
     
-    for (int iz=izm; iz<izp; iz++) {
-      for (int iy=iym; iy<iyp; iy++) {
-        for (int ix=ixm; ix<ixp; ix++) {
-          int i = ix + mx*(iy + my*iz);
-          array[i] = padded_face_[i];
+    const int nf = padded_face_field_list_.size();
+#ifdef DEBUG_PADDED_ARRAY  
+    CkPrintf ("DEBUG_PROLONG_DATA_MSG TRACE nf %s:%d %d\n",__FILE__,__LINE__,nf);
+#endif    
+
+#ifdef DEBUG_PADDED_ARRAY
+    CkPrintf ("DEBUG_PROLONG_DATA_MSG data %p padded_face_array_allocate %d %d %d  %d*%d*%d*%d\n",
+              (void *)data,ifx,ify,ifz,nf,mx,my,mz);
+              
+#endif
+
+    cello_float * padded_array =
+      data->field_data()->padded_array_allocate (ifx,ify,ifz, nf, mx,my,mz);
+#ifdef DEBUG_PADDED_ARRAY  
+    CkPrintf ("DEBUG_PADDED_ARRAY_ALLOCATE data %p %p\n",data,&padded_array[0]);
+#endif    
+    
+    const int ia_start = iaxm + mx*(iaym + my*iazm);
+
+#ifdef DEBUG_PADDED_ARRAY  
+    CkPrintf ("DEBUG_PROLONG_DATA_MSG padded_face_.size() %d [%d  %d %d %d]\n",
+              padded_face_.size(),nf,nx,ny,nz);
+    CkPrintf ("DEBUG_PROLONG_DATA_MSG padded_array %p [%d  %d %d %d]\n",
+              padded_array,nf,mx,my,mz);
+#endif    
+    for (int i_f=0; i_f<nf; i_f++) {
+#ifdef DEBUG_PADDED_ARRAY  
+      CkPrintf ("DEBUG_PROLONG_DATA_MSG padded_field_list[%d] = %d\n",
+                i_f,padded_field_list_[i_f]);
+#endif      
+      double sum_a=0.0,sum_b=0.0;
+      int count=0;
+      const int ia0 (na*i_f);
+#ifdef TRACE_PADDED_ARRAY_VALUES
+      if (i_f == 0) {
+        CkPrintf ("PADDED_ARRAY_VALUES %s:%d tag %s i_f %d update array %p padded_array before\n",
+                  __FILE__,__LINE__,tag_,i_f,(void*)&padded_array[ia0]);
+        for (int iz=0; iz<mz; iz++) {
+          for (int iy=0; iy<my; iy++) {
+            CkPrintf ("PADDED_ARRAY_VALUES update array pre tag %s i_f %d %p %d %d %d: ",
+                      tag_,i_f,(void*)&padded_array[ia0],0,iy,iz);
+            for (int ix=0; ix<mx; ix++) {
+              int i = ia0+ix+ mx*(iy+ my*iz);
+              CkPrintf (" %6.3g",padded_array[i]);
+            }
+            CkPrintf ("\n");
+          }
         }
       }
+#endif      
+      
+      const int ib0 (nb*i_f);
+      for (int iz=0; iz<nz; iz++) {
+        for (int iy=0; iy<ny; iy++) {
+          for (int ix=0; ix<nx; ix++) {
+            int ia = ia0 + (ix + mx*(iy + my*iz) + ia_start);
+            int ib = ib0 + ix + nx*(iy + ny*iz);
+            ASSERT6("DataMsg::update",
+                    "padded_array invalid access 0 <= %d (%d : %d %d %d) < %ld",
+                    ib,i_f,ix,iy,iz,padded_face_.size(),
+                    0 <= ib && ib < padded_face_.size());
+            padded_array[ia] = padded_face_[ib];
+#ifdef DEBUG_PADDED_ARRAY  
+            CkPrintf ("DEBUG_PADDED_ARRAY write %d %d %d [%d] = %g\n",
+                      ifx,ify,ifz,ia,padded_array[ia]);
+#endif            
+            sum_a += padded_array[ia];
+            sum_b += padded_face_[ib];
+            ++count;
+            ASSERT8("DataMsg::update",
+                    "nan in sum (%d : %d %d %d) / (%d : %d %d %d)",
+                    i_f,ix,iy,iz,nf,nx,ny,nz,
+                    (sum_a == sum_a));
+          }
+        }
+      }
+#ifdef DEBUG_TRACE_SUMS
+    {
+      int count = 0;
+      double sum = 0.0;
+      int zero = 0;
+      for (int iz=0; iz<nz; iz++) {
+        for (int iy=0; iy<ny; iy++) {
+          for (int ix=0; ix<nx; ix++) {
+            int i=ib0+ix+nx*(iy+ny*iz);
+            count++;
+            sum += padded_face_[i];
+            if (padded_face_[i] == 0) ++zero;
+          }
+        }
+      }
+      CkPrintf ("DEBUG_TRACE_SUM recv buffer [%d %d %d] n3 %d %d %d i_f %d %s %d %d %8.4g\n",
+                if3_pf_[0],if3_pf_[1],if3_pf_[2],nx,ny,nz,
+                i_f,tag_,zero,count,sum);
     }
-#ifdef DEBUG_PADDED_ARRAY
-    CkPrintf ("DEBUG DataMsg::update m3 %d %d %d\n",
-              m3_pf_[0],m3_pf_[1],m3_pf_[2]);
+    {
+      int count = 0;
+      double sum = 0.0;
+      int zero = 0;
+      for (int iz=0; iz<mz; iz++) {
+        for (int iy=0; iy<my; iy++) {
+          for (int ix=0; ix<mx; ix++) {
+            int i=ia0+ix+mx*(iy+my*iz);
+            count++;
+            sum += padded_array[i];
+            if (padded_array[i] == 0) ++zero;
+          }
+        }
+      }
+      CkPrintf ("DEBUG_TRACE_SUM recv array extra [%d %d %d] %d n3 %d %d %d i_f %d A %p F %p %d %d %8.4g\n",
+                if3_pf_[0],if3_pf_[1],if3_pf_[2],ia0,mx,my,mz,i_f,
+                &padded_array[ia0],data->field_data(),zero,count,sum);
+    }
+#endif    
+#ifdef TRACE_PADDED_ARRAY_VALUES
+      if (i_f == 0) {
+        CkPrintf ("PADDED_ARRAY_VALUES %s:%d tag %s i_f %d update %p padded_face_\n",
+                  __FILE__,__LINE__,tag_,i_f,&padded_face_[ib0]);
+        for (int iz=0; iz<nz; iz++) {
+          for (int iy=0; iy<ny; iy++) {
+            CkPrintf ("PADDED_ARRAY_VALUES update buffer post tag %s i_f %d %p %d %d %d: ",
+                      tag_,i_f,&padded_face_[ib0],0,iy,iz);
+            for (int ix=0; ix<nx; ix++) {
+              int i = ib0 + ix+ nx*(iy+ ny*iz);
+              CkPrintf (" %6.3g",padded_face_[i]);
+            }
+            CkPrintf ("\n");
+          }
+        }
+        CkPrintf ("PADDED_ARRAY_VALUES %s:%d update %p padded_array after %d %d %d \n",
+                  __FILE__,__LINE__,&padded_array[ia0],mx,my,mz);
+        for (int iz=0; iz<mz; iz++) {
+          for (int iy=0; iy<my; iy++) {
+            CkPrintf ("PADDED_ARRAY_VALUES update array post tag %s i_f %d %p %d %d %d: ",
+                      tag_,i_f,&padded_array[ia0],0,iy,iz);
+            for (int ix=0; ix<mx; ix++) {
+              int i = ia0 + ix+ mx*(iy+ my*iz);
+              CkPrintf (" %6.3g",padded_array[i]);
+            }
+            CkPrintf ("\n");
+          }
+        }
+      }
 #endif
+#ifdef DEBUG_PADDED_ARRAY    
+      CkPrintf ("TRACE_PADDED_ARRAY DataMsg::update i_f %d ia0 %d %p sum %g (total %g)\n",
+                i_f,ia0,&padded_array[ia0],
+                cello::sum(&padded_array[ia0],mx,my,mz,iaxm,iaym,iazm,nx,ny,nz),
+                cello::sum(&padded_array[ia0],mx,my,mz,0,0,0,mx,my,mz));
+#endif    
+#ifdef DEBUG_PADDED_ARRAY  
+      CkPrintf ("DEBUG_PROLONG_DATA_MSG field %d/%d sum array %g sum face %g count %d\n",
+                i_f,nf,sum_a,sum_b,count);
+#endif      
+    }
   }
+#ifdef DEBUG_PADDED_ARRAY  
+  print("data_msg:update");
+#endif  
 
+}
+
+//----------------------------------------------------------------------
+
+void DataMsg::print (const char * message) const
+{
+#ifdef DEBUG_PADDED_ARRAY  
+  CkPrintf ("%s DATA_MSG %p\n",  message,(void *)this);
+  CkPrintf ("%s DATA_MSG field_face_    = %p\n",
+            message,(void*)field_face_);
+  CkPrintf ("%s DATA_MSG field_data_    = %p\n",
+            message,(void*)field_data_);
+  CkPrintf ("%s DATA_MSG particle_data_ = %p\n",
+            message,(void*)particle_data_);
+  CkPrintf ("%s DATA_MSG particle_data_delete_ = %d\n",
+            message,particle_data_delete_?1:0);
+  CkPrintf ("%s DATA_MSG |face_fluxes_list_| = %lu\n",
+            message,face_fluxes_list_.size());
+  CkPrintf ("%s DATA_MSG |face_fluxes_delete_| = %lu\n",
+            message,face_fluxes_delete_.size());
+  CkPrintf ("%s DATA_MSG field_face_delete_ = %d\n",
+            message,field_face_delete_?1:0);
+  CkPrintf ("%s DATA_MSG field_data_delete_ = %d\n",
+            message,field_data_delete_?1:0);
+  CkPrintf ("%s DATA_MSG padded_face_.sum = %f\n", message,
+            std::accumulate(padded_face_.begin(),padded_face_.end(),0.0));
+  CkPrintf ("%s DATA_MSG padded_face_field_list_.sum = %d\n", message,
+            std::accumulate
+            (padded_face_field_list_.begin(),
+             padded_face_field_list_.end(),0));
+  CkPrintf ("%s DATA_MSG padded ma3_pf_   = %d %d %d\n",
+            message,ma3_pf_[0],ma3_pf_[1],ma3_pf_[2]);
+  CkPrintf ("%s DATA_MSG padded n3_pf_   = %d %d %d\n",
+            message,n3_pf_[0],n3_pf_[1],n3_pf_[2]);
+  CkPrintf ("%s DATA_MSG padded iam3_pf_   = %d %d %d\n",
+            message,iam3_pf_[0],iam3_pf_[1],iam3_pf_[2]);
+  CkPrintf ("%s DATA_MSG padded if3_pf_   = %d %d %d\n",
+            message,if3_pf_[0],if3_pf_[1],if3_pf_[2]);
+    
+  fflush(stdout);
+#endif  
 }

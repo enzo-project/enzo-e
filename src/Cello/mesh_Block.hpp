@@ -603,15 +603,21 @@ protected:
   /// Handle the special case of refresh on interpolated faces
   /// requiring extra padding
   int refresh_load_extra_face_
-  (Refresh refresh, Index index_neighbor,
+  (Refresh refresh,  int refresh_type,
+   Index index_neighbor,
    int level, int level_face, int if3[3],int ic3[3]);
 
   /// Send padded array of fields to neighbor for interpolations whose
   /// domains overlap multiple blocks
   void refresh_extra_send_
-  (Refresh & refresh, Index index_neighbor, int if3[3],
+  (Refresh & refresh,
+   int refresh_type,
+   Index index_neighbor, int if3[3],
    int ma3[3], int iam3[3], int iap3[3], int ifm3[3], int ifp3[3],
    Field field);
+
+  /// Apply prolongation operations on Block
+  void refresh_extra_apply_(Refresh * refresh);
 
   /// Scatter particles in ghost zones to neighbors
   int refresh_load_particle_faces_ (Refresh * refresh);

@@ -25,27 +25,7 @@ public: // interface
 
   /// Constructor of uninitialized FieldFace
 
-  FieldFace (int rank) throw()
-    : rank_(rank),
-      refresh_type_(refresh_unknown),
-      prolong_(NULL),
-      restrict_(NULL),
-      refresh_(NULL),
-      new_refresh_(false),
-      box_()
-  {
-#ifdef DEBUG_FIELD_FACE    
-    CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",
-	      CkMyPe(),__FILE__,__LINE__,this);
-#endif    
-    ++counter[cello::index_static()]; 
-
-    for (int i=0; i<3; i++) {
-      face_[i] = 0;
-      child_[i] = 0;
-    }
-
-  }
+  FieldFace (int rank) throw();
 
   /// Destructor
   ~FieldFace() throw();
@@ -206,7 +186,10 @@ private: // functions
    const int i3[3], const int n3[3], const int m3[3]);
 
   /// Initialize the associated Box object box_ using current attributes
-  void set_box_();
+  void set_box_(Box * box);
+
+  /// Adjust box for accumulating values instead of assigning them
+  void box_adjust_accumulate_ (Box * box, int accumulate, int g3[3]);
 
 private: // attributes
 
@@ -237,8 +220,6 @@ private: // attributes
 
   /// Whether refresh object should be deleted in destructor
   bool new_refresh_;
-
-  Box box_;
 };
 
 #endif /* DATA_FIELD_FACE_HPP */

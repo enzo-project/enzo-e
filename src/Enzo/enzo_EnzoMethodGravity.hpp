@@ -78,7 +78,7 @@ public: // interface
   { return "gravity"; }
 
   /// Compute maximum timestep for this method
-  virtual double timestep (Block * block) const throw() ;
+  virtual double timestep (Block * block) throw() ;
 
   /// Compute accelerations from potential and exit solver
   void compute_accelerations (EnzoBlock * enzo_block) throw();
@@ -90,7 +90,7 @@ public: // interface
   void compute_ (EnzoBlock * enzo_block) throw();
 
   /// Compute maximum timestep for this method
-  double timestep_ (Block * block) const throw() ;
+  double timestep_ (Block * block) throw() ;
   
 protected: // attributes
 

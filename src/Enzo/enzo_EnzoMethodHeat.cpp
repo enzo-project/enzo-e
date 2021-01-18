@@ -57,7 +57,7 @@ void EnzoMethodHeat::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodHeat::timestep ( Block * block ) const throw()
+double EnzoMethodHeat::timestep ( Block * block ) throw()
 {
   // initialize_(block);
 
@@ -83,7 +83,7 @@ double EnzoMethodHeat::timestep ( Block * block ) const throw()
 
 //======================================================================
 
-void EnzoMethodHeat::compute_ (Block * block,enzo_float * Unew) const throw()
+void EnzoMethodHeat::compute_ (Block * block,enzo_float * Unew) throw()
 {
   Data * data = block->data();
   Field field   =      data->field();
@@ -114,7 +114,7 @@ void EnzoMethodHeat::compute_ (Block * block,enzo_float * Unew) const throw()
 
   const int rank = ((mz == 1) ? ((my == 1) ? 1 : 2) : 3);
 
-  const double dt = timestep(block);
+  double dt = timestep(block);
 
   enzo_float * U = new enzo_float [m];
   for (int i=0; i<m; i++) U[i]=Unew[i];

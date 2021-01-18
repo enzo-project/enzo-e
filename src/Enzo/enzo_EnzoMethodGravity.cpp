@@ -18,6 +18,8 @@
 // #define DEBUG_COPY_B
 // #define DEBUG_COPY_POTENTIAL
 
+#define NEW_TIMESTEP
+
 //----------------------------------------------------------------------
 
 EnzoMethodGravity::EnzoMethodGravity
@@ -218,14 +220,14 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodGravity::timestep (Block * block) const throw()
+double EnzoMethodGravity::timestep (Block * block) throw()
 {
   return timestep_(block);
 }
 
 //----------------------------------------------------------------------
 
-double EnzoMethodGravity::timestep_ (Block * block) const throw()
+double EnzoMethodGravity::timestep_ (Block * block) throw()
 {
   Field field = block->data()->field();
 
@@ -234,29 +236,63 @@ double EnzoMethodGravity::timestep_ (Block * block) const throw()
   field.dimensions (0,&mx,&my,&mz);
   field.ghost_depth(0,&gx,&gy,&gz);
 
+#ifdef NEW_TIMESTEP  
+  enzo_float * a3[3] =
+    { (enzo_float*) field.values ("acceleration_x"),
+      (enzo_float*) field.values ("acceleration_y"),
+      (enzo_float*) field.values ("acceleration_z") };
+#else
   enzo_float * ax = (enzo_float*) field.values ("acceleration_x");
   enzo_float * ay = (enzo_float*) field.values ("acceleration_y");
   enzo_float * az = (enzo_float*) field.values ("acceleration_z");
+#endif  
 
+  const int rank = cello::rank();
+  
   enzo_float dt = std::numeric_limits<enzo_float>::max();
 
+#ifdef NEW_TIMESTEP  
+  double h3[3];
+  block->cell_width(h3,h3+1,h3+2);
+#else  
   double hx,hy,hz;
   block->cell_width(&hx,&hy,&hz);
+#endif  
   
   EnzoPhysicsCosmology * cosmology = enzo::cosmology();
   
   if (cosmology) {
-    const int rank = cello::rank();
     enzo_float cosmo_a = 1.0;
     enzo_float cosmo_dadt = 0.0;
     double dt   = block->dt();
     double time = block->time();
     cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*dt);
+#ifdef NEW_TIMESTEP  
+    if (rank >= 1) h3[0]*=cosmo_a;
+    if (rank >= 2) h3[1]*=cosmo_a;
+    if (rank >= 3) h3[2]*=cosmo_a;
+#else
     if (rank >= 1) hx*=cosmo_a;
     if (rank >= 2) hy*=cosmo_a;
     if (rank >= 3) hz*=cosmo_a;
+#endif 
   }
 
+#ifdef NEW_TIMESTEP  
+  for (int axis=0; axis<rank; axis++) {
+    if (a3[axis]) {
+      for (int iz=gz; iz<mz-gz; iz++) {
+        for (int iy=gy; iy<my-gy; iy++) {
+          for (int ix=gx; ix<mx-gx; ix++) {
+            int i=ix + mx*(iy + iz*my);
+            enzo_float dt_temp = sqrt(h3[axis]/fabs(a3[axis][i])+1e-20);
+            dt = std::min(enzo_float(dt),dt_temp);
+          }
+        }
+      }
+    }
+  }
+#else  
   if (ax) {
     for (int iz=gz; iz<mz-gz; iz++) {
       for (int iy=gy; iy<my-gy; iy++) {
@@ -270,8 +306,8 @@ double EnzoMethodGravity::timestep_ (Block * block) const throw()
   if (ay) {
     for (int iz=gz; iz<mz-gz; iz++) {
       for (int iy=gy; iy<my-gy; iy++) {
-	for (int ix=gx; ix<mx-gx; ix++) {
-	  int i=ix + mx*(iy + iz*my);
+        for (int ix=gx; ix<mx-gx; ix++) {
+          int i=ix + mx*(iy + iz*my);
 	  dt = std::min(enzo_float(dt),enzo_float(sqrt(hy/(fabs(ay[i]+1e-20)))));
 	}
       }
@@ -280,13 +316,13 @@ double EnzoMethodGravity::timestep_ (Block * block) const throw()
   if (az) {
     for (int iz=gz; iz<mz-gz; iz++) {
       for (int iy=gy; iy<my-gy; iy++) {
-	for (int ix=gx; ix<mx-gx; ix++) {
-	  int i=ix + mx*(iy + iz*my);
-	  dt = std::min(enzo_float(dt),enzo_float(sqrt(hz/(fabs(az[i]+1e-20)))));
-	}
+        for (int ix=gx; ix<mx-gx; ix++) {
+          int i=ix + mx*(iy + iz*my);
+          dt = std::min(enzo_float(dt),enzo_float(sqrt(hz/(fabs(az[i]+1e-20)))));
+        }
       }
     }
   }
-
+#endif
   return 0.5*dt;
 }
