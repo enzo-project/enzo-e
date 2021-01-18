@@ -171,6 +171,7 @@ public: // interface
       initial_feedback_test_star_mass(),
       initial_feedback_test_temperature(),
       initial_feedback_test_from_file(),
+      initial_feedback_test_metal_fraction(),
 
       // EnzoInitialInclinedWave
       initial_inclinedwave_alpha(0.0),
@@ -571,6 +572,7 @@ public: // attributes
   double                     initial_feedback_test_star_mass;
   double                     initial_feedback_test_temperature;
   bool                       initial_feedback_test_from_file;
+  double                     initial_feedback_test_metal_fraction;
 
   /// EnzoInitialIsolatedGalaxy
   double                     initial_IG_center_position[3];

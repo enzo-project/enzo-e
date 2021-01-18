@@ -2,7 +2,7 @@
 
 /// @file	enzo_EnzoInitialIsolatedGalaxy.cpp
 /// @author	Andrew Emerick (aemerick11@gmail.com)
-/// @date	Tue May 8
+/// @date	Tue May 8 2018
 /// @brief	Implementation of an isolated galaxy simulation
 ///
 /// This sets up an isolated galaxy with either an analytic
@@ -430,7 +430,7 @@ void EnzoInitialIsolatedGalaxy::InitializeExponentialGasDistribution(Block * blo
 
         // compute the disk density (in code units)
         double disk_density = this->gauss_mass(rho_zero, x/enzo_units->length(), y/enzo_units->length(),
-                                              z/enzo_units->length(), hx) / (hx*hx*hx);
+                                              z/enzo_units->length(), hx) / (hx*hy*hz);
 
 
         if ((this->gas_halo_density_ * this->gas_halo_temperature_ > disk_density*this->disk_temperature_) &&
@@ -661,11 +661,11 @@ void EnzoInitialIsolatedGalaxy::InitializeGasFromParticles(Block * block){
     // corresponding 1D grid position
     int i  = INDEX(ix,iy,iz,mx,my);
 
-    d[i]    = d[i]*iflag[i] + (particleIcMass[ipt][ip] / (hx*hx*hx));
+    d[i]    = d[i]*iflag[i] + (particleIcMass[ipt][ip] / (hx*hy*hz));
 
     // add momentum
     for (int dim = 0; dim < 3; dim++){
-      v3[dim][i] = particleIcMass[ipt][ip] * particleIcVelocity[ipt][dim][ip] / (hx*hx*hx);
+      v3[dim][i] = particleIcMass[ipt][ip] * particleIcVelocity[ipt][dim][ip] / (hx*hy*hz);
     }
 
     iflag[i] = 1;
@@ -694,7 +694,7 @@ void EnzoInitialIsolatedGalaxy::InitializeGasFromParticles(Block * block){
     }
   } // end loop over grid adjusting vel and energy
 
-  // finally, average velocity of cells adjcent to deposit cells
+  // finally, average velocity of cells adjacent to deposit cells
   // to reduce shocks.
   int xo = 1;
   int yo = mx;
@@ -723,7 +723,7 @@ void EnzoInitialIsolatedGalaxy::InitializeGasFromParticles(Block * block){
                         iflag[yh]*d[yh] + iflag[yl]*d[yl] +
                         iflag[zh]*d[zh] + iflag[zl]*d[zl];
 
-        // if adjcent to deposit cells, set velocity to
+        // if adjacent to deposit cells, set velocity to
         // mass-weighted average of deposited cells and
         // set energies to disk energy (these cells are within the
         // disk but are 'empty' regions)

@@ -84,6 +84,7 @@ EnzoConfig::EnzoConfig() throw ()
   initial_feedback_test_star_mass(),
   initial_feedback_test_temperature(),
   initial_feedback_test_from_file(),
+  initial_feedback_test_metal_fraction(0.01),
   // EnzoInitialInclinedWave
   initial_inclinedwave_alpha(0.0),
   initial_inclinedwave_beta(0.0),
@@ -456,6 +457,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_feedback_test_star_mass;
   p | initial_feedback_test_temperature;
   p | initial_feedback_test_from_file;
+  p | initial_feedback_test_metal_fraction;
 
   PUParray(p, initial_IG_center_position,3);
   PUParray(p, initial_IG_bfield,3);
@@ -1055,6 +1057,9 @@ void EnzoConfig::read(Parameters * p) throw()
 
   initial_feedback_test_from_file = p->value_logical
     ("Initial:feedback_test:from_file", false);
+
+  initial_feedback_test_metal_fraction = p->value_float
+    ("Initial:feedback_test:metal_fraction", 0.01);
 
   method_check_gravity_particle_type = p->value_string
     ("Method:check_gravity:particle_type","dark");

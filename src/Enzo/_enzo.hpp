@@ -163,8 +163,6 @@ extern "C" {
 
 #include "enzo_EnzoUnits.hpp"
 
-// #include "enzo_EnzoPhysicalConstants.hpp"
-
 #include "enzo_EnzoFactory.hpp"
 
 #include "enzo_EnzoSimulation.hpp"

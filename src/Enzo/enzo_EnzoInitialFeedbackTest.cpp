@@ -137,7 +137,7 @@ void EnzoInitialFeedbackTest::enforce_block
          for (int dim = 0; dim < 3; dim ++)
              te[i] = ge[i] + 0.5 * v3[dim][i] * v3[dim][i];
 
-         metal[i] = 0.01 * d[i]; // half solar
+         metal[i] = enzo_config->initial_feedback_test_metal_fraction * d[i];
 
       }
     }

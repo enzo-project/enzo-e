@@ -193,7 +193,7 @@ void EnzoInitialBurkertBodenheimer::enforce_block
       for (int kx=kxm; kx<kxp; kx++) {
 	double xc = dxm + hxa*(0.5+kx);
 
-	// (explosion center xc,yc,zc)
+	// (cloud center xc,yc,zc)
 
 	for (int iz=0; iz<mz; iz++) {
 	  double z = bzm + (iz - gz + 0.5)*hz - zc;

@@ -69,7 +69,7 @@
       field_list = ["metal_density"]; # needed for proper advection (should get auto flagged as such if not specified here)
     }
     
-    derived { # flag these to ensure they are computed properly on output (*should* work without having to speiciy here)
+    derived { # flag these to ensure they are computed properly on output (*should* work without having to specify here)
       field_list = ["temperature","pressure"];
     }
 

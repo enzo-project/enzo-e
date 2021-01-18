@@ -16,8 +16,6 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
 {
   if (NumberOfBaryonFields > 0) {
  
-    //const enzo_float pi = 3.14159;
- 
     /* Compute cosmology factors. */
  
     enzo_float cosmo_a = 1.0, cosmo_dadt = 0.0;
