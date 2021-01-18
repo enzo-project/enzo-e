@@ -1,5 +1,6 @@
 Import('env')
 Import('parallel_run')
+Import('parallel_arg')
 Import('serial_run')
 Import('ip_charm')
 
