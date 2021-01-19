@@ -21,8 +21,7 @@ if (charm_args != ""): parallel_arg = charm_args
 
 # Define a test for running unit tests
 
-date_cmd = 'echo "-------JR1------------"; echo "CHARM ARGS = $charm_args"; date +"%Y-%m-%d %H:%M:%S";'
-'echo "test test"'
+date_cmd = 'echo "-------------------"; date +"%Y-%m-%d %H:%M:%S";'
 hdf5_to_png  = Builder(action = 'test/cello-h5topng.sh $ARGS; mv *.png test');
 copy_bin     = Builder(action = "cp $SOURCE $ARGS");
 run_serial   = Builder(action = "$RMIN; echo $TARGET > test/STATUS;" + date_cmd + serial_run   +  "$SOURCE $ARGS> $TARGET 2>&1; $CPIN; $COPY")
