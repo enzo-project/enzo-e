@@ -15,7 +15,7 @@ env['RMIN'] = 'rm -f parameters.out'
 env['clocal_cmd'] = '++local'
 
 
-date_cmd = 'echo $TARGET > test/STATUS; echo "-------JR------------"; date +"%Y-%m-%d %H:%M:%S";'
+date_cmd = 'echo $TARGET > test/STATUS; echo "-------------------"; date +"%Y-%m-%d %H:%M:%S";'
 
 run_balance_none = Builder(action = "$RMIN; " + date_cmd + parallel_run + "  $SOURCE  $clocal_cmd $ARGS  > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunBalanceNone' : run_balance_none } )

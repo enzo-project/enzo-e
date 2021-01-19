@@ -174,7 +174,6 @@ if [ $target == "test" ]; then
    grep -rI "^ pass"       $subdir/*.unit > $dir/pass.$configure
    echo $dir
    echo $subdir
-   echo "done with greping...."
    f=`wc -l < $dir/fail.$configure`
    i=`wc -l < $dir/incomplete.$configure`
    p=`wc -l < $dir/pass.$configure`
