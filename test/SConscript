@@ -55,91 +55,91 @@ SConscript('Balance/SConscript')
 # DATA COMPONENT         
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
-#SConscript('DataComponent/SConscript')
+SConscript('DataComponent/SConscript')
 #----------------------------------------------------------------------
 
 #----------------------------------------------------------------------
 # ERROR COMPONENT
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
-#SConscript('ErrorComponent/SConscript')
+SConscript('ErrorComponent/SConscript')
 #----------------------------------------------------------------------
 
 #----------------------------------------------------------------------
 #INITIAL COMPONENT
 #----------------------------------------------------------------------
-#SConscript('InitialComponent/SConscript')
+SConscript('InitialComponent/SConscript')
 
 #----------------------------------------------------------------------
 # IOCOMPONENT
 #----------------------------------------------------------------------
-#SConscript('IOComponent/SConscript')
+SConscript('IOComponent/SConscript')
 
 #----------------------------------------------------------------------
 # MEMORY COMPONENT
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
-#SConscript('MemoryComponent/SConscript')
+SConscript('MemoryComponent/SConscript')
 
 #----------------------------------------------------------------------
 # METHOD Gravity TESTS
 #----------------------------------------------------------------------
-#SConscript('MethodGravity/SConscript')
+SConscript('MethodGravity/SConscript')
 
 #----------------------------------------------------------------------
 # METHOD COSMOLOGY TESTS
 #----------------------------------------------------------------------
-#SConscript('MethodCosmology/SConscript')
+SConscript('MethodCosmology/SConscript')
 
 #----------------------------------------------------------------------
 # METHOD HEAT TESTS
 #----------------------------------------------------------------------
-#SConscript('MethodHeat/SConscript')
+SConscript('MethodHeat/SConscript')
 
 #----------------------------------------------------------------------
 # SERIAL RESTART
 #----------------------------------------------------------------------
-#SConscript('Restart/SConscript')
+SConscript('Restart/SConscript')
 
 #----------------------------------------------------------------------
 # BOUNDARY CONDITIONS
 #----------------------------------------------------------------------
-#SConscript('BoundaryConditions/SConscript')
+SConscript('BoundaryConditions/SConscript')
 
 #----------------------------------------------------------------------
 # MESH GENERATION
 #----------------------------------------------------------------------
-#SConscript('MeshGeneration/SConscript')
+SConscript('MeshGeneration/SConscript')
 
 #----------------------------------------------------------------------
 # AMRPPM
 #----------------------------------------------------------------------
-#SConscript('AmrPpm/SConscript')
+SConscript('AmrPpm/SConscript')
 
 #----------------------------------------------------------------------
 #PERFORMANCE
 #----------------------------------------------------------------------
-#SConscript('Performance/SConscript')
+SConscript('Performance/SConscript')
 
 #----------------------------------------------------------------------
 # OUTPUT
 #----------------------------------------------------------------------
-#SConscript('Output/SConscript')
+SConscript('Output/SConscript')
 
 #----------------------------------------------------------------------
 # PARTICLES
 #----------------------------------------------------------------------
-#SConscript('Particles/SConscript')
+SConscript('Particles/SConscript')
 
 #----------------------------------------------------------------------
 # CELLO
 #----------------------------------------------------------------------
-#SConscript('Cello/SConscript')
+SConscript('Cello/SConscript')
 
 #----------------------------------------------------------------------
 # UnitsComponent
 #----------------------------------------------------------------------
-#SConscript('UnitsComponent/SConscript')
+SConscript('UnitsComponent/SConscript')
 
 
 
