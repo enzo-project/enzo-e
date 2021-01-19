@@ -1,6 +1,5 @@
 Import('env')
 Import('parallel_run')
-Import('parallel_arg')
 Import('serial_run')
 Import('ip_charm')
 Import('bin_path')
@@ -33,7 +32,7 @@ run_balance_rand_cent = Builder(action = "$RMIN; " + date_cmd + parallel_run + "
 env.Append(BUILDERS = { 'RunBalanceRandCent' : run_balance_rand_cent } )
 env_mv_rand_cent  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/RandCent; mv `ls *.png *.h5` ' + test_path + '/Balance/RandCent')
 
-run_balance_refine = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE   $clocal_cmd $clocal_cmd $ARGS +balancer RefineLB > $TARGET 2>&1; $CPIN; $COPY")
+run_balance_refine = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE  $clocal_cmd $ARGS +balancer RefineLB > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunBalanceRefine' : run_balance_refine } )
 env_mv_refine  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/Refine; mv `ls *.png *.h5` ' + test_path + '/Balance/Refine')
 

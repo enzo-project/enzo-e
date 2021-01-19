@@ -237,10 +237,7 @@ if [ $target == "test" ]; then
     file_started=test/runs_started.$configure
     file_completed=test/runs_completed.$configure
 
-    ls test/*/test_*.unit 
     ls test/*/test_*.unit                   > $file_attempted
-    head test/*/test_*.unit
-    grep  "BEGIN" test/*/test_*.unit
     grep -l "BEGIN" test/*/test_*.unit      > $file_started
     grep -l "END CELLO"  test/*/test_*.unit > $file_completed
 
