@@ -6,7 +6,7 @@ Import('ip_charm')
 
 Import('bin_path')
 Import('test_path')
-
+import os
 #----------------------------------------------------------------------
 # defines
 #----------------------------------------------------------------------
@@ -14,7 +14,11 @@ Import('test_path')
 env['CPIN'] = 'touch parameters.out; mv parameters.out ${TARGET}.in'
 env['RMIN'] = 'rm -f parameters.out'
 
-date_cmd = 'echo $TARGET > test/STATUS; echo "-------JR------------"; echo "CHARM ARGS = $charm_args"; date +"%Y-%m-%d %H:%M:%S";'
+charm_args = os.getenv('CHARM_ARGS','')
+if (charm_args != ""): parallel_arg = charm_args
+charm_args_local = 'echo ++local'
+
+date_cmd = 'echo $TARGET > test/STATUS; echo "-------JR------------"; echo "CHARM ARGS = $charm_args"; echo "parellel_run = $parallel_run"; echo "charm_args_local = $charm_args_local"; echo "TARGET = $TARGET"; date +"%Y-%m-%d %H:%M:%S";'
 run_balance_none = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunBalanceNone' : run_balance_none } )
 env_mv_none  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/None; mv `ls *.png *.h5` ' + test_path + '/Balance/None')
