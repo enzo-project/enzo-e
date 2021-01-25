@@ -168,11 +168,12 @@ if [ $target == "test" ]; then
     rm -f              test/STOP
 
    # count failures, incompletes, and passes
-
-   grep "^ FAIL"       $dir/*/*unit > $dir/fail.$configure
-   grep "^ incomplete" $dir/*/*unit > $dir/incomplete.$configure
-   grep "^ pass"       $dir/*/*unit > $dir/pass.$configure
-
+   subdir=test/*
+   grep -rI "^ FAIL"       $subdir/*.unit > $dir/fail.$configure
+   grep -rI "^ incomplete" $subdir/*.unit > $dir/incomplete.$configure
+   grep -rI "^ pass"       $subdir/*.unit > $dir/pass.$configure
+   echo $dir
+   echo $subdir
    f=`wc -l < $dir/fail.$configure`
    i=`wc -l < $dir/incomplete.$configure`
    p=`wc -l < $dir/pass.$configure`
@@ -184,8 +185,8 @@ if [ $target == "test" ]; then
    printf "%s %s %-12s %-6s %-6s %s %-2s %s %-2s %s %-4s %s %-2s\n" \
         $line | tee $log
 
-   for test in $dir/*unit; do
-
+   for test in $subdir/*.unit; do
+      echo $test
       test_begin=`grep "UNIT TEST BEGIN" $test | wc -l`
       test_end=`grep "UNIT TEST END"   $test | wc -l`
 
@@ -197,7 +198,7 @@ if [ $target == "test" ]; then
          printf "$line" >> $log
       fi
    done
-
+   
    echo "$stop" > test/STOP
 
 fi
