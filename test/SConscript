@@ -49,7 +49,7 @@ SConscript('Balance/SConscript')
 #----------------------------------------------------------------------
 # ARRAY COMPONENT         
 #----------------------------------------------------------------------
-#env.RunSerial('test_CelloArray.unit',bin_path + '/test_CelloArray')
+SConscript('ArrayComponent/SConscript')
 
 #----------------------------------------------------------------------
 # DATA COMPONENT         

@@ -591,7 +591,7 @@ class VariableAssignmentTests{
   // these are tests that check that check the assignments of arrays to
   // variables.
 
-  template<template<typename, std::size_t> typename Builder>
+  template<template<typename, std::size_t> class Builder>
   void test_assignment_(){
     // vector used to hold expected results (the contents of this vector will
     // be updated throughout this test
@@ -728,8 +728,8 @@ class VariableAssignmentTests{
 
   }
 
-  template<template<typename, std::size_t> typename Builder1,
-           template<typename, std::size_t> typename Builder2>
+  template<template<typename, std::size_t> class Builder1,
+           template<typename, std::size_t> class Builder2>
   void test_deepcopy_assignment_(){
     std::string func_name =
       ("VariableAssignmentTests::test_deepcopy_assignment_<" +
@@ -786,7 +786,7 @@ class BulkAssignmentTest{
 
 public:
 
-  template<template<typename, std::size_t> typename Builder>
+  template<template<typename, std::size_t> class Builder>
   void test_assign_from_scalar_(){
     std::string func_name = "BulkAssignmentTest::test_assign_from_scalar_";
 
@@ -814,8 +814,8 @@ public:
   }
   
 
-  template<template<typename, std::size_t> typename Builder1,
-           template<typename, std::size_t> typename Builder2>
+  template<template<typename, std::size_t> class Builder1,
+           template<typename, std::size_t> class Builder2>
   void test_assign_from_array_(){
     std::string func_name =
       ("BulkAssignmentTest::test_assign_from_array_<" +
@@ -869,8 +869,8 @@ public:
   }
 
 
-  template<template<typename, std::size_t> typename Builder1,
-           template<typename, std::size_t> typename Builder2>
+  template<template<typename, std::size_t> class Builder1,
+           template<typename, std::size_t> class Builder2>
   void test_assign_subarrays_(){
     // These tests actually uncovered a longstanding bug
     std::string func_name =
@@ -989,7 +989,7 @@ private:
   }
 public:
 
-  template<template<typename, std::size_t> typename Builder>
+  template<template<typename, std::size_t> class Builder>
   void test_pass_by_val_(){
     Builder<double, 2> builder(2,3);
     CelloArray<double, 2> *arr_ptr = builder.get_arr();
