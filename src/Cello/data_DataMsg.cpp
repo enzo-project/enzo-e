@@ -9,11 +9,24 @@
 
 long DataMsg::counter[CONFIG_NODE_SIZE] = {0};
 
-// #define DEBUG_PADDED_ARRAY
-// #define DEBUG_TRACE_SUMS
-
-#define ACTIVATE_PADDED_ARRAY
+// #define TRACE_DATA_MSG_PACK
 // #define TRACE_PADDED_ARRAY_VALUES
+
+// #define TRACE_PACK
+
+#ifdef TRACE_PACK
+#  define TRACE_DATA_SIZE CkPrintf ("DEBUG_DATA_MSG %p data_size %d %d\n", \
+                                  (void *)this,debug_counter++,size)
+#  define TRACE_LOAD_DATA CkPrintf ("DEBUG_DATA_MSG %p load_data %d %d\n", \
+                                  (void *)this,debug_counter++,pc-buffer)
+#  define TRACE_SAVE_DATA CkPrintf ("DEBUG_DATA_MSG %p save_data %d %d\n", \
+                                  (void *)this,debug_counter++,pc-buffer)
+#else
+#  define TRACE_DATA_SIZE /* ... */
+#  define TRACE_LOAD_DATA /* ... */
+#  define TRACE_SAVE_DATA /* ... */
+#endif
+  
 #define CHECK
 
 //----------------------------------------------------------------------
@@ -24,32 +37,17 @@ void DataMsg::set_padded_face
  std::vector<int> padded_face_field_list, Field field,
  std::string block_name)
 {
-#ifdef ACTIVATE_PADDED_ARRAY  
   for (int i=0; i<3; i++) {
     ma3_pf_[i]  = ma3[i];
     n3_pf_[i]   = n3[i];
     iam3_pf_[i] = iam3[i];
     if3_pf_[i]  = if3[i];
   }
-#ifdef DEBUG_PADDED_ARRAY  
-    CkPrintf ("DEBUG DataMsg::set_padded_face %p ma3 %d %d %d\n",
-              (void *)this,ma3_pf_[0],ma3_pf_[1],ma3_pf_[2]);
-    CkPrintf ("DEBUG DataMsg::set_padded_face %p n3 %d %d %d\n",
-              (void *)this,n3_pf_[0],n3_pf_[1],n3_pf_[2]);
-    CkPrintf ("DEBUG DataMsg::set_padded_face %p iam3 %d %d %d\n",
-              (void *)this,iam3_pf_[0],iam3_pf_[1],iam3_pf_[2]);
-    CkPrintf ("DEBUG DataMsg::set_padded_face %p if3 %d %d %d\n",
-              (void *)this,if3_pf_[0],if3_pf_[1],if3_pf_[2]);
-#endif
   padded_face_field_list_ = padded_face_field_list;
 
   const int nx(n3_pf_[0]), ny(n3_pf_[1]), nz(n3_pf_[2]);
   const int nf = padded_face_field_list.size();
   const int na(nx*ny*nz);
-#ifdef DEBUG_PADDED_ARRAY  
-  CkPrintf ("DEBUG_PROLONG_DATA_MSG TRACE nf %s:%d %d\n",__FILE__,__LINE__,nf);
-  CkPrintf ("DEBUG_PROLONG_DATA_MSG TRACE na %s:%d %d\n",__FILE__,__LINE__,na);
-#endif  
 
   padded_face_.resize(nf*na);
   std::fill(padded_face_.begin(),padded_face_.end(),0.0);
@@ -93,26 +91,6 @@ void DataMsg::set_padded_face
         }
       }
     }
-#ifdef DEBUG_TRACE_SUMS
-    {
-      int count = 0;
-      double sum = 0.0;
-      int zero = 0;
-      for (int iz=0; iz<nz; iz++) {
-        for (int iy=0; iy<ny; iy++) {
-          for (int ix=0; ix<nx; ix++) {
-            int i=ia0+ix+nx*(iy+ny*iz);
-            count++;
-            sum += padded_face_[i];
-            if (padded_face_[i] == 0) ++zero;
-          }
-        }
-      }
-      CkPrintf ("DEBUG_TRACE_SUM %s send buffer [%d %d %d] n3 %d %d %d i_f %d %s %d %d %8.4g\n",
-                block_name.c_str(), if3[0],if3[1],if3[2],
-                nx,ny,nz,i_f,tag_,zero,count,sum);
-    }
-#endif    
 #ifdef TRACE_PADDED_ARRAY_VALUES
     if (i_f == 0) {
       CkPrintf ("PADDED_ARRAY_VALUES %s:%d i_f %d set_padded_array field %p r %d\n",
@@ -144,15 +122,9 @@ void DataMsg::set_padded_face
     }
 #endif      
 
-#ifdef DEBUG_PADDED_ARRAY    
-    CkPrintf ("TRACE_PADDED_ARRAY DataMsg::set_padded_array i_f %d %p sum %g\n",
-              i_f,&padded_face_[ia0],
-              cello::sum(&padded_field[ia0],nx,ny,nz,0,0,0,nx,ny,nz));
-#endif    
     // move to next field section in padded array
     //    padded_field += na;
   }
-#endif  
 }
 
 //----------------------------------------------------------------------
@@ -167,6 +139,8 @@ int DataMsg::data_size () const
   //  1. determine buffer size (must be consistent with #3)
   //--------------------------------------------------
 
+  int debug_counter = 0;
+  
   Field field (cello::field_descr(), field_data_);
 
   const int n_ff = (ff) ? ff->data_size() : 0;
@@ -176,32 +150,33 @@ int DataMsg::data_size () const
 
   int size = 0;
 
+  TRACE_DATA_SIZE;
   size += sizeof(int); // n_ff_
   size += sizeof(int); // n_fa_
   size += sizeof(int); // n_pd_
   size += sizeof(int); // n_fd_
 
+  TRACE_DATA_SIZE;
+
   size += n_ff;
+  TRACE_DATA_SIZE;
   size += n_fa;
+  TRACE_DATA_SIZE;
   size += n_pd;
+  TRACE_DATA_SIZE;
   for (int i=0; i<n_fd; i++) {
     size += sizeof(int); // face_fluxes_delete_[i] 
     size += fd[i]->data_size();
   }
+  TRACE_DATA_SIZE;
 
   // Padded array for interpolation
   size += sizeof(int); // padded array size (0 if none)
   const int na = (n3_pf_[0]*n3_pf_[1]*n3_pf_[2]);
-#ifdef DEBUG_PADDED_ARRAY  
-  CkPrintf ("DEBUG_PROLONG_DATA_MSG TRACE na %s:%d %d\n",__FILE__,__LINE__,na);
-#endif  
   if (na > 0) {
     size += sizeof(int); // padded_face_field_list_.size()
 
     int nf = padded_face_field_list_.size();
-#ifdef DEBUG_PADDED_ARRAY  
-    CkPrintf ("DEBUG_PROLONG_DATA_MSG TRACE nf %s:%d %d\n",__FILE__,__LINE__,nf);
-#endif    
     size += nf*sizeof(int); // padded_face_field_list_
     size += (nf*na)*sizeof(cello_float); // padded_face_
 
@@ -210,17 +185,9 @@ int DataMsg::data_size () const
     size += 3*sizeof(int); // iam3_pf_[3]
     size += 3*sizeof(int); // if3_pf_[3]
   }
+  TRACE_DATA_SIZE;
   size += 8*sizeof(char); // tag_
-#ifdef DEBUG_PADDED_ARRAY  
-  CkPrintf ("DEBUG %s DataMsg::data_size %p ma3 %d %d %d\n",
-            tag_,(void *)this,ma3_pf_[0],ma3_pf_[1],ma3_pf_[2]);
-  CkPrintf ("DEBUG %s DataMsg::data_size %p n3 %d %d %d\n",
-            tag_,(void *)this,n3_pf_[0],n3_pf_[1],n3_pf_[2]);
-  CkPrintf ("DEBUG %s DataMsg::data_size %p iam3 %d %d %d\n",
-            tag_,(void *)this,iam3_pf_[0],iam3_pf_[1],iam3_pf_[2]);
-  CkPrintf ("DEBUG %s DataMsg::data_size %p if3 %d %d %d\n",
-            tag_,(void *)this,if3_pf_[0],if3_pf_[1],if3_pf_[2]);
-#endif
+  TRACE_DATA_SIZE;
   
   return size;
 }
@@ -236,6 +203,7 @@ char * DataMsg::save_data (char * buffer) const
   };
 
   pc = buffer;
+  int debug_counter = 0;
 
   Field field (cello::field_descr(), field_data_);
 
@@ -248,24 +216,29 @@ char * DataMsg::save_data (char * buffer) const
   const int n_pa = (pd) ? pd->data_size(cello::particle_descr()) : 0;
   const int n_fd = fd.size();
 
+  TRACE_SAVE_DATA;
   (*pi++) = n_ff;
   (*pi++) = n_fa;
   (*pi++) = n_pa;
   (*pi++) = n_fd;
+  TRACE_SAVE_DATA;
 
   // save field face
+  TRACE_SAVE_DATA;
   if (n_ff > 0) {
     pc = ff->save_data (pc);
   }
-  // save field array
+    // save field array
   if (n_ff > 0 && n_fa > 0) {
     ff->face_to_array(field,pc);
     pc += n_fa;
   }
+  TRACE_SAVE_DATA;
   // save particle data
   if (n_pa > 0) {
     pc = pd->save_data(cello::particle_descr(),pc);
   }
+  TRACE_SAVE_DATA;
   // save fluxes
   if (n_fd > 0) {
     for (int i=0; i<n_fd; i++) {
@@ -274,18 +247,13 @@ char * DataMsg::save_data (char * buffer) const
     }
   }
 
+  TRACE_SAVE_DATA;
   // Padded face array for interpolation
 
   const int na = (n3_pf_[0]*n3_pf_[1]*n3_pf_[2]);
-#ifdef DEBUG_PADDED_ARRAY  
-  CkPrintf ("DEBUG_PROLONG_DATA_MSG TRACE na %s:%d %d\n",__FILE__,__LINE__,na);
-#endif  
   (*pi++) = na;
   if (na > 0) {
     const int nf = padded_face_field_list_.size();
-#ifdef DEBUG_PADDED_ARRAY  
-    CkPrintf ("DEBUG_PROLONG_DATA_MSG TRACE nf %s:%d %d\n",__FILE__,__LINE__,nf);
-#endif    
     (*pi++) = nf;
     for (int i=0; i<nf; i++) {
       (*pi++) = padded_face_field_list_[i];
@@ -301,23 +269,12 @@ char * DataMsg::save_data (char * buffer) const
       (*pi++) = if3_pf_[i];
     }
   
-#ifdef DEBUG_PADDED_ARRAY
-  CkPrintf ("DEBUG %s DataMsg::save_data %p ma3 %d %d %d\n",
-            tag_,(void *)this,ma3_pf_[0],ma3_pf_[1],ma3_pf_[2]);
-  CkPrintf ("DEBUG %s DataMsg::save_data %p n3 %d %d %d\n",
-            tag_,(void *)this,n3_pf_[0],n3_pf_[1],n3_pf_[2]);
-  CkPrintf ("DEBUG %s DataMsg::save_data %p iam3 %d %d %d\n",
-            tag_,(void *)this,iam3_pf_[0],iam3_pf_[1],iam3_pf_[2]);
-  CkPrintf ("DEBUG %s DataMsg::save_data %p if3 %d %d %d\n",
-            tag_,(void *)this,if3_pf_[0],if3_pf_[1],if3_pf_[2]);
-#endif
   }
+  TRACE_SAVE_DATA;
   strncpy (pc,tag_,8);
   pc+=8*sizeof(char);
-  
-#ifdef DEBUG_PADDED_ARRAY  
-  print("data_msg:save_data");
-#endif  
+  TRACE_SAVE_DATA;
+
   ASSERT2 ("DataMsg::save_data()",
   	   "Expecting buffer size %d actual size %d",
   	   data_size(),(pc-buffer),
@@ -341,26 +298,35 @@ char * DataMsg::load_data (char * buffer)
   };
 
   pc = buffer;
+  int debug_counter = 0;
 
-  field_face_ = new FieldFace(cello::rank());
 
+  TRACE_LOAD_DATA;
   const int n_ff = (*pi++);
   const int n_fa = (*pi++);
   const int n_pa = (*pi++);
   const int n_fd = (*pi++);
+  TRACE_LOAD_DATA;
 
   // load field face
+  TRACE_LOAD_DATA;
+  field_face_ = new FieldFace(cello::rank());
   if (n_ff > 0) {
+    //    field_face_ = new FieldFace(cello::rank());
     pc = field_face_->load_data (pc);
+  // } else {
+  //   field_face_ = nullptr;
   }
+  TRACE_LOAD_DATA;
 
   // load field array
   if (n_fa > 0) {
     field_array_ = pc;
     pc += n_fa;
   } else {
-    field_array_ = NULL;
+    field_array_ = nullptr;
   }
+  TRACE_LOAD_DATA;
 
   // load particle data
   if (n_pa > 0) {
@@ -368,8 +334,9 @@ char * DataMsg::load_data (char * buffer)
     pd->allocate(cello::particle_descr());
     pc = pd->load_data(cello::particle_descr(),pc);
   } else {
-    particle_data_ = NULL;
+    particle_data_ = nullptr;
   }
+  TRACE_LOAD_DATA;
 
   // load flux data
   if (n_fd > 0) {
@@ -382,16 +349,11 @@ char * DataMsg::load_data (char * buffer)
       pc = ff->load_data(pc);
     }
   }
+  TRACE_LOAD_DATA;
 
   const int na = (*pi++);
-#ifdef DEBUG_PADDED_ARRAY  
-  CkPrintf ("DEBUG_PROLONG_DATA_MSG TRACE na %s:%d %d\n",__FILE__,__LINE__,na);
-#endif  
   if (na > 0) {
     const int nf = (*pi++);
-#ifdef DEBUG_PADDED_ARRAY  
-    CkPrintf ("DEBUG_PROLONG_DATA_MSG TRACE nf %s:%d %d\n",__FILE__,__LINE__,nf);
-#endif    
     padded_face_field_list_.resize(nf);
     for (int i=0; i<nf; i++) {
       padded_face_field_list_[i] = (*pi++);
@@ -407,29 +369,18 @@ char * DataMsg::load_data (char * buffer)
       iam3_pf_[i] = (*pi++);
       if3_pf_[i]  = (*pi++);
     }
-
-#ifdef DEBUG_PADDED_ARRAY  
-    CkPrintf ("DEBUG DataMsg::load_data %p ma3 %d %d %d\n",
-              (void *)this,ma3_pf_[0],ma3_pf_[1],ma3_pf_[2]);
-    CkPrintf ("DEBUG DataMsg::load_data %p n3 %d %d %d\n",
-              (void *)this,n3_pf_[0],n3_pf_[1],n3_pf_[2]);
-    CkPrintf ("DEBUG DataMsg::load_data %p iam3 %d %d %d\n",
-              (void *)this,iam3_pf_[0],iam3_pf_[1],iam3_pf_[2]);
-    CkPrintf ("DEBUG DataMsg::load_data %p if3 %d %d %d\n",
-              (void *)this,if3_pf_[0],if3_pf_[1],if3_pf_[2]);
-#endif
     ASSERT2 ("DataMsg::load_data()",
              "Expecting buffer size %d actual size %d",
              data_size(),(pc-buffer),
              (data_size() == (pc-buffer)));
+
   }
+  TRACE_LOAD_DATA;
   strncpy (tag_,pc,8);
   tag_[8] = 0;
   pc+=8*sizeof(char);
+  TRACE_LOAD_DATA;
     
-#ifdef DEBUG_PADDED_ARRAY  
-  print("data_msg:load_data");
-#endif  
   return pc;
 }
 
@@ -443,7 +394,7 @@ void DataMsg::update (Data * data, bool is_local)
 
   // Update particles
   
-  if (pd != NULL) {
+  if (pd != nullptr) {
 
     // Insert new particles 
 
@@ -456,12 +407,12 @@ void DataMsg::update (Data * data, bool is_local)
     cello::simulation()->data_insert_particles(count);
     
     delete particle_data_;
-    particle_data_ = NULL; 
+    particle_data_ = nullptr; 
   }
   
   // Update fields
   
-  if (ff != NULL && fa != NULL) {
+  if (ff != nullptr && fa != nullptr) {
 
     Field field_dst = data->field();
 
@@ -494,28 +445,15 @@ void DataMsg::update (Data * data, bool is_local)
     }
     face_fluxes_list_.clear();
   }
-  if (ff != NULL) {
+  if (ff != nullptr) {
     delete field_face_;
-    field_face_ = NULL;
+    field_face_ = nullptr;
   }
 
   // Updated padded array
 
   const int na = n3_pf_[0]*n3_pf_[1]*n3_pf_[2];
-#ifdef DEBUG_PADDED_ARRAY  
-  CkPrintf ("DEBUG_PROLONG_DATA_MSG TRACE na %s:%d %d\n",__FILE__,__LINE__,na);
-#endif  
   if (na>0) {
-#ifdef DEBUG_PADDED_ARRAY  
-    CkPrintf ("DEBUG %s DataMsg::update %p ma3 %d %d %d\n",
-              tag_,(void *)this,ma3_pf_[0],ma3_pf_[1],ma3_pf_[2]);
-    CkPrintf ("DEBUG %s DataMsg::update %p n3 %d %d %d\n",
-              tag_,(void *)this,n3_pf_[0],n3_pf_[1],n3_pf_[2]);
-    CkPrintf ("DEBUG %s DataMsg::update %p iam3 %d %d %d\n",
-              tag_,(void *)this,iam3_pf_[0],iam3_pf_[1],iam3_pf_[2]);
-    CkPrintf ("DEBUG %s DataMsg::update %p if3 %d %d %d\n",
-              tag_,(void *)this,if3_pf_[0],if3_pf_[1],if3_pf_[2]);
-#endif
     const int mx  ( ma3_pf_[0]),  my( ma3_pf_[1]),  mz( ma3_pf_[2]);
     const int nx  (  n3_pf_[0]),  ny(  n3_pf_[1]),  nz(  n3_pf_[2]);
     const int iaxm(iam3_pf_[0]),iaym(iam3_pf_[1]),iazm(iam3_pf_[2]);
@@ -524,35 +462,14 @@ void DataMsg::update (Data * data, bool is_local)
     const int nb(nx*ny*nz);
     
     const int nf = padded_face_field_list_.size();
-#ifdef DEBUG_PADDED_ARRAY  
-    CkPrintf ("DEBUG_PROLONG_DATA_MSG TRACE nf %s:%d %d\n",__FILE__,__LINE__,nf);
-#endif    
 
-#ifdef DEBUG_PADDED_ARRAY
-    CkPrintf ("DEBUG_PROLONG_DATA_MSG data %p padded_face_array_allocate %d %d %d  %d*%d*%d*%d\n",
-              (void *)data,ifx,ify,ifz,nf,mx,my,mz);
-              
-#endif
 
     cello_float * padded_array =
       data->field_data()->padded_array_allocate (ifx,ify,ifz, nf, mx,my,mz);
-#ifdef DEBUG_PADDED_ARRAY  
-    CkPrintf ("DEBUG_PADDED_ARRAY_ALLOCATE data %p %p\n",data,&padded_array[0]);
-#endif    
     
     const int ia_start = iaxm + mx*(iaym + my*iazm);
 
-#ifdef DEBUG_PADDED_ARRAY  
-    CkPrintf ("DEBUG_PROLONG_DATA_MSG padded_face_.size() %d [%d  %d %d %d]\n",
-              padded_face_.size(),nf,nx,ny,nz);
-    CkPrintf ("DEBUG_PROLONG_DATA_MSG padded_array %p [%d  %d %d %d]\n",
-              padded_array,nf,mx,my,mz);
-#endif    
     for (int i_f=0; i_f<nf; i_f++) {
-#ifdef DEBUG_PADDED_ARRAY  
-      CkPrintf ("DEBUG_PROLONG_DATA_MSG padded_field_list[%d] = %d\n",
-                i_f,padded_field_list_[i_f]);
-#endif      
       double sum_a=0.0,sum_b=0.0;
       int count=0;
       const int ia0 (na*i_f);
@@ -572,6 +489,7 @@ void DataMsg::update (Data * data, bool is_local)
           }
         }
       }
+      fflush(stdout);
 #endif      
       
       const int ib0 (nb*i_f);
@@ -585,10 +503,6 @@ void DataMsg::update (Data * data, bool is_local)
                     ib,i_f,ix,iy,iz,padded_face_.size(),
                     0 <= ib && ib < padded_face_.size());
             padded_array[ia] = padded_face_[ib];
-#ifdef DEBUG_PADDED_ARRAY  
-            CkPrintf ("DEBUG_PADDED_ARRAY write %d %d %d [%d] = %g\n",
-                      ifx,ify,ifz,ia,padded_array[ia]);
-#endif            
             sum_a += padded_array[ia];
             sum_b += padded_face_[ib];
             ++count;
@@ -599,44 +513,6 @@ void DataMsg::update (Data * data, bool is_local)
           }
         }
       }
-#ifdef DEBUG_TRACE_SUMS
-    {
-      int count = 0;
-      double sum = 0.0;
-      int zero = 0;
-      for (int iz=0; iz<nz; iz++) {
-        for (int iy=0; iy<ny; iy++) {
-          for (int ix=0; ix<nx; ix++) {
-            int i=ib0+ix+nx*(iy+ny*iz);
-            count++;
-            sum += padded_face_[i];
-            if (padded_face_[i] == 0) ++zero;
-          }
-        }
-      }
-      CkPrintf ("DEBUG_TRACE_SUM recv buffer [%d %d %d] n3 %d %d %d i_f %d %s %d %d %8.4g\n",
-                if3_pf_[0],if3_pf_[1],if3_pf_[2],nx,ny,nz,
-                i_f,tag_,zero,count,sum);
-    }
-    {
-      int count = 0;
-      double sum = 0.0;
-      int zero = 0;
-      for (int iz=0; iz<mz; iz++) {
-        for (int iy=0; iy<my; iy++) {
-          for (int ix=0; ix<mx; ix++) {
-            int i=ia0+ix+mx*(iy+my*iz);
-            count++;
-            sum += padded_array[i];
-            if (padded_array[i] == 0) ++zero;
-          }
-        }
-      }
-      CkPrintf ("DEBUG_TRACE_SUM recv array extra [%d %d %d] %d n3 %d %d %d i_f %d A %p F %p %d %d %8.4g\n",
-                if3_pf_[0],if3_pf_[1],if3_pf_[2],ia0,mx,my,mz,i_f,
-                &padded_array[ia0],data->field_data(),zero,count,sum);
-    }
-#endif    
 #ifdef TRACE_PADDED_ARRAY_VALUES
       if (i_f == 0) {
         CkPrintf ("PADDED_ARRAY_VALUES %s:%d tag %s i_f %d update %p padded_face_\n",
@@ -652,6 +528,7 @@ void DataMsg::update (Data * data, bool is_local)
             CkPrintf ("\n");
           }
         }
+      fflush(stdout);
         CkPrintf ("PADDED_ARRAY_VALUES %s:%d update %p padded_array after %d %d %d \n",
                   __FILE__,__LINE__,&padded_array[ia0],mx,my,mz);
         for (int iz=0; iz<mz; iz++) {
@@ -666,22 +543,10 @@ void DataMsg::update (Data * data, bool is_local)
           }
         }
       }
+      fflush(stdout);
 #endif
-#ifdef DEBUG_PADDED_ARRAY    
-      CkPrintf ("TRACE_PADDED_ARRAY DataMsg::update i_f %d ia0 %d %p sum %g (total %g)\n",
-                i_f,ia0,&padded_array[ia0],
-                cello::sum(&padded_array[ia0],mx,my,mz,iaxm,iaym,iazm,nx,ny,nz),
-                cello::sum(&padded_array[ia0],mx,my,mz,0,0,0,mx,my,mz));
-#endif    
-#ifdef DEBUG_PADDED_ARRAY  
-      CkPrintf ("DEBUG_PROLONG_DATA_MSG field %d/%d sum array %g sum face %g count %d\n",
-                i_f,nf,sum_a,sum_b,count);
-#endif      
     }
   }
-#ifdef DEBUG_PADDED_ARRAY  
-  print("data_msg:update");
-#endif  
 
 }
 
@@ -689,7 +554,6 @@ void DataMsg::update (Data * data, bool is_local)
 
 void DataMsg::print (const char * message) const
 {
-#ifdef DEBUG_PADDED_ARRAY  
   CkPrintf ("%s DATA_MSG %p\n",  message,(void *)this);
   CkPrintf ("%s DATA_MSG field_face_    = %p\n",
             message,(void*)field_face_);
@@ -723,5 +587,4 @@ void DataMsg::print (const char * message) const
             message,if3_pf_[0],if3_pf_[1],if3_pf_[2]);
     
   fflush(stdout);
-#endif  
 }

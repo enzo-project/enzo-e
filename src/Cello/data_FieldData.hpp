@@ -66,6 +66,20 @@ public: // interface
 		       std::string name, int history=0) const throw ()
   { return values (field_descr,field_descr->field_id(name),history); }
 
+  /// Return array for the corresponding coarse field
+  char * coarse_values (const FieldDescr *,
+		 int id_field, int history=0) throw ();
+  char * coarse_values (const FieldDescr * field_descr,
+		 std::string name, int history=0) throw ()
+  { return coarse_values (field_descr,field_descr->field_id(name),history); }
+
+  /// Return array for the corresponding coarse field
+  const char * coarse_values (const FieldDescr *,
+		       int id_field, int history=0) const throw ();
+  const char * coarse_values (const FieldDescr * field_descr,
+		       std::string name, int history=0) const throw ()
+  { return coarse_values (field_descr,field_descr->field_id(name),history); }
+  
   /// Return array for the corresponding field, which does not contain
   /// ghosts whether they're allocated or not
   char * unknowns (const FieldDescr *,
@@ -124,6 +138,15 @@ public: // interface
   void deallocate_temporary(const FieldDescr *,int id) 
     throw ();
 
+  /// Allocate storage for coarse padded array
+  void allocate_coarse(const FieldDescr *) throw();
+  /// Allocate storage for a coarse padded array
+  void allocate_coarse(const FieldDescr *, int id) throw();
+  /// Deallocate storage for the coarse fields
+  void deallocate_coarse() throw ();
+  /// Deallocate storage for the coarse fields
+  void deallocate_coarse(int id) throw ();
+
   /// Return whether ghost cells are allocated or not.  
   bool ghosts_allocated() const throw ()
   {  return ghosts_allocated_; }
@@ -132,6 +155,10 @@ public: // interface
   /// (including ghosts), and total number of bytes n
   int field_size (const FieldDescr *,
 		  int id_field, int *nx=0, int *ny=0, int *nz=0) const throw();
+
+  /// Return the number of elements (nx,ny,nz) along each axis of the coarse field
+  void coarse_dimensions
+  (const FieldDescr *, int id_field, int *nx=0, int *ny=0, int *nz=0) const throw();
 
   /// Print basic field characteristics for debugging
   void print (const FieldDescr *,
@@ -199,10 +226,14 @@ public: // interface
     const int n = nf*nx*ny*nz;
     if (padded_array_[i] == nullptr) {
       padded_array_[i] = new cello_float [n];
+#ifdef TRACE_PADDED_FACE
+      CkPrintf ("TRACE_PADDED %s:%d allocate %p = %d*(%d*%d*%d)\n",
+                __FILE__,__LINE__,(void*)padded_array_[i],nf,nx,ny,nz);
+#endif              
       std::fill_n (padded_array_[i],n,0.0);
     }
-#ifdef TRACE_PADDED
-    CkPrintf ("TRACE_PADDED %s:%d OUT data %p array %p %d %d %d  = %d * (%d %d %d)\n",
+#ifdef TRACE_PADDED_FACE
+    CkPrintf ("TRACE_PADDED %s:%d data %p array %p %d %d %d  = %d * (%d %d %d)\n",
               __FILE__,__LINE__,(void *)this,(void *)&padded_array_[i],ifx,ify,ifz,nf,nx,ny,nz);
 #endif
     padded_array_dimensions_[0][i] = nx;
@@ -339,6 +370,16 @@ private: // attributes
   /// Current scaling of each field
   std::vector<double> units_scaling_;
 
+  //--------------------------------------------------
+  
+  /// Length of allocated coarse fields
+  std::vector<int> coarse_dimensions_;
+
+  /// Coarse fields with one ghost zone for padded Prolong
+  std::vector<char *> array_coarse_;
+
+  //--------------------------------------------------
+  
   /// Face padded array data indexed with if3[]
   cello_float * padded_array_[3*3*3];
 
@@ -347,7 +388,6 @@ private: // attributes
   
   /// Allocated dimensions of padded_array_
   int padded_array_dimensions_[3][3*3*3];
-
 };   
 
 #endif /* DATA_FIELD_DATA_HPP */

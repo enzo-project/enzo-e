@@ -13,6 +13,7 @@
 // #define TRACE_BLOCK
 
 // #define DEBUG_ADAPT
+// #define DEBUG_FIELD_FACE
 // #define DEBUG_FACE
 
 #ifdef DEBUG_FACE

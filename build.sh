@@ -166,47 +166,38 @@ if [ $target == "test" ]; then
 
     rm -f              test/STOP
 
-   # count failures, incompletes, and passes
+    # count failures, incompletes, and passes
 
-   grep "^ FAIL"       $dir/*unit > $dir/fail.$configure
-   grep "^ incomplete" $dir/*unit > $dir/incomplete.$configure
-   grep "^ pass"       $dir/*unit > $dir/pass.$configure
+    grep "^ FAIL"       $dir/*unit > $dir/fail.$configure
+    grep "^ incomplete" $dir/*unit > $dir/incomplete.$configure
+    grep "^ pass"       $dir/*unit > $dir/pass.$configure
 
-   f=`wc -l < $dir/fail.$configure`
-   i=`wc -l < $dir/incomplete.$configure`
-   p=`wc -l < $dir/pass.$configure`
+    f=`wc -l < $dir/fail.$configure`
+    i=`wc -l < $dir/incomplete.$configure`
+    p=`wc -l < $dir/pass.$configure`
 
-   stop=`date +"%H:%M:%S"`
+    stop=`date +"%H:%M:%S"`
 
-   line="$stop ${configure_print} FAIL: $f Incomplete: $i Pass: $p "
+    line="$stop ${configure_print} FAIL: $f Incomplete: $i Pass: $p "
 
-   printf "%s %s %-12s %-6s %-6s %s %-2s %s %-2s %s %-4s %s %-2s\n" \
-        $line | tee $log
+    printf "%s %s %-12s %-6s %-6s %s %-2s %s %-2s %s %-4s %s %-2s\n" \
+           $line | tee $log
 
-   for test in $dir/*unit; do
+    for test in $dir/*unit; do
 
-      test_begin=`grep "UNIT TEST BEGIN" $test | wc -l`
-      test_end=`grep "UNIT TEST END"   $test | wc -l`
+        test_begin=`grep "UNIT TEST BEGIN" $test | wc -l`
+        test_end=`grep "UNIT TEST END"   $test | wc -l`
 
-      crash=$((test_begin - $test_end))
+        crash=$((test_begin - $test_end))
 
-      if [ $crash != 0 ]; then
-         line="   CRASH: $test\n"
-         printf "$line"
-         printf "$line" >> $log
-      fi
-   done
+        if [ $crash != 0 ]; then
+            line="   CRASH: $test\n"
+            printf "$line"
+            printf "$line" >> $log
+        fi
+    done
 
-   echo "$stop" > test/STOP
-
-fi
-
-if [ x$CELLO_ARCH == "xncsa-bw" ]; then
-    echo "Relinking with static libpng15.a..."
-    build_dir="build"
-   /u/sciteam/bordner/Charm/charm/bin/charmc -language charm++ -tracemode projections -o $build_dir/charm/Enzo/enzo-p -g -g $build_dir/charm/Enzo/enzo-p.o $build_dir/charm/Cello/main_enzo.o -Llib/charm -L/opt/cray/hdf5/default/cray/74/lib -lcharm -lenzo -lsimulation -lproblem -lcomm -lmesh -lfield -lio -ldisk -lmemory -lparameters -lerror -lmonitor -lparallel -lperformance -ltest -lcello -lexternal -lhdf5 -lz /u/sciteam/bordner/lib/libpng15.a -lgfortran
-
-   mv $build_dir/charm/Enzo/enzo-p bin/charm
+    echo "$stop" > test/STOP
 
 fi
 
@@ -225,7 +216,7 @@ d=`date "+%H:%M:%S"`
 rm -f test/STATUS
 
 if [ ! -e $target ]; then
-   exit 1
+    exit 1
 fi
 
 # check for failures 

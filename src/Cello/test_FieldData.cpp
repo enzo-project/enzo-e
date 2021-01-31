@@ -83,7 +83,7 @@ PARALLEL_MAIN_BEGIN
   field_descr->set_centering(it3, 0, 0, 1);
 
   int nx,ny,nz;
-  nx=4; ny=5; nz=6;
+  nx=4; ny=8; nz=6;
   double xpm,ypm,zpm;
   xpm = -1.0;  ypm = -2.0, zpm = -3.0;
   double xpp,ypp,zpp;

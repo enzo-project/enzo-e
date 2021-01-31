@@ -7,8 +7,6 @@
 
 #include "mesh.hpp"
 
-// #define DEBUG_BOX
-
 //----------------------------------------------------------------------
 
 void Box::compute_block_start(BoxType bt)
@@ -32,16 +30,6 @@ void Box::compute_block_start(BoxType bt)
   for (int i=rank_; i<3; i++) {
     block_start_[bt][i] = 0;
   }
-#ifdef DEBUG_BOX  
-  CkPrintf ("DEBUG_BOX block start block_size %d %d %d\n",
-            block_size_[0],block_size_[1],block_size_[2]);
-  CkPrintf ("DEBUG_BOX child[%d]              %d %d %d\n",
-            bt,child_[bt][0],child_[bt][1],child_[bt][2]);
-  CkPrintf ("DEBUG_BOX face[%d]               %d %d %d\n",
-            bt,face_[bt][0],face_[bt][1],face_[bt][2]);
-  CkPrintf ("DEBUG_BOX block_start[%d]        %d %d %d\n",
-            bt,block_start_[bt][0],block_start_[bt][1],block_start_[bt][2]);
-#endif  
 }
 
 //----------------------------------------------------------------------
@@ -64,21 +52,6 @@ void Box::compute_region()
     region_start_[i] = 0;
     region_stop_[i] = 1;
   }
-#ifdef DEBUG_BOX
-  CkPrintf ("DEBUG_BOX compute region block_size %d %d %d\n",
-            block_size_[0],block_size_[1],block_size_[2]);
-  CkPrintf ("DEBUG_BOX compute region child %d %d %d\n",
-            child_[0][0],child_[0][1],child_[0][2]);
-  CkPrintf ("DEBUG_BOX compute region face %d %d %d\n",
-            face_[0][0],face_[0][1],face_[0][2]);
-  CkPrintf ("DEBUG_BOX compute region L %d pad %d\n", level_[0],pad_);  
-            
-
-  CkPrintf ("DEBUG_BOX compute region region_start-pre %d %d %d\n",
-            region_start_[0],region_start_[1],region_start_[2]);
-  CkPrintf ("DEBUG_BOX compute region region_stop %d %d %d\n",
-            region_stop_[0],region_stop_[1],region_stop_[2]);
-#endif  
   if (pad_ > 0) {
     if (level_[0] == +1) {
       for (int i=0; i<rank_; i++) {
@@ -92,18 +65,12 @@ void Box::compute_region()
       }
     }
   }
-#ifdef DEBUG_BOX
-  CkPrintf ("DEBUG_BOX compute region region_start-post %d %d %d\n",
-            region_start_[0],region_start_[1],region_start_[2]);
-  CkPrintf ("DEBUG_BOX compute region region_stop %d %d %d\n",
-            region_stop_[0],region_stop_[1],region_stop_[2]);
-#endif  
 }
 
 //----------------------------------------------------------------------
 
 bool Box::get_limits
-( BoxType bt,  BlockType block_type,  int region_start[3], int region_stop[3])
+( BlockType block_type,  int region_start[3], int region_stop[3], BoxType bt )
 {
   if (block_type == BlockType::send) {
 
@@ -114,7 +81,9 @@ bool Box::get_limits
 
   } else if (block_type == BlockType::receive ||
              block_type == BlockType::extra) {
-
+    ASSERT("Box::get_limits()",
+           "Expected BoxType bt to not be BoxType_ignored",
+           (bt != BoxType_ignored));
     const float r = std::pow(2.0,1.0*level_[bt]);
   
     for (int i=0; i<rank_; i++) {
@@ -127,6 +96,10 @@ bool Box::get_limits
   } else if (block_type == BlockType::array) {
 
     // receiving coarse-level array for interpolation
+
+    ASSERT("Box::get_limits()",
+           "Expected BoxType bt to not be BoxType_ignored",
+           (bt != BoxType_ignored));
 
     const float ri = std::pow(2.0,-1.0*level_[bt]);
     
@@ -151,12 +124,6 @@ bool Box::get_limits
   for (int i=0; i<rank_; i++) {
     l_intersect = l_intersect && (region_start[i] < region_stop[i]); 
   }
-#ifdef DEBUG_BOX
-  CkPrintf ("DEBUG_BOX get_limits type %d  im3 %d %d %d  ip3 %d %d %d\n",
-            block_type,
-            region_start[0],region_start[1],region_start[2],
-            region_stop[0],region_stop[1],region_stop[2]);
-#endif  
 
   return l_intersect;
 }

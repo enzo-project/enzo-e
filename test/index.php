@@ -760,8 +760,8 @@ test_summary("Scalar",array("Scalar"),
 	     array("test_Scalar"),'test'); 
 test_summary("Performance",array("Papi", "Performance","Timer"),
 	     array("test_Papi","test_Performance","test_Timer"),'test'); 
-test_summary("Problem",array("Mask","Refresh","Value"),
-	     array("test_Mask","test_Refresh","test_Value"),'test'); 
+test_summary("Problem",array("Mask","Refresh","Value","Box"),
+             array("test_Mask","test_Refresh","test_Value","test_Box"),'test'); 
 test_summary("Prolong",array("prolong_linear"),
 	     array("test_ProlongLinear"),'test'); 
 test_summary("Schedule",array("Schedule"),
@@ -2333,6 +2333,9 @@ end_hidden("refresh");
 begin_hidden("value", "Value");
 tests("Cello","test_Value",   "test_Value","","");
 end_hidden("value");
+begin_hidden("box", "Box");
+tests("Cello","test_Box",   "test_Box","","");
+end_hidden("box");
 
 //----------------------------------------------------------------------
 

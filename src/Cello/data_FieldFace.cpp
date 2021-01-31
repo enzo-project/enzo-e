@@ -8,18 +8,7 @@
 #include "cello.hpp"
 #include "data.hpp"
 
-#define ENABLE_PADDING
-
-// TESTING!!!
-// #define BYPASS_F2F_PADDED_ARRAY
-
-
-// #define TRACE_PADDED_ARRAY_VALUES
-// #define DEBUG_ENZO_PROLONG
-//#define DEBUG_FIELD_FACE
-// Whether to use Fortran files for copying
 #define FORTRAN_STORE
-// #define BYPASS_ARRAY_COPY
 
 long FieldFace::counter[CONFIG_NODE_SIZE] = {0};
 
@@ -38,6 +27,14 @@ enum enum_op_type {
   op_store
 };
 
+
+#define CHECK_COARSE(FIELD,i_f)                 \
+  { \
+    cello_float * coarse = (cello_float *)FIELD.coarse_values(i_f);     \
+    ASSERT ("CHECK_COARSE","coarse array is null", (coarse != nullptr)); \
+  }
+
+
 //----------------------------------------------------------------------
 
 FieldFace::FieldFace (int rank) throw()
@@ -48,10 +45,6 @@ FieldFace::FieldFace (int rank) throw()
     refresh_(NULL),
     new_refresh_(false)
 {
-#ifdef DEBUG_FIELD_FACE    
-  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",
-            CkMyPe(),__FILE__,__LINE__,this);
-#endif    
   ++counter[cello::index_static()]; 
 
   for (int i=0; i<3; i++) {
@@ -65,9 +58,6 @@ FieldFace::FieldFace (int rank) throw()
 
 FieldFace::~FieldFace() throw ()
 {
-#ifdef DEBUG_FIELD_FACE  
-  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE deleting %p\n",CkMyPe(),__FILE__,__LINE__,(void*)this);
-#endif
   --counter[cello::index_static()];
 
   if (new_refresh_) {
@@ -86,10 +76,6 @@ FieldFace::FieldFace(const FieldFace & field_face) throw ()
      new_refresh_(false)
 
 {
-#ifdef DEBUG_FIELD_FACE  
-  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p(%p)\n",
-            CkMyPe(),__FILE__,__LINE__,(void*)this,(void*)&field_face);
-#endif  
   ++counter[cello::index_static()];
 
   copy_(field_face);
@@ -173,6 +159,8 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
 
   for (size_t i_f=0; i_f < field_list_src.size(); i_f++) {
 
+    CHECK_COARSE(field,i_f);
+
     const size_t index_field = field_list_src[i_f];
     
     precision_type precision = field.precision(index_field);
@@ -196,18 +184,17 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
     field.size(n3,n3+1,n3+2);
     Box box(rank_,n3,g3);
     set_box_(&box);
-    Problem * problem   = cello::problem();
-#ifdef ENABLE_PADDING
+
     if (refresh_type_ == refresh_fine) {
-      Prolong * prolong = prolong_ ? prolong_ : problem->prolong();
-      const int pad = prolong->padding();
+      const int pad = prolong()->padding();
       if (pad>0) box.set_padding(pad);
     }
-#endif
+
     box_adjust_accumulate_(&box,accumulate,g3);
 
     box.compute_region();
-    box.get_limits(BoxType_receive,Box::BlockType::send,i3,n3);
+    // limits for Send block 
+    box.get_limits(Box::BlockType::send,i3,n3);
     n3[0] -= i3[0];
     n3[1] -= i3[1];
     n3[2] -= i3[2];
@@ -223,9 +210,7 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
 
       int i3_array[3] = {0,0,0};
 
-      Restrict * restrict = restrict_ ? restrict_ : problem->restrict();
-
-      index_array += restrict->apply
+      index_array += restrict()->apply
 	(precision, 
 	 array_face,nc3,i3_array,nc3, 
 	 field_face,m3,i3, n3);
@@ -267,6 +252,7 @@ void FieldFace::array_to_face (char * array, Field field) throw()
   
   for (size_t i_f=0; i_f < field_list_dst.size(); i_f++) {
 
+    CHECK_COARSE(field,i_f);
     size_t index_field = field_list_dst[i_f];
 
     precision_type precision = field.precision(index_field);
@@ -287,23 +273,22 @@ void FieldFace::array_to_face (char * array, Field field) throw()
 
     int i3[3], n3[3];
 
+    // adjust face relative to sender
     invert_face();
+
     field.size(n3,n3+1,n3+2);
     Box box (rank_,n3,g3);
     set_box_(&box);
     invert_face();
 
-    Problem * problem   = cello::problem();
-#ifdef ENABLE_PADDING
     if (refresh_type_ == refresh_fine) {
-      Prolong * prolong = prolong_ ? prolong_ : problem->prolong();
-      const int pad = prolong->padding();
+      const int pad = prolong()->padding();
       if (pad>0) box.set_padding(pad);
     }
-#endif
+
     box_adjust_accumulate_(&box,accumulate,g3);
 
-    box.get_limits(BoxType_receive,Box::BlockType::receive,i3,n3);
+    box.get_limits(Box::BlockType::receive,i3,n3,BoxType_receive);
     n3[0] -= i3[0];
     n3[1] -= i3[1];
     n3[2] -= i3[2];
@@ -322,21 +307,16 @@ void FieldFace::array_to_face (char * array, Field field) throw()
 
       int i3_array[3] = {0,0,0};
 
-      Problem * problem = cello::problem();
-
-      Prolong * prolong = prolong_ ? prolong_ : problem->prolong();
-
-      const int pad = prolong->padding();
+      const int pad = prolong()->padding();
 
       if (pad == 0) {
-        index_array += prolong->apply
+        index_array += prolong()->apply
           (precision, 
            field_ghost,m3,i3,       n3,
            array_ghost,nc3,i3_array, nc3,
            accumulate);
       } else {
 
-#ifndef BYPASS_F2F_PADDED_ARRAY
         const int nf = refresh_->field_list_src().size();
         const int nxc = rank_ >= 1 ? (nc3[0]+2*pad) : 1;
         const int nyc = rank_ >= 2 ? (nc3[1]+2*pad) : 1;
@@ -359,60 +339,11 @@ void FieldFace::array_to_face (char * array, Field field) throw()
         const int nc = nxc*nyc*nzc;
         cello_float * padded_array = &padded_face_vector[i_f*nc];
 
-#ifdef TRACE_PADDED_ARRAY_VALUES        
-
-        if (i_f == 0) {
-          const int io = (oxc) + nxc*((oyc) + nyc*(ozc));
-          CkPrintf ("PADDED_ARRAY_VALUES %s:%d i_f %d array_to_face padded_array field %p PRE\n",
-                    __FILE__,__LINE__,i_f,(void*)&padded_array[io]);
-          for (int iz=0; iz<nzc; iz++) {
-            for (int iy=0; iy<nyc; iy++) {
-              CkPrintf ("PADDED_ARRAY_VALUES set_padded_array field i_f %d %p %d %d %d: ",
-                        i_f,(void*)&padded_array[io],0,iy,iz);
-              for (int ix=0; ix<nxc; ix++) {
-                int i=io + ix + nxc*(iy + nyc*iz);
-                CkPrintf (" %6.3g",padded_array[i]);
-              }
-              CkPrintf ("\n");
-            }
-          }
-        }
-#endif      
         cello::copy(padded_array,
                     nxc,nyc,nzc, oxc,oyc,ozc,
                     (cello_float *) array_ghost,
                     nc3[0],nc3[1],nc3[2],0,0,0,
                     nc3[0],nc3[1],nc3[2]);
-#ifdef TRACE_PADDED_ARRAY_VALUES        
-        if (i_f == 0) {
-          const int io = (oxc) + nxc*((oyc) + nyc*(ozc));
-          CkPrintf ("PADDED_ARRAY_VALUES %s:%d i_f %d array_to_face padded_array field %p POST\n",
-                    __FILE__,__LINE__,i_f,(void*)&padded_array[io]);
-          for (int iz=0; iz<nzc; iz++) {
-            for (int iy=0; iy<nyc; iy++) {
-              CkPrintf ("PADDED_ARRAY_VALUES set_padded_array field i_f %d %p %d %d %d: ",
-                        i_f,(void*)&padded_array[io],0,iy,iz);
-              for (int ix=0; ix<nxc; ix++) {
-                int i=io + ix + nxc*(iy + nyc*iz);
-                CkPrintf (" %6.3g",padded_array[i]);
-              }
-              CkPrintf ("\n");
-            }
-          }
-        }
-#endif      
-
-#   ifdef DEBUG_ENZO_PROLONG        
-        const double sum_pre = cello::sum
-          (padded_array, nxc,nyc,nzc, 0,0,0, nxc,nyc,nzc);
-        CkPrintf ("TRACE_PADDED_ARRAY %d Block::array_to_face() i_f %d %p sum %g -> %g\n",
-                  refresh_->id(),i_f,padded_array,
-                  sum_pre,
-                  cello::sum(padded_array,
-                             nxc,nyc,nzc, 0,0,0, nxc,nyc,nzc));
-#   endif
-
-#endif /* BYPASS_F2F_PADDED_ARRAY */
 
       }
 
@@ -452,8 +383,12 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
   auto field_list_src = refresh_->field_list_src();
   auto field_list_dst = refresh_->field_list_dst();
   
+  
+  cello_float * padded_face_vector = nullptr;
+
   for (size_t i_f=0; i_f < field_list_src.size(); i_f++) {
 
+    CHECK_COARSE(field_src,i_f);
     size_t index_src = field_list_src[i_f];
     size_t index_dst = field_list_dst[i_f];
 
@@ -462,9 +397,6 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
     field_src.dimensions(index_src,&m3[0],&m3[1],&m3[2]);
     field_src.ghost_depth(index_src,&g3[0],&g3[1],&g3[2]);
     field_src.centering(index_src,&c3[0],&c3[1],&c3[2]);
-#   ifdef DEBUG_ENZO_PROLONG        
-        CkPrintf ("DEBUG_PADDDED_ARRAY m3      %d %d %d\n",m3[0],m3[1],m3[2]);
-#endif        
     
     const bool accumulate = accumulate_(index_src,index_dst);
 
@@ -474,45 +406,26 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
     field_src.size(n3,n3+1,n3+2);
     Box box (rank_,n3,g3);
     set_box_(&box);
-    Problem * problem   = cello::problem();
-    Prolong * prolong = prolong_ ? prolong_ : problem->prolong();
-#ifdef ENABLE_PADDING
+
     if (refresh_type_ == refresh_fine) {
-      if (prolong->padding()) {
-        box.set_padding(prolong->padding());
+      if (prolong()->padding()) {
+        box.set_padding(prolong()->padding());
       }      
     }
-#endif    
+
     box_adjust_accumulate_(&box,accumulate,g3);
 
-    box.get_limits(BoxType_receive,Box::BlockType::send,is3,ns3);
+    box.get_limits(Box::BlockType::send,is3,ns3);
     ns3[0] -= is3[0];
     ns3[1] -= is3[1];
     ns3[2] -= is3[2];
-#   ifdef DEBUG_ENZO_PROLONG        
-        CkPrintf ("DEBUG_PADDDED_ARRAY is3     %d %d %d\n",is3[0],is3[1],is3[2]);
-        CkPrintf ("DEBUG_PADDDED_ARRAY ns3     %d %d %d\n",ns3[0],ns3[1],ns3[2]);
-#   endif
-#ifdef DEBUG_FIELD_FACE
-    box.print("face_to_face");
-    CkPrintf ("DEBUG_FIELD_FACE face_to_face is3 %d %d %d send\n",
-              is3[0],is3[1],is3[2]);
-    CkPrintf ("DEBUG_FIELD_FACE face_to_face ns3 %d %d %d send\n",
-              ns3[0],ns3[1],ns3[2]);
-#endif    
 
     int id3[3], nd3[3];
 
-    box.get_limits(BoxType_receive,Box::BlockType::receive,id3,nd3);
+    box.get_limits(Box::BlockType::receive,id3,nd3,BoxType_receive);
     nd3[0] -= id3[0];
     nd3[1] -= id3[1];
     nd3[2] -= id3[2];
-#ifdef DEBUG_FIELD_FACE    
-    CkPrintf ("DEBUG_FIELD_FACE face_to_face id3 %d %d %d send\n",
-              id3[0],id3[1],id3[2]);
-    CkPrintf ("DEBUG_FIELD_FACE face_to_face nd3 %d %d %d send\n",
-              nd3[0],nd3[1],nd3[2]);
-#endif    
 
     // Adjust loop limits if accumulating to include ghost zones
     // on neighbor axes
@@ -535,35 +448,22 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
 	     "Odd ghost zones not implemented yet: prolong needs padding",
 	     ! need_padding);
 
-      const int pad = prolong->padding();
+      const int pad = prolong()->padding();
 
       if (pad == 0) {
 
-        prolong->apply (precision, 
+        prolong()->apply (precision, 
                         values_dst,m3,id3, nd3,
                         values_src,m3,is3, ns3,
                         accumulate);
 
       } else {
         
-#ifndef BYPASS_F2F_PADDED_ARRAY
-
-#ifdef DEBUG_ENZO_PROLONG        
-        CkPrintf ("DEBUG_PADDING face_to_face\n");
-#endif
-        
         int ia3[3], na3[3];
-        box.get_limits(BoxType_receive,Box::BlockType::receive,ia3,na3);
+        box.get_limits(Box::BlockType::receive,ia3,na3,BoxType_receive);
         na3[0] -= ia3[0];
         na3[1] -= ia3[1];
         na3[2] -= ia3[2];
-#ifdef DEBUG_FIELD_FACE    
-        CkPrintf ("DEBUG_FIELD_FACE face_to_face ia3 %d %d %d send\n",
-                  ia3[0],ia3[1],ia3[2]);
-        CkPrintf ("DEBUG_FIELD_FACE face_to_face na3 %d %d %d send\n",
-                  na3[0],na3[1],na3[2]);
-#endif    
-
 
         const int nf = refresh_->field_list_src().size();
         const int nxc = rank_ >= 1 ? (ns3[0]+2*pad) : 1;
@@ -572,17 +472,11 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
         const int oxc = (rank_ >= 1) ? 1 : 0;
         const int oyc = (rank_ >= 2) ? 1 : 0;
         const int ozc = (rank_ >= 3) ? 1 : 0;
-#   ifdef DEBUG_ENZO_PROLONG        
-        CkPrintf ("DEBUG_PADDDED_ARRAY n[xyz]c %d %d %d\n",nxc,nyc,nzc);
-        CkPrintf ("DEBUG_PADDDED_ARRAY o[xyz]c %d %d %d\n",oxc,oyc,ozc);
-#endif        
         FieldData * field_data = field_dst.field_data();
-#   ifdef DEBUG_ENZO_PROLONG        
-        CkPrintf ("DEBUG_PADDED_ARRAY n[xyz]c %d %d %d\n",nxc,nyc,nzc);
-        CkPrintf ("DEBUG_FIELD_FACE padded array ns %d %d %d\n",ns3[0],ns3[1],ns3[2]);
-#endif        
-        cello_float * padded_face_vector = field_data->padded_array_allocate
-          (face_[0],face_[1],face_[2],nf,nxc,nyc,nzc);
+        if (i_f == 0)  {
+          padded_face_vector = field_data->padded_array_allocate
+            (face_[0],face_[1],face_[2],nf,nxc,nyc,nzc);
+        }
         const int na = field_data->padded_array_dimensions
           (face_[0],face_[1],face_[2]);
 
@@ -594,73 +488,32 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
         const int nc = nxc*nyc*nzc;
         cello_float * padded_array = &padded_face_vector[i_f*nc];
 
-
-#ifdef TRACE_PADDED_ARRAY_VALUES        
-        if (i_f == 0) {
-          const int io = (oxc) + nxc*((oyc) + nyc*(ozc));
-          CkPrintf ("PADDED_ARRAY_VALUES %s:%d i_f %d face_to_face padded_array field %p PRE\n",
-                    __FILE__,__LINE__,i_f,(void*)&padded_array[io]);
-          for (int iz=0; iz<nzc; iz++) {
-            for (int iy=0; iy<nyc; iy++) {
-              CkPrintf ("PADDED_ARRAY_VALUES set_padded_array field i_f %d %p %d %d %d: ",
-                        i_f,(void*)&padded_array[io],0,iy,iz);
-              for (int ix=0; ix<nxc; ix++) {
-                int i=io + ix + nxc*(iy + nyc*iz);
-                CkPrintf (" %6.3g",padded_array[i]);
-              }
-              CkPrintf ("\n");
-            }
-          }
-        }
-#endif      
+        print("face_to_face");
+        CkPrintf ("DEBUG_COPY padded_array %p i_f %d nc %d\n",
+                  padded_array,i_f,nc);
+        CkPrintf ("DEBUG_COPY nxc,nyc,nzc %d %d %d\n", nxc,nyc,nzc);
+        CkPrintf ("DEBUG_COPY oxc,oyc,ozc %d %d %d\n", oxc,oyc,ozc);
+        CkPrintf ("DEBUG_COPY values_src  %p\n",values_src);
+        CkPrintf ("DEBUG_COPY m3[]        %d %d %d\n", m3[0],m3[1],m3[2]);
+        CkPrintf ("DEBUG_COPY is3[]       %d %d %d\n", is3[0],is3[1],is3[2]);
+        CkPrintf ("DEBUG_COPY ns3[]       %d %d %d\n", ns3[0],ns3[1],ns3[2]);
+        fflush(stdout);
+        for (int i=0; i<nxc*nyc*nzc; i++) {padded_array[i] = 0.0;}
         cello::copy(padded_array,
                     nxc,nyc,nzc, oxc,oyc,ozc,
                     (cello_float *) values_src,
                     m3[0],m3[1],m3[2],is3[0],is3[1],is3[2],
                     ns3[0],ns3[1],ns3[2]);
-#ifdef TRACE_PADDED_ARRAY_VALUES        
-        if (i_f == 0) {
-          const int io = (oxc) + nxc*((oyc) + nyc*(ozc));
-          CkPrintf ("PADDED_ARRAY_VALUES %s:%d i_f %d face_to_face padded_array field %p POST\n",
-                    __FILE__,__LINE__,i_f,(void*)&padded_array[io]);
-          for (int iz=0; iz<nzc; iz++) {
-            for (int iy=0; iy<nyc; iy++) {
-              CkPrintf ("PADDED_ARRAY_VALUES set_padded_array field i_f %d %p %d %d %d: ",
-                        i_f,(void*)&padded_array[io],0,iy,iz);
-              for (int ix=0; ix<nxc; ix++) {
-                int i=io + ix + nxc*(iy + nyc*iz);
-                CkPrintf (" %6.3g",padded_array[i]);
-              }
-              CkPrintf ("\n");
-            }
-          }
-        }
-#endif      
-
-#   ifdef DEBUG_ENZO_PROLONG        
-        const double sum_pre = cello::sum
-          (padded_array, nxc,nyc,nzc, 0,0,0, nxc,nyc,nzc);
-        CkPrintf ("TRACE_PADDED_ARRAY %d Block::face_to_face() i_f %d %p sum %g -> %g\n",
-                  refresh_->id(),i_f,padded_array,
-                  sum_pre,
-                  cello::sum(padded_array,
-                             nxc,nyc,nzc, 0,0,0, nxc,nyc,nzc));
-#   endif
-
-#endif
-        
       }
 
     } else if (refresh_type_ == refresh_coarse) {
 
       // Restrict field
 
-      Restrict * restrict = restrict_ ? restrict_ : problem->restrict();
-
-      restrict->apply (precision, 
-		       values_dst,m3,id3, nd3,
-		       values_src,m3,is3, ns3,
-		       accumulate);
+      restrict()->apply (precision,
+                         values_dst,m3,id3, nd3,
+                         values_src,m3,is3, ns3,
+                         accumulate);
 
     } else {
 
@@ -700,6 +553,7 @@ int FieldFace::num_bytes_array(Field field) throw()
 
   for (size_t i_f=0; i_f < field_list_src.size(); i_f++) {
 
+    CHECK_COARSE(field,i_f);
     size_t index_field = field_list_src[i_f];
 
     precision_type precision = field.precision(index_field);
@@ -719,17 +573,14 @@ int FieldFace::num_bytes_array(Field field) throw()
     field.size(n3,n3+1,n3+2);
     Box box (rank_,n3,g3);
     set_box_(&box);
-    Problem * problem   = cello::problem();
-#ifdef ENABLE_PADDING
+
     if (refresh_type_ == refresh_fine) {
-      Prolong * prolong = prolong_ ? prolong_ : problem->prolong();
-      const int pad = prolong->padding();
+      const int pad = prolong()->padding();
       if (pad>0) box.set_padding(pad);
     }
-#endif    
 
     box_adjust_accumulate_(&box,accumulate,g3);
-    box.get_limits(BoxType_receive,Box::BlockType::send,i3,n3);
+    box.get_limits(Box::BlockType::send,i3,n3);
     n3[0] -= i3[0];
     n3[1] -= i3[1];
     n3[2] -= i3[2];
@@ -984,10 +835,12 @@ template<class T> void FieldFace::copy_
 
 void FieldFace::print(const char * message)
 {
-  CkPrintf (" FieldFace %s %p\n",message,(void*)this);
-  CkPrintf ("    face_  %d %d %d\n",face_[0],face_[1],face_[2]);
-  CkPrintf ("    ghost_  %d %d %d\n",ghost_[0],ghost_[1],ghost_[2]);
-  CkPrintf ("    child_  %d %d %d\n",child_[0],child_[1],child_[2]);
+  CkPrintf (" FieldFace   %s %p\n",message,(void*)this);
+  CkPrintf ("    face_    %d %d %d\n",face_[0],face_[1],face_[2]);
+  CkPrintf ("    ghost_   %d %d %d\n",ghost_[0],ghost_[1],ghost_[2]);
+  CkPrintf ("    child_   %d %d %d\n",child_[0],child_[1],child_[2]);
+  CkPrintf ("    prolong_ %p\n",(void*)prolong_);
+  CkPrintf ("    restrict_ %p\n",(void*)restrict_);
   CkPrintf ("    refresh_type_ %d\n",refresh_type_);
   if (refresh_) refresh_->print();
 }
@@ -1135,8 +988,8 @@ void FieldFace::set_box_(Box * box)
 
   box->set_block(BoxType_receive,level,face_,child_);
 
-  if (prolong_ && prolong_->padding() > 0)
-    box->set_padding(prolong_->padding());
+  if (prolong() && prolong()->padding() > 0)
+    box->set_padding(prolong()->padding());
   box->compute_region();
 }
 

@@ -8,7 +8,7 @@
 #ifndef MESH_BOX_HPP
 #define MESH_BOX_HPP
 
-enum BoxType { BoxType_receive = 0, BoxType_extra = 1 };
+enum BoxType { BoxType_receive = 0, BoxType_extra = 1, BoxType_ignored = -1 };
 
 class Box {
 
@@ -111,7 +111,7 @@ public: // interface
   void compute_region();
 
   /// Get send/box (recv/extra) intersection loop limits for the specified block
-  bool get_limits (BoxType bt, BlockType block_type, int region_start[3], int region_stop[3]);
+  bool get_limits (BlockType block_type, int region_start[3], int region_stop[3],BoxType bt=BoxType_ignored);
 
   void get_region_size (int ma3[3])
   {

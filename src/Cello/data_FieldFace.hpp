@@ -88,11 +88,21 @@ public: // interface
   /// Set Prolong operation (default is Problem::prolong() )
   void set_prolong (Prolong * prolong)
   { prolong_ = prolong; }
+
+  Prolong * prolong ()
+  { return prolong_ ?
+      prolong_ : (cello::problem() ?
+                  cello::problem()->prolong() : nullptr); }
   
   /// Set Restrict operation (default is Problem::restrict() )
   void set_restrict (Restrict * restrict)
   { restrict_ = restrict; }
 
+  Restrict * restrict ()
+  { return restrict_ ?
+      restrict_ : (cello::problem() ?
+                   cello::problem()->restrict() : nullptr); }
+  
   /// Set the Refresh object 
   void set_refresh (Refresh * refresh, bool new_refresh)
   {

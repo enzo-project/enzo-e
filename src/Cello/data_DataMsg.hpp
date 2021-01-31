@@ -238,7 +238,7 @@ protected: // attributes
 
   /// Padded face array (for interpolation that requires extra layer
   /// of cells around FieldFace that intersects multiple Blocks)
-  /// This stores padded faces for all fields in
+  /// This stores padded faces for all fields
   std::vector<cello_float> padded_face_;
   /// List of field indices for padded face
   std::vector<int> padded_face_field_list_;

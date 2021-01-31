@@ -17,7 +17,7 @@ BEGIN{
     for (i=1; i<NF; i++) {
 	if ($i == "blocks") nb=$(i-1);
     }
-    printf "** TODO Invalid %s of size %d\n",$(NF-4),$NF
+    printf "** TODO Invalid %s of size %d\n",$3,$NF
 }
 
 /\(/ && /\)/ && /pp:/ || /F:/ {

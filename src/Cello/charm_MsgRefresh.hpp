@@ -8,7 +8,7 @@
 #ifndef CHARM_MSG_REFRESH_HPP
 #define CHARM_MSG_REFRESH_HPP
 
-// #define TRACE_MSG_REFRESH /* include name_block and name_type */
+// #define TRACE_MSG_REFRESH /* also uncomment in control_refresh.cpp */
 
 #include "cello.hpp"
 

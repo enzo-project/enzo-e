@@ -284,6 +284,8 @@ test_mask         = env.Program (['test_Mask.cpp', objs_mesh],
                                  LIBS=[libs_mesh,  libs_test])
 test_value        = env.Program (['test_Value.cpp', objs_mesh],
                                  LIBS=[libs_mesh,  libs_test])
+test_box        = env.Program (['test_Box.cpp', objs_mesh],
+                                 LIBS=[libs_mesh,  libs_test])
 
 test_memory       = env.Program ('test_Memory.cpp',     LIBS=[libs_memory, libs_test])
 test_monitor      = env.Program ('test_Monitor.cpp',    LIBS=[libs_monitor,libs_test])
@@ -330,7 +332,7 @@ binaries_data = [test_scalar_data,
                   test_field_face,
                   test_it_index,
 		  test_particle]
-binaries_problem = [test_mask,test_value,test_refresh]
+binaries_problem = [test_mask,test_value,test_refresh,test_box]
 binaries_io    = [test_colormap]
 binaries_memory  = [test_memory]
 binaries_mesh = [ test_data,test_tree,test_tree_density,test_sync,test_node,test_node_trace,test_it_node,test_index,test_face,test_face_fluxes,test_flux_data,test_prolong_linear,test_schedule,test_it_face,test_it_child]

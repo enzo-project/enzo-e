@@ -611,10 +611,9 @@ protected:
   /// domains overlap multiple blocks
   void refresh_extra_send_
   (Refresh & refresh,
-   int refresh_type,
    Index index_neighbor, int if3[3],
    int ma3[3], int iam3[3], int iap3[3], int ifm3[3], int ifp3[3],
-   Field field);
+   Field field,std::string debug);
 
   /// Apply prolongation operations on Block
   void refresh_extra_apply_(Refresh * refresh);

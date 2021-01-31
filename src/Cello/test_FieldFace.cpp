@@ -285,7 +285,7 @@ PARALLEL_MAIN_BEGIN
   int nbx=2, nby=3, nbz=4;
   std::vector<FieldData *> field_data(nbx*nby*nbz);
 
-  int mx=5, my=6, mz=7;
+  int mx=4, my=6, mz=8;
 
   init_fields(field_descr,field_data.data(),nbx,nby,nbz,mx,my,mz);
 

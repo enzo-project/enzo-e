@@ -8,7 +8,7 @@
 #include "enzo.hpp"
 
 #include "cello.hpp"
-// #define TRACE_PROLONG
+#define TRACE_PROLONG
 // #define DEBUG_ENZO_PROLONG
 // #define TRACE_PADDED_ARRAY_VALUES
 
