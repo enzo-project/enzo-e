@@ -32,3 +32,32 @@
 The Enzo-E project is fully open-source and contributions are very
 welcome. If you're interested in getting involved, come say hello on
 the developers mailing list!
+
+## Branch Notes:
+
+This branch uses  `cmake` to build. Note that the project should not be
+compiled from within the repository by in another build repository. For cloning
+the repository, we suggest using
+```
+mkdir enzo-e-project
+cd enzo-e-project
+git clone git@github.com:forrestglines/enzo-e.git
+```
+For building, we create a new directory inside of `enzo-e-project`, export a `CHARM_HOME` environment variable, then use cmake to build.
+```
+mkdir build
+cd build
+cmake  ../enzo-e
+make
+```
+If `ninja` is installed, the `ninja` build system can be used for faster build times
+```
+cmake  -GNinja ../enzo-e
+ninja
+```
+
+The Enzo-E executable is built within `src/`. Example inputs are copied into build directory as part of the `cmake` configuration. The executable can be run using
+```
+$CHARM_HOME/bin/charmrun +p4 src/enzo_e_exe input/test_cosmo-bcg.in
+```
+

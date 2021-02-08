@@ -1,13 +1,13 @@
 
 cmake_minimum_required(VERSION 3.12)
 
+#Import cmake package handling
+INCLUDE( FindPackageHandleStandardArgs )
 
-# Imports machine-specific configuration
-#include(cmake/MachineCfg.cmake)
 
+#Define project and languages
 project(enzo-e LANGUAGES C CXX Fortran)
 
-INCLUDE( FindPackageHandleStandardArgs )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -33,70 +33,34 @@ endif()
 #Get CHARM++ variables
 # Checks an environment variable; note that the first check
 # does not require the usual CMake $-sign.
-IF( DEFINED ENV{CHARM_DIR} )
-  SET( CHARM_DIR "$ENV{CHARM_DIR}" )
+IF( DEFINED ENV{CHARM_HOME} )
+  SET( CHARM_HOME "$ENV{CHARM_HOME}" )
 ELSE()
-  message( STATUS "CHARM_DIR not defined")
+  message( STATUS "CHARM_HOME not defined")
 ENDIF()
+set(CHARMC_EXE "${CHARM_HOME}/bin/charmc")
+include_directories(${CHARM_HOME}/include)
+
+#LINK_DIRECTORIES(${CHARM_HOME}/lib)
+#set(CHARM_LIBRARIES "moduleCommonLBs" "ckmain" "ck" "memory-default" "threads-default" "conv-machine" "conv-core" "tmgr" "conv-util" "conv-partition" "conv-ldb" "memory-default" "threads-default" "ldb-rand" "ckqt" "moduleCommonLBs" "moduleNDMeshStreamer" "modulecompletion" "hwloc_embedded" "mpi-mainmodule")
 
 
-set(CHARMC_EXE "${CHARM_DIR}/bin/charmc")
-include_directories(${CHARM_DIR}/include)
-
-LINK_DIRECTORIES(${CHARM_DIR}/lib)
-set(CHARM_LIBRARIES "moduleCommonLBs" "ckmain" "ck" "memory-default" "threads-default" "conv-machine" "conv-core" "tmgr" "conv-util" "conv-partition" "conv-ldb" "memory-default" "threads-default" "ldb-rand" "ckqt" "moduleCommonLBs" "moduleNDMeshStreamer" "modulecompletion" "hwloc_embedded" "mpi-mainmodule")
-set(ENZO_E_LIBRARIES  "dl" "pthread" "z" "hdf5" "png" "gfortran")
-
+#Set up and fine boost
 set(Boost_USE_STATIC_LIBS OFF) 
-set(Boost_USE_MULTITHREADED ON)  
+set(Boost_USE_MULTITHREADED OFF)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
 find_package(Boost REQUIRED COMPONENTS system filesystem) 
 
-#Cello variables
-
+#Define preprocessor definitions
 add_compile_definitions(CONFIG_PRECISION_DOUBLE)
 add_compile_definitions(CONFIG_NODE_SIZE=4)
 add_compile_definitions(CONFIG_NODE_SIZE_3=12)
 add_compile_definitions(NO_FREETYPE)
 add_compile_definitions(SMALL_INTS)
+add_compile_definitions(CONFIG_USE_PERFORMANCE CONFIG_USE_MEMORY CONFIG_HAVE_VERSION_CONTROL)
 
-#set(CHARMC_EXE "${CHARM_DIR}/bin/charmc")
-
-#define CELLO_ARCH "linux_gnu"
-#define CELLO_PREC "double"
-#define CELLO_CC "gcc "
-#define CELLO_CFLAGS "-O3 -g -ffast-math -funroll-loops -fPIC -pedantic   "
-set( CMAKE_C_FLAGS "-O3 -g -ffast-math -funroll-loops -fPIC -pedantic   ")
-#define CELLO_CPPDEFINES "CONFIG_PRECISION_DOUBLE SMALL_INTS {'CONFIG_NODE_SIZE': 64} {'CONFIG_NODE_SIZE_3': 192} NO_FREETYPE CONFIG_USE_PERFORMANCE CONFIG_USE_MEMORY CONFIG_HAVE_VERSION_CONTROL"
-#define CELLO_CPPPATH "#/include /usr/include /usr/include/boost /lib/x86_64-linux-gnu/include"
-#define CELLO_CXX "/home/forrest/MSU/research/code/charm//bin/charmc -language charm++  "
-#define CELLO_CXXFLAGS "-O3 -g -ffast-math -funroll-loops -fPIC -pedantic     -balancer CommonLBs"
-set( CMAKE_CXX_FLAGS "-O3 -g -ffast-math -funroll-loops -fPIC -pedantic" )
-set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ffast-math -funroll-loops -fPIC -pedantic -ffixed-line-length-132    -fdefault-real-8 -fdefault-double-8")
-#define CELLO_FORTRAN "gfortran"
-#define CELLO_FORTRANLIBS "gfortran"
-#define CELLO_FORTRANPATH "#/include"
-#define CELLO_LIBPATH "#/lib /usr/lib /usr/lib/x86_64-linux-gnu /lib/x86_64-linux-gnu/lib /usr/lib/x86_64-linux-gnu"
-#define CELLO_LINKFLAGS "-O3 -g -ffast-math -funroll-loops -fPIC -pedantic     -module CommonLBs"
-set( CMAKE_EXE_LINKER_FLAGS "-O3 -g -ffast-math -funroll-loops -fPIC -pedantic -module CommonLBs" )
-#define CELLO_HOST "forrest-razer"
-#define CELLO_DIR "/home/forrest/MSU/research/code/enzo-e"
-#define CELLO_DATE "2021-02-02"
-#define CELLO_TIME "00:23:53"
-#define CHARM_VERSION 61002
-#define CHARM_PATH "/home/forrest/MSU/research/code/charm/"
-#define CELLO_CHANGESET "f04dd0621a4e63e2c39d8390f4b93f2c57e6a3f1"
-#define CHARM_BUILD "multicore-linux-x86_64"
-
-#configure_file(${CMAKE_SOURCE_DIR}/auto_config.def.in ${CMAKE_BINARY_DIR}/auto_config.def)
-
-message( STATUS ${CHARMC_EXE})
-#SET(CMAKE_C_LINK_EXECUTABLE ${CHARMC_EXE})
-#SET(CMAKE_CXX_LINK_EXECUTABLE ${CHARMC_EXE})
-SET(CMAKE_LINKER ${CHARMC_EXE})
-set(CMAKE_CXX_LINK_EXECUTABLE "<CMAKE_LINKER> ${CMAKE_EXE_LINKER_FLAGS} <OBJECTS> <LINK_LIBRARIES> -o <TARGET>")
-
-function(preprocess_charm_interfaces out_var)
+#Define function to process Charm++ interface files
+function(preprocess_charm_interfaces out_headers)
   set(result)
   #Loop over each input file
   foreach(in_f ${ARGN})
@@ -130,8 +94,24 @@ function(preprocess_charm_interfaces out_var)
     list(APPEND result ${CMAKE_CURRENT_BINARY_DIR}/${out_decl})
   endforeach()
   #message(STATUS ${result} )
-  set(${out_var} "${result}" PARENT_SCOPE)
+  set(${out_headers} "${result}" PARENT_SCOPE)
 endfunction()
+
+#Copy the input files to the build directory
+file(COPY ${CMAKE_SOURCE_DIR}/input DESTINATION ${CMAKE_BINARY_DIR})
+
+#Set some C,CXX, Fortran flags for compiling
+#FIXME: Shouldn't need to define these explicitly
+set( CMAKE_C_FLAGS "-O3 -g -ffast-math -funroll-loops -fPIC -pedantic   ")
+set( CMAKE_CXX_FLAGS "-O3 -g -ffast-math -funroll-loops -fPIC -pedantic" )
+set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ffast-math -funroll-loops -fPIC -pedantic -ffixed-line-length-132    -fdefault-real-8 -fdefault-double-8")
+set( CMAKE_EXE_LINKER_FLAGS "-O3 -g -ffast-math -funroll-loops -fPIC -pedantic -module CommonLBs" )
+
+#Set up the linker
+set(ENZO_E_LIBRARIES  "dl" "pthread" "z" "hdf5" "png" "gfortran")
+
+SET(CMAKE_LINKER ${CHARMC_EXE})
+set(CMAKE_CXX_LINK_EXECUTABLE "<CMAKE_LINKER> ${CMAKE_EXE_LINKER_FLAGS} <OBJECTS> <LINK_LIBRARIES> -o <TARGET>")
 
 add_subdirectory(src)
 

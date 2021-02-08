@@ -1,7 +1,5 @@
 
-
-add_compile_definitions(NO_FREETYPE)
-
+#Define external_library target, including all CPP source files and hpp,dir headers
 add_library(external_library
     STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/External/ExprEval/defs.h
@@ -24,6 +22,8 @@ add_library(external_library
     ${CMAKE_CURRENT_SOURCE_DIR}/External/pngwriter.h
     )
 
+
+#Define the charm interface CI files
 set( charm_interfaces
     Cello/main.CI
     Cello/main_enzo.CI
@@ -34,9 +34,13 @@ set( charm_interfaces
     Enzo/enzo.CI
     )
 
+# Use the preproccess_charm_interafaces function to create "*.decl.h" and
+# "*.def.h" header files. These header files should have the "GENERATED"
+# property for cmake, so they should be useable as dependencies for compiling
+# source files
 preprocess_charm_interfaces(charm_interface_headers ${charm_interfaces})
 
-
+#Define cello_library target, including all CPP,C,Fortran source files and hpp,dir headers
 add_library(cello_library
     STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/Cello/array_CelloArray.hpp
@@ -376,14 +380,14 @@ add_library(cello_library
     ${CMAKE_CURRENT_SOURCE_DIR}/Cello/test_Unit.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Cello/test_Unit.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Cello/test_Value.cpp
-    ${charm_interface_headers}
+    ${charm_interface_headers} #Include the charm interface headers as source dependencies
     )
 
+#Add the other directories in project for including
 target_include_directories(cello_library
 	PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR}
 )
-
 target_include_directories(cello_library
 	PRIVATE
     ${CMAKE_SOURCE_DIR}/src/External
@@ -396,9 +400,11 @@ target_include_directories(cello_library
 	PRIVATE
     ${CMAKE_SOURCE_DIR}/src/Enzo
 )
+#Make sure and external_library builds before cello_library
 add_dependencies(cello_library external_library)
 
 
+#Define enzo_e_exe executable, including all CPP,C,Fortran source files and hpp,dir headers
 add_executable(enzo_e_exe
     ${CMAKE_CURRENT_SOURCE_DIR}/Enzo/calcdiss.F
     ${CMAKE_CURRENT_SOURCE_DIR}/Enzo/calc_dt.F
@@ -624,13 +630,15 @@ add_executable(enzo_e_exe
     ${CMAKE_CURRENT_SOURCE_DIR}/Enzo/xeuler_sweep.F
     ${CMAKE_CURRENT_SOURCE_DIR}/Enzo/yeuler_sweep.F
     ${CMAKE_CURRENT_SOURCE_DIR}/Enzo/zeuler_sweep.F
-    ${charm_interface_headers}
+    ${charm_interface_headers} #Include the charm interface headers as source dependencies
     )
+
+
+#Add the other directories in project for including
 target_include_directories(enzo_e_exe
 	PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR}
 )
-
 target_include_directories(enzo_e_exe
 	PRIVATE
     ${CMAKE_SOURCE_DIR}/src/External
@@ -640,16 +648,20 @@ target_include_directories(enzo_e_exe
 	PRIVATE
     ${CMAKE_SOURCE_DIR}/src/Cello
 )
+
+#Make sure cello_library and external_library build before enzo_e_exe
 add_dependencies(enzo_e_exe cello_library)
 add_dependencies(enzo_e_exe external_library)
 
+#Link cello_library and external_library to enzo_e_exe
 target_link_libraries(enzo_e_exe cello_library)
 target_link_libraries(enzo_e_exe external_library)
 
-message(STATUS "Link to ${CHARM_LIBRARIES}")
-target_link_libraries(enzo_e_exe ${CHARM_LIBRARIES})
+#Link external libraries
+#target_link_libraries(enzo_e_exe ${CHARM_LIBRARIES}) No need to link CHARM_LIBRARIES, linking with charmc takes care of it
 target_link_libraries(enzo_e_exe ${ENZO_E_LIBRARIES})
 
+#Link Boost
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS}) 
     target_link_libraries(enzo_e_exe ${Boost_LIBRARIES})
