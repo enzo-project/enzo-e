@@ -391,6 +391,7 @@ Export('test_path')
 Export('ip_charm')
 Export('smp')
 Export('prec')
+Export('use_valgrind')
 
 
 cpppath     = [inc_path]

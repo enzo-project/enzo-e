@@ -1,13 +1,19 @@
 #
 #  Grackle Test Problem:
 #
-#  Sets up a cooling test without hyrdodynamics to run many
+#  Sets up a cooling test without hydrodynamics to run many
 #  one-zone models in Grackle, fully sampling the density,
 #  temperature, and metallicity parameter space over which 
 #  the chemistry and cooling/heating tables are valid.
 #
-#   
+#  This is currently used for automated checkpoint-restart
+#  testing (the Stopping and Output criteria are overwritten
+#  by the test).
 #
+#  Before using this to launch a simulation, you must
+#  overwrite the entry in Method:grackle:data_file parameter
+#  (this automatically handled for the checkpoint restart
+#  test)
 
  Boundary {
      type = "reflecting";
