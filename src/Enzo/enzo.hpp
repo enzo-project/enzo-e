@@ -39,6 +39,7 @@
 #include "_disk.hpp"
 #include "_io.hpp"
 #include "_compute.hpp"
+#include "_array.hpp"
 
 //----------------------------------------------------------------------
 // Component class includes

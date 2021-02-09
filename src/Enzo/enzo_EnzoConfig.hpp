@@ -130,6 +130,24 @@ public: // interface
       physics_cosmology_initial_redshift(0.0),
       physics_cosmology_final_redshift(0.0),
       physics_gravity(false),
+      // EnzoInitialBCenter
+      initial_bcenter_update_etot(false),
+      // EnzoInitialCloud
+      initial_cloud_subsample_n(0),
+      initial_cloud_radius(0.),
+      initial_cloud_center_x(0.0),
+      initial_cloud_center_y(0.0),
+      initial_cloud_center_z(0.0),
+      initial_cloud_density_cloud(0.0),
+      initial_cloud_density_wind(0.0),
+      initial_cloud_velocity_wind(0.0),
+      initial_cloud_etot_wind(0.0),
+      initial_cloud_eint_wind(0.0),
+      initial_cloud_metal_mass_frac(0.0),
+      initial_cloud_initialize_uniform_bfield(false),
+      initial_cloud_perturb_stddev(0.0),
+      initial_cloud_trunc_dev(0.0),
+      initial_cloud_perturb_seed(0),
       // EnzoInitialCosmology
       initial_cosmology_temperature(0.0),
       // EnzoInitialCollapse
@@ -148,6 +166,14 @@ public: // interface
       initial_grackle_test_minimum_temperature(10.0),
       initial_grackle_test_reset_energies(0),
 #endif /* CONFIG_USE_GRACKLE */
+      // EnzoInitialInclinedWave
+      initial_inclinedwave_alpha(0.0),
+      initial_inclinedwave_beta(0.0),
+      initial_inclinedwave_amplitude(0.0),
+      initial_inclinedwave_lambda(0.0),
+      initial_inclinedwave_parallel_vel(std::numeric_limits<double>::min()),
+      initial_inclinedwave_positive_vel(true),
+      initial_inclinedwave_wave_type(""),
       // EnzoInitialMusic
       initial_music_field_files(),
       initial_music_field_datasets(),
@@ -184,6 +210,12 @@ public: // interface
       initial_sedov_random_pressure_out(0.0),
       initial_sedov_random_density(0.0),
       initial_sedov_random_te_multiplier(0),
+      // EnzoInitialShockTube
+      initial_shock_tube_setup_name(""),
+      initial_shock_tube_aligned_ax(""),
+      initial_shock_tube_axis_velocity(0.0),
+      initial_shock_tube_trans_velocity(0.0),
+      initial_shock_tube_flip_initialize(false),
       // EnzoInitialSoup
       initial_soup_rank(0),
       initial_soup_file(""),
@@ -229,6 +261,15 @@ public: // interface
       method_pm_deposit_alpha(0.5),
       // EnzoMethodPmUpdate
       method_pm_update_max_dt(0.0),
+      // EnzoMethodMHDVlct
+      method_vlct_riemann_solver(""),
+      method_vlct_half_dt_reconstruct_method(""),
+      method_vlct_full_dt_reconstruct_method(""),
+      method_vlct_theta_limiter(0.0),
+      method_vlct_density_floor(0.0),
+      method_vlct_pressure_floor(0.0),
+      method_vlct_dual_energy(false),
+      method_vlct_dual_energy_eta(0.0),
       // EnzoProlong
       prolong_enzo_type(),
       prolong_enzo_positive(true),
@@ -249,6 +290,7 @@ public: // interface
 
   {
     for (int axis=0; axis<3; axis++) {
+      initial_cloud_uniform_bfield[axis] = 0;
       initial_sedov_array[axis] = 0;
       initial_sedov_random_array[axis] = 0;
       initial_soup_array[axis] = 0;
@@ -306,6 +348,27 @@ public: // attributes
   /// Gravity
   bool                       physics_gravity;
 
+  /// EnzoInitialBCenter;
+  bool                       initial_bcenter_update_etot;
+
+  /// EnzoInitialCloud;
+  int                        initial_cloud_subsample_n;
+  double                     initial_cloud_radius;
+  double                     initial_cloud_center_x;
+  double                     initial_cloud_center_y;
+  double                     initial_cloud_center_z;
+  double                     initial_cloud_density_cloud;
+  double                     initial_cloud_density_wind;
+  double                     initial_cloud_velocity_wind;
+  double                     initial_cloud_etot_wind;
+  double                     initial_cloud_eint_wind;
+  double                     initial_cloud_metal_mass_frac;
+  bool                       initial_cloud_initialize_uniform_bfield;
+  double                     initial_cloud_uniform_bfield[3];
+  double                     initial_cloud_perturb_stddev;
+  double                     initial_cloud_trunc_dev;
+  unsigned int               initial_cloud_perturb_seed;
+
   /// EnzoInitialCosmology;
   double                     initial_cosmology_temperature;
 
@@ -328,6 +391,15 @@ public: // attributes
   int                        initial_grackle_test_reset_energies;
 #endif /* CONFIG_USE_GRACKLE */
 
+  /// EnzoInitialInclinedWave
+  double                     initial_inclinedwave_alpha;
+  double                     initial_inclinedwave_beta;
+  double                     initial_inclinedwave_amplitude;
+  double                     initial_inclinedwave_lambda;
+  double                     initial_inclinedwave_parallel_vel;
+  bool                       initial_inclinedwave_positive_vel;
+  std::string                initial_inclinedwave_wave_type;
+  
   /// EnzoInitialMusic
 
   std::vector < std::string > initial_music_field_files;
@@ -371,6 +443,13 @@ public: // attributes
   double                     initial_sedov_random_pressure_out;
   double                     initial_sedov_random_density;
   int                        initial_sedov_random_te_multiplier;
+
+  /// EnzoInitialShockTube
+  std::string                initial_shock_tube_setup_name;
+  std::string                initial_shock_tube_aligned_ax;
+  double                     initial_shock_tube_axis_velocity;
+  double                     initial_shock_tube_trans_velocity;
+  bool                       initial_shock_tube_flip_initialize;
 
   /// EnzoInitialSoup
   int                        initial_soup_rank;
@@ -432,6 +511,19 @@ public: // attributes
   /// EnzoMethodPmUpdate
 
   double                     method_pm_update_max_dt;
+
+  /// EnzoMethodMHDVlct
+  std::string                method_vlct_riemann_solver;
+  std::string                method_vlct_half_dt_reconstruct_method;
+  std::string                method_vlct_full_dt_reconstruct_method;
+  double                     method_vlct_theta_limiter;
+  double                     method_vlct_density_floor;
+  double                     method_vlct_pressure_floor;
+  bool                       method_vlct_dual_energy;
+  // unlike ppm, only use a single eta value. It should have a default value
+  // closer to method_ppm_dual_energy_eta1
+  double                     method_vlct_dual_energy_eta;
+
 
   std::string                prolong_enzo_type;
   bool                       prolong_enzo_positive;

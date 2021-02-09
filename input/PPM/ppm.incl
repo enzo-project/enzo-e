@@ -1,0 +1,100 @@
+# File:    ppm.incl
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+   # Domain is the two dimensional box 0 < x,y < 1.0
+
+   include "input/Domain/domain-2d-01.incl"
+
+   # The computational mesh is a single uniform grid
+
+   Mesh { 
+      root_rank = 2;
+      root_size = [80,80];
+   }
+
+   # Field parameters include those concerning fields as a group, as
+   # well as individual fields
+   
+   Field {
+
+      ghost_depth = 3;
+
+      list = [
+	"density",	
+	"velocity_x",
+	"velocity_y",
+	"total_energy",
+	"internal_energy",
+	"pressure"
+      ] ;
+
+      gamma = 1.4;
+
+      padding   = 0;
+      alignment = 8;    
+   }
+
+   Method {
+
+      # list of methods to apply and in what order
+ 
+      list = ["ppm"];
+
+      ppm {
+
+         courant   = 0.8;
+
+         # method-specific parameters
+
+         diffusion   = true;
+         flattening  = 3;
+         steepening  = true;
+
+         dual_energy = false;
+     }
+   }
+   include "input/flux_correct.incl"
+
+   Initial {
+      list = ["value"];
+      value {
+         density = [ 0.125, x + y < 0.5,
+                       1.0 ];
+         total_energy = [ 0.14 / (0.4 * 0.125), x + y < 0.5,
+                          1.0  / (0.4 * 1.0) ];
+         velocity_x      = 0.0;
+         velocity_y      = 0.0;
+         internal_energy = 0.0;
+         pressure = 0.0;
+      } 
+   }
+
+   Boundary { type = "reflecting"; }
+
+   Stopping {        cycle = 400;   } 
+   Testing {   cycle_final = 400; }
+
+   Testing {
+      time_final  = [1.04069762624371];
+      time_tolerance = 1.0e-4;
+   }
+   
+   Output { 
+
+      list = [ "density", "data" ];
+
+      density {
+	type     = "image";
+        field_list = ["density"];
+        include "input/Schedule/schedule_cycle_10.incl"
+        include "input/Colormap/colormap_blackbody.incl";
+      }
+
+      data {
+	type     = "data";
+        field_list = ["density"];
+        include "input/Schedule/schedule_cycle_100.incl"
+      }
+
+   }

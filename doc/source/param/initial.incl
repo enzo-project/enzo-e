@@ -43,6 +43,350 @@ value
 	       
 :e:`is read as "Set the density field equal to` :p:`sin ( x + y )` :e:`wherever` :p:`x - y < 0.0` :e:`, otherwise set to` :p:`1.0` :e:`".`
 
+cloud
+-----
+
+The :p:`cloud` Initial subgroup is used to setup a Spherical cloud embedded in
+a hot wind. The cloud and wind are assumed to be in pressure equilibrium with one another.
+
+The presence of (or lack thereof) the "bfield_x", "bfield_y", and "bfield_z"
+fields indicate whether the setup is purely hydrodynamic or involves magnetic
+fields. Presently, only uniform magnetic fields are supported if they are
+constant across the entire domain. The values of the magnetic fields are
+specified in one of 2 ways:
+
+1. If the :p:`uniform_bfield` parameter is passed a list of 3 floats, the
+   first, second, and third entries are used to initilize the x, y, and z
+   componentents of a uniform magnetic field. If the "bfieldi_x",
+   "bfieldi_y", and "bfieldi_z" face-centered fields are defined, then they
+   will be correctly initialized for use with the VL+CT integrator.
+2. (Deprecated) If the :p:`uniform_bfield` parameter is not specified (or is
+   passed a list containing 0 entries), then the cell-centered magnetic
+   fields are assumed to have been initialized by another Initial subgroup
+   (e.g. value) prior to the call of this subgroup.
+
+The initial density of a cell (from a uniform-resolution mesh) is
+initialized to
+:math:`f_{V} \rho_{\rm cl} \delta + (1 - f_{\rm V})\rho_{\rm w}`,
+where :math:`f_{V}` is the fraction of the cell's volume enclosed
+by the cloud (estimated by subsampling) and :math:`\delta` is
+nominally `1`. Machinery is provided to optionally produce
+perturbations to break symmetries in the initial density
+distribution. When this machinery is used, :math:`\delta` is
+randomly drawn from a truncated Gaussian with :math:`\mu=1`.
+Pressure equilibria is maintained when this machinery is used.
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`subsample_n`
+:Summary: :s:`Determines the subsampling resolution`
+:Type:    :t:`integer`
+:Default: :d:`0`
+:Scope:   Enzo
+
+:e:`Subsampling is used to initialize the fields in regions of overlap
+between the cloud and the wind. For cells in this region, the fraction
+of the volume enclosed by the cloud is estimated by subdividing a cell
+into` :math:`2^n` :e:`subcells along each axis (a value of 0,
+corresponds to no subsampling. The average density of the cells in
+this region are volume weighted and the average velocities are mass
+weighted. The total energy in a cell is currently computed by assuming
+constant internal energy density throughout the grid and using the
+average velocities and densities (and, if applicable, the magnetic
+fields).`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`cloud_radius`
+:Summary: :s:`Initial radius of the spherical cloud`
+:Type:    :t:`float`
+:Default: :d:`none`
+:Scope:   Enzo
+
+:e:`This must be a positive value.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`cloud_center_x`
+:Summary: :s:`x coordinate of the cloud center`
+:Type:    :t:`float`
+:Default: :d:`0.0`
+:Scope:   Enzo
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`cloud_center_y`
+:Summary: :s:`y coordinate of the cloud center`
+:Type:    :t:`float`
+:Default: :d:`0.0`
+:Scope:   Enzo
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`cloud_center_z`
+:Summary: :s:`z coordinate of the cloud center`
+:Type:    :t:`float`
+:Default: :d:`0.0`
+:Scope:   Enzo
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`cloud_density`
+:Summary: :s:`initial mass density of the cloud`
+:Type:    :t:`float`
+:Default: :d:`none`
+:Scope:   Enzo
+
+:e:`This must be a positive value.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`metal_mass_frac`
+:Summary: :s:`initial fraction of the mass density contributed by metals`
+:Type:    :t:`float`
+:Default: :d:`0.0`
+:Scope:   Enzo
+
+:e:`If the ` ``"metal_density_frac"`` :e:`field exists and is
+registered as a member of the ` ``"colour"`` :e:`group, then the field
+is initialized by multiplying this value by the` ``"density"``
+:e:`field (this is done everywhere, regardless of proximity to the
+cloud center). Under these circumstances, this must have a positive
+value.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`uniform_bfield`
+:Summary: :s:`initial uniform magnetic field values`
+:Type:    :t:`list` ( :t:`float` )
+:Default: :d:`[ ]`
+:Scope:   :z:`Enzo`
+
+:e:`If specified, provides the values of the components of the initial magnetic field that are uniform throughout the entire domain. When employed this MUST have 3 entries. This will also initialize the face-centered fields magnetic fields (in addition to the cell-centered fields) if the appropriate fields have been defined. When this is not specified (i.e., when this has a list of 0 entries), the magnetic fields are assumed to have been pre-initialized by a separate problem initializer prior to the execution of the cloud initializer.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`wind_density`
+:Summary: :s:`initial mass density of the wind`
+:Type:    :t:`float`
+:Default: :d:`none`
+:Scope:   Enzo
+
+:e:`This must be a positive value.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`wind_velocity`
+:Summary: :s:`initial velocity of the wind along the x-axis`
+:Type:    :t:`float`
+:Default: :d:`0.0`
+:Scope:   Enzo
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`wind_total_energy`
+:Summary: :s:`initial specific total energy of the wind`
+:Type:    :t:`float`
+:Default: :d:`none`
+:Scope:   Enzo
+
+:e:`This must be a positive value.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`wind_internal_energy`
+:Summary: :s:`initial specific internal energy of the wind`
+:Type:    :t:`float`
+:Default: :d:`0`
+:Scope:   Enzo
+
+:e:`If the` ``"internal_energy"`` :e:`field is defined, then this must
+be a positive value. In this case, the value is also used to help
+initialize the` ``"total_energy"`` :e:`field for cells that overlap
+with the cloud.  However, if the` ``"internal_energy"`` :e:`field is
+not defined, then this must not have a specified value (i.e. it must
+have a value of 0).`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`perturb_standard_deviation`
+:Summary: :s:`standard deviation used for perturbations`
+:Type:    :t:`float`
+:Default: :d:`0`
+:Scope:   Enzo
+
+:e:`This must be either 0 or a positive value. In the former case, the
+perturbation machinery is not used. In the latter case, it gives the
+standard deviation of the truncated gaussian for truncation (technically,
+it's the standard deviation of the gaussian before truncation).`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`perturb_truncation_deviation`
+:Summary: :s:`number of deviation where perturbation gaussian is truncated`
+:Type:    :t:`float`
+:Default: :d:`0`
+:Scope:   Enzo
+
+:e:`Meaningless unless Initial:cloud:perturb_standard_deviation is
+positive. This must be either 0 or a positive value. In the former
+case, the gaussian is not truncated (nominally allowing the
+possibility of negative values). In the latter case, this determines
+the number of standard deviations from the mean at which the gaussian
+should be truncated.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`perturb_seed`
+:Summary: :s:`Seeds the perturbations to cloud density`
+:Type:    :t:`integer`
+:Default: :d:`0`
+:Scope:   Enzo
+
+:e:`This must be a zero or larger. Meaningless unless
+Initial:cloud:perturb_standard_deviation is positive.`
+
+   .. warning::
+
+      Due to reliance on ``std::normal_distribution`` the perturbations are
+      not currently guaranteed to be the same (when the seed is the same) for
+      different compilers or versions of the c++ standard library.
+
+      Changes in the grid resolution, domain size, way that mesh is divided
+      across root blocks, or ghost depth will also affect the perturbations.
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`wind_total_energy`
+:Summary: :s:`initial specific total energy of the wind`
+:Type:    :t:`float`
+:Default: :d:`none`
+:Scope:   Enzo
+
+:e:`This must be a positive value.`
+
+inclined_wave
+-------------
+
+The :p:`inclined_wave` Initial subgroup is used to setup a HD or
+MHD wave at an angle inclined to the simulation domain for testing
+HD/MHD integrators. If applicable, magnetic fields fields are set
+to zero when a HD wave is initialized.
+
+The procedure to addopted from
+`Gardiner & Stone (2008) <http://adsabs.harvard.edu/abs/2008JCoPh.227.4123G>`_ .
+Specifically, a coordinate system "x0", "x1", "x2" is defined and the
+wave is initialized to travel along "x0". The transformation between
+"x", "y", "z" and "x0", "x1", "x2", is determined by the values of the
+:p:`alpha` and :p:`beta` parameters. They are explicitly related by
+
+.. math::
+
+   x &= x_0\cos\alpha\cos\beta - x_1\sin\beta - x_2\sin \alpha \cos \beta \\
+   y &= x_0\cos\alpha\sin\beta + x_1\cos\beta - x_2\sin \alpha \sin \beta \\
+   z &= x_0\sin\alpha + x_2 \cos\alpha
+
+As in that paper, non-zero magnetic fields are initialized using the
+vector potential to ensure that they are divergence-free.
+
+:Parameter:  :p:`Initial` : :p:`inclined_wave` : :p:`alpha`
+:Summary: :s:`Angle used to help determine wave inclination`
+:Type:    :t:`float`
+:Default: :d:`0`
+:Scope:   :z:`Enzo`
+
+:e:`The angle is assumed to have units of radians.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`inclined_wave` : :p:`beta`
+:Summary: :s:`Angle used to help determine wave inclination`
+:Type:    :t:`float`
+:Default: :d:`0`
+:Scope:   :z:`Enzo`
+
+:e:`The angle is assumed to have units of radians.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`inclined_wave` : :p:`wave_type`
+:Summary: :s:`Specifies the type of wave to initialize.`
+:Type:    :t:`string`
+:Default: :d:`alfven`
+:Scope:   :z:`Enzo`
+
+:e:`The values used to initialize hydrodynamical linear waves are taken from
+the columns of the matrix given in equation B3 of`
+`Stone et al. (2008) <http://adsabs.harvard.edu/abs/2008ApJS..178..137S>`_
+:e:`. Valid hydrodynamical waves include:`
+
+  * ``"sound"`` :e:`A linear sound wave.`
+
+  * ``"hd_entropy"`` :e:`A linear HD entropy wave with perturbations
+    in v0 (velocity along the "x0"-axis).`
+
+  * ``"hd_transv_entropy_v1"`` :e:`A linear HD entropy wave with
+    perturbations in velocity component v1 (transverse to the direction
+    of bulk motion).`
+
+  * ``"hd_transv_entropy_v2"`` :e:`A linear HD entropy wave with
+    perturbations in velocity component v2 (transverse to the direction of
+    bulk motion).`
+
+:e:`Each of the valid MHD waves are described in`
+`Gardiner & Stone (2008) <http://adsabs.harvard.edu/abs/2008JCoPh.227.4123G>`_
+:e:`. Valid MHD wave types include:`
+
+  * ``"alfven"`` :e:`A linear Alfven wave with perturbations to the
+    magnetic field along the "x2"-axis.`
+  * ``"circ_alfven"`` :e:`A traveling circularly polarized Alfven
+    wave.`
+  * ``"mhd_entropy"`` :e:`A linear MHD entropy wave.`
+  * ``"fast"`` :e:`A linear fast magnetosonic wave.`
+  * ``"slow"`` :e:`A linear slow magnetosonic wave.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`inclined_wave` : :p:`amplitude`
+:Summary: :s:`Sets the amplitudes of the waves.`
+:Type:    :t:`float`
+:Default: :d:`1.e-6`
+:Scope:   :z:`Enzo`
+
+:e:`This must be a positive value. This has no effect for the circularly
+polarized Alfven wave (for that case, amplitude is fixed at 0.1).`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`inclined_wave` : :p:`lambda`
+:Summary: :s:`The wavelength of the wave.`
+:Type:    :t:`float`
+:Default: :d:`1.`
+:Scope:   :z:`Enzo`
+
+:e:`This must be a positive value.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`inclined_wave` : :p:`positive_vel`
+:Summary: :s:`Sets the sign of the wave speed.`
+:Type:    :t:`logical`
+:Default: :d:`true`
+:Scope:   :z:`Enzo`
+
+:e:`This has no effect for the circularly polarized Alfven wave. This is
+ignored for linear HD entropy waves when Initial:inclined_wave:parallel_vel
+is specified.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`inclined_wave` : :p:`parallel_vel`
+:Summary: :s:`optionally sets the background velocity for HD waves`
+:Type:    :t:`float`
+:Default: :d:`none`
+:Scope:   Enzo
+
+:e:`This can be used to specify a background velocity along v0 for
+HD linear waves.`
+
 music
 -----
 
@@ -201,6 +545,77 @@ sedov
 :Scope:     Enzo  
 :Todo:    :o:`write`
 
+shock_tube
+----------
+
+The :p:`shock_tube` Initial subgroup is used to setup axis-aligned
+shock tube test problems.
+
+Generically, a shock tube get's set up to evolve along an axis given by
+the value of :p:`aligned_ax`. The discontinuity is always placed at
+0.5 along that axis (typically the domain should extend from 0.0 to 1.0).
+
+:Parameter:  :p:`Initial` : :p:`shock_tube` : :p:`setup_name`
+:Summary: :s:`Specifies the name of the shock tube problem to setup.`
+:Type:    :t:`string`
+:Default: :d:`none`
+:Scope:   :z:`Enzo`
+
+:e:`Valid shock tube problems include:`
+
+  * ``"rj2a"`` :e:`An MHD shock tube problem illustrated in Figure 2a of`
+    `Ryu & Jones (1995) <http://adsabs.harvard.edu/abs/1995ApJ...442..228R>`_
+    :e:`. The initialization assumes that the adiabatic index is 5/3.`
+  * ``"sod"`` :e:`The hydrodynamical Sod shock tube test problem. The
+    canonical adiabatic is 1.4 (although this is not required).`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`shock_tube` : :p:`aligned_ax`
+:Summary: :s:`Specify the axis along which the shock tube evolves along.`
+:Type:    :t:`string`
+:Default: :d:`x`
+:Scope:   :z:`Enzo`
+
+:e:`Allowed values are` ``"x"`` :e:`,`  ``"y"`` :e:`, or` ``"z"`` :e:`.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`shock_tube` : :p:`axis_velocity`
+:Summary: :s:`Value to add to velocity component along aligned_ax`
+:Type:    :t:`float`
+:Default: :d:`0.`
+:Scope:   Enzo
+
+:e:`This value is added throughout the entire domain.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`shock_tube` : :p:`transverse_velocity`
+:Summary: :s:`Value to add to a velocity component perpendicular to aligned_ax`
+:Type:    :t:`float`
+:Default: :d:`0.`
+:Scope:   Enzo
+
+:e:`This value is added throughout the entire domain. If aligned_ax is`
+``"x"`` :e:`,`  ``"y"`` :e:`, or` ``"z"`` :e:`, then this value is added to
+the` ``"velocity_y"`` :e:`,`  ``"velocity_z"`` :e:`, or` ``"velocity_z"``
+:e:`field.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`shock_tube` : :p:`flip_initialize`
+:Summary: :s:`Whether to mirror the initial condition across the discontinuity`
+:Type:    :t:`logical`
+:Default: :d:`false`
+:Scope:   Enzo
+
+:e:`When this is` ``"true"`` :e:`the entire setup is mirrored across
+the discontinuity. Basically the left and right states are swapped AND
+all components of the magnetic field and velocity (including
+contributions from axis_velocity and transverse_velocity) are
+multiplied by -1.`
+
 turbulence
 ----------
 
@@ -233,3 +648,91 @@ turbulence
 
 :e:`Initial temperature for initializing the turbulence problem.  Default is 0.0, meaning it is not used.  Either` `pressure` :e:`or` `temperature` :e:`should be defined, but not both.`
 
+vlct_bfield
+-----------
+
+This is used to compute the cell-centered magnetic field for the VL +
+CT MHD method. This initializer can be utilized in 2 ways:
+
+  1. Components of the vector potential (``"Ax"``, ``"Ay"``, ``"Az"``)
+     can be specified as parameters of the subgroup (functions can be
+     specified for each component in the same way as functions are
+     specified for the :p:`value` subgroup. The initializer operates
+     in this mode as long as the values for one of the components of
+     the vector potential is specified (any unspecified components are
+     assumed to be zero everywhere). In this mode, both the
+     cell-centered and face-centered magnetic field values get
+     specified.
+
+  2. Initialize the cell-centered values of the magnetic fields after
+     after another Initial subgroup (e.g. the :p:`value` subgroup) has
+     already to specified the face-centered magnetic fields
+     (``"bfieldi_x"``, ``"bfieldi_y"``, ``"bfieldi_z"``). The
+     cell-centered value is just the average of the corresponding
+     face-centered component. The initializer operates in this mode if
+     none of the components of the vector potential have specified
+     values. (To properly specify use this mode, specify
+     ``"vlct_bfield"`` in the Initial:list parameter list following
+     the name of the Initial subgroup used to setup the face-centered
+     values.
+
+In both modes, the option to update partially initialized
+``"total_energy"`` fields with the specific magnetic energy computed
+from the newly computed cell-centered bfields and pre-initialized
+``"density"`` fields.
+
+*It might be nice to eventually generalize this initializer to be able
+to initialize cell-centered B-fields from vector potentials for MHD
+integrators that don't require face-centered B-fields*
+
+:Parameter:  :p:`Initial` : :p:`value` : :p:`update_etot` :
+:Summary: :s:`update total energy with the initialized magnetic fields`
+:Type:    :t:`logical`
+:Default: :d:`false`
+:Scope:     Enzo
+
+:e:`If true, then the calculated cell-centered magnetic fields are
+used to update the specific total energy. This requires that the`
+``"total_energy"`` :e:`field has already been partially initialized
+(it just doesn't include the specific magnetic energy), and that the`
+``"density"`` :e:`field has been initialized.`
+
+
+:Parameter:  :p:`Initial` : :p:`value` : :p:`Ax` :
+:Summary: :s:`Expression for the x-component of the magnetic vector potential`
+:Type:    :t:`list` ( :t:`float-expr`, [ :t:`logical-expr`, :t:`float-expr`, [ ... ] ] )
+:Default: :d:`[]`
+:Scope:     Enzo
+
+:e:`This parameter allows for the direct specification of the x-component of
+the magnetic vector potential (which will be used to compute magnetic fields).
+The arguements for this parameter follow the same sets of rules as the
+parameters of Initial:value. If this parameter is not specified, but the
+values of the other components of the magnetic vector potential are, then
+this component is assumed to be zero everywhere.`
+
+:Parameter:  :p:`Initial` : :p:`value` : :p:`Ay` :
+:Summary: :s:`Expression for the y-component of the magnetic vector potential`
+:Type:    :t:`list` ( :t:`float-expr`, [ :t:`logical-expr`, :t:`float-expr`, [ ... ] ] )
+:Default: :d:`[]`
+:Scope:     Enzo
+
+:e:`This parameter allows for the direct specification of the y-component of
+the magnetic vector potential (which will be used to compute magnetic fields).
+The arguements for this parameter follow the same sets of rules as the
+parameters of Initial:value. If this parameter is not specified, but the
+values of the other components of the magnetic vector potential are, then
+this component is assumed to be zero everywhere.`
+
+:Parameter:  :p:`Initial` : :p:`value` : :p:`Az` :
+:Summary: :s:`Expression for the z-component of the magnetic vector potential`
+:Type:    :t:`list` ( :t:`float-expr`, [ :t:`logical-expr`, :t:`float-expr`, [ ... ] ] )
+:Default: :d:`[]`
+:Scope:     Enzo
+
+:e:`This parameter allows for the direct specification of the z-component of
+the magnetic vector potential (which will be used to compute magnetic fields).
+The arguements for this parameter follow the same sets of rules as the
+parameters of Initial:value. If this parameter is not specified, but the
+values of the other components of the magnetic vector potential are, then
+this component is assumed to be zero everywhere.`

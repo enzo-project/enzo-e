@@ -1,0 +1,151 @@
+Import('env')
+Import('parallel_run')
+Import('serial_run')
+Import('ip_charm')
+
+Import('bin_path')
+Import('test_path')
+
+#----------------------------------------------------------
+#defines
+#----------------------------------------------------------
+
+env['CPIN'] = 'touch parameters.out; mv parameters.out ${TARGET}.in'
+env['RMIN'] = 'rm -f parameters.out'
+env['clocal_cmd'] = '++local'
+
+
+date_cmd = 'echo $TARGET > test/STATUS; echo "---------------------"; date +"%Y-%m-%d %H:%M:%S";'
+
+
+run_output_stride_1 = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd  $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunOutputStride_1' : run_output_stride_1 } )
+env_mv_output_stride_1 = env.Clone(COPY = 'mkdir -p ' + test_path + '/Output/Stride1;  mv `ls *.png *h5` ' + test_path + '/Output/Stride1')
+
+
+run_output_stride_2 = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd  $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunOutputStride_2' : run_output_stride_2 } )
+env_mv_output_stride_2 = env.Clone(COPY = 'mkdir -p ' + test_path + '/Output/Stride2;  mv `ls *.png *h5` ' + test_path + '/Output/Stride2')
+
+run_output_stride_4 = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd  $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunOutputStride_4' : run_output_stride_4 } )
+env_mv_output_stride_4 = env.Clone(COPY = 'mkdir -p ' + test_path + '/Output/Stride4;  mv `ls *.png *h5` ' + test_path + '/Output/Stride4')
+
+
+
+
+run_header = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd  $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunHeader' : run_header } )
+env_mv_header = env.Clone(COPY = 'mkdir -p ' + test_path + '/Output/Header; mv `ls *.png *h5` ' + test_path + '/Output/Header')
+
+env_mv_out = env.Clone(COPY = 'mv *.png *.h5 Dir_* ' + test_path)
+
+
+
+
+
+
+#-------------------------------------------------------------
+#load balancing
+#-------------------------------------------------------------
+
+output_stride_1_RUN = env_mv_output_stride_1.RunOutputStride_1 (
+     'test_output-stride-1.unit',
+     bin_path + '/enzo-p',
+     ARGS='input/Output/output-stride-1.in')
+
+output_stride_1_C00 = env_mv_out.Hdf5ToPng (
+     'test_output-stride-1-C00.unit',
+     'test_output-stride-1.unit',
+     ARGS='ouput-stride-1 00');
+
+output_stride_1_C10 = env_mv_out.Hdf5ToPng (
+     'test_output-stride-1-C10.unit',
+     'test_output-stride-1-C00.unit',
+     ARGS='ouput-stride-1 10');
+
+output_stride_1 = env_mv_out.Hdf5ToPng (
+     'test_output-stride-1-H5.unit',
+     'test_output-stride-1-C10.unit',
+     ARGS='ouput-stride-1 20');
+
+
+env.Requires(output_stride_1,     output_stride_1_C10)
+env.Requires(output_stride_1_C10, output_stride_1_C00)
+env.Requires(output_stride_1_C00, output_stride_1_RUN)
+
+Clean(output_stride_1,
+     [Glob('#/' + test_path + '/output-stride-1*.png'),
+     'test_output-stride-1.unit'])
+
+#-------------------------------------------------------------
+
+output_stride_2_RUN = env_mv_output_stride_2.RunOutputStride_2 (
+     'test_output-stride-2.unit',
+     bin_path + '/enzo-p',
+     ARGS='input/Output/output-stride-2.in')
+
+output_stride_2_C00 = env_mv_out.Hdf5ToPng (
+     'test_output-stride-2-C00.unit',
+     'test_output-stride-2.unit',
+     ARGS='ouput-stride-2 00');
+
+output_stride_2_C10 = env_mv_out.Hdf5ToPng (
+     'test_output-stride-2-C10.unit',
+     'test_output-stride-2-C00.unit',
+     ARGS='ouput-stride-2 10');
+
+output_stride_2 = env_mv_out.Hdf5ToPng (
+     'test_output-stride-2-H5.unit',
+     'test_output-stride-2-C10.unit',
+     ARGS='ouput-stride-2 20');
+
+
+env.Requires(output_stride_2,     output_stride_2_C10)
+env.Requires(output_stride_2_C10, output_stride_2_C00)
+env.Requires(output_stride_2_C00, output_stride_2_RUN)
+
+Clean(output_stride_2,
+     [Glob('#/' + test_path + '/output-stride-2*.png'),
+     'test_output-stride-2.unit'])
+
+#-------------------------------------------------------------
+
+output_stride_4_RUN = env_mv_output_stride_4.RunOutputStride_4 (
+     'test_output-stride-4.unit',
+     bin_path + '/enzo-p',
+     ARGS='input/Output/output-stride-4.in')
+
+output_stride_4_C00 = env_mv_out.Hdf5ToPng (
+     'test_output-stride-4-C00.unit',
+     'test_output-stride-4.unit',
+     ARGS='ouput-stride-4 00');
+
+output_stride_4_C10 = env_mv_out.Hdf5ToPng (
+     'test_output-stride-4-C10.unit',
+     'test_output-stride-4-C00.unit',
+     ARGS='ouput-stride-4 10');
+
+output_stride_4 = env_mv_out.Hdf5ToPng (
+     'test_output-stride-4-H5.unit',
+     'test_output-stride-4-C10.unit',
+     ARGS='ouput-stride-4 20');
+
+
+env.Requires(output_stride_4,     output_stride_4_C10)
+env.Requires(output_stride_4_C10, output_stride_4_C00)
+env.Requires(output_stride_4_C00, output_stride_4_RUN)
+
+Clean(output_stride_4,
+     [Glob('#/' + test_path + '/output-stride-4*.png'),
+     'test_output-stride-4.unit'])
+
+#--------------------------------------------------------------
+
+output_header=env_mv_header.RunHeader(
+      'test_output-headers.unit',
+      bin_path + '/enzo-p',
+      ARGS='input/Output/output-headers.in')
+
+Clean(output_header,
+     [Glob('#/' + test_path + '/Dir_*')])

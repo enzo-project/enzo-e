@@ -128,6 +128,28 @@ Initial * EnzoProblem::create_initial_
   } else if (type == "grackle_test") {
     initial = new EnzoInitialGrackleTest(enzo_config);
 #endif /* CONFIG_USE_GRACKLE */
+  } else if (type == "vlct_bfield") {
+    initial = new EnzoInitialBCenter(parameters, cycle, time,
+				     enzo_config->initial_bcenter_update_etot);
+  } else if (type == "cloud") {
+    initial = new EnzoInitialCloud
+      (cycle,time,
+       enzo_config->initial_cloud_subsample_n,
+       enzo_config->initial_cloud_radius,
+       enzo_config->initial_cloud_center_x,
+       enzo_config->initial_cloud_center_y,
+       enzo_config->initial_cloud_center_z,
+       enzo_config->initial_cloud_density_cloud,
+       enzo_config->initial_cloud_density_wind,
+       enzo_config->initial_cloud_etot_wind,
+       enzo_config->initial_cloud_eint_wind,
+       enzo_config->initial_cloud_velocity_wind,
+       enzo_config->initial_cloud_metal_mass_frac,
+       enzo_config->initial_cloud_initialize_uniform_bfield,
+       enzo_config->initial_cloud_uniform_bfield,
+       enzo_config->initial_cloud_perturb_stddev,
+       enzo_config->initial_cloud_trunc_dev,
+       enzo_config->initial_cloud_perturb_seed);
   } else if (type == "collapse") {
     initial = new EnzoInitialCollapse
       (cycle,time,
@@ -143,6 +165,17 @@ Initial * EnzoProblem::create_initial_
        enzo_config->field_gamma,
        enzo_config->initial_cosmology_temperature
        );
+  } else if (type == "inclined_wave") {
+    initial = new EnzoInitialInclinedWave
+      (cycle, time,
+       enzo_config->initial_inclinedwave_alpha,
+       enzo_config->initial_inclinedwave_beta,
+       enzo_config->field_gamma,
+       enzo_config->initial_inclinedwave_amplitude,
+       enzo_config->initial_inclinedwave_lambda,
+       enzo_config->initial_inclinedwave_parallel_vel,
+       enzo_config->initial_inclinedwave_positive_vel,
+       enzo_config->initial_inclinedwave_wave_type);
   } else if (type == "turbulence") {
     initial = new EnzoInitialTurbulence
       (cycle,time,
@@ -160,6 +193,15 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_pm_level);
   } else if (type == "ppml_test") {
     initial = new EnzoInitialPpmlTest (cycle,time,enzo_config);
+  } else if (type == "shock_tube") {
+    initial = new EnzoInitialShockTube
+      (enzo_config->field_gamma,
+       cycle, time,
+       enzo_config->initial_shock_tube_setup_name,
+       enzo_config->initial_shock_tube_aligned_ax,
+       enzo_config->initial_shock_tube_axis_velocity,
+       enzo_config->initial_shock_tube_trans_velocity,
+       enzo_config->initial_shock_tube_flip_initialize);
   } else if (type == "soup") {
     const int rank = enzo_config->initial_soup_rank;
     initial = new EnzoInitialSoup
@@ -566,6 +608,19 @@ Method * EnzoProblem::create_method_
        enzo_config->method_gravity_grav_const,
        enzo_config->method_gravity_order,
        enzo_config->method_gravity_accumulate);
+      
+  } else if (name == "mhd_vlct") {
+
+    method = new EnzoMethodMHDVlct
+      (enzo_config->method_vlct_riemann_solver,
+       enzo_config->method_vlct_half_dt_reconstruct_method,
+       enzo_config->method_vlct_full_dt_reconstruct_method,
+       enzo_config->field_gamma,
+       enzo_config->method_vlct_theta_limiter,
+       enzo_config->method_vlct_density_floor,
+       enzo_config->method_vlct_pressure_floor,
+       enzo_config->method_vlct_dual_energy,
+       enzo_config->method_vlct_dual_energy_eta);
 
   } else {
 

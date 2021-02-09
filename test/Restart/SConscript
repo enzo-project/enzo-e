@@ -1,0 +1,164 @@
+Import('env')
+Import('parallel_run')
+Import('serial_run')
+Import('ip_charm')
+
+Import('bin_path')
+Import('test_path')
+
+
+#----------------------------------------------------------
+#defines
+#----------------------------------------------------------
+
+env['CPIN'] = 'touch parameters.out; mv parameters.out ${TARGET}.in'
+env['RMIN'] = 'rm -f parameters.out'
+env['clocal_cmd'] = '++local'
+
+
+date_cmd = 'echo $TARGET > test/STATUS; echo "---------------------"; date +"%Y-%m-%d %H:%M:%S";'
+
+
+
+run_checkpoint_ppm_1 = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunCheckpointPpm_1' : run_checkpoint_ppm_1 } )
+env_mv_checkpoint_ppm_1 = env.Clone(COPY = 'rm `ls *.png` ')
+
+
+run_restart_ppm_1 = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunRestartPpm_1' : run_restart_ppm_1 } )
+env_mv_restart_ppm_1 = env.Clone(COPY = 'mkdir -p ' + test_path + '/Restart/RestartPpm-1; mv `ls *.png *.h5` ' + test_path + '/Restart/RestartPpm-1')
+
+
+
+run_checkpoint_ppm_8 = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd  $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunCheckpointPpm_8' : run_checkpoint_ppm_8 } )
+env_mv_checkpoint_ppm_8 = env.Clone(COPY = 'rm `ls *.png` ')
+
+run_restart_ppm_8 = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd  $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunRestartPpm_8' : run_restart_ppm_8 } )
+env_mv_restart_ppm_8 = env.Clone(COPY = 'mkdir -p ' + test_path + '/Restart/RestartPpm-8; mv `ls *.png *.h5` ' + test_path + '/Restart/RestartPpm-8')
+
+
+run_ppml_1 = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunPpml_1' : run_ppml_1 } )
+env_mv_ppml_1 = env.Clone(COPY = 'mkdir -p ' + test_path + '/Restart/MethodPpml-1; mv `ls *.png *.h5` ' + test_path + '/Restart/MethodPpml-1')
+
+
+run_ppml_8 = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd  $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunPpml_8' : run_ppml_8 } )
+env_mv_ppml_8 = env.Clone(COPY = 'mkdir -p ' + test_path + '/Restart/MethodPpml-8; mv `ls *.png *.h5` ' + test_path + '/Restart/MethodPpml-8')
+
+
+env_mv_out=env.Clone(COPY = 'mv *.png *.h5 Dir_* ' + test_path)
+
+#-------------------------------------------------------------
+#load balancing
+#-------------------------------------------------------------
+
+#serial restart
+
+checkpoint_ppm_1 = env_mv_checkpoint_ppm_1.RunCheckpointPpm_1 (
+     'test_checkpoint_ppm-1.unit',
+     bin_path + '/enzo-p',
+     ARGS='input/Checkpoint/checkpoint_ppm-1.in')
+
+
+restart_ppm_1 = env_mv_restart_ppm_1.RunRestartPpm_1 (
+     'test_restart_ppm-1.unit',
+     bin_path + '/enzo-p',
+     ARGS='+restart checkpoint_ppm-1-10')
+
+env.MakeMovie("/RestartPpm-1/restart_ppm-1.swf", "test_restart_ppm-1.unit", \
+              ARGS = test_path + "/Restart/CheckpointPpm-1/checkpoint-1-*.png");
+env.PngToGif("/RestartPpm-1/restart_ppm-1.gif", "test_restart_ppm-1.unit", \
+              ARGS = test_path + "/Restart/CheckpointPpm-1/checkpoint_ppm-1-*.png");
+
+Clean(restart_ppm_1,
+     [Glob('#/' + test_path + '/CheckpointPpm-1/checkpoint_ppm-1*.png')])
+
+env.Requires(restart_ppm_1, checkpoint_ppm_1)
+
+
+#parallel restart
+
+
+checkpoint_ppm_8 = env_mv_checkpoint_ppm_8.RunCheckpointPpm_8 (
+     'test_checkpoint_ppm-8.unit',
+     bin_path + '/enzo-p',
+     ARGS='input/Checkpoint/checkpoint_ppm-8.in')
+
+
+restart_ppm_8 = env_mv_restart_ppm_8.RunRestartPpm_8 (
+     'test_restart_ppm-8.unit',
+     bin_path + '/enzo-p',
+     ARGS='+restart checkpoint_ppm-8-10')
+
+env.MakeMovie("/RestartPpm-8/restart_ppm-8.swf", "test_restart_ppm-8.unit", \
+              ARGS = test_path + "/Restart/CheckpointPpm-8/checkpoint-8-*.png");
+env.PngToGif("/RestartPpm-8/restart_ppm-8.gif", "test_restart_ppm-8.unit", \
+              ARGS = test_path + "/Restart/CheckpointPpm-8/checkpoint_ppm-8-*.png");
+
+Clean(restart_ppm_8,
+     [Glob('#/' + test_path + '/CheckpointPpm-8/checkpoint_ppm-8*.png')])
+
+env.Requires(restart_ppm_8, checkpoint_ppm_8)
+
+# MethodPpml tests
+
+method_ppml_1 = env_mv_ppml_1.RunPpml_1(
+     'test_method_ppml-1.unit',
+     bin_path + '/enzo-p',
+     ARGS='input/PPML/method_ppml-1.in')
+
+Clean(method_ppml_1,
+      [Glob('#/' + test_path + '/Ppml-1/method_ppml-1-?-????-*.png'),
+       Glob('#/' + test_path + '/Ppml-1/method_ppml-1-??-????-*.h5')])
+
+env.MakeMovie("/Ppml-1/method_ppml-1-x.swf", "test_method_ppml-1.unit", \
+              ARGS = test_path + "/Restart/Ppml-1/method_ppml-1-x-????.png");
+env.PngToGif("/Ppml-1/method_ppml-1-x.gif", "test_method_ppml-1.unit", \
+              ARGS = test_path + "/Restart/Ppml-1/method_ppml-1-x-????.png");
+env.MakeMovie("/Ppml-1/method_ppml-1-y.swf", "test_method_ppml-1.unit", \
+              ARGS = test_path + "/Restart/Ppml-1/method_ppml-1-y-????.png");
+env.PngToGif("/Ppml-1/method_ppml-1-y.gif", "test_method_ppml-1.unit", \
+              ARGS = test_path + "/Restart/Ppml-1/method_ppml-1-y-????.png");
+env.MakeMovie("/Ppml-1/method_ppml-1-z.swf", "test_method_ppml-1.unit", \
+              ARGS = test_path + "/Restart/Ppml-1/method_ppml-1-z-????.png");
+env.PngToGif("/Ppml-1/method_ppml-1-z.gif", "test_method_ppml-1.unit", \
+              ARGS = test_path + "/Restart/Ppml-1/method_ppml-1-z-????.png");
+
+
+method_ppml_8 = env_mv_ppml_8.RunPpml_8(
+     'test_method_ppml-8.unit',
+     bin_path + '/enzo-p',
+     ARGS='input/PPML/method_ppml-8.in')
+
+Clean(method_ppml_8,
+      [Glob('#/' + test_path + '/Ppml-8/method_ppml-8-?-????-*.png'),
+       Glob('#/' + test_path + '/Ppml-8/method_ppml-8-??-????-*.h5')])
+
+env.MakeMovie("/Ppml-8/method_ppml-8-x.swf", "test_method_ppml-8.unit", \
+              ARGS = test_path + "/Restart/Ppml-8/method_ppml-8-x-????.png");
+env.PngToGif("/Ppml-8/method_ppml-8-x.gif", "test_method_ppml-8.unit", \
+              ARGS = test_path + "/Restart/Ppml-8/method_ppml-8-x-????.png");
+env.MakeMovie("/Ppml-8/method_ppml-8-y.swf", "test_method_ppml-8.unit", \
+              ARGS = test_path + "/Restart/Ppml-8/method_ppml-8-y-????.png");
+env.PngToGif("/Ppml-8/method_ppml-8-y.gif", "test_method_ppml-8.unit", \
+              ARGS = test_path + "/Restart/Ppml-8/method_ppml-8-y-????.png");
+env.MakeMovie("/Ppml-8/method_ppml-8-z.swf", "test_method_ppml-8.unit", \
+              ARGS = test_path + "/Restart/Ppml-8/method_ppml-8-z-????.png");
+env.PngToGif("/Ppml-8/method_ppml-8-z.gif", "test_method_ppml-8.unit", \
+              ARGS = test_path + "/Restart/Ppml-8/method_ppml-8-z-????.png");
+
+
+#Updated PPML test using EnzoInitialPpmlTest for multi-nodes
+
+Clean(env_mv_out.RunSerial('test_method_ppml-test-1.unit',bin_path + '/enzo-p',
+			   ARGS='input/PPML/method_ppml-test-1.in'),
+      [Glob('#/' +test_path + '/PPML1_*')])
+
+
+Clean(env_mv_out.RunSerial('test_method_ppml-test-8.unit',bin_path + '/enzo-p',
+			   ARGS='input/PPML/method_ppml-test-8.in'),
+      [Glob('#/' +test_path + '/PPML8_*')])
