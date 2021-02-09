@@ -41,7 +41,10 @@ the repository, we suggest using
 ```
 mkdir enzo-e-project
 cd enzo-e-project
-git clone git@github.com:forrestglines/enzo-e.git
+git clone https://github.com/forrestglines/enzo-e.git
+cd enzo-e
+git checkout cmake
+cd ../
 ```
 For building, we create a new directory inside of `enzo-e-project`, export a `CHARM_HOME` environment variable, then use cmake to build.
 ```
