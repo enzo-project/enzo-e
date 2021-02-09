@@ -71,13 +71,15 @@ void EnzoInitialBurkertBodenheimer::enforce_block
 
   const int rank = cello::rank();
 
+  ASSERT("EnzoInitialBurkertBodenheimer::enforce_block",
+         "This problem must be run in 3D.",
+         rank == 3);
+
+
   double hx,hy,hz;
   field.cell_width(bxm,bxp,&hx,
 		   bym,byp,&hy,
 		   bzm,bzp,&hz);
-  if (rank < 2) hy = 0.0;
-  if (rank < 3) hz = 0.0;
-
 
   int gx,gy,gz;
   field.ghost_depth(0,&gx,&gy,&gz);
