@@ -12,7 +12,7 @@ Import('test_path')
 
 env['CPIN'] = 'touch parameters.out; mv parameters.out ${TARGET}.in'
 env['RMIN'] = 'rm -f parameters.out'
-
+env['clocal_cmd'] = '++local'
 
 
 date_cmd = 'echo $TARGET > test/STATUS; echo "---------------------"; date +"%Y-%m-%d %H:%M:%S";'
@@ -26,27 +26,27 @@ env.Append(BUILDERS = { 'pngToGif'  : png_to_gif})
 
 
 
-run_particle_x = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
+run_particle_x = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd  $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunParticleX' : run_particle_x } )
 env_mv_particle_x = env.Clone(COPY = 'mkdir -p ' + test_path + '/Particles/ParticleX; mv `ls *.png *.h5` ' + test_path + '/Particles/ParticleX')
 
-run_particle_y = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
+run_particle_y = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd  $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunParticleY' : run_particle_y } )
 env_mv_particle_y = env.Clone(COPY = 'mkdir -p ' + test_path + '/Particles/ParticleY; mv `ls *.png *.h5` ' + test_path + '/Particles/ParticleY')
 
-run_particle_xy = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
+run_particle_xy = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd  $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunParticleXY' : run_particle_xy } )
 env_mv_particle_xy = env.Clone(COPY = 'mkdir -p ' + test_path + '/Particles/ParticleXY; mv `ls *.png *.h5` ' + test_path + '/Particles/ParticleXY')
 
-run_particle_circle = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
+run_particle_circle = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd  $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunParticleCircle' : run_particle_circle } )
 env_mv_particle_circle = env.Clone(COPY = 'mkdir -p ' + test_path + '/Particles/ParticleCircle; mv `ls *.png *.h5` ' + test_path + '/Particles/ParticleCircle')
 
-run_particle_amr_static = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
+run_particle_amr_static = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd  $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunParticleAmrStatic' : run_particle_amr_static } )
 env_mv_particle_amr_static = env.Clone(COPY = 'mkdir -p ' + test_path + '/Particles/ParticleAmrStatic; mv `ls *.png *.h5` ' + test_path + '/Particles/ParticleAmrStatic')
 
-run_particle_amr_dynamic = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
+run_particle_amr_dynamic = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd  $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunParticleAmrDynamic' : run_particle_amr_dynamic } )
 env_mv_particle_amr_dynamic = env.Clone(COPY = 'mkdir -p ' + test_path + '/Particles/ParticleAmrDynamic; mv `ls *.png *.h5` ' + test_path + '/Particles/ParticleAmrDynamic')
 

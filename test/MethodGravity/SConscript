@@ -13,7 +13,7 @@ Import('test_path')
 
 env['CPIN'] = 'touch parameters.out; mv parameters.out ${TARGET}.in'
 env['RMIN'] = 'rm -f parameters.out'
-
+env['clocal_cmd'] = '++local'
 
 
 date_cmd = 'echo $TARGET > test/STATUS; echo "---------------------"; date +"%Y-%m-%d %H:%M:%S";'
@@ -24,7 +24,7 @@ env.Append(BUILDERS = { 'RunGravityCg_1' : run_gravity_cg_1 } )
 env_mv_gravity_cg_1 = env.Clone(COPY = 'mkdir -p ' + test_path + '/MethodGravity/GravityCg1; mv `ls *.png *.h5` ' + test_path + '/MethodGravity/GravityCg1')
 
 
-run_gravity_cg_8 = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
+run_gravity_cg_8 = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd  $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunGravityCg_8' : run_gravity_cg_8 } )
 env_mv_gravity_cg_8 = env.Clone(COPY = 'mkdir -p ' + test_path + '/MethodGravity/GravityCg8; mv `ls *.png *.h5` ' + test_path + '/MethodGravity/GravityCg8') 
 
