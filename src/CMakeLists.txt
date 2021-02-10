@@ -661,9 +661,4 @@ target_link_libraries(enzo_e_exe external_library)
 #target_link_libraries(enzo_e_exe ${CHARM_LIBRARIES}) No need to link CHARM_LIBRARIES, linking with charmc takes care of it
 target_link_libraries(enzo_e_exe ${ENZO_E_LIBRARIES})
 
-#Link Boost
-if(Boost_FOUND)
-    include_directories(${Boost_INCLUDE_DIRS}) 
-    target_link_libraries(enzo_e_exe ${Boost_LIBRARIES})
-endif()
 

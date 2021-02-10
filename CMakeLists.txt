@@ -45,11 +45,26 @@ include_directories(${CHARM_HOME}/include)
 #set(CHARM_LIBRARIES "moduleCommonLBs" "ckmain" "ck" "memory-default" "threads-default" "conv-machine" "conv-core" "tmgr" "conv-util" "conv-partition" "conv-ldb" "memory-default" "threads-default" "ldb-rand" "ckqt" "moduleCommonLBs" "moduleNDMeshStreamer" "modulecompletion" "hwloc_embedded" "mpi-mainmodule")
 
 
-#Set up and fine boost
+#Set up and find boost
 set(Boost_USE_STATIC_LIBS OFF) 
 set(Boost_USE_MULTITHREADED OFF)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
 find_package(Boost REQUIRED COMPONENTS system filesystem) 
+include_directories(${Boost_INCLUDE_DIRS}) 
+link_directories(${Boost_LIBRARY_DIRS}) 
+
+#Set up and find HDF5
+find_package(HDF5 REQUIRED COMPONENTS CXX)
+include_directories(${HDF5_INCLUDE_DIRS}) 
+add_definitions(${HDF5_DEFINITIONS})
+
+#Set up and find png
+find_package(PNG REQUIRED)
+include_directories(${PNG_INCLUDE_DIRS}) 
+add_definitions(${PNG_DEFINITIONS})
+
+#Set up the linker
+set(ENZO_E_LIBRARIES  "dl" "pthread" "z" "gfortran" ${Boost_LIBRARIES}  ${HDF5_LIBRARIES} ${PNG_LIBRARIES} )
 
 #Define preprocessor definitions
 add_compile_definitions(CONFIG_PRECISION_DOUBLE)
@@ -107,8 +122,6 @@ set( CMAKE_CXX_FLAGS "-O3 -g -ffast-math -funroll-loops -fPIC -pedantic" )
 set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ffast-math -funroll-loops -fPIC -pedantic -ffixed-line-length-132    -fdefault-real-8 -fdefault-double-8")
 set( CMAKE_EXE_LINKER_FLAGS "-O3 -g -ffast-math -funroll-loops -fPIC -pedantic -module CommonLBs" )
 
-#Set up the linker
-set(ENZO_E_LIBRARIES  "dl" "pthread" "z" "hdf5" "png" "gfortran")
 
 SET(CMAKE_LINKER ${CHARMC_EXE})
 set(CMAKE_CXX_LINK_EXECUTABLE "<CMAKE_LINKER> ${CMAKE_EXE_LINKER_FLAGS} <OBJECTS> <LINK_LIBRARIES> -o <TARGET>")
