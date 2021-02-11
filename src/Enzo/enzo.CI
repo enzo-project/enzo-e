@@ -75,6 +75,7 @@ module enzo {
   PUPable EnzoMatrixLaplace;
   PUPable EnzoMatrixDiagonal;
   PUPable EnzoMatrixIdentity;
+  PUPable IoEnzoBlock;
 
   PUPable EnzoMethodCheckGravity;
   PUPable EnzoMethodComovingExpansion;
