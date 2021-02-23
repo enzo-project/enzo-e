@@ -9,6 +9,7 @@
 #include "data.hpp"
 
 #define FORTRAN_STORE
+// #define DEBUG_NEW_BOX
 
 long FieldFace::counter[CONFIG_NODE_SIZE] = {0};
 
@@ -186,7 +187,7 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
     set_box_(&box);
 
     if (refresh_type_ == refresh_fine) {
-      const int pad = prolong()->padding();
+      const int pad = prolong()->coarse_padding();
       if (pad>0) box.set_padding(pad);
     }
 
@@ -194,10 +195,11 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
 
     box.compute_region();
     // limits for Send block 
-    box.get_limits(Box::BlockType::send,i3,n3);
-    n3[0] -= i3[0];
-    n3[1] -= i3[1];
-    n3[2] -= i3[2];
+    box.get_start_size(i3,n3,BlockType::send,BlockType::send);
+#ifdef DEBUG_NEW_BOX    
+    CkPrintf ("DEBUG_NEW_BOX %s:%d %d %d %d\n",__FILE__,__LINE__,i3[0],i3[1],i3[2]);
+    CkPrintf ("DEBUG_NEW_BOX %s:%d %d %d %d\n",__FILE__,__LINE__,n3[0],n3[1],n3[2]);
+#endif    
 
     // scale by density if needed to convert to conservative form
     mul_by_density_(field,index_field,i3,n3,m3);
@@ -282,68 +284,97 @@ void FieldFace::array_to_face (char * array, Field field) throw()
     invert_face();
 
     if (refresh_type_ == refresh_fine) {
-      const int pad = prolong()->padding();
+      const int pad = prolong()->coarse_padding();
       if (pad>0) box.set_padding(pad);
     }
 
     box_adjust_accumulate_(&box,accumulate,g3);
 
-    box.get_limits(Box::BlockType::receive,i3,n3,BoxType_receive);
-    n3[0] -= i3[0];
-    n3[1] -= i3[1];
-    n3[2] -= i3[2];
-
+    box.get_start_size(i3,n3,BlockType::receive,BlockType::receive);
+#ifdef DEBUG_NEW_BOX    
+    CkPrintf ("DEBUG_NEW_BOX %s:%d %d %d %d\n",__FILE__,__LINE__,i3[0],i3[1],i3[2]);
+    CkPrintf ("DEBUG_NEW_BOX %s:%d %d %d %d\n",__FILE__,__LINE__,n3[0],n3[1],n3[2]);
+#endif
+    
     if (refresh_type_ == refresh_fine) {
 
       // Prolong array to field
 
-      bool need_padding = (g3[0]%2==1) || (g3[1]%2==1) || (g3[2]%2==1);
-
-      ASSERT("FieldFace::array_to_face()",
-	     "Odd ghost zones not implemented yet: prolong needs padding",
-	     ! need_padding);
-
+      ASSERT ("FieldFace::array_to_face()",
+              "No prolongation operator",
+              (prolong() != nullptr));
+        
       int nc3[3] = { (n3[0]+1)/2, (n3[1]+1)/2, (n3[2]+1)/2 };
 
-      int i3_array[3] = {0,0,0};
+      // check that array sizes are valid
+      prolong()->array_sizes_valid(n3,nc3); // ,o3
 
-      const int pad = prolong()->padding();
+      int ia3[3] = {0,0,0};
+
+      const int pad = prolong()->coarse_padding();
 
       if (pad == 0) {
-        index_array += prolong()->apply
+
+        // interpolation does not require padded coarse array
+
+        ASSERT7 ("FieldFace::array_to_face()",
+                 "Prolong %s array sizes (%d %d %d) and (%d %d %d) are invalid",
+                 prolong()->name().c_str(),
+                 n3[0],n3[1],n3[2],
+                 nc3[0],nc3[1],nc3[2],
+                 (prolong()->array_sizes_valid(n3,nc3)));
+        
+        prolong()->apply
           (precision, 
-           field_ghost,m3,i3,       n3,
-           array_ghost,nc3,i3_array, nc3,
+           field_ghost,m3, i3,       n3,
+           array_ghost,nc3,ia3, nc3,
            accumulate);
+
+        index_array += cello::sizeof_precision(precision)*
+          nc3[0]*nc3[1]*nc3[2];
+        
       } else {
 
-        const int nf = refresh_->field_list_src().size();
-        const int nxc = rank_ >= 1 ? (nc3[0]+2*pad) : 1;
-        const int nyc = rank_ >= 2 ? (nc3[1]+2*pad) : 1;
-        const int nzc = rank_ >= 3 ? (nc3[2]+2*pad) : 1;
-        const int oxc = (rank_ >= 1) ? 1 : 0;
-        const int oyc = (rank_ >= 2) ? 1 : 0;
-        const int ozc = (rank_ >= 3) ? 1 : 0;
-        FieldData * field_data = field.field_data();
-        cello_float * padded_face_vector = field_data->padded_array_allocate
-          (face_[0],face_[1],face_[2],nf,nxc,nyc,nzc);
+        ERROR("FieldFace::array_to_face",
+              "Shouldn't get here: refresh_fine with pad != 0 is not handled by FieldFace");
 
-        const int na = field_data->padded_array_dimensions
-          (face_[0],face_[1],face_[2]);
+        // interpolation requires padded coarse array
+
+//         box.get_start_size(i3,n3,BlockType::receive,BlockType::receive);
+// #ifdef DEBUG_NEW_BOX    
+//     CkPrintf ("DEBUG_NEW_BOX %s:%d %d %d %d\n",__FILE__,__LINE__,i3[0],i3[1],i3[2]);
+//     CkPrintf ("DEBUG_NEW_BOX %s:%d %d %d %d\n",__FILE__,__LINE__,n3[0],n3[1],n3[2]);
+// #endif
+//         const int nxc = rank_ >= 1 ? (nc3[0]+2*pad) : 1;
+//         const int nyc = rank_ >= 2 ? (nc3[1]+2*pad) : 1;
+//         const int nzc = rank_ >= 3 ? (nc3[2]+2*pad) : 1;
+//         const int oxc = (rank_ >= 1) ? 1 : 0;
+//         const int oyc = (rank_ >= 2) ? 1 : 0;
+//         const int ozc = (rank_ >= 3) ? 1 : 0;
+//         FieldData * field_data = field.field_data();
+//         cello_float * coarse_field =
+//           (cello_float *) field.coarse_values(i_f);
+
+//         // cello_float * padded_face_vector = field_data->padded_array_allocate
+//         //   (face_[0],face_[1],face_[2],nf,nxc,nyc,nzc);
+
+//         // const int na = field_data->padded_array_dimensions
+//         //   (face_[0],face_[1],face_[2]);
                                                                       
-        ASSERT5("EnzoProlong::apply",
-                "Array size mismatch %d * %d * %d  !=  %d / %d\n",
-                nxc,nyc,nzc,na, nf,
-                (nxc*nyc*nzc) == (na/nf));
+//         // ASSERT5("EnzoProlong::apply",
+//         //         "Array size mismatch %d * %d * %d  !=  %d / %d\n",
+//         //         nxc,nyc,nzc,na, nf,
+//         //         (nxc*nyc*nzc) == (na/nf));
 
-        const int nc = nxc*nyc*nzc;
-        cello_float * padded_array = &padded_face_vector[i_f*nc];
+//         //        const int nc = nxc*nyc*nzc;
+//         const int i0 = 0;
+//         cello_float * padded_array = &coarse_field[i0];
 
-        cello::copy(padded_array,
-                    nxc,nyc,nzc, oxc,oyc,ozc,
-                    (cello_float *) array_ghost,
-                    nc3[0],nc3[1],nc3[2],0,0,0,
-                    nc3[0],nc3[1],nc3[2]);
+//         cello::copy(padded_array,
+//                     nxc,nyc,nzc, oxc,oyc,ozc,
+//                     (cello_float *) array_ghost,
+//                     nc3[0],nc3[1],nc3[2],0,0,0,
+//                     nc3[0],nc3[1],nc3[2]);
 
       }
 
@@ -383,7 +414,6 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
   auto field_list_src = refresh_->field_list_src();
   auto field_list_dst = refresh_->field_list_dst();
   
-  
   cello_float * padded_face_vector = nullptr;
 
   for (size_t i_f=0; i_f < field_list_src.size(); i_f++) {
@@ -392,41 +422,42 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
     size_t index_src = field_list_src[i_f];
     size_t index_dst = field_list_dst[i_f];
 
-    int m3[3]={0},g3[3]={0},c3[3]={0};
+    int m3[3],n3[3],g3[3],c3[3];
 
-    field_src.dimensions(index_src,&m3[0],&m3[1],&m3[2]);
-    field_src.ghost_depth(index_src,&g3[0],&g3[1],&g3[2]);
-    field_src.centering(index_src,&c3[0],&c3[1],&c3[2]);
+    field_src.dimensions (index_src,m3,m3+1,m3+2);
+    field_src.size                 (n3,n3+1,n3+2);
+    field_src.ghost_depth(index_src,g3,g3+1,g3+2);
+    field_src.centering  (index_src,c3,c3+1,c3+2);
     
     const bool accumulate = accumulate_(index_src,index_dst);
+    const int pad = prolong() ? prolong()->coarse_padding() : 0;
 
-    int is3[3], ns3[3];
-
-    int n3[3];
-    field_src.size(n3,n3+1,n3+2);
     Box box (rank_,n3,g3);
     set_box_(&box);
 
     if (refresh_type_ == refresh_fine) {
-      if (prolong()->padding()) {
-        box.set_padding(prolong()->padding());
+      if (pad > 0) {
+        ERROR("FieldFace::face_to_face",
+              "Shouldn't get here: refresh_fine with pad != 0 is not handled by FieldFace");
+        box.set_padding(pad);
       }      
     }
 
     box_adjust_accumulate_(&box,accumulate,g3);
 
-    box.get_limits(Box::BlockType::send,is3,ns3);
-    ns3[0] -= is3[0];
-    ns3[1] -= is3[1];
-    ns3[2] -= is3[2];
-
+    int is3[3], ns3[3];
+    box.get_start_size(is3,ns3,BlockType::send,BlockType::send);
+#ifdef DEBUG_NEW_BOX    
+    CkPrintf ("DEBUG_NEW_BOX %s:%d %d %d %d\n",__FILE__,__LINE__,is3[0],is3[1],is3[2]);
+    CkPrintf ("DEBUG_NEW_BOX %s:%d %d %d %d\n",__FILE__,__LINE__,ns3[0],ns3[1],ns3[2]);
+#endif
     int id3[3], nd3[3];
 
-    box.get_limits(Box::BlockType::receive,id3,nd3,BoxType_receive);
-    nd3[0] -= id3[0];
-    nd3[1] -= id3[1];
-    nd3[2] -= id3[2];
-
+    box.get_start_size(id3,nd3,BlockType::receive,BlockType::receive);
+#ifdef DEBUG_NEW_BOX    
+    CkPrintf ("DEBUG_NEW_BOX %s:%d %d %d %d\n",__FILE__,__LINE__,id3[0],id3[1],id3[2]);
+    CkPrintf ("DEBUG_NEW_BOX %s:%d %d %d %d\n",__FILE__,__LINE__,nd3[0],nd3[1],nd3[2]);
+#endif
     // Adjust loop limits if accumulating to include ghost zones
     // on neighbor axes
 
@@ -448,9 +479,20 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
 	     "Odd ghost zones not implemented yet: prolong needs padding",
 	     ! need_padding);
 
-      const int pad = prolong()->padding();
-
       if (pad == 0) {
+
+        ASSERT ("FieldFace::array_to_face()",
+                "No prolongation operator",
+                (prolong() != nullptr));
+
+        const bool is_valid = prolong()->array_sizes_valid(nd3,ns3);
+        
+        ASSERT7 ("FieldFace::array_to_face()",
+                 "Prolong %s array sizes (%d %d %d) and (%d %d %d) are invalid",
+                 prolong()->name().c_str(),
+                 nd3[0],nd3[1],nd3[2],
+                 ns3[0],ns3[1],ns3[2],
+                 is_valid );
 
         prolong()->apply (precision, 
                         values_dst,m3,id3, nd3,
@@ -459,51 +501,28 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
 
       } else {
         
-        int ia3[3], na3[3];
-        box.get_limits(Box::BlockType::receive,ia3,na3,BoxType_receive);
-        na3[0] -= ia3[0];
-        na3[1] -= ia3[1];
-        na3[2] -= ia3[2];
+        ERROR("FieldFace::face_to_face",
+              "Shouldn't get here: refresh_fine with pad != 0 is not handled by FieldFace");
+        // copy ghost data to coarse array
+        
+        // loop limits for coarse array
+        // intersect
+        // int ic3[3], nc3[3];
+        // box.get_start_size(ic3,nc3,BlockType::receive, false,true);
 
-        const int nf = refresh_->field_list_src().size();
-        const int nxc = rank_ >= 1 ? (ns3[0]+2*pad) : 1;
-        const int nyc = rank_ >= 2 ? (ns3[1]+2*pad) : 1;
-        const int nzc = rank_ >= 3 ? (ns3[2]+2*pad) : 1;
-        const int oxc = (rank_ >= 1) ? 1 : 0;
-        const int oyc = (rank_ >= 2) ? 1 : 0;
-        const int ozc = (rank_ >= 3) ? 1 : 0;
-        FieldData * field_data = field_dst.field_data();
-        if (i_f == 0)  {
-          padded_face_vector = field_data->padded_array_allocate
-            (face_[0],face_[1],face_[2],nf,nxc,nyc,nzc);
-        }
-        const int na = field_data->padded_array_dimensions
-          (face_[0],face_[1],face_[2]);
+        // FieldData * field_data = field_dst.field_data();
 
-        ASSERT5("EnzoProlong::apply",
-                "Array size mismatch %d * %d * %d  !=  %d / %d\n",
-                nxc,nyc,nzc,na, nf,
-                ((nxc*nyc*nzc) == na));
+        // int mc3[3];
+        // field_dst.coarse_dimensions(i_f,mc3,mc3+1,mc3+2);
+        // cello_float * coarse_field =
+        //   (cello_float *) field_dst.coarse_values(i_f);
 
-        const int nc = nxc*nyc*nzc;
-        cello_float * padded_array = &padded_face_vector[i_f*nc];
-
-        print("face_to_face");
-        CkPrintf ("DEBUG_COPY padded_array %p i_f %d nc %d\n",
-                  padded_array,i_f,nc);
-        CkPrintf ("DEBUG_COPY nxc,nyc,nzc %d %d %d\n", nxc,nyc,nzc);
-        CkPrintf ("DEBUG_COPY oxc,oyc,ozc %d %d %d\n", oxc,oyc,ozc);
-        CkPrintf ("DEBUG_COPY values_src  %p\n",values_src);
-        CkPrintf ("DEBUG_COPY m3[]        %d %d %d\n", m3[0],m3[1],m3[2]);
-        CkPrintf ("DEBUG_COPY is3[]       %d %d %d\n", is3[0],is3[1],is3[2]);
-        CkPrintf ("DEBUG_COPY ns3[]       %d %d %d\n", ns3[0],ns3[1],ns3[2]);
-        fflush(stdout);
-        for (int i=0; i<nxc*nyc*nzc; i++) {padded_array[i] = 0.0;}
-        cello::copy(padded_array,
-                    nxc,nyc,nzc, oxc,oyc,ozc,
-                    (cello_float *) values_src,
-                    m3[0],m3[1],m3[2],is3[0],is3[1],is3[2],
-                    ns3[0],ns3[1],ns3[2]);
+        // // copy src field values to dst coarse field
+        // cello::copy(coarse_field,
+        //             mc3[0],mc3[1],mc3[2], ic3[0],ic3[1],ic3[2],
+        //             (cello_float *) values_src,
+        //             m3[0],m3[1],m3[2],is3[0],is3[1],is3[2],
+        //             ns3[0],ns3[1],ns3[2]);
       }
 
     } else if (refresh_type_ == refresh_coarse) {
@@ -575,16 +594,16 @@ int FieldFace::num_bytes_array(Field field) throw()
     set_box_(&box);
 
     if (refresh_type_ == refresh_fine) {
-      const int pad = prolong()->padding();
+      const int pad = prolong()->coarse_padding();
       if (pad>0) box.set_padding(pad);
     }
 
     box_adjust_accumulate_(&box,accumulate,g3);
-    box.get_limits(Box::BlockType::send,i3,n3);
-    n3[0] -= i3[0];
-    n3[1] -= i3[1];
-    n3[2] -= i3[2];
-
+    box.get_start_size(i3,n3,BlockType::send,BlockType::send);
+#ifdef DEBUG_NEW_BOX    
+    CkPrintf ("DEBUG_NEW_BOX %s:%d %d %d %d\n",__FILE__,__LINE__,i3[0],i3[1],i3[2]);
+    CkPrintf ("DEBUG_NEW_BOX %s:%d %d %d %d\n",__FILE__,__LINE__,n3[0],n3[1],n3[2]);
+#endif
     array_size += n3[0]*n3[1]*n3[2]*bytes_per_element;
 
   }
@@ -746,12 +765,9 @@ template<class T> size_t FieldFace::store_
     } else if (sizeof(T)==sizeof(double)) {
       FORTRAN_NAME(field_face_store_8)(ghost_8 + im,   array_8, m3,n3,
                                        &iaccumulate);
-      // SUSPECTED ERROR IN COMPILER: seg fault for quad test in
-      // test_FieldFace
-      //
-      //  } else if (sizeof(T)==sizeof(long double)) {
-      //    FORTRAN_NAME(field_face_store_16)(ghost_16 + im, array_16, m3,n3,
-      //				      &iaccumulate);
+    } else if (sizeof(T)==sizeof(long double)) {
+      FORTRAN_NAME(field_face_store_16)(ghost_16 + im, array_16, m3,n3,
+                                        &iaccumulate);
     } else {
       ERROR1 ("FieldFace::store_()",
               "unknown float precision sizeof(T) = %lu\n",sizeof(T));
@@ -988,8 +1004,8 @@ void FieldFace::set_box_(Box * box)
 
   box->set_block(BoxType_receive,level,face_,child_);
 
-  if (prolong() && prolong()->padding() > 0)
-    box->set_padding(prolong()->padding());
+  if (prolong() && prolong()->coarse_padding() > 0)
+    box->set_padding(prolong()->coarse_padding());
   box->compute_region();
 }
 

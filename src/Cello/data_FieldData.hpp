@@ -209,76 +209,6 @@ public: // interface
   /// 1.0 if in code units, or the scaling factor if in cgs
   double units_scaling (const FieldDescr *, int id);
 
-  //----------------------------------------------------------------------
-  // padded face array
-  //----------------------------------------------------------------------
-
-  cello_float * padded_array_allocate
-  (int ifx, int ify, int ifz, int nf, int nx, int ny, int nz)
-  {
-    ASSERT3 ("padded_array_allocate()",
-            "Face out of bounds -1 <= %d %d %d <= +1",
-             ifx,ify,ifz,
-             ((-1<=ifx && ifx<=+1) &&
-              (-1<=ify && ify<=+1) &&
-              (-1<=ifz && ifz<=+1)));
-    const int i = (ifx+1) + 3*((ify+1) + 3*(ifz+1));
-    const int n = nf*nx*ny*nz;
-    if (padded_array_[i] == nullptr) {
-      padded_array_[i] = new cello_float [n];
-#ifdef TRACE_PADDED_FACE
-      CkPrintf ("TRACE_PADDED %s:%d allocate %p = %d*(%d*%d*%d)\n",
-                __FILE__,__LINE__,(void*)padded_array_[i],nf,nx,ny,nz);
-#endif              
-      std::fill_n (padded_array_[i],n,0.0);
-    }
-#ifdef TRACE_PADDED_FACE
-    CkPrintf ("TRACE_PADDED %s:%d data %p array %p %d %d %d  = %d * (%d %d %d)\n",
-              __FILE__,__LINE__,(void *)this,(void *)&padded_array_[i],ifx,ify,ifz,nf,nx,ny,nz);
-#endif
-    padded_array_dimensions_[0][i] = nx;
-    padded_array_dimensions_[1][i] = ny;
-    padded_array_dimensions_[2][i] = nz;
-    padded_array_fields_[i] = nf;
-    return padded_array_[i];
-  }
-  
-  void padded_array_deallocate (int ifx, int ify, int ifz)
-  {
-    const int i = (ifx+1) + 3*((ify+1) + 3*(ifz+1));
-    delete [] padded_array_[i];
-    padded_array_[i] = nullptr;
-    padded_array_fields_[i] = 0;
-    for (int j=0; j<3; j++) {
-      padded_array_dimensions_[j][i] = 0;
-    }
-  }
-  
-  cello_float * padded_array (int ifx, int ify, int ifz)
-  { return padded_array_[(ifx+1) + 3*((ify+1) + 3*(ifz+1))]; }
-
-  int padded_array_fields (int ifx, int ify, int ifz)
-  {
-    const int i = (ifx+1) + 3*((ify+1) + 3*(ifz+1));
-    return padded_array_fields_[i];
-  }
-  int padded_array_dimensions (int ifx, int ify, int ifz)
-  {
-    const int i = (ifx+1) + 3*((ify+1) + 3*(ifz+1));
-    return
-      padded_array_dimensions_[0][i] *
-      padded_array_dimensions_[1][i] *
-      padded_array_dimensions_[2][i];
-  }
-
-  int padded_array_dimensions (int axis, int ifx, int ify, int ifz)
-  {
-    const int i = (ifx+1) + 3*((ify+1) + 3*(ifz+1));
-    return padded_array_dimensions_[axis][i];
-  }
-
-  void padded_array_print();
-  
   //--------------------------------------------------
 private: // functions
   //--------------------------------------------------
@@ -378,16 +308,6 @@ private: // attributes
   /// Coarse fields with one ghost zone for padded Prolong
   std::vector<char *> array_coarse_;
 
-  //--------------------------------------------------
-  
-  /// Face padded array data indexed with if3[]
-  cello_float * padded_array_[3*3*3];
-
-  /// Number of fields allocated in padded face array
-  int padded_array_fields_[3*3*3];
-  
-  /// Allocated dimensions of padded_array_
-  int padded_array_dimensions_[3][3*3*3];
 };   
 
 #endif /* DATA_FIELD_DATA_HPP */

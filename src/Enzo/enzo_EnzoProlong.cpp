@@ -8,9 +8,10 @@
 #include "enzo.hpp"
 
 #include "cello.hpp"
-#define TRACE_PROLONG
+
+//#define TRACE_PROLONG
 // #define DEBUG_ENZO_PROLONG
-// #define TRACE_PADDED_ARRAY_VALUES
+#define TRACE_PADDED_ARRAY_VALUES
 
 #ifdef TRACE_PROLONG
 #  undef TRACE_PROLONG
@@ -51,26 +52,25 @@ void EnzoProlong::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-int EnzoProlong::apply 
+void EnzoProlong::apply 
 ( precision_type precision,
   void *       values_f, int m3_f[3], int o3_f[3], int n3_f[3],
   const void * values_c, int m3_c[3], int o3_c[3], int n3_c[3],
   bool accumulate)
 {
   TRACE_PROLONG("EnzoProlong::apply()");
-  return apply_((enzo_float *)     values_f,m3_f,o3_f,n3_f,
-                (const enzo_float*)values_c,m3_c,o3_c,n3_c,accumulate);
+  apply_((enzo_float *)     values_f,m3_f,o3_f,n3_f,
+         (const enzo_float*)values_c,m3_c,o3_c,n3_c,accumulate);
 }
 
 //----------------------------------------------------------------------
 
-int EnzoProlong::apply_
+void EnzoProlong::apply_
 ( 
  enzo_float * values_f, int m3_f[3], int o3_f[3], int n3_f[3],
  const enzo_float * values_c, int m3_c[3], int o3_c[3], int n3_c[3],
  bool accumulate)
 {
-  
   TRACE_PROLONG("EnzoProlong::apply_()");
 
   int rank = cello::rank();
@@ -93,7 +93,6 @@ int EnzoProlong::apply_
 
   const int nf = n3_f[0]*n3_f[1]*n3_f[2];
 
-  const enzo_float * parent(values_c);
   enzo_float * grid = new enzo_float[nf];
   
   for (int i=0; i<nf; i++) grid[i] = -99.0;
@@ -118,6 +117,9 @@ int EnzoProlong::apply_
   //  CkPrintf ("DEBUG_ENZO_PROLONG NEW n3_c    %d %d %d\n",n3_c[0],n3_c[1],n3_c[2]);
   //  CkPrintf ("DEBUG_ENZO_PROLONG NEW o3_c    %d %d %d\n",o3_c[0],o3_c[1],o3_c[2]);
 
+  CkPrintf ("DEBUG_ENZO_PROLONG NEW m3_f    %d %d %d\n",m3_f[0],m3_f[1],m3_f[2]);
+  CkPrintf ("DEBUG_ENZO_PROLONG NEW m3_c    %d %d %d\n",m3_c[0],m3_c[1],m3_c[2]);
+
   CkPrintf ("DEBUG_ENZO_PROLONG NEW pdims   %d %d %d\n",pdims[0],pdims[1],pdims[2]);
   CkPrintf ("DEBUG_ENZO_PROLONG NEW pstart  %d %d %d\n",pstart[0],pstart[1],pstart[2]);
   CkPrintf ("DEBUG_ENZO_PROLONG NEW pend    %d %d %d\n",pend[0],pend[1],pend[2]);
@@ -125,9 +127,9 @@ int EnzoProlong::apply_
   CkPrintf ("DEBUG_ENZO_PROLONG NEW gdims   %d %d %d\n",gdims[0],gdims[1],gdims[2]);
   CkPrintf ("DEBUG_ENZO_PROLONG NEW gstart  %d %d %d\n",gstart[0],gstart[1],gstart[2]);
 
-  CkPrintf ("TRACE_PADDED_ARRAY EnzoProlong::apply parent %p sum %g\n",
-            (void*)parent,
-            cello::sum(parent,
+  CkPrintf ("TRACE_PADDED_ARRAY EnzoProlong::apply values_c %p sum %g\n",
+            (void*)values_c,
+            cello::sum(values_c,
                        m3_c[0],m3_c[1],m3_c[2],
                        o3_c[0],o3_c[1],o3_c[2],
                        n3_c[0],n3_c[1],n3_c[2]));
@@ -139,29 +141,29 @@ int EnzoProlong::apply_
     int im=o3_c[0]+m3_c[0]*(o3_c[1]+m3_c[1]*o3_c[2]);
     int ip=(o3_c[0]+n3_c[0]-1)+m3_c[0]*((o3_c[1]+n3_c[1]-1)+m3_c[1]*(o3_c[2]+n3_c[2]-1));
     
-  CkPrintf ("DEBUG_PROLONG %s:%d parent first %g\n",
-            __FILE__,__LINE__,parent[im]);
-  CkPrintf ("DEBUG_PROLONG %s:%d parent sum %g\n",
-            __FILE__,__LINE__,cello::sum
-            (parent,
-             m3_c[0],m3_c[1],m3_c[2],
-             o3_c[0],o3_c[1],o3_c[2],
-             n3_c[0],n3_c[1],n3_c[2]));
-  CkPrintf ("DEBUG_PROLONG %s:%d parent last %g\n",
-            __FILE__,__LINE__,parent[ip]);
+    CkPrintf ("DEBUG_PROLONG %s:%d values_c first %g\n",
+              __FILE__,__LINE__,values_c[im]);
+    CkPrintf ("DEBUG_PROLONG %s:%d values_c sum %g\n",
+              __FILE__,__LINE__,cello::sum
+              (values_c,
+               m3_c[0],m3_c[1],m3_c[2],
+               o3_c[0],o3_c[1],o3_c[2],
+               n3_c[0],n3_c[1],n3_c[2]));
+    CkPrintf ("DEBUG_PROLONG %s:%d values_c last %g\n",
+              __FILE__,__LINE__,values_c[ip]);
   }
 
 #endif  
 
 #ifdef TRACE_PADDED_ARRAY_VALUES
-  CkPrintf ("PADDED_ARRAY_VALUES %s:%d parent %p\n",
-            __FILE__,__LINE__,(void*)parent);
+  CkPrintf ("PADDED_ARRAY_VALUES %s:%d values_c %p\n",
+            __FILE__,__LINE__,(void*)values_c);
   for (int iz=0; iz<n3_c[2]; iz++) {
     for (int iy=0; iy<n3_c[1]; iy++) {
-      CkPrintf ("PADDED_ARRAY_VALUES parent %p %d %d %d: ",parent,0,iy,iz);
+      CkPrintf ("PADDED_ARRAY_VALUES values_c %d %d %d: ",0,iy,iz);
       for (int ix=0; ix<n3_c[0]; ix++) {
         int i = ix+ n3_c[0]*(iy+ n3_c[1]*iz);
-        CkPrintf (" %6.3g",parent[i]);
+        CkPrintf (" %6.3g",values_c[i]);
       }
       CkPrintf ("\n");
     }
@@ -169,24 +171,24 @@ int EnzoProlong::apply_
 #endif
   FORTRAN_NAME(interpolate)
     (&rank,
-     (enzo_float*)parent, pdims, pstart, pend, r3,
+     (enzo_float*)values_c, pdims, pstart, pend, r3,
      grid, gdims, gstart, work, &method_,
      &positive_, &error);
 
 
 #ifdef TRACE_PADDED_ARRAY_VALUES
-  CkPrintf ("PADDED_ARRAY_VALUES %s:%d grid %p\n",
-            __FILE__,__LINE__,(void*)grid);
-  for (int iz=0; iz<n3_f[2]; iz++) {
-    for (int iy=0; iy<n3_f[1]; iy++) {
-      CkPrintf ("PADDED_ARRAY_VALUES grid %p %d %d %d: ",grid,0,iy,iz);
-      for (int ix=0; ix<n3_f[0]; ix++) {
-        int i = ix+ n3_f[0]*(iy+ n3_f[1]*iz);
-        CkPrintf (" %6.3g",grid[i]);
-      }
-      CkPrintf ("\n");
-    }
-  }
+  // CkPrintf ("PADDED_ARRAY_VALUES %s:%d grid %p\n",
+  //           __FILE__,__LINE__,(void*)grid);
+  // for (int iz=0; iz<n3_f[2]; iz++) {
+  //   for (int iy=0; iy<n3_f[1]; iy++) {
+  //     CkPrintf ("PADDED_ARRAY_VALUES grid %p %d %d %d: ",grid,0,iy,iz);
+  //     for (int ix=0; ix<n3_f[0]; ix++) {
+  //       int i = ix+ n3_f[0]*(iy+ n3_f[1]*iz);
+  //       CkPrintf (" %6.3g",grid[i]);
+  //     }
+  //     CkPrintf ("\n");
+  //   }
+  // }
 #endif
 
 #ifdef DEBUG_ENZO_PROLONG
@@ -218,6 +220,4 @@ int EnzoProlong::apply_
   }
   delete [] grid;
   delete [] work;
-  return (sizeof(enzo_float) * m3_c[0]*m3_c[1]*m3_c[2]);
-  
 }  

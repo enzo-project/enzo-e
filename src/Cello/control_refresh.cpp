@@ -13,9 +13,14 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
-//#define TRACE_MSG_REFRESH /* also uncomment in charm_MsgRefresh.hpp */
-
-#define ENABLE_EXTRA
+// #define TRACE_CONTROL_REFRESH /* also uncomment in charm_MsgRefresh.hpp */
+// #define TRACE_COARSE_ARRAY_VALUES
+// #define DEBUG_COARSE_ARRAY              
+//#define DEBUG_DATA_MSG
+// #define DEBUG_NEW_BOX
+#define ENABLE_RECV
+#define ENABLE_EXTRA_SEND
+#define ENABLE_MAIN_SEND /* main S->R send with EnzoProlong */
 
 #define CHECK_ID(ID) ASSERT1 ("CHECK_ID","Invalid id %d",ID,(ID>=0));
 
@@ -168,9 +173,7 @@ void Block::refresh_check_done (int id_refresh)
     // complete any outstanding data operations (e.g. multi-block
     // interpolations)
 
-#ifdef ENABLE_EXTRA    
-    refresh_extra_apply_(refresh);
-#endif    
+    refresh_coarse_apply_(refresh);
       
     // Call callback
 
@@ -182,9 +185,8 @@ void Block::refresh_check_done (int id_refresh)
 
 void Block::p_refresh_recv (MsgRefresh * msg_refresh)
 {
-#ifdef TRACE_MSG_REFRESH
-  CkPrintf ("Block::p_refresh_recv() %s\n",name().c_str());
-  msg_refresh->print("p_refresh_recv");
+#ifdef TRACE_CONTROL_REFRESH
+  CkPrintf ("TRACE_CONTROL_REFRESH Block::p_refresh_recv() %s\n",name().c_str());
 #endif  
 
   const int id_refresh = msg_refresh->id_refresh();
@@ -264,13 +266,14 @@ int Block::refresh_load_field_faces_ (Refresh & refresh)
 	(level_face == level + 1) ? refresh_fine : refresh_unknown;
 
       // handle padded interpolation special case if needed
-#ifdef ENABLE_EXTRA
-      count += refresh_load_extra_face_
-        (refresh,refresh_type,index_neighbor, level,level_face,if3,ic3);
-#endif      
-
-      refresh_load_field_face_ (refresh,refresh_type,index_neighbor,if3,ic3);
-      ++count;
+      const int pad = cello::problem()->prolong()->coarse_padding();
+      if (pad > 0 && level_face != level) {
+        count += refresh_load_coarse_face_
+          (refresh,refresh_type,index_neighbor,if3,ic3);
+      } else {
+        refresh_load_field_face_ (refresh,refresh_type,index_neighbor,if3,ic3);
+        ++count;
+      }
     }
 
   } else if (neighbor_type == neighbor_level) {
@@ -303,19 +306,16 @@ int Block::refresh_load_field_faces_ (Refresh & refresh)
 //----------------------------------------------------------------------
 
 void Block::refresh_load_field_face_
-( Refresh & refresh,
-  int refresh_type,
-  Index index_neighbor,
-  int if3[3],
-  int ic3[3])
-
+( Refresh & refresh,  int refresh_type,
+  Index index_neighbor,  int if3[3], int ic3[3])
 {
   // create refresh message
   
   MsgRefresh * msg_refresh = new MsgRefresh;
-#ifdef TRACE_MSG_REFRESH
+#ifdef TRACE_CONTROL_REFRESH
   {
-    std::string type=name(index_neighbor) + ":load_field_face";
+  CkPrintf ("TRACE_CONTROL_REFRESH Block::refresh_load_field_face_() %s\n",name().c_str());
+  std::string type=name(index_neighbor) + ":load_field_face";
     msg_refresh->set_block_type(name(),type);
   }
 #endif  
@@ -337,31 +337,40 @@ void Block::refresh_load_field_face_
   msg_refresh->set_data_msg (data_msg);
 
   // initialize data message
+#ifdef DEBUG_DATA_MSG
+      CkPrintf ("DEBUG_DATA_MSG %s:%d %p %s calling set_field_face()\n",
+                __FILE__,__LINE__,(void*)data_msg,data_msg->tag());
+#endif      
   data_msg -> set_field_face (field_face,true);
   data_msg -> set_field_data (data()->field_data(),false);
 
-#ifdef TRACE_MSG_REFRESH  
-  msg_refresh->print("refresh_load_field_face_");
-#endif  
   thisProxy[index_neighbor].p_refresh_recv (msg_refresh);
 
 }
 
 //----------------------------------------------------------------------
 
-int Block::refresh_load_extra_face_
-(Refresh refresh,
- int refresh_type,
- Index index_neighbor,
- int level, int level_face,
- int if3[3],
- int ic3[3])
+int Block::refresh_load_coarse_face_
+(Refresh refresh, int refresh_type,
+ Index index_neighbor, int if3[3], int ic3[3])
 {
+#ifdef TRACE_CONTROL_REFRESH  
+  CkPrintf ("TRACE_CONTROL_REFRESH Block::refresh_load_coarse_face_() %s\n",name().c_str());
+  
+#endif
+
+  const int level_face = index_neighbor.level();
+  const int level = index_.level();
   int count = 0;
 
-  const int padding = cello::problem()->prolong()->padding();
+  const int pad = cello::problem()->prolong()->coarse_padding();
 
-  if ((padding > 0) && (level != level_face)) {
+#ifdef TRACE_CONTROL_REFRESH  
+  CkPrintf ("DEBUG_CONTROL_REFRESH type %s pad %d levels self nbr %d %d\n",
+            cello::problem()->prolong()->name().c_str(),
+            pad,level,level_face);
+#endif  
+  if ((pad > 0) && (level != level_face)) {
 
     // Create box_face
     
@@ -397,10 +406,39 @@ int Block::refresh_load_extra_face_
                    l_send ? if3[2] : -if3[2] };
     
     box_sr.set_block(BoxType_receive,+1,jf3,ic3);
-    box_sr.set_padding(padding);
+    box_sr.set_padding(pad);
 
     box_sr.compute_region();
 
+    // SEND MAIN SEND->RECV VIA COARSE ARRAY
+
+    int iam3[3],iap3[3];
+    int ifms3[3],ifps3[3];
+    int ifmr3[3],ifpr3[3];
+    
+#ifdef ENABLE_MAIN_SEND
+    if (l_send) {
+
+      box_sr.get_start_stop
+        (iam3,iap3,BlockType::extra,BlockType::coarse);
+      box_sr.get_start_stop
+        (ifms3,ifps3,BlockType::extra,BlockType::send);
+      box_sr.get_start_stop
+        (ifmr3,ifpr3,BlockType::extra,BlockType::receive);
+
+      refresh_coarse_send_
+        (index_neighbor,
+         data()->field(), refresh,
+         iam3,iap3,ifms3,ifps3,ifmr3,ifpr3,"R");
+
+    } else if (l_recv) {
+
+      // only count receives
+      count ++;
+      
+    }
+#endif      
+      
     if (l_send) {
 
       // SENDER LOOP OVER EXTRA BLOCKS
@@ -425,13 +463,24 @@ int Block::refresh_load_extra_face_
           // ... determine overlap of extra block with intersection region
           const int level_send = level;
           box_sr.set_block (BoxType_extra,(level_extra-level_send), ef3,ec3);
-        
-          int im3[3],ip3[3];
-          bool overlap = box_sr.get_limits (Box::BlockType::extra,im3,ip3,BoxType_extra);
-          
+          int tm3[3],tp3[3];
+          bool overlap = box_sr.get_start_stop
+            (tm3,tp3,BlockType::extra,BlockType::extra);
           if (overlap) {
 
-            if (level_extra == level) {
+#ifdef DEBUG_COARSE_ARRAY
+          box_sr.print("[SR send]");
+          CkPrintf ("DEBUG_COARSE_ARRAY level E %d S %d\n",level_extra,level_send);
+          CkPrintf ("DEBUG_COARSE_ARRAY [send] S %s R %s E %s\n",
+                    name().c_str(),
+                    name(index_neighbor).c_str(),
+                    name(index_extra).c_str());
+          CkPrintf ("DEBUG_NEW_BOX [SR send e-e] t %s:%d %d:%d %d:%d %d:%d\n",
+                    __FILE__,__LINE__,
+                    tm3[0],tp3[0],tm3[1],tp3[1],tm3[2],tp3[2]);
+#endif
+
+          if (level_extra == level) {
           
               // this block sends; extra block is coarse
           
@@ -442,7 +491,7 @@ int Block::refresh_load_extra_face_
 
               // Box Bs | Be -> br
               box_er.set_block(BoxType_receive,+1,if3_er,ic3);
-              box_er.set_padding(padding);
+              box_er.set_padding(pad);
               box_er.compute_region();
 
               
@@ -450,28 +499,40 @@ int Block::refresh_load_extra_face_
               
               box_er.set_block(BoxType_extra,0,if3_es,ic3); // ic3 ignored
 
-              int ifm3[3],ifp3[3];
-              int iam3[3],iap3[3];
-              box_er.get_limits (Box::BlockType::extra,ifm3,ifp3,BoxType_extra);
-              box_er.get_limits (Box::BlockType::array,iam3,iap3,BoxType_extra);
+              box_er.get_start_stop
+                (iam3,iap3,BlockType::extra,BlockType::coarse);
+              box_er.get_start_stop
+                (ifms3,ifps3,BlockType::extra,BlockType::send);
+              box_er.get_start_stop
+                (ifmr3,ifpr3,BlockType::extra,BlockType::receive);
 
-              int ma3[3];
-              box_er.get_region_size (ma3);
-              
-              refresh_extra_send_
-                (refresh, index_neighbor, if3_er,
-                 ma3, iam3,iap3, ifm3,ifp3, data()->field(),"R");
+#ifdef DEBUG_NEW_BOX    
+              box_er.print("   ER [send]");
+              CkPrintf ("DEBUG_NEW_BOX [ER send e-c] ia %s:%d %d:%d %d:%d %d:%d\n",
+                        __FILE__,__LINE__,
+                        iam3[0],iap3[0],iam3[1],iap3[1],iam3[2],iap3[2]);
+              CkPrintf ("DEBUG_NEW_BOX [ER send e-s] ifs %s:%d %d:%d %d:%d %d:%d  %g %g %g\n",
+                        __FILE__,__LINE__,
+                        ifms3[0],ifps3[0],ifms3[1],ifps3[1],ifms3[2],ifps3[2],
+                        1.0*(ifps3[0]-ifms3[0])/(iap3[0]-iam3[0]),
+                        1.0*(ifps3[1]-ifms3[1])/(iap3[1]-iam3[1]),
+                        1.0*(ifps3[2]-ifms3[2])/(iap3[2]-iam3[2]));
+              CkPrintf ("DEBUG_NEW_BOX [ER send e-r] ifr %s:%d %d:%d %d:%d %d:%d  %g %g %g\n",
+                        __FILE__,__LINE__,
+                        ifmr3[0],ifpr3[0],ifmr3[1],ifpr3[1],ifmr3[2],ifpr3[2],
+                        1.0*(ifpr3[0]-ifmr3[0])/(iap3[0]-iam3[0]),
+                        1.0*(ifpr3[1]-ifmr3[1])/(iap3[1]-iam3[1]),
+                        1.0*(ifpr3[2]-ifmr3[2])/(iap3[2]-iam3[2]));
+#endif
 
-              ASSERT9 ("Block::refresh_load_extra_face_",
-                       "Array limits %d %d %d - %d %d %d not within array size %d %d %d\n",
-                       iam3[0],iam3[1],iam3[2],
-                       iap3[0],iap3[1],iap3[2],
-                       ma3[0], ma3[1], ma3[2],
-                       (0 <= iam3[0] && iap3[0] <= ma3[0]) &&
-                       (0 <= iam3[1] && iap3[1] <= ma3[1]) &&
-                       (0 <= iam3[2] && iap3[2] <= ma3[2]));
-                       
-              ASSERT3 ("Block::refresh_load_extra_face_",
+#ifdef ENABLE_EXTRA_SEND              
+              refresh_coarse_send_
+                (index_neighbor,
+                 data()->field(), refresh,
+                 iam3,iap3,ifms3,ifps3,ifmr3,ifpr3,"R");
+#endif              
+
+              ASSERT3 ("Block::refresh_load_coarse_face_",
                        "Face if3_er %d %d %d out of bounds",
                        if3_er[0],if3_er[1],if3_er[2],
                        (-1 <= if3_er[0] && if3_er[0] <= 1) &&
@@ -492,7 +553,7 @@ int Block::refresh_load_extra_face_
         
         const Index index_extra = it_extra.index();
         const int   level_extra = it_extra.face_level();
-        
+
         int ec3[3] = {0,0,0};
         if (level_extra > level_face) {
           index_extra.child(level_extra,ec3,ec3+1,ec3+2);
@@ -519,37 +580,77 @@ int Block::refresh_load_extra_face_
           }
           box_sr.set_block (BoxType_extra,(level_extra-level_send), if3_se,ec3);
         
-          int im3[3],ip3[3];
-          bool overlap = box_sr.get_limits (Box::BlockType::extra,im3,ip3,BoxType_extra);
-
+          int tm3[3],tp3[3];
+          bool overlap = box_sr.get_start_stop
+            (tm3,tp3,BlockType::extra,BlockType::extra);
           if (overlap) {
 
+#ifdef DEBUG_COARSE_ARRAY              
+            box_sr.print("[SR recv]");
+            CkPrintf ("DEBUG_COARSE_ARRAY level E %d S %d\n",level_extra,level_send);
+            CkPrintf ("DEBUG_COARSE_ARRAY [recv] S %s R %s E %s\n",
+                      name().c_str(),
+                      name(index_neighbor).c_str(),
+                      name(index_extra).c_str());
+            CkPrintf ("DEBUG_NEW_BOX [SR recv e-e] t %s:%d %d:%d %d:%d %d:%d\n",
+                      __FILE__,__LINE__,
+                      tm3[0],tp3[0],tm3[1],tp3[1],tm3[2],tp3[2]);
+#endif              
+
+#ifdef ENABLE_EXTRA_SEND
             ++count;
+#endif            
             
             if (level_extra == level) {
 
               // handle contribution of this block br to Bs -> be
               // Box br | Bs -> be
               box_se.set_block(BoxType_receive,+1,if3_se,ec3);
-              box_se.set_padding(padding);
+              box_se.set_padding(pad);
               box_se.compute_region();
 
               int if3_sr[3] = { -if3[0], -if3[1], -if3[2] };
               box_se.set_block(BoxType_extra,+1,if3_sr,ic3);
 
-              int ifm3[3],ifp3[3];
               int iam3[3],iap3[3];
-              box_se.get_limits (Box::BlockType::extra,ifm3,ifp3,BoxType_extra);
-              box_se.get_limits (Box::BlockType::array,iam3,iap3,BoxType_extra);
+              int ifms3[3],ifps3[3];
+              int ifmr3[3],ifpr3[3];
 
+              box_se.get_start_stop
+                (iam3,iap3,BlockType::extra,BlockType::coarse);
+              box_se.get_start_stop
+                (ifms3,ifps3,BlockType::extra,BlockType::send);
+              box_se.get_start_stop
+                (ifmr3,ifpr3,BlockType::extra,BlockType::receive);
+#ifdef DEBUG_NEW_BOX    
+              box_se.print("   [SE recv]");
+              CkPrintf ("DEBUG_NEW_BOX [SE recv e-c] ia %s:%d %d:%d %d:%d %d:%d\n",
+                        __FILE__,__LINE__,
+                        iam3[0],iap3[0],iam3[1],iap3[1],iam3[2],iap3[2]);
+              CkPrintf ("DEBUG_NEW_BOX [SE recv e-s] ifs %s:%d %d:%d %d:%d %d:%d  %g %g %g\n",
+                        __FILE__,__LINE__,
+                        ifms3[0],ifps3[0],ifms3[1],ifps3[1],ifms3[2],ifps3[2],
+                        1.0*(ifps3[0]-ifms3[0])/(iap3[0]-iam3[0]),
+                        1.0*(ifps3[1]-ifms3[1])/(iap3[1]-iam3[1]),
+                        1.0*(ifps3[2]-ifms3[2])/(iap3[2]-iam3[2]));
+              CkPrintf ("DEBUG_NEW_BOX [SE recv e-r] ifr %s:%d %d:%d %d:%d %d:%d  %g %g %g\n",
+                        __FILE__,__LINE__,
+                        ifmr3[0],ifpr3[0],ifmr3[1],ifpr3[1],ifmr3[2],ifpr3[2],
+                        1.0*(ifpr3[0]-ifmr3[0])/(iap3[0]-iam3[0]),
+                        1.0*(ifpr3[1]-ifmr3[1])/(iap3[1]-iam3[1]),
+                        1.0*(ifpr3[2]-ifmr3[2])/(iap3[2]-iam3[2]));
+#endif
               int ma3[3];
               box_se.get_region_size(ma3);
 
-              refresh_extra_send_
-                (refresh, index_extra, if3_se,
-                 ma3, iam3,iap3, ifm3,ifp3, data()->field(),"E");
+#ifdef ENABLE_EXTRA_SEND              
+              refresh_coarse_send_
+                (index_extra,
+                 data()->field(),refresh,
+                 iam3,iap3, ifms3,ifps3, ifmr3,ifpr3,"E");
+#endif              
 
-              ASSERT3 ("Block::refresh_load_extra_face_",
+              ASSERT3 ("Block::refresh_load_coarse_face_",
                        "Face if3_se %d %d %d out of bounds",
                        if3_se[0],if3_se[1],if3_se[2],
                        ((-1 <= if3_se[0] && if3_se[0] <= 1) &&
@@ -568,63 +669,72 @@ int Block::refresh_load_extra_face_
 
 //----------------------------------------------------------------------
 
-void Block::refresh_extra_send_
-(Refresh & refresh,
- Index index_neighbor, int if3[3],
- int m3[3], int iam3[3], int iap3[3], int ifm3[3], int ifp3[3],
- Field field,std::string debug)
+void Block::refresh_coarse_send_
+(Index index_neighbor,
+ Field field,Refresh & refresh,
+ int iam3[3], int iap3[3],
+ int ifms3[3], int ifps3[3],
+ int ifmr3[3], int ifpr3[3],
+ std::string debug)
 {
+#ifdef TRACE_CONTROL_REFRESH  
+  CkPrintf ("TRACE_CONTROL_REFRESH Block::refresh_coarse_send_() %s\n",name().c_str());
+#endif  
+
   MsgRefresh * msg_refresh = new MsgRefresh;
-#ifdef TRACE_MSG_REFRESH
-  std::string type=name(index_neighbor) + ":extra_send-" + debug;
+
+#ifdef TRACE_CONTROL_REFRESH
+  std::string type=std::string("extra_send-") + debug;
   msg_refresh->set_block_type(name(),type);
 #endif  
 
   DataMsg * data_msg = new DataMsg;
 
+#ifdef DEBUG_DATA_MSG
+      CkPrintf ("DEBUG_DATA_MSG %s:%d %p %s NOT calling set_field_face()\n",
+                __FILE__,__LINE__,(void*)data_msg,data_msg->tag());
+#endif      
   // data_msg -> set_field_face (field_face,true);
   // data_msg -> set_field_data (data()->field_data(),false);
 
   const int id_refresh = refresh.id();
   CHECK_ID(id_refresh);
-  int nf = (ifp3[0]-ifm3[0])*(ifp3[1]-ifm3[1])*(ifp3[2]-ifm3[2]);
-  int na = (iap3[0]-iam3[0])*(iap3[1]-iam3[1])*(iap3[2]-iam3[2]);
-  int v = nf/na;
-  int r = (ifp3[0]-ifm3[0]) / (iap3[0]-iam3[0]);
-  int n3[3] = { (iap3[0]-iam3[0]),
-                (iap3[1]-iam3[1]),
-                (iap3[2]-iam3[2]) };
 
-  data_msg->set_padded_face
-    (m3,n3,r,v,iam3,ifm3, if3,
-     refresh.field_list_src(),field,name(index_neighbor));
+  data_msg->set_coarse_array
+    (field, iam3,iap3,ifms3,ifps3,ifmr3,ifpr3,refresh.field_list_src());
 
   msg_refresh->set_refresh_id (id_refresh);
   msg_refresh->set_data_msg (data_msg);
 
-#ifdef TRACE_MSG_REFRESH  
-  msg_refresh->print("refresh_extra_send_");
+#ifdef TRACE_CONTROL_REFRESH  
+  msg_refresh->print("TRACE_CONTROL_REFRESH refresh_coarse_send_");
 #endif  
   thisProxy[index_neighbor].p_refresh_recv (msg_refresh);
 }
 
 //----------------------------------------------------------------------
 
-void Block::refresh_extra_apply_ (Refresh * refresh)
+void Block::refresh_coarse_apply_ (Refresh * refresh)
 {
+#ifdef TRACE_CONTROL_REFRESH  
+  CkPrintf ("TRACE_CONTROL_REFRESH Block::refresh_coarse_apply_() %s\n",name().c_str());
+#endif  
+#ifdef DEBUG_COARSE_ARRAY  
+  CkPrintf ("DEBUG_COARSE_ARRAY %s refresh_coarse_apply_\n",name().c_str());
+  fflush(stdout);
+#endif  
   Prolong * prolong = cello::problem()->prolong();
   
-  const int padding = prolong->padding();
+  const int pad = prolong->coarse_padding();
 
-  if (padding > 0) {
+  if (pad > 0) {
   
     const int min_face_rank = refresh->min_face_rank();
     const int neighbor_type = refresh->neighbor_type();
     const int root_level    = refresh->root_level();
     const int min_level     = cello::config()->mesh_min_level;
 
-    if ((padding > 0) &&
-        neighbor_type == neighbor_leaf ||
+    if (neighbor_type == neighbor_leaf ||
         neighbor_type == neighbor_tree) {
 
       ItNeighbor it_neighbor =
@@ -640,36 +750,14 @@ void Block::refresh_extra_apply_ (Refresh * refresh)
       
         const int level_face = it_neighbor.face_level();
 
+#ifdef DEBUG_COARSE_ARRAY
+        CkPrintf ("DEBUG_COARSE_ARRAY block %s level %d level_face %d\n",
+                  name().c_str(),level,level_face);
+#endif        
         if (level == level_face + 1) {
-          cello_float * padded_array =
-            this->data()->field_data()->padded_array(of3[0],of3[1],of3[2]);
 
-          FieldData * field_data = data()->field_data();
-          const int ma = field_data->padded_array_dimensions(of3[0],of3[1],of3[2]);
-          const int mf  = field_data->padded_array_fields(of3[0],of3[1],of3[2]);
-          const int mxa = field_data->padded_array_dimensions(0,of3[0],of3[1],of3[2]);
-          const int mya = field_data->padded_array_dimensions(1,of3[0],of3[1],of3[2]);
-          const int mza = field_data->padded_array_dimensions(2,of3[0],of3[1],of3[2]);
-          const int maf = ma * mf;
-          CkPrintf ("DEBUG_EXTRA_APPLY maf %d [%d %d %d]\n",maf,of3[0],of3[1],of3[2]);
-          CkPrintf ("DEBUG_EXTRA_APPLY mf  %d \n",mf);
-          CkPrintf ("DEBUG_EXTRA_APPLY ma  %d \n",ma);
-          fflush(stdout);
-          ASSERT3("Block::refresh_extra_apply_",
-                  "Padded array for face %d %d %d is not allocated",
-                  of3[0],of3[1],of3[2],
-                  maf > 0);
-          ASSERT4("Block::refresh_extra_apply_",
-                  "Padded array size %d does not match expected %d*%d*%d",
-                  ma,mxa,mya,mza,
-                  (ma == mxa*mya*mza) );
-          
           const auto & field_list = refresh->field_list_src();
           const int nf = field_list.size();
-          ASSERT2("Block::refresh_extra_apply_",
-                  "Expected padded array fields %d does not match Refresh %d",
-                  mf,nf,
-                  (mf == nf) );
         
           // Create Box to find loop limits
           int n3[3];
@@ -684,45 +772,104 @@ void Block::refresh_extra_apply_ (Refresh * refresh)
           int ic3[3];
           index_.child(level,ic3,ic3+1,ic3+2);
           box.set_block (BoxType_receive,+1, of3,ic3);
-          box.set_padding(padding);
+          box.set_padding(pad);
+          int gr3[3] = {0,0,0};
+          box.set_recv_ghosts(gr3); // non-ghost block values only
           box.compute_region();
-          int i3_c[3] = {0,0,0};
-          int n3_c[3];
-          box.get_region_size(n3_c);
-          box.set_padding(0);
+          int i3_c[3], n3_c[3];
+          box.set_padding(pad);
           box.compute_region();
 
           int i3_f[3],n3_f[3];
-          bool overlap = box.get_limits (Box::BlockType::receive,i3_f,n3_f,BoxType_receive);
-          n3_f[0] -= i3_f[0];
-          n3_f[1] -= i3_f[1];
-          n3_f[2] -= i3_f[2];
-          
-          const int nc = n3_c[0]*n3_c[1]*n3_c[2];
+          const bool lghost = true;
+          const bool lcoarse = true;
+          box.get_start_size (i3_f,n3_f,BlockType::receive,BlockType::receive);
+          box.get_start_size (i3_c,n3_c,BlockType::receive,BlockType::coarse);
+#ifdef DEBUG_NEW_BOX    
+          CkPrintf ("DEBUG_EXTRA_RECV coarse_apply block values %d:%d %d:%d %d:%d\n",
+                    i3_c[0],i3_c[0]+n3_c[0],
+                    i3_c[1],i3_c[1]+n3_c[1],
+                    i3_c[2],i3_c[2]+n3_c[2]);
+          CkPrintf ("DEBUG_EXTRA_RECV coarse_apply coarse values %d:%d %d:%d %d:%d\n",
+                    i3_f[0],i3_f[0]+n3_f[0],
+                    i3_f[1],i3_f[1]+n3_f[1],
+                    i3_f[2],i3_f[2]+n3_f[2]);
+#endif          
 
-          ASSERT6("refresh_extra_apply",
-                 "%s Expected padded_array size %d face %d %d %d does not match expected %d",
-                  name().c_str(),ma,
-                  of3[0],of3[1],of3[2],
-                  nc,
-                  (ma == nc));
           for (int i_f=0; i_f<nf; i_f++) {
 
-   
             const int index_field = field_list[i_f];
+
+            int m3_c[3];
             int m3_f[3];
+            field.coarse_dimensions(i_f,m3_c,m3_c+1,m3_c+2);
             field.dimensions(index_field,&m3_f[0],&m3_f[1],&m3_f[2]);
             
-            precision_type precision = field.precision(index_field);
-            char * values_f = field.values(index_field);
-            //@@@
-            cello_float * values_c = &padded_array[i_f*nc];
-            // @@@@@ values_f invalid
-            prolong->apply(precision,
-                           values_f, m3_f, i3_f, n3_f,
-                           values_c, n3_c, i3_c, n3_c,
+            cello_float * field_values =
+              (cello_float *) field.values(index_field);
+            cello_float * coarse_field =
+              (cello_float *) field.coarse_values(i_f);
+              
+            
+            const cello_float rr = 1.0/cello::num_children();
+            const float r = n3_f[0] / n3_c[0];
+#ifdef CHECK
+            ASSERT1 ("Block::refresh_coarse_apply",
+                     "Field-to-coarse array axis ratio r=%g is not 1.0 or 2.0",
+                     r, (r==1.0 || r==2.0));
+#endif    
+
+            const int if0 = i3_f[0] + m3_f[0]*(i3_f[1] + m3_f[1]*i3_f[2]);
+            const int ic0 = i3_c[0] + m3_c[0]*(i3_c[1] + m3_c[1]*i3_c[2]);
+
+            // clear first to avoid double-counting overlapped subregions
+            for (int kz=0; kz<n3_f[2]; kz++) {
+              const int kzr=kz/r;
+              for (int ky=0; ky<n3_f[1]; ky++) {
+                const int kyr=ky/r;
+                for (int kx=0; kx<n3_f[0]; kx++) {
+                  const int kxr=kx/r;
+                  int kc = ic0 + kxr + m3_c[0]*(kyr + m3_c[1]*kzr);
+                  coarse_field[kc] = 0;
+                }
+              }
+            }
+            for (int kz=0; kz<n3_f[2]; kz++) {
+              const int kzr=kz/r;
+              for (int ky=0; ky<n3_f[1]; ky++) {
+                const int kyr=ky/r;
+                for (int kx=0; kx<n3_f[0]; kx++) {
+                  const int kxr=kx/r;
+                  int kc = ic0 + kxr + m3_c[0]*(kyr + m3_c[1]*kzr);
+                  int kf = if0 + kx + m3_f[0]*(ky + m3_f[1]*kz);
+                  coarse_field[kc] += rr*field_values[kf];
+                }
+              }
+            }
+
+#ifdef TRACE_COARSE_ARRAY_VALUES
+            if (i_f == 0) {
+              CkPrintf ("COARSE_ARRAY_VALUES refresh_coarse_apply_()  block %s field %d (%d %d %d)\n",
+                        name().c_str(),i_f,m3_c[0],m3_c[1],m3_c[2]);
+              for (int iz=0; iz<m3_c[2]; iz++) {
+                for (int iy=0; iy<m3_c[1]; iy++) {
+                  CkPrintf ("COARSE_ARRAY_VALUES coarse_field %d %d %d: ",0,iy,iz);
+                  for (int ix=0; ix<m3_c[0]; ix++) {
+                    int i = ix+ m3_c[0]*(iy+ m3_c[1]*iz);
+                    CkPrintf (" %6.3g",coarse_field[i]);
+                  }
+                  CkPrintf ("\n");
+                }
+              }
+            }
+#endif
+            
+            // copy local field values to coarse array
+            prolong->array_sizes_valid (n3_f,n3_c);
+            prolong->apply(precision_default,
+                           field_values, m3_f, i3_f, n3_f,
+                           coarse_field, m3_c, i3_c, n3_c,
                            refresh->accumulate());
-            //  bool accumulate)
           }
         }
       }

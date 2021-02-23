@@ -9,6 +9,7 @@
 #define MESH_BOX_HPP
 
 enum BoxType { BoxType_receive = 0, BoxType_extra = 1, BoxType_ignored = -1 };
+enum class BlockType { send, receive, extra, coarse };
 
 class Box {
 
@@ -18,13 +19,13 @@ class Box {
   
 public: // interface
 
-  enum class BlockType { send, receive, extra, array };
-  
   /// Constructor
   Box(int rank, int block_size[3], int ghost_depth[3])
     : rank_(rank),
       block_size_(),
       ghost_depth_(),
+      coarse_size_(),
+      coarse_ghost_(),
       face_(),
       child_(),
       block_start_(),
@@ -41,6 +42,8 @@ public: // interface
       block_size_[i] = block_size[i];
       ghost_depth_[i] = ghost_depth[i];
       ghost_depth_recv_[i] = ghost_depth[i];
+      coarse_size_[i] = block_size[i] / 2;
+      coarse_ghost_[i] = ghost_depth_[i]/2 + ghost_depth_[i]%1 + 1;
     }
   }
   
@@ -52,6 +55,8 @@ public: // interface
     p | rank_;
     PUParray(p,block_size_,3);
     PUParray(p,ghost_depth_,3);
+    PUParray(p,coarse_size_,3);
+    PUParray(p,coarse_ghost_,3);
     PUParray(p,level_,2);
     for (int i=0; i<2; i++) {
       PUParray(p,face_[i],3);
@@ -104,6 +109,15 @@ public: // interface
     pad_ = pad;
   }
   
+  /// Set coarse field size
+  inline void set_coarse (int coarse_size[3], int coarse_ghost[3])
+  {
+    for (int i=0; i<rank_; i++) {
+      coarse_size_[i] = coarse_size[i];
+      coarse_ghost_[i] = coarse_ghost[i];
+    }
+  }
+
   /// Determine the start of the specified block
   void compute_block_start(BoxType bt);
 
@@ -111,7 +125,13 @@ public: // interface
   void compute_region();
 
   /// Get send/box (recv/extra) intersection loop limits for the specified block
-  bool get_limits (BlockType block_type, int region_start[3], int region_stop[3],BoxType bt=BoxType_ignored);
+  bool get_start_stop
+  (int index_start[3], int index_stop[3],
+   BlockType block_intersect, BlockType block_coords);
+
+  bool get_start_size
+  (int index_start[3], int index_size[3],
+   BlockType block_intersect, BlockType block_coords);
 
   void get_region_size (int ma3[3])
   {
@@ -122,8 +142,6 @@ public: // interface
       ma3[i] = 1;
     }
   }
-  /// Restrict limits to block, including or excluding ghosts
-  void restrict_limits (int region_start[3], int region_stop[3], bool include_ghosts);
 
   void print(const char * mesg)
   {
@@ -154,7 +172,15 @@ public: // interface
               region_stop_[0],region_stop_[1],region_stop_[2]);
     CkPrintf ("Box----------------\n");
   }
-  
+
+private: // methods
+
+  /// Restrict limits to block, including or excluding ghosts
+  bool intersect_regions_
+  (int index_min[3], int index_max[3],
+   const int index_start[3], const int index_stop[3]);
+
+
 private: // attributes
 
   // NOTE: change pup() function whenever attributes change
@@ -168,7 +194,12 @@ private: // attributes
   /// Depth of allocated ghost zones
   int ghost_depth_[3];
 
+  /// Size of coarse fields
+  int coarse_size_[3];
   
+  /// Depth of coarse field ghosts
+  int coarse_ghost_[3];
+
   /// Number of ghost zones receive block wants
   int ghost_depth_recv_[3];
 

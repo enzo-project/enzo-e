@@ -17,7 +17,7 @@ ProlongInject::ProlongInject() throw()
 
 //----------------------------------------------------------------------
 
-int ProlongInject::apply 
+void ProlongInject::apply 
 ( precision_type precision,
   void *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
   const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
@@ -27,7 +27,7 @@ int ProlongInject::apply
 
   case precision_single:
 
-    return apply_(       (float *) values_f, nd3_f, im3_f, n3_f,
+    apply_(       (float *) values_f, nd3_f, im3_f, n3_f,
 			 (const float *) values_c, nd3_c, im3_c, n3_c,
 			 accumulate);
 
@@ -35,7 +35,7 @@ int ProlongInject::apply
 
   case precision_double:
 
-    return apply_(       (double *) values_f, nd3_f, im3_f, n3_f,
+    apply_(       (double *) values_f, nd3_f, im3_f, n3_f,
 			 (const double *) values_c, nd3_c, im3_c, n3_c,
 			 accumulate);
 
@@ -45,14 +45,13 @@ int ProlongInject::apply
 
     ERROR1 ("ProlongInject::apply()", "Unknown precision %d", precision);
 
-    return 0;
   }
 }
 
 //----------------------------------------------------------------------
 
 template <class T>
-int ProlongInject::apply_
+void ProlongInject::apply_
 (       T * values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
 	const T * values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
 	bool accumulate)
@@ -95,9 +94,6 @@ int ProlongInject::apply_
 
       }
     }
-
-    return (sizeof(T) * n3_c[0]);
-
 
   } else if (n3_f[2] == 1) {
 
@@ -143,8 +139,6 @@ int ProlongInject::apply_
 	}
       }
     }
-
-    return (sizeof(T) * n3_c[0]*n3_c[1]);
 
   } else {
 
@@ -203,8 +197,6 @@ int ProlongInject::apply_
 	}
       }
     }
-    return (sizeof(T) * n3_c[0]*n3_c[1]*n3_c[2]);
-
   }
 }
 

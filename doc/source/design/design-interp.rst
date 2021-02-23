@@ -54,8 +54,9 @@ There are three main block roles involved in an interpolation:
          compute the interpolated ghost cell values
 
 
-Some minor operations are not included, such as extra blocks that are in the same level as the receiving
-block need to "coarsen" their values before sending to the receiving block in operation 3.
+Some minor operations are not included, such as extra blocks that are
+in the same level as the receiving block need to "coarsen" their
+values before sending to the receiving block in operation 3.
 
 Sending Block
 =============
@@ -67,8 +68,9 @@ Sending Block
     :alt: image illustrating the inter-relationship between sending (coarse) block Bs, receiving (fine) block Br, and extra blocks Be.
 
 The sending block must send its data to the receiving block, as it
-does for all other refresh operations.  The main difference is it requires
-an additional layer of padding when sending.  This is handled in ``Block::refresh_load_field_face_````control_refresh.cpp``
+does for all other refresh operations.  The main difference is it
+requires an additional layer of padding when sending.  This is handled
+in ``Block::refresh_load_field_face_````control_refresh.cpp``
 
 Extra Block
 ===========
@@ -78,11 +80,14 @@ Extra Block
     :align: center
     :alt: image illustrating the inter-relationship between sending (coarse) block Bs, receiving (fine) block Br, and extra blocks Be.
 
-In addition to the sending block, some extra blocks must also send their overlapped cell data to the receiving block.
-This requires an extra loop and some additional logic for a block to determine that it must participate in
-an interpolation operation not as the sender or receiver.  This is handled in the ``Block::refresh_load_extra_face_()``
-method, which can be found in the ``control_refresh.cpp`` source file.  Depending on the relative mesh refinement level,
-an extra block may be handled 
+In addition to the sending block, some extra blocks must also send
+their overlapped cell data to the receiving block.  This requires an
+extra loop and some additional logic for a block to determine that it
+must participate in an interpolation operation not as the sender or
+receiver.  This is handled in the
+``Block::refresh_load_extra_face_()`` method, which can be found in
+the ``control_refresh.cpp`` source file.  Depending on the relative
+mesh refinement level, an extra block may be handled
           
 Receiving Block
 ===============

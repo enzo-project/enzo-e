@@ -33,7 +33,7 @@ public: // interface
   void pup (PUP::er &p);
 
   /// Prolong fine Field values in the child block (icx,icy,icz) to parent
-  virtual int apply 
+  virtual void apply 
   ( precision_type precision,
     void *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
     const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
@@ -43,12 +43,12 @@ public: // interface
   virtual std::string name () const { return "enzo"; }
 
   /// Amount of padding required in coarse region (default 0)
-  virtual int padding() const
+  virtual int coarse_padding() const
   { return 1; }
 
 private: // functions
 
-  int apply_
+  void apply_
   ( enzo_float *  values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
     const enzo_float * values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
     bool accumulate = false);

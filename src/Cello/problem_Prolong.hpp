@@ -27,9 +27,7 @@ public: // interface
 
   /// CHARM++ migration constructor for PUP::able
   Prolong (CkMigrateMessage *m) :
-    PUP::able(m),
-    monotonic_(false),
-    positive_(false)
+    PUP::able(m)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -37,15 +35,13 @@ public: // interface
   {
     TRACEPUP;
     PUP::able::pup(p); 
-    p | monotonic_;
-    p | positive_;
   }
 
   /// Prolong fine Field values in the child block (icx,icy,icz) to parent
 
 public: // virtual methods
   
-  virtual int apply 
+  virtual void apply 
   ( precision_type precision,
     void *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
     const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
@@ -55,38 +51,22 @@ public: // virtual methods
   virtual std::string name () const = 0;
 
   /// Amount of padding required in coarse region (default 0)
-  virtual int padding() const
+  virtual int coarse_padding() const
   { return 0; }
+
+  virtual bool array_sizes_valid (int n3_f[3], int n3_c[3], int * o3 = 0) const
+  { return true; }
+  
+  /// Check whether the size is 
 
 public: // methods
   
-  /// Set whether interpolation should be monotonic
-  void set_monotonic (bool monotonic) 
-  { monotonic_ = monotonic; }
-
-  /// Return monotonicity setting
-  bool monotonic (bool monotonic) const
-  { return monotonic_; }
-
-  /// Set whether interpolation should be positive
-  void set_positive (bool positive) 
-  { positive_ = positive; }
-
-  /// Return positivity setting
-  bool positive (bool positive) const
-  { return positive_; }
 protected: // functions
 
 
 protected: // attributes
 
   // NOTE: change pup() function whenever attributes change
-
-  /// Whether interpolation should be monotonic
-  bool monotonic_;
-
-  /// Whether interpolation should be positive
-  bool positive_;
 
 };
 

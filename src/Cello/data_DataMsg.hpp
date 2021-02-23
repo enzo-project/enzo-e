@@ -8,6 +8,19 @@
 #ifndef DATA_DATA_MSG_HPP
 #define DATA_DATA_MSG_HPP
 
+// #define DEBUG_DATA_MSG
+// #define TRACE_DATA_MSG
+
+#ifdef TRACE_DATA_MSG
+#  undef TRACE_DATA_MSG
+#  define TRACE_DATA_MSG(msg) \
+  CkPrintf ("TRACE_DATA_MSG %p %s %s\n",(void*)this,tag_,msg);\
+  fflush(stdout);
+#else
+#  define TRACE_DATA_MSG(msg) /* ... */
+#endif  
+ 
+
 class FaceFluxes;
 class ParticleData;
 class FieldData;
@@ -28,21 +41,28 @@ public: // interface
       particle_data_delete_(false),
       face_fluxes_list_(),
       face_fluxes_delete_(),
-      padded_face_(),
-      padded_face_field_list_()
+      coarse_field_buffer_(),
+      coarse_field_list_()
   {
     cello::hex_string(tag_,8);
+#ifdef DEBUG_DATA_MSG    
+    CkPrintf ("DEBUG_DATA_MSG DataMsg() %s\n",tag_);
+#endif    
+    TRACE_DATA_MSG("DataMsg()");
     for (int i=0; i<3; i++) {
-      ma3_pf_[i] =0;
-      n3_pf_[i]  =0;
-      if3_pf_[i] =0;
-      iam3_pf_[i]=0;
+      iam3_cf_[i]  =0;
+      iap3_cf_[i]  =0;
+      ifms3_cf_[i]  =0;
+      ifps3_cf_[i]  =0;
+      ifmr3_cf_[i]  =0;
+      ifpr3_cf_[i]  =0;
     }
     ++counter[cello::index_static()]; 
   }
 
   ~DataMsg()
   {
+    TRACE_DATA_MSG("~DataMsg()");
     --counter[cello::index_static()];
     
     if (field_face_delete_) {
@@ -65,19 +85,25 @@ public: // interface
     }
     face_fluxes_list_.clear();
     face_fluxes_delete_.clear();
-    padded_face_.clear();
-    padded_face_field_list_.clear();
+    coarse_field_buffer_.clear();
+    coarse_field_list_.clear();
   }
 
   /// Copy constructor
   DataMsg(const DataMsg & data_msg) throw()
   {
+    TRACE_DATA_MSG("DataMsg(DataMsg)");
     ++counter[cello::index_static()]; 
   };
 
   /// Assignment operator
   DataMsg & operator= (const DataMsg & data_msg) throw()
-  { return *this; }
+  {
+    TRACE_DATA_MSG("DataMsg::operator =()");
+    ERROR("DataMsg::operator=()",
+          "This method should not be called");
+    return *this;
+  }
 
   void pup(PUP::er &p) {
     TRACEPUP;
@@ -98,6 +124,7 @@ public: // interface
   /// Set the FieldFace object
   void set_field_face  (FieldFace * field_face, bool is_new) 
   {
+    TRACE_DATA_MSG("set_field_face");
     field_face_ = field_face; 
     field_face_delete_ = is_new;
   }
@@ -169,15 +196,16 @@ public: // interface
   }
 
   /// ------------------
-  /// PADDED FACE ARRAYS
+  /// COARSE FACE ARRAYS
   /// ------------------
 
-  /// Initialize the padded face arrays to send to neighbors
-  void set_padded_face
-  (int ma3[3], int n3[3], int r, int v,
-   int iam3[3], int ifm3[3], int if3[3],
-   std::vector<int> padded_face_field_list_, Field field,
-   std::string block_name_temp);
+  /// Initialize the  coarse face arrays to send to neighbors
+  void set_coarse_array
+  (Field field,
+   int iam3[3],int iap3[3],
+   int ifms3[3],int ifps3[3],
+   int ifmr3[3],int ifpr3[3],
+   const std::vector<int> & coarse_array_field_list_);
 
   ///--------------------
   /// PACKING / UNPACKING
@@ -201,6 +229,8 @@ public: // interface
 
   /// Debugging
   void print (const char * message) const;
+
+  const char * tag() const { return tag_; };
 
 public: // static methods
 
@@ -236,20 +266,18 @@ protected: // attributes
   /// Whether Flux data should be deleted in destructor
   std::vector<bool> face_fluxes_delete_;
 
-  /// Padded face array (for interpolation that requires extra layer
-  /// of cells around FieldFace that intersects multiple Blocks)
-  /// This stores padded faces for all fields
-  std::vector<cello_float> padded_face_;
-  /// List of field indices for padded face
-  std::vector<int> padded_face_field_list_;
-  /// dimensions of the padded face array
-  int ma3_pf_[3];
-  /// size of the coarse-block array section
-  int n3_pf_[3];
-  /// lower loop limits for the padded array
-  int iam3_pf_[3];
-  /// face associated with the padded face (from the receiver's perspective)
-  int if3_pf_[3];
+  /// Padded coarse array values for prolongation operators that
+  /// requiring extra layers of cells around the interpoltaed region
+  std::vector<cello_float> coarse_field_buffer_;
+  /// List of field indices for coarse fields
+  std::vector<int> coarse_field_list_;
+
+  /// loop limits of the coarse-block array section
+  int iam3_cf_[3], iap3_cf_[3];
+  /// loop limits for the sending field
+  int ifms3_cf_[3], ifps3_cf_[3];
+  /// loop limits for the receiving field
+  int ifmr3_cf_[3], ifpr3_cf_[3];
   /// hex tag identifying object to match sender and receiver
   char tag_[9];
 

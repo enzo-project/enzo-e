@@ -8,6 +8,7 @@
 #include "data.hpp"
 #include "charm.hpp"
 #include "charm_simulation.hpp"
+
 // #define DEBUG_MSG_REFRESH
 
 // #undef TRACE_MSG_REFRESH
@@ -239,7 +240,7 @@ void MsgRefresh::update (Data * data)
 	    CkMyPe(),__FILE__,__LINE__,this,tag_);
 #endif  
 #ifdef DEBUG_MSG_REFRESH  
-  CkPrintf ("DEBUG_CHARM %p update data_msg_ %p\n",this,data_msg_);
+  CkPrintf ("DEBUG_CHARM %p update data_msg_ %s %p\n",this,data_msg_->tag(),data_msg_);
 #endif
   if (data_msg_ == nullptr) return;
 

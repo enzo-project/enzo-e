@@ -17,7 +17,7 @@ ProlongLinear::ProlongLinear() throw()
 
 //----------------------------------------------------------------------
 
-int ProlongLinear::apply 
+void ProlongLinear::apply 
 ( precision_type precision,
   void *       values_f, int mf3[3], int of3[3], int nf3[3],
   const void * values_c, int mc3[3], int oc3[3], int nc3[3],
@@ -37,17 +37,17 @@ int ProlongLinear::apply
 
   case precision_single:
 
-    return apply_((float *)       values_f, mf3, of3, nf3,
-		  (const float *) values_c, mc3, oc3, nc3,
-		  accumulate);
+    apply_((float *)       values_f, mf3, of3, nf3,
+           (const float *) values_c, mc3, oc3, nc3,
+           accumulate);
 
     break;
 
   case precision_double:
 
-    return apply_((double *)       values_f, mf3, of3, nf3,
-		  (const double *) values_c, mc3, oc3, nc3,
-		  accumulate);
+    apply_((double *)       values_f, mf3, of3, nf3,
+           (const double *) values_c, mc3, oc3, nc3,
+           accumulate);
 
     break;
 
@@ -56,15 +56,13 @@ int ProlongLinear::apply
     ERROR1 ("ProlongLinear::apply()",
             "Unknown precision %d",
             precision);
-
-    return 0;
   }
 }
 
 //----------------------------------------------------------------------
 
 template <class T>
-int ProlongLinear::apply_
+void ProlongLinear::apply_
 (       T * values_f, int mf3[3], int of3[3], int nf3[3],
 	const T * values_c, int mc3[3], int oc3[3], int nc3[3],
 	bool accumulate)
@@ -154,8 +152,6 @@ int ProlongLinear::apply_
 	  +              wx1*values_c[i_c + dcx ];
       }
     }
-    return (sizeof(T) * nc3[0]);
-
 
   } else if (rank == 2) {
 
@@ -272,8 +268,6 @@ int ProlongLinear::apply_
 	}
       }
     }
-
-    return (sizeof(T) * nc3[0]*nc3[1]);
 
   } else { // rank == 3
 
@@ -447,9 +441,6 @@ int ProlongLinear::apply_
 	}
       }
     }
-
-    return (sizeof(T) * nc3[0]*nc3[1]*nc3[2]);
-
   }
 }
 

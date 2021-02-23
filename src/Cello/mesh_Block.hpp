@@ -598,31 +598,32 @@ protected:
   void refresh_begin_();
 
   /// Pack field face data into arrays and send to neighbors
-  int refresh_load_field_faces_ (Refresh * refresh);
+  // int refresh_load_field_faces_ (Refresh * refresh);
 
   /// Handle the special case of refresh on interpolated faces
   /// requiring extra padding
-  int refresh_load_extra_face_
+  int refresh_load_coarse_face_
   (Refresh refresh,  int refresh_type,
-   Index index_neighbor,
-   int level, int level_face, int if3[3],int ic3[3]);
+   Index index_neighbor, int if3[3],int ic3[3]);
 
   /// Send padded array of fields to neighbor for interpolations whose
   /// domains overlap multiple blocks
-  void refresh_extra_send_
-  (Refresh & refresh,
-   Index index_neighbor, int if3[3],
-   int ma3[3], int iam3[3], int iap3[3], int ifm3[3], int ifp3[3],
-   Field field,std::string debug);
+  void refresh_coarse_send_
+  (Index index,
+   Field field, Refresh & refresh,
+   int iam3[3], int iap3[3],
+   int ifms3[3], int ifps3[3],
+   int ifmr3[3], int ifpr3[3],
+   std::string debug);
 
   /// Apply prolongation operations on Block
-  void refresh_extra_apply_(Refresh * refresh);
+  void refresh_coarse_apply_(Refresh * refresh);
 
   /// Scatter particles in ghost zones to neighbors
   int refresh_load_particle_faces_ (Refresh * refresh);
 
-  void refresh_load_field_face_
-  (int refresh_type, Index index, int if3[3], int ic3[3]);
+  // void refresh_load_field_face_
+  // (int refresh_type, Index index, int if3[3], int ic3[3]);
   void refresh_load_particle_face_
   (int refresh_type, Index index, int if3[3], int ic3[3]);
  

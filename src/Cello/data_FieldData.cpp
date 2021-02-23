@@ -8,6 +8,7 @@
 #include "cello.hpp"
 #include "data.hpp"
 
+// #define DEBUG_COARSE_ARRAY
 //----------------------------------------------------------------------
 
 FieldData::FieldData 
@@ -40,13 +41,6 @@ FieldData::FieldData
 
   if (field_descr) set_history_(field_descr);
 
-  for (int i=0; i<27; i++) {
-    padded_array_[i] = nullptr;
-    padded_array_fields_[i] = 0;
-    for (int j=0; j<3; j++) {
-      padded_array_dimensions_[j][i] = 0;
-    }
-  }
 }
 
 //----------------------------------------------------------------------
@@ -63,10 +57,6 @@ FieldData::~FieldData() throw()
     delete [] array_coarse_[i];
     array_coarse_[i] = NULL;
     coarse_dimensions_[i] = 0;
-  }
-  for (int i=0; i<27; i++) {
-    delete [] padded_array_[i];
-    padded_array_[i] = nullptr;
   }
 }
 
@@ -211,6 +201,10 @@ char * FieldData::coarse_values
 (const FieldDescr * field_descr,
  int id_field, int index_history ) throw ()
 {
+#ifdef DEBUG_COARSE_ARRAY
+      CkPrintf ("DEBUG_COARSE_ARRAY %p returning %p[%d]\n",
+                (void*)this,(void *)array_coarse_[id_field],id_field);
+#endif
   return array_coarse_[id_field];
 }
 
@@ -492,16 +486,32 @@ void FieldData::allocate_coarse (const FieldDescr * field_descr, int id_field) t
     if (precision == precision_single) {
       array_coarse_[id_field] = (char*) new float [m];
       coarse_dimensions_[id_field] = m*sizeof(float);
+      for (int i=0; i<m; i++) ((float*) array_coarse_[id_field])[i] = 0.0;
+#ifdef DEBUG_COARSE_ARRAY
+      CkPrintf ("DEBUG_COARSE_ARRAY %p allocated %p[%d] = %d*%lu\n",
+                (void *)this,(void *)array_coarse_[id_field],id_field,m,sizeof(float));
+#endif
     } else if (precision == precision_double) {
       array_coarse_[id_field] = (char*) new double [m];
       coarse_dimensions_[id_field] = m*sizeof(double);
+      for (int i=0; i<m; i++) ((double*) array_coarse_[id_field])[i] = 0.0;
+#ifdef DEBUG_COARSE_ARRAY
+      CkPrintf ("DEBUG_COARSE_ARRAY %p allocated %p[%d] = %d*%lu\n",
+                (void *)this,(void *)array_coarse_[id_field],id_field,m,sizeof(double));
+#endif
     } else if (precision == precision_quadruple) {
       array_coarse_[id_field] = (char*) new long double [m];
       coarse_dimensions_[id_field] = m*sizeof(long double);
+      for (int i=0; i<m; i++) ((long double*) array_coarse_[id_field])[i] = 0.0;
+#ifdef DEBUG_COARSE_ARRAY
+      CkPrintf ("DEBUG_COARSE_ARRAY %p allocated %p[%d] = %d*%lu\n",
+                (void *)this,(void *)array_coarse_[id_field],id_field,m,sizeof(long double));
+#endif
     } else {
       WARNING("FieldData::allocate_coarse",
               "Calling allocate_coarse() on already-allocated Field");
     }
+
   }
 }
 
@@ -679,10 +689,9 @@ void FieldData::coarse_dimensions
 
   //    compute coarse block size
 
-  if (mcx) (*mcx) = (nx!=1) ? nx/2 + gx + cx + 2 : 1;
-  if (mcy) (*mcy) = (ny!=1) ? ny/2 + gy + cy + 2 : 1;
-  if (mcz) (*mcz) = (nz!=1) ? nz/2 + gz + cz + 2 : 1;
-
+  if (mcx) (*mcx) = (nx!=1) ? nx/2 + (gx + 2*(gx%1)) + cx + 2 : 1;
+  if (mcy) (*mcy) = (ny!=1) ? ny/2 + (gy + 2*(gy%1)) + cx + 2 : 1;
+  if (mcz) (*mcz) = (nz!=1) ? nz/2 + (gz + 2*(gz%1)) + cz + 2 : 1;
 }
 
 //----------------------------------------------------------------------

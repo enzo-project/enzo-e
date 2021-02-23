@@ -7,6 +7,7 @@
 
 #include "mesh.hpp"
 
+// #define DEBUG_NEW_BOX
 //----------------------------------------------------------------------
 
 void Box::compute_block_start(BoxType bt)
@@ -69,84 +70,129 @@ void Box::compute_region()
 
 //----------------------------------------------------------------------
 
-bool Box::get_limits
-( BlockType block_type,  int region_start[3], int region_stop[3], BoxType bt )
+bool Box::get_start_size
+( int index_start[3], int index_size[3],
+  BlockType block_intersect, BlockType block_coords)
 {
-  if (block_type == BlockType::send) {
-
-    for (int i=0; i<rank_; i++) {
-      region_start[i] = ghost_depth_[i] + region_start_[i];
-      region_stop[i]  = ghost_depth_[i] + region_stop_[i];
-    }
-
-  } else if (block_type == BlockType::receive ||
-             block_type == BlockType::extra) {
-    ASSERT("Box::get_limits()",
-           "Expected BoxType bt to not be BoxType_ignored",
-           (bt != BoxType_ignored));
-    const float r = std::pow(2.0,1.0*level_[bt]);
-  
-    for (int i=0; i<rank_; i++) {
-      region_start[i] = ghost_depth_[i] +
-        r*(region_start_[i] - block_start_[bt][i]);
-      region_stop[i]  = ghost_depth_[i] +
-        r*(region_stop_[i] - block_start_[bt][i]);
-    }
-
-  } else if (block_type == BlockType::array) {
-
-    // receiving coarse-level array for interpolation
-
-    ASSERT("Box::get_limits()",
-           "Expected BoxType bt to not be BoxType_ignored",
-           (bt != BoxType_ignored));
-
-    const float ri = std::pow(2.0,-1.0*level_[bt]);
-    
-    for (int i=0; i<rank_; i++) {
-      region_start[i] = -region_start_[i] +
-        std::max(region_start_[i],block_start_[bt][i]) ;
-      region_stop[i]  = -region_start_[i] +
-        std::min(region_stop_[i],int(block_start_[bt][i]+ri*block_size_[i])) ;
-    }
-
-  }
-  for (int i=rank_; i<3; i++) {
-    region_start[i] = 0;
-    region_stop[i] = 1;
-  }
-
-  if (block_type == BlockType::extra) {
-    restrict_limits (region_start,region_stop,false);
-  }
-    
-  bool l_intersect = true;
+  bool intersect = get_start_stop
+    (index_start,index_size, block_intersect,block_coords);
   for (int i=0; i<rank_; i++) {
-    l_intersect = l_intersect && (region_start[i] < region_stop[i]); 
+    index_size[i] -= index_start[i];
+  }
+  return intersect;
+}
+  
+//----------------------------------------------------------------------
+
+bool Box::get_start_stop
+( int index_min[3], int index_max[3],
+  BlockType block_intersect, BlockType block_coords)
+{
+  // initialize index_[min|max] to be the S->r region
+  for (int i=0; i<3; i++) {
+    index_min[i] = region_start_[i];
+    index_max[i] = region_stop_[i];
   }
 
+  int m3[3] = {1,1,1};
+  int n3[3] = {1,1,1};
+  int g3[3] = {0,0,0};
+  for (int i=0; i<rank_; i++) {
+    m3[i] = block_size_[i] + 2*ghost_depth_[i];
+    n3[i] = block_size_[i];
+    g3[i] = ghost_depth_[i];
+  }
+
+  // define intersecting block limits
+  int block_min[3] = {0,0,0};
+  int block_max[3] = {1,1,1};
+  
+  if (block_intersect == BlockType::send) {
+    
+    for (int i=0; i<rank_; i++) {
+      block_min[i] = -ghost_depth_send_[i];
+      block_max[i] = n3[i] + ghost_depth_send_[i];
+    }
+    
+  } else if (block_intersect == BlockType::receive) {
+    
+    const float r = std::pow(2.0,-1.0*level_[0]);
+
+    for (int i=0; i<rank_; i++) {
+      block_min[i] = block_start_[0][i] + r*(-ghost_depth_recv_[i]);
+      block_max[i] = block_start_[0][i] + r*(n3[i]+ghost_depth_recv_[i]);
+    }
+    
+  } else if (block_intersect == BlockType::extra) {
+
+    const float r = std::pow(2.0,-1.0*level_[1]);
+
+    for (int i=0; i<rank_; i++) {
+      block_min[i] = block_start_[1][i] + r*(-ghost_depth_send_[i]);
+      block_max[i] = block_start_[1][i] + r*(n3[i]+ghost_depth_send_[i]);
+    }
+    
+  } else if (block_intersect == BlockType::coarse) {
+
+    ERROR ("Box::get_start_stop",
+           "Intersecting block cannot be the coarse array");
+
+  } 
+
+  // compute the block - region intersection
+  const bool l_intersect = intersect_regions_
+    (index_min,index_max, block_min,block_max);
+
+  // transform to block_coords
+  if (block_coords == BlockType::send) {
+
+    for (int i=0; i<rank_; i++) {
+      index_min[i] += g3[i];
+      index_max[i] += g3[i];
+    }
+
+  } else if (block_coords == BlockType::receive) {
+      
+    const float r = std::pow(2.0,1.0*level_[0]);
+    for (int i=0; i<rank_; i++) {
+      index_min[i] = g3[i] + r*(index_min[i] - block_start_[0][i]);
+      index_max[i] = g3[i] + r*(index_max[i] - block_start_[0][i]);
+    }
+
+  } else if (block_coords == BlockType::extra) {
+      
+    const float r = std::pow(2.0,1.0*level_[1]);
+    for (int i=0; i<rank_; i++) {
+      index_min[i] = g3[i] + r*(index_min[i] - block_start_[1][i]);
+      index_max[i] = g3[i] + r*(index_max[i] - block_start_[1][i]);
+    }
+
+  } else if (block_coords == BlockType::coarse) {
+
+    for (int i=0; i<rank_; i++) {
+      index_min[i] = coarse_ghost_[i] + (index_min[i] - block_start_[0][i]);
+      index_max[i] = coarse_ghost_[i] + (index_max[i] - block_start_[0][i]);
+    }
+
+  }
+
+  // return whether region intersects
   return l_intersect;
 }
 
 //----------------------------------------------------------------------
 
-void Box::restrict_limits
-(int region_start[3], int region_stop[3], bool include_ghosts)
+bool Box::intersect_regions_
+(int index_min[3], int index_max[3],
+ const int block_min[3], int const block_max[3])
 {
-  if (include_ghosts) {
-    for (int i=0; i<rank_; i++) {
-      const int block_start = 0;
-      const int block_stop  = block_size_[i]+2*ghost_depth_[i];
-      region_start[i] = std::max(region_start[i],block_start);
-      region_stop[i]  = std::min(region_stop[i], block_stop);
-    }
-  } else {
-    for (int i=0; i<rank_; i++) {
-      const int block_start = ghost_depth_[i];
-      const int block_stop  = ghost_depth_[i] + block_size_[i];;
-      region_start[i] = std::max(region_start[i],block_start);
-      region_stop[i]  = std::min(region_stop[i], block_stop);
-    }
+  
+  bool l_intersect = true;
+  for (int i=0; i<rank_; i++) {
+    index_min[i] = std::max(index_min[i],block_min[i]);
+    index_max[i] = std::min(index_max[i], block_max[i]);
+    l_intersect = l_intersect && (index_min[i] < index_max[i]); 
   }
+  return l_intersect;
 }
 
