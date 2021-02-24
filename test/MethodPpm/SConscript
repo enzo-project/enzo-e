@@ -13,6 +13,7 @@ Import('test_path')
 
 env['CPIN'] = 'touch parameters.out; mv parameters.out ${TARGET}.in'
 env['RMIN'] = 'rm -f parameters.out'
+env['clocal_cmd'] = '++local'
 
 #charm_args = os.getenv('CHARM_ARGS','')
 
@@ -30,7 +31,7 @@ env.Append(BUILDERS = { 'RunPpm1' : run_ppm1 } )
 env_mv_ppm1 = env.Clone(COPY = 'mkdir -p ' + test_path + '/MethodPpm/Ppm-1; mv `ls *.png *.h5` ' + test_path + '/MethodPpm/Ppm-1')
 
 
-run_ppm8 = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
+run_ppm8 = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunPpm8' : run_ppm8 } )
 env_mv_ppm8 = env.Clone(COPY = 'mkdir -p ' + test_path + '/MethodPpm/Ppm-8; mv `ls *.png *.h5` ' + test_path + '/MethodPpm/Ppm-8')
 
