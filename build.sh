@@ -15,7 +15,7 @@
 arch=$CELLO_ARCH
 prec=$CELLO_PREC
 
-python="python2"
+python="python3"
 # initialize time
 
 H0=`date +"%H"`
@@ -54,7 +54,7 @@ if [ "$#" -ge 1 ]; then
       rm -rf config/*.pyc
       rm -rf test/fail.* test/pass.* test/incomplete.*
       rm -rf test/*.test-log
-      rm -rf scons-local-2.2.0/SCons/*.pyc scons-local-2.2.0/SCons/*/*.pyc
+      rm -rf scons-local-4.1.0/SCons/*.pyc scons-local-4.1.0/SCons/*/*.pyc
       rm -rf charmrun parameters.out checkpoint_ppm* output-stride*.h5
       rm -rf cov-int.tgz cov-int
       rm -rf `find test -name "*.png"`
