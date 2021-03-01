@@ -97,6 +97,11 @@ SConscript('MethodCosmology/SConscript')
 SConscript('MethodHeat/SConscript')
 
 #----------------------------------------------------------------------
+# METHOD PPM TESTS
+#----------------------------------------------------------------------
+SConscript('MethodPpm/SConscript')
+
+#----------------------------------------------------------------------
 # SERIAL RESTART
 #----------------------------------------------------------------------
 SConscript('Restart/SConscript')

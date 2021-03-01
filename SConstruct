@@ -276,6 +276,7 @@ elif (arch == "davros_gnu"):   from davros_gnu   import *
 elif (arch == "davros_gnu_debug"):  from davros_gnu_debug  import *
 elif (arch == "darwin_gnu"):   from darwin_gnu   import *
 elif (arch == "darwin_homebrew"):   from darwin_homebrew   import *
+elif (arch == "msu_hpcc_gcc"): from msu_hpcc_gcc   import *
 
 #======================================================================
 # END ARCHITECTURE SETTINGS
