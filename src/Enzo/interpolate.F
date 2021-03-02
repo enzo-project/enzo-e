@@ -4,7 +4,7 @@ c     See LICENSE_ENZO file for license and copyright information
 c=======================================================================
 c//////////////////////  SUBROUTINE INTERPOLATE  \\\\\\\\\\\\\\\\\\\\\\\
 c
-c #define DEBUG_INTERP
+C #define DEBUG_INTERP
       
       subroutine interpolate(ndim, parent, pdims, pstart, pend, refine,
      &                       grid, gdims, gstart, work, imethod,
@@ -53,12 +53,18 @@ c  arguements
 c
       integer imethod, iposflag, ndim, ierror
       integer pdims(ndim), pstart(ndim), pend(ndim), refine(ndim),
-     &        gdims(ndim), gstart(ndim)
+     &     gdims(ndim), gstart(ndim)
+      integer icx,icy
+      integer icxm,icym,iczm
+      integer ncx,ncy,ncz
+      integer ifx,ify
+      integer ifxm,ifym,ifzm
+      integer nfx,nfy,nfz
       ENZO_REAL    grid(1), parent(1), work(1)
 c
 c  locals
 c
-      integer i
+      integer i,ix,iy
 c
 c\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////////
 c=======================================================================
@@ -79,6 +85,36 @@ c
       print*, 'ENZO_DEBUG imethod = ', imethod
       print*, 'ENZO_DEBUG iposflag = ', iposflag
       flush(6)
+      print*
+      ncx = (pend(1)-pstart(1)+5)/2
+      ncy = (pend(2)-pstart(2)+5)/2
+      ncz = (pend(3)-pstart(3)+5)/2
+      nfx = (pend(1)-pstart(1)+1)
+      nfy = (pend(2)-pstart(2)+1)
+      nfz = (pend(3)-pstart(3)+1)
+      icxm = pstart(1)-1
+      icym = pstart(2)-1
+      iczm = pstart(3)-1
+      ifxm = gstart(1)
+      ifym = gstart(2)
+      ifzm = gstart(3)
+      print*, 'ENZO_DEBUG nc[xyz] = ',ncx,ncy,ncz
+      print*, 'ENZO_DEBUG nf[xyz] = ',nfx,nfy,nfz
+      print*, 'ENZO_DEBUG ic[xyz]m = ',icxm,icym,iczm
+      print*, 'ENZO_DEBUG if[xyz]m = ',ifxm,ifym,ifzm
+ 10   format (1x, 10f6.2)
+      print*, 'parent'
+      do icx=icxm,icxm+ncx-1
+         print 10,
+     $        (parent((icx-1)+pdims(1)*(icy-1)+1), icy=icym,icym+ncy-1)
+      end do
+      print*
+      print*, 'grid'
+      do ifx=ifxm,ifxm+nfx-1
+         print 10,
+     $        (grid((ifx-1)+pdims(1)*(ify-1)+1), ify=ifym,ifym+nfy-1)
+      end do
+      print*
 #endif      
       if (ndim .lt. 1 .or. ndim .gt. 3) then
          write (6,*) "INTERPOLATE: ERROR ndim =", ndim
@@ -245,5 +281,13 @@ c
 c
       endif
 c
+#ifdef DEBUG_INTERP      
+      print*, 'grid [exit]'
+      do ifx=ifxm,ifxm+nfx-1
+         print 10,
+     $        (grid((ifx-1)+pdims(1)*(ify-1)+1), ify=ifym,ifym+nfy-1)
+      end do
+      print*
+#endif      
       return
       end

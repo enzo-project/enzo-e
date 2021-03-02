@@ -273,7 +273,6 @@ void Block::adapt_refine_()
       int num_field_data = 1;
 
       // Create data message object to send
-
       data_msg = new DataMsg;
 
       data_msg -> set_field_face (field_face,false);

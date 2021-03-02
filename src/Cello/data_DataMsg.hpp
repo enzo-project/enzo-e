@@ -35,7 +35,7 @@ public: // interface
   DataMsg() 
     : field_face_(nullptr),
       field_face_delete_   (false),
-      field_data_(nullptr),
+      field_data_u_(nullptr),
       field_data_delete_   (false),
       particle_data_(nullptr),
       particle_data_delete_(false),
@@ -70,8 +70,8 @@ public: // interface
       field_face_ = nullptr;
     }
     if (field_data_delete_) {
-      delete field_data_;
-      field_data_ = nullptr;
+      delete field_data_u_;
+      field_data_u_ = nullptr;
     }
     if (particle_data_delete_) {
       delete particle_data_;
@@ -131,17 +131,17 @@ public: // interface
 
   /// Return the serialized FieldFace array
   char * field_array () 
-  { return field_array_; }
+  { return field_array_u_; }
 
 
   /// Return the FieldData
   FieldData * field_data () 
-  { return field_data_; }
+  { return field_data_u_; }
 
   /// Set the FieldData object
   void set_field_data    (FieldData * field_data, bool is_new) 
   {
-    field_data_ = field_data;
+    field_data_u_ = field_data;
     field_data_delete_ = is_new;
   }
 
@@ -246,10 +246,10 @@ protected: // attributes
   union {
 
     /// Field data if local
-    FieldData * field_data_;
+    FieldData * field_data_u_;
 
     /// packed source field data if remote
-    char * field_array_;
+    char * field_array_u_;
 
   };
   /// Whethere FieldData data should be deleted in destructor

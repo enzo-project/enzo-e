@@ -8,6 +8,7 @@
 #include "mesh.hpp"
 
 // #define DEBUG_NEW_BOX
+// #define DEBUG_BOX
 //----------------------------------------------------------------------
 
 void Box::compute_block_start(BoxType bt)
@@ -93,7 +94,13 @@ bool Box::get_start_stop
     index_min[i] = region_start_[i];
     index_max[i] = region_stop_[i];
   }
-
+#ifdef DEBUG_BOX
+  CkPrintf ("DEBUG_BOX get_start_stop  region %d:%d %d:%d %d:%d\n",
+            region_start_[0],region_stop_[0],
+            region_start_[1],region_stop_[1],
+            region_start_[2],region_stop_[2]);
+#endif
+  
   int m3[3] = {1,1,1};
   int n3[3] = {1,1,1};
   int g3[3] = {0,0,0};
@@ -107,7 +114,14 @@ bool Box::get_start_stop
   int block_min[3] = {0,0,0};
   int block_max[3] = {1,1,1};
   
-  if (block_intersect == BlockType::send) {
+  if (block_intersect == BlockType::none) {
+    
+    for (int i=0; i<rank_; i++) {
+      block_min[i] = -std::numeric_limits<int>::max();
+      block_max[i] = +std::numeric_limits<int>::max();
+    }
+    
+  } else if (block_intersect == BlockType::send) {
     
     for (int i=0; i<rank_; i++) {
       block_min[i] = -ghost_depth_send_[i];

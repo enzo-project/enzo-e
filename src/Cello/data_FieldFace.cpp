@@ -29,12 +29,16 @@ enum enum_op_type {
 };
 
 
-#define CHECK_COARSE(FIELD,i_f)                 \
+#ifdef CHECK_COARSE
+#   undef  CHECK_COARSE
+#   define CHECK_COARSE(FIELD,i_f)                 \
   { \
     cello_float * coarse = (cello_float *)FIELD.coarse_values(i_f);     \
     ASSERT ("CHECK_COARSE","coarse array is null", (coarse != nullptr)); \
   }
-
+#else
+#   define CHECK_COARSE(FIELD,i_f)  /* ... */
+#endif
 
 //----------------------------------------------------------------------
 
@@ -437,7 +441,7 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
 
     if (refresh_type_ == refresh_fine) {
       if (pad > 0) {
-        ERROR("FieldFace::face_to_face",
+        WARNING("FieldFace::face_to_face",
               "Shouldn't get here: refresh_fine with pad != 0 is not handled by FieldFace");
         box.set_padding(pad);
       }      
@@ -501,7 +505,7 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
 
       } else {
         
-        ERROR("FieldFace::face_to_face",
+        WARNING("FieldFace::face_to_face",
               "Shouldn't get here: refresh_fine with pad != 0 is not handled by FieldFace");
         // copy ghost data to coarse array
         

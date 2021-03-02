@@ -9,7 +9,7 @@
 #define MESH_BOX_HPP
 
 enum BoxType { BoxType_receive = 0, BoxType_extra = 1, BoxType_ignored = -1 };
-enum class BlockType { send, receive, extra, coarse };
+enum class BlockType { undefined, send, receive, extra, coarse, none };
 
 class Box {
 

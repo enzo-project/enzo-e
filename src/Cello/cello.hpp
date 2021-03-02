@@ -204,51 +204,77 @@ enum type_enum {
 #   error Multiple CONFIG_PRECISION_[SINGLE|DOUBLE|QUAD] defined
 #endif
 
+//----------------------------------------------------------------------
 /// Macros for sizing, saving, and restoring data from buffers
+//----------------------------------------------------------------------
 
-#define SIZE_INT_ARRAY(COUNT,LIST)			\
+
+#define SIZE_SCALAR_TYPE(COUNT,TYPE,VALUE)      \
   {						\
-    (*COUNT) += sizeof(int);			\
-    (*COUNT) += sizeof(int)*LIST.size();	\
-  }
-#define SIZE_INT(COUNT,VALUE)			\
-  {						\
-    (*COUNT) += sizeof(int);			\
+    COUNT += sizeof(TYPE);			\
   }
 
-#define SAVE_INT_ARRAY(PTR,LIST)				\
-  {							\
-    int length = LIST.size();				\
-    int n;						\
-    memcpy((*PTR),&length, n=sizeof(int));		\
-    (*PTR)+=n;						\
-    memcpy((*PTR),&LIST[0],n=length*sizeof(int));	\
-    (*PTR)+=n;						\
-  }
-#define SAVE_INT(PTR,VALUE)			\
-  {						\
-    int n;					\
-    memcpy((*PTR),&VALUE,n=sizeof(int));	\
-    (*PTR)+=n;					\
+#define SAVE_SCALAR_TYPE(POINTER,TYPE,VALUE)    \
+  {                                             \
+    int n;                                      \
+    memcpy(POINTER,&VALUE,n=sizeof(TYPE));	\
+    POINTER += n;                               \
   }
 
-#define LOAD_INT_ARRAY(PTR,LIST)				\
-  {							\
-    int length;						\
-    int n;						\
-    memcpy(&length, (*PTR), n=sizeof(int));		\
-    (*PTR)+=n;						\
-    LIST.resize(length);				\
-    memcpy(&LIST[0],(*PTR),n=length*sizeof(int));	\
-    (*PTR)+=n;						\
-  }
-#define LOAD_INT(PTR,VALUE)			\
-  {						\
-    int n;					\
-    memcpy(&VALUE,(*PTR),n=sizeof(int));	\
-    (*PTR)+=n;					\
+#define LOAD_SCALAR_TYPE(POINTER,TYPE,VALUE)    \
+  {                                             \
+    int n;                                      \
+    memcpy(&VALUE,POINTER,n=sizeof(TYPE));	\
+    POINTER += n;                               \
   }
 
+
+#define SIZE_ARRAY_TYPE(COUNT,TYPE,ARRAY,LENGTH)        \
+  {                                                     \
+    COUNT += sizeof(int);                               \
+    COUNT += LENGTH*sizeof(TYPE);                       \
+  }
+#define SAVE_ARRAY_TYPE(POINTER,TYPE,ARRAY,LENGTH)      \
+  {                                                     \
+    int n,length = LENGTH;                              \
+    memcpy(POINTER,&length, n=sizeof(int));             \
+    POINTER += n;                                       \
+    memcpy(POINTER,&ARRAY[0],n=length*sizeof(TYPE));	\
+    POINTER += n;                                       \
+  }
+#define LOAD_ARRAY_TYPE(POINTER,TYPE,ARRAY,LENGTH)      \
+  {                                                     \
+    int n;                                              \
+    memcpy(&LENGTH, POINTER, n=sizeof(int));		\
+    POINTER += n;                                       \
+    memcpy(&ARRAY[0],POINTER,n=LENGTH*sizeof(TYPE));	\
+    POINTER += n;                                       \
+  }
+
+#define SIZE_VECTOR_TYPE(COUNT,TYPE,VECTOR)     \
+  {						\
+    COUNT += sizeof(int);			\
+    COUNT += sizeof(TYPE)*VECTOR.size();        \
+  }
+#define SAVE_VECTOR_TYPE(POINTER,TYPE,VECTOR)                   \
+  {                                                             \
+    int length = VECTOR.size();                                 \
+    int n;                                                      \
+    memcpy(POINTER,&length, n=sizeof(int));                             \
+    POINTER += n;                                                       \
+    memcpy(POINTER,(TYPE*)&VECTOR[0],n=length*sizeof(TYPE));            \
+    POINTER += n;                                                       \
+  }
+#define LOAD_VECTOR_TYPE(POINTER,TYPE,VECTOR)                   \
+  {                                                             \
+    int length;                                                 \
+    int n;                                                      \
+    memcpy(&length, POINTER, n=sizeof(int));                    \
+    POINTER += n;                                               \
+    VECTOR.resize(length);                                      \
+    memcpy((TYPE*)VECTOR.data(),POINTER,n=length*sizeof(TYPE));	\
+    POINTER += n;                                               \
+  }
 /// Type for CkMyPe(); used for Block() constructor to differentiate
 /// from Block(int)
 typedef unsigned process_type;
@@ -385,11 +411,12 @@ namespace cello {
   {
     //hexadecimal characters
     char hex_characters[]={'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
-
+    static std::default_random_engine generator;
+    static std::uniform_int_distribution<int> distribution(0,15);
     int i;
     for(i=0;i<length;i++)
       {
-        str[i]=hex_characters[rand()%16];
+        str[i]=hex_characters[distribution(generator)];
       }
     str[length]=0;
   }
