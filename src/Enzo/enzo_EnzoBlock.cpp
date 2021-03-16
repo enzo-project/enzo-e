@@ -170,13 +170,13 @@ EnzoBlock::EnzoBlock
     redshift(0.0)
 {
 #ifdef DEBUG_ENZO_BLOCK
-  CkPrintf ("%d %p BEGIN TRACE_BLOCK EnzoBlock(msg)\n",CkMyPe(),this);
+  CkPrintf ("%d %p BEGIN TRACE_BLOCK EnzoBlock(msg)\n",CkMyPe(),(void *)this);
   print();
 #endif
   initialize_enzo_();
   initialize();
 #ifdef DEBUG_ENZO_BLOCK
-  CkPrintf ("%d %p END TRACE_BLOCK EnzoBlock(msg)\n",CkMyPe(),this);
+  CkPrintf ("%d %p END TRACE_BLOCK EnzoBlock(msg)\n",CkMyPe(),(void *)this);
   EnzoBlock::print();
 #endif
 }
@@ -221,7 +221,7 @@ void EnzoBlock::initialize_enzo_()
 EnzoBlock::~EnzoBlock()
 {
 #ifdef DEBUG_ENZO_BLOCK
-  CkPrintf ("%d %p TRACE_BLOCK ~EnzoBlock(...)\n",CkMyPe(),this);
+  CkPrintf ("%d %p TRACE_BLOCK ~EnzoBlock(...)\n",CkMyPe(),(void *)this);
   print();
 #endif
 }

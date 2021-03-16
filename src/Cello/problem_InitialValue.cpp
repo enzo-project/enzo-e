@@ -132,7 +132,7 @@ void InitialValue::enforce_block ( Block * block,
 
 	// Following convention of earlier version: initializing values in a
 	// temporary array of doubles. Then the values are copied into the
-	// field and casted to the appropriate value.
+	// field and cast to the appropriate type.
 
 	// The cast to double * in the following line is redundant
 	values_[index_field]->evaluate((double *)val_array, t,
@@ -141,6 +141,7 @@ void InitialValue::enforce_block ( Block * block,
 				       ndz,ndz,z);
 
 	copy_values_(field_data,val_array,index_field,ndx,ndy,ndz);
+        
       } else if (block->index().is_root()) {
 	WARNING1("InitialValue::enforce_block",  
 		 "Uninitialized field %s",

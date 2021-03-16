@@ -11,6 +11,60 @@
 #define FORTRAN_STORE
 // #define DEBUG_NEW_BOX
 
+//======================================================================
+// #define DEBUG_ARRAY
+// #define DEBUG_ARRAY_CYCLE 00
+// #define DEBUG_PRINT true
+// #define DEBUG_BLOCK_ONLY false
+
+#ifdef TRACE_PROLONG
+#  undef TRACE_PROLONG
+#  define TRACE_PROLONG(MSG) CkPrintf ("TRACE_PROLONG %s:%d %s\n",__FILE__,__LINE__,MSG);
+#else
+#  undef TRACE_PROLONG
+#  define TRACE_PROLONG(MSG) /* ... */
+#endif
+
+#ifdef DEBUG_ARRAY
+
+#   define DEBUG_PRINT_ARRAY0(NAME,ARRAY,m3,n3,o3)              \
+  DEBUG_PRINT_ARRAY_(NAME,ARRAY,m3,n3,o3[0],o3[1],o3[2])
+#   define DEBUG_PRINT_ARRAY(NAME,ARRAY,m3,n3)  \
+  DEBUG_PRINT_ARRAY_(NAME,ARRAY,m3,n3,0,0,0)
+#   define DEBUG_PRINT_ARRAY_(NAME,ARRAY,m3,n3,ox,oy,oz)                \
+  if (cello::simulation()->cycle() >= DEBUG_ARRAY_CYCLE) {              \
+    if (n3[0]> 6 && (n3[1]>6||n3[1]==1) && (n3[2]>6||n3[2]==1)) {       \
+      if (DEBUG_PRINT) CkPrintf ("PADDED_ARRAY_VALUES %s:%d %s %p\n",   \
+                                 __FILE__,__LINE__,NAME,(void*)ARRAY);  \
+      const int o = ox + m3[0]*(oy + m3[1]*oz);                         \
+      double min=1e100,max=-1e100,avg=0.0;                              \
+      for (int iz=0; iz<n3[2]; iz++) {                                  \
+        for (int iy=0; iy<n3[1]; iy++) {                                \
+          if (DEBUG_PRINT) CkPrintf ("PADDED_ARRAY_VALUES %s %p %d %d %d: ", \
+                                     NAME,(void*)ARRAY,0,iy,iz);        \
+          for (int ix=0; ix<n3[0]; ix++) {                              \
+            int i = ix+ m3[0]*(iy+ m3[1]*iz);                           \
+            if (DEBUG_PRINT) CkPrintf (" %6.3g",ARRAY[o+i]);            \
+            min=std::min(min,ARRAY[o+i]);                               \
+            max=std::max(max,ARRAY[o+i]);                               \
+            avg+=ARRAY[o+i];                                            \
+          }                                                             \
+          if (DEBUG_PRINT) CkPrintf ("\n");                             \
+        }                                                               \
+      }                                                                 \
+      CkPrintf ("DEBUG_ARRAY_SUM %s %g  %g  %g\n",NAME,min,avg,max);    \
+    }                                                                   \
+  }
+
+#else
+
+#   define DEBUG_PRINT_ARRAY0(NAME,ARRAY,m3,n3,o3)  /* ... */
+#   define DEBUG_PRINT_ARRAY(NAME,ARRAY,m3,n3)  /* ... */
+#   define DEBUG_PRINT_ARRAY_(NAME,ARRAY,m3,n3,ox,oy,oz)  /* ... */
+#endif
+
+//======================================================================
+
 long FieldFace::counter[CONFIG_NODE_SIZE] = {0};
 
 #define FORTRAN_NAME(NAME) NAME##_
@@ -162,6 +216,8 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
   auto field_list_src = refresh_->field_list_src();
   auto field_list_dst = refresh_->field_list_dst();
 
+  const int pad = prolong() ? prolong()->coarse_padding() : 0;
+
   for (size_t i_f=0; i_f < field_list_src.size(); i_f++) {
 
     CHECK_COARSE(field,i_f);
@@ -190,9 +246,10 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
     Box box(rank_,n3,g3);
     set_box_(&box);
 
-    if (refresh_type_ == refresh_fine) {
-      const int pad = prolong()->coarse_padding();
-      if (pad>0) box.set_padding(pad);
+    if (refresh_type_ == refresh_fine && pad > 0) {
+      box.set_padding(pad);
+    } else {
+      box.set_padding(0);
     }
 
     box_adjust_accumulate_(&box,accumulate,g3);
@@ -256,6 +313,8 @@ void FieldFace::array_to_face (char * array, Field field) throw()
   auto field_list_src = refresh_->field_list_src();
   auto field_list_dst = refresh_->field_list_dst();
   
+  const int pad = prolong() ? prolong()->coarse_padding() : 0;
+  
   for (size_t i_f=0; i_f < field_list_dst.size(); i_f++) {
 
     CHECK_COARSE(field,i_f);
@@ -287,9 +346,10 @@ void FieldFace::array_to_face (char * array, Field field) throw()
     set_box_(&box);
     invert_face();
 
-    if (refresh_type_ == refresh_fine) {
-      const int pad = prolong()->coarse_padding();
-      if (pad>0) box.set_padding(pad);
+    if (refresh_type_ == refresh_fine && pad > 0) {
+      box.set_padding(pad);
+    } else {
+      box.set_padding(0);
     }
 
     box_adjust_accumulate_(&box,accumulate,g3);
@@ -315,73 +375,23 @@ void FieldFace::array_to_face (char * array, Field field) throw()
 
       int ia3[3] = {0,0,0};
 
-      const int pad = prolong()->coarse_padding();
+#ifdef DEBUG_ARRAY
+      CkPrintf ("DEBUG_ARRAY array_to_face calling Prolong::apply\n");
+#endif            
+      prolong()->apply
+        (precision, 
+         field_ghost,m3, i3,       n3,
+         array_ghost,nc3,ia3, nc3,
+         accumulate);
 
-      if (pad == 0) {
+#ifdef DEBUG_ARRAY            
+      CkPrintf ("field %lu\n",  i_f);
+#endif      
+      DEBUG_PRINT_ARRAY0("array_to_face array_ghost",((cello_float *)array_ghost),nc3,nc3,ia3);
+      DEBUG_PRINT_ARRAY0("array_to_face field_ghost",((cello_float *)field_ghost),m3,n3,i3);
 
-        // interpolation does not require padded coarse array
-
-        ASSERT7 ("FieldFace::array_to_face()",
-                 "Prolong %s array sizes (%d %d %d) and (%d %d %d) are invalid",
-                 prolong()->name().c_str(),
-                 n3[0],n3[1],n3[2],
-                 nc3[0],nc3[1],nc3[2],
-                 (prolong()->array_sizes_valid(n3,nc3)));
-        
-        prolong()->apply
-          (precision, 
-           field_ghost,m3, i3,       n3,
-           array_ghost,nc3,ia3, nc3,
-           accumulate);
-
-        index_array += cello::sizeof_precision(precision)*
-          nc3[0]*nc3[1]*nc3[2];
-        
-      } else {
-
-        ERROR("FieldFace::array_to_face",
-              "Shouldn't get here: refresh_fine with pad != 0 is not handled by FieldFace");
-
-        // interpolation requires padded coarse array
-
-//         box.get_start_size(i3,n3,BlockType::receive,BlockType::receive);
-// #ifdef DEBUG_NEW_BOX    
-//     CkPrintf ("DEBUG_NEW_BOX %s:%d %d %d %d\n",__FILE__,__LINE__,i3[0],i3[1],i3[2]);
-//     CkPrintf ("DEBUG_NEW_BOX %s:%d %d %d %d\n",__FILE__,__LINE__,n3[0],n3[1],n3[2]);
-// #endif
-//         const int nxc = rank_ >= 1 ? (nc3[0]+2*pad) : 1;
-//         const int nyc = rank_ >= 2 ? (nc3[1]+2*pad) : 1;
-//         const int nzc = rank_ >= 3 ? (nc3[2]+2*pad) : 1;
-//         const int oxc = (rank_ >= 1) ? 1 : 0;
-//         const int oyc = (rank_ >= 2) ? 1 : 0;
-//         const int ozc = (rank_ >= 3) ? 1 : 0;
-//         FieldData * field_data = field.field_data();
-//         cello_float * coarse_field =
-//           (cello_float *) field.coarse_values(i_f);
-
-//         // cello_float * padded_face_vector = field_data->padded_array_allocate
-//         //   (face_[0],face_[1],face_[2],nf,nxc,nyc,nzc);
-
-//         // const int na = field_data->padded_array_dimensions
-//         //   (face_[0],face_[1],face_[2]);
-                                                                      
-//         // ASSERT5("EnzoProlong::apply",
-//         //         "Array size mismatch %d * %d * %d  !=  %d / %d\n",
-//         //         nxc,nyc,nzc,na, nf,
-//         //         (nxc*nyc*nzc) == (na/nf));
-
-//         //        const int nc = nxc*nyc*nzc;
-//         const int i0 = 0;
-//         cello_float * padded_array = &coarse_field[i0];
-
-//         cello::copy(padded_array,
-//                     nxc,nyc,nzc, oxc,oyc,ozc,
-//                     (cello_float *) array_ghost,
-//                     nc3[0],nc3[1],nc3[2],0,0,0,
-//                     nc3[0],nc3[1],nc3[2]);
-
-      }
-
+      index_array += cello::sizeof_precision(precision)*
+        nc3[0]*nc3[1]*nc3[2];
 
     } else {
 
@@ -420,6 +430,8 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
   
   cello_float * padded_face_vector = nullptr;
 
+  const int pad = prolong() ? prolong()->coarse_padding() : 0;
+  
   for (size_t i_f=0; i_f < field_list_src.size(); i_f++) {
 
     CHECK_COARSE(field_src,i_f);
@@ -434,17 +446,14 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
     field_src.centering  (index_src,c3,c3+1,c3+2);
     
     const bool accumulate = accumulate_(index_src,index_dst);
-    const int pad = prolong() ? prolong()->coarse_padding() : 0;
 
     Box box (rank_,n3,g3);
     set_box_(&box);
 
-    if (refresh_type_ == refresh_fine) {
-      if (pad > 0) {
-        WARNING("FieldFace::face_to_face",
-              "Shouldn't get here: refresh_fine with pad != 0 is not handled by FieldFace");
-        box.set_padding(pad);
-      }      
+    if (refresh_type_ == refresh_fine && pad > 0) {
+      box.set_padding(pad);
+    } else {
+      box.set_padding(0);
     }
 
     box_adjust_accumulate_(&box,accumulate,g3);
@@ -483,51 +492,21 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
 	     "Odd ghost zones not implemented yet: prolong needs padding",
 	     ! need_padding);
 
-      if (pad == 0) {
 
-        ASSERT ("FieldFace::array_to_face()",
-                "No prolongation operator",
-                (prolong() != nullptr));
+#ifdef DEBUG_ARRAY
+      CkPrintf ("DEBUG_ARRAY face_to_face calling Prolong::apply\n");
+#endif            
 
-        const bool is_valid = prolong()->array_sizes_valid(nd3,ns3);
-        
-        ASSERT7 ("FieldFace::array_to_face()",
-                 "Prolong %s array sizes (%d %d %d) and (%d %d %d) are invalid",
-                 prolong()->name().c_str(),
-                 nd3[0],nd3[1],nd3[2],
-                 ns3[0],ns3[1],ns3[2],
-                 is_valid );
-
-        prolong()->apply (precision, 
+      prolong()->apply (precision, 
                         values_dst,m3,id3, nd3,
                         values_src,m3,is3, ns3,
                         accumulate);
+#ifdef DEBUG_ARRAY            
+      CkPrintf ("field %lu\n",  i_f);
+#endif      
+      DEBUG_PRINT_ARRAY0("face_to_face values_src",((cello_float *)values_src),m3,ns3,is3);
+      DEBUG_PRINT_ARRAY0("face_to_face values_dst",((cello_float *)values_dst),m3,nd3,id3);
 
-      } else {
-        
-        WARNING("FieldFace::face_to_face",
-              "Shouldn't get here: refresh_fine with pad != 0 is not handled by FieldFace");
-        // copy ghost data to coarse array
-        
-        // loop limits for coarse array
-        // intersect
-        // int ic3[3], nc3[3];
-        // box.get_start_size(ic3,nc3,BlockType::receive, false,true);
-
-        // FieldData * field_data = field_dst.field_data();
-
-        // int mc3[3];
-        // field_dst.coarse_dimensions(i_f,mc3,mc3+1,mc3+2);
-        // cello_float * coarse_field =
-        //   (cello_float *) field_dst.coarse_values(i_f);
-
-        // // copy src field values to dst coarse field
-        // cello::copy(coarse_field,
-        //             mc3[0],mc3[1],mc3[2], ic3[0],ic3[1],ic3[2],
-        //             (cello_float *) values_src,
-        //             m3[0],m3[1],m3[2],is3[0],is3[1],is3[2],
-        //             ns3[0],ns3[1],ns3[2]);
-      }
 
     } else if (refresh_type_ == refresh_coarse) {
 
@@ -574,6 +553,8 @@ int FieldFace::num_bytes_array(Field field) throw()
   auto field_list_src = refresh_->field_list_src();
   auto field_list_dst = refresh_->field_list_dst();
 
+  const int pad = prolong() ? prolong()->coarse_padding() : 0;
+  
   for (size_t i_f=0; i_f < field_list_src.size(); i_f++) {
 
     CHECK_COARSE(field,i_f);
@@ -597,9 +578,10 @@ int FieldFace::num_bytes_array(Field field) throw()
     Box box (rank_,n3,g3);
     set_box_(&box);
 
-    if (refresh_type_ == refresh_fine) {
-      const int pad = prolong()->coarse_padding();
-      if (pad>0) box.set_padding(pad);
+    if (refresh_type_ == refresh_fine && pad > 0) {
+      box.set_padding(pad);
+    } else {
+      box.set_padding(0);
     }
 
     box_adjust_accumulate_(&box,accumulate,g3);
@@ -1008,8 +990,8 @@ void FieldFace::set_box_(Box * box)
 
   box->set_block(BoxType_receive,level,face_,child_);
 
-  if (prolong() && prolong()->coarse_padding() > 0)
-    box->set_padding(prolong()->coarse_padding());
+  const int pad = prolong() ? prolong()->coarse_padding() : 0;
+  box->set_padding(pad);
   box->compute_region();
 }
 

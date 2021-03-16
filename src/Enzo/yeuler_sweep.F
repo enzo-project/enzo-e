@@ -196,6 +196,7 @@ c
             vslice(j,k) = w(i,j,k)
             wslice(j,k) = u(i,j,k)
             if (dslice(j,k) < 0.0) then
+               ierror = ENZO_ERROR_YEULER_DSLICE
                print*, 'yeuler_sweep dslice ',i,j,k,dslice(j,k)
                if (num_ie_error .ge. 0) then
                   num_ie_error = num_ie_error + 1
@@ -203,8 +204,10 @@ c
                   ie_error_y(num_ie_error) = j
                   ie_error_z(num_ie_error) = k
                endif
+               return
             end if
             if (eslice(j,k) < 0.0) then
+               ierror = ENZO_ERROR_YEULER_ESLICE
                print*, 'yeuler_sweep eslice ',i,j,k,eslice(j,k)
                if (num_ie_error .ge. 0) then
                   num_ie_error = num_ie_error + 1
@@ -212,6 +215,7 @@ c
                   ie_error_y(num_ie_error) = j
                   ie_error_z(num_ie_error) = k
                endif
+               return
             end if
          enddo
          if (gravity .eq. 1) then
@@ -223,6 +227,7 @@ c
             do j=1, jn
                geslice(j,k) = ge(i,j,k)
                if (geslice(j,k) < 0.0) then
+                  ierror = ENZO_ERROR_YEULER_GESLICE
                   print*, 'yeuler_sweep geslice ',i,j,k,geslice(j,k)
                   if (num_ie_error .ge. 0) then
                      num_ie_error = num_ie_error + 1
@@ -230,6 +235,7 @@ c
                      ie_error_y(num_ie_error) = j
                      ie_error_z(num_ie_error) = k
                   endif
+                  return
                end if
             enddo
          endif
@@ -311,7 +317,7 @@ c
      &     jn, kn, js, je, k1, k2, dt, 
      &     gamma, idiff, gravity, idual, eta1, eta2,
      &     df, ef, uf, vf, wf, gef, ges,
-     &     ncolor, colslice, colf, SmallRho)
+     &     ncolor, colslice, colf, SmallRho,ierror)
 c
 c  If necessary, recompute the pressure to correctly set ge and e
 c

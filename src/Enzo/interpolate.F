@@ -118,6 +118,7 @@ c
 #endif      
       if (ndim .lt. 1 .or. ndim .gt. 3) then
          write (6,*) "INTERPOLATE: ERROR ndim =", ndim
+         ierror = ENZO_ERROR_INTERPOLATE_NDIM
 c         ERROR_MESSAGE
       endif
 c
@@ -125,6 +126,7 @@ c  Error check for interpolation method
 c
       if (imethod .lt. 0 .or. imethod .gt. 4) then
          write (6,*) "INTERPOLATE: ERROR imethod =", imethod
+         ierror = ENZO_ERROR_INTERPOLATE_METHOD
 c         ERROR_MESSAGE
       endif
 c
@@ -136,6 +138,7 @@ c
             write(6,1030) pstart(i), pend(i), pdims(i), i
  1030       format("INTERPOLATE: ERROR pstart =", i5, "  pend =", i5,
      &             "  pdims =", i5, "  i =", i2)
+            ierror = ENZO_ERROR_INTERPOLATE_PSTART_PEND
 c            ERROR_MESSAGE
          endif
       enddo
@@ -146,6 +149,7 @@ c
          if (int(pstart(i)/refine(i))*refine(i) .ne. pstart(i)) then
             write(6,*) "INTERPOLATE: ERROR pstart(i) =", pstart(i),
      &                 " refine(i) =", refine(i), " i =", i
+            ierror = ENZO_ERROR_INTERPOLATE_PSTART_REFINE
 c            ERROR_MESSAGE
          endif
       enddo
@@ -239,6 +243,7 @@ c
 #endif
          if (ndim .ne. 3) then
             write(6,*) 'INTERPOLATE: imethod=2 only for 3d'
+            ierror = ENZO_ERROR_INTERPOLATE_PSTART_IMETHOD2
 c            ERROR_MESSAGE
          endif
 c

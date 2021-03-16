@@ -81,10 +81,8 @@ enum enzo_sync_id {
   enzo_sync_id_solver_bicgstab_precon_2,
   enzo_sync_id_solver_bicgstab_loop_25,
   enzo_sync_id_solver_bicgstab_loop_85,
-  enzo_sync_id_solver_cg,
-  enzo_sync_id_solver_cg_loop_0a,
-  enzo_sync_id_solver_cg_loop_0b,
-  enzo_sync_id_solver_cg_loop_2a,
+  enzo_sync_id_solver_cg_matvec,
+  enzo_sync_id_solver_cg_loop_2,
   enzo_sync_id_solver_dd,
   enzo_sync_id_solver_dd_coarse,
   enzo_sync_id_solver_dd_domain,
@@ -113,7 +111,8 @@ enum return_enum {
   return_unknown,
   return_converged,
   return_diverged,
-  return_error
+  return_error,
+  return_bypass
 };
 
 //----------------------------------------------------------------------

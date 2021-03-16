@@ -84,6 +84,12 @@ public: // interface
     method_flux_correct_group(),
     method_flux_correct_enable(),
     method_flux_correct_min_digits(),
+    method_refresh_field_list(),
+    method_refresh_particle_list(),
+    method_refresh_ghost_depth(),
+    method_refresh_min_face_rank(),
+    method_refresh_all_fields(),
+    method_refresh_all_particles(),
     method_timestep(),
     method_trace_name(),
   // MethodNull
@@ -119,7 +125,7 @@ public: // interface
     output_field_list(),
     output_particle_list(),
     output_name(),
-    index_schedule_(0),
+    index_schedule(0),
     schedule_list(),
     schedule_type(),
     schedule_var(),
@@ -241,6 +247,12 @@ public: // interface
       method_flux_correct_group(),
       method_flux_correct_enable(),
       method_flux_correct_min_digits(),
+      method_refresh_field_list(),
+      method_refresh_particle_list(),
+      method_refresh_ghost_depth(),
+      method_refresh_min_face_rank(),
+      method_refresh_all_fields(),
+      method_refresh_all_particles(),
       method_timestep(),
       method_trace_name(),
       method_null_dt(0.0),
@@ -275,7 +287,7 @@ public: // interface
       output_field_list(),
       output_particle_list(),
       output_name(),
-      index_schedule_(-1),
+      index_schedule(-1),
       schedule_list(),
       schedule_type(),
       schedule_var(),
@@ -444,6 +456,12 @@ public: // attributes
   std::vector<std::string>   method_flux_correct_group;
   std::vector<bool>          method_flux_correct_enable;
   std::vector<double>        method_flux_correct_min_digits;
+  std::vector< std::vector<int> > method_refresh_field_list;
+  std::vector< std::vector<int> > method_refresh_particle_list;
+  std::vector<int>           method_refresh_ghost_depth;
+  std::vector<int>           method_refresh_min_face_rank;
+  std::vector<int>           method_refresh_all_fields;
+  std::vector<int>           method_refresh_all_particles;
   std::vector<double>        method_timestep;
   std::vector<std::string>   method_trace_name;
   double                     method_null_dt;
@@ -486,13 +504,13 @@ public: // attributes
   std::vector < std::vector <std::string> >  output_field_list;
   std::vector < std::vector <std::string> > output_particle_list;
   std::vector < std::vector <std::string> >  output_name;
-  int                        index_schedule_;
+  int                         index_schedule;
   std::vector< std::vector<double> > schedule_list;
-  std::vector< std::string > schedule_type;
-  std::vector< std::string > schedule_var;
-  std::vector< double >      schedule_start;
-  std::vector< double >      schedule_stop;
-  std::vector< double >      schedule_step;
+  std::vector< std::string >  schedule_type;
+  std::vector< std::string >  schedule_var;
+  std::vector< double >       schedule_start;
+  std::vector< double >       schedule_stop;
+  std::vector< double >       schedule_step;
 
   // Particles
 

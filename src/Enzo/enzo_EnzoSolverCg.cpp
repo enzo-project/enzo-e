@@ -8,6 +8,38 @@
 #include "enzo.hpp"
 #include "enzo.decl.h"
 
+// #define COPY_FIELD
+
+//----------------------------------------------------------------------
+
+#ifdef COPY_FIELD
+#  undef COPY_FIELD
+#   define COPY_FIELD(BLOCK,MSG,ID,COPY)                        \
+  {                                                             \
+  Field field = BLOCK->data()->field();                         \
+  enzo_float* X      = (enzo_float*) field.values(ID);          \
+  enzo_float* X_bcg  = (enzo_float*) field.values(COPY);        \
+  const int m = mx_*my_*mz_;                                    \
+  if (X_bcg) for (int i=0; i<m; i++)  X_bcg[i] = X[i];          \
+  long double sum=0.0,min=1e100,max=-1e100;                     \
+  int count = 0;                                                \
+  for (int iz=gz_; iz<mz_-gz_; iz++) {                          \
+    for (int iy=gy_; iy<my_-gy_; iy++) {                        \
+      for (int ix=gx_; ix<mx_-gx_; ix++) {                      \
+        int i=ix+mx_*(iy+my_*iz);                               \
+        sum += X[i];                                            \
+        min = std::min(min,(long double)X[i]);                  \
+        max = std::max(max,(long double)X[i]);                  \
+        count++;                                                \
+      }                                                         \
+    }                                                           \
+  }                                                             \
+  CkPrintf ("DEBUG_COPY_FIELD %s %s [%Lg %Lg %Lg]\n",           \
+    BLOCK->name().c_str(),COPY,min,sum/count,max);              \
+  }
+#else
+#   define COPY_FIELD(BLOCK,MSG,ID,COPY) /* ... */   
+#endif
 //----------------------------------------------------------------------
 
 EnzoSolverCg::EnzoSolverCg 
@@ -204,6 +236,8 @@ void EnzoSolverCg::compute_ (EnzoBlock * enzo_block) throw()
   enzo_float * R = (enzo_float*) field.values(ir_);
   enzo_float * D = (enzo_float*) field.values(id_);
   enzo_float * Z = (enzo_float*) field.values(iz_);
+
+  COPY_FIELD(enzo_block,"compute_",ib_,"B0_bcg");
 
   if (is_finest_(enzo_block)) {
 

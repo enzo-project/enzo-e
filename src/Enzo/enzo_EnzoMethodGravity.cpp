@@ -156,12 +156,14 @@ void EnzoBlock::p_method_gravity_continue()
 }
 
 //----------------------------------------------------------------------
+
 void EnzoMethodGravity::refresh_potential (EnzoBlock * enzo_block) throw()
 {
   cello::refresh(ir_exit_)->set_active(enzo_block->is_leaf());
   enzo_block->refresh_start
     (ir_exit_, CkIndex_EnzoBlock::p_method_gravity_end());
 }
+
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_method_gravity_end()
@@ -171,6 +173,8 @@ void EnzoBlock::p_method_gravity_end()
   // wait for all Blocks before continuing
   compute_done();
 }
+
+//----------------------------------------------------------------------
 
 void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
 {
@@ -182,7 +186,6 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
   field.dimensions (0,&mx,&my,&mz);
   const int m = mx*my*mz;
   enzo_float * potential = (enzo_float*) field.values ("potential");
-
   EnzoPhysicsCosmology * cosmology = enzo::cosmology();
   
   if (cosmology) {
@@ -212,6 +215,12 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
   enzo_float * de_t = (enzo_float*) field.values("density_total");
   if (de_t) for (int i=0; i<m; i++) de_t[i] = 0.0;
 
+#ifdef DEBUG_COPY_POTENTIAL
+  enzo_float * potential_copy = (enzo_float*) field.values ("potential_copy");
+  if (potential_copy) {
+    for (int i=0; i<m; i++) potential_copy[i] = potential[i];
+  }
+#endif	
   if (potential) {
     for (int i=0; i<m; i++) potential[i] = 0.0;
   }

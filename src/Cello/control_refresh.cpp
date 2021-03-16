@@ -15,6 +15,65 @@
 
 #define CHECK_ID(ID) ASSERT1 ("CHECK_ID","Invalid id %d",ID,(ID>=0));
 
+// #define TRACE_REFRESH_RECV
+// #define TRACE_LOAD_FACE
+
+//======================================================================
+// #define PRINT_COARSE_FIELD
+// #define DEBUG_ARRAY
+// #define DEBUG_ARRAY_CYCLE 0
+// #define DEBUG_PRINT true
+// #define DEBUG_PRINT_BLOCK "B1:1_1:1"
+// #define DEBUG_BOX
+
+#ifdef TRACE_PROLONG
+#  undef TRACE_PROLONG
+#  define TRACE_PROLONG(MSG) CkPrintf ("TRACE_PROLONG %s:%d %s\n",__FILE__,__LINE__,MSG);
+#else
+#  undef TRACE_PROLONG
+#  define TRACE_PROLONG(MSG) /* ... */
+#endif
+
+#ifdef DEBUG_ARRAY
+
+#   define DEBUG_PRINT_ARRAY0(NAME,ARRAY,m3,n3,o3)              \
+  DEBUG_PRINT_ARRAY_(NAME,ARRAY,m3,n3,o3[0],o3[1],o3[2])
+#   define DEBUG_PRINT_ARRAY(NAME,ARRAY,m3,n3)  \
+  DEBUG_PRINT_ARRAY_(NAME,ARRAY,m3,n3,0,0,0)
+#   define DEBUG_PRINT_ARRAY_(NAME,ARRAY,m3,n3,ox,oy,oz)                \
+  if (i_f == 0) {                                                       \
+  if (cello::simulation()->cycle() >= DEBUG_ARRAY_CYCLE) {              \
+    if (DEBUG_PRINT) CkPrintf ("PADDED_ARRAY_VALUES %s:%d %s %p\n",     \
+                               __FILE__,__LINE__,NAME,(void*)ARRAY);    \
+    const int o = ox + m3[0]*(oy + m3[1]*oz);                           \
+    double min=1e100,max=-1e100,avg=0.0;                                \
+    for (int iz=0; iz<n3[2]; iz++) {                                    \
+      for (int iy=0; iy<n3[1]; iy++) {                                  \
+        if (DEBUG_PRINT) CkPrintf ("PADDED_ARRAY_VALUES %s %p %d %d %d: ", \
+                                   NAME,(void*)ARRAY,0,iy,iz);          \
+        for (int ix=0; ix<n3[0]; ix++) {                                \
+          int i = ix+ m3[0]*(iy+ m3[1]*iz);                             \
+          if (DEBUG_PRINT) CkPrintf (" %6.3g",ARRAY[o+i]);              \
+          min=std::min(min,ARRAY[o+i]);                                 \
+          max=std::max(max,ARRAY[o+i]);                                 \
+          avg+=ARRAY[o+i];                                              \
+        }                                                               \
+        if (DEBUG_PRINT) CkPrintf ("\n");                               \
+      }                                                                 \
+    }                                                                   \
+    CkPrintf ("DEBUG_ARRAY_SUM %s %g  %g  %g\n",NAME,min,avg,max);      \
+  }                                                                     \
+}
+
+#else
+
+#   define DEBUG_PRINT_ARRAY0(NAME,ARRAY,m3,n3,o3)  /* ... */
+#   define DEBUG_PRINT_ARRAY(NAME,ARRAY,m3,n3)  /* ... */
+#   define DEBUG_PRINT_ARRAY_(NAME,ARRAY,m3,n3,ox,oy,oz)  /* ... */
+
+#endif
+
+//======================================================================
 //----------------------------------------------------------------------
 
 void Block::refresh_start (int id_refresh, int callback)
@@ -114,6 +173,9 @@ void Block::refresh_wait (int id_refresh, int callback)
     MsgRefresh * msg = refresh_msg_list_[id_refresh][id_msg];
 
     // unpack message data into Block data
+#ifdef DEBUG_BOX    
+    CkPrintf ("DEBUG_REFRESH_UPDATE %s\n",name().c_str());
+#endif    
     msg->update(data());
       
     delete msg;
@@ -184,6 +246,9 @@ void Block::p_refresh_recv (MsgRefresh * msg_refresh)
   if (sync->state() == RefreshState::READY) {
 
     // unpack message data into Block data if ready
+#ifdef DEBUG_BOX    
+    CkPrintf ("DEBUG_REFRESH_UPDATE %s\n",name().c_str());
+#endif    
     msg_refresh->update(data());
       
     delete msg_refresh;
@@ -254,12 +319,38 @@ int Block::refresh_load_field_faces_ (Refresh & refresh)
 
       // handle padded interpolation special case if needed
       const int pad = cello::problem()->prolong()->coarse_padding();
-      if (pad > 0 && level_face != level) {
-        count += refresh_load_coarse_face_
-          (refresh,refresh_type,index_neighbor,if3,ic3);
-      } else {
+      if (pad == 0) {
+#ifdef TRACE_LOAD_FACE
+  CkPrintf ("TRACE_LOAD_FACE %d %s > %s\n",
+            __LINE__,name().c_str(),name(index_neighbor).c_str());
+  fflush(stdout);
+#endif        
         refresh_load_field_face_ (refresh,refresh_type,index_neighbor,if3,ic3);
         ++count;
+      } else {
+        if (level_face == level) {
+#ifdef TRACE_LOAD_FACE
+  CkPrintf ("TRACE_LOAD_FACE %d %s > %s\n",
+            __LINE__,name().c_str(),name(index_neighbor).c_str());
+  fflush(stdout);
+#endif        
+          refresh_load_field_face_ (refresh,refresh_type,index_neighbor,if3,ic3);
+          ++count;
+        } else {
+          count += refresh_load_coarse_face_
+            (refresh,refresh_type,index_neighbor,if3,ic3);
+        }
+        if (level_face < level) {
+#ifdef TRACE_LOAD_FACE
+  CkPrintf ("TRACE_LOAD_FACE %d %s > %s\n",
+            __LINE__,name().c_str(),name(index_neighbor).c_str());
+  fflush(stdout);
+#endif        
+          refresh_load_field_face_ (refresh,refresh_type,index_neighbor,if3,ic3);
+        } else if (level_face > level) {
+          count ++;
+        }
+
       }
     }
 
@@ -279,6 +370,11 @@ int Block::refresh_load_field_faces_ (Refresh & refresh)
 	
 	Index index_face = it_face.index();
 	int ic3[3] = {0,0,0};
+#ifdef TRACE_LOAD_FACE
+  CkPrintf ("TRACE_LOAD_FACE %d %s > %s\n",
+            __LINE__,name().c_str(),name(index_face).c_str());
+  fflush(stdout);
+#endif        
 	refresh_load_field_face_ (refresh,refresh_same,index_face,if3,ic3);
 	++count;
 
@@ -320,6 +416,11 @@ void Block::refresh_load_field_face_
   data_msg -> set_field_face (field_face,true);
   data_msg -> set_field_data (data()->field_data(),false);
 
+#ifdef TRACE_REFRESH_RECV  
+  CkPrintf ("TRACE_REFRESH_RECV %d %s > %s\n",
+            __LINE__,name().c_str(),name(index_neighbor).c_str());
+  fflush(stdout);
+#endif  
   thisProxy[index_neighbor].p_refresh_recv (msg_refresh);
 
 }
@@ -385,16 +486,22 @@ int Block::refresh_load_coarse_face_
     if (l_send) {
 
       box_sr.get_start_stop
-        (iam3,iap3,BlockType::extra,BlockType::coarse);
+        (iam3,iap3,BlockType::extra,BlockType::receive_coarse);
       box_sr.get_start_stop
         (ifms3,ifps3,BlockType::extra,BlockType::send);
       box_sr.get_start_stop
         (ifmr3,ifpr3,BlockType::extra,BlockType::receive);
 
+#ifdef DEBUG_BOX    
+      CkPrintf ("DEBUG_REFRESH SR S %s R %s if3 %d %d %d\n",
+                name().c_str(),name(index_neighbor).c_str(),
+                if3[0],if3[1],if3[2]);
+#endif      
+
       refresh_coarse_send_
         (index_neighbor,
          data()->field(), refresh,
-         iam3,iap3,ifms3,ifps3,ifmr3,ifpr3,"R");
+         iam3,iap3,ifms3,ifps3,ifmr3,ifpr3,"SR");
 
     } else if (l_recv) {
 
@@ -452,16 +559,22 @@ int Block::refresh_load_coarse_face_
               box_er.set_block(BoxType_extra,0,if3_es,ic3); // ic3 ignored
 
               box_er.get_start_stop
-                (iam3,iap3,BlockType::extra,BlockType::coarse);
+                (iam3,iap3,BlockType::extra,BlockType::receive_coarse);
               box_er.get_start_stop
-                (ifms3,ifps3,BlockType::extra,BlockType::send);
+                (ifms3,ifps3,BlockType::extra,BlockType::extra);
               box_er.get_start_stop
                 (ifmr3,ifpr3,BlockType::extra,BlockType::receive);
+
+#ifdef DEBUG_BOX    
+              CkPrintf ("DEBUG_REFRESH ER [S] %s R %s E %s if3_es %d %d %d\n",
+                        name().c_str(),name(index_neighbor).c_str(),name(index_extra).c_str(),
+                        if3_es[0],if3_es[1],if3_es[2]);
+#endif              
 
               refresh_coarse_send_
                 (index_neighbor,
                  data()->field(), refresh,
-                 iam3,iap3,ifms3,ifps3,ifmr3,ifpr3,"R");
+                 iam3,iap3,ifms3,ifps3,ifmr3,ifpr3,"ER");
 
               ASSERT3 ("Block::refresh_load_coarse_face_",
                        "Face if3_er %d %d %d out of bounds",
@@ -534,19 +647,25 @@ int Block::refresh_load_coarse_face_
               int ifmr3[3],ifpr3[3];
 
               box_se.get_start_stop
-                (iam3,iap3,BlockType::extra,BlockType::coarse);
+                (iam3,iap3,BlockType::extra,BlockType::receive_coarse);
               box_se.get_start_stop
-                (ifms3,ifps3,BlockType::extra,BlockType::send);
+                (ifms3,ifps3,BlockType::extra,BlockType::extra);
               box_se.get_start_stop
                 (ifmr3,ifpr3,BlockType::extra,BlockType::receive);
 
               int ma3[3];
               box_se.get_region_size(ma3);
 
+#ifdef DEBUG_BOX    
+              CkPrintf ("DEBUG_REFRESH SE [R] %s S %s E %s if3_sr %d %d %d\n",
+                        name().c_str(),name(index_neighbor).c_str(),name(index_extra).c_str(),
+                        if3_sr[0],if3_sr[1],if3_sr[2]);
+#endif              
+
               refresh_coarse_send_
                 (index_extra,
                  data()->field(),refresh,
-                 iam3,iap3, ifms3,ifps3, ifmr3,ifpr3,"E");
+                 iam3,iap3, ifms3,ifps3, ifmr3,ifpr3,"SE");
 
               ASSERT3 ("Block::refresh_load_coarse_face_",
                        "Face if3_se %d %d %d out of bounds",
@@ -581,13 +700,23 @@ void Block::refresh_coarse_send_
 
   const int id_refresh = refresh.id();
   CHECK_ID(id_refresh);
-
+#ifdef DEBUG_BOX    
+  if (name(index_neighbor) == DEBUG_PRINT_BLOCK) {
+    CkPrintf ("DEBUG_PROLONG %s set_coarse_array %s > %s\n",
+              debug.c_str(),name().c_str(),name(index_neighbor).c_str());
+  }
+#endif    
   data_msg->set_coarse_array
-    (field, iam3,iap3,ifms3,ifps3,ifmr3,ifpr3,refresh.field_list_src());
+    (field, iam3,iap3,ifms3,ifps3,ifmr3,ifpr3,refresh.field_list_src(),name(index_neighbor));
 
   msg_refresh->set_refresh_id (id_refresh);
   msg_refresh->set_data_msg (data_msg);
 
+#ifdef TRACE_REFRESH_RECV  
+  CkPrintf ("TRACE_REFRESH_RECV %d %s > %s\n",
+            __LINE__,name().c_str(),name(index_neighbor).c_str());
+  fflush(stdout);
+#endif  
   thisProxy[index_neighbor].p_refresh_recv (msg_refresh);
 }
 
@@ -650,7 +779,7 @@ void Block::refresh_coarse_apply_ (Refresh * refresh)
           const bool lghost = true;
           const bool lcoarse = true;
           box.get_start_size (i3_f,n3_f,BlockType::receive,BlockType::receive);
-          box.get_start_size (i3_c,n3_c,BlockType::receive,BlockType::coarse);
+          box.get_start_size (i3_c,n3_c,BlockType::receive,BlockType::receive_coarse);
 
           for (int i_f=0; i_f<nf; i_f++) {
 
@@ -666,8 +795,8 @@ void Block::refresh_coarse_apply_ (Refresh * refresh)
             cello_float * coarse_field =
               (cello_float *) field.coarse_values(i_f);
               
-            const cello_float rr = cello::num_children();
             const float r = n3_f[0] / n3_c[0];
+            const cello_float rr = (r == 1) ? 1.0 : 1.0/cello::num_children();
 
 #ifdef CHECK
             ASSERT1 ("Block::refresh_coarse_apply",
@@ -675,6 +804,23 @@ void Block::refresh_coarse_apply_ (Refresh * refresh)
                      r, (r==1.0 || r==2.0));
 #endif    
 
+#ifdef PRINT_COARSE_FIELD
+            CkPrintf ("DEBUG_COARSE_FIELD %s refresh_coarse_apply() field %d\n",
+                      name().c_str(),i_f);
+            if (i_f == 0) {
+              for (int iz=0; iz<m3_c[2]; iz++) {
+                for (int iy=0; iy<m3_c[1]; iy++) {
+                  CkPrintf ("DEBUG_COARSE_FIELD coarse_field %d %d %d: ",0,iy,iz);
+                  for (int ix=0; ix<m3_c[0]; ix++) {
+                    int i = ix+ m3_c[0]*(iy+ m3_c[1]*iz);
+                    CkPrintf (" %6.3g",coarse_field[i]);
+                  }
+                  CkPrintf ("\n");
+                }
+              }
+            }
+            
+#endif            
             const int if0 = i3_f[0] + m3_f[0]*(i3_f[1] + m3_f[1]*i3_f[2]);
             const int ic0 = i3_c[0] + m3_c[0]*(i3_c[1] + m3_c[1]*i3_c[2]);
 
@@ -708,7 +854,7 @@ void Block::refresh_coarse_apply_ (Refresh * refresh)
             box.set_recv_ghosts(g3); // reset recv ghosts to default
             box.compute_region();
 
-            box.get_start_size (ip3_c,np3_c,BlockType::none,BlockType::coarse);
+            box.get_start_size (ip3_c,np3_c,BlockType::none,BlockType::receive_coarse);
             box.set_padding(0);
             box.compute_region();
             
@@ -717,6 +863,16 @@ void Block::refresh_coarse_apply_ (Refresh * refresh)
             box.compute_region();
 
             prolong->array_sizes_valid (n3_f,n3_c);
+#ifdef DEBUG_ARRAY
+            CkPrintf ("DEBUG_ARRAY %s refresh_coarse_apply calling Prolong::apply\n",
+                      name().c_str());
+#endif            
+#ifdef DEBUG_ARRAY            
+            CkPrintf ("BLOCK %s field %d face %d %d %d\n",
+                      name().c_str(),i_f,of3[0],of3[1],of3[2]);
+#endif            
+            DEBUG_PRINT_ARRAY0("refresh_coarse_apply coarse_field",coarse_field,m3_c,np3_c,ip3_c);
+            DEBUG_PRINT_ARRAY0("refresh_field_apply field_values",field_values,m3_f,np3_f,ip3_f);
             prolong->apply(precision_default,
                            field_values, m3_f, ip3_f, np3_f,
                            coarse_field, m3_c, ip3_c, np3_c,
@@ -792,6 +948,11 @@ void Block::particle_send_
       msg_refresh->set_data_msg (data_msg);
       msg_refresh->set_refresh_id (id_refresh);
 
+#ifdef TRACE_REFRESH_RECV  
+      CkPrintf ("TRACE_REFRESH_RECV %d %s > %s\n",
+                __LINE__,name().c_str(),name(index).c_str());
+      fflush(stdout);
+#endif  
       thisProxy[index].p_refresh_recv (msg_refresh);
 
     } else if (p_data) {
@@ -800,6 +961,11 @@ void Block::particle_send_
       msg_refresh->set_data_msg (nullptr);
       msg_refresh->set_refresh_id (id_refresh);
 
+#ifdef TRACE_REFRESH_RECV  
+      CkPrintf ("TRACE_REFRESH_RECV %d %s > %s\n",
+                __LINE__,name().c_str(),name(index).c_str());
+      fflush(stdout);
+#endif  
       thisProxy[index].p_refresh_recv (msg_refresh);
 
       // assert ParticleData object exits but has no particles
@@ -1273,6 +1439,11 @@ void Block::refresh_load_flux_face_
   msg_refresh->set_data_msg (data_msg);
   msg_refresh->set_refresh_id (id_refresh);
 
+#ifdef TRACE_REFRESH_RECV  
+  CkPrintf ("TRACE_REFRESH_RECV %d %s > %s\n",
+            __LINE__,name().c_str(),name(index_neighbor).c_str());
+  fflush(stdout);
+#endif  
   thisProxy[index_neighbor].p_refresh_recv (msg_refresh);
 
 }

@@ -205,7 +205,8 @@ public: // interface
    int iam3[3],int iap3[3],
    int ifms3[3],int ifps3[3],
    int ifmr3[3],int ifpr3[3],
-   const std::vector<int> & coarse_array_field_list_);
+   const std::vector<int> & coarse_array_field_list_,
+   std::string debug_block_recv);
 
   ///--------------------
   /// PACKING / UNPACKING

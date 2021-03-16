@@ -195,19 +195,19 @@ c            for the source term in the gas energy equation.
 c
        if (idual .eq. 1) then
           do i=i1, i2
-             if (geslice(i,j) .lt. 0._RKIND) 
-     $            write(6,*) 'euler: geslice<0:', i,j,geslice(i,j)
+             if (geslice(i,j) .lt. 0._RKIND) then
+                 write(6,*) 'euler: geslice<0:', i,j,geslice(i,j)
+              end if
              geslice(i,j) = max((geslice(i,j)*dslice(i,j) +
      $            (gef(i,j) - gef(i+1,j)) + ges(i,j)) * dnuinv(i)
      $            ,0.5_RKIND*geslice(i,j))
 c             if (geslice(i,j) .lt. tiny) geslice(i,j) = tiny
              if (geslice(i,j) .lt. 0._RKIND) then
-                print*, 'ERROR'
                 write(6,*) i,j,dslice(i,j),dnu(i),pcent(i),eslice(i,j),
      &               gef(i,j), gef(i+1,j), ges(i,j),
      &               geslice(i,j)*dslice(i,j),
      &               uslice(i,j),uslice(i+1,j)
-c                write(6,*) pb(i),pb(i+1),p0(i),p0(i+1),
+c     write(6,*) pb(i),pb(i+1),p0(i),p0(i+1),
 c     &               pbar(i,j),pbar(i+1,j),lbar(i),l0(i),
 c     &               pls(i,j),prs(i,j),pls(i+1,j),prs(i+1,j)
 c                write(6,*) ub(i),ub(i+1),geb(i),geb(i+1),
@@ -257,12 +257,14 @@ c
      &            (dslice(i,j)*dnuinv(i)+1._RKIND)
              eslice(i,j) = eslice(i,j) + dt*grslice(i,j)*0.5_RKIND*
      &            (uslice(i,j) + uold(i)*dslice(i,j)*dnuinv(i))
-             if (eslice(i,j) .le. 0) write(6,*) 'eu1',i,j,eslice(i,j),
-     &            dslice(i,j),dnu(i),uslice(i,j),grslice(i,j),
-     &            dt*grslice(i,j)*0.5_RKIND*
-     &            (dslice(i,j)/dnu(i)+1._RKIND),
-     &            dt*grslice(i,j)*0.5_RKIND*
-     &            (uslice(i,j) + uold(i)*dslice(i,j)/dnu(i))
+             if (eslice(i,j) .le. 0) then
+                write(6,*) 'eu1',i,j,eslice(i,j),
+     &               dslice(i,j),dnu(i),uslice(i,j),grslice(i,j),
+     &               dt*grslice(i,j)*0.5_RKIND*
+     &               (dslice(i,j)/dnu(i)+1._RKIND),
+     &               dt*grslice(i,j)*0.5_RKIND*
+     &               (uslice(i,j) + uold(i)*dslice(i,j)/dnu(i))
+             end if
              eslice(i,j) = max(eslice(i,j), tiny)
 #endif /* GRAVITY_METHOD1 */
 

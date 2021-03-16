@@ -45,6 +45,7 @@ module mesh {
   PUPable MethodDebug;
   PUPable MethodFluxCorrect;
   PUPable MethodNull;
+  PUPable MethodRefresh;
   PUPable MethodTrace;
   PUPable OutputCheckpoint;
   PUPable OutputData;

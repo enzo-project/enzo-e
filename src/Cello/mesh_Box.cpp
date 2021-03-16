@@ -7,7 +7,6 @@
 
 #include "mesh.hpp"
 
-// #define DEBUG_NEW_BOX
 // #define DEBUG_BOX
 //----------------------------------------------------------------------
 
@@ -95,6 +94,7 @@ bool Box::get_start_stop
     index_max[i] = region_stop_[i];
   }
 #ifdef DEBUG_BOX
+  print("get_start_stop");
   CkPrintf ("DEBUG_BOX get_start_stop  region %d:%d %d:%d %d:%d\n",
             region_start_[0],region_stop_[0],
             region_start_[1],region_stop_[1],
@@ -146,7 +146,8 @@ bool Box::get_start_stop
       block_max[i] = block_start_[1][i] + r*(n3[i]+ghost_depth_send_[i]);
     }
     
-  } else if (block_intersect == BlockType::coarse) {
+  } else if (block_intersect == BlockType::receive_coarse ||
+             block_intersect == BlockType::extra_coarse) {
 
     ERROR ("Box::get_start_stop",
            "Intersecting block cannot be the coarse array");
@@ -181,11 +182,18 @@ bool Box::get_start_stop
       index_max[i] = g3[i] + r*(index_max[i] - block_start_[1][i]);
     }
 
-  } else if (block_coords == BlockType::coarse) {
+  } else if (block_coords == BlockType::receive_coarse) {
 
     for (int i=0; i<rank_; i++) {
       index_min[i] = coarse_ghost_[i] + (index_min[i] - block_start_[0][i]);
       index_max[i] = coarse_ghost_[i] + (index_max[i] - block_start_[0][i]);
+    }
+
+  } else if (block_coords == BlockType::extra_coarse) {
+
+    for (int i=0; i<rank_; i++) {
+      index_min[i] = coarse_ghost_[i] + (index_min[i] - block_start_[1][i]);
+      index_max[i] = coarse_ghost_[i] + (index_max[i] - block_start_[1][i]);
     }
 
   }

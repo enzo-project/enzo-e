@@ -116,6 +116,12 @@ void Config::pup (PUP::er &p)
   p | method_flux_correct_group;
   p | method_flux_correct_enable;
   p | method_flux_correct_min_digits;
+  p | method_refresh_field_list;
+  p | method_refresh_particle_list;
+  p | method_refresh_ghost_depth;
+  p | method_refresh_min_face_rank;
+  p | method_refresh_all_fields;
+  p | method_refresh_all_particles;
   p | method_timestep;
   p | method_trace_name;
   p | method_null_dt;
@@ -157,7 +163,7 @@ void Config::pup (PUP::er &p)
   p | output_field_list;
   p | output_particle_list;
   p | output_name;
-  p | index_schedule_;
+  p | index_schedule;
   p | schedule_list;
   p | schedule_type;
   p | schedule_var;
@@ -710,6 +716,12 @@ void Config::read_method_ (Parameters * p) throw()
   method_flux_correct_group.resize(num_method);
   method_flux_correct_enable.resize(num_method);
   method_flux_correct_min_digits.resize(num_method);
+  method_refresh_field_list.resize(num_method);
+  method_refresh_particle_list.resize(num_method);
+  method_refresh_ghost_depth.resize(num_method);
+  method_refresh_min_face_rank.resize(num_method);
+  method_refresh_all_fields.resize(num_method);
+  method_refresh_all_particles.resize(num_method);
   method_timestep.resize(num_method);
   method_schedule_index.resize(num_method);
   method_close_files_seconds_stagger.resize(num_method);
@@ -762,7 +774,30 @@ void Config::read_method_ (Parameters * p) throw()
     method_flux_correct_min_digits[index_method] =
       p->value_float (full_name + ":min_digits",0.0);
 
-    // Read specified timestep, if any (for MethodTrace)
+    int n = p->list_length(full_name + ":field_list");
+    method_refresh_field_list[index_method].resize(n);
+    for (int i=0; i<n; i++) {
+      method_refresh_field_list[index_method][i] =
+        p->list_value_integer(i,full_name+":field_list",-1);
+    }
+    n = p->list_length(full_name + ":particle_list");
+    method_refresh_particle_list[index_method].resize(n);
+    for (int i=0; i<n; i++) {
+      method_refresh_particle_list[index_method][i] =
+        p->list_value_integer(i,full_name+":particle_list",-1);
+    }
+
+    // Read refresh method parameters
+    method_refresh_ghost_depth[index_method] =
+      p->value_integer(full_name+":ghost_depth",0); // default 0 all ghosts
+    method_refresh_min_face_rank[index_method] =
+      p->value_integer(full_name+"min_face_rank",0); // default 0 all faces
+    method_refresh_all_fields[index_method] =
+      p->value_logical(full_name+"all_fields",false);
+    method_refresh_all_particles[index_method] =
+      p->value_logical(full_name+"all_particles",false);
+
+  // Read specified timestep, if any (for MethodTrace)
     method_timestep[index_method] = p->value_float  
       (full_name + ":timestep",std::numeric_limits<double>::max());
 
@@ -1400,7 +1435,7 @@ void Config::read_testing_ (Parameters * p) throw()
 
 int Config::read_schedule_(Parameters * p, const std::string group)
 {
-  int index = index_schedule_;
+  int index = index_schedule;
 
   schedule_list.resize(index+1);
   schedule_type.resize(index+1);
@@ -1469,7 +1504,7 @@ int Config::read_schedule_(Parameters * p, const std::string group)
 	    schedule_type[index].c_str(),group.c_str());
   }
 
-  return index_schedule_++;
+  return index_schedule++;
 }
 //======================================================================
 

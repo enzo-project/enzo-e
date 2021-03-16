@@ -836,6 +836,16 @@ Method * Problem::create_method_
        config->method_flux_correct_enable[index_method],
        config->method_flux_correct_min_digits[index_method]);
 
+  } else if (name == "refresh") {
+
+    method = new MethodRefresh
+      (config->method_refresh_field_list[index_method],
+       config->method_refresh_particle_list[index_method],
+       config->method_refresh_ghost_depth[index_method],
+       config->method_refresh_min_face_rank[index_method],
+       config->method_refresh_all_fields[index_method],
+       config->method_refresh_all_particles[index_method]);
+
   } else if (name == "debug") {
 
     method = new MethodDebug (config->num_fields);

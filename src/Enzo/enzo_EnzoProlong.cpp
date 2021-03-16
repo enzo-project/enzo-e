@@ -11,10 +11,8 @@
 
 // #define TRACE_PROLONG
 // #define DEBUG_ENZO_PROLONG
-// #define TRACE_PADDED_ARRAY_VALUES
-// #define DEBUG_ARRAY
 
-#define ENABLE_INTERPOLATE
+// #define DEBUG_ARRAY
 
 #ifdef TRACE_PROLONG
 #  undef TRACE_PROLONG
@@ -34,6 +32,8 @@
   {                                                             \
     CkPrintf ("PADDED_ARRAY_VALUES %s:%d %s %p\n",              \
               __FILE__,__LINE__,NAME,(void*)ARRAY);             \
+    CkPrintf ("m3 %d %d %d n3 %d %d %d o3 %d %d %d\n",          \
+              m3[0],m3[1],m3[2],n3[0],n3[1],n3[2],ox,oy,oz); \
     const int o = ox + m3[0]*(oy + m3[1]*oz);                   \
     for (int iz=0; iz<n3[2]; iz++) {                            \
       for (int iy=0; iy<n3[1]; iy++) {                          \
@@ -134,7 +134,6 @@ void EnzoProlong::apply
   const void * values_c, int m3_c[3], int o3_c[3], int n3_c[3],
   bool accumulate)
 {
-  TRACE_PROLONG("EnzoProlong::apply()");
   if (method_ >= 0) {
     apply_((enzo_float *)     values_f,m3_f,o3_f,n3_f,
            (const enzo_float*)values_c,m3_c,o3_c,n3_c,accumulate);
@@ -155,8 +154,6 @@ void EnzoProlong::apply_
  const enzo_float * values_c, int m3_c[3], int o3_c[3], int n3_c[3],
  bool accumulate)
 {
-  TRACE_PROLONG("EnzoProlong::apply_()");
-
   int rank = cello::rank();
 
   int error = 0;
@@ -210,16 +207,6 @@ void EnzoProlong::apply_
 
 #endif
 
-  //  DEBUG_PRINT_ARRAY0("values_c",values_c,m3_c,n3_c,o3_c);
-
-  //   cello_float * copy_c = new cello_float [m3_c[0]*m3_c[1]*m3_c[2]];
-
-  // fill copy_c or copy values_c->copy_c
-  //    DEBUG_FILL_ARRAY("copy_c",copy_c,m3_c,m3_c);
-  //DEBUG_COPY_ARRAY0("copy_c",copy_c,values_c,m3_c,n3_c,o3_c);
-  
-  //   DEBUG_PRINT_ARRAY0("copy_c",copy_c,m3_c,n3_c,o3_c);
-
   int o_c = o3_c[0] + m3_c[0]*(o3_c[1] + m3_c[1]*o3_c[2]);
   int o_f = o3_f[0] + m3_f[0]*(o3_f[1] + m3_f[1]*o3_f[2]);
 
@@ -229,21 +216,8 @@ void EnzoProlong::apply_
      ((enzo_float*)(values_f))+o_f, gdims, gstart, work, &method_,
      &positive_, &error);
 
-  //  DEBUG_PRINT_ARRAY("grid",grid,n3_f,n3_f);
-  
-  // const int i3_f = o3_f[0] + m3_f[0]*(o3_f[1] + m3_f[1]*o3_f[2]);
-  // for (int iz=0; iz<n3_f[2]; iz++) {
-  //   for (int iy=0; iy<n3_f[1]; iy++) {
-  //     for (int ix=0; ix<n3_f[0]; ix++) {
-  //       int iv = i3_f + ix+ m3_f[0]*(iy+ m3_f[1]*iz);
-  //       int ig = ix+ n3_f[0]*(iy+ n3_f[1]*iz);
-  //       values_f[iv] = grid[ig];
-  //     }
-  //   }
-  // }
-
+  DEBUG_PRINT_ARRAY0("values_c",values_c,m3_c,n3_c,o3_c);
   DEBUG_PRINT_ARRAY0("values_f",values_f,m3_f,n3_f,o3_f);
 
-  //  delete [] grid;
   delete [] work;
 }
