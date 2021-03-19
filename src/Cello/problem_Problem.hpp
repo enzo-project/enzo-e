@@ -195,7 +195,8 @@ public: // interface
 
   /// Initialize the output objects
   void initialize_output(const Config * config,
-			 const Factory * factory) throw();
+                         const Factory * factory,
+                         bool restart_append_objects = false) throw();
 
   /// Initialize the method objects
   void initialize_method(Config * config) throw();

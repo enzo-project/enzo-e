@@ -257,11 +257,21 @@ void Problem::initialize_restrict(Config * config) throw()
 
 void Problem::initialize_output
 (const Config * config,
- const Factory * factory) throw()
+ const Factory * factory,
+ bool restart_append_objects /* default: false */) throw()
 {
   FieldDescr * field_descr = cello::field_descr();
-  
-  for (int index=0; index < config->num_output; index++) {
+
+  int start = (int)output_list_.size();
+
+  if (!restart_append_objects) { // sanity check
+    ASSERT("Problem::initialize_output",
+           ("No Output objects should be initialized when this function is "
+            "called (except when initializing new Output objects specified at "
+            "restart)"), start == 0);
+  }
+
+  for (int index=start; index < config->num_output; index++) {
 
     std::string type       = config->output_type[index];
 
