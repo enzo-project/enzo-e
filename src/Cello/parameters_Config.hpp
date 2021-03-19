@@ -580,7 +580,8 @@ protected: // functions
   void read_mesh_        ( Parameters * ) throw();
   void read_method_      ( Parameters * ) throw();
   void read_monitor_     ( Parameters * ) throw();
-  void read_output_      ( Parameters * ) throw();
+  void read_output_      ( Parameters * p,
+                           bool append_restart_parameters = false) throw();
   void read_particle_    ( Parameters * ) throw();
   void read_performance_ ( Parameters * ) throw();
   void read_physics_     ( Parameters * ) throw();

@@ -789,7 +789,9 @@ void Config::read_monitor_ (Parameters * p) throw()
 
 //----------------------------------------------------------------------
 
-void Config::read_output_ (Parameters * p) throw()
+void Config::read_output_ (Parameters * p,
+                           bool append_restart_parameters // default: =false
+                           ) throw()
 {
   //--------------------------------------------------
   // Output
@@ -797,10 +799,16 @@ void Config::read_output_ (Parameters * p) throw()
 
   p->group_set(0,"Output");
 
-  num_output = p->list_length("list");
+  if (!append_restart_parameters){ // sanity check!
+    ASSERT("Config::read_output_",
+           ("num_outputs should be 0 the first time that this function is "
+            "called."),
+           num_output == 0);
+  }
+  int num_new_output = p->list_length("list");
+  num_output += num_new_output;
 
   p->group_set(0,"Output");
-
 
   output_list.resize(num_output);
   output_type.resize(num_output);
@@ -831,16 +839,37 @@ void Config::read_output_ (Parameters * p) throw()
   output_particle_list.resize(num_output);
   output_name.resize(num_output);
 
-  output_dir_global = p->value_string("dir_global",".");
+  if (append_restart_parameters){
+    ASSERT("Config::read_output_",
+           "Output::dir_global must be consistent with the original value.",
+           output_dir_global == p->value_string("dir_global","."));
+  } else {
+    output_dir_global = p->value_string("dir_global",".");
+  }
 
-  for (int index_output=0; index_output<num_output; index_output++) {
+  for (int fileset_index=0; fileset_index<num_new_output; fileset_index++) {
 
-    TRACE1 ("index = %d",index_output);
+    int index_output = (num_output - num_new_output) + fileset_index;
+    TRACE2 ("fileset_index = %d, index = %d",fileset_index, index_output);
 
-    output_list[index_output] = 
-      p->list_value_string (index_output,"Output:list","unknown");
+    std::string fileset_name =
+      p->list_value_string (fileset_index,"Output:list","unknown");
+    bool existing_fset = std::find(output_list.begin(), output_list.end(),
+                                   fileset_name) != output_list.end();
 
-    p->group_set(1,output_list[index_output]);
+    if (existing_fset && append_restart_parameters){
+      ERROR1("Config::read_output_",
+             ("\"%s\" appears more that once in the Output:list that is "
+              "concatenated from the config file and the restart file"),
+             fileset_name.c_str());
+    } else if (existing_fset){
+      ERROR1("Config::read_output_",
+             "\"%s\" appears more that once in Output:list.",
+             fileset_name.c_str());
+    }
+
+    output_list[index_output] = fileset_name;
+    p->group_set(1,fileset_name);
 
     output_type[index_output] = p->value_string("type","unknown");
 
@@ -905,14 +934,14 @@ void Config::read_output_ (Parameters * p) throw()
     }
 
     // Read schedule for the Output object
-      
+
     p->group_push("schedule");
     output_schedule_index[index_output] = 
       read_schedule_(p, output_list[index_output]);
     p->group_pop();
 
     // Image 
-    
+
     if (output_type[index_output] == "image") {
 
 
@@ -989,7 +1018,7 @@ void Config::read_output_ (Parameters * p) throw()
       }
 
     }
-  }  
+  }
 
 }
 
