@@ -112,6 +112,10 @@ void Problem::pup (PUP::er &p)
   for (int i=0; i<n; i++) {
     p | output_list_[i]; // PUP::able
   }
+  // initialize any new Output objects that might have been added to config
+  // from a restart_file while unpacking OutputCheckpoint
+  if (up) initialize_output (cello::config(), cello::simulation()->factory(),
+                             true);
 
   p | prolong_; // PUP::able
   p | restrict_; // PUP::able

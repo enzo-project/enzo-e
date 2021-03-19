@@ -228,8 +228,6 @@ void Simulation::pup (PUP::er &p)
   p | stop_;
   p | phase_;
 
-  p | problem_; // PUPable
-
   if (up) performance_ = new Performance;
   p | *performance_;
 
@@ -255,6 +253,10 @@ void Simulation::pup (PUP::er &p)
 
   if (up) particle_descr_ = new ParticleDescr;
   p | *particle_descr_;
+
+  // FieldDescr and ParticleDescr need to be unpacked before Problem in case
+  // new Output objects are generated while unpacking the Problem instance
+  p | problem_; // PUPable
 
   if (up && (phase_ == phase_restart)) {
     monitor_->header();

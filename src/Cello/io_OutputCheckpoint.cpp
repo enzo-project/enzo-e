@@ -77,6 +77,7 @@ void OutputCheckpoint::update_config_()
     config->testing_time_final[0] = p.value_float
       ("Testing:time_final",0.0);
   }
+  config->read_output_from_restart(&p);
 
 }
 
