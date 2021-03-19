@@ -26,7 +26,7 @@ public: // functions
   /// Create an uninitialized OutputData object
   OutputData(int index,
 	     const Factory * factory,
-	     Config * config) throw();
+	     const Config * config) throw();
 
   /// Close the file if it is open
   virtual ~OutputData() throw();

@@ -256,7 +256,7 @@ void Problem::initialize_restrict(Config * config) throw()
 //----------------------------------------------------------------------
 
 void Problem::initialize_output
-(Config * config,
+(const Config * config,
  const Factory * factory) throw()
 {
   FieldDescr * field_descr = cello::field_descr();
@@ -857,7 +857,7 @@ Output * Problem::create_output_
 (
  std::string    name,
  int index,
- Config *  config,
+ const Config *  config,
  const Factory * factory
  ) throw ()
 /// @param name           Name of Output object to create

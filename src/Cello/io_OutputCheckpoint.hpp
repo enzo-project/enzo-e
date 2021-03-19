@@ -22,7 +22,7 @@ public: // functions
   /// Create an uninitialized OutputCheckpoint object
   OutputCheckpoint(int index, 
 		   const Factory * factory, 
-		   Config * config, 
+		   const Config * config,
 		   int process_count) throw();
 
   /// Destructor

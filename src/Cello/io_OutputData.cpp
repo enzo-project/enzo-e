@@ -18,7 +18,7 @@ OutputData::OutputData
 (
  int index,
  const Factory * factory,
- Config * config
+ const Config * config
 ) throw ()
   : Output(index,factory),
     text_block_count_(0)

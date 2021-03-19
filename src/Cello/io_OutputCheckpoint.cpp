@@ -14,7 +14,7 @@ OutputCheckpoint::OutputCheckpoint
 (
  int index,
  const Factory * factory,
- Config * config,
+ const Config * config,
  int process_count
 ) throw ()
   : Output(index,factory),
