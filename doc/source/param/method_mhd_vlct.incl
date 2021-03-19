@@ -1,5 +1,41 @@
 :p:`Method:mhd_vlct` parameters are used to initialize parameters for
-Enzo-E's VL + CT MHD method.
+Enzo-E's VL (+ CT) (magneto)hydrodynamic integrator.
+
+The Method:mhd_vlct:mhd_choice determines whether the method is used as a pure hydrodynamic integrator or a MHD integrator that uses constrained transport.
+
+----
+
+:Parameter:  :p:`Method` : :p:`mhd_vlct` : :p:`mhd_choice`
+:Summary: :s:`Denotes handling of bfields (or lack thereof)`
+:Type:   :t:`string`
+:Default: :d:`none`
+:Scope:     :z:`Enzo`
+
+:e:`Denotes how the integrator handles magentic fields. This must be
+specified. Valid choices include:`
+
+  * ``"no_bfield"`` :e:`The integrator acts as a pure hydrodynamical
+    integrator; magnetic fields are ignored entirely.`
+
+  * ``"constrained_transport"`` :e:`Magnetic fields are evolved using
+    constrained transport. The primary representation of the magnetic
+    fields are stored in face-centered cello fields and cell-centered
+    cello-fields are used to store a secondary representation.`
+
+:e:`This may be updated to include additional options in the
+future. For more details see`
+:ref:`vlct_overview`
+
+:e:`For debugging purposes, there is technically one last choice,
+``"unsafe_constant_uniform"``. :e:`This is NOT meant for science runs.
+When this option is selected, the magnetic field is treated as a
+cell-centered conserved quantity and the magnetic fluxes computed in
+the Riemann solver are directly added to to the magnetic fields
+(magnetic field values are only stored in cell-centered Cello
+fields). Outside of very specific cases, this will NOT enforce the
+divergence-free constrain of the magnetic fields to grow. To use this
+option, you need to explicitly comment out an error in`
+``"enzo_EnzoMethodMHDVlct.cpp"``.
 
 ----
 
@@ -20,7 +56,7 @@ reconstruction and quantity updates.`
 :Default: :d:`none`
 :Scope:     :z:`Enzo`
 
-:e:`Thermal pressure floor, which must exceed 0 This is applied during
+:e:`Thermal pressure floor, which must exceed 0. This is applied during
 reconstruction and quantity updates.`
 
 ----
@@ -69,8 +105,8 @@ primitives for the full timestep. For a list of options, see`
 :Scope:     :z:`Enzo`
 
 :e:`Modifies the disipation of the slope limiter of the`
-``"plm"``/``plm_enzo`` :e:`piecewise linear reconstruction algorithm.
-For more details, see` :ref:`using-vlct-reconstruction`
+``"plm"``/``"plm_enzo"`` :e:`piecewise linear reconstruction
+algorithm.  For more details, see` :ref:`using-vlct-reconstruction`
 
 ----
 
