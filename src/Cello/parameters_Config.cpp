@@ -1502,3 +1502,22 @@ int Config::read_schedule_(Parameters * p, const std::string group)
 }
 //======================================================================
 
+void Config::read_output_from_restart (Parameters * parameters) throw()
+{
+  // first, ensure the user isn't trying to mutate existing output file sets
+  // (this is mostly provided as a convenience)
+  parameters->group_set(0,"Output");
+  int i = -1;
+  while(parameters->group(++i) != ""){
+    std::string fileset_name = parameters->group(i);
+    ASSERT1("Config::read_output_from_restart",
+            ("The \"%s\" output file set alreay existed prior to restart. You "
+             "can't modify the properties of existing file sets at restart."),
+            fileset_name,
+            (std::find(output_list.begin(), output_list.end(), fileset_name)
+             == output_list.end()));
+  }
+
+  // next, actually read the output file
+  read_output_ (parameters, true);
+}
