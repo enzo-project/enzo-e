@@ -12,9 +12,7 @@ long DataMsg::counter[CONFIG_NODE_SIZE] = {0};
 #define CHECK
 
 // #define TRACE_COARSE_ARRAY_VALUES
-
-// #define DEBUG_PRINT_BLOCK "B1:1_1:1"
-
+// #define DEBUG_PRINT_BLOCK "B1:0_1:1"
 // #define DEBUG_SET_COARSE_ARRAY
 //----------------------------------------------------------------------
 

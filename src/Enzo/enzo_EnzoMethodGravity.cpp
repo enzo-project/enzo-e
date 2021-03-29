@@ -221,10 +221,6 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
     for (int i=0; i<m; i++) potential_copy[i] = potential[i];
   }
 #endif	
-  if (potential) {
-    for (int i=0; i<m; i++) potential[i] = 0.0;
-  }
-
 }
 
 //----------------------------------------------------------------------

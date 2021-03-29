@@ -315,12 +315,14 @@ void Block::init
 
     // Create field face of refined data from parent
     int if3[3] = {0,0,0};
-    bool lg3[3] = {true,true,true};
+    int g3[3];
+    cello::field_descr()->ghost_depth(0,g3,g3+1,g3+2);
     Refresh * refresh = new Refresh;
     refresh->add_all_data();
     
     FieldFace * field_face = create_face
-      (if3, ic3, lg3, refresh_fine, refresh, true);
+      (if3, ic3, g3, refresh_fine, refresh, true);
+    
 #ifdef DEBUG_FIELD_FACE  
   CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",
             CkMyPe(),__FILE__,__LINE__,(void*)field_face);
@@ -633,12 +635,12 @@ Block::~Block()
     int n; 
     char * array;
     int if3[3]={0,0,0};
-    bool lg3[3]={false,false,false};
+    int g3[3]={0,0,0};
     Refresh * refresh = new Refresh;
     refresh->add_all_data();
     
     FieldFace * field_face = create_face
-      ( if3,ic3,lg3,refresh_coarse,refresh,true);
+      ( if3,ic3,g3,refresh_coarse,refresh,true);
 #ifdef DEBUG_FIELD_FACE  
     CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",
               CkMyPe(),__FILE__,__LINE__,(void*)field_face);
@@ -679,13 +681,13 @@ void Block::p_refresh_child
  )
 {
   performance_start_(perf_refresh_child);
-  int  if3[3]  = {0,0,0};
-  bool lg3[3] = {false,false,false};
+  int if3[3] = {0,0,0};
+  int  g3[3] = {0,0,0};
   Refresh * refresh = new Refresh;
   refresh->add_all_data();
   
   FieldFace * field_face = create_face
-    (if3, ic3, lg3, refresh_coarse,refresh,true);
+    (if3, ic3, g3, refresh_coarse,refresh,true);
 #ifdef DEBUG_FIELD_FACE  
   CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",
             CkMyPe(),__FILE__,__LINE__,(void*)field_face);
@@ -946,7 +948,7 @@ void Block::index_global
 //----------------------------------------------------------------------
 
 FieldFace * Block::create_face
-(int if3[3], int ic3[3], bool lg3[3],
+(int if3[3], int ic3[3], int g3[3],
  int refresh_type, Refresh * refresh, bool new_refresh) const
 {
   FieldFace  * field_face = new FieldFace(cello::rank());
@@ -958,7 +960,7 @@ FieldFace * Block::create_face
   field_face -> set_refresh_type (refresh_type);
   field_face -> set_child (ic3[0],ic3[1],ic3[2]);
   field_face -> set_face (if3[0],if3[1],if3[2]);
-  field_face -> set_ghost(lg3[0],lg3[1],lg3[2]);
+  field_face -> set_ghost(g3[0],g3[1],g3[2]);
   field_face -> set_refresh(refresh,new_refresh);
 
   return field_face;

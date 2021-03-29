@@ -11,7 +11,7 @@
 
 // #define TRACE_PROLONG
 // #define DEBUG_ENZO_PROLONG
-
+// #define USE_PROLONG_LINEAR
 // #define DEBUG_ARRAY
 
 #ifdef TRACE_PROLONG
@@ -105,7 +105,6 @@ EnzoProlong::EnzoProlong(std::string type,int positive) throw()
 {
   TRACE_PROLONG("EnzoProlong()");
   if      (type == "3A")  method_ = 0;
-  else if (type == "linear") method_ = -1;
   else if (type == "2A") method_ = 1;
   else if (type == "2B") method_ = 2;
   else {
@@ -134,17 +133,36 @@ void EnzoProlong::apply
   const void * values_c, int m3_c[3], int o3_c[3], int n3_c[3],
   bool accumulate)
 {
-  if (method_ >= 0) {
-    apply_((enzo_float *)     values_f,m3_f,o3_f,n3_f,
-           (const enzo_float*)values_c,m3_c,o3_c,n3_c,accumulate);
-  } else {
+#ifdef USE_PROLONG_LINEAR
+  static bool first_call = true;
+  if (first_call) {
     WARNING("EnzoProlong::apply()","CALLING ProlongLinear");
-    ProlongLinear prolong_linear;
-    prolong_linear.apply
-      (precision,
-       values_f,m3_f,o3_f,n3_f,
-       values_c,m3_c,o3_c,n3_c,accumulate);
+    first_call = false;
   }
+  ProlongLinear prolong_linear;
+  for (int i=0; i<3; i++) {
+    if (n3_c[i] > 1) {
+      n3_c[i]-=2;
+      o3_c[i]+=1;
+    }
+  }
+  // CkPrintf ("n3_c %d %d %d n3_f %d %d %d\n",
+  //           n3_c[0],n3_c[1],n3_c[2],
+  //           n3_f[0],n3_f[1],n3_f[2]);
+  prolong_linear.apply
+    (precision,
+     values_f,m3_f,o3_f,n3_f,
+     values_c,m3_c,o3_c,n3_c,accumulate);
+  for (int i=0; i<3; i++) {
+    if (n3_c[i] > 1) {
+      n3_c[i]+=2;
+      o3_c[i]-=1;
+    }
+  }
+#else
+  apply_((enzo_float *)     values_f,m3_f,o3_f,n3_f,
+         (const enzo_float*)values_c,m3_c,o3_c,n3_c,accumulate);
+#endif    
 }
 //----------------------------------------------------------------------
 
@@ -215,7 +233,7 @@ void EnzoProlong::apply_
      ((enzo_float*)(values_c))+o_c, pdims, pstart, pend, r3,
      ((enzo_float*)(values_f))+o_f, gdims, gstart, work, &method_,
      &positive_, &error);
-
+  
   DEBUG_PRINT_ARRAY0("values_c",values_c,m3_c,n3_c,o3_c);
   DEBUG_PRINT_ARRAY0("values_f",values_f,m3_f,n3_f,o3_f);
 

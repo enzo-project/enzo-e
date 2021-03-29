@@ -5,7 +5,11 @@
 /// @date     2013-05-09
 /// @brief    Implentation of default linear prolongation
 
+// #define CELLO_TRACE
+
 #include "problem.hpp"
+
+// #define TRACE_SUMS
 
 //----------------------------------------------------------------------
 
@@ -95,6 +99,10 @@ void ProlongLinear::apply_
   int gcy = (nf3[1]==2*nc3[1]) ? 1 : 0;
   int gcz = (nf3[2]==2*nc3[2]) ? 1 : 0;
 
+#ifdef TRACE_SUMS
+  T cmin=1e30,cmax=-1e30,cavg=0.0,ccount=0;
+  T fmin=1e30,fmax=-1e30,favg=030,fcount=0;
+#endif
   if (rank == 1) {
 
     const int ofx = of3[0];
@@ -442,6 +450,47 @@ void ProlongLinear::apply_
       }
     }
   }
+#ifdef TRACE_SUMS
+  for (int icz=0; icz<nc3[2]; icz++) {
+    int iz=icz+oc3[2];
+    for (int icy=0; icy<nc3[1]; icy++) {
+      int iy=icy+oc3[1];
+      for (int icx=0; icx<nc3[0]; icx++) {
+        ccount++;
+        int ix=icx+oc3[0];
+        int i_c=ix + mc3[0]*(iy + mc3[1]*iz);
+        cavg += values_c[i_c];
+        cmin = std::min(cmin,values_c[i_c]);
+        cmax = std::max(cmax,values_c[i_c]);
+      }
+    }
+  }
+  for (int ifz=0; ifz<nf3[2]; ifz++) {
+    int iz=ifz+of3[2];
+    for (int ify=0; ify<nf3[1]; ify++) {
+      int iy=ify+of3[1];
+      for (int ifx=0; ifx<nf3[0]; ifx++) {
+        fcount++;
+        int ix=ifx+of3[0];
+        int i_f=ix + mf3[0]*(iy + mf3[1]*iz);
+        favg += values_f[i_f];
+        fmin = std::min(fmin,values_f[i_f]);
+        fmax = std::max(fmax,values_f[i_f]);
+      }
+    }
+  }
+  
+  favg/=fcount;
+  cavg/=ccount;
+  CkPrintf ("TRACE_SUMS acc %d mf %d %d %d nf %d %d %d of %d %d %d mn/avg/max %g %g %g\n",
+            accumulate,
+            mf3[0],mf3[1],mf3[2],nf3[0],nf3[1],nf3[2],of3[0],of3[1],of3[2],
+            fmin,favg,fmax);
+  // CkPrintf ("TRACE_SUMS PROLONG mc %d %d %d nc %d %d %d oc %d %d %d mn/avg/max %g %g %g\n",
+  //           mc3[0],mc3[1],mc3[2],nc3[0],nc3[1],nc3[2],oc3[0],oc3[1],oc3[2],
+  //           cmin,cavg,cmax);
+#endif        
+  
 }
 
 //======================================================================

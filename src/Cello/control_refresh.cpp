@@ -15,15 +15,17 @@
 
 #define CHECK_ID(ID) ASSERT1 ("CHECK_ID","Invalid id %d",ID,(ID>=0));
 
+// #define BOX_ACCUMULATE
+
 // #define TRACE_REFRESH_RECV
 // #define TRACE_LOAD_FACE
-
+// #define TRACE_PROLONG
 //======================================================================
 // #define PRINT_COARSE_FIELD
 // #define DEBUG_ARRAY
 // #define DEBUG_ARRAY_CYCLE 0
 // #define DEBUG_PRINT true
-// #define DEBUG_PRINT_BLOCK "B1:1_1:1"
+// #define DEBUG_PRINT_BLOCK "B1:0_1:1"
 // #define DEBUG_BOX
 
 #ifdef TRACE_PROLONG
@@ -45,6 +47,8 @@
   if (cello::simulation()->cycle() >= DEBUG_ARRAY_CYCLE) {              \
     if (DEBUG_PRINT) CkPrintf ("PADDED_ARRAY_VALUES %s:%d %s %p\n",     \
                                __FILE__,__LINE__,NAME,(void*)ARRAY);    \
+    if (DEBUG_PRINT) CkPrintf ("PADDED_ARRAY_VALUES m3 %d %d %d n3 %d %d %d o3 %d %d %d\n", \
+                               m3[0],m3[1],m3[2],n3[0],n3[1],n3[2],ox,oy,oz); \
     const int o = ox + m3[0]*(oy + m3[1]*oz);                           \
     double min=1e100,max=-1e100,avg=0.0;                                \
     for (int iz=0; iz<n3[2]; iz++) {                                    \
@@ -382,7 +386,6 @@ int Block::refresh_load_field_faces_ (Refresh & refresh)
 
     }
   }
-
   return count;
 }
 
@@ -403,9 +406,9 @@ void Block::refresh_load_field_face_
   if (refresh_type == refresh_coarse) {
     index_.child(index_.level(),ic3,ic3+1,ic3+2);
   }
-  bool lg3[3] = {false,false,false};
+  int g3[3] = {0,0,0};
   FieldFace * field_face = create_face
-    (if3, ic3, lg3, refresh_type, &refresh,false);
+    (if3, ic3, g3, refresh_type, &refresh,false);
 
   // initialize refresh message
 
@@ -475,6 +478,19 @@ int Block::refresh_load_coarse_face_
     box_sr.set_block(BoxType_receive,+1,jf3,ic3);
     box_sr.set_padding(pad);
 
+    // ... adjust send-ghost depth for accumulate
+#ifdef BOX_ACCUMULATE
+    int gs3[3] = {0,0,0};
+    if (refresh.accumulate()) {
+      for (int i=0; i<rank; i++)
+        if (if3[i]) gs3[i] = g3[i];
+    } // else {
+    //   for (int i=0; i<rank; i++)
+    //     if (!if3[i]) gs3[i] = g3[i];
+    // }
+    box_sr.set_send_ghosts(gs3);
+#endif    
+
     box_sr.compute_region();
 
     // SEND MAIN SEND->RECV VIA COARSE ARRAY
@@ -485,14 +501,34 @@ int Block::refresh_load_coarse_face_
     
     if (l_send) {
 
+      bool lpad;
+      TRACE_ONCE;
       box_sr.get_start_stop
-        (iam3,iap3,BlockType::extra,BlockType::receive_coarse);
+        (iam3,iap3,BlockType::extra,BlockType::receive_coarse,lpad=true);
+#ifdef DEBUG_ACCUMULATE      
+      CkPrintf ("DEBUG_BOX:%d  %d %d %d  %d %d %d\n",
+                __LINE__,
+                iam3[0],iam3[1],iam3[2],
+                iap3[0],iap3[1],iap3[2]);
+#endif      
       box_sr.get_start_stop
-        (ifms3,ifps3,BlockType::extra,BlockType::send);
+        (ifms3,ifps3,BlockType::extra,BlockType::send,lpad=true);
+#ifdef DEBUG_ACCUMULATE      
+      CkPrintf ("DEBUG_BOX:%d  %d %d %d  %d %d %d\n",
+                __LINE__,
+                ifms3[0],ifms3[1],ifms3[2],
+                ifps3[0],ifps3[1],ifps3[2]);
+#endif      
       box_sr.get_start_stop
-        (ifmr3,ifpr3,BlockType::extra,BlockType::receive);
+        (ifmr3,ifpr3,BlockType::extra,BlockType::receive,lpad=false);
+#ifdef DEBUG_ACCUMULATE      
+      CkPrintf ("DEBUG_BOX:%d  %d %d %d  %d %d %d\n",
+                __LINE__,
+                ifmr3[0],ifmr3[1],ifmr3[2],
+                ifpr3[0],ifpr3[1],ifpr3[2]);
+#endif      
 
-#ifdef DEBUG_BOX    
+#ifdef DEBUG_BOX
       CkPrintf ("DEBUG_REFRESH SR S %s R %s if3 %d %d %d\n",
                 name().c_str(),name(index_neighbor).c_str(),
                 if3[0],if3[1],if3[2]);
@@ -535,8 +571,16 @@ int Block::refresh_load_coarse_face_
           const int level_send = level;
           box_sr.set_block (BoxType_extra,(level_extra-level_send), ef3,ec3);
           int tm3[3],tp3[3];
+          bool lpad;
+          TRACE_ONCE;
           bool overlap = box_sr.get_start_stop
-            (tm3,tp3,BlockType::extra,BlockType::extra);
+            (tm3,tp3,BlockType::extra,BlockType::extra,lpad=true);
+#ifdef DEBUG_ACCUMULATE      
+          CkPrintf ("DEBUG_BOX:%d %d  %d %d %d  %d %d %d\n",overlap,
+                    __LINE__,
+                    tm3[0],tm3[1],tm3[2],
+                    tp3[0],tp3[1],tp3[2]);
+#endif          
           if (overlap) {
 
           if (level_extra == level) {
@@ -551,6 +595,20 @@ int Block::refresh_load_coarse_face_
               // Box Bs | Be -> br
               box_er.set_block(BoxType_receive,+1,if3_er,ic3);
               box_er.set_padding(pad);
+
+              // ... adjust send-ghost depth for accumulate
+#ifdef BOX_ACCUMULATE
+              int gs3[3] = {0,0,0};
+              if (refresh.accumulate()) {
+                for (int i=0; i<rank; i++)
+                  if (if3_er[i]) gs3[i] = g3[i];
+              } // else {
+              //   for (int i=0; i<rank; i++)
+              //     if (!if3_er[i]) gs3[i] = g3[i];
+              // }
+              box_er.set_send_ghosts(gs3);
+#endif              
+
               box_er.compute_region();
 
               
@@ -558,14 +616,34 @@ int Block::refresh_load_coarse_face_
               
               box_er.set_block(BoxType_extra,0,if3_es,ic3); // ic3 ignored
 
+              bool lpad;
+              TRACE_ONCE;
               box_er.get_start_stop
-                (iam3,iap3,BlockType::extra,BlockType::receive_coarse);
+                (iam3,iap3,BlockType::extra,BlockType::receive_coarse,lpad=true);
+#ifdef DEBUG_ACCUMULATE      
+              CkPrintf ("DEBUG_BOX:%d  %d %d %d  %d %d %d\n",
+                        __LINE__,
+                        iam3[0],iam3[1],iam3[2],
+                        iap3[0],iap3[1],iap3[2]);
+#endif              
               box_er.get_start_stop
-                (ifms3,ifps3,BlockType::extra,BlockType::extra);
+                (ifms3,ifps3,BlockType::extra,BlockType::extra,lpad=true);
+#ifdef DEBUG_ACCUMULATE      
+              CkPrintf ("DEBUG_BOX:%d  %d %d %d  %d %d %d\n",
+                        __LINE__,
+                        ifms3[0],ifms3[1],ifms3[2],
+                        ifps3[0],ifps3[1],ifps3[2]);
+#endif              
               box_er.get_start_stop
-                (ifmr3,ifpr3,BlockType::extra,BlockType::receive);
+                (ifmr3,ifpr3,BlockType::extra,BlockType::receive,lpad=false);
+#ifdef DEBUG_ACCUMULATE      
+              CkPrintf ("DEBUG_BOX:%d  %d %d %d  %d %d %d\n",
+                        __LINE__,
+                        ifmr3[0],ifmr3[1],ifmr3[2],
+                        ifpr3[0],ifpr3[1],ifpr3[2]);
+#endif              
 
-#ifdef DEBUG_BOX    
+#ifdef DEBUG_BOX
               CkPrintf ("DEBUG_REFRESH ER [S] %s R %s E %s if3_es %d %d %d\n",
                         name().c_str(),name(index_neighbor).c_str(),name(index_extra).c_str(),
                         if3_es[0],if3_es[1],if3_es[2]);
@@ -625,8 +703,16 @@ int Block::refresh_load_coarse_face_
           box_sr.set_block (BoxType_extra,(level_extra-level_send), if3_se,ec3);
         
           int tm3[3],tp3[3];
+          bool lpad;
+          TRACE_ONCE;
           bool overlap = box_sr.get_start_stop
-            (tm3,tp3,BlockType::extra,BlockType::extra);
+            (tm3,tp3,BlockType::extra,BlockType::extra,lpad = true);
+#ifdef DEBUG_ACCUMULATE      
+          CkPrintf ("DEBUG_BOX:%d %d  %d %d %d  %d %d %d\n",overlap,
+                    __LINE__,
+                    tm3[0],tm3[1],tm3[2],
+                    tp3[0],tp3[1],tp3[2]);
+#endif          
           if (overlap) {
 
             ++count;
@@ -637,6 +723,20 @@ int Block::refresh_load_coarse_face_
               // Box br | Bs -> be
               box_se.set_block(BoxType_receive,+1,if3_se,ec3);
               box_se.set_padding(pad);
+
+              // ... adjust send-ghost depth for accumulate
+#ifdef BOX_ACCUMULATE
+              int gs3[3] = {0,0,0};
+              if (refresh.accumulate()) {
+                for (int i=0; i<rank; i++)
+                  if (if3_se[i]) gs3[i] = g3[i];
+              } // else {
+              //   for (int i=0; i<rank; i++)
+              //     if (!if3_se[i]) gs3[i] = g3[i];
+              // }
+              box_se.set_send_ghosts(gs3);
+#endif              
+
               box_se.compute_region();
 
               int if3_sr[3] = { -if3[0], -if3[1], -if3[2] };
@@ -645,18 +745,37 @@ int Block::refresh_load_coarse_face_
               int iam3[3],iap3[3];
               int ifms3[3],ifps3[3];
               int ifmr3[3],ifpr3[3];
-
+              bool lpad;
+              TRACE_ONCE;
               box_se.get_start_stop
-                (iam3,iap3,BlockType::extra,BlockType::receive_coarse);
+                (iam3,iap3,BlockType::extra,BlockType::receive_coarse,lpad=true);
+#ifdef DEBUG_ACCUMULATE      
+              CkPrintf ("DEBUG_BOX:%d  %d %d %d  %d %d %d\n",
+                        __LINE__,
+                        iam3[0],iam3[1],iam3[2],
+                        iap3[0],iap3[1],iap3[2]);
+#endif              
               box_se.get_start_stop
-                (ifms3,ifps3,BlockType::extra,BlockType::extra);
+                (ifms3,ifps3,BlockType::extra,BlockType::extra,lpad=true);
+#ifdef DEBUG_ACCUMULATE      
+              CkPrintf ("DEBUG_BOX:%d  %d %d %d  %d %d %d\n",
+                        __LINE__,
+                        ifms3[0],ifms3[1],ifms3[2],
+                        ifps3[0],ifps3[1],ifps3[2]);
+#endif              
               box_se.get_start_stop
-                (ifmr3,ifpr3,BlockType::extra,BlockType::receive);
+                (ifmr3,ifpr3,BlockType::extra,BlockType::receive,lpad=false);
+#ifdef DEBUG_ACCUMULATE      
+              CkPrintf ("DEBUG_BOX:%d  %d %d %d  %d %d %d\n",
+                        __LINE__,
+                        ifmr3[0],ifmr3[1],ifmr3[2],
+                        ifpr3[0],ifpr3[1],ifpr3[2]);
+#endif              
 
               int ma3[3];
               box_se.get_region_size(ma3);
 
-#ifdef DEBUG_BOX    
+#ifdef DEBUG_BOX
               CkPrintf ("DEBUG_REFRESH SE [R] %s S %s E %s if3_sr %d %d %d\n",
                         name().c_str(),name(index_neighbor).c_str(),name(index_extra).c_str(),
                         if3_sr[0],if3_sr[1],if3_sr[2]);
@@ -700,7 +819,7 @@ void Block::refresh_coarse_send_
 
   const int id_refresh = refresh.id();
   CHECK_ID(id_refresh);
-#ifdef DEBUG_BOX    
+#ifdef DEBUG_BOX
   if (name(index_neighbor) == DEBUG_PRINT_BLOCK) {
     CkPrintf ("DEBUG_PROLONG %s set_coarse_array %s > %s\n",
               debug.c_str(),name().c_str(),name(index_neighbor).c_str());
@@ -772,14 +891,44 @@ void Block::refresh_coarse_apply_ (Refresh * refresh)
           box.set_padding(pad);
           int gr3[3] = {0,0,0};
           box.set_recv_ghosts(gr3); // non-ghost block values only
+
+          // ... adjust send-ghost depth for accumulate
+#ifdef BOX_ACCUMULATE
+          int gs3[3] = {0,0,0};
+          if (refresh->accumulate()) {
+            for (int i=0; i<rank; i++)
+              if (of3[i]) gs3[i] = g3[i];
+          }//  else {
+          //   for (int i=0; i<rank; i++)
+          //     if (!of3[i]) gs3[i] = g3[i];
+          // }
+          box.set_send_ghosts(gs3);
+#endif          
+
           box.compute_region();
           int i3_c[3], n3_c[3];
 
           int i3_f[3],n3_f[3];
           const bool lghost = true;
           const bool lcoarse = true;
-          box.get_start_size (i3_f,n3_f,BlockType::receive,BlockType::receive);
-          box.get_start_size (i3_c,n3_c,BlockType::receive,BlockType::receive_coarse);
+          bool lpad;
+          TRACE_ONCE;
+          box.get_start_size
+            (i3_f,n3_f,BlockType::receive,BlockType::receive,lpad=false);
+#ifdef DEBUG_ACCUMULATE      
+          CkPrintf ("DEBUG_BOX:%d  %d %d %d  %d %d %d\n",
+                    __LINE__,
+                    i3_f[0],i3_f[1],i3_f[2],
+                    n3_f[0],n3_f[1],n3_f[2]);
+#endif          
+          box.get_start_size
+            (i3_c,n3_c,BlockType::receive,BlockType::receive_coarse,lpad=true);
+#ifdef DEBUG_ACCUMULATE      
+          CkPrintf ("DEBUG_BOX:%d  %d %d %d  %d %d %d\n",
+                    __LINE__,
+                    i3_c[0],i3_c[1],i3_c[2],
+                    n3_c[0],n3_c[1],n3_c[2]);
+#endif          
 
           for (int i_f=0; i_f<nf; i_f++) {
 
@@ -793,7 +942,7 @@ void Block::refresh_coarse_apply_ (Refresh * refresh)
             cello_float * field_values =
               (cello_float *) field.values(index_field);
             cello_float * coarse_field =
-              (cello_float *) field.coarse_values(i_f);
+              (cello_float *) field.coarse_values(index_field);
               
             const float r = n3_f[0] / n3_c[0];
             const cello_float rr = (r == 1) ? 1.0 : 1.0/cello::num_children();
@@ -810,7 +959,7 @@ void Block::refresh_coarse_apply_ (Refresh * refresh)
             if (i_f == 0) {
               for (int iz=0; iz<m3_c[2]; iz++) {
                 for (int iy=0; iy<m3_c[1]; iy++) {
-                  CkPrintf ("DEBUG_COARSE_FIELD coarse_field %d %d %d: ",0,iy,iz);
+                  CkPrintf ("DEBUG_COARSE_FIELD BEFORE coarse_field %d %d %d: ",0,iy,iz);
                   for (int ix=0; ix<m3_c[0]; ix++) {
                     int i = ix+ m3_c[0]*(iy+ m3_c[1]*iz);
                     CkPrintf (" %6.3g",coarse_field[i]);
@@ -849,18 +998,44 @@ void Block::refresh_coarse_apply_ (Refresh * refresh)
               }
             }
 
+#ifdef PRINT_COARSE_FIELD
+            if (i_f == 0) {
+              for (int iz=0; iz<m3_c[2]; iz++) {
+                for (int iy=0; iy<m3_c[1]; iy++) {
+                  CkPrintf ("DEBUG_COARSE_FIELD AFTER coarse_field %d %d %d: ",0,iy,iz);
+                  for (int ix=0; ix<m3_c[0]; ix++) {
+                    int i = ix+ m3_c[0]*(iy+ m3_c[1]*iz);
+                    CkPrintf (" %6.3g",coarse_field[i]);
+                  }
+                  CkPrintf ("\n");
+                }
+              }
+            }
+            
+#endif            
             int ip3_c[3],np3_c[3];
             int ip3_f[3],np3_f[3];
             box.set_recv_ghosts(g3); // reset recv ghosts to default
             box.compute_region();
 
-            box.get_start_size (ip3_c,np3_c,BlockType::none,BlockType::receive_coarse);
-            box.set_padding(0);
-            box.compute_region();
-            
-            box.get_start_size (ip3_f,np3_f,BlockType::none,BlockType::receive);
-            box.set_padding(pad);
-            box.compute_region();
+            bool lpad;
+            TRACE_ONCE;
+            box.get_start_size
+              (ip3_c,np3_c,BlockType::none,BlockType::receive_coarse,lpad=true);
+#ifdef DEBUG_ACCUMULATE      
+            CkPrintf ("DEBUG_BOX:%d  %d %d %d  %d %d %d\n",
+                      __LINE__,
+                      ip3_c[0],ip3_c[1],ip3_c[2],
+                      np3_c[0],np3_c[1],np3_c[2]);
+#endif            
+            box.get_start_size
+              (ip3_f,np3_f,BlockType::none,BlockType::receive,lpad=false);
+#ifdef DEBUG_ACCUMULATE      
+            CkPrintf ("DEBUG_BOX:%d  %d %d %d  %d %d %d\n",
+                      __LINE__,
+                      ip3_f[0],ip3_f[1],ip3_f[2],
+                      np3_f[0],np3_f[1],np3_f[2]);
+#endif            
 
             prolong->array_sizes_valid (n3_f,n3_c);
 #ifdef DEBUG_ARRAY
@@ -873,7 +1048,9 @@ void Block::refresh_coarse_apply_ (Refresh * refresh)
 #endif            
             DEBUG_PRINT_ARRAY0("refresh_coarse_apply coarse_field",coarse_field,m3_c,np3_c,ip3_c);
             DEBUG_PRINT_ARRAY0("refresh_field_apply field_values",field_values,m3_f,np3_f,ip3_f);
-            prolong->apply(precision_default,
+            TRACE_PROLONG("refresh_coarse_apply");
+
+            prolong->apply(default_precision,
                            field_values, m3_f, ip3_f, np3_f,
                            coarse_field, m3_c, ip3_c, np3_c,
                            refresh->accumulate());

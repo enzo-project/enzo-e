@@ -38,7 +38,12 @@ void Box::compute_block_start(BoxType bt)
 void Box::compute_region()
 {
   const float ri = std::pow(2.0,-1.0*level_[0]);
-  
+
+  // initialize default for rank < 3
+  for (int i=0; i<3; i++) {
+    region_start_[i] = 0;
+    region_stop_[i] = 1;
+  }
   for (int i=0; i<rank_; i++) {
     const int recv_start =
       int(floor(block_start_[0][i] - ri*ghost_depth_recv_[i]));
@@ -49,33 +54,16 @@ void Box::compute_region()
     region_stop_[i] = std::min
       (block_size_[i] + ghost_depth_send_[i], recv_stop);
   }
-  for (int i=rank_; i<3; i++) {
-    region_start_[i] = 0;
-    region_stop_[i] = 1;
-  }
-  if (pad_ > 0) {
-    if (level_[0] == +1) {
-      for (int i=0; i<rank_; i++) {
-        region_start_[i] -= pad_;
-        region_stop_[i]  += pad_;
-      }
-    } else if (level_[0] == -1) {
-      for (int i=0; i<rank_; i++) {
-        region_start_[i] -= 2*pad_;
-        region_stop_[i]  += 2*pad_;
-      }
-    }
-  }
 }
 
 //----------------------------------------------------------------------
 
 bool Box::get_start_size
 ( int index_start[3], int index_size[3],
-  BlockType block_intersect, BlockType block_coords)
+  BlockType block_intersect, BlockType block_coords, bool lpad)
 {
   bool intersect = get_start_stop
-    (index_start,index_size, block_intersect,block_coords);
+    (index_start,index_size, block_intersect,block_coords,lpad);
   for (int i=0; i<rank_; i++) {
     index_size[i] -= index_start[i];
   }
@@ -86,21 +74,31 @@ bool Box::get_start_size
 
 bool Box::get_start_stop
 ( int index_min[3], int index_max[3],
-  BlockType block_intersect, BlockType block_coords)
+  BlockType block_intersect, BlockType block_coords,
+  bool lpad)
 {
+  if (pad_ != 0) {
+    ASSERT ("Box::get_start_stop",
+            "Expecting lpad = false with block_coords == receive",
+            ! ((lpad == true) && (block_coords == BlockType::receive)));
+    ASSERT ("Box::get_start_stop",
+            "Expecting lpad = true with block_coords == send",
+            ! ((lpad == false) && (block_coords == BlockType::send)));
+    ASSERT ("Box::get_start_stop",
+            "Expecting lpad = true with block_coords == *_coarse",
+            ! ((lpad == false) &&
+             ((block_coords == BlockType::receive_coarse) ||
+              (block_coords == BlockType::extra_coarse))));
+  }
   // initialize index_[min|max] to be the S->r region
   for (int i=0; i<3; i++) {
     index_min[i] = region_start_[i];
     index_max[i] = region_stop_[i];
   }
-#ifdef DEBUG_BOX
-  print("get_start_stop");
-  CkPrintf ("DEBUG_BOX get_start_stop  region %d:%d %d:%d %d:%d\n",
-            region_start_[0],region_stop_[0],
-            region_start_[1],region_stop_[1],
-            region_start_[2],region_stop_[2]);
-#endif
   
+  // apply padding if needed
+  if (lpad) apply_padding_(index_min,index_max);
+
   int m3[3] = {1,1,1};
   int n3[3] = {1,1,1};
   int g3[3] = {0,0,0};
@@ -218,3 +216,11 @@ bool Box::intersect_regions_
   return l_intersect;
 }
 
+
+void Box::apply_padding_(int index_start[3], int index_stop[3])
+{
+  for (int i=0; i<rank_; i++) {
+    index_start[i] -= pad_;
+    index_stop[i]  += pad_;
+  }
+}

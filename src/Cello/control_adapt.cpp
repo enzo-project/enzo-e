@@ -256,12 +256,13 @@ void Block::adapt_refine_()
       // Create FieldFace for interpolating field data to child ic3[]
 
       int if3[3] = {0,0,0};
-      bool lg3[3] = {true,true,true};
+      int g3[3];
+      cello::field_descr()->ghost_depth(0,g3,g3+1,g3+2);
       Refresh * refresh = new Refresh;
       refresh->add_all_data();
       
       FieldFace * field_face = create_face 
-	(if3,ic3,lg3, refresh_fine, refresh, true);
+	(if3,ic3,g3, refresh_fine, refresh, true);
 #ifdef DEBUG_FIELD_FACE  
   CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
 #endif
@@ -737,12 +738,12 @@ void Block::adapt_coarsen_()
   int ic3[3];
   index_.child(level,&ic3[0],&ic3[1],&ic3[2]);
   int if3[3] = {0,0,0};
-  bool lg3[3] = {false,false,false};
+  int g3[3] = {0,0,0};
   Refresh * refresh = new Refresh;
   refresh->add_all_data();
 
   FieldFace * field_face = create_face
-    (if3, ic3, lg3, refresh_coarse, refresh, true);
+    (if3, ic3, g3, refresh_coarse, refresh, true);
 #ifdef DEBUG_FIELD_FACE  
   CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
 #endif

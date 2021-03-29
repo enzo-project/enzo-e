@@ -127,11 +127,11 @@ public: // interface
   /// Get send/box (recv/extra) intersection loop limits for the specified block
   bool get_start_stop
   (int index_start[3], int index_stop[3],
-   BlockType block_intersect, BlockType block_coords);
+   BlockType block_intersect, BlockType block_coords, bool lpad);
 
   bool get_start_size
   (int index_start[3], int index_size[3],
-   BlockType block_intersect, BlockType block_coords);
+   BlockType block_intersect, BlockType block_coords, bool lpad);
 
   void get_region_size (int ma3[3])
   {
@@ -180,6 +180,8 @@ private: // methods
   (int index_min[3], int index_max[3],
    const int index_start[3], const int index_stop[3]);
 
+  /// Apply padding, if any, to the index region
+  void apply_padding_(int index_min[3], int index_max[3]);
 
 private: // attributes
 
@@ -212,7 +214,6 @@ private: // attributes
   /// around the intersected region
   int pad_;
 
-
   /// Relative refinement level of recv block relative to the send block
   int level_[2];
   
@@ -222,13 +223,10 @@ private: // attributes
   /// Child index of send-block or receive block, whichever is finer
   /// (not accessed if both in same level)
   int child_[2][3];
-
-
   
   /// Starting index of the neighbor (send) block relative to the
   /// receive block
   int block_start_[2][3];
-
   
   /// Starting and stopping indices of the send-recv intersection region
   int region_start_[3];

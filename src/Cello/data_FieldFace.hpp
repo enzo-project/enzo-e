@@ -42,7 +42,7 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Set whether or not to include ghost zones along each axis
-  inline void set_ghost (bool gx, bool gy = true, bool gz = true)
+  inline void set_ghost (int gx, int gy, int gz)
   {
     ghost_[0] = gx;
     ghost_[1] = gy;
@@ -210,7 +210,7 @@ private: // attributes
   int face_[3];
 
   /// Whether to include ghost zones along x,y,z axes
-  bool ghost_[3];
+  int ghost_[3];
 
   /// Child index (0,0,0) to (1,1,1) if restriction or prolongation are used
   int child_[3];

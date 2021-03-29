@@ -250,7 +250,6 @@ c
 c  Compute the pressure on a slice
 c
       if (idual .eq. 1) then
-         ierror = 3
          call pgas2d_dual(
      &        dslice, eslice, geslice, pslice, 
      &        uslice, vslice, wslice, eta1, eta2,
@@ -322,7 +321,6 @@ c
 c  If necessary, recompute the pressure to correctly set ge and e
 c
       if (idual .eq. 1) then
-         ierror = 3
          call pgas2d_dual
      &     (dslice, eslice, geslice, pslice, 
      &     uslice, vslice, wslice, eta1, eta2,

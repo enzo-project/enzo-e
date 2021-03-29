@@ -129,7 +129,7 @@ bool test_field(T * values,
 				  index_field,
 				  MD3,ND3);
 	if (values[i] != value) {
-          CkPrintf ("MISMATCH %d %d %d  %g != %g\n",ix,iy,iz,values[i],value);
+          CkPrintf ("MISMATCH %d %d %d  %g != %g\n",ix,iy,iz,(double)values[i],value);
           result = false;
         }
       }
@@ -278,9 +278,15 @@ PARALLEL_MAIN_BEGIN
 
   // initialize field ghost zone depths
 
-  field_descr->set_ghost_depth(0, 1,1,1);
-  field_descr->set_ghost_depth(1, 1,2,3);
-  field_descr->set_ghost_depth(2, 3,2,1);
+  const int g33[3][3] = { {1,1,1},
+                          {1,2,3},
+                          {3,2,1} };
+  // const int g33[3][3] = { {4,4,4},
+  //                         {4,4,4},
+  //                         {4,4,4} };
+  field_descr->set_ghost_depth(0, g33[0][0], g33[0][1], g33[0][2]);
+  field_descr->set_ghost_depth(1, g33[1][0], g33[1][1], g33[1][2]);
+  field_descr->set_ghost_depth(2, g33[2][0], g33[2][1], g33[2][2]);
 
   int nbx=2, nby=3, nbz=4;
   std::vector<FieldData *> field_data(nbx*nby*nbz);
@@ -329,8 +335,8 @@ PARALLEL_MAIN_BEGIN
 	  face_lower.set_refresh_type(refresh_same);
 	  face_upper.set_refresh_type(refresh_same);
 
-	  face_lower.set_ghost(true,true,true);
-	  face_upper.set_ghost(true,true,true);
+	  face_lower.set_ghost(g33[0][0],g33[0][1],g33[0][2]);
+	  face_upper.set_ghost(g33[0][0],g33[0][1],g33[0][2]);
 
 	  face_lower.set_face(ixp,iyp,izp);
 	  face_upper.set_face(ixm,iym,izm);

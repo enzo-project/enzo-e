@@ -133,6 +133,7 @@ c
 c  Error check for bounds (must have one parent cell on each side)
 c
       do i = 1, ndim
+C         print*, 'DEBUG INTERPOLATE pdims pend',pdims(i),pend(i)
          if (pstart(i) .lt. refine(i) .or. 
      &       pend(i) .ge. (pdims(i)-1)*refine(i)) then
             write(6,1030) pstart(i), pend(i), pdims(i), i

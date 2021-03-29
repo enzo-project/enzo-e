@@ -690,7 +690,7 @@ void FieldData::coarse_dimensions
   //    compute coarse block size
 
   if (mcx) (*mcx) = (nx!=1) ? nx/2 + (gx + 2*(gx%1)) + cx + 2 : 1;
-  if (mcy) (*mcy) = (ny!=1) ? ny/2 + (gy + 2*(gy%1)) + cx + 2 : 1;
+  if (mcy) (*mcy) = (ny!=1) ? ny/2 + (gy + 2*(gy%1)) + cy + 2 : 1;
   if (mcz) (*mcz) = (nz!=1) ? nz/2 + (gz + 2*(gz%1)) + cz + 2 : 1;
 }
 

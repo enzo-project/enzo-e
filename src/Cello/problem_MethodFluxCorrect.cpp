@@ -187,11 +187,12 @@ void MethodFluxCorrect::compute_continue_sum_fields
       const double digits =
         -log10(cello::err_rel(field_sum_0_[i_f],field_sum_[i_f]));
       cello::monitor()->print
-        ("Method", "Field %s sum %20.16Le conserved to %g digits of %d",
+        ("Method", "Field %s sum %20.16Le conserved to %g digits of %d [sum0 %20.16Le sum %20.16Le]",
          field.field_name(index_field).c_str(),
          field_sum_[i_f],
          digits,
-         cello::digits_max(precision));
+         cello::digits_max(precision),
+         field_sum_0_[i_f],field_sum_[i_f]);
       unit_func("MethodFluxCorrect precision (density)");
       if (index_field == index_density) unit_assert (digits >= min_digits_);
     }

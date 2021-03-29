@@ -57,6 +57,19 @@ class Simulation;
 class Solver;
 class Units;
 
+#ifdef CELLO_DEBUG
+# define TRACE_ONCE                                           \
+  {                                                             \
+    static bool first = true;                                   \
+    if (first) {                                                \
+      first = false;                                            \
+      CkPrintf ("TRACE_ONCE %s:%d\n",__FILE__,__LINE__);        \
+    }                                                           \
+  }
+#else
+# define TRACE_ONCE /* ... */
+#endif
+
 //----------------------------------------------------------------------
 // TEMPLATE FUNCTIONS
 //----------------------------------------------------------------------

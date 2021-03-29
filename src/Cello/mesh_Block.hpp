@@ -791,7 +791,7 @@ public: // virtual functions
   void ResumeFromSync();
 
   FieldFace * create_face
-  (int if3[3], int ic3[3], bool lg3[3],
+  (int if3[3], int ic3[3], int g3[3],
    int refresh_type,
    Refresh * refresh,
    bool new_refresh) const;

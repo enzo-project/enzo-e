@@ -11,6 +11,7 @@
 
 // #define IE_ERROR_FIELD
 // #define DEBUG_PPM
+#define EXIT_ON_ERROR
 //----------------------------------------------------------------------
 
 int EnzoBlock::SolveHydroEquations 
@@ -291,9 +292,11 @@ int EnzoBlock::SolveHydroEquations
      &error, ie_error_x,ie_error_y,ie_error_z,&num_ie_error
      );
 
+#ifdef EXIT_ON_ERROR  
   ASSERT2 ("EnzoBlock::SolveHydroEquations",
            "Error %d in call to ppm_de block %s",error,name().c_str(),
            (error == 0));
+#endif  
 
 
 #ifdef IE_ERROR_FIELD  

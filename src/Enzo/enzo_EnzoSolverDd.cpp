@@ -418,14 +418,16 @@ FieldMsg * EnzoSolverDd::pack_field_(EnzoBlock * enzo_block,
 				     int * ic3)
 {
   int  if3[3] = {0,0,0};
-  bool lg3[3];
-  for (int i=0; i<3; i++) lg3[i] = (refresh_type == refresh_fine);
+  int g3[3];
+  cello::field_descr()->ghost_depth(index_field,g3,g3+1,g3+2);
+  if (refresh_type != refresh_fine)
+    for (int i=0; i<3; i++) g3[i]=0;
 
   Refresh * refresh = new Refresh;
   refresh->add_field(index_field);
 
   FieldFace * field_face = enzo_block->create_face
-    (if3, ic3, lg3, refresh_type, refresh, true);
+    (if3, ic3, g3, refresh_type, refresh, true);
 
   if (refresh_type == refresh_coarse)
     field_face->set_restrict(restrict_);
@@ -462,15 +464,17 @@ void EnzoSolverDd::unpack_field_
  int refresh_type)
 {
   int if3[3] = {0,0,0};
-  bool lg3[3];
-  for (int i=0; i<3; i++) lg3[i] = (refresh_type == refresh_fine);
+  int g3[3];
+  cello::field_descr()->ghost_depth(index_field,g3,g3+1,g3+2);
+  if (refresh_type != refresh_fine)
+    for (int i=0; i<3; i++) g3[i]=0;
   Refresh * refresh = new Refresh;
   refresh->add_field(index_field);
 
   int * ic3 = msg->ic3;
 
   FieldFace * field_face = enzo_block->create_face 
-    (if3, ic3, lg3, refresh_type, refresh, true);
+    (if3, ic3, g3, refresh_type, refresh, true);
 
   if (refresh_type == refresh_coarse)
     field_face->set_restrict(restrict_);

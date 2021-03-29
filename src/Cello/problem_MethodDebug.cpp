@@ -11,8 +11,8 @@
 
 // #define DEBUG_METHOD_DEBUG
 // #define WRITE_FILES
-// #define WRITE_FILES_CYCLE_START 90
-// #define WRITE_FILES_CYCLE_STOP 95
+// #define WRITE_FILES_CYCLE_START 0
+// #define WRITE_FILES_CYCLE_STOP 10
 //----------------------------------------------------------------------
 
 MethodDebug::MethodDebug (int num_fields) throw() 
@@ -48,40 +48,40 @@ void MethodDebug::compute ( Block * block) throw()
   const int nf = field.num_permanent();
   long double * reduce = new long double [1+4*nf];
   reduce[0] = nf;
-  for (int i_f=0; i_f<nf; i_f++) {
-    reduce[4*i_f+1] = std::numeric_limits<long double>::max();
-    reduce[4*i_f+2] = -std::numeric_limits<long double>::max();
-    reduce[4*i_f+3] = 0;
-    reduce[4*i_f+4] = 0;
+  for (int index_field=0; index_field<nf; index_field++) {
+    reduce[4*index_field+1] = std::numeric_limits<long double>::max();
+    reduce[4*index_field+2] = -std::numeric_limits<long double>::max();
+    reduce[4*index_field+3] = 0;
+    reduce[4*index_field+4] = 0;
   }
 
   if (block->is_leaf()) {
 
     const double rel_vol = cello::relative_cell_volume (block->level());
-    for (int i_f=0; i_f<nf; i_f++) {
+    for (int index_field=0; index_field<nf; index_field++) {
 
-      cello_float * values = (cello_float *) field.values(i_f);
+      cello_float * values = (cello_float *) field.values(index_field);
 
       for (int iz=gz; iz<mz-gz; iz++) {
         for (int iy=gy; iy<my-gy; iy++) {
           for (int ix=gx; ix<mx-gx; ix++) {
             int i=ix + mx*(iy + my*iz);
-            reduce[4*i_f+1] = std::min(reduce[4*i_f+1],(long double)values[i]);
-            reduce[4*i_f+2] = std::max(reduce[4*i_f+2],(long double)values[i]);
-            reduce[4*i_f+3] += values[i];
-            ++reduce[4*i_f+4];
+            reduce[4*index_field+1] = std::min(reduce[4*index_field+1],(long double)values[i]);
+            reduce[4*index_field+2] = std::max(reduce[4*index_field+2],(long double)values[i]);
+            reduce[4*index_field+3] += values[i];
+            ++reduce[4*index_field+4];
           }    
         }    
       }
-      reduce[4*i_f+3] *= rel_vol;
+      reduce[4*index_field+3] *= rel_vol;
     }
   }
 #ifdef DEBUG_METHOD_DEBUG
   CkPrintf ("DEBUG_METHOD_DEBUG nf = %d\n",nf);
-  for (int i_f=0; i_f<nf; i_f++) {
+  for (int index_field=0; index_field<nf; index_field++) {
     CkPrintf ("DEBUG_METHOD_DEBUG %s %s %g %g %g %g\n",block->name().c_str(),
-              field.field_name(i_f).c_str(),reduce[4*i_f+1],
-              reduce[4*i_f+2],reduce[4*i_f+3],reduce[4*i_f+1]);
+              field.field_name(index_field).c_str(),reduce[4*index_field+1],
+              reduce[4*index_field+2],reduce[4*index_field+3],reduce[4*index_field+1]);
   }    
 #endif    
   
@@ -112,12 +112,12 @@ void MethodDebug::compute_continue_sum_fields
   const int nf = field.num_permanent();
   long double * data = (long double *) msg->getData();
   int id = 1;
-  int i_f = 0;
-  for (int i_f=0; i_f<nf; i_f++) {
-    field_min_[i_f] = data[id++];
-    field_max_[i_f] = data[id++];
-    field_sum_[i_f] = data[id++];
-    field_count_[i_f] = data[id++];
+  int index_field = 0;
+  for (int index_field=0; index_field<nf; index_field++) {
+    field_min_[index_field] = data[id++];
+    field_max_[index_field] = data[id++];
+    field_sum_[index_field] = data[id++];
+    field_count_[index_field] = data[id++];
   }
   delete msg;
 
@@ -134,12 +134,12 @@ void MethodDebug::compute_continue_sum_fields
     int gx,gy,gz;
     field.dimensions (0,&mx,&my,&mz);
     field.ghost_depth (0,&gx,&gy,&gz);
-    for (int i_f=0; i_f<nf; i_f++) {
+    for (int index_field=0; index_field<nf; index_field++) {
       char buffer[81];
       snprintf(buffer,80,"field-%03d-%02d-%s.data",block->cycle(),CkMyPe(),
-               field.field_name(i_f).c_str());
+               field.field_name(index_field).c_str());
       FILE * fp = fopen (buffer,"a");
-      cello_float * values = (cello_float*)field.values(i_f);
+      cello_float * values = (cello_float*)field.values(index_field);
       for (int iz=gz; iz<mz-gz; iz++) {
         for (int iy=gy; iy<my-gy; iy++) {
           for (int ix=gx; ix<mx-gx; ix++) {
@@ -158,17 +158,17 @@ void MethodDebug::compute_continue_sum_fields
     int nx,ny,nz;
     cello::hierarchy()->root_size(&nx,&ny,&nz);
     long int root_cells = nx*ny*nz;
-    for (int i_f=0; i_f<nf; i_f++) {
+    for (int index_field=0; index_field<nf; index_field++) {
 
       cello::monitor()->print
-        ("Method", "Field %s min %20.16Le",field.field_name(i_f).c_str(),
-         field_min_[i_f]);
+        ("Method", "Field %s min %20.16Le",field.field_name(index_field).c_str(),
+         field_min_[index_field]);
       cello::monitor()->print
-        ("Method", "Field %s max %20.16Le",field.field_name(i_f).c_str(),
-         field_max_[i_f]);
+        ("Method", "Field %s max %20.16Le",field.field_name(index_field).c_str(),
+         field_max_[index_field]);
       cello::monitor()->print
-        ("Method", "Field %s avg %20.16Le", field.field_name(i_f).c_str(),
-         field_sum_[i_f]/root_cells);
+        ("Method", "Field %s avg %20.16Le", field.field_name(index_field).c_str(),
+         field_sum_[index_field]/root_cells);
     }
   }
 
