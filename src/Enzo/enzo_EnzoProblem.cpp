@@ -683,14 +683,7 @@ Restrict * EnzoProblem::create_restrict_
 
   Restrict * restrict = 0;
 
-  if (type == "enzo") {
-    restrict = new EnzoRestrict (enzo::config()->interpolation_method);
-
-  } else {
-
-    restrict = Problem::create_restrict_(type,config);
-
-  }
+  restrict = Problem::create_restrict_(type,config);
 
   return restrict;
 

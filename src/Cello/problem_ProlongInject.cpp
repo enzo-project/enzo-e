@@ -12,6 +12,7 @@
 ProlongInject::ProlongInject() throw()
   : Prolong ()
 {
+  CkPrintf ("%d TRACE_PROLONG ProlongInject\n",CkMyPe());
   TRACE("ProlongInject::ProlongInject");
 }
 

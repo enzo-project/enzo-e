@@ -108,8 +108,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_turbulence_density(0.0),
   initial_turbulence_pressure(0.0),
   initial_turbulence_temperature(0.0),
-  // EnzoProlong
-  interpolation_method(""),
   // EnzoMethodCheckGravity
   method_check_gravity_particle_type(),
   // EnzoMethodHeat
@@ -297,8 +295,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_soup_pressure_in;
   p | initial_soup_pressure_out;
   p | initial_soup_density;
-
-  p | interpolation_method;
 
   p | method_check_gravity_particle_type;
 
@@ -623,9 +619,6 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Method:turbulence:edot",-1.0);
   method_turbulence_mach_number = p->value_float
     ("Method:turbulence:mach_number",0.0);
-
-  interpolation_method = p->value_string
-    ("Field:interpolation_method","SecondOrderA");
 
   method_check_gravity_particle_type = p->value_string
     ("Method:check_gravity:particle_type","dark");

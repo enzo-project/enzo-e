@@ -16,6 +16,7 @@
 ProlongLinear::ProlongLinear() throw()
   : Prolong ()
 {
+  CkPrintf ("%d TRACE_PROLONG ProlongLinear\n",CkMyPe());
   TRACE("ProlongLinear::ProlongLinear");
 }
 

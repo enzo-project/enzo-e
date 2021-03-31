@@ -580,39 +580,8 @@ env.PngToGif ("boundary_outflow-3d.gif","test_boundary_outflow-3d.unit", \
                 ARGS= test_path + "/boundary_outflow-3d-????.png");
 
 #----------------------------------------------------------------------
-# Mesh generation
-#----------------------------------------------------------------------
-
-Clean(env_mv_out.RunSerial ('test_mesh-balanced.unit',enzo_bin, 
-		ARGS='input/mesh-balanced.in'),
-      [Glob('#/' + test_path + '/mesh-balanced*.png')])
-
-# Clean(env_mv_out.RunSerial ('test_mesh-unbalanced.unit',enzo_bin, 
-# 		ARGS='input/mesh-unbalanced.in'),
-#       [Glob('#/' + test_path + '/mesh-unbalanced*.png')])
-
-#----------------------------------------------------------------------
 # AMR PPM
 #----------------------------------------------------------------------
-
-
-# serial
-
-# Clean(env_mv_out.RunParallel ('test_adapt-L1-P1.unit',enzo_bin, 
-# 		ARGS='input/adapt-L1-P1.in'),
-#       [Glob('#/' + test_path + '/adapt-L1-P1*.png')])
-# 
-# Clean(env_mv_out.RunParallel ('test_adapt-L2-P1.unit',enzo_bin, 
-# 		ARGS='input/adapt-L2-P1.in'),
-#       [Glob('#/' + test_path + '/adapt-L2-P1*.png')])
-# 
-# Clean(env_mv_out.RunParallel ('test_adapt-L3-P1.unit',enzo_bin, 
-# 		ARGS='input/adapt-L3-P1.in'),
-#       [Glob('#/' + test_path + '/adapt-L3-P1*.png')])
-# 
-# Clean(env_mv_out.RunParallel ('test_adapt-L4-P1.unit',enzo_bin, 
-# 		ARGS='input/adapt-L4-P1.in'),
-#       [Glob('#/' + test_path + '/adapt-L4-P1*.png')])
 
 Clean(env_mv_out.RunParallel ('test_adapt-L5-P1.unit',enzo_bin, 
 		ARGS='input/adapt-L5-P1.in'),
@@ -622,16 +591,9 @@ env.PngToGif ("adapt-L5-P1-mesh.gif", "test_adapt-L5-P1.unit", \
 env.PngToGif ("adapt-L5-P1-density.gif", "test_adapt-L5-P1.unit", \
                 ARGS= test_path + "/adapt-L5-P1-density-*.png");
 
-
-
 #----------------------------------------------------------------------
 # PERFORMANCE
 #----------------------------------------------------------------------
-
-# env.RunParallel ('test_performance-papi.unit',
-#                 enzo_bin, 
-#                 ARGS='input/performance-papi.in')
-
 
 Clean(env_mv_out.RunParallel ('test_initial_png.unit',
 		enzo_bin, 

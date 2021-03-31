@@ -322,7 +322,16 @@ int Block::refresh_load_field_faces_ (Refresh & refresh)
 	(level_face == level + 1) ? refresh_fine : refresh_unknown;
 
       // handle padded interpolation special case if needed
-      const int pad = cello::problem()->prolong()->coarse_padding();
+      int pad = cello::problem()->prolong()->coarse_padding();
+
+      // revert to ProlongLinear if accumulate is true
+      // since EnzoProlong currently doesn't work correctly
+      // with accumulate = true
+
+      //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+      //      if (refresh.accumulate()) pad = 0;
+      //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
       if (pad == 0) {
 #ifdef TRACE_LOAD_FACE
   CkPrintf ("TRACE_LOAD_FACE %d %s > %s\n",

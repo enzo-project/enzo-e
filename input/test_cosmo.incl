@@ -35,7 +35,7 @@ Adapt {
      gamma = 1.666700000000000;
      ghost_depth = 4;
      history = 1;
-     list = [ "density", "velocity_x", "velocity_y", "velocity_z", "acceleration_x", "acceleration_y", "acceleration_z", "total_energy", "internal_energy", "pressure", "density_total", "density_particle", "density_particle_accumulate", "potential", "density_gas", "X_copy", "B", "R0", "DD_po_1", "DD_B", "Y1_bcg", "Y2_bcg", "P1_bcg", "Q2_bcg", "V1_bcg", "R1_bcg" ];
+     list = [ "density", "velocity_x", "velocity_y", "velocity_z", "acceleration_x", "acceleration_y", "acceleration_z", "total_energy", "internal_energy", "pressure", "density_total", "density_particle", "density_particle_accumulate", "potential", "density_gas", "X_copy", "B" ];
      padding = 0;
  }
 

@@ -24,7 +24,6 @@ Field {
     ghost_depth = 4;
     list = [ "density", "velocity_x", "velocity_y", "velocity_z", "total_energy", "internal_energy", "pressure" ];
     padding = 0;
-    prolong = "linear";
 }
 
 Initial {

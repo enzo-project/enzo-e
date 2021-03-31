@@ -195,8 +195,6 @@ public: // interface
       initial_turbulence_density(0.0),
       initial_turbulence_pressure(0.0),
       initial_turbulence_temperature(0.0),
-      // EnzoProlong
-      interpolation_method(""),
       // EnzoMethodCheckGravity
       method_check_gravity_particle_type(),
       // EnzoMethodHeat
@@ -387,9 +385,6 @@ public: // attributes
   double                     initial_turbulence_density;
   double                     initial_turbulence_pressure;
   double                     initial_turbulence_temperature;
-
-  /// EnzoProlong
-  std::string                interpolation_method;
 
   /// EnzoMethodCheckGravity
   std::string                method_check_gravity_particle_type;
