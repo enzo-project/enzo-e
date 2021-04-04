@@ -241,29 +241,6 @@ env.PngToGif ("method_ppm-8.gif", "test_method_ppm-8.unit", \
                 ARGS= test_path + "/method_ppm-8-*.png");
 
 #----------------------------------------------------------------------
-# MethodGravity tests
-#----------------------------------------------------------------------
-
-# serial
-Clean(env_mv_out.RunSerial ('test_method_gravity_cg-1.unit',enzo_bin, 
-		ARGS='input/method_gravity_cg-1.in'),
-      [Glob('#/' + test_path + '/method_gravity_cg-1*.png'),
-       Glob('#/' + test_path + '/method_gravity_cg-1*.h5')])
-
-env.PngToGif ("method_gravity_cg-1.gif", "test_method_gravity_cg-1.unit", \
-                ARGS= test_path + "/method_gravity_cg-1*.png");
-
-# parallel
-
-Clean(env_mv_out.RunParallel ('test_method_gravity_cg-8.unit',enzo_bin, 
-		ARGS='input/method_gravity_cg-8.in'),
-      [Glob('#/' + test_path + '/method_gravity_cg-8*.png'),
-      Glob('#/' + test_path + '/method_gravity_cg-8*.h5')])
-
-env.PngToGif ("method_gravity_cg-8.gif", "test_method_gravity_cg-8.unit", \
-                ARGS= test_path + "/method_gravity_cg-8-*.png");
-
-#----------------------------------------------------------------------
 # MethodCosmology tests
 #----------------------------------------------------------------------
 

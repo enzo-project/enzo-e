@@ -12,7 +12,6 @@
 // #define DEBUG_NEW_BOX
 
 // #define TRACE_PROLONG
-
 //======================================================================
 // #define DEBUG_ARRAY
 // #define DEBUG_ARRAY_CYCLE 00
@@ -244,7 +243,7 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
     int index_src = field_list_src[i_f];
     int index_dst = field_list_dst[i_f];
     
-    const bool accumulate = accumulate_(index_src,index_dst);
+    const bool accumulate = refresh_->accumulate(i_f);
 
     int i3[3], n3[3];
     field.size(n3,n3+1,n3+2);
@@ -338,7 +337,7 @@ void FieldFace::array_to_face (char * array, Field field) throw()
 
     int index_src = field_list_src[i_f];
     int index_dst = field_list_dst[i_f];
-    const bool accumulate = accumulate_(index_src,index_dst);
+    const bool accumulate = refresh_->accumulate(i_f);
 
     int i3[3], n3[3];
 
@@ -387,7 +386,7 @@ void FieldFace::array_to_face (char * array, Field field) throw()
         TRACE_PROLONG("array_to_face",m3,i3,n3,mc3,ic3,nc3);
       }
       prolong()->apply
-        (precision, 
+        (precision,
          field_ghost,m3, i3,  n3,
          array_ghost,mc3,ic3, nc3,
          accumulate);
@@ -452,7 +451,7 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
     field_src.ghost_depth(index_src,g3,g3+1,g3+2);
     field_src.centering  (index_src,c3,c3+1,c3+2);
     
-    const bool accumulate = accumulate_(index_src,index_dst);
+    const bool accumulate = refresh_->accumulate(i_f);
 
     Box box (rank_,n3,g3);
     set_box_(&box);
@@ -502,13 +501,12 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
 #endif            
 
       // adjust for full-block interpolation to child
-      if (i_f == 0) {
-        TRACE_PROLONG("face_to_face",m3,id3,nd3,m3,is3,ns3);
-      }
-      prolong()->apply (precision, 
+      TRACE_PROLONG("face_to_face",m3,id3,nd3,m3,is3,ns3);
+      prolong()->apply (precision,
                         values_dst,m3,id3, nd3,
                         values_src,m3,is3, ns3,
                         accumulate);
+
 #ifdef DEBUG_ARRAY            
       CkPrintf ("field %lu\n",  i_f);
 #endif      
@@ -578,7 +576,7 @@ int FieldFace::num_bytes_array(Field field) throw()
 
     int index_src = field_list_src[i_f];
     int index_dst = field_list_dst[i_f];
-    const bool accumulate = accumulate_(index_src,index_dst);
+    const bool accumulate = refresh_->accumulate(i_f);
 
     int i3[3], n3[3];
     field.size(n3,n3+1,n3+2);
@@ -862,13 +860,6 @@ void FieldFace::set_field_list(std::vector<int> field_list)
 
 //----------------------------------------------------------------------
 
-bool FieldFace::accumulate_(int index_src, int index_dst) const
-{
-  return ((index_src != index_dst) && refresh_->accumulate());
-}
-
-//----------------------------------------------------------------------
-
 void FieldFace::mul_by_density_
 (Field field, int index_field,
  const int i3[3], const int n3[3], const int m3[3])
@@ -1008,18 +999,19 @@ void FieldFace::set_box_(Box * box)
 
 void FieldFace::box_adjust_accumulate_ (Box * box, int accumulate, int g3[3])
 {
+
+  int gs3[3];
   if (accumulate) {
-    int gs3[3] = {(face_[0]!=0)?g3[0]:0,
-                  (face_[1]!=0)?g3[1]:0,
-                  (face_[2]!=0)?g3[2]:0};
-    box->set_send_ghosts(gs3);
+    gs3[0] = (face_[0]!=0)?g3[0]:0;
+    gs3[1] = (face_[1]!=0)?g3[1]:0;
+    gs3[2] = (face_[2]!=0)?g3[2]:0;
                            
   } else {
-    int gs3[3] = {(ghost_[0]&&face_[0]==0)?g3[0]:0,
-                  (ghost_[1]&&face_[1]==0)?g3[1]:0,
-                  (ghost_[2]&&face_[2]==0)?g3[2]:0};
-    box->set_send_ghosts (gs3);
+    gs3[0] = (ghost_[0]&&face_[0]==0)?g3[0]:0;
+    gs3[1] = (ghost_[1]&&face_[1]==0)?g3[1]:0;
+    gs3[2] = (ghost_[2]&&face_[2]==0)?g3[2]:0;
   }
+  box->set_send_ghosts(gs3);
   box->compute_block_start(BoxType_receive);
   box->compute_region();
 }

@@ -42,6 +42,7 @@ public: // interface
       block_size_[i] = block_size[i];
       ghost_depth_[i] = ghost_depth[i];
       ghost_depth_recv_[i] = ghost_depth[i];
+      ghost_depth_send_[i] = 0;
       coarse_size_[i] = block_size[i] / 2;
       coarse_ghost_[i] = ghost_depth_[i]/2 + ghost_depth_[i]%1 + 1;
     }

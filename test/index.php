@@ -628,10 +628,6 @@ test_summary("Method: heat",
              array("method_heat-1","method_heat-8"),
              array("enzo-p",  "enzo-p"),'test');
 
-test_summary("Method: gravity",
-             array("method_gravity_cg-1","method_gravity_cg-8"),
-             array("enzo-p",             "enzo-p"),'test');
-
 test_summary("Method: flux_correct",
              array("method_flux2-xm","method_flux2-xp",
                    "method_flux2-ym","method_flux2-yp",
@@ -930,54 +926,6 @@ test_table ("-","method_heat-mesh-8",
 	    array("000000","000200","000400"), $types);
 
 end_hidden ("method_heat-8");
-
-//======================================================================
-
-test_group("Method: gravity");
-
-?>
-
-Method-gravity tests serve to test basic functionality of the "gravity_cg" method
-in Enzo-P.
-
-</p>
-
-<?php
-
-
-  begin_hidden("method_gravity_cg-1", "GRAVITY (serial)");
-
-tests("Enzo","enzo-p","test_method_gravity_cg-1","GRAVITY_CG 1 block","");
-
-test_table ("-","method_gravity_cg-1",
-	    array("mesh-000000","mesh-000010","mesh-000020","mesh-000030","mesh-000040","mesh-000050"), $types);
-test_table ("-","method_gravity_cg-1",
-	    array("rho-000000","rho-000010","rho-000020","rho-000030","rho-000040","rho-000050"), $types);
-test_table ("-","method_gravity_cg-1",
-	    array("phi-000000","phi-000010","phi-000020","phi-000030","phi-000040","phi-000050"), $types);
-test_table ("-","method_gravity_cg-1",
-	    array("ax-000000","ax-000010","ax-000020","ax-000030","ax-000040","ax-000050"), $types);
-test_table ("-","method_gravity_cg-1",
-	    array("ay-000000","ay-000010","ay-000020","ay-000030","ay-000040","ay-000050"), $types);
-
-end_hidden("method_gravity_cg-1");
-
-  begin_hidden("method_gravity_cg-8", "GRAVITY (parallel)");
-
-tests("Enzo","enzo-p","test_method_gravity_cg-8","GRAVITY_CG 8 block","");
-
-test_table ("-","method_gravity_cg-8",
-	    array("mesh-000000","mesh-000010","mesh-000020","mesh-000030","mesh-000040","mesh-000050"), $types);
-test_table ("-","method_gravity_cg-8",
-	    array("rho-000000","rho-000010","rho-000020","rho-000030","rho-000040","rho-000050"), $types);
-test_table ("-","method_gravity_cg-8",
-	    array("phi-000000","phi-000010","phi-000020","phi-000030","phi-000040","phi-000050"), $types);
-test_table ("-","method_gravity_cg-8",
-	    array("ax-000000","ax-000010","ax-000020","ax-000030","ax-000040","ax-000050"), $types);
-test_table ("-","method_gravity_cg-8",
-	    array("ay-000000","ay-000010","ay-000020","ay-000030","ay-000040","ay-000050"), $types);
-
-end_hidden("method_gravity_cg-8");
 
 //======================================================================
 

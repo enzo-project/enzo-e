@@ -29,25 +29,27 @@ OutputImage::OutputImage(int index,
 			 bool image_log,
 			 bool image_abs,
 			 bool ghost,
+                         bool use_min_max,
 			 double min_value, double max_value) throw ()
 : Output(index,factory),
-    image_data_(NULL),
-    image_mesh_(NULL),
-    color_particle_attribute_(color_particle_attribute),
-    axis_(axis),
-    min_value_(min_value),max_value_(max_value),
-    nxi_(image_size_x),
-    nyi_(image_size_y),
-    png_(NULL),
-    image_type_(image_type),
-    face_rank_(face_rank),
-    image_log_(image_log),
-    image_abs_(image_abs),
-    ghost_(ghost),
-    min_level_(min_level),
-    max_level_(max_level),
-    leaf_only_(leaf_only)
-
+  image_data_(NULL),
+  image_mesh_(NULL),
+  color_particle_attribute_(color_particle_attribute),
+  axis_(axis),
+  use_min_max_(use_min_max),
+  min_value_(min_value),
+  max_value_(max_value),
+  nxi_(image_size_x),
+  nyi_(image_size_y),
+  png_(NULL),
+  image_type_(image_type),
+  face_rank_(face_rank),
+  image_log_(image_log),
+  image_abs_(image_abs),
+  ghost_(ghost),
+  min_level_(min_level),
+  max_level_(max_level),
+  leaf_only_(leaf_only)
 {
 
   if      (image_reduce_type=="min") { op_reduce_ = reduce_min; } 
@@ -137,12 +139,6 @@ void OutputImage::pup (PUP::er &p)
   p | map_r_;
   p | map_g_;
   p | map_b_;
-  p | op_reduce_;
-  p | mesh_color_type_;
-  p | color_particle_attribute_;
-  p | axis_;
-  p | nxi_;
-  p | nyi_;
 
   int has_data = (image_data_ != NULL);
   p | has_data;
@@ -162,19 +158,29 @@ void OutputImage::pup (PUP::er &p)
     image_mesh_ = NULL;
   }
   
+  p | op_reduce_;
+  p | mesh_color_type_;
+  p | color_particle_attribute_;
+  p | axis_;
+  p | use_min_max_;
+  p | min_value_;
+  p | max_value_;
+  p | nxi_;
+  p | nyi_;
+
   WARNING("OutputImage::pup","skipping png");
   // p | *png_;
   if (p.isUnpacking()) png_ = NULL;
   p | image_type_;
-  p | min_level_;
-  p | max_level_;
-  p | leaf_only_;
   p | face_rank_;
   p | image_log_;
   p | image_abs_;
+  p | ghost_;
+  p | min_level_;
+  p | max_level_;
+  p | leaf_only_;
   PUParray(p,image_lower_,3);
   PUParray(p,image_upper_,3);
-  p | ghost_;
 }
 
 //----------------------------------------------------------------------
@@ -716,33 +722,35 @@ void OutputImage::image_write_ () throw()
 
   double min,max;
 
-
-  min = std::numeric_limits<double>::max();
-  max = -min;
-
   // Compute min and max
 
-  if (image_log_) {
-    for (int i=0; i<m; i++) {
-      min = MIN(min,log(data_(i)));
-      max = MAX(max,log(data_(i)));
-    }
-  } else if (image_abs_) {
-    for (int i=0; i<m; i++) {
-      min = MIN(min,fabs(data_(i)));
-      max = MAX(max,fabs(data_(i)));
-    }
-  } else { 
-    for (int i=0; i<m; i++) {
-      min = MIN(min,data_(i));
-      max = MAX(max,data_(i));
+  if (use_min_max_) {
+
+    min = MIN(min,min_value_);
+    max = MAX(max,max_value_);
+
+  } else {
+
+    min = std::numeric_limits<double>::max();
+    max = -min;
+
+    if (image_log_) {
+      for (int i=0; i<m; i++) {
+        min = MIN(min,log(fabs(data_(i))));
+        max = MAX(max,log(fabs(data_(i))));
+      }
+    } else if (image_abs_) {
+      for (int i=0; i<m; i++) {
+        min = MIN(min,fabs(data_(i)));
+        max = MAX(max,fabs(data_(i)));
+      }
+    } else { 
+      for (int i=0; i<m; i++) {
+        min = MIN(min,data_(i));
+        max = MAX(max,data_(i));
+      }
     }
   }
-
-  // Use min/max if specified
-
-  min = MIN(min,min_value_);
-  max = MAX(max,max_value_);
 
   size_t n = map_r_.size();
 
@@ -757,7 +765,7 @@ void OutputImage::image_write_ () throw()
       double value = data_(i);
 
       if (image_abs_) value = fabs(value);
-      if (image_log_) value = log(value);
+      if (image_log_) value = log(fabs(value));
 
       double r=0.0,g=0.0,b=0.0;
 

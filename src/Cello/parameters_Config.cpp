@@ -601,7 +601,6 @@ void Config::read_field_ (Parameters * p) throw()
   }
 
   field_prolong   = p->value_string ("Field:prolong","linear");
-
   field_restrict  = p->value_string ("Field:restrict","linear");
 }
 

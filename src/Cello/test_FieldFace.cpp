@@ -278,9 +278,9 @@ PARALLEL_MAIN_BEGIN
 
   // initialize field ghost zone depths
 
-  const int g33[3][3] = { {1,1,1},
-                          {1,2,3},
-                          {3,2,1} };
+   const int g33[3][3] = { {1,1,1},
+                           {1,2,3},
+                           {3,2,1} };
   // const int g33[3][3] = { {4,4,4},
   //                         {4,4,4},
   //                         {4,4,4} };

@@ -22,80 +22,6 @@
 #  define TRACE_PROLONG(MSG) /* ... */
 #endif
 
-#ifdef DEBUG_ARRAY
-
-#   define DEBUG_PRINT_ARRAY0(NAME,ARRAY,m3,n3,o3)              \
-  DEBUG_PRINT_ARRAY_(NAME,ARRAY,m3,n3,o3[0],o3[1],o3[2])
-#   define DEBUG_PRINT_ARRAY(NAME,ARRAY,m3,n3)  \
-  DEBUG_PRINT_ARRAY_(NAME,ARRAY,m3,n3,0,0,0)
-#   define DEBUG_PRINT_ARRAY_(NAME,ARRAY,m3,n3,ox,oy,oz)        \
-  {                                                             \
-    CkPrintf ("PADDED_ARRAY_VALUES %s:%d %s %p\n",              \
-              __FILE__,__LINE__,NAME,(void*)ARRAY);             \
-    CkPrintf ("m3 %d %d %d n3 %d %d %d o3 %d %d %d\n",          \
-              m3[0],m3[1],m3[2],n3[0],n3[1],n3[2],ox,oy,oz); \
-    const int o = ox + m3[0]*(oy + m3[1]*oz);                   \
-    for (int iz=0; iz<n3[2]; iz++) {                            \
-      for (int iy=0; iy<n3[1]; iy++) {                          \
-        CkPrintf ("PADDED_ARRAY_VALUES %s %p %d %d %d: ",       \
-                  NAME,(void*)ARRAY,0,iy,iz);                   \
-        for (int ix=0; ix<n3[0]; ix++) {                        \
-          int i = ix+ m3[0]*(iy+ m3[1]*iz);                     \
-          CkPrintf (" %6.3g",ARRAY[o+i]);                       \
-        }                                                       \
-        CkPrintf ("\n");                                        \
-      }                                                         \
-    }                                                           \
-  }
-
-#   define DEBUG_FILL_ARRAY0(NAME,ARRAY,m3,n3,o3)       \
-  DEBUG_FILL_ARRAY_(NAME,ARRAY,m3,n3,o3[0],o3[1],o3[2])
-#   define DEBUG_FILL_ARRAY(NAME,ARRAY,m3,n3)   \
-  DEBUG_FILL_ARRAY_(NAME,ARRAY,m3,n3,0,0,0)
-#   define DEBUG_FILL_ARRAY_(NAME,ARRAY,m3,n3,ox,oy,oz) \
-  {                                                     \
-    const int o = ox + m3[0]*(oy + m3[1]*oz);           \
-    for (int iz=0; iz<n3[2]; iz++) {                    \
-      for (int iy=0; iy<n3[1]; iy++) {                  \
-        for (int ix=0; ix<n3[0]; ix++) {                \
-          int i = ix+ m3[0]*(iy+ m3[1]*iz);             \
-          ARRAY[o+i] = o+i;                             \
-        }                                               \
-      }                                                 \
-    }                                                   \
-  }
-
-#   define DEBUG_COPY_ARRAY0(NAME,ARRAY_D,ARRAY_S,m3,n3,o3)             \
-  DEBUG_COPY_ARRAY_(NAME,ARRAY_D,ARRAY_S,m3,n3,o3[0],o3[1],o3[2])
-#   define DEBUG_COPY_ARRAY(NAME,ARRAY_D,ARRAY_S,m3,n3) \
-  DEBUG_COPY_ARRAY_(NAME,ARRAY_D,ARRAY_S,m3,n3,0,0,0)
-#   define DEBUG_COPY_ARRAY_(NAME,ARRAY_D,ARRAY_S,m3,n3,ox,oy,oz)       \
-  {                                                                     \
-    const int o = ox + m3[0]*(oy + m3[1]*oz);                           \
-    for (int iz=0; iz<n3[2]; iz++) {                                    \
-      for (int iy=0; iy<n3[1]; iy++) {                                  \
-        for (int ix=0; ix<n3[0]; ix++) {                                \
-          int i = ix+ m3[0]*(iy+ m3[1]*iz);                             \
-          ARRAY_D[o+i] = ARRAY_S[o+i];                                  \
-        }                                                               \
-      }                                                                 \
-    }                                                                   \
-  }
-
-#else
-
-#   define DEBUG_PRINT_ARRAY0(NAME,ARRAY,m3,n3,o3)  /* ... */
-#   define DEBUG_PRINT_ARRAY(NAME,ARRAY,m3,n3)  /* ... */
-#   define DEBUG_PRINT_ARRAY_(NAME,ARRAY,m3,n3,ox,oy,oz)  /* ... */
-
-#   define DEBUG_FILL_ARRAY0(NAME,ARRAY,m3,n3,o3)  /* ... */
-#   define DEBUG_FILL_ARRAY(NAME,ARRAY,m3,n3)  /* ... */
-#   define DEBUG_FILL_ARRAY_(NAME,ARRAY,m3,n3,ox,oy,oz)  /* ... */
-
-#   define DEBUG_COPY_ARRAY0(NAME,ARRAY_D,ARRAY_S,m3,n3,o3)  /* ... */
-#   define DEBUG_COPY_ARRAY(NAME,ARRAY_D,ARRAY_S,m3,n3)  /* ... */
-#   define DEBUG_COPY_ARRAY_(NAME,ARRAY_D,ARRAY_S,m3,n3,ox,oy,oz)  /* ... */
-#endif
 //----------------------------------------------------------------------
 
 EnzoProlong::EnzoProlong(std::string type,int positive) throw()
@@ -103,7 +29,8 @@ EnzoProlong::EnzoProlong(std::string type,int positive) throw()
     method_(-1),
     positive_(positive)
 {
-  TRACE_PROLONG("EnzoProlong()");
+  //  CkPrintf ("TRACE_PROLONG EnzoProlong()\n");
+  
   if      (type == "3A")  method_ = 0;
   else if (type == "2A") method_ = 1;
   else if (type == "2B") method_ = 2;
@@ -140,24 +67,17 @@ void EnzoProlong::apply
     first_call = false;
   }
   ProlongLinear prolong_linear;
-  for (int i=0; i<3; i++) {
-    if (n3_c[i] > 1) {
-      n3_c[i]-=2;
-      o3_c[i]+=1;
-    }
+  for (int i=0; i<cello::rank(); i++) {
+    n3_c[i]-=2;
+    o3_c[i]+=1;
   }
-  // CkPrintf ("n3_c %d %d %d n3_f %d %d %d\n",
-  //           n3_c[0],n3_c[1],n3_c[2],
-  //           n3_f[0],n3_f[1],n3_f[2]);
   prolong_linear.apply
     (precision,
      values_f,m3_f,o3_f,n3_f,
      values_c,m3_c,o3_c,n3_c,accumulate);
-  for (int i=0; i<3; i++) {
-    if (n3_c[i] > 1) {
+  for (int i=0; i<cello::rank(); i++) {
       n3_c[i]+=2;
       o3_c[i]-=1;
-    }
   }
 #else
   apply_((enzo_float *)     values_f,m3_f,o3_f,n3_f,
@@ -228,14 +148,30 @@ void EnzoProlong::apply_
   int o_c = o3_c[0] + m3_c[0]*(o3_c[1] + m3_c[1]*o3_c[2]);
   int o_f = o3_f[0] + m3_f[0]*(o3_f[1] + m3_f[1]*o3_f[2]);
 
+  const int mf = m3_f[0]*m3_f[1]*m3_f[2];
+  enzo_float * temp_f = (accumulate) ? (new enzo_float [mf]) : values_f;
+
   FORTRAN_NAME(interpolate)
     (&rank,
      ((enzo_float*)(values_c))+o_c, pdims, pstart, pend, r3,
-     ((enzo_float*)(values_f))+o_f, gdims, gstart, work, &method_,
+     ((enzo_float*)(temp_f))+o_f, gdims, gstart, work, &method_,
      &positive_, &error);
-  
+
   DEBUG_PRINT_ARRAY0("values_c",values_c,m3_c,n3_c,o3_c);
   DEBUG_PRINT_ARRAY0("values_f",values_f,m3_f,n3_f,o3_f);
+
+  if (accumulate) {
+    int i0 = o3_f[0] + m3_f[0]*(o3_f[1] + m3_f[1]*o3_f[2]);
+    for (int iz=0; iz<n3_f[2]; iz++) {
+      for (int iy=0; iy<n3_f[1]; iy++) {
+        for (int ix=0; ix<n3_f[0]; ix++) {
+          int i = i0 + ix + m3_f[0]*(iy + m3_f[1]*iz);
+          values_f[i] += temp_f[i];
+        }
+      }
+    }
+    delete [] temp_f;
+  }
 
   delete [] work;
 }

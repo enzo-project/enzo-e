@@ -180,9 +180,6 @@ private: // functions
 	      const T * vs, int ms3[3], int ns3[3], int is3[3],
 	      bool accumulate) throw();
 
-
-  bool accumulate_(int index_src, int index_dst) const;
-
   /// Multiply the given field by density to convert to conservative
   /// form if needed
   void mul_by_density_

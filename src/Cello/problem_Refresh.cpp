@@ -73,6 +73,20 @@ std::vector<int> Refresh::field_list_dst() const
 
 //----------------------------------------------------------------------
 
+void Refresh::box_accumulate_adjust
+(Box * box, int if3[3], int g3[3])
+{
+  if (accumulate_) {
+    int gs3[3] = {0};
+    for (int i=0; i<cello::rank(); i++) {
+      gs3[i] = (if3[i] != 0) ? g3[i] : 0;
+    }
+    box->set_send_ghosts(gs3);
+  }
+}
+
+//----------------------------------------------------------------------
+
 int Refresh::data_size () const
 {
   int count = 0;

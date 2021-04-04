@@ -487,26 +487,14 @@ void FieldData::allocate_coarse (const FieldDescr * field_descr, int id_field) t
       array_coarse_[id_field] = (char*) new float [m];
       coarse_dimensions_[id_field] = m*sizeof(float);
       for (int i=0; i<m; i++) ((float*) array_coarse_[id_field])[i] = 0.0;
-#ifdef DEBUG_COARSE_ARRAY
-      CkPrintf ("DEBUG_COARSE_ARRAY %p allocated %p[%d] = %d*%lu\n",
-                (void *)this,(void *)array_coarse_[id_field],id_field,m,sizeof(float));
-#endif
     } else if (precision == precision_double) {
       array_coarse_[id_field] = (char*) new double [m];
       coarse_dimensions_[id_field] = m*sizeof(double);
       for (int i=0; i<m; i++) ((double*) array_coarse_[id_field])[i] = 0.0;
-#ifdef DEBUG_COARSE_ARRAY
-      CkPrintf ("DEBUG_COARSE_ARRAY %p allocated %p[%d] = %d*%lu\n",
-                (void *)this,(void *)array_coarse_[id_field],id_field,m,sizeof(double));
-#endif
     } else if (precision == precision_quadruple) {
       array_coarse_[id_field] = (char*) new long double [m];
       coarse_dimensions_[id_field] = m*sizeof(long double);
       for (int i=0; i<m; i++) ((long double*) array_coarse_[id_field])[i] = 0.0;
-#ifdef DEBUG_COARSE_ARRAY
-      CkPrintf ("DEBUG_COARSE_ARRAY %p allocated %p[%d] = %d*%lu\n",
-                (void *)this,(void *)array_coarse_[id_field],id_field,m,sizeof(long double));
-#endif
     } else {
       WARNING("FieldData::allocate_coarse",
               "Calling allocate_coarse() on already-allocated Field");
@@ -688,7 +676,6 @@ void FieldData::coarse_dimensions
   field_descr->centering (id_field,&cx,&cy,&cz);
 
   //    compute coarse block size
-
   if (mcx) (*mcx) = (nx!=1) ? nx/2 + (gx + 2*(gx%1)) + cx + 2 : 1;
   if (mcy) (*mcy) = (ny!=1) ? ny/2 + (gy + 2*(gy%1)) + cy + 2 : 1;
   if (mcz) (*mcz) = (nz!=1) ? nz/2 + (gz + 2*(gz%1)) + cz + 2 : 1;

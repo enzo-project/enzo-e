@@ -9,6 +9,7 @@
 #ifndef PROBLEM_REFRESH_HPP
 #define PROBLEM_REFRESH_HPP
 
+class Box;
 class Refresh : public PUP::able {
 
   /// @class    Refresh
@@ -274,17 +275,23 @@ public: // interface
   /// Return whether to add neighbor face values to ghost zones or to
   /// copy them.  NOTE only accumulates if source field is different
   /// from destination field
-  bool accumulate() const 
+  bool accumulate(int i_f) const 
   {
-    return accumulate_;
+    return accumulate_ && (field_list_src_[i_f] != field_list_dst_[i_f]);
   }
 
+  //  bool accumulate() const
+  //  { return accumulate_; }
+  
   /// Set whether to add neighbor face values to ghost zones instead of
   /// copying them.
   void set_accumulate(bool accumulate)
   {
     accumulate_ = accumulate;
   }
+
+  // Boxes
+  void box_accumulate_adjust (Box * box, int if3[3], int g3[3]);
 
   //----------------
   // Synchronization

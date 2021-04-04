@@ -50,6 +50,7 @@ public: // functions
 	      bool image_log,
 	      bool image_abs,
 	      bool ghost,
+              bool use_min_max,
 	      double min_value, double max_value) throw();
 
   /// OutputImage destructor: free allocated image data
@@ -203,6 +204,7 @@ private: // attributes
   axis_type axis_;
 
   /// Minimum and maximum values if specified
+  bool use_min_max_;
   double min_value_;
   double max_value_;
 

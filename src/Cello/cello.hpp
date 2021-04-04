@@ -218,6 +218,120 @@ enum type_enum {
 #endif
 
 //----------------------------------------------------------------------
+/// Macros for debugging
+//----------------------------------------------------------------------
+
+#define TRACE_PROLONG_SUM(FUNC,V_F,M_F,O_F,N_F,V_C,M_C,O_C,N_C,A)       \
+  {                                                                     \
+    long double sum_f=0.0, sum_c=0.0;                                   \
+    int count_f=0,count_c=0;                                            \
+    int ic0 = O_C[0] + M_C[0]*(O_C[1] + M_C[1]*O_C[2]);                 \
+    int if0 = O_F[0] + M_F[0]*(O_F[1] + M_F[1]*O_F[2]);                 \
+    for (int icz=0; icz<N_C[2]; icz++) {                                \
+      for (int icy=0; icy<N_C[1]; icy++) {                              \
+        for (int icx=0; icx<N_C[0]; icx++) {                            \
+          int i_c=ic0 + icx + M_C[0]*(icy + M_C[1]*icz);                \
+          sum_c+=V_C[i_c];                                              \
+          count_c++;                                                    \
+        }                                                               \
+      }                                                                 \
+    }                                                                   \
+    for (int ifz=0; ifz<N_F[2]; ifz++) {                                \
+      for (int ify=0; ify<N_F[1]; ify++) {                              \
+        for (int ifx=0; ifx<N_F[0]; ifx++) {                            \
+          int i_f=if0 + ifx + M_F[0]*(ify + M_F[1]*ifz);                \
+          sum_f+=V_F[i_f];                                              \
+          count_f++;                                                    \
+        }                                                               \
+      }                                                                 \
+    }                                                                   \
+    CkPrintf ("TRACE_PROLONG %d %s\n",A,FUNC.c_str());                  \
+    CkPrintf ("TRACE_PROLONG %d mc3 %d %d nc3 %d %d oc3 %d %d\n",       \
+              A,M_C[0],M_C[1],N_C[0],N_C[1],O_C[0],O_C[1]);             \
+    CkPrintf ("TRACE_PROLONG %d mf3 %d %d nf3 %d %d of3 %d %d\n",       \
+              A,M_F[0],M_F[1],N_F[0],N_F[1],O_F[0],O_F[1]);             \
+    CkPrintf ("TRACE_PROLONG %d sum_c %d %20.15Lg  sum_f %d %20.15Lg\n", \
+              A,count_c,sum_c,count_f,sum_f);                           \
+  }
+
+//----------------------------------------------------------------------
+
+#ifdef DEBUG_ARRAY
+
+#   define DEBUG_PRINT_ARRAY0(NAME,ARRAY,m3,n3,o3)              \
+  DEBUG_PRINT_ARRAY_(NAME,ARRAY,m3,n3,o3[0],o3[1],o3[2])
+#   define DEBUG_PRINT_ARRAY(NAME,ARRAY,m3,n3)  \
+  DEBUG_PRINT_ARRAY_(NAME,ARRAY,m3,n3,0,0,0)
+#   define DEBUG_PRINT_ARRAY_(NAME,ARRAY,m3,n3,ox,oy,oz)        \
+  {                                                             \
+    CkPrintf ("PADDED_ARRAY_VALUES %s:%d %s %p\n",              \
+              __FILE__,__LINE__,NAME,(void*)ARRAY);             \
+    CkPrintf ("m3 %d %d %d n3 %d %d %d o3 %d %d %d\n",          \
+              m3[0],m3[1],m3[2],n3[0],n3[1],n3[2],ox,oy,oz); \
+    const int o = ox + m3[0]*(oy + m3[1]*oz);                   \
+    for (int iz=0; iz<n3[2]; iz++) {                            \
+      for (int iy=0; iy<n3[1]; iy++) {                          \
+        CkPrintf ("PADDED_ARRAY_VALUES %s %p %d %d %d: ",       \
+                  NAME,(void*)ARRAY,0,iy,iz);                   \
+        for (int ix=0; ix<n3[0]; ix++) {                        \
+          int i = ix+ m3[0]*(iy+ m3[1]*iz);                     \
+          CkPrintf (" %6.3g",ARRAY[o+i]);                       \
+        }                                                       \
+        CkPrintf ("\n");                                        \
+      }                                                         \
+    }                                                           \
+  }
+
+#   define DEBUG_FILL_ARRAY0(NAME,ARRAY,m3,n3,o3)       \
+  DEBUG_FILL_ARRAY_(NAME,ARRAY,m3,n3,o3[0],o3[1],o3[2])
+#   define DEBUG_FILL_ARRAY(NAME,ARRAY,m3,n3)   \
+  DEBUG_FILL_ARRAY_(NAME,ARRAY,m3,n3,0,0,0)
+#   define DEBUG_FILL_ARRAY_(NAME,ARRAY,m3,n3,ox,oy,oz) \
+  {                                                     \
+    const int o = ox + m3[0]*(oy + m3[1]*oz);           \
+    for (int iz=0; iz<n3[2]; iz++) {                    \
+      for (int iy=0; iy<n3[1]; iy++) {                  \
+        for (int ix=0; ix<n3[0]; ix++) {                \
+          int i = ix+ m3[0]*(iy+ m3[1]*iz);             \
+          ARRAY[o+i] = o+i;                             \
+        }                                               \
+      }                                                 \
+    }                                                   \
+  }
+
+#   define DEBUG_COPY_ARRAY0(NAME,ARRAY_D,ARRAY_S,m3,n3,o3)             \
+  DEBUG_COPY_ARRAY_(NAME,ARRAY_D,ARRAY_S,m3,n3,o3[0],o3[1],o3[2])
+#   define DEBUG_COPY_ARRAY(NAME,ARRAY_D,ARRAY_S,m3,n3) \
+  DEBUG_COPY_ARRAY_(NAME,ARRAY_D,ARRAY_S,m3,n3,0,0,0)
+#   define DEBUG_COPY_ARRAY_(NAME,ARRAY_D,ARRAY_S,m3,n3,ox,oy,oz)       \
+  {                                                                     \
+    const int o = ox + m3[0]*(oy + m3[1]*oz);                           \
+    for (int iz=0; iz<n3[2]; iz++) {                                    \
+      for (int iy=0; iy<n3[1]; iy++) {                                  \
+        for (int ix=0; ix<n3[0]; ix++) {                                \
+          int i = ix+ m3[0]*(iy+ m3[1]*iz);                             \
+          ARRAY_D[o+i] = ARRAY_S[o+i];                                  \
+        }                                                               \
+      }                                                                 \
+    }                                                                   \
+  }
+
+#else
+
+#   define DEBUG_PRINT_ARRAY0(NAME,ARRAY,m3,n3,o3)  /* ... */
+#   define DEBUG_PRINT_ARRAY(NAME,ARRAY,m3,n3)  /* ... */
+#   define DEBUG_PRINT_ARRAY_(NAME,ARRAY,m3,n3,ox,oy,oz)  /* ... */
+
+#   define DEBUG_FILL_ARRAY0(NAME,ARRAY,m3,n3,o3)  /* ... */
+#   define DEBUG_FILL_ARRAY(NAME,ARRAY,m3,n3)  /* ... */
+#   define DEBUG_FILL_ARRAY_(NAME,ARRAY,m3,n3,ox,oy,oz)  /* ... */
+
+#   define DEBUG_COPY_ARRAY0(NAME,ARRAY_D,ARRAY_S,m3,n3,o3)  /* ... */
+#   define DEBUG_COPY_ARRAY(NAME,ARRAY_D,ARRAY_S,m3,n3)  /* ... */
+#   define DEBUG_COPY_ARRAY_(NAME,ARRAY_D,ARRAY_S,m3,n3,ox,oy,oz)  /* ... */
+#endif
+
+//----------------------------------------------------------------------
 /// Macros for sizing, saving, and restoring data from buffers
 //----------------------------------------------------------------------
 

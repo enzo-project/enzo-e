@@ -408,11 +408,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
     delete [] de_gas;
     
-    double sum_de_p = 0.0;
-    for (int i=0; i<mx*my*mz; i++) sum_de_p += de_p[i];
-
   }
-
     
   block->compute_done(); 
   

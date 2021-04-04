@@ -16,7 +16,9 @@
 #undef CK_TEMPLATES_ONLY
 
 // #define DEBUG_COPY_B
+// #define DEBUG_COPY_DENSITIES
 // #define DEBUG_COPY_POTENTIAL
+// #define DEBUG_COPY_ACCELERATION
 
 #define NEW_TIMESTEP
 
@@ -40,10 +42,10 @@ EnzoMethodGravity::EnzoMethodGravity
 
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
-  refresh->add_field("acceleration_x");
-  refresh->add_field("acceleration_y");
-  refresh->add_field("acceleration_z");
-  refresh->add_field("density");
+  //  refresh->add_field("acceleration_x");
+  //  refresh->add_field("acceleration_y");
+  //  refresh->add_field("acceleration_z");
+  //  refresh->add_field("density");
   // Accumulate is used when particles are deposited into density_total
   
   if (accumulate) {
@@ -51,6 +53,10 @@ EnzoMethodGravity::EnzoMethodGravity
     refresh->add_field_src_dst
       ("density_particle","density_particle_accumulate");
     refresh->add_field_src_dst("density_total","B");
+  } else {
+    refresh->add_field("acceleration_x");
+    refresh->add_field("acceleration_y");
+    refresh->add_field("acceleration_z");
   }
 
   ir_exit_ = add_refresh_();
@@ -75,6 +81,9 @@ void EnzoMethodGravity::compute(Block * block) throw()
   const int id  = field.field_id("density");
   const int idt = field.field_id("density_total");
   const int idensity = (idt != -1) ? idt : id;
+  ASSERT ("EnzoMethodGravity::compute",
+          "modifying density in EnzoMethodGravity?",
+          idensity != id);
   
   // Solve the linear system
   int mx,my,mz;
@@ -88,6 +97,12 @@ void EnzoMethodGravity::compute(Block * block) throw()
 #ifdef DEBUG_COPY_B  
   const int ib_copy = field.field_id ("B_copy");
   enzo_float * B_copy = (enzo_float*) field.values (ib_copy);
+#endif  
+#ifdef DEBUG_COPY_DENSITIES  
+  const int id_copy = field.field_id ("D_copy");
+  const int idt_copy = field.field_id ("DT_copy");
+  enzo_float * D_copy = (enzo_float*) field.values (id_copy);
+  enzo_float * DT_copy = (enzo_float*) field.values (idt_copy);
 #endif  
   enzo_float * D = (enzo_float*) field.values (idensity);
 
@@ -121,9 +136,15 @@ void EnzoMethodGravity::compute(Block * block) throw()
     for (int i=0; i<mx*my*mz; i++) B[i] = 0.0;
 
   }
+
   
 #ifdef DEBUG_COPY_B
   for (int i=0; i<m; i++) B_copy[i] = B[i];
+#endif	
+#ifdef DEBUG_COPY_DENSITIES
+  enzo_float * DT = (enzo_float*) field.values (idt);
+  for (int i=0; i<m; i++) DT_copy[i] = DT[i];
+  for (int i=0; i<m; i++) D_copy[i] = D[i];
 #endif	
 
   Solver * solver = enzo::problem()->solver(index_solver_);

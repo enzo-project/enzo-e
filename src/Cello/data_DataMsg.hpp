@@ -42,7 +42,8 @@ public: // interface
       face_fluxes_list_(),
       face_fluxes_delete_(),
       coarse_field_buffer_(),
-      coarse_field_list_()
+      coarse_field_list_src_(),
+      coarse_field_list_dst_()
   {
     cello::hex_string(tag_,8);
 #ifdef DEBUG_DATA_MSG    
@@ -86,7 +87,8 @@ public: // interface
     face_fluxes_list_.clear();
     face_fluxes_delete_.clear();
     coarse_field_buffer_.clear();
-    coarse_field_list_.clear();
+    coarse_field_list_src_.clear();
+    coarse_field_list_dst_.clear();
   }
 
   /// Copy constructor
@@ -205,7 +207,8 @@ public: // interface
    int iam3[3],int iap3[3],
    int ifms3[3],int ifps3[3],
    int ifmr3[3],int ifpr3[3],
-   const std::vector<int> & coarse_array_field_list_,
+   const std::vector<int> & field_list_src,
+   const std::vector<int> & field_list_dst,
    std::string debug_block_recv);
 
   ///--------------------
@@ -270,8 +273,10 @@ protected: // attributes
   /// Padded coarse array values for prolongation operators that
   /// requiring extra layers of cells around the interpoltaed region
   std::vector<cello_float> coarse_field_buffer_;
-  /// List of field indices for coarse fields
-  std::vector<int> coarse_field_list_;
+  /// List of field indices for coarse fields; src / dst for
+  /// accum=true
+  std::vector<int> coarse_field_list_src_;
+  std::vector<int> coarse_field_list_dst_;
 
   /// loop limits of the coarse-block array section
   int iam3_cf_[3], iap3_cf_[3];

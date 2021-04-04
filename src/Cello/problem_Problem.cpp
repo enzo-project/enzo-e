@@ -924,6 +924,10 @@ Output * Problem::create_output_
 
     int image_axis = config->output_axis[index][0] - 'x';
 
+    bool use_min_max =
+      (image_min != std::numeric_limits<double>::max()) &&
+      (image_max != -std::numeric_limits<double>::max());
+    
     output = new OutputImage (index,factory,
 			      CkNumPes(),
 			      nx,ny,nz, 
@@ -943,6 +947,7 @@ Output * Problem::create_output_
 			      image_log,
 			      image_abs,
 			      image_ghost,
+                              use_min_max,
 			      image_min, image_max);
 
   } else if (name == "data") {

@@ -21,7 +21,8 @@ void DataMsg::set_coarse_array
    int iam3[3], int iap3[3],
    int ifms3[3], int ifps3[3],
    int ifmr3[3], int ifpr3[3],
-   const std::vector<int> & coarse_field_list,
+   const std::vector<int> & field_list_src,
+   const std::vector<int> & field_list_dst,
    std::string debug_block_recv)
 {
   for (int i=0; i<3; i++) {
@@ -32,7 +33,8 @@ void DataMsg::set_coarse_array
     ifmr3_cf_[i] = ifmr3[i];
     ifpr3_cf_[i] = ifpr3[i];
   }
-  coarse_field_list_ = coarse_field_list;
+  coarse_field_list_src_ = field_list_src;
+  coarse_field_list_dst_ = field_list_dst;
 
   const int nf3[3] = {(ifps3[0] - ifms3[0]),
                       (ifps3[1] - ifms3[1]),
@@ -40,13 +42,21 @@ void DataMsg::set_coarse_array
   const int na3[3] = {(iap3[0] - iam3[0]),
                       (iap3[1] - iam3[1]),
                       (iap3[2] - iam3[2])};
-  const int nf = coarse_field_list.size();
+  const int nf = field_list_src.size();
   const int na = na3[0]*na3[1]*na3[2];
 
-  coarse_field_buffer_.resize(nf*na);
+#ifdef CHECK
+    ASSERT2 ("DataMsg::set_coarse_array",
+             "field_list_src %d and field_list_dst %d must be the same size",
+             field_list_src.size(),
+             field_list_dst.size(),
+             (field_list_src.size() == field_list_dst.size()));
+#endif
+
+    coarse_field_buffer_.resize(nf*na);
   std::fill(coarse_field_buffer_.begin(),coarse_field_buffer_.end(),0.0);
   for (int i_f=0; i_f<nf; i_f++) {
-    const int index_field = coarse_field_list[i_f];
+    const int index_field = coarse_field_list_src_[i_f];
     cello_float * coarse_field = coarse_field_buffer_.data() + i_f*na;
     // get Field dimensions
     int mfx,mfy,mfz;
@@ -170,7 +180,8 @@ int DataMsg::data_size () const
 
   if (na > 0) {
 
-    SIZE_VECTOR_TYPE(size,int,coarse_field_list_);
+    SIZE_VECTOR_TYPE(size,int,coarse_field_list_src_);
+    SIZE_VECTOR_TYPE(size,int,coarse_field_list_dst_);
     SIZE_VECTOR_TYPE(size,cello_float,coarse_field_buffer_);
 
     size += 3*sizeof(int); // iam3_cf_
@@ -246,7 +257,8 @@ char * DataMsg::save_data (char * buffer) const
 
   if (na > 0) {
 
-    SAVE_VECTOR_TYPE(pc,int,coarse_field_list_);
+    SAVE_VECTOR_TYPE(pc,int,coarse_field_list_src_);
+    SAVE_VECTOR_TYPE(pc,int,coarse_field_list_dst_);
     SAVE_VECTOR_TYPE(pc,cello_float,coarse_field_buffer_);
 
     for (int i=0; i<3; i++) {
@@ -335,7 +347,8 @@ char * DataMsg::load_data (char * buffer)
 
   if (na > 0) {
 
-    LOAD_VECTOR_TYPE(pc,int,coarse_field_list_);
+    LOAD_VECTOR_TYPE(pc,int,coarse_field_list_src_);
+    LOAD_VECTOR_TYPE(pc,int,coarse_field_list_dst_);
     LOAD_VECTOR_TYPE(pc,cello_float,coarse_field_buffer_);
 
     for (int i=0; i<3; i++) {
@@ -435,12 +448,12 @@ void DataMsg::update (Data * data, bool is_local)
        (iap3_cf_[2] - iam3_cf_[2])};
     
     // const int ia_start = iaxm + mx*(iaym + my*iazm);
-    const int nf = coarse_field_list_.size();
+    const int nf = coarse_field_list_dst_.size();
     
     for (int i_f=0; i_f<nf; i_f++) {
 
       Field field = data->field();
-      const int index_field = coarse_field_list_[i_f];
+      const int index_field = coarse_field_list_dst_[i_f];
       int m3_c[3];
       field.coarse_dimensions(index_field,m3_c,m3_c+1,m3_c+2);
       const int ic0 = iam3_cf_[0] + m3_c[0]*(iam3_cf_[1] + m3_c[1]*iam3_cf_[2]);
@@ -518,10 +531,14 @@ void DataMsg::print (const char * message) const
             message,tag_,field_data_delete_?1:0);
   CkPrintf ("%s %s DATA_MSG coarse_field_buffer_.sum = %f\n", message,tag_,
             std::accumulate(coarse_field_buffer_.begin(),coarse_field_buffer_.end(),0.0));
-  CkPrintf ("%s %s DATA_MSG coarse_field_list_.sum = %d\n", message,tag_,
+  CkPrintf ("%s %s DATA_MSG coarse_field_list_src_.sum = %d\n", message,tag_,
             std::accumulate
-            (coarse_field_list_.begin(),
-             coarse_field_list_.end(),0));
+            (coarse_field_list_src_.begin(),
+             coarse_field_list_src_.end(),0));
+  CkPrintf ("%s %s DATA_MSG coarse_field_list_dst_.sum = %d\n", message,tag_,
+            std::accumulate
+            (coarse_field_list_dst_.begin(),
+             coarse_field_list_dst_.end(),0));
   CkPrintf ("%s %s DATA_MSG coarse iam3_cf_   = %d %d %d\n",
             message,tag_,iam3_cf_[0],iam3_cf_[1],iam3_cf_[2]);
   CkPrintf ("%s %s DATA_MSG coarse iap3_cf_   = %d %d %d\n",
