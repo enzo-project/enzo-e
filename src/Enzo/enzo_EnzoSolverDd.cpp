@@ -37,9 +37,9 @@ EnzoSolverDd::EnzoSolverDd
    int index_solve_coarse,
    int index_solve_domain,
    int index_solve_smooth,
-   Restrict * restrict,
-     Prolong * prolong,
-     int coarse_level)
+   int index_prolong,
+   int index_restrict,
+   int coarse_level)
     : Solver(name,
 	     field_x,
 	     field_b,
@@ -51,8 +51,8 @@ EnzoSolverDd::EnzoSolverDd
       index_solve_coarse_(index_solve_coarse),
       index_solve_domain_(index_solve_domain),
       index_solve_smooth_(index_solve_smooth),
-      restrict_(restrict),
-      prolong_(prolong),
+      index_prolong_(index_prolong),
+      index_restrict_(index_restrict),
       ixc_(-1),
       mx_(0),my_(0),mz_(0),
       gx_(0),gy_(0),gz_(0),
@@ -429,10 +429,13 @@ FieldMsg * EnzoSolverDd::pack_field_(EnzoBlock * enzo_block,
   FieldFace * field_face = enzo_block->create_face
     (if3, ic3, g3, refresh_type, refresh, true);
 
-  if (refresh_type == refresh_coarse)
-    field_face->set_restrict(restrict_);
-  if (refresh_type == refresh_fine)
-    field_face->set_prolong(prolong_);
+  Problem * problem = cello::problem();
+  
+  if (refresh_type == refresh_fine) {
+    field_face->set_prolong(problem->prolong(index_prolong_));
+  } else if (refresh_type == refresh_coarse) {
+    field_face->set_restrict(problem->restrict(index_restrict_));
+  }
   
   Field field = enzo_block->data()->field();
   int narray; 
@@ -476,10 +479,13 @@ void EnzoSolverDd::unpack_field_
   FieldFace * field_face = enzo_block->create_face 
     (if3, ic3, g3, refresh_type, refresh, true);
 
-  if (refresh_type == refresh_coarse)
-    field_face->set_restrict(restrict_);
-  if (refresh_type == refresh_fine)
-    field_face->set_prolong(prolong_);
+  Problem * problem = cello::problem();
+
+  if (refresh_type == refresh_fine) {
+    field_face->set_prolong(problem->prolong(index_prolong_));
+  } else if (refresh_type == refresh_coarse) {
+    field_face->set_restrict(problem->restrict(index_restrict_));
+  }
 
   Field field = enzo_block->data()->field();
   

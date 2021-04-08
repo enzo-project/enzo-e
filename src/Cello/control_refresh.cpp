@@ -263,15 +263,8 @@ int Block::refresh_load_field_faces_ (Refresh & refresh)
 	(level_face == level + 1) ? refresh_fine : refresh_unknown;
 
       // handle padded interpolation special case if needed
-      int pad = cello::problem()->prolong()->coarse_padding();
-
-      // revert to ProlongLinear if accumulate is true
-      // since EnzoProlong currently doesn't work correctly
-      // with accumulate = true
-
-      //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-      //      if (refresh.accumulate()) pad = 0;
-      //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+      Prolong * prolong = cello::problem()->prolong();
+      int pad = refresh.coarse_padding(prolong);
 
       if (pad == 0) {
         refresh_load_field_face_
@@ -366,7 +359,8 @@ int Block::refresh_load_coarse_face_
   const int level = index_.level();
   int count = 0;
 
-  const int pad = cello::problem()->prolong()->coarse_padding();
+  Prolong * prolong = cello::problem()->prolong();
+  const int pad = refresh.coarse_padding(prolong);
 
   if ((pad > 0) && (level != level_face)) {
 
@@ -651,8 +645,8 @@ void Block::refresh_coarse_send_
 void Block::refresh_coarse_apply_ (Refresh * refresh)
 {
   Prolong * prolong = cello::problem()->prolong();
-  
-  const int pad = prolong->coarse_padding();
+
+  const int pad = refresh->coarse_padding(prolong);
 
   if (pad > 0) {
   

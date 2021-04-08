@@ -136,8 +136,8 @@ EnzoSolverMg0::EnzoSolverMg0
  int index_solve_coarse,
  int index_smooth_post,
  int index_smooth_last,
- Restrict * restrict,
- Prolong * prolong,
+ int index_prolong,
+ int index_restrict,
  int coarse_level) 
   : Solver(name,
 	   field_x,
@@ -155,8 +155,8 @@ EnzoSolverMg0::EnzoSolverMg0
     index_solve_coarse_(index_solve_coarse),
     index_smooth_post_(index_smooth_post),
     index_smooth_last_(index_smooth_last),
-    restrict_(restrict),
-    prolong_(prolong),
+    index_prolong_(index_prolong),
+    index_restrict_(index_restrict),
     iter_max_(iter_max), 
     ic_(-1), ir_(-1),
     mx_(0),my_(0),mz_(0),
@@ -187,18 +187,6 @@ EnzoSolverMg0::EnzoSolverMg0
   i_msg_ = scalar_descr_void->new_value(name + ":msg");
 
 }
-
-//----------------------------------------------------------------------
-
-EnzoSolverMg0::~EnzoSolverMg0 () throw()
-{
-  delete prolong_;
-  delete restrict_;
-
-  prolong_ = NULL;
-  restrict_ = NULL;
-}
-
 
 //----------------------------------------------------------------------
 
@@ -947,7 +935,8 @@ FieldMsg * EnzoSolverMg0::pack_residual_(EnzoBlock * enzo_block) throw()
   FieldFace * field_face = enzo_block->create_face
     (if3, ic3, g3, refresh_coarse, refresh, true);
 
-  field_face->set_restrict(restrict_);
+  Restrict * restrict = cello::problem()->restrict(index_restrict_);
+  field_face->set_restrict(restrict);
   
   int narray; 
   char * array;
@@ -995,7 +984,8 @@ void EnzoSolverMg0::unpack_residual_
   FieldFace * field_face = enzo_block->create_face 
     (if3, ic3, g3, refresh_coarse, refresh, true);
 
-  field_face->set_restrict(restrict_);
+  Restrict * restrict = cello::problem()->restrict(index_restrict_);
+  field_face->set_restrict(restrict);
 
   Field field = enzo_block->data()->field();
   
@@ -1027,7 +1017,8 @@ FieldMsg * EnzoSolverMg0::pack_correction_
     (if3, ic3, g3, refresh_fine, refresh, true);
 
   Field field = enzo_block->data()->field();
-  field_face->set_prolong(prolong_);
+  Prolong * prolong = cello::problem()->prolong (index_prolong_);
+  field_face->set_prolong(prolong);
 
   int narray; 
   char * array;
@@ -1073,7 +1064,8 @@ void EnzoSolverMg0::unpack_correction_
   FieldFace * field_face = enzo_block->create_face 
     (if3, msg->ic3, g3, refresh_fine, refresh, true);
 
-  field_face->set_prolong(prolong_);
+  Prolong * prolong = cello::problem()->prolong (index_prolong_);
+  field_face->set_prolong(prolong);
 
   Field field = enzo_block->data()->field();
   

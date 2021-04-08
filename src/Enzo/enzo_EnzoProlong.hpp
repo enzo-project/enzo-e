@@ -19,14 +19,18 @@ class EnzoProlong : public Prolong {
 public: // interface
 
   /// Constructor
-  EnzoProlong(std::string method, int positive) throw();
+  EnzoProlong(std::string method,
+              bool positive,
+              bool use_linear) throw();
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoProlong);
 
   /// CHARM++ migration constructor
   EnzoProlong(CkMigrateMessage *m)
-    : Prolong(m),method_(-1), positive_(false)
+    : Prolong(m),method_(-1),
+      positive_(1),
+      use_linear_(false)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -42,8 +46,10 @@ public: // interface
   /// Return the name identifying the prolongation operator
   virtual std::string name () const { return "enzo"; }
 
+protected: // protected virtual methods
+  
   /// Amount of padding required in coarse region (default 0)
-  virtual int coarse_padding() const
+  virtual int coarse_padding_() const
   { return 1; }
 
 private: // functions
@@ -62,6 +68,9 @@ private: // attributes
 
   /// Positivity flag
   int positive_;
+
+  /// Whether to bypass and actually use ProlongLinear (for debugging)
+  bool use_linear_;
 
 };
 

@@ -33,9 +33,8 @@ bool Sync::next () throw()
 {
   advance_();
   check_done_();
-  return (index_curr_ == 0 && is_done_ == true);
+  return (index_curr_ == 0) && is_done_;
 }
-
 
 //----------------------------------------------------------------------
 
@@ -49,22 +48,27 @@ void Sync::advance () throw()
 
 void Sync::advance_() throw()
 {
-  if (index_stop_ > 0) {
-    index_curr_ = (index_stop_ + (index_curr_-1) + 1) % index_stop_ + 1;  
-  } else {
-    // stop is not known yet
-    ++ index_curr_;
-  }
+  ++ index_curr_;
 }
 
 //----------------------------------------------------------------------
 
 void Sync::check_done_() throw()
 {
-  if ( (index_curr_ == index_stop_) && 
-       (index_stop_ > 0) ) {
-    index_curr_ = 0;
-    is_done_ = true;
+  if (index_stop_ > 0) {
+    if (index_curr_ == index_stop_) {
+      // reached stopping value
+      index_curr_ = 0;
+      is_done_ = true;
+    }
+    if (index_curr_ > index_stop_) {
+      // exceded stopping value: error!
+      // [ INCOMPLETE: this will never occur since index_curr_ set to
+      // 0 above ]
+      WARNING2("Sync::check_done_()",
+             "Incrementing sync counter %d beyond limit %d",
+             index_curr_,index_stop_);
+    }
   }
 }
 //----------------------------------------------------------------------

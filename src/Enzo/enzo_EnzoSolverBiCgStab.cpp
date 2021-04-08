@@ -45,11 +45,12 @@ void mutex_init_bcg_iter()
 
 // #define DEBUG_CALLBACK
 
-//#define TRACE_DOT
+// #define TRACE_DOT
 
 // #define TRACE_CYCLE
-// #define CYCLE_START 0
-// #define CYCLE_END   100
+// #define CYCLE_START 94
+// #define CYCLE_END   94
+
 // #define ITER_START 0
 // #define ITER_END   10
 // #define CYCLE_EXIT 95

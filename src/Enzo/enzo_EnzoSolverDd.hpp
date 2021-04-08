@@ -35,8 +35,8 @@ public: // interface
    int index_solve_coarse,
    int index_solve_domain,
    int index_solve_smooth,
-   Restrict * restrict,
-   Prolong * prolong,
+   int index_prolong,
+   int index_restrict,
    int coarse_level) ;
 
   EnzoSolverDd() {};
@@ -51,8 +51,8 @@ public: // interface
        index_solve_coarse_(-1),
        index_solve_domain_(-1),
        index_solve_smooth_(-1),
-       restrict_(NULL),
-       prolong_(NULL),
+       index_prolong_(-1),
+       index_restrict_(-1),
        i_sync_restrict_(-1),
        i_sync_prolong_(-1),
        i_msg_(-1),
@@ -76,9 +76,8 @@ public: // interface
     p | index_solve_coarse_;
     p | index_solve_domain_;
     p | index_solve_smooth_;
-
-    p | restrict_;
-    p | prolong_;
+    p | index_prolong_;
+    p | index_restrict_;
 
     p | i_sync_restrict_;
     p | i_sync_prolong_;
@@ -190,17 +189,13 @@ protected: // attributes
   /// Matrix
   std::shared_ptr<Matrix> A_;
 
-  /// Indices for coarse solver, domain solver, and smoother
+  /// Indices for coarse solver, domain solver, and smoother, prolong, restrict
 
   int index_solve_coarse_;
   int index_solve_domain_;
   int index_solve_smooth_;
-  
-  /// Restriction
-  Restrict * restrict_;
-
-  /// Prolongation
-  Prolong * prolong_;
+  int index_prolong_;
+  int index_restrict_;
 
   /// MG scalar id's
   int i_sync_restrict_;

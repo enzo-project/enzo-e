@@ -10,6 +10,8 @@
 #define PROBLEM_REFRESH_HPP
 
 class Box;
+class Prolong;
+class Restrict;
 class Refresh : public PUP::able {
 
   /// @class    Refresh
@@ -35,7 +37,9 @@ public: // interface
     active_(true),
     callback_(0) ,
     root_level_(0),
-    id_refresh_(-1)
+    id_refresh_(-1),
+    id_prolong_(0),
+    id_restrict_(0)
   {
   }
 
@@ -62,7 +66,9 @@ public: // interface
       active_(active),
       callback_(0),
       root_level_(0),
-      id_refresh_(-1)
+      id_refresh_(-1),
+      id_prolong_(0),
+      id_restrict_(0)
   {
   }
 
@@ -72,22 +78,24 @@ public: // interface
   /// CHARM++ migration constructor for PUP::able
   Refresh (CkMigrateMessage *m)
     : PUP::able(m),
-    all_fields_(false),
-    field_list_src_(),
-    field_list_dst_(),
-    all_particles_(false),
-    particle_list_(),
-    all_fluxes_(false),
-    ghost_depth_(0),
-    min_face_rank_(0),
-    neighbor_type_(0),
-    accumulate_(false),
-    sync_type_(0),
-    sync_id_ (-1),
-    active_(true),
-    callback_(0),
-    root_level_(0),
-    id_refresh_(-1)
+      all_fields_(false),
+      field_list_src_(),
+      field_list_dst_(),
+      all_particles_(false),
+      particle_list_(),
+      all_fluxes_(false),
+      ghost_depth_(0),
+      min_face_rank_(0),
+      neighbor_type_(0),
+      accumulate_(false),
+      sync_type_(0),
+      sync_id_ (-1),
+      active_(true),
+      callback_(0),
+      root_level_(0),
+      id_refresh_(-1),
+      id_prolong_(-1),
+      id_restrict_(-1)
   {
   }
 
@@ -113,6 +121,8 @@ public: // interface
     p | callback_;
     p | root_level_;
     p | id_refresh_;
+    p | id_prolong_;
+    p | id_restrict_;
   }
 
   //--------------------------------------------------
@@ -385,6 +395,13 @@ public: // interface
   int id() const
   { return id_refresh_; }
 
+  /// Return whether the prolongation requires padded coarse array
+  int coarse_padding(const Prolong * prolong) const;
+
+  /// Return the prolongation and restriction operators
+  Prolong * prolong ();
+  Restrict * restrict ();
+  
   //--------------------------------------------------
 
   /// Return the number of bytes required to serialize the data object
@@ -458,6 +475,9 @@ private: // attributes
   /// ID in refresh_list_[]
   int id_refresh_;
 
+  /// ids of interpolation and restriction operators
+  int id_prolong_;
+  int id_restrict_;
 };
 
 #endif /* PROBLEM_REFRESH_HPP */

@@ -142,6 +142,7 @@ EnzoConfig::EnzoConfig() throw ()
   /// EnzoProlong
   prolong_enzo_type(),
   prolong_enzo_positive(true),
+  prolong_enzo_use_linear(false),
   /// EnzoSolverMg0
   solver_pre_smooth(),
   solver_post_smooth(),
@@ -321,6 +322,7 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | prolong_enzo_type;
   p | prolong_enzo_positive;
+  p | prolong_enzo_use_linear;
 
   p | solver_pre_smooth;
   p | solver_post_smooth;
@@ -472,8 +474,9 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Method:pm_update:max_dt", std::numeric_limits<double>::max());
 
   // ENZO interpolation
-  prolong_enzo_type     = p->value_string  ("Prolong:enzo:type","2A");
-  prolong_enzo_positive = p->value_logical ("Prolong:enzo:positive",true);
+  prolong_enzo_type       = p->value_string  ("Prolong:enzo:type","2A");
+  prolong_enzo_positive   = p->value_logical ("Prolong:enzo:positive",true);
+  prolong_enzo_use_linear = p->value_logical ("Prolong:enzo:use_linear",false);
 
   // Particle method initialization
   initial_pm_field        = p->value_string  ("Initial:pm:field","density");

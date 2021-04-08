@@ -24,13 +24,15 @@
 
 //----------------------------------------------------------------------
 
-EnzoProlong::EnzoProlong(std::string type,int positive) throw()
+EnzoProlong::EnzoProlong
+(std::string type,
+ bool positive,
+ bool use_linear) throw()
   : Prolong (),
     method_(-1),
-    positive_(positive)
+    positive_(positive ? 1 : 0),
+    use_linear_(use_linear)
 {
-  //  CkPrintf ("TRACE_PROLONG EnzoProlong()\n");
-  
   if      (type == "3A")  method_ = 0;
   else if (type == "2A") method_ = 1;
   else if (type == "2B") method_ = 2;
@@ -49,6 +51,8 @@ void EnzoProlong::pup (PUP::er &p)
   Prolong::pup(p);
 
   p | method_;
+  p | positive_;
+  p | use_linear_;
 }
 
 
@@ -60,29 +64,48 @@ void EnzoProlong::apply
   const void * values_c, int m3_c[3], int o3_c[3], int n3_c[3],
   bool accumulate)
 {
-#ifdef USE_PROLONG_LINEAR
-  static bool first_call = true;
-  if (first_call) {
-    WARNING("EnzoProlong::apply()","CALLING ProlongLinear");
-    first_call = false;
+  if (!accumulate) {
+    // only call EnzoProlong if accumulate = false
+    if (!use_linear_) {
+      // only call EnzoProlong if not reverting to linear
+      apply_((enzo_float *)     values_f,m3_f,o3_f,n3_f,
+             (const enzo_float*)values_c,m3_c,o3_c,n3_c,accumulate);
+    }  else {
+      static bool first_call = true;
+      if (first_call) {
+        WARNING("EnzoProlong::apply()","CALLING ProlongLinear");
+        first_call = false;
+      }
+      ProlongLinear prolong_linear;
+      for (int i=0; i<cello::rank(); i++) {
+        n3_c[i]-=2;
+        o3_c[i]+=1;
+      }
+      prolong_linear.apply
+        (precision,
+         values_f,m3_f,o3_f,n3_f,
+         values_c,m3_c,o3_c,n3_c,accumulate);
+      for (int i=0; i<cello::rank(); i++) {
+        n3_c[i]+=2;
+        o3_c[i]-=1;
+      }
+    }
+
+  } else {
+    // else call ProlongLinear if accumulate = true
+    static bool first_call = true;
+    if (first_call) {
+      WARNING("EnzoProlong::apply()","CALLING ProlongLinear");
+      first_call = false;
+    }
+
+    ProlongLinear prolong_linear;
+    prolong_linear.apply
+      (precision,
+       values_f,m3_f,o3_f,n3_f,
+       values_c,m3_c,o3_c,n3_c,accumulate);
   }
-  ProlongLinear prolong_linear;
-  for (int i=0; i<cello::rank(); i++) {
-    n3_c[i]-=2;
-    o3_c[i]+=1;
-  }
-  prolong_linear.apply
-    (precision,
-     values_f,m3_f,o3_f,n3_f,
-     values_c,m3_c,o3_c,n3_c,accumulate);
-  for (int i=0; i<cello::rank(); i++) {
-      n3_c[i]+=2;
-      o3_c[i]-=1;
-  }
-#else
-  apply_((enzo_float *)     values_f,m3_f,o3_f,n3_f,
-         (const enzo_float*)values_c,m3_c,o3_c,n3_c,accumulate);
-#endif    
+
 }
 //----------------------------------------------------------------------
 
@@ -102,7 +125,6 @@ void EnzoProlong::apply_
   //  enzo_float * grid = new enzo_float[nf];
   //  DEBUG_FILL_ARRAY("grid",grid,n3_f,n3_f);
 
-  positive_ = 0;
   for (int i=0; i<rank; i++) {
     pdims[i] = m3_c[i];
     pstart[i] = 2;

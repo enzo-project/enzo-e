@@ -15,13 +15,13 @@ Problem::Problem() throw()
     initial_list_(),
     physics_list_(),
     refine_list_(),
-    stopping_(NULL),
+    stopping_(nullptr),
     solver_list_(),
     method_list_(),
     output_list_(),
-    prolong_(NULL),
-    restrict_(NULL),
-    units_(NULL),
+    prolong_list_(),
+    restrict_list_(),
+    units_(nullptr),
     index_refine_(0),
     index_output_(0),
     index_boundary_(0)
@@ -113,9 +113,20 @@ void Problem::pup (PUP::er &p)
     p | output_list_[i]; // PUP::able
   }
 
-  p | prolong_; // PUP::able
-  p | restrict_; // PUP::able
+  if (pk) n=prolong_list_.size();
+  p | n;
+  if (up) prolong_list_.resize(n);
+  for (int i=0; i<n; i++) {
+    p | prolong_list_[i]; // PUP::able
+  }
 
+  if (pk) n=restrict_list_.size();
+  p | n;
+  if (up) restrict_list_.resize(n);
+  for (int i=0; i<n; i++) {
+    p | restrict_list_[i]; // PUP::able
+  }
+  
   p | index_refine_;
   p | index_output_;
   p | index_boundary_;
@@ -134,7 +145,7 @@ void Problem::initialize_boundary(Config * config,
 
     ASSERT1("Problem::initialize_boundary",
 	  "Boundary type %s not recognized",
-	  type.c_str(),  boundary != NULL);
+	  type.c_str(),  boundary != nullptr);
 
     boundary_list_.push_back(boundary);
   }
@@ -157,7 +168,7 @@ void Problem::initialize_initial(Config * config,
     ASSERT1("Problem::initialize_initial",
 	    "Initial type %s not recognized",
 	    config->initial_list[index].c_str(),
-	    initial != NULL);
+	    initial != nullptr);
 
     initial_list_.push_back( initial );
   }
@@ -179,7 +190,7 @@ void Problem::initialize_physics(Config * config,
     ASSERT1("Problem::initialize_physics",
 	    "Physics type %s not recognized",
 	    config->physics_list[index].c_str(),
-	    (physics != NULL) );
+	    (physics != nullptr) );
 
     physics_list_.push_back( physics );
   }
@@ -226,31 +237,47 @@ void Problem::initialize_stopping(Config * config) throw()
 
   ASSERT("Problem::initialize_stopping",
 	  "Stopping object not successfully created",
-	  stopping_ != NULL);
+	  stopping_ != nullptr);
 }
 
 //----------------------------------------------------------------------
 
 void Problem::initialize_prolong(Config * config) throw()
 {
-  prolong_ = create_prolong_(config->field_prolong,config);
+  // default prolongation
+  ASSERT ("Problem::initialize_prolong()",
+          "Initial default prolongation must be added to Problem::prolong_list_ first",
+          (prolong_list_.size() == 0));
+  
+  Prolong * prolong = create_prolong_(config->field_prolong,config);
 
   ASSERT1("Problem::initialize_prolong",
 	  "Prolong type %s not recognized",
 	  config->field_prolong.c_str(),
-	  prolong_ != NULL);
-}
+	  prolong != nullptr);
+
+  prolong_list_.push_back(prolong);
+
+}  
 
 //----------------------------------------------------------------------
 
 void Problem::initialize_restrict(Config * config) throw()
 {
-  restrict_ = create_restrict_(config->field_restrict,config);
+  // default restriction
+  ASSERT ("Problem::initialize_restrict()",
+          "Initial default restriction must be added to Problem::restrict_list_ first",
+          (restrict_list_.size() == 0));
+
+  Restrict * restrict = create_restrict_(config->field_restrict,config);
 
   ASSERT1("Problem::initialize_restrict",
 	  "Restrict type %s not recognized",
 	  config->field_restrict.c_str(),
-	  restrict_ != NULL);
+	  restrict != nullptr);
+
+  restrict_list_.push_back(restrict);
+
 }
 
 //----------------------------------------------------------------------
@@ -267,7 +294,7 @@ void Problem::initialize_output
 
     Output * output = create_output_ (type,index, config,factory);
 
-    if (output == NULL) {
+    if (output == nullptr) {
       ERROR2("Problem::initialize_output",
 	     "Unknown parameter type Output:%s:type = %s",
 	     config->output_list[index].c_str(),type.c_str());
@@ -395,7 +422,7 @@ void Problem::initialize_output
 
       OutputImage * output_image = dynamic_cast<OutputImage *> (output);
 
-      if (output_image != NULL) {
+      if (output_image != nullptr) {
 
         // COLORMAP
 
@@ -509,7 +536,7 @@ void Problem::initialize_units(Config * config) throw()
 
   ASSERT("Problem::initialize_units",
 	  "Units object not successfully created",
-	  units_ != NULL);
+	  units_ != nullptr);
 }
 
 //======================================================================
@@ -527,9 +554,9 @@ void Problem::deallocate_() throw()
     delete refine_list_[i];    refine_list_[i] = 0;
   }
   delete stopping_;      stopping_ = 0;
-  delete units_;         units_ = NULL;
+  delete units_;         units_ = nullptr;
   for (size_t i=0; i<physics_list_.size(); i++) {
-    delete physics_list_[i];   physics_list_[i] = NULL;
+    delete physics_list_[i];   physics_list_[i] = nullptr;
   }
   for (size_t i=0; i<output_list_.size(); i++) {
     delete output_list_[i];    output_list_[i] = 0;
@@ -584,7 +611,7 @@ Boundary * Problem::create_boundary_
     return new BoundaryPeriodic(axis);
 
   }
-  return NULL;
+  return nullptr;
 }
 
 //----------------------------------------------------------------------
@@ -602,7 +629,7 @@ Initial * Problem::create_initial_
   // parameter: Initial : time
   //--------------------------------------------------
 
-  Initial * initial = NULL;
+  Initial * initial = nullptr;
 
   if (type == "file") {
     initial = new InitialFile (parameters,
@@ -684,7 +711,7 @@ Refine * Problem::create_refine_
        config->adapt_output[index],
        config->adapt_level_exponent[index] );
   }
-  return NULL;
+  return nullptr;
 }
 
 //----------------------------------------------------------------------
@@ -742,7 +769,7 @@ Solver * Problem::create_solver_
 {
   TRACE1("Problem::create_solver %s",type.c_str());
 
-  Solver * solver = NULL;
+  Solver * solver = nullptr;
 
   if (type == "null") {
     solver = new SolverNull
@@ -770,7 +797,7 @@ Physics * Problem::create_physics_
   TRACE1("Problem::create_physics %s",name.c_str());
 
   // No default physics
-  Physics * physics = NULL;
+  Physics * physics = nullptr;
 
   return physics;
 }
@@ -782,7 +809,7 @@ Physics * Problem::physics (std::string type) const throw()
   for (size_t i=0; i<physics_list_.size(); i++) {
     if (physics_list_[i]->type() == type) return physics_list_[i];
   }
-  return NULL;
+  return nullptr;
 }
 
 //----------------------------------------------------------------------
@@ -792,7 +819,7 @@ Method * Problem::method (std::string name) const throw()
   for (size_t i=0; i<method_list_.size(); i++) {
     if (method_list_[i]->name() == name) return method_list_[i];
   }
-  return NULL;
+  return nullptr;
 }
 
 //----------------------------------------------------------------------
@@ -803,7 +830,7 @@ Compute * Problem::create_compute
 {
   TRACE1("Problem::create_compute %s", name.c_str());
 
-  Compute * compute = NULL;
+  Compute * compute = nullptr;
 
   return compute;
 }
@@ -818,7 +845,7 @@ Method * Problem::create_method_
   TRACE1("Problem::create_method %s",name.c_str());
 
   // No default method
-  Method * method = NULL;
+  Method * method = nullptr;
 
   if (name == "trace") {
     method = new MethodTrace(config->method_courant[index_method],
@@ -876,7 +903,7 @@ Output * Problem::create_output_
 /// @param factory        Factory object for creating Io objects of correct type
 { 
 
-  Output * output = NULL;
+  Output * output = nullptr;
 
   if (name == "image") {
 

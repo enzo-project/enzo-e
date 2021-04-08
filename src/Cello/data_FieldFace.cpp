@@ -987,12 +987,13 @@ void FieldFace::set_box_(Box * box)
 
   box->set_block(BoxType_receive,level,face_,child_);
 
-  const int pad = ((refresh_type_==refresh_fine) && prolong()) ? prolong()->coarse_padding() : 0;
+  Prolong * prolong = this->prolong();
+  int pad = prolong ? refresh_->coarse_padding(prolong) : 0;
+  if (refresh_type_ != refresh_fine) pad = 0;
 
   box->set_padding(pad);
 
   box->compute_region();
-
 }
 
 //----------------------------------------------------------------------

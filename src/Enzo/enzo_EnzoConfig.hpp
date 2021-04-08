@@ -230,6 +230,7 @@ public: // interface
       // EnzoProlong
       prolong_enzo_type(),
       prolong_enzo_positive(true),
+      prolong_enzo_use_linear(false),
       // EnzoSolverMg0
       solver_pre_smooth(),
       solver_post_smooth(),
@@ -430,6 +431,7 @@ public: // attributes
 
   std::string                prolong_enzo_type;
   bool                       prolong_enzo_positive;
+  bool                       prolong_enzo_use_linear;
   
   ///==============
   /// EnzoSolverMg0

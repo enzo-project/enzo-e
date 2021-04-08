@@ -87,6 +87,27 @@ void Refresh::box_accumulate_adjust
 
 //----------------------------------------------------------------------
 
+int Refresh::coarse_padding(const Prolong * prolong) const
+{
+  return accumulate_ ? 0 : prolong->coarse_padding_();
+}
+
+//----------------------------------------------------------------------
+
+Prolong * Refresh::prolong ()
+{
+  return cello::problem()->prolong(id_prolong_);
+}
+
+//----------------------------------------------------------------------
+
+Restrict * Refresh::restrict ()
+{
+  return cello::problem()->restrict(id_restrict_);
+}
+  
+//----------------------------------------------------------------------
+
 int Refresh::data_size () const
 {
   int count = 0;
@@ -113,6 +134,8 @@ int Refresh::data_size () const
   SIZE_SCALAR_TYPE(count,int,callback_);
   SIZE_SCALAR_TYPE(count,int,root_level_);
   SIZE_SCALAR_TYPE(count,int,id_refresh_);
+  SIZE_SCALAR_TYPE(count,int,id_prolong_);
+  SIZE_SCALAR_TYPE(count,int,id_restrict_);
 
   return count;
 
@@ -142,6 +165,8 @@ char * Refresh::save_data (char * buffer) const
   SAVE_SCALAR_TYPE(p,int,callback_);
   SAVE_SCALAR_TYPE(p,int,root_level_);
   SAVE_SCALAR_TYPE(p,int,id_refresh_);
+  SAVE_SCALAR_TYPE(p,int,id_prolong_);
+  SAVE_SCALAR_TYPE(p,int,id_restrict_);
 
   ASSERT2 ("Refresh::save_data\n",
  	   "Actual size %ld does not equal computed size %d",
@@ -177,6 +202,8 @@ char * Refresh::load_data (char * buffer)
   LOAD_SCALAR_TYPE(p,int,callback_);
   LOAD_SCALAR_TYPE(p,int,root_level_);
   LOAD_SCALAR_TYPE(p,int,id_refresh_);
+  LOAD_SCALAR_TYPE(p,int,id_prolong_);
+  LOAD_SCALAR_TYPE(p,int,id_restrict_);
 
   ASSERT2 ("Refresh::load_data\n",
 	   "Actual size %ld does not equal computed size %d",
