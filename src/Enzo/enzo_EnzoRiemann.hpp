@@ -28,7 +28,7 @@ public: // interface
   /// @param solver The name of the Riemann solver to use. Valid names include
   ///     "hll", "hlle", and "hlld"
   static EnzoRiemann* construct_riemann
-    (std::vector<std::string> integrable_groups, std::string solver);
+    (std::vector<std::string> integrable_quantities, std::string solver);
 
   EnzoRiemann() throw()
   {}
