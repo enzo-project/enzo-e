@@ -57,7 +57,7 @@ public: // interface
   /// Returns the partial timestep index.
   ///
   /// 0 means that the current interface bfields are stored in the permanent
-  /// fields (this is how the. 1 means that they are stored in the 
+  /// fields. 1 means that they are stored in the temporary arrays
   int partial_timestep_index() const { return partial_timestep_index_; }
 
   /// increments the partial timestep index

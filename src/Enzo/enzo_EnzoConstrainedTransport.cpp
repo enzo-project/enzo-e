@@ -25,7 +25,7 @@ EnzoConstrainedTransport::EnzoConstrainedTransport(Block *block,
           "num_partial_timesteps!=2.");
   }
 
-  const char* field_names[] = {"bfieldi_x", "bfieldi_y", "bfieldi_z"};
+  const std::string field_names[] = {"bfieldi_x", "bfieldi_y", "bfieldi_z"};
   EnzoFieldArrayFactory array_factory(block, 0); // stale_depth = 0
 
   // setup bfieldi_l_ and if num_partial_timesteps_ > 1, also setup
@@ -151,7 +151,7 @@ void EnzoConstrainedTransport::correct_reconstructed_bfield
     EFlt3DArray bfield = coord.get_subarray((*cur_bfieldi_l)[dim],
                                             full_ax, full_ax, CSlice(1,-1));
 
-    const char* names[3] = {"bfield_x", "bfield_y", "bfield_z"};
+    const std::string names[3] = {"bfield_x", "bfield_y", "bfield_z"};
     EFlt3DArray l_bfield = l_map.at(names[dim]);
     EFlt3DArray r_bfield = r_map.at(names[dim]);
 
@@ -262,7 +262,7 @@ void EnzoConstrainedTransport::update_all_bfield_components
   }
 
   // Finally, update cell-centered B-field
-  const char* names[3] = {"bfield_x", "bfield_y", "bfield_z"};
+  const std::string names[3] = {"bfield_x", "bfield_y", "bfield_z"};
   for (int dim = 0; dim<3; dim++){
     EnzoConstrainedTransport::compute_center_bfield
       (dim, out_centered_bfield_map[names[dim]], (*out_bfieldi_l)[dim],
@@ -275,8 +275,8 @@ void EnzoConstrainedTransport::update_all_bfield_components
 void EnzoConstrainedTransport::compute_center_efield
 (int dim, EFlt3DArray &efield, EnzoEFltArrayMap &prim_map, int stale_depth)
 {
-  const char* v_names[3] = {"velocity_x", "velocity_y", "velocity_z"};
-  const char* b_names[3] = {"bfield_x", "bfield_y", "bfield_z"};
+  const std::string v_names[3] = {"velocity_x", "velocity_y", "velocity_z"};
+  const std::string b_names[3] = {"bfield_x", "bfield_y", "bfield_z"};
 
   EnzoPermutedCoordinates coord(dim);
   int j = coord.j_axis();
@@ -499,7 +499,7 @@ void EnzoConstrainedTransport::compute_edge_efield
   EFlt3DArray Eedge = edge_efield.subarray(stale_slc, stale_slc, stale_slc);
 
   // Initialize face-centered E-fields
-  const char* keys[] = {"bfield_x", "bfield_y", "bfield_z"};
+  const std::string keys[] = {"bfield_x", "bfield_y", "bfield_z"};
 
   // Ex(k,j+1/2,i) = -1.*yflux(Bz)
   EFlt3DArray Ej = jflux_map.get(keys[coord.k_axis()],stale_depth);

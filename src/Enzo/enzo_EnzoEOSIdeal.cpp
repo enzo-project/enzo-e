@@ -8,6 +8,8 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
+// #define DEBUG_MATCHING_ARRAY_SHAPES
+
 //----------------------------------------------------------------------
 
 void EnzoEOSIdeal::pup (PUP::er &p)
@@ -96,14 +98,14 @@ void check_recon_integ_overlap_(Grouping &reconstructable_group,
 //----------------------------------------------------------------------
 
 // Helper function that performs a quick check to confirm that certain fields
-// are  by both reconstructable_group and integrable_group
+// are held by both reconstructable_group and integrable_group
 void confirm_same_kv_pair_(const EnzoEFltArrayMap &reconstructable,
                            const EnzoEFltArrayMap &integrable,
-                           bool may_be_missing, const std::string &key,
+                           bool allowed_to_be_omitted, const std::string &key,
                            const std::string &func_name)
 {
-  if (may_be_missing && ( (!integrable.contains(key)) ||
-                          (!reconstructable.contains(key)) ) ){
+  if (allowed_to_be_omitted && ( (!integrable.contains(key)) ||
+                                 (!reconstructable.contains(key)) ) ){
     return;
   } else {
     ASSERT1(func_name.c_str(),
@@ -174,7 +176,9 @@ void EnzoEOSIdeal::integrable_from_reconstructable
   }
 
   const bool idual = this->uses_dual_energy_formalism();
-  const bool mag   = reconstructable.contains("bfield_x");
+  const bool mag   = (reconstructable.contains("bfield_x") ||
+                      reconstructable.contains("bfield_y") ||
+                      reconstructable.contains("bfield_z"));
   // Confirm that the expected fields (e.g. density, vx, vy, vz, bx, by, bz)
   // are the same in reconstructable_group and integrable_group 
   check_recon_integ_overlap_(reconstructable, integrable,
@@ -324,16 +328,17 @@ void EnzoEOSIdeal::pressure_from_reconstructable
   } else {
     EFlt3DArray old_p = reconstructable.get("pressure", stale_depth);
 
-    if ((old_p.shape(0) != pressure.shape(0)) ||
-        (old_p.shape(1) != pressure.shape(1)) ||
-        (old_p.shape(2) != pressure.shape(2))   ){
-      ERROR6("EnzoEOSIdeal::pressure_from_reconstructable",
-             ("The pressure array in reconstructable has shape (%d,%d,%d) "
-              "while the array passed to this function has shape (%d,%d,%d). "
-              "They should be the same."),
-             old_p.shape(0), old_p.shape(1), old_p.shape(2),
-             pressure.shape(0), pressure.shape(1), pressure.shape(2));
-    }
+#ifdef DEBUG_MATCHING_ARRAY_SHAPES
+    ASSERT6("EnzoEOSIdeal::pressure_from_reconstructable",
+            ("The pressure array in reconstructable has shape (%d,%d,%d) "
+             "while the array passed to this function has shape (%d,%d,%d). "
+             "They should be the same."),
+            old_p.shape(0), old_p.shape(1), old_p.shape(2),
+            pressure.shape(0), pressure.shape(1), pressure.shape(2),
+            ((old_p.shape(0) == pressure.shape(0)) &&
+             (old_p.shape(1) == pressure.shape(1)) &&
+             (old_p.shape(2) == pressure.shape(2))));
+#endif
 
     for (int iz=0; iz< old_p.shape(0); iz++) {
       for (int iy=0; iy< old_p.shape(1); iy++) {
@@ -342,7 +347,6 @@ void EnzoEOSIdeal::pressure_from_reconstructable
 	}
       }
     }
-    // pressure.subarray() = old_p;
   }
 }
 

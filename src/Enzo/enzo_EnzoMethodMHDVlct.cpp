@@ -179,6 +179,7 @@ EnzoMethodMHDVlct::~EnzoMethodMHDVlct()
   delete half_dt_recon_;
   delete full_dt_recon_;
   delete riemann_solver_;
+  delete integrable_updater_;
 }
 
 //----------------------------------------------------------------------

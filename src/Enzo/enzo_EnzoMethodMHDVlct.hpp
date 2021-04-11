@@ -6,7 +6,7 @@
 /// @brief    [\ref Enzo] Declaration of the VL + CT (van Leer combined with
 ///           constrained transport) MHD method
 ///
-/// This class encapsulates relies on the following component classses
+/// This class relies on the following component classses
 ///
 ///    EnzoEquationOfState:       Equation of State for Gas
 ///    EnzoReconstructor:         Reconstructs primitive variables
