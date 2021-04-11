@@ -472,7 +472,6 @@ void EnzoRiemannImpl<ImplFunctor>::solve_passive_advection_
   // - Later entries specify keys for groups of passive scalars that need to
   //   sum to 1 (when in specific form).
 
-  bool first_list = true;
   for (std::size_t i = 0; i < passive_lists.size(); i++){
     // If we know of group_name that must always sum to 1, we should check for
     // that now! (The easiest way to facillitate that would be to separate
