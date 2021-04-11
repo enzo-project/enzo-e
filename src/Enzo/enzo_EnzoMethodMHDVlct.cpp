@@ -331,11 +331,11 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
                                            density.shape(2));
       interface_velocity_arr_ptr = &interface_velocity_arr;
     } else {
-      interface_velocity_arr_ptr = NULL;
+      interface_velocity_arr_ptr = nullptr;
     }
 
     // allocate constrained transport object
-    EnzoConstrainedTransport *ct = NULL;
+    EnzoConstrainedTransport *ct = nullptr;
     if (mhd_choice_ == bfield_choice::constrained_transport) {
       ct = new EnzoConstrainedTransport(block, 2);
     }
@@ -379,7 +379,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       } else {
         reconstructor = full_dt_recon_;
 
-        if (ct != NULL){ ct->increment_partial_timestep(); }
+        if (ct != nullptr){ ct->increment_partial_timestep(); }
 
         // After the fluxes were added to the passive scalar in the first half
         // timestep, the values were stored in conserved form in the fields
@@ -437,7 +437,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // This is where source terms should be computed (added to dUcons_group)
 
       // Update Bfields
-      if (ct != NULL) {
+      if (ct != nullptr) {
         ct->update_all_bfield_components(cur_integrable_map, xflux_map,
                                          yflux_map, zflux_map,
                                          out_integrable_map, cur_dt,
@@ -462,7 +462,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       stale_depth+=reconstructor->delayed_staling_rate();
     }
 
-    if (ct != NULL){delete ct;}
+    if (ct != nullptr){delete ct;}
   }
 
   block->compute_done();
@@ -554,7 +554,7 @@ void EnzoMethodMHDVlct::compute_flux_
   // Need to set the component of reconstructed B-field along dim, equal to
   // the corresponding longitudinal component of the B-field tracked at cell
   // interfaces (should potentially be handled internally by reconstructor)
-  if (ct_handler != NULL) {
+  if (ct_handler != nullptr) {
     ct_handler->correct_reconstructed_bfield(reconstructable_l,
                                              reconstructable_r,
 					     dim, cur_stale_depth);
@@ -595,7 +595,7 @@ void EnzoMethodMHDVlct::compute_flux_
   }
 
   // Finally, have the ct handler record the upwind direction
-  if (ct_handler != NULL){
+  if (ct_handler != nullptr){
     ct_handler->identify_upwind(flux_map, dim, cur_stale_depth);
   }
 }

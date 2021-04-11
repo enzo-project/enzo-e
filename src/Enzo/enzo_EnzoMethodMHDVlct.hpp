@@ -26,7 +26,7 @@
 ///        - velocity        (both integrable and reconstructable)
 ///        - pressure        (just reconstructable)
 ///        - total_energy    (just integrable)
-///      When supportin magnetic fields, there is also:
+///      When supporting magnetic fields, there is also:
 ///        - bfield          (both integrable and reconstructable)
 ///      When using the dual energy formalism there is also:
 ///        - internal_energy (just integrable)

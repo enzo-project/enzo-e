@@ -25,7 +25,7 @@ public:
   EnzoFieldArrayFactory(Block *block, int stale_depth = 0)
   {
     ASSERT("EnzoFieldArrayFactory", "block must not be a nullptr",
-	   stale_depth >= 0);
+	   block != nullptr);
     block_ = block;
     ASSERT("EnzoFieldArrayFactory", "stale_depth must be >= 0",
 	   stale_depth >= 0);

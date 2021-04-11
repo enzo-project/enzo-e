@@ -17,7 +17,7 @@ class EnzoConstrainedTransport
   /// hydrodynamical integrators that are entirely responsible for all
   /// constrained-transport related operations that would not otherwise be
   /// performed by the solver. The distinction between whether a pointer is
-  /// NULL or points to an instance of this class should entirely dictate
+  /// a `nullptr` or points to an instance of this class should entirely dictate
   /// whether constrained-transport related operations are used in the
   /// integrator.
   ///

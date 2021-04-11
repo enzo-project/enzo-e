@@ -820,7 +820,7 @@ inline bool is_alias_(void* ptr1, intp offset1, const intp* shape1,
                       const intp* shape2, const intp* stride2,
                       std::size_t nDim)
 {
-  if ((ptr1 == NULL) || (ptr2 == NULL) || (ptr1 != ptr2)) { return false; }
+  if ((ptr1 == nullptr) || (ptr2 == nullptr) || (ptr1 != ptr2)) { return false; }
   if (offset1 != offset2) { return false; }
   for (std::size_t i = 0; i < nDim; i++){
     if ((shape1[i] != shape2[i]) || (stride1[i] != stride2[i])){
