@@ -42,8 +42,8 @@ EnzoMethodGravity::EnzoMethodGravity
 
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
-  //  refresh->add_field("acceleration_x");
-  //  refresh->add_field("acceleration_y");
+  // refresh->add_field("acceleration_x");
+  // refresh->add_field("acceleration_y");
   //  refresh->add_field("acceleration_z");
   //  refresh->add_field("density");
   // Accumulate is used when particles are deposited into density_total
@@ -139,12 +139,12 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
   
 #ifdef DEBUG_COPY_B
-  for (int i=0; i<m; i++) B_copy[i] = B[i];
+  if (B_copy) for (int i=0; i<m; i++) B_copy[i] = B[i];
 #endif	
 #ifdef DEBUG_COPY_DENSITIES
   enzo_float * DT = (enzo_float*) field.values (idt);
-  for (int i=0; i<m; i++) DT_copy[i] = DT[i];
-  for (int i=0; i<m; i++) D_copy[i] = D[i];
+  if (DT_copy) for (int i=0; i<m; i++) DT_copy[i] = DT[i];
+  if (D_copy) for (int i=0; i<m; i++) D_copy[i] = D[i];
 #endif	
 
   Solver * solver = enzo::problem()->solver(index_solver_);

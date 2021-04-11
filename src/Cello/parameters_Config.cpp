@@ -600,7 +600,7 @@ void Config::read_field_ (Parameters * p) throw()
 	    precision_str.c_str());
   }
 
-  field_prolong   = p->value_string ("Field:prolong","linear");
+  field_prolong   = p->value_string ("Field:prolong","enzo");
   field_restrict  = p->value_string ("Field:restrict","linear");
 }
 

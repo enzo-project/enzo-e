@@ -369,5 +369,4 @@ namespace cello {
     return (1.0/pow(1.0*num_children(),1.0*level));
   }
   
-
 }

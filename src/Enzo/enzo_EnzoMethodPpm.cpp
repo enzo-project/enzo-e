@@ -22,12 +22,14 @@
 
 #define COPY_FIELD(BLOCK,FIELD,FIELD_COPY)                              \
   {                                                                     \
-    Field field = BLOCK->data()->field();				\
-    enzo_float * f = (enzo_float *) field.values(FIELD);            \
-    enzo_float * f_copy = (enzo_float *) field.values(FIELD_COPY);  \
-    int mx,my,mz;                                                       \
-    field.dimensions(0,&mx,&my,&mz);                                    \
-    for (int i=0; i<mx*my*mz; i++) f_copy[i]=f[i];              \
+    Field field = BLOCK->data()->field();                               \
+    enzo_float * f = (enzo_float *) field.values(FIELD);                \
+    enzo_float * f_copy = (enzo_float *) field.values(FIELD_COPY);      \
+    if (f_copy) {                                                       \
+      int mx,my,mz;                                                     \
+      field.dimensions(0,&mx,&my,&mz);                                  \
+      for (int i=0; i<mx*my*mz; i++) f_copy[i]=f[i];                    \
+    }                                                                   \
   }
 
 //----------------------------------------------------------------------

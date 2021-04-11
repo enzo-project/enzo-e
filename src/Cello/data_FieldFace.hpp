@@ -8,8 +8,6 @@
 #ifndef DATA_FIELD_FACE_HPP
 #define DATA_FIELD_FACE_HPP
 
-class Prolong;
-class Restrict;
 class Refresh;
 
 class FieldFace {
@@ -85,23 +83,11 @@ public: // interface
   void set_refresh_type (int refresh_type)
   {  refresh_type_ = refresh_type;  }
 
-  /// Set Prolong operation (default is Problem::prolong() )
-  void set_prolong (Prolong * prolong)
-  { prolong_ = prolong; }
-
   Prolong * prolong ()
-  { return prolong_ ?
-      prolong_ : (cello::problem() ?
-                  cello::problem()->prolong() : nullptr); }
-  
-  /// Set Restrict operation (default is Problem::restrict() )
-  void set_restrict (Restrict * restrict)
-  { restrict_ = restrict; }
+  { return refresh_->prolong(); }
 
   Restrict * restrict ()
-  { return restrict_ ?
-      restrict_ : (cello::problem() ?
-                   cello::problem()->restrict() : nullptr); }
+  { return refresh_->restrict(); }
   
   /// Set the Refresh object 
   void set_refresh (Refresh * refresh, bool new_refresh)
@@ -214,12 +200,6 @@ private: // attributes
 
   /// Refresh type: fine, coarse, or same
   int refresh_type_;
-
-  /// Prolongation object
-  Prolong * prolong_;
-
-  /// Restriction object
-  Restrict * restrict_;
 
   /// Refresh object for lists of particles and fields to copy,
   /// and whether to copy or add

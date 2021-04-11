@@ -89,21 +89,34 @@ void Refresh::box_accumulate_adjust
 
 int Refresh::coarse_padding(const Prolong * prolong) const
 {
-  return accumulate_ ? 0 : prolong->coarse_padding_();
+  const int pad = accumulate_ ? 0 : prolong->coarse_padding_();
+  return pad;
 }
 
 //----------------------------------------------------------------------
 
 Prolong * Refresh::prolong ()
 {
-  return cello::problem()->prolong(id_prolong_);
+  Problem * problem = cello::problem();
+  Prolong * prolong = problem ? problem->prolong(id_prolong_) : nullptr;
+  if (prolong == nullptr) {
+    WARNING("Refresh::prolong()",
+            "Creating new ProlongLinear, potential memory leak");
+  }
+  return prolong ? prolong : new ProlongLinear;
 }
 
 //----------------------------------------------------------------------
 
 Restrict * Refresh::restrict ()
 {
-  return cello::problem()->restrict(id_restrict_);
+  Problem * problem = cello::problem();
+  Restrict * restrict = problem ? problem->restrict(id_restrict_) : nullptr;
+  if (restrict == nullptr) {
+    WARNING("Refresh::restrict()",
+            "Creating new RestrictLinear, potential memory leak");
+  }
+  return restrict ? restrict : new RestrictLinear;
 }
   
 //----------------------------------------------------------------------

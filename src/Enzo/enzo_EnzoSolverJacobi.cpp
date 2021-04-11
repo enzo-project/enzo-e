@@ -64,13 +64,17 @@ EnzoSolverJacobi::EnzoSolverJacobi
   int monitor_iter,
   int restart_cycle,
   int solve_type,
+  int index_prolong,
+  int index_restrict,
   double weight, int iter_max) throw()
   : Solver(name,
 	   field_x,
 	   field_b,
 	   monitor_iter,
 	   restart_cycle,
-	   solve_type),
+	   solve_type,
+           index_prolong,
+           index_restrict),
     A_ (NULL),
     ir_ (-1),
     id_ (-1),
@@ -114,7 +118,6 @@ void EnzoSolverJacobi::apply
 
   if (solve_type_ == solve_level && ! is_finest_(block))
     Solver::end_(block);
-
 
   A_ = A;
 

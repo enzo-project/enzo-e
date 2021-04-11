@@ -29,6 +29,8 @@ public: // interface
    int monitor_iter,
    int restart_cycle,
    int solve_type,
+   int index_prolong,
+   int index_restrict,
    int min_level,
    int max_level,
    int iter_max,
@@ -37,8 +39,6 @@ public: // interface
    int index_solve_coarse,
    int index_smooth_post,
    int index_smooth_last,
-   int index_prolong,
-   int index_restrict,
    int coarse_level);
 
   EnzoSolverMg0() {};
@@ -56,8 +56,6 @@ public: // interface
        index_solve_coarse_(-1),
        index_smooth_post_(-1),
        index_smooth_last_(-1),
-       index_prolong_(-1),
-       index_restrict_(-1),
        iter_max_(0),
        i_sync_restrict_(-1),
        i_sync_prolong_(-1),
@@ -93,8 +91,6 @@ public: // interface
     p | index_solve_coarse_;
     p | index_smooth_post_;
     p | index_smooth_last_;
-    p | index_prolong_;
-    p | index_restrict_;
     
     p | iter_max_;
 
@@ -185,8 +181,6 @@ public: // interface
     CkPrintf (" index_solve_coarse_ = %d\n",index_solve_coarse_);
     CkPrintf (" index_smooth_post_ = %d\n",index_smooth_post_);
     CkPrintf (" index_smooth_last_ = %d\n",index_smooth_last_);
-    CkPrintf (" index_prolong_ = %d\n",index_prolong_);
-    CkPrintf (" index_restrict_ = %d\n",index_restrict_);
     CkPrintf (" iter_max_ = %d\n",iter_max_);
     CkPrintf (" res_tol_ = %g\n",res_tol_);
     CkPrintf (" i_sync_restrict_ = %d\n",i_sync_restrict_);
@@ -305,12 +299,6 @@ protected: // attributes
 
   /// Solver for final smoothing of solution
   int index_smooth_last_;
-
-  /// Restriction index
-  int index_restrict_;
-
-  /// Prolongation index
-  int index_prolong_;
 
   /// Maximum number of MG iterations
   int iter_max_;

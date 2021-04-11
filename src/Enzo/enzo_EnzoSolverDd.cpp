@@ -32,13 +32,13 @@ EnzoSolverDd::EnzoSolverDd
    int monitor_iter,
    int restart_cycle,
    int solve_type,
+   int index_prolong,
+   int index_restrict,
    int min_level,
    int max_level,
    int index_solve_coarse,
    int index_solve_domain,
    int index_solve_smooth,
-   int index_prolong,
-   int index_restrict,
    int coarse_level)
     : Solver(name,
 	     field_x,
@@ -46,6 +46,8 @@ EnzoSolverDd::EnzoSolverDd
 	     monitor_iter,
 	     restart_cycle,
 	     solve_type,
+             index_prolong,
+             index_restrict,
 	     min_level,
 	     max_level),
       index_solve_coarse_(index_solve_coarse),
@@ -424,17 +426,17 @@ FieldMsg * EnzoSolverDd::pack_field_(EnzoBlock * enzo_block,
     for (int i=0; i<3; i++) g3[i]=0;
 
   Refresh * refresh = new Refresh;
+  refresh->set_prolong(index_prolong_);
+  refresh->set_restrict(index_restrict_);
   refresh->add_field(index_field);
 
   FieldFace * field_face = enzo_block->create_face
     (if3, ic3, g3, refresh_type, refresh, true);
 
-  Problem * problem = cello::problem();
-  
   if (refresh_type == refresh_fine) {
-    field_face->set_prolong(problem->prolong(index_prolong_));
+    refresh->set_prolong(index_prolong_);
   } else if (refresh_type == refresh_coarse) {
-    field_face->set_restrict(problem->restrict(index_restrict_));
+    refresh->set_restrict(index_restrict_);
   }
   
   Field field = enzo_block->data()->field();
@@ -472,6 +474,8 @@ void EnzoSolverDd::unpack_field_
   if (refresh_type != refresh_fine)
     for (int i=0; i<3; i++) g3[i]=0;
   Refresh * refresh = new Refresh;
+  refresh->set_prolong(index_prolong_);
+  refresh->set_restrict(index_restrict_);
   refresh->add_field(index_field);
 
   int * ic3 = msg->ic3;
@@ -479,12 +483,10 @@ void EnzoSolverDd::unpack_field_
   FieldFace * field_face = enzo_block->create_face 
     (if3, ic3, g3, refresh_type, refresh, true);
 
-  Problem * problem = cello::problem();
-
   if (refresh_type == refresh_fine) {
-    field_face->set_prolong(problem->prolong(index_prolong_));
+    refresh->set_prolong(index_prolong_);
   } else if (refresh_type == refresh_coarse) {
-    field_face->set_restrict(problem->restrict(index_restrict_));
+    refresh->set_restrict(index_restrict_);
   }
 
   Field field = enzo_block->data()->field();

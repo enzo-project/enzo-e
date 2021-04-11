@@ -30,13 +30,13 @@ public: // interface
    int monitor_iter,
    int restart_cycle,
    int solve_type,
+   int index_prolong,
+   int index_restrict,
    int min_level,
    int max_level,
    int index_solve_coarse,
    int index_solve_domain,
    int index_solve_smooth,
-   int index_prolong,
-   int index_restrict,
    int coarse_level) ;
 
   EnzoSolverDd() {};

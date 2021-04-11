@@ -24,16 +24,16 @@ public: // interface
     : rank_(rank),
       block_size_(),
       ghost_depth_(),
+      ghost_depth_recv_(),
+      ghost_depth_send_(),
       coarse_size_(),
       coarse_ghost_(),
+      pad_(),
       face_(),
       child_(),
       block_start_(),
       region_start_(),
-      region_stop_(),
-      ghost_depth_recv_(),
-      ghost_depth_send_(),
-      pad_()
+      region_stop_()
   {
     for (int i=0; i<2; i++) {
       level_[i] = 0;
@@ -56,6 +56,8 @@ public: // interface
     p | rank_;
     PUParray(p,block_size_,3);
     PUParray(p,ghost_depth_,3);
+    PUParray(p,ghost_depth_recv_,3);
+    PUParray(p,ghost_depth_send_,3);
     PUParray(p,coarse_size_,3);
     PUParray(p,coarse_ghost_,3);
     PUParray(p,level_,2);
@@ -64,11 +66,9 @@ public: // interface
       PUParray(p,child_[i],3);
       PUParray(p,block_start_[i],3);
     }
+    p | pad_;
     PUParray(p,region_start_,3);
     PUParray(p,region_stop_,3);
-    PUParray(p,ghost_depth_recv_,3);
-    PUParray(p,ghost_depth_send_,3);
-    p | pad_;
 
   }
 
@@ -197,12 +197,6 @@ private: // attributes
   /// Depth of allocated ghost zones
   int ghost_depth_[3];
 
-  /// Size of coarse fields
-  int coarse_size_[3];
-  
-  /// Depth of coarse field ghosts
-  int coarse_ghost_[3];
-
   /// Number of ghost zones receive block wants
   int ghost_depth_recv_[3];
 
@@ -210,6 +204,12 @@ private: // attributes
   /// only used with "accumulate" refresh (default is 0) since otherwise
   /// will overwrite non-ghost zones in receiver
   int ghost_depth_send_[3];
+
+  /// Size of coarse fields
+  int coarse_size_[3];
+  
+  /// Depth of coarse field ghosts
+  int coarse_ghost_[3];
 
   /// Number of extra coarse zones of padding for interpolation
   /// around the intersected region

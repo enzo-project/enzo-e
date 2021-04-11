@@ -31,7 +31,7 @@ CkReductionMsg * r_reduce_performance(int n, CkReductionMsg ** msgs)
     ASSERT4("r_reduce_performance()",
 	    "CkReductionMsg actual size %d is different from expected %lu num_sum %d num_max %d",
 	    msgs[i]->getSize(),length*sizeof(long long),num_sum,num_max,
-	    (msgs[i]->getSize() == length*sizeof(long long)));
+	    ((long unsigned)(msgs[i]->getSize() == length*sizeof(long long))));
       
     long long * values = (long long *) msgs[i]->getData();
     int j = 2;
@@ -199,7 +199,7 @@ CkReductionMsg * sum_long_double_n(int n, CkReductionMsg ** msgs)
     ASSERT2("sum_long_double_n()",
 	    "CkReductionMsg actual size %d is different from expected %lu",
 	    msgs[i]->getSize(),(N+1)*sizeof(long double),
-	    (msgs[i]->getSize() == (N+1)*sizeof(long double)));
+            ((long unsigned)msgs[i]->getSize() == (N+1)*sizeof(long double)));
     
     long double * values = (long double *) msgs[i]->getData();
 

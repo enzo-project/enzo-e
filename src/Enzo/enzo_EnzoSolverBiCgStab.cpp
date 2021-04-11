@@ -200,6 +200,8 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
  std::string field_x, std::string field_b,
  int monitor_iter, int restart_cycle,
  int solve_type,
+ int index_prolong,
+ int index_restrict,
  int min_level, int max_level,
  int iter_max, double res_tol,
  int index_precon,
@@ -211,6 +213,8 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
 	   monitor_iter,
 	   restart_cycle,
 	   solve_type,
+           index_prolong,
+           index_restrict,
 	   min_level,
 	   max_level),
     A_(nullptr),
@@ -907,8 +911,10 @@ void EnzoSolverBiCgStab::loop_25 (EnzoBlock * block) throw() {
   
   TRACE_BCG(block,this,"loop_25");
 
+  Refresh * refresh = cello::refresh(ir_loop_3_);
 
-  cello::refresh(ir_loop_3_)->set_active(is_finest_(block));
+  refresh->set_active(is_finest_(block));
+
   block->refresh_start
     (ir_loop_3_, CkIndex_EnzoBlock::p_solver_bicgstab_loop_3());
 }
@@ -1206,7 +1212,9 @@ void EnzoSolverBiCgStab::loop_85 (EnzoBlock * block) throw() {
   
   TRACE_BCG(block,this,"loop_85");
 
-  cello::refresh(ir_loop_9_)->set_active(is_finest_(block));
+  Refresh * refresh = cello::refresh(ir_loop_9_);
+
+  refresh->set_active(is_finest_(block));
 
   block->refresh_start
     (ir_loop_9_, CkIndex_EnzoBlock::p_solver_bicgstab_loop_9());

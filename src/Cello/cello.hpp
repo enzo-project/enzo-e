@@ -44,6 +44,7 @@
 class Config;
 class CProxy_Block;
 class FieldDescr;
+class Field;
 class Grouping;
 class Hierarchy;
 class Monitor;
@@ -609,16 +610,18 @@ namespace cello {
   Units *         units();
   /// Return reference to in indexed Refresh object
   Refresh *       refresh(int ir);
-
-  /// Return the ScalarDescr object defining Block long double Scalar data values
+  /// Return the ScalarDescr object defining Block long double Scalar
+  /// data values
   ScalarDescr *   scalar_descr_long_double();
   /// Return the ScalarDescr object defining Block double Scalar data values
   ScalarDescr *   scalar_descr_double();
   /// Return the ScalarDescr object defining Block int Scalar data values
   ScalarDescr *   scalar_descr_int();
-  /// Return the ScalarDescr object defining Block Sync counter Scalar data values
+  /// Return the ScalarDescr object defining Block Sync counter Scalar
+  /// data values
   ScalarDescr *   scalar_descr_sync();
-  /// Return the ScalarDescr object defining Block pointer Scalar data values
+  /// Return the ScalarDescr object defining Block pointer Scalar data
+  /// values
   ScalarDescr *   scalar_descr_void();
 
   /// Return the ith Output object
@@ -633,6 +636,18 @@ namespace cello {
   size_t          num_blocks_process();
   /// Return the cell volume at the given level relative to the root level
   double          relative_cell_volume (int level);
+  //----------------------------------------------------------------------
+
+  /// Scale the field, if it's in the make_field_conservative group,
+  /// by density
+  void mul_by_density
+  (int precision, void* values, int index_field,
+   const int m3[3], const int n3[3], const int i3[3]);
+  /// Unscale the field, if it's in the make_field_conservative group,
+  /// by density
+  void div_by_density
+  (int precision, void* values, int index_field,
+   const int m3[3], const int n3[3], const int i3[3]);
 }
 
 #endif /* CELLO_HPP */

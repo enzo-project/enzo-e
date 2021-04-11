@@ -128,6 +128,8 @@ EnzoSolverMg0::EnzoSolverMg0
  int monitor_iter,
  int restart_cycle,
  int solve_type,
+ int index_prolong,
+ int index_restrict,
  int min_level,
  int max_level,
  int iter_max,
@@ -136,8 +138,6 @@ EnzoSolverMg0::EnzoSolverMg0
  int index_solve_coarse,
  int index_smooth_post,
  int index_smooth_last,
- int index_prolong,
- int index_restrict,
  int coarse_level) 
   : Solver(name,
 	   field_x,
@@ -145,6 +145,8 @@ EnzoSolverMg0::EnzoSolverMg0
 	   monitor_iter,
 	   restart_cycle,
 	   solve_type,
+           index_prolong,
+           index_restrict,
 	   min_level,
 	   max_level),
     bs_(0), bc_(0),
@@ -155,8 +157,6 @@ EnzoSolverMg0::EnzoSolverMg0
     index_solve_coarse_(index_solve_coarse),
     index_smooth_post_(index_smooth_post),
     index_smooth_last_(index_smooth_last),
-    index_prolong_(index_prolong),
-    index_restrict_(index_restrict),
     iter_max_(iter_max), 
     ic_(-1), ir_(-1),
     mx_(0),my_(0),mz_(0),
@@ -928,6 +928,8 @@ FieldMsg * EnzoSolverMg0::pack_residual_(EnzoBlock * enzo_block) throw()
   int if3[3] = {0,0,0};
   int g3[3] = {0,0,0};
   Refresh * refresh = new Refresh;
+  refresh->set_prolong(index_prolong_);
+  refresh->set_restrict(index_restrict_);
   refresh->add_field(ir_);
 
   // copy data from EnzoBlock to array via FieldFace
@@ -935,8 +937,7 @@ FieldMsg * EnzoSolverMg0::pack_residual_(EnzoBlock * enzo_block) throw()
   FieldFace * field_face = enzo_block->create_face
     (if3, ic3, g3, refresh_coarse, refresh, true);
 
-  Restrict * restrict = cello::problem()->restrict(index_restrict_);
-  field_face->set_restrict(restrict);
+  refresh->set_restrict(index_restrict_);
   
   int narray; 
   char * array;
@@ -975,6 +976,8 @@ void EnzoSolverMg0::unpack_residual_
   int if3[3] = {0,0,0};
   int g3[3] = {0,0,0};
   Refresh * refresh = new Refresh;
+  refresh->set_prolong(index_prolong_);
+  refresh->set_restrict(index_restrict_);
   refresh->add_field(ib_);
 
   // copy data from msg to this EnzoBlock
@@ -984,8 +987,7 @@ void EnzoSolverMg0::unpack_residual_
   FieldFace * field_face = enzo_block->create_face 
     (if3, ic3, g3, refresh_coarse, refresh, true);
 
-  Restrict * restrict = cello::problem()->restrict(index_restrict_);
-  field_face->set_restrict(restrict);
+  refresh->set_restrict(index_restrict_);
 
   Field field = enzo_block->data()->field();
   
@@ -1009,6 +1011,8 @@ FieldMsg * EnzoSolverMg0::pack_correction_
   int g3[3];
   cello::field_descr()->ghost_depth(ix_,g3,g3+1,g3+2);
   Refresh * refresh = new Refresh;
+  refresh->set_prolong(index_prolong_);
+  refresh->set_restrict(index_restrict_);
   refresh->add_field(ix_);
     
   // copy data from EnzoBlock to array via FieldFace
@@ -1017,12 +1021,8 @@ FieldMsg * EnzoSolverMg0::pack_correction_
     (if3, ic3, g3, refresh_fine, refresh, true);
 
   Field field = enzo_block->data()->field();
-  Prolong * prolong = cello::problem()->prolong (index_prolong_);
-  field_face->set_prolong(prolong);
-
   int narray; 
   char * array;
-    
   field_face->face_to_array (field,&narray,&array);
 
   delete field_face;
@@ -1057,6 +1057,8 @@ void EnzoSolverMg0::unpack_correction_
   int g3[3];
   cello::field_descr()->ghost_depth(ic_,g3,g3+1,g3+2);
   Refresh * refresh = new Refresh;
+  refresh->set_prolong(index_prolong_);
+  refresh->set_restrict(index_restrict_);
   refresh->add_field(ic_);
 
   // copy data from msg to this EnzoBlock
@@ -1064,11 +1066,7 @@ void EnzoSolverMg0::unpack_correction_
   FieldFace * field_face = enzo_block->create_face 
     (if3, msg->ic3, g3, refresh_fine, refresh, true);
 
-  Prolong * prolong = cello::problem()->prolong (index_prolong_);
-  field_face->set_prolong(prolong);
-
   Field field = enzo_block->data()->field();
-  
   field_face->array_to_face (msg->a, field);
 
   delete field_face;

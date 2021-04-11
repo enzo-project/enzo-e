@@ -30,7 +30,6 @@ MsgRefresh::MsgRefresh()
       name_type_()
 #endif      
 {
-  cello::hex_string(tag_,8);
   ++counter[cello::index_static()];
 }
 
@@ -87,8 +86,6 @@ void * MsgRefresh::pack (MsgRefresh * msg)
     size += msg->data_msg_->data_size();
   }
 
-  size += 8*sizeof(char);
-  
   //--------------------------------------------------
   //  2. allocate buffer using CkAllocBuffer()
   //--------------------------------------------------
@@ -129,14 +126,6 @@ void * MsgRefresh::pack (MsgRefresh * msg)
 #ifdef DEBUG_MSG_REFRESH  
   CkPrintf ("DEBUG_CHARM %p pack data_msg_ %p\n",msg,msg->data_msg_);
 #endif  
-
-  strncpy(pc,msg->tag_,8);
-  msg->tag_[8] = '\0';
-  pc += 8*sizeof(char);
-  
-#ifdef DEBUG_MSG_REFRESH  
-  msg->print(std::string(msg->tag_)+":pack");
-#endif
 
   delete msg;
 
@@ -212,21 +201,9 @@ MsgRefresh * MsgRefresh::unpack(void * buffer)
   CkPrintf ("DEBUG_CHARM %p unpack data_msg_ %p\n",msg,msg->data_msg_);
 #endif
 
-  strncpy (msg->tag_,pc,8);
-  msg->tag_[8] = '\0';
-  pc+=8*sizeof(char);
-  
-#ifdef DEBUG_MSG_REFRESH  
-  CkPrintf ("DEBUG_CHARM %p unpack tag_ %s\n",msg,msg->tag_);
-#endif
-  
   // 3. Save the input buffer for freeing later
 
   msg->buffer_ = buffer;
-
-#ifdef DEBUG_MSG_REFRESH  
-  msg->print(std::string(msg->tag_)+":unpack");
-#endif
 
   return msg;
 }
@@ -235,20 +212,9 @@ MsgRefresh * MsgRefresh::unpack(void * buffer)
 
 void MsgRefresh::update (Data * data)
 {
-#ifdef DEBUG_MSG_REFRESH
-  CkPrintf ("%d %s:%d DEBUG_MSG_REFRESH updating %p %s\n",
-	    CkMyPe(),__FILE__,__LINE__,this,tag_);
-#endif  
-#ifdef DEBUG_MSG_REFRESH  
-  CkPrintf ("DEBUG_CHARM %p update data_msg_ %s %p\n",this,data_msg_?data_msg_->tag():"NULL",data_msg_);
-#endif
   if (data_msg_ == nullptr) return;
 
   data_msg_->update(data,is_local_);
-
-#ifdef DEBUG_MSG_REFRESH  
-  print(std::string(tag_)+":update");
-#endif
 
   if (!is_local_) {
       CkFreeMsg (buffer_);
@@ -261,12 +227,12 @@ void MsgRefresh::update (Data * data)
 void MsgRefresh::print (std::string message)
 {
 #ifdef DEBUG_MSG_REFRESH  
-  CkPrintf ("%s MSG_REFRESH %d %s %p %s %s\n",
-            tag_,id_refresh_,message.c_str(),this,name_block_.c_str(),name_type_.c_str());
+  CkPrintf ("MSG_REFRESH %d %s %p %s %s\n",
+            id_refresh_,message.c_str(),this,name_block_.c_str(),name_type_.c_str());
   if (data_msg_) {
-    data_msg_->print((std::string(tag_) + ":" + message).c_str());
+    data_msg_->print(message).c_str());
   } else {
-    CkPrintf ("%s MSG_REFRESH data_msg_ = nil\n",tag_);
+    CkPrintf ("MSG_REFRESH data_msg_ = nil\n");
   }
 #endif  
 }

@@ -398,8 +398,21 @@ public: // interface
   /// Return whether the prolongation requires padded coarse array
   int coarse_padding(const Prolong * prolong) const;
 
-  /// Return the prolongation and restriction operators
+  /// Set the prolongation operator for refresh
+  void set_prolong (int id_prolong)
+  { id_prolong_ = id_prolong; }
+  
+  /// Return the prolongation operator for refresh
   Prolong * prolong ();
+  /// Return the prolongation id
+  int index_prolong () const
+  { return id_prolong_; }
+
+  /// Set the restriction operator for refresh
+  void set_restrict (int id_restrict)
+  { id_restrict_ = id_restrict; }
+  
+  /// Return the restriction operator for refresh
   Restrict * restrict ();
   
   //--------------------------------------------------

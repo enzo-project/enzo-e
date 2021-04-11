@@ -138,11 +138,11 @@ public: // interface
   Method * method (std::string name) const throw();
 
   /// Return the ith prolong object
-  Prolong * prolong(int i = 0) const throw()
+  Prolong * prolong(size_t i = 0) const throw()
   { return (i < prolong_list_.size()) ? prolong_list_[i] : nullptr; }
 
   /// Return the ith restrict object
-  Restrict * restrict(int i = 0) const throw()
+  Restrict * restrict(size_t i = 0) const throw()
   { return (i < restrict_list_.size()) ? restrict_list_[i] : nullptr; }
 
   //--------------------------------------------------

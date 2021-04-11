@@ -25,6 +25,19 @@
 
 #define CHECK_ID(ID) ASSERT1 ("CHECK_ID","Invalid id %d",ID,(ID>=0));
 
+#ifdef TRACE_PROLONG
+#  undef TRACE_PROLONG
+#  define TRACE_PROLONG(MSG,PROLONG,mf3,if3,nf3,mc3,ic3,nc3)            \
+  CkPrintf ("TRACE_PROLONG %s:%d %s %s mf %d %d %d nf %d %d %d if %d %d %d\n",__FILE__,__LINE__,MSG, PROLONG->name().c_str(), \
+            mf3[0],mf3[1],mf3[2],nf3[0],nf3[1],nf3[2],if3[0],if3[1],if3[2]); \
+  CkPrintf ("TRACE_PROLONG %s:%d %s %s mc %d %d %d nc %d %d %d ic %d %d %d\n",__FILE__,__LINE__,MSG, PROLONG->name().c_str(), \
+    mc3[0],mc3[1],mc3[2],nc3[0],nc3[1],nc3[2],ic3[0],ic3[1],ic3[2]);    \
+  
+#else
+#  undef TRACE_PROLONG
+#  define TRACE_PROLONG(MSG,PROLONG,mf3,if3,nf3,mc3,ic3,nc3) /* ... */
+#endif
+
 //======================================================================
 
 void Block::refresh_start (int id_refresh, int callback)
@@ -35,7 +48,6 @@ void Block::refresh_start (int id_refresh, int callback)
 
   // Send field and/or particle data associated with the given refresh
   // object to corresponding neighbors
-
   if ( refresh->is_active() ) {
 
     ASSERT1 ("Block::refresh_start()",
@@ -117,7 +129,7 @@ void Block::refresh_wait (int id_refresh, int callback)
 
   // process any existing messages in the refresh message list
 
-  for (auto id_msg=0;
+  for (size_t id_msg=0;
        id_msg<refresh_msg_list_[id_refresh].size();
        id_msg++) {
 
@@ -263,7 +275,7 @@ int Block::refresh_load_field_faces_ (Refresh & refresh)
 	(level_face == level + 1) ? refresh_fine : refresh_unknown;
 
       // handle padded interpolation special case if needed
-      Prolong * prolong = cello::problem()->prolong();
+      Prolong * prolong = refresh.prolong();
       int pad = refresh.coarse_padding(prolong);
 
       if (pad == 0) {
@@ -359,7 +371,7 @@ int Block::refresh_load_coarse_face_
   const int level = index_.level();
   int count = 0;
 
-  Prolong * prolong = cello::problem()->prolong();
+  Prolong * prolong = refresh.prolong();
   const int pad = refresh.coarse_padding(prolong);
 
   if ((pad > 0) && (level != level_face)) {
@@ -644,7 +656,7 @@ void Block::refresh_coarse_send_
 
 void Block::refresh_coarse_apply_ (Refresh * refresh)
 {
-  Prolong * prolong = cello::problem()->prolong();
+  Prolong * prolong = refresh->prolong();
 
   const int pad = refresh->coarse_padding(prolong);
 
@@ -700,10 +712,7 @@ void Block::refresh_coarse_apply_ (Refresh * refresh)
 
             // ... adjust send-ghost depth for accumulate
             int i3_c[3], n3_c[3];
-
-            int i3_f[3],n3_f[3];
-            const bool lghost = true;
-            const bool lcoarse = true;
+            int i3_f[3], n3_f[3];
             bool lpad;
 
             box_r.get_start_size
@@ -782,7 +791,7 @@ void Block::refresh_coarse_apply_ (Refresh * refresh)
 
             prolong->array_sizes_valid (n3_f,n3_c);
             const bool accumulate = refresh->accumulate(i_f);
-
+            TRACE_PROLONG("coarse_apply",prolong, m3_f,ip3_f,np3_f, m3_c,ip3_c,np3_c);
             prolong->apply(default_precision,
                            field_values_dst, m3_f, ip3_f, np3_f,
                            coarse_field_src, m3_c, ip3_c, np3_c,

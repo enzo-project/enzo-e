@@ -13,9 +13,10 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
-// #define DEBUG_INITIALIZE
+// #define TRACE_INITIALIZE
 
-#ifdef DEBUG_INITIALIZE
+#ifdef TRACE_INITIALIZE
+#  undef TRACE_INITIALIZE
 #  define TRACE_INITIALIZE CkPrintf ("%d %s:%d DEBUG_INITIALIZE\n",CkMyPe(),__FILE__,__LINE__);
 #else
 #  define TRACE_INITIALIZE /*  */
@@ -84,6 +85,7 @@ void Simulation::r_initialize_block_array(CkReductionMsg * msg)
   delete msg;
   
   initialize_block_array_();
+  TRACE_INITIALIZE;
 }
 
 //----------------------------------------------------------------------

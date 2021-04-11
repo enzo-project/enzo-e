@@ -43,6 +43,8 @@ public: // interface
 		     int monitor_iter,
 		     int restart_cycle,
 		     int solve_type,
+		     int index_prolong,
+		     int index_restrict,
 		     int min_level,
 		     int max_level,
 		     int iter_max, 
@@ -278,10 +280,8 @@ protected: // attributes
   int is_dot_sync_;
   int is_iter_;
 
-  typedef void (EnzoSolverBiCgStab::*enzo_solver_bicgstab_member)(EnzoBlock *, CkReductionMsg *) ;
-  
   /// Convergence tolerance on the relative residual
-  long double res_tol_;
+  double res_tol_;
 
   /// Preconditioner (-1 if none)
   int index_precon_;

@@ -49,6 +49,8 @@ EnzoSolverCg::EnzoSolverCg
  int monitor_iter,
  int restart_cycle,
  int solve_type,
+ int index_prolong,
+ int index_restrict,
  int min_level, int max_level,
  int iter_max, double res_tol,
  int index_precon
@@ -59,6 +61,8 @@ EnzoSolverCg::EnzoSolverCg
 	   monitor_iter,
 	   restart_cycle,
 	   solve_type,
+           index_prolong,
+           index_restrict,
 	   min_level,
 	   max_level),
     A_(NULL),

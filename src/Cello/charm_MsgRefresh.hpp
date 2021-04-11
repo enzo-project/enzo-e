@@ -94,9 +94,6 @@ protected: // attributes
   std::string name_block_;
   std::string name_type_;
 #endif  
-
-  /// hex tag identifying object to match sender and receiver
-  char tag_[9];
 };
 
 #endif /* CHARM_MSG_HPP */

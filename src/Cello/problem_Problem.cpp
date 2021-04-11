@@ -772,13 +772,27 @@ Solver * Problem::create_solver_
   Solver * solver = nullptr;
 
   if (type == "null") {
+
+    Prolong * prolong = create_prolong_
+      (config->solver_prolong[index_solver],config);
+    Restrict * restrict = create_restrict_
+      (config->solver_restrict[index_solver],config);
+
+    const int index_prolong = prolong_list_.size();
+    const int index_restrict = restrict_list_.size();
+    prolong_list_.push_back(prolong);
+    restrict_list_.push_back(restrict);
+    
     solver = new SolverNull
       (config->solver_list         [index_solver],
        config->solver_field_x      [index_solver],
        config->solver_field_b      [index_solver],
-       config->solver_monitor_iter [index_solver],
-       config->solver_min_level    [index_solver],
-       config->solver_max_level    [index_solver]);
+       0, // restart cycle
+       solve_leaf,
+       index_prolong,
+       index_restrict,
+       config->solver_min_level[index_solver],
+       config->solver_max_level[index_solver]);
   }
 
   if (solver) solver->set_index(index_solver);

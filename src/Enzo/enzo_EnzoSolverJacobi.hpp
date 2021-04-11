@@ -23,6 +23,8 @@ public: // interface
 		   int monitor_iter,
 		   int restart_cycle,
 		   int solve_type,
+                   int index_prolong,
+                   int index_restrict,
 		   double weight=1.0,
 		   int iter_max = 1) throw();
 

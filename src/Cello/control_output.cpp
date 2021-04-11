@@ -87,7 +87,7 @@ void Problem::new_output_next(Simulation * simulation) throw()
   // print blocks on this process to check block_vec_ array
 
   Hierarchy * hierarchy = simulation->hierarchy();
-  for (int i=0; i<hierarchy->num_blocks(); i++) {
+  for (size_t i=0; i<hierarchy->num_blocks(); i++) {
     CkPrintf ("%d Block %d = %s\n",CkMyPe(),i,
 	      hierarchy->block(i)->name().c_str());
   }
@@ -229,8 +229,6 @@ void Block::p_output_write (int index_output, int step)
   TRACE_OUTPUT("Simulation::p_output_write()");
   performance_start_ (perf_output);
 
-  FieldDescr    * field_descr    = cello::field_descr();
-  ParticleDescr * particle_descr = cello::particle_descr();
   Simulation    * simulation     = cello::simulation();
   Output        * output         = cello::output(index_output);
   Config        * config         = (Config *) cello::config();

@@ -8,19 +8,6 @@
 #ifndef DATA_DATA_MSG_HPP
 #define DATA_DATA_MSG_HPP
 
-// #define DEBUG_DATA_MSG
-// #define TRACE_DATA_MSG
-
-#ifdef TRACE_DATA_MSG
-#  undef TRACE_DATA_MSG
-#  define TRACE_DATA_MSG(msg) \
-  CkPrintf ("TRACE_DATA_MSG %p %s %s\n",(void*)this,tag_,msg);\
-  fflush(stdout);
-#else
-#  define TRACE_DATA_MSG(msg) /* ... */
-#endif  
- 
-
 class FaceFluxes;
 class ParticleData;
 class FieldData;
@@ -45,11 +32,6 @@ public: // interface
       coarse_field_list_src_(),
       coarse_field_list_dst_()
   {
-    cello::hex_string(tag_,8);
-#ifdef DEBUG_DATA_MSG    
-    CkPrintf ("DEBUG_DATA_MSG DataMsg() %s\n",tag_);
-#endif    
-    TRACE_DATA_MSG("DataMsg()");
     for (int i=0; i<3; i++) {
       iam3_cf_[i]  =0;
       iap3_cf_[i]  =0;
@@ -63,7 +45,6 @@ public: // interface
 
   ~DataMsg()
   {
-    TRACE_DATA_MSG("~DataMsg()");
     --counter[cello::index_static()];
     
     if (field_face_delete_) {
@@ -94,21 +75,18 @@ public: // interface
   /// Copy constructor
   DataMsg(const DataMsg & data_msg) throw()
   {
-    TRACE_DATA_MSG("DataMsg(DataMsg)");
     ++counter[cello::index_static()]; 
   };
 
   /// Assignment operator
   DataMsg & operator= (const DataMsg & data_msg) throw()
   {
-    TRACE_DATA_MSG("DataMsg::operator =()");
     ERROR("DataMsg::operator=()",
           "This method should not be called");
     return *this;
   }
 
   void pup(PUP::er &p) {
-    TRACEPUP;
     WARNING("DataMsg::pup()",
 	    "DataMsg::pup() should never be called!");
   }
@@ -126,7 +104,6 @@ public: // interface
   /// Set the FieldFace object
   void set_field_face  (FieldFace * field_face, bool is_new) 
   {
-    TRACE_DATA_MSG("set_field_face");
     field_face_ = field_face; 
     field_face_delete_ = is_new;
   }
@@ -234,11 +211,6 @@ public: // interface
   /// Debugging
   void print (const char * message) const;
 
-  const char * tag() const { return tag_; };
-
-public: // static methods
-
-  
 protected: // attributes
 
   /// Field Face Data
@@ -284,8 +256,6 @@ protected: // attributes
   int ifms3_cf_[3], ifps3_cf_[3];
   /// loop limits for the receiving field
   int ifmr3_cf_[3], ifpr3_cf_[3];
-  /// hex tag identifying object to match sender and receiver
-  char tag_[9];
 
 };
 

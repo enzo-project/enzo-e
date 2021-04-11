@@ -97,7 +97,6 @@ void DataMsg::set_coarse_array
         for (int kx=0; kx<nf3[0]; kx++) {
           int ka = (kx/rd) + na3[0]*((ky/rd) + na3[1]*(kz/rd));
           int kf = if0 + kx + mfx*(ky + mfy*kz);
-          int kf2 = (ifms3[0] + kx) + mfx*((ifms3[1]+ky) + mfy*(ifms3[2]+kz));
           coarse_field[ka] += rr*field_values[kf];
         }
       }
@@ -142,8 +141,6 @@ int DataMsg::data_size () const
   //  1. determine buffer size (must be consistent with #3)
   //--------------------------------------------------
 
-  int debug_counter = 0;
-  
   Field field (cello::field_descr(), field_data_u_);
 
   const int n_ff = (ff) ? ff->data_size() : 0;
@@ -191,7 +188,6 @@ int DataMsg::data_size () const
     size += 3*sizeof(int); // ifmr3_cf_
     size += 3*sizeof(int); // ifpr3_cf_
   }
-  size += 8*sizeof(char); // tag_
   
   return size;
 }
@@ -207,7 +203,6 @@ char * DataMsg::save_data (char * buffer) const
   };
 
   pc = buffer;
-  int debug_counter = 0;
 
   Field field (cello::field_descr(), field_data_u_);
 
@@ -271,8 +266,6 @@ char * DataMsg::save_data (char * buffer) const
     }
   
   }
-  strncpy (pc,tag_,8);
-  pc+=8*sizeof(char);
 
   ASSERT2 ("DataMsg::save_data()",
   	   "Expecting buffer size %d actual size %d",
@@ -360,9 +353,6 @@ char * DataMsg::load_data (char * buffer)
       ifpr3_cf_[i] = (*pi++);
     }
   }
-  strncpy (tag_,pc,8);
-  tag_[8] = 0;
-  pc+=8*sizeof(char);
     
   return pc;
 }
@@ -510,47 +500,44 @@ void DataMsg::update (Data * data, bool is_local)
 
 void DataMsg::print (const char * message) const
 {
-  CkPrintf ("%s %s --------------------------------------------------\n",
-            message,tag_);
-  CkPrintf ("%s %s DATA_MSG %p\n",  message,tag_,(void *)this);
-  CkPrintf ("%s %s DATA_MSG field_face_    = %p\n",
-            message,tag_,(void*)field_face_);
-  CkPrintf ("%s %s DATA_MSG field_data_u_    = %p\n",
-            message,tag_,(void*)field_data_u_);
-  CkPrintf ("%s %s DATA_MSG particle_data_ = %p\n",
-            message,tag_,(void*)particle_data_);
-  CkPrintf ("%s %s DATA_MSG particle_data_delete_ = %d\n",
-            message,tag_,particle_data_delete_?1:0);
-  CkPrintf ("%s %s DATA_MSG |face_fluxes_list_| = %lu\n",
-            message,tag_,face_fluxes_list_.size());
-  CkPrintf ("%s %s DATA_MSG |face_fluxes_delete_| = %lu\n",
-            message,tag_,face_fluxes_delete_.size());
-  CkPrintf ("%s %s DATA_MSG field_face_delete_ = %d\n",
-            message,tag_,field_face_delete_?1:0);
-  CkPrintf ("%s %s DATA_MSG field_data_delete_ = %d\n",
-            message,tag_,field_data_delete_?1:0);
-  CkPrintf ("%s %s DATA_MSG coarse_field_buffer_.sum = %f\n", message,tag_,
+  CkPrintf ("%s DATA_MSG field_face_    = %p\n",
+            message,(void*)field_face_);
+  CkPrintf ("%s DATA_MSG field_data_u_    = %p\n",
+            message,(void*)field_data_u_);
+  CkPrintf ("%s DATA_MSG particle_data_ = %p\n",
+            message,(void*)particle_data_);
+  CkPrintf ("%s DATA_MSG particle_data_delete_ = %d\n",
+            message,particle_data_delete_?1:0);
+  CkPrintf ("%s DATA_MSG |face_fluxes_list_| = %lu\n",
+            message,face_fluxes_list_.size());
+  CkPrintf ("%s DATA_MSG |face_fluxes_delete_| = %lu\n",
+            message,face_fluxes_delete_.size());
+  CkPrintf ("%s DATA_MSG field_face_delete_ = %d\n",
+            message,field_face_delete_?1:0);
+  CkPrintf ("%s DATA_MSG field_data_delete_ = %d\n",
+            message,field_data_delete_?1:0);
+  CkPrintf ("%s DATA_MSG coarse_field_buffer_.sum = %f\n", message,
             std::accumulate(coarse_field_buffer_.begin(),coarse_field_buffer_.end(),0.0));
-  CkPrintf ("%s %s DATA_MSG coarse_field_list_src_.sum = %d\n", message,tag_,
+  CkPrintf ("%s DATA_MSG coarse_field_list_src_.sum = %d\n", message,
             std::accumulate
             (coarse_field_list_src_.begin(),
              coarse_field_list_src_.end(),0));
-  CkPrintf ("%s %s DATA_MSG coarse_field_list_dst_.sum = %d\n", message,tag_,
+  CkPrintf ("%s DATA_MSG coarse_field_list_dst_.sum = %d\n", message,
             std::accumulate
             (coarse_field_list_dst_.begin(),
              coarse_field_list_dst_.end(),0));
-  CkPrintf ("%s %s DATA_MSG coarse iam3_cf_   = %d %d %d\n",
-            message,tag_,iam3_cf_[0],iam3_cf_[1],iam3_cf_[2]);
-  CkPrintf ("%s %s DATA_MSG coarse iap3_cf_   = %d %d %d\n",
-            message,tag_,iap3_cf_[0],iap3_cf_[1],iap3_cf_[2]);
-  CkPrintf ("%s %s DATA_MSG coarse ifms3_cf_   = %d %d %d\n",
-            message,tag_,ifms3_cf_[0],ifms3_cf_[1],ifms3_cf_[2]);
-  CkPrintf ("%s %s DATA_MSG coarse ifps3_cf_   = %d %d %d\n",
-            message,tag_,ifps3_cf_[0],ifps3_cf_[1],ifps3_cf_[2]);
-  CkPrintf ("%s %s DATA_MSG coarse ifmr3_cf_   = %d %d %d\n",
-            message,tag_,ifmr3_cf_[0],ifmr3_cf_[1],ifmr3_cf_[2]);
-  CkPrintf ("%s %s DATA_MSG coarse ifpr3_cf_   = %d %d %d\n",
-            message,tag_,ifpr3_cf_[0],ifpr3_cf_[1],ifpr3_cf_[2]);
+  CkPrintf ("%s DATA_MSG coarse iam3_cf_   = %d %d %d\n",
+            message,iam3_cf_[0],iam3_cf_[1],iam3_cf_[2]);
+  CkPrintf ("%s DATA_MSG coarse iap3_cf_   = %d %d %d\n",
+            message,iap3_cf_[0],iap3_cf_[1],iap3_cf_[2]);
+  CkPrintf ("%s DATA_MSG coarse ifms3_cf_   = %d %d %d\n",
+            message,ifms3_cf_[0],ifms3_cf_[1],ifms3_cf_[2]);
+  CkPrintf ("%s DATA_MSG coarse ifps3_cf_   = %d %d %d\n",
+            message,ifps3_cf_[0],ifps3_cf_[1],ifps3_cf_[2]);
+  CkPrintf ("%s DATA_MSG coarse ifmr3_cf_   = %d %d %d\n",
+            message,ifmr3_cf_[0],ifmr3_cf_[1],ifmr3_cf_[2]);
+  CkPrintf ("%s DATA_MSG coarse ifpr3_cf_   = %d %d %d\n",
+            message,ifpr3_cf_[0],ifpr3_cf_[1],ifpr3_cf_[2]);
     
   fflush(stdout);
 }

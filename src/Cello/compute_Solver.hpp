@@ -26,6 +26,8 @@ public: // interface
 	  int monitor_iter,
 	  int restart_cycle,
 	  int solve_type,
+          int index_prolong,
+          int index_restrict,
 	  int min_level = 0,
 	  int max_level = std::numeric_limits<int>::max()) throw();
 
@@ -37,17 +39,19 @@ public: // interface
 
   Solver (CkMigrateMessage *m)
     : PUP::able (m),
-    name_(""),
-    ix_(-1),ib_(-1),
-    monitor_iter_(0),
-    restart_cycle_(1),
-    callback_(0),
-    index_(0),
-    min_level_(- std::numeric_limits<int>::max()),
-    max_level_(  std::numeric_limits<int>::max()),
-    id_sync_(0),
-    solve_type_(solve_leaf),
-    ir_post_(-1)
+      name_(""),
+      ix_(-1),ib_(-1),
+      monitor_iter_(0),
+      restart_cycle_(1),
+      callback_(0),
+      index_(0),
+      min_level_(- std::numeric_limits<int>::max()),
+      max_level_(  std::numeric_limits<int>::max()),
+      id_sync_(0),
+      solve_type_(solve_leaf),
+      index_prolong_(0),
+      index_restrict_(0),
+      ir_post_(-1)
   { }
 
   /// Destructor
@@ -72,6 +76,8 @@ public: // interface
     p | max_level_;
     p | id_sync_;
     p | solve_type_;
+    p | index_prolong_;
+    p | index_restrict_;
     p | ir_post_;
   }
 
@@ -237,6 +243,12 @@ protected: // attributes
   /// Type of solver; see enum solve_type for supported types
   int solve_type_;
 
+  /// Prolongation index
+  int index_prolong_;
+
+  /// Restriction index
+  int index_restrict_;
+  
   /// New Refresh id for after the solver
   int ir_post_;
 };

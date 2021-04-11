@@ -20,19 +20,18 @@
 
 #ifdef TRACE_PROLONG
 #  undef TRACE_PROLONG
-#  define TRACE_PROLONG(MSG,mf3,if3,nf3,mc3,ic3,nc3)                    \
-  CkPrintf ("TRACE_PROLONG %s:%d %s  mf %d %d %d nf %d %d %d if %d %d %d\n",__FILE__,__LINE__,MSG, \
+#  define TRACE_PROLONG(MSG,PROLONG,mf3,if3,nf3,mc3,ic3,nc3)            \
+  CkPrintf ("TRACE_PROLONG %s:%d %s %s mf %d %d %d nf %d %d %d if %d %d %d\n",__FILE__,__LINE__,MSG, PROLONG->name().c_str(), \
             mf3[0],mf3[1],mf3[2],nf3[0],nf3[1],nf3[2],if3[0],if3[1],if3[2]); \
-  CkPrintf ("TRACE_PROLONG %s:%d %s  mc %d %d %d nc %d %d %d ic %d %d %d\n",__FILE__,__LINE__,MSG, \
+  CkPrintf ("TRACE_PROLONG %s:%d %s %s mc %d %d %d nc %d %d %d ic %d %d %d\n",__FILE__,__LINE__,MSG, PROLONG->name().c_str(), \
             mc3[0],mc3[1],mc3[2],nc3[0],nc3[1],nc3[2],ic3[0],ic3[1],ic3[2]); \
   
 #else
 #  undef TRACE_PROLONG
-#  define TRACE_PROLONG(MSG,mf3,if3,nf3,mc3,ic3,nc3) /* ... */
+#  define TRACE_PROLONG(MSG,PROLONG,mf3,if3,nf3,mc3,ic3,nc3) /* ... */
 #endif
 
 #ifdef DEBUG_ARRAY
-
 #   define DEBUG_PRINT_ARRAY0(NAME,ARRAY,m3,n3,o3)              \
   DEBUG_PRINT_ARRAY_(NAME,ARRAY,m3,n3,o3[0],o3[1],o3[2])
 #   define DEBUG_PRINT_ARRAY(NAME,ARRAY,m3,n3)  \
@@ -105,8 +104,6 @@ enum enum_op_type {
 FieldFace::FieldFace (int rank) throw()
   : rank_(rank),
     refresh_type_(refresh_unknown),
-    prolong_(NULL),
-    restrict_(NULL),
     refresh_(NULL),
     new_refresh_(false)
 {
@@ -135,8 +132,6 @@ FieldFace::~FieldFace() throw ()
 
 FieldFace::FieldFace(const FieldFace & field_face) throw ()
   :  refresh_type_(refresh_unknown),
-     prolong_(NULL),
-     restrict_(NULL),
      refresh_(NULL),
      new_refresh_(false)
 
@@ -166,10 +161,8 @@ void FieldFace::copy_(const FieldFace & field_face)
     face_[i]  = field_face.face_[i];
     child_[i] = field_face.child_[i];
   }
-  refresh_type_ = field_face.refresh_type_;
-  restrict_     = field_face.restrict_;
-  prolong_      = field_face.prolong_;
-  refresh_      = field_face.refresh_;
+  refresh_type_   = field_face.refresh_type_;
+  refresh_        = field_face.refresh_;
   // new_refresh_ must not be true in more than one FieldFace to avoid
   // multiple deletes
   new_refresh_  = false;
@@ -189,8 +182,6 @@ void FieldFace::pup (PUP::er &p)
   PUParray(p,ghost_,3);
   PUParray(p,child_,3);
   p | refresh_type_;
-  p | prolong_;
-  p | restrict_;
   p | refresh_;
   p | new_refresh_;
 }
@@ -240,9 +231,6 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
     field.ghost_depth(index_field,&g3[0],&g3[1],&g3[2]);
     field.centering(index_field,&c3[0],&c3[1],&c3[2]);
 
-    int index_src = field_list_src[i_f];
-    int index_dst = field_list_dst[i_f];
-    
     const bool accumulate = refresh_->accumulate(i_f);
 
     int i3[3], n3[3];
@@ -335,8 +323,6 @@ void FieldFace::array_to_face (char * array, Field field) throw()
     field.ghost_depth(index_field,&g3[0],&g3[1],&g3[2]);
     field.centering(index_field,&c3[0],&c3[1],&c3[2]);
 
-    int index_src = field_list_src[i_f];
-    int index_dst = field_list_dst[i_f];
     const bool accumulate = refresh_->accumulate(i_f);
 
     int i3[3], n3[3];
@@ -382,9 +368,7 @@ void FieldFace::array_to_face (char * array, Field field) throw()
       ic3[2] = 0;
 
       // adjust for full-block interpolation to child
-      if (i_f == 0) {
-        TRACE_PROLONG("array_to_face",m3,i3,n3,mc3,ic3,nc3);
-      }
+      TRACE_PROLONG("array_to_face",prolong(),m3,i3,n3,mc3,ic3,nc3);
       prolong()->apply
         (precision,
          field_ghost,m3, i3,  n3,
@@ -435,8 +419,6 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
   auto field_list_src = refresh_->field_list_src();
   auto field_list_dst = refresh_->field_list_dst();
   
-  cello_float * padded_face_vector = nullptr;
-
   for (size_t i_f=0; i_f < field_list_src.size(); i_f++) {
 
     size_t index_src = field_list_src[i_f];
@@ -501,7 +483,7 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
 #endif            
 
       // adjust for full-block interpolation to child
-      TRACE_PROLONG("face_to_face",m3,id3,nd3,m3,is3,ns3);
+      TRACE_PROLONG("face_to_face",prolong(),m3,id3,nd3,m3,is3,ns3);
       prolong()->apply (precision,
                         values_dst,m3,id3, nd3,
                         values_src,m3,is3, ns3,
@@ -574,8 +556,6 @@ int FieldFace::num_bytes_array(Field field) throw()
     field.ghost_depth(index_field,&g3[0],&g3[1],&g3[2]);
     field.centering(index_field,&c3[0],&c3[1],&c3[2]);
 
-    int index_src = field_list_src[i_f];
-    int index_dst = field_list_dst[i_f];
     const bool accumulate = refresh_->accumulate(i_f);
 
     int i3[3], n3[3];
@@ -615,7 +595,9 @@ int FieldFace::data_size () const
   count += 3*sizeof(int);  // face_[3]
   count += 3*sizeof(int); // ghost_[3]
   count += 3*sizeof(int);  // child_[3];
-  count += 1*sizeof(int);  // refresh_type_ (restrict,prolong,copy)
+
+  count += 1*sizeof(int);  // refresh_type_
+
   count += refresh_->data_size(); // refresh_
 
   return count;
@@ -629,17 +611,11 @@ char * FieldFace::save_data (char * buffer) const
   char * p = buffer;
   int n;
 
-  memcpy(p,face_, n=3*sizeof(int));  
-  p+=n;
+  memcpy(p,face_, n=3*sizeof(int));  p+=n;
+  memcpy(p,ghost_,n=3*sizeof(int));  p+=n;
+  memcpy(p,child_,n=3*sizeof(int));  p+=n;
 
-  memcpy(p,ghost_,n=3*sizeof(int)); 
-  p+=n;
-
-  memcpy(p,child_,n=3*sizeof(int));  
-  p+=n;
-
-  memcpy(p,&refresh_type_,n=sizeof(int));  
-  p+=n;
+  memcpy(p,&refresh_type_,n=sizeof(int));   p+=n;
 
   p = refresh_->save_data(p);
 
@@ -659,17 +635,11 @@ char * FieldFace::load_data (char * buffer)
   char * p = buffer;
   int n;
 
-  memcpy(face_,p, n=3*sizeof(int));
-  p+=n;
+  memcpy(face_,p, n=3*sizeof(int)); p+=n;
+  memcpy(ghost_,p,n=3*sizeof(int)); p+=n;
+  memcpy(child_,p,n=3*sizeof(int)); p+=n;
 
-  memcpy(ghost_,p,n=3*sizeof(int));
-  p+=n;
-
-  memcpy(child_,p,n=3*sizeof(int));
-  p+=n;
-
-  memcpy(&refresh_type_,p,n=sizeof(int));
-  p+=n;
+  memcpy(&refresh_type_,p,n=sizeof(int));   p+=n;
 
   Refresh * refresh = new Refresh;
   set_refresh(refresh,true);
@@ -845,8 +815,6 @@ void FieldFace::print(const char * message)
   CkPrintf ("    face_    %d %d %d\n",face_[0],face_[1],face_[2]);
   CkPrintf ("    ghost_   %d %d %d\n",ghost_[0],ghost_[1],ghost_[2]);
   CkPrintf ("    child_   %d %d %d\n",child_[0],child_[1],child_[2]);
-  CkPrintf ("    prolong_ %p\n",(void*)prolong_);
-  CkPrintf ("    restrict_ %p\n",(void*)restrict_);
   CkPrintf ("    refresh_type_ %d\n",refresh_type_);
   if (refresh_) refresh_->print();
 }
