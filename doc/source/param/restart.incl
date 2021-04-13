@@ -4,4 +4,19 @@
 :Default: :d:`""`
 :Scope:     :c:`Cello`
 
-:e:`This optional parameter is used to specify the name of a parameter file to read on restart.  Its purpose is to allow a simulation to be restarted with slightly different parameter values, e.g. with a smaller courant number.  Currently, very few parameters are supported in the restart parameter file, just` :p:`Field` : :p:`courant` :e:`and` :p:`Testing` : :p:`time_final`.
+:e:`This optional parameter is used to specify the name of a parameter
+file to read on restart.  Its purpose is to allow a simulation to be
+restarted with slightly different parameter values.  Currently, very
+few parameters are supported in the restart parameter file. These
+include:`
+
+  * Modifying the value of :p:`Testing` : :p:`time_final`
+
+  * Specifying new output file sets. These should be specified in an
+    :p:`Output` Group in a similar manner to how the file set would be
+    specified in a normal parameter file. The entries of :p:`Output` :
+    :p:`list` should NOT include any of the names of file sets
+    specified in the original input file (the entries in the restart
+    file's :p:`Output` : :p:`list` are effectively appended to the
+    list of entries from the original file). Note that the properties
+    for existing file sets can NOT be be modified.
