@@ -125,6 +125,11 @@ public: // interface
   int num_attributes(int it) const
   { return particle_descr_->num_attributes(it); }
 
+  /// Check if attribute exists
+
+  bool has_attribute (int it, std::string attribute) const
+  { return particle_descr_->has_attribute(it,attribute); }
+
   /// Return the index for the given attribute
 
   int attribute_index (int it, std::string attribute) const
@@ -197,6 +202,10 @@ public: // interface
   int constant_offset(int it, int ic) const
   { return particle_descr_->constant_offset(it,ic); }
 
+  /// Check if given constant exists
+
+  bool has_constant(int it, std::string constant) const
+  { return particle_descr_->has_constant(it,constant); }
 
   //--------------------------------------------------
   // BYTES
