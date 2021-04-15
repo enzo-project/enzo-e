@@ -195,8 +195,6 @@ public: // interface
       initial_turbulence_density(0.0),
       initial_turbulence_pressure(0.0),
       initial_turbulence_temperature(0.0),
-      // EnzoMethodCheckGravity
-      method_check_gravity_particle_type(),
       // EnzoMethodHeat
       method_heat_alpha(0.0),
       // EnzoMethodHydro
@@ -387,9 +385,6 @@ public: // attributes
   double                     initial_turbulence_pressure;
   double                     initial_turbulence_temperature;
 
-  /// EnzoMethodCheckGravity
-  std::string                method_check_gravity_particle_type;
-  
   /// EnzoMethodHeat
   double                     method_heat_alpha;
 

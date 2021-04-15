@@ -350,33 +350,33 @@ if (prec == "double"):
     Clean(env_mv_out.RunParallel ('test_collapse-bcg2.unit',
                                   enzo_bin, 
 		                  ARGS='input/test_collapse-bcg2.in'),
-          [Glob('#/' + test_path + '/Dir_COLLAPSE_BCG2_*'),
-                             Glob('#/Dir_COLLAPSE_BCG2_*')]);
+          [Glob('#/' + test_path + '/Dir_Collapse_BCG2_*'),
+                             Glob('#/Dir_Collapse_BCG2_*')]);
     Clean(env_mv_out.RunParallel ('test_collapse-dd2.unit',
                                   enzo_bin, 
 		                  ARGS='input/test_collapse-dd2.in'),
-          [Glob('#/' + test_path + '/Dir_COLLAPSE_DD2_*'),
-                             Glob('#/Dir_COLLAPSE_DD2_*')]);
+          [Glob('#/' + test_path + '/Dir_Collapse_DD2_*'),
+                             Glob('#/Dir_Collapse_DD2_*')]);
     Clean(env_mv_out.RunParallel ('test_collapse-hg2.unit',
                                   enzo_bin, 
 		                  ARGS='input/test_collapse-hg2.in'),
-          [Glob('#/' + test_path + '/Dir_COLLAPSE_HG2_*'),
-                             Glob('#/Dir_COLLAPSE_HG2_*')])
+          [Glob('#/' + test_path + '/Dir_Collapse_HG2_*'),
+                             Glob('#/Dir_Collapse_HG2_*')])
     Clean(env_mv_out.RunParallel ('test_collapse-gas-bcg2.unit',
                                   enzo_bin, 
 		                  ARGS='input/test_collapse-gas-bcg2.in'),
-          [Glob('#/' + test_path + '/Dir_COLLAPSE_GAS-BCG2_*'),
-                             Glob('#/Dir_COLLAPSE_GAS-BCG2_*')])
+          [Glob('#/' + test_path + '/Dir_Collapse_GAS-BCG2_*'),
+                             Glob('#/Dir_Collapse_GAS-BCG2_*')])
     Clean(env_mv_out.RunParallel ('test_collapse-gas-dd2.unit',
                                   enzo_bin, 
 		                  ARGS='input/test_collapse-gas-dd2.in'),
-          [Glob('#/' + test_path + '/Dir_COLLAPSE_GAS-DD2_*'),
-                             Glob('#/Dir_COLLAPSE_GAS-DD2_*')])
+          [Glob('#/' + test_path + '/Dir_Collapse_GAS-DD2_*'),
+                             Glob('#/Dir_Collapse_GAS-DD2_*')])
     Clean(env_mv_out.RunParallel ('test_collapse-gas-hg2.unit',
                                   enzo_bin, 
 		                  ARGS='input/test_collapse-gas-hg2.in'),
-          [Glob('#/' + test_path + '/Dir_COLLAPSE_GAS-HG2_*'),
-                             Glob('#/Dir_COLLAPSE_GAS-HG2_*')])
+          [Glob('#/' + test_path + '/Dir_Collapse_GAS-HG2_*'),
+                             Glob('#/Dir_Collapse_GAS-HG2_*')])
 
 #----------------------------------------------------------------------
 # MethodHeat tests

@@ -889,7 +889,11 @@ Method * Problem::create_method_
 
   } else if (name == "debug") {
 
-    method = new MethodDebug (config->num_fields);
+    method = new MethodDebug
+      (config->num_fields,
+       config->method_debug_print[index_method],
+       config->method_debug_coarse[index_method],
+       config->method_debug_ghost[index_method]);
 
   } else if (name == "close_files") {
 

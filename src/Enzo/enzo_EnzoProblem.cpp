@@ -540,11 +540,6 @@ Method * EnzoProblem::create_method_
        enzo_config->method_turbulence_mach_number,
        enzo_config->physics_cosmology);
 
-  } else if (name == "check_gravity") {
-
-    method = new EnzoMethodCheckGravity
-      (enzo_config->method_check_gravity_particle_type);
-
   } else if (name == "cosmology") {
 
     method = new EnzoMethodCosmology;
@@ -566,12 +561,20 @@ Method * EnzoProblem::create_method_
 	     solver_name.c_str(),
 	     0 <= index_solver && index_solver < enzo_config->num_solvers);
 
-  method = new EnzoMethodGravity
+    Prolong * prolong = create_prolong_
+      (config->method_refresh_prolong[index_method],config);
+
+    const int index_prolong = prolong_list_.size();
+    prolong_list_.push_back(prolong);
+  
+    method = new EnzoMethodGravity
       (
        enzo_config->solver_index.at(solver_name),
        enzo_config->method_gravity_grav_const,
        enzo_config->method_gravity_order,
-       enzo_config->method_gravity_accumulate);
+       enzo_config->method_gravity_accumulate,
+       index_prolong
+       );
 
   } else {
 

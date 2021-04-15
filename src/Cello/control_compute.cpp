@@ -145,6 +145,9 @@ void Block::compute_end_ ()
   // Push back fields if saving old ones
   data()->field().save_history(time_);
 
+  // delete fluxes
+  data()->flux_data()->deallocate();
+
   // Update block cycle and time
   set_cycle (cycle_ + 1);
   set_time  (time_  + dt_);

@@ -17,7 +17,7 @@
 
 // #define DEBUG_COPY_B
 // #define DEBUG_COPY_DENSITIES
-// #define DEBUG_COPY_POTENTIAL
+// #dfeine DEBUG_COPY_POTENTIAL
 // #define DEBUG_COPY_ACCELERATION
 
 #define NEW_TIMESTEP
@@ -28,12 +28,14 @@ EnzoMethodGravity::EnzoMethodGravity
 (int index_solver,
  double grav_const,
  int order,
- bool accumulate)
+ bool accumulate,
+ int index_prolong)
   : Method(),
     index_solver_(index_solver),
     grav_const_(grav_const),
     order_(order),
-    ir_exit_(-1)
+    ir_exit_(-1),
+    index_prolong_(index_prolong)
 {
 
   // Refresh adds density_total field faces and one layer of ghost
@@ -42,27 +44,36 @@ EnzoMethodGravity::EnzoMethodGravity
 
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
-  // refresh->add_field("acceleration_x");
-  // refresh->add_field("acceleration_y");
-  //  refresh->add_field("acceleration_z");
+  refresh->set_prolong(index_prolong_);
+  refresh->add_field("acceleration_x");
+  refresh->add_field("acceleration_y");
+  refresh->add_field("acceleration_z");
   //  refresh->add_field("density");
   // Accumulate is used when particles are deposited into density_total
   
   if (accumulate) {
+
+    // EnzoProlong does not work with accumulate!
+    std::string prolong_name =
+      cello::problem()->prolong(index_prolong_)->name();
+    
+    ASSERT1("EnzoMethodGravity::EnzoMethodGravity()",
+           "Requesting accumulated particle mass refresh: "
+           "rerun with parameter Method : %s : prolong = \"linear\"",
+            name().c_str(),
+            (prolong_name != "enzo"));
+    
     refresh->set_accumulate(true);
     refresh->add_field_src_dst
       ("density_particle","density_particle_accumulate");
     refresh->add_field_src_dst("density_total","B");
-  } else {
-    refresh->add_field("acceleration_x");
-    refresh->add_field("acceleration_y");
-    refresh->add_field("acceleration_z");
   }
 
   ir_exit_ = add_refresh_();
-  cello::simulation()->refresh_set_name(ir_post_,name()+":exit");
+  cello::simulation()->refresh_set_name(ir_exit_,name()+":exit");
   Refresh * refresh_exit = cello::refresh(ir_exit_);
-  
+
+  refresh_exit->set_prolong(index_prolong_);
   refresh_exit->add_field("potential");
 
   refresh_exit->set_callback(CkIndex_EnzoBlock::p_method_gravity_end());
@@ -138,6 +149,17 @@ void EnzoMethodGravity::compute(Block * block) throw()
   }
 
   
+  Solver * solver = enzo::problem()->solver(index_solver_);
+  
+  // May exit before solve is done...
+  solver->set_callback (CkIndex_EnzoBlock::p_method_gravity_continue());
+
+  const int ix = field.field_id ("potential");
+  std::shared_ptr<Matrix> A (std::make_shared<EnzoMatrixLaplace>(order_));
+
+  solver->set_field_x(ix);
+  solver->set_field_b(ib);
+  
 #ifdef DEBUG_COPY_B
   if (B_copy) for (int i=0; i<m; i++) B_copy[i] = B[i];
 #endif	
@@ -147,18 +169,6 @@ void EnzoMethodGravity::compute(Block * block) throw()
   if (D_copy) for (int i=0; i<m; i++) D_copy[i] = D[i];
 #endif	
 
-  Solver * solver = enzo::problem()->solver(index_solver_);
-  
-  // May exit before solve is done...
-  solver->set_callback (CkIndex_EnzoBlock::p_method_gravity_continue());
-
-  const int ix = field.field_id ("potential");
-
-  std::shared_ptr<Matrix> A (std::make_shared<EnzoMatrixLaplace>(order_));
-
-  solver->set_field_x(ix);
-  solver->set_field_b(ib);
-  
   solver->apply (A, block);
 }
 

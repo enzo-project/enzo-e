@@ -81,11 +81,15 @@ public: // interface
     method_close_files_seconds_delay(),
     method_close_files_group_size(),
     method_courant(),
+    method_debug_print(),
+    method_debug_coarse(),
+    method_debug_ghost(),
     method_flux_correct_group(),
     method_flux_correct_enable(),
     method_flux_correct_min_digits(),
     method_refresh_field_list(),
     method_refresh_particle_list(),
+    method_refresh_prolong(),
     method_refresh_ghost_depth(),
     method_refresh_min_face_rank(),
     method_refresh_all_fields(),
@@ -244,11 +248,15 @@ public: // interface
       method_close_files_seconds_delay(),
       method_close_files_group_size(),
       method_courant(),
+      method_debug_print(),
+      method_debug_coarse(),
+      method_debug_ghost(),
       method_flux_correct_group(),
       method_flux_correct_enable(),
       method_flux_correct_min_digits(),
       method_refresh_field_list(),
       method_refresh_particle_list(),
+      method_refresh_prolong(),
       method_refresh_ghost_depth(),
       method_refresh_min_face_rank(),
       method_refresh_all_fields(),
@@ -453,11 +461,16 @@ public: // attributes
   std::vector<double>        method_close_files_seconds_delay;
   std::vector<int>           method_close_files_group_size;
   std::vector<double>        method_courant;
+  std::vector<bool>          method_debug_print;
+  std::vector<bool>          method_debug_coarse;
+  std::vector<bool>          method_debug_ghost;
+
   std::vector<std::string>   method_flux_correct_group;
   std::vector<bool>          method_flux_correct_enable;
   std::vector<double>        method_flux_correct_min_digits;
   std::vector< std::vector<int> > method_refresh_field_list;
   std::vector< std::vector<int> > method_refresh_particle_list;
+  std::vector<std::string>   method_refresh_prolong;
   std::vector<int>           method_refresh_ghost_depth;
   std::vector<int>           method_refresh_min_face_rank;
   std::vector<int>           method_refresh_all_fields;

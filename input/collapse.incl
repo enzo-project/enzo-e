@@ -8,5 +8,4 @@
  }
  Method {
      list = [ "pm_deposit", "gravity", "pm_update" ];
-     check_gravity { particle_type = "dark"; }
  }

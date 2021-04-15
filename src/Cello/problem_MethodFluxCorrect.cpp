@@ -198,8 +198,6 @@ void MethodFluxCorrect::compute_continue_sum_fields
     }
   }
 
-  block->data()->flux_data()->deallocate();
-
   block->compute_done();
 }
 

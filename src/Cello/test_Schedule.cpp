@@ -128,8 +128,7 @@ PARALLEL_MAIN_BEGIN
     unit_assert(schedule->write_this_cycle (0,  0.0) == false);
     unit_assert(schedule->write_this_cycle (0,  0.0) == false);
 
-    int err;
-    err = system("sleep 2");
+    system("sleep 2");
 
     unit_assert(schedule->write_this_cycle (0,  0.0) == true);
     unit_assert(schedule->write_this_cycle (0,  0.0) == true);
@@ -137,7 +136,7 @@ PARALLEL_MAIN_BEGIN
     unit_assert(schedule->write_this_cycle (0,  0.0) == false);
     unit_assert(schedule->write_this_cycle (0,  0.0) == false);
 
-    err = system("sleep 2");
+    system("sleep 2");
 
     unit_assert(schedule->write_this_cycle (0,  0.0) == true);
     unit_assert(schedule->write_this_cycle (0,  0.0) == true);

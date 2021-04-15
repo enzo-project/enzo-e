@@ -339,9 +339,10 @@ void OutputImage::write_block ( const Block *  block ) throw()
 
       // add block contribution to image
 
-      const char * field_values = (ghost_) ? 
-	field.values(index_field) :
-	field.unknowns(index_field);
+      const char * field_values;
+      field_values = (ghost_) ? 
+        field.values(index_field) :
+        field.unknowns(index_field);
 
       float  * field_float  = (float*)field_values;
       double * field_double = (double*)field_values;

@@ -33,6 +33,9 @@
 #include "charm_simulation.hpp"
 #include "enzo.hpp"
 
+// #define DEBUG_COPY_X0
+// #define DEBUG_COPY_R
+
 static CmiNodeLock bcg_iter_node_lock;
 ///----------------------------------------------------------------------
 void mutex_init_bcg_iter()
@@ -230,6 +233,13 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
     ir_loop_9_(-1)
 {
 
+  // RESET restart_cycle TO 1 UNTIL CONVERGENCE
+  if (restart_cycle_ != 1) {
+    restart_cycle_ = 1;
+    WARNING("EnzoSolverBiCgStab::EnzoSolverBiCgStab()",
+            "BYPASSING CONVERGENCE BUG: RESETTING restart_cycle_ = 1");
+  }
+  
   //  if (solve_type == solve_tree) {
   ScalarDescr * scalar_descr_quad = cello::scalar_descr_long_double();
 
@@ -453,6 +463,12 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* block) throw() {
       for (int i=0; i<m_; i++) X[i] = X_copy[i];
 
       A_->residual (ir_, ib_, ix_, block);
+#ifdef DEBUG_COPY_R
+  const int ir_copy = field.field_id ("R_copy");
+  enzo_float * R_copy = (enzo_float*) field.values (ir_copy);
+  enzo_float * R = (enzo_float*) field.values (ir_);
+  if (R_copy) for (int i=0; i<m_; i++) R_copy[i] = R[i];
+#endif  
       
     }
   }
@@ -666,6 +682,14 @@ void EnzoSolverBiCgStab::loop_0a(EnzoBlock* block,
   }
 
   delete msg;
+
+#ifdef DEBUG_COPY_X0
+  Field field = block->data()->field();
+  const int ix0_copy = field.field_id ("X0_copy");
+  enzo_float * X0_copy = (enzo_float*) field.values (ix0_copy);
+  enzo_float * X =       (enzo_float*) field.values (ix_);
+  if (X0_copy) for (int i=0; i<m_; i++) X0_copy[i] = X[i];
+#endif  
 
   TRACE_SCALAR(block,"beta_n",S(beta_n));
   TRACE_SCALAR(block,"bnorm_",S(bnorm));

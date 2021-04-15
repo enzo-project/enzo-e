@@ -113,11 +113,15 @@ void Config::pup (PUP::er &p)
   p | method_close_files_seconds_delay;
   p | method_close_files_group_size;
   p | method_courant;
+  p | method_debug_print;
+  p | method_debug_coarse;
+  p | method_debug_ghost;
   p | method_flux_correct_group;
   p | method_flux_correct_enable;
   p | method_flux_correct_min_digits;
   p | method_refresh_field_list;
   p | method_refresh_particle_list;
+  p | method_refresh_prolong;
   p | method_refresh_ghost_depth;
   p | method_refresh_min_face_rank;
   p | method_refresh_all_fields;
@@ -712,11 +716,15 @@ void Config::read_method_ (Parameters * p) throw()
 
   method_list.   resize(num_method);
   method_courant.resize(num_method);
+  method_debug_print.resize(num_method);
+  method_debug_coarse.resize(num_method);
+  method_debug_ghost.resize(num_method);
   method_flux_correct_group.resize(num_method);
   method_flux_correct_enable.resize(num_method);
   method_flux_correct_min_digits.resize(num_method);
   method_refresh_field_list.resize(num_method);
   method_refresh_particle_list.resize(num_method);
+  method_refresh_prolong.resize(num_method);
   method_refresh_ghost_depth.resize(num_method);
   method_refresh_min_face_rank.resize(num_method);
   method_refresh_all_fields.resize(num_method);
@@ -765,6 +773,14 @@ void Config::read_method_ (Parameters * p) throw()
     // Read courant condition if any
     method_courant[index_method] = p->value_float  (full_name + ":courant",1.0);
 
+    // Read any MethodDebug parameters
+    method_debug_print[index_method] = p->value_logical
+      (full_name + ":print",false);
+    method_debug_coarse[index_method] = p->value_logical
+      (full_name + ":coarse",false);
+    method_debug_ghost[index_method] = p->value_logical
+      (full_name + ":ghost",false);
+
     // Read field group for flux correction
     method_flux_correct_group[index_method] =
       p->value_string (full_name + ":group","conserved");
@@ -773,6 +789,7 @@ void Config::read_method_ (Parameters * p) throw()
     method_flux_correct_min_digits[index_method] =
       p->value_float (full_name + ":min_digits",0.0);
 
+    // Field and particle lists if needed by the Method
     int n = p->list_length(full_name + ":field_list");
     method_refresh_field_list[index_method].resize(n);
     for (int i=0; i<n; i++) {
@@ -785,6 +802,9 @@ void Config::read_method_ (Parameters * p) throw()
       method_refresh_particle_list[index_method][i] =
         p->list_value_integer(i,full_name+":particle_list",-1);
     }
+
+    method_refresh_prolong[index_method] =
+      p->value_string(full_name+":prolong","linear");
 
     // Read refresh method parameters
     method_refresh_ghost_depth[index_method] =
