@@ -12,9 +12,8 @@
 //----------------------------------------------------------------------
 
 static void append_key_to_vec_
-(const std::vector<std::string> &integrable_quantities, FieldCat target_cat,
- bool skip_bfield, std::size_t *density_index,
- std::vector<std::string> &key_vec)
+(const str_vec_t &integrable_quantities, FieldCat target_cat,
+ bool skip_bfield, std::size_t *density_index, str_vec_t &key_vec)
 {
   for (std::string name : integrable_quantities){
     bool vector_quantity, actively_advected;
@@ -56,7 +55,7 @@ static void append_key_to_vec_
 //----------------------------------------------------------------------
 
 EnzoIntegrableUpdate::EnzoIntegrableUpdate
-(const std::vector<std::string>& integrable_quantities,
+(const str_vec_t& integrable_quantities,
  bool skip_B_update) throw()
 {
   // Add conserved quantities to integrable_keys_ and identify the index
@@ -79,7 +78,7 @@ EnzoIntegrableUpdate::EnzoIntegrableUpdate
 
 void EnzoIntegrableUpdate::clear_dUcons_map
 (EnzoEFltArrayMap &dUcons_map, enzo_float value,
- const std::vector<std::vector<std::string>> &passive_lists) const noexcept
+ const std::vector<str_vec_t> &passive_lists) const noexcept
 {
   auto clear_arr = [value,&dUcons_map](const std::string& key)
   {
@@ -95,7 +94,7 @@ void EnzoIntegrableUpdate::clear_dUcons_map
 
   for (const std::string& key : integrable_keys_){ clear_arr(key); }
 
-  for (const std::vector<std::string>& cur_list : passive_lists){
+  for (const str_vec_t& cur_list : passive_lists){
     for (const std::string& key : cur_list){ clear_arr(key); }
   }
 }
@@ -105,7 +104,7 @@ void EnzoIntegrableUpdate::clear_dUcons_map
 void EnzoIntegrableUpdate::accumulate_flux_component
 (int dim, double dt, enzo_float cell_width, EnzoEFltArrayMap &flux_map,
  EnzoEFltArrayMap &dUcons_map, int stale_depth,
- const std::vector<std::vector<std::string>> &passive_lists) const noexcept
+ const std::vector<str_vec_t> &passive_lists) const noexcept
 {
   EnzoPermutedCoordinates coord(dim);
   enzo_float dtdx_i = dt/cell_width;
@@ -145,7 +144,7 @@ void EnzoIntegrableUpdate::accumulate_flux_component
   for (const std::string& key : integrable_keys_){ accumulate(key); }
 
   // second, handle passive scalars:
-  for (const std::vector<std::string> key_list : passive_lists){
+  for (const str_vec_t key_list : passive_lists){
     for (const std::string& key : key_list){ accumulate(key); }
   }
 
@@ -171,7 +170,7 @@ void EnzoIntegrableUpdate::update_quantities
  EnzoEFltArrayMap &out_integrable_map,
  EnzoEFltArrayMap &out_conserved_passive_scalar,
  EnzoEquationOfState *eos, int stale_depth,
- const std::vector<std::vector<std::string>> &passive_lists) const
+ const std::vector<str_vec_t> &passive_lists) const
 {
 
   // Update passive scalars, it doesn't currently support renormalizing to 1
@@ -228,7 +227,7 @@ void EnzoIntegrableUpdate::update_quantities
 void EnzoIntegrableUpdate::update_passive_scalars_
 (EnzoEFltArrayMap &initial_integrable_map, EnzoEFltArrayMap &dUcons_map,
  EnzoEFltArrayMap &out_conserved_passive_scalar, int stale_depth,
- const std::vector<std::vector<std::string>> &passive_lists) const
+ const std::vector<str_vec_t> &passive_lists) const
 {
 
   EFlt3DArray cur_rho = initial_integrable_map.get("density", stale_depth);
@@ -239,7 +238,7 @@ void EnzoIntegrableUpdate::update_passive_scalars_
 
   for (std::size_t i = 0; i < passive_lists.size(); i++){
 
-    const std::vector<std::string> &cur_list = passive_lists[i];
+    const str_vec_t &cur_list = passive_lists[i];
 
     if ((i > 0) && (cur_list.size() > 0)){
       ERROR("EnzoIntegrableUpdate::update_passive_scalars_",

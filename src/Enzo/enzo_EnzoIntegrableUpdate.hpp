@@ -57,7 +57,7 @@ public: // interface
   ///     into one list of passive scalars.
   void clear_dUcons_map
   (EnzoEFltArrayMap &dUcons_map, enzo_float value,
-   const std::vector<std::vector<std::string>> &passive_lists) const noexcept;
+   const std::vector<str_vec_t> &passive_lists) const noexcept;
 
   /// Computes the change in (the conserved form of) the integrable and
   /// passively advected quantites due to the flux divergence along dimension
@@ -84,7 +84,7 @@ public: // interface
   void accumulate_flux_component
   (int dim, double dt, enzo_float cell_width, EnzoEFltArrayMap &flux_map,
    EnzoEFltArrayMap &dUcons_map, int stale_depth,
-   const std::vector<std::vector<std::string>> &passive_lists) const noexcept;
+   const std::vector<str_vec_t> &passive_lists) const noexcept;
 
   /// adds flux divergence (and source terms) to the initial integrable
   /// quantities and stores the results in `out_integrable_map`
@@ -119,7 +119,7 @@ public: // interface
    EnzoEFltArrayMap &out_integrable_map,
    EnzoEFltArrayMap &out_conserved_passive_scalar,
    EnzoEquationOfState *eos, int stale_depth,
-   const std::vector<std::vector<std::string>> &passive_lists) const;
+   const std::vector<str_vec_t> &passive_lists) const;
 
   /// provides a const vector of all registerred integrable keys
   const std::vector<std::string> integrable_keys() const throw()
@@ -135,7 +135,7 @@ private:
   void update_passive_scalars_
   (EnzoEFltArrayMap &initial_integrable_map, EnzoEFltArrayMap &dUcons_map,
    EnzoEFltArrayMap &out_conserved_passive_scalar, int stale_depth,
-   const std::vector<std::vector<std::string>> &passive_lists) const;
+   const std::vector<str_vec_t> &passive_lists) const;
 
   /// Dynamically allocates and constructs an array of instances of EFlt3DArray
   /// that are loaded from `map` using the ordering of keys in integrable_keys_

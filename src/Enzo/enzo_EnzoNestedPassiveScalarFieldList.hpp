@@ -52,7 +52,7 @@ public:
   { }
 
   /// Retrieve the nested passive scalar field list
-  std::shared_ptr<const std::vector<std::vector<std::string>>> get_list()
+  std::shared_ptr<const std::vector<str_vec_t>> get_list()
     noexcept
   {
     if (!initialized_){
@@ -65,7 +65,7 @@ public:
   /// Retrieve the nested passive scalar field list
   ///
   /// This method is required to support the timestep method of Method objects.
-  std::shared_ptr<const std::vector<std::vector<std::string>>> get_list()
+  std::shared_ptr<const std::vector<str_vec_t>> get_list()
     const noexcept
   { return (initialized_) ? nested_names_ : build_nested_list_(); }
 
@@ -74,12 +74,12 @@ public:
 private:
 
   /// Helper method where the nested list is actually constructed
-  static std::shared_ptr<const std::vector<std::vector<std::string>>>
+  static std::shared_ptr<const std::vector<str_vec_t>>
     build_nested_list_() noexcept;
 
 private:
   bool initialized_;
-  std::shared_ptr<const std::vector<std::vector<std::string>>> nested_names_;
+  std::shared_ptr<const std::vector<str_vec_t>> nested_names_;
 };
 
 

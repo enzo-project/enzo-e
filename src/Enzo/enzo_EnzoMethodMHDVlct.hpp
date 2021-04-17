@@ -182,7 +182,7 @@ protected: // methods
   ///     form of the scalars will be stored.
   /// @param[in]  stale_depth The current stale depth
   void compute_specific_passive_scalars_
-  (const std::vector<std::vector<std::string>> passive_lists,
+  (const std::vector<str_vec_t> passive_lists,
    EFlt3DArray& density, EnzoEFltArrayMap& conserved_passive_scalar_map,
    EnzoEFltArrayMap& specific_passive_scalar_map,
    int stale_depth) const noexcept;
@@ -272,7 +272,7 @@ protected: // methods
    EnzoEFltArrayMap &flux_map, EnzoEFltArrayMap &dUcons_map,
    EFlt3DArray *interface_velocity_arr_ptr, EnzoReconstructor &reconstructor,
    EnzoConstrainedTransport *ct_handler, int stale_depth,
-   const std::vector<std::vector<std::string>>& passive_lists) const noexcept;
+   const std::vector<str_vec_t>& passive_lists) const noexcept;
 
   /// Setup arrays used throughout `compute`. This includes both arrays that
   /// wrap Cello fields AND temporary arrays used as scratch space.

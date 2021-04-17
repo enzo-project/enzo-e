@@ -10,12 +10,9 @@
 #include "enzo.hpp"
 #include "charm_enzo.hpp"
 
-// define a shorthand alias type just for use in this f
-typedef std::vector<std::string> str_vec_t;
-
 //----------------------------------------------------------------------
 
-std::shared_ptr<const std::vector<std::vector<std::string>>>
+std::shared_ptr<const std::vector<str_vec_t>>
 EnzoNestedPassiveScalarFieldList::build_nested_list_() noexcept
 {
 

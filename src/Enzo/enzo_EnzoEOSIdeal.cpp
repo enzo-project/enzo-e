@@ -119,8 +119,7 @@ void confirm_same_kv_pair_(const EnzoEFltArrayMap &reconstructable,
 
 void check_recon_integ_overlap_
 (const EnzoEFltArrayMap &reconstructable, const EnzoEFltArrayMap &integrable,
- const std::string &func_name,
- const std::vector<std::vector<std::string>> &passive_lists)
+ const std::string &func_name, const std::vector<str_vec_t> &passive_lists)
 {
   // We assume that the following groups are represented by the same fields in
   // integrable and reconstructable. This should probably not be hardcoded
@@ -148,7 +147,7 @@ void check_recon_integ_overlap_
 void EnzoEOSIdeal::reconstructable_from_integrable
 (EnzoEFltArrayMap &integrable, EnzoEFltArrayMap &reconstructable,
  EnzoEFltArrayMap &conserved_passive_map, int stale_depth,
- const std::vector<std::vector<std::string>> &passive_lists) const
+ const std::vector<str_vec_t> &passive_lists) const
 {
 
   // Confirm that the expected fields (e.g. density, vx, vy, vz, bx, by, bz)
@@ -166,8 +165,7 @@ void EnzoEOSIdeal::reconstructable_from_integrable
 
 void EnzoEOSIdeal::integrable_from_reconstructable
 (EnzoEFltArrayMap &reconstructable, EnzoEFltArrayMap &integrable,
- int stale_depth,
- const std::vector<std::vector<std::string>> &passive_lists) const
+ int stale_depth, const std::vector<str_vec_t> &passive_lists) const
 {
   if (grackle_variable_gamma_()){
     // we would need to model a field with the

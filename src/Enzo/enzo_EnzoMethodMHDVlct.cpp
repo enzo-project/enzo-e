@@ -251,7 +251,7 @@ EnzoEFltArrayMap EnzoMethodMHDVlct::conserved_passive_scalar_map_
 (Block * block) const noexcept
 {
   EnzoEFltArrayMap map("conserved_passive_scalar");
-  std::shared_ptr<const std::vector<std::vector<std::string>>> nested_list
+  std::shared_ptr<const std::vector<str_vec_t>> nested_list
     = nested_passive_list_.get_list();
   EnzoFieldArrayFactory array_factory(block,0);
   for (const std::vector<std::string> &cur_list : *nested_list){
@@ -494,7 +494,7 @@ void EnzoMethodMHDVlct::check_mesh_and_ghost_size_(Block *block) const noexcept
 //----------------------------------------------------------------------
 
 void EnzoMethodMHDVlct::compute_specific_passive_scalars_
-(const std::vector<std::vector<std::string>> passive_lists,
+(const std::vector<str_vec_t> passive_lists,
  EFlt3DArray& density, EnzoEFltArrayMap& conserved_passive_scalar_map,
  EnzoEFltArrayMap& specific_passive_scalar_map, int stale_depth) const noexcept
 {
@@ -530,7 +530,7 @@ void EnzoMethodMHDVlct::compute_flux_
  EnzoEFltArrayMap &flux_map, EnzoEFltArrayMap &dUcons_map,
  EFlt3DArray *interface_velocity_arr_ptr, EnzoReconstructor &reconstructor,
  EnzoConstrainedTransport *ct_handler, int stale_depth,
- const std::vector<std::vector<std::string>>& passive_lists) const noexcept
+ const std::vector<str_vec_t>& passive_lists) const noexcept
 {
 
   // purely for the purposes of making the caluclation more explicit, we define
@@ -605,7 +605,7 @@ void EnzoMethodMHDVlct::compute_flux_
 static void add_temporary_arrays_to_map_
 (EnzoEFltArrayMap &map, std::array<int,3> &shape,
  const std::vector<std::string>* const nonpassive_names,
- const std::vector<std::vector<std::string>>* const passive_lists)
+ const std::vector<str_vec_t>* const passive_lists)
 {
 
   if (nonpassive_names != nullptr){

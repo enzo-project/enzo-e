@@ -91,7 +91,7 @@ public: // interface
   (EnzoEFltArrayMap &prim_map_l, EnzoEFltArrayMap &prim_map_r,
    const EFlt3DArray &pressure_array_l, const EFlt3DArray &pressure_array_r,
    EnzoEFltArrayMap &flux_map, int dim, EnzoEquationOfState *eos,
-   int stale_depth, const std::vector<std::vector<std::string>> &passive_lists,
+   int stale_depth, const std::vector<str_vec_t> &passive_lists,
    EFlt3DArray *interface_velocity) const = 0;
 
 };
