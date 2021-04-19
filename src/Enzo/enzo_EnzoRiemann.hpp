@@ -67,12 +67,7 @@ public: // interface
   ///     Values of 0, 1, and 2 correspond to the x, y, and z directions.
   /// @param[in]     eos Instance of the fluid's EnzoEquationOfState object
   /// @param[in]     stale_depth indicates the current stale_depth.
-  /// @param[in]     passive_lists A list of lists of keys for passively
-  ///     advected scalars. The first list holds the keys for quantities that
-  ///     are normally passively advected. Subsequent lists group together
-  ///     collections of passively advected scalars whose specific value
-  ///     (before and after advection) must sum to 1. Keys must not be
-  ///     duplicated across more than one list.
+  /// @param[in]     passive_list A list of keys for passive scalars.
   /// @param[in,out] interface_velocity Pointer to an array to hold the
   ///     computed component of the velocity at the cell interfaces along
   ///     `dim` (the array should not include exterior faces of the block and
@@ -91,7 +86,7 @@ public: // interface
   (EnzoEFltArrayMap &prim_map_l, EnzoEFltArrayMap &prim_map_r,
    const EFlt3DArray &pressure_array_l, const EFlt3DArray &pressure_array_r,
    EnzoEFltArrayMap &flux_map, int dim, EnzoEquationOfState *eos,
-   int stale_depth, const std::vector<str_vec_t> &passive_lists,
+   int stale_depth, const str_vec_t &passive_list,
    EFlt3DArray *interface_velocity) const = 0;
 
 };

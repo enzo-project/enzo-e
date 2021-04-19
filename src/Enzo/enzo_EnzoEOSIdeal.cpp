@@ -40,64 +40,6 @@ bool grackle_variable_gamma_(){
 //----------------------------------------------------------------------
 
 // Helper function that performs a quick check to confirm that certain fields
-// are  by both reconstructable_group and integrable_group
-void confirm_same_fields_(Grouping &grouping_ref, Grouping &grouping_check,
-			  std::string ref_name, std::string check_name,
-			  std::vector<std::string> group_names,
-			  std::string func_name)
-{
-  for (std::size_t i = 0; i<group_names.size(); i++){
-    std::string group_name = group_names[i];
-    int num_ref_fields = grouping_ref.size(group_name);
-    int num_check_fields = grouping_check.size(group_name);
-
-    ASSERT3(func_name.c_str(),
-	    ("%s and %s groupings must have the same number of entries "
-	     "for the %s group"),
-	    ref_name.c_str(), check_name.c_str(), group_name.c_str(),
-	    num_ref_fields == num_check_fields);
-
-    for (int j=0;j<num_ref_fields;j++){
-      std::string ref_field = grouping_ref.item(group_name,j);
-      std::string check_field = grouping_check.item(group_name,j);
-
-      ASSERT4(func_name.c_str(),
-	      ("Field %d of the %s group is expected to have the same name in "
-	       "the %s and %s groupings"),
-	      j, group_name.c_str(), ref_name.c_str(), check_name.c_str(),
-	      ref_field == check_field);
-    }
-  }
-}
-
-//----------------------------------------------------------------------
-
-void check_recon_integ_overlap_(Grouping &reconstructable_group,
-				Grouping &integrable_group,
-				std::string func_name)
-{
-  // We assume that the following groups are represented by the same fields in
-  // integrable and reconstructable
-  std::vector<std::string> common_groups = {"density", "velocity"};
-  if (integrable_group.size("bfield") > 0 ||
-      reconstructable_group.size("bfield") > 0){
-    common_groups.push_back("bfield");
-  }
-
-  // we also expect overlap with the passive scalars
-  std::vector<std::string> scalar_groups =
-    EnzoCenteredFieldRegistry::passive_scalar_group_names();
-  common_groups.insert(common_groups.end(), scalar_groups.begin(),
-		       scalar_groups.end());
-    
-  confirm_same_fields_(integrable_group, reconstructable_group,
-		       "integrable", "reconstructable", common_groups,
-		       func_name);
-}
-
-//----------------------------------------------------------------------
-
-// Helper function that performs a quick check to confirm that certain fields
 // are held by both reconstructable_group and integrable_group
 void confirm_same_kv_pair_(const EnzoEFltArrayMap &reconstructable,
                            const EnzoEFltArrayMap &integrable,
@@ -119,7 +61,7 @@ void confirm_same_kv_pair_(const EnzoEFltArrayMap &reconstructable,
 
 void check_recon_integ_overlap_
 (const EnzoEFltArrayMap &reconstructable, const EnzoEFltArrayMap &integrable,
- const std::string &func_name, const std::vector<str_vec_t> &passive_lists)
+ const std::string &func_name, const str_vec_t &passive_list)
 {
   // We assume that the following groups are represented by the same fields in
   // integrable and reconstructable. This should probably not be hardcoded
@@ -134,11 +76,8 @@ void check_recon_integ_overlap_
   for (const std::string& key : optional_common_keys){
     confirm_same_kv_pair_(reconstructable, integrable, true, key, func_name);
   }
-  for (const std::vector<std::string>& cur_list : passive_lists){
-    for (const std::string& key : cur_list){
-      confirm_same_kv_pair_(reconstructable, integrable, false, key,
-                            func_name);
-    }
+  for (const std::string& key : passive_list){
+    confirm_same_kv_pair_(reconstructable, integrable, false, key, func_name);
   }
 }
 
@@ -147,14 +86,14 @@ void check_recon_integ_overlap_
 void EnzoEOSIdeal::reconstructable_from_integrable
 (EnzoEFltArrayMap &integrable, EnzoEFltArrayMap &reconstructable,
  EnzoEFltArrayMap &conserved_passive_map, int stale_depth,
- const std::vector<str_vec_t> &passive_lists) const
+ const str_vec_t &passive_list) const
 {
 
   // Confirm that the expected fields (e.g. density, vx, vy, vz, bx, by, bz)
   // are the same in reconstructable_group and integrable_group
   check_recon_integ_overlap_(reconstructable, integrable,
 			     "EnzoEOSIdeal::reconstructable_from_integrable",
-                             passive_lists);
+                             passive_list);
 
   // Simply compute the pressure
   pressure_from_integrable(integrable, reconstructable.at("pressure"),
@@ -165,7 +104,7 @@ void EnzoEOSIdeal::reconstructable_from_integrable
 
 void EnzoEOSIdeal::integrable_from_reconstructable
 (EnzoEFltArrayMap &reconstructable, EnzoEFltArrayMap &integrable,
- int stale_depth, const std::vector<str_vec_t> &passive_lists) const
+ int stale_depth, const str_vec_t &passive_list) const
 {
   if (grackle_variable_gamma_()){
     // we would need to model a field with the
@@ -178,10 +117,10 @@ void EnzoEOSIdeal::integrable_from_reconstructable
                       reconstructable.contains("bfield_y") ||
                       reconstructable.contains("bfield_z"));
   // Confirm that the expected fields (e.g. density, vx, vy, vz, bx, by, bz)
-  // are the same in reconstructable_group and integrable_group 
+  // are the same in reconstructable_group and integrable_group
   check_recon_integ_overlap_(reconstructable, integrable,
 			     "EnzoEOSIdeal::integrable_from_reconstructable",
-                             passive_lists);
+                             passive_list);
 
   EFlt3DArray density = reconstructable.get("density", stale_depth);
   EFlt3DArray vx = reconstructable.get("velocity_x", stale_depth);

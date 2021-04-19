@@ -78,7 +78,7 @@ EnzoIntegrableUpdate::EnzoIntegrableUpdate
 
 void EnzoIntegrableUpdate::clear_dUcons_map
 (EnzoEFltArrayMap &dUcons_map, enzo_float value,
- const std::vector<str_vec_t> &passive_lists) const noexcept
+ const str_vec_t &passive_list) const noexcept
 {
   auto clear_arr = [value,&dUcons_map](const std::string& key)
   {
@@ -93,10 +93,7 @@ void EnzoIntegrableUpdate::clear_dUcons_map
   };
 
   for (const std::string& key : integrable_keys_){ clear_arr(key); }
-
-  for (const str_vec_t& cur_list : passive_lists){
-    for (const std::string& key : cur_list){ clear_arr(key); }
-  }
+  for (const std::string& key : passive_list){ clear_arr(key); }
 }
 
 //----------------------------------------------------------------------
@@ -104,7 +101,7 @@ void EnzoIntegrableUpdate::clear_dUcons_map
 void EnzoIntegrableUpdate::accumulate_flux_component
 (int dim, double dt, enzo_float cell_width, EnzoEFltArrayMap &flux_map,
  EnzoEFltArrayMap &dUcons_map, int stale_depth,
- const std::vector<str_vec_t> &passive_lists) const noexcept
+ const str_vec_t &passive_list) const noexcept
 {
   EnzoPermutedCoordinates coord(dim);
   enzo_float dtdx_i = dt/cell_width;
@@ -140,14 +137,8 @@ void EnzoIntegrableUpdate::accumulate_flux_component
 
     };
 
-  // first, handle actively integrated quantities:
   for (const std::string& key : integrable_keys_){ accumulate(key); }
-
-  // second, handle passive scalars:
-  for (const str_vec_t key_list : passive_lists){
-    for (const std::string& key : key_list){ accumulate(key); }
-  }
-
+  for (const std::string& key : passive_list){ accumulate(key); }
 }
 
 //----------------------------------------------------------------------
@@ -170,13 +161,13 @@ void EnzoIntegrableUpdate::update_quantities
  EnzoEFltArrayMap &out_integrable_map,
  EnzoEFltArrayMap &out_conserved_passive_scalar,
  EnzoEquationOfState *eos, int stale_depth,
- const std::vector<str_vec_t> &passive_lists) const
+ const str_vec_t &passive_list) const
 {
 
   // Update passive scalars, it doesn't currently support renormalizing to 1
   update_passive_scalars_(initial_integrable_map, dUcons_map,
                           out_conserved_passive_scalar, stale_depth,
-                          passive_lists);
+                          passive_list);
 
   // For now, not having density floor affect momentum or total energy density
   enzo_float density_floor = eos->get_density_floor();
@@ -227,40 +218,28 @@ void EnzoIntegrableUpdate::update_quantities
 void EnzoIntegrableUpdate::update_passive_scalars_
 (EnzoEFltArrayMap &initial_integrable_map, EnzoEFltArrayMap &dUcons_map,
  EnzoEFltArrayMap &out_conserved_passive_scalar, int stale_depth,
- const std::vector<str_vec_t> &passive_lists) const
+ const str_vec_t &passive_list) const
 {
-
   EFlt3DArray cur_rho = initial_integrable_map.get("density", stale_depth);
 
   // cell-centered grid dimensions
   int mz, my, mx;
   mz = cur_rho.shape(0);    my = cur_rho.shape(1);    mx = cur_rho.shape(2);
 
-  for (std::size_t i = 0; i < passive_lists.size(); i++){
+  for (const std::string &key : passive_list){
+    EFlt3DArray cur_specific, out_conserved, dU;
+    cur_specific = initial_integrable_map.get(key, stale_depth);
+    out_conserved = out_conserved_passive_scalar.get(key, stale_depth);
+    dU = dUcons_map.get(key, stale_depth);
 
-    const str_vec_t &cur_list = passive_lists[i];
-
-    if ((i > 0) && (cur_list.size() > 0)){
-      ERROR("EnzoIntegrableUpdate::update_passive_scalars_",
-            "This function does not currently support sets of passively "
-            "advected scalars that must sum to 1.");
-    }
-
-    for (const std::string &key : cur_list){
-      EFlt3DArray cur_specific, out_conserved, dU;
-      cur_specific = initial_integrable_map.get(key, stale_depth);
-      out_conserved = out_conserved_passive_scalar.get(key, stale_depth);
-      dU = dUcons_map.get(key, stale_depth);
-
-      for (int iz=1; iz<mz-1; iz++) {
-	for (int iy=1; iy<my-1; iy++) {
-	  for (int ix=1; ix<mx-1; ix++) {
-	    out_conserved(iz,iy,ix)
-	      = (cur_specific(iz,iy,ix) * cur_rho(iz,iy,ix) + dU(iz,iy,ix));
-	  }
-	}
+    for (int iz=1; iz<mz-1; iz++) {
+      for (int iy=1; iy<my-1; iy++) {
+        for (int ix=1; ix<mx-1; ix++) {
+          out_conserved(iz,iy,ix)
+            = (cur_specific(iz,iy,ix) * cur_rho(iz,iy,ix) + dU(iz,iy,ix));
+        }
       }
-
     }
   }
+
 }

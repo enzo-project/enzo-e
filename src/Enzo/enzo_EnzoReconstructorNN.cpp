@@ -13,7 +13,7 @@
 void EnzoReconstructorNN::reconstruct_interface
 (EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
  EnzoEFltArrayMap &primr_map, int dim, EnzoEquationOfState *eos,
- int stale_depth, const std::vector<str_vec_t>& passive_lists)
+ int stale_depth, const str_vec_t& passive_list)
 {
 
   // determine components of i unit vector
@@ -43,8 +43,5 @@ void EnzoReconstructorNN::reconstruct_interface
     };
 
   for (const std::string &key : active_key_names_){ fn(key); }
-
-  for (const str_vec_t cur_l : passive_lists){
-    for (const std::string &key : cur_l){ fn(key); }
-  }
+  for (const std::string &key : passive_list){ fn(key); }
 }

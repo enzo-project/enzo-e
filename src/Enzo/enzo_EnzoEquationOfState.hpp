@@ -103,23 +103,22 @@ public: // interface
   ///     Grackle's use.
   /// @param[in]  stale_depth indicates the current stale_depth for the
   ///     supplied cell-centered quantities
-  /// @param[in]  passive_lists A list of lists of keys for passive scalars. In
-  ///     this method, this is effectively concatenated into one list of keys.
-  ///     It specifies which passive scalars in `reconstructable` and
+  /// @param[in]  passive_list A list of keys for passive scalars. In this
+  ///     method, it specifies which passive scalars in `reconstructable` and
   ///     `integrable` should be aliases of each other.
   ///
   /// For a barotropic EOS, this nominally does nothing
   /// For a non-barotropic EOS, this computes pressure
   ///
   /// @note
-  /// This interface is not ideal. `passive_lists` is not really used for
+  /// This interface is not ideal. `passive_list` is not really used for
   /// anything except for checking aliasing. Now that this interface has
   /// transitioned from using Groupings of field names to directly handling
   /// arrays, it may be better to eliminate this method altogether.
   virtual void reconstructable_from_integrable
   (EnzoEFltArrayMap &integrable, EnzoEFltArrayMap &reconstructable,
    EnzoEFltArrayMap &conserved_passive_map, int stale_depth,
-   const std::vector<str_vec_t> &passive_lists) const =0;
+   const str_vec_t &passive_list) const =0;
 
   /// Converts reconstructable primitives to integrable primitives
   ///
@@ -131,10 +130,9 @@ public: // interface
   ///     this array and reconstructable are expected to be aliases.
   /// @param[in] stale_depth indicates the current stale_depth for the
   ///     supplied cell-centered quantities
-  /// @param[in]  passive_lists A list of lists of keys for passive scalars. In
-  ///     this method, this is effectively concatenated into one list of keys.
-  ///     It specifies which passive scalars in reconstructable and integrable
-  ///     should be aliases of each other.
+  /// @param[in]  passive_list A list of keys for passive scalars. In this
+  ///     method, it specifies which passive scalars in `reconstructable` and
+  ///     `integrable` should be aliases of each other.
   ///
   /// For a barotropic EOS, this nominally does nothing
   /// For a non-barotropic EOS, this computes specific total energy from
@@ -142,13 +140,13 @@ public: // interface
   /// internal energy from the pressure
   ///
   /// @note
-  /// This interface is not ideal. `passive_lists` is not really used for
+  /// This interface is not ideal. `passive_list` is not really used for
   /// anything except for checking aliasing. Now that this interface has
   /// transitioned from using Groupings of field names to directly handling
   /// arrays, it may be better to eliminate this method altogether.
   virtual void integrable_from_reconstructable
   (EnzoEFltArrayMap &reconstructable, EnzoEFltArrayMap &integrable,
-   int stale_depth, const std::vector<str_vec_t> &passive_lists) const =0;
+   int stale_depth, const str_vec_t &passive_list) const =0;
 
   /// Computes thermal pressure from integrable quantities
   /// 

@@ -188,7 +188,7 @@ public: // interface
               const EFlt3DArray &pressure_array_l,
               const EFlt3DArray &pressure_array_r,
               EnzoEFltArrayMap &flux_map, int dim, EnzoEquationOfState *eos,
-              int stale_depth, const std::vector<str_vec_t> &passive_lists,
+              int stale_depth, const str_vec_t &passive_list,
               EFlt3DArray *interface_velocity) const;
 
 protected : //methods
@@ -199,8 +199,7 @@ protected : //methods
                                 EnzoEFltArrayMap &flux_map,
 				const EFlt3DArray &density_flux,
                                 int stale_depth,
-                                const std::vector<str_vec_t> &passive_lists)
-    const throw();
+                                const str_vec_t &passive_list) const throw();
 
 protected: //attributes
 
@@ -302,7 +301,7 @@ void EnzoRiemannImpl<ImplFunctor>::solve
 (EnzoEFltArrayMap &prim_map_l, EnzoEFltArrayMap &prim_map_r,
  const EFlt3DArray &pressure_array_l, const EFlt3DArray &pressure_array_r,
  EnzoEFltArrayMap &flux_map, int dim, EnzoEquationOfState *eos,
- int stale_depth, const std::vector<str_vec_t> &passive_lists,
+ int stale_depth, const str_vec_t &passive_list,
  EFlt3DArray *interface_velocity) const
 {
 
@@ -378,7 +377,7 @@ void EnzoRiemannImpl<ImplFunctor>::solve
 
   solve_passive_advection_(prim_map_l, prim_map_r, flux_map,
   			   flux_arrays[LUT::density], stale_depth,
-                           passive_lists);
+                           passive_list);
 
   if (LUT::has_bfields()){
     // If Dedner Fluxes are required, they might get handled here
@@ -390,32 +389,11 @@ void EnzoRiemannImpl<ImplFunctor>::solve
 
 //----------------------------------------------------------------------
 
-inline void compute_unity_sum_passive_fluxes_(const enzo_float dens_flux,
-					      EFlt3DArray *flux_arrays,
-					      EFlt3DArray *reconstructed,
-					      const int num_fields,
-					      const int iz, const int iy,
-					      const int ix) noexcept
-{
-  ERROR("EnzoRiemannImpl::solve_passive_advection_",
-        "This codepath is untested");
-  enzo_float sum = 0.;
-  for (int field_ind=0; field_ind<num_fields; field_ind++){
-    sum += reconstructed[field_ind](iz,iy,ix);
-  }
-  for (int field_ind=0; field_ind<num_fields; field_ind++){
-    flux_arrays[field_ind](iz,iy,ix) = (reconstructed[field_ind](iz,iy,ix)
-					* dens_flux / sum);
-  }
-}
-
-//----------------------------------------------------------------------
-
 inline void passive_advection_helper_
-(const std::vector<std::string>& passive_keys,
+(const str_vec_t &passive_keys,
  EnzoEFltArrayMap& prim_map_l, EnzoEFltArrayMap& prim_map_r,
  EnzoEFltArrayMap& flux_map, const EFlt3DArray &density_flux,
- int stale_depth, const bool unity_sum) noexcept
+ int stale_depth) noexcept
 {
   std::size_t num_keys = passive_keys.size();
   if (num_keys == 0) {return;}
@@ -435,21 +413,17 @@ inline void passive_advection_helper_
   const int sd = stale_depth;
   for (int iz = sd; iz < density_flux.shape(0) - sd; iz++) {
     for (int iy = sd; iy < density_flux.shape(1) - sd; iy++) {
-      for (int ix = sd; ix < density_flux.shape(2) - sd; ix++) {
 
-	enzo_float dens_flux = density_flux(iz,iy,ix);
-	EFlt3DArray *reconstr = (dens_flux>0) ? wl_arrays : wr_arrays;
-
-	if (unity_sum) {
-	  compute_unity_sum_passive_fluxes_(dens_flux, flux_arrays, reconstr,
-	  				    num_keys, iz, iy, ix);
-	} else {
-	  for (int ind=0; ind<num_keys; ind++){
-	    flux_arrays[ind](iz,iy,ix) = reconstr[ind](iz,iy,ix) * dens_flux;
-	  }
+      for (int key_ind=0; key_ind<num_keys; key_ind++){
+        for (int ix = sd; ix < density_flux.shape(2) - sd; ix++) {
+          enzo_float dens_flux = density_flux(iz,iy,ix);
+          enzo_float wl = wl_arrays[key_ind](iz,iy,ix);
+          enzo_float wr = wr_arrays[key_ind](iz,iy,ix);
+          enzo_float w_upwind = (dens_flux>0) ? wl : wr;
+          flux_arrays[key_ind](iz,iy,ix) = w_upwind * dens_flux;
 	}
-
       }
+
     }
   }
   delete[] wl_arrays; delete[] wr_arrays; delete[] flux_arrays;
@@ -461,23 +435,11 @@ template <class ImplFunctor>
 void EnzoRiemannImpl<ImplFunctor>::solve_passive_advection_
 (EnzoEFltArrayMap &prim_map_l, EnzoEFltArrayMap &prim_map_r,
  EnzoEFltArrayMap &flux_map, const EFlt3DArray &density_flux,
- int stale_depth, const std::vector<str_vec_t> &passive_lists) const throw()
+ int stale_depth, const str_vec_t &passive_list) const throw()
 {
-  // First address passive scalars:
-  // passive_lists holds different lists of passive scalar quantities
-  // - The first entry in passive_lists (even if it's empty) provides a set of
-  //   keys for quantities that are simply passively advected
-  // - Later entries specify keys for groups of passive scalars that need to
-  //   sum to 1 (when in specific form).
-
-  for (std::size_t i = 0; i < passive_lists.size(); i++){
-    // If we know of group_name that must always sum to 1, we should check for
-    // that now! (The easiest way to facillitate that would be to separate
-    // species from colours)
-    const bool unity_sum = (i != 0);
-    passive_advection_helper_(passive_lists[i], prim_map_l, prim_map_r,
-                              flux_map, density_flux, stale_depth, unity_sum);
-  }
+  // First address the passive scalars (they are listed in passive_list)
+  passive_advection_helper_(passive_list, prim_map_l, prim_map_r, flux_map,
+                            density_flux, stale_depth);
 
   // Next address integrable quantites that have passively advected fluxes
   for (std::size_t i=0; i<passive_integrable_quantities_.size(); i++){
@@ -495,8 +457,7 @@ void EnzoRiemannImpl<ImplFunctor>::solve_passive_advection_
     }
   }
   passive_advection_helper_(passive_integrable_quantities_, prim_map_l,
-                            prim_map_r, flux_map, density_flux, stale_depth,
-                            false);
+                            prim_map_r, flux_map, density_flux, stale_depth);
 }
 
 #endif /* ENZO_ENZO_RIEMANN_IMPL_HPP */

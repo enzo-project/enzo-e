@@ -166,7 +166,7 @@ public: // interface
   void reconstruct_interface
   (EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
    EnzoEFltArrayMap &primr_map, int dim, EnzoEquationOfState *eos,
-   int stale_depth, const std::vector<str_vec_t>& passive_lists);
+   int stale_depth, const str_vec_t& passive_list);
 
   int total_staling_rate()
   { return 2; }
@@ -185,7 +185,7 @@ template <class Limiter>
 void EnzoReconstructorPLM<Limiter>::reconstruct_interface
 (EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
  EnzoEFltArrayMap &primr_map, int dim, EnzoEquationOfState *eos,
- int stale_depth, const std::vector<str_vec_t>& passive_lists)
+ int stale_depth, const str_vec_t& passive_list)
 {
   EnzoPermutedCoordinates coord(dim);
   Limiter limiter_func = Limiter();
@@ -261,9 +261,7 @@ void EnzoReconstructorPLM<Limiter>::reconstruct_interface
     fn(key, use_floor, prim_floor);
   }
 
-  for (const std::vector<std::string> cur_l : passive_lists){
-    for (const std::string &key : cur_l){ fn(key, false, 0.); }
-  }
+  for (const std::string &key : passive_list){ fn(key, false, 0.); }
 }
 
 //----------------------------------------------------------------------

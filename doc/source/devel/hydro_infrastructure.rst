@@ -13,10 +13,7 @@ VL + CT MHD solver.
 Grackle (for* ``primordial_chemistry > 0`` *) are not yet implemented
 within the infrastucture. However they are mentioned throughout this
 guide and slots have been explicitly left open for them to be
-implemented within the framework. Additionally note that while
-passively advected scalars are mostly supported, there is not yet
-support for renomralizing the specific values of multiple passively
-advected scalars to have a sum of 1.*
+implemented within the framework.*
 
 *Note: Currently brief summaries of the interfaces of each of the
 objects are provided below. More detailed descriptions are provided
@@ -216,8 +213,9 @@ Because all fields storing passively advected scalars are not
 necessarily known when initializing a hydro/MHD integrator (i.e.
 they could be initialized by a different Method or an initializer),
 the passively advected scalars don't need to be registered when
-constructing these classes. More details are provided below
-:ref:`Passive-Scalar-Handling`
+constructing these classes. Instead, a ``std::vector<std::string>``
+specifying the names of the passive scalars is often passed to the
+method(s) of the class that perform(s) the encapsulated operation.
 
 The implementation of these operation classes aims to avoid the
 traditional approach in which field data is directly accessed from
@@ -327,61 +325,6 @@ cell-centered array associated with "density" is used to compute the
 reconstruct values that are stored in the fields of the "density"
 group in the reconstructed grouping).
 
-
-.. _Passive-Scalar-Handling:
-
-Passive Scalar Handling
------------------------
-
-*FILL THIS SECTION IN LATER*
-
-Passively advected scalars can broadly be broken into two categories
-related their relationships with other passive scalars. These
-categories include:
-
-1. Independent passive scalars that have no relationship with any other
-   passive scalar (they are treated entirely independently). As an
-   example, this could be a dye used to track the origin of a
-   fluid. Enzo referred to these as "colours."
-
-2. Inderdepentent passive scalars that belong to a group of passive
-   scalars for which the combined mass fraction of all members must
-   equal 1. For example, when using Grackle with
-   ``primordial_chemistry > 0`` passively advected scalars are used to
-   track abundances of individual atomic/ionic species (:math:`{\rm
-   H}`, :math:`{\rm H}^+`, :math:`{\rm He}`, etc.). It would be
-   unphysical for these passive scalars to have a combined
-   mass-fraction that exceeds 1. Enzo referred to these as "species".
-
-Idealy, we wouldn't need to distinguish between these categories.
-In practice, extra care is required for passive scalars belonging to
-the second category. **Please note that currently passive scalars in
-the second category are NOT (fully) supported.**
-
-As described above, passive scalars are stored in the same instances
-of ``EnzoEFltArrayMap`` as the rest of the advected hydro quantities.
-
-*Note that it remains unclear whether it would be better to store them
-in their own separates maps and therefore that part of the design may
-change in the future. Regardless, it's essential that we can associate
-the name with each array so that we can employ Grackle to compute gas
-properties at partial timesteps in the future.*
-
-To help track the map keys corresponding to passively advected scalars
-(since they can't be registered at construction) and to specify the
-category of each scalar, the following variable is passed to many
-method calls:
-
-.. code-block:: c++
-
-   const std::vector<std::vector<std::string>> passive_lists
-
-Elements of ``passive_lists[0]`` specify the names/keys of passive
-scalars in the first category. All subsequent vectors hold collections
-passive scalars names/keys whose total value must sum to 1. *This isn't
-an elegant solution; it's really a placeholder until we fully support the
-second category of passive scalars. We could probably replace this datatype
-with just a ``std::pair`` of vectors.*
 
 =================
 Equation Of State
@@ -497,14 +440,14 @@ copied between arrays.
    void reconstructable_from_integrable
      (EnzoEFltArrayMap &integrable, EnzoEFltArrayMap &reconstructable,
       EnzoEFltArrayMap &conserved_passive_map, int stale_depth,
-      const std::vector<std::vector<std::string>> &passive_lists);
+      const std::vector<std::string> &passive_list);
 
 This method is responsible for computing the reconstructable
 quantities (to be held in ``reconstructable``) from the
 integrable quantities (stored in ``integrable``). Note that
 because of the high degree of overlap between the quantities in each
 category, the overlapping quantities are assumed to be represented by
-aliased arrays. Entries in ``passive_lists`` specifies the passively
+aliased arrays. Entries in ``passive_list`` specifies the passively
 advected scalars that should be present in both maps.
 The conserved form of the passively advected scalars
 must be provided (stored in ``conserved_passive_map``) in case the
@@ -518,15 +461,14 @@ calling ``EnzoEquationOfState::pressure_from_integrable``.
 
    void integrable_from_reconstructable
      (EnzoEFltArrayMap &reconstructable, EnzoEFltArrayMap &integrable,
-      int stale_depth,
-      const std::vector<std::vector<std::string>> &passive_lists);
+      int stale_depth, const std::vector<std::string> &passive_list);
 
 This method computes the integrable quantities (to be held in
 ``integrable``) from the reconstructable quantities (stored in
 ``reconstructable``). Again, because of the high degree of
 overlap between the quantities in each category, the overlapping
 quantities are assumed to be represented by aliased quantities.
-Entries in ``passive_lists`` specifies the passively
+Entries in ``passive_list`` specifies the passively
 advected scalars that should be present in both maps.
 
 For a barotropic equation of state, this nominally does nothing, while
@@ -583,8 +525,7 @@ The main interface function provided by this class is:
     void reconstruct_interface
       (EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
        EnzoEFltArrayMap &primr_map, int dim, EnzoEquationOfState *eos,
-       int stale_depth,
-       const std::vector<std::vector<std::string>>& passive_lists);
+       int stale_depth, const std::vector<std::string>& passive_list);
 
 This function takes the cell-centered reconstructable primtive
 quantities (specified by the contents of ``prim_map``) and computes
@@ -596,9 +537,9 @@ current stale_depth for the supplied cell-centered quantities (prior
 to reconstruction). Note that the arrays in ``priml_map`` and
 ``primr_map`` should have arrays that are large enough to store
 cell-centered quantitites so that they can be reused to hold the
-face-centered fields along each dimension. In the context of this
-function ``passive_lists`` is effectively concatenated into one list
-of keys.
+face-centered fields along each dimension. ``passive_list`` is used to
+specify the names (keys) of the passively advected quantities that are
+to be reconstructed.
 
 The ``int EnzoReconstructor::immediate_staling_rate()`` method is
 provided to determine the amount by which the stale depth increases
@@ -692,8 +633,7 @@ The main interface function of ``EnzoRiemann`` is:
      (EnzoEFltArrayMap &prim_map_l, EnzoEFltArrayMap &prim_map_r,
       const EFlt3DArray &pressure_array_l, const EFlt3DArray &pressure_array_r,
       EnzoEFltArrayMap &flux_map, int dim, EnzoEquationOfState *eos,
-      int stale_depth,
-      const std::vector<std::vector<std::string>> &passive_lists,
+      int stale_depth, const std::vector<std::string> &passive_lists,
       EFlt3DArray *interface_velocity)
 
 In this function, the ``prim_map_l`` and ``prim_map_r`` arguments are
@@ -1063,38 +1003,36 @@ The function requires that we:
     be skipped.
 
 The names of the integrable quantites should match the names specified
-in ``FIELD_TABLE``; see :ref:`Centered-Field-Registry`
-for more details. The update to the magnetic field should
-be skipped when Constrained Transport is in use (since the magnetic
-field update is handled separately). If the magnetic field is not
-specified as an integrable quantity, then the value specified for
-``skip_B_update`` is unimportant
+in ``FIELD_TABLE``; see :ref:`Centered-Field-Registry` for more
+details. The update to the magnetic field should be skipped when
+Constrained Transport is in use (since the magnetic field update is
+handled separately). If the magnetic field is not specified as an
+integrable quantity, then the value specified for ``skip_B_update`` is
+unimportant
 
 The following method is used to compute the change in (the conserved
 form of) the integrable and passively advected quantites due to the
 flux divergence along dimension ``dim`` over the (partial) imestep
-``dt``. The arrays in ``dUcons_map`` are used to accumulate
-the total changes in these quantities. In the context of this
-function, ``passive_lists`` is effectively concatenated into one list
-of keys naming all of the passively advected scalars.
+``dt``. The arrays in ``dUcons_map`` are used to accumulate the total
+changes in these quantities. ``passive_list`` lists the names (keys)
+of the passively advected scalars.
 
 .. code-block:: c++
 
    void accumulate_flux_component
      (int dim, double dt, enzo_float cell_width, EnzoEFltArrayMap &flux_map,
       EnzoEFltArrayMap &dUcons_map, int stale_depth,
-      const std::vector<std::vector<std::string>> &passive_lists) const;
+      const std::vector<std::string> &passive_list) const;
 
 The method used to clear the values of the arrays used for accumulation is
 provided below. This sanitization should be performed before starting
-to accumulate flux divergence or source terms. The ``passive_lists``
+to accumulate flux divergence or source terms. The ``passive_list``
 argument is used in the same way as the previous function.
 
 .. code-block:: c++
 
-    void clear_dUcons_group
-      (EnzoEFltArrayMap &dUcons_map, enzo_float value,
-       const std::vector<std::vector<std::string>> &passive_lists) const
+    void clear_dUcons_group(EnzoEFltArrayMap &dUcons_map, enzo_float value,
+                            const std::vector<std::string> &passive_list) const;
 
 The method used to actually add the accumulated change in the integrable
 (specified in ``dUcons_map``) to the values of the
@@ -1108,7 +1046,7 @@ integrable quantities from the start of the timestep (specificed by
       EnzoEFltArrayMap &out_integrable_map,
       EnzoEFltArrayMap &out_conserved_passive_scalar,
       EnzoEquationOfState *eos, int stale_depth,
-      const std::vector<std::vector<std::string>> &passive_lists) const;
+      const std::vector<std::string> &passive_list) const;
 
 The fields included in ``dUcons_map`` should include contributions
 from both the flux divergence AND source terms. The results for the
@@ -1116,7 +1054,4 @@ actively advected quanties are stored in ``out_integrable_map`` and
 the results for the passively advected scalars are stored in conserved
 form in the arrays held by ``out_conserved_passive_scalar`` (note that
 the initial values of the passive scalars specified in
-``initial_integrable_map`` are in specific form). As is described in
-:ref:`Passive-Scalar-Handling`, ``passive_lists`` is used to both
-specify the names of the passive scalars and the category of the
-passive scalar.
+``initial_integrable_map`` are in specific form).

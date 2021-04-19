@@ -122,7 +122,7 @@ public: // interface
       mhd_choice_(bfield_choice::no_bfield),
       integrable_field_list_(),
       reconstructable_field_list_(),
-      nested_passive_list_()
+      lazy_passive_list_()
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -172,9 +172,7 @@ protected: // methods
   /// Converts conservative passive scalars (which are originally densities)
   /// to specific form (basically just divide by density)
   ///
-  /// @param[in]  passive_lists A list of lists of keys for passively
-  ///     advected scalars. In this method, this is effectively concatenated
-  ///     into one list of passive scalars.
+  /// @param[in]  passive_list A list of keys for passive scalars.
   /// @param[in]  density Array holding the current density values
   /// @param[in]  conserved_passive_scalar_map Map of the arrays containing the
   ///     current values of the passively advected scalars (in conserved form)
@@ -182,8 +180,8 @@ protected: // methods
   ///     form of the scalars will be stored.
   /// @param[in]  stale_depth The current stale depth
   void compute_specific_passive_scalars_
-  (const std::vector<str_vec_t> passive_lists,
-   EFlt3DArray& density, EnzoEFltArrayMap& conserved_passive_scalar_map,
+  (const str_vec_t &passive_list, EFlt3DArray& density,
+   EnzoEFltArrayMap& conserved_passive_scalar_map,
    EnzoEFltArrayMap& specific_passive_scalar_map,
    int stale_depth) const noexcept;
 
@@ -252,12 +250,7 @@ protected: // methods
   ///     CT, this should be a `nullptr`.
   /// @param[in]     stale_depth indicates the current stale depth (before
   ///     performing reconstruction)
-  /// @param[in]     passive_lists A list of lists of keys for passively
-  ///     advected scalars. The first list holds the keys for quantities that
-  ///     are normally passively advected. Subsequent lists group together
-  ///     collections of passively advected scalars whose specific value
-  ///     (before and after advection) must sum to 1. Keys must not be
-  ///     duplicated across more than one list.
+  /// @param[in]     passive_list A list of keys for passively advected scalars.
   ///
   /// @par Note
   /// It might be worth breaking this into 2 functions (where one of them
@@ -272,7 +265,7 @@ protected: // methods
    EnzoEFltArrayMap &flux_map, EnzoEFltArrayMap &dUcons_map,
    EFlt3DArray *interface_velocity_arr_ptr, EnzoReconstructor &reconstructor,
    EnzoConstrainedTransport *ct_handler, int stale_depth,
-   const std::vector<str_vec_t>& passive_lists) const noexcept;
+   const str_vec_t& passive_list) const noexcept;
 
   /// Setup arrays used throughout `compute`. This includes both arrays that
   /// wrap Cello fields AND temporary arrays used as scratch space.
@@ -341,11 +334,8 @@ protected: // attributes
   /// keys to the mappings of arrays used in the calculation
   std::vector<std::string> reconstructable_field_list_;
 
-  /// Lazy initializer of the nested list of fields holding passive scalars
-  /// The first sublist holds all field names of quantities that are normally
-  /// passively advected. Subsequent lists hold sets of names for scalars whose
-  /// total mass fraction must be 1 (like species).
-  EnzoNestedPassiveScalarFieldList nested_passive_list_;
+  /// Lazy initializer of the list of fields holding passive scalars
+  EnzoLazyPassiveScalarFieldList lazy_passive_list_;
 };
 
 #endif /* ENZO_ENZO_METHOD_VLCT_HPP */

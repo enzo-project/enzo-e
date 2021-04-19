@@ -53,11 +53,11 @@ public: // interface
   void reconstructable_from_integrable
   (EnzoEFltArrayMap &integrable, EnzoEFltArrayMap &reconstructable,
    EnzoEFltArrayMap &conserved_passive_map, int stale_depth,
-   const std::vector<str_vec_t> &passive_lists) const;
+   const str_vec_t &passive_list) const;
 
   void integrable_from_reconstructable
   (EnzoEFltArrayMap &reconstructable, EnzoEFltArrayMap &integrable,
-   int stale_depth, const std::vector<str_vec_t> &passive_lists) const;
+   int stale_depth, const str_vec_t &passive_list) const;
 
   void pressure_from_integrable
   (EnzoEFltArrayMap &integrable_map, const EFlt3DArray &pressure,
@@ -67,7 +67,7 @@ public: // interface
                                      EFlt3DArray &pressure,
                                      int stale_depth) const;
 
-inline  enzo_float get_density_floor() const { return density_floor_; }
+  inline enzo_float get_density_floor() const { return density_floor_; }
 
   enzo_float get_pressure_floor() const { return pressure_floor_; }
 

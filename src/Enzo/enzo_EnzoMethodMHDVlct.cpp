@@ -20,7 +20,7 @@ static void build_field_l_(const std::vector<std::string> &quantity_l,
     success = EnzoCenteredFieldRegistry::quantity_properties (quantity,
                                                               &is_vector);
 
-    ASSERT1("add_temporary_arrays_to_map_",
+    ASSERT1("build_field_l_",
             ("\"%s\" is not registered in EnzoCenteredFieldRegistry"),
             quantity.c_str(), success);
 
@@ -200,7 +200,7 @@ void EnzoMethodMHDVlct::pup (PUP::er &p)
   p|mhd_choice_;
   p|integrable_field_list_;
   p|reconstructable_field_list_;
-  p|nested_passive_list_;
+  p|lazy_passive_list_;
 }
 
 //----------------------------------------------------------------------
@@ -251,16 +251,13 @@ EnzoEFltArrayMap EnzoMethodMHDVlct::conserved_passive_scalar_map_
 (Block * block) const noexcept
 {
   EnzoEFltArrayMap map("conserved_passive_scalar");
-  std::shared_ptr<const std::vector<str_vec_t>> nested_list
-    = nested_passive_list_.get_list();
+  std::shared_ptr<const str_vec_t> passive_list= lazy_passive_list_.get_list();
   EnzoFieldArrayFactory array_factory(block,0);
-  for (const std::vector<std::string> &cur_list : *nested_list){
-    for (const std::string& field_name : cur_list){
-      ASSERT1("EnzoMethodMHDVlct::conserved_passive_scalar_map_",
-              "EnzoEFltArrayMap can't hold more than one key called \"%s\"",
-              field_name.c_str(), !map.contains(field_name));
-      map[field_name] = array_factory.from_name(field_name);
-    }
+  for (const std::string& field_name : (*passive_list)){
+    ASSERT1("EnzoMethodMHDVlct::conserved_passive_scalar_map_",
+            "EnzoEFltArrayMap can't hold more than one key called \"%s\"",
+            field_name.c_str(), !map.contains(field_name));
+    map[field_name] = array_factory.from_name(field_name);
   }
   return map;
 }
@@ -351,7 +348,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 
     // convert the passive scalars from conserved form to specific form
     // (outside the integrator, they are treated like conserved densities)
-    compute_specific_passive_scalars_(*(nested_passive_list_.get_list()),
+    compute_specific_passive_scalars_(*(lazy_passive_list_.get_list()),
                                       primitive_map["density"],
                                       conserved_passive_scalar_map,
                                       primitive_map, stale_depth);
@@ -385,7 +382,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
         // timestep, the values were stored in conserved form in the fields
         // held by conserved_passive_scalar_map.
         // Need to convert them to specific form
-        compute_specific_passive_scalars_(*(nested_passive_list_.get_list()),
+        compute_specific_passive_scalars_(*(lazy_passive_list_.get_list()),
                                           cur_integrable_map["density"],
                                           conserved_passive_scalar_map,
                                           cur_integrable_map, stale_depth);
@@ -395,7 +392,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // of the current loop, flux divergence and source terms will be
       // accumulated in these arrays)
       integrable_updater_->clear_dUcons_map(dUcons_map, 0.,
-                                            *(nested_passive_list_.get_list()));
+                                            *(lazy_passive_list_.get_list()));
 
       // Compute the reconstructable quantities from the integrable quantites
       // Although cur_integrable_map holds the passive scalars in integrable
@@ -412,24 +409,24 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
                                             cur_reconstructable_map,
                                             conserved_passive_scalar_map,
                                             stale_depth,
-                                            *(nested_passive_list_.get_list()));
+                                            *(lazy_passive_list_.get_list()));
 
       // Compute flux along each dimension
       compute_flux_(0, cur_dt, cell_widths[0], cur_reconstructable_map,
                     priml_map, primr_map, pressure_l, pressure_r,
                     xflux_map, dUcons_map, interface_velocity_arr_ptr,
                     *reconstructor, ct, stale_depth,
-                    *(nested_passive_list_.get_list()));
+                    *(lazy_passive_list_.get_list()));
       compute_flux_(1, cur_dt, cell_widths[1], cur_reconstructable_map,
                     priml_map, primr_map, pressure_l, pressure_r,
                     yflux_map, dUcons_map, interface_velocity_arr_ptr,
                     *reconstructor, ct, stale_depth,
-                    *(nested_passive_list_.get_list()));
+                    *(lazy_passive_list_.get_list()));
       compute_flux_(2, cur_dt, cell_widths[2], cur_reconstructable_map,
                     priml_map, primr_map, pressure_l, pressure_r,
                     zflux_map, dUcons_map, interface_velocity_arr_ptr,
                     *reconstructor, ct, stale_depth,
-                    *(nested_passive_list_.get_list()));
+                    *(lazy_passive_list_.get_list()));
 
       // increment the stale_depth
       stale_depth+=reconstructor->immediate_staling_rate();
@@ -455,7 +452,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       integrable_updater_->update_quantities
         (primitive_map, dUcons_map, out_integrable_map,
          conserved_passive_scalar_map, eos_, stale_depth,
-         *(nested_passive_list_.get_list()));
+         *(lazy_passive_list_.get_list()));
 
       // increment stale_depth since the inner values have been updated
       // but the outer values have not
@@ -494,29 +491,26 @@ void EnzoMethodMHDVlct::check_mesh_and_ghost_size_(Block *block) const noexcept
 //----------------------------------------------------------------------
 
 void EnzoMethodMHDVlct::compute_specific_passive_scalars_
-(const std::vector<str_vec_t> passive_lists,
- EFlt3DArray& density, EnzoEFltArrayMap& conserved_passive_scalar_map,
+(const str_vec_t &passive_list, EFlt3DArray& density,
+ EnzoEFltArrayMap& conserved_passive_scalar_map,
  EnzoEFltArrayMap& specific_passive_scalar_map, int stale_depth) const noexcept
 {
   int mz = density.shape(0);
   int my = density.shape(1);
   int mx = density.shape(2);
 
-  for (const std::vector<std::string> cur_l : passive_lists){
-    for (const std::string& key : cur_l){
+  for (const std::string& key : passive_list){
+    EFlt3DArray cur_conserved = conserved_passive_scalar_map.at(key);
+    EFlt3DArray out_specific = specific_passive_scalar_map.at(key);
 
-      EFlt3DArray cur_conserved = conserved_passive_scalar_map.at(key);
-      EFlt3DArray out_specific = specific_passive_scalar_map.at(key);
-
-      for (int iz = stale_depth; iz < mz - stale_depth; iz++) {
-	for (int iy = stale_depth; iy < my - stale_depth; iy++) {
-	  for (int ix = stale_depth; ix < mx - stale_depth; ix++) {
-	    out_specific(iz,iy,ix) = cur_conserved(iz,iy,ix)/density(iz,iy,ix);
-	  }
-	}
+    for (int iz = stale_depth; iz < mz - stale_depth; iz++) {
+      for (int iy = stale_depth; iy < my - stale_depth; iy++) {
+        for (int ix = stale_depth; ix < mx - stale_depth; ix++) {
+          out_specific(iz,iy,ix) = cur_conserved(iz,iy,ix)/density(iz,iy,ix);
+        }
       }
-
     }
+
   }
 }
 
@@ -530,7 +524,7 @@ void EnzoMethodMHDVlct::compute_flux_
  EnzoEFltArrayMap &flux_map, EnzoEFltArrayMap &dUcons_map,
  EFlt3DArray *interface_velocity_arr_ptr, EnzoReconstructor &reconstructor,
  EnzoConstrainedTransport *ct_handler, int stale_depth,
- const std::vector<str_vec_t>& passive_lists) const noexcept
+ const str_vec_t& passive_list) const noexcept
 {
 
   // purely for the purposes of making the caluclation more explicit, we define
@@ -543,8 +537,7 @@ void EnzoMethodMHDVlct::compute_flux_
   // First, reconstruct the left and right interface values
   reconstructor.reconstruct_interface(reconstructable_map,
                                       reconstructable_l, reconstructable_r,
-				      dim, eos_, stale_depth,
-                                      *(nested_passive_list_.get_list()));
+				      dim, eos_, stale_depth, passive_list);
 
   // We temporarily increment the stale_depth for the rest of this calculation
   // here. We can't fully increment otherwise it will screw up the
@@ -562,11 +555,9 @@ void EnzoMethodMHDVlct::compute_flux_
 
   // Calculate integrable values on left and right faces:
   eos_->integrable_from_reconstructable(reconstructable_l, integrable_l,
-					cur_stale_depth,
-                                        *(nested_passive_list_.get_list()));
+					cur_stale_depth, passive_list);
   eos_->integrable_from_reconstructable(reconstructable_r, integrable_r,
-					cur_stale_depth,
-                                        *(nested_passive_list_.get_list()));
+					cur_stale_depth, passive_list);
 
   // Calculate pressure on left and right faces:
   eos_->pressure_from_reconstructable(reconstructable_l, pressure_l,
@@ -576,15 +567,14 @@ void EnzoMethodMHDVlct::compute_flux_
 
   // Next, compute the fluxes
   riemann_solver_->solve(integrable_l, integrable_r, pressure_l, pressure_r,
-                         flux_map, dim, eos_, cur_stale_depth,
-                         *(nested_passive_list_.get_list()),
+                         flux_map, dim, eos_, cur_stale_depth, passive_list,
                          interface_velocity_arr_ptr);
 
   // Accumulate the change in integrable quantities from these flux_map in
   // dUcons_map
-  integrable_updater_->accumulate_flux_component
-    (dim, cur_dt, cell_width, flux_map, dUcons_map, cur_stale_depth,
-     *(nested_passive_list_.get_list()));
+  integrable_updater_->accumulate_flux_component(dim, cur_dt, cell_width,
+                                                 flux_map, dUcons_map,
+                                                 cur_stale_depth, passive_list);
 
   // if using dual energy formalism, compute the dual energy formalism
   if (eos_->uses_dual_energy_formalism()){
@@ -605,7 +595,7 @@ void EnzoMethodMHDVlct::compute_flux_
 static void add_temporary_arrays_to_map_
 (EnzoEFltArrayMap &map, std::array<int,3> &shape,
  const std::vector<std::string>* const nonpassive_names,
- const std::vector<str_vec_t>* const passive_lists)
+ const str_vec_t* const passive_lists)
 {
 
   if (nonpassive_names != nullptr){
@@ -615,13 +605,10 @@ static void add_temporary_arrays_to_map_
   }
 
   if (passive_lists != nullptr){
-    for (const std::vector<std::string>& cur_list : (*passive_lists)){
-      for (const std::string& key : cur_list){
-        map[key] = EFlt3DArray(shape[0], shape[1], shape[2]);
-      }
+    for (const std::string& key : (*passive_lists)){
+      map[key] = EFlt3DArray(shape[0], shape[1], shape[2]);
     }
   }
-
 }
 
 //----------------------------------------------------------------------
@@ -655,12 +642,11 @@ void EnzoMethodMHDVlct::setup_arrays_
                              primitive_map.at("density").shape(1),
                              primitive_map.at("density").shape(2)};
   add_temporary_arrays_to_map_(primitive_map, shape, nullptr,
-                               (nested_passive_list_.get_list()).get());
+                               (lazy_passive_list_.get_list()).get());
 
   // Then, setup temp_primitive_map
-  add_temporary_arrays_to_map_(temp_primitive_map, shape,
-                               &combined_key_list,
-                               (nested_passive_list_.get_list()).get());
+  add_temporary_arrays_to_map_(temp_primitive_map, shape, &combined_key_list,
+                               (lazy_passive_list_.get_list()).get());
 
   // Prepare arrays to hold fluxes (it should include groups for all actively
   // and passively advected quantities)
@@ -670,7 +656,7 @@ void EnzoMethodMHDVlct::setup_arrays_
     cur_shape[i] -= 1;
     add_temporary_arrays_to_map_(*(flux_maps[i]), cur_shape,
                                  &combined_key_list,
-                                 (nested_passive_list_.get_list()).get());
+                                 (lazy_passive_list_.get_list()).get());
   }
 
   // Prepare fields used to accumulate all changes to the actively advected and
@@ -679,7 +665,7 @@ void EnzoMethodMHDVlct::setup_arrays_
   // fields (this exclusion is implicitly handled integrable_updater_)
   std::vector<std::string> tmp = integrable_updater_->integrable_keys();
   add_temporary_arrays_to_map_(dUcons_map, shape, &tmp,
-                               (nested_passive_list_.get_list()).get());
+                               (lazy_passive_list_.get_list()).get());
 
   // Prepare temporary fields for priml and primr
   // As necessary, we pretend that these are centered along:
@@ -687,9 +673,9 @@ void EnzoMethodMHDVlct::setup_arrays_
   //   - y and have shape (  mz,my-1,  mx)
   //   - x and have shape (  mz,  my,mx-1)
   add_temporary_arrays_to_map_(priml_map, shape, &combined_key_list,
-                               (nested_passive_list_.get_list()).get());
+                               (lazy_passive_list_.get_list()).get());
   add_temporary_arrays_to_map_(primr_map, shape, &combined_key_list,
-                               (nested_passive_list_.get_list()).get());
+                               (lazy_passive_list_.get_list()).get());
 
   // If there are pressure entries in priml_map and primr_map (depends on the
   // EOS), set pressure_l and pressure_name_r equal to

@@ -45,19 +45,16 @@ public: // interface
   }
 
   /// Iterates through all arrays in `dUcons_map` that are registered as
-  /// integrable quantities or are specified with `passive_lists`. All elements
+  /// integrable quantities or are specified with `passive_list`. All elements
   /// in these arrays are set to `value`.
   ///
   /// @param[in,out] dUcons_map The map holding the arrays that are to be
   ///     modified. These arrays are nominally used to accumulate the changes
   ///     to all integrable and passively advected quantites.
   /// @param[in]     value The value array elements are assigned.
-  /// @param[in]     passive_lists A list of lists of keys for passively
-  ///     advected scalars. In this method, this is effectively concatenated
-  ///     into one list of passive scalars.
-  void clear_dUcons_map
-  (EnzoEFltArrayMap &dUcons_map, enzo_float value,
-   const std::vector<str_vec_t> &passive_lists) const noexcept;
+  /// @param[in]     passive_list A list of keys for passive scalars.
+  void clear_dUcons_map(EnzoEFltArrayMap &dUcons_map, enzo_float value,
+                        const str_vec_t &passive_list) const noexcept;
 
   /// Computes the change in (the conserved form of) the integrable and
   /// passively advected quantites due to the flux divergence along dimension
@@ -77,14 +74,11 @@ public: // interface
   /// @param[in]     stale_depth The stale depth at the time of the function
   ///     call. This should match the stale depth at the time the fluxes were
   ///     computed.
-  /// @param[in]     passive_lists A list of lists of keys for passively
-  ///     advected scalars. Keys must not be duplicated across more than one
-  ///     list. In this method, this is effectively concatenated into one list
-  ///     of passive scalar keys.
-  void accumulate_flux_component
-  (int dim, double dt, enzo_float cell_width, EnzoEFltArrayMap &flux_map,
-   EnzoEFltArrayMap &dUcons_map, int stale_depth,
-   const std::vector<str_vec_t> &passive_lists) const noexcept;
+  /// @param[in]     passive_list A list of keys for passive scalars.
+  void accumulate_flux_component(int dim, double dt, enzo_float cell_width,
+                                 EnzoEFltArrayMap &flux_map,
+                                 EnzoEFltArrayMap &dUcons_map, int stale_depth,
+                                 const str_vec_t &passive_list) const noexcept;
 
   /// adds flux divergence (and source terms) to the initial integrable
   /// quantities and stores the results in `out_integrable_map`
@@ -108,18 +102,13 @@ public: // interface
   ///     applicable used for placing a density floor.
   /// @param[in]  stale_depth The stale depth at the time of the function call
   ///     (the stale_depth must be incremented after this function is called)
-  /// @param[in]  passive_lists A list of lists of keys for passively advected
-  ///     scalars. The first list holds the keys for quantities that are
-  ///     normally passively advected. Subsequent lists group together
-  ///     collections pf passively advected scalars whose specific value
-  ///     (before and after advection) must sum to 1. Keys must not be
-  ///     duplicated across more than one list.
+  /// @param[in]  passive_list A list of keys for passive scalars.
   void update_quantities
   (EnzoEFltArrayMap &initial_integrable_map, EnzoEFltArrayMap &dUcons_map,
    EnzoEFltArrayMap &out_integrable_map,
    EnzoEFltArrayMap &out_conserved_passive_scalar,
    EnzoEquationOfState *eos, int stale_depth,
-   const std::vector<str_vec_t> &passive_lists) const;
+   const str_vec_t &passive_list) const;
 
   /// provides a const vector of all registerred integrable keys
   const std::vector<std::string> integrable_keys() const throw()
@@ -135,7 +124,7 @@ private:
   void update_passive_scalars_
   (EnzoEFltArrayMap &initial_integrable_map, EnzoEFltArrayMap &dUcons_map,
    EnzoEFltArrayMap &out_conserved_passive_scalar, int stale_depth,
-   const std::vector<str_vec_t> &passive_lists) const;
+   const str_vec_t &passive_list) const;
 
   /// Dynamically allocates and constructs an array of instances of EFlt3DArray
   /// that are loaded from `map` using the ordering of keys in integrable_keys_

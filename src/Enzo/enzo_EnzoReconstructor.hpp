@@ -75,8 +75,7 @@ public: // interface
   /// @param[in]  eos Pointer to an instance of EnzoEquationOfState object
   /// @param[in]  stale_depth indicates the current stale_depth for the
   ///     supplied cell-centered quantities
-  /// @param[in]  passive_lists A list of lists of keys for passive scalars. In
-  ///     this method, this is effectively concatenated into one list of keys.
+  /// @param[in]  passive_list A list of keys for passive scalars.
   ///
   /// @note It's alright for arrays in `priml_map` and `primr_map` to have the
   /// shapes of cell-centered arrays (i.e. the same shape as arrays in
@@ -87,7 +86,7 @@ public: // interface
   virtual void reconstruct_interface
   (EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
    EnzoEFltArrayMap &primr_map, int dim, EnzoEquationOfState *eos,
-   int stale_depth, const std::vector<str_vec_t>& passive_lists)=0;
+   int stale_depth, const str_vec_t& passive_list)=0;
 
   /// The rate amount by which the stale_depth increases after the current
   /// reconstructor is used to update the fluid over a (partial or full)
