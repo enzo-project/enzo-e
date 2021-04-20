@@ -23,42 +23,67 @@ class EnzoConstrainedTransport
   ///
   /// To accomplish these goals, this object is responsible for the
   /// allocation/deallocation of the required temporary scratch-space
-  /// and providing the actual constrained transport operations. To manage
-  /// scratch-space in a thread-safe manner (i.e. allocating/deallocating it
-  /// separately for each block) while avoiding two-step constructing and
-  /// destruction of instances of this class, the temporary scratch-space
-  /// arrays are implemented as temporary fields that are allocated/deallocated
-  /// in the class's constructor/destructor. As a consequence, instances of
-  /// this class need to be constructed and destroyed separately for each leaf
-  /// block during every cycle that the underlying MHD integrator is applied.
-  /// The instance also internally tracks the current partial timestep to be
-  /// less intrusive for the underlying MHD integrator.
+  /// and providing the actual constrained transport operations.
   ///
-  /// Although this design is crude, it is simple. The design could be improved
-  /// by making separating the responsiblities of the allocation/deallocation
-  /// of temporary scratch space and the implementation of the constrained
-  /// transport operation between two classes. However this refactoring has
-  /// been defered to the future when other classes may be introduced to
-  /// encapsulate other approaches to updated the magnetic field (e.g. Dedner
-  /// divergence cleaning).
+  /// This class is effectively a state machine.
+  /// - To update the bfield for a given block, the `register_target_block`
+  ///   method must first be used to register that block. An error will be
+  ///   raised if this method is called and a block has already been
+  ///   initialized. Because the shapes of the blocks are not necessarily known
+  ///   at construction, the scratch arrays are lazily initialized the first
+  ///   time this is called.
+  /// - Errors will be raised if the `correct_reconstructed_bfield`,
+  ///   `identify_upwind`, `update_all_bfield_components`, or
+  ///   `increment_partial_timestep` are called without having a registered
+  ///    block.
+  /// - When the `increment_partial_timestep` method has been called
+  ///   `num_partial_timesteps` times after a block has been registered, the
+  ///    block will be unregistered.
+  ///
+  /// To the hydro solver the main effect observable effect of calling this
+  /// class is updating the cell-centered Bfield components. However, the
+  /// updates to the face-centered Bfield components (implicitly performed by
+  /// this class) are equally as important (given that the face-centered fields
+  /// are the primary represntation of the Bfield and the cell-centered values
+  /// are derived directly from the face-centered values).
+  ///
+  /// The design could potentially be improved by separating the
+  /// responsiblities of the block-specific data (and scratch space) and the
+  /// implementation of the constrained transport operations between two
+  /// classes. However this refactoring has been defered to the future when
+  /// other classes may be introduced that encapsulate other approaches for
+  /// updating the magnetic field (e.g. Dedner divergence cleaning).
 
 public: // interface
 
   /// Create a new EnzoConstrainedTransport (allocates scratch space)
   ///
-  /// @param[in] block holds data to be processed
   /// @param[in] num_partial_timesteps The number of partial timesteps over
   ///     which the constructed instance will update the magnetic fields.
-  EnzoConstrainedTransport(Block *block, int num_partial_timesteps);
+  EnzoConstrainedTransport(int num_partial_timesteps);
 
   /// checks that the interface bfields exist and have the required shapes
   static void check_required_fields();
 
+  /// Register the pointer to the Block for which the Bfields will be updated.
+  ///
+  /// Only one block can be registered at a time (an error will be raised if
+  /// another block is already registered). The very first time this is called,
+  /// it will initialize the scratch space.
+  ///
+  /// @param[in] block holds data to be processed
+  void register_target_block(Block *block) throw();
+
   /// Returns the partial timestep index.
   ///
   /// 0 means that the current interface bfields are stored in the permanent
-  /// fields. 1 means that they are stored in the temporary arrays
-  int partial_timestep_index() const { return partial_timestep_index_; }
+  /// fields. 1 means that they are stored in the temporary arrays. An error
+  /// will occur if no block is registered.
+  int partial_timestep_index() const throw()
+  {
+    require_registered_block_();
+    return partial_timestep_index_;
+  }
 
   /// increments the partial timestep index
   void increment_partial_timestep() throw();
@@ -139,6 +164,16 @@ public: // interface
 
 
 protected: // methods
+  /// Helper method that raises an error if there isn't a registered block.
+  void require_registered_block_() const throw()
+  {
+    if (target_block_ == nullptr){
+      ERROR("EnzoConstrainedTransport::require_registered_block_",
+            "An invalid method has been executed that requires that a target "
+            "block is registered.");
+    }
+  }
+
   /// Computes component i of the cell-centered E-field.
   ///
   /// @param[in]  dim The component of the cell-centered E-field to compute.
@@ -261,10 +296,20 @@ protected: // methods
 
 protected: // attributes
 
-  /// Contains the relevant current data. This is not strictly necessary, but
-  /// it's presence that this class must be separately initialized for
-  /// different blocks.
-  Block *const block_;
+  /// Number of partial timesteps in a cycle. A value of 1 would means that
+  /// there is only a single update over the full timestep. A value of 2 means
+  /// that there is a half timestep and a full timestep.
+  const int num_partial_timesteps_;
+
+  /// Holds the index of the current partial timestep. This will be reset
+  /// everytime a new target_block_ is registered. A negative value is used
+  /// to indicate that the scratch arrays are not yet allocated.
+  int partial_timestep_index_;
+
+  // Block Specific data: (its updated everytime a new block is registerd)
+
+  /// Pointer to the Block that this class is operating upon. 
+  Block * target_block_;
 
   /// Set of arrays wrapping the Cello fields that contain the interface
   /// magnetic field components. A given component is face-centered along the
@@ -273,7 +318,12 @@ protected: // attributes
   ///
   /// If a cell-centered array has shape (mz,my,mx), the entries in this list
   /// have shapes (mz,my,mx+1), (mz,my+1,mx), and (mz+1,my,mx), respectively.
+  ///
+  /// The entries in this array will be 
   std::array<EFlt3DArray,3> bfieldi_l_;
+
+
+  // Scratch arrays: The following are reused for different blocks
 
   /// Set of arrays to temporarily hold the values of the face-centered fields
   /// computed at the half time-step. Each entry should have the same shape as
@@ -304,12 +354,5 @@ protected: // attributes
   /// electric field components. This array is reused for each component.
   EFlt3DArray center_efield_;
 
-  /// Number of partial timesteps in a cycle. A value of 1 would means that
-  /// there is only a single update over the full timestep. A value of 2 means
-  /// that there is a half timestep and a full timestep.
-  const int num_partial_timesteps_;
-
-  /// Holds the index of the current partial timestep.
-  int partial_timestep_index_;
 };
 #endif /* ENZO_ENZO_CONSTRAINEDTRANSPORT_HPP */

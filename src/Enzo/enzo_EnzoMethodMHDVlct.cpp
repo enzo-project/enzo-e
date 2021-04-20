@@ -334,7 +334,8 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // allocate constrained transport object
     EnzoConstrainedTransport *ct = nullptr;
     if (mhd_choice_ == bfield_choice::constrained_transport) {
-      ct = new EnzoConstrainedTransport(block, 2);
+      ct = new EnzoConstrainedTransport(2);
+      ct->register_target_block(block);
     }
 
     const enzo_float* const cell_widths = enzo::block(block)->CellWidth;
@@ -372,11 +373,8 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 
       if (i == 0){
         reconstructor = half_dt_recon_;
-        // ct does NOT need to be incremented
       } else {
         reconstructor = full_dt_recon_;
-
-        if (ct != nullptr){ ct->increment_partial_timestep(); }
 
         // After the fluxes were added to the passive scalar in the first half
         // timestep, the values were stored in conserved form in the fields
@@ -439,6 +437,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
                                          yflux_map, zflux_map,
                                          out_integrable_map, cur_dt,
                                          stale_depth);
+        ct->increment_partial_timestep();
       }
 
       // Update quantities (includes flux divergence and source terms) 
