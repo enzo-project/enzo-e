@@ -80,7 +80,7 @@ void EnzoIntegrableUpdate::clear_dUcons_map
 (EnzoEFltArrayMap &dUcons_map, enzo_float value,
  const str_vec_t &passive_list) const noexcept
 {
-  auto clear_arr = [value,&dUcons_map](const std::string& key)
+  auto init_arr = [value,&dUcons_map](const std::string& key)
   {
     EFlt3DArray array = dUcons_map.at(key);
     for (int iz=0; iz<array.shape(0); iz++) {
@@ -92,8 +92,8 @@ void EnzoIntegrableUpdate::clear_dUcons_map
     }
   };
 
-  for (const std::string& key : integrable_keys_){ clear_arr(key); }
-  for (const std::string& key : passive_list){ clear_arr(key); }
+  for (const std::string& key : integrable_keys_){ init_arr(key); }
+  for (const std::string& key : passive_list){ init_arr(key); }
 }
 
 //----------------------------------------------------------------------
