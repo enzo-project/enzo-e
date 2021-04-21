@@ -214,7 +214,8 @@ extern "C" {
 #include "enzo_EnzoRiemannHLL.hpp"
 #include "enzo_EnzoRiemannHLLC.hpp"
 #include "enzo_EnzoRiemannHLLD.hpp"
-#include "enzo_EnzoConstrainedTransport.hpp"
+#include "enzo_EnzoBfieldMethod.hpp"
+#include "enzo_EnzoBfieldMethodCT.hpp"
 #include "enzo_EnzoSourceInternalEnergy.hpp"
 
 #include "enzo_EnzoMethodCheckGravity.hpp"

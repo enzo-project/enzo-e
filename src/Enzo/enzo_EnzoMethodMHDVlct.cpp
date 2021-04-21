@@ -89,7 +89,10 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
 	 field_descr->is_field("pressure"));
 
   if (mhd_choice_ == bfield_choice::constrained_transport) {
-    EnzoConstrainedTransport::check_required_fields();
+    bfield_method_ = new EnzoBfieldMethodCT(2);
+    bfield_method_->check_required_fields();
+  } else {
+    bfield_method_ = nullptr;
   }
 
   // Finally, initialize the default Refresh object
@@ -180,6 +183,9 @@ EnzoMethodMHDVlct::~EnzoMethodMHDVlct()
   delete full_dt_recon_;
   delete riemann_solver_;
   delete integrable_updater_;
+  if (bfield_method_ != nullptr){
+    delete bfield_method_;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -198,6 +204,7 @@ void EnzoMethodMHDVlct::pup (PUP::er &p)
   p|riemann_solver_;
   p|integrable_updater_;
   p|mhd_choice_;
+  p|bfield_method_;
   p|integrable_field_list_;
   p|reconstructable_field_list_;
   p|lazy_passive_list_;
@@ -332,10 +339,8 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     }
 
     // allocate constrained transport object
-    EnzoConstrainedTransport *ct = nullptr;
-    if (mhd_choice_ == bfield_choice::constrained_transport) {
-      ct = new EnzoConstrainedTransport(2);
-      ct->register_target_block(block);
+    if (bfield_method_ != nullptr) {
+      bfield_method_->register_target_block(block);
     }
 
     const enzo_float* const cell_widths = enzo::block(block)->CellWidth;
@@ -413,17 +418,17 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       compute_flux_(0, cur_dt, cell_widths[0], cur_reconstructable_map,
                     priml_map, primr_map, pressure_l, pressure_r,
                     xflux_map, dUcons_map, interface_velocity_arr_ptr,
-                    *reconstructor, ct, stale_depth,
+                    *reconstructor, bfield_method_, stale_depth,
                     *(lazy_passive_list_.get_list()));
       compute_flux_(1, cur_dt, cell_widths[1], cur_reconstructable_map,
                     priml_map, primr_map, pressure_l, pressure_r,
                     yflux_map, dUcons_map, interface_velocity_arr_ptr,
-                    *reconstructor, ct, stale_depth,
+                    *reconstructor, bfield_method_, stale_depth,
                     *(lazy_passive_list_.get_list()));
       compute_flux_(2, cur_dt, cell_widths[2], cur_reconstructable_map,
                     priml_map, primr_map, pressure_l, pressure_r,
                     zflux_map, dUcons_map, interface_velocity_arr_ptr,
-                    *reconstructor, ct, stale_depth,
+                    *reconstructor, bfield_method_, stale_depth,
                     *(lazy_passive_list_.get_list()));
 
       // increment the stale_depth
@@ -432,12 +437,13 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // This is where source terms should be computed (added to dUcons_group)
 
       // Update Bfields
-      if (ct != nullptr) {
-        ct->update_all_bfield_components(cur_integrable_map, xflux_map,
-                                         yflux_map, zflux_map,
-                                         out_integrable_map, cur_dt,
-                                         stale_depth);
-        ct->increment_partial_timestep();
+      if (bfield_method_ != nullptr) {
+        bfield_method_->update_all_bfield_components(cur_integrable_map,
+                                                     xflux_map, yflux_map,
+                                                     zflux_map,
+                                                     out_integrable_map, cur_dt,
+                                                     stale_depth);
+        bfield_method_->increment_partial_timestep();
       }
 
       // Update quantities (includes flux divergence and source terms) 
@@ -457,8 +463,6 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // but the outer values have not
       stale_depth+=reconstructor->delayed_staling_rate();
     }
-
-    if (ct != nullptr){delete ct;}
   }
 
   block->compute_done();
@@ -522,7 +526,7 @@ void EnzoMethodMHDVlct::compute_flux_
  EFlt3DArray &pressure_l, EFlt3DArray &pressure_r,
  EnzoEFltArrayMap &flux_map, EnzoEFltArrayMap &dUcons_map,
  EFlt3DArray *interface_velocity_arr_ptr, EnzoReconstructor &reconstructor,
- EnzoConstrainedTransport *ct_handler, int stale_depth,
+ EnzoBfieldMethod *bfield_method, int stale_depth,
  const str_vec_t& passive_list) const noexcept
 {
 
@@ -546,10 +550,10 @@ void EnzoMethodMHDVlct::compute_flux_
   // Need to set the component of reconstructed B-field along dim, equal to
   // the corresponding longitudinal component of the B-field tracked at cell
   // interfaces (should potentially be handled internally by reconstructor)
-  if (ct_handler != nullptr) {
-    ct_handler->correct_reconstructed_bfield(reconstructable_l,
-                                             reconstructable_r,
-					     dim, cur_stale_depth);
+  if (bfield_method != nullptr) {
+    bfield_method->correct_reconstructed_bfield(reconstructable_l,
+                                                reconstructable_r,
+                                                dim, cur_stale_depth);
   }
 
   // Calculate integrable values on left and right faces:
@@ -583,9 +587,9 @@ void EnzoMethodMHDVlct::compute_flux_
                               cur_stale_depth);
   }
 
-  // Finally, have the ct handler record the upwind direction
-  if (ct_handler != nullptr){
-    ct_handler->identify_upwind(flux_map, dim, cur_stale_depth);
+  // Finally, have the record the upwind direction (for handling CT)
+  if (bfield_method != nullptr){
+    bfield_method->identify_upwind(flux_map, dim, cur_stale_depth);
   }
 }
 

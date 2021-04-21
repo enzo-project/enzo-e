@@ -15,7 +15,7 @@
 ///
 /// This class can be run with and without magnetic fields. When run with
 /// magnetic fields, it makes use of the following component:
-///    EnzoConstrainedTransport:  Performs constrained transport
+///    EnzoBfieldMethod:  Performs constrained transport
 ///
 /// Some notes on implementation
 ///    - this Method tracks specific total energy (referred to as total_energy)
@@ -120,6 +120,7 @@ public: // interface
       riemann_solver_(nullptr),
       integrable_updater_(nullptr),
       mhd_choice_(bfield_choice::no_bfield),
+      bfield_method_(nullptr),
       integrable_field_list_(),
       reconstructable_field_list_(),
       lazy_passive_list_()
@@ -244,10 +245,10 @@ protected: // methods
   ///     interface velocity is not stored in the array.
   /// @param[in]     reconstructor the instance of EnzoReconstructor to use to
   ///     update reconstruct the face centered values
-  /// @param[in,out] ct_handler When using running with constrained transport
-  ///     (CT), this is a pointer to an instance of EnzoConstrainedTransport.
-  ///     During the function call, the internal state is updated. If not using
-  ///     CT, this should be a `nullptr`.
+  /// @param[in,out] bfield_method When using running with bfield handling, this
+  ///     is a pointer to an instance of EnzoBfieldMethod. During the function
+  ///     call, the internal state is updated. If not handling bfields, this
+  ///     should be a `nullptr`.
   /// @param[in]     stale_depth indicates the current stale depth (before
   ///     performing reconstruction)
   /// @param[in]     passive_list A list of keys for passively advected scalars.
@@ -264,7 +265,7 @@ protected: // methods
    EFlt3DArray &pressure_l, EFlt3DArray &pressure_r,
    EnzoEFltArrayMap &flux_map, EnzoEFltArrayMap &dUcons_map,
    EFlt3DArray *interface_velocity_arr_ptr, EnzoReconstructor &reconstructor,
-   EnzoConstrainedTransport *ct_handler, int stale_depth,
+   EnzoBfieldMethod *bfield_method, int stale_depth,
    const str_vec_t& passive_list) const noexcept;
 
   /// Setup arrays used throughout `compute`. This includes both arrays that
@@ -325,6 +326,9 @@ protected: // attributes
 
   /// Indicates how magnetic fields are handled
   bfield_choice mhd_choice_;
+
+  /// Pointer to the BfieldMethod handler
+  EnzoBfieldMethod *bfield_method_;
 
   /// Names of the integrable fields (only includes the field names for
   /// actively advected quantities). These also serve as the keys to the

@@ -184,6 +184,10 @@ classes include:
   * ``EnzoIntegrableUpdate`` - encapsulates the operation of updating
     integrable quantities after a (partial) time-step.
 
+  * ``EnzoBfieldMethod`` - encapsulates operations related to integrating
+    magnetic fields that are not performed by the other operation classes.
+    For example, a subclass exists for supporting Constrained Transport.
+
 Each of these operation classes are fairly modular (to allow for
 selective usage of the frame work components). However, all of the
 classes require that an instance of ``EnzoEquationOfState`` get's
@@ -1055,3 +1059,180 @@ the results for the passively advected scalars are stored in conserved
 form in the arrays held by ``out_conserved_passive_scalar`` (note that
 the initial values of the passive scalars specified in
 ``initial_integrable_map`` are in specific form).
+
+==========================
+Magnetic Field Integration
+==========================
+
+Subclasses of the abstract base class, ``EnzoBfieldMethod`` are used
+to implement magnetic field integration-related operations. While
+operations like reconstruction and flux calculations of relevant
+quantities are expected to be carried out with ``EnzoReconstructor``
+and ``EnzoRiemann``, all other magnetic field integration-related
+operations should be encapsulated by ``EnzoBfieldMethod``.
+
+Currently, the only subclass is ``EnzoBfieldMethodCT``, which
+implements operations related to Constrained Transport. Other
+subclasses could be implemented in the future that encapsulate other
+integration methods (e.g. divergence cleaning).
+
+From the perspective of an integrator that employs
+``EnzoBfieldMethod``, the primary result of each operation is to
+modify the values cell-centered/reconstructed quantities, since that's
+all the integrator directly needs to know about. In reality, side
+effects performed by these operations can be equally as important. For
+example, ``EnzoBfieldMethodCT`` implicitly needs to update
+face-centered magnetic field values (given that the face-centered
+values serve as the primary representation, and the cell-centered
+values are derived directly from them).
+
+
+To accomplish these goals, ``EnzoBfieldMethod``, basically implements
+a state machine. It basically provides 3 classes of methods: (i) state
+machine-methods, (ii) physics methods, and (iii) descriptor methods.
+
+State Machine Methods
+---------------------
+
+When the ``EnzoBfieldMethod`` is first constructed, it has an
+uninitialized state. During construction the number of partial
+timesteps (``num_partial_timesteps``) involved per cycle must be
+specified.
+
+At the beginning of an integration cycle (when an
+``EnzoBfieldMethod`` object is unitialized), the cello ``Block`` that
+is going to be integrated block that must be specified using the
+following method.
+
+.. code-block:: c++
+
+   void register_target_block(Block *block) noexcept;
+
+This method will correctly set the internal state and will invoke the
+virtual ``register_target_block_`` method, which is used by subclasses
+to preload relevant data from ``block`` and for the delayed
+initialization of scratch arrays (since the shapes may not be known at
+construction).
+
+Once a target block has been registerred, the ``EnzoBfieldMethod`` object
+is now ready to perform integration-related operations for the first partial
+timestep (the physics methods can now be called). The following method is
+used to increment the partial timestep:
+
+.. code-block:: c++
+
+   void increment_partial_timestep() noexcept;
+
+The target block is unregistered once this method to has been called
+``num_partial_timesteps`` times. Any calls to ``register_target_block``
+while a block is still registered will currently cause an error.
+
+
+There are couple of things to keep in mind:
+
+   * Any calls to physics methods or other state machine or other when
+     no target block is registered are not allowed.
+   * It's EXTREMELY important that ``increment_partial_timestep`` is
+     always invoked ``num_partial_timesteps`` after a target block is
+     registered and before there is chance for blocks to migrate
+     between nodes. In other words, the a target block should always
+     be registerred and unregistered during a single call to the cello
+     ``Method`` object that represents the integrator.
+
+
+Physics Methods
+---------------
+
+These methods are actually used to perform the relevant magnetic field
+integration operations. Each method is a pure virtual method that must
+be implemented by a subclass (even if the method immediately
+returns). These methods were all written and named based on the
+operations of Constrained Transport (CT). In the future, additional
+methods may need to be introduced to facillitate the implementation of
+other magnetic field integration schemes.
+
+These methods are listed below with brief description. For more details,
+please see the docstring. The methods are expected to generally
+be called in the general order that they are listed. While this isn't
+currently enforced, incorrect results may arise if they aren't called
+in the proper order.
+
+In the context of CT, the following method is used to overwrite the
+reconstructed value magnetic field component that corresponds to the
+axis of reconstruction with the (internally tracked) face-centered
+value.
+
+.. code-block:: c++
+
+   void correct_reconstructed_bfield(EnzoEFltArrayMap &l_map,
+                                     EnzoEFltArrayMap &r_map, int dim,
+                                     int stale_depth) noexcept;
+
+The following method is used by ``EnzoBfieldMethodCT`` to take note of
+the upwind direction after computing the Riemann Fluxes along a
+dimension ``dim``.
+
+.. code-block:: c++
+
+   void identify_upwind(const EnzoEFltArrayMap &flux_map, int dim,
+                        int stale_depth) noexcept;
+
+Finally, the following method is used to actually update the cell-centered
+magnetic field values.
+
+.. code-block:: c++
+
+   void update_all_bfield_components
+     (EnzoEFltArrayMap &cur_prim_map, EnzoEFltArrayMap &xflux_map,
+      EnzoEFltArrayMap &yflux_map, EnzoEFltArrayMap &zflux_map,
+      EnzoEFltArrayMap &out_centered_bfield_map, enzo_float dt,
+      int stale_depth) noexcept;
+
+In ``EnzoBfieldMethodCT`` this will also update the face-centered
+magnetic field values (it assumes that ``identify_upwind`` was called
+once for each dimension and uses the stored data). When using this
+alongside ``EnzoIntegrableUpdate``, care needs to be taken about the
+order in which this method is called relative to
+``EnzoIntegrableUpdate::update_quantities`` that accounts for the time
+when floors are applied to the total energy.
+
+Descriptor Methods
+------------------
+
+These are virtual methods that can be invoked at any time after the
+``EnzoBfieldMethod`` object has been constructed. These are used to
+describe requirements of the given magnetic field integration method.
+
+Currently, only one such method exists:
+
+.. code-block:: c++
+
+   void check_required_fields() const noexcept;
+
+These may change in the future.
+
+How to extend
+-------------
+
+Implementing a new method for magnetic field integration is fairly
+straight-forward. Basically all you have to do is implement a subclass
+of ``EnzoBfieldMethod``. In addition to providing implementations for
+each each physics and descriptor method, the subclass also needs to
+implement:
+
+.. code-block:: c++
+
+   void register_target_block_(Block *target_block,
+                               bool first_initialization) noexcept;
+
+As mentioned earlier, this method is called by
+``register_target_block`` while registering a new target block. In
+this call the subclass should preload any data it will need from the
+``target_block``. The ``first_initialization`` argument indicate
+whether this is the first time a ``target_block`` is being registered
+after the instance has been constructed (this includes the first time
+following deserialization after a restart). It can be used to help with
+lazy intialization of scratch space.
+
+*Once a second concrete subclass of* ``EnzoBfieldMethod`` *is
+provided, it may be worthwhile to introduce a factory method.*

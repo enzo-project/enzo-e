@@ -1,92 +1,44 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoConstrainedTransport.cpp
+/// @file     enzo_EnzoBfieldMethodCT.hpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Mon June 24 2019
-/// @brief    [\ref Enzo] Implementation of EnzoConstrainedTransport
+/// @brief    [\ref Enzo] Declaration of BfieldMethodCT
 
-#ifndef ENZO_ENZO_CONSTRAINEDTRANSPORT_HPP
-#define ENZO_ENZO_CONSTRAINEDTRANSPORT_HPP
-class EnzoConstrainedTransport
+#ifndef ENZO_ENZO_BFIELDMETHODCT_HPP
+#define ENZO_ENZO_BFIELDMETHODCT_HPP
+class EnzoBfieldMethodCT : public EnzoBfieldMethod
 {
-  /// @class    EnzoConstrainedTransport
+  /// @class    EnzoBfieldMethodCT
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Encapsulates operations of constrained transport
-  ///
-  /// Instances of this class are meant to be used as components of an MHD or
-  /// hydrodynamical integrators that are entirely responsible for all
-  /// constrained-transport related operations that would not otherwise be
-  /// performed by the solver. The distinction between whether a pointer is
-  /// a `nullptr` or points to an instance of this class should entirely dictate
-  /// whether constrained-transport related operations are used in the
-  /// integrator.
-  ///
-  /// To accomplish these goals, this object is responsible for the
-  /// allocation/deallocation of the required temporary scratch-space
-  /// and providing the actual constrained transport operations.
-  ///
-  /// This class is effectively a state machine.
-  /// - To update the bfield for a given block, the `register_target_block`
-  ///   method must first be used to register that block. An error will be
-  ///   raised if this method is called and a block has already been
-  ///   initialized. Because the shapes of the blocks are not necessarily known
-  ///   at construction, the scratch arrays are lazily initialized the first
-  ///   time this is called.
-  /// - Errors will be raised if the `correct_reconstructed_bfield`,
-  ///   `identify_upwind`, `update_all_bfield_components`, or
-  ///   `increment_partial_timestep` are called without having a registered
-  ///    block.
-  /// - When the `increment_partial_timestep` method has been called
-  ///   `num_partial_timesteps` times after a block has been registered, the
-  ///    block will be unregistered.
-  ///
-  /// To the hydro solver the main effect observable effect of calling this
-  /// class is updating the cell-centered Bfield components. However, the
-  /// updates to the face-centered Bfield components (implicitly performed by
-  /// this class) are equally as important (given that the face-centered fields
-  /// are the primary represntation of the Bfield and the cell-centered values
-  /// are derived directly from the face-centered values).
-  ///
-  /// The design could potentially be improved by separating the
-  /// responsiblities of the block-specific data (and scratch space) and the
-  /// implementation of the constrained transport operations between two
-  /// classes. However this refactoring has been defered to the future when
-  /// other classes may be introduced that encapsulate other approaches for
-  /// updating the magnetic field (e.g. Dedner divergence cleaning).
 
 public: // interface
 
-  /// Create a new EnzoConstrainedTransport (allocates scratch space)
+  /// Create a new EnzoBfieldMethodCT
   ///
   /// @param[in] num_partial_timesteps The number of partial timesteps over
   ///     which the constructed instance will update the magnetic fields.
-  EnzoConstrainedTransport(int num_partial_timesteps);
+  EnzoBfieldMethodCT(int num_partial_timesteps)
+    : EnzoBfieldMethod(num_partial_timesteps),
+      cell_widths_(nullptr)
+  { }
 
-  /// checks that the interface bfields exist and have the required shapes
-  static void check_required_fields();
+  /// Charm++ PUP::able declarations
+  PUPable_decl(EnzoBfieldMethodCT);
 
-  /// Register the pointer to the Block for which the Bfields will be updated.
-  ///
-  /// Only one block can be registered at a time (an error will be raised if
-  /// another block is already registered). The very first time this is called,
-  /// it will initialize the scratch space.
-  ///
-  /// @param[in] block holds data to be processed
-  void register_target_block(Block *block) throw();
+  /// Charm++ PUP::able migration constructor
+  EnzoBfieldMethodCT (CkMigrateMessage *m)
+    : EnzoBfieldMethod (m)
+  { }
 
-  /// Returns the partial timestep index.
-  ///
-  /// 0 means that the current interface bfields are stored in the permanent
-  /// fields. 1 means that they are stored in the temporary arrays. An error
-  /// will occur if no block is registered.
-  int partial_timestep_index() const throw()
-  {
-    require_registered_block_();
-    return partial_timestep_index_;
+  /// CHARM++ Pack / Unpack function
+  void pup (PUP::er &p){
+    EnzoBfieldMethodCT::pup(p);
   }
 
-  /// increments the partial timestep index
-  void increment_partial_timestep() throw();
+  /// checks that the interface bfields exist and have the required shapes
+  void check_required_fields() const noexcept;
 
   /// Overwrites the component of the reconstructed bfields along the axis of
   /// reconstruction with given dimension with corresponding face-centerd
@@ -104,7 +56,7 @@ public: // interface
   ///     immediate staling rate.
   void correct_reconstructed_bfield(EnzoEFltArrayMap &l_map,
                                     EnzoEFltArrayMap &r_map, int dim,
-                                    int stale_depth);
+                                    int stale_depth) noexcept;
 
   /// identifies and stores the upwind direction
   ///
@@ -113,7 +65,8 @@ public: // interface
   /// @param[in] dim The dimension to identify the upwind direction along.
   /// @param[in] stale_depth The current staling depth. This should match the
   ///     staling depth used to compute the flux_group.
-  void identify_upwind(EnzoEFltArrayMap &flux_map, int dim, int stale_depth);
+  void identify_upwind(const EnzoEFltArrayMap &flux_map, int dim,
+                       int stale_depth) noexcept;
 
   /// Updates all components of the face-centered and the cell-centered bfields
   ///
@@ -125,10 +78,10 @@ public: // interface
   /// @param[in]  xflux_map,yflux_map,zflux_map Maps containing the values of
   ///     the fluxes computed along the x, y, and z directions. The function
   ///     namely makes use of the various magnetic field fluxes
-  /// @param[out] bfieldc_map Map holding the arrays where the updated values
-  ///     for each cell-centered magnetic fields component should be stored.
-  ///     This can contain the same arrays as `cur_prim_map` (or even be the
-  ///     same array).
+  /// @param[out] out_centered_bfield_map Map holding the arrays where the
+  ///     updated values for each cell-centered magnetic field component should
+  ///     be stored. These arrays can be aliases of `cur_prim_map` (The
+  ///     arguments can even reference the same object).
   /// @param[in]  dt The (partial) time-step over which to update the magnetic
   ///     fields.
   /// @param[in]  stale_depth indicates the current stale_depth for the
@@ -140,7 +93,7 @@ public: // interface
                                     EnzoEFltArrayMap &yflux_map,
                                     EnzoEFltArrayMap &zflux_map,
                                     EnzoEFltArrayMap &out_centered_bfield_map,
-                                    enzo_float dt, int stale_depth);
+                                    enzo_float dt, int stale_depth) noexcept;
 
   /// Computes a component of the cell-centered magnetic by averaging the
   /// face-centered values of that component of the magnetic field.
@@ -162,17 +115,17 @@ public: // interface
 				    EFlt3DArray &bfieldi_comp,
                                     int stale_depth = 0);
 
-
 protected: // methods
-  /// Helper method that raises an error if there isn't a registered block.
-  void require_registered_block_() const throw()
-  {
-    if (target_block_ == nullptr){
-      ERROR("EnzoConstrainedTransport::require_registered_block_",
-            "An invalid method has been executed that requires that a target "
-            "block is registered.");
-    }
-  }
+
+  /// Virtual method that subclasses overide to preload any method specific
+  /// data from the new target block and optionally initialize scratch space
+  ///
+  /// @param[in] target_block holds data to be processed
+  /// @param[in] first_initialization Indicates if this is the first call since
+  ///    construction (including deserialization). When true, scratch space
+  ///    data should be allocated.
+  void register_target_block_(Block *target_block,
+                              bool first_initialization) noexcept;
 
   /// Computes component i of the cell-centered E-field.
   ///
@@ -187,7 +140,7 @@ protected: // methods
   ///
   /// @note this function is called in `compute_all_edge_efields`
   static void compute_center_efield(int dim, EFlt3DArray &center_efield,
-                                    EnzoEFltArrayMap &prim_map,
+                                    const EnzoEFltArrayMap &prim_map,
                                     int stale_depth = 0);
 
   /// Computes component i of the edge-centered E-field that sits on the faces
@@ -288,28 +241,15 @@ protected: // methods
   /// @param[in] dt The time time-step over which to apply the fluxes
   /// @param[in] stale_depth indicates the current stale_depth for the supplied
   ///     quantities
-  static void update_bfield(const std::array<enzo_float,3> &cell_widths,
-                            int dim, const std::array<EFlt3DArray,3> &efield_l,
+  static void update_bfield(const enzo_float* &cell_widths, int dim,
+                            const std::array<EFlt3DArray,3> &efield_l,
                             EFlt3DArray &cur_interface_bfield,
                             EFlt3DArray &out_interface_bfield,
 			    enzo_float dt, int stale_depth);
 
 protected: // attributes
 
-  /// Number of partial timesteps in a cycle. A value of 1 would means that
-  /// there is only a single update over the full timestep. A value of 2 means
-  /// that there is a half timestep and a full timestep.
-  const int num_partial_timesteps_;
-
-  /// Holds the index of the current partial timestep. This will be reset
-  /// everytime a new target_block_ is registered. A negative value is used
-  /// to indicate that the scratch arrays are not yet allocated.
-  int partial_timestep_index_;
-
-  // Block Specific data: (its updated everytime a new block is registerd)
-
-  /// Pointer to the Block that this class is operating upon. 
-  Block * target_block_;
+  // Block Specific data: (its updated everytime a new block is registered.)
 
   /// Set of arrays wrapping the Cello fields that contain the interface
   /// magnetic field components. A given component is face-centered along the
@@ -321,6 +261,9 @@ protected: // attributes
   ///
   /// The entries in this array will be 
   std::array<EFlt3DArray,3> bfieldi_l_;
+
+  /// Array holding cell widths (from the CellWidth attribute of EnzoBlock)
+  const enzo_float *cell_widths_;
 
 
   // Scratch arrays: The following are reused for different blocks
@@ -355,4 +298,4 @@ protected: // attributes
   EFlt3DArray center_efield_;
 
 };
-#endif /* ENZO_ENZO_CONSTRAINEDTRANSPORT_HPP */
+#endif /* ENZO_ENZO_BFIELDMETHODCT_HPP */

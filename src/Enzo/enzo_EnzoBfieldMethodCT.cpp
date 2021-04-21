@@ -1,40 +1,18 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoConstrainedTransport.cpp
+/// @file     enzo_EnzoBfieldMethodCT.cpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Mon May 6 2019
-/// @brief    [\ref Enzo] Implementation of EnzoConstrainedTransport
+/// @brief    [\ref Enzo] Implementation of EnzoBfieldMethodCT
 
 #include "cello.hpp"
 #include "enzo.hpp"
 
 //----------------------------------------------------------------------
 
-EnzoConstrainedTransport::EnzoConstrainedTransport(int num_partial_timesteps)
-  : num_partial_timesteps_(num_partial_timesteps),
-    partial_timestep_index_(-1),
-    target_block_(nullptr)
+void EnzoBfieldMethodCT::register_target_block_
+(Block *block, bool first_initialization) noexcept
 {
-  ASSERT("EnzoConstrainedTransport", "num_partial_timesteps must be positive",
-	 num_partial_timesteps_ > 0);
-
-  if (num_partial_timesteps_ != 2){
-    ERROR("EnzoConstrainedTransport",
-          "This machinery hasn't been tested for cases when "
-          "num_partial_timesteps!=2.");
-  }
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConstrainedTransport::register_target_block(Block *block) throw()
-{
-  if (target_block_ != nullptr){
-    ERROR("EnzoConstrainedTransport::register_target_block",
-          "A target block is already specified");
-  }
-  target_block_ = block;
-
   // setup bfieldi_l_ (initialize arrays that wrap the fields holding each
   // component of the interface centered magnetic field).
   const std::string field_names[] = {"bfieldi_x", "bfieldi_y", "bfieldi_z"};
@@ -43,16 +21,13 @@ void EnzoConstrainedTransport::register_target_block(Block *block) throw()
     bfieldi_l_[i] = array_factory.from_name(field_names[i]);
   }
 
-  if (partial_timestep_index_ > 0){
-    // sanity check
-    ERROR("EnzoConstrainedTransport::register_target_block", "Invalid state.");
-  } else if (partial_timestep_index_ < 0){
-    // initialize the scratch arrays for the first time
-    partial_timestep_index_ = 0;
+  EnzoBlock *enzo_block = enzo::block(block);
+  cell_widths_ = (const enzo_float*)enzo_block->CellWidth;
 
-    // if num_partial_timesteps_ > 1, setup temp_bfieldi_l_ (they have the same
+  if (first_initialization){
+    // if num_partial_timesteps() > 1, setup temp_bfieldi_l_ (they have the same
     // shape as each component of bfieldi_l_ and manage their own memory).
-    if (num_partial_timesteps_ > 1){
+    if (num_partial_timesteps() > 1){
       for (std::size_t i = 0; i<3; i++){
         temp_bfieldi_l_[i] = EFlt3DArray(bfieldi_l_[i].shape(0),
                                          bfieldi_l_[i].shape(1),
@@ -88,10 +63,10 @@ void EnzoConstrainedTransport::register_target_block(Block *block) throw()
 
 //----------------------------------------------------------------------
 
-void EnzoConstrainedTransport::check_required_fields()
+void EnzoBfieldMethodCT::check_required_fields() const noexcept
 {
   FieldDescr * field_descr = cello::field_descr();
-  ASSERT("EnzoConstrainedTransport::check_required_fields",
+  ASSERT("EnzoBfieldMethodCT::check_required_fields",
 	 ("There must be face-centered permanent fields called \"bfieldi_x\","
 	  "\"bfield_y\" and \"bfield_z\"."),
 	 (field_descr->is_field("bfield_x") &&
@@ -103,7 +78,7 @@ void EnzoConstrainedTransport::check_required_fields()
   for (std::size_t i = 0; i < 3; i++){
     std::string name = names[i];
     // first check that field exists
-    ASSERT1("EnzoConstrainedTransport::check_required_fields",
+    ASSERT1("EnzoBfieldMethodCT::check_required_fields",
 	    "There must be face-centered permanent fields called \"%s\"",
 	    name.c_str(), field_descr->is_field(name));
 
@@ -114,11 +89,11 @@ void EnzoConstrainedTransport::check_required_fields()
 			   &centering[2]);
     for (std::size_t j = 0; j<3; j++){
       if (j!=i){
-	ASSERT2("EnzoConstrainedTransport::update_refresh",
+	ASSERT2("EnzoBfieldMethodCT::update_refresh",
 		"The \"%s\" field must be cell-centered along the %s-axis",
 		name.c_str(), axes[j].c_str(), centering[j] == 0);
       } else {
-	ASSERT2("EnzoConstrainedTransport::update_refresh",
+	ASSERT2("EnzoBfieldMethodCT::update_refresh",
 		"The \"%s\" field must be face-centered along the %s-axis",
 		name.c_str(), axes[j].c_str(), centering[j] == 1);
       }
@@ -129,38 +104,25 @@ void EnzoConstrainedTransport::check_required_fields()
 
 //----------------------------------------------------------------------
 
-void EnzoConstrainedTransport::increment_partial_timestep() throw()
-{
-  require_registered_block_(); // confirm that target_block_ is valid
-
-  if ((partial_timestep_index_ + 1) == num_partial_timesteps_){
-    partial_timestep_index_ = 0;
-    target_block_ = nullptr;
-  } else {
-    partial_timestep_index_++;
-  }
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConstrainedTransport::correct_reconstructed_bfield
-(EnzoEFltArrayMap &l_map, EnzoEFltArrayMap &r_map, int dim, int stale_depth)
+void EnzoBfieldMethodCT::correct_reconstructed_bfield
+(EnzoEFltArrayMap &l_map, EnzoEFltArrayMap &r_map, int dim,
+ int stale_depth) noexcept
 {
   require_registered_block_(); // confirm that target_block_ is valid
 
   std::array<EFlt3DArray,3> *cur_bfieldi_l;
-  if (partial_timestep_index_== 0){
+  if (partial_timestep_index() == 0){
     cur_bfieldi_l = &bfieldi_l_;
-  } else if (partial_timestep_index_== 1){
+  } else if (partial_timestep_index() == 1){
     cur_bfieldi_l = &temp_bfieldi_l_;
   } else {
-    ERROR1("EnzoConstrainedTransport::correct_reconstructed_bfield",
+    ERROR1("EnzoBfieldMethodCT::correct_reconstructed_bfield",
 	   "Unsure how to handle current partial_timestep_index_ of %d",
-	   partial_timestep_index_);
+	   partial_timestep_index());
   }
 
   if ((dim < 0) || (dim > 2)){
-    ERROR("EnzoConstrainedTransport::correct_reconstructed_bfield",
+    ERROR("EnzoBfieldMethodCT::correct_reconstructed_bfield",
           "dim has an invalid value");
   } else {
     // the interface bfield values held in *cur_bfieldi_l[dim] includes values
@@ -190,8 +152,8 @@ void EnzoConstrainedTransport::correct_reconstructed_bfield
 
 //----------------------------------------------------------------------
 
-void EnzoConstrainedTransport::identify_upwind(EnzoEFltArrayMap &flux_map,
-                                               int dim, int stale_depth)
+void EnzoBfieldMethodCT::identify_upwind(const EnzoEFltArrayMap &flux_map,
+                                         int dim, int stale_depth) noexcept
 {
   require_registered_block_(); // confirm that target_block_ is valid
 
@@ -205,7 +167,7 @@ void EnzoConstrainedTransport::identify_upwind(EnzoEFltArrayMap &flux_map,
   //    densities.
 
   if ((dim < 0) || (dim > 2)){
-    ERROR("EnzoConstrainedTransport::identify_upwind",
+    ERROR("EnzoBfieldMethodCT::identify_upwind",
           "dim has an invalid value");
   } else {
     EFlt3DArray density_flux = flux_map.get("density", stale_depth);
@@ -239,10 +201,11 @@ void EnzoConstrainedTransport::identify_upwind(EnzoEFltArrayMap &flux_map,
 
 //----------------------------------------------------------------------
 
-void EnzoConstrainedTransport::update_all_bfield_components
+void EnzoBfieldMethodCT::update_all_bfield_components
 (EnzoEFltArrayMap &cur_prim_map, EnzoEFltArrayMap &xflux_map,
  EnzoEFltArrayMap &yflux_map, EnzoEFltArrayMap &zflux_map,
- EnzoEFltArrayMap &out_centered_bfield_map, enzo_float dt, int stale_depth)
+ EnzoEFltArrayMap &out_centered_bfield_map, enzo_float dt,
+ int stale_depth) noexcept
 {
   // The current interface values of the interface magnetic fields that are to
   // be updated are always the values from the start of the timestep
@@ -250,41 +213,35 @@ void EnzoConstrainedTransport::update_all_bfield_components
   // Now determine the set of arrays where the updated interface bfields are to
   // be stored:
   std::array<EFlt3DArray,3> *out_bfieldi_l;
-  if ((partial_timestep_index_== 1) || (num_partial_timesteps_ == 1)){
+  if ((partial_timestep_index()== 1) || (num_partial_timesteps() == 1)){
     out_bfieldi_l = &bfieldi_l_; // the same as cur_bfieldi_l
-  } else if (partial_timestep_index_== 0){
+  } else if (partial_timestep_index()== 0){
     out_bfieldi_l = &temp_bfieldi_l_;
   } else {
-    ERROR1("EnzoConstrainedTransport::correct_reconstructed_bfield",
+    ERROR1("EnzoBfieldMethodCT::correct_reconstructed_bfield",
 	   "Unsure how to handle current partial_timestep_index_ of %d",
-	   partial_timestep_index_);
+	   partial_timestep_index());
   }
 
   // First, compute the edge-centered Electric fields (each time, it uses
   // the current integrable quantities)
-  EnzoConstrainedTransport::compute_all_edge_efields(cur_prim_map, xflux_map,
+  EnzoBfieldMethodCT::compute_all_edge_efields(cur_prim_map, xflux_map,
                                                      yflux_map, zflux_map,
                                                      center_efield_,
                                                      edge_efield_l_, weight_l_,
                                                      stale_depth);
 
-  EnzoBlock *enzo_block = enzo::block(target_block_);
-  std::array<enzo_float,3> cell_widths;
-  for (std::size_t i=0; i < 3; i++){
-    cell_widths[i] = enzo_block->CellWidth[i];
-  }
-
   // Update longitudinal B-field (add source terms of constrained transport)
   for (int dim = 0; dim<3; dim++){
-    EnzoConstrainedTransport::update_bfield
-      (cell_widths, dim, edge_efield_l_, (*cur_bfieldi_l)[dim],
+    EnzoBfieldMethodCT::update_bfield
+      (cell_widths_, dim, edge_efield_l_, (*cur_bfieldi_l)[dim],
        (*out_bfieldi_l)[dim], dt, stale_depth);
   }
 
   // Finally, update cell-centered B-field
   const std::string names[3] = {"bfield_x", "bfield_y", "bfield_z"};
   for (int dim = 0; dim<3; dim++){
-    EnzoConstrainedTransport::compute_center_bfield
+    EnzoBfieldMethodCT::compute_center_bfield
       (dim, out_centered_bfield_map[names[dim]], (*out_bfieldi_l)[dim],
        stale_depth);
   }
@@ -292,8 +249,9 @@ void EnzoConstrainedTransport::update_all_bfield_components
 
 //----------------------------------------------------------------------
 
-void EnzoConstrainedTransport::compute_center_efield
-(int dim, EFlt3DArray &efield, EnzoEFltArrayMap &prim_map, int stale_depth)
+void EnzoBfieldMethodCT::compute_center_efield
+(int dim, EFlt3DArray &efield, const EnzoEFltArrayMap &prim_map,
+ int stale_depth)
 {
   const std::string v_names[3] = {"velocity_x", "velocity_y", "velocity_z"};
   const std::string b_names[3] = {"bfield_x", "bfield_y", "bfield_z"};
@@ -493,7 +451,7 @@ void inplace_entry_multiply_(EFlt3DArray &array, enzo_float val){
 //     down the x, y, and z direction. Currently, it expects values of 1 and 0
 //     to indicate that the upwind direction is in positive and negative
 //     direction, or 0 to indicate no upwind direction.
-void EnzoConstrainedTransport::compute_edge_efield
+void EnzoBfieldMethodCT::compute_edge_efield
 (int dim, EFlt3DArray &center_efield, EFlt3DArray &edge_efield,
  EnzoEFltArrayMap &jflux_map, EnzoEFltArrayMap &kflux_map,
  std::array<EFlt3DArray,3> &weight_l, int stale_depth)
@@ -571,7 +529,7 @@ void EnzoConstrainedTransport::compute_edge_efield
 
 //----------------------------------------------------------------------
 
-void EnzoConstrainedTransport::compute_all_edge_efields
+void EnzoBfieldMethodCT::compute_all_edge_efields
   (EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &xflux_map,
    EnzoEFltArrayMap &yflux_map, EnzoEFltArrayMap &zflux_map,
    EFlt3DArray &center_efield, std::array<EFlt3DArray,3> &edge_efield_l,
@@ -579,7 +537,7 @@ void EnzoConstrainedTransport::compute_all_edge_efields
 {
 
   for (int i = 0; i < 3; i++){
-    EnzoConstrainedTransport::compute_center_efield(i, center_efield, prim_map,
+    EnzoBfieldMethodCT::compute_center_efield(i, center_efield, prim_map,
                                                     stale_depth);
 
     EnzoEFltArrayMap *jflux_map;
@@ -595,7 +553,7 @@ void EnzoConstrainedTransport::compute_all_edge_efields
       kflux_map = &yflux_map;
     }
 
-    EnzoConstrainedTransport::compute_edge_efield(i, center_efield,
+    EnzoBfieldMethodCT::compute_edge_efield(i, center_efield,
                                                   edge_efield_l[i], *jflux_map,
                                                   *kflux_map, weight_l,
                                                   stale_depth);
@@ -627,8 +585,8 @@ void EnzoConstrainedTransport::compute_all_edge_efields
 // Then:
 //   E_k_term(k,j,i+1/2) = dt/dj*(ek_Rj(k,j,i) - ek_Lj(k,j,i))
 //   E_j_term(k,j,i+1/2) = dt/dk*(ej_Rk(k,j,i) - ej_Lk(k,j,i))
-void EnzoConstrainedTransport::update_bfield
-(const std::array<enzo_float,3> &cell_widths, int dim,
+void EnzoBfieldMethodCT::update_bfield
+(const enzo_float* &cell_widths, int dim,
  const std::array<EFlt3DArray,3> &efield_l,
  EFlt3DArray &cur_interface_bfield, EFlt3DArray &out_interface_bfield,
  enzo_float dt, int stale_depth)
@@ -711,10 +669,10 @@ void EnzoConstrainedTransport::update_bfield
 //   B_center(k,j,i)   ->  B_i(k,j,i+1)
 //   Bi_left(k,j,i)    ->  B_i(k,j,i+1/2)
 //   Bi_right(k,j,i)   ->  B_i(k,j,i+3/2)
-void EnzoConstrainedTransport::compute_center_bfield(int dim,
-                                                     EFlt3DArray &bfieldc_comp,
-						     EFlt3DArray &bfieldi_comp,
-						     int stale_depth)
+void EnzoBfieldMethodCT::compute_center_bfield(int dim,
+                                               EFlt3DArray &bfieldc_comp,
+                                               EFlt3DArray &bfieldi_comp,
+                                               int stale_depth)
 {
   EnzoPermutedCoordinates coord(dim);
   CSlice stale_slc = (stale_depth > 0) ?

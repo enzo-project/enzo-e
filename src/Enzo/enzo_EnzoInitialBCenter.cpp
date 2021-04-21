@@ -30,7 +30,7 @@ void EnzoInitialBCenter::initialize_bfield_center( Block * block )
   for (int i=0; i<3; i++){
     EFlt3DArray bfieldc = array_factory.from_name(centered_names[i]);
     EFlt3DArray bfieldi = array_factory.from_name(interface_names[i]);
-    EnzoConstrainedTransport::compute_center_bfield(i, bfieldc, bfieldi);
+    EnzoBfieldMethodCT::compute_center_bfield(i, bfieldc, bfieldi);
   }
 }
 
