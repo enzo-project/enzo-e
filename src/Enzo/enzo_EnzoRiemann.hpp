@@ -22,9 +22,9 @@ public: // interface
   /// Factory method for constructing the EnzoRiemann object. (The signature
   /// may need to be modified as additional physics get added)
   ///
-  /// @param integrable_quantities A vector of integrable quantities (listed as
-  ///     advected quantities in FIELD_TABLE). This is used to register the
-  ///     quantities that the Riemann Solver operates on.
+  /// @param integrable_quantities A vector of integration quantities (which
+  ///     must be listed as advected quantities in FIELD_TABLE). This is used
+  ///     to register the quantities that the Riemann Solver operates on.
   /// @param solver The name of the Riemann solver to use. Valid names include
   ///     "hll", "hlle", and "hlld"
   static EnzoRiemann* construct_riemann
@@ -54,12 +54,9 @@ public: // interface
   /// Computes the Riemann Fluxes for each conserved field along a given
   /// dimension, dim
   /// @param[in]     priml_map,primr_map Maps of arrays holding the left/right
-  ///     reconstructed face-centered integrable primitives. This should be
+  ///     reconstructed face-centered primitives. This should be
   ///     face-centered along `dim` (without having values on the exterior
   ///     faces of the block) and cell-centered along the other dimensions.
-  /// @param[in]     pressure_array_l,pressure_array_r Arrays holding the
-  ///     precomputed left/right reconstructed pressure values. These should
-  ///     have the same face-centering as the arrays in priml_map/primr_map.
   /// @param[out]    flux_map Holds arrays where the calculated fluxes
   ///     will be stored. The arrays should be face-centered along `dim`
   ///     (without having values on the exterior faces of the block)
@@ -73,7 +70,7 @@ public: // interface
   ///     `dim` (the array should not include exterior faces of the block and
   ///     should be cell-centered along other dimensions). This quantity is
   ///     used to compute the internal energy source term (needed under the
-  ///     dual energy formalism). If the value is `NULL`, then the interface
+  ///     dual energy formalism). If the value is `nullptr`, then the interface
   ///     velocity is not stored in the array.
   ///
   /// @note It's alright for arrays in `priml_map` and `primr_map` to have the
@@ -84,7 +81,6 @@ public: // interface
   /// applies to the other arrays passed as arguments.
   virtual void solve
   (EnzoEFltArrayMap &prim_map_l, EnzoEFltArrayMap &prim_map_r,
-   const EFlt3DArray &pressure_array_l, const EFlt3DArray &pressure_array_r,
    EnzoEFltArrayMap &flux_map, int dim, EnzoEquationOfState *eos,
    int stale_depth, const str_vec_t &passive_list,
    EFlt3DArray *interface_velocity) const = 0;

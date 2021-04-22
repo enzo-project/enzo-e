@@ -569,8 +569,8 @@ void EnzoMethodMHDVlct::compute_flux_
                                       cur_stale_depth);
 
   // Next, compute the fluxes
-  riemann_solver_->solve(integrable_l, integrable_r, pressure_l, pressure_r,
-                         flux_map, dim, eos_, cur_stale_depth, passive_list,
+  riemann_solver_->solve(integrable_l, integrable_r, flux_map, dim, eos_,
+                         cur_stale_depth, passive_list,
                          interface_velocity_arr_ptr);
 
   // Accumulate the change in integrable quantities from these flux_map in

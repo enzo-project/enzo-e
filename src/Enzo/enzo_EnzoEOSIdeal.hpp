@@ -63,6 +63,9 @@ public: // interface
   (EnzoEFltArrayMap &integrable_map, const EFlt3DArray &pressure,
    EnzoEFltArrayMap &conserved_passive_map, int stale_depth) const;
 
+  void eint_from_primitive(EnzoEFltArrayMap &primitive, EFlt3DArray &eint,
+                           int stale_depth) const;
+
   void pressure_from_reconstructable(EnzoEFltArrayMap &reconstructable,
                                      EFlt3DArray &pressure,
                                      int stale_depth) const;
