@@ -12,6 +12,12 @@
 #include <pup_stl.h>
 #include <cstdint> // used to check that static methods are defined
 
+// TO DO BEFORE PR:
+//    - finish sorting out the primitives naming
+//    - clean up all of the EnzoRiemannUtils docstrings
+//    - I've very made very inconsistent changes to the rest of the docstrings
+//    - I need to entirely excise
+
 //----------------------------------------------------------------------
 
 struct HydroLUT {
@@ -82,7 +88,8 @@ struct MHDLUT{
 /// form. Note that because the quantities are inherently specific or
 /// conserved. For quantities that are inherently conserved (e.g. density) the
 /// associated values in `prim_l`/`prim_r` are identical those in
-/// `cons_l`/`cons_r`.
+/// `cons_l`/`cons_r`. The only exception is pressure. If the conserved
+/// quantities hold the total_energy, then the primitives hold the pressure.
 ///
 /// The left and right reconstructed pressure values are passed as `pressure_l`
 /// and `pressure_r`. `barotropic_eos` indicates whether the fluid equation of
@@ -151,14 +158,6 @@ class EnzoRiemannImpl : public EnzoRiemann
 		"ImplFunctor's operator() method doesn't have the correct "
 		"function signature");
 
-  /// The following vector holds advection quantities for which passive
-  /// advection fluxes can be computed when they are not directly handled by a
-  /// Riemann Solver. Unlike normal passively advected scalars, quantities
-  /// listed here nominally play a more direct role in hydrodynamical
-  /// integration. The canonical example is "specific internal energy"
-  ///
-  /// Note: This is unrelated to Riemann Solver Fallback. 
-  static const std::vector<std::string> PassiveFallbackAdvectionQuantities;
 
 public: // interface
 
@@ -185,8 +184,6 @@ public: // interface
   void pup (PUP::er &p);
 
   void solve (EnzoEFltArrayMap &prim_map_l, EnzoEFltArrayMap &prim_map_r,
-              const EFlt3DArray &pressure_array_l,
-              const EFlt3DArray &pressure_array_r,
               EnzoEFltArrayMap &flux_map, int dim, EnzoEquationOfState *eos,
               int stale_depth, const str_vec_t &passive_list,
               EFlt3DArray *interface_velocity) const;
@@ -206,23 +203,9 @@ protected: //attributes
   /// Names of the quantities to advect
   std::vector<std::string> integrable_groups_;
 
-  /// Names of the integrable quantities that require passive fluxes
-  std::vector<std::string> passive_integrable_quantities_;
-
-  /// Field categories of each quantity in passive_integrable_quantities_
-  std::vector<FieldCat> passive_integrable_categories_;
-
+  /// Tracks whether the internal energy needs to be computed
+  bool calculate_internal_energy_flux_;
 };
-
-//----------------------------------------------------------------------
-
-// TODO: move this to EnzoRiemann so that it isn't initialized for every
-// template
-
-template <class ImplFunctor>
-const std::vector<std::string>
-EnzoRiemannImpl<ImplFunctor>::PassiveFallbackAdvectionQuantities =
-  {"internal_energy"};
 
 //----------------------------------------------------------------------
 
@@ -254,16 +237,15 @@ EnzoRiemannImpl<ImplFunctor>::EnzoRiemannImpl
 		      group) != integrable_groups.end());
   }
 
-  // Check that all quantities in integrable_groups are in lut_groups or in
-  // EnzoRiemannImpl<ImplFunctor>::PassiveFallbackAdvectionQuantities
-  for (std::string group : integrable_groups){
+  calculate_internal_energy_flux_ = false;
+
+  // Check that all quantities in integrable_groups or if it's "internal energy"
+  for (std::string group : integrable_groups) {
     if (std::find(lut_groups.begin(), lut_groups.end(), group)
 	!= lut_groups.end()){
       integrable_groups_.push_back(group);
-    } else if (std::find(PassiveFallbackAdvectionQuantities.begin(),
-			 PassiveFallbackAdvectionQuantities.end(),
-			 group) != PassiveFallbackAdvectionQuantities.end()){
-      passive_integrable_quantities_.push_back(group);
+    } else if (group == "internal_energy") {
+      calculate_internal_energy_flux_ = true;
     } else if (group == "bfield") {
       ERROR("EnzoRiemannImpl",
             "This solver isn't equipped to handle bfields. Their fluxes "
@@ -274,13 +256,6 @@ EnzoRiemannImpl<ImplFunctor>::EnzoRiemannImpl
     }
   }
 
-  // determine the categories of each passive integrable group
-  for (std::string group : passive_integrable_quantities_){
-    FieldCat category;
-    EnzoCenteredFieldRegistry::quantity_properties(group, nullptr,
-                                                   &category, nullptr);
-    passive_integrable_categories_.push_back(category);
-  }
 }
 
 //----------------------------------------------------------------------
@@ -291,15 +266,13 @@ void EnzoRiemannImpl<ImplFunctor>::pup (PUP::er &p)
   EnzoRiemann::pup(p);
 
   p|integrable_groups_;
-  p|passive_integrable_quantities_;
-  p|passive_integrable_categories_;
+  p|calculate_internal_energy_flux_;
 }
 
 //----------------------------------------------------------------------
 template <class ImplFunctor>
 void EnzoRiemannImpl<ImplFunctor>::solve
 (EnzoEFltArrayMap &prim_map_l, EnzoEFltArrayMap &prim_map_r,
- const EFlt3DArray &pressure_array_l, const EFlt3DArray &pressure_array_r,
  EnzoEFltArrayMap &flux_map, int dim, EnzoEquationOfState *eos,
  int stale_depth, const str_vec_t &passive_list,
  EFlt3DArray *interface_velocity) const
@@ -317,6 +290,10 @@ void EnzoRiemannImpl<ImplFunctor>::solve
   ASSERT("EnzoRiemannImpl::solve", "currently no support for barotropic eos",
 	 !barotropic);
 
+  // TODO: Add special handling for barotropic equations of state
+  const EFlt3DArray pressure_array_l = prim_map_l.at("pressure");
+  const EFlt3DArray pressure_array_r = prim_map_r.at("pressure");
+
   // Check if the interface velocity must be stored
   const bool store_interface_vel = (interface_velocity != nullptr);
   EFlt3DArray velocity_i_bar_array;
@@ -324,17 +301,21 @@ void EnzoRiemannImpl<ImplFunctor>::solve
 
   std::array<EFlt3DArray,LUT::NEQ> wl_arrays, wr_arrays, flux_arrays;
   using enzo_riemann_utils::load_array_of_fields;
-  wl_arrays = load_array_of_fields<LUT>(prim_map_l, dim);
-  wr_arrays = load_array_of_fields<LUT>(prim_map_r, dim);
-  flux_arrays = load_array_of_fields<LUT>(flux_map, dim);
+  wl_arrays = load_array_of_fields<LUT>(prim_map_l, dim, true);
+  wr_arrays = load_array_of_fields<LUT>(prim_map_r, dim, true);
+  flux_arrays = load_array_of_fields<LUT>(flux_map, dim, false);
+
+  const int mz = flux_arrays[0].shape(0);
+  const int my = flux_arrays[0].shape(1);
+  const int mx = flux_arrays[0].shape(2);
 
   ImplFunctor func;
 
   // compute the flux at all non-stale cell interfaces
   const int sd = stale_depth;
-  for (int iz = sd; iz < flux_arrays[0].shape(0) - sd; iz++) {
-    for (int iy = sd; iy < flux_arrays[0].shape(1) - sd; iy++) {
-      for (int ix = sd; ix < flux_arrays[0].shape(2) - sd; ix++) {
+  for (int iz = sd; iz < mz - sd; iz++) {
+    for (int iy = sd; iy < my - sd; iy++) {
+      for (int ix = sd; ix < mx - sd; ix++) {
 
 	lutarray<LUT> wl, wr;
 	// get the fluid fields
@@ -348,8 +329,9 @@ void EnzoRiemannImpl<ImplFunctor>::solve
 	enzo_float pressure_r = pressure_array_r(iz,iy,ix);
 
 	// get the conserved quantities
-	lutarray<LUT> Ul = enzo_riemann_utils::compute_conserved<LUT>(wl);
-	lutarray<LUT> Ur = enzo_riemann_utils::compute_conserved<LUT>(wr);
+	lutarray<LUT> Ul = enzo_riemann_utils::compute_conserved<LUT>(wl,                                                                             gamma);
+	lutarray<LUT> Ur = enzo_riemann_utils::compute_conserved<LUT>(wr,
+                                                                      gamma);
 
 	// compute the interface fluxes
 	lutarray<LUT> Fl = enzo_riemann_utils::active_fluxes<LUT>(wl, Ul,
@@ -375,6 +357,26 @@ void EnzoRiemannImpl<ImplFunctor>::solve
     }
   }
 
+  // NEED TO HANDLE INTERNAL ENERGY
+
+  // It would be better to always have the Riemann Solver directly return an
+  // internal energy flux (just like the interface velocity) since the left and
+  // right states are basically computed for free
+  if (calculate_internal_energy_flux_){
+    EnzoEFltArrayMap eint_l_map, eint_r_map;
+    eint_l_map["internal_energy"] = EFlt3DArray(mz, my, mx);
+    eos->eint_from_primitive(prim_map_l, eint_l_map["internal_energy"],
+                             stale_depth);
+    eint_r_map["internal_energy"] = EFlt3DArray(mz, my, mx);
+    eos->eint_from_primitive(prim_map_r, eint_r_map["internal_energy"],
+                             stale_depth);
+
+    solve_passive_advection_(eint_l_map, eint_r_map, flux_map,
+                             flux_arrays[LUT::density], stale_depth,
+                             {"internal_energy"});
+
+  }
+
   solve_passive_advection_(prim_map_l, prim_map_r, flux_map,
   			   flux_arrays[LUT::density], stale_depth,
                            passive_list);
@@ -389,13 +391,13 @@ void EnzoRiemannImpl<ImplFunctor>::solve
 
 //----------------------------------------------------------------------
 
-inline void passive_advection_helper_
-(const str_vec_t &passive_keys,
- EnzoEFltArrayMap& prim_map_l, EnzoEFltArrayMap& prim_map_r,
- EnzoEFltArrayMap& flux_map, const EFlt3DArray &density_flux,
- int stale_depth) noexcept
+template <class ImplFunctor>
+void EnzoRiemannImpl<ImplFunctor>::solve_passive_advection_
+(EnzoEFltArrayMap &prim_map_l, EnzoEFltArrayMap &prim_map_r,
+ EnzoEFltArrayMap &flux_map, const EFlt3DArray &density_flux,
+ int stale_depth, const str_vec_t &passive_list) const throw()
 {
-  std::size_t num_keys = passive_keys.size();
+  std::size_t num_keys = passive_list.size();
   if (num_keys == 0) {return;}
 
   // This was essentially transcribed from hydro_rk in Enzo:
@@ -406,9 +408,9 @@ inline void passive_advection_helper_
   EFlt3DArray *flux_arrays = new EFlt3DArray[num_keys];
 
   for (std::size_t ind=0; ind<num_keys; ind++){
-    wl_arrays[ind] = prim_map_l.at(passive_keys[ind]);
-    wr_arrays[ind] = prim_map_r.at(passive_keys[ind]);
-    flux_arrays[ind] = flux_map.at(passive_keys[ind]);
+    wl_arrays[ind] = prim_map_l.at(passive_list[ind]);
+    wr_arrays[ind] = prim_map_r.at(passive_list[ind]);
+    flux_arrays[ind] = flux_map.at(passive_list[ind]);
   }
   const int sd = stale_depth;
   for (int iz = sd; iz < density_flux.shape(0) - sd; iz++) {
@@ -427,37 +429,6 @@ inline void passive_advection_helper_
     }
   }
   delete[] wl_arrays; delete[] wr_arrays; delete[] flux_arrays;
-}
-
-//----------------------------------------------------------------------
-
-template <class ImplFunctor>
-void EnzoRiemannImpl<ImplFunctor>::solve_passive_advection_
-(EnzoEFltArrayMap &prim_map_l, EnzoEFltArrayMap &prim_map_r,
- EnzoEFltArrayMap &flux_map, const EFlt3DArray &density_flux,
- int stale_depth, const str_vec_t &passive_list) const throw()
-{
-  // First address the passive scalars (they are listed in passive_list)
-  passive_advection_helper_(passive_list, prim_map_l, prim_map_r, flux_map,
-                            density_flux, stale_depth);
-
-  // Next address integrable quantites that have passively advected fluxes
-  for (std::size_t i=0; i<passive_integrable_quantities_.size(); i++){
-    std::string key = passive_integrable_quantities_[i];
-
-    ASSERT1("EnzoRiemannImpl::solve_passive_advection_",
-	    "Passive advection fluxes were to be computed for the integrable "
-	    "quantity, \"%s\", but it was not provided.",
-	    key.c_str(),  prim_map_l.contains(key));
-
-    if (passive_integrable_categories_[i] != FieldCat::specific){
-      // this is here to indicate that FieldCat::conserved should be allowed
-      INCOMPLETE("passive_advection_helper_ doesn't currently support "
-                 "conserved passive scalars");
-    }
-  }
-  passive_advection_helper_(passive_integrable_quantities_, prim_map_l,
-                            prim_map_r, flux_map, density_flux, stale_depth);
 }
 
 #endif /* ENZO_ENZO_RIEMANN_IMPL_HPP */

@@ -20,18 +20,31 @@
 
 namespace enzo_riemann_utils{
 
-  /// Computes the conserved counterpart for every integrable primitive.
-  /// Integrable primitives are categorized as conserved, specific, and other
-  ///
-  /// quantities classified as conserved are copied, quantities classified as
-  /// primitive are multiplied by density, and for simplicity, quantities
-  /// classified as other are copied (There are no obvious cases where there
-  /// should ever be a quanitity classified as other
-  ///
-  /// This has been factored out EnzoRiemannImpl to reduce the number of
-  /// template functions created when the same LUT is reused
   template <class LUT>
-  inline lutarray<LUT> compute_conserved(const lutarray<LUT> prim) noexcept
+  inline enzo_float mag_pressure(const lutarray<LUT> prim) noexcept
+  {
+    enzo_float bi = (LUT::bfield_i >= 0) ? prim[LUT::bfield_i] : 0;
+    enzo_float bj = (LUT::bfield_j >= 0) ? prim[LUT::bfield_j] : 0;
+    enzo_float bk = (LUT::bfield_k >= 0) ? prim[LUT::bfield_k] : 0;
+    return 0.5 * (bi*bi + bj*bj + bk *bk);
+  }
+
+  //----------------------------------------------------------------------
+
+  /// Computes the conserved counterpart for every primitive.
+  ///
+  /// Primitives are generally categorized as conserved or specific. A
+  /// "conserved" primitive is directly copied, and a "specific" primitive
+  /// is multiplied by the density. The main exception is pressure, which is
+  /// stored in prim[LUT::total_energy].
+  ///
+  /// This is currently assumed to only be implemented for a non-barotropic EOS
+  /// with a calorically perfect EOS
+  ///
+  /// We might want to consolidate this with active_fluxes
+  template <class LUT>
+  inline lutarray<LUT> compute_conserved(const lutarray<LUT> prim,
+                                         enzo_float gamma) noexcept
   {
     lutarray<LUT> cons;
 
@@ -45,18 +58,23 @@ namespace enzo_riemann_utils{
     for (std::size_t i = LUT::specific_start; i < LUT::NEQ; i++) {
       cons[i] = prim[i] * prim[LUT::density];
     }
+
+    if (LUT::total_energy >= 0) { // overwrite the total energy index
+      enzo_float pressure = prim[LUT::total_energy];
+      enzo_float internal_edens = pressure / (gamma - 1.);
+
+      enzo_float density = prim[LUT::density];
+      enzo_float vi = prim[LUT::velocity_i];
+      enzo_float vj = prim[LUT::velocity_j];
+      enzo_float vk = prim[LUT::velocity_k];
+      enzo_float kinetic_edens = 0.5 * density * (vi*vi + vj*vj + vk *vk);
+
+      enzo_float magnetic_edens = mag_pressure<LUT>(prim);
+
+      cons[LUT::total_energy] = internal_edens + kinetic_edens + magnetic_edens;
+    }
+    
     return cons;
-  }
-
-  //----------------------------------------------------------------------
-
-  template <class LUT>
-  inline enzo_float mag_pressure(const lutarray<LUT> prim) noexcept
-  {
-    enzo_float bi = (LUT::bfield_i >= 0) ? prim[LUT::bfield_i] : 0;
-    enzo_float bj = (LUT::bfield_j >= 0) ? prim[LUT::bfield_j] : 0;
-    enzo_float bk = (LUT::bfield_k >= 0) ? prim[LUT::bfield_k] : 0;
-    return 0.5 * (bi*bi + bj*bj + bk *bk);
   }
 
   //----------------------------------------------------------------------
@@ -207,7 +225,7 @@ namespace enzo_riemann_utils{
   ///   the mesh). This allows for appropriate loading of reconstructed fields.
   template<class LUT>
   inline std::array<EFlt3DArray,LUT::NEQ> load_array_of_fields
-  (EnzoEFltArrayMap& map, int dim) noexcept
+  (EnzoEFltArrayMap& map, int dim, bool prim) noexcept
   {
     std::array<EFlt3DArray,LUT::NEQ> arr;
     // in the case where we don't have reconstructed values (dim = -1) we assume
@@ -217,9 +235,15 @@ namespace enzo_riemann_utils{
     // define a lambda function to execute for every member of lut. For each
     // member in lut, its passed: 1. the member's name
     //                            2. the associated index
-    auto fn = [coord, &arr, &map](std::string name, int index)
+    auto fn = [coord, prim, &arr, &map](std::string name, int index)
       {
-        if (index != -1){ arr[index] = map.at(parse_mem_name_(name, coord)); }
+        if (index != -1){
+          if (prim && (index == LUT::total_energy)){
+            arr[index] = map.at("pressure");
+          } else {
+            arr[index] = map.at(parse_mem_name_(name, coord));
+          }
+        }
       };
 
     LUT::for_each_entry(fn);

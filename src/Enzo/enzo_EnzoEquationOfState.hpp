@@ -184,6 +184,21 @@ public: // interface
                                              EFlt3DArray &pressure,
                                              int stale_depth) const = 0;
 
+  /// Computes specific internal energy from primitive quantities (nominally
+  /// after reconstruction)
+  ///
+  /// @param[in]  reconstructable Map holding primitive values that are used to
+  ///     compute the specific internal energy
+  /// @param[out] pressure Array where the specific internal energy is to be
+  ///     stored.
+  /// @param[in]  stale_depth indicates the current stale_depth for the
+  ///     supplied cell-centered quantities
+  ///
+  /// For a barotropic EOS, this might not do anything
+  virtual void eint_from_primitive(EnzoEFltArrayMap &primitive,
+                                   EFlt3DArray &eint,
+                                   int stale_depth) const = 0;
+
   /// returns the density floor
   virtual enzo_float get_density_floor() const = 0;
 
