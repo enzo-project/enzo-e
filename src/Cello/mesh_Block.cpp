@@ -10,12 +10,12 @@
 #include "main.hpp"
 #include "charm_simulation.hpp"
 
-// #define TRACE_BLOCK
+#define TRACE_BLOCK
 
-// #define DEBUG_ADAPT
-// #define DEBUG_FACE
+//#define DEBUG_ADAPT
+//#define DEBUG_FACE
 
-// #define DEBUG_NEW_REFRESH
+//#define DEBUG_NEW_REFRESH
 
 #ifdef DEBUG_FACE
 #   define DEBUG_FACES(MSG) debug_faces_(MSG)
@@ -161,12 +161,11 @@ Block::Block ( process_type ip_source )
 
   usesAtSync = true;
 #ifdef TRACE_BLOCK
-  {
   int v3[3];
   index_.values(v3);
-  CkPrintf ("%d %s index TRACE_BLOCK Block(ip_source)  %d %d %d \n",  CkMyPe(),name().c_str(),
+  CkPrintf ("%d index TRACE_BLOCK Block(ip_source)  %d %d %d \n", CkMyPe(), 
+    //name().c_str(), 
     v3[0],v3[1],v3[2]);
-}
 #endif
 
   performance_start_(perf_block);
@@ -193,13 +192,12 @@ void Block::p_set_msg_refine(MsgRefine * msg)
 	msg->num_face_level_, msg->face_level_);
 
 #ifdef TRACE_BLOCK
-  {
   int v3[3];
   index_.values(v3);
-  CkPrintf ("%d %s index TRACE_BLOCK p_set_msg_refine(MsgRefine)  %d %d %d \n",  CkMyPe(),name().c_str(),
-	    v3[0],v3[1],v3[2]);
+  CkPrintf ("%d index TRACE_BLOCK p_set_msg_refine(MsgRefine)  %d %d %d \n",  CkMyPe(),
+    //name().c_str(), 
+    v3[0],v3[1],v3[2]);
   msg->print();
-  }
 #endif
 
   bool is_first_cycle =  (cycle_ == cello::config()->initial_cycle);
@@ -208,7 +206,7 @@ void Block::p_set_msg_refine(MsgRefine * msg)
     msg->update(data());
   } else {
     apply_initial_();
-    if (this->level() > 0) msg->update(data());
+    //if (this->level() > 0) msg->update(data());
   }
 
   delete msg;

@@ -9,7 +9,7 @@
 
 #include "disk.hpp"
 
-// #define TRACE_DISK
+//#define TRACE_DISK
 
 #define MAX_DATA_RANK 4
 #define MAX_ATTR_RANK 4
@@ -802,7 +802,7 @@ void FileHdf5::write_meta_
   // Create the attribute
 
 #ifdef TRACE_DISK  
-  CkPrintf ("%d [%d] TRACE_DISK H5Acreate()\n",CkMyPe(),__LINE__);
+  CkPrintf ("%d [%d] TRACE_DISK H5Acreate(%s)\n",CkMyPe(),__LINE__,name.c_str());
   fflush(stdout);
 #endif  
   hid_t meta_id = H5Acreate ( type_id,
