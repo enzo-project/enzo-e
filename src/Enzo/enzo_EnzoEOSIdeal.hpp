@@ -50,25 +50,17 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
-  void reconstructable_from_integrable
-  (EnzoEFltArrayMap &integrable, EnzoEFltArrayMap &reconstructable,
+  void primitive_from_integration
+  (EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &primitive_map,
    EnzoEFltArrayMap &conserved_passive_map, int stale_depth,
    const str_vec_t &passive_list) const;
 
-  void integrable_from_reconstructable
-  (EnzoEFltArrayMap &reconstructable, EnzoEFltArrayMap &integrable,
-   int stale_depth, const str_vec_t &passive_list) const;
-
-  void pressure_from_integrable
-  (EnzoEFltArrayMap &integrable_map, const EFlt3DArray &pressure,
+  void pressure_from_integration
+  (EnzoEFltArrayMap &integration_map, const EFlt3DArray &pressure,
    EnzoEFltArrayMap &conserved_passive_map, int stale_depth) const;
 
   void eint_from_primitive(EnzoEFltArrayMap &primitive, EFlt3DArray &eint,
                            int stale_depth) const;
-
-  void pressure_from_reconstructable(EnzoEFltArrayMap &reconstructable,
-                                     EFlt3DArray &pressure,
-                                     int stale_depth) const;
 
   inline enzo_float get_density_floor() const { return density_floor_; }
 

@@ -88,73 +88,43 @@ public: // interface
     PUP::able::pup(p);
   }
 
-  /// Converts cell-centered integrable primitives to reconstructable primitives
+  /// Converts integration quantities to primitives
   ///
-  /// @param[in]  integrable Map holding integrable primitive values that are
+  /// @param[in]  integration_map Map holding integration quantities that are
   ///     to be converted
-  /// @param[out] reconstructable Map holding arrays where the computed
-  ///     reconstructable data is to be stored. Due to the large degree of
-  ///     overlap between integrable and reconstructable quantities, several
-  ///     arrays held in this Map and `integrable` are expected to be aliases.
+  /// @param[out] primitive_map Map holding arrays where the computed
+  ///     primitive data is to be stored.
   /// @param[in]  conserved_passive_map Map containing the passively advected
-  ///     scalars in conserved form (note that while `integrable` may also
+  ///     scalars in conserved form (note that while `integration_map` may also
   ///     contain the same passive scalars, those values are in specific form -
   ///     which are never used in this calculation). These are provided for
   ///     Grackle's use.
   /// @param[in]  stale_depth indicates the current stale_depth for the
   ///     supplied cell-centered quantities
-  /// @param[in]  passive_list A list of keys for passive scalars. In this
-  ///     method, it specifies which passive scalars in `reconstructable` and
-  ///     `integrable` should be aliases of each other.
+  /// @param[in]  passive_list A list of keys for passive scalars. These keys
+  ///     will be used to determine which quantities will be copied from the
+  ///     integration_map to the primitive_map.
   ///
-  /// For a barotropic EOS, this nominally does nothing
-  /// For a non-barotropic EOS, this computes pressure
+  /// The quantities appearing in both `integration_map` and `primitive_map`
+  /// are simply deepcopied. For a barotropic EOS, this nominally just copies
+  /// performs a deepcopy on every quantity. For a non-barotropic EOS, this
+  /// computes pressure.
   ///
   /// @note
-  /// This interface is not ideal. `passive_list` is not really used for
-  /// anything except for checking aliasing. Now that this interface has
-  /// transitioned from using Groupings of field names to directly handling
-  /// arrays, it may be better to eliminate this method altogether.
-  virtual void reconstructable_from_integrable
-  (EnzoEFltArrayMap &integrable, EnzoEFltArrayMap &reconstructable,
+  /// It's a not obvious to me that the EOS should necessarily be responsible
+  /// for this operation.
+  virtual void primitive_from_integration
+  (EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &primitive_map,
    EnzoEFltArrayMap &conserved_passive_map, int stale_depth,
    const str_vec_t &passive_list) const =0;
 
-  /// Converts reconstructable primitives to integrable primitives
-  ///
-  /// @param[in] reconstructable Map holding reconstructable primitive values
-  ///     that are to be converted
-  /// @param[out] integrable Map holding arrays where the computed integrable
-  ///     data is to be stored. Due to the large degree of overlap between
-  ///     integrable and reconstructable quantities, several arrays held in
-  ///     this array and reconstructable are expected to be aliases.
-  /// @param[in] stale_depth indicates the current stale_depth for the
-  ///     supplied cell-centered quantities
-  /// @param[in]  passive_list A list of keys for passive scalars. In this
-  ///     method, it specifies which passive scalars in `reconstructable` and
-  ///     `integrable` should be aliases of each other.
-  ///
-  /// For a barotropic EOS, this nominally does nothing
-  /// For a non-barotropic EOS, this computes specific total energy from
-  /// pressure. If using the dual energy formalism, it will also compute the
-  /// internal energy from the pressure
-  ///
-  /// @note
-  /// This interface is not ideal. `passive_list` is not really used for
-  /// anything except for checking aliasing. Now that this interface has
-  /// transitioned from using Groupings of field names to directly handling
-  /// arrays, it may be better to eliminate this method altogether.
-  virtual void integrable_from_reconstructable
-  (EnzoEFltArrayMap &reconstructable, EnzoEFltArrayMap &integrable,
-   int stale_depth, const str_vec_t &passive_list) const =0;
-
-  /// Computes thermal pressure from integrable quantities
+  /// Computes thermal pressure from integration quantities
   /// 
-  /// @param[in]  integrable_map Map holding integrable primitive values
-  ///     that are used to compute the pressure
+  /// @param[in]  integration_map Map holding integration quantities that are
+  ///     used to compute the pressure
   /// @param[out] pressure Array where the thermal pressure is to be stored
   /// @param[in]  conserved_passive_map Map containing the passively advected
-  ///     scalars in conserved form (note that while `integrable` may also
+  ///     scalars in conserved form (note that while `integration_map` may also
   ///     contain the same passive scalars, those values are in specific form -
   ///     which are never used in this calculation). These are provided for
   ///     Grackle's use.
@@ -163,26 +133,9 @@ public: // interface
   ///
   /// This nominally should wrap EnzoComputePressure. But at the time of
   /// writing, it doesn't actually wrap EnzoComputePressure
-  virtual void pressure_from_integrable
-  (EnzoEFltArrayMap &integrable_map, const EFlt3DArray &pressure,
+  virtual void pressure_from_integration
+  (EnzoEFltArrayMap &integration_map, const EFlt3DArray &pressure,
    EnzoEFltArrayMap &conserved_passive_map, int stale_depth) const = 0;
-
-  /// Computes thermal pressure from reconstructable quantities (nominally
-  /// after reconstruction)
-  ///
-  /// @param[in]  reconstructable Map holding reconstructable primitive values
-  ///     that are used to compute the pressure
-  /// @param[out] pressure Array where the thermal pressure is to be stored
-  /// @param[in]  stale_depth indicates the current stale_depth for the
-  ///     supplied cell-centered quantities
-  ///
-  /// For a non-barotropic EOS, pressure is considered a reconstructable
-  /// quantity. In that case, if the pressure array in reconstructable is an
-  /// alias of the pressure array argument, nothing happens. If they aren't
-  /// aliases values are copied between arrays.
-  virtual void pressure_from_reconstructable(EnzoEFltArrayMap &reconstructable,
-                                             EFlt3DArray &pressure,
-                                             int stale_depth) const = 0;
 
   /// Computes specific internal energy from primitive quantities (nominally
   /// after reconstruction)
