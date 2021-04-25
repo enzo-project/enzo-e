@@ -281,14 +281,19 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // fields and/or serve as scratch space.
 
     // map that holds arrays wrapping the Cello Fields holding each of the
-    // primitive quantities. Additionally, this also includes temporary arrays
-    // used to hold the specific form of the passive scalar
-    EnzoEFltArrayMap primitive_map; // this will be overwritten
+    // integration quantities. Additionally, this also includes temporary
+    // arrays used to hold the specific form of the passive scalar
+    EnzoEFltArrayMap integration_map; // this will be overwritten
 
-    // map used for storing primitive values at the half time-step. This
-    // includes key,array pairs for each entry in primitive_map (there should
+    // map used for storing integration values at the half time-step. This
+    // includes key,array pairs for each entry in integration_map (there should
     // be no aliased fields shared between maps)
-    EnzoEFltArrayMap temp_primitive_map("temp_primitive");
+    EnzoEFltArrayMap temp_integration_map("temp_integration");
+
+    // Map of arrays used to temporarily store the cell-centered primitive
+    // quantities that are subsequently reconstructed. This includes arrays for
+    // storing the specific form of each of the passively advected scalars.
+    EnzoEFltArrayMap primitive_map("primitive");
 
     // map holding the arrays wrapping each fields corresponding to a passively
     // advected scalar. The scalar is in conserved form.
@@ -297,14 +302,6 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // holds left and right reconstructed primitives (scratch-space)
     EnzoEFltArrayMap priml_map("priml");
     EnzoEFltArrayMap primr_map("primr");
-
-    // Arrays used to store the pressure computed from the reconstructed left
-    // and right primitives
-    // Note: in the case of adiabatic fluids, pressure is a reconstructable
-    //       quantity and entries are included for it in priml_map and
-    //       primr_map. In that case, pressure_l and pressure_r are aliases of
-    //       those arrays.
-    EFlt3DArray pressure_l, pressure_r;
 
     // maps used to store fluxes (in the future, these will wrap FluxData
     // entries)
@@ -319,10 +316,9 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // CT is used, it won't have space to store changes in the magnetic fields.
     EnzoEFltArrayMap dUcons_map("dUcons");
 
-    setup_arrays_(block, primitive_map, temp_primitive_map,
+    setup_arrays_(block, integration_map, temp_integration_map, primitive_map,
                   conserved_passive_scalar_map, priml_map, primr_map,
-		  pressure_l, pressure_r, xflux_map, yflux_map, zflux_map,
-                  dUcons_map);
+		  xflux_map, yflux_map, zflux_map, dUcons_map);
 
     // Setup a pointer to an array that used to store interface velocity fields
     // from computed by the Riemann Solver (to use in the calculation of the
@@ -330,7 +326,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // use, don't actually allocate the array and set the pointer to NULL.
     EFlt3DArray interface_velocity_arr, *interface_velocity_arr_ptr;
     if (eos_->uses_dual_energy_formalism()){
-      EFlt3DArray density = primitive_map.at("density");
+      EFlt3DArray density = integration_map.at("density");
       interface_velocity_arr = EFlt3DArray(density.shape(0), density.shape(1),
                                            density.shape(2));
       interface_velocity_arr_ptr = &interface_velocity_arr;
@@ -355,24 +351,18 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // convert the passive scalars from conserved form to specific form
     // (outside the integrator, they are treated like conserved densities)
     compute_specific_passive_scalars_(*(lazy_passive_list_.get_list()),
-                                      primitive_map["density"],
+                                      integration_map["density"],
                                       conserved_passive_scalar_map,
-                                      primitive_map, stale_depth);
+                                      integration_map, stale_depth);
 
     // repeat the following loop twice (for half time-step and full time-step)
 
     for (int i=0;i<2;i++){
       double cur_dt = (i == 0) ? dt/2. : dt;
-      EnzoEFltArrayMap& cur_integrable_map =
-        (i == 0) ? primitive_map      : temp_primitive_map;
-      EnzoEFltArrayMap& out_integrable_map =
-        (i == 0) ? temp_primitive_map :      primitive_map;
-      // For the purposes of making the calculation procedure slightly more
-      // more explicit, we distinguish between cur_integrable_group and
-      // cur_reconstructable_group. Due to the high level of overlap between
-      // these, they are simply aliases of the same underlying Grouping that
-      // holds groups for both of them
-      EnzoEFltArrayMap& cur_reconstructable_map = cur_integrable_map;
+      EnzoEFltArrayMap& cur_integration_map =
+        (i == 0) ? integration_map      : temp_integration_map;
+      EnzoEFltArrayMap& out_integration_map =
+        (i == 0) ? temp_integration_map :      integration_map;
 
       EnzoReconstructor *reconstructor;
 
@@ -386,9 +376,9 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
         // held by conserved_passive_scalar_map.
         // Need to convert them to specific form
         compute_specific_passive_scalars_(*(lazy_passive_list_.get_list()),
-                                          cur_integrable_map["density"],
+                                          cur_integration_map["density"],
                                           conserved_passive_scalar_map,
-                                          cur_integrable_map, stale_depth);
+                                          cur_integration_map, stale_depth);
       }
 
       // set all elements of the arrays in dUcons_map to 0 (throughout the rest
@@ -397,39 +387,32 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       integrable_updater_->clear_dUcons_map(dUcons_map, 0.,
                                             *(lazy_passive_list_.get_list()));
 
-      // Compute the reconstructable quantities from the integrable quantites
-      // Although cur_integrable_map holds the passive scalars in integrable
+      // Compute the primitive quantities from the integration quantites
+      // Although cur_integration_map holds the passive scalars in integrable
       // form, the conserved form of the values is required in case Grackle is
       // being used.
       //
-      // Note: cur_integrable_map and cur_reconstructable_map are aliases of
-      // the same map since there is such a large degree of overlap between
-      // reconstructable and integrable quantities
-      //
-      // For a barotropic gas, the following nominally does nothing
-      // For a non-barotropic gas, the following nominally computes pressure
-      eos_->reconstructable_from_integrable(cur_integrable_map,
-                                            cur_reconstructable_map,
-                                            conserved_passive_scalar_map,
-                                            stale_depth,
-                                            *(lazy_passive_list_.get_list()));
+      // For a barotropic gas, the following nominally does nothing beyond
+      // copying all of the fields. For a non-barotropic gas, the following
+      // nominally also computes pressure
+      eos_->primitive_from_integration(cur_integration_map, primitive_map,
+                                       conserved_passive_scalar_map,
+                                       stale_depth,
+                                       *(lazy_passive_list_.get_list()));
 
       // Compute flux along each dimension
-      compute_flux_(0, cur_dt, cell_widths[0], cur_reconstructable_map,
-                    priml_map, primr_map, pressure_l, pressure_r,
-                    xflux_map, dUcons_map, interface_velocity_arr_ptr,
-                    *reconstructor, bfield_method_, stale_depth,
-                    *(lazy_passive_list_.get_list()));
-      compute_flux_(1, cur_dt, cell_widths[1], cur_reconstructable_map,
-                    priml_map, primr_map, pressure_l, pressure_r,
-                    yflux_map, dUcons_map, interface_velocity_arr_ptr,
-                    *reconstructor, bfield_method_, stale_depth,
-                    *(lazy_passive_list_.get_list()));
-      compute_flux_(2, cur_dt, cell_widths[2], cur_reconstructable_map,
-                    priml_map, primr_map, pressure_l, pressure_r,
-                    zflux_map, dUcons_map, interface_velocity_arr_ptr,
-                    *reconstructor, bfield_method_, stale_depth,
-                    *(lazy_passive_list_.get_list()));
+      compute_flux_(0, cur_dt, cell_widths[0], primitive_map,
+                    priml_map, primr_map, xflux_map, dUcons_map,
+                    interface_velocity_arr_ptr, *reconstructor, bfield_method_,
+                    stale_depth, *(lazy_passive_list_.get_list()));
+      compute_flux_(1, cur_dt, cell_widths[1], primitive_map,
+                    priml_map, primr_map, yflux_map, dUcons_map,
+                    interface_velocity_arr_ptr, *reconstructor, bfield_method_,
+                    stale_depth, *(lazy_passive_list_.get_list()));
+      compute_flux_(2, cur_dt, cell_widths[2], primitive_map,
+                    priml_map, primr_map, zflux_map, dUcons_map,
+                    interface_velocity_arr_ptr, *reconstructor, bfield_method_,
+                    stale_depth, *(lazy_passive_list_.get_list()));
 
       // increment the stale_depth
       stale_depth+=reconstructor->immediate_staling_rate();
@@ -438,10 +421,11 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 
       // Update Bfields
       if (bfield_method_ != nullptr) {
-        bfield_method_->update_all_bfield_components(cur_integrable_map,
+        bfield_method_->update_all_bfield_components(cur_integration_map,
                                                      xflux_map, yflux_map,
                                                      zflux_map,
-                                                     out_integrable_map, cur_dt,
+                                                     out_integration_map,
+                                                     cur_dt,
                                                      stale_depth);
         bfield_method_->increment_partial_timestep();
       }
@@ -455,7 +439,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       //     specific form. Instead they are saved in conserved_passive_scalars
       //     in conserved form.
       integrable_updater_->update_quantities
-        (primitive_map, dUcons_map, out_integrable_map,
+        (integration_map, dUcons_map, out_integration_map,
          conserved_passive_scalar_map, eos_, stale_depth,
          *(lazy_passive_list_.get_list()));
 
@@ -521,25 +505,16 @@ void EnzoMethodMHDVlct::compute_specific_passive_scalars_
 
 void EnzoMethodMHDVlct::compute_flux_
 (int dim, double cur_dt, enzo_float cell_width,
- EnzoEFltArrayMap &reconstructable_map,
+ EnzoEFltArrayMap &primitive_map,
  EnzoEFltArrayMap &priml_map, EnzoEFltArrayMap &primr_map,
- EFlt3DArray &pressure_l, EFlt3DArray &pressure_r,
  EnzoEFltArrayMap &flux_map, EnzoEFltArrayMap &dUcons_map,
  EFlt3DArray *interface_velocity_arr_ptr, EnzoReconstructor &reconstructor,
  EnzoBfieldMethod *bfield_method, int stale_depth,
  const str_vec_t& passive_list) const noexcept
 {
 
-  // purely for the purposes of making the caluclation more explicit, we define
-  // the following aliases for priml_map and primr_map
-  EnzoEFltArrayMap &reconstructable_l = priml_map;
-  EnzoEFltArrayMap &reconstructable_r = primr_map;
-  EnzoEFltArrayMap &integrable_l = priml_map;
-  EnzoEFltArrayMap &integrable_r = primr_map;
-
   // First, reconstruct the left and right interface values
-  reconstructor.reconstruct_interface(reconstructable_map,
-                                      reconstructable_l, reconstructable_r,
+  reconstructor.reconstruct_interface(primitive_map, priml_map, primr_map,
 				      dim, eos_, stale_depth, passive_list);
 
   // We temporarily increment the stale_depth for the rest of this calculation
@@ -549,27 +524,14 @@ void EnzoMethodMHDVlct::compute_flux_
 
   // Need to set the component of reconstructed B-field along dim, equal to
   // the corresponding longitudinal component of the B-field tracked at cell
-  // interfaces (should potentially be handled internally by reconstructor)
+  // interfaces
   if (bfield_method != nullptr) {
-    bfield_method->correct_reconstructed_bfield(reconstructable_l,
-                                                reconstructable_r,
+    bfield_method->correct_reconstructed_bfield(priml_map, primr_map,
                                                 dim, cur_stale_depth);
   }
 
-  // Calculate integrable values on left and right faces:
-  eos_->integrable_from_reconstructable(reconstructable_l, integrable_l,
-					cur_stale_depth, passive_list);
-  eos_->integrable_from_reconstructable(reconstructable_r, integrable_r,
-					cur_stale_depth, passive_list);
-
-  // Calculate pressure on left and right faces:
-  eos_->pressure_from_reconstructable(reconstructable_l, pressure_l,
-                                      cur_stale_depth);
-  eos_->pressure_from_reconstructable(reconstructable_r, pressure_r,
-                                      cur_stale_depth);
-
   // Next, compute the fluxes
-  riemann_solver_->solve(integrable_l, integrable_r, flux_map, dim, eos_,
+  riemann_solver_->solve(priml_map, primr_map, flux_map, dim, eos_,
                          cur_stale_depth, passive_list,
                          interface_velocity_arr_ptr);
 
@@ -582,7 +544,7 @@ void EnzoMethodMHDVlct::compute_flux_
   // if using dual energy formalism, compute the dual energy formalism
   if (eos_->uses_dual_energy_formalism()){
     EnzoSourceInternalEnergy eint_src;
-    eint_src.calculate_source(dim, cur_dt, cell_width, reconstructable_map,
+    eint_src.calculate_source(dim, cur_dt, cell_width, primitive_map,
                               dUcons_map, *interface_velocity_arr_ptr, eos_,
                               cur_stale_depth);
   }
@@ -617,11 +579,10 @@ static void add_temporary_arrays_to_map_
 //----------------------------------------------------------------------
 
 void EnzoMethodMHDVlct::setup_arrays_
-(Block *block, EnzoEFltArrayMap &primitive_map,
- EnzoEFltArrayMap &temp_primitive_map,
+(Block *block, EnzoEFltArrayMap &integration_map,
+ EnzoEFltArrayMap &temp_integration_map, EnzoEFltArrayMap &primitive_map,
  EnzoEFltArrayMap &conserved_passive_scalar_map,
  EnzoEFltArrayMap &priml_map, EnzoEFltArrayMap &primr_map,
- EFlt3DArray &pressure_l, EFlt3DArray &pressure_r,
  EnzoEFltArrayMap &xflux_map, EnzoEFltArrayMap &yflux_map,
  EnzoEFltArrayMap &zflux_map, EnzoEFltArrayMap &dUcons_map) noexcept
 {
@@ -630,7 +591,7 @@ void EnzoMethodMHDVlct::setup_arrays_
   // separately deallocate it!
 
   // To assist with setting up arrays, let's create a list of ALL primitive
-  // keys (including passive scalars) and all integrable keys. These are the
+  // keys (including passive scalars) and all integration keys. These are the
   // same thing except the latter excludes quantities (like pressure) that we
   // don't compute pressure for.
   std::vector<std::string> combined_key_list = unique_combination_
@@ -639,16 +600,21 @@ void EnzoMethodMHDVlct::setup_arrays_
   // First, setup conserved_passive_scalar_map
   conserved_passive_scalar_map = conserved_passive_scalar_map_(block);
 
-  // Next, setup nonpassive components of primitive_map
-  primitive_map = nonpassive_primitive_map_(block);
-  std::array<int,3> shape = {primitive_map.at("density").shape(0),
-                             primitive_map.at("density").shape(1),
-                             primitive_map.at("density").shape(2)};
-  add_temporary_arrays_to_map_(primitive_map, shape, nullptr,
+  // Next, setup nonpassive components of integration_map
+  integration_map = nonpassive_primitive_map_(block);
+  std::array<int,3> shape = {integration_map.at("density").shape(0),
+                             integration_map.at("density").shape(1),
+                             integration_map.at("density").shape(2)};
+  add_temporary_arrays_to_map_(integration_map, shape, nullptr,
                                (lazy_passive_list_.get_list()).get());
 
-  // Then, setup temp_primitive_map
-  add_temporary_arrays_to_map_(temp_primitive_map, shape, &combined_key_list,
+  // Then, setup temp_integration_map
+  add_temporary_arrays_to_map_(temp_integration_map, shape, &combined_key_list,
+                               (lazy_passive_list_.get_list()).get());
+
+  // Now, setup primitive_map
+  add_temporary_arrays_to_map_(primitive_map, shape,
+                               &reconstructable_field_list_,
                                (lazy_passive_list_.get_list()).get());
 
   // Prepare arrays to hold fluxes (it should include groups for all actively
@@ -679,18 +645,6 @@ void EnzoMethodMHDVlct::setup_arrays_
                                (lazy_passive_list_.get_list()).get());
   add_temporary_arrays_to_map_(primr_map, shape, &combined_key_list,
                                (lazy_passive_list_.get_list()).get());
-
-  // If there are pressure entries in priml_map and primr_map (depends on the
-  // EOS), set pressure_l and pressure_name_r equal to
-  // those field names. Otherwise, reserve/allocate left/right pressure fields
-  if (priml_map.contains("pressure")) {
-    pressure_l = priml_map.at("pressure");
-    pressure_r = primr_map.at("pressure");
-  } else {
-    pressure_l = EFlt3DArray(shape[0], shape[1], shape[2]);
-    pressure_r = EFlt3DArray(shape[0], shape[1], shape[2]);
-  }
-
 }
 
 //----------------------------------------------------------------------
@@ -702,13 +656,13 @@ double EnzoMethodMHDVlct::timestep ( Block * block ) const throw()
 
   // Construct a map holding the field data for each of the (non-passive)
   // primitive quantities.
-  EnzoEFltArrayMap primitive_map = nonpassive_primitive_map_(block);
+  EnzoEFltArrayMap integration_map = nonpassive_primitive_map_(block);
 
   if (eos_->uses_dual_energy_formalism()){
     // synchronize eint and etot.
     // This is only strictly necessary after problem initialization and when
     // there is an inflow boundary condition
-    eos_->apply_floor_to_energy_and_sync(primitive_map, 0);
+    eos_->apply_floor_to_energy_and_sync(integration_map, 0);
   }
 
   // Compute thermal pressure (this presently requires that "pressure" is a
@@ -717,22 +671,22 @@ double EnzoMethodMHDVlct::timestep ( Block * block ) const throw()
   EFlt3DArray pressure = array_factory.from_name("pressure");
   EnzoEFltArrayMap conserved_passive_scalar_map =
       conserved_passive_scalar_map_(block);
-  eos_->pressure_from_integrable(primitive_map, pressure,
-				 conserved_passive_scalar_map, 0);
+  eos_->pressure_from_integration(integration_map, pressure,
+				  conserved_passive_scalar_map, 0);
 
   // Now load other necessary quantities
   enzo_float gamma = eos_->get_gamma();
-  EFlt3DArray density = primitive_map.at("density");
-  EFlt3DArray velocity_x = primitive_map.at("velocity_x");
-  EFlt3DArray velocity_y = primitive_map.at("velocity_y");
-  EFlt3DArray velocity_z = primitive_map.at("velocity_z");
+  EFlt3DArray density = integration_map.at("density");
+  EFlt3DArray velocity_x = integration_map.at("velocity_x");
+  EFlt3DArray velocity_y = integration_map.at("velocity_y");
+  EFlt3DArray velocity_z = integration_map.at("velocity_z");
 
   const bool mhd = (mhd_choice_ != bfield_choice::no_bfield);
   EFlt3DArray bfieldc_x, bfieldc_y, bfieldc_z;
   if (mhd) {
-    bfieldc_x = primitive_map.at("bfield_x");
-    bfieldc_y = primitive_map.at("bfield_y");
-    bfieldc_z = primitive_map.at("bfield_z");
+    bfieldc_x = integration_map.at("bfield_x");
+    bfieldc_y = integration_map.at("bfield_y");
+    bfieldc_z = integration_map.at("bfield_z");
   }
 
   // widths of cells

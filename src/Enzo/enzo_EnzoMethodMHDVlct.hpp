@@ -215,20 +215,16 @@ protected: // methods
   ///     1, and 2 correspond to the x, y, and z directions, respectively.
   /// @param[in]     dt The current timestep.
   /// @param[in]     cell_width The cell width along dimension `dim`.
-  /// @param[in]     reconstructable_map Map of arrays holding cell-centered
+  /// @param[in]     primitive_map Map of arrays holding cell-centered
   ///     primitive quantities that are to be reconstructed (This includes
   ///     specific passive scalars).
   /// @param[in]     priml_map,primr_map Maps of arrays used to temporarily
-  ///     hold the left/right reconstructed face-centered reconstructable and
-  ///     integrable quantities. These arrays should have the shape of a
-  ///     cell-centered field, but are treated as though they have the shape of
-  ///     a that is face-centered along `dim` (If a cell-centered field holds
-  ///     `N` elements along `dim`, then such a face-centered field should only
-  ///     have `N-1` elements along `dim`).
-  /// @param[in]     pressure_l,pressure_r Arrays used to temporarily store the
-  ///     left/right pressure values. The shape of these arrays should be the
-  ///     same as in priml_map,primr_map. Note, pressure_l (pressure_r) is
-  ///     allowed to be a shallow copy of an array in priml_map (primr_map).
+  ///     hold the left/right reconstructed face-centered primitives. These
+  ///     arrays should have the shape of a cell-centered field, but are
+  ///     treated as though they have the shape of a that is face-centered
+  ///     along `dim` (If a cell-centered field holds `N` elements along `dim`,
+  ///     then such a face-centered field should only have `N-1` elements along
+  ///     `dim`).
   /// @param[in]     flux_map Holds arrays where the calculated fluxes
   ///     will be stored. The arrays should be face-centered along `dim`.
   ///     If a cell-centered field holds `N` elements along `dim`, then this
@@ -252,17 +248,10 @@ protected: // methods
   /// @param[in]     stale_depth indicates the current stale depth (before
   ///     performing reconstruction)
   /// @param[in]     passive_list A list of keys for passively advected scalars.
-  ///
-  /// @par Note
-  /// It might be worth breaking this into 2 functions (where one of them
-  /// handles the reconstruction of the fields and calculation of the flux and
-  /// the other additionally handles the accumulation of values in flux_map
-  /// and calculates any relevant source terms.
   void compute_flux_
   (int dim, double cur_dt, enzo_float cell_width,
-   EnzoEFltArrayMap &reconstructable_map,
+   EnzoEFltArrayMap &primitive_map,
    EnzoEFltArrayMap &priml_map, EnzoEFltArrayMap &primr_map,
-   EFlt3DArray &pressure_l, EFlt3DArray &pressure_r,
    EnzoEFltArrayMap &flux_map, EnzoEFltArrayMap &dUcons_map,
    EFlt3DArray *interface_velocity_arr_ptr, EnzoReconstructor &reconstructor,
    EnzoBfieldMethod *bfield_method, int stale_depth,
@@ -272,24 +261,23 @@ protected: // methods
   /// wrap Cello fields AND temporary arrays used as scratch space.
   ///
   /// @param[in]  block holds data to be processed
-  /// @param[out] primitive_map Map of arrays wrapping the Cello Fields holding
-  ///     each of the integrable and reconstructable quantity. This also holds
-  ///     temporary arrays where the specific form of the passively advected
-  ///     scalars will be stored.
-  /// @param[out] temp_primitive_map Map for storing the integrable and
-  ///     reconstructable quantities at the half timestep. This should have all
+  /// @param[out] integration_map Map of arrays wrapping the Cello Fields
+  ///     holding each of the integration quantities. This also holds temporary
+  ///     arrays where the specific form of the passively advected scalars will
+  ///     be stored.
+  /// @param[out] temp_integration_map Map for storing the integration
+  ///     quantities at the half timestep. This should have all
   ///     the same entries as primitive_map. However, all arrays in this map
   ///     are temporary.
+  /// @param[out] primitive_map Map of arrays used to temporarily store the
+  ///     cell-centered primitive quantities that are subsequently
+  ///     reconstructed. This includes arrays for storing the specific form of
+  ///     each of the passively advected scalars.
   /// @param[out] priml_map,primr_map Maps of arrays used to temporarily
-  ///     hold the left/right reconstructed face-centered reconstructable and
-  ///     integrable quantities. These arrays should have the shape of a
-  ///     cell-centered field so that they can be reused for multiple
-  ///     dimensions. These have the same keys as primitive_map.
-  /// @param[out] pressure_l,pressure_r Arrays used to temporarily store the
-  ///     left/right pressure values. The shape of these arrays should be the
-  ///     same as in priml_map,primr_map. Note, for adiabatic equations of
-  ///     state pressure_l (pressure_r) is a shallow copy of an array in
-  ///     priml_map (primr_map).
+  ///     hold the left/right reconstructed face-centered primitive quantities.
+  ///     These arrays should have the shape of a cell-centered field so that
+  ///     they can be reused for multiple dimensions. These have the same keys
+  ///     as primitive_map.
   /// @param[out] xflux_map, yflux_map, zflux_map Maps of temporary arrays that
   ///     are used to store the x, y, and z fluxes. A given map of arrays will
   ///     hold values along at the face-centers along the direction of the
@@ -301,11 +289,10 @@ protected: // methods
   ///     space to store changes in the magnetic fields (that update is handled
   ///     separately).
   void setup_arrays_
-  (Block *block, EnzoEFltArrayMap &primitive_map,
-   EnzoEFltArrayMap &temp_primitive_map,
+  (Block *block, EnzoEFltArrayMap &integration_map,
+   EnzoEFltArrayMap &temp_integration_map, EnzoEFltArrayMap &primitive_map,
    EnzoEFltArrayMap &conserved_passive_scalar_map,
    EnzoEFltArrayMap &priml_map, EnzoEFltArrayMap &primr_map,
-   EFlt3DArray &pressure_l, EFlt3DArray &pressure_r,
    EnzoEFltArrayMap &xflux_map, EnzoEFltArrayMap &yflux_map,
    EnzoEFltArrayMap &zflux_map, EnzoEFltArrayMap &dUcons_map) noexcept;
 
