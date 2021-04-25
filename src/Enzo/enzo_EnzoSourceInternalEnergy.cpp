@@ -42,14 +42,11 @@ void EnzoSourceInternalEnergy::calculate_source
   CSlice full_ax(nullptr, nullptr);
 
   // load cell-centered quantities.
-  // define: rho_center(k,j,i)         ->  rho(k,j,i+1)
-  //         eint_center(k,j,i)        ->  eint(k,j,i+1)
+  // define: pressure_center(k,j,i)    ->  pressure(k,j,i+1)
   //         deint_dens_center(k,j,i)  ->  deint_dens(k,j,i+1)
-  EFlt3DArray rho, eint, rho_center, eint_center;
-  rho  = prim_map.get("density", stale_depth);
-  eint = prim_map.get("internal_energy", stale_depth);
-  rho_center  = coord.get_subarray(rho, full_ax, full_ax, CSlice(1, -1));
-  eint_center = coord.get_subarray(eint, full_ax, full_ax, CSlice(1, -1));
+  EFlt3DArray pressure = prim_map.get("pressure", stale_depth);
+  EFlt3DArray pressure_center = coord.get_subarray(pressure, full_ax, full_ax,
+                                                   CSlice(1, -1));
 
   EFlt3DArray deint_dens = dUcons_map.get("internal_energy", stale_depth);
   EFlt3DArray deint_dens_center = coord.get_subarray(deint_dens, full_ax,
@@ -71,12 +68,13 @@ void EnzoSourceInternalEnergy::calculate_source
 
   enzo_float gm1 = eos->get_gamma() - 1.;
 
-  for (int iz=0; iz<eint_center.shape(0); iz++) {
-    for (int iy=0; iy<eint_center.shape(1); iy++) {
-      for (int ix=0; ix<eint_center.shape(2); ix++) {
-	enzo_float p = gm1 * eint_center(iz,iy,ix) * rho_center(iz,iy,ix);
+  for (int iz=0; iz<pressure_center.shape(0); iz++) {
+    for (int iy=0; iy<pressure_center.shape(1); iy++) {
+      for (int ix=0; ix<pressure_center.shape(2); ix++) {
+	enzo_float p = pressure_center(iz,iy,ix);
 	// the following just applies std::max (in a macro-enabled debug mode
 	// it will raise errors when the floor is actually needed)
+        // It's probably redudant to apply the floor here
 	p = EnzoEquationOfState::apply_floor(p, p_floor);
 	deint_dens_center(iz,iy,ix) -= dtdx*p*(vr(iz,iy,ix) - vl(iz,iy,ix));
       }
