@@ -222,8 +222,8 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
             double x0 = 1.0 - (tx - floor(tx));
             double x1 = 1.0 - x0;
 
-            de_p[ix0] += pmass[ip*dm]/inv_vol*x0;
-            de_p[ix1] += pmass[ip*dm]/inv_vol*x1;
+            de_p[ix0] += pmass[ip*dm]*inv_vol*x0;
+            de_p[ix1] += pmass[ip*dm]*inv_vol*x1;
 
           }
 
@@ -267,31 +267,31 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
             double x1 = 1.0 - x0;
             double y1 = 1.0 - y0;
 
-            if ( pmass[ip*dm]/inv_vol < 0.0) {
-              CkPrintf ("%s:%d ERROR: pmass[%d]/inv_vol = %f\n",
-			__FILE__,__LINE__,ip*dm,pmass[ip*dm]/inv_vol);
+            if ( pmass[ip*dm]*inv_vol < 0.0) {
+              CkPrintf ("%s:%d ERROR: pmass[%d]*inv_vol = %f\n",
+			__FILE__,__LINE__,ip*dm,pmass[ip*dm]*inv_vol);
             }
 
-            de_p[ix0+mx*iy0] += pmass[ip*dm]/inv_vol*x0*y0;
-            de_p[ix1+mx*iy0] += pmass[ip*dm]/inv_vol*x1*y0;
-            de_p[ix0+mx*iy1] += pmass[ip*dm]/inv_vol*x0*y1;
-            de_p[ix1+mx*iy1] += pmass[ip*dm]/inv_vol*x1*y1;
+            de_p[ix0+mx*iy0] += pmass[ip*dm]*inv_vol*x0*y0;
+            de_p[ix1+mx*iy0] += pmass[ip*dm]*inv_vol*x1*y0;
+            de_p[ix0+mx*iy1] += pmass[ip*dm]*inv_vol*x0*y1;
+            de_p[ix1+mx*iy1] += pmass[ip*dm]*inv_vol*x1*y1;
 
             if ( de_p[ix0+mx*iy0] < 0.0) {
               CkPrintf ("%s:%d ERROR: de_p %d %d = %f\n",
-                        __FILE__,__LINE__,ix0,iy0,pmass[ip*dm]/inv_vol);
+                        __FILE__,__LINE__,ix0,iy0,pmass[ip*dm]*inv_vol);
             }
             if ( de_p[ix1+mx*iy0] < 0.0) {
               CkPrintf ("%s:%d ERROR: de_p %d %d = %f\n",
-                        __FILE__,__LINE__,ix1,iy0,pmass[ip*dm]/inv_vol);
+                        __FILE__,__LINE__,ix1,iy0,pmass[ip*dm]*inv_vol);
             }
             if ( de_p[ix0+mx*iy1] < 0.0) {
               CkPrintf ("%s:%d ERROR: de_p %d %d = %f\n",
-                        __FILE__,__LINE__,ix0,iy1,pmass[ip*dm]/inv_vol);
+                        __FILE__,__LINE__,ix0,iy1,pmass[ip*dm]*inv_vol);
             }
             if ( de_p[ix1+mx*iy1] < 0.0) {
               CkPrintf ("%s:%d ERROR: de_p %d %d = %f\n",
-                        __FILE__,__LINE__,ix1,iy1,pmass[ip*dm]/inv_vol);
+                        __FILE__,__LINE__,ix1,iy1,pmass[ip*dm]*inv_vol);
             }
           }
 
@@ -350,14 +350,14 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
             double y1 = 1.0 - y0;
             double z1 = 1.0 - z0;
 
-            de_p[ix0+mx*(iy0+my*iz0)] += pmass[ip*dm]/inv_vol*x0*y0*z0;
-            de_p[ix1+mx*(iy0+my*iz0)] += pmass[ip*dm]/inv_vol*x1*y0*z0;
-            de_p[ix0+mx*(iy1+my*iz0)] += pmass[ip*dm]/inv_vol*x0*y1*z0;
-            de_p[ix1+mx*(iy1+my*iz0)] += pmass[ip*dm]/inv_vol*x1*y1*z0;
-            de_p[ix0+mx*(iy0+my*iz1)] += pmass[ip*dm]/inv_vol*x0*y0*z1;
-            de_p[ix1+mx*(iy0+my*iz1)] += pmass[ip*dm]/inv_vol*x1*y0*z1;
-            de_p[ix0+mx*(iy1+my*iz1)] += pmass[ip*dm]/inv_vol*x0*y1*z1;
-            de_p[ix1+mx*(iy1+my*iz1)] += pmass[ip*dm]/inv_vol*x1*y1*z1;
+            de_p[ix0+mx*(iy0+my*iz0)] += pmass[ip*dm]*inv_vol*x0*y0*z0;
+            de_p[ix1+mx*(iy0+my*iz0)] += pmass[ip*dm]*inv_vol*x1*y0*z0;
+            de_p[ix0+mx*(iy1+my*iz0)] += pmass[ip*dm]*inv_vol*x0*y1*z0;
+            de_p[ix1+mx*(iy1+my*iz0)] += pmass[ip*dm]*inv_vol*x1*y1*z0;
+            de_p[ix0+mx*(iy0+my*iz1)] += pmass[ip*dm]*inv_vol*x0*y0*z1;
+            de_p[ix1+mx*(iy0+my*iz1)] += pmass[ip*dm]*inv_vol*x1*y0*z1;
+            de_p[ix0+mx*(iy1+my*iz1)] += pmass[ip*dm]*inv_vol*x0*y1*z1;
+            de_p[ix1+mx*(iy1+my*iz1)] += pmass[ip*dm]*inv_vol*x1*y1*z1;
 
           } // Loop over particle in batch
         } // if rank == 3
