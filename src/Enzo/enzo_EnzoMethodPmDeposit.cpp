@@ -2,7 +2,7 @@
 
 /// @file     enzo_EnzoMethodPmDeposit.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @author   Stefan Arridge (stefan.arridge@gmail.com)
+/// Edited:   Stefan Arridge (stefan.arridge@gmail.com)
 /// @date     Fri Apr  2 17:05:23 PDT 2010
 /// @brief    Implements the EnzoMethodPmDeposit class
 ///
@@ -117,19 +117,11 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 					  block->time() + alpha_*block->dt());
     }
 
-    // Stefan: Not sure if cell widths need to be converted to a physical
-    // length
-    //if (rank >= 1) hx *= cosmo_a;
-    //if (rank >= 2) hy *= cosmo_a;
-    //if (rank >= 3) hz *= cosmo_a;
-
     double inv_vol = 1.0;
     if (rank >= 1) inv_vol /= hx;
     if (rank >= 2) inv_vol /= hy;
     if (rank >= 3) inv_vol /= hz;
 
-    // Stefan: Unsure of the meaning of this line. How is cosmological time
-    // defined in Enzo?
     const double dt = alpha_ * block->dt() / cosmo_a;
 
     // Get the number of particle types in the 'has_mass' group
@@ -217,7 +209,8 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
           for (int ip=0; ip<np; ip++) {
 
 	    // Stefan: Unsure about this line, doesn't match what's in the
-	    // Enzo paper
+	    // Enzo paper, which says that particles are drifted by half a timestep
+	    // before being deposited to the grid
             double x = xa[ip*dp] + vxa[ip*dv]*dt;
 
             double tx = nx*(x - xm) / (xp - xm) - 0.5;
