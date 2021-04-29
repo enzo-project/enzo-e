@@ -162,13 +162,26 @@ void Problem::initialize_initial(Config * config,
 
     std::string type = config->initial_list[index];
 
-    Initial * initial = create_initial_
-      (type,index,config,parameters);
+    Initial * initial = nullptr;
+
+    if (type == "hdf5") {
+
+      const int cycle = config->initial_cycle;
+      double time     = config->initial_time;
+      
+      initial = new InitialHdf5
+        (cycle,time,config,config->mesh_max_initial_level);
+      
+    } else {
+      
+      initial = create_initial_ (type,index,config,parameters);
+
+    }
 
     ASSERT1("Problem::initialize_initial",
 	    "Initial type %s not recognized",
 	    config->initial_list[index].c_str(),
-	    initial != nullptr);
+	    (initial != nullptr) );
 
     initial_list_.push_back( initial );
   }
@@ -877,15 +890,32 @@ Method * Problem::create_method_
        config->method_flux_correct_enable[index_method],
        config->method_flux_correct_min_digits[index_method]);
 
+  } else if (name == "output") {
+
+    method = new MethodOutput
+      (config->method_field_list[index_method],
+       config->method_particle_list[index_method],
+       config->method_ghost_depth[index_method],
+       config->method_min_face_rank[index_method],
+       config->method_all_fields[index_method],
+       config->method_all_particles[index_method],
+       config->method_output_blocking[0][index_method],
+       config->method_output_blocking[1][index_method],
+       config->method_output_blocking[2][index_method]);
+    CkPrintf ("MethodOutput (%d  %d  %d\n",
+              config->method_output_blocking[0][index_method],
+              config->method_output_blocking[1][index_method],
+              config->method_output_blocking[2][index_method]);
+
   } else if (name == "refresh") {
 
     method = new MethodRefresh
-      (config->method_refresh_field_list[index_method],
-       config->method_refresh_particle_list[index_method],
-       config->method_refresh_ghost_depth[index_method],
-       config->method_refresh_min_face_rank[index_method],
-       config->method_refresh_all_fields[index_method],
-       config->method_refresh_all_particles[index_method]);
+      (config->method_field_list[index_method],
+       config->method_particle_list[index_method],
+       config->method_ghost_depth[index_method],
+       config->method_min_face_rank[index_method],
+       config->method_all_fields[index_method],
+       config->method_all_particles[index_method]);
 
   } else if (name == "debug") {
 
@@ -997,8 +1027,7 @@ Output * Problem::create_output_
 
   } else if (name == "data") {
 
-    output = new OutputData (index,factory,
-			     config);
+    output = new OutputData (index,factory,config);
 
   } else if (name == "checkpoint") {
 

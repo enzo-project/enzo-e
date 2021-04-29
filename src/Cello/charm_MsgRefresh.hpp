@@ -67,7 +67,7 @@ public: // interface
   }
 #endif    
 
-  void print(std::string message);
+  void print(const char * message);
   
 public: // static methods
 

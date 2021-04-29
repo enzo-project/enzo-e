@@ -60,9 +60,6 @@ EnzoSolverDd::EnzoSolverDd
       gx_(0),gy_(0),gz_(0),
       coarse_level_(coarse_level)
 {
-  // Initialize temporary fields
-  Block * block = NULL;
-
   ixc_ = cello::field_descr()->insert_temporary();
 
   /// Initialize default Refresh

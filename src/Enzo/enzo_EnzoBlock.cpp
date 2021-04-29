@@ -169,10 +169,6 @@ EnzoBlock::EnzoBlock
     dt(dt_),
     redshift(0.0)
 {
-#ifdef DEBUG_ENZO_BLOCK
-  CkPrintf ("%d %p BEGIN TRACE_BLOCK EnzoBlock(msg)\n",CkMyPe(),(void *)this);
-  print();
-#endif
   initialize_enzo_();
   initialize();
 #ifdef DEBUG_ENZO_BLOCK

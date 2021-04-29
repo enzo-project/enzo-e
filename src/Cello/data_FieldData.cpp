@@ -17,15 +17,15 @@ FieldData::FieldData
  int nx, int ny, int nz 
  ) throw()
   : array_permanent_(),
-    array_temporary_(),
     temporary_size_(),
+    array_temporary_(),
     offsets_(),
     ghosts_allocated_(true),
     history_id_(),
     history_time_(),
     units_scaling_(),
-    array_coarse_(),
-    coarse_dimensions_()
+    coarse_dimensions_(),
+    array_coarse_()
 {
   if (nx != 0) {
     size_[0] = nx;
@@ -534,8 +534,7 @@ void FieldData::deallocate_temporary (const FieldDescr * field_descr,
 
 void FieldData::deallocate_coarse () throw()
 {
-  for (int index_field=0; index_field<array_coarse_.size(); index_field++) {
-
+  for (size_t index_field=0; index_field<array_coarse_.size(); index_field++) {
     deallocate_coarse(index_field);
   }
 
@@ -545,7 +544,7 @@ void FieldData::deallocate_coarse () throw()
 
 void FieldData::deallocate_coarse (int index_field) throw()
 {
-  if (index_field < array_coarse_.size()) {
+  if (index_field < (int)array_coarse_.size()) {
     delete [] array_coarse_[index_field];
     array_coarse_[index_field] = nullptr;
     coarse_dimensions_ [index_field] = 0;

@@ -14,12 +14,12 @@
 MethodFluxCorrect::MethodFluxCorrect
 (std::string group, bool enable, double min_digits) throw() 
   : Method (),
+    ir_pre_(-1),
     group_(group),
     enable_(enable),
     min_digits_(min_digits),
     field_sum_(),
-    field_sum_0_(),
-    ir_pre_(-1)
+    field_sum_0_()
 {
   // Set up post-refresh to refresh all conserved fields in group_
   cello::simulation()->refresh_set_name(ir_post_,name());

@@ -555,7 +555,7 @@ void Block::compute_derived(const std::vector< std::string>& field_list
     //   should contruct list of fields from full list
     //   rather than copying this loop twice...
     if (field_list.size() > 0){
-      for (auto i = 0; i < field_list.size(); i++){
+      for (size_t i = 0; i < field_list.size(); i++){
         std::string name = field_list[i];
         if (field.groups()->is_in(name,"derived")){
           Compute * compute = problem->create_compute(name,

@@ -19,6 +19,7 @@ module mesh {
   readonly int MsgCoarsen::counter[CONFIG_NODE_SIZE];
   readonly int MsgRefine::counter[CONFIG_NODE_SIZE];
   readonly int MsgRefresh::counter[CONFIG_NODE_SIZE];
+  readonly int MsgOutput::counter[CONFIG_NODE_SIZE];
   readonly int DataMsg::counter[CONFIG_NODE_SIZE];
   readonly int FieldFace::counter[CONFIG_NODE_SIZE];
   readonly int ParticleData::counter[CONFIG_NODE_SIZE];
@@ -29,22 +30,24 @@ module mesh {
 
   PUPable BoundaryPeriodic;
   PUPable BoundaryValue;
-  PUPable Config;
   PUPable ColormapRGB;
+  PUPable Config;
   PUPable Factory;
   PUPable Initial;
   PUPable InitialFile;
   PUPable InitialTrace;
   PUPable InitialValue;
+  PUPable InitialHdf5;
   PUPable InputData;
   PUPable ItIndexList;
   PUPable ItIndexRange;
-  PUPable MaskPng;
   PUPable MaskExpr;
+  PUPable MaskPng;
   PUPable MethodCloseFiles;
   PUPable MethodDebug;
   PUPable MethodFluxCorrect;
   PUPable MethodNull;
+  PUPable MethodOutput;
   PUPable MethodRefresh;
   PUPable MethodTrace;
   PUPable OutputCheckpoint;
@@ -73,8 +76,9 @@ module mesh {
   };
 
   message MsgCoarsen;
-  message MsgRefresh;
+  message MsgOutput;
   message MsgRefine;
+  message MsgRefresh;
 
   array[Index] Block {
 
@@ -117,6 +121,10 @@ module mesh {
 
     entry void p_method_flux_correct_refresh();
     entry void r_method_flux_correct_sum_fields(CkReductionMsg * msg);
+
+    entry void p_method_output_next(MsgOutput *);
+    entry void p_method_output_write(MsgOutput *);
+    entry void r_method_output_continue(CkReductionMsg * msg);
 
     entry void r_method_debug_sum_fields(CkReductionMsg * msg);
 

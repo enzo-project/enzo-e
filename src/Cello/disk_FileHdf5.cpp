@@ -201,8 +201,6 @@ void FileHdf5::data_open
   hsize_t dim[10] = {0};
   hsize_t maxdim[10] = {0};
 
-  int rank = H5Sget_simple_extent_dims(data_space_id_,dim,maxdim);
- 
   // set output extents
 
   get_extents_(data_space_id_,m1,m2,m3,m4);
@@ -1156,9 +1154,7 @@ hid_t FileHdf5::space_create_(int m1, int m2, int m3, int m4,
   hid_t space_id = H5Screate_simple (rank, dims, 0);
 
   if (need_hyper) {
-
-    hid_t retval = H5Sselect_hyperslab
-      (space_id,H5S_SELECT_SET,start,0,count,0);
+    H5Sselect_hyperslab (space_id,H5S_SELECT_SET,start,0,count,0);
   }
 
   // error check H5Screate_simple

@@ -14,7 +14,7 @@ class MethodRefresh : public Method
   /// @ingroup  MethodRefresh
   /// @brief    [\ref MethodRefresh] Declaration of MethodRefresh
   ///
-  /// Correct fluxes of conserved fields at AMR refinement level jumps
+  /// Method for refreshing data in ghost zones
 
 public: // interface
 

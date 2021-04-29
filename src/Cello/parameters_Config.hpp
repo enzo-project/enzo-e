@@ -60,6 +60,15 @@ public: // interface
     initial_list(),
     initial_cycle(0),
     initial_time(0.0),
+    initial_hdf5_field_files(),
+    initial_hdf5_field_datasets(),
+    initial_hdf5_field_names(),
+    initial_hdf5_field_coords(),
+    initial_hdf5_particle_files(),
+    initial_hdf5_particle_datasets(),
+    initial_hdf5_particle_coords(),
+    initial_hdf5_particle_types(),
+    initial_hdf5_particle_attributes(),
     initial_trace_name(""),
     initial_trace_field(""),
     initial_trace_mpp(0.0),
@@ -87,13 +96,14 @@ public: // interface
     method_flux_correct_group(),
     method_flux_correct_enable(),
     method_flux_correct_min_digits(),
-    method_refresh_field_list(),
-    method_refresh_particle_list(),
-    method_refresh_prolong(),
-    method_refresh_ghost_depth(),
-    method_refresh_min_face_rank(),
-    method_refresh_all_fields(),
-    method_refresh_all_particles(),
+    method_field_list(),
+    method_output_blocking(),
+    method_particle_list(),
+    method_prolong(),
+    method_ghost_depth(),
+    method_min_face_rank(),
+    method_all_fields(),
+    method_all_particles(),
     method_timestep(),
     method_trace_name(),
   // MethodNull
@@ -227,6 +237,15 @@ public: // interface
       initial_list(),
       initial_cycle(0),
       initial_time(0.0),
+      initial_hdf5_field_files(),
+      initial_hdf5_field_datasets(),
+      initial_hdf5_field_names(),
+      initial_hdf5_field_coords(),
+      initial_hdf5_particle_files(),
+      initial_hdf5_particle_datasets(),
+      initial_hdf5_particle_coords(),
+      initial_hdf5_particle_types(),
+      initial_hdf5_particle_attributes(),
       initial_trace_name(""),
       initial_trace_field(""),
       initial_trace_mpp(0.0),
@@ -254,13 +273,14 @@ public: // interface
       method_flux_correct_group(),
       method_flux_correct_enable(),
       method_flux_correct_min_digits(),
-      method_refresh_field_list(),
-      method_refresh_particle_list(),
-      method_refresh_prolong(),
-      method_refresh_ghost_depth(),
-      method_refresh_min_face_rank(),
-      method_refresh_all_fields(),
-      method_refresh_all_particles(),
+      method_field_list(),
+      method_output_blocking(),
+      method_particle_list(),
+      method_prolong(),
+      method_ghost_depth(),
+      method_min_face_rank(),
+      method_all_fields(),
+      method_all_particles(),
       method_timestep(),
       method_trace_name(),
       method_null_dt(0.0),
@@ -429,6 +449,17 @@ public: // attributes
   int                        initial_cycle;
   double                     initial_time;
 
+  std::vector < std::string > initial_hdf5_field_files;
+  std::vector < std::string > initial_hdf5_field_datasets;
+  std::vector < std::string > initial_hdf5_field_names;
+  std::vector < std::string > initial_hdf5_field_coords;
+
+  std::vector < std::string > initial_hdf5_particle_files;
+  std::vector < std::string > initial_hdf5_particle_datasets;
+  std::vector < std::string > initial_hdf5_particle_coords;
+  std::vector < std::string > initial_hdf5_particle_types;
+  std::vector < std::string > initial_hdf5_particle_attributes;
+
   std::string                initial_trace_name;
   std::string                initial_trace_field;
   double                     initial_trace_mpp;
@@ -468,13 +499,16 @@ public: // attributes
   std::vector<std::string>   method_flux_correct_group;
   std::vector<bool>          method_flux_correct_enable;
   std::vector<double>        method_flux_correct_min_digits;
-  std::vector< std::vector<int> > method_refresh_field_list;
-  std::vector< std::vector<int> > method_refresh_particle_list;
-  std::vector<std::string>   method_refresh_prolong;
-  std::vector<int>           method_refresh_ghost_depth;
-  std::vector<int>           method_refresh_min_face_rank;
-  std::vector<int>           method_refresh_all_fields;
-  std::vector<int>           method_refresh_all_particles;
+
+  std::vector< std::vector<int> > method_field_list;
+  std::vector< int >         method_output_blocking[3];
+  std::vector< std::vector<int> > method_particle_list;
+  std::vector<std::string>   method_prolong;
+  std::vector<int>           method_ghost_depth;
+  std::vector<int>           method_min_face_rank;
+  std::vector<int>           method_all_fields;
+  std::vector<int>           method_all_particles;
+
   std::vector<double>        method_timestep;
   std::vector<std::string>   method_trace_name;
   double                     method_null_dt;

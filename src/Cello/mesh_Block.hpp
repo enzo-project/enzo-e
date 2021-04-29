@@ -590,6 +590,10 @@ public:
   void r_method_flux_correct_sum_fields(CkReductionMsg * msg);
   void r_method_debug_sum_fields(CkReductionMsg * msg);
 
+  void p_method_output_next (MsgOutput * msg);
+  void p_method_output_write (MsgOutput * msg);
+  void r_method_output_continue(CkReductionMsg * msg);
+  
 protected:
 
   //--------------------------------------------------

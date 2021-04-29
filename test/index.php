@@ -135,16 +135,6 @@ function test_passed ($output_file) {
 
 //----------------------------------------------------------------------
 
-function test_unfinished ($output_file) {
-  if (file_exists($output_file)) {
-    system("grep 0/ $output_file | awk 'BEGIN{c=0}; /incomplete/ {c=c+1}; END {if (c!=0) print\"<td class=unfinished>\",c,\"</td>\"; if (c==0) print \"<td class=pass>0</td>\"}'");
-  } else {
-    echo "<td class=pass></td>";
-  }
-}
-
-//----------------------------------------------------------------------
-
 function test_failed ($output_file) {
   if (file_exists($output_file)) {
     system("grep 0/ $output_file | awk 'BEGIN{c=0}; /FAIL/ {c=c+1}; END {if (c!=0) print\"<td class=fail>\",c,\"</td>\"; if (c==0) print \"<td class=pass>0</td>\"}'");
@@ -192,7 +182,6 @@ function tests($component,$testrun,$output,$test_name,$dir) {
     echo "   <th>Duration</th>";
     echo "   <th>Failed</th>";
     echo "   <th>Passed</th>";
-    //    echo "   <th>Unfinished</th>";
     echo "</tr>\n";
 
     //--------------------------------------------------
@@ -217,7 +206,6 @@ function tests($component,$testrun,$output,$test_name,$dir) {
       test_duration   ($file);
       test_failed     ($file);
       test_passed     ($file);
-      //      test_unfinished ($file);
 
       echo "</tr>\n";
     }
@@ -372,30 +360,6 @@ function summary_failed_tests ($test_output, $executables, $state, $dir,$valid)
 
 //----------------------------------------------------------------------
 
-function summary_unfinished_tests ($test_output, $executables, $state, $dir,$valid)
-{
-  global $types;
-  global $num_types;
-
-  for ($i = 0; $i<$num_types; ++$i) {
-
-    $output_files = "";
-    for ($test = 0; $test<sizeof($test_output); ++$test) {
-      $output = "../$dir/test_$test_output[$test].unit";
-      $output_files = "$output_files $output";
-    }
-
-    /* if (! $valid) { */
-    /*   printf ("<td></td>"); */
-    /* } else { */
-      system("grep '0/' $output_files | awk 'BEGIN {c=0}; /incomplete/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=unfinished>\",c,\"</td>\";}} '");
-    /* } */
-  }
-  return $valid;
-}
-
-//----------------------------------------------------------------------
-
 function summary_passed_tests ($test_output, $executables, $state, $dir,$valid)
 {
 
@@ -439,10 +403,6 @@ function test_summary($component,$test_output,$executables, $dir)
     ($test_output, $executables, $state, $dir,$valid);
   $valid = summary_passed_tests
     ($test_output, $executables, $state, $dir,$valid);
-
-  /* printf ("<th class=divider></th>"); */
-  /* $valid = summary_unfinished_tests */
-  /*   ($test_output, $executables, $state, $dir,$valid); */
 
   printf ("</tr>\n");
 }
@@ -599,8 +559,6 @@ printf ( "<th colspan=$num_types class=fail>No output</th>");
 printf ( "<th colspan=$num_types class=fail>Some output</th>");
 printf ( "<th colspan=$num_types class=fail>Failed </th>");
 printf ( "<th colspan=$num_types class=pass>Passed </th>");
-/* printf ("<th class=divider></th>"); */
-/* printf ( "<th colspan=$num_types class=unfinished>Unfinished</br>Tests</th>"); */
 printf ( "</tr>\n");
 
 //----------------------------------------------------------------------
@@ -1631,21 +1589,18 @@ end_hidden("boundary_outflow_2d");
 //----------------------------------------------------------------------
 
 begin_hidden("boundary_reflecting_3d", "3D Reflecting");
-
 tests("Enzo","enzo-p","test_boundary_reflecting-3d","Reflecting 3D","");
 test_table ("-","boundary_reflecting-3d",
 	    array("0000","0020","0040","0060","0080"), $types);
 end_hidden("boundary_reflecting_3d");
 
 begin_hidden("boundary_periodic_3d", "3D Periodic");
-
 tests("Enzo", "enzo-p","test_boundary_periodic-3d","Periodic 3D","");
 test_table ("-","boundary_periodic-3d",
 	    array("0000","0020","0040","0060","0080"), $types);
 end_hidden("boundary_periodic_3d");
 
 begin_hidden("boundary_outflow_3d", "3D Outflow");
-
 tests("Enzo","enzo-p","test_boundary_outflow-3d","Outflow 3D","");
 test_table ("-","boundary_outflow-3d",
 	    array("0000","0020","0040","0060","0080"), $types);
@@ -1654,7 +1609,6 @@ end_hidden("boundary_outflow_3d");
 //----------------------------------------------------------------------
 
 test_group("Initial");
-
 test_subgroup ("InitialValue with PNG mask");
 begin_hidden("initial_mask","png mask initial conditions");
 
@@ -1688,17 +1642,14 @@ end_hidden("initial_mask");
 //----------------------------------------------------------------------
 
 test_group("Output");
-
 begin_hidden("output_stride_1", "Stride 1");
 tests("Enzo","enzo-p","test_output-stride-1","","");
 test_table_blocks ("output-stride-1", array("00","10","20"),$types);
 end_hidden("output_stride_1");
-
 begin_hidden("output_stride_2", "Stride 2");
 tests("Enzo","enzo-p","test_output-stride-2","","");
 test_table_blocks ("output-stride-2",  array("00","10","20"), $types);
 end_hidden("output_stride_2");
-
 begin_hidden("output_stride_4", "Stride 4");
 tests("Enzo","enzo-p","test_output-stride-4","","");
 test_table_blocks ("output-stride-4",  array("00","10","20"), $types);
@@ -1707,7 +1658,6 @@ end_hidden("output_stride_4");
 //----------------------------------------------------------------------
 
 test_group("Particle");
-
 begin_hidden("particle", "Particle");
 tests("Cello","test_Particle","test_Particle","","");
 end_hidden("particle");
@@ -1746,10 +1696,9 @@ end_hidden("particle-amr-dynamic");
 
 //======================================================================
 
-     echo "<a name=\"cello\"><h1>Cello unit tests</h1>";
+echo "<a name=\"cello\"><h1>Cello unit tests</h1>";
 
 test_group("Disk");
-
 begin_hidden("disk_hdf5", "HDF5");
 tests("Cello","test_FileHdf5", "test_FileHdf5","","");
 end_hidden("disk_hdf5");
@@ -1757,7 +1706,6 @@ end_hidden("disk_hdf5");
 //----------------------------------------------------------------------
 
 test_group("Error");
-
 begin_hidden("error", "Error");
 tests("Cello","test_Error","test_Error","","");
 end_hidden("error");
@@ -1766,7 +1714,6 @@ end_hidden("error");
 //----------------------------------------------------------------------
 
 test_group("Field");
-
 begin_hidden("field", "Field");
 tests("Cello","test_Field","test_Field","","");
 end_hidden("field");
@@ -1789,17 +1736,13 @@ end_hidden("grouping");
 //----------------------------------------------------------------------
 
 test_group("Memory");
-
-
 begin_hidden("memory", "Memory");
 tests("Cello","test_Memory","test_Memory","","");
 end_hidden("memory");
 
-
 //----------------------------------------------------------------------
 
 test_group("Mesh");
-
 begin_hidden("data", "Data");
 tests("Cello","test_Data","test_Data","",""); 
 end_hidden("data");
@@ -1861,7 +1804,6 @@ end_hidden("it_node");
 //----------------------------------------------------------------------
 
 test_group("Monitor");
-
 begin_hidden("monitor", "Monitor");
 tests("Cello","test_Monitor","test_Monitor","","");
 end_hidden("monitor");
@@ -1869,7 +1811,6 @@ end_hidden("monitor");
 //----------------------------------------------------------------------
 
 test_group("Parameters");
-
 begin_hidden("parameters", "Parameters");
 tests("Cello","test_Parameters","test_Parameters","","");
 end_hidden("parameters");
@@ -1877,14 +1818,12 @@ end_hidden("parameters");
 //----------------------------------------------------------------------
 
 test_group("Particle");
-
 begin_hidden("particle", "Particle");
 tests("Cello","test_Particle","test_Particle","","");
 end_hidden("particle");
 //----------------------------------------------------------------------
 
 test_group("Performance");
-
 begin_hidden("performance", "Performance");
 tests("Cello","test_Performance","test_Performance","","");
 end_hidden("performance");
@@ -1898,7 +1837,6 @@ end_hidden("timer");
 //----------------------------------------------------------------------
 
 test_group("Problem");
-
 begin_hidden("mask", "Mask");
 tests("Cello","test_Mask",   "test_Mask","","");
 end_hidden("mask");
@@ -1915,7 +1853,6 @@ end_hidden("box");
 //----------------------------------------------------------------------
 
 test_group("Prolong");
-
 begin_hidden("prolong", "ProlongLinear");
 tests("Cello","test_ProlongLinear",  "test_prolong_linear","ProlongLinear","");
 end_hidden("Prolong");
@@ -1923,7 +1860,6 @@ end_hidden("Prolong");
 //----------------------------------------------------------------------
 
 test_group("Scalar");
-
 begin_hidden("scalar", "Scalar");
 tests("Cello","test_Scalar","test_Scalar","","");
 end_hidden("scalar");
@@ -1931,7 +1867,6 @@ end_hidden("scalar");
 //----------------------------------------------------------------------
 
 test_group("Schedule");
-
 begin_hidden("schedule", "Schedule");
 tests("Cello","test_Schedule","test_Schedule","","");
 end_hidden("schedule");
@@ -1939,8 +1874,6 @@ end_hidden("schedule");
 //----------------------------------------------------------------------
 
 test_group("Sync");
-
-
 begin_hidden("sync", "Sync");
 tests("Cello","test_Sync","test_Sync","","");
 end_hidden("sync");
@@ -1948,8 +1881,6 @@ end_hidden("sync");
 //----------------------------------------------------------------------
 
 test_group("Type");
-
-
 begin_hidden("type", "Type");
 tests("Cello","test_Type","test_Type","","");
 end_hidden("type");
@@ -1957,7 +1888,6 @@ end_hidden("type");
 //----------------------------------------------------------------------
 
 test_group("Units");
-
 begin_hidden("enzo_units", "HDF5");
 tests("Enzo","test_EnzoUnits", "test_EnzoUnits","","");
 end_hidden("enzo_units");
@@ -1965,7 +1895,6 @@ end_hidden("enzo_units");
 //----------------------------------------------------------------------
 
 test_group("Colormap");
-
 begin_hidden("colormap", "Colormap");
 tests("Cello","test_Colormap","test_Colormap","","");
 end_hidden("colormap");

@@ -117,7 +117,6 @@ void MethodDebug::compute_continue_sum_fields
   const int nf = field.num_permanent();
   long double * data = (long double *) msg->getData();
   int id = 1;
-  int index_field = 0;
   for (int index_field=0; index_field<nf; index_field++) {
     field_min_[index_field] = data[id++];
     field_max_[index_field] = data[id++];
@@ -143,13 +142,10 @@ void MethodDebug::compute_continue_sum_fields
     }
   }
 
-  const int cycle = block->cycle();
-
   if (block->is_leaf()) {
 
     for (int i_f=0; i_f<nf; i_f++) {
 
-        
       int mx,my,mz;
       field.dimensions (i_f,&mx,&my,&mz);
       cello_float * values = (cello_float*)field.values(i_f);

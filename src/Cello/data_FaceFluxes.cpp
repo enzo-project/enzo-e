@@ -62,16 +62,16 @@ void FaceFluxes::set_flux_array ( std::vector<cello_float> array,
   ASSERT5("FaceFluxes::set_flux_array",
           "Input array size %lu is smaller than required %d = %d * %d *%d",
           array.size(),mx*my*mz,mx,my,mz,
-          (array.size() >= mx*my*mz) );
+          ((int)array.size() >= mx*my*mz) );
   ASSERT4("FaceFluxes::set_flux_array",
           "Input array size %lu is too small for strides (dx,dy,dz)=(%d,%d,%d)",
           array.size(),dx,dy,dz,
-          (array.size() >= (mx-1)*dx+(my-1)*dy+(mz-1)*dz) );
+          ((int)array.size() >= (mx-1)*dx+(my-1)*dy+(mz-1)*dz) );
 
   ASSERT5("FaceFluxes::set_flux_array",
           "Flux array size %lu is smaller than required %d = %d * %d *%d",
           fluxes_.size(),mx*my*mz,mx,my,mz,
-          (fluxes_.size() >= mx*my*mz) );
+          ((int)fluxes_.size() >= mx*my*mz) );
 
   for (int iz=0; iz<mz; iz++) {
     for (int iy=0; iy<my; iy++) {

@@ -911,7 +911,6 @@ void Simulation::monitor_performance()
   long long * counters_reduce = new long long [n];
 
   const int in = cello::index_static();
-
   
   int m=0;
   const int num_max = 4 + num_solver;

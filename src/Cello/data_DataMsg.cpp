@@ -290,7 +290,6 @@ char * DataMsg::load_data (char * buffer)
   };
 
   pc = buffer;
-  int debug_counter = 0;
 
   int n_ff,n_fa,n_pa,n_fd;
   LOAD_SCALAR_TYPE(pc,int,n_ff);
@@ -409,7 +408,7 @@ void DataMsg::update (Data * data, bool is_local)
 
   FluxData * flux_data = data->flux_data();
   if (face_fluxes_list_.size() > 0) {
-    for (int i=0; i<face_fluxes_list_.size(); i++) {
+    for (size_t i=0; i<face_fluxes_list_.size(); i++) {
       FaceFluxes * face_fluxes = face_fluxes_list_[i];
       Face face = face_fluxes->face();
       flux_data->sum_neighbor_fluxes

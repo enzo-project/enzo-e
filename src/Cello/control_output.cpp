@@ -87,8 +87,8 @@ void Problem::new_output_next(Simulation * simulation) throw()
   // print blocks on this process to check block_vec_ array
 
   Hierarchy * hierarchy = simulation->hierarchy();
-  for (int i=0; i<hierarchy->num_blocks(); i++) {
-    CkPrintf ("%d Block %d = %s\n",CkMyPe(),i,
+  for (size_t i=0; i<hierarchy->num_blocks(); i++) {
+    CkPrintf ("%d Block %u = %s\n",CkMyPe(),i,
 	      hierarchy->block(i)->name().c_str());
   }
   if (output != NULL) {

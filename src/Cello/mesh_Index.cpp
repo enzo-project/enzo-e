@@ -321,7 +321,6 @@ void Index::tree (int * bx, int * by, int *bz, int level) const
 void Index::set_child(int level, int ix, int iy, int iz, int min_level)
 {
   if (level > 0) {
-    ASSERT ("Index::set_child","level must be at least 1",level>0);
     unsigned shift = (INDEX_BITS_TREE - level);
     unsigned mask  = ~(1 << shift);
     a_[0].tree = (a_[0].tree & mask) | (ix<<shift);

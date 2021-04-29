@@ -103,9 +103,7 @@ void EnzoInitialCollapse::enforce_block
 
   // Initialize Fields
 
-  const int in = cello::index_static();
-
-  const double gamma = EnzoBlock::Gamma[in];
+  const double gamma = EnzoBlock::Gamma[cello::index_static()];
   const double energy = 1e-3*(cello::kboltz)*temperature_ / ((gamma - 1.0) * (1.0 * cello::mass_hydrogen));
   
   // ...compute ellipsoid density

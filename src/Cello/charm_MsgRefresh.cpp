@@ -9,9 +9,8 @@
 #include "charm.hpp"
 #include "charm_simulation.hpp"
 
-// #define DEBUG_MSG_REFRESH
-
 // #undef TRACE_MSG_REFRESH
+
 //----------------------------------------------------------------------
 
 long MsgRefresh::counter[CONFIG_NODE_SIZE] = { };
@@ -53,9 +52,6 @@ void MsgRefresh::set_data_msg  (DataMsg * data_msg)
 	     "overwriting existing data_msg_");
     delete data_msg_;
   }
-#ifdef DEBUG_MSG_REFRESH  
-  CkPrintf ("DEBUG_CHARM %p set_data_msg %p\n",this,data_msg_);
-#endif  
   data_msg_ = data_msg;
 }
 
@@ -63,10 +59,6 @@ void MsgRefresh::set_data_msg  (DataMsg * data_msg)
 
 void * MsgRefresh::pack (MsgRefresh * msg)
 {
-#ifdef DEBUG_MSG_REFRESH
-  CkPrintf ("%d %s:%d DEBUG_MSG_REFRESH packing %p\n",
-	    CkMyPe(),__FILE__,__LINE__,msg);
-#endif  
   if (msg->buffer_ != nullptr) return msg->buffer_;
 
   int size = 0;
@@ -114,18 +106,11 @@ void * MsgRefresh::pack (MsgRefresh * msg)
   for (int i=0; i<n; i++) (*pc++) = msg->name_type_[i];
 #endif  
   
-#ifdef DEBUG_MSG_REFRESH
-  CkPrintf ("DEBUG_MSG_REFRESH MsgRefresh::pack id_refresh=%d\n",msg->id_refresh_);
-#endif  
-
   have_data = (msg->data_msg_ != nullptr);
   (*pi++) = have_data;
   if (have_data) {
     pc = msg->data_msg_->save_data(pc);
   }
-#ifdef DEBUG_MSG_REFRESH  
-  CkPrintf ("DEBUG_CHARM %p pack data_msg_ %p\n",msg,msg->data_msg_);
-#endif  
 
   delete msg;
 
@@ -151,11 +136,6 @@ MsgRefresh * MsgRefresh::unpack(void * buffer)
 
   msg = new ((void*)msg) MsgRefresh;
   
-#ifdef DEBUG_MSG_REFRESH
-  CkPrintf ("%d %s:%d DEBUG_MSG_REFRESH unpacking %p\n",
-	    CkMyPe(),__FILE__,__LINE__,msg);
-#endif  
-
   msg->is_local_ = false;
 
   // 2. De-serialize message data from input buffer into the allocated
@@ -186,10 +166,6 @@ MsgRefresh * MsgRefresh::unpack(void * buffer)
   }
 #endif  
   
-#ifdef DEBUG_MSG_REFRESH
-  CkPrintf ("DEBUG_MSG_REFRESH MsgRefresh::pack id_refresh=%d\n",msg->id_refresh_);
-#endif  
-
   int have_data = (*pi++);
   if (have_data) {
     msg->data_msg_ = new DataMsg;
@@ -197,9 +173,6 @@ MsgRefresh * MsgRefresh::unpack(void * buffer)
   } else {
     msg->data_msg_ = nullptr;
   }
-#ifdef DEBUG_MSG_REFRESH  
-  CkPrintf ("DEBUG_CHARM %p unpack data_msg_ %p\n",msg,msg->data_msg_);
-#endif
 
   // 3. Save the input buffer for freeing later
 
@@ -224,15 +197,11 @@ void MsgRefresh::update (Data * data)
 
 //----------------------------------------------------------------------
 
-void MsgRefresh::print (std::string message)
+void MsgRefresh::print (const char * message)
 {
-#ifdef DEBUG_MSG_REFRESH  
-  CkPrintf ("MSG_REFRESH %d %s %p %s %s\n",
-            id_refresh_,message.c_str(),this,name_block_.c_str(),name_type_.c_str());
   if (data_msg_) {
-    data_msg_->print(message).c_str());
+    data_msg_->print(message);
   } else {
     CkPrintf ("MSG_REFRESH data_msg_ = nil\n");
   }
-#endif  
 }

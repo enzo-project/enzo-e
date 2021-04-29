@@ -73,7 +73,6 @@ void EnzoMethodPpm::pup (PUP::er &p)
 void EnzoMethodPpm::compute ( Block * block) throw()
 {
   TRACE_PPM("BEGIN compute()");
-
 #ifdef COPY_FIELDS_TO_OUTPUT
   const int rank = cello::rank();
   COPY_FIELD(block,"density","density_in");

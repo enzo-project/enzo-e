@@ -108,14 +108,14 @@ EnzoMethodGrackle::EnzoMethodGrackle
 //  WARNING("EnzoMethodGrackle: ",
 //          "Not all fields needed for current Grackle settings are defined. Attempting to define:");
 
-  for (int ifield = 0; ifield < fields_to_define.size(); ifield++){
+  for (size_t ifield = 0; ifield < fields_to_define.size(); ifield++){
 //    WARNING(fields_to_define[ifield].c_str() );
     field_descr->insert_permanent( fields_to_define[ifield] );
   }
 
   // Set these fields to color if they exist
   //    list of fields belonging to this method that are color
-  for (int ifield=0; ifield < color_fields.size(); ifield++){
+  for (size_t ifield=0; ifield < color_fields.size(); ifield++){
     if (   field_descr->is_permanent(  color_fields[ifield] ) &&
          !(field_descr->groups()->is_in( color_fields[ifield], "color")) ){
 
@@ -442,7 +442,6 @@ void EnzoMethodGrackle::update_grackle_density_fields(
 void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
 {
 
-  EnzoUnits * enzo_units = enzo::units();
   const EnzoConfig * enzo_config = enzo::config();
 
   Field field = enzo_block->data()->field();
@@ -574,9 +573,6 @@ void EnzoMethodGrackle::ResetEnergies ( EnzoBlock * enzo_block) throw()
    enzo_float * internal_energy = (enzo_float*) field.values("internal_energy");
    enzo_float * total_energy    = (enzo_float*) field.values("total_energy");
 
-   enzo_float * pressure    = (enzo_float*) field.values("pressure");
-   enzo_float * temperature = (enzo_float*) field.values("temperature");
-
    enzo_float * HI_density    = (enzo_float*) field.values("HI_density");
    enzo_float * HII_density   = (enzo_float*) field.values("HII_density");
    enzo_float * HeI_density   = (enzo_float*) field.values("HeI_density");
@@ -591,8 +587,6 @@ void EnzoMethodGrackle::ResetEnergies ( EnzoBlock * enzo_block) throw()
    enzo_float * DI_density    = (enzo_float *) field.values("DI_density");
    enzo_float * DII_density   = (enzo_float *) field.values("DII_density");
    enzo_float * HDI_density   = (enzo_float *) field.values("HDI_density");
-
-   enzo_float * metal_density = (enzo_float*) field.values("metal_density");
 
    // Field size
    int nx,ny,nz;

@@ -8,6 +8,8 @@
 #ifndef PROBLEM_BOUNDARY_VALUE_HPP
 #define PROBLEM_BOUNDARY_VALUE_HPP
 
+class Value;
+
 class BoundaryValue : public Boundary
 {
 
@@ -41,15 +43,7 @@ public: // interface
   { }
 
   /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p) 
-  {
-    // NOTE: change this function whenever attributes change
-    Boundary::pup(p); 
-    TRACEPUP; 
-
-    p | *value_;
-    p | field_list_;
-  };
+  void pup (PUP::er &p) ;
 
 public: // virtual functions
 

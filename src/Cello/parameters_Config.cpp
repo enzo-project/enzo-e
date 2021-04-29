@@ -81,6 +81,17 @@ void Config::pup (PUP::er &p)
   p | initial_list;
   p | initial_cycle;
   p | initial_time;
+
+  p | initial_hdf5_field_files;
+  p | initial_hdf5_field_datasets;
+  p | initial_hdf5_field_names;
+  p | initial_hdf5_field_coords;
+  p | initial_hdf5_particle_files;
+  p | initial_hdf5_particle_datasets;
+  p | initial_hdf5_particle_coords;
+  p | initial_hdf5_particle_types;
+  p | initial_hdf5_particle_attributes;
+
   p | initial_trace_name;
   p | initial_trace_field;
   p | initial_trace_mpp;
@@ -119,13 +130,16 @@ void Config::pup (PUP::er &p)
   p | method_flux_correct_group;
   p | method_flux_correct_enable;
   p | method_flux_correct_min_digits;
-  p | method_refresh_field_list;
-  p | method_refresh_particle_list;
-  p | method_refresh_prolong;
-  p | method_refresh_ghost_depth;
-  p | method_refresh_min_face_rank;
-  p | method_refresh_all_fields;
-  p | method_refresh_all_particles;
+  p | method_field_list;
+  p | method_output_blocking[0];
+  p | method_output_blocking[1];
+  p | method_output_blocking[2];
+  p | method_particle_list;
+  p | method_prolong;
+  p | method_ghost_depth;
+  p | method_min_face_rank;
+  p | method_all_fields;
+  p | method_all_particles;
   p | method_timestep;
   p | method_trace_name;
   p | method_null_dt;
@@ -632,12 +646,50 @@ void Config::read_initial_ (Parameters * p) throw()
 
   }
 
+  // InitialHdf5
+
+  std::string name_initial = "Initial:hdf5:";
+  int num_files = p->list_length (name_initial + "file_list");
+  for (int index_file=0; index_file<num_files; index_file++) {
+    std::string file_id = name_initial +
+      p->list_value_string (index_file,name_initial+"file_list") + ":";
+
+    std::string type    = p->value_string (file_id+"type","");
+    std::string name    = p->value_string (file_id+"name","");
+    std::string file    = p->value_string (file_id+"file","");
+    std::string dataset = p->value_string (file_id+"dataset","");
+    std::string coords  = p->value_string (file_id+"coords","xyz");
+
+    if (type == "particle") {
+      std::string attribute = p->value_string (file_id+"attribute","");
+      //      if (name != "") {
+      initial_hdf5_particle_files.     push_back(file);
+      initial_hdf5_particle_datasets.  push_back(dataset);
+      initial_hdf5_particle_coords.    push_back(coords);
+      initial_hdf5_particle_types.     push_back(name);
+      initial_hdf5_particle_attributes.push_back(attribute);
+      //      }
+    } else if (type == "field") {
+      initial_hdf5_field_files.        push_back(file);
+      initial_hdf5_field_datasets.     push_back(dataset);
+      initial_hdf5_field_names.        push_back(name);
+      initial_hdf5_field_coords.       push_back(coords);
+    } else {
+      ERROR2 ("EnzoConfig::read",
+	      "Unknown particle type %s for parameter %s",
+	      type.c_str(),(file_id+"type").c_str());
+    }
+  }
+
+  // InitialTrace
   initial_trace_name = p->value_string ("Initial:trace:name","trace");
   initial_trace_field = p->value_string ("Initial:trace:field","");
   initial_trace_mpp = p->value_float ("Initial:trace:mass_per_particle",0.0);
   initial_trace_dx = p->list_value_integer (0,"Initial:trace:stride",1);
   initial_trace_dy = p->list_value_integer (1,"Initial:trace:stride",1);
   initial_trace_dz = p->list_value_integer (2,"Initial:trace:stride",1);
+
+  
 }
 
 //----------------------------------------------------------------------
@@ -722,13 +774,16 @@ void Config::read_method_ (Parameters * p) throw()
   method_flux_correct_group.resize(num_method);
   method_flux_correct_enable.resize(num_method);
   method_flux_correct_min_digits.resize(num_method);
-  method_refresh_field_list.resize(num_method);
-  method_refresh_particle_list.resize(num_method);
-  method_refresh_prolong.resize(num_method);
-  method_refresh_ghost_depth.resize(num_method);
-  method_refresh_min_face_rank.resize(num_method);
-  method_refresh_all_fields.resize(num_method);
-  method_refresh_all_particles.resize(num_method);
+  method_field_list.resize(num_method);
+  method_output_blocking[0].resize(num_method);
+  method_output_blocking[1].resize(num_method);
+  method_output_blocking[2].resize(num_method);
+  method_particle_list.resize(num_method);
+  method_prolong.resize(num_method);
+  method_ghost_depth.resize(num_method);
+  method_min_face_rank.resize(num_method);
+  method_all_fields.resize(num_method);
+  method_all_particles.resize(num_method);
   method_timestep.resize(num_method);
   method_schedule_index.resize(num_method);
   method_close_files_seconds_stagger.resize(num_method);
@@ -789,31 +844,39 @@ void Config::read_method_ (Parameters * p) throw()
     method_flux_correct_min_digits[index_method] =
       p->value_float (full_name + ":min_digits",0.0);
 
-    // Field and particle lists if needed by the Method
+    // Field and particle lists if needed by MethodRefresh
     int n = p->list_length(full_name + ":field_list");
-    method_refresh_field_list[index_method].resize(n);
+    method_field_list[index_method].resize(n);
     for (int i=0; i<n; i++) {
-      method_refresh_field_list[index_method][i] =
+      method_field_list[index_method][i] =
         p->list_value_integer(i,full_name+":field_list",-1);
     }
     n = p->list_length(full_name + ":particle_list");
-    method_refresh_particle_list[index_method].resize(n);
+    method_particle_list[index_method].resize(n);
     for (int i=0; i<n; i++) {
-      method_refresh_particle_list[index_method][i] =
+      method_particle_list[index_method][i] =
         p->list_value_integer(i,full_name+":particle_list",-1);
     }
 
-    method_refresh_prolong[index_method] =
+    for (int i=0; i<3; i++) {
+      method_output_blocking[i][index_method] =
+        p->list_value_integer(i,full_name+":blocking",1);
+      CkPrintf ("method_output_blocking[%d][%d] = %d\n",
+                i,index_method,method_output_blocking[i][index_method]);
+    }
+    //    }
+    
+    method_prolong[index_method] =
       p->value_string(full_name+":prolong","linear");
 
     // Read refresh method parameters
-    method_refresh_ghost_depth[index_method] =
+    method_ghost_depth[index_method] =
       p->value_integer(full_name+":ghost_depth",0); // default 0 all ghosts
-    method_refresh_min_face_rank[index_method] =
+    method_min_face_rank[index_method] =
       p->value_integer(full_name+"min_face_rank",0); // default 0 all faces
-    method_refresh_all_fields[index_method] =
+    method_all_fields[index_method] =
       p->value_logical(full_name+"all_fields",false);
-    method_refresh_all_particles[index_method] =
+    method_all_particles[index_method] =
       p->value_logical(full_name+"all_particles",false);
 
   // Read specified timestep, if any (for MethodTrace)

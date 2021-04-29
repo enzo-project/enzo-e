@@ -140,7 +140,10 @@ public: // interface
       GridEndIndex[i] = 0; 
       CellWidth[i] = 0.0;
     }
-    performance_stop_(perf_block);
+#ifdef DEBUG_ENZO_BLOCK
+  CkPrintf ("%d %p TRACE_BLOCK EnzoBlock(CkMigrateMessage *)\n",CkMyPe(),(void *)this);
+  print();
+#endif
   }
 
   /// Pack / unpack the EnzoBlock in a CHARM++ program

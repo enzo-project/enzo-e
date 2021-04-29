@@ -372,10 +372,10 @@ enum type_enum {
   }
 #define LOAD_ARRAY_TYPE(POINTER,TYPE,ARRAY,LENGTH)      \
   {                                                     \
-    int n;                                              \
-    memcpy(&LENGTH, POINTER, n=sizeof(int));		\
+    int n,length = LENGTH;                              \
+    memcpy(&length, POINTER, n=sizeof(int));		\
     POINTER += n;                                       \
-    memcpy(&ARRAY[0],POINTER,n=LENGTH*sizeof(TYPE));	\
+    memcpy(&ARRAY[0],POINTER,n=length*sizeof(TYPE));	\
     POINTER += n;                                       \
   }
 

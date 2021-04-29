@@ -23,8 +23,8 @@ MethodRefresh::MethodRefresh
     particle_list_(particle_list),
     ghost_depth_(ghost_depth),
     min_face_rank_(min_face_rank),
-    all_particles_(all_particles),
-    all_fields_(all_fields)
+    all_fields_(all_fields),
+    all_particles_(all_particles)
 {
 
   Refresh * refresh = cello::refresh(ir_post_);

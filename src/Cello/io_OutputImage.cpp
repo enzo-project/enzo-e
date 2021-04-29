@@ -721,7 +721,8 @@ void OutputImage::image_write_ () throw()
   int my = nyi_;
   int m  = mx*my;
 
-  double min,max;
+  double min = std::numeric_limits<double>::max();
+  double max = -std::numeric_limits<double>::max();
 
   // Compute min and max
 
@@ -731,9 +732,6 @@ void OutputImage::image_write_ () throw()
     max = MAX(max,max_value_);
 
   } else {
-
-    min = std::numeric_limits<double>::max();
-    max = -min;
 
     if (image_log_) {
       for (int i=0; i<m; i++) {
