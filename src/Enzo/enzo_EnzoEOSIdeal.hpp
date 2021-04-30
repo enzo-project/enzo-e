@@ -52,12 +52,11 @@ public: // interface
 
   void primitive_from_integration
   (EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &primitive_map,
-   EnzoEFltArrayMap &conserved_passive_map, int stale_depth,
-   const str_vec_t &passive_list) const;
+   int stale_depth, const str_vec_t &passive_list) const;
 
   void pressure_from_integration
   (EnzoEFltArrayMap &integration_map, const EFlt3DArray &pressure,
-   EnzoEFltArrayMap &conserved_passive_map, int stale_depth) const;
+   int stale_depth) const;
 
   void eint_from_primitive(EnzoEFltArrayMap &primitive, EFlt3DArray &eint,
                            int stale_depth) const;
@@ -66,7 +65,7 @@ public: // interface
 
   enzo_float get_pressure_floor() const { return pressure_floor_; }
 
-  void apply_floor_to_energy_and_sync(EnzoEFltArrayMap &integrable_map,
+  void apply_floor_to_energy_and_sync(EnzoEFltArrayMap &integration_map,
                                       int stale_depth) const;
 
   bool is_barotropic() const { return false; }

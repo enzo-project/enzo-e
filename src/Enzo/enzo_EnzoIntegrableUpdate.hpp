@@ -39,7 +39,7 @@ public: // interface
   void pup (PUP::er &p)
   {
     PUP::able::pup(p);
-    p|integrable_keys_;
+    p|integration_keys_;
     p|first_specific_index_;
     p|density_index_;
   }
@@ -83,36 +83,32 @@ public: // interface
   /// adds flux divergence (and source terms) to the initial integrable
   /// quantities and stores the results in `out_integrable_map`
   ///
-  /// @param[in] initial_integrable_map Map of arrays holding the values of
-  ///     integrable quantities from the start of the timestep. The fluxes
+  /// @param[in] initial_integration_map Map of arrays holding the values of
+  ///     integration quantities from the start of the timestep. The fluxes
   ///     will be added to fields held in this map. This should also contain
-  ///     the passive scalars in specific form (as mass fractions) that are to
-  ///     be integrated.
+  ///     the passive scalars in conserved form (as densities) that are to be
+  ///     integrated.
   /// @param[in]  dUcons_map Map of arrays where the net changes to the
-  ///     integrable quantities and passively advected quantites are stored.
+  ///     integration quantities and passively advected quantites are stored.
   ///     If constrained transport is being used, this will not include arrays
   ///     for the magnetic fields.
-  /// @param[out] out_integrable_map Map of the fields where the updated
-  ///     integrable quantities will be stored (This can be a reference to the
+  /// @param[out] out_integration_map Map of the fields where the updated
+  ///     integration quantities will be stored (This can be a reference to the
   ///     same Map referenced by initial_integrable_map). The updated passively
-  ///     advected scalars will NOT be stored here.
-  /// @param[out] out_conserved_passive_scalar Map of arrays where the updated
-  ///     passive scalar quantities are stored in conserved form (as densities).
+  ///     advected scalars will be stored here.
   /// @param[in]  eos Pointer to the fluid's equation of state object. When
   ///     applicable used for placing a density floor.
   /// @param[in]  stale_depth The stale depth at the time of the function call
   ///     (the stale_depth must be incremented after this function is called)
   /// @param[in]  passive_list A list of keys for passive scalars.
   void update_quantities
-  (EnzoEFltArrayMap &initial_integrable_map, EnzoEFltArrayMap &dUcons_map,
-   EnzoEFltArrayMap &out_integrable_map,
-   EnzoEFltArrayMap &out_conserved_passive_scalar,
-   EnzoEquationOfState *eos, int stale_depth,
-   const str_vec_t &passive_list) const;
+  (EnzoEFltArrayMap &initial_integration_map, EnzoEFltArrayMap &dUcons_map,
+   EnzoEFltArrayMap &out_integration_map, EnzoEquationOfState *eos,
+   int stale_depth, const str_vec_t &passive_list) const;
 
   /// provides a const vector of all registerred integrable keys
   const std::vector<std::string> integrable_keys() const throw()
-  { return integrable_keys_; }
+  { return integration_keys_; }
 
 private:
 
@@ -122,28 +118,28 @@ private:
   ///
   /// (This should called before the density is updated)
   void update_passive_scalars_
-  (EnzoEFltArrayMap &initial_integrable_map, EnzoEFltArrayMap &dUcons_map,
-   EnzoEFltArrayMap &out_conserved_passive_scalar, int stale_depth,
+  (EnzoEFltArrayMap &initial_integration_map, EnzoEFltArrayMap &dUcons_map,
+   EnzoEFltArrayMap &out_integration_map, int stale_depth,
    const str_vec_t &passive_list) const;
 
   /// Dynamically allocates and constructs an array of instances of EFlt3DArray
-  /// that are loaded from `map` using the ordering of keys in integrable_keys_
+  /// that are loaded from `map` using the ordering of keys in integration_keys_
   /// @param[in] map Map of arrays holding data related to each integrable
-  ///   quantities registered in integrable_keys_
+  ///   quantities registered in integration_keys_
   /// @param[in] stale_depth indicates the current stale_depth for the loaded
   ///   quantities.
-  EFlt3DArray* load_integrable_quantities_(EnzoEFltArrayMap &map,
-                                           int stale_depth) const;
+  EFlt3DArray* load_integration_quantities_(EnzoEFltArrayMap &map,
+                                            int stale_depth) const;
 
 private: // attributes
 
-  /// Holds key names used to load each integrable quantity component from a
+  /// Holds key names used to load each integration quantity component from a
   /// a mapping. Keys for conserved quantities are always listed before the
   /// specfic quantities. This excludes passively advected scalars.
-  std::vector<std::string> integrable_keys_;
-  /// index of the first specific quantity listed in integrable_keys_
+  std::vector<std::string> integration_keys_;
+  /// index of the first specific quantity listed in integration_keys_
   std::size_t first_specific_index_;
-  /// index of integrable_keys_ that holds the string "density"
+  /// index of integration_keys_ that holds the string "density"
   std::size_t density_index_;
 };
 

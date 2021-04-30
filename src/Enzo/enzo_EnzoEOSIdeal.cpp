@@ -41,42 +41,17 @@ bool grackle_variable_gamma_(){
 
 void EnzoEOSIdeal::primitive_from_integration
 (EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &primitive_map,
- EnzoEFltArrayMap &conserved_passive_map, int stale_depth,
- const str_vec_t &passive_list) const
+ int stale_depth, const str_vec_t &passive_list) const
 {
   if (grackle_variable_gamma_()){
-    ERROR("EnzoEOSIdeal::pressure_from_integrable",
+    ERROR("EnzoEOSIdeal::primitive_from_integration",
 	  "Doesn't currently support spatial variations in gamma");
   }
 
-  // TODO: abstract this out and make it a general function.
-  auto deepcopy = [](EFlt3DArray copy_array, EFlt3DArray output_array)
-    {
-
-      int mz = output_array.shape(0);
-      int my = output_array.shape(1);
-      int mx = output_array.shape(2);
-
-#ifdef DEBUG_MATCHING_ARRAY_SHAPES
-      ASSERT6("EnzoEOSIdeal::pressure_from_reconstructable",
-              ("The array being copied from integration_map has shape "
-               "(%d,%d,%d), while the destination array has shape (%d,%d,%d). "
-               "They should be the same."),
-              copy_array.shape(0), copy_array.shape(1), copy_array.shape(2),
-              mz, my, mx,
-              ((copy_array.shape(0) == mz) &&
-               (copy_array.shape(1) == my) &&
-               (copy_array.shape(2) == mx)));
-#endif
-
-      for (int iz = 0; iz < mz; iz++) {
-        for (int iy = 0; iy < my; iy++) {
-          for (int ix = 0; ix < mx; ix++) {
-            output_array(iz,iy,ix) = copy_array(iz,iy,ix);
-          }
-        }
-      }
-    };
+  EFlt3DArray density = integration_map.at("density");
+  int mz = density.shape(0);
+  int my = density.shape(1);
+  int mx = density.shape(2);
 
   // The EOS object doesn't necessarily know what the integration quantities
   // are. This means we take something of an exhaustive approach. This could be
@@ -85,17 +60,51 @@ void EnzoEOSIdeal::primitive_from_integration
     EnzoCenteredFieldRegistry::get_registered_quantities(true, true);
 
   for (const std::string& key : quantity_list){
-    if (integration_map.contains(key) && primitive_map.contains(key)){
-      deepcopy(integration_map.at(key), primitive_map.at(key));
+    if ((!integration_map.contains(key)) || (!primitive_map.contains(key))){
+      continue;
+    }
+
+    EFlt3DArray integ_array = integration_map.at(key);
+    EFlt3DArray prim_array = primitive_map.at(key);
+
+#ifdef DEBUG_MATCHING_ARRAY_SHAPES
+    ASSERT6("EnzoEOSIdeal::primitive_from_integration",
+            ("The array being copied from integration_map has shape "
+             "(%d,%d,%d), while the destination array has shape (%d,%d,%d). "
+             "They should be the same."),
+            mz, my, mx,
+            prim_array.shape(0), prim_array.shape(1), prim_array.shape(2),
+            ((prim_array.shape(0) == mz) &&
+             (prim_array.shape(1) == my) &&
+             (prim_array.shape(2) == mx)));
+#endif
+
+    for (int iz = stale_depth; iz < mz - stale_depth; iz++) {
+      for (int iy = stale_depth; iy < my - stale_depth; iy++) {
+        for (int ix = stale_depth; ix < mx - stale_depth; ix++) {
+          prim_array(iz,iy,ix) = integ_array(iz,iy,ix);
+        }
+      }
     }
   }
 
+  // Convert the passive scalars from conserved-form (i.e. a density) to
+  // specific-form (mass fractions)
   for (const std::string& key : passive_list){
-    deepcopy(integration_map.at(key), primitive_map.at(key));
+    EFlt3DArray cur_conserved = integration_map.at(key);
+    EFlt3DArray out_specific = primitive_map.at(key);
+
+    for (int iz = stale_depth; iz < mz - stale_depth; iz++) {
+      for (int iy = stale_depth; iy < my - stale_depth; iy++) {
+        for (int ix = stale_depth; ix < mx - stale_depth; ix++) {
+          out_specific(iz,iy,ix) = cur_conserved(iz,iy,ix)/density(iz,iy,ix);
+        }
+      }
+    }
   }
 
   pressure_from_integration(integration_map, primitive_map.at("pressure"),
-                            conserved_passive_map, stale_depth);
+                            stale_depth);
 }
 
 
@@ -104,7 +113,7 @@ void EnzoEOSIdeal::primitive_from_integration
 
 void EnzoEOSIdeal::pressure_from_integration
 (EnzoEFltArrayMap &integration_map, const EFlt3DArray &pressure,
- EnzoEFltArrayMap &conserved_passive_map, int stale_depth) const
+ int stale_depth) const
 {
 
   // For now, we are not actually wrapping ComputePressure
@@ -208,7 +217,7 @@ void EnzoEOSIdeal::eint_from_primitive(EnzoEFltArrayMap &primitive,
 // based on the enzo's hydro_rk implementation of synchronization (found in the
 // Grid_UpdateMHD.C file)
 void EnzoEOSIdeal::apply_floor_to_energy_and_sync
-(EnzoEFltArrayMap &integrable_map, int stale_depth) const
+(EnzoEFltArrayMap &integration_map, int stale_depth) const
 {
   if (grackle_variable_gamma_()){
     ERROR("EnzoEOSIdeal::apply_floor_to_energy_and_sync",
@@ -216,25 +225,25 @@ void EnzoEOSIdeal::apply_floor_to_energy_and_sync
   }
 
   const bool idual = this->uses_dual_energy_formalism();
-  const bool mag = (integrable_map.contains("bfield_x") ||
-                    integrable_map.contains("bfield_y") ||
-                    integrable_map.contains("bfield_z"));
+  const bool mag = (integration_map.contains("bfield_x") ||
+                    integration_map.contains("bfield_y") ||
+                    integration_map.contains("bfield_z"));
   // in hydro_rk, eta was set equal to eta1 (it didn't use eta2 at all)
   const double eta = dual_energy_formalism_eta_;
 
   EFlt3DArray density, vx, vy, vz, etot, eint, bx, by, bz;
-  density = integrable_map.get("density", stale_depth);
-  vx = integrable_map.get("velocity_x", stale_depth);
-  vy = integrable_map.get("velocity_y", stale_depth);
-  vz = integrable_map.get("velocity_z", stale_depth);
-  etot = integrable_map.get("total_energy", stale_depth);
+  density = integration_map.get("density", stale_depth);
+  vx = integration_map.get("velocity_x", stale_depth);
+  vy = integration_map.get("velocity_y", stale_depth);
+  vz = integration_map.get("velocity_z", stale_depth);
+  etot = integration_map.get("total_energy", stale_depth);
   if (idual){
-    eint = integrable_map.get("internal_energy", stale_depth);
+    eint = integration_map.get("internal_energy", stale_depth);
   }
   if (mag){
-    bx = integrable_map.get("bfield_x", stale_depth);
-    by = integrable_map.get("bfield_y", stale_depth);
-    bz = integrable_map.get("bfield_z", stale_depth);
+    bx = integration_map.get("bfield_x", stale_depth);
+    by = integration_map.get("bfield_y", stale_depth);
+    bz = integration_map.get("bfield_z", stale_depth);
   }
 
   float ggm1 = get_gamma()*(get_gamma() - 1.);

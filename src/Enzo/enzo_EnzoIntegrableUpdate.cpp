@@ -58,20 +58,20 @@ EnzoIntegrableUpdate::EnzoIntegrableUpdate
 (const str_vec_t& integrable_quantities,
  bool skip_B_update) throw()
 {
-  // Add conserved quantities to integrable_keys_ and identify the index
+  // Add conserved quantities to integration_keys_ and identify the index
   // holding the density key
   density_index_ = std::numeric_limits<std::size_t>::max();
   append_key_to_vec_(integrable_quantities, FieldCat::conserved, skip_B_update,
-                     &density_index_, integrable_keys_);
+                     &density_index_, integration_keys_);
   // Confirm that density is in fact a registered quantity
   ASSERT("EnzoIntegrableUpdate",
 	 ("\"density\" must be a registered integrable quantity."),
 	 density_index_ != std::numeric_limits<std::size_t>::max());
   // Record the first index holding a key for a specific quantity
-  first_specific_index_ = integrable_keys_.size();
-  // Add specific quantities to integrable_keys_
+  first_specific_index_ = integration_keys_.size();
+  // Add specific quantities to integration_keys_
   append_key_to_vec_(integrable_quantities, FieldCat::specific, skip_B_update,
-                     nullptr, integrable_keys_);
+                     nullptr, integration_keys_);
 }
 
 //----------------------------------------------------------------------
@@ -92,7 +92,7 @@ void EnzoIntegrableUpdate::clear_dUcons_map
     }
   };
 
-  for (const std::string& key : integrable_keys_){ init_arr(key); }
+  for (const std::string& key : integration_keys_){ init_arr(key); }
   for (const std::string& key : passive_list){ init_arr(key); }
 }
 
@@ -137,19 +137,19 @@ void EnzoIntegrableUpdate::accumulate_flux_component
 
     };
 
-  for (const std::string& key : integrable_keys_){ accumulate(key); }
+  for (const std::string& key : integration_keys_){ accumulate(key); }
   for (const std::string& key : passive_list){ accumulate(key); }
 }
 
 //----------------------------------------------------------------------
 
-EFlt3DArray* EnzoIntegrableUpdate::load_integrable_quantities_
+EFlt3DArray* EnzoIntegrableUpdate::load_integration_quantities_
 (EnzoEFltArrayMap &map, int stale_depth) const
 {
-  std::size_t nfields = integrable_keys_.size();
+  std::size_t nfields = integration_keys_.size();
   EFlt3DArray* arr = new EFlt3DArray[nfields];
   for (std::size_t i = 0; i<nfields; i++){
-    arr[i] = map.get(integrable_keys_[i], stale_depth);
+    arr[i] = map.get(integration_keys_[i], stale_depth);
   }
   return arr;
 }
@@ -157,26 +157,24 @@ EFlt3DArray* EnzoIntegrableUpdate::load_integrable_quantities_
 //----------------------------------------------------------------------
 
 void EnzoIntegrableUpdate::update_quantities
-(EnzoEFltArrayMap &initial_integrable_map, EnzoEFltArrayMap &dUcons_map,
- EnzoEFltArrayMap &out_integrable_map,
- EnzoEFltArrayMap &out_conserved_passive_scalar,
+(EnzoEFltArrayMap &initial_integration_map, EnzoEFltArrayMap &dUcons_map,
+ EnzoEFltArrayMap &out_integration_map,
  EnzoEquationOfState *eos, int stale_depth,
  const str_vec_t &passive_list) const
 {
 
   // Update passive scalars, it doesn't currently support renormalizing to 1
-  update_passive_scalars_(initial_integrable_map, dUcons_map,
-                          out_conserved_passive_scalar, stale_depth,
-                          passive_list);
+  update_passive_scalars_(initial_integration_map, dUcons_map,
+                          out_integration_map, stale_depth, passive_list);
 
   // For now, not having density floor affect momentum or total energy density
   enzo_float density_floor = eos->get_density_floor();
 
   EFlt3DArray *cur_prim, *dU, *out_prim;
-  cur_prim = load_integrable_quantities_(initial_integrable_map, stale_depth);
-  dU       = load_integrable_quantities_(dUcons_map, stale_depth);
-  out_prim = load_integrable_quantities_(out_integrable_map,stale_depth);
-  std::size_t nfields = integrable_keys_.size();
+  cur_prim = load_integration_quantities_(initial_integration_map, stale_depth);
+  dU       = load_integration_quantities_(dUcons_map, stale_depth);
+  out_prim = load_integration_quantities_(out_integration_map,stale_depth);
+  std::size_t nfields = integration_keys_.size();
 
   for (int iz = 1; iz < (cur_prim[density_index_].shape(0) - 1); iz++) {
     for (int iy = 1; iy < (cur_prim[density_index_].shape(1) - 1); iy++) {
@@ -185,7 +183,7 @@ void EnzoIntegrableUpdate::update_quantities
 	// get the initial density
 	enzo_float old_rho = cur_prim[density_index_](iz,iy,ix);
 
-	// now update the integrable primitives that are conserved
+	// now update the integration qiamtotoes that are conserved
 	for (std::size_t i = 0; i < first_specific_index_; i++){
 	  out_prim[i](iz,iy,ix) = cur_prim[i](iz,iy,ix) + dU[i](iz,iy,ix);
 	}
@@ -195,7 +193,7 @@ void EnzoIntegrableUpdate::update_quantities
 	new_rho = EnzoEquationOfState::apply_floor(new_rho, density_floor);
 	out_prim[density_index_](iz,iy,ix) = new_rho;
 
-	// update the specific integrable primitives
+	// update the specific integration primitives
 	enzo_float inv_new_rho = 1./new_rho;
 	for (std::size_t i = first_specific_index_; i < nfields; i++){
 	  out_prim[i](iz,iy,ix) =
@@ -208,7 +206,7 @@ void EnzoIntegrableUpdate::update_quantities
 
   // apply floor to energy and sync the internal energy with total energy
   // (the latter only occurs if the dual energy formalism is in use)
-  eos->apply_floor_to_energy_and_sync(out_integrable_map, stale_depth + 1);
+  eos->apply_floor_to_energy_and_sync(out_integration_map, stale_depth + 1);
 
   delete[] cur_prim;  delete[] dU;  delete[] out_prim;
 }
@@ -216,27 +214,25 @@ void EnzoIntegrableUpdate::update_quantities
 //----------------------------------------------------------------------
 
 void EnzoIntegrableUpdate::update_passive_scalars_
-(EnzoEFltArrayMap &initial_integrable_map, EnzoEFltArrayMap &dUcons_map,
- EnzoEFltArrayMap &out_conserved_passive_scalar, int stale_depth,
+(EnzoEFltArrayMap &initial_integration_map, EnzoEFltArrayMap &dUcons_map,
+ EnzoEFltArrayMap &out_integration_map, int stale_depth,
  const str_vec_t &passive_list) const
 {
-  EFlt3DArray cur_rho = initial_integrable_map.get("density", stale_depth);
-
   // cell-centered grid dimensions
+  EFlt3DArray cur_rho = initial_integration_map.get("density", stale_depth);
   int mz, my, mx;
   mz = cur_rho.shape(0);    my = cur_rho.shape(1);    mx = cur_rho.shape(2);
 
   for (const std::string &key : passive_list){
-    EFlt3DArray cur_specific, out_conserved, dU;
-    cur_specific = initial_integrable_map.get(key, stale_depth);
-    out_conserved = out_conserved_passive_scalar.get(key, stale_depth);
+    EFlt3DArray cur_conserved, out_conserved, dU;
+    cur_conserved = initial_integration_map.get(key, stale_depth);
+    out_conserved = out_integration_map.get(key, stale_depth);
     dU = dUcons_map.get(key, stale_depth);
 
     for (int iz=1; iz<mz-1; iz++) {
       for (int iy=1; iy<my-1; iy++) {
         for (int ix=1; ix<mx-1; ix++) {
-          out_conserved(iz,iy,ix)
-            = (cur_specific(iz,iy,ix) * cur_rho(iz,iy,ix) + dU(iz,iy,ix));
+          out_conserved(iz,iy,ix) = cur_conserved(iz,iy,ix) + dU(iz,iy,ix);
         }
       }
     }

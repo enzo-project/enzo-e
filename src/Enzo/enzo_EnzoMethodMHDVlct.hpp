@@ -11,7 +11,7 @@
 ///    EnzoEquationOfState:       Equation of State for Gas
 ///    EnzoReconstructor:         Reconstructs primitive variables
 ///    EnzoRiemann:               Solves the Riemann Problem
-///    EnzoIntegrableUpdate:      handles the updating of advected quantites
+///    EnzoIntegrableUpdate:      handles the updating of integration quantites
 ///
 /// This class can be run with and without magnetic fields. When run with
 /// magnetic fields, it makes use of the following component:
@@ -19,17 +19,20 @@
 ///
 /// Some notes on implementation
 ///    - this Method tracks specific total energy (referred to as total_energy)
-///    - We categorize quantities as reconstructable and integrable primitives.
-///      Nearly every field overlaps between the two cases. Examples of the
-///      primitives for adiabatic, ideal gas (without dual energy formalism):
-///        - density         (both integrable and reconstructable)
-///        - velocity        (both integrable and reconstructable)
-///        - pressure        (just reconstructable)
-///        - total_energy    (just integrable)
+///    - We categorize quantities as integration quantities quantities and
+///      primitives. Nearly every field overlaps between the two cases. Each
+///      integration quantity is either a conserved quantity or a conserved
+///      quanity divided by density (i.e. specific) Examples of the integration
+///      quantities and primitives for adiabatic, ideal gas (without dual
+///      energy formalism) include:
+///        - density         (both integration and primitive)
+///        - velocity        (both integration and primitive)
+///        - pressure        (just primitive)
+///        - total_energy    (just integration)
 ///      When supporting magnetic fields, there is also:
-///        - bfield          (both integrable and reconstructable)
+///        - bfield          (both integration and primitive)
 ///      When using the dual energy formalism there is also:
-///        - internal_energy (just integrable)
+///        - internal_energy (just integration)
 ///
 ///    EnzoEFltArrayMap Objects
 ///    ------------------------
@@ -38,26 +41,27 @@
 ///    class implements a map/dictionary that holds instances of EFlt3DArray.
 ///    All arrays in a given map are assumed to have the same shape.
 ///
-///    Currently, 8 different maps are used:
-///        1. primitive_map: holds the integrable and reconstructed quantities
-///           that are stored in Cello fields. It also holds the values of all
-///           passively advected scalars, in specific form, which are stored
-///           in temporary arrays
-///        2. temp_primive_map: This holds temporary arrays for each of the
-///           quantities in primitive_map. These arrays are used to store the
-///           estimated state at the partial timestep.
-///        3. priml_map: holds left reconstructed primitive fields (has the
+///    Currently, 9 different maps are used:
+///        1. integration_map: Map of arrays wrapping the Cello Fields holding
+///           each of the integration quantities. This includes each of the
+///           passive scalars (as densities).
+///        2. temp_integration_map: Map of arrays used to hold temporary values
+///           of for each of the quantities in integration_map. These arrays
+///           are used to store the estimated values at the partial timestep.
+///        3. primitive_map: Map of arrays used to temporarily store the
+///           primitive quantities 
+///        4. priml_map: holds left reconstructed primitive quantities (has the
 ///           same keys as primitive_map)
-///        4. primr_map: holds right reconstructed primitive fields (has the
+///        5. primr_map: holds right reconstructed primitive quantities (has the
 ///           same keys as primitive_map)
-///        5. xflux_map: holds fluxes in the x-direction
-///        6. yflux_map: holds fluxes in the y-direction
-///        7. zflux_map: holds fluxes in the z-direction
-///        8. dUcons_map: holds arrays which are used to accumulate the total
-///           change in the conserved versions of all integrable quantities
+///        6. xflux_map: holds fluxes in the x-direction
+///        7. yflux_map: holds fluxes in the y-direction
+///        8. zflux_map: holds fluxes in the z-direction
+///        9. dUcons_map: holds arrays which are used to accumulate the total
+///           change in the conserved versions of all integration quantities
 ///           (includes both flux divergence and source terms)
 ///    Note:
-///        - All arrays in maps 1, 2, and 8 have the same shapes as
+///        - All arrays in maps 1, 2, 3, and 8 have the same shapes as
 ///          cell-centered Cello Fields
 ///        - All arrays in priml_map and primr_map technically have the shape
 ///          of a cell-centered field, but they are treated as though they have
@@ -66,11 +70,6 @@
 ///        - For the purposes of these enumerated maps, we assume that the
 ///          length of a face-centered array along the dimension with
 ///          face-centering is 1 less than that of a cell-centered array
-///        - All reconstructed fields are not technically registered as
-///          cell-centered fields.  Consequently, they are formally registered
-///          as cell-centered fields (to guarantee that they have enough space).
-///        - All reconstructable and integrable primitive quantities have
-///          key-array pairs named for them in maps number 1, 2, 3, and 4.
 
 #ifndef ENZO_ENZO_METHOD_VLCT_HPP
 #define ENZO_ENZO_METHOD_VLCT_HPP
@@ -121,8 +120,8 @@ public: // interface
       integrable_updater_(nullptr),
       mhd_choice_(bfield_choice::no_bfield),
       bfield_method_(nullptr),
-      integrable_field_list_(),
-      reconstructable_field_list_(),
+      integration_field_list_(),
+      primitive_field_list_(),
       lazy_passive_list_()
   { }
 
@@ -146,22 +145,22 @@ protected: // methods
   /// returns the bfield_choice enum that matches the input string
   bfield_choice parse_bfield_choice_(std::string choice) const noexcept;
 
-  /// Determines the quantities from (FIELD_TABLE) to be reconstructed and
-  /// integrated and that will be integrated.
+  /// Determines the integration quantities and primitives from (FIELD_TABLE)
+  /// that are to be integrated and reconstructed
   ///
   /// @param[in]  eos Pointer to the fluid's EquationOfState object.
   /// @param[in]  mhd_choice Encodes how the integrator will handle B-fields
-  /// @param[out] integrable_quantities Reference to a vector that get's filled
-  ///     by this function with the integrable quantities (matching names in
+  /// @param[out] integration_quantities Reference to a vector that get's filled
+  ///     by this function with the integration quantities (matching names in
   ///     FIELD_TABLE) used by the integrator
-  /// @param[out] reconstructable_quantities Reference to a vector that get's
-  ///     filled by this function with the names of quantities (matching
-  ///     names in FIELD_TABLE) that are used by the integrator for
+  /// @param[out] primitive_quantities Reference to a vector that get's
+  ///     filled by this function with the names of primitive quantities
+  ///     (matching names in FIELD_TABLE) that are used by the integrator for
   ///     reconstruction
   static void determine_quantities_
   (const EnzoEquationOfState *eos, bfield_choice mhd_choice,
-   std::vector<std::string> &integrable_quantities,
-   std::vector<std::string> &reconstructable_quantities) noexcept;
+   std::vector<std::string> &integration_quantities,
+   std::vector<std::string> &primitive_quantities) noexcept;
 
   /// Checks that the mesh size is sufficiently large to handle the given ghost
   /// depth and confirms that the ghost depth is consistent with the
@@ -170,32 +169,15 @@ protected: // methods
   /// @param[in] block used to determine the current mesh size and ghost depth
   void check_mesh_and_ghost_size_(Block *block) const noexcept;
 
-  /// Converts conservative passive scalars (which are originally densities)
-  /// to specific form (basically just divide by density)
-  ///
-  /// @param[in]  passive_list A list of keys for passive scalars.
-  /// @param[in]  density Array holding the current density values
-  /// @param[in]  conserved_passive_scalar_map Map of the arrays containing the
-  ///     current values of the passively advected scalars (in conserved form)
-  /// @param[out] specific_passive_scalar_map Map of arrays where the specific
-  ///     form of the scalars will be stored.
-  /// @param[in]  stale_depth The current stale depth
-  void compute_specific_passive_scalars_
-  (const str_vec_t &passive_list, EFlt3DArray& density,
-   EnzoEFltArrayMap& conserved_passive_scalar_map,
-   EnzoEFltArrayMap& specific_passive_scalar_map,
-   int stale_depth) const noexcept;
-
-  /// Constructs a map containing the field data for each primitive (except for
-  /// the passively advected scalars).
-  EnzoEFltArrayMap nonpassive_primitive_map_(Block * block) const noexcept;
-  
-  /// Constructs a map containing the field data for each passively advected
-  /// scalar (in conserved form).
-  EnzoEFltArrayMap conserved_passive_scalar_map_(Block * block) const noexcept;
+  /// Constructs a map containing the field data for each integration quantity
+  /// This includes all passively advected scalars (as densities) included in
+  /// passive_list
+  EnzoEFltArrayMap get_integration_map_(Block * block,
+                                        const str_vec_t *passive_list)
+    const noexcept;
 
   /// Computes the fluxes along a given dimension, `dim`, and accumulate the
-  /// changes to the integrable quantities in `dUcons_map`
+  /// changes to the integration quantities in `dUcons_map`
   ///
   /// If using the dual energy formalism, this also computes a part of the
   /// internal energy density source term,
@@ -230,7 +212,7 @@ protected: // methods
   ///     If a cell-centered field holds `N` elements along `dim`, then this
   ///     should only hold `N-1` elements along `dim`.
   /// @param[in,out] dUcons_map Map of arrays where the changes to the
-  ///     integrable quantities are accumulated. If constrained transport is
+  ///     integration quantities are accumulated. If constrained transport is
   ///     being used, this won't include arrays for the magnetic fields.
   /// @param[in]     interface_velocity_arr_ptr Pointer to an array to
   ///     temporarily hold the computed component of the velocity at the cell
@@ -240,7 +222,7 @@ protected: // methods
   ///     under the dual energy formalism). If the value is `nullptr`, then the
   ///     interface velocity is not stored in the array.
   /// @param[in]     reconstructor the instance of EnzoReconstructor to use to
-  ///     update reconstruct the face centered values
+  ///     update reconstruct the face-centered primitives
   /// @param[in,out] bfield_method When using running with bfield handling, this
   ///     is a pointer to an instance of EnzoBfieldMethod. During the function
   ///     call, the internal state is updated. If not handling bfields, this
@@ -262,9 +244,8 @@ protected: // methods
   ///
   /// @param[in]  block holds data to be processed
   /// @param[out] integration_map Map of arrays wrapping the Cello Fields
-  ///     holding each of the integration quantities. This also holds temporary
-  ///     arrays where the specific form of the passively advected scalars will
-  ///     be stored.
+  ///     holding each of the integration quantities. This includes each of the
+  ///     passive scalars (as densities).
   /// @param[out] temp_integration_map Map for storing the integration
   ///     quantities at the half timestep. This should have all
   ///     the same entries as primitive_map. However, all arrays in this map
@@ -284,14 +265,13 @@ protected: // methods
   ///     fluxes. Note, if a cell-centered field holds `N` elements along
   ///     `dim`, then this should only hold `N-1` elements along `dim`.
   /// @param[out] dUcons_map Map of temporary arrays used to accumulate the
-  ///     changes to the conserved forms of the integrable quantities and
+  ///     changes to the conserved forms of the integration quantities and
   ///     passively advected scalars. If CT is used, this grouping won't have
   ///     space to store changes in the magnetic fields (that update is handled
   ///     separately).
   void setup_arrays_
   (Block *block, EnzoEFltArrayMap &integration_map,
    EnzoEFltArrayMap &temp_integration_map, EnzoEFltArrayMap &primitive_map,
-   EnzoEFltArrayMap &conserved_passive_scalar_map,
    EnzoEFltArrayMap &priml_map, EnzoEFltArrayMap &primr_map,
    EnzoEFltArrayMap &xflux_map, EnzoEFltArrayMap &yflux_map,
    EnzoEFltArrayMap &zflux_map, EnzoEFltArrayMap &dUcons_map) noexcept;
@@ -317,13 +297,14 @@ protected: // attributes
   /// Pointer to the BfieldMethod handler
   EnzoBfieldMethod *bfield_method_;
 
-  /// Names of the integrable fields (only includes the field names for
+  /// Names of the integration fields (only includes the field names for
   /// actively advected quantities). These also serve as the keys to the
   /// mappings of arrays used in the calculation
-  std::vector<std::string> integrable_field_list_;
-  /// Names of the reconstructable primitive fields. These also serve as the
-  /// keys to the mappings of arrays used in the calculation
-  std::vector<std::string> reconstructable_field_list_;
+  std::vector<std::string> integration_field_list_;
+  /// Names of the primitive fields (this should exclude passively advected
+  /// scalars). These also serve as the keys to the mappings of arrays used in
+  /// the calculation
+  std::vector<std::string> primitive_field_list_;
 
   /// Lazy initializer of the list of fields holding passive scalars
   EnzoLazyPassiveScalarFieldList lazy_passive_list_;
