@@ -61,9 +61,10 @@ public: // interface
   /// Reconstructs the interface values
   ///
   /// @param[in]  prim_map Map holding the data for the cell-centered
-  ///     reconstructable primitives. This is expected to have keys for all
-  ///     of the active reconstructed quantities registered with the factory
-  ///     method (plus all of the keys listed in `passive lists`)
+  ///     primitives that are to be reconstructed. This is expected to have
+  ///     a key-array pair for each entry in the list passed as the
+  ///     ``active_reconstructed_quantities`` argument of the factory method
+  ///     (plus all of the keys listed in `passive lists`)
   /// @param[out] priml_map,primr_map Holds existing arrays where the
   ///     left/right reconstructed, face-centered primitives are written.
   ///     These must supply the same keys that are expected for prim_map.
@@ -125,8 +126,8 @@ public: // interface
   { return total_staling_rate() - immediate_staling_rate(); }
 
 protected:
-  /// list of the key names for all components of (non-passively advected
-  /// quantities) that are to be reconstructed.
+  /// list of the key names for all components of (non-passively advected)
+  /// primitives that are to be reconstructed.
   std::vector<std::string> active_key_names_;
 };
 

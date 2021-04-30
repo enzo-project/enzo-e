@@ -91,43 +91,35 @@ public: // interface
   /// Converts integration quantities to primitives
   ///
   /// @param[in]  integration_map Map holding integration quantities that are
-  ///     to be converted
+  ///     to be converted. Passive scalars in this map are expected to be in
+  ///     conserved form (they are densities).
   /// @param[out] primitive_map Map holding arrays where the computed
-  ///     primitive data is to be stored.
-  /// @param[in]  conserved_passive_map Map containing the passively advected
-  ///     scalars in conserved form (note that while `integration_map` may also
-  ///     contain the same passive scalars, those values are in specific form -
-  ///     which are never used in this calculation). These are provided for
-  ///     Grackle's use.
+  ///     primitive data is to be stored. Passive scalars in this map are
+  ///     expected to be in specific form (they are mass fractions).
   /// @param[in]  stale_depth indicates the current stale_depth for the
   ///     supplied cell-centered quantities
   /// @param[in]  passive_list A list of keys for passive scalars. These keys
   ///     will be used to determine which quantities will be copied from the
   ///     integration_map to the primitive_map.
   ///
-  /// The quantities appearing in both `integration_map` and `primitive_map`
-  /// are simply deepcopied. For a barotropic EOS, this nominally just copies
-  /// performs a deepcopy on every quantity. For a non-barotropic EOS, this
-  /// computes pressure.
+  /// Non-passive scalar quantities appearing in both `integration_map` and
+  /// `primitive_map` are simply deepcopied and passive scalar quantities are
+  /// converted from conserved-form to specific form. For a non-barotropic EOS,
+  /// this also computes pressure.
   ///
   /// @note
   /// It's a not obvious to me that the EOS should necessarily be responsible
   /// for this operation.
   virtual void primitive_from_integration
   (EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &primitive_map,
-   EnzoEFltArrayMap &conserved_passive_map, int stale_depth,
-   const str_vec_t &passive_list) const =0;
+   int stale_depth, const str_vec_t &passive_list) const =0;
 
   /// Computes thermal pressure from integration quantities
   /// 
   /// @param[in]  integration_map Map holding integration quantities that are
-  ///     used to compute the pressure
+  ///     used to compute the pressure. This should include all necessary
+  ///     passively advected quantities in conserved form.
   /// @param[out] pressure Array where the thermal pressure is to be stored
-  /// @param[in]  conserved_passive_map Map containing the passively advected
-  ///     scalars in conserved form (note that while `integration_map` may also
-  ///     contain the same passive scalars, those values are in specific form -
-  ///     which are never used in this calculation). These are provided for
-  ///     Grackle's use.
   /// @param[in]  stale_depth indicates the current stale_depth for the
   ///     supplied cell-centered quantities
   ///
@@ -135,12 +127,12 @@ public: // interface
   /// writing, it doesn't actually wrap EnzoComputePressure
   virtual void pressure_from_integration
   (EnzoEFltArrayMap &integration_map, const EFlt3DArray &pressure,
-   EnzoEFltArrayMap &conserved_passive_map, int stale_depth) const = 0;
+   int stale_depth) const = 0;
 
   /// Computes specific internal energy from primitive quantities (nominally
   /// after reconstruction)
   ///
-  /// @param[in]  reconstructable Map holding primitive values that are used to
+  /// @param[in]  primitive Map holding primitive values that are used to
   ///     compute the specific internal energy
   /// @param[out] pressure Array where the specific internal energy is to be
   ///     stored.
@@ -163,9 +155,10 @@ public: // interface
   /// and it synchronize the internal energy and total energy fields. If the
   /// EOS is barotropic, this does nothing.
   ///
-  /// @param[in,out] integrable_map Map holding integrable primitives that will
-  ///     be used to apply the floor. It must also include a "total_energy"
-  ///     entry (unless the EOS is barotropic) upon which the floor is applied.
+  /// @param[in,out] integration_map Map holding integration quantities that
+  ///     will be used to apply the floor. It must also include a
+  ///     "total_energy" entry (unless the EOS is barotropic) upon which the
+  ///     floor is applied.
   /// @param[in]     stale_depth indicates the current stale_depth for the
   ///     supplied cell-centered quantities
   ///
@@ -174,7 +167,7 @@ public: // interface
   /// is a local operation that doesn't require data about neighboring cells
   /// (similar to the implementation of the dual energy formalsim in Enzo's
   /// Runge Kutta and MHD with Constrained Transport solvers).
-  virtual void apply_floor_to_energy_and_sync(EnzoEFltArrayMap &integrable_map,
+  virtual void apply_floor_to_energy_and_sync(EnzoEFltArrayMap &integration_map,
                                               int stale_depth) const = 0;
 
   /// returns whether the equation of state is barotropic
