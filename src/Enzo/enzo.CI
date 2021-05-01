@@ -99,7 +99,7 @@ module enzo {
   PUPable EnzoMethodMHDVlct;
 
   PUPable EnzoEOSIdeal;
-  PUPable EnzoIntegrableUpdate;
+  PUPable EnzoIntegrationQuanUpdate;
   PUPable EnzoReconstructorNN;
   // EnzoReconstructorPLMEnzoRKLim
   PUPable EnzoReconstructorPLM<PLM_EnzoRKLimiter>;

@@ -1,37 +1,39 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoIntegrableUpdate.hpp
+/// @file     enzo_EnzoIntegrationQuanUpdate.hpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Thurs June 20 2019
-/// @brief    [\ref Enzo] Declaration of Enzo's Integrable Update class. This 
-/// is responsible for adding flux and sources terms to integrable quantities.
+/// @brief    [\ref Enzo] Declaration of Enzo's Integration Quantity Update
+/// class. This is responsible for adding flux and sources terms to integration
+/// quantities.
 
 #include <tuple>
 
-#ifndef ENZO_ENZO_INTEGRABLE_UPDATE_HPP
-#define ENZO_ENZO_INTEGRABLE_UPDATE_HPP
-class EnzoIntegrableUpdate : public PUP::able
+#ifndef ENZO_ENZO_INTEGRATION_QUAN_UPDATE_HPP
+#define ENZO_ENZO_INTEGRATION_QUAN_UPDATE_HPP
+class EnzoIntegrationQuanUpdate : public PUP::able
 {
-  /// @class    EnzoIntegrableUpdate
+  /// @class    EnzoIntegrationQuanUpdate
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Encapsulates the updating of (actively and
-  ///           passively) advected integrable quantites
+  ///           passively) advected integration quantites
 
 public: // interface
 
-  /// Create a new EnzoIntegrableUpdate instance
-  EnzoIntegrableUpdate(const std::vector<std::string> &integrable_quantities,
-		       bool skip_B_update) throw();
+  /// Create a new EnzoIntegrationQuanUpdate instance
+  EnzoIntegrationQuanUpdate
+  (const std::vector<std::string> &integration_quantities,
+   bool skip_B_update) throw();
 
   /// Virtual destructor
-  virtual ~EnzoIntegrableUpdate()
+  virtual ~EnzoIntegrationQuanUpdate()
   {  }
 
   /// CHARM++ PUP::able declaration
-  PUPable_decl(EnzoIntegrableUpdate);
+  PUPable_decl(EnzoIntegrationQuanUpdate);
 
   /// CHARM++ migration constructor for PUP::able
-  EnzoIntegrableUpdate (CkMigrateMessage *m)
+  EnzoIntegrationQuanUpdate (CkMigrateMessage *m)
     : PUP::able(m)
   {  }
 
@@ -44,20 +46,20 @@ public: // interface
     p|density_index_;
   }
 
-  /// Iterates through all arrays in `dUcons_map` that are registered as
-  /// integrable quantities or are specified with `passive_list`. All elements
+  /// Iterates through all arrays in `dUcons_map` that are pre-registered
+  /// integration quantities or are specified with `passive_list`. All elements
   /// in these arrays are set to `value`.
   ///
   /// @param[in,out] dUcons_map The map holding the arrays that are to be
   ///     modified. These arrays are nominally used to accumulate the changes
-  ///     to all integrable and passively advected quantites.
+  ///     to all integration quantities.
   /// @param[in]     value The value array elements are assigned.
   /// @param[in]     passive_list A list of keys for passive scalars.
   void clear_dUcons_map(EnzoEFltArrayMap &dUcons_map, enzo_float value,
                         const str_vec_t &passive_list) const noexcept;
 
-  /// Computes the change in (the conserved form of) the integrable and
-  /// passively advected quantites due to the flux divergence along dimension
+  /// Computes the change in (the conserved form of) the integration quantities
+  /// (including passive scalars) due to the flux divergence along dimension
   /// `dim` over the timestep `dt`. These changes are added to the accumulator
   /// arrays contained by `dUcons_map`.
   ///
@@ -80,8 +82,8 @@ public: // interface
                                  EnzoEFltArrayMap &dUcons_map, int stale_depth,
                                  const str_vec_t &passive_list) const noexcept;
 
-  /// adds flux divergence (and source terms) to the initial integrable
-  /// quantities and stores the results in `out_integrable_map`
+  /// adds flux divergence (and source terms) to the initial integration
+  /// quantities and stores the results in `out_integration_map`
   ///
   /// @param[in] initial_integration_map Map of arrays holding the values of
   ///     integration quantities from the start of the timestep. The fluxes
@@ -94,8 +96,8 @@ public: // interface
   ///     for the magnetic fields.
   /// @param[out] out_integration_map Map of the fields where the updated
   ///     integration quantities will be stored (This can be a reference to the
-  ///     same Map referenced by initial_integrable_map). The updated passively
-  ///     advected scalars will be stored here.
+  ///     same Map referenced by initial_integration_map). The updated
+  ///     passively advected scalars will be stored here.
   /// @param[in]  eos Pointer to the fluid's equation of state object. When
   ///     applicable used for placing a density floor.
   /// @param[in]  stale_depth The stale depth at the time of the function call
@@ -106,8 +108,8 @@ public: // interface
    EnzoEFltArrayMap &out_integration_map, EnzoEquationOfState *eos,
    int stale_depth, const str_vec_t &passive_list) const;
 
-  /// provides a const vector of all registerred integrable keys
-  const std::vector<std::string> integrable_keys() const throw()
+  /// provides a const vector of all registerred integration keys
+  const std::vector<std::string> integration_keys() const throw()
   { return integration_keys_; }
 
 private:
@@ -124,7 +126,7 @@ private:
 
   /// Dynamically allocates and constructs an array of instances of EFlt3DArray
   /// that are loaded from `map` using the ordering of keys in integration_keys_
-  /// @param[in] map Map of arrays holding data related to each integrable
+  /// @param[in] map Map of arrays holding data related to each integration
   ///   quantities registered in integration_keys_
   /// @param[in] stale_depth indicates the current stale_depth for the loaded
   ///   quantities.
@@ -143,4 +145,4 @@ private: // attributes
   std::size_t density_index_;
 };
 
-#endif /* ENZO_ENZO_INTEGRABLE_UPDATE_HPP */
+#endif /* ENZO_ENZO_INTEGRATION_QUAN_UPDATE_HPP */

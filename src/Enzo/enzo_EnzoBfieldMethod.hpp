@@ -164,7 +164,7 @@ public: // interface
   /// @param[in]  stale_depth indicates the current stale_depth for the
   ///     supplied quantities. This should nominally be the same as the stale
   ///     depth used to compute the fluxes and that is passed to
-  ///     EnzoIntegrableUpdate::update_quantities.
+  ///     EnzoIntegrationQuanUpdate::update_quantities.
   virtual void update_all_bfield_components
   (EnzoEFltArrayMap &cur_prim_map, EnzoEFltArrayMap &xflux_map,
    EnzoEFltArrayMap &yflux_map, EnzoEFltArrayMap &zflux_map,
