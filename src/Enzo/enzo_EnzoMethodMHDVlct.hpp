@@ -11,7 +11,7 @@
 ///    EnzoEquationOfState:       Equation of State for Gas
 ///    EnzoReconstructor:         Reconstructs primitive variables
 ///    EnzoRiemann:               Solves the Riemann Problem
-///    EnzoIntegrableUpdate:      handles the updating of integration quantites
+///    EnzoIntegrationQuanUpdate: Handles updates to integration quantites
 ///
 /// This class can be run with and without magnetic fields. When run with
 /// magnetic fields, it makes use of the following component:
@@ -117,7 +117,7 @@ public: // interface
       half_dt_recon_(nullptr),
       full_dt_recon_(nullptr),
       riemann_solver_(nullptr),
-      integrable_updater_(nullptr),
+      integration_quan_updater_(nullptr),
       mhd_choice_(bfield_choice::no_bfield),
       bfield_method_(nullptr),
       integration_field_list_(),
@@ -288,8 +288,8 @@ protected: // attributes
   EnzoReconstructor *full_dt_recon_;
   /// Pointer to the Riemann solver
   EnzoRiemann *riemann_solver_;
-  /// Pointer to the integrable quantity updater
-  EnzoIntegrableUpdate *integrable_updater_;
+  /// Pointer to the integration quantity updater
+  EnzoIntegrationQuanUpdate *integration_quan_updater_;
 
   /// Indicates how magnetic fields are handled
   bfield_choice mhd_choice_;

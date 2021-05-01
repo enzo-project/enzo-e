@@ -75,8 +75,8 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
     (primitive_quantities, full_recon_name, (enzo_float)theta_limiter);
   riemann_solver_ = EnzoRiemann::construct_riemann(integration_quantities,
                                                    rsolver);
-  integrable_updater_ = new EnzoIntegrableUpdate(integration_quantities,
-                                                 true);
+  integration_quan_updater_ =
+    new EnzoIntegrationQuanUpdate(integration_quantities, true);
 
   // Determine the lists of fields that are required to hold the integration
   // quantities and primitives and ensure that they are defined
@@ -182,7 +182,7 @@ EnzoMethodMHDVlct::~EnzoMethodMHDVlct()
   delete half_dt_recon_;
   delete full_dt_recon_;
   delete riemann_solver_;
-  delete integrable_updater_;
+  delete integration_quan_updater_;
   if (bfield_method_ != nullptr){
     delete bfield_method_;
   }
@@ -202,7 +202,7 @@ void EnzoMethodMHDVlct::pup (PUP::er &p)
   p|half_dt_recon_;
   p|full_dt_recon_;
   p|riemann_solver_;
-  p|integrable_updater_;
+  p|integration_quan_updater_;
   p|mhd_choice_;
   p|bfield_method_;
   p|integration_field_list_;
@@ -333,8 +333,8 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // set all elements of the arrays in dUcons_map to 0 (throughout the rest
       // of the current loop, flux divergence and source terms will be
       // accumulated in these arrays)
-      integrable_updater_->clear_dUcons_map(dUcons_map, 0.,
-                                             *(lazy_passive_list_.get_list()));
+      integration_quan_updater_->clear_dUcons_map
+        (dUcons_map, 0., *(lazy_passive_list_.get_list()));
 
       // Compute the primitive quantities from the integration quantites
       // This basically copies all quantities that are both and an integration
@@ -380,7 +380,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // cell-centered B-field so that the pressure floor can be applied to the
       // total energy (and if necessary the total energy can be synchronized
       // with the internal energy)
-      integrable_updater_->update_quantities
+      integration_quan_updater_->update_quantities
         (integration_map, dUcons_map, out_integration_map, eos_, stale_depth,
          *(lazy_passive_list_.get_list()));
 
@@ -454,9 +454,10 @@ void EnzoMethodMHDVlct::compute_flux_
   // from the fluxes and use these values to update dUcons_map (which is used
   // to accumulate the total change in these quantities over the current
   // [partial] timestep)
-  integrable_updater_->accumulate_flux_component(dim, cur_dt, cell_width,
-                                                 flux_map, dUcons_map,
-                                                 cur_stale_depth, passive_list);
+  integration_quan_updater_->accumulate_flux_component(dim, cur_dt, cell_width,
+                                                       flux_map, dUcons_map,
+                                                       cur_stale_depth,
+                                                       passive_list);
 
   // if using dual energy formalism, compute the component of the internal
   // energy source term for this dim (and update dUcons_map).
@@ -535,8 +536,8 @@ void EnzoMethodMHDVlct::setup_arrays_
   // quantities (including passively advected scalars). If CT is in use,
   // dUcons_group should not have storage for magnetic fields since CT
   // independently updates magnetic fields (this exclusion is implicitly
-  // handled by integrable_updater_)
-  std::vector<std::string> tmp = integrable_updater_->integrable_keys();
+  // handled by integration_quan_updater_)
+  std::vector<std::string> tmp = integration_quan_updater_->integration_keys();
   add_temporary_arrays_to_map_(dUcons_map, shape, &tmp,
                                (lazy_passive_list_.get_list()).get());
 

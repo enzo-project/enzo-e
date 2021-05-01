@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoIntegrableUpdate.cpp
+/// @file     enzo_EnzoIntegrationQuanUpdate.cpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Mon June 24 2019
-/// @brief    [\ref Enzo] Implementation of EnzoIntegrableUpdate.
+/// @brief    [\ref Enzo] Implementation of EnzoIntegrationQuanUpdate.
 
 #include "cello.hpp"
 #include "enzo.hpp"
@@ -12,10 +12,10 @@
 //----------------------------------------------------------------------
 
 static void append_key_to_vec_
-(const str_vec_t &integrable_quantities, FieldCat target_cat,
+(const str_vec_t &integration_quantities, FieldCat target_cat,
  bool skip_bfield, std::size_t *density_index, str_vec_t &key_vec)
 {
-  for (std::string name : integrable_quantities){
+  for (std::string name : integration_quantities){
     bool vector_quantity, actively_advected;
     FieldCat category;
     bool success = EnzoCenteredFieldRegistry::quantity_properties
@@ -26,14 +26,14 @@ static void append_key_to_vec_
 	    ("\"%s\" is not registered in EnzoCenteredFieldRegistry"),
 	    name.c_str(), success);
     ASSERT1("append_key_to_vec_",
-	    ("\"%s\" should not be listed as an integrable quantity because "
+	    ("\"%s\" should not be listed as an integration quantity because "
 	     "it is not actively advected."),
 	    name.c_str(), actively_advected);
 
     if (category != target_cat){
       ASSERT1("append_key_to_vec_",
-	      ("Can't handle the integrable \"%s\" quantity because it has a "
-	       "field category of FieldCat::other"),
+	      ("Can't handle the integration quantity, \"%s\", because it has "
+	       "a field category of FieldCat::other"),
 	      name.c_str(), category != FieldCat::other);
       continue;
     } else if (skip_bfield && (name == "bfield")){
@@ -54,29 +54,29 @@ static void append_key_to_vec_
 
 //----------------------------------------------------------------------
 
-EnzoIntegrableUpdate::EnzoIntegrableUpdate
-(const str_vec_t& integrable_quantities,
+EnzoIntegrationQuanUpdate::EnzoIntegrationQuanUpdate
+(const str_vec_t& integration_quantities,
  bool skip_B_update) throw()
 {
   // Add conserved quantities to integration_keys_ and identify the index
   // holding the density key
   density_index_ = std::numeric_limits<std::size_t>::max();
-  append_key_to_vec_(integrable_quantities, FieldCat::conserved, skip_B_update,
+  append_key_to_vec_(integration_quantities, FieldCat::conserved, skip_B_update,
                      &density_index_, integration_keys_);
   // Confirm that density is in fact a registered quantity
-  ASSERT("EnzoIntegrableUpdate",
-	 ("\"density\" must be a registered integrable quantity."),
+  ASSERT("EnzoIntegrationQuanUpdate",
+	 ("\"density\" must be a registered integration quantity."),
 	 density_index_ != std::numeric_limits<std::size_t>::max());
   // Record the first index holding a key for a specific quantity
   first_specific_index_ = integration_keys_.size();
   // Add specific quantities to integration_keys_
-  append_key_to_vec_(integrable_quantities, FieldCat::specific, skip_B_update,
+  append_key_to_vec_(integration_quantities, FieldCat::specific, skip_B_update,
                      nullptr, integration_keys_);
 }
 
 //----------------------------------------------------------------------
 
-void EnzoIntegrableUpdate::clear_dUcons_map
+void EnzoIntegrationQuanUpdate::clear_dUcons_map
 (EnzoEFltArrayMap &dUcons_map, enzo_float value,
  const str_vec_t &passive_list) const noexcept
 {
@@ -98,7 +98,7 @@ void EnzoIntegrableUpdate::clear_dUcons_map
 
 //----------------------------------------------------------------------
 
-void EnzoIntegrableUpdate::accumulate_flux_component
+void EnzoIntegrationQuanUpdate::accumulate_flux_component
 (int dim, double dt, enzo_float cell_width, EnzoEFltArrayMap &flux_map,
  EnzoEFltArrayMap &dUcons_map, int stale_depth,
  const str_vec_t &passive_list) const noexcept
@@ -143,7 +143,7 @@ void EnzoIntegrableUpdate::accumulate_flux_component
 
 //----------------------------------------------------------------------
 
-EFlt3DArray* EnzoIntegrableUpdate::load_integration_quantities_
+EFlt3DArray* EnzoIntegrationQuanUpdate::load_integration_quantities_
 (EnzoEFltArrayMap &map, int stale_depth) const
 {
   std::size_t nfields = integration_keys_.size();
@@ -156,7 +156,7 @@ EFlt3DArray* EnzoIntegrableUpdate::load_integration_quantities_
 
 //----------------------------------------------------------------------
 
-void EnzoIntegrableUpdate::update_quantities
+void EnzoIntegrationQuanUpdate::update_quantities
 (EnzoEFltArrayMap &initial_integration_map, EnzoEFltArrayMap &dUcons_map,
  EnzoEFltArrayMap &out_integration_map,
  EnzoEquationOfState *eos, int stale_depth,
@@ -213,7 +213,7 @@ void EnzoIntegrableUpdate::update_quantities
 
 //----------------------------------------------------------------------
 
-void EnzoIntegrableUpdate::update_passive_scalars_
+void EnzoIntegrationQuanUpdate::update_passive_scalars_
 (EnzoEFltArrayMap &initial_integration_map, EnzoEFltArrayMap &dUcons_map,
  EnzoEFltArrayMap &out_integration_map, int stale_depth,
  const str_vec_t &passive_list) const
