@@ -131,10 +131,12 @@ void Config::pup (PUP::er &p)
   p | method_flux_correct_enable;
   p | method_flux_correct_min_digits;
   p | method_field_list;
+  p | method_particle_list;
+  p | method_output_file_name;
+  p | method_output_path_name;
   p | method_output_blocking[0];
   p | method_output_blocking[1];
   p | method_output_blocking[2];
-  p | method_particle_list;
   p | method_prolong;
   p | method_ghost_depth;
   p | method_min_face_rank;
@@ -775,10 +777,12 @@ void Config::read_method_ (Parameters * p) throw()
   method_flux_correct_enable.resize(num_method);
   method_flux_correct_min_digits.resize(num_method);
   method_field_list.resize(num_method);
+  method_particle_list.resize(num_method);
+  method_output_file_name.resize(num_method);
+  method_output_path_name.resize(num_method);
   method_output_blocking[0].resize(num_method);
   method_output_blocking[1].resize(num_method);
   method_output_blocking[2].resize(num_method);
-  method_particle_list.resize(num_method);
   method_prolong.resize(num_method);
   method_ghost_depth.resize(num_method);
   method_min_face_rank.resize(num_method);
@@ -849,13 +853,36 @@ void Config::read_method_ (Parameters * p) throw()
     method_field_list[index_method].resize(n);
     for (int i=0; i<n; i++) {
       method_field_list[index_method][i] =
-        p->list_value_integer(i,full_name+":field_list",-1);
+        p->list_value_string(i,full_name+":field_list");
     }
     n = p->list_length(full_name + ":particle_list");
     method_particle_list[index_method].resize(n);
     for (int i=0; i<n; i++) {
       method_particle_list[index_method][i] =
-        p->list_value_integer(i,full_name+":particle_list",-1);
+        p->list_value_string(i,full_name+":particle_list");
+    }
+
+    if (p->type(full_name+":file_name") == parameter_string) {
+      method_output_file_name[index_method].push_back
+        (p->value_string(full_name+":file_name",""));
+    } else if (p->type(full_name+":file_name") == parameter_list) {
+      int size = p->list_length(full_name+":file_name");
+      if (size > 0) method_output_file_name[index_method].resize(size);
+      for (int i=0; i<size; i++) {
+        method_output_file_name[index_method][i] =
+          p->list_value_string(i,full_name+":file_name","");
+      }
+    }
+    if (p->type(full_name+":path_name") == parameter_string) {
+      method_output_path_name[index_method].push_back
+        (p->value_string(full_name+":path_name",""));
+    } else if (p->type(full_name+":path_name") == parameter_list) {
+      int size = p->list_length(full_name+":path_name");
+      if (size > 0) method_output_path_name[index_method].resize(size);
+      for (int i=0; i<size; i++) {
+        method_output_path_name[index_method][i] =
+          p->list_value_string(i,full_name+":path_name","");
+      }
     }
 
     for (int i=0; i<3; i++) {

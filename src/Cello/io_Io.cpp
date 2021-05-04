@@ -11,9 +11,8 @@
 
 //----------------------------------------------------------------------
 
-Io::Io(size_t data_count) throw()
-  : meta_name_(), 
-    data_count_(data_count)
+Io::Io() throw()
+  : meta_name_()
 {}
 
 //----------------------------------------------------------------------
@@ -35,8 +34,7 @@ void Io::meta_value
 
 //----------------------------------------------------------------------
 void Io::field_array 
-(int index, 
- void ** buffer, std::string * name, int * type,
+(void ** buffer, std::string * name, int * type,
  int * nxd, int * nyd, int * nzd,
  int * nx,  int * ny,  int * nz) throw()
 {

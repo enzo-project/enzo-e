@@ -177,10 +177,6 @@ int EnzoBlock::SolveHydroEquations
 
   FluxData * flux_data = data()->flux_data();
 
-  const int nx = mx - 2*gx;
-  const int ny = my - 2*gy;
-  const int nz = mz - 2*gz;
-
   enzo_float * standard = temp;
 
   // int l3[3] = {gx,gy,gz};

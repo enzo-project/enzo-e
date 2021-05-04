@@ -27,99 +27,11 @@ void Block::output_enter_ ()
 {
   TRACE_OUTPUT("Block::output_enter_()");
   performance_start_(perf_output);
-#ifdef NEW_OUTPUT
-  new_output_begin_();
-#else /* NEW_OUTPUT */
   output_begin_();
-#endif  
   performance_stop_(perf_output);
 }
 
-//======================================================================
-// NEW OUTPUT
-//======================================================================
-
-void Block::new_output_begin_ ()
-{
-  TRACE_OUTPUT("Block::new_output_begin_()");
-  cello::simulation() -> new_output_start();
-}
-
 //----------------------------------------------------------------------
-
-void Block::new_output_write_block()
-{
-  TRACE_OUTPUT("Block::new_output_write_block_()");
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::new_output_start()
-{
-  TRACE_OUTPUT("Simulation::new_output_start()");
-  if (sync_new_output_start_.next()) {
-    TRACE_OUTPUT("Simulation::new_output_start() continuing\n");
-    problem()->output_reset();
-    problem()->new_output_next(this);
-  }
-}
-
-//----------------------------------------------------------------------
-
-void Problem::new_output_next(Simulation * simulation) throw()
-{
-  TRACE_OUTPUT("Problem::new_output_next()");
-  int cycle   = simulation->cycle();
-  double time = simulation->time();
-
-  Output * output = NULL;
-
-  // Find next schedule output (index_output_ initialized to -1)
-
-  do {
-
-    output = this->output(++index_output_);
-
-  } while (output && ! output->is_scheduled(cycle, time));
-
-  // assert (! output) || ( output->is_scheduled() )
-
-  // print blocks on this process to check block_vec_ array
-
-  Hierarchy * hierarchy = simulation->hierarchy();
-  for (size_t i=0; i<hierarchy->num_blocks(); i++) {
-    CkPrintf ("%d Block %u = %s\n",CkMyPe(),i,
-	      hierarchy->block(i)->name().c_str());
-  }
-  if (output != NULL) {
-
-    if (output->is_writer()) {
-      TRACE_OUTPUT("Problem::new_output_next: is_writer==true");
-    } else {
-      TRACE_OUTPUT("Problem::new_output_next: is_writer==false: barrier");
-    }
-
-    
-    // open file if writer
-    output->init();
-    output->open();
-    output->write_simulation(simulation);
-    output->next();
-
-
-  } else {
-
-    // ...otherwise exit output phase
-
-    TRACE_OUTPUT("Problem::new_output_next(): calling output_exit()");
-    simulation->output_exit();
-
-  }
-}
-
-//======================================================================
-// OLD OUTPUT
-//======================================================================
 
 void Block::output_begin_ ()
 {

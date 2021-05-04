@@ -11,28 +11,12 @@
 //----------------------------------------------------------------------
 
 Index::Index() { clear(); }
-
-//----------------------------------------------------------------------
-
-Index::Index(const Index & index) 
-{
-  copy_(index);
-}
-
 //----------------------------------------------------------------------
 
 Index::Index(int ix, int iy, int iz) 
 {
   clear();
   set_array(ix,iy,iz);
-}
-
-//----------------------------------------------------------------------
-
-Index & Index::operator = (const Index & index)
-{
-  copy_(index);
-  return *this;
 }
 
 //----------------------------------------------------------------------
@@ -422,6 +406,33 @@ std::string Index::bit_string(int max_level,int rank, const int nb3[3]) const
       
   }
   return bits;
+}
+
+// ----------------------------------------------------------------------
+
+int Index::data_size () const
+{
+  int size;
+  SIZE_ARRAY_TYPE(size,int,v_,3);
+  return size;
+}
+
+// ----------------------------------------------------------------------
+
+char * Index::save_data (char * buffer) const
+{
+  char * pc = buffer;
+  SAVE_ARRAY_TYPE(pc,int,v_,3);
+  return pc;
+}
+
+// ----------------------------------------------------------------------
+
+char * Index::load_data (char * buffer)
+{
+  char * pc = buffer;
+  LOAD_ARRAY_TYPE(pc,int,v_,3);
+  return pc;
 }
 
 //======================================================================

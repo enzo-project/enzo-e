@@ -892,8 +892,15 @@ Method * Problem::create_method_
 
   } else if (name == "output") {
 
+    ASSERT("Problem::create_method_()",
+           "MethodOutput must have 'file_name' parameter set",
+           config->method_output_file_name[index_method].size() > 0);
+
+
     method = new MethodOutput
-      (config->method_field_list[index_method],
+      (config->method_output_file_name[index_method],
+       config->method_output_path_name[index_method],
+       config->method_field_list[index_method],
        config->method_particle_list[index_method],
        config->method_ghost_depth[index_method],
        config->method_min_face_rank[index_method],

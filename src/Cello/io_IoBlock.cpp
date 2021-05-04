@@ -70,8 +70,7 @@ void IoBlock::meta_value
 //----------------------------------------------------------------------
 
 void IoBlock::field_array
-(int index,
- void ** buffer, std::string * name, int * type,
+(void ** buffer, std::string * name, int * type,
  int * nxd, int * nyd, int * nzd,
  int * nx,  int * ny,  int * nz) throw()
 {

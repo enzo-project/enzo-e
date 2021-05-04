@@ -8,6 +8,11 @@
 #ifndef PROBLEM_METHOD_OUTPUT_HPP
 #define PROBLEM_METHOD_OUTPUT_HPP
 
+class IoBlock;
+class IoFieldData;
+class IoParticleData;
+class FileHdf5;
+
 class MethodOutput : public Method
 {
   /// @class    MethodOutput
@@ -21,8 +26,10 @@ public: // interface
 
   /// Create a new MethodOutput
   MethodOutput
-  (std::vector<int> field_list,
-   std::vector<int> particle_list,
+  (std::vector< std::string > file_name,
+   std::vector< std::string > path_name,
+   std::vector< std::string > field_list,
+   std::vector< std::string > particle_list,
    int ghost_depth,
    int min_face_rank,
    bool all_fields,
@@ -48,6 +55,8 @@ public: // interface
   {
     TRACEPUP;
     Method::pup(p);
+    p | file_name_;
+    p | path_name_;
     p | field_list_;
     p | particle_list_;
     p | ghost_depth_;
@@ -55,6 +64,7 @@ public: // interface
     p | all_fields_;
     p | all_particles_;
     PUParray(p,blocking_,3);
+    p | is_count_;
   }
 
   void compute_continue (Block * block);
@@ -76,9 +86,20 @@ protected: // functions
   void output_ (Block * block);
 
   int is_writer_ (Index index);
-    
+
+  FileHdf5 * file_open_(Block * block, int a3[3]);
+  void file_write_hierarchy_(FileHdf5 * file);
+  void file_write_block_(FileHdf5 * , Block * , MsgOutput *);
+  
+  
 protected: // attributes
 
+  /// File name and format
+  std::vector <std::string> file_name_;
+
+  /// Path name and format
+  std::vector <std::string> path_name_;
+  
   /// List of id's of fields to output
   std::vector<int> field_list_;
 
@@ -102,6 +123,8 @@ protected: // attributes
   /// minimal root-level Block
   int blocking_[3];
 
+  /// Block Scalar int for counting files
+  int is_count_;
 };
 
 

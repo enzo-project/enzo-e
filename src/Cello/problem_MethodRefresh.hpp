@@ -20,8 +20,8 @@ public: // interface
 
   /// Create a new MethodRefresh
   MethodRefresh
-  (std::vector<int> field_list,
-   std::vector<int> particle_list,
+  (std::vector< std::string > field_list,
+   std::vector< std::string > particle_list,
    int ghost_depth,
    int min_face_rank,
    bool all_fields,

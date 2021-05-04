@@ -10,7 +10,7 @@
 //----------------------------------------------------------------------
 
 IoFieldData::IoFieldData() throw ()
-  : Io(1),
+  : Io(),
     field_data_(0),
     field_index_(0)
 
@@ -50,8 +50,7 @@ void IoFieldData::meta_value
 //----------------------------------------------------------------------
 
 void IoFieldData::field_array
-(int index, // WARNING: index ignored
- void ** buffer, std::string * name, int * type,
+(void ** buffer, std::string * name, int * type,
  int * nxd, int * nyd, int * nzd,
  int * nx,  int * ny,  int * nz) throw()
 {

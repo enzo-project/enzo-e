@@ -146,14 +146,7 @@ public: // interface
   { return (i < restrict_list_.size()) ? restrict_list_[i] : nullptr; }
 
   //--------------------------------------------------
-  // NEW OUTPUT
-  //--------------------------------------------------
-
-  /// Process the next output object if any, else proceed with simulation
-  void new_output_next(Simulation * simulation) throw();
-
-  //--------------------------------------------------
-  // OLD OUTPUT
+  // OUTPUT
   //--------------------------------------------------
 
   /// reset output index to 0

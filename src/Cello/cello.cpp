@@ -369,4 +369,117 @@ namespace cello {
     return (1.0/pow(1.0*num_children(),1.0*level));
   }
   
+  //----------------------------------------------------------------------
+
+  std::string expand_name
+  (
+   const std::vector<std::string> * file_format,
+   int counter,
+   Block * block
+   )
+  {
+    if (file_format->size()==0) return "";
+  
+    const std::string & name = (*file_format)[0];
+  
+    const int MAX_BUFFER = 255;
+
+    char buffer[MAX_BUFFER+1];
+    char buffer_new[MAX_BUFFER+1];
+
+    // Error check no \% in file name
+
+    ASSERT1 ("cello::expand_name",
+             "File name %s cannot contain '\\%%'",
+             name.c_str(),
+             name.find("\\%") == std::string::npos);
+
+    // Error check variable count equals format conversion specifier count
+
+    std::string rest = name;
+    size_t count = 0;
+    size_t pos = 0;
+    size_t len;
+    while ((pos = rest.find("%")) != std::string::npos) {
+      count ++;
+      len = rest.size();
+      rest = rest.substr(pos+1,len-pos-1);
+    }
+
+    ASSERT3 ("cello::expand_name",
+             "The number of format conversion specifiers %lu "
+             "associated with file name %s "
+             "must equal the number of variables %lu",
+             count, name.c_str(),file_format->size()-1,
+             file_format->size()-1 == count);
+
+    // loop through file_format[] from the right and replace 
+    // format strings with variable values
+
+    std::string left  = name;
+    std::string middle = "";
+    std::string right = "";
+
+    for (size_t i=0; i<file_format->size()-1; i++) {
+
+      // visit variables from right to left
+      const std::string & arg = (*file_format)[file_format->size() - 1 - i];
+
+      size_t pos = left.rfind("%");
+      size_t len = left.size();
+
+      middle = left.substr(pos,len-pos);
+      left  = left.substr(0,pos);
+
+      strncpy (buffer, middle.c_str(),MAX_BUFFER);
+      if      (arg == "cycle") { sprintf (buffer_new,buffer, block->cycle()); }
+      else if (arg == "time")  { sprintf (buffer_new,buffer, block->time()); }
+      else if (arg == "count") { sprintf (buffer_new,buffer, counter); }
+      else if (arg == "proc")  { sprintf (buffer_new,buffer, CkMyPe()); }
+      else if (arg == "flipflop")  { sprintf (buffer_new,buffer, counter % 2); }
+      else 
+        {
+          ERROR3("cello::expand_name",
+                 "Unknown file variable #%d '%s' for file '%s'",
+                 int(i),arg.c_str(),name.c_str());
+        }
+
+      right = std::string(buffer_new) + right;
+
+    }
+
+    return left + right;
+  }
+
+  //----------------------------------------------------------------------
+
+  std::string directory
+  (
+   const std::vector<std::string> * path_format,
+   int counter,
+   Block * block
+   )
+  {
+    std::string dir = ".";
+    std::string name_dir = expand_name(path_format,counter, block);
+
+    // Create subdirectory if any
+    if (name_dir != "") {
+      dir = name_dir;
+      boost::filesystem::path directory(name_dir);
+      if (! boost::filesystem::is_directory(directory)) {
+
+        boost::filesystem::create_directory(directory);
+
+        ASSERT1 ("cello::directory()",
+                 "Error creating directory %s",
+                 name_dir.c_str(),
+                 boost::filesystem::is_directory(directory));
+      }
+    }
+
+    return dir;
+  }
+
+  //----------------------------------------------------------------------
 }

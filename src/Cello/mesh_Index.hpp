@@ -53,11 +53,7 @@ public:
 
   Index();
 
-  Index(const Index & index);
-
   Index(int ix, int iy, int iz);
-
-  Index & operator = (const Index & index);
 
   bool operator == (const Index & index) const;
 
@@ -160,6 +156,19 @@ public:
     return  (x.v_[0] < y.v_[0]);
   }
 
+  ///--------------------
+  /// PACKING / UNPACKING
+  ///--------------------
+  
+  /// Return the number of bytes required to serialize the data object
+  int data_size () const;
+
+  /// Serialize the object into the provided empty memory buffer.
+  char * save_data (char * buffer) const;
+
+  /// Restore the object from the provided initialized memory buffer data.
+  char * load_data (char * buffer);
+
 private: // methods
 
   /// Clear tree bits that are associated with levels higher than
@@ -168,13 +177,6 @@ private: // methods
 
   int num_bits_(int value) const;
 	
-  inline void copy_ (const Index & index)
-  {
-    v_[0] = index.v_[0];
-    v_[1] = index.v_[1];
-    v_[2] = index.v_[2];
-  }
-
   void print_ (FILE * fp,
 	       const char * msg,
 	       int max_level,

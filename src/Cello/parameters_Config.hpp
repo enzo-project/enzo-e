@@ -97,8 +97,10 @@ public: // interface
     method_flux_correct_enable(),
     method_flux_correct_min_digits(),
     method_field_list(),
-    method_output_blocking(),
     method_particle_list(),
+    method_output_file_name(),
+    method_output_path_name(),
+    method_output_blocking(),
     method_prolong(),
     method_ghost_depth(),
     method_min_face_rank(),
@@ -274,8 +276,10 @@ public: // interface
       method_flux_correct_enable(),
       method_flux_correct_min_digits(),
       method_field_list(),
-      method_output_blocking(),
       method_particle_list(),
+      method_output_file_name(),
+      method_output_path_name(),
+      method_output_blocking(),
       method_prolong(),
       method_ghost_depth(),
       method_min_face_rank(),
@@ -500,9 +504,11 @@ public: // attributes
   std::vector<bool>          method_flux_correct_enable;
   std::vector<double>        method_flux_correct_min_digits;
 
-  std::vector< std::vector<int> > method_field_list;
+  std::vector< std::vector< std::string > > method_field_list;
+  std::vector< std::vector< std::string > > method_particle_list;
+  std::vector< std::vector< std::string > > method_output_file_name;
+  std::vector< std::vector< std::string > > method_output_path_name;
   std::vector< int >         method_output_blocking[3];
-  std::vector< std::vector<int> > method_particle_list;
   std::vector<std::string>   method_prolong;
   std::vector<int>           method_ghost_depth;
   std::vector<int>           method_min_face_rank;

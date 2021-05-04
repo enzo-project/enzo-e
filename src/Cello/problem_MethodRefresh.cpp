@@ -12,20 +12,43 @@
 //----------------------------------------------------------------------
 
 MethodRefresh::MethodRefresh
-(std::vector<int> field_list,
- std::vector<int> particle_list,
+(std::vector< std::string > field_list,
+ std::vector< std::string > particle_list,
  int ghost_depth,
  int min_face_rank,
  bool all_fields,
  bool all_particles)
   : Method(),
-    field_list_(field_list),
-    particle_list_(particle_list),
+    field_list_(),
+    particle_list_(),
     ghost_depth_(ghost_depth),
     min_face_rank_(min_face_rank),
     all_fields_(all_fields),
     all_particles_(all_particles)
 {
+
+  if (field_list.size() > 0) {
+    field_list_.resize(field_list.size());
+    for (size_t i=0; i<field_list.size(); i++) {
+      const int index_field = cello::field_descr()->field_id(field_list[i]);
+        field_list_[i] = index_field;
+    }
+  }
+
+  if (particle_list.size() > 0) {
+    particle_list_.resize(particle_list.size());
+    for (size_t i=0; i<particle_list.size(); i++) {
+      const int index_particle =
+        cello::particle_descr()->type_index(particle_list[i]);
+      particle_list_[i] = index_particle;
+    }
+  }
+
+  ASSERT("MethodRefresh()",
+         "MethodRefresh requires either field_list or particle_list "
+         "to be non-empty",
+         (all_fields || all_particles ||
+          field_list.size() > 0 || particle_list.size() > 0));
 
   Refresh * refresh = cello::refresh(ir_post_);
 

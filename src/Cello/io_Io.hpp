@@ -17,7 +17,7 @@ class Io {
 public: // interface
 
   /// Constructor
-  Io(size_t data_count = 0) throw();
+  Io() throw();
 
   /// Destructor
   virtual ~Io () throw ()
@@ -30,7 +30,6 @@ public: // interface
     TRACEPUP;
 
     p | meta_name_;
-    p | data_count_;
 
   }
 
@@ -40,19 +39,10 @@ public: // interface
   size_t meta_count() const throw()
   { return meta_name_.size(); }
 
-  /// Return number of data items associated with the associated class
-  size_t data_count() const throw()
-  { return data_count_; }
-
-  
 protected: // attributes
 
   /// Name of the metadata items
   std::vector <std::string> meta_name_;
-
-  /// Name of the data items
-  size_t data_count_;
-
 
 };
 

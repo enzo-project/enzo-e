@@ -41,6 +41,7 @@
 
 // #define DEBUG_CHECK
 
+class Block;
 class Config;
 class CProxy_Block;
 class FieldDescr;
@@ -59,7 +60,7 @@ class Solver;
 class Units;
 
 #ifdef CELLO_DEBUG
-# define TRACE_ONCE                                           \
+# define TRACE_ONCE                                             \
   {                                                             \
     static bool first = true;                                   \
     if (first) {                                                \
@@ -336,73 +337,148 @@ enum type_enum {
 /// Macros for sizing, saving, and restoring data from buffers
 //----------------------------------------------------------------------
 
-
 #define SIZE_SCALAR_TYPE(COUNT,TYPE,VALUE)      \
   {						\
-    COUNT += sizeof(TYPE);			\
+    (COUNT) += sizeof(TYPE);			\
   }
 
 #define SAVE_SCALAR_TYPE(POINTER,TYPE,VALUE)    \
   {                                             \
     int n;                                      \
     memcpy(POINTER,&VALUE,n=sizeof(TYPE));	\
-    POINTER += n;                               \
+    (POINTER) += n;                             \
   }
 
 #define LOAD_SCALAR_TYPE(POINTER,TYPE,VALUE)    \
   {                                             \
     int n;                                      \
     memcpy(&VALUE,POINTER,n=sizeof(TYPE));	\
-    POINTER += n;                               \
+    (POINTER) += n;                             \
   }
 
+//--------------------------------------------------
 
 #define SIZE_ARRAY_TYPE(COUNT,TYPE,ARRAY,LENGTH)        \
   {                                                     \
-    COUNT += sizeof(int);                               \
-    COUNT += LENGTH*sizeof(TYPE);                       \
+    (COUNT) += sizeof(int);                             \
+    (COUNT) += (LENGTH)*sizeof(TYPE);                     \
   }
+
 #define SAVE_ARRAY_TYPE(POINTER,TYPE,ARRAY,LENGTH)      \
   {                                                     \
-    int n,length = LENGTH;                              \
+    int n,length = (LENGTH);                              \
     memcpy(POINTER,&length, n=sizeof(int));             \
-    POINTER += n;                                       \
+    (POINTER) += n;                                     \
     memcpy(POINTER,&ARRAY[0],n=length*sizeof(TYPE));	\
-    POINTER += n;                                       \
+    (POINTER) += n;                                     \
   }
 #define LOAD_ARRAY_TYPE(POINTER,TYPE,ARRAY,LENGTH)      \
   {                                                     \
-    int n,length = LENGTH;                              \
+    int n,length = (LENGTH);                              \
     memcpy(&length, POINTER, n=sizeof(int));		\
-    POINTER += n;                                       \
+    (POINTER) += n;                                     \
     memcpy(&ARRAY[0],POINTER,n=length*sizeof(TYPE));	\
-    POINTER += n;                                       \
+    (POINTER) += n;                                     \
   }
+
+//--------------------------------------------------
+
+#define SIZE_STRING_TYPE(COUNT,STRING)          \
+  {                                             \
+    (COUNT) += sizeof(int);                     \
+    (COUNT) += (STRING).size()*sizeof(char);    \
+  }
+#define SAVE_STRING_TYPE(POINTER,STRING)                        \
+  {                                                             \
+    int n,length = (STRING).size();                               \
+    memcpy(POINTER,&length, n=sizeof(int));                     \
+    (POINTER) += n;                                             \
+    memcpy(POINTER,(STRING).data(),n=length*sizeof(char));	\
+    (POINTER) += n;                                             \
+  }
+
+#define LOAD_STRING_TYPE(POINTER,STRING)                        \
+  {                                                             \
+    int n,length;                                               \
+    memcpy(&length, POINTER, n=sizeof(int));                    \
+    (POINTER) += n;                                             \
+    (STRING).resize(length);                                    \
+    for (int i=0; i<length; i++) (STRING)[i] = (*(POINTER)++);  \
+  }
+
+//--------------------------------------------------
 
 #define SIZE_VECTOR_TYPE(COUNT,TYPE,VECTOR)     \
   {						\
-    COUNT += sizeof(int);			\
-    COUNT += sizeof(TYPE)*VECTOR.size();        \
+    (COUNT) += sizeof(int);			\
+    (COUNT) += sizeof(TYPE)*(VECTOR).size();    \
   }
 #define SAVE_VECTOR_TYPE(POINTER,TYPE,VECTOR)                   \
   {                                                             \
-    int length = VECTOR.size();                                 \
+    int length = (VECTOR).size();                               \
     int n;                                                      \
-    memcpy(POINTER,&length, n=sizeof(int));                             \
-    POINTER += n;                                                       \
-    memcpy(POINTER,(TYPE*)&VECTOR[0],n=length*sizeof(TYPE));            \
-    POINTER += n;                                                       \
+    memcpy(POINTER,&length, n=sizeof(int));                     \
+    (POINTER) += n;                                             \
+    memcpy(POINTER,(TYPE*)&(VECTOR)[0],n=length*sizeof(TYPE));  \
+    (POINTER) += n;                                             \
   }
-#define LOAD_VECTOR_TYPE(POINTER,TYPE,VECTOR)                   \
-  {                                                             \
-    int length;                                                 \
-    int n;                                                      \
-    memcpy(&length, POINTER, n=sizeof(int));                    \
-    POINTER += n;                                               \
-    VECTOR.resize(length);                                      \
-    memcpy((TYPE*)VECTOR.data(),POINTER,n=length*sizeof(TYPE));	\
-    POINTER += n;                                               \
+#define LOAD_VECTOR_TYPE(POINTER,TYPE,VECTOR)                           \
+  {                                                                     \
+    int length;                                                         \
+    int n;                                                              \
+    memcpy(&length, POINTER, n=sizeof(int));                            \
+    (POINTER) += n;                                                     \
+    (VECTOR).resize(length);                                            \
+    memcpy((TYPE*)(VECTOR).data(),POINTER,n=length*sizeof(TYPE));	\
+    (POINTER) += n;                                                     \
   }
+
+//--------------------------------------------------
+
+#define SIZE_OBJECT_TYPE(COUNT,OBJECT)          \
+  {						\
+    (COUNT) += (OBJECT).data_size();            \
+  }
+
+#define SAVE_OBJECT_TYPE(POINTER,OBJECT)        \
+  {                                             \
+    (POINTER) = (OBJECT).save_data(POINTER);    \
+  }
+
+#define LOAD_OBJECT_TYPE(POINTER,OBJECT)        \
+  {                                             \
+    (POINTER) = (OBJECT).load_data(POINTER);    \
+  }
+
+//--------------------------------------------------
+
+#define SIZE_OBJECT_PTR_TYPE(COUNT,TYPE,OBJECT_PTR)     \
+  {                                                     \
+  int have_data = ((OBJECT_PTR) != nullptr);            \
+  SIZE_SCALAR_TYPE(COUNT,int,have_data);                \
+  if (have_data) {                                      \
+    (COUNT) += (OBJECT_PTR)->data_size();               \
+  }
+
+#define SAVE_OBJECT_PTR_TYPE(POINTER,TYPE,OBJECT_PTR)   \
+  {                                                     \
+  int have_data = ((OBJECT_PTR) != nullptr);            \
+  SAVE_SCALAR_TYPE(POINTER,int,have_data);              \
+  if (have_data) {                                      \
+    (POINTER) = (OBJECT_PTR)->save_data(POINTER);       \
+  }
+
+#define LOAD_OBJECT_PTR_TYPE(POINTER,TYPE,OBJECT_PTR)   \
+  {                                                     \
+  int have_data;                                        \
+  LOAD_SCALAR_TYPE(POINTER,int,have_data);              \
+  if (have_data) {                                      \
+    (OBJECT_PTR) = new TYPE;                            \
+    (POINTER) = (OBJECT_PTR)->load_data(POINTER);       \
+  }
+
+//--------------------------------------------------
+
 /// Type for CkMyPe(); used for Block() constructor to differentiate
 /// from Block(int)
 typedef unsigned process_type;
@@ -648,6 +724,17 @@ namespace cello {
   void div_by_density
   (int precision, void* values, int index_field,
    const int m3[3], const int n3[3], const int i3[3]);
+
+  /// Return the name for the format and given arguments
+  std::string expand_name
+  (const std::vector <std::string> * file_name, int counter, Block * block);
+
+  /// Return the path for this file group output.  Creates
+  /// the subdirectories if they don't exist
+  std::string directory
+  (const std::vector <std::string> * path_name, int counter, Block * block);
+
+  
 }
 
 #endif /* CELLO_HPP */

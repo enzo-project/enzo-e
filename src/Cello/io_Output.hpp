@@ -75,7 +75,7 @@ public: // functions
 
   /// Set dir name
   void set_dir (std::string dir_name,
-		  std::vector<std::string> dir_args) throw()
+                std::vector<std::string> dir_args) throw()
   {
     dir_name_ = dir_name;
     dir_args_ = dir_args;

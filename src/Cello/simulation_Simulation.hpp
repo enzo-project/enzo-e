@@ -240,13 +240,7 @@ public: // virtual functions
   void r_recv_config(CkReductionMsg * msg);
 
   //--------------------------------------------------
-  // NEW OUTPUT
-  //--------------------------------------------------
-
-  void new_output_start ();
-
-  //--------------------------------------------------
-  // OLD OUTPUT
+  // OUTPUT
   //--------------------------------------------------
 
   /// Call output on Problem list of Output objects
@@ -320,7 +314,7 @@ public: // virtual functions
   void data_delete_particles(int64_t count) ;
 
   void set_checkpoint(char * checkpoint)
-  { strncpy (dir_checkpoint_,checkpoint,254);}
+  { strncpy (dir_checkpoint_,checkpoint,255);}
 
   void set_solver_iter(int is, int iter)
   {
@@ -536,9 +530,6 @@ protected: // attributes
   /// Output synchronization (depreciated)
   Sync sync_output_begin_;
   Sync sync_output_write_;
-
-  Sync sync_new_output_start_;
-  Sync sync_new_output_next_;
 
   /// Refresh phase lists
 
