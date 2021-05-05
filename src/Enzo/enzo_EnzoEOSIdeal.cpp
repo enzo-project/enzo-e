@@ -186,34 +186,6 @@ void EnzoEOSIdeal::pressure_from_integration
 
 //----------------------------------------------------------------------
 
-void EnzoEOSIdeal::eint_from_primitive(EnzoEFltArrayMap &primitive,
-                                       EFlt3DArray &eint,
-                                       int stale_depth) const
-{
-  if (grackle_variable_gamma_()){
-    // we would need to model a field with the
-    ERROR("EnzoEOSIdeal::eint_from_primitive",
-	  "Doesn't currently support spatial variations in gamma");
-  }
-
-  EFlt3DArray density = primitive.get("density", stale_depth);
-  EFlt3DArray pressure = primitive.get("pressure", stale_depth);
-
-  CSlice unstaled(stale_depth,-stale_depth);
-  EFlt3DArray e = eint.subarray(unstaled, unstaled, unstaled);
-  enzo_float inv_gm1 = 1./(get_gamma()-1.);
-
-  for (int iz=0; iz<e.shape(0); iz++) {
-    for (int iy=0; iy<e.shape(1); iy++) {
-      for (int ix=0; ix<e.shape(2); ix++) {
-        e(iz,iy,ix) = pressure(iz,iy,ix) * inv_gm1 / density(iz,iy,ix);
-      }
-    }
-  }
-}
-
-//----------------------------------------------------------------------
-
 // based on the enzo's hydro_rk implementation of synchronization (found in the
 // Grid_UpdateMHD.C file)
 void EnzoEOSIdeal::apply_floor_to_energy_and_sync

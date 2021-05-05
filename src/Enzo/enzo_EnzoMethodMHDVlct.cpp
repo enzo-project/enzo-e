@@ -59,22 +59,35 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   eos_ = new EnzoEOSIdeal(gamma, density_floor, pressure_floor,
 			  dual_energy_formalism, dual_energy_formalism_eta);
 
+#ifdef CONFIG_USE_GRACKLE
+  if (enzo::config()->method_grackle_use_grackle){
+    // we can remove the following once EnzoMethodGrackle no longer requires
+    // the internal_energy to be a permanent field
+    ASSERT("EnzoMethodMHDVlct::determine_quantities_",
+           ("Grackle cannot currently be used alongside this integrator "
+            "unless the dual-energy formalism is in use"),
+           eos_->uses_dual_energy_formalism());
+  }
+#endif /* CONFIG_USE_GRACKLE */
+
   // Determine whether magnetic fields are to be used
   mhd_choice_ = parse_bfield_choice_(mhd_choice);
 
+  riemann_solver_ = EnzoRiemann::construct_riemann
+    (rsolver, mhd_choice_ != bfield_choice::no_bfield,
+     eos_->uses_dual_energy_formalism());
+
   // determine integration and primitive quantities
   std::vector<std::string> integration_quantities, primitive_quantities;
-  EnzoMethodMHDVlct::determine_quantities_(eos_, mhd_choice_,
-                                           integration_quantities,
-                                           primitive_quantities);
+  integration_quantities = riemann_solver_->integration_quantities();
+  primitive_quantities = riemann_solver_->primitive_quantities();
 
   // Initialize the remaining component objects
   half_dt_recon_ = EnzoReconstructor::construct_reconstructor
     (primitive_quantities, half_recon_name, (enzo_float)theta_limiter);
   full_dt_recon_ = EnzoReconstructor::construct_reconstructor
     (primitive_quantities, full_recon_name, (enzo_float)theta_limiter);
-  riemann_solver_ = EnzoRiemann::construct_riemann(integration_quantities,
-                                                   rsolver);
+  
   integration_quan_updater_ =
     new EnzoIntegrationQuanUpdate(integration_quantities, true);
 
@@ -126,51 +139,6 @@ EnzoMethodMHDVlct::bfield_choice EnzoMethodMHDVlct::parse_bfield_choice_
           "Unrecognized choice. Known options include \"no_bfield\" and "
           "\"constrained_transport\"");
     return bfield_choice::no_bfield;
-  }
-}
-
-//----------------------------------------------------------------------
-
-void EnzoMethodMHDVlct::determine_quantities_
-(const EnzoEquationOfState *eos, EnzoMethodMHDVlct::bfield_choice mhd_choice,
- std::vector<std::string> &integration_quantities,
- std::vector<std::string> &primitive_quantities) noexcept
-{
-#ifdef CONFIG_USE_GRACKLE
-  if (enzo::config()->method_grackle_use_grackle){
-    // we can remove the following once EnzoMethodGrackle no longer requires
-    // the internal_energy to be a permanent field
-    ASSERT("EnzoMethodMHDVlct::determine_quantities_",
-           ("Grackle cannot currently be used alongside this integrator "
-            "unless the dual-energy formalism is in use"),
-           eos->uses_dual_energy_formalism());
-  }
-#endif /* CONFIG_USE_GRACKLE */
-
-  std::string common[] {"density", "velocity"};
-  for (std::string quantity : common){
-    integration_quantities.push_back(quantity);
-    primitive_quantities.push_back(quantity);
-  }
-
-  if (mhd_choice != bfield_choice::no_bfield){
-    integration_quantities.push_back("bfield");
-    primitive_quantities.push_back("bfield");
-  }
-
-  if (eos->is_barotropic()){
-    ERROR("EnzoMethodMHDVlct::determine_quantities_",
-	  "Not presently equipped to handle barotropic equations of state.");
-  } else {
-    // add specific total energy to integration quantities
-    integration_quantities.push_back("total_energy");
-    // add pressure to primitive quantities
-    primitive_quantities.push_back("pressure");
-    // add specific internal energy to integration quantities (if using the
-    // dual energy formalism)
-    if (eos->uses_dual_energy_formalism()){
-      integration_quantities.push_back("internal_energy");
-    }
   }
 }
 

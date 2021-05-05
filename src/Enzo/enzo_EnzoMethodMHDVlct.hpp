@@ -145,23 +145,6 @@ protected: // methods
   /// returns the bfield_choice enum that matches the input string
   bfield_choice parse_bfield_choice_(std::string choice) const noexcept;
 
-  /// Determines the integration quantities and primitives from (FIELD_TABLE)
-  /// that are to be integrated and reconstructed
-  ///
-  /// @param[in]  eos Pointer to the fluid's EquationOfState object.
-  /// @param[in]  mhd_choice Encodes how the integrator will handle B-fields
-  /// @param[out] integration_quantities Reference to a vector that get's filled
-  ///     by this function with the integration quantities (matching names in
-  ///     FIELD_TABLE) used by the integrator
-  /// @param[out] primitive_quantities Reference to a vector that get's
-  ///     filled by this function with the names of primitive quantities
-  ///     (matching names in FIELD_TABLE) that are used by the integrator for
-  ///     reconstruction
-  static void determine_quantities_
-  (const EnzoEquationOfState *eos, bfield_choice mhd_choice,
-   std::vector<std::string> &integration_quantities,
-   std::vector<std::string> &primitive_quantities) noexcept;
-
   /// Checks that the mesh size is sufficiently large to handle the given ghost
   /// depth and confirms that the ghost depth is consistent with the
   /// requirements of the reconstructors
