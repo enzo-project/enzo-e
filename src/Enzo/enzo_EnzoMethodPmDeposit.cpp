@@ -2,7 +2,7 @@
 
 /// @file     enzo_EnzoMethodPmDeposit.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// Edited:   Stefan Arridge (stefan.arridge@gmail.com)
+/// @author   Stefan Arridge (stefan.arridge@gmail.com)
 /// @date     Fri Apr  2 17:05:23 PDT 2010
 /// @brief    Implements the EnzoMethodPmDeposit class
 ///
