@@ -58,9 +58,6 @@ public: // interface
   (EnzoEFltArrayMap &integration_map, const EFlt3DArray &pressure,
    int stale_depth) const;
 
-  void eint_from_primitive(EnzoEFltArrayMap &primitive, EFlt3DArray &eint,
-                           int stale_depth) const;
-
   inline enzo_float get_density_floor() const { return density_floor_; }
 
   enzo_float get_pressure_floor() const { return pressure_floor_; }

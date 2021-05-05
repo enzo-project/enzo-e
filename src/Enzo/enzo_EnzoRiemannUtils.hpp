@@ -18,6 +18,31 @@
 
 //----------------------------------------------------------------------
 
+struct EOSStructIdeal{
+  // In the future it might make sense to use this under the hood of the
+  // EnzoEOSIdeal class.
+  //
+  // It might also make sense to make this into POD struct that get's passed to
+  // an Impl Functor's operator() method. If the structure is simple enough,
+  // the overhead of constructing/destroying can be optimized out
+
+  static inline enzo_float specific_eint(enzo_float density,
+                                         enzo_float pressure,
+                                         enzo_float gamma) noexcept
+  { return pressure / ( (gamma - 1.0) * density); }
+
+  static inline enzo_float eint_dens(enzo_float density, enzo_float pressure,
+                                     enzo_float gamma) noexcept
+  { return pressure / (gamma - 1.0); }
+
+  static inline enzo_float sound_speed(enzo_float density, enzo_float pressure,
+                                       enzo_float gamma) noexcept
+  { return std::sqrt(gamma * pressure / density); }
+
+};
+
+//----------------------------------------------------------------------
+
 namespace enzo_riemann_utils{
 
   template <class LUT>
@@ -60,14 +85,15 @@ namespace enzo_riemann_utils{
     }
 
     if (LUT::total_energy >= 0) { // overwrite the total energy index
-      enzo_float pressure = prim[LUT::total_energy];
-      enzo_float internal_edens = pressure / (gamma - 1.);
-
       enzo_float density = prim[LUT::density];
+      enzo_float pressure = prim[LUT::total_energy];
+      enzo_float internal_edens = EOSStructIdeal::eint_dens(density, pressure,
+                                                            gamma);
+
       enzo_float vi = prim[LUT::velocity_i];
       enzo_float vj = prim[LUT::velocity_j];
       enzo_float vk = prim[LUT::velocity_k];
-      enzo_float kinetic_edens = 0.5 * density * (vi*vi + vj*vj + vk *vk);
+      enzo_float kinetic_edens = 0.5 * density * (vi*vi + vj*vj + vk*vk);
 
       enzo_float magnetic_edens = mag_pressure<LUT>(prim);
 
@@ -76,13 +102,6 @@ namespace enzo_riemann_utils{
     
     return cons;
   }
-
-  //----------------------------------------------------------------------
-
-  template <class LUT>
-  inline enzo_float sound_speed(const lutarray<LUT> prim_vals,
-                                enzo_float pressure, enzo_float gamma) noexcept
-  { return std::sqrt(gamma * pressure / prim_vals[LUT::density]); }
 
   //----------------------------------------------------------------------
 
@@ -98,7 +117,9 @@ namespace enzo_riemann_utils{
     // TODO: optimize calc of cs2 to omit sqrt and pow
     //       can also skip the calculation of B2 by checking if
     //       LUT::bfield_i, LUT::bfield_j, LUT::bfield_k are all negative
-    enzo_float cs2 = std::pow(sound_speed<LUT>(prim_vals, pressure, gamma),2);
+    enzo_float cs = EOSStructIdeal::sound_speed(prim_vals[LUT::density],
+                                                pressure, gamma);
+    enzo_float cs2 = std::pow(cs,2);
     enzo_float B2 = (bi*bi + bj*bj + bk *bk);
     if (B2 == 0){
       return std::sqrt(cs2);
@@ -127,7 +148,9 @@ namespace enzo_riemann_utils{
     // TODO: optimize calc of cs2 to omit sqrt and pow
     //       can also skip the calculation of B2 by checking if
     //       LUT::bfield_i, LUT::bfield_j, LUT::bfield_k are all negative
-    enzo_float cs2 = std::pow(sound_speed<LUT>(prim_vals, pressure, gamma),2);
+    enzo_float cs = EOSStructIdeal::sound_speed(prim_vals[LUT::density],
+                                                pressure, gamma);
+    enzo_float cs2 = std::pow(cs,2);
     enzo_float B2 = (bi*bi + bj*bj + bk *bk);
     if (B2 == 0){
       return std::sqrt(cs2);
