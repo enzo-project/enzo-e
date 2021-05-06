@@ -60,7 +60,7 @@ The `Getting started using Enzo-E`_ section should cover everything
 one needs to know to download Enzo-E / Cello and its dependent
 software, configure, build, and run a small example test problem.
 
-.. _Getting started using Enzo-E: getting_started.html
+.. _Getting started using Enzo-E: tutorial/getting_started.html
 
 Parameters
 ----------
@@ -69,18 +69,18 @@ The `Enzo-E / Cello parameter reference`_ section is a reference page
 for all Enzo-E and Cello parameters, which are used to write
 parameters files defining simulations to run.
 
-.. _Enzo-E / Cello parameter reference: parameters-list.html
+.. _Enzo-E / Cello parameter reference: reference/index.html
 
 How parameters are organized within a parameter file is described in
 `Parameter files`_, which covers parameter groups, subgroups,
 parameters, and data types recognized.
 
-.. _Parameter files: parameters-file.html
+.. _Parameter files: user/parameters-file.html
 
 An example parameter file is described in detail in `Parameter
 file example`_.
 
-.. _Parameter file example: parameters-example.html
+.. _Parameter file example: user/parameters-example.html
 
 Using and developing Enzo-E / Cello
 -----------------------------------
@@ -90,7 +90,7 @@ Enzo-E, including what methods, fields, particle types etc. are
 available.  While only an outline exists now, we are working on
 getting this section completed soon.
 
-.. _Using Enzo-E: using.html
+.. _Using Enzo-E: user/index.html
 
 The new `Developing with Cello`_ section will describe how to add new
 functionality to an application such as Enzo-E built on Cello,
@@ -99,7 +99,7 @@ refinement criteria.  As with the `Using Enzo-E`_ section, this
 documentation is under active development, and is mostly an outline at
 this point.
 
-.. _Developing with Cello: devel.html
+.. _Developing with Cello: devel/index.html
 
 
 PDF User and Developer Guide (depreciated)

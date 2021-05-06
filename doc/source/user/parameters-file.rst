@@ -15,7 +15,7 @@ similar to configuration files readable by `libconfig
 <http://www.hyperrealm.com/libconfig/libconfig.html>`_.  For
 documentation on specific parameters in Enzo-E / Cello, please see the
 `Enzo-E / Cello parameter reference
-<http://cello-project.org/doc/parameters-list.html>`_ page.
+<../param/index.html>`_ page.
 
 Groups
 ******
