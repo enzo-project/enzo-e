@@ -45,7 +45,7 @@ boost_lib = boost_path + '/lib'
 # Change charm_path below to match where your copy is.  To compile
 # Charm++ on Pleiades with Intel compilers, use the following:
 #
-#    ./build charm++ mpi-linux-x86_64 smp gcc gfortran --with-production -j8
+#    ./build charm++ mpi-linux-x86_64 gcc gfortran --with-production -j8
 #
 #--------------------------------------------------
 
@@ -53,8 +53,6 @@ if os.path.isdir(home + '/src/charm-v6.10.2'):
 	charm_path = home + '/src/charm-v6.10.2'
 else:
 	charm_path = charm_path_search(home)
-
-smp = 1
 
 ## no PAPI for now
 # papi_inc = home + '/include'

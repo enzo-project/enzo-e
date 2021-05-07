@@ -75,7 +75,7 @@ and verified to work).
    $ wget http://charm.cs.illinois.edu/distrib/charm-6.10.2.tar.gz
    $ tar xzf charm-6.10.2.tar.gz
    $ cd charm-v6.10.2/
-   $ ./build charm++ mpi-linux-x86_64 smp gcc gfortran --with-production --enable-tracing -j8
+   $ ./build charm++ mpi-linux-x86_64 gcc gfortran --with-production --enable-tracing -j8
 
    
 Install Cello/Enzo-E
@@ -137,18 +137,14 @@ For example
 
 .. code-block:: bash
 
-  # get an interactive job. The mpiprocs options result in two processes being launched per node.
-  $ qsub -I  -l select=2:ncpus=40:mpiprocs=2:model=sky_ele -l walltime=0:30:0
+  # get an interactive job.
+  $ qsub -I  -l select=1:ncpus=40:model=sky_ele -l walltime=0:30:0
   
   # now within the job first prepare the environment
   $ module load gcc/8.2 boost/1.62 mpi-hpe/mpt python3/3.5.2
   $ export LD_LIBRARY_PATH=${HOME}/src/hdf5-1.10.7/install/lib:$LD_LIBRARY_PATH
 
-  # Now run HelloWorld test:
-  # mpiexec will automatically launch 4 processes (two on each node) based on the mpiprocs=2 request above.
-  # ++ppn sets the number of worker threads (per process) to 4.
-  # Given the "smp" mode used when compiling Charm++ above, one additional communication thread per process is launched.
-  # In total this test is run using 16 cores for computation and 4 cores for communication spread across two nodes.
-  $ mpiexec ./bin/enzo-p ++ppn 4 +setcpuaffinity input/HelloWorld/Hi.in
+  # Now run HelloWorld test (using 4 processes here):
+  $ mpiexec -np 4 ./bin/enzo-p input/HelloWorld/Hi.in
 
 

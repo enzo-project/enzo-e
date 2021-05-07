@@ -9,8 +9,25 @@ Frequently Asked Questions
 Building
 ********
 
-Q: Build fails with ``Function ... has no IMPLICIT type```
-----------------------------------------------------------
+Q: Charm++ build fails with ``error: C compiler cannot create executables``
+---------------------------------------------------------------------------
+
+If the Charm++ build command fails during the configure step with the error above
+*and* the mentioned `config.log` (e.g., in the `mpi-linux-x86_64-gfortran-smp-gcc/tmp`
+directory) contains an error like
+
+.. code-block:: bash
+
+  conftest.c:133:1: error: expected identifier or '(' before numeric constant
+   4.8
+   ^~~
+
+then the error could be caused by the Python version of the build environment.
+The error has been observed for Python 3.7.0 on NASA's Pleiades supercomputer
+and could be circumvented by using the Python 3.5.2 module.
+
+Q: Enzo-E build fails with ``Function ... has no IMPLICIT type``
+----------------------------------------------------------------
 
 If the Enzo-E build fails with error messages like
 
