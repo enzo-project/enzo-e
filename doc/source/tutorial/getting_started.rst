@@ -37,7 +37,7 @@ and install 1.``Charm++``, 2.``HDF5``, 3.``libpng``, 3.``libboost``, and 4.``sco
 1. Install ``Charm++``
 ----------------------
 
-``Charm++`` can be `downloaded here <http://charm.cs.illinois.edu/software>`_.
+``Charm++`` can be `downloaded here <https://charm.cs.illinois.edu/software>`_.
 
 To build Charm++ on a Mac, try this:
 
@@ -53,25 +53,25 @@ be used to configure and install ``Charm++`` on numerous other platforms.
 2. Install ``HDF5``
 -------------------
 
-"`HDF5 <http://www.hdfgroup.org/HDF5/>`_ is a "data model, library, and
+"`HDF5 <https://www.hdfgroup.org/HDF5/>`_ is a "data model, library, and
 file format for storing and managing data", and is the primary library
 used by Enzo-E / Cello for data output.
 
 If HDF5 is not already installed on your machine, it may be available
 through your operating system distribution, otherwise it can be
-downloaded from the `HDF5 <http://www.hdfgroup.org/HDF5/>`_ website.
+downloaded from the `HDF5 <https://www.hdfgroup.org/HDF5/>`_ website.
 Enzo-E / Cello currently uses the "serial" (non-MPI) version of HDF5.
 
 3. Install ``libpng``
 ---------------------
 
-"`libpng <http://www.libpng.org/pub/png/libpng.html>`_ is the official
+"`libpng <https://www.libpng.org/pub/png/libpng.html>`_ is the official
 PNG reference library", and is the image format used by Enzo-E / Cello.
 
 If ``libpng`` is not already installed on your machine, it may be
 available through your operating system distribution, otherwise it can
 be downloaded from the `libpng
-<http://www.libpng.org/pub/png/libpng.html>`_ website.
+<https://www.libpng.org/pub/png/libpng.html>`_ website.
 
 4. Install ``libboost-dev``
 ---------------------------
@@ -228,7 +228,7 @@ Building
 After configuring Cello for your computer, the Cello framework and
 Enzo-E application can be compiled using "make", which in turn calls
 the included ``./build.sh`` script.  Other options are available for
-generating useful `http://orgmode.org/ <org-mode>`_ files, generating
+generating useful `https://orgmode.org/ <org-mode>`_ files, generating
 doxygen documentation, running
 regression tests, and running code analysis tools.
 

@@ -18,7 +18,6 @@ Cello parameter files begin with ``#`` :
     ### Problem: Hello World
     ### Summary: Evolve high-pressure region shaped as an "E"
     ###    Date: 2011-10-27
-    ###  Author: James Bordner (jobordner@ucsd.edu)
 
 Parameters are organized into "groups", which may be nested.  Below
 we look in turn at each group in the HelloWorld.in sample parameter file.

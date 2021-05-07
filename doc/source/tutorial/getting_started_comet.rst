@@ -16,7 +16,7 @@ supercomputer, see the `Comet User Guide`_.
 Install ``Charm++`` on Comet
 ----------------------------
 
-``Charm++`` can be `downloaded here <http://charm.cs.illinois.edu/software>`_.
+``Charm++`` can be `downloaded here <https://charm.cs.illinois.edu/software>`_.
 
 To build Charm++ on Comet, try this:
 
