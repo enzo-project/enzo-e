@@ -41,7 +41,7 @@ and install 1.``Charm++``, 2.``HDF5``, 3.``libpng``, 3.``libboost``, and 4.``sco
 
 To build Charm++ on a Mac, try this:
 
-   ``./build charm++ netlrts-darwin-x86_64 gcc gfortran -j4 --with-production``
+   ``./build charm++ netlrts-darwin-x86_64 -j4 --with-production``
 
 If you're running Linux, try building Charm++ using this:
 
