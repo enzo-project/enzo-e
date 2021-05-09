@@ -9,65 +9,6 @@
 #include "charm_simulation.hpp"
 #include "test.hpp"
 
-// #define TRACE_METHOD_OUTPUT
-// #define TRACE_FILE
-// #define TRACE_MSG_OUTPUT
-// #define TRACE_FIELD_SUMS /* use for cello-bug/210503 checking */
-
-#define TRACE_BLOCK_DENSITY(BLOCK_NAME,DATA)                           \
-  {                                                                     \
-    Field field = DATA->field();                                        \
-    if (BLOCK_NAME == "B000_000") {                                     \
-      int index_density = field.field_id("density");                    \
-      int mx,my,mz;                                                     \
-      field.dimensions(index_density,&mx,&my,&mz);                      \
-      cello_float * density = (cello_float *)field.values(index_density); \
-      CkPrintf ("TRACE_BLOCK_DENSITY %s %d block %s density [4,4] %p %g\n", \
-        __FILE__,__LINE__,BLOCK_NAME.c_str(), (void *)&(density[4+mx*(4)]), density[4+mx*(4)]); \
-    }                                                                   \
-  }
-
-//--------------------------------------------------
-
-#ifdef TRACE_METHOD_OUTPUT
-#   undef TRACE_METHOD_OUTPUT
-#   define TRACE_METHOD_OUTPUT(block,msg,tag)                           \
-  {                                                                     \
-  CkPrintf ("TRACE_METHOD_OUTPUT %s %s %s\n",std::string(msg).c_str(),block->name().c_str(),tag); \
-  fflush(stdout);                                                       \
-}
-#else
-#   define TRACE_METHOD_OUTPUT(block,msg,tag) /* ... */
-#endif
-
-//--------------------------------------------------
-
-#ifdef TRACE_FILE
-#   undef TRACE_FILE
-#   define TRACE_FILE(block,file,msg)           \
-  {                                             \
-    CkPrintf ("TRACE_FILE %p %s %s\n",          \
-              (void *)file,                     \
-              block->name().c_str(),            \
-              std::string(msg).c_str());        \
-    fflush(stdout);                             \
-  }
-#else
-#   define TRACE_FILE(block,file,msg) /* ... */
-#endif
-
-//--------------------------------------------------
-
-#ifdef TRACE_MSG_OUTPUT
-#   undef TRACE_MSG_OUTPUT                                            
-#   define TRACE_MSG_OUTPUT(MSG_OUTPUT,MSG)                     \
-  CkPrintf ("TRACE_MSG_OUTPUT %s:%d %d %p %s %s\n",                \
-            __FILE__,__LINE__,CkMyPe(),(void *) MSG_OUTPUT,MSG_OUTPUT->tag(),MSG);  
-#else  
-#   define TRACE_MSG_OUTPUT(MSG_OUTPUT,MSG) /* ... */
-#endif
-    
-
 //----------------------------------------------------------------------
 
 MethodOutput::MethodOutput
@@ -183,13 +124,9 @@ void MethodOutput::pup (PUP::er &p)
 
 void MethodOutput::compute ( Block * block) throw()
 {
-  TRACE_METHOD_OUTPUT(block,"compute","...");
-
   // barrier to ensure tree traversal doesn't reach a block
   // before the method has started
 
-  TRACE_BLOCK_DENSITY(block->name(),block->data());
-  
   CkCallback callback(CkIndex_Block::r_method_output_continue(nullptr), 
                       cello::block_array());
   block->contribute(callback);
@@ -209,8 +146,6 @@ void Block::r_method_output_continue(CkReductionMsg *msg)
 
 void MethodOutput::compute_continue(Block * block)
 {
-  TRACE_METHOD_OUTPUT(block,"compute_continue","...");
-
   if (is_writer_(block->index())) {
     int a3[3];
     block->index().array(a3,a3+1,a3+2);
@@ -227,7 +162,7 @@ void MethodOutput::compute_continue(Block * block)
     
     // Create output message
     MsgOutput * msg_output = new MsgOutput(bt,this,file);
-    TRACE_MSG_OUTPUT(msg_output,"new");
+
     msg_output->set_index_send (block->index());
     // Get its block_trace object
     BlockTrace * block_trace = msg_output->block_trace();
@@ -236,7 +171,6 @@ void MethodOutput::compute_continue(Block * block)
     
     if (block->is_leaf()) {
 
-      TRACE_FILE(block,file,std::string("WRITE ")+block->name().c_str());
       msg_output->set_block(block,factory_);
       file_write_block_(file,block,nullptr);
       
@@ -245,20 +179,16 @@ void MethodOutput::compute_continue(Block * block)
     
     if ( ! block_trace->next(block->is_leaf())) {
       Index index_next = block_trace->top();
-      TRACE_METHOD_OUTPUT(block,"continue next",msg_output->tag());
       msg_output->del_block();
       cello::block_array()[index_next].p_method_output_next(msg_output);
       
     } else {
       // Close file
       FileHdf5 * file = msg_output->file();
-      TRACE_FILE(block,file,"close file");
       file->file_close();
       delete file;
-      TRACE_METHOD_OUTPUT(block,"done",msg_output->tag());
 
       // Delete message
-      TRACE_MSG_OUTPUT(msg_output,"delete");
       delete msg_output;
       msg_output = nullptr;
 
@@ -269,7 +199,6 @@ void MethodOutput::compute_continue(Block * block)
 
   if (block->level() < 0) {
     // negative level blocks do not participate
-    TRACE_METHOD_OUTPUT(block,"done","...");
     block->compute_done();
   }
 }
@@ -298,13 +227,10 @@ void MethodOutput::next(Block * block, MsgOutput * msg_output_in )
 {
   // Copy incoming message and delete old (cannot reuse!)
   MsgOutput * msg_output = new MsgOutput (*msg_output_in);
-  TRACE_MSG_OUTPUT(msg_output,"new");
 
-  TRACE_MSG_OUTPUT(msg_output_in,"delete");
   delete msg_output_in;
   msg_output_in = nullptr;
   
-  TRACE_METHOD_OUTPUT(block,"next",msg_output->tag());
   const bool is_leaf = block->is_leaf();
   BlockTrace * bt = msg_output->block_trace();
   bt->next(block->is_leaf());
@@ -321,7 +247,6 @@ void MethodOutput::next(Block * block, MsgOutput * msg_output_in )
   } else {
     // if non-leaf, forward to child
     Index index_next = bt->top();
-    TRACE_METHOD_OUTPUT(block,"next next",msg_output->tag());
     msg_output->del_block();
     cello::block_array()[index_next].p_method_output_next(msg_output);
   }
@@ -336,14 +261,11 @@ void MethodOutput::write(Block * block, MsgOutput * msg_output_in )
   // Write the block data
   
   FileHdf5 * file = msg_output_in->file();
-  TRACE_FILE(block,file,std::string("WRITE ")+block->name().c_str());
   file_write_block_(file,block,msg_output_in);
 
   // Copy incoming message
   MsgOutput * msg_output = new MsgOutput (*msg_output_in);
-  TRACE_MSG_OUTPUT(msg_output,"new");
   // and delete it (cannot reuse)
-  TRACE_MSG_OUTPUT(msg_output_in,"delete");
   delete msg_output_in;
   msg_output_in = nullptr;
 
@@ -353,10 +275,8 @@ void MethodOutput::write(Block * block, MsgOutput * msg_output_in )
   Index index_home = bt->home();
   if (index_next == index_home) {
     // done
-    TRACE_FILE(block,file,"close");
     block->compute_done();
   } else {
-    TRACE_METHOD_OUTPUT(block,"write next",msg_output->tag());
     msg_output->del_block();
     cello::block_array()[index_next].p_method_output_next(msg_output);
   }  
@@ -390,7 +310,6 @@ FileHdf5 * MethodOutput::file_open_(Block * block, int a3[3])
 
   // Create File
   FileHdf5 * file = new FileHdf5 (path_name, file_name);
-  TRACE_FILE(block,file,std::string("file create ")+path_name+" "+file_name);
   file->file_create();
   return file;
 }
@@ -487,12 +406,10 @@ void MethodOutput::file_write_block_
     msg_output->update(data);
   }
   
+  // Write Block Field data
+  
   FieldData * field_data = data->field_data();
 
-  // Update data fields with fields from MsgOutput
-
-  TRACE_BLOCK_DENSITY (block_name,data);
-  // Write the Block data
   for (int i_f=0; i_f<field_list_.size(); i_f++) {
     const int index_field = field_list_[i_f];
     IoFieldData * io_field_data = factory_->create_io_field_data();
@@ -501,42 +418,14 @@ void MethodOutput::file_write_block_
     std::string name;
     int type;
     int mx,my,mz;  // Array dimension
-    int nx,ny,nz;     // Array size
+    int nx,ny,nz;  // Array size
 
     io_field_data->set_field_data((FieldData*)field_data);
     io_field_data->set_field_index(index_field);
+    
     io_field_data->field_array
       (&buffer, &name, &type, &mx,&my,&mz, &nx,&ny,&nz);
 
-#ifdef TRACE_FIELD_SUMS    
-  {
-    Field field = block->data()->field();
-    int index_field = field.field_id("density");
-    int mx,my,mz;
-    int gx,gy,gz;
-    field.dimensions(index_field,&mx,&my,&mz);
-    field.ghost_depth(index_field,&gx,&gy,&gz);
-    long double sum = 0;
-    cello_float * temp = (cello_float *)
-      field_data->values(cello::field_descr(),index_field);
-    for (int iz=gz; iz<mz-gz; iz++) {
-      for (int iy=gy; iy<my-gy; iy++) {
-        for (int ix=gx; ix<mx-gx; ix++) {
-          int i0 = ix + mx*(iy + my*iz);
-          CkPrintf ("DEBUG_VALUE RECV %s %d %d %d %g\n",block_name.c_str(),
-                    ix,iy,iz,temp[i0]);
-          fflush(stdout);
-          sum += temp[i0];
-        }
-      }
-    }
-    CkPrintf ("DEBUG_WRITE_BLOCK VALUE RECV %s %d field %d sum %Lg comm %d\n",
-              block_name.c_str(), CkMyPe(),
-              index_field, sum,
-              (block->name() == block_name) ? 0 : 1);
-  }
-#endif 
- 
     file->mem_create(nx,ny,nz,nx,ny,nz,0,0,0);
     if (mz > 1) {
       file->data_create(name.c_str(),type,mz,my,mx,1,nz,ny,nx,1);
@@ -550,24 +439,78 @@ void MethodOutput::file_write_block_
 
     delete io_field_data;
   }
-  // Output::write_block(block);
-  // ItIndex * it_f = it_field_index_;
-  // if (it_f) {
-  //   for (it_f->first(); ! it_f->done();  it_f->next()  ) {
-  //     const FieldData * field_data = msg_output
-  //     write_field_data (field_data, it_f->value());
-  //   }
-  // }
 
-  // // Write particles
+  // Write Block Particle data
 
-  // ItIndex * it_p = it_particle_index_;
-  // if (it_p) {
-  //   for (it_p->first(); ! it_p->done();  it_p->next()  ) {
-  //     const ParticleData * particle_data = block->data()->particle_data();
-  //     write_particle_data (particle_data, it_p->value());
-  //   }
-  // }
+  Particle particle = data->particle();
+
+  for (int i_p=0; i_p<particle_list_.size(); i_p++) {
+
+    // Get particle type for it'th element of the particle output list
+    const int it = particle_list_[i_p];
+
+    // get the number of particle batches and attributes
+    const int nb = particle.num_batches(it);
+    const int na = particle.num_attributes(it);
+
+
+    // For each particle attribute
+    for (int ia=0; ia<na; ia++) {
+
+      IoParticleData * io_particle_data = factory_->create_io_particle_data();
+
+      // For each particle attribute
+      int np = particle.num_particles (it);
+
+      const std::string name = "particle_"
+        +                particle.type_name(it) + "_"
+        +                particle.attribute_name(it,ia);
+    
+      const int type = particle.attribute_type(it,ia);
+
+      // create the disk array
+      file->data_create(name.c_str(),type,np,1,1,1,np,1,1,1);
+
+      // running count of particles in the type
+      int i0 = 0;
+
+      // for each batch of particles
+      for (int ib=0; ib<nb; ib++) {
+
+        // number of particles in batch (it,ib)
+        const int mb = particle.num_particles(it,ib);
+
+        // create the memory space for the batch
+        file->mem_create(mb,1,1,mb,1,1,0,0,0);
+
+        // get the buffer of data
+        const void * buffer = (const void *) particle.attribute_array(it,ia,ib);
+
+        // find the hyper_slab of the disk dataset
+        file->data_slice (np,1,1,1, mb,1,1,1, i0,0,0,0);
+
+        // update the running count of particles for the type
+        i0 += mb;
+
+        // write the batch to disk
+        file->data_write(buffer);
+
+        // close the memory space
+        file->mem_close();
+      }
+
+      // check that the number of particles equals the number written 
+    
+      ASSERT2 ("OutputData::write_particle_data()",
+               "Particle count mismatch %d particles %d written",
+               np,i0,
+               np == i0);
+
+      // close the attribute dataset
+      file->data_close();
+      delete io_particle_data;
+    }
+  }
 
   file->group_close();
 }
@@ -661,33 +604,6 @@ DataMsg * MethodOutput::create_data_msg_ (Block * block)
     any_particles = false;
   }
 
-#ifdef TRACE_FIELD_SUMS    
-  {
-    Field field = block->data()->field();
-    int index_field = field.field_id("density");
-    int mx,my,mz;
-    int gx,gy,gz;
-    field.dimensions(index_field,&mx,&my,&mz);
-    field.ghost_depth(index_field,&gx,&gy,&gz);
-    long double sum = 0;
-    cello_float * temp = (cello_float *) field.values(index_field);
-    for (int iz=gz; iz<mz-gz; iz++) {
-      for (int iy=gy; iy<my-gy; iy++) {
-        for (int ix=gx; ix<mx-gx; ix++) {
-          int i0 = ix + mx*(iy + my*iz);
-          sum += temp[i0];
-          CkPrintf ("DEBUG_VALUE SEND %s %d %d %d %g\n",block->name().c_str(),
-                    ix,iy,iz,temp[i0]);
-          fflush(stdout);
-        }
-      }
-    }
-    CkPrintf ("DEBUG_WRITE_BLOCK VALUE SEND %s %d field %d sum %Lg\n",
-              block->name().c_str(), CkMyPe(),
-              index_field, sum);
-  }
-#endif  
-
   // Create FieldFace object specifying fields to send
   FieldFace * field_face = block->create_face 
     (if3,ic3,g3, refresh_same, refresh, true);
@@ -696,6 +612,7 @@ DataMsg * MethodOutput::create_data_msg_ (Block * block)
   DataMsg * data_msg = new DataMsg;
   data_msg -> set_field_face (field_face,true);
   data_msg -> set_field_data (block->data()->field_data(),false);
+  data_msg -> set_particle_data (block->data()->particle_data(),false);
   return data_msg;
 }
 
