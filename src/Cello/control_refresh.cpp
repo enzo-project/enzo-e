@@ -337,9 +337,6 @@ void Block::refresh_load_field_face_
   
   MsgRefresh * msg_refresh = new MsgRefresh;
 
-  // create data message
-  DataMsg * data_msg = new DataMsg;
-  
   // create field face
   if (refresh_type == refresh_coarse) {
     index_.child(index_.level(),ic3,ic3+1,ic3+2);
@@ -348,14 +345,15 @@ void Block::refresh_load_field_face_
   FieldFace * field_face = create_face
     (if3, ic3, g3, refresh_type, &refresh,false);
 
-  // initialize refresh message
-
-  msg_refresh->set_refresh_id (refresh.id());
-  msg_refresh->set_data_msg (data_msg);
-
+  // create data message
+  DataMsg * data_msg = new DataMsg;
   // initialize data message
   data_msg -> set_field_face (field_face,true);
   data_msg -> set_field_data (data()->field_data(),false);
+
+  // initialize refresh message
+  msg_refresh->set_refresh_id (refresh.id());
+  msg_refresh->set_data_msg (data_msg);
 
   thisProxy[index_neighbor].p_refresh_recv (msg_refresh);
 

@@ -21,7 +21,6 @@ class Data;
 class MsgRefresh;
 class MsgRefine;
 class MsgCoarsen;
-class Factory;
 class FieldFace;
 class Hierarchy;
 class ItFace;

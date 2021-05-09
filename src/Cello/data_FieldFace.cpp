@@ -11,12 +11,25 @@
 #define FORTRAN_STORE
 // #define DEBUG_NEW_BOX
 
+// #define TRACE_FIELD_FACE
 // #define TRACE_PROLONG
 //======================================================================
 // #define DEBUG_ARRAY
 // #define DEBUG_ARRAY_CYCLE 00
 // #define DEBUG_PRINT true
 // #define DEBUG_BLOCK_ONLY true
+
+#ifdef TRACE_FIELD_FACE
+#  undef TRACE_FIELD_FACE
+#  define TRACE_FIELD_FACE(MSG)                         \
+  CkPrintf ("TRACE_FIELD_FACE %d %s:%d %p %d %s\n",        \
+            CkMyPe(), __FILE__,__LINE__,this,               \
+            FieldFace::counter[cello::index_static()],  \
+            MSG);
+#else
+#  define TRACE_FIELD_FACE(MSG) /* ... */
+#endif
+
 
 #ifdef TRACE_PROLONG
 #  undef TRACE_PROLONG
@@ -108,7 +121,7 @@ FieldFace::FieldFace (int rank) throw()
     new_refresh_(false)
 {
   ++counter[cello::index_static()]; 
-
+  TRACE_FIELD_FACE("FieldFace(int)");
   for (int i=0; i<3; i++) {
     face_[i] = 0;
     child_[i] = 0;
@@ -121,6 +134,7 @@ FieldFace::FieldFace (int rank) throw()
 FieldFace::~FieldFace() throw ()
 {
   --counter[cello::index_static()];
+  TRACE_FIELD_FACE("~FieldFace()");
 
   if (new_refresh_) {
     delete refresh_;
@@ -137,6 +151,7 @@ FieldFace::FieldFace(const FieldFace & field_face) throw ()
 
 {
   ++counter[cello::index_static()];
+  TRACE_FIELD_FACE("FieldFace(FieldFace)");
 
   copy_(field_face);
 }
@@ -237,7 +252,6 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
     field.size(n3,n3+1,n3+2);
     Box box(rank_,n3,g3);
     set_box_(&box);
-
 
     box_adjust_accumulate_(&box,accumulate,g3);
 
@@ -415,7 +429,6 @@ void FieldFace::array_to_face (char * array, Field field) throw()
 
 void FieldFace::face_to_face (Field field_src, Field field_dst)
 {
-  
   auto field_list_src = refresh_->field_list_src();
   auto field_list_dst = refresh_->field_list_dst();
   

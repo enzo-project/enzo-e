@@ -24,8 +24,11 @@ MsgOutput::MsgOutput()
     file_(nullptr),
     data_msg_(nullptr),
     buffer_(nullptr),
+    tag_(),
+    io_block_(),
     block_name(),
-    tag_()
+    block_lower(),
+    block_upper()
 {
   ++counter[cello::index_static()];
   cello::hex_string(tag_,TAG_LEN-1);
@@ -46,7 +49,11 @@ MsgOutput::MsgOutput
     file_(file),
     data_msg_(nullptr),
     buffer_(nullptr),
-    block_name()
+    tag_(),
+    io_block_(),
+    block_name(),
+    block_lower(),
+    block_upper()
 {
   cello::hex_string(tag_,TAG_LEN-1);
   ++counter[cello::index_static()]; 
@@ -57,8 +64,6 @@ MsgOutput::MsgOutput
 MsgOutput::~MsgOutput()
 {
   --counter[cello::index_static()];
-  delete data_msg_;
-  data_msg_ = 0;
   CkFreeMsg (buffer_);
   buffer_=nullptr;
 }
@@ -100,7 +105,16 @@ void * MsgOutput::pack (MsgOutput * msg)
 
   // Block name
   SIZE_STRING_TYPE(size,msg->block_name);
+  SIZE_ARRAY_TYPE(size,double,msg->block_lower,3);
+  SIZE_ARRAY_TYPE(size,double,msg->block_upper,3);
+  
   SIZE_ARRAY_TYPE(size,char,msg->tag_,TAG_LEN);
+
+  int have_io = (msg->io_block_ != nullptr);
+  SIZE_SCALAR_TYPE(size,int,have_io);
+  if (have_io) {
+    SIZE_OBJECT_TYPE(size,*(msg->io_block_));
+  }
 
   //--------------------------------------------------
   
@@ -133,7 +147,17 @@ void * MsgOutput::pack (MsgOutput * msg)
 
   // Block name
   SAVE_STRING_TYPE(pc,msg->block_name);
+  SAVE_ARRAY_TYPE(pc,double,msg->block_lower,3);
+  SAVE_ARRAY_TYPE(pc,double,msg->block_upper,3);
+
   SAVE_ARRAY_TYPE(pc,char,msg->tag_,TAG_LEN);
+
+  have_io = (msg->io_block_ != nullptr);
+  SAVE_SCALAR_TYPE(pc,int,have_io);
+  
+  if (have_io) {
+    SAVE_OBJECT_TYPE(pc,*(msg->io_block_));
+  }
 
   ASSERT2("MsgOutput::pack()",
 	  "buffer size mismatch %ld allocated %d packed",
@@ -185,8 +209,21 @@ MsgOutput * MsgOutput::unpack(void * buffer)
 
   // Block name
   LOAD_STRING_TYPE(pc,msg->block_name);
+  LOAD_ARRAY_TYPE(pc,double,msg->block_lower,3);
+  LOAD_ARRAY_TYPE(pc,double,msg->block_upper,3);
+
   LOAD_ARRAY_TYPE(pc,char,msg->tag_,TAG_LEN);
   
+  int have_io;
+  LOAD_SCALAR_TYPE(pc,int,have_io);
+  if (have_io) {
+
+    // create the correct IoBlock (IoBlock or IoEnzoBlock
+    msg->io_block_ = msg->method_output_->factory()->create_io_block();
+
+    LOAD_OBJECT_TYPE(pc,*(msg->io_block_));
+  }
+
   // Save the input buffer for freeing later
 
   msg->buffer_ = buffer;
@@ -203,8 +240,8 @@ void MsgOutput::update (Data * data)
   data_msg_->update(data,is_local_);
 
   if (!is_local_) {
-      CkFreeMsg (buffer_);
-      buffer_ = nullptr;
+    CkFreeMsg (buffer_);
+    buffer_ = nullptr;
   }
 }
 
@@ -220,31 +257,39 @@ void MsgOutput::set_index_send(Index index)
 
 //----------------------------------------------------------------------
 
-void MsgOutput::set_block (Block * block)
+void MsgOutput::set_block (Block * block, const Factory * factory)
 {
   block_name = block->name();
+  block->data()->lower(block_lower,block_lower+1,block_lower+2);
+  block->data()->upper(block_upper,block_upper+1,block_upper+2);
+  delete io_block_;
+  io_block_ = factory->create_io_block();
+  io_block_->set_block(block);
 }
 
 //----------------------------------------------------------------------
 
 void MsgOutput::del_block()
 {
+  delete data_msg_;
+  data_msg_ = nullptr;
+  delete io_block_;
+  io_block_ = nullptr;
 }
 
 //----------------------------------------------------------------------
 
 void MsgOutput::print (const char * msg)
 {
-    CkPrintf ("MSG_OUTPUT====================\n");
-    CkPrintf ("MSG_OUTPUT tag %s %s\n",msg,tag_);
-    CkPrintf ("MSG_OUTPUT is_local %d\n",is_local_);
-    int v3[3];
-    index_send_.values(v3);
-    CkPrintf ("MSG_OUTPUT index_send values %d %d %d\n",v3[0],v3[1],v3[2]);
-    CkPrintf ("MSG_OUTPUT block_trace_ %p\n",block_trace_);
-    block_trace_.print(msg);
-    CkPrintf ("MSG_OUTPUT method_output_ %p\n",method_output_);
-    CkPrintf ("MSG_OUTPUT file_ %p\n",file_);
-    CkPrintf ("MSG_OUTPUT data_msg_ %p\n",data_msg_);
-    CkPrintf ("MSG_OUTPUT\n");
-  }
+  CkPrintf ("MSG_OUTPUT====================\n");
+  CkPrintf ("MSG_OUTPUT tag %s %s\n",msg,tag_);
+  CkPrintf ("MSG_OUTPUT is_local %d\n",is_local_);
+  int v3[3];
+  index_send_.values(v3);
+  CkPrintf ("MSG_OUTPUT index_send values %d %d %d\n",v3[0],v3[1],v3[2]);
+  block_trace_.print(msg);
+  CkPrintf ("MSG_OUTPUT method_output_ %p\n",(void *)method_output_);
+  CkPrintf ("MSG_OUTPUT file_ %p\n",(void *)file_);
+  CkPrintf ("MSG_OUTPUT data_msg_ %p\n",(void *)data_msg_);
+  CkPrintf ("MSG_OUTPUT\n");
+}

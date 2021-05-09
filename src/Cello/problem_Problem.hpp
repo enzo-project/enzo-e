@@ -193,7 +193,8 @@ public: // interface
 			 const Factory * factory) throw();
 
   /// Initialize the method objects
-  void initialize_method(Config * config) throw();
+  void initialize_method(Config * config,
+			 const Factory * factory) throw();
 
   /// Initialize Solver objects
   void initialize_solver(Config * config) throw();
@@ -245,26 +246,29 @@ protected: // functions
 
   /// Create named refine object
   virtual Refine * create_refine_ 
-  (std::string type, 
+  (std::string type,
+   int index,
    Config * config, 
-   Parameters * parameters,
-   int index) throw ();
+   Parameters * parameters) throw ();
 
   /// Create named solver object
   virtual Solver *   create_solver_
-  (std::string type, 
-   Config * config, 
-   int index_solver) throw ();
+  (std::string type,
+   int index_solver,
+   Config * config) throw ();
 
   /// Create named method object
   virtual Method *   create_method_
-  (std::string type, 
-   Config * config, 
-   int index_method) throw ();
+  (std::string type,
+   int index_method,
+   Config * config,
+   const Factory * factory) throw ();
 
   /// Create named output object
   virtual Output *   create_output_  
-  (std::string type, int index, Config * config,
+  (std::string type,
+   int index,
+   Config * config,
    const Factory * ) throw ();
 
   /// Create named prolongation object

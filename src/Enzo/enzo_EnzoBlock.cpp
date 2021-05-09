@@ -249,7 +249,6 @@ void EnzoBlock::pup(PUP::er &p)
   PUParray(p,CellWidth,MAX_DIMENSION);
 
   p | redshift;
-  TRACE ("END EnzoBlock::pup()");
 }
 
 //======================================================================

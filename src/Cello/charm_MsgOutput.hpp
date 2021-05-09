@@ -14,9 +14,11 @@ class Block;
 class BlockTrace;
 class Data;
 class DataMsg;
-class Index;
-class MethodOutput;
 class FileHdf5;
+class Index;
+class IoBlock;
+class Factory;
+class MethodOutput;
 
 #define TAG_LEN 9
 
@@ -45,9 +47,15 @@ public: // interface
     method_output_ = msg_output.method_output_;
     file_          = msg_output.file_;
     data_msg_      = msg_output.data_msg_;
-    strncpy(tag_,msg_output.tag_,TAG_LEN);
-    block_name     = msg_output.block_name;
     buffer_        = nullptr;
+    io_block_      = msg_output.io_block_;
+    block_name     = msg_output.block_name;
+    for (int i=0; i<3; i++) {
+      block_lower[i]    = msg_output.block_lower[i];
+      block_upper[i]    = msg_output.block_upper[i];
+    }
+    // new tag
+    cello::hex_string(tag_,TAG_LEN-1);
   };
 
   /// Set the DataMsg object
@@ -69,7 +77,7 @@ public: // interface
   void set_index_send (Index index);
 
   /// Set the Block whose data this message will be holding
-  void set_block (Block * block);
+  void set_block (Block * block, const Factory * factory);
 
   /// Clear the Block data in this message
   void del_block();
@@ -77,6 +85,8 @@ public: // interface
   void print (const char * msg);
 
   const char * tag() { return tag_;}
+
+  IoBlock * io_block() { return io_block_; }
   
 public: // static methods
 
@@ -109,12 +119,20 @@ protected: // attributes
   /// Saved Charm++ buffers for deleting after unpack()
   void * buffer_;
 
+  /// Random hex tag for tracking messages for debugging
   char tag_[TAG_LEN];
+
+  /// Data for the Block
+  IoBlock * io_block_;
   
 public: // attributes
 
   /// Block meta-data
   std::string block_name;
+
+  /// Block extents
+  double block_lower[3];
+  double block_upper[3];
   
 };
 

@@ -215,16 +215,16 @@ void Problem::initialize_physics(Config * config,
 void Problem::initialize_refine(Config * config,
 				Parameters * parameters) throw()
 {
-  for (int i=0; i<config->num_adapt; i++) {
+  for (int index=0; index<config->num_adapt; index++) {
 
-    std::string name = config->adapt_type[i];
+    std::string name = config->adapt_type[index];
 
     Refine * refine = create_refine_ 
-      (name,config,parameters,i);
+      (name,index,config,parameters);
 
     if (refine) {
       refine_list_.push_back( refine );
-      int index_schedule = config->adapt_schedule_index[i];
+      int index_schedule = config->adapt_schedule_index[index];
 
       if (index_schedule >= 0) {
 	refine->set_schedule
@@ -296,8 +296,7 @@ void Problem::initialize_restrict(Config * config) throw()
 //----------------------------------------------------------------------
 
 void Problem::initialize_output
-(Config * config,
- const Factory * factory) throw()
+(Config * config, const Factory * factory) throw()
 {
   FieldDescr * field_descr = cello::field_descr();
   
@@ -481,7 +480,8 @@ void Problem::initialize_output
 
 //----------------------------------------------------------------------
 
-void Problem::initialize_method ( Config * config ) throw()
+void Problem::initialize_method
+( Config * config, const Factory * factory ) throw()
 {
   const size_t num_method = config->method_list.size();
 
@@ -493,7 +493,7 @@ void Problem::initialize_method ( Config * config ) throw()
 
     std::string name = config->method_list[index_method];
 
-    Method * method = create_method_(name, config, index_method);
+    Method * method = create_method_(name, index_method, config, factory);
 
     if (method) {
 
@@ -528,15 +528,15 @@ void Problem::initialize_solver( Config * config ) throw()
 
     std::string type = config->solver_type[index_solver];
 
-    Solver * solver = create_solver_(type, config, index_solver);
+    Solver * solver = create_solver_(type, index_solver, config);
 
     if (solver) {
 
       solver_list_.push_back(solver); 
 
     } else {
-      ERROR1("Problem::initialize_method",
-	     "Unknown Method %s",type.c_str());
+      ERROR1("Problem::initialize_solver",
+	     "Unknown Solver %s",type.c_str());
     }
   }
 }
@@ -669,9 +669,9 @@ Initial * Problem::create_initial_
 Refine * Problem::create_refine_
 (
  std::string        type,
+ int                index,
  Config *           config,
- Parameters *       parameters,
- int                index
+ Parameters *       parameters
  ) throw ()
 { 
 
@@ -777,8 +777,9 @@ Units * Problem::create_units_
 
 Solver * Problem::create_solver_ 
 ( std::string  type,
-  Config * config,
-  int index_solver) throw ()
+  int index_solver,
+  Config * config
+  ) throw ()
 {
   TRACE1("Problem::create_solver %s",type.c_str());
 
@@ -816,12 +817,12 @@ Solver * Problem::create_solver_
 //----------------------------------------------------------------------
 
 Physics * Problem::create_physics_ 
-( std::string  name,
+( std::string type,
   int index,
   Config * config,
   Parameters * parameters) throw ()
 {
-  TRACE1("Problem::create_physics %s",name.c_str());
+  TRACE1("Problem::create_physics %s",type.c_str());
 
   // No default physics
   Physics * physics = nullptr;
@@ -866,8 +867,10 @@ Compute * Problem::create_compute
 
 Method * Problem::create_method_ 
 ( std::string  name,
+  int index_method,
   Config * config,
-  int index_method) throw ()
+  const Factory * factory
+  ) throw ()
 {
   TRACE1("Problem::create_method %s",name.c_str());
 
@@ -898,21 +901,18 @@ Method * Problem::create_method_
 
 
     method = new MethodOutput
-      (config->method_output_file_name[index_method],
-       config->method_output_path_name[index_method],
-       config->method_field_list[index_method],
-       config->method_particle_list[index_method],
-       config->method_ghost_depth[index_method],
-       config->method_min_face_rank[index_method],
-       config->method_all_fields[index_method],
-       config->method_all_particles[index_method],
-       config->method_output_blocking[0][index_method],
-       config->method_output_blocking[1][index_method],
-       config->method_output_blocking[2][index_method]);
-    CkPrintf ("MethodOutput (%d  %d  %d\n",
-              config->method_output_blocking[0][index_method],
-              config->method_output_blocking[1][index_method],
-              config->method_output_blocking[2][index_method]);
+      ( factory,
+        config->method_output_file_name[index_method],
+        config->method_output_path_name[index_method],
+        config->method_field_list[index_method],
+        config->method_particle_list[index_method],
+        config->method_ghost_depth[index_method],
+        config->method_min_face_rank[index_method],
+        config->method_all_fields[index_method],
+        config->method_all_particles[index_method],
+        config->method_output_blocking[0][index_method],
+        config->method_output_blocking[1][index_method],
+        config->method_output_blocking[2][index_method]);
 
   } else if (name == "refresh") {
 

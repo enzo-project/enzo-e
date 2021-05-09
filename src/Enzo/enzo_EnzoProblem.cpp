@@ -207,9 +207,9 @@ Stopping * EnzoProblem::create_stopping_
 Refine * EnzoProblem::create_refine_
 (
  std::string        type,
+ int                index,
  Config *           config,
- Parameters *       parameters,
- int                index
+ Parameters *       parameters
  ) throw ()
 {
 
@@ -251,7 +251,7 @@ Refine * EnzoProblem::create_refine_
        config->adapt_level_exponent[index] );
 
   } else {
-    return Problem::create_refine_(type,config,parameters,index);
+    return Problem::create_refine_(type,index,config,parameters);
   }
 }
 
@@ -259,8 +259,8 @@ Refine * EnzoProblem::create_refine_
 
 Solver * EnzoProblem::create_solver_
 ( std::string  solver_type,
-  Config * config,
-  int index_solver) throw ()
+  int index_solver,
+  Config * config) throw ()
 /// @param solver_type   Name of the solver to create
 /// @param config Configuration parameters class
 {
@@ -398,7 +398,7 @@ Solver * EnzoProblem::create_solver_
 
   } else {
     // Not an Enzo Solver--try base class Cello Solver
-    solver = Problem::create_solver_ (solver_type,config, index_solver);
+    solver = Problem::create_solver_ (solver_type, index_solver,config);
   }
 
   ASSERT1 ("EnzoProblem::create_solver()",
@@ -464,12 +464,12 @@ Compute * EnzoProblem::create_compute
 
 Method * EnzoProblem::create_method_
 ( std::string  name,
+  int index_method,
   Config * config,
-  int index_method) throw ()
+  const Factory * factory) throw ()
 /// @param name   Name of the method to create
 /// @param config Configuration parameters class
 {
-
   Method * method = 0;
 
   const EnzoConfig * enzo_config = enzo::config();
@@ -579,7 +579,8 @@ Method * EnzoProblem::create_method_
   } else {
 
     // Fallback to Cello method's
-    method = Problem::create_method_ (name,config, index_method);
+    method = Problem::create_method_ (name, index_method,config,
+                                      enzo::simulation()->factory());
 
   }
 

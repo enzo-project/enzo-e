@@ -383,27 +383,29 @@ enum type_enum {
 
 //--------------------------------------------------
 
-#define SIZE_STRING_TYPE(COUNT,STRING)          \
-  {                                             \
-    (COUNT) += sizeof(int);                     \
-    (COUNT) += (STRING).size()*sizeof(char);    \
+#define SIZE_STRING_TYPE(COUNT,STRING)                                  \
+  {                                                                     \
+    (COUNT) += sizeof(int);                                             \
+    (COUNT) += (STRING).size()*sizeof(char);                            \
   }
 #define SAVE_STRING_TYPE(POINTER,STRING)                        \
   {                                                             \
-    int n,length = (STRING).size();                               \
+    int n,length = (STRING).size();                             \
     memcpy(POINTER,&length, n=sizeof(int));                     \
     (POINTER) += n;                                             \
     memcpy(POINTER,(STRING).data(),n=length*sizeof(char));	\
     (POINTER) += n;                                             \
   }
 
-#define LOAD_STRING_TYPE(POINTER,STRING)                        \
-  {                                                             \
-    int n,length;                                               \
-    memcpy(&length, POINTER, n=sizeof(int));                    \
-    (POINTER) += n;                                             \
-    (STRING).resize(length);                                    \
-    for (int i=0; i<length; i++) (STRING)[i] = (*(POINTER)++);  \
+#define LOAD_STRING_TYPE(POINTER,STRING)                \
+  {                                                     \
+    int n,length;                                       \
+    memcpy(&length, POINTER, n=sizeof(int));            \
+    (POINTER) += n;                                     \
+    (STRING).resize(length);                            \
+    char * string = (char *)(STRING).data();            \
+    memcpy(string,POINTER,n=length*sizeof(char));       \
+    (POINTER) += n;                                     \
   }
 
 //--------------------------------------------------

@@ -412,7 +412,7 @@ std::string Index::bit_string(int max_level,int rank, const int nb3[3]) const
 
 int Index::data_size () const
 {
-  int size;
+  int size = 0;
   SIZE_ARRAY_TYPE(size,int,v_,3);
   return size;
 }

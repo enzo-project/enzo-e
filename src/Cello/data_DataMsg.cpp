@@ -404,6 +404,11 @@ void DataMsg::update (Data * data, bool is_local)
     }
   }
 
+  if (ff != nullptr) {
+    delete field_face_;
+    field_face_ = nullptr;
+  }
+
   // Update fluxes
 
   FluxData * flux_data = data->flux_data();
@@ -415,10 +420,6 @@ void DataMsg::update (Data * data, bool is_local)
         (face_fluxes,face.axis(), 1 - face.face(), i);
     }
     face_fluxes_list_.clear();
-  }
-  if (ff != nullptr) {
-    delete field_face_;
-    field_face_ = nullptr;
   }
 
   // Updated coarse array

@@ -59,6 +59,9 @@ public:
 
   bool operator != (const Index & index) const;
 
+  int operator [] (std::size_t i) const
+  { return v_[i]; }
+
   void clear () ;
   
   Index index_parent (int min_level = 0) const;

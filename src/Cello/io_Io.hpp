@@ -8,7 +8,7 @@
 #ifndef IO_IO_HPP
 #define IO_IO_HPP
 
-class Io {
+class Io : public PUP::able {
 
   /// @class    Io
   /// @ingroup  Io
@@ -23,6 +23,12 @@ public: // interface
   virtual ~Io () throw ()
   {}
 
+  /// CHARM++ function for determining the specific class in the class hierarchy
+  PUPable_decl(Io);
+
+  Io (CkMigrateMessage *m) : PUP::able(m) 
+  { TRACE("Io::Io(CkMigrateMessage*)"); }
+
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -32,6 +38,17 @@ public: // interface
     p | meta_name_;
 
   }
+
+  /// PACKING / UNPACKING
+  
+  /// Return the number of bytes required to serialize the data object
+  virtual int data_size () const;
+
+  /// Serialize the object into the provided empty memory buffer.
+  virtual char * save_data (char * buffer) const;
+
+  /// Restore the object from the provided initialized memory buffer data.
+  virtual char * load_data (char * buffer);
 
 #include "_io_Io_common.hpp"
 

@@ -59,6 +59,8 @@ module enzo {
   PUPable EnzoInitialSoup;  	  
   PUPable EnzoInitialTurbulence;
 
+  PUPable IoEnzoBlock;
+
   PUPable EnzoRefineShock;
   PUPable EnzoRefineParticleMass;
   PUPable EnzoRefineMass;

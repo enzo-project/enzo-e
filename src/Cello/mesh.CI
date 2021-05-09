@@ -33,6 +33,11 @@ module mesh {
   PUPable ColormapRGB;
   PUPable Config;
   PUPable Factory;
+  PUPable Io;
+  PUPable IoBlock;
+  PUPable IoFieldData;
+  PUPable IoParticleData;
+  PUPable IoHierarchy;
   PUPable Initial;
   PUPable InitialFile;
   PUPable InitialTrace;

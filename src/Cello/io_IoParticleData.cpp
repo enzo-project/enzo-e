@@ -15,10 +15,10 @@ IoParticleData::IoParticleData() throw ()
     particle_index_(0)
 
 {
-  meta_name_.push_back("particle_num_types");
-  meta_name_.push_back("array_size");
-  meta_name_.push_back("num_particles");
-  meta_name_.push_back("ghosts_allocated");
+  // meta_name_.push_back("particle_num_types");
+  // meta_name_.push_back("array_size");
+  // meta_name_.push_back("num_particles");
+  // meta_name_.push_back("ghosts_allocated");
 }
 
 //----------------------------------------------------------------------

@@ -198,8 +198,6 @@ void FileHdf5::data_open
   // Get the dataspace
 
   data_space_id_ = get_data_space_(data_id_, name);
-  hsize_t dim[10] = {0};
-  hsize_t maxdim[10] = {0};
 
   // set output extents
 

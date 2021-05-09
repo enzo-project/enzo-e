@@ -39,7 +39,6 @@ OutputData::OutputData
   
   stride = config->output_stride_wait[index_];
   stride_wait_ = (stride == 0) ? 1 : stride;
-
 }
 
 //----------------------------------------------------------------------

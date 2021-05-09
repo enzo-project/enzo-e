@@ -107,7 +107,7 @@ public: // interface
   
   /// Initialize EnzoBlock using MsgRefine returned by creating process
   virtual void p_set_msg_refine(MsgRefine * msg);
-
+  
   /// Initialize an empty EnzoBlock
   EnzoBlock()
     :  CBase_EnzoBlock(),
