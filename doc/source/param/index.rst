@@ -14,8 +14,7 @@ listed; for example, a parameter may only be valid if some other
 parameter is set to a certain value.
 
 If you find any errors in the documentation, or have any specific
-suggestions, please contact the documentation maintainer at
-jobordner@ucsd.edu.
+suggestions, please contact the Enzo Project developers at `github <https://github.com/enzo-project>`_.
 
 -----
 Adapt

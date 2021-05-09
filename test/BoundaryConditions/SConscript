@@ -12,7 +12,7 @@ Import('test_path')
 
 env['CPIN'] = 'touch parameters.out; mv parameters.out ${TARGET}.in'
 env['RMIN'] = 'rm -f parameters.out'
-
+env['clocal_cmd'] = '++local'
 
 
 date_cmd = 'echo $TARGET > test/STATUS; echo "---------------------"; date +"%Y-%m-%d %H:%M:%S";'
@@ -26,28 +26,28 @@ env.Append(BUILDERS = { 'pngToGif'  : png_to_gif})
 
 
 
-run_reflecting_2d = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
+run_reflecting_2d = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd  $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunReflecting2d' : run_reflecting_2d } )
 env_mv_reflecting_2d = env.Clone(COPY = 'mkdir -p ' + test_path + '/BoundaryConditions/Reflecting-2D; mv `ls *.png *.h5` ' + test_path + '/BoundaryConditions/Reflecting-2D')
 
-run_periodic_2d = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
+run_periodic_2d = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd  $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunPeriodic2d' : run_periodic_2d } )
 env_mv_periodic_2d = env.Clone(COPY = 'mkdir -p ' + test_path + '/BoundaryConditions/Periodic-2D; mv `ls *.png *.h5` ' + test_path + '/BoundaryConditions/Periodic-2D')
 
-run_outflow_2d = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
+run_outflow_2d = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd  $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunOutflow2d' : run_outflow_2d } )
 env_mv_outflow_2d = env.Clone(COPY = 'mkdir -p ' + test_path + '/BoundaryConditions/Outflow-2D; mv `ls *.png *.h5` ' + test_path + '/BoundaryConditions/Outflow-2D')
 
 
-run_reflecting_3d = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
+run_reflecting_3d = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd  $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunReflecting3d' : run_reflecting_3d } )
 env_mv_reflecting_3d = env.Clone(COPY = 'mkdir -p ' + test_path + '/BoundaryConditions/Reflecting-3D; mv `ls *.png *.h5` ' + test_path + '/BoundaryConditions/Reflecting-3D')
 
-run_periodic_3d = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
+run_periodic_3d = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd  $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunPeriodic3d' : run_periodic_3d } )
 env_mv_periodic_3d = env.Clone(COPY = 'mkdir -p ' + test_path + '/BoundaryConditions/Periodic-3D; mv `ls *.png *.h5` ' + test_path + '/BoundaryConditions/Periodic-3D')
 
-run_outflow_3d = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
+run_outflow_3d = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd  $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunOutflow3d' : run_outflow_3d } )
 env_mv_outflow_3d = env.Clone(COPY = 'mkdir -p ' + test_path + '/BoundaryConditions/Outflow-3D; mv `ls *.png *.h5` ' + test_path + '/BoundaryConditions/Outflow-3D')
 

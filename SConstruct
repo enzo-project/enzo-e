@@ -160,10 +160,10 @@ if (arch == 'unknown' and "CELLO_ARCH" in os.environ):
 if (prec == 'unknown' and "CELLO_PREC" in os.environ):
      prec = os.environ["CELLO_PREC"]
 
-print 
+print()
 print("    CELLO_ARCH scons arch=",arch)
 print("    CELLO_PREC scons prec=",prec)
-print 
+print()
 
 #----------------------------------------------------------------------
 # CONFIGURATION DEFINES
@@ -271,10 +271,12 @@ elif (arch == "mf_gnu"):       from mf_gnu       import *
 elif (arch == "mf_gnu_debug"): from mf_gnu_debug import *
 elif (arch == "stampede_gnu"): from stampede_gnu import *
 elif (arch == "stampede_intel"): from stampede_intel import *
+elif (arch == "frontera_intel"): from frontera_intel import *
 elif (arch == "davros_gnu"):   from davros_gnu   import *
 elif (arch == "davros_gnu_debug"):  from davros_gnu_debug  import *
 elif (arch == "darwin_gnu"):   from darwin_gnu   import *
 elif (arch == "darwin_homebrew"):   from darwin_homebrew   import *
+elif (arch == "msu_hpcc_gcc"): from msu_hpcc_gcc   import *
 
 #======================================================================
 # END ARCHITECTURE SETTINGS
@@ -296,9 +298,9 @@ if (prec == 'single' or prec == 'double'):
      defines.append(define[prec])
 else:
      print("Unrecognized precision ",prec)
-     print
+     print()
      print("Valid precisions are 'single' and 'double'")
-     print
+     print()
      print("The precision is set using the environment variable $CELLO_PREC")
      print("or by using 'scons prec=<precision>")
      sys.exit(1)
@@ -530,7 +532,7 @@ cello_def.write ("#define CELLO_TIME "
 		"\""+time.strftime("%H:%M:%S",time.gmtime())+"\"\n" )
 
 #----------
-charm_version = str(subprocess.check_output (["cat", charm_path + "/VERSION"]).rstrip());
+charm_version = subprocess.check_output (["cat", charm_path + "/VERSION"]).rstrip().decode('utf-8');
 cello_def.write ("#define CHARM_VERSION "+charm_version+"\n" )
      
 fp_charm_version = open ("test/CHARM_VERSION", "w")
@@ -589,8 +591,9 @@ Export('use_papi')
 
 if (have_git == 1):
    branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).rstrip()
-
-build_dir = 'build'
+   build_dir = 'build-' + branch.decode('utf-8')
+else:     
+   build_dir = 'build'
    
 SConscript( 'src/SConscript',variant_dir=build_dir)
 SConscript('test/SConscript')
