@@ -63,4 +63,4 @@ png_path = os.getenv('LIBPNG_HOME', '/lib/x86_64-linux-gnu')
 boost_inc = os.getenv('BOOST_INC', '/usr/include/boost')
 boost_lib = os.getenv('BOOST_LIB', '/usr/lib/x86_64-linux-gnu')
 
-grackle_path = grackle_path_search(home)
+grackle_path = os.getenv(GRACKLE_PATH, grackle_path_search(home))

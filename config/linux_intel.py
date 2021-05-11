@@ -53,4 +53,4 @@ png_path = os.getenv('LIBPNG_HOME')
 if png_path is None:
 	png_path     = '/lib/x86_64-linux-gnu'
 
-grackle_path_search = grackle_path_search(home)
+grackle_path_search = os.getenv(GRACKLE_PATH, grackle_path_search(home))

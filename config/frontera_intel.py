@@ -63,4 +63,4 @@ png_path     = '/usr/lib64'
 if os.path.isdir(home + '/public/Grackle/src/clib'):
 	grackle_path = home + '/public/Grackle/src/clib'
 else:
-	grackle_path = grackle_path_search(home)
+	grackle_path = os.getenv(GRACKLE_PATH, grackle_path_search(home))
