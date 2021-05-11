@@ -10,14 +10,105 @@
 
 //----------------------------------------------------------------------
 
+namespace{ // define some local helper functions
+
+  std::map<std::string, unsigned int> init_str_index_map_
+    (const std::vector<std::string> &keys)
+  {
+    std::map<std::string, unsigned int> out;
+    for (std::size_t i = 0; i < keys.size(); i++){
+      const std::string& key = keys[i];
+      ASSERT1("init_str_index_map_",
+              "There can't be more than 1 key called %s",
+              key.c_str(), out.find(key) == out.end());
+      out[key] = (unsigned int)i;
+    }
+    return out;
+  }
+
+}
+
+//----------------------------------------------------------------------
+
+EnzoEFltArrayMap::EnzoEFltArrayMap(std::string name,
+                                   const std::vector<std::string> &keys,
+                                   const std::array<int,3>& shape)
+  : name_(name)
+{
+  // copy the contents of keys to keys_
+  keys_ = keys;
+
+  // initialize str_index_map_
+  str_index_map_ = init_str_index_map_(keys);
+
+  // initialize arrays_
+  arrays_.reserve(keys.size());
+  for (const std::string& key : keys){
+    arrays_.push_back(EFlt3DArray(shape[0], shape[1], shape[2]));
+  }
+}
+
+//----------------------------------------------------------------------
+
+EnzoEFltArrayMap::EnzoEFltArrayMap(std::string name,
+                                   const std::vector<std::string> &keys,
+                                   const std::vector<EFlt3DArray> &arrays)
+  : name_(name)
+{
+  ASSERT2("EnzoEFltArrayMap::EnzoEFltArrayMap",
+          "keys and arrays have lengths %zu and %zu. They should be the same",
+          (std::size_t)keys.size(), (std::size_t)arrays.size(),
+          keys.size() == arrays.size());
+
+  // copy the contents of keys to keys_
+  keys_ = keys;
+
+  // initialize str_index_map_
+  str_index_map_ = init_str_index_map_(keys);
+
+  // validate that each entry in arrays_ has the same shape.
+  if (keys.size() > 0){
+    int ref_mz = arrays[0].shape(0);
+    int ref_my = arrays[0].shape(1);
+    int ref_mx = arrays[0].shape(2);
+    for (std::size_t i = 1; i < arrays.size(); i++){
+      int mz = arrays[i].shape(0);
+      int my = arrays[i].shape(1);
+      int mx = arrays[i].shape(2);
+
+      ASSERT8("EnzoEFltArrayMap::EnzoEFltArrayMap",
+              ("The shapes, (mz, my, mx), of the %s and %s arrays are "
+               "(%d, %d, %d) and (%d, %d, %d). The shapes must be the same"),
+              keys[0].c_str(), keys[i].c_str(),
+              ref_mz, ref_my, ref_mx, mz, my, mx,
+              ((ref_mz == mz) && (ref_my == my) && (ref_mx == mx)));
+    }
+  }
+
+  // copy the contents of arrays to arrays_
+  arrays_ = arrays;
+}
+
+//----------------------------------------------------------------------
+
 const EFlt3DArray& EnzoEFltArrayMap::at(const std::string& key) const noexcept
 {
-  auto result = map_.find(key);
-  if (result == map_.cend()){
+  auto result = str_index_map_.find(key);
+  if (result == str_index_map_.cend()){
     ERROR1("EnzoEFltArrayMap::at", "map doesn't contain the key: \"%s\"",
            key.c_str());
   }
-  return result->second;
+  return arrays_[result->second];
+}
+
+//----------------------------------------------------------------------
+
+const EFlt3DArray& EnzoEFltArrayMap::at(const std::size_t index) const noexcept
+{
+  ASSERT("EnzoEFltArrayMap::at",
+         "index must be less than or equal to the length of the ArrayMap.",
+	 index < size());
+  return arrays_[index];
 }
 
 //----------------------------------------------------------------------
@@ -61,27 +152,23 @@ void EnzoEFltArrayMap::print_summary() const noexcept
     return;
   }
 
-
   if (name_ == ""){
-    CkPrintf("Nameless Array Map\n");
+    CkPrintf("Nameless Array Map");
   } else {
-    CkPrintf("\"%s\" Array Map\n", name_.c_str());
+    CkPrintf("\"%s\" Array Map", name_.c_str());
   }
 
-  int i = 0;
-  CkPrintf("{");
+  CkPrintf(": entry_shape = (%d, %d, %d)\n{",
+           arrays_[0].shape(0), arrays_[0].shape(1), arrays_[0].shape(2));
 
-  for ( const auto &pair : map_ ) {
+  for ( std::size_t i = 0; i < my_size; i++){
     if (i != 0){
       CkPrintf(",\n ");
     }
-    CkPrintf("\"%s\" : EFlt3DArray(%p, %d, %d, %d)",
-             pair.first.c_str(),
-             (void*)pair.second.data(),
-             (int)pair.second.shape(0),
-             (int)pair.second.shape(1),
-             (int)pair.second.shape(2));
-    i++;
+
+    EFlt3DArray array = arrays_[i];
+    CkPrintf("\"%s\" : EFlt3DArray(%p)",
+             keys_[i].c_str(), (void*)array.data());
   }
   CkPrintf("}\n");
   fflush(stdout);

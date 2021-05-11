@@ -42,6 +42,16 @@ static void build_field_l_(const std::vector<std::string> &quantity_l,
 
 //----------------------------------------------------------------------
 
+// concatenate 2 vectors of strings
+static str_vec_t concat_str_vec_(const str_vec_t& vec1, const str_vec_t& vec2){
+  str_vec_t out(vec1);
+  out.reserve(vec1.size() + vec2.size());
+  out.insert(out.begin(),vec2.begin(), vec2.end());
+  return out;
+}
+
+//----------------------------------------------------------------------
+
 EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
 				      std::string half_recon_name,
 				      std::string full_recon_name,
@@ -183,24 +193,17 @@ void EnzoMethodMHDVlct::pup (PUP::er &p)
 EnzoEFltArrayMap EnzoMethodMHDVlct::get_integration_map_
 (Block * block,  const str_vec_t *passive_list) const noexcept
 {
-  EnzoEFltArrayMap map("integration");
+  str_vec_t field_list = (passive_list == nullptr) ? integration_field_list_ :
+    concat_str_vec_(integration_field_list_, *passive_list);
+
   EnzoFieldArrayFactory array_factory(block,0);
-  for (const std::string& field_name : integration_field_list_){
-    ASSERT1("EnzoMethodMHDVlct::get_integration_map_",
-            "EnzoEFltArrayMap can't hold more than one key called \"%s\"",
-            field_name.c_str(), !map.contains(field_name));
-    map[field_name] = array_factory.from_name(field_name);
+  std::vector<EFlt3DArray> arrays;
+  arrays.reserve(field_list.size());
+  for (const std::string& field_name : field_list){
+    arrays.push_back(array_factory.from_name(field_name));
   }
 
-  if (passive_list != nullptr){
-    for (const std::string& field_name : (*passive_list)){
-      ASSERT1("EnzoMethodMHDVlct::get_integration_map_",
-              "EnzoEFltArrayMap can't hold more than one key called \"%s\"",
-              field_name.c_str(), !map.contains(field_name));
-      map[field_name] = array_factory.from_name(field_name);
-    }
-  }
-  return map;
+  return EnzoEFltArrayMap("integration",field_list,arrays);
 }
 
 //----------------------------------------------------------------------
@@ -212,12 +215,12 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     check_mesh_and_ghost_size_(block);
 
     // declaring Maps of arrays and stand-alone arrays that wrap existing
-    // fields and/or serve as scratch space.
+    // fields and/or serve as scratch space. These will all be overwritten.
 
     // map that holds arrays wrapping the Cello Fields holding each of the
     // integration quantities. Additionally, this also includes temporary
     // arrays used to hold the specific form of the passive scalar
-    EnzoEFltArrayMap integration_map; // this will be overwritten
+    EnzoEFltArrayMap integration_map;
 
     // map used for storing integration values at the half time-step. This
     // includes key,array pairs for each entry in integration_map (there should
@@ -444,23 +447,21 @@ void EnzoMethodMHDVlct::compute_flux_
 
 //----------------------------------------------------------------------
 
-static void add_temporary_arrays_to_map_
-(EnzoEFltArrayMap &map, const std::array<int,3> &shape,
+static EnzoEFltArrayMap setup_temporary_array_map_
+(const std::string &name, const std::array<int,3> &shape,
  const std::vector<std::string>* const nonpassive_names,
- const str_vec_t* const passive_lists)
+ const str_vec_t* const passive_list)
 {
-
-  if (nonpassive_names != nullptr){
-    for (const std::string& name : (*nonpassive_names)){
-      map[name] = EFlt3DArray(shape[0], shape[1], shape[2]);
-    }
+  str_vec_t key_list;
+  if ((nonpassive_names != nullptr) && (passive_list != nullptr)){
+    key_list = concat_str_vec_(*nonpassive_names, *passive_list);
+  } else if (nonpassive_names != nullptr){
+    key_list = *nonpassive_names;
+  } else if (passive_list != nullptr){
+    key_list = *passive_list;
   }
 
-  if (passive_lists != nullptr){
-    for (const std::string& key : (*passive_lists)){
-      map[key] = EFlt3DArray(shape[0], shape[1], shape[2]);
-    }
-  }
+  return EnzoEFltArrayMap(name, key_list, shape);
 }
 
 //----------------------------------------------------------------------
@@ -485,9 +486,9 @@ void EnzoMethodMHDVlct::setup_arrays_
 				   integration_map.at("density").shape(2)};
 
   // Next, setup temp_integration_map
-  add_temporary_arrays_to_map_(temp_integration_map, shape,
-                               &integration_field_list_,
-                               (lazy_passive_list_.get_list()).get());
+  temp_integration_map = setup_temporary_array_map_
+    (temp_integration_map.name(), shape, &integration_field_list_,
+     (lazy_passive_list_.get_list()).get());
 
   // Prepare arrays to hold fluxes. It should include keys for all integration
   // quantities actively (including passively advected scalars)
@@ -495,9 +496,9 @@ void EnzoMethodMHDVlct::setup_arrays_
   for (std::size_t i = 0; i < 3; i++){
     std::array<int,3> cur_shape = shape; // makes a deep copy
     cur_shape[i] -= 1;
-    add_temporary_arrays_to_map_(*(flux_maps[i]), cur_shape,
-                                 &integration_field_list_,
-                                 (lazy_passive_list_.get_list()).get());
+    *(flux_maps[i]) = setup_temporary_array_map_
+      (flux_maps[i]->name(), cur_shape, &integration_field_list_,
+       (lazy_passive_list_.get_list()).get());
   }
 
   // Prepare fields used to accumulate all changes to the integration
@@ -506,23 +507,26 @@ void EnzoMethodMHDVlct::setup_arrays_
   // independently updates magnetic fields (this exclusion is implicitly
   // handled by integration_quan_updater_)
   std::vector<std::string> tmp = integration_quan_updater_->integration_keys();
-  add_temporary_arrays_to_map_(dUcons_map, shape, &tmp,
-                               (lazy_passive_list_.get_list()).get());
+  dUcons_map = setup_temporary_array_map_
+    (dUcons_map.name(), shape, &tmp, (lazy_passive_list_.get_list()).get());
+
 
   // Setup primitive_map
-  add_temporary_arrays_to_map_(primitive_map, shape,
-                               &primitive_field_list_,
-                               (lazy_passive_list_.get_list()).get());
+  primitive_map = setup_temporary_array_map_
+    (primitive_map.name(), shape, &primitive_field_list_,
+     (lazy_passive_list_.get_list()).get());
 
   // Prepare maps for holding the left and right reconstructed primitives.
   // As necessary, we pretend that these are centered along:
   //   - z and have shape (mz-1,  my,  mx)
   //   - y and have shape (  mz,my-1,  mx)
   //   - x and have shape (  mz,  my,mx-1)
-  add_temporary_arrays_to_map_(priml_map, shape, &primitive_field_list_,
-                               (lazy_passive_list_.get_list()).get());
-  add_temporary_arrays_to_map_(primr_map, shape, &primitive_field_list_,
-                               (lazy_passive_list_.get_list()).get());
+  priml_map = setup_temporary_array_map_(priml_map.name(), shape,
+                                         &primitive_field_list_,
+                                         (lazy_passive_list_.get_list()).get());
+  primr_map = setup_temporary_array_map_(primr_map.name(), shape,
+                                         &primitive_field_list_,
+                                         (lazy_passive_list_.get_list()).get());
 }
 
 //----------------------------------------------------------------------
