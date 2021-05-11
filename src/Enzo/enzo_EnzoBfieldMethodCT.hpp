@@ -111,8 +111,8 @@ public: // interface
   ///     supplied quantities.
   ///
   /// @note this function is called in `update_all_bfield_components`
-  static void compute_center_bfield(int dim, EFlt3DArray &bfieldc_comp,
-				    EFlt3DArray &bfieldi_comp,
+  static void compute_center_bfield(int dim, const EFlt3DArray &bfieldc_comp,
+				    const EFlt3DArray &bfieldi_comp,
                                     int stale_depth = 0);
 
 protected: // methods

@@ -670,8 +670,8 @@ void EnzoBfieldMethodCT::update_bfield
 //   Bi_left(k,j,i)    ->  B_i(k,j,i+1/2)
 //   Bi_right(k,j,i)   ->  B_i(k,j,i+3/2)
 void EnzoBfieldMethodCT::compute_center_bfield(int dim,
-                                               EFlt3DArray &bfieldc_comp,
-                                               EFlt3DArray &bfieldi_comp,
+                                               const EFlt3DArray &bfieldc_comp,
+                                               const EFlt3DArray &bfieldi_comp,
                                                int stale_depth)
 {
   EnzoPermutedCoordinates coord(dim);
