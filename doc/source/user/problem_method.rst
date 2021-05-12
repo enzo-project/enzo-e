@@ -146,7 +146,7 @@ PPML ideal MHD solver
 
 VL + CT (van Leer + Constrained Transport) MHD solver based on the
 unsplit Godunov method described by
-`Stone & Gardiner (2009) <http://adsabs.harvard.edu/abs/2009NewA...14..139S>`_
+`Stone & Gardiner (2009) <https://adsabs.harvard.edu/abs/2009NewA...14..139S>`_
 .
 
 The algorithm combines attributes similar to the MUSCL-Hancock with
@@ -405,7 +405,7 @@ We provide a few notes about the choice of interpolator for this algorithm:
      full-timestep (most test problems have been run using ``plm`` with
      ``theta_limiter=2``, matching the integrator description in
      `Stone & Gardiner 2009
-     <http://adsabs.harvard.edu/abs/2009NewA...14..139S>`_ ). Using ``"nn"``
+     <https://adsabs.harvard.edu/abs/2009NewA...14..139S>`_ ). Using ``"nn"``
      both times also works, however errors tests show that errors arise when
      piecewise linear reconstruction is used both times.
    * It is supposed to be possible to reconstruct the characteristic quantities
@@ -440,7 +440,7 @@ them:
     min/max eigenvalues of Roe's matrix to be wavespeed estimates. For a
     description of the procedure for MHD quantities, see
     `Stone et al. (2008)
-    <http://adsabs.harvard.edu/abs/2008ApJS..178..137S>`_ .
+    <https://adsabs.harvard.edu/abs/2008ApJS..178..137S>`_ .
     If using an HLL Riemann Solver, this is the recommended choice.
   * ``"hllc"`` **[EXPERIMENTAL]** The HLLC approximate Riemann solver.
     For an overview see Toro, 2009, *Riemann Solvers and Numerical
