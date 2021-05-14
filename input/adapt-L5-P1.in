@@ -27,7 +27,7 @@ Method {
       schedule { var = "cycle"; step = 20; }
       blocking = [1,2];
       path_name = ["Dir_New-%04d","cycle"];
-      file_name = ["density-%d.h5","proc"];
+      file_name = ["density-%d.h5","count"];
       field_list = ["density" ];
       ghost_depth = 4;
    }
