@@ -1672,7 +1672,7 @@ tests("Enzo","enzo-p","test_particle-y","","");
 test_table ("-","particle-y", array("000","003","006","009"),$types);
 end_hidden("particle-y");
 
-begin_hidden("particle-xy", "Particle (vx,vy) = (0,1)");
+begin_hidden("particle-xy", "Particle (vx,vy) = (-1,-1)");
 tests("Enzo","enzo-p","test_particle-xy","","");
 test_table ("-","particle-xy", array("000","003","006","009"),$types);
 end_hidden("particle-xy");

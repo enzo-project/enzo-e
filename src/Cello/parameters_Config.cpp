@@ -157,7 +157,6 @@ void Config::pup (PUP::er &p)
   p | output_list;
   p | output_type;
   p | output_axis;
-  p | output_image_block_size;
   p | output_colormap;
   p | output_image_lower;
   p | output_image_upper;
@@ -898,7 +897,7 @@ void Config::read_method_ (Parameters * p) throw()
 
     // Read refresh method parameters
     method_ghost_depth[index_method] =
-      p->value_integer(full_name+":ghost_depth",0); // default 0 all ghosts
+      p->value_integer(full_name+":ghost_depth",0);
     method_min_face_rank[index_method] =
       p->value_integer(full_name+"min_face_rank",0); // default 0 all faces
     method_all_fields[index_method] =
@@ -949,7 +948,6 @@ void Config::read_output_ (Parameters * p) throw()
   output_list.resize(num_output);
   output_type.resize(num_output);
   output_axis.resize(num_output);
-  output_image_block_size.resize(num_output);
   output_colormap.resize(num_output);
   output_image_lower.resize(num_output);
   output_image_upper.resize(num_output);
@@ -1075,9 +1073,6 @@ void Config::read_output_ (Parameters * p) throw()
       }
 
 
-      output_image_block_size[index_output] = 
-	p->value_integer("image_block_size",1);
-
       output_image_type[index_output] = p->value_string("image_type","data");
 
       output_image_log[index_output] = p->value_logical("image_log",false);
@@ -1091,9 +1086,9 @@ void Config::read_output_ (Parameters * p) throw()
 
       output_image_size[index_output].resize(2);
       output_image_size[index_output][0] = 
-	p->list_value_integer(0,"image_size",0);
+	p->list_value_integer(0,"image_size",512);
       output_image_size[index_output][1] = 
-	p->list_value_integer(1,"image_size",0);
+	p->list_value_integer(1,"image_size",512);
 
       output_image_reduce_type[index_output] = 
 	p->value_string("image_reduce_type","sum");

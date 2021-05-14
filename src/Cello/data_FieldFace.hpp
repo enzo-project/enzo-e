@@ -47,6 +47,12 @@ public: // interface
     ghost_[2] = gz;
   }
 
+  void ghost (int *gx, int *gy, int *gz)
+  {
+    *gx = ghost_[0];
+    *gy = ghost_[1];
+    *gz = ghost_[2];
+  }
   /// Set the face
   inline void set_face (int fx, int fy = 0, int fz = 0)
   {

@@ -20,3 +20,15 @@ Output {
            image_max = 6.0;
          }
 }
+
+Method {
+   list += ["output"];
+   output {
+      schedule { var = "cycle"; step = 20; }
+      blocking = [1,2];
+      path_name = ["Dir_New-%04d","cycle"];
+      file_name = ["density-%d.h5","proc"];
+      field_list = ["density" ];
+      ghost_depth = 4;
+   }
+}

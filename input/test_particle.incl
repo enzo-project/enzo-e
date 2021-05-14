@@ -41,7 +41,8 @@
              var = "cycle";
          };
          type = "image";
-	 image_block_size = 9;
+	 image_size = [128,128];
+         # image_block_size = 9; # DEPRECIATED
      };
      vx {
          name = ["particle-vx-%03d.png","cycle"];
@@ -51,7 +52,8 @@
              var = "cycle";
          };
          type = "image";
-	 image_block_size = 9;
+         image_size = [128,128];
+         # image_block_size = 9; # DEPRECIATED
      };
      vy {
          name = ["particle-vy-%03d.png","cycle"];
@@ -61,7 +63,8 @@
              var = "cycle";
          };
          type = "image";
-	 image_block_size = 9;
+         image_size = [128,128];              
+         # image_block_size = 9; # DEPRECIATED
      };
  }
 

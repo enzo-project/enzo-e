@@ -26,7 +26,8 @@ Output {
     trace {
         name = [ "particle-circle-%03d.png", "cycle" ];
 	include "input/schedule_cycle_5.incl"
-        image_block_size = 3;
+        image_size = [512,512];
+        #  image_block_size = 3; # DEPRECIATED
     }
 }
 

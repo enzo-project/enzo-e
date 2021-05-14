@@ -441,28 +441,22 @@ void Problem::initialize_output
         int n = config->output_colormap[index].size() / 3;
 
         if (n > 0) {
-          double * r = new double [n];
-          double * g = new double [n];
-          double * b = new double [n];
+          std::vector<float> colormap[3];
+          for (int i=0; i<3; i++) {
+            colormap[i].resize(n,0.0);
+          }
 
           for (int i=0; i<n; i++) {
 
-            int ir=3*i+0;
-            int ig=3*i+1;
-            int ib=3*i+2;
-
-            r[i] = config->output_colormap[index][ir];
-            g[i] = config->output_colormap[index][ig];
-            b[i] = config->output_colormap[index][ib];
+            for (int rgb=0; rgb<3; rgb++) {
+              int index_colormap = 3*i+rgb;
+              colormap[rgb][i] =
+                config->output_colormap[index][index_colormap];
+            }
 
           }
 
-          output_image->set_colormap(n,r,g,b);
-
-          delete [] r;
-          delete [] g;
-          delete [] b;
-
+          output_image->set_colormap(colormap);
         }
 
       }
@@ -962,25 +956,9 @@ Output * Problem::create_output_
 
   if (name == "image") {
 
-    //--------------------------------------------------
-    // parameter: Mesh : root_size
-    // parameter: Mesh : root_blocks
-    //--------------------------------------------------
-
-    int nx = config->mesh_root_size[0];
-    int ny = config->mesh_root_size[1];
-    int nz = config->mesh_root_size[2];
-
-    int nbx = config->mesh_root_blocks[0];
-    int nby = config->mesh_root_blocks[1];
-    int nbz = config->mesh_root_blocks[2];
-
     // NOTE: assumes cube for non-z axis images
 
     std::string image_type       = config->output_image_type[index];
-    int         image_size_x     = config->output_image_size[index][0];
-    int         image_size_y     = config->output_image_size[index][1];
-    int         image_block_size = config->output_image_block_size[index];
     bool        image_ghost      = config->output_image_ghost[index];
     bool        image_log        = config->output_image_log[index];
     bool        image_abs        = config->output_image_abs[index];
@@ -989,6 +967,8 @@ Output * Problem::create_output_
     int         max_level        = std::min(config->output_max_level[index],
 					    config->mesh_max_level);
     bool        leaf_only        = config->output_leaf_only[index];
+    int         image_size[2] = { config->output_image_size[index][0],
+                                  config->output_image_size[index][1] };
     std::string image_reduce_type = config->output_image_reduce_type[index];
     std::string image_mesh_color  = config->output_image_mesh_color[index];
     std::string image_color_particle_attribute =
@@ -1012,17 +992,16 @@ Output * Problem::create_output_
     
     output = new OutputImage (index,factory,
 			      CkNumPes(),
-			      nx,ny,nz, 
-			      nbx,nby,nbz,
+			      config->mesh_root_size,
+			      config->mesh_root_blocks,
 			      min_level,
 			      max_level,
 			      leaf_only,
 			      image_type,
-			      image_size_x,image_size_y,
+			      image_size,
 			      image_reduce_type,
 			      image_mesh_color,
 			      image_color_particle_attribute,
-			      image_block_size,
 			      image_lower, image_upper,
 			      image_face_rank,
 			      image_axis,

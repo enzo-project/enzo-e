@@ -56,7 +56,7 @@ MethodOutput::MethodOutput
 
   Refresh * refresh = cello::refresh(ir_post_);
 
-  if (ghost_depth > 0) refresh->set_ghost_depth (ghost_depth);
+  refresh->set_ghost_depth (ghost_depth);
   refresh->set_min_face_rank(min_face_rank);
 
   // add fields to refresh
@@ -157,7 +157,7 @@ void MethodOutput::compute_continue(Block * block)
                         index_min[2] + blocking_[2]};
     BlockTrace bt (cello::rank(),index_min,index_max);
 
-    // Create and open file
+    
     FileHdf5 * file = file_open_(block,a3);
     
     // Create output message
@@ -242,7 +242,6 @@ void MethodOutput::next(Block * block, MsgOutput * msg_output_in )
     DataMsg * data_msg = create_data_msg_(block);
     msg_output->set_data_msg(data_msg);
     msg_output->set_block(block,factory_);
-    msg_output->io_block()->print("next");
     cello::block_array()[index_home].p_method_output_write(msg_output);
   } else {
     // if non-leaf, forward to child
@@ -275,6 +274,9 @@ void MethodOutput::write(Block * block, MsgOutput * msg_output_in )
   Index index_home = bt->home();
   if (index_next == index_home) {
     // done
+    // Close file
+    FileHdf5 * file = msg_output->file();
+    file->file_close();
     block->compute_done();
   } else {
     msg_output->del_block();
@@ -308,7 +310,11 @@ FileHdf5 * MethodOutput::file_open_(Block * block, int a3[3])
   int count = file_count_(block);
   std::string file_name = cello::expand_name(&file_name_,count,block);
 
-  // Create File
+  Monitor::instance()->print 
+    ("Output","MethodOutput writing data file %s",
+     (path_name + "/" + file_name).c_str());
+
+    // Create File
   FileHdf5 * file = new FileHdf5 (path_name, file_name);
   file->file_create();
   return file;
@@ -376,7 +382,6 @@ void MethodOutput::file_write_block_
 
   // Write block meta data
 
-  io_block->print("write");
   write_meta_ (file, io_block, "group");
 
   // Call write(block) on base Output object
@@ -608,11 +613,18 @@ DataMsg * MethodOutput::create_data_msg_ (Block * block)
   FieldFace * field_face = block->create_face 
     (if3,ic3,g3, refresh_same, refresh, true);
 
+  int gx=-1,gy=-1,gz=-1;
+  field_face->ghost(&gx,&gy,&gz);
+  
   // Create data message object to send
   DataMsg * data_msg = new DataMsg;
-  data_msg -> set_field_face (field_face,true);
-  data_msg -> set_field_data (block->data()->field_data(),false);
-  data_msg -> set_particle_data (block->data()->particle_data(),false);
+  if (any_fields) {
+    data_msg -> set_field_face (field_face,true);
+    data_msg -> set_field_data (block->data()->field_data(),false);
+  }
+  if (any_particles) {
+    data_msg -> set_particle_data (block->data()->particle_data(),false);
+  }
   return data_msg;
 }
 

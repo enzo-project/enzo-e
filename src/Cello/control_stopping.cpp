@@ -191,7 +191,7 @@ void Block::stopping_balance_()
   if (do_balance) {
 
     if (index_.is_root())
-      cello::monitor()->print ("Balance","staring load balance step");
+      cello::monitor()->print ("Balance","starting load balance step");
     
     control_sync_quiescence (CkIndex_Main::p_stopping_balance());
 

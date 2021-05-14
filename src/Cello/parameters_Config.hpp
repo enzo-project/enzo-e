@@ -116,7 +116,6 @@ public: // interface
     output_list(),
     output_type(),
     output_axis(),
-    output_image_block_size(),
     output_image_lower(),
     output_image_upper(),
     output_colormap(),
@@ -294,7 +293,6 @@ public: // interface
       output_list(),
       output_type(),
       output_axis(),
-      output_image_block_size(),
       output_image_lower(),
       output_image_upper(),
       output_colormap(),
@@ -531,7 +529,6 @@ public: // attributes
   std::vector <std::string>   output_list;
   std::vector < std::string > output_type;
   std::vector < std::string > output_axis;
-  std::vector < int >         output_image_block_size;
   std::vector < std::vector <double> > output_image_lower;
   std::vector < std::vector <double> > output_image_upper;
   std::vector < std::vector <double> > output_colormap;
