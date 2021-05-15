@@ -581,6 +581,7 @@ public:
   void p_method_output_next (MsgOutput * msg);
   void p_method_output_write (MsgOutput * msg);
   void r_method_output_continue(CkReductionMsg * msg);
+  void r_method_output_done(CkReductionMsg * msg);
   
 protected:
 

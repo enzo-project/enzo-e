@@ -193,13 +193,13 @@ void MethodOutput::compute_continue(Block * block)
       msg_output = nullptr;
 
       // Exit MethodOutput
-      block->compute_done();
+      compute_done(block);
     }
   }
 
   if (block->level() < 0) {
     // negative level blocks do not participate
-    block->compute_done();
+    compute_done(block);
   }
 }
 
@@ -249,7 +249,7 @@ void MethodOutput::next(Block * block, MsgOutput * msg_output_in )
     msg_output->del_block();
     cello::block_array()[index_next].p_method_output_next(msg_output);
   }
-  block->compute_done();
+  compute_done(block);
 
 }
 
@@ -277,7 +277,7 @@ void MethodOutput::write(Block * block, MsgOutput * msg_output_in )
     // Close file
     FileHdf5 * file = msg_output->file();
     file->file_close();
-    block->compute_done();
+    compute_done(block);
   } else {
     msg_output->del_block();
     cello::block_array()[index_next].p_method_output_next(msg_output);
@@ -285,6 +285,24 @@ void MethodOutput::write(Block * block, MsgOutput * msg_output_in )
 }
 
 //----------------------------------------------------------------------
+
+void MethodOutput::compute_done (Block * block)
+{
+  CkCallback callback(CkIndex_Block::r_method_output_done(nullptr), 
+                      cello::block_array());
+  block->contribute(callback);
+}
+
+//----------------------------------------------------------------------
+
+void Block::r_method_output_done(CkReductionMsg *msg)
+{
+  delete msg;
+  MethodOutput * method = static_cast<MethodOutput*> (this->method());
+  this->compute_done();
+}
+
+//======================================================================
 
 int MethodOutput::is_writer_ (Index index) 
 {

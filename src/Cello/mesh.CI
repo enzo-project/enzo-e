@@ -130,6 +130,7 @@ module mesh {
     entry void p_method_output_next(MsgOutput *);
     entry void p_method_output_write(MsgOutput *);
     entry void r_method_output_continue(CkReductionMsg * msg);
+    entry void r_method_output_done(CkReductionMsg * msg);
 
     entry void r_method_debug_sum_fields(CkReductionMsg * msg);
 

@@ -67,6 +67,9 @@ public: // interface
 
   virtual void compute ( Block * block) throw();
 
+  /// barrier before exiting
+  void compute_done (Block * block);
+  
   /// Return the name of this MethodOutput
   virtual std::string name () throw ()
   { return "output"; }
