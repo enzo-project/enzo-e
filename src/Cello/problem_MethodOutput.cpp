@@ -412,9 +412,12 @@ void MethodOutput::file_write_block_
 
   Data * data;
 
+  bool data_allocated;
   if (is_local) {
+    data_allocated = false;
     data = block->data();
   } else {
+    data_allocated = true;
     data = new Data
     (nx,ny,nz,
      num_field_data,
@@ -535,6 +538,7 @@ void MethodOutput::file_write_block_
     }
   }
 
+  if (data_allocated) delete data;
   file->group_close();
 }
 
