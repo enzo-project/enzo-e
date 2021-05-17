@@ -10,6 +10,8 @@
 
 #include "enzo.hpp"
 
+// #define TRACE_BLOCK
+
 // #define DEBUG_ENZO_BLOCK
 
 //======================================================================
@@ -171,6 +173,11 @@ EnzoBlock::EnzoBlock
 {
   initialize_enzo_();
   initialize();
+#ifdef TRACE_BLOCK
+  CkPrintf ("%d index TRACE_BLOCK EnzoBlock(MsgRefine)  %d %d %d \n",
+            CkMyPe(), index_[0],index_[1],index_[2]);
+  msg->print();
+#endif
 #ifdef DEBUG_ENZO_BLOCK
   CkPrintf ("%d %p END TRACE_BLOCK EnzoBlock(msg)\n",CkMyPe(),(void *)this);
   EnzoBlock::print();
@@ -185,6 +192,11 @@ EnzoBlock::EnzoBlock
     dt(dt_),
     redshift(0.0)
 {
+#ifdef TRACE_BLOCK
+  CkPrintf ("%d index TRACE_BLOCK EnzoBlock(%d)  %d %d %d \n",
+            CkMyPe(),ip_source,
+	    index_[0],index_[1],index_[2]);
+#endif
 }
 
 //----------------------------------------------------------------------

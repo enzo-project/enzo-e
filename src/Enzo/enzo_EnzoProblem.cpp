@@ -92,7 +92,12 @@ Initial * EnzoProblem::create_initial_
 
   const EnzoConfig * enzo_config = enzo::config();
 
-  if (type == "music") {
+  if (type == "hdf5") {
+
+    initial = new EnzoInitialHdf5
+      (cycle,time,enzo_config,config->mesh_max_initial_level);
+
+  } else if (type == "music") {
 
     initial = new EnzoInitialMusic
       (cycle,time,enzo_config,config->mesh_max_initial_level);
@@ -479,28 +484,6 @@ Method * EnzoProblem::create_method_
   if (name == "ppm") {
 
     method = new EnzoMethodPpm;
-
-  } else if (name == "hydro") {
-
-    method = new EnzoMethodHydro
-      (enzo_config->method_hydro_method,
-       enzo_config->field_gamma,
-       enzo_config->physics_gravity,
-       enzo_config->physics_cosmology,
-       enzo_config->method_hydro_dual_energy,
-       enzo_config->method_hydro_dual_energy_eta_1,
-       enzo_config->method_hydro_dual_energy_eta_2,
-       enzo_config->method_hydro_reconstruct_method,
-       enzo_config->method_hydro_reconstruct_conservative,
-       enzo_config->method_hydro_reconstruct_positive,
-       enzo_config->ppm_density_floor,
-       enzo_config->ppm_pressure_floor,
-       enzo_config->ppm_pressure_free,
-       enzo_config->ppm_diffusion,
-       enzo_config->ppm_flattening,
-       enzo_config->ppm_steepening,
-       enzo_config->method_hydro_riemann_solver
-       );
 
   } else if (name == "ppml") {
 

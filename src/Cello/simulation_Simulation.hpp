@@ -266,7 +266,8 @@ public: // virtual functions
   void r_write(CkReductionMsg * msg);
 
   /// Continue on to Problem::output_wait() from checkpoint
-  virtual void r_write_checkpoint();
+  virtual void r_write_checkpoint_output();
+  virtual void r_write_checkpoint_method();
 
   /// Receive data from non-writing process, write to disk, close, and
   /// proceed with next output

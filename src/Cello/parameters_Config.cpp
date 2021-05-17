@@ -82,16 +82,6 @@ void Config::pup (PUP::er &p)
   p | initial_cycle;
   p | initial_time;
 
-  p | initial_hdf5_field_files;
-  p | initial_hdf5_field_datasets;
-  p | initial_hdf5_field_names;
-  p | initial_hdf5_field_coords;
-  p | initial_hdf5_particle_files;
-  p | initial_hdf5_particle_datasets;
-  p | initial_hdf5_particle_coords;
-  p | initial_hdf5_particle_types;
-  p | initial_hdf5_particle_attributes;
-
   p | initial_trace_name;
   p | initial_trace_field;
   p | initial_trace_mpp;
@@ -120,6 +110,8 @@ void Config::pup (PUP::er &p)
   p | method_courant_global;
   p | method_list;
   p | method_schedule_index;
+  p | method_file_name;
+  p | method_path_name;
   p | method_close_files_seconds_stagger;
   p | method_close_files_seconds_delay;
   p | method_close_files_group_size;
@@ -132,8 +124,6 @@ void Config::pup (PUP::er &p)
   p | method_flux_correct_min_digits;
   p | method_field_list;
   p | method_particle_list;
-  p | method_output_file_name;
-  p | method_output_path_name;
   p | method_output_blocking[0];
   p | method_output_blocking[1];
   p | method_output_blocking[2];
@@ -647,41 +637,6 @@ void Config::read_initial_ (Parameters * p) throw()
 
   }
 
-  // InitialHdf5
-
-  std::string name_initial = "Initial:hdf5:";
-  int num_files = p->list_length (name_initial + "file_list");
-  for (int index_file=0; index_file<num_files; index_file++) {
-    std::string file_id = name_initial +
-      p->list_value_string (index_file,name_initial+"file_list") + ":";
-
-    std::string type    = p->value_string (file_id+"type","");
-    std::string name    = p->value_string (file_id+"name","");
-    std::string file    = p->value_string (file_id+"file","");
-    std::string dataset = p->value_string (file_id+"dataset","");
-    std::string coords  = p->value_string (file_id+"coords","xyz");
-
-    if (type == "particle") {
-      std::string attribute = p->value_string (file_id+"attribute","");
-      //      if (name != "") {
-      initial_hdf5_particle_files.     push_back(file);
-      initial_hdf5_particle_datasets.  push_back(dataset);
-      initial_hdf5_particle_coords.    push_back(coords);
-      initial_hdf5_particle_types.     push_back(name);
-      initial_hdf5_particle_attributes.push_back(attribute);
-      //      }
-    } else if (type == "field") {
-      initial_hdf5_field_files.        push_back(file);
-      initial_hdf5_field_datasets.     push_back(dataset);
-      initial_hdf5_field_names.        push_back(name);
-      initial_hdf5_field_coords.       push_back(coords);
-    } else {
-      ERROR2 ("EnzoConfig::read",
-	      "Unknown particle type %s for parameter %s",
-	      type.c_str(),(file_id+"type").c_str());
-    }
-  }
-
   // InitialTrace
   initial_trace_name = p->value_string ("Initial:trace:name","trace");
   initial_trace_field = p->value_string ("Initial:trace:field","");
@@ -769,6 +724,8 @@ void Config::read_method_ (Parameters * p) throw()
 
   method_list.   resize(num_method);
   method_courant.resize(num_method);
+  method_file_name.resize(num_method);
+  method_path_name.resize(num_method);
   method_debug_print.resize(num_method);
   method_debug_coarse.resize(num_method);
   method_debug_ghost.resize(num_method);
@@ -777,8 +734,6 @@ void Config::read_method_ (Parameters * p) throw()
   method_flux_correct_min_digits.resize(num_method);
   method_field_list.resize(num_method);
   method_particle_list.resize(num_method);
-  method_output_file_name.resize(num_method);
-  method_output_path_name.resize(num_method);
   method_output_blocking[0].resize(num_method);
   method_output_blocking[1].resize(num_method);
   method_output_blocking[2].resize(num_method);
@@ -820,6 +775,32 @@ void Config::read_method_ (Parameters * p) throw()
       method_schedule_index[index_method] = -1;
     }
 
+    // Read method file_name
+    if (p->type(full_name+":file_name") == parameter_string) {
+      method_file_name[index_method].push_back
+        (p->value_string(full_name+":file_name",""));
+    } else if (p->type(full_name+":file_name") == parameter_list) {
+      int size = p->list_length(full_name+":file_name");
+      if (size > 0) method_file_name[index_method].resize(size);
+      for (int i=0; i<size; i++) {
+        method_file_name[index_method][i] =
+          p->list_value_string(i,full_name+":file_name","");
+      }
+    }
+
+    // Read method path_name
+    if (p->type(full_name+":path_name") == parameter_string) {
+      method_path_name[index_method].push_back
+        (p->value_string(full_name+":path_name",""));
+    } else if (p->type(full_name+":path_name") == parameter_list) {
+      int size = p->list_length(full_name+":path_name");
+      if (size > 0) method_path_name[index_method].resize(size);
+      for (int i=0; i<size; i++) {
+        method_path_name[index_method][i] =
+          p->list_value_string(i,full_name+":path_name","");
+      }
+    }
+
     // Read throttling parameters for MethodCloseFiles
     method_close_files_seconds_stagger[index_method] = p->value_float
       (full_name + ":seconds_stagger",0.0);
@@ -859,29 +840,6 @@ void Config::read_method_ (Parameters * p) throw()
     for (int i=0; i<n; i++) {
       method_particle_list[index_method][i] =
         p->list_value_string(i,full_name+":particle_list");
-    }
-
-    if (p->type(full_name+":file_name") == parameter_string) {
-      method_output_file_name[index_method].push_back
-        (p->value_string(full_name+":file_name",""));
-    } else if (p->type(full_name+":file_name") == parameter_list) {
-      int size = p->list_length(full_name+":file_name");
-      if (size > 0) method_output_file_name[index_method].resize(size);
-      for (int i=0; i<size; i++) {
-        method_output_file_name[index_method][i] =
-          p->list_value_string(i,full_name+":file_name","");
-      }
-    }
-    if (p->type(full_name+":path_name") == parameter_string) {
-      method_output_path_name[index_method].push_back
-        (p->value_string(full_name+":path_name",""));
-    } else if (p->type(full_name+":path_name") == parameter_list) {
-      int size = p->list_length(full_name+":path_name");
-      if (size > 0) method_output_path_name[index_method].resize(size);
-      for (int i=0; i<size; i++) {
-        method_output_path_name[index_method][i] =
-          p->list_value_string(i,full_name+":path_name","");
-      }
     }
 
     for (int i=0; i<3; i++) {

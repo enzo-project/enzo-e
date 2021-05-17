@@ -162,21 +162,7 @@ void Problem::initialize_initial(Config * config,
 
     std::string type = config->initial_list[index];
 
-    Initial * initial = nullptr;
-
-    if (type == "hdf5") {
-
-      const int cycle = config->initial_cycle;
-      double time     = config->initial_time;
-      
-      initial = new InitialHdf5
-        (cycle,time,config,config->mesh_max_initial_level);
-      
-    } else {
-      
-      initial = create_initial_ (type,index,config,parameters);
-
-    }
+    Initial * initial = create_initial_ (type,index,config,parameters);
 
     ASSERT1("Problem::initialize_initial",
 	    "Initial type %s not recognized",
@@ -887,17 +873,24 @@ Method * Problem::create_method_
        config->method_flux_correct_enable[index_method],
        config->method_flux_correct_min_digits[index_method]);
 
+  } else if (name == "checkpoint") {
+
+    method = new MethodCheckpoint
+      ( config->method_path_name[index_method]);
+
   } else if (name == "output") {
 
     ASSERT("Problem::create_method_()",
            "MethodOutput must have 'file_name' parameter set",
-           config->method_output_file_name[index_method].size() > 0);
-
+           config->method_file_name[index_method].size() > 0);
+    ASSERT("Problem::create_method_()",
+           "MethodOutput must have 'path_name' parameter set",
+           config->method_path_name[index_method].size() > 0);
 
     method = new MethodOutput
       ( factory,
-        config->method_output_file_name[index_method],
-        config->method_output_path_name[index_method],
+        config->method_file_name[index_method],
+        config->method_path_name[index_method],
         config->method_field_list[index_method],
         config->method_particle_list[index_method],
         config->method_ghost_depth[index_method],

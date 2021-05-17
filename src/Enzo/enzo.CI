@@ -49,6 +49,7 @@ module enzo {
 
   PUPable EnzoInitialCollapse;
   PUPable EnzoInitialCosmology;
+  PUPable EnzoInitialHdf5;
   PUPable EnzoInitialImplosion2;
   PUPable EnzoInitialMusic;
   PUPable EnzoInitialPm;
@@ -78,7 +79,6 @@ module enzo {
   PUPable EnzoMethodCosmology;
   PUPable EnzoMethodGravity;
   PUPable EnzoMethodHeat;
-  PUPable EnzoMethodHydro;
   PUPable EnzoMethodPmDeposit;
   PUPable EnzoMethodPmUpdate;
   PUPable EnzoMethodPpm;

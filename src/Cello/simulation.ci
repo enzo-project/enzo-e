@@ -25,7 +25,8 @@ module simulation {
 
     entry void s_write (); // [SC6]
     entry void r_write (CkReductionMsg * msg); // [SC7]
-    entry void r_write_checkpoint ();
+    entry void r_write_checkpoint_output ();
+    entry void r_write_checkpoint_method ();
 
     entry void p_output_write (int n, char buffer[n]); // [SC8]
     entry void r_output_barrier (CkReductionMsg * msg);

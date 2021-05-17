@@ -92,10 +92,8 @@ Block::Block ( MsgRefine * msg )
 	msg->num_face_level_, msg->face_level_);
 
 #ifdef TRACE_BLOCK
-  int v3[3];
-  index_.values(v3);
   CkPrintf ("%d %s index TRACE_BLOCK Block(MsgRefine)  %d %d %d \n",  CkMyPe(),name().c_str(),
-	    v3[0],v3[1],v3[2]);
+	    index_[0],index_[1],index_[2]);
   msg->print();
 #endif
 
@@ -156,10 +154,9 @@ Block::Block ( process_type ip_source )
   usesAtSync = true;
 #ifdef TRACE_BLOCK
   {
-  int v3[3];
-  index_.values(v3);
-  CkPrintf ("%d %s index TRACE_BLOCK Block(ip_source)  %d %d %d \n",  CkMyPe(),name().c_str(),
-    v3[0],v3[1],v3[2]);
+  CkPrintf ("%d %s index TRACE_BLOCK Block(%d)  %d %d %d \n",
+            CkMyPe(),name().c_str(),ip_source, 
+            index_[0],index_[1],index_[2]);
 }
 #endif
 
@@ -188,10 +185,8 @@ void Block::p_set_msg_refine(MsgRefine * msg)
 
 #ifdef TRACE_BLOCK
   {
-  int v3[3];
-  index_.values(v3);
   CkPrintf ("%d %s index TRACE_BLOCK p_set_msg_refine(MsgRefine)  %d %d %d \n",  CkMyPe(),name().c_str(),
-	    v3[0],v3[1],v3[2]);
+	    index_[0],index_[1],index_[2]);
   msg->print();
   }
 #endif
@@ -242,10 +237,8 @@ void Block::init
   
   if ((monitor != NULL) && monitor->is_verbose()) {
     char buffer [80];
-    int v3[3];
-    this->index().values(v3);
     sprintf (buffer,"Block() %s %d (%x %x %x) created",name().c_str(),
-	     index.level(),v3[0],v3[1],v3[2]);
+	     index.level(),index[0],index[1],index[2]);
     monitor->print("Adapt",buffer);
   }
   int ibx,iby,ibz;
@@ -616,10 +609,8 @@ Block::~Block()
   
   if (monitor && monitor->is_verbose()) {
     char buffer [80];
-    int v3[3];
-    index().values(v3);
     sprintf (buffer,"~Block() %s (%d;%d;%d) destroyed",name().c_str(),
-	     v3[0],v3[1],v3[2]);
+	     index_[0],index_[1],index_[2]);
     monitor->print("Adapt",buffer);
   }
 

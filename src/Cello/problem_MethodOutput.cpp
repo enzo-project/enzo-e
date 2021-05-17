@@ -363,7 +363,6 @@ void MethodOutput::file_write_hierarchy_(FileHdf5 * file)
 void MethodOutput::file_write_block_
 (FileHdf5 * file, Block * block, MsgOutput * msg_output)
 {
-
   const bool is_local = (msg_output == nullptr);
 
   std::string block_name = (is_local) ?
@@ -474,11 +473,10 @@ void MethodOutput::file_write_block_
 
     // Get particle type for it'th element of the particle output list
     const int it = particle_list_[i_p];
-
+  
     // get the number of particle batches and attributes
     const int nb = particle.num_batches(it);
     const int na = particle.num_attributes(it);
-
 
     // For each particle attribute
     for (int ia=0; ia<na; ia++) {

@@ -148,6 +148,16 @@ public: // interface
       initial_grackle_test_minimum_temperature(10.0),
       initial_grackle_test_reset_energies(0),
 #endif /* CONFIG_USE_GRACKLE */
+      // EnzoInitialHdf5
+      initial_hdf5_field_files(),
+      initial_hdf5_field_datasets(),
+      initial_hdf5_field_names(),
+      initial_hdf5_field_coords(),
+      initial_hdf5_particle_files(),
+      initial_hdf5_particle_datasets(),
+      initial_hdf5_particle_coords(),
+      initial_hdf5_particle_types(),
+      initial_hdf5_particle_attributes(),
       // EnzoInitialMusic
       initial_music_field_files(),
       initial_music_field_datasets(),
@@ -197,15 +207,6 @@ public: // interface
       initial_turbulence_temperature(0.0),
       // EnzoMethodHeat
       method_heat_alpha(0.0),
-      // EnzoMethodHydro
-      method_hydro_method(""),
-      method_hydro_dual_energy(false),
-      method_hydro_dual_energy_eta_1(0.0),
-      method_hydro_dual_energy_eta_2(0.0),
-      method_hydro_reconstruct_method(""),
-      method_hydro_reconstruct_conservative(false),
-      method_hydro_reconstruct_positive(false),
-      method_hydro_riemann_solver(""),
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
@@ -261,6 +262,40 @@ public: // interface
   /// Read values from the Parameters object
   void read (Parameters * parameters) throw();
 
+protected: // methods
+
+  void read_adapt_(Parameters *);
+
+  void read_field_(Parameters *);
+  
+  void read_initial_collapse_(Parameters *);
+  void read_initial_cosmology_(Parameters *);
+  void read_initial_grackle_(Parameters *);
+  void read_initial_hdf5_(Parameters *);
+  void read_initial_music_(Parameters *);
+  void read_initial_pm_(Parameters *);
+  void read_initial_sedov_(Parameters *);
+  void read_initial_sedov_random_(Parameters *);
+  void read_initial_soup_(Parameters * p);
+  void read_initial_turbulence_(Parameters *);
+  
+  void read_method_grackle_(Parameters *);
+  void read_method_gravity_(Parameters *);
+  void read_method_heat_(Parameters *);
+  void read_method_pm_deposit_(Parameters *);
+  void read_method_pm_update_(Parameters *);
+  void read_method_ppm_(Parameters *);
+  void read_method_turbulence_(Parameters *);
+  
+  void read_physics_(Parameters *);
+
+  void read_prolong_enzo_(Parameters *);
+
+  void read_solvers_(Parameters *);
+
+  void read_stopping_(Parameters *);
+  
+  
 public: // attributes
 
   // NOTE: change pup() function whenever attributes change
@@ -325,13 +360,24 @@ public: // attributes
   int                        initial_grackle_test_reset_energies;
 #endif /* CONFIG_USE_GRACKLE */
 
+  /// EnzoInitialHdf5
+
+  std::vector < std::string > initial_hdf5_field_files;
+  std::vector < std::string > initial_hdf5_field_datasets;
+  std::vector < std::string > initial_hdf5_field_names;
+  std::vector < std::string > initial_hdf5_field_coords;
+  std::vector < std::string > initial_hdf5_particle_files;
+  std::vector < std::string > initial_hdf5_particle_datasets;
+  std::vector < std::string > initial_hdf5_particle_coords;
+  std::vector < std::string > initial_hdf5_particle_types;
+  std::vector < std::string > initial_hdf5_particle_attributes;
+
   /// EnzoInitialMusic
 
   std::vector < std::string > initial_music_field_files;
   std::vector < std::string > initial_music_field_datasets;
   std::vector < std::string > initial_music_field_names;
   std::vector < std::string > initial_music_field_coords;
-
   std::vector < std::string > initial_music_particle_files;
   std::vector < std::string > initial_music_particle_datasets;
   std::vector < std::string > initial_music_particle_coords;
@@ -387,16 +433,6 @@ public: // attributes
 
   /// EnzoMethodHeat
   double                     method_heat_alpha;
-
-  /// EnzoMethodHydro
-  std::string                method_hydro_method;
-  bool                       method_hydro_dual_energy;
-  double                     method_hydro_dual_energy_eta_1;
-  double                     method_hydro_dual_energy_eta_2;
-  std::string                method_hydro_reconstruct_method;
-  bool                       method_hydro_reconstruct_conservative;
-  bool                       method_hydro_reconstruct_positive;
-  std::string                method_hydro_riemann_solver;
 
   /// EnzoMethodTurbulence
   double                     method_turbulence_edot;

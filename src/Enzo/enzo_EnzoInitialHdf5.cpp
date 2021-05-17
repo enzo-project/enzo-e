@@ -1,38 +1,37 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     _InitiaHdf5.cpp
+/// @file     enzo_EnzoInitiaHdf5.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     2017-06-23
+/// @date     2021-05-13
 /// @brief    Read initial conditions from HDF5
-///           (multi-scale cosmological initial conditions)
-#include "problem.hpp"
+#include "enzo.hpp"
 #include <chrono>
 #include <thread>
 
 //----------------------------------------------------------------------
 
-InitialHdf5::InitialHdf5
+EnzoInitialHdf5::EnzoInitialHdf5
 (int cycle,
  double time,
- const Config * config,
+ const EnzoConfig * enzo_config,
  int level) throw()
   : Initial(cycle,time),
     level_(level),
-    field_files_     (config->initial_hdf5_field_files),
-    field_datasets_  (config->initial_hdf5_field_datasets),
-    field_coords_    (config->initial_hdf5_field_coords),
-    field_names_     (config->initial_hdf5_field_names),
-    particle_files_     (config->initial_hdf5_particle_files),
-    particle_datasets_  (config->initial_hdf5_particle_datasets),
-    particle_coords_    (config->initial_hdf5_particle_coords),
-    particle_types_     (config->initial_hdf5_particle_types),
-    particle_attributes_(config->initial_hdf5_particle_attributes)
+    field_files_     (enzo_config->initial_hdf5_field_files),
+    field_datasets_  (enzo_config->initial_hdf5_field_datasets),
+    field_coords_    (enzo_config->initial_hdf5_field_coords),
+    field_names_     (enzo_config->initial_hdf5_field_names),
+    particle_files_     (enzo_config->initial_hdf5_particle_files),
+    particle_datasets_  (enzo_config->initial_hdf5_particle_datasets),
+    particle_coords_    (enzo_config->initial_hdf5_particle_coords),
+    particle_types_     (enzo_config->initial_hdf5_particle_types),
+    particle_attributes_(enzo_config->initial_hdf5_particle_attributes)
 {
 }
 
 //----------------------------------------------------------------------
 
-void InitialHdf5::pup (PUP::er &p)
+void EnzoInitialHdf5::pup (PUP::er &p)
 {
   TRACEPUP;
   // NOTE: change this function whenever attributes change
@@ -54,7 +53,7 @@ void InitialHdf5::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void InitialHdf5::enforce_block
+void EnzoInitialHdf5::enforce_block
 ( Block * block, const Hierarchy * hierarchy ) throw()
 {
 
@@ -102,25 +101,25 @@ void InitialHdf5::enforce_block
     const int IY = field_coords_[index].find ("y");
     const int IZ = field_coords_[index].find ("z");
 
-    ASSERT3 ("InitialHdf5::enforce_block()",
+    ASSERT3 ("EnzoInitialHdf5::enforce_block()",
 	    "bad field coordinates %d %d %d",
 	     IX,IY,IZ,
 	     ((IX<4)&&(IY<4)&&(IZ<4)) &&
 	     ((IX != IY) || (IY==-1 && IZ == -1)) &&
 	     ((IX != IY && IY != IZ) || (IZ == -1)));
     
-    int m4[4] = {0};
+    int m4[4] = {0,0,0,0};
     int type_data = type_unknown;
     file-> data_open (field_datasets_[index], &type_data,
 		     m4,m4+1,m4+2,m4+3);
     // compute cell widths
-    double h4[4] = {1};
+    double h4[4] = {1,1,1,1};
     h4[IX] = (upper_block[0] - lower_block[0]) / nx;
     h4[IY] = (upper_block[1] - lower_block[1]) / ny;
     h4[IZ] = (upper_block[2] - lower_block[2]) / nz;
 
     // determine offsets
-    int o4[4] = {0};
+    int o4[4] = {0,0,0,0};
     o4[IX] = (lower_block[0] - lower_domain[0]) / h4[IX];
     o4[IY] = (lower_block[1] - lower_domain[1]) / h4[IY];
     o4[IZ] = (lower_block[2] - lower_domain[2]) / h4[IZ];
@@ -133,11 +132,24 @@ void InitialHdf5::enforce_block
     if (o4[IY] >= m4[IY]) o4[IY] = o4[IY] % m4[IY];
     if (o4[IZ] >= m4[IZ]) o4[IZ] = o4[IZ] % m4[IZ];
 
-    int n4[4] = {1};
+    int n4[4] = {1,1,1,1};
     n4[IX] = (upper_block[0] - lower_block[0]) / h4[IX];
     n4[IY] = (upper_block[1] - lower_block[1]) / h4[IY];
     n4[IZ] = (upper_block[2] - lower_block[2]) / h4[IZ];
-      
+
+    CkPrintf ("DEBUG_INITIAL_HDF5 %s m4 %d %d %d %d\n",
+              block->name().c_str(),m4[0],m4[1],m4[2],m4[3]);
+    CkPrintf ("DEBUG_INITIAL_HDF5 %s n4 %d %d %d %d\n",
+              block->name().c_str(),n4[0],n4[1],n4[2],n4[3]);
+    CkPrintf ("DEBUG_INITIAL_HDF5 %s o4 %d %d %d %d\n",
+              block->name().c_str(),o4[0],o4[1],o4[2],o4[3]);
+
+    {
+      int ax,ay,az;
+    block->index().array(&ax,&ay,&az);
+    CkPrintf ("DEBUG_INITAL_HDF5 %s array %d %d %d\n",
+              block->name().c_str(),ax,ay,az);
+    }
     // open the dataspace
     file-> data_slice
       (m4[0],m4[1],m4[2],m4[3],
@@ -161,14 +173,14 @@ void InitialHdf5::enforce_block
     } else if (type_data == type_double) {
       data_double = new double [nx*ny*nz];
     } else {
-      ERROR3 ("InitialHdf5::enforce_block()",
+      ERROR3 ("EnzoInitialHdf5::enforce_block()",
 	      "Unsupported data type %d in file %s field %s",
 	      type_data,file_name.c_str(),field_datasets_[index].c_str());
     }
 
     file->data_read (data);
 
-    cello_float * array = (cello_float *) field.values(field_names_[index]);
+    enzo_float * array = (enzo_float *) field.values(field_names_[index]);
 
     if (type_data == type_single) {
 
@@ -188,10 +200,8 @@ void InitialHdf5::enforce_block
     }
     
     file->data_close();
-
-    close_count[file_name] = 0;
     file->file_close();
-    FileHdf5::file_list.erase(file_name);
+
   }
 
   for (size_t index=0; index<particle_files_.size(); index++) {
@@ -205,7 +215,7 @@ void InitialHdf5::enforce_block
     file->file_open();
 
     // Open the dataset
-    int m4[4] = {0};
+    int m4[4] = {0,0,0,0};
     int type_data = type_unknown;
     file-> data_open (particle_datasets_[index], &type_data,
 		     m4,m4+1,m4+2,m4+3);
@@ -226,13 +236,14 @@ void InitialHdf5::enforce_block
     const int IZ = particle_coords_[index].find ("z");
 
     // compute cell widths
-    double h4[4] = {1};
+    double h4[4] = {1,1,1,1};
+    CkPrintf ("h4 = %f %f %f %f\n",h4[0],h4[1],h4[2],h4[3]);
     h4[IX] = (upper_block[0] - lower_block[0]) / nx;
     h4[IY] = (upper_block[1] - lower_block[1]) / ny;
     h4[IZ] = (upper_block[2] - lower_block[2]) / nz;
 
     // determine offsets
-    int o4[4] = {0};
+    int o4[4] = {0,0,0,0};
     o4[IX] = (lower_block[0] - lower_domain[0]) / h4[IX];
     o4[IY] = (lower_block[1] - lower_domain[1]) / h4[IY];
     o4[IZ] = (lower_block[2] - lower_domain[2]) / h4[IZ];
@@ -241,7 +252,7 @@ void InitialHdf5::enforce_block
     if (o4[IY] >= m4[IY]) o4[IY] = o4[IY] % m4[IY];
     if (o4[IZ] >= m4[IZ]) o4[IZ] = o4[IZ] % m4[IZ];
 
-    int n4[4] = {1};
+    int n4[4] = {1,1,1,1};
     n4[IX] = (upper_block[0] - lower_block[0]) / h4[IX];
     n4[IY] = (upper_block[1] - lower_block[1]) / h4[IY];
     n4[IZ] = (upper_block[2] - lower_block[2]) / h4[IZ];
@@ -268,19 +279,18 @@ void InitialHdf5::enforce_block
     } else if (type_data == type_double) {
       data_double = new double [nx*ny*nz];
     } else {
-      ERROR3 ("InitialHdf5::enforce_block()",
+      ERROR3 ("EnzoInitialHdf5::enforce_block()",
 	      "Unsupported data type %d in file %s particle dataset %s",
 	      type_data,file_name.c_str(),particle_datasets_[index].c_str());
     }
     
+    // read data and close file
     file->data_read (data);
 
     file->data_close();
 
-    close_count[file_name] = 0;
     file->file_close();
     delete file;
-    FileHdf5::file_list.erase(file_name);
 
     // Create particles and initialize them
 
@@ -294,7 +304,7 @@ void InitialHdf5::enforce_block
     // insert particles if they don't exist yet
     if (particle.num_particles(it) == 0) {
       particle.insert_particles(it,np);
-      cello::simulation()->data_insert_particles(np);
+      enzo::simulation()->data_insert_particles(np);
     }
 
     // read particle attribute
@@ -323,7 +333,7 @@ void InitialHdf5::enforce_block
 	  (array_double,data_double,particle,it,ia,np);
       }
     } else {
-      ERROR3 ("InitialHdf5::enforce_block()",
+      ERROR3 ("EnzoInitialHdf5::enforce_block()",
 	      "Unsupported particle precision %s for "
 	      "particle type %s attribute %s",
 	      cello::precision_name[type_array],
@@ -426,8 +436,8 @@ void InitialHdf5::enforce_block
 //======================================================================
 
 template <class T>
-void InitialHdf5::copy_field_data_to_array_
-(cello_float * array, T * data,
+void EnzoInitialHdf5::copy_field_data_to_array_
+(enzo_float * array, T * data,
  int mx,int my,int mz,int nx,int ny,int nz,int gx,int gy,int gz,int n4[4],
  int IX, int IY) const
 {
@@ -448,7 +458,7 @@ void InitialHdf5::copy_field_data_to_array_
 //----------------------------------------------------------------------
 
 template <class T, class S>
-void InitialHdf5::copy_particle_data_to_array_
+void EnzoInitialHdf5::copy_particle_data_to_array_
 (T * array, S * data,
  Particle particle, int it, int ia, int np)
 {

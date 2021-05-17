@@ -368,17 +368,15 @@ void DataMsg::update (Data * data, bool is_local)
   if (pd != nullptr) {
 
     // Insert new particles 
-
     Particle particle = data->particle();
 
     int count = 0;
     for (int it=0; it<particle.num_types(); it++) {
       count += particle.gather (it, 1, &pd);
     }
+
     cello::simulation()->data_insert_particles(count);
-    
-    delete particle_data_;
-    particle_data_ = nullptr; 
+
   }
   
   // Update fields
