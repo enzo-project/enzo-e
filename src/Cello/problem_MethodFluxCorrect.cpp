@@ -203,120 +203,292 @@ void MethodFluxCorrect::compute_continue_sum_fields
 
 //======================================================================
 
+
+static void flux_correct_helper_(cello_float * const field_array,
+                                 int mx, int my, int mz,
+                                 int nx, int ny, int nz,
+                                 int i_f, FluxData * flux_data,
+                                 const int rank,
+                                 const bool (&perform_correction)[3][2])
+{
+  int ix,iy,iz;
+
+  int axis,face,level_face;
+
+  axis=0;
+  // X axis
+  for (face=0; face<2; face++) {
+    if (perform_correction[axis][face]) {
+      int dbx,dby,dbz;
+      int dnx,dny,dnz;
+      auto block_fluxes    = flux_data->block_fluxes(axis,face,i_f);
+      auto neighbor_fluxes = flux_data->neighbor_fluxes(axis,face,i_f);
+      auto block_flux_array = block_fluxes->flux_array(&dbx,&dby,&dbz);
+      auto neighbor_flux_array = neighbor_fluxes->flux_array(&dnx,&dny,&dnz);
+
+      ix = (face == 0) ? 0 : nx-1;
+      for (iz=0; iz<nz; iz++) {
+        for (iy=0; iy<ny; iy++) {
+          int i=ix+mx*(iy+my*iz);
+          int ib = iy*dby+iz*dbz;
+          int in = iy*dny+iz*dnz;
+
+          field_array[i] +=
+            (2*face-1)*(block_flux_array[ib] - neighbor_flux_array[in]);
+        }
+      }
+    }
+  }
+
+  if (rank >= 2) {
+    axis=1;
+    // Y axis
+    for (face=0; face<2; face++) {
+      if (perform_correction[axis][face]) {
+        int dbx,dby,dbz;
+        int dnx,dny,dnz;
+        auto block_fluxes    = flux_data->block_fluxes(axis,face,i_f);
+        auto neighbor_fluxes = flux_data->neighbor_fluxes(axis,face,i_f);
+        auto block_flux_array =
+          block_fluxes->flux_array(&dbx,&dby,&dbz);
+        auto neighbor_flux_array =
+          neighbor_fluxes->flux_array(&dnx,&dny,&dnz);
+
+        iy = (face == 0) ? 0 : ny-1;
+        for (iz=0; iz<nz; iz++) {
+          for (ix=0; ix<nx; ix++) {
+            int i=ix+mx*(iy+my*iz);
+            int ib = ix*dbx+iz*dbz;
+            int in = ix*dnx+iz*dnz;
+            field_array[i] +=
+              (2*face-1)*(block_flux_array[ib] - neighbor_flux_array[in]);
+          }
+        }
+      }
+    }
+
+  } // rank >= 2
+
+  if (rank >= 3) {
+    axis=2;
+    for (face=0; face<2; face++) {
+      if (perform_correction[axis][face]) {
+        int dbx,dby,dbz;
+        int dnx,dny,dnz;
+        auto block_fluxes    = flux_data->block_fluxes(axis,face,i_f);
+        auto neighbor_fluxes = flux_data->neighbor_fluxes(axis,face,i_f);
+        auto block_flux_array = block_fluxes->flux_array(&dbx,&dby,&dbz);
+        auto neighbor_flux_array = neighbor_fluxes->flux_array(&dnx,&dny,&dnz);
+
+        iz = (face == 0) ? 0 : nz-1;
+        for (iy=0; iy<ny; iy++) {
+          for (ix=0; ix<nx; ix++) {
+            int i=ix+mx*(iy+my*iz);
+            int ib = ix*dbx+iy*dby;
+            int in = ix*dnx+iy*dny;
+            field_array[i] +=
+              (2*face-1)*(block_flux_array[ib] - neighbor_flux_array[in]);
+          }
+        }
+      } // perform_correction[axis][face]
+    } // face
+  } // rank >= 3
+}
+
+static void divide_by_density_(const cello_float * const input_array,
+                               const cello_float * const density_field,
+                               cello_float* const output_array,
+                               const bool (&perform_correction)[3][2],
+                               const int rank,
+                               int mx, int my, int mz,
+                               int nx, int ny, int nz)
+{
+
+  {
+    const int axis = 0;
+    for (int face=0; face<2; face++) {
+      if (perform_correction[axis][face]){
+
+        int ix = (face == 0) ? 0 : nx-1;
+        for (int iz=0; iz<nz; iz++) {
+          for (int iy=0; iy<ny; iy++) {
+            int i=ix+mx*(iy+my*iz);
+            output_array[i] = input_array[i] / density_field[i];
+          }
+        }
+      }
+    }
+
+  } // rank >= 1
+
+  if (rank >= 2) {
+    const int axis = 1;
+    for (int face=0; face<2; face++) {
+      if (perform_correction[axis][face]){
+
+        int iy = (face == 0) ? 0 : ny-1;
+        for (int iz=0; iz<nz; iz++) {
+          for (int ix=0; ix<nx; ix++) {
+            int i=ix+mx*(iy+my*iz);
+            output_array[i] = input_array[i] / density_field[i];
+          }
+        }
+      }
+    }
+
+  } // rank >= 2
+
+  if (rank >= 3) {
+    const int axis=2;
+    for (int face=0; face<2; face++) {
+      if (perform_correction[axis][face]){
+
+        int iz = (face == 0) ? 0 : nz-1;
+        for (int iy=0; iy<ny; iy++) {
+          for (int ix=0; ix<nx; ix++) {
+            int i=ix+mx*(iy+my*iz);
+            output_array[i] = input_array[i] / density_field[i];
+          }
+        }
+      } // perform_correction[axis][face]
+    } // face
+  } // rank >= 3
+
+}
+
+
 void MethodFluxCorrect::flux_correct_(Block * block)
 {
-    
+
   Field field = block->data()->field();
   FluxData * flux_data = block->data()->flux_data();
   const int nf = flux_data->num_fields();
 
   // Perform flux-correction
   if (enable_ && block->is_leaf()) {
+    if (nf  == 0){
+      return;
+    }
 
     const int level = block->level();
 
     const int rank = cello::rank();
 
-    int ix,iy,iz;
+    int gx,gy,gz;
+    field.ghost_depth (0,&gx,&gy,&gz);
+
     int nx,ny,nz;
     field.size(&nx,&ny,&nz);
 
+    int mx = nx + 2*gx;
+    int my = ny + 2*gy;
+    int mz = nz + 2*gz;
+
+    // determine which faces require flux corrections
+    bool perform_correction[3][2];
+    for (int axis=0; axis < 3; axis++){
+      for (int face = 0; face < 2; face++){
+        if ((axis < rank) && (block->face_level(axis,face) > level)){
+          perform_correction[axis][face] = true;
+        } else {
+          perform_correction[axis][face] = false;
+        }
+      }
+    }
+
+    int i_f_density = -1; // will be used to store i_f for density
     for (int i_f=0; i_f<nf; i_f++) {
-
       const int index_field = flux_data->index_field(i_f);
-      cello_float * field_array = (cello_float*) field.unknowns(index_field);
-      int mx,my,mz;
-      int gx,gy,gz;
-      field.dimensions (index_field,&mx,&my,&mz);
-      field.ghost_depth(index_field,&gx,&gy,&gz);
+      const std::string field_name = field.field_name(index_field);
 
-      int axis,face,level_face;
+      if (field_name == "density"){
+        i_f_density = i_f;
+      }
+    }
 
-      axis=0;
-      // X axis
-      for (face=0; face<2; face++) {
-        level_face = block->face_level(axis,face);
-        if (level_face > level) {
-          int dbx,dby,dbz;
-          int dnx,dny,dnz;
-          auto block_fluxes    = flux_data->block_fluxes(axis,face,i_f);
-          auto neighbor_fluxes = flux_data->neighbor_fluxes(axis,face,i_f);
-          auto block_flux_array =
-            block_fluxes->flux_array(&dbx,&dby,&dbz);
-          auto neighbor_flux_array =
-            neighbor_fluxes->flux_array(&dnx,&dny,&dnz);
-          
-          ix = (face == 0) ? 0 : nx-1;
-          for (iz=0; iz<nz; iz++) {
-            for (iy=0; iy<ny; iy++) {
-              int i=ix+mx*(iy+my*iz);
-              int ib = iy*dby+iz*dbz;
-              int in = iy*dny+iz*dnz;
-                
-              field_array[i] +=
-                (2*face-1)*(block_flux_array[ib] - neighbor_flux_array[in]);
-            }
+    // Allocate scratch space. It's technically possible to do all of
+    // this in-place, (without scratch space), but you that get's
+    // complex (you need to be very careful iterating over cells on
+    // the edges of the active zone multiple times). For similar
+    // reasons, we do a little
+    cello_float* scratch1 = new (std::nothrow) cello_float[mx*my*mz];
+    cello_float* scratch2 = new (std::nothrow) cello_float[mx*my*mz];
+
+    cello_float* old_rho_array = scratch1 + (gx + mx*(gy + my*gz));
+    cello_float* temp_cons_array = scratch2 + (gx + mx*(gy + my*gz));
+
+    // load the density array
+    cello_float* density_array = nullptr;
+    if (field.is_field("density")){
+      density_array = (cello_float*) field.unknowns("density");
+
+      // copy the values in the density_array (we could be more selective about
+      // what we copy)
+      for (int iz=0; iz<nz; iz++) {
+        for (int iy=0; iy<ny; iy++) {
+          for (int ix=0; ix<nx; ix++) {
+            int i=ix + mx*(iy + my*iz);
+            old_rho_array[i] = density_array[i];
           }
         }
       }
-      
-      if (rank >= 2) {
-        axis=1;
-        // Y axis
-        for (face=0; face<2; face++) {
-          level_face = block->face_level(axis,face);
-          if (level_face > level) {
-            int dbx,dby,dbz;
-            int dnx,dny,dnz;
-            auto block_fluxes    = flux_data->block_fluxes(axis,face,i_f);
-            auto neighbor_fluxes = flux_data->neighbor_fluxes(axis,face,i_f);
-            auto block_flux_array =
-              block_fluxes->flux_array(&dbx,&dby,&dbz);
-            auto neighbor_flux_array =
-              neighbor_fluxes->flux_array(&dnx,&dny,&dnz);
-          
-            iy = (face == 0) ? 0 : ny-1;
-            for (iz=0; iz<nz; iz++) {
-              for (ix=0; ix<nx; ix++) {
-                int i=ix+mx*(iy+my*iz);
-                int ib = ix*dbx+iz*dbz;
-                int in = ix*dnx+iz*dnz;
-                field_array[i] +=
-                  (2*face-1)*(block_flux_array[ib] - neighbor_flux_array[in]);
-              }
+    }
+
+    // perform the density flux correction
+    if (i_f_density > -1){
+      flux_correct_helper_(density_array, mx,my,mz, nx,ny,nz,
+                           i_f_density, flux_data, rank, perform_correction);
+    }
+
+
+    // perform the flux corrections for the other fields
+    Grouping * groups = cello::field_groups();
+    for (int i_f=0; i_f<nf; i_f++) {
+      const int index_field = flux_data->index_field(i_f);
+      const std::string field_name = field.field_name(index_field);
+
+      if (i_f == i_f_density){ // density flux correction already happened
+        continue;
+      }
+
+      cello_float* field_array = (cello_float*) field.unknowns(index_field);
+
+      if (groups->is_in(field_name, "make_field_conservative")){
+        // Handle flux corrections for fields that must be multiplied by the
+        // density to be made conservative
+
+        ASSERT1("MethodFluxCorrect::flux_correct_",
+                ("The \"density\" field must exist to perform flux "
+                 "corrections on \"%s\"."), field_name.c_str(),
+                density_array != nullptr);
+
+        // compute the conserved quantity
+        for (int iz=0; iz<nz; iz++) {
+          for (int iy=0; iy<ny; iy++) {
+            for (int ix=0; ix<nx; ix++) {
+              int i=ix + mx*(iy + my*iz);
+              temp_cons_array[i] = old_rho_array[i]*field_array[i];
             }
           }
         }
 
-      } // rank >= 2
+        // now perform the actual flux correction
+        flux_correct_helper_(temp_cons_array, mx,my,mz, nx,ny,nz,
+                             i_f, flux_data, rank, perform_correction);
 
-      if (rank >= 3) {
-        axis=2;
-        for (face=0; face<2; face++) {
-          level_face = block->face_level(axis,face);
-          if (level_face > level) {
-            int dbx,dby,dbz;
-            int dnx,dny,dnz;
-            auto block_fluxes    = flux_data->block_fluxes(axis,face,i_f);
-            auto neighbor_fluxes = flux_data->neighbor_fluxes(axis,face,i_f);
-            auto block_flux_array =
-              block_fluxes->flux_array(&dbx,&dby,&dbz);
-            auto neighbor_flux_array =
-              neighbor_fluxes->flux_array(&dnx,&dny,&dnz);
-          
-            iz = (face == 0) ? 0 : nz-1;
-            for (iy=0; iy<ny; iy++) {
-              for (ix=0; ix<nx; ix++) {
-                int i=ix+mx*(iy+my*iz);
-                int ib = ix*dbx+iy*dby;
-                int in = ix*dnx+iy*dny;
-                field_array[i] +=
-                  (2*face-1)*(block_flux_array[ib] - neighbor_flux_array[in]);
-              }
-            }
-          } // level_face > level
-        } // face
-      } // rank >= 3
+        // now, divide the updated quantities by appropriate values in
+        // density_array and write the result to field_array
+        divide_by_density_(temp_cons_array, density_array, field_array,
+                           perform_correction, rank, mx,my,mz, nx,ny,nz);
+      } else {
+        // the quantity is already in conserved form. We can just apply the
+        // flux correction directly on the field_data
+        flux_correct_helper_(field_array, mx,my,mz, nx,ny,nz,
+                             i_f, flux_data, rank, perform_correction);
+      }
     }
+
+    delete[] scratch1;
+    delete[] scratch2;
   }
 }
