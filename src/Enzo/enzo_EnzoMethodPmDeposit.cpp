@@ -208,9 +208,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
           for (int ip=0; ip<np; ip++) {
 
-	    // Stefan: Unsure about this line, doesn't match what's in the
-	    // Enzo paper, which says that particles are drifted by half a timestep
-	    // before being deposited to the grid
             double x = xa[ip*dp] + vxa[ip*dv]*dt;
 
             double tx = nx*(x - xm) / (xp - xm) - 0.5;
