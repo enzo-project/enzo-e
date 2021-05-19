@@ -165,7 +165,7 @@ using the ``CHARM_HOME`` environment variable.
   ============================================  =============================
 
 4. Specify Grackle directory
---------------------------
+----------------------------
 
 At compile time, Enzo-E will try to automatically find your Grackle installation.
 If compilation fails because ``grackle.h`` cannot be included, it is possible
