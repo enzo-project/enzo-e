@@ -237,7 +237,7 @@ namespace cello {
 
   CProxy_Block block_array()
   {
-    return cello::simulation()->hierarchy()->block_array();
+    return cello::hierarchy()->block_array();
   }
 
   //---------------------------------------------------------------------- 
