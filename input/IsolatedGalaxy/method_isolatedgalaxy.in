@@ -187,8 +187,7 @@ Stopping {
 #   stop time in wall seconds: AE FOR DEBUGGING SANITY ONLY
     seconds  = 3600.0;
 #   AE output interval
-#    cycle    = 1000;
-    cycle    = 2;
+    cycle    = 1000;
     interval = 1; 
 }
 
