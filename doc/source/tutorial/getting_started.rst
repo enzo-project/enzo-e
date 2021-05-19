@@ -164,6 +164,19 @@ using the ``CHARM_HOME`` environment variable.
   ``export CHARM_HOME=$HOME/Charm/charm.6.10``  Set directory of Charm++ used
   ============================================  =============================
 
+4. Specify Grackle directory
+----------------------------
+
+At compile time, Enzo-E will try to automatically find your Grackle installation.
+If compilation fails because ``grackle.h`` cannot be included, it is possible
+that the directory was incorrectly identified. You can specify
+Grackle's installation directory with the ``GRACKLE_HOME`` environment variable:
+
+  =================================== =====================================
+  =================================== =====================================
+  ``export GRACKLE_HOME=$HOME/local`` Set directory of Grackle installation
+  =================================== =====================================
+
 Porting
 =======
 
@@ -277,6 +290,15 @@ are displayed a node local run (i.e., no "remote" connections even to the local 
 could be used instead by add ``++local`` to ``charmrun``, e.g.:
 
      ``~/Charm/bin/charmrun ++local +p4 bin/enzo-p input/HelloWorld/Hi.in``
+
+If you receive an error like
+
+..  code-block:: bash
+
+    Charmrun> Timeout waiting for node-program to connect
+
+trying running ``./bin/enzo-p`` without ``charmrun`` as crashes due to, e.g.,
+libraries not being found may not be displaying.
 
 If all goes well, Enzo-E will run the Hello World problem.  Below are
 some of the generated images from the longer-running "HelloWorld.in"
