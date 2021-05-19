@@ -105,7 +105,7 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
   //           color fields as well, but maybe that is taken care of
   //           properly
   ParticleDescr * particle_descr = cello::particle_descr();
-  if (this-stellar_disk_ || this->stellar_bulge_)
+  if (this->stellar_disk_ || this->stellar_bulge_)
       particle_descr->groups()->add("star","has_mass"); // hack
   if (this->live_dm_halo_)
       particle_descr->groups()->add("dark","has_mass");
@@ -123,7 +123,7 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
   } // AE: Need an error check to make sure these are set correctly
 
   // gather other parameters not associated with this IC
-  this->uniform_density_    = config->field_uniform_density;
+  this->uniform_density_    = config->field_uniform_density / enzo_units->density();
   this->dual_energy_        = field_descr->is_field("internal_energy") &&
                               field_descr->is_field("total_energy");
   this->gamma_              = config->field_gamma;
@@ -240,7 +240,7 @@ void EnzoInitialIsolatedGalaxy::enforce_block
   //
   // Make sure we can operate on this block
   //
-//  if (!block->is_leaf()) return;  // remove once parent-to-child particle ICs working
+  if (!block->is_leaf()) return;  // remove once parent-to-child particle ICs working
 
   Timer timer;
   timer.start();
@@ -249,15 +249,10 @@ void EnzoInitialIsolatedGalaxy::enforce_block
          "Block does not exist",
          block != NULL);
 
-   EnzoBlock * enzo_block = enzo::block(block);
+  EnzoBlock * enzo_block = enzo::block(block);
 
-  // uncomment once parent-to-child particle ICs working
-    if (enzo_block->level() == 0){
-      Particle particle = block->data()->particle();
-      InitializeParticles(block, &particle);
-    }
-  //
-  if (!block->is_leaf()) return;
+  Particle particle = block->data()->particle();
+  InitializeParticles(block, &particle);
 
 
 #ifdef CONFIG_USE_GRACKLE
@@ -379,7 +374,7 @@ void EnzoInitialIsolatedGalaxy::InitializeExponentialGasDistribution(Block * blo
   double halo_gas_energy = this->gas_halo_temperature_ / this->mu_ / (this->gamma_ -1);
 
   double disk_gas_energy = this->disk_temperature_ / this->mu_ / (this->gamma_ -1) ;
-
+  
   // initialize fields to something
   for (int iz=0; iz<mz; iz++){
     for (int iy=0; iy<my; iy++){
@@ -429,9 +424,8 @@ void EnzoInitialIsolatedGalaxy::InitializeExponentialGasDistribution(Block * blo
         double r_cyl  = sqrt(x*x + y*y);
 
         // compute the disk density (in code units)
-        double disk_density = this->gauss_mass(rho_zero, x/enzo_units->length(), y/enzo_units->length(),
-                                              z/enzo_units->length(), hx) / (hx*hy*hz);
-
+        double disk_density = this->gauss_mass(rho_zero, x/enzo_units->length(), 
+          y/enzo_units->length(), z/enzo_units->length(), hx) / (hx*hy*hz);
 
         if ((this->gas_halo_density_ * this->gas_halo_temperature_ > disk_density*this->disk_temperature_) &&
             (radius < this->gas_halo_radius_*enzo_units->length())){
@@ -759,7 +753,7 @@ void EnzoInitialIsolatedGalaxy::InitializeParticles(Block * block,
                                                     Particle * particle){
 
   //
-  // Loop through all particle types and initialize thier positions and
+  // Loop through all particle types and initialize their positions and
   // velocities.
   //
 
@@ -792,14 +786,15 @@ void EnzoInitialIsolatedGalaxy::InitializeParticles(Block * block,
     int ia_vy = particle->attribute_index (it, "vy");
     int ia_vz = particle->attribute_index (it, "vz");
 
-    int ia_to    = particle->is_attribute(it,"creation_time") ?
-                   particle->attribute_index(it,"creation_time") : -1;
-
-    int ia_l     = particle->is_attribute(it,"lifetime") ?
-                   particle->attribute_index(it,"lifetime") : -1;
-
-    int ia_metal = particle->is_attribute(it,"metal_fraction") ?
-                   particle->attribute_index(it,"metal_fraction") : -1;
+    int ia_to = -1;
+    int ia_l = -1;
+    int ia_metal = -1;
+    if (particle->is_attribute(it, "creation_time"))
+      ia_to = particle->attribute_index(it,"creation_time");
+    if (particle->is_attribute(it, "lifetime"))
+      ia_l = particle->attribute_index(it,"lifetime");
+    if (particle->is_attribute(it, "metal_fraction"))
+      ia_metal = particle->attribute_index(it,"metal_fraction");
 
     int ib  = 0; // batch counter
     int ipp = 0; // particle counter

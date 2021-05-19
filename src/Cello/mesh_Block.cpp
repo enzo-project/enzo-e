@@ -10,7 +10,7 @@
 #include "main.hpp"
 #include "charm_simulation.hpp"
 
-#define TRACE_BLOCK
+//#define TRACE_BLOCK
 
 //#define DEBUG_ADAPT
 //#define DEBUG_FACE
@@ -111,7 +111,6 @@ Block::Block ( MsgRefine * msg )
     msg->update(data());
   } else {
     apply_initial_();
-    if (this->level() > 0) msg->update(data()); // AJE: needed to get root grid particles in IC to lower grids
   }
 
   delete msg;
@@ -206,7 +205,6 @@ void Block::p_set_msg_refine(MsgRefine * msg)
     msg->update(data());
   } else {
     apply_initial_();
-    //if (this->level() > 0) msg->update(data());
   }
 
   delete msg;
