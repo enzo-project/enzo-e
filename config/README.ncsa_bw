@@ -69,4 +69,3 @@ Blue Waters.
 
    $charmrun ./enzo-p $charmarg $input >& $output
    ==================================================
-
