@@ -24,18 +24,14 @@ void EnzoInitialBCenter::initialize_bfield_center( Block * block )
 {
   // Simply sets the values of the cell-centered B-fields based on the
   // previously initialized face-centered B-fields
-  EnzoConstrainedTransport ct;
-  Grouping bfieldc_group, bfieldi_group;
-  bfieldc_group.add("bfield_x","bfield");
-  bfieldc_group.add("bfield_y","bfield");
-  bfieldc_group.add("bfield_z","bfield");
-
-  bfieldi_group.add("bfieldi_x", "bfield");
-  bfieldi_group.add("bfieldi_y", "bfield");
-  bfieldi_group.add("bfieldi_z", "bfield");
-  ct.compute_center_bfield(block, 0, bfieldc_group, bfieldi_group);
-  ct.compute_center_bfield(block, 1, bfieldc_group, bfieldi_group);
-  ct.compute_center_bfield(block, 2, bfieldc_group, bfieldi_group);
+  const char* centered_names[3] = {"bfield_x","bfield_y","bfield_z"};
+  const char* interface_names[3] = {"bfieldi_x","bfieldi_y","bfieldi_z"};
+  EnzoFieldArrayFactory array_factory(block);
+  for (int i=0; i<3; i++){
+    EFlt3DArray bfieldc = array_factory.from_name(centered_names[i]);
+    EFlt3DArray bfieldi = array_factory.from_name(interface_names[i]);
+    EnzoBfieldMethodCT::compute_center_bfield(i, bfieldc, bfieldi);
+  }
 }
 
 //----------------------------------------------------------------------

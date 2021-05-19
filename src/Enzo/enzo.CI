@@ -107,6 +107,8 @@ module enzo {
   PUPable EnzoRiemannImpl<HLLCImpl>; //EnzoRiemannHLLC
   PUPable EnzoRiemannImpl<HLLDImpl>; //EnzoRiemannHLLD
 
+  PUPable EnzoBfieldMethodCT;
+
   PUPable EnzoPhysicsCosmology;
 
   PUPable EnzoProblem;

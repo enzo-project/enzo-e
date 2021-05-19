@@ -166,39 +166,38 @@ namespace enzo_riemann_utils{
 
   //----------------------------------------------------------------------
 
-  inline void parse_mem_name_(std::string member_name,
-                              EnzoPermutedCoordinates coord,
-                              std::string &group_name, int &group_index)
+  inline std::string parse_mem_name_(std::string member_name,
+                                     EnzoPermutedCoordinates coord)
   {
-    group_name = member_name;
-    group_index = 0;
+    char suffixes[3] {'x','y','z'};
+
     std::size_t length = member_name.length();
     if (length >= 2){
+      int suffix_index = 0;
       std::string suffix = member_name.substr(length-2,2);
       if (suffix == std::string("_i")){
-        group_index = coord.i_axis();
+        suffix_index = coord.i_axis();
       } else if (suffix == std::string("_j")){
-        group_index = coord.j_axis();
+        suffix_index = coord.j_axis();
       } else if (suffix == std::string("_k")){
-        group_index = coord.k_axis();
+        suffix_index = coord.k_axis();
       } else {
-        return;
+        return member_name;
       }
 
-      group_name = member_name.substr(0,length-2);
+      std::string key = member_name.substr(0,length-1);
+      key.push_back(suffixes[suffix_index]);
+      return key;
     }
+    return member_name;
   }
 
   //----------------------------------------------------------------------
 
-  /// Constructs an array of instances of EFlt3DArray where each instance holds
-  /// the field data of the corresponding field in the LUT
+  /// Constructs an array of instances of EFlt3DArray that is organized
+  /// according to the LUT
   ///
-  /// @param block The mesh block from which data will be loaded
-  /// @param grouping Reference to a grouping that with groups named after the
-  ///   relevant quantities specified in the generation of lut. The data is
-  ///   actually loaded from the fields in block with names matching the
-  ///   relevant field names specified in this object.
+  /// @param map The mapping that holds the array data
   /// @param dim Optional integer specifying which dimension is the ith
   ///   direction. This is used for mapping the i,j,k vector components listed
   ///   in lut to the x,y,z field components. Values of 0, 1, and 2 correspond
@@ -206,49 +205,21 @@ namespace enzo_riemann_utils{
   ///   respectively. Note that each of the fields in grouping are assumed to
   ///   be face-centered along this dimension (excluding the exterior faces of
   ///   the mesh). This allows for appropriate loading of reconstructed fields.
-  /// @param stale_depth indicates the current stale_depth for the loaded
-  ///   quanties.
   template<class LUT>
   inline std::array<EFlt3DArray,LUT::NEQ> load_array_of_fields
-  (Block *block, Grouping &grouping,
-   int dim, int stale_depth) noexcept
+  (EnzoEFltArrayMap& map, int dim) noexcept
   {
     std::array<EFlt3DArray,LUT::NEQ> arr;
     // in the case where we don't have reconstructed values (dim = -1) we assume
     // that the that i-axis is aligned with the x-axis
     EnzoPermutedCoordinates coord( (dim == -1) ? 0 : dim);
-    EnzoFieldArrayFactory array_factory(block, stale_depth);
 
-    // define a lambda function to execute for every member of lut
-    auto fn = [coord, dim, &arr, &array_factory, &grouping](std::string name,
-                                                            int index)
+    // define a lambda function to execute for every member of lut. For each
+    // member in lut, its passed: 1. the member's name
+    //                            2. the associated index
+    auto fn = [coord, &arr, &map](std::string name, int index)
       {
-        // name is the name of a given member of the lut
-        // index is the value associated with the member
-        if (index != -1){
-          int group_index;
-          std::string group_name;
-          parse_mem_name_(name, coord, group_name, group_index);
-
-          // Sanity Check:
-          std::string quantity_type = (group_name == name) ? "SCALAR":"VECTOR";
-          int group_size = grouping.size(group_name);
-
-          int expected_size = (quantity_type == "VECTOR") ? 3 : 1;
-          ASSERT3("load_array_of_fields_",
-                  "The \"%s\" group holds %d field(s). It should hold %d.",
-                  group_name.c_str(), group_size, expected_size,
-                  group_size == expected_size);
-
-          if (dim != -1){
-            arr[index] = array_factory.reconstructed_field(grouping,
-                                                           group_name,
-                                                           group_index, dim);
-          } else {
-            arr[index] = array_factory.from_grouping(grouping, group_name,
-                                                     group_index);
-          }
-        }
+        if (index != -1){ arr[index] = map.at(parse_mem_name_(name, coord)); }
       };
 
     LUT::for_each_entry(fn);
