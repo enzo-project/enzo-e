@@ -291,6 +291,14 @@ could be used instead by add ``++local`` to ``charmrun``, e.g.:
 
      ``~/Charm/bin/charmrun ++local +p4 bin/enzo-p input/HelloWorld/Hi.in``
 
+If you receive an error like
+
+.. code-block:: bash
+    Charmrun> Timeout waiting for node-program to connect
+
+trying running ``./bin/enzo-p`` without ``charmrun`` as crashes due to, e.g.,
+libraries not being found may not be displaying.
+
 If all goes well, Enzo-E will run the Hello World problem.  Below are
 some of the generated images from the longer-running "HelloWorld.in"
 problem (note "HelloWorld.in" runs for about an hour, compared to a
