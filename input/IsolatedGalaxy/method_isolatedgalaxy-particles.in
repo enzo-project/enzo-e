@@ -55,7 +55,7 @@
          mass_type = "baryon"; # options are currently dark and baryon
      };
 #    max level at zero for now until flux correction working
-     max_level = 0; 
+     max_level = 1; 
  }
 
  Field {
@@ -125,25 +125,28 @@
 # uncomment the below to use particles
 #
 
-# Particle {
+ Particle {
 #     list = [ "dark" , "stars"];
-#     dark {
-#         attributes = [ "x", "single",
-#                        "y", "single",
-#                        "z", "single",
-#                        "vx", "single",
-#                        "vy", "single",
-#                        "vz", "single",
-#                        "ax", "single",
-#                        "ay", "single",
-#                        "az", "single" ,
-#                        "is_local", "single"];
-#         position = [ "x", "y", "z" ];
-#         velocity = [ "vx", "vy", "vz" ];
-#         groups = ["has_mass"];
+     list = [ "dark" ];
+     dark {
+         attributes = [ "x", "single",
+                        "y", "single",
+                        "z", "single",
+                        "vx", "single",
+                        "vy", "single",
+                        "vz", "single",
+                        "ax", "single",
+                        "ay", "single",
+                        "az", "single",
+			"mass", "single", 
+                        "is_local", "single"];
+         position = [ "x", "y", "z" ];
+         velocity = [ "vx", "vy", "vz" ];
+         groups = ["has_mass"];
 #         constants = [ "mass", "single", .8382456140 ];
-#
-#     }
+
+     }
+     }
 
 #    stars {
 #         attributes = [ "x", "single",
@@ -164,10 +167,13 @@
 #      }
 # }
 
+# JHW: The halo.dat particle data used with the live_dm_halo option is a random
+#      distribution within the halo for testing purposes only. Not physical!
   Initial {
     list = ["isolated_galaxy"];
     isolated_galaxy {
         analytic_velocity = true;           # use v_circ from background potential
+	live_dm_halo      = true;           # read particle data from halo.dat
         center_position  = [0.5, 0.5, 0.5]; #  
         scale_length     = 4.166666667;     # gas in kpc
         scale_height     = 2.916666667;     # gas in kpc
@@ -207,6 +213,7 @@ Output {
                        "pressure", "acceleration_x", "acceleration_y",
                        "acceleration_z", "potential"];
         dir   = ["ISOLATED_GALAXY_%03d","cycle"];
+	particle_list = ["dark"];
         name = [ "isolated-galaxy-data-%03d-%03d.h5", "cycle", "proc" ];
         type = "data";
 
