@@ -293,7 +293,8 @@ could be used instead by add ``++local`` to ``charmrun``, e.g.:
 
 If you receive an error like
 
-.. code-block:: bash
+..  code-block:: bash
+
     Charmrun> Timeout waiting for node-program to connect
 
 trying running ``./bin/enzo-p`` without ``charmrun`` as crashes due to, e.g.,
