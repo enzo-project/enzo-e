@@ -10,7 +10,7 @@ module enzo {
   initnode void register_method_turbulence(void);
   initnode void mutex_init();
   initnode void mutex_init_bcg_iter();
-  
+
   readonly EnzoConfig g_enzo_config;
   readonly int EnzoBlock::UseMinimumPressureSupport[CONFIG_NODE_SIZE];
   readonly enzo_float EnzoBlock::MinimumPressureSupportParameter[CONFIG_NODE_SIZE];
@@ -51,17 +51,20 @@ module enzo {
   PUPable EnzoInitialCloud;
   PUPable EnzoInitialCollapse;
   PUPable EnzoInitialCosmology;
+  PUPable EnzoInitialFeedbackTest;
   PUPable EnzoInitialInclinedWave;
   PUPable EnzoInitialImplosion2;
   PUPable EnzoInitialMusic;
   PUPable EnzoInitialPm;
+  PUPable EnzoInitialBurkertBodenheimer;
   PUPable EnzoInitialPpmlTest;
   PUPable EnzoInitialSedovArray2;
   PUPable EnzoInitialSedovArray3;
   PUPable EnzoInitialSedovRandom;
   PUPable EnzoInitialShockTube;
-  PUPable EnzoInitialSoup;  	  
+  PUPable EnzoInitialSoup;
   PUPable EnzoInitialTurbulence;
+  PUPable EnzoInitialIsolatedGalaxy;
 
   PUPable EnzoRefineShock;
   PUPable EnzoRefineParticleMass;
@@ -77,10 +80,15 @@ module enzo {
   PUPable EnzoMatrixIdentity;
   PUPable IoEnzoBlock;
 
+  PUPable EnzoMethodBackgroundAcceleration;
+  PUPable EnzoMethodFeedback;
+  PUPable EnzoMethodDistributedFeedback;
+
   PUPable EnzoMethodCheckGravity;
   PUPable EnzoMethodComovingExpansion;
   PUPable EnzoMethodCosmology;
   PUPable EnzoMethodGravity;
+
   PUPable EnzoMethodHeat;
   PUPable EnzoMethodHydro;
   PUPable EnzoMethodPmDeposit;
@@ -107,6 +115,8 @@ module enzo {
   PUPable EnzoRiemannImpl<HLLCImpl>; //EnzoRiemannHLLC
   PUPable EnzoRiemannImpl<HLLDImpl>; //EnzoRiemannHLLD
 
+  PUPable EnzoMethodStarMaker;
+  PUPable EnzoMethodStarMakerStochasticSF;
   PUPable EnzoBfieldMethodCT;
 
   PUPable EnzoPhysicsCosmology;
@@ -189,7 +199,7 @@ module enzo {
 				   int i_function);
 
     // EnzoSolverDd
-    
+
     entry void p_solver_dd_restrict_recv(FieldMsg * msg);
     entry void p_solver_dd_prolong_recv(FieldMsg * msg);
     entry void p_solver_dd_solve_coarse();
@@ -197,19 +207,19 @@ module enzo {
     entry void p_solver_dd_last_smooth();
     entry void r_solver_dd_barrier(CkReductionMsg *msg);
     entry void r_solver_dd_end(CkReductionMsg *msg);
-    
+
     // EnzoSolverJacobi
 
     entry void p_solver_jacobi_continue();
 
     // EnzoSolverMg0
-    
+
     entry void p_solver_mg0_restrict();
     entry void p_solver_mg0_solve_coarse();
     entry void p_solver_mg0_post_smooth();
     entry void p_solver_mg0_last_smooth();
     entry void r_solver_mg0_begin_solve(CkReductionMsg *msg);
-    entry void r_solver_mg0_barrier(CkReductionMsg* msg);  
+    entry void r_solver_mg0_barrier(CkReductionMsg* msg);
     entry void p_solver_mg0_prolong_recv(FieldMsg * msg);
     entry void p_solver_mg0_restrict_recv(FieldMsg * msg);
 

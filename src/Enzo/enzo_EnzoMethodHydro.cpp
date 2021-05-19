@@ -10,7 +10,7 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodHydro::EnzoMethodHydro 
+EnzoMethodHydro::EnzoMethodHydro
 ( std::string method,
   enzo_float gamma,
   bool gravity,
@@ -47,9 +47,18 @@ EnzoMethodHydro::EnzoMethodHydro
     ppm_flattening_(ppm_flattening),
     ppm_steepening_(ppm_steepening),
     riemann_solver_(riemann_solver)
-    
+
 {
   // Initialize default Refresh object
+
+  const int rank = cello::rank();
+  this->required_fields_ = std::vector<std::string>
+                               {"density","internal_energy","total_energy","pressure"};
+  if (rank >= 0) this->required_fields_.insert(this->required_fields_.end(),{"velocity_x","acceleration_x"});
+  if (rank >= 1) this->required_fields_.insert(this->required_fields_.end(),{"velocity_y","acceleration_y"});
+  if (rank >= 2) this->required_fields_.insert(this->required_fields_.end(),{"velocity_z","acceleration_z"});
+
+  this->define_fields();
 }
 
 //----------------------------------------------------------------------
@@ -128,65 +137,65 @@ void EnzoMethodHydro::compute ( Block * block) throw()
   //         colnum[i] = colorNum+i;
 
   //     }
-  //     // second, the color field advection if using RadiativeTransferFLD for 
+  //     // second, the color field advection if using RadiativeTransferFLD for
   //     // a radiation propagation problem (i.e. not using ray-tracing)
   //     if (RadiativeTransferFLD == 2) {
   //       if (ImplicitProblem < 4)  {  // grey radiation problem
-	
+
   // 	// set the grey radiation field (required)
   // 	if ((colorNum =
-  // 	     FindField(RadiationFreq0, FieldType, NumberOfBaryonFields)) < 0) 
+  // 	     FindField(RadiationFreq0, FieldType, NumberOfBaryonFields)) < 0)
   // 	  ENZO_FAIL("Could not find RadiationFreq0.");
   // 	colnum[0] = colorNum;
 
   // 	// check for other chemistry fields; add if they're present
   // 	//   ElectronDensity
   // 	if ((colorNum =
-  // 	     FindField(ElectronDensity, FieldType, NumberOfBaryonFields)) >= 0) 
+  // 	     FindField(ElectronDensity, FieldType, NumberOfBaryonFields)) >= 0)
   // 	  colnum[++NumberOfcolors] = colorNum;
   // 	//   HIDensity
   // 	if ((colorNum =
-  // 	     FindField(HIDensity, FieldType, NumberOfBaryonFields)) >= 0) 
+  // 	     FindField(HIDensity, FieldType, NumberOfBaryonFields)) >= 0)
   // 	  colnum[++NumberOfcolors] = colorNum;
   // 	//   HIIDensity
   // 	if ((colorNum =
-  // 	     FindField(HIIDensity, FieldType, NumberOfBaryonFields)) >= 0) 
+  // 	     FindField(HIIDensity, FieldType, NumberOfBaryonFields)) >= 0)
   // 	  colnum[++NumberOfcolors] = colorNum;
   // 	//   HeIDensity
   // 	if ((colorNum =
-  // 	     FindField(HeIDensity, FieldType, NumberOfBaryonFields)) >= 0) 
+  // 	     FindField(HeIDensity, FieldType, NumberOfBaryonFields)) >= 0)
   // 	  colnum[++NumberOfcolors] = colorNum;
   // 	//   HeIIDensity
   // 	if ((colorNum =
-  // 	     FindField(HeIIDensity, FieldType, NumberOfBaryonFields)) >= 0) 
+  // 	     FindField(HeIIDensity, FieldType, NumberOfBaryonFields)) >= 0)
   // 	  colnum[++NumberOfcolors] = colorNum;
   // 	//   HeIIIDensity
   // 	if ((colorNum =
-  // 	     FindField(HeIIIDensity, FieldType, NumberOfBaryonFields)) >= 0) 
+  // 	     FindField(HeIIIDensity, FieldType, NumberOfBaryonFields)) >= 0)
   // 	  colnum[++NumberOfcolors] = colorNum;
   // 	//   HMDensity
   // 	if ((colorNum =
-  // 	     FindField(HMDensity, FieldType, NumberOfBaryonFields)) >= 0) 
+  // 	     FindField(HMDensity, FieldType, NumberOfBaryonFields)) >= 0)
   // 	  colnum[++NumberOfcolors] = colorNum;
   // 	//   H2IDensity
   // 	if ((colorNum =
-  // 	     FindField(H2IDensity, FieldType, NumberOfBaryonFields)) >= 0) 
+  // 	     FindField(H2IDensity, FieldType, NumberOfBaryonFields)) >= 0)
   // 	  colnum[++NumberOfcolors] = colorNum;
   // 	//   H2IIDensity
   // 	if ((colorNum =
-  // 	     FindField(H2IIDensity, FieldType, NumberOfBaryonFields)) >= 0) 
+  // 	     FindField(H2IIDensity, FieldType, NumberOfBaryonFields)) >= 0)
   // 	  colnum[++NumberOfcolors] = colorNum;
   // 	//   DIDensity
   // 	if ((colorNum =
-  // 	     FindField(DIDensity, FieldType, NumberOfBaryonFields)) >= 0) 
+  // 	     FindField(DIDensity, FieldType, NumberOfBaryonFields)) >= 0)
   // 	  colnum[++NumberOfcolors] = colorNum;
   // 	//   DIIDensity
   // 	if ((colorNum =
-  // 	     FindField(DIIDensity, FieldType, NumberOfBaryonFields)) >= 0) 
+  // 	     FindField(DIIDensity, FieldType, NumberOfBaryonFields)) >= 0)
   // 	  colnum[++NumberOfcolors] = colorNum;
   // 	//   HDIDensity
   // 	if ((colorNum =
-  // 	     FindField(HDIDensity, FieldType, NumberOfBaryonFields)) >= 0) 
+  // 	     FindField(HDIDensity, FieldType, NumberOfBaryonFields)) >= 0)
   // 	  colnum[++NumberOfcolors] = colorNum;
   //       }
   //     }
@@ -194,7 +203,7 @@ void EnzoMethodHydro::compute ( Block * block) throw()
   //     /* Add "real" color fields (metallicity, etc.) as color variables. */
 
   //     int SNcolorNum, MetalNum, MBHcolorNum, Galaxy1colorNum, Galaxy2colorNum,
-  //       MetalIaNum, MetalIINum; 
+  //       MetalIaNum, MetalIINum;
 
   //     if (this->IdentifycolorFields(SNcolorNum, MetalNum, MetalIaNum, MetalIINum,
   //                 MBHcolorNum, Galaxy1colorNum, Galaxy2colorNum) == FAIL)
@@ -277,7 +286,7 @@ void EnzoMethodHydro::compute ( Block * block) throw()
   // 	colnum[NumberOfcolors++] = H2OINum;
   // 	colnum[NumberOfcolors++] = O2INum;
   //       }
-      
+
   //     } // if(TestProblemData.GloverChemistryModel)
 
 
@@ -294,11 +303,11 @@ void EnzoMethodHydro::compute ( Block * block) throw()
 
   //     if(ShockMethod){
   //       int MachNum, PSTempNum,PSDenNum;
-      
+
   //       if (IdentifyShockSpeciesFields(MachNum,PSTempNum,PSDenNum) == FAIL) {
   // 	ENZO_FAIL("Error in IdentifyShockSpeciesFields.")
   //       }
-      
+
   //       colnum[NumberOfcolors++] = MachNum;
   //       if(StorePreShockFields){
   // 	colnum[NumberOfcolors++] = PSTempNum;
@@ -306,7 +315,7 @@ void EnzoMethodHydro::compute ( Block * block) throw()
   //       }
   //     }
   //     /* Determine if Gamma should be a scalar or a field. */
-    
+
   //     int UseGammaField = FALSE;
   //     float *GammaField = NULL;
   //     if (HydroMethod == Zeus_Hydro && MultiSpecies > 1) {
@@ -320,7 +329,7 @@ void EnzoMethodHydro::compute ( Block * block) throw()
   //       GammaField[0] = gamma_;
 
   //     }
-    
+
   //     /* Set lowest level flag (used on Zeus hydro). */
 
   //     int LowestLevel = (level > MaximumRefinementLevel-1) ? TRUE : FALSE;
@@ -390,7 +399,7 @@ void EnzoMethodHydro::compute ( Block * block) throw()
 
   //     } // end of loop over subgrids
 
-  //     /* compute global start index for left edge of entire grid 
+  //     /* compute global start index for left edge of entire grid
   //        (including boundary zones) */
 
   //     for (dim = 0; dim < GridRank; dim++)
@@ -421,7 +430,7 @@ void EnzoMethodHydro::compute ( Block * block) throw()
   // #ifdef TRANSFER
   //     if (RadiationPressure)
   //       GravityOn = 1;
-  // #endif    
+  // #endif
 
   //     //Some setup for MHDCT
 
@@ -429,7 +438,7 @@ void EnzoMethodHydro::compute ( Block * block) throw()
   //     if ( UseMHDCT ) {
   //         MHDCT_ConvertEnergyToConservedS();  //Energy toggle.  Probably will be removed soon.
   //         for(field=0;field<3;field++){
-  //             if(ElectricField[field] == NULL ) 
+  //             if(ElectricField[field] == NULL )
   //                 ElectricField[field] = new float[ElectricSize[field]];
   //             for(i=0;i<ElectricSize[field]; i++) ElectricField[field][i] = 0.0;
   //         }
@@ -440,12 +449,12 @@ void EnzoMethodHydro::compute ( Block * block) throw()
   //         }
   //         CenterMagneticField();
   // #ifdef BIERMANN
-        
+
   //         /* Compute Units. */
-        
+
   //         float DensityUnits = 1, LengthUnits = 1, TemperatureUnits = 1, TimeUnits = 1,
   //           VelocityUnits = 1, BFieldUnits = 1;
-        
+
   //         if(ComovingCoordinates){
   //           if (MHDCosmologyGetUnits(&DensityUnits, &LengthUnits, &TemperatureUnits,
   //           		     &TimeUnits, &VelocityUnits, Time,&BFieldUnits) == FAIL) {
@@ -466,12 +475,12 @@ void EnzoMethodHydro::compute ( Block * block) throw()
 
 
   //     float* Fluxes[3] = {MagneticFlux[0][0],MagneticFlux[1][0],MagneticFlux[2][0]};
-  //     int CurlStart[3] = {0,0,0}, 
+  //     int CurlStart[3] = {0,0,0},
   //     CurlEnd[3] = {mx-1,my-1,mz-1};
   //     if ( UseMHDCT ){
   //         if (HydroMethod == MHD_Li){
-  //           this->SolveMHD_Li(CycleNumber, NumberOfSubgrids, SubgridFluxes, 
-  //                 CellWidthTemp, GridGlobalStart, gravity_, 
+  //           this->SolveMHD_Li(CycleNumber, NumberOfSubgrids, SubgridFluxes,
+  //                 CellWidthTemp, GridGlobalStart, gravity_,
   //                 NumberOfcolors, colnum, Fluxes);
   //         }
 
@@ -514,11 +523,11 @@ void EnzoMethodHydro::compute ( Block * block) throw()
   //        Notice that it is hard-wired for three dimensions, but it does
   //        the right thing for < 3 dimensions. */
   //     /* note: Start/EndIndex are zero based */
-        
+
   if (method_ == "ppm") {
 
     ppm_method_ (block);
-    
+
   }
 
   //     /* PPM LR has been withdrawn. */
@@ -551,19 +560,19 @@ void EnzoMethodHydro::compute ( Block * block) throw()
   //     }
 
   //     if (HydroMethod == Zeus_Hydro)
-  //       if (this->ZeusSolver(gamma_Field, UseGammaField, CycleNumber, 
+  //       if (this->ZeusSolver(gamma_Field, UseGammaField, CycleNumber,
   //                hxa, CellWidthTemp[1], CellWidthTemp[2],
   //                gravity_, NumberOfSubgrids, GridGlobalStart,
   //                SubgridFluxes,
   //                NumberOfcolors, colnum, LowestLevel,
   //                MinimumSupportEnergyCoefficient) == FAIL)
   // 	ENZO_FAIL("ZeusSolver() failed!\n");
-	
+
 
 
   //     /* Clean up allocated fields. */
 
-  //     delete [] GammaField;   
+  //     delete [] GammaField;
 
   //     for (dim = 0; dim < MAX_DIMENSION; dim++)
   //       delete [] CellWidthTemp[dim];
@@ -571,8 +580,8 @@ void EnzoMethodHydro::compute ( Block * block) throw()
   //   /* If we're supposed to be outputting on Density, we need to update
   //      the current maximum value of that Density. */
 
-  //     if (OutputOnDensity == 1 || 
-  //         StopFirstTimeAtDensity > 0. || 
+  //     if (OutputOnDensity == 1 ||
+  //         StopFirstTimeAtDensity > 0. ||
   //         StopFirstTimeAtMetalEnrichedDensity > 0.) {
   //       int DensNum = FindField(Density, FieldType, NumberOfBaryonFields);
 
@@ -609,7 +618,7 @@ void EnzoMethodHydro::compute ( Block * block) throw()
   //           else if (SNcolorNum != -1)
   //             MetalPointer = BaryonField[SNcolorNum];
   //         } // ENDELSE both metal types
- 
+
   //       }
 
   //       for (i = 0; i < size; i++) {
@@ -619,7 +628,7 @@ void EnzoMethodHydro::compute ( Block * block) throw()
 
   //         if (StopFirstTimeAtMetalEnrichedDensity > 0. &&
   //             (MetalPointer[i] / de[i]) > EnrichedMetalFraction) {
-  //           CurrentMaximumMetalEnrichedDensity = 
+  //           CurrentMaximumMetalEnrichedDensity =
   //             max(de[i], CurrentMaximumMetalEnrichedDensity);
   //         }
 
@@ -632,7 +641,7 @@ void EnzoMethodHydro::compute ( Block * block) throw()
   block->compute_done();
 
 
- 
+
 }
 
 //----------------------------------------------------------------------
@@ -641,9 +650,9 @@ void EnzoMethodHydro::ppm_method_ ( Block * block )
 {
 
   Field field = block->data()->field();
-  
+
   // Assume gravity if acceleration fields exist
-  
+
   int mx,my,mz;
   field.dimensions (0,&mx,&my,&mz);
 
@@ -689,8 +698,8 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
   // /* Find fields: density, total energy, velocity1-3. */
 
   // int DensNum, GENum, Vel1Num, Vel2Num, Vel3Num, TENum;
-  
-  // this->IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num, 
+
+  // this->IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num,
   // 				   Vel3Num, TENum);
 
   // int nxz, nyz, nzz, ixyz;
@@ -700,15 +709,15 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
   // nzz = GridEndIndex[2] - GridStartIndex[2] + 1;
 
   // float MinimumPressure = tiny_number;
-  
+
   // // Copy from field to slice
 
-  // float *dslice, *eslice, *uslice, *vslice, *wslice, *grslice, *geslice, 
+  // float *dslice, *eslice, *uslice, *vslice, *wslice, *grslice, *geslice,
   //   *colslice, *pslice;
 
 
   Field field = block->data()->field();
-  
+
   int mx,my,mz;
   field.dimensions (0,&mx,&my,&mz);
 
@@ -743,7 +752,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
   enzo_float * slice_array = new enzo_float [na];
 
   // initialize array of slices
-  
+
   enzo_float * pa = slice_array;
 
   // ...density, pressure, and velocities
@@ -759,7 +768,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
   if (gravity_) {
     grslice = pa; pa +=ns;
   }
-  
+
   // ... add slice for gas energy if needed
   enzo_float * geslice = NULL;
   if (dual_energy_) {
@@ -780,7 +789,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
   enzo_float * pr = (enzo_float *) field.values("pressure");
 
   const int rank = cello::rank();
-  
+
   for (int iy=0; iy<my; iy++) {
     for (int ix=0; ix<mx; ix++) {
       int i  = ix + mx*(iy + my*iz);
@@ -827,7 +836,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
       }
     }
   }
-    
+
   ASSERT2("EnzoMethodHydro::ppm_xeuler_x",
 	  "temporary slice array actual size %ld differs from expected size %d",
 	  (pa-slice_array), na,
@@ -835,39 +844,39 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
 
   // Allocate memory for fluxes
 
-  enzo_float *dls, *drs, *flatten, *pbar, *pls, *prs, *ubar, *uls, *urs, *vls, 
+  enzo_float *dls, *drs, *flatten, *pbar, *pls, *prs, *ubar, *uls, *urs, *vls,
     *vrs, *gels, *gers, *wls, *wrs, *diffcoef, *df, *ef, *uf, *vf, *wf, *gef,
     *ges, *colf, *colls, *colrs;
 
   int nf = (23 + 3*nc)*ns;
-  
+
   enzo_float * fluxes_array = new enzo_float [nf];
 
   enzo_float * pf = fluxes_array;
-  
+
   dls      = pf; pf += ns;
-  drs      = pf; pf += ns;	
-  flatten  = pf; pf += ns;	
-  pbar     = pf; pf += ns;	
-  pls      = pf; pf += ns;	
-  prs      = pf; pf += ns;	
-  ubar     = pf; pf += ns;	
-  uls      = pf; pf += ns;	
-  urs      = pf; pf += ns;	
-  vls      = pf; pf += ns;	
-  vrs      = pf; pf += ns;	
-  gels     = pf; pf += ns;	
-  gers     = pf; pf += ns;	
-  wls      = pf; pf += ns;	
-  wrs      = pf; pf += ns;	
-  diffcoef = pf; pf += ns;	
-  df       = pf; pf += ns;		
-  ef       = pf; pf += ns;		
-  uf       = pf; pf += ns;		
-  vf       = pf; pf += ns;		
-  wf       = pf; pf += ns;		
-  gef      = pf; pf += ns;	
-  ges      = pf; pf += ns;	
+  drs      = pf; pf += ns;
+  flatten  = pf; pf += ns;
+  pbar     = pf; pf += ns;
+  pls      = pf; pf += ns;
+  prs      = pf; pf += ns;
+  ubar     = pf; pf += ns;
+  uls      = pf; pf += ns;
+  urs      = pf; pf += ns;
+  vls      = pf; pf += ns;
+  vrs      = pf; pf += ns;
+  gels     = pf; pf += ns;
+  gers     = pf; pf += ns;
+  wls      = pf; pf += ns;
+  wrs      = pf; pf += ns;
+  diffcoef = pf; pf += ns;
+  df       = pf; pf += ns;
+  ef       = pf; pf += ns;
+  uf       = pf; pf += ns;
+  vf       = pf; pf += ns;
+  wf       = pf; pf += ns;
+  gef      = pf; pf += ns;
+  ges      = pf; pf += ns;
   colf     = pf; pf += nc*ns;
   colls    = pf; pf += nc*ns;
   colrs    = pf; pf += nc*ns;
@@ -898,35 +907,35 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
   int je = my;
   int ie_p1 = ie + 1;
   int k_p1  = iz + 1;
-  
+
 
   if (dual_energy_) {
 
     FORTRAN_NAME(woc_pgas2d_dual)
-      (dslice, eslice, geslice, pslice, uslice, vslice, 
+      (dslice, eslice, geslice, pslice, uslice, vslice,
        wslice, &dual_energy_eta1_,
        &dual_energy_eta2_,
-       &mx,&my, &is, &ie, &js, &je, 
+       &mx,&my, &is, &ie, &js, &je,
        &gamma_, &ppm_pressure_floor_);
 
   } else {
 
     FORTRAN_NAME(woc_pgas2d)
-      (dslice, eslice, pslice, uslice, vslice, 
+      (dslice, eslice, pslice, uslice, vslice,
        wslice, &mx, &my,
        &is, &ie, &js, &je, &gamma_, &ppm_pressure_floor_);
   }
 
-  
+
   // If requested, compute diffusion and slope flattening coefficients
 
   // Adjust cell widths for cosmological expansion if needed
-  
+
   EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
   enzo_float cosmo_a    = 1.0;
   enzo_float cosmo_dadt = 0.0;
-  
+
   if (cosmology) {
     cosmology->compute_expansion_factor
       (&cosmo_a, &cosmo_dadt, (enzo_float)block->time());
@@ -938,13 +947,13 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
   enzo_float hxa = cosmo_a*h;
   enzo_float hya = cosmo_a*h;
   enzo_float hza = cosmo_a*h;
-  
+
   enzo_float dt = block->dt();
-  
+
   enzo_float * flatten_array = new enzo_float[ns];
 
   int riemann_solver_fallback = 1;
-  
+
   if (ppm_diffusion_ || ppm_flattening_) {
 
     int dim_p1 = 1;
@@ -973,7 +982,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
        &dual_energy_eta1_, &dual_energy_eta2_,
        &ppm_steepening_, &ppm_flattening_,
        &reconstruct_conservative_, &reconstruct_positive_,
-       &dt, &gamma_, &ppm_pressure_free_, 
+       &dt, &gamma_, &ppm_pressure_free_,
        dls, drs, pls, prs, gels, gers, uls, urs, vls, vrs,
        wls, wrs, &nc, colslice, colls, colrs);
   }
@@ -993,7 +1002,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
     int axis=-1;
     FORTRAN_NAME(woc_flux_twoshock)
       (dslice, eslice, geslice, uslice, vslice, wslice,
-       &hxa, diffcoef, 
+       &hxa, diffcoef,
        &mx, &my,
        &is, &ie, &js, &je, &dt, &gamma_,
        &ppm_diffusion_, &dual_energy_,
@@ -1003,12 +1012,12 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
        vls, vrs, wls, wrs, pbar, ubar,
        df, ef, uf, vf, wf, gef, ges,
        &nc, colslice, colls, colrs, colf,&axis);
-    
+
   } else if (riemann_solver_ == "hll") {
 
     FORTRAN_NAME(woc_flux_hll)
       (dslice, eslice, geslice, uslice, vslice, wslice,
-       &hxa, diffcoef, 
+       &hxa, diffcoef,
        &mx, &my,
        &is, &ie, &js, &je, &dt, &gamma_,
        &ppm_diffusion_, &dual_energy_,
@@ -1023,7 +1032,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
 
     FORTRAN_NAME(woc_flux_hllc)
       (dslice, eslice, geslice, uslice, vslice, wslice,
-       &hxa, diffcoef, 
+       &hxa, diffcoef,
        &mx, &my,
        &is, &ie, &js, &je, &dt, &gamma_,
        &ppm_diffusion_, &dual_energy_,
@@ -1052,10 +1061,10 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
 
   FORTRAN_NAME(woc_euler)
     (dslice, eslice, grslice, geslice, uslice, vslice, wslice,
-     &hxa, diffcoef, 
-     &mx, &my, 
-     &is, &ie, &js, &je, &dt, &gamma_, 
-     &ppm_diffusion_, &gravity_, &dual_energy_, 
+     &hxa, diffcoef,
+     &mx, &my,
+     &is, &ie, &js, &je, &dt, &gamma_,
+     &ppm_diffusion_, &gravity_, &dual_energy_,
      &dual_energy_eta1_, &dual_energy_eta2_,
      df, ef, uf, vf, wf, gef, ges,
      &nc, colslice, colf, &ppm_density_floor_);
@@ -1063,25 +1072,25 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
   // /* If necessary, recompute the pressure to correctly set ge and e */
 
   // if (dual_energy_)
-  //   FORTRAN_NAME(woc_pgas2d_dual)(dslice, eslice, geslice, pslice, uslice, vslice, 
-  // 			      wslice, &dual_energy_eta1_, 
-  // 			      &dual_energy_eta2_, &mx, 
-  // 			      &my, &is_m3, &ie_p3, &js, &je, 
+  //   FORTRAN_NAME(woc_pgas2d_dual)(dslice, eslice, geslice, pslice, uslice, vslice,
+  // 			      wslice, &dual_energy_eta1_,
+  // 			      &dual_energy_eta2_, &mx,
+  // 			      &my, &is_m3, &ie_p3, &js, &je,
   // 			      &gamma_, &ppm_pressure_floor_);
 
   // /* Check this slice against the list of subgrids (all subgrid
   //    quantities are zero-based) */
 
-  // int jstart, jend, offset, nfi, lface, rface, lindex, rindex, 
+  // int jstart, jend, offset, nfi, lface, rface, lindex, rindex,
   //   fistart, fiend, fjstart, fjend, clindex, crindex;
-  
+
   // for (n = 0; n < NumberOfSubgrids; n++) {
 
-  //   fistart = SubgridFluxes[n]->RightFluxStartGlobalIndex[dim][idim] - 
+  //   fistart = SubgridFluxes[n]->RightFluxStartGlobalIndex[dim][idim] -
   //     GridGlobalStart[idim];
   //   fiend = SubgridFluxes[n]->RightFluxEndGlobalIndex[dim][idim] -
   //     GridGlobalStart[idim];
-  //   fjstart = SubgridFluxes[n]->RightFluxStartGlobalIndex[dim][jdim] - 
+  //   fjstart = SubgridFluxes[n]->RightFluxStartGlobalIndex[dim][jdim] -
   //     GridGlobalStart[jdim];
   //   fjend = SubgridFluxes[n]->RightFluxEndGlobalIndex[dim][jdim] -
   //     GridGlobalStart[jdim];
@@ -1099,7 +1108,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
 
   // 	rface = SubgridFluxes[n]->RightFluxStartGlobalIndex[dim][dim] -
   // 	  GridGlobalStart[dim] + 1;
-  // 	rindex = j * GridDimension[dim] + rface;	
+  // 	rindex = j * GridDimension[dim] + rface;
 
   // 	SubgridFluxes[n]->LeftFluxes [DensNum][dim][offset] = df[lindex];
   // 	SubgridFluxes[n]->RightFluxes[DensNum][dim][offset] = df[rindex];
@@ -1129,9 +1138,9 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
   // 	  crindex = (j + ncolor * my) * GridDimension[dim] +
   // 	    rface;
 
-  // 	  SubgridFluxes[n]->LeftFluxes [colnum[ncolor]][dim][offset] = 
+  // 	  SubgridFluxes[n]->LeftFluxes [colnum[ncolor]][dim][offset] =
   // 	    colf[clindex];
-  // 	  SubgridFluxes[n]->RightFluxes[colnum[ncolor]][dim][offset] = 
+  // 	  SubgridFluxes[n]->RightFluxes[colnum[ncolor]][dim][offset] =
   // 	    colf[crindex];
   // 	} // ENDFOR ncolor
 
@@ -1196,10 +1205,10 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
   // int dim_p1 = dim+1;   // To match definition in calcdiss
 
   // /* Find fields: density, total energy, velocity1-3. */
-  
+
   // int DensNum, GENum, Vel1Num, Vel2Num, Vel3Num, TENum;
 
-  // this->IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num, 
+  // this->IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num,
   // 				   Vel3Num, TENum);
 
   // int nxz, nyz, nzz, ixyz;
@@ -1209,10 +1218,10 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
   // nzz = GridEndIndex[2] - GridStartIndex[2] + 1;
 
   // float MinimumPressure = tiny_number;
-  
+
   // // Copy from field to slice
 
-  // float *dslice, *eslice, *uslice, *vslice, *wslice, *grslice, *geslice, 
+  // float *dslice, *eslice, *uslice, *vslice, *wslice, *grslice, *geslice,
   //   *colslice, *pslice;
 
   // int size = my * mz;
@@ -1223,13 +1232,13 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
   // wslice = new float[size];
   // pslice = new float[size];
   // if (gravity_) {
-  //   grslice = new float[size];  
+  //   grslice = new float[size];
   // }
   // if (dual_energy_) {
-  //   geslice = new float[size];  
+  //   geslice = new float[size];
   // }
   // if (nc > 0) {
-  //   colslice = new float[nc * size];  
+  //   colslice = new float[nc * size];
   // }
 
   // int j, k, n, ncolor, index2, index3;
@@ -1248,7 +1257,7 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
   //   // Set velocities to zero if rank < 3 since hydro routines are
   //   // hard-coded for 3-d
 
-  //   if (GridRank > 1) 
+  //   if (GridRank > 1)
   //     for (j = 0; j < my; j++) {
   // 	index3 = (k*my + j) * mx + i;
   // 	uslice[index2+j] = vy[index3];
@@ -1256,7 +1265,7 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
   //   else
   //     for (j = 0; j < my; j++)
   // 	uslice[index2+j] = 0;
-  
+
   //   if (GridRank > 2)
   //     for (j = 0; j < my; j++) {
   // 	index3 = (k*my + j) * mx + i;
@@ -1265,7 +1274,7 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
   //   else
   //     for (j = 0; j < my; j++)
   // 	vslice[index2+j] = 0;
-    
+
   //   if (gravity_)
   //     for (j = 0; j < my; j++) {
   // 	index3 = (k*my + j) * mx + i;
@@ -1290,36 +1299,36 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
 
   // /* Allocate memory for fluxes */
 
-  // float *dls, *drs, *flatten, *pbar, *pls, *prs, *ubar, *uls, *urs, *vls, 
+  // float *dls, *drs, *flatten, *pbar, *pls, *prs, *ubar, *uls, *urs, *vls,
   //   *vrs, *gels, *gers, *wls, *wrs, *diffcoef, *df, *ef, *uf, *vf, *wf, *gef,
   //   *ges, *colf, *colls, *colrs;
 
-  // dls = new float[size];	
-  // drs = new float[size];	
-  // flatten = new float[size];	
-  // pbar = new float[size];	
-  // pls = new float[size];	
-  // prs = new float[size];	
-  // ubar = new float[size];	
-  // uls = new float[size];	
-  // urs = new float[size];	
-  // vls = new float[size];	
-  // vrs = new float[size];	
-  // gels = new float[size];	
-  // gers = new float[size];	
-  // wls = new float[size];	
-  // wrs = new float[size];	
-  // diffcoef = new float[size];	
-  // df = new float[size];		
-  // ef = new float[size];		
-  // uf = new float[size];		
-  // vf = new float[size];		
-  // wf = new float[size];		
-  // gef = new float[size];	
+  // dls = new float[size];
+  // drs = new float[size];
+  // flatten = new float[size];
+  // pbar = new float[size];
+  // pls = new float[size];
+  // prs = new float[size];
+  // ubar = new float[size];
+  // uls = new float[size];
+  // urs = new float[size];
+  // vls = new float[size];
+  // vrs = new float[size];
+  // gels = new float[size];
+  // gers = new float[size];
+  // wls = new float[size];
+  // wrs = new float[size];
+  // diffcoef = new float[size];
+  // df = new float[size];
+  // ef = new float[size];
+  // uf = new float[size];
+  // vf = new float[size];
+  // wf = new float[size];
+  // gef = new float[size];
   // ges = new float[size];
-  // colf = new float[nc*size];  
-  // colls = new float[nc*size];  
-  // colrs = new float[nc*size];  
+  // colf = new float[nc*size];
+  // colls = new float[nc*size];
+  // colrs = new float[nc*size];
 
   // /* Convert start and end indexes into 1-based for FORTRAN */
 
@@ -1338,14 +1347,14 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
 
   // /*
   // if (dual_energy_)
-  //   FORTRAN_NAME(woc_pgas2d_dual)(dslice, eslice, geslice, pslice, uslice, vslice, 
-  // 			      wslice, &dual_energy_eta1_, 
-  // 			      &dual_energy_eta2_, &my, 
-  // 			      &mz, &is_m3, &ie_p3, &js, &je, 
+  //   FORTRAN_NAME(woc_pgas2d_dual)(dslice, eslice, geslice, pslice, uslice, vslice,
+  // 			      wslice, &dual_energy_eta1_,
+  // 			      &dual_energy_eta2_, &my,
+  // 			      &mz, &is_m3, &ie_p3, &js, &je,
   // 			      &gamma_, &ppm_pressure_floor_);
   // else
   //   FORTRAN_NAME(woc_pgas2d)(dslice, eslice, pslice, uslice, vslice,
-  // 			 wslice, &my, &mz, 
+  // 			 wslice, &my, &mz,
   // 			 &is_m3, &ie_p3, &js, &je, &gamma_, &ppm_pressure_floor_);
   // */
   // /* If requested, compute diffusion and slope flattening coefficients */
@@ -1353,7 +1362,7 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
   // if (ppm_diffusion_ != 0 || PPMFlatteningParameter != 0)
   //   FORTRAN_NAME(woc_calcdiss)(dslice, eslice, uslice, vz,
   // 			   vx, pslice, CellWidthTemp[1],
-  // 			   CellWidthTemp[2], hxa, 
+  // 			   CellWidthTemp[2], hxa,
   // 			   &my, &mz,
   // 			   &mx, &is, &ie, &js, &je, &k_p1,
   // 			   &nxz, &dim_p1, &mx,
@@ -1367,11 +1376,11 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
   //   FORTRAN_NAME(woc_inteuler)(dslice, pslice, &gravity_, grslice, geslice, uslice,
   // 			   vslice, wslice, CellWidthTemp[1], flatten,
   // 			   &my, &mz,
-  // 			   &is, &ie, &js, &je, &dual_energy_, 
+  // 			   &is, &ie, &js, &je, &dual_energy_,
   // 			   &dual_energy_eta1_, &dual_energy_eta2_,
   // 			   &PPMSteepeningParameter, &PPMFlatteningParameter,
   // 			   &ConservativeReconstruction, &PositiveReconstruction,
-  // 			   &dt, &gamma_, &ppm_pressure_free_, 
+  // 			   &dt, &gamma_, &ppm_pressure_free_,
   // 			   dls, drs, pls, prs, gels, gers, uls, urs, vls, vrs,
   // 			   wls, wrs, &nc, colslice, colls, colrs);
 
@@ -1385,9 +1394,9 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
   // 			   &dt, &gamma_, &ppm_pressure_floor_, &ppm_pressure_free_,
   // 			   pbar, ubar, &gravity_, grslice,
   // 			   &dual_energy_, &dual_energy_eta1_);
-    
+
   //   FORTRAN_NAME(woc_flux_twoshock)(dslice, eslice, geslice, uslice, vslice, wslice,
-  // 				CellWidthTemp[1], diffcoef, 
+  // 				CellWidthTemp[1], diffcoef,
   // 				&my, &mz,
   // 				&is, &ie, &js, &je, &dt, &gamma_,
   // 				&ppm_diffusion_, &dual_energy_,
@@ -1401,7 +1410,7 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
 
   // case HLL:
   //   FORTRAN_NAME(woc_flux_hll)(dslice, eslice, geslice, uslice, vslice, wslice,
-  // 			   CellWidthTemp[1], diffcoef, 
+  // 			   CellWidthTemp[1], diffcoef,
   // 			   &my, &mz,
   // 			   &is, &ie, &js, &je, &dt, &gamma_,
   // 			   &ppm_diffusion_, &dual_energy_,
@@ -1415,7 +1424,7 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
 
   // case HLLC:
   //   FORTRAN_NAME(woc_flux_hllc)(dslice, eslice, geslice, uslice, vslice, wslice,
-  // 			    CellWidthTemp[1], diffcoef, 
+  // 			    CellWidthTemp[1], diffcoef,
   // 			    &my, &mz,
   // 			    &is, &ie, &js, &je, &dt, &gamma_,
   // 			    &ppm_diffusion_, &dual_energy_,
@@ -1445,10 +1454,10 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
   // /* Compute Eulerian fluxes and update zone-centered quantities */
 
   // FORTRAN_NAME(woc_euler)(dslice, eslice, grslice, geslice, uslice, vslice, wslice,
-  // 		      CellWidthTemp[1], diffcoef, 
-  // 		      &my, &mz, 
-  // 		      &is, &ie, &js, &je, &dt, &gamma_, 
-  // 		      &ppm_diffusion_, &gravity_, &dual_energy_, 
+  // 		      CellWidthTemp[1], diffcoef,
+  // 		      &my, &mz,
+  // 		      &is, &ie, &js, &je, &dt, &gamma_,
+  // 		      &ppm_diffusion_, &gravity_, &dual_energy_,
   // 		      &dual_energy_eta1_, &dual_energy_eta2_,
   // 		      df, ef, uf, vf, wf, gef, ges,
   // 		      &nc, colslice, colf, &density_floor_);
@@ -1456,25 +1465,25 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
   // /* If necessary, recompute the pressure to correctly set ge and e */
 
   // if (dual_energy_)
-  //   FORTRAN_NAME(woc_pgas2d_dual)(dslice, eslice, geslice, pslice, uslice, vslice, 
-  // 			      wslice, &dual_energy_eta1_, 
-  // 			      &dual_energy_eta2_, &my, 
-  // 			      &mz, &is_m3, &ie_p3, &js, &je, 
+  //   FORTRAN_NAME(woc_pgas2d_dual)(dslice, eslice, geslice, pslice, uslice, vslice,
+  // 			      wslice, &dual_energy_eta1_,
+  // 			      &dual_energy_eta2_, &my,
+  // 			      &mz, &is_m3, &ie_p3, &js, &je,
   // 			      &gamma_, &ppm_pressure_floor_);
 
   // /* Check this slice against the list of subgrids (all subgrid
   //    quantities are zero-based) */
 
-  // int jstart, jend, offset, nfi, lface, rface, lindex, rindex, 
+  // int jstart, jend, offset, nfi, lface, rface, lindex, rindex,
   //   fistart, fiend, fjstart, fjend, clindex, crindex;
-  
+
   // for (n = 0; n < NumberOfSubgrids; n++) {
 
-  //   fistart = SubgridFluxes[n]->RightFluxStartGlobalIndex[dim][idim] - 
+  //   fistart = SubgridFluxes[n]->RightFluxStartGlobalIndex[dim][idim] -
   //     GridGlobalStart[idim];
   //   fiend = SubgridFluxes[n]->RightFluxEndGlobalIndex[dim][idim] -
   //     GridGlobalStart[idim];
-  //   fjstart = SubgridFluxes[n]->RightFluxStartGlobalIndex[dim][jdim] - 
+  //   fjstart = SubgridFluxes[n]->RightFluxStartGlobalIndex[dim][jdim] -
   //     GridGlobalStart[jdim];
   //   fjend = SubgridFluxes[n]->RightFluxEndGlobalIndex[dim][jdim] -
   //     GridGlobalStart[jdim];
@@ -1492,7 +1501,7 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
 
   // 	rface = SubgridFluxes[n]->RightFluxStartGlobalIndex[dim][dim] -
   // 	  GridGlobalStart[dim] + 1;
-  // 	rindex = k * GridDimension[dim] + rface;	
+  // 	rindex = k * GridDimension[dim] + rface;
 
   // 	SubgridFluxes[n]->LeftFluxes [DensNum][dim][offset] = df[lindex];
   // 	SubgridFluxes[n]->RightFluxes[DensNum][dim][offset] = df[rindex];
@@ -1523,9 +1532,9 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
   // 	  crindex = (k + ncolor * mz) * GridDimension[dim] +
   // 	    rface;
 
-  // 	  SubgridFluxes[n]->LeftFluxes [colnum[ncolor]][dim][offset] = 
+  // 	  SubgridFluxes[n]->LeftFluxes [colnum[ncolor]][dim][offset] =
   // 	    colf[clindex];
-  // 	  SubgridFluxes[n]->RightFluxes[colnum[ncolor]][dim][offset] = 
+  // 	  SubgridFluxes[n]->RightFluxes[colnum[ncolor]][dim][offset] =
   // 	    colf[crindex];
   // 	} // ENDFOR ncolor
 
@@ -1570,7 +1579,7 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
   // 	index3 = (k*my + j) * mx + i;
   // 	BaryonField[colnum[n]][index3] = colslice[index2+j];
   //     }
-  //   } // ENDFOR colors    
+  //   } // ENDFOR colors
 
   // } // ENDFOR j
 
@@ -1629,10 +1638,10 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   // int dim_p1 = dim+1;   // To match definition in calcdiss
 
   // /* Find fields: density, total energy, velocity1-3. */
-  
+
   // int DensNum, GENum, Vel1Num, Vel2Num, Vel3Num, TENum;
 
-  // this->IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num, 
+  // this->IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num,
   // 				   Vel3Num, TENum);
 
   // int nxz, nyz, nzz, ixyz;
@@ -1642,27 +1651,27 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   // nzz = GridEndIndex[2] - GridStartIndex[2] + 1;
 
   // float MinimumPressure = tiny_number;
-  
+
   // // Copy from field to slice
 
-  // float *dslice, *eslice, *uslice, *vslice, *wslice, *grslice, *geslice, 
+  // float *dslice, *eslice, *uslice, *vslice, *wslice, *grslice, *geslice,
   //   *colslice, *pslice;
 
   // int size = mz * mx;
-  // dslice = new float[size];  
-  // eslice = new float[size];  
-  // uslice = new float[size];  
-  // vslice = new float[size];  
-  // wslice = new float[size];  
-  // pslice = new float[size];  
+  // dslice = new float[size];
+  // eslice = new float[size];
+  // uslice = new float[size];
+  // vslice = new float[size];
+  // wslice = new float[size];
+  // pslice = new float[size];
   // if (gravity_) {
-  //   grslice = new float[size];  
+  //   grslice = new float[size];
   // }
   // if (dual_energy_) {
-  //   geslice = new float[size];  
+  //   geslice = new float[size];
   // }
   // if (NumberOfcolors > 0) {
-  //   colslice = new float[NumberOfcolors * size];  
+  //   colslice = new float[NumberOfcolors * size];
   // }
 
   // int i, k, n, ncolor, index2, index3;
@@ -1688,7 +1697,7 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   //   else
   //     for (k = 0; k < mz; k++)
   // 	wslice[index2+k] = 0;
-  
+
   //   if (GridRank > 2)
   //     for (k = 0; k < mz; k++) {
   // 	index3 = (k*my + j) * mx + i;
@@ -1721,36 +1730,36 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
 
   // /* Allocate memory for temporaries used in solver */
 
-  // float *dls, *drs, *flatten, *pbar, *pls, *prs, *ubar, *uls, *urs, *vls, 
+  // float *dls, *drs, *flatten, *pbar, *pls, *prs, *ubar, *uls, *urs, *vls,
   //   *vrs, *gels, *gers, *wls, *wrs, *diffcoef, *df, *ef, *uf, *vf, *wf, *gef,
   //   *ges, *colf, *colls, *colrs;
 
-  // dls = new float[size];	
-  // drs = new float[size];	
-  // flatten = new float[size];	
-  // pbar = new float[size];	
-  // pls = new float[size];	
-  // prs = new float[size];	
-  // ubar = new float[size];	
-  // uls = new float[size];	
-  // urs = new float[size];	
-  // vls = new float[size];	
-  // vrs = new float[size];	
-  // gels = new float[size];	
-  // gers = new float[size];	
-  // wls = new float[size];	
-  // wrs = new float[size];	
-  // diffcoef = new float[size];	
-  // df = new float[size];		
-  // ef = new float[size];		
-  // uf = new float[size];		
-  // vf = new float[size];		
-  // wf = new float[size];		
-  // gef = new float[size];	
+  // dls = new float[size];
+  // drs = new float[size];
+  // flatten = new float[size];
+  // pbar = new float[size];
+  // pls = new float[size];
+  // prs = new float[size];
+  // ubar = new float[size];
+  // uls = new float[size];
+  // urs = new float[size];
+  // vls = new float[size];
+  // vrs = new float[size];
+  // gels = new float[size];
+  // gers = new float[size];
+  // wls = new float[size];
+  // wrs = new float[size];
+  // diffcoef = new float[size];
+  // df = new float[size];
+  // ef = new float[size];
+  // uf = new float[size];
+  // vf = new float[size];
+  // wf = new float[size];
+  // gef = new float[size];
   // ges = new float[size];
-  // colf = new float[NumberOfcolors*size];  
-  // colls = new float[NumberOfcolors*size];  
-  // colrs = new float[NumberOfcolors*size];  
+  // colf = new float[NumberOfcolors*size];
+  // colls = new float[NumberOfcolors*size];
+  // colrs = new float[NumberOfcolors*size];
 
   // /* Convert start and end indexes into 1-based for FORTRAN */
 
@@ -1768,14 +1777,14 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   // /* Compute the pressure on a slice */
   // /*
   // if (dual_energy_)
-  //   FORTRAN_NAME(woc_pgas2d_dual)(dslice, eslice, geslice, pslice, uslice, vslice, 
-  // 			      wslice, &dual_energy_eta1_, 
-  // 			      &dual_energy_eta2_, &mz, 
-  // 			      &mx, &is_m3, &ie_p3, &js, &je, 
+  //   FORTRAN_NAME(woc_pgas2d_dual)(dslice, eslice, geslice, pslice, uslice, vslice,
+  // 			      wslice, &dual_energy_eta1_,
+  // 			      &dual_energy_eta2_, &mz,
+  // 			      &mx, &is_m3, &ie_p3, &js, &je,
   // 			      &gamma_, &ppm_pressure_floor_);
   // else
-  //   FORTRAN_NAME(woc_pgas2d)(dslice, eslice, pslice, uslice, vslice, 
-  // 			 wslice, &mz, &mx, 
+  //   FORTRAN_NAME(woc_pgas2d)(dslice, eslice, pslice, uslice, vslice,
+  // 			 wslice, &mz, &mx,
   // 			 &is_m3, &ie_p3, &js, &je, &gamma_, &ppm_pressure_floor_);
   // */
   // /* If requested, compute diffusion and slope flattening coefficients */
@@ -1783,8 +1792,8 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   // if (ppm_diffusion_ != 0 || PPMFlatteningParameter != 0)
   //   FORTRAN_NAME(woc_calcdiss)(dslice, eslice, uslice, vx,
   // 			   vy, pslice, CellWidthTemp[2],
-  // 			   hxa, CellWidthTemp[1], 
-  // 			   &mz, &mx, 
+  // 			   hxa, CellWidthTemp[1],
+  // 			   &mz, &mx,
   // 			   &my, &is, &ie, &js, &je, &k_p1,
   // 			   &nyz, &dim_p1, &mx,
   // 			   &my, &mz,
@@ -1797,11 +1806,11 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   //   FORTRAN_NAME(woc_inteuler)(dslice, pslice, &gravity_, grslice, geslice, uslice,
   // 			   vslice, wslice, CellWidthTemp[2], flatten,
   // 			   &mz, &mx,
-  // 			   &is, &ie, &js, &je, &dual_energy_, 
+  // 			   &is, &ie, &js, &je, &dual_energy_,
   // 			   &dual_energy_eta1_, &dual_energy_eta2_,
   // 			   &PPMSteepeningParameter, &PPMFlatteningParameter,
   // 			   &ConservativeReconstruction, &PositiveReconstruction,
-  // 			   &dt, &gamma_, &ppm_pressure_free_, 
+  // 			   &dt, &gamma_, &ppm_pressure_free_,
   // 			   dls, drs, pls, prs, gels, gers, uls, urs, vls, vrs,
   // 			   wls, wrs, &NumberOfcolors, colslice, colls, colrs);
 
@@ -1815,9 +1824,9 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   // 			   &dt, &gamma_, &ppm_pressure_floor_, &ppm_pressure_free_,
   // 			   pbar, ubar, &gravity_, grslice,
   // 			   &dual_energy_, &dual_energy_eta1_);
-    
+
   //   FORTRAN_NAME(woc_flux_twoshock)(dslice, eslice, geslice, uslice, vslice, wslice,
-  // 				CellWidthTemp[2], diffcoef, 
+  // 				CellWidthTemp[2], diffcoef,
   // 				&mz, &mx,
   // 				&is, &ie, &js, &je, &dt, &gamma_,
   // 				&ppm_diffusion_, &dual_energy_,
@@ -1831,7 +1840,7 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
 
   // case HLL:
   //   FORTRAN_NAME(woc_flux_hll)(dslice, eslice, geslice, uslice, vslice, wslice,
-  // 			   CellWidthTemp[2], diffcoef, 
+  // 			   CellWidthTemp[2], diffcoef,
   // 			   &mz, &mx,
   // 			   &is, &ie, &js, &je, &dt, &gamma_,
   // 			   &ppm_diffusion_, &dual_energy_,
@@ -1845,7 +1854,7 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
 
   // case HLLC:
   //   FORTRAN_NAME(woc_flux_hllc)(dslice, eslice, geslice, uslice, vslice, wslice,
-  // 			    CellWidthTemp[2], diffcoef, 
+  // 			    CellWidthTemp[2], diffcoef,
   // 			    &mz, &mx,
   // 			    &is, &ie, &js, &je, &dt, &gamma_,
   // 			    &ppm_diffusion_, &dual_energy_,
@@ -1874,10 +1883,10 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   // /* Compute Eulerian fluxes and update zone-centered quantities */
 
   // FORTRAN_NAME(woc_euler)(dslice, eslice, grslice, geslice, uslice, vslice, wslice,
-  // 		      CellWidthTemp[2], diffcoef, 
-  // 		      &mz, &mx, 
-  // 		      &is, &ie, &js, &je, &dt, &gamma_, 
-  // 		      &ppm_diffusion_, &gravity_, &dual_energy_, 
+  // 		      CellWidthTemp[2], diffcoef,
+  // 		      &mz, &mx,
+  // 		      &is, &ie, &js, &je, &dt, &gamma_,
+  // 		      &ppm_diffusion_, &gravity_, &dual_energy_,
   // 		      &dual_energy_eta1_, &dual_energy_eta2_,
   // 		      df, ef, uf, vf, wf, gef, ges,
   // 		      &NumberOfcolors, colslice, colf, &density_floor_);
@@ -1885,25 +1894,25 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   // /* If necessary, recompute the pressure to correctly set ge and e */
 
   // if (dual_energy_)
-  //   FORTRAN_NAME(woc_pgas2d_dual)(dslice, eslice, geslice, pslice, uslice, vslice, 
-  // 			      wslice, &dual_energy_eta1_, 
-  // 			      &dual_energy_eta2_, &mz, 
-  // 			      &mx, &is_m3, &ie_p3, &js, &je, 
+  //   FORTRAN_NAME(woc_pgas2d_dual)(dslice, eslice, geslice, pslice, uslice, vslice,
+  // 			      wslice, &dual_energy_eta1_,
+  // 			      &dual_energy_eta2_, &mz,
+  // 			      &mx, &is_m3, &ie_p3, &js, &je,
   // 			      &gamma_, &ppm_pressure_floor_);
 
   // /* Check this slice against the list of subgrids (all subgrid
   //    quantities are zero-based) */
 
-  // int jstart, jend, offset, nfi, lface, rface, lindex, rindex, 
+  // int jstart, jend, offset, nfi, lface, rface, lindex, rindex,
   //   fistart, fiend, fjstart, fjend, clindex, crindex;
-  
+
   // for (n = 0; n < NumberOfSubgrids; n++) {
 
-  //   fistart = SubgridFluxes[n]->RightFluxStartGlobalIndex[dim][idim] - 
+  //   fistart = SubgridFluxes[n]->RightFluxStartGlobalIndex[dim][idim] -
   //     GridGlobalStart[idim];
   //   fiend = SubgridFluxes[n]->RightFluxEndGlobalIndex[dim][idim] -
   //     GridGlobalStart[idim];
-  //   fjstart = SubgridFluxes[n]->RightFluxStartGlobalIndex[dim][jdim] - 
+  //   fjstart = SubgridFluxes[n]->RightFluxStartGlobalIndex[dim][jdim] -
   //     GridGlobalStart[jdim];
   //   fjend = SubgridFluxes[n]->RightFluxEndGlobalIndex[dim][jdim] -
   //     GridGlobalStart[jdim];
@@ -1921,7 +1930,7 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
 
   // 	rface = SubgridFluxes[n]->RightFluxStartGlobalIndex[dim][dim] -
   // 	  GridGlobalStart[dim] + 1;
-  // 	rindex = i * GridDimension[dim] + rface;	
+  // 	rindex = i * GridDimension[dim] + rface;
 
   // 	SubgridFluxes[n]->LeftFluxes [DensNum][dim][offset] = df[lindex];
   // 	SubgridFluxes[n]->RightFluxes[DensNum][dim][offset] = df[rindex];
@@ -1952,9 +1961,9 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   // 	  crindex = (i + ncolor * mx) * GridDimension[dim] +
   // 	    rface;
 
-  // 	  SubgridFluxes[n]->LeftFluxes [colnum[ncolor]][dim][offset] = 
+  // 	  SubgridFluxes[n]->LeftFluxes [colnum[ncolor]][dim][offset] =
   // 	    colf[clindex];
-  // 	  SubgridFluxes[n]->RightFluxes[colnum[ncolor]][dim][offset] = 
+  // 	  SubgridFluxes[n]->RightFluxes[colnum[ncolor]][dim][offset] =
   // 	    colf[crindex];
   // 	} // ENDFOR ncolor
 
@@ -2047,7 +2056,7 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
 
   // return SUCCESS;
 
-  
+
 }
 
 //----------------------------------------------------------------------
@@ -2056,6 +2065,6 @@ double EnzoMethodHydro::timestep ( Block * block ) const throw()
 {
 
   double dt = std::numeric_limits<double>::max();
-  
+
   return dt;
 }

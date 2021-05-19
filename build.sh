@@ -264,7 +264,7 @@ if [ $target == "test" ]; then
     fi
     echo
 
-    if [ $f -gt 0 ]; then
+    if [ $f -gt 0 ] || [ $crash -gt 0 ] ; then
 	echo "Exiting testing with failures:"
 	echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 	cat "$dir/fail.$configure"

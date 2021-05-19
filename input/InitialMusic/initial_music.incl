@@ -75,7 +75,8 @@
      dark {
      	  attributes = ["position_x",      "default",
 	                "position_y",      "default",
-                        "position_z",      "default" ];
+                        "position_z",      "default" ,
+                        "is_local",        "default"];
      	  attributes += ["velocity_x",     "default",
                          "velocity_y",     "default",
                          "velocity_z",     "default" ];

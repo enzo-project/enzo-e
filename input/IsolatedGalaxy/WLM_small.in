@@ -1,0 +1,273 @@
+#======================================================================
+#
+#  File        : 
+#  Author      : Andrew Emerick (aemerick11@gmail.com)
+#  Date        : 2018-05-16
+#  Brief       : File for initializing an isolated galaxy
+#
+#    Sets up a WLM-like isolated dwarf galaxy with ICs generated from
+#    MakeDiskGalaxy output (not included in repo). Can use live
+#    particle distributions or analytic halo background
+#
+#
+#  Description : 
+#
+#  REQUIRES root_blocks
+#
+#======================================================================
+
+# The domain is (x,y) such that 0 < x,y < 1
+
+  Domain {
+     lower = [0.0, 0.0, 0.0];
+     upper = [1.0, 1.0, 1.0];
+  }
+
+# The root-level mesh 32x32x32
+
+  Mesh {
+    root_rank = 3;
+    root_size = [32, 32, 32];
+#    root_size = [64, 64, 64];
+#
+#   AE: I had to specify this to get the data output working
+    root_blocks = [4, 4, 4];
+  }
+
+# Isolated bounary conditions with outflow
+
+  Boundary {
+      type = "outflow";
+  }
+
+# Refine by (relative) slope of density
+#    this needs to be played with to refine by mass
+
+ #Adapt {
+ #    list = ["mass"];
+ #    mass {
+# AE: For mass, field should be thefield used to compute the mass
+#     (i.e. mass is computed as field * volume)
+#     max and min are in code units
+#         field_list = [ "density" ];
+#         max_coarsen = 1.0E-4; # 1.0E4 solar masses
+#         min_refine  = 1.0E-4;  # 1.0E4 solar masses
+#         type = "mass";
+# options for mass type are 'dark' and 'baryon'. AE: This should
+#        be specified in documentation, but does not seem to be
+#
+#         mass_type = "baryon"; # options are currently dark and baryon
+#     };
+#     max_level = 4;
+# }
+
+ Field {
+      history     = 1;
+      alignment   = 8;
+      gamma       = 1.4;
+      ghost_depth = 4;      # better way to set?
+      list = ["density", "velocity_x", "velocity_y", "velocity_z",
+              "acceleration_x", "acceleration_y", "acceleration_z",
+              "total_energy", "internal_energy", "pressure", "temperature", 
+              "potential","B","density_total","density_particle",
+              "density_particle_accumulate"];
+      padding = 0;
+      uniform_density = 1.0E-5;
+  }
+
+  # Simulation code units
+  Units {
+     length  = 7.405626262E22;
+     time    = 3.15576E16;
+     mass    = 1.9891E41;     
+#     density = 4.89746405317508E-31; do not specify if mass + length are specified
+  }
+
+
+  Method { 
+      # Background acceleration MUST occur after 
+      #   gravity if gravity is used (otherwise gravity method 
+      #   overwrites accelerations computed in background acceleration method)
+      list = [
+              "pm_deposit",
+              "gravity",
+              "background_acceleration",
+              "ppm",
+              "pm_update",
+              "star_maker"];
+
+      star_maker {
+                  type = "stochastic";
+                  use_density_threshold    = true;
+                  use_velocity_divergence  = false;
+                  use_dynamical_time       = false;
+                  # set to a large number for now for testing
+                  number_density_threshold = 1000.0; 
+                  maximum_mass_fraction    = 0.8;
+                  efficiency               = 0.01;
+                  minimum_star_mass        = 10.0;
+                 };
+
+      ppm {
+            diffusion = true;
+            riemann_solver = "two_shock";
+            dual_energy = true;
+            flattening = 3;
+            steepening = true;
+            mol_weight = 1.2;
+            courant = 0.4;
+            density_floor = 1.0E-30;
+            number_density_floor = 1.0E-30;
+            pressure_floor = 1.0E-30;
+            temperature_floor = 1.0E-30;
+          };
+
+      gravity {
+          solver   = "cg";
+          #iter_max = 100;
+          #res_tol  = 1e-6;
+          }
+
+
+      # values for the background NFW potential
+      #    also can have background stellar bulge and / or stellar disk potential
+      background_acceleration {
+          type = "GalaxyModel";
+          DM_density     = -1.0   ;  # specify this OR mass - not both - mass_radius must be virial if this is used
+          DM_mass        = 1.0E10;   # mass interior to below radius (in Msun) -  (this particular value is virial mass)
+          DM_mass_radius = 45.0;     # radius (kpc) corresponding to above mass (this is virial)
+          core_radius    = 3.0;      # r_c in kpc  (c = r_c / R_vir)
+          bulge_mass     = 0.0;      # mass of stellar bulge (Msun)
+          stellar_mass   = 0.0;      # disk (Msun)
+          stellar_scale_height_r = 1.00;
+          stellar_scale_height_z = 0.70;
+          center = [0.5, 0.5, 0.5];
+          angular_momentum = [0.0, 0.0, 1.0];
+          apply_acceleration = true;              # for debugging - leave ON
+      };
+
+  }
+
+Solver {
+  list = ["cg"];
+  cg {
+       type = "cg";
+       iter_max = 100;
+#       res_tol = 1E-6;
+#       moniter_iter = 10;
+     }
+}
+
+ Particle {
+     list = ["star"];
+
+#     Turn this on if using live DM
+#     dark {
+#         attributes = [ "x", "single",
+#                        "y", "single",
+#                        "z", "single",
+#                        "vx", "single",
+#                        "vy", "single",
+#                        "vz", "single",
+#                        "ax", "single",
+#                        "ay", "single",
+#                        "az", "single" ,
+#                        "is_local", "single"];
+#         position = [ "x", "y", "z" ];
+#         velocity = [ "vx", "vy", "vz" ];
+#         groups = ["has_mass"];
+#         constants = [ "mass", "single", .8382456140 ];
+#
+#     }
+
+    star {
+         attributes = [ "x", "double",
+                        "y", "double",
+                        "z", "double",
+                        "vx", "double",
+                        "vy", "double",
+                        "vz", "double",
+                        "ax", "double",
+                        "ay", "double",
+                        "az", "double",
+                        "mass", "double",
+                        "is_local","double"];
+         position = [ "x", "y", "z" ];
+         velocity = [ "vx", "vy", "vz" ];
+#
+#        AE: Note - as of Feb 11 2019 I'm not sure if this grouping
+#                   works when set here. I had to force this grouping
+#                   property by hard coding in the isolated galaxy
+#                   IC routine to get star particles registered
+#                   in this group
+#
+         groups = ["has_mass"];
+      }
+  }
+
+  Initial {
+# units in kpc and Msun now - density in cgs
+    list = ["isolated_galaxy"];
+    isolated_galaxy {
+#       double exponential disk 
+        center_position  = [0.5, 0.5, 0.5];
+        scale_length     = 1.0;         # kpc  (only used if gas.dat not used -see below)
+        scale_height     = 0.7;         # kpc  (only used if gas.dat not used -see below)
+        disk_mass            = 8.0E7;   # total disk mass (gas+stars)
+        gas_fraction         = 0.875;   # gas fraction of disk (only used if gas.dat not used - see below)
+        disk_temperature     = 1.0E4;   # disk gas temperature (K)
+        gas_halo_mass        = 8.0E5;   # total mass of CGM
+        gas_halo_temperature = 1.0E6;   # CGM / halo temperature (K)
+        gas_halo_radius      = 45.00;   # set to virial radius (kpc) - CGM limit
+        live_dm_halo   = false;         # live DM halo (needs big box)
+        stellar_disk   = true;          # start with disk component (disk.dat)?
+        stellar_bulge  = false;         # star with bulge component (bulge.dat)?
+        use_gas_particles = true;       # use gas.dat  for gas ICs
+        analytic_velocity = false;      # turn ON if not using gas particle IC's (requires output file)
+
+       }
+   }
+
+
+Stopping {
+#   stop time in code units - 10 Myr
+    time     = 0.010;
+#   stop time in wall seconds
+    seconds  = 36000.0;
+    cycle    = 10000;
+    interval = 1; 
+}
+
+#
+# AE: (note to self) This schedules the output. Must specify what fields you want
+#     to be output. items under "list" correspond to named items
+#     that start the bracketed regions. I *think* these names are
+#     arbitrary... it is the stuff inside the brackets that 
+#     determines the function (particularly the 'type' value)
+#
+Output {
+    list = [ "data" ];
+    data {
+        field_list = [ "density" , "total_energy" , "internal_energy",
+                       "velocity_x", "velocity_y", "velocity_z",
+                       "pressure", "acceleration_x", "acceleration_y",
+                       "acceleration_z", "temperature", "potential", "B",
+                       "density_particle_accumulate", "density_particle",
+                       "density_total"]; 
+
+        particle_list = ["star"];
+
+        dir   = ["ISOLATED_GALAXY_%04d","cycle"];
+        name = [ "isolated-galaxy-data-%04d-%03d.h5", "cycle", "proc" ];
+        type = "data";
+
+        # schedule the output based on 'var' and 'step'
+        #   step refers to the interval if 'var' to output on
+        schedule {
+             var   = "time";
+             step  = 0.001; #            time in code units (Myr)
+        }
+    };
+
+
+}

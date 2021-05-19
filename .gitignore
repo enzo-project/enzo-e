@@ -18,4 +18,12 @@ test/CHARM_BUILD
 test/CHARM_VERSION
 test/START
 test/STOP
+include
+build
+build-*
+lib
+bin/enzo-p
+charmrun
+config.log
+errors.org
 warnings.org

@@ -118,6 +118,7 @@ public: // interface
       ppm_use_minimum_pressure_support(false),
       ppm_mol_weight(0.0),
       field_gamma(0.0),
+      field_uniform_density(1.0),
       // Cosmology
       physics_cosmology(false),
       physics_cosmology_hubble_constant_now(0.0),
@@ -166,6 +167,12 @@ public: // interface
       initial_grackle_test_minimum_temperature(10.0),
       initial_grackle_test_reset_energies(0),
 #endif /* CONFIG_USE_GRACKLE */
+      initial_feedback_test_density(),
+      initial_feedback_test_star_mass(),
+      initial_feedback_test_temperature(),
+      initial_feedback_test_from_file(),
+      initial_feedback_test_metal_fraction(),
+
       // EnzoInitialInclinedWave
       initial_inclinedwave_alpha(0.0),
       initial_inclinedwave_beta(0.0),
@@ -174,6 +181,7 @@ public: // interface
       initial_inclinedwave_parallel_vel(std::numeric_limits<double>::min()),
       initial_inclinedwave_positive_vel(true),
       initial_inclinedwave_wave_type(""),
+
       // EnzoInitialMusic
       initial_music_field_files(),
       initial_music_field_datasets(),
@@ -195,6 +203,14 @@ public: // interface
       initial_pm_field(""),
       initial_pm_mpp(0.0),
       initial_pm_level(0),
+      initial_burkertbodenheimer_rank(0),
+      initial_burkertbodenheimer_radius_relative(0.0),
+      initial_burkertbodenheimer_particle_ratio(0.0),
+      initial_burkertbodenheimer_mass(0.0),
+      initial_burkertbodenheimer_temperature(0.0),
+      initial_burkertbodenheimer_densityprofile(1),
+      initial_burkertbodenheimer_rotating(true),
+      initial_burkertbodenheimer_outer_velocity(-1),
       // EnzoInitialSedovArray[23]
       initial_sedov_rank(0),
       initial_sedov_radius_relative(0.0),
@@ -227,6 +243,31 @@ public: // interface
       initial_turbulence_density(0.0),
       initial_turbulence_pressure(0.0),
       initial_turbulence_temperature(0.0),
+      // EnzoInitialIsolatedGalaxy
+      //   AE: Maybe these values (and those in cpp) don't matter
+      //       are they overwritten by the read-in (even when not found in param file)?
+      initial_IG_scale_length(0.0343218),       // Gas disk scale length in code units
+      initial_IG_scale_height(0.00343218),      // Gas disk scale height in code units
+      initial_IG_disk_mass(42.9661),            // Gas disk mass in code units
+      initial_IG_gas_fraction(0.2),             // Gas disk M_gas / M_star
+      initial_IG_disk_temperature(1e4),         // Gas disk temperature in K
+      initial_IG_disk_metal_fraction(1.0E-10),         // Gas disk metal fraction
+      initial_IG_gas_halo_mass(0.1),             // Gas halo total mass in code units
+      initial_IG_gas_halo_temperature(1e4),      // Gas halo initial temperature
+      initial_IG_gas_halo_metal_fraction(1.0E-10),      // Gas halo metal fraction
+      initial_IG_gas_halo_density(0.0),          // Gas halo uniform density (ignored if zero)
+      initial_IG_gas_halo_radius(1.0),           // Gas halo maximum radius in code units
+      initial_IG_use_gas_particles(false),       //
+      initial_IG_live_dm_halo(false),
+      initial_IG_stellar_disk(false),
+      initial_IG_stellar_bulge(false),
+      initial_IG_analytic_velocity(false),
+      initial_IG_include_recent_SF(false),
+      initial_IG_recent_SF_start(-100.0),
+      initial_IG_recent_SF_end(0.0),
+      initial_IG_recent_SF_bin_size(5.0),
+      initial_IG_recent_SF_SFR(2.0),
+      initial_IG_recent_SF_seed(12345),
       // EnzoProlong
       interpolation_method(""),
       // EnzoMethodCheckGravity
@@ -242,6 +283,31 @@ public: // interface
       method_hydro_reconstruct_conservative(false),
       method_hydro_reconstruct_positive(false),
       method_hydro_riemann_solver(""),
+      /// EnzoMethodFeedback
+      method_feedback_ejecta_mass(0.0),
+      method_feedback_supernova_energy(1.0),
+      method_feedback_ejecta_metal_fraction(0.0),
+      method_feedback_stencil(3),
+      method_feedback_radius(-1.0),
+      method_feedback_shift_cell_center(true),
+      method_feedback_ke_fraction(0.0),
+      method_feedback_use_ionization_feedback(false),
+      method_feedback_time_first_sn(-1.0), // in Myr
+      /// EnzoMethodStarMaker
+      method_star_maker_type(""),
+      method_star_maker_use_density_threshold(true),           // check above density threshold before SF
+      method_star_maker_use_velocity_divergence(true),         // check for converging flow before SF
+      method_star_maker_use_dynamical_time(true),              //
+      method_star_maker_use_self_gravitating(false),           //
+      method_star_maker_use_h2_self_shielding(false),
+      method_star_maker_use_jeans_mass(false),
+      method_star_maker_number_density_threshold(0.0),      // Number density threshold in cgs
+      method_star_maker_maximum_mass_fraction(0.5),            // maximum cell mass fraction to convert to stars
+      method_star_maker_efficiency(0.01),            // star maker efficiency
+      method_star_maker_minimum_star_mass(1.0E4),    // minium star particle mass in solar masses
+      method_star_maker_maximum_star_mass(1.0E4),    // maximum star particle mass in solar masses
+      // EnzoMethodNull
+      method_null_dt(0.0),
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
@@ -257,6 +323,19 @@ public: // interface
       method_gravity_solver(""),
       method_gravity_order(4),
       method_gravity_accumulate(false),
+      // EnzoMethodBackgroundAcceleration
+      method_background_acceleration_type(""),
+      method_background_acceleration_mass(0.0),
+      method_background_acceleration_DM_mass(0.0),
+      method_background_acceleration_DM_density(0.0),
+      method_background_acceleration_bulge_mass(0.0),
+      method_background_acceleration_core_radius(0.0),
+      method_background_acceleration_bulge_radius(0.0),
+      method_background_acceleration_stellar_mass(0.0),
+      method_background_acceleration_DM_mass_radius(0.0),
+      method_background_acceleration_stellar_scale_height_r(0.0),
+      method_background_acceleration_stellar_scale_height_z(0.0),
+      method_background_acceleration_apply_acceleration(true),
       // EnzoMethodPmDeposit
       method_pm_deposit_alpha(0.5),
       // EnzoMethodPmUpdate
@@ -298,7 +377,14 @@ public: // interface
       initial_soup_d_pos[axis] = 0;
       initial_soup_d_size[axis] = 0;
       initial_collapse_array[axis] = 0;
+      initial_IG_center_position[axis] = 0.5;
+      initial_IG_bfield[axis]         = 0.0;
+      method_background_acceleration_center[axis] = 0.5;
+      method_background_acceleration_angular_momentum[axis] = 0;
+
+      initial_feedback_test_position[axis] = 0.5;
     }
+    method_background_acceleration_angular_momentum[2] = 1;
   }
 
   /// CHARM++ Pack / Unpack function
@@ -333,6 +419,7 @@ public: // attributes
   double                     ppm_mol_weight;
 
   double                     field_gamma;
+  double                     field_uniform_density;
 
   /// Cosmology
   bool                       physics_cosmology;
@@ -400,7 +487,7 @@ public: // attributes
   double                     initial_inclinedwave_parallel_vel;
   bool                       initial_inclinedwave_positive_vel;
   std::string                initial_inclinedwave_wave_type;
-  
+
   /// EnzoInitialMusic
 
   std::vector < std::string > initial_music_field_files;
@@ -425,6 +512,17 @@ public: // attributes
   std::string                initial_pm_field;
   double                     initial_pm_mpp;
   int                        initial_pm_level;
+
+   /// EnzoInitialBurkertBodenheimer
+  int                        initial_burkertbodenheimer_rank;
+  int                        initial_burkertbodenheimer_array[3];
+  double                     initial_burkertbodenheimer_radius_relative;
+  double                     initial_burkertbodenheimer_particle_ratio;
+  double                     initial_burkertbodenheimer_mass;
+  double                     initial_burkertbodenheimer_temperature;
+  int                        initial_burkertbodenheimer_densityprofile;
+  bool                       initial_burkertbodenheimer_rotating;
+  double                     initial_burkertbodenheimer_outer_velocity;
 
   /// EnzoInitialSedovArray[23]
   int                        initial_sedov_rank;
@@ -468,12 +566,47 @@ public: // attributes
   double                     initial_turbulence_pressure;
   double                     initial_turbulence_temperature;
 
+  /// EnzoInitialFeedbackTest
+
+  double                     initial_feedback_test_position[3];
+  double                     initial_feedback_test_density;
+  double                     initial_feedback_test_star_mass;
+  double                     initial_feedback_test_temperature;
+  bool                       initial_feedback_test_from_file;
+  double                     initial_feedback_test_metal_fraction;
+
+  /// EnzoInitialIsolatedGalaxy
+  double                     initial_IG_center_position[3];
+  double                     initial_IG_bfield[3];
+  double                     initial_IG_scale_length;
+  double                     initial_IG_scale_height;
+  double                     initial_IG_disk_mass;
+  double                     initial_IG_gas_fraction;
+  double                     initial_IG_disk_temperature;
+  double                     initial_IG_disk_metal_fraction;
+  double                     initial_IG_gas_halo_mass;
+  double                     initial_IG_gas_halo_temperature;
+  double                     initial_IG_gas_halo_metal_fraction;
+  double                     initial_IG_gas_halo_density;
+  double                     initial_IG_gas_halo_radius;
+  bool                       initial_IG_use_gas_particles;
+  bool                       initial_IG_live_dm_halo;
+  bool                       initial_IG_stellar_bulge;
+  bool                       initial_IG_stellar_disk;
+  bool                       initial_IG_analytic_velocity;
+  bool                       initial_IG_include_recent_SF;
+  double                     initial_IG_recent_SF_start;
+  double                     initial_IG_recent_SF_end;
+  double                     initial_IG_recent_SF_bin_size;
+  double                     initial_IG_recent_SF_SFR;
+  int                        initial_IG_recent_SF_seed;
+
   /// EnzoProlong
   std::string                interpolation_method;
 
   /// EnzoMethodCheckGravity
   std::string                method_check_gravity_particle_type;
-  
+
   /// EnzoMethodHeat
   double                     method_heat_alpha;
 
@@ -486,6 +619,38 @@ public: // attributes
   bool                       method_hydro_reconstruct_conservative;
   bool                       method_hydro_reconstruct_positive;
   std::string                method_hydro_riemann_solver;
+
+  /// EnzoMethodFeedback
+
+  double                    method_feedback_ejecta_mass;
+  double                    method_feedback_supernova_energy;
+  double                    method_feedback_ejecta_metal_fraction;
+  double                    method_feedback_ke_fraction;
+  double                    method_feedback_time_first_sn;
+  int                       method_feedback_stencil;
+  double                    method_feedback_radius;
+  bool                      method_feedback_shift_cell_center;
+  bool                      method_feedback_use_ionization_feedback;
+
+  /// EnzoMethodStarMaker
+
+  std::string               method_star_maker_type;
+  bool                      method_star_maker_use_density_threshold;
+  bool                      method_star_maker_use_velocity_divergence;
+  bool                      method_star_maker_use_dynamical_time;
+  bool                      method_star_maker_use_h2_self_shielding;
+  bool                      method_star_maker_use_jeans_mass;
+  bool                      method_star_maker_use_self_gravitating;
+  double                    method_star_maker_number_density_threshold;
+  double                    method_star_maker_maximum_mass_fraction;
+  double                    method_star_maker_efficiency;
+  double                    method_star_maker_minimum_star_mass;
+  double                    method_star_maker_maximum_star_mass;
+
+
+
+  /// EnzoMethodNull
+  double                     method_null_dt;
 
   /// EnzoMethodTurbulence
   double                     method_turbulence_edot;
@@ -504,6 +669,24 @@ public: // attributes
   std::string                method_gravity_solver;
   int                        method_gravity_order;
   bool                       method_gravity_accumulate;
+
+  /// EnzoMethodBackgroundAcceleration
+
+  std::string                method_background_acceleration_type;
+  double                     method_background_acceleration_mass;
+  double                     method_background_acceleration_DM_mass;
+  double                     method_background_acceleration_DM_density;
+  double                     method_background_acceleration_bulge_mass;
+  double                     method_background_acceleration_core_radius;
+  double                     method_background_acceleration_bulge_radius;
+  double                     method_background_acceleration_stellar_mass;
+  double                     method_background_acceleration_DM_mass_radius;
+  double                     method_background_acceleration_stellar_scale_height_r;
+  double                     method_background_acceleration_stellar_scale_height_z;
+  double                     method_background_acceleration_center[3];
+  double                     method_background_acceleration_angular_momentum[3];
+  bool                       method_background_acceleration_apply_acceleration;
+
 
   /// EnzoMethodPmDeposit
 
@@ -529,7 +712,7 @@ public: // attributes
 
   std::string                prolong_enzo_type;
   bool                       prolong_enzo_positive;
-  
+
   ///==============
   /// EnzoSolverMg0
   ///==============
@@ -551,7 +734,7 @@ public: // attributes
   std::vector<int>           solver_coarse_solve;
 
   /// Solver index for domain decomposition (dd) domain solver
-  
+
   std::vector<int>           solver_domain_solve;
 
   /// Weighting factor for smoother
