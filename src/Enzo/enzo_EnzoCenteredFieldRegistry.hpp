@@ -172,20 +172,6 @@ public:
   ///      {'_x', '_y', '_z'}.
   static std::string get_actively_advected_quantity_name
   (std::string name, bool ijk_suffix) noexcept;
-  
-  /// Constructs a Grouping of fields and yields a pointer to it from a vector
-  /// of quantity names. The quantity names must match entries of FIELD_TABLE.
-  ///
-  /// The names of the names of the fields in each group depend on the the
-  /// leading_prefix argument and the quantity type indicated in FIELD_TABLE
-  /// The rules for determining the field names are:
-  /// - SCALAR quantity: leading_prefix + group_name
-  /// - Vector conserved quantity:
-  ///   - leading_prefix + group_name + "_x"
-  ///   - leading_prefix + group_name + "_y"
-  ///   - leading_prefix + group_name + "_z"
-  static Grouping* build_grouping(const std::vector<std::string> quan_names,
-                                  const std::string leading_prefix = "");
 
 private: // attributes
 

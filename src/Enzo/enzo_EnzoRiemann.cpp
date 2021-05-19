@@ -13,8 +13,7 @@
 //----------------------------------------------------------------------
 
 EnzoRiemann* EnzoRiemann::construct_riemann
-(std::vector<std::string> integrable_groups,
- std::vector<std::string> passive_groups, std::string solver)
+(std::vector<std::string> integrable_quantities, std::string solver)
 {
   // determine the type of solver to construct:
   // convert string to lower case (https://stackoverflow.com/a/313990)
@@ -25,14 +24,14 @@ EnzoRiemann* EnzoRiemann::construct_riemann
 
   // Eventually we may want to check for non-MHD Riemann solvers
   if (formatted == std::string("hll")){
-    out = new EnzoRiemannHLLMHD(integrable_groups, passive_groups);
+    out = new EnzoRiemannHLLMHD(integrable_quantities);
   } else if (formatted == std::string("hlle")){
-    out = new EnzoRiemannHLLEMHD(integrable_groups, passive_groups);
+    out = new EnzoRiemannHLLEMHD(integrable_quantities);
   } else if (formatted == std::string("hllc")){
-    out = new EnzoRiemannHLLC(integrable_groups, passive_groups);
+    out = new EnzoRiemannHLLC(integrable_quantities);
   } else if (formatted == std::string("hlld")){
     // could possibly check that MHD fields are included
-    out = new EnzoRiemannHLLD(integrable_groups, passive_groups);
+    out = new EnzoRiemannHLLD(integrable_quantities);
   } else {
     ERROR("EnzoRiemann::construct_riemann",
 	  "The only known solvers are HLL, HLLE, HLLC, & HLLD");

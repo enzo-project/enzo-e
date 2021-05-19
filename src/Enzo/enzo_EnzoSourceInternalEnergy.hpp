@@ -51,40 +51,38 @@ class EnzoSourceInternalEnergy
 public:
 
   /// Computes the internal energy density source term contributed by the
-  /// derivative of the velocity along dimension `dim` and add it to the field
+  /// derivative of the velocity along dimension `dim` and add it to the array
   /// tracking the total change in internal_energy density.
   ///
-  /// @param block holds data to be processed
-  /// @param dt The time time-step overwhich to apply the source term
-  /// @param prim_group holds field names of the cell-centered primitives from
-  ///     the start of the timestep (but after the synchronization of the
-  ///     internal energy with the total energy).
-  /// @param dUcons_group Contains fields that track the accumulated change in
-  ///     the integrable and passively advected quantites. The calculated
-  ///     internal energy density source term will simply be added to the field
-  ///     store in the "internal_energy" group. The source term for internal
-  ///     energy density is computed instead of specific internal energy
-  ///     because this grouping tracks changes to the conserved form of
-  ///     integrable/passive quantities.
-  /// @param interface_velocity_name indicates the name of field where the
-  ///     value of the interface velocity along dimension `dim` is stored. This
-  ///     should have been calculated by the Riemann Solver. The underlying
-  ///     field should formally be defined as cell-centered to allow for it's
-  ///     reuse in representing face-centered fields (excluding the exterior
-  ///     faces of the block) along different dimensions
-  /// @param dim Dimension along which to compute the contribution of the
+  /// @param[in]  dim Dimension along which to compute the contribution of the
   ///     internal Energy source term. Values of 0, 1, and 2 correspond to the
-  ///     x, y, and z directions, respectively.
-  /// @param eos Instance of the fluid's EnzoEquationOfState object
-  /// @param stale_depth indicates the number of field entries from the
-  ///     outermost field value that the region including "stale" values (need
-  ///     to be refreshed) extends over (0 means there are no "stale" values).
-  ///     The update using the delayed staling rate should be applied at some
-  ///     time after this function call
-  void calculate_source(Block *block, double dt,
-			Grouping &prim_group, Grouping &dUcons_group,
-			std::string interface_velocity_name, int dim,
-			EnzoEquationOfState *eos, int stale_depth)
+  ///     the x, y, and z directions, respectively.
+  /// @param[in]  dt The time time-step overwhich to apply the source term
+  /// @param[in]  prim_map Map holding the values of the cell-centered
+  ///     primitives from the start of the timestep (but after the
+  ///     synchronization of the internal energy with the total energy).
+  /// @param[out] dUcons_map Map of arrays where the net changes to the
+  ///     integrable quantities and passively advected quantites are
+  ///     accumulated. The internal energy density source term is simply added
+  ///     to the array associated with the "internal_energy" key. The source
+  ///     term for internal energy density is computed instead of specific
+  ///     internal energy because this map accumulates the net change to the
+  ///     conserved form of the integrable/passive quantities.
+  /// @param[in]  interface_velocity Array storing the values of the interface
+  ///     velocity along dimension `dim` is stored (it should be computed by
+  ///     the Riemann Solver). This should have the same dimensions as the
+  ///     arrays stored in prim_map/dUcons_map, except along dimension `dim`.
+  ///     Along that dimension, this array should hold one fewer value.
+  /// @param[in]  eos Instance of the fluid's EnzoEquationOfState object
+  /// @param[in]  stale_depth indicates the current stale_depth for the
+  ///     supplied cell-centered quantities. The update using the
+  ///     reconstructor's delayed_staling_rate should be applied at some
+  ///     time after this function call.
+  void calculate_source(int dim, double dt, enzo_float cell_width,
+                        EnzoEFltArrayMap &prim_map,
+                        EnzoEFltArrayMap &dUcons_map,
+                        EFlt3DArray &interface_velocity,
+                        EnzoEquationOfState *eos, int stale_depth)
     const throw();
 };
 
