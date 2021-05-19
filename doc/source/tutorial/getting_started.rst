@@ -164,6 +164,19 @@ using the ``CHARM_HOME`` environment variable.
   ``export CHARM_HOME=$HOME/Charm/charm.6.10``  Set directory of Charm++ used
   ============================================  =============================
 
+4. Specify Grackle directory
+--------------------------
+
+At compile time, Enzo-E will try to automatically find your Grackle installation.
+If compilation fails because ``grackle.h`` cannot be included, it is possible
+that the directory was incorrectly identified. You can specify
+Grackle's installation directory with the ``GRACKLE_HOME`` environment variable:
+
+  =================================== =====================================
+  =================================== =====================================
+  ``export GRACKLE_HOME=$HOME/local`` Set directory of Grackle installation
+  =================================== =====================================
+
 Porting
 =======
 
