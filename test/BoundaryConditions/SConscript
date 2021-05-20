@@ -60,7 +60,7 @@ env_mv_outflow_3d = env.Clone(COPY = 'mkdir -p ' + test_path + '/BoundaryConditi
 
 boundary_reflecting_2d = env_mv_reflecting_2d.RunReflecting2d (
      'test_boundary_reflecting-2d.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Boundary/boundary_reflecting-2d.in')
 
 Clean(boundary_reflecting_2d,
@@ -69,7 +69,7 @@ Clean(boundary_reflecting_2d,
 
 boundary_periodic_2d = env_mv_periodic_2d.RunPeriodic2d (
      'test_boundary_periodic-2d.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Boundary/boundary_periodic-2d.in')
 
 Clean(boundary_periodic_2d,
@@ -78,7 +78,7 @@ Clean(boundary_periodic_2d,
 
 boundary_outflow_2d = env_mv_outflow_2d.RunOutflow2d (
      'test_boundary_outflow-2d.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Boundary/boundary_outflow-2d.in')
 
 Clean(boundary_outflow_2d,
@@ -110,7 +110,7 @@ env.PngToGif("/Outflow-2D/boundary_outflow-2d.gif", "test_boundary_outflow-2d.un
 
 boundary_reflecting_3d = env_mv_reflecting_3d.RunReflecting3d (
      'test_boundary_reflecting-3d.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Boundary/boundary_reflecting-3d.in')
 
 Clean(boundary_reflecting_3d,
@@ -119,7 +119,7 @@ Clean(boundary_reflecting_3d,
 
 boundary_periodic_3d = env_mv_periodic_3d.RunPeriodic3d (
      'test_boundary_periodic-3d.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Boundary/boundary_periodic-3d.in')
 
 Clean(boundary_periodic_3d,
@@ -128,7 +128,7 @@ Clean(boundary_periodic_3d,
 
 boundary_outflow_3d = env_mv_outflow_3d.RunOutflow3d (
      'test_boundary_outflow-3d.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Boundary/boundary_outflow-3d.in')
 
 Clean(boundary_outflow_3d,

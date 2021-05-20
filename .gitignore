@@ -1,6 +1,4 @@
 *~
-bin/enzo-p
-bin/enzo-p.prev
 build
 build-*
 charmrun

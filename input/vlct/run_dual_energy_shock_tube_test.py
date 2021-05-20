@@ -115,19 +115,19 @@ if __name__ == '__main__':
     if nproc <= 0:
         raise ValueError("number of processes must be a positive integer")
     elif nproc == 1:
-        executable = 'bin/enzo-p'
+        executable = 'bin/enzo-e'
     else:
         charm_args = os.environ.get('CHARM_ARGS')
         if charm_args is None:
-            executable_template = 'charmrun +p{:d} bin/enzo-p'
+            executable_template = 'charmrun +p{:d} bin/enzo-e'
         else:
             executable_template \
-                = ' '.join(['charmrun', charm_args, '+p{:d}', 'bin/enzo-p'])
+                = ' '.join(['charmrun', charm_args, '+p{:d}', 'bin/enzo-e'])
         executable = executable_template.format(nproc)
 
     # this script can either be called from the base repository or from
     # the subdirectory: input/vlct
-    prep_cur_dir('bin/enzo-p')
+    prep_cur_dir('bin/enzo-e')
 
     # run the tests
     run_tests(executable)

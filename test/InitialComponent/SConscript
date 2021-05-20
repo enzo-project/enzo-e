@@ -57,7 +57,7 @@ env_mv_music_114 = env.Clone(COPY = 'mkdir -p ' + test_path + '/InitialComponent
 
 music_111 = env_mv_music_111.RunMusic111(
      'InitialMusic/test_initial_music-111.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/initial_music-111.in')
 
 Clean(music_111,
@@ -67,7 +67,7 @@ Clean(music_111,
 
 music_222 = env_mv_music_222.RunMusic222(
      'test_initial_music-222.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/InitialMusic/initial_music-222.in')
 
 Clean(music_222,
@@ -77,7 +77,7 @@ Clean(music_222,
 
 music_444 = env_mv_music_444.RunMusic444(
      'test_initial_music-444.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/InitialMusic/initial_music-444.in')
 
 Clean(music_444,
@@ -87,7 +87,7 @@ Clean(music_444,
 
 music_211 = env_mv_music_211.RunMusic111(
      'test_initial_music-211.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/InitialMusic/initial_music-211.in')
 
 Clean(music_211,
@@ -97,7 +97,7 @@ Clean(music_211,
 
 music_121 = env_mv_music_121.RunMusic111(
      'test_initial_music-121.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/InitialMusic/initial_music-121.in')
 
 Clean(music_121,
@@ -106,7 +106,7 @@ Clean(music_121,
 
 music_112 = env_mv_music_112.RunMusic112(
      'test_initial_music-112.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/InitialMusic/initial_music-112.in')
 
 Clean(music_112,
@@ -116,7 +116,7 @@ Clean(music_112,
 
 music_411 = env_mv_music_411.RunMusic411(
      'test_initial_music-411.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/InitialMusic/initial_music-411.in')
 
 Clean(music_411,
@@ -126,7 +126,7 @@ Clean(music_411,
 
 music_141 = env_mv_music_141.RunMusic141(
      'test_initial_music-141.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/InitialMusic/initial_music-141.in')
 
 Clean(music_141,
@@ -136,7 +136,7 @@ Clean(music_141,
 
 music_114 = env_mv_music_114.RunMusic114(
      'test_initial_music-114.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/InitialMusic/initial_music-114.in')
 
 Clean(music_114,

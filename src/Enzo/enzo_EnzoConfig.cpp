@@ -1542,11 +1542,7 @@ void EnzoConfig::read(Parameters * p) throw()
     // When radiative transfer is eventually included, make
     // sure to set the below parameter to match the Enzo-E
     // parameter for turning RT on / off:
-<<<<<<< HEAD
-    //   grackle_data->use_radiative_transfer = ENZO_E_PARAMETER_NAME;
-=======
-    //   method_grackle_chemistry->use_radiative_transfer = ENZO_P_PARAMETER_NAME;
->>>>>>> main/master
+    //   method_grackle_chemistry->use_radiative_transfer = ENZO_E_PARAMETER_NAME;
 
   }
 #endif /* CONFIG_USE_GRACKLE */
