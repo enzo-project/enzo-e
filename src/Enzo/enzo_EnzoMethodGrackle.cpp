@@ -230,7 +230,8 @@ void EnzoMethodGrackle::define_required_grackle_fields()
 
 //----------------------------------------------------------------------
 
-void EnzoMethodGrackle::initialize_grackle_chemistry_data(double current_time)
+void EnzoMethodGrackle::initialize_grackle_chemistry_data
+(double current_time, bool preinitialized_units /* default false */)
 {
 
   /* Define Grackle's chemistry data if not yet defined */
@@ -243,34 +244,14 @@ void EnzoMethodGrackle::initialize_grackle_chemistry_data(double current_time)
     deallocate_grackle_rates_();
   }
 
-  EnzoUnits * enzo_units = enzo::units();
+  // Initialize grackle units and data
+  TRACE("Calling initialize_chemistry_data from EnzoMethodGrackle::EnzoMethodGrackle() or EnzoMethodGrackle::pup(PUP::er &p)");
+
   const EnzoConfig * enzo_config = enzo::config();
 
-  grackle_units_.comoving_coordinates = enzo_config->physics_cosmology;
-
-  // Copy over code units to grackle units struct
-  grackle_units_.density_units  = enzo_units->density();
-  grackle_units_.length_units   = enzo_units->length();
-  grackle_units_.time_units     = enzo_units->time();
-  grackle_units_.velocity_units = enzo_units->velocity();
-  grackle_units_.a_units        = 1.0;
-  grackle_units_.a_value        = 1.0;
-
-  if (grackle_units_.comoving_coordinates){
-    enzo_float cosmo_a  = 1.0;
-    enzo_float cosmo_dt = 0.0;
-
-    EnzoPhysicsCosmology * cosmology = enzo::cosmology();
-
-    cosmology->compute_expansion_factor(&cosmo_a, &cosmo_dt,
-                                        current_time);
-    grackle_units_.a_units
-         = 1.0 / (1.0 + enzo_config->physics_cosmology_initial_redshift);
-    grackle_units_.a_value = cosmo_a;
-
-  } else if (enzo_config->method_grackle_radiation_redshift > -1){
-    grackle_units_.a_value = 1.0 /
-                         (1.0 + enzo_config->method_grackle_radiation_redshift);
+  if (!preinitialized_units){
+    // initialize grackle_units
+    setup_grackle_units (current_time, &grackle_units_);
   }
 
   // Initialize grackle units and data
@@ -290,9 +271,8 @@ void EnzoMethodGrackle::initialize_grackle_chemistry_data(double current_time)
 
 //----------------------------------------------------------------------------
 
-void EnzoMethodGrackle::setup_grackle_units (EnzoBlock * enzo_block,
-                                             code_units * grackle_units,
-                                             int i_hist /* default 0 */
+void EnzoMethodGrackle::setup_grackle_units (double current_time,
+                                             code_units * grackle_units
                                              ) throw()
 {
   EnzoUnits * enzo_units = enzo::units();
@@ -314,16 +294,7 @@ void EnzoMethodGrackle::setup_grackle_units (EnzoBlock * enzo_block,
 
     EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
-    enzo_float compute_time;
-    if (i_hist == 0) {
-      compute_time = enzo_block->time();
-    } else {
-      Field field = enzo_block->data()->field();
-      compute_time = field.history_time(i_hist);
-    }
-
-    cosmology->compute_expansion_factor(&cosmo_a, &cosmo_dt,
-                                        compute_time);
+    cosmology->compute_expansion_factor(&cosmo_a, &cosmo_dt, current_time);
     grackle_units->a_units
          = 1.0 / (1.0 + enzo_config->physics_cosmology_initial_redshift);
     grackle_units->a_value = cosmo_a;
