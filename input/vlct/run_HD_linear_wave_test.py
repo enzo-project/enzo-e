@@ -115,7 +115,7 @@ def cleanup():
 
 if __name__ == '__main__':
 
-    executable = 'bin/enzo-p'
+    executable = 'bin/enzo-e'
 
     # this script can either be called from the base repository or from
     # the subdirectory: input/vlct

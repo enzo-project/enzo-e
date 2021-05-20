@@ -78,11 +78,11 @@ Use the created builder in conjunction with the clone to create the test run var
 
     'test_balance_none.unit',
 
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
 
      ARGS='input/Balance/load-balance-4.in')
 
-This runs the test in the environment specified above (in Clone). It makes the target ``test_balance_none.unit`` which is created by compiling and running enzo-e as bin/enzo-p using ``input/Balance/load-balance-4.in`` as the input file.
+This runs the test in the environment specified above (in Clone). It makes the target ``test_balance_none.unit`` which is created by compiling and running enzo-e as bin/enzo-e using ``input/Balance/load-balance-4.in`` as the input file.
      
 Clean the test ::
   Clean(balance_none,

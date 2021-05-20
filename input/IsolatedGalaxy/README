@@ -1,0 +1,5 @@
+JHW: The halo.dat particle data used with the live_dm_halo option is a random
+     distribution within the halo for testing purposes only. Not physical!
+
+# Columns in halo.dat
+# x y z[pc] vx vy vz[km/s] mass[Msun]

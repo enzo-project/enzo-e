@@ -60,13 +60,13 @@ env_mv_out=env.Clone(COPY = 'mv *.png *.h5 Dir_* ' + test_path)
 
 checkpoint_ppm_1 = env_mv_checkpoint_ppm_1.RunCheckpointPpm_1 (
      'test_checkpoint_ppm-1.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Checkpoint/checkpoint_ppm-1.in')
 
 
 restart_ppm_1 = env_mv_restart_ppm_1.RunRestartPpm_1 (
      'test_restart_ppm-1.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='+restart checkpoint_ppm-1-10')
 
 env.MakeMovie("/RestartPpm-1/restart_ppm-1.swf", "test_restart_ppm-1.unit", \
@@ -85,13 +85,13 @@ env.Requires(restart_ppm_1, checkpoint_ppm_1)
 
 checkpoint_ppm_8 = env_mv_checkpoint_ppm_8.RunCheckpointPpm_8 (
      'test_checkpoint_ppm-8.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Checkpoint/checkpoint_ppm-8.in')
 
 
 restart_ppm_8 = env_mv_restart_ppm_8.RunRestartPpm_8 (
      'test_restart_ppm-8.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='+restart checkpoint_ppm-8-10')
 
 env.MakeMovie("/RestartPpm-8/restart_ppm-8.swf", "test_restart_ppm-8.unit", \
@@ -108,7 +108,7 @@ env.Requires(restart_ppm_8, checkpoint_ppm_8)
 
 method_ppml_1 = env_mv_ppml_1.RunPpml_1(
      'test_method_ppml-1.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/PPML/method_ppml-1.in')
 
 Clean(method_ppml_1,
@@ -131,7 +131,7 @@ env.PngToGif("/Ppml-1/method_ppml-1-z.gif", "test_method_ppml-1.unit", \
 
 method_ppml_8 = env_mv_ppml_8.RunPpml_8(
      'test_method_ppml-8.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/PPML/method_ppml-8.in')
 
 Clean(method_ppml_8,
@@ -154,11 +154,11 @@ env.PngToGif("/Ppml-8/method_ppml-8-z.gif", "test_method_ppml-8.unit", \
 
 #Updated PPML test using EnzoInitialPpmlTest for multi-nodes
 
-Clean(env_mv_out.RunSerial('test_method_ppml-test-1.unit',bin_path + '/enzo-p',
+Clean(env_mv_out.RunSerial('test_method_ppml-test-1.unit',bin_path + '/enzo-e',
 			   ARGS='input/PPML/method_ppml-test-1.in'),
       [Glob('#/' +test_path + '/PPML1_*')])
 
 
-Clean(env_mv_out.RunSerial('test_method_ppml-test-8.unit',bin_path + '/enzo-p',
+Clean(env_mv_out.RunSerial('test_method_ppml-test-8.unit',bin_path + '/enzo-e',
 			   ARGS='input/PPML/method_ppml-test-8.in'),
       [Glob('#/' +test_path + '/PPML8_*')])

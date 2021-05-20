@@ -42,7 +42,7 @@ env_mv_initial_png = env.Clone(COPY = 'mkdir -p ' + test_path + '/Performance/In
 
 balance_initial_png = env_mv_initial_png.RunInitialPng (
      'test_initial_png.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/HelloWorld/initial_png.in')
 
 Clean(balance_initial_png,

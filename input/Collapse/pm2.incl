@@ -52,7 +52,8 @@
 			"vx", "default",
                         "vy", "default",
 			"ax", "default",
-                        "ay", "default"];
+                        "ay", "default",
+                        "is_local", "default"];
 
           constants = ["mass", "double", 2e33];
           position = ["x","y"];

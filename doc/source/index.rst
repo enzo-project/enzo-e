@@ -29,18 +29,20 @@ programming system, targeting the development of Exascale software
 applications, and actively developed at the Parallel Programming
 Laboratory at the University of Illinois, Urbana-Champaign.
 
-Enzo-E currently has two hyperbolic solvers: `PPM
+Enzo-E currently has three hyperbolic solvers: `PPM
 <http://adsabs.harvard.edu/abs/1995CoPhC..89..149B>`_, an enhanced
 piecewise parabolic method solver that was migrated to Enzo-E from the
-ENZO code base, and `PPML <https://arxiv.org/abs/0905.2960>`_, an ideal
-compressible MHD solver originally implemented in serial Fortran.
-More recently, physics and infrastructure capabilities have been
-developed for particle methods, including an implementation of ENZO's
-CIC particle-mesh gravity solver, and cosmological expansion with
-comoving coordinates.  Currently we are collaborating with
-`Prof. Daniel Reynolds <https://faculty.smu.edu/reynolds/>`_ on
-developing and implementing a highly scalable multigrid-based linear
-solver.
+ENZO code base, `PPML <https://arxiv.org/abs/0905.2960>`_, an ideal
+compressible MHD solver originally implemented in serial Fortran, and
+`VL+CT <https://adsabs.harvard.edu/abs/2009NewA...14..139S>`_, a
+dimensionally-unsplit compressible MHD solver implemented specifically
+for Enzo-E in C++.  More recently, physics and infrastructure
+capabilities have been developed for particle methods, including an
+implementation of ENZO's CIC particle-mesh gravity solver, and
+cosmological expansion with comoving coordinates.  Currently we are
+collaborating with `Prof. Daniel Reynolds
+<https://faculty.smu.edu/reynolds/>`_ on developing and implementing a
+highly scalable multigrid-based linear solver.
 
 .. toctree::
    :maxdepth: 1
@@ -111,16 +113,16 @@ presentation, and some sections are somewhat outdated.  This document,
 while currently still useful, is being phased out in favor of the
 above online content.
 
-   :download:`Using and Developing Enzo-P/Cello <http://client64-249.sdsc.edu/Tutorial/enzo-p-cello.pdf>`
+   :download:`Using and Developing Enzo-E/Cello <http://client64-249.sdsc.edu/Tutorial/enzo-p-cello.pdf>`
 
 Presentations given at the 2018 Enzo Days Workshop are also available
 below.  They are more up-to-date, but are also still rather large.
 
-   :download:`Enzo-P / Cello Status and What's New? <http://client64-249.sdsc.edu/Tutorial/1805-1-status.pdf>`
+   :download:`Enzo-E / Cello Status and What's New? <http://client64-249.sdsc.edu/Tutorial/1805-1-status.pdf>`
 
-   :download:`Introduction to Enzo-P <http://client64-249.sdsc.edu/Tutorial/1805-2-intro.pdf>`
+   :download:`Introduction to Enzo-E <http://client64-249.sdsc.edu/Tutorial/1805-2-intro.pdf>`
 	     
-   :download:`First Steps with Enzo-P <http://client64-249.sdsc.edu/Tutorial/1805-3-using.pdf>`
+   :download:`First Steps with Enzo-E <http://client64-249.sdsc.edu/Tutorial/1805-3-using.pdf>`
 
 Indices and tables
 ==================
