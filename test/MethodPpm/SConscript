@@ -13,6 +13,7 @@ Import('test_path')
 
 env['CPIN'] = 'touch parameters.out; mv parameters.out ${TARGET}.in'
 env['RMIN'] = 'rm -f parameters.out'
+env['clocal_cmd'] = '++local'
 
 #charm_args = os.getenv('CHARM_ARGS','')
 
@@ -30,7 +31,7 @@ env.Append(BUILDERS = { 'RunPpm1' : run_ppm1 } )
 env_mv_ppm1 = env.Clone(COPY = 'mkdir -p ' + test_path + '/MethodPpm/Ppm-1; mv `ls *.png *.h5` ' + test_path + '/MethodPpm/Ppm-1')
 
 
-run_ppm8 = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
+run_ppm8 = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunPpm8' : run_ppm8 } )
 env_mv_ppm8 = env.Clone(COPY = 'mkdir -p ' + test_path + '/MethodPpm/Ppm-8; mv `ls *.png *.h5` ' + test_path + '/MethodPpm/Ppm-8')
 
@@ -42,7 +43,7 @@ env_mv_ppm8 = env.Clone(COPY = 'mkdir -p ' + test_path + '/MethodPpm/Ppm-8; mv `
 #serial
 balance_ppm_1 = env_mv_ppm1.RunSerial (
      'test_method_ppm-1.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/PPM/method_ppm-1.in')
 
 Clean(balance_ppm_1,
@@ -59,7 +60,7 @@ env.PngToGif("/Ppm-1/method_ppm-1.gif", "test_method_ppm-1.unit", \
 
 balance_ppm_8 = env_mv_ppm8.RunPpm8 (
      'test_method_ppm-8.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/PPM/method_ppm-8.in')
 
 Clean(balance_ppm_8,

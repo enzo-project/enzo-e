@@ -46,7 +46,8 @@ Method {
             "vz", "default",
             "ax", "default",
             "ay", "default",
-            "az", "default"
+            "az", "default",
+            "is_local", "default"
             ];
          constants = [ "mass", "default", 10.00000000000000 ];
          groups = [ "has_mass" ];

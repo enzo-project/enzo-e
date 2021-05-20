@@ -29,17 +29,3 @@ env.Append(BUILDERS = { 'RunMesh' : run_mesh } )
 env_mv_mesh = env.Clone(COPY = 'mkdir -p ' + test_path + '/MethodHeat/Heat-1; mv `ls *.png *.h5` ' + test_path + '/MethodHeat/Heat-1')
 
 
-#-------------------------------------------------------------
-#load balancing
-#-------------------------------------------------------------
-
-#serial
-balance_mesh = env_mv_mesh.RunMesh (
-     'test_mesh-balanced.unit',
-     bin_path + '/enzo-p',
-     ARGS='input/Balance/mesh-balanced.in')
-
-Clean(balance_mesh,
-     [Glob('#/' + test_path + '/mesh-balanced*.png')])
-
-

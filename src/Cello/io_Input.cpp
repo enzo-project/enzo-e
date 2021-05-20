@@ -55,26 +55,17 @@ void Input::pup (PUP::er &p)
   bool up = p.isUnpacking();
 
   WARNING("Input::pup","skipping file_");
-  //    p | *file_;
   p | sync_;
   p | index_charm_;
   p | cycle_;
   p | time_;
   p | file_name_;
   p | file_args_;
-  p | it_field_index_; // PUP::able
-  p | it_particle_index_; // PUP::able
-  if (up) io_block_ = new IoBlock;
-  p | *io_block_;
-
-  WARNING("Input::pup","skipping io_field_data_");
-  // if (up) io_field_data_ = new IoFieldData;
-  // p | *io_field_data_;
-
-  WARNING("Input::pup","skipping io_particle_data_");
-  // if (up) io_particle_data_ = new IoParticleData;
-  // p | *io_particle_data_;
-
+  p | it_field_index_;
+  p | it_particle_index_;
+  p | io_block_;
+  p | io_field_data_;
+  p | io_particle_data_;
   p | stride_reader_;
 }
 

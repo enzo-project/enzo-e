@@ -294,7 +294,7 @@ Adapt {
 
  Particle {
      dark {
-         attributes = [ "x", "default", "y", "default", "z", "default", "vx", "default", "vy", "default", "vz", "default", "ax", "default", "ay", "default", "az", "default" ];
+         attributes = [ "x", "default", "y", "default", "z", "default", "vx", "default", "vy", "default", "vz", "default", "ax", "default", "ay", "default", "az", "default", "is_local", "default"];
          constants = [ "mass", "default", 0.8666666666667000 ];
          position = [ "x", "y", "z" ];
          velocity = [ "vx", "vy", "vz" ];

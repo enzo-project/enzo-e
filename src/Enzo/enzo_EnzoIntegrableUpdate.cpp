@@ -7,38 +7,47 @@
 
 #include "cello.hpp"
 #include "enzo.hpp"
+#include <limits>
 
-void append_grouping_pairs_(std::vector<std::string> integrable_groups,
-			    FieldCat target_cat, std::size_t *density_index,
-			    std::vector<std::pair<std::string,int>> &pair_vec)
+//----------------------------------------------------------------------
+
+static void append_key_to_vec_
+(const str_vec_t &integrable_quantities, FieldCat target_cat,
+ bool skip_bfield, std::size_t *density_index, str_vec_t &key_vec)
 {
-  int rank = cello::rank();
-  for (std::string name : integrable_groups){
+  for (std::string name : integrable_quantities){
     bool vector_quantity, actively_advected;
     FieldCat category;
-    EnzoCenteredFieldRegistry::quantity_properties(name, &vector_quantity,
-                                                   &category,
-                                                   &actively_advected);
-    // Sanity Check
-    ASSERT1("append_grouping_pairs_",
+    bool success = EnzoCenteredFieldRegistry::quantity_properties
+      (name, &vector_quantity, &category, &actively_advected);
+
+    // Sanity Checks:
+    ASSERT1("append_key_to_vec_",
+	    ("\"%s\" is not registered in EnzoCenteredFieldRegistry"),
+	    name.c_str(), success);
+    ASSERT1("append_key_to_vec_",
 	    ("\"%s\" should not be listed as an integrable quantity because "
 	     "it is not actively advected."),
 	    name.c_str(), actively_advected);
 
     if (category != target_cat){
-      ASSERT1("append_grouping_pairs_",
+      ASSERT1("append_key_to_vec_",
 	      ("Can't handle the integrable \"%s\" quantity because it has a "
 	       "field category of FieldCat::other"),
 	      name.c_str(), category != FieldCat::other);
       continue;
-    } else if ((density_index != NULL) && (name == "density")){
-      *density_index = pair_vec.size();
+    } else if (skip_bfield && (name == "bfield")){
+      continue;
+    } else if ((density_index != nullptr) && (name == "density")){
+      *density_index = key_vec.size();
     }
 
-    int nfields = vector_quantity ? 3 : 1;
-    for (int i = 0; i < nfields; i++){
-      std::pair<std::string,int> pair(name,i);
-      pair_vec.push_back(pair);
+    if (vector_quantity){
+      key_vec.push_back(name + "_x");
+      key_vec.push_back(name + "_y");
+      key_vec.push_back(name + "_z");
+    } else {
+      key_vec.push_back(name);
     }
   }
 }
@@ -46,109 +55,61 @@ void append_grouping_pairs_(std::vector<std::string> integrable_groups,
 //----------------------------------------------------------------------
 
 EnzoIntegrableUpdate::EnzoIntegrableUpdate
-(std::vector<std::string> integrable_groups, bool skip_B_update,
- std::vector<std::string> passive_groups) throw()
+(const str_vec_t& integrable_quantities,
+ bool skip_B_update) throw()
 {
-  passive_groups_ = passive_groups;
-
-  if (skip_B_update){
-    // remove bfield group from integrable_groups (if present)
-    std::string target("bfield");
-    integrable_groups.erase(std::remove(integrable_groups.begin(),
-					integrable_groups.end(), target),
-			    integrable_groups.end());
-  }
-
-  // assemble combined_integrable_groups_
-  auto contains = [](const std::vector<std::string> &vec,
-		     const std::string &value)
-  { return std::find(vec.cbegin(),vec.cend(), value) != vec.cend(); };
-
-  for (const std::string& elem : integrable_groups){
-    if (!contains(combined_integrable_groups_, elem)) {
-      combined_integrable_groups_.push_back(elem);
-    }
-  }
-  for (const std::string& elem : passive_groups_){
-    if (!contains(combined_integrable_groups_, elem)) {
-      combined_integrable_groups_.push_back(elem);
-    }
-  }
-
-  // sanity check:
-  std::vector<std::string>::size_type num_unique_groups;
-  num_unique_groups = this->combined_integrable_groups().size();
+  // Add conserved quantities to integrable_keys_ and identify the index
+  // holding the density key
+  density_index_ = std::numeric_limits<std::size_t>::max();
+  append_key_to_vec_(integrable_quantities, FieldCat::conserved, skip_B_update,
+                     &density_index_, integrable_keys_);
+  // Confirm that density is in fact a registered quantity
   ASSERT("EnzoIntegrableUpdate",
-	 ("group names appear more than once in integrable_groups or "
-	  "passive_groups"),
-	 num_unique_groups == (integrable_groups.size() +
-			       passive_groups_.size()) );
-
-  // prepare integrable_grouping_items_
-  ASSERT("EnzoIntegrableUpdate",
-	 ("\"density\" must be a registered integrable group."),
-	 contains(integrable_groups, "density"));
-  // First, add conserved quantities to integrable_grouping_items_
-  append_grouping_pairs_(integrable_groups, FieldCat::conserved,
-			 &density_index_, integrable_grouping_items_);
-  first_specific_index_ = integrable_grouping_items_.size();
-  append_grouping_pairs_(integrable_groups, FieldCat::specific,
-			 NULL, integrable_grouping_items_);
+	 ("\"density\" must be a registered integrable quantity."),
+	 density_index_ != std::numeric_limits<std::size_t>::max());
+  // Record the first index holding a key for a specific quantity
+  first_specific_index_ = integrable_keys_.size();
+  // Add specific quantities to integrable_keys_
+  append_key_to_vec_(integrable_quantities, FieldCat::specific, skip_B_update,
+                     nullptr, integrable_keys_);
 }
 
 //----------------------------------------------------------------------
 
-void EnzoIntegrableUpdate::clear_dUcons_group(Block *block,
-					      Grouping &dUcons_group,
-					      enzo_float value) const
+void EnzoIntegrableUpdate::clear_dUcons_map
+(EnzoEFltArrayMap &dUcons_map, enzo_float value,
+ const str_vec_t &passive_list) const noexcept
 {
-  const std::vector<std::string> group_names =combined_integrable_groups();
-  EnzoFieldArrayFactory array_factory(block, 0);
-
-  for (const std::string& name : group_names){
-    int num_fields = dUcons_group.size(name);
-
-    for (int i=0; i<num_fields; i++){
-      EFlt3DArray array = array_factory.from_grouping(dUcons_group, name, i);
-
-      for (int iz=0; iz<array.shape(0); iz++) {
-	for (int iy=0; iy<array.shape(1); iy++) {
-	  for (int ix=0; ix<array.shape(2); ix++) {
-	    array(iz,iy,ix) = value;
-	  }
-	}
+  auto init_arr = [value,&dUcons_map](const std::string& key)
+  {
+    EFlt3DArray array = dUcons_map.at(key);
+    for (int iz=0; iz<array.shape(0); iz++) {
+      for (int iy=0; iy<array.shape(1); iy++) {
+        for (int ix=0; ix<array.shape(2); ix++) {
+          array(iz,iy,ix) = value;
+        }
       }
-
     }
-  }
+  };
+
+  for (const std::string& key : integrable_keys_){ init_arr(key); }
+  for (const std::string& key : passive_list){ init_arr(key); }
 }
 
 //----------------------------------------------------------------------
 
-void EnzoIntegrableUpdate::accumulate_flux_component(Block *block,
-						     int dim, double dt,
-						     Grouping &flux_group,
-						     Grouping &dUcons_group,
-						     int stale_depth) const
+void EnzoIntegrableUpdate::accumulate_flux_component
+(int dim, double dt, enzo_float cell_width, EnzoEFltArrayMap &flux_map,
+ EnzoEFltArrayMap &dUcons_map, int stale_depth,
+ const str_vec_t &passive_list) const noexcept
 {
-  const std::vector<std::string> group_names =combined_integrable_groups();
-  EnzoFieldArrayFactory array_factory(block, stale_depth);
   EnzoPermutedCoordinates coord(dim);
+  enzo_float dtdx_i = dt/cell_width;
 
-  EnzoBlock * enzo_block = enzo::block(block);
-  enzo_float dtdx_i = dt/enzo_block->CellWidth[coord.i_axis()];
-
-  CSlice full_ax(nullptr, nullptr);
-
-  for (std::string name : group_names){
-
-    int num_fields = dUcons_group.size(name);
-    ASSERT1("EnzoIntegrableUpdate::accumulate_flux_divergence",
-	    ("The number of fields in the \"%s\" group is differnt between "
-	     "flux_group and dUcons_group."), name.c_str(),
-	    num_fields == flux_group.size(name));
-
-    for (int field_ind = 0; field_ind < num_fields; field_ind++){
+  auto accumulate = [dtdx_i,stale_depth,coord,
+                     &flux_map,&dUcons_map](const std::string& key)
+    {
+      CSlice full_ax(nullptr, nullptr);
       // Since we don't have fluxes on the exterior faces along axis i, we can
       // not update dU in the first & last cell along the axis. Thus we cast
       // the calculation as:
@@ -156,13 +117,13 @@ void EnzoIntegrableUpdate::accumulate_flux_component(Block *block,
 
       // define : dU_center(k,j,i) -> dU(k,j,i+1)
       EFlt3DArray dU, dU_center;
-      dU = array_factory.from_grouping(dUcons_group, name, field_ind);
+      dU = dUcons_map.get(key,stale_depth);
       dU_center = coord.get_subarray(dU, full_ax, full_ax, CSlice(1, -1));
 
       // define:  fl(k,j,i)        -> flux(k, j, i+1/2)
       //          fr(k,j,i)        -> flux(k, j, i+3/2)
       EFlt3DArray flux, fl, fr;
-      flux = array_factory.from_grouping(flux_group, name, field_ind);
+      flux = flux_map.get(key,stale_depth);
       fl = coord.get_subarray(flux, full_ax, full_ax, CSlice(0, -1));
       fr = coord.get_subarray(flux, full_ax, full_ax, CSlice(1, nullptr));
 
@@ -174,21 +135,21 @@ void EnzoIntegrableUpdate::accumulate_flux_component(Block *block,
 	}
       }
 
-    }
-  }
+    };
+
+  for (const std::string& key : integrable_keys_){ accumulate(key); }
+  for (const std::string& key : passive_list){ accumulate(key); }
 }
 
 //----------------------------------------------------------------------
 
-EFlt3DArray* EnzoIntegrableUpdate::load_integrable_quantites_
-(Block *block, Grouping & grouping, int stale_depth) const
+EFlt3DArray* EnzoIntegrableUpdate::load_integrable_quantities_
+(EnzoEFltArrayMap &map, int stale_depth) const
 {
-  std::size_t nfields = integrable_grouping_items_.size();
+  std::size_t nfields = integrable_keys_.size();
   EFlt3DArray* arr = new EFlt3DArray[nfields];
-  EnzoFieldArrayFactory array_factory(block, stale_depth);
   for (std::size_t i = 0; i<nfields; i++){
-    std::pair<std::string, int> pair = integrable_grouping_items_[i];
-    arr[i] = array_factory.from_grouping(grouping, pair.first, pair.second);
+    arr[i] = map.get(integrable_keys_[i], stale_depth);
   }
   return arr;
 }
@@ -196,25 +157,26 @@ EFlt3DArray* EnzoIntegrableUpdate::load_integrable_quantites_
 //----------------------------------------------------------------------
 
 void EnzoIntegrableUpdate::update_quantities
-(Block *block, Grouping &initial_integrable_group, Grouping &dUcons_group,
- Grouping &out_integrable_group, Grouping &out_conserved_passive_scalar,
- EnzoEquationOfState *eos, int stale_depth) const
+(EnzoEFltArrayMap &initial_integrable_map, EnzoEFltArrayMap &dUcons_map,
+ EnzoEFltArrayMap &out_integrable_map,
+ EnzoEFltArrayMap &out_conserved_passive_scalar,
+ EnzoEquationOfState *eos, int stale_depth,
+ const str_vec_t &passive_list) const
 {
 
   // Update passive scalars, it doesn't currently support renormalizing to 1
-  update_passive_scalars_(block, initial_integrable_group, dUcons_group,
-			  out_conserved_passive_scalar, stale_depth);
+  update_passive_scalars_(initial_integrable_map, dUcons_map,
+                          out_conserved_passive_scalar, stale_depth,
+                          passive_list);
 
   // For now, not having density floor affect momentum or total energy density
   enzo_float density_floor = eos->get_density_floor();
 
   EFlt3DArray *cur_prim, *dU, *out_prim;
-  cur_prim = load_integrable_quantites_(block, initial_integrable_group,
-					stale_depth);
-  dU       = load_integrable_quantites_(block, dUcons_group, stale_depth);
-  out_prim = load_integrable_quantites_(block, out_integrable_group,
-					stale_depth);
-  std::size_t nfields = integrable_grouping_items_.size();
+  cur_prim = load_integrable_quantities_(initial_integrable_map, stale_depth);
+  dU       = load_integrable_quantities_(dUcons_map, stale_depth);
+  out_prim = load_integrable_quantities_(out_integrable_map,stale_depth);
+  std::size_t nfields = integrable_keys_.size();
 
   for (int iz = 1; iz < (cur_prim[density_index_].shape(0) - 1); iz++) {
     for (int iy = 1; iy < (cur_prim[density_index_].shape(1) - 1); iy++) {
@@ -246,8 +208,7 @@ void EnzoIntegrableUpdate::update_quantities
 
   // apply floor to energy and sync the internal energy with total energy
   // (the latter only occurs if the dual energy formalism is in use)
-  eos->apply_floor_to_energy_and_sync(block, out_integrable_group,
-				      stale_depth+1);
+  eos->apply_floor_to_energy_and_sync(out_integrable_map, stale_depth + 1);
 
   delete[] cur_prim;  delete[] dU;  delete[] out_prim;
 }
@@ -255,47 +216,30 @@ void EnzoIntegrableUpdate::update_quantities
 //----------------------------------------------------------------------
 
 void EnzoIntegrableUpdate::update_passive_scalars_
-  (Block *block, Grouping &initial_integrable_group, Grouping &dUcons_group,
-   Grouping &out_conserved_passive_scalar, int stale_depth) const
+(EnzoEFltArrayMap &initial_integrable_map, EnzoEFltArrayMap &dUcons_map,
+ EnzoEFltArrayMap &out_conserved_passive_scalar, int stale_depth,
+ const str_vec_t &passive_list) const
 {
-
-  // Does not currently handle passively advected scalars that must sum to 1
-  // The easiest way to do that would be to divide each group of fields that
-  // must sum to 1 into different groupings
-
-  EnzoFieldArrayFactory array_factory(block, stale_depth);
-
-  EFlt3DArray cur_rho
-    = array_factory.from_grouping(initial_integrable_group, "density", 0);
+  EFlt3DArray cur_rho = initial_integrable_map.get("density", stale_depth);
 
   // cell-centered grid dimensions
   int mz, my, mx;
   mz = cur_rho.shape(0);    my = cur_rho.shape(1);    mx = cur_rho.shape(2);
 
-  std::vector<std::string> group_names = this->passive_groups_;
-  for (std::string group_name : group_names){
-    int num_fields = initial_integrable_group.size(group_name);
+  for (const std::string &key : passive_list){
+    EFlt3DArray cur_specific, out_conserved, dU;
+    cur_specific = initial_integrable_map.get(key, stale_depth);
+    out_conserved = out_conserved_passive_scalar.get(key, stale_depth);
+    dU = dUcons_map.get(key, stale_depth);
 
-    // iterate over the fields in the group
-    for (int field_ind=0; field_ind<num_fields; field_ind++){
-
-      EFlt3DArray cur_specific, out_conserved, dU;
-      cur_specific = array_factory.from_grouping(initial_integrable_group,
-						 group_name, field_ind);
-      out_conserved = array_factory.from_grouping(out_conserved_passive_scalar,
-						  group_name, field_ind);
-      dU = array_factory.from_grouping(dUcons_group, group_name, field_ind);
-
-      for (int iz=1; iz<mz-1; iz++) {
-	for (int iy=1; iy<my-1; iy++) {
-	  for (int ix=1; ix<mx-1; ix++) {
-
-	    out_conserved(iz,iy,ix)
-	      = (cur_specific(iz,iy,ix) * cur_rho(iz,iy,ix) + dU(iz,iy,ix));
-	  }
-	}
+    for (int iz=1; iz<mz-1; iz++) {
+      for (int iy=1; iy<my-1; iy++) {
+        for (int ix=1; ix<mx-1; ix++) {
+          out_conserved(iz,iy,ix)
+            = (cur_specific(iz,iy,ix) * cur_rho(iz,iy,ix) + dU(iz,iy,ix));
+        }
       }
-
     }
   }
+
 }

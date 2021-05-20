@@ -239,6 +239,7 @@ protected:
     if (name_dir != "") {
       dir = name_dir;
       boost::filesystem::path directory(name_dir);
+
       if (! boost::filesystem::is_directory(directory)) {
 
         boost::filesystem::create_directory(directory);

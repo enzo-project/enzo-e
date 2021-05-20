@@ -21,26 +21,22 @@ public: // interface
 
   /// Factory method for constructing EnzoReconstructor
   /// (The signature of this method may need to be modified)
-  /// @param reconstructable_groups A vector of reconstructable quantities
-  ///     (that are also listed in FIELD_TABLE). These are used as group names
-  ///     in the Grouping objects that store field names. In effect this is
-  ///     used to register the quantities operated on by the Reconstructor
-  /// @param passive_groups A vector with the names of the groups of passively
-  ///     advected scalars that may be included. (If a group is listed here but
-  ///     the Grouping object doesn't actually provide any fields in the group,
-  ///     no problems are caused)
-  /// @param name The name of the Riemann solver to use. Valid names include
-  ///     "nn" and "plm"
-  /// @param theta_limiter An argument that is optionally used to tune certain
-  ///     types of limiters
+  ///
+  /// @param[in] active_reconstructed_quantities A vector listing the
+  ///     names of quantities (they should be listed in FIELD_TABLE) that are
+  ///     to be reconstructed. This should omit the names of passively
+  ///     advected scalars.
+  /// @param[in] name The name of the Riemann solver to use. Valid names
+  ///     include "nn" and "plm"
+  /// @param[in] theta_limiter An argument that is optionally used to tune
+  ///     certain types of limiters
   static EnzoReconstructor* construct_reconstructor
-    (std::vector<std::string> reconstructable_groups,
-     std::vector<std::string> passive_groups, std::string name,
-     enzo_float theta_limiter);
+    (const std::vector<std::string> &active_reconstructed_quantities,
+     std::string name, enzo_float theta_limiter);
 
   /// Create a new EnzoReconstructor
-  EnzoReconstructor(std::vector<std::string> group_names) throw()
-    : group_names_(group_names)
+  EnzoReconstructor(std::vector<std::string> active_key_names) throw()
+    : active_key_names_(active_key_names)
   { }
 
   /// Virtual destructor
@@ -59,32 +55,38 @@ public: // interface
   void pup (PUP::er &p)
   {
     PUP::able::pup(p);
-    p|group_names_;
+    p|active_key_names_;
   }
 
   /// Reconstructs the interface values
   ///
-  /// @param block holds data to be processed
-  /// @param prim_group holds field names of the cell-centered reconstructable
-  ///     primitives. This object is expected to have Grouping matching the
-  ///     names registerred with the factory method
-  /// @param priml_group,primr_group holds field names where the reconstructed
-  ///     left/right face-centered primitives will be stored. The relevant
-  ///     fields should be formally defined as cell-centered (to allow for
-  ///     reuse along multiple dimensions). During the calculation, they are
-  ///     treated as face-centered (without having values on the exterior faces
-  ///     of the block). Consequentially there will be some unused space at the
-  ///     end of the arrays.  
-  /// @param dim Dimension along which to reconstruct interface values. Values
-  ///     of 0, 1, and 2 correspond to the x, y, and z directions, respectively.
-  /// @param eos Pointer to an instance of EnzoEquationOfState object
-  /// @param stale_depth indicates the current stale_depth for the supplied
-  ///     cell-centered quantities
-  virtual void reconstruct_interface (Block *block, Grouping &prim_group,
-				      Grouping &priml_group,
-				      Grouping &primr_group, int dim,
-				      EnzoEquationOfState *eos,
-				      int stale_depth)=0;
+  /// @param[in]  prim_map Map holding the data for the cell-centered
+  ///     reconstructable primitives. This is expected to have keys for all
+  ///     of the active reconstructed quantities registered with the factory
+  ///     method (plus all of the keys listed in `passive lists`)
+  /// @param[out] priml_map,primr_map Holds existing arrays where the
+  ///     left/right reconstructed, face-centered primitives are written.
+  ///     These must supply the same keys that are expected for prim_map.
+  ///     The arrays are expected to have identical shapes to those in
+  ///     prim_map, except along dimension `dim`. Along that dimension, these
+  ///     arrays should hold one fewer value.
+  /// @param[in]  dim Dimension along which to reconstruct interface values.
+  ///     Values of 0, 1, and 2 correspond to the x, y, and z directions.
+  /// @param[in]  eos Pointer to an instance of EnzoEquationOfState object
+  /// @param[in]  stale_depth indicates the current stale_depth for the
+  ///     supplied cell-centered quantities
+  /// @param[in]  passive_list A list of keys for passive scalars.
+  ///
+  /// @note It's alright for arrays in `priml_map` and `primr_map` to have the
+  /// shapes of cell-centered arrays (i.e. the same shape as arrays in
+  /// `prim_map`). In this case, the function effectively treats such arrays as
+  /// if their `subarray` method were invoked, where `CSlice(0,-1)` is
+  /// specified for the `dim` axis and `CSlice(nullptr,nullptr)` is specified
+  /// for other axes.
+  virtual void reconstruct_interface
+  (EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
+   EnzoEFltArrayMap &primr_map, int dim, EnzoEquationOfState *eos,
+   int stale_depth, const str_vec_t& passive_list)=0;
 
   /// The rate amount by which the stale_depth increases after the current
   /// reconstructor is used to update the fluid over a (partial or full)
@@ -123,9 +125,9 @@ public: // interface
   { return total_staling_rate() - immediate_staling_rate(); }
 
 protected:
-  /// list of the group_names which include all field names that will be
-  /// reconstructed
-  std::vector<std::string> group_names_;
+  /// list of the key names for all components of (non-passively advected
+  /// quantities) that are to be reconstructed.
+  std::vector<std::string> active_key_names_;
 };
 
 #endif /* ENZO_ENZO_RECONSTRUCTOR_HPP */

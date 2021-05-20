@@ -32,16 +32,16 @@ repository `Enzo-E / Cello github repository
 
 
 Before compiling ``Enzo-E / Cello``, you may also need to download
-and install 1.``Charm++``, 2.``HDF5``, 3.``libpng``, and 3.``libboost``:
+and install 1.``Charm++``, 2.``HDF5``, 3.``libpng``, 3.``libboost``, and 4.``scons``:
 
 1. Install ``Charm++``
 ----------------------
 
-``Charm++`` can be `downloaded here <http://charm.cs.illinois.edu/software>`_.
+``Charm++`` can be `downloaded here <https://charm.cs.illinois.edu/software>`_.
 
 To build Charm++ on a Mac, try this:
 
-   ``./build charm++ netlrts-darwin-x86_64 gcc gfortran -j4 --with-production``
+   ``./build charm++ netlrts-darwin-x86_64 -j4 --with-production``
 
 If you're running Linux, try building Charm++ using this:
 
@@ -53,25 +53,25 @@ be used to configure and install ``Charm++`` on numerous other platforms.
 2. Install ``HDF5``
 -------------------
 
-"`HDF5 <http://www.hdfgroup.org/HDF5/>`_ is a "data model, library, and
+"`HDF5 <https://www.hdfgroup.org/HDF5/>`_ is a "data model, library, and
 file format for storing and managing data", and is the primary library
 used by Enzo-E / Cello for data output.
 
 If HDF5 is not already installed on your machine, it may be available
 through your operating system distribution, otherwise it can be
-downloaded from the `HDF5 <http://www.hdfgroup.org/HDF5/>`_ website.
+downloaded from the `HDF5 <https://www.hdfgroup.org/HDF5/>`_ website.
 Enzo-E / Cello currently uses the "serial" (non-MPI) version of HDF5.
 
 3. Install ``libpng``
 ---------------------
 
-"`libpng <http://www.libpng.org/pub/png/libpng.html>`_ is the official
+"`libpng <https://www.libpng.org/pub/png/libpng.html>`_ is the official
 PNG reference library", and is the image format used by Enzo-E / Cello.
 
 If ``libpng`` is not already installed on your machine, it may be
 available through your operating system distribution, otherwise it can
 be downloaded from the `libpng
-<http://www.libpng.org/pub/png/libpng.html>`_ website.
+<https://www.libpng.org/pub/png/libpng.html>`_ website.
 
 4. Install ``libboost-dev``
 ---------------------------
@@ -82,9 +82,27 @@ If ``libboost-dev`` is not already installed on your machine, it may be
 available through your operating system distribution, otherwise it can
 be downloaded from the `libboost <https://www.boost.org/>`_ website.
 
+5. Install ``scons``
+--------------------
+
+"`SCons <https://www.scons.org/>`_" is a "software construction tool" that is
+used to build ``Enzo-E / Cello`` using scripts written in ``python``.
+
+``scons`` can be install via ``pip`` or if you are using Anaconda or Miniconda
+through ``conda``. It may also be pre-packed for installation for your operating system
+distribution. Building ``Enzo-E / Cello`` requires a version of ``scons`` built
+for Python 3. See `Installing SCons
+<https://scons.org/doc/production/HTML/scons-user/ch01s02.html>`_ for
+installation details.
+
+6. Install Grackle
+------------------
+
 By default Enzo-E requires the Grackle chemistry and cooling library.
 If you do not need to use Grackle, you can change the line
 ``use_grackle = 1`` in the ``SConstruct`` file to ``use_grackle = 0``.
+See the `Grackle documentation <https://grackle.readthedocs.io>`__ for installation
+instructions.
 
 Configuring
 ===========
@@ -145,6 +163,19 @@ using the ``CHARM_HOME`` environment variable.
   ============================================  =============================
   ``export CHARM_HOME=$HOME/Charm/charm.6.10``  Set directory of Charm++ used
   ============================================  =============================
+
+4. Specify Grackle directory
+----------------------------
+
+At compile time, Enzo-E will try to automatically find your Grackle installation.
+If compilation fails because ``grackle.h`` cannot be included, it is possible
+that the directory was incorrectly identified. You can specify
+Grackle's installation directory with the ``GRACKLE_HOME`` environment variable:
+
+  =================================== =====================================
+  =================================== =====================================
+  ``export GRACKLE_HOME=$HOME/local`` Set directory of Grackle installation
+  =================================== =====================================
 
 Porting
 =======
@@ -210,13 +241,13 @@ Building
 After configuring Cello for your computer, the Cello framework and
 Enzo-E application can be compiled using "make", which in turn calls
 the included ``./build.sh`` script.  Other options are available for
-generating useful `http://orgmode.org/ <org-mode>`_ files, generating
+generating useful `https://orgmode.org/ <org-mode>`_ files, generating
 doxygen documentation, running
 regression tests, and running code analysis tools.
 
         ==================  ===============================================================
         ==================  ===============================================================
-	``make``            *Compile Enzo-E as* ``./bin/enzo-p``
+	``make``            *Compile Enzo-E as* ``./bin/enzo-e``
 	``make clean``      *Remove object and test files*
 	``make reset``      *Clear any settings from an incomplete build*
 	``make doc``        *Generate doxygen documentation from source in* ``src-html`` *(requires* ``doxygen`` *)*
@@ -240,12 +271,34 @@ and take a look at Enzo-E's output.
 An included "Hello World" problem can be run using the following
 from the ``$CELLO_HOME`` directory:
 
-     ``charmrun +p4 bin/enzo-p input/Hi.in``
+     ``charmrun +p4 bin/enzo-e input/HelloWorld/Hi.in``
 
 This assumes that the ``charmrun`` command is in your path.  If it
 is not, then you will need to include the path name as well, e.g.:
 
-     ``~/Charm/bin/charmrun +p4 bin/enzo-p input/Hi.in``
+     ``~/Charm/bin/charmrun +p4 bin/enzo-e input/HelloWorld/Hi.in``
+
+This also assumes that local connections can be established passwordless.
+If errors like
+
+..  code-block:: bash
+
+    Permission denied (publickey,gssapi-keyex,gssapi-with-mic,password,hostbased).
+    Charmrun> Error 255 returned from remote shell (localhost:0)
+
+are displayed a node local run (i.e., no "remote" connections even to the local host)
+could be used instead by add ``++local`` to ``charmrun``, e.g.:
+
+     ``~/Charm/bin/charmrun ++local +p4 bin/enzo-e input/HelloWorld/Hi.in``
+
+If you receive an error like
+
+..  code-block:: bash
+
+    Charmrun> Timeout waiting for node-program to connect
+
+trying running ``./bin/enzo-e`` without ``charmrun`` as crashes due to, e.g.,
+libraries not being found may not be displaying.
 
 If all goes well, Enzo-E will run the Hello World problem.  Below are
 some of the generated images from the longer-running "HelloWorld.in"

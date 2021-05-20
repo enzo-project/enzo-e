@@ -591,7 +591,7 @@ class VariableAssignmentTests{
   // these are tests that check that check the assignments of arrays to
   // variables.
 
-  template<template<typename, std::size_t> typename Builder>
+  template<template<typename, std::size_t> class Builder>
   void test_assignment_(){
     // vector used to hold expected results (the contents of this vector will
     // be updated throughout this test
@@ -728,8 +728,8 @@ class VariableAssignmentTests{
 
   }
 
-  template<template<typename, std::size_t> typename Builder1,
-           template<typename, std::size_t> typename Builder2>
+  template<template<typename, std::size_t> class Builder1,
+           template<typename, std::size_t> class Builder2>
   void test_deepcopy_assignment_(){
     std::string func_name =
       ("VariableAssignmentTests::test_deepcopy_assignment_<" +
@@ -786,7 +786,7 @@ class BulkAssignmentTest{
 
 public:
 
-  template<template<typename, std::size_t> typename Builder>
+  template<template<typename, std::size_t> class Builder>
   void test_assign_from_scalar_(){
     std::string func_name = "BulkAssignmentTest::test_assign_from_scalar_";
 
@@ -814,8 +814,8 @@ public:
   }
   
 
-  template<template<typename, std::size_t> typename Builder1,
-           template<typename, std::size_t> typename Builder2>
+  template<template<typename, std::size_t> class Builder1,
+           template<typename, std::size_t> class Builder2>
   void test_assign_from_array_(){
     std::string func_name =
       ("BulkAssignmentTest::test_assign_from_array_<" +
@@ -869,8 +869,8 @@ public:
   }
 
 
-  template<template<typename, std::size_t> typename Builder1,
-           template<typename, std::size_t> typename Builder2>
+  template<template<typename, std::size_t> class Builder1,
+           template<typename, std::size_t> class Builder2>
   void test_assign_subarrays_(){
     // These tests actually uncovered a longstanding bug
     std::string func_name =
@@ -974,6 +974,8 @@ public:
 
 };
 
+//----------------------------------------------------------------------
+
 class PassByValueTests{
 
 private:
@@ -989,7 +991,7 @@ private:
   }
 public:
 
-  template<template<typename, std::size_t> typename Builder>
+  template<template<typename, std::size_t> class Builder>
   void test_pass_by_val_(){
     Builder<double, 2> builder(2,3);
     CelloArray<double, 2> *arr_ptr = builder.get_arr();
@@ -1004,6 +1006,86 @@ public:
   void run_tests(){
     test_pass_by_val_<MemManagedArrayBuilder>();
     test_pass_by_val_<PtrWrapArrayBuilder>();
+  }
+
+};
+
+
+//----------------------------------------------------------------------
+
+class IsAliasTests{
+
+public:
+
+
+  void test_is_alias_independent_ptr_wrapping_(){
+    PtrWrapArrayBuilder<double, 2> builder(2,3);
+    CelloArray<double, 2> *arr_ptr = builder.get_arr();
+
+    double *ptr = builder.get_wrapped_ptr();
+
+    CelloArray<double, 2> array_2(ptr + 3, 1, 3);
+
+    ASSERT("IsAliasTests::test_is_alias_independent_ptr_wrapping_",
+           "The arrays aren't aliases because they only partially overlap.",
+           !arr_ptr->is_alias(array_2));
+
+    CelloArray<double, 2> subarray = arr_ptr->subarray(CSlice(1,2),
+                                                       CSlice(0,3));
+    ASSERT("IsAliasTests::test_is_alias_independent_ptr_wrapping_",
+           ("The arrays are aliases even though they were constructed "
+            "independently from each other"),
+           subarray.is_alias(array_2));
+
+    CelloArray<double, 1> array_3(ptr + 3, 3);
+    ASSERT("IsAliasTests::test_is_alias_independent_ptr_wrapping_",
+           ("The arrays are not perfect aliases because they have different "
+            "numbers of dimensions."), !subarray.is_alias(array_3));
+  }
+  
+  template<template<typename, std::size_t> class Builder>
+  void test_is_alias_(){
+    Builder<double, 2> builder(2,3);
+    CelloArray<double, 2> *arr_ptr = builder.get_arr();
+
+    double data[6] = {0, 0, 0, 0, 0, 0};
+    CelloArray<double, 2> array_2(data, 2, 3);
+
+    ASSERT("IsAliasTests::test_is_alias_", "The arrays aren't aliases.",
+           !arr_ptr->is_alias(array_2));
+
+    CelloArray<double, 2> array_3(2, 3);
+
+    ASSERT("IsAliasTests::test_is_alias_", "The arrays aren't aliases.",
+           !arr_ptr->is_alias(array_3));
+
+    CelloArray<double, 2> subarray1 = arr_ptr->subarray(CSlice(0,2),
+                                                        CSlice(1,3));
+    CelloArray<double, 2> subarray2 = arr_ptr->subarray(CSlice(0,2),
+                                                        CSlice(0,2));
+    ASSERT("IsAliasTests::test_is_alias_",
+           "The arrays have partial but are not aliases.",
+           !arr_ptr->is_alias(subarray1));
+    ASSERT("IsAliasTests::test_is_alias_",
+           "The arrays have partial but are not aliases.",
+           !arr_ptr->is_alias(subarray2));
+
+    CelloArray<double, 2> subarray1a = subarray1.subarray(CSlice(0,2),
+                                                          CSlice(0,1));
+    CelloArray<double, 2> subarray2a = subarray2.subarray(CSlice(0,2),
+                                                          CSlice(1,2));
+    ASSERT("IsAliasTests::test_is_alias_", "The arrays are aliases.",
+           subarray1a.is_alias(subarray2a));
+    ASSERT("IsAliasTests::test_is_alias_", "The arrays are aliases.",
+           subarray1a.is_alias(arr_ptr->subarray(CSlice(0,2),
+                                                 CSlice(1,2)))
+           );
+  }
+
+  void run_tests(){
+    test_is_alias_<MemManagedArrayBuilder>();
+    test_is_alias_<PtrWrapArrayBuilder>();
+    test_is_alias_independent_ptr_wrapping_();
   }
 
 };
@@ -1035,6 +1117,9 @@ PARALLEL_MAIN_BEGIN
 
   PassByValueTests pass_by_val_tests;
   pass_by_val_tests.run_tests();
+
+  IsAliasTests is_alias_tests;
+  is_alias_tests.run_tests();
 
   unit_finalize();
 

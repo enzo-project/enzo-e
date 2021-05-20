@@ -323,7 +323,8 @@
 			"vz", "default",
 			"ax", "default",
 			"ay", "default",
-			"az", "default" ];
+			"az", "default" ,
+                        "is_local", "default"];
          position = [ "x", "y", "z" ];
 	 velocity = [ "vx", "vy", "vz" ];
          constants = [ "mass", "double", .8382456140 ];
