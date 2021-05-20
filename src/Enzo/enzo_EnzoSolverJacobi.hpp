@@ -37,7 +37,8 @@ public: // interface
       id_(-1),
       w_(0),
       i_iter_(-1),
-      n_(0)
+      n_(0),
+      ir_smooth_(-1)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -52,6 +53,7 @@ public: // interface
     p | w_;
     p | i_iter_;
     p | n_;
+    p | ir_smooth_;
   }
 
 public: // virtual methods
@@ -62,6 +64,30 @@ public: // virtual methods
   /// Type of this solver
   virtual std::string type() const { return "jacobi"; }
 
+  bool is_finest(Block * block) {return is_finest_(block); }
+  
+protected: // virtual methods
+  
+  /// Whether Block is active
+  virtual bool is_active_(Block * block) const
+  {
+    if (solve_type_ == solve_level) {
+      return true;
+    } else {
+      return Solver::is_active_(block);
+    }
+  }
+
+  /// Whether solution is defined on this Block
+  virtual bool is_finest_(Block * block) const
+  {
+    if (solve_type_ == solve_level) {
+      return true;
+    } else {
+      return Solver::is_finest_(block);
+    }
+  }
+  
 public: // methods
 
   /// Continue after refresh to perform Jacobi update
@@ -117,6 +143,9 @@ protected: // attributes
   
   /// Number of iterations
   int n_;
+
+  // Refresh after each smoothing
+  int ir_smooth_;
 };
 
 #endif /* ENZO_ENZO_SOLVER_JACOBI_HPP */

@@ -8,6 +8,8 @@
 module enzo {
 
   initnode void register_method_turbulence(void);
+  initnode void mutex_init();
+  initnode void mutex_init_bcg_iter();
 
   readonly EnzoConfig g_enzo_config;
   readonly int EnzoBlock::UseMinimumPressureSupport[CONFIG_NODE_SIZE];
@@ -45,17 +47,24 @@ module enzo {
   PUPable EnzoConfig;
   PUPable EnzoFactory;
 
+  PUPable EnzoInitialBCenter;
+  PUPable EnzoInitialCloud;
   PUPable EnzoInitialCollapse;
   PUPable EnzoInitialCosmology;
+  PUPable EnzoInitialFeedbackTest;
+  PUPable EnzoInitialInclinedWave;
   PUPable EnzoInitialImplosion2;
   PUPable EnzoInitialMusic;
   PUPable EnzoInitialPm;
+  PUPable EnzoInitialBurkertBodenheimer;
   PUPable EnzoInitialPpmlTest;
   PUPable EnzoInitialSedovArray2;
   PUPable EnzoInitialSedovArray3;
   PUPable EnzoInitialSedovRandom;
-  PUPable EnzoInitialSoup;  	  
+  PUPable EnzoInitialShockTube;
+  PUPable EnzoInitialSoup;
   PUPable EnzoInitialTurbulence;
+  PUPable EnzoInitialIsolatedGalaxy;
 
   PUPable EnzoRefineShock;
   PUPable EnzoRefineParticleMass;
@@ -69,18 +78,46 @@ module enzo {
   PUPable EnzoMatrixLaplace;
   PUPable EnzoMatrixDiagonal;
   PUPable EnzoMatrixIdentity;
+  PUPable IoEnzoBlock;
 
+  PUPable EnzoMethodBackgroundAcceleration;
+  PUPable EnzoMethodFeedback;
+  PUPable EnzoMethodDistributedFeedback;
+
+  PUPable EnzoMethodCheckGravity;
   PUPable EnzoMethodComovingExpansion;
   PUPable EnzoMethodCosmology;
+  PUPable EnzoMethodGravity;
+
   PUPable EnzoMethodHeat;
-  PUPable EnzoMethodNull;
-  PUPable EnzoMethodPpm;
   PUPable EnzoMethodHydro;
-  PUPable EnzoMethodPpml;
   PUPable EnzoMethodPmDeposit;
   PUPable EnzoMethodPmUpdate;
+  PUPable EnzoMethodPpm;
+  PUPable EnzoMethodPpml;
   PUPable EnzoMethodTurbulence;
-  PUPable EnzoMethodGravity;
+  PUPable EnzoMethodMHDVlct;
+
+  PUPable EnzoEOSIdeal;
+  PUPable EnzoIntegrableUpdate;
+  PUPable EnzoReconstructorNN;
+  // EnzoReconstructorPLMEnzoRKLim
+  PUPable EnzoReconstructorPLM<PLM_EnzoRKLimiter>;
+  // EnzoReconstructorPLMAthenaLim
+  PUPable EnzoReconstructorPLM<PLM_AthenaLimiter>;
+
+  // EnzoRiemannHLLMHD
+  PUPable EnzoRiemannImpl<HLLImpl<DavisWavespeed<MHDLUT>>>;
+  // EnzoRiemannHLLE
+  PUPable EnzoRiemannImpl<HLLImpl<EinfeldtWavespeed<HydroLUT>>>;
+  // EnzoRiemannHLLEMHD
+  PUPable EnzoRiemannImpl<HLLImpl<EinfeldtWavespeed<MHDLUT>>>;
+  PUPable EnzoRiemannImpl<HLLCImpl>; //EnzoRiemannHLLC
+  PUPable EnzoRiemannImpl<HLLDImpl>; //EnzoRiemannHLLD
+
+  PUPable EnzoMethodStarMaker;
+  PUPable EnzoMethodStarMakerStochasticSF;
+  PUPable EnzoBfieldMethodCT;
 
   PUPable EnzoPhysicsCosmology;
 
@@ -126,12 +163,12 @@ module enzo {
     entry void p_method_turbulence_end(CkReductionMsg *msg);
 
     // EnzoMethodGravity synchronization entry methods
-    entry void r_method_gravity_continue();
-    entry void r_method_gravity_end();
+    entry void p_method_gravity_continue();
+    entry void p_method_gravity_end();
 
     // EnzoSolverCg synchronization entry methods
 
-    entry void r_solver_cg_matvec();
+    entry void p_solver_cg_matvec();
 
     entry void r_solver_cg_loop_0a(CkReductionMsg *msg);
     entry void r_solver_cg_loop_0b(CkReductionMsg *msg);
@@ -156,13 +193,13 @@ module enzo {
 
     entry void p_dot_recv_parent(int n, long double dot[n],
 				 std::vector<int> isa,
-				 int i_function);
+				 int i_function, int iter);
     entry void p_dot_recv_children(int n, long double dot[n],
 				   std::vector<int> isa,
 				   int i_function);
 
     // EnzoSolverDd
-    
+
     entry void p_solver_dd_restrict_recv(FieldMsg * msg);
     entry void p_solver_dd_prolong_recv(FieldMsg * msg);
     entry void p_solver_dd_solve_coarse();
@@ -170,19 +207,19 @@ module enzo {
     entry void p_solver_dd_last_smooth();
     entry void r_solver_dd_barrier(CkReductionMsg *msg);
     entry void r_solver_dd_end(CkReductionMsg *msg);
-    
+
     // EnzoSolverJacobi
 
     entry void p_solver_jacobi_continue();
 
     // EnzoSolverMg0
-    
+
     entry void p_solver_mg0_restrict();
     entry void p_solver_mg0_solve_coarse();
     entry void p_solver_mg0_post_smooth();
     entry void p_solver_mg0_last_smooth();
     entry void r_solver_mg0_begin_solve(CkReductionMsg *msg);
-    entry void r_solver_mg0_barrier(CkReductionMsg* msg);  
+    entry void r_solver_mg0_barrier(CkReductionMsg* msg);
     entry void p_solver_mg0_prolong_recv(FieldMsg * msg);
     entry void p_solver_mg0_restrict_recv(FieldMsg * msg);
 

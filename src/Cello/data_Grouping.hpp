@@ -6,8 +6,8 @@
 /// @brief    [\ref Data] Declaration of the Grouping class
 ///
 /// This class serves to define groups of Fields, Particles, etc. into
-/// named categories.  For example, one can define a "colour" group
-/// for fields, and add all colour fields to the "colour" grouping.  The
+/// named categories.  For example, one can define a "color" group
+/// for fields, and add all color fields to the "color" grouping.  The
 /// API supports adding groups, adding "items" (field names, particle
 /// set names, etc.) to groups, testing whether an item is included
 /// in a group, returning the size of the group, and returning an
@@ -26,18 +26,6 @@ class Grouping {
   /// @brief    [\ref Data] 
 
 public: // interface
-
-  // /// Constructor
-  // Grouping() throw();
-
-  // /// Copy constructor
-  // Grouping(const Grouping & Grouping) throw();
-
-  // /// Assignment operator
-  // Grouping & operator= (const Grouping & Grouping) throw();
-
-  // /// Destructor
-  // ~Grouping() throw();
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
@@ -83,6 +71,28 @@ public: // interface
       }
     }
     return "";
+  }
+
+  /// Return a vector of all elements of a group
+  std::vector<std::string> group_list (std::string group)
+  {
+    int count = 0;
+
+    for (auto it=groups_.begin(); it != groups_.end(); it++) {
+      if (it->second == group) {
+	++count;
+      }
+    }
+    std::vector<std::string> list;
+    list.resize(count);
+    count = 0;
+    for (auto it=groups_.begin(); it != groups_.end(); it++) {
+      if (it->second == group) {
+        list[count] = it->first;
+	++count;
+      }
+    }
+    return list;
   }
 protected: // functions
 

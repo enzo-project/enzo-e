@@ -49,6 +49,7 @@ const std::map<std::string, double (*) (double)> Param::function_map =
 void Param::pup (PUP::er &p)
 {
   TRACEPUP;
+  const bool up = p.isUnpacking();
   // NOTE: change this function whenever attributes change
   p | type_;
   p | value_accessed_;
@@ -60,30 +61,31 @@ void Param::pup (PUP::er &p)
     p | value_logical_; 
   } else if (type_ == parameter_string) {
     int n = 0;
-    if (!p.isUnpacking()) {
+    if (!up) {
       n=strlen(value_string_);
     }
     p | n;
-    if (p.isUnpacking()) value_string_ = new char [n];
-    if (n > 0) PUParray(p,value_string_,n);
+    // +1 to include '\0' terminator
+    if (up) value_string_ = new char [n+1];
+    PUParray(p,value_string_,n+1);
   } else if (type_ == parameter_list) {
     int n = 0;
-    if (! p.isUnpacking()) {
+    if (! up) {
       n = value_list_->size();
     }
     p | n;
-    if (p.isUnpacking()) {
+    if (up) {
       value_list_ = new list_type;
       value_list_->resize(n);
     }
     for (int i=0; i<n; i++) {
       int l_param = 0;
-      if (! p.isUnpacking() ) {
+      if (! up) {
 	l_param = ((*value_list_)[i] != NULL);
       }
       p | l_param;
       if (l_param) {
-	if (p.isUnpacking())
+	if (up)
 	  (*value_list_)[i] = new Param;
 	p | *(*value_list_)[i];
       }
@@ -101,32 +103,33 @@ void Param::pup (PUP::er &p)
 
 void Param::pup_expr_ (PUP::er &p, struct node_expr ** node) {
   int l_expr = 0;
-  if (! p.isUnpacking() ) {
+  const bool up = p.isUnpacking();
+  if (! up ) {
     l_expr = ((*node) != NULL);
   }
   p | l_expr;
-  if (!l_expr && p.isUnpacking()) (*node) = NULL;
+  if (!l_expr && up) (*node) = NULL;
   if (l_expr) {
 
     // PUP type
-    if (p.isUnpacking()) {
+    if (up) {
       (*node) = new struct node_expr;
     }
     p | (*node)->type;
 
     // PUP function_name
     int n = 0;
-    if (!p.isUnpacking() && (*node)->function_name) {
+    if (!up && (*node)->function_name) {
       n = strlen((*node)->function_name);
     }
     p | n;
     if (n > 0) {
-      if (p.isUnpacking()) {
+      if (up) {
 	(*node)->function_name = new char [ n + 1];
       }
       PUParray (p,(*node)->function_name,n+1);
     } else {
-      if (p.isUnpacking()) (*node)->function_name = NULL;
+      if (up) (*node)->function_name = NULL;
     }
 
     // PUP value (note function_name needs to be before value)
@@ -144,7 +147,7 @@ void Param::pup_expr_ (PUP::er &p, struct node_expr ** node) {
       p | (*node)->var_value;
       break;
     case enum_node_function:
-      if (p.isUnpacking()) {
+      if (up) {
       	(*node)->fun_value = function_map.at((*node)->function_name);
       }
       break;
@@ -343,10 +346,13 @@ void Param::evaluate_float
   int i;
   switch (node->type) {
   case enum_node_operation:
+    ASSERT("Param::evaluate_float()",
+           "node is NULL",
+           (node != NULL));
     ASSERT3("Param::evaluate_float()",
 	    "Error in operation %d: left %p right %p",
 	    node ? node->op_value:-1,left,right,
-	    left != NULL && right != NULL);
+	    ((left != NULL) && (right != NULL)));
     switch (node->op_value) {
     case enum_op_add: for (i=0; i<n; i++) result[i] = left[i] + right[i]; break;
     case enum_op_sub: for (i=0; i<n; i++) result[i] = left[i] - right[i]; break;
@@ -376,10 +382,10 @@ void Param::evaluate_float
     break;
   case enum_node_variable:
     switch (node->var_value) {
-    case 'x':	for (i=0; i<n; i++) result[i] = x[i]; break;
-    case 'y':	for (i=0; i<n; i++) result[i] = y[i]; break;
-    case 'z':	for (i=0; i<n; i++) result[i] = z[i]; break;
-    case 't':	for (i=0; i<n; i++) result[i] = t;    break;
+    case 'x': if (x) for (i=0; i<n; i++) result[i] = x[i]; break;
+    case 'y': if (y) for (i=0; i<n; i++) result[i] = y[i]; break;
+    case 'z': if (z) for (i=0; i<n; i++) result[i] = z[i]; break;
+    case 't': for (i=0; i<n; i++) result[i] = t;    break;
     default:
       ERROR1("Param::evaluate_float",
 	     "unknown variable %c in floating-point expression",
@@ -554,6 +560,6 @@ void Param::dealloc_node_expr_ (struct node_expr * p)
   if (p->right != NULL) dealloc_node_expr_(p->right);
   free (p->function_name);
   free (p);
-};
+}
 
 //----------------------------------------------------------------------

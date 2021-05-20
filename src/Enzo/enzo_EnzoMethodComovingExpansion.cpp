@@ -16,19 +16,28 @@ EnzoMethodComovingExpansion::EnzoMethodComovingExpansion
   : Method(),
     comoving_coordinates_(comoving_coordinates)
 {
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
-			     enzo_sync_id_comoving_expansion);
+  cello::simulation()->new_refresh_set_name(ir_post_,name());
 
   const int rank = cello::rank();
-  //  refresh(ir)->add_all_fields();
-  FieldDescr * field_descr = cello::field_descr();
 
-  refresh(ir)->add_field(field_descr->field_id("density"));
-  refresh(ir)->add_field(field_descr->field_id("total_energy"));
-  refresh(ir)->add_field(field_descr->field_id("internal_energy"));
-  if (rank >= 1) refresh(ir)->add_field(field_descr->field_id("velocity_x"));
-  if (rank >= 2) refresh(ir)->add_field(field_descr->field_id("velocity_y"));
-  if (rank >= 3) refresh(ir)->add_field(field_descr->field_id("velocity_z"));
+  // Declare required fields
+  this->required_fields_ = std::vector<std::string>
+                        {"density","total_energy","internal_energy","pressure"};
+
+  if (rank >= 1) this->required_fields_.push_back("velocity_x");
+  if (rank >= 2) this->required_fields_.push_back("velocity_y");
+  if (rank >= 3) this->required_fields_.push_back("velocity_z");
+
+  // define required fields if they do not exist
+  this->define_fields();
+
+  Refresh * refresh = cello::refresh(ir_post_);
+  refresh->add_field("density");
+  refresh->add_field("total_energy");
+  refresh->add_field("internal_energy");
+  if (rank >= 1) refresh->add_field("velocity_x");
+  if (rank >= 2) refresh->add_field("velocity_y");
+  if (rank >= 3) refresh->add_field("velocity_z");
 
   if ( ! comoving_coordinates_ ) {
     WARNING
@@ -49,6 +58,14 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
   }
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
+
+  Monitor * monitor = cello::monitor();
+  if (block->index().is_root()) {
+    monitor->print("Method", "%s redshift %.8f",
+		   this->name().c_str(),
+		   enzo::cosmology()->current_redshift());
+  }
+
 
   /* Only do this if
      1. this is a leaf block
@@ -71,7 +88,6 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
 
       int has_history = ((field.num_history() > 0) &&
   			 (field.history_time(1) > 0.));
-
       enzo_float compute_time;
       if (has_history) {
   	compute_time = 0.5 * (enzo_block->time() +
@@ -85,8 +101,8 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
       enzo_float cosmo_a=1.0;
       enzo_float cosmo_dadt=0.0;
       cosmology->compute_expansion_factor (&cosmo_a, &cosmo_dadt, compute_time);
-      double dt = enzo_block->time() - field.history_time(1);
-      //      double dt = block->dt();
+      //      double dt = enzo_block->time() - field.history_time(1);
+      double dt = block->dt();
       enzo_float Coefficient = dt*cosmo_dadt/cosmo_a;
 
 

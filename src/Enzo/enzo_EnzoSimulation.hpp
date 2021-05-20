@@ -12,7 +12,7 @@
 #include "charm++.h"
 #include "enzo.decl.h"
 
-class EnzoSimulation : public BASE_ENZO_SIMULATION
+class EnzoSimulation : public CBase_EnzoSimulation
 			    
 {
 
@@ -27,10 +27,10 @@ public: // functions
   ( const char parameter_file[], int n);
 
   /// CHARM++ Constructor
-  EnzoSimulation() : BASE_ENZO_SIMULATION() {}
+  EnzoSimulation() : CBase_EnzoSimulation() {}
 
   /// CHARM++ Migration constructor
-  EnzoSimulation(CkMigrateMessage * m) : BASE_ENZO_SIMULATION(m)  
+  EnzoSimulation(CkMigrateMessage * m) : CBase_EnzoSimulation(m)  
   {
   };
 

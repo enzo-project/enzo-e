@@ -128,6 +128,30 @@ Initial * EnzoProblem::create_initial_
   } else if (type == "grackle_test") {
     initial = new EnzoInitialGrackleTest(enzo_config);
 #endif /* CONFIG_USE_GRACKLE */
+  } else if (type == "feedback_test") {
+    initial = new EnzoInitialFeedbackTest(enzo_config);
+  } else if (type == "vlct_bfield") {
+    initial = new EnzoInitialBCenter(parameters, cycle, time,
+				     enzo_config->initial_bcenter_update_etot);
+  } else if (type == "cloud") {
+    initial = new EnzoInitialCloud
+      (cycle,time,
+       enzo_config->initial_cloud_subsample_n,
+       enzo_config->initial_cloud_radius,
+       enzo_config->initial_cloud_center_x,
+       enzo_config->initial_cloud_center_y,
+       enzo_config->initial_cloud_center_z,
+       enzo_config->initial_cloud_density_cloud,
+       enzo_config->initial_cloud_density_wind,
+       enzo_config->initial_cloud_etot_wind,
+       enzo_config->initial_cloud_eint_wind,
+       enzo_config->initial_cloud_velocity_wind,
+       enzo_config->initial_cloud_metal_mass_frac,
+       enzo_config->initial_cloud_initialize_uniform_bfield,
+       enzo_config->initial_cloud_uniform_bfield,
+       enzo_config->initial_cloud_perturb_stddev,
+       enzo_config->initial_cloud_trunc_dev,
+       enzo_config->initial_cloud_perturb_seed);
   } else if (type == "collapse") {
     initial = new EnzoInitialCollapse
       (cycle,time,
@@ -143,6 +167,17 @@ Initial * EnzoProblem::create_initial_
        enzo_config->field_gamma,
        enzo_config->initial_cosmology_temperature
        );
+  } else if (type == "inclined_wave") {
+    initial = new EnzoInitialInclinedWave
+      (cycle, time,
+       enzo_config->initial_inclinedwave_alpha,
+       enzo_config->initial_inclinedwave_beta,
+       enzo_config->field_gamma,
+       enzo_config->initial_inclinedwave_amplitude,
+       enzo_config->initial_inclinedwave_lambda,
+       enzo_config->initial_inclinedwave_parallel_vel,
+       enzo_config->initial_inclinedwave_positive_vel,
+       enzo_config->initial_inclinedwave_wave_type);
   } else if (type == "turbulence") {
     initial = new EnzoInitialTurbulence
       (cycle,time,
@@ -160,6 +195,15 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_pm_level);
   } else if (type == "ppml_test") {
     initial = new EnzoInitialPpmlTest (cycle,time,enzo_config);
+  } else if (type == "shock_tube") {
+    initial = new EnzoInitialShockTube
+      (enzo_config->field_gamma,
+       cycle, time,
+       enzo_config->initial_shock_tube_setup_name,
+       enzo_config->initial_shock_tube_aligned_ax,
+       enzo_config->initial_shock_tube_axis_velocity,
+       enzo_config->initial_shock_tube_trans_velocity,
+       enzo_config->initial_shock_tube_flip_initialize);
   } else if (type == "soup") {
     const int rank = enzo_config->initial_soup_rank;
     initial = new EnzoInitialSoup
@@ -179,6 +223,18 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_soup_density,
        enzo_config->initial_soup_pressure_in,
        enzo_config->initial_soup_pressure_out);
+  } else if (type == "burkertbodenheimer") {
+    initial = new EnzoInitialBurkertBodenheimer
+      (cycle,time,
+       enzo_config->initial_burkertbodenheimer_rank,
+       enzo_config->initial_burkertbodenheimer_array,
+       enzo_config->initial_burkertbodenheimer_radius_relative,
+       enzo_config->initial_burkertbodenheimer_particle_ratio,
+       enzo_config->initial_burkertbodenheimer_mass,
+       enzo_config->initial_burkertbodenheimer_temperature,
+       enzo_config->initial_burkertbodenheimer_densityprofile);
+  } else if (type == "isolated_galaxy") {
+    initial = new EnzoInitialIsolatedGalaxy (enzo_config);
   } else {
     initial = Problem::create_initial_
       (type,index,config,parameters);
@@ -217,7 +273,7 @@ Refine * EnzoProblem::create_refine_
 
   if (type == "shock") {
 
-    return new EnzoRefineShock 
+    return new EnzoRefineShock
       (config->adapt_min_refine[index],
        config->adapt_max_coarsen[index],
        config->adapt_min_refine2[index],
@@ -288,6 +344,10 @@ Solver * EnzoProblem::create_solver_
     solve_type = solve_unknown;
   }
 
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("DEBUG_NEW_REFRESH create solver %s\n",
+	    enzo_config->solver_list[index_solver].c_str());
+#endif
   if (solver_type == "cg") {
 
     solver = new EnzoSolverCg
@@ -324,7 +384,7 @@ Solver * EnzoProblem::create_solver_
        enzo_config->solver_last_smooth[index_solver],
        restrict,  prolong,
        enzo_config->solver_coarse_level[index_solver]);
-       
+
   } else if (solver_type == "bicgstab") {
 
       solver = new EnzoSolverBiCgStab
@@ -513,11 +573,6 @@ Method * EnzoProblem::create_method_
       (enzo_config->method_heat_alpha,
        config->method_courant[index_method]);
 
-  } else if (name == "null") {
-
-    method = new EnzoMethodNull
-      (enzo_config->method_null_dt);
-
 #ifdef CONFIG_USE_GRACKLE
     //--------------------------------------------------
   } else if (name == "grackle") {
@@ -537,6 +592,11 @@ Method * EnzoProblem::create_method_
        enzo_config->method_turbulence_mach_number,
        enzo_config->physics_cosmology);
 
+  } else if (name == "check_gravity") {
+
+    method = new EnzoMethodCheckGravity
+      (enzo_config->method_check_gravity_particle_type);
+
   } else if (name == "cosmology") {
 
     method = new EnzoMethodCosmology;
@@ -552,7 +612,7 @@ Method * EnzoProblem::create_method_
     std::string solver_name = enzo_config->method_gravity_solver;
 
     int index_solver = enzo_config->solver_index.at(solver_name);
-    
+
     ASSERT1 ("EnzoProblem::create_solver_()",
 	     "Cannot find solver \"%s\"",
 	     solver_name.c_str(),
@@ -564,6 +624,50 @@ Method * EnzoProblem::create_method_
        enzo_config->method_gravity_grav_const,
        enzo_config->method_gravity_order,
        enzo_config->method_gravity_accumulate);
+
+  } else if (name == "mhd_vlct") {
+
+    method = new EnzoMethodMHDVlct
+      (enzo_config->method_vlct_riemann_solver,
+       enzo_config->method_vlct_half_dt_reconstruct_method,
+       enzo_config->method_vlct_full_dt_reconstruct_method,
+       enzo_config->field_gamma,
+       enzo_config->method_vlct_theta_limiter,
+       enzo_config->method_vlct_density_floor,
+       enzo_config->method_vlct_pressure_floor,
+       enzo_config->method_vlct_mhd_choice,
+       enzo_config->method_vlct_dual_energy,
+       enzo_config->method_vlct_dual_energy_eta);
+
+  } else if (name == "background_acceleration") {
+
+    // If self-gravity is calculated, we do not need to zero
+    // out the acceleration field from the previous time step
+    // before adding the background accelerations
+    bool zero_acceleration = true;
+    for (int index = 0; index < method_list_.size(); index++){
+      if (method_list_[index]->name() == "gravity"){
+        zero_acceleration = false;
+        break;
+      }
+    }
+
+    method = new EnzoMethodBackgroundAcceleration
+          (zero_acceleration);
+
+  } else if (name == "star_maker") {
+
+    // should generalize this to enable multiple maker types
+    if (enzo_config->method_star_maker_type == "stochastic"){
+      method = new EnzoMethodStarMakerStochasticSF();
+    } else{ // does not do anything
+      method = new EnzoMethodStarMaker();
+    }
+
+  } else if (name == "feedback") {
+
+    // need a similar type swtich as in star maker
+    method = new EnzoMethodDistributedFeedback();
 
   } else {
 
@@ -595,7 +699,15 @@ Prolong * EnzoProblem::create_prolong_
 
   Prolong * prolong = 0;
 
-  prolong = Problem::create_prolong_(type,config);
+  const EnzoConfig * enzo_config = enzo::config();
+
+  if (type == "enzo") {
+    prolong = new EnzoProlong
+      (enzo_config->prolong_enzo_type,
+       enzo_config->prolong_enzo_positive);
+  } else {
+    prolong = Problem::create_prolong_(type,config);
+  }
 
   return prolong;
 
@@ -633,7 +745,6 @@ Physics * EnzoProblem::create_physics_
 
     physics = Problem::create_physics_
       (type,index,config,parameters);
-
   }
 
   return physics;
@@ -678,6 +789,7 @@ Restrict * EnzoProblem::create_restrict_
   Restrict * restrict = 0;
 
   if (type == "enzo") {
+
     restrict = new EnzoRestrict (enzo::config()->interpolation_method);
 
   } else {

@@ -1,0 +1,108 @@
+Import('env')
+Import('parallel_run')
+Import('serial_run')
+Import('ip_charm')
+
+Import('bin_path')
+Import('test_path')
+
+#-------------------------------------------------------
+#defines
+#-------------------------------------------------------
+
+env['CPIN'] = 'touch parameters.out; mv parameters.out ${TARGET}.in'
+env['RMIN'] = 'rm -f parameters.out'
+env['clocal_cmd'] = '++local'
+date_cmd = 'echo $TARGET > test/STATUS; echo "-------------------"; date +"%Y-%m-%d %H:%M:%S";'
+
+run_field_data = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunFieldData' : run_field_data} )
+env_mv_data = env.Clone(COPY = 'mkdir -p ' + test_path + '/DataComponent/FieldData; mv `ls *.png *.h5` ' +test_path + '/DataComponent/FieldData')
+
+
+run_field_descr = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunFieldDescr' : run_field_descr} )
+env_mv_descr = env.Clone(COPY = 'mkdir -p ' + test_path + '/DataComponent/FieldDescr; mv `ls *.png *.h5` ' +test_path + '/DataComponent/FieldDescr')
+
+run_field_face = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunFieldFace' : run_field_face} )
+env_mv_face = env.Clone(COPY = 'mkdir -p ' + test_path + '/DataComponent/FieldFace; mv `ls *.png *.h5` ' +test_path + '/DataComponent/FieldFace')
+
+
+run_field = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunField' : run_field} )
+env_mv_field = env.Clone(COPY = 'mkdir -p ' + test_path + '/DataComponent/Field; mv `ls *.png /*.h5` ' +test_path + '/DataComponentField')
+
+run_grouping = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunGrouping' : run_grouping} )
+env_mv_grouping = env.Clone(COPY = 'mkdir -p ' + test_path + '/DataComponent/Grouping; mv `ls *.png *.h5` ' +test_path + '/DataComponent/Grouping')
+
+run_it_index = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunItIndex' : run_it_index} )
+env_mv_it_index = env.Clone(COPY = 'mkdir -p ' + test_path + '/DataComponent/ItIndex; mv `ls *.png *.h5` ' +test_path + '/DataComponent/ItIndex')
+
+run_particle = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunParticle' : run_particle} )
+env_mv_particle = env.Clone(COPY = 'mkdir -p ' + test_path + '/DataComponent/Particle; mv `ls *.png *.h5` ' +test_path + '/DataComponent/Particle')
+
+run_scalar = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunScalar' : run_scalar} )
+env_mv_scalar = env.Clone(COPY = 'mkdir -p ' + test_path + '/DataComponent/Scalar; mv `ls *.png *.h5` ' +test_path + '/DataComponent/Scalar')
+
+
+#-----------------------------------------------------------------------------------
+# Load Balancing
+#-----------------------------------------------------------------------------------
+
+#fieldLB
+
+env.RunField ('test_Field.unit', bin_path + '/test_Field')
+
+#FieldDescrLB
+
+balance_field_descr = env.RunFieldDescr (
+    'test_FieldDescr.unit',
+    bin_path + '/test_fieldDescr')
+
+#FieldDataLB
+
+balance_field_data = env_mv_data.RunFieldData (
+    'test_FieldData.unit',
+    bin_path + '/FieldData')
+
+#FieldFaceLB
+
+balance_field_face = env_mv_face.RunFieldFace (
+    'test_FieldFace.unit',
+    bin_path + '/test_FieldFace')
+
+
+#ParticleLB
+
+balance_particle = env_mv_particle.RunParticle (
+    'test_Particle.unit',
+    bin_path + '/test_Particle')
+
+
+#GroupingLB
+
+balance_grouping = env_mv_grouping.RunGrouping (
+    'test_Grouping.unit',
+    bin_path + '/test_Grouping')
+
+
+
+#ItIndexLB
+
+balance_it_index = env_mv_it_index.RunItIndex (
+    'test_ItIndex.unit',
+    bin_path + '/test_ItIndex')
+
+
+
+#ScalarLB
+
+balance_scalar = env_mv_scalar.RunScalar (
+    'test_Scalar.unit',
+    bin_path + '/test_Scalar')
+

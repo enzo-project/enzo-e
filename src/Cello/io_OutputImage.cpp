@@ -8,16 +8,6 @@
 #include "cello.hpp"
 #include "io.hpp"
 
-// #define DEBUG_OUTPUT
-
-#ifdef DEBUG_OUTPUT
-#  define TRACE_OUTPUT(M)						\
-  CkPrintf ("%d TRACE_OUTPUT %s\n",CkMyPe(),M);				\
-  fflush(stdout);
-#else
-#  define TRACE_OUTPUT(M) /* ... */
-#endif
-
 //----------------------------------------------------------------------
 
 OutputImage::OutputImage(int index,
@@ -60,7 +50,7 @@ OutputImage::OutputImage(int index,
 
 {
 
-  if      (image_reduce_type=="min") { op_reduce_ = reduce_min; } 
+  if      (image_reduce_type=="min") { op_reduce_ = reduce_min; }
   else if (image_reduce_type=="max") { op_reduce_ = reduce_max; }
   else if (image_reduce_type=="avg") { op_reduce_ = reduce_avg; }
   else if (image_reduce_type=="sum") { op_reduce_ = reduce_sum; }
@@ -78,8 +68,6 @@ OutputImage::OutputImage(int index,
 	    "Unrecognized output_image_mesh_color %s",
 	    image_mesh_color.c_str());
   }
-
-  TRACE1 ("OutputImage reduce %d",op_reduce_);
 
   int nl = image_block_size * (1 << max_level_); // image size factor
 
@@ -100,7 +88,7 @@ OutputImage::OutputImage(int index,
     nxi_ += 2*nxb*ngx*nl;
     nyi_ += 2*nyb*ngy*nl;
   }
-  
+
   // Override default Output::stride_write_: only root writes
   set_stride_write (process_count);
   // Let all processes contribute data when its available
@@ -136,10 +124,6 @@ OutputImage::~OutputImage() throw ()
   image_data_ = NULL;
   delete [] image_mesh_;
   image_mesh_ = NULL;
-#ifdef DEBUG_OUTPUT
-  CkPrintf ("%d TRACE_OUTPUT ~OutputImage %p %p\n",
-	    CkMyPe(),image_data_,image_mesh_); fflush(stdout);
-#endif  
 }
 
 //----------------------------------------------------------------------
@@ -177,11 +161,7 @@ void OutputImage::pup (PUP::er &p)
   } else {
     image_mesh_ = NULL;
   }
-#ifdef DEBUG_OUTPUT
-  CkPrintf ("%d TRACE_OUTPUT pup %p %p\n",
-	    CkMyPe(),image_data_,image_mesh_); fflush(stdout);
-#endif  
-  
+
   WARNING("OutputImage::pup","skipping png");
   // p | *png_;
   if (p.isUnpacking()) png_ = NULL;
@@ -220,7 +200,6 @@ void OutputImage::set_colormap
 
 void OutputImage::init () throw()
 {
-  TRACE_OUTPUT("OutputImage::init()");
   image_create_();
 }
 
@@ -228,7 +207,6 @@ void OutputImage::init () throw()
 
 void OutputImage::open () throw()
 {
-  TRACE_OUTPUT("OutputImage::open()");
   // Open file if writing a single block
 
   if (is_writer()) {
@@ -236,9 +214,9 @@ void OutputImage::open () throw()
     std::string file_name = expand_name_ (&file_name_,&file_args_);
 
     std::string dir_name = directory();
-    
+
     // Create png object
-    Monitor::instance()->print ("Output","writing image file %s", 
+    Monitor::instance()->print ("Output","writing image file %s",
 				(dir_name + "/" + file_name).c_str());
     png_create_(dir_name + "/" + file_name);
     if (chmod (dir_name.c_str(),0755) == -1) {
@@ -253,7 +231,6 @@ void OutputImage::open () throw()
 
 void OutputImage::close () throw()
 {
-  TRACE_OUTPUT("OutputImage::close()");
   if (is_writer()) image_write_();
   image_close_();
   png_close_();
@@ -276,10 +253,8 @@ void OutputImage::write_block ( const Block *  block ) throw()
 
   if (! is_active_(block) ) return;
 
-  TRACE("OutputImage::write_block()");
-
   Field field = ((Data *)block->data())->field();
-  
+
   const int rank = cello::rank();
 
   ASSERT("OutputImage::write_block",
@@ -304,7 +279,7 @@ void OutputImage::write_block ( const Block *  block ) throw()
 
   it_field_index_->first();
 
-  int index_field = (it_field_index_->size() > 0) 
+  int index_field = (it_field_index_->size() > 0)
     ? it_field_index_->value() : -1;
 
   // extents of domain
@@ -334,7 +309,7 @@ void OutputImage::write_block ( const Block *  block ) throw()
 
   double h3[3];
   block->cell_width(h3,h3+1,h3+2);
-  
+
   if (type_is_data_()) {
 
     if (index_field >= 0) {
@@ -358,7 +333,7 @@ void OutputImage::write_block ( const Block *  block ) throw()
 
       // add block contribution to image
 
-      const char * field_values = (ghost_) ? 
+      const char * field_values = (ghost_) ?
 	field.values(index_field) :
 	field.unknowns(index_field);
 
@@ -369,7 +344,7 @@ void OutputImage::write_block ( const Block *  block ) throw()
 
       double factor = (nb3[IZ] > 1) ? 1.0 / pow(2.0,1.0*level) : 1.0;
       if (rank >= 2 && (std::abs(dm3[IZ] - dp3[IZ]) < h3[IZ])) factor = 1.0;
-      
+
       int m3[3];
       m3[0] = ghost_ ? nd3[0] : nb3[0];
       m3[1] = ghost_ ? nd3[1] : nb3[1];
@@ -502,10 +477,14 @@ void OutputImage::write_block ( const Block *  block ) throw()
     for (int ib=0; ib<nb; ib++) {
 
       const int np = particle.num_particles(it,ib);
-      double position[3][np];
-      particle.position(it,ib, position[0], position[1], position[2]);
-      const double * xa = position[IX];
-      const double * ya = position[IY];
+      std::vector<double> position[3];
+      position[0].resize(np);
+      position[1].resize(np);
+      position[2].resize(np);
+      particle.position
+        (it,ib, position[0].data(),position[1].data(), position[2].data());
+      const double * xa = position[IX].data();
+      const double * ya = position[IY].data();
       double * pa = (double *) particle.attribute_array (it,ia_color,ib);
       for (int ip=0; ip<np; ip++) {
 
@@ -537,7 +516,7 @@ void OutputImage::write_block ( const Block *  block ) throw()
 
 void OutputImage::write_field_data
 (
- const FieldData * field_data,  
+ const FieldData * field_data,
  int index_field) throw()
 {
   WARNING("OutputImage::write_field_data",
@@ -548,7 +527,7 @@ void OutputImage::write_field_data
 
 void OutputImage::write_particle_data
 (
- const ParticleData * particle_data,  
+ const ParticleData * particle_data,
  int index_particle) throw()
 {
   WARNING("OutputImage::write_particle_data",
@@ -559,9 +538,6 @@ void OutputImage::write_particle_data
 
 void OutputImage::prepare_remote (int * n, char ** buffer) throw()
 {
-  TRACE("OutputImage::prepare_remote()");
-  DEBUG("prepare_remote");
-
   int size = 0;
   int nx = nxi_;
   int ny = nyi_;
@@ -589,16 +565,13 @@ void OutputImage::prepare_remote (int * n, char ** buffer) throw()
 
   for (int k=0; k<nx*ny; k++) *p.d++ = image_data_[k];
   for (int k=0; k<nx*ny; k++) *p.d++ = image_mesh_[k];
-  
+
 }
 
 //----------------------------------------------------------------------
 
 void OutputImage::update_remote  ( int m, char * buffer) throw()
 {
-  TRACE("OutputImage::update_remote()");
-  DEBUG("update_remote");
-
   union {
     char   * c;
     double * d;
@@ -611,7 +584,7 @@ void OutputImage::update_remote  ( int m, char * buffer) throw()
   const int ny = *p.i++;
 
   const int n = nx*ny;
-  
+
   if (op_reduce_ == reduce_min) {
     for (int k=0; k<n; k++) image_data_[k] = std::min(image_data_[k],*p.d++);
     for (int k=0; k<n; k++) image_mesh_[k] = std::min(image_mesh_[k],*p.d++);
@@ -635,8 +608,6 @@ void OutputImage::update_remote  ( int m, char * buffer) throw()
 
 void OutputImage::cleanup_remote  (int * n, char ** buffer) throw()
 {
-  TRACE("OutputImage::cleanup_remote()");
-  DEBUG("cleanup_remote");
   delete [] (*buffer);
   (*buffer) = NULL;
 }
@@ -707,11 +678,6 @@ void OutputImage::image_create_ () throw()
 
   image_data_  = new double [nxi_*nyi_];
   image_mesh_  = new double [nxi_*nyi_];
-  TRACE2("new image_data_ = %p image_mesh_ = %p",image_data_,image_mesh_);
-#ifdef DEBUG_OUTPUT
-  CkPrintf ("%d TRACE_OUTPUT image_create_ %p %p\n",
-	    CkMyPe(),image_data_,image_mesh_); fflush(stdout);
-#endif  
 
   const double min = std::numeric_limits<double>::max();
   const double max = -min;
@@ -719,17 +685,17 @@ void OutputImage::image_create_ () throw()
   double value0;
 
   switch (op_reduce_) {
-  case reduce_min: 
+  case reduce_min:
     value0 = min;
     break;
-  case reduce_max: 
+  case reduce_max:
     value0 = max;
     break;
-  case reduce_avg: 
-  case reduce_sum: 
+  case reduce_avg:
+  case reduce_sum:
   case reduce_set:
-  default:         
-    value0 = 0; 
+  default:
+    value0 = 0;
     break;
   }
 
@@ -766,7 +732,7 @@ void OutputImage::image_write_ () throw()
       min = MIN(min,fabs(data_(i)));
       max = MAX(max,fabs(data_(i)));
     }
-  } else { 
+  } else {
     for (int i=0; i<m; i++) {
       min = MIN(min,data_(i));
       max = MAX(max,data_(i));
@@ -821,7 +787,7 @@ void OutputImage::image_write_ () throw()
 	png_->plot      (ix+1, iy+1, r,g,b);
 
       } else {
-	
+
 	// red if out of bounds
 	png_->plot(ix+1, iy+1, 1.0, 0.0, 0.0);
 
@@ -829,7 +795,7 @@ void OutputImage::image_write_ () throw()
 
       // Plot pixel
     }
-  }      
+  }
 
 }
 
@@ -839,9 +805,9 @@ double OutputImage::data_(int index) const
 {
   if (type_is_mesh_() && type_is_data_())
     return (image_data_[index] + 0.2*image_mesh_[index])/1.2;
-  else if (type_is_data_()) 
+  else if (type_is_data_())
     return image_data_[index];
-  else  if (type_is_mesh_()) 
+  else  if (type_is_mesh_())
     return image_mesh_[index];
   else {
     ERROR ("OutputImage::data_()",
@@ -858,22 +824,16 @@ void OutputImage::image_close_ () throw()
 	 "image_ already created",
 	 image_data_ != NULL || image_mesh_ != NULL);
 
-  TRACE1("delete image_data_ = %p",image_data_);
   delete [] image_data_;
-  image_data_ = 0;
+  image_data_ = nullptr;
 
-  TRACE1("delete image_mesh_ = %p",image_mesh_)
   delete [] image_mesh_;
-  image_mesh_ = 0;
-#ifdef DEBUG_OUTPUT
-  CkPrintf ("%d TRACE_OUTPUT image_close_ %p %p\n",
-	    CkMyPe(),image_data_,image_mesh_); fflush(stdout);
-#endif  
+  image_mesh_ = nullptr;
 }
 
 //----------------------------------------------------------------------
 
-void OutputImage::reduce_point_ 
+void OutputImage::reduce_point_
 (double * data, int ix, int iy, double value, double alpha) throw()
 {
   if ( ! (0 <= ix && ix < nxi_)) return;
@@ -887,15 +847,15 @@ void OutputImage::reduce_point_
   const int i = ix + nxi_*iy;
 
   double value_new = 0.0;
-  
+
   switch (op_reduce_) {
   case reduce_min:
     value_new = alpha*value + (1-alpha)*(data[i]);
-    data[i] = std::min(data[i],value_new); 
+    data[i] = std::min(data[i],value_new);
     break;
   case reduce_max:
     value_new = alpha*value + (1-alpha)*(data[i]);
-    data[i] = std::max(data[i],value_new); 
+    data[i] = std::max(data[i],value_new);
     break;
   case reduce_avg:
   case reduce_sum:
@@ -911,9 +871,9 @@ void OutputImage::reduce_point_
 //----------------------------------------------------------------------
 
 void OutputImage::reduce_line_
-(double * data, 
- int ix0, int ix1, 
- int iy0, int iy1, 
+(double * data,
+ int ix0, int ix1,
+ int iy0, int iy1,
  double value, double alpha)
 {
   if (ix1 < ix0) { int t = ix1; ix1 = ix0; ix0 = t; }
@@ -922,7 +882,7 @@ void OutputImage::reduce_line_
   int dx = ix1 - ix0;
   int dy = iy1 - iy0;
   double err = 0.0;
-  
+
   if (dx >= dy) {
     double derr = fabs(1.0*dy/dx);
     int iy = iy0;
@@ -951,12 +911,13 @@ void OutputImage::reduce_line_
 //----------------------------------------------------------------------
 
 void OutputImage::reduce_line_x_
-(double * data, 
+(double * data,
  int ixm, int ixp,
  int iy,
  double value, double alpha)
 {
-  ASSERT2("OutputImage::reduce_line_x","! (ixm (%d) <= ixp (%d)",ixm,ixp,ixm<=ixp);
+  ASSERT2("OutputImage::reduce_line_x","! (ixm (%d) <= ixp (%d)",ixm,ixp,
+          ( ixm <= ixp) );
   if (ixp < ixm) { int t = ixp; ixp = ixm; ixm = t; }
 
   for (int ix=ixm; ix<=ixp; ++ix) {
@@ -972,7 +933,8 @@ void OutputImage::reduce_line_y_
  int iym, int iyp,
  double value, double alpha)
 {
-  ASSERT2("OutputImage::reduce_line_y","! (iym (%d) <= iyp (%d)",iym,iyp,iym<=iyp);
+  ASSERT2("OutputImage::reduce_line_y","! (iym (%d) <= iyp (%d)",iym,iyp,
+          ( iym <= iyp ) );
   if (iyp < iym) { int t = iyp; iyp = iym; iym = t; }
   for (int iy=iym; iy<=iyp; ++iy) {
     reduce_point_(data,ix,iy,value,alpha);
@@ -984,10 +946,9 @@ void OutputImage::reduce_line_y_
 void OutputImage::reduce_box_
 (double * data,
  int ixm, int ixp,
- int iym, int iyp, 
+ int iym, int iyp,
  double value, reduce_type reduce, double alpha)
 {
-  TRACE6("reduce_box %d %d %d %d %f %f",ixm,ixp,iym,iyp,value,alpha);
   reduce_type reduce_save = op_reduce_;
   op_reduce_ = reduce;
   reduce_line_x_(data,ixm,ixp,iym,value,alpha);
@@ -1000,9 +961,9 @@ void OutputImage::reduce_box_
 //----------------------------------------------------------------------
 
 void OutputImage::reduce_box_filled_
-(double * data, 
+(double * data,
  int ixm, int ixp,
- int iym, int iyp, 
+ int iym, int iyp,
  double value, double alpha)
 {
   for (int ix=ixm; ix<=ixp; ++ix) {

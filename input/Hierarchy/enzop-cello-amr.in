@@ -1,0 +1,43 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/Adapt/adapt.incl"
+Stopping { cycle = 800; }
+Mesh    { 
+   root_size   = [32,32];
+}
+Adapt {  max_level   = 7;  }
+
+include "input/Hierarchy/initial-enzop-cello.incl"
+
+Boundary { type = "periodic"; }
+
+Output {
+     list = ["de","mesh"];
+      de {
+           name = ["enzo-de-%05d.png", "cycle"]; 
+           include "input/Schedule/schedule_cycle_10.incl"
+           image_reduce_type = "max";
+	   image_type = "data";
+           image_size = [4096,4096];
+           image_log = true;
+           include "input/Colormap/colormap_blackbody.incl"
+          }
+      mesh { name = ["enzo-mesh-%05d.png", "cycle"];
+           include "input/Schedule/schedule_cycle_10.incl"
+	   image_type = "mesh";
+	   image_size = [2049,2049];
+#	   image_block_size = 7;
+	   image_mesh_color = "age";
+           include "input/Colormap/colormap_greyscale.incl"
+       }
+
+}
+Adapt {
+   list = ["slope"];
+   slope {
+      type = "slope";
+      max_coarsen = 5.0;
+      min_refine  = 20.0;
+   }
+}

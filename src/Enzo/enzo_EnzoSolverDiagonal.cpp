@@ -9,10 +9,6 @@
 
 #include "enzo.decl.h"
 
-#define CK_TEMPLATES_ONLY
-#include "enzo.def.h"
-#undef CK_TEMPLATES_ONLY
-
 // #define DEBUG_SOLVER
 
 #ifdef DEBUG_SOLVER
@@ -25,8 +21,7 @@
 
 //======================================================================
 
-void EnzoSolverDiagonal::apply
-( std::shared_ptr<Matrix> A, Block * block) throw()
+void EnzoSolverDiagonal::apply (std::shared_ptr<Matrix> A, Block * block) throw()
 {
   Solver::begin_(block);
 

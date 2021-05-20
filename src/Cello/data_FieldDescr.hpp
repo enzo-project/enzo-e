@@ -123,7 +123,7 @@ public: // functions
   //----------------------------------------------------------------------
   // History
   //----------------------------------------------------------------------
-  
+
   /// Set the history depth for storing old field values
   void set_history (int history) throw()
   {
@@ -158,7 +158,13 @@ public: // functions
     }
     history_ = history;
   }
-  
+
+  void reset_history(int history) throw()
+  {
+    history_ = 0;
+    set_history(history);
+  }
+
   /// Return the history depth for storing old field values
   int num_history () const throw()
   { return history_; }

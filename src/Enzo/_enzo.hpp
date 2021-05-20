@@ -11,7 +11,7 @@
 //----------------------------------------------------------------------
 
 #define OMEGA_TOLERANCE 1.0e-5
- 
+
 #ifdef CONFIG_PRECISION_SINGLE
 #   define ETA_TOLERANCE 1.0e-5
 #   define ENZO_HUGE_VAL HUGE_VALF
@@ -58,20 +58,14 @@ enum {
   index_turbulence_maxd,
   max_turbulence_array };
 
-#ifdef CONFIG_NEW_CHARM
-#   define BASE_ENZO_BLOCK      CBase_EnzoBlock
-#   define BASE_ENZO_SIMULATION CBase_EnzoSimulation
-#else
-#   define BASE_ENZO_BLOCK      Block
-#   define BASE_ENZO_SIMULATION Simulation
-#endif
-
 //----------------------------------------------------------------------
 
 enum enzo_sync_id {
   enzo_sync_id_cg = sync_id_last,
   enzo_sync_id_comoving_expansion,
+  enzo_sync_id_method_background_acceleration,
   enzo_sync_id_method_cosmology,
+  enzo_sync_id_method_feedback,
 #ifdef CONFIG_USE_GRACKLE
   enzo_sync_id_method_grackle,
 #endif
@@ -83,8 +77,12 @@ enum enzo_sync_id {
   enzo_sync_id_method_pm_update,
   enzo_sync_id_method_ppm,
   enzo_sync_id_method_ppml,
+  enzo_sync_id_method_star_maker,
   enzo_sync_id_method_turbulence,
+  enzo_sync_id_method_vlct,
   enzo_sync_id_solver_bicgstab,
+  enzo_sync_id_solver_bicgstab_precon_1,
+  enzo_sync_id_solver_bicgstab_precon_2,
   enzo_sync_id_solver_bicgstab_loop_25,
   enzo_sync_id_solver_bicgstab_loop_85,
   enzo_sync_id_solver_cg,
@@ -101,9 +99,10 @@ enum enzo_sync_id {
   enzo_sync_id_solver_mg0_post,
   enzo_sync_id_solver_mg0_pre,
   enzo_sync_id_solver_jacobi_1,
-  enzo_sync_id_solver_jacobi_2
+  enzo_sync_id_solver_jacobi_2,
+  enzo_sync_id_solver_jacobi_3
 };
-  
+
 //----------------------------------------------------------------------
 
 // #include "macros_and_parameters.h"
@@ -127,7 +126,7 @@ const int field_undefined = -1;
 
 //----------------------------------------------------------------------
 
-struct fluxes
+struct enzo_fluxes
 {
   long_int LeftFluxStartGlobalIndex [MAX_DIMENSION][MAX_DIMENSION];
   long_int LeftFluxEndGlobalIndex   [MAX_DIMENSION][MAX_DIMENSION];
@@ -176,11 +175,20 @@ extern "C" {
 
 #include "enzo_IoEnzoBlock.hpp"
 
+#include "enzo_EnzoFieldArrayFactory.hpp"
+#include "enzo_EnzoEFltArrayMap.hpp"
+#include "enzo_EnzoPermutedCoordinates.hpp"
+#include "enzo_EnzoCenteredFieldRegistry.hpp"
+
 #include "enzo_EnzoBoundary.hpp"
 
+#include "enzo_EnzoInitialBCenter.hpp"
+#include "enzo_EnzoInitialCloud.hpp"
 #include "enzo_EnzoInitialCollapse.hpp"
 #include "enzo_EnzoInitialCosmology.hpp"
+#include "enzo_EnzoInitialFeedbackTest.hpp"
 #include "enzo_EnzoInitialGrackleTest.hpp"
+#include "enzo_EnzoInitialInclinedWave.hpp"
 #include "enzo_EnzoInitialImplosion2.hpp"
 #include "enzo_EnzoInitialMusic.hpp"
 #include "enzo_EnzoInitialPm.hpp"
@@ -188,25 +196,52 @@ extern "C" {
 #include "enzo_EnzoInitialSedovArray2.hpp"
 #include "enzo_EnzoInitialSedovArray3.hpp"
 #include "enzo_EnzoInitialSedovRandom.hpp"
+#include "enzo_EnzoInitialShockTube.hpp"
 #include "enzo_EnzoInitialSoup.hpp"
 #include "enzo_EnzoInitialTurbulence.hpp"
+#include "enzo_EnzoInitialIsolatedGalaxy.hpp"
+#include "enzo_EnzoInitialBurkertBodenheimer.hpp"
 
 #include "enzo_EnzoRefineShock.hpp"
 #include "enzo_EnzoRefineParticleMass.hpp"
 #include "enzo_EnzoRefineMass.hpp"
 
+#include "enzo_EnzoMethodBackgroundAcceleration.hpp"
+#include "enzo_EnzoLazyPassiveScalarFieldList.hpp"
+#include "enzo_EnzoEquationOfState.hpp"
+#include "enzo_EnzoEOSIdeal.hpp"
+#include "enzo_EnzoIntegrableUpdate.hpp"
+#include "enzo_EnzoReconstructor.hpp"
+#include "enzo_EnzoReconstructorNN.hpp"
+#include "enzo_EnzoReconstructorPLM.hpp"
+#include "enzo_EnzoRiemann.hpp"
+#include "enzo_EnzoRiemannLUT.hpp"
+#include "enzo_EnzoRiemannUtils.hpp"
+#include "enzo_EnzoRiemannImpl.hpp"
+#include "enzo_EnzoRiemannHLL.hpp"
+#include "enzo_EnzoRiemannHLLC.hpp"
+#include "enzo_EnzoRiemannHLLD.hpp"
+#include "enzo_EnzoBfieldMethod.hpp"
+#include "enzo_EnzoBfieldMethodCT.hpp"
+#include "enzo_EnzoSourceInternalEnergy.hpp"
+
+#include "enzo_EnzoMethodCheckGravity.hpp"
 #include "enzo_EnzoMethodComovingExpansion.hpp"
 #include "enzo_EnzoMethodCosmology.hpp"
+#include "enzo_EnzoMethodFeedback.hpp"
+#include "enzo_EnzoMethodDistributedFeedback.hpp"
 #include "enzo_EnzoMethodGrackle.hpp"
 #include "enzo_EnzoMethodGravity.hpp"
-#include "enzo_EnzoMethodHydro.hpp"
 #include "enzo_EnzoMethodHeat.hpp"
-#include "enzo_EnzoMethodNull.hpp"
+#include "enzo_EnzoMethodHydro.hpp"
 #include "enzo_EnzoMethodPmDeposit.hpp"
 #include "enzo_EnzoMethodPmUpdate.hpp"
 #include "enzo_EnzoMethodPpm.hpp"
 #include "enzo_EnzoMethodPpml.hpp"
 #include "enzo_EnzoMethodTurbulence.hpp"
+#include "enzo_EnzoMethodStarMaker.hpp"
+#include "enzo_EnzoMethodStarMakerStochasticSF.hpp"
+#include "enzo_EnzoMethodMHDVlct.hpp"
 
 #include "enzo_EnzoMatrixDiagonal.hpp"
 #include "enzo_EnzoMatrixIdentity.hpp"
@@ -235,4 +270,3 @@ extern "C" {
 #include "enzo_EnzoRestrict.hpp"
 
 #endif /* ENZO_PRIVATE_HPP */
-

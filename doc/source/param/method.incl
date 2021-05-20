@@ -29,6 +29,8 @@ list is applied in the order specified.  Possible methods include:`
   * :t:`"ppml"` :e:`for the PPML ideal MHD solver.`  *This may be phased
     out in favor of using a more general "mhd" method instead, with a
     specific mhd solver specified.*
+  * :t:`"mhd_vlct"` :e:`for the VL + CT (van Leer + Constrained Transport) MHD
+    solver.`
   * :t:`"trace"` :e:`for moving tracer particles.`  **This will be phased
     out in favor of a more general "move_particles" method.**
   * :t:`"turbulence"` :e:`computes random forcing for turbulence
@@ -60,6 +62,18 @@ list is applied in the order specified.  Possible methods include:`
 :e:`The global Courant safety factor is a multiplication factor for
 the time step applied on top of any Field or Particle specific Courant
 safety factors.`
+
+flux_correct
+------------
+
+:Parameter:  :p:`Method` : :p:`flux_correct` : :p:`group`
+:Summary: :s:`Name of group of fields to apply flux correction to`
+:Type:    :t:`string`
+:Default: :d:`"conserved"`
+:Scope:     :z:`Cello`
+
+:e:`Flux correction must be applied to conserved fields in AMR simulations to maintain conserved quantities across mesh resolution jumps.  This parameter selects the group of fields to which the "flux_correct" method will be applied.`
+
 
 gravity
 -------
@@ -557,6 +571,11 @@ heat
 :Scope:     :z:`Enzo`
 
 :e:`Thermal diffusivity parameter for the heat equation.`
+
+mhd_vlct
+--------
+
+.. include:: method_mhd_vlct.incl
 
 null
 ----

@@ -1,3 +1,5 @@
+.. _parameter-file:
+
 Parameter files
 ---------------
 
@@ -10,10 +12,10 @@ application itself to be more powerful.
 
 This page describes how Cello parameter files are structured, which is
 similar to configuration files readable by `libconfig
-<http://www.hyperrealm.com/libconfig/libconfig.html>`_.  For
+<https://www.hyperrealm.com/libconfig/libconfig.html>`_.  For
 documentation on specific parameters in Enzo-E / Cello, please see the
 `Enzo-E / Cello parameter reference
-<http://cello-project.org/doc/parameters-list.html>`_ page.
+<../param/index.html>`_ page.
 
 Groups
 ******
@@ -82,7 +84,7 @@ Below, ``Initial`` is a group, ``value`` is a subgroup, and
 
 The shorthand used for naming parameters in the documentation is
 <group> : <subgroup> : <parameter>, e.g. "``Mesh : root_size``" or
-"``Initial : density : value``".  Note that This shorthand is used
+"``Initial : value : density``".  Note that This shorthand is used
 only for documentation--it is not valid syntax within the parameter file.
 
 Parameters
@@ -310,3 +312,8 @@ underlying grammar and syntax are relatively fixed.
          cycle = 100;
          time = 2.50;
      }
+
+----
+
+2020-04-10: Updated with corrections from Joshua Smith.
+     

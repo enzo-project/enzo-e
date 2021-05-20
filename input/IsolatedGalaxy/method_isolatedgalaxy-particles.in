@@ -1,0 +1,227 @@
+#======================================================================
+#
+#  File        : 
+#  Author      : Andrew Emerick (aemerick11@gmail.com)
+#  Date        : 2018-05-16
+#  Brief       : File for initializing an isolated galaxy
+#
+#  Description : 
+#
+#  REQUIRES root_blocks
+#
+#======================================================================
+
+# The domain is (x,y) such that 0 < x,y < 1
+
+  Domain {
+     lower = [0.0, 0.0, 0.0];
+     upper = [1.0, 1.0, 1.0];
+  }
+
+# The root-level mesh 32x32x32
+
+  Mesh {
+    root_rank = 3;
+#    root_size = [128,128,128];
+    root_size = [32, 32, 32];
+#
+#   AE: I had to specify this to get the data output working
+#       not sure why
+    root_blocks = [4, 4, 4];
+  }
+
+# Isolated bounary conditions with outflow
+
+  Boundary {
+      type = "outflow";
+  }
+
+# Refine by (relative) slope of density
+#    this needs to be played with to refine by mass
+
+ Adapt {
+     list = ["mass"];
+     mass {
+# AE: For mass, field should be thefield used to compute the mass
+#     (i.e. mass is computed as field * volume)
+#     max and min are in code units
+         field_list = [ "density" ];
+         max_coarsen = 1.0E-4; # 1.0E4 solar masses
+         min_refine  = 1.0E-4;  # 1.0E4 solar masses
+         type = "mass";
+# options for mass type are 'dark' and 'baryon'. AE: This should
+#        be specified in documentation, but does not seem to be
+#
+         mass_type = "baryon"; # options are currently dark and baryon
+     };
+#    max level at zero for now until flux correction working
+     max_level = 1; 
+ }
+
+ Field {
+      history     = 1;
+      alignment   = 8;
+      gamma       = 1.6667; 
+      ghost_depth = 4;
+      list = ["density", "velocity_x", "velocity_y", "velocity_z",
+              "acceleration_x", "acceleration_y", "acceleration_z",
+              "total_energy", "internal_energy", "pressure", "potential"];
+      padding = 0;
+      uniform_density = 1.673E-32;  # cgs
+  }
+
+  # This is actually where units should go
+  Units {
+     length  = 7.40562619321E23;
+     time    = 3.15576E16;
+     mass    = 1.9891E41;
+#     density = 4.89746405317508E-31; do not specify if mass + length are specified
+  }
+
+  Method {
+      list = ["background_acceleration","ppm"];
+#,"gravity_bicgstab"];
+      ppm {
+            diffusion = true;
+            dual_energy = true;
+            flattening = 3;
+            steepening = true;
+            mu = 1.2;
+            courant = 0.4;
+            density_floor = 1.0E-30;
+            number_density_floor = 1.0E-30;
+            pressure_floor = 1.0E-30;
+            temperature_floor = 1.0E-30;
+          };
+
+#     gravity {
+#          solver   = "gravity";
+#          iter_max = 100;
+#          res_tol  = 1e-6;
+#          }
+
+      background_acceleration {
+          type = "GalaxyModel";
+          DM_density     = 3.07199E-25 ;   # cgs - central density for 1E10 Msun NFW halo
+          DM_mass        = -1.0 ;# 1.0E10; # set < 0 to use density, > 0 uses this instead of density
+          DM_mass_radius = 45.0;           # kpc virial radius (or radius within which above mass refers to)
+          core_radius    = 3.0;            # kpc core radius
+          bulge_mass     = 0.0;            # stellar bulge mass (Msun)
+          stellar_mass   = 0.0;  # 1.0E7;  # stellar mass - Miyamoto Nagai disk (Msun)
+          stellar_scale_height_r = 1.00;   # kpc
+          stellar_scale_height_z = 0.70;   # kpc
+          center = [0.5, 0.5, 0.5];        # code units
+          angular_momentum = [0.0, 0.0, 1.0]; 
+     };
+
+#     gravity_bicgstab {
+#          iter_max = 100;
+#          res_tol  = 1e-6;
+#          }
+
+  }
+
+#
+# uncomment the below to use particles
+#
+
+ Particle {
+#     list = [ "dark" , "stars"];
+     list = [ "dark" ];
+     dark {
+         attributes = [ "x", "single",
+                        "y", "single",
+                        "z", "single",
+                        "vx", "single",
+                        "vy", "single",
+                        "vz", "single",
+                        "ax", "single",
+                        "ay", "single",
+                        "az", "single",
+			"mass", "single", 
+                        "is_local", "single"];
+         position = [ "x", "y", "z" ];
+         velocity = [ "vx", "vy", "vz" ];
+         groups = ["has_mass"];
+#         constants = [ "mass", "single", .8382456140 ];
+
+     }
+     }
+
+#    stars {
+#         attributes = [ "x", "single",
+#                        "y", "single",
+#                        "z", "single",
+#                        "vx", "single",
+#                        "vy", "single",
+#                        "vz", "single",
+#                        "ax", "single",
+#                        "ay", "single",
+#                        "az", "single" ,
+#                        "is_local", "single"];
+#         position = [ "x", "y", "z" ];
+#         velocity = [ "vx", "vy", "vz" ];
+#         groups = ["has_mass"];
+         #constants = [ "mass", "single", .8382456140 ];
+         
+#      }
+# }
+
+# JHW: The halo.dat particle data used with the live_dm_halo option is a random
+#      distribution within the halo for testing purposes only. Not physical!
+  Initial {
+    list = ["isolated_galaxy"];
+    isolated_galaxy {
+        analytic_velocity = true;           # use v_circ from background potential
+	live_dm_halo      = true;           # read particle data from halo.dat
+        center_position  = [0.5, 0.5, 0.5]; #  
+        scale_length     = 4.166666667;     # gas in kpc
+        scale_height     = 2.916666667;     # gas in kpc
+        disk_mass        = 7.9972e7;        # Msun 
+        gas_fraction     = 0.875;           #
+        disk_temperature = 1.0E4;           # K
+        gas_halo_mass        = 7.9972e5;    # Msun
+        gas_halo_temperature = 1.0E6;       # K
+        gas_halo_radius      = 45.0;        # kpc
+       }
+   }
+
+
+Stopping {
+#   stop time in code units - 10 Myr
+    time     = 0.010;
+#   stop time in wall seconds: AE FOR DEBUGGING SANITY ONLY
+    seconds  = 3600.0;
+#   AE output interval
+    cycle    = 1000;
+    interval = 1; 
+}
+
+#
+# AE: This schedules the output. Must specify what fields you want
+#     to be output. items under "list" correspond to named items
+#     that start the bracketed regions. I *think* these names are
+#     arbitrary... it is the stuff inside the brackets that 
+#     determines the function (particularly the 'type' value)
+#
+Output {
+    list = [ "data" ];
+    data {
+        field_list = [ "density" , "total_energy" , "internal_energy",
+                       "velocity_x", "velocity_y", "velocity_z",
+                       "pressure", "acceleration_x", "acceleration_y",
+                       "acceleration_z", "potential"];
+        dir   = ["ISOLATED_GALAXY_%03d","cycle"];
+	particle_list = ["dark"];
+        name = [ "isolated-galaxy-data-%03d-%03d.h5", "cycle", "proc" ];
+        type = "data";
+
+        # schedule the output based on 'var' and 'step'
+        #   step refers to the interval if 'var' to output on
+        schedule {
+             var   = "time";
+#            time in code units (Myr)
+             step  = 0.001;
+        }
+    };
+}

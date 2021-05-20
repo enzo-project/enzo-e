@@ -1,0 +1,67 @@
+Import('env')
+Import('parallel_run')
+Import('serial_run')
+Import('ip_charm')
+
+Import('bin_path')
+Import('test_path')
+
+
+#----------------------------------------------------------
+#defines
+#----------------------------------------------------------
+
+env['CPIN'] = 'touch parameters.out; mv parameters.out ${TARGET}.in'
+env['RMIN'] = 'rm -f parameters.out'
+env['clocal_cmd'] = '++local'
+
+
+date_cmd = 'echo $TARGET > test/STATUS; echo "---------------------"; date +"%Y-%m-%d %H:%M:%S";'
+make_movie = Builder(action = "png2swf -r 5 -o $TARGET ${ARGS} ")
+env.Append(BUILDERS = { 'MakeMovie' : make_movie})
+run_gravity_cg_1 = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunGravityCg_1' : run_gravity_cg_1 } )
+env_mv_gravity_cg_1 = env.Clone(COPY = 'mkdir -p ' + test_path + '/MethodGravity/GravityCg1; mv `ls *.png *.h5` ' + test_path + '/MethodGravity/GravityCg1')
+
+
+run_gravity_cg_8 = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd  $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunGravityCg_8' : run_gravity_cg_8 } )
+env_mv_gravity_cg_8 = env.Clone(COPY = 'mkdir -p ' + test_path + '/MethodGravity/GravityCg8; mv `ls *.png *.h5` ' + test_path + '/MethodGravity/GravityCg8') 
+
+
+
+#-------------------------------------------------------------
+#load balancing
+#-------------------------------------------------------------
+
+#serial
+gravity_cg_1 = env_mv_gravity_cg_8.RunGravityCg_1 (
+     'test_method_gravity_cg-1.unit',
+     bin_path + '/enzo-p',
+     ARGS='input/Gravity/method_gravity_cg-1.in')
+
+Clean(gravity_cg_1,
+     [Glob('#/' + test_path + '/GravityCg-1/method_gravity_cg-1*.png'),
+      Glob('#/' + test_path + '/GravityCg-1/method_gravity_cg-1*.h5')])
+
+env.MakeMovie("/GravityCg-1/method_gravity_cg-1.swf", "test_method_gravity_cg-1.unit", \
+              ARGS = test_path + "/MethodGravity/GravityCg-1/method_gravity_cg-1*.png");
+env.PngToGif("/GravityCg-1/method_gravity_cg-1.gif", "test_method_gravity_cg-1.unit", \
+              ARGS = test_path + "/MethodGravity/GravityCg-1/method_gravity_cg-1*.png");
+
+
+#parallel
+
+gravity_cg_8 = env_mv_gravity_cg_8.RunGravityCg_8 (
+     'test_method_gravity_cg-8.unit',
+     bin_path + '/enzo-p',
+     ARGS='input/Gravity/method_gravity_cg-8.in')
+
+Clean(gravity_cg_8,
+     [Glob('#/' + test_path + '/GravityCg-8/method_gravity_cg-8*.png'),
+      Glob('#/' + test_path + '/GravityCg-8/method_gravity_cg-8*.h5')])
+
+env.MakeMovie("/GravityCg-8/method_gravity_cg-8.swf", "test_method_gravity_cg-8.unit", \
+              ARGS = test_path + "/MethodGravity/GravityCg-8/method_gravity_cg-8*.png");
+env.PngToGif("/GravityCg-8/method_gravity_cg-8.gif", "test_method_gravity_cg-8.unit", \
+              ARGS = test_path + "/MethodGravity/GravityCg-8/method_gravity_cg-8*.png");

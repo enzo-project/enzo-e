@@ -31,12 +31,14 @@ c  LOCALS:
 c
 c-----------------------------------------------------------------------
       implicit NONE
+#define FORTRAN
+#include "fortran_types.h"
 c-----------------------------------------------------------------------
 c
 c  Arguments
 c
-      ENZO_REAL u(in,jn), v(in,jn)
       integer rank, nbox, in, jn, ig, jg
+      ENZO_REAL u(in,jn), v(in,jn)
 c
 c  Locals
 c
@@ -136,7 +138,7 @@ c
          do j=1, jn
             y = delta*(j+jg-1)
             do i=1, in
-	       x = delta*(i+ig-1)
+               x = delta*(i+ig-1)
                vel = amp*sin(twopi*(mode(1,m)*x + mode(2,m)*y) + pha)
                if (km .gt. 0) then
                   u(i,j) = u(i,j) + vel*mode(2,m)
@@ -150,7 +152,7 @@ c normalize to get rms 2D Mach = 1.0 for seed 12345 and given k_f
 c
       do j=1, jn
          do i=1, in
-	    u(i,j) = u(i,j)/4.2846841
+            u(i,j) = u(i,j)/4.2846841
             v(i,j) = v(i,j)/4.2846841
          enddo
       enddo

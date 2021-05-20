@@ -37,6 +37,13 @@
 
 #include "charm_enzo.hpp"
 
+// The following needs to be included once and only once
+// This may not be the perfect place for this, but it is when it is included in
+// multiple object files
+#define CK_TEMPLATES_ONLY
+#include "enzo.def.h"
+#undef CK_TEMPLATES_ONLY
+
 //----------------------------------------------------------------------
 
 extern CProxy_EnzoSimulation proxy_enzo_simulation;
@@ -98,7 +105,7 @@ PARALLEL_MAIN_BEGIN
   // Print initial baseline memory usage
 
   Memory * memory = Memory::instance();
-  monitor_->print("Memory","bytes %lld bytes_high %lld",
+  monitor_->print("Memory","bytes %ld bytes_high %ld",
 		  memory->bytes(), memory->bytes_high());
 
 #ifdef CONFIG_USE_PAPI

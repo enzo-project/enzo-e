@@ -1,0 +1,59 @@
+ Stopping {
+     cycle = 100;
+  }
+
+Adapt {
+     list = [ "mask" ];
+     mask {
+        type = "mask";
+     }
+}     
+ Boundary {
+     type = "periodic";
+ }
+
+ Field {
+     alignment = 8;
+     gamma = 1.400000000000000;
+     ghost_depth = 4;
+     list = [ "velocity_y", "total_energy", "internal_energy","pressure","velocity_x","density" ];
+     padding = 0;
+     prolong = "linear";
+ }
+
+ Group {
+     conserved {
+         field_list = [ "density", "internal_energy", "total_energy"  ];
+     };
+     make_field_conservative {
+         field_list = [ "velocity_x", "velocity_y",
+                        "internal_energy", "total_energy" ];
+     }
+     list = [ "conserved", "make_field_conservative" ];
+ }
+
+ Initial {
+     list = [ "value" ];
+     value {
+         internal_energy = 0.000;
+         pressure = 0.000;
+     };
+ }
+
+ Method {
+     list = [ "ppm", "flux_correct" ];
+     ppm {
+         courant = 0.8000000000000000;
+         diffusion = true;
+         dual_energy = false;
+         flattening = 3;
+         steepening = true;
+     };
+     flux_correct {
+        min_digits = 4.0;
+     }
+ }
+
+ Testing {
+     cycle_final = 100;
+ }

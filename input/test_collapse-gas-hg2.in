@@ -1,0 +1,18 @@
+include "input/collapse.incl"
+include "input/collapse-output.incl"
+Output {
+   ax { dir = [ "Dir_Collapse-GAS-HG2_%04d", "cycle" ]; schedule { step = 10; } }
+ mesh { dir = [ "Dir_Collapse-GAS-HG2_%04d", "cycle" ]; schedule { step = 10; }  }
+   po { dir = [ "Dir_Collapse-GAS-HG2_%04d", "cycle" ]; schedule { step = 10; }  }
+   de { dir = [ "Dir_Collapse-GAS-HG2_%04d", "cycle" ]; schedule { step = 10; }  }
+   list = ["ax","po","de","mesh"];
+}
+ Method {
+     list = [ "ppm", "pm_deposit", "gravity", "pm_update" ];
+ }
+
+include "input/collapse-adapt-gas-2d.incl"
+include "input/collapse-problem-gas-2d.incl"
+include "input/collapse-solver-hg.incl"
+
+

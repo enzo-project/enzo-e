@@ -1,0 +1,153 @@
+Import('env')
+Import('parallel_run')
+Import('serial_run')
+Import('ip_charm')
+Import('test_path')
+Import('bin_path')
+
+#---------------------------------------------------
+# Defines
+#---------------------------------------------------
+
+env['CPIN'] = 'touch parameters.out; mv parameters.out ${TARGET}.in'
+env['RMIN'] = 'rm -f parameters.out'
+env['clocal_cmd'] = '++local'
+
+date_cmd = 'echo $TARGET > test/STATUS; echo "-------------------"; date +"%Y-%m-%d %H:%M:%S";'
+
+run_music_111 = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunMusic111' : run_music_111 } )
+env_mv_music_111 = env.Clone(COPY = 'mkdir -p ' + test_path + '/InitialComponent/Music111; mv `ls *.png *.h5` ' + test_path + '/InitialComponent/Music111')
+
+run_music_222 = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunMusic222' : run_music_222 } )
+env_mv_music_222 = env.Clone(COPY = 'mkdir -p ' + test_path + '/InitialComponent/Music222; mv `ls *.png *.h5` ' + test_path + '/InitialComponent/Music222')
+
+run_music_444 = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunMusic444' : run_music_444 } )
+env_mv_music_444 = env.Clone(COPY = 'mkdir -p ' + test_path + '/InitialComponent/Music444; mv `ls *.png *.h5` ' + test_path + '/InitialComponent/Music444')
+
+run_music_211 = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunMusic211' : run_music_211 } )
+env_mv_music_211 = env.Clone(COPY = 'mkdir -p ' + test_path + '/InitialComponent/Music211; mv `ls *.png *.h5` ' + test_path + '/InitialComponent/Music211')
+
+run_music_121 = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunMusic121' : run_music_121 } )
+env_mv_music_121= env.Clone(COPY = 'mkdir -p ' + test_path + '/InitialComponent/Music121; mv `ls *.png *.h5` ' + test_path + '/InitialComponent/Music121')
+
+run_music_112 = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunMusic112' : run_music_112 } )
+env_mv_music_112 = env.Clone(COPY = 'mkdir -p ' + test_path + '/InitialComponent/Music112; mv `ls *.png *.h5` ' + test_path + '/InitialComponent/Music112')
+
+run_music_411 = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunMusic411' : run_music_411 } )
+env_mv_music_411 = env.Clone(COPY = 'mkdir -p ' + test_path + '/InitialComponent/Music411; mv `ls *.png *.h5` ' + test_path + '/InitialComponent/Music411')
+
+run_music_141 = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunMusic141' : run_music_141 } )
+env_mv_music_141 = env.Clone(COPY = 'mkdir -p ' + test_path + '/InitialComponent/Music141; mv `ls *.png *.h5` ' + test_path + '/InitialComponent/Music141')
+
+run_music_114 = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunMusic114' : run_music_114 } )
+env_mv_music_114 = env.Clone(COPY = 'mkdir -p ' + test_path + '/InitialComponent/Music114; mv `ls *.png *.h5` ' + test_path + '/InitialComponent/Music114')
+
+#------------------------------------------------------------------------------
+#
+#------------------------------------------------------------------------------
+
+music_111 = env_mv_music_111.RunMusic111(
+     'InitialMusic/test_initial_music-111.unit',
+     bin_path + '/enzo-p',
+     ARGS='input/initial_music-111.in')
+
+Clean(music_111,
+     [Glob('#/' + test_path + '/*-111.png')])
+
+
+
+music_222 = env_mv_music_222.RunMusic222(
+     'test_initial_music-222.unit',
+     bin_path + '/enzo-p',
+     ARGS='input/InitialMusic/initial_music-222.in')
+
+Clean(music_222,
+     [Glob('#/' + test_path + '/*-222.png')])
+
+
+
+music_444 = env_mv_music_444.RunMusic444(
+     'test_initial_music-444.unit',
+     bin_path + '/enzo-p',
+     ARGS='input/InitialMusic/initial_music-444.in')
+
+Clean(music_444,
+     [Glob('#/' + test_path + '/*-444.png')])
+
+
+
+music_211 = env_mv_music_211.RunMusic111(
+     'test_initial_music-211.unit',
+     bin_path + '/enzo-p',
+     ARGS='input/InitialMusic/initial_music-211.in')
+
+Clean(music_211,
+     [Glob('#/' + test_path + '/*-211.png')])
+
+
+
+music_121 = env_mv_music_121.RunMusic111(
+     'test_initial_music-121.unit',
+     bin_path + '/enzo-p',
+     ARGS='input/InitialMusic/initial_music-121.in')
+
+Clean(music_121,
+     [Glob('#/' + test_path + '/*-121.png')])
+
+
+music_112 = env_mv_music_112.RunMusic112(
+     'test_initial_music-112.unit',
+     bin_path + '/enzo-p',
+     ARGS='input/InitialMusic/initial_music-112.in')
+
+Clean(music_112,
+     [Glob('#/' + test_path + '/*-112.png')])
+
+
+
+music_411 = env_mv_music_411.RunMusic411(
+     'test_initial_music-411.unit',
+     bin_path + '/enzo-p',
+     ARGS='input/InitialMusic/initial_music-411.in')
+
+Clean(music_411,
+     [Glob('#/' + test_path + '/*-411.png')])
+
+
+
+music_141 = env_mv_music_141.RunMusic141(
+     'test_initial_music-141.unit',
+     bin_path + '/enzo-p',
+     ARGS='input/InitialMusic/initial_music-141.in')
+
+Clean(music_141,
+     [Glob('#/' + test_path + '/*-141.png')])
+
+
+
+music_114 = env_mv_music_114.RunMusic114(
+     'test_initial_music-114.unit',
+     bin_path + '/enzo-p',
+     ARGS='input/InitialMusic/initial_music-114.in')
+
+Clean(music_114,
+     [Glob('#/' + test_path + '/*-114.png')])
+
+
+
+
+
+
+
+
+
+

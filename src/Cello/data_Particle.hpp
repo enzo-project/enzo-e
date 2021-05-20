@@ -15,12 +15,12 @@ class Particle {
 
   /// @class    Particle
   /// @ingroup  Data
-  /// @brief    [\ref Data] 
+  /// @brief    [\ref Data]
 
 public: // interface
 
   /// Constructor
-  Particle() 
+  Particle()
     : particle_descr_ (NULL),
       particle_data_ (NULL)
   { }
@@ -38,12 +38,12 @@ public: // interface
   Particle(const Particle & particle) throw()
   {
     particle_descr_ = particle.particle_descr_;
-    particle_data_ = particle.particle_data_; 
+    particle_data_ = particle.particle_data_;
   }
 
   /// Assignment operator
   Particle & operator= (const Particle & particle) throw()
-  { 
+  {
     particle_descr_ = particle.particle_descr_;
     particle_data_ = particle.particle_data_;
     return *this;
@@ -71,7 +71,7 @@ public: // interface
       warn[in] = true;
     }
   };
-  
+
   /// Return the particle descriptor for this particle
   ParticleDescr * particle_descr() { return particle_descr_; }
 
@@ -85,8 +85,8 @@ public: // interface
   /// Create a new type and return its id
 
   int new_type(std::string type)
-  { 
-    int it = particle_descr_->new_type(type); 
+  {
+    int it = particle_descr_->new_type(type);
     particle_data_->allocate(particle_descr_);
     return it;
   }
@@ -95,11 +95,16 @@ public: // interface
 
   int num_types() const
   { return particle_descr_->num_types(); }
-  
+
   /// Return the index for the given particle type
 
   int type_index (std::string type) const
   { return particle_descr_->type_index(type); }
+
+  /// Return whether the particle type exists
+
+  bool type_exists (std::string type) const
+  { return particle_descr_->type_exists(type); }
 
   /// Return the name of the given particle type given its index
 
@@ -119,6 +124,11 @@ public: // interface
 
   int num_attributes(int it) const
   { return particle_descr_->num_attributes(it); }
+
+  /// Check if attribute exists
+
+  bool is_attribute (int it, std::string attribute) const
+  { return particle_descr_->is_attribute(it,attribute); }
 
   /// Return the index for the given attribute
 
@@ -191,6 +201,11 @@ public: // interface
 
   int constant_offset(int it, int ic) const
   { return particle_descr_->constant_offset(it,ic); }
+
+  /// Check if given constant exists
+
+  bool has_constant(int it, std::string constant) const
+  { return particle_descr_->has_constant(it,constant); }
 
 
   //--------------------------------------------------
@@ -265,11 +280,11 @@ public: // interface
   /// Return the attribute array for the given particle type and batch
 
   char * attribute_array (int it,int ia,int ib)
-  { return particle_data_->attribute_array 
+  { return particle_data_->attribute_array
       (particle_descr_, it,ia,ib); }
 
   const char * attribute_array (int it,int ia,int ib) const
-  { return particle_data_->attribute_array 
+  { return particle_data_->attribute_array
       (particle_descr_, it,ia,ib); }
 
   /// Return the number of batches of particles for the given type.
@@ -286,6 +301,13 @@ public: // interface
   { return particle_data_->num_particles(particle_descr_,it); }
   int num_particles () const
   { return particle_data_->num_particles(particle_descr_); }
+
+  int num_local_particles (int it, int ib) const
+  { return particle_data_->num_local_particles(particle_descr_,it,ib); }
+  int num_local_particles (int it) const
+  { return particle_data_->num_local_particles(particle_descr_,it); }
+  int num_local_particles () const
+  { return particle_data_->num_local_particles(particle_descr_); }
 
   /// Create the given number of particles of the given type.  Always
   /// creates them at the end instead of filling up any unused
@@ -309,10 +331,10 @@ public: // interface
 
   void scatter (int it, int ib,
 		int np, const bool * mask, const int * index,
-		int n, ParticleData ** particle_array)
+		int n, ParticleData ** particle_array, const bool copy = false)
   { particle_data_->scatter
-      (particle_descr_,it,ib,np,mask,index,n,particle_array);  }
-  
+      (particle_descr_,it,ib,np,mask,index,n,particle_array,copy);  }
+
   /// Gather particles from an array of other Particle structures.
   /// Typically used after receiving particles from neighboring blocks
   /// that have entered this block.  Return the total number of particles
@@ -357,23 +379,20 @@ public: // interface
   /// Fill a vector of position coordinates for the given type and batch
   /// Bounds is used when positions are stored relative to the local block
   /// (e.g. as integers) and used to convert local to global coordinates
-  bool position (int it, int ib,
-		 double * x, double * y = 0, double * z = 0)
+  bool position (int it, int ib, double * x, double * y, double * z)
   { return particle_data_->position(particle_descr_,it,ib,x,y,z); }
 
   /// Update positions in a batch a given amount.  Only used in refresh for
   /// updating positions in periodic boundary conditions
-  void position_update (int it, int ib, 
+  void position_update (int it, int ib,
 			long double dx, long double dy, long double dz)
   { particle_data_->position_update (particle_descr_,it,ib,dx,dy,dz);  }
 
   /// Fill a vector of velocity coordinates for the given type and batch
-  bool velocity (int it, int ib,
-		 double * vx, double * vy = 0, double * vz = 0)
+  bool velocity (int it, int ib, double * vx, double * vy, double * vz)
   { return particle_data_->velocity(particle_descr_,it,ib,vx,vy,vz); }
 
   //--------------------------------------------------
-
   /// Return the number of bytes required to serialize the data object
   int data_size () const
   { return particle_data_->data_size (particle_descr_); }
@@ -397,8 +416,8 @@ public: // interface
 
   void write_ifrite (int it, std::string file_name,
 		     double xm, double ym, double zm,
-		     double xp, double yp, double zp) 
-  { particle_data_->write_ifrite 
+		     double xp, double yp, double zp)
+  { particle_data_->write_ifrite
       (particle_descr_,it,file_name,xm,ym,zm,xp,yp,zp);  }
 
 private: // functions

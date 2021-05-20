@@ -18,11 +18,10 @@ EnzoMethodPpml::EnzoMethodPpml()
     comoving_coordinates_(enzo::config()->physics_cosmology)
 {
   // Initialize the default Refresh object
+  cello::simulation()->new_refresh_set_name(ir_post_,name());
 
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
-			     enzo_sync_id_method_ppml);
-
-  refresh(ir)->add_all_fields();
+  Refresh * refresh = cello::refresh(ir_post_);
+  refresh->add_all_fields();
 }
 
 //----------------------------------------------------------------------
@@ -94,7 +93,9 @@ double EnzoMethodPpml::timestep (Block * block) const throw()
  
   /* 1) Compute Courant condition for baryons. */
  
-  if (EnzoBlock::NumberOfBaryonFields > 0) {
+  const int in = cello::index_static();
+  
+  if (EnzoBlock::NumberOfBaryonFields[in] > 0) {
  
     /* Find fields: density, total energy, velocity1-3. */
  

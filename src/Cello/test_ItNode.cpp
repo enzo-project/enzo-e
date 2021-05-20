@@ -92,13 +92,10 @@ PARALLEL_MAIN_BEGIN
 
     for (int count = 0; count < 2; count ++) {
       unit_assert (it_node.next_node() == root);
-      printf ("%p\n",it_node.node_trace()->node());
       unit_assert (it_node.done()==false);
       unit_assert (it_node.next_node() == root->child(0));
-      printf ("%p\n",it_node.node_trace()->node());
       unit_assert (it_node.done()==false);
       unit_assert (it_node.next_node() == root->child(0)->child(0));
-      printf ("%p\n",it_node.node_trace()->node());
       unit_assert (it_node.done()==false);
       unit_assert (it_node.next_node() == root->child(0)->child(1));
       unit_assert (it_node.done()==false);

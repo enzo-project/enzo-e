@@ -76,6 +76,7 @@ PARALLEL_MAIN_BEGIN
   unit_assert(*scalar.value(i4) == 4.0);
 
   unit_func ("index() (out of range)");
+
   unit_assert(scalar.index("i6") == -1);
   //--------------------------------------------------
 

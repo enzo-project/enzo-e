@@ -1,8 +1,8 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     problem_Method.hpp 
-/// @author   James Bordner (jobordner@ucsd.edu) 
-/// @date     Mon Jul 13 11:11:47 PDT 2009 
+/// @file     problem_Method.hpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     Mon Jul 13 11:11:47 PDT 2009
 /// @brief    [\ref Problem] Declaration for the Method class
 
 #ifndef PROBLEM_METHOD_HPP
@@ -11,7 +11,7 @@
 class Refresh;
 class Schedule;
 
-class Method : public PUP::able 
+class Method : public PUP::able
 {
   /// @class    Method
   /// @ingroup  Method
@@ -20,39 +20,37 @@ class Method : public PUP::able
 public: // interface
 
   /// Create a new Method
-  Method (double courant = 1.0) throw()
-    : refresh_list_(),
-      schedule_(NULL),
-      courant_(courant)
-  { }
+  Method (double courant = 1.0) throw();
 
   /// Destructor
   virtual ~Method() throw();
 
   /// Charm++ PUP::able declarations
   PUPable_abstract(Method);
-  
+
   Method (CkMigrateMessage *m)
     : PUP::able(m),
-      refresh_list_(),
-      schedule_(NULL),
-      courant_(1.0)
+    schedule_(NULL),
+    courant_(1.0),
+    ir_post_(-1),
+    neighbor_type_(neighbor_leaf)
+
   { }
-      
+
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
 public: // virtual functions
 
-  /// Apply the method to advance a block one timestep 
+  /// Apply the method to advance a block one timestep
 
-  virtual void compute ( Block * block) throw() = 0; 
+  virtual void compute ( Block * block) throw() = 0;
 
   /// Return the name of this Method
   virtual std::string name () throw () = 0;
 
   /// Compute maximum timestep for this method
-  virtual double timestep (Block * block) const throw() 
+  virtual double timestep (Block * block) const throw()
   { return std::numeric_limits<double>::max(); }
 
   /// Resume computation after a reduction
@@ -62,30 +60,25 @@ public: // virtual functions
     /* This function intentionally empty */
   }
 
-  int add_refresh (int ghost_depth, 
-		   int min_face_rank, 
-		   int neighbor_type, 
-		   int sync_type,
-		   int id)
-  {
-    int index=refresh_list_.size();
-    refresh_list_.resize(index+1);
-    refresh_list_[index] = new Refresh 
-      (ghost_depth,min_face_rank,neighbor_type,sync_type,id,true);
-    return index;
-  }
+  /// Add a new refresh object
+  int add_new_refresh_ (int neighbor_type = neighbor_leaf);
 
-  Refresh * refresh(size_t index=0) 
-  {
-    return (index < refresh_list_.size()) ? refresh_list_[index] : NULL;
-  }
+  /// Return the index for the main post-refresh object
+  int refresh_id_post() const;
 
   /// Return the Schedule object pointer
-  Schedule * schedule() throw() 
+  Schedule * schedule() throw()
   { return schedule_; };
 
   /// Set schedule
   void set_schedule (Schedule * schedule) throw();
+
+  /// Define required fields for method
+  void define_fields () throw();
+
+  /// Define certain field groupings if necessary
+  void define_group_fields (std::vector<std::string> group_fields,
+                            std::string groupname) throw();
 
   double courant() const throw ()
   { return courant_; }
@@ -112,15 +105,23 @@ public: // attributes (static)
 
 protected: // attributes
 
-  ///  Refresh object
-  std::vector<Refresh *> refresh_list_;
-
-
   /// Schedule object, if any (default is every cycle)
   Schedule * schedule_;
 
   /// Courant condition for the Method
   double courant_;
+
+  /// Index for main refresh after Method is called
+  int ir_post_;
+
+  /// Default refresh type
+  int neighbor_type_;
+
+  /// List of fields required for the Method
+  std::vector<std::string> required_fields_;
+
+  /// Specifies centering of required fields that are not cell-centered
+  std::map<std::string, std::array<int,3>> field_centering_;
 
 };
 
