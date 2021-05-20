@@ -141,12 +141,10 @@ void OutputData::write_block ( const  Block * block ) throw()
   if (name_dir == "") {
     // output block list and parameters to work directory
     name_dir  = ".";
-    // strip extension, use this for name
-    name_file = name_out_file.substr(0, name_out_file.rfind("."));
-  } else {
-    // output block list and parameters to subdirectory
-    name_file = name_dir;
   }
+
+  // strip extension, use this for name
+  name_file = name_out_file.substr(0, name_out_file.rfind("."));
 
   const int num_blocks = cello::hierarchy()->num_blocks();
   int count = 0;
