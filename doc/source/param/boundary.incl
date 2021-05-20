@@ -51,7 +51,7 @@
 :Default: :d:`"all"`
 :Scope:     :c:`Cello`
 
-:e:`The` :p:`face` :e:`parameter can restrict the boundary conditions to be applied only to the` :p:`upper` :e:`or` :p:`lower` :e:`faces.  face orthogonal to the given face.`  :p:`face` :e:`must be` :t:`"x"` , :t:`"y"` , :t:`"z"` :e:`or` :t:`"all"`.  :e:`The` :p:`face` :e:`parameter may be used in conjunction with the` :p:`axis` :e:`parameter, or by itself.`
+:e:`The` :p:`face` :e:`parameter can restrict the boundary conditions to be applied only to the` :p:`upper` :e:`or` :p:`lower` :e:`faces.  face orthogonal to the given face.`  :p:`face` :e:`must be` :t:`"upper"` , :t:`"lower"` :e:`or` :t:`"all"`.  :e:`The` :p:`face` :e:`parameter may be used in conjunction with the` :p:`axis` :e:`parameter, or by itself.`
 
 ----
 
