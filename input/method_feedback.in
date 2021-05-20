@@ -1,0 +1,223 @@
+#
+#
+#  Very simple feedback test problem
+#
+#     Drops a star particle of desired mass
+#     into a unigrid, uniform domain. Commented-out
+#     Adapt blocks below can be used to add in AMR
+#     (static, nested grids or adaptive).
+#
+
+#Adapt {
+#     list = ["mass"];
+#     mass {
+#         field_list = [ "density" ];
+#         max_coarsen = 1.0E-4; # 1.0E4 solar masses
+#         min_refine  = 1.0E-4;  # 1.0E4 solar masses
+#         type = "mass";
+#
+#         mass_type = "baryon"; # options are currently dark and baryon
+#     };
+#     max_level = 1;
+#}
+
+Boundary {
+  type = "outflow";
+}
+
+Domain {
+    lower = [ 0.0, 0.0, 0.0];
+    upper = [ 1.0, 1.0, 1.0];
+}
+
+Mesh {
+  root_blocks = [2, 2, 2];
+  root_rank   = 3;
+  root_size   = [64, 64, 64]; # given length units, res = 1024 pc / 64 = 16 pc
+}
+
+#Adapt {
+#    max_level = 2;
+#    list = ["mask"];
+#    mask {
+#        type = "mask";
+ #       value = [2.0, (x > 0.45) && (x < 0.55) && (y > 0.45) && (y < 0.55) && (z > 0.45) && (z < 0.55), 0.0];
+#                 1.0, (x > 0.20) && (x < 0.80) && (y > 0.20) && (y < 0.8) && (z > 0.2) && (z < 0.8), .0];
+#        value = [ 1.0, ((x - 0.5)*(x - 0.5) + (y - 0.5)*(y - 0.5) + (z - 0.5)*(z - 0.5)) < 0.25, 0];
+#        value = [1.0, x + y + z < 0.75, 0.0];
+#+ (z - 0.5)*(z - 0.5)) < 0.25, 0];       
+#        value = [1.0, y < 0.75,
+#                 1.0, y > 0.25,
+#                 0.0];
+#    };
+#}
+
+
+Field {
+  alignment   = 8;
+  gamma       = 1.40;
+  ghost_depth = 4;
+
+  list = ["density", "internal_energy", "total_energy",
+          "metal_density", "velocity_x", "velocity_y", "velocity_z",
+          "pressure", "temperature"];
+
+}
+
+Group {
+  list = ["color","derived"];
+  
+  color {
+    field_list = ["metal_density"];
+  }
+  derived {
+    field_list = ["temperature","pressure"];
+  }
+
+}
+
+Method {
+  list = [ "null", "ppm", "feedback", "star_maker"];
+
+  null {
+    dt = 10.0; # force a minimum dt - code units
+  };
+
+  # star maker is turned on here as a method just to list and comment the parameters,
+  # but setting number density to something stupid so no stars actually form
+  star_maker {
+     type = "stochastic";
+     number_density_threshold = 1.0E10; # set arbitrarily high - just turns this off 
+     minimum_star_mass        = 1000.0; # have to set this for use with feedback routine at the moment
+                                        #   this sets the minimum star mass, but for the sake of stochastic
+                                        #   SF routine this IS the particle mass
+     use_density_threshold    = true  ; # check number density for SF (def true)
+     use_velocity_divergence  = true  ; # converging flow criterion   (def true)
+     use_dynamical_time       = true ;  # compute t_ff / t_dyn        (def true)
+     maximum_mass_fraction    = 0.5  ;  # maximum fraction of a cell that can be converted into stars
+                                        #    can be redundant with number density threshold depending
+                                        #    on rest of SF criteria and refinement criteria (default 0.5)
+     efficiency               = 0.02 ;  # efficiency per free fall time (default 0.01)
+     
+  };
+
+  feedback {
+     shift_cell_center = true;       # kick fb injection when close to grid boundary
+     # time_first_sn     = 1.0;      # for testing - set time of first SN (in Myr) to not have to go through random number draws also triggers hard-coded progenitor mass and SN energy values (20 Msun star explosion)
+     #  ejecta_mass      = 10.0;     # solar masses - OLD PARAM - NOT USED 
+     #  supernova_energy = 1.0;      # in 10^51 erg - OLD PARAM - NOT USED
+     ke_fraction      = 0.0;      # fraction of kinetic energy (otherwise thermal) - < 0 computes it self-consistently to attempt to fully resolve the SN
+     # ejecta_metal_fraction = 0.5;  # OLD PARAM - NOT USED
+     feedback_stencil      = 3;      # deposit feedback in a NxN CIC stencil centered on the particle - should work with any odd ineger, but not tested for anything other than 3 
+     use_ionization_feedback = true;    # local (one zone) rad heating
+  };
+
+  ppm {
+        diffusion = true;
+        riemann_solver = "two_shock";
+        dual_energy = true;
+        flattening = 3;
+        steepening = true;
+        mol_weight = 1.2;
+        courant = 0.4;
+        density_floor = 1.0E-20;
+        number_density_floor = 1.0E-20;
+        pressure_floor = 1.0E-20;
+        temperature_floor = 1.0E-20;
+      };
+
+#
+#  add 'grackle' to list above to use and uncomment
+#
+#  #grackle {
+#    data_file = "CloudyData_UVB=HM2012.h5";
+#    with_radiative_cooling = 1;
+#    primordial_chemistry = 0;
+#    UVbackground = 1;
+#  } ;
+}
+
+Particle {
+    list = ["star"];
+
+    star {
+        attributes = [ "x", "double",
+                       "y", "double",
+                       "z", "double",
+                       "vx", "double",
+                       "vy", "double",
+                       "vz", "double",
+                       "ax", "double",
+                       "ay", "double",
+                       "az", "double",
+                       "mass", "double",
+                       "is_local", "double",
+                       "creation_time", "double",
+                       "lifetime", "double",
+                       "metal_fraction", "double" ];
+        position = [ "x", "y", "z" ];
+        velocity = [ "vx", "vy", "vz" ];
+        groups = ["has_mass"];
+    }
+}
+
+
+Units {
+    length = 3.1596E21; ## 1024 pc  ### 1.5798E21; # 512 pc #### 7.899E20;    # 256 pc
+    time   = 3.15576E13; # 1 Myr
+    mass   = 1.9891E36;
+  }
+
+Initial {
+
+  list = ["feedback_test"]; # name of IC problem
+
+  feedback_test {
+    density    = 1.2E-24;             # uniform mass density for ICs
+    position   = [0.425, 0.425, 0.5]; # off-center to avoid block boundary
+    temperature = 100.0;              # in K
+                                      #   particles are still local to each block and are kicked away from
+                                      #   boundaries if NxN feedback zone crosses a block boundary
+    star_mass  = 1000;                # particle mass in Msun
+  }
+
+#
+# use this to test with some KE on the grid to make (add 'value' to list above)
+# sure momentum and KE energy injection work in a flow
+# value {
+#    velocity_x = 0.1;
+#  }
+
+}
+
+Output {
+    list = [ "data" ];
+    data {
+        # Add more here if desired. This just outputs bare minimum needed
+        # to see if routines are working OK (i.e. velocity and energy could be cool to add)
+        field_list = [ "density" , "metal_density",
+                       "pressure", "temperature"];
+
+        particle_list = ["star"];
+
+        dir   = ["FEEDBACK_TEST_%04d","count"];
+        name = [ "feedback-test-data-%04d-%03d.h5", "count", "proc" ];
+        type = "data";
+
+        # schedule the output based on 'var' and 'step'
+        #   step refers to the interval if 'var' to output on
+        schedule {
+             var   = "time";
+             step  = 0.25; #            time in code units (Myr)
+        }
+    };
+
+
+}
+
+Stopping {
+    time = 100.0;
+    cycle = 100000;
+    seconds = 3600.0;
+    interval = 1;
+}

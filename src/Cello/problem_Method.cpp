@@ -3,7 +3,7 @@
 /// @file     problem_Method.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2015-09-04
-/// @brief    
+/// @brief
 
 #include "problem.hpp"
 
@@ -37,6 +37,8 @@ void Method::pup (PUP::er &p)
   p | courant_;
   p | ir_post_;
   p | neighbor_type_;
+  p | required_fields_; // std::vector<str> required fields
+  p | field_centering_; // std::map<std::string, std::array<int,3>>
 
 }
 
@@ -66,10 +68,74 @@ int Method::refresh_id_post() const
 //----------------------------------------------------------------------
 
 void Method::set_schedule (Schedule * schedule) throw()
-{ 
+{
   if (schedule_) delete schedule_;
   schedule_ = schedule;
 }
 
-//======================================================================
+//----------------------------------------------------------------------
 
+void Method::define_fields () throw()
+{
+  /* Ensure required fields are defined for this method */
+
+  FieldDescr * field_descr = cello::field_descr();
+  Config   * config  = (Config *) cello::config();
+
+  bool added_fields = false;
+
+  for (int ifield = 0; ifield < required_fields_.size(); ifield++){
+    std::string field = required_fields_[ifield];
+    if( ! field_descr->is_field( field )){
+      int id_field = field_descr->insert_permanent( field );
+
+      field_descr->set_precision(id_field, config->field_precision);
+
+      if ( field_centering_.find(field) != field_centering_.end()){
+        // field is not cell-centered
+        const int cx = field_centering_[field][0];
+        const int cy = field_centering_[field][1];
+        const int cz = field_centering_[field][2];
+        field_descr->set_centering(id_field, cx, cy, cz);
+      }
+
+      added_fields = true;
+    }
+  }
+
+  // Need to reconstruct history if new fields added
+  if (added_fields) field_descr->reset_history(config->field_history);
+}
+
+//----------------------------------------------------------------------
+
+void Method::define_group_fields (std::vector<std::string> group_fields,
+                                  std::string groupname) throw()
+{
+  /* Ensure fields are grouped correctly */
+
+  FieldDescr * field_descr = cello::field_descr();
+  Config   * config  = (Config *) cello::config();
+
+  bool added_fields = false;
+
+  for (int ifield = 0; ifield < group_fields.size(); ifield++){
+
+    // Maybe just throw error here to keep this fully separate from above
+    if( ! field_descr->is_field( required_fields_[ifield] )){
+      int field_id = field_descr->insert_permanent( required_fields_[ifield] );
+      field_descr->set_precision(field_id, config->field_precision);
+      added_fields = true;
+    }
+
+    if (!(field_descr->groups()->is_in( group_fields[ifield], groupname)) ){
+      field_descr->groups()->add( group_fields[ifield], groupname);
+    }
+
+  }
+
+  // Need to reconstruct history if new fields added
+  if (added_fields) field_descr->reset_history(config->field_history);
+}
+
+//======================================================================

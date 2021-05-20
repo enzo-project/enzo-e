@@ -12,18 +12,33 @@
 //----------------------------------------------------------------------
 
 EnzoReconstructor* EnzoReconstructor::construct_reconstructor
-(std::vector<std::string> reconstructable_groups,
- std::vector<std::string> passive_groups, std::string name,
- enzo_float theta_limiter)
+(const std::vector<std::string> &active_reconstructed_quantities,
+ std::string name, enzo_float theta_limiter)
 {
   
   ASSERT("EnzoReconstructor::construct_reconstructor",
 	 "theta_limiter must satisfy 1<=theta_limiter<=2",
 	 (1.<=theta_limiter) && (theta_limiter<=2));
 
-  // some repeated code from construct_riemann
-  std::vector<std::string> groups = reconstructable_groups;
-  groups.insert(groups.end(), passive_groups.begin(), passive_groups.end());
+  // Construct a vector of keys for all components of the quantities listed in
+  // active_reconstructed_quantities
+  std::vector<std::string> key_l;
+
+  for (const std::string &quantity_name : active_reconstructed_quantities){
+    bool vector_quantity;
+    if (!EnzoCenteredFieldRegistry::quantity_properties(quantity_name,
+                                                        &vector_quantity)){
+      ERROR1("EnzoReconstructorNN::reconstruct_interface",
+             "\"%s\" is not a known quantity.", quantity_name.c_str());
+    }
+    if (vector_quantity){
+      key_l.push_back(quantity_name + "_x");
+      key_l.push_back(quantity_name + "_y");
+      key_l.push_back(quantity_name + "_z");
+    } else {
+      key_l.push_back(quantity_name);
+    }
+  }
 
   // convert string to lower case (https://stackoverflow.com/a/313990)
   std::string formatted(name.size(), ' ');
@@ -31,12 +46,12 @@ EnzoReconstructor* EnzoReconstructor::construct_reconstructor
 		 ::tolower);
   EnzoReconstructor* out;
   if (formatted == std::string("nn")){
-    out = new EnzoReconstructorNN(groups);
+    out = new EnzoReconstructorNN(key_l);
   } else if ((formatted == std::string("plm")) ||
 	     (formatted == std::string("plm_enzo"))){
-    out = new EnzoReconstructorPLMEnzoRKLim(groups, theta_limiter);
+    out = new EnzoReconstructorPLMEnzoRKLim(key_l, theta_limiter);
   } else if (formatted == std::string("plm_athena")) {
-    out = new EnzoReconstructorPLMAthenaLim(groups, theta_limiter);
+    out = new EnzoReconstructorPLMAthenaLim(key_l, theta_limiter);
   } else {
     ASSERT("EnzoReconstructor",
 	   "The only allowed solvers are NN, PLM, PLM_ENZO, & PLM_ATHENA",

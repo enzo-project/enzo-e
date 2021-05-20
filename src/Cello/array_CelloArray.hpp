@@ -374,6 +374,8 @@ class FixedDimArray_
 
 public: // interface
 
+  typedef T value_type;
+
   // Destructor
   ~FixedDimArray_() { cleanup_helper_();}
 
@@ -435,7 +437,7 @@ public: // interface
   /// the result of this method is first assigned to another variable and the
   /// variable is placed on the LHS, then different behavior will occur.
   template<typename... Args, REQUIRE_TYPE(Args,CSlice)>
-  TempArray_<T,D> subarray(Args... args) noexcept;
+  TempArray_<T,D> subarray(Args... args) const noexcept;
 
   /// Returns the length of a given dimension
   ///
@@ -454,6 +456,9 @@ public: // interface
     }
     return out;
   }
+
+  /// Returns the number of dimensions
+  constexpr std::size_t rank() const noexcept {return D;}
 
   /// Swaps the contents of this array with the contents of a different array.
   /// This is only defined for arrays with the same numbers of dimensions D
@@ -659,7 +664,7 @@ inline void prep_slices_(const CSlice* slices, const intp shape[],
 // Returnd TempArray_ representing a view of a subarray of the current instance
 template<typename T, std::size_t D>
 template<typename... Args, class>
-TempArray_<T,D> FixedDimArray_<T,D>::subarray(Args... args) noexcept{
+TempArray_<T,D> FixedDimArray_<T,D>::subarray(Args... args) const noexcept{
   // TODO: put some thought into creating a const-qualified version of this
   // function
   static_assert(D == sizeof...(args) || 0 == sizeof...(args),
@@ -860,10 +865,9 @@ public: // interface
 
   /// Copy constructor. Makes *this a shallow copy of other.
   ///
-  /// @note Note that allowing this constructor to accept a const reference
-  ///     would enable the creation of mutatable shallow copies of
-  ///     const-qualified CelloArrays.
-  CelloArray(CelloArray<T,D>& other) : CelloArray() {
+  /// @note The fact that this accepts const reference reflects the fact that
+  ///     CelloArray has pointer-like semantics
+  CelloArray(const CelloArray<T,D>& other) : CelloArray() {
     this->shallow_copy_init_helper_(other);
   }
 
@@ -875,7 +879,7 @@ public: // interface
   ///
   /// (The contents of any previously created shallow copies or subarrays of
   /// *this are unaffected by this method)
-  CelloArray<T,D>& operator=(CelloArray<T,D>& other){
+  CelloArray<T,D>& operator=(const CelloArray<T,D>& other){
     this->cleanup_helper_();
     this->shallow_copy_init_helper_(other);
     return *this;
@@ -894,6 +898,41 @@ public: // interface
     swap(*this,other);
     return *this;
   }
+
+  /// Returns whether CelloArray is a perfect alias of other.
+  ///
+  /// Returns False if there is just partial overlap, either array is
+  /// uninitialized, or if the number of dimensions of the arrays differs.
+  template<typename OtherArray>
+  bool is_alias(const OtherArray& other) const{
+
+    // should probably also compare the value_type of each array. It's unclear
+    // how to do that
+
+    if (this->rank() != other.rank()) {return false;}
+
+    if ((this->shared_data_.get() == nullptr) ||
+        (other.shared_data_.get() == nullptr)) {
+      return false;
+    }
+
+    void* ptr1 = (void*)(this->shared_data_.get() + this->offset_);
+    void* ptr2 = (void*)(other.shared_data_.get() + other.offset_);
+    if (ptr1 != ptr2){ return false; }
+
+    const intp* shape1 = this->shape_;
+    const intp* shape2 = other.shape_;
+    const intp* stride1 = this->stride_;
+    const intp* stride2 = other.stride_;
+
+    for (std::size_t i = 0; i < D; i++){
+      if ((shape1[i] != shape2[i]) || (stride1[i] != stride2[i])){
+        return false;
+      }
+    }
+    return true;
+  }
+  
 };
 
 #endif /* ARRAY_CELLO_ARRAY_HPP */

@@ -16,8 +16,6 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
 {
   if (NumberOfBaryonFields > 0) {
  
-    const enzo_float pi = 3.14159;
- 
     /* Compute cosmology factors. */
  
     enzo_float cosmo_a = 1.0, cosmo_dadt = 0.0;
@@ -54,7 +52,7 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
     /* Set minimum GE. */
  
     MinimumSupportEnergyCoefficient =
-      GravitationalConstant[in]/(4.0*pi) / (pi * (Gamma[in]*(Gamma[in]-1.0))) *
+      GravitationalConstant[in]/(4.0*cello::pi) / (cello::pi * (Gamma[in]*(Gamma[in]-1.0))) *
       CosmoFactor * MinimumPressureSupportParameter[in] *
       CellWidth[0] * CellWidth[0];
  

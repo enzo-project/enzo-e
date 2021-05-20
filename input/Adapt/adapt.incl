@@ -12,13 +12,13 @@ include "input/Adapt/adapt_slope.incl"
 
 Stopping { 
 	 cycle = 10000; 
-	 time = 0.1;
+	 time = 0.05;
 }
 
 Boundary { type = "periodic"; }
 
 Testing {
-   time_final  = 0.10;
+   time_final  = 0.05;
    cycle_final = 0;
 }
 
@@ -36,26 +36,26 @@ Output {
     hdf {
        field_list = ["density"];
        type     = "data";
-       include "input/Schedule/schedule_time_0.02.incl"
+       include "input/Schedule/schedule_time_0.01.incl"
     }
     de {
        field_list = ["density"];
        type     = "image";
-       include "input/Schedule/schedule_time_0.02.incl"
+       include "input/Schedule/schedule_time_0.01.incl"
        include "input/Colormap/colormap_blackbody.incl"
     }
     dl {
        field_list = ["density"];
        image_log = true;
        type     = "image";
-       include "input/Schedule/schedule_time_0.02.incl"
+       include "input/Schedule/schedule_time_0.01.incl"
        include "input/Colormap/colormap_blackbody.incl"
     }
     te {
 
        field_list = ["total_energy"];
        type     = "image";
-       include "input/Schedule/schedule_time_0.02.incl"
+       include "input/Schedule/schedule_time_0.01.incl"
        colormap = [1.0,1.0,1.0, 1.0,0.0,0.0,  0.75,0.25,0.0,  1.0,1.0,0.0,   0.0,1.0,0.0,  0.0,0.0,1.0,  0.5,1.0,0.5];
     }
 
@@ -63,7 +63,7 @@ Output {
 
        field_list = ["velocity_x"];
        type     = "image";
-       include "input/Schedule/schedule_time_0.02.incl"
+       include "input/Schedule/schedule_time_0.01.incl"
        colormap = [1.0,1.0,1.0, 1.0,0.0,0.0,  0.75,0.25,0.0,  1.0,1.0,0.0,   0.0,1.0,0.0,  0.0,0.0,1.0,  0.5,1.0,0.5];
     }
 
@@ -71,7 +71,7 @@ Output {
 
        field_list = ["velocity_y"];
        type     = "image";
-       include "input/Schedule/schedule_time_0.02.incl"
+       include "input/Schedule/schedule_time_0.01.incl"
        colormap = [1.0,1.0,1.0, 1.0,0.0,0.0,  0.75,0.25,0.0,  1.0,1.0,0.0,   0.0,1.0,0.0,  0.0,0.0,1.0,  0.5,1.0,0.5];
     }
 
@@ -81,7 +81,7 @@ Output {
 	image_reduce_type = "max";
         field_list = ["density"];
 	image_size = [513,513];
-        include "input/Schedule/schedule_time_0.02.incl"
+        include "input/Schedule/schedule_time_0.01.incl"
 	image_min = 0.0;
         include "input/Colormap/colormap_rainbow.incl"
       }

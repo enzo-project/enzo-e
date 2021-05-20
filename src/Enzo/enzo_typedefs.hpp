@@ -28,6 +28,8 @@ typedef long                gr_int;  // Grackle int
 /// alias for EFlt3DArray
 typedef CelloArray<enzo_float,3> EFlt3DArray;
 
+typedef std::vector<std::string> str_vec_t;
+
 /* #include "enzo_typedefs_30.hpp" */
 
 #endif /* ENZO_TYPEDEFS_HPP */
