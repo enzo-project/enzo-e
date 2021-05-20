@@ -41,7 +41,7 @@ env_mv_cosmology_8 = env.Clone(COPY = 'mkdir -p ' + test_path + '/MethodCosmolog
 #serial
 balance_cosmology_1 = env_mv_cosmology_1.RunCosmology_1 (
      'test_method_cosmology-1.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Cosmology/method_cosmology-1.in')
 
 Clean(balance_cosmology_1,
@@ -58,7 +58,7 @@ Clean(balance_cosmology_1,
 
 balance_cosmology_8 = env_mv_cosmology_8.RunCosmology_8 (
      'test_method_cosmology-8.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Cosmology/method_cosmology-8.in')
 
 Clean(balance_cosmology_8,

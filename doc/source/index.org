@@ -9,10 +9,10 @@
            Parameter File Example
         Developer Guide (index_develop)
            Developing with Cello
-           Enzo-P / Cello Guiding Principles
+           Enzo-E / Cello Guiding Principles
            Design
         Reference (index_reference)
-           Enzo-P / Cello parameter reference
+           Enzo-E / Cello parameter reference
 
 ** TODO Files
    - [ ] [[file:index.rst][index.rst]]

@@ -7,7 +7,7 @@ void Main::enzo_finalize (Simulation * simulation)
   
   int cycle_final = config->testing_cycle_final;
 
-  unit_class ("Enzo-P");
+  unit_class ("Enzo-E");
   unit_func  ("final cycle");
   if (cycle_final != 0) {
     unit_assert (simulation->cycle()==cycle_final);
@@ -17,7 +17,7 @@ void Main::enzo_finalize (Simulation * simulation)
 
   double time_tolerance = config->testing_time_tolerance;
 
-  unit_class ("Enzo-P");
+  unit_class ("Enzo-E");
   unit_func  ("final time");
   monitor->print ("Testing","actual   time:  %.15g",simulation->time());
   monitor->print ("Testing","tolerance:      %g",time_tolerance);
@@ -36,7 +36,7 @@ void Main::enzo_finalize (Simulation * simulation)
     unit_assert ( err_rel_min < time_tolerance);
   }
 
-  monitor->print ("","END ENZO-P");
+  monitor->print ("","END ENZO-E");
 
 }
 
