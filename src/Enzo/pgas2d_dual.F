@@ -78,9 +78,7 @@ C      print*, 'DEBUG_PRESSURE eta ',eta1,eta2
 C     print*, 'DEBUG_PRESSURE pmin ',pmin
       icall = ierror
       ierror = 0
-      do j=1,10
-         sum(j) = 0.0
-      end do
+
       do j=j1,j2
          do i=i1,i2
 c
