@@ -15,6 +15,7 @@ commands:
             echo 'export HDF5_LIB=/usr/lib/x86_64-linux-gnu' >> $BASH_ENV
             echo 'export CHARM_HOME=$HOME/local/charm-v$CHARM_VER' >> $BASH_ENV
             echo 'export GRACKLE_HOME=$HOME/local' >> $BASH_ENV
+            echo 'export GRACKLE_INPUT_DATA_DIR=$HOME/grackle/grackle_data_files/input/' >> $BASH_ENV
             # tag the tip so we can go back to it
             git tag tip
 
@@ -26,7 +27,7 @@ commands:
           command: |
             source $BASH_ENV
             sudo apt-get update
-            sudo apt-get install -y bc csh libhdf5-serial-dev gfortran libtool-bin libpapi-dev libpng-dev libboost-all-dev
+            sudo apt-get install -y bc csh libhdf5-serial-dev gfortran libtool-bin libpapi-dev libpng-dev libboost-all-dev 
             # apt-get installs hdf5 libraries with _serial
             sudo ln -s /usr/lib/x86_64-linux-gnu/libhdf5_serial.so /usr/lib/x86_64-linux-gnu/libhdf5.so
             # install scons
@@ -45,6 +46,8 @@ commands:
               ./build charm++ netlrts-linux-x86_64 -j4 --with-production
             fi
             # prepare testing dependencies
+            # hdf5-tools is necessary for h5diff which is used by testing
+            sudo apt-get install -y hdf5-tools
             python3 -m venv $HOME/venv
             source $HOME/venv/bin/activate
             pip install --upgrade pip
@@ -54,6 +57,10 @@ commands:
 
   install-grackle:
     description: "Install grackle."
+    parameters:
+      prec:
+        type: string
+
     steps:
       - run:
           name: "Install grackle."
@@ -63,8 +70,14 @@ commands:
             ./configure
             cd src/clib
             make machine-linux-gnu
+            if [ << parameters.prec >> == "single" ]; then
+              make precision-32
+            fi
             make
             make install
+            # the grackle_data_files submodule is necessary for testing
+            cd ../..
+            git submodule update --init
 
   install-docs-dependencies:
     description: "Install dependencies for docs build."
@@ -145,7 +158,8 @@ jobs:
           paths:
             - ~/local
 
-      - install-grackle
+      - install-grackle:
+          prec: << parameters.prec >>
 
       - build-and-test:
           prec: << parameters.prec >>

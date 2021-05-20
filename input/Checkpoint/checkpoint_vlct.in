@@ -1,0 +1,79 @@
+# Template for running the automated checkpoint-restart tests on VL+CT (we may
+# want to tweak this to look at a MHD wave in the future)
+#
+# The testing tool automatically provides Stopping and Output sections
+
+   Domain {
+      lower = [0.0, 0.0, 0.0];
+      upper = [1.0, 0.5, 0.5];
+   }
+
+   Boundary {
+      type = "periodic";
+   }
+
+   Mesh {
+      root_rank = 3; # 3D
+      root_blocks = [2,2,2];
+      root_size = [16,8,8]; # number of cells per axis
+   }
+
+   Method {
+      list = ["mhd_vlct"];
+      mhd_vlct{
+         courant = 0.4;
+         riemann_solver = "hllc";
+         half_dt_reconstruct_method = "nn";
+         full_dt_reconstruct_method = "plm";
+         theta_limiter = 2.;
+         density_floor = 1.e-30;
+         pressure_floor = 1.e-30;
+         };
+   }
+
+   Field {
+      list = ["density", "velocity_x", "velocity_y", "velocity_z",
+              "total_energy",
+              "bfieldi_x", "bfieldi_y", "bfieldi_z",
+              "bfield_x", "bfield_y", "bfield_z",
+              "pressure"];
+
+      gamma = 1.6666666666666667;
+      
+      ghost_depth = 3;
+      padding = 0;
+      alignment = 8;
+
+      bfieldi_x{
+         centering = [false, true, true];
+      };
+      bfieldi_y{
+         centering = [true, false, true];
+      };
+      bfieldi_z{
+         centering = [true, true, false];
+      };
+   }
+
+   Group {
+      list = ["derived"];
+      derived {
+         field_list = ["pressure"];
+      }
+   }
+
+
+   Initial{
+      list = ["inclined_wave"];
+
+      inclined_wave{
+         # the wave is aligned with the x-axis
+         alpha = 0.;
+         beta = 0.;
+
+         lambda = 1.;
+         amplitude = 1.e-6;
+         wave_type = "sound";
+      };
+   }
+
