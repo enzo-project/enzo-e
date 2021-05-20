@@ -43,7 +43,7 @@ env_mv_ppm8 = env.Clone(COPY = 'mkdir -p ' + test_path + '/MethodPpm/Ppm-8; mv `
 #serial
 balance_ppm_1 = env_mv_ppm1.RunSerial (
      'test_method_ppm-1.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/PPM/method_ppm-1.in')
 
 Clean(balance_ppm_1,
@@ -60,7 +60,7 @@ env.PngToGif("/Ppm-1/method_ppm-1.gif", "test_method_ppm-1.unit", \
 
 balance_ppm_8 = env_mv_ppm8.RunPpm8 (
      'test_method_ppm-8.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/PPM/method_ppm-8.in')
 
 Clean(balance_ppm_8,

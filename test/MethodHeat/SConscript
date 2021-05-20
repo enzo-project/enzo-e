@@ -41,7 +41,7 @@ env_mv_heat_8 = env.Clone(COPY = 'mkdir -p ' + test_path + '/MethodHeat/Heat-8; 
 #serial
 balance_heat_1 = env_mv_heat_1.RunHeat_1 (
      'test_method_heat-1.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Heat/method_heat-1.in')
 
 Clean(balance_heat_1,
@@ -58,7 +58,7 @@ env.PngToGif("/Heat-1/method_heat-1.gif", "test_method_heat-1.unit", \
 
 balance_heat_8 = env_mv_heat_8.RunHeat_8 (
      'test_method_heat-8.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Heat/method_heat-8.in')
 
 Clean(balance_heat_8,

@@ -1,5 +1,5 @@
 #
-# Enzo-P/Cello Configuration file for NCSA Blue Waters
+# Enzo-E/Cello Configuration file for NCSA Blue Waters
 #
 # See README.ncsa_bw for additional information
 

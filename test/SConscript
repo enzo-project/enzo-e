@@ -38,7 +38,7 @@ env_mv_out  = env.Clone(COPY = 'mv -f *.png *.h5 Dir_* ' + test_path)
 env_mv_test = env.Clone(COPY = 'mv -f test*out test*in ' + test_path)
 env_rm_png  = env.Clone(COPY = 'rm -f *.png')
 
-enzo_bin = bin_path + '/enzo-p'
+enzo_bin = bin_path + '/enzo-e'
 
 # h5topng
 

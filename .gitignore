@@ -1,6 +1,4 @@
 *~
-bin/enzo-p
-bin/enzo-p.prev
 build
 build-*
 charmrun
@@ -20,10 +18,17 @@ test/START
 test/STOP
 include
 build
-build-*
-lib
-bin/enzo-p
 charmrun
 config.log
 errors.org
 warnings.org
+
+# ignore directories used for building branches
+build-*/Cello/*
+build-*/Enzo/*
+build-*/External/*
+build-*/SConscript
+
+# ignore the binaries
+bin/enzo-e
+bin/enzo-e.prev
