@@ -184,6 +184,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_check_gravity_particle_type(),
   // EnzoMethodHeat
   method_heat_alpha(0.0),
+
   // EnzoMethodHydro
   method_hydro_method(""),
   method_hydro_dual_energy(false),

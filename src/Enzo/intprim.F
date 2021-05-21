@@ -1,10 +1,9 @@
+#define FORTRAN
 #include "fortran.h"
-#define FORTRAN      
 c=======================================================================
 c///////////////////////  SUBROUTINE INTPRIM  \\\\\\\\\\\\\\\\\\\\\\\\\\\
 c
-      subroutine intprim(
-     &     dslice, uslice, vslice, wslice, pslice, 
+      subroutine intprim(dslice, uslice, vslice, wslice, pslice, 
      &     idim, i1, i2, isteep, steepen, iflatten, flatten, 
      &     iposrec, c1, c2, c3, c4, c5, c6, char1, char2, c0, 
      &     dd, dl, dr, d6, dla, dra, dl0, dr0,
@@ -151,18 +150,18 @@ c
          do i = i1-2, i2+2
             limit = 0.5_RKIND * dslice(i)
             if (dqc(i,1) .gt. limit) then
+               print*, 'WARNING'
                print*, 'Enforcing positive pressure by limiting ' ,
      $              'density slope', i, dslice(i), limit
-               print*, 'WARNING_MESSAGE'
                dqc(i,1) = limit
             endif
          enddo
          ! Velocity1
          do i = i1-2, i2+2
             if (dqc(i,2) .gt. dxdt2(i)) then
+               print*, 'WARNING'
                print*, 'Enforcing positive pressure by limiting ' ,
      $              'velocity slope', i, uslice(i), dxdt2(i)
-               print*, 'WARNING_MESSAGE'
                dqc(i,2) = dxdt2(i)
             endif
          enddo
@@ -176,9 +175,9 @@ c
             pc = pslice(i) - dqc(i,5)
             dplim = 2._RKIND * abs(0.125_RKIND*rhoc*du2*gamma1+pc)
             if (dqc(i,5) .gt. dplim) then
+               print*, 'WARNING'
                print*, 'Enforcing positive pressure by limiting ' ,
      $              'pressure slope', i, pslice(i), dplim
-               print*, 'WARNING_MESSAGE'
                dqc(i,5) = dplim
             endif
          enddo
@@ -194,11 +193,16 @@ c
 c
 c     Construct left and right values (eqn 1.6)
 c
-      call lr_states(dslice,c3,c4,c5,c6, dd, i1, i2, idim, dl, dr)
-      call lr_states(uslice,c3,c4,c5,c6, du, i1, i2, idim, ul, ur)
-      call lr_states(vslice,c3,c4,c5,c6, dv, i1, i2, idim, vl, vr)
-      call lr_states(wslice,c3,c4,c5,c6, dw, i1, i2, idim, wl, wr)
-      call lr_states(pslice,c3,c4,c5,c6, dp, i1, i2, idim, pl, pr)
+      call lr_states
+     $     (dslice, c3, c4, c5, c6, dd, i1, i2, idim, dl, dr)
+      call lr_states
+     $    (uslice, c3, c4, c5, c6, du, i1, i2, idim, ul, ur)
+      call lr_states
+     $    (vslice, c3, c4, c5, c6, dv, i1, i2, idim, vl, vr)
+      call lr_states
+     $    (wslice, c3, c4, c5, c6, dw, i1, i2, idim, wl, wr)
+      call lr_states
+     $    (pslice, c3, c4, c5, c6, dp, i1, i2, idim, pl, pr)
 c
 c     Steepen density if asked for (use precomputed steepening parameter)
 c
@@ -213,23 +217,33 @@ c
 c
 c     Monotonize again, flatten, and check for boundness
 c
-      call mono_n_flat(dslice, dl, dr,iflatten, flatten,i1,i2,idim)
-      call mono_n_flat(uslice, ul, ur,iflatten, flatten,i1,i2,idim)
-      call mono_n_flat(vslice, vl, vr,iflatten, flatten,i1,i2,idim)
-      call mono_n_flat(wslice, wl, wr,iflatten, flatten,i1,i2,idim)
-      call mono_n_flat(pslice, pl, pr,iflatten, flatten,i1,i2,idim)
+      call mono_n_flat
+     $    (dslice, dl, dr, iflatten, flatten, i1, i2, idim)
+      call mono_n_flat
+     $    (uslice, ul, ur, iflatten, flatten, i1, i2, idim)
+      call mono_n_flat
+     $    (vslice, vl, vr, iflatten, flatten, i1, i2, idim)
+      call mono_n_flat
+     $    (wslice, wl, wr, iflatten, flatten, i1, i2, idim)
+      call mono_n_flat
+     $    (pslice, pl, pr, iflatten, flatten, i1, i2, idim)
 c
 c    Now construct left and right interface values (eqn 1.12 and 3.3)
 c
-      call lr_interface(dslice, dl, dr, char1, char2, c0,i1,i2,idim,
+      call lr_interface
+     $    (dslice, dl, dr, char1, char2, c0, i1, i2, idim,
      $     dd, d6, dla, dra, dl0, dr0)
-      call lr_interface(uslice, ul, ur, char1, char2, c0,i1,i2,idim,
+      call lr_interface
+     $    (uslice, ul, ur, char1, char2, c0, i1, i2, idim,
      $     du, u6, ula, ura, ul0, ur0)
-      call lr_interface(vslice, vl, vr, char1, char2, c0,i1,i2,idim,
+      call lr_interface
+     $    (vslice, vl, vr, char1, char2, c0, i1, i2, idim,
      $     dv, v6, vla, vra, vl0, vr0)
-      call lr_interface(wslice, wl, wr, char1, char2, c0,i1,i2,idim,
+      call lr_interface
+     $    (wslice, wl, wr, char1, char2, c0, i1, i2, idim,
      $     dw, w6, wla, wra, wl0, wr0)
-      call lr_interface(pslice, pl, pr, char1, char2, c0,i1,i2,idim,
+      call lr_interface
+     $    (pslice, pl, pr, char1, char2, c0, i1, i2, idim,
      $     dp, p6, pla, pra, pl0, pr0)
 c
       return
@@ -238,7 +252,7 @@ c
 c-----------------------------------------------------------------------
 
       subroutine linslope
-     $     (qslice, c1, c2, i1, i2, idim, qplus, qmnus, 
+     $    (qslice, c1, c2, i1, i2, idim, qplus, qmnus, 
      $     qcent, qvanl)
 c      
       implicit none
@@ -265,8 +279,7 @@ c
 
 c-----------------------------------------------------------------------
 
-      subroutine char2prim
-     $     (n, dqc, rem, i1, i2, idim, dq)
+      subroutine char2prim(n, dqc, rem, i1, i2, idim, dq)
 c      
       implicit none
 #include "fortran_types.h"
@@ -287,8 +300,7 @@ c
 
 c-----------------------------------------------------------------------
 
-      subroutine lr_states
-     $     (qslice, c3, c4, c5, c6, dq, i1, i2, idim, 
+      subroutine lr_states(qslice, c3, c4, c5, c6, dq, i1, i2, idim, 
      $     ql, qr)
 c      
       implicit none
@@ -310,8 +322,7 @@ c
 
 c-----------------------------------------------------------------------
 
-      subroutine mono_n_flat
-     $     (qslice, ql, qr, iflatten, flatten, 
+      subroutine mono_n_flat(qslice, ql, qr, iflatten, flatten, 
      $     i1, i2, idim)
 c
       implicit none
@@ -367,8 +378,7 @@ c
 
 c-----------------------------------------------------------------------
 
-      subroutine lr_interface
-     $     (qslice, ql, qr, char1, char2, c0,
+      subroutine lr_interface(qslice, ql, qr, char1, char2, c0,
      $     i1, i2, idim, dq, q6, qla, qra, ql0, qr0)
 c
       implicit none

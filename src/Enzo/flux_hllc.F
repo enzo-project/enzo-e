@@ -3,7 +3,7 @@
 c=======================================================================
 c////////////////////////  SUBROUTINE FLUX_HLLC \\\\\\\\\\\\\\\\\\\\\\\\
 
-      subroutine woc_flux_hllc(
+      subroutine flux_hllc(
      &     dslice, eslice, geslice, uslice, vslice, wslice, dx,diffcoef,
      &     idim, jdim, i1, i2, j1, j2, dt, gamma,
      &     idiff, idual, eta1, ifallback,
@@ -379,7 +379,7 @@ C               ERROR_MESSAGE
                write(0,*) 'Falling back to a more diffusive Riemann',
      $              'solver, HLL'
                print*, 'WARNING'
-               call woc_flux_hll(dslice, eslice, geslice, 
+               call flux_hll(dslice, eslice, geslice, 
      $              uslice, vslice, wslice,
      $              dx, diffcoef, idim, jdim, i, i, j, j, dt, gamma,
      $              idiff, idual, eta1, ifallback,
