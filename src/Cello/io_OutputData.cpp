@@ -133,7 +133,6 @@ void OutputData::write_block ( const  Block * block ) throw()
 
   std::string name_dir = expand_name_(&dir_name_,&dir_args_);
 
-
   // Write blocks text file
   std::string name_file;
   std::string name_out_file  = expand_name_(&file_name_,&file_args_);
@@ -144,7 +143,10 @@ void OutputData::write_block ( const  Block * block ) throw()
   }
 
   // strip extension, use this for name
-  name_file = name_out_file.substr(0, name_out_file.rfind("."));
+  name_file = expand_name_by_proc_(&file_name_, &file_args_, 0);
+  if (name_file.rfind(".") != std::string::npos) {
+    name_file = name_file.substr(0, name_file.rfind("."));
+  }
 
   const int num_blocks = cello::hierarchy()->num_blocks();
   int count = 0;

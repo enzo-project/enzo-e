@@ -126,6 +126,16 @@ std::string Output::expand_name_
  const std::vector<std::string> * args_p
 ) const throw()
 {
+  return expand_name_by_proc_(name_p, args_p, CkMyPe());
+}
+
+std::string Output::expand_name_by_proc_
+(
+ const std::string              * name_p,
+ const std::vector<std::string> * args_p,
+ const int proc
+) const throw()
+{
   if (*name_p == "") return "";
   
   const std::string & name = *name_p;
@@ -185,7 +195,7 @@ std::string Output::expand_name_
     if      (arg == "cycle") { sprintf (buffer_new,buffer, cycle_); }
     else if (arg == "time")  { sprintf (buffer_new,buffer, time_); }
     else if (arg == "count") { sprintf (buffer_new,buffer, count_); }
-    else if (arg == "proc")  { sprintf (buffer_new,buffer, CkMyPe()); }
+    else if (arg == "proc")  { sprintf (buffer_new,buffer, proc); }
     else if (arg == "flipflop")  { sprintf (buffer_new,buffer, count_%2); }
     else 
       {
