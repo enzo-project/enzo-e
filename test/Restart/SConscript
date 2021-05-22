@@ -200,14 +200,14 @@ if use_valgrind == 0:
     # VL+CT Checkpoint-Restart Test
     env_ckpt_restart.RunCkptRestartSerial(
         os.path.join(os.getcwd(),'test_restart_vlct.unit'),
-        bin_path + '/enzo-p',
+        bin_path + '/enzo-e',
         TEST_NAME = 'restart_vlct',
         INPUTFILE = 'input/Checkpoint/checkpoint_vlct.in')
 
     # Boundary Checkpoint-Restart Test
     env_ckpt_restart.RunCkptRestartSerial(
         os.path.join(os.getcwd(),'test_restart_boundary.unit'),
-        bin_path + '/enzo-p',
+        bin_path + '/enzo-e',
         TEST_NAME = 'restart_boundary',
         INPUTFILE = 'input/Checkpoint/checkpoint_boundary.in')
 
@@ -225,7 +225,7 @@ if use_valgrind == 0:
 
         env_ckpt_restart.RunCkptRestartParallel(
             'test_restart_grackle.unit',
-            bin_path + '/enzo-p',
+            bin_path + '/enzo-e',
             TEST_NAME = 'restart_grackle',
             INPUTFILE = 'test/Restart/restart_grackle.in'
         )

@@ -444,7 +444,7 @@ def run_ckpt_restart_test(test_name, template_input_path, enzoe_wrapper,
 # Setup the parser for the CLI
 
 _default_enzoe_binary = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),'../bin/enzo-p'
+    os.path.dirname(os.path.abspath(__file__)),'../bin/enzo-e'
 )
 
 _description = """\
