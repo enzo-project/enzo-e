@@ -45,6 +45,7 @@ public: // interface
     p | min_digits_;
     p | field_sum_;
     p | field_sum_0_;
+    // don't pup scratch_
   };
 
   void compute_continue_refresh ( Block * block) throw();
@@ -83,6 +84,9 @@ protected: // attributes
 
   std::vector<long double> field_sum_;
   std::vector<long double> field_sum_0_;
+
+  /// scratch space for performing the flux correction
+  std::vector<cello_float> scratch_;
 };
 
 

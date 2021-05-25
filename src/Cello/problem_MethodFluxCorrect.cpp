@@ -19,7 +19,8 @@ MethodFluxCorrect::MethodFluxCorrect
     min_digits_(min_digits),
     field_sum_(),
     field_sum_0_(),
-    ir_pre_(-1)
+    ir_pre_(-1),
+    scratch_()
 {
   // Set up post-refresh to refresh all conserved fields in group_
   cello::simulation()->new_refresh_set_name(ir_post_,name());
@@ -406,16 +407,17 @@ void MethodFluxCorrect::flux_correct_(Block * block)
       }
     }
 
-    // Allocate scratch space. It's technically possible to do all of
-    // this in-place, (without scratch space), but you that get's
-    // complex (you need to be very careful iterating over cells on
-    // the edges of the active zone multiple times). For similar
-    // reasons, we do a little
-    cello_float* scratch1 = new (std::nothrow) cello_float[mx*my*mz];
-    cello_float* scratch2 = new (std::nothrow) cello_float[mx*my*mz];
+    // Allocate scratch space (if not already allocated necessary). It's
+    // technically possible to do all of these operations in-place, (without
+    // scratch space), but that get's complex (you need to be very careful
+    // iterating over cells on the edges of the active zone multiple times).
+    std::size_t num_field_elements = (std::size_t) (mx * my * mz);
+    if (scratch_.size() == 0) { scratch_.resize(2 * num_field_elements); }
 
-    cello_float* old_rho_array = scratch1 + (gx + mx*(gy + my*gz));
-    cello_float* temp_cons_array = scratch2 + (gx + mx*(gy + my*gz));
+    std::size_t active_zone_offset = (std::size_t) (gx + mx*(gy + my*gz));
+    cello_float *old_rho_array, *temp_cons_array;
+    old_rho_array = scratch_.data() + active_zone_offset;
+    temp_cons_array = scratch_.data() + num_field_elements + active_zone_offset;
 
     // load the density array
     cello_float* density_array = nullptr;
@@ -487,8 +489,5 @@ void MethodFluxCorrect::flux_correct_(Block * block)
                              i_f, flux_data, rank, perform_correction);
       }
     }
-
-    delete[] scratch1;
-    delete[] scratch2;
   }
 }
