@@ -224,7 +224,6 @@ void InitialTrace::density_placement_
   const int it = particle.type_index(name_);
 
   particle.insert_particles (it,np);
-
   cello::simulation()->data_insert_particles(np);
   
   const int ia_id = particle.attribute_index(it,"id");

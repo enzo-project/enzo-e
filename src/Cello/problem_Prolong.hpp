@@ -11,7 +11,6 @@
 
 class Refresh;
 class Prolong : public PUP::able 
-
 {
 
   /// @class    Prolong

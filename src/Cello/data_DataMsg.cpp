@@ -290,7 +290,6 @@ char * DataMsg::load_data (char * buffer)
   };
 
   pc = buffer;
-  int debug_counter = 0;
 
   int n_ff,n_fa,n_pa,n_fd;
   LOAD_SCALAR_TYPE(pc,int,n_ff);
@@ -369,17 +368,15 @@ void DataMsg::update (Data * data, bool is_local)
   if (pd != nullptr) {
 
     // Insert new particles 
-
     Particle particle = data->particle();
 
     int count = 0;
     for (int it=0; it<particle.num_types(); it++) {
       count += particle.gather (it, 1, &pd);
     }
+
     cello::simulation()->data_insert_particles(count);
-    
-    delete particle_data_;
-    particle_data_ = nullptr; 
+
   }
   
   // Update fields
@@ -405,21 +402,22 @@ void DataMsg::update (Data * data, bool is_local)
     }
   }
 
+  if (ff != nullptr) {
+    delete field_face_;
+    field_face_ = nullptr;
+  }
+
   // Update fluxes
 
   FluxData * flux_data = data->flux_data();
   if (face_fluxes_list_.size() > 0) {
-    for (int i=0; i<face_fluxes_list_.size(); i++) {
+    for (size_t i=0; i<face_fluxes_list_.size(); i++) {
       FaceFluxes * face_fluxes = face_fluxes_list_[i];
       Face face = face_fluxes->face();
       flux_data->sum_neighbor_fluxes
         (face_fluxes,face.axis(), 1 - face.face(), i);
     }
     face_fluxes_list_.clear();
-  }
-  if (ff != nullptr) {
-    delete field_face_;
-    field_face_ = nullptr;
   }
 
   // Updated coarse array

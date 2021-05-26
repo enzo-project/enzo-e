@@ -171,9 +171,6 @@ public: // interface
     field_list_dst_ = field_list;
   }
 
-  /// Return the field list as a list, even if all_fields is set
-  std::vector<int> field_list() const;
-  
   /// Return whether all fields are refreshed
   bool all_fields() const
   { return all_fields_; }
@@ -192,6 +189,12 @@ public: // interface
   //--------------------------------------------------
   // PARTICLE METHODS
   //--------------------------------------------------
+
+  /// Add specified fields
+  void set_particle_list (std::vector<int> particle_list)
+  {
+    particle_list_ = particle_list;
+  }
 
   /// Add the given particle type to the list
   void add_particle(int id_particle) {

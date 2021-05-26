@@ -228,10 +228,6 @@ protected:
   
   inline long double & scalar_ (Block *block, int i_scalar)
   {
-    ASSERT("EnzoSolverBiCgStab::scalar_",
-	   "Scalar long double index is 0",
-	   (i_scalar != 0));
-    
     return *block->data()->scalar_long_double().value(i_scalar);
   }
 

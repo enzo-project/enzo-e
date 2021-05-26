@@ -162,13 +162,12 @@ void Problem::initialize_initial(Config * config,
 
     std::string type = config->initial_list[index];
 
-    Initial * initial = create_initial_
-      (type,index,config,parameters);
+    Initial * initial = create_initial_ (type,index,config,parameters);
 
     ASSERT1("Problem::initialize_initial",
 	    "Initial type %s not recognized",
 	    config->initial_list[index].c_str(),
-	    initial != nullptr);
+	    (initial != nullptr) );
 
     initial_list_.push_back( initial );
   }
@@ -202,16 +201,16 @@ void Problem::initialize_physics(Config * config,
 void Problem::initialize_refine(Config * config,
 				Parameters * parameters) throw()
 {
-  for (int i=0; i<config->num_adapt; i++) {
+  for (int index=0; index<config->num_adapt; index++) {
 
-    std::string name = config->adapt_type[i];
+    std::string name = config->adapt_type[index];
 
     Refine * refine = create_refine_ 
-      (name,config,parameters,i);
+      (name,index,config,parameters);
 
     if (refine) {
       refine_list_.push_back( refine );
-      int index_schedule = config->adapt_schedule_index[i];
+      int index_schedule = config->adapt_schedule_index[index];
 
       if (index_schedule >= 0) {
 	refine->set_schedule
@@ -283,8 +282,7 @@ void Problem::initialize_restrict(Config * config) throw()
 //----------------------------------------------------------------------
 
 void Problem::initialize_output
-(Config * config,
- const Factory * factory) throw()
+(Config * config, const Factory * factory) throw()
 {
   FieldDescr * field_descr = cello::field_descr();
   
@@ -429,28 +427,22 @@ void Problem::initialize_output
         int n = config->output_colormap[index].size() / 3;
 
         if (n > 0) {
-          double * r = new double [n];
-          double * g = new double [n];
-          double * b = new double [n];
+          std::vector<float> colormap[3];
+          for (int i=0; i<3; i++) {
+            colormap[i].resize(n,0.0);
+          }
 
           for (int i=0; i<n; i++) {
 
-            int ir=3*i+0;
-            int ig=3*i+1;
-            int ib=3*i+2;
-
-            r[i] = config->output_colormap[index][ir];
-            g[i] = config->output_colormap[index][ig];
-            b[i] = config->output_colormap[index][ib];
+            for (int rgb=0; rgb<3; rgb++) {
+              int index_colormap = 3*i+rgb;
+              colormap[rgb][i] =
+                config->output_colormap[index][index_colormap];
+            }
 
           }
 
-          output_image->set_colormap(n,r,g,b);
-
-          delete [] r;
-          delete [] g;
-          delete [] b;
-
+          output_image->set_colormap(colormap);
         }
 
       }
@@ -468,7 +460,8 @@ void Problem::initialize_output
 
 //----------------------------------------------------------------------
 
-void Problem::initialize_method ( Config * config ) throw()
+void Problem::initialize_method
+( Config * config, const Factory * factory ) throw()
 {
   const size_t num_method = config->method_list.size();
 
@@ -480,7 +473,7 @@ void Problem::initialize_method ( Config * config ) throw()
 
     std::string name = config->method_list[index_method];
 
-    Method * method = create_method_(name, config, index_method);
+    Method * method = create_method_(name, index_method, config, factory);
 
     if (method) {
 
@@ -515,15 +508,15 @@ void Problem::initialize_solver( Config * config ) throw()
 
     std::string type = config->solver_type[index_solver];
 
-    Solver * solver = create_solver_(type, config, index_solver);
+    Solver * solver = create_solver_(type, index_solver, config);
 
     if (solver) {
 
       solver_list_.push_back(solver); 
 
     } else {
-      ERROR1("Problem::initialize_method",
-	     "Unknown Method %s",type.c_str());
+      ERROR1("Problem::initialize_solver",
+	     "Unknown Solver %s",type.c_str());
     }
   }
 }
@@ -656,9 +649,9 @@ Initial * Problem::create_initial_
 Refine * Problem::create_refine_
 (
  std::string        type,
+ int                index,
  Config *           config,
- Parameters *       parameters,
- int                index
+ Parameters *       parameters
  ) throw ()
 { 
 
@@ -764,8 +757,9 @@ Units * Problem::create_units_
 
 Solver * Problem::create_solver_ 
 ( std::string  type,
-  Config * config,
-  int index_solver) throw ()
+  int index_solver,
+  Config * config
+  ) throw ()
 {
   TRACE1("Problem::create_solver %s",type.c_str());
 
@@ -803,12 +797,12 @@ Solver * Problem::create_solver_
 //----------------------------------------------------------------------
 
 Physics * Problem::create_physics_ 
-( std::string  name,
+( std::string type,
   int index,
   Config * config,
   Parameters * parameters) throw ()
 {
-  TRACE1("Problem::create_physics %s",name.c_str());
+  TRACE1("Problem::create_physics %s",type.c_str());
 
   // No default physics
   Physics * physics = nullptr;
@@ -853,8 +847,10 @@ Compute * Problem::create_compute
 
 Method * Problem::create_method_ 
 ( std::string  name,
+  int index_method,
   Config * config,
-  int index_method) throw ()
+  const Factory * factory
+  ) throw ()
 {
   TRACE1("Problem::create_method %s",name.c_str());
 
@@ -877,15 +873,43 @@ Method * Problem::create_method_
        config->method_flux_correct_enable[index_method],
        config->method_flux_correct_min_digits[index_method]);
 
+  } else if (name == "checkpoint") {
+
+    method = new MethodCheckpoint
+      ( config->method_path_name[index_method]);
+
+  } else if (name == "output") {
+
+    ASSERT("Problem::create_method_()",
+           "MethodOutput must have 'file_name' parameter set",
+           config->method_file_name[index_method].size() > 0);
+    ASSERT("Problem::create_method_()",
+           "MethodOutput must have 'path_name' parameter set",
+           config->method_path_name[index_method].size() > 0);
+
+    method = new MethodOutput
+      ( factory,
+        config->method_file_name[index_method],
+        config->method_path_name[index_method],
+        config->method_field_list[index_method],
+        config->method_particle_list[index_method],
+        config->method_ghost_depth[index_method],
+        config->method_min_face_rank[index_method],
+        config->method_all_fields[index_method],
+        config->method_all_particles[index_method],
+        config->method_output_blocking[0][index_method],
+        config->method_output_blocking[1][index_method],
+        config->method_output_blocking[2][index_method]);
+
   } else if (name == "refresh") {
 
     method = new MethodRefresh
-      (config->method_refresh_field_list[index_method],
-       config->method_refresh_particle_list[index_method],
-       config->method_refresh_ghost_depth[index_method],
-       config->method_refresh_min_face_rank[index_method],
-       config->method_refresh_all_fields[index_method],
-       config->method_refresh_all_particles[index_method]);
+      (config->method_field_list[index_method],
+       config->method_particle_list[index_method],
+       config->method_ghost_depth[index_method],
+       config->method_min_face_rank[index_method],
+       config->method_all_fields[index_method],
+       config->method_all_particles[index_method]);
 
   } else if (name == "debug") {
 
@@ -925,25 +949,9 @@ Output * Problem::create_output_
 
   if (name == "image") {
 
-    //--------------------------------------------------
-    // parameter: Mesh : root_size
-    // parameter: Mesh : root_blocks
-    //--------------------------------------------------
-
-    int nx = config->mesh_root_size[0];
-    int ny = config->mesh_root_size[1];
-    int nz = config->mesh_root_size[2];
-
-    int nbx = config->mesh_root_blocks[0];
-    int nby = config->mesh_root_blocks[1];
-    int nbz = config->mesh_root_blocks[2];
-
     // NOTE: assumes cube for non-z axis images
 
     std::string image_type       = config->output_image_type[index];
-    int         image_size_x     = config->output_image_size[index][0];
-    int         image_size_y     = config->output_image_size[index][1];
-    int         image_block_size = config->output_image_block_size[index];
     bool        image_ghost      = config->output_image_ghost[index];
     bool        image_log        = config->output_image_log[index];
     bool        image_abs        = config->output_image_abs[index];
@@ -952,6 +960,8 @@ Output * Problem::create_output_
     int         max_level        = std::min(config->output_max_level[index],
 					    config->mesh_max_level);
     bool        leaf_only        = config->output_leaf_only[index];
+    int         image_size[2] = { config->output_image_size[index][0],
+                                  config->output_image_size[index][1] };
     std::string image_reduce_type = config->output_image_reduce_type[index];
     std::string image_mesh_color  = config->output_image_mesh_color[index];
     std::string image_color_particle_attribute =
@@ -975,17 +985,16 @@ Output * Problem::create_output_
     
     output = new OutputImage (index,factory,
 			      CkNumPes(),
-			      nx,ny,nz, 
-			      nbx,nby,nbz,
+			      config->mesh_root_size,
+			      config->mesh_root_blocks,
 			      min_level,
 			      max_level,
 			      leaf_only,
 			      image_type,
-			      image_size_x,image_size_y,
+			      image_size,
 			      image_reduce_type,
 			      image_mesh_color,
 			      image_color_particle_attribute,
-			      image_block_size,
 			      image_lower, image_upper,
 			      image_face_rank,
 			      image_axis,
@@ -997,8 +1006,7 @@ Output * Problem::create_output_
 
   } else if (name == "data") {
 
-    output = new OutputData (index,factory,
-			     config);
+    output = new OutputData (index,factory,config);
 
   } else if (name == "checkpoint") {
 

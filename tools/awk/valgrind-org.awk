@@ -37,6 +37,6 @@ BEGIN{
 	n=length($NF);
 	file=substr($NF,2,n-2);
 	sub(/:/,"::",file);
-	printf "   - [ ] [[file:source/%s][%s]]\n",file,file
+	printf "   - [ ] [[file:src/%s][%s]]\n",file,file
     }
 }

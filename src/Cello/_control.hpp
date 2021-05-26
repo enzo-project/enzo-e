@@ -23,11 +23,5 @@ enum sync_id {
 
 #include <string>
 
-//----------------------------------------------------------------------
-// Component class includes
-//----------------------------------------------------------------------
-
-#include "control_Control.hpp"
-
 #endif /* _CONTROL_HPP */
 

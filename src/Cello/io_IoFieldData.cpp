@@ -10,15 +10,15 @@
 //----------------------------------------------------------------------
 
 IoFieldData::IoFieldData() throw ()
-  : Io(1),
+  : Io(),
     field_data_(0),
     field_index_(0)
 
 {
-  meta_name_.push_back("size");
-  meta_name_.push_back("array_size");
-  meta_name_.push_back("num_fields");
-  meta_name_.push_back("ghosts_allocated");
+  // meta_name_.push_back("size");
+  // meta_name_.push_back("array_size");
+  // meta_name_.push_back("num_fields");
+  // meta_name_.push_back("ghosts_allocated");
 }
 
 //----------------------------------------------------------------------
@@ -43,16 +43,15 @@ void IoFieldData::pup (PUP::er &p)
 void IoFieldData::meta_value
 (int index,
  void ** buffer, std::string * name, int * type,
- int * nxd, int * nyd, int * nzd) throw()
+ int * mx, int * my, int * mz) throw()
 {
 }
 
 //----------------------------------------------------------------------
 
 void IoFieldData::field_array
-(int index, // WARNING: index ignored
- void ** buffer, std::string * name, int * type,
- int * nxd, int * nyd, int * nzd,
+(void ** buffer, std::string * name, int * type,
+ int * mx, int * my, int * mz,
  int * nx,  int * ny,  int * nz) throw()
 {
   FieldDescr * field_descr = cello::field_descr();
@@ -88,9 +87,9 @@ void IoFieldData::field_array
 
   if (field_data_->ghosts_allocated()) {
 
-    if (nxd) (*nxd) = nbx + 2*ngx + cx;
-    if (nyd) (*nyd) = nby + 2*ngy + cy;
-    if (nzd) (*nzd) = nbz + 2*ngz + cz;
+    if (mx) (*mx) = nbx + 2*ngx + cx;
+    if (my) (*my) = nby + 2*ngy + cy;
+    if (mz) (*mz) = nbz + 2*ngz + cz;
 
     // Exclude ghosts when writing
 
@@ -106,9 +105,9 @@ void IoFieldData::field_array
 
   } else {
 
-    if (nxd) (*nxd) = nbx + cx;
-    if (nyd) (*nyd) = nby + cy;
-    if (nzd) (*nzd) = nbz + cz;
+    if (mx) (*mx) = nbx + cx;
+    if (my) (*my) = nby + cy;
+    if (mz) (*mz) = nbz + cz;
 
     if (nx) (*nx) = nbx + cx;
     if (ny) (*ny) = nby + cy;

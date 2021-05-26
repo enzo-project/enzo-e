@@ -47,7 +47,7 @@ void Simulation::initialize() throw()
   problem_->initialize_stopping(config_);
   problem_->initialize_prolong (config_);
   problem_->initialize_restrict (config_);
-  problem_->initialize_method(config_);
+  problem_->initialize_method  (config_,factory());
   problem_->initialize_output  (config_,factory());
   problem_->initialize_solver  (config_);
 

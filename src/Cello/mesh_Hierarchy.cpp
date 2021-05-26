@@ -93,7 +93,7 @@ void Hierarchy::pup (PUP::er &p)
   // checkpoint / restart then double-counts Blocks.
 
   if (up) {
-    for (int i=0; i<num_blocks_level_.size(); i++)
+    for (size_t i=0; i<num_blocks_level_.size(); i++)
       num_blocks_level_[i]=0;
     num_blocks_      = 0;
     num_particles_   = 0;

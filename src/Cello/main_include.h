@@ -12,7 +12,8 @@
 
      entry void p_exit (int count_blocks);
 
-     entry void p_checkpoint(int count, std::string dir);
+     entry void p_checkpoint_method(int count, std::string dir);
+     entry void p_checkpoint_output(int count, std::string dir);
 
      entry void p_initial_exit();
      entry void p_adapt_enter();

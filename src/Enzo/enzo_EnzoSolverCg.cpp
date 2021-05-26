@@ -202,7 +202,6 @@ void EnzoSolverCg::apply ( std::shared_ptr<Matrix> A, Block * block) throw()
   field.size           (&nx_,&ny_,&nz_);
   field.dimensions (ib_,&mx_,&my_,&mz_);
   field.ghost_depth(ib_,&gx_,&gy_,&gz_);
-
   EnzoBlock * enzo_block = enzo::block(block);
 
   // assumes all fields involved in calculation have same precision

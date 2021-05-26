@@ -128,26 +128,22 @@ void InputData::read_field( Block * block, int index_field) throw()
   io_field_data()->set_field_data(field.field_data());
   io_field_data()->set_field_index(index_field);
 
-  for (size_t i=0; i<io_field_data()->data_count(); i++) {
+  void * buffer = 0;
+  std::string name;
+  int type;
+  int nxd,nyd,nzd;  // Array dimension
+  int nx,ny,nz;     // Array size
 
-    void * buffer = 0;
-    std::string name;
-    int type;
-    int nxd,nyd,nzd;  // Array dimension
-    int nx,ny,nz;     // Array size
+  // Read ith FieldData data
 
-    // Read ith FieldData data
+  file_->data_open(name.c_str(),&type,&nx,&ny,&nz);
+  file_->data_read(buffer);
+  file_->data_close();
 
-    file_->data_open(name.c_str(),&type,&nx,&ny,&nz);
-    file_->data_read(buffer);
-    file_->data_close();
-
-    // Get ith FieldData data
-    io_field_data()->field_array(i, &buffer, &name, &type, 
-				 &nxd,&nyd,&nzd,
-				 &nx, &ny, &nz);
-
-  }
+  // Get ith FieldData data
+  io_field_data()->field_array(&buffer, &name, &type, 
+                               &nxd,&nyd,&nzd,
+                               &nx, &ny, &nz);
 
 }
 
@@ -156,31 +152,6 @@ void InputData::read_field( Block * block, int index_field) throw()
 void InputData::read_particle
 ( Block * block, int index_particle) throw()
 {
-  // io_particle_data()->set_particle_descr((ParticleDescr*)particle_descr);
-  // io_particle_data()->set_particle_data(particle_data);
-  // io_particle_data()->set_particle_index(index_particle);
-
-  // for (size_t i=0; i<io_particle_data()->data_count(); i++) {
-
-  //   void * buffer = 0;
-  //   std::string name;
-  //   int type;
-  //   int nxd,nyd,nzd;  // Array dimension
-  //   int nx,ny,nz;     // Array size
-
-  //   // Read ith ParticleData data
-
-  //   file_->data_open(name.c_str(),&type,&nx,&ny,&nz);
-  //   file_->data_read(buffer);
-  //   file_->data_close();
-
-  //   // Get ith ParticleData data
-  //   io_particle_data()->field_array(i, &buffer, &name, &type, 
-  //                                   &nxd,&nyd,&nzd,
-  // 				       &nx, &ny, &nz);
-
-  // }
-
 }
 
 //======================================================================

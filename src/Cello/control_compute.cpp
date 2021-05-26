@@ -92,7 +92,6 @@ void Block::compute_continue_ ()
     (schedule->write_this_cycle(cycle_,time_));
 
   if (is_scheduled) {
-
     TRACE2 ("Block::compute_continue() method = %d %p\n",
 	    index_method_,method); fflush(stdout);
 

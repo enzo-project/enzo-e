@@ -25,6 +25,10 @@ public: // interface
   virtual ~IoFieldData() throw()
   {}
 
+  PUPable_decl(IoFieldData);
+
+  IoFieldData(CkMigrateMessage *m) : Io(m) {}
+
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 

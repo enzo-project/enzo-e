@@ -11,28 +11,12 @@
 //----------------------------------------------------------------------
 
 Index::Index() { clear(); }
-
-//----------------------------------------------------------------------
-
-Index::Index(const Index & index) 
-{
-  copy_(index);
-}
-
 //----------------------------------------------------------------------
 
 Index::Index(int ix, int iy, int iz) 
 {
   clear();
   set_array(ix,iy,iz);
-}
-
-//----------------------------------------------------------------------
-
-Index & Index::operator = (const Index & index)
-{
-  copy_(index);
-  return *this;
 }
 
 //----------------------------------------------------------------------
@@ -321,7 +305,6 @@ void Index::tree (int * bx, int * by, int *bz, int level) const
 void Index::set_child(int level, int ix, int iy, int iz, int min_level)
 {
   if (level > 0) {
-    ASSERT ("Index::set_child","level must be at least 1",level>0);
     unsigned shift = (INDEX_BITS_TREE - level);
     unsigned mask  = ~(1 << shift);
     a_[0].tree = (a_[0].tree & mask) | (ix<<shift);
@@ -423,6 +406,33 @@ std::string Index::bit_string(int max_level,int rank, const int nb3[3]) const
       
   }
   return bits;
+}
+
+// ----------------------------------------------------------------------
+
+int Index::data_size () const
+{
+  int size = 0;
+  SIZE_ARRAY_TYPE(size,int,v_,3);
+  return size;
+}
+
+// ----------------------------------------------------------------------
+
+char * Index::save_data (char * buffer) const
+{
+  char * pc = buffer;
+  SAVE_ARRAY_TYPE(pc,int,v_,3);
+  return pc;
+}
+
+// ----------------------------------------------------------------------
+
+char * Index::load_data (char * buffer)
+{
+  char * pc = buffer;
+  LOAD_ARRAY_TYPE(pc,int,v_,3);
+  return pc;
 }
 
 //======================================================================

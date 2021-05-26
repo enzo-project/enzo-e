@@ -217,7 +217,6 @@ void Factory::create_block
   TRACE2("Factory::create_block(num_field_data %d  count_adapt %d)",
 	 num_field_data,count_adapt);
 
-
   // --------------------------------------------------
   // ENTRY: #3 Factory::create_block() -> Block::Block()
   // ENTRY: level > 0 block array insert

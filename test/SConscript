@@ -123,6 +123,7 @@ env.RunSerial('test_Memory.unit',      bin_path + '/test_Memory')
 env.RunSerial('test_Data.unit',     bin_path + '/test_Data')
 env.RunSerial('test_Index.unit',    bin_path + '/test_Index')
 env.RunSerial('test_Face.unit',     bin_path + '/test_Face')
+env.RunSerial('test_BlockTrace.unit', bin_path + '/test_BlockTrace')
 Clean(env_mv_out.RunSerial('test_Tree.unit', bin_path + '/test_Tree'),
       ['#/test_Tree.unit.in',
        '#/test_tree_1-initial.png',	

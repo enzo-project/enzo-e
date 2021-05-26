@@ -90,7 +90,7 @@ void OutputCheckpoint::write_simulation ( const Simulation * simulation ) throw(
 
   simulation->set_phase (phase_restart);
 
-  proxy_main.p_checkpoint(CkNumPes(),dir_name);
+  proxy_main.p_checkpoint_output(CkNumPes(),dir_name);
 
 }
 

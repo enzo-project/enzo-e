@@ -89,7 +89,7 @@ void EnzoComputeTemperature::compute_(Block * block,
 
   Field field = enzo_block->data()->field();
 
-  const int in = cello::index_static();
+  const enzo_float gamma = EnzoBlock::Gamma[cello::index_static()];
 
   if (enzo::config()->method_grackle_use_grackle){
 
@@ -115,8 +115,7 @@ void EnzoComputeTemperature::compute_(Block * block,
     enzo_float * d = (enzo_float*) field.values("density", i_hist_);
     enzo_float * p = (enzo_float*) field.values("pressure", i_hist_);
 
-    EnzoComputePressure compute_pressure(EnzoBlock::Gamma[in],
-                                         comoving_coordinates_);
+    EnzoComputePressure compute_pressure(gamma,comoving_coordinates_);
     compute_pressure.set_history(i_hist_);
 
     if (recompute_pressure) compute_pressure.compute(block, p);

@@ -21,7 +21,6 @@ class Data;
 class MsgRefresh;
 class MsgRefine;
 class MsgCoarsen;
-class Factory;
 class FieldFace;
 class Hierarchy;
 class ItFace;
@@ -378,17 +377,6 @@ protected:
   void output_exit_();
 public:
 
-  //--------------------------------------------------
-  // NEW OUTPUT
-  //--------------------------------------------------
-
-  void new_output_begin_();
-  void new_output_write_block();
-
-  //--------------------------------------------------
-  // OLD OUTPUT
-  //--------------------------------------------------
-  
   void p_output_enter()
   {      output_enter_();  }
   void r_output_enter(CkReductionMsg * msg)
@@ -586,10 +574,17 @@ public:
   /// Get restricted data from child when it is deleted
   void p_refresh_child (int n, char a[],int ic3[3]);
 
+  void r_method_checkpoint_continue(CkReductionMsg * msg);
+
   void p_method_flux_correct_refresh();
   void r_method_flux_correct_sum_fields(CkReductionMsg * msg);
   void r_method_debug_sum_fields(CkReductionMsg * msg);
 
+  void p_method_output_next (MsgOutput * msg);
+  void p_method_output_write (MsgOutput * msg);
+  void r_method_output_continue(CkReductionMsg * msg);
+  void r_method_output_done(CkReductionMsg * msg);
+  
 protected:
 
   //--------------------------------------------------

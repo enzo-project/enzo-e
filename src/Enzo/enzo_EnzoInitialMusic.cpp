@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoInitiaHdf5.cpp
+/// @file     enzo_EnzoInitiaMusic.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2017-06-23
 /// @brief    Read initial conditions from HDF5
@@ -163,18 +163,18 @@ void EnzoInitialMusic::enforce_block
 	     ((IX != IY) || (IY==-1 && IZ == -1)) &&
 	     ((IX != IY && IY != IZ) || (IZ == -1)));
     
-    int m4[4] = {0};
+    int m4[4] = {0,0,0,0};
     int type_data = type_unknown;
     file-> data_open (field_datasets_[index], &type_data,
 		     m4,m4+1,m4+2,m4+3);
     // compute cell widths
-    double h4[4] = {1};
+    double h4[4] = {1,1,1,1};
     h4[IX] = (upper_block[0] - lower_block[0]) / nx;
     h4[IY] = (upper_block[1] - lower_block[1]) / ny;
     h4[IZ] = (upper_block[2] - lower_block[2]) / nz;
 
     // determine offsets
-    int o4[4] = {0};
+    int o4[4] = {0,0,0,0};
     o4[IX] = (lower_block[0] - lower_domain[0]) / h4[IX];
     o4[IY] = (lower_block[1] - lower_domain[1]) / h4[IY];
     o4[IZ] = (lower_block[2] - lower_domain[2]) / h4[IZ];
@@ -187,11 +187,11 @@ void EnzoInitialMusic::enforce_block
     if (o4[IY] >= m4[IY]) o4[IY] = o4[IY] % m4[IY];
     if (o4[IZ] >= m4[IZ]) o4[IZ] = o4[IZ] % m4[IZ];
 
-    int n4[4] = {1};
+    int n4[4] = {1,1,1,1};
     n4[IX] = (upper_block[0] - lower_block[0]) / h4[IX];
     n4[IY] = (upper_block[1] - lower_block[1]) / h4[IY];
     n4[IZ] = (upper_block[2] - lower_block[2]) / h4[IZ];
-      
+
     // open the dataspace
     file-> data_slice
       (m4[0],m4[1],m4[2],m4[3],
@@ -305,7 +305,7 @@ void EnzoInitialMusic::enforce_block
     }
 
     // Open the dataset
-    int m4[4] = {0};
+    int m4[4] = {0,0,0,0};
     int type_data = type_unknown;
     file-> data_open (particle_datasets_[index], &type_data,
 		     m4,m4+1,m4+2,m4+3);
@@ -326,13 +326,13 @@ void EnzoInitialMusic::enforce_block
     const int IZ = particle_coords_[index].find ("z");
 
     // compute cell widths
-    double h4[4] = {1};
+    double h4[4] = {1,1,1,1};
     h4[IX] = (upper_block[0] - lower_block[0]) / nx;
     h4[IY] = (upper_block[1] - lower_block[1]) / ny;
     h4[IZ] = (upper_block[2] - lower_block[2]) / nz;
 
     // determine offsets
-    int o4[4] = {0};
+    int o4[4] = {0,0,0,0};
     o4[IX] = (lower_block[0] - lower_domain[0]) / h4[IX];
     o4[IY] = (lower_block[1] - lower_domain[1]) / h4[IY];
     o4[IZ] = (lower_block[2] - lower_domain[2]) / h4[IZ];
@@ -341,7 +341,7 @@ void EnzoInitialMusic::enforce_block
     if (o4[IY] >= m4[IY]) o4[IY] = o4[IY] % m4[IY];
     if (o4[IZ] >= m4[IZ]) o4[IZ] = o4[IZ] % m4[IZ];
 
-    int n4[4] = {1};
+    int n4[4] = {1,1,1,1};
     n4[IX] = (upper_block[0] - lower_block[0]) / h4[IX];
     n4[IY] = (upper_block[1] - lower_block[1]) / h4[IY];
     n4[IZ] = (upper_block[2] - lower_block[2]) / h4[IZ];

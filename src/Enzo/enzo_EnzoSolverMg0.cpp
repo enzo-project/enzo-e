@@ -361,17 +361,6 @@ void EnzoSolverMg0::do_shift_(EnzoBlock * enzo_block,
 
     delete msg;
   } 
-  
-  if (A_->is_singular() && is_finest_(enzo_block)) {
-
-    // Shift B if needed to be in range(A) for periodic b.c.
-    
-    SOLVER_CONTROL(enzo_block,"fine","fine", "5 applying do_shift_2");
-
-    Field field = enzo_block->data()->field();
-
-    double shift = -bs_ / bc_;
-  }
 }   
    
 //----------------------------------------------------------------------
@@ -424,8 +413,6 @@ void EnzoSolverMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
 void EnzoSolverMg0::monitor_output_(EnzoBlock * enzo_block)
 {
   const int iter = *(piter(enzo_block));
-
-  const int level = enzo_block->level();
 
   const bool l_output =
     ( ( enzo_block->index().is_root()) &&
@@ -816,8 +803,6 @@ void EnzoSolverMg0::post_smooth(EnzoBlock * enzo_block) throw()
 {
   SOLVER_CONTROL(enzo_block,"coarse+1","fine", "27 post_smooth_4");
 
-  const int level = enzo_block->level();
-
   if ( ! is_finest_(enzo_block) ) {
 
     SOLVER_CONTROL(enzo_block,"coarse","fine-1", "28 call prolong_send_3");
@@ -847,8 +832,6 @@ void EnzoSolverMg0::end_cycle(EnzoBlock * enzo_block) throw()
 
   const int iter = *piter(enzo_block);
 	    
-  const int level = enzo_block->level();
-
   const bool l_output =
     ( ( enzo_block->index().is_root()) &&
       ( (is_converged) || (is_diverged) ||

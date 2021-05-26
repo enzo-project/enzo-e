@@ -267,14 +267,8 @@ void Block::adapt_refine_()
   CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
 #endif
 
-      DataMsg * data_msg = NULL;
-
-      int narray = 0;
-      char * array = 0;
-      int num_field_data = 1;
-
       // Create data message object to send
-      data_msg = new DataMsg;
+      DataMsg * data_msg = new DataMsg;
 
       data_msg -> set_field_face (field_face,false);
       data_msg -> set_field_data (data()->field_data(),false);
@@ -284,6 +278,10 @@ void Block::adapt_refine_()
       const Factory * factory = cello::simulation()->factory();
 
       // Create the child object with interpolated data
+
+      int narray = 0;
+      char * array = 0;
+      int num_field_data = 1;
 
       factory->create_block 
 	(

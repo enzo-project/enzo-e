@@ -10,12 +10,6 @@ import socket
 
 
 #----------------------------------------------------------------------
-# Temporary setting for using new Output implementation
-#----------------------------------------------------------------------
-
-new_output = 0
-
-#----------------------------------------------------------------------
 # Maximum number of procesess per shared-memory node (can be larger than needed)
 #----------------------------------------------------------------------
 
@@ -196,8 +190,6 @@ define_papi  =        'CONFIG_USE_PAPI','PAPI3'
 
 # Experimental code defines
 
-define_new_output   = 'NEW_OUTPUT'
-
 # Debugging defines
 
 define_trace =        'CELLO_TRACE'
@@ -328,8 +320,6 @@ if (use_jemalloc == 1):
 
 if (use_papi != 0):      defines.append( define_papi )
 if (use_grackle != 0):   defines.append( define_grackle )
-
-if (new_output != 0):    defines.append( define_new_output )
 
 if (trace != 0):         defines.append( define_trace )
 if (verbose != 0):       defines.append( define_verbose )

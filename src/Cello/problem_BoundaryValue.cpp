@@ -9,6 +9,18 @@
 
 //----------------------------------------------------------------------
 
+void BoundaryValue::pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    Boundary::pup(p); 
+    TRACEPUP; 
+
+    p | *value_;
+    p | field_list_;
+  }
+
+//----------------------------------------------------------------------
+
 void BoundaryValue::enforce 
 (Block * block, face_enum face, axis_enum axis) const throw()
 {

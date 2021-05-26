@@ -242,7 +242,7 @@ int ParticleDescr::attribute_index (int it, std::string attribute_name) const
 
   static int count[CONFIG_NODE_SIZE] = {0};
 
-  if (index == -1 && count[cello::index_static()]++ < 10 ) {
+  if (index == -1 && count[cello::index_static()]++ < 1 ) {
     WARNING2("ParticleDescr::attribute_index()",
 	     "Trying to access unknown attribute %s in particle type \"%s\"",
 	     attribute_name.c_str(),type_name(it).c_str());

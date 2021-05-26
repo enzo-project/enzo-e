@@ -26,6 +26,10 @@ public: // interface
   virtual ~IoParticleData() throw()
   {}
 
+  PUPable_decl(IoParticleData);
+
+  IoParticleData(CkMigrateMessage *m) : Io(m) {}
+
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
@@ -35,7 +39,9 @@ public: // interface
 
   /// Set ParticleData
   void set_particle_data (ParticleData * particle_data) throw()
-  { particle_data_ = particle_data;};
+  {
+    particle_data_ = particle_data;
+  };
 
 #include "_io_Io_common.hpp"
 

@@ -99,11 +99,9 @@ bool Box::get_start_stop
   // apply padding if needed
   if (lpad) apply_padding_(index_min,index_max);
 
-  int m3[3] = {1,1,1};
   int n3[3] = {1,1,1};
   int g3[3] = {0,0,0};
   for (int i=0; i<rank_; i++) {
-    m3[i] = block_size_[i] + 2*ghost_depth_[i];
     n3[i] = block_size_[i];
     g3[i] = ghost_depth_[i];
   }

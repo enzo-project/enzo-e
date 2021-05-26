@@ -107,7 +107,7 @@ public: // interface
   
   /// Initialize EnzoBlock using MsgRefine returned by creating process
   virtual void p_set_msg_refine(MsgRefine * msg);
-
+  
   /// Initialize an empty EnzoBlock
   EnzoBlock()
     :  CBase_EnzoBlock(),
@@ -140,7 +140,10 @@ public: // interface
       GridEndIndex[i] = 0; 
       CellWidth[i] = 0.0;
     }
-    performance_stop_(perf_block);
+#ifdef DEBUG_ENZO_BLOCK
+  CkPrintf ("%d %p TRACE_BLOCK EnzoBlock(CkMigrateMessage *)\n",CkMyPe(),(void *)this);
+  print();
+#endif
   }
 
   /// Pack / unpack the EnzoBlock in a CHARM++ program

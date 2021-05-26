@@ -54,7 +54,8 @@ Output {
       }
       image_type = "mesh";
       image_reduce_type = "max";
-      image_block_size = 5;
+      # image_block_size = 5; # DEPRECIATED
+      image_size = [1025,1025];
       colormap = [0.0, 0.0, 0.0,
                   1.0, 1.0, 1.0];
    }
