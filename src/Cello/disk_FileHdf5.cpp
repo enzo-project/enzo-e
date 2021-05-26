@@ -81,7 +81,7 @@ void FileHdf5::file_open () throw()
 
   file_id_ = H5Fopen(file_name.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 #ifdef TRACE_DISK  
-  CkPrintf ("%d [%d] TRACE_DISK H5Fopen(%d)\n",CkMyPe(),__LINE__,file_id_);
+  CkPrintf ("%d [%d] TRACE_DISK H5Fopen(%s)\n",CkMyPe(),__LINE__,file_name.c_str());
   fflush(stdout);
 #endif  
 
@@ -158,7 +158,7 @@ void FileHdf5::file_close () throw()
   // Close the file
 
 #ifdef TRACE_DISK  
-  CkPrintf ("%d [%d] TRACE_DISK H5Fclose(%d)\n",CkMyPe(),__LINE__,file_id_);
+  CkPrintf ("%d [%d] TRACE_DISK H5Fclose(%s)\n",CkMyPe(),__LINE__,file_name.c_str());
   fflush(stdout);
 #endif  
   int retval = H5Fclose (file_id_);
@@ -1215,6 +1215,11 @@ void FileHdf5::space_close_ (hid_t space_id) throw()
 
 hid_t FileHdf5::open_dataset_ (hid_t group, std::string name) throw()
 {
+  
+#ifdef TRACE_DISK
+  CkPrintf ("%d [%d] TRACE_DISK H5Dopen(%s)\n",CkMyPe(),__LINE__,name.c_str());
+  fflush(stdout);
+#endif  
   hid_t dataset_id = H5Dopen( group, name.c_str(), H5P_DEFAULT);
 
   // error check H5Dopen

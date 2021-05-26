@@ -40,8 +40,8 @@ Adapt {
  }
 
  Initial {
-     list = [ "music", "cosmology" ];
-     music {
+     list = [ "hdf5", "cosmology" ];
+     hdf5 {
          throttle_internode = false;
          throttle_intranode = false;
          throttle_node_files = false;
