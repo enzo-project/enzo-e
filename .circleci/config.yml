@@ -121,6 +121,42 @@ commands:
               make test
             fi
 
+
+  build-no-grackle:
+    description: "Compile enzo-e without Grackle."
+    parameters:
+      prec:
+        type: string
+        default: double
+      tag:
+        type: string
+        default: tip
+    steps:
+      - run:
+          name: "Compile enzo-e without grackle."
+          command: |
+            source $BASH_ENV
+            source $HOME/venv/bin/activate
+
+            git checkout << parameters.tag >>
+            export CELLO_PREC=<< parameters.prec >>
+
+            # to help make sure that this test doesn't get forgotten if parts
+            # of the build system change, check the validity of the default
+            # value of use_grackle
+            DFLT_GRACKLE_VAL=$(sed -n 's/^use_grackle *= *//p' SConstruct)
+            if [[ "$DFLT_GRACKLE_VAL" != "0" && "$DFLT_GRACKLE_VAL" != "1" ]];
+            then
+                echo "The \"use_grackle\" parameter in SConstruct has an unexpected value"
+                exit 1;
+            fi
+
+            # now actually update SConstruct to have "use_grackle = 0"
+            sed -i "s/^use_grackle *=.*/use_grackle = 0/" SConstruct
+
+            # finally, try to build enzo-e
+            make
+
   build-docs:
     description: "Test the docs build."
     steps:
@@ -166,6 +202,18 @@ jobs:
           tag: tip
           skipfile: notafile
 
+  test-build-no-grackle:
+    docker:
+      - image: cimg/python:3.7
+
+    working_directory: ~/enzo-e
+
+    steps:
+      - checkout
+      - set-env
+      - install-dependencies
+      - build-no-grackle
+
   docs-build:
     docker:
       - image: circleci/python:3.7.2
@@ -185,3 +233,4 @@ workflows:
        - test-suite:
            prec: double
        - docs-build
+       - test-build-no-grackle
