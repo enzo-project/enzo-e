@@ -243,7 +243,6 @@ void EnzoMethodGrackle::initialize_grackle_chemistry_data(double current_time)
          = 1.0 / (1.0 + enzo_config->physics_cosmology_initial_redshift);
     grackle_units_.a_value = cosmo_a;
 
-    std::cout << "EnzoMethodGrackle.cpp::a_value, current_time" << grackle_units_.a_units << "," << grackle_units_.length_units << std::endl;
   } else if (enzo_config->method_grackle_radiation_redshift > -1){
     grackle_units_.a_value = 1.0 /
                          (1.0 + enzo_config->method_grackle_radiation_redshift);
