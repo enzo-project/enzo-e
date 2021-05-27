@@ -239,15 +239,18 @@ workflows:
    tests:
      jobs:
        - test-suite:
+           name: test-suite_single-prec
            prec: single
            usegrackle: true
            skiptest: false
        - test-suite:
+           name: test-suite_double-prec
            prec: double
            usegrackle: true
            skiptest: false
        - docs-build
        - test-suite:
+           name: build-no-grackle
            prec: double
            usegrackle: false
            skiptest: true
