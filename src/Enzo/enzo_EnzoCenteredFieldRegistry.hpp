@@ -27,7 +27,7 @@
 /// @brief    vector of passively advected group names
 ///
 /// This should be updated as new groups are added
-const std::vector<std::string> passive_group_names = {"colour"};
+const std::vector<std::string> passive_group_names = {"color"};
 
 //----------------------------------------------------------------------
 
