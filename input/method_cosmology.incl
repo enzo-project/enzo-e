@@ -33,7 +33,7 @@
  }
 
  Initial {
-     list = [ "value", "music", "cosmology" ];
+     list = [ "value", "hdf5", "cosmology" ];
      music {
          FD {
              coords = "tzyx";

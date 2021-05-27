@@ -11,9 +11,6 @@ long DataMsg::counter[CONFIG_NODE_SIZE] = {0};
 
 #define CHECK
 
-// #define TRACE_COARSE_ARRAY_VALUES
-// #define DEBUG_PRINT_BLOCK "B1:0_1:1"
-// #define DEBUG_SET_COARSE_ARRAY
 //----------------------------------------------------------------------
 
 void DataMsg::set_coarse_array
@@ -76,22 +73,6 @@ void DataMsg::set_coarse_array
     int rd = r;
     // compute constant factor v for r!=1
 
-#ifdef DEBUG_SET_COARSE_ARRAY    
-    CkPrintf ("DEBUG_SET_COARSE_ARRAY nf %d %d %d\n", nf3[0],nf3[1],nf3[2]);
-    CkPrintf ("DEBUG_SET_COARSE_ARRAY na %d %d %d\n", na3[0],na3[1],na3[2]);
-    CkPrintf ("DEBUG_SET_COARSE_ARRAY mf %d %d %d\n", mfx,mfy,mfz);
-    CkPrintf ("DEBUG_SET_COARSE_ARRAY ifms %d %d %d\n", ifms3[0], ifms3[1], ifms3[2]);
-    CkPrintf ("DEBUG_SET_COARSE_ARRAY r %g\n", r);
-    CkPrintf ("DEBUG_SET_COARSE_ARRAY ka range %d:%d max %d\n",
-              0,
-              ((nf3[0]-1)/rd) + na3[0]*(((nf3[1]-1)/rd) + na3[1]*((nf3[2]-1)/rd)),
-              na3[0]*na3[1]*na3[2]);
-    CkPrintf ("DEBUG_SET_COARSE_ARRAY kf range %d:%d max %d\n",
-              if0,
-              if0+(nf3[0]-1)+mfx*((nf3[1]-1) + mfy*(nf3[2]-1)),
-              mfx*mfy*mfz);
-    fflush(stdout);
-#endif    
     for (int kz=0; kz<nf3[2]; kz++) {
       for (int ky=0; ky<nf3[1]; ky++) {
         for (int kx=0; kx<nf3[0]; kx++) {
@@ -101,31 +82,6 @@ void DataMsg::set_coarse_array
         }
       }
     }
-#ifdef TRACE_COARSE_ARRAY_VALUES
-    if (i_f == 0) {
-        CkPrintf ("COARSE_ARRAY_VALUES %s ia [%d:%d %d:%d]\n",
-                  debug_block_recv.c_str(),
-                  iam3[0],iap3[0],iam3[1],iap3[1]);
-        CkPrintf ("COARSE_ARRAY_VALUES %s ifs [%d:%d %d:%d]\n",
-                  debug_block_recv.c_str(),
-                  ifms3[0],ifps3[0],ifms3[1],ifps3[1]);
-        CkPrintf ("COARSE_ARRAY_VALUES %s  ifr [%d:%d %d:%d]\n",
-                  debug_block_recv.c_str(),
-                  ifmr3[0],ifpr3[0],ifmr3[1],ifpr3[1]);
-        CkPrintf ("COARSE_ARRAY_VALUES set_coarse_array  field %d (%d %d %d)\n",
-                  i_f,na3[0],na3[1],na3[2]);
-        for (int iz=0; iz<na3[2]; iz++) {
-          for (int iy=0; iy<na3[1]; iy++) {
-            CkPrintf ("COARSE_ARRAY_VALUES coarse_field %d %d %d: ",0,iy,iz);
-            for (int ix=0; ix<na3[0]; ix++) {
-              int i = ix+ na3[0]*(iy+ na3[1]*iz);
-              CkPrintf (" %6.3g",coarse_field[i]);
-            }
-            CkPrintf ("\n");
-          }
-        }
-    }
-#endif
   }
 }
 
@@ -315,6 +271,7 @@ char * DataMsg::load_data (char * buffer)
 
   // load particle data
   if (n_pa > 0) {
+    particle_data_delete_ = true;
     ParticleData * pd = particle_data_ = new ParticleData;
     pd->allocate(cello::particle_descr());
     pc = pd->load_data(cello::particle_descr(),pc);
@@ -365,6 +322,7 @@ void DataMsg::update (Data * data, bool is_local)
   char         * fa = field_array_u_;
 
   // Update particles
+
   if (pd != nullptr) {
 
     // Insert new particles 
@@ -376,7 +334,7 @@ void DataMsg::update (Data * data, bool is_local)
     }
 
     cello::simulation()->data_insert_particles(count);
-
+    
   }
   
   // Update fields
@@ -435,7 +393,6 @@ void DataMsg::update (Data * data, bool is_local)
        (iap3_cf_[1] - iam3_cf_[1]),
        (iap3_cf_[2] - iam3_cf_[2])};
     
-    // const int ia_start = iaxm + mx*(iaym + my*iazm);
     const int nf = coarse_field_list_dst_.size();
     
     for (int i_f=0; i_f<nf; i_f++) {
@@ -447,20 +404,9 @@ void DataMsg::update (Data * data, bool is_local)
       const int ic0 = iam3_cf_[0] + m3_c[0]*(iam3_cf_[1] + m3_c[1]*iam3_cf_[2]);
 
       cello_float * coarse_buffer = coarse_field_buffer_.data() + i_f*na;
-      cello_float * coarse_field = (cello_float *)field.coarse_values(index_field);
+      cello_float * coarse_field =
+        (cello_float *) field.coarse_values(index_field);
       
-#ifdef DEBUG_SET_COARSE_ARRAY    
-    CkPrintf ("DEBUG_SET_COARSE_ARRAY m3_c %d %d %d\n", m3_c[0],m3_c[1],m3_c[2]);
-    CkPrintf ("DEBUG_SET_COARSE_ARRAY kb range %d:%d max %d\n",
-              0,
-              (na3[0]-1) + na3[0]*((na3[1]-1) +  na3[1]*(na3[2]-1)),
-              na3[0]*na3[1]*na3[2]);
-    CkPrintf ("DEBUG_SET_COARSE_ARRAY kc range %d:%d max %d\n",
-              ic0,
-              ic0 + (na3[0]-1) + m3_c[0]*((na3[1]-1) + m3_c[1]*(na3[2]-1)),
-              m3_c[0]*m3_c[1]*m3_c[2]);
-    fflush(stdout);
-#endif    
       for (int kz=0; kz<na3[2]; kz++) {
         for (int ky=0; ky<na3[1]; ky++) {
           for (int kx=0; kx<na3[0]; kx++) {
@@ -470,26 +416,6 @@ void DataMsg::update (Data * data, bool is_local)
           }
         }
       }
-#ifdef TRACE_COARSE_ARRAY_VALUES
-      if (i_f == 0) {
-        CkPrintf ("COARSE_ARRAY_VALUES ia [%d:%d %d:%d]\n",
-                  iam3_cf_[0],iap3_cf_[0],iam3_cf_[1],iap3_cf_[1]);
-        CkPrintf ("COARSE_ARRAY_VALUES ifs [%d:%d %d:%d]\n",
-                  ifms3_cf_[0],ifps3_cf_[0],ifms3_cf_[1],ifps3_cf_[1]);
-        CkPrintf ("COARSE_ARRAY_VALUES ifr [%d:%d %d:%d]\n",
-                  ifmr3_cf_[0],ifpr3_cf_[0],ifmr3_cf_[1],ifpr3_cf_[1]);
-        for (int kz=0; kz<na3[2]; kz++) {
-          for (int ky=0; ky<na3[1]; ky++) {
-            CkPrintf ("COARSE_ARRAY_VALUES unpacked %d %d %d: ",0,ky,kz);
-            for (int kx=0; kx<na3[0]; kx++) {
-              const int kc = ic0 + kx + m3_c[0]*(ky + m3_c[1]*kz);
-              CkPrintf (" %6.3g",coarse_field[kc]);
-            }
-            CkPrintf ("\n");
-          }
-        }
-      }
-#endif
     }
   }
 }

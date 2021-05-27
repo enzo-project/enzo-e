@@ -48,13 +48,17 @@ public: // interface
 
 protected: // functions
 
-  /// If internode throttling enabled, sleep (i_noden * throttle_seconds_stagger_) seconds
-  /// before first file open for each pe in node i_node
-  void throttle_stagger_();
-  /// If internode throttling enabled, sleep throttle_seconds_delay_ seconds after
-  /// each open/close pair
-  void throttle_delay_();
-  
+  int read_dataset_
+  (void ** data, int index, Block * block,
+   std::string file_name,
+   std::string axis_map,
+   std::string dataset,
+   int *mx, int *my, int *mz,
+   int *nx, int *ny, int *nz,
+   int *gx, int *gy, int *gz,
+   int n4[4], double h4[4],
+   int *IX, int *IY, int *IZ);
+
   template <class T>
   void copy_field_data_to_array_
   (enzo_float * array, T * data,
@@ -65,6 +69,12 @@ protected: // functions
   void copy_particle_data_to_array_
   (T * array, S * data,
    Particle particle, int it, int ia, int np);
+
+  template <class T>
+  void update_particle_displacements_
+  ( T * array, int nx, int ny, int nz,
+    Particle particle, int it, int ia,
+    double lower, double h, int axis); 
 
 protected: // attributes
 
@@ -83,33 +93,6 @@ protected: // attributes
   std::vector < std::string > particle_coords_;
   std::vector < std::string > particle_types_;
   std::vector < std::string > particle_attributes_;
-
-  /// Throttle output between nodes by introducing a delay before
-  /// starting reading based on node id throttle_group_size, and
-  /// throttle_seconds_delay_
-  bool throttle_internode_;
-  
-  /// Use Charm++ mutex to limit open files to one per node
-  /// REQUIRES CONFIG_SMP_MODE
-  bool throttle_intranode_;
-
-  /// Open a file at most once per node.  NOTE: this leaves files
-  /// open, which should be called by including "close_files" to
-  /// Method : list
-  bool throttle_node_files_;
-
-  /// Number of blocks per node; used to close HDF5 files after
-  /// the last block reads
-  int throttle_close_count_;
-
-  /// Number of groups with different group_sizes
-  int throttle_group_size_;
-  /// if internode throttling, start reading only after stagger * K
-  /// seconds for pe's in node K
-  double throttle_seconds_stagger_;
-  /// if internode throttling, delay after each open/close pair
-  double throttle_seconds_delay_;
-
 };
 
 #endif /* ENZO_ENZO_INITIAL_HDF5_HPP */
