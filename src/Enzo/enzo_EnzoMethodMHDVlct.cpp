@@ -271,215 +271,86 @@ EnzoEFltArrayMap EnzoMethodMHDVlct::conserved_passive_scalar_map_
 
 //----------------------------------------------------------------------
 
-void update_flux_data_old_(Block * block, const EnzoEFltArrayMap &flux_map,
-                           int dim, double cell_width, double dt)
+static void update_flux_data_(Block * block, const EnzoEFltArrayMap &flux_map,
+                              int dim, double cell_width, double dt)
 {
+
   Field field = block->data()->field();
-  const EnzoPermutedCoordinates coord(dim);
 
-  // first get dimensions of cell-centered fields along i,j,k
-  int ghost[3], cc_shape[3]; // the values are ordered as x,y,z
-  field.ghost_depth(0, &(ghost[0]), &(ghost[1]), &(ghost[2]));
-  field.dimensions(0, &(cc_shape[0]), &(cc_shape[1]), &(cc_shape[2]));
-
-  int gi = ghost[coord.i_axis()];     int mi = cc_shape[coord.i_axis()];
-  int gj = ghost[coord.j_axis()];     int mj = cc_shape[coord.j_axis()];
-  int gk = ghost[coord.k_axis()];     int mk = cc_shape[coord.k_axis()];
-
-  // now, compute slices along j and k axes dimension. We build these with
-  // exact indices (i.e. we don't use negative indices) just in case the arrays
-  // holding the fluxes are bigger than they need to be
-  const CSlice j_slc(gj, mj - gj); // slices along j and k just include the
-  const CSlice k_slc(gk, mk - gk); // active zone
-
-  // the fluxes on the lower face of the block are found between the cells at
-  // (gi-1) and gi. Because the flux arrays have space for values located on
-  // all interior faces between cells, these values are located at the index
-  // (gi-1).
-  const CSlice i_lower_slc(gi - 1, gi);
-  // the fluxes on the upper face of the block are found between the cells at
-  // (mi-gi-1) and (mi-gi). Because the flux arrays have space for values
-  // located on all interior faces between cells, these values are located at
-  // the index (mi-gi-1).
-  const CSlice i_upper_slc(mi - gi - 1, mi -gi);
-
-  // Finally we actually store the fluxes
-  FluxData * flux_data = block->data()->flux_data();
-
+  // load the cell-centered shape and the ghost depth
+  int density_field_id = field.field_id("density");
+  int cc_mx, cc_my, cc_mz; // the values are ordered as x,y,z
+  field.dimensions(density_field_id, &cc_mx, &cc_my, &cc_mz);
+  int gx, gy, gz;
+  field.ghost_depth(density_field_id, &gx, &gy, &gz);
 
   double dt_dxi = dt/cell_width;
 
+  FluxData * flux_data = block->data()->flux_data();
   const int nf = flux_data->num_fields();
-  for (int i_f=0; i_f <nf; i_f++) {
-    int * flux_index = 0;
+
+  for (int i_f = 0; i_f < nf; i_f++) {
     const int index_field = flux_data->index_field(i_f);
     const std::string field_name = field.field_name(index_field);
 
     // note the field_name is the same as the key
+    EFlt3DArray flux_arr = flux_map.at(field_name);
 
-    for (int face = 0; face < 2; face++){
+    FaceFluxes * left_ff = flux_data->block_fluxes(dim,0,i_f);
+    FaceFluxes * right_ff = flux_data->block_fluxes(dim,1,i_f);
 
-      FaceFluxes * ff_b = flux_data->block_fluxes(dim,face,i_f);
-      int mx, my, mz;
-      ff_b->get_size(&mx,&my,&mz);
-      int dx, dy, dz;
-      enzo_float* dest = ff_b->flux_array(&dx,&dy,&dz).data();
+    int mx, my, mz;
+    left_ff->get_size(&mx,&my,&mz);
 
-      if (dim == 0){
-        dx = 0;
-      } else if (dim ==1){
-        dy = 0;
-      } else {
-        dz = 0;
-      }
+    int dx_l,dy_l,dz_l,    dx_r,dy_r,dz_r;
+    enzo_float* left_dest =
+      (enzo_float *)left_ff->flux_array(&dx_l,&dy_l,&dz_l).data();
+    enzo_float* right_dest =
+      (enzo_float *)right_ff->flux_array(&dx_r,&dy_r,&dz_r).data();
 
-      const CSlice& i_slc = (face == 0) ? i_lower_slc : i_upper_slc;
-      EFlt3DArray tmp = flux_map.at(field_name);
-      EFlt3DArray src = coord.get_subarray(tmp, k_slc, j_slc, i_slc);
+    // NOTE: dx_l/dx_r, dy_l/dy_r, dz_l/dz_r have the wrong value when
+    // dim is 0, 1, or 2 respectively. In each case the variables are equal to
+    // 1 when they should be 0.
 
-      // as a sanity check: may want to check
-      ASSERT7("update_flux_data_",
-              ("For the flux along %d, the subarray is expected to have shape "
-               "(%d,%d,%d). Instead, its shape is (%d,%d,%d)."),
-              dim, mz,my,mx, src.shape(0), src.shape(1), src.shape(2),
-              ((src.shape(0) == mz) && (src.shape(1) == my) &&
-               (src.shape(2) == mx))
-              );
+    if (dim == 0){
+      int left_ix = gx-1;
+      int right_ix = cc_mx-gx-1;
 
       for (int iz = 0; iz < mz; iz++){
         for (int iy = 0; iy < my; iy++){
-          for (int ix = 0; ix < mx; ix++){
-            dest[iz*dz + iy*dy + ix*dx] = dt_dxi * src(iz,iy,ix);
-          }
+          left_dest[dz_l*iz + dy_l*iy]
+            = dt_dxi* flux_arr(gz+iz, gy+iy, left_ix);
+          right_dest[dz_r*iz + dy_r*iy]
+            = dt_dxi* flux_arr(gz+iz, gy+iy, right_ix);
+        }
+      }
+
+    } else if (dim == 1) {
+      int left_iy = gy-1;
+      int right_iy = cc_my-gy-1;
+
+      for (int iz = 0; iz < mz; iz++){
+        for (int ix = 0; ix < mx; ix++){
+          left_dest[dz_l*iz + dx_l*ix]
+            = dt_dxi* flux_arr(gz+iz, left_iy, gx+ix);
+          right_dest[dz_l*iz + dx_l*ix]
+            = dt_dxi* flux_arr(gz+iz, right_iy, gx+ix);
+        }
+      }
+    } else {
+      int left_iz = gz-1;
+      int right_iz = cc_mz-gz-1;
+
+      for (int iy = 0; iy < my; iy++){
+        for (int ix = 0; ix < mx; ix++){
+          left_dest[dy_l*iy + dx_l*ix]
+            = dt_dxi* flux_arr(left_iz, gy + iy, gx+ix);
+          right_dest[dy_l*iy + dx_l*ix]
+            = dt_dxi* flux_arr(right_iz, gy + iy, gx+ix);
         }
       }
 
     }
-  }
-}
-
-void update_flux_data_(Block * block, const EnzoEFltArrayMap &flux_map,
-                       int dim, double cell_width, double dt)
-{
-  Field field = block->data()->field();
-  const EnzoPermutedCoordinates coord(dim);
-
-  double dt_dxi = dt/cell_width;
-
-  // first get dimensions of cell-centered fields along i,j,k
-  int ghost[3], cc_shape[3]; // the values are ordered as x,y,z
-
-  int density_field_id = field.field_id("density");
-  field.ghost_depth(density_field_id, &(ghost[0]), &(ghost[1]), &(ghost[2]));
-  field.dimensions(density_field_id,
-                   &(cc_shape[0]), &(cc_shape[1]), &(cc_shape[2]));
-
-  EFlt3DArray dflux = flux_map.at("density");
-
-  FluxData * flux_data = block->data()->flux_data();
-  if (dim == 0){
-
-    //CkPrintf("ghost zones: (gz,gy,gx) = (%d,%d,%d)\n",
-    //      ghost[2], ghost[1], ghost[0]);
-
-    //CkPrintf("Cell-centered shape: (mz,my,mx) = (%d,%d,%d)\n",
-    //         cc_shape[2], cc_shape[1], cc_shape[0]);
-    //CkPrintf("Flux-array shape: (mz,my,mx) = (%d,%d,%d)\n",
-    //         dflux.shape(0), dflux.shape(1), dflux.shape(2));
-
-    // CkPrintf("lower slice: from %ld to %ld\n",
-    //         i_lower_slc.get_start(), i_lower_slc.get_stop());
-
-    //CkPrintf("upper slice: from %ld to %ld\n",
-    //         i_upper_slc.get_start(), i_upper_slc.get_stop());
-
-    int gx = ghost[0];
-    int gy = ghost[1];
-    int gz = ghost[2];
-
-    const int nf = flux_data->num_fields();
-    for (int i_f=0; i_f <nf; i_f++) {
-      const int index_field = flux_data->index_field(i_f);
-      const std::string field_name = field.field_name(index_field);
-
-      // note the field_name is the same as the key
-
-      CkPrintf("field:%s\n", field_name.c_str());
-
-      EFlt3DArray flux_arr = flux_map.at(field_name);
-
-
-      FaceFluxes * left_ff = flux_data->block_fluxes(dim,0,i_f);
-      FaceFluxes * right_ff = flux_data->block_fluxes(dim,1,i_f);
-
-      int mx, my, mz;
-      left_ff->get_size(&mx,&my,&mz);
-      if (i_f == 0){
-        CkPrintf("mx,my,mz = %d,%d,%d\n",mx,my,mz);
-      }
-      int dx_l,dy_l,dz_l,    dx_r,dy_r,dz_r;
-      enzo_float* left_dest =
-        (enzo_float *)left_ff->flux_array(&dx_l,&dy_l,&dz_l).data();
-      enzo_float* right_dest =
-        (enzo_float *)right_ff->flux_array(&dx_r,&dy_r,&dz_r).data();
-
-      int left_ix = gx-1;
-      int right_ix = cc_shape[0]-gx-1;
-
-      if (i_f == 0){
-        CkPrintf("dx_l,dy_l,dz_l = %d,%d,%d\n", dx_l,dy_l,dz_l);
-        CkPrintf("dx_r,dy_r,dz_r = %d,%d,%d\n", dx_r,dy_r,dz_r);
-
-        CkPrintf("L: first: %p, last: %p\n", left_dest, left_dest+my*mz-1);
-        CkPrintf("R: first: %p, last: %p\n", right_dest, right_dest+my*mz-1);
-
-        CkPrintf("index for L: %d, index for R:%d\n",
-                 left_ix,right_ix);
-      }
-
-      for (int iz = 0; iz<mz; iz++){
-        for (int iy = 0; iy<my; iy++){
-          for (int ix = 0; ix <mx; ix++){
-            left_dest[dz_l*iz + dy_l*iy]
-              = dt_dxi* flux_arr(gz+iz, gy + iy, gx-1);
-
-            right_dest[dz_r*iz + dy_r*iy]
-              = dt_dxi* flux_arr(gz+iz, gy + iy, cc_shape[0]-gx-1);
-          }
-        }
-      }
-
-      //ERROR("early exit", "stop");
-    }
-
-  } else {
-    const int nf = flux_data->num_fields();
-    for (int i_f=0; i_f <nf; i_f++) {
-      FaceFluxes * left_ff = flux_data->block_fluxes(dim,0,i_f);
-      FaceFluxes * right_ff = flux_data->block_fluxes(dim,1,i_f);
-
-      int mx, my, mz;
-      left_ff->get_size(&mx,&my,&mz);
-      if (i_f == 0){
-        CkPrintf("mx,my,mz = %d,%d,%d\n",mx,my,mz);
-      }
-      int dx_l,dy_l,dz_l,    dx_r,dy_r,dz_r;
-      enzo_float* left_dest =
-        (enzo_float *)left_ff->flux_array(&dx_l,&dy_l,&dz_l).data();
-      enzo_float* right_dest =
-        (enzo_float *)right_ff->flux_array(&dx_r,&dy_r,&dz_r).data();
-
-      for (int iz = 0; iz<mz; iz++){
-        for (int iy = 0; iy<my; iy++){
-          for (int ix = 0; ix <mx; ix++){
-            left_dest[dz_l*iz + dy_l*iy + dx_l*ix] = 0.;
-
-            right_dest[dz_r*iz + dy_r*iy + dx_r*ix] = 0.;
-          }
-        }
-      }
-    }
-
   }
 }
 
@@ -661,8 +532,8 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       if (i == 1 && bfield_method_ == nullptr) {
         if (eos_->uses_dual_energy_formalism()){
           // the interface velocity on the edge of the block will be different!
-          // I think the answer here is to add this effect to the internal
-          // energy flux
+          // I'm not actually sure whether this is really an issue for the
+          // internal energy source term. We should look at what PPM does
           ERROR("EnzoMethodMHDVlct::compute",
                 "Handling of the dual energy source term is won't be properly "
                 "corrected!");
