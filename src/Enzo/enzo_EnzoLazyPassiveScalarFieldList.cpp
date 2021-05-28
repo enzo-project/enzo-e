@@ -35,13 +35,15 @@ EnzoLazyPassiveScalarFieldList::build_passive_list_() noexcept
 void EnzoLazyPassiveScalarFieldList::pup(PUP::er &p) {
   p | initialized_;
 
-  if (p.isUnpacking()){
-    str_vec_t* temp_vals = new std::vector<std::string>();
-    p | *temp_vals;
-    passive_names_ = std::const_pointer_cast<const str_vec_t>
-      (std::shared_ptr<str_vec_t>(temp_vals));
-  } else {
-    str_vec_t temp_copy = *passive_names_;
-    p | temp_copy;
+  if (initialized_){
+    if (p.isUnpacking()){
+      str_vec_t* temp_vals = new std::vector<std::string>();
+      p | *temp_vals;
+      passive_names_ = std::const_pointer_cast<const str_vec_t>
+	(std::shared_ptr<str_vec_t>(temp_vals));
+    } else {
+      str_vec_t temp_copy = *passive_names_;
+      p | temp_copy;
+    }
   }
 }
