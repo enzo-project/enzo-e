@@ -26,17 +26,17 @@ struct EOSStructIdeal{
   // an Impl Functor's operator() method. If the structure is simple enough,
   // the overhead of constructing/destroying can be optimized out
 
-  static inline enzo_float specific_eint(enzo_float density,
-                                         enzo_float pressure,
-                                         enzo_float gamma) noexcept
+  static inline enzo_float specific_eint(const enzo_float density,
+                                         const enzo_float pressure,
+                                         const enzo_float gamma) noexcept
   { return pressure / ( (gamma - 1.0) * density); }
 
-  static inline enzo_float eint_dens(enzo_float density, enzo_float pressure,
-                                     enzo_float gamma) noexcept
+  static inline enzo_float eint_dens(const enzo_float density, const enzo_float pressure,
+                                     const enzo_float gamma) noexcept
   { return pressure / (gamma - 1.0); }
 
-  static inline enzo_float sound_speed(enzo_float density, enzo_float pressure,
-                                       enzo_float gamma) noexcept
+  static inline enzo_float sound_speed(const enzo_float density, const enzo_float pressure,
+                                       const enzo_float gamma) noexcept
   { return std::sqrt(gamma * pressure / density); }
 
 };
@@ -69,7 +69,7 @@ namespace enzo_riemann_utils{
   /// We might want to consolidate this with active_fluxes
   template <class LUT>
   inline lutarray<LUT> compute_conserved(const lutarray<LUT> prim,
-                                         enzo_float gamma) noexcept
+                                         const enzo_float gamma) noexcept
   {
     lutarray<LUT> cons;
 
@@ -90,10 +90,10 @@ namespace enzo_riemann_utils{
       enzo_float internal_edens = EOSStructIdeal::eint_dens(density, pressure,
                                                             gamma);
 
-      enzo_float vi = prim[LUT::velocity_i];
-      enzo_float vj = prim[LUT::velocity_j];
-      enzo_float vk = prim[LUT::velocity_k];
-      enzo_float kinetic_edens = 0.5 * density * (vi*vi + vj*vj + vk*vk);
+      const enzo_float vi = prim[LUT::velocity_i];
+      const enzo_float vj = prim[LUT::velocity_j];
+      const enzo_float vk = prim[LUT::velocity_k];
+      const enzo_float kinetic_edens = 0.5 * density * (vi*vi + vj*vj + vk*vk);
 
       enzo_float magnetic_edens = mag_pressure<LUT>(prim);
 
@@ -117,10 +117,10 @@ namespace enzo_riemann_utils{
     // TODO: optimize calc of cs2 to omit sqrt and pow
     //       can also skip the calculation of B2 by checking if
     //       LUT::bfield_i, LUT::bfield_j, LUT::bfield_k are all negative
-    enzo_float cs = EOSStructIdeal::sound_speed(prim_vals[LUT::density],
+    const enzo_float cs = EOSStructIdeal::sound_speed(prim_vals[LUT::density],
                                                 pressure, gamma);
-    enzo_float cs2 = std::pow(cs,2);
-    enzo_float B2 = (bi*bi + bj*bj + bk *bk);
+    const enzo_float cs2 = std::pow(cs,2);
+    const enzo_float B2 = (bi*bi + bj*bj + bk *bk);
     if (B2 == 0){
       return std::sqrt(cs2);
     }
@@ -148,10 +148,10 @@ namespace enzo_riemann_utils{
     // TODO: optimize calc of cs2 to omit sqrt and pow
     //       can also skip the calculation of B2 by checking if
     //       LUT::bfield_i, LUT::bfield_j, LUT::bfield_k are all negative
-    enzo_float cs = EOSStructIdeal::sound_speed(prim_vals[LUT::density],
+    const enzo_float cs = EOSStructIdeal::sound_speed(prim_vals[LUT::density],
                                                 pressure, gamma);
-    enzo_float cs2 = std::pow(cs,2);
-    enzo_float B2 = (bi*bi + bj*bj + bk *bk);
+    const enzo_float cs2 = std::pow(cs,2);
+    const enzo_float B2 = (bi*bi + bj*bj + bk *bk);
     if (B2 == 0){
       return std::sqrt(cs2);
     }
@@ -248,7 +248,7 @@ namespace enzo_riemann_utils{
   ///   the mesh). This allows for appropriate loading of reconstructed fields.
   template<class LUT>
   inline std::array<EFlt3DArray,LUT::NEQ> load_array_of_fields
-  (EnzoEFltArrayMap& map, int dim, bool prim) noexcept
+  (EnzoEFltArrayMap& map, const int dim, const bool prim) noexcept
   {
     std::array<EFlt3DArray,LUT::NEQ> arr;
     // in the case where we don't have reconstructed values (dim = -1) we assume
@@ -258,7 +258,7 @@ namespace enzo_riemann_utils{
     // define a lambda function to execute for every member of lut. For each
     // member in lut, its passed: 1. the member's name
     //                            2. the associated index
-    auto fn = [coord, prim, &arr, &map](std::string name, int index)
+    auto fn = [coord, prim, &arr, &map](const std::string& name, const int index)
       {
         if (index != -1){
           if (prim && (index == LUT::total_energy)){

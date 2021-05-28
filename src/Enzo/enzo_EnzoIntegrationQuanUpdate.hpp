@@ -23,7 +23,7 @@ public: // interface
   /// Create a new EnzoIntegrationQuanUpdate instance
   EnzoIntegrationQuanUpdate
   (const std::vector<std::string> &integration_quantities,
-   bool skip_B_update) throw();
+   const bool skip_B_update) throw();
 
   /// Virtual destructor
   virtual ~EnzoIntegrationQuanUpdate()
@@ -106,7 +106,7 @@ public: // interface
   void update_quantities
   (EnzoEFltArrayMap &initial_integration_map, EnzoEFltArrayMap &dUcons_map,
    EnzoEFltArrayMap &out_integration_map, EnzoEquationOfState *eos,
-   int stale_depth, const str_vec_t &passive_list) const;
+   const int stale_depth, const str_vec_t &passive_list) const;
 
   /// provides a const vector of all registerred integration keys
   const std::vector<std::string> integration_keys() const throw()
@@ -121,7 +121,7 @@ private:
   /// (This should called before the density is updated)
   void update_passive_scalars_
   (EnzoEFltArrayMap &initial_integration_map, EnzoEFltArrayMap &dUcons_map,
-   EnzoEFltArrayMap &out_integration_map, int stale_depth,
+   EnzoEFltArrayMap &out_integration_map, const int stale_depth,
    const str_vec_t &passive_list) const;
 
   /// Dynamically allocates and constructs an array of instances of EFlt3DArray
@@ -131,7 +131,7 @@ private:
   /// @param[in] stale_depth indicates the current stale_depth for the loaded
   ///   quantities.
   EFlt3DArray* load_integration_quantities_(EnzoEFltArrayMap &map,
-                                            int stale_depth) const;
+                                            const int stale_depth) const;
 
 private: // attributes
 

@@ -27,8 +27,8 @@ public: // interface
   /// @param mhd Indicates whether magnetic fields are present
   /// @param internal_energy Indicates whether the internal energy is an
   ///     integration quantity
-  static EnzoRiemann* construct_riemann(std::string solver, bool mhd,
-                                        bool internal_energy);
+  static EnzoRiemann* construct_riemann(const std::string& solver, const bool mhd,
+                                        const bool internal_energy);
 
   EnzoRiemann() noexcept
   {}
@@ -85,9 +85,9 @@ public: // interface
   /// applies to the other arrays passed as arguments.
   virtual void solve
   (EnzoEFltArrayMap &prim_map_l, EnzoEFltArrayMap &prim_map_r,
-   EnzoEFltArrayMap &flux_map, int dim, EnzoEquationOfState *eos,
-   int stale_depth, const str_vec_t &passive_list,
-   EFlt3DArray *interface_velocity) const = 0;
+   EnzoEFltArrayMap &flux_map, const int dim, const EnzoEquationOfState *eos,
+   const int stale_depth, const str_vec_t &passive_list,
+   const EFlt3DArray *interface_velocity) const = 0;
 
   /// Return the names of the actively advected integration quantities for
   /// which fluxes will be computed.

@@ -112,7 +112,7 @@ public: // interface
   /// for this operation.
   virtual void primitive_from_integration
   (EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &primitive_map,
-   int stale_depth, const str_vec_t &passive_list) const =0;
+   const int stale_depth, const str_vec_t &passive_list) const =0;
 
   /// Computes thermal pressure from integration quantities
   /// 
@@ -127,7 +127,7 @@ public: // interface
   /// writing, it doesn't actually wrap EnzoComputePressure
   virtual void pressure_from_integration
   (EnzoEFltArrayMap &integration_map, const EFlt3DArray &pressure,
-   int stale_depth) const = 0;
+   const int stale_depth) const = 0;
 
   /// returns the density floor
   virtual enzo_float get_density_floor() const = 0;
@@ -153,7 +153,7 @@ public: // interface
   /// (similar to the implementation of the dual energy formalsim in Enzo's
   /// Runge Kutta and MHD with Constrained Transport solvers).
   virtual void apply_floor_to_energy_and_sync(EnzoEFltArrayMap &integration_map,
-                                              int stale_depth) const = 0;
+                                              const int stale_depth) const = 0;
 
   /// returns whether the equation of state is barotropic
   virtual bool is_barotropic() const = 0;

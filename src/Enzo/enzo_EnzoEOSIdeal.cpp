@@ -41,7 +41,7 @@ bool grackle_variable_gamma_(){
 
 void EnzoEOSIdeal::primitive_from_integration
 (EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &primitive_map,
- int stale_depth, const str_vec_t &passive_list) const
+ const int stale_depth, const str_vec_t &passive_list) const
 {
   if (grackle_variable_gamma_()){
     ERROR("EnzoEOSIdeal::primitive_from_integration",
@@ -49,9 +49,9 @@ void EnzoEOSIdeal::primitive_from_integration
   }
 
   EFlt3DArray density = integration_map.at("density");
-  int mz = density.shape(0);
-  int my = density.shape(1);
-  int mx = density.shape(2);
+  const int mz = density.shape(0);
+  const int my = density.shape(1);
+  const int mx = density.shape(2);
 
   // The EOS object doesn't necessarily know what the integration quantities
   // are. This means we take something of an exhaustive approach. This could be
@@ -113,7 +113,7 @@ void EnzoEOSIdeal::primitive_from_integration
 
 void EnzoEOSIdeal::pressure_from_integration
 (EnzoEFltArrayMap &integration_map, const EFlt3DArray &pressure,
- int stale_depth) const
+ const int stale_depth) const
 {
 
   // For now, we are not actually wrapping ComputePressure
@@ -189,7 +189,7 @@ void EnzoEOSIdeal::pressure_from_integration
 // based on the enzo's hydro_rk implementation of synchronization (found in the
 // Grid_UpdateMHD.C file)
 void EnzoEOSIdeal::apply_floor_to_energy_and_sync
-(EnzoEFltArrayMap &integration_map, int stale_depth) const
+(EnzoEFltArrayMap &integration_map, const int stale_depth) const
 {
   if (grackle_variable_gamma_()){
     ERROR("EnzoEOSIdeal::apply_floor_to_energy_and_sync",

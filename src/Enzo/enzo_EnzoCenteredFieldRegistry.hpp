@@ -152,7 +152,7 @@ public:
   /// @param exclude_non_active_advection Determines whether quantities that
   ///     are bit actively advected should be excluded from the list
   static std::vector<std::string> get_registered_quantities
-  (bool enumerate_components, bool exclude_non_active_advection = false);
+  (const bool enumerate_components, const bool exclude_non_active_advection = false);
 
   /// provides the quantity properties listed in FIELD_TABLE (if present)
   ///
