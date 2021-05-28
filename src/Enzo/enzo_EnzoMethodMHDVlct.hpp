@@ -214,12 +214,12 @@ protected: // methods
   ///     performing reconstruction)
   /// @param[in]     passive_list A list of keys for passively advected scalars.
   void compute_flux_
-  (int dim, double cur_dt, enzo_float cell_width,
+  (const int dim, const double cur_dt, const enzo_float cell_width,
    EnzoEFltArrayMap &primitive_map,
    EnzoEFltArrayMap &priml_map, EnzoEFltArrayMap &primr_map,
    EnzoEFltArrayMap &flux_map, EnzoEFltArrayMap &dUcons_map,
    EFlt3DArray *interface_velocity_arr_ptr, EnzoReconstructor &reconstructor,
-   EnzoBfieldMethod *bfield_method, int stale_depth,
+   EnzoBfieldMethod *bfield_method, const int stale_depth,
    const str_vec_t& passive_list) const noexcept;
 
   /// Setup arrays used throughout `compute`. This includes both arrays that

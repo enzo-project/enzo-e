@@ -387,12 +387,12 @@ void EnzoMethodMHDVlct::check_mesh_and_ghost_size_(Block *block) const noexcept
 //----------------------------------------------------------------------
 
 void EnzoMethodMHDVlct::compute_flux_
-(int dim, double cur_dt, enzo_float cell_width,
+(const int dim, const double cur_dt, const enzo_float cell_width,
  EnzoEFltArrayMap &primitive_map,
  EnzoEFltArrayMap &priml_map, EnzoEFltArrayMap &primr_map,
  EnzoEFltArrayMap &flux_map, EnzoEFltArrayMap &dUcons_map,
  EFlt3DArray *interface_velocity_arr_ptr, EnzoReconstructor &reconstructor,
- EnzoBfieldMethod *bfield_method, int stale_depth,
+ EnzoBfieldMethod *bfield_method, const int stale_depth,
  const str_vec_t& passive_list) const noexcept
 {
 
@@ -445,7 +445,7 @@ void EnzoMethodMHDVlct::compute_flux_
 //----------------------------------------------------------------------
 
 static void add_temporary_arrays_to_map_
-(EnzoEFltArrayMap &map, std::array<int,3> &shape,
+(EnzoEFltArrayMap &map, const std::array<int,3> &shape,
  const std::vector<std::string>* const nonpassive_names,
  const str_vec_t* const passive_lists)
 {
@@ -480,9 +480,9 @@ void EnzoMethodMHDVlct::setup_arrays_
   integration_map = get_integration_map_
     (block, (lazy_passive_list_.get_list()).get());
 
-  std::array<int,3> shape = {integration_map.at("density").shape(0),
-                             integration_map.at("density").shape(1),
-                             integration_map.at("density").shape(2)};
+  const std::array<int,3> shape = {integration_map.at("density").shape(0),
+				   integration_map.at("density").shape(1),
+				   integration_map.at("density").shape(2)};
 
   // Next, setup temp_integration_map
   add_temporary_arrays_to_map_(temp_integration_map, shape,
@@ -551,7 +551,7 @@ double EnzoMethodMHDVlct::timestep ( Block * block ) const throw()
   eos_->pressure_from_integration(integration_map, pressure, 0);
 
   // Now load other necessary quantities
-  enzo_float gamma = eos_->get_gamma();
+  const enzo_float gamma = eos_->get_gamma();
   EFlt3DArray density = integration_map.at("density");
   EFlt3DArray velocity_x = integration_map.at("velocity_x");
   EFlt3DArray velocity_y = integration_map.at("velocity_y");

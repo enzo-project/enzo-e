@@ -79,11 +79,13 @@ public:
   ///     supplied cell-centered quantities. The update using the
   ///     reconstructor's delayed_staling_rate should be applied at some
   ///     time after this function call.
-  void calculate_source(int dim, double dt, enzo_float cell_width,
+  void calculate_source(const int dim, const double dt,
+			const enzo_float cell_width,
                         EnzoEFltArrayMap &prim_map,
                         EnzoEFltArrayMap &dUcons_map,
                         EFlt3DArray &interface_velocity,
-                        EnzoEquationOfState *eos, int stale_depth)
+                        const EnzoEquationOfState *eos,
+			const int stale_depth)
     const throw();
 };
 
