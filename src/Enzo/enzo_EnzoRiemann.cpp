@@ -12,8 +12,8 @@
 
 //----------------------------------------------------------------------
 
-EnzoRiemann* EnzoRiemann::construct_riemann(std::string solver, bool mhd,
-                                            bool internal_energy)
+EnzoRiemann* EnzoRiemann::construct_riemann(const std::string& solver, const bool mhd,
+                                            const bool internal_energy)
 {
   // determine the type of solver to construct:
   // convert string to lower case (https://stackoverflow.com/a/313990)

@@ -249,7 +249,7 @@ void EnzoBfieldMethodCT::update_all_bfield_components
 //----------------------------------------------------------------------
 
 void EnzoBfieldMethodCT::compute_center_efield
-(int dim, EFlt3DArray &efield, const EnzoEFltArrayMap &integration_map,
+(const int dim, EFlt3DArray &efield, const EnzoEFltArrayMap &integration_map,
  int stale_depth)
 {
   const std::string v_names[3] = {"velocity_x", "velocity_y", "velocity_z"};

@@ -15,7 +15,7 @@ static void append_key_to_vec_
 (const str_vec_t &integration_quantities, FieldCat target_cat,
  bool skip_bfield, std::size_t *density_index, str_vec_t &key_vec)
 {
-  for (std::string name : integration_quantities){
+  for (const std::string &name : integration_quantities){
     bool vector_quantity, actively_advected;
     FieldCat category;
     bool success = EnzoCenteredFieldRegistry::quantity_properties
@@ -56,7 +56,7 @@ static void append_key_to_vec_
 
 EnzoIntegrationQuanUpdate::EnzoIntegrationQuanUpdate
 (const str_vec_t& integration_quantities,
- bool skip_B_update) throw()
+ const bool skip_B_update) throw()
 {
   // Add conserved quantities to integration_keys_ and identify the index
   // holding the density key
@@ -159,7 +159,7 @@ EFlt3DArray* EnzoIntegrationQuanUpdate::load_integration_quantities_
 void EnzoIntegrationQuanUpdate::update_quantities
 (EnzoEFltArrayMap &initial_integration_map, EnzoEFltArrayMap &dUcons_map,
  EnzoEFltArrayMap &out_integration_map,
- EnzoEquationOfState *eos, int stale_depth,
+ EnzoEquationOfState *eos, const int stale_depth,
  const str_vec_t &passive_list) const
 {
 
@@ -183,7 +183,7 @@ void EnzoIntegrationQuanUpdate::update_quantities
 	// get the initial density
 	enzo_float old_rho = cur_prim[density_index_](iz,iy,ix);
 
-	// now update the integration qiamtotoes that are conserved
+	// now update the integration quantities that are conserved
 	for (std::size_t i = 0; i < first_specific_index_; i++){
 	  out_prim[i](iz,iy,ix) = cur_prim[i](iz,iy,ix) + dU[i](iz,iy,ix);
 	}
@@ -215,7 +215,7 @@ void EnzoIntegrationQuanUpdate::update_quantities
 
 void EnzoIntegrationQuanUpdate::update_passive_scalars_
 (EnzoEFltArrayMap &initial_integration_map, EnzoEFltArrayMap &dUcons_map,
- EnzoEFltArrayMap &out_integration_map, int stale_depth,
+ EnzoEFltArrayMap &out_integration_map, const int stale_depth,
  const str_vec_t &passive_list) const
 {
   // cell-centered grid dimensions

@@ -175,9 +175,9 @@ public: // interface
   void pup (PUP::er &p);
 
   void solve (EnzoEFltArrayMap &prim_map_l, EnzoEFltArrayMap &prim_map_r,
-              EnzoEFltArrayMap &flux_map, int dim, EnzoEquationOfState *eos,
-              int stale_depth, const str_vec_t &passive_list,
-              EFlt3DArray *interface_velocity) const;
+              EnzoEFltArrayMap &flux_map, const int dim, const EnzoEquationOfState *eos,
+              const int stale_depth, const str_vec_t &passive_list,
+              const EFlt3DArray *interface_velocity) const;
 
   const std::vector<std::string> integration_quantities() const noexcept
   { return integration_quantities_; }
@@ -210,7 +210,7 @@ protected: //attributes
 //----------------------------------------------------------------------
 
 template <class ImplFunctor>
-EnzoRiemannImpl<ImplFunctor>::EnzoRiemannImpl(bool internal_energy)
+EnzoRiemannImpl<ImplFunctor>::EnzoRiemannImpl(const bool internal_energy)
   : EnzoRiemann()
 {
   integration_quantities_ = LUT::integration_quantity_names();
@@ -251,9 +251,9 @@ void EnzoRiemannImpl<ImplFunctor>::pup (PUP::er &p)
 /// @param left,right The passive scalars (as mass fractions) on the left and
 ///    right sides of the cell interface
 /// @param density_flux The density flux at the local interface
-static inline enzo_float calc_passive_scalar_flux_(enzo_float left,
-                                                   enzo_float right,
-                                                   enzo_float density_flux){
+static inline enzo_float calc_passive_scalar_flux_(const enzo_float left,
+                                                   const enzo_float right,
+                                                   const enzo_float density_flux){
   // next line is equivalent to: upwind = (density_flux > 0) ? left : right;
   // but is branchless
   enzo_float upwind = (density_flux > 0) * left + (density_flux <= 0) * right;
@@ -262,12 +262,12 @@ static inline enzo_float calc_passive_scalar_flux_(enzo_float left,
 
 //----------------------------------------------------------------------
 
-static inline enzo_float passive_eint_flux_(enzo_float density_l,
-                                            enzo_float pressure_l,
-                                            enzo_float density_r,
-                                            enzo_float pressure_r,
-                                            enzo_float gamma,
-                                            enzo_float density_flux){
+static inline enzo_float passive_eint_flux_(const enzo_float density_l,
+                                            const enzo_float pressure_l,
+                                            const enzo_float density_r,
+                                            const enzo_float pressure_r,
+                                            const enzo_float gamma,
+                                            const enzo_float density_flux){
   enzo_float eint_l = EOSStructIdeal::specific_eint(density_l, pressure_l,
                                                     gamma);
   enzo_float eint_r = EOSStructIdeal::specific_eint(density_r, pressure_r,
@@ -385,7 +385,7 @@ template <class ImplFunctor>
 void EnzoRiemannImpl<ImplFunctor>::solve_passive_advection_
 (EnzoEFltArrayMap &prim_map_l, EnzoEFltArrayMap &prim_map_r,
  EnzoEFltArrayMap &flux_map, const EFlt3DArray &density_flux,
- int stale_depth, const str_vec_t &passive_list) const throw()
+ const int stale_depth, const str_vec_t &passive_list) const throw()
 {
   std::size_t num_keys = passive_list.size();
   if (num_keys == 0) {return;}
