@@ -13,7 +13,7 @@
 
 static void append_key_to_vec_
 (const str_vec_t &integration_quantities, FieldCat target_cat,
- bool skip_bfield, std::size_t *density_index, str_vec_t &key_vec)
+ const bool skip_bfield, std::size_t *density_index, str_vec_t &key_vec)
 {
   for (const std::string &name : integration_quantities){
     bool vector_quantity, actively_advected;

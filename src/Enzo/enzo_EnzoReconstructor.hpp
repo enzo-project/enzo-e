@@ -86,8 +86,8 @@ public: // interface
   /// for other axes.
   virtual void reconstruct_interface
   (EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
-   EnzoEFltArrayMap &primr_map, int dim, EnzoEquationOfState *eos,
-   int stale_depth, const str_vec_t& passive_list)=0;
+   EnzoEFltArrayMap &primr_map, const int dim, const EnzoEquationOfState *eos,
+   const int stale_depth, const str_vec_t& passive_list)=0;
 
   /// The rate amount by which the stale_depth increases after the current
   /// reconstructor is used to update the fluid over a (partial or full)

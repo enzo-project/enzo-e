@@ -175,8 +175,9 @@ public: // interface
   void pup (PUP::er &p);
 
   void solve (EnzoEFltArrayMap &prim_map_l, EnzoEFltArrayMap &prim_map_r,
-              EnzoEFltArrayMap &flux_map, const int dim, const EnzoEquationOfState *eos,
-              const int stale_depth, const str_vec_t &passive_list,
+              EnzoEFltArrayMap &flux_map, const int dim,
+	      const EnzoEquationOfState *eos, const int stale_depth,
+	      const str_vec_t &passive_list,
               const EFlt3DArray *interface_velocity) const;
 
   const std::vector<std::string> integration_quantities() const noexcept
@@ -192,7 +193,7 @@ protected : //methods
                                 EnzoEFltArrayMap &prim_map_r,
                                 EnzoEFltArrayMap &flux_map,
 				const EFlt3DArray &density_flux,
-                                int stale_depth,
+                                const int stale_depth,
                                 const str_vec_t &passive_list) const throw();
 
 protected: //attributes
@@ -280,9 +281,9 @@ static inline enzo_float passive_eint_flux_(const enzo_float density_l,
 template <class ImplFunctor>
 void EnzoRiemannImpl<ImplFunctor>::solve
 (EnzoEFltArrayMap &prim_map_l, EnzoEFltArrayMap &prim_map_r,
- EnzoEFltArrayMap &flux_map, int dim, EnzoEquationOfState *eos,
- int stale_depth, const str_vec_t &passive_list,
- EFlt3DArray *interface_velocity) const
+ EnzoEFltArrayMap &flux_map, const int dim, const EnzoEquationOfState *eos,
+ const int stale_depth, const str_vec_t &passive_list,
+ const EFlt3DArray *interface_velocity) const
 {
 
   const bool barotropic = eos->is_barotropic();
@@ -387,7 +388,7 @@ void EnzoRiemannImpl<ImplFunctor>::solve_passive_advection_
  EnzoEFltArrayMap &flux_map, const EFlt3DArray &density_flux,
  const int stale_depth, const str_vec_t &passive_list) const throw()
 {
-  std::size_t num_keys = passive_list.size();
+  const std::size_t num_keys = passive_list.size();
   if (num_keys == 0) {return;}
 
   // This was essentially transcribed from hydro_rk in Enzo:
@@ -408,9 +409,9 @@ void EnzoRiemannImpl<ImplFunctor>::solve_passive_advection_
 
       for (int key_ind=0; key_ind<num_keys; key_ind++){
         for (int ix = sd; ix < density_flux.shape(2) - sd; ix++) {
-          enzo_float dens_flux = density_flux(iz,iy,ix);
-          enzo_float wl = wl_arrays[key_ind](iz,iy,ix);
-          enzo_float wr = wr_arrays[key_ind](iz,iy,ix);
+          const enzo_float dens_flux = density_flux(iz,iy,ix);
+          const enzo_float wl = wl_arrays[key_ind](iz,iy,ix);
+          const enzo_float wr = wr_arrays[key_ind](iz,iy,ix);
           flux_arrays[key_ind](iz,iy,ix) =
             calc_passive_scalar_flux_(wl, wr, dens_flux);
 	}

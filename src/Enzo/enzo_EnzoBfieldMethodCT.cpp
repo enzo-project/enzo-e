@@ -36,11 +36,12 @@ void EnzoBfieldMethodCT::register_target_block_
     }
 
     // get the standard size of cell-centered fields
-    int mz = bfieldi_l_[0].shape(0); // interface bfield_z cell-centered along z
-    int my = bfieldi_l_[0].shape(1); // interface bfield_y cell-centered along y
+    // interface bfield_x is cell-centered along y and z
+    const int mz = bfieldi_l_[0].shape(0);
+    const int my = bfieldi_l_[0].shape(1);
     // interface bfield_x is face-centered along x (and the array includes
     // values on external faces of the grid)
-    int mx = bfieldi_l_[0].shape(2) - 1;
+    const int mx = bfieldi_l_[0].shape(2) - 1;
 
     // allocate arrays to hold weight values for each dimension. For a given
     // dimension, the array tracks the upwind/downwind direction on the cell

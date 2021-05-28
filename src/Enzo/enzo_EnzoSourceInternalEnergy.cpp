@@ -11,9 +11,10 @@
 //----------------------------------------------------------------------
 
 void EnzoSourceInternalEnergy::calculate_source
-(int dim, double dt, enzo_float cell_width, EnzoEFltArrayMap &prim_map,
- EnzoEFltArrayMap &dUcons_map, EFlt3DArray &interface_velocity,
- EnzoEquationOfState *eos, int stale_depth) const throw()
+(const int dim, const double dt, const enzo_float cell_width,
+ EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &dUcons_map,
+ EFlt3DArray &interface_velocity, const EnzoEquationOfState *eos,
+ const int stale_depth) const throw()
 {
   // SANITY CHECKS:
   ASSERT("EnzoSourceInternalEnergy::calculate_source",
@@ -24,7 +25,7 @@ void EnzoSourceInternalEnergy::calculate_source
 	 "The EOS can't be barotropic and use the dual energy formalism.",
 	 !(eos->is_barotropic()) );
 
-  enzo_float dtdx = dt/cell_width;
+  const enzo_float dtdx = dt/cell_width;
 
   EnzoPermutedCoordinates coord(dim);
 

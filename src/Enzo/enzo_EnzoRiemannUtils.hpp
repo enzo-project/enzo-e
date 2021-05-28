@@ -258,7 +258,8 @@ namespace enzo_riemann_utils{
     // define a lambda function to execute for every member of lut. For each
     // member in lut, its passed: 1. the member's name
     //                            2. the associated index
-    auto fn = [coord, prim, &arr, &map](const std::string& name, const int index)
+    auto fn = [coord, prim, &arr, &map](const std::string& name,
+					const int index)
       {
         if (index != -1){
           if (prim && (index == LUT::total_energy)){
