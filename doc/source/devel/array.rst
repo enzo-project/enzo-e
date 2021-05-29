@@ -332,21 +332,11 @@ bugs, we require that any default-constructed ``CSlice`` must be
 assigned a non-default constructed value (or an error will be raised).
 
 
-Elementwise Assignment
-----------------------
+Copying Elements between arrays
+-------------------------------
 
-We also provide elementwise assignment (copying elements between arrays).
-To invoke this, ``arr.subarray(Arg... args)`` must appear on the LHS
-(left-hand side) of an ``=``. The expression on the RHS (right-hand) side
-can be either:
-
-  * A scalar of the type contained by ``arr``. In this case, all elements in
-    the resulting subarray are set equal to the scalar.
-
-  * Another array or subarray that contains the same type of elements as
-    ``arr`` (The dimensions & shape of the RHS array must match the LHS
-    subarray). In this case, the elements in the LHS subarray are each
-    set equal to the corresponding elements of the array on the RHS.
+We also provide the ``copy_to`` instance method in order to copy
+elements between elements between two ``CelloArray`` instances.
 
 An example is illustrated below:
 
@@ -356,19 +346,13 @@ An example is illustrated below:
    CelloArray<int,2> arr(data,3,4);
    // arr reflects: [[0,1,2,3],[4,5,6,7],[8,9,10,11]]
    CelloArray<int,2> arr2(2,2); // arr2 is initially [[0,0],[0,0]]
-   arr2.subarray(CSlice(0,2),
-                 CSlice(0,2)) = 7; //arr2 is now [[7,7],[7,7]]
-   // The previous 2 lines could be re-written as: arr2.subarray() = 7;
-   arr.subarray(CSlice(1,3), CSlice(0,2)) = arr2;
+   arr2(0,0) = 7;
+   arr2(0,1) = 7;
+   arr2(1,0) = 7;
+   arr2(1,1) = 7; // arr2 is now [[7,7],[7,7]]
+   arr2.copy_to(arr.subarray(CSlice(1,3), CSlice(0,2)));
    // arr now reflects: [[0,1,2,3],[7,7,6,7],[7,7,10,11]]
-   arr.subarray(CSlice(0,3), 
-                CSlice(1,3)) = arr.subarray(CSlice(0,3), CSlice(2,4));
-   // arr now reflects: [[1,2,3,3],[7,6,7,7],[7,10,11,11]]
-   CelloArray<int,2> arr3 = arr.subarray(CSlice(1,3), CSlice(2,4));
-   // arr3 is a view of the subarray: [[7,7],[11,11]] of arr
-   //arr3 = 17;   // This will not compile
-   arr3 = arr2; // arr3 is now a shallow copy of arr2 & arr is unchanged
-
+   arr2(0,1) = 4; // arr2 is now [[7,4],[7,7]] and arr is unaffected
 
 ===========
 Convenience
@@ -436,12 +420,12 @@ First is an the ``CelloArray`` version:
 
    void reconstruct_NN_x(EFlt3DArray &w, EFlt3DArray &wl, 
                          EFlt3DArray &wr){
-       wl.subarray() = w.subarray(CSlice(0,w.shape(0)),
-                                  CSlice(0,w.shape(1)),
-                                  CSlice(0,-1));
-       wr.subarray() = w.subarray(CSlice(0,w.shape(0)),
-                                  CSlice(0,w.shape(1)),
-                                  CSlice(1,w.shape(2)));
+       w.subarray(CSlice(0,w.shape(0)),
+                  CSlice(0,w.shape(1)),
+                  CSlice(0,-1)).copy_to(wl);
+       w.subarray(CSlice(0,w.shape(0)),
+                  CSlice(0,w.shape(1)),
+                  CSlice(1,w.shape(2))).copy_to(wr);
    }
 
 The analogous code using conventional pointer operations is:
@@ -451,7 +435,7 @@ The analogous code using conventional pointer operations is:
    typedef double enzo_float;
 
    void reconstruct_NN_x(enzo_float *w, enzo_float *wl, enzo_float *wr,
-                      int mx, int my, int mz){
+                         int mx, int my, int mz){
      int offset = 1;
      for (int iz=0; iz<mz-1; iz++) {
        for (int iy=0; iy<my-1; iy++) {
