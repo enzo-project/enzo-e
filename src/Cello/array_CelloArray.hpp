@@ -334,7 +334,7 @@ intp calc_index_(const std::size_t D, const intp offset,
 ///     to shape[0]. Otherwise returns true. This is used to help signal when
 ///     to stop dynamically iterating over an array.
 static inline bool increment_outer_indices_(std::size_t D, intp *indices,
-                                            intp *shape){
+                                            const intp *shape){
   std::size_t i = D-1;
   ASSERT("increment_out_indices", "the dimension must be positive",
          D>0);
@@ -351,14 +351,11 @@ static inline bool increment_outer_indices_(std::size_t D, intp *indices,
 
 //----------------------------------------------------------------------
 
-// Need to forward declare CelloArray and TempArray_ since they are referenced
-// in FixedDimArray_ and are also derived from FixedDimArray_
+// Need to forward declare CelloArray since it is referenced in FixedDimArray_
+// and are also derived from FixedDimArray_
 
 template<typename T, std::size_t D>
 class CelloArray;
-
-template<typename T, std::size_t D>
-class TempArray_;
 
 //----------------------------------------------------------------------
 
@@ -369,8 +366,7 @@ class FixedDimArray_
   /// @class    FixedDimArray_
   /// @ingroup  Array
   /// @brief    [\ref Array] base class for CelloArray. This exists to factor
-  ///           out behavior used by both CelloArray and TempArray (a helper
-  ///           class that allows for numpy inspired elementwise assignment)
+  ///           out behavior used by CelloArray
 
 public: // interface
 
@@ -414,10 +410,6 @@ public: // interface
     return shared_data_.get()[offset_ + k*stride_[0] + j*stride_[1] + i];
   }
 
-
-  /// Produce a deepcopy of the array.
-  TempArray_<T,D> deepcopy() const noexcept;
-
   /// Return a subarray with the same number of dimensions, D.
   ///
   /// @param args Instances of CSlice for each array dimension. If no arguments
@@ -437,7 +429,7 @@ public: // interface
   /// the result of this method is first assigned to another variable and the
   /// variable is placed on the LHS, then different behavior will occur.
   template<typename... Args, REQUIRE_TYPE(Args,CSlice)>
-  TempArray_<T,D> subarray(Args... args) const noexcept;
+  CelloArray<T,D> subarray(Args... args) const noexcept;
 
   /// Returns the length of a given dimension
   ///
@@ -661,15 +653,15 @@ inline void prep_slices_(const CSlice* slices, const intp shape[],
 
 //----------------------------------------------------------------------
 
-// Returnd TempArray_ representing a view of a subarray of the current instance
+// Returnd CelloArray representing a view of a subarray of the current instance
 template<typename T, std::size_t D>
 template<typename... Args, class>
-TempArray_<T,D> FixedDimArray_<T,D>::subarray(Args... args) const noexcept{
+CelloArray<T,D> FixedDimArray_<T,D>::subarray(Args... args) const noexcept{
   // TODO: put some thought into creating a const-qualified version of this
   // function
   static_assert(D == sizeof...(args) || 0 == sizeof...(args),
 		"Number of slices don't match number of dimensions");
-  TempArray_<T,D> subarray;
+  CelloArray<T,D> subarray;
   if (sizeof...(args) == 0) {
     subarray.shallow_copy_init_helper_(*this);
   } else {
@@ -692,20 +684,6 @@ TempArray_<T,D> FixedDimArray_<T,D>::subarray(Args... args) const noexcept{
     }
   }
   return subarray;
-}
-
-//----------------------------------------------------------------------
-
-template<typename T, std::size_t D>
-TempArray_<T,D> FixedDimArray_<T,D>::deepcopy() const noexcept
-{
-  std::shared_ptr<T> new_data(new T[size()], std::default_delete<T[]>());
-  TempArray_<T,D> out;
-  out.init_helper_(new_data, shape_, 0);
-  // Take advantage of how TempArray_'s assignment operator performs
-  // elementwise assignment
-  out = *this;
-  return out;
 }
 
 //----------------------------------------------------------------------
@@ -736,85 +714,6 @@ void FixedDimArray_<T,D>::assert_all_entries_finite_() const noexcept
     }
     continue_outer_iter = increment_outer_indices_(D, indices, this->shape_);
   }
-}
-
-//----------------------------------------------------------------------
-
-template<typename T, std::size_t D>
-class TempArray_ : public FixedDimArray_<T,D>
-{
-  /// @class    TempArray_
-  /// @ingroup  Array
-  /// @brief    [\ref Array] helper class for used to provide CelloArray with
-  ///           elementwise assignment inspired by numpy
-  
-  friend class FixedDimArray_<T,D>;
-  friend class CelloArray<T,D>;
-
-public: // interface
-
-  /// Assigns to each element of *this the value of val
-  TempArray_<T,D>& operator=(const T& val);
-
-  /// Assigns to each element of *this the value of the corresponding element in
-  /// other. Shapes must match
-  TempArray_<T,D>& operator=(const TempArray_<T,D>& other){
-    assign_helper_(other.offset_,other.stride_,other.shape_,
-                   other.shared_data_.get());
-    return *this;
-  }
-
-  TempArray_<T,D>& operator=(const CelloArray<T,D>& other){
-    assign_helper_(other.offset_,other.stride_, other.shape_,
-                   other.shared_data_.get());
-    return *this;
-  }
-
-private:
-  /// Default constructor.
-  ///
-  /// Not public to prevent initialization of instances of FixedDimArray_
-  TempArray_() : FixedDimArray_<T,D>() { }
-
-  /// helper method that helps assign the elements of *this with the
-  /// corresponding of a different array with the same shape
-  void assign_helper_(const intp o_offset, const intp *o_stride,
-		      const intp *o_shape, const T* o_data){
-    for (std::size_t i = 0; i<D; i++){
-      ASSERT("TempArray_","shapes aren't the same.",
-	     this->shape_[i] == o_shape[i]);
-    }
-    bool continue_outer_iter = true;
-    intp indices[D] = {}; // all elements to 0
-    while (continue_outer_iter){
-      intp index = calc_index_(D, this->offset_, this->stride_, indices);
-      intp o_index = calc_index_(D, o_offset, o_stride, indices);
-      for (intp i = 0; i<this->shape_[D-1]; i++){
-	this->shared_data_.get()[index] = o_data[o_index];
-	index++; o_index++;
-      }
-      continue_outer_iter = increment_outer_indices_(D, indices, this->shape_);
-    }
-  }
-
-};
-
-//----------------------------------------------------------------------
-
-template<typename T, std::size_t D>
-TempArray_<T,D>& TempArray_<T,D>::operator=(const T& val)
-{
-  bool continue_outer_iter = true;
-  intp indices[D] = {}; // all elements to 0
-  while (continue_outer_iter){
-    intp index = calc_index_(D, this->offset_, this->stride_, indices);
-    for (intp i = 0; i<this->shape_[D-1]; i++){
-      this->shared_data_.get()[index] = val;
-      index++;
-    }
-    continue_outer_iter = increment_outer_indices_(D, indices, this->shape_);
-  }
-  return *this;
 }
 
 //----------------------------------------------------------------------
@@ -873,7 +772,6 @@ public: // interface
 
   /// Move constructor. Constructs the array with the contents of other
   CelloArray(CelloArray<T,D>&& other) : CelloArray() {swap(*this,other);}
-  CelloArray(TempArray_<T,D>&& other) : CelloArray() {swap(*this,other);}
 
   /// Copy assignment operator. Makes *this a shallow copy of other.
   ///
@@ -894,10 +792,9 @@ public: // interface
     swap(*this,other);
     return *this;
   }
-  CelloArray<T,D>& operator=(TempArray_<T,D>&& other) {
-    swap(*this,other);
-    return *this;
-  }
+
+  /// Produce a deepcopy of the array.
+  CelloArray<T,D> deepcopy() const noexcept;
 
   /// Returns whether CelloArray is a perfect alias of other.
   ///
@@ -932,7 +829,52 @@ public: // interface
     }
     return true;
   }
-  
+
+  /// Copy elements from the current array to ``dest``. Both arrays must have
+  /// the same shape. 
+  ///
+  /// @param dest The array where elements are copied into.
+  ///
+  /// @note It might be better to make this a standalone function.
+  /// @note This could also be better optimized
+  void copy_to(const CelloArray<T,D>& other) const noexcept;
 };
+
+//----------------------------------------------------------------------
+
+template<typename T, std::size_t D>
+void CelloArray<T,D>::copy_to(const CelloArray<T,D>& other) const noexcept{
+  const intp o_offset = other.offset_;
+  const intp *o_stride = other.stride_;
+  const intp *o_shape = other.shape_;
+  T* o_data = other.shared_data_.get();
+  for (std::size_t i = 0; i<D; i++){
+    ASSERT("CelloArray::copy_to", "shapes aren't the same.",
+           this->shape_[i] == o_shape[i]);
+  }
+  bool continue_outer_iter = true;
+  intp indices[D] = {}; // all elements to 0
+  while (continue_outer_iter){
+    intp index = calc_index_(D, this->offset_, this->stride_, indices);
+    intp o_index = calc_index_(D, o_offset, o_stride, indices);
+    for (intp i = 0; i<this->shape_[D-1]; i++){
+      o_data[o_index] = this->shared_data_.get()[index];
+      index++; o_index++;
+    }
+    continue_outer_iter = increment_outer_indices_(D, indices, this->shape_);
+  }
+}
+
+//----------------------------------------------------------------------
+
+template<typename T, std::size_t D>
+CelloArray<T,D> CelloArray<T,D>::deepcopy() const noexcept
+{
+  std::shared_ptr<T> new_data(new T[this->size()], std::default_delete<T[]>());
+  CelloArray<T,D> out;
+  out.init_helper_(new_data, this->shape_, 0);
+  this->copy_to(out);
+  return out;
+}
 
 #endif /* ARRAY_CELLO_ARRAY_HPP */
