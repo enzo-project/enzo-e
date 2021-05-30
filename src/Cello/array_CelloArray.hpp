@@ -527,34 +527,7 @@ public: // interface
   /// Returns False if there is just partial overlap, either array is
   /// uninitialized, or if the number of dimensions of the arrays differs.
   template<typename OtherArray>
-  bool is_alias(const OtherArray& other) const noexcept{
-
-    // should probably also compare the value_type of each array. It's unclear
-    // how to do that
-
-    if (this->rank() != other.rank()) {return false;}
-
-    if ((this->shared_data_.get() == nullptr) ||
-        (other.shared_data_.get() == nullptr)) {
-      return false;
-    }
-
-    void* ptr1 = (void*)(this->shared_data_.get() + this->offset_);
-    void* ptr2 = (void*)(other.shared_data_.get() + other.offset_);
-    if (ptr1 != ptr2){ return false; }
-
-    const intp* shape1 = this->shape_;
-    const intp* shape2 = other.shape_;
-    const intp* stride1 = this->stride_;
-    const intp* stride2 = other.stride_;
-
-    for (std::size_t i = 0; i < D; i++){
-      if ((shape1[i] != shape2[i]) || (stride1[i] != stride2[i])){
-        return false;
-      }
-    }
-    return true;
-  }
+  bool is_alias(const OtherArray& other) const noexcept;
 
   /// Copy elements from the current array to ``dest``. Both arrays must have
   /// the same shape.
@@ -569,27 +542,7 @@ protected:
 
   /// Assists with the initialization of the CelloArray instances
   void init_helper_(const std::shared_ptr<T> &shared_data,
-		    const intp shape_arr[D], const intp offset){
-    if ((shared_data.get() == nullptr) || (shared_data.use_count() == 0)){
-      ERROR("CelloArray::init_helper_",
-	    "shared_data must not hold a NULL pointer or be empty. The "
-            "current array is probably being moved/copied from an "
-            "uninitialized array.");
-    }
-    shared_data_ = shared_data;
-    offset_ = offset;
-
-    std::size_t i = D;
-    while (i>0){
-      --i;
-      shape_[i] = shape_arr[i];
-      if (i + 1 == D){
-        stride_[i] = 1;
-      } else {
-        stride_[i] = shape_[i+1] * stride_[i+1];
-      }
-    }
-  }
+		    const intp shape_arr[D], const intp offset);
 
   // Assists with the destruction of CelloArray
   inline void cleanup_helper_(){ }
@@ -626,6 +579,32 @@ public: // attributes
   intp stride_[D];
 
 };
+
+//----------------------------------------------------------------------
+
+template<typename T, std::size_t D>
+void CelloArray<T,D>::init_helper_(const std::shared_ptr<T> &shared_data,
+                                   const intp shape_arr[D], const intp offset){
+  if ((shared_data.get() == nullptr) || (shared_data.use_count() == 0)){
+    ERROR("CelloArray::init_helper_",
+          "shared_data must not hold a NULL pointer or be empty. The "
+          "current array is probably being moved/copied from an "
+          "uninitialized array.");
+  }
+  shared_data_ = shared_data;
+  offset_ = offset;
+
+  std::size_t i = D;
+  while (i>0){
+    --i;
+    shape_[i] = shape_arr[i];
+    if (i + 1 == D){
+      stride_[i] = 1;
+    } else {
+      stride_[i] = shape_[i+1] * stride_[i+1];
+    }
+  }
+}
 
 //----------------------------------------------------------------------
 
@@ -759,6 +738,38 @@ CelloArray<T,D> CelloArray<T,D>::subarray(Args... args) const noexcept{
     }
   }
   return subarray;
+}
+
+//----------------------------------------------------------------------
+
+template<typename T, std::size_t D>
+template<typename OtherArray>
+bool CelloArray<T,D>::is_alias(const OtherArray& other) const noexcept {
+  // should probably also compare the value_type of each array. It's unclear
+  // how to do that
+
+  if (this->rank() != other.rank()) {return false;}
+
+  if ((this->shared_data_.get() == nullptr) ||
+      (other.shared_data_.get() == nullptr)) {
+    return false;
+  }
+
+  void* ptr1 = (void*)(this->shared_data_.get() + this->offset_);
+  void* ptr2 = (void*)(other.shared_data_.get() + other.offset_);
+  if (ptr1 != ptr2){ return false; }
+
+  const intp* shape1 = this->shape_;
+  const intp* shape2 = other.shape_;
+  const intp* stride1 = this->stride_;
+  const intp* stride2 = other.stride_;
+
+  for (std::size_t i = 0; i < D; i++){
+    if ((shape1[i] != shape2[i]) || (stride1[i] != stride2[i])){
+      return false;
+    }
+  }
+  return true;
 }
 
 //----------------------------------------------------------------------
