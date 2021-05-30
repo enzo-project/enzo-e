@@ -372,6 +372,10 @@ class CelloArray
 public: // interface
 
   typedef T value_type;
+  typedef typename std::add_const<T>::type const_value_type;
+  typedef typename std::remove_const<T>::type nonconst_value_type;
+
+  friend class CelloArray<const_value_type,D>;
 
   /// Default constructor. Constructs an uninitialized CelloArray.
   CelloArray()
@@ -402,12 +406,28 @@ public: // interface
   template<typename... Args, REQUIRE_INT(Args)>
   CelloArray(T* array, Args... args);
 
+  /// conversion constructor that facilitates implicit casts from
+  /// CelloArray<nonconst_value_type,D> to CelloArray<const_value_type,D>
+  ///
+  /// @note
+  /// This is only defined for instances of CelloArray for which T is const-
+  /// qualified. If it were defined in cases where T is not const-qualified,
+  /// then it would duplicate the copy-constructor.
+  template<class = std::enable_if<std::is_same<T, const_value_type>::value>>
+  CelloArray(const CelloArray<nonconst_value_type, D> &other) : CelloArray() {
+    std::shared_ptr<const_value_type> other_shared_data
+      = std::const_pointer_cast<const_value_type>(other.shared_data_);
+    this->shallow_copy_init_helper_(other_shared_data, other.offset_,
+                                    other.shape_, other.stride_);
+  }
+
   /// Copy constructor. Makes *this a shallow copy of other.
   ///
   /// @note The fact that this accepts const reference reflects the fact that
   ///     CelloArray has pointer-like semantics
   CelloArray(const CelloArray<T,D>& other) : CelloArray() {
-    this->shallow_copy_init_helper_(other);
+    this->shallow_copy_init_helper_(other.shared_data_, other.offset_,
+                                    other.shape_, other.stride_);
   }
 
   /// Move constructor. Constructs the array with the contents of other
@@ -422,7 +442,8 @@ public: // interface
   /// *this are unaffected by this method)
   CelloArray<T,D>& operator=(const CelloArray<T,D>& other){
     this->cleanup_helper_();
-    this->shallow_copy_init_helper_(other);
+    this->shallow_copy_init_helper_(other.shared_data_, other.offset_,
+                                    other.shape_, other.stride_);
     return *this;
   }
 
@@ -441,15 +462,7 @@ public: // interface
   /// @param args The indices for each dimension of the array. The number of
   ///     provided indices must match the number of array dimensions, D.
   template<typename... Args, REQUIRE_INT(Args)>
-  T &operator() (Args... args) noexcept {
-    static_assert(D==sizeof...(args),
-		  "Number of indices don't match number of dimensions");
-    CHECK_BOUNDND(shape_, args)
-    CHECK_IF_FINITE(shared_data_.get()[offset_ + calc_index_(stride_,args...)]);
-    return shared_data_.get()[offset_ + calc_index_(stride_,args...)];
-  }
-  template<typename... Args, REQUIRE_INT(Args)>
-  T operator() (Args... args) const noexcept {
+  T& operator() (Args... args) const noexcept {
     static_assert(D==sizeof...(args),
 		  "Number of indices don't match number of dimensions");
     CHECK_BOUNDND(shape_, args)
@@ -458,13 +471,7 @@ public: // interface
   }
 
   // Specialized implementation for 3D arrays (to reduce compile time)
-  T &operator() (const int k, const int j, const int i) noexcept {
-    static_assert(D==3, "3 indices should only be specified for 3D arrays");
-    CHECK_BOUND3D(shape_, k, j, i)
-    CHECK_IF_FINITE(shared_data_.get()[offset_ + k*stride_[0] + j*stride_[1] + i])
-    return shared_data_.get()[offset_ + k*stride_[0] + j*stride_[1] + i];
-  }
-  T operator() (const int k, const int j, const int i) const noexcept {
+  T& operator() (const int k, const int j, const int i) const noexcept {
     static_assert(D==3, "3 indices should only be specified for 3D arrays");
     CHECK_BOUND3D(shape_, k, j, i)
     CHECK_IF_FINITE(shared_data_.get()[offset_ + k*stride_[0] + j*stride_[1] + i])
@@ -559,11 +566,13 @@ protected:
   inline void cleanup_helper_(){ }
 
   /// helps initialize CelloArray instances by shallow copy
-  void shallow_copy_init_helper_(const CelloArray<T,D> &other){
-    init_helper_(other.shared_data_, other.shape_, other.offset_);
+  void shallow_copy_init_helper_(const std::shared_ptr<T> &shared_data_o,
+                                 intp offset_o, const intp shape_o[D],
+                                 const intp stride_o[D]) {
+    init_helper_(shared_data_o, shape_o, offset_o);
     // stride_ is copied from other, not initialized from shape_, in order to
     // appropriately handle cases where other is a subarray
-    for (std::size_t i = 0; i<D; i++){ stride_[i] = other.stride_[i]; }
+    for (std::size_t i = 0; i<D; i++){ stride_[i] = stride_o[i]; }
   }
 
   /// this method is provided to assist with the optional debugging mode that
@@ -722,8 +731,6 @@ inline void prep_slices_(const CSlice* slices, const intp shape[],
 template<typename T, std::size_t D>
 template<typename... Args, class>
 CelloArray<T,D> CelloArray<T,D>::subarray(Args... args) const noexcept{
-  // TODO: put some thought into creating a const-qualified version of this
-  // function
   static_assert(D == sizeof...(args),
 		"Number of slices don't match number of dimensions");
   CelloArray<T,D> subarray;
@@ -752,7 +759,9 @@ CelloArray<T,D> CelloArray<T,D>::subarray(Args... args) const noexcept{
 template<typename T, std::size_t D>
 template<typename oT, std::size_t oD>
 bool CelloArray<T,D>::is_alias(const CelloArray<oT,oD>& other) const noexcept {
-  if (!std::is_same<T,oT>::value) { return false; }
+  typedef typename CelloArray<T,D>::const_value_type const_T;
+  typedef typename CelloArray<oT,oD>::const_value_type const_oT;
+  if (!std::is_same<const_T,const_oT>::value) {return false;}
 
   if (this->rank() != other.rank()) {return false;}
 
