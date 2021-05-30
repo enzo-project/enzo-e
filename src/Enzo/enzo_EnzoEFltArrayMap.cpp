@@ -103,6 +103,16 @@ const EFlt3DArray& EnzoEFltArrayMap::at(const std::string& key) const noexcept
 
 //----------------------------------------------------------------------
 
+const EFlt3DArray& EnzoEFltArrayMap::at(const std::size_t index) const noexcept
+{
+  ASSERT("EnzoEFltArrayMap::at",
+         "index must be less than or equal to the length of the ArrayMap.",
+	 index < size());
+  return arrays_[index];
+}
+
+//----------------------------------------------------------------------
+
 EFlt3DArray exclude_stale_cells_(const EFlt3DArray &arr, int stale_depth)
 {
   ASSERT("exclude_stale_cells_","each dim of arr must exceed 2*stale_depth.",

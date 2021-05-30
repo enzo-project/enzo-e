@@ -70,13 +70,14 @@ public: // interface
     : EnzoEFltArrayMap("", keys, arrays)
   { }
 
-  const EFlt3DArray& operator[] (const std::string& key)
-  { return arrays_[str_index_map_[key]]; }
+  const EFlt3DArray& operator[] (const std::string& key) const noexcept
+  { return at(key); }
 
-  const EFlt3DArray& operator[] (std::string&& key)
-  { return arrays_[str_index_map_[key]]; }
+  const EFlt3DArray& operator[] (std::size_t index) const noexcept
+  { return at(index); }
 
   const EFlt3DArray& at(const std::string& key) const noexcept;
+  const EFlt3DArray& at(std::size_t index) const noexcept;
 
   bool contains(const std::string& key) const noexcept{
     return (str_index_map_.find(key) != str_index_map_.cend());
