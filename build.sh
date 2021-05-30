@@ -25,7 +25,15 @@ S0=`date +"%S"`
 
 log="log.build"
 
-proc=4
+# Set to zero to use all avaiable cores.  To override, set to a non-zero value
+# or use CELLO_BUILD_NCORE environment variable
+proc=0
+if [[ ! -z ${CELLO_BUILD_NCORE} ]]; then
+   proc=${CELLO_BUILD_NCORE}
+elif [[ ${proc} -eq 0 ]]; then
+   # first command: Linux. second command: macOS
+   proc=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
+fi
 
 # set default target
 
@@ -114,6 +122,7 @@ echo "BEGIN enzo-e/Cello ${0}"
 echo "arch=$arch"
 echo "prec=$prec"
 echo "target=$target"
+echo "proc=$proc"
 
 rm -f "test/*/running.$arch.$prec"
 

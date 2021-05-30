@@ -10,6 +10,7 @@ commands:
             echo 'export CHARM_VER=6.10.2' >> $BASH_ENV
             echo 'export LD_LIBRARY_PATH=$HOME/local/lib:$LD_LIBRARY_PATH' >> $BASH_ENV
             echo 'export CELLO_ARCH=linux_gnu' >> $BASH_ENV
+            echo 'export CELLO_BUILD_NCORE=4' >> $BASH_ENV
             echo 'export CHARM_ARGS=++local' >> $BASH_ENV
             echo 'export HDF5_INC=/usr/include/hdf5/serial' >> $BASH_ENV
             echo 'export HDF5_LIB=/usr/lib/x86_64-linux-gnu' >> $BASH_ENV

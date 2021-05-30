@@ -238,12 +238,14 @@ fragment below may differ due to the file being updated.)
 Building
 ========
 
-After configuring Cello for your computer, the Cello framework and
-Enzo-E application can be compiled using "make", which in turn calls
-the included ``./build.sh`` script.  Other options are available for
-generating useful `https://orgmode.org/ <org-mode>`_ files, generating
-doxygen documentation, running
-regression tests, and running code analysis tools.
+After configuring Cello for your computer, the Cello framework and Enzo-E
+application can be compiled using "make", which in turn calls the included
+``./build.sh`` script.  By default, the build system will use all available
+cores.  To specify the number of cores to compile Cello, either set the ``proc``
+variable in ``./build.sh`` or set the environment variable ``CELLO_BUILD_NCORE``
+to the desired value.  Other options are available for generating useful
+`https://orgmode.org/ <org-mode>`_ files, generating doxygen documentation,
+running regression tests, and running code analysis tools.
 
         ==================  ===============================================================
         ==================  ===============================================================
