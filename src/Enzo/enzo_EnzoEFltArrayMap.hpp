@@ -83,7 +83,7 @@ public: // interface
     return (str_index_map_.find(key) != str_index_map_.cend());
   }
 
-  /// Similar to at, but a slice of the array ommitting staled values is
+  /// Similar to `at`, but a slice of the array ommitting staled values is
   /// returned by value
   EFlt3DArray get(const std::string& key,
                   int stale_depth = 0) const noexcept;
@@ -95,6 +95,29 @@ public: // interface
 
   /// Return the name of the instance (if it has one)
   const std::string& name() noexcept {return name_;}
+
+  /// Returns the length along a given dimension of each contained array
+  ///
+  /// @param dim Indicates the dimension for which we want the shape. This
+  ///    should be 0, 1, or 2
+  ///
+  /// @note
+  /// The program will fail if this method is invoked and the map holds zero
+  /// elements.
+  int array_shape(unsigned int dim) const noexcept;
+
+  /// Return a new map holding subsections of each array held by the map
+  ///
+  /// @param slc_z, slc_y, slc_x Instance of CSlice that specify that are
+  ///    passed to the `subarray` method of each contained array.
+  EnzoEFltArrayMap subarray_map(const CSlice &slc_z,
+                                const CSlice &slc_y,
+                                const CSlice &slc_x,
+                                const std::string& name = "");
+  const EnzoEFltArrayMap subarray_map(const CSlice &slc_z,
+                                      const CSlice &slc_y,
+                                      const CSlice &slc_x,
+                                      const std::string& name = "") const;
 
 private: // attributes
   // name_ is to help with debugging!

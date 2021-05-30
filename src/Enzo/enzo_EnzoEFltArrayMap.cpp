@@ -159,7 +159,7 @@ void EnzoEFltArrayMap::print_summary() const noexcept
   }
 
   CkPrintf(": entry_shape = (%d, %d, %d)\n{",
-           arrays_[0].shape(0), arrays_[0].shape(1), arrays_[0].shape(2));
+           array_shape(0), array_shape(1), array_shape(2));
 
   for ( std::size_t i = 0; i < my_size; i++){
     if (i != 0){
@@ -172,4 +172,50 @@ void EnzoEFltArrayMap::print_summary() const noexcept
   }
   CkPrintf("}\n");
   fflush(stdout);
+}
+
+//----------------------------------------------------------------------
+
+int EnzoEFltArrayMap::array_shape(unsigned int dim) const noexcept{
+  if (size() == 0){
+    ERROR("EnzoEFltArrayMap::array_shape",
+          "EnzoEFltArrayMap contains 0 arrays");
+  }
+  return arrays_[0].shape(dim);
+}
+
+//----------------------------------------------------------------------
+
+// TODO: optimize this function
+//   1. We don't need to go through EnzoEFltArrayMap's full constructor (We
+//      could re-use knowledge about keys_ and str_index_map_)
+//   2. There might be some benefit to not directly constructing subarrays and
+//      lazily evaluating them instead in the output array
+static inline std::vector<EFlt3DArray> make_subarrays_
+(const std::vector<EFlt3DArray>& arrays,
+ const CSlice &slc_z, const CSlice &slc_y, const CSlice &slc_x)
+{
+  std::vector<EFlt3DArray> out;
+  out.reserve(arrays.size());
+  for (const EFlt3DArray& arr : arrays){
+    out.push_back(arr.subarray(slc_z, slc_y, slc_x));
+  }
+  return out;
+}
+
+EnzoEFltArrayMap EnzoEFltArrayMap::subarray_map(const CSlice &slc_z,
+                                                const CSlice &slc_y,
+                                                const CSlice &slc_x,
+                                                const std::string& name)
+{
+  return EnzoEFltArrayMap(name, keys_,
+                          make_subarrays_(arrays_, slc_z, slc_y, slc_x));
+}
+
+const EnzoEFltArrayMap EnzoEFltArrayMap::subarray_map
+(const CSlice &slc_z, const CSlice &slc_y, const CSlice &slc_x,
+ const std::string& name) const
+{
+  return EnzoEFltArrayMap(name, keys_,
+                          make_subarrays_(arrays_, slc_z, slc_y, slc_x));
 }
