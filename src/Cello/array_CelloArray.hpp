@@ -372,6 +372,10 @@ class CelloArray
 public: // interface
 
   typedef T value_type;
+  typedef typename std::add_const<T>::type const_value_type;
+  typedef typename std::remove_const<T>::type nonconst_value_type;
+
+  friend class CelloArray<const_value_type,D>;
 
   /// Default constructor. Constructs an uninitialized CelloArray.
   CelloArray()
@@ -402,12 +406,28 @@ public: // interface
   template<typename... Args, REQUIRE_INT(Args)>
   CelloArray(T* array, Args... args);
 
+  /// conversion constructor that facilitates implicit casts from
+  /// CelloArray<nonconst_value_type,D> to CelloArray<const_value_type,D>
+  ///
+  /// @note
+  /// This is only defined for instances of CelloArray for which T is const-
+  /// qualified. If it were defined in cases where T is not const-qualified,
+  /// then it would duplicate the copy-constructor.
+  template<class = std::enable_if<std::is_same<T, const_value_type>::value>>
+  CelloArray(const CelloArray<nonconst_value_type, D> &other) : CelloArray() {
+    std::shared_ptr<const_value_type> other_shared_data
+      = std::const_pointer_cast<const_value_type>(other.shared_data_);
+    this->shallow_copy_init_helper_(other_shared_data, other.offset_,
+                                    other.shape_, other.stride_);
+  }
+
   /// Copy constructor. Makes *this a shallow copy of other.
   ///
   /// @note The fact that this accepts const reference reflects the fact that
   ///     CelloArray has pointer-like semantics
   CelloArray(const CelloArray<T,D>& other) : CelloArray() {
-    this->shallow_copy_init_helper_(other);
+    this->shallow_copy_init_helper_(other.shared_data_, other.offset_,
+                                    other.shape_, other.stride_);
   }
 
   /// Move constructor. Constructs the array with the contents of other
@@ -422,7 +442,8 @@ public: // interface
   /// *this are unaffected by this method)
   CelloArray<T,D>& operator=(const CelloArray<T,D>& other){
     this->cleanup_helper_();
-    this->shallow_copy_init_helper_(other);
+    this->shallow_copy_init_helper_(other.shared_data_, other.offset_,
+                                    other.shape_, other.stride_);
     return *this;
   }
 
@@ -559,11 +580,13 @@ protected:
   inline void cleanup_helper_(){ }
 
   /// helps initialize CelloArray instances by shallow copy
-  void shallow_copy_init_helper_(const CelloArray<T,D> &other){
-    init_helper_(other.shared_data_, other.shape_, other.offset_);
+  void shallow_copy_init_helper_(const std::shared_ptr<T> &shared_data_o,
+                                 intp offset_o, const intp shape_o[D],
+                                 const intp stride_o[D]) {
+    init_helper_(shared_data_o, shape_o, offset_o);
     // stride_ is copied from other, not initialized from shape_, in order to
     // appropriately handle cases where other is a subarray
-    for (std::size_t i = 0; i<D; i++){ stride_[i] = other.stride_[i]; }
+    for (std::size_t i = 0; i<D; i++){ stride_[i] = stride_o[i]; }
   }
 
   /// this method is provided to assist with the optional debugging mode that
@@ -752,7 +775,9 @@ CelloArray<T,D> CelloArray<T,D>::subarray(Args... args) const noexcept{
 template<typename T, std::size_t D>
 template<typename oT, std::size_t oD>
 bool CelloArray<T,D>::is_alias(const CelloArray<oT,oD>& other) const noexcept {
-  if (!std::is_same<T,oT>::value) { return false; }
+  typedef typename CelloArray<T,D>::const_value_type const_T;
+  typedef typename CelloArray<oT,oD>::const_value_type const_oT;
+  if (!std::is_same<const_T,const_oT>::value) {return false;}
 
   if (this->rank() != other.rank()) {return false;}
 

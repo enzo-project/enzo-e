@@ -983,6 +983,55 @@ public:
 
 };
 
+//----------------------------------------------------------------------
+
+class ImplicitCastingTests{
+  // these are tests that check that CelloArray<T,D> can be implicitly casted
+  // to CelloArray<const T,D>.
+
+private:
+  template<template<typename, std::size_t> class Builder>
+  void test_cast_(){
+
+    Builder<double, 2> builder(2,3);
+    CelloArray<double, 2> *arr_ptr_a = builder.get_arr();
+    (*arr_ptr_a)(0,2) = 97.25;
+
+    CelloArray<const double, 2> alias_1 = *arr_ptr_a;
+    check_expected_values_(*arr_ptr_a);
+    // it's not obvious that this last check is strictly necessary
+    check_subarray_values_(arr_ptr_a->subarray(CSlice(0,1),CSlice(1,3)));
+  }
+
+  void check_expected_values_(const CelloArray<const double, 2> &arr){
+    double expected[2][3] = {{0.0, 0.0, 97.25},
+                             {0.0, 0.0,  0.0 }};
+
+    for (int j = 0; j < 2; j++){
+      for (int i = 0; i < 3; i++){
+        ASSERT2("ImplicitCastingTests::check_expected_values_",
+                "The array has an unexpected value at (%d, %d)",
+                j,i,expected[j][i] == arr(j,i));
+      }
+    }
+  }
+
+  void check_subarray_values_(CelloArray<const double, 2> arr){
+    double expected[1][2] = {{0.0, 97.25}};
+
+    for (int i = 0; i < 2; i++){
+      ASSERT1("ImplicitCastingTests::check_expected_values_",
+              "The array has an unexpected value at (0, %d)",
+              i,expected[0][i] == arr(0,i));
+    }
+  }
+
+public:
+  void run_tests(){
+    test_cast_<MemManagedArrayBuilder>();
+    test_cast_<PtrWrapArrayBuilder>();
+  }
+};
 
 //----------------------------------------------------------------------
 
@@ -1053,6 +1102,15 @@ public:
            subarray1a.is_alias(arr_ptr->subarray(CSlice(0,2),
                                                  CSlice(1,2)))
            );
+
+    // Lastly, let's make sure that is_alias works if one argument is casted to
+    // be an array of constants
+    CelloArray<const double, 2> subarray1a_alias = subarray1a;
+    CelloArray<const double, 2> subarray2a_alias = subarray2a;
+    ASSERT("IsAliasTests::test_is_alias_", "The arrays are aliases.",
+           subarray1a_alias.is_alias(subarray2a));
+    ASSERT("IsAliasTests::test_is_alias_", "The arrays are aliases.",
+           subarray1a.is_alias(subarray2a_alias));
   }
 
   void run_tests(){
@@ -1090,6 +1148,9 @@ PARALLEL_MAIN_BEGIN
 
   PassByValueTests pass_by_val_tests;
   pass_by_val_tests.run_tests();
+
+  ImplicitCastingTests implicit_casting_tests;
+  implicit_casting_tests.run_tests();
 
   IsAliasTests is_alias_tests;
   is_alias_tests.run_tests();
