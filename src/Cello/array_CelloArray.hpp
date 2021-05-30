@@ -501,6 +501,14 @@ public: // interface
     return out;
   }
 
+  /// Returns the stride for a given dimension
+  int stride(unsigned int dim) const noexcept{
+    ASSERT1("CelloArray::stride",
+            "%ui is greater than the number of dimensions",
+	    dim, dim<D);
+    return (int)stride_[dim];
+  }
+
   /// Returns the number of dimensions
   constexpr std::size_t rank() const noexcept {return D;}
 
@@ -517,7 +525,10 @@ public: // interface
   ///
   /// @note
   /// When the array is unitialized, this may or may not return a ``nullptr``
-  T* data() const noexcept { return shared_data_.get(); }
+  T* data() const noexcept {
+    T* ptr = shared_data_.get();
+    return (ptr == nullptr) ? nullptr : ptr + offset_;
+  }
 
   /// Produce a deepcopy of the array.
   CelloArray<T,D> deepcopy() const noexcept;
@@ -526,8 +537,8 @@ public: // interface
   ///
   /// Returns False if there is just partial overlap, either array is
   /// uninitialized, or if the number of dimensions of the arrays differs.
-  template<typename OtherArray>
-  bool is_alias(const OtherArray& other) const noexcept;
+  template<typename oT, std::size_t oD>
+  bool is_alias(const CelloArray<oT,oD>& other) const noexcept;
 
   /// Copy elements from the current array to ``dest``. Both arrays must have
   /// the same shape.
@@ -561,7 +572,7 @@ protected:
   /// this is implicitly called, so it is not made available to users
   void assert_all_entries_finite_() const noexcept;
 
-public: // attributes
+private: // attributes
 
   /// shared pointer to data
   std::shared_ptr<T> shared_data_;
@@ -713,29 +724,25 @@ template<typename... Args, class>
 CelloArray<T,D> CelloArray<T,D>::subarray(Args... args) const noexcept{
   // TODO: put some thought into creating a const-qualified version of this
   // function
-  static_assert(D == sizeof...(args) || 0 == sizeof...(args),
+  static_assert(D == sizeof...(args),
 		"Number of slices don't match number of dimensions");
   CelloArray<T,D> subarray;
-  if (sizeof...(args) == 0) {
-    subarray.shallow_copy_init_helper_(*this);
-  } else {
-    // the dummy value at the end of input_slices keeps the compiler from
-    // freaking out when no arguments are passed
-    CSlice input_slices[1+sizeof...(args)] = {args...,CSlice()};
-    CSlice slices[D];
-    prep_slices_(input_slices, shape_, D, slices);
+  // the dummy value at the end of input_slices keeps the compiler from
+  // freaking out when no arguments are passed
+  CSlice input_slices[1+sizeof...(args)] = {args...,CSlice()};
+  CSlice slices[D];
+  prep_slices_(input_slices, shape_, D, slices);
 
-    intp new_shape[D];
-    intp new_offset = offset_;
-    for (std::size_t dim=0; dim<D; dim++){
-      new_shape[dim] = slices[dim].get_stop() - slices[dim].get_start();
-      new_offset += slices[dim].get_start() * stride_[dim];
-    }
+  intp new_shape[D];
+  intp new_offset = offset_;
+  for (std::size_t dim=0; dim<D; dim++){
+    new_shape[dim] = slices[dim].get_stop() - slices[dim].get_start();
+    new_offset += slices[dim].get_start() * stride_[dim];
+  }
 
-    subarray.init_helper_(shared_data_,new_shape,new_offset);
-    for (std::size_t dim=0; dim<D; dim++){
-      subarray.stride_[dim] = stride_[dim];
-    }
+  subarray.init_helper_(shared_data_,new_shape,new_offset);
+  for (std::size_t dim=0; dim<D; dim++){
+    subarray.stride_[dim] = stride_[dim];
   }
   return subarray;
 }
@@ -743,31 +750,22 @@ CelloArray<T,D> CelloArray<T,D>::subarray(Args... args) const noexcept{
 //----------------------------------------------------------------------
 
 template<typename T, std::size_t D>
-template<typename OtherArray>
-bool CelloArray<T,D>::is_alias(const OtherArray& other) const noexcept {
-  // should probably also compare the value_type of each array. It's unclear
-  // how to do that
+template<typename oT, std::size_t oD>
+bool CelloArray<T,D>::is_alias(const CelloArray<oT,oD>& other) const noexcept {
+  if (!std::is_same<T,oT>::value) { return false; }
 
   if (this->rank() != other.rank()) {return false;}
 
-  if ((this->shared_data_.get() == nullptr) ||
-      (other.shared_data_.get() == nullptr)) {
-    return false;
-  }
+  if ((this->data() == nullptr) || (other.data() == nullptr)) {return false;}
 
-  void* ptr1 = (void*)(this->shared_data_.get() + this->offset_);
-  void* ptr2 = (void*)(other.shared_data_.get() + other.offset_);
+  void* ptr1 = (void*)(this->data());
+  void* ptr2 = (void*)(other.data());
   if (ptr1 != ptr2){ return false; }
 
-  const intp* shape1 = this->shape_;
-  const intp* shape2 = other.shape_;
-  const intp* stride1 = this->stride_;
-  const intp* stride2 = other.stride_;
-
   for (std::size_t i = 0; i < D; i++){
-    if ((shape1[i] != shape2[i]) || (stride1[i] != stride2[i])){
-      return false;
-    }
+    bool different_extents = this->shape(i) != other.shape(i);
+    bool different_strides = this->stride(i) != other.stride(i);
+    if (different_extents || different_strides) {return false;}
   }
   return true;
 }
