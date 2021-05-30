@@ -75,13 +75,12 @@ void EnzoEFltArrayMap::print_summary() const noexcept
     if (i != 0){
       CkPrintf(",\n ");
     }
-    CkPrintf("\"%s\" : EFlt3DArray(%p, %d, %d, %d), owners: %ld",
+    CkPrintf("\"%s\" : EFlt3DArray(%p, %d, %d, %d)",
              pair.first.c_str(),
-             (void*)pair.second.shared_data_.get(),
+             (void*)pair.second.data(),
              (int)pair.second.shape(0),
              (int)pair.second.shape(1),
-             (int)pair.second.shape(2),
-             pair.second.shared_data_.use_count());
+             (int)pair.second.shape(2));
     i++;
   }
   CkPrintf("}\n");
