@@ -254,7 +254,7 @@ template <bool... vals> using all_true = std::is_same<bool_pack<true, vals...>,
 /// multi-dimensional indices to a single index of the underlying pointer
 /// wrapped by FixedDimArray_
 template<typename T>
-intp calc_index_(intp* stride, T first, T last){
+intp calc_index_(const intp* stride, T first, T last){
   // last element in stride is alway 1
   return (*stride)*first + last;
 }
@@ -262,7 +262,7 @@ intp calc_index_(intp* stride, T first, T last){
 /// This is a function overload for calc_index that handles the edge case where
 /// the array is 1 dimensional
 template<typename T>
-intp calc_index_(intp* stride, T first){return first;}
+intp calc_index_(const intp* stride, T first){return first;}
 
 /// a helper function template that helps convert multi-dimensional indices to
 /// a single index (or address) of the appropriate element in the underlying
@@ -284,7 +284,7 @@ intp calc_index_(intp* stride, T first){return first;}
 /// multidimensional indices as mathematical vectors, we are essentially
 /// returning the dot product of the vectors.
 template<typename T, typename... Rest>
-intp calc_index_(intp* stride, T first, Rest... rest){
+intp calc_index_(const intp* stride, T first, Rest... rest){
   // gets unrolled at compile time
   return (*stride)*first + calc_index_(stride+1, rest...);
 }
