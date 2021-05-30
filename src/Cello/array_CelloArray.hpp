@@ -183,9 +183,9 @@ bool check_bounds_(intp *shape, T first, Rest... rest){
 // defined to actually check the validity of indices passed to the array
 #ifdef CHECK_BOUNDS
 #  define CHECK_BOUND3D(shape, k, j, i)                                       \
-  ASSERT("FixedDimArray_","Invalid index", check_bounds_(shape,k,j,i));
+  ASSERT("CelloArray","Invalid index", check_bounds_(shape,k,j,i));
 #  define CHECK_BOUNDND(shape, ARGS)                                          \
-  ASSERT("FixedDimArray_","Invalid index", check_bounds_(shape, ARGS...));
+  ASSERT("CelloArray","Invalid index", check_bounds_(shape, ARGS...));
 #else
 #  define CHECK_BOUND3D(shape, k, j, i)   /* ... */
 #  define CHECK_BOUNDND(shape, ARGS)      /* ... */
@@ -207,7 +207,7 @@ bool check_if_finite_(const T elem){
 // existing pointer holding a NaN or inf
 #ifdef CHECK_FINITE_ELEMENTS
 #  define CHECK_IF_FINITE(value)                                              \
-  ASSERT("FixedDimArray_","Non-Finite Value", check_if_finite_(value));
+  ASSERT("CelloArray","Non-Finite Value", check_if_finite_(value));
 #  define CHECK_IF_ARRAY_FINITE(value)    this->assert_all_entries_finite_();
 #else
 #  define CHECK_IF_FINITE(value)          /* ... */
@@ -252,7 +252,7 @@ template <bool... vals> using all_true = std::is_same<bool_pack<true, vals...>,
 
 /// This serves as the terminal tail recursion function call used to convert
 /// multi-dimensional indices to a single index of the underlying pointer
-/// wrapped by FixedDimArray_
+/// wrapped by CelloArray
 template<typename T>
 intp calc_index_(const intp* stride, T first, T last){
   // last element in stride is alway 1
@@ -266,7 +266,7 @@ intp calc_index_(const intp* stride, T first){return first;}
 
 /// a helper function template that helps convert multi-dimensional indices to
 /// a single index (or address) of the appropriate element in the underlying
-/// pointer wrapped by FixedDimArray_
+/// pointer wrapped by CelloArray
 ///
 /// @param stride pointer to the current element of the cstyle array holding the
 ///     strides for each array dimension. The number of elements in stride_,
@@ -351,29 +351,90 @@ static inline bool increment_outer_indices_(std::size_t D, intp *indices,
 
 //----------------------------------------------------------------------
 
-// Need to forward declare CelloArray since it is referenced in FixedDimArray_
-// and are also derived from FixedDimArray_
-
 template<typename T, std::size_t D>
-class CelloArray;
-
-//----------------------------------------------------------------------
-
-template<typename T, std::size_t D>
-class FixedDimArray_
+class CelloArray
 {
-
-  /// @class    FixedDimArray_
+  /// @class    CelloArray
   /// @ingroup  Array
-  /// @brief    [\ref Array] base class for CelloArray. This exists to factor
-  ///           out behavior used by CelloArray
+  /// @brief    [\ref Array] class template that encapsulates a
+  ///           multidimensional numeric array with a fixed number of
+  ///           dimensions.
+  ///
+  /// The semantics of this template class resemble those of numpy arrays and
+  /// pointers instead of those c++ standard library containers (like vectors).
+  /// The class effectively acts as an address to the underlying data. The
+  /// copy constructor and copy assignment operation effectively make shallow
+  /// copies and deepcopies must be explicitly created. Note that a consequnce
+  /// of this behavior is that when instances are passed to functions by value,
+  /// any modifications to the array within the function will be reflected
+  /// everywhere.
 
 public: // interface
 
   typedef T value_type;
 
+  /// Default constructor. Constructs an uninitialized CelloArray.
+  CelloArray()
+    : shared_data_(),
+      offset_(0),
+      shape_(),
+      stride_()
+  { };
+
+  /// Construct a multidimensional numeric array that allocates its own data
+  /// (where the data is freed once no arrays reference it anymore)
+  ///
+  /// @param args the lengths of each dimension. There must by D values and
+  ///     they must all have the same type - int or intp
+  template<typename... Args, REQUIRE_INT(Args)>
+  CelloArray(Args... args);
+
+  /// Construct a multidimensional numeric array that wraps an existing pointer
+  ///
+  /// @param array The pointer to the existing array data
+  /// @param args the lengths of each dimension. There must by D values and
+  ///     they must all have the same type - int or intp
+  ///
+  /// @note Note that instances of CelloArray that wrap existing pointers are
+  ///     inherently less safe. Segmentation faults can more easily arise due
+  ///     incorrect shapes being specified at this constructor and due to the
+  ///     memory of the wrapped array being freed
+  template<typename... Args, REQUIRE_INT(Args)>
+  CelloArray(T* array, Args... args);
+
+  /// Copy constructor. Makes *this a shallow copy of other.
+  ///
+  /// @note The fact that this accepts const reference reflects the fact that
+  ///     CelloArray has pointer-like semantics
+  CelloArray(const CelloArray<T,D>& other) : CelloArray() {
+    this->shallow_copy_init_helper_(other);
+  }
+
+  /// Move constructor. Constructs the array with the contents of other
+  CelloArray(CelloArray<T,D>&& other) : CelloArray() {swap(*this,other);}
+
   // Destructor
-  ~FixedDimArray_() { cleanup_helper_();}
+  ~CelloArray() { cleanup_helper_();}
+
+  /// Copy assignment operator. Makes *this a shallow copy of other.
+  ///
+  /// (The contents of any previously created shallow copies or subarrays of
+  /// *this are unaffected by this method)
+  CelloArray<T,D>& operator=(const CelloArray<T,D>& other){
+    this->cleanup_helper_();
+    this->shallow_copy_init_helper_(other);
+    return *this;
+  }
+
+  /// Move assignment operator. Replaces the contents of *this with those of
+  /// other.
+  ///
+  /// (Contents of any previously created shallow copies or subarrays of
+  /// *this are unaffected)
+  CelloArray<T,D>& operator=(CelloArray<T,D>&& other) {
+    swap(*this,other);
+    return *this;
+  }
 
   /// access array Elements.
   ///
@@ -419,15 +480,6 @@ public: // interface
   ///
   /// For a 3D CelloArray, the function declaration might look like:
   /// CelloArray<T,3> subarray(CSlice k_slice, CSlice j_slice, CSlice i_slice);
-  ///
-  /// This can be used to achieve elementwise assignment. If the method call is
-  /// placed on the left-hand-side (LHS) of an equal sign, then the elements in
-  /// the specified subarray (or shallow) copy will be assigned the values on
-  /// the right-hand-side (RHS) of the equalt. Valid items on the RHS are
-  /// scalars of type T or an array of equal D and the same shape. Note that
-  /// the method needs to actually be called on the LHS of the equal sign. If
-  /// the result of this method is first assigned to another variable and the
-  /// variable is placed on the LHS, then different behavior will occur.
   template<typename... Args, REQUIRE_TYPE(Args,CSlice)>
   CelloArray<T,D> subarray(Args... args) const noexcept;
 
@@ -435,7 +487,7 @@ public: // interface
   ///
   /// @param dim Indicates the dimension for which we want the shape
   int shape(unsigned int dim) const noexcept{
-    ASSERT1("FixedDimArray_", "%ui is greater than the number of dimensions",
+    ASSERT1("CelloArray::shape", "%ui is greater than the number of dimensions",
 	    dim, dim<D);
     return (int)shape_[dim];
   }
@@ -454,50 +506,72 @@ public: // interface
 
   /// Swaps the contents of this array with the contents of a different array.
   /// This is only defined for arrays with the same numbers of dimensions D
-  friend void swap(FixedDimArray_<T,D> &first, FixedDimArray_<T,D> &second){
+  friend void swap(CelloArray<T,D> &first, CelloArray<T,D> &second){
     std::swap(first.shared_data_, second.shared_data_);
     std::swap(first.offset_, second.offset_);
     std::swap(first.shape_, second.shape_);
     std::swap(first.stride_, second.stride_);
   }
 
-protected: // methods to be reused by subclasses
+  /// Returns pointer to the underlying data
+  ///
+  /// @note
+  /// When the array is unitialized, this may or may not return a ``nullptr``
+  T* data() const noexcept { return shared_data_.get(); }
 
-  /// Default constructor
-  ///
-  /// Not public to prevent initialization of instances of FixedDimArray_
-  FixedDimArray_()
-    : shared_data_(),
-      offset_(0),
-      shape_(),
-      stride_()
-  { };
+  /// Produce a deepcopy of the array.
+  CelloArray<T,D> deepcopy() const noexcept;
 
-  /// Construct a multidimensional numeric array that allocates its own data
-  /// (where the data is freed once no arrays reference it anymore)
+  /// Returns whether CelloArray is a perfect alias of other.
   ///
-  /// @param args the lengths of each dimension. There must by D values and
-  ///     they must all have the same type - int or intp
-  ///
-  /// Not public to prevent initialization of instances of FixedDimArray_
-  template<typename... Args, REQUIRE_INT(Args)>
-  FixedDimArray_(Args... args);
+  /// Returns False if there is just partial overlap, either array is
+  /// uninitialized, or if the number of dimensions of the arrays differs.
+  template<typename OtherArray>
+  bool is_alias(const OtherArray& other) const noexcept{
 
-  /// Construct a multidimensional numeric array that wraps an existing pointer
-  ///
-  /// @param array The pointer to the existing array data
-  /// @param args the lengths of each dimension. There must by D values and
-  ///     they must all have the same type - int or intp
-  ///
-  /// Not public to prevent initialization of instances of FixedDimArray_
-  template<typename... Args, REQUIRE_INT(Args)>
-  FixedDimArray_(T* array, Args... args);
+    // should probably also compare the value_type of each array. It's unclear
+    // how to do that
 
-  /// Assists with the initialization of the FixedDimArray_ objects
+    if (this->rank() != other.rank()) {return false;}
+
+    if ((this->shared_data_.get() == nullptr) ||
+        (other.shared_data_.get() == nullptr)) {
+      return false;
+    }
+
+    void* ptr1 = (void*)(this->shared_data_.get() + this->offset_);
+    void* ptr2 = (void*)(other.shared_data_.get() + other.offset_);
+    if (ptr1 != ptr2){ return false; }
+
+    const intp* shape1 = this->shape_;
+    const intp* shape2 = other.shape_;
+    const intp* stride1 = this->stride_;
+    const intp* stride2 = other.stride_;
+
+    for (std::size_t i = 0; i < D; i++){
+      if ((shape1[i] != shape2[i]) || (stride1[i] != stride2[i])){
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /// Copy elements from the current array to ``dest``. Both arrays must have
+  /// the same shape.
+  ///
+  /// @param dest The array where elements are copied into.
+  ///
+  /// @note It might be better to make this a standalone function.
+  /// @note This could be optimized
+  void copy_to(const CelloArray<T,D>& other) const noexcept;
+
+protected:
+
+  /// Assists with the initialization of the CelloArray instances
   void init_helper_(const std::shared_ptr<T> &shared_data,
 		    const intp shape_arr[D], const intp offset){
     if ((shared_data.get() == nullptr) || (shared_data.use_count() == 0)){
-      ERROR("FixedDimArray_::init_helper_",
+      ERROR("CelloArray::init_helper_",
 	    "shared_data must not hold a NULL pointer or be empty. The "
             "current array is probably being moved/copied from an "
             "uninitialized array.");
@@ -517,16 +591,16 @@ protected: // methods to be reused by subclasses
     }
   }
 
-  /// helps initialize FixedDimArray_ objects by shallow copy
-  void shallow_copy_init_helper_(const FixedDimArray_<T,D> &other){
+  // Assists with the destruction of CelloArray
+  inline void cleanup_helper_(){ }
+
+  /// helps initialize CelloArray instances by shallow copy
+  void shallow_copy_init_helper_(const CelloArray<T,D> &other){
     init_helper_(other.shared_data_, other.shape_, other.offset_);
     // stride_ is copied from other, not initialized from shape_, in order to
     // appropriately handle cases where other is a subarray
     for (std::size_t i = 0; i<D; i++){ stride_[i] = other.stride_[i]; }
   }
-
-  /// Assists with the destruction of FixedDimArray_
-  void cleanup_helper_(){ }
 
   /// this method is provided to assist with the optional debugging mode that
   /// checks if provided wrapped arrays contain NaNs or infs
@@ -535,7 +609,6 @@ protected: // methods to be reused by subclasses
   void assert_all_entries_finite_() const noexcept;
 
 public: // attributes
-  // (these are only public so that various subclasses can access these)
 
   /// shared pointer to data
   std::shared_ptr<T> shared_data_;
@@ -551,6 +624,7 @@ public: // attributes
   /// quanitifies the offset in the address of an element caused by
   /// incrementing the dimension's index. The last index is always 1
   intp stride_[D];
+
 };
 
 //----------------------------------------------------------------------
@@ -559,15 +633,16 @@ public: // attributes
 /// and not too big)
 inline void check_array_shape_(intp shape[], std::size_t D)
 {
-  ASSERT("FixedDimArray_", "Positive dimensions are required.", shape[0]>0);
-  ASSERT1("FixedDimArray_", "The array cannot exceed %ld elements.",
+  ASSERT("check_array_shape_", "Positive dimensions are required.", shape[0]>0);
+  ASSERT1("check_array_shape_", "The array cannot exceed %ld elements.",
 	  (long)ARRAY_SIZE_MAX, (ARRAY_SIZE_MAX / shape[0]) >= 1);
   intp cur_size = 1;
 
   for (std::size_t i = 0; i+1 < D; i++){
     cur_size *= shape[i];
-    ASSERT("FixedDimArray_", "Positive dimensions are required.",shape[i+1]>0);
-    ASSERT1("FixedDimArray_", "The array cannot exceed %ld elements.",
+    ASSERT("check_array_shape_", "Positive dimensions are required.",
+           shape[i+1]>0);
+    ASSERT1("check_array_shape_", "The array cannot exceed %ld elements.",
 	    (long)ARRAY_SIZE_MAX, (ARRAY_SIZE_MAX / shape[i+1]) >= cur_size);
   }
 }
@@ -577,7 +652,7 @@ inline void check_array_shape_(intp shape[], std::size_t D)
 // Constructor of CelloArray by allocating new data
 template<typename T, std::size_t D>
 template<typename... Args, class>
-FixedDimArray_<T,D>::FixedDimArray_(Args... args)
+CelloArray<T,D>::CelloArray(Args... args)
 {
   static_assert(D==sizeof...(args), "Incorrect number of dimensions");
   intp shape[D] = {((intp)args)...};
@@ -598,7 +673,7 @@ FixedDimArray_<T,D>::FixedDimArray_(Args... args)
 // Constructor of array that wraps an existing c-style array
 template<typename T, std::size_t D>
 template<typename... Args, class>
-FixedDimArray_<T,D>::FixedDimArray_(T* array, Args... args)
+CelloArray<T,D>::CelloArray(T* array, Args... args)
 {
   static_assert(D==sizeof...(args), "Incorrect number of dimensions");
   intp shape[D] = {((intp)args)...};
@@ -635,16 +710,16 @@ inline void prep_slices_(const CSlice* slices, const intp shape[],
        stop += shape[i];
      }
 
-     ASSERT3("FixedDimArray_",
+     ASSERT3("prep_slices_",
 	     "slice start of %ld doesn't lie in bound of dim %ld of size %ld.",
 	     (long)slices[i].get_start(), (long)i, (long)shape[i],
 	     start < shape[i]);
-     ASSERT3("FixedDimArray_",
+     ASSERT3("prep_slices_",
 	     "slice stop of %d doesn't lie in bound of dim %ld of size %ld.",
 	     (long)slices[i].get_stop(), (long)i, (long)shape[i],
 	     stop <= shape[i]);
-     ASSERT4("FixedDimArray_", ("slice stop (%ld) doesn't exceed slice start "
-				"(%ld) must for dim %ld of size %ld."),
+     ASSERT4("prep_slices_", ("slice stop (%ld) doesn't exceed slice start "
+                              "(%ld) must for dim %ld of size %ld."),
 	     (long)slices[i].get_start(), (long)slices[i].get_stop(), (long)i,
 	     (long)shape[i], stop>start);
      out_slices[i] = CSlice(start,stop);
@@ -656,7 +731,7 @@ inline void prep_slices_(const CSlice* slices, const intp shape[],
 // Returnd CelloArray representing a view of a subarray of the current instance
 template<typename T, std::size_t D>
 template<typename... Args, class>
-CelloArray<T,D> FixedDimArray_<T,D>::subarray(Args... args) const noexcept{
+CelloArray<T,D> CelloArray<T,D>::subarray(Args... args) const noexcept{
   // TODO: put some thought into creating a const-qualified version of this
   // function
   static_assert(D == sizeof...(args) || 0 == sizeof...(args),
@@ -685,160 +760,6 @@ CelloArray<T,D> FixedDimArray_<T,D>::subarray(Args... args) const noexcept{
   }
   return subarray;
 }
-
-//----------------------------------------------------------------------
-
-template<typename T, std::size_t D>
-void FixedDimArray_<T,D>::assert_all_entries_finite_() const noexcept
-{
-  bool continue_outer_iter = true;
-  intp indices[D] = {}; // all elements to 0
-  while (continue_outer_iter){
-    intp index = calc_index_(D, this->offset_, this->stride_, indices);
-    for (intp i = 0; i<this->shape_[D-1]; i++){
-
-      if (!check_if_finite_(this->shared_data_.get()[index])){
-	//  let's get the indices as a string
-	std::string str_indices = "";
-	for (std::size_t j=0; j+1<D; j++){
-	  str_indices+= std::to_string(indices[j]) + ", ";
-	}
-	str_indices += std::to_string(i);
-
-	ASSERT1("FixedDimArray_::assert_all_entries_finite_()",
-                "The element at (%s) has a non-finite value.",
-		str_indices.c_str(),false);
-
-      }
-      index++;
-    }
-    continue_outer_iter = increment_outer_indices_(D, indices, this->shape_);
-  }
-}
-
-//----------------------------------------------------------------------
-
-template<typename T, std::size_t D>
-class CelloArray : public FixedDimArray_<T,D>
-{
-  /// @class    CelloArray
-  /// @ingroup  Array
-  /// @brief    [\ref Array] class template that encapsulates a
-  ///           multidimensional numeric array with a fixed number of
-  ///           dimensions.
-  ///
-  /// The semantics of this template class resemble those of numpy arrays and
-  /// pointers instead of those c++ standard library containers (like vectors).
-  /// The class effectively acts as an address to the underlying data. The
-  /// copy constructor and copy assignment operation effectively make shallow
-  /// copies and deepcopies must be explicitly created. Note that a consequnce
-  /// of this behavior is that when instances are passed to functions by value,
-  /// any modifications to the array within the function will be reflected
-  /// everywhere.
-
-public: // interface
-
-  /// Default constructor. Constructs an uninitialized CelloArray.
-  CelloArray() : FixedDimArray_<T,D>() { }
-
-  /// Construct a multidimensional numeric array that allocates its own data
-  /// (where the data is freed once no arrays reference it anymore)
-  ///
-  /// @param args the lengths of each dimension. There must by D values and
-  ///     they must all have the same type - int or intp
-  template<typename... Args, REQUIRE_INT(Args)>
-  CelloArray(Args... args) : FixedDimArray_<T,D>(args...) { }
-
-  /// Construct a multidimensional numeric array that wraps an existing pointer
-  ///
-  /// @param array The pointer to the existing array data
-  /// @param args the lengths of each dimension. There must by D values and
-  ///     they must all have the same type - int or intp
-  ///
-  /// @note Note that instances of CelloArray that wrap existing pointers are
-  ///     inherently less safe. Segmentation faults can more easily arise due
-  ///     incorrect shapes being specified at this constructor and due to the
-  ///     memory of the wrapped array being freed
-  template<typename... Args, REQUIRE_INT(Args)>
-  CelloArray(T* array, Args... args) : FixedDimArray_<T,D>(array, args...) { }
-
-  /// Copy constructor. Makes *this a shallow copy of other.
-  ///
-  /// @note The fact that this accepts const reference reflects the fact that
-  ///     CelloArray has pointer-like semantics
-  CelloArray(const CelloArray<T,D>& other) : CelloArray() {
-    this->shallow_copy_init_helper_(other);
-  }
-
-  /// Move constructor. Constructs the array with the contents of other
-  CelloArray(CelloArray<T,D>&& other) : CelloArray() {swap(*this,other);}
-
-  /// Copy assignment operator. Makes *this a shallow copy of other.
-  ///
-  /// (The contents of any previously created shallow copies or subarrays of
-  /// *this are unaffected by this method)
-  CelloArray<T,D>& operator=(const CelloArray<T,D>& other){
-    this->cleanup_helper_();
-    this->shallow_copy_init_helper_(other);
-    return *this;
-  }
-
-  /// Move assignment operator. Replaces the contents of *this with those of
-  /// other.
-  ///
-  /// (Contents of any previously created shallow copies or subarrays of
-  /// *this are unaffected)
-  CelloArray<T,D>& operator=(CelloArray<T,D>&& other) {
-    swap(*this,other);
-    return *this;
-  }
-
-  /// Produce a deepcopy of the array.
-  CelloArray<T,D> deepcopy() const noexcept;
-
-  /// Returns whether CelloArray is a perfect alias of other.
-  ///
-  /// Returns False if there is just partial overlap, either array is
-  /// uninitialized, or if the number of dimensions of the arrays differs.
-  template<typename OtherArray>
-  bool is_alias(const OtherArray& other) const{
-
-    // should probably also compare the value_type of each array. It's unclear
-    // how to do that
-
-    if (this->rank() != other.rank()) {return false;}
-
-    if ((this->shared_data_.get() == nullptr) ||
-        (other.shared_data_.get() == nullptr)) {
-      return false;
-    }
-
-    void* ptr1 = (void*)(this->shared_data_.get() + this->offset_);
-    void* ptr2 = (void*)(other.shared_data_.get() + other.offset_);
-    if (ptr1 != ptr2){ return false; }
-
-    const intp* shape1 = this->shape_;
-    const intp* shape2 = other.shape_;
-    const intp* stride1 = this->stride_;
-    const intp* stride2 = other.stride_;
-
-    for (std::size_t i = 0; i < D; i++){
-      if ((shape1[i] != shape2[i]) || (stride1[i] != stride2[i])){
-        return false;
-      }
-    }
-    return true;
-  }
-
-  /// Copy elements from the current array to ``dest``. Both arrays must have
-  /// the same shape. 
-  ///
-  /// @param dest The array where elements are copied into.
-  ///
-  /// @note It might be better to make this a standalone function.
-  /// @note This could also be better optimized
-  void copy_to(const CelloArray<T,D>& other) const noexcept;
-};
 
 //----------------------------------------------------------------------
 
@@ -875,6 +796,36 @@ CelloArray<T,D> CelloArray<T,D>::deepcopy() const noexcept
   out.init_helper_(new_data, this->shape_, 0);
   this->copy_to(out);
   return out;
+}
+
+//----------------------------------------------------------------------
+
+template<typename T, std::size_t D>
+void CelloArray<T,D>::assert_all_entries_finite_() const noexcept
+{
+  bool continue_outer_iter = true;
+  intp indices[D] = {}; // all elements to 0
+  while (continue_outer_iter){
+    intp index = calc_index_(D, this->offset_, this->stride_, indices);
+    for (intp i = 0; i<this->shape_[D-1]; i++){
+
+      if (!check_if_finite_(this->shared_data_.get()[index])){
+	//  let's get the indices as a string
+	std::string str_indices = "";
+	for (std::size_t j=0; j+1<D; j++){
+	  str_indices+= std::to_string(indices[j]) + ", ";
+	}
+	str_indices += std::to_string(i);
+
+	ASSERT1("CelloArray::assert_all_entries_finite_()",
+                "The element at (%s) has a non-finite value.",
+		str_indices.c_str(),false);
+
+      }
+      index++;
+    }
+    continue_outer_iter = increment_outer_indices_(D, indices, this->shape_);
+  }
 }
 
 #endif /* ARRAY_CELLO_ARRAY_HPP */
