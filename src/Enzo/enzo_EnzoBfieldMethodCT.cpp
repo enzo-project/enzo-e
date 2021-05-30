@@ -171,13 +171,14 @@ void EnzoBfieldMethodCT::identify_upwind(const EnzoEFltArrayMap &flux_map,
     ERROR("EnzoBfieldMethodCT::identify_upwind",
           "dim has an invalid value");
   } else {
-    EFlt3DArray density_flux = flux_map.get("density", stale_depth);
+    const CelloArray<const enzo_float, 3> density_flux = flux_map.get
+      ("density", stale_depth);
 
     CSlice stale_slc = (stale_depth > 0) ?
       CSlice(stale_depth,-stale_depth) : CSlice(nullptr, nullptr);
 
-    EFlt3DArray weight_field = weight_l_[dim].subarray(stale_slc, stale_slc,
-                                                       stale_slc);
+    const CelloArray<enzo_float, 3> weight_field =
+      weight_l_[dim].subarray(stale_slc, stale_slc, stale_slc);
 
     // Iteration limits compatible with both 2D and 3D grids
     for (int iz=0; iz<density_flux.shape(0); iz++) {
@@ -261,16 +262,16 @@ void EnzoBfieldMethodCT::compute_center_efield
   int k = coord.k_axis();
 
   // Load the jth and kth components of the velocity and cell-centered bfield
-  EFlt3DArray velocity_j = integration_map.at(v_names[j]);
-  EFlt3DArray velocity_k = integration_map.at(v_names[k]);
-  EFlt3DArray bfield_j = integration_map.at(b_names[j]);
-  EFlt3DArray bfield_k = integration_map.at(b_names[k]);
+  const CelloArray<const enzo_float, 3> vel_j = integration_map.at(v_names[j]);
+  const CelloArray<const enzo_float, 3> vel_k = integration_map.at(v_names[k]);
+  const CelloArray<const enzo_float, 3> b_j = integration_map.at(b_names[j]);
+  const CelloArray<const enzo_float, 3> b_k = integration_map.at(b_names[k]);
 
   for (int iz=stale_depth; iz<efield.shape(0)-stale_depth; iz++) {
     for (int iy=stale_depth; iy<efield.shape(1)-stale_depth; iy++) {
       for (int ix=stale_depth; ix<efield.shape(2)-stale_depth; ix++) {
-	efield(iz,iy,ix) = (-velocity_j(iz,iy,ix) * bfield_k(iz,iy,ix) +
-                            velocity_k(iz,iy,ix) * bfield_j(iz,iy,ix));
+	efield(iz,iy,ix) = (-vel_j(iz,iy,ix) * b_k(iz,iy,ix) +
+                            vel_k(iz,iy,ix) * b_j(iz,iy,ix));
       }
     }
   }
