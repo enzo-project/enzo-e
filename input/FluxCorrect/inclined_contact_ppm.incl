@@ -93,30 +93,7 @@
          dual_energy = false;
          flattening = 0;
          steepening = false;
-     };
-
-     flux_correct {
-         # this only applies to density
-         min_digits = 16.4;
      }
- }
-
- Output {
-
-     list = [];
-
-     data {
-         type = "data";
-         field_list = ["density", "velocity_x", "velocity_y", "velocity_z",
-	      	       "total_energy"];
-         name = [ "data-%04d.h5", "proc" ];
-         dir = [ "x-axis_contact_amr_%03d", "cycle" ];
-         schedule {
-             list = [0.0, 1.0];
-             var = "time";
-         };
-     };
-
  }
 
  Stopping {
