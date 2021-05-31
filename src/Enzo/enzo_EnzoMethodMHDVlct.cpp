@@ -317,18 +317,25 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
                                        *(lazy_passive_list_.get_list()));
 
       // Compute flux along each dimension
-      compute_flux_(0, cur_dt, cell_widths[0], primitive_map,
-                    priml_map, primr_map, xflux_map, dUcons_map,
-                    interface_velocity_arr_ptr, *reconstructor, bfield_method_,
-                    stale_depth, *(lazy_passive_list_.get_list()));
-      compute_flux_(1, cur_dt, cell_widths[1], primitive_map,
-                    priml_map, primr_map, yflux_map, dUcons_map,
-                    interface_velocity_arr_ptr, *reconstructor, bfield_method_,
-                    stale_depth, *(lazy_passive_list_.get_list()));
-      compute_flux_(2, cur_dt, cell_widths[2], primitive_map,
-                    priml_map, primr_map, zflux_map, dUcons_map,
-                    interface_velocity_arr_ptr, *reconstructor, bfield_method_,
-                    stale_depth, *(lazy_passive_list_.get_list()));
+      EnzoEFltArrayMap *flux_maps[3] = {&xflux_map, &yflux_map, &zflux_map};
+
+      for (int dim = 0; dim < 3; dim++){
+        // trim the shape of priml_map and primr_map (they're bigger than
+        // necessary so that they can be reused for each dim). This isn't
+        // strictly necessary, but it helps make the code easier to understand
+        CSlice x_slc = (dim == 0) ? CSlice(0,-1) : CSlice(0, nullptr);
+        CSlice y_slc = (dim == 1) ? CSlice(0,-1) : CSlice(0, nullptr);
+        CSlice z_slc = (dim == 2) ? CSlice(0,-1) : CSlice(0, nullptr);
+
+        EnzoEFltArrayMap pl_map = priml_map.subarray_map(z_slc, y_slc, x_slc);
+        EnzoEFltArrayMap pr_map = primr_map.subarray_map(z_slc, y_slc, x_slc);
+
+        compute_flux_(dim, cur_dt, cell_widths[dim], primitive_map,
+                      pl_map, pr_map, *(flux_maps[dim]), dUcons_map,
+                      interface_velocity_arr_ptr, *reconstructor,
+                      bfield_method_, stale_depth,
+                      *(lazy_passive_list_.get_list()));
+      }
 
       // increment the stale_depth
       stale_depth+=reconstructor->immediate_staling_rate();
