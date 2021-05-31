@@ -63,10 +63,12 @@
 ///    Note:
 ///        - All arrays in maps 1, 2, 3, and 8 have the same shapes as
 ///          cell-centered Cello Fields
-///        - All arrays in priml_map and primr_map technically have the shape
-///          of a cell-centered field, but they are treated as though they have
-///          the shape of a face-centered field. This is done so that they can
-///          be reused for different axes.
+///        - When they're allocated, all arrays in priml_map and primr_map
+///          technically have the shape of a cell-centered field (to allow them
+///          to be reused while computing the flux along each dimesnion). While
+///          computing the fluxes, the arrays are sliced so that they have the
+///          same shape as xflux_map, yflux_map, or zflux_map (depending on the
+///          context).
 ///        - For the purposes of these enumerated maps, we assume that the
 ///          length of a face-centered array along the dimension with
 ///          face-centering is 1 less than that of a cell-centered array
@@ -185,11 +187,7 @@ protected: // methods
   ///     specific passive scalars).
   /// @param[in]     priml_map,primr_map Maps of arrays used to temporarily
   ///     hold the left/right reconstructed face-centered primitives. These
-  ///     arrays should have the shape of a cell-centered field, but are
-  ///     treated as though they have the shape of a that is face-centered
-  ///     along `dim` (If a cell-centered field holds `N` elements along `dim`,
-  ///     then such a face-centered field should only have `N-1` elements along
-  ///     `dim`).
+  ///     arrays should have the shape as flux_map
   /// @param[in]     flux_map Holds arrays where the calculated fluxes
   ///     will be stored. The arrays should be face-centered along `dim`.
   ///     If a cell-centered field holds `N` elements along `dim`, then this
