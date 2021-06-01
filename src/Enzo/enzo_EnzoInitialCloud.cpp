@@ -460,7 +460,7 @@ void EnzoInitialCloud::enforce_block
   FieldDescr * field_descr = cello::field_descr();
   const bool use_cloud_dye
     = (field_descr->is_field("cloud_dye") &&
-       field_descr->groups()->is_in("cloud_dye", "colour"));
+       field_descr->groups()->is_in("cloud_dye", "color"));
   EFlt3DArray cloud_dye_density;
   if (use_cloud_dye){
     cloud_dye_density = array_factory.from_name("cloud_dye");
@@ -468,10 +468,10 @@ void EnzoInitialCloud::enforce_block
 
   const bool set_metal_density
     = (field_descr->is_field("metal_density") &&
-       field_descr->groups()->is_in("metal_density","colour"));
+       field_descr->groups()->is_in("metal_density","color"));
   if (metal_mass_frac_>0.){
     ASSERT("EnzoInitialCloud::enforce_block",
-	   "metal_denisty field must be in the \"colour\" group since a metal "
+	   "metal_denisty field must be in the \"color\" group since a metal "
 	   "mass fraction was specified.", set_metal_density);
   }
   EFlt3DArray metal_density;
