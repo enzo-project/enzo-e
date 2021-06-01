@@ -1,8 +1,0 @@
-include "input/FluxCorrect/inclined_contact_ppm.incl"
-
- Method {
-     flux_correct {
-         # this only applies to density
-         min_digits = 7.0;
-     }
- }

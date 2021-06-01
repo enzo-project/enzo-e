@@ -12,11 +12,13 @@
 //----------------------------------------------------------------------
 
 MethodFluxCorrect::MethodFluxCorrect
-(std::string group, bool enable, double min_digits) throw() 
+(std::string group, bool enable,
+ const std::vector<std::string>& min_digits_fields,
+ const std::vector<double>& min_digits_vals) throw() 
   : Method (),
     group_(group),
     enable_(enable),
-    min_digits_(min_digits),
+    min_digits_map_(),
     field_sum_(),
     field_sum_0_(),
     ir_pre_(-1),
@@ -29,7 +31,7 @@ MethodFluxCorrect::MethodFluxCorrect
   for (int i_f=0; i_f<nf; i_f++) {
     cello::refresh(ir_post_)->add_field(groups->item(group_,i_f));
   }
-  
+
   //  ir_pre_ = add_new_refresh_(neighbor_flux);
   ir_pre_ = add_new_refresh_(neighbor_leaf);
   Refresh * refresh_pre = cello::refresh(ir_pre_);
@@ -44,6 +46,20 @@ MethodFluxCorrect::MethodFluxCorrect
   for (int i_f=0; i_f<nf; i_f++) {
     refresh_pre->add_field(groups->item(group_,i_f));
   }
+
+  // Set up min_digits_pairs_
+  ASSERT("MethodFluxCorrect::MethodFluxCorrect",
+         "min_digits_fields and min_digits_values must have the same length",
+         min_digits_fields.size() == min_digits_vals.size());
+  for (std::size_t i = 0; i < min_digits_fields.size(); i++){
+    const std::string& field = min_digits_fields[i];
+    ASSERT2("MethodFluxCorrect::MethodFluxCorrect",
+            ("Can't check conserved digits for the \"%s\" field since it's "
+             "not in the field group \"%s\"."),
+            field.c_str(), group_.c_str(), groups->is_in(field,group_));
+    min_digits_map_[field] = min_digits_vals[i];
+  }
+
   // sum mass, momentum, energy
 
   field_sum_.resize(nf);
@@ -58,7 +74,7 @@ void MethodFluxCorrect::compute ( Block * block) throw()
 
   block->new_refresh_start
     (ir_pre_, CkIndex_Block::p_method_flux_correct_refresh());
- 
+
 }
 
 //----------------------------------------------------------------------
@@ -96,9 +112,9 @@ void MethodFluxCorrect::compute_continue_refresh( Block * block ) throw()
   if (block->is_leaf()) {
 
     cello_float * density = (cello_float *) field.values("density");
-    
+
     Grouping * groups = cello::field_groups();
-    
+
     for (int i_f=0; i_f<nf; i_f++) {
 
       const int index_field = flux_data->index_field(i_f);
@@ -114,8 +130,8 @@ void MethodFluxCorrect::compute_continue_refresh( Block * block ) throw()
             for (int ix=gx; ix<mx-gx; ix++) {
               int i=ix + mx*(iy + my*iz);
               reduce[i_f+1] += values[i]*density[i];
-            }    
-          }    
+            }
+          }
         }
       } else {
         for (int iz=gz; iz<mz-gz; iz++) {
@@ -123,20 +139,20 @@ void MethodFluxCorrect::compute_continue_refresh( Block * block ) throw()
             for (int ix=gx; ix<mx-gx; ix++) {
               int i=ix + mx*(iy + my*iz);
               reduce[i_f+1] += values[i];
-            }    
-          }    
+            }
+          }
         }
       }
 
       // scale by relative mesh cell volume/area
 
       const int level = block->level();
-      
+
       const int w = 1 << level*cello::rank();
       reduce[i_f+1] /= w;
     }
   }
-  
+
   CkCallback callback (CkIndex_Block::r_method_flux_correct_sum_fields(nullptr), 
                        block->proxy_array());
 
@@ -186,14 +202,21 @@ void MethodFluxCorrect::compute_continue_sum_fields
       const int precision = field.precision (index_field);
       const double digits =
         -log10(cello::err_rel(field_sum_0_[i_f],field_sum_[i_f]));
+      const std::string& field_name = field.field_name(index_field);
       cello::monitor()->print
         ("Method", "Field %s sum %20.16Le conserved to %g digits of %d",
-         field.field_name(index_field).c_str(),
+         field_name.c_str(),
          field_sum_[i_f],
          digits,
          cello::digits_max(precision));
-      unit_func("MethodFluxCorrect precision (density)");
-      if (index_field == index_density) unit_assert (digits >= min_digits_);
+
+      auto search = min_digits_map_.find(field_name);
+      if (search != min_digits_map_.end()){
+        const double& min_digits = search->second;
+        std::string test_name = "MethodFluxCorrect prec: " + field_name;
+        unit_func(test_name.c_str());
+        unit_assert (digits >= min_digits);
+      }
     }
   }
 

@@ -31,7 +31,7 @@ print("Precision:", prec)
 
 run_ppm1 = Builder(action = "$RMIN; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunPpm1' : run_ppm1 } )
-env_mv_ppm1 = env.Clone(COPY = 'mkdir -p ' + test_path + '/MethodFluxCorrect/Inclined-Contact-Ppm; mv `ls *.png *.h5` ' + test_path + '/MethodFluxCorrect/Inclined-Contact-Ppm')
+env_mv_ppm1 = env.Clone(COPY = 'mkdir -p ' + test_path + '/MethodFluxCorrect/Inclined-Contact-SMR-Ppm; mv `ls *.png *.h5` ' + test_path + '/MethodFluxCorrect/Inclined-Contact-SMR-Ppm')
 
 #-------------------------------------------------------------
 #load balancing
@@ -40,15 +40,15 @@ env_mv_ppm1 = env.Clone(COPY = 'mkdir -p ' + test_path + '/MethodFluxCorrect/Inc
 #serial
 if prec == 'double':
    balance_ppm_1 = env_mv_ppm1.RunSerial (
-        'inclined_contact_ppm.unit',
+        'inclined_contact_smr_ppm.unit',
         bin_path + '/enzo-e',
-        ARGS='input/FluxCorrect/inclined_contact_ppm-double.in')
+        ARGS='input/FluxCorrect/inclined_contact_smr_ppm-double.in')
 else:
    balance_ppm_1 = env_mv_ppm1.RunSerial (
-        'inclined_contact_ppm.unit',
+        'inclined_contact_smr_ppm.unit',
         bin_path + '/enzo-e',
-        ARGS='input/FluxCorrect/inclined_contact_ppm-single.in')
+        ARGS='input/FluxCorrect/inclined_contact_smr_ppm-single.in')
 
 Clean(balance_ppm_1,
-     [Glob('#/' + test_path + '/Inclined-Contact-Ppm*.png'),
-      Glob('#/' + test_path + '/Inclined-Contact-Ppm*.h5')])
+     [Glob('#/' + test_path + '/Inclined-Contact-SMR-Ppm*.png'),
+      Glob('#/' + test_path + '/Inclined-Contact-SMR-Ppm*.h5')])
