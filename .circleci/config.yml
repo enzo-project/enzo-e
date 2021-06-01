@@ -138,7 +138,7 @@ commands:
         default: false
     steps:
       - run:
-          name: "Fetch enzo-e files enzo-e and run tests."
+          name: "Checkout target tag from enzo-e repository."
           command: |
             source $BASH_ENV
             source $HOME/venv/bin/activate
