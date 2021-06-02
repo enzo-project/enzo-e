@@ -128,6 +128,8 @@ module enzo {
     // EnzoMethodTurbulence synchronization entry methods
     entry void p_method_turbulence_end(CkReductionMsg *msg);
 
+    entry void p_initial_hdf5_recv(MsgInitial * msg_initial);
+
     // EnzoMethodGravity synchronization entry methods
     entry void p_method_gravity_continue();
     entry void p_method_gravity_end();

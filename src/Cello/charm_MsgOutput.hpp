@@ -20,8 +20,6 @@ class IoBlock;
 class Factory;
 class MethodOutput;
 
-#define TAG_LEN 9
-
 class MsgOutput : public CMessage_MsgOutput {
 
 public: // interface
@@ -55,7 +53,7 @@ public: // interface
       block_upper[i]    = msg_output.block_upper[i];
     }
     // new tag
-    cello::hex_string(tag_,TAG_LEN-1);
+    cello::hex_string(tag_,TAG_LEN);
   };
 
   /// Set the DataMsg object
@@ -120,7 +118,7 @@ protected: // attributes
   void * buffer_;
 
   /// Random hex tag for tracking messages for debugging
-  char tag_[TAG_LEN];
+  char tag_[TAG_LEN+1];
 
   /// Data for the Block
   IoBlock * io_block_;

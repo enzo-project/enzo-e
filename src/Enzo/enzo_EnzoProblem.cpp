@@ -95,7 +95,19 @@ Initial * EnzoProblem::create_initial_
   if (type == "hdf5") {
 
     initial = new EnzoInitialHdf5
-      (cycle,time,enzo_config,config->mesh_max_initial_level);
+      (cycle,time,
+       enzo_config->initial_hdf5_max_level,
+       enzo_config->initial_hdf5_format,
+       enzo_config->initial_hdf5_blocking,
+       enzo_config->initial_hdf5_field_files,
+       enzo_config->initial_hdf5_field_datasets,
+       enzo_config->initial_hdf5_field_coords,
+       enzo_config->initial_hdf5_field_names,
+       enzo_config->initial_hdf5_particle_files,
+       enzo_config->initial_hdf5_particle_datasets,
+       enzo_config->initial_hdf5_particle_coords,
+       enzo_config->initial_hdf5_particle_types,
+       enzo_config->initial_hdf5_particle_attributes);
 
   } else if (type == "music") {
 

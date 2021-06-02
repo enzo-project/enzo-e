@@ -149,6 +149,9 @@ public: // interface
       initial_grackle_test_reset_energies(0),
 #endif /* CONFIG_USE_GRACKLE */
       // EnzoInitialHdf5
+      initial_hdf5_max_level(),
+      initial_hdf5_format(),
+      initial_hdf5_blocking(),
       initial_hdf5_field_files(),
       initial_hdf5_field_datasets(),
       initial_hdf5_field_names(),
@@ -362,6 +365,9 @@ public: // attributes
 
   /// EnzoInitialHdf5
 
+  int                         initial_hdf5_max_level;
+  std::string                 initial_hdf5_format;
+  int                         initial_hdf5_blocking[3];
   std::vector < std::string > initial_hdf5_field_files;
   std::vector < std::string > initial_hdf5_field_datasets;
   std::vector < std::string > initial_hdf5_field_names;
@@ -371,7 +377,6 @@ public: // attributes
   std::vector < std::string > initial_hdf5_particle_coords;
   std::vector < std::string > initial_hdf5_particle_types;
   std::vector < std::string > initial_hdf5_particle_attributes;
-
   /// EnzoInitialMusic
 
   std::vector < std::string > initial_music_field_files;

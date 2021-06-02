@@ -87,7 +87,6 @@ protected: // functions
   void write_meta_ ( FileHdf5 * file, Io * io, std::string type_meta );
   DataMsg * create_data_msg_ (Block * block);
   
-  
 protected: // attributes
 
   /// File name and format

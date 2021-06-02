@@ -103,7 +103,7 @@
 
   Initial {
 
-     list = ["value", "hdf5"];
+     list = ["value", "music"];
 
      value {
          density = [0.0];

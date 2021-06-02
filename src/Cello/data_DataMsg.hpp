@@ -215,7 +215,7 @@ protected: // attributes
 
   /// Field Face Data
   FieldFace * field_face_;
-  /// Whethere FieldFace data should be deleted in destructor
+  /// Whether FieldFace data should be deleted in destructor
   bool field_face_delete_;
 
   /// Field data
@@ -228,12 +228,12 @@ protected: // attributes
     char * field_array_u_;
 
   };
-  /// Whethere FieldData data should be deleted in destructor
+  /// Whether FieldData data should be deleted in destructor
   bool field_data_delete_;
   
   /// Particle data
   ParticleData * particle_data_;
-  /// Whethere Particle data should be deleted in destructor
+  /// Whether Particle data should be deleted in destructor
   bool particle_data_delete_;
 
   /// Flux faces (array for each field)

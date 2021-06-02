@@ -52,7 +52,10 @@ void EnzoInitialSedovArray3::enforce_block
 ( Block * block, const Hierarchy * hierarchy ) throw()
 
 {
-  if (!block->is_leaf()) return;
+  if (!block->is_leaf()) {
+    block->initial_done();
+    return;
+  }
   
   ASSERT("EnzoInitialSedovArray3",
 	 "Block does not exist",
@@ -188,6 +191,6 @@ void EnzoInitialSedovArray3::enforce_block
       }
     }
   }
-  
+  block->initial_done();
 }
 

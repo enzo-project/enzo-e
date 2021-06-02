@@ -209,6 +209,8 @@ public: /// entry methods
   /// Compute sum, min, and max of g values for EnzoMethodTurbulence
   void p_method_turbulence_end(CkReductionMsg *msg);
 
+  void p_initial_hdf5_recv(MsgInitial * msg_initial);
+  
   /// TEMP
   double timestep() { return dt; }
 

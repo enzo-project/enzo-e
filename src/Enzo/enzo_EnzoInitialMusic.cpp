@@ -84,7 +84,10 @@ void EnzoInitialMusic::enforce_block
 ( Block * block, const Hierarchy * hierarchy ) throw()
 {
 
-  if (block->level() != level_) return;
+  if (block->level() != level_) {
+    block->initial_done();
+    return;
+  }
 
   // Optionally pause before reading if throttling enabled.  For
   // reducing filesystem contention on large runs
@@ -326,6 +329,12 @@ void EnzoInitialMusic::enforce_block
     const int IY = particle_coords_[index].find ("y");
     const int IZ = particle_coords_[index].find ("z");
 
+    // field size
+    int n4[4] = {1,1,1,1};
+    n4[IX] = nx;
+    n4[IY] = ny;
+    n4[IZ] = nz;
+    
     // compute cell widths
     double h4[4] = {1,1,1,1};
     h4[IX] = (upper_block[0] - lower_block[0]) / nx;
@@ -341,11 +350,6 @@ void EnzoInitialMusic::enforce_block
     if (o4[IX] >= m4[IX]) o4[IX] = o4[IX] % m4[IX];
     if (o4[IY] >= m4[IY]) o4[IY] = o4[IY] % m4[IY];
     if (o4[IZ] >= m4[IZ]) o4[IZ] = o4[IZ] % m4[IZ];
-
-    int n4[4] = {1,1,1,1};
-    n4[IX] = (upper_block[0] - lower_block[0]) / h4[IX];
-    n4[IY] = (upper_block[1] - lower_block[1]) / h4[IY];
-    n4[IZ] = (upper_block[2] - lower_block[2]) / h4[IZ];
 
     // open the dataspace
     file-> data_slice
@@ -539,6 +543,8 @@ void EnzoInitialMusic::enforce_block
       }
     }
   }  
+
+  block->initial_done();
 }
 
 //----------------------------------------------------------------------

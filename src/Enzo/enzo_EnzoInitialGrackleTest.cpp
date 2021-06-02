@@ -236,6 +236,9 @@ void EnzoInitialGrackleTest::enforce_block
 
   EnzoMethodGrackle::delete_grackle_fields(&grackle_fields_);
 
+
+  block->initial_done();
+
   return;
 #endif /* CONFIG_USE_GRACKLE */
 }
