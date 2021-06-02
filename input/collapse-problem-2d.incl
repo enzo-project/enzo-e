@@ -36,7 +36,7 @@ Method {
 
  Particle {
      dark {
-         attributes = [ "x", "default", "y", "default", "vx", "default", "vy", "default", "ax", "default", "ay", "default" ];
+         attributes = [ "x", "default", "y", "default", "vx", "default", "vy", "default", "ax", "default", "ay", "default", "is_local", "default"];
          constants = [ "mass", "default", 10.00000000000000 ];
          groups = [ "has_mass" ];
          position = [ "x", "y" ];

@@ -1,13 +1,13 @@
-#include "fortran.h"
 #define FORTRAN
+#include "fortran.h"
 c=======================================================================
 c///////////////////////  SUBROUTINE TWOSHOCK  \\\\\\\\\\\\\\\\\\\\\\\\\
 
-      subroutine twoshock (
-     &     dls, drs, pls, prs, uls, urs, 
-     &     idim, jdim, i1, i2, j1, j2, dt, gamma, pmin, ipresfree,
-     &     pbar, ubar, gravity, grslice, idual, eta1
-     &     )
+      subroutine twoshock(
+     &           dls, drs, pls, prs, uls, urs, 
+     &           idim, jdim, i1, i2, j1, j2, dt, gamma, pmin, ipresfree,
+     &           pbar, ubar, gravity, grslice, idual, eta1
+     &                   )
 
 c  RIEMANN SOLVER USING TWO-SHOCK APPROXIMATION
 c
@@ -91,12 +91,12 @@ c
 
 !     Tolerance can be relaxed to reduce the cost of this routine
 
-#ifdef CONFIG_BFLOAT_4
+#ifdef CONFIG_PRECISION_SINGLE
       R_PREC tolerance
       parameter (tolerance = 1.0e-7_RKIND)
 #endif
 
-#ifdef CONFIG_BFLOAT_8
+#ifdef CONFIG_PRECISION_DOUBLE
       R_PREC tolerance
       parameter (tolerance = 1.e-14_RKIND)
 #endif

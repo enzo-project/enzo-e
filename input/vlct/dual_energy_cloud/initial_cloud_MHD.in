@@ -1,0 +1,56 @@
+# pure hydro cloud problem. This is called initial_cloud_MHD.in because this
+# version nominally supports magnetic fields (they are uniformly zero).
+#
+# R_cloud = 15000 pc = 3.086e20 cm per parsec
+# cloud number density = 0.25.e-1 cm^-3 (of hydrogen)
+# cloud Temperature = 4.e4
+# gamma = 5/3.
+# denisty contrast = 180
+# wind Mach number = 1.5 (v = 1.759e7 cm/s)
+# pressure = 1.3806e-13 dyne/cm^2
+
+ include "input/vlct/dual_energy_cloud/initial_cloud_HD.in"
+
+ Initial {
+
+    value {
+        bfield_x   = [ 0.];
+        bfield_y   = [ 0.];
+        bfield_z   = [ 0.];
+        bfieldi_x  = [ 0.];
+        bfieldi_y  = [ 0.];
+        bfieldi_z  = [ 0.];
+    }
+ }
+
+ Boundary {
+     list = ["downwind", "density_upwind", "metal_density_upwind",
+             "velocity_x_upwind", "transverse_velocity_upwind",
+             "etot_upwind", "eint_upwind", "bfield_upwind",
+             "cloud_dye_upwind", "yedge", "zedge"];
+
+     bfield_upwind{
+         type = "inflow";
+         axis = "x";
+         face = "lower";
+         field_list = ["bfield_x", "bfieldi_x",
+                       "bfield_y", "bfieldi_y",
+                       "bfield_z", "bfieldi_z"];
+         value = 0.;
+     };
+ }
+
+ Field {
+     # The VL+CT method tracks primitive quantities.
+     #    - bfieldi_x/y/z are interface magnetic fields (aka longitudinal).
+     #      The x/y/z component is the only component tracked at the faces
+     #      between cells along the x/y/z component
+     #    - bfield_x/y/z are the cell-centered magenetic fields. Each
+     #      component is the average value of the corresponding interface
+     #      values
+     list = ["density", "velocity_x", "velocity_y", "velocity_z",
+             "cloud_dye", "metal_density", "temperature", "pressure", 
+	     "total_energy", "internal_energy",
+             "bfieldi_x", "bfieldi_y", "bfieldi_z",
+             "bfield_x", "bfield_y", "bfield_z"];
+ }

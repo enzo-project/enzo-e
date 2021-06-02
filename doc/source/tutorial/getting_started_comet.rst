@@ -16,7 +16,7 @@ supercomputer, see the `Comet User Guide`_.
 Install ``Charm++`` on Comet
 ----------------------------
 
-``Charm++`` can be `downloaded here <http://charm.cs.illinois.edu/software>`_.
+``Charm++`` can be `downloaded here <https://charm.cs.illinois.edu/software>`_.
 
 To build Charm++ on Comet, try this:
 
@@ -87,7 +87,7 @@ parameter file (``input/method_ppm-8.in``) accordingly.
 
 ..  code-block:: bash
 		 
-    $ ./charmrun +p8 ++mpiexec bin/enzo-p input/method_ppm-8.in
+    $ ./charmrun +p8 ++mpiexec bin/enzo-e input/method_ppm-8.in
 
 
 This assumes that the charmrun command is in your path--if it is not,

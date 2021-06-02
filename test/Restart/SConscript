@@ -6,6 +6,9 @@ Import('ip_charm')
 Import('bin_path')
 Import('test_path')
 
+Import('use_valgrind')
+Import('use_grackle')
+
 
 #----------------------------------------------------------
 #defines
@@ -52,6 +55,33 @@ env_mv_ppml_8 = env.Clone(COPY = 'mkdir -p ' + test_path + '/Restart/MethodPpml-
 
 env_mv_out=env.Clone(COPY = 'mv *.png *.h5 Dir_* ' + test_path)
 
+# setup the checkpoint-restart tests
+import os, os.path
+if use_valgrind == 0:
+
+    # All of the SCons paths are given relative to main-directory.
+    # This tool is meant to be executed from within the current directory.
+    # With that in mind, we need to adjust the paths in the commands
+    _cmd = ('../../tools/ckpt_restart_test.py $TEST_NAME '
+            '--input ../../$INPUTFILE --output ../../$TARGET '
+            '--include-directive-root ../../ --restart_cycle $RESTART_CYCLE '
+            '--stop_cycle $STOP_CYCLE --enzo ../../$SOURCE')
+
+    _parallel_run_parts = parallel_run.split()
+    _parallel_cmd = (_cmd + ' --charm ' + _parallel_run_parts[0] +
+                     ' --parallel-args ' + ' '.join(_parallel_run_parts[1:])
+                     + ' $clocal_cmd')
+
+    run_ckpt_restart_serial = Builder(action = (date_cmd + 'cd ' + os.getcwd()
+                                                + '; ' + _cmd + '; cd -'))
+    run_ckpt_restart_parallel = Builder(action = (date_cmd + 'cd ' +
+                                                  os.getcwd() + '; ' +
+                                                  _parallel_cmd + '; cd -'))
+    env.Append(
+        BUILDERS = { 'RunCkptRestartSerial' : run_ckpt_restart_serial,
+                     'RunCkptRestartParallel' : run_ckpt_restart_parallel } )
+    env_ckpt_restart = env.Clone(RESTART_CYCLE = 2, STOP_CYCLE = 4)
+
 #-------------------------------------------------------------
 #load balancing
 #-------------------------------------------------------------
@@ -60,13 +90,13 @@ env_mv_out=env.Clone(COPY = 'mv *.png *.h5 Dir_* ' + test_path)
 
 checkpoint_ppm_1 = env_mv_checkpoint_ppm_1.RunCheckpointPpm_1 (
      'test_checkpoint_ppm-1.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Checkpoint/checkpoint_ppm-1.in')
 
 
 restart_ppm_1 = env_mv_restart_ppm_1.RunRestartPpm_1 (
      'test_restart_ppm-1.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='+restart checkpoint_ppm-1-10')
 
 env.MakeMovie("/RestartPpm-1/restart_ppm-1.swf", "test_restart_ppm-1.unit", \
@@ -85,13 +115,13 @@ env.Requires(restart_ppm_1, checkpoint_ppm_1)
 
 checkpoint_ppm_8 = env_mv_checkpoint_ppm_8.RunCheckpointPpm_8 (
      'test_checkpoint_ppm-8.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Checkpoint/checkpoint_ppm-8.in')
 
 
 restart_ppm_8 = env_mv_restart_ppm_8.RunRestartPpm_8 (
      'test_restart_ppm-8.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='+restart checkpoint_ppm-8-10')
 
 env.MakeMovie("/RestartPpm-8/restart_ppm-8.swf", "test_restart_ppm-8.unit", \
@@ -108,7 +138,7 @@ env.Requires(restart_ppm_8, checkpoint_ppm_8)
 
 method_ppml_1 = env_mv_ppml_1.RunPpml_1(
      'test_method_ppml-1.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/PPML/method_ppml-1.in')
 
 Clean(method_ppml_1,
@@ -131,7 +161,7 @@ env.PngToGif("/Ppml-1/method_ppml-1-z.gif", "test_method_ppml-1.unit", \
 
 method_ppml_8 = env_mv_ppml_8.RunPpml_8(
      'test_method_ppml-8.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/PPML/method_ppml-8.in')
 
 Clean(method_ppml_8,
@@ -154,11 +184,49 @@ env.PngToGif("/Ppml-8/method_ppml-8-z.gif", "test_method_ppml-8.unit", \
 
 #Updated PPML test using EnzoInitialPpmlTest for multi-nodes
 
-Clean(env_mv_out.RunSerial('test_method_ppml-test-1.unit',bin_path + '/enzo-p',
+Clean(env_mv_out.RunSerial('test_method_ppml-test-1.unit',bin_path + '/enzo-e',
 			   ARGS='input/PPML/method_ppml-test-1.in'),
       [Glob('#/' +test_path + '/PPML1_*')])
 
 
-Clean(env_mv_out.RunSerial('test_method_ppml-test-8.unit',bin_path + '/enzo-p',
+Clean(env_mv_out.RunSerial('test_method_ppml-test-8.unit',bin_path + '/enzo-e',
 			   ARGS='input/PPML/method_ppml-test-8.in'),
       [Glob('#/' +test_path + '/PPML8_*')])
+
+
+# run the automated ckpt-restart tests
+if use_valgrind == 0:
+
+    # VL+CT Checkpoint-Restart Test
+    env_ckpt_restart.RunCkptRestartSerial(
+        os.path.join(os.getcwd(),'test_restart_vlct.unit'),
+        bin_path + '/enzo-e',
+        TEST_NAME = 'restart_vlct',
+        INPUTFILE = 'input/Checkpoint/checkpoint_vlct.in')
+
+    # Boundary Checkpoint-Restart Test
+    env_ckpt_restart.RunCkptRestartSerial(
+        os.path.join(os.getcwd(),'test_restart_boundary.unit'),
+        bin_path + '/enzo-e',
+        TEST_NAME = 'restart_boundary',
+        INPUTFILE = 'input/Checkpoint/checkpoint_boundary.in')
+
+    # Grackle Checkpoint-Restart Test
+    grackle_data_dir = os.getenv('GRACKLE_INPUT_DATA_DIR', '')
+    if grackle_data_dir != '' and use_grackle:
+        # Write an input file with a valid path to a Grackle data file
+        # In the future, we may want to add this as a build target
+        _include_file = os.path.abspath("../../input/Checkpoint/"
+                                        "checkpoint_grackle.in")
+        with open('restart_grackle.in','w') as f:
+            f.write("include \"" + _include_file + "\"\n")
+            f.write("Method { grackle { data_file = \"" + grackle_data_dir +
+                     "/CloudyData_UVB=HM2012_shielded.h5\"; } }")
+
+        env_ckpt_restart.RunCkptRestartParallel(
+            'test_restart_grackle.unit',
+            bin_path + '/enzo-e',
+            TEST_NAME = 'restart_grackle',
+            INPUTFILE = 'test/Restart/restart_grackle.in'
+        )
+

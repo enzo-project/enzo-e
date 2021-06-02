@@ -253,13 +253,13 @@ int ParticleDescr::attribute_index (int it, std::string attribute_name) const
 
 //----------------------------------------------------------------------
 
-bool ParticleDescr::has_attribute(int it, std::string attribute_name) const
+bool ParticleDescr::is_attribute(int it, std::string attribute_name) const
 {
   ASSERT1("ParticleDescr::is_attribute",
           "Trying to access unknown particle type '%s'",
           type_name(it).c_str(),
-          (0 <= it && it < num_types()));
-
+	  (0 <= it && it < num_types()));
+    
   auto iter=attribute_index_[it].find(attribute_name);
 
   int index = (iter != attribute_index_[it].end()) ? iter->second : -1;
@@ -410,12 +410,12 @@ int ParticleDescr::constant_offset (int it, int ic) const
 
 //----------------------------------------------------------------------
 
-bool ParticleDescr::has_constant(int it, std::string constant_name) const
+bool ParticleDescr::is_constant(int it, std::string constant_name) const
 {
   ASSERT1("ParticleDescr::constant_index",
           "Trying to access unknown particle type '%s'",
           type_name(it).c_str(),
-          (0 <= it && it < num_types()));
+	  (0 <= it && it < num_types()));
 
   auto iter=constant_index_[it].find(constant_name);
 

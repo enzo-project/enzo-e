@@ -1,4 +1,3 @@
-#include "fortran.h"
 #define FORTRAN
 c=======================================================================
 c//////////////////////  SUBROUTINE PGAS2D_DUAL  \\\\\\\\\\\\\\\\\\\\\\\
@@ -54,7 +53,6 @@ c-----------------------------------------------------------------------
 c
 c  argument declarations
 c
-      double precision sum(10)
       INTG_PREC i1, i2, idim, j1, j2, jdim
       R_PREC    eta1, eta2, gamma, pmin
       R_PREC dslice(idim,jdim), eslice(idim,jdim), pslice(idim,jdim),
@@ -72,7 +70,6 @@ c\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////
 c=======================================================================
 c
 c  compute the pressure
-
 C      print*, 'DEBUG_PRESSURE pgas2d_dual.F'
 C      print*, 'DEBUG_PRESSURE i1 i2 ',i1,i2
 C      print*, 'DEBUG_PRESSURE j1 j2 ',j1,j2
@@ -81,9 +78,7 @@ C      print*, 'DEBUG_PRESSURE eta ',eta1,eta2
 C     print*, 'DEBUG_PRESSURE pmin ',pmin
       icall = ierror
       ierror = 0
-      do j=1,10
-         sum(j) = 0.0
-      end do
+
       do j=j1,j2
          do i=i1,i2
 c
@@ -137,18 +132,8 @@ c           Compute the pressure with the total energy derived gas energy
 c
             pslice(i,j) = (gamma - 1._RKIND)*dslice(i,j)*ge2
 c
-            sum(1)=sum(1)+abs(dslice(i,j))
-            sum(2)=sum(2)+abs(eslice(i,j))
-            sum(3)=sum(3)+abs(pslice(i,j))
-            sum(4)=sum(4)+abs(uslice(i,j))
-            sum(5)=sum(5)+abs(vslice(i,j))
-            sum(6)=sum(6)+abs(wslice(i,j))
-            sum(7)=sum(7)+abs(geslice(i,j))
          enddo
       enddo
-      do j=1,7
-C         print*, 'DEBUG_PRESSURE sum = ',j,sum(j)
-      end do
 c
       return
       end

@@ -1,12 +1,10 @@
-#include "fortran.h"
 #define FORTRAN
+#include "fortran.h"
 c=======================================================================
 c///////////////////////  SUBROUTINE INTVAR  \\\\\\\\\\\\\\\\\\\\\\\\\\\
 c
-      subroutine intvar(
-     &     qslice, idim, i1, i2, isteep, steepen,
-     &     iflatten, 
-     &     flatten, c1, c2, c3, c4, c5, c6, char1, char2,
+      subroutine intvar(qslice, idim, i1, i2, isteep, steepen,
+     &     iflatten, flatten, c1, c2, c3, c4, c5, c6, char1, char2,
      &     c0, dq, ql, qr, q6, qla, qra, ql0, qr0)
 c
 c  COMPUTES LEFT AND RIGHT EULERIAN INTERFACE VALUES FOR RIEMANN SOLVER
@@ -170,15 +168,9 @@ c
      .       (1._RKIND-ft*char2(i  ))*q6(i  ))
       enddo
 c
-C      print*, 'DEBUG_VAR ft',i,ft
       do i=i1,i2+1
          ql0(i) = qr(i-1)-c0(i-1)*(dq(i-1) - 
      .        (1._RKIND-ft*c0(i-1))*q6(i-1))
-C         print*, 'DEBUG_VAR ql0',i,ql0(i-1)
-C         print*, 'DEBUG_VAR qr',i,qr(i-1)
-C         print*, 'DEBUG_VAR c0',i,c0(i-1)
-C         print*, 'DEBUG_VAR dq',i,dq(i-1)
-C         print*, 'DEBUG_VAR q6',i,q6(i-1)
          qr0(i) = ql(i  )-c0(i  )*(dq(i  ) +
      .        (1._RKIND+ft*c0(i  ))*q6(i  ))
       enddo

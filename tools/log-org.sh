@@ -1,7 +1,7 @@
 #!/usr/bin/awk -f
 
 BEGIN{
-    print "* TODO [/] Enzo-P / Cello hg log [C-u C-c # to update stats]"
+    print "* TODO [/] Enzo-E / Cello hg log [C-u C-c # to update stats]"
 }
 {
     if (index($1,":") == length($1)) 

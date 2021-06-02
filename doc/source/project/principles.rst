@@ -54,7 +54,7 @@ The *array-of-octree* AMR approach that is implemented in Cello has
 been shown to be among the most scalable known AMR approaches to date.
 The specific AMR remeshing algorithm is based on that developed and
 prototyped by the Charm++ group (see `Langer, et al
-<http://charm.cs.illinois.edu/papers/12-35>`_).  As in their approach,
+<https://charm.cs.illinois.edu/papers/12-35>`_).  As in their approach,
 our mesh refinement algorithm proceeds mostly asynchronously, using
 only a lightweight barrier-like operation provided by the Charm++
 runtime system to detect consensus on refinement levels between
@@ -130,7 +130,7 @@ for testing invariants during code execution, helping to identify
 numerical anomalies and reporting them to the user before they may
 otherwise make themselves known, which reduces time debugging and
 leads to overall higher software quality.  Defect tracking is
-coordinated through `Bugzilla <http://http://www.bugzilla.org/>`_ to
+coordinated through `Bugzilla <https://https://www.bugzilla.org/>`_ to
 ensure that users have a means to report bugs, and that developers
 have the means to obtain the information required to fix them.
 

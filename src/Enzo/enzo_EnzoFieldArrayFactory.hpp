@@ -13,90 +13,51 @@ class EnzoFieldArrayFactory
 {
   /// @class    EnzoFieldArrayFactory
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] Encapsulates construction of CelloArrays from fields
+  /// @brief    [\ref Enzo] Encapsulates construction of CelloArrays that wrap
+  ///           Cello fields
+  ///
+  /// This functionallity should probably be incorporated directly into Cello's
+  /// Field class
 
 public:
 
   /// Create a new EnzoFieldArrayFactory
   EnzoFieldArrayFactory(Block *block, int stale_depth = 0)
   {
+    ASSERT("EnzoFieldArrayFactory", "block must not be a nullptr",
+	   block != nullptr);
     block_ = block;
     ASSERT("EnzoFieldArrayFactory", "stale_depth must be >= 0",
 	   stale_depth >= 0);
     stale_depth_ = stale_depth;
   }
 
-  ~EnzoFieldArrayFactory()
-  { block_ = NULL;}
-
   /// returns a field as an array
-  EFlt3DArray from_name(std::string field_name);
+  EFlt3DArray from_name(const std::string &field_name){
+    Field field = block_->data()->field();
+    const int id = field.field_id(field_name);
 
-  /// returns a field from a Grouping
-  EFlt3DArray from_grouping(Grouping &grouping, std::string group_name,
-			    int index);
+    ASSERT1("EnzoFieldArrayFactory",
+            "The \"%s\" field has the incorrect precision.",
+            field_name.c_str(),
+            cello::sizeof_precision(field.precision(id)) == sizeof(enzo_float));
 
-  /// returns a field from a Grouping as an array with a shape appropriate
-  /// for being face-centered along the specified axis (excluding faces on the
-  /// exterior of the grid).
-  ///
-  /// If the underlying field is cell-centered, then the returned array wraps
-  /// an appropriate subset of the underlying data. This facillitates the reuse
-  /// of individual fields for temporarily storing data that is face-centered
-  /// along different axes (e.g. like for reconstructed fields)
-  ///
-  /// If the underlying field is face-centered, then the field is returned as
-  /// an array (equivalent to calling `from_grouping`) as long as the field's
-  /// properties exactly match the designated centering (i.e. it is only
-  /// face-center along the specified axis AND it excludes the faces on the
-  /// grid exterior). If the properties don't match an error is raised.  
-  EFlt3DArray assigned_center_from_grouping(Grouping &grouping,
-					    std::string group_name,
-					    int index, int dim);
+    int mx, my, mz;
+    field.dimensions (id,&mx,&my,&mz);
+    EFlt3DArray arr((enzo_float *) field.values(field_name), mz, my, mx);
 
-  /// returns a field as an array with a shape appropriate for being
-  /// face-centered along a specified axis.
-  EFlt3DArray assigned_center_from_name(std::string field_name, int dim)
-  {
-    Grouping temp_group;
-    temp_group.add(field_name, "group");
-    return assigned_center_from_grouping(temp_group, "group", 0, dim);
+    if (stale_depth_ != 0){
+      ASSERT("EnzoFieldArrayFactory",
+             "each dim of arr must exceed 2*stale_depth_.",
+             2*stale_depth_ < arr.shape(0) &&
+             2*stale_depth_ < arr.shape(1) &&
+             2*stale_depth_ < arr.shape(2));
+    return arr.subarray(CSlice(stale_depth_, -stale_depth_),
+                        CSlice(stale_depth_, -stale_depth_),
+                        CSlice(stale_depth_, -stale_depth_));
+    }
+    return arr;
   }
-
-  /// Read in fields from Grouping that represented reconstructed quantities.
-  /// The reconstructed fields should formally be initialized as cell-centered
-  /// fields.
-  ///
-  /// This is deprecated and replaced by `assigned_center_from_grouping`
-  EFlt3DArray reconstructed_field(Grouping &grouping, std::string group_name,
-				  int index, int dim)
-  { return assigned_center_from_grouping(grouping, group_name, index, dim); }
-
-  /// Read in field from Grouping of face-centered interface B-fields. The
-  /// returned view doesn't include face-centered values on the outermost
-  /// faces of the grid
-  ///
-  /// For some additional clarity, if a cell-centered field has N elements
-  /// along dimension `dim`, then there are N+1 values along that same
-  /// dimension of the interface bfield component that is also face-centered
-  /// along that component. The reason that it has more more entries than a
-  /// face-centered field is because it has more values on the outermost
-  /// (exterior) faces of the grid. This method returns the bfield without
-  /// the values on those faces. 
-  EFlt3DArray bfieldi_without_outermost_block_faces(Grouping &grouping,
-                                                    int dim);
-protected: // methods
-
-  /// Helper function that reads in the field without applying stale depth
-  EFlt3DArray full_field_from_name_(std::string field_name);
-
-  /// Helper function that checks the validity of a group_name and index
-  void check_grouping_details_(Grouping &grouping, std::string group_name,
-			       int index);
-
-  /// Helper function that returns an instance of EFlt3DArray but without the
-  /// stale cells (stale_depth must be a positive integer)
-  EFlt3DArray exclude_stale_cells_(EFlt3DArray &arr);
 
 protected: // attributes
 

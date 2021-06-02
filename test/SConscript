@@ -29,7 +29,7 @@ run_parallel = Builder(action = "$RMIN; echo $TARGET > test/STATUS;" + date_cmd 
 
 png_to_gif   = Builder(action = "convert -delay 5 -loop 0 ${ARGS} $TARGET ")
 
-env.Append(BUILDERS = { 'RunSerial'   : run_serial } ) 
+env.Append(BUILDERS = { 'RunSerial'   : run_serial } )
 env.Append(BUILDERS = { 'RunParallel' : run_parallel } )
 env.Append(BUILDERS = { 'Hdf5ToPng'   : hdf5_to_png } )
 env.Append(BUILDERS = { 'PngToGif'    : png_to_gif } )
@@ -38,7 +38,7 @@ env_mv_out  = env.Clone(COPY = 'mv -f *.png *.h5 Dir_* ' + test_path)
 env_mv_test = env.Clone(COPY = 'mv -f test*out test*in ' + test_path)
 env_rm_png  = env.Clone(COPY = 'rm -f *.png')
 
-enzo_bin = bin_path + '/enzo-p'
+enzo_bin = bin_path + '/enzo-e'
 
 # h5topng
 
@@ -47,12 +47,12 @@ SConscript('Balance/SConscript')
 #----------------------------------------------------------------------
 
 #----------------------------------------------------------------------
-# ARRAY COMPONENT         
+# ARRAY COMPONENT
 #----------------------------------------------------------------------
 SConscript('ArrayComponent/SConscript')
 
 #----------------------------------------------------------------------
-# DATA COMPONENT         
+# DATA COMPONENT
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
 SConscript('DataComponent/SConscript')

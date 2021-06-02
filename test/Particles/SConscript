@@ -66,7 +66,7 @@ env_mv_particle_amr_dynamic = env.Clone(COPY = 'mkdir -p ' + test_path + '/Parti
 
 balance_particle_x = env_mv_particle_x.RunParticleX (
      'test_particle-x.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Particle/test_particle-x.in')
 
 Clean(balance_particle_x,
@@ -79,7 +79,7 @@ env.PngToGif("/ParticleX/particle-x.gif", "test_particle-x.unit", \
 
 balance_particle_y = env_mv_particle_y.RunParticleY (
      'test_particle-y.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Particle/test_particle-y.in')
 
 Clean(balance_particle_y,
@@ -91,7 +91,7 @@ env.PngToGif("/ParticleY/particle-y.gif", "test_particle-y.unit", \
 
 balance_particle_xy = env_mv_particle_xy.RunParticleXY (
      'test_particle-xy.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Particle/test_particle-xy.in')
 
 Clean(balance_particle_xy,
@@ -103,7 +103,7 @@ env.PngToGif("/ParticleXY/particle-xy.gif", "test_particle-xy.unit", \
 
 balance_particle_circle = env_mv_particle_circle.RunParticleCircle (
      'test_particle-circle.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Particle/test_particle-circle.in')
 
 Clean(balance_particle_circle,
@@ -115,7 +115,7 @@ env.PngToGif("/ParticleCircle/particle-circle.gif", "test_particle-circle.unit",
 
 balance_particle_amr_static = env_mv_particle_amr_static.RunParticleAmrStatic (
      'test_particle-amr-static.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Particle/test_particle-amr-static.in')
 
 Clean(balance_particle_amr_static,
@@ -128,7 +128,7 @@ env.PngToGif("/ParticleAmrStatic/particle-amr-static.gif", "test_particle-amr-st
 
 balance_particle_amr_dynamic = env_mv_particle_amr_dynamic.RunParticleAmrDynamic (
      'test_particle-amr-dynamic.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Particle/test_particle-amr-dynamic.in')
 
 Clean(balance_particle_amr_dynamic,

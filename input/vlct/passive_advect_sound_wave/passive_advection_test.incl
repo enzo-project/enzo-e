@@ -5,9 +5,9 @@
    }
 
    Group {
-      list = ["colour"];
+      list = ["color"];
 
-      colour {
+      color {
          field_list = ["red"];
       }
    }

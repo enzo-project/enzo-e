@@ -8,7 +8,6 @@ import socket
 # USER CONFIGURATION
 #======================================================================
 
-
 #----------------------------------------------------------------------
 # Temporary setting for using new Output implementation
 #----------------------------------------------------------------------
@@ -254,6 +253,7 @@ elif (arch == "gordon_intel"): from gordon_intel import *
 elif (arch == "gordon_pgi"):   from gordon_pgi   import *
 elif (arch == "comet_gnu"):    from comet_gnu    import *
 elif (arch == "linux_gnu"):    from linux_gnu    import *
+elif (arch == "linux_illium"): from linux_illium import *
 elif (arch == "linux_gcc_9"):  from linux_gcc_9  import *
 elif (arch == "linux_intel"):  from linux_intel  import *
 elif (arch == "linux_yt"):     from linux_yt     import *
@@ -392,6 +392,7 @@ Export('test_path')
 Export('ip_charm')
 Export('smp')
 Export('prec')
+Export('use_valgrind')
 
 
 cpppath     = [inc_path]
@@ -499,7 +500,7 @@ cello_def.write ("#define CELLO_ARCH "
 cello_def.write ("#define CELLO_PREC "
 		"\""+prec+"\"\n")
 cello_def.write ("#define CELLO_CC "
-		"\""+cc+"\"\n")	
+		"\""+cc+"\"\n")
 cello_def.write ("#define CELLO_CFLAGS "
 		"\""+cflags+"\"\n")
 cello_def.write ("#define CELLO_CPPDEFINES "
@@ -507,7 +508,7 @@ cello_def.write ("#define CELLO_CPPDEFINES "
 cello_def.write ("#define CELLO_CPPPATH "
 		"\""+" ".join(map(str,cpppath))+"\"\n")
 cello_def.write ("#define CELLO_CXX "
-		"\""+cxx+"\"\n")	
+		"\""+cxx+"\"\n")
 cello_def.write ("#define CELLO_CXXFLAGS "
 		"\""+cxxflags+"\"\n")
 cello_def.write ("#define CELLO_FORTRANFLAGS "
@@ -534,7 +535,7 @@ cello_def.write ("#define CELLO_TIME "
 #----------
 charm_version = subprocess.check_output (["cat", charm_path + "/VERSION"]).rstrip().decode('utf-8');
 cello_def.write ("#define CHARM_VERSION "+charm_version+"\n" )
-     
+
 fp_charm_version = open ("test/CHARM_VERSION", "w")
 fp_charm_version.write(charm_version + str("\n"));
 fp_charm_version.close()
@@ -546,12 +547,12 @@ cello_def.write ("#define CHARM_PATH \"" + charm_path + "\"\n" )
 #----------
 
 if (have_git):
-      
+
    git_changeset = str(subprocess.check_output(["git", "rev-parse", "HEAD"]).rstrip())
    cello_def.write ("#define CELLO_CHANGESET \""+git_changeset+"\"\n" )
 
 else:
-        
+
    cello_def.write ("#define CELLO_CHANGESET \"unknown\"\n" )
 
 #----------
@@ -609,7 +610,7 @@ Clean('.','src-html')
 Clean('.','src-latex')
 Clean('.','src-xml')
 
-# files left behind by enzo-p
+# files left behind by enzo-e
 Clean('.','Checkpoint')
 Clean('.','parameters.out')
 Clean('.','parameters.libconfig')
@@ -619,7 +620,7 @@ Clean('.','parameters.libconfig')
 #======================================================================
 
 # env = Environment(tools=['default', 'packaging'])
-# title = 'Enzo-P / Cello Extreme AMR Astrophysics and Cosmology'
+# title = 'Enzo-E / Cello Extreme AMR Astrophysics and Cosmology'
 # env.Package( NAME           = 'cello',
 #              VERSION        = '0.5.0',
 #              PACKAGEVERSION = 0,

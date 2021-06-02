@@ -6,7 +6,8 @@ Particle {
       attributes = ["id", "int64",
 		    "x", "single",
                     "y", "single",
-		    "z", "single"];
+		    "z", "single",
+                    "is_local", "int64"];
       position = ["x","y","z"];
    }
 }

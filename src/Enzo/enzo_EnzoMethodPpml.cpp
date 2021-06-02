@@ -93,7 +93,9 @@ double EnzoMethodPpml::timestep (Block * block) const throw()
  
   /* 1) Compute Courant condition for baryons. */
  
-  if (EnzoBlock::NumberOfBaryonFields > 0) {
+  const int in = cello::index_static();
+  
+  if (EnzoBlock::NumberOfBaryonFields[in] > 0) {
  
     /* Find fields: density, total energy, velocity1-3. */
  

@@ -83,8 +83,7 @@ public: // interface
   char * constant_value (int it, int ic);
 
   /// Check if given constant exists for the given particle type
-  
-  bool has_constant (int it, std::string constant) const;
+  bool is_constant (int it, std::string constant) const;
 
   //--------------------------------------------------
   // ATTRIBUTES
@@ -100,7 +99,7 @@ public: // interface
 
   /// Check if attribute exists
 
-  bool has_attribute (int it, std::string attribute) const;
+  bool is_attribute (int it, std::string attribute) const;
 
   /// Return the index for the given attribute
 
