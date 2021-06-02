@@ -228,6 +228,12 @@ protected:
   (const std::string * file_name,
    const std::vector<std::string> * file_args) const throw();
 
+  std::string expand_name_by_proc_
+  (const std::string * file_name,
+   const std::vector<std::string> * file_args,
+   const int proc // processing element index
+  ) const throw();
+
   /// Return the path for this file group output.  Creates
   /// the subdirectories if they don't exist
   std::string directory () const

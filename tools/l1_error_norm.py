@@ -176,13 +176,20 @@ def get_block_list(dir_name):
                 break
         dir_name = dir_name[:stop_slice]
 
-    fname = os.path.join(dir_name,
-                         '.'.join((os.path.basename(dir_name), 'block_list')))
-    if not os.path.isfile(fname):
-        if not os.path.isdir(dir_name):
-            raise ValueError(
-                "{:s} is not the name of a directory".format(orig_dir_name))
-        raise ValueError("a file called {:s} can't be found".format(fname))
+    if not os.path.isdir(dir_name):
+        raise ValueError(
+            "{:s} is not the name of a directory.".format(orig_dir_name))
+
+    for file in os.listdir(dir_name):
+        if file.endswith(".block_list"):
+            fname = os.path.join(dir_name, file)
+            break;
+
+    if not fname:
+        raise ValueError(
+            "Could not find a block_list file in directory {:s}."
+            .format(orig_dir_name))
+
     return fname
 
 def _sanitize_units(arr):
