@@ -1883,13 +1883,6 @@ void EnzoSolverBiCgStab::new_register_refresh_()
     refresh_post->set_root_level (coarse_level_);
 
   refresh_post->add_field (ix_);
-  refresh_post->add_field (ir_);
-  refresh_post->add_field (ir0_);
-  refresh_post->add_field (ip_);
-  refresh_post->add_field (iy_);
-  refresh_post->add_field (iv_);
-  refresh_post->add_field (iq_);
-  refresh_post->add_field (iu_);
 
   //--------------------------------------------------
 
@@ -1901,15 +1894,7 @@ void EnzoSolverBiCgStab::new_register_refresh_()
   if (solve_type_ == solve_tree)
     refresh_loop_3->set_root_level (coarse_level_);
 
-  refresh_loop_3->add_field (ix_);
-
-  refresh_loop_3->add_field (ir_);
-  refresh_loop_3->add_field (ir0_);
-  refresh_loop_3->add_field (ip_);
   refresh_loop_3->add_field (iy_);
-  refresh_loop_3->add_field (iv_);
-  refresh_loop_3->add_field (iq_);
-  refresh_loop_3->add_field (iu_);
 
   refresh_loop_3->set_callback(CkIndex_EnzoBlock::p_solver_bicgstab_loop_3());
   
@@ -1923,15 +1908,7 @@ void EnzoSolverBiCgStab::new_register_refresh_()
   if (solve_type_ == solve_tree)
     refresh_loop_9->set_root_level (coarse_level_);
 
-  refresh_loop_9->add_field (ix_);
-
-  refresh_loop_9->add_field (ir_);
-  refresh_loop_9->add_field (ir0_);
-  refresh_loop_9->add_field (ip_);
   refresh_loop_9->add_field (iy_);
-  refresh_loop_9->add_field (iv_);
-  refresh_loop_9->add_field (iq_);
-  refresh_loop_9->add_field (iu_);
   
   refresh_loop_9->set_callback(CkIndex_EnzoBlock::p_solver_bicgstab_loop_9());
 
