@@ -22,7 +22,7 @@
 /// ordering is based off the requirements of the Riemann Solver and the class
 /// offers a method to return a (const?) vector of arrays with that ordering,
 /// optimizations could be made to the Riemann Solver (as well as
-/// EnzoReconstructor and EnzoIntegrableUpdater). This could be most
+/// EnzoReconstructor and EnzoIntegrationQuanUpdater). This could be most
 /// efficiently achieved by internally storing the contained array within a
 /// vector and also storing some kind of mapping relating the keys to indices
 /// the vector.

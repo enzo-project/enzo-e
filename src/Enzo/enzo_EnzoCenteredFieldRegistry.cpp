@@ -29,10 +29,14 @@ const ft_map EnzoCenteredFieldRegistry::field_table_ = {
 //----------------------------------------------------------------------
 
 std::vector<std::string> EnzoCenteredFieldRegistry::get_registered_quantities
-(bool enumerate_components)
+(const bool enumerate_components, const bool exclude_non_active_advection)
 {
   std::vector<std::string> out;
   for (auto const &key_item_pair : EnzoCenteredFieldRegistry::field_table_) {
+    if (exclude_non_active_advection &&
+        (!(key_item_pair.second).actively_advected)){
+      continue;
+    }
     if (enumerate_components && (key_item_pair.second).vector_quantity){
       out.push_back(key_item_pair.first + std::string("_x"));
       out.push_back(key_item_pair.first + std::string("_y"));

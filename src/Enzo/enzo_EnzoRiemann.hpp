@@ -22,15 +22,15 @@ public: // interface
   /// Factory method for constructing the EnzoRiemann object. (The signature
   /// may need to be modified as additional physics get added)
   ///
-  /// @param integrable_quantities A vector of integrable quantities (listed as
-  ///     advected quantities in FIELD_TABLE). This is used to register the
-  ///     quantities that the Riemann Solver operates on.
   /// @param solver The name of the Riemann solver to use. Valid names include
   ///     "hll", "hlle", and "hlld"
-  static EnzoRiemann* construct_riemann
-    (std::vector<std::string> integrable_quantities, std::string solver);
+  /// @param mhd Indicates whether magnetic fields are present
+  /// @param internal_energy Indicates whether the internal energy is an
+  ///     integration quantity
+  static EnzoRiemann* construct_riemann(const std::string& solver, const bool mhd,
+                                        const bool internal_energy);
 
-  EnzoRiemann() throw()
+  EnzoRiemann() noexcept
   {}
 
   /// Virtual destructor
@@ -54,15 +54,16 @@ public: // interface
   /// Computes the Riemann Fluxes for each conserved field along a given
   /// dimension, dim
   /// @param[in]     priml_map,primr_map Maps of arrays holding the left/right
-  ///     reconstructed face-centered integrable primitives. This should be
-  ///     face-centered along `dim` (without having values on the exterior
-  ///     faces of the block) and cell-centered along the other dimensions.
-  /// @param[in]     pressure_array_l,pressure_array_r Arrays holding the
-  ///     precomputed left/right reconstructed pressure values. These should
-  ///     have the same face-centering as the arrays in priml_map/primr_map.
-  /// @param[out]    flux_map Holds arrays where the calculated fluxes
-  ///     will be stored. The arrays should be face-centered along `dim`
-  ///     (without having values on the exterior faces of the block)
+  ///     reconstructed face-centered primitives. A list of the expected
+  ///     primitive quantities is provided by the `primitive_quantities` method.
+  ///     These should be face-centered along `dim` (without having values on
+  ///     the exterior faces of the block) and cell-centered along the other
+  ///     dimensions.
+  /// @param[out]    flux_map Holds arrays where the calculated fluxes for the
+  ///     integration quantities will be stored. Fluxes are computed for each
+  ///     integration quantities in the list provided by the
+  ///     ``integration_quantities`` method. The arrays should be face-centered
+  ///     along `dim` (without having values on the exterior faces of the block)
   /// @param[in]     dim Dimension along which to compute Riemann fluxes.
   ///     Values of 0, 1, and 2 correspond to the x, y, and z directions.
   /// @param[in]     eos Instance of the fluid's EnzoEquationOfState object
@@ -73,7 +74,7 @@ public: // interface
   ///     `dim` (the array should not include exterior faces of the block and
   ///     should be cell-centered along other dimensions). This quantity is
   ///     used to compute the internal energy source term (needed under the
-  ///     dual energy formalism). If the value is `NULL`, then the interface
+  ///     dual energy formalism). If the value is `nullptr`, then the interface
   ///     velocity is not stored in the array.
   ///
   /// @note It's alright for arrays in `priml_map` and `primr_map` to have the
@@ -84,11 +85,19 @@ public: // interface
   /// applies to the other arrays passed as arguments.
   virtual void solve
   (EnzoEFltArrayMap &prim_map_l, EnzoEFltArrayMap &prim_map_r,
-   const EFlt3DArray &pressure_array_l, const EFlt3DArray &pressure_array_r,
-   EnzoEFltArrayMap &flux_map, int dim, EnzoEquationOfState *eos,
-   int stale_depth, const str_vec_t &passive_list,
-   EFlt3DArray *interface_velocity) const = 0;
+   EnzoEFltArrayMap &flux_map, const int dim, const EnzoEquationOfState *eos,
+   const int stale_depth, const str_vec_t &passive_list,
+   const EFlt3DArray *interface_velocity) const = 0;
 
+  /// Return the names of the actively advected integration quantities for
+  /// which fluxes will be computed.
+  virtual const std::vector<std::string> integration_quantities()
+    const noexcept = 0;
+
+  /// Return the names of the (non passive scalar) primitives that are required
+  /// to compute the flux.
+  virtual const std::vector<std::string> primitive_quantities()
+    const noexcept = 0;
 };
 
 #endif /* ENZO_ENZO_RIEMANN_HPP */
