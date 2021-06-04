@@ -40,6 +40,7 @@ public: // interface
     data_precision_ = msg_initial.data_precision_;
     data_bytes_     = 0;
     data_values_    = nullptr;
+    data_delete_    = false;
     count_           = msg_initial.count_;
     // new message, so new tag
     cello::hex_string(tag_,TAG_LEN);
@@ -136,6 +137,9 @@ protected: // attributes
 
   /// Data values in a packed array of length data_bytes_
   char * data_values_;
+
+  /// Whether to delete data_values_ when deleting this message
+  int data_delete_;
   
   /// If positive, the expected count of number of messages (including
   /// this one) that will be received

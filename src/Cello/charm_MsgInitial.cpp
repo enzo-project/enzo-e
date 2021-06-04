@@ -34,6 +34,7 @@ MsgInitial::MsgInitial()
     data_precision_(),
     data_bytes_(0),
     data_values_(nullptr),
+    data_delete_(false),
     count_(false),
     tag_(),
     n4_(),
@@ -50,6 +51,7 @@ MsgInitial::MsgInitial()
 MsgInitial::~MsgInitial()
 {
   --counter[cello::index_static()];
+  if (data_delete_) delete [] data_values_;
   CkFreeMsg (buffer_);
   buffer_=nullptr;
 }
@@ -72,6 +74,7 @@ void * MsgInitial::pack (MsgInitial * msg)
   SIZE_SCALAR_TYPE(size,int, msg->data_precision_);
   SIZE_SCALAR_TYPE(size,int, msg->data_bytes_);
   SIZE_ARRAY_TYPE (size,char,msg->data_values_,msg->data_bytes_);
+  SIZE_SCALAR_TYPE(size,int, msg->data_delete_);
   SIZE_SCALAR_TYPE(size,int, msg->count_);
   SIZE_ARRAY_TYPE (size,char,msg->tag_,TAG_LEN+1);
   SIZE_ARRAY_TYPE (size,int,   msg->n4_,4);
@@ -104,6 +107,7 @@ void * MsgInitial::pack (MsgInitial * msg)
   SAVE_SCALAR_TYPE(pc,int,msg->data_precision_);
   SAVE_SCALAR_TYPE(pc,int,msg->data_bytes_);
   SAVE_ARRAY_TYPE(pc,char,msg->data_values_,msg->data_bytes_);
+  SAVE_SCALAR_TYPE(pc,int,msg->data_delete_);
   SAVE_SCALAR_TYPE(pc,int,msg->count_);
   SAVE_ARRAY_TYPE(pc,char,msg->tag_,TAG_LEN+1);
   SAVE_ARRAY_TYPE (pc,int,   msg->n4_,4);
@@ -153,7 +157,10 @@ MsgInitial * MsgInitial::unpack(void * buffer)
   LOAD_STRING_TYPE(pc,msg->data_attribute_);
   LOAD_SCALAR_TYPE(pc,int,msg->data_precision_);
   LOAD_SCALAR_TYPE(pc,int,msg->data_bytes_);
+  msg->data_values_ = new char[msg->data_bytes_];
   LOAD_ARRAY_TYPE (pc,char,msg->data_values_,msg->data_bytes_);
+  LOAD_SCALAR_TYPE(pc,int,msg->data_delete_);
+  msg->data_delete_ = true;
   LOAD_SCALAR_TYPE(pc,int,msg->count_);
   LOAD_ARRAY_TYPE(pc,char,msg->tag_,TAG_LEN+1);
   LOAD_ARRAY_TYPE (pc,int,   msg->n4_,4);
@@ -285,6 +292,7 @@ void MsgInitial::copy_data_( char * data, int data_size, int data_precision)
   data_precision_ = data_precision;
   data_bytes_ = data_size*bytes_per_element;
   data_values_ = new char[data_bytes_];
+  data_delete_ = true;
   std::copy_n( data, data_bytes_, data_values_);
 }
 

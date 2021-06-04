@@ -332,11 +332,13 @@ FileHdf5 * MethodOutput::file_open_(Block * block, int a3[3])
   int count = file_count_(block);
   std::string file_name = cello::expand_name(&file_name_,count,block);
 
-  Monitor::instance()->print 
-    ("Output","MethodOutput writing data file %s",
-     (path_name + "/" + file_name).c_str());
+  if (block->index().is_root()) {
+    Monitor::instance()->print 
+      ("Output","MethodOutput writing data file %s",
+       (path_name + "/" + file_name).c_str());
+  }
 
-    // Create File
+  // Create File
   FileHdf5 * file = new FileHdf5 (path_name, file_name);
   file->file_create();
   return file;
