@@ -18,30 +18,24 @@ public: // interface
 
   /// Constructor
   Value() throw()
-  : mask_list_() 
+  : scalar_expr_list_(), mask_list_()
   { };
-
-  /// Destructor
-  ~Value() throw() { };
-
-  /// Copy constructor
-  Value(const Value & value) throw()
-  { copy_(value); }
-
-  /// Assignment operator
-  Value & operator= (const Value & value) throw()
-  { copy_(value); return *this; }
 
   Value(Parameters * parameters,
 	const std::string parameter_name) throw();
 
+  /// Move constructor
+  Value( Value &&other) throw() : Value() {swap(*this,other);}
+
+  /// Move assignment. Replace the contents of *this with that of other
+  Value & operator=(Value &&other) throw() { swap(*this,other); return *this;}
+
+  /// delete the copy constructor and copy assignment operator
+  Value(const Value & value) = delete;
+  Value & operator= (const Value & value) = delete;
 
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    TRACEPUP;
-    // NOTE: change this function whenever attributes change
-  }
+  void pup (PUP::er &p);
 
   template <class T>
   void evaluate
@@ -52,21 +46,25 @@ public: // interface
 
   double evaluate (double t, double x, double y, double z) throw ();
 
-private: // functions
-
-  void copy_(const Value & value) throw();
+  /// Swaps the contents of the first Value object with another
+  friend void swap(Value &first, Value &second){
+    // NOTE: change this function whenever attributes change
+    std::swap(first.scalar_expr_list_, second.scalar_expr_list_);
+    std::swap(first.mask_list_, second.mask_list_);
+  }
 
 private: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
   /// List of scalar expressions
-  std::vector<ScalarExpr *> scalar_expr_list_;
+  std::vector<ScalarExpr> scalar_expr_list_;
 
   /// List of masks for each scalar expression
+  ///
+  /// Note: Entries are only ever shared temporarily.
   std::vector< std::shared_ptr<Mask> > mask_list_;
 
 };
 
 #endif /* PROBLEM_VALUE_HPP */
-

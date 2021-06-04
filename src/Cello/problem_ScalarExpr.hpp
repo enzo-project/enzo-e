@@ -2,11 +2,14 @@
 
 /// @file     problem_ScalarExpr.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
+/// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     2014-03-28
 /// @brief    [\ref Problem] Declaration of the ScalarExpr class
 
 #ifndef PROBLEM_SCALAR_EXPR_HPP
 #define PROBLEM_SCALAR_EXPR_HPP
+
+#include "_parameters.hpp" // require full declaration of Expression class
 
 class ScalarExpr {
 
@@ -16,36 +19,33 @@ class ScalarExpr {
 
 public: // interface
 
-  /// Constructor
+  /// Default Constructor
   ScalarExpr() throw()
-  : param_(0),
+  : expr_(),
     value_(0)
   { }
 
   /// Destructor
-  ~ScalarExpr() throw();
+  ~ScalarExpr() = default;
 
   /// Copy constructor
-  ScalarExpr(const ScalarExpr & scalar_expr) throw()
-  { copy_(scalar_expr); }
+  ScalarExpr(const ScalarExpr & scalar_expr) = default;
 
-  /// Assignment operator
-  ScalarExpr & operator= (const ScalarExpr & scalar_expr) throw()
-  { copy_(scalar_expr); return *this; }
+  /// Copy assignment operator
+  ScalarExpr & operator= (const ScalarExpr & scalar_expr) = default;
 
-  /// Clone the object
-  virtual ScalarExpr * clone() const
-  { return (new ScalarExpr(*this)); }
-  
-  ScalarExpr(Param * param) throw();
+  /// Main Constructor
+  ScalarExpr(Parameters * parameters,
+	     const std::string &parameter_name,
+	     int parameter_index = -1) throw();
 
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
     TRACEPUP;
-    WARNING("MaskExpr::pup()","UNFINISHED");
-    p | value_;
     // NOTE: change this function whenever attributes change
+    p | expr_;
+    p | value_;
   }
 
   /// Evaluate mask at a point
@@ -70,15 +70,10 @@ public: // interface
     evaluate(value,t,ndx,nx,x,ndy,ny,y,ndz,nz,z,0,0);
   }
 
-  
-private: // functions
-
-  void copy_(const ScalarExpr & scalar_expr) throw();
-
 private: // attributes
 
   /// Value if param_ type is precision_float_expr
-  Param * param_;
+  Expression expr_;
 
   /// Value if param_ type is precision_float
   double value_;

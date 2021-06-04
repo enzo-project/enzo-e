@@ -2,6 +2,7 @@
 
 /// @file     problem_ScalarExpr.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
+/// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     2014-03-31
 /// @brief    Implementation of the ScalarExpr class
 
@@ -11,31 +12,20 @@
 
 //----------------------------------------------------------------------
 
-ScalarExpr::ScalarExpr (Param * param) throw()
-  : param_(param),
+ScalarExpr::ScalarExpr (Parameters * parameters,
+			const std::string &parameter_name,
+			int parameter_index) throw()
+  : expr_(),
     value_(0)
 {
-  if (param_->type() == parameter_float) {
-    value_ = param_->get_float();
-    param_ = 0;
+  Param* param = parameters->param(parameter_name, parameter_index);
+  if (param->type() == parameter_float) {
+    value_ = param->get_float();
+  } else if (parameter_index == -1) {
+    expr_ = parameters->value_Expression(parameter_name);
+  } else {
+    expr_ = parameters->list_value_Expression(parameter_index, parameter_name);
   }
-}
-
-//----------------------------------------------------------------------
-
-ScalarExpr::~ScalarExpr() throw()
-{
-  delete param_;
-  param_ = NULL;
-}
-
-//----------------------------------------------------------------------
-
-void ScalarExpr::copy_(const ScalarExpr & scalar_expr) throw()
-{
- 
-  param_ = (scalar_expr.param_) ? new Param(*scalar_expr.param_) : 0;
-  value_ = scalar_expr.value_;
 }
 
 //----------------------------------------------------------------------
@@ -46,8 +36,8 @@ double ScalarExpr::evaluate (double t, double x, double y, double z,
   double value;
   bool m = mask ? mask->evaluate(t,x,y,z) : true;
   if (m) {
-    if (param_)
-      param_->evaluate_float(1,&value,&x,&y,&z,t);
+    if (expr_.initialized())
+      expr_.evaluate_float(1,&value,&x,&y,&z,t);
     else
       value = value_;
   } else {
@@ -99,8 +89,8 @@ void ScalarExpr::evaluate (T * value, double t,
 
   int n=nx*ny*nz;
 
-  if (param_) {
-    param_->evaluate_float(n, value_temp, x,y,z,t);
+  if (expr_.initialized()) {
+    expr_.evaluate_float(n, value_temp, x,y,z,t);
   } else {
     for (int i=0; i<n; i++) value_temp[i]=value_;
   }

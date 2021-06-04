@@ -36,7 +36,9 @@ public: // interface
   virtual std::shared_ptr<Mask> make_clone() const = 0;
 
   /// Create a new object of the appropriate subclass
-  static std::shared_ptr<Mask> create(Param * param, Parameters * parameters);
+  static std::shared_ptr<Mask> create(Parameters * parameters,
+				      const std::string &parameter_name,
+				      int parameter_index = -1);
 
   /// CHARM++ PUP::able declaration
   PUPable_abstract(Mask);

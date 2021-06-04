@@ -7,12 +7,16 @@
 
 #include "problem.hpp"
 
-std::shared_ptr<Mask> Mask::create(Param * param, Parameters * parameters)
+std::shared_ptr<Mask> Mask::create(Parameters * parameters,
+				   const std::string &parameter_name,
+				   int parameter_index)
 {
-  std::shared_ptr<Mask> mask;
+  Param * param = parameters->param(parameter_name, parameter_index);
+  std::shared_ptr<Mask> mask(nullptr);
   if (param) {
     if ((param->type() == parameter_logical_expr)) {
-      mask = std::make_shared<MaskExpr> (param);
+      mask = std::make_shared<MaskExpr> (parameters, parameter_name,
+					 parameter_index);
     } else if ((param->type() == parameter_string)) {
       double xm = 0.0;
       double ym = 0.0;

@@ -49,9 +49,8 @@ Boundary * EnzoProblem::create_boundary_
 
   std::shared_ptr<Mask> mask = nullptr;
   if (config->boundary_mask[index]) {
-    std::string param_str = "Boundary:" + config->boundary_list[index] + ":mask";
-    Param * param = parameters->param(param_str);
-    mask = Mask::create(param,parameters);
+    std::string param_name = "Boundary:" + config->boundary_list[index] + ":mask";
+    mask = Mask::create(parameters, param_name);
   }
   axis_enum axis = (axis_enum) config->boundary_axis[index];
   face_enum face = (face_enum) config->boundary_face[index];

@@ -9,6 +9,8 @@
 #ifndef PROBLEM_MASK_EXPR_HPP
 #define PROBLEM_MASK_EXPR_HPP
 
+#include "_parameters.hpp" // require full declaration of Expression class
+
 class MaskExpr : public Mask {
 
   /// @class    MaskExpr
@@ -17,45 +19,36 @@ class MaskExpr : public Mask {
 
 public: // interface
 
-  /// Constructor
-  MaskExpr() throw() 
-  : Mask(), param_(NULL)
-  { };
+  /// Default Constructor
+  MaskExpr() throw();
+
+  /// Main Constructor
+  MaskExpr(Parameters * parameters,
+	   const std::string &parameter_name,
+	   int parameter_index = -1) throw();
 
   /// Destructor
   virtual ~MaskExpr() throw() 
   { };
 
   /// Copy constructor
-  MaskExpr(const MaskExpr & mask) throw() 
-  {copy_(mask); }
+  MaskExpr(const MaskExpr & mask) = default;
 
   /// Assignment operator
-  MaskExpr & operator= (const MaskExpr & mask) throw()
-  {   copy_(mask); return *this; }
-
+  MaskExpr & operator= (const MaskExpr & mask) = default;
 
   /// Clone the object
   virtual std::shared_ptr<Mask> make_clone() const
   { return std::make_shared<MaskExpr> (*this); }
 
-  MaskExpr(Param * param) throw();
-
   PUPable_decl(MaskExpr);
 
   MaskExpr(CkMigrateMessage *m)
-    : Mask (m), param_(NULL)
+    : MaskExpr()
   {}
 
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    TRACEPUP;
-    Mask::pup(p);
-
-    WARNING("MaskExpr::pup()","UNFINISHED");
-    // NOTE: change this function whenever attributes change
-  }
+  void pup (PUP::er &p);
 
   /// Evaluate mask at a point
   virtual bool evaluate (double t, double x, double y, double z) const;
@@ -65,17 +58,12 @@ public: // interface
 			 int ndx, int nx, double * x,
 			 int ndy, int ny, double * y,
 			 int ndz, int nz, double * z) const;
-  
-private: // functions
-
-  void copy_(const MaskExpr & mask) throw();
 
 private: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
-  Param * param_;
-
+  Expression expr_;
 
 };
 

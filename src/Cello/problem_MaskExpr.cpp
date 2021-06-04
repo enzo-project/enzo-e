@@ -9,17 +9,33 @@
 
 //----------------------------------------------------------------------
 
-MaskExpr::MaskExpr
-(Param * param) throw()
-  : Mask(), param_(param)
+MaskExpr::MaskExpr() throw()
+  : Mask(), expr_()
+{ }
+
+//----------------------------------------------------------------------
+
+MaskExpr::MaskExpr(Parameters * parameters,
+		   const std::string &parameter_name,
+		   int parameter_index) throw()
+  : MaskExpr()
 {
+  if (parameter_index == -1) {
+    expr_ = parameters->value_Expression(parameter_name);
+  } else {
+    expr_ = parameters->list_value_Expression(parameter_index, parameter_name);
+  }
 }
 
 //----------------------------------------------------------------------
 
-void MaskExpr::copy_(const MaskExpr & mask) throw()
+void MaskExpr::pup (PUP::er &p)
 {
-  param_ = mask.param_;
+  TRACEPUP;
+  Mask::pup(p);
+
+  // NOTE: change this function whenever attributes change
+  p|expr_;
 }
 
 //----------------------------------------------------------------------
@@ -27,7 +43,7 @@ void MaskExpr::copy_(const MaskExpr & mask) throw()
 bool MaskExpr::evaluate (double t, double x, double y, double z) const
 {
   bool value;
-  param_->evaluate_logical(1,&value,&x,&y,&z,t);
+  expr_.evaluate_logical(1,&value,&x,&y,&z,t);
   return value;
 }
 
@@ -63,7 +79,7 @@ void MaskExpr::evaluate (bool * mask, double t,
 
   int n=nx*ny*nz;
 
-  param_->evaluate_logical(n,mask_temp,x,y,z,t);
+  expr_.evaluate_logical(n,mask_temp,x,y,z,t);
 
   for (int iz=0; iz<nz; iz++) {
     for (int iy=0; iy<ny; iy++) {
