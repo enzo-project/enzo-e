@@ -8,15 +8,6 @@
 #ifndef MESH_BLOCK_HPP
 #define MESH_BLOCK_HPP
 
-#ifdef CELLO_TRACE
-#define TRACE_ADAPT(MSG)			\
-  index_.print(MSG,-1,2,false,simulation());	\
-  TRACE1("this = %p",this);
-#else
-#define TRACE_ADAPT(MSG)			\
-  ; 
-#endif
-
 class Data;
 class MsgRefresh;
 class MsgRefine;
@@ -261,25 +252,34 @@ public: // interface
   // INITIAL
   //--------------------------------------------------
 
-  /// Enter initial phase
-  void initial_enter_();
   /// Initiate computing the sequence of Methods
-  void initial_begin_();
+  void initial_new_begin_(int level);
   /// Initiate computing the next Method in the sequence
-  void initial_next_();
-  /// Return after performing any Refresh operations
-  void initial_continue_();
-  /// Cleanup after all Methods have been applied
-  void initial_end_();
+  void r_initial_new_next(CkReductionMsg * msg)
+  { delete msg; initial_new_next_(); }
+  void initial_new_next_();
 
   void r_end_initialize(CkReductionMsg * msg)
-  {  initial_exit_();  delete msg;  }
+  {
+    initial_exit_();  delete msg;
+  }
   
   void initial_exit_();
   void p_initial_exit()
-  {      initial_exit_();  }
-  void r_initial_exit(CkReductionMsg * msg)
-  {      initial_exit_();  delete msg;  }
+  { initial_exit_(); }
+
+  void r_initial_new_continue(CkReductionMsg * msg)
+  { delete msg; initial_new_continue_(); }
+  
+  /// Return after performing any Refresh operations
+  void initial_new_continue_();
+  
+  /// Return the currently active Initial index
+  int index_initial() const throw()
+  { return index_initial_; }
+
+  /// Return the currently-active Initial object
+  Initial * initial () throw();
 
   //--------------------------------------------------
   // COMPUTE
@@ -358,8 +358,13 @@ protected: // methods
 public: // methods
 
   /// Prepare to call compute_next_() after computing (used to
-  /// synchronize between methods) Must be called at end of Method
+  /// synchronize between methods) Must be called at end of each
+  /// Method::compute()
   void compute_done();
+
+  /// Prepare to call next phase after initialization / adapt;
+  /// Must be called at end of each Initial::enforce_block()
+  void initial_done();
 
   /// Compute all derived fields in a block (default)
   ///   if field_list is provided, loops through that list and computes
@@ -852,7 +857,7 @@ protected: // functions
   void coarsen_face_level_update_ (Index index_child);
 
   /// Apply all initial conditions to this Block
-  void apply_initial_() throw();
+  void apply_initial_(MsgRefine * msg) throw();
 
   /// Determine which faces require boundary updates or communication
   void determine_boundary_

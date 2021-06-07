@@ -219,6 +219,10 @@ enum type_enum {
 #   error Multiple CONFIG_PRECISION_[SINGLE|DOUBLE|QUAD] defined
 #endif
 
+
+/// Length of hex message tags used for debugging
+#define TAG_LEN 8
+
 //----------------------------------------------------------------------
 /// Macros for debugging
 //----------------------------------------------------------------------
@@ -597,9 +601,6 @@ namespace cello {
   int digits_max(int precision);
 
   // type_enum functions (prefered)
-  int sizeof_type (int);
-  int is_type_supported (int);
-
   extern bool type_is_float(int type);
   extern bool type_is_int(int type);
   extern bool type_is_valid(int type);

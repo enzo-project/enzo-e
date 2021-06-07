@@ -44,6 +44,8 @@ void EnzoInitialPm::enforce_block
   } else {
     density_placement_ (block,field,particle);
   }
+
+  block->initial_done();
 }
 
 //----------------------------------------------------------------------

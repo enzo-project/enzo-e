@@ -127,6 +127,7 @@ public: // interface
   enzo_float initial_redshift()      { return initial_redshift_; }
   enzo_float final_redshift()        { return final_redshift_; }
 
+  /// Set Cosmology parameters (used by testing only)
   void set_hubble_constant_now(enzo_float value)
   { hubble_constant_now_=value; }
   void set_omega_matter_now(enzo_float value)

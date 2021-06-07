@@ -13,20 +13,25 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
-// #define TRACE_INITIALIZE
+// #define DEBUG_INITIAL
 
-#ifdef TRACE_INITIALIZE
-#  undef TRACE_INITIALIZE
-#  define TRACE_INITIALIZE CkPrintf ("%d %s:%d DEBUG_INITIALIZE\n",CkMyPe(),__FILE__,__LINE__);
+#ifdef DEBUG_INITIAL
+#   define TRACE_INITIAL(MSG,BLOCK)                     \
+  CkPrintf ("TRACE_CONTROL_INITIAL %s %s\n",                    \
+            BLOCK->name().c_str(),MSG); fflush(stdout);
+
+#   define TRACE_INITIAL_SIM(MSG)                       \
+  CkPrintf ("TRACE_CONTROL_INITIAL %s\n",MSG); fflush(stdout);
 #else
-#  define TRACE_INITIALIZE /*  */
+#   define TRACE_INITIAL(MSG,BLOCK) /* ... */
+#   define TRACE_INITIAL_SIM(MSG) /* ... */
 #endif
 
 //----------------------------------------------------------------------
 
 void Simulation::initialize() throw()
 {
-  TRACE_INITIALIZE;
+  TRACE_INITIAL_SIM("Simulation::initialize()");
   set_phase(phase_initial);
 
   initialize_config_();
@@ -80,65 +85,68 @@ void Simulation::initialize() throw()
 
 void Simulation::r_initialize_block_array(CkReductionMsg * msg) 
 {
-  TRACE_INITIALIZE;
+  TRACE_INITIAL_SIM("Simulation::r_initialize_block_array_()");
   performance_->start_region(perf_initial);
   delete msg;
   
   initialize_block_array_();
-  TRACE_INITIALIZE;
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::r_initialize_hierarchy(CkReductionMsg * msg) 
-{
-  TRACE_INITIALIZE;
-  performance_->start_region(perf_initial);
-  delete msg;
-
-  if (CkMyPe() == 0) {
-
-    // --------------------------------------------------
-    // ENTRY: #3 Simulation::r_initialize_hierarchy() -> Block::p_adapt_mesh()
-    // ENTRY: Block Array if Simulation is_root()
-    // --------------------------------------------------
-    hierarchy()->block_array().p_initial_exit();
-    // --------------------------------------------------
-  }
-  performance_->stop_region(perf_initial);
 }
 
 //======================================================================
 // NEW INITIAL
 //======================================================================
 
-void Block::initial_enter_()
+void  Block::initial_new_begin_(int level)
 {
+  TRACE_INITIAL("initial_new_begin_",this);
+  index_initial_ = 0;
+
+  CkCallback callback 
+    (CkIndex_Block::r_initial_new_next(nullptr), thisProxy);
+
+  contribute(0,0,CkReduction::concat,callback);
 }
 
 //----------------------------------------------------------------------
 
-void  Block::initial_begin_()
+void  Block::initial_new_next_()
 {
+  TRACE_INITIAL("initial_new_next_()",this);
+  Initial * initial = cello::problem()->initial(index_initial_);
+  if (initial) {
+    initial->enforce_block(this,nullptr);
+  } else {
+    bool is_first_cycle = (cycle_ == cello::config()->initial_cycle);
+    if (is_first_cycle && level() <= 0) {
+      initial_exit_();
+    }
+  }
 }
 
 //----------------------------------------------------------------------
 
-void  Block::initial_next_()
+void  Block::initial_done()
 {
+  if (cello::config()->initial_new) {
+
+    TRACE_INITIAL("initial_new_done",this);
+
+    // barrier before continuing
+    CkCallback callback (CkIndex_Block::r_initial_new_continue(nullptr), thisProxy);
+
+    contribute(0,0,CkReduction::concat,callback);
+  }
 }
 
 //----------------------------------------------------------------------
 
-void  Block::initial_continue_()
+void  Block::initial_new_continue_()
 {
+  TRACE_INITIAL("initial_new_continue",this);
+  index_initial_++;
+  initial_new_next_();
 }
 
 //----------------------------------------------------------------------
 
-void  Block::initial_end_()
-{
-}
-
-//----------------------------------------------------------------------
 

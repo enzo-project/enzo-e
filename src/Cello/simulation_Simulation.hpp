@@ -231,9 +231,6 @@ public: // virtual functions
   /// Wait for all Hierarchy to be initialized before creating any Blocks
   void r_initialize_block_array(CkReductionMsg * msg);
 
-  /// Wait for all local patches to be created before calling run
-  void r_initialize_hierarchy(CkReductionMsg * msg);
-
   /// Send Config and Parameters from ip==0 to all other processes
 
   void send_config();

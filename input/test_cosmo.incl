@@ -40,37 +40,35 @@ Adapt {
  }
 
  Initial {
+
+     # "new" initialization required for "hdf5" Initial type
+     # (supports communication, but currently limited to unigrid)
+
+     new = true;
+     
      list = [ "hdf5", "cosmology" ];
      hdf5 {
-         throttle_internode = false;
-         throttle_intranode = false;
-         throttle_node_files = false;
-         throttle_group_size = 64;
-         throttle_seconds_delay   = 0.01;
-         throttle_seconds_stagger = 0.1;
+         blocking = [2,4,1];
+         format = "music";
          FD {
-             coords = "tzyx";
              dataset = "GridDensity";
              file = "input/cosmo_grid_density.h5";
              name = "density";
              type = "field";
          };
          FVX {
-             coords = "tzyx";
              dataset = "GridVelocities_x";
              file = "input/cosmo_grid_velocities_x.h5";
              name = "velocity_x";
              type = "field";
          };
          FVY {
-             coords = "tzyx";
              dataset = "GridVelocities_y";
              file = "input/cosmo_grid_velocities_y.h5";
              name = "velocity_y";
              type = "field";
          };
          FVZ {
-             coords = "tzyx";
              dataset = "GridVelocities_z";
              file = "input/cosmo_grid_velocities_z.h5";
              name = "velocity_z";
@@ -78,7 +76,6 @@ Adapt {
          };
          PVX {
              attribute = "vx";
-             coords = "tzyx";
              dataset = "ParticleVelocities_x";
              file = "input/cosmo_particle_velocities_x.h5";
              name = "dark";
@@ -86,7 +83,6 @@ Adapt {
          };
          PVY {
              attribute = "vy";
-             coords = "tzyx";
              dataset = "ParticleVelocities_y";
              file = "input/cosmo_particle_velocities_y.h5";
              name = "dark";
@@ -94,7 +90,6 @@ Adapt {
          };
          PVZ {
              attribute = "vz";
-             coords = "tzyx";
              dataset = "ParticleVelocities_z";
              file = "input/cosmo_particle_velocities_z.h5";
              name = "dark";
@@ -102,7 +97,6 @@ Adapt {
          };
          PX {
              attribute = "x";
-             coords = "tzyx";
              dataset = "ParticleDisplacements_x";
              file = "input/cosmo_particle_displacements_x.h5";
              name = "dark";
@@ -110,7 +104,6 @@ Adapt {
          };
          PY {
              attribute = "y";
-             coords = "tzyx";
              dataset = "ParticleDisplacements_y";
              file = "input/cosmo_particle_displacements_y.h5";
              name = "dark";
@@ -118,7 +111,6 @@ Adapt {
          };
          PZ {
              attribute = "z";
-             coords = "tzyx";
              dataset = "ParticleDisplacements_z";
              file = "input/cosmo_particle_displacements_z.h5";
              name = "dark";

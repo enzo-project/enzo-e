@@ -100,10 +100,6 @@ EnzoSolverCg::EnzoSolverCg
     cello::simulation()->refresh_set_name(ir_post_,name);
     
     refresh->add_field (ix_);
-    refresh->add_field (id_);
-    refresh->add_field (ir_);
-    refresh->add_field (iy_);
-    refresh->add_field (iz_);
 
   //--------------------------------------------------
 
@@ -113,9 +109,6 @@ EnzoSolverCg::EnzoSolverCg
     Refresh * refresh_matvec = cello::refresh(ir_matvec_);
 
     refresh_matvec->add_field (id_);
-    refresh_matvec->add_field (ir_);
-    refresh_matvec->add_field (iy_);
-    refresh_matvec->add_field (iz_);
 
     refresh_matvec->set_callback(CkIndex_EnzoBlock::p_solver_cg_matvec());
     
@@ -126,11 +119,7 @@ EnzoSolverCg::EnzoSolverCg
 
     Refresh * refresh_loop_2 = cello::refresh(ir_loop_2_);
 
-    refresh_loop_2->add_field (ix_);
     refresh_loop_2->add_field (id_);
-    refresh_loop_2->add_field (ir_);
-    refresh_loop_2->add_field (iy_);
-    refresh_loop_2->add_field (iz_);
 
     refresh_loop_2->set_callback(CkIndex_EnzoBlock::p_solver_cg_loop_2());
     

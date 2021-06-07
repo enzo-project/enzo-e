@@ -205,4 +205,6 @@ void EnzoInitialSoup::enforce_block
     }
   }
 
+  block->initial_done();
+
 }

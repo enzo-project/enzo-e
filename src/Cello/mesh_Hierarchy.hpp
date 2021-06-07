@@ -247,7 +247,7 @@ protected: // attributes
   /// Upper extent of the hierarchy
   double upper_[3];
 
-  /// How the Forest is distributed into Blocks
+  /// How the array-of-octrees is distributed into Blocks
   int blocking_[3];
 
   /// Periodicity of boundary conditions on faces

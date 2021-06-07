@@ -36,7 +36,10 @@ void EnzoInitialCollapse::enforce_block
 
 {
 
-  if (!block->is_leaf()) return;
+  if (!block->is_leaf()) {
+    block->initial_done();
+    return;
+  }
 
   Timer timer;
   timer.start();
@@ -197,5 +200,6 @@ void EnzoInitialCollapse::enforce_block
 
   Particle particle = block->data()->particle();
   
+  block->initial_done();
 }
 

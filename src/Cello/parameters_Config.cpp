@@ -78,6 +78,7 @@ void Config::pup (PUP::er &p)
   // Initial
 
   p | num_initial;
+  p | initial_new;
   p | initial_list;
   p | initial_cycle;
   p | initial_time;
@@ -124,9 +125,7 @@ void Config::pup (PUP::er &p)
   p | method_flux_correct_min_digits;
   p | method_field_list;
   p | method_particle_list;
-  p | method_output_blocking[0];
-  p | method_output_blocking[1];
-  p | method_output_blocking[2];
+  PUParray (p,method_output_blocking,3);
   p | method_prolong;
   p | method_ghost_depth;
   p | method_min_face_rank;
@@ -624,6 +623,7 @@ void Config::read_initial_ (Parameters * p) throw()
   TRACE("Parameters: Initial");
   initial_cycle = p->value_integer("Initial:cycle",0);
   initial_time  = p->value_float  ("Initial:time",0.0);
+  initial_new = p->value_logical ("Initial:new",false);
 
   num_initial = p->list_length("Initial:list");
 
@@ -845,8 +845,6 @@ void Config::read_method_ (Parameters * p) throw()
     for (int i=0; i<3; i++) {
       method_output_blocking[i][index_method] =
         p->list_value_integer(i,full_name+":blocking",1);
-      CkPrintf ("method_output_blocking[%d][%d] = %d\n",
-                i,index_method,method_output_blocking[i][index_method]);
     }
     //    }
     

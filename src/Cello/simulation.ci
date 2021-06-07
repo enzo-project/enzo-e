@@ -21,7 +21,6 @@ module simulation {
     entry void p_get_msg_refine (Index);
     
     entry void r_initialize_block_array (CkReductionMsg * msg);    // [SC2]
-    entry void r_initialize_hierarchy (CkReductionMsg * msg); // [SC3]
 
     entry void s_write (); // [SC6]
     entry void r_write (CkReductionMsg * msg); // [SC7]

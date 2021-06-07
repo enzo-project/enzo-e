@@ -147,17 +147,21 @@ void Block::r_method_output_continue(CkReductionMsg *msg)
 void MethodOutput::compute_continue(Block * block)
 {
   if (is_writer_(block->index())) {
+
     int a3[3];
     block->index().array(a3,a3+1,a3+2);
-    int index_min[3] = {a3[0] - (a3[0] % blocking_[0]),
-                        a3[1] - (a3[1] % blocking_[1]),
-                        a3[2] - (a3[2] % blocking_[2])};
-    int index_max[3] = {index_min[0] + blocking_[0],
-                        index_min[1] + blocking_[1],
-                        index_min[2] + blocking_[2]};
+    
+    int root_blocks[3];
+    cello::hierarchy()->root_blocks
+      (root_blocks,root_blocks+1,root_blocks+2);
+    
+    int index_min[3] = {a3[0],a3[1],a3[2]};
+    int index_max[3] = {std::min(a3[0] + blocking_[0],root_blocks[0]),
+                        std::min(a3[1] + blocking_[1],root_blocks[1]),
+                        std::min(a3[2] + blocking_[2],root_blocks[2])};
+    
     BlockTrace bt (cello::rank(),index_min,index_max);
 
-    
     FileHdf5 * file = file_open_(block,a3);
     
     // Create output message
@@ -328,11 +332,13 @@ FileHdf5 * MethodOutput::file_open_(Block * block, int a3[3])
   int count = file_count_(block);
   std::string file_name = cello::expand_name(&file_name_,count,block);
 
-  Monitor::instance()->print 
-    ("Output","MethodOutput writing data file %s",
-     (path_name + "/" + file_name).c_str());
+  if (block->index().is_root()) {
+    Monitor::instance()->print 
+      ("Output","MethodOutput writing data file %s",
+       (path_name + "/" + file_name).c_str());
+  }
 
-    // Create File
+  // Create File
   FileHdf5 * file = new FileHdf5 (path_name, file_name);
   file->file_create();
   return file;

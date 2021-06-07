@@ -62,6 +62,9 @@ EnzoConfig::EnzoConfig() throw ()
   initial_grackle_test_reset_energies(0),
 #endif /* CONFIG_USE_GRACKLE */
   // EnzoInitialHdf5
+  initial_hdf5_max_level(),
+  initial_hdf5_format(),
+  initial_hdf5_blocking(),
   initial_hdf5_field_files(),
   initial_hdf5_field_datasets(),
   initial_hdf5_field_names(),
@@ -264,6 +267,9 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_turbulence_pressure;
   p | initial_turbulence_temperature;
 
+  p | initial_hdf5_max_level;
+  p | initial_hdf5_format;
+  PUParray(p, initial_hdf5_blocking,3);
   p | initial_hdf5_field_files;
   p | initial_hdf5_field_datasets;
   p | initial_hdf5_field_names;
@@ -486,33 +492,46 @@ void EnzoConfig::read_initial_grackle_(Parameters * p)
 
 void EnzoConfig::read_initial_hdf5_(Parameters * p)
 {
-  std::string name_initial = "Initial:hdf5:";
-  int num_files = p->list_length (name_initial + "file_list");
+  const std::string name_initial = "Initial:hdf5:";
+
+  initial_hdf5_max_level = p->value_integer (name_initial + "max_level", 0);
+  initial_hdf5_format    = p->value_string  (name_initial + "format", "music");
+
+  for (int i=0; i<3; i++) {
+    initial_hdf5_blocking[i] =
+      p->list_value_integer(i,name_initial+"blocking",1);
+  }
+  
+  const int num_files = p->list_length (name_initial + "file_list");
+
   for (int index_file=0; index_file<num_files; index_file++) {
+
     std::string file_id = name_initial +
       p->list_value_string (index_file,name_initial+"file_list") + ":";
 
-    std::string type    = p->value_string (file_id+"type","");
-    std::string name    = p->value_string (file_id+"name","");
-    std::string file    = p->value_string (file_id+"file","");
-    std::string dataset = p->value_string (file_id+"dataset","");
-    std::string coords  = p->value_string (file_id+"coords","xyz");
+    const std::string type    = p->value_string (file_id + "type","");
+    const std::string name    = p->value_string (file_id + "name","");
+    const std::string file    = p->value_string (file_id + "file","");
+    const std::string dataset = p->value_string (file_id + "dataset","");
+    const std::string coords  = p->value_string (file_id + "coords","xyz");
 
     if (type == "particle") {
-      std::string attribute = p->value_string (file_id+"attribute","");
-      //      if (name != "") {
+
+      const std::string attribute = p->value_string (file_id+"attribute","");
+      
       initial_hdf5_particle_files.     push_back(file);
       initial_hdf5_particle_datasets.  push_back(dataset);
       initial_hdf5_particle_coords.    push_back(coords);
       initial_hdf5_particle_types.     push_back(name);
       initial_hdf5_particle_attributes.push_back(attribute);
-      //      }
+
     } else if (type == "field") {
 
       initial_hdf5_field_files.        push_back(file);
       initial_hdf5_field_datasets.     push_back(dataset);
       initial_hdf5_field_names.        push_back(name);
       initial_hdf5_field_coords.       push_back(coords);
+
     } else {
       ERROR2 ("EnzoConfig::read",
 	      "Unknown particle type %s for parameter %s",
@@ -525,9 +544,12 @@ void EnzoConfig::read_initial_hdf5_(Parameters * p)
 
 void EnzoConfig::read_initial_music_(Parameters * p)
 {
-  std::string name_initial = "Initial:music:";
-  int num_files = p->list_length (name_initial + "file_list");
+  const std::string name_initial = "Initial:music:";
+
+  const int num_files = p->list_length (name_initial + "file_list");
+
   for (int index_file=0; index_file<num_files; index_file++) {
+    
     std::string file_id = name_initial +
       p->list_value_string (index_file,name_initial+"file_list") + ":";
 

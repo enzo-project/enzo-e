@@ -17,9 +17,10 @@ module mesh {
   initnode void mutex_init_hierarchy();
 
   readonly int MsgCoarsen::counter[CONFIG_NODE_SIZE];
+  readonly int MsgInitial::counter[CONFIG_NODE_SIZE];
+  readonly int MsgOutput::counter[CONFIG_NODE_SIZE];
   readonly int MsgRefine::counter[CONFIG_NODE_SIZE];
   readonly int MsgRefresh::counter[CONFIG_NODE_SIZE];
-  readonly int MsgOutput::counter[CONFIG_NODE_SIZE];
   readonly int DataMsg::counter[CONFIG_NODE_SIZE];
   readonly int FieldFace::counter[CONFIG_NODE_SIZE];
   readonly int ParticleData::counter[CONFIG_NODE_SIZE];
@@ -81,6 +82,7 @@ module mesh {
   };
 
   message MsgCoarsen;
+  message MsgInitial;
   message MsgOutput;
   message MsgRefine;
   message MsgRefresh;
@@ -97,8 +99,9 @@ module mesh {
     //--------------------------------------------------
 
     entry void p_initial_exit();
-    entry void r_initial_exit(CkReductionMsg *);
     entry void r_end_initialize(CkReductionMsg *);
+    entry void r_initial_new_next(CkReductionMsg *);
+    entry void r_initial_new_continue(CkReductionMsg *);
 
     //--------------------------------------------------
     // *** OUTPUT ***

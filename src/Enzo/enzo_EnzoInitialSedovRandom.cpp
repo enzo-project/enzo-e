@@ -63,11 +63,6 @@ void EnzoInitialSedovRandom::enforce_block
 ( Block * block, const Hierarchy * hierarchy ) throw()
 
 {
-
-  ASSERT("EnzoInitialSedovRandom",
-   "Block does not exist",
-   block != NULL);
-
   Field field = block->data()->field();
 
   ASSERT("EnzoInitialSedovRandom",
@@ -309,5 +304,6 @@ void EnzoInitialSedovRandom::enforce_block
 
   delete [] rn_array;
   
+  block->initial_done();
 }
 

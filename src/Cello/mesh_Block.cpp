@@ -91,24 +91,9 @@ Block::Block ( MsgRefine * msg )
 	0, NULL, msg->refresh_type_,
 	msg->num_face_level_, msg->face_level_);
 
-#ifdef TRACE_BLOCK
-  CkPrintf ("%d %s index TRACE_BLOCK Block(MsgRefine)  %d %d %d \n",  CkMyPe(),name().c_str(),
-	    index_[0],index_[1],index_[2]);
-  msg->print();
-#endif
-
-  bool is_first_cycle = (cycle_ == cello::config()->initial_cycle);
-
   index_.array(array_,array_+1,array_+2);
 
-
-  if (! is_first_cycle) {
-    msg->update(data());
-    delete msg;
-  } else {
-    delete msg;
-    apply_initial_();
-  }
+  apply_initial_(msg);
 
   performance_stop_(perf_block);
 
@@ -152,13 +137,6 @@ Block::Block ( process_type ip_source )
   init_refresh_();
 
   usesAtSync = true;
-#ifdef TRACE_BLOCK
-  {
-  CkPrintf ("%d %s index TRACE_BLOCK Block(%d)  %d %d %d \n",
-            CkMyPe(),name().c_str(),ip_source, 
-            index_[0],index_[1],index_[2]);
-}
-#endif
 
   performance_start_(perf_block);
 
@@ -185,21 +163,11 @@ void Block::p_set_msg_refine(MsgRefine * msg)
 
 #ifdef TRACE_BLOCK
   {
-  CkPrintf ("%d %s index TRACE_BLOCK p_set_msg_refine(MsgRefine)  %d %d %d \n",  CkMyPe(),name().c_str(),
-	    index_[0],index_[1],index_[2]);
-  msg->print();
+  CkPrintf ("%d %s index TRACE_BLOCK p_set_msg_refine(MsgRefine)\n",  CkMyPe(),name().c_str());
   }
 #endif
 
-  bool is_first_cycle =  (cycle_ == cello::config()->initial_cycle);
-
-  if (! is_first_cycle) {
-    msg->update(data());
-    delete msg;
-  } else {
-    delete msg;
-    apply_initial_();
-  } 
+  apply_initial_(msg);
   
   performance_stop_(perf_block);
 
@@ -353,13 +321,15 @@ void Block::init
 void Block::initialize()
 {
   bool is_first_cycle = (cycle_ == cello::config()->initial_cycle);
-  if (is_first_cycle && level() <= 0) {
-    CkCallback callback (CkIndex_Block::r_end_initialize(NULL), thisProxy);
-#ifdef TRACE_CONTRIBUTE    
-    CkPrintf ("%s %s:%d DEBUG_CONTRIBUTE r_end_initialize()\n",
-	      name().c_str(),__FILE__,__LINE__); fflush(stdout);
+  if (! cello::config()->initial_new) {
+    if (is_first_cycle && level() <= 0) {
+      CkCallback callback (CkIndex_Block::r_end_initialize(NULL), thisProxy);
+#ifdef TRACE_BLOCK    
+      CkPrintf ("%s %s:%d DEBUG_CONTRIBUTE r_end_initialize()\n",
+                name().c_str(),__FILE__,__LINE__); fflush(stdout);
 #endif    
-    contribute(0,0,CkReduction::concat,callback);
+      contribute(0,0,CkReduction::concat,callback);
+    }
   }
 }
 
@@ -466,6 +436,15 @@ Method * Block::method () throw ()
   Problem * problem = cello::problem();
   Method * method = problem->method(index_method_);
   return method;
+}
+
+//----------------------------------------------------------------------
+
+Initial * Block::initial () throw ()
+{
+  Problem * problem = cello::problem();
+  Initial * initial = problem->initial(index_initial_);
+  return initial;
 }
 
 //----------------------------------------------------------------------
@@ -577,20 +556,35 @@ void Block::compute_derived(const std::vector< std::string>& field_list
 
 //======================================================================
 
-void Block::apply_initial_() throw ()
+void Block::apply_initial_(MsgRefine * msg) throw ()
 {
 
-  TRACE("Block::apply_initial_()");
+  bool is_first_cycle =  (cycle_ == cello::config()->initial_cycle);
 
-  // Apply initial conditions
+  if (! is_first_cycle) {
+    msg->update(data());
+    delete msg;
+  } else {
+    delete msg;
+    TRACE("Block::apply_initial_()");
+    if (cello::config()->initial_new) {
 
-  index_initial_ = 0;
-  Problem * problem = cello::problem();
-  while (Initial * initial = problem->initial(index_initial_++)) {
-    initial->enforce_block(this,cello::hierarchy());
+      initial_new_begin_(0);
+
+    } else {
+      // Apply initial conditions
+
+      index_initial_ = 0;
+      Problem * problem = cello::problem();
+      while (Initial * initial = problem->initial(index_initial_)) {
+        initial->enforce_block(this,cello::hierarchy());
+        index_initial_++;
+      }
+
+    } 
+
   }
 }
-
 //----------------------------------------------------------------------
 
 Block::~Block()

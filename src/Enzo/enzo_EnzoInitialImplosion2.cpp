@@ -89,4 +89,7 @@ void EnzoInitialImplosion2::enforce_block
       }
     }
   }
+
+  block->initial_done();
+
 }

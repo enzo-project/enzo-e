@@ -394,6 +394,50 @@ void FileHdf5::data_close() throw()
 
 //----------------------------------------------------------------------
 
+void FileHdf5::file_read_scalar
+( void * buffer, std::string name,  int * type) throw()
+{
+  std::string file_name = path_ + "/" + name_;
+
+  // error check file open
+
+  ASSERT1("FileHdf5::file_read_meta",
+	  "Trying to read metadata from the unopened file %s",
+	  file_name.c_str(), is_file_open_);
+
+  hid_t meta_id = H5Aopen_name(file_id_, name.c_str());
+
+  // error check H5Aopen_name
+
+  ASSERT3("FileHdf5::file_read_meta",
+	  "H5Aopen_name() returned %ld opening %s in file %s",
+	  meta_id, name.c_str(),file_name.c_str(),
+	  (meta_id >= 0));
+
+  // set output type
+
+  int scalar_type = hdf5_to_scalar_(H5Aget_type (meta_id));
+
+  if (type) (*type) = scalar_type;
+
+  // Read the attribute
+
+#ifdef TRACE_DISK  
+  CkPrintf ("%d [%d] TRACE_DISK H5Aread()\n",CkMyPe(),__LINE__);
+  fflush(stdout);
+#endif  
+  int retval = 
+    H5Aread(meta_id, scalar_to_hdf5_(scalar_type), buffer);
+
+  // error check H5Aread
+
+  ASSERT1("FileHdf5::file_read_meta_","H5Aread() returned %d",
+	  retval,(retval>=0));
+}
+
+
+//----------------------------------------------------------------------
+
 void FileHdf5::file_read_meta
   ( void * buffer, std::string name,  int * type,
     int * n1, int * n2, int * n3, int * n4) throw()

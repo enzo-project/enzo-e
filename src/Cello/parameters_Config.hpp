@@ -57,18 +57,10 @@ public: // interface
     field_restrict(""),
     field_group_list(),
     num_initial(0),
+    initial_new(false),
     initial_list(),
     initial_cycle(0),
     initial_time(0.0),
-    initial_hdf5_field_files(),
-    initial_hdf5_field_datasets(),
-    initial_hdf5_field_names(),
-    initial_hdf5_field_coords(),
-    initial_hdf5_particle_files(),
-    initial_hdf5_particle_datasets(),
-    initial_hdf5_particle_coords(),
-    initial_hdf5_particle_types(),
-    initial_hdf5_particle_attributes(),
     initial_trace_name(""),
     initial_trace_field(""),
     initial_trace_mpp(0.0),
@@ -235,18 +227,10 @@ public: // interface
       field_restrict(""),
       field_group_list(),
       num_initial(0),
+      initial_new(false),
       initial_list(),
       initial_cycle(0),
       initial_time(0.0),
-      initial_hdf5_field_files(),
-      initial_hdf5_field_datasets(),
-      initial_hdf5_field_names(),
-      initial_hdf5_field_coords(),
-      initial_hdf5_particle_files(),
-      initial_hdf5_particle_datasets(),
-      initial_hdf5_particle_coords(),
-      initial_hdf5_particle_types(),
-      initial_hdf5_particle_attributes(),
       initial_trace_name(""),
       initial_trace_field(""),
       initial_trace_mpp(0.0),
@@ -447,20 +431,10 @@ public: // attributes
   // Initial
 
   int                        num_initial;
+  bool                       initial_new;
   std::vector<std::string>   initial_list;
   int                        initial_cycle;
   double                     initial_time;
-
-  std::vector < std::string > initial_hdf5_field_files;
-  std::vector < std::string > initial_hdf5_field_datasets;
-  std::vector < std::string > initial_hdf5_field_names;
-  std::vector < std::string > initial_hdf5_field_coords;
-
-  std::vector < std::string > initial_hdf5_particle_files;
-  std::vector < std::string > initial_hdf5_particle_datasets;
-  std::vector < std::string > initial_hdf5_particle_coords;
-  std::vector < std::string > initial_hdf5_particle_types;
-  std::vector < std::string > initial_hdf5_particle_attributes;
 
   std::string                initial_trace_name;
   std::string                initial_trace_field;

@@ -835,9 +835,7 @@ int Parameters::group_count() const throw()
 
 void Parameters::group_push(std::string str) throw()
 {
-  int n = current_group_.size();
-  current_group_.resize(n + 1);
-  current_group_[n] = str;
+  current_group_.push_back(str);
 }
 
 //----------------------------------------------------------------------
@@ -872,7 +870,7 @@ void Parameters::group_set(int index, std::string group) throw()
 
 void Parameters::group_clear() throw ()
 {
-  current_group_.resize(0);
+  current_group_.clear();
 }
 
 //----------------------------------------------------------------------

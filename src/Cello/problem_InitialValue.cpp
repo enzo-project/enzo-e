@@ -161,6 +161,8 @@ void InitialValue::enforce_block ( Block * block,
     delete [] yf;
     delete [] zf;
   }
+
+  block->initial_done();
 }
 
 //======================================================================

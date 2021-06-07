@@ -56,7 +56,11 @@ void EnzoInitialTurbulence::enforce_block
 
 {
   TRACE_TURBULENCE;
-  if (!block->is_leaf()) return;
+
+  if (!block->is_leaf()) {
+    block->initial_done();
+    return;
+  }
 
   //  INCOMPLETE("EnzoInitialTurbulence::enforce_block()");
 
@@ -248,4 +252,5 @@ void EnzoInitialTurbulence::enforce_block
 	  "not implemented yet");
   }
 
+  block->initial_done();
 }

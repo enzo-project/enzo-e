@@ -82,6 +82,9 @@ void InitialFile::enforce_block
     input_->read_block(0,block_name);
 
   }
+
+  block->initial_done();
+
 }
 
 //----------------------------------------------------------------------
