@@ -65,16 +65,14 @@ public: // interface
   ~Param () 
   { dealloc_(); };
 
-  /// Copy constructor
-  Param(const Param & param) throw()
-    : type_(parameter_unknown),
-      value_accessed_(false)
-  { INCOMPLETE("Param::Param"); };
+  Param(const Param & param) = delete;
+  Param & operator= (const Param & param) = delete;
 
-  /// Assignment operator
-  Param & operator= (const Param & param) throw()
-  { INCOMPLETE("Param::operator =");
-    return *this; };
+  /// Move Constructor
+  Param(Param&& param) = default;
+
+  /// Move assignment operator
+  Param & operator= (Param&& param) = default;
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
