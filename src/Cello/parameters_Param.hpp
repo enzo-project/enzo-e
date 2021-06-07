@@ -79,26 +79,6 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
-  /// Evaluate a floating-point expression given vectos x,y,z,t
-  void evaluate_float  
-  ( int                n, 
-    double *           result, 
-    double *           x, 
-    double *           y, 
-    double *           z, 
-    double             t,
-    struct node_expr * node = 0 );
-
-  /// Evaluate a logical expression given vectos x,y,z,t
-  void evaluate_logical  
-  ( int                n, 
-    bool *             result, 
-    double *           x, 
-    double *           y, 
-    double *           z, 
-    double             t,
-    struct node_expr * node = 0);
-
   /// Set the parameter type and value
   void set(struct param_struct * param);
 

@@ -124,62 +124,6 @@ public: // interface
   void done_set_list ( std::string parameter ) throw()
   { monitor_write_(parameter); }
 
-  /// Evaluate the floating-point valued parameter expression
-  void evaluate_float 
-  (
-   std::string parameter,
-   int         n, 
-   double    * result, 
-   double    * deflt,
-   double    * x, 
-   double    * y, 
-   double    * z, 
-   double    t)
-    throw();
-
-  /// Evaluate the logical-valued parameter expression
-  void evaluate_logical 
-  (
-   std::string parameter,
-   int         n, 
-   bool      * result, 
-   bool      * deflt,
-   double    * x, 
-   double    * y, 
-   double    * z, 
-   double    t)
-    throw();
-
-  /// Evaluate the floating-point valued list element expression
-  void list_evaluate_float 
-  (
-   int ,
-   std::string parameter,
-   int         n, 
-   double    * result, 
-   double    * deflt,
-   double    * x, 
-   double    * y, 
-   double    * z, 
-   double    t
-   )    
-    throw();
-
-  /// Evaluate the logical-valued list element expression
-  void list_evaluate_logical
-  (
-   int ,
-   std::string parameter,
-   int         n, 
-   bool      * result, 
-   bool      * deflt,
-   double    * x, 
-   double    * y, 
-   double    * z, 
-   double    t
-   )    
-    throw();
-
   //--------------------------------------------------
   // PARAMETER GROUPS
 
