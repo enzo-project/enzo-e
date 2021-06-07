@@ -156,6 +156,10 @@ public: // interface
   /// Clear all groups
   void group_clear() throw();
 
+  /// Returns a vector holding the names of all leaf parameters in the current
+  /// group
+  std::vector<std::string> leaf_parameter_names() const throw();
+
   /// Return the full name of the parameter including group
   std::string full_name (std::string parameter) const throw();
 

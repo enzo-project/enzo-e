@@ -70,6 +70,9 @@ public: // interface
     evaluate(value,t,ndx,nx,x,ndy,ny,y,ndz,nz,z,0,0);
   }
 
+  /// Checks whether the ScalarExpr wraps a single float parameter
+  bool wraps_single_float_param() const;
+
 private: // attributes
 
   /// Value if param_ type is precision_float_expr

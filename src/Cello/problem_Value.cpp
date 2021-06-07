@@ -60,7 +60,7 @@ Value::Value(Parameters * parameters,
 
 //----------------------------------------------------------------------
 
-double Value::evaluate (double t, double x, double y, double z) throw ()
+double Value::evaluate (double t, double x, double y, double z) const throw ()
 {
   double value = 0.0;
   for (int index = (int)scalar_expr_list_.size()-1; index>=0; index--) {
@@ -76,7 +76,7 @@ void Value::evaluate
 (T * values, double t,
  int ndx, int nx, double * x,
  int ndy, int ny, double * y,
- int ndz, int nz, double * z) throw ()
+ int ndz, int nz, double * z) const throw ()
 {
   for (int index = (int)scalar_expr_list_.size()-1; index>=0; index--) {
     scalar_expr_list_[index].evaluate
@@ -88,19 +88,19 @@ template void Value::evaluate
 (float * values, double t,
  int ndx, int nx, double * x,
  int ndy, int ny, double * y,
- int ndz, int nz, double * z) throw ();
+ int ndz, int nz, double * z) const throw ();
 
 template void Value::evaluate
 (double * values, double t,
  int ndx, int nx, double * x,
  int ndy, int ny, double * y,
- int ndz, int nz, double * z) throw ();
+ int ndz, int nz, double * z) const throw ();
 
 template void Value::evaluate
 (long double * values, double t,
  int ndx, int nx, double * x,
  int ndy, int ny, double * y,
- int ndz, int nz, double * z) throw ();
+ int ndz, int nz, double * z) const throw ();
 
 
 void Value::pup(PUP::er &p){

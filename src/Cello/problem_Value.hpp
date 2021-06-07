@@ -42,9 +42,18 @@ public: // interface
   (T * values, double t,
    int ndx, int nx, double * x,
    int ndy, int ny, double * y,
-   int ndz, int nz, double * z) throw ();
+   int ndz, int nz, double * z) const throw ();
 
-  double evaluate (double t, double x, double y, double z) throw ();
+  double evaluate (double t, double x, double y, double z) const throw ();
+
+  /// Checks whether the Value Object wraps a single float parameter
+  bool wraps_single_float_param() const
+  {
+    if ((scalar_expr_list_.size() != 1) || (mask_list_[0].get() != nullptr)){
+      return false;
+    }
+    return scalar_expr_list_[0].wraps_single_float_param();
+  }
 
   /// Swaps the contents of the first Value object with another
   friend void swap(Value &first, Value &second){

@@ -145,3 +145,7 @@ template void ScalarExpr::evaluate
  int ndz, int nz, double * z, 
  std::shared_ptr<Mask> mask, long double * deflt) const;
 
+//----------------------------------------------------------------------
+
+bool ScalarExpr::wraps_single_float_param() const
+{ return !expr_.initialized(); }
