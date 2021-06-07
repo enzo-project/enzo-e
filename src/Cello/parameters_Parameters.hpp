@@ -18,9 +18,10 @@ class Parameters {
   /// @ingroup  Parameters
   /// @brief    [\ref Parameters] Read in a parameter file and access
   /// parameter values
+  friend Expression; // This is only a friend class so that it can call the
+                     // construct_or_rebuild_Expression_ method
 
 public: // interface
-
 
   /// Create an empty Parameters object
   Parameters(Monitor * monitor = 0) throw();
@@ -82,6 +83,8 @@ public: // interface
   bool value_logical (std::string , bool deflt = false) throw();
   /// Return the string-valued parameter
   std::string value_string ( std::string , std::string deflt = "") throw();
+  /// Return the Expression-valued parameter
+  Expression value_Expression ( std::string ) throw();
 
   /// Return the length of the list parameter
   int list_length (std::string parameter);
@@ -93,6 +96,8 @@ public: // interface
   bool list_value_logical (int ,std::string , bool deflt = false) throw();
   /// Access a string list element
   std::string list_value_string (int,std::string, std::string d= "") throw();
+  /// Return an Expression list element
+  Expression list_value_Expression ( int, std::string ) throw();
 
   /// Assign a value to the integer-valued parameter
   void set_integer ( std::string parameter, int value ) throw();
@@ -208,7 +213,7 @@ public: // interface
   void group_clear() throw();
 
   /// Return the full name of the parameter including group
-  std::string full_name (std::string parameter) throw();
+  std::string full_name (std::string parameter) const throw();
 
   /// Return the type of the given parameter
   parameter_type type(std::string) throw();
@@ -232,10 +237,10 @@ private: // functions
   int readline_ (FILE* fp, char * buffer, int n) throw();
 
   /// Return the full parameter name Group:group:group:...:parameter
-  std::string parameter_name_(std::string parameter)
+  std::string parameter_name_(std::string parameter) const throw()
   {
     bool is_full_parameter = (parameter.find(":") != std::string::npos);
-    return (is_full_parameter ? parameter : full_name (parameter));
+    return (is_full_parameter ? parameter : this->full_name (parameter));
   }
 
   /// Return the Param pointer for the specified list parameter element
@@ -254,6 +259,24 @@ private: // functions
 		    Param * param ) throw();
 
   size_t extract_groups_( const std::string parameter, std::string * group);
+
+  /// Return the pointer to the const Param for the specified parameter
+  ///
+  /// @param[in]  parameter  Name of the parameter
+  /// @param[in]  index      List index of the parameter. If the parameter is
+  ///     not in a list, then this should be -1.
+  /// @returns This returns a pair of pointers to const Param objects. The
+  ///     first entry is a pointer to the const Param for the specified
+  ///     parameter (or a nullptr if it can't be found). When ``index > -1``,
+  ///     the second entry is a pointer to the constant ``Param`` object
+  ///     representing a list that holds the specified parameter (this is a
+  ///     nullptr if it can't be found or ``index == -1``)
+  std::pair<const Param*, const Param*> const_param_(std::string parameter,
+						     int index = -1) const;
+
+  /// This is used to construct or rebuild Expression objects
+  Expression construct_or_rebuild_Expression_
+  (const std::string & parameter_name, int param_index = -1) const throw();
 
   //--------------------------------------------------
 

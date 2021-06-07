@@ -108,7 +108,7 @@ public: // interface
 	     int param_write_type);
 
   /// Return whether the parameter has the given type
-  bool is_type (parameter_enum type) { return type_ == type; }
+  bool is_type (parameter_enum type) const { return type_ == type; }
 
   bool accessed () const { return value_accessed_; }
 
