@@ -31,24 +31,12 @@ public: // interface
 		      int cycle, double time,
 		      bool update_etot) throw ();
 
-  /// Destructor
-  ~EnzoInitialBCenter()
-  {
-    for (int i = 0; i < 3; i++){
-      if (values_[i] != nullptr) {
-	delete values_[i];
-	values_[i] = nullptr;
-      }
-    }
-  }
-
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoInitialBCenter);
 
   /// CHARM++ migration constructor
   EnzoInitialBCenter(CkMigrateMessage *m)
     : Initial (m),
-      parameters_(nullptr),
       values_(),
       update_etot_(false)
   {  }
@@ -61,13 +49,15 @@ public: // interface
     Initial::pup(p);
     TRACEPUP;
 
-    // Value has an incomplete PUP method - instead we follow the style used by
-    // InitialValue
-    bool up = p.isUnpacking();
-    if (up) parameters_ = new Parameters;
-    p | *parameters_;
-    initialize_values_();
-
+    const bool up = p.isUnpacking();
+    for (int i = 0; i < 3; i++){
+      bool not_null = (values_[i] != nullptr);
+      p|not_null;
+      if (not_null){
+        if (up){ values_[i] = new Value(); }
+        p | (*(values_[i]));
+      }
+    }
     p|update_etot_;
   }
 
@@ -90,23 +80,14 @@ public: // interface
 					   CelloArray<double,3> &Ay,
 					   CelloArray<double,3> &Az);
 
-public:
-
   /// Initialize a Block
   virtual void enforce_block
   ( Block * block, const Hierarchy * hierarchy ) throw();
 
-private:
-
-  /// Initializes values_ from parameters_
-  void initialize_values_();
 
 protected: // attributes
 
-  /// This is tracked so that values_ can be reinitialized after PUPing
-  Parameters * parameters_;
-  
-  /// Each value will hold a pointer to a component of the vector potential
+  /// Each entry may hold a pointer to a component of the vector potential
   Value* values_[3];
 
   /// Whether or not to update the total specific energy using the new
