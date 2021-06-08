@@ -326,10 +326,8 @@ def ckpt_restart_test(test_name, template_input_path, enzoe_wrapper,
     test_name: string
         The name of the test. This determines the output directories.
     template_input_filepath: string
-        The path to the enzo-e input file. This file must not include
-        scalar/logical expressions or append lists to parameters. If "Stopping"
-        "Output" sections are present, they will be overwritten. Not all of
-        these conditions can be diagnosed.
+        The path to the enzo-e input file. If "Stopping" and "Output" sections
+        are present, they will be overwritten.
     enzoe_wrapper: instance of `EnzoE` class
         Object used to execute simulations
     ckpt_cycle: int, optional
@@ -476,8 +474,9 @@ parser = argparse.ArgumentParser(
 parser.add_argument('test_name', help = 'specifies the name of the test')
 parser.add_argument('-i','--input', required = True,
                     help = ('Required option used to specify the template '
-                            'input file. This can\'t have any scalar/logical '
-                            'expressions or append lists to parameters.'))
+                            'input file. Support for scalar/logical '
+                            'expressions has not been rigorously tested. Files'
+                            'can\'t append lists to parameters.'))
 parser.add_argument('-o','--output', default = None,
                     help = ('Name of the file where to write the test report. '
                             + 'Default is ' +

@@ -33,7 +33,7 @@ public: // interface
       mask_()
   {
     if (parameters) {
-      mask_ = Mask::create (parameters->param(parameter_name),parameters);
+      mask_ = Mask::create (parameters, parameter_name);
     } else {
       mask_ = nullptr;
     } 

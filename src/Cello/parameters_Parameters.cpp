@@ -456,68 +456,22 @@ void Parameters::set_string
 
 //----------------------------------------------------------------------
 
-void Parameters::evaluate_float 
-(
- std::string parameter,
- int         n, 
- double    * result, 
- double    * deflt,
- double    * x, 
- double    * y, 
- double    * z, 
- double    t) throw()
+Expression Parameters::value_Expression
+( std::string parameter) throw()
 /// @param   parameter Parameter name
-/// @param   n         Length of variable arrays
-/// @param   result    Output array of evaluated floating point parameters values if it exists, or deflt if not
-/// @param   deflt     Array of default values
-/// @param   x         Array of x values
-/// @param   y         Array of y values
-/// @param   z         Array of z values
-/// @param   t         t value
+/// @return  Return Expression parameter if it exists
 {
-  Param * param = this->param(parameter);
-  ASSERT1 ("Parameters::evaluate_float",
-	   "Parameter %s is not a floating-point expression", parameter.c_str(),
-	   ( ! param || param->is_type(parameter_float_expr)));
-  if (param != NULL) {
-    param->evaluate_float(n,result,x,y,z,t);
-  } else {
-    for (int i=0; i<n; i++) result[i] = deflt[i];
-  }
-}
-
-//----------------------------------------------------------------------
-
-void Parameters::evaluate_logical 
-(
- std::string parameter,
- int         n, 
- bool      * result, 
- bool      * deflt,
- double    * x, 
- double    * y, 
- double    * z, 
- double    t) throw()
-/// @param   parameter Parameter name
-/// @param   n         Length of variable arrays
-/// @param   result    Output array of evaluated logical parameters values if it exists, or deflt if not
-/// @param   deflt     Array of default values
-/// @param   x         Array of X values
-/// @param   y         Array of Y values
-/// @param   z         Array of Z values
-/// @param   t         T value
-{
-  Param * param = this->param(parameter);
-  ASSERT1 ("Parameters::evaluate_logical",
-	   "Parameter %s is not a logical expression", parameter.c_str(),
-	   (! param || param->is_type(parameter_logical_expr)));
-  if (param != NULL) {
-    param->evaluate_logical(n,result,x,y,z,t);
-  } else {
-    WARNING("Parameters::evaluate_logical",
-	    "param is NULL but deflt not set");
-  //   for (int i=0; i<n; i++) result[i] = deflt[i];
-  }
+  Param * param = this->param (parameter);
+  ASSERT1 ("Parameters::value_string",
+	   "Parameter %s[%d] does not exist",
+	   parameter.c_str(), param!= nullptr);
+  ASSERT1 ("Parameters::list_value_string",
+	   "Parameter %s is not an expression",
+	   parameter.c_str(), ( param->is_type(parameter_float_expr) ||
+                                param->is_type(parameter_logical_expr) ));
+  monitor_access_(parameter,"");
+  param->set_accessed();
+  return this->construct_or_rebuild_Expression_(parameter, -1);
 }
 
 //----------------------------------------------------------------------
@@ -618,6 +572,28 @@ std::string Parameters::list_value_string
 	   ( ! param || param->is_type(parameter_string)));
   monitor_access_(parameter,deflt,index);
   return (param != NULL) ? param->value_string_ : deflt;
+}
+
+//----------------------------------------------------------------------
+
+Expression Parameters::list_value_Expression
+( int index,
+  std::string parameter) throw()
+/// @param   index     Index of the Expression list parameter element
+/// @param   parameter Parameter name
+/// @return  Return Expression list parameter element value if it exists
+{
+  Param * param = this->param (parameter,index);
+  ASSERT2 ("Parameters::list_value_string",
+	   "Parameter %s[%d] does not exist",
+	   parameter.c_str(),index, param!= nullptr);
+  ASSERT2 ("Parameters::list_value_string",
+	   "Parameter %s[%d] is not an expression",
+	   parameter.c_str(), index, (param->is_type(parameter_float_expr) ||
+				      param->is_type(parameter_logical_expr)));
+  monitor_access_(parameter,"",index);
+  param->set_accessed();
+  return this->construct_or_rebuild_Expression_(parameter, index);
 }
 
 //----------------------------------------------------------------------
@@ -730,80 +706,6 @@ void Parameters::set_list_string
 
 //----------------------------------------------------------------------
 
-void Parameters::list_evaluate_float 
-(
- int index,
- std::string parameter,
- int         n, 
- double    * result, 
- double    * deflt,
- double    * x, 
- double    * y, 
- double    * z, 
- double    t
- ) throw()
-/// @param   index     Index into the list
-/// @param   parameter Parameter name
-/// @param   n         Length of variable arrays
-/// @param   result    Output array of evaluated floating point expression list parameter element values if it exists, or deflt if not
-/// @param   deflt     Array of default values
-/// @param   x         Array of X values
-/// @param   y         Array of Y values
-/// @param   z         Array of Z values
-/// @param   t         T value
-{
-
-  Param * param = this->param(parameter,index);
-  ASSERT2 ("Parameters::list_evaluate_float",
-	   "Parameter %s[%d] is not a floating-point expression",
-	   parameter.c_str(),index,
-	   ( ! param || param->is_type(parameter_float_expr)));
-  if (param != NULL) {
-    param->evaluate_float(n,result,x,y,z,t);
-  // } else {
-  //   for (int i=0; i<n; i++) result[i] = deflt[i];
-  }
-}
-
-//----------------------------------------------------------------------
-
-void Parameters::list_evaluate_logical 
-(
- int index,
- std::string parameter,
- int         n, 
- bool      * result, 
- bool      * deflt,
- double    * x, 
- double    * y, 
- double    * z, 
- double    t) throw()
-/// @param   index     Index into the list
-/// @param   parameter Parameter name
-/// @param   n         Length of variable arrays
-/// @param   result    Output array of evaluated logical expression list parameter element values if it exists, or deflt if not
-/// @param   deflt     Array of default values
-/// @param   x         Array of X values
-/// @param   y         Array of Y values
-/// @param   z         Array of Z values
-/// @param   t         Array of T values
-{
-  Param * param = this->param(parameter,index);
-  ASSERT2 ("Parameters::list_evaluate_logical",
-	   "Parameter %s[%d] is not a logical",
-	   parameter.c_str(),index,
-	   ( ! param || param->is_type(parameter_logical_expr)));
-  if (param != NULL) {
-    param->evaluate_logical(n,result,x,y,z,t);
-  } else {
-    WARNING("Parameters::list_evaluate_logical",
-	    "param is NULL but deflt not set");
-  //   for (int i=0; i<n; i++) result[i] = deflt[i];
-  }
-}
-
-//----------------------------------------------------------------------
-
 std::string Parameters::group(int i) const throw()
 {
   return (i < current_group_.size()) ? current_group_[i] : "";
@@ -877,7 +779,36 @@ void Parameters::group_clear() throw ()
 
 //----------------------------------------------------------------------
 
-std::string Parameters::full_name(std::string parameter) throw()
+std::vector<std::string> Parameters::leaf_parameter_names() const throw()
+{
+  std::vector<std::string> out;
+  std::string prefix = full_name("");
+  std::size_t prefix_size = prefix.size();
+  
+  for (auto it_param =  parameter_map_.lower_bound(prefix);
+       it_param != parameter_map_.end();
+       ++it_param) {
+
+    // If the current key doesn't share the prefix, abort the search
+    if (((it_param->first).compare(0, prefix_size, prefix) != 0) ||
+	((it_param->first).size() <= prefix_size) ) {
+      break;
+    }
+    std::string suffix = (it_param->first).substr(prefix_size,
+						  std::string::npos);
+    if (suffix.find(':') != std::string::npos){
+      // this isn't a leaf parameter
+      continue;
+    } else {
+      out.push_back(suffix);
+    }
+  }
+  return out;
+}
+
+//----------------------------------------------------------------------
+
+std::string Parameters::full_name(std::string parameter) const throw()
 {
   int n = current_group_.size();
   std::string full_name = "";
@@ -1024,23 +955,44 @@ int Parameters::readline_
 
 //----------------------------------------------------------------------
 
+/// Return the const Param pointer for the specified parameter
+std::pair<const Param*, const Param*> Parameters::const_param_
+(std::string parameter, int index) const
+{
+  const Param *list_ptr, *param_ptr;
+  auto search = parameter_map_.find(parameter_name_(parameter));
+  if (search == parameter_map_.end()){
+    list_ptr = nullptr;
+    param_ptr = nullptr;
+  } else if (index == -1){
+    list_ptr = nullptr;
+    param_ptr = search->second;
+  } else {
+    list_ptr = search->second;
+    param_ptr = nullptr;
+    int list_length = list_ptr->value_list_->size();
+    if (0 <= index && index < list_length ) {
+      param_ptr = (*(list_ptr->value_list_))[index];
+    }
+  }
+  return std::make_pair(param_ptr, list_ptr);
+}
+
+//----------------------------------------------------------------------
+
 /// Return the Param pointer for the specified parameter
 Param * Parameters::param (std::string parameter, int index)
 {
-  if (index == -1) {
-    return parameter_map_[parameter_name_(parameter)];
-  } else {
-    Param * list = this->param(parameter);
-    Param * param = NULL;
-    if (list != NULL) {
-      list->set_accessed();
-      int list_length = list->value_list_->size();
-      if (list != NULL && 0 <= index && index < list_length ) {
-	param =  (*(list->value_list_))[index];
-      }
-    }
-    return param;
-  }
+  std::pair<const Param*, const Param*> ptr_pair = const_param_(parameter,
+								index);
+
+  // Casting const Param* to Param * is okay as long as parameter_map_ is
+  // defined as a non-const instance of std::map<std::string, Param *>
+  Param* param_ptr = const_cast<Param*>(ptr_pair.first);
+  Param* list_ptr = const_cast<Param*>(ptr_pair.second);
+
+  if (list_ptr != nullptr){ list_ptr->set_accessed(); }
+  return param_ptr;
 }
 
 //----------------------------------------------------------------------
@@ -1102,6 +1054,30 @@ void Parameters::check()
 		it_param->first.c_str());
     }
   }
+}
+
+//----------------------------------------------------------------------
+
+Expression Parameters::construct_or_rebuild_Expression_
+(const std::string & param_name, int param_index) const throw()
+{
+  std::string full_name = this->parameter_name_(param_name);
+
+  std::pair<const Param*, const Param*> ppair = const_param_(full_name,
+							     param_index);
+  const Param* param_ptr = ppair.first;
+  // ppair.second is just the list holding ppair.first (if param_index != -1)
+
+  // sanity check (this is somewhat redundant on construction)
+  ASSERT("Parameters::construct_or_rebuild_Expression_",
+	 "The parameter is not an expression",
+	 ( (param_ptr != nullptr) &&
+	   (param_ptr->is_type(parameter_float_expr) ||
+	    param_ptr->is_type(parameter_logical_expr)) ) );
+  const struct node_expr * value_expr = param_ptr->value_expr_;
+
+  return Expression(value_expr, param_ptr->is_type(parameter_float_expr),
+		    full_name, param_index);
 }
 
 //----------------------------------------------------------------------

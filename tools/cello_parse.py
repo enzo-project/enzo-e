@@ -1,10 +1,13 @@
 #!/usr/bin/python
 
 """
-This cannot currently parse the following 3 cases:
-1. Appending list entries to parameters
-2. Scalar expressions
-3. Logical expressions
+This cannot currently parse the parameter files that appending list entries to
+parameters
+
+This tentatively has support for parameter files involving scalar expressions
+and logical expressions. This functionallity is NOT rigorously tested.
+Furthermore, the parser currently permits expressions that Enzo-E/Cello would
+find to be invalid.
 
 Adapted from commit ae686c4ec29d7fba6041c49857c804c6db69507d of libconf:
 Copyright (c) 2016 Christian Aichinger <Greek0@gmx.net>
@@ -182,26 +185,19 @@ class Tokenizer:
         (Token,     'name',       r'[A-Za-z\*][-A-Za-z0-9_\*]*'),
         (Token,     '}',          r'\}'),
         (Token,     '{',          r'\{'),
-        (Token,     ')',          r'\)'),
-        (Token,     '(',          r'\('),
         (Token,     ']',          r'\]'),
         (Token,     '[',          r'\['),
         (Token,     ',',          r','),
         (Token,     ';',          r';'),
         (Token,     '+=',         r'\+='),
-        (Token,     '=',          r'='),
+        (Token,     '=',          r'(?<!=)=(?!=)'), # doesn't match '=='
+        # Tokens explicitly related to identifying expressions
+        (Token,     'binary-op',  r'[+/\^*]|(-(?=\s))|' # arithmetic
+                                  r'([=!<>]=)|>|<|'   # relational
+                                  r'(\|\|)|(\&\&)'),  # logical
+        (Token,     ')',          r'\)'),
+        (Token,     '(',          r'\('),
     ])
-
-    # In future, to support identification of scalar/logical expressions, we
-    # need want to:
-    # 1. Replace the regex expression for '=' with r'(?<!=)=(?!=)', so that the
-    #    relational '==' token is not detected as the '=' token
-    # 2. Add the following tokens to the map:
-    #   (Token,     'arithmetic', r'[+/\^*]|(-\s)'),
-    #   (Token,     'relational', r'([=!<>]=)|>|<'),
-    #   (Token,     'logical',    r'(\|\|)|(\&\&)')
-    #   Since we won't actually be evaluating them, we could probably
-    #   consolidate all of the tokens into a single 'binary-op' token.
 
     def __init__(self, filename):
         self.filename = filename
@@ -363,6 +359,11 @@ class TokenStream:
         '''Return ``True`` if the end of the token stream is reached.'''
         return self.position >= len(self.tokens)
 
+class ExpressionType:
+    """String wrapper that represents a scalar or logical expression"""
+    def __init__(self, value):
+        self.value = value
+
 class Parser:
     '''Recursive descent parser for Cello Config files
 
@@ -428,8 +429,7 @@ class Parser:
 
     def value(self):
         # the order that values are checked are given by the order in this list
-        acceptable = [self.string, self.boolean, self.integer, self.float,
-                      self.list]
+        acceptable = [self.string, self.numeric_or_expression, self.list]
         return self._parse_any_of(acceptable)
 
     def value_list_or_empty(self):
@@ -443,14 +443,36 @@ class Parser:
     def group(self):
         return self._enclosed_block('{', self.setting_list_or_empty, '}')
 
-    def boolean(self):
-        return self._create_value_node('boolean')
+    def numeric_or_expression(self):
+        """This parses either a boolean, integer, float OR an expression
 
-    def integer(self):
-        return self._create_value_node('integer')
+        This must handle all cases because a numeric token can be the first
+        token in an expression.
 
-    def float(self):
-        return self._create_value_node('float')
+        Note: This method may permit parsing of expressions that includes
+        invalid variable/constant/function names.
+        """
+
+        # types of tokens that compose an expression
+        expr_types = ('boolean','integer','float','name','(',')','binary-op')
+        standalone_types = expr_types[:3] # can also represent standalone vals
+
+        token_list = []
+        while self.tokens.peek().type not in ';,]':
+            next_token = self.tokens.accept(*expr_types)
+            if next_token is not None:
+                token_list.append(next_token)
+            elif len(token_list) == 0:
+                return None
+            else:
+                self.tokens.error("Problem parsing number/expression")
+
+        if len(token_list)==0:
+            return None
+        elif (len(token_list)==1) and (token_list[0].type in standalone_types):
+            return token_list[0].value
+        else:
+            return ExpressionType(' '.join((elem.text for elem in token_list)))
 
     def string(self):
         t_first = self.tokens.accept('string')
@@ -465,13 +487,6 @@ class Parser:
             values.append(t.value)
 
         return ''.join(values)
-
-    def _create_value_node(self, tokentype):
-        t = self.tokens.accept(tokentype)
-        if t is None:
-            return None
-
-        return t.value
 
     def _parse_any_of(self, nonterminals):
         for fun in nonterminals:
@@ -586,7 +601,7 @@ def get_dump_type(value):
     '''Get the Cello config datatype of a value
 
     Return values: ``'d'`` (dict), ``'l'`` (list), ``'i'`` (integer), 
-    ``'b'`` (bool), ``'f'`` (float), or ``'s'`` (string).
+    ``'b'`` (bool), ``'f'`` (float), ``'s'`` (string), ``'e'`` (expression).
     '''
 
     if isinstance(value, dict):
@@ -604,6 +619,8 @@ def get_dump_type(value):
         return 'f'
     if isstr(value):
         return 's'
+    if isinstance(value, ExpressionType):
+        return 'e'
 
     return None
 
@@ -638,6 +655,8 @@ def dump_value(key, value, f, indent=0):
         f.write(u'\n{}]'.format(spaces))
     elif dtype == 's':
         f.write(u'{}{}{}'.format(spaces, key_prefix, dump_string(value)))
+    elif dtype == 'e':
+        f.write(u'{}{}{}'.format(spaces, key_prefix, value.value))
     elif dtype == 'b':
         f.write(u'{}{}{}'.format(spaces, key_prefix, ['false','true'][value]))
     elif dtype in 'fi':

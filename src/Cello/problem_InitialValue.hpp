@@ -25,17 +25,11 @@ public: // interface
   InitialValue(Parameters * parameters,
                int cycle, double time) throw();
 
-  /// Destructor
-  virtual ~InitialValue() throw()
-  { if (initialized_values_) { delete[] values_; } }
-
   PUPable_decl(InitialValue);
 
   InitialValue(CkMigrateMessage *m)
     : Initial (m),
-      num_fields_(0),
-      initialized_values_(false),
-      values_(NULL)
+      ic_pairs_()
   {}
 
   /// CHARM++ Pack / Unpack function
@@ -52,25 +46,14 @@ private: // functions
 		     double * value, int index_field,
 		     int nx, int ny, int nz) throw();
 
-  /// Helper function used to initialize values_
-  void initialize_values_();
-
   template<class T>
   void copy_precision_
   (T * field, int offset, double * value, int nx, int ny, int nz);
 
 private: // attributes
 
-  Parameters * parameters_;
-
-  /// number of fields
-  int num_fields_;
-
-  /// indicates whether or not values_ has been initialized
-  bool initialized_values_;
-
-  /// values for every field - this is lazily initialized
-  Value ** values_;
+  /// pairs of field names and Value objects
+  std::vector<std::pair<std::string,Value>> ic_pairs_;
 
 };
 

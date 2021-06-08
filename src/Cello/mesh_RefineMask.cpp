@@ -16,16 +16,10 @@ RefineMask::RefineMask(Parameters * parameters,
 		       std::string output) throw ()
 
   : Refine (0.0, 0.0, max_level,include_ghosts, output),
-    value_(new Value(parameters,parameter_name))
+    value_(parameters,parameter_name)
 {
 }
 
-//----------------------------------------------------------------------
-RefineMask::~RefineMask()
-{
-  if (value_) delete value_;
-  value_ = NULL;
-}
 //----------------------------------------------------------------------
 
 void RefineMask::pup (PUP::er &p)
@@ -33,7 +27,7 @@ void RefineMask::pup (PUP::er &p)
   // NOTE: change this function whenever attributes change
   TRACEPUP;
   Refine::pup(p);
-  p | *value_;
+  p | value_;
 }
 
 //----------------------------------------------------------------------
@@ -55,10 +49,10 @@ int RefineMask::apply ( Block * block ) throw ()
 
   double * v = new double [nx*ny*nz];
 
-  value_->evaluate(v, t,
-		   nx,nx,x,
-		   ny,ny,y,
-		   nz,nz,z);
+  value_.evaluate(v, t,
+                  nx,nx,x,
+                  ny,ny,y,
+                  nz,nz,z);
 
   double level_want = 0.0;
 

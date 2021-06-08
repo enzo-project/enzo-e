@@ -1,6 +1,15 @@
-# The basic idea here is to check that the checkpoint capabilities of all
-# boundaries work correctly. Maybe this should be broken into separate tests
-# in the future.
+# The basic idea here is to check that the checkpoint capabilities of "inflow",
+# "outflow", and "periodic" boundaries work correctly. Maybe this should be
+# broken into separate tests in the future.
+#
+# It's REALLY IMPORTANT that the inflow boundary has time dependence.
+# Otherwise, serialization of the inflow boundary can fail without any
+# observable consequences (since the integrator may never overwrite the values
+# of the ghost zone values at the inflow boundary after the restart).
+#
+# It also seems to be important that no boundaries use the "reflecting"
+# condition (this was previously the case and the choice seemed to suppress
+# issues with the inflow boundary).
 #
 # The testing tool automatically provides Stopping and Output sections
 
@@ -30,7 +39,7 @@
         axis = "x";
         type = "inflow";
         field_list = "total_energy";
-        value = 5.5;
+        value = [2.5 + 0.5 * (5.0 + (-1.0 - 0.05*t) * (-1.0 - 0.05*t))];
       }
       VX_inflow {
         face = "lower";
@@ -44,7 +53,7 @@
         axis = "x";
         type = "inflow";
         field_list = "velocity_y";
-        value = -1.0;
+        value = -1.0 - 0.05*t;
       }
       VZ_inflow {
         face = "lower";
@@ -61,7 +70,7 @@
       };
 
       yedge {
-         type = "reflecting";
+         type = "periodic";
       };
 
       zedge {
@@ -114,7 +123,7 @@
           velocity_x    = 1.0;
           velocity_y    = -1.0;
           velocity_z    = 2.0;
-          internal_energy = 0.0; 
+          internal_energy = 0.0;
        }
    }
 

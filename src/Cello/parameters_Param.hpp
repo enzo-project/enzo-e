@@ -65,39 +65,17 @@ public: // interface
   ~Param () 
   { dealloc_(); };
 
-  /// Copy constructor
-  Param(const Param & param) throw()
-    : type_(parameter_unknown),
-      value_accessed_(false)
-  { INCOMPLETE("Param::Param"); };
+  Param(const Param & param) = delete;
+  Param & operator= (const Param & param) = delete;
 
-  /// Assignment operator
-  Param & operator= (const Param & param) throw()
-  { INCOMPLETE("Param::operator =");
-    return *this; };
+  /// Move Constructor
+  Param(Param&& param) = default;
+
+  /// Move assignment operator
+  Param & operator= (Param&& param) = default;
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-
-  /// Evaluate a floating-point expression given vectos x,y,z,t
-  void evaluate_float  
-  ( int                n, 
-    double *           result, 
-    double *           x, 
-    double *           y, 
-    double *           z, 
-    double             t,
-    struct node_expr * node = 0 );
-
-  /// Evaluate a logical expression given vectos x,y,z,t
-  void evaluate_logical  
-  ( int                n, 
-    bool *             result, 
-    double *           x, 
-    double *           y, 
-    double *           z, 
-    double             t,
-    struct node_expr * node = 0);
 
   /// Set the parameter type and value
   void set(struct param_struct * param);
@@ -108,7 +86,7 @@ public: // interface
 	     int param_write_type);
 
   /// Return whether the parameter has the given type
-  bool is_type (parameter_enum type) { return type_ == type; }
+  bool is_type (parameter_enum type) const { return type_ == type; }
 
   bool accessed () const { return value_accessed_; }
 

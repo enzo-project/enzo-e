@@ -95,10 +95,10 @@ void BoundaryValue::enforce
 	    array = new float [ndx*ndy*ndz];
 	  }
 	  
-	  value_->evaluate((float *)array+i0, t, 
-			   ndx,nx,x+ix0, 
-			   ndy,ny,y+iy0,
-			   ndz,nz,z+iz0);
+	  value_.evaluate((float *)array+i0, t, 
+                          ndx,nx,x+ix0, 
+                          ndy,ny,y+iy0,
+                          ndz,nz,z+iz0);
 	  if (mask_ != nullptr) {
 	    for (int i=0; i<ndx*ndy*ndz; i++) ((float *)temp)[i]=((float *)array)[i];
 	    delete [] ((float*)array);
@@ -113,10 +113,10 @@ void BoundaryValue::enforce
 	    temp = (double *)array;
 	    array = new double [ndx*ndy*ndz];
 	  }
-	  value_->evaluate((double *)array+i0, t, 
-			   ndx,nx,x+ix0, 
-			   ndy,ny,y+iy0,
-			   ndz,nz,z+iz0);
+	  value_.evaluate((double *)array+i0, t, 
+                          ndx,nx,x+ix0, 
+                          ndy,ny,y+iy0,
+                          ndz,nz,z+iz0);
 	  if (mask_ != nullptr) {
 	    for (int i=0; i<ndx*ndy*ndz; i++) ((double *)temp)[i]=((double *)array)[i];
 	    delete [] ((double *)array);
@@ -133,10 +133,10 @@ void BoundaryValue::enforce
 	    temp = (long double *)array;
 	    array = new long double [ndx*ndy*ndz];
 	  }
-	  value_->evaluate((long double *)array+i0, t, 
-			   ndx,nx,x+ix0, 
-			   ndy,ny,y+iy0,
-			   ndz,nz,z+iz0);
+	  value_.evaluate((long double *)array+i0, t, 
+                          ndx,nx,x+ix0, 
+                          ndy,ny,y+iy0,
+                          ndz,nz,z+iz0);
 	  if (mask_ != nullptr) {
 	    for (int i=0; i<ndx*ndy*ndz; i++) 
 	      ((long double *)temp)[i]=((long double *)array)[i];
