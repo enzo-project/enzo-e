@@ -27,8 +27,6 @@ public: // interface
 	     bool include_ghosts,
 	     std::string output) throw();
 
-  /// Destructor
-  ~RefineMask();
   
   /// default constructor
   // RefineMask () throw() : Refine() {};
@@ -37,7 +35,7 @@ public: // interface
 
   RefineMask(CkMigrateMessage *m)
     : Refine (m),
-      value_(NULL)
+      value_()
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -48,11 +46,9 @@ public: // interface
 
   virtual std::string name () const { return "mask"; };
 
-private: // functions
-
 private: // attributes
 
-  Value * value_;
+  Value value_;
 };
 
 #endif /* MESH_REFINE_MASK_HPP */
