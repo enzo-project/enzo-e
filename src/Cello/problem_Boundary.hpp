@@ -64,11 +64,13 @@ public: // interface
     int face = face_;
     p | face;
     face_ = (face_enum)face;
-    static bool warn[CONFIG_NODE_SIZE] = {false};
-    const int in = cello::index_static();
-    if (! warn[in]) {
-      WARNING ("Boundary::pup()", "Skipping p | mask_");
-      warn[in] = true;
+    if (p.isUnpacking()){
+      Mask* mask_ptr;
+      p|mask_ptr;
+      mask_ = std::shared_ptr<Mask>(mask_ptr);
+    } else {
+      Mask* mask_ptr = mask_.get();
+      p|mask_ptr;
     }
     PUParray(p,periodicity_,3);
   };

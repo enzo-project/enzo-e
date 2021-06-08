@@ -19,13 +19,13 @@ public: // interface
 
   /// Create a new BoundaryValue
   BoundaryValue() throw() 
-  : Boundary (), value_(0) 
+  : Boundary (), value_() 
   {  }
 
   /// Create a new BoundaryValue
-  BoundaryValue(axis_enum axis, face_enum face, Value * value, 
+  BoundaryValue(axis_enum axis, face_enum face, Value&& value, 
 		std::vector<std::string> field_list) throw() 
-    : Boundary(axis,face,0), value_(value), field_list_(field_list)
+    : Boundary(axis,face,0), value_(std::move(value)), field_list_(field_list)
   { }
 
   /// Destructor
@@ -36,7 +36,7 @@ public: // interface
 
   BoundaryValue(CkMigrateMessage *m)
     : Boundary (m),
-      value_(NULL),
+      value_(),
       field_list_()
   { }
 
@@ -46,17 +46,7 @@ public: // interface
     // NOTE: change this function whenever attributes change
     Boundary::pup(p); 
     TRACEPUP;
-
-    int has_value = (value_!=NULL);
-    p | has_value;
-    if (has_value){
-      if (p.isUnpacking()){
-        value_ = new Value;
-      }
-      p | *value_;
-    } else {
-      value_ = NULL;
-    }
+    p | value_;
     p | field_list_;
   };
 
@@ -78,7 +68,7 @@ protected: // functions
 
 protected: // attributes
 
-  Value * value_;
+  Value value_;
   std::vector<std::string> field_list_;
 
 };
