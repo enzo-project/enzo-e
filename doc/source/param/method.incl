@@ -109,12 +109,22 @@ this parameter.`
 by fields. This is used for testing purposes (the simulation will
 check at each timestep whether this expectation has been met). Entries of this list should alternate between the name of fields (a string) and the expected number of conserved digits for that field (a float).`
 
-:e:`The example provided below indicates that the` ``"density"`` :e:`and` ``velocity_x`` :e:`fields are expected to be conserved to` ``7.1`` :e:`and` ``4.9`` digits, respectively`::
+:e:`The example provided below indicates that the` ``"density"`` :e:`field and the product of the` ``"density"`` :e:`&` ``"velocity_x"`` :e:`fields are expected to be conserved to` ``7.1`` :e:`and` ``4.9`` :e:`digits, respectively`::
 
      Method {
         flux_correct {
            min_digits = ["density", 7.1,
                          "velocity_x", 4.9];
+        }
+     }
+
+     Group {
+        list = [ "conserved", "make_field_conservative" ];
+        conserved {
+           field_list = [ "density", "velocity_x"];
+        }
+        make_field_conservative {
+           field_list = [ "velocity_x"];
         }
      }
 

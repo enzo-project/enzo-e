@@ -34,10 +34,6 @@
      root_size = [ 32, 16, 16];
  }
 
-# static mesh refinement
-
-
-
  Initial {
 
       list = ["inclined_wave"];

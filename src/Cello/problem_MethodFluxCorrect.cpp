@@ -319,19 +319,19 @@ static void flux_correct_helper_(cello_float * const field_array,
   } // rank >= 3
 }
 
-static void divide_by_density_(const cello_float * const input_array,
-                               const cello_float * const density_field,
-                               cello_float* const output_array,
-                               const bool (&perform_correction)[3][2],
-                               const int rank,
-                               int mx, int my, int mz,
-                               int nx, int ny, int nz)
+/// divide each cell in input_array for which the flux correction was performed
+/// and store the result in the corresponding cell of output_array 
+static void divide_flux_corrected_cells_by_density_
+(const cello_float * const input_array, const cello_float * const density_field,
+ cello_float* const output_array, const bool (&correction_performed)[3][2],
+ const int rank, int mx, int my, int mz,
+ int nx, int ny, int nz)
 {
 
   {
     const int axis = 0;
     for (int face=0; face<2; face++) {
-      if (perform_correction[axis][face]){
+      if (correction_performed[axis][face]){
 
         int ix = (face == 0) ? 0 : nx-1;
         for (int iz=0; iz<nz; iz++) {
@@ -348,7 +348,7 @@ static void divide_by_density_(const cello_float * const input_array,
   if (rank >= 2) {
     const int axis = 1;
     for (int face=0; face<2; face++) {
-      if (perform_correction[axis][face]){
+      if (correction_performed[axis][face]){
 
         int iy = (face == 0) ? 0 : ny-1;
         for (int iz=0; iz<nz; iz++) {
@@ -365,7 +365,7 @@ static void divide_by_density_(const cello_float * const input_array,
   if (rank >= 3) {
     const int axis=2;
     for (int face=0; face<2; face++) {
-      if (perform_correction[axis][face]){
+      if (correction_performed[axis][face]){
 
         int iz = (face == 0) ? 0 : nz-1;
         for (int iy=0; iy<ny; iy++) {
@@ -374,7 +374,7 @@ static void divide_by_density_(const cello_float * const input_array,
             output_array[i] = input_array[i] / density_field[i];
           }
         }
-      } // perform_correction[axis][face]
+      } // correction_performed[axis][face]
     } // face
   } // rank >= 3
 
@@ -503,8 +503,9 @@ void MethodFluxCorrect::flux_correct_(Block * block)
 
         // now, divide the updated quantities by appropriate values in
         // density_array and write the result to field_array
-        divide_by_density_(temp_cons_array, density_array, field_array,
-                           perform_correction, rank, mx,my,mz, nx,ny,nz);
+        divide_flux_corrected_cells_by_density_(temp_cons_array, density_array,
+                                                field_array, perform_correction,
+                                                rank, mx,my,mz, nx,ny,nz);
       } else {
         // the quantity is already in conserved form. We can just apply the
         // flux correction directly on the field_data
