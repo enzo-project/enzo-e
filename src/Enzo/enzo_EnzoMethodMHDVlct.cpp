@@ -50,7 +50,8 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
 				      double pressure_floor,
 				      std::string mhd_choice,
 				      bool dual_energy_formalism,
-				      double dual_energy_formalism_eta)
+				      double dual_energy_formalism_eta,
+				      bool store_fluxes_for_corrections)
   : Method()
 {
   // Initialize equation of state (check the validity of quantity floors)
@@ -93,6 +94,13 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
     bfield_method_->check_required_fields();
   } else {
     bfield_method_ = nullptr;
+  }
+
+  store_fluxes_for_corrections_ = store_fluxes_for_corrections;
+  if (store_fluxes_for_corrections){
+    ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
+           "Flux corrections are currently only supported in hydro-mode",
+           mhd_choice_ == bfield_choice::no_bfield);
   }
 
   // Finally, initialize the default Refresh object
@@ -208,6 +216,7 @@ void EnzoMethodMHDVlct::pup (PUP::er &p)
   p|integrable_field_list_;
   p|reconstructable_field_list_;
   p|lazy_passive_list_;
+  p|store_fluxes_for_corrections_;
 }
 
 //----------------------------------------------------------------------
@@ -356,9 +365,10 @@ static void update_flux_data_(Block * block, const EnzoEFltArrayMap &flux_map,
 
 //----------------------------------------------------------------------
 
-void EnzoMethodMHDVlct::compute ( Block * block) throw()
+static void allocate_FC_flux_buffer_(Block * block) throw()
 {
   Field field = block->data()->field();
+  // this could be better integrated with fields required by the solver
   auto field_names = field.groups()->group_list("conserved");
   const int nf = field_names.size();
   std::vector<int> field_list;
@@ -369,8 +379,16 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
-  // do we need to allocate every cycle?
+  // this needs to be allocated every cycle
   block->data()->flux_data()->allocate (nx,ny,nz,field_list);
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodMHDVlct::compute ( Block * block) throw()
+{
+  if (store_fluxes_for_corrections_){ allocate_FC_flux_buffer_(block); }
+
   if (block->is_leaf()) {
     // Check that the mesh size and ghost depths are appropriate
     check_mesh_and_ghost_size_(block);
@@ -529,15 +547,12 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
                     *reconstructor, bfield_method_, stale_depth,
                     *(lazy_passive_list_.get_list()));
 
-      if (i == 1 && bfield_method_ == nullptr) {
-        if (eos_->uses_dual_energy_formalism()){
-          // the interface velocity on the edge of the block will be different!
-          // I'm not actually sure whether this is really an issue for the
-          // internal energy source term. We should look at what PPM does
-          ERROR("EnzoMethodMHDVlct::compute",
-                "Handling of the dual energy source term is won't be properly "
-                "corrected!");
-        }
+      if (i == 1 && store_fluxes_for_corrections_) {
+        // Dual Energy Formalism Note:
+        // - the interface velocities on the edge of the blocks will be
+        //   different if using SMR/AMR. This means that the internal energy
+        //   source terms won't be fully self-consistent along the edges. This
+        //   same effect is also present in the Ppm Solver
         update_flux_data_(block, xflux_map, 0, cell_widths[0], cur_dt);
         update_flux_data_(block, yflux_map, 1, cell_widths[1], cur_dt);
         update_flux_data_(block, zflux_map, 2, cell_widths[2], cur_dt);

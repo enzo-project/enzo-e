@@ -526,11 +526,16 @@ Method * EnzoProblem::create_method_
 
   const EnzoConfig * enzo_config = enzo::config();
 
+  // The following 2 lines may need to be updated in the future
+  const std::vector<std::string>& mlist = enzo_config->method_list;
+  const bool store_fluxes_for_corrections =
+    std::find(mlist.begin(), mlist.end(), "flux_correct") != mlist.end();
+
   TRACE1("EnzoProblem::create_method %s",name.c_str());
 
   if (name == "ppm") {
 
-    method = new EnzoMethodPpm;
+    method = new EnzoMethodPpm(store_fluxes_for_corrections);
 /*
   } else if (name == "hydro") {
 
@@ -637,7 +642,8 @@ Method * EnzoProblem::create_method_
        enzo_config->method_vlct_pressure_floor,
        enzo_config->method_vlct_mhd_choice,
        enzo_config->method_vlct_dual_energy,
-       enzo_config->method_vlct_dual_energy_eta);
+       enzo_config->method_vlct_dual_energy_eta,
+       store_fluxes_for_corrections);
 
   } else if (name == "background_acceleration") {
 
