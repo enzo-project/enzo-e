@@ -432,7 +432,7 @@ void MethodFluxCorrect::flux_correct_(Block * block)
 
     // Allocate scratch space (if not already allocated necessary). It's
     // technically possible to do all of these operations in-place, (without
-    // scratch space), but that get's complex (you need to be very careful
+    // scratch space), but that gets complex (you need to be very careful
     // iterating over cells on the edges of the active zone multiple times).
     std::size_t num_field_elements = (std::size_t) (mx * my * mz);
     if (scratch_.size() == 0) { scratch_.resize(2 * num_field_elements); }

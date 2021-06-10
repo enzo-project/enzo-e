@@ -100,7 +100,7 @@ this parameter.`
 ----
 
 :Parameter:  :p:`Method` : :p:`flux_correct` : :p:`min_digits`
-:Summary: :s:`Number of digits to be conserved by fields in tests`
+:Summary: :s:`Number of digits expected to be conserved by fields in tests`
 :Type:    :t:`list`
 :Default: :d:`[]`
 :Scope:     :z:`Cello`
@@ -682,4 +682,3 @@ turbulence
 :Default: :d:`0.0`
 :Scope:     :z:`Enzo`
 :Todo: :o:`write`
-
