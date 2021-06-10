@@ -1,3 +1,4 @@
+# Checks how well flux corrections conserve quantities when using Ppm solver.
 # To be used when Enzo-E is compiled with CELLO_PREC=single
 
 include "input/FluxCorrect/inclined_contact_ppm.incl"
