@@ -280,8 +280,9 @@ EnzoEFltArrayMap EnzoMethodMHDVlct::conserved_passive_scalar_map_
 
 //----------------------------------------------------------------------
 
-static void update_flux_data_(Block * block, const EnzoEFltArrayMap &flux_map,
-                              int dim, double cell_width, double dt)
+void EnzoMethodMHDVlct::save_fluxes_for_corrections_
+(Block * block, const EnzoEFltArrayMap &flux_map, int dim, double cell_width,
+ double dt) const noexcept
 {
 
   Field field = block->data()->field();
@@ -553,9 +554,12 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
         //   different if using SMR/AMR. This means that the internal energy
         //   source terms won't be fully self-consistent along the edges. This
         //   same effect is also present in the Ppm Solver
-        update_flux_data_(block, xflux_map, 0, cell_widths[0], cur_dt);
-        update_flux_data_(block, yflux_map, 1, cell_widths[1], cur_dt);
-        update_flux_data_(block, zflux_map, 2, cell_widths[2], cur_dt);
+        save_fluxes_for_corrections_(block, xflux_map, 0, cell_widths[0],
+				     cur_dt);
+        save_fluxes_for_corrections_(block, yflux_map, 1, cell_widths[1],
+				     cur_dt);
+        save_fluxes_for_corrections_(block, zflux_map, 2, cell_widths[2],
+				     cur_dt);
       }
 
       // increment the stale_depth
