@@ -106,7 +106,8 @@ public: // interface
 		    double pressure_floor,
 		    std::string mhd_choice,
 		    bool dual_energy_formalism,
-		    double dual_energy_formalism_eta);
+		    double dual_energy_formalism_eta,
+		    bool store_fluxes_for_corrections);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodMHDVlct);
@@ -123,7 +124,8 @@ public: // interface
       bfield_method_(nullptr),
       integrable_field_list_(),
       reconstructable_field_list_(),
-      lazy_passive_list_()
+      lazy_passive_list_(),
+      store_fluxes_for_corrections_(false)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -340,6 +342,9 @@ protected: // attributes
 
   /// Lazy initializer of the list of fields holding passive scalars
   EnzoLazyPassiveScalarFieldList lazy_passive_list_;
+
+  /// Indicates whether fluxes should be stored for flux corrections
+  bool store_fluxes_for_corrections_;
 };
 
 #endif /* ENZO_ENZO_METHOD_VLCT_HPP */
