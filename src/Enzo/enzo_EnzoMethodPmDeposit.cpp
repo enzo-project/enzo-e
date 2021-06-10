@@ -118,6 +118,13 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     block->lower(&xm,&ym,&zm);
     block->upper(&xp,&yp,&zp);
     block->cell_width(&hx,&hy,&hz);
+
+    // To calculate densities from particle masses, we need the inverse
+    // volume of each cell
+    double inv_vol = 1.0;
+    if (rank >= 1) inv_vol /= hx;
+    if (rank >= 2) inv_vol /= hy;
+    if (rank >= 3) inv_vol /= hz;
     
     // Get cosmological scale factors, if cosmology is turned on
     enzo_float cosmo_a=1.0;
@@ -128,11 +135,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
       cosmology->compute_expansion_factor(&cosmo_a,&cosmo_dadt,
 					  block->time() + alpha_*block->dt());
     }
-
-    double inv_vol = 1.0;
-    if (rank >= 1) inv_vol /= hx;
-    if (rank >= 2) inv_vol /= hy;
-    if (rank >= 3) inv_vol /= hz;
 
     const double dt = alpha_ * block->dt() / cosmo_a;
 
