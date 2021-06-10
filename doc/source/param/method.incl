@@ -11,6 +11,7 @@ list is applied in the order specified.  Possible methods include:`
   * :t:`"comoving_expansion"` :e:`adds comoving expansion terms to the
     physical variables.`
   * :t:`"cosmology"` :e:`for writing redshift to monitor output.`
+  * :t:`"flux_correct"` :e:`for performing flux corrections when using AMR.`
   * :t:`"grackle"` :e:`for heating and cooling methods in the Enzo
     Grackle library`
   * :t:`"gravity"` :e:`solves for the gravitational potential given gas
@@ -74,6 +75,64 @@ flux_correct
 
 :e:`Flux correction must be applied to conserved fields in AMR simulations to maintain conserved quantities across mesh resolution jumps.  This parameter selects the group of fields to which the "flux_correct" method will be applied.`
 
+:e:`Fields that store a conserved quantity divided by density`
+(e.g. ``"total_energy"``, ``"velocity_x"``) :e:`have special
+handling. Such fields must be included in both the group specified by
+this parameter AND the` ``"make_field_conservative"`` :e:`group. Flux
+corrections are applied to an element of such fields according to the
+following procedure:`
+
+  1. :e:`The element is multiplied by the corresponding element of
+     the` ``"density"`` :e:`field (before the flux corrections are
+     applied to the` ``"density"`` :e:`field).`
+
+  2. :e:`Flux corrections are applied to the product from step 1.`
+
+  3. :e:`Finally, the element in the original field is assigned the
+     value computed in step 2 divided by the corresponding element
+     from the` ``"density"`` :e:`field (after flux corrections are
+     applied to the` ``"density"`` :e:`field).`
+
+:e:`An error will be raised if these special fields are detected, and
+the` ``"density"`` :e:`field is not included in the group specified by
+this parameter.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`flux_correct` : :p:`min_digits`
+:Summary: :s:`Number of digits expected to be conserved by fields in tests`
+:Type:    :t:`list`
+:Default: :d:`[]`
+:Scope:     :z:`Cello`
+
+:e:`Specifies the minimum number of digits that are expected to be conserved
+by fields. This is used for testing purposes (the simulation will
+check at each timestep whether this expectation has been met). Entries of this list should alternate between the name of fields (a string) and the expected number of conserved digits for that field (a float).`
+
+:e:`The example provided below indicates that the` ``"density"`` :e:`field and the product of the` ``"density"`` :e:`&` ``"velocity_x"`` :e:`fields are expected to be conserved to` ``7.1`` :e:`and` ``4.9`` :e:`digits, respectively`::
+
+     Method {
+        flux_correct {
+           min_digits = ["density", 7.1,
+                         "velocity_x", 4.9];
+        }
+     }
+
+     Group {
+        list = [ "conserved", "make_field_conservative" ];
+        conserved {
+           field_list = [ "density", "velocity_x"];
+        }
+        make_field_conservative {
+           field_list = [ "velocity_x"];
+        }
+     }
+
+:e:`For the sake of backwards compatibility, this parameter can be
+assigned a single float (that is not in a list). In this case, the
+value is assumed to be the expected minimum number of digits conserved
+by the` ``"density"`` :e:`field.` *(Support for this type of parameter
+may be removed in the future)*
 
 gravity
 -------
@@ -623,4 +682,3 @@ turbulence
 :Default: :d:`0.0`
 :Scope:     :z:`Enzo`
 :Todo: :o:`write`
-
