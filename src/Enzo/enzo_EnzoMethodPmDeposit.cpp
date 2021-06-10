@@ -238,6 +238,16 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	    
             de_p[ix0] += pmass[ip*dm]*inv_vol*x0;
             de_p[ix1] += pmass[ip*dm]*inv_vol*x1;
+
+	    if (de_p[ix0] < 0.0) {
+      	      CkPrintf ("%s:%d ERROR: de_p %d = %f\n",
+      	   	        __FILE__,__LINE__,ix0,de_p[ix0]);
+      	    }
+
+	    if (de_p[ix1] < 0.0) {
+      	      CkPrintf ("%s:%d ERROR: de_p %d = %f\n",
+      	   	        __FILE__,__LINE__,ix0,de_p[ix1]);
+      	    }
 	    
       	  } // np
 	  
@@ -282,21 +292,21 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
       	    de_p[ix0+mx*iy1] += pmass[ip*dm]*inv_vol*x0*y1;
       	    de_p[ix1+mx*iy1] += pmass[ip*dm]*inv_vol*x1*y1;
 	    
-      	    if ( de_p[ix0+mx*iy0] < 0.0) {
+      	    if (de_p[ix0+mx*iy0] < 0.0) {
       	      CkPrintf ("%s:%d ERROR: de_p %d %d = %f\n",
-      	   	        __FILE__,__LINE__,ix0,iy0,inv_vol);
+      	   	        __FILE__,__LINE__,ix0,iy0,de_p[ix0+mx*iy0]);
       	    }
-      	    if ( de_p[ix1+mx*iy0] < 0.0) {
+      	    if (de_p[ix1+mx*iy0] < 0.0) {
       	      CkPrintf ("%s:%d ERROR: de_p %d %d = %f\n",
-      		        __FILE__,__LINE__,ix1,iy0,inv_vol);
+      		        __FILE__,__LINE__,ix1,iy0,de_p[ix1+mx*iy0]);
       	    }
-      	    if ( de_p[ix0+mx*iy1] < 0.0) {
+      	    if (de_p[ix0+mx*iy1] < 0.0) {
 	      CkPrintf ("%s:%d ERROR: de_p %d %d = %f\n",
-      		        __FILE__,__LINE__,ix0,iy1,inv_vol);
+      		        __FILE__,__LINE__,ix0,iy1,de_p[ix0+mx*iy1]);
       	    }
-      	    if ( de_p[ix1+mx*iy1] < 0.0) {
+      	    if (de_p[ix1+mx*iy1] < 0.0) {
       	      CkPrintf ("%s:%d ERROR: de_p %d %d = %f\n",
-      		        __FILE__,__LINE__,ix1,iy1,inv_vol);
+      		        __FILE__,__LINE__,ix1,iy1,de_p[ix1+mx*iy1]);
       	    }
 	  } // ip
 
@@ -362,6 +372,46 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
             de_p[ix0+mx*(iy1+my*iz1)] += pmass[ip*dm]*inv_vol*x0*y1*z1;
             de_p[ix1+mx*(iy1+my*iz1)] += pmass[ip*dm]*inv_vol*x1*y1*z1;
 
+	    if (de_p[ix0+mx*(iy0+my*iz0)] < 0.0) {
+	      CkPrintf ("%s:%d ERROR: de_p %d %d %d = %f\n",
+			__FILE__,__LINE__,
+			ix0,iy0,iz0,de_p[ix0+mx*(iy0+my*iz0)]);
+	    }
+	    if (de_p[ix1+mx*(iy0+my*iz0)] < 0.0) {
+	      CkPrintf ("%s:%d ERROR: de_p %d %d %d = %f\n",
+			__FILE__,__LINE__,
+			ix1,iy0,iz0,de_p[ix1+mx*(iy0+my*iz0)]);
+	    }
+	    if (de_p[ix0+mx*(iy1+my*iz0)] < 0.0) {
+	      CkPrintf ("%s:%d ERROR: de_p %d %d %d = %f\n",
+			__FILE__,__LINE__,
+			ix0,iy1,iz0,de_p[ix0+mx*(iy1+my*iz0)]);
+	    }
+	    if (de_p[ix1+mx*(iy1+my*iz0)] < 0.0) {
+	      CkPrintf ("%s:%d ERROR: de_p %d %d %d = %f\n",
+			__FILE__,__LINE__,
+			ix1,iy1,iz0,de_p[ix1+mx*(iy1+my*iz0)]);
+	    }
+	    if (de_p[ix0+mx*(iy0+my*iz1)] < 0.0) {
+	      CkPrintf ("%s:%d ERROR: de_p %d %d %d = %f\n",
+			__FILE__,__LINE__,
+			ix0,iy0,iz1,de_p[ix0+mx*(iy0+my*iz1)]);
+	    }
+	    if (de_p[ix1+mx*(iy0+my*iz1)] < 0.0) {
+	      CkPrintf ("%s:%d ERROR: de_p %d %d %d = %f\n",
+			__FILE__,__LINE__,
+			ix1,iy0,iz1,de_p[ix1+mx*(iy0+my*iz1)]);
+	    }
+	    if (de_p[ix0+mx*(iy1+my*iz1)] < 0.0) {
+	      CkPrintf ("%s:%d ERROR: de_p %d %d %d = %f\n",
+			__FILE__,__LINE__,
+			ix0,iy1,iz1,de_p[ix0+mx*(iy1+my*iz1)]);
+	    }
+	    if (de_p[ix1+mx*(iy1+my*iz1)] < 0.0) {
+	      CkPrintf ("%s:%d ERROR: de_p %d %d %d = %f\n",
+			__FILE__,__LINE__,
+			ix1,iy1,iz1,de_p[ix1+mx*(iy1+my*iz1)]);
+	    }
           } // Loop over particle in batch
         } // if rank == 3
 	
