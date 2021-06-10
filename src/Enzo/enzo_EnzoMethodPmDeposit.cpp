@@ -141,15 +141,20 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     // Get the number of particle types in the 'has_mass' group
     ParticleDescr * particle_descr = cello::particle_descr();
     Grouping * particle_groups = particle_descr->groups();
-    int num_mass = particle_groups->size("has_mass");
+    const int num_mass = particle_groups->size("has_mass");
 
+    enzo_float * pmass = NULL;
+   
     // Loop over all particles that have mass
     for (int ipt = 0; ipt < num_mass; ipt++) {
       const int it = particle.type_index(particle_groups->item("has_mass",ipt));
 
       // Index for mass attribute / constant
       int im = 0;
-      
+
+      if (particle.is_constant(it, "mass"))
+	pmass = new enzo_float[particle_descr->batch_size()];
+      	
       // check correct precision for position
       int ia = particle.attribute_index(it,"x");
       int ba = particle.attribute_bytes(it,ia); // "bytes (actual)"
@@ -163,12 +168,11 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
                ((ba == 4) ? "single" : ((ba == 8) ? "double" : "quadruple")),
                ((be == 4) ? "single" : ((be == 8) ? "double" : "quadruple")),
                (ba == be));
-
-
+ 
       // Loop over batches
       for (int ib=0; ib<particle.num_batches(it); ib++) {
-	// Pointer to array of particle masses
-	enzo_float * pmass = NULL;
+	
+      
         const int np = particle.num_particles(it,ib);
 
 	// Particle masses can be either a constant value for all particles,
@@ -181,16 +185,15 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 		  "'mass'. Exiting.", particle.type_name(it).c_str(),
 		  particle.is_attribute(it,"mass"));
 	  
-	  // In this case we fill an array of length np with the constant
+	  // In this case we fill the first np elements of pmass with the constant
 	  // value
-	  pmass = new enzo_float[np];
 	  im = particle.constant_index(it,"mass");
 	  for (int ip = 0; ip<np; ip++)
 	    pmass[ip] = *((enzo_float *)(particle.constant_value (it,im)));
           
         } else if (particle.is_attribute(it,"mass")) {
 
-	  // In this case we set to pointer to the attribute array
+	  // In this case we set pmass to point to the mass attribute array
 	  im = particle.attribute_index(it,"mass");
 	  pmass = (enzo_float *) particle.attribute_array( it, im, ib);
         }
@@ -417,11 +420,14 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
           } // Loop over particle in batch
         } // if rank == 3
 	
-	// If constant mass, delete the pmass array
-	if (particle.is_constant(it,"mass")) delete [] pmass;
-
       } // Loop over batches
+      
+      // If constant mass, delete the pmass array
+      if (particle.is_constant(it,"mass")) delete [] pmass;
+      
     } // Loop over particle types in 'has_mass' group
+    
+    
 
 
     //--------------------------------------------------
