@@ -834,7 +834,8 @@ Method * Problem::create_method_
     method = new MethodFluxCorrect
       (config->method_flux_correct_group[index_method],
        config->method_flux_correct_enable[index_method],
-       config->method_flux_correct_min_digits[index_method]);
+       config->method_flux_correct_min_digits_fields[index_method],
+       config->method_flux_correct_min_digits_values[index_method]);
 
   } else if (name == "debug") {
 

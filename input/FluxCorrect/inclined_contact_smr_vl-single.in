@@ -1,0 +1,25 @@
+# Checks how well flux corrections conserve quantities when using VL+CT solver
+# in pure hydro mode.
+# To be used when Enzo-E is compiled with CELLO_PREC=single
+
+include "input/FluxCorrect/inclined_contact_vl.incl"
+include "input/FluxCorrect/smr.incl"
+
+ Method {
+     flux_correct {
+         # Specify the minimum expected conserved digits for various fields
+         # (for testing purposes). These expected min_digits values are set to
+         # within ~0.10 of the minimum digits measured from full simulations.
+	 # Builds on some machines achieve significantly better conservation
+	 # than builds on other machines.
+         #
+         # NOTE: For each field in the "make_field_conservative" group, the
+	 # minimum conserved digits applies to the conservation of that field
+	 # multiplied by the "density" field
+         min_digits = ["density",      6.5,
+                       "total_energy", 5.7,
+                       "velocity_x",   5.7,
+                       "velocity_y",   5.7,
+                       "velocity_z",   5.7];
+     }
+ }

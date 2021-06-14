@@ -1,0 +1,18 @@
+include "input/FluxCorrect/inclined_contact.incl"
+
+ Method{
+     list = ["mhd_vlct", "flux_correct"];
+
+     mhd_vlct{
+         courant = 0.4;
+         mhd_choice = "no_bfield";
+         half_dt_reconstruct_method = "nn";
+         full_dt_reconstruct_method = "plm";
+
+         riemann_solver = "hllc";
+
+         pressure_floor = 1e-30;
+         density_floor = 1e-30;
+
+     }
+ }

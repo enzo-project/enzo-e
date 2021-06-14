@@ -92,6 +92,11 @@ SConscript('MethodGravity/SConscript')
 SConscript('MethodCosmology/SConscript')
 
 #----------------------------------------------------------------------
+# METHOD FLUX CORRECT TESTS
+#----------------------------------------------------------------------
+SConscript('MethodFluxCorrect/SConscript')
+
+#----------------------------------------------------------------------
 # METHOD HEAT TESTS
 #----------------------------------------------------------------------
 SConscript('MethodHeat/SConscript')
