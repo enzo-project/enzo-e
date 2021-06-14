@@ -17,7 +17,7 @@ include "input/FluxCorrect/smr.incl"
 	 # minimum conserved digits applies to the conservation of that field
 	 # multiplied by the "density" field
          min_digits = ["density",      6.5,
-                       "total_energy", 5.8,
+                       "total_energy", 5.7,
                        "velocity_x",   5.7,
                        "velocity_y",   5.7,
                        "velocity_z",   5.7];
