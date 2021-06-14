@@ -19,8 +19,8 @@ class EnzoReconstructorNN : public EnzoReconstructor
 public: // interface
 
   /// Create a new EnzoReconstructorNN
-  EnzoReconstructorNN(std::vector<std::string> group_names)
-    : EnzoReconstructor(group_names)
+  EnzoReconstructorNN(std::vector<std::string> active_key_names)
+    : EnzoReconstructor(active_key_names)
   { }
 
   /// CHARM++ PUP::able declaration
@@ -37,10 +37,10 @@ public: // interface
     EnzoReconstructor::pup(p);
   };
 
-  void reconstruct_interface (Block *block, Grouping &prim_group,
-			      Grouping &priml_group, Grouping &primr_group,
-			      int dim, EnzoEquationOfState *eos,
-			      int stale_depth);
+  void reconstruct_interface
+  (EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
+   EnzoEFltArrayMap &primr_map, int dim, EnzoEquationOfState *eos,
+   int stale_depth, const str_vec_t& passive_list);
 
   int total_staling_rate()
   { return 1; }

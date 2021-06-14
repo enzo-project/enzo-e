@@ -141,38 +141,46 @@ PPML ideal MHD solver
 
 .. _vlct_overview:
 
-``"mhd_vlct"``: MHD
-===================
+``"mhd_vlct"``: hydrodynamics/MHD
+=================================
 
-VL + CT (van Leer + Constrained Transport) MHD solver based on the
-unsplit Godunov method described by
-`Stone & Gardiner (2009) <http://adsabs.harvard.edu/abs/2009NewA...14..139S>`_
-.
+This implements the VL + CT (van Leer + Constrained Transport) unsplit
+Godunov method described by `Stone & Gardiner (2009)
+<https://adsabs.harvard.edu/abs/2009NewA...14..139S>`_
+. This solver operates in 2 modes (designated by the required
+``Method:mhd_vlct:mhd_choice`` parameter):
 
-The algorithm combines attributes similar to the MUSCL-Hancock with
-the constrained transport method.  In short, the method includes two
+  1. a pure hydrodynamical mode (it cannot handle magnetic fields)
+  2. a MHD mode.
+
+The algorithm is a predictor-corrector scheme, with attributes similar
+to the MUSCL-Hancock method. For both modes, the method includes two
 main steps. First the values are integrated to the half
 time-step. Then, the values at the half time-step are used to
-caluclate the change in the quantities over the full time-step. The
-primary representation of the magnetic fields are 3 face-centered
-fields (one for each component), which lie on the cell face matching
-the dimension of the component (e.g. the x component lies on the
-x-face). The method also tracks cell-centered components of the bfield
-which are just the averages of the face-centered components. The
-implementation has been modified to perform reconstruction using
-internal energy inplace of pressure (in typical Enzo fashion).
+caluclate the change in the quantities over the full time-step.
 
-This method can effectively function as a hydrodynamics method if
-the magnetic fields are all initialized to zero (if they start at
-zero, they will never be modified to non-zero values).
+In the MHD mode, the algorithm is combined with the constrained
+transport method. The primary representation of the magnetic field,
+:math:`\vec{B}`, components are stored in 3 face-centered Cello fields.
+In more detail:
 
-Note that the courant factor should be less than 0.5.
+  - :math:`B_x` is stored on the x-faces
+  - :math:`B_y` is stored on the y-faces
+  - :math:`B_z` is stored on the z-faces
 
-This method only support 3 dimensions.
+The method also tracks components of the magnetic fields at the cell-centers,
+which just store the average of the values from the cell's faces.
+
+Currently, this method only support 3-dimensional problems.  In the
+future, alternative modes supporting MHD could easily be implemented
+that use divergence-cleaning schemes instead of constrained transport.
 
 
 parameters
 ----------
+
+Note that the courant factor (specified by the ``"courant"``
+parameter) should be less than 0.5.
 
 .. list-table:: Method ``mhd_vlct`` parameters
    :widths: 10 5 1 30
@@ -182,6 +190,10 @@ parameters
      - Type
      - Default
      - Description
+   * - ``"mhd_choice"``
+     - `string`
+     - `none`
+     - `Specifies handling of magnetic fields (or lack thereof)`
    * - ``"density_floor"``
      - `float`
      - `none`
@@ -280,8 +292,11 @@ fields
      - ``enzo_float``
      - [rw]
      - if dual-energy
+
+In hydro-mode, none of the 6 fields used to store the magnetic field should
+be defined.
        
-At initialization the face-centered magnetic fields should be
+At initialization the face-centered magnetic field should be
 divergence free. Trivial configurations (e.g. a constant magnetic
 field everywhere) can be provided with the ``"value"``
 initializer. For non-trivial configurations, we have provide the
@@ -309,7 +324,7 @@ main differences from the original conception:
      is computed at the left and right interfaces from the reconstructed
      quantities.
   3. Synchronization of the total and internal energies is a local
-     operation that doesn't require knowledge cell neighbors. In the
+     operation that doesn't require knowledge of cell neighbors. In the
      original conception, knowledge of the immediate neighbors had been
      required (each synchronization incremented the stale depth - 3 extra
      ghost zones would have been required).
@@ -320,11 +335,12 @@ specific ``internal_energy``, :math:`e`, is set to
 ``total_energy``) when the following conditions are met:
 
   * :math:`c_s'^2 > \eta v^2`, where :math:`c_s'^2=\gamma(\gamma - 1) e'`.
-  * :math:`c_s'^2 > \eta B^2/\rho`
+  * :math:`c_s'^2 > \eta B^2/\rho` (this is always satisfied in hydro mode)
   * :math:`e' > e /2`
 
 If the above condition is not met, then ``total_energy`` is set to
-:math:`e + (v^2 + B^2/\rho)/2`.
+:math:`e + (v^2 + B^2/\rho)/2` in MHD mode (in hydro mode, it's set to
+:math:`e + v^2/2`).
     
 When ``"dual_energy_eta"``, is set to ``0``, :math:`e` is always set to
 ``e'``. This is done to provide support for Grackle (in the future)
@@ -405,8 +421,8 @@ We provide a few notes about the choice of interpolator for this algorithm:
      full-timestep (most test problems have been run using ``plm`` with
      ``theta_limiter=2``, matching the integrator description in
      `Stone & Gardiner 2009
-     <http://adsabs.harvard.edu/abs/2009NewA...14..139S>`_ ). Using ``"nn"``
-     both times also works, however errors tests show that errors arise when
+     <https://adsabs.harvard.edu/abs/2009NewA...14..139S>`_ ). Using ``"nn"``
+     both times also works, however tests show that errors arise when
      piecewise linear reconstruction is used both times.
    * It is supposed to be possible to reconstruct the characteristic quantities
      for this method or to use higher order reconstruction in place of ``"plm"``
@@ -432,31 +448,33 @@ them:
     :math:`S_R = \max(u_L + a_L, u_R + a_R)`. This is one of the
     proposed methods from Davis, 1988, SIAM J. Sci. and Stat. Comput.,
     9(3), 445–473. The same wavespeed estimator was used in MHD HLL
-    solver implemented for Enzo's Runge Kutta solver. Currently this
-    raises an error as it is not tested.
+    solver implemented for Enzo's Runge Kutta solver. Currently, this
+    has only been implemented for MHD mode and it will raise an error
+    as it isn't tested.
+
   * ``"hlle"`` The HLLE approximate Riemann solver - the HLL solver
     with wavespeed bounds estimated according to
     Einfeldt, 1988, SJNA, 25(2), 294–318. This method allows the
     min/max eigenvalues of Roe's matrix to be wavespeed estimates. For a
     description of the procedure for MHD quantities, see
     `Stone et al. (2008)
-    <http://adsabs.harvard.edu/abs/2008ApJS..178..137S>`_ .
+    <https://adsabs.harvard.edu/abs/2008ApJS..178..137S>`_ .
     If using an HLL Riemann Solver, this is the recommended choice.
-  * ``"hllc"`` **[EXPERIMENTAL]** The HLLC approximate Riemann solver.
+    Currently, this has only been implemented for MHD mode.
+
+  * ``"hllc"`` The HLLC approximate Riemann solver.
     For an overview see Toro, 2009, *Riemann Solvers and Numerical
     Methods for Fluid Dynamics*, Springer-Verlag. This is a solver for
     hydrodynamical problems that models contact and shear waves. The
     wavespeed bounds are estimated according to the Einfeldt approach.
-
-    .. warning::
-
-      In the current version, the HLLC solver is experimental. Do **NOT**
-      use it unless all magnetic fields are intialized to be uniformly zero
-      everywhere.
+    This can only be used in hydro mode.
     
   * ``"hlld"`` The HLLD approximate Riemann solver described in
-    Miyoshi & Kusano, 2005. JCP, 315, 344. The wavespeed bounds
-    are estimated according to eqn 67 from the paper.
+    Miyoshi & Kusano, 2005. JCP, 315, 344. The wavespeed bounds are
+    estimated according to eqn 67 from the paper. This reduces to an
+    HLLC Riemann Solver when magnetic fields are zero (the wavespeed
+    bounds will differ from ``"hllc``). This can only be used in MHD
+    mode.
 
 
 .. note::

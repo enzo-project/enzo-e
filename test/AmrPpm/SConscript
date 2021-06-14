@@ -38,7 +38,7 @@ env_mv_adapt = env.Clone(COPY = 'mkdir -pv ' + test_path + '/AmrPpm/Adapt-L5-P1;
 
 balance_adapt = env_mv_adapt.RunAdapt (
      'test_adapt-L5-P1.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Adapt/adapt-L5-P1.in')
 
 Clean(balance_adapt,

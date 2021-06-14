@@ -257,7 +257,7 @@ public: // static attributes
 
   /// Current number of blocks on this node
   static int num_blocks_node;
-  
+
   /// Current number of particles on this node
   static int64_t num_particles_node;
 

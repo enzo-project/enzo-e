@@ -1,5 +1,6 @@
-#include "fortran.h"
 #define FORTRAN
+#include "fortran.h"
+
 c=======================================================================
 c//////////////////////////  SUBROUTINE EULER  \\\\\\\\\\\\\\\\\\\\\\\\\
 c
@@ -78,7 +79,7 @@ c
 c
 #define FORTRAN
 #include "fortran_types.h"
-
+c
       INTG_PREC ijkn
       parameter (ijkn=MAX_ANY_SINGLE_DIRECTION)
 c-----------------------------------------------------------------------
@@ -203,6 +204,7 @@ c
      $            ,0.5_RKIND*geslice(i,j))
 c             if (geslice(i,j) .lt. tiny) geslice(i,j) = tiny
              if (geslice(i,j) .lt. 0._RKIND) then
+                print*, 'ERROR'
                 write(6,*) i,j,dslice(i,j),dnu(i),pcent(i),eslice(i,j),
      &               gef(i,j), gef(i+1,j), ges(i,j),
      &               geslice(i,j)*dslice(i,j),

@@ -37,7 +37,7 @@ env_mv_gravity_cg_8 = env.Clone(COPY = 'mkdir -p ' + test_path + '/MethodGravity
 #serial
 gravity_cg_1 = env_mv_gravity_cg_8.RunGravityCg_1 (
      'test_method_gravity_cg-1.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Gravity/method_gravity_cg-1.in')
 
 Clean(gravity_cg_1,
@@ -54,7 +54,7 @@ env.PngToGif("/GravityCg-1/method_gravity_cg-1.gif", "test_method_gravity_cg-1.u
 
 gravity_cg_8 = env_mv_gravity_cg_8.RunGravityCg_8 (
      'test_method_gravity_cg-8.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Gravity/method_gravity_cg-8.in')
 
 Clean(gravity_cg_8,

@@ -81,12 +81,19 @@ public: // interface
     Method::pup(p);
 
     p | grackle_units_;
-    p | time_grackle_data_initialized_;
 
+    double last_init_time = time_grackle_data_initialized_;
+    p | last_init_time;
     if (p.isUnpacking()) {
-      // the following recomputes grackle_rates_. This avoids having to write
-      // pup methods for all of Grackle's internal data structures
-      initialize_grackle_chemistry_data(time_grackle_data_initialized_);
+      ASSERT("EnzoMethodGrackle::pup",
+             "grackle_chemistry_data must have previously been initialized",
+             last_init_time!=ENZO_FLOAT_UNDEFINED);
+      // the following recomputes grackle_rates_ (and sets the value of
+      // time_grackle_data_initialized_ to last_init_time). This is done
+      // to avoid writing pup methods for all of Grackle's internal data
+      // structures.
+      time_grackle_data_initialized_ = ENZO_FLOAT_UNDEFINED;
+      initialize_grackle_chemistry_data(last_init_time, true);
     }
 
   #endif /* CONFIG_USE_GRACKLE */
@@ -106,11 +113,24 @@ public: // interface
 
   static void define_required_grackle_fields();
 
-  void initialize_grackle_chemistry_data(double current_time);
+  void initialize_grackle_chemistry_data(double current_time,
+                                         bool preinitialized_units = false);
+
+  static void setup_grackle_units (double current_time,
+                                   code_units * grackle_units) throw();
 
   static void setup_grackle_units(EnzoBlock * enzo_block,
                                   code_units * grackle_units,
-                                  int i_hist = 0 ) throw();
+                                  int i_hist = 0 ) throw()
+  {
+    double compute_time;
+    if (i_hist == 0) {
+      compute_time = enzo_block->time();
+    } else {
+      compute_time = enzo_block->data()->field().history_time(i_hist);
+    }
+    setup_grackle_units(compute_time, grackle_units);
+  }
 
   static void setup_grackle_fields(EnzoBlock * enzo_block,
                                    grackle_field_data * grackle_fields,

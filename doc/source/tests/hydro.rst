@@ -15,7 +15,7 @@ test_double_mach
 
 2D double mach reflection problem
 
-From `broken link <http://ww.astro.virginia.edu/VITA/ATHENA/dmr.html>_`
+From `broken link <https://ww.astro.virginia.edu/VITA/ATHENA/dmr.html>_`
 
 test_implosion
 ==============

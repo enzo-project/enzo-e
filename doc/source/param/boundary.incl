@@ -30,7 +30,7 @@
 :Default: :d:`"undefined"`
 :Scope:     :c:`Cello`
 
-:e:`Boundary conditions in Enzo-P include` :t:`"reflecting"` :e:`,` :t:`"outflow"` :e:`,` :t:`"inflow"` :e:`, and` :t:`"periodic"`.  :e:`Other boundary condition types can be implemented by either a) modifying the existing` :p:`EnzoBoundary` :e:`class or b) creating a new class inherited from the` :p:`Boundary` :e:`base class.`  :t:`"inflow"` :e:`boundary conditions additionally require` :p:`value` :e:`and` :p:`field_list` :e:`parameters.`
+:e:`Boundary conditions in Enzo-E include` :t:`"reflecting"` :e:`,` :t:`"outflow"` :e:`,` :t:`"inflow"` :e:`, and` :t:`"periodic"`.  :e:`Other boundary condition types can be implemented by either a) modifying the existing` :p:`EnzoBoundary` :e:`class or b) creating a new class inherited from the` :p:`Boundary` :e:`base class.`  :t:`"inflow"` :e:`boundary conditions additionally require` :p:`value` :e:`and` :p:`field_list` :e:`parameters.`
 
 ----
 
@@ -51,7 +51,7 @@
 :Default: :d:`"all"`
 :Scope:     :c:`Cello`
 
-:e:`The` :p:`face` :e:`parameter can restrict the boundary conditions to be applied only to the` :p:`upper` :e:`or` :p:`lower` :e:`faces.  face orthogonal to the given face.`  :p:`face` :e:`must be` :t:`"x"` , :t:`"y"` , :t:`"z"` :e:`or` :t:`"all"`.  :e:`The` :p:`face` :e:`parameter may be used in conjunction with the` :p:`axis` :e:`parameter, or by itself.`
+:e:`The` :p:`face` :e:`parameter can restrict the boundary conditions to be applied only to the` :p:`upper` :e:`or` :p:`lower` :e:`faces.  face orthogonal to the given face.`  :p:`face` :e:`must be` :t:`"upper"` , :t:`"lower"` :e:`or` :t:`"all"`.  :e:`The` :p:`face` :e:`parameter may be used in conjunction with the` :p:`axis` :e:`parameter, or by itself.`
 
 ----
 

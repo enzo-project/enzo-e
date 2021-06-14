@@ -51,7 +51,7 @@ env_mv_out = env.Clone(COPY = 'mv *.png *.h5 Dir_* ' + test_path)
 
 output_stride_1_RUN = env_mv_output_stride_1.RunOutputStride_1 (
      'test_output-stride-1.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Output/output-stride-1.in')
 
 output_stride_1_C00 = env_mv_out.Hdf5ToPng (
@@ -82,7 +82,7 @@ Clean(output_stride_1,
 
 output_stride_2_RUN = env_mv_output_stride_2.RunOutputStride_2 (
      'test_output-stride-2.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Output/output-stride-2.in')
 
 output_stride_2_C00 = env_mv_out.Hdf5ToPng (
@@ -113,7 +113,7 @@ Clean(output_stride_2,
 
 output_stride_4_RUN = env_mv_output_stride_4.RunOutputStride_4 (
      'test_output-stride-4.unit',
-     bin_path + '/enzo-p',
+     bin_path + '/enzo-e',
      ARGS='input/Output/output-stride-4.in')
 
 output_stride_4_C00 = env_mv_out.Hdf5ToPng (
@@ -144,7 +144,7 @@ Clean(output_stride_4,
 
 output_header=env_mv_header.RunHeader(
       'test_output-headers.unit',
-      bin_path + '/enzo-p',
+      bin_path + '/enzo-e',
       ARGS='input/Output/output-headers.in')
 
 Clean(output_header,

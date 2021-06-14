@@ -53,6 +53,7 @@ sources  = [Glob('enzo*cpp'),
 	    'euler.F',
 	    'expand_terms.F',
 	    'flux_hll.F',
+	    'flux_hllc.F',
 	    'flux_twoshock.F',
 	    'grid_cic.F',
 	    'interp1d.F',
@@ -65,8 +66,7 @@ sources  = [Glob('enzo*cpp'),
 	    'intprim.F',
 	    'intvar.F',
 	    'ngpinterp.F',
-	    'pgas2d_dual.F',
-    	    'pgas2d_dual.F',
+    	'pgas2d_dual.F',
 	    'pgas2d.F',
 	    'ppm_de.F',
 	    'PPML_Conservative.F',
@@ -86,20 +86,6 @@ sources  = [Glob('enzo*cpp'),
 	    'turboinit2d.F',
 	    'turboinit.F',
 	    'twoshock.F',
-	    'woc_calcdiss.F',
-	    'woc_calc_eigen.F',
-	    'woc_cic_deposit.F',
-	    'woc_euler.F',
-	    'woc_flux_hllc.F',
-	    'woc_flux_hll.F',
-	    'woc_flux_twoshock.F',
-	    'woc_inteuler.F',
-	    'woc_intpos.F',
-	    'woc_intprim.F',
-	    'woc_intvar.F',
-	    'woc_pgas2d_dual.F',
-	    'woc_pgas2d.F',
-	    'woc_twoshock.F',
 	    'xeuler_sweep.F',
 	    'yeuler_sweep.F',
 	    'zeuler_sweep.F']
@@ -121,13 +107,13 @@ env = env.Clone(LIBS=[components,libraries_external])
 
 libraries_enzo   = env.Library ('enzo', sources)
 
-test_enzo_p = env.Program (['enzo-p.cpp', charm_main])
+test_enzo_e = env.Program (['enzo-e.cpp', charm_main])
 
 test_enzo_units = env.Program (['test_EnzoUnits.cpp'])
 
 test_enzo_prolong = env.Program (['test_Prolong.cpp', charm_main])
 
-binaries = [test_enzo_p, test_enzo_prolong, test_enzo_units]
+binaries = [test_enzo_e, test_enzo_prolong, test_enzo_units]
 
 env.CharmBuilder(['enzo.decl.h','enzo.def.h'],'enzo.ci',ARG = 'enzo')
 env.CppBuilder('enzo.ci','enzo.CI',ARG = 'enzo')

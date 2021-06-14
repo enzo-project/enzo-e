@@ -1,5 +1,5 @@
-#include "fortran.h"
 #define FORTRAN
+#include "fortran.h"
 c=======================================================================
 c///////////////////////  SUBROUTINE INTEULER  \\\\\\\\\\\\\\\\\\\\\\\\\
 c
@@ -97,7 +97,7 @@ c
 c
 c  local declarations
 c
-      INTG_PREC i, j, k, n, m, ic,jj
+      INTG_PREC i, j, n, m, ic
       R_PREC steepen(ijkn),tmp1(ijkn),tmp2(ijkn),tmp3(ijkn),tmp4(ijkn)
       R_PREC qa,qb,qc,qd,qe,s1,s2,f1
       R_PREC  c1(ijkn), c2(ijkn), c3(ijkn), c4(ijkn), c5(ijkn), c6(ijkn)
@@ -123,8 +123,7 @@ c
      &    ,coll0(ijkn,MAX_COLOR),colr0(ijkn,MAX_COLOR)
      &    ,dcol(ijkn,MAX_COLOR),coll(ijkn,MAX_COLOR)
      &    ,colr(ijkn,MAX_COLOR),col6(ijkn,MAX_COLOR)
-      R_PREC lem(idim,5,5),rem(idim,5,5), dxdt2(ijkn),TEMP(ijkn)
-      double precision sum
+      R_PREC lem(idim,5,5),rem(idim,5,5), dxdt2(ijkn)
 c
 c  parameters
 c
@@ -142,116 +141,6 @@ c     write(6,*) 'INTEULER: j1   =',j1,  ' j2   =',j2
 c
 c     Compute coefficients used in interpolation formulae (from eq. 1.6)
 c
-C      do i=1,ijkn
-C         steepen(i)=0.0D0
-C         tmp1(i)=0.0D0
-C         tmp2(i)=0.0D0
-C         tmp3(i)=0.0D0
-C         tmp4(i)=0.0D0
-C         c1(i)=0.0D0
-C         c2(i)=0.0D0
-C         c3(i)=0.0D0
-C         c4(i)=0.0D0
-C         c5(i)=0.0D0
-C         c6(i)=0.0D0
-C         c7(i)=0.0D0
-C         c8(i)=0.0D0
-C         dd(i)=0.0D0
-C         dl(i)=0.0D0
-C         dr(i)=0.0D0
-C         d6(i)=0.0D0
-C         dp(i)=0.0D0
-C         pl(i)=0.0D0
-C         pr(i)=0.0D0
-C         p6(i)=0.0D0
-C         du(i)=0.0D0
-C         ul(i)=0.0D0
-C         ur(i)=0.0D0
-C         u6(i)=0.0D0
-C         dv(i)=0.0D0
-C         vl(i)=0.0D0
-C         vr(i)=0.0D0
-C         v6(i)=0.0D0
-C         dw(i)=0.0D0
-C         wl(i)=0.0D0
-C         wr(i)=0.0D0
-C         w6(i)=0.0D0
-C         dge(i)=0.0D0
-C         gel(i)=0.0D0
-C         ger(i)=0.0D0
-C         ge6(i)=0.0D0
-C         dla(i)=0.0D0
-C         dra(i)=0.0D0
-C         pla(i)=0.0D0
-C         pra(i)=0.0D0
-C         ula(i)=0.0D0
-C         ura(i)=0.0D0
-C         vla(i)=0.0D0
-C         vra(i)=0.0D0
-C         wla(i)=0.0D0
-C         wra(i)=0.0D0
-C         plm(i)=0.0D0
-C         prm(i)=0.0D0
-C         ulm(i)=0.0D0
-C         urm(i)=0.0D0
-C         dl0(i)=0.0D0
-C         dr0(i)=0.0D0
-C         pl0(i)=0.0D0
-C         pr0(i)=0.0D0
-C         plp(i)=0.0D0
-C         prp(i)=0.0D0
-C         ulp(i)=0.0D0
-C         urp(i)=0.0D0
-C         ul0(i)=0.0D0
-C         ur0(i)=0.0D0
-C         vl0(i)=0.0D0
-C         vr0(i)=0.0D0
-C         wl0(i)=0.0D0
-C         wr0(i)=0.0D0
-C         cs(i)=0.0D0
-C         d2d(i)=0.0D0
-C         dxb(i)=0.0D0
-C         dx2i(i)=0.0D0
-C         cm(i)=0.0D0
-C         c0(i)=0.0D0
-C         cp(i)=0.0D0
-C         char1(i)=0.0D0
-C         char2(i)=0.0D0
-C         betalp(i)=0.0D0
-C         betalm(i)=0.0D0
-C         betal0(i)=0.0D0
-C         cla(i)=0.0D0
-C         betarp(i)=0.0D0
-C         betarm(i)=0.0D0
-C         betar0(i)=0.0D0
-C         cra(i)=0.0D0
-C         gela(i)=0.0D0
-C         gera(i)=0.0D0
-C         gel0(i)=0.0D0
-C         ger0(i)=0.0D0
-C         TEMP(i)=0.0D0
-C         do j=1,MAX_COLOR
-C            colla(i,j)=0.0D0
-C            colra(i,j)=0.0D0
-C            coll0(i,j)=0.0D0
-C            colr0(i,j)=0.0D0
-C            dcol(i,j)=0.0D0
-C            coll(i,j)=0.0D0
-C            colr(i,j)=0.0D0
-C            col6(i,j)=0.0D0
-C         end do
-C      end do
-C
-C      do i=1,idim
-C         do j=1,5
-C            do k=1,5
-C               lem(i,j,k)=0.0D0
-C               rem(i,j,k)=0.0D0
-C               dxdt2(i)=0.0D0
-C            end do
-C         end do
-C      end do
-
       do i=i1-2,i2+2
          qa    = dxi(i)/(dxi(i-1) + dxi(i) + dxi(i+1))
          c1(i) = qa*(2._RKIND*dxi(i-1) + dxi(i))/(dxi(i+1) + dxi(i))
@@ -319,10 +208,6 @@ c
       do i=i1-2,i2+2
         cm(i) = dt*(uslice(i,j)-cs(i))*dx2i(i)
         c0(i) = dt*(uslice(i,j)      )*dx2i(i)
-C        print*, 'DEBUG_C0 c0 ',i,c0(i)
-C        print*, 'DEBUG_C0 dt ',i,dt
-C        print*, 'DEBUG_C0 us ',i,uslice(i,j)
-C        print*, 'DEBUG_C0 dx ',i,dx2i(i)
         cp(i) = dt*(uslice(i,j)+cs(i))*dx2i(i)
       enddo
 c
@@ -338,7 +223,6 @@ c
 c     Compute left and right states for each variable
 c       (steepening, if requested, is only applied to density)
 c
- 
          call intprim(dslice(1,j), uslice(1,j), vslice(1,j), 
      &        wslice(1,j), pslice(1,j), 
      &        idim, i1, i2, isteep, steepen, iflatten, flatten, 
@@ -386,6 +270,7 @@ c
          endif
 
       endif                     ! iconsrec
+
 c
       if (idual .eq. 1)
      & call intvar(geslice(1,j), idim, i1, i2, 0_IKIND, steepen, 
@@ -679,7 +564,7 @@ c
          enddo
       endif
 c
- 400  continue
+400   continue
 c
       return
       end

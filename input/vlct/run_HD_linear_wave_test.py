@@ -47,7 +47,7 @@ def analyze_tests():
     # define the functor for evaluating the norm of the L1 error vector
     l1_func = CalcSimL1Norm("tools/l1_error_norm.py",
                             ["density","velocity_x","velocity_y","velocity_z",
-                             "pressure","bfield_x","bfield_y","bfield_z"])
+                             "pressure",])
 
     # define the template for the directory holding the simulation data
     template = "method_vlct-{nblocks}-{wave_name}N{res}{direction}_{time:.1f}"
@@ -115,7 +115,7 @@ def cleanup():
 
 if __name__ == '__main__':
 
-    executable = 'bin/enzo-p'
+    executable = 'bin/enzo-e'
 
     # this script can either be called from the base repository or from
     # the subdirectory: input/vlct

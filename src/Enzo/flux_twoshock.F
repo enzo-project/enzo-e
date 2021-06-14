@@ -1,6 +1,5 @@
+#define FORTRAN
 #include "fortran.h"
-
-#define FORTRAN      
 c=======================================================================
 c//////////////////////  SUBROUTINE FLUX_TWOSHOCK \\\\\\\\\\\\\\\\\\\\\\
 c
@@ -11,7 +10,7 @@ c
      $     dls, drs, pls, prs, gels, gers, 
      $     uls, urs, vls, vrs, wls, wrs, pbar, ubar,
      $     df, ef, uf, vf, wf, gef, ges,
-     $     ncolor, colslice, colls, colrs, colf
+     $     ncolor, colslice, colls, colrs, colf, axis
      $     )
 c
 c-----------------------------------------------------------------------
@@ -71,13 +70,7 @@ c
 c
 c-----------------------------------------------------------------------
 c
-C      print*, 'DEBUG_FLUX dx = ',dx(1),dx(idim)
-C      print*, 'DEBUG_FLUX idim, jdim ',idim,jdim
-C      print*, 'DEBUG_FLUX i1, i2, j1, j2 ',i1,i2,j1,j2
-C      print*, 'DEBUG_FLUX dt, gamma ', dt, gamma
-C      print*, 'DEBUG_FLUX idiff, idual ',idiff, idual
-C      print*, 'DEBUG_FLUX , eta1, ifallback ', eta1, ifallback
-
+      integer axis
       qa = (gamma + 1._RKIND)/(2._RKIND*gamma)
       qb = (gamma - 1._RKIND)/(gamma + 1._RKIND)
 
@@ -421,6 +414,7 @@ c
              endif
              write (6,*) 'a', df(i,j)-df(i+1,j), dslice(i,j), 
      $            dt/dx(i), dt, lbar(i),l0(i)
+             write (6,*) 'axis',axis
              write (6,*) 'b', db(i-1), db(i), db(i+1)
              write (6,*) 'c', ub(i-1), ub(i), ub(i+1)
              write (6,*) 'd', pb(i-1), pb(i), pb(i+1)
@@ -447,11 +441,11 @@ c             if (gravity .eq. 1)
 c     &        write (6,*) grslice(i-1,j), grslice(i,j), grslice(i+1,j)
              if (ifallback.eq.0) then
                 write(0,*) 'stop in euler with e < 0'
-                print*, 'ERROR_MESSAGE'
+C                ERROR_MESSAGE
              else
+                print*, 'WARNING'
                 write(0,*) 'Falling back to a more diffusive Riemann',
      $               'solver, HLL'
-                print*, 'WARNING_MESSAGE'
                 call flux_hll(dslice, eslice, geslice, 
      $               uslice, vslice, wslice,
      $               dx, diffcoef, idim, jdim, i, i, j, j, dt, gamma,
@@ -470,6 +464,7 @@ c
           do i=i1, i2
              if (colslice(i,j,n) +
      $            (colf(i,j,n)-colf(i+1,j,n))/dx(i) .lt. 0._RKIND) then
+                print*, 'WARNING'
                 write(6,*) 'flux_twoshock: negative color',i,j,n
                 write(6,*) 'a', dx(i), colf(i-1,j,n),colf(i,j,n),
      $               colf(i+1,j,n)
@@ -487,7 +482,6 @@ c
                 write(6,*) 'g', ub(i-1),ub(i),ub(i+1)
                 write(6,*) 'h', u0(i-1),u0(i),u0(i+1)
                 write(6,*) 'i', ubar(i-1,j),ubar(i,j),ubar(i+1,j)
-                print*, 'WARNING_MESSAGE'
              endif
           enddo
        enddo
