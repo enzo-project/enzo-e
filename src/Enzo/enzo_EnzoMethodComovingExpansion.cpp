@@ -20,6 +20,17 @@ EnzoMethodComovingExpansion::EnzoMethodComovingExpansion
 
   const int rank = cello::rank();
 
+  // Declare required fields
+  this->required_fields_ = std::vector<std::string>
+                        {"density","total_energy","internal_energy","pressure"};
+
+  if (rank >= 1) this->required_fields_.push_back("velocity_x");
+  if (rank >= 2) this->required_fields_.push_back("velocity_y");
+  if (rank >= 3) this->required_fields_.push_back("velocity_z");
+
+  // define required fields if they do not exist
+  this->define_fields();
+
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_field("density");
   refresh->add_field("total_energy");
@@ -27,7 +38,7 @@ EnzoMethodComovingExpansion::EnzoMethodComovingExpansion
   if (rank >= 1) refresh->add_field("velocity_x");
   if (rank >= 2) refresh->add_field("velocity_y");
   if (rank >= 3) refresh->add_field("velocity_z");
-					
+
   if ( ! comoving_coordinates_ ) {
     WARNING
       ("EnzoMethodComovingExpansion::EnzoMethodComovingExpansion()",

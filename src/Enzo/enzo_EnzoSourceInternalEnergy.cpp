@@ -11,9 +11,9 @@
 //----------------------------------------------------------------------
 
 void EnzoSourceInternalEnergy::calculate_source
-(Block *block, double dt, Grouping &prim_group, Grouping &dUcons_group,
- std::string interface_velocity_name, int dim, EnzoEquationOfState *eos,
- int stale_depth) const throw()
+(int dim, double dt, enzo_float cell_width, EnzoEFltArrayMap &prim_map,
+ EnzoEFltArrayMap &dUcons_map, EFlt3DArray &interface_velocity,
+ EnzoEquationOfState *eos, int stale_depth) const throw()
 {
   // SANITY CHECKS:
   ASSERT("EnzoSourceInternalEnergy::calculate_source",
@@ -24,10 +24,8 @@ void EnzoSourceInternalEnergy::calculate_source
 	 "The EOS can't be barotropic and use the dual energy formalism.",
 	 !(eos->is_barotropic()) );
 
-  EnzoBlock * enzo_block = enzo::block(block);
-  enzo_float dtdx = dt/enzo_block->CellWidth[dim];
+  enzo_float dtdx = dt/cell_width;
 
-  EnzoFieldArrayFactory array_factory(block,stale_depth);
   EnzoPermutedCoordinates coord(dim);
 
   // Since we don't know the ith component of the velocity on the external
@@ -48,23 +46,25 @@ void EnzoSourceInternalEnergy::calculate_source
   //         eint_center(k,j,i)        ->  eint(k,j,i+1)
   //         deint_dens_center(k,j,i)  ->  deint_dens(k,j,i+1)
   EFlt3DArray rho, eint, rho_center, eint_center;
-  rho  = array_factory.from_grouping(prim_group, "density",         0);
-  eint = array_factory.from_grouping(prim_group, "internal_energy", 0);
-  rho_center  = coord.get_subarray(rho,  full_ax, full_ax, CSlice(1, -1));
+  rho  = prim_map.get("density", stale_depth);
+  eint = prim_map.get("internal_energy", stale_depth);
+  rho_center  = coord.get_subarray(rho, full_ax, full_ax, CSlice(1, -1));
   eint_center = coord.get_subarray(eint, full_ax, full_ax, CSlice(1, -1));
 
-  EFlt3DArray deint_dens, deint_dens_center;
-  deint_dens = array_factory.from_grouping(dUcons_group, "internal_energy", 0);
-  deint_dens_center = coord.get_subarray(deint_dens, full_ax, full_ax,
-					 CSlice(1, -1));
+  EFlt3DArray deint_dens = dUcons_map.get("internal_energy", stale_depth);
+  EFlt3DArray deint_dens_center = coord.get_subarray(deint_dens, full_ax,
+                                                     full_ax, CSlice(1, -1));
 
+  // remove staled zone from interface_velocity
+  CSlice stale_slice(stale_depth,-stale_depth);
+  EFlt3DArray vel = interface_velocity.subarray(stale_slice, stale_slice,
+                                                stale_slice);
   // load the face-centered values of the ith velocity component
   // define: vl(k,j,i)                 ->  vel_i(k,j,i+1/2)
   //         vr(k,j,i)                 ->  vel_i(k,j,i+3/2)
-  EFlt3DArray vel, vl, vr;
-  vel = array_factory.assigned_center_from_name(interface_velocity_name, dim);
-  vl = coord.get_subarray(vel, full_ax, full_ax, CSlice(0, -1));
-  vr = coord.get_subarray(vel, full_ax, full_ax, CSlice(1, nullptr));
+  EFlt3DArray vl = coord.get_subarray(vel, full_ax, full_ax, CSlice(0, -1));
+  EFlt3DArray vr = coord.get_subarray(vel, full_ax, full_ax,
+                                      CSlice(1, nullptr));
 
   // in the original flux_hll.F the floor was set to tiny (a small number)
   enzo_float p_floor = eos->get_pressure_floor();

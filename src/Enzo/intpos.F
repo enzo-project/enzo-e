@@ -1,10 +1,9 @@
+#define FORTRAN
 #include "fortran.h"
-#define FORTRAN      
 c=======================================================================
 c///////////////////////  SUBROUTINE INTPOS  \\\\\\\\\\\\\\\\\\\\\\\\\\\
 c
-      subroutine intpos(
-     $     dslice, uslice, pslice, idim, i1, i2,
+      subroutine intpos(dslice, uslice, pslice, idim, i1, i2,
      $     dxdt2, gamma,
      $     drho, rhol, rhor, dla, dra, dl0, dr0,
      $     du, ul, ur, ula, ura, ul0, ur0,
@@ -76,9 +75,9 @@ c
             dra(i) = dslice(i) + 0.5_RKIND*drho(i)
             dl0(i) = dla(i)
             dr0(i) = dra(i)
+            print*, 'WARNING'
             print*, 'Enforcing positive pressure by limiting ' ,
      $           'density slope', i, dslice(i), drho(i)
-            print*, 'WARNING_MESSAGE'
          endif
       enddo
 c
@@ -93,9 +92,9 @@ c
             ura(i) = uslice(i) + 0.5_RKIND*du(i)
             ul0(i) = ula(i)
             ur0(i) = ura(i)
+            print*, 'WARNING'
             print*, 'Enforcing positive pressure by limiting ' ,
      $           'velocity slope', i, uslice(i), du(i)
-            print *, 'WARNING_MESSAGE'
          endif
       enddo
 c
@@ -109,9 +108,9 @@ c
             pra(i) = pslice(i) + 0.5_RKIND*dp(i)
             pl0(i) = pla(i)
             pr0(i) = pra(i)
+            print*, 'WARNING'
             print*, 'Enforcing positive pressure by limiting ' ,
      $           'pressure slope', i, pslice(i), dp(i)
-            print*, 'WARNING_MESSAGE'
          endif
       enddo
 

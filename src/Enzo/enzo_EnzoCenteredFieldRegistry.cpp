@@ -100,27 +100,3 @@ std::string EnzoCenteredFieldRegistry::get_actively_advected_quantity_name
   }
   return out;
 }
-
-//----------------------------------------------------------------------
-
-Grouping* EnzoCenteredFieldRegistry::build_grouping
-(const std::vector<std::string> quan_names,
- const std::string leading_prefix)
-{
-  Grouping *out = new Grouping;
-  for (const std::string& name : quan_names){
-    auto search = EnzoCenteredFieldRegistry::field_table_.find(name);
-
-    if (search == EnzoCenteredFieldRegistry::field_table_.cend()){
-      ERROR1("EnzoCenteredFieldRegistry::build_grouping",
-	     "%s is not a registered name", name.c_str());
-    } else if ((search->second).vector_quantity){
-        out->add(leading_prefix + name + std::string("_x"), name);
-        out->add(leading_prefix + name + std::string("_y"), name);
-        out->add(leading_prefix + name + std::string("_z"), name);
-    } else {
-        out->add(leading_prefix + name, name);
-    }
-  }
-  return out;
-}

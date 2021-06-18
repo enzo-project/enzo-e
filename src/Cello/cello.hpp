@@ -306,7 +306,6 @@ namespace cello {
   // Approximate mean molecular weight of metals
   const double mu_metal = 16.0;
 
-
   // precision functions
   double machine_epsilon     (int);
   template <class T>

@@ -141,9 +141,9 @@ class EnzoReconstructorPLM : public EnzoReconstructor
 public: // interface
 
   /// Create a new EnzoReconstructorPLM
-  EnzoReconstructorPLM(std::vector<std::string> group_names,
+  EnzoReconstructorPLM(std::vector<std::string> active_key_names,
 		       enzo_float theta_limiter)
-    : EnzoReconstructor(group_names),
+    : EnzoReconstructor(active_key_names),
       theta_limiter_(theta_limiter)
   { }
 
@@ -163,10 +163,10 @@ public: // interface
     p | theta_limiter_;
   };
 
-  void reconstruct_interface (Block *block, Grouping &prim_group,
-			      Grouping &priml_group, Grouping &primr_group,
-			      int dim, EnzoEquationOfState *eos,
-			      int stale_depth);
+  void reconstruct_interface
+  (EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
+   EnzoEFltArrayMap &primr_map, int dim, EnzoEquationOfState *eos,
+   int stale_depth, const str_vec_t& passive_list);
 
   int total_staling_rate()
   { return 2; }
@@ -183,37 +183,19 @@ private:
 
 template <class Limiter>
 void EnzoReconstructorPLM<Limiter>::reconstruct_interface
-  (Block *block, Grouping &prim_group, Grouping &priml_group,
-   Grouping &primr_group, int dim, EnzoEquationOfState *eos, int stale_depth)
+(EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
+ EnzoEFltArrayMap &primr_map, int dim, EnzoEquationOfState *eos,
+ int stale_depth, const str_vec_t& passive_list)
 {
-  std::vector<std::string> group_names = this->group_names_;
-
-  EnzoFieldArrayFactory array_factory(block, stale_depth);
   EnzoPermutedCoordinates coord(dim);
-
   Limiter limiter_func = Limiter();
   const enzo_float theta_limiter = theta_limiter_;
 
-  // unecessary values are computed for inside faces of outermost ghost zone
-  for (unsigned int group_ind=0; group_ind<group_names.size(); group_ind++){
-
-    // load group name and number of fields in the group
-    std::string group_name = group_names[group_ind];
-    int num_fields = prim_group.size(group_name);
-
-    // Handle possibility of having a density floor
-    enzo_float prim_floor =0;
-    bool use_floor = false;
-    if (group_name == "density"){
-      prim_floor = eos->get_density_floor();
-      use_floor=true;
-    } else if (group_name == "pressure"){
-      prim_floor = eos->get_pressure_floor();
-      use_floor=true;
-    }
-
-    // iterate over the fields in the group
-    for (int field_ind=0; field_ind<num_fields; field_ind++){
+  auto fn = [coord, limiter_func, theta_limiter, stale_depth,
+             &prim_map, &priml_map, &primr_map](const std::string &key,
+                                                bool use_floor,
+                                                enzo_float prim_floor)
+    {
       // Cast the problem as reconstructing values at:
       //   wl(k, j, i+3/2) and wr(k,j,i+1/2)
 
@@ -221,55 +203,65 @@ void EnzoReconstructorPLM<Limiter>::reconstruct_interface
       // define:   wc_left(k,j,i)   -> w(k,j,i)
       //           wc_center(k,j,i) -> w(k,j,i+1)
       //           wc_right(k,j,i)  -> w(k,j,i+2)
-      EFlt3DArray wc_left, wc_center, wc_right;
-      wc_left = array_factory.from_grouping(prim_group, group_name, field_ind);
-      wc_center = coord.left_edge_offset(wc_left, 0, 0, 1);
-      wc_right  = coord.left_edge_offset(wc_left, 0, 0, 2);
+      EFlt3DArray wc_left = prim_map.get(key, stale_depth);
+      EFlt3DArray wc_center = coord.left_edge_offset(wc_left, 0, 0, 1);
+      EFlt3DArray wc_right  = coord.left_edge_offset(wc_left, 0, 0, 2);
 
       // Prepare face-centered arrays
       // define:   wl_offset(k,j,i)-> wl(k,j,i+3/2)
       //           wr(k,j,i)       -> wr(k,j,i+1/2)
-      EFlt3DArray wr, wl, wl_offset;
-      wr = array_factory.reconstructed_field(primr_group, group_name, field_ind,
-					     dim);
-      wl = array_factory.reconstructed_field(priml_group, group_name, field_ind,
-					     dim);
-      wl_offset = coord.left_edge_offset(wl, 0, 0, 1);
-      
+      EFlt3DArray wr = primr_map.get(key,stale_depth);
+      EFlt3DArray wl = priml_map.get(key,stale_depth);
+      EFlt3DArray wl_offset = coord.left_edge_offset(wl, 0, 0, 1);
+
       // At the interfaces between the first and second cell (second-to-
       // last and last cell), along a given axis, no need to worry about
       // initializing the left (right) interface value thanks to the adoption
       // of immediate_staling_rate
 
       for (int iz=0; iz<wc_right.shape(0); iz++) {
-	for (int iy=0; iy<wc_right.shape(1); iy++) {
-	  for (int ix=0; ix<wc_right.shape(2); ix++) {
+        for (int iy=0; iy<wc_right.shape(1); iy++) {
+          for (int ix=0; ix<wc_right.shape(2); ix++) {
 
-	    // compute limited slopes
-	    enzo_float val = wc_center(iz,iy,ix);
-	    enzo_float dv = limiter_func(wc_left(iz,iy,ix), val,
-					 wc_right(iz,iy,ix), theta_limiter);
-	    enzo_float half_dv = dv*0.5;
-	    enzo_float left_val, right_val;
+            // compute limited slopes
+            enzo_float val = wc_center(iz,iy,ix);
+            enzo_float dv = limiter_func(wc_left(iz,iy,ix), val,
+                                         wc_right(iz,iy,ix), theta_limiter);
+            enzo_float half_dv = dv*0.5;
+            enzo_float left_val, right_val;
 
-	    if (use_floor) {
-	      right_val = EnzoEquationOfState::apply_floor(val - half_dv,
-							   prim_floor);
-	      left_val  = EnzoEquationOfState::apply_floor(val + half_dv,
-							   prim_floor);
-	    } else {
-	      right_val = val - half_dv;
-	      left_val  = val + half_dv;
-	    }
+            if (use_floor) {
+              right_val = EnzoEquationOfState::apply_floor(val - half_dv,
+                                                           prim_floor);
+              left_val  = EnzoEquationOfState::apply_floor(val + half_dv,
+                                                           prim_floor);
+            } else {
+              right_val = val - half_dv;
+              left_val  = val + half_dv;
+            }
 
-	    // face centered fields: index i corresponds to the value at i-1/2
-	    wr(iz,iy,ix) = right_val;
-	    wl_offset(iz,iy,ix) = left_val;
-	  }
-	}
+            // face centered fields: index i corresponds to the value at i-1/2
+            wr(iz,iy,ix) = right_val;
+            wl_offset(iz,iy,ix) = left_val;
+          }
+        }
       }
+    };
+
+  for (const std::string &key : active_key_names_){
+    enzo_float prim_floor = 0;
+    bool use_floor = false;
+    if (key == "density"){
+      prim_floor = eos->get_density_floor();
+      use_floor=true;
+    } else if (key == "pressure"){
+      prim_floor = eos->get_pressure_floor();
+      use_floor=true;
     }
+    fn(key, use_floor, prim_floor);
   }
+
+  for (const std::string &key : passive_list){ fn(key, false, 0.); }
 }
 
 //----------------------------------------------------------------------
@@ -328,7 +320,7 @@ struct PLM_EnzoRKLimiter
   /// see LeVeque (2002).
 
   enzo_float operator()(enzo_float vm1, enzo_float v,
-			enzo_float vp1, enzo_float theta_limiter)
+			enzo_float vp1, enzo_float theta_limiter) const
   {
     enzo_float dv_c = 0.5*(vp1-vm1);
     enzo_float dv_l = (v-vm1) * theta_limiter;
@@ -377,7 +369,7 @@ struct PLM_AthenaLimiter
   ///     for reconstruction of characteristics.
 
   enzo_float operator()(enzo_float vm1, enzo_float v,
-			enzo_float vp1, enzo_float theta_limiter)
+			enzo_float vp1, enzo_float theta_limiter) const
   {
     enzo_float dv_l = (v-vm1);
     enzo_float dv_r = (vp1-v);

@@ -1,3 +1,4 @@
+#define FORTRAN
 #include "fortran.h"
 c=======================================================================
 c//////////////////////  SUBROUTINE CIC_DEPOSIT  \\\\\\\\\\\\\\\\\\\\\\\
@@ -5,7 +6,7 @@ c
       subroutine cic_deposit(posx, posy, posz, ndim, npositions, 
      &                      mass, field, leftedge, 
      &                      dim1, dim2, dim3, cellsize, cloudsize)
-
+#ifndef CONFIG_PFLOAT_16
 c
 c  PERFORMS 1/2/3D CLOUD-IN-CELL INTERPOLATION FROM FIELD TO SUMFIELD
 c
@@ -49,17 +50,18 @@ c-----------------------------------------------------------------------
 c
 c  argument declarations
 c
-      integer dim1, dim2, dim3, npositions, ndim
-      ENZO_REAL posx(npositions), posy(npositions), posz(npositions),
+      INTG_PREC dim1, dim2, dim3, npositions, ndim
+      P_PREC posx(npositions), posy(npositions), posz(npositions),
      &        leftedge(3)
-      ENZO_REAL    mass(npositions), field(dim1, dim2, dim3), cellsize,
+      R_PREC    mass(npositions), field(dim1, dim2, dim3), cellsize,
      &          cloudsize
 c
 c  locals
 c
-      integer i1, j1, k1, i2,j2,k2,n
-      ENZO_REAL    xpos, ypos, zpos, dx1, dy1, dz1, dx2,dy2,dz2
-      ENZO_REAL edge1, edge2, edge3, fact, shift, half, refine
+      INTG_PREC iii, jjj, kkk
+      INTG_PREC i1, j1, k1, n
+      R_PREC    xpos, ypos, zpos, dx, dy, dz
+      P_PREC edge1, edge2, edge3, fact, shift, half, refine
 c
 c\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////
 c=======================================================================
@@ -67,17 +69,20 @@ c
 
 !     write(0,*) npositions, leftedge, dim1, dim2, dim3, cellsize
 
-      fact = 1.0/cellsize
+      print*, 'cic_deposit.F mass(1)=',mass(1)
+      fact = 1._PKIND/cellsize
       refine = cellsize/cloudsize
-      half = 0.5001/refine
-      shift = 0.5/refine
-      edge1 = REAL(dim1) - half
-      edge2 = REAL(dim2) - half
-      edge3 = REAL(dim3) - half
+      half = 0.5001_PKIND/refine
+      shift = 0.5_PKIND/refine
+      edge1 = REAL(dim1,PKIND) - half
+      edge2 = REAL(dim2,PKIND) - half
+      edge3 = REAL(dim3,PKIND) - half
 c
       if (cloudsize .gt. cellsize) then
+         print*, 'ERROR'
+C         ERROR_MESSAGE
          write(6,*) "cloudsize > cellsize in cic_deposit!"
-         ERROR_MESSAGE
+         write(6,*) cloudsize, cellsize
       endif
 c
 c     1D
@@ -90,18 +95,18 @@ c           Compute the position of the central cell
 c
             xpos = min(max((posx(n) - leftedge(1))*fact, half), edge1)
 c
-c           Convert this into an integer index
+c           Convert this into an INTG_PREC index
 c
-            i1  = int(xpos - shift) + 1
+            i1  = int(xpos - shift,IKIND) + 1
 c
 c           Compute the weights
 c
-            dx1 = min((REAL(i1)+shift-xpos)*refine, 1.0)
+            dx = min((REAL(i1,RKIND)+shift-xpos)*refine, 1.0_RKIND)
 c
 c           Interpolate from field into sumfield
 c
-            field(i1  ,1,1) = field(i1  ,1,1) + mass(n)*dx1
-            field(i1+1,1,1) = field(i1+1,1,1) + mass(n)*(1.0-dx1)
+            field(i1  ,1,1) = field(i1  ,1,1) + mass(n)*dx
+            field(i1+1,1,1) = field(i1+1,1,1) + mass(n)*(1._RKIND-dx)
 c
          enddo
 c
@@ -118,26 +123,26 @@ c
             xpos = min(max((posx(n) - leftedge(1))*fact, half), edge1)
             ypos = min(max((posy(n) - leftedge(2))*fact, half), edge2)
 c
-c           Convert this into an integer index
+c           Convert this into an INTG_PREC index
 c
-            i1 = int(xpos - shift) + 1
-            j1 = int(ypos - shift) + 1
-            i2 = i1 + 1
-            j2 = j1 + 1
+            i1  = int(xpos - shift,IKIND) + 1
+            j1  = int(ypos - shift,IKIND) + 1
 c
 c           Compute the weights
 c
-            dx1 = min((REAL(i1)+shift-xpos)*refine, 1.0)
-            dy1 = min((REAL(j1)+shift-ypos)*refine, 1.0)
-            dx2 = (1.0-dx1)
-            dy2 = (1.0-dy1)
+            dx = min((REAL(i1,RKIND)+shift-xpos)*refine, 1.0_RKIND)
+            dy = min((REAL(j1,RKIND)+shift-ypos)*refine, 1.0_RKIND)
 c
 c           Interpolate from field into sumfield
 c
-            field(i1,j1,1) = field(i1,j1,1) + mass(n)*dx1*dy1
-            field(i2,j1,1) = field(i2,j1,1) + mass(n)*dx2*dy1
-            field(i1,j2,1) = field(i1,j2,1) + mass(n)*dx1*dy2
-            field(i2,j2,1) = field(i2,j2,1) + mass(n)*dx2*dy2
+            field(i1  ,j1  ,1) = field(i1  ,j1  ,1) +
+     &                           mass(n)*      dx *      dy
+            field(i1+1,j1  ,1) = field(i1+1,j1  ,1) +
+     &                           mass(n)*(1._RKIND-dx)*      dy
+            field(i1  ,j1+1,1) = field(i1  ,j1+1,1) + 
+     &                           mass(n)*      dx *(1._RKIND-dy)
+            field(i1+1,j1+1,1) = field(i1+1,j1+1,1) +
+     &                           mass(n)*(1._RKIND-dx)*(1._RKIND-dy)
 c
          enddo
 c
@@ -155,40 +160,44 @@ c
             ypos = min(max((posy(n) - leftedge(2))*fact, half),edge2)
             zpos = min(max((posz(n) - leftedge(3))*fact, half),edge3)
 c     
-c     Convert this into an integer index
+c     Convert this into an INTG_PREC index
 c     
-            i1 = int(xpos - shift) + 1
-            j1 = int(ypos - shift) + 1
-            k1 = int(zpos - shift) + 1
-            i2 = i1 + 1
-            j2 = j1 + 1
-            k2 = k1 + 1
+            i1  = int(xpos - shift,IKIND) + 1
+            j1  = int(ypos - shift,IKIND) + 1
+            k1  = int(zpos - shift,IKIND) + 1
+
 c     
 c     Compute the weights
 c     
-            dx1 = min((REAL(i1)+shift-xpos)*refine, 1.0)
-            dy1 = min((REAL(j1)+shift-ypos)*refine, 1.0)
-            dz1 = min((REAL(k1)+shift-zpos)*refine, 1.0)
-            dx2 = (1.0 - dx1)
-            dy2 = (1.0 - dy1)
-            dz2 = (1.0 - dz1)
+            dx = min((REAL(i1,RKIND)+shift-xpos)*refine, 1.0_RKIND)
+            dy = min((REAL(j1,RKIND)+shift-ypos)*refine, 1.0_RKIND)
+            dz = min((REAL(k1,RKIND)+shift-zpos)*refine, 1.0_RKIND)
 c     
 c     Interpolate from field into sumfield
-c     
+c
+C            print*, 'DEBUG_CIC',dx,dy,dz
+            field(i1  ,j1  ,k1  ) = field(i1  ,j1  ,k1  ) +
+     &              mass(n)*     dx *     dy *    dz
+            field(i1+1,j1  ,k1  ) = field(i1+1,j1  ,k1  ) +
+     &              mass(n)*(1._RKIND-dx)*     dy *    dz
+            field(i1  ,j1+1,k1  ) = field(i1  ,j1+1,k1  ) + 
+     &              mass(n)*     dx *(1._RKIND-dy)*    dz
+            field(i1+1,j1+1,k1  ) = field(i1+1,j1+1,k1  ) +
+     &              mass(n)*(1._RKIND-dx)*(1._RKIND-dy)*    dz
+            field(i1  ,j1  ,k1+1) = field(i1  ,j1  ,k1+1) +
+     &              mass(n)*     dx *     dy *(1._RKIND-dz)
+            field(i1+1,j1  ,k1+1) = field(i1+1,j1  ,k1+1) +
+     &              mass(n)*(1._RKIND-dx)*     dy *(1._RKIND-dz)
+            field(i1  ,j1+1,k1+1) = field(i1  ,j1+1,k1+1) + 
+     &              mass(n)*     dx *(1._RKIND-dy)*(1._RKIND-dz)
+            field(i1+1,j1+1,k1+1) = field(i1+1,j1+1,k1+1) +
+     &           mass(n)*(1._RKIND-dx)*(1._RKIND-dy)*(1._RKIND-dz)
 
-            field(i1,j1,k1) = field(i1,j1,k1) + mass(n)*dx1*dy1*dz1
-            field(i2,j1,k1) = field(i2,j1,k1) + mass(n)*dx2*dy1*dz1
-            field(i1,j2,k1) = field(i1,j2,k1) + mass(n)*dx1*dy2*dz1
-            field(i2,j2,k1) = field(i2,j2,k1) + mass(n)*dx2*dy2*dz1
-            field(i1,j1,k2) = field(i1,j1,k2) + mass(n)*dx1*dy1*dz2
-            field(i2,j1,k2) = field(i2,j1,k2) + mass(n)*dx2*dy1*dz2
-            field(i1,j2,k2) = field(i1,j2,k2) + mass(n)*dx1*dy2*dz2
-            field(i2,j2,k2) = field(i2,j2,k2) + mass(n)*dx2*dy2*dz2
 c     
          enddo
       
       endif
 c
       return
-
+#endif
       end
