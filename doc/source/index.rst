@@ -54,6 +54,7 @@ highly scalable multigrid-based linear solver.
    design/index
    project/index
    tests/index
+   faq
    
 Getting started
 ---------------

@@ -11,14 +11,16 @@ configuring and compiling the code, and running a sample test problem.
 
 Other pages are available for helping to get started on specific
 architectures, including the "Comet" supercomputer at San Diego
-Supercomputing Center (SDSC), and the NSF Petascale supercomputer "Blue
-Waters" at the National Center for Supercomputing Applications (NCSA).
+Supercomputing Center (SDSC), the NSF Petascale supercomputer "Blue
+Waters" at the National Center for Supercomputing Applications (NCSA),
+and NASA's Pleiades/Electra supercomputer.
 
 .. toctree::
    :maxdepth: 1
 	   
    getting_started_comet
    getting_started_blue_waters
+   getting_started_pleiades
 
 Downloading
 ===========
