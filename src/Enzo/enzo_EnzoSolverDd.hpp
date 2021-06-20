@@ -55,12 +55,15 @@ public: // interface
        index_restrict_(-1),
        i_sync_restrict_(-1),
        i_sync_prolong_(-1),
-       i_msg_(-1),
+       i_msg_restrict_(),
+       i_msg_prolong_(-1),
        ixc_(-1),
        mx_(0),my_(0),mz_(0),
        gx_(0),gy_(0),gz_(0),
        coarse_level_(0)
-  {}
+  {
+    for (int i=0; i<8; i++) i_msg_restrict_[i] = -1;
+  }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
@@ -81,7 +84,8 @@ public: // interface
 
     p | i_sync_restrict_;
     p | i_sync_prolong_;
-    p | i_msg_;
+    p | i_msg_prolong_;
+    PUParray(p,i_msg_restrict_,8);
 
     p | ixc_;
 
@@ -150,12 +154,20 @@ public: // methods
   /// End of solver
   void end(Block* block) throw();
   
-  /// Access the msg Scalar value for the Block
-  FieldMsg ** pmsg(Block * block)
+  /// Access the Field message for buffering prolongation data
+  FieldMsg ** pmsg_prolong(Block * block)
   {
     ScalarData<void *> * scalar_data = block->data()->scalar_data_void();
     ScalarDescr *        scalar_descr = cello::scalar_descr_void();
-    return (FieldMsg **)scalar_data->value(scalar_descr,i_msg_);
+    return (FieldMsg **)scalar_data->value(scalar_descr,i_msg_prolong_);
+  }
+  
+  /// Access the Field message for buffering restriction data
+  FieldMsg ** pmsg_restrict(Block * block, int ic)
+  {
+    ScalarData<void *> * scalar_data = block->data()->scalar_data_void();
+    ScalarDescr *        scalar_descr = cello::scalar_descr_void();
+    return (FieldMsg **)scalar_data->value(scalar_descr,i_msg_restrict_[ic]);
   }
   
   /// Access the prolong Sync Scalar value for the Block
@@ -200,7 +212,8 @@ protected: // attributes
   /// MG scalar id's
   int i_sync_restrict_;
   int i_sync_prolong_;
-  int i_msg_;
+  int i_msg_prolong_;
+  int i_msg_restrict_[8];
 
   /// Solver-specific temporary fields
   int ixc_;

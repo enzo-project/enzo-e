@@ -521,14 +521,6 @@ cello_def.write ("#define CELLO_TIME "
 		"\""+time.strftime("%H:%M:%S",time.gmtime())+"\"\n" )
 
 #----------
-charm_version = str(subprocess.check_output (["cat", charm_path + "/VERSION"]).rstrip());
-cello_def.write ("#define CHARM_VERSION "+charm_version+"\n" )
-     
-fp_charm_version = open ("test/CHARM_VERSION", "w")
-fp_charm_version.write(charm_version + str("\n"));
-fp_charm_version.close()
-
-Clean('.','test/CHARM_VERSION')
 
 cello_def.write ("#define CHARM_PATH \"" + charm_path + "\"\n" )
 

@@ -74,7 +74,10 @@ EnzoSolverDd::EnzoSolverDd
   i_sync_prolong_  = scalar_descr_sync->new_value(name + ":prolong");
 
   ScalarDescr * scalar_descr_void = cello::scalar_descr_void();
-  i_msg_ = scalar_descr_void->new_value(name + ":msg");
+  i_msg_prolong_ = scalar_descr_void->new_value(name + ":msg_prolong");
+  for (int ic=0; ic<cello::num_children(); ic++) {
+    i_msg_restrict_[ic] = scalar_descr_void->new_value(name + ":msg_restrict");
+  }
 }
 
 //----------------------------------------------------------------------
@@ -102,12 +105,12 @@ void EnzoSolverDd::apply ( std::shared_ptr<Matrix> A, Block * block) throw()
   Sync * sync_restrict = psync_restrict(block);
 
   sync_restrict->reset();
-  sync_restrict->set_stop(cello::num_children());
+  sync_restrict->set_stop(1 + cello::num_children()); // self and children
   
   Sync * sync_prolong = psync_prolong(block);
 
   sync_prolong->reset();
-  sync_prolong->set_stop(2); // self and parent
+  sync_prolong->set_stop(1 + 1); // self and parent
 
   int level = block->level();
 
@@ -132,6 +135,12 @@ void EnzoSolverDd::apply ( std::shared_ptr<Matrix> A, Block * block) throw()
     
       call_coarse_solver(enzo::block(block));
     
+    } else {
+
+      // non-leaf blocks in range [coarse_level,max_level_]
+
+      // count self for restrict receive
+      restrict_recv(enzo::block(block),nullptr);
     }
   }
 }
@@ -191,9 +200,20 @@ void EnzoSolverDd::restrict_recv
 {
   // Unpack "B" vector data from children
 
-  unpack_field_(enzo_block,msg,ib_,refresh_coarse);
+  // Save field message from child
+  if (msg != NULL) *pmsg_restrict(enzo_block,msg->child_index()) = msg;
+
+  // Continue if all expected messages received
+  if (psync_restrict(enzo_block)->next() ) {
+
+    // Restore saved messages then clear
+    for (int i=0; i<cello::num_children(); i++) {
+      msg = *pmsg_restrict(enzo_block,i);
+      *pmsg_restrict(enzo_block,i) = NULL;
+      // Unpack field from message then delete message
+      unpack_field_(enzo_block,msg,ib_,refresh_coarse);
+    }
   
-  if (psync_restrict(enzo_block)->next())  {
     begin_solve(enzo_block);
   }
 }
@@ -292,27 +312,29 @@ void EnzoBlock::solver_dd_prolong_recv(FieldMsg * msg)
 void EnzoSolverDd::prolong_recv
 (EnzoBlock * enzo_block, FieldMsg * msg) throw()
 {
+  // Unpack "X" vector data from parent
   
-  // Save message
-  if (msg != NULL) *pmsg(enzo_block) = msg;
+  // Save field message from parent
+  if (msg != NULL) *pmsg_prolong(enzo_block) = msg;
 
-  // Return if not ready yet
-  if (! psync_prolong(enzo_block)->next() ) return;
+  // Continue if all expected messages received
+  if (psync_prolong(enzo_block)->next() ) {
 
-  // Restore saved message then clear
-  msg = *pmsg(enzo_block);
-  *pmsg(enzo_block) = NULL;
+    // Restore saved message then clear
+    msg = *pmsg_prolong(enzo_block);
+    *pmsg_prolong(enzo_block) = NULL;
 
-  unpack_field_(enzo_block,msg,ixc_,refresh_fine);
+    // Unpack field from message then delete message
+    unpack_field_(enzo_block,msg,ixc_,refresh_fine);
 
-  // copy X = XC
-  // copy X_copy = XC (using Solver::reuse_solution_(cycle) )
-  copy_xc_to_x_(enzo_block);
+    // copy X = XC
+    // copy X_copy = XC (using Solver::reuse_solution_(cycle) )
+    copy_xc_to_x_(enzo_block);
   
-  call_domain_solver(enzo_block);
+    call_domain_solver(enzo_block);
 
-  prolong_send_ (enzo_block);
-
+    prolong_send_ (enzo_block);
+  }
 }
 
 //----------------------------------------------------------------------
