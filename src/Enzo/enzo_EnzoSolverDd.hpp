@@ -62,7 +62,7 @@ public: // interface
        gx_(0),gy_(0),gz_(0),
        coarse_level_(0)
   {
-    for (int i=0; i<8; i++) i_msg_restrict_[i] = -1;
+    for (int i=0; i<cello::num_children(); i++) i_msg_restrict_[i] = -1;
   }
 
   /// CHARM++ Pack / Unpack function

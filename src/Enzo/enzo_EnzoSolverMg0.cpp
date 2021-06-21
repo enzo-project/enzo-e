@@ -106,15 +106,17 @@
 #include "enzo.decl.h"
 
 // #define DEBUG_SOLVER_CONTROL
-// #define CYCLE 000
 
-// #define AFTER_CYCLE(BLOCK,CYCLE) (BLOCK->cycle() >= CYCLE)
+#define CYCLE 129
+#define AFTER_CYCLE(BLOCK,CYCLE) (BLOCK->cycle() >= CYCLE)
 
 #ifdef DEBUG_SOLVER_CONTROL
-#   define SOLVER_CONTROL(BLOCK,MIN,MAX,MESSAGE)			\
-  if (AFTER_CYCLE(BLOCK,CYCLE))						\
-    CkPrintf ("DEBUG_SOLVER_CONTROL %-4s %-10s %s\n",	\
-	      name_.c_str(),BLOCK->name().c_str(),MESSAGE);
+#   define SOLVER_CONTROL(BLOCK,MIN,MAX,MESSAGE)                \
+  if (AFTER_CYCLE(BLOCK,CYCLE)) {                               \
+    CkPrintf ("DEBUG_SOLVER_CONTROL %-4s %-10s %s\n",           \
+	      name_.c_str(),BLOCK->name().c_str(),MESSAGE);     \
+    fflush(stdout); \
+  }
 #else
 #   define SOLVER_CONTROL(BLOCK,MIN,MAX,MESSAGE) /* ... */
 #endif
@@ -152,7 +154,7 @@ EnzoSolverMg0::EnzoSolverMg0
     bs_(0), bc_(0),
     rr_(0), rr_local_(0), rr0_(0),
     res_tol_(res_tol),
-    A_(NULL),
+    A_(nullptr),
     index_smooth_pre_(index_smooth_pre),
     index_solve_coarse_(index_solve_coarse),
     index_smooth_post_(index_smooth_post),
@@ -184,7 +186,10 @@ EnzoSolverMg0::EnzoSolverMg0
   i_sync_prolong_  = scalar_descr_sync->new_value(name + ":prolong");
 
   ScalarDescr * scalar_descr_void = cello::scalar_descr_void();
-  i_msg_ = scalar_descr_void->new_value(name + ":msg");
+  i_msg_prolong_ = scalar_descr_void->new_value(name + ":msg_prolong");
+  for (int ic=0; ic<cello::num_children(); ic++) {
+    i_msg_restrict_[ic] = scalar_descr_void->new_value(name + ":msg_restrict");
+  }
 
 }
 
@@ -205,7 +210,6 @@ void EnzoSolverMg0::apply ( std::shared_ptr<Matrix> A, Block * block) throw()
   rr_local_ = 0.0;
   rr0_ = 0.0;
   *piter(block) = 0.0;
-  *pmsg(block) = NULL;
 
   /// Current and initial residual norm R'*R
 
@@ -220,13 +224,11 @@ void EnzoSolverMg0::apply ( std::shared_ptr<Matrix> A, Block * block) throw()
   
   Sync * sync_restrict = psync_restrict(block);
 
-  sync_restrict->reset();
-  sync_restrict->set_stop(cello::num_children());
+  sync_restrict->set_stop(1 + cello::num_children()); // self and children
   
   Sync * sync_prolong = psync_prolong(block);
 
-  sync_prolong->reset();
-  sync_prolong->set_stop(2); // self and parent
+  sync_prolong->set_stop(1 + 1); // self and parent
 
   enter_solver_ (enzo_block);
 }
@@ -270,7 +272,7 @@ void EnzoSolverMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
     /// initiate callback for p_solver_begin_solve and contribute to
     /// sum and count
 
-    CkCallback callback(CkIndex_EnzoBlock::r_solver_mg0_begin_solve(NULL), 
+    CkCallback callback(CkIndex_EnzoBlock::r_solver_mg0_begin_solve(nullptr), 
 			enzo::block_array());
 
     SOLVER_CONTROL (enzo_block,"min","max","1 calling begin_solve_1 (shift)");
@@ -282,7 +284,7 @@ void EnzoSolverMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
 
     SOLVER_CONTROL(enzo_block,"min","max","2 calling begin_solve_2 (no shift)");
 
-    begin_solve (enzo_block,NULL);
+    begin_solve (enzo_block,nullptr);
 
   }
 
@@ -338,10 +340,13 @@ void EnzoSolverMg0::begin_solve(EnzoBlock * enzo_block,
 
   } else {
 
+
     int level = enzo_block->level();
     if ( ! (coarse_level_ <= level && level <= max_level_) ) {
       SOLVER_CONTROL(enzo_block,"min","max", "CALL_COARSE_SOLVER_1");
       call_coarse_solver(enzo_block);
+    } else {
+      restrict_recv(enzo_block,nullptr);
     }
 
   }
@@ -352,7 +357,7 @@ void EnzoSolverMg0::begin_solve(EnzoBlock * enzo_block,
 void EnzoSolverMg0::do_shift_(EnzoBlock * enzo_block,
 			      CkReductionMsg *msg) throw()
 {
-  if (msg != NULL) {
+  if (msg != nullptr) {
     
     long double* data = (long double*) msg->getData();
 
@@ -433,7 +438,7 @@ void EnzoBlock::p_solver_mg0_solve_coarse()
   EnzoSolverMg0 * solver = 
     static_cast<EnzoSolverMg0*> (this->solver());
 
-  CkCallback callback(CkIndex_EnzoBlock::r_solver_mg0_barrier(NULL), 
+  CkCallback callback(CkIndex_EnzoBlock::r_solver_mg0_barrier(nullptr), 
 		      enzo::block_array());
   
   long double data[1] = {solver->rr_local()};
@@ -637,19 +642,26 @@ void EnzoSolverMg0::restrict_recv
 {
 
   SOLVER_CONTROL(enzo_block,"coarse","fine-1", "15 restrict_recv_1");
+  if (msg == nullptr)   SOLVER_CONTROL(enzo_block,"coarse","fine-1", "16 restrict_recv_1 nullptr");
 
   // Unpack "B" vector data from children
 
-  unpack_residual_(enzo_block,msg);
+  // Save field message from child
+  if (msg != nullptr) *pmsg_restrict(enzo_block,msg->child_index()) = msg;
 
-  // continue with EnzoSolverMg0
+  // Continue if all expected messages received
+  if (psync_restrict(enzo_block)->next() ) {
 
-  if (psync_restrict(enzo_block)->next())
-    {
-      SOLVER_CONTROL(enzo_block,"coarse","fine-1", "16 call begin_cycle_1");
-      begin_cycle_ (enzo_block);
+    // Restore saved messages then clear
+    for (int i=0; i<cello::num_children(); i++) {
+      msg = *pmsg_restrict(enzo_block,i);
+      *pmsg_restrict(enzo_block,i) = nullptr;
+      // Unpack field from message then delete message
+      unpack_residual_(enzo_block,msg);
     }
-
+  
+    begin_cycle_ (enzo_block);
+  }
 }
 
 //----------------------------------------------------------------------
@@ -678,7 +690,7 @@ void EnzoSolverMg0::prolong(EnzoBlock * enzo_block) throw()
 
   if (coarse_level_ < level && level <= max_level_) {
     SOLVER_CONTROL(enzo_block,"coarse","fine-1", "20 call prolong_recv_1");
-    enzo_block->solver_mg0_prolong_recv(NULL);
+    enzo_block->solver_mg0_prolong_recv(nullptr);
   } else {
   
     SOLVER_CONTROL(enzo_block,"coarse","fine-1", "19 call end_cycle_1");
@@ -743,17 +755,16 @@ void EnzoSolverMg0::prolong_recv
   // Save message
 
   // Return if not ready yet
-  if (msg != NULL) *pmsg(enzo_block) = msg;
+  if (msg != nullptr) *pmsg_prolong(enzo_block) = msg;
   
   if (! psync_prolong(enzo_block)->next() ) return;
-  // Restore saved message then clear
-  msg = *pmsg(enzo_block);
-  *pmsg(enzo_block) = NULL;
 
   SOLVER_CONTROL(enzo_block,"coarse+1","fine", "24 prolong_recv_3");
-  
-  // Unpack "C" vector data from children
 
+  // Restore saved message then clear
+  msg = *pmsg_prolong(enzo_block);
+  *pmsg_prolong(enzo_block) = nullptr;
+  // Unpack "C" vector data from children
   unpack_correction_(enzo_block,msg);
   
   Field field = enzo_block->data()->field();
@@ -872,6 +883,8 @@ void EnzoSolverMg0::end_cycle(EnzoBlock * enzo_block) throw()
 	SOLVER_CONTROL(enzo_block,"coarse","fine-1", "34 call coarse_solver");
         SOLVER_CONTROL(enzo_block,"min","max", "CALL_COARSE_SOLVER_4");
 	call_coarse_solver(enzo_block);
+      } else {
+        restrict_recv(enzo_block,nullptr);
       }
 
     }
