@@ -454,7 +454,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     enzo_float hxf = hx;
     enzo_float hyf = hy;
     enzo_float hzf = hz;
-    enzo_float dtf = alpha_;
+    enzo_float dtf = dt;
 
     enzo_float * vxf = (enzo_float *) field.values("velocity_x");
     enzo_float * vyf = (enzo_float *) field.values("velocity_y");
