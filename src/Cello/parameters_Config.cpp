@@ -126,6 +126,7 @@ void Config::pup (PUP::er &p)
   p | method_field_list;
   p | method_particle_list;
   PUParray (p,method_output_blocking,3);
+  p | method_output_all_blocks;
   p | method_prolong;
   p | method_ghost_depth;
   p | method_min_face_rank;
@@ -737,6 +738,7 @@ void Config::read_method_ (Parameters * p) throw()
   method_output_blocking[0].resize(num_method);
   method_output_blocking[1].resize(num_method);
   method_output_blocking[2].resize(num_method);
+  method_output_all_blocks.resize(num_method);
   method_prolong.resize(num_method);
   method_ghost_depth.resize(num_method);
   method_min_face_rank.resize(num_method);
@@ -846,7 +848,8 @@ void Config::read_method_ (Parameters * p) throw()
       method_output_blocking[i][index_method] =
         p->list_value_integer(i,full_name+":blocking",1);
     }
-    //    }
+    method_output_all_blocks[index_method] =
+      p->value_logical(full_name+":all_blocks",true);
     
     method_prolong[index_method] =
       p->value_string(full_name+":prolong","linear");

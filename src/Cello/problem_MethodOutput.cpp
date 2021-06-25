@@ -21,6 +21,7 @@ MethodOutput::MethodOutput
    int min_face_rank,
    bool all_fields,
    bool all_particles,
+   bool all_blocks,
    int blocking_x,
    int blocking_y,
    int blocking_z)
@@ -35,7 +36,8 @@ MethodOutput::MethodOutput
       all_particles_(all_particles),
       blocking_(),
       is_count_(-1),
-      factory_(factory)
+      factory_(factory),
+      all_blocks_(all_blocks)
 {
   if (field_list.size() > 0) {
     field_list_.resize(field_list.size());
@@ -91,7 +93,7 @@ MethodOutput::MethodOutput
   blocking_[2] = blocking_z;
 
   is_count_ = cello::scalar_descr_int()->new_value("method_output:count");
-
+  
 }
 
 //----------------------------------------------------------------------
@@ -117,6 +119,7 @@ void MethodOutput::pup (PUP::er &p)
   PUParray(p,blocking_,3);
   p | is_count_;
   p | factory_nonconst_;
+  p | all_blocks_;
 
 }
 
@@ -173,13 +176,12 @@ void MethodOutput::compute_continue(Block * block)
 
     file_write_hierarchy_(file);
     
-    if (block->is_leaf()) {
+    if (all_blocks_ || block->is_leaf()) {
 
       msg_output->set_block(block,factory_);
       file_write_block_(file,block,nullptr);
-      
-    }
 
+    }
     
     if ( ! block_trace->next(block->is_leaf())) {
       Index index_next = block_trace->top();
@@ -240,15 +242,15 @@ void MethodOutput::next(Block * block, MsgOutput * msg_output_in )
   bt->next(block->is_leaf());
   msg_output->set_index_send (block->index());
 
-  if (is_leaf) {
-    // if leaf, copy data to msg and send to writer
+  if (all_blocks_ || is_leaf) {
+    // if leaf (or writing all blocks), copy data to msg and send to writer
     Index index_home = bt->home();
     DataMsg * data_msg = create_data_msg_(block);
     msg_output->set_data_msg(data_msg);
     msg_output->set_block(block,factory_);
     cello::block_array()[index_home].p_method_output_write(msg_output);
   } else {
-    // if non-leaf, forward to child
+    // if non-leaf (and not all blocks), forward message to child
     Index index_next = bt->top();
     msg_output->del_block();
     cello::block_array()[index_next].p_method_output_next(msg_output);

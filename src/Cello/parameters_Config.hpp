@@ -93,6 +93,7 @@ public: // interface
     method_field_list(),
     method_particle_list(),
     method_output_blocking(),
+    method_output_all_blocks(),
     method_prolong(),
     method_ghost_depth(),
     method_min_face_rank(),
@@ -263,6 +264,7 @@ public: // interface
       method_field_list(),
       method_particle_list(),
       method_output_blocking(),
+      method_output_all_blocks(),
       method_prolong(),
       method_ghost_depth(),
       method_min_face_rank(),
@@ -484,6 +486,7 @@ public: // attributes
   std::vector< std::vector< std::string > > method_field_list;
   std::vector< std::vector< std::string > > method_particle_list;
   std::vector< int >         method_output_blocking[3];
+  std::vector< bool >        method_output_all_blocks;
   std::vector<std::string>   method_prolong;
   std::vector<int>           method_ghost_depth;
   std::vector<int>           method_min_face_rank;

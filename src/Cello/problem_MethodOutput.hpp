@@ -36,9 +36,10 @@ public: // interface
    int min_face_rank,
    bool all_fields,
    bool all_particles,
-   int blocking_x = 1,
-   int blocking_y = 1,
-   int blocking_z = 1);
+   bool all_blocks,
+   int blocking_x,
+   int blocking_y,
+   int blocking_z);
 
   /// Destructor
   virtual ~MethodOutput() throw();
@@ -128,6 +129,8 @@ protected: // attributes
     Factory * factory_nonconst_;
   };
 
+  /// Whether to output all blocks or just leaf-blocks
+  bool all_blocks_;
 };
 
 
