@@ -34,7 +34,7 @@ MsgInitial::MsgInitial()
     data_precision_(),
     data_bytes_(0),
     data_values_(nullptr),
-    data_delete_(false),
+    data_delete_(true),
     count_(false),
     tag_(),
     n4_(),
