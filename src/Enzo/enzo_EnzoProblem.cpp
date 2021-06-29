@@ -623,7 +623,8 @@ Method * EnzoProblem::create_method_
        enzo_config->solver_index.at(solver_name),
        enzo_config->method_gravity_grav_const,
        enzo_config->method_gravity_order,
-       enzo_config->method_gravity_accumulate);
+       enzo_config->method_gravity_accumulate,
+       enzo_config->method_gravity_dt_max);
 
   } else if (name == "mhd_vlct") {
 

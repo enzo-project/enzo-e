@@ -20,11 +20,13 @@ EnzoMethodGravity::EnzoMethodGravity
 (int index_solver,
  double grav_const,
  int order,
- bool accumulate)
+ bool accumulate,
+ double dt_max)
   : Method(),
     index_solver_(index_solver),
     grav_const_(grav_const),
     order_(order),
+    dt_max_(dt_max),
     ir_exit_(-1)
 {
 
@@ -260,12 +262,12 @@ double EnzoMethodGravity::timestep_ (Block * block) const throw()
   int gx,gy,gz;
   field.dimensions (0,&mx,&my,&mz);
   field.ghost_depth(0,&gx,&gy,&gz);
-
+  
+  const int rank = cello::rank();
+  
   enzo_float * ax = (enzo_float*) field.values ("acceleration_x");
   enzo_float * ay = (enzo_float*) field.values ("acceleration_y");
   enzo_float * az = (enzo_float*) field.values ("acceleration_z");
-
-  enzo_float dt = std::numeric_limits<enzo_float>::max();
 
   double hx,hy,hz;
   block->cell_width(&hx,&hy,&hz);
@@ -273,47 +275,46 @@ double EnzoMethodGravity::timestep_ (Block * block) const throw()
   EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
   if (cosmology) {
-    const int rank = cello::rank();
     enzo_float cosmo_a = 1.0;
     enzo_float cosmo_dadt = 0.0;
-    double dt   = block->dt();
     double time = block->time();
-    cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*dt);
+    cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*block->dt());
     if (rank >= 1) hx*=cosmo_a;
     if (rank >= 2) hy*=cosmo_a;
     if (rank >= 3) hz*=cosmo_a;
   }
+  
+  double mean_cell_width;
 
-  if (ax) {
-    for (int iz=gz; iz<mz-gz; iz++) {
-      for (int iy=gy; iy<my-gy; iy++) {
-	for (int ix=gx; ix<mx-gx; ix++) {
-	  int i=ix + mx*(iy + iz*my);
-	  dt = std::min(enzo_float(dt),enzo_float(sqrt(hx/(fabs(ax[i]+1e-20)))));
-	}
-      }
-    }
-  }
-  if (ay) {
-    for (int iz=gz; iz<mz-gz; iz++) {
-      for (int iy=gy; iy<my-gy; iy++) {
-	for (int ix=gx; ix<mx-gx; ix++) {
-	  int i=ix + mx*(iy + iz*my);
-	  dt = std::min(enzo_float(dt),enzo_float(sqrt(hy/(fabs(ay[i]+1e-20)))));
-	}
-      }
-    }
-  }
-  if (az) {
-    for (int iz=gz; iz<mz-gz; iz++) {
-      for (int iy=gy; iy<my-gy; iy++) {
-	for (int ix=gx; ix<mx-gx; ix++) {
-	  int i=ix + mx*(iy + iz*my);
-	  dt = std::min(enzo_float(dt),enzo_float(sqrt(hz/(fabs(az[i]+1e-20)))));
-	}
-      }
-    }
-  }
+  if (rank == 1) mean_cell_width = hx;
+  if (rank == 2) mean_cell_width = sqrt(hx*hy);
+  if (rank == 3) mean_cell_width = cbrt(hx*hy*hz);
 
+  // Timestep is sqrt(mean_cell_width / (acceleration + epsilon), with epsilon defined as
+  // mean_cell_width / dt_max_^2. This means that when acceleration is zero, the timestep is
+  // equal to dt_max_
+  
+  const double epsilon = mean_cell_width / (dt_max_ * dt_max_);
+
+  // Find cell with maximum acceleration magnitude
+  
+  double a_mag_max = 0.0;
+  double a_mag;
+  
+  for (int iz=gz; iz<mz-gz; iz++) {
+    for (int iy=gy; iy<my-gy; iy++) {
+      for (int ix=gx; ix<mx-gx; ix++) {
+	int i=ix + mx*(iy + iz*my);
+	if (rank == 1) a_mag = std::abs(ax[i]);
+	if (rank == 2) a_mag = sqrt(ax[i] * ax[i] + ay[i] * ay[i]);
+	if (rank == 3) a_mag = sqrt(ax[i] * ax[i] + ay[i] * ay[i] + az[i] * az[i]);
+	  
+	a_mag_max = std::max(a_mag_max,a_mag);
+      }
+    }
+  }
+  
+  double dt = sqrt(mean_cell_width / (a_mag_max + epsilon)) ;
+  
   return 0.5*dt;
 }
