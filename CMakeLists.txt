@@ -54,7 +54,8 @@ include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS}) 
 
 #Set up and find HDF5
-find_package(HDF5 REQUIRED COMPONENTS CXX)
+set(HDF5_USE_STATIC_LIBS OFF)
+find_package(HDF5)
 include_directories(${HDF5_INCLUDE_DIRS}) 
 add_definitions(${HDF5_DEFINITIONS})
 
@@ -64,7 +65,7 @@ include_directories(${PNG_INCLUDE_DIRS})
 add_definitions(${PNG_DEFINITIONS})
 
 #Set up the linker
-set(ENZO_E_LIBRARIES  "dl" "pthread" "z" "gfortran" ${Boost_LIBRARIES}  ${HDF5_LIBRARIES} ${PNG_LIBRARIES} )
+set(ENZO_E_LIBRARIES  "dl" "pthread" "z" "gfortran" ${Boost_LIBRARIES}  ${PNG_LIBRARIES} )
 
 #Define preprocessor definitions
 add_compile_definitions(CONFIG_PRECISION_DOUBLE)
