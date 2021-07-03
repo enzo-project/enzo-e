@@ -39,87 +39,188 @@ set( charm_interfaces
 # source files
 preprocess_charm_interfaces(charm_interface_headers ${charm_interfaces})
 
-# make this a function for now (in case we shuffle files around)
-# can probably remove this later.
-function(find_sources prefix out_sources)
-  set(result)
-  FILE(GLOB result CONFIGURE_DEPENDS
-    ${CMAKE_CURRENT_SOURCE_DIR}/Cello/${prefix}*cpp
-  )
-  # THIS IS A HACK TO MAKE SURE THAT CHARM INTERFACES ARE PROCESSED FIRST
-  LIST(APPEND result "${charm_interface_headers}")
-  set(${out_sources} "${result}" PARENT_SCOPE)
-endfunction()
+add_library(cello_library STATIC
+	${CMAKE_SOURCE_DIR}/src/Cello/cello.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/cello_Sync.cpp
+	)
 
-find_sources(cello sources_cello)
-find_sources(charm sources_charm)
-find_sources(control sources_control)
-find_sources(disk sources_disk)
-find_sources(error sources_error)
-find_sources(data_ sources_data) # not a typo
-# there's some stuff about data0, but not sure what that's about
-find_sources(io sources_io)
-find_sources(main sources_main)
-find_sources(memory sources_memory)
-find_sources(mesh sources_mesh)
-find_sources(monitor sources_monitor)
-find_sources(parallel sources_parallel)
+add_library(charm_library STATIC
+    ${charm_interface_headers} #Include the charm interface headers as source dependencies
+	${CMAKE_SOURCE_DIR}/src/Cello/charm_MappingArray.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/charm_MappingTree.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/charm_MsgCoarsen.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/charm_MsgRefine.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/charm_MsgRefresh.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/charm_mesh.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/charm_reductions.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/charm_simulation.cpp
+	)
 
-find_sources(parameters sources_parameters)
-LIST(APPEND sources_parameters "${CMAKE_CURRENT_SOURCE_DIR}/Cello/parse.tab.c")
-LIST(APPEND sources_parameters "${CMAKE_CURRENT_SOURCE_DIR}/Cello/lex.yy.c")
+add_library(control_library STATIC
+	${CMAKE_SOURCE_DIR}/src/Cello/control_adapt.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/control_charm.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/control_compute.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/control_initialize.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/control_new_refresh.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/control_output.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/control_refresh.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/control_stopping.cpp
+	)
 
-find_sources(performance sources_performance)
-find_sources(problem sources_problem)
-find_sources(compute sources_compute)
-# skipping array because it's header-only
-find_sources(simulation sources_simulation)
-find_sources(test_Unit sources_test) # not a typo
+add_library(disk_library STATIC
+	${CMAKE_SOURCE_DIR}/src/Cello/disk_FileHdf5.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/main.cpp
+	)
 
+add_library(error_library STATIC
+	${CMAKE_SOURCE_DIR}/src/Cello/error_Error.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/main.cpp
+	)
 
+add_library(data_library STATIC
+	${CMAKE_SOURCE_DIR}/src/Cello/data_Data.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/data_DataMsg.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/data_Face.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/data_FaceFluxes.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/data_FieldData.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/data_FieldDescr.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/data_FieldFace.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/data_FluxData.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/data_ParticleData.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/data_ParticleDescr.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/data_png_array.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/main_simulation.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/field_face_store.F
+	)
 
+add_library(data0_library INTERFACE
+	)
 
-# may need to rebuild parse.y or parse.l
+add_library(io_library STATIC
+	${CMAKE_SOURCE_DIR}/src/Cello/io_ColormapRGB.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/io_Input.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/io_InputData.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/io_Io.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/io_IoBlock.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/io_IoFieldData.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/io_IoHierarchy.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/io_IoParticleData.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/io_Output.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/io_OutputCheckpoint.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/io_OutputData.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/io_OutputImage.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/io_Schedule.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/io_ScheduleInterval.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/io_ScheduleList.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/main_simulation.cpp
+	)
 
+add_library(main_library STATIC
+	${CMAKE_SOURCE_DIR}/src/Cello/main.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/main_enzo.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/main_mesh.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/main_simulation.cpp
+	)
 
-# now append some main files
-LIST(APPEND sources_disk "${CMAKE_CURRENT_SOURCE_DIR}/Cello/main.cpp")
-LIST(APPEND sources_error "${CMAKE_CURRENT_SOURCE_DIR}/Cello/main.cpp")
-LIST(APPEND sources_data
-    "${CMAKE_CURRENT_SOURCE_DIR}/Cello/main_simulation.cpp"
-)
-LIST(APPEND sources_data
-    "${CMAKE_CURRENT_SOURCE_DIR}/Cello/field_face_store.F"
-)
-LIST(APPEND sources_io "${CMAKE_CURRENT_SOURCE_DIR}/Cello/main_simulation.cpp")
-LIST(APPEND sources_memory "${CMAKE_CURRENT_SOURCE_DIR}/Cello/main.cpp")
-LIST(APPEND sources_mesh "${CMAKE_CURRENT_SOURCE_DIR}/Cello/main_mesh.cpp")
-LIST(APPEND sources_monitor "${CMAKE_CURRENT_SOURCE_DIR}/Cello/main.cpp")
-LIST(APPEND sources_parameters "${CMAKE_CURRENT_SOURCE_DIR}/Cello/main.cpp")
-LIST(APPEND sources_performance "${CMAKE_CURRENT_SOURCE_DIR}/Cello/main.cpp")
+add_library(memory_library STATIC
+	${CMAKE_SOURCE_DIR}/src/Cello/memory_Memory.cpp
+    #${CMAKE_SOURCE_DIR}/src/Cello/main.cpp
+	)
 
+add_library(mesh_library STATIC
+	${CMAKE_SOURCE_DIR}/src/Cello/mesh_Block.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/mesh_Factory.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/mesh_Hierarchy.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/mesh_Index.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/mesh_ItFace.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/mesh_ItNeighbor.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/mesh_ItNode.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/mesh_Node.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/mesh_NodeTrace.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/mesh_Refine.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/mesh_RefineDensity.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/mesh_RefineMask.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/mesh_RefineParticleCount.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/mesh_RefineShear.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/mesh_RefineSlope.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/mesh_Tree.cpp
+    ${CMAKE_SOURCE_DIR}/src/Cello/main_mesh.cpp
+	)
 
-# Build the Libraries
-add_library(cello_library STATIC ${sources_cello})
-add_library(charm_library STATIC ${sources_charm})
-add_library(control_library STATIC ${sources_control})
-add_library(disk_library STATIC ${sources_disk})
-add_library(error_library STATIC ${sources_error})
-# there could be an issue here because we don't have the data0 targets
-add_library(data_library STATIC ${sources_data})
-add_library(io_library STATIC ${sources_io})
-add_library(main_library STATIC ${sources_main})
-add_library(memory_library STATIC ${sources_memory})
-add_library(mesh_library STATIC ${sources_mesh})
-add_library(monitor_library STATIC ${sources_monitor})
-add_library(problem_library STATIC ${sources_problem})
-add_library(compute_library STATIC ${sources_compute})
-add_library(parallel_library STATIC ${sources_parallel})
-add_library(parameters_library STATIC ${sources_parameters})
-add_library(performance_library STATIC ${sources_performance})
-add_library(simulation_library STATIC ${sources_simulation})
-add_library(test_library STATIC ${sources_test})
-add_library(array_library INTERFACE)
+add_library(monitor_library STATIC
+	${CMAKE_SOURCE_DIR}/src/Cello/monitor_Monitor.cpp
+    #${CMAKE_SOURCE_DIR}/src/Cello/main.cpp
+	)
+
+add_library(parallel_library STATIC
+	${CMAKE_SOURCE_DIR}/src/Cello/parallel_GroupProcess.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/parallel_GroupProcessCharm.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/parallel_GroupProcessMpi.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/parallel_GroupProcessSerial.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/parallel_ReduceMpi.cpp
+	)
+
+add_library(parameters_library STATIC
+	${CMAKE_SOURCE_DIR}/src/Cello/parameters.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/parameters_Config.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/parameters_Param.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/parameters_Parameters.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/parse.tab.c
+	${CMAKE_SOURCE_DIR}/src/Cello/lex.yy.c
+    #${CMAKE_SOURCE_DIR}/src/Cello/main.cpp
+	)
+
+add_library(performance_library STATIC
+	${CMAKE_SOURCE_DIR}/src/Cello/performance_Papi.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/performance_Performance.cpp
+    #${CMAKE_SOURCE_DIR}/src/Cello/main.cpp
+	)
+
+add_library(problem_library STATIC
+	${CMAKE_SOURCE_DIR}/src/Cello/problem_BoundaryValue.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/problem_Initial.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/problem_InitialFile.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/problem_InitialTrace.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/problem_InitialValue.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/problem_Mask.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/problem_MaskExpr.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/problem_MaskPng.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/problem_Method.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/problem_MethodCloseFiles.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/problem_MethodDebug.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/problem_MethodFluxCorrect.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/problem_MethodNull.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/problem_MethodTrace.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/problem_Problem.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/problem_Prolong.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/problem_ProlongInject.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/problem_ProlongLinear.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/problem_Refresh.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/problem_Restrict.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/problem_RestrictLinear.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/problem_ScalarExpr.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/problem_Stopping.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/problem_Value.cpp
+	)
+
+add_library(compute_library STATIC
+	${CMAKE_SOURCE_DIR}/src/Cello/compute_Matrix.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/compute_Solver.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/compute_SolverNull.cpp
+	)
+
+# array_library is basically header-only
+add_library(array_library INTERFACE
+	)
+
+add_library(simulation_library STATIC
+	${CMAKE_SOURCE_DIR}/src/Cello/simulation.cpp
+	${CMAKE_SOURCE_DIR}/src/Cello/simulation_Simulation.cpp
+	)
+
+add_library(test_library STATIC
+	${CMAKE_SOURCE_DIR}/src/Cello/test_Unit.cpp
+	)
 
 target_include_directories(array_library INTERFACE ${CMAKE_SOURCE_DIR}/src/Cello)
 target_include_directories(cello_library PRIVATE ${CMAKE_SOURCE_DIR}/src/Cello)
@@ -167,27 +268,27 @@ target_link_libraries(performance_library
 )
 target_link_libraries(array_library INTERFACE error_library)
 target_link_libraries(parallel_library INTERFACE error_library)
-#target_link_libraries(data_library
-#    INTERFACE data_library
-#    INTERFACE io_library
-#    INTERFACE parallel_library
-#    INTERFACE cello_library
-#)
+target_link_libraries(data_library
+    INTERFACE data_library
+    INTERFACE io_library
+    INTERFACE parallel_library
+    INTERFACE cello_library
+)
 target_link_libraries(memory_library
     PUBLIC ${Boost_LIBRARIES}
     INTERFACE error_library
 )
-#target_link_libraries(mesh_library
-#    PUBLIC ${PNG_LIBRARIES}
-#    PUBLIC ${HDF5_LIBRARIES}
-#    PUBLIC ${Boost_LIBRARIES}
-#    INTERFACE data_library
-#    INTERFACE io_library
-#    INTERFACE disk_library
-#    INTERFACE parallel_library
-#    INTERFACE external_library
-#    INTERFACE error_library
-#)
+target_link_libraries(mesh_library
+    PUBLIC ${PNG_LIBRARIES}
+    PUBLIC ${HDF5_LIBRARIES}
+    PUBLIC ${Boost_LIBRARIES}
+    INTERFACE data_library
+    INTERFACE io_library
+    INTERFACE disk_library
+    INTERFACE parallel_library
+    INTERFACE external_library
+    INTERFACE error_library
+)
 target_link_libraries(problem_library INTERFACE external_library)
 target_link_libraries(parameters_library
     PUBLIC ${Boost_LIBRARIES}
@@ -198,16 +299,19 @@ target_link_libraries(simulation_library INTERFACE problem_library)
 target_link_libraries(test_library
     INTERFACE parallel_library
     INTERFACE cello_library
+    PUBLIC charm_library
     INTERFACE data_library
     INTERFACE simulation_library
 )
 
 # this includes everything - may need to add something related to PAPI in the future
-target_link_libraries(mesh_library
+add_library(all_library INTERFACE)
+target_link_libraries(all_library
     INTERFACE charm_library
     INTERFACE control_library
     INTERFACE simulation_library
     INTERFACE compute_library
+    INTERFACE mesh_library
     INTERFACE data_library
     INTERFACE problem_library
     INTERFACE io_library
@@ -222,7 +326,7 @@ target_link_libraries(mesh_library
     INTERFACE array_library
     INTERFACE cello_library
     INTERFACE external_library
-    INTERFACE "png"
+    INTERFACE ${PNG_LIBRARIES}
     INTERFACE ${HDF5_LIBRARIES}
     INTERFACE ${Boost_LIBRARIES}
 )
@@ -242,14 +346,15 @@ add_executable(test_memory ${CMAKE_CURRENT_SOURCE_DIR}/Cello/test_Memory.cpp)
 target_link_libraries(test_memory memory_library test_library)
 
 add_executable(test_monitor ${CMAKE_CURRENT_SOURCE_DIR}/Cello/test_Monitor.cpp)
-target_link_libraries(test_monitor monitor_library test_library)
+target_link_libraries(test_monitor PUBLIC monitor_library test_library)
+#target_link_libraries(test_monitor monitor_library all_library)
 
 # these tests don't work:
-#add_executable(test_parameters ${CMAKE_CURRENT_SOURCE_DIR}/Cello/test_Parameters.cpp)
-#target_link_libraries(test_parameters parameters_library test_library)
+add_executable(test_parameters ${CMAKE_CURRENT_SOURCE_DIR}/Cello/test_Parameters.cpp)
+target_link_libraries(test_parameters parameters_library test_library)
 
-#add_executable(test_parse ${CMAKE_CURRENT_SOURCE_DIR}/Cello/test_Parse.cpp)
-#target_link_libraries(test_parse parameters_library test_library)
+add_executable(test_parse ${CMAKE_CURRENT_SOURCE_DIR}/Cello/test_Parse.cpp)
+target_link_libraries(test_parse parameters_library test_library)
 
 
 # this is a bit of a shortcut to help with the include directories:
@@ -262,6 +367,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 #Define enzo_e_exe executable, including all CPP,C,Fortran source files and hpp,dir headers
 add_executable(enzo_e_exe
+    ${charm_interface_headers} #Include the charm interface headers as source dependencies
     ${CMAKE_CURRENT_SOURCE_DIR}/Enzo/calcdiss.F
     ${CMAKE_CURRENT_SOURCE_DIR}/Enzo/calc_dt.F
     ${CMAKE_CURRENT_SOURCE_DIR}/Enzo/calc_eigen.F
@@ -272,7 +378,7 @@ add_executable(enzo_e_exe
     ${CMAKE_CURRENT_SOURCE_DIR}/Enzo/enzo.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Enzo/enzo_defines.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Enzo/enzo.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Enzo/enzo.dir
+    #${CMAKE_CURRENT_SOURCE_DIR}/Enzo/enzo.dir
     ${CMAKE_CURRENT_SOURCE_DIR}/Enzo/enzo-e.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Enzo/enzo_EnzoBfieldMethod.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Enzo/enzo_EnzoBfieldMethodCT.cpp
@@ -493,7 +599,6 @@ add_executable(enzo_e_exe
     ${CMAKE_CURRENT_SOURCE_DIR}/Enzo/xeuler_sweep.F
     ${CMAKE_CURRENT_SOURCE_DIR}/Enzo/yeuler_sweep.F
     ${CMAKE_CURRENT_SOURCE_DIR}/Enzo/zeuler_sweep.F
-    #${charm_interface_headers} #Include the charm interface headers as source dependencies
     )
 
 
