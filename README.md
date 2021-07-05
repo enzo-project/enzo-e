@@ -35,32 +35,41 @@ the developers mailing list!
 
 ## Branch Notes:
 
-This branch uses  `cmake` to build. Note that the project should not be
-compiled from within the repository by in another build repository. For cloning
-the repository, we suggest using
+This branch uses  `cmake` to build. In source builds (e.g., calling `make` from within
+the folder containing the sources it not supported and a separate folder (either
+within the repository or anywhere else on the filesystem) must be used.
+
+First, we install the latest `Charm++`, which now also uses `cmake` as default
+build system (as example we use the pure MPI backend).
+
+```bash
+git clone https://github.com/UIUC-PPL/charm.git
+cd charm
+# Note, the directory name can be anything
+mkdir build-mpi
+cd build-mpi
+cmake -DNETWORK=mpi -DSMP=OFF ..
+make
 ```
-mkdir enzo-e-project
-cd enzo-e-project
+
+Second, we install `Enzo-E` (in a different directory)
+
+```bash
 git clone https://github.com/forrestglines/enzo-e.git
 cd enzo-e
 git checkout cmake
-cd ../
-```
-For building, we create a new directory inside of `enzo-e-project`, export a `CHARM_HOME` environment variable, then use cmake to build.
-```
-mkdir build
-cd build
-cmake  ../enzo-e
+# Again, the directory name can be anything
+mkdir build-mpi
+cd build-mpi
+# Note, the Fortran flags have just been tested for gfortran so far
+cmake -DCHARM_ROOT=/PATH/TO/charm/build-mpi -DCMAKE_CXX_COMPILER=/PATH/TO/charm/build-mpi/bin/charmc -DCMAKE_Fortran_FLAGS="-fdefault-real-8 -fdefault-double-8 -ffixed-line-length-132" ..
 make
 ```
-If `ninja` is installed, the `ninja` build system can be used for faster build times
-```
-cmake  -GNinja ../enzo-e
-ninja
-```
 
-The Enzo-E executable is built within `src/`. Example inputs are copied into build directory as part of the `cmake` configuration. The executable can be run using
+Note, if `ninja` is installed, the `ninja` build system can be used for faster build times by adding `-GNinja` (before the `..`) to the `cmake` command and calling `ninja` afterwards instead of `make.
+
+The Enzo-E executable is built within `bin/`. Example inputs are copied into build directory as part of the `cmake` configuration (TODO). The executable can be run using
 ```
-$CHARM_HOME/bin/charmrun +p4 src/enzo_e_exe input/test_cosmo-bcg.in
+/PATH/TO/charm/build-mpi/bin/charmrun +p4 src/enzo_e_exe input/test_cosmo-bcg.in
 ```
 
