@@ -9,6 +9,7 @@
 
 #include "monitor.hpp" 
 
+// TODO: adapt to use cmake generated information
 //#include "auto_config.def"
 
 //----------------------------------------------------------------------
