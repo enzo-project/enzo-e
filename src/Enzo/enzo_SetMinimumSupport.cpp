@@ -14,7 +14,7 @@
 int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
 				 bool comoving_coordinates)
 {
-  if (NumberOfBaryonFields > 0) {
+  if (NumberOfBaryonFields[0] > 0) {
  
     /* Compute cosmology factors. */
  
