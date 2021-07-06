@@ -23,4 +23,4 @@ add_executable(enzo-e ${CMAKE_CURRENT_SOURCE_DIR}/../Cello/main_enzo.cpp ${SRC_F
 add_dependencies(enzo-e enzoCharmModule main_enzoCharmModule simulationCharmModule)
 target_link_libraries(enzo-e PUBLIC charm simulation problem compute control mesh data io disk memory parameters error monitor parallel performance test_Unit cello pngwriter Boost::filesystem PNG::PNG HDF5::HDF5)
 # TOOD(pgrete) need a cleaner place for the generated headers (current in Cello folder) or export header location
-target_include_directories (enzo-e PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/../Cello ${CMAKE_CURRENT_SOURCE_DIR}/../Cello ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories (enzo-e PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/../Cello ${CMAKE_CURRENT_SOURCE_DIR}/../Cello ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${CHARM_INCLUDE_DIRS})

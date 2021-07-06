@@ -17,7 +17,7 @@ function(addCelloLib LIBNAME EXTRASRCS)
   add_library(${LIBNAME} STATIC ${SRC_FILES} ${EXTRASRCS})
   add_dependencies(${LIBNAME} simulationCharmModule mainCharmModule meshCharmModule main_meshCharmModule main_simulationCharmModule)
   target_link_libraries(${LIBNAME} pngwriter)
-  target_include_directories (${LIBNAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+  target_include_directories (${LIBNAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CHARM_INCLUDE_DIRS})
 
 endfunction(addCelloLib)
 
@@ -44,5 +44,5 @@ addCelloLib(test_Unit "")
 
 add_executable(test_monitor test_Monitor.cpp)
 target_link_libraries(test_monitor PUBLIC monitor test_Unit cello parallel error Boost::filesystem)
-target_include_directories (test_monitor PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories (test_monitor PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CHARM_INCLUDE_DIRS})
 

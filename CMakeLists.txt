@@ -1,8 +1,19 @@
 cmake_minimum_required(VERSION 3.12)
 
+# Machine config needs to be imported before project() to properly
+# set compilers this way.
+if (DEFINED Enzo-E_CONFIG)
+  if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config/${Enzo-E_CONFIG}.cmake)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/config/${Enzo-E_CONFIG}.cmake)
+  else()
+    message(FATAL_ERROR
+      "Given machine configuration ${Enzo-E_CONFIG}.cmake not found in ${CMAKE_CURRENT_SOURCE_DIR}/config.")
+  endif()
+endif()
+
 #Define project and languages
 # TODO set proper version before merge
-project(enzo-e VERSION 0.9.0 LANGUAGES C CXX Fortran)
+project(Enzo-E VERSION 0.9.0 LANGUAGES C CXX Fortran)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -30,6 +41,9 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 find_package(Charm REQUIRED)
+# Link executables with the charmc wrapper
+STRING(REGEX REPLACE "<CMAKE_CXX_COMPILER>" "${CHARM_COMPILER}"
+       CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE}")
 
 #Define preprocessor definitions
 add_compile_definitions(CONFIG_PRECISION_DOUBLE)
