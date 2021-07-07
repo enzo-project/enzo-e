@@ -40,7 +40,7 @@ public: // interface
     data_precision_ = msg_initial.data_precision_;
     data_bytes_     = 0;
     data_values_    = nullptr;
-    data_delete_    = false;
+    data_delete_    = true;
     count_           = msg_initial.count_;
     // new message, so new tag
     cello::hex_string(tag_,TAG_LEN);

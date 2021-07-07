@@ -22,6 +22,7 @@ inline void operator|(PUP::er &p, chemistry_data &c){
  p | c.use_grackle;
  p | c.with_radiative_cooling;
  p | c.primordial_chemistry;
+ p | c.dust_chemistry;
  p | c.metal_cooling;
  p | c.UVbackground;
 
@@ -40,8 +41,11 @@ inline void operator|(PUP::er &p, chemistry_data &c){
  p | c.cmb_temperature_floor;
  p | c.Gamma;
  p | c.h2_on_dust;
+ p | c.use_dust_density_field;
  p | c.photoelectric_heating;
  p | c.photoelectric_heating_rate;
+ p | c.use_isrf_field;
+ p | c.interstellar_radiation_field;
  p | c.use_volumetric_heating_rate;
  p | c.use_specific_heating_rate;
  p | c.three_body_rate;
@@ -52,6 +56,7 @@ inline void operator|(PUP::er &p, chemistry_data &c){
  p | c.HydrogenFractionByMass;
  p | c.DeuteriumToHydrogenRatio;
  p | c.SolarMetalFractionByMass;
+ p | c.local_dust_to_gas_ratio;
  p | c.NumberOfTemperatureBins;
  p | c.CaseBRecombination;
  p | c.TemperatureStart;
@@ -216,7 +221,7 @@ public: // interface
       // EnzoMethodGrackle
       method_grackle_use_grackle(false),
 #ifdef CONFIG_USE_GRACKLE
-      method_grackle_chemistry(),
+      method_grackle_chemistry(nullptr),
       method_grackle_use_cooling_timestep(false),
       method_grackle_radiation_redshift(-1.0),
 #endif

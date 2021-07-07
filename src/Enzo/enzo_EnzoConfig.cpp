@@ -731,7 +731,7 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
   if (method_grackle_use_grackle) {
 
     method_grackle_chemistry = new chemistry_data;
-    *method_grackle_chemistry = _set_default_chemistry_parameters();
+    set_default_chemistry_parameters(method_grackle_chemistry);
 
     /* this must be set AFTER default values are set */
     method_grackle_chemistry->use_grackle = method_grackle_use_grackle;

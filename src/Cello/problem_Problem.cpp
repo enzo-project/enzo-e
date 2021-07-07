@@ -897,6 +897,7 @@ Method * Problem::create_method_
         config->method_min_face_rank[index_method],
         config->method_all_fields[index_method],
         config->method_all_particles[index_method],
+        config->method_output_all_blocks[index_method],
         config->method_output_blocking[0][index_method],
         config->method_output_blocking[1][index_method],
         config->method_output_blocking[2][index_method]);
