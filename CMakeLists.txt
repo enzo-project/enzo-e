@@ -45,6 +45,28 @@ find_package(Charm REQUIRED)
 STRING(REGEX REPLACE "<CMAKE_CXX_COMPILER>" "${CHARM_COMPILER}"
        CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE}")
 
+# Need to process Grackle here as both Cello and Enzo-E depend on it
+option(USE_GRACKLE "Use Grackle Chemistry" ON)
+find_package(Grackle)
+if (USE_GRACKLE)
+  if (Grackle_FOUND)
+    # Setting global compile def as performance and simulation Cello libs need the var
+    # We should discuss the use of a central config.hpp (similar to the existing
+    # auto_config.def but also centrally included beyond informational output).
+    add_compile_definitions(CONFIG_USE_GRACKLE)
+
+    # Also specifically setting the defines used in the *.ci files of Cello and Enzo.
+    # Alternatively, figure out a way to extract those from the `COMPILE_DEFINITIONS`
+    # property and directly process in `cmake/charm.cmake`.
+    set(CHARM_PREPROC_DEFS ${CHARM_PREPROC_DEFS} "-DCONFIG_USE_GRACKLE ")
+  else()
+    message(FATAL_ERROR
+      "Configured to use Grackle but Grackle library not found.\n"
+      "Either disable grackle (e.g., `-DUSE_GRACKLE=OFF`) or provide path "
+      "(e.g., `-DGrackle_ROOT=/PATH/TO/GRACKLE/INSTALL/DIRECTORY`).")
+  endif()
+endif()
+
 #Define preprocessor definitions
 add_compile_definitions(CONFIG_PRECISION_DOUBLE)
 add_compile_definitions(CONFIG_NODE_SIZE=4)
@@ -63,3 +85,6 @@ add_subdirectory(src/Cello)
 add_subdirectory(src/Enzo)
 add_subdirectory(src/External)
 
+message(STATUS
+  "Cello/Enzo-E configured as follows:\n"
+  "USE_GRACKLE = ${USE_GRACKLE}")

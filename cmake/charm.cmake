@@ -43,7 +43,7 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # \brief     Function used to setup a Charm++ module. 
 #
-# 2021/07/05 pgrete: adapated from https://github.com/quinoacomputing/cmake-modules
+# 2021/07/05 pgrete: adapted from https://github.com/quinoacomputing/cmake-modules
 #
 ################################################################################
 
@@ -58,9 +58,11 @@ function(addCharmModule MODULE)
   # Arguments:
   #   MODULE:    Name of the Charm++ module.
   # Add custom command generating .decl.h and .def.h from .ci
+  # IMPORTANT: CHARM_PREPROC_DEFS need to include all preprocessor defines that are
+  #   used in the *.ci files.
   add_custom_command(OUTPUT ${MODULE}.decl.h ${MODULE}.def.h
                      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${MODULE}.ci
-                     COMMAND ${CHARM_COMPILER} ${ARGN}
+                     COMMAND ${CHARM_COMPILER} ${CHARM_PREPROC_DEFS} ${ARGN}
                              ${CMAKE_CURRENT_SOURCE_DIR}/${MODULE}.ci)
   # Add custom target dependency for Charm++ module
   add_custom_target(${MODULE}CharmModule
