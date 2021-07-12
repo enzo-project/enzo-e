@@ -126,7 +126,7 @@ public: // interface
   { return particle_descr_->num_attributes(it); }
 
   /// Check if attribute exists
-
+  
   bool is_attribute (int it, std::string attribute) const
   { return particle_descr_->is_attribute(it,attribute); }
 
@@ -204,9 +204,8 @@ public: // interface
 
   /// Check if given constant exists
 
-  bool has_constant(int it, std::string constant) const
-  { return particle_descr_->has_constant(it,constant); }
-
+  bool is_constant(int it, std::string constant) const
+  { return particle_descr_->is_constant(it,constant); }
 
   //--------------------------------------------------
   // BYTES
