@@ -63,7 +63,7 @@ git checkout cmake
 mkdir build-mpi
 cd build-mpi
 # Note, the Fortran flags have just been tested for gfortran so far
-cmake -DCHARM_ROOT=/PATH/TO/charm/build-mpi -DCMAKE_CXX_COMPILER=/PATH/TO/charm/build-mpi/bin/charmc -DCMAKE_Fortran_FLAGS="-fdefault-real-8 -fdefault-double-8 -ffixed-line-length-132" ..
+cmake -DCHARM_ROOT=/PATH/TO/charm/build-mpi -DEnzo-E_CONFIG=linux_gcc ..
 make
 ```
 

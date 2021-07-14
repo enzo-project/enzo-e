@@ -78,6 +78,13 @@ add_compile_definitions(CONFIG_USE_PERFORMANCE CONFIG_USE_MEMORY CONFIG_HAVE_VER
 find_package(Boost REQUIRED COMPONENTS filesystem)
 find_package(PNG REQUIRED)
 find_package(HDF5 REQUIRED COMPONENTS C)
+# HDF5 Interface library
+add_library(HDF5_C INTERFACE)
+target_link_libraries(HDF5_C INTERFACE ${HDF5_C_LIBRARIES})
+target_compile_definitions(HDF5_C INTERFACE ${HDF5_C_DEFINITIONS})
+target_include_directories(HDF5_C INTERFACE ${HDF5_C_INCLUDE_DIRS})
+
+
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
