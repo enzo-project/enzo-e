@@ -181,7 +181,8 @@ public: // interface
   /// Solve the hydro equations using PPM
   int SolveHydroEquations ( enzo_float time, 
 			    enzo_float dt,
-			    bool comoving_coordinates);
+			    bool comoving_coordinates,
+                            bool single_flux_array);
 
   /// Solve the hydro equations using Enzo 3.0 PPM
   int SolveHydroEquations3 ( enzo_float time, enzo_float dt);

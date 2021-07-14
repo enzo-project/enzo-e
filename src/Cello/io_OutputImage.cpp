@@ -26,8 +26,8 @@
 OutputImage::OutputImage(int index,
 			 const Factory * factory,
 			 int process_count,
-			 int root_size[3],
-			 int root_blocks[3],
+			 const int root_size_in[3],
+			 const int root_blocks_in[3],
 			 int min_level, int max_level, int leaf_only,
 			 std::string image_type,
 			 int image_size[2],
@@ -61,6 +61,10 @@ OutputImage::OutputImage(int index,
   max_level_(max_level),
   leaf_only_(leaf_only)
 {
+  int root_size[3] =
+    {root_size_in[0], root_size_in[1], root_size_in[2]};
+  int root_blocks[3] =
+    {root_blocks_in[0], root_blocks_in[1], root_blocks_in[2]};
   image_size_[0] = image_size[0];
   image_size_[1] = image_size[1];
   if      (image_reduce_type=="min") { op_reduce_ = reduce_min; } 

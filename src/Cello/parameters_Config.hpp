@@ -90,6 +90,7 @@ public: // interface
     method_flux_correct_group(),
     method_flux_correct_enable(),
     method_flux_correct_min_digits(),
+    method_flux_correct_single_array(true),
     method_field_list(),
     method_particle_list(),
     method_output_blocking(),
@@ -261,6 +262,7 @@ public: // interface
       method_flux_correct_group(),
       method_flux_correct_enable(),
       method_flux_correct_min_digits(),
+      method_flux_correct_single_array(true),
       method_field_list(),
       method_particle_list(),
       method_output_blocking(),
@@ -482,6 +484,7 @@ public: // attributes
   std::vector<std::string>   method_flux_correct_group;
   std::vector<bool>          method_flux_correct_enable;
   std::vector<double>        method_flux_correct_min_digits;
+  bool                       method_flux_correct_single_array;
 
   std::vector< std::vector< std::string > > method_field_list;
   std::vector< std::vector< std::string > > method_particle_list;

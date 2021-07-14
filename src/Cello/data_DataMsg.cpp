@@ -11,6 +11,15 @@ long DataMsg::counter[CONFIG_NODE_SIZE] = {0};
 
 #define CHECK
 
+// #define TRACE_DATA_MSG
+
+#ifdef TRACE_DATA_MSG
+#   undef TRACE_DATA_MSG
+#   define TRACE_DATA_MSG(MSG) CkPrintf ("TRACE_DATA_MSG %p %s\n", \
+                                         (void *)this,MSG); fflush(stdout);
+#else
+#   define TRACE_DATA_MSG(MSG) /* ... */
+#endif
 //----------------------------------------------------------------------
 
 void DataMsg::set_coarse_array
@@ -89,6 +98,8 @@ void DataMsg::set_coarse_array
 
 int DataMsg::data_size () const
 {
+  TRACE_DATA_MSG("size_data()");
+
   FieldFace    * ff = field_face_;
   ParticleData * pd = particle_data_;
   auto & fd = face_fluxes_list_;
@@ -152,6 +163,7 @@ int DataMsg::data_size () const
 
 char * DataMsg::save_data (char * buffer) const
 {
+  TRACE_DATA_MSG("save_data()");
   union {
     char * pc;
     int  * pi;
@@ -236,6 +248,7 @@ char * DataMsg::save_data (char * buffer) const
 
 char * DataMsg::load_data (char * buffer)
 {
+  TRACE_DATA_MSG("load_data()");
   // 2. De-serialize message data from input buffer into the allocated
   // message (must be consistent with pack())
 
@@ -284,7 +297,8 @@ char * DataMsg::load_data (char * buffer)
     face_fluxes_list_.resize(n_fd);
     face_fluxes_delete_.resize(n_fd);
     for (int i=0; i<n_fd; i++) {
-      face_fluxes_delete_[i] = (*pi++);   
+      face_fluxes_delete_[i] = (*pi++);
+      face_fluxes_delete_[i] = true;
       FaceFluxes * ff = new FaceFluxes;
       face_fluxes_list_[i] = ff;
       pc = ff->load_data(pc);
@@ -317,6 +331,7 @@ char * DataMsg::load_data (char * buffer)
 
 void DataMsg::update (Data * data, bool is_local)
 {
+  TRACE_DATA_MSG("update()");
   ParticleData * pd = particle_data_;
   FieldFace    * ff = field_face_;
   char         * fa = field_array_u_;
@@ -374,8 +389,11 @@ void DataMsg::update (Data * data, bool is_local)
       Face face = face_fluxes->face();
       flux_data->sum_neighbor_fluxes
         (face_fluxes,face.axis(), 1 - face.face(), i);
+      if (face_fluxes_delete_[i]) {
+        delete face_fluxes;
+        face_fluxes_list_[i] = nullptr;
+      }
     }
-    face_fluxes_list_.clear();
   }
 
   // Updated coarse array

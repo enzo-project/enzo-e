@@ -111,8 +111,8 @@ PARALLEL_MAIN_BEGIN
 
         int dbx,dby,dbz;
         int dnx,dny,dnz;
-        std::vector<cello_float> & fluxes_blk = ff_blk->flux_array(&dbx,&dby,&dbz);
-        std::vector<cello_float> & fluxes_nbr = ff_nbr->flux_array(&dnx,&dny,&dnz);
+        cello_float * fluxes_blk = ff_blk->flux_array(&dbx,&dby,&dbz);
+        cello_float * fluxes_nbr = ff_nbr->flux_array(&dnx,&dny,&dnz);
         
         int count = 0;
         unit_func ("array_blk()");

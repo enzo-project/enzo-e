@@ -83,7 +83,6 @@ void MethodFluxCorrect::compute_continue_refresh( Block * block ) throw()
   field.dimensions (0,&mx,&my,&mz);
   field.ghost_depth (0,&gx,&gy,&gz);
 
-
   cello_float * values;
 
   FluxData * flux_data = block->data()->flux_data();
@@ -239,11 +238,11 @@ void MethodFluxCorrect::flux_correct_(Block * block)
         if (level_face > level) {
           int dbx,dby,dbz;
           int dnx,dny,dnz;
-          auto block_fluxes    = flux_data->block_fluxes(axis,face,i_f);
-          auto neighbor_fluxes = flux_data->neighbor_fluxes(axis,face,i_f);
-          auto block_flux_array =
+          FaceFluxes *  block_fluxes    = flux_data->block_fluxes(axis,face,i_f);
+          FaceFluxes *  neighbor_fluxes = flux_data->neighbor_fluxes(axis,face,i_f);
+          cello_float * block_flux_array =
             block_fluxes->flux_array(&dbx,&dby,&dbz);
-          auto neighbor_flux_array =
+          cello_float * neighbor_flux_array =
             neighbor_fluxes->flux_array(&dnx,&dny,&dnz);
           
           ix = (face == 0) ? 0 : nx-1;
@@ -268,11 +267,11 @@ void MethodFluxCorrect::flux_correct_(Block * block)
           if (level_face > level) {
             int dbx,dby,dbz;
             int dnx,dny,dnz;
-            auto block_fluxes    = flux_data->block_fluxes(axis,face,i_f);
-            auto neighbor_fluxes = flux_data->neighbor_fluxes(axis,face,i_f);
-            auto block_flux_array =
+            FaceFluxes *  block_fluxes    = flux_data->block_fluxes(axis,face,i_f);
+            FaceFluxes *  neighbor_fluxes = flux_data->neighbor_fluxes(axis,face,i_f);
+            cello_float * block_flux_array =
               block_fluxes->flux_array(&dbx,&dby,&dbz);
-            auto neighbor_flux_array =
+            cello_float * neighbor_flux_array =
               neighbor_fluxes->flux_array(&dnx,&dny,&dnz);
           
             iy = (face == 0) ? 0 : ny-1;
@@ -297,11 +296,11 @@ void MethodFluxCorrect::flux_correct_(Block * block)
           if (level_face > level) {
             int dbx,dby,dbz;
             int dnx,dny,dnz;
-            auto block_fluxes    = flux_data->block_fluxes(axis,face,i_f);
-            auto neighbor_fluxes = flux_data->neighbor_fluxes(axis,face,i_f);
-            auto block_flux_array =
+            FaceFluxes * block_fluxes = flux_data->block_fluxes(axis,face,i_f);
+            FaceFluxes *  neighbor_fluxes = flux_data->neighbor_fluxes(axis,face,i_f);
+            cello_float * block_flux_array =
               block_fluxes->flux_array(&dbx,&dby,&dbz);
-            auto neighbor_flux_array =
+            cello_float * neighbor_flux_array =
               neighbor_fluxes->flux_array(&dnx,&dny,&dnz);
           
             iz = (face == 0) ? 0 : nz-1;

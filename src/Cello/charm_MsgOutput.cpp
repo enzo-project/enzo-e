@@ -55,8 +55,8 @@ MsgOutput::MsgOutput
     block_lower(),
     block_upper()
 {
-  cello::hex_string(tag_,TAG_LEN);
   ++counter[cello::index_static()]; 
+  cello::hex_string(tag_,TAG_LEN);
 }
 
 //----------------------------------------------------------------------

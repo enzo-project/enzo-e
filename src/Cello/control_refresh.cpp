@@ -1307,7 +1307,6 @@ void Block::refresh_load_flux_face_
   Index index_neighbor,
   int if3[3],
   int ic3[3])
-
 {
   // ... coarse neighbor requires child index of self in parent
   if (refresh_type == refresh_coarse) {

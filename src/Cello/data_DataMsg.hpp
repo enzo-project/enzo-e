@@ -59,6 +59,7 @@ public: // interface
       delete particle_data_;
       particle_data_ = nullptr;
     }
+    
     for (size_t i=0; i<face_fluxes_list_.size(); i++) {
       if (face_fluxes_delete_[i]) {
         delete face_fluxes_list_[i];

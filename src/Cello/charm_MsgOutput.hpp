@@ -39,23 +39,17 @@ public: // interface
   MsgOutput(const MsgOutput & msg_output) throw()
     : CMessage_MsgOutput() // do NOT call copy constructor on base
   {
-    is_local_      = msg_output.is_local_;
-    index_send_    = msg_output.index_send_;
-    block_trace_   = msg_output.block_trace_;
-    method_output_ = msg_output.method_output_;
-    file_          = msg_output.file_;
-    data_msg_      = msg_output.data_msg_;
-    buffer_        = nullptr;
-    io_block_      = msg_output.io_block_;
-    block_name     = msg_output.block_name;
-    for (int i=0; i<3; i++) {
-      block_lower[i]    = msg_output.block_lower[i];
-      block_upper[i]    = msg_output.block_upper[i];
-    }
-    // new tag
-    cello::hex_string(tag_,TAG_LEN);
+    ++counter[cello::index_static()];
+    copy_(msg_output);
+    cello::hex_string(tag_,TAG_LEN); // add new tag for new message
   };
 
+  MsgOutput & operator = (const MsgOutput & msg_output)
+  {
+    copy_(msg_output);
+    return *this;
+  }
+    
   /// Set the DataMsg object
   void set_data_msg (DataMsg * data_msg);
   
@@ -94,6 +88,26 @@ public: // static methods
   /// Unpack data to de-serialize
   static MsgOutput * unpack(void *);
 
+protected: // methods
+
+  void copy_(const MsgOutput & msg_output)
+  {
+    is_local_      = msg_output.is_local_;
+    index_send_    = msg_output.index_send_;
+    block_trace_   = msg_output.block_trace_;
+    method_output_ = msg_output.method_output_;
+    file_          = msg_output.file_;
+    data_msg_      = msg_output.data_msg_;
+    buffer_        = nullptr;
+    io_block_      = msg_output.io_block_;
+    block_name     = msg_output.block_name;
+    for (int i=0; i<3; i++) {
+      block_lower[i]    = msg_output.block_lower[i];
+      block_upper[i]    = msg_output.block_upper[i];
+    }
+    strncpy(tag_,msg_output.tag_,TAG_LEN);
+  }
+  
 protected: // attributes
 
   /// Whether destination is local or remote

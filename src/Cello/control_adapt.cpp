@@ -270,6 +270,7 @@ void Block::adapt_refine_()
       // Create data message object to send
       DataMsg * data_msg = new DataMsg;
 
+      // @@@ should be true but ~FieldFace() crashes
       data_msg -> set_field_face (field_face,false);
       data_msg -> set_field_data (data()->field_data(),false);
       ParticleData * p_data = new ParticleData(*particle_list[IC3(ic3)]);

@@ -99,8 +99,11 @@ void EnzoMethodPpm::compute ( Block * block) throw()
 
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
-  block->data()->flux_data()->allocate (nx,ny,nz,field_list);
-  
+
+  int single_flux_array = enzo::config()->method_flux_correct_single_array;
+
+  block->data()->flux_data()->allocate (nx,ny,nz,field_list,single_flux_array);
+
   if (block->is_leaf()) {
 
     EnzoBlock * enzo_block = enzo::block(block);
@@ -143,7 +146,7 @@ void EnzoMethodPpm::compute ( Block * block) throw()
     TRACE_PPM ("BEGIN SolveHydroEquations");
 
     enzo_block->SolveHydroEquations 
-      ( block->time(), block->dt(), comoving_coordinates_ );
+      ( block->time(), block->dt(), comoving_coordinates_, single_flux_array );
 
     TRACE_PPM ("END SolveHydroEquations");
 

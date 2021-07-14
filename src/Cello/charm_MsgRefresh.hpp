@@ -26,14 +26,16 @@ public: // interface
   virtual ~MsgRefresh();
 
   /// Copy constructor
-  MsgRefresh(const MsgRefresh & data_msg) throw()
+  MsgRefresh(const MsgRefresh & msg_refresh) throw()
   {
     ++counter[cello::index_static()]; 
   };
 
   /// Assignment operator
   MsgRefresh & operator= (const MsgRefresh & data_msg) throw()
-  { return *this; }
+  {
+    return *this;
+  }
 
   // Set the new refresh object id
   void set_refresh_id(int id_refresh)
