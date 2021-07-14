@@ -30,7 +30,7 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
   //  if (GridRank != 3) 
   //    my_exit(EXIT_ENZO_FAILURE);
 
-  if (NumberOfBaryonFields > 0) {
+  if (NumberOfBaryonFields[0] > 0) {
  
     /* initialize */
  
