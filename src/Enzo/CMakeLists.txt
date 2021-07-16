@@ -14,6 +14,12 @@ set(External_LIBS "pngwriter;Boost::filesystem;PNG::PNG;HDF5_C")
 if (USE_GRACKLE)
   LIST(APPEND External_LIBS "Grackle::Grackle")
 endif()
+if (use_papi)
+  LIST(APPEND External_LIBS "PAPI::papi")
+endif()
+if (use_jemalloc)
+  LIST(APPEND External_LIBS "jemalloc::jemalloc")
+endif()
 
 # Following the SCons build and first build an enzo library that is then turned into an enzo-e binary
 # (Note, the first attempt to directly build the binary resulted in failed vtable lookups in GrackleMethod and GrackleInputTest classes)
@@ -21,10 +27,12 @@ add_library(enzo STATIC ${SRC_FILES})
 add_dependencies(enzo enzoCharmModule main_enzoCharmModule simulationCharmModule)
 target_link_libraries(enzo PRIVATE ${Cello_LIBS} ${External_LIBS})
 target_include_directories (enzo PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/../Cello ${CMAKE_CURRENT_SOURCE_DIR}/../Cello ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${CHARM_INCLUDE_DIRS})
+target_link_options(enzo PRIVATE ${Cello_TARGET_LINK_OPTIONS})
 
 add_executable(enzo-e enzo-e.cpp ${CMAKE_CURRENT_SOURCE_DIR}/../Cello/main_enzo.cpp)
 add_dependencies(enzo-e enzoCharmModule main_enzoCharmModule simulationCharmModule)
 target_link_libraries(enzo-e PRIVATE enzo ${External_LIBS})
 # TOOD(pgrete) need a cleaner place for the generated headers (current in Cello folder) or export header location
 target_include_directories (enzo-e PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/../Cello ${CMAKE_CURRENT_SOURCE_DIR}/../Cello ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${CHARM_INCLUDE_DIRS})
+target_link_options(enzo-e PRIVATE ${Cello_TARGET_LINK_OPTIONS})
 
