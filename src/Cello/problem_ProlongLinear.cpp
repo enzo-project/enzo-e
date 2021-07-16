@@ -17,7 +17,7 @@
 ProlongLinear::ProlongLinear() throw()
   : Prolong ()
 {
-  //   CkPrintf ("TRACE_PROLONG ProlongLinear()\n");
+  //  CkPrintf ("TRACE_PROLONG ProlongLinear()\n");
 }
 
 //----------------------------------------------------------------------

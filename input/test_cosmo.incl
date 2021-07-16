@@ -120,10 +120,6 @@ Adapt {
      };
  }
 
- Memory {
-     limit_gb = 1.000000000000000;
- }
-
  Mesh {
      root_blocks = [ 4, 4, 4 ];
      root_rank = 3;
