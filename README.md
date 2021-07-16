@@ -62,16 +62,100 @@ git checkout cmake
 # Again, the directory name can be anything
 mkdir build-mpi
 cd build-mpi
-# Note, the Fortran flags have just been tested for gfortran so far
-cmake -DCHARM_ROOT=/PATH/TO/charm/build-mpi -DEnzo-E_CONFIG=linux_gcc ..
+```
+
+For a basic configuration on a linux system with GNU compiler stack the following
+command should work out of the box. If not please report.
+Also see following subsection for more configuration options.
+
+```
+cmake -DCHARM_ROOT=/PATH/TO/charm/build-mpi -DEnzo-E_CONFIG=linux_gcc -DUSE_GRACKLE=OFF ..
 make
 ```
 
 Note, if `ninja` is installed, the `ninja` build system can be used for faster build times by adding `-GNinja` (before the `..`) to the `cmake` command and calling `ninja` afterwards instead of `make.
 
-The Enzo-E executable is built within `bin/`. Example inputs are copied into build directory as part of the `cmake` configuration (TODO). The executable can be run using
+The Enzo-E executable is built within `bin/`. 
+
+#### Configuration options
+
+Current `cmake` options follow the notation of the SCons options (potentially 
+subject to change), i.e., the following (default value at the end of the line)
+is available:
+- `USE_GRACKLE` "Use Grackle Chemistry" ON
+- `USE_DOUBLE_PREC` "Use double precision. Turn off for single precision." ON
+- `new_output` "Temporary setting for using new Output implementation" OFF
+- `node_size` "Maximum number of procesess per shared-memory node (can be larger than needed)" 64
+- `trace` "Print out detailed messages with the TRACE() series of statements" OFF
+- `verbose` "Trace main phases" OFF
+- `trace_charm` "Print out messages with the TRACE_CHARM() and TRACEPUP() series of statements" OFF
+- `debug` "Whether to enable displaying messages with the DEBUG() series of
+statements. Also writes messages to out.debug.<P> where P is the
+(physical) process rank. Still requires the \"DEBUG\" group to be
+enabled in Monitor (that is Monitor::is_active(\"DEBUG\") must be true for any output) OFF
+- `debug_field` "" OFF
+- `debug_field_face` "" OFF
+- `check` "Do extra run-time checking.  Useful for debugging, but can potentially slow     calculations down" OFF
+- `debug_verbose` "Print periodically all field values.  See src/Field/field_FieldBlock.cpp" OFF
+- `memory` "Track dynamic memory statistics.  Can be useful, but can cause problems on some systems that also override new [] () / delete [] ()" OFF
+- `balance` "Enable charm++ dynamic load balancing" ON`
+- `balancer` "Charm++ load balancer to use" "CommonLBs"
+- `use_gprof` "Compile with -pg to use gprof for performance profiling" OFF
+- `use_performance` "Use Cello Performance class for collecting performance
+data (currently requires global reductions, and may not be fully
+functional) (basic time data on root processor is still output)" ON
+- `use_projections` "Compile the CHARM++ version for use with the Projections performance tool." OFF
+-` use_jemalloc "Use the jemalloc library for memory allocation" OFF
+- `smp` "Use Charm++ in SMP mode." OFF
+- `use_papi` "Use the PAPI performance API" OFF
+
+All variables can be set either on the commad line by `-D<variable>=<value>` or
+in a machine config, see below.
+For example, a configure line may look like
+```bash
+cmake -DCHARM_ROOT=$(pwd)/../../charm/build-gcc-mpi-proj -DEnzo-E_CONFIG=msu_hpcc_gcc -DGrackle_ROOT=${HOME}/src/grackle/build-gcc -Duse_projections=ON -Duse_jemalloc=ON -Dbalance=ON  ..
 ```
-/PATH/TO/charm/build-mpi/bin/charmrun +p4 src/enzo_e_exe input/test_cosmo-bcg.in
+To see all available (and selected) options you can also run `ccmake .` in the
+build directory (after running `cmake` in first place), or use the `ccmake` GUI 
+directly to interactively configure Enzo-E by calling `ccmake ..` in an empty build
+directory.
+
+If packages (external libraries) are not found automatically or if the wrong one was
+picked up, you can specify the search path by
+`-D<package_name>_ROOT=/PATH/TO/PACKAGE/INSTALL`,
+cf., the `cmake` example command just above.
+Note, these package location are also picked up from the environment, i.e., an alternative
+option  is `export <package_name>_ROOT=/PATH/TO/PACKAGE/INSTALL` .
+
+The last option is a machine specific configuration file (see below).
+
+In addition, the general `cmake` option to set basic optimization flags via
+`CMAKE_BUILD_TYPE` with values of 
+- `Release` (typically `-O3`),
+- `RelWithDebInfo` (typically `-O2 -g`), and
+- `Debug` (typically `-O0 -g`)
+
+are available.
+
+
+##### Machine files
+Finally, for convenience we provide the option to set default value for your own
+machine/setup, see the `*.cmake` files in the `config` directory.
+
+You can specify compilers and option in there that will be used a default when
+`cmake` is called with `-DEnzo-E_CONFG=my_config_name` where `my_config_name` requires
+a corresponding `config/my_config_name.cmake` to exist.
+*Note*, all command line parameter take precedence over the default options.
+In other words, if `USE_DOUBLE_PREC` is `ON` in the machine file (or even automatically
+through the global default), the running
+`cmake -DEnzo-E_CONFIG=my_config_name -DUSE_DOUBLE_PREC=OFF ..` will result in a single
+precision version of Enzo-E.
+
+Options in the machine file can also include the paths to external libraries and
+can be set via a "cached string", i.e., via
+
+```cmake
+set(CHARM_ROOT "/home/user/Charm/charm/build-mpi" CACHE STRING "my charm build")
 ```
 
 ### Pleiades with Intel compilers
