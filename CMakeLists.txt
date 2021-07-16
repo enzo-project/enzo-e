@@ -82,6 +82,7 @@ target_compile_definitions(HDF5_C INTERFACE ${HDF5_C_DEFINITIONS})
 target_include_directories(HDF5_C INTERFACE ${HDF5_C_INCLUDE_DIRS})
 
 
+set(Cello_TARGET_LINK_OPTIONS "")
 
 #----------------------------------------------------------------------------------------
 # Define preprocessor definitions/user configuration options
@@ -158,8 +159,10 @@ endif()
 
 option(balance "Enable charm++ dynamic load balancing" ON)
 set(balancer "CommonLBs" CACHE STRING "Charm++ load balancer to use")
-if ()
-  add_compile_definitions()
+if (balance)
+  foreach(BALANCER IN LISTS balancer)
+    string(APPEND Cello_TARGET_LINK_OPTIONS " -balancer ${BALANCER} -module ${BALANCER}")
+  endforeach()
 endif()
 
 
@@ -186,10 +189,9 @@ endif()
 
 
 option(use_projections "Compile the CHARM++ version for use with the Projections performance tool." OFF)
-set(Cello_TARGET_LINK_OPTIONS "")
 if (use_projections)
   add_compile_definitions(CONFIG_USE_PROJECTIONS)
-  set(Cello_TARGET_LINK_OPTIONS -tracemode projections)
+  string(APPEND Cello_TARGET_LINK_OPTIONS " -tracemode projections")
 endif()
 
 
