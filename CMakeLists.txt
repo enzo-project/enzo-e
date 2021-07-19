@@ -1,14 +1,19 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.13)
 
 # Machine config needs to be imported before project() to properly
 # set compilers this way.
 if (DEFINED Enzo-E_CONFIG)
-  if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config/${Enzo-E_CONFIG}.cmake)
-    include(${CMAKE_CURRENT_SOURCE_DIR}/config/${Enzo-E_CONFIG}.cmake)
+  if (EXISTS $ENV{HOME}/.enzo-e/${Enzo-E_CONFIG}.cmake)
+    set(Enzo-E_CONFIG_PATH $ENV{HOME}/.enzo-e/${Enzo-E_CONFIG}.cmake)
+  elseif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config/${Enzo-E_CONFIG}.cmake)
+    set(Enzo-E_CONFIG_PATH ${CMAKE_CURRENT_SOURCE_DIR}/config/${Enzo-E_CONFIG}.cmake)
   else()
     message(FATAL_ERROR
-      "Given machine configuration ${Enzo-E_CONFIG}.cmake not found in ${CMAKE_CURRENT_SOURCE_DIR}/config.")
+      "Given machine configuration ${Enzo-E_CONFIG}.cmake neither found in $ENV{HOME}/.enzo-e "
+      "nor in ${CMAKE_CURRENT_SOURCE_DIR}/config.")
   endif()
+  message(STATUS "Using machine configuration file from ${Enzo-E_CONFIG_PATH}")
+  include(${Enzo-E_CONFIG_PATH})
 endif()
 
 #Define project and languages
@@ -70,6 +75,11 @@ if (USE_GRACKLE)
 endif()
 
 find_package(Boost REQUIRED COMPONENTS filesystem)
+# Fix linking error to
+# /opt/apps/gcc/8.3.0/bin/ld: main.cpp:(.text+0x679e): undefined reference to `boost::system::generic_category()'
+# /opt/apps/gcc/8.3.0/bin/ld: main.cpp:(.text+0x67aa): undefined reference to `boost::system::system_category()'
+# due to deprecated code (`filesystem` depends on `system`).
+add_compile_definitions(BOOST_SYSTEM_NO_DEPRECATED)
 
 find_package(PNG REQUIRED)
 add_compile_definitions(NO_FREETYPE)
@@ -249,7 +259,7 @@ endif()
 # Include machine file second time (if used initially) to set additional options that may depend
 # on global (default) options, such as USE_DOUBLE_PREC
 if (__processedUserDefaults)
-    include(${CMAKE_CURRENT_SOURCE_DIR}/config/${Enzo-E_CONFIG}.cmake)
+  include(${Enzo-E_CONFIG_PATH})
 endif()
 
 # In principle a more fine grained control (i.e., target specific include directories

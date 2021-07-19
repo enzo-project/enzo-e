@@ -145,6 +145,10 @@ machine/setup, see the `*.cmake` files in the `config` directory.
 You can specify compilers and option in there that will be used a default when
 `cmake` is called with `-DEnzo-E_CONFG=my_config_name` where `my_config_name` requires
 a corresponding `config/my_config_name.cmake` to exist.
+The alternative directory for the machine configuration files is a `.enzo-e` directory
+in your home directory.
+If a file with the same name exists in your `${HOME}/.enzo-e` directory and in the `config`
+directory only the first one will be used.
 *Note*, all command line parameter take precedence over the default options.
 In other words, if `USE_DOUBLE_PREC` is `ON` in the machine file (or even automatically
 through the global default), the running
@@ -210,6 +214,54 @@ cmake -DCHARM_ROOT=${HOME}/src/charm/build-icc-mpi -DGrackle_ROOT=${HOME}/src/gr
 make
 
 # To run Enzo-E simply call `mpiexec ./build-icc-mpi/bin/enzo-e input/HelloWorld/Hi.in` as usual
+
+```
+
+### TACC Frontera with Intel compilers
+
+```bash
+# Assuming the default Intel stack is loaded only boost and hdf5 modules are required
+module load boost hdf5
+
+# Build Grackle (optional)
+# Following https://grackle.readthedocs.io/en/latest/Installation.html
+mkdir -p ~/src
+cd ~/src
+git clone https://github.com/grackle-project/grackle
+cd grackle
+git submodule update --init
+./configure
+# create build directory as install target later
+mkdir build-icc
+cd src/clib
+# Adjust config to  set install path, and optimization options
+# TACC Stampede config works just fine for TACC Frontera
+sed -i 's#$(HOME)/local#$(PWD)/../../build-icc#;s/-xCORE-AVX2/-xCORE-AVX512/' Make.mach.tacc-stampede-intel
+make machine-tacc-stampede-intel
+make
+make install
+
+# Build Charm++
+cd ~/src
+git clone https://github.com/UIUC-PPL/charm.git
+cd charm
+git checkout v7.0.0-rc1
+mkdir build-icc-mpi
+cd build-icc-mpi
+cmake -DNETWORK=mpi -DSMP=OFF -DCMAKE_CXX_COMPILER=icpc -DCMAKE_C_COMPILER=icc -DCMAKE_Fortran_COMPILER=ifort ..
+make
+
+# Build Enzo-E
+cd ~/src
+git clone https://github.com/forrestglines/enzo-e.git
+cd enzo-e
+git checkout cmake
+mkdir build-icc-mpi
+cd build-icc-mpi
+cmake -DCHARM_ROOT=${HOME}/src/charm/build-icc-mpi -DGrackle_ROOT=${HOME}/src/grackle/build-icc -DEnzo-E_CONFIG=frontera_icc ..
+make
+
+# To run Enzo-E simply call `ibrun ./build-icc-mpi/bin/enzo-e input/HelloWorld/Hi.in +balancer GreedyLB` as usual
 
 ```
 
