@@ -11,7 +11,7 @@ Solver {
          res_tol = 0.02;                  
          monitor_iter = 10;
          type = "bicgstab";
-         precondition = "diagonal_D";
+         precondition = "diagonal";
      };
      diagonal {
         type = "diagonal";

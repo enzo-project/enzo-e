@@ -830,11 +830,8 @@ void Config::read_method_ (Parameters * p) throw()
       p->value_logical (full_name + ":enable",true);
     method_flux_correct_min_digits[index_method] =
       p->value_float (full_name + ":min_digits",0.0);
-    if (name == "flux_correct") 
-      {
-        method_flux_correct_single_array =
-          p->value_logical (full_name + ":single_array",true);
-      }
+    method_flux_correct_single_array =
+      p->value_logical (full_name + ":single_array",true);
 
     // Field and particle lists if needed by MethodRefresh
     int n = p->list_length(full_name + ":field_list");
