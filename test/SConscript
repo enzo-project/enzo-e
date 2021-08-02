@@ -87,6 +87,11 @@ SConscript('MemoryComponent/SConscript')
 SConscript('MethodGravity/SConscript')
 
 #----------------------------------------------------------------------
+# METHOD Grackle TESTS
+#----------------------------------------------------------------------
+SConscript('MethodGrackle/SConscript')
+
+#----------------------------------------------------------------------
 # METHOD COSMOLOGY TESTS
 #----------------------------------------------------------------------
 SConscript('MethodCosmology/SConscript')
