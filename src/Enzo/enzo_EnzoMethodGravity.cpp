@@ -45,9 +45,12 @@ EnzoMethodGravity::EnzoMethodGravity
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->set_prolong(index_prolong_);
-  refresh->add_field("acceleration_x");
-  refresh->add_field("acceleration_y");
-  refresh->add_field("acceleration_z");
+
+  const int rank = cello::rank();
+  
+  if (rank >= 1) refresh->add_field("acceleration_x");
+  if (rank >= 2) refresh->add_field("acceleration_y");
+  if (rank >= 3) refresh->add_field("acceleration_z");
   //  refresh->add_field("density");
   // Accumulate is used when particles are deposited into density_total
   

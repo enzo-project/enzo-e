@@ -286,6 +286,7 @@ Adapt {
          constants = [ "mass", "default", 0.8666666666667000 ];
          position = [ "x", "y", "z" ];
          velocity = [ "vx", "vy", "vz" ];
+         group_list = ["has_mass"];
      };
      list = [ "dark" ];
  }

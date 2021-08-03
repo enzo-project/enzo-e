@@ -753,9 +753,6 @@ protected:
   /// Check consistency between is_leaf_ and size of children_()
   void check_leaf_();
 
-  /// Check if Block should have been deleted
-  void check_delete_();
-
 public: // virtual functions
 
   /// Set state
@@ -982,9 +979,6 @@ protected: // attributes
 
   /// whether Block has been coarsened and should be deleted
   bool coarsened_;
-
-  /// Whether Block is marked for deletion
-  bool delete_;
 
   /// Whether Block is a leaf node during adapt phase (stored not
   /// computed to avoid race condition bug #30)

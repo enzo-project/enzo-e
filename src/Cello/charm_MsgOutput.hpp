@@ -79,6 +79,11 @@ public: // interface
   const char * tag() { return tag_;}
 
   IoBlock * io_block() { return io_block_; }
+
+  std::string block_name() const  { return block_name_; }
+
+  double * block_lower() { return block_lower_; }
+  double * block_upper() { return block_upper_; }
   
 public: // static methods
 
@@ -100,10 +105,10 @@ protected: // methods
     data_msg_      = msg_output.data_msg_;
     buffer_        = nullptr;
     io_block_      = msg_output.io_block_;
-    block_name     = msg_output.block_name;
+    block_name_     = msg_output.block_name_;
     for (int i=0; i<3; i++) {
-      block_lower[i]    = msg_output.block_lower[i];
-      block_upper[i]    = msg_output.block_upper[i];
+      block_lower_[i]    = msg_output.block_lower_[i];
+      block_upper_[i]    = msg_output.block_upper_[i];
     }
     strncpy(tag_,msg_output.tag_,TAG_LEN);
   }
@@ -137,14 +142,12 @@ protected: // attributes
   /// Data for the Block
   IoBlock * io_block_;
   
-public: // attributes
-
   /// Block meta-data
-  std::string block_name;
+  std::string block_name_;
 
   /// Block extents
-  double block_lower[3];
-  double block_upper[3];
+  double block_lower_[3];
+  double block_upper_[3];
   
 };
 

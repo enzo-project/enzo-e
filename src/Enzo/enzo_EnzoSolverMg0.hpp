@@ -99,8 +99,8 @@ public: // interface
 
     p | i_sync_restrict_;
     p | i_sync_prolong_;
-    p | i_msg_prolong_;
     PUParray(p,i_msg_restrict_,8);
+    p | i_msg_prolong_;
     p | i_iter_;
     
     p | ic_;
@@ -190,11 +190,11 @@ public: // interface
     CkPrintf (" i_sync_restrict_ = %d\n",i_sync_restrict_);
     CkPrintf (" i_sync_prolong_ = %d\n",i_sync_prolong_);
     CkPrintf (" i_iter_ = %d\n",i_iter_);
-    CkPrintf (" i_msg_prolong_ = %d\n",i_msg_prolong_);
     CkPrintf (" i_msg_restrict_ = %d %d %d %d %d %d %d %d\n",
               i_msg_restrict_[0],i_msg_restrict_[1],i_msg_restrict_[2],
               i_msg_restrict_[3],i_msg_restrict_[4],i_msg_restrict_[5],
               i_msg_restrict_[6],i_msg_restrict_[7]);
+    CkPrintf (" i_msg_prolong_ = %d\n",i_msg_prolong_);
     
     CkPrintf (" ib_ = %d\n",ib_);
     CkPrintf (" ic_ = %d\n",ic_);
@@ -323,8 +323,8 @@ protected: // attributes
   /// MG scalar id's
   int i_sync_restrict_;
   int i_sync_prolong_;
-  int i_msg_prolong_;
   int i_msg_restrict_[8];
+  int i_msg_prolong_;
   int i_iter_;
 
   /// MG vector id's

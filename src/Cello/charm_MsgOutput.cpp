@@ -26,9 +26,9 @@ MsgOutput::MsgOutput()
     buffer_(nullptr),
     tag_(),
     io_block_(),
-    block_name(),
-    block_lower(),
-    block_upper()
+    block_name_(),
+    block_lower_(),
+    block_upper_()
 {
   ++counter[cello::index_static()];
   cello::hex_string(tag_,TAG_LEN);
@@ -51,9 +51,9 @@ MsgOutput::MsgOutput
     buffer_(nullptr),
     tag_(),
     io_block_(),
-    block_name(),
-    block_lower(),
-    block_upper()
+    block_name_(),
+    block_lower_(),
+    block_upper_()
 {
   ++counter[cello::index_static()]; 
   cello::hex_string(tag_,TAG_LEN);
@@ -104,9 +104,9 @@ void * MsgOutput::pack (MsgOutput * msg)
   }
 
   // Block name
-  SIZE_STRING_TYPE(size,msg->block_name);
-  SIZE_ARRAY_TYPE(size,double,msg->block_lower,3);
-  SIZE_ARRAY_TYPE(size,double,msg->block_upper,3);
+  SIZE_STRING_TYPE(size,msg->block_name_);
+  SIZE_ARRAY_TYPE(size,double,msg->block_lower_,3);
+  SIZE_ARRAY_TYPE(size,double,msg->block_upper_,3);
   
   SIZE_ARRAY_TYPE(size,char,msg->tag_,TAG_LEN+1);
 
@@ -146,9 +146,9 @@ void * MsgOutput::pack (MsgOutput * msg)
   }
 
   // Block name
-  SAVE_STRING_TYPE(pc,msg->block_name);
-  SAVE_ARRAY_TYPE(pc,double,msg->block_lower,3);
-  SAVE_ARRAY_TYPE(pc,double,msg->block_upper,3);
+  SAVE_STRING_TYPE(pc,msg->block_name_);
+  SAVE_ARRAY_TYPE(pc,double,msg->block_lower_,3);
+  SAVE_ARRAY_TYPE(pc,double,msg->block_upper_,3);
 
   SAVE_ARRAY_TYPE(pc,char,msg->tag_,TAG_LEN+1);
 
@@ -208,9 +208,9 @@ MsgOutput * MsgOutput::unpack(void * buffer)
   }
 
   // Block name
-  LOAD_STRING_TYPE(pc,msg->block_name);
-  LOAD_ARRAY_TYPE(pc,double,msg->block_lower,3);
-  LOAD_ARRAY_TYPE(pc,double,msg->block_upper,3);
+  LOAD_STRING_TYPE(pc,msg->block_name_);
+  LOAD_ARRAY_TYPE(pc,double,msg->block_lower_,3);
+  LOAD_ARRAY_TYPE(pc,double,msg->block_upper_,3);
 
   LOAD_ARRAY_TYPE(pc,char,msg->tag_,TAG_LEN+1);
   
@@ -259,9 +259,9 @@ void MsgOutput::set_index_send(Index index)
 
 void MsgOutput::set_block (Block * block, const Factory * factory)
 {
-  block_name = block->name();
-  block->data()->lower(block_lower,block_lower+1,block_lower+2);
-  block->data()->upper(block_upper,block_upper+1,block_upper+2);
+  block_name_ = block->name();
+  block->data()->lower(block_lower_,block_lower_+1,block_lower_+2);
+  block->data()->upper(block_upper_,block_upper_+1,block_upper_+2);
   delete io_block_;
   io_block_ = factory->create_io_block();
   io_block_->set_block(block);

@@ -70,7 +70,6 @@ Block::Block ( MsgRefine * msg )
     adapt_step_(0),
     adapt_(adapt_unknown),
     coarsened_(false),
-    delete_(false),
     is_leaf_(true),
     age_(0),
     face_level_last_(),
@@ -124,7 +123,6 @@ Block::Block ( process_type ip_source )
     adapt_step_(0),
     adapt_(adapt_unknown),
     coarsened_(false),
-    delete_(false),
     is_leaf_(true),
     age_(0),
     face_level_last_(),
@@ -378,7 +376,6 @@ void Block::pup(PUP::er &p)
   p | adapt_step_;
   p | adapt_;
   p | coarsened_;
-  p | delete_;
   p | is_leaf_;
   p | age_;
   p | face_level_last_;
@@ -495,7 +492,6 @@ void Block::print () const
   CkPrintf ("adapt_step_ = %d\n",adapt_step_);
   CkPrintf ("adapt_ = %d\n",adapt_);
   CkPrintf ("coarsened_ = %d\n",coarsened_);
-  CkPrintf ("delete_ = %d\n",delete_);
   CkPrintf ("is_leaf_ = %d\n",is_leaf_);
   CkPrintf ("age_ = %d\n",age_);
   CkPrintf ("face_level_last_.size() = %lu\n",face_level_last_.size());
@@ -708,7 +704,6 @@ Block::Block ()
     adapt_step_(0),
     adapt_(0),
     coarsened_(false),
-    delete_(false),
     is_leaf_(true),
     age_(0),
     face_level_last_(),
@@ -746,7 +741,6 @@ Block::Block (CkMigrateMessage *m)
     adapt_step_(0),
     adapt_(adapt_unknown),
     coarsened_(false),
-    delete_(false),
     is_leaf_(true),
     age_(0),
     face_level_last_(),
@@ -1055,7 +1049,6 @@ void Block::copy_(const Block & block) throw()
   adapt_step_ = block.adapt_step_;
   adapt_      = block.adapt_;
   coarsened_  = block.coarsened_;
-  delete_     = block.delete_;
 }
 
 //----------------------------------------------------------------------
@@ -1110,18 +1103,6 @@ void Block::check_leaf_()
   }
 }
 
-
-//----------------------------------------------------------------------
-
-void Block::check_delete_()
-{
-  if (delete_) {
-    WARNING1("Block::check_delete_()",
-	     "%s: Block exists but is marked for deletion",
-	     name_.c_str());
-    return;
-  }
-}
 
 //----------------------------------------------------------------------
 
