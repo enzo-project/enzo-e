@@ -62,5 +62,3 @@ elif (cello_var == "ucx-gcc-smp"):
     parallel_run = charm_path + "/bin/charmrun +p4 "
     parallel_arg = " ++processPerHost 1 ++ppn 2 "
     smp = 1
-
-
