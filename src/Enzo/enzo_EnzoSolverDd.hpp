@@ -84,8 +84,8 @@ public: // interface
 
     p | i_sync_restrict_;
     p | i_sync_prolong_;
-    p | i_msg_prolong_;
     PUParray(p,i_msg_restrict_,8);
+    p | i_msg_prolong_;
 
     p | ixc_;
 
@@ -212,8 +212,8 @@ protected: // attributes
   /// MG scalar id's
   int i_sync_restrict_;
   int i_sync_prolong_;
-  int i_msg_prolong_;
   int i_msg_restrict_[8];
+  int i_msg_prolong_;
 
   /// Solver-specific temporary fields
   int ixc_;

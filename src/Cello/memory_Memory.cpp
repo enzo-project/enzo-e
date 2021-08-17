@@ -62,7 +62,7 @@ void * Memory::allocate ( size_t bytes )
     CmiAbort("MEMORY ALLOCATION ERROR");
   }
 
-  int * buffer = (int *)(malloc(bytes + 2*sizeof(int)));
+  int * buffer = (int *)(std::malloc(bytes + 2*sizeof(int)));
 
   ASSERT("Memory::allocate",
 	 "Cannot allocate buffer: out of memory",
@@ -131,7 +131,7 @@ void Memory::deallocate ( void * pointer )
 
   }
 
-  free(buffer);
+  std::free(buffer);
 
 #endif
 }

@@ -1,6 +1,8 @@
 import os
 
 is_arch_valid = 1
+use_gfortran = 0
+smp = 0
 
 #python_lt_27 = 1
 
@@ -17,6 +19,17 @@ flags_fc = '-nofor-main'
 
 libpath_fortran = ''
 libs_fortran    = ['irc', 'imf','ifcore','ifport','stdc++','intlc','svml']
+
+###USE GFORTRAN INSTEAD OF IFORT
+if use_gfortran:
+    f90 = 'gfortran'
+    libpath_fortran = '/opt/apps/gcc/9.1.0/lib64'
+    libs_fortran = ['gfortran']
+    flags_arch_fortran = '-ffixed-line-length-132'
+    flags_prec_double = '-fdefault-real-8 -fdefault-double-8'
+    flags_arch = '-O3 -Wall'
+    flags_fc = ''
+########################
 
 home = os.environ['HOME']
 

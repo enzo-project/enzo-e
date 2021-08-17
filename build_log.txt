@@ -1,0 +1,2013 @@
+./build.sh bin/enzo-p
+Remove bin/enzo-p
+2021-07-23 15:44:27 BEGIN
+BEGIN Enzo-P/Cello ./build.sh
+arch=frontera_gcc
+prec=double
+target=bin/enzo-p
+2021-07-23 15:44:27 compiling...                 
+('    CELLO_ARCH scons arch=', 'frontera_gcc')
+('    CELLO_PREC scons prec=', 'double')
+
+
+scons: warning: Ignoring missing SConscript '/home1/07320/whick002/local/SConscript'
+File "/home1/07320/whick002/enzo-e/build/External/SConscript", line 8, in <module>
+
+scons: warning: Two different environments were specified for target main_enzo.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home1/07320/whick002/enzo-e/build/Cello/SConscript", line 211, in <module>
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo-p.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo-p.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Cello/main_enzo.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Cello/main_enzo.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoBlock.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoBlock.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoBoundary.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoBoundary.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoComputeAcceleration.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoComputeAcceleration.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoComputeCicInterp.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoComputeCicInterp.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoComputeCoolingTime.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoComputeCoolingTime.cpp
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo-p.cpp:35:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo-p.cpp:35:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/enzo-p.cpp:131:
+build/Enzo/enzo.def.h: In static member function ‘static void CkIndex_EnzoSimulation::_call_EnzoSimulation_marshall1(void*, void*)’:
+build/Enzo/enzo.def.h:2117:19: warning: unused variable ‘impl_obj’ [-Wunused-variable]
+ 2117 |   EnzoSimulation* impl_obj = static_cast<EnzoSimulation*>(impl_obj_void);
+      |                   ^~~~~~~~
+build/Enzo/enzo.def.h:2120:13: warning: unused variable ‘env’ [-Wunused-variable]
+ 2120 |   envelope *env = UsrToEnv(impl_msg_typed);
+      |             ^~~
+build/Enzo/enzo.def.h: In static member function ‘static int CkIndex_EnzoSimulation::_callmarshall_EnzoSimulation_marshall1(char*, void*)’:
+build/Enzo/enzo.def.h:2134:19: warning: unused variable ‘impl_obj’ [-Wunused-variable]
+ 2134 |   EnzoSimulation* impl_obj = static_cast<EnzoSimulation*>(impl_obj_void);
+      |                   ^~~~~~~~
+build/Enzo/enzo.def.h:2135:13: warning: unused variable ‘env’ [-Wunused-variable]
+ 2135 |   envelope *env = UsrToEnv(impl_buf);
+      |             ^~~
+build/Enzo/enzo.def.h: In static member function ‘static void CkIndex_EnzoSimulation::_marshallmessagepup_EnzoSimulation_marshall1(PUP::er&, void*)’:
+build/Enzo/enzo.def.h:2165:47: warning: comparison of integer expressions of different signedness: ‘long unsigned int’ and ‘int’ [-Wsign-compare]
+ 2165 |   for (int impl_i=0;impl_i*(sizeof(*filename))<impl_cnt_filename;impl_i++) {
+      |                     ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+build/Enzo/enzo.def.h:2152:13: warning: unused variable ‘env’ [-Wunused-variable]
+ 2152 |   envelope *env = UsrToEnv(impl_msg_typed);
+      |             ^~~
+build/Enzo/enzo.def.h: In static member function ‘static void CkIndex_EnzoSimulation::_call_p_get_msg_refine_marshall3(void*, void*)’:
+build/Enzo/enzo.def.h:2283:13: warning: unused variable ‘env’ [-Wunused-variable]
+ 2283 |   envelope *env = UsrToEnv(impl_msg_typed);
+      |             ^~~
+build/Enzo/enzo.def.h: In static member function ‘static int CkIndex_EnzoSimulation::_callmarshall_p_get_msg_refine_marshall3(char*, void*)’:
+build/Enzo/enzo.def.h:2294:13: warning: unused variable ‘env’ [-Wunused-variable]
+ 2294 |   envelope *env = UsrToEnv(impl_buf);
+      |             ^~~
+build/Enzo/enzo.def.h: In static member function ‘static void CkIndex_EnzoSimulation::_marshallmessagepup_p_get_msg_refine_marshall3(PUP::er&, void*)’:
+build/Enzo/enzo.def.h:2307:13: warning: unused variable ‘env’ [-Wunused-variable]
+ 2307 |   envelope *env = UsrToEnv(impl_msg_typed);
+      |             ^~~
+In file included from include/_enzo.hpp:218,
+                 from include/enzo.hpp:47,
+                 from build/Cello/main_enzo.cpp:2:
+include/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+include/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+include/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+include/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from include/_enzo.hpp:221,
+                 from include/enzo.hpp:47,
+                 from build/Cello/main_enzo.cpp:2:
+include/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+include/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+include/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+include/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+build/Enzo/enzo.def.h: In static member function ‘static void CkIndex_EnzoBlock::_call_EnzoBlock_MsgRefine(void*, void*)’:
+build/Enzo/enzo.def.h:3187:14: warning: unused variable ‘impl_obj’ [-Wunused-variable]
+ 3187 |   EnzoBlock* impl_obj = static_cast<EnzoBlock*>(impl_obj_void);
+      |              ^~~~~~~~
+build/Enzo/enzo.def.h: In static member function ‘static void CkIndex_EnzoBlock::_call_EnzoBlock_marshall2(void*, void*)’:
+build/Enzo/enzo.def.h:3247:14: warning: unused variable ‘impl_obj’ [-Wunused-variable]
+ 3247 |   EnzoBlock* impl_obj = static_cast<EnzoBlock*>(impl_obj_void);
+      |              ^~~~~~~~
+build/Enzo/enzo.def.h:3250:13: warning: unused variable ‘env’ [-Wunused-variable]
+ 3250 |   envelope *env = UsrToEnv(impl_msg_typed);
+      |             ^~~
+build/Enzo/enzo.def.h: In static member function ‘static int CkIndex_EnzoBlock::_callmarshall_EnzoBlock_marshall2(char*, void*)’:
+build/Enzo/enzo.def.h:3260:14: warning: unused variable ‘impl_obj’ [-Wunused-variable]
+ 3260 |   EnzoBlock* impl_obj = static_cast<EnzoBlock*>(impl_obj_void);
+      |              ^~~~~~~~
+build/Enzo/enzo.def.h:3261:13: warning: unused variable ‘env’ [-Wunused-variable]
+ 3261 |   envelope *env = UsrToEnv(impl_buf);
+      |             ^~~
+build/Enzo/enzo.def.h: In static member function ‘static void CkIndex_EnzoBlock::_marshallmessagepup_EnzoBlock_marshall2(PUP::er&, void*)’:
+build/Enzo/enzo.def.h:3274:13: warning: unused variable ‘env’ [-Wunused-variable]
+ 3274 |   envelope *env = UsrToEnv(impl_msg_typed);
+      |             ^~~
+build/Enzo/enzo.def.h: In static member function ‘static void CkIndex_EnzoBlock::_call_EnzoBlock_void(void*, void*)’:
+build/Enzo/enzo.def.h:3312:14: warning: unused variable ‘impl_obj’ [-Wunused-variable]
+ 3312 |   EnzoBlock* impl_obj = static_cast<EnzoBlock*>(impl_obj_void);
+      |              ^~~~~~~~
+build/Enzo/enzo.def.h: In static member function ‘static void CkIndex_EnzoBlock::_call_p_dot_recv_parent_marshall26(void*, void*)’:
+build/Enzo/enzo.def.h:3995:13: warning: unused variable ‘env’ [-Wunused-variable]
+ 3995 |   envelope *env = UsrToEnv(impl_msg_typed);
+      |             ^~~
+build/Enzo/enzo.def.h: In static member function ‘static int CkIndex_EnzoBlock::_callmarshall_p_dot_recv_parent_marshall26(char*, void*)’:
+build/Enzo/enzo.def.h:4016:13: warning: unused variable ‘env’ [-Wunused-variable]
+ 4016 |   envelope *env = UsrToEnv(impl_buf);
+      |             ^~~
+build/Enzo/enzo.def.h: In static member function ‘static void CkIndex_EnzoBlock::_marshallmessagepup_p_dot_recv_parent_marshall26(PUP::er&, void*)’:
+build/Enzo/enzo.def.h:4060:42: warning: comparison of integer expressions of different signedness: ‘long unsigned int’ and ‘int’ [-Wsign-compare]
+ 4060 |   for (int impl_i=0;impl_i*(sizeof(*dot))<impl_cnt_dot;impl_i++) {
+      |                     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~
+build/Enzo/enzo.def.h:4039:13: warning: unused variable ‘env’ [-Wunused-variable]
+ 4039 |   envelope *env = UsrToEnv(impl_msg_typed);
+      |             ^~~
+build/Enzo/enzo.def.h: In static member function ‘static void CkIndex_EnzoBlock::_call_p_dot_recv_children_marshall27(void*, void*)’:
+build/Enzo/enzo.def.h:4131:13: warning: unused variable ‘env’ [-Wunused-variable]
+ 4131 |   envelope *env = UsrToEnv(impl_msg_typed);
+      |             ^~~
+build/Enzo/enzo.def.h: In static member function ‘static int CkIndex_EnzoBlock::_callmarshall_p_dot_recv_children_marshall27(char*, void*)’:
+build/Enzo/enzo.def.h:4150:13: warning: unused variable ‘env’ [-Wunused-variable]
+ 4150 |   envelope *env = UsrToEnv(impl_buf);
+      |             ^~~
+build/Enzo/enzo.def.h: In static member function ‘static void CkIndex_EnzoBlock::_marshallmessagepup_p_dot_recv_children_marshall27(PUP::er&, void*)’:
+build/Enzo/enzo.def.h:4190:42: warning: comparison of integer expressions of different signedness: ‘long unsigned int’ and ‘int’ [-Wsign-compare]
+ 4190 |   for (int impl_i=0;impl_i*(sizeof(*dot))<impl_cnt_dot;impl_i++) {
+      |                     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~
+build/Enzo/enzo.def.h:4171:13: warning: unused variable ‘env’ [-Wunused-variable]
+ 4171 |   envelope *env = UsrToEnv(impl_msg_typed);
+      |             ^~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo.cpp:1:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo.cpp:1:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoBlock.cpp:11:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Cello/main.cpp:315,
+                 from build/Cello/main_enzo.cpp:3:
+build/Cello/main_enzo.def.h: In static member function ‘static void CkIndex_Main::_call_Main_CkArgMsg(void*, void*)’:
+build/Cello/main_enzo.def.h:537:9: warning: unused variable ‘impl_obj’ [-Wunused-variable]
+  537 |   Main* impl_obj = static_cast<Main*>(impl_obj_void);
+      |         ^~~~~~~~
+In file included from build/Cello/main.cpp:315,
+                 from build/Cello/main_enzo.cpp:3:
+build/Cello/main_enzo.def.h: In static member function ‘static void CkIndex_Main::_call_p_exit_marshall2(void*, void*)’:
+build/Cello/main_enzo.def.h:583:13: warning: unused variable ‘env’ [-Wunused-variable]
+  583 |   envelope *env = UsrToEnv(impl_msg_typed);
+      |             ^~~
+build/Cello/main_enzo.def.h: In static member function ‘static int CkIndex_Main::_callmarshall_p_exit_marshall2(char*, void*)’:
+build/Cello/main_enzo.def.h:594:13: warning: unused variable ‘env’ [-Wunused-variable]
+  594 |   envelope *env = UsrToEnv(impl_buf);
+      |             ^~~
+build/Cello/main_enzo.def.h: In static member function ‘static void CkIndex_Main::_marshallmessagepup_p_exit_marshall2(PUP::er&, void*)’:
+build/Cello/main_enzo.def.h:607:13: warning: unused variable ‘env’ [-Wunused-variable]
+  607 |   envelope *env = UsrToEnv(impl_msg_typed);
+      |             ^~~
+build/Cello/main_enzo.def.h: In static member function ‘static void CkIndex_Main::_call_p_checkpoint_method_marshall3(void*, void*)’:
+build/Cello/main_enzo.def.h:665:13: warning: unused variable ‘env’ [-Wunused-variable]
+  665 |   envelope *env = UsrToEnv(impl_msg_typed);
+      |             ^~~
+build/Cello/main_enzo.def.h: In static member function ‘static int CkIndex_Main::_callmarshall_p_checkpoint_method_marshall3(char*, void*)’:
+build/Cello/main_enzo.def.h:678:13: warning: unused variable ‘env’ [-Wunused-variable]
+  678 |   envelope *env = UsrToEnv(impl_buf);
+      |             ^~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoBlock.cpp:11:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+build/Cello/main_enzo.def.h: In static member function ‘static void CkIndex_Main::_marshallmessagepup_p_checkpoint_method_marshall3(PUP::er&, void*)’:
+build/Cello/main_enzo.def.h:693:13: warning: unused variable ‘env’ [-Wunused-variable]
+  693 |   envelope *env = UsrToEnv(impl_msg_typed);
+      |             ^~~
+build/Cello/main_enzo.def.h: In static member function ‘static void CkIndex_Main::_call_p_checkpoint_output_marshall4(void*, void*)’:
+build/Cello/main_enzo.def.h:755:13: warning: unused variable ‘env’ [-Wunused-variable]
+  755 |   envelope *env = UsrToEnv(impl_msg_typed);
+      |             ^~~
+build/Cello/main_enzo.def.h: In static member function ‘static int CkIndex_Main::_callmarshall_p_checkpoint_output_marshall4(char*, void*)’:
+build/Cello/main_enzo.def.h:768:13: warning: unused variable ‘env’ [-Wunused-variable]
+  768 |   envelope *env = UsrToEnv(impl_buf);
+      |             ^~~
+build/Cello/main_enzo.def.h: In static member function ‘static void CkIndex_Main::_marshallmessagepup_p_checkpoint_output_marshall4(PUP::er&, void*)’:
+build/Cello/main_enzo.def.h:783:13: warning: unused variable ‘env’ [-Wunused-variable]
+  783 |   envelope *env = UsrToEnv(impl_msg_typed);
+      |             ^~~
+build/Cello/main_enzo.def.h: In static member function ‘static void CkIndex_Main::_call_p_text_file_write_marshall19(void*, void*)’:
+build/Cello/main_enzo.def.h:1322:13: warning: unused variable ‘env’ [-Wunused-variable]
+ 1322 |   envelope *env = UsrToEnv(impl_msg_typed);
+      |             ^~~
+build/Cello/main_enzo.def.h: In static member function ‘static int CkIndex_Main::_callmarshall_p_text_file_write_marshall19(char*, void*)’:
+build/Cello/main_enzo.def.h:1351:13: warning: unused variable ‘env’ [-Wunused-variable]
+ 1351 |   envelope *env = UsrToEnv(impl_buf);
+      |             ^~~
+build/Cello/main_enzo.def.h: In static member function ‘static void CkIndex_Main::_marshallmessagepup_p_text_file_write_marshall19(PUP::er&, void*)’:
+build/Cello/main_enzo.def.h:1411:42: warning: comparison of integer expressions of different signedness: ‘long unsigned int’ and ‘int’ [-Wsign-compare]
+ 1411 |   for (int impl_i=0;impl_i*(sizeof(*dir))<impl_cnt_dir;impl_i++) {
+      |                     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~
+build/Cello/main_enzo.def.h:1420:43: warning: comparison of integer expressions of different signedness: ‘long unsigned int’ and ‘int’ [-Wsign-compare]
+ 1420 |   for (int impl_i=0;impl_i*(sizeof(*file))<impl_cnt_file;impl_i++) {
+      |                     ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~
+build/Cello/main_enzo.def.h:1429:43: warning: comparison of integer expressions of different signedness: ‘long unsigned int’ and ‘int’ [-Wsign-compare]
+ 1429 |   for (int impl_i=0;impl_i*(sizeof(*line))<impl_cnt_line;impl_i++) {
+      |                     ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~
+build/Cello/main_enzo.def.h:1382:13: warning: unused variable ‘env’ [-Wunused-variable]
+ 1382 |   envelope *env = UsrToEnv(impl_msg_typed);
+      |             ^~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoComputeCicInterp.cpp:12:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoComputeCicInterp.cpp:12:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoComputeCoolingTime.cpp:11:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoComputeCoolingTime.cpp:11:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoBoundary.cpp:10:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoBoundary.cpp:10:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoComputeAcceleration.cpp:10:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoComputeAcceleration.cpp:10:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoComputePressure.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoComputePressure.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoComputeTemperature.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoComputeTemperature.cpp
+In file included from include/_simulation.hpp:23,
+                 from include/enzo.hpp:38,
+                 from build/Cello/main_enzo.cpp:2:
+In member function ‘void Simulation::set_checkpoint(char*)’,
+    inlined from ‘void Main::p_checkpoint_output(int, std::string)’ at build/Cello/main.cpp:82:31:
+include/simulation_Simulation.hpp:315:13: warning: ‘char* strncpy(char*, const char*, size_t)’ output may be truncated copying 255 bytes from a string of length 255 [-Wstringop-truncation]
+  315 |   { strncpy (dir_checkpoint_,checkpoint,255);}
+      |     ~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In member function ‘void Simulation::set_checkpoint(char*)’,
+    inlined from ‘void Main::p_checkpoint_method(int, std::string)’ at build/Cello/main.cpp:110:31:
+include/simulation_Simulation.hpp:315:13: warning: ‘char* strncpy(char*, const char*, size_t)’ output may be truncated copying 255 bytes from a string of length 255 [-Wstringop-truncation]
+  315 |   { strncpy (dir_checkpoint_,checkpoint,255);}
+      |     ~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoConfig.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoConfig.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoControl.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoControl.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoFactory.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoFactory.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoInitialCollapse.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoInitialCollapse.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoInitialCosmology.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoInitialCosmology.cpp
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoComputePressure.cpp:11:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoComputePressure.cpp:11:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoComputeTemperature.cpp:11:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoComputeTemperature.cpp:11:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoConfig.cpp:9:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoConfig.cpp:9:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoControl.cpp:9:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoControl.cpp:9:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoFactory.cpp:8:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoFactory.cpp:8:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialCollapse.cpp:12:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialCollapse.cpp:12:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoInitialGrackleTest.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoInitialGrackleTest.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoInitialHdf5.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoInitialHdf5.cpp
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialCosmology.cpp:9:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialCosmology.cpp:9:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoInitialImplosion2.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoInitialImplosion2.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoInitialMusic.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoInitialMusic.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoInitialPm.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoInitialPm.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoInitialPpmlTest.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoInitialPpmlTest.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoInitialSedovArray2.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoInitialSedovArray2.cpp
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialGrackleTest.cpp:9:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialGrackleTest.cpp:9:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialHdf5.cpp:7:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialHdf5.cpp:7:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+build/Enzo/enzo_EnzoInitialHdf5.cpp: In constructor ‘EnzoInitialHdf5::EnzoInitialHdf5(int, double, int, std::string, const int*, std::vector<std::__cxx11::basic_string<char> >, std::vector<std::__cxx11::basic_string<char> >, std::vector<std::__cxx11::basic_string<char> >, std::vector<std::__cxx11::basic_string<char> >, std::vector<std::__cxx11::basic_string<char> >, std::vector<std::__cxx11::basic_string<char> >, std::vector<std::__cxx11::basic_string<char> >, std::vector<std::__cxx11::basic_string<char> >, std::vector<std::__cxx11::basic_string<char> >)’:
+build/Enzo/enzo_EnzoInitialHdf5.cpp:52:20: warning: comparison of integer expressions of different signedness: ‘int’ and ‘std::vector<std::__cxx11::basic_string<char> >::size_type’ {aka ‘long unsigned int’} [-Wsign-compare]
+   52 |     for (int i=0; i<field_coords.size(); i++)  field_coords_[i] = "tzyx";
+      |                   ~^~~~~~~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoInitialHdf5.cpp:53:20: warning: comparison of integer expressions of different signedness: ‘int’ and ‘std::vector<std::__cxx11::basic_string<char> >::size_type’ {aka ‘long unsigned int’} [-Wsign-compare]
+   53 |     for (int i=0; i<particle_coords.size(); i++) particle_coords_[i] = "tzyx";
+      |                   ~^~~~~~~~~~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoInitialHdf5.cpp: In member function ‘virtual void EnzoInitialHdf5::enforce_block(Block*, const Hierarchy*)’:
+build/Enzo/enzo_EnzoInitialHdf5.cpp:100:12: warning: unused variable ‘sync_msg’ [-Wunused-variable]
+  100 |     Sync * sync_msg = psync_msg(block);
+      |            ^~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialImplosion2.cpp:10:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialImplosion2.cpp:10:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialMusic.cpp:8:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialMusic.cpp:8:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+build/Enzo/enzo_EnzoInitialHdf5.cpp: In function ‘void EnzoInitialHdf5::read_dataset_(File*, char**, Index, int, double*, double*, int*, std::string, int, int, int, int*, int*, double*, int*, int*, int*)’:
+build/Enzo/enzo_EnzoInitialHdf5.cpp:581:19: warning: ‘data’ may be used uninitialized in this function [-Wmaybe-uninitialized]
+  581 |   file->data_read ((*data));
+      |   ~~~~~~~~~~~~~~~~^~~~~~~~~
+build/Enzo/enzo_EnzoInitialHdf5.cpp: In member function ‘void EnzoInitialHdf5::read_dataset_(File*, char**, Index, int, double*, double*, int*, std::string, int, int, int, int*, int*, double*, int*, int*, int*)’:
+build/Enzo/enzo_EnzoInitialHdf5.cpp:581:19: warning: ‘data’ may be used uninitialized in this function [-Wmaybe-uninitialized]
+  581 |   file->data_read ((*data));
+      |   ~~~~~~~~~~~~~~~~^~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialPm.cpp:8:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialPm.cpp:8:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoInitialSedovArray3.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoInitialSedovArray3.cpp
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialPpmlTest.cpp:8:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialPpmlTest.cpp:8:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoInitialSedovRandom.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoInitialSedovRandom.cpp
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialSedovArray2.cpp:15:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialSedovArray2.cpp:15:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoInitialSoup.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoInitialSoup.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoInitialTurbulence.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoInitialTurbulence.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoMatrixDiagonal.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoMatrixDiagonal.cpp
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialSedovArray3.cpp:15:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialSedovArray3.cpp:15:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoMatrixIdentity.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoMatrixIdentity.cpp
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialSedovRandom.cpp:15:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialSedovRandom.cpp:15:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoMatrixLaplace.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoMatrixLaplace.cpp
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialSoup.cpp:8:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialSoup.cpp:8:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoMethodComovingExpansion.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoMethodComovingExpansion.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoMethodCosmology.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoMethodCosmology.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoMethodGrackle.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoMethodGrackle.cpp
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialTurbulence.cpp:11:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoInitialTurbulence.cpp:11:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMatrixDiagonal.cpp:9:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMatrixDiagonal.cpp:9:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMatrixIdentity.cpp:9:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMatrixIdentity.cpp:9:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoMethodGravity.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoMethodGravity.cpp
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMatrixLaplace.cpp:9:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMatrixLaplace.cpp:9:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMethodComovingExpansion.cpp:10:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMethodComovingExpansion.cpp:10:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoMethodHeat.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoMethodHeat.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoMethodPmDeposit.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoMethodPmDeposit.cpp
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMethodCosmology.cpp:10:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMethodCosmology.cpp:10:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoMethodPmUpdate.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoMethodPmUpdate.cpp
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMethodGrackle.cpp:10:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMethodGrackle.cpp:10:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoMethodPpm.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoMethodPpm.cpp
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMethodGravity.cpp:10:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMethodGravity.cpp:10:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoMethodPpml.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoMethodPpml.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoMethodTurbulence.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoMethodTurbulence.cpp
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMethodHeat.cpp:10:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMethodHeat.cpp:10:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMethodPmDeposit.cpp:14:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMethodPmDeposit.cpp:14:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMethodPmUpdate.cpp:10:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMethodPmUpdate.cpp:10:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMethodPpm.cpp:9:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMethodPpm.cpp:9:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoPhysicsCosmology.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoPhysicsCosmology.cpp
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMethodPpml.cpp:12:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMethodPpml.cpp:12:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMethodTurbulence.cpp:11:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoMethodTurbulence.cpp:11:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoProblem.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoProblem.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoProlong.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoProlong.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoProlongMC1.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoProlongMC1.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoProlongPoisson.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoProlongPoisson.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoRefineMass.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoRefineMass.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoRefineParticleMass.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoRefineParticleMass.cpp
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoPhysicsCosmology.cpp:8:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoPhysicsCosmology.cpp:8:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoRefineShock.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoRefineShock.cpp
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoProblem.cpp:10:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoProblem.cpp:10:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoProlong.cpp:8:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoProlong.cpp:8:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoRestrict.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoRestrict.cpp
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoProlongMC1.cpp:8:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoProlongMC1.cpp:8:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoProlongPoisson.cpp:27:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoProlongPoisson.cpp:27:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoRefineMass.cpp:10:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoRefineMass.cpp:10:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoRefineParticleMass.cpp:8:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoRefineParticleMass.cpp:8:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoSimulation.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoSimulation.cpp
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoRefineShock.cpp:8:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoRefineShock.cpp:8:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoSolverBiCgStab.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoSolverBiCgStab.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoSolverCg.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoSolverCg.cpp
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoRestrict.cpp:8:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoRestrict.cpp:8:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoSolverDd.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoSolverDd.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoSolverDiagonal.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoSolverDiagonal.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoSolverJacobi.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoSolverJacobi.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoSolverMg0.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoSolverMg0.cpp
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoSimulation.cpp:15:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoSimulation.cpp:15:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_EnzoStopping.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_EnzoStopping.cpp
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoSolverBiCgStab.cpp:34:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoSolverBiCgStab.cpp:34:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverBiCgStab.cpp: In constructor ‘EnzoSolverBiCgStab::EnzoSolverBiCgStab(std::string, std::string, std::string, int, int, int, int, int, int, int, int, double, int, int)’:
+build/Enzo/enzo_EnzoSolverBiCgStab.cpp:247:7: warning: unused variable ‘is_skip’ [-Wunused-variable]
+  247 |   int is_skip   =  scalar_descr_quad->new_value("solver_bicgstab_skip");
+      |       ^~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoSolverCg.cpp:8:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoSolverCg.cpp:8:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoSolverDd.cpp:24:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoSolverDd.cpp:24:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoSolverDiagonal.cpp:8:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoSolverDiagonal.cpp:8:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_IoEnzoBlock.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_IoEnzoBlock.cpp
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoSolverJacobi.cpp:9:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoSolverJacobi.cpp:9:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoSolverMg0.cpp:105:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoSolverMg0.cpp:105:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoStopping.cpp:9:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_EnzoStopping.cpp:9:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_SetMinimumSupport.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_SetMinimumSupport.cpp
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_IoEnzoBlock.cpp:8:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_IoEnzoBlock.cpp:8:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+build/Enzo/enzo_IoEnzoBlock.cpp: In member function ‘virtual void IoEnzoBlock::set_block(Block*)’:
+build/Enzo/enzo_IoEnzoBlock.cpp:35:7: warning: unused variable ‘i’ [-Wunused-variable]
+   35 |   int i;
+      |       ^
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_SolveHydroEquations.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_SolveHydroEquations.cpp
+/home1/07320/whick002/charm_smp/bin/charmc -language charm++ -o build/Enzo/enzo_SolveMHDEquations.o -c -O3 -Wall -g -ffast-math -funroll-loops -balancer CommonLBs -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude -I/home1/00369/tg456481/include -I/opt/apps/intel19/python3_7/boost/1.72 -I/home1/07320/whick002/local/include -I/usr/lib64/include build/Enzo/enzo_SolveMHDEquations.cpp
+gfortran -o build/Enzo/calcdiss.o -c -O3 -Wall -g -ffast-math -funroll-loops -fdefault-real-8 -fdefault-double-8 -DCONFIG_PRECISION_DOUBLE -DSMALL_INTS -DCONFIG_NODE_SIZE=64 -DCONFIG_NODE_SIZE_3=192 -DNO_FREETYPE -DCONFIG_USE_PERFORMANCE -DCONFIG_USE_GRACKLE -DCONFIG_USE_MEMORY -DCONFIG_HAVE_VERSION_CONTROL -DCONFIG_SMP_MODE -Iinclude build/Enzo/calcdiss.F
+build/Enzo/calcdiss.F:124:72:
+
+  124 |       INTG_PREC dimx, dimy, dimz, i1, i2, idiff, idim, idir, iflatten,
+      |                                                                        1
+Warning: Line truncated at (1) [-Wline-truncation]
+build/Enzo/calcdiss.F:127:72:
+
+  127 |       R_PREC    dslice(idim,jdim), eslice(idim,jdim), uslice(idim,jdim),
+      |                                                                        1
+Warning: Line truncated at (1) [-Wline-truncation]
+build/Enzo/calcdiss.F:128:72:
+
+  128 |      &        diffcoef(idim,jdim), flatten(idim,jdim), pslice(idim,jdim)
+      |                                                                        1
+Error: Expected another dimension in array declaration at (1)
+build/Enzo/calcdiss.F:19:24:
+
+   19 |      &            dslice, eslice, uslice, v, w, pslice, dx, dy, dz,
+      |                        1
+Error: Symbol ‘dslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:19:32:
+
+   19 |      &            dslice, eslice, uslice, v, w, pslice, dx, dy, dz,
+      |                                1
+Error: Symbol ‘eslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:19:40:
+
+   19 |      &            dslice, eslice, uslice, v, w, pslice, dx, dy, dz,
+      |                                        1
+Error: Symbol ‘uslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:19:54:
+
+   19 |      &            dslice, eslice, uslice, v, w, pslice, dx, dy, dz,
+      |                                                      1
+Error: Symbol ‘pslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:20:46:
+
+   20 |      &            idim, jdim, kdim, i1, i2, j1, j2, k, nzz, idir,
+      |                                              1
+Error: Symbol ‘j1’ at (1) has no IMPLICIT type; did you mean ‘i1’?
+build/Enzo/calcdiss.F:21:62:
+
+   21 |      &            dimx, dimy, dimz, dt, gamma, idiff, iflatten,
+      |                                                              1
+Error: Symbol ‘iflatten’ at (1) has no IMPLICIT type; did you mean ‘flattemp’?
+build/Enzo/calcdiss.F:22:26:
+
+   22 |      &            diffcoef, flatten
+      |                          1
+Error: Symbol ‘diffcoef’ at (1) has no IMPLICIT type; did you mean ‘difftemp’?
+build/Enzo/calcdiss.F:22:35:
+
+   22 |      &            diffcoef, flatten
+      |                                   1
+Error: Symbol ‘flatten’ at (1) has no IMPLICIT type; did you mean ‘flattemp’?
+build/Enzo/calcdiss.F:197:23:
+
+  197 |      &           / min(pslice(i+1,j),  pslice(i-1,j))
+      |                       1
+Error: Function ‘pslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:199:33:
+
+  199 |      &          uslice(i-1,j).gt.uslice(i+1,j) ) then
+      |                                 1
+Error: Function ‘uslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:415:22:
+
+  415 |      &            min(pslice(i+2,j),pslice(i-2,j)) .lt. epsilon) then
+      |                      1
+Error: Function ‘pslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:419:50:
+
+  419 |      &                /   ( pslice(i+2,j) - pslice(i-2,j) )
+      |                                                  1
+Error: Function ‘pslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:433:41:
+
+  433 |                if (pslice(i+1,j) - pslice(i-1,j) .lt. 0._RKIND) then
+      |                                         1
+Error: Function ‘pslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:452:38:
+
+  452 |                di(i) = 1._RKIND/dslice(i,j)
+      |                                      1
+Error: Function ‘dslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:457:60:
+
+  457 |                is = i + int(sign(two, pslice(i+1,j) - pslice(i-1,j)))
+      |                                                            1
+Error: Function ‘pslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:461:45:
+
+  461 |      &              / (pslice(i+2,j) - pslice(i-2,j)) ))
+      |                                             1
+Error: Function ‘pslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:464:51:
+
+  464 |      &              0.5_RKIND*(pslice(i+2,j)+pslice(i-2,j))
+      |                                                   1
+Error: Function ‘pslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:468:55:
+
+  468 |      &              (Z + sqrt(gamma*pslice(is,j)*dslice(is,j))) / Z
+      |                                                       1
+Error: Function ‘dslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:494:38:
+
+  494 |                di(i) = 1._RKIND/dslice(i,j)
+      |                                      1
+Error: Function ‘dslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:499:43:
+
+  499 |                dp1 = pslice(i+1,j) - pslice(i-1,j)
+      |                                           1
+Error: Function ‘pslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:500:43:
+
+  500 |                dp2 = pslice(i+2,j) - pslice(i-2,j)
+      |                                           1
+Error: Function ‘pslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:501:43:
+
+  501 |                de1 = eslice(i+1,j) - eslice(i-1,j)
+      |                                           1
+Error: Function ‘eslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:502:43:
+
+  502 |                de2 = eslice(i+2,j) - eslice(i-2,j)
+      |                                           1
+Error: Function ‘eslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:518:42:
+
+  518 |      &              wflag(i)*abs(dp2)/min(pslice(i+2,j),pslice(i-2,j))
+      |                                          1
+Error: Function ‘pslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:531:51:
+
+  531 |      &              0.5_RKIND*(pslice(i+2,j)+pslice(i-2,j))
+      |                                                   1
+Error: Function ‘pslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:537:48:
+
+  537 |                ZE   = s*Z/dslice(ism,j) + uslice(ism,j) + tiny
+      |                                                1
+Error: Function ‘uslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:538:53:
+
+  538 |                cj2s = sqrt(gamma*pslice(isp,j)/dslice(isp,j))
+      |                                                     1
+Error: Function ‘dslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:542:45:
+
+  542 |                kappa_tilde = abs((ZE - uslice(isp,j) + s*cj2s)/ZE)
+      |                                             1
+Error: Function ‘uslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:561:41:
+
+  561 |                if (pslice(i+1,j) - pslice(i-1,j) .lt. 0._RKIND) then
+      |                                         1
+Error: Function ‘pslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:577:51:
+
+  577 |                difftemp(i) = uslice(i-2,j) - uslice(i+1,j)
+      |                                                   1
+Error: Function ‘uslice’ at (1) has no IMPLICIT type
+build/Enzo/calcdiss.F:609:54:
+
+  609 |                s  = - sign(one, pslice(i-1,j) - pslice(i,j))
+      |                                                      1
+Error: Function ‘pslice’ at (1) has no IMPLICIT type
+scons: *** [build/Enzo/calcdiss.o] Error 1
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_SetMinimumSupport.cpp:10:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_SetMinimumSupport.cpp:10:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_SolveMHDEquations.cpp:22:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_SolveMHDEquations.cpp:22:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+build/Enzo/enzo_SolveMHDEquations.cpp: In member function ‘int EnzoBlock::SolveMHDEquations(enzo_float)’:
+build/Enzo/enzo_SolveMHDEquations.cpp:39:15: warning: variable ‘GridGlobalStart’ set but not used [-Wunused-but-set-variable]
+   39 |     Elong_int GridGlobalStart[MAX_DIMENSION];
+      |               ^~~~~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:218,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_SolveHydroEquations.cpp:9:
+build/Enzo/enzo_EnzoSolverDd.hpp: In constructor ‘EnzoSolverDd::EnzoSolverDd(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverDd.hpp:216:7: warning: ‘EnzoSolverDd::i_msg_restrict_’ will be initialized after [-Wreorder]
+  216 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:215:7: warning:   ‘int EnzoSolverDd::i_msg_prolong_’ [-Wreorder]
+  215 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverDd.hpp:48:3: warning:   when initialized here [-Wreorder]
+   48 |   EnzoSolverDd (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~
+In file included from build/Enzo/_enzo.hpp:221,
+                 from build/Enzo/enzo.hpp:47,
+                 from build/Enzo/enzo_SolveHydroEquations.cpp:9:
+build/Enzo/enzo_EnzoSolverMg0.hpp: In constructor ‘EnzoSolverMg0::EnzoSolverMg0(CkMigrateMessage*)’:
+build/Enzo/enzo_EnzoSolverMg0.hpp:327:7: warning: ‘EnzoSolverMg0::i_msg_restrict_’ will be initialized after [-Wreorder]
+  327 |   int i_msg_restrict_[8];
+      |       ^~~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:326:7: warning:   ‘int EnzoSolverMg0::i_msg_prolong_’ [-Wreorder]
+  326 |   int i_msg_prolong_;
+      |       ^~~~~~~~~~~~~~
+build/Enzo/enzo_EnzoSolverMg0.hpp:50:3: warning:   when initialized here [-Wreorder]
+   50 |   EnzoSolverMg0 (CkMigrateMessage *m)
+      |   ^~~~~~~~~~~~~
+FAIL
+done
+END   Enzo-P/Cello ./build.sh: arch = frontera_gcc  prec = double  target = bin/enzo-p time = .71 min
+make: *** [bin/enzo-p] Error 1

@@ -30,9 +30,9 @@ inline void operator|(PUP::er &p, code_units &c){
 }
 
 typedef int (*grackle_local_property_func)(chemistry_data*,
-					   chemistry_data_storage *,
-					   code_units*, grackle_field_data*,
-					   enzo_float*);
+                       chemistry_data_storage *,
+                       code_units*, grackle_field_data*,
+                       enzo_float*);
 #endif
 
 
@@ -81,12 +81,19 @@ public: // interface
     Method::pup(p);
 
     p | grackle_units_;
-    p | time_grackle_data_initialized_;
 
+    double last_init_time = time_grackle_data_initialized_;
+    p | last_init_time;
     if (p.isUnpacking()) {
-      // the following recomputes grackle_rates_. This avoids having to write
-      // pup methods for all of Grackle's internal data structures
-      initialize_grackle_chemistry_data(time_grackle_data_initialized_);
+      ASSERT("EnzoMethodGrackle::pup",
+             "grackle_chemistry_data must have previously been initialized",
+             last_init_time!=ENZO_FLOAT_UNDEFINED);
+      // the following recomputes grackle_rates_ (and sets the value of
+      // time_grackle_data_initialized_ to last_init_time). This is done
+      // to avoid writing pup methods for all of Grackle's internal data
+      // structures.
+      time_grackle_data_initialized_ = ENZO_FLOAT_UNDEFINED;
+      initialize_grackle_chemistry_data(last_init_time, true);
     }
 
   #endif /* CONFIG_USE_GRACKLE */
@@ -100,15 +107,28 @@ public: // interface
   { return "grackle"; }
 
   /// Compute maximum timestep for this method
-  virtual double timestep ( Block * block) throw();
+  virtual double timestep ( Block * block) const throw();
 
 #ifdef CONFIG_USE_GRACKLE
 
-  void initialize_grackle_chemistry_data(double current_time);
+  void initialize_grackle_chemistry_data(double current_time,
+                                         bool preinitialized_units = false);
+
+  static void setup_grackle_units (double current_time,
+                                   code_units * grackle_units) throw();
 
   static void setup_grackle_units(EnzoBlock * enzo_block,
                                   code_units * grackle_units,
-                                  int i_hist = 0 ) throw();
+                                  int i_hist = 0 ) throw()
+  {
+    double compute_time;
+    if (i_hist == 0) {
+      compute_time = enzo_block->time();
+    } else {
+      compute_time = enzo_block->data()->field().history_time(i_hist);
+    }
+    setup_grackle_units(compute_time, grackle_units);
+  }
 
   static void setup_grackle_fields(EnzoBlock * enzo_block,
                                    grackle_field_data * grackle_fields,
@@ -117,63 +137,63 @@ public: // interface
   static void update_grackle_density_fields(EnzoBlock * enzo_block,
                                    grackle_field_data * grackle_fields) throw();
 
-  static void delete_grackle_fields(grackle_field_data * grackle_fields) throw() {
-      grackle_fields->density         = NULL;
-      grackle_fields->internal_energy = NULL;
-      grackle_fields->x_velocity      = NULL;
-      grackle_fields->y_velocity      = NULL;
-      grackle_fields->z_velocity      = NULL;
-      grackle_fields->HI_density      = NULL;
-      grackle_fields->HII_density     = NULL;
-      grackle_fields->HeI_density     = NULL;
-      grackle_fields->HeII_density    = NULL;
-      grackle_fields->HeIII_density   = NULL;
-      grackle_fields->e_density       = NULL;
-      grackle_fields->HM_density      = NULL;
-      grackle_fields->H2I_density     = NULL;
-      grackle_fields->H2II_density    = NULL;
-      grackle_fields->DI_density      = NULL;
-      grackle_fields->DII_density     = NULL;
-      grackle_fields->HDI_density     = NULL;
-      grackle_fields->metal_density   = NULL;
-      grackle_fields->volumetric_heating_rate = NULL;
-      grackle_fields->specific_heating_rate   = NULL;
+  static void delete_grackle_fields(grackle_field_data * grackle_fields_) throw() {
+      grackle_fields_->density         = NULL;
+      grackle_fields_->internal_energy = NULL;
+      grackle_fields_->x_velocity      = NULL;
+      grackle_fields_->y_velocity      = NULL;
+      grackle_fields_->z_velocity      = NULL;
+      grackle_fields_->HI_density      = NULL;
+      grackle_fields_->HII_density     = NULL;
+      grackle_fields_->HeI_density     = NULL;
+      grackle_fields_->HeII_density    = NULL;
+      grackle_fields_->HeIII_density   = NULL;
+      grackle_fields_->e_density       = NULL;
+      grackle_fields_->HM_density      = NULL;
+      grackle_fields_->H2I_density     = NULL;
+      grackle_fields_->H2II_density    = NULL;
+      grackle_fields_->DI_density      = NULL;
+      grackle_fields_->DII_density     = NULL;
+      grackle_fields_->HDI_density     = NULL;
+      grackle_fields_->metal_density   = NULL;
+      grackle_fields_->volumetric_heating_rate = NULL;
+      grackle_fields_->specific_heating_rate   = NULL;
 
-      delete [] grackle_fields->grid_dimension; grackle_fields->grid_dimension = NULL;
-      delete [] grackle_fields->grid_start;     grackle_fields->grid_start      = NULL;
-      delete [] grackle_fields->grid_end;       grackle_fields->grid_end        = NULL;
+      delete [] grackle_fields_->grid_dimension; grackle_fields_->grid_dimension = NULL;
+      delete [] grackle_fields_->grid_start;     grackle_fields_->grid_start      = NULL;
+      delete [] grackle_fields_->grid_end;       grackle_fields_->grid_end        = NULL;
 
       return;
  }
 
   void calculate_cooling_time(Block * block, enzo_float* ct,
-			      code_units* grackle_units = NULL,
-			      grackle_field_data* grackle_fields = NULL,
-			      int i_hist = 0) const throw()
+                  code_units* grackle_units = NULL,
+                  grackle_field_data* grackle_fields = NULL,
+                  int i_hist = 0) const throw()
   {
     compute_local_property_(block, ct, grackle_units, grackle_fields, i_hist,
-			    &local_calculate_cooling_time,
-			    "local_calculate_cooling_time");
+                &local_calculate_cooling_time,
+                "local_calculate_cooling_time");
   }
 
   void calculate_pressure(Block * block, enzo_float* pressure,
-			  code_units* grackle_units = NULL,
-			  grackle_field_data* grackle_fields = NULL,
-			  int i_hist = 0) const throw()
+              code_units* grackle_units = NULL,
+              grackle_field_data* grackle_fields = NULL,
+              int i_hist = 0) const throw()
   {
     compute_local_property_(block, pressure, grackle_units, grackle_fields,
-			    i_hist, &local_calculate_pressure,
-			    "local_calculate_pressure");
+                i_hist, &local_calculate_pressure,
+                "local_calculate_pressure");
   }
 
   void calculate_temperature(Block * block, enzo_float* temperature,
-			     code_units* grackle_units = NULL,
-			     grackle_field_data* grackle_fields = NULL,
-			     int i_hist = 0) const throw()
+                 code_units* grackle_units = NULL,
+                 grackle_field_data* grackle_fields = NULL,
+                 int i_hist = 0) const throw()
   {
     compute_local_property_(block, temperature, grackle_units, grackle_fields,
-			    i_hist, &local_calculate_temperature,
-			    "local_calculate_temperature");
+                i_hist, &local_calculate_temperature,
+                "local_calculate_temperature");
   }
 
 #endif
@@ -186,10 +206,10 @@ protected: // methods
 
   // when grackle_units is NULL, new values are temporarily allocated
   void compute_local_property_(Block * block, enzo_float* values,
-			       code_units* grackle_units,
-			       grackle_field_data* grackle_fields, int i_hist,
-			       grackle_local_property_func func,
-			       std::string func_name) const throw();
+                   code_units* grackle_units,
+                   grackle_field_data* grackle_fields, int i_hist,
+                   grackle_local_property_func func,
+                   std::string func_name) const throw();
 
 #endif
 
@@ -205,6 +225,7 @@ protected: // methods
   code_units grackle_units_;
   chemistry_data_storage grackle_rates_;
   double time_grackle_data_initialized_;
+
 #endif
 
 };

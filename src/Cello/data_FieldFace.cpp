@@ -19,6 +19,15 @@
 // #define DEBUG_PRINT true
 // #define DEBUG_BLOCK_ONLY true
 
+//----------------------------------------------------------------------
+
+#define CONFIG_SMP_MODE
+static CmiNodeLock field_face_node_lock;
+void mutex_init_field_face()
+{  field_face_node_lock = CmiCreateLock(); }
+
+//----------------------------------------------------------------------
+
 #ifdef TRACE_FIELD_FACE
 #  undef TRACE_FIELD_FACE
 #  define TRACE_FIELD_FACE(MSG)                         \
@@ -432,6 +441,10 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
   auto field_list_src = refresh_->field_list_src();
   auto field_list_dst = refresh_->field_list_dst();
   
+#ifdef CONFIG_SMP_MODE
+  CmiLock(field_face_node_lock);
+#endif  
+    
   for (size_t i_f=0; i_f < field_list_src.size(); i_f++) {
 
     size_t index_src = field_list_src[i_f];
@@ -476,10 +489,10 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
     
     char * values_src = field_src.values(index_src);
     char * values_dst = field_dst.values(index_dst);
-    
+
     // scale by density if needed to convert to conservative form
     mul_by_density_(field_src,index_src,is3,ns3,m3);
-
+    
     if (refresh_type_ == refresh_fine) {
 
       // Prolong field
@@ -543,6 +556,9 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
     div_by_density_(field_src,index_src,is3,ns3,m3);
     div_by_density_(field_dst,index_dst,id3,nd3,m3);
   }
+#ifdef CONFIG_SMP_MODE
+  CmiUnlock(field_face_node_lock);
+#endif  
 }
 
 //----------------------------------------------------------------------

@@ -22,14 +22,12 @@
 
 #define COPY_FIELD(BLOCK,FIELD,FIELD_COPY)                              \
   {                                                                     \
-    Field field = BLOCK->data()->field();                               \
-    enzo_float * f = (enzo_float *) field.values(FIELD);                \
-    enzo_float * f_copy = (enzo_float *) field.values(FIELD_COPY);      \
-    if (f_copy) {                                                       \
-      int mx,my,mz;                                                     \
-      field.dimensions(0,&mx,&my,&mz);                                  \
-      for (int i=0; i<mx*my*mz; i++) f_copy[i]=f[i];                    \
-    }                                                                   \
+    Field field = BLOCK->data()->field();				\
+    enzo_float * f = (enzo_float *) field.values(FIELD);            \
+    enzo_float * f_copy = (enzo_float *) field.values(FIELD_COPY);  \
+    int mx,my,mz;                                                       \
+    field.dimensions(0,&mx,&my,&mz);                                    \
+    for (int i=0; i<mx*my*mz; i++) f_copy[i]=f[i];              \
   }
 
 //----------------------------------------------------------------------
@@ -53,6 +51,15 @@ EnzoMethodPpm::EnzoMethodPpm ()
   refresh->add_field("acceleration_y");
   refresh->add_field("acceleration_z");
    // PPM parameters initialized in EnzoBlock::initialize()
+  
+  // add all color fields to refresh
+     FieldDescr * field_descr = cello::field_descr();
+       for (int i = 0; i < field_descr->field_count(); i++){
+            std::string name = field_descr->field_name(i);
+                    if (field_descr->groups()->is_in(name,"color")){
+                               refresh->add_field(field_descr->field_id(name));
+                    }
+      } 
 }
 
 //----------------------------------------------------------------------
@@ -73,6 +80,7 @@ void EnzoMethodPpm::pup (PUP::er &p)
 void EnzoMethodPpm::compute ( Block * block) throw()
 {
   TRACE_PPM("BEGIN compute()");
+
 #ifdef COPY_FIELDS_TO_OUTPUT
   const int rank = cello::rank();
   COPY_FIELD(block,"density","density_in");
@@ -167,7 +175,7 @@ void EnzoMethodPpm::compute ( Block * block) throw()
   TRACE_PPM("END compute()");
 
   block->compute_done(); 
-  
+
 }
 
 //----------------------------------------------------------------------

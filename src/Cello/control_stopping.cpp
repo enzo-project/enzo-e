@@ -23,6 +23,7 @@
 
 // #define DEBUG_STOPPING
 
+
 #ifdef DEBUG_STOPPING
 #   define TRACE_STOPPING(A)					\
   CkPrintf ("%d %s:%d %s TRACE %s\n",					\

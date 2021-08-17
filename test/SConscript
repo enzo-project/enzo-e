@@ -209,7 +209,7 @@ env.RunSerial('test_parse_implosion.unit',  bin_path + '/test_Parse', ARGS='inpu
 # TEST PROLONG_LINEAR
 #----------------------------------------------------------------------
 
-env.RunSerial('test_prolong_linear.unit',  bin_path + '/test_ProlongLinear')
+env.RunSerial('test_ProlongLinear.unit',  bin_path + '/test_ProlongLinear')
 
 #----------------------------------------------------------------------
 # TEST FULL APPLICATION

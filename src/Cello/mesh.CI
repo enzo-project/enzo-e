@@ -15,6 +15,8 @@ module mesh {
   initnode void register_sum_long_double_n(void);
 
   initnode void mutex_init_hierarchy();
+  initnode void mutex_init_initial_value();
+  initnode void mutex_init_field_face();
 
   readonly int MsgCoarsen::counter[CONFIG_NODE_SIZE];
   readonly int MsgInitial::counter[CONFIG_NODE_SIZE];

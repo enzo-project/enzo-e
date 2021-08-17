@@ -716,7 +716,7 @@ test_summary("Performance",array("Papi", "Performance","Timer"),
 	     array("test_Papi","test_Performance","test_Timer"),'test'); 
 test_summary("Problem",array("Mask","Refresh","Value","Box"),
              array("test_Mask","test_Refresh","test_Value","test_Box"),'test'); 
-test_summary("Prolong",array("prolong_linear"),
+test_summary("Prolong",array("ProlongLinear"),
 	     array("test_ProlongLinear"),'test'); 
 test_summary("Schedule",array("Schedule"),
 	     array("test_Schedule"),'test'); 
@@ -1854,7 +1854,7 @@ end_hidden("box");
 
 test_group("Prolong");
 begin_hidden("prolong", "ProlongLinear");
-tests("Cello","test_ProlongLinear",  "test_prolong_linear","ProlongLinear","");
+tests("Cello","test_ProlongLinear",  "test_ProlongLinear","","");
 end_hidden("Prolong");
 
 //----------------------------------------------------------------------

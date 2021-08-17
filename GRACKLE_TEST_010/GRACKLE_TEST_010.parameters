@@ -1,0 +1,97 @@
+ Boundary {
+     type = "reflecting";
+ }
+
+ Domain {
+     lower = [ 0.000000000000000, 0.000000000000000, 0.000000000000000 ];
+     upper = [ 1.000000000000000, 1.000000000000000, 1.000000000000000 ];
+ }
+
+ Field {
+     alignment = 8;
+     gamma = 1.400000000000000;
+     ghost_depth = 3;
+     list = [ "density", "internal_energy", "total_energy", "velocity_x", "velocity_y", "velocity_z", "HI_density", "HII_density", "HM_density", "HeI_density", "HeII_density", "HeIII_density", "H2I_density", "H2II_density", "DI_density", "DII_density", "HDI_density", "e_density", "metal_density", "cooling_time", "temperature", "pressure", "gamma" ];
+     padding = 0;
+ }
+
+ Group {
+     color {
+         field_list = [ "HI_density", "HII_density", "HM_density", "HeI_density", "HeII_density", "HeIII_density", "H2I_density", "H2II_density", "DI_density", "DII_density", "HDI_density", "e_density", "metal_density", "cooling_time", "temperature", "pressure", "gamma" ];
+     };
+     derived {
+         field_list = [ "temperature", "pressure", "cooling_time" ];
+     };
+     list = [ "color", "derived" ];
+ }
+
+ Initial {
+     grackle_test {
+         dt = 100.0000000000000;
+         maximum_H_number_density = 1000.000000000000;
+         maximum_metallicity = 1.000000000000000;
+         maximum_temperature = 100000000.0000000;
+         minimum_H_number_density = 0.0001000000000000000;
+         minimum_metallicity = 1.000000000000000;
+         minimum_temperature = 10.00000000000000;
+         reset_energies = 0;
+     };
+     list = [ "grackle_test" ];
+ }
+
+ Mesh {
+     root_blocks = [ 4, 4 ];
+     root_rank = 2;
+     root_size = [ 128, 128 ];
+ }
+
+ Method {
+     grackle {
+         HydrogenFractionByMass = 0.7300000000000000;
+         UVbackground = 1;
+         courant = 0.4000000000000000;
+         data_file = "/home1/07320/whick002/local/input/CloudyData_UVB=HM2012_shielded.h5";
+         metal_cooling = 1;
+         primordial_chemistry = 3;
+         self_shielding_method = 3;
+         use_cooling_timestep = false;
+         with_radiative_cooling = 1;
+     };
+     list = [ "grackle", "null" ];
+     null {
+         dt = 100.0000000000000;
+     };
+ }
+
+ Output {
+     checkpoint {
+         dir = [ "checkpoint_ppm-8-%d", "cycle" ];
+         schedule {
+             list = [ 10, 20 ];
+             var = "cycle";
+         };
+         type = "checkpoint";
+     };
+     data {
+         dir = [ "GRACKLE_TEST_%03d", "cycle" ];
+         field_list = [ "density", "internal_energy", "total_energy", "velocity_x", "velocity_y", "velocity_z", "HI_density", "HII_density", "HM_density", "HeI_density", "HeII_density", "HeIII_density", "H2I_density", "H2II_density", "DI_density", "DII_density", "HDI_density", "e_density", "metal_density", "cooling_time", "temperature", "pressure", "gamma" ];
+         name = [ "method_grackle-1-%03d-%03d.h5", "cycle", "proc" ];
+         schedule {
+             start = 0.000000000000000;
+             step = 1000.000000000000;
+             var = "time";
+         };
+         type = "data";
+     };
+     list = [ "checkpoint", "data" ];
+ }
+
+ Stopping {
+     time = 1000.000000000000;
+ }
+
+ Units {
+     density = 1.672621900000000e-24;
+     length = 3.086000000000000e+16;
+     time = 31557600000000.00;
+ }

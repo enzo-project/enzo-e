@@ -13,7 +13,7 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
-// #define DEBUG_COMPUTE
+//#define DEBUG_COMPUTE
 
 #define CYCLE 0
 

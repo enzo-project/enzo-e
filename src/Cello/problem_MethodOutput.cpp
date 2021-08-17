@@ -374,7 +374,7 @@ void MethodOutput::file_write_block_
   const bool is_local = (msg_output == nullptr);
 
   std::string block_name = (is_local) ?
-    block->name() : msg_output->block_name;
+    block->name() : msg_output->block_name();
 
   IoBlock * io_block = (is_local) ?
     factory_->create_io_block() : msg_output->io_block();
@@ -388,9 +388,9 @@ void MethodOutput::file_write_block_
   }
     
   double * lower = (is_local)?
-    block_lower : msg_output->block_lower;
+    block_lower : msg_output->block_lower();
   double * upper = (is_local)?
-    block_upper : msg_output->block_upper;
+    block_upper : msg_output->block_upper();
 
   // Generate path name
 

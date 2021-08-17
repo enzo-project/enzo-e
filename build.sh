@@ -24,7 +24,7 @@ S0=`date +"%S"`
 
 log="log.build"
 
-proc=8
+proc=4
 
 # set default target
 

@@ -20,7 +20,7 @@ void mutex_init_hierarchy()
   hierarchy_node_lock = CmiCreateLock();
 }
 
-// #define CELLO_TRACE
+#define CELLO_TRACE
 
 //----------------------------------------------------------------------
 

@@ -120,10 +120,6 @@ Adapt {
      };
  }
 
- Memory {
-     limit_gb = 1.000000000000000;
- }
-
  Mesh {
      root_blocks = [ 4, 4, 4 ];
      root_rank = 3;
@@ -290,6 +286,7 @@ Adapt {
          constants = [ "mass", "default", 0.8666666666667000 ];
          position = [ "x", "y", "z" ];
          velocity = [ "vx", "vy", "vz" ];
+         group_list = ["has_mass"];
      };
      list = [ "dark" ];
  }

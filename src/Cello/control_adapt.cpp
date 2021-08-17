@@ -109,12 +109,8 @@ void Block::adapt_next_()
 /// been deleted.  
 void Block::adapt_end_()
 {
-  if (index_.is_root()) thisProxy.doneInserting();
 
-  if (delete_) {
-    ckDestroy();
-    return;
-  }
+  if (index_.is_root()) thisProxy.doneInserting();
 
   for (size_t i=0; i<face_level_last_.size(); i++)
     face_level_last_[i] = -1;
@@ -825,13 +821,11 @@ void Block::p_adapt_recv_child (MsgCoarsen * msg)
 
 void Block::p_adapt_delete()
 {
-  performance_start_(perf_adapt_end);
 #ifdef DEBUG_ADAPT
   CkPrintf ("%s DELETING\n",name().c_str());
 #endif
-  delete_ = true;
-  performance_stop_(perf_adapt_end);
-  performance_start_(perf_adapt_end_sync);
+
+  ckDestroy();
 }
 
 //======================================================================
