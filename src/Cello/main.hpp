@@ -97,6 +97,7 @@ public:
   void p_adapt_enter();
   void p_adapt_called();
   void p_adapt_end();
+  void p_adapt_update();
   void p_adapt_next();
   void p_adapt_exit();
   void p_compute_enter();

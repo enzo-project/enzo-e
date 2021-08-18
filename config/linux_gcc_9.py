@@ -65,7 +65,8 @@ boost_lib = os.getenv('BOOST_LIB', '/usr/lib/x86_64-linux-gnu')
 
 grackle_path = grackle_path_search(home)
 
-cello_var = os.environ['CELLO_VAR']
+cello_var = os.environ.get('CELLO_VAR',"net")
+
 if (cello_var == "net"):
     parallel_run = charm_path + "/bin/charmrun +p4 "
     parallel_arg = " "

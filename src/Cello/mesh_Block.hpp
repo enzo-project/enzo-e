@@ -430,26 +430,10 @@ public:
     performance_stop_(perf_adapt_update);
     performance_start_(perf_adapt_update_sync);
   }
-  void r_adapt_next (CkReductionMsg * msg)
-  {
-    performance_start_(perf_adapt_update);
-    delete msg;    
-    adapt_next_();
-    performance_stop_(perf_adapt_update);
-    performance_start_(perf_adapt_update_sync);
-  }
 
   void p_adapt_called() 
   {
     performance_start_(perf_adapt_notify);
-    adapt_called_();
-    performance_stop_(perf_adapt_notify);
-    performance_start_(perf_adapt_notify_sync);
-  }
-  void r_adapt_called(CkReductionMsg * msg) 
-  {
-    performance_start_(perf_adapt_notify);
-    delete msg;    
     adapt_called_();
     performance_stop_(perf_adapt_notify);
     performance_start_(perf_adapt_notify_sync);
@@ -462,15 +446,10 @@ public:
     performance_stop_(perf_adapt_end);
     performance_start_(perf_adapt_end_sync);
   }
-  void r_adapt_end (CkReductionMsg * msg)  
+  void p_adapt_update()
   {
-    performance_start_(perf_adapt_end);
-    delete msg;    
-    adapt_end_();
-    performance_stop_(perf_adapt_end);
-    performance_start_(perf_adapt_end_sync);
+    adapt_update_();
   }
-
   void p_adapt_exit() 
   {
     performance_start_(perf_adapt_end);
@@ -478,15 +457,6 @@ public:
     performance_stop_(perf_adapt_end);
     performance_start_(perf_adapt_end_sync);
   }
-  void r_adapt_exit(CkReductionMsg * msg) 
-  {
-    performance_start_(perf_adapt_end);
-    delete msg;
-    adapt_exit_();
-    performance_stop_(perf_adapt_end);
-    performance_start_(perf_adapt_end_sync);
-  }
-
 
   /// Parent tells child to delete itself
   void p_adapt_delete();
@@ -509,6 +479,7 @@ protected:
   void adapt_begin_ ();
   void adapt_next_ ();
   void adapt_end_ ();
+  void adapt_update_();
   void adapt_exit_();
   void adapt_coarsen_();
   void adapt_refine_();
@@ -973,9 +944,6 @@ protected: // attributes
 
   /// Number of adapt steps in the adapt phase
   int adapt_step_;
-
-  /// Current adapt value for the block
-  int adapt_;
 
   /// whether Block has been coarsened and should be deleted
   bool coarsened_;
