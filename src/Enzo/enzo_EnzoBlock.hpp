@@ -206,9 +206,11 @@ public: /// entry methods
 
   /// Perform the necessary reductions
   CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs);
+  CkReductionMsg * r_method_mhd_turbulence_it(int n, CkReductionMsg ** msgs);
 
   /// Compute sum, min, and max of g values for EnzoMethodTurbulence
   void p_method_turbulence_end(CkReductionMsg *msg);
+  void p_method_mhd_turbulence_it_end(CkReductionMsg *msg);
 
   void p_initial_hdf5_recv(MsgInitial * msg_initial);
   

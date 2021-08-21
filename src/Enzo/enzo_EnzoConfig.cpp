@@ -119,6 +119,7 @@ EnzoConfig::EnzoConfig() throw ()
   initial_soup_density(0.0),
   // EnzoInitialTurbulence
   initial_turbulence_density(0.0),
+  initial_turbulence_bfieldx(0.0),
   initial_turbulence_pressure(0.0),
   initial_turbulence_temperature(0.0),
   // EnzoMethodHeat
@@ -264,6 +265,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_sedov_random_te_multiplier;
 
   p | initial_turbulence_density;
+  p | initial_turbulence_bfieldx;
   p | initial_turbulence_pressure;
   p | initial_turbulence_temperature;
 
@@ -314,7 +316,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_heat_alpha;
 
   p | method_turbulence_edot;
-
+  p | method_turbulence_mach_number;
+    
   p | method_gravity_grav_const;
   p | method_gravity_solver;
   p | method_gravity_order;
@@ -957,6 +960,20 @@ void EnzoConfig::read_method_turbulence_(Parameters * p)
     ("Method:turbulence:edot",-1.0);
   method_turbulence_mach_number = p->value_float
     ("Method:turbulence:mach_number",0.0);
+  initial_turbulence_density = p->value_float 
+    ("Initial:mhd_turbulence_it:density",1.0);
+
+  // MHD Turbulence method and initialization
+
+  initial_turbulence_density = p->value_float 
+    ("Initial:mhd_turbulence_it:density",1.0);
+  initial_turbulence_bfieldx = p->value_float 
+    ("Initial:mhd_turbulence_it:bfieldx",0.0);
+  method_turbulence_edot = p->value_float
+    ("Method:mhd_turbulence_it:edot",-1.0);
+  method_turbulence_mach_number = p->value_float 
+    ("Method:mhd_turbulence_it:mach_number",0.0);
+
 }
 
 //----------------------------------------------------------------------

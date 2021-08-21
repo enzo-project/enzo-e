@@ -167,6 +167,12 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_turbulence_pressure,
        enzo_config->initial_turbulence_temperature,
        enzo_config->field_gamma);
+  } else if (type == "mhd_turbulence_it") {
+    initial = new EnzoInitialMHDTurbulenceIT 
+      (cycle,time, 
+       enzo_config->initial_turbulence_density,
+       enzo_config->initial_turbulence_bfieldx,
+       enzo_config->field_gamma);
   } else if (type == "pm") {
     std::string param_str = "Initial:" + config->initial_list[index] + ":mask";
     initial = new EnzoInitialPm
@@ -532,6 +538,15 @@ Method * EnzoProblem::create_method_
       (enzo_config->method_turbulence_edot,
        enzo_config->initial_turbulence_density,
        enzo_config->initial_turbulence_temperature,
+       enzo_config->method_turbulence_mach_number,
+       enzo_config->physics_cosmology);
+
+  } else if (name == "mhd_turbulence_it") {
+
+    method = new EnzoMethodMHDTurbulenceIT 
+      (enzo_config->method_turbulence_edot,
+       enzo_config->initial_turbulence_density,
+       enzo_config->initial_turbulence_bfieldx,
        enzo_config->method_turbulence_mach_number,
        enzo_config->physics_cosmology);
 

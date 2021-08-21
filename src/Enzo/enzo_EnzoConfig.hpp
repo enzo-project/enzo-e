@@ -211,6 +211,7 @@ public: // interface
       initial_soup_density(0.0),
       // EnzoInitialTurbulence
       initial_turbulence_density(0.0),
+      initial_turbulence_bfieldx(0.0),
       initial_turbulence_pressure(0.0),
       initial_turbulence_temperature(0.0),
       // EnzoMethodHeat
@@ -438,6 +439,7 @@ public: // attributes
 
   /// EnzoInitialTurbulence
   double                     initial_turbulence_density;
+  double                     initial_turbulence_bfieldx;
   double                     initial_turbulence_pressure;
   double                     initial_turbulence_temperature;
 

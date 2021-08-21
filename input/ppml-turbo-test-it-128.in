@@ -1,0 +1,111 @@
+ Mesh {
+     root_rank = 3;
+     root_blocks = [ 4, 4, 4 ];
+     root_size = [ 128, 128, 128 ];
+ }
+
+ Domain {
+     lower = [ 0.0000000000000, 0.0000000000000, 0.0000000000000 ];
+     upper = [ 1.0000000000000, 1.0000000000000, 1.0000000000000 ];
+ }
+
+ Initial {
+     list = ["mhd_turbulence_it"];
+     mhd_turbulence_it {
+         density     = 1.0000000000000;
+         bfieldx     = 1.0000000000000;
+         gamma       = 1.0000000000000;
+     }
+ }
+
+ Boundary {
+   type = "periodic";
+ }
+
+ Stopping {
+     cycle = 10;
+     time  = 3.0000000;
+ }
+
+ Method {
+     list = [ "ppml" , "mhd_turbulence_it"];
+     ppml {
+         courant = 0.3000000000000000;
+     };
+     mhd_turbulence_it {
+         courant     =  0.3;
+         mach_number =  2.0;
+         e_dot       = -1.0;
+     };
+ }
+
+ Field {
+     alignment = 8;
+     gamma = 1.000000000000000;
+     ghost_depth = 3;
+     list = [ "density", "velox",    "veloy",    "veloz",    "bfieldx",    "bfieldy",    "bfieldz",    "drivx",    "drivy",    "drivz", 
+              "dens_rx", "velox_rx", "veloy_rx", "veloz_rx", "bfieldx_rx", "bfieldy_rx", "bfieldz_rx", "drivx_rx", "drivy_rx", "drivz_rx",
+              "dens_ry", "velox_ry", "veloy_ry", "veloz_ry", "bfieldx_ry", "bfieldy_ry", "bfieldz_ry", "drivx_ry", "drivy_ry", "drivz_ry", 
+              "dens_rz", "velox_rz", "veloy_rz", "veloz_rz", "bfieldx_rz", "bfieldy_rz", "bfieldz_rz", "drivx_rz", "drivy_rz", "drivz_rz" ];
+     padding = 0;
+ }
+
+Output {
+
+# NOTE: checkpoint must come first as workaround for bug #55
+#     list = [ "d_x", "d_y", "d_z", "dump" ];
+#     list = [ "checkpoint", "d_x", "d_y", "d_z", "dump" ];
+     list = [ "checkpoint", "d_x", "d_y", "d_z" ];
+     checkpoint {
+         type  = "checkpoint";
+         dir   = ["checkpoint_%03d","count"];
+         schedule { var = "seconds"; start=1800.0; step = 1800.0;}
+     };  
+
+     d_x {
+         axis = "x";
+         colormap = [ 0.000000000000000, 0.000000000000000, 0.000000000000000,
+                      1.000000000000000, 0.000000000000000, 0.000000000000000, 
+                      1.000000000000000, 1.000000000000000, 0.000000000000000,
+                      1.000000000000000, 1.000000000000000, 1.000000000000000 ];
+         field_list = [ "density" ];
+         image_size = [ 128, 128 ];
+         name = [ "turbo-test-ppml-it-x-%04d.png", "cycle" ];
+         schedule {
+             step = 1;
+             var = "cycle";
+         };
+         type = "image";
+      };
+     d_y {
+         axis = "y";
+         colormap = [ 0.000000000000000, 0.000000000000000, 0.000000000000000,
+                      1.000000000000000, 0.000000000000000, 0.000000000000000, 
+                      1.000000000000000, 1.000000000000000, 0.000000000000000,
+                      1.000000000000000, 1.000000000000000, 1.000000000000000 ];
+         field_list = [ "density" ];
+         image_size = [ 128, 128 ];
+         name = [ "turbo-test-ppml-it-y-%04d.png", "cycle" ];
+         schedule {
+             step = 1;
+             var = "cycle";
+         };
+         type = "image";
+     };     
+    d_z {
+         axis = "z";
+         colormap = [ 0.000000000000000, 0.000000000000000, 0.000000000000000,
+                      1.000000000000000, 0.000000000000000, 0.000000000000000, 
+                      1.000000000000000, 1.000000000000000, 0.000000000000000,
+                      1.000000000000000, 1.000000000000000, 1.000000000000000 ];
+         field_list = [ "density" ];
+         image_size = [ 128, 128 ];
+         name = [ "turbo-test-ppml-it-z-%04d.png", "cycle" ];
+         schedule {
+             step = 1;
+             var = "cycle";
+         };
+         type = "image";
+     };
+ }
+
