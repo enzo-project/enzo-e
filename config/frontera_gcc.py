@@ -37,7 +37,8 @@ papi_lib = home + '/lib'
 png_path     = '/usr/lib64'
 grackle_path = home + '/local'
 
-cello_var = os.environ['CELLO_VAR']
+cello_var = os.environ.get('CELLO_VAR',"mpi-gcc")
+
 if (cello_var == "mpi-gcc"):
     parallel_run = charm_path + "/bin/charmrun +p4 "
     parallel_arg = " "

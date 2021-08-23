@@ -93,8 +93,22 @@ void Block::adapt_next_()
     if (level() < level_next_) adapt_refine_();
     if (level() > level_next_) adapt_coarsen_();
   }
+  control_sync_quiescence (CkIndex_Main::p_adapt_update());
 
+}
+
+//----------------------------------------------------------------------
+
+void Block::adapt_update_()
+{
+  if (index_.is_root()) thisProxy.doneInserting();
+
+#ifdef NEW_ADAPT  
   control_sync_quiescence (CkIndex_Main::p_adapt_end());
+#else
+  adapt_end_();
+#endif
+  
 }
 
 //----------------------------------------------------------------------
@@ -109,9 +123,6 @@ void Block::adapt_next_()
 /// been deleted.  
 void Block::adapt_end_()
 {
-
-  if (index_.is_root()) thisProxy.doneInserting();
-
   for (size_t i=0; i<face_level_last_.size(); i++)
     face_level_last_[i] = -1;
 
@@ -159,7 +170,7 @@ int Block::adapt_compute_desired_level_(int level_maximum)
 {
   if (! is_leaf()) return adapt_same;
 
-  adapt_ = adapt_unknown;
+  int adapt = adapt_unknown;
 
   int level = this->level();
   int level_desired = level;
@@ -173,19 +184,19 @@ int Block::adapt_compute_desired_level_(int level_maximum)
     Schedule * schedule = refine->schedule();
 
     if ((schedule==NULL) || schedule->write_this_cycle(cycle(),time()) ) {
-      adapt_ = std::max(adapt_,refine->apply(this));
+      adapt = std::max(adapt,refine->apply(this));
     }
 
   }
   const int initial_cycle = cello::config()->initial_cycle;
   const bool is_first_cycle = (initial_cycle == cycle());
 
-  if (adapt_ == adapt_coarsen && level > 0 && ! is_first_cycle) 
+  if (adapt == adapt_coarsen && level > 0 && ! is_first_cycle) 
     level_desired = level - 1;
-  else if (adapt_ == adapt_refine  && level < level_maximum) 
+  else if (adapt == adapt_refine  && level < level_maximum) 
     level_desired = level + 1;
   else {
-    adapt_ = adapt_same;
+    adapt = adapt_same;
     level_desired = level;
   }
 
@@ -210,8 +221,6 @@ void Block::adapt_refine_()
   CkPrintf ("%s REFINE\n",name().c_str());
   fflush(stdout);
 #endif
-
-  adapt_ = adapt_unknown;
 
   int nx,ny,nz;
   data()->field_data()->size(&nx,&ny,&nz);

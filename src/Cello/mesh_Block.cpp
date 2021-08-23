@@ -68,7 +68,6 @@ Block::Block ( MsgRefine * msg )
     child_face_level_next_(),
     count_coarsen_(0),
     adapt_step_(0),
-    adapt_(adapt_unknown),
     coarsened_(false),
     is_leaf_(true),
     age_(0),
@@ -121,7 +120,6 @@ Block::Block ( process_type ip_source )
     child_face_level_next_(),
     count_coarsen_(0),
     adapt_step_(0),
-    adapt_(adapt_unknown),
     coarsened_(false),
     is_leaf_(true),
     age_(0),
@@ -189,7 +187,6 @@ void Block::init
   time_ = time;
   dt_ = dt;
   adapt_step_ = num_adapt_steps;
-  adapt_ = adapt_unknown;
 
   // Enable Charm++ AtSync() dynamic load balancing
 
@@ -374,7 +371,6 @@ void Block::pup(PUP::er &p)
   p | child_face_level_next_;
   p | count_coarsen_;
   p | adapt_step_;
-  p | adapt_;
   p | coarsened_;
   p | is_leaf_;
   p | age_;
@@ -490,7 +486,6 @@ void Block::print () const
   CkPrintf ("child_face_level_next_.size() = %lu\n",child_face_level_next_.size());
   CkPrintf ("count_coarsen_ = %d\n",count_coarsen_);
   CkPrintf ("adapt_step_ = %d\n",adapt_step_);
-  CkPrintf ("adapt_ = %d\n",adapt_);
   CkPrintf ("coarsened_ = %d\n",coarsened_);
   CkPrintf ("is_leaf_ = %d\n",is_leaf_);
   CkPrintf ("age_ = %d\n",age_);
@@ -702,7 +697,6 @@ Block::Block ()
     child_face_level_next_(),
     count_coarsen_(0),
     adapt_step_(0),
-    adapt_(0),
     coarsened_(false),
     is_leaf_(true),
     age_(0),
@@ -739,7 +733,6 @@ Block::Block (CkMigrateMessage *m)
     child_face_level_next_(),
     count_coarsen_(0),
     adapt_step_(0),
-    adapt_(adapt_unknown),
     coarsened_(false),
     is_leaf_(true),
     age_(0),
@@ -1047,7 +1040,6 @@ void Block::copy_(const Block & block) throw()
   dt_         = block.dt_;
   stop_       = block.stop_;
   adapt_step_ = block.adapt_step_;
-  adapt_      = block.adapt_;
   coarsened_  = block.coarsened_;
 }
 

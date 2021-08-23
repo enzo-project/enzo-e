@@ -8,6 +8,7 @@ import socket
 # USER CONFIGURATION
 #======================================================================
 
+new_adapt = 1
 
 #----------------------------------------------------------------------
 # Maximum number of procesess per shared-memory node (can be larger than needed)
@@ -304,6 +305,9 @@ defines.append({'CONFIG_NODE_SIZE_3' : node_size*3 })
 defines.append(define_png)
 
 charm_perf = ''
+
+if (new_adapt == 1):
+     defines.append('NEW_ADAPT')
 
 if (use_projections == 1):
      defines.append(define_projections)

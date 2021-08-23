@@ -111,6 +111,11 @@ void Monitor::header () const
 #else
   print ("Define","CONFIG_SMP_MODE     %s","no");
 #endif  
+#ifdef NEW_ADAPT
+  print ("Define","NEW_ADAPT    %s","Yes");
+#else
+  print ("Define","NEW_ADAPT    %s","no");
+#endif  
   print ("CHARM","CkNumPes()           %d",CkNumPes());
   print ("CHARM","CkNumNodes()         %d",CkNumNodes());
 }
