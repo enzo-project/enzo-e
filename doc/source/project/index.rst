@@ -8,4 +8,4 @@ Project documents
    project-plan	        
    principles
    components
-   gravity_solver_optimisation/index
+   gravity_solver_optimization/index
