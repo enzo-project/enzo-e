@@ -92,6 +92,7 @@ EnzoSolverJacobi::EnzoSolverJacobi
 #endif  
 
   refresh->add_field (ix_);
+  refresh->set_min_face_rank(2);
 
   ScalarDescr * scalar_descr_int = cello::scalar_descr_int();
   i_iter_ = scalar_descr_int->new_value(name_ + ":iter");  
@@ -108,6 +109,7 @@ EnzoSolverJacobi::EnzoSolverJacobi
   
   refresh_smooth->add_field (ix_);
   refresh_smooth->set_solver_id(index());
+  refresh_smooth->set_min_face_rank(2);
 #ifdef DEBUG_NEW_REFRESH  
   CkPrintf ("DEBUG_NEW_REFRESH %s:%d id_solver=%d\n",__FILE__,__LINE__,index());
 #endif  
@@ -276,6 +278,7 @@ void EnzoSolverJacobi::do_refresh_(Block * block)
 
   refresh->set_active(is_finest_(block));
   refresh->add_field (ix_);
+  refresh->set_min_face_rank(2);
   
 #ifdef DEBUG_NEW_REFRESH  
   CkPrintf ("DEBUG_NEW_REFRESH %s:%d ir_smooth=%d\n",__FILE__,__LINE__,ir_smooth_);

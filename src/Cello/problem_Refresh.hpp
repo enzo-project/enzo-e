@@ -279,6 +279,11 @@ public: // interface
   int min_face_rank() const
   { return min_face_rank_; }
 
+  /// Set a new minimum rank (dimension) of faces to refresh
+  /// e.g. 0: everything, 1: omit corners, 2: omit corners and edges
+  void set_min_face_rank(int min_face_rank)
+  { min_face_rank_ = min_face_rank; }
+
   /// Return the data field ghost depth
   int ghost_depth() const
   { return ghost_depth_; }
