@@ -104,11 +104,11 @@ EnzoSolverJacobi::EnzoSolverJacobi
   cello::simulation()->refresh_set_name(ir_smooth_,name+":smooth");
   
   refresh_smooth->add_field (ix_);
+  refresh_smooth->set_solver_id(index());
   refresh_smooth->set_min_face_rank(2);
 #ifdef DEBUG_NEW_REFRESH  
   CkPrintf ("DEBUG_NEW_REFRESH %s:%d id_solver=%d\n",__FILE__,__LINE__,index());
 #endif  
-
   refresh_smooth->set_callback(CkIndex_EnzoBlock::p_solver_jacobi_continue());
 
 }
