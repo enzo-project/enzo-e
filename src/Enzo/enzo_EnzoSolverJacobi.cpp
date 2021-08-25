@@ -105,10 +105,9 @@ EnzoSolverJacobi::EnzoSolverJacobi
   
   refresh_smooth->add_field (ix_);
   refresh_smooth->set_min_face_rank(2);
-#ifdef DEBUG_NEW_REFRESH  
+#ifdef DEBUG_NEW_REFRESH
   CkPrintf ("DEBUG_NEW_REFRESH %s:%d id_solver=%d\n",__FILE__,__LINE__,index());
-#endif  
-
+#endif
   refresh_smooth->set_callback(CkIndex_EnzoBlock::p_solver_jacobi_continue());
 
 }
