@@ -471,7 +471,7 @@ void Problem::initialize_method
   
   for (size_t index_method=0; index_method < num_method ; index_method++) {
 
-    std::string name = config->method_list[index_method];
+    std::string name = config->method_type[index_method];
 
     Method * method = create_method_(name, index_method, config, factory);
 

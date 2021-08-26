@@ -135,6 +135,7 @@ void Config::pup (PUP::er &p)
   p | method_all_particles;
   p | method_timestep;
   p | method_trace_name;
+  p | method_type;
   p | method_null_dt;
 
   // Monitor
@@ -751,6 +752,7 @@ void Config::read_method_ (Parameters * p) throw()
   method_close_files_seconds_delay.resize(num_method);
   method_close_files_group_size.resize(num_method);
   method_trace_name.resize(num_method);
+  method_type.resize(num_method);
   
   method_courant_global = p->value_float ("Method:courant",1.0);
   
@@ -873,6 +875,9 @@ void Config::read_method_ (Parameters * p) throw()
 
     method_trace_name[index_method] = p->value_string
       (full_name + ":name", "trace");
+
+    method_type[index_method] = p->value_string
+      (full_name + ":type", name);
   }
   method_null_dt = p->value_float
     ("Method:null:dt",std::numeric_limits<double>::max());
