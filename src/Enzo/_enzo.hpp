@@ -66,6 +66,7 @@ enum enzo_sync_id {
   enzo_sync_id_method_background_acceleration,
   enzo_sync_id_method_cosmology,
   enzo_sync_id_method_feedback,
+  enzo_sync_id_method_radiative_transfer,
 #ifdef CONFIG_USE_GRACKLE
   enzo_sync_id_method_grackle,
 #endif
@@ -242,6 +243,7 @@ extern "C" {
 #include "enzo_EnzoMethodStarMaker.hpp"
 #include "enzo_EnzoMethodStarMakerStochasticSF.hpp"
 #include "enzo_EnzoMethodMHDVlct.hpp"
+#include "enzo_EnzoMethodRadiativeTransfer.hpp"
 
 #include "enzo_EnzoMatrixDiagonal.hpp"
 #include "enzo_EnzoMatrixIdentity.hpp"
