@@ -1,0 +1,119 @@
+ Boundary {
+     type = "outflow";
+ }
+
+ Domain {
+     lower = [ 0.0, 0.0, 0.0 ];
+     upper = [ 1.0, 1.0, 1.0 ];
+ }
+
+ Field {
+     alignment = 8;
+     gamma = 1.40;
+     ghost_depth = 4;
+     list = [ "photon_density", "flux_x", "flux_y", "flux_z"];
+     padding = 0;
+ }
+
+ Initial {
+     list = ["value"];
+
+     value {
+     #   photon_density = [ 1.0,
+     #                      (x - 0.5)*(x - 0.5) +
+     #                      (y - 0.5)*(y - 0.5) + 
+     #                      (z - 0.5)*(z - 0.5) <  0.050 ,
+     #                    0.0 ];
+     #   flux_x         = [ 1.0*3.0E11,
+     #                      (x - 0.5)*(x - 0.5) +
+     #                      (y - 0.5)*(y - 0.5) + 
+     #                      (z - 0.5)*(z - 0.5) <  0.050 ,
+     #                    0.0 ];
+     
+     photon_density = [ 1.0, x < 0.50, 0.0];
+     flux_x         = [ 1.0*29979245800.0, x < 0.50, 0.0];
+     flux_y         = 0.0;
+     flux_z         = 0.0;
+  
+     }
+ }
+
+ Mesh {
+     root_blocks = [ 1, 1, 1 ];
+     root_rank = 3;
+     root_size = [ 16, 16, 16 ];
+ }
+
+Adapt {
+   max_level = 0; 
+}
+
+
+ Method {
+     list = [ "radiative_transfer" ];
+     radiative_transfer {
+         N_groups = 1;
+         min_freq = 0.0;
+         max_freq = 0.0;
+         flux_function = "GLF";
+         clight = 29979245800.0;
+     }
+ }
+
+ Output {
+     list = [ "N", "Fx", "Fy", "Fz" ];
+     N {
+         dir = ["PHOTON_WALL_X"];
+         field_list = [ "photon_density" ];
+         name = [ "RT_N-%04d.png", "cycle" ];
+         image_size = [512,512];
+         schedule {
+             step = 1;
+             var = "cycle";
+         }
+         type = "image";
+     }
+     Fx {
+         dir = ["PHOTON_WALL_X"];
+         field_list = [ "flux_x" ];
+         name = [ "RT_Fx-%04d.png", "cycle" ];
+         image_size = [512,512];
+         schedule {
+             step = 1;
+             var = "cycle";
+         }
+         type = "image";
+     }
+     Fy {
+         dir = ["PHOTON_WALL_X"];
+         field_list = [ "flux_y" ];
+         name = [ "RT_Fy-%04d.png", "cycle" ];
+         image_size = [512,512];
+         schedule {
+             step = 1;
+             var = "cycle";
+         }
+         type = "image";
+     }
+     Fz {
+         dir = ["PHOTON_WALL_X"];
+         field_list = [ "flux_z" ];
+         name = [ "RT_Fz-%04d.png", "cycle" ];
+         image_size = [512,512];
+         schedule {
+             step = 1;
+             var = "cycle";
+         }
+         type = "image";
+     }
+
+ }
+
+ Stopping {
+     cycle = 10;
+ }
+
+# Testing {
+#     cycle_final = 1000;
+#     time_final = 0.0006103515625;
+# }

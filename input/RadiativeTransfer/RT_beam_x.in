@@ -1,0 +1,27 @@
+include "RT.incl"
+
+Initial{
+   value {
+     photon_density = [ 1.0, 
+                            0.45 < x && x <  0.55 && 
+                            0.45 < y && y <  0.55 &&
+                            0.45 < z && z <  0.55,     
+                      0.0];
+     flux_x         = [ 1.0*29979245800.0,
+                            0.45 < x && x <  0.55 && 
+                            0.45 < y && y <  0.55 &&
+                            0.45 < z && z <  0.55,
+                        0.0 ]; 
+
+     flux_y         = 0.0;
+     flux_z         = 0.0;
+ 
+   }
+}
+
+Output {
+   N  {dir = ["BEAM_X"];}
+   Fx {dir = ["BEAM_X"];}
+   Fy {dir = ["BEAM_X"];}
+   Fz {dir = ["BEAM_X"];}
+}

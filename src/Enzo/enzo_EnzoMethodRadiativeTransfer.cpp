@@ -9,6 +9,7 @@
 
 #include "enzo.hpp"
 
+#define DEBUG_RT_TRANSPORT_STEP
 //----------------------------------------------------------------------
 
 EnzoMethodRadiativeTransfer ::EnzoMethodRadiativeTransfer()
@@ -65,9 +66,28 @@ void EnzoMethodRadiativeTransfer::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodRadiativeTransfer::timestep ( Block * block, double clight ) const throw()
+double EnzoMethodRadiativeTransfer::timestep ( Block * block ) const throw()
 {
-  return block->dt();
+  Data * data = block->data();
+  Field field = data->field();
+
+  int mx,my,mz;
+  field.dimensions (0,&mx,&my,&mz);
+  const int rank = ((mz == 1) ? ((my == 1) ? 1 : 2) : 3);
+
+  double hx,hy,hz;
+  block->cell_width(&hx,&hy,&hz);
+
+  double h_min = std::numeric_limits<double>::max();
+  if (rank >= 1) h_min = std::min(h_min,hx);
+  if (rank >= 2) h_min = std::min(h_min,hy);
+  if (rank >= 3) h_min = std::min(h_min,hz);
+
+  const EnzoConfig * enzo_config = enzo::config();
+  const double clight = enzo_config->method_radiative_transfer_clight;
+
+
+  return h_min / (3*clight);
 }
 
 
@@ -101,9 +121,9 @@ double EnzoMethodRadiativeTransfer::deltaQ_faces (double U_l, double U_lplus1, d
                                                   double Q_l, double Q_lplus1, double Q_lminus1,
                                                   double clight) throw()
 {
-  // calls flux_function(), and calculates Q_{i+1/2} - Q_{i=1/2}
+  // calls flux_function(), and calculates Q_{i-1/2} - Q_{i+1/2}
   
-  return flux_function(U_l, U_lplus1, Q_l, Q_lplus1, "Glf", clight) - flux_function(U_lminus1, U_l, Q_lminus1, Q_l, "GLF", clight); 
+  return flux_function(U_lminus1, U_l, Q_lminus1, Q_l, "GLF", clight) - flux_function(U_l, U_lplus1, Q_l, Q_lplus1, "GLF", clight); 
 }
 
 
@@ -224,7 +244,7 @@ void EnzoMethodRadiativeTransfer::transport_photons ( Block * block, double clig
   }
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  double dt = block->dt();
+  double dt = timestep(block);
   double hx = (xp-xm)/(mx-2*gx);
   double hy = (yp-ym)/(my-2*gy);
   double hz = (zp-zm)/(mz-2*gz);
@@ -283,6 +303,13 @@ void EnzoMethodRadiativeTransfer::transport_photons ( Block * block, double clig
         Fx[i] = Fxnew[i];
         Fy[i] = Fynew[i];
         Fz[i] = Fznew[i];
+     
+#ifdef DEBUG_RT_TRANSPORT_STEP
+       std::cout << " N [i]: " << N [i]
+                 << " Fx[i]: " << Fx[i]
+                 << " Fy[i]: " << Fy[i]
+                 << " Fz[i]: " << Fz[i] << std::endl;     
+#endif
       }
     }
   }

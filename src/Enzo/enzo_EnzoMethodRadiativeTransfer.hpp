@@ -43,7 +43,7 @@ public: // interface
   { return "radiative_transfer"; }
 
   /// Compute maximum timestep for this method
-  virtual double timestep ( Block * block, double clight) const throw();
+  virtual double timestep ( Block * block ) const throw();
 
 protected: // methods
 

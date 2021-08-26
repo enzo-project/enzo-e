@@ -27,7 +27,7 @@ log="log.build"
 
 # Set to zero to use all avaiable cores.  To override, set to a non-zero value
 # or use CELLO_BUILD_NCORE environment variable
-proc=0
+proc=8
 if [[ ! -z ${CELLO_BUILD_NCORE} ]]; then
    proc=${CELLO_BUILD_NCORE}
 elif [[ ${proc} -eq 0 ]]; then
