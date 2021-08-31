@@ -9,7 +9,11 @@
 
 #include "enzo.hpp"
 
-#define DEBUG_RT_TRANSPORT_STEP
+//#define DEBUG_CHECK_TIMESTEP
+//#define DEBUG_RT_TRANSPORT_STEP
+//#define DEBUG_PRINT_REDUCED_VARIABLES
+//#define DEBUG_CHECK_NAN
+//#define DEBUG_CHECK_NAN1
 //----------------------------------------------------------------------
 
 EnzoMethodRadiativeTransfer ::EnzoMethodRadiativeTransfer()
@@ -134,7 +138,11 @@ void EnzoMethodRadiativeTransfer::get_reduced_variables (double * chi, double (*
         double Fnorm = sqrt(Fx[i]*Fx[i] + Fy[i]*Fy[i] + Fz[i]*Fz[i]);
         double f = Fnorm / (clight*N[i]); // reduced flux
         *chi = (3 + 4*f*f) / (5 + 2*sqrt(4-3*f*f));
-        // for (int i=0; i<(*n_idx).size(); i++) {}
+
+#ifdef DEBUG_CHECK_NAN
+        // We need 0 < f < 1
+        if (isnan(*chi)) std::cout << " f: " << f << " N[i]: " << N[i] << std::endl;   
+#endif
         (*n)[0] = Fx[i]/Fnorm;
         (*n)[1] = Fy[i]/Fnorm; 
         (*n)[2] = Fz[i]/Fnorm;
@@ -162,21 +170,30 @@ void EnzoMethodRadiativeTransfer::update_fluxes_1D (double * N_update, double * 
   double chi_l, chi_lplus1, chi_lminus1; // need to keep these for diagonal terms. Free to overwrite n though
   double n[3];
   int k = axis;
+  
+  //construct column `axis` of pressure tensor for cell `i` and its neighbors along direction of `axis`
   for (int j=0; j<3; j++) {
     get_reduced_variables(&chi_l, &n, i, clight, N, Fx, Fy, Fz);
-    P_l_k[j] = 0.5*(3*chi_l-1) * n[j]*n[k];
+    P_l_k[j] = 0.5*(3*chi_l-1) * n[j]*n[k] * N_l;
    
     get_reduced_variables(&chi_lplus1, &n, i+increment, clight, N, Fx, Fy, Fz);
-    P_lplus1_k[j] = 0.5*(3*chi_lplus1-1) * n[j]*n[k];
+    P_lplus1_k[j] = 0.5*(3*chi_lplus1-1) * n[j]*n[k] * N_lplus1;
 
     get_reduced_variables(&chi_lminus1, &n, i-increment, clight, N, Fx, Fy, Fz);
-    P_lminus1_k[j] = 0.5*(3*chi_lminus1-1) * n[j]*n[k];   
+    P_lminus1_k[j] = 0.5*(3*chi_lminus1-1) * n[j]*n[k] * N_lminus1;   
   }  
+
+#ifdef DEBUG_PRINT_REDUCED_VARIABLES             
+    std::cout << " i: "           << i
+              << " chi_l: "       << chi_l
+              << " chi_lplus1: "  << chi_lplus1
+              << " chi_lminus1: " << chi_lminus1 << std::endl;
+#endif
  
   // diagonals += (1-chi)/2 
-  P_l_k[k]       += 0.5*(1-chi_l);
-  P_lplus1_k[k]  += 0.5*(1-chi_lplus1);
-  P_lminus1_k[k] += 0.5*(1-chi_lminus1);
+  P_l_k[k]       += 0.5*(1-chi_l) * N_l;
+  P_lplus1_k[k]  += 0.5*(1-chi_lplus1) * N_lplus1;
+  P_lminus1_k[k] += 0.5*(1-chi_lminus1) * N_lminus1;
 
   // update F (absorb into previous loop?)
   // F^{n+1}_i = F^n_i + dt/dx *c^2*(P_k^n_{i+1/2}-P_k^n_{i-1/2}), F and P_k are vectors here
@@ -305,10 +322,11 @@ void EnzoMethodRadiativeTransfer::transport_photons ( Block * block, double clig
         Fz[i] = Fznew[i];
      
 #ifdef DEBUG_RT_TRANSPORT_STEP
-       std::cout << " N [i]: " << N [i]
-                 << " Fx[i]: " << Fx[i]
-                 << " Fy[i]: " << Fy[i]
-                 << " Fz[i]: " << Fz[i] << std::endl;     
+        std::cout << " i: "     << i     
+                  << " N [i]: " << N [i]
+                  << " Fx[i]: " << Fx[i]
+                  << " Fy[i]: " << Fy[i]
+                  << " Fz[i]: " << Fz[i] << std::endl;     
 #endif
       }
     }
@@ -340,7 +358,10 @@ void EnzoMethodRadiativeTransfer::compute_ (Block * block) throw()
   // implement for only one frequency bin for now
   // Will need to call these functions in a loop over all the frequency groups
   // Need to get a frequency spectrum for the photons somehow (which SED???)
-  
+ 
+#ifdef DEBUG_CHECK_TIMESTEP
+  std::cout << "calculated dt: " << this->timestep(block) << " actual dt: " << block->dt() << std::endl;
+#endif 
   this->inject_photons(block);
   this->transport_photons(block, clight);
   this->thermochemistry(block); 
