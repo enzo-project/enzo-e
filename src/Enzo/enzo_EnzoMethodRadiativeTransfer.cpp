@@ -14,6 +14,7 @@
 //#define DEBUG_PRINT_REDUCED_VARIABLES
 //#define DEBUG_CHECK_NAN
 //#define DEBUG_CHECK_NAN1
+//#define OLD_TRANSPORT_METHOD
 //----------------------------------------------------------------------
 
 EnzoMethodRadiativeTransfer ::EnzoMethodRadiativeTransfer()
@@ -24,9 +25,24 @@ EnzoMethodRadiativeTransfer ::EnzoMethodRadiativeTransfer()
 
   this->required_fields_ = std::vector<std::string> {"photon_density"}; //number density
 
-  if (rank >= 1) this->required_fields_.push_back("flux_x");
-  if (rank >= 2) this->required_fields_.push_back("flux_y");
-  if (rank >= 3) this->required_fields_.push_back("flux_z");
+  if (rank >= 1) {
+    this->required_fields_.push_back("flux_x");
+    this->required_fields_.push_back("P00"); // elements of the pressure tensor
+  }
+  if (rank >= 2) {
+    this->required_fields_.push_back("flux_y");
+    this->required_fields_.push_back("P10");
+    this->required_fields_.push_back("P01");
+    this->required_fields_.push_back("P11");
+  }
+  if (rank >= 3) {
+    this->required_fields_.push_back("flux_z");
+    this->required_fields_.push_back("P02");
+    this->required_fields_.push_back("P12");
+    this->required_fields_.push_back("P20");
+    this->required_fields_.push_back("P21");
+    this->required_fields_.push_back("P22");
+  }
 
   // define required fields if they do not exist
   this->define_fields();
@@ -37,10 +53,24 @@ EnzoMethodRadiativeTransfer ::EnzoMethodRadiativeTransfer()
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_field("photon_density");
 
-  if (rank >= 1) refresh->add_field("flux_x");
-  if (rank >= 2) refresh->add_field("flux_y");
-  if (rank >= 3) refresh->add_field("flux_z");
-
+  if (rank >= 1) {
+    refresh->add_field("flux_x");
+    refresh->add_field("P00"); // elements of the pressure tensor
+  }
+  if (rank >= 2) {
+    refresh->add_field("flux_y");
+    refresh->add_field("P10");
+    refresh->add_field("P01");
+    refresh->add_field("P11");
+  }
+  if (rank >= 3) {
+    refresh->add_field("flux_z");
+    refresh->add_field("P02");
+    refresh->add_field("P12");
+    refresh->add_field("P20");
+    refresh->add_field("P21");
+    refresh->add_field("P22");
+  }
 }
 
 //----------------------------------------------------------------------
@@ -146,6 +176,135 @@ void EnzoMethodRadiativeTransfer::get_reduced_variables (double * chi, double (*
         (*n)[0] = Fx[i]/Fnorm;
         (*n)[1] = Fy[i]/Fnorm; 
         (*n)[2] = Fz[i]/Fnorm;
+}
+
+void EnzoMethodRadiativeTransfer::get_pressure_tensor (Block * block, 
+                       enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz, 
+                       double clight) throw()
+{
+  Field field = block->data()->field();
+  int mx,my,mz;  
+  field.dimensions(0,&mx, &my, &mz); //field dimensions, including ghost zones
+  int gx,gy,gz;
+  field.ghost_depth(0,&gx, &gy, &gz);
+
+  // if rank >= 1
+  enzo_float * P00 = (enzo_float *) field.values("P00");
+  // if rank >= 2
+  enzo_float * P10 = (enzo_float *) field.values("P10");
+  enzo_float * P01 = (enzo_float *) field.values("P01");
+  enzo_float * P11 = (enzo_float *) field.values("P11");
+  // if rank >= 3
+  enzo_float * P02 = (enzo_float *) field.values("P02");
+  enzo_float * P12 = (enzo_float *) field.values("P12");
+  enzo_float * P20 = (enzo_float *) field.values("P20");
+  enzo_float * P21 = (enzo_float *) field.values("P21"); 
+  enzo_float * P22 = (enzo_float *) field.values("P22"); 
+
+  for (int iz=gz; iz<mz-gz; iz++) {
+   for (int iy=gy; iy<my-gy; iy++) {
+    for (int ix=gx; ix<my-gx; ix++) {
+      int i = INDEX(ix,iy,iz,mx,my); //index of current cell
+      double chi, n[3]; 
+      get_reduced_variables(&chi, &n, i, clight, N, Fx, Fy, Fz);
+      P00[i] = N[i] * ( 0.5*(1.0-chi) + 0.5*(3.0*chi - 1)*n[0]*n[0] );
+      P10[i] = N[i] * 0.5*(3.0*chi - 1)*n[1]*n[0];
+      P01[i] = N[i] * 0.5*(3.0*chi - 1)*n[0]*n[1];
+      P11[i] = N[i] * ( 0.5*(1.0-chi) + 0.5*(3.0*chi - 1)*n[1]*n[1] );
+      P02[i] = N[i] * 0.5*(3.0*chi - 1)*n[0]*n[2];
+      P12[i] = N[i] * 0.5*(3.0*chi - 1)*n[1]*n[2];
+      P20[i] = N[i] * 0.5*(3.0*chi - 1)*n[2]*n[0];
+      P21[i] = N[i] * 0.5*(3.0*chi - 1)*n[2]*n[1];
+      P22[i] = N[i] * ( 0.5*(1.0-chi) + 0.5*(3.0*chi - 1)*n[2]*n[2] ); 
+    }
+   }
+  }
+
+}
+
+void EnzoMethodRadiativeTransfer::get_updated_values (Block * block, double * N_update, 
+                       double * Fx_update, double * Fy_update, double * Fz_update, 
+                       enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz, 
+                       double hx, double hy, double hz, double dt, double clight, 
+                       int i, int idx, int idy, int idz) throw()
+{
+  Field field = block->data()->field();
+  // if rank >= 1
+  enzo_float * P00 = (enzo_float *) field.values("P00");
+  // if rank >= 2
+  enzo_float * P10 = (enzo_float *) field.values("P10");
+  enzo_float * P01 = (enzo_float *) field.values("P01");
+  enzo_float * P11 = (enzo_float *) field.values("P11");
+  // if rank >= 3
+  enzo_float * P02 = (enzo_float *) field.values("P02");
+  enzo_float * P12 = (enzo_float *) field.values("P12");
+  enzo_float * P20 = (enzo_float *) field.values("P20");
+  enzo_float * P21 = (enzo_float *) field.values("P21"); 
+  enzo_float * P22 = (enzo_float *) field.values("P22");  
+
+
+  // if rank >= 1
+  *N_update += dt/hx * deltaQ_faces( N[i],  N[i+idx],  N[i-idx],
+                                   Fx[i], Fx[i+idx], Fx[i-idx], 
+                                   clight );
+    
+  *Fx_update += dt/hx * deltaQ_faces(Fx[i], Fx[i+idx], Fx[i-idx],
+                                   clight*clight*P00[i],
+                                   clight*clight*P00[i+idx],
+                                   clight*clight*P00[i-idx], clight);
+
+  // if rank >= 2
+  *N_update += dt/hy * deltaQ_faces( N[i],  N[i+idy],  N[i-idy],
+                                   Fy[i], Fy[i+idy], Fy[i-idy], 
+                                   clight );
+    
+  *Fx_update += dt/hy * deltaQ_faces(Fx[i], Fx[i+idy], Fx[i-idy],
+                                   clight*clight*P10[i],
+                                   clight*clight*P10[i+idy],
+                                   clight*clight*P10[i-idy], clight);
+
+  *Fy_update += dt/hx * deltaQ_faces(Fy[i], Fy[i+idx], Fy[i-idx],
+                                   clight*clight*P01[i],
+                                   clight*clight*P01[i+idx],
+                                   clight*clight*P01[i-idx], clight);
+
+  *Fy_update += dt/hy * deltaQ_faces(Fy[i], Fy[i+idy], Fy[i-idy],
+                                   clight*clight*P11[i],
+                                   clight*clight*P11[i+idy],
+                                   clight*clight*P11[i-idy], clight);
+
+
+   // if rank >= 3
+  *N_update += dt/hz * deltaQ_faces( N[i],  N[i+idz],  N[i-idz],
+                                   Fz[i], Fz[i+idz], Fz[i-idz], 
+                                   clight );  
+
+  *Fx_update += dt/hz * deltaQ_faces(Fx[i], Fx[i+idz], Fx[i-idz],
+                                   clight*clight*P20[i],
+                                   clight*clight*P20[i+idz],
+                                   clight*clight*P20[i-idz], clight);
+
+  *Fy_update += dt/hz * deltaQ_faces(Fy[i], Fy[i+idz], Fy[i-idz],
+                                   clight*clight*P21[i],
+                                   clight*clight*P21[i+idz],
+                                   clight*clight*P21[i-idz], clight);
+
+  *Fz_update += dt/hx * deltaQ_faces(Fz[i], Fz[i+idx], Fz[i-idx],
+                                   clight*clight*P02[i],
+                                   clight*clight*P02[i+idx],
+                                   clight*clight*P02[i-idx], clight);
+
+  *Fz_update += dt/hy * deltaQ_faces(Fz[i], Fz[i+idy], Fz[i-idy],
+                                   clight*clight*P12[i],
+                                   clight*clight*P12[i+idy],
+                                   clight*clight*P12[i-idy], clight);
+
+  *Fz_update += dt/hz * deltaQ_faces(Fz[i], Fz[i+idz], Fz[i-idz],
+                                   clight*clight*P22[i],
+                                   clight*clight*P22[i+idz],
+                                   clight*clight*P22[i-idz], clight);
+
+
 }
 
 void EnzoMethodRadiativeTransfer::update_fluxes_1D (double * N_update, double * F_update, 
@@ -281,13 +440,17 @@ void EnzoMethodRadiativeTransfer::transport_photons ( Block * block, double clig
   // would just be for (int iz=0, iz<1, iz++)
   //
 
+  //calculate the pressure tensor
+  get_pressure_tensor(block, N, Fx, Fy, Fz, clight);
+ 
   for (int iz=gz; iz<mz-gz; iz++) {
     for (int iy=gy; iy<my-gy; iy++) {
       for (int ix=gx; ix<my-gx; ix++) {
         int i = INDEX(ix,iy,iz,mx,my); //index of current cell
     
         double N_update=0, Fx_update=0, Fy_update=0, Fz_update=0;
-        
+
+/* 
         // if rank >= 1
         update_fluxes_1D( &N_update, &Fx_update, N, Fx, Fy, Fz,
                           hx, dt, clight, i, idx, 0);
@@ -297,7 +460,12 @@ void EnzoMethodRadiativeTransfer::transport_photons ( Block * block, double clig
         // if rank >= 3
         update_fluxes_1D( &N_update, &Fz_update, N, Fx, Fy, Fz,
                           hz, dt, clight, i, idz, 2);
-
+*/        
+        // TODO: Just pass in *new variable instead of update variable so you don't
+        // have to do the += steps after
+        get_updated_values( block, &N_update, &Fx_update, &Fy_update, &Fz_update,
+                             N, Fx, Fy, Fz, hx, hy, hz, dt, clight,
+                             i, idx, idy, idz ); 
         // get updated fluxes
         Fxnew[i] += Fx_update;
         Fynew[i] += Fy_update;
