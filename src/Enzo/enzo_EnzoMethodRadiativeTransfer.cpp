@@ -9,12 +9,6 @@
 
 #include "enzo.hpp"
 
-//#define DEBUG_CHECK_TIMESTEP
-//#define DEBUG_RT_TRANSPORT_STEP
-//#define DEBUG_PRINT_REDUCED_VARIABLES
-//#define DEBUG_CHECK_NAN
-//#define DEBUG_CHECK_NAN1
-//#define OLD_TRANSPORT_METHOD
 //----------------------------------------------------------------------
 
 EnzoMethodRadiativeTransfer ::EnzoMethodRadiativeTransfer()
@@ -28,7 +22,7 @@ EnzoMethodRadiativeTransfer ::EnzoMethodRadiativeTransfer()
   if (rank >= 1) {
     this->required_fields_.push_back("flux_x");
     this->required_fields_.push_back("P00"); // elements of the pressure tensor
-  }
+  }                                         
   if (rank >= 2) {
     this->required_fields_.push_back("flux_y");
     this->required_fields_.push_back("P10");
@@ -169,10 +163,6 @@ void EnzoMethodRadiativeTransfer::get_reduced_variables (double * chi, double (*
         double f = Fnorm / (clight*N[i]); // reduced flux
         *chi = (3 + 4*f*f) / (5 + 2*sqrt(4-3*f*f));
 
-#ifdef DEBUG_CHECK_NAN
-        // We need 0 < f < 1
-        if (isnan(*chi)) std::cout << " f: " << f << " N[i]: " << N[i] << std::endl;   
-#endif
         (*n)[0] = Fx[i]/Fnorm;
         (*n)[1] = Fy[i]/Fnorm; 
         (*n)[2] = Fz[i]/Fnorm;
@@ -201,9 +191,14 @@ void EnzoMethodRadiativeTransfer::get_pressure_tensor (Block * block,
   enzo_float * P21 = (enzo_float *) field.values("P21"); 
   enzo_float * P22 = (enzo_float *) field.values("P22"); 
 
-  for (int iz=gz; iz<mz-gz; iz++) {
-   for (int iy=gy; iy<my-gy; iy++) {
-    for (int ix=gx; ix<my-gx; ix++) {
+  // Need to directly calculate pressure tensor elements 
+  // one layer deep into the ghost zones because active cells
+  // need information about their neighbors, and there's no 
+  // guarantee that a neighboring block will have updated
+  // its pressure tensor by the time this block starts
+  for (int iz=gz-1; iz<mz-gz+1; iz++) { 
+   for (int iy=gy-1; iy<my-gy+1; iy++) {
+    for (int ix=gx-1; ix<mx-gx+1; ix++) {
       int i = INDEX(ix,iy,iz,mx,my); //index of current cell
       double chi, n[3]; 
       get_reduced_variables(&chi, &n, i, clight, N, Fx, Fy, Fz);
@@ -222,7 +217,7 @@ void EnzoMethodRadiativeTransfer::get_pressure_tensor (Block * block,
 
 }
 
-void EnzoMethodRadiativeTransfer::get_updated_values (Block * block, double * N_update, 
+void EnzoMethodRadiativeTransfer::get_U_update (Block * block, double * N_update, 
                        double * Fx_update, double * Fy_update, double * Fz_update, 
                        enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz, 
                        double hx, double hy, double hz, double dt, double clight, 
@@ -307,64 +302,6 @@ void EnzoMethodRadiativeTransfer::get_updated_values (Block * block, double * N_
 
 }
 
-void EnzoMethodRadiativeTransfer::update_fluxes_1D (double * N_update, double * F_update, 
-                       enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz, 
-                       double h, double dt, double clight, int i, int increment, int axis) throw()
-{
-  // calculate evolved photon density N
-
-  double N_l = N[i], N_lplus1 = N[i+increment], N_lminus1 = N[i-increment];
-  double F_l, F_lplus1, F_lminus1;
-  if      (axis == 0) F_l = Fx[i], F_lplus1 = Fx[i+increment], F_lminus1 = Fx[i-increment];
-  else if (axis == 1) F_l = Fy[i], F_lplus1 = Fy[i+increment], F_lminus1 = Fy[i-increment];
-  else                F_l = Fz[i], F_lplus1 = Fz[i+increment], F_lminus1 = Fz[i-increment];
-
-  *N_update += dt/h * deltaQ_faces( N_l, N_lplus1, N_lminus1,
-                                    F_l, F_lplus1, F_lminus1, 
-                                    clight );
-                                                        
-  // Calculate column `k = axis` of pressure tensor and update flux along that axis
-
-  double P_l_k[3], P_lplus1_k[3], P_lminus1_k[3]; // TODO: Account for < 3 dimensions 
-  double chi_l, chi_lplus1, chi_lminus1; // need to keep these for diagonal terms. Free to overwrite n though
-  double n[3];
-  int k = axis;
-  
-  //construct column `axis` of pressure tensor for cell `i` and its neighbors along direction of `axis`
-  for (int j=0; j<3; j++) {
-    get_reduced_variables(&chi_l, &n, i, clight, N, Fx, Fy, Fz);
-    P_l_k[j] = 0.5*(3*chi_l-1) * n[j]*n[k] * N_l;
-   
-    get_reduced_variables(&chi_lplus1, &n, i+increment, clight, N, Fx, Fy, Fz);
-    P_lplus1_k[j] = 0.5*(3*chi_lplus1-1) * n[j]*n[k] * N_lplus1;
-
-    get_reduced_variables(&chi_lminus1, &n, i-increment, clight, N, Fx, Fy, Fz);
-    P_lminus1_k[j] = 0.5*(3*chi_lminus1-1) * n[j]*n[k] * N_lminus1;   
-  }  
-
-#ifdef DEBUG_PRINT_REDUCED_VARIABLES             
-    std::cout << " i: "           << i
-              << " chi_l: "       << chi_l
-              << " chi_lplus1: "  << chi_lplus1
-              << " chi_lminus1: " << chi_lminus1 << std::endl;
-#endif
- 
-  // diagonals += (1-chi)/2 
-  P_l_k[k]       += 0.5*(1-chi_l) * N_l;
-  P_lplus1_k[k]  += 0.5*(1-chi_lplus1) * N_lplus1;
-  P_lminus1_k[k] += 0.5*(1-chi_lminus1) * N_lminus1;
-
-  // update F (absorb into previous loop?)
-  // F^{n+1}_i = F^n_i + dt/dx *c^2*(P_k^n_{i+1/2}-P_k^n_{i-1/2}), F and P_k are vectors here
-  for (int j=0; j<3; j++) {
-    *F_update += dt/h * deltaQ_faces(F_l, F_lplus1, F_lminus1,
-                                     clight*clight * P_l_k[j], 
-                                     clight*clight * P_lplus1_k[j], 
-                                     clight*clight * P_lminus1_k[j], clight);
-  }
-  
-}
-
 void EnzoMethodRadiativeTransfer::transport_photons ( Block * block, double clight ) throw()
 {
   // TODO: Make Nnew, Fxnew, Fynew, Fznew input parameters so that we don't need
@@ -373,8 +310,6 @@ void EnzoMethodRadiativeTransfer::transport_photons ( Block * block, double clig
 
   // TODO: Adapt for 2D and 3D cases
   
-  // TODO: Store elements of pressure tensor as field variable and access to avoid unnecessary recalculation
-
   // Solve dU/dt + del[F(U)] = 0; F(U) = { (Fx,Fy,Fz), c^2 P }
   //                                U  = { N, (Fx,Fy,Fz) }
   // M1 closure: P_i = D_i * N_i, where D_i is the Eddington tensor for 
@@ -445,25 +380,13 @@ void EnzoMethodRadiativeTransfer::transport_photons ( Block * block, double clig
  
   for (int iz=gz; iz<mz-gz; iz++) {
     for (int iy=gy; iy<my-gy; iy++) {
-      for (int ix=gx; ix<my-gx; ix++) {
+      for (int ix=gx; ix<mx-gx; ix++) {
         int i = INDEX(ix,iy,iz,mx,my); //index of current cell
-    
         double N_update=0, Fx_update=0, Fy_update=0, Fz_update=0;
-
-/* 
-        // if rank >= 1
-        update_fluxes_1D( &N_update, &Fx_update, N, Fx, Fy, Fz,
-                          hx, dt, clight, i, idx, 0);
-        // if rank >= 2
-        update_fluxes_1D( &N_update, &Fy_update, N, Fx, Fy, Fz,
-                          hy, dt, clight, i, idy, 1);
-        // if rank >= 3
-        update_fluxes_1D( &N_update, &Fz_update, N, Fx, Fy, Fz,
-                          hz, dt, clight, i, idz, 2);
-*/        
+      
         // TODO: Just pass in *new variable instead of update variable so you don't
         // have to do the += steps after
-        get_updated_values( block, &N_update, &Fx_update, &Fy_update, &Fz_update,
+        get_U_update( block, &N_update, &Fx_update, &Fy_update, &Fz_update,
                              N, Fx, Fy, Fz, hx, hy, hz, dt, clight,
                              i, idx, idy, idz ); 
         // get updated fluxes
@@ -482,23 +405,19 @@ void EnzoMethodRadiativeTransfer::transport_photons ( Block * block, double clig
   // now copy values over (can eliminate this loop by passing *new variables as input parameters)
   for (int iz=gz; iz<mz-gz; iz++) {
     for (int iy=gy; iy<my-gy; iy++) {
-      for (int ix=gx; ix<my-gx; ix++) {
+      for (int ix=gx; ix<mx-gx; ix++) {
         int i = INDEX(ix,iy,iz,mx,my); //index of current cell
         N [i] = Nnew [i];
         Fx[i] = Fxnew[i];
         Fy[i] = Fynew[i];
         Fz[i] = Fznew[i];
-     
-#ifdef DEBUG_RT_TRANSPORT_STEP
-        std::cout << " i: "     << i     
-                  << " N [i]: " << N [i]
-                  << " Fx[i]: " << Fx[i]
-                  << " Fy[i]: " << Fy[i]
-                  << " Fz[i]: " << Fz[i] << std::endl;     
-#endif
       }
     }
   }
+  delete [] Nnew;
+  delete [] Fxnew;
+  delete [] Fynew;
+  delete [] Fznew;
 }
 
 
@@ -527,9 +446,6 @@ void EnzoMethodRadiativeTransfer::compute_ (Block * block) throw()
   // Will need to call these functions in a loop over all the frequency groups
   // Need to get a frequency spectrum for the photons somehow (which SED???)
  
-#ifdef DEBUG_CHECK_TIMESTEP
-  std::cout << "calculated dt: " << this->timestep(block) << " actual dt: " << block->dt() << std::endl;
-#endif 
   this->inject_photons(block);
   this->transport_photons(block, clight);
   this->thermochemistry(block); 

@@ -70,17 +70,12 @@ protected: // methods
                        enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz,
                        double clight) throw();
 
-  void get_updated_values (Block * block, double * N_update, 
+  void get_U_update (Block * block, double * N_update, 
                        double * Fx_update, double * Fy_update, double * Fz_update, 
                        enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz, 
                        double hx, double hy, double hz, double dt, double clight, 
                        int i, int idx, int idy, int idz) throw();
 
-
-  void update_fluxes_1D (double * N_update, double * F_update, 
-                         enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz,
-                         double h, double dt, double clight, int i, int increment, int axis) throw(); 
-  
   void transport_photons (Block * block, double clight) throw();
   // --------- CHEMISTRY STEP ---------
 
