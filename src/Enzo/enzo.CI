@@ -52,7 +52,7 @@ module enzo {
   PUPable EnzoInitialCosmology;
   PUPable EnzoInitialHdf5;
   PUPable EnzoInitialImplosion2;
-  PUPable EnzoInitialMHDTurbulenceIT;
+  PUPable EnzoInitialTurbulenceMhdIT;
   PUPable EnzoInitialMusic;
   PUPable EnzoInitialPm;
   PUPable EnzoInitialPpmlTest;
@@ -81,12 +81,13 @@ module enzo {
   PUPable EnzoMethodCosmology;
   PUPable EnzoMethodGravity;
   PUPable EnzoMethodHeat;
-  PUPable EnzoMethodMHDTurbulenceIT;
   PUPable EnzoMethodPmDeposit;
   PUPable EnzoMethodPmUpdate;
   PUPable EnzoMethodPpm;
   PUPable EnzoMethodPpml;
   PUPable EnzoMethodTurbulence;
+  PUPable EnzoMethodTurbulenceMhdIT;
+  PUPable EnzoMethodTurbulenceOU;
 
   PUPable EnzoPhysicsCosmology;
 

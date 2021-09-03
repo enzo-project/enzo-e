@@ -127,9 +127,25 @@ EnzoConfig::EnzoConfig() throw ()
   // EnzoMethodTurbulence
   method_turbulence_edot(0.0),
   method_turbulence_mach_number(0.0),
+  // EnzoMethodTurbulenceOU
+  method_turbulence_apply_cooling(false),
+  method_turbulence_apply_forcing(false),
+  method_turbulence_apply_injection_rate(false),
+  method_turbulence_cooling_term(0),
+  method_turbulence_hc_alpha(0.0), 
+  method_turbulence_hc_sigma(0.0),
+  method_turbulence_injection_rate(0.006),
+  method_turbulence_kfa(12.57),
+  method_turbulence_kfi(6.27),
+  method_turbulence_olap(0),
+  method_turbulence_read_sol(false),
+  method_turbulence_sol_weight(1.0),
+  method_turbulence_totemp(0.0),
+  method_turbulence_update_solution(false),
+  // EnzoMethodGrackle
   method_grackle_use_grackle(false),
 #ifdef CONFIG_USE_GRACKLE
-  method_grackle_chemistry(),
+  method_grackle_chemistry(nullptr),
   method_grackle_use_cooling_timestep(false),
   method_grackle_radiation_redshift(-1.0),
 #endif
@@ -168,10 +184,6 @@ EnzoConfig::EnzoConfig() throw ()
     initial_soup_d_size[i] = 0.0;
     initial_collapse_array[i] = 0;
   }
-
-#ifdef CONFIG_USE_GRACKLE
-    method_grackle_chemistry = NULL;
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -347,6 +359,21 @@ void EnzoConfig::pup (PUP::er &p)
   p | units_density;
   p | units_length;
   p | units_time;
+
+  p | method_turbulence_apply_cooling;
+  p | method_turbulence_apply_forcing;
+  p | method_turbulence_apply_injection_rate;
+  p | method_turbulence_cooling_term;
+  p | method_turbulence_hc_alpha;
+  p | method_turbulence_hc_sigma;
+  p | method_turbulence_injection_rate;
+  p | method_turbulence_kfa;
+  p | method_turbulence_kfi;
+  p | method_turbulence_olap;
+  p | method_turbulence_read_sol;
+  p | method_turbulence_sol_weight;
+  p | method_turbulence_totemp;
+  p | method_turbulence_update_solution;
 
   p  | method_grackle_use_grackle;
 
@@ -955,25 +982,57 @@ void EnzoConfig::read_method_ppm_(Parameters * p)
 
 void EnzoConfig::read_method_turbulence_(Parameters * p)
 {
-  
+
+  double mach = 0.0;
   method_turbulence_edot = p->value_float
     ("Method:turbulence:edot",-1.0);
-  method_turbulence_mach_number = p->value_float
-    ("Method:turbulence:mach_number",0.0);
+  method_turbulence_mach_number = mach = p->value_float
+    ("Method:turbulence:mach_number",mach);
   initial_turbulence_density = p->value_float 
-    ("Initial:mhd_turbulence_it:density",1.0);
+    ("Initial:turbulence_mhd_it:density",1.0);
 
   // MHD Turbulence method and initialization
 
   initial_turbulence_density = p->value_float 
-    ("Initial:mhd_turbulence_it:density",1.0);
+    ("Initial:turbulence_mhd_it:density",1.0);
   initial_turbulence_bfieldx = p->value_float 
-    ("Initial:mhd_turbulence_it:bfieldx",0.0);
+    ("Initial:turbulence_mhd_it:bfieldx",0.0);
   method_turbulence_edot = p->value_float
-    ("Method:mhd_turbulence_it:edot",-1.0);
-  method_turbulence_mach_number = p->value_float 
-    ("Method:mhd_turbulence_it:mach_number",0.0);
+    ("Method:turbulence_mhd_it:edot",-1.0);
+  method_turbulence_mach_number = mach = p->value_float 
+    ("Method:turbulence_mhd_it:mach_number",mach);
 
+  // MethodTurbulenceOU
+  method_turbulence_apply_cooling = p->value_logical
+    ("Method:turbulence_ou:apply_cooling",false);
+  method_turbulence_apply_forcing = p->value_logical
+    ("Method:turbulence_ou:apply_forcing",false);
+  method_turbulence_apply_injection_rate = p->value_logical
+    ("Method:turbulence_ou:apply_injection_rate",false);
+  method_turbulence_cooling_term = p->value_integer
+    ("Method:turbulence_ou:cooling_term",0);
+  method_turbulence_hc_alpha = p->value_float
+    ("Method:turbulence_ou:hc_alpha",0.0);
+  method_turbulence_hc_sigma = p->value_float
+    ("Method:turbulence_ou:hc_sigma",0.0);
+  method_turbulence_injection_rate = p->value_float
+    ("Method:turbulence_ou:injection_rate",0.006);
+  method_turbulence_kfi = p->value_float
+    ("Method:turbulence_ou:kfi",6.27);
+  method_turbulence_kfa= p->value_float
+    ("Method:turbulence_ou:kfa",12.57);
+  method_turbulence_mach_number = mach = p->value_float
+    ("Method:turbulence_ou:mach_number",mach);
+  method_turbulence_olap = p->value_integer
+    ("Method:turbulence_ou:olap",0);
+  method_turbulence_read_sol = p->value_logical
+    ("Method:turbulence_ou:read_sol",false);
+  method_turbulence_sol_weight = p->value_float
+    ("Method:turbulence_ou:sol_weight",1.0);
+  method_turbulence_totemp = p->value_float
+    ("Method:turbulence_ou:totemp",0.0);
+  method_turbulence_update_solution = p->value_logical
+    ("Method:turbulence_ou:update_solution",false);
 }
 
 //----------------------------------------------------------------------

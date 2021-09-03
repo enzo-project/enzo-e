@@ -168,7 +168,7 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_turbulence_temperature,
        enzo_config->field_gamma);
   } else if (type == "mhd_turbulence_it") {
-    initial = new EnzoInitialMHDTurbulenceIT 
+    initial = new EnzoInitialTurbulenceMhdIT 
       (cycle,time, 
        enzo_config->initial_turbulence_density,
        enzo_config->initial_turbulence_bfieldx,
@@ -541,14 +541,36 @@ Method * EnzoProblem::create_method_
        enzo_config->method_turbulence_mach_number,
        enzo_config->physics_cosmology);
 
-  } else if (name == "mhd_turbulence_it") {
+  } else if (name == "turbulence_mhd_it") {
 
-    method = new EnzoMethodMHDTurbulenceIT 
+    method = new EnzoMethodTurbulenceMhdIT 
       (enzo_config->method_turbulence_edot,
        enzo_config->initial_turbulence_density,
        enzo_config->initial_turbulence_bfieldx,
        enzo_config->method_turbulence_mach_number,
        enzo_config->physics_cosmology);
+
+  } else if (name == "turbulence_ou") {
+
+    method = new EnzoMethodTurbulenceOU 
+      (enzo_config->field_gamma,
+       enzo_config->domain_lower,
+       enzo_config->domain_upper,
+       enzo_config->method_turbulence_apply_cooling,
+       enzo_config->method_turbulence_apply_forcing,
+       enzo_config->method_turbulence_apply_injection_rate,
+       enzo_config->method_turbulence_cooling_term,
+       enzo_config->method_turbulence_hc_alpha, 
+       enzo_config->method_turbulence_hc_sigma,
+       enzo_config->method_turbulence_injection_rate,
+       enzo_config->method_turbulence_kfi,
+       enzo_config->method_turbulence_kfa,
+       enzo_config->method_turbulence_mach_number,
+       enzo_config->method_turbulence_olap,
+       enzo_config->method_turbulence_read_sol,
+       enzo_config->method_turbulence_sol_weight,
+       enzo_config->method_turbulence_totemp,
+       enzo_config->method_turbulence_update_solution);
 
   } else if (name == "cosmology") {
 

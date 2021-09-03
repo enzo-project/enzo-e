@@ -1,37 +1,37 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoMethodMHDTurbulenceIT.hpp
+/// @file     enzo_EnzoMethodTurbulenceMhdIT.hpp
 /// @author   Alexei Kritsuk (kritsuk@gmail.com)
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Wed Jul 23 00:31:13 UTC 2014
 /// @date     Fri Aug 24 00:31:13 UTC 2018
 /// @brief    [\ref Enzo] Implementation of Enzo IsoThermal TURBULENCE MHD method
 
-#ifndef ENZO_ENZO_METHOD_MHDTURBULENCEIT_HPP
-#define ENZO_ENZO_METHOD_MHDTURBULENCEIT_HPP
+#ifndef ENZO_ENZO_METHOD_TURBULENCE_MHD_IT_HPP
+#define ENZO_ENZO_METHOD_TURBULENCE_MHD_IT_HPP
 
 //----------------------------------------------------------------------
 
-class EnzoMethodMHDTurbulenceIT : public Method {
+class EnzoMethodTurbulenceMhdIT : public Method {
 
-  /// @class    EnzoMethodMHDTurbulenceIT
+  /// @class    EnzoMethodTurbulenceMhdIT
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Encapsulate Enzo's ISOTHERMAL TURBULENCE MHD method
 
 public: // interface
 
   /// Create a new EnzoMethodTurbulence object
-  EnzoMethodMHDTurbulenceIT(double edot,
+  EnzoMethodTurbulenceMhdIT(double edot,
 			    double density_initial,
 			    double bfieldx_initial,
 			    double mach_number,
 			    bool comoving_coordinates);
 
   /// Charm++ PUP::able declarations
-  PUPable_decl(EnzoMethodMHDTurbulenceIT);
+  PUPable_decl(EnzoMethodTurbulenceMhdIT);
   
   /// Charm++ PUP::able migration constructor
-  EnzoMethodMHDTurbulenceIT (CkMigrateMessage *m)
+  EnzoMethodTurbulenceMhdIT (CkMigrateMessage *m)
     : Method (m),
       density_initial_(0.0),
       bfieldx_initial_(0.0),
@@ -47,7 +47,7 @@ public: // interface
   virtual void compute( Block * block) throw();
 
   virtual std::string name () throw () 
-  { return "mhd_turbulence_it"; }
+  { return "turbulence_mhd_it"; }
 
   /// Resume computation after a reduction
   virtual void compute_resume ( Block * block,
@@ -56,6 +56,7 @@ public: // interface
 private: // methods
 
   void compute_resume_ (Block * block, CkReductionMsg * msg) throw();
+  void monitor_output_(Block * block, double * g, double norm, double bnotx);
 
 private: // attributes
 
@@ -75,4 +76,4 @@ private: // attributes
   bool comoving_coordinates_;
 };
 
-#endif /* ENZO_ENZO_METHOD_MHDTURBULENCEIT_HPP */
+#endif /* ENZO_ENZO_METHOD_TURBULENCE_MHD_IT_HPP */

@@ -1,28 +1,59 @@
 C **********************************************************************
 C *** Forcing terms for OU turbulence (2D or 3D)
 C *** Adapted from AREPO code developed by Volker Springel
-C **********************************************************************
-      subroutine initTurbForcingOU(myid)
+C     **********************************************************************
+      subroutine cello_init_turbulence_OU
+     &     (cello_is_root,
+     &     cello_rank,
+     &     cello_domain_size,
+     &     cello_gamma,
+     &     cello_apply_injection_rate,
+     &     cello_cooling_term,
+     &     cello_hc_alpha,
+     &     cello_hc_sigma,
+     &     cello_injection_rate,
+     &     cello_kfi,
+     &     cello_kfa,
+     &     cello_mach,
+     &     cello_read_sol,
+     &     cello_sol_weight,
+     &     cello_totemp)
+      
       implicit none
       include 'turbforcingOU.h'
+C
+      integer :: cello_is_root
+      integer :: cello_rank
+      real*8 :: cello_domain_size(3)
+      real*8 :: cello_gamma;
+      integer :: cello_apply_injection_rate
+      integer :: cello_cooling_term
+      real*8 :: cello_hc_alpha
+      real*8 :: cello_hc_sigma
+      real*8 :: cello_injection_rate
+      real*8 :: cello_kfi
+      real*8 :: cello_kfa
+      real*8 :: cello_mach
+      integer :: cello_read_sol
+      real*8 :: cello_sol_weight
+      real*8 :: cello_totemp
+      integer :: modes_input
+C
       real*8 :: Mach, gamma, P0, rho0, c_s, Edot
       real*8 :: kmax, kmin, boxSize(3), kx, ky, kz, kk, kc, amp
-      integer :: argi(1), ikmax(3), ikx, iky, ikz, N, i, j
+      integer :: ikmax(3), ikx, iky, ikz, N, i, j
       real*8 :: RandomPhase, argx(3)
       real*8, parameter :: PI_2 = 3.14159265358979323846d0*2.d0 
       integer :: myid, seed, modesPerK
       logical :: apply_injection_rate
 
-      call GETDATA('apply_injection_rate', argx, argi)
-      apply_injection_rate = (argi(1) .ne. 0)
+      apply_injection_rate = (cello_apply_injection_rate .ne. 0)
 
-      call GETDATA('accDims', argx, argi)
-      Ndims = argi(1)
-
-      call GETDATA("gamma", gamma, argi)
-      call GETDATA("Lx",boxSize(1),argi)
-      call GETDATA("Ly",boxSize(2),argi)
-      call GETDATA("Lz",boxSize(3),argi)
+      Ndims = cello_rank
+      gamma = cello_gamma
+      boxSize(1) = cello_domain_size(1)
+      boxSize(2) = cello_domain_size(2)
+      boxSize(3) = cello_domain_size(3)
       if (Ndims.eq.3) then
         modesPerK = 4
         boxVolume = boxSize(1) * boxSize(2) * boxSize(3)
@@ -33,11 +64,11 @@ C **********************************************************************
         stop "only dim=2 or dim=3 is supported"
       endif        
 
-      call GETDATA("InjectionRate", Edot, argi)   ! default 0.006
-      call GETDATA("SolWeight", SolWeight, argi)  ! default 1.0
-      call GETDATA("Mach", Mach, argi)            ! default 0.2
-      call GETDATA("kfi", kmin, argi)             ! default 6.27
-      call GETDATA("kfa", kmax, argi)             ! default 12.57
+      Edot = cello_injection_rate
+      SolWeight = cello_sol_weight
+      Mach = cello_mach
+      kmin = cello_kfi
+      kmax = cello_kfa
             
       P0 = 1.d0
       totTime = 0d0
@@ -129,7 +160,7 @@ C **********************************************************************
       enddo
       enddo
 
-      if(myid.eq.0) then
+      if (cello_is_root .ne. 0) then
         print *, "accDims = ", Ndims
         print '(A,3(G10.4))', " Box = ", boxSize
         print *, "NModes = ", NModes
@@ -141,15 +172,15 @@ C **********************************************************************
         print *, 'kc = ', kc
       endif
 
-      call GETDATA('readinsol', argx, argi)
-      if (argi(1) .ne. 0) then
+      if (cello_read_sol .ne. 0) then
         open (42, file='OUturb.bin', form='UNFORMATTED', 
      &      access='STREAM', action='read')
-        read (42) argi(1)
-        if (argi(1) .ne. NModes) then
+        read (42) modes_input
+        if (modes_input .ne. NModes) then
           stop "wrong number of modes in OUturb.bin"
         endif
-        if (myid.eq.0) print *, 'reading phases for ', NModes, ' modes'
+        if (cello_is_root .ne. 0) print *, 'reading phases for ',
+     &       NModes, ' modes'
         read (42) seed, totTime, OUPhase, Phase
         close (42)
         call initrandomx(seed)
@@ -167,6 +198,8 @@ C **********************************************************************
       endif
       
       end subroutine
+
+
 C **********************************************************************      
       subroutine saveTurbForcingOUState(myid, nameSuffix)
       implicit none
@@ -274,17 +307,41 @@ c OUTPUT:
 c       res         - residual (updated)
 c       turbAcc     - injected turbulent accelerations and energy (updated)
 c***********************************************************************
-      subroutine turbForceOU(nc, ni, nj, nk,
-     *                       w, grid, jac, temperature, wk, dt, res,
-     *                       turbAcc, update_sol)
+      subroutine turbForceOU
+     &     (nc, ni, nj, nk,
+     &     w, grid, jac, temperature, wk, dt, res,
+     &     turbAcc, update_sol,
+     &     cello_apply_cooling,
+     &     cello_apply_forcing,
+     &     cello_apply_injection_rate,
+     &     cello_cooling_term,
+     &     cello_gamma,
+     &     cello_hc_alpha,
+     &     cello_hc_sigma,
+     &     cello_injection_rate,
+     &     cello_olap,
+     &     cello_totemp
+     &     )
       implicit none
       include 'turbforcingOU.h'
+
+      integer :: cello_apply_forcing
+      integer :: cello_apply_injection_rate
+      integer :: cello_cooling_term
+      integer :: cello_apply_cooling
+      real*8 :: cello_gamma;
+      real*8 :: cello_hc_alpha
+      real*8 :: cello_hc_sigma
+      real*8 :: cello_injection_rate
+      integer :: cello_olap
+      real*8 :: cello_totemp
+      
 #ifdef USING_MPI
       include 'mpif.h'
       integer :: err
       real*8 :: gvmpi(4), avmpi(2)
 #endif            
-      integer :: nc, ni, nj, nk, argi(1), i, j, k, m, dir
+      integer :: nc, ni, nj, nk, i, j, k, m, dir
       integer :: nd1, ol2, ol2k, cooling_term
       real*8 :: grid(3,ni,nj,nk), w(nc,ni,nj,nk), res(nc,ni,nj,nk)
       real*8 :: jac(ni,nj,nk), temperature(ni,nj,nk), wk(3,ni,nj,nk) 
@@ -292,36 +349,32 @@ c***********************************************************************
       real*8 :: totemp, gm1, deTurb, E0, Edot, Acorr, av(2)
       real*8 :: rho, dt, dumx, acc(3), da(3), du(3), gv(4), kr, de
       logical :: update_sol, apply_injection_rate
-            
-      call GETDATA("apply_forcing", dumx, argi)
-      if(argi(1).eq.0) return 
 
-      call GETDATA('apply_injection_rate', dumx, argi)
-      apply_injection_rate = (argi(1) .ne. 0)
-      
-      call GETDATA("cooling_term", dumx, argi)
-      cooling_term = argi(1)
+      if(cello_apply_forcing .eq. 0) return 
+
+      apply_injection_rate = (cello_apply_injection_rate .ne. 0)
+
+      cooling_term = cello_cooling_term
       
       if (cooling_term.eq.-1) then 
         ! backwards compatibility for "apply_cooling" option
-        call GETDATA("apply_cooling", dumx, argi)
-        if (argi(1).eq.0) then
+        if (cello_apply_cooling .eq. 0) then
           cooling_term = 0
         else
           cooling_term = 1
         endif
       endif
 
-      call GETDATA("hc_alpha", hc_alpha, argi)
-      call GETDATA("hc_sigma", hc_sigma, argi)
-      call GETDATA("totemp", totemp, argi )
-      call GETDATA("gamma", gamma, argi)
+      hc_alpha = cello_hc_alpha
+      hc_sigma = cello_hc_sigma
+      totemp   = cello_totemp
+      gamma    = cello_gamma
+
       gm1 = gamma-1
 
       E0 = 1.d0 / (gamma - 1.d0)
 
-      call GETDATA('olap', dumx, argi)
-      ol2 = argi(1)/2
+      ol2 = cello_olap/2
       ol2k = ol2
       if (nk.eq.1) ol2k = 0
 
@@ -386,8 +439,8 @@ c***********************************************************************
       enddo
 
       if (apply_injection_rate) then
-        call GETDATA("InjectionRate", dumx, argi)
-        Edot = dumx * boxVolume
+         
+        Edot = cello_injection_rate * boxVolume
 
         av = 0d0
         do k=1+ol2k,nk-ol2k

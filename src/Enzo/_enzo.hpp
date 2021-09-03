@@ -214,7 +214,7 @@ extern "C" {
 #include "enzo_EnzoInitialSedovRandom.hpp"
 #include "enzo_EnzoInitialSoup.hpp"
 #include "enzo_EnzoInitialTurbulence.hpp"
-#include "enzo_EnzoInitialMHDTurbulenceIT.hpp"
+#include "enzo_EnzoInitialTurbulenceMhdIT.hpp"
 
 #include "enzo_EnzoRefineShock.hpp"
 #include "enzo_EnzoRefineParticleMass.hpp"
@@ -230,7 +230,8 @@ extern "C" {
 #include "enzo_EnzoMethodPpm.hpp"
 #include "enzo_EnzoMethodPpml.hpp"
 #include "enzo_EnzoMethodTurbulence.hpp"
-#include "enzo_EnzoMethodMHDTurbulenceIT.hpp"
+#include "enzo_EnzoMethodTurbulenceMhdIT.hpp"
+#include "enzo_EnzoMethodTurbulenceOU.hpp"
 
 #include "enzo_EnzoMatrixDiagonal.hpp"
 #include "enzo_EnzoMatrixIdentity.hpp"

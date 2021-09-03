@@ -50,14 +50,39 @@ extern "C" void FORTRAN_NAME(turboinit2d)
    int *in, int *jn,
    int *ig, int *jg);
 
-// extern "C" void FORTRAN_NAME(calc_dt_30)(
-//                   int *rank, int *idim, int *jdim, int *kdim,
-//                   int *i1, int *i2, int *j1, int *j2, int *k1, int *k2,
-// 			     hydro_method *ihydro, float *C2,
-//                   FLOAT *dx, FLOAT *dy, FLOAT *dz, float *vgx, float *vgy,
-//                              float *vgz, float *gamma, int *ipfree, float *aye,
-//                   float *d, float *p, float *u, float *v, float *w,
-// 			     float *dt, float *dtviscous);
+extern "C" void FORTRAN_NAME(cello_init_turbulence_ou)
+  (int * is_root,
+   int * rank,
+   double fomain_size[],
+   double * gamma,
+   int * apply_injection_rate,
+   int * cooling_term,
+   double * hc_alpha, 
+   double * hc_sigma,
+   double * injection_rate,
+   double * kmin,
+   double * kmax,
+   double * mach,
+   int * read_sol,
+   double * sol_weight,
+   double * totemp);
+
+extern "C" void FORTRAN_NAME(turbforceou)
+  (int * nc, int * ni, int * nj, int * nk,
+   double * w, double * grid, double * jac, double * temperature,
+   double * wk, double * dt, double * res,
+   double * turbAcc, int * cello_update_sol,
+   int * cello_apply_cooling,
+   int * cello_apply_forcing,
+   int * cello_apply_injection_rate,
+   int * cello_cooling_term,
+   double * cello_gamma,
+   double * cello_hc_alpha,
+   double * cello_hc_sigma,
+   double * cello_injection_rate,
+   int * olap,
+   double * cello_totemp
+   );
  
 extern "C" void FORTRAN_NAME(calc_dt_ppml)
   (int *idim, int *jdim, int *kdim,

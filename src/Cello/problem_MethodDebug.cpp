@@ -65,7 +65,7 @@ void MethodDebug::compute ( Block * block) throw()
     const double rel_vol = cello::relative_cell_volume (block->level());
     for (int index_field=0; index_field<nf; index_field++) {
 
-      cello_float * values = (cello_float *) field.values(index_field);
+      cello_float * values = cello::field(block,index_field);
 
       for (int iz=gz; iz<mz-gz; iz++) {
         for (int iy=gy; iy<my-gy; iy++) {

@@ -219,6 +219,21 @@ public: // interface
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
+      // EnzoMethodTurbulenceOU
+      method_turbulence_apply_cooling(false),
+      method_turbulence_apply_forcing(false),
+      method_turbulence_apply_injection_rate(false),
+      method_turbulence_cooling_term(0),
+      method_turbulence_hc_alpha(0.0), 
+      method_turbulence_hc_sigma(0.0),
+      method_turbulence_injection_rate(0.006),
+      method_turbulence_kfa(12.57),
+      method_turbulence_kfi(6.27),
+      method_turbulence_olap(0),
+      method_turbulence_read_sol(false),
+      method_turbulence_sol_weight(1.0),
+      method_turbulence_totemp(0.0),
+      method_turbulence_update_solution(false),
       // EnzoMethodGrackle
       method_grackle_use_grackle(false),
 #ifdef CONFIG_USE_GRACKLE
@@ -449,6 +464,23 @@ public: // attributes
   /// EnzoMethodTurbulence
   double                     method_turbulence_edot;
   double                     method_turbulence_mach_number;
+
+  /// EnzoMethodTurbulenceOU
+
+  bool method_turbulence_apply_cooling; //
+  bool method_turbulence_apply_forcing; //
+  bool method_turbulence_apply_injection_rate; //
+  int method_turbulence_cooling_term; //
+  double method_turbulence_hc_alpha; //
+  double method_turbulence_hc_sigma; //
+  double method_turbulence_injection_rate; //
+  double method_turbulence_kfa; //
+  double method_turbulence_kfi; //
+  int method_turbulence_olap; //
+  bool method_turbulence_read_sol; //
+  double method_turbulence_sol_weight; //
+  double method_turbulence_totemp; //
+  bool method_turbulence_update_solution; //
 
   /// EnzoMethodGrackle
   bool                       method_grackle_use_grackle;

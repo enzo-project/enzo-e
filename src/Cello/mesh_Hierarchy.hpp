@@ -67,10 +67,10 @@ public: // interface
   /// Set domain upper extent
   void set_upper(double x, double y, double z) throw ();
   
-  /// Set root-level grid size
+  /// Set root-level grid size in cells
   void set_root_size(int nx, int ny, int nz) throw ();
 
-  /// Set root-level grid size
+  /// Set root-level grid size in blocks
   void set_blocking(int nbx, int nby, int nbz) throw ();
 
   //----------------------------------------------------------------------

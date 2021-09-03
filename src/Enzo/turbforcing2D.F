@@ -239,16 +239,10 @@ c***********************************************************************
       if(nk.ne.1) stop "turbForceNorm2d is for 2D only"
       if(nig .ne. njg) stop "turbForceNorm2d assume ni=nj"
       
-      call GETDATA("apply_forcing", dumx, argi)
       if(argi(1).eq.0) return 
       
-      call GETDATA("norm_eps", eps, argi)
-      call GETDATA("olap", dumx, argi)
       nbox = nig - argi(1) ! nig - olap
       ol2 = argi(1)/2
-      
-      call GETDATA("kfi", kk(1), argi)
-      call GETDATA("kfa", kk(2), argi)
       
       call calcTurbAcc2d(2, nbox, grid, ni, nj, seed, kk, wk)
  

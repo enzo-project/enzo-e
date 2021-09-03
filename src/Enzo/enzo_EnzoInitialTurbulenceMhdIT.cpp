@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoInitialMHDTurbulenceIT.cpp
+/// @file     enzo_EnzoInitialTurbulenceMhdIT.cpp
 /// @author   Alexei Kritsuk (akritsuk@ucsd.edu)
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed Jul 23 00:30:49 UTC 2014
@@ -20,7 +20,7 @@
 #endif
 //----------------------------------------------------------------------
 
-EnzoInitialMHDTurbulenceIT::EnzoInitialMHDTurbulenceIT 
+EnzoInitialTurbulenceMhdIT::EnzoInitialTurbulenceMhdIT 
 (int init_cycle, double init_time, 
  double density_initial,
  double bfieldx_initial,
@@ -33,7 +33,7 @@ EnzoInitialMHDTurbulenceIT::EnzoInitialMHDTurbulenceIT
 
 //----------------------------------------------------------------------
 
-void EnzoInitialMHDTurbulenceIT::pup (PUP::er &p)
+void EnzoInitialTurbulenceMhdIT::pup (PUP::er &p)
 {
   // NOTE: update whenever attributes change
 
@@ -49,16 +49,16 @@ void EnzoInitialMHDTurbulenceIT::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void EnzoInitialMHDTurbulenceIT::enforce_block 
+void EnzoInitialTurbulenceMhdIT::enforce_block 
 ( Block * block, const Hierarchy  * hierarchy ) throw()
 
 {
   TRACE_TURBULENCE;
   if (!block->is_leaf()) return;
 
-  //  INCOMPLETE("EnzoInitialMHDTurbulenceIT::enforce_block()");
+  //  INCOMPLETE("EnzoInitialTurbulenceMhdIT::enforce_block()");
 
-  ASSERT("EnzoInitialMHDTurbulenceIT",
+  ASSERT("EnzoInitialTurbulenceMhdIT",
 	 "Block does not exist",
 	 block != NULL);
 
@@ -231,7 +231,7 @@ void EnzoInitialMHDTurbulenceIT::enforce_block
 
   // assumes cubical domain
 
-  ASSERT3 ("EnzoInitialMHDTurbulenceIT::enforce_block()",
+  ASSERT3 ("EnzoInitialTurbulenceMhdIT::enforce_block()",
 	   "Root grid mesh dimensions %d %d %d must be equal or 1",
 	   Nx,Ny,Nz,
 	   ( Ny == 1)  || 

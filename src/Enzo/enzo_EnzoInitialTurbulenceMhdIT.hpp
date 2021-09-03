@@ -1,25 +1,25 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoInitialMHDTurbulenceIT.hpp
+/// @file     enzo_EnzoInitialTurbulenceMhdIT.hpp
 /// @author   Alexei Kritsuk (kritsuk@gmail.com)
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed Jul 23 00:30:57 UTC 2014
 /// @date     Wed Aug 24 00:30:57 UTC 2018
 /// @brief    [\ref Enzo] Initial conditions for MHD turbulence simulations with 
 
-#ifndef ENZO_ENZO_INITIAL_MHDTURBULENCEIT_HPP
-#define ENZO_ENZO_INITIAL_MHDTURBULENCEIT_HPP
+#ifndef ENZO_ENZO_INITIAL_TURBULENCE_MHD_IT_HPP
+#define ENZO_ENZO_INITIAL_TURBULENCE_MHD_IT_HPP
 
-class EnzoInitialMHDTurbulenceIT : public Initial {
+class EnzoInitialTurbulenceMhdIT : public Initial {
 
-  /// @class    EnzoInitialMHDTurbulenceIT
+  /// @class    EnzoInitialTurbulenceMhdIT
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Initialization routine for turbulence simulations
 
 public: // interface
 
   /// CHARM++ constructor
-  EnzoInitialMHDTurbulenceIT(double density_initial,
+  EnzoInitialTurbulenceMhdIT(double density_initial,
 			     double bfieldx_initial,
 			     double gamma) throw() 
     : Initial(),
@@ -30,16 +30,16 @@ public: // interface
   { }
   
   /// Constructor
-  EnzoInitialMHDTurbulenceIT(int cycle, double time,
+  EnzoInitialTurbulenceMhdIT(int cycle, double time,
 			     double density_initial,
 			     double bfieldx_initial,
 			     double gamma) throw();
 
   /// CHARM++ PUP::able declaration
-  PUPable_decl(EnzoInitialMHDTurbulenceIT);
+  PUPable_decl(EnzoInitialTurbulenceMhdIT);
 
   /// CHARM++ migration constructor
-  EnzoInitialMHDTurbulenceIT(CkMigrateMessage *m) 
+  EnzoInitialTurbulenceMhdIT(CkMigrateMessage *m) 
     : Initial (m), 
       density_initial_(0),
       bfieldx_initial_(0),
@@ -64,5 +64,5 @@ private: // attributes
 
 };
 
-#endif /* ENZO_ENZO_INITIAL_MHDTURBULENCEIT_HPP */
+#endif /* ENZO_ENZO_INITIAL_TURBULENCE_MHD_IT_HPP */
 

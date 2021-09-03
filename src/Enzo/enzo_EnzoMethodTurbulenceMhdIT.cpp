@@ -1,11 +1,11 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoMethodMHDTurbulenceIT.cpp
+/// @file     enzo_EnzoMethodTurbulenceMhdIT.cpp
 /// @author   Alexei Kritsuk (akritsuk@ucsd.edu)
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed Jul 23 00:31:04 UTC 2014
 /// @date     Fri Aug 24 00:31:04 UTC 2018
-/// @brief    Implements the EnzoMethodMHDTurbulenceIT class
+/// @brief    Implements the EnzoMethodTurbulenceMhdIT class
 
 #include "cello.hpp"
 
@@ -23,7 +23,7 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodMHDTurbulenceIT::EnzoMethodMHDTurbulenceIT 
+EnzoMethodTurbulenceMhdIT::EnzoMethodTurbulenceMhdIT 
 (double edot,
  double density_initial,
  double bfieldx_initial,
@@ -44,12 +44,12 @@ EnzoMethodMHDTurbulenceIT::EnzoMethodMHDTurbulenceIT
   cello::simulation()->refresh_set_name(ir_post_,name());
   refresh_post->add_all_fields();
 
-   // TURBULENCE parameters initialized in EnzoBlock::initialize()
+  // TURBULENCE parameters initialized in EnzoBlock::initialize()
 }
 
 //----------------------------------------------------------------------
 
-void EnzoMethodMHDTurbulenceIT::pup (PUP::er &p)
+void EnzoMethodTurbulenceMhdIT::pup (PUP::er &p)
 {
 
   // NOTE: change this function whenever attributes change
@@ -68,7 +68,7 @@ void EnzoMethodMHDTurbulenceIT::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void EnzoMethodMHDTurbulenceIT::compute ( Block * block) throw()
+void EnzoMethodTurbulenceMhdIT::compute ( Block * block) throw()
 {
   TRACE_TURBULENCE;  
 
@@ -82,64 +82,64 @@ void EnzoMethodMHDTurbulenceIT::compute ( Block * block) throw()
   enzo_float *  dens_rz = (enzo_float *) field.values("dens_rz");
 
   enzo_float *  velocity[3] = {
-    (enzo_float *) field.values("velox"),
-    (enzo_float *) field.values("veloy"),
-    (enzo_float *) field.values("veloz") };
+                               (enzo_float *) field.values("velox"),
+                               (enzo_float *) field.values("veloy"),
+                               (enzo_float *) field.values("veloz") };
 
   enzo_float *  velo_rx[3] = {
-    (enzo_float *) field.values("velox_rx"),
-    (enzo_float *) field.values("veloy_rx"),
-    (enzo_float *) field.values("veloz_rx") };
+                              (enzo_float *) field.values("velox_rx"),
+                              (enzo_float *) field.values("veloy_rx"),
+                              (enzo_float *) field.values("veloz_rx") };
 
   enzo_float *  velo_ry[3] = {
-    (enzo_float *) field.values("velox_ry"),
-    (enzo_float *) field.values("veloy_ry"),
-    (enzo_float *) field.values("veloz_ry") };
+                              (enzo_float *) field.values("velox_ry"),
+                              (enzo_float *) field.values("veloy_ry"),
+                              (enzo_float *) field.values("veloz_ry") };
 
   enzo_float *  velo_rz[3] = {
-    (enzo_float *) field.values("velox_rz"),
-    (enzo_float *) field.values("veloy_rz"),
-    (enzo_float *) field.values("veloz_rz") };
+                              (enzo_float *) field.values("velox_rz"),
+                              (enzo_float *) field.values("veloy_rz"),
+                              (enzo_float *) field.values("veloz_rz") };
 
   enzo_float * driving[3] = {
-    (enzo_float *) field.values("drivx"),
-    (enzo_float *) field.values("drivy"),
-    (enzo_float *) field.values("drivz") };
+                             (enzo_float *) field.values("drivx"),
+                             (enzo_float *) field.values("drivy"),
+                             (enzo_float *) field.values("drivz") };
 
   enzo_float * driv_rx[3] = {
-    (enzo_float *) field.values("drivx_rx"),
-    (enzo_float *) field.values("drivy_rx"),
-    (enzo_float *) field.values("drivz_rx") };
+                             (enzo_float *) field.values("drivx_rx"),
+                             (enzo_float *) field.values("drivy_rx"),
+                             (enzo_float *) field.values("drivz_rx") };
 
   enzo_float * driv_ry[3] = {
-    (enzo_float *) field.values("drivx_ry"),
-    (enzo_float *) field.values("drivy_ry"),
-    (enzo_float *) field.values("drivz_ry") };
+                             (enzo_float *) field.values("drivx_ry"),
+                             (enzo_float *) field.values("drivy_ry"),
+                             (enzo_float *) field.values("drivz_ry") };
 
   enzo_float * driv_rz[3] = {
-    (enzo_float *) field.values("drivx_rz"),
-    (enzo_float *) field.values("drivy_rz"),
-    (enzo_float *) field.values("drivz_rz") };
+                             (enzo_float *) field.values("drivx_rz"),
+                             (enzo_float *) field.values("drivy_rz"),
+                             (enzo_float *) field.values("drivz_rz") };
 
   enzo_float * bfield[3] = {
-    (enzo_float *) field.values("bfieldx"),
-    (enzo_float *) field.values("bfieldy"),
-    (enzo_float *) field.values("bfieldz") };
+                            (enzo_float *) field.values("bfieldx"),
+                            (enzo_float *) field.values("bfieldy"),
+                            (enzo_float *) field.values("bfieldz") };
 
   enzo_float * bfield_rx[3] = {
-    (enzo_float *) field.values("bfieldx_rx"),
-    (enzo_float *) field.values("bfieldy_rx"),
-    (enzo_float *) field.values("bfieldz_rx") };
+                               (enzo_float *) field.values("bfieldx_rx"),
+                               (enzo_float *) field.values("bfieldy_rx"),
+                               (enzo_float *) field.values("bfieldz_rx") };
 
   enzo_float * bfield_ry[3] = {
-    (enzo_float *) field.values("bfieldx_ry"),
-    (enzo_float *) field.values("bfieldy_ry"),
-    (enzo_float *) field.values("bfieldz_ry") };
+                               (enzo_float *) field.values("bfieldx_ry"),
+                               (enzo_float *) field.values("bfieldy_ry"),
+                               (enzo_float *) field.values("bfieldz_ry") };
 
   enzo_float * bfield_rz[3] = {
-    (enzo_float *) field.values("bfieldx_rz"),
-    (enzo_float *) field.values("bfieldy_rz"),
-    (enzo_float *) field.values("bfieldz_rz") };
+                               (enzo_float *) field.values("bfieldx_rz"),
+                               (enzo_float *) field.values("bfieldy_rz"),
+                               (enzo_float *) field.values("bfieldz_rz") };
 
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
@@ -197,19 +197,19 @@ void EnzoMethodMHDTurbulenceIT::compute ( Block * block) throw()
 	  g[index_mhd_turbulence_it_dvy]  +=  (rank >= 2) ? d*velocity[1][i] : 0.0; // 5
 	  g[index_mhd_turbulence_it_dvz]  +=  (rank >= 3) ? d*velocity[2][i] : 0.0; // 6
 	  /*
-	  g[index_mhd_turbulence_it_dax]  +=  d*driving[0][i];                      // 7
-	  g[index_mhd_turbulence_it_day]  +=  (rank >= 2) ? d*driving[1][i] : 0.0;  // 8
-	  g[index_mhd_turbulence_it_daz]  +=  (rank >= 3) ? d*driving[2][i] : 0.0;  // 9
+            g[index_mhd_turbulence_it_dax]  +=  d*driving[0][i];                      // 7
+            g[index_mhd_turbulence_it_day]  +=  (rank >= 2) ? d*driving[1][i] : 0.0;  // 8
+            g[index_mhd_turbulence_it_daz]  +=  (rank >= 3) ? d*driving[2][i] : 0.0;  // 9
 	  */
 	  g[index_mhd_turbulence_it_dax]  +=  ( d*driving[0][i] + dens_rx[i]*driv_rx[0][i] + 
-	                                                          dens_ry[i]*driv_ry[0][i] + 
-						                  dens_rz[i]*driv_rz[0][i] )/4.0;                      // 7
+                                                dens_ry[i]*driv_ry[0][i] + 
+                                                dens_rz[i]*driv_rz[0][i] )/4.0;                      // 7
 	  g[index_mhd_turbulence_it_day]  +=  (rank >= 2) ? ( d*driving[1][i] + dens_rx[i]*driv_rx[1][i] +
-                                                                                dens_ry[i]*driv_ry[1][i] +
-	                                                                        dens_rz[i]*driv_rz[1][i] )/4.0 : 0.0;  // 8
+                                                              dens_ry[i]*driv_ry[1][i] +
+                                                              dens_rz[i]*driv_rz[1][i] )/4.0 : 0.0;  // 8
 	  g[index_mhd_turbulence_it_daz]  +=  (rank >= 3) ? ( d*driving[2][i] + dens_rx[i]*driv_rx[2][i] +
-                                                                                dens_ry[i]*driv_ry[2][i] +
-	                                                                        dens_rz[i]*driv_rz[2][i] )/4.0 : 0.0;  // 9
+                                                              dens_ry[i]*driv_ry[2][i] +
+                                                              dens_rz[i]*driv_rz[2][i] )/4.0 : 0.0;  // 9
 
 	  g[index_mhd_turbulence_it_bx]   +=  bfield[0][i];                         // 10
 	  g[index_mhd_turbulence_it_by]   +=  (rank >= 2) ? bfield[1][i] : 0.0;     // 11
@@ -296,7 +296,7 @@ void EnzoBlock::p_method_mhd_turbulence_it_end(CkReductionMsg * msg)
 
 //----------------------------------------------------------------------
 
-void EnzoMethodMHDTurbulenceIT::compute_resume 
+void EnzoMethodTurbulenceMhdIT::compute_resume 
 (Block * block,
  CkReductionMsg * msg) throw()
 {
@@ -387,9 +387,9 @@ void EnzoMethodMHDTurbulenceIT::compute_resume
     //    norm = (edot_ != 0.0) ? (sqrt(vad*vad + 2.0*zon*aad*dt*edot_) - vad)/aad : 0.0;
    
       
-      // OLD COMPUTATION:
-      //
-      //      norm = ( sqrt(g[0]*g[0] + 2.0*n*g[1]*dt*edot_) - g[0] ) / g[1];
+    // OLD COMPUTATION:
+    //
+    //      norm = ( sqrt(g[0]*g[0] + 2.0*n*g[1]*dt*edot_) - g[0] ) / g[1];
   }
 
   // ASSUMES CONSTANT TIME STEP
@@ -397,7 +397,22 @@ void EnzoMethodMHDTurbulenceIT::compute_resume
   // double dt0 = dt;
   // norm = (dt/dt0)*norm;
 
+  monitor_output_(block,g,norm,bnotx);
 
+  if (block->is_leaf()) {
+    compute_resume_(block,msg);
+  }
+
+  delete msg;
+  block->compute_done();
+
+}
+
+//======================================================================
+
+void EnzoMethodTurbulenceMhdIT::monitor_output_
+(Block * block, double * g, double norm, double bnotx)
+{
   if (block->index().is_root()) {
 
     Monitor * monitor = cello::monitor();
@@ -462,19 +477,11 @@ void EnzoMethodMHDTurbulenceIT::compute_resume
 		    g[index_mhd_turbulence_it_maxd] /
 		    g[index_mhd_turbulence_it_mind]);                  
   }
-
-  if (block->is_leaf()) {
-    compute_resume_(block,msg);
-  }
-
-  delete msg;
-  block->compute_done();
-
 }
 
 //----------------------------------------------------------------------
 
-void EnzoMethodMHDTurbulenceIT::compute_resume_ 
+void EnzoMethodTurbulenceMhdIT::compute_resume_ 
 (Block * block, CkReductionMsg * msg) throw()
 {
   
@@ -516,37 +523,37 @@ void EnzoMethodMHDTurbulenceIT::compute_resume_
   //  const int rank = (my == 1) ? 1 : ((mz == 1) ? 2 : 3);
 
   enzo_float * v3[3] = {
-    (enzo_float*) field.values ("velox"),
-    (enzo_float*) field.values ("veloy"),
-    (enzo_float*) field.values ("veloz") };
+                        (enzo_float*) field.values ("velox"),
+                        (enzo_float*) field.values ("veloy"),
+                        (enzo_float*) field.values ("veloz") };
   enzo_float * v3_rx[3] = {
-    (enzo_float*) field.values ("velox_rx"),
-    (enzo_float*) field.values ("veloy_rx"),
-    (enzo_float*) field.values ("veloz_rx") };
+                           (enzo_float*) field.values ("velox_rx"),
+                           (enzo_float*) field.values ("veloy_rx"),
+                           (enzo_float*) field.values ("veloz_rx") };
   enzo_float * v3_ry[3] = {
-    (enzo_float*) field.values ("velox_ry"),
-    (enzo_float*) field.values ("veloy_ry"),
-    (enzo_float*) field.values ("veloz_ry") };
+                           (enzo_float*) field.values ("velox_ry"),
+                           (enzo_float*) field.values ("veloy_ry"),
+                           (enzo_float*) field.values ("veloz_ry") };
   enzo_float * v3_rz[3] = {
-    (enzo_float*) field.values ("velox_rz"),
-    (enzo_float*) field.values ("veloy_rz"),
-    (enzo_float*) field.values ("veloz_rz") };
+                           (enzo_float*) field.values ("velox_rz"),
+                           (enzo_float*) field.values ("veloy_rz"),
+                           (enzo_float*) field.values ("veloz_rz") };
   enzo_float * a3[3] = {
-    (enzo_float*) field.values ("drivx"),
-    (enzo_float*) field.values ("drivy"),
-    (enzo_float*) field.values ("drivz") };
+                        (enzo_float*) field.values ("drivx"),
+                        (enzo_float*) field.values ("drivy"),
+                        (enzo_float*) field.values ("drivz") };
   enzo_float * a3_rx[3] = {
-    (enzo_float*) field.values ("drivx_rx"),
-    (enzo_float*) field.values ("drivy_rx"),
-    (enzo_float*) field.values ("drivz_rx") };
+                           (enzo_float*) field.values ("drivx_rx"),
+                           (enzo_float*) field.values ("drivy_rx"),
+                           (enzo_float*) field.values ("drivz_rx") };
   enzo_float * a3_ry[3] = {
-    (enzo_float*) field.values ("drivx_ry"),
-    (enzo_float*) field.values ("drivy_ry"),
-    (enzo_float*) field.values ("drivz_ry") };
+                           (enzo_float*) field.values ("drivx_ry"),
+                           (enzo_float*) field.values ("drivy_ry"),
+                           (enzo_float*) field.values ("drivz_ry") };
   enzo_float * a3_rz[3] = {
-    (enzo_float*) field.values ("drivx_rz"),
-    (enzo_float*) field.values ("drivy_rz"),
-    (enzo_float*) field.values ("drivz_rz") };
+                           (enzo_float*) field.values ("drivx_rz"),
+                           (enzo_float*) field.values ("drivy_rz"),
+                           (enzo_float*) field.values ("drivz_rz") };
 
   // compute injected bulk momentum <d*a> in x, y, and z directions
 
@@ -576,20 +583,20 @@ void EnzoMethodMHDTurbulenceIT::compute_resume_
   }
 
   /*
-  for (int iz=gz; iz<gz+nz; iz++) {
+    for (int iz=gz; iz<gz+nz; iz++) {
     for (int iy=gy; iy<gy+ny; iy++) {
-      for (int ix=gx; ix<gx+nx; ix++) {
-	int i = ix + mx*(iy + my*iz);
-	for (int id=0; id<rank; id++) {
-	  v3[id][i]    += (a3[id][i]-bm[id])*norm;
-	  v3_rx[id][i] += (a3_rx[id][i]-bm[id])*norm;
-	  v3_ry[id][i] += (a3_ry[id][i]-bm[id])*norm;
-	  v3_rz[id][i] += (a3_rz[id][i]-bm[id])*norm;
+    for (int ix=gx; ix<gx+nx; ix++) {
+    int i = ix + mx*(iy + my*iz);
+    for (int id=0; id<rank; id++) {
+    v3[id][i]    += (a3[id][i]-bm[id])*norm;
+    v3_rx[id][i] += (a3_rx[id][i]-bm[id])*norm;
+    v3_ry[id][i] += (a3_ry[id][i]-bm[id])*norm;
+    v3_rz[id][i] += (a3_rz[id][i]-bm[id])*norm;
 		    
-	}
-      }
     }
-  }
+    }
+    }
+    }
   */
 
   TRACE_TURBULENCE;  
