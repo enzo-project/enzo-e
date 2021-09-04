@@ -212,6 +212,9 @@ public: /// entry methods
   void p_method_turbulence_end(CkReductionMsg *msg);
   void p_method_mhd_turbulence_it_end(CkReductionMsg *msg);
 
+  void r_method_turbulence_ou_shift(CkReductionMsg *msg);
+  void r_method_turbulence_ou_update(CkReductionMsg *msg);
+  
   void p_initial_hdf5_recv(MsgInitial * msg_initial);
   
   /// TEMP

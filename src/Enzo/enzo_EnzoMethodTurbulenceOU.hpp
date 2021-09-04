@@ -60,6 +60,9 @@ public: // interface
   /// Apply the method to advance a block one timestep 
   virtual void compute( Block * block) throw();
 
+  void compute_shift(EnzoBlock *, CkReductionMsg *msg);
+  void compute_update(EnzoBlock *, CkReductionMsg *msg);
+
   virtual std::string name () throw () 
   { return "turbulence_ou"; }
 

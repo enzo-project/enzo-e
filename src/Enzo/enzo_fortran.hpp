@@ -57,15 +57,12 @@ extern "C" void FORTRAN_NAME(cello_init_turbulence_ou)
    double * gamma,
    int * apply_injection_rate,
    int * cooling_term,
-   double * hc_alpha, 
-   double * hc_sigma,
    double * injection_rate,
    double * kmin,
    double * kmax,
    double * mach,
    int * read_sol,
-   double * sol_weight,
-   double * totemp);
+   double * sol_weight);
 
 extern "C" void FORTRAN_NAME(turbforceou)
   (int * nc, int * ni, int * nj, int * nk,
@@ -77,11 +74,9 @@ extern "C" void FORTRAN_NAME(turbforceou)
    int * cello_apply_injection_rate,
    int * cello_cooling_term,
    double * cello_gamma,
-   double * cello_hc_alpha,
-   double * cello_hc_sigma,
    double * cello_injection_rate,
    int * olap,
-   double * cello_totemp
+   double * r_gv
    );
  
 extern "C" void FORTRAN_NAME(calc_dt_ppml)
