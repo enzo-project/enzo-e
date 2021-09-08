@@ -84,7 +84,8 @@ module enzo {
   PUPable EnzoMethodFeedback;
   PUPable EnzoMethodDistributedFeedback;
 
-  PUPable EnzoMethodRadiativeTransfer;
+  PUPable EnzoMethodRadiationInjection;
+  PUPable EnzoMethodRadiationTransport;
 
   PUPable EnzoMethodCheckGravity;
   PUPable EnzoMethodComovingExpansion;

@@ -1,0 +1,56 @@
+include "RT.incl"
+
+Boundary {
+   list = ["photon_density","flux_x","flux_y"];
+   photon_density {
+     type = "inflow";
+     field_list = "photon_density";
+     value = [1.0,
+                  x <= 0.0 &&
+                  0.2 < y && y < 0.24 &&
+                  0.48 < z && z < 0.52,
+              1e-16];
+   }
+
+  flux_x {
+     type = "inflow";
+     field_list = "flux_x";
+     value = [1.0*29979245800.0 / sqrt(2.0),
+                  x <= 0.0 &&
+                  0.2 < y && y < 0.24 &&
+                  0.48 < z && z < 0.52,
+              1e-16];
+  }
+
+  flux_y {
+     type = "inflow";
+     field_list = "flux_y";
+     value = [1.0*29979245800.0 / sqrt(2.0),
+                  x <= 0.0 &&
+                  0.2 < y && y < 0.24 &&
+                  0.48 < z && z < 0.52,
+              1e-16];
+  }
+}
+Initial{
+   value {
+     photon_density = 1e-16; 
+     flux_x         = 1e-16;
+     flux_y         = 1e-16;
+     flux_z         = 1e-16;
+   }
+}
+
+Output {
+   list += ["hdf5"];
+   N    {dir = ["BEAM_XY"];}
+   Fx   {dir = ["BEAM_XY"];}
+   Fy   {dir = ["BEAM_XY"];}
+   Fz   {dir = ["BEAM_XY"];}
+   hdf5 {dir = ["BEAM_XY"];}
+}
+
+Stopping {
+   time = 5.2e-11;
+   cycle = 1000;
+}

@@ -243,7 +243,8 @@ extern "C" {
 #include "enzo_EnzoMethodStarMaker.hpp"
 #include "enzo_EnzoMethodStarMakerStochasticSF.hpp"
 #include "enzo_EnzoMethodMHDVlct.hpp"
-#include "enzo_EnzoMethodRadiativeTransfer.hpp"
+#include "enzo_EnzoMethodRadiationInjection.hpp"
+#include "enzo_EnzoMethodRadiationTransport.hpp"
 
 #include "enzo_EnzoMatrixDiagonal.hpp"
 #include "enzo_EnzoMatrixIdentity.hpp"

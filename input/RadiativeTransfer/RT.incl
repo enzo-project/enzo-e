@@ -30,18 +30,18 @@
      #                      (z - 0.5)*(z - 0.5) <  0.050 ,
      #                    0.0 ];
      
-     photon_density = [ 1.0, x < 0.50, 0.0];
-     flux_x         = [ 1.0*29979245800.0, x < 0.50, 0.0];
-     flux_y         = 0.0;
-     flux_z         = 0.0;
+     photon_density = [ 1.0, x < 0.50, 1e-16];
+     flux_x         = [ 1.0*29979245800.0, x < 0.50, 1e-16];
+     flux_y         = 1e-16;
+     flux_z         = 1e-16;
   
      }
  }
 
  Mesh {
-     root_blocks = [ 1, 1, 1 ];
+     root_blocks = [ 16, 16, 16 ];
      root_rank = 3;
-     root_size = [ 16, 16, 16 ];
+     root_size = [ 256, 256, 256 ];
  }
 
 Adapt {
@@ -50,8 +50,8 @@ Adapt {
 
 
  Method {
-     list = [ "radiative_transfer" ];
-     radiative_transfer {
+     list = [ "radiation_transport" ];
+     radiation_transport {
          N_groups = 1;
          min_freq = 0.0;
          max_freq = 0.0;
@@ -61,14 +61,15 @@ Adapt {
  }
 
  Output {
-     list = [ "N", "Fx", "Fy", "Fz" ];
+     list = [ "N", "Fx", "Fy", "Fz"  ];
      N {
          dir = ["PHOTON_WALL_X"];
          field_list = [ "photon_density" ];
          name = [ "RT_N-%04d.png", "cycle" ];
          image_size = [512,512];
+         image_log = false;
          schedule {
-             step = 1;
+             step = 20;
              var = "cycle";
          }
          type = "image";
@@ -78,8 +79,10 @@ Adapt {
          field_list = [ "flux_x" ];
          name = [ "RT_Fx-%04d.png", "cycle" ];
          image_size = [512,512];
+         image_log = false;
+
          schedule {
-             step = 1;
+             step = 20;
              var = "cycle";
          }
          type = "image";
@@ -89,8 +92,10 @@ Adapt {
          field_list = [ "flux_y" ];
          name = [ "RT_Fy-%04d.png", "cycle" ];
          image_size = [512,512];
+         image_log = false;
+
          schedule {
-             step = 1;
+             step = 20;
              var = "cycle";
          }
          type = "image";
@@ -100,17 +105,28 @@ Adapt {
          field_list = [ "flux_z" ];
          name = [ "RT_Fz-%04d.png", "cycle" ];
          image_size = [512,512];
+         image_log = false;
+
          schedule {
-             step = 1;
+             step = 20;
              var = "cycle";
          }
          type = "image";
      }
-
+     hdf5 {
+     field_list = [ "photon_density", "flux_x", "flux_y", "flux_z" ];
+         dir = ["PHOTON_WALL_X"];
+         name = [ "data-%03d.h5", "count" ];
+         schedule {
+             step = 20;
+             var = "cycle";
+         };
+         type = "data";
+     };
  }
 
  Stopping {
-     cycle = 10;
+     cycle = 200;
  }
 
 # Testing {

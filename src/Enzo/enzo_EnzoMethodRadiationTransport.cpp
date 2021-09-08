@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoMethodRadiativeTransfer.cpp
+/// @file     enzo_EnzoMethodRadiationTransport.cpp
 /// @author   William Hicks (whicks@ucsd.edu)
 /// @date     Mon Aug 16 17:05:23 PDT 2021
-/// @brief    Implements the EnzoMethodRadiativeTransfer  class
+/// @brief    Implements the EnzoMethodRadiationTransport  class
 
 #include "cello.hpp"
 
@@ -11,7 +11,7 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodRadiativeTransfer ::EnzoMethodRadiativeTransfer()
+EnzoMethodRadiationTransport ::EnzoMethodRadiationTransport()
   : Method()
 {
 
@@ -69,7 +69,7 @@ EnzoMethodRadiativeTransfer ::EnzoMethodRadiativeTransfer()
 
 //----------------------------------------------------------------------
 
-void EnzoMethodRadiativeTransfer ::pup (PUP::er &p)
+void EnzoMethodRadiationTransport ::pup (PUP::er &p)
 {
 
   // NOTE: change this function whenever attributes change
@@ -81,7 +81,7 @@ void EnzoMethodRadiativeTransfer ::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void EnzoMethodRadiativeTransfer::compute ( Block * block) throw()
+void EnzoMethodRadiationTransport::compute ( Block * block) throw()
 {
 
   if (block->is_leaf()) {
@@ -94,7 +94,7 @@ void EnzoMethodRadiativeTransfer::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodRadiativeTransfer::timestep ( Block * block ) const throw()
+double EnzoMethodRadiationTransport::timestep ( Block * block ) const throw()
 {
   Data * data = block->data();
   Field field = data->field();
@@ -112,7 +112,7 @@ double EnzoMethodRadiativeTransfer::timestep ( Block * block ) const throw()
   if (rank >= 3) h_min = std::min(h_min,hz);
 
   const EnzoConfig * enzo_config = enzo::config();
-  const double clight = enzo_config->method_radiative_transfer_clight;
+  const double clight = enzo_config->method_radiation_transport_clight;
 
 
   return h_min / (3*clight);
@@ -120,14 +120,8 @@ double EnzoMethodRadiativeTransfer::timestep ( Block * block ) const throw()
 
 
 //----------------------------------------------------------------------
-void EnzoMethodRadiativeTransfer::inject_photons ( Block * block ) throw()
-{
-  // Solve dN_i/dt = Ndot^*_i 
-}
 
-//----------------------------------------------------------------------
-
-double EnzoMethodRadiativeTransfer::flux_function (double U_l, double U_lplus1,
+double EnzoMethodRadiationTransport::flux_function (double U_l, double U_lplus1,
 					   double Q_l, double Q_lplus1,  
 					   std::string type,
 					   double clight) 
@@ -139,13 +133,13 @@ double EnzoMethodRadiativeTransfer::flux_function (double U_l, double U_lplus1,
   }
 
   else {
-    ERROR("EnzoMethodRadiativeTransfer::flux_function",
+    ERROR("EnzoMethodRadiationTransport::flux_function",
 	     "flux_function type not recognized");
     return 0.0; 
   }
 }
 
-double EnzoMethodRadiativeTransfer::deltaQ_faces (double U_l, double U_lplus1, double U_lminus1,
+double EnzoMethodRadiationTransport::deltaQ_faces (double U_l, double U_lplus1, double U_lminus1,
                                                   double Q_l, double Q_lplus1, double Q_lminus1,
                                                   double clight) throw()
 {
@@ -156,7 +150,7 @@ double EnzoMethodRadiativeTransfer::deltaQ_faces (double U_l, double U_lplus1, d
 
 
 
-void EnzoMethodRadiativeTransfer::get_reduced_variables (double * chi, double (*n)[3], int i, double clight,
+void EnzoMethodRadiationTransport::get_reduced_variables (double * chi, double (*n)[3], int i, double clight,
                                                          enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz) throw()
 {
         double Fnorm = sqrt(Fx[i]*Fx[i] + Fy[i]*Fy[i] + Fz[i]*Fz[i]);
@@ -168,7 +162,7 @@ void EnzoMethodRadiativeTransfer::get_reduced_variables (double * chi, double (*
         (*n)[2] = Fz[i]/Fnorm;
 }
 
-void EnzoMethodRadiativeTransfer::get_pressure_tensor (Block * block, 
+void EnzoMethodRadiationTransport::get_pressure_tensor (Block * block, 
                        enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz, 
                        double clight) throw()
 {
@@ -196,6 +190,8 @@ void EnzoMethodRadiativeTransfer::get_pressure_tensor (Block * block,
   // need information about their neighbors, and there's no 
   // guarantee that a neighboring block will have updated
   // its pressure tensor by the time this block starts
+  //
+  // Do I only need to go into the ghost zones during the first cycle???
   for (int iz=gz-1; iz<mz-gz+1; iz++) { 
    for (int iy=gy-1; iy<my-gy+1; iy++) {
     for (int ix=gx-1; ix<mx-gx+1; ix++) {
@@ -217,7 +213,7 @@ void EnzoMethodRadiativeTransfer::get_pressure_tensor (Block * block,
 
 }
 
-void EnzoMethodRadiativeTransfer::get_U_update (Block * block, double * N_update, 
+void EnzoMethodRadiationTransport::get_U_update (Block * block, double * N_update, 
                        double * Fx_update, double * Fy_update, double * Fz_update, 
                        enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz, 
                        double hx, double hy, double hz, double dt, double clight, 
@@ -302,7 +298,7 @@ void EnzoMethodRadiativeTransfer::get_U_update (Block * block, double * N_update
 
 }
 
-void EnzoMethodRadiativeTransfer::transport_photons ( Block * block, double clight ) throw()
+void EnzoMethodRadiationTransport::transport_photons ( Block * block, double clight ) throw()
 {
   // TODO: Make Nnew, Fxnew, Fynew, Fznew input parameters so that we don't need
   // the loop at the end that copies the values over to the original fields 
@@ -424,30 +420,23 @@ void EnzoMethodRadiativeTransfer::transport_photons ( Block * block, double clig
 //----------------------------------------------------------------------
 
 
-void EnzoMethodRadiativeTransfer::thermochemistry ( Block * block ) throw()
-{
-
-}
-
 //======================================================================
 
-void EnzoMethodRadiativeTransfer::compute_ (Block * block) throw()
+void EnzoMethodRadiationTransport::compute_ (Block * block) throw()
 {
   const EnzoConfig * enzo_config = enzo::config();
   
-  const int N_groups = enzo_config->method_radiative_transfer_N_groups;
-  const double min_freq = enzo_config->method_radiative_transfer_min_freq;
-  const double max_freq = enzo_config->method_radiative_transfer_max_freq;
-  const std::string flux_function = enzo_config->method_radiative_transfer_flux_function;
-  const double clight = enzo_config->method_radiative_transfer_clight;
+  const int N_groups = enzo_config->method_radiation_transport_N_groups;
+  const double min_freq = enzo_config->method_radiation_transport_min_freq;
+  const double max_freq = enzo_config->method_radiation_transport_max_freq;
+  const std::string flux_function = enzo_config->method_radiation_transport_flux_function;
+  const double clight = enzo_config->method_radiation_transport_clight;
 
 
   // implement for only one frequency bin for now
   // Will need to call these functions in a loop over all the frequency groups
   // Need to get a frequency spectrum for the photons somehow (which SED???)
  
-  this->inject_photons(block);
   this->transport_photons(block, clight);
-  this->thermochemistry(block); 
 
 }

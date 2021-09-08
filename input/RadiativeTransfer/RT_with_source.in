@@ -1,0 +1,222 @@
+#
+#
+#  Very simple feedback test problem
+#
+#     Drops a star particle of desired mass
+#     into a unigrid, uniform domain. Commented-out
+#     Adapt blocks below can be used to add in AMR
+#     (static, nested grids or adaptive).
+#
+
+#Adapt {
+#     list = ["mass"];
+#     mass {
+#         field_list = [ "density" ];
+#         max_coarsen = 1.0E-4; # 1.0E4 solar masses
+#         min_refine  = 1.0E-4;  # 1.0E4 solar masses
+#         type = "mass";
+#
+#         mass_type = "baryon"; # options are currently dark and baryon
+#     };
+#     max_level = 1;
+#}
+
+Boundary {
+  type = "outflow";
+}
+
+Domain {
+    lower = [ 0.0, 0.0, 0.0];
+    upper = [ 1.0, 1.0, 1.0];
+}
+
+Mesh {
+  root_blocks = [4, 4, 4];
+  root_rank   = 3;
+  root_size   = [64, 64, 64]; # given length units, res = 1024 pc / 64 = 16 pc
+}
+
+#Adapt {
+#    max_level = 2;
+#    list = ["mask"];
+#    mask {
+#        type = "mask";
+ #       value = [2.0, (x > 0.45) && (x < 0.55) && (y > 0.45) && (y < 0.55) && (z > 0.45) && (z < 0.55), 0.0];
+#                 1.0, (x > 0.20) && (x < 0.80) && (y > 0.20) && (y < 0.8) && (z > 0.2) && (z < 0.8), .0];
+#        value = [ 1.0, ((x - 0.5)*(x - 0.5) + (y - 0.5)*(y - 0.5) + (z - 0.5)*(z - 0.5)) < 0.25, 0];
+#        value = [1.0, x + y + z < 0.75, 0.0];
+#+ (z - 0.5)*(z - 0.5)) < 0.25, 0];       
+#        value = [1.0, y < 0.75,
+#                 1.0, y > 0.25,
+#                 0.0];
+#    };
+#}
+
+
+Field {
+  alignment   = 8;
+  gamma       = 1.40;
+  ghost_depth = 4;
+
+  list = ["density", "internal_energy", "total_energy",
+          "metal_density", "velocity_x", "velocity_y", "velocity_z",
+          "pressure", "temperature", "photon_density", "flux_x", "flux_y", "flux_z"];
+
+}
+
+Group {
+  list = ["color","derived"];
+  
+  color {
+    field_list = ["metal_density"];
+  }
+  derived {
+    field_list = ["temperature","pressure"];
+  }
+
+}
+
+Method {
+  list = [ "radiation_injection", "radiation_transport" ];
+  radiation_injection {
+      clight = 29979245800.0;
+  }
+ 
+  radiation_transport {
+      N_groups = 1;
+      min_freq = 0.0;
+      max_freq = 0.0;
+      flux_function = "GLF";
+      clight = 29979245800.0;
+  }
+}
+
+Particle {
+    list = ["star"];
+
+    star {
+        attributes = [ "x", "double",
+                       "y", "double",
+                       "z", "double",
+                       "vx", "double",
+                       "vy", "double",
+                       "vz", "double",
+                       "ax", "double",
+                       "ay", "double",
+                       "az", "double",
+                       "id", "double",
+                       "mass", "double",
+                       "is_local", "double",
+                       "creation_time", "double",
+                       "lifetime", "double",
+                       "metal_fraction", "double" ];
+        position = [ "x", "y", "z" ];
+        velocity = [ "vx", "vy", "vz" ];
+        groups = ["has_mass"];
+    }
+}
+
+
+#Units {
+#    length = 3.1596E21; ## 1024 pc  ### 1.5798E21; # 512 pc #### 7.899E20;    # 256 pc
+#    time   = 3.15576E13; # 1 Myr
+#    mass   = 1.9891E36;
+#  }
+
+Initial {
+
+  list = ["value", "feedback_test"]; # name of IC problem
+
+  value {
+    photon_density = 1e-16;
+    flux_x = 1e-16;
+    flux_y = 1e-16;
+    flux_z = 1e-16; 
+  }
+  feedback_test {
+    density    = 1.2E-24;             # uniform mass density for ICs
+    position   = [0.5, 0.5, 0.5]; # off-center to avoid block boundary
+    temperature = 100.0;              # in K
+                                      #   particles are still local to each block and are kicked away from
+                                      #   boundaries if NxN feedback zone crosses a block boundary
+    star_mass  = 1000.0;                # particle mass in Msun
+  }
+
+#
+# use this to test with some KE on the grid to make (add 'value' to list above)
+# sure momentum and KE energy injection work in a flow
+# value {
+#    velocity_x = 0.1;
+#  }
+
+}
+
+Output {
+     list = [ "N", "Fx", "Fy", "Fz"  ];
+     N {
+         dir = ["ISOTROPIC_SOURCE"];
+         field_list = [ "photon_density" ];
+         name = [ "RT_N-%04d.png", "cycle" ];
+         image_size = [512,512];
+         image_log = false;
+         schedule {
+             step = 10;
+             var = "cycle";
+         }
+         type = "image";
+     }
+     Fx {
+         dir = ["ISOTROPIC_SOURCE"];
+         field_list = [ "flux_x" ];
+         name = [ "RT_Fx-%04d.png", "cycle" ];
+         image_size = [512,512];
+         image_log = false;
+
+         schedule {
+             step = 10;
+             var = "cycle";
+         }
+         type = "image";
+     }
+     Fy {
+         dir = ["ISOTROPIC_SOURCE"];
+         field_list = [ "flux_y" ];
+         name = [ "RT_Fy-%04d.png", "cycle" ];
+         image_size = [512,512];
+         image_log = false;
+
+         schedule {
+             step = 10;
+             var = "cycle";
+         }
+         type = "image";
+     }
+     Fz {
+         dir = ["ISOTROPIC_SOURCE"];
+         field_list = [ "flux_z" ];
+         name = [ "RT_Fz-%04d.png", "cycle" ];
+         image_size = [512,512];
+         image_log = false;
+
+         schedule {
+             step = 10;
+             var = "cycle";
+         }
+         type = "image";
+    };
+    hdf5 {
+    field_list = [ "photon_density", "flux_x", "flux_y", "flux_z" ];
+        dir = ["ISOTROPIC_SOURCE"];
+        name = [ "data-%03d.h5", "count" ];
+        schedule {
+            step = 10;
+            var = "cycle";
+        };
+        type = "data";
+    };
+
+}
+
+Stopping {
+  cycle = 300;
+}

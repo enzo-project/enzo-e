@@ -311,12 +311,14 @@ public: // interface
       method_star_maker_efficiency(0.01),            // star maker efficiency
       method_star_maker_minimum_star_mass(1.0E4),    // minium star particle mass in solar masses
       method_star_maker_maximum_star_mass(1.0E4),    // maximum star particle mass in solar masses
-      // EnzoMethodRadiativeTransfer
-      method_radiative_transfer_N_groups(1), // # of frequency bins
-      method_radiative_transfer_min_freq(0.0), // lower bound of freq. bins
-      method_radiative_transfer_max_freq(0.0), // upper bound of freq. bins
-      method_radiative_transfer_flux_function(""), // which flux function to use
-      method_radiative_transfer_clight(3.0E11), // reduced speed of light value to use
+      // EnzoMethodRadiationInjection
+      method_radiation_injection_clight(29979245800.0),
+      // EnzoMethodRadiationTransport
+      method_radiation_transport_N_groups(1), // # of frequency bins
+      method_radiation_transport_min_freq(0.0), // lower bound of freq. bins
+      method_radiation_transport_max_freq(0.0), // upper bound of freq. bins
+      method_radiation_transport_flux_function(""), // which flux function to use
+      method_radiation_transport_clight(29979245800.0), // reduced speed of light value to use
       // EnzoMethodNull
       method_null_dt(0.0),
       // EnzoMethodTurbulence
@@ -643,13 +645,17 @@ public: // attributes
   bool                      method_feedback_shift_cell_center;
   bool                      method_feedback_use_ionization_feedback;
 
-  /// EnzoMethodRadiativeTransfer
+  /// EnzoMethodRadiationInjection
   
-  int                       method_radiative_transfer_N_groups;
-  double                    method_radiative_transfer_min_freq;
-  double                    method_radiative_transfer_max_freq;
-  std::string               method_radiative_transfer_flux_function;
-  double                    method_radiative_transfer_clight;
+  double                    method_radiation_injection_clight;
+
+  /// EnzoMethodRadiationTransport
+  
+  int                       method_radiation_transport_N_groups;
+  double                    method_radiation_transport_min_freq;
+  double                    method_radiation_transport_max_freq;
+  std::string               method_radiation_transport_flux_function;
+  double                    method_radiation_transport_clight;
 
   /// EnzoMethodStarMaker
 

@@ -1,35 +1,35 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoMethodRadiativeTransfer.hpp
+/// @file     enzo_EnzoMethodRadiationTransport.hpp
 /// @author   William Hicks (whicks@ucsd.edu) 
 /// @date     Mon Aug  16 16:14:38 PDT 2021
-/// @brief    [\ref Enzo] Declaration of EnzoMethodRadiativeTransfer
+/// @brief    [\ref Enzo] Declaration of EnzoMethodRadiationTransport
 ///           Radiative transfer using M1 closure method as implemented
 ///           in the RAMSES-RT code
 
-#ifndef ENZO_ENZO_METHOD_RADIATIVE_TRANSFER
-#define ENZO_ENZO_METHOD_RADIATIVE_TRANSFER
+#ifndef ENZO_ENZO_METHOD_RADIATION_TRANSPORT
+#define ENZO_ENZO_METHOD_RADIATION_TRANSPORT
 
-class EnzoMethodRadiativeTransfer : public Method {
+class EnzoMethodRadiationTransport : public Method {
 
-  /// @class    EnzoMethodRadiativeTransfer 
+  /// @class    EnzoMethodRadiationTransport 
   /// @ingroup  Enzo
   ///
-  /// @brief    [\ref Enzo] Declaration of EnzoMethodRadiativeTransfer
+  /// @brief    [\ref Enzo] Declaration of EnzoMethodRadiationTransport
   ///           Radiative transfer using M1 closure method as implemented
   ///           in the RAMSES-RT code
 
 public: // interface
 
-  /// Create a new EnzoMethodRadiativeTransfer object
+  /// Create a new EnzoMethodRadiationTransport object
 
-  EnzoMethodRadiativeTransfer();
+  EnzoMethodRadiationTransport();
 
   /// Charm++ PUP::able declarations
-  PUPable_decl(EnzoMethodRadiativeTransfer );
+  PUPable_decl(EnzoMethodRadiationTransport );
   
   /// Charm++ PUP::able migration constructor
-  EnzoMethodRadiativeTransfer  (CkMigrateMessage *m)
+  EnzoMethodRadiationTransport  (CkMigrateMessage *m)
     : Method (m)
   { }
 
@@ -40,16 +40,13 @@ public: // interface
   virtual void compute( Block * block) throw();
 
   virtual std::string name () throw () 
-  { return "radiative_transfer"; }
+  { return "radiation_transport"; }
 
   /// Compute maximum timestep for this method
   virtual double timestep ( Block * block ) const throw();
 
 protected: // methods
 
-
-  // -------- INJECTION STEP -----------
-  void inject_photons (Block * block) throw();
 
   //--------- TRANSPORT STEP --------
 
@@ -77,15 +74,10 @@ protected: // methods
                        int i, int idx, int idy, int idz) throw();
 
   void transport_photons (Block * block, double clight) throw();
-  // --------- CHEMISTRY STEP ---------
-
-  void thermochemistry (Block * block) throw(); 
-
-
 
   void compute_ (Block * block) throw();
 protected: // attributes
 
 };
 
-#endif /* ENZO_ENZO_METHOD_RADIATIVE_TRANSFER_HPP */
+#endif /* ENZO_ENZO_METHOD_RADIATION_TRANSPORT_HPP */

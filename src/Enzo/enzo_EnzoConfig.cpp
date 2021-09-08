@@ -206,12 +206,14 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_ke_fraction(0.0),
   method_feedback_use_ionization_feedback(false),
   method_feedback_time_first_sn(-1), // in Myr
-  // EnzoMethodRadiativeTransfer
-  method_radiative_transfer_N_groups(1), // # of frequency bins
-  method_radiative_transfer_min_freq(0.0), // lower bound of freq. bins
-  method_radiative_transfer_max_freq(0.0), // upper bound of freq. bins
-  method_radiative_transfer_flux_function("GLF"), // which flux function to use
-  method_radiative_transfer_clight(3.0E11), // reduced speed of light value to use 
+  // EnzoMethodRadiationInjection
+  method_radiation_injection_clight(29979245800.0),
+  // EnzoMethodRadiationTransport
+  method_radiation_transport_N_groups(1), // # of frequency bins
+  method_radiation_transport_min_freq(0.0), // lower bound of freq. bins
+  method_radiation_transport_max_freq(0.0), // upper bound of freq. bins
+  method_radiation_transport_flux_function("GLF"), // which flux function to use
+  method_radiation_transport_clight(29979245800.0), // reduced speed of light value to use 
   // EnzoMethodStarMaker,
   method_star_maker_type(""),                              // star maker type to use
   method_star_maker_use_density_threshold(true),           // check above density threshold before SF
@@ -535,11 +537,13 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_feedback_use_ionization_feedback;
   p | method_feedback_time_first_sn;
 
-  p | method_radiative_transfer_N_groups;
-  p | method_radiative_transfer_min_freq;
-  p | method_radiative_transfer_max_freq;
-  p | method_radiative_transfer_flux_function;
-  p | method_radiative_transfer_clight;
+  p | method_radiation_injection_clight;
+
+  p | method_radiation_transport_N_groups;
+  p | method_radiation_transport_min_freq;
+  p | method_radiation_transport_max_freq;
+  p | method_radiation_transport_flux_function;
+  p | method_radiation_transport_clight;
 
   p | method_star_maker_type;
   p | method_star_maker_use_density_threshold;
@@ -1128,21 +1132,24 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_feedback_use_ionization_feedback = p->value_logical
     ("Method:feedback:use_ionization_feedback", false);
+ 
+  method_radiation_injection_clight = p->value_float
+    ("Method:radiation_injection:clight",29979245800.0);
 
-  method_radiative_transfer_N_groups = p->value_integer
-    ("Method:radiative_transfer:N_groups",1);
+  method_radiation_transport_N_groups = p->value_integer
+    ("Method:radiation_transport:N_groups",1);
 
-  method_radiative_transfer_min_freq = p->value_float
-    ("Method:radiative_transfer:min_freq",0.0);
+  method_radiation_transport_min_freq = p->value_float
+    ("Method:radiation_transport:min_freq",0.0);
 
-  method_radiative_transfer_max_freq = p->value_float
-    ("Method:radiative_transfer:max_freq",0.0);
+  method_radiation_transport_max_freq = p->value_float
+    ("Method:radiation_transport:max_freq",0.0);
 
-  method_radiative_transfer_flux_function = p->value_string
-    ("Method:radiative_transfer:flux_function","GLF");
+  method_radiation_transport_flux_function = p->value_string
+    ("Method:radiation_transport:flux_function","GLF");
 
-  method_radiative_transfer_clight = p->value_float
-    ("Method:radiative_transfer:clight",3.0E11);
+  method_radiation_transport_clight = p->value_float
+    ("Method:radiation_transport:clight",29979245800.0);
 
   method_star_maker_type = p->value_string
     ("Method:star_maker:type","stochastic");
