@@ -102,10 +102,10 @@ C
       
       if (Ndims.eq.3) then
          WeightNorm = 
-     *        1.d0/sqrt(1.d0-2.d0*SolWeight+3.d0*SolWeight**2)
+     &        1.d0/sqrt(1.d0-2.d0*SolWeight+3.d0*SolWeight**2)
       else
          WeightNorm = 
-     *        1.d0/sqrt(1.d0-2.d0*SolWeight+2.d0*SolWeight**2)
+     &        1.d0/sqrt(1.d0-2.d0*SolWeight+2.d0*SolWeight**2)
       endif
 
       WeightNorm = WeightNorm * 2.d0 / sqrt(dble(NModes))
@@ -278,7 +278,7 @@ C     **********************************************************************
          do i = 1, 3
             do n = 1, 2
                OUPhase(n,i,j) = OUPhase(n,i,j)*damping +
-     *              OUVar*dfact*RandomPhase()
+     &              OUVar*dfact*RandomPhase()
             enddo
          enddo
       enddo
@@ -289,11 +289,9 @@ c     3D Turbulent forcing source term
 c     Updates res:    res = res + source*dt
 c     by DK
 c     INPUT:
-c     nc          - number of components
 c     ni, nj, nk  - local domain dimensions
 c     w           - flow field
 c     grid        - grid coordinates
-c     jac         - jacobian
 c     temperature - temperature field
 c     wk          - work array 3*ni*nj*nk
 c     dt          - time step
@@ -303,8 +301,10 @@ c     res         - residual (updated)
 c     turbAcc     - injected turbulent accelerations and energy (updated)
 c***********************************************************************
       subroutine turbForceOU
-     &     (nc, ni, nj, nk,
-     &     w, grid, jac, temperature, wk, dt, res,
+     &     (ni, nj, nk,
+     &     field_density,
+     &     grid,
+     &     wk, dt,
      &     turbAcc, update_sol,
      &     cello_apply_cooling,
      &     cello_apply_forcing,
@@ -327,15 +327,17 @@ c***********************************************************************
       integer :: cello_olap
       real*8 :: r_gv(4)
       
-      integer :: nc, ni, nj, nk, i, j, k, m, dir
+      integer :: ni, nj, nk, i, j, k, m, dir
       integer :: ol2, ol2k, cooling_term
-      real*8 :: grid(3,ni,nj,nk), w(nc,ni,nj,nk), res(nc,ni,nj,nk)
-      real*8 :: jac(ni,nj,nk), temperature(ni,nj,nk), wk(3,ni,nj,nk) 
+      real*8 :: grid(3,ni,nj,nk)
+      real*8 :: field_density(ni,nj,nk)
+      real*8 :: wk(3,ni,nj,nk) 
       real*8 :: turbAcc(4, ni,nj,nk), gamma
       real*8 :: deTurb
       real*8 :: rho, dt, dumx, acc(3), da(3), kr, de
       logical :: update_sol, apply_injection_rate
 
+      print*, 'cello_apply_forcing',cello_apply_forcing
       if(cello_apply_forcing .eq. 0) return 
 
       apply_injection_rate = (cello_apply_injection_rate .ne. 0)
@@ -375,9 +377,9 @@ c***********************************************************************
                acc = acc*WeightNorm
 
                if ((k.ge.1+ol2k).and.(k.le.nk-ol2k).and.
-     *              (j.ge.1+ol2).and.(j.le.nj-ol2).and.
-     *              (i.ge.1+ol2).and.(i.le.ni-ol2)) then
-                  rho = w(1,i,j,k) 
+     &              (j.ge.1+ol2).and.(j.le.nj-ol2).and.
+     &              (i.ge.1+ol2).and.(i.le.ni-ol2)) then
+                  rho = field_density(i,j,k) 
                   r_gv(1:3) = r_gv(1:3) + acc*rho
                   r_gv(4) = r_gv(4) + rho
                endif
@@ -387,11 +389,19 @@ c***********************************************************************
          enddo
       enddo
       
+      print*, 'force out work(1:3) = ',
+     &     wk(1,1,1,1),wk(2,1,1,1),wk(3,1,1,1)
+      print*, 'r_gv out = ',r_gv(1),r_gv(2),r_gv(3),r_gv(4)
       end subroutine
 C======================================================================
+c     jac         - jacobian
       subroutine turbForceShift
-     &     (nc, ni, nj, nk,
-     &     w, grid, jac, temperature, wk, dt, res,
+     &     (ni, nj, nk,
+     &     field_density,
+     &     field_momentum_x,
+     &     field_momentum_y,
+     &     field_momentum_z,
+     &     field_jacobian, wk,
      &     turbAcc, update_sol,
      &     cello_apply_injection_rate,
      &     cello_olap,
@@ -402,11 +412,15 @@ C======================================================================
       implicit none
       include 'turbforcingOU.h'
 
-      integer :: nc, ni, nj, nk, i, j, k
+      integer :: ni, nj, nk, i, j, k
       integer :: cello_apply_injection_rate
       integer :: cello_olap
-      real*8 :: grid(3,ni,nj,nk), w(nc,ni,nj,nk), res(nc,ni,nj,nk), dt
-      real*8 :: jac(ni,nj,nk), temperature(ni,nj,nk), wk(3,ni,nj,nk) 
+      real*8 :: field_density(ni,nj,nk)
+      real*8 :: field_momentum_x(ni,nj,nk)
+      real*8 :: field_momentum_y(ni,nj,nk)
+      real*8 :: field_momentum_z(ni,nj,nk)
+      real*8 :: field_jacobian(ni,nj,nk)
+      real*8 :: wk(3,ni,nj,nk) 
       real*8 :: turbAcc(4, ni,nj,nk)
       real*8 :: cello_injection_rate
       logical :: update_sol, apply_injection_rate
@@ -419,8 +433,12 @@ C     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 C     force total impulse to zero using reduction r_gv
 C     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-      da = r_gv(1:3)/r_gv(4)
+      print*, 'turbForceShift'
 
+      da = r_gv(1:3)/r_gv(4)
+      print*, 'r_gv = ',r_gv(1),r_gv(2),r_gv(3),r_gv(4)
+      print*, 'shift in work(1:3) = ',
+     &     wk(1,1,1,1),wk(2,1,1,1),wk(3,1,1,1)
       do k=1,nk
          do j=1,nj
             do i=1,ni
@@ -448,19 +466,34 @@ C     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
             do j=1+ol2,nj-ol2
                do i=1+ol2,ni-ol2
                   acc = wk(1:3,i,j,k)
-                  r_av(1) = r_av(1) + 0.5d0 * 
-     &                 jac(i,j,k) * w(1,i,j,k) * dot_product(acc, acc)
+                  r_av(1) = r_av(1) + 0.5d0 * field_jacobian(i,j,k) *
+     &                 field_density(i,j,k) * dot_product(acc, acc)
                   r_av(2) = r_av(2) +
-     &                 jac(i,j,k) * dot_product(w(2:4,i,j,k), acc)
+     &                 field_jacobian(i,j,k) *
+     &                 (field_momentum_x(i,j,k)*wk(1,i,j,k) +
+     &                 field_momentum_y(i,j,k)*wk(2,i,j,k) +
+     &                 field_momentum_z(i,j,k)*wk(3,i,j,k))
                enddo
             enddo
          enddo
       endif
+      print*, 'shift out work(1:3) = ',
+     &     wk(1,1,1,1),wk(2,1,1,1),wk(3,1,1,1)
       end subroutine
 C======================================================================
       subroutine turbForceUpdate
-     &     (nc, ni, nj, nk,
-     &     w, grid, jac, temperature, wk, dt, res,
+     &     (ni, nj, nk,
+     &     field_density,
+     &     field_momentum_x,
+     &     field_momentum_y,
+     &     field_momentum_z,
+     &     field_energy,
+     &     resid_density,
+     &     resid_momentum_x,
+     &     resid_momentum_y,
+     &     resid_momentum_z,
+     &     resid_energy,
+     &     field_temperature, wk, dt,
      &     turbAcc, update_sol,
      &     cello_apply_injection_rate,
      &     cello_injection_rate,
@@ -474,16 +507,26 @@ C======================================================================
      &     )
       implicit none
       include 'turbforcingOU.h'
-      
-      integer :: nc, ni, nj, nk, i, j, k
+
+      integer :: ni, nj, nk, i, j, k
+      real*8 :: field_density(ni,nj,nk)
+      real*8 :: field_momentum_x(ni,nj,nk)
+      real*8 :: field_momentum_y(ni,nj,nk)
+      real*8 :: field_momentum_z(ni,nj,nk)
+      real*8 :: field_energy(ni,nj,nk)
       integer :: cello_apply_injection_rate
       integer :: cello_cooling_term
       integer :: cello_apply_cooling
       real*8 :: cello_gamma
       real*8 :: cello_hc_alpha
       real*8 :: cello_hc_sigma
-      real*8 :: grid(3,ni,nj,nk), w(nc,ni,nj,nk), res(nc,ni,nj,nk), dt
-      real*8 :: jac(ni,nj,nk), temperature(ni,nj,nk), wk(3,ni,nj,nk) 
+      real*8 :: resid_density(ni,nj,nk)
+      real*8 :: resid_momentum_x(ni,nj,nk)
+      real*8 :: resid_momentum_y(ni,nj,nk)
+      real*8 :: resid_momentum_z(ni,nj,nk)
+      real*8 :: resid_energy(ni,nj,nk)
+      real*8 :: dt
+      real*8 :: field_temperature(ni,nj,nk), wk(3,ni,nj,nk) 
       real*8 :: turbAcc(4, ni,nj,nk)
       real*8 :: cello_injection_rate
       real*8 :: cello_totemp
@@ -494,6 +537,10 @@ C======================================================================
       real*8 :: gm1, hc_alpha, hc_sigma, totemp
       integer nd1, cooling_term
       
+      print*, 'turbForceUpdate'
+      print*, 'update in work(1:3) = ',
+     &     wk(1,1,1,1),wk(2,1,1,1),wk(3,1,1,1)
+      
       apply_injection_rate = (cello_apply_injection_rate .ne. 0)
 
       if (apply_injection_rate) then
@@ -502,7 +549,8 @@ C======================================================================
       else
          Acorr = 1.d0
       endif
-
+      print*, 'Acorr = ',Acorr
+      call flush(6)
       gamma    = cello_gamma
 
       E0 = 1.d0 / (gamma - 1.d0)
@@ -531,23 +579,42 @@ C     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
                acc = Acorr * wk(1:3,i,j,k)
                du = acc*dt
 
-               rho = w(1,i,j,k)
-               deTurb = dot_product(du(1:Ndims),du(1:Ndims))*0.5d0*rho + 
-     *              dot_product(w(2:nd1,i,j,k), du(1:Ndims))
-               de = addCooling
-     *              (deTurb, rho, w(5,i,j,k), temperature(i,j,k))
-               res(2:nd1,i,j,k) = res(2:nd1,i,j,k) + du(1:Ndims)*rho
-               res(5,i,j,k) = res(5,i,j,k) + de
+               rho = field_density(i,j,k)
+               if (Ndims.eq.2) then
+                  deTurb = dot_product(du(1:Ndims),du(1:Ndims))*
+     &                 0.5d0*rho + 
+     &                 (field_momentum_x(i,j,k) * du(1) +
+     &                 field_momentum_y(i,j,k) * du(2))
+               else if (Ndims.eq.3) then
+                  deTurb = dot_product(du(1:Ndims),du(1:Ndims))*
+     &                 0.5d0*rho + 
+     &                 (field_momentum_x(i,j,k) * du(1) +
+     &                 field_momentum_y(i,j,k) * du(2) +
+     &                 field_momentum_z(i,j,k) * du(3))
+               end if
+               de = addCooling (deTurb, rho,
+     &              field_energy(i,j,k), field_temperature(i,j,k))
+               resid_momentum_x(i,j,k) = resid_momentum_x(i,j,k) +
+     &              du(1)*rho
+               resid_momentum_y(i,j,k) = resid_momentum_y(i,j,k) +
+     &              du(2)*rho
+               resid_momentum_z(i,j,k) = resid_momentum_z(i,j,k) +
+     &              du(3)*rho
+               resid_energy(i,j,k) = resid_energy(i,j,k) + de
 
                turbAcc(1:Ndims,i,j,k) =
-     *              turbAcc(1:Ndims,i,j,k) + acc(1:Ndims)
+     &              turbAcc(1:Ndims,i,j,k) + acc(1:Ndims)
                turbAcc(4,i,j,k) = turbAcc(4,i,j,k) + de
             enddo
          enddo
       enddo
       
       if(update_sol) then
-         w = w + res
+         field_density = field_density + resid_density
+         field_momentum_x = field_momentum_x + resid_momentum_x
+         field_momentum_y = field_momentum_y + resid_momentum_y
+         field_momentum_z = field_momentum_z + resid_momentum_z
+         field_energy = field_energy + resid_energy
       endif
 
       contains
@@ -575,8 +642,8 @@ c     Empiric cooling formula
          T = temp*2.d3          ! Convert to SI
 
          addCooling = deTurb - dt * ngas * rho*
-     *        (1.d7*exp(-1.184d5/(T+1.d3)) + 1.4d-2*sqrt(T)*exp(-92/T))*
-     *        1.d-5             ! Convert from SI
+     &        (1.d7*exp(-1.184d5/(T+1.d3)) + 1.4d-2*sqrt(T)*exp(-92/T))*
+     &        1.d-5             ! Convert from SI
       case (2)
 c     Stiff version of case 1 => use ODE solver
          X = gm1*totemp/rho
@@ -589,7 +656,7 @@ c     Stiff version of case 1 => use ODE solver
          tm1 = dt
          iState = 1
  002     CALL DLSODE (cooling_F2, 1, Y, tm0, tm1, 1, 1.D-8, 1.D-10,
-     *        iTask, iState, iOpt, RW, NRW, IW, NIW, dummy, 22) ! 21 TO USE JAC; 22 - NO JAC
+     &        iTask, iState, iOpt, RW, NRW, IW, NIW, dummy, 22) ! 21 TO USE JAC; 22 - NO JAC
 
          IF(iState .EQ. -1) THEN
             iState = 2
@@ -598,8 +665,8 @@ c     Stiff version of case 1 => use ODE solver
          addCooling = Y(1) - E
 !     T = temp*2.d3 ! Convert to SI
 !     X = deTurb - dt * ngas * rho*
-!     *   (1.d7*exp(-1.184d5/(T+1.d3)) + 1.4d-2*sqrt(T)*exp(-92/T))*
-!     *   1.d-5      ! Convert from SI
+!     &   (1.d7*exp(-1.184d5/(T+1.d3)) + 1.4d-2*sqrt(T)*exp(-92/T))*
+!     &   1.d-5      ! Convert from SI
 !     print *, IW(11), addCooling, X
       case (3)
 c     Linear cooling (as in W.Schmidt & P.Grete 2019)
@@ -618,7 +685,7 @@ c     Stiff version of case 3 => use ODE solver (for testing)
          tm1 = dt
          iState = 1
  040     CALL DLSODE (cooling_F40, 1, Y, tm0, tm1, 1, 1.D-8, 1.D-10,
-     *        iTask, iState, iOpt, RW, NRW, IW, NIW, dummy, 22) ! 21 TO USE JAC; 22 - NO JAC
+     &        iTask, iState, iOpt, RW, NRW, IW, NIW, dummy, 22) ! 21 TO USE JAC; 22 - NO JAC
 
          IF(iState .EQ. -1) THEN
             iState = 2
@@ -626,7 +693,7 @@ c     Stiff version of case 3 => use ODE solver (for testing)
          ENDIF
          addCooling = Y(1) - E 
 !     print *, IW(11), addCooling,
-!     *  (E0 +  deTurb/(dt * hc_alpha) - E)*(1.0 - exp(-hc_alpha * dt))
+!     &  (E0 +  deTurb/(dt * hc_alpha) - E)*(1.0 - exp(-hc_alpha * dt))
       case (5)
 c     Stefan's law (as in D.Porter 2002)
          T2 = temp * temp
@@ -643,7 +710,7 @@ c     Stiff version of case 5 => use ODE solver
          tm1 = dt
          iState = 1
  006     CALL DLSODE (cooling_F6, 1, Y, tm0, tm1, 1, 1.D-8, 1.D-10,
-     *        iTask, iState, iOpt, RW, NRW, IW, NIW, dummy, 22) ! 21 TO USE JAC; 22 - NO JAC
+     &        iTask, iState, iOpt, RW, NRW, IW, NIW, dummy, 22) ! 21 TO USE JAC; 22 - NO JAC
 
          IF(iState .EQ. -1) THEN
             iState = 2
@@ -651,7 +718,7 @@ c     Stiff version of case 5 => use ODE solver
          ENDIF
          addCooling = Y(1) - E
 !     print *, IW(11), addCooling
-!     *  deTurb - dt * hc_sigma * (temp ** 4)
+!     &  deTurb - dt * hc_sigma * (temp ** 4)
       case default
          stop "unsupported cooling term"
       end select
@@ -674,8 +741,8 @@ C     **********************************************************************
       T = temp*2.d3             ! Convert to SI
 
       Ydot(1) = deTurbDot - ngas * rho*
-     *     (1.d7*exp(-1.184d5/(T+1.d3)) + 1.4d-2*sqrt(T)*exp(-92/T))*
-     *     1.d-5                ! Convert from SI
+     &     (1.d7*exp(-1.184d5/(T+1.d3)) + 1.4d-2*sqrt(T)*exp(-92/T))*
+     &     1.d-5                ! Convert from SI
 
       end subroutine
 C     **********************************************************************

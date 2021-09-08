@@ -65,9 +65,9 @@ extern "C" void FORTRAN_NAME(cello_init_turbulence_ou)
    double * sol_weight);
 
 extern "C" void FORTRAN_NAME(turbforceou)
-  (int * nc, int * ni, int * nj, int * nk,
-   double * w, double * grid, double * jac, double * temperature,
-   double * wk, double * dt, double * res,
+  (int * ni, int * nj, int * nk,
+   double * field_density, double * grid,
+   double * wk, double * dt,
    double * turbAcc, int * cello_update_sol,
    int * cello_apply_cooling,
    int * cello_apply_forcing,
@@ -78,6 +78,47 @@ extern "C" void FORTRAN_NAME(turbforceou)
    int * olap,
    double * r_gv
    );
+ 
+extern "C" void FORTRAN_NAME(turbforceshift)
+  (int * ni, int * nj, int * nk,
+   double * field_density,
+   double * field_momentum_x,
+   double * field_momentum_y,
+   double * field_momentum_z,
+   double * field_jacobian,
+   double * wk,
+   double * turbAcc, int * cello_update_sol,
+   int * cello_apply_injection_rate,
+   int * cello_olap,
+   double * cello_injection_rate,
+   double * r_gv,
+   double * r_av);
+ 
+extern "C" void FORTRAN_NAME(turbforceupdate)
+  (int * ni, int * nj, int * nk,
+   double * field_density,
+   double * field_momentum_x,
+   double * field_momentum_y,
+   double * field_momentum_z,
+   double * field_energy,
+   double * resid_density,
+   double * resid_momentum_x,
+   double * resid_momentum_y,
+   double * resid_momentum_z,
+   double * resid_energy,
+   double * field_temperature,
+   double * wk, double * dt, double * res,
+   double * turbAcc,
+   int * cello_update_sol,
+   int * cello_apply_injection_rate,
+   double * cello_injection_rate,
+   int * cello_cooling_term,
+   int * cello_apply_cooling,
+   double * cello_gamma,
+   double * cello_hc_alpha,
+   double * cello_hc_sigma,
+   double * cello_totemp,
+   double * r_av );
  
 extern "C" void FORTRAN_NAME(calc_dt_ppml)
   (int *idim, int *jdim, int *kdim,

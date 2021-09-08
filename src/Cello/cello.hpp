@@ -681,6 +681,7 @@ namespace cello {
   Grouping *      field_groups();
   /// Return the field array given field index
   cello_float *   field (Block *, int);
+  cello_float *   field (Block *, std::string);
   /// Return a pointer to the ParticledDescr object defining particles on Blocks
   ParticleDescr * particle_descr();
   /// Return a pointer to the Groupings object defining particle groups

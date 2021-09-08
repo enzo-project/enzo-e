@@ -1,5 +1,14 @@
 include "input/method_turbulence3d.incl"
 
+Field {
+   list += [
+        "acceleration_x",
+        "acceleration_y",
+        "acceleration_z",
+        "work_1",
+        "work_2",
+        "work_3"];
+ }
  Initial {
      list = ["value"];
      turbulence {

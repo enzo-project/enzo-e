@@ -293,6 +293,12 @@ namespace cello {
   }
 
   //---------------------------------------------------------------------- 
+  cello_float *   field (Block * block, std::string field_name)
+  {
+    return (cello_float *) block->data()->field().values(field_name);
+  }
+
+  //---------------------------------------------------------------------- 
 
   Monitor * monitor()
   {

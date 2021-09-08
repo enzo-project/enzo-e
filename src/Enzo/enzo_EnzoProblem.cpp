@@ -552,6 +552,8 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "turbulence_ou") {
 
+    CkPrintf ("enzo_config->method_turbulence_apply_forcing %d\n",
+              enzo_config->method_turbulence_apply_forcing);
     method = new EnzoMethodTurbulenceOU 
       (enzo_config->field_gamma,
        enzo_config->domain_lower,
