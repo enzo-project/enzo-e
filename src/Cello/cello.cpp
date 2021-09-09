@@ -287,18 +287,6 @@ namespace cello {
   { return field_descr()->groups(); }
     
   //---------------------------------------------------------------------- 
-  cello_float *   field (Block * block, int id_field)
-  {
-    return (cello_float *) block->data()->field().values(id_field);
-  }
-
-  //---------------------------------------------------------------------- 
-  cello_float *   field (Block * block, std::string field_name)
-  {
-    return (cello_float *) block->data()->field().values(field_name);
-  }
-
-  //---------------------------------------------------------------------- 
 
   Monitor * monitor()
   {

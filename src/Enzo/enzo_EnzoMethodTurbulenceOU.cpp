@@ -125,7 +125,7 @@ void EnzoMethodTurbulenceOU::compute ( Block * block) throw()
     double r_gv[4] = {0.0,0.0,0.0,0.0};
 
     Field field = block->data()->field();
-    double * field_density = cello::field(block,"density");
+    double * field_density = (double *)field.values("density");
    
     double xm,ym,zm;
     double xp,yp,zp;
@@ -138,9 +138,9 @@ void EnzoMethodTurbulenceOU::compute ( Block * block) throw()
     field.ghost_depth(0,&gx,&gy,&gz);
 
     // Restore work array
-    double * field_work_1 =  cello::field(block,"work_1");
-    double * field_work_2 =  cello::field(block,"work_2");
-    double * field_work_3 =  cello::field(block,"work_3");
+    double * field_work_1 =  (double *)field.values("work_1");
+    double * field_work_2 =  (double *)field.values("work_2");
+    double * field_work_3 =  (double *)field.values("work_3");
     const int m = mx*my*mz;
     double * array_work = new double [3*m];
     std::copy_n (field_work_1,m,array_work+0*m);
@@ -255,11 +255,12 @@ void EnzoMethodTurbulenceOU::compute_shift
     CkPrintf ("r_gv = %g %g %g %g\n",r_gv[0],r_gv[1],r_gv[2],r_gv[3]);
     double r_av[2] = {0.0,0.0};
 
-    double * field_density     = cello::field(enzo_block,"density");
-    double * field_momentum_x  = cello::field(enzo_block,"velocity_x");
-    double * field_momentum_y  = cello::field(enzo_block,"velocity_y");
-    double * field_momentum_z  = cello::field(enzo_block,"velocity_z");
-    double * field_jacobian      = cello::field(enzo_block,"total_jacobian");
+    Field field = enzo_block->data()->field();
+    double * field_density     = (double *)field.values("density");
+    double * field_momentum_x  = (double *)field.values("velocity_x");
+    double * field_momentum_y  = (double *)field.values("velocity_y");
+    double * field_momentum_z  = (double *)field.values("velocity_z");
+    double * field_jacobian      = (double *)field.values("total_jacobian");
     
     // convert to conservative form
     int mx,my,mz;
@@ -277,9 +278,9 @@ void EnzoMethodTurbulenceOU::compute_shift
     }
 
     // Restore work array
-    double * field_work_1 = cello::field(enzo_block,"work_1");
-    double * field_work_2 = cello::field(enzo_block,"work_2");
-    double * field_work_3 = cello::field(enzo_block,"work_3");
+    double * field_work_1 = (double *)field.values("work_1");
+    double * field_work_2 = (double *)field.values("work_2");
+    double * field_work_3 = (double *)field.values("work_3");
     const int m = mx*my*mz;
     double * array_work = new double [3*m];
     std::copy_n (field_work_1,m,array_work+0*m);
@@ -380,17 +381,18 @@ void EnzoMethodTurbulenceOU::compute_update
   double cello_injection_rate;
   double r_av[4] = {0.0,0.0,0.0,0.0};
 
-  double * field_density     = cello::field(enzo_block,"density");
-  double * field_momentum_x  = cello::field(enzo_block,"velocity_x");
-  double * field_momentum_y  = cello::field(enzo_block,"velocity_y");
-  double * field_momentum_z  = cello::field(enzo_block,"velocity_z");
-  double * field_energy      = cello::field(enzo_block,"total_energy");
-  double * resid_density     = cello::field(enzo_block,"resid_density_r");
-  double * resid_momentum_x  = cello::field(enzo_block,"resid_velocity_x");
-  double * resid_momentum_y  = cello::field(enzo_block,"resid_velocity_y");
-  double * resid_momentum_z  = cello::field(enzo_block,"resid_velocity_z");
-  double * resid_energy      = cello::field(enzo_block,"total_energy");
-  double * field_temperature = cello::field(enzo_block,"temperature");
+  Field field = enzo_block->data()->field();
+  double * field_density     = (double *)field.values("density");
+  double * field_momentum_x  = (double *)field.values("velocity_x");
+  double * field_momentum_y  = (double *)field.values("velocity_y");
+  double * field_momentum_z  = (double *)field.values("velocity_z");
+  double * field_energy      = (double *)field.values("total_energy");
+  double * resid_density     = (double *)field.values("resid_density_r");
+  double * resid_momentum_x  = (double *)field.values("resid_velocity_x");
+  double * resid_momentum_y  = (double *)field.values("resid_velocity_y");
+  double * resid_momentum_z  = (double *)field.values("resid_velocity_z");
+  double * resid_energy      = (double *)field.values("total_energy");
+  double * field_temperature = (double *)field.values("temperature");
 
   int mx,my,mz;
   enzo_block->data()->field().dimensions(0,&mx,&my,&mz);
@@ -417,9 +419,9 @@ void EnzoMethodTurbulenceOU::compute_update
   }
 
   // Restore work array
-  double * field_work_1 =  cello::field(enzo_block,"work_1");
-  double * field_work_2 =  cello::field(enzo_block,"work_2");
-  double * field_work_3 =  cello::field(enzo_block,"work_3");
+  double * field_work_1 =  (double *)field.values("work_1");
+  double * field_work_2 =  (double *)field.values("work_2");
+  double * field_work_3 =  (double *)field.values("work_3");
   double * array_work = new double [3*m];
   std::copy_n (field_work_1,m,array_work+0*m);
   std::copy_n (field_work_2,m,array_work+1*m);
