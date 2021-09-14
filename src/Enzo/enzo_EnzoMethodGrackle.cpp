@@ -166,6 +166,8 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------
 
+#ifdef CONFIG_USE_GRACKLE
+
 void EnzoMethodGrackle::initialize_grackle_chemistry_data
 (double current_time, bool preinitialized_units /* default false */)
 {
@@ -205,7 +207,11 @@ void EnzoMethodGrackle::initialize_grackle_chemistry_data
   return;
 }
 
+#endif
+
 //----------------------------------------------------------------------------
+
+#ifdef CONFIG_USE_GRACKLE
 
 void EnzoMethodGrackle::setup_grackle_units (double current_time,
                                              code_units * grackle_units
@@ -243,7 +249,11 @@ void EnzoMethodGrackle::setup_grackle_units (double current_time,
   return;
 }
 
+#endif
+
 //--------------------------------------------------------------------------
+
+#ifdef CONFIG_USE_GRACKLE
 
 void EnzoMethodGrackle::setup_grackle_fields
 (EnzoBlock * enzo_block,
@@ -342,7 +352,11 @@ void EnzoMethodGrackle::setup_grackle_fields
   return;
 }
 
+#endif
+
 //----------------------------------------------------------------------------
+
+#ifdef CONFIG_USE_GRACKLE
 
 void EnzoMethodGrackle::update_grackle_density_fields(
                                EnzoBlock * enzo_block,
@@ -404,6 +418,8 @@ void EnzoMethodGrackle::update_grackle_density_fields(
 
   return;
 }
+
+#endif
 
 //----------------------------------------------------------------------
 
