@@ -22,12 +22,14 @@
 
 #define COPY_FIELD(BLOCK,FIELD,FIELD_COPY)                              \
   {                                                                     \
-    Field field = BLOCK->data()->field();				\
-    enzo_float * f = (enzo_float *) field.values(FIELD);            \
-    enzo_float * f_copy = (enzo_float *) field.values(FIELD_COPY);  \
-    int mx,my,mz;                                                       \
-    field.dimensions(0,&mx,&my,&mz);                                    \
-    for (int i=0; i<mx*my*mz; i++) f_copy[i]=f[i];              \
+    Field field = BLOCK->data()->field();                               \
+    enzo_float * f = (enzo_float *) field.values(FIELD);                \
+    enzo_float * f_copy = (enzo_float *) field.values(FIELD_COPY);      \
+    if (f_copy) {                                                       \
+      int mx,my,mz;                                                     \
+      field.dimensions(0,&mx,&my,&mz);                                  \
+      for (int i=0; i<mx*my*mz; i++) f_copy[i]=f[i];                    \
+    }                                                                   \
   }
 
 //----------------------------------------------------------------------
@@ -39,18 +41,26 @@ EnzoMethodPpm::EnzoMethodPpm ()
 
   const int rank = cello::rank();
 
-  this->required_fields_ = std::vector<std::string> {"density","total_energy",
-                                         "internal_energy","pressure"};
-
-  if (rank >= 0) this->required_fields_.insert(this->required_fields_.end(),{"velocity_x","acceleration_x"});
-  if (rank >= 1) this->required_fields_.insert(this->required_fields_.end(),{"velocity_y","acceleration_y"});
-  if (rank >= 2) this->required_fields_.insert(this->required_fields_.end(),{"velocity_z","acceleration_z"});
-
-  this->define_fields();
+  cello::define_field("density");
+  cello::define_field("total_energy");
+  cello::define_field("internal_energy");
+  cello::define_field("pressure");
+  if (rank >= 1) {
+      cello::define_field("velocity_x");
+      cello::define_field("acceleration_x");
+  }
+  if (rank >= 2) {
+      cello::define_field("velocity_y");
+      cello::define_field("acceleration_y");
+  }
+  if (rank >= 3) {
+      cello::define_field("velocity_z");
+      cello::define_field("acceleration_z");
+  }
 
   // Initialize default Refresh object
 
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_field("density");
   refresh->add_field("velocity_x");
@@ -89,7 +99,6 @@ void EnzoMethodPpm::pup (PUP::er &p)
 void EnzoMethodPpm::compute ( Block * block) throw()
 {
   TRACE_PPM("BEGIN compute()");
-
 #ifdef COPY_FIELDS_TO_OUTPUT
   const int rank = cello::rank();
   COPY_FIELD(block,"density","density_in");
@@ -116,7 +125,9 @@ void EnzoMethodPpm::compute ( Block * block) throw()
 
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
-  block->data()->flux_data()->allocate (nx,ny,nz,field_list);
+  int single_flux_array = enzo::config()->method_flux_correct_single_array;
+
+  block->data()->flux_data()->allocate (nx,ny,nz,field_list,single_flux_array);
 
   if (block->is_leaf()) {
 
@@ -159,8 +170,8 @@ void EnzoMethodPpm::compute ( Block * block) throw()
 
     TRACE_PPM ("BEGIN SolveHydroEquations");
 
-    enzo_block->SolveHydroEquations
-      ( block->time(), block->dt(), comoving_coordinates_ );
+    enzo_block->SolveHydroEquations 
+      ( block->time(), block->dt(), comoving_coordinates_, single_flux_array );
 
     TRACE_PPM ("END SolveHydroEquations");
 
@@ -186,7 +197,7 @@ void EnzoMethodPpm::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodPpm::timestep ( Block * block ) const throw()
+double EnzoMethodPpm::timestep ( Block * block ) throw()
 {
 
   TRACE_PPM("timestep()");

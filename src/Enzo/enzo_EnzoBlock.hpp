@@ -107,7 +107,7 @@ public: // interface
   
   /// Initialize EnzoBlock using MsgRefine returned by creating process
   virtual void p_set_msg_refine(MsgRefine * msg);
-
+  
   /// Initialize an empty EnzoBlock
   EnzoBlock()
     :  CBase_EnzoBlock(),
@@ -140,7 +140,10 @@ public: // interface
       GridEndIndex[i] = 0; 
       CellWidth[i] = 0.0;
     }
-    performance_stop_(perf_block);
+#ifdef DEBUG_ENZO_BLOCK
+  CkPrintf ("%d %p TRACE_BLOCK EnzoBlock(CkMigrateMessage *)\n",CkMyPe(),(void *)this);
+  print();
+#endif
   }
 
   /// Pack / unpack the EnzoBlock in a CHARM++ program
@@ -178,7 +181,8 @@ public: // interface
   /// Solve the hydro equations using PPM
   int SolveHydroEquations ( enzo_float time, 
 			    enzo_float dt,
-			    bool comoving_coordinates);
+			    bool comoving_coordinates,
+                            bool single_flux_array);
 
   /// Solve the hydro equations using Enzo 3.0 PPM
   int SolveHydroEquations3 ( enzo_float time, enzo_float dt);
@@ -206,6 +210,8 @@ public: /// entry methods
   /// Compute sum, min, and max of g values for EnzoMethodTurbulence
   void p_method_turbulence_end(CkReductionMsg *msg);
 
+  void p_initial_hdf5_recv(MsgInitial * msg_initial);
+  
   /// TEMP
   double timestep() { return dt; }
 

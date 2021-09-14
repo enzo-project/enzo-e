@@ -27,7 +27,6 @@ Output {
            include "input/Schedule/schedule_cycle_10.incl"
 	   image_type = "mesh";
 	   image_size = [2049,2049];
-#	   image_block_size = 7;
 	   image_mesh_color = "age";
            include "input/Colormap/colormap_greyscale.incl"
        }

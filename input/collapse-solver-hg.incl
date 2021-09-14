@@ -10,16 +10,16 @@ Method {
  Solver {
      coarse {
          iter_max = 100;
-         res_tol = 0.01000000000000000;
+         res_tol = 0.1000000000000000;
          solve_type = "block";
          type = "cg";
      };
      hg {
          coarse_level = 0;
          iter_max = 100;
-         monitor_iter = 1;
+         monitor_iter = 10;
          precondition = "mg";
-         res_tol = 0.01000000000000000;
+         res_tol = 0.1000000000000000;
 #         restart_cycle = 1000;
          type = "bicgstab";
      };
@@ -34,7 +34,7 @@ Method {
          coarse_level = -2;
          coarse_solve = "coarse";
          iter_max = 1;
-         res_tol = 0.01;
+         res_tol = 0.1;
          last_smooth = "last";
          max_level = 4;
          min_level = -2;

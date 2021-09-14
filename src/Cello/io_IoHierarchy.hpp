@@ -31,7 +31,6 @@ public: // interface
   virtual ~IoHierarchy () throw()
   {}
 
-
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -42,20 +41,18 @@ public: // interface
 
     Io::pup(p);
 
-    WARNING ("IoHierarchy::pup","skipping hierarchy_");
-    //    if (p.isUnpacking()) hierarchy_ = new Hierarchy;
-    //    p | *hierarchy_;
+    PUParray(p,lower_,3);
+    PUParray(p,upper_,3);
+    p | max_level_;
   }
 
 #include "_io_Io_common.hpp"
 
-  
-private: // functions
-
-  Hierarchy * hierarchy_;
-
 private: // attributes
 
+  double lower_[3];
+  double upper_[3];
+  int max_level_;
 
 };
 

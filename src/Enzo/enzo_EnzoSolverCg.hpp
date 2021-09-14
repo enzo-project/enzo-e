@@ -22,6 +22,8 @@ public: // interface
 		int monitor_iter,
 		int restart_cycle,
 		int solve_type,
+                int index_prolong,
+                int index_restrict,
 		int min_level,
 		int max_level,
 		int iter_max, 

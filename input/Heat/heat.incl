@@ -72,7 +72,6 @@ Adapt {
 	type     = "image";
 	image_type  = "mesh";
 	image_reduce_type = "max";
-#	image_block_size  = 5;
 	image_size = [641,641];
         include "input/Schedule/schedule_cycle_10.incl"
 	image_min = 0.0;

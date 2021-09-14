@@ -22,9 +22,9 @@ public: // interface
 		     std::string field_b,
 		     int monitor_iter,
 		     int restart_cycle,
-		     int solve_type) throw()
-    : Solver(name,field_x,field_b,monitor_iter,restart_cycle,solve_type)
-  { }
+		     int solve_type,
+                     int index_prolong,
+                     int index_restrict) throw();
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoSolverDiagonal);
@@ -39,6 +39,7 @@ public: // interface
   {
     TRACEPUP;
     Solver::pup(p);
+    p | id_;
   };
 
   //--------------------------------------------------
@@ -61,6 +62,8 @@ protected: // methods
 
 protected: // attributes
 
+  /// Index for temporary field for matrix diagonal
+  int id_;
 };
 
 #endif /* ENZO_ENZO_SOLVER_DIAGONAL_HPP */

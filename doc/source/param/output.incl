@@ -245,6 +245,7 @@ any point in time.`
 :Default: :d:`1`
 :Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
+:Status:    **DEPRECIATED**
 
 :e:`For images of meshes, this parameter defines how many pixels wide each finest-level block is in the image.  This parameter and the image_size parameter should not both be set.`
 

@@ -40,7 +40,7 @@ PARALLEL_MAIN_BEGIN
   {
 
     int nx,ny,nz;
-    nx=4; ny=5; nz=6;
+    nx=4; ny=8; nz=6;
     FieldDescr * field_descr = new FieldDescr;
     FieldData * field_data = new FieldData(field_descr, nx,ny,nz);
 
@@ -595,6 +595,48 @@ PARALLEL_MAIN_BEGIN
     unit_assert ((t1[0] == -1.00));
     unit_assert ((t2[0] == -2.00));
     unit_assert ((t3[0] == -3.00));
+
+    // Test coarse fields
+
+    // unit_assert (cv1 == NULL);
+    // unit_assert (cv2 == NULL);
+    // unit_assert (cv3 == NULL);
+    // unit_assert (cv4 == NULL);
+    // unit_assert (cv5 == NULL);
+    // unit_assert (ct1 == NULL);
+    // unit_assert (ct2 == NULL);
+    // unit_assert (ct3 == NULL);
+    
+    // unit_func("allocate_coarse");
+
+    field.allocate_coarse();
+
+    float       *cv1 = (float *) field.coarse_values(i1);
+    double      *cv2 = (double *) field.coarse_values(i2);
+    double      *cv3 = (double *) field.coarse_values(i3);
+    double      *cv4 = (double *) field.coarse_values(i4);
+    long double *cv5 = (long double *) field.coarse_values(i5);
+    float       *ct1 = (float *) field.coarse_values(j1);
+    double      *ct2 = (double *) field.coarse_values(j2);
+    double      *ct3 = (double *) field.coarse_values(j3);
+
+    cv1[0] = -1.00;
+    cv2[0] = -2.00;
+    cv3[0] = -3.00;
+    cv4[0] = -4.00;
+    cv5[0] = -5.00;
+    ct1[0] = 1.00;
+    ct2[0] = 2.00;
+    ct3[0] = 3.00;
+
+    unit_assert ((cv1[0] == -1.00));
+    unit_assert ((cv2[0] == -2.00));
+    unit_assert ((cv3[0] == -3.00));
+    unit_assert ((cv4[0] == -4.00));
+    unit_assert ((cv5[0] == -5.00));
+    unit_assert ((ct1[0] == 1.00));
+    unit_assert ((ct2[0] == 2.00));
+    unit_assert ((ct3[0] == 3.00));
 
     //--------------------------------------------------
 

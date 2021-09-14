@@ -175,7 +175,7 @@ Solver {
 #                        "is_local", "single"];
 #         position = [ "x", "y", "z" ];
 #         velocity = [ "vx", "vy", "vz" ];
-#         groups = ["has_mass"];
+#         group_list = ["has_mass"];
 #         constants = [ "mass", "single", .8382456140 ];
 #
 #     }
@@ -201,7 +201,7 @@ Solver {
 #                   IC routine to get star particles registered
 #                   in this group
 #
-         groups = ["has_mass"];
+         group_list = ["has_mass"];
       }
   }
 

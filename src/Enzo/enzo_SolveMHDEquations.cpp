@@ -30,7 +30,8 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
   //  if (GridRank != 3) 
   //    my_exit(EXIT_ENZO_FAILURE);
 
-  if (NumberOfBaryonFields > 0) {
+  const int in = cello::index_static();
+  if (NumberOfBaryonFields[in] > 0) {
  
     /* initialize */
  
@@ -39,9 +40,7 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
  
     /* Compute size (in floats) of the current grid. */
  
-    const int in = cello::index_static();
-
-    size = 1;
+      size = 1;
     for (dim = 0; dim < GridRank[in]; dim++)
       size *= GridDimension[dim];
  

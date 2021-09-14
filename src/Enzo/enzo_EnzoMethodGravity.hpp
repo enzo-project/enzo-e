@@ -27,13 +27,15 @@ public: // interface
   EnzoMethodGravity(int index_solver,
 		    double grav_const,
 		    int order,
-		    bool accumulate);
+		    bool accumulate,
+                    int index_prolong);
 
   EnzoMethodGravity()
     : index_solver_(-1),
       grav_const_(0.0),
       order_(4),
-      ir_exit_(-1)
+      ir_exit_(-1),
+      index_prolong_(0)
   {};
 
   /// Destructor
@@ -48,7 +50,8 @@ public: // interface
       index_solver_(-1),
       grav_const_(0.0),
       order_(4),
-      ir_exit_(-1)
+      ir_exit_(-1),
+      index_prolong_(0)
       
   { }
 
@@ -78,7 +81,7 @@ public: // interface
   { return "gravity"; }
 
   /// Compute maximum timestep for this method
-  virtual double timestep (Block * block) const throw() ;
+  virtual double timestep (Block * block) throw() ;
 
   /// Compute accelerations from potential and exit solver
   void compute_accelerations (EnzoBlock * enzo_block) throw();
@@ -90,7 +93,7 @@ public: // interface
   void compute_ (EnzoBlock * enzo_block) throw();
 
   /// Compute maximum timestep for this method
-  double timestep_ (Block * block) const throw() ;
+  double timestep_ (Block * block) throw() ;
   
 protected: // attributes
 
@@ -106,6 +109,9 @@ protected: // attributes
 
   /// Refresh id's
   int ir_exit_;
+
+  /// Prolongation
+  int index_prolong_;
 };
 
 
