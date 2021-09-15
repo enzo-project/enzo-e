@@ -87,6 +87,9 @@ private: // attributes
   double totemp_;
   bool update_solution_;
 
+  // True only on first block's call on a node each cycle
+  static int iupdate_phases_;
+
 };
 
 #endif /* ENZO_ENZO_METHOD_TURBULENCE_OU_HPP */

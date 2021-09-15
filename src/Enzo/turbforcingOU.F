@@ -96,7 +96,7 @@ C
             enddo
          enddo
       enddo
-      
+
       allocate(Mode(3,NModes))
       allocate(OUPhase(2,3,NModes), Ampl(NModes), Phase(2,3,NModes))
       
@@ -154,18 +154,18 @@ C
          enddo
       enddo
 
-      if (cello_is_root .ne. 0) then
-         print *, "accDims = ", Ndims
-         print '(A,3(G10.4))', " Box = ", boxSize
-         print *, "NModes = ", NModes
-         print *, "Mach = ", Mach
-         print *, 'c_s = ', c_s
-         print *, 'TDecay = ', TDecay
-         print *, 'DtFreq = ', DtFreq
-         print *, 'OUVar = ', OUVar
-         print *, 'kc = ', kc
-         print *, 'cello_read_sol = ',cello_read_sol
-      endif
+C      if (cello_is_root .ne. 0) then
+C         print *, "accDims = ", Ndims
+C         print '(A,3(G10.4))', " Box = ", boxSize
+C         print *, "NModes = ", NModes
+C         print *, "Mach = ", Mach
+C         print *, 'c_s = ', c_s
+C         print *, 'TDecay = ', TDecay
+C         print *, 'DtFreq = ', DtFreq
+C         print *, 'OUVar = ', OUVar
+C         print *, 'kc = ', kc
+C         print *, 'cello_read_sol = ',cello_read_sol
+C      endif
 
       if (cello_read_sol .ne. 0) then
          open (42, file='OUturb.bin', form='UNFORMATTED', 
@@ -282,7 +282,6 @@ C     **********************************************************************
             enddo
          enddo
       enddo
-      
       end subroutine      
 C     **********************************************************************
 c     3D Turbulent forcing source term
@@ -301,14 +300,16 @@ c     res         - residual (updated)
 c     turbAcc     - injected turbulent accelerations and energy (updated)
 c***********************************************************************
       subroutine turbForceOU
-     &     (ni, nj, nk,
+     &     (mx,my,mz,
+     &     ni, nj, nk,
      &     field_density,
      &     grid,
-     &     wk, dt,
-     &     turbAcc, update_sol,
+     &     wk, time, dt,
+     &     update_sol,
      &     cello_apply_cooling,
      &     cello_apply_forcing,
      &     cello_apply_injection_rate,
+     &     cello_update_phases,
      &     cello_cooling_term,
      &     cello_gamma,
      &     cello_injection_rate,
@@ -326,36 +327,39 @@ c***********************************************************************
       real*8 :: cello_injection_rate
       integer :: cello_olap
       real*8 :: r_gv(4)
-      
+      integer :: cello_update_phases
+
+      integer :: mx,my,mz
       integer :: ni, nj, nk, i, j, k, m, dir
       integer :: ol2, ol2k, cooling_term
-      real*8 :: grid(3,ni,nj,nk)
-      real*8 :: field_density(ni,nj,nk)
-      real*8 :: wk(3,ni,nj,nk) 
-      real*8 :: turbAcc(4, ni,nj,nk), gamma
+      real*8 :: grid(3,mx,my,mz)
+      real*8 :: field_density(mx,my,mz)
+      real*8 :: wk(3,mx,my,mz)
+      real*8 :: gamma
       real*8 :: deTurb
-      real*8 :: rho, dt, dumx, acc(3), da(3), kr, de
+      real*8 :: rho, time, dt, dumx, acc(3), da(3), kr, de
       logical :: update_sol, apply_injection_rate
-
-      print*, 'cello_apply_forcing',cello_apply_forcing
+      real*8 :: timeUpdate
+      
       if(cello_apply_forcing .eq. 0) return 
-
       apply_injection_rate = (cello_apply_injection_rate .ne. 0)
 
       ol2 = cello_olap/2
       ol2k = ol2
       if (nk.eq.1) ol2k = 0
 
-      if(dt*2.d0 .gt. DtFreq) then ! require at least two dt in DtFreq
-         print *, "dt = ", dt, " > DtFreq = ", DtFreq
-         stop "dt too big"
-      endif
       
-      totTime = totTime + dt
-      if(totTime .gt. DtFreq) then
-         call updatePhases()
-         call calcPhases()
-         totTime = totTime - DtFreq
+      timeUpdate = floor(time / DtFreq)
+      
+      if ( cello_update_phases.ne.0. ) then
+         totTime = totTime + dt
+         if ( (time       .le. timeUpdate) .and.
+     &        (timeUpdate .lt. time + dt)) then
+C     print*, 'updating phases'
+            call updatePhases()
+            call calcPhases()
+            totTime = totTime - DtFreq
+         endif
       endif
 
       r_gv = 0d0
@@ -388,21 +392,18 @@ c***********************************************************************
             enddo
          enddo
       enddo
-      
-      print*, 'force out work(1:3) = ',
-     &     wk(1,1,1,1),wk(2,1,1,1),wk(3,1,1,1)
-      print*, 'r_gv out = ',r_gv(1),r_gv(2),r_gv(3),r_gv(4)
       end subroutine
 C======================================================================
 c     jac         - jacobian
       subroutine turbForceShift
-     &     (ni, nj, nk,
+     &     (mx,my,mz,
+     &     ni, nj, nk,
      &     field_density,
      &     field_momentum_x,
      &     field_momentum_y,
      &     field_momentum_z,
      &     field_jacobian, wk,
-     &     turbAcc, update_sol,
+     &     update_sol,
      &     cello_apply_injection_rate,
      &     cello_olap,
      &     cello_injection_rate,
@@ -415,13 +416,13 @@ c     jac         - jacobian
       integer :: ni, nj, nk, i, j, k
       integer :: cello_apply_injection_rate
       integer :: cello_olap
-      real*8 :: field_density(ni,nj,nk)
-      real*8 :: field_momentum_x(ni,nj,nk)
-      real*8 :: field_momentum_y(ni,nj,nk)
-      real*8 :: field_momentum_z(ni,nj,nk)
-      real*8 :: field_jacobian(ni,nj,nk)
-      real*8 :: wk(3,ni,nj,nk) 
-      real*8 :: turbAcc(4, ni,nj,nk)
+      integer :: mx,my,mz
+      real*8 :: field_density(mx,my,mz)
+      real*8 :: field_momentum_x(mx,my,mz)
+      real*8 :: field_momentum_y(mx,my,mz)
+      real*8 :: field_momentum_z(mx,my,mz)
+      real*8 :: field_jacobian(mx,my,mz)
+      real*8 :: wk(3,mx,my,mz) 
       real*8 :: cello_injection_rate
       logical :: update_sol, apply_injection_rate
       real*8 :: r_gv(4), r_av(2)
@@ -433,12 +434,7 @@ C     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 C     force total impulse to zero using reduction r_gv
 C     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-      print*, 'turbForceShift'
-
       da = r_gv(1:3)/r_gv(4)
-      print*, 'r_gv = ',r_gv(1),r_gv(2),r_gv(3),r_gv(4)
-      print*, 'shift in work(1:3) = ',
-     &     wk(1,1,1,1),wk(2,1,1,1),wk(3,1,1,1)
       do k=1,nk
          do j=1,nj
             do i=1,ni
@@ -468,21 +464,27 @@ C     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
                   acc = wk(1:3,i,j,k)
                   r_av(1) = r_av(1) + 0.5d0 * field_jacobian(i,j,k) *
      &                 field_density(i,j,k) * dot_product(acc, acc)
-                  r_av(2) = r_av(2) +
-     &                 field_jacobian(i,j,k) *
-     &                 (field_momentum_x(i,j,k)*wk(1,i,j,k) +
-     &                 field_momentum_y(i,j,k)*wk(2,i,j,k) +
-     &                 field_momentum_z(i,j,k)*wk(3,i,j,k))
+                  if (Ndims.eq.2) then
+                     r_av(2) = r_av(2) +
+     &                    field_jacobian(i,j,k) *
+     &                    (field_momentum_x(i,j,k)*wk(1,i,j,k) +
+     &                    field_momentum_y(i,j,k)*wk(2,i,j,k))
+                  else if (Ndims.eq.3) then
+                     r_av(2) = r_av(2) +
+     &                    field_jacobian(i,j,k) *
+     &                    (field_momentum_x(i,j,k)*wk(1,i,j,k) +
+     &                    field_momentum_y(i,j,k)*wk(2,i,j,k) +
+     &                    field_momentum_z(i,j,k)*wk(3,i,j,k))
+                  endif
                enddo
             enddo
          enddo
       endif
-      print*, 'shift out work(1:3) = ',
-     &     wk(1,1,1,1),wk(2,1,1,1),wk(3,1,1,1)
       end subroutine
 C======================================================================
       subroutine turbForceUpdate
-     &     (ni, nj, nk,
+     &     (mx, my, mz,
+     &     ni, nj, nk,
      &     field_density,
      &     field_momentum_x,
      &     field_momentum_y,
@@ -508,26 +510,27 @@ C======================================================================
       implicit none
       include 'turbforcingOU.h'
 
+      integer :: mx,my,mz
       integer :: ni, nj, nk, i, j, k
-      real*8 :: field_density(ni,nj,nk)
-      real*8 :: field_momentum_x(ni,nj,nk)
-      real*8 :: field_momentum_y(ni,nj,nk)
-      real*8 :: field_momentum_z(ni,nj,nk)
-      real*8 :: field_energy(ni,nj,nk)
+      real*8 :: field_density(mx,my,mz)
+      real*8 :: field_momentum_x(mx,my,mz)
+      real*8 :: field_momentum_y(mx,my,mz)
+      real*8 :: field_momentum_z(mx,my,mz)
+      real*8 :: field_energy(mx,my,mz)
       integer :: cello_apply_injection_rate
       integer :: cello_cooling_term
       integer :: cello_apply_cooling
       real*8 :: cello_gamma
       real*8 :: cello_hc_alpha
       real*8 :: cello_hc_sigma
-      real*8 :: resid_density(ni,nj,nk)
-      real*8 :: resid_momentum_x(ni,nj,nk)
-      real*8 :: resid_momentum_y(ni,nj,nk)
-      real*8 :: resid_momentum_z(ni,nj,nk)
-      real*8 :: resid_energy(ni,nj,nk)
+      real*8 :: resid_density(mx,my,mz)
+      real*8 :: resid_momentum_x(mx,my,mz)
+      real*8 :: resid_momentum_y(mx,my,mz)
+      real*8 :: resid_momentum_z(mx,my,mz)
+      real*8 :: resid_energy(mx,my,mz)
       real*8 :: dt
-      real*8 :: field_temperature(ni,nj,nk), wk(3,ni,nj,nk) 
-      real*8 :: turbAcc(4, ni,nj,nk)
+      real*8 :: field_temperature(mx,my,mz), wk(3,mx,my,mz) 
+      real*8 :: turbAcc(4, mx,my,mz)
       real*8 :: cello_injection_rate
       real*8 :: cello_totemp
       logical :: update_sol, apply_injection_rate
@@ -537,10 +540,6 @@ C======================================================================
       real*8 :: gm1, hc_alpha, hc_sigma, totemp
       integer nd1, cooling_term
       
-      print*, 'turbForceUpdate'
-      print*, 'update in work(1:3) = ',
-     &     wk(1,1,1,1),wk(2,1,1,1),wk(3,1,1,1)
-      
       apply_injection_rate = (cello_apply_injection_rate .ne. 0)
 
       if (apply_injection_rate) then
@@ -549,8 +548,6 @@ C======================================================================
       else
          Acorr = 1.d0
       endif
-      print*, 'Acorr = ',Acorr
-      call flush(6)
       gamma    = cello_gamma
 
       E0 = 1.d0 / (gamma - 1.d0)
@@ -598,8 +595,10 @@ C     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
      &              du(1)*rho
                resid_momentum_y(i,j,k) = resid_momentum_y(i,j,k) +
      &              du(2)*rho
-               resid_momentum_z(i,j,k) = resid_momentum_z(i,j,k) +
-     &              du(3)*rho
+               if (Ndims.eq.3) then
+                  resid_momentum_z(i,j,k) = resid_momentum_z(i,j,k) +
+     &                 du(3)*rho
+               end if
                resid_energy(i,j,k) = resid_energy(i,j,k) + de
 
                turbAcc(1:Ndims,i,j,k) =
@@ -613,7 +612,9 @@ C     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
          field_density = field_density + resid_density
          field_momentum_x = field_momentum_x + resid_momentum_x
          field_momentum_y = field_momentum_y + resid_momentum_y
-         field_momentum_z = field_momentum_z + resid_momentum_z
+         if (Ndims.eq.3) then
+            field_momentum_z = field_momentum_z + resid_momentum_z
+         endif
          field_energy = field_energy + resid_energy
       endif
 

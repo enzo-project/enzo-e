@@ -18,7 +18,7 @@ Field {
  }
 
 Method {
-     list = [ "ppm" , "turbulence_ou"];
+     list = [ "ppm", "turbulence_ou"];
      ppm {
          courant = 0.5;
          diffusion = true;
