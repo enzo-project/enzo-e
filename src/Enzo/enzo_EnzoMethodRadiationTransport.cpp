@@ -8,7 +8,6 @@
 #include "cello.hpp"
 
 #include "enzo.hpp"
-
 //----------------------------------------------------------------------
 
 EnzoMethodRadiationTransport ::EnzoMethodRadiationTransport()
@@ -150,13 +149,12 @@ double EnzoMethodRadiationTransport::deltaQ_faces (double U_l, double U_lplus1, 
 
 
 
-void EnzoMethodRadiationTransport::get_reduced_variables (double * chi, double (*n)[3], int i, double clight,
+void EnzoMethodRadiationTransport::get_reduced_variables (long double * chi, long double (*n)[3], int i, double clight,
                                                          enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz) throw()
 {
         double Fnorm = sqrt(Fx[i]*Fx[i] + Fy[i]*Fy[i] + Fz[i]*Fz[i]);
-        double f = Fnorm / (clight*N[i]); // reduced flux
+        long double f = Fnorm / (clight*N[i]); // reduced flux
         *chi = (3 + 4*f*f) / (5 + 2*sqrt(4-3*f*f));
-
         (*n)[0] = Fx[i]/Fnorm;
         (*n)[1] = Fy[i]/Fnorm; 
         (*n)[2] = Fz[i]/Fnorm;
@@ -196,7 +194,7 @@ void EnzoMethodRadiationTransport::get_pressure_tensor (Block * block,
    for (int iy=gy-1; iy<my-gy+1; iy++) {
     for (int ix=gx-1; ix<mx-gx+1; ix++) {
       int i = INDEX(ix,iy,iz,mx,my); //index of current cell
-      double chi, n[3]; 
+      long double chi, n[3]; 
       get_reduced_variables(&chi, &n, i, clight, N, Fx, Fy, Fz);
       P00[i] = N[i] * ( 0.5*(1.0-chi) + 0.5*(3.0*chi - 1)*n[0]*n[0] );
       P10[i] = N[i] * 0.5*(3.0*chi - 1)*n[1]*n[0];
@@ -206,7 +204,7 @@ void EnzoMethodRadiationTransport::get_pressure_tensor (Block * block,
       P12[i] = N[i] * 0.5*(3.0*chi - 1)*n[1]*n[2];
       P20[i] = N[i] * 0.5*(3.0*chi - 1)*n[2]*n[0];
       P21[i] = N[i] * 0.5*(3.0*chi - 1)*n[2]*n[1];
-      P22[i] = N[i] * ( 0.5*(1.0-chi) + 0.5*(3.0*chi - 1)*n[2]*n[2] ); 
+      P22[i] = N[i] * ( 0.5*(1.0-chi) + 0.5*(3.0*chi - 1)*n[2]*n[2] );
     }
    }
   }
@@ -215,7 +213,7 @@ void EnzoMethodRadiationTransport::get_pressure_tensor (Block * block,
 
 void EnzoMethodRadiationTransport::get_U_update (Block * block, double * N_update, 
                        double * Fx_update, double * Fy_update, double * Fz_update, 
-                       enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz, 
+                       enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz,
                        double hx, double hy, double hz, double dt, double clight, 
                        int i, int idx, int idy, int idz) throw()
 {
@@ -351,7 +349,7 @@ void EnzoMethodRadiationTransport::transport_photons ( Block * block, double cli
   }
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  double dt = timestep(block);
+  double dt = block->dt();//timestep(block);
   double hx = (xp-xm)/(mx-2*gx);
   double hy = (yp-ym)/(my-2*gy);
   double hz = (zp-zm)/(mz-2*gz);
@@ -373,7 +371,7 @@ void EnzoMethodRadiationTransport::transport_photons ( Block * block, double cli
 
   //calculate the pressure tensor
   get_pressure_tensor(block, N, Fx, Fy, Fz, clight);
- 
+
   for (int iz=gz; iz<mz-gz; iz++) {
     for (int iy=gy; iy<my-gy; iy++) {
       for (int ix=gx; ix<mx-gx; ix++) {
@@ -393,7 +391,7 @@ void EnzoMethodRadiationTransport::transport_photons ( Block * block, double cli
 
         // now get updated photon densities
         Nnew[i] += N_update;
-       
+          
       }
     }   
   } 
@@ -431,8 +429,7 @@ void EnzoMethodRadiationTransport::compute_ (Block * block) throw()
   const double max_freq = enzo_config->method_radiation_transport_max_freq;
   const std::string flux_function = enzo_config->method_radiation_transport_flux_function;
   const double clight = enzo_config->method_radiation_transport_clight;
-
-
+  
   // implement for only one frequency bin for now
   // Will need to call these functions in a loop over all the frequency groups
   // Need to get a frequency spectrum for the photons somehow (which SED???)

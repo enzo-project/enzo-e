@@ -59,7 +59,7 @@ protected: // methods
                        double Q_l, double Q_lplus1, double Q_lminus1,
                        double clight) throw();
 
-  void get_reduced_variables (double * chi_idx, double (*n_idx)[3], int i, double clight,
+  void get_reduced_variables (long double * chi_idx, long double (*n_idx)[3], int i, double clight,
                               enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz) 
                               throw(); 
 
@@ -69,7 +69,7 @@ protected: // methods
 
   void get_U_update (Block * block, double * N_update, 
                        double * Fx_update, double * Fy_update, double * Fz_update, 
-                       enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz, 
+                       enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz,
                        double hx, double hy, double hz, double dt, double clight, 
                        int i, int idx, int idy, int idz) throw();
 

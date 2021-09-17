@@ -1088,7 +1088,7 @@ void FieldFace::div_by_density_
   Grouping * groups = cello::field_groups();
 
   void * field_density = field.values("density");
-  
+ 
   const std::string field_name = field.field_name(index_field);
 
   const bool scale_by_density =
