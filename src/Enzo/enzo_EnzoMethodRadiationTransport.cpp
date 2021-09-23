@@ -10,8 +10,13 @@
 #include "enzo.hpp"
 //----------------------------------------------------------------------
 
-EnzoMethodRadiationTransport ::EnzoMethodRadiationTransport()
+EnzoMethodRadiationTransport ::EnzoMethodRadiationTransport(const int N_groups, const double clight)
   : Method()
+    , N_groups_(N_groups)
+    , clight_(clight)
+    , eps_()
+    , sigN_()
+    , sigE_()
 {
 
   const int rank = cello::rank();
@@ -64,6 +69,21 @@ EnzoMethodRadiationTransport ::EnzoMethodRadiationTransport()
     refresh->add_field("P21");
     refresh->add_field("P22");
   }
+  
+  const EnzoConfig * enzo_config = enzo::config();
+  //int N_groups = 3;//enzo_config->method_radiation_transport_N_groups;
+
+  // store frequency group attributes as ScalarData variables
+  ScalarDescr * scalar_descr = cello::scalar_descr_double();
+  
+
+  for (int i=0; i<N_groups_; i++) {
+    std::string istring = std::to_string(i);
+    eps_ .push_back( scalar_descr->new_value("eps" +istring) );
+    sigN_.push_back( scalar_descr->new_value("sigN"+istring) );
+    sigE_.push_back( scalar_descr->new_value("sigE"+istring) ); 
+  }
+
 }
 
 //----------------------------------------------------------------------
@@ -76,6 +96,12 @@ void EnzoMethodRadiationTransport ::pup (PUP::er &p)
   TRACEPUP;
 
   Method::pup(p);
+
+  p | N_groups_;
+  p | clight_;
+  p | eps_;
+  p | sigN_;
+  p | sigE_;
 }
 
 //----------------------------------------------------------------------
@@ -93,7 +119,7 @@ void EnzoMethodRadiationTransport::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodRadiationTransport::timestep ( Block * block ) const throw()
+double EnzoMethodRadiationTransport::timestep ( Block * block ) throw()
 {
   Data * data = block->data();
   Field field = data->field();
@@ -111,10 +137,8 @@ double EnzoMethodRadiationTransport::timestep ( Block * block ) const throw()
   if (rank >= 3) h_min = std::min(h_min,hz);
 
   const EnzoConfig * enzo_config = enzo::config();
-  const double clight = enzo_config->method_radiation_transport_clight;
 
-
-  return h_min / (3*clight);
+  return h_min / (3*clight_);
 }
 
 
@@ -122,13 +146,12 @@ double EnzoMethodRadiationTransport::timestep ( Block * block ) const throw()
 
 double EnzoMethodRadiationTransport::flux_function (double U_l, double U_lplus1,
 					   double Q_l, double Q_lplus1,  
-					   std::string type,
-					   double clight) 
+					   std::string type) 
 					   throw()
 {
   // returns face-flux of a cell at index idx
   if (type == "GLF") {
-    return 0.5*(  Q_l+Q_lplus1 - clight*(U_lplus1-U_l) ); 
+    return 0.5*(  Q_l+Q_lplus1 - clight_*(U_lplus1-U_l) ); 
   }
 
   else {
@@ -139,21 +162,21 @@ double EnzoMethodRadiationTransport::flux_function (double U_l, double U_lplus1,
 }
 
 double EnzoMethodRadiationTransport::deltaQ_faces (double U_l, double U_lplus1, double U_lminus1,
-                                                  double Q_l, double Q_lplus1, double Q_lminus1,
-                                                  double clight) throw()
+                                                  double Q_l, double Q_lplus1, double Q_lminus1)
+                                                  throw()
 {
   // calls flux_function(), and calculates Q_{i-1/2} - Q_{i+1/2}
   
-  return flux_function(U_lminus1, U_l, Q_lminus1, Q_l, "GLF", clight) - flux_function(U_l, U_lplus1, Q_l, Q_lplus1, "GLF", clight); 
+  return flux_function(U_lminus1, U_l, Q_lminus1, Q_l, "GLF") - flux_function(U_l, U_lplus1, Q_l, Q_lplus1, "GLF"); 
 }
 
 
 
-void EnzoMethodRadiationTransport::get_reduced_variables (long double * chi, long double (*n)[3], int i, double clight,
+void EnzoMethodRadiationTransport::get_reduced_variables (double * chi, double (*n)[3], int i,
                                                          enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz) throw()
 {
         double Fnorm = sqrt(Fx[i]*Fx[i] + Fy[i]*Fy[i] + Fz[i]*Fz[i]);
-        long double f = Fnorm / (clight*N[i]); // reduced flux
+        double f = Fnorm / (clight_*N[i]); // reduced flux
         *chi = (3 + 4*f*f) / (5 + 2*sqrt(4-3*f*f));
         (*n)[0] = Fx[i]/Fnorm;
         (*n)[1] = Fy[i]/Fnorm; 
@@ -161,8 +184,8 @@ void EnzoMethodRadiationTransport::get_reduced_variables (long double * chi, lon
 }
 
 void EnzoMethodRadiationTransport::get_pressure_tensor (Block * block, 
-                       enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz, 
-                       double clight) throw()
+                       enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz) 
+                       throw()
 {
   Field field = block->data()->field();
   int mx,my,mz;  
@@ -194,8 +217,8 @@ void EnzoMethodRadiationTransport::get_pressure_tensor (Block * block,
    for (int iy=gy-1; iy<my-gy+1; iy++) {
     for (int ix=gx-1; ix<mx-gx+1; ix++) {
       int i = INDEX(ix,iy,iz,mx,my); //index of current cell
-      long double chi, n[3]; 
-      get_reduced_variables(&chi, &n, i, clight, N, Fx, Fy, Fz);
+      double chi, n[3]; 
+      get_reduced_variables(&chi, &n, i, N, Fx, Fy, Fz);
       P00[i] = N[i] * ( 0.5*(1.0-chi) + 0.5*(3.0*chi - 1)*n[0]*n[0] );
       P10[i] = N[i] * 0.5*(3.0*chi - 1)*n[1]*n[0];
       P01[i] = N[i] * 0.5*(3.0*chi - 1)*n[0]*n[1];
@@ -214,7 +237,7 @@ void EnzoMethodRadiationTransport::get_pressure_tensor (Block * block,
 void EnzoMethodRadiationTransport::get_U_update (Block * block, double * N_update, 
                        double * Fx_update, double * Fy_update, double * Fz_update, 
                        enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz,
-                       double hx, double hy, double hz, double dt, double clight, 
+                       double hx, double hy, double hz, double dt, 
                        int i, int idx, int idy, int idz) throw()
 {
   Field field = block->data()->field();
@@ -234,69 +257,66 @@ void EnzoMethodRadiationTransport::get_U_update (Block * block, double * N_updat
 
   // if rank >= 1
   *N_update += dt/hx * deltaQ_faces( N[i],  N[i+idx],  N[i-idx],
-                                   Fx[i], Fx[i+idx], Fx[i-idx], 
-                                   clight );
+                                   Fx[i], Fx[i+idx], Fx[i-idx] );
     
   *Fx_update += dt/hx * deltaQ_faces(Fx[i], Fx[i+idx], Fx[i-idx],
-                                   clight*clight*P00[i],
-                                   clight*clight*P00[i+idx],
-                                   clight*clight*P00[i-idx], clight);
+                                   clight_*clight_*P00[i],
+                                   clight_*clight_*P00[i+idx],
+                                   clight_*clight_*P00[i-idx] );
 
   // if rank >= 2
   *N_update += dt/hy * deltaQ_faces( N[i],  N[i+idy],  N[i-idy],
-                                   Fy[i], Fy[i+idy], Fy[i-idy], 
-                                   clight );
+                                   Fy[i], Fy[i+idy], Fy[i-idy] ); 
     
   *Fx_update += dt/hy * deltaQ_faces(Fx[i], Fx[i+idy], Fx[i-idy],
-                                   clight*clight*P10[i],
-                                   clight*clight*P10[i+idy],
-                                   clight*clight*P10[i-idy], clight);
+                                   clight_*clight_*P10[i],
+                                   clight_*clight_*P10[i+idy],
+                                   clight_*clight_*P10[i-idy] );
 
   *Fy_update += dt/hx * deltaQ_faces(Fy[i], Fy[i+idx], Fy[i-idx],
-                                   clight*clight*P01[i],
-                                   clight*clight*P01[i+idx],
-                                   clight*clight*P01[i-idx], clight);
+                                   clight_*clight_*P01[i],
+                                   clight_*clight_*P01[i+idx],
+                                   clight_*clight_*P01[i-idx] );
 
   *Fy_update += dt/hy * deltaQ_faces(Fy[i], Fy[i+idy], Fy[i-idy],
-                                   clight*clight*P11[i],
-                                   clight*clight*P11[i+idy],
-                                   clight*clight*P11[i-idy], clight);
+                                   clight_*clight_*P11[i],
+                                   clight_*clight_*P11[i+idy],
+                                   clight_*clight_*P11[i-idy] );
 
 
    // if rank >= 3
   *N_update += dt/hz * deltaQ_faces( N[i],  N[i+idz],  N[i-idz],
-                                   Fz[i], Fz[i+idz], Fz[i-idz], 
-                                   clight );  
+                                   Fz[i], Fz[i+idz], Fz[i-idz] );
 
   *Fx_update += dt/hz * deltaQ_faces(Fx[i], Fx[i+idz], Fx[i-idz],
-                                   clight*clight*P20[i],
-                                   clight*clight*P20[i+idz],
-                                   clight*clight*P20[i-idz], clight);
+                                   clight_*clight_*P20[i],
+                                   clight_*clight_*P20[i+idz],
+                                   clight_*clight_*P20[i-idz] );
 
   *Fy_update += dt/hz * deltaQ_faces(Fy[i], Fy[i+idz], Fy[i-idz],
-                                   clight*clight*P21[i],
-                                   clight*clight*P21[i+idz],
-                                   clight*clight*P21[i-idz], clight);
+                                   clight_*clight_*P21[i],
+                                   clight_*clight_*P21[i+idz],
+                                   clight_*clight_*P21[i-idz]);
 
   *Fz_update += dt/hx * deltaQ_faces(Fz[i], Fz[i+idx], Fz[i-idx],
-                                   clight*clight*P02[i],
-                                   clight*clight*P02[i+idx],
-                                   clight*clight*P02[i-idx], clight);
+                                   clight_*clight_*P02[i],
+                                   clight_*clight_*P02[i+idx],
+                                   clight_*clight_*P02[i-idx]);
 
   *Fz_update += dt/hy * deltaQ_faces(Fz[i], Fz[i+idy], Fz[i-idy],
-                                   clight*clight*P12[i],
-                                   clight*clight*P12[i+idy],
-                                   clight*clight*P12[i-idy], clight);
+                                   clight_*clight_*P12[i],
+                                   clight_*clight_*P12[i+idy],
+                                   clight_*clight_*P12[i-idy]);
 
   *Fz_update += dt/hz * deltaQ_faces(Fz[i], Fz[i+idz], Fz[i-idz],
-                                   clight*clight*P22[i],
-                                   clight*clight*P22[i+idz],
-                                   clight*clight*P22[i-idz], clight);
+                                   clight_*clight_*P22[i],
+                                   clight_*clight_*P22[i+idz],
+                                   clight_*clight_*P22[i-idz]);
 
 
 }
 
-void EnzoMethodRadiationTransport::transport_photons ( Block * block, double clight ) throw()
+void EnzoMethodRadiationTransport::transport_photons ( Block * block ) throw()
 {
   // TODO: Make Nnew, Fxnew, Fynew, Fznew input parameters so that we don't need
   // the loop at the end that copies the values over to the original fields 
@@ -370,7 +390,7 @@ void EnzoMethodRadiationTransport::transport_photons ( Block * block, double cli
   //
 
   //calculate the pressure tensor
-  get_pressure_tensor(block, N, Fx, Fy, Fz, clight);
+  get_pressure_tensor(block, N, Fx, Fy, Fz);
 
   for (int iz=gz; iz<mz-gz; iz++) {
     for (int iy=gy; iy<my-gy; iy++) {
@@ -381,7 +401,7 @@ void EnzoMethodRadiationTransport::transport_photons ( Block * block, double cli
         // TODO: Just pass in *new variable instead of update variable so you don't
         // have to do the += steps after
         get_U_update( block, &N_update, &Fx_update, &Fy_update, &Fz_update,
-                             N, Fx, Fy, Fz, hx, hy, hz, dt, clight,
+                             N, Fx, Fy, Fz, hx, hy, hz, dt,
                              i, idx, idy, idz ); 
         // get updated fluxes
         Fxnew[i] += Fx_update;
@@ -424,16 +444,38 @@ void EnzoMethodRadiationTransport::compute_ (Block * block) throw()
 {
   const EnzoConfig * enzo_config = enzo::config();
   
-  const int N_groups = enzo_config->method_radiation_transport_N_groups;
+  //int N_groups = enzo_config->method_radiation_transport_N_groups;
   const double min_freq = enzo_config->method_radiation_transport_min_freq;
   const double max_freq = enzo_config->method_radiation_transport_max_freq;
   const std::string flux_function = enzo_config->method_radiation_transport_flux_function;
-  const double clight = enzo_config->method_radiation_transport_clight;
+
+  // store frequency group attributes as ScalarData variables
+  Scalar<double> scalar = block->data()->scalar_double();
+
+  // should make the frequency bin centers and widths input parameters,
+  // with the defaults corresponding to HI, HeI, and HeII ionization 
+  //N_groups = 3;//enzo_config->method_radiation_transport_N_groups;
+
+  //these will be input parameters eventually...
+  std::vector<double> nu_ion = {3.288e15, 5.946e15, 1.316e16}; //HI, HeI, HeII
+  std::vector<double> bin_lower = {0.5*nu_ion[0], 0.5*(nu_ion[1]-nu_ion[0]), 0.5*(nu_ion[2]-nu_ion[1])};
+  std::vector<double> bin_upper = {0.5*(nu_ion[1]-nu_ion[0]), 0.5*(nu_ion[2]-nu_ion[1]), 2.0*nu_ion[2]};
+  // should just pass bin_edges parameter
   
-  // implement for only one frequency bin for now
-  // Will need to call these functions in a loop over all the frequency groups
-  // Need to get a frequency spectrum for the photons somehow (which SED???)
- 
-  this->transport_photons(block, clight);
+  std::vector<double> eps  = {13.60, 24.59, 54.42}; // in eV, convert to cgs by multiplying by cello::erg_eV
+  std::vector<double> sigN = {5.475e-14, 9.492e-16, 1.369e-14}; // in cm^2
+  std::vector<double> sigE = {5.475e-14, 9.492e-16, 1.369e-14}; // in cm^2
+
+
+  for (int i=0; i<N_groups_; i++) {
+    std::string istring = std::to_string(i);
+    *scalar.value(eps_ [i]) = eps [i]*cello::erg_eV;
+    *scalar.value(sigE_[i]) = sigE[i];
+    *scalar.value(sigN_[i]) = sigN[i];
+  }
+
+  // add parameter to transport_photons (+inject_photons, etc.) that specifies which photon group
+  // you're using
+  this->transport_photons(block);
 
 }

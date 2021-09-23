@@ -673,7 +673,9 @@ Method * EnzoProblem::create_method_
     method = new EnzoMethodRadiationInjection();
   } else if (name == "radiation_transport") {
 
-    method = new EnzoMethodRadiationTransport();
+    method = new EnzoMethodRadiationTransport(
+                 enzo_config->method_radiation_transport_N_groups,
+                 enzo_config->method_radiation_transport_clight);
   } else {
 
     // Fallback to Cello method's
