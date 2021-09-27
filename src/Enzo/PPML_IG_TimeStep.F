@@ -47,19 +47,19 @@ c     See LICENSE_PPML file for license and copyright information
                CGA=CG+VAH
                DSC=CGA**2-4.d0*VAX*CG
                IF(DSC.LT.0.) DSC=0.
-               CFSX=dsqrt(DSC)
+               CFSX=dsqrt(1.0d0*DSC)
                CGS=dsqrt((CGA+CFSX)/2.d0)
-               TAUX=DX/(DABS(vx(I,J,K))+CGS)
+               TAUX=DX/(DABS(1.0d0*vx(I,J,K))+CGS)
                DSC=CGA**2-4.d0*VAY*CG
                IF(DSC.LT.0.) DSC=0.
-               CFSY=dsqrt(DSC)
-               CGS=dsqrt((CGA+CFSY)/2.d0)
-               TAUY=DY/(DABS(vy(I,J,K))+CGS)
+               CFSY=dsqrt(1.0d0*DSC)
+               CGS=dsqrt(1.0d0*(CGA+CFSY)/2.d0)
+               TAUY=DY/(DABS(1.0d0*vy(I,J,K))+CGS)
                DSC=CGA**2-4.d0*VAZ*CG
                IF(DSC.LT.0.) DSC=0.
-               CFSZ=dsqrt(DSC)
-               CGS=dsqrt((CGA+CFSZ)/2.d0)
-               TAUZ=DZ/(DABS(vz(I,J,K))+CGS)
+               CFSZ=dsqrt(1.0d0*DSC)
+               CGS=dsqrt(1.0d0*(CGA+CFSZ)/2.d0)
+               TAUZ=DZ/(DABS(1.0d0*vz(I,J,K))+CGS)
 
                DTMX=MIN(DTMX,TAUX)
                DTMY=MIN(DTMY,TAUY)

@@ -342,7 +342,7 @@ int EnzoBlock::SolveMHDEquationsIG ( enzo_float dt, enzo_float gamma )
 
     /* current PPML-IG implementation only supports 3D and does not support color fields */	
 
-    double b0[3] = { 0.0, 0.0, 0.0 };
+    enzo_float b0[3] = { 0.0, 0.0, 0.0 };
       FORTRAN_NAME(ppml_ig)
 	(density,velox,   veloy,   veloz,   bfieldx,   bfieldy,   bfieldz,   pressure,
 	 dens_rx,velox_rx,veloy_rx,veloz_rx,bfieldx_rx,bfieldy_rx,bfieldz_rx,press_rx,
