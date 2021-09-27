@@ -66,7 +66,8 @@ void Block::stopping_begin_()
     Method * method;
     double dt_block = std::numeric_limits<double>::max();
     while ((method = problem->method(index++))) {
-      dt_block = std::min(dt_block,method->timestep(this));
+      double dt_method = method->timestep(this);
+      dt_block = std::min(dt_block,dt_method);
     }
 
     // Reduce timestep to coincide with scheduled output if needed

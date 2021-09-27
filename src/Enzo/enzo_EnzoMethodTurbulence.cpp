@@ -155,7 +155,7 @@ void EnzoMethodTurbulence::compute ( Block * block) throw()
     }
   }
 
-  CkCallback callback (CkIndex_EnzoBlock::p_method_turbulence_end(NULL),
+  CkCallback callback (CkIndex_EnzoBlock::r_method_turbulence_end(NULL),
 		       enzo_block->proxy_array());
   enzo_block->contribute(n*sizeof(double),g,r_method_turbulence_type,callback);
 }
@@ -191,7 +191,7 @@ CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs)
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::p_method_turbulence_end(CkReductionMsg * msg)
+void EnzoBlock::r_method_turbulence_end(CkReductionMsg * msg)
 {
   TRACE_TURBULENCE;  
   performance_start_(perf_compute,__FILE__,__LINE__);

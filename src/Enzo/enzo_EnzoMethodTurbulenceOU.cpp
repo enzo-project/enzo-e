@@ -37,7 +37,7 @@
    }                                                            \
    avg /= count;                                                \
    CkPrintf ("FIELD_STATS %s  %g %g %g\n",NAME,min,avg,max);    \
-   }
+  }
 #else
 #   define CHECK_FIELD(VALUES,NAME) /* ... */
 #   define FIELD_STATS(NAME,VALUES,mx,my,mz,gx,gy,gz) /* ... */
@@ -88,7 +88,18 @@ EnzoMethodTurbulenceOU::EnzoMethodTurbulenceOU
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
 
-  refresh->add_all_fields();
+  //  refresh->add_all_fields();
+  //  refresh->add_field ("density");
+  refresh->add_field ("density");
+  refresh->add_field ("velocity_x");
+  refresh->add_field ("velocity_y");
+  refresh->add_field ("velocity_z");
+  refresh->add_field ("resid_velocity_x");
+  refresh->add_field ("resid_velocity_y");
+  refresh->add_field ("resid_velocity_z");
+  refresh->add_field ("work_4");
+  refresh->add_field ("work_5");
+  refresh->add_field ("work_6");
 
   // Call fortran initializer
   
@@ -128,7 +139,22 @@ void EnzoMethodTurbulenceOU::pup (PUP::er &p)
   TRACEPUP;
 
   Method::pup(p);
-
+  p | gamma_;
+  p | apply_cooling_;
+  p | apply_forcing_;
+  p | apply_injection_rate_;
+  p | cooling_term_;
+  p | hc_alpha_; 
+  p | hc_sigma_;
+  p | injection_rate_;
+  p | kfi_;
+  p | kfa_;
+  p | mach_;
+  p | olap_;
+  p | read_sol_;
+  p | sol_weight_;
+  p | totemp_;
+  p | update_solution_;
 }
 
 //----------------------------------------------------------------------
@@ -169,10 +195,10 @@ void EnzoMethodTurbulenceOU::compute ( Block * block) throw()
 
     // Restore work array
     double * field_work_1 =  (double *)field.values("work_1");
-    CHECK_FIELD(field_work_1,"work_1");
     double * field_work_2 =  (double *)field.values("work_2");
-    CHECK_FIELD(field_work_2,"work_2");
     double * field_work_3 =  (double *)field.values("work_3");
+    CHECK_FIELD(field_work_1,"work_1");
+    CHECK_FIELD(field_work_2,"work_2");
     CHECK_FIELD(field_work_3,"work_3");
     const int m = mx*my*mz;
     double * array_work = new double [3*m];
@@ -267,8 +293,11 @@ void EnzoMethodTurbulenceOU::compute_shift
            n,(n==4));
   for (int i=0; i<n; i++) r_gvld0[i] = data[id++];
   delete msg;
-  
-  long double r_avld1[2+1] = {2.0, 0.0,0.0};
+
+  const int num_reduce = 4;
+  long double r_avld1[num_reduce+1];
+  std::fill_n(r_avld1,num_reduce+1,0.0);
+  r_avld1[0] = num_reduce;
 
   if (enzo_block->is_leaf()) {
   
@@ -280,18 +309,19 @@ void EnzoMethodTurbulenceOU::compute_shift
     int iapply_injection_rate = apply_injection_rate_ ? 1 : 0;
     int cello_apply_injection_rate;
     double r_gv[4] = {r_gvld0[0],r_gvld0[1],r_gvld0[2],r_gvld0[3]};
-    double r_av[2] = {0.0,0.0};
+    double r_av[num_reduce];
+    std::fill_n(r_av,num_reduce,0.0);
 
     Field field = enzo_block->data()->field();
     double * field_density     = (double *)field.values("density");
-    CHECK_FIELD(field_density,"density");
     double * field_momentum_x  = (double *)field.values("velocity_x");
-    CHECK_FIELD(field_momentum_x,"velocity_x");
     double * field_momentum_y  = (double *)field.values("velocity_y");
-    CHECK_FIELD(field_momentum_y,"velocity_y");
     double * field_momentum_z  = (double *)field.values("velocity_z");
-    CHECK_FIELD(field_momentum_z,"velocity_z");
     double * field_jacobian    = (double *)field.values("jacobian");
+    CHECK_FIELD(field_density,"density");
+    CHECK_FIELD(field_momentum_x,"velocity_x");
+    CHECK_FIELD(field_momentum_y,"velocity_y");
+    CHECK_FIELD(field_momentum_z,"velocity_z");
     CHECK_FIELD(field_jacobian,"jacobian");
     
     // convert to conservative form
@@ -313,10 +343,10 @@ void EnzoMethodTurbulenceOU::compute_shift
 
     // Restore work array
     double * field_work_1 = (double *)field.values("work_1");
-    CHECK_FIELD(field_work_1,"work_1");
     double * field_work_2 = (double *)field.values("work_2");
-    CHECK_FIELD(field_work_2,"work_2");
     double * field_work_3 = (double *)field.values("work_3");
+    CHECK_FIELD(field_work_1,"work_1");
+    CHECK_FIELD(field_work_2,"work_2");
     CHECK_FIELD(field_work_3,"work_3");
     const int m = mx*my*mz;
     double * array_work = new double [3*m];
@@ -356,7 +386,7 @@ void EnzoMethodTurbulenceOU::compute_shift
     FIELD_STATS("momentum_y shift stop ",field_momentum_y,mx,my,mz,gx,gy,gz);
     FIELD_STATS("momentum_z shift stop ",field_momentum_z,mx,my,mz,gx,gy,gz);
 
-    for (int i=0; i<4+1; i++) r_avld1[i+1] = r_av[i];
+    for (int i=0; i<2; i++) r_avld1[i+1] = r_av[i];
 
     // revert to code units
     for (int iz=0; iz<mz; iz++) {
@@ -381,12 +411,85 @@ void EnzoMethodTurbulenceOU::compute_shift
     delete [] array_work;
 #endif  
   }
+
+  Field field = enzo_block->data()->field();
+  const bool include_ppml_divb = (field.values("bfieldx") != nullptr);
+  if (include_ppml_divb) {
+    enzo_float * bfield[3] =
+      { (enzo_float *) field.values("bfieldx"),
+        (enzo_float *) field.values("bfieldy"),
+        (enzo_float *) field.values("bfieldz") };
+
+    enzo_float * bfield_rx[3] =
+      { (enzo_float *) field.values("bfieldx_rx"),
+        (enzo_float *) field.values("bfieldy_rx"),
+        (enzo_float *) field.values("bfieldz_rx") };
+
+    enzo_float * bfield_ry[3] =
+      { (enzo_float *) field.values("bfieldx_ry"),
+        (enzo_float *) field.values("bfieldy_ry"),
+        (enzo_float *) field.values("bfieldz_ry") };
+
+    enzo_float * bfield_rz[3] =
+      { (enzo_float *) field.values("bfieldx_rz"),
+        (enzo_float *) field.values("bfieldy_rz"),
+        (enzo_float *) field.values("bfieldz_rz") };
+
+    CHECK_FIELD(field_bfield,"bfieldx");
+    CHECK_FIELD(field_bfield,"bfieldy");
+    CHECK_FIELD(field_bfield,"bfieldz");
+    CHECK_FIELD(field_work_2,"bfieldx_rx");
+    CHECK_FIELD(field_work_3,"bfieldx_ry");
+    CHECK_FIELD(field_work_3,"bfieldx_rz");
+    CHECK_FIELD(field_work_2,"bfieldy_rx");
+    CHECK_FIELD(field_work_3,"bfieldy_ry");
+    CHECK_FIELD(field_work_3,"bfieldy_rz");
+    CHECK_FIELD(field_work_2,"bfieldz_rx");
+    CHECK_FIELD(field_work_3,"bfieldz_ry");
+    CHECK_FIELD(field_work_3,"bfieldz_rz");
+    
+    int mx,my,mz;
+    int nx,ny,nz;
+    int gx,gy,gz;
+    field.size(&nx,&ny,&nz);
+    field.ghost_depth(0,&gx,&gy,&gz);
+    field.dimensions(0,&mx,&my,&mz);
+    int dx = 1;
+    int dy = mx;
+    int dz = mx*my;
+    r_avld1[3] = 0.0;
+    r_avld1[4] = 0.0;
+    for (int iz=0; iz<nz; iz++) {
+      for (int iy=0; iy<ny; iy++) {
+	for (int ix=0; ix<nx; ix++) {
+          int i = (ix+gx) + mx*((iy+gy) + my*(iz+gz));
+          ++r_avld1[4];
+          r_avld1[3] += fabs(bfield_rx[0][i+dx] - bfield_rx[0][i-dx] +
+                             bfield_rx[0][i+dx+dy] - bfield_rx[0][i-dx+dy] +
+                             bfield_rx[0][i+dx+dz] - bfield_rx[0][i-dx+dz] +
+                             bfield_rx[0][i+dx+dy+dz] - bfield_rx[0][i-dx+dy+dz]
+                             +
+                             bfield_ry[1][i+dy] - bfield_ry[1][i-dy] +
+                             bfield_ry[1][i+dy+dx] - bfield_ry[1][i-dy+dx] +
+                             bfield_ry[1][i+dy+dz] - bfield_ry[1][i-dy+dz] +
+                             bfield_ry[1][i+dy+dx+dz] - bfield_ry[1][i-dy+dx+dz]
+                             +
+                             bfield_rz[2][i+dz] - bfield_rz[2][i-dz] +
+                             bfield_rz[2][i+dz+dx] - bfield_rz[2][i-dz+dx] +
+                             bfield_rz[2][i+dz+dy] - bfield_rz[2][i-dz+dy] +
+                             bfield_rz[2][i+dz+dx+dy] - bfield_rz[2][i-dz+dx+dy]);
+        }
+      }
+    }
+  } else {
+    r_avld1[3] = r_avld1[4] = 0.0;
+  }
   
+
   CkCallback callback = CkCallback
     (CkIndex_EnzoBlock::r_method_turbulence_ou_update(nullptr), 
      enzo::block_array());
-  n = 2;
-  enzo_block->contribute((n+1)*sizeof(long double), r_avld1, 
+  enzo_block->contribute((num_reduce+1)*sizeof(long double), r_avld1, 
                          sum_long_double_n_type, callback);
 }
 
@@ -402,12 +505,13 @@ void EnzoMethodTurbulenceOU::compute_update
 (EnzoBlock * enzo_block, CkReductionMsg *msg)
 {
   long double * data = (long double *) msg->getData();
-  long double r_avld0[2];
+  const int num_reduce = 4;
+  long double r_avld0[num_reduce+1];
   int id=0;
   int n = data[id++];
-  ASSERT1 ("EnzoMethodTurbulenceOU::compute_shift()",
-           "Expected length 2 but actual length %d",
-           n,(n==2));
+  ASSERT2 ("EnzoMethodTurbulenceOU::compute_shift()",
+           "Expected length %d but actual length %d",
+           num_reduce,n,(n==num_reduce));
   for (int i=0; i<n; i++) r_avld0[i] = data[id++];
   delete msg;
 
@@ -422,28 +526,34 @@ void EnzoMethodTurbulenceOU::compute_update
 
   Field field = enzo_block->data()->field();
   double * field_density     = (double *)field.values("density");
-  CHECK_FIELD(field_density,"density");
   double * field_momentum_x  = (double *)field.values("velocity_x");
-  CHECK_FIELD(field_momentum_x,"velocity_x");
   double * field_momentum_y  = (double *)field.values("velocity_y");
-  CHECK_FIELD(field_momentum_y,"velocity_y");
   double * field_momentum_z  = (double *)field.values("velocity_z");
-  CHECK_FIELD(field_momentum_z,"velocity_z");
   double * field_energy      = (double *)field.values("total_energy");
-  CHECK_FIELD(field_energy,"total_energy");
   double * resid_density     = (double *)field.values("resid_density");
-  CHECK_FIELD(resid_density,"resid_density");
   double * resid_momentum_x  = (double *)field.values("resid_velocity_x");
-  CHECK_FIELD(resid_momentum_x,"resid_velocity_x");
   double * resid_momentum_y  = (double *)field.values("resid_velocity_y");
-  CHECK_FIELD(resid_momentum_y,"resid_velocity_y");
   double * resid_momentum_z  = (double *)field.values("resid_velocity_z");
-  CHECK_FIELD(resid_momentum_z,"resid_velocity_z");
   double * resid_energy      = (double *)field.values("resid_total_energy");
-  CHECK_FIELD(resid_energy,"resid_energy");
   double * field_temperature = (double *)field.values("temperature");
+  CHECK_FIELD(field_density,"density");
+  CHECK_FIELD(field_momentum_x,"velocity_x");
+  CHECK_FIELD(field_momentum_y,"velocity_y");
+  CHECK_FIELD(field_momentum_z,"velocity_z");
+  CHECK_FIELD(field_energy,"total_energy");
+  CHECK_FIELD(resid_density,"resid_density");
+  CHECK_FIELD(resid_momentum_x,"resid_velocity_x");
+  CHECK_FIELD(resid_momentum_y,"resid_velocity_y");
+  CHECK_FIELD(resid_momentum_z,"resid_velocity_z");
+  CHECK_FIELD(resid_energy,"resid_energy");
   CHECK_FIELD(field_temperature,"temperature");
 
+  const bool include_ppml_divb = (field.values("bfieldx") != nullptr);
+  if (include_ppml_divb && enzo_block->index().is_root()) {
+    Monitor * monitor = cello::monitor();
+    monitor->print ("Method","<|div(b)|>  %.17Lg",
+		    r_avld0[2]/8.0/r_avld0[3]);
+  }
   int mx,my,mz;
   int nx,ny,nz;
   field.dimensions(0,&mx,&my,&mz);
@@ -452,25 +562,21 @@ void EnzoMethodTurbulenceOU::compute_update
 
   double * turbAcc = new double [4*m];
   double * field_work_4 = (double *)field.values("work_4");
-  CHECK_FIELD(field_work_4,"work_4");
   double * field_work_5 = (double *)field.values("work_5");
-  CHECK_FIELD(field_work_5,"work_5");
   double * field_work_6 = (double *)field.values("work_6");
-  CHECK_FIELD(field_work_6,"work_6");
   double * field_work_7 = (double *)field.values("work_7");
+  CHECK_FIELD(field_work_4,"work_4");
+  CHECK_FIELD(field_work_5,"work_5");
+  CHECK_FIELD(field_work_6,"work_6");
   CHECK_FIELD(field_work_7,"work_7");
-  std::copy_n (field_work_4,m,turbAcc+0*m);
-  std::copy_n (field_work_5,m,turbAcc+1*m);
-  std::copy_n (field_work_6,m,turbAcc+2*m);
-  std::copy_n (field_work_7,m,turbAcc+3*m);
-  
+
   std::fill_n(resid_density,m,0.0);
   std::fill_n(resid_momentum_x,m,0.0);
   std::fill_n(resid_momentum_y,m,0.0);
   std::fill_n(resid_momentum_z,m,0.0);
   std::fill_n(resid_energy,m,0.0);
 
-        // convert to conservative form
+  // convert to conservative form
   for (int iz=0; iz<mz; iz++) {
     for (int iy=0; iy<my; iy++) {
       for (int ix=0; ix<mx; ix++) {
@@ -484,30 +590,43 @@ void EnzoMethodTurbulenceOU::compute_update
     }
   }
 
+  int gx,gy,gz;
+  field.ghost_depth(0,&gx,&gy,&gz);
+  const int i0 = gx + mx*(gy + my*gz);
+
+  for (int iz=0; iz<nz; iz++) {
+    for (int iy=0; iy<ny; iy++) {
+      for (int ix=0; ix<nx; ix++) {
+        int i=ix+mx*(iy+my*iz);
+        turbAcc[0+4*i] = field_work_4[i+i0];
+        turbAcc[1+4*i] = field_work_5[i+i0];
+        turbAcc[2+4*i] = field_work_6[i+i0];
+        turbAcc[3+4*i] = field_work_7[i+i0];
+      }
+    }
+  }
   // Restore work array
   double * field_work_1 =  (double *)field.values("work_1");
-  CHECK_FIELD(field_work_1,"work_1");
   double * field_work_2 =  (double *)field.values("work_2");
-  CHECK_FIELD(field_work_2,"work_2");
   double * field_work_3 =  (double *)field.values("work_3");
+  CHECK_FIELD(field_work_1,"work_1");
+  CHECK_FIELD(field_work_2,"work_2");
   CHECK_FIELD(field_work_3,"work_3");
   double * array_work = new double [3*m];
   std::copy_n (field_work_1,m,array_work+0*m);
   std::copy_n (field_work_2,m,array_work+1*m);
   std::copy_n (field_work_3,m,array_work+2*m);
 
-    int gx,gy,gz;
-    field.ghost_depth(0,&gx,&gy,&gz);
-    FIELD_STATS("density update start",field_density,mx,my,mz,gx,gy,gz);
-    FIELD_STATS("momentum_x update start",field_momentum_x,mx,my,mz,gx,gy,gz);
-    FIELD_STATS("momentum_y update start",field_momentum_y,mx,my,mz,gx,gy,gz);
-    FIELD_STATS("momentum_z update start",field_momentum_z,mx,my,mz,gx,gy,gz);
-    FIELD_STATS("energy update start",field_energy,mx,my,mz,gx,gy,gz);
-    FIELD_STATS("work_1 update start",field_work_1,mx,my,mz,gx,gy,gz);
-    FIELD_STATS("work_2 update start",field_work_2,mx,my,mz,gx,gy,gz);
-    FIELD_STATS("work_3 update start",field_work_3,mx,my,mz,gx,gy,gz);
-    // index of first non-ghost value
-    const int i0 = gx + mx*(gy + my*gz);
+  FIELD_STATS("density update start",field_density,mx,my,mz,gx,gy,gz);
+  FIELD_STATS("momentum_x update start",field_momentum_x,mx,my,mz,gx,gy,gz);
+  FIELD_STATS("momentum_y update start",field_momentum_y,mx,my,mz,gx,gy,gz);
+  FIELD_STATS("momentum_z update start",field_momentum_z,mx,my,mz,gx,gy,gz);
+  FIELD_STATS("energy update start",field_energy,mx,my,mz,gx,gy,gz);
+  FIELD_STATS("work_1 update start",field_work_1,mx,my,mz,gx,gy,gz);
+  FIELD_STATS("work_2 update start",field_work_2,mx,my,mz,gx,gy,gz);
+  FIELD_STATS("work_3 update start",field_work_3,mx,my,mz,gx,gy,gz);
+  // index of first non-ghost value
+
   FORTRAN_NAME(turbforceupdate)
     (&mx, &my, &mz,
      &nx, &ny, &nz,
@@ -534,17 +653,12 @@ void EnzoMethodTurbulenceOU::compute_update
      &hc_sigma_,
      &totemp_,
      r_av );
-    FIELD_STATS("density update stop ",field_density,mx,my,mz,gx,gy,gz);
-    FIELD_STATS("momentum_x update stop ",field_momentum_x,mx,my,mz,gx,gy,gz);
-    FIELD_STATS("momentum_y update stop ",field_momentum_y,mx,my,mz,gx,gy,gz);
-    FIELD_STATS("momentum_z update stop ",field_momentum_z,mx,my,mz,gx,gy,gz);
-    FIELD_STATS("energy update stop ",field_energy,mx,my,mz,gx,gy,gz);
+  FIELD_STATS("density update stop ",field_density,mx,my,mz,gx,gy,gz);
+  FIELD_STATS("momentum_x update stop ",field_momentum_x,mx,my,mz,gx,gy,gz);
+  FIELD_STATS("momentum_y update stop ",field_momentum_y,mx,my,mz,gx,gy,gz);
+  FIELD_STATS("momentum_z update stop ",field_momentum_z,mx,my,mz,gx,gy,gz);
+  FIELD_STATS("energy update stop ",field_energy,mx,my,mz,gx,gy,gz);
 #endif
-
-    std::copy_n (turbAcc+0*m,m,field_work_4);
-    std::copy_n (turbAcc+1*m,m,field_work_5);
-    std::copy_n (turbAcc+2*m,m,field_work_6);
-    std::copy_n (turbAcc+3*m,m,field_work_7);
 
   // revert to code units
   for (int iz=0; iz<mz; iz++) {
@@ -559,7 +673,17 @@ void EnzoMethodTurbulenceOU::compute_update
       }
     }
   }
-
+  for (int iz=0; iz<nz; iz++) {
+    for (int iy=0; iy<ny; iy++) {
+      for (int ix=0; ix<nx; ix++) {
+        int i=ix+mx*(iy+my*iz);
+        field_work_4[i+i0] = turbAcc[0+4*i];
+        field_work_5[i+i0] = turbAcc[1+4*i];
+        field_work_6[i+i0] = turbAcc[2+4*i];
+        field_work_7[i+i0] = turbAcc[3+4*i];
+      }
+    }
+  }
   // Save work array
   std::copy_n (array_work+0*m,m,field_work_1);
   std::copy_n (array_work+1*m,m,field_work_2);

@@ -467,20 +467,20 @@ public: // attributes
 
   /// EnzoMethodTurbulenceOU
 
-  bool method_turbulence_apply_cooling; //
-  bool method_turbulence_apply_forcing; //
-  bool method_turbulence_apply_injection_rate; //
-  int method_turbulence_cooling_term; //
-  double method_turbulence_hc_alpha; //
-  double method_turbulence_hc_sigma; //
-  double method_turbulence_injection_rate; //
-  double method_turbulence_kfa; //
-  double method_turbulence_kfi; //
-  int method_turbulence_olap; //
-  bool method_turbulence_read_sol; //
-  double method_turbulence_sol_weight; //
-  double method_turbulence_totemp; //
-  bool method_turbulence_update_solution; //
+  bool method_turbulence_apply_cooling;
+  bool method_turbulence_apply_forcing;
+  bool method_turbulence_apply_injection_rate;
+  int method_turbulence_cooling_term;
+  double method_turbulence_hc_alpha;
+  double method_turbulence_hc_sigma;
+  double method_turbulence_injection_rate;
+  double method_turbulence_kfa;
+  double method_turbulence_kfi;
+  int method_turbulence_olap;
+  bool method_turbulence_read_sol;
+  double method_turbulence_sol_weight;
+  double method_turbulence_totemp;
+  bool method_turbulence_update_solution;
 
   /// EnzoMethodGrackle
   bool                       method_grackle_use_grackle;

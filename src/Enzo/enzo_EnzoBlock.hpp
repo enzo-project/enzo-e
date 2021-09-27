@@ -190,6 +190,9 @@ public: // interface
   /// Solve the mhd equations (with ppml), saving subgrid fluxes
   int SolveMHDEquations(enzo_float dt);
 
+  /// Solve the mhd equations (with ppml), saving subgrid fluxes
+  int SolveMHDEquationsIG(enzo_float dt, enzo_float gamma);
+
   /// Set EnzoBlock's dt (overloaded to update EnzoBlock::dt)
   virtual void set_dt (double dt) throw();
 
@@ -206,12 +209,15 @@ public: /// entry methods
 
   /// Perform the necessary reductions
   CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs);
-  CkReductionMsg * r_method_mhd_turbulence_it(int n, CkReductionMsg ** msgs);
+  CkReductionMsg * r_method_turbulence_mhd_ig(int n, CkReductionMsg ** msgs);
+  CkReductionMsg * r_method_turbulence_mhd_it(int n, CkReductionMsg ** msgs);
 
   /// Compute sum, min, and max of g values for EnzoMethodTurbulence
-  void p_method_turbulence_end(CkReductionMsg *msg);
-  void p_method_mhd_turbulence_it_end(CkReductionMsg *msg);
-
+  void r_method_turbulence_end(CkReductionMsg *msg);
+  void r_method_turbulence_mhd_it_end(CkReductionMsg *msg);
+  void r_method_turbulence_mhd_ig_end(CkReductionMsg *msg);
+  
+  
   void r_method_turbulence_ou_shift(CkReductionMsg *msg);
   void r_method_turbulence_ou_update(CkReductionMsg *msg);
   

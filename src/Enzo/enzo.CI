@@ -8,7 +8,8 @@
 module enzo {
 
   initnode void register_method_turbulence(void);
-  initnode void register_method_mhd_turbulence_it(void);
+  initnode void register_method_turbulence_mhd_it(void);
+//  initnode void register_method_turbulence_mhd_ig(void);
   initnode void mutex_init();
   initnode void mutex_init_bcg_iter();
   
@@ -85,8 +86,10 @@ module enzo {
   PUPable EnzoMethodPmUpdate;
   PUPable EnzoMethodPpm;
   PUPable EnzoMethodPpml;
+  PUPable EnzoMethodPpmlIG;
   PUPable EnzoMethodTurbulence;
   PUPable EnzoMethodTurbulenceMhdIT;
+//  PUPable EnzoMethodTurbulenceMhdIG;
   PUPable EnzoMethodTurbulenceOU;
 
   PUPable EnzoPhysicsCosmology;
@@ -130,8 +133,9 @@ module enzo {
     entry void p_set_msg_refine (MsgRefine * msg);
 
     // EnzoMethodTurbulence synchronization entry methods
-    entry void p_method_turbulence_end(CkReductionMsg *msg);
-    entry void p_method_mhd_turbulence_it_end(CkReductionMsg *msg);
+    entry void r_method_turbulence_end(CkReductionMsg *msg);
+    entry void r_method_turbulence_mhd_it_end(CkReductionMsg *msg);
+//    entry void r_method_turbulence_mhd_ig_end(CkReductionMsg *msg);
 
     entry void r_method_turbulence_ou_shift(CkReductionMsg *msg);
     entry void r_method_turbulence_ou_update(CkReductionMsg *msg);

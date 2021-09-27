@@ -60,35 +60,6 @@ enum {
 
 //----------------------------------------------------------------------
 
-enum {
-  index_mhd_turbulence_it_vad, // 0
-  index_mhd_turbulence_it_aad, // 1
-  index_mhd_turbulence_it_vvd, // 2
-  index_mhd_turbulence_it_vv,  // 3
-  index_mhd_turbulence_it_dvx, // 4
-  index_mhd_turbulence_it_dvy, // 5
-  index_mhd_turbulence_it_dvz, // 6
-  index_mhd_turbulence_it_dax, // 7
-  index_mhd_turbulence_it_day, // 8
-  index_mhd_turbulence_it_daz, // 9
-  index_mhd_turbulence_it_bx,  // 10
-  index_mhd_turbulence_it_by,  // 11
-  index_mhd_turbulence_it_bz,  // 12
-  index_mhd_turbulence_it_bb,  // 13
-  index_mhd_turbulence_it_bbod,// 14
-  index_mhd_turbulence_it_divb,// 15
-  index_mhd_turbulence_it_d,   // 16
-  index_mhd_turbulence_it_dd,  // 17
-  index_mhd_turbulence_it_lnd, // 18
-  index_mhd_turbulence_it_dlnd,// 19
-  index_mhd_turbulence_it_zones,//20
-  index_mhd_turbulence_it_mind,// 21
-  index_mhd_turbulence_it_maxd,// 22
-  max_mhd_turbulence_it_array//23
-};
-
-//----------------------------------------------------------------------
-
 enum enzo_sync_id {
   enzo_sync_id_cg = sync_id_last,
   enzo_sync_id_comoving_expansion,
@@ -147,18 +118,6 @@ enum return_enum {
 //----------------------------------------------------------------------
 
 const int field_undefined = -1;
-
-//----------------------------------------------------------------------
-
-struct enzo_fluxes
-{
-  long_int LeftFluxStartGlobalIndex [MAX_DIMENSION][MAX_DIMENSION];
-  long_int LeftFluxEndGlobalIndex   [MAX_DIMENSION][MAX_DIMENSION];
-  long_int RightFluxStartGlobalIndex[MAX_DIMENSION][MAX_DIMENSION];
-  long_int RightFluxEndGlobalIndex  [MAX_DIMENSION][MAX_DIMENSION];
-  enzo_float *LeftFluxes [MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
-  enzo_float *RightFluxes[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
-};
 
 //----------------------------------------------------------------------
 // Cello include file
@@ -229,7 +188,9 @@ extern "C" {
 #include "enzo_EnzoMethodPmUpdate.hpp"
 #include "enzo_EnzoMethodPpm.hpp"
 #include "enzo_EnzoMethodPpml.hpp"
+#include "enzo_EnzoMethodPpmlIG.hpp"
 #include "enzo_EnzoMethodTurbulence.hpp"
+// #include "enzo_EnzoMethodTurbulenceMhdIG.hpp"
 #include "enzo_EnzoMethodTurbulenceMhdIT.hpp"
 #include "enzo_EnzoMethodTurbulenceOU.hpp"
 

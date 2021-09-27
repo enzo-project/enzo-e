@@ -167,7 +167,7 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_turbulence_pressure,
        enzo_config->initial_turbulence_temperature,
        enzo_config->field_gamma);
-  } else if (type == "mhd_turbulence_it") {
+  } else if (type == "turbulence_mhd_it") {
     initial = new EnzoInitialTurbulenceMhdIT 
       (cycle,time, 
        enzo_config->initial_turbulence_density,

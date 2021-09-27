@@ -273,7 +273,6 @@ C     **********************************************************************
       
       damping = exp(-DtFreq/TDecay)
       dfact = sqrt(1.d0 - damping**2)
-      
       do j = 1, NModes
          do i = 1, 3
             do n = 1, 2
@@ -348,14 +347,13 @@ c***********************************************************************
       ol2k = ol2
       if (nk.eq.1) ol2k = 0
 
-      
-      timeUpdate = floor(time / DtFreq)
+      timeUpdate = (floor(time / DtFreq)+1)*DtFreq
       
       if ( cello_update_phases.ne.0. ) then
          totTime = totTime + dt
          if ( (time       .le. timeUpdate) .and.
      &        (timeUpdate .lt. time + dt)) then
-C     print*, 'updating phases'
+            print*, 'Updating phases'
             call updatePhases()
             call calcPhases()
             totTime = totTime - DtFreq
