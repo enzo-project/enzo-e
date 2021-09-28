@@ -78,16 +78,16 @@ public: // interface
    int nx, int ny, int nz,
    double h4[4], int IX, int IY, int IZ);
 
+protected: // functions
+ 
 /// Access the Sync counter for messages
-  Sync * psync_msg(Block * block)
+  Sync * psync_msg_(Block * block)
   {
     ScalarData<Sync> * scalar_data = block->data()->scalar_data_sync();
     ScalarDescr *      scalar_descr = cello::scalar_descr_sync();
     return scalar_data->value(scalar_descr,i_sync_msg_);
   }
 
-protected: // functions
-  
   char * allocate_array_ (int n, int type_data)
   {
     char * data;
@@ -174,8 +174,9 @@ protected: // attributes
   bool l_particle_displacements_;
   std::string particle_position_names_[3];
 
-  /// Count number of expected incoming messages if not a reader, to
-  /// call initial_done() when sync counter reached
+  /// Index of the Sync object for counting incoming messages if not
+  /// a reader; used to call initial_done() (only) after all expected
+  /// messages have been received
   int i_sync_msg_;
 };
 

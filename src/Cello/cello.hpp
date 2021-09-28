@@ -726,17 +726,6 @@ namespace cello {
   double          relative_cell_volume (int level);
   //----------------------------------------------------------------------
 
-  /// Scale the field, if it's in the make_field_conservative group,
-  /// by density
-  void mul_by_density
-  (int precision, void* values, int index_field,
-   const int m3[3], const int n3[3], const int i3[3]);
-  /// Unscale the field, if it's in the make_field_conservative group,
-  /// by density
-  void div_by_density
-  (int precision, void* values, int index_field,
-   const int m3[3], const int n3[3], const int i3[3]);
-
   /// Return the file name for the format and given arguments
   std::string expand_name
   (const std::vector <std::string> * file_name, int counter, Block * block);

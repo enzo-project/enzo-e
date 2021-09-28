@@ -160,7 +160,7 @@ module enzo {
     entry void p_set_msg_refine (MsgRefine * msg);
 
     // EnzoMethodTurbulence synchronization entry methods
-    entry void p_method_turbulence_end(CkReductionMsg *msg);
+    entry void r_method_turbulence_end(CkReductionMsg *msg);
 
     entry void p_initial_hdf5_recv(MsgInitial * msg_initial);
 

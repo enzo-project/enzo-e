@@ -36,7 +36,7 @@ class EnzoBlock : public CBase_EnzoBlock
 
   //----------------------------------------------------------------------
   // variables
-  
+
 public:
 
   // /// Cosmology
@@ -104,10 +104,10 @@ public: // interface
 
   /// Initialize the EnzoBlock chare array
   EnzoBlock ( process_type ip_source );
-  
+
   /// Initialize EnzoBlock using MsgRefine returned by creating process
   virtual void p_set_msg_refine(MsgRefine * msg);
-  
+
   /// Initialize an empty EnzoBlock
   EnzoBlock()
     :  CBase_EnzoBlock(),
@@ -116,17 +116,17 @@ public: // interface
   {
     performance_start_(perf_block);
     for (int i=0; i<MAX_DIMENSION; i++) {
-      GridLeftEdge[i] = 0; 
-      GridDimension[i] = 0; 
-      GridStartIndex[i] = 0; 
-      GridEndIndex[i] = 0; 
+      GridLeftEdge[i] = 0;
+      GridDimension[i] = 0;
+      GridStartIndex[i] = 0;
+      GridEndIndex[i] = 0;
       CellWidth[i] = 0.0;
     }
     performance_stop_(perf_block);
   }
 
   /// Initialize a migrated EnzoBlock
-  EnzoBlock (CkMigrateMessage *m) 
+  EnzoBlock (CkMigrateMessage *m)
     : CBase_EnzoBlock (m),
       dt(0.0),
       redshift(0.0)
@@ -134,10 +134,10 @@ public: // interface
     performance_start_(perf_block);
     TRACE("CkMigrateMessage");
     for (int i=0; i<MAX_DIMENSION; i++) {
-      GridLeftEdge[i] = 0; 
-      GridDimension[i] = 0; 
-      GridStartIndex[i] = 0; 
-      GridEndIndex[i] = 0; 
+      GridLeftEdge[i] = 0;
+      GridDimension[i] = 0;
+      GridStartIndex[i] = 0;
+      GridEndIndex[i] = 0;
       CellWidth[i] = 0.0;
     }
 #ifdef DEBUG_ENZO_BLOCK
@@ -156,13 +156,13 @@ public: // interface
   virtual ~EnzoBlock();
 
   //--------------------------------------------------
-  // Charm++ virtual 
+  // Charm++ virtual
   //--------------------------------------------------
 
-  virtual const CProxy_Block proxy_array() const 
+  virtual const CProxy_Block proxy_array() const
   { return thisProxy; }
 
-  virtual const CProxyElement_Block proxy_element() const 
+  virtual const CProxyElement_Block proxy_element() const
   { return thisProxy[thisIndex]; }
 
   /// Write attributes, e.g. to stdout for debugging
@@ -176,12 +176,12 @@ public: // interface
 
   /// Set the energy to provide minimal pressure support
   int SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
-			bool comoving_coordinates);
+                        bool comoving_coordinates);
 
   /// Solve the hydro equations using PPM
-  int SolveHydroEquations ( enzo_float time, 
-			    enzo_float dt,
-			    bool comoving_coordinates,
+  int SolveHydroEquations ( enzo_float time,
+                            enzo_float dt,
+                            bool comoving_coordinates,
                             bool single_flux_array);
 
   /// Solve the hydro equations using Enzo 3.0 PPM
@@ -195,7 +195,7 @@ public: // interface
 
   /// Set EnzoBlock's time (overloaded to update current time)
   virtual void set_time (double time) throw();
-  
+
   /// Set EnzoBlock's stopping criteria
   void set_stop (bool stop) throw();
 
@@ -208,10 +208,10 @@ public: /// entry methods
   CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs);
 
   /// Compute sum, min, and max of g values for EnzoMethodTurbulence
-  void p_method_turbulence_end(CkReductionMsg *msg);
+  void r_method_turbulence_end(CkReductionMsg *msg);
 
   void p_initial_hdf5_recv(MsgInitial * msg_initial);
-  
+
   /// TEMP
   double timestep() { return dt; }
 
@@ -226,36 +226,36 @@ public: /// entry methods
   //--------------------------------------------------
 
   /// EnzoSolverCg entry method: DOT ==> refresh P
-  void r_solver_cg_loop_0a (CkReductionMsg * msg) ;  
+  void r_solver_cg_loop_0a (CkReductionMsg * msg);
 
   /// EnzoSolverCg entry method: ==> refresh P
-  void r_solver_cg_loop_0b (CkReductionMsg * msg) ;  
+  void r_solver_cg_loop_0b (CkReductionMsg * msg);
 
   /// EnzoSolverCg entry method: DOT(R,R) after shift
-  void r_solver_cg_shift_1 (CkReductionMsg * msg) ;
+  void r_solver_cg_shift_1 (CkReductionMsg * msg);
 
   /// EnzoSolverCg entry method
-  void p_solver_cg_loop_2 () ;
+  void p_solver_cg_loop_2 ();
 
   /// EnzoSolverCg entry method: DOT(P,AP)
-  void r_solver_cg_loop_3 (CkReductionMsg * msg) ;
+  void r_solver_cg_loop_3 (CkReductionMsg * msg);
 
   /// EnzoSolverCg entry method: DOT(R,R)
-  void r_solver_cg_loop_5 (CkReductionMsg * msg) ;
+  void r_solver_cg_loop_5 (CkReductionMsg * msg);
 
-  /// EnzoSolverCg entry method: 
+  /// EnzoSolverCg entry method:
   /// perform the necessary reductions for shift
   CkReductionMsg * r_solver_cg_shift(int n, CkReductionMsg ** msgs);
 
   void p_solver_cg_matvec();
 
   //--------------------------------------------------
-  
+
   /// EnzoSolverBiCGStab entry method: SUM(B) and COUNT(B)
   void r_solver_bicgstab_start_1(CkReductionMsg* msg);
 
   /// EnzoSolverBiCGStab entry method: DOT(R,R)
-  void r_solver_bicgstab_start_3(CkReductionMsg* msg);  
+  void r_solver_bicgstab_start_3(CkReductionMsg* msg);
 
   /// EnzoSolverBiCGStab entry method: return from preconditioner
   void p_solver_bicgstab_loop_2();
@@ -264,7 +264,7 @@ public: /// entry methods
   void p_solver_bicgstab_loop_3();
 
   /// EnzoSolverBiCGStab entry method: DOT(V,R0), SUM(Y) and SUM(V)
-  void r_solver_bicgstab_loop_5(CkReductionMsg* msg);  
+  void r_solver_bicgstab_loop_5(CkReductionMsg* msg);
 
   /// EnzoSolverBiCGStab entry method: return from preconditioner
   void p_solver_bicgstab_loop_8();
@@ -289,7 +289,7 @@ public: /// entry methods
 			   int i_function);
 
 /// EnzoSolverDd
-  
+
   void p_solver_dd_restrict_recv(FieldMsg * msg);
   void p_solver_dd_prolong_recv(FieldMsg * msg);
   void solver_dd_prolong_recv(FieldMsg * msg);
@@ -305,12 +305,12 @@ public: /// entry methods
 
   // EnzoSolverMg0
 
-  void r_solver_mg0_begin_solve(CkReductionMsg* msg);  
+  void r_solver_mg0_begin_solve(CkReductionMsg* msg);
   void p_solver_mg0_restrict();
   void p_solver_mg0_solve_coarse();
   void p_solver_mg0_post_smooth();
   void p_solver_mg0_last_smooth();
-  void r_solver_mg0_barrier(CkReductionMsg* msg);  
+  void r_solver_mg0_barrier(CkReductionMsg* msg);
   void p_solver_mg0_prolong_recv(FieldMsg * msg);
   void solver_mg0_prolong_recv(FieldMsg * msg);
   void p_solver_mg0_restrict_recv(FieldMsg * msg);
@@ -341,13 +341,13 @@ public: // attributes (YIKES!)
   enzo_float redshift;
 
   /// starting pos (active problem space)
-  enzo_float GridLeftEdge[MAX_DIMENSION]; 
+  enzo_float GridLeftEdge[MAX_DIMENSION];
   /// total dimensions of all grids
-  int GridDimension[MAX_DIMENSION]; 
+  int GridDimension[MAX_DIMENSION];
   /// starting index of the active region
-  int GridStartIndex[MAX_DIMENSION]; 
+  int GridStartIndex[MAX_DIMENSION];
   /// stoping index of the active region
-  int GridEndIndex[MAX_DIMENSION]; 
+  int GridEndIndex[MAX_DIMENSION];
   enzo_float CellWidth[MAX_DIMENSION];
 
 };

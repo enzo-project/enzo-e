@@ -586,4 +586,5 @@ void EnzoInitialCloud::enforce_block
       }
     }
   }
+  block->initial_done();
 }
