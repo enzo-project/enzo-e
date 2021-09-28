@@ -737,7 +737,7 @@ namespace cello {
   (int precision, void* values, int index_field,
    const int m3[3], const int n3[3], const int i3[3]);
 
-  /// Return the name for the format and given arguments
+  /// Return the file name for the format and given arguments
   std::string expand_name
   (const std::vector <std::string> * file_name, int counter, Block * block);
 
