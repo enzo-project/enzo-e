@@ -28,7 +28,7 @@ public: // interface
 		    double grav_const,
 		    int order,
 		    bool accumulate,
-                    int index_prolong);
+		    int index_prolong);
 
   EnzoMethodGravity()
     : index_solver_(-1),
