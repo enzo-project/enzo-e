@@ -5,18 +5,12 @@ Adapt Design
 In the *adapt phase*, blocks may refine or coarsen to adapt to the
 evolving resolution requirements of a simulation.  The main
 complication is enforcing the "level-jump" condition, which prohibits
-adjacent blocks from being in non-consecutive mesh refinement levels.  If
-:math:`L_i^k` is the refinement level of block i at timestep k, and blocks i and
-j are adjacent, the level-jump condition can be written as:
-
-* **Level-jump condition (spacial):** :math:`|L_i^{k+1} - L_j^{k+1}| \le 1`
-
+adjacent blocks from being in non-consecutive mesh refinement levels.
 Since we also want to only refine or coarsen a given block at most
 once per refinement, we also have the "temporal" level-jump condition,
 which prohibits a block's level from changing more than one level per
-timestep:
-
-* **Level-jump condition (temporal):** :math:`|L_i^k - L_i^{k+1}| \le 1`
+timestep.  These conditions are discussed in more detail below
+in `Revised adapt algorithm implementation`_.
 
 Maintaining the level-jump conditions may require refining blocks that
 would not otherwise be refined, and may similarly require not
@@ -110,4 +104,27 @@ Revised adapt algorithm implementation
 ======================================
 
 Below we summarize the updated algorithm used to perform the mesh
-adaptation phase in Enzo-E/Cello.
+adaptation phase in Enzo-E/Cello.  First, some notation:
+
+* :math:`B_i` *block i*
+* :math:`B_j` *a block adjacent to block i*
+* :math:`L_i^{k}` *the level of Block i in cycle k*
+* :math:`\hat{L}_i^{k+1}` *Block i's desired next level (locally-evaluated)*
+* :math:`\underline{L}_i^{k+1},\bar{L}_i^{k+1}` *Lower and upper bounds on the block's next level*
+* :math:`L_i^{k,r}` *the value of the r'th step in updating the desired next level (consensus in progress)*
+* :math:`L_i^{k+1}` *the final next level (committed: consensus completed)*
+* :math:`\mathcal{C}` *set of all committed blocks*
+ 
+Below we list some properties in terms of these values:
+
+* :math:`|L_i^{k+1} - L_j^{k+1}| \le 1` *The  (spacial) level-jump condition*
+* :math:`|L_i^k - L_i^{k+1}| \le 1` *The temporal level-jump condition*
+* :math:`(\hat{L}_i^{k+1} =L_i^{k} + 1) \implies L_i^{k+1} = L_i^k+1` *Blocks that want to refine can always refine*
+* :math:`(\hat{L}_i^{k+1} =L_i^{k}) \land (\forall_j L_j^k \leq L_i^k) \implies L_i^{k+1} = L_i^{k}` *Blocks that want to stay in the same level can if no neighboring blocks are in a finer level*
+
+.. figure:: adapt-levels.png
+   :scale: 50 %
+   :align: center
+
+   **Figure 2.** Valid transitions between block levels
+
