@@ -104,25 +104,39 @@ Revised adapt algorithm implementation
 ======================================
 
 Below we summarize the updated algorithm used to perform the mesh
-adaptation phase in Enzo-E/Cello.  First, some notation:
+adaptation phase in Enzo-E/Cello.
+
+But first, some notation:
 
 * :math:`B_i` *block i*
 * :math:`B_j` *a block adjacent to block i*
 * :math:`L_i^{k}` *the level of Block i in cycle k*
-* :math:`\hat{L}_i^{k+1}` *Block i's desired next level (locally-evaluated)*
-* :math:`\underline{L}_i^{k+1},\bar{L}_i^{k+1}` *Lower and upper bounds on the block's next level*
-* :math:`L_i^{k,r}` *the value of the r'th step in updating the desired next level (consensus in progress)*
-* :math:`L_i^{k+1}` *the final next level (committed: consensus completed)*
+* :math:`\hat{L}_i^{k+1}` *block i's desired next level (locally-evaluated)*
+* :math:`\underline{L}_i^{k+1,r},\bar{L}_i^{k+1,r}` *"level bounds": bounds on block i's next level after consensus update r*
+* :math:`L_i^{k+1}` *the next level (consensus complete)*
 * :math:`\mathcal{C}` *set of all committed blocks*
  
 Below we list some properties in terms of these values:
 
-* :math:`|L_i^{k+1} - L_j^{k+1}| \le 1` *The  (spacial) level-jump condition*
-* :math:`|L_i^k - L_i^{k+1}| \le 1` *The temporal level-jump condition*
-* :math:`(\hat{L}_i^{k+1} =L_i^{k} + 1) \implies L_i^{k+1} = L_i^k+1` *Blocks that want to refine can always refine*
-* :math:`(\hat{L}_i^{k+1} =L_i^{k}) \land (\forall_j L_j^k \leq L_i^k) \implies L_i^{k+1} = L_i^{k}` *Blocks that want to stay in the same level can if no neighboring blocks are in a finer level*
+* :math:`|L_i^{k+1} - L_j^{k+1}| \le 1` *the  (spacial) level-jump condition*
+* :math:`|L_i^k - L_i^{k+1}| \le 1` *the temporal level-jump condition*
 
-.. figure:: adapt-levels.png
+Since :math:`\underline{L}_i^{k+1,r} \leq L_i^{k+1} \leq
+\bar{L}_i^{k+1,r}`, if the lower and upper bounds are equal, we know
+the value for the next level :math:`L_i^{k+1}`, and the block is said to be
+"committed".
+
+The balancing step of the algorithm proceeds by alternately sending a
+block's level bounds to its neighbors, and updating the block's level
+bounds given updated bounds from its neighbors. Initial bounds are
+initialized for step :math:`r=0` to be
+:math:`\underline{L}_i^{k+1,0}=\hat{L}_i^{k+1}` and
+:math:`\bar{L}_i^{k+1,0} = L_i^{k} + 1`.
+
+* :math:`(\hat{L}_i^{k+1} =L_i^{k} + 1) \implies L_i^{k+1} = L_i^k+1` *blocks that want to refine can always refine*
+* :math:`(\hat{L}_i^{k+1} =L_i^{k}) \land (\forall_j L_j^k \leq L_i^k) \implies L_i^{k+1} = L_i^{k}` *blocks that want to stay in the same level can if no neighboring blocks are in a finer level*
+
+  .. figure:: adapt-levels.png
    :scale: 50 %
    :align: center
 
