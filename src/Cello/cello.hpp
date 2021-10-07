@@ -261,14 +261,20 @@ namespace cello {
   // pi
   const double pi = 3.14159265358979324;
 
+  // Euler's number
+  const double e  = 2.71828182845904524;
+
   // ergs per eV
   const double erg_eV = 1.60217653E-12;
 
   // eV per erg
   const double eV_erg = 6.24150948E11;
 
-  // Boltzman constant in CGS
+  // Boltzmann constant in CGS
   const double kboltz = 1.3806504e-16;
+
+  // Planck function in CGS
+  const double hplanck = 6.626196e-27;
 
   // Solar mass in CGS
   const double mass_solar = 1.98841586e33;
@@ -278,6 +284,15 @@ namespace cello {
 
   // Electron mass in CGS
   const double mass_electron = 9.10938291E-28;
+
+  // Solar Luminosity in CGS
+  const double luminosity_solar = 3.839e33; // erg/s
+
+  // Solar radius in CGS
+  const double radius_solar = 6.957e10;
+
+  // Stefan-Boltzmann constant in CGS
+  const double sigma_SF = 5.670e-7;
 
   // parsec in CGS
   const double pc_cm  = 3.0856775809623245E18;

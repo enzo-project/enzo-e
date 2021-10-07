@@ -206,14 +206,14 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_ke_fraction(0.0),
   method_feedback_use_ionization_feedback(false),
   method_feedback_time_first_sn(-1), // in Myr
-  // EnzoMethodRadiationInjection
-  method_radiation_injection_clight(29979245800.0),
-  // EnzoMethodRadiationTransport
-  method_radiation_transport_N_groups(1), // # of frequency bins
-  method_radiation_transport_min_freq(0.0), // lower bound of freq. bins
-  method_radiation_transport_max_freq(0.0), // upper bound of freq. bins
-  method_radiation_transport_flux_function("GLF"), // which flux function to use
-  method_radiation_transport_clight(29979245800.0), // reduced speed of light value to use 
+  // EnzoMethodRamsesRT
+  method_ramses_rt_N_groups(1), // # of frequency bins
+  method_ramses_rt_min_freq(0.0), // lower bound of freq. bins
+  method_ramses_rt_max_freq(0.0), // upper bound of freq. bins
+  method_ramses_rt_flux_function("GLF"), // which flux function to use
+  method_ramses_rt_clight(29979245800.0), // reduced speed of light value to use
+  method_ramses_rt_bin_lower(),
+  method_ramses_rt_bin_upper(),
   // EnzoMethodStarMaker,
   method_star_maker_type(""),                              // star maker type to use
   method_star_maker_use_density_threshold(true),           // check above density threshold before SF
@@ -306,6 +306,7 @@ EnzoConfig::EnzoConfig() throw ()
 #ifdef CONFIG_USE_GRACKLE
     method_grackle_chemistry = NULL;
 #endif
+
 }
 
 //----------------------------------------------------------------------
@@ -537,13 +538,13 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_feedback_use_ionization_feedback;
   p | method_feedback_time_first_sn;
 
-  p | method_radiation_injection_clight;
-
-  p | method_radiation_transport_N_groups;
-  p | method_radiation_transport_min_freq;
-  p | method_radiation_transport_max_freq;
-  p | method_radiation_transport_flux_function;
-  p | method_radiation_transport_clight;
+  p | method_ramses_rt_N_groups;
+  p | method_ramses_rt_min_freq;
+  p | method_ramses_rt_max_freq;
+  p | method_ramses_rt_flux_function;
+  p | method_ramses_rt_clight;
+  p | method_ramses_rt_bin_lower;
+  p | method_ramses_rt_bin_upper;
 
   p | method_star_maker_type;
   p | method_star_maker_use_density_threshold;
@@ -1132,24 +1133,31 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_feedback_use_ionization_feedback = p->value_logical
     ("Method:feedback:use_ionization_feedback", false);
- 
-  method_radiation_injection_clight = p->value_float
-    ("Method:radiation_injection:clight",29979245800.0);
 
-  method_radiation_transport_N_groups = p->value_integer
-    ("Method:radiation_transport:N_groups",1);
+  method_ramses_rt_N_groups = p->value_integer
+    ("Method:ramses_rt:N_groups",1);
 
-  method_radiation_transport_min_freq = p->value_float
-    ("Method:radiation_transport:min_freq",0.0);
+  method_ramses_rt_min_freq = p->value_float
+    ("Method:ramses_rt:min_freq",0.0);
 
-  method_radiation_transport_max_freq = p->value_float
-    ("Method:radiation_transport:max_freq",0.0);
+  method_ramses_rt_max_freq = p->value_float
+    ("Method:ramses_rt:max_freq",0.0);
 
-  method_radiation_transport_flux_function = p->value_string
-    ("Method:radiation_transport:flux_function","GLF");
+  method_ramses_rt_flux_function = p->value_string
+    ("Method:ramses_rt:flux_function","GLF");
 
-  method_radiation_transport_clight = p->value_float
-    ("Method:radiation_transport:clight",29979245800.0);
+  method_ramses_rt_clight = p->value_float
+    ("Method:ramses_rt:clight",29979245800.0);
+
+  method_ramses_rt_bin_lower.resize(method_ramses_rt_N_groups);
+  method_ramses_rt_bin_upper.resize(method_ramses_rt_N_groups);
+  for (int i=0; i < method_ramses_rt_N_groups; i++) {
+    method_ramses_rt_bin_lower[i] = p->list_value_float
+      (i,"Method:ramses_rt:bin_lower", -1.0);
+
+    method_ramses_rt_bin_upper[i] = p->list_value_float
+      (i,"Method:ramses_rt:bin_upper", -1.0);
+  }
 
   method_star_maker_type = p->value_string
     ("Method:star_maker:type","stochastic");

@@ -218,6 +218,9 @@ public: /// entry methods
   void p_method_gravity_end();
 
   //--------------------------------------------------
+  //EnzoMethodRamsesRT
+  void p_method_ramses_rt_solve_transport_eqn();
+  //--------------------------------------------------
 
   /// EnzoSolverCg entry method: DOT ==> refresh P
   void r_solver_cg_loop_0a (CkReductionMsg * msg) ;  
@@ -333,6 +336,9 @@ public: // attributes (YIKES!)
 
   /// Cosmological redshift for the current cycle
   enzo_float redshift;
+
+  /// frequency group iterator for EnzoMethodRamsesRT
+  int method_ramses_rt_igroup;
 
   /// starting pos (active problem space)
   enzo_float GridLeftEdge[MAX_DIMENSION]; 

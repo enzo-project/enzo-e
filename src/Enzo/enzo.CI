@@ -84,8 +84,7 @@ module enzo {
   PUPable EnzoMethodFeedback;
   PUPable EnzoMethodDistributedFeedback;
 
-  PUPable EnzoMethodRadiationInjection;
-  PUPable EnzoMethodRadiationTransport;
+  PUPable EnzoMethodRamsesRT;
 
   PUPable EnzoMethodCheckGravity;
   PUPable EnzoMethodComovingExpansion;
@@ -168,6 +167,9 @@ module enzo {
     // EnzoMethodGravity synchronization entry methods
     entry void p_method_gravity_continue();
     entry void p_method_gravity_end();
+
+    // EnzoMethodRamsesRT synchronization entry methods
+    entry void p_method_ramses_rt_solve_transport_eqn();  
 
     // EnzoSolverCg synchronization entry methods
 

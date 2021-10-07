@@ -668,14 +668,12 @@ Method * EnzoProblem::create_method_
 
     // need a similar type swtich as in star maker
     method = new EnzoMethodDistributedFeedback();
-  } else if (name == "radiation_injection") {
-   
-    method = new EnzoMethodRadiationInjection();
-  } else if (name == "radiation_transport") {
 
-    method = new EnzoMethodRadiationTransport(
-                 enzo_config->method_radiation_transport_N_groups,
-                 enzo_config->method_radiation_transport_clight);
+  } else if (name == "ramses_rt") {
+
+    method = new EnzoMethodRamsesRT(
+                 enzo_config->method_ramses_rt_N_groups,
+                 enzo_config->method_ramses_rt_clight);
   } else {
 
     // Fallback to Cello method's

@@ -311,14 +311,16 @@ public: // interface
       method_star_maker_efficiency(0.01),            // star maker efficiency
       method_star_maker_minimum_star_mass(1.0E4),    // minium star particle mass in solar masses
       method_star_maker_maximum_star_mass(1.0E4),    // maximum star particle mass in solar masses
-      // EnzoMethodRadiationInjection
-      method_radiation_injection_clight(29979245800.0),
-      // EnzoMethodRadiationTransport
-      method_radiation_transport_N_groups(1), // # of frequency bins
-      method_radiation_transport_min_freq(0.0), // lower bound of freq. bins
-      method_radiation_transport_max_freq(0.0), // upper bound of freq. bins
-      method_radiation_transport_flux_function(""), // which flux function to use
-      method_radiation_transport_clight(29979245800.0), // reduced speed of light value to use
+
+      // EnzoMethodRamsesRT
+      method_ramses_rt_N_groups(1), // # of frequency bins
+      method_ramses_rt_min_freq(0.0), // lower bound of freq. bins
+      method_ramses_rt_max_freq(0.0), // upper bound of freq. bins
+      method_ramses_rt_flux_function(""), // which flux function to use
+      method_ramses_rt_clight(29979245800.0), // reduced speed of light value to use
+      method_ramses_rt_bin_lower(),
+      method_ramses_rt_bin_upper(),
+
       // EnzoMethodNull
       method_null_dt(0.0),
       // EnzoMethodTurbulence
@@ -645,17 +647,15 @@ public: // attributes
   bool                      method_feedback_shift_cell_center;
   bool                      method_feedback_use_ionization_feedback;
 
-  /// EnzoMethodRadiationInjection
+  /// EnzoMethodRamsesRT
   
-  double                    method_radiation_injection_clight;
-
-  /// EnzoMethodRadiationTransport
-  
-  int                       method_radiation_transport_N_groups;
-  double                    method_radiation_transport_min_freq;
-  double                    method_radiation_transport_max_freq;
-  std::string               method_radiation_transport_flux_function;
-  double                    method_radiation_transport_clight;
+  int                       method_ramses_rt_N_groups;
+  double                    method_ramses_rt_min_freq;
+  double                    method_ramses_rt_max_freq;
+  std::string               method_ramses_rt_flux_function;
+  double                    method_ramses_rt_clight;
+  std::vector<double>       method_ramses_rt_bin_lower;
+  std::vector<double>       method_ramses_rt_bin_upper;
 
   /// EnzoMethodStarMaker
 
