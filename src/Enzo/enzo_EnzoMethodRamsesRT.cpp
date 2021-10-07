@@ -638,11 +638,46 @@ void EnzoBlock::p_method_ramses_rt_solve_transport_eqn()
 {
   EnzoMethodRamsesRT * method = static_cast<EnzoMethodRamsesRT*> (this->method());
   method->call_solve_transport_eqn(this);
-  
-  this->compute_done(); // THIS IS ONLY HERE TEMPORARILY
-  // PUT THIS AT END OF CHEMISTRY STEP ONCE THAT'S DONE
+
+  // sum group fields and end compute()
+  // TODO: Make tracking integrated group fields optional
+  // Move compute_done() call to after chemistry step once that's started 
+  method->sum_group_fields(this); 
+  this->compute_done(); 
 }
 
+//-----------------------------------------
+void EnzoMethodRamsesRT::sum_group_fields(EnzoBlock * enzo_block) throw()
+{
+  Field field = enzo_block->data()->field();
+  int mx,my,mz;  
+  field.dimensions(0,&mx, &my, &mz); //field dimensions, including ghost zones
+  int gx,gy,gz;
+  field.ghost_depth(0,&gx, &gy, &gz);
+
+  const int m = mx*my*mz;
+  const EnzoConfig * enzo_config = enzo::config();
+
+  enzo_float * N  = (enzo_float *) field.values("photon_density");
+  enzo_float * Fx = (enzo_float *) field.values("flux_x");
+  enzo_float * Fy = (enzo_float *) field.values("flux_y");
+  enzo_float * Fz = (enzo_float *) field.values("flux_z");
+
+  for (int i=0; i < enzo_config->method_ramses_rt_N_groups; i++) {
+    std::string istring = std::to_string(i);
+    enzo_float *  N_i = (enzo_float *) field.values("photon_density_" + istring);
+    enzo_float * Fx_i = (enzo_float *) field.values("flux_x_" + istring);
+    enzo_float * Fy_i = (enzo_float *) field.values("flux_y_" + istring);
+    enzo_float * Fz_i = (enzo_float *) field.values("flux_z_" + istring);
+    for (int j=0; j<m; j++)
+    {
+      N [j] +=  N_i[j];
+      Fx[j] += Fx_i[j];
+      Fy[j] += Fy_i[j];
+      Fz[j] += Fz_i[j];
+    }    
+  }
+}
 
 
 //======================================================================
@@ -671,12 +706,6 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
   field.dimensions(0,&mx, &my, &mz); //field dimensions, including ghost zones
   int gx,gy,gz;
   field.ghost_depth(0,&gx, &gy, &gz);
-  
-
-  enzo_float * N  = (enzo_float *) field.values("photon_density");
-  enzo_float * Fx = (enzo_float *) field.values("flux_x");
-  enzo_float * Fy = (enzo_float *) field.values("flux_y");
-  enzo_float * Fz = (enzo_float *) field.values("flux_z");
 
   const int m = mx*my*mz;
 

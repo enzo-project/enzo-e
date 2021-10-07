@@ -63,6 +63,8 @@ public: // interface
 
   void call_solve_transport_eqn(EnzoBlock * enzo_block) throw();
 
+  void sum_group_fields (EnzoBlock * enzo_block) throw();
+
 protected: // methods
 
   //--------- INJECTION STEP -------
