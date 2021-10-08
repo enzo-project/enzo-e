@@ -10,15 +10,48 @@
 //----------------------------------------------------------------------
 
 #include "cello.hpp"
-
 #include "enzo.hpp"
 
 //----------------------------------------------------------------------
 
-EnzoMethodPpmlIG::EnzoMethodPpmlIG ( EnzoConfig * enzo_config ) 
+#define DEBUG_FIELDS
+
+#ifdef DEBUG_FIELDS
+#   define CHECK_FIELD(VALUES,NAME)             \
+  ASSERT1("CHECK_FIELD",                        \
+          "Field %s must be defined",           \
+          NAME,                                 \
+          (VALUES != nullptr));
+
+#   define FIELD_STATS(NAME,VALUES,mx,my,mz,gx,gy,gz)           \
+  {                                                             \
+   double avg=0.0, max=-1.0, min=1e9;                           \
+   int count=0;                                                 \
+   for (int iz=gz; iz<mz-gz; iz++) {                            \
+     for (int iy=gy; iy<my-gy; iy++) {                          \
+       for (int ix=gx; ix<mx-gx; ix++) {                        \
+         const int i=ix+mx*(iy+my*iz);                          \
+         avg += VALUES[i];                                      \
+         max = std::max(max,VALUES[i]);                         \
+         min = std::min(min,VALUES[i]);                         \
+         count++;                                               \
+       }                                                        \
+     }                                                          \
+   }                                                            \
+   avg /= count;                                                \
+   CkPrintf ("FIELD_STATS %s  %g %g %g\n",NAME,min,avg,max);    \
+  }
+#else
+#   define CHECK_FIELD(VALUES,NAME) /* ... */
+#   define FIELD_STATS(NAME,VALUES,mx,my,mz,gx,gy,gz) /* ... */
+#endif
+
+//----------------------------------------------------------------------
+
+EnzoMethodPpmlIG::EnzoMethodPpmlIG () 
   : Method(),
-    comoving_coordinates_(enzo_config->physics_cosmology),
-    gamma_               (enzo_config->field_gamma)
+    comoving_coordinates_(enzo::config()->physics_cosmology),
+    gamma_               (enzo::config()->field_gamma)
 {
   // Initialize the default Refresh object
 
@@ -137,6 +170,14 @@ double EnzoMethodPpmlIG::timestep (Block * block) throw()
     enzo_float * by = (enzo_float *) field.values("bfieldy");
     enzo_float * bz = (enzo_float *) field.values("bfieldz");
     enzo_float * pr = (enzo_float *) field.values("pressure");
+    CHECK_FIELD(d,"density");
+    CHECK_FIELD(vx,"velox");
+    CHECK_FIELD(vy,"veloy");
+    CHECK_FIELD(vz,"veloz");
+    CHECK_FIELD(bx,"bfieldx");
+    CHECK_FIELD(by,"bfieldy");
+    CHECK_FIELD(bz,"bfieldz");
+    CHECK_FIELD(pr,"pressure");
     enzo_float b0[3];
     FORTRAN_NAME(calc_dt_ppml_ig)
       (enzo_block->GridDimension, 
@@ -166,7 +207,6 @@ double EnzoMethodPpmlIG::timestep (Block * block) throw()
   dt = std::numeric_limits<enzo_float>::max();
 
   dt = MIN(dt, dtBaryons);
-
 
   return dt;
 }

@@ -18,8 +18,43 @@
 // Solve the MHD equations with the solver, saving the subgrid fluxes
 
 #include "cello.hpp"
-
 #include "enzo.hpp" 
+
+//----------------------------------------------------------------------
+
+#define DEBUG_FIELDS
+
+#ifdef DEBUG_FIELDS
+#   define CHECK_FIELD(VALUES,NAME)             \
+  ASSERT1("CHECK_FIELD",                        \
+          "Field %s must be defined",           \
+          NAME,                                 \
+          (VALUES != nullptr));
+
+#   define FIELD_STATS(NAME,VALUES,mx,my,mz,gx,gy,gz)           \
+  {                                                             \
+   double avg=0.0, max=-1.0, min=1e9;                           \
+   int count=0;                                                 \
+   for (int iz=gz; iz<mz-gz; iz++) {                            \
+     for (int iy=gy; iy<my-gy; iy++) {                          \
+       for (int ix=gx; ix<mx-gx; ix++) {                        \
+         const int i=ix+mx*(iy+my*iz);                          \
+         avg += VALUES[i];                                      \
+         max = std::max(max,VALUES[i]);                         \
+         min = std::min(min,VALUES[i]);                         \
+         count++;                                               \
+       }                                                        \
+     }                                                          \
+   }                                                            \
+   avg /= count;                                                \
+   CkPrintf ("FIELD_STATS %s  %g %g %g\n",NAME,min,avg,max);    \
+  }
+#else
+#   define CHECK_FIELD(VALUES,NAME) /* ... */
+#   define FIELD_STATS(NAME,VALUES,mx,my,mz,gx,gy,gz) /* ... */
+#endif
+
+//----------------------------------------------------------------------
 
 int EnzoBlock::SolveMHDEquationsIG ( enzo_float dt, enzo_float gamma )
 {
@@ -85,6 +120,42 @@ int EnzoBlock::SolveMHDEquationsIG ( enzo_float dt, enzo_float gamma )
     enzo_float *bfieldy_rz = (enzo_float *) field.values ("bfieldy_rz");
     enzo_float *bfieldz_rz = (enzo_float *) field.values ("bfieldz_rz");
     enzo_float *press_rz   = (enzo_float *) field.values ("press_rz");
+
+    CHECK_FIELD(density,"density");
+    CHECK_FIELD(velox,"velox");
+    CHECK_FIELD(veloy,"veloy");
+    CHECK_FIELD(veloz,"veloz");
+    CHECK_FIELD(bfieldx,"bfieldx");
+    CHECK_FIELD(bfieldy,"bfieldy");
+    CHECK_FIELD(bfieldz,"bfieldz");
+    CHECK_FIELD(pressure,"pressure");
+
+    CHECK_FIELD(dens_rx,"dens_rx");
+    CHECK_FIELD(velox_rx,"velox_rx");
+    CHECK_FIELD(veloy_rx,"veloy_rx");
+    CHECK_FIELD(veloz_rx,"veloz_rx");
+    CHECK_FIELD(bfieldx_rx,"bfieldx_rx");
+    CHECK_FIELD(bfieldy_rx,"bfieldy_rx");
+    CHECK_FIELD(bfieldz_rx,"bfieldz_rx");
+    CHECK_FIELD(press_rx,"press_rx");
+
+    CHECK_FIELD(dens_ry,"dens_ry");
+    CHECK_FIELD(velox_ry,"velox_ry");
+    CHECK_FIELD(veloy_ry,"veloy_ry");
+    CHECK_FIELD(veloz_ry,"veloz_ry");
+    CHECK_FIELD(bfieldx_ry,"bfieldx_ry");
+    CHECK_FIELD(bfieldy_ry,"bfieldy_ry");
+    CHECK_FIELD(bfieldz_ry,"bfieldz_ry");
+    CHECK_FIELD(press_ry,"press_ry");
+
+    CHECK_FIELD(dens_rz,"dens_rz");
+    CHECK_FIELD(velox_rz,"velox_rz");
+    CHECK_FIELD(veloy_rz,"veloy_rz");
+    CHECK_FIELD(veloz_rz,"veloz_rz");
+    CHECK_FIELD(bfieldx_rz,"bfieldx_rz");
+    CHECK_FIELD(bfieldy_rz,"bfieldy_rz");
+    CHECK_FIELD(bfieldz_rz,"bfieldz_rz");
+    CHECK_FIELD(press_rz,"press_rz");
 
     /* allocate space for fluxes */
  
@@ -340,8 +411,28 @@ int EnzoBlock::SolveMHDEquationsIG ( enzo_float dt, enzo_float gamma )
     /* note: Start/EndIndex are zero based */
 
 
-    /* current PPML-IG implementation only supports 3D and does not support color fields */	
+    /* current PPML-IG implementation only supports 3D and does not
+       support color fields */	
 
+    int mx,my,mz;
+    field.dimensions(0,&mx,&my,&mz);
+    const int m = mx*my*mz;
+
+    enzo_float *velocity_x      = (enzo_float *) field.values ("velocity_x");
+    enzo_float *velocity_y      = (enzo_float *) field.values ("velocity_y");
+    enzo_float *velocity_z      = (enzo_float *) field.values ("velocity_z");
+    bool have_velocity = (velocity_x != nullptr);
+
+    if (have_velocity) {
+      std::copy_n(velocity_x,m,velox);
+      std::copy_n(velocity_y,m,veloy);
+      std::copy_n(velocity_z,m,veloz);
+    }
+
+    std::copy_n(pressure,m,press_rx);
+    std::copy_n(pressure,m,press_ry);
+    std::copy_n(pressure,m,press_rz);
+    
     enzo_float b0[3] = { 0.0, 0.0, 0.0 };
       FORTRAN_NAME(ppml_ig)
 	(density,velox,   veloy,   veloz,   bfieldx,   bfieldy,   bfieldz,   pressure,
@@ -364,6 +455,15 @@ int EnzoBlock::SolveMHDEquationsIG ( enzo_float dt, enzo_float gamma )
 	 h1,h2,h3,h4,h5,h6,h7,h8,
 	 ex,ey,ez,
 	 qu1,qu2,qu3,qu4,qu5,qu6,qu7,qu8);
+
+    if (have_velocity) {
+      std::copy_n(velox,m,velocity_x);
+      std::copy_n(veloy,m,velocity_y);
+      std::copy_n(veloz,m,velocity_z);
+    }
+    std::copy_n(press_rx,m,pressure);
+    std::copy_n(press_rx,m,pressure);
+    std::copy_n(press_rx,m,pressure);
 
     /* deallocate temporary space for solver */
  

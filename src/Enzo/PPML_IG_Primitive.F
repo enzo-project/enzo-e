@@ -2,7 +2,7 @@ c     See LICENSE_PPML file for license and copyright information
 
 #include "fortran.h"
 
-      Subroutine Primitiv(gamma,nx,ny,nz,qu1,qu2,qu3,qu4,qu5,qu6,
+      Subroutine Primitiv_ig(gamma,nx,ny,nz,qu1,qu2,qu3,qu4,qu5,qu6,
      &                    qu7,qu8,dn,vx,vy,vz,bx,by,bz,pn)
       Implicit NONE
 

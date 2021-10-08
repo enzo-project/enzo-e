@@ -7,7 +7,7 @@ C *** Ornstein-Uhlenbeck forcing source terms for 3D turbulence simulation
 C *** Adopted by Dmitry Kotov from AREPO code developed by Volker Springel
 C ************************************************************************
 
-      subroutine OUpumpInit(gamma,rho0,P0,SolWeight,Mach,kmin,kmax,argx)
+      subroutine OUpumpInit_ig(gamma,rho0,P0,SolWeight,Mach,kmin,kmax,argx)
       implicit none
 
       include 'PPML_IG_OUforcing.h'
@@ -176,7 +176,7 @@ c      call GETDATA('readinsol', argx, argi)
       end subroutine
 
 C **********************************************************************      
-      subroutine cleanupTurbForcing3D(myid)
+      subroutine cleanupTurbForcing3D_ig(myid)
       implicit none
       include 'PPML_IG_OUforcing.h'
       integer :: myid
@@ -192,7 +192,7 @@ C **********************************************************************
       end subroutine
 
 C **********************************************************************
-      ENZO_REAL function RandomPhase()
+      ENZO_REAL function RandomPhase_ig()
       implicit none
       ENZO_REAL r0, r1, randomnr
       ENZO_REAL, parameter :: PI_2 = 3.14159265d0*2.d0 
@@ -204,7 +204,7 @@ C **********************************************************************
       end function 
 
 C **********************************************************************
-      subroutine calcPhases()   
+      subroutine calcPhases_ig()   
       implicit none
       include 'PPML_IG_OUforcing.h'
       integer :: i, j
@@ -239,7 +239,7 @@ C **********************************************************************
       end subroutine
 
 C **********************************************************************
-      subroutine updatePhases()   
+      subroutine updatePhases_ig()   
       implicit none
       include 'PPML_IG_OUforcing.h'
       ENZO_REAL :: damping, dfact, RandomPhase
@@ -276,7 +276,7 @@ c       update_sol     - flag to update w
 c OUTPUT:
 c       res            - residual (updated)
 c***********************************************************************
-      subroutine turbForce3D(nc, ni, nj, nk, nig, njg, nkg, 
+      subroutine turbForce3D_ig(nc, ni, nj, nk, nig, njg, nkg, 
      *                       w, grid, dt, res, update_sol)
       implicit none
       include 'PPML_IG_OUforcing.h'
@@ -301,7 +301,7 @@ c      call GETDATA("apply_forcing", dumx, argi)
 c      if(argi(1).eq.0) return 
       
 !AK overlap (number of ghost zones on one side)
-      call GETDATA("olap", dumx, argi)
+      call GETDATA_ig("olap", dumx, argi)
       ol2 = argi(1)/2
 
       if(dt*0.5d0 .gt. DtFreq) then ! require at least two dt in DtFreq
@@ -311,8 +311,8 @@ c      if(argi(1).eq.0) return
       
       totTime = totTime + dt
       if(totTime .gt. DtFreq) then
-        call updatePhases()
-        call calcPhases()
+        call updatePhases_ig()
+        call calcPhases_ig()
         totTime = totTime - DtFreq
       endif
  

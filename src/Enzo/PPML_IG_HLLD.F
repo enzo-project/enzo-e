@@ -2,7 +2,7 @@ c     See LICENSE_PPML file for license and copyright information
 
 #include "fortran.h"
 
-	Subroutine HLLDx(gamma,pl,pr,bs,f,us)
+	Subroutine HLLDx_ig(gamma,pl,pr,bs,f,us)
 	Implicit NONE
 
 	Integer m
@@ -11,18 +11,18 @@ c     See LICENSE_PPML file for license and copyright information
 	ENZO_REAL rlz,slz,rrz,srz,gamma
         ENZO_REAL pl(8),pr(8),bs(3)
  
-        call cons(gamma,pl,ql)
-        call cons(gamma,pr,qr)
+        call cons_ig(gamma,pl,ql)
+        call cons_ig(gamma,pr,qr)
 	
-	call pressx(gamma,ql,bs,ul,ptl,cfl)
-	call pressx(gamma,qr,bs,ur,ptr,cfr)
+	call pressx_ig(gamma,ql,bs,ul,ptl,cfl)
+	call pressx_ig(gamma,qr,bs,ur,ptr,cfr)
 
 	sl = min(ul,ur) - max(cfl,cfr)
 	sr = max(ul,ur) + max(cfl,cfr)
 
 	if(sl.gt.0.)then
 
-	   call fluxx(gamma,pl,bs,f)       
+	   call fluxx_ig(gamma,pl,bs,f)       
 
 	   do m=1,8
 	      us(m) = ql(m)
@@ -34,7 +34,7 @@ c     See LICENSE_PPML file for license and copyright information
 
 	if(sr.lt.0.)then
 
-	   call fluxx(gamma,pr,bs,f)   
+	   call fluxx_ig(gamma,pr,bs,f)   
 
 	   do m=1,8
 	      us(m) = qr(m)
@@ -58,8 +58,8 @@ c     See LICENSE_PPML file for license and copyright information
 
 	if(sl.le.0.and.slz.ge.0.)then
   
-	   call fluxx(gamma,pl,bs,fl)
-	   call quzx(gamma,sm,sl,cfl,ptz,ql,bs,qlz)  
+	   call fluxx_ig(gamma,pl,bs,fl)
+	   call quzx_ig(gamma,sm,sl,cfl,ptz,ql,bs,qlz)  
 	
 	   do m=1,8
 	      f(m) = fl(m) + sl*(qlz(m) - ql(m))
@@ -76,8 +76,8 @@ c     See LICENSE_PPML file for license and copyright information
 
 	if(srz.le.0.and.sr.ge.0.)then
 
-	   call fluxx(gamma,pr,bs,fr) 
-	   call quzx(gamma,sm,sr,cfr,ptz,qr,bs,qrz) 
+	   call fluxx_ig(gamma,pr,bs,fr) 
+	   call quzx_ig(gamma,sm,sr,cfr,ptz,qr,bs,qrz) 
 	    
 	   do m=1,8
 	      f(m) = fr(m) + sr*(qrz(m) - qr(m))
@@ -88,14 +88,14 @@ c     See LICENSE_PPML file for license and copyright information
 
 	endif
 
-	call quzx(gamma,sm,sl,cfl,ptz,ql,bs,qlz)  
-	call quzx(gamma,sm,sr,cfr,ptz,qr,bs,qrz)  
+	call quzx_ig(gamma,sm,sl,cfl,ptz,ql,bs,qlz)  
+	call quzx_ig(gamma,sm,sr,cfr,ptz,qr,bs,qrz)  
 
 	if(slz.le.0.and.sm.ge.0.)then
 
-	   call fluxx(gamma,pl,bs,fl)            
+	   call fluxx_ig(gamma,pl,bs,fl)            
 
-	   call quzzx(1,gamma,sm,qlz,qrz,bs,qzz) 
+	   call quzzx_ig(1,gamma,sm,qlz,qrz,bs,qzz) 
 
 	   do m=1,8
 	      f(m) = fl(m) + slz*qzz(m) - (slz - sl)*qlz(m) - sl*ql(m)
@@ -108,9 +108,9 @@ c     See LICENSE_PPML file for license and copyright information
 
 	if(sm.le.0.and.srz.ge.0.)then
 
-	   call fluxx(gamma,pr,bs,fr)
+	   call fluxx_ig(gamma,pr,bs,fr)
 
-	   call quzzx(2,gamma,sm,qlz,qrz,bs,qzz)
+	   call quzzx_ig(2,gamma,sm,qlz,qrz,bs,qzz)
 
 	   do m=1,8
 	      f(m) = fr(m) + srz*qzz(m) - (srz - sr)*qrz(m) - sr*qr(m)
@@ -125,15 +125,15 @@ c     See LICENSE_PPML file for license and copyright information
 	end
 
 
-	Subroutine quzx(gamma,sm,sa,cfa,ptz,qa,bs,qz)
+	Subroutine quzx_ig(gamma,sm,sa,cfa,ptz,qa,bs,qz)
 	Implicit NONE
 
 	ENZO_REAL qa(8),qz(8),qb(8),bs(3)
         ENZO_REAL gamma,ua,v2,b2,pg,sam,sap,slu,slm,psb,vb,vbz,rlz
 	ENZO_REAL rsm,smb,smr,vba,eps,sm,sa,cfa,ptz
-	ENZO_REAL qb5,qb6,qb7,bp,bp0,pta,rst,gamma
+	ENZO_REAL qb5,qb6,qb7,bp,bp0,pta,rst
 
-        call prim(gamma,qa,qb)
+        call prim_ig(gamma,qa,qb)
 
 	ua = qb(2)
 	v2 = qb(2)**2 + qb(3)**2 + qb(4)**2
@@ -206,15 +206,15 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(5)*(vb - vbz))/(sa - sm)
 	return
 	end
 
-	Subroutine quzzx(nt,gamma,sm,ql,qr,bs,q)
+	Subroutine quzzx_ig(nt,gamma,sm,ql,qr,bs,q)
 	Implicit NONE
 
         integer nt
 	ENZO_REAL ql(8),qr(8),q(8),qlm(8),qrm(8),bs(3)
         ENZO_REAL sl,sr,xs,xt,r1,r5,vm,r8,sa,sn,tm,vz,sm,gamma
 
-        call prim(gamma,ql,qlm) 
-        call prim(gamma,qr,qrm) 
+        call prim_ig(gamma,ql,qlm) 
+        call prim_ig(gamma,qr,qrm) 
 
 	sl = sqrt(qlm(1))
 	sr = sqrt(qrm(1))
@@ -262,11 +262,11 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(5)*(vb - vbz))/(sa - sm)
 	return
 	end
 
-	Subroutine pressx(gamma,ql,bs,ul,pt,cfl)
+	Subroutine pressx_ig(gamma,ql,bs,ul,pt,cfl)
 	Implicit NONE
 
         ENZO_REAL ql(8),bs(3)  
-	ENZO_REAL gamma,ul,ck,cb,ds,cfl,qb5,qb6,qb7,bp,bp0,vk,bm,pg,pt,gamma
+	ENZO_REAL gamma,ul,ck,cb,ds,cfl,qb5,qb6,qb7,bp,bp0,vk,bm,pg,pt
 
 	qb5 = ql(5)+bs(1)
 	qb6 = ql(6)+bs(2)
@@ -292,7 +292,7 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(5)*(vb - vbz))/(sa - sm)
 	return
 	end
 
-	Subroutine HLLDy(gamma,pl,pr,bs,f,us)
+	Subroutine HLLDy_ig(gamma,pl,pr,bs,f,us)
 	Implicit NONE
 
 	Integer m
@@ -301,18 +301,18 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(5)*(vb - vbz))/(sa - sm)
 	ENZO_REAL rlz,slz,rrz,srz
         ENZO_REAL pl(8),pr(8),bs(3)
  
-        call cons(gamma,pl,ql)
-        call cons(gamma,pr,qr)
+        call cons_ig(gamma,pl,ql)
+        call cons_ig(gamma,pr,qr)
 	
-	call pressy(gamma,ql,bs,ul,ptl,cfl)
-	call pressy(gamma,qr,bs,ur,ptr,cfr)
+	call pressy_ig(gamma,ql,bs,ul,ptl,cfl)
+	call pressy_ig(gamma,qr,bs,ur,ptr,cfr)
 
 	sl = min(ul,ur) - max(cfl,cfr)
 	sr = max(ul,ur) + max(cfl,cfr)
 
 	if(sl.gt.0.)then
 
-	   call fluxy(gamma,pl,bs,f)
+	   call fluxy_ig(gamma,pl,bs,f)
 
 	   do m=1,8
 	      us(m) = ql(m)
@@ -324,7 +324,7 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(5)*(vb - vbz))/(sa - sm)
 
 	if(sr.lt.0.)then
 
-	   call fluxy(gamma,pr,bs,f)
+	   call fluxy_ig(gamma,pr,bs,f)
 
 	   do m=1,8
 	      us(m) = qr(m)
@@ -348,8 +348,8 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(5)*(vb - vbz))/(sa - sm)
 
 	if(sl.le.0.and.slz.ge.0.)then
   
-	   call fluxy(gamma,pl,bs,fl)
-	   call quzy(gamma,sm,sl,cfl,ptz,ql,bs,qlz)
+	   call fluxy_ig(gamma,pl,bs,fl)
+	   call quzy_ig(gamma,sm,sl,cfl,ptz,ql,bs,qlz)
 	
 	   do m=1,8
 	      f(m) = fl(m) + sl*(qlz(m) - ql(m))
@@ -366,8 +366,8 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(5)*(vb - vbz))/(sa - sm)
 
 	if(srz.le.0.and.sr.ge.0.)then
 
-	   call fluxy(gamma,pr,bs,fr)
-	   call quzy(gamma,sm,sr,cfr,ptz,qr,bs,qrz)
+	   call fluxy_ig(gamma,pr,bs,fr)
+	   call quzy_ig(gamma,sm,sr,cfr,ptz,qr,bs,qrz)
 	    
 	   do m=1,8
 	      f(m) = fr(m) + sr*(qrz(m) - qr(m))
@@ -378,14 +378,14 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(5)*(vb - vbz))/(sa - sm)
 
 	endif
 
-	call quzy(gamma,sm,sl,cfl,ptz,ql,bs,qlz)
-	call quzy(gamma,sm,sr,cfr,ptz,qr,bs,qrz)
+	call quzy_ig(gamma,sm,sl,cfl,ptz,ql,bs,qlz)
+	call quzy_ig(gamma,sm,sr,cfr,ptz,qr,bs,qrz)
 
 	if(slz.le.0.and.sm.ge.0.)then
 
-	   call fluxy(gamma,pl,bs,fl)
+	   call fluxy_ig(gamma,pl,bs,fl)
 
-	   call quzzy(1,gamma,sm,qlz,qrz,bs,qzz)
+	   call quzzy_ig(1,gamma,sm,qlz,qrz,bs,qzz)
 
 	   do m=1,8
 	      f(m) = fl(m) + slz*qzz(m) - (slz - sl)*qlz(m) - sl*ql(m)
@@ -398,9 +398,9 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(5)*(vb - vbz))/(sa - sm)
 
 	if(sm.le.0.and.srz.ge.0.)then
 
-	   call fluxy(gamma,pr,bs,fr)
+	   call fluxy_ig(gamma,pr,bs,fr)
 
-	   call quzzy(2,gamma,sm,qlz,qrz,bs,qzz)
+	   call quzzy_ig(2,gamma,sm,qlz,qrz,bs,qzz)
 
 	   do m=1,8
 	      f(m) = fr(m) + srz*qzz(m) - (srz - sr)*qrz(m) - sr*qr(m)
@@ -415,15 +415,15 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(5)*(vb - vbz))/(sa - sm)
 	end
 
 
-	Subroutine quzy(gamma,sm,sa,cfa,ptz,qa,bs,qz)
+	Subroutine quzy_ig(gamma,sm,sa,cfa,ptz,qa,bs,qz)
 	Implicit NONE
 
 	ENZO_REAL qa(8),qz(8),qb(8),bs(3)
 	ENZO_REAL gamma,ua,v2,b2,pg,pta,sam,sap,slu,slm,psb,vb,vbz,rlz
 	ENZO_REAL rsm,smb,smr,vba,eps,sm,sa,cfa,ptz
-	ENZO_REAL qb5,qb6,qb7,bp,bp0,rst,gamma
+	ENZO_REAL qb5,qb6,qb7,bp,bp0,rst
 
-        call prim(gamma,qa,qb)
+        call prim_ig(gamma,qa,qb)
 
 	ua = qb(3)
 	v2 = qb(2)**2 + qb(3)**2 + qb(4)**2
@@ -496,15 +496,15 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(6)*(vb - vbz))/(sa - sm)
 	return
 	end
 
-	Subroutine quzzy(nt,gamma,sm,ql,qr,bs,q)
+	Subroutine quzzy_ig(nt,gamma,sm,ql,qr,bs,q)
 	Implicit NONE
 
         integer nt
 	ENZO_REAL ql(8),qr(8),q(8),qlm(8),qrm(8),bs(3)
         ENZO_REAL sl,sr,xs,xt,r1,r6,vm,r8,sa,sn,tm,vz,sm,gamma
 
-        call prim(gamma,ql,qlm) 
-        call prim(qgamma,r,qrm) 
+        call prim_ig(gamma,ql,qlm) 
+        call prim_ig(gamma,qr,qrm) 
 
 	sl = sqrt(qlm(1))
 	sr = sqrt(qrm(1))
@@ -552,11 +552,11 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(6)*(vb - vbz))/(sa - sm)
 	return
 	end
 
-	Subroutine pressy(gamma,ql,bs,ul,pt,cfl)
+	Subroutine pressy_ig(gamma,ql,bs,ul,pt,cfl)
 	Implicit NONE
 
 	ENZO_REAL ql(8),bs(3)
-	ENZO_REAL gamma,ul,ck,cb,ds,cfl,qb5,qb6,qb7,bp,bp0,vk,bm,pg,pt,gamma
+	ENZO_REAL gamma,ul,ck,cb,ds,cfl,qb5,qb6,qb7,bp,bp0,vk,bm,pg,pt
 	
 	
 	qb5 = ql(5)+bs(1)
@@ -584,7 +584,7 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(6)*(vb - vbz))/(sa - sm)
 	end
 
 
-	Subroutine HLLDz(gamma,pl,pr,bs,f,us)
+	Subroutine HLLDz_ig(gamma,pl,pr,bs,f,us)
 	Implicit NONE
 
 	Integer m
@@ -593,18 +593,18 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(6)*(vb - vbz))/(sa - sm)
 	ENZO_REAL rlz,slz,rrz,srz,gamma
 	ENZO_REAL pl(8),pr(8),bs(3)
  
-        call cons(gamma,pl,ql)
-        call cons(gamma,pr,qr)
+        call cons_ig(gamma,pl,ql)
+        call cons_ig(gamma,pr,qr)
 	   
-	call pressz(gamma,ql,bs,ul,ptl,cfl)
-	call pressz(gamma,qr,bs,ur,ptr,cfr)
+	call pressz_ig(gamma,ql,bs,ul,ptl,cfl)
+	call pressz_ig(gamma,qr,bs,ur,ptr,cfr)
 
 	sl = min(ul,ur) - max(cfl,cfr)
 	sr = max(ul,ur) + max(cfl,cfr)
 
 	if(sl.gt.0.)then
 
-	   call fluxz(gamma,pl,bs,f)
+	   call fluxz_ig(gamma,pl,bs,f)
 
 	   do m=1,8
 	      us(m) = ql(m)
@@ -616,7 +616,7 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(6)*(vb - vbz))/(sa - sm)
 
 	if(sr.lt.0.)then
 
-	   call fluxz(gamma,pr,bs,f)
+	   call fluxz_ig(gamma,pr,bs,f)
 
 	   do m=1,8
 	      us(m) = qr(m)
@@ -640,8 +640,8 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(6)*(vb - vbz))/(sa - sm)
 
 	if(sl.le.0.and.slz.ge.0.)then
   
-	   call fluxz(gamma,pl,bs,fl)
-	   call quz(gamma,sm,sl,cfl,ptz,ql,bs,qlz)
+	   call fluxz_ig(gamma,pl,bs,fl)
+	   call quz_ig(gamma,sm,sl,cfl,ptz,ql,bs,qlz)
 	
 	   do m=1,8
 	      f(m) = fl(m) + sl*(qlz(m) - ql(m))
@@ -658,8 +658,8 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(6)*(vb - vbz))/(sa - sm)
 
 	if(srz.le.0.and.sr.ge.0.)then
 
-	   call fluxz(gamma,pr,bs,fr)
-	   call quz(gamma,sm,sr,cfr,ptz,qr,bs,qrz)
+	   call fluxz_ig(gamma,pr,bs,fr)
+	   call quz_ig(gamma,sm,sr,cfr,ptz,qr,bs,qrz)
 	    
 	   do m=1,8
 	      f(m) = fr(m) + sr*(qrz(m) - qr(m))
@@ -670,14 +670,14 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(6)*(vb - vbz))/(sa - sm)
 
 	endif
 
-	call quz(gamma,sm,sl,cfl,ptz,ql,bs,qlz)
-	call quz(gamma,sm,sr,cfr,ptz,qr,bs,qrz)
+	call quz_ig(gamma,sm,sl,cfl,ptz,ql,bs,qlz)
+	call quz_ig(gamma,sm,sr,cfr,ptz,qr,bs,qrz)
 
 	if(slz.le.0.and.sm.ge.0.)then
 
-	   call fluxz(gamma,pl,bs,fl)
+	   call fluxz_ig(gamma,pl,bs,fl)
 
-	   call quzz(1,gamma,sm,qlz,qrz,bs,qzz)
+	   call quzz_ig(1,gamma,sm,qlz,qrz,bs,qzz)
 
 	   do m=1,8
 	      f(m) = fl(m) + slz*qzz(m) - (slz - sl)*qlz(m) - sl*ql(m)
@@ -690,9 +690,9 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(6)*(vb - vbz))/(sa - sm)
 
 	if(sm.le.0.and.srz.ge.0.)then
 
-	   call fluxz(gamma,pr,bs,fr)
+	   call fluxz_ig(gamma,pr,bs,fr)
 
-	   call quzz(2,gamma,sm,qlz,qrz,bs,qzz)
+	   call quzz_ig(2,gamma,sm,qlz,qrz,bs,qzz)
 
 	   do m=1,8
 	      f(m) = fr(m) + srz*qzz(m) - (srz - sr)*qrz(m) - sr*qr(m)
@@ -707,15 +707,15 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(6)*(vb - vbz))/(sa - sm)
 	end
 
 
-	Subroutine quz(gamma,sm,sa,cfa,ptz,qa,bs,qz)
+	Subroutine quz_ig(gamma,sm,sa,cfa,ptz,qa,bs,qz)
 	Implicit NONE
 
 	ENZO_REAL qa(8),qz(8),qb(8),bs(3)
         ENZO_REAL gamma,ua,v2,b2,pg,sam,sap,slu,slm,psb,vb,vbz,rlz
 	ENZO_REAL rsm,smb,smr,vba,eps,sm,sa,cfa,ptz
-	ENZO_REAL qb5,qb6,qb7,bp,bp0,pta,rst,gamma
+	ENZO_REAL qb5,qb6,qb7,bp,bp0,pta,rst
 
-        call prim(gamma,qa,qb)
+        call prim_ig(gamma,qa,qb)
 
 	ua = qb(4)
 	v2 = qb(2)**2 + qb(3)**2 + qb(4)**2
@@ -788,15 +788,15 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(7)*(vb - vbz))/(sa - sm)
 	return
 	end
 
-	Subroutine quzz(nt,gamma,sm,ql,qr,bs,q)
+	Subroutine quzz_ig(nt,gamma,sm,ql,qr,bs,q)
 	Implicit NONE
 
 	integer nt
 	ENZO_REAL ql(8),qr(8),q(8),qlm(8),qrm(8),bs(3)
 	ENZO_REAL sl,sr,xs,xt,r1,r7,vm,r8,sa,sn,tm,vz,sm,gamma
 
-        call prim(gamma,ql,qlm) 
-        call prim(gamma,qr,qrm) 
+        call prim_ig(gamma,ql,qlm) 
+        call prim_ig(gamma,qr,qrm) 
 
 	sl = sqrt(qlm(1))
 	sr = sqrt(qrm(1))
@@ -844,11 +844,11 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(7)*(vb - vbz))/(sa - sm)
 	return
 	end
 
-	Subroutine pressz(gamma,ql,bs,ul,pt,cfl)
+	Subroutine pressz_ig(gamma,ql,bs,ul,pt,cfl)
 	Implicit NONE
 
 	ENZO_REAL ql(8),bs(3)
-	ENZO_REAL gamma,ul,ck,cb,ds,cfl,qb5,qb6,qb7,bp,bp0,vk,bm,pg,pt,gamma
+	ENZO_REAL gamma,ul,ck,cb,ds,cfl,qb5,qb6,qb7,bp,bp0,vk,bm,pg,pt
 
 	qb5 = ql(5)+bs(1)
 	qb6 = ql(6)+bs(2)

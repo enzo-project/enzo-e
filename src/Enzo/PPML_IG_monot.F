@@ -2,7 +2,7 @@ c     See LICENSE_PPML file for license and copyright information
 
 #include "fortran.h"
 
-      Subroutine Monot(md,nx,gamma,dv1,dv2,bpx,qp,qm,qxl,qxr)
+      Subroutine Monot_ig(md,nx,gamma,dv1,dv2,bpx,qp,qm,qxl,qxr)
       Implicit NONE
 
       External Xmedian
@@ -47,17 +47,17 @@ c     See LICENSE_PPML file for license and copyright information
             bs(m)=Bpx(i,m)
          Enddo		  
 		 
-         if(md.eq.1)CALL VECTLRx(gamma,q3,bs,QL,QR,UV)
-         if(md.eq.2)CALL VECTLRy(gamma,q3,bs,QL,QR,UV)
-         if(md.eq.3)CALL VECTLRz(gamma,q3,bs,QL,QR,UV)
+         if(md.eq.1)CALL VECTLRx_ig(gamma,q3,bs,QL,QR,UV)
+         if(md.eq.2)CALL VECTLRy_ig(gamma,q3,bs,QL,QR,UV)
+         if(md.eq.3)CALL VECTLRz_ig(gamma,q3,bs,QL,QR,UV)
         
-         CALL AMPLTD(QL,q1,u1)
-         CALL AMPLTD(QL,q2,u2)
-         CALL AMPLTD(QL,q3,u3)
-         CALL AMPLTD(QL,q4,u4)
-         CALL AMPLTD(QL,q5,u5)
-         CALL AMPLTD(QL,qpl,c1)
-         CALL AMPLTD(QL,qpr,c2)
+         CALL AMPLTD_ig(QL,q1,u1)
+         CALL AMPLTD_ig(QL,q2,u2)
+         CALL AMPLTD_ig(QL,q3,u3)
+         CALL AMPLTD_ig(QL,q4,u4)
+         CALL AMPLTD_ig(QL,q5,u5)
+         CALL AMPLTD_ig(QL,qpl,c1)
+         CALL AMPLTD_ig(QL,qpr,c2)
 
          Do m=1,8  
 
@@ -80,13 +80,13 @@ c     See LICENSE_PPML file for license and copyright information
 	 
          If(imd.eq.0)then 	 
 
-            CALL AMPLTD(QR,c2,b2)
+            CALL AMPLTD_ig(QR,c2,b2)
 	 
             Do m=1,8  
                qxr(i,m)=b2(m)
             enddo
 
-            CALL AMPLTD(QR,c1,b1)
+            CALL AMPLTD_ig(QR,c1,b1)
 	 
             Do m=1,8  
                qxl(i,m)=b1(m)
@@ -102,7 +102,7 @@ c     See LICENSE_PPML file for license and copyright information
                vx4=u4(m)
                vx5=u5(m)
                
-               CALL W5RECM(vx1,vx2,vx3,vx4,vx5,VL1,VR1)
+               CALL W5RECM_ig(vx1,vx2,vx3,vx4,vx5,VL1,VR1)
                
                vl(m)=vl1 
                vr(m)=vr1 
@@ -164,13 +164,13 @@ c     See LICENSE_PPML file for license and copyright information
 
             Enddo
 
-            CALL AMPLTD(QR,c2,b2)
+            CALL AMPLTD_ig(QR,c2,b2)
 	 
             Do m=1,8  
                qxr(i,m)=b2(m)
             enddo
 
-            CALL AMPLTD(QR,c1,b1)
+            CALL AMPLTD_ig(QR,c1,b1)
 
             Do m=1,8  
                qxl(i,m)=b1(m)

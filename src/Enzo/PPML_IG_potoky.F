@@ -2,8 +2,14 @@ c     See LICENSE_PPML file for license and copyright information
 
 #include "fortran.h"
 
-      Subroutine POTOKy(Nx,gamma,Dx,Dt,Bp,Qlx,Qrx,Qpm,Qdx,Qdz,Sy,
-     &	  Qrp,Fm) 
+#ifdef INCLUDE_GRAVITY      
+      Subroutine POTOKy_ig(Nx,gamma,Dx,Dt,Bp,Qlx,Qrx,Qpm,Qdx,Qdz,Sy,
+     &     Qrp,Fm)
+#else
+      Subroutine POTOKy_ig(Nx,gamma,Dx,Dt,Bp,Qlx,Qrx,Qpm,Qdx,Qdz,
+     &     Qrp,Fm)
+#endif      
+      
       Implicit NONE
       Integer nx,i,j,k,m,l
 
@@ -18,8 +24,10 @@ c     See LICENSE_PPML file for license and copyright information
       ENZO_REAL tvl(8),tvr(8),tp(8),tc(8),tdx(8),tdz(8)
       ENZO_REAL DT,DX,DTX,DXI,TL6,gamma
       ENZO_REAL bl,br,fl1,fr1,ul_v,ur_v,cfl,qsr(8)
-
-      ENZO_REAL Sy(Nx,7),Syl(7),Syr(7)
+      ENZO_REAL Syl(7),Syr(7)
+#ifdef INCLUDE_GRAVITY
+      ENZO_REAL Sy(7)
+#endif
 	  
       Do i=1,Nx  
          Do m=1,8
@@ -37,15 +45,21 @@ c     See LICENSE_PPML file for license and copyright information
             Qp(m)=Qpm(i,m)
             Udx(m)=Qdx(i,m)
             Udz(m)=Qdz(i,m)
+#ifdef INCLUDE_GRAVITY
             Syl(m)=Sy(i,m)
-	  
+#else
+            Syl(m)=0.0d0
+#endif            
             Tvl(m)=Qlx(i+1,m)
             Tvr(m)=Qrx(i+1,m)
             Tp(m)=Qpm(i+1,m)
             Tdx(m)=Qdx(i+1,m)
             Tdz(m)=Qdz(i+1,m)
+#ifdef INCLUDE_GRAVITY
             Syr(m)=Sy(i+1,m)
-
+#else
+            Syr(m)=0.0d0
+#endif
          Enddo
 		
          Do m=1,3
@@ -55,18 +69,18 @@ c     See LICENSE_PPML file for license and copyright information
   
          DTX=DT/DX
 	
-         CALL VECTEGy(gamma,Qp,Bs,Qc)
-         CALL VECTEGy(gamma,Tp,Bs,Tc)
+         CALL VECTEGy_ig(gamma,Qp,Bs,Qc)
+         CALL VECTEGy_ig(gamma,Tp,Bs,Tc)
 
 	 IF(QC(7).GT.0.)THEN                  
         
             DXI=QC(7)*DTX
 
-	    CALL FPML(DXI,QVL,QVR,QP,VM) 
+	    CALL FPML_ig(DXI,QVL,QVR,QP,VM) 
 
-	    CALL VECTLRY(gamma,QP,BS,QL,QR,UV)
-            CALL MATR_AX(gamma,QP,BS,AX)
-            CALL MATR_AZ(gamma,QP,BS,AZ)
+	    CALL VECTLRY_ig(gamma,QP,BS,QL,QR,UV)
+            CALL MATR_AX_ig(gamma,QP,BS,AX)
+            CALL MATR_AZ_ig(gamma,QP,BS,AZ)
         
 	    DO L=1,8
                VL(L)=0.
@@ -86,7 +100,7 @@ c     See LICENSE_PPML file for license and copyright information
 
 		  DXI=QC(M)*DTX
 
-                  CALL FPML(DXI,QVL,QVR,QP,QV) 
+                  CALL FPML_ig(DXI,QVL,QVR,QP,QV) 
 
                   SL(M)=0.   
                   DO L=1,8
@@ -118,11 +132,11 @@ c     See LICENSE_PPML file for license and copyright information
         
             DXI=-TC(1)*DTX
 
-	    CALL FPMR(DXI,TVL,TVR,TP,VM) 
+	    CALL FPMR_ig(DXI,TVL,TVR,TP,VM) 
 
-	    CALL VECTLRY(gamma,TP,BS,QL,QR,UV)
-            CALL MATR_AX(gamma,TP,BS,AX)
-            CALL MATR_AZ(gamma,TP,BS,AZ)
+	    CALL VECTLRY_ig(gamma,TP,BS,QL,QR,UV)
+            CALL MATR_AX_ig(gamma,TP,BS,AX)
+            CALL MATR_AZ_ig(gamma,TP,BS,AZ)
 
  	    DO L=1,8
                VL(L)=0.
@@ -142,7 +156,7 @@ c     See LICENSE_PPML file for license and copyright information
                   
                   DXI=-TC(M)*DTX
 
-                  CALL FPMR(DXI,TVL,TVR,TP,QV) 
+                  CALL FPMR_ig(DXI,TVL,TVR,TP,QV) 
 
                   SL(M)=0.   
                   DO L=1,8
@@ -177,9 +191,9 @@ c     See LICENSE_PPML file for license and copyright information
          TL(6)=QVR(6)
          TR(6)=TVL(6)
 	   
-         CALL CONS(gamma,TL,PX)
-         CALL CONS(gamma,TR,VL)
-         CALL HLLDy(gamma,PX,VL,BS,FR,UR) !HLLD method
+         CALL CONS_ig(gamma,TL,PX)
+         CALL CONS_ig(gamma,TR,VL)
+         CALL HLLDy_ig(gamma,PX,VL,BS,FR,UR) !HLLD method
 
          DO M=1,8  
             FM(I,M)=FR(M)      
@@ -193,11 +207,11 @@ c     See LICENSE_PPML file for license and copyright information
 
             DXI=1.-QC(7)*DTX
             
-	    CALL FQML(DXI,QVL,QVR,QP,VM) 
+	    CALL FQML_ig(DXI,QVL,QVR,QP,VM) 
 
-	    CALL VECTLRY(gamma,QP,BS,QL,QR,UV)
-            CALL MATR_AX(gamma,QP,BS,AX)
-            CALL MATR_AZ(gamma,QP,BS,AZ)
+	    CALL VECTLRY_ig(gamma,QP,BS,QL,QR,UV)
+            CALL MATR_AX_ig(gamma,QP,BS,AX)
+            CALL MATR_AZ_ig(gamma,QP,BS,AZ)
 
 	    DO L=1,8
                VL(L)=0.
@@ -217,7 +231,7 @@ c     See LICENSE_PPML file for license and copyright information
 
 		  DXI=1.-QC(M)*DTX
 
-                  CALL FQML(DXI,QVL,QVR,QP,QV) 
+                  CALL FQML_ig(DXI,QVL,QVR,QP,QV) 
 
                   SL(M)=0.   
                   DO L=1,8
@@ -248,11 +262,11 @@ c     See LICENSE_PPML file for license and copyright information
         
             DXI=-TC(1)*DTX
 
-            CALL FQML(DXI,TVL,TVR,TP,VM) 
+            CALL FQML_ig(DXI,TVL,TVR,TP,VM) 
 
-	    CALL VECTLRY(gamma,TP,BS,QL,QR,UV)
-            CALL MATR_AX(gamma,TP,BS,AX)
-            CALL MATR_AZ(gamma,TP,BS,AZ)
+	    CALL VECTLRY_ig(gamma,TP,BS,QL,QR,UV)
+            CALL MATR_AX_ig(gamma,TP,BS,AX)
+            CALL MATR_AZ_ig(gamma,TP,BS,AZ)
 
 	    DO L=1,8
                VL(L)=0.
@@ -272,7 +286,7 @@ c     See LICENSE_PPML file for license and copyright information
 
                   DXI=-TC(M)*DTX
 
-                  CALL FQML(DXI,TVL,TVR,TP,QV) 
+                  CALL FQML_ig(DXI,TVL,TVR,TP,QV) 
 
                   SL(M)=0.   
                   DO L=1,8
@@ -307,12 +321,12 @@ c     See LICENSE_PPML file for license and copyright information
          TL(6)=QVR(6)
          TR(6)=TVL(6)
 	   
-         CALL CONS(gamma,TL,PX)
-         CALL CONS(gamma,TR,VL)
-         CALL HLLDy(gamma,PX,VL,BS,FR,UR) !HLLD method
+         CALL CONS_ig(gamma,TL,PX)
+         CALL CONS_ig(gamma,TR,VL)
+         CALL HLLDy_ig(gamma,PX,VL,BS,FR,UR) !HLLD method
 		 
 
-         CALL PRIM(gamma,UR,PX)
+         CALL PRIM_ig(gamma,UR,PX)
 
          DO M=1,8  
             QRP(I,M)=PX(M)      

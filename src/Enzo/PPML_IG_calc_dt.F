@@ -2,7 +2,7 @@ c     See LICENSE_PPML file for license and copyright information
 
 #include "fortran.h"
 
-      Subroutine calc_dt_ppml(gamma,nx,ny,nz,
+      Subroutine calc_dt_ppml_ig(gamma,nx,ny,nz,
      1     i1,i2,j1,j2,k1,k2,
      1     dx,dy,dz,
      1     dn,vx,vy,vz,bx,by,bz,pn,

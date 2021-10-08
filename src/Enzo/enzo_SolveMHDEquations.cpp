@@ -81,64 +81,65 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
     Field field = data()->field();
 
     enzo_float *density    = (enzo_float *) field.values ("density");
-    CHECK_FIELD(density,"density");
     enzo_float *velox      = (enzo_float *) field.values ("velox");
-    CHECK_FIELD(velox,"velox");
     enzo_float *veloy      = (enzo_float *) field.values ("veloy");
-    CHECK_FIELD(veloy,"veloy");
     enzo_float *veloz      = (enzo_float *) field.values ("veloz");
-    CHECK_FIELD(veloz,"veloz");
     enzo_float *bfieldx    = (enzo_float *) field.values ("bfieldx");
-    CHECK_FIELD(bfieldx,"bfieldx");
     enzo_float *bfieldy    = (enzo_float *) field.values ("bfieldy");
-    CHECK_FIELD(bfieldy,"bfieldy");
     enzo_float *bfieldz    = (enzo_float *) field.values ("bfieldz");
-    CHECK_FIELD(bfieldz,"bfieldz");
     enzo_float *dens_rx    = (enzo_float *) field.values ("dens_rx");
-    CHECK_FIELD(dens_rx,"dens_rx");
     enzo_float *velox_rx   = (enzo_float *) field.values ("velox_rx");
-    CHECK_FIELD(velox_rx,"velox_rx");
     enzo_float *veloy_rx   = (enzo_float *) field.values ("veloy_rx");
-    CHECK_FIELD(veloy_rx,"veloy_rx");
     enzo_float *veloz_rx   = (enzo_float *) field.values ("veloz_rx");
-    CHECK_FIELD(veloz_rx,"veloz_rx");
     enzo_float *bfieldx_rx = (enzo_float *) field.values ("bfieldx_rx");
-    CHECK_FIELD(bfieldx_rx,"bfieldx_rx");
     enzo_float *bfieldy_rx = (enzo_float *) field.values ("bfieldy_rx");
-    CHECK_FIELD(bfieldy_rx,"bfieldy_rx");
     enzo_float *bfieldz_rx = (enzo_float *) field.values ("bfieldz_rx");
-    CHECK_FIELD(bfieldz_rx,"bfieldz_rx");
 
     enzo_float *dens_ry    = (enzo_float *) field.values ("dens_ry");
-    CHECK_FIELD(dens_ry,"dens_ry");
     enzo_float *velox_ry   = (enzo_float *) field.values ("velox_ry");
-    CHECK_FIELD(velox_ry,"velox_ry");
     enzo_float *veloy_ry   = (enzo_float *) field.values ("veloy_ry");
-    CHECK_FIELD(veloy_ry,"veloy_ry");
     enzo_float *veloz_ry   = (enzo_float *) field.values ("veloz_ry");
-    CHECK_FIELD(veloz_ry,"veloz_ry");
     enzo_float *bfieldx_ry = (enzo_float *) field.values ("bfieldx_ry");
-    CHECK_FIELD(bfieldx_ry,"bfieldx_ry");
     enzo_float *bfieldy_ry = (enzo_float *) field.values ("bfieldy_ry");
-    CHECK_FIELD(bfieldy_ry,"bfieldy_ry");
     enzo_float *bfieldz_ry = (enzo_float *) field.values ("bfieldz_ry");
-    CHECK_FIELD(bfieldz_ry,"bfieldz_ry");
 
     enzo_float *dens_rz    = (enzo_float *) field.values ("dens_rz");
-    CHECK_FIELD(dens_rz,"dens_rz");
     enzo_float *velox_rz   = (enzo_float *) field.values ("velox_rz");
-    CHECK_FIELD(velox_rz,"velox_rz");
     enzo_float *veloy_rz   = (enzo_float *) field.values ("veloy_rz");
-    CHECK_FIELD(veloy_rz,"veloy_rz");
     enzo_float *veloz_rz   = (enzo_float *) field.values ("veloz_rz");
-    CHECK_FIELD(veloz_rz,"veloz_rz");
     enzo_float *bfieldx_rz = (enzo_float *) field.values ("bfieldx_rz");
-    CHECK_FIELD(bfieldx_rz,"bfieldx_rz");
     enzo_float *bfieldy_rz = (enzo_float *) field.values ("bfieldy_rz");
-    CHECK_FIELD(bfieldy_rz,"bfieldy_rz");
     enzo_float *bfieldz_rz = (enzo_float *) field.values ("bfieldz_rz");
-    CHECK_FIELD(bfieldz_rz,"bfieldz_rz");
 
+
+    CHECK_FIELD(density,"density");
+    CHECK_FIELD(velox,"velox");
+    CHECK_FIELD(veloy,"veloy");
+    CHECK_FIELD(veloz,"veloz");
+    CHECK_FIELD(bfieldx,"bfieldx");
+    CHECK_FIELD(bfieldy,"bfieldy");
+    CHECK_FIELD(bfieldz,"bfieldz");
+    CHECK_FIELD(dens_rx,"dens_rx");
+    CHECK_FIELD(velox_rx,"velox_rx");
+    CHECK_FIELD(veloy_rx,"veloy_rx");
+    CHECK_FIELD(veloz_rx,"veloz_rx");
+    CHECK_FIELD(bfieldx_rx,"bfieldx_rx");
+    CHECK_FIELD(bfieldy_rx,"bfieldy_rx");
+    CHECK_FIELD(bfieldz_rx,"bfieldz_rx");
+    CHECK_FIELD(dens_ry,"dens_ry");
+    CHECK_FIELD(velox_ry,"velox_ry");
+    CHECK_FIELD(veloy_ry,"veloy_ry");
+    CHECK_FIELD(veloz_ry,"veloz_ry");
+    CHECK_FIELD(bfieldx_ry,"bfieldx_ry");
+    CHECK_FIELD(bfieldy_ry,"bfieldy_ry");
+    CHECK_FIELD(bfieldz_ry,"bfieldz_ry");
+    CHECK_FIELD(dens_rz,"dens_rz");
+    CHECK_FIELD(velox_rz,"velox_rz");
+    CHECK_FIELD(veloy_rz,"veloy_rz");
+    CHECK_FIELD(veloz_rz,"veloz_rz");
+    CHECK_FIELD(bfieldx_rz,"bfieldx_rz");
+    CHECK_FIELD(bfieldy_rz,"bfieldy_rz");
+    CHECK_FIELD(bfieldz_rz,"bfieldz_rz");
     /* compute global start index for left edge of entire grid
        (including boundary zones) */
  
@@ -335,7 +336,9 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
     /* note: Start/EndIndex are zero based */
 
 
-    /* current PPML implementation only supports 3D and does not support color fields */	
+    /* current PPML implementation only supports 3D and does not
+       support color fields */
+    
     enzo_float *velocity_x      = (enzo_float *) field.values ("velocity_x");
     enzo_float *velocity_y      = (enzo_float *) field.values ("velocity_y");
     enzo_float *velocity_z      = (enzo_float *) field.values ("velocity_z");
@@ -351,31 +354,31 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
       std::copy_n(velocity_z,m,veloz);
     }
     
-      FORTRAN_NAME(ppml)
-	(density,velox,   veloy,   veloz,   bfieldx,   bfieldy,   bfieldz,
-	 dens_rx,velox_rx,veloy_rx,veloz_rx,bfieldx_rx,bfieldy_rx,bfieldz_rx,
-	 dens_ry,velox_ry,veloy_ry,veloz_ry,bfieldx_ry,bfieldy_ry,bfieldz_ry,
-	 dens_rz,velox_rz,veloy_rz,veloz_rz,bfieldx_rz,bfieldy_rz,bfieldz_rz,
-	 &dt, &CellWidthTemp[0], &CellWidthTemp[1], &CellWidthTemp[2],
-	 &GridDimension[0], &GridDimension[1], &GridDimension[2], 
-	 GridStartIndex, GridEndIndex,
-	 &NumberOfSubgrids, leftface, rightface,
-	 istart, iend, jstart, jend,
-	 standard, dnindex,
-	 vxindex, vyindex, vzindex,
-	 bxindex, byindex, bzindex,
-	 f1,f2,f3,f4,f5,f6,f7,
-	 g1,g2,g3,g4,g5,g6,g7,
-	 h1,h2,h3,h4,h5,h6,h7,
-	 ex,ey,ez,
-	 qu1,qu2,qu3,qu4,qu5,qu6,qu7);
+    FORTRAN_NAME(ppml)
+      (density,velox,   veloy,   veloz,   bfieldx,   bfieldy,   bfieldz,
+       dens_rx,velox_rx,veloy_rx,veloz_rx,bfieldx_rx,bfieldy_rx,bfieldz_rx,
+       dens_ry,velox_ry,veloy_ry,veloz_ry,bfieldx_ry,bfieldy_ry,bfieldz_ry,
+       dens_rz,velox_rz,veloy_rz,veloz_rz,bfieldx_rz,bfieldy_rz,bfieldz_rz,
+       &dt, &CellWidthTemp[0], &CellWidthTemp[1], &CellWidthTemp[2],
+       &GridDimension[0], &GridDimension[1], &GridDimension[2], 
+       GridStartIndex, GridEndIndex,
+       &NumberOfSubgrids, leftface, rightface,
+       istart, iend, jstart, jend,
+       standard, dnindex,
+       vxindex, vyindex, vzindex,
+       bxindex, byindex, bzindex,
+       f1,f2,f3,f4,f5,f6,f7,
+       g1,g2,g3,g4,g5,g6,g7,
+       h1,h2,h3,h4,h5,h6,h7,
+       ex,ey,ez,
+       qu1,qu2,qu3,qu4,qu5,qu6,qu7);
     /* deallocate temporary space for solver */
  
-      if (have_velocity) {
-        std::copy_n(velox,m,velocity_x);
-        std::copy_n(veloy,m,velocity_y);
-        std::copy_n(veloz,m,velocity_z);
-      }
+    if (have_velocity) {
+      std::copy_n(velox,m,velocity_x);
+      std::copy_n(veloy,m,velocity_y);
+      std::copy_n(veloz,m,velocity_z);
+    }
 
     delete [] temp;
  

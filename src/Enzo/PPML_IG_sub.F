@@ -2,7 +2,7 @@ c     See LICENSE_PPML file for license and copyright information
 
 #include "fortran.h"
 
-      SUBROUTINE VECTLRx(gamma,QU,BS,QL,QR,U)
+      SUBROUTINE VECTLRx_ig(gamma,QU,BS,QL,QR,U)
       Implicit NONE
 
       ENZO_REAL QU(8),QL(8,8),QR(8,8),U(8),BS(3)  	
@@ -234,7 +234,7 @@ c     See LICENSE_PPML file for license and copyright information
       RETURN
       END
 
-      SUBROUTINE VECTLRy(gamma,QU,BS,QL,QR,U)
+      SUBROUTINE VECTLRy_ig(gamma,QU,BS,QL,QR,U)
       Implicit NONE
 
       ENZO_REAL QU(8),QL(8,8),QR(8,8),U(8),BS(3)  	
@@ -466,14 +466,15 @@ c     See LICENSE_PPML file for license and copyright information
       RETURN
       END
 
-      SUBROUTINE VECTLRz(gamma,QU,BS,QL,QR,U)
+      SUBROUTINE VECTLRz_ig(gamma,QU,BS,QL,QR,U)
       Implicit NONE
 
       ENZO_REAL QU(8),QL(8,8),QR(8,8),U(8),BS(3)  	
       ENZO_REAL DLT,X22,SK1,BVX,BVY,BVZ,VAX,VAY,VAZ
       ENZO_REAL VAH,CKV,CSR,CSV,CWH,DSCV,VF2
       ENZO_REAL VS2,CF,CS,CA,BYY,BXZ,SBB,BMG,GPP,GPB
-      ENZO_REAL ASS,AS,AF,BX,BY,BSGN,CD2,GAMMA 
+      ENZO_REAL ASS,AS,AF,BX,BY,BSGN,CD2,GAMMA
+      ENZO_REAL QU5,QU6,QU7
       
       DLT=1.E-12
       X22=1./SQRT(2.)
@@ -699,14 +700,14 @@ c     See LICENSE_PPML file for license and copyright information
       END
 
 
-      SUBROUTINE VECTEGx(gamma,QU,BS,U)
+      SUBROUTINE VECTEGx_ig(gamma,QU,BS,U)
       Implicit NONE
 
       ENZO_REAL QU(8),U(8),BS(3)  	
       ENZO_REAL DLT,SK1,BVX,BVY,BVZ,VAX,VAY,VAZ
       ENZO_REAL VAH,CKV,A1,A2,CSR,CSV,CWH,DSCV,VF2
       ENZO_REAL VS2,CF,CS,VA,BXX,BYZ,SBB,BMG,GPP,GPB
-      ENZO_REAL ASS,AS,AF,GAMMA,QU5,QU6,QU7 
+      ENZO_REAL ASS,AS,AF,GAMMA,QU5,QU6,QU7
 
       DLT=1.E-12
 
@@ -767,14 +768,14 @@ c     See LICENSE_PPML file for license and copyright information
       RETURN
       END
 
-      SUBROUTINE VECTEGy(gamma,QU,BS,U)
+      SUBROUTINE VECTEGy_ig(gamma,QU,BS,U)
       Implicit NONE
 
       ENZO_REAL QU(8),U(8),BS(3)  	
       ENZO_REAL DLT,SK1,BVX,BVY,BVZ,VAX,VAY,VAZ
       ENZO_REAL VAH,CKV,A1,A2,CSR,CSV,CWH,DSCV,VF2
       ENZO_REAL VS2,CF,CS,VA,BYY,BXZ,SBB,BMG,GPP,GPB
-      ENZO_REAL ASS,AS,AF,GAMMA 
+      ENZO_REAL ASS,AS,AF,GAMMA ,QU5,QU6,QU7
 	
       DLT=1.E-12
 
@@ -835,13 +836,13 @@ c     See LICENSE_PPML file for license and copyright information
       RETURN
       END
 
-      SUBROUTINE VECTEGz(gamma,QU,BS,U)
+      SUBROUTINE VECTEGz_ig(gamma,QU,BS,U)
       Implicit NONE
 
       ENZO_REAL QU(8),U(8),BS(3)  	
       ENZO_REAL DLT,SK1,BVX,BVY,BVZ,VAX,VAY,VAZ
       ENZO_REAL VAH,CKV,A1,A2,CSR,CSV,CWH,DSCV,VF2
-      ENZO_REAL VS2,CF,CS,CA,BXY,BZZ,SBB,BMG,GPP,GPB
+      ENZO_REAL VS2,CF,CS,VA,BXY,BZZ,SBB,BMG,GPP,GPB
       ENZO_REAL ASS,AS,AF,GAMMA,QU5,QU6,QU7 
 
       DLT=1.E-12
@@ -903,13 +904,13 @@ c     See LICENSE_PPML file for license and copyright information
       RETURN
       END
 
-      SUBROUTINE FLUXx(gamma,QP,BS,F)
+      SUBROUTINE FLUXx_ig(gamma,QP,BS,F)
       Implicit NONE
 	
       ENZO_REAL QP(8),Q(8),BS(3),F(8)
       ENZO_REAL gamma,qb5,qb6,qb7,bp,bp0,ux,uy,uz,vk,bm,pg,vb,pt
 
-      CALL CONS(gamma,QP,Q)
+      CALL CONS_ig(gamma,QP,Q)
        
       qb5 = q(5)+bs(1)
       qb6 = q(6)+bs(2)
@@ -942,13 +943,13 @@ c     See LICENSE_PPML file for license and copyright information
       RETURN
       END
       
-      SUBROUTINE FLUXy(gamma,QP,BS,F)
+      SUBROUTINE FLUXy_ig(gamma,QP,BS,F)
       Implicit NONE
 	
       ENZO_REAL QP(8),Q(8),BS(3),F(8)
       ENZO_REAL gamma,qb5,qb6,qb7,bp,bp0,ux,uy,uz,vk,bm,pg,vb,pt
 
-      CALL CONS(gamma,QP,Q)
+      CALL CONS_ig(gamma,QP,Q)
 
       qb5 = q(5)+bs(1)
       qb6 = q(6)+bs(2)
@@ -980,13 +981,13 @@ c     See LICENSE_PPML file for license and copyright information
       RETURN
       END
 
-      SUBROUTINE FLUXz(gamma,QP,BS,F)
+      SUBROUTINE FLUXz_ig(gamma,QP,BS,F)
       Implicit NONE
       
       ENZO_REAL QP(8),Q(8),BS(3),F(8)
       ENZO_REAL gamma,qb5,qb6,qb7,bp,bp0,ux,uy,uz,vk,bm,pg,vb,pt
 
-      CALL CONS(gamma,QP,Q)
+      CALL CONS_ig(gamma,QP,Q)
 
       qb5 = q(5)+bs(1)
       qb6 = q(6)+bs(2)
@@ -1018,12 +1019,13 @@ c     See LICENSE_PPML file for license and copyright information
       RETURN
       END
 
-      SUBROUTINE FPMR(Y,QL,QR,QP,QC) 
+      SUBROUTINE FPMR_ig(Y,QL,QR,QP,QC) 
       Implicit NONE
       
       ENZO_REAL QL(8),QR(8),QP(8),QC(8)
       ENZO_REAL DQ,Q6,Y
-
+      integer M
+      
       DO M=1,8
          DQ=QR(M)-QL(M)
 	 Q6=6.0*(QP(M)-(QR(M)+QL(M))/2.)
@@ -1033,12 +1035,13 @@ c     See LICENSE_PPML file for license and copyright information
       RETURN
       END
 	 
-      SUBROUTINE FPML(Y,QL,QR,QP,QC) 
+      SUBROUTINE FPML_ig(Y,QL,QR,QP,QC) 
       Implicit NONE
-      
+
+      integer m
       ENZO_REAL QL(8),QR(8),QP(8),QC(8)
       ENZO_REAL DQ,Q6,y
-
+      
       DO M=1,8
          DQ=QR(M)-QL(M)
 	 Q6=6.0*(QP(M)-(QR(M)+QL(M))/2.)
@@ -1048,7 +1051,7 @@ c     See LICENSE_PPML file for license and copyright information
       RETURN
       END
 	
-      SUBROUTINE FQML(Y,QL,QR,QP,QC) 
+      SUBROUTINE FQML_ig(Y,QL,QR,QP,QC) 
       Implicit NONE
       
       Integer M
@@ -1065,7 +1068,7 @@ c     See LICENSE_PPML file for license and copyright information
       END
 
 
-      Subroutine QDD6(Nx,Qvr,Qvl,Qrx,Qlx,Qp)
+      Subroutine QDD6_ig(Nx,Qvr,Qvl,Qrx,Qlx,Qp)
       Implicit NONE
 
       Integer m,nx,i
@@ -1099,7 +1102,7 @@ c     See LICENSE_PPML file for license and copyright information
       Return
       End	
 	 
-      SUBROUTINE MATR_AX(gamma,QU,BS,QL)
+      SUBROUTINE MATR_AX_ig(gamma,QU,BS,QL)
       Implicit NONE
 
       ENZO_REAL QU(8),QL(8,8),BS(3)
@@ -1184,7 +1187,7 @@ c     See LICENSE_PPML file for license and copyright information
       RETURN
       END
 
-      SUBROUTINE MATR_AY(gamma,QU,BS,QL)
+      SUBROUTINE MATR_AY_ig(gamma,QU,BS,QL)
       Implicit NONE
 
       ENZO_REAL QU(8),QL(8,8),BS(3)  	
@@ -1269,7 +1272,7 @@ c     See LICENSE_PPML file for license and copyright information
       RETURN
       END
 
-      SUBROUTINE MATR_AZ(gamma,QU,BS,QL)
+      SUBROUTINE MATR_AZ_ig(gamma,QU,BS,QL)
       Implicit NONE
 
       ENZO_REAL QU(8),QL(8,8),BS(3)  	
@@ -1355,7 +1358,7 @@ c     See LICENSE_PPML file for license and copyright information
       RETURN
       END
 
-      SUBROUTINE DUDW(gamma,QU,BS,QL)
+      SUBROUTINE DUDW_ig(gamma,QU,BS,QL)
       Implicit NONE
 
       ENZO_REAL QU(8),QL(8,8),BS(3)  	
@@ -1440,12 +1443,12 @@ c     See LICENSE_PPML file for license and copyright information
       RETURN
       END
 
-      SUBROUTINE AMPLTD(QL,QD,SL)
+      SUBROUTINE AMPLTD_ig(QL,QD,SL)
       Implicit NONE
 
-      Integer M
+      Integer L,M
       ENZO_REAL QL(8,8),QD(8),SL(8)
-	  
+      
       DO M=1,8
          SL(M)=0.   
          DO L=1,8
@@ -1456,7 +1459,7 @@ c     See LICENSE_PPML file for license and copyright information
       RETURN
       END 
 
-      Function Xminmod(x,y)
+      Function Xminmod_ig(x,y)
       
       ENZO_REAL x,y,Xminmod
 	
@@ -1465,7 +1468,7 @@ c     See LICENSE_PPML file for license and copyright information
       Return
       End
 
-      Function Xmedian(x,y,z)
+      Function Xmedian_ig(x,y,z)
       
       ENZO_REAL x,y,z,Xminmod,Xmedian
 
@@ -1476,7 +1479,7 @@ c     See LICENSE_PPML file for license and copyright information
       Return
       End
 
-      SUBROUTINE W5RECM(VP1,VP2,VP3,VP4,VP5,VL,VR)
+      SUBROUTINE W5RECM_ig(VP1,VP2,VP3,VP4,VP5,VL,VR)
       Implicit NONE
       
       ENZO_REAL IS1,IS2,IS3,DELTA,WS1,WS2,WS3,WJ1,WJ2,WJ3
@@ -1565,7 +1568,7 @@ c     See LICENSE_PPML file for license and copyright information
       RETURN
       END
 	
-      Function VLeer(a,b)
+      Function VLeer_ig(a,b)
 
       ENZO_REAL a,b,VLeer
 
@@ -1579,7 +1582,7 @@ c     See LICENSE_PPML file for license and copyright information
       Return
       End	
 	  
-      SUBROUTINE PRIM(gamma,QU,QP)
+      SUBROUTINE PRIM_ig(gamma,QU,QP)
       Implicit NONE
 
       ENZO_REAL QU(8),QP(8)
@@ -1601,7 +1604,7 @@ c     See LICENSE_PPML file for license and copyright information
       RETURN
       END
 
-      SUBROUTINE CONS(gamma,QP,QU)
+      SUBROUTINE CONS_ig(gamma,QP,QU)
       Implicit NONE
 
       ENZO_REAL QU(8),QP(8)

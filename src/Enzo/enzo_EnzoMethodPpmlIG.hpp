@@ -19,7 +19,7 @@ class EnzoMethodPpmlIG : public Method {
 public: // interface
 
   /// Creae a new EnzoMethodPpmlIG object
-  EnzoMethodPpmlIG(EnzoConfig * enzo_config);
+  EnzoMethodPpmlIG();
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodPpmlIG);

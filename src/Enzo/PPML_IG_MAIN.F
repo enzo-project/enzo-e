@@ -301,7 +301,7 @@ c--------------------------------------------------------
 		
             Enddo
 
-            Call Monot(1,nxp,gamma,Dx1,Dx2,Bpx,qp1,qr1,qlx1,qrx1)
+            Call Monot_ig(1,nxp,gamma,Dx1,Dx2,Bpx,qp1,qr1,qlx1,qrx1)
 		
             Do i=nxb+1,nxe
                Qlx1(i,5)=Qr1(i-1,5)
@@ -391,15 +391,18 @@ c--------------------------------------------------------
 			
             Enddo
 		
-            CALL QDD6(nxp,Qrx1,Qlx1,Qvr1,Qvl1,Qp1)
+            CALL QDD6_ig(nxp,Qrx1,Qlx1,Qvr1,Qvl1,Qp1)
 
             Do i=nxb,nxe
                Qvl1(i,5)=Qlx1(i,5)
                Qvr1(i,5)=Qrx1(i,5)
             Enddo
-			
-      CALL POTOKx(nxp,gamma,Dx,Dt,Bpx,Qvl1,Qvr1,Qp1,Qdy1,Qdz1,Qrp1,Fm1)
 
+#ifdef INCLUDE_GRAVITY            
+      CALL POTOKx_ig(nxp,gamma,Dx,Dt,Bpx,Qvl1,Qvr1,Qp1,Qdy1,Qdz1,Qrp1,sx,Fm1)
+#else
+      CALL POTOKx_ig(nxp,gamma,Dx,Dt,Bpx,Qvl1,Qvr1,Qp1,Qdy1,Qdz1,Qrp1,fm1)
+#endif
             Do i=i1-1,i2
 
                dnrx(i,j,k)=Qrp1(i,1)		
@@ -527,7 +530,7 @@ c--------------------------------------------------------
 
             Enddo
 
-            Call Monot(2,nyp,gamma,Dy1,Dy2,Bpy,qp2,qr2,qlx2,qrx2)
+            Call Monot_ig(2,nyp,gamma,Dy1,Dy2,Bpy,qp2,qr2,qlx2,qrx2)
 		
             Do j=nyb+1,nye
                Qlx2(j,6)=Qr2(j-1,6)
@@ -617,14 +620,18 @@ c--------------------------------------------------------
 			
             Enddo
 		
-            CALL QDD6(nyp,Qrx2,Qlx2,Qvr2,Qvl2,Qp2)
+            CALL QDD6_ig(nyp,Qrx2,Qlx2,Qvr2,Qvl2,Qp2)
 
             Do j=nyb,nye
                Qvl2(j,6)=Qlx2(j,6)
                Qvr2(j,6)=Qrx2(j,6)
             Enddo
 			
-      CALL POTOKy(nyp,gamma,Dx,Dt,Bpy,Qvl2,Qvr2,Qp2,Qdx2,Qdz2,Qrp2,Fm2) 
+#ifdef INCLUDE_GRAVITY            
+      CALL POTOKy_ig(nyp,gamma,Dx,Dt,Bpy,Qvl2,Qvr2,Qp2,Qdx2,Qdz2,Qrp2,Fm2) 
+#else
+      CALL POTOKy_ig(nyp,gamma,Dx,Dt,Bpy,Qvl2,Qvr2,Qp2,Qdx2,Qdz2,Qrp2,Fm2) 
+#endif
 			
 
             Do j=j1-1,j2
@@ -754,7 +761,7 @@ c--------------------------------------------------------
 		 
             Enddo
 
-            Call Monot(3,nzp,gamma,Dz1,Dz2,Bpz,Qp3,Qr3,qlx3,qrx3)
+            Call Monot_ig(3,nzp,gamma,Dz1,Dz2,Bpz,Qp3,Qr3,qlx3,qrx3)
 		
             Do k=nzb+1,nze
                Qlx3(k,7)=Qr3(k-1,7)
@@ -847,14 +854,18 @@ c--------------------------------------------------------
 
             Enddo
 		
-            CALL QDD6(nzp,Qrx3,Qlx3,Qvr3,Qvl3,Qp3)
+            CALL QDD6_ig(nzp,Qrx3,Qlx3,Qvr3,Qvl3,Qp3)
 
             Do k=nzb,nze
                Qvl3(k,7)=Qlx3(k,7)
                Qvr3(k,7)=Qrx3(k,7)
             Enddo
 			
-      CALL POTOKz(nzp,gamma,Dx,Dt,Bpz,Qvl3,Qvr3,Qp3,Qdx3,Qdy3,Qrp3,Fm3) 
+#ifdef INCLUDE_GRAVITY            
+      CALL POTOKz_ig(nzp,gamma,Dx,Dt,Bpz,Qvl3,Qvr3,Qp3,Qdx3,Qdy3,Qrp3,Fm3) 
+#else
+      CALL POTOKz_ig(nzp,gamma,Dx,Dt,Bpz,Qvl3,Qvr3,Qp3,Qdx3,Qdy3,Qrp3,Fm3) 
+#endif
 
             Do k=k1-1,k2
 
@@ -1453,7 +1464,7 @@ c          write(10,*) i,f1(i,j,k)
 c        enddo
 c        close(10)
 
-      Call Conserv(gamma,nxp,nyp,nzp,dn,vx,vy,vz,bx,by,bz,pn,
+      Call Conserv_ig(gamma,nxp,nyp,nzp,dn,vx,vy,vz,bx,by,bz,pn,
      &             qu1,qu2,qu3,qu4,qu5,qu6,qu7,qu8) 	  
 
       Do k=k1,k2
@@ -1508,7 +1519,7 @@ c        close(10)
          Enddo
       Enddo
   
-      Call Primitiv(gamma,nxp,nyp,nzp,qu1,qu2,qu3,qu4,qu5,qu6,qu7,qu8,
+      Call Primitiv_ig(gamma,nxp,nyp,nzp,qu1,qu2,qu3,qu4,qu5,qu6,qu7,qu8,
      &              dn,vx,vy,vz,bx,by,bz,pn) 	  
 
 	 

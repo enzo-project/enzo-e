@@ -507,6 +507,10 @@ Method * EnzoProblem::create_method_
 
     method = new EnzoMethodPpml;
 
+  } else if (name == "ppml_ig") {
+
+    method = new EnzoMethodPpmlIG;
+
   } else if (name == "pm_deposit") {
 
     method = new EnzoMethodPmDeposit (enzo_config->method_pm_deposit_alpha);
