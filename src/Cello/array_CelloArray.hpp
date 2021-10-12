@@ -421,6 +421,20 @@ public: // interface
                                     other.shape_, other.stride_);
   }
 
+  // The following is defined to give nice error messages for invalid
+  // casts/copies. Without the following, the CelloArray(Args... args)
+  // constructor gets invoked and the errors are hard to understand
+  template<typename oT, std::size_t oD,
+	   class = std::enable_if<!std::is_same<T, const_value_type>::value ||
+	                          !std::is_same<T, oT>::value || oD != D>>
+  CelloArray(const CelloArray<oT, oD> &other) : CelloArray() {
+    static_assert(!std::is_same<oT, const_value_type>::value,
+		  "can't cast CelloArray<const T,D> to CelloArray<T,D>");
+    static_assert(!std::is_same<oT, T>::value,
+		  "incompatible types for cast/copy");
+    static_assert(D == oD, "number of array dimensions must be equal");
+  }
+
   /// Copy constructor. Makes *this a shallow copy of other.
   ///
   /// @note The fact that this accepts const reference reflects the fact that
