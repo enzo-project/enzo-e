@@ -52,7 +52,7 @@ complete is non-trivial.
 Revised adapt algorithm description
 ===================================
 
-In this section we describe our "updated" algorithm for the adapt
+In this section we describe a revised algorithm for the adapt
 phase in Enzo-E/Cello. The previous parallel algorithm relied on
 Charm++'s support for **"quiescence detection"**, which is defines as
 *"the state in which no processor is executing an entry point, no
@@ -65,17 +65,21 @@ Cello, users still occasionally ran into issues of level-jumps in the
 resulting mesh hierarchy, which catestrophically stop simulations with
 an error message.
 
-Our revised algorithm avoids using quiescence detection in favor of a
-more direct approach.  First, as with the previous algorithm, each
-block evaluates its local adapt criteria to determine whether it needs
-to refine, stay in the same level, or can coarsen.  Next, based on the
-local adapt result and the current levels of its neighbors, each block
-"commits to" its desired action if it has been decided; that is, if it
-is guaranteed not to change during the balancing step.  Then, blocks
-send to their neighbors their desired local adapt level, and whether
-they are commited to that level or not. When a block then receives
-updated status of its neighbors that forces either its next level or
-its "committed" state to change, it again communicates that to its
+The revised algorithm was developed by Phil Miller, and was originally
+presented in his University of Illinois at Urbana-Champaign
+Ph.D. Dissertation, `Reducing synchronization in distributed parallel
+programs <\http://hdl.handle.net/2142/95305>`_ (2016). This algorithm
+avoids using quiescence detection in favor of a more direct approach.
+First, as with the previous algorithm, each block evaluates its local
+adapt criteria to determine whether it needs to refine, stay in the
+same level, or can coarsen.  Next, based on the local adapt result and
+the current levels of its neighbors, each block "commits to" its
+desired action if it has been decided; that is, if it is guaranteed
+not to change during the balancing step.  Then, blocks send to their
+neighbors their desired local adapt level, and whether they are
+commited to that level or not. When a block then receives updated
+status of its neighbors that forces either its next level or its
+"committed" state to change, it again communicates that to its
 neighbors. Each time a block transitions to the "commited" state, it
 is counted, and when all blocks are counted, we know that all blocks
 are now in the commited state, and consequently the balancing step is
@@ -112,26 +116,40 @@ But first, some notation:
 * :math:`B_j` *a block adjacent to block i*
 * :math:`L_i^{k}` *the level of Block i in cycle k*
 * :math:`\hat{L}_i^{k+1}` *block i's desired next level (locally-evaluated)*
-* :math:`\underline{L}_i^{k+1,r},\bar{L}_i^{k+1,r}` *"level bounds": bounds on block i's next level after consensus update r*
+* :math:`\{ \underline{L}_i^{k+1} .. \bar{L}_i^{k+1} \}` *current "level bounds": current bounds on block i's next level*
 * :math:`L_i^{k+1}` *the next level (consensus complete)*
-* :math:`\mathcal{C}` *set of all committed blocks*
  
 Below we list some properties in terms of these values:
 
-* :math:`|L_i^{k+1} - L_j^{k+1}| \le 1` *the  (spacial) level-jump condition*
+* :math:`|L_i^{k} - L_j^{k}| \le 1` *the  (spacial) level-jump condition*
 * :math:`|L_i^k - L_i^{k+1}| \le 1` *the temporal level-jump condition*
 
-Since :math:`\underline{L}_i^{k+1,r} \leq L_i^{k+1} \leq
-\bar{L}_i^{k+1,r}`, if the lower and upper bounds are equal, we know
+Since :math:`\underline{L}_i^{k+1} \leq L_i^{k+1} \leq
+\bar{L}_i^{k+1}`, if the lower and upper bounds are equal, we know
 the value for the next level :math:`L_i^{k+1}`, and the block is said to be
 "committed".
 
 The balancing step of the algorithm proceeds by alternately sending a
 block's level bounds to its neighbors, and updating the block's level
-bounds given updated bounds from its neighbors. Initial bounds are
-initialized for step :math:`r=0` to be
-:math:`\underline{L}_i^{k+1,0}=\hat{L}_i^{k+1}` and
-:math:`\bar{L}_i^{k+1,0} = L_i^{k} + 1`.
+bounds given updated bounds from its neighbors.
+
+Initial bounds are initialized to be
+:math:`\underline{L}_i^{k+1}=\hat{L}_i^{k+1}` and
+:math:`\bar{L}_i^{k+1} = L_i^{k} + 1`. That is, the minimum level is
+the level determined by the local refinement criteria, and the maximum
+is one level of refinement more than the current. If the local refinement
+criteria forces refinement, then the block's next level is committed.
+
+Blocks then send their level bounds to their neighbors, and wait for
+incoming level bounds send from their neighbors. Level bounds may change
+depending on incoming neighbor level bounds; in particular:
+
+:math:`\underline{L}_i^{k+1} \leftarrow \max ( \underline{L}_i^{k+1}, \max_j (\underline{L}_j^{k+1} + 1))`
+
+:math:`\bar{L}_i^{k+1} \leftarrow \max ( \underline{L}_i^{k+1}, \max_j(\bar{L}_j^{k+1} + 1))`
+
+That is, level bounds for block i are the maximum of 1. the current minimum level and 2. the maximum of level-bounds of all neighbors plus one. For the lower bound, this ensures that the next level is at least the local level determined by refinement criteria, and the level required to enforce the spacial
+level-jump condition.
 
 * :math:`(\hat{L}_i^{k+1} =L_i^{k} + 1) \implies L_i^{k+1} = L_i^k+1` *blocks that want to refine can always refine*
 * :math:`(\hat{L}_i^{k+1} =L_i^{k}) \land (\forall_j L_j^k \leq L_i^k) \implies L_i^{k+1} = L_i^{k}` *blocks that want to stay in the same level can if no neighboring blocks are in a finer level*
