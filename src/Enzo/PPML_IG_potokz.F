@@ -210,8 +210,8 @@ c     See LICENSE_PPML file for license and copyright information
 	    CALL FQML_ig(DXI,QVL,QVR,QP,VM) 
 
 	    CALL VECTLRZ_ig(gamma,QP,BS,QL,QR,UV)
-            CALL MATR_AX_ig(gamma,QP,AX)
-            CALL MATR_AY_ig(gamma,QP,AY)
+            CALL MATR_AX_ig(gamma,QP,BS,AX)
+            CALL MATR_AY_ig(gamma,QP,BS,AY)
 
 	    DO L=1,8
                VL(L)=0.
@@ -265,8 +265,8 @@ c     See LICENSE_PPML file for license and copyright information
 	    CALL FQML_ig(DXI,TVL,TVR,TP,VM) 
             
 	    CALL VECTLRZ_ig(gamma,TP,BS,QL,QR,UV)
-            CALL MATR_AX_ig(gamma,TP,AX)
-            CALL MATR_AY_ig(gamma,TP,AY)
+            CALL MATR_AX_ig(gamma,TP,BS,AX)
+            CALL MATR_AY_ig(gamma,TP,BS,AY)
 
 	    DO L=1,8
                VL(L)=0.

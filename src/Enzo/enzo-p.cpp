@@ -1,6 +1,7 @@
 // See LICENSE_CELLO file for license and copyright information
 
 //----------------------------------------------------------------------
+       #include <fenv.h>
 
 /// @file      enzo-p.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
@@ -63,7 +64,8 @@ PARALLEL_MAIN_BEGIN
   CkPrintf ("PNG_1_5_X\n");
 #endif
   
-
+  feenableexcept(FE_INVALID | FE_OVERFLOW);
+  
   // Check parameter file
 
   if (PARALLEL_ARGC != 2) {

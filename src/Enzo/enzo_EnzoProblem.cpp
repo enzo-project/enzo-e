@@ -503,7 +503,7 @@ Method * EnzoProblem::create_method_
 
     method = new EnzoMethodPpm;
 
-  } else if (name == "ppml") {
+  } else if (name == "ppml" || name == "ppml_it") {
 
     method = new EnzoMethodPpml;
 

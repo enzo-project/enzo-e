@@ -4,7 +4,6 @@ c     PPML MHD solver for Ideal Gas (PPML_IG)
 #include "fortran.h"
 
 /* #define INCLUDE_GRAVITY */  /* INCOMPLETE */
-/* #define USE_PN1_PN2 */      
       
       Subroutine PPML_IG(dn,vx,vy,vz,bx,by,bz,pn,
      &                   dnrx,vxrx,vyrx,vzrx,bxrx,byrx,bzrx,pnrx, 
@@ -108,9 +107,7 @@ c     b0                                      - components of uniform magnetic f
       ENZO_REAL gx(nx,ny,nz),gy(nx,ny,nz),gz(nx,ny,nz)  	 
       ENZO_REAL sx(nx,7),sy(ny,7),sz(nz,7) !AK 8?
 #endif      
-#ifdef USE_PN1_PN2               
-      ENZO_REAL pn1(nx,ny,nz),pn2(nx,ny,nz)
-#endif
+      ENZO_REAL pn1, pn2
       ENZO_REAL b0(3)
       ENZO_REAL bpx(nx,3),bpy(ny,3),bpz(nz,3)
 	  
@@ -166,7 +163,7 @@ C           ERROR_MESSAGE
 
       ighost=GridStartIndex(1)
       jghost=GridStartIndex(2)
-      kghost=GridStartIndex(3)	  
+      kghost=GridStartIndex(3)
 !SU      kghost=GridEndIndex(3)	  
 
         if (i1.eq.0) then
@@ -200,7 +197,7 @@ C           ERROR_MESSAGE
       nyp=nye-nyb+1 	  
       nzp=nze-nzb+1 	  
 
-c-------------------------------------------------------	  
+c-------------------------------------------------------
 c
 c     Calculation of flux in x - direction
 c	  
@@ -327,10 +324,8 @@ c--------------------------------------------------------
                bz1=Qp1(i,7)
                bz2=bz1
 
-#ifdef USE_PN1_PN2               
                pn1=Qp1(i,8)
                pn2=pn1
-#endif               
 
                do m3=k-1,k+1
                   do m2=j-1,j+1
@@ -357,10 +352,8 @@ c--------------------------------------------------------
                         bz1=min(bz1,bz(m1,m2,m3))
                         bz2=max(bz2,bz(m1,m2,m3))
 
-#ifdef USE_PN1_PN2               
                         pn1=min(pn1,pn(m1,m2,m3))
                         pn2=max(pn2,pn(m1,m2,m3))
-#endif                        
                         
                      Enddo 
                   Enddo 
@@ -384,10 +377,8 @@ c--------------------------------------------------------
                qlx1(i,7)=max(bz1,min(bz2,qlx1(i,7)))
                qrx1(i,7)=max(bz1,min(bz2,qrx1(i,7)))
 
-#ifdef USE_PN1_PN2               
                qlx1(i,8)=max(pn1,min(pn2,qlx1(i,8)))
                qrx1(i,8)=max(pn1,min(pn2,qrx1(i,8)))
-#endif               
 			
             Enddo
 		
@@ -556,10 +547,8 @@ c--------------------------------------------------------
                bz1=Qp2(j,7)
                bz2=bz1
 
-#ifdef USE_PN1_PN2               
                pn1=Qp2(j,8)
                pn2=pn1
-#endif               
 			 
                do m3=k-1,k+1 
                   do m2=j-1,j+1 
@@ -586,10 +575,8 @@ c--------------------------------------------------------
                         bz1=min(bz1,bz(m1,m2,m3))   
                         bz2=max(bz2,bz(m1,m2,m3))   
 
-#ifdef USE_PN1_PN2               
                         pn1=min(pn1,pn(m1,m2,m3))   
                         pn2=max(pn2,pn(m1,m2,m3))
-#endif                        
 				
                      Enddo 
                   Enddo 
@@ -613,10 +600,8 @@ c--------------------------------------------------------
                qlx2(j,7)=max(bz1,min(bz2,qlx2(j,7)))
                qrx2(j,7)=max(bz1,min(bz2,qrx2(j,7)))
 
-#ifdef USE_PN1_PN2               
                qlx2(j,8)=max(pn1,min(pn2,qlx2(j,8)))
                qrx2(j,8)=max(pn1,min(pn2,qrx2(j,8)))
-#endif               
 			
             Enddo
 		
@@ -630,7 +615,7 @@ c--------------------------------------------------------
 #ifdef INCLUDE_GRAVITY            
       CALL POTOKy_ig(nyp,gamma,Dx,Dt,Bpy,Qvl2,Qvr2,Qp2,Qdx2,Qdz2,Qrp2,Fm2) 
 #else
-      CALL POTOKy_ig(nyp,gamma,Dx,Dt,Bpy,Qvl2,Qvr2,Qp2,Qdx2,Qdz2,Qrp2,Fm2) 
+      CALL POTOKy_ig(nyp,gamma,Dx,Dt,Bpy,Qvl2,Qvr2,Qp2,Qdx2,Qdz2,Qrp2,Fm2)
 #endif
 			
 
@@ -787,10 +772,8 @@ c--------------------------------------------------------
                bz1=Qp3(k,7)
                bz2=bz1
 
-#ifdef USE_PN1_PN2               
                pn1=Qp3(k,8)
                pn2=pn1
-#endif               
 			 
                do m3=k-1,k+1 
                   do m2=j-1,j+1 
@@ -817,10 +800,8 @@ c--------------------------------------------------------
                         bz1=min(bz1,bz(m1,m2,m3))   
                         bz2=max(bz2,bz(m1,m2,m3))   
 
-#ifdef USE_PN1_PN2               
                         pn1=min(pn1,pn(m1,m2,m3))   
                         pn2=max(pn2,pn(m1,m2,m3))
-#endif                        
 				
                      Enddo 
                   Enddo 
@@ -847,10 +828,8 @@ c--------------------------------------------------------
 !bug			qlx3(k,7)=max(bz1,min(bz2,qlx3(k,7)))
 !bug			qrx3(k,7)=max(bz1,min(bz2,qrx3(k,7)))
 
-#ifdef USE_PN1_PN2               
                qlx3(k,8)=max(pn1,min(pn2,qlx3(k,8)))
                qrx3(k,8)=max(pn1,min(pn2,qrx3(k,8)))
-#endif               
 
             Enddo
 		
@@ -1649,5 +1628,3 @@ c
 	  
       Return
       End 
-!1234567890123456789012345678901234567890123456789012345678901234567890
-!         1         2         3         4         5         6         7                                                                    

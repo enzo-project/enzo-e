@@ -216,6 +216,8 @@ public: // interface
       initial_turbulence_temperature(0.0),
       // EnzoMethodHeat
       method_heat_alpha(0.0),
+      // EnzoMethodPpmlIg
+      method_ppml_b0(),
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
@@ -309,6 +311,7 @@ protected: // methods
   void read_method_pm_deposit_(Parameters *);
   void read_method_pm_update_(Parameters *);
   void read_method_ppm_(Parameters *);
+  void read_method_ppml_(Parameters *);
   void read_method_turbulence_(Parameters *);
   
   void read_physics_(Parameters *);
@@ -460,6 +463,9 @@ public: // attributes
 
   /// EnzoMethodHeat
   double                     method_heat_alpha;
+
+  /// EnzoMethodPpmlIg
+  double                     method_ppml_b0[3];
 
   /// EnzoMethodTurbulence
   double                     method_turbulence_edot;

@@ -10,10 +10,9 @@ c     See LICENSE_PPML file for license and copyright information
         ENZO_REAL ul,ur,cfl,cfr,ptl,ptr,sl,sr,slu,sru,smu,sm,ptz
 	ENZO_REAL rlz,slz,rrz,srz,gamma
         ENZO_REAL pl(8),pr(8),bs(3)
- 
+
         call cons_ig(gamma,pl,ql)
         call cons_ig(gamma,pr,qr)
-	
 	call pressx_ig(gamma,ql,bs,ul,ptl,cfl)
 	call pressx_ig(gamma,qr,bs,ur,ptr,cfr)
 
@@ -22,7 +21,7 @@ c     See LICENSE_PPML file for license and copyright information
 
 	if(sl.gt.0.)then
 
-	   call fluxx_ig(gamma,pl,bs,f)       
+	   call fluxx_ig(gamma,pl,bs,f)
 
 	   do m=1,8
 	      us(m) = ql(m)
@@ -88,8 +87,8 @@ c     See LICENSE_PPML file for license and copyright information
 
 	endif
 
-	call quzx_ig(gamma,sm,sl,cfl,ptz,ql,bs,qlz)  
-	call quzx_ig(gamma,sm,sr,cfr,ptz,qr,bs,qrz)  
+	call quzx_ig(gamma,sm,sl,cfl,ptz,ql,bs,qlz)
+	call quzx_ig(gamma,sm,sr,cfr,ptz,qr,bs,qrz)
 
 	if(slz.le.0.and.sm.ge.0.)then
 

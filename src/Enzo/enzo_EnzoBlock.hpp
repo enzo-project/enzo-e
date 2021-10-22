@@ -191,7 +191,7 @@ public: // interface
   int SolveMHDEquations(enzo_float dt);
 
   /// Solve the mhd equations (with ppml), saving subgrid fluxes
-  int SolveMHDEquationsIG(enzo_float dt, enzo_float gamma);
+  int SolveMHDEquationsIG(enzo_float dt, enzo_float gamma, enzo_float b0[3]);
 
   /// Set EnzoBlock's dt (overloaded to update EnzoBlock::dt)
   virtual void set_dt (double dt) throw();

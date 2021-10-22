@@ -51,8 +51,12 @@
 EnzoMethodPpmlIG::EnzoMethodPpmlIG () 
   : Method(),
     comoving_coordinates_(enzo::config()->physics_cosmology),
-    gamma_               (enzo::config()->field_gamma)
+    gamma_               (enzo::config()->field_gamma),
+    b0_()
 {
+  b0_[0] = enzo::config()->method_ppml_b0[0];
+  b0_[1] = enzo::config()->method_ppml_b0[1];
+  b0_[2] = enzo::config()->method_ppml_b0[2];
   // Initialize the default Refresh object
 
   cello::simulation()->refresh_set_name(ir_post_,name());
@@ -72,6 +76,7 @@ void EnzoMethodPpmlIG::pup (PUP::er &p)
   Method::pup(p);
   p | comoving_coordinates_;
   p | gamma_;
+  PUParray(p,b0_,3);
 }
 
 //----------------------------------------------------------------------
@@ -82,7 +87,7 @@ void EnzoMethodPpmlIG::compute ( Block * block ) throw()
   if (!block->is_leaf()) return;
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
-  enzo_block->SolveMHDEquationsIG ( block->dt(), gamma_ );
+  enzo_block->SolveMHDEquationsIG ( block->dt(), gamma_, b0_ );
 
   enzo_block->compute_done();
 
@@ -92,7 +97,6 @@ void EnzoMethodPpmlIG::compute ( Block * block ) throw()
 
 double EnzoMethodPpmlIG::timestep (Block * block) throw()
 {
- 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
   /* initialize */
@@ -142,7 +146,7 @@ double EnzoMethodPpmlIG::timestep (Block * block) throw()
     // 					 Vel3Num, TENum) == FAIL) {
     // 	fprintf(stderr, "ComputeTimeStep: IdentifyPhysicalQuantities error.\n");
     // 	exit(FAIL);
-    //   }
+
  
     // /* Compute the pressure. */
  
@@ -178,24 +182,29 @@ double EnzoMethodPpmlIG::timestep (Block * block) throw()
     CHECK_FIELD(by,"bfieldy");
     CHECK_FIELD(bz,"bfieldz");
     CHECK_FIELD(pr,"pressure");
-    enzo_float b0[3];
+
+    /// Compute pressure
+    // const int in = cello::index_static();
+    // EnzoComputePressure compute_pressure (EnzoBlock::Gamma[in], false);
+    // compute_pressure.compute(enzo_block, pr);
+    
     FORTRAN_NAME(calc_dt_ppml_ig)
-      (enzo_block->GridDimension, 
-       enzo_block->GridDimension+1, 
+      (enzo_block->GridDimension,
+       enzo_block->GridDimension+1,
        enzo_block->GridDimension+2,
-       enzo_block->GridStartIndex, 
+       enzo_block->GridStartIndex,
        enzo_block->GridEndIndex,
-       enzo_block->GridStartIndex+1, 
+       enzo_block->GridStartIndex+1,
        enzo_block->GridEndIndex+1,
-       enzo_block->GridStartIndex+2, 
+       enzo_block->GridStartIndex+2,
        enzo_block->GridEndIndex+2,
-       &enzo_block->CellWidth[0], 
-       &enzo_block->CellWidth[1], 
+       &enzo_block->CellWidth[0],
+       &enzo_block->CellWidth[1],
        &enzo_block->CellWidth[2],
        d,
        vx, vy, vz,
        bx, by, bz, pr,
-       b0, &gamma_,
+       b0_, &gamma_,
        &dtBaryons);
 
     dtBaryons *= courant_;

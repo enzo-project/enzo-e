@@ -26,7 +26,7 @@ c     See LICENSE_PPML file for license and copyright information
       VAY=BVY**2
       VAZ=BVZ**2
       VAH=VAX+VAY+VAZ
-      CKV=GAMMA*QU(8)/QU(1)        
+      CKV=GAMMA*QU(8)/QU(1)
       CSR=SQRT(CKV)
       CSV=CKV+VAH
       CWH=CKV-VAH
@@ -1335,7 +1335,7 @@ c     See LICENSE_PPML file for license and copyright information
       QL(6,5)=0.
       QL(6,6)=QU(4)
       QL(6,7)=0.
-      QL(7,8)=0.
+      QL(6,8)=0.
 
       QL(7,1)=0.
       QL(7,2)=0.

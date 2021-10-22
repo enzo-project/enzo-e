@@ -28,7 +28,8 @@ public: // interface
   EnzoMethodPpmlIG (CkMigrateMessage *m)
     : Method (m),
       comoving_coordinates_(false),
-      gamma_(0.0)
+      gamma_(0.0),
+      b0_()
   {}
 
   /// CHARM++ Pack / Unpack function
@@ -47,6 +48,7 @@ protected: // interface
 
   bool comoving_coordinates_;
   enzo_float gamma_;
+  enzo_float b0_[3];
   
 };
 

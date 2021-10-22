@@ -55,7 +55,6 @@ void EnzoMethodPpml::compute ( Block * block ) throw()
 
 double EnzoMethodPpml::timestep (Block * block) throw()
 {
- 
   EnzoBlock * enzo_block = enzo::block(block);
 
   /* initialize */
@@ -136,22 +135,22 @@ double EnzoMethodPpml::timestep (Block * block) throw()
     enzo_float * bz = (enzo_float *) field.values("bfieldz");
 
     FORTRAN_NAME(calc_dt_ppml)
-      (enzo_block->GridDimension, 
-       enzo_block->GridDimension+1, 
-       enzo_block->GridDimension+2,
-       enzo_block->GridStartIndex, 
-       enzo_block->GridEndIndex,
-       enzo_block->GridStartIndex+1, 
-       enzo_block->GridEndIndex+1,
-       enzo_block->GridStartIndex+2, 
-       enzo_block->GridEndIndex+2,
-       &enzo_block->CellWidth[0], 
-       &enzo_block->CellWidth[1], 
-       &enzo_block->CellWidth[2],
-       d,
-       vx, vy, vz,
-       bx, by, bz,
-       &dtBaryons);
+      (enzo_block->GridDimension,   // ( )
+       enzo_block->GridDimension+1,   // ( )
+       enzo_block->GridDimension+2,  // ( )
+       enzo_block->GridStartIndex,   // ( )
+       enzo_block->GridEndIndex,  // ( )
+       enzo_block->GridStartIndex+1,   // ( )
+       enzo_block->GridEndIndex+1,  // ( )
+       enzo_block->GridStartIndex+2,   // ( )
+       enzo_block->GridEndIndex+2,  // ( )
+       &enzo_block->CellWidth[0],   // ( )
+       &enzo_block->CellWidth[1],   // ( )
+       &enzo_block->CellWidth[2],  // ( )
+       d,  // ( )
+       vx, vy, vz,  // ( )
+       bx, by, bz,  // ( )
+       &dtBaryons);  // ( )
     /* Multiply resulting dt by CourantSafetyNumber (for extra safety!). */
  
     dtBaryons *= courant_;
@@ -163,7 +162,6 @@ double EnzoMethodPpml::timestep (Block * block) throw()
   dt = std::numeric_limits<enzo_float>::max();
 
   dt = MIN(dt, dtBaryons);
-
 
   return dt;
 }

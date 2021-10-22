@@ -124,6 +124,8 @@ EnzoConfig::EnzoConfig() throw ()
   initial_turbulence_temperature(0.0),
   // EnzoMethodHeat
   method_heat_alpha(0.0),
+  // EnzoMethodPpmlIg
+  method_ppml_b0(),
   // EnzoMethodTurbulence
   method_turbulence_edot(0.0),
   method_turbulence_mach_number(0.0),
@@ -327,6 +329,8 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | method_heat_alpha;
 
+  PUParray(p,method_ppml_b0,3);
+
   p | method_turbulence_edot;
   p | method_turbulence_mach_number;
     
@@ -424,6 +428,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_pm_deposit_(p);
   read_method_pm_update_(p);
   read_method_ppm_(p);
+  read_method_ppml_(p);
   read_method_turbulence_(p);
   
   read_physics_(p);
@@ -976,6 +981,15 @@ void EnzoConfig::read_method_ppm_(Parameters * p)
     ("Method:ppm:use_minimum_pressure_support",false);
   ppm_mol_weight = p->value_float
     ("Method:ppm:mol_weight",0.6);
+}
+
+//----------------------------------------------------------------------
+
+void EnzoConfig::read_method_ppml_(Parameters * p)
+{
+  method_ppml_b0[0] = p->list_value_float (0,"Method:ppml_ig:b0",1.0);
+  method_ppml_b0[1] = p->list_value_float (1,"Method:ppml_ig:b0",1.0);
+  method_ppml_b0[2] = p->list_value_float (2,"Method:ppml_ig:b0",1.0);
 }
 
 //----------------------------------------------------------------------
