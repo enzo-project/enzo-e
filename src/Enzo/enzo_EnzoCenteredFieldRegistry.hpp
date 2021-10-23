@@ -169,11 +169,38 @@ public:
   /// There are 2 ways that a name can be associated with a quantity
   ///   1. They can exactly match the name of the quantity.
   ///   2. For VECTOR quantities, they can be composed of the quantity name
-  ///      followed by a 2 character suffix. If ijk_suffix is true, then the
-  ///      suffixes are {'_i', '_j', '_k'}. Otherwise they are
-  ///      {'_x', '_y', '_z'}.
+  ///      followed by a 2 character suffix. The `ijk_suffix` argument
+  ///      determines the suffixes, as in ``try_get_vector_component``.
   static std::string get_actively_advected_quantity_name
   (std::string name, bool ijk_suffix) noexcept;
+
+  /// Identifies the vector component (if any) associated with a name.
+  ///
+  /// For all names consisting of 3 or more characters, this checks whether the
+  /// last 2-characters in the string match a list of known suffixes (the
+  /// list's contents depend on the `ijk_suffix` parameter). Upon success, this
+  /// returns the character corresponding to the suffix. In all other cases,
+  /// this returns the null character, `'\0'`.
+  ///
+  /// @param name The name that will be checked
+  /// @param ijk_suffix When true, the suffixes are `{'_i', '_j', '_k'}`, and
+  ///     the function returns `'i'`, `'j'`, or `'k'` upon a successful match.
+  ///     Otherwise, the suffixes are `{'_x', '_y', '_z'}`, and the function
+  ///     returns `'x'`, `'y'`, or `'z'` upon a successful match.
+  static char try_get_vector_component(const std::string& name,
+                                       bool ijk_suffix) noexcept
+  {
+    const std::array<char,3> ref = {ijk_suffix ? 'i' : 'x',
+                                    ijk_suffix ? 'j' : 'y',
+                                    ijk_suffix ? 'k' : 'z'};
+    std::size_t len = name.length();
+    if ((len >= 3) && (name[len - 2] == '_')){
+        if (std::find(ref.begin(), ref.end(), name[len - 1]) != ref.end()){
+            return name[len - 1];
+        }
+    }
+    return '\0';
+  }
 
 private: // attributes
 

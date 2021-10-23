@@ -210,27 +210,24 @@ namespace enzo_riemann_utils{
   inline std::string parse_mem_name_(std::string member_name,
                                      EnzoPermutedCoordinates coord)
   {
+    char component = EnzoCenteredFieldRegistry::try_get_vector_component
+      (member_name, true);
+    // return immediately, if not a vector component
+    if (component == '\0') { return member_name; }
+
+    std::string out = member_name.substr(0, member_name.length() - 1);
     char suffixes[3] {'x','y','z'};
-
-    std::size_t length = member_name.length();
-    if (length >= 2){
-      int suffix_index = 0;
-      std::string suffix = member_name.substr(length-2,2);
-      if (suffix == std::string("_i")){
-        suffix_index = coord.i_axis();
-      } else if (suffix == std::string("_j")){
-        suffix_index = coord.j_axis();
-      } else if (suffix == std::string("_k")){
-        suffix_index = coord.k_axis();
-      } else {
-        return member_name;
-      }
-
-      std::string key = member_name.substr(0,length-1);
-      key.push_back(suffixes[suffix_index]);
-      return key;
+    if (component == 'i'){
+      out.push_back(suffixes[coord.i_axis()]);
+    } else if (component == 'j'){
+      out.push_back(suffixes[coord.j_axis()]);
+    } else if (component == 'k'){
+      out.push_back(suffixes[coord.k_axis()]);
+    } else {
+      ERROR("enzo_riemann_utils::parse_mem_name_",
+	    "branch should be unreachable");
     }
-    return member_name;
+    return out;
   }
 
   //----------------------------------------------------------------------

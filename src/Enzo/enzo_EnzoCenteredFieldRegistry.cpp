@@ -68,39 +68,30 @@ bool EnzoCenteredFieldRegistry::quantity_properties
 
 //----------------------------------------------------------------------
 
-bool is_actively_advected_vector_component_
-(std::string name, bool ijk_suffix) noexcept
-{
-  const std::array<std::string,3> suffixes =  {ijk_suffix ? "_i" : "_x",
-					       ijk_suffix ? "_j" : "_y",
-					       ijk_suffix ? "_k" : "_z"};
-
-  std::size_t length = name.length();
-  if (length >= 2){
-    std::string suffix = name.substr(length-2,2);
-    if (std::find(suffixes.begin(), suffixes.end(), suffix) != suffixes.end()){
-      std::string prefix = name.substr(0,length-2);
-      bool is_vector, actively_advected;
-      FieldCat category;
-      bool success = EnzoCenteredFieldRegistry::quantity_properties
-        (prefix, &is_vector, &category, &actively_advected);
-      return success && is_vector && actively_advected;
-    }
-  }
-  return false;
-}
-
-//----------------------------------------------------------------------
-
 std::string EnzoCenteredFieldRegistry::get_actively_advected_quantity_name
 (std::string name, bool ijk_suffix) noexcept
 {
-  std::string out = "";
-  if (EnzoCenteredFieldRegistry::quantity_properties(name)){
-    out = name;
-  } else if (is_actively_advected_vector_component_(name, true)){
-    // current element is a VECTOR QUANTITY
-    out = name.substr(0,name.length()-2);
+
+  // check if name matches the name of a scalar quantity)
+  {
+    bool is_vector, actively_advected;
+    FieldCat category;
+    bool success = EnzoCenteredFieldRegistry::quantity_properties
+      (name, &is_vector, &category, &actively_advected);
+    if (success && (!is_vector) && actively_advected) {return name;}
   }
-  return out;
+
+  // next, check if name corresponds to a component of a vector quantity
+  if (try_get_vector_component(name, ijk_suffix) != '\0'){
+    std::string candidate = name.substr(0, name.length()-2);
+
+    bool is_vector, actively_advected;
+    FieldCat category;
+    bool success = EnzoCenteredFieldRegistry::quantity_properties
+      (candidate, &is_vector, &category, &actively_advected);
+    if (success && is_vector && actively_advected) {return candidate;}
+  }
+
+  // return empty string to indicate failure
+  return "";
 }

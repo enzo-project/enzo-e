@@ -138,7 +138,9 @@ struct EnzoRiemannLUT{
   /// The lookup table is always expected to include density and the 3 velocity
   /// components. Although it may not be strictly enforced (yet), the lookup
   /// table is also expected to include either all 3 components of a vector
-  /// quantity or None of them.
+  /// quantity or None of them. Additionally, the kth component of a vector
+  /// quantity is expected to have a value that is 1 larger than that of the
+  /// jth component and 2 larger than the ith component,
   ///
   /// This template class also provides a handful of helpful static methods to
   /// programmatically probe the table's contents at runtime and validate that
@@ -406,7 +408,8 @@ void EnzoRiemannLUT<InputLUT>::validate()
                                                                      true);
     if (quantity == ""){
       ERROR2("EnzoRiemannLUT<InputLUT>::validate",
-             "\"%s\" (at index %d) isn't an actively advected quantity",
+             "\"%s\" (at index %d) isn't an actively advected scalar quantity"
+             "or a component of an actively advected vector quantity",
              name.c_str(), (int)i);
     }
 
@@ -452,6 +455,47 @@ void EnzoRiemannLUT<InputLUT>::validate()
     ERROR2("EnzoRiemannLUT<InputLUT>::validate",
            "InputLUT's specfic_start value should be set to %d, not %d.",
            (int)min_specific, (int)EnzoRiemannLUT<InputLUT>::specific_start);
+  }
+
+
+  // (It would be faster to include this within the above loop, but this is]
+  // more readable)
+  // verify for actively advected vector quantity, qname, that has components
+  // associated with non-negative values that:
+  // - if InputLUT::{qname}_j >= 0, then it's equal to  1 + InputLUT::{qname}_i
+  //   and greater than 0
+  // - if InputLUT::{qname}_k >= 0, then it's equal to  1 + InputLUT::{qname}_j
+  //   and greater than 1
+  char prev_entry_vector_ax = '\0';
+  std::string prev_quantity = "";
+
+  for (const auto& name : entry_names){
+    char component = EnzoCenteredFieldRegistry::try_get_vector_component(name,
+                                                                         true);
+    if (component == '\0'){ // name isn't a component of a vector
+      prev_entry_vector_ax = '\0';
+      prev_quantity = "";
+    } else {
+      std::string quantity =
+        EnzoCenteredFieldRegistry::get_actively_advected_quantity_name(name,
+                                                                       true);
+      if ( (component == 'j') && ((quantity != prev_quantity) ||
+                                  (prev_entry_vector_ax != 'i')) ){
+        ERROR2("EnzoRiemannLUT<InputLUT>::validate",
+               "\"%s_j\" is expected to have an index that is 1 greater than "
+               "the index of \"%s_i\".",
+               quantity.c_str(), quantity.c_str());
+      } else if ( (component == 'k') && ((quantity != prev_quantity) ||
+                                         (prev_entry_vector_ax != 'j')) ){
+        ERROR2("EnzoRiemannLUT<InputLUT>::validate",
+               "\"%s_k\" is expected to have an index that is 1 greater than "
+               "the index of \"%s_j\".",
+               quantity.c_str(), quantity.c_str());
+      }
+
+      prev_entry_vector_ax = component;
+      prev_quantity = quantity;
+    }
   }
 }
 
