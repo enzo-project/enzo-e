@@ -284,9 +284,6 @@ private:
 
 public: //associated static functions
 
-  /// returns a vector of integration quantity names included in the InputLUT
-  static std::vector<std::string> integration_quantity_names() noexcept;
-
   /// returns whether the LUT has any bfields
   static constexpr bool has_bfields(){
     return (qkey::bfield_i>=0) || (qkey::bfield_j>=0) || (qkey::bfield_k>=0);
@@ -338,28 +335,6 @@ void EnzoRiemannLUT<LUT>::for_each_entry(Function fn) noexcept{
                                                  name);
   FIELD_TABLE
   #undef ENTRY
-}
-
-//----------------------------------------------------------------------
-
-template <class InputLUT>
-std::vector<std::string> EnzoRiemannLUT<InputLUT>::integration_quantity_names()
-  noexcept
-{
-  std::vector<std::string> vec;
-
-  auto fn = [&](std::string name, int index)
-    {   
-      if (index < 0) {return;}
-      std::string quantity =
-        EnzoCenteredFieldRegistry::get_actively_advected_quantity_name(name,
-                                                                       true);
-      if (std::find(vec.begin(), vec.end(), quantity) == vec.end()){
-        vec.push_back(quantity);
-      }
-    };
-  EnzoRiemannLUT<InputLUT>::for_each_entry(fn);
-  return vec;
 }
 
 //----------------------------------------------------------------------

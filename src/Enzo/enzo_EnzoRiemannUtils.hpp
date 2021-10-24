@@ -272,6 +272,41 @@ namespace enzo_riemann_utils{
     return arr;
   }
 
+  //----------------------------------------------------------------------
+
+  /// Returns the keys corresponding to each entry in the LUT, (in the
+  /// order of the lookup table). For components of vector quantities, this
+  /// maps the i, j, and k components to the x, y, and z components
+  ///
+  /// @param prim When true, the function returns the keys for the primitive
+  ///   quantities. Otherwise, it returns the keys for the integration
+  ///   quantities.
+  template<class LUT>
+  inline std::vector<std::string> get_quantity_keys(const bool prim) noexcept
+  {
+    // initialize out as a vector of empty strings
+    std::vector<std::string> out(LUT::NEQ);
+
+    EnzoPermutedCoordinates coord(0); // map i,j,k to x,y,z
+    // define a lambda function to execute for every member of lut. For each
+    // member in lut, its passed: 1. the member's name
+    //                            2. the associated index
+    auto fn = [coord, prim, &out](const std::string& name, const int index)
+      {
+        if (index != -1){
+          if (prim && (index == LUT::total_energy)){
+            out[index] = "pressure";
+          } else {
+            out[index] = parse_mem_name_(name, coord);
+          }
+        }
+      };
+
+    LUT::for_each_entry(fn);
+
+    return out;
+  }
+
 }
 
 #endif /* ENZO_ENZO_RIEMANN_UTILS_HPP */

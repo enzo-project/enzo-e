@@ -12,27 +12,8 @@
 
 //----------------------------------------------------------------------
 
-static void build_field_l_(const std::vector<std::string> &quantity_l,
-                           std::vector<std::string> &field_l)
+static void check_field_l_(std::vector<std::string> &field_l)
 {
-  for (const std::string& quantity : quantity_l){
-    bool success, is_vector;
-    success = EnzoCenteredFieldRegistry::quantity_properties (quantity,
-                                                              &is_vector);
-
-    ASSERT1("build_field_l_",
-            ("\"%s\" is not registered in EnzoCenteredFieldRegistry"),
-            quantity.c_str(), success);
-
-    if (is_vector){
-      field_l.push_back(quantity + "_x");
-      field_l.push_back(quantity + "_y");
-      field_l.push_back(quantity + "_z");
-    } else {
-      field_l.push_back(quantity);
-    }
-  }
-
   FieldDescr * field_descr = cello::field_descr();
   for (const std::string& field : field_l){
     ASSERT1("EnzoMethodMHDVlct", "\"%s\" must be a permanent field",
@@ -87,24 +68,23 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
     (rsolver, mhd_choice_ != bfield_choice::no_bfield,
      eos_->uses_dual_energy_formalism());
 
-  // determine integration and primitive quantities
-  std::vector<std::string> integration_quantities, primitive_quantities;
-  integration_quantities = riemann_solver_->integration_quantities();
-  primitive_quantities = riemann_solver_->primitive_quantities();
+  // determine integration and primitive field list
+  integration_field_list_ = riemann_solver_->integration_quantity_keys();
+  primitive_field_list_ = riemann_solver_->primitive_quantity_keys();
 
   // Initialize the remaining component objects
   half_dt_recon_ = EnzoReconstructor::construct_reconstructor
-    (primitive_quantities, half_recon_name, (enzo_float)theta_limiter);
+    (primitive_field_list_, half_recon_name, (enzo_float)theta_limiter);
   full_dt_recon_ = EnzoReconstructor::construct_reconstructor
-    (primitive_quantities, full_recon_name, (enzo_float)theta_limiter);
-  
+    (primitive_field_list_, full_recon_name, (enzo_float)theta_limiter);
+
   integration_quan_updater_ =
-    new EnzoIntegrationQuanUpdate(integration_quantities, true);
+    new EnzoIntegrationQuanUpdate(integration_field_list_, true);
 
   // Determine the lists of fields that are required to hold the integration
   // quantities and primitives and ensure that they are defined
-  build_field_l_(integration_quantities, integration_field_list_);
-  build_field_l_(primitive_quantities, primitive_field_list_);
+  check_field_l_(integration_field_list_);
+  check_field_l_(primitive_field_list_);
 
   // make sure "pressure" is defined (it's needed to compute the timestep)
   FieldDescr * field_descr = cello::field_descr();

@@ -180,11 +180,11 @@ public: // interface
 	      const str_vec_t &passive_list,
               const EFlt3DArray *interface_velocity) const;
 
-  const std::vector<std::string> integration_quantities() const noexcept
-  { return integration_quantities_; }
+  const std::vector<std::string> integration_quantity_keys() const noexcept
+  { return integration_quantity_keys_; }
 
-  const std::vector<std::string> primitive_quantities() const noexcept
-  { return primitive_quantities_; }
+  const std::vector<std::string> primitive_quantity_keys() const noexcept
+  { return primitive_quantity_keys_; }
 
 protected : //methods
   
@@ -198,11 +198,14 @@ protected : //methods
 
 protected: //attributes
 
-  /// Names of the integration quantities for which the flux is computed
-  std::vector<std::string> integration_quantities_;
+  /// expected keys (and key-order) that the `solve` method expects the
+  /// `flux_map` argument to have
+  std::vector<std::string> integration_quantity_keys_;
 
-  /// Names of the primitive quantities that are used in the flux calcualtion
-  std::vector<std::string> primitive_quantities_;
+  /// expected keys (and key-order) that the `solve` method expects the
+  /// `priml_map` and `primr_map` arguments to have (i.e. these are the keys
+  /// for the primitives that are required to compute the flux)
+  std::vector<std::string> primitive_quantity_keys_;
 
   /// Tracks whether the internal energy needs to be computed
   bool calculate_internal_energy_flux_;
@@ -214,22 +217,19 @@ template <class ImplFunctor>
 EnzoRiemannImpl<ImplFunctor>::EnzoRiemannImpl(const bool internal_energy)
   : EnzoRiemann()
 {
-  integration_quantities_ = LUT::integration_quantity_names();
+  integration_quantity_keys_ =
+    enzo_riemann_utils::get_quantity_keys<LUT>(false);
+  primitive_quantity_keys_ = enzo_riemann_utils::get_quantity_keys<LUT>(true);
 
-  for (std::string quantity : integration_quantities_){
-    if (quantity == "total_energy"){
-      primitive_quantities_.push_back("pressure");
-    } else if (quantity == "internal_energy"){
-      ERROR("EnzoRiemannImpl",
-            "No support for a LUT directly containing \"internal_energy\"");
-    } else {
-      primitive_quantities_.push_back(quantity);
-    }
+  for (std::string key : integration_quantity_keys_){
+    ASSERT("EnzoRiemannImpl::EnzoRiemannImpl",
+	   "No support for a LUT directly containing \"internal_energy\"",
+	   key != "internal_energy");
   }
 
   calculate_internal_energy_flux_ = internal_energy;
-  if (calculate_internal_energy_flux_){
-    integration_quantities_.push_back("internal_energy");
+  if (calculate_internal_energy_flux_) {
+    integration_quantity_keys_.push_back("internal_energy");
   }
 }
 
@@ -240,8 +240,8 @@ void EnzoRiemannImpl<ImplFunctor>::pup (PUP::er &p)
 {
   EnzoRiemann::pup(p);
 
-  p|integration_quantities_;
-  p|primitive_quantities_;
+  p|integration_quantity_keys_;
+  p|primitive_quantity_keys_;
   p|calculate_internal_energy_flux_;
 }
 

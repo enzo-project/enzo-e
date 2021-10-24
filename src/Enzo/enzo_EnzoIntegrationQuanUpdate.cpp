@@ -12,66 +12,68 @@
 //----------------------------------------------------------------------
 
 static void append_key_to_vec_
-(const str_vec_t &integration_quantities, FieldCat target_cat,
+(const str_vec_t &integration_quantity_keys, FieldCat target_cat,
  const bool skip_bfield, std::size_t *density_index, str_vec_t &key_vec)
 {
-  for (const std::string &name : integration_quantities){
+  for (const std::string &key : integration_quantity_keys){
+    std::string quantity_name =
+      EnzoCenteredFieldRegistry::get_actively_advected_quantity_name(key,
+								     false);
+    ASSERT1("append_key_to_vec_", // Sanity Check!
+	    ("Could not identify the quantity registered in "
+	     "EnzoCenteredFieldRegistry that's associated with \"%s\""),
+	    key.c_str(), quantity_name != "");
+
     bool vector_quantity, actively_advected;
     FieldCat category;
     bool success = EnzoCenteredFieldRegistry::quantity_properties
-      (name, &vector_quantity, &category, &actively_advected);
+      (quantity_name, &vector_quantity, &category, &actively_advected);
 
     // Sanity Checks:
-    ASSERT1("append_key_to_vec_",
+    ASSERT1("append_key_to_vec_", // this should never get raised!
 	    ("\"%s\" is not registered in EnzoCenteredFieldRegistry"),
-	    name.c_str(), success);
+	    quantity_name.c_str(), success);
     ASSERT1("append_key_to_vec_",
 	    ("\"%s\" should not be listed as an integration quantity because "
 	     "it is not actively advected."),
-	    name.c_str(), actively_advected);
+	    quantity_name.c_str(), actively_advected);
 
     if (category != target_cat){
       ASSERT1("append_key_to_vec_",
 	      ("Can't handle the integration quantity, \"%s\", because it has "
 	       "a field category of FieldCat::other"),
-	      name.c_str(), category != FieldCat::other);
+	      quantity_name.c_str(), category != FieldCat::other);
       continue;
-    } else if (skip_bfield && (name == "bfield")){
+    } else if (skip_bfield && (quantity_name == "bfield")){
       continue;
-    } else if ((density_index != nullptr) && (name == "density")){
+    } else if ((density_index != nullptr) && (quantity_name == "density")){
       *density_index = key_vec.size();
     }
 
-    if (vector_quantity){
-      key_vec.push_back(name + "_x");
-      key_vec.push_back(name + "_y");
-      key_vec.push_back(name + "_z");
-    } else {
-      key_vec.push_back(name);
-    }
+    key_vec.push_back(key);
   }
 }
 
 //----------------------------------------------------------------------
 
 EnzoIntegrationQuanUpdate::EnzoIntegrationQuanUpdate
-(const str_vec_t& integration_quantities,
+(const str_vec_t& integration_quantity_keys,
  const bool skip_B_update) throw()
 {
-  // Add conserved quantities to integration_keys_ and identify the index
-  // holding the density key
+  // Add conserved keys to integration_keys_ and identify the index holding the
+  // density key
   density_index_ = std::numeric_limits<std::size_t>::max();
-  append_key_to_vec_(integration_quantities, FieldCat::conserved, skip_B_update,
-                     &density_index_, integration_keys_);
+  append_key_to_vec_(integration_quantity_keys, FieldCat::conserved,
+                     skip_B_update, &density_index_, integration_keys_);
   // Confirm that density is in fact a registered quantity
   ASSERT("EnzoIntegrationQuanUpdate",
-	 ("\"density\" must be a registered integration quantity."),
-	 density_index_ != std::numeric_limits<std::size_t>::max());
+         ("\"density\" must be a registered integration quantity."),
+         density_index_ != std::numeric_limits<std::size_t>::max());
   // Record the first index holding a key for a specific quantity
   first_specific_index_ = integration_keys_.size();
   // Add specific quantities to integration_keys_
-  append_key_to_vec_(integration_quantities, FieldCat::specific, skip_B_update,
-                     nullptr, integration_keys_);
+  append_key_to_vec_(integration_quantity_keys, FieldCat::specific,
+                     skip_B_update, nullptr, integration_keys_);
 }
 
 //----------------------------------------------------------------------

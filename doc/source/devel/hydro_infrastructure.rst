@@ -208,9 +208,9 @@ Each of the operation classes are designed to be configured upon
 initialization. The instances can then be used multiple times per
 time-step (along multiple dimensions if the operation is directional)
 and in other time-steps. Lists (excluding passive scalars) of the
-expected primitives and integration quantities are respectively
+expected primitives and integration keys are respectively
 *registered* during the construction of ``EnzoReconstructor`` and
-``EnzoIntegrationQuanUpdate``. These quantities must each share a name
+``EnzoIntegrationQuanUpdate``. These keys must each share a name
 with the registered quantities in ``FIELD_TABLE``. In contrast,
 configuration of ``EnzoRiemann``, is less flexible and instances
 actually specify the non-passive integration quantities and
@@ -475,14 +475,14 @@ To get a pointer to an instance of a concrete implementation of
 .. code-block:: c++
 
    EnzoReconstructor* construct_reconstructor
-    (const std::vector<std::string> active_reconstructed_quantities,
+    (const std::vector<std::string> active_primitive_keys,
      std::string name, enzo_float theta_limiter);
 
-The factory method requires that we register the names of the
+The factory method requires that we register the keys of the
 non-passive scalar primitive quantities that are are to be
-reconstructed via ``active_reconstructed_quantities``. We specify
+reconstructed via ``active_primitive_keys``. We specify
 the name of the reconstruction algorithm, ``name``. Note that the
-names of the primitive quantites should match quantities specified in
+primitive keys should correspond to quantities specified in
 ``FIELD_TABLE`` ; for more details about ``FIELD_TABLE``, see
 :ref:`Centered-Field-Registry`
 
@@ -966,17 +966,17 @@ signature:
 
 .. code-block:: c++
 
-   EnzoIntegrationQuanUpdate(std::vector<std::string> integration_groups,
+   EnzoIntegrationQuanUpdate(std::vector<std::string> integration_quantity_keys,
                              bool skip_B_update)
 
 The function requires that we:
 
-  * register the names of the integration quantities (with
-    ``integration_groups``)
+  * register the keys of the integration quantities (with
+    ``integration_quantity_keys``)
   * indicate whether the update to the magnetic field should
     be skipped.
 
-The names of the integration quantites should match the names specified
+The integration quantity keys should match the names specified
 in ``FIELD_TABLE``; see :ref:`Centered-Field-Registry` for more
 details. The update to the magnetic field should be skipped when
 Constrained Transport is in use (since the magnetic field update is

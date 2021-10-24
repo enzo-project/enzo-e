@@ -22,7 +22,7 @@ public: // interface
 
   /// Create a new EnzoIntegrationQuanUpdate instance
   EnzoIntegrationQuanUpdate
-  (const std::vector<std::string> &integration_quantities,
+  (const std::vector<std::string> &integration_quantity_keys,
    const bool skip_B_update) throw();
 
   /// Virtual destructor
