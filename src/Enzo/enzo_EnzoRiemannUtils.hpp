@@ -232,48 +232,6 @@ namespace enzo_riemann_utils{
 
   //----------------------------------------------------------------------
 
-  /// Constructs an array of instances of EFlt3DArray that is organized
-  /// according to the LUT
-  ///
-  /// @param map The mapping that holds the array data
-  /// @param dim Optional integer specifying which dimension is the ith
-  ///   direction. This is used for mapping the i,j,k vector components listed
-  ///   in lut to the x,y,z field components. Values of 0, 1, and 2 correspond
-  ///   the ith direction pointing parallel to the x, y, and z directions,
-  ///   respectively. Note that each of the fields in grouping are assumed to
-  ///   be face-centered along this dimension (excluding the exterior faces of
-  ///   the mesh). This allows for appropriate loading of reconstructed fields.
-  template<class LUT>
-  inline std::array<EFlt3DArray,LUT::NEQ> load_array_of_fields
-  (EnzoEFltArrayMap& map, const int dim, const bool prim) noexcept
-  {
-    std::array<EFlt3DArray,LUT::NEQ> arr;
-    // in the case where we don't have reconstructed values (dim = -1) we assume
-    // that the that i-axis is aligned with the x-axis
-    EnzoPermutedCoordinates coord( (dim == -1) ? 0 : dim);
-
-    // define a lambda function to execute for every member of lut. For each
-    // member in lut, its passed: 1. the member's name
-    //                            2. the associated index
-    auto fn = [coord, prim, &arr, &map](const std::string& name,
-					const int index)
-      {
-        if (index != -1){
-          if (prim && (index == LUT::total_energy)){
-            arr[index] = map.at("pressure");
-          } else {
-            arr[index] = map.at(parse_mem_name_(name, coord));
-          }
-        }
-      };
-
-    LUT::for_each_entry(fn);
-
-    return arr;
-  }
-
-  //----------------------------------------------------------------------
-
   /// Returns the keys corresponding to each entry in the LUT, (in the
   /// order of the lookup table). For components of vector quantities, this
   /// maps the i, j, and k components to the x, y, and z components
@@ -307,6 +265,122 @@ namespace enzo_riemann_utils{
     return out;
   }
 
-}
+  //----------------------------------------------------------------------
+
+  /// Constructs an array of instances of EFlt3DArray this is something of a
+  /// stopgap solution until we fully support implemntation of EFlt3DArray
+  /// with 4D CelloArrays
+  template<class LUT>
+  inline std::array<CelloArray<const enzo_float, 3>,LUT::NEQ> array_from_map
+  (const EnzoEFltArrayMap& map) noexcept
+  {
+    std::array<CelloArray<const enzo_float, 3>, LUT::NEQ> out;
+    for (std::size_t i = 0; i < LUT::NEQ; i++) { out[i] = map[i]; }
+    return out;
+  }
+
+  template<class LUT>
+  inline std::array<CelloArray<enzo_float, 3>,LUT::NEQ> array_from_map
+  (EnzoEFltArrayMap& map) noexcept
+  {
+    std::array<CelloArray<enzo_float, 3>, LUT::NEQ> out;
+    for (std::size_t i = 0; i < LUT::NEQ; i++) { out[i] = map[i]; }
+    return out;
+  }
+
+  //----------------------------------------------------------------------
+
+  /// @def      LUT_TRANSFER_T_SCALAR
+  /// @brief    Part of the LUT_TRANSFER group of macros that are used to copy
+  ///           values between a std::array<enzo_float, LUT::NEQ> and a given
+  ///           location in a list of 3D external arrays.
+  ///
+  /// The macro copies values from `src` to `dest`. When `src` (`dest`) is the
+  /// list of external arrays, `SRCSUF` (`DESTSUF`) should be the parentheses
+  /// enclosed indices of the arrays while `DESTSUF` (`SRCSUF`) should be passed
+  /// an empty argument.
+  ///
+  /// When the external array is the dest, pass `true` to `external_d`
+  /// (otherwise, pass false). This is essential for permuting vector
+  /// components. In all cases, the external arrays store the x, y, and z
+  /// components at the indices for the ith, jth, and kth components. (When
+  /// `dim` is 1 or 2, these values need to be permuted when transfering
+  /// to/from the lutarray)
+  #define LUT_TRANSFER_T_SCALAR(LUT, name, src, dest, SRCSUF, DESTSUF, dim,   \
+                                external_d)                                   \
+    if (LUT::name != -1){ dest[LUT::name] DESTSUF = src[LUT::name] SRCSUF; }
+  #define LUT_TRANSFER_T_VECTOR(LUT, name, src, dest, SRCSUF, DESTSUF, dim,   \
+                                external_d)                                   \
+    if ((LUT::COMBINE(name,_i) != -1) && (LUT::COMBINE(name,_j) != -1) &&     \
+        (LUT::COMBINE(name,_k) != -1)){                                       \
+      /* The following needs to permute vectors: */                           \
+      /* copy LUT::COMBINE(name,_i) */                                        \
+      dest[LUT::COMBINE(name,_i) + ((external_d) ? dim : 0)] DESTSUF =        \
+        src[LUT::COMBINE(name,_i) + ((!external_d) ? dim : 0)] SRCSUF;        \
+      /* copy LUT::COMBINE(name,_j) (equiv to LUT::COMBINE(name,_i) + 1) */   \
+      dest[LUT::COMBINE(name,_i) + ((external_d) ? ((dim+1)%3) : 1)] DESTSUF =\
+        src[LUT::COMBINE(name,_i) + ((!external_d) ? ((dim+1)%3) : 1)] SRCSUF;\
+      /* copy LUT::COMBINE(name,_k) (equiv to LUT::COMBINE(name,_i) + 2) */   \
+      dest[LUT::COMBINE(name,_i) + ((external_d) ? ((dim+2)%3) : 2)] DESTSUF =\
+        src[LUT::COMBINE(name,_i) + ((!external_d) ? ((dim+2)%3) : 2)] SRCSUF;\
+  }
+  #define LUT_TRANSFER_F_SCALAR(LUT, name, src, dest, SRCSUF, DESTSUF, dim,   \
+                                external_d) /* ... */
+  #define LUT_TRANSFER_F_VECTOR(LUT, name, src, dest, SRCSUF, DESTSUF, dim,   \
+                                external_d) /* ... */
+
+  //----------------------------------------------------------------------
+
+  /// transfers values from the specified correct location in `external` to a
+  /// 1D output array. Care is taken to appropriately permute the vector
+  /// components.
+  ///
+  /// The external arrays always holds store the x, y, and z components of a
+  /// vector at the indices for the ith, jth, and kth. The mapping for the
+  /// output array is:
+  /// - x -> i, y -> j, z -> k, when `dim == 0`
+  /// - y -> i, z -> j, x -> k, when `dim == 1`
+  /// - z -> i, x -> j, y -> k, when `dim == 2`
+  template<class LUT>
+  inline lutarray<LUT> build_lutarray
+  (const int dim, const int iz, const int iy, const int ix,
+   const std::array<CelloArray<const enzo_float, 3>, LUT::NEQ>& external)
+    noexcept
+  {
+    lutarray<LUT> out;
+    #define ENTRY(name, math_type, category, if_advection)                    \
+      LUT_TRANSFER_##if_advection##_##math_type (EnzoRiemannLUT<LUT>, name,   \
+                                                 external, out, (iz,iy,ix), , \
+                                                 dim, false);
+    FIELD_TABLE
+    #undef ENTRY
+    return out;
+  }
+
+  //----------------------------------------------------------------------
+
+  /// transfers values from `src` to the correct location in `external`. Care
+  /// is taken to appropriately permute the vector components.
+  ///
+  /// The external arrays always holds store the x, y, and z components of a
+  /// vector at the indices for the ith, jth, and kth. The mapping of `src` is:
+  /// - x -> i, y -> j, z -> k, when `dim == 0`
+  /// - y -> i, z -> j, x -> k, when `dim == 1`
+  /// - z -> i, x -> j, y -> k, when `dim == 2`
+  template<class LUT>
+  inline void transfer_from_lutarray
+  (const int dim, const int iz, const int iy, const int ix,
+   const std::array<CelloArray<enzo_float, 3>, LUT::NEQ>& external,
+   const lutarray<LUT> src) noexcept
+  {
+    #define ENTRY(name, math_type, category, if_advection)                    \
+      LUT_TRANSFER_##if_advection##_##math_type (EnzoRiemannLUT<LUT>, name,   \
+                                                 src, external, , (iz,iy,ix), \
+                                                 dim, true);
+    FIELD_TABLE
+    #undef ENTRY
+  }
+
+}  
 
 #endif /* ENZO_ENZO_RIEMANN_UTILS_HPP */

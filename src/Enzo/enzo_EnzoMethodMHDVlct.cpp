@@ -25,9 +25,9 @@ static void check_field_l_(std::vector<std::string> &field_l)
 
 // concatenate 2 vectors of strings
 static str_vec_t concat_str_vec_(const str_vec_t& vec1, const str_vec_t& vec2){
-  str_vec_t out(vec1);
+  str_vec_t out(vec2);
   out.reserve(vec1.size() + vec2.size());
-  out.insert(out.begin(),vec2.begin(), vec2.end());
+  out.insert(out.begin(),vec1.begin(), vec1.end());
   return out;
 }
 
@@ -487,6 +487,7 @@ void EnzoMethodMHDVlct::setup_arrays_
       (flux_maps[i]->name(), cur_shape, &integration_field_list_,
        (lazy_passive_list_.get_list()).get());
   }
+  
 
   // Prepare fields used to accumulate all changes to the integration
   // quantities (including passively advected scalars). If CT is in use,

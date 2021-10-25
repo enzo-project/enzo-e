@@ -12,6 +12,9 @@
 #include <pup_stl.h>
 #include <cstdint> // used to check that static methods are defined
 
+// defining RIEMANN_DEBUG adds some extra error checking, useful for debugging
+//#define RIEMANN_DEBUG
+
 //----------------------------------------------------------------------
 
 struct HydroLUT {
@@ -174,7 +177,8 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
-  void solve (EnzoEFltArrayMap &prim_map_l, EnzoEFltArrayMap &prim_map_r,
+  void solve (const EnzoEFltArrayMap &prim_map_l,
+	      const EnzoEFltArrayMap &prim_map_r,
               EnzoEFltArrayMap &flux_map, const int dim,
 	      const EnzoEquationOfState *eos, const int stale_depth,
 	      const str_vec_t &passive_list,
@@ -189,12 +193,16 @@ public: // interface
 protected : //methods
   
   /// Computes the fluxes for the passively advected quantites.
-  void solve_passive_advection_(EnzoEFltArrayMap &prim_map_l,
-                                EnzoEFltArrayMap &prim_map_r,
+  void solve_passive_advection_(const EnzoEFltArrayMap &prim_map_l,
+                                const EnzoEFltArrayMap &prim_map_r,
                                 EnzoEFltArrayMap &flux_map,
 				const EFlt3DArray &density_flux,
                                 const int stale_depth,
                                 const str_vec_t &passive_list) const throw();
+
+  /// debugging method (checks that the order of keys matches expectations
+  void check_key_order_(const EnzoEFltArrayMap &map, bool prim,
+			const str_vec_t &passive_list) const noexcept;
 
 protected: //attributes
 
@@ -280,7 +288,7 @@ static inline enzo_float passive_eint_flux_(const enzo_float density_l,
 
 template <class ImplFunctor>
 void EnzoRiemannImpl<ImplFunctor>::solve
-(EnzoEFltArrayMap &prim_map_l, EnzoEFltArrayMap &prim_map_r,
+(const EnzoEFltArrayMap &prim_map_l, const EnzoEFltArrayMap &prim_map_r,
  EnzoEFltArrayMap &flux_map, const int dim, const EnzoEquationOfState *eos,
  const int stale_depth, const str_vec_t &passive_list,
  const EFlt3DArray *interface_velocity) const
@@ -299,8 +307,10 @@ void EnzoRiemannImpl<ImplFunctor>::solve
 	 !barotropic);
 
   // TODO: Add special handling for barotropic equations of state
-  const EFlt3DArray pressure_array_l = prim_map_l.at("pressure");
-  const EFlt3DArray pressure_array_r = prim_map_r.at("pressure");
+  const CelloArray<const enzo_float, 3> pressure_array_l =
+    prim_map_l.at("pressure");
+  const CelloArray<const enzo_float, 3> pressure_array_r =
+    prim_map_r.at("pressure");
 
   // Check if the internal energy flux must be computed
   const bool calculate_internal_energy_flux = calculate_internal_energy_flux_;
@@ -313,11 +323,18 @@ void EnzoRiemannImpl<ImplFunctor>::solve
     velocity_i_bar_array = *interface_velocity;
   }
 
-  std::array<EFlt3DArray,LUT::NEQ> wl_arrays, wr_arrays, flux_arrays;
-  using enzo_riemann_utils::load_array_of_fields;
-  wl_arrays = load_array_of_fields<LUT>(prim_map_l, dim, true);
-  wr_arrays = load_array_of_fields<LUT>(prim_map_r, dim, true);
-  flux_arrays = load_array_of_fields<LUT>(flux_map, dim, false);
+#ifdef RIEMANN_DEBUG
+  check_key_order_(prim_map_l, true, passive_list);
+  check_key_order_(prim_map_r, true, passive_list);
+  check_key_order_(flux_map, false, passive_list);
+#endif
+
+  const std::array<CelloArray<const enzo_float, 3>, LUT::NEQ> wl_arrays =
+    enzo_riemann_utils::array_from_map<LUT>(prim_map_l);
+  const std::array<CelloArray<const enzo_float, 3>, LUT::NEQ> wr_arrays =
+    enzo_riemann_utils::array_from_map<LUT>(prim_map_r);
+  const std::array<CelloArray<enzo_float, 3>, LUT::NEQ> flux_arrays =
+    enzo_riemann_utils::array_from_map<LUT>(flux_map);
 
   ImplFunctor func;
 
@@ -327,12 +344,11 @@ void EnzoRiemannImpl<ImplFunctor>::solve
     for (int iy = sd; iy < flux_arrays[0].shape(1) - sd; iy++) {
       for (int ix = sd; ix < flux_arrays[0].shape(2) - sd; ix++) {
 
-	lutarray<LUT> wl, wr;
 	// get the fluid fields
-	for (std::size_t field_ind=0; field_ind<LUT::NEQ; field_ind++){
-	  wl[field_ind] = wl_arrays[field_ind](iz,iy,ix);
-	  wr[field_ind] = wr_arrays[field_ind](iz,iy,ix);
-	}
+        const lutarray<LUT> wl =
+	  enzo_riemann_utils::build_lutarray<LUT>(dim, iz, iy, ix, wl_arrays);
+	const lutarray<LUT> wr =
+	  enzo_riemann_utils::build_lutarray<LUT>(dim, iz, iy, ix, wr_arrays);
 
 	// get the left/right pressure
 	enzo_float pressure_l = pressure_array_l(iz,iy,ix);
@@ -357,9 +373,8 @@ void EnzoRiemannImpl<ImplFunctor>::solve
                                     isothermal_cs, interface_velocity_i);
 
 	// record the Riemann Fluxes
-	for (std::size_t field_ind=0; field_ind<LUT::NEQ; field_ind++){
-	  flux_arrays[field_ind](iz,iy,ix) = fluxes[field_ind];
-	}
+	enzo_riemann_utils::transfer_from_lutarray<LUT>(dim, iz, iy, ix,
+							flux_arrays, fluxes);
 
 	if (calculate_internal_energy_flux){
 	  velocity_i_bar_array(iz,iy,ix) = interface_velocity_i;
@@ -384,7 +399,7 @@ void EnzoRiemannImpl<ImplFunctor>::solve
 
 template <class ImplFunctor>
 void EnzoRiemannImpl<ImplFunctor>::solve_passive_advection_
-(EnzoEFltArrayMap &prim_map_l, EnzoEFltArrayMap &prim_map_r,
+(const EnzoEFltArrayMap &prim_map_l, const EnzoEFltArrayMap &prim_map_r,
  EnzoEFltArrayMap &flux_map, const EFlt3DArray &density_flux,
  const int stale_depth, const str_vec_t &passive_list) const throw()
 {
@@ -394,8 +409,10 @@ void EnzoRiemannImpl<ImplFunctor>::solve_passive_advection_
   // This was essentially transcribed from hydro_rk in Enzo:
 
   // load array of fields
-  EFlt3DArray *wl_arrays = new EFlt3DArray[num_keys];
-  EFlt3DArray *wr_arrays = new EFlt3DArray[num_keys];
+  CelloArray<const enzo_float, 3> *wl_arrays =
+    new CelloArray<const enzo_float, 3>[num_keys];
+  CelloArray<const enzo_float, 3> *wr_arrays =
+    new CelloArray<const enzo_float, 3>[num_keys];
   EFlt3DArray *flux_arrays = new EFlt3DArray[num_keys];
 
   for (std::size_t ind=0; ind<num_keys; ind++){
@@ -420,6 +437,26 @@ void EnzoRiemannImpl<ImplFunctor>::solve_passive_advection_
     }
   }
   delete[] wl_arrays; delete[] wr_arrays; delete[] flux_arrays;
+}
+
+//----------------------------------------------------------------------
+
+template <class ImplFunctor>
+void EnzoRiemannImpl<ImplFunctor>::check_key_order_
+(const EnzoEFltArrayMap &map, bool prim, const str_vec_t &passive_list)
+  const noexcept
+{
+  auto concat = [](str_vec_t vec1, const str_vec_t& vec2){
+    vec1.insert( vec1.end(), vec2.begin(), vec2.end() );
+    return vec1;
+  };
+
+  // This could be implemented far more efficiently (but it's just for
+  // debugging)
+  str_vec_t standard_keys =
+    prim ? primitive_quantity_keys() : integration_quantity_keys();
+  str_vec_t all_keys = concat(standard_keys, passive_list);
+  map.validate_key_order(all_keys, true);
 }
 
 #endif /* ENZO_ENZO_RIEMANN_IMPL_HPP */

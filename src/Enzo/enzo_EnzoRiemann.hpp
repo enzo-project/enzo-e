@@ -77,6 +77,12 @@ public: // interface
   ///     dual energy formalism). If the value is `nullptr`, then the interface
   ///     velocity is not stored in the array.
   ///
+  /// @note This function expects that the keys within `priml_map` and
+  /// `primr_map` ordered such that the passive scalar keys occur after the
+  /// keys specified by `primitive_quantity_keys()`. Likewise, in ``flux_map``,
+  /// the passive scalar keys should occur after the keys specified by
+  /// `integration_quantity_keys()`.
+  ///
   /// @note It's alright for arrays in `priml_map` and `primr_map` to have the
   /// shapes of cell-centered arrays. In this case, the function effectively
   /// treats such arrays as if their `subarray` method were invoked, where
@@ -85,7 +91,7 @@ public: // interface
   /// applies to the other arrays (other than those contained by `flux_map`)
   /// that are passed as arguments.
   virtual void solve
-  (EnzoEFltArrayMap &prim_map_l, EnzoEFltArrayMap &prim_map_r,
+  (const EnzoEFltArrayMap &prim_map_l, const EnzoEFltArrayMap &prim_map_r,
    EnzoEFltArrayMap &flux_map, const int dim, const EnzoEquationOfState *eos,
    const int stale_depth, const str_vec_t &passive_list,
    const EFlt3DArray *interface_velocity) const = 0;

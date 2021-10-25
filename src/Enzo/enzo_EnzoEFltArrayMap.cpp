@@ -107,6 +107,7 @@ bool EnzoEFltArrayMap::validate_key_order(const std::vector<std::string> &ref,
   for (std::size_t i =0; i < std::min(ref.size(),keys_.size()); i++){
     bool equal = ref[i] == keys_[i];
     if (!equal && raise_err){
+      print_summary();
       ERROR4("EnzoEFltArrayMap::validate_key_order",
 	     ("keys of ArrayMap%s don't match expectations. At index %d, the "
 	      "key is \"%s\" when it's expected to be \"%s\"\n"),
@@ -118,6 +119,7 @@ bool EnzoEFltArrayMap::validate_key_order(const std::vector<std::string> &ref,
 
   if (ref.size() != keys_.size()){
     if (raise_err){
+      print_summary();
       ERROR3("EnzoEFltArrayMap::validate_key_order",
 	     "ArrayMap%s doesn't have the expected number of keys. It has %d "
 	     "keys. It's expected to have %d",
