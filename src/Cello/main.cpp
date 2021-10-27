@@ -85,7 +85,7 @@ void Main::p_checkpoint_output(int count, std::string dir_name)
 #ifdef CHARM_ENZO
     CkPrintf ("Calling CkStartCheckpoint\n");
     CkCallback callback(CkIndex_EnzoSimulation::r_write_checkpoint_output(),proxy_simulation);
-    CkStartCheckpoint (dir_checkpoint_,callback,1);
+    CkStartCheckpoint (dir_checkpoint_,callback,false,1);
 #endif
   }
   // --------------------------------------------------
@@ -113,7 +113,7 @@ void Main::p_checkpoint_method(int count, std::string dir_name)
 #ifdef CHARM_ENZO
     CkPrintf ("Calling CkStartCheckpoint\n");
     CkCallback callback(CkIndex_EnzoSimulation::r_write_checkpoint_method(),proxy_simulation);
-    CkStartCheckpoint (dir_checkpoint_,callback,1);
+    CkStartCheckpoint (dir_checkpoint_,callback,false,1);
 #endif
   }
   // --------------------------------------------------

@@ -17,10 +17,47 @@
 
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
-
+// #define TRACE_ADAPT
+// #define TRACE_LEVELS
 //--------------------------------------------------
 // #define DEBUG_ADAPT
 //--------------------------------------------------
+
+#ifdef TRACE_LEVELS
+#  undef TRACE_LEVELS
+#  define TRACE_LEVELS(MSG)                                             \
+  CkPrintf ("TRACE_LEVELS %s %s curr ",MSG,name().c_str());             \
+  for (int i=0; i<27; i++) {                                            \
+    CkPrintf ("%2d",adapt_.vector_face_level(Adapt::LevelType::curr)[i]); \
+  }                                                                     \
+  CkPrintf ("\n");                                                      \
+  CkPrintf ("TRACE_LEVELS %s %s next ",MSG,name().c_str());             \
+  for (int i=0; i<27; i++) {                                            \
+    CkPrintf ("%2d",adapt_.vector_face_level(Adapt::LevelType::next)[i]); \
+  }                                                                     \
+  CkPrintf ("\n");                                                      \
+  for (int c=0; c<8; c++) {                                             \
+    CkPrintf ("TRACE_LEVELS %s %s last %d: ",MSG,name().c_str(),c);     \
+    for (int i=0; i<27; i++) {                                          \
+      CkPrintf ("%2d",adapt_.vector_face_level(Adapt::LevelType::last)[c*27+i]); \
+    }                                                                   \
+    CkPrintf ("\n");                                                    \
+  }                                                                     \
+  fflush(stdout);
+#else
+#  define TRACE_LEVELS(MSG) /* ... */
+#endif
+
+
+#ifdef TRACE_ADAPT
+#  undef TRACE_ADAPT
+#  define TRACE_ADAPT(BLOCK,MSG) \
+  CkPrintf ("TRACE_ADAPT %s %s\n",MSG,BLOCK->name().c_str()); \
+  TRACE_LEVELS(MSG);                                          \
+  fflush(stdout);
+#else
+#  define TRACE_ADAPT(BLOCK,MSG)  TRACE_LEVELS(MSG);
+#endif
 
 //======================================================================
 
@@ -32,6 +69,7 @@
 
 void Block::adapt_enter_()
 {
+  TRACE_ADAPT(this,"enter 0");
   if ( do_adapt_()) {
 
     adapt_begin_();
@@ -46,8 +84,13 @@ void Block::adapt_enter_()
 //----------------------------------------------------------------------
 
 void Block::adapt_begin_()
-
 {
+  TRACE_ADAPT(this,"begin 1");
+#ifdef DEBUG_ADAPT
+  CkPrintf ("DEBUG_ADAPT %s A adapt_begin_\n",name().c_str());
+  fflush(stdout);
+#endif  
+
   cello::simulation()->set_phase(phase_adapt);
 
   const int level_maximum = cello::config()->mesh_max_level;
@@ -71,6 +114,11 @@ void Block::adapt_begin_()
 /// detection.
 void Block::adapt_called_()
 {
+  TRACE_ADAPT(this,"called 2");
+#ifdef DEBUG_ADAPT
+  CkPrintf ("DEBUG_ADAPT %s A adapt_called_\n",name().c_str());
+  fflush(stdout);
+#endif  
   adapt_send_level();
 
   control_sync_quiescence (CkIndex_Main::p_adapt_next());
@@ -87,6 +135,11 @@ void Block::adapt_called_()
 /// adapt_end_().
 void Block::adapt_next_()
 {
+  TRACE_ADAPT(this,"next 3");
+#ifdef DEBUG_ADAPT
+  CkPrintf ("DEBUG_ADAPT %s B adapt_next_\n",name().c_str());
+  fflush(stdout);
+#endif  
   update_levels_();
 
   if (is_leaf()) {
@@ -101,13 +154,14 @@ void Block::adapt_next_()
 
 void Block::adapt_update_()
 {
+  TRACE_ADAPT(this,"update 4");
+#ifdef DEBUG_ADAPT
+  CkPrintf ("DEBUG_ADAPT %s C adapt_update_\n",name().c_str());
+  fflush(stdout);
+#endif  
   if (index_.is_root()) thisProxy.doneInserting();
 
-#ifdef NEW_ADAPT  
-  control_sync_quiescence (CkIndex_Main::p_adapt_end());
-#else
   adapt_end_();
-#endif
   
 }
 
@@ -123,8 +177,13 @@ void Block::adapt_update_()
 /// been deleted.
 void Block::adapt_end_()
 {
-  for (size_t i=0; i<face_level_last_.size(); i++)
-    face_level_last_[i] = -1;
+  TRACE_ADAPT(this,"end 5");
+#ifdef DEBUG_ADAPT
+  CkPrintf ("DEBUG_ADAPT %s D adapt_end_\n",name().c_str());
+  fflush(stdout);
+#endif
+
+  adapt_.reset_face_level(Adapt::LevelType::last);
 
   sync_coarsen_.reset();
   sync_coarsen_.set_stop(cello::num_children());
@@ -297,7 +356,13 @@ void Block::adapt_refine_()
 	 adapt_step_,
 	 cycle_,time_,dt_,
 	 narray, array, refresh_fine,
-	 27,&child_face_level_curr_[27*IC3(ic3)],
+	 27,
+#ifdef OLD_ADAPT
+         &child_face_level_curr_.data()[27*IC3(ic3)],
+#endif
+#ifdef NEW_ADAPT
+         face_level_next_.data(),
+#endif
 	 cello::simulation());
 
       delete [] array;
@@ -460,6 +525,21 @@ void Block::adapt_send_level()
     int ic3[3];
     it_neighbor.child(ic3);
 
+#ifdef DEBUG_ADAPT
+  {
+    char buffer [255];
+    int nb3[3] = {2,2,2};
+    CkPrintf ("%s %s <- %s"
+	      " [%d => %d] if3 %2d %2d %2d  ic3 %d %d %d\n",
+	      "send",
+              name(index_neighbor).c_str(),
+              name().c_str(),
+              level,level_next_,
+	      of3[0],of3[1],of3[2],
+	      ic3[0],ic3[1],ic3[2]);
+    fflush(stdout);
+  }
+#endif
     thisProxy[index_neighbor].p_adapt_recv_level
       (index_,ic3,of3,level,level_next_);
   }
@@ -501,20 +581,24 @@ void Block::p_adapt_recv_level
   }
 
   // note face_level_last_ initialized as -1, in which case won't skip
+#ifdef USE_ADAPT_CLASS
+#else /* USE_ADAPT_CLASS */
   const bool skip_face_update =
-    (level_face_new <= face_level_last_[ICF3(ic3,if3)]);
+    (level_face_new <= adapt_.face_level_last(ic3,if3));
+#endif /* USE_ADAPT_CLASS */
 
 #ifdef DEBUG_ADAPT
   {
     char buffer [255];
     int nb3[3] = {2,2,2};
-    CkPrintf ("%s %s <- B%s"
+    CkPrintf ("%s %s <- %s"
 	      " [%d => %d] if3 %2d %2d %2d  ic3 %d %d %d [%d] %s\n",
-	      name().c_str(),"recv",
-	      index_send.bit_string(index_send.level(),cello::rank(),nb3).c_str(),
+	      "recv",
+              name().c_str(),
+              name(index_send).c_str(),
 	      level_face_curr,level_face_new,
 	      if3[0],if3[1],if3[2],
-	      ic3[0],ic3[1],ic3[2], face_level_last_[ICF3(ic3,if3)],
+	      ic3[0],ic3[1],ic3[2], adapt_.face_level_last(ic3,if3),
 	      skip_face_update ? "SKIP" : "");
     fflush(stdout);
   }
@@ -526,9 +610,12 @@ void Block::p_adapt_recv_level
     return;
   }
 
-  face_level_last_[ICF3(ic3,if3)] = level_face_new;
+#ifdef USE_ADAPT_CLASS
+#else /* USE_ADAPT_CLASS */
+  adapt_.set_face_level_last(ic3,if3,level_face_new);
 
   int level_next = level_next_;
+#endif /* USE_ADAPT_CLASS */
 
   const int level = this->level();
 
@@ -649,11 +736,15 @@ void Block::adapt_recv
     // neighbor.  Unique face level is updated, and levels on
     // possibly multiple faces of multiple children are updated.
 
-    set_face_level_next (of3, level_face_new);
+#ifdef USE_ADAPT_CLASS
+#else /* USE_ADAPT_CLASS */
+    adapt_.set_face_level (of3, Adapt::LevelType::next, level_face_new);
+#endif /* USE_ADAPT_CLASS */
 
     ItChild it_child (rank,of3);
     int jc3[3];
 
+#ifdef OLD_ADAPT
     while (it_child.next(jc3)) {
 
       int kf3[3];
@@ -678,6 +769,7 @@ void Block::adapt_recv
 	}
       }
     }
+#endif
 
   } else if (level_relative == -1) {
 
@@ -691,8 +783,12 @@ void Block::adapt_recv
     int jf3[3];
     while (it_face.next(jf3)) {
 
-      set_face_level_next (jf3, level_face_new);
+#ifdef USE_ADAPT_CLASS
+#else /* USE_ADAPT_CLASS */
+      adapt_.set_face_level (jf3, Adapt::LevelType::next, level_face_new);
+#endif /* USE_ADAPT_CLASS */
 
+#ifdef OLD_ADAPT
       ItChild it_child (rank,jf3);
 
       int jc3[3];
@@ -706,6 +802,7 @@ void Block::adapt_recv
 	  set_child_face_level_next(jc3,kf3,level_face_new);
 	}
       }
+#endif
     }
   }
 }
@@ -764,8 +861,14 @@ void Block::adapt_coarsen_()
   data_msg -> set_field_data (data()->field_data(),false);
   data_msg -> set_particle_data (data()->particle_data(),false);
 
-  const int nf = face_level_curr_.size();
-  MsgCoarsen * msg = new MsgCoarsen (nf,face_level_curr_,ic3);
+#ifdef USE_ADAPT_CLASS
+#else /* USE_ADAPT_CLASS */
+  const int nf = adapt_.size_face_level(Adapt::LevelType::curr);
+#endif /* USE_ADAPT_CLASS */
+#ifdef USE_ADAPT_CLASS
+#else /* USE_ADAPT_CLASS */
+  MsgCoarsen * msg = new MsgCoarsen (nf,adapt_.vector_face_level(Adapt::LevelType::curr),ic3);
+#endif /* USE_ADAPT_CLASS */
   msg->set_data_msg (data_msg);
 
   thisProxy[index_parent].p_adapt_recv_child (msg);
@@ -783,7 +886,9 @@ void Block::p_adapt_recv_child (MsgCoarsen * msg)
   msg->update(data());
 
   int * ic3 = msg->ic3();
+#ifdef OLD_ADAPT
   int * child_face_level_curr = msg->face_level();
+#endif  
 
   // copy child face level array
   const int min_face_rank = cello::config()->adapt_min_face_rank;
@@ -791,6 +896,7 @@ void Block::p_adapt_recv_child (MsgCoarsen * msg)
   ItFace it_face_child = this->it_face(min_face_rank,index_child);
   int of3[3];
 
+#ifdef OLD_ADAPT
   while (it_face_child.next(of3)) {
     int level_child = child_face_level_curr[IF3(of3)];
     set_child_face_level_curr(ic3,of3,level_child);
@@ -802,9 +908,10 @@ void Block::p_adapt_recv_child (MsgCoarsen * msg)
     int level_child = child_face_level_curr[IF3(of3)];
     int opf3[3];
     if (parent_face_(opf3,of3,ic3)) {
-      set_face_level_curr(opf3,level_child);
+      adapt_.set_face_level(opf3,Adapt::LevelType::curr,level_child);
     }
   }
+#endif  
 
   // I am a leaf on the wind
   is_leaf_=true;
@@ -840,6 +947,7 @@ void Block::p_adapt_delete()
 
 //======================================================================
 
+#ifdef OLD_ADAPT
 void Block::initialize_child_face_levels_()
 {
   const int  rank = cello::rank();
@@ -868,7 +976,7 @@ void Block::initialize_child_face_levels_()
       Index inp = in.index_parent();
       // Determine level for the child's face
       int level_child_face = (inp == thisIndex) ?
-	level + 1 : face_level(ip3);
+	level + 1 : adapt_.face_level(ip3,Adapt::LevelType::curr);
       set_child_face_level_curr(ic3,if3, level_child_face);
     }
 
@@ -879,6 +987,7 @@ void Block::initialize_child_face_levels_()
 
   child_face_level_next_ = child_face_level_curr_;
 }
+#endif
 
 //----------------------------------------------------------------------
 

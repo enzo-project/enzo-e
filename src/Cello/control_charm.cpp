@@ -16,21 +16,30 @@
 // #define DEBUG_REFRESH
 // #define DEBUG_CONTROL
 // #define TRACE_CONTRIBUTE
-#ifdef DEBUG_CONTROL
+// #define DEBUG_ADAPT
+
+// #define BLOCK  "B0:100_0:101"
+
+#ifdef DEBUG_CONTROL 
 # define TRACE_CONTROL(A)						\
-  CkPrintf ("%d %s %s TRACE_CONTROL %s \n",				\
-	    CkMyPe(),__FILE__,					\
-	    name_.c_str(), A);						\
-  fflush(stdout);						
-# define TRACE_SYNC(A)							\
-  CkPrintf ("%d %s %s TRACE_CONTROL %s entry %d id %d\n",	\
-	    CkMyPe(),__FILE__,					\
-	    name_.c_str(), A,entry_point,id_sync);			\
-  fflush(stdout);						
+  if (std::string(BLOCK)=="all" || name_==BLOCK) {                      \
+    CkPrintf ("%d %s %s TRACE_CONTROL %s \n",				\
+              CkMyPe(),__FILE__,					\
+              name_.c_str(), A);                                        \
+    fflush(stdout);                                                     \
+  }
+# define TRACE_SYNC(A)                                          \
+  if (std::string(BLOCK)=="all" || name_==BLOCK) {              \
+    CkPrintf ("%d %s %s TRACE_CONTROL %s entry %d id %d\n",	\
+              CkMyPe(),__FILE__,                                \
+              name_.c_str(), A,entry_point,id_sync);            \
+    fflush(stdout);                                             \
+  }
 #else
 # define TRACE_CONTROL(A) ;
 # define TRACE_SYNC(A) ;
 #endif
+
 
 //----------------------------------------------------------------------
 
@@ -51,6 +60,10 @@ void Block::initial_exit_()
 
 void Block::adapt_exit_()
 {
+#ifdef DEBUG_ADAPT
+  CkPrintf ("DEBUG_ADAPT %s A adapt_begin_\n",name().c_str());
+  fflush(stdout);
+#endif  
   TRACE_CONTROL("adapt_exit");
 
   control_sync_quiescence(CkIndex_Main::p_output_enter());

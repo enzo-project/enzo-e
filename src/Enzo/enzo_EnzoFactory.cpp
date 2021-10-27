@@ -9,6 +9,8 @@
 
 #include "charm_enzo.hpp"
 
+// #define DEBUG_NEW_ADAPT
+
 //----------------------------------------------------------------------
 
 void EnzoFactory::pup (PUP::er &p)
@@ -189,7 +191,13 @@ void EnzoFactory::create_block
  int count_adapt,
  int cycle, double time, double dt,
  int narray, char * array, int refresh_type,
- int num_face_level, int * face_level,
+ int num_face_level,
+#ifdef OLD_ADAPT
+ int * face_level,
+#endif
+#ifdef NEW_ADAPT
+ int * face_level_parent,
+#endif
  Simulation * simulation
  ) const throw()
 {
@@ -200,6 +208,46 @@ void EnzoFactory::create_block
 
   CProxy_EnzoBlock enzo_block_array = (CProxy_EnzoBlock) block_array;
 
+#ifdef NEW_ADAPT  
+  int * face_level = new int[27];
+  int level = index.level();
+  int cx,cy,cz;
+  index.child(level,&cx,&cy,&cz);
+  for (int iz=0; iz<3; iz++) {
+    int ipz=(iz+1+cz) / 2;
+    for (int iy=0; iy<3; iy++) {
+      int ipy=(iy+1+cy) / 2;
+      for (int ix=0; ix<3; ix++) {
+        int ipx=(ix+1+cx) / 2;
+        int i=ix+3*(iy+3*iz);
+        int ip=ipx+3*(ipy+3*ipz);
+        face_level[i] = face_level_parent[ip];
+      }
+    }
+  }
+  // Increment faces internal to block (including self) to be in fine level 
+  for (int iz=0; iz<2; iz++) {
+    for (int iy=0; iy<2; iy++) {
+      for (int ix=0; ix<2; ix++) {
+        int i = (ix+1-cx) + 3*( (iy+1-cy) + 3*(iz+1-cz));
+        ++ face_level[i];
+      }
+    }
+  }
+#endif
+#ifdef DEBUG_NEW_ADAPT  
+  int nb3[3] = {2,2,1};
+  index.print("enzo factory",2,2,nb3,true);
+  int iz = 1;
+  for (int iy=0; iy<3; iy++) {
+    for (int ix=0; ix<3; ix++) {
+      int i=ix+3*(iy+3*iz);
+      CkPrintf ("%1d",face_level[i]);
+    }
+  }
+  
+  CkPrintf ("\n");
+#endif  
   MsgRefine * msg = new MsgRefine 
     (index,
      nx,ny,nz,

@@ -8,7 +8,7 @@ import socket
 # USER CONFIGURATION
 #======================================================================
 
-new_adapt = 1
+new_adapt = 0
 
 #----------------------------------------------------------------------
 # Maximum number of procesess per shared-memory node (can be larger than needed)
@@ -311,6 +311,8 @@ charm_perf = ''
 
 if (new_adapt == 1):
      defines.append('NEW_ADAPT')
+if (new_adapt == 0):
+     defines.append('OLD_ADAPT')
 
 if (use_projections == 1):
      defines.append(define_projections)
@@ -583,7 +585,12 @@ if (have_git == 1):
    build_dir = 'build-' + branch.decode('utf-8')
 else:     
    build_dir = 'build'
-   
+
+if (new_adapt == 1):
+     build_dir = "build-new-adapt"
+else:
+     build_dir = "build-old-adapt"
+     
 SConscript( 'src/SConscript',variant_dir=build_dir)
 SConscript('test/SConscript')
 

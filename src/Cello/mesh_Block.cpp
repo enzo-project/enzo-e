@@ -62,16 +62,16 @@ Block::Block ( MsgRefine * msg )
     sync_coarsen_(),
     sync_count_(),
     sync_max_(),
-    face_level_curr_(),
-    face_level_next_(),
+    adapt_(),
+#ifdef OLD_ADAPT
     child_face_level_curr_(),
     child_face_level_next_(),
+#endif /* OLD_ADAPT */
     count_coarsen_(0),
     adapt_step_(0),
     coarsened_(false),
     is_leaf_(true),
     age_(0),
-    face_level_last_(),
     name_(""),
     index_method_(-1),
     index_solver_(),
@@ -115,16 +115,16 @@ Block::Block ( process_type ip_source )
     sync_coarsen_(),
     sync_count_(),
     sync_max_(),
-    face_level_curr_(),
-    face_level_next_(),
+    adapt_(),
+#ifdef OLD_ADAPT
     child_face_level_curr_(),
     child_face_level_next_(),
+#endif /* OLD_ADAPT */
     count_coarsen_(0),
     adapt_step_(0),
     coarsened_(false),
     is_leaf_(true),
     age_(0),
-    face_level_last_(),
     name_(""),
     index_method_(-1),
     index_solver_(),
@@ -232,33 +232,36 @@ void Block::init
 
   // Initialize neighbor face levels
 
-  face_level_last_.resize(27*8);
-
   if (num_face_level == 0) {
 
-    face_level_curr_.resize(27);
-    child_face_level_curr_.resize(cello::num_children()*27);
+    adapt_.reset_face_level (Adapt::LevelType::curr);
 
-    for (int i=0; i<27; i++) face_level_curr_[i] = 0;
+#ifdef OLD_ADAPT    
+    child_face_level_curr_.resize(cello::num_children()*27);
+#endif
 
   } else {
 
-    face_level_curr_.resize(num_face_level);
+#ifdef OLD_ADAPT
     child_face_level_curr_.resize(cello::num_children()*num_face_level);
-
-    for (int i=0; i<num_face_level; i++) face_level_curr_[i] = face_level[i];
+#endif
+    adapt_.copy_face_level(Adapt::LevelType::curr,face_level);
 
   }
 
-  for (size_t i=0; i<face_level_last_.size(); i++) 
-    face_level_last_[i] = -1;
+#ifdef OLD_ADAPT
   for (size_t i=0; i<child_face_level_curr_.size(); i++) 
     child_face_level_curr_[i] = 0;
+#endif  
 
+#ifdef OLD_ADAPT
   initialize_child_face_levels_();
+#endif  
 
-  face_level_next_ = face_level_curr_;
+  adapt_.update_next_from_curr();
+#ifdef OLD_ADAPT
   child_face_level_next_ = child_face_level_curr_;
+#endif  
 
   const int level = this->level();
 
@@ -366,16 +369,16 @@ void Block::pup(PUP::er &p)
   p | sync_coarsen_;
   p | sync_count_;
   p | sync_max_;
-  p | face_level_curr_;
-  p | face_level_next_;
+  p | adapt_;
+#ifdef OLD_ADAPT
   p | child_face_level_curr_;
   p | child_face_level_next_;
+#endif /* OLD_ADAPT */
   p | count_coarsen_;
   p | adapt_step_;
   p | coarsened_;
   p | is_leaf_;
   p | age_;
-  p | face_level_last_;
   p | name_;
   p | index_method_;
   p | index_solver_;
@@ -481,16 +484,15 @@ void Block::print () const
   CkPrintf ("stop_ = %d\n",stop_);
   CkPrintf ("index_initial_ = %d\n",index_initial_);
   CkPrintf ("children_.size() = %lu\n",children_.size());
-  CkPrintf ("face_level_curr_.size() = %lu\n",face_level_curr_.size());
-  CkPrintf ("face_level_next_.size() = %lu\n",face_level_next_.size());
+#ifdef OLD_ADAPT
   CkPrintf ("child_face_level_curr_.size() = %lu\n",child_face_level_curr_.size());
   CkPrintf ("child_face_level_next_.size() = %lu\n",child_face_level_next_.size());
+#endif /* OLD_ADAPT */
   CkPrintf ("count_coarsen_ = %d\n",count_coarsen_);
   CkPrintf ("adapt_step_ = %d\n",adapt_step_);
   CkPrintf ("coarsened_ = %d\n",coarsened_);
   CkPrintf ("is_leaf_ = %d\n",is_leaf_);
   CkPrintf ("age_ = %d\n",age_);
-  CkPrintf ("face_level_last_.size() = %lu\n",face_level_last_.size());
   CkPrintf ("name_ = %s\n",name_.c_str());
   CkPrintf ("index_method_ = %d\n",index_method_);
   //  CkPrintf ("index_solver_ = %d\n",index_solver());
@@ -692,16 +694,16 @@ Block::Block ()
     sync_coarsen_(),
     sync_count_(),
     sync_max_(),
-    face_level_curr_(),
-    face_level_next_(),
+    adapt_(),
+#ifdef OLD_ADAPT
     child_face_level_curr_(),
     child_face_level_next_(),
+#endif /* OLD_ADAPT */
     count_coarsen_(0),
     adapt_step_(0),
     coarsened_(false),
     is_leaf_(true),
     age_(0),
-    face_level_last_(),
     name_(""),
     index_method_(-1),
     index_solver_(),
@@ -728,25 +730,24 @@ Block::Block (CkMigrateMessage *m)
     sync_coarsen_(),
     sync_count_(),
     sync_max_(),
-    face_level_curr_(),
-    face_level_next_(),
+    adapt_(),
+#ifdef OLD_ADAPT
     child_face_level_curr_(),
     child_face_level_next_(),
+#endif /* OLD_ADAPT */
     count_coarsen_(0),
     adapt_step_(0),
     coarsened_(false),
     is_leaf_(true),
     age_(0),
-    face_level_last_(),
     name_(""),
     index_method_(-1),
     index_solver_(),
     refresh_()
-    
 {
 
   init_refresh_();
-  
+
 #ifdef TRACE_BLOCK
   CkPrintf ("TRACE_BLOCK Block(CkMigrateMessage*)\n");
   fflush(stdout);
@@ -1171,6 +1172,7 @@ void Block::debug_faces_(const char * mesg)
       fprintf (fp_debug,"| ");
 #endif
       PARALLEL_PRINTF ("| ");
+#ifdef OLD_ADAPT
       for (ic3[0]=0; ic3[0]<2; ic3[0]++) {
 	for (if3[0]=-1; if3[0]<=1; if3[0]++) {
 	  for (if3[0]=-1; if3[0]<=1; if3[0]++) {
@@ -1181,9 +1183,11 @@ void Block::debug_faces_(const char * mesg)
 	  }
 	}
       }
+#endif
 #ifdef CELLO_DEBUG
       fprintf (fp_debug,"| ");
 #endif
+#ifdef OLD_ADAPT
       PARALLEL_PRINTF ("| ");
       for (ic3[0]=0; ic3[0]<2; ic3[0]++) {
 	for (if3[0]=-1; if3[0]<=1; if3[0]++) {
@@ -1195,6 +1199,7 @@ void Block::debug_faces_(const char * mesg)
 	  }
 	}
       }
+#endif      
 #ifdef CELLO_DEBUG
       fprintf (fp_debug,"\n");
       fflush(fp_debug);

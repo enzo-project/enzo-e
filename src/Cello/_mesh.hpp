@@ -104,8 +104,9 @@ enum adapt_type {
 
 class Tree;
 
-#include "mesh_Index.hpp"
 #include "mesh_Box.hpp"
+#include "mesh_Adapt.hpp"
+#include "mesh_Index.hpp"
 
 #include "mesh_Block.hpp"
 #include "mesh_Hierarchy.hpp"

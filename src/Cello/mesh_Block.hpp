@@ -62,6 +62,7 @@ public: // interface
 
   /// Copy constructor
   Block(const Block & block)
+    : adapt_()
   /// @param     block  Object being copied
   {  copy_(block);  }
 
@@ -141,36 +142,28 @@ public: // interface
   const Index & index() const
   { return index_; }
 
+  
   int face_level (const int if3[3]) const
-  { return face_level_curr_[IF3(if3)]; }
+  { return adapt_.face_level(if3,Adapt::LevelType::curr); }
 
   int face_level (int axis, int face) const
-  {
-    int if3[3];
-    cello::af_to_xyz(axis,face,if3);
-    return face_level_curr_[IF3(if3)];
-  }
+  { return adapt_.face_level(axis,face,Adapt::LevelType::curr); }
 
-  int face_level_next (const int if3[3]) const
-  { return face_level_next_[IF3(if3)]; }
-
+#ifdef OLD_ADAPT
   int child_face_level (const int ic3[3], const int if3[3]) const
   { return child_face_level_curr_[ICF3(ic3,if3)]; }
 
   int child_face_level_next (const int ic3[3], const int if3[3]) const
   { return child_face_level_next_[ICF3(ic3,if3)]; }
+#endif /* OLD_ADAPT */
 
-  void set_face_level_curr (const int if3[3], int level)
-  { face_level_curr_[IF3(if3)] = level; }
-
-  void set_face_level_next (const int if3[3], int level)
-  { face_level_next_[IF3(if3)] = level; }
-
+#ifdef OLD_ADAPT
   void set_child_face_level_curr (const int ic3[3], const int if3[3], int level)
   { child_face_level_curr_[ICF3(ic3,if3)] = level;  }
 
   void set_child_face_level_next (const int ic3[3], const int if3[3], int level)
   { child_face_level_next_[ICF3(ic3,if3)] = level; }
+#endif /* OLD_ADAPT */
 
   //----------------------------------------------------------------------
   // GENERAL
@@ -204,10 +197,12 @@ public: // interface
 
   void update_levels_ ()
   {
-    face_level_curr_ =       face_level_next_;
-    //    for (int i=0; i<face_level_next_.size(); i++) face_level_next_[i]=0;
+    adapt_.update_curr_from_next();
+
+#ifdef OLD_ADAPT
     child_face_level_curr_ = child_face_level_next_;
-    //    for (int i=0; i<child_face_level_next_.size(); i++) child_face_level_next_[i]=0;
+#endif /* OLD_ADAPT */
+
   }
 
   bool is_child_ (const Index & index) const
@@ -219,7 +214,9 @@ public: // interface
   }
 
   /// Initialize child face levels given own face levels
+#ifdef OLD_ADAPT
   void initialize_child_face_levels_();
+#endif /* OLD_ADAPT */
 
   /// Initialize arrays for refresh
   void init_refresh_();
@@ -938,17 +935,16 @@ protected: // attributes
   std::vector<int>  sync_count_;
   std::vector<int>  sync_max_;
 
-  /// current level of neighbors along each face
-  std::vector<int> face_level_curr_;
+  /// Adapt object
+  Adapt adapt_;
 
-  /// new level of neighbors along each face
-  std::vector<int> face_level_next_;
-
+#ifdef OLD_ADAPT
   /// current level of neighbors accumulated from children that can coarsen
   std::vector<int> child_face_level_curr_;
 
   /// new level of neighbors accumulated from children that can coarsen
   std::vector<int> child_face_level_next_;
+#endif /* OLD_ADAPT */
 
   /// Can coarsen only if all children can coarsen
   int count_coarsen_;
@@ -965,9 +961,6 @@ protected: // attributes
 
   /// Age of the Block in cycles (for OutputImage)
   int age_;
-
-  /// Last face level received from given face
-  std::vector<int> face_level_last_;
 
   /// String for storing bit ID name
   mutable std::string name_;
