@@ -292,95 +292,59 @@ namespace enzo_riemann_utils{
 
   /// @def      LUT_TRANSFER_T_SCALAR
   /// @brief    Part of the LUT_TRANSFER group of macros that are used to copy
-  ///           values between a std::array<enzo_float, LUT::NEQ> and a given
-  ///           location in a list of 3D external arrays.
+  ///           scalar actively advected values between a
+  ///           std::array<enzo_float, LUT::NEQ> and a given
+  ///           location in a list of 3D external arrays. These macros simply
+  ///           ignore the vector quantities (since that involves some level of
+  ///           permutation)
   ///
   /// The macro copies values from `src` to `dest`. When `src` (`dest`) is the
   /// list of external arrays, `SRCSUF` (`DESTSUF`) should be the parentheses
   /// enclosed indices of the arrays while `DESTSUF` (`SRCSUF`) should be passed
   /// an empty argument.
-  ///
-  /// When the external array is the dest, pass `true` to `external_d`
-  /// (otherwise, pass false). This is essential for permuting vector
-  /// components. In all cases, the external arrays store the x, y, and z
-  /// components at the indices for the ith, jth, and kth components. (When
-  /// `dim` is 1 or 2, these values need to be permuted when transfering
-  /// to/from the lutarray)
-  #define LUT_TRANSFER_T_SCALAR(LUT, name, src, dest, SRCSUF, DESTSUF, dim,   \
-                                external_d)                                   \
+  #define LUT_TRANSFER_T_SCALAR(LUT, src, dest, SRCSUF, DESTSUF, name)        \
     if (LUT::name != -1){ dest[LUT::name] DESTSUF = src[LUT::name] SRCSUF; }
-  #define LUT_TRANSFER_T_VECTOR(LUT, name, src, dest, SRCSUF, DESTSUF, dim,   \
-                                external_d)                                   \
-    if ((LUT::COMBINE(name,_i) != -1) && (LUT::COMBINE(name,_j) != -1) &&     \
-        (LUT::COMBINE(name,_k) != -1)){                                       \
-      /* The following needs to permute vectors: */                           \
-      /* copy LUT::COMBINE(name,_i) */                                        \
-      dest[LUT::COMBINE(name,_i) + ((external_d) ? dim : 0)] DESTSUF =        \
-        src[LUT::COMBINE(name,_i) + ((!external_d) ? dim : 0)] SRCSUF;        \
-      /* copy LUT::COMBINE(name,_j) (equiv to LUT::COMBINE(name,_i) + 1) */   \
-      dest[LUT::COMBINE(name,_i) + ((external_d) ? ((dim+1)%3) : 1)] DESTSUF =\
-        src[LUT::COMBINE(name,_i) + ((!external_d) ? ((dim+1)%3) : 1)] SRCSUF;\
-      /* copy LUT::COMBINE(name,_k) (equiv to LUT::COMBINE(name,_i) + 2) */   \
-      dest[LUT::COMBINE(name,_i) + ((external_d) ? ((dim+2)%3) : 2)] DESTSUF =\
-        src[LUT::COMBINE(name,_i) + ((!external_d) ? ((dim+2)%3) : 2)] SRCSUF;\
-  }
-  #define LUT_TRANSFER_F_SCALAR(LUT, name, src, dest, SRCSUF, DESTSUF, dim,   \
-                                external_d) /* ... */
-  #define LUT_TRANSFER_F_VECTOR(LUT, name, src, dest, SRCSUF, DESTSUF, dim,   \
-                                external_d) /* ... */
+  #define LUT_TRANSFER_T_VECTOR(LUT, src, dest, SRCSUF, DESTSUF, name) /*...*/
+  #define LUT_TRANSFER_F_SCALAR(LUT, src, dest, SRCSUF, DESTSUF, name) /*...*/
+  #define LUT_TRANSFER_F_VECTOR(LUT, src, dest, SRCSUF, DESTSUF, name) /*...*/
 
   //----------------------------------------------------------------------
 
-  /// transfers values from the specified correct location in `external` to a
-  /// 1D output array. Care is taken to appropriately permute the vector
-  /// components.
-  ///
-  /// The external arrays always holds store the x, y, and z components of a
-  /// vector at the indices for the ith, jth, and kth. The mapping for the
-  /// output array is:
-  /// - x -> i, y -> j, z -> k, when `dim == 0`
-  /// - y -> i, z -> j, x -> k, when `dim == 1`
-  /// - z -> i, x -> j, y -> k, when `dim == 2`
+  /// transfers actively advected scalar quantities values from the specified
+  /// correct location in `external` to a 1D output array.
   template<class LUT>
-  inline lutarray<LUT> build_lutarray
+  void transfer_scalars_to_lutarray
   (const int dim, const int iz, const int iy, const int ix,
-   const std::array<CelloArray<const enzo_float, 3>, LUT::NEQ>& external)
+   const std::array<CelloArray<const enzo_float, 3>, LUT::NEQ>& external,
+   lutarray<LUT> &dest)
     noexcept
   {
-    lutarray<LUT> out;
     #define ENTRY(name, math_type, category, if_advection)                    \
-      LUT_TRANSFER_##if_advection##_##math_type (EnzoRiemannLUT<LUT>, name,   \
-                                                 external, out, (iz,iy,ix), , \
-                                                 dim, false);
+      LUT_TRANSFER_##if_advection##_##math_type (EnzoRiemannLUT<LUT>,         \
+                                                 external, dest, (iz,iy,ix), ,\
+                                                 name);
     FIELD_TABLE
     #undef ENTRY
-    return out;
   }
 
   //----------------------------------------------------------------------
 
-  /// transfers values from `src` to the correct location in `external`. Care
-  /// is taken to appropriately permute the vector components.
-  ///
-  /// The external arrays always holds store the x, y, and z components of a
-  /// vector at the indices for the ith, jth, and kth. The mapping of `src` is:
-  /// - x -> i, y -> j, z -> k, when `dim == 0`
-  /// - y -> i, z -> j, x -> k, when `dim == 1`
-  /// - z -> i, x -> j, y -> k, when `dim == 2`
+  /// transfers actively advected scalar quantities values from `src` to the
+  /// correct location in `external`.
   template<class LUT>
-  inline void transfer_from_lutarray
+  inline void transfer_scalars_from_lutarray
   (const int dim, const int iz, const int iy, const int ix,
    const std::array<CelloArray<enzo_float, 3>, LUT::NEQ>& external,
    const lutarray<LUT> src) noexcept
   {
     #define ENTRY(name, math_type, category, if_advection)                    \
-      LUT_TRANSFER_##if_advection##_##math_type (EnzoRiemannLUT<LUT>, name,   \
+      LUT_TRANSFER_##if_advection##_##math_type (EnzoRiemannLUT<LUT>,         \
                                                  src, external, , (iz,iy,ix), \
-                                                 dim, true);
+                                                 name);
     FIELD_TABLE
     #undef ENTRY
   }
 
-}  
+}
 
 #endif /* ENZO_ENZO_RIEMANN_UTILS_HPP */

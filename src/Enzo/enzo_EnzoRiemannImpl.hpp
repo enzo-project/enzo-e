@@ -336,6 +336,15 @@ void EnzoRiemannImpl<ImplFunctor>::solve
   const std::array<CelloArray<enzo_float, 3>, LUT::NEQ> flux_arrays =
     enzo_riemann_utils::array_from_map<LUT>(flux_map);
 
+  // determine mapping between vector components of the external arrays and the
+  // values of LUT (by default, the Riemann Solver maps i->x, j->y, k->z
+  const int external_velocity_i = dim + LUT::velocity_i;
+  const int external_velocity_j = ((dim+1)%3) + LUT::velocity_i;
+  const int external_velocity_k = ((dim+2)%3) + LUT::velocity_i;
+  const int external_bfield_i = dim + LUT::bfield_i;
+  const int external_bfield_j = ((dim+1)%3) + LUT::bfield_i;
+  const int external_bfield_k = ((dim+2)%3) + LUT::bfield_i;
+
   ImplFunctor func;
 
   // compute the flux at all non-stale cell interfaces
@@ -344,44 +353,75 @@ void EnzoRiemannImpl<ImplFunctor>::solve
     for (int iy = sd; iy < flux_arrays[0].shape(1) - sd; iy++) {
       for (int ix = sd; ix < flux_arrays[0].shape(2) - sd; ix++) {
 
-	// get the fluid fields
-        const lutarray<LUT> wl =
-	  enzo_riemann_utils::build_lutarray<LUT>(dim, iz, iy, ix, wl_arrays);
-	const lutarray<LUT> wr =
-	  enzo_riemann_utils::build_lutarray<LUT>(dim, iz, iy, ix, wr_arrays);
+        // get the local values of the fluid fields
+        lutarray<LUT> wl, wr;
+        // first copy the scalar-type quantities (e.g. density, total_energy)
+        enzo_riemann_utils::transfer_scalars_to_lutarray<LUT>(dim, iz, iy, ix,
+                                                              wl_arrays, wl);
+        enzo_riemann_utils::transfer_scalars_to_lutarray<LUT>(dim, iz, iy, ix,
+                                                              wr_arrays, wr);
+        // now, manually copy the vector-type quantities
+        wl[LUT::velocity_i] = wl_arrays[external_velocity_i](iz,iy,ix);
+        wl[LUT::velocity_j] = wl_arrays[external_velocity_j](iz,iy,ix);
+        wl[LUT::velocity_k] = wl_arrays[external_velocity_k](iz,iy,ix);
 
-	// get the left/right pressure
-	enzo_float pressure_l = pressure_array_l(iz,iy,ix);
-	enzo_float pressure_r = pressure_array_r(iz,iy,ix);
+        wr[LUT::velocity_i] = wr_arrays[external_velocity_i](iz,iy,ix);
+        wr[LUT::velocity_j] = wr_arrays[external_velocity_j](iz,iy,ix);
+        wr[LUT::velocity_k] = wr_arrays[external_velocity_k](iz,iy,ix);
 
-	// get the conserved quantities
-	lutarray<LUT> Ul = enzo_riemann_utils::compute_conserved<LUT>(wl,
+        if (LUT::has_bfields()){
+          wl[LUT::bfield_i] = wl_arrays[external_bfield_i](iz,iy,ix);
+          wl[LUT::bfield_j] = wl_arrays[external_bfield_j](iz,iy,ix);
+          wl[LUT::bfield_k] = wl_arrays[external_bfield_k](iz,iy,ix);
+
+          wr[LUT::bfield_i] = wr_arrays[external_bfield_i](iz,iy,ix);
+          wr[LUT::bfield_j] = wr_arrays[external_bfield_j](iz,iy,ix);
+          wr[LUT::bfield_k] = wr_arrays[external_bfield_k](iz,iy,ix);
+        }
+
+        // get the left/right pressure
+        enzo_float pressure_l = pressure_array_l(iz,iy,ix);
+        enzo_float pressure_r = pressure_array_r(iz,iy,ix);
+
+        // get the conserved quantities
+        lutarray<LUT> Ul = enzo_riemann_utils::compute_conserved<LUT>(wl,
                                                                       gamma);
-	lutarray<LUT> Ur = enzo_riemann_utils::compute_conserved<LUT>(wr,
+        lutarray<LUT> Ur = enzo_riemann_utils::compute_conserved<LUT>(wr,
                                                                       gamma);
 
-	// compute the interface fluxes
-	lutarray<LUT> Fl = enzo_riemann_utils::active_fluxes<LUT>(wl, Ul,
+        // compute the interface fluxes
+        lutarray<LUT> Fl = enzo_riemann_utils::active_fluxes<LUT>(wl, Ul,
                                                                   pressure_l);
-	lutarray<LUT> Fr = enzo_riemann_utils::active_fluxes<LUT>(wr, Ur,
+        lutarray<LUT> Fr = enzo_riemann_utils::active_fluxes<LUT>(wr, Ur,
                                                                   pressure_r);
 
-	enzo_float interface_velocity_i;
-	// Now compute the Riemann Fluxes
+        enzo_float interface_velocity_i;
+        // Now compute the Riemann Fluxes
         lutarray<LUT> fluxes = func(Fl, Fr, wl, wr, Ul, Ur, pressure_l,
                                     pressure_r, barotropic, gamma,
                                     isothermal_cs, interface_velocity_i);
 
-	// record the Riemann Fluxes
-	enzo_riemann_utils::transfer_from_lutarray<LUT>(dim, iz, iy, ix,
-							flux_arrays, fluxes);
+        // record the Riemann Fluxes
+        // first handle-type scalar quantities (e.g. density, total_energy)
+        enzo_riemann_utils::transfer_scalars_from_lutarray<LUT>(dim, iz, iy, ix,
+                                                                flux_arrays,
+                                                                fluxes);
+        // now, manually record fluxes for vector-type quantities
+        flux_arrays[external_velocity_i](iz,iy,ix) = fluxes[LUT::velocity_i];
+        flux_arrays[external_velocity_j](iz,iy,ix) = fluxes[LUT::velocity_j];
+        flux_arrays[external_velocity_k](iz,iy,ix) = fluxes[LUT::velocity_k];
+        if (LUT::has_bfields()){
+          flux_arrays[external_bfield_i](iz,iy,ix) = fluxes[LUT::bfield_i];
+          flux_arrays[external_bfield_j](iz,iy,ix) = fluxes[LUT::bfield_j];
+          flux_arrays[external_bfield_k](iz,iy,ix) = fluxes[LUT::bfield_k];
+        }
 
-	if (calculate_internal_energy_flux){
-	  velocity_i_bar_array(iz,iy,ix) = interface_velocity_i;
+        if (calculate_internal_energy_flux){
+          velocity_i_bar_array(iz,iy,ix) = interface_velocity_i;
           internal_energy_flux(iz,iy,ix) = passive_eint_flux_
             (wl[LUT::density], pressure_l, wr[LUT::density], pressure_r,
              gamma, fluxes[LUT::density]);
-	}
+        }
       }
     }
   }
