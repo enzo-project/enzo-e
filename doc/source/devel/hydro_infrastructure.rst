@@ -416,8 +416,8 @@ energy. If the equation of state is barotropic, this should do nothing.
 
 .. code-block:: c++
 
-   void pressure_from_integration(EnzoEFltArrayMap &integration_map,
-                                  const EFlt3DArray &pressure,
+   void pressure_from_integration(const EnzoEFltArrayMap &integration_map,
+                                  const CelloArray<enzo_float, 3> &pressure,
                                   int stale_depth);
 
 This method computes the pressure from the integration quantities
@@ -434,7 +434,7 @@ internal energy.*
 .. code-block:: c++
 
    void primitive_from_integration
-     (EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &primitive_map,
+     (const EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &primitive_map,
       int stale_depth, const std::vector<std::string> &passive_list);
 
 This method is responsible for computing the primitive quantities (to
