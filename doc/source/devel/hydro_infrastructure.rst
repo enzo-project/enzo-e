@@ -493,7 +493,7 @@ The main interface function provided by this class is:
 .. code-block:: c++
 
     void reconstruct_interface
-      (EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
+      (const EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
        EnzoEFltArrayMap &primr_map, int dim, EnzoEquationOfState *eos,
        int stale_depth, const std::vector<std::string>& passive_list);
 
@@ -504,10 +504,10 @@ reconstructed states (the results are stored in ``priml_map`` and
 value of ``0``/ ``1``/ ``2`` then the values are reconstructed along
 the x-/y-/z-axis. ``stale_depth`` indicates the current stale_depth
 for the supplied cell-centered quantities (prior to
-reconstruction). Note that the arrays in ``priml_map`` and
-``primr_map`` should be large enough to store cell-centered
-quantitites so that they can be reused to hold the face-centered
-fields along each dimension. ``passive_list`` is used to specify the
+reconstruction). ``priml_map`` and ``primr_map`` should have the same
+shapes as ``prim_map``, except along the reconstruction axis; along that
+axis ``prim_map`` should be able to hold 1 more value.
+``passive_list`` is used to specify the
 names (keys) of the passively advected quantities that are to be
 reconstructed.
 

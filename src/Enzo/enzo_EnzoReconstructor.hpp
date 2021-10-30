@@ -84,7 +84,7 @@ public: // interface
   /// specified for the `dim` axis and `CSlice(nullptr,nullptr)` is specified
   /// for other axes.
   virtual void reconstruct_interface
-  (EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
+  (const EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
    EnzoEFltArrayMap &primr_map, const int dim, const EnzoEquationOfState *eos,
    const int stale_depth, const str_vec_t& passive_list)=0;
 
