@@ -1026,7 +1026,8 @@ of the passively advected scalars.
 .. code-block:: c++
 
    void accumulate_flux_component
-     (int dim, double dt, enzo_float cell_width, EnzoEFltArrayMap &flux_map,
+     (int dim, double dt, enzo_float cell_width,
+     const EnzoEFltArrayMap &flux_map,
       EnzoEFltArrayMap &dUcons_map, int stale_depth,
       const std::vector<std::string> &passive_list) const;
 
@@ -1048,7 +1049,8 @@ integration quantities from the start of the timestep (specificed by
 .. code-block:: c++
 
    void update_quantities
-     (EnzoEFltArrayMap &initial_integration_map, EnzoEFltArrayMap &dUcons_map,
+     (EnzoEFltArrayMap &initial_integration_map,
+      const EnzoEFltArrayMap &dUcons_map,
       EnzoEFltArrayMap &out_integration_map,
       EnzoEFltArrayMap &out_conserved_passive_scalar,
       EnzoEquationOfState *eos, int stale_depth,

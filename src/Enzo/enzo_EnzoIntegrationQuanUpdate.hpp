@@ -78,7 +78,7 @@ public: // interface
   ///     computed.
   /// @param[in]     passive_list A list of keys for passive scalars.
   void accumulate_flux_component(int dim, double dt, enzo_float cell_width,
-                                 EnzoEFltArrayMap &flux_map,
+                                 const EnzoEFltArrayMap &flux_map,
                                  EnzoEFltArrayMap &dUcons_map, int stale_depth,
                                  const str_vec_t &passive_list) const noexcept;
 
@@ -104,7 +104,8 @@ public: // interface
   ///     (the stale_depth must be incremented after this function is called)
   /// @param[in]  passive_list A list of keys for passive scalars.
   void update_quantities
-  (EnzoEFltArrayMap &initial_integration_map, EnzoEFltArrayMap &dUcons_map,
+  (EnzoEFltArrayMap &initial_integration_map,
+   const EnzoEFltArrayMap &dUcons_map,
    EnzoEFltArrayMap &out_integration_map, EnzoEquationOfState *eos,
    const int stale_depth, const str_vec_t &passive_list) const;
 
@@ -120,18 +121,22 @@ private:
   ///
   /// (This should called before the density is updated)
   void update_passive_scalars_
-  (EnzoEFltArrayMap &initial_integration_map, EnzoEFltArrayMap &dUcons_map,
+  (EnzoEFltArrayMap &initial_integration_map,
+   const EnzoEFltArrayMap &dUcons_map,
    EnzoEFltArrayMap &out_integration_map, const int stale_depth,
    const str_vec_t &passive_list) const;
 
-  /// Dynamically allocates and constructs an array of instances of EFlt3DArray
+  /// Constructs a vector ``EFlt3DArray`` or ``CelloArray<const enzo_float,3>``
   /// that are loaded from `map` using the ordering of keys in integration_keys_
   /// @param[in] map Map of arrays holding data related to each integration
   ///   quantities registered in integration_keys_
   /// @param[in] stale_depth indicates the current stale_depth for the loaded
   ///   quantities.
-  EFlt3DArray* load_integration_quantities_(EnzoEFltArrayMap &map,
-                                            const int stale_depth) const;
+  const std::vector<EFlt3DArray> load_integration_quan_
+  (EnzoEFltArrayMap &map, const int stale_depth) const noexcept;
+
+  const std::vector<CelloArray<const enzo_float, 3>> load_integration_quan_
+  (const EnzoEFltArrayMap &map, int stale_depth) const noexcept;
 
 private: // attributes
 
