@@ -94,7 +94,7 @@ public: // interface
   (const EnzoEFltArrayMap &prim_map_l, const EnzoEFltArrayMap &prim_map_r,
    EnzoEFltArrayMap &flux_map, const int dim, const EnzoEquationOfState *eos,
    const int stale_depth, const str_vec_t &passive_list,
-   const EFlt3DArray *interface_velocity) const = 0;
+   const CelloArray<enzo_float,3> * const interface_velocity) const = 0;
 
   /// Return the expected keys (and key-order) that the `solve` method expects
   /// the `flux_map` argument to have (i.e. these correspond to the fluxes of

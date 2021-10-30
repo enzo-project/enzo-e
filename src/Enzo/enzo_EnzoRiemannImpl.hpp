@@ -182,7 +182,7 @@ public: // interface
               EnzoEFltArrayMap &flux_map, const int dim,
 	      const EnzoEquationOfState *eos, const int stale_depth,
 	      const str_vec_t &passive_list,
-              const EFlt3DArray *interface_velocity) const;
+              const CelloArray<enzo_float,3> * const interface_velocity) const;
 
   const std::vector<std::string> integration_quantity_keys() const noexcept
   { return integration_quantity_keys_; }
@@ -291,7 +291,7 @@ void EnzoRiemannImpl<ImplFunctor>::solve
 (const EnzoEFltArrayMap &prim_map_l, const EnzoEFltArrayMap &prim_map_r,
  EnzoEFltArrayMap &flux_map, const int dim, const EnzoEquationOfState *eos,
  const int stale_depth, const str_vec_t &passive_list,
- const EFlt3DArray *interface_velocity) const
+ const CelloArray<enzo_float,3> * const interface_velocity) const
 {
 
   const bool barotropic = eos->is_barotropic();
@@ -312,16 +312,20 @@ void EnzoRiemannImpl<ImplFunctor>::solve
   const CelloArray<const enzo_float, 3> pressure_array_r =
     prim_map_r.at("pressure");
 
-  // Check if the internal energy flux must be computed
+  // Check if the internal energy flux must be computed and then initialize the
+  // appropriate array
   const bool calculate_internal_energy_flux = calculate_internal_energy_flux_;
-  EFlt3DArray internal_energy_flux, velocity_i_bar_array;
-  if (calculate_internal_energy_flux){
-    internal_energy_flux = flux_map.at("internal_energy");
-    ASSERT("EnzoRiemannImpl::solve",
-           ("interface_velocity is expected to be non-NULL when computing the "
-            "internal energy flux"), (interface_velocity != nullptr));
-    velocity_i_bar_array = *interface_velocity;
+  if ((calculate_internal_energy_flux) && (interface_velocity == nullptr)){
+    ERROR("EnzoRiemannImpl::solve",
+          "interface_velocity is expected to be non-NULL when computing the "
+          "internal energy flux");
   }
+  // TODO: check if falling back to default constructor actually introduces a
+  // branch in the for-loop. (if so consider using scratch space, instead)
+  const EFlt3DArray internal_energy_flux = (calculate_internal_energy_flux) ?
+    flux_map.at("internal_energy") : EFlt3DArray();
+  const EFlt3DArray velocity_i_bar_array = (calculate_internal_energy_flux) ?
+    *interface_velocity : EFlt3DArray();
 
 #ifdef RIEMANN_DEBUG
   check_key_order_(prim_map_l, true, passive_list);
