@@ -194,6 +194,9 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // Check that the mesh size and ghost depths are appropriate
     check_mesh_and_ghost_size_(block);
 
+    // load the list of keys for the passively advected scalars
+    const str_vec_t passive_list = *(lazy_passive_list_.get_list());
+
     // declaring Maps of arrays and stand-alone arrays that wrap existing
     // fields and/or serve as scratch space. These will all be overwritten.
 
@@ -235,7 +238,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 
     setup_arrays_(block, integration_map, temp_integration_map, primitive_map,
                   priml_map, primr_map,  xflux_map, yflux_map, zflux_map,
-                  dUcons_map);
+                  dUcons_map, passive_list);
 
     // Setup a pointer to an array that used to store interface velocity fields
     // from computed by the Riemann Solver (to use in the calculation of the
@@ -284,8 +287,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // set all elements of the arrays in dUcons_map to 0 (throughout the rest
       // of the current loop, flux divergence and source terms will be
       // accumulated in these arrays)
-      integration_quan_updater_->clear_dUcons_map
-        (dUcons_map, 0., *(lazy_passive_list_.get_list()));
+      integration_quan_updater_->clear_dUcons_map(dUcons_map, 0., passive_list);
 
       // Compute the primitive quantities from the integration quantites
       // This basically copies all quantities that are both and an integration
@@ -293,8 +295,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // conserved-form to specific-form (i.e. from density to mass fraction).
       // For a non-barotropic gas, this also computes pressure
       eos_->primitive_from_integration(cur_integration_map, primitive_map,
-                                       stale_depth,
-                                       *(lazy_passive_list_.get_list()));
+                                       stale_depth, passive_list);
 
       // Compute flux along each dimension
       EnzoEFltArrayMap *flux_maps[3] = {&xflux_map, &yflux_map, &zflux_map};
@@ -313,8 +314,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
         compute_flux_(dim, cur_dt, cell_widths[dim], primitive_map,
                       pl_map, pr_map, *(flux_maps[dim]), dUcons_map,
                       interface_velocity_arr_ptr, *reconstructor,
-                      bfield_method_, stale_depth,
-                      *(lazy_passive_list_.get_list()));
+                      bfield_method_, stale_depth, passive_list);
       }
 
       // increment the stale_depth
@@ -340,7 +340,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // with the internal energy)
       integration_quan_updater_->update_quantities
         (integration_map, dUcons_map, out_integration_map, eos_, stale_depth,
-         *(lazy_passive_list_.get_list()));
+         passive_list);
 
       // increment stale_depth since the inner values have been updated
       // but the outer values have not
@@ -458,15 +458,15 @@ void EnzoMethodMHDVlct::setup_arrays_
  EnzoEFltArrayMap &temp_integration_map, EnzoEFltArrayMap &primitive_map,
  EnzoEFltArrayMap &priml_map, EnzoEFltArrayMap &primr_map,
  EnzoEFltArrayMap &xflux_map, EnzoEFltArrayMap &yflux_map,
- EnzoEFltArrayMap &zflux_map, EnzoEFltArrayMap &dUcons_map) noexcept
+ EnzoEFltArrayMap &zflux_map, EnzoEFltArrayMap &dUcons_map,
+ const str_vec_t& passive_list) noexcept
 {
 
   // allocate stuff! Make sure to do it in a way such that we don't have to
   // separately deallocate it!
 
   // First, setup integration_map
-  integration_map = get_integration_map_
-    (block, (lazy_passive_list_.get_list()).get());
+  integration_map = get_integration_map_(block, &passive_list);
 
   const std::array<int,3> shape = {integration_map.at("density").shape(0),
 				   integration_map.at("density").shape(1),
@@ -475,7 +475,7 @@ void EnzoMethodMHDVlct::setup_arrays_
   // Next, setup temp_integration_map
   temp_integration_map = setup_temporary_array_map_
     (temp_integration_map.name(), shape, &integration_field_list_,
-     (lazy_passive_list_.get_list()).get());
+     &passive_list);
 
   // Prepare arrays to hold fluxes. It should include keys for all integration
   // quantities actively (including passively advected scalars)
@@ -485,9 +485,8 @@ void EnzoMethodMHDVlct::setup_arrays_
     cur_shape[i] -= 1;
     *(flux_maps[i]) = setup_temporary_array_map_
       (flux_maps[i]->name(), cur_shape, &integration_field_list_,
-       (lazy_passive_list_.get_list()).get());
+       &passive_list);
   }
-  
 
   // Prepare fields used to accumulate all changes to the integration
   // quantities (including passively advected scalars). If CT is in use,
@@ -495,14 +494,13 @@ void EnzoMethodMHDVlct::setup_arrays_
   // independently updates magnetic fields (this exclusion is implicitly
   // handled by integration_quan_updater_)
   std::vector<std::string> tmp = integration_quan_updater_->integration_keys();
-  dUcons_map = setup_temporary_array_map_
-    (dUcons_map.name(), shape, &tmp, (lazy_passive_list_.get_list()).get());
+  dUcons_map = setup_temporary_array_map_(dUcons_map.name(), shape, &tmp,
+                                          &passive_list);
 
 
   // Setup primitive_map
   primitive_map = setup_temporary_array_map_
-    (primitive_map.name(), shape, &primitive_field_list_,
-     (lazy_passive_list_.get_list()).get());
+    (primitive_map.name(), shape, &primitive_field_list_, &passive_list);
 
   // Prepare maps for holding the left and right reconstructed primitives.
   // As necessary, we pretend that these are centered along:
@@ -510,11 +508,9 @@ void EnzoMethodMHDVlct::setup_arrays_
   //   - y and have shape (  mz,my-1,  mx)
   //   - x and have shape (  mz,  my,mx-1)
   priml_map = setup_temporary_array_map_(priml_map.name(), shape,
-                                         &primitive_field_list_,
-                                         (lazy_passive_list_.get_list()).get());
+                                         &primitive_field_list_, &passive_list);
   primr_map = setup_temporary_array_map_(primr_map.name(), shape,
-                                         &primitive_field_list_,
-                                         (lazy_passive_list_.get_list()).get());
+                                         &primitive_field_list_, &passive_list);
 }
 
 //----------------------------------------------------------------------

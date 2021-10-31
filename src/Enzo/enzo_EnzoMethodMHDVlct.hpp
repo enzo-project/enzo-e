@@ -250,12 +250,14 @@ protected: // methods
   ///     passively advected scalars. If CT is used, this grouping won't have
   ///     space to store changes in the magnetic fields (that update is handled
   ///     separately).
+  /// @param[in]  passive_list A list of keys for passively advected scalars.
   void setup_arrays_
   (Block *block, EnzoEFltArrayMap &integration_map,
    EnzoEFltArrayMap &temp_integration_map, EnzoEFltArrayMap &primitive_map,
    EnzoEFltArrayMap &priml_map, EnzoEFltArrayMap &primr_map,
    EnzoEFltArrayMap &xflux_map, EnzoEFltArrayMap &yflux_map,
-   EnzoEFltArrayMap &zflux_map, EnzoEFltArrayMap &dUcons_map) noexcept;
+   EnzoEFltArrayMap &zflux_map, EnzoEFltArrayMap &dUcons_map,
+   const str_vec_t& passive_list) noexcept;
 
 protected: // attributes
 
