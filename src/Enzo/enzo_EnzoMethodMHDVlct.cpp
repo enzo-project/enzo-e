@@ -98,6 +98,8 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
     bfield_method_ = nullptr;
   }
 
+  scratch_space_ = nullptr;
+
   // Finally, initialize the default Refresh object
   cello::simulation()->new_refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
@@ -141,6 +143,9 @@ EnzoMethodMHDVlct::~EnzoMethodMHDVlct()
   delete full_dt_recon_;
   delete riemann_solver_;
   delete integration_quan_updater_;
+  if (scratch_space_ != nullptr){
+    delete scratch_space_;
+  }
   if (bfield_method_ != nullptr){
     delete bfield_method_;
   }
@@ -161,6 +166,8 @@ void EnzoMethodMHDVlct::pup (PUP::er &p)
   p|full_dt_recon_;
   p|riemann_solver_;
   p|integration_quan_updater_;
+  // skip scratch_space_. This will be freshly constructed the first time that
+  // the compute method is called.
   p|mhd_choice_;
   p|bfield_method_;
   p|integration_field_list_;
@@ -188,6 +195,19 @@ EnzoEFltArrayMap EnzoMethodMHDVlct::get_integration_map_
 
 //----------------------------------------------------------------------
 
+EnzoVlctScratchSpace* EnzoMethodMHDVlct::get_scratch_ptr_
+(const std::array<int,3>& field_shape, const str_vec_t& passive_list) noexcept
+{
+  if (scratch_space_ == nullptr){
+    scratch_space_ = new EnzoVlctScratchSpace
+      (field_shape, integration_field_list_, primitive_field_list_,
+       integration_quan_updater_->integration_keys(), passive_list);
+  }
+  return scratch_space_;
+}
+
+//----------------------------------------------------------------------
+
 void EnzoMethodMHDVlct::compute ( Block * block) throw()
 {
   if (block->is_leaf()) {
@@ -197,48 +217,45 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // load the list of keys for the passively advected scalars
     const str_vec_t passive_list = *(lazy_passive_list_.get_list());
 
-    // declaring Maps of arrays and stand-alone arrays that wrap existing
-    // fields and/or serve as scratch space. These will all be overwritten.
+    // initialize map that holds arrays wrapping the Cello Fields holding each
+    // of the integration quantities. Additionally, this also includes
+    // temporary arrays used to hold the specific form of the passive scalar
+    EnzoEFltArrayMap integration_map = get_integration_map_(block,
+                                                            &passive_list);
 
-    // map that holds arrays wrapping the Cello Fields holding each of the
-    // integration quantities. Additionally, this also includes temporary
-    // arrays used to hold the specific form of the passive scalar
-    EnzoEFltArrayMap integration_map;
+    // get maps of arrays and stand-alone arrays that serve as scratch space.
+    // (first, retrieve the pointer to the scratch space struct)
+    const std::array<int,3> shape = {integration_map.at("density").shape(0),
+                                     integration_map.at("density").shape(1),
+                                     integration_map.at("density").shape(2)};
+    EnzoVlctScratchSpace* const scratch = get_scratch_ptr_(shape, passive_list);
 
     // map used for storing integration values at the half time-step. This
     // includes key,array pairs for each entry in integration_map (there should
     // be no aliased fields shared between maps)
-    EnzoEFltArrayMap temp_integration_map("temp_integration");
+    EnzoEFltArrayMap temp_integration_map = scratch->temp_integration_map;
 
     // Map of arrays used to temporarily store the cell-centered primitive
     // quantities that are subsequently reconstructed. This includes arrays for
     // storing the specific form of each of the passively advected scalars.
-    EnzoEFltArrayMap primitive_map("primitive");
-
-    // map holding the arrays wrapping each fields corresponding to a passively
-    // advected scalar. The scalar is in conserved form.
-    EnzoEFltArrayMap conserved_passive_scalar_map; // this will be overwritten
+    EnzoEFltArrayMap primitive_map = scratch->primitive_map;
 
     // holds left and right reconstructed primitives (scratch-space)
-    EnzoEFltArrayMap priml_map("priml");
-    EnzoEFltArrayMap primr_map("primr");
+    EnzoEFltArrayMap priml_map = scratch->priml_map;
+    EnzoEFltArrayMap primr_map = scratch->primr_map;
 
     // maps used to store fluxes (in the future, these will wrap FluxData
     // entries)
-    EnzoEFltArrayMap xflux_map("xflux");
-    EnzoEFltArrayMap yflux_map("yflux");
-    EnzoEFltArrayMap zflux_map("zflux");
+    EnzoEFltArrayMap xflux_map = scratch->xflux_map;
+    EnzoEFltArrayMap yflux_map = scratch->yflux_map;
+    EnzoEFltArrayMap zflux_map = scratch->zflux_map;
 
     // map of arrays  used to accumulate the changes to the conserved forms of
     // the integration quantities and passively advected scalars. In other
     // words, at the start of the (partial) timestep, the fields are all set to
     // zero and are used to accumulate the flux divergence and source terms. If
     // CT is used, it won't have space to store changes in the magnetic fields.
-    EnzoEFltArrayMap dUcons_map("dUcons");
-
-    setup_arrays_(block, integration_map, temp_integration_map, primitive_map,
-                  priml_map, primr_map,  xflux_map, yflux_map, zflux_map,
-                  dUcons_map, passive_list);
+    EnzoEFltArrayMap dUcons_map = scratch->dUcons_map;
 
     // Setup a pointer to an array that used to store interface velocity fields
     // from computed by the Riemann Solver (to use in the calculation of the
@@ -430,87 +447,6 @@ void EnzoMethodMHDVlct::compute_flux_
   if (bfield_method != nullptr){
     bfield_method->identify_upwind(flux_map, dim, cur_stale_depth);
   }
-}
-
-//----------------------------------------------------------------------
-
-static EnzoEFltArrayMap setup_temporary_array_map_
-(const std::string &name, const std::array<int,3> &shape,
- const std::vector<std::string>* const nonpassive_names,
- const str_vec_t* const passive_list)
-{
-  str_vec_t key_list;
-  if ((nonpassive_names != nullptr) && (passive_list != nullptr)){
-    key_list = concat_str_vec_(*nonpassive_names, *passive_list);
-  } else if (nonpassive_names != nullptr){
-    key_list = *nonpassive_names;
-  } else if (passive_list != nullptr){
-    key_list = *passive_list;
-  }
-
-  return EnzoEFltArrayMap(name, key_list, shape);
-}
-
-//----------------------------------------------------------------------
-
-void EnzoMethodMHDVlct::setup_arrays_
-(Block *block, EnzoEFltArrayMap &integration_map,
- EnzoEFltArrayMap &temp_integration_map, EnzoEFltArrayMap &primitive_map,
- EnzoEFltArrayMap &priml_map, EnzoEFltArrayMap &primr_map,
- EnzoEFltArrayMap &xflux_map, EnzoEFltArrayMap &yflux_map,
- EnzoEFltArrayMap &zflux_map, EnzoEFltArrayMap &dUcons_map,
- const str_vec_t& passive_list) noexcept
-{
-
-  // allocate stuff! Make sure to do it in a way such that we don't have to
-  // separately deallocate it!
-
-  // First, setup integration_map
-  integration_map = get_integration_map_(block, &passive_list);
-
-  const std::array<int,3> shape = {integration_map.at("density").shape(0),
-				   integration_map.at("density").shape(1),
-				   integration_map.at("density").shape(2)};
-
-  // Next, setup temp_integration_map
-  temp_integration_map = setup_temporary_array_map_
-    (temp_integration_map.name(), shape, &integration_field_list_,
-     &passive_list);
-
-  // Prepare arrays to hold fluxes. It should include keys for all integration
-  // quantities actively (including passively advected scalars)
-  EnzoEFltArrayMap* flux_maps[3] = {&zflux_map, &yflux_map, &xflux_map};
-  for (std::size_t i = 0; i < 3; i++){
-    std::array<int,3> cur_shape = shape; // makes a deep copy
-    cur_shape[i] -= 1;
-    *(flux_maps[i]) = setup_temporary_array_map_
-      (flux_maps[i]->name(), cur_shape, &integration_field_list_,
-       &passive_list);
-  }
-
-  // Prepare fields used to accumulate all changes to the integration
-  // quantities (including passively advected scalars). If CT is in use,
-  // dUcons_group should not have storage for magnetic fields since CT
-  // independently updates magnetic fields (this exclusion is implicitly
-  // handled by integration_quan_updater_)
-  std::vector<std::string> tmp = integration_quan_updater_->integration_keys();
-  dUcons_map = setup_temporary_array_map_(dUcons_map.name(), shape, &tmp,
-                                          &passive_list);
-
-
-  // Setup primitive_map
-  primitive_map = setup_temporary_array_map_
-    (primitive_map.name(), shape, &primitive_field_list_, &passive_list);
-
-  // Prepare maps for holding the left and right reconstructed primitives.
-  // As necessary, we pretend that these are centered along:
-  //   - z and have shape (mz-1,  my,  mx)
-  //   - y and have shape (  mz,my-1,  mx)
-  //   - x and have shape (  mz,  my,mx-1)
-  priml_map = setup_temporary_array_map_(priml_map.name(), shape,
-                                         &primitive_field_list_, &passive_list);
-  primr_map = setup_temporary_array_map_(primr_map.name(), shape,
-                                         &primitive_field_list_, &passive_list);
 }
 
 //----------------------------------------------------------------------
