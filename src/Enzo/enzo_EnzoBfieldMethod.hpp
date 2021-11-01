@@ -157,8 +157,7 @@ public: // interface
   ///     namely makes use of the various magnetic field fluxes
   /// @param[out] out_centered_bfield_map Map holding the arrays where the
   ///     updated values for each cell-centered magnetic field component should
-  ///     be stored. These arrays can be aliases of `cur_prim_map` (The
-  ///     arguments can even reference the same object).
+  ///     be stored. This can be an alias of `cur_integration_map`.
   /// @param[in]  dt The (partial) time-step over which to update the magnetic
   ///     fields.
   /// @param[in]  stale_depth indicates the current stale_depth for the
@@ -166,8 +165,8 @@ public: // interface
   ///     depth used to compute the fluxes and that is passed to
   ///     EnzoIntegrationQuanUpdate::update_quantities.
   virtual void update_all_bfield_components
-  (EnzoEFltArrayMap &cur_integration_map, EnzoEFltArrayMap &xflux_map,
-   EnzoEFltArrayMap &yflux_map, EnzoEFltArrayMap &zflux_map,
+  (EnzoEFltArrayMap &cur_integration_map, const EnzoEFltArrayMap &xflux_map,
+   const EnzoEFltArrayMap &yflux_map, const EnzoEFltArrayMap &zflux_map,
    EnzoEFltArrayMap &out_centered_bfield_map, enzo_float dt, int stale_depth)
     noexcept=0;
 

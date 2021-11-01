@@ -10,6 +10,21 @@
 
 //----------------------------------------------------------------------
 
+namespace{
+  std::array<CelloArray<const enzo_float,3>,3> immutable_arr_of_EFlt3DArray
+    (const std::array<CelloArray<enzo_float,3>,3>& arg) noexcept
+  {
+    std::array<CelloArray<const enzo_float,3>, 3> out;
+    for (std::size_t i = 0; i < 3; i++){ out[i] = arg[i]; }
+    return out;
+  }
+
+
+}
+
+
+//----------------------------------------------------------------------
+
 void EnzoBfieldMethodCT::register_target_block_
 (Block *block, bool first_initialization) noexcept
 {
@@ -204,8 +219,8 @@ void EnzoBfieldMethodCT::identify_upwind(const EnzoEFltArrayMap &flux_map,
 //----------------------------------------------------------------------
 
 void EnzoBfieldMethodCT::update_all_bfield_components
-(EnzoEFltArrayMap &cur_integration_map, EnzoEFltArrayMap &xflux_map,
- EnzoEFltArrayMap &yflux_map, EnzoEFltArrayMap &zflux_map,
+(EnzoEFltArrayMap &cur_integration_map, const EnzoEFltArrayMap &xflux_map,
+ const EnzoEFltArrayMap &yflux_map, const EnzoEFltArrayMap &zflux_map,
  EnzoEFltArrayMap &out_centered_bfield_map, enzo_float dt,
  int stale_depth) noexcept
 {
@@ -227,15 +242,15 @@ void EnzoBfieldMethodCT::update_all_bfield_components
 
   // First, compute the edge-centered Electric fields (each time, it uses
   // the current integration quantities)
-  EnzoBfieldMethodCT::compute_all_edge_efields(cur_integration_map, xflux_map,
-                                               yflux_map, zflux_map,
-                                               center_efield_, edge_efield_l_,
-                                               weight_l_, stale_depth);
+  EnzoBfieldMethodCT::compute_all_edge_efields
+    (cur_integration_map, xflux_map, yflux_map, zflux_map, center_efield_,
+     edge_efield_l_, immutable_arr_of_EFlt3DArray(weight_l_), stale_depth);
 
   // Update longitudinal B-field (add source terms of constrained transport)
+  const auto const_edge_efield_l = immutable_arr_of_EFlt3DArray(edge_efield_l_);
   for (int dim = 0; dim<3; dim++){
     EnzoBfieldMethodCT::update_bfield
-      (cell_widths_, dim, edge_efield_l_, (*cur_bfieldi_l)[dim],
+      (cell_widths_, dim, const_edge_efield_l, (*cur_bfieldi_l)[dim],
        (*out_bfieldi_l)[dim], dt, stale_depth);
   }
 
@@ -367,14 +382,22 @@ void EnzoBfieldMethodCT::compute_center_efield
 //     Eedge(k,j,i)    =     E(k+1/2,j+1/2,i)
 // To be independent of reconstruction method, compute E-field at all edges
 // that lie within the mesh.
-
+template<bool negate_Ej>
 void compute_edge_(int xstart, int ystart, int zstart,
 		   int xstop, int ystop, int zstop,
-		   EFlt3DArray &Eedge, EFlt3DArray &Wj, EFlt3DArray &Wj_kp1,
-		   EFlt3DArray &Wk, EFlt3DArray &Wk_jp1, EFlt3DArray &Ec,
-		   EFlt3DArray &Ec_jkp1, EFlt3DArray &Ec_jp1,
-		   EFlt3DArray &Ec_kp1, EFlt3DArray &Ej, EFlt3DArray &Ej_kp1,
-		   EFlt3DArray &Ek, EFlt3DArray &Ek_jp1)
+		   const CelloArray<enzo_float, 3> &Eedge,
+		   const CelloArray<const enzo_float, 3> &Wj,
+		   const CelloArray<const enzo_float, 3> &Wj_kp1,
+		   const CelloArray<const enzo_float, 3> &Wk,
+		   const CelloArray<const enzo_float, 3> &Wk_jp1,
+		   const CelloArray<const enzo_float, 3> &Ec,
+		   const CelloArray<const enzo_float, 3> &Ec_jkp1,
+		   const CelloArray<const enzo_float, 3> &Ec_jp1,
+		   const CelloArray<const enzo_float, 3> &Ec_kp1,
+		   const CelloArray<const enzo_float, 3> &Ej,
+		   const CelloArray<const enzo_float, 3> &Ej_kp1,
+		   const CelloArray<const enzo_float, 3> &Ek,
+		   const CelloArray<const enzo_float, 3> &Ek_jp1)
 {
   for (int iz = zstart; iz < zstop; iz++){
     for (int iy = ystart; iy < ystop; iy++){
@@ -385,16 +408,28 @@ void compute_edge_(int xstart, int ystart, int zstart,
 	//  dEdj(k+1/2,j+3/4,i) =
 	//       W_k(k+1/2,  j+1)  * (E(    k,  j+1) - E(    k,j+1/2)) +
 	//    (1-W_k(k+1/2,  j+1)) * (E(  k+1,  j+1) - E(  k+1,j+1/2))
-	dEdj_r =
-	       Wk_jp1(iz,iy,ix)  * ( Ec_jp1(iz,iy,ix) -     Ej(iz,iy,ix)) +
-	  (1 - Wk_jp1(iz,iy,ix)) * (Ec_jkp1(iz,iy,ix) - Ej_kp1(iz,iy,ix));
+	if (negate_Ej){
+	  dEdj_r =
+	         Wk_jp1(iz,iy,ix)  * ( Ec_jp1(iz,iy,ix) +     Ej(iz,iy,ix)) +
+	    (1 - Wk_jp1(iz,iy,ix)) * (Ec_jkp1(iz,iy,ix) + Ej_kp1(iz,iy,ix));
+	} else {
+	  dEdj_r =
+	         Wk_jp1(iz,iy,ix)  * ( Ec_jp1(iz,iy,ix) -     Ej(iz,iy,ix)) +
+	    (1 - Wk_jp1(iz,iy,ix)) * (Ec_jkp1(iz,iy,ix) - Ej_kp1(iz,iy,ix));
+	}
 
 	//  dEdj(k+1/2,j+1/4,i) =
 	//       W_k(k+1/2,    j)  * (E(    k,j+1/2) - E(    k,    j)) +
 	//    (1-W_k(k+1/2,    j)) * (E(  k+1,j+1/2) - E(  k+1,    j))
-	dEdj_l =
-	           Wk(iz,iy,ix)  * (     Ej(iz,iy,ix) -     Ec(iz,iy,ix)) +
-	  (1 -     Wk(iz,iy,ix)) * ( Ej_kp1(iz,iy,ix) - Ec_kp1(iz,iy,ix));
+	if (negate_Ej){
+	  dEdj_l =
+	             Wk(iz,iy,ix)  * (    -Ej(iz,iy,ix) -     Ec(iz,iy,ix)) +
+	    (1 -     Wk(iz,iy,ix)) * (-Ej_kp1(iz,iy,ix) - Ec_kp1(iz,iy,ix));
+	} else {
+	  dEdj_l =
+	             Wk(iz,iy,ix)  * (     Ej(iz,iy,ix) -     Ec(iz,iy,ix)) +
+	    (1 -     Wk(iz,iy,ix)) * ( Ej_kp1(iz,iy,ix) - Ec_kp1(iz,iy,ix));
+	}
 
 	//  dEdk(k+3/4,j+1/2,i) =
 	//       W_j(  k+1,j+1/2)  * (E(  k+1,    j) - E(k+1/2,    j)) +
@@ -410,22 +445,13 @@ void compute_edge_(int xstart, int ystart, int zstart,
 	           Wj(iz,iy,ix)  * (     Ek(iz,iy,ix) -     Ec(iz,iy,ix)) +
 	  (1 -     Wj(iz,iy,ix)) * ( Ek_jp1(iz,iy,ix) - Ec_jp1(iz,iy,ix));
 
-	Eedge(iz,iy,ix) = 0.25*(Ej(iz,iy,ix) + Ej_kp1(iz,iy,ix) +
-				Ek(iz,iy,ix) + Ek_jp1(iz,iy,ix) +
+	enzo_float Ej_sum = Ej(iz,iy,ix) + Ej_kp1(iz,iy,ix);
+	if (negate_Ej){Ej_sum *= -1;}
+	enzo_float Ek_sum = Ek(iz,iy,ix) + Ek_jp1(iz,iy,ix);
+
+	Eedge(iz,iy,ix) = 0.25*(Ej_sum + Ek_sum +
 				(dEdj_l-dEdj_r) + (dEdk_l - dEdk_r));
 
-      }
-    }
-  }
-}
-
-//----------------------------------------------------------------------
-
-void inplace_entry_multiply_(EFlt3DArray &array, enzo_float val){
-  for (int iz = 0; iz < array.shape(0); iz++){
-    for (int iy = 0; iy < array.shape(1); iy++){
-      for (int ix = 0; ix < array.shape(2); ix++){
-	array(iz,iy,ix)*=val;
       }
     }
   }
@@ -453,9 +479,10 @@ void inplace_entry_multiply_(EFlt3DArray &array, enzo_float val){
 //     to indicate that the upwind direction is in positive and negative
 //     direction, or 0 to indicate no upwind direction.
 void EnzoBfieldMethodCT::compute_edge_efield
-(int dim, EFlt3DArray &center_efield, EFlt3DArray &edge_efield,
- EnzoEFltArrayMap &jflux_map, EnzoEFltArrayMap &kflux_map,
- std::array<EFlt3DArray,3> &weight_l, int stale_depth)
+(int dim, const CelloArray<const enzo_float, 3> &center_efield,
+ const CelloArray<enzo_float, 3> &edge_efield,
+ const EnzoEFltArrayMap &jflux_map, const EnzoEFltArrayMap &kflux_map,
+ const std::array<CelloArray<const enzo_float, 3>,3> &weight_l, int stale_depth)
 {
 
   EnzoPermutedCoordinates coord(dim);
@@ -467,35 +494,36 @@ void EnzoBfieldMethodCT::compute_edge_efield
   CSlice stale_slc = (stale_depth > 0) ?
       CSlice(stale_depth,-stale_depth) : CSlice(nullptr, nullptr);
 
-  // Initialize Cell-Centered E-fields
-  EFlt3DArray Ec, Ec_jp1, Ec_kp1, Ec_jkp1;
-  Ec = center_efield.subarray(stale_slc, stale_slc, stale_slc);
-  Ec_jp1  = coord.left_edge_offset(Ec, 0, 1, 0);
-  Ec_kp1  = coord.left_edge_offset(Ec, 1, 0, 0);
-  Ec_jkp1 = coord.left_edge_offset(Ec, 1, 1, 0);
-
   // Initialize edge-centered Efield [it maps (k,j,i) -> (k+1/2,j+1/2,i)]
   EFlt3DArray Eedge = edge_efield.subarray(stale_slc, stale_slc, stale_slc);
+
+  using RdOnlyEFlt3DArray = CelloArray<const enzo_float, 3>;
+
+  // Initialize Cell-Centered E-fields
+  const RdOnlyEFlt3DArray Ec = center_efield.subarray(stale_slc, stale_slc,
+						      stale_slc);
+  const RdOnlyEFlt3DArray Ec_jp1  = coord.left_edge_offset(Ec, 0, 1, 0);
+  const RdOnlyEFlt3DArray Ec_kp1  = coord.left_edge_offset(Ec, 1, 0, 0);
+  const RdOnlyEFlt3DArray Ec_jkp1 = coord.left_edge_offset(Ec, 1, 1, 0);
 
   // Initialize face-centered E-fields
   const std::string keys[] = {"bfield_x", "bfield_y", "bfield_z"};
 
-  // Ex(k,j+1/2,i) = -1.*yflux(Bz)
-  EFlt3DArray Ej = jflux_map.get(keys[coord.k_axis()],stale_depth);
-  inplace_entry_multiply_(Ej,-1.);
-  EFlt3DArray Ej_kp1 = coord.left_edge_offset(Ej, 1, 0, 0);
+  // Ex(k,j+1/2,i) = -1.*yflux(Bz) // defer the negation until later!
+  const RdOnlyEFlt3DArray Ej = jflux_map.get(keys[coord.k_axis()],stale_depth);
+  const RdOnlyEFlt3DArray Ej_kp1 = coord.left_edge_offset(Ej, 1, 0, 0);
 
   // Ex(k+1/2,j,i) = zflux(By)
-  EFlt3DArray Ek = kflux_map.get(keys[coord.j_axis()],stale_depth);
-  // No need to multiply entries by minus 1
-  EFlt3DArray Ek_jp1 = coord.left_edge_offset(Ek, 0, 1, 0);
+  const RdOnlyEFlt3DArray Ek = kflux_map.get(keys[coord.j_axis()],stale_depth);
+  const RdOnlyEFlt3DArray Ek_jp1 = coord.left_edge_offset(Ek, 0, 1, 0);
 
   // Initialize the weight arrays
-  EFlt3DArray Wj, Wj_kp1, Wk, Wk_jp1;
-  Wj = weight_l[coord.j_axis()].subarray(stale_slc, stale_slc, stale_slc);
-  Wj_kp1 = coord.left_edge_offset(Wj, 1, 0, 0);
-  Wk = weight_l[coord.k_axis()].subarray(stale_slc, stale_slc, stale_slc);
-  Wk_jp1 = coord.left_edge_offset(Wk, 0, 1, 0);
+  const RdOnlyEFlt3DArray Wj =
+    weight_l[coord.j_axis()].subarray(stale_slc, stale_slc, stale_slc);
+  const RdOnlyEFlt3DArray Wj_kp1 = coord.left_edge_offset(Wj, 1, 0, 0);
+  const RdOnlyEFlt3DArray Wk =
+    weight_l[coord.k_axis()].subarray(stale_slc, stale_slc, stale_slc);
+  const RdOnlyEFlt3DArray Wk_jp1 = coord.left_edge_offset(Wk, 0, 1, 0);
 
   // Integration limits
   //
@@ -522,27 +550,29 @@ void EnzoBfieldMethodCT::compute_edge_efield
   int ystart = 1 - j_y - k_y; // if dim==1: 1, otherwise: 0
   int zstart = 1 - j_z - k_z; // if dim==2: 1, otherwise: 0
 
-  compute_edge_(xstart, ystart, zstart,
-		Ec.shape(2) - 1, Ec.shape(1) - 1, Ec.shape(0) - 1,
-		Eedge, Wj, Wj_kp1, Wk, Wk_jp1, Ec, Ec_jkp1, Ec_jp1, Ec_kp1,
-		Ej, Ej_kp1, Ek, Ek_jp1);
+  compute_edge_<true>(xstart, ystart, zstart,
+		      Ec.shape(2) - 1, Ec.shape(1) - 1, Ec.shape(0) - 1,
+		      Eedge, Wj, Wj_kp1, Wk, Wk_jp1,
+		      Ec, Ec_jkp1, Ec_jp1, Ec_kp1,
+		      Ej, Ej_kp1, Ek, Ek_jp1);
 }
 
 //----------------------------------------------------------------------
 
 void EnzoBfieldMethodCT::compute_all_edge_efields
-  (EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &xflux_map,
-   EnzoEFltArrayMap &yflux_map, EnzoEFltArrayMap &zflux_map,
+  (const EnzoEFltArrayMap &integration_map, const EnzoEFltArrayMap &xflux_map,
+   const EnzoEFltArrayMap &yflux_map, const EnzoEFltArrayMap &zflux_map,
    EFlt3DArray &center_efield, std::array<EFlt3DArray,3> &edge_efield_l,
-   std::array<EFlt3DArray,3> &weight_l, int stale_depth)
+   const std::array< CelloArray<const enzo_float, 3>, 3> &weight_l,
+   int stale_depth)
 {
 
   for (int i = 0; i < 3; i++){
     EnzoBfieldMethodCT::compute_center_efield(i, center_efield,
                                               integration_map, stale_depth);
 
-    EnzoEFltArrayMap *jflux_map;
-    EnzoEFltArrayMap *kflux_map;
+    const EnzoEFltArrayMap *jflux_map;
+    const EnzoEFltArrayMap *kflux_map;
     if (i == 0){
       jflux_map = &yflux_map;
       kflux_map = &zflux_map;
@@ -554,10 +584,9 @@ void EnzoBfieldMethodCT::compute_all_edge_efields
       kflux_map = &yflux_map;
     }
 
-    EnzoBfieldMethodCT::compute_edge_efield(i, center_efield,
-                                                  edge_efield_l[i], *jflux_map,
-                                                  *kflux_map, weight_l,
-                                                  stale_depth);
+    EnzoBfieldMethodCT::compute_edge_efield(i, center_efield, edge_efield_l[i],
+                                            *jflux_map, *kflux_map, weight_l,
+                                            stale_depth);
   }
 }
 
@@ -588,8 +617,9 @@ void EnzoBfieldMethodCT::compute_all_edge_efields
 //   E_j_term(k,j,i+1/2) = dt/dk*(ej_Rk(k,j,i) - ej_Lk(k,j,i))
 void EnzoBfieldMethodCT::update_bfield
 (const enzo_float* &cell_widths, int dim,
- const std::array<EFlt3DArray,3> &efield_l,
- EFlt3DArray &cur_interface_bfield, EFlt3DArray &out_interface_bfield,
+ const std::array<CelloArray<const enzo_float, 3>,3> &efield_l,
+ const CelloArray<enzo_float, 3> &cur_interface_bfield,
+ const CelloArray<enzo_float, 3> &out_interface_bfield,
  enzo_float dt, int stale_depth)
 {
   EnzoPermutedCoordinates coord(dim);
@@ -602,12 +632,12 @@ void EnzoBfieldMethodCT::update_bfield
       CSlice(stale_depth,-stale_depth) : CSlice(nullptr, nullptr);
 
   // Load edge centered efields 
-  EFlt3DArray E_j, ej_Lk, ej_Rk, E_k, ek_Lj, ek_Rj;
+  CelloArray<const enzo_float, 3> E_j, ej_Lk, ej_Rk, E_k, ek_Lj, ek_Rj;
   E_j = efield_l[coord.j_axis()].subarray(stale_slc, stale_slc, stale_slc);
   E_k = efield_l[coord.k_axis()].subarray(stale_slc, stale_slc, stale_slc);
 
   // Load interface bfields (includes exterior faces)
-  EFlt3DArray cur_bfield, bcur, out_bfield, bout;
+  CelloArray<enzo_float, 3> cur_bfield, bcur, out_bfield, bout;
   cur_bfield = cur_interface_bfield.subarray(stale_slc, stale_slc, stale_slc);
   out_bfield = out_interface_bfield.subarray(stale_slc, stale_slc, stale_slc);
 
@@ -670,21 +700,23 @@ void EnzoBfieldMethodCT::update_bfield
 //   B_center(k,j,i)   ->  B_i(k,j,i+1)
 //   Bi_left(k,j,i)    ->  B_i(k,j,i+1/2)
 //   Bi_right(k,j,i)   ->  B_i(k,j,i+3/2)
-void EnzoBfieldMethodCT::compute_center_bfield(int dim,
-                                               const EFlt3DArray &bfieldc_comp,
-                                               const EFlt3DArray &bfieldi_comp,
-                                               int stale_depth)
+void EnzoBfieldMethodCT::compute_center_bfield
+(int dim, const CelloArray<enzo_float,3> &bfieldc_comp,
+ const CelloArray<const enzo_float,3> &bfieldi_comp, int stale_depth)
 {
   EnzoPermutedCoordinates coord(dim);
   CSlice stale_slc = (stale_depth > 0) ?
       CSlice(stale_depth,-stale_depth) : CSlice(nullptr, nullptr);
 
   // Load Cell-centered fields
-  EFlt3DArray b_center = bfieldc_comp.subarray(stale_slc,stale_slc,stale_slc);
+  const CelloArray<enzo_float,3> b_center
+    = bfieldc_comp.subarray(stale_slc,stale_slc,stale_slc);
   // Load Face-centered fields
-  EFlt3DArray bi_left = bfieldi_comp.subarray(stale_slc,stale_slc,stale_slc);
+  const CelloArray<const enzo_float,3> bi_left
+    = bfieldi_comp.subarray(stale_slc,stale_slc,stale_slc);
   // Get the view of the Face-center B-field that starting from i=1
-  EFlt3DArray bi_right = coord.left_edge_offset(bi_left,0,0,1);
+  const CelloArray<const enzo_float,3> bi_right
+    = coord.left_edge_offset(bi_left,0,0,1);
 
   // iteration limits are compatible with a 2D grid and 3D grid
   for (int iz=0; iz<b_center.shape(0); iz++) {

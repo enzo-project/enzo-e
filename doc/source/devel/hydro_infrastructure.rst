@@ -1187,8 +1187,8 @@ magnetic field values.
 .. code-block:: c++
 
    void update_all_bfield_components
-     (EnzoEFltArrayMap &cur_prim_map, EnzoEFltArrayMap &xflux_map,
-      EnzoEFltArrayMap &yflux_map, EnzoEFltArrayMap &zflux_map,
+     (EnzoEFltArrayMap &cur_prim_map, const EnzoEFltArrayMap &xflux_map,
+      const EnzoEFltArrayMap &yflux_map, const EnzoEFltArrayMap &zflux_map,
       EnzoEFltArrayMap &out_centered_bfield_map, enzo_float dt,
       int stale_depth) noexcept;
 

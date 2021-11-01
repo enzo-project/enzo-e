@@ -80,8 +80,7 @@ public: // interface
   ///     namely makes use of the various magnetic field fluxes
   /// @param[out] out_centered_bfield_map Map holding the arrays where the
   ///     updated values for each cell-centered magnetic field component should
-  ///     be stored. These arrays can be aliases of `cur_integration_map` (The
-  ///     arguments can even reference the same object).
+  ///     be stored. This can be an alias of `cur_integration_map`.
   /// @param[in]  dt The (partial) time-step over which to update the magnetic
   ///     fields.
   /// @param[in]  stale_depth indicates the current stale_depth for the
@@ -89,9 +88,9 @@ public: // interface
   ///     depth used to compute the fluxes and that is passed to
   ///     EnzoIntegrationQuanUpdate::update_quantities.
   void update_all_bfield_components(EnzoEFltArrayMap &cur_integration_map,
-                                    EnzoEFltArrayMap &xflux_map,
-                                    EnzoEFltArrayMap &yflux_map,
-                                    EnzoEFltArrayMap &zflux_map,
+                                    const EnzoEFltArrayMap &xflux_map,
+                                    const EnzoEFltArrayMap &yflux_map,
+                                    const EnzoEFltArrayMap &zflux_map,
                                     EnzoEFltArrayMap &out_centered_bfield_map,
                                     enzo_float dt, int stale_depth) noexcept;
 
@@ -111,9 +110,9 @@ public: // interface
   ///     supplied quantities.
   ///
   /// @note this function is called in `update_all_bfield_components`
-  static void compute_center_bfield(int dim, const EFlt3DArray &bfieldc_comp,
-				    const EFlt3DArray &bfieldi_comp,
-                                    int stale_depth = 0);
+  static void compute_center_bfield
+  (int dim, const CelloArray<enzo_float,3> &bfieldc_comp,
+   const CelloArray<const enzo_float,3> &bfieldi_comp, int stale_depth = 0);
 
 protected: // methods
 
@@ -172,12 +171,13 @@ protected: // methods
   /// @param[in]  stale_depth the stale depth at the time of this function call
   ///
   /// @note this function is called in compute_all_edge_efields
-  void static compute_edge_efield (int dim, EFlt3DArray &center_efield,
-				   EFlt3DArray &edge_efield,
-                                   EnzoEFltArrayMap &jflux_map,
-                                   EnzoEFltArrayMap &kflux_map,
-				   std::array<EFlt3DArray,3> &weight_l,
-				   int stale_depth);
+  void static compute_edge_efield
+  (int dim, const CelloArray<const enzo_float, 3> &center_efield,
+   const CelloArray<enzo_float, 3> &edge_efield,
+   const EnzoEFltArrayMap &jflux_map,
+   const EnzoEFltArrayMap &kflux_map,
+   const std::array< CelloArray<const enzo_float, 3>, 3> &weight_l,
+   int stale_depth);
 
   /// Compute the all of the edge-centered electric fields using the current
   /// fluxes and current cell-centered integration quantities .
@@ -208,10 +208,11 @@ protected: // methods
   ///     the weighting scheme used by Athena++ at a later date).
   /// @param[in] stale_depth the stale depth at the time of this function call
   static void compute_all_edge_efields
-  (EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &xflux_map,
-   EnzoEFltArrayMap &yflux_map, EnzoEFltArrayMap &zflux_map,
+  (const EnzoEFltArrayMap &integration_map, const EnzoEFltArrayMap &xflux_map,
+   const EnzoEFltArrayMap &yflux_map, const EnzoEFltArrayMap &zflux_map,
    EFlt3DArray &center_efield, std::array<EFlt3DArray,3> &edge_efield_l,
-   std::array<EFlt3DArray,3> &weight_l, int stale_depth);
+   const std::array< CelloArray<const enzo_float, 3>, 3> &weight_l,
+   int stale_depth);
 
   /// Updates the face-centered B-field component along the ith dimension using
   /// the jth and kth components of the edge-centered E-field
@@ -241,11 +242,12 @@ protected: // methods
   /// @param[in] dt The time time-step over which to apply the fluxes
   /// @param[in] stale_depth indicates the current stale_depth for the supplied
   ///     quantities
-  static void update_bfield(const enzo_float* &cell_widths, int dim,
-                            const std::array<EFlt3DArray,3> &efield_l,
-                            EFlt3DArray &cur_interface_bfield,
-                            EFlt3DArray &out_interface_bfield,
-			    enzo_float dt, int stale_depth);
+  static void update_bfield
+  (const enzo_float* &cell_widths, int dim,
+   const std::array<CelloArray<const enzo_float, 3>, 3> &efield_l,
+   const CelloArray<enzo_float, 3> &cur_interface_bfield,
+   const CelloArray<enzo_float, 3> &out_interface_bfield,
+   enzo_float dt, int stale_depth);
 
 protected: // attributes
 
