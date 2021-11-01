@@ -17,47 +17,6 @@
 
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
-// #define TRACE_ADAPT
-// #define TRACE_LEVELS
-//--------------------------------------------------
-// #define DEBUG_ADAPT
-//--------------------------------------------------
-
-#ifdef TRACE_LEVELS
-#  undef TRACE_LEVELS
-#  define TRACE_LEVELS(MSG)                                             \
-  CkPrintf ("TRACE_LEVELS %s %s curr ",MSG,name().c_str());             \
-  for (int i=0; i<27; i++) {                                            \
-    CkPrintf ("%2d",adapt_.vector_face_level(Adapt::LevelType::curr)[i]); \
-  }                                                                     \
-  CkPrintf ("\n");                                                      \
-  CkPrintf ("TRACE_LEVELS %s %s next ",MSG,name().c_str());             \
-  for (int i=0; i<27; i++) {                                            \
-    CkPrintf ("%2d",adapt_.vector_face_level(Adapt::LevelType::next)[i]); \
-  }                                                                     \
-  CkPrintf ("\n");                                                      \
-  for (int c=0; c<8; c++) {                                             \
-    CkPrintf ("TRACE_LEVELS %s %s last %d: ",MSG,name().c_str(),c);     \
-    for (int i=0; i<27; i++) {                                          \
-      CkPrintf ("%2d",adapt_.vector_face_level(Adapt::LevelType::last)[c*27+i]); \
-    }                                                                   \
-    CkPrintf ("\n");                                                    \
-  }                                                                     \
-  fflush(stdout);
-#else
-#  define TRACE_LEVELS(MSG) /* ... */
-#endif
-
-
-#ifdef TRACE_ADAPT
-#  undef TRACE_ADAPT
-#  define TRACE_ADAPT(BLOCK,MSG) \
-  CkPrintf ("TRACE_ADAPT %s %s\n",MSG,BLOCK->name().c_str()); \
-  TRACE_LEVELS(MSG);                                          \
-  fflush(stdout);
-#else
-#  define TRACE_ADAPT(BLOCK,MSG)  TRACE_LEVELS(MSG);
-#endif
 
 //======================================================================
 
@@ -69,7 +28,6 @@
 
 void Block::adapt_enter_()
 {
-  TRACE_ADAPT(this,"enter 0");
   if ( do_adapt_()) {
 
     adapt_begin_();
@@ -85,12 +43,6 @@ void Block::adapt_enter_()
 
 void Block::adapt_begin_()
 {
-  TRACE_ADAPT(this,"begin 1");
-#ifdef DEBUG_ADAPT
-  CkPrintf ("DEBUG_ADAPT %s A adapt_begin_\n",name().c_str());
-  fflush(stdout);
-#endif  
-
   cello::simulation()->set_phase(phase_adapt);
 
   const int level_maximum = cello::config()->mesh_max_level;
@@ -114,11 +66,6 @@ void Block::adapt_begin_()
 /// detection.
 void Block::adapt_called_()
 {
-  TRACE_ADAPT(this,"called 2");
-#ifdef DEBUG_ADAPT
-  CkPrintf ("DEBUG_ADAPT %s A adapt_called_\n",name().c_str());
-  fflush(stdout);
-#endif  
   adapt_send_level();
 
   control_sync_quiescence (CkIndex_Main::p_adapt_next());
@@ -135,11 +82,6 @@ void Block::adapt_called_()
 /// adapt_end_().
 void Block::adapt_next_()
 {
-  TRACE_ADAPT(this,"next 3");
-#ifdef DEBUG_ADAPT
-  CkPrintf ("DEBUG_ADAPT %s B adapt_next_\n",name().c_str());
-  fflush(stdout);
-#endif  
   update_levels_();
 
   if (is_leaf()) {
@@ -154,11 +96,6 @@ void Block::adapt_next_()
 
 void Block::adapt_update_()
 {
-  TRACE_ADAPT(this,"update 4");
-#ifdef DEBUG_ADAPT
-  CkPrintf ("DEBUG_ADAPT %s C adapt_update_\n",name().c_str());
-  fflush(stdout);
-#endif  
   if (index_.is_root()) thisProxy.doneInserting();
 
   adapt_end_();
@@ -177,12 +114,6 @@ void Block::adapt_update_()
 /// been deleted.
 void Block::adapt_end_()
 {
-  TRACE_ADAPT(this,"end 5");
-#ifdef DEBUG_ADAPT
-  CkPrintf ("DEBUG_ADAPT %s D adapt_end_\n",name().c_str());
-  fflush(stdout);
-#endif
-
   adapt_.reset_face_level(Adapt::LevelType::last);
 
   sync_coarsen_.reset();
@@ -276,11 +207,6 @@ void Block::adapt_refine_()
     monitor->print("Adapt",buffer);
   }
 
-#ifdef DEBUG_ADAPT
-  CkPrintf ("%s REFINE\n",name().c_str());
-  fflush(stdout);
-#endif
-
   int nx,ny,nz;
   data()->field_data()->size(&nx,&ny,&nz);
 
@@ -326,9 +252,6 @@ void Block::adapt_refine_()
       refresh->add_all_data();
       FieldFace * field_face = create_face 
 	(if3,ic3,g3, refresh_fine, refresh, true);
-#ifdef DEBUG_FIELD_FACE
-  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
-#endif
 
       // Create data message object to send
       DataMsg * data_msg = new DataMsg;
@@ -361,7 +284,8 @@ void Block::adapt_refine_()
          &child_face_level_curr_.data()[27*IC3(ic3)],
 #endif
 #ifdef NEW_ADAPT
-         face_level_next_.data(),
+         adapt_.vector_face_level(Adapt::LevelType::next).data(),
+         //         face_level_next_.data(),
 #endif
 	 cello::simulation());
 
@@ -390,10 +314,6 @@ void Block::adapt_refine_()
   cello::simulation()->data_delete_particles(count);
 
   is_leaf_ = false;
-#ifdef DEBUG_ADAPT
-  CkPrintf ("%s adapt_refine is_leaf <- 0\n",name().c_str());
-  fflush(stdout);
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -490,20 +410,9 @@ void Block::particle_scatter_children_ (ParticleData * particle_list[],
 
 void Block::adapt_delete_child_(Index index_child)
 {
-#ifdef DEBUG_ADAPT
-  int nb3[3] = {2,2,2};
-  CkPrintf ("%s deleting child %s\n",
-	    name().c_str(),
-            index_child.bit_string
-            (index_child.level(),cello::rank(),nb3).c_str());
-  fflush(stdout);
-#endif
   thisProxy[index_child].p_adapt_delete();
 
   if (sync_coarsen_.next()) {
-#ifdef DEBUG_ADAPT
-    CkPrintf ("%s coarsen next\n",name().c_str());
-#endif
     children_.clear();
   }
 }
@@ -525,21 +434,6 @@ void Block::adapt_send_level()
     int ic3[3];
     it_neighbor.child(ic3);
 
-#ifdef DEBUG_ADAPT
-  {
-    char buffer [255];
-    int nb3[3] = {2,2,2};
-    CkPrintf ("%s %s <- %s"
-	      " [%d => %d] if3 %2d %2d %2d  ic3 %d %d %d\n",
-	      "send",
-              name(index_neighbor).c_str(),
-              name().c_str(),
-              level,level_next_,
-	      of3[0],of3[1],of3[2],
-	      ic3[0],ic3[1],ic3[2]);
-    fflush(stdout);
-  }
-#endif
     thisProxy[index_neighbor].p_adapt_recv_level
       (index_,ic3,of3,level,level_next_);
   }
@@ -581,28 +475,8 @@ void Block::p_adapt_recv_level
   }
 
   // note face_level_last_ initialized as -1, in which case won't skip
-#ifdef USE_ADAPT_CLASS
-#else /* USE_ADAPT_CLASS */
   const bool skip_face_update =
     (level_face_new <= adapt_.face_level_last(ic3,if3));
-#endif /* USE_ADAPT_CLASS */
-
-#ifdef DEBUG_ADAPT
-  {
-    char buffer [255];
-    int nb3[3] = {2,2,2};
-    CkPrintf ("%s %s <- %s"
-	      " [%d => %d] if3 %2d %2d %2d  ic3 %d %d %d [%d] %s\n",
-	      "recv",
-              name().c_str(),
-              name(index_send).c_str(),
-	      level_face_curr,level_face_new,
-	      if3[0],if3[1],if3[2],
-	      ic3[0],ic3[1],ic3[2], adapt_.face_level_last(ic3,if3),
-	      skip_face_update ? "SKIP" : "");
-    fflush(stdout);
-  }
-#endif
 
   if (skip_face_update) {
     performance_stop_(perf_adapt_update);
@@ -610,12 +484,9 @@ void Block::p_adapt_recv_level
     return;
   }
 
-#ifdef USE_ADAPT_CLASS
-#else /* USE_ADAPT_CLASS */
   adapt_.set_face_level_last(ic3,if3,level_face_new);
 
   int level_next = level_next_;
-#endif /* USE_ADAPT_CLASS */
 
   const int level = this->level();
 
@@ -736,10 +607,7 @@ void Block::adapt_recv
     // neighbor.  Unique face level is updated, and levels on
     // possibly multiple faces of multiple children are updated.
 
-#ifdef USE_ADAPT_CLASS
-#else /* USE_ADAPT_CLASS */
     adapt_.set_face_level (of3, Adapt::LevelType::next, level_face_new);
-#endif /* USE_ADAPT_CLASS */
 
     ItChild it_child (rank,of3);
     int jc3[3];
@@ -783,10 +651,7 @@ void Block::adapt_recv
     int jf3[3];
     while (it_face.next(jf3)) {
 
-#ifdef USE_ADAPT_CLASS
-#else /* USE_ADAPT_CLASS */
       adapt_.set_face_level (jf3, Adapt::LevelType::next, level_face_new);
-#endif /* USE_ADAPT_CLASS */
 
 #ifdef OLD_ADAPT
       ItChild it_child (rank,jf3);
@@ -811,10 +676,6 @@ void Block::adapt_recv
 
 void Block::adapt_coarsen_()
 {
-#ifdef DEBUG_ADAPT
-  CkPrintf ("%s COARSEN\n",name().c_str());
-  fflush(stdout);
-#endif
   const int level = this->level();
 
   // send data to parent
@@ -846,9 +707,6 @@ void Block::adapt_coarsen_()
 
   FieldFace * field_face = create_face
     (if3, ic3, g3, refresh_coarse, refresh, true);
-#ifdef DEBUG_FIELD_FACE
-  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
-#endif
 
   const Index index_parent = index_.index_parent();
 
@@ -861,14 +719,9 @@ void Block::adapt_coarsen_()
   data_msg -> set_field_data (data()->field_data(),false);
   data_msg -> set_particle_data (data()->particle_data(),false);
 
-#ifdef USE_ADAPT_CLASS
-#else /* USE_ADAPT_CLASS */
   const int nf = adapt_.size_face_level(Adapt::LevelType::curr);
-#endif /* USE_ADAPT_CLASS */
-#ifdef USE_ADAPT_CLASS
-#else /* USE_ADAPT_CLASS */
+
   MsgCoarsen * msg = new MsgCoarsen (nf,adapt_.vector_face_level(Adapt::LevelType::curr),ic3);
-#endif /* USE_ADAPT_CLASS */
   msg->set_data_msg (data_msg);
 
   thisProxy[index_parent].p_adapt_recv_child (msg);
@@ -911,14 +764,10 @@ void Block::p_adapt_recv_child (MsgCoarsen * msg)
       adapt_.set_face_level(opf3,Adapt::LevelType::curr,level_child);
     }
   }
-#endif  
+#endif
 
   // I am a leaf on the wind
   is_leaf_=true;
-
-#ifdef DEBUG_ADAPT
-  CkPrintf ("%s p_adapt_recv_child is_leaf <- 1\n",name().c_str());
-#endif
 
   // Can now safely notify child to delete itself
   adapt_delete_child_(index_child);
@@ -938,10 +787,6 @@ void Block::p_adapt_recv_child (MsgCoarsen * msg)
 
 void Block::p_adapt_delete()
 {
-#ifdef DEBUG_ADAPT
-  CkPrintf ("%s DELETING\n",name().c_str());
-#endif
-
   ckDestroy();
 }
 
