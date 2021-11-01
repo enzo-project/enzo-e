@@ -201,7 +201,8 @@ EnzoVlctScratchSpace* EnzoMethodMHDVlct::get_scratch_ptr_
   if (scratch_space_ == nullptr){
     scratch_space_ = new EnzoVlctScratchSpace
       (field_shape, integration_field_list_, primitive_field_list_,
-       integration_quan_updater_->integration_keys(), passive_list);
+       integration_quan_updater_->integration_keys(), passive_list,
+       eos_->uses_dual_energy_formalism());
   }
   return scratch_space_;
 }
@@ -260,16 +261,10 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // Setup a pointer to an array that used to store interface velocity fields
     // from computed by the Riemann Solver (to use in the calculation of the
     // internal energy source term). If the dual energy formalism is not in
-    // use, don't actually allocate the array and set the pointer to NULL.
-    EFlt3DArray interface_velocity_arr, *interface_velocity_arr_ptr;
-    if (eos_->uses_dual_energy_formalism()){
-      EFlt3DArray density = integration_map.at("density");
-      interface_velocity_arr = EFlt3DArray(density.shape(0), density.shape(1),
-                                           density.shape(2));
-      interface_velocity_arr_ptr = &interface_velocity_arr;
-    } else {
-      interface_velocity_arr_ptr = nullptr;
-    }
+    // use, don't actually allocate the array and set the pointer to nullptr.
+    const EFlt3DArray* const interface_velocity_arr_ptr =
+      (eos_->uses_dual_energy_formalism()) ? &(scratch->interface_vel_arr) :
+      nullptr;
 
     // allocate constrained transport object
     if (bfield_method_ != nullptr) {
@@ -398,9 +393,9 @@ void EnzoMethodMHDVlct::compute_flux_
  EnzoEFltArrayMap &primitive_map,
  EnzoEFltArrayMap &priml_map, EnzoEFltArrayMap &primr_map,
  EnzoEFltArrayMap &flux_map, EnzoEFltArrayMap &dUcons_map,
- EFlt3DArray *interface_velocity_arr_ptr, EnzoReconstructor &reconstructor,
- EnzoBfieldMethod *bfield_method, const int stale_depth,
- const str_vec_t& passive_list) const noexcept
+ const EFlt3DArray* const interface_velocity_arr_ptr,
+ EnzoReconstructor &reconstructor, EnzoBfieldMethod *bfield_method,
+ const int stale_depth, const str_vec_t& passive_list) const noexcept
 {
 
   // First, reconstruct the left and right interface values

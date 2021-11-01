@@ -219,9 +219,9 @@ protected: // methods
    EnzoEFltArrayMap &primitive_map,
    EnzoEFltArrayMap &priml_map, EnzoEFltArrayMap &primr_map,
    EnzoEFltArrayMap &flux_map, EnzoEFltArrayMap &dUcons_map,
-   EFlt3DArray *interface_velocity_arr_ptr, EnzoReconstructor &reconstructor,
-   EnzoBfieldMethod *bfield_method, const int stale_depth,
-   const str_vec_t& passive_list) const noexcept;
+   const EFlt3DArray* const interface_velocity_arr_ptr,
+   EnzoReconstructor &reconstructor, EnzoBfieldMethod *bfield_method,
+   const int stale_depth, const str_vec_t& passive_list) const noexcept;
 
   /// Returns a pointer to the scratch space struct. If the scratch space has
   /// not already been allocated, it will be allocated now.
@@ -300,11 +300,16 @@ public:
   ///     method of ``EnzoIntegrationQuanUpdate``.
   /// @param[in] passive_list The list of keys for the passively advected
   ///     scalars that should be included in each arraymap.
+  /// @param[in] dual_energy Indicates whether the dual energy formalism is in
+  ///     use (which specifies if relevant scratch-space should be allocated).
   EnzoVlctScratchSpace(const std::array<int,3>& shape,
                        const str_vec_t& integration_key_list,
                        const str_vec_t& primitive_key_list,
                        const str_vec_t& integ_updater_keys,
-                       const str_vec_t& passive_list) noexcept
+                       const str_vec_t& passive_list,
+		       bool dual_energy) noexcept
+    : interface_vel_arr((dual_energy) ? EFlt3DArray(shape[0],shape[1],shape[2])
+			: EFlt3DArray())
   {
     // define function to setup the arraymaps
     auto setup = [&shape, &passive_list](const std::string& name,
@@ -329,6 +334,12 @@ public:
   }
 
 public: // attributes
+  /// Array used to store interface velocity values that are computed by the
+  /// Riemann Solver(to use in the calculation of the internal energy source
+  /// term). If not using the dual energy formalism, this isn't doesn't
+  /// allocate memory.
+  const CelloArray<enzo_float,3> interface_vel_arr;
+
   /// Map for storing the integration quantities at the half timestep
   EnzoEFltArrayMap temp_integration_map;
 
