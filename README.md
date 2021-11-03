@@ -45,7 +45,7 @@ build system (as example we use the pure MPI backend).
 ```bash
 git clone https://github.com/UIUC-PPL/charm.git
 cd charm
-git checkout v7.0.0-rc1
+git checkout v7.0.0
 # Note, the directory name can be anything
 mkdir build-mpi
 cd build-mpi
@@ -99,7 +99,8 @@ enabled in Monitor (that is Monitor::is_active(\"DEBUG\") must be true for any o
 - `debug_verbose` "Print periodically all field values.  See src/Field/field_FieldBlock.cpp" OFF
 - `memory` "Track dynamic memory statistics.  Can be useful, but can cause problems on some systems that also override new [] () / delete [] ()" OFF
 - `balance` "Enable charm++ dynamic load balancing" ON`
-- `balancer` "Charm++ load balancer to use" "CommonLBs"
+- `balancer_included` "Charm++ load balancer included" "CommonLBs"
+- `balancer_default` "Charm++ load balancer to use by default" "TreeLB"
 - `use_gprof` "Compile with -pg to use gprof for performance profiling" OFF
 - `use_performance` "Use Cello Performance class for collecting performance
 data (currently requires global reductions, and may not be fully
@@ -191,7 +192,7 @@ make install
 cd ~/src
 git clone https://github.com/UIUC-PPL/charm.git
 cd charm
-git checkout v7.0.0-rc1
+git checkout v7.0.0
 mkdir build-icc-mpi
 cd build-icc-mpi
 cmake -DNETWORK=mpi -DSMP=OFF -DCMAKE_CXX_COMPILER=icpc -DCMAKE_C_COMPILER=icc -DCMAKE_Fortran_COMPILER=ifort ..
@@ -245,7 +246,7 @@ make install
 cd ~/src
 git clone https://github.com/UIUC-PPL/charm.git
 cd charm
-git checkout v7.0.0-rc1
+git checkout v7.0.0
 mkdir build-icc-mpi
 cd build-icc-mpi
 cmake -DNETWORK=mpi -DSMP=OFF -DCMAKE_CXX_COMPILER=icpc -DCMAKE_C_COMPILER=icc -DCMAKE_Fortran_COMPILER=ifort ..

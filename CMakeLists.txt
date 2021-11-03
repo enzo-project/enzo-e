@@ -106,9 +106,9 @@ endif()
 add_compile_definitions(SMALL_INTS)
 
 
-option(new_output "Temporary setting for using new Output implementation" OFF)
-if (new_output)
-  add_compile_definitions(NEW_OUTPUT)
+option(new_adapt "Temporary setting for using new Output implementation" ON)
+if (new_adapt)
+  add_compile_definitions(NEW_ADAPT)
 endif()
 
 set(node_size "64" CACHE STRING "Maximum number of procesess per shared-memory node (can be larger than needed)")
@@ -168,10 +168,15 @@ if (memory)
 endif()
 
 option(balance "Enable charm++ dynamic load balancing" ON)
-set(balancer "CommonLBs" CACHE STRING "Charm++ load balancer to use")
+set(balancer_included "CommonLBs" CACHE STRING "Charm++ load balancer to include")
+set(balancer_default "TreeLB" CACHE STRING "Charm++ load balancer to use by default")
+#TODO we should figure our reasonale defaults and/or provide instructions in the docs
 if (balance)
-  foreach(BALANCER IN LISTS balancer)
-    string(APPEND Cello_TARGET_LINK_OPTIONS " -balancer ${BALANCER} -module ${BALANCER}")
+  foreach(BALANCER IN LISTS balancer_included)
+    string(APPEND Cello_TARGET_LINK_OPTIONS " -module ${BALANCER}")
+  endforeach()
+  foreach(BALANCER IN LISTS balancer_default)
+    string(APPEND Cello_TARGET_LINK_OPTIONS " -balancer ${BALANCER}")
   endforeach()
 endif()
 
@@ -273,9 +278,12 @@ add_subdirectory(src/Cello)
 add_subdirectory(src/Enzo)
 add_subdirectory(src/External)
 
+include(CTest)
+add_subdirectory(test)
 
 # now generate the the config
 configure_file(auto_config.def.in auto_config.def @ONLY)
 message(STATUS
   "Cello/Enzo-E configured as follows:\n"
   "USE_GRACKLE = ${USE_GRACKLE}")
+
