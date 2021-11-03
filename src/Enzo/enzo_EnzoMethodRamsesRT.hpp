@@ -104,6 +104,15 @@ protected: // methods
 
   void solve_transport_eqn (EnzoBlock * enzo_block) throw();
 
+  //---------- THERMOCHEMISTRY STEP ------------
+  // Interaction with matter is completely local, so don't need a refresh before this step
+  // Can call this function during solve_transport_eqn()
+  void add_attenuation ( EnzoBlock * enzo_block, 
+              enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz, 
+              double clight, int i) throw(); 
+
+  void get_cross_section( EnzoBlock * enzo_block, int j ) throw(); 
+
   void compute_ (Block * block) throw();
 protected: // attributes
   int N_groups_;

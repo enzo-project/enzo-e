@@ -101,18 +101,16 @@ EnzoMethodRamsesRT ::EnzoMethodRamsesRT(const int N_groups, const double clight)
   // store frequency group attributes as ScalarData variables
   ScalarDescr * scalar_descr = cello::scalar_descr_double();
   
-
+  //TODO: make N_species a parameter
+  int N_species_ = 6;
   for (int i=0; i<N_groups_; i++) {
     std::string istring = std::to_string(i);
-    eps_ .push_back( scalar_descr->new_value("eps_" +istring) );
-    sigN_.push_back( scalar_descr->new_value("sigN_"+istring) );
-    sigE_.push_back( scalar_descr->new_value("sigE_"+istring) );
-
-    gfracN_.push_back( scalar_descr->new_value("gfracN_"+istring) );
-    gfracF_.push_back( scalar_descr->new_value("gfracF_"+istring) );
-
-
-
+    eps_ .push_back( scalar_descr->new_value("eps_" +istring ));
+    for (int j=0; j<N_species_; j++) {
+      std::string jstring = std::to_string(j);
+      sigN_.push_back( scalar_descr->new_value("sigN_"+istring+jstring ));
+      sigE_.push_back( scalar_descr->new_value("sigE_"+istring+jstring ));
+    }
   }
 
 }
@@ -173,6 +171,7 @@ double EnzoMethodRamsesRT::timestep ( Block * block ) const throw()
   if (rank >= 3) h_min = std::min(h_min,hz);
 
   const EnzoConfig * enzo_config = enzo::config();
+  //EnzoUnits * enzo_units = enzo::units();
 
   //enzo_block = enzo::block(block);
   return h_min / (3*enzo_config->method_ramses_rt_clight);//clight_);
@@ -205,9 +204,10 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(enzo_float * N, int i, double T
   // need to replace this with a better integration method 
  
   // integrate planck function. This version gives units of photon_density / time 
-  double N_per_t = (freq_upper-freq_lower) * 8*cello::pi*freq_center*freq_center / (clight*clight*clight) 
+  N[i] = f_esc*(freq_upper-freq_lower) * 8*cello::pi*freq_center*freq_center / (clight*clight*clight) 
          / ( pow(cello::e, cello::hplanck*freq_center/(cello::kboltz*T)) -1 );
-  N[i] += N_per_t * dt * f_esc;
+  //N[i] += N_per_t * f_esc;// * dt * f_esc;
+  //N[i] = 1e16;
 }
 
 void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
@@ -495,7 +495,83 @@ void EnzoMethodRamsesRT::get_U_update (EnzoBlock * enzo_block, double * N_update
 
 }
 
-void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block) throw()
+//----------------------------------
+void EnzoMethodRamsesRT::get_cross_section (EnzoBlock * enzo_block, int j) throw()
+{
+  // copy FindCrossSection.C from Enzo
+
+  Scalar<double> scalar = enzo_block->data()->scalar_double();
+
+  *(scalar.value( scalar.index("sigN_" + std::to_string(enzo_block->method_ramses_rt_igroup) 
+                               + std::to_string(j)) )) = 2e-14 * (enzo_block->method_ramses_rt_igroup); //5.9e-14;
+
+  //double * sigE = scalar.value( scalar.index("sigE_" + std::to_string(enzo_block->method_ramses_rt_igroup) 
+  //                            + std::to_string(j)) )
+}
+
+//---------------------------------
+void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * N, 
+                     enzo_float * Fx, enzo_float * Fy, enzo_float * Fz, double clight, int i) throw()
+{
+  const EnzoConfig * enzo_config = enzo::config();
+  
+  Field field = enzo_block->data()->field();
+  std::string igroup = std::to_string(enzo_block->method_ramses_rt_igroup);
+
+  if (!field.is_field("density")) return;
+  
+  //enzo_float * density = (enzo_float *) field.values("density");
+
+  //TODO: Only call get_cross_section here every N cycles, where N is an input parameter.
+  //      Also only call if igroup=0 so that it only gets called once
+  //TODO: make N_species a parameter
+  int N_species_ = 6;
+  std::vector<std::string> chemistry_fields = {"HI_density", "HII_density", 
+                                               "HeI_density", "HeII_density", "HeIII_density",
+                                               "e_density"};
+  for (int j=0; j<N_species_; j++) {
+      enzo_float * density_j = (enzo_float *) field.values(chemistry_fields[j]);
+      get_cross_section(enzo_block, j);
+  }
+ 
+
+  //it's okay to use the same cross section for both attenuation (affects N) and 
+  //radiation pressure (affects F) because F and N have approximately the 
+  //same spectral shape.
+
+  //gives d_dt ~ 3e-8 for density ~ 1e8 particles/cm^3
+  //double sigma = 5.9e-14;// ~Lyalpha cross-section
+
+  //For testing purposes, want d_dt to be non-negligible (like ~0.1 or something)
+  //double d_dt = density[i]/cello::mass_hydrogen * clight*sigma;
+
+
+  // loop through species and calculate attenuation coefficient
+
+  //std::vector<std::string> chemistry_fields_nonzero = {"HI_density", "HeI_density", "HeII_density"};
+  std::vector<double> masses = {cello::mass_hydrogen, cello::mass_hydrogen, 
+                      4*cello::mass_hydrogen, 4*cello::mass_hydrogen, 4*cello::mass_hydrogen,
+                      cello::mass_electron};
+ 
+  // TODO: Make this loop only over HI, HeI, and HeII. The fully-ionized species will have basically zero cross-section. 
+  Scalar<double> scalar = enzo_block->data()->scalar_double();
+  double d_dt = 0.0;
+  for (int j=0; j<chemistry_fields.size(); j++) {  
+    enzo_float * density_j = (enzo_float *) field.values(chemistry_fields[j]);     
+    double sigN_ij = *(scalar.value( scalar.index("sigN_" + igroup + std::to_string(j)) ));
+    
+    d_dt += density_j[i] / masses[j] * clight*sigN_ij;
+  }
+  
+
+  N [i] -= d_dt*N [i] * enzo_block->dt;
+  Fx[i] -= d_dt*Fx[i] * enzo_block->dt;
+  Fy[i] -= d_dt*Fy[i] * enzo_block->dt;
+  Fz[i] -= d_dt*Fz[i] * enzo_block->dt; 
+  
+}
+
+void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
 {
 
   // TODO: Adapt for 2D and 3D cases
@@ -523,7 +599,7 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block) throw()
   // array incremenent (because 3D array of field values are flattened to 1D)
   const int idx = 1;
   const int idy = mx;
-  const int idz = mx*my;
+  const int idz = mx*my;  
 
   std::string istring = std::to_string(enzo_block->method_ramses_rt_igroup);
   enzo_float * N  = (enzo_float *) field.values("photon_density_" + istring);
@@ -564,6 +640,8 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block) throw()
   //calculate the pressure tensor
   get_pressure_tensor(enzo_block, N, Fx, Fy, Fz);
 
+  //if (true) get_group_attributes(); // if (enzo_block->cycle % attribute_cycle_step == 0)
+
   for (int iz=gz; iz<mz-gz; iz++) {
     for (int iy=gy; iy<my-gy; iy++) {
       for (int ix=gx; ix<mx-gx; ix++) {
@@ -573,8 +651,8 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block) throw()
         get_U_update( enzo_block, &N_update, &Fx_update, &Fy_update, &Fz_update,
                              N, Fx, Fy, Fz, hx, hy, hz, dt, enzo_config->method_ramses_rt_clight,
                              i, idx, idy, idz ); 
-        // get updated fluxes
 
+        // get updated fluxes
 
         Fxnew[i] += Fx_update;
         Fynew[i] += Fy_update;
@@ -582,11 +660,15 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block) throw()
          
         // now get updated photon densities
         Nnew[i] += N_update;
-        
+ 
+        // add interactions with matter, ignoring chemistry for now. Chemistry due to RT can be handled by Grackle 
+        add_attenuation(enzo_block, Nnew, Fxnew, Fynew, Fznew, enzo_config->method_ramses_rt_clight, i);        
       }
     }   
   } 
-   
+  
+
+
   // now copy values over  
   for (int iz=gz; iz<mz-gz; iz++) {
     for (int iy=gy; iy<my-gy; iy++) {
@@ -596,8 +678,6 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block) throw()
         Fx[i] = Fxnew[i];
         Fy[i] = Fynew[i];
         Fz[i] = Fznew[i];
-
-
       }
     }
   } 
@@ -663,6 +743,14 @@ void EnzoMethodRamsesRT::sum_group_fields(EnzoBlock * enzo_block) throw()
   enzo_float * Fy = (enzo_float *) field.values("flux_y");
   enzo_float * Fz = (enzo_float *) field.values("flux_z");
 
+  for (int j=0; j<m; j++)
+  {
+    N [j] = 0.0;
+    Fx[j] = 0.0;
+    Fy[j] = 0.0;
+    Fz[j] = 0.0; 
+  }
+
   for (int i=0; i < enzo_config->method_ramses_rt_N_groups; i++) {
     std::string istring = std::to_string(i);
     enzo_float *  N_i = (enzo_float *) field.values("photon_density_" + istring);
@@ -699,8 +787,6 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
   //
   // To test that multigroup is working, sample from a blackbody spectrum and plot the intensity in each group. Should trace out blackbody.
 
-
-
   Field field = block->data()->field();
   int mx,my,mz;  
   field.dimensions(0,&mx, &my, &mz); //field dimensions, including ghost zones
@@ -711,7 +797,7 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
 
   if (block->cycle() == 0)
   {
-    for (int i=0; i<N_groups_; i++) {
+    for (int i=0; i<enzo_config->method_ramses_rt_N_groups; i++) {
       std::string istring = std::to_string(i);
       enzo_float *  N_i = (enzo_float *) field.values("photon_density_" + istring);
       enzo_float * Fx_i = (enzo_float *) field.values("flux_x_" + istring);
