@@ -1,5 +1,6 @@
 Import('env')
 Import('parallel_run')
+Import('parallel_arg')
 Import('serial_run')
 Import('ip_charm')
 Import('bin_path')
@@ -16,27 +17,27 @@ env['clocal_cmd'] = '++local'
 
 date_cmd = 'echo $TARGET > test/STATUS; echo "-------------------"; date +"%Y-%m-%d %H:%M:%S";'
 
-run_balance_none = Builder(action = "$RMIN; " + date_cmd + parallel_run + "  $SOURCE  $clocal_cmd $ARGS  > $TARGET 2>&1; $CPIN; $COPY")
+run_balance_none = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd " + parallel_arg + "$ARGS > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunBalanceNone' : run_balance_none } )
 env_mv_none  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/None; mv `ls *.png *.h5` ' + test_path + '/Balance/None')
 
-run_balance_greedy = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE  $clocal_cmd $ARGS +balancer GreedyLB > $TARGET 2>&1; $CPIN; $COPY")
+run_balance_greedy = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd " + parallel_arg + "$ARGS +balancer GreedyLB > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunBalanceGreedy' : run_balance_greedy } )
 env_mv_greedy  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/Greedy; mv `ls *.png *.h5` ' + test_path + '/Balance/Greedy')
 
-#run_balance_hybrid = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE  $clocal_cmd $ARGS +balancer HybridLB > $TARGET 2>&1; $CPIN; $COPY")
+#run_balance_hybrid = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd " + parallel_arg + "$ARGS +balancer HybridLB > $TARGET 2>&1; $CPIN; $COPY")
 #env.Append(BUILDERS = { 'RunBalanceHybrid' : run_balance_hybrid } )
 #env_mv_hybrid  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/Hybrid; mv `ls *.png *.h5` ' + test_path + '/Balance/Hybrid')
 
-run_balance_rand_cent = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE  $clocal_cmd $ARGS +balancer RandCentLB > $TARGET 2>&1; $CPIN; $COPY")
+run_balance_rand_cent = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd " + parallel_arg + "$ARGS +balancer RandCentLB > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunBalanceRandCent' : run_balance_rand_cent } )
 env_mv_rand_cent  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/RandCent; mv `ls *.png *.h5` ' + test_path + '/Balance/RandCent')
 
-run_balance_refine = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE  $clocal_cmd $ARGS +balancer RefineLB > $TARGET 2>&1; $CPIN; $COPY")
+run_balance_refine = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd " + parallel_arg + "$ARGS +balancer RefineLB > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunBalanceRefine' : run_balance_refine } )
 env_mv_refine  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/Refine; mv `ls *.png *.h5` ' + test_path + '/Balance/Refine')
 
-run_balance_rotate = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE  $clocal_cmd $ARGS +balancer RotateLB > $TARGET 2>&1; $CPIN; $COPY")
+run_balance_rotate = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $clocal_cmd " + parallel_arg + "$ARGS +balancer RotateLB > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunBalanceRotate' : run_balance_rotate } )
 env_mv_rotate  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/Rotate; mv `ls *.png *.h5` ' + test_path + '/Balance/Rotate')
 

@@ -13,6 +13,8 @@ SolverNull::SolverNull (std::string name,
 			int monitor_iter,
 			int restart_cycle,
 			int solve_type,
+                        int index_prolong,
+                        int index_restrict,
 			int min_level,
 			int max_level) throw()
   : Solver(name,
@@ -21,10 +23,12 @@ SolverNull::SolverNull (std::string name,
 	   monitor_iter,
 	   restart_cycle,
 	   solve_type,
+           index_prolong,
+           index_restrict,
 	   min_level,
 	   max_level)
 {
-  cello::simulation()->new_refresh_set_name(ir_post_,name);
+  cello::simulation()->refresh_set_name(ir_post_,name);
 }
 //----------------------------------------------------------------------
 

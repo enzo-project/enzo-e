@@ -40,7 +40,7 @@ public: // virtual methods
   { return "ppm"; }
 
   /// Compute maximum timestep for this method
-  virtual double timestep ( Block * block) const throw();
+  virtual double timestep ( Block * block) throw();
 
 protected: // interface
 

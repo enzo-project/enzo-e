@@ -93,8 +93,22 @@ void Block::adapt_next_()
     if (level() < level_next_) adapt_refine_();
     if (level() > level_next_) adapt_coarsen_();
   }
+  control_sync_quiescence (CkIndex_Main::p_adapt_update());
 
+}
+
+//----------------------------------------------------------------------
+
+void Block::adapt_update_()
+{
+  if (index_.is_root()) thisProxy.doneInserting();
+
+#ifdef NEW_ADAPT  
   control_sync_quiescence (CkIndex_Main::p_adapt_end());
+#else
+  adapt_end_();
+#endif
+  
 }
 
 //----------------------------------------------------------------------
@@ -109,13 +123,6 @@ void Block::adapt_next_()
 /// been deleted.
 void Block::adapt_end_()
 {
-  if (index_.is_root()) thisProxy.doneInserting();
-
-  if (delete_) {
-    ckDestroy();
-    return;
-  }
-
   for (size_t i=0; i<face_level_last_.size(); i++)
     face_level_last_[i] = -1;
 
@@ -163,7 +170,7 @@ int Block::adapt_compute_desired_level_(int level_maximum)
 {
   if (! is_leaf()) return adapt_same;
 
-  adapt_ = adapt_unknown;
+  int adapt = adapt_unknown;
 
   int level = this->level();
   int level_desired = level;
@@ -177,19 +184,19 @@ int Block::adapt_compute_desired_level_(int level_maximum)
     Schedule * schedule = refine->schedule();
 
     if ((schedule==NULL) || schedule->write_this_cycle(cycle(),time()) ) {
-      adapt_ = std::max(adapt_,refine->apply(this));
+      adapt = std::max(adapt,refine->apply(this));
     }
 
   }
   const int initial_cycle = cello::config()->initial_cycle;
   const bool is_first_cycle = (initial_cycle == cycle());
 
-  if (adapt_ == adapt_coarsen && level > 0 && ! is_first_cycle)
+  if (adapt == adapt_coarsen && level > 0 && ! is_first_cycle)
     level_desired = level - 1;
-  else if (adapt_ == adapt_refine  && level < level_maximum)
+  else if (adapt == adapt_refine  && level < level_maximum)
     level_desired = level + 1;
   else {
-    adapt_ = adapt_same;
+    adapt = adapt_same;
     level_desired = level;
   }
 
@@ -214,8 +221,6 @@ void Block::adapt_refine_()
   CkPrintf ("%s REFINE\n",name().c_str());
   fflush(stdout);
 #endif
-
-  adapt_ = adapt_unknown;
 
   int nx,ny,nz;
   data()->field_data()->size(&nx,&ny,&nz);
@@ -256,26 +261,20 @@ void Block::adapt_refine_()
       // Create FieldFace for interpolating field data to child ic3[]
 
       int if3[3] = {0,0,0};
-      bool lg3[3] = {true,true,true};
+      int g3[3];
+      cello::field_descr()->ghost_depth(0,g3,g3+1,g3+2);
       Refresh * refresh = new Refresh;
       refresh->add_all_data();
-
-      FieldFace * field_face = create_face
-	(if3,ic3,lg3, refresh_fine, refresh, true);
+      FieldFace * field_face = create_face 
+	(if3,ic3,g3, refresh_fine, refresh, true);
 #ifdef DEBUG_FIELD_FACE
   CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
 #endif
 
-      DataMsg * data_msg = NULL;
-
-      int narray = 0;
-      char * array = 0;
-      int num_field_data = 1;
-
       // Create data message object to send
+      DataMsg * data_msg = new DataMsg;
 
-      data_msg = new DataMsg;
-
+      // @@@ should be true but ~FieldFace() crashes
       data_msg -> set_field_face (field_face,false);
       data_msg -> set_field_data (data()->field_data(),false);
       ParticleData * p_data = new ParticleData(*particle_list[IC3(ic3)]);
@@ -284,6 +283,10 @@ void Block::adapt_refine_()
       const Factory * factory = cello::simulation()->factory();
 
       // Create the child object with interpolated data
+
+      int narray = 0;
+      char * array = 0;
+      int num_field_data = 1;
 
       factory->create_block
 	(
@@ -740,12 +743,12 @@ void Block::adapt_coarsen_()
   int ic3[3];
   index_.child(level,&ic3[0],&ic3[1],&ic3[2]);
   int if3[3] = {0,0,0};
-  bool lg3[3] = {false,false,false};
+  int g3[3] = {0,0,0};
   Refresh * refresh = new Refresh;
   refresh->add_all_data();
 
   FieldFace * field_face = create_face
-    (if3, ic3, lg3, refresh_coarse, refresh, true);
+    (if3, ic3, g3, refresh_coarse, refresh, true);
 #ifdef DEBUG_FIELD_FACE
   CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
 #endif
@@ -828,13 +831,11 @@ void Block::p_adapt_recv_child (MsgCoarsen * msg)
 
 void Block::p_adapt_delete()
 {
-  performance_start_(perf_adapt_end);
 #ifdef DEBUG_ADAPT
   CkPrintf ("%s DELETING\n",name().c_str());
 #endif
-  delete_ = true;
-  performance_stop_(perf_adapt_end);
-  performance_start_(perf_adapt_end_sync);
+
+  ckDestroy();
 }
 
 //======================================================================

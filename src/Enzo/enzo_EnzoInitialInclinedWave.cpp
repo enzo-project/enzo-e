@@ -739,7 +739,9 @@ void EnzoInitialInclinedWave::enforce_block(Block * block,
   delete density_init;
   delete momentum_init;
   delete total_energy_density_init;
-  if (a_init != nullptr) { delete a_init; }
+  delete a_init;
+  
+  block->initial_done();
 }
 
 //----------------------------------------------------------------------

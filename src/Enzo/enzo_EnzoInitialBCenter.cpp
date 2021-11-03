@@ -224,6 +224,7 @@ void EnzoInitialBCenter::enforce_block( Block * block,
     }
 
   }
+  block->initial_done();
 }
 
 //----------------------------------------------------------------------

@@ -105,6 +105,7 @@ enum adapt_type {
 class Tree;
 
 #include "mesh_Index.hpp"
+#include "mesh_Box.hpp"
 
 #include "mesh_Block.hpp"
 #include "mesh_Hierarchy.hpp"
@@ -113,6 +114,7 @@ class Tree;
 // Tree and components (not used in Cello)
 #include "mesh_Node.hpp"
 #include "mesh_NodeTrace.hpp"
+#include "mesh_BlockTrace.hpp"
 #include "mesh_Tree.hpp"
 #include "mesh_ItNode.hpp"
 

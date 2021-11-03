@@ -139,7 +139,7 @@ public: // interface
   { return "mhd_vlct"; }
 
   /// Compute maximum timestep for this method
-  virtual double timestep ( Block * block) const throw();
+  virtual double timestep ( Block * block) throw();
 
 protected: // methods
 

@@ -114,7 +114,7 @@ Particle {
                        "metal_fraction", "double" ];
         position = [ "x", "y", "z" ];
         velocity = [ "vx", "vy", "vz" ];
-        groups = ["has_mass"];
+        group_list = ["has_mass"];
     }
 }
 

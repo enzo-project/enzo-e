@@ -24,7 +24,7 @@ public: // functions
   OutputData() throw() : text_block_count_(0) {}
 
   /// Create an uninitialized OutputData object
-  OutputData(int index,
+  OutputData(int index_output,
 	     const Factory * factory,
 	     Config * config) throw();
 

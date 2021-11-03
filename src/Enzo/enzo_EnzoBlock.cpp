@@ -10,6 +10,8 @@
 
 #include "enzo.hpp"
 
+// #define TRACE_BLOCK
+
 // #define DEBUG_ENZO_BLOCK
 
 //======================================================================
@@ -169,14 +171,15 @@ EnzoBlock::EnzoBlock
     dt(dt_),
     redshift(0.0)
 {
-#ifdef DEBUG_ENZO_BLOCK
-  CkPrintf ("%d %p BEGIN TRACE_BLOCK EnzoBlock(msg)\n",CkMyPe(),this);
-  print();
-#endif
   initialize_enzo_();
   initialize();
+#ifdef TRACE_BLOCK
+  CkPrintf ("%d index TRACE_BLOCK EnzoBlock(MsgRefine)  %d %d %d \n",
+            CkMyPe(), index_[0],index_[1],index_[2]);
+  msg->print();
+#endif
 #ifdef DEBUG_ENZO_BLOCK
-  CkPrintf ("%d %p END TRACE_BLOCK EnzoBlock(msg)\n",CkMyPe(),this);
+  CkPrintf ("%d %p END TRACE_BLOCK EnzoBlock(msg)\n",CkMyPe(),(void *)this);
   EnzoBlock::print();
 #endif
 }
@@ -189,6 +192,11 @@ EnzoBlock::EnzoBlock
     dt(dt_),
     redshift(0.0)
 {
+#ifdef TRACE_BLOCK
+  CkPrintf ("%d index TRACE_BLOCK EnzoBlock(%d)  %d %d %d \n",
+            CkMyPe(),ip_source,
+	    index_[0],index_[1],index_[2]);
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -221,7 +229,7 @@ void EnzoBlock::initialize_enzo_()
 EnzoBlock::~EnzoBlock()
 {
 #ifdef DEBUG_ENZO_BLOCK
-  CkPrintf ("%d %p TRACE_BLOCK ~EnzoBlock(...)\n",CkMyPe(),this);
+  CkPrintf ("%d %p TRACE_BLOCK ~EnzoBlock(...)\n",CkMyPe(),(void *)this);
   print();
 #endif
 }
@@ -253,7 +261,6 @@ void EnzoBlock::pup(PUP::er &p)
   PUParray(p,CellWidth,MAX_DIMENSION);
 
   p | redshift;
-  TRACE ("END EnzoBlock::pup()");
 }
 
 //======================================================================
