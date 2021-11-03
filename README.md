@@ -109,6 +109,9 @@ functional) (basic time data on root processor is still output)" ON
 -` use_jemalloc "Use the jemalloc library for memory allocation" OFF
 - `smp` "Use Charm++ in SMP mode." OFF
 - `use_papi` "Use the PAPI performance API" OFF
+- `PARALLEL_LAUNCHER` "Launcher to use for parallel tests" `charmrun`
+- `PARALLEL_LAUNCHER_NPROC_ARG` "Argument to set number of processing elements for parallel launcher" `+p` (for use with `charmrun`)
+- `PARALLEL_LAUNCHER_NPROC` "Number of processors to run parallel unit tests" 4
 
 All variables can be set either on the commad line by `-D<variable>=<value>` or
 in a machine config, see below.
@@ -265,6 +268,24 @@ make
 # To run Enzo-E simply call `ibrun ./build-icc-mpi/bin/enzo-e input/HelloWorld/Hi.in +balancer GreedyLB` as usual
 
 ```
+
+#### Testing
+
+In order to check your build you can run the `Enzo-E` test suite from within the build directory by calling `ctest`.
+
+By default all tests will be run and the output is stored in the `test` directory of the build.
+
+A quick `ctest` primer:
+- `ctest -N` to see all available tests
+- `ctest -V` to run all tests with verbose output
+- `ctest -R someregex` to run all tests matching `someregex`, e.g., `ctest -R heat`
+- `ctest -L somelabel` to run all test with label matching `somelabel`. For `Enzo-E` we currently only set `serial` and `parallel` for serial and parallel (i.e., using multiple PEs) tests, respectively
+
+*Note*, you may need to adjust the parallel launch configuration to your environment for the parallel test.
+By default, `charmrun` with 4 PEs will be used to launch parallel tests.
+To use `srun` instead (e.g., for a pure Charm++ MPI build) with 8 ranks you have to set
+- `-DPARALLEL_LAUNCHER=srun -DPARALLEL_LAUNCHER_NPROC_ARG="-n" -DPARALLEL_LAUNCHER_NPROC=8`
+when configuring your build.
 
 #### FAQ
 

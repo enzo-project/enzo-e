@@ -210,7 +210,10 @@ if (use_projections)
 endif()
 
 
-set(ip_charm "4" CACHE STRING "Number of processors to run parallel unit tests")
+set(ip_charm "4" CACHE STRING "Number of processors to run parallel unit tests (legacy name)")
+set(PARALLEL_LAUNCHER ${CHARM_RUN} CACHE STRING "Launcher to use for parallel tests")
+set(PARALLEL_LAUNCHER_NPROC_ARG "+p" CACHE STRING "Argument to set number of processing elements for parallel launcher")
+set(PARALLEL_LAUNCHER_NPROC ${ip_charm} CACHE STRING "Number of processors to run parallel unit tests")
 
 
 option(have_git "Is this is a Git repository" ON)
