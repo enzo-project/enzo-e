@@ -543,12 +543,22 @@ public: // interface
   }
 
   /// Returns pointer to the underlying data
-  ///
-  /// @note
-  /// When the array is unitialized, this may or may not return a ``nullptr``
   T* data() const noexcept {
     T* ptr = shared_data_.get();
     return (ptr == nullptr) ? nullptr : ptr + offset_;
+  }
+
+  /// Returns whether the CelloArray wraps a nullptr (i.e. it's unitialized)
+  bool is_null() const noexcept{
+    // it's *technically* possible for a std::shared_ptr to be empty and store
+    // a non-nullptr. I'm fairly confident that this only happens if you do
+    // something like the following:
+    // std::shared_ptr<char> empty();
+    // int* pInt = new int(63);
+    // std::shared_ptr<int> pShared(empty, pInt);
+    // Since we never anything quite like this, we can assume that when
+    // shared_data_ is empty, it holds a nullptr AND vice-versa
+    return shared_data_.get() == nullptr;
   }
 
   /// Produce a deepcopy of the array.
