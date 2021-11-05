@@ -101,8 +101,7 @@ EnzoMethodRamsesRT ::EnzoMethodRamsesRT(const int N_groups, const double clight)
   // store frequency group attributes as ScalarData variables
   ScalarDescr * scalar_descr = cello::scalar_descr_double();
   
-  //TODO: make N_species a parameter
-  int N_species_ = 6;
+  int N_species_ = 3; //only three ionizable species (HI, HeI, HeII)
   for (int i=0; i<N_groups_; i++) {
     std::string istring = std::to_string(i);
     eps_ .push_back( scalar_descr->new_value("eps_" +istring ));
@@ -496,27 +495,112 @@ void EnzoMethodRamsesRT::get_U_update (EnzoBlock * enzo_block, double * N_update
 }
 
 //----------------------------------
-void EnzoMethodRamsesRT::get_cross_section (EnzoBlock * enzo_block, int j) throw()
+double EnzoMethodRamsesRT::sigma_vernier (double energy, int type) throw()
 {
   // copy FindCrossSection.C from Enzo
+  // Uses fits from Vernier et al. (1996) to calculate photoionization cross-section 
+  // between photons of energy E and gas of a given species. Then need to average this
+  // value over  
+ 
+  float sigma;
+  float e_th, e_max, e0, sigma0, ya, P, yw, y0, y1;
+
+  switch (type) { 
+    // HI
+  case 0:
+    e_th = 13.6;
+    e_max = 5e4;
+    e0 = 4.298e-1;
+    sigma0 = 5.475e4;
+    ya = 32.88;
+    P = 2.963;
+    yw = y0 = y1 = 0.0;
+    break;
+
+    // HeI
+  case 1:
+    e_th = 24.59;
+    e_max = 5e4;
+    e0 = 13.61;
+    sigma0 = 9.492e2;
+    ya = 1.469;
+    P = 3.188;
+    yw = 2.039;
+    y0 = 0.4434;
+    y1 = 2.136;
+    break;
+  
+    // HeII
+  case 2:
+    e_th = 54.42;
+    e_max = 5e4;
+    e0 = 1.720;
+    sigma0 = 1.369e4;
+    ya = 32.88;
+    P = 2.963;
+    yw = y0 = y1 = 0.0;
+    break;      
+  }
+
+  float x, y, fy;
+  x = energy/e0 - y0;
+  y = sqrt(x*x + y1*y1);
+  fy = ((x-1.0)*(x-1.0) + yw*yw) * pow(y, 0.5*P-5.5) * 
+    pow((1.0 + sqrt(y/ya)), -P);
+
+  sigma = sigma0 * fy * 1e-18;
+
+  return sigma;
+
+}
+
+//------------------------
+
+void EnzoMethodRamsesRT::get_cross_sections (EnzoBlock * enzo_block, int j) throw()
+{
+  const EnzoConfig * enzo_config = enzo::config();
+  double E_low  = (enzo_config->method_ramses_rt_bin_lower)[enzo_block->method_ramses_rt_igroup];
+  double E_high = (enzo_config->method_ramses_rt_bin_upper)[enzo_block->method_ramses_rt_igroup]; 
+  double E_mid  = E_low + 0.5*(E_high-E_low);
+
+  //TODO: Need to calculate sigma_ij by averaging over the SED of the star. See eq. B3-B5
+  double sigma_ij = sigma_vernier(E_mid, j); 
+
+  //TODO: Need to average sigma_ij over all stars in the simulation. See eq. B6-B8
+  
+  Scalar<double> scalar = enzo_block->data()->scalar_double();
+  *(scalar.value( scalar.index("sigN_" + std::to_string(enzo_block->method_ramses_rt_igroup) 
+                               + std::to_string(j)) )) = sigma_ij;
+
+  *(scalar.value( scalar.index("sigE_" + std::to_string(enzo_block->method_ramses_rt_igroup) 
+                              + std::to_string(j)) )) = sigma_ij;
+}
+
+//--------------------------
+
+void EnzoMethodRamsesRT::get_mean_photon_energy (EnzoBlock * enzo_block) throw()
+{
+  //TODO: This currently just approximates the average photon energy within group i as the midpoint.
+  //      Need to integrate over each star's SED, and then average over all stars.
+  const EnzoConfig * enzo_config = enzo::config();
+  double E_low  = (enzo_config->method_ramses_rt_bin_lower)[enzo_block->method_ramses_rt_igroup];
+  double E_high = (enzo_config->method_ramses_rt_bin_upper)[enzo_block->method_ramses_rt_igroup]; 
+  double E_mid  = E_low + 0.5*(E_high-E_low);
 
   Scalar<double> scalar = enzo_block->data()->scalar_double();
-
-  *(scalar.value( scalar.index("sigN_" + std::to_string(enzo_block->method_ramses_rt_igroup) 
-                               + std::to_string(j)) )) = 2e-14 * (enzo_block->method_ramses_rt_igroup); //5.9e-14;
-
-  //double * sigE = scalar.value( scalar.index("sigE_" + std::to_string(enzo_block->method_ramses_rt_igroup) 
-  //                            + std::to_string(j)) )
+  *(scalar.value( scalar.index("eps_" + 
+                  std::to_string(enzo_block->method_ramses_rt_igroup)) )) = E_mid;  
 }
 
 //---------------------------------
+
 void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * N, 
                      enzo_float * Fx, enzo_float * Fy, enzo_float * Fz, double clight, int i) throw()
 {
   const EnzoConfig * enzo_config = enzo::config();
   
   Field field = enzo_block->data()->field();
-  std::string igroup = std::to_string(enzo_block->method_ramses_rt_igroup);
+  int igroup = enzo_block->method_ramses_rt_igroup;
 
   if (!field.is_field("density")) return;
   
@@ -524,41 +608,30 @@ void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * 
 
   //TODO: Only call get_cross_section here every N cycles, where N is an input parameter.
   //      Also only call if igroup=0 so that it only gets called once
-  //TODO: make N_species a parameter
-  int N_species_ = 6;
-  std::vector<std::string> chemistry_fields = {"HI_density", "HII_density", 
-                                               "HeI_density", "HeII_density", "HeIII_density",
-                                               "e_density"};
-  for (int j=0; j<N_species_; j++) {
+  std::vector<std::string> chemistry_fields = {"HI_density", 
+                                               "HeI_density", "HeII_density"};
+  std::vector<double> masses = {cello::mass_hydrogen,
+                      4*cello::mass_hydrogen, 4*cello::mass_hydrogen};
+
+  //Calculate photon group attributes----
+  get_mean_photon_energy (enzo_block);
+  for (int j=0; j<chemistry_fields.size(); j++) {
       enzo_float * density_j = (enzo_float *) field.values(chemistry_fields[j]);
-      get_cross_section(enzo_block, j);
+      get_cross_sections(enzo_block, j);
   }
+  //----------------------------------
+ 
  
 
   //it's okay to use the same cross section for both attenuation (affects N) and 
   //radiation pressure (affects F) because F and N have approximately the 
   //same spectral shape.
 
-  //gives d_dt ~ 3e-8 for density ~ 1e8 particles/cm^3
-  //double sigma = 5.9e-14;// ~Lyalpha cross-section
-
-  //For testing purposes, want d_dt to be non-negligible (like ~0.1 or something)
-  //double d_dt = density[i]/cello::mass_hydrogen * clight*sigma;
-
-
-  // loop through species and calculate attenuation coefficient
-
-  //std::vector<std::string> chemistry_fields_nonzero = {"HI_density", "HeI_density", "HeII_density"};
-  std::vector<double> masses = {cello::mass_hydrogen, cello::mass_hydrogen, 
-                      4*cello::mass_hydrogen, 4*cello::mass_hydrogen, 4*cello::mass_hydrogen,
-                      cello::mass_electron};
- 
-  // TODO: Make this loop only over HI, HeI, and HeII. The fully-ionized species will have basically zero cross-section. 
   Scalar<double> scalar = enzo_block->data()->scalar_double();
   double d_dt = 0.0;
   for (int j=0; j<chemistry_fields.size(); j++) {  
     enzo_float * density_j = (enzo_float *) field.values(chemistry_fields[j]);     
-    double sigN_ij = *(scalar.value( scalar.index("sigN_" + igroup + std::to_string(j)) ));
+    double sigN_ij = *(scalar.value( scalar.index("sigN_" + std::to_string(igroup) + std::to_string(j)) ));
     
     d_dt += density_j[i] / masses[j] * clight*sigN_ij;
   }
@@ -570,6 +643,8 @@ void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * 
   Fz[i] -= d_dt*Fz[i] * enzo_block->dt; 
   
 }
+
+//----------------------
 
 void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
 {
@@ -720,7 +795,7 @@ void EnzoBlock::p_method_ramses_rt_solve_transport_eqn()
   method->call_solve_transport_eqn(this);
 
   // sum group fields and end compute()
-  // TODO: Make tracking integrated group fields optional
+  // TODO: Make tracking integrated group fields optional?
   // Move compute_done() call to after chemistry step once that's started 
   method->sum_group_fields(this); 
   this->compute_done(); 

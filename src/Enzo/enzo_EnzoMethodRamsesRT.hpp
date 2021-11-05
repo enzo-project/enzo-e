@@ -106,17 +106,21 @@ protected: // methods
 
   //---------- THERMOCHEMISTRY STEP ------------
   // Interaction with matter is completely local, so don't need a refresh before this step
-  // Can call this function during solve_transport_eqn()
   void add_attenuation ( EnzoBlock * enzo_block, 
               enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz, 
               double clight, int i) throw(); 
 
-  void get_cross_section( EnzoBlock * enzo_block, int j ) throw(); 
+  double sigma_vernier (double energy, int type) throw();
+
+  void get_cross_sections( EnzoBlock * enzo_block, int type ) throw(); 
+
+  void get_mean_photon_energy (EnzoBlock * enzo_block) throw();
 
   void compute_ (Block * block) throw();
+
+
 protected: // attributes
   int N_groups_;
-  //int igroup_;// = 0;
   double clight_;
   std::vector<double> eps_, sigN_, sigE_;
   std::vector<double> gfracN_, gfracF_;
