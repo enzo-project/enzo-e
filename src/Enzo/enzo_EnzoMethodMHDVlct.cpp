@@ -258,14 +258,6 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // CT is used, it won't have space to store changes in the magnetic fields.
     EnzoEFltArrayMap dUcons_map = scratch->dUcons_map;
 
-    // Setup a pointer to an array that used to store interface velocity fields
-    // from computed by the Riemann Solver (to use in the calculation of the
-    // internal energy source term). If the dual energy formalism is not in
-    // use, don't actually allocate the array and set the pointer to nullptr.
-    const EFlt3DArray* const interface_velocity_arr_ptr =
-      (eos_->uses_dual_energy_formalism()) ? &(scratch->interface_vel_arr) :
-      nullptr;
-
     // allocate constrained transport object
     if (bfield_method_ != nullptr) {
       bfield_method_->register_target_block(block);
@@ -314,8 +306,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 
       for (int dim = 0; dim < 3; dim++){
         // trim the shape of priml_map and primr_map (they're bigger than
-        // necessary so that they can be reused for each dim). This isn't
-        // strictly necessary, but it helps make the code easier to understand
+        // necessary so that they can be reused for each dim).
         CSlice x_slc = (dim == 0) ? CSlice(0,-1) : CSlice(0, nullptr);
         CSlice y_slc = (dim == 1) ? CSlice(0,-1) : CSlice(0, nullptr);
         CSlice z_slc = (dim == 2) ? CSlice(0,-1) : CSlice(0, nullptr);
@@ -323,10 +314,24 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
         EnzoEFltArrayMap pl_map = priml_map.subarray_map(z_slc, y_slc, x_slc);
         EnzoEFltArrayMap pr_map = primr_map.subarray_map(z_slc, y_slc, x_slc);
 
+        EFlt3DArray *interface_vel_arr_ptr, sliced_interface_vel_arr;
+        if (eos_->uses_dual_energy_formalism()){
+          // trim scratch-array for storing interface velocity values (computed
+          // by the Riemann Solver). This is used in the calculation of the
+          // internal energy source term). As with priml_map and primr_map, the
+          // array is bigger than necessary so it can be reused for each dim
+          sliced_interface_vel_arr =
+            scratch->interface_vel_arr.subarray(z_slc, y_slc, x_slc);
+          interface_vel_arr_ptr = &sliced_interface_vel_arr;
+        } else {
+          // no scratch-space was allocated, so we just pass a nullptr
+          interface_vel_arr_ptr = nullptr;
+        }
+
         compute_flux_(dim, cur_dt, cell_widths[dim], primitive_map,
                       pl_map, pr_map, *(flux_maps[dim]), dUcons_map,
-                      interface_velocity_arr_ptr, *reconstructor,
-                      bfield_method_, stale_depth, passive_list);
+                      interface_vel_arr_ptr, *reconstructor, bfield_method_,
+                      stale_depth, passive_list);
       }
 
       // increment the stale_depth

@@ -76,13 +76,6 @@ public: // interface
   /// @param[in]  stale_depth indicates the current stale_depth for the
   ///     supplied cell-centered quantities
   /// @param[in]  passive_list A list of keys for passive scalars.
-  ///
-  /// @note It's alright for arrays in `priml_map` and `primr_map` to have the
-  /// shapes of cell-centered arrays (i.e. the same shape as arrays in
-  /// `prim_map`). In this case, the function effectively treats such arrays as
-  /// if their `subarray` method were invoked, where `CSlice(0,-1)` is
-  /// specified for the `dim` axis and `CSlice(nullptr,nullptr)` is specified
-  /// for other axes.
   virtual void reconstruct_interface
   (const EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
    EnzoEFltArrayMap &primr_map, const int dim, const EnzoEquationOfState *eos,

@@ -82,14 +82,6 @@ public: // interface
   /// keys specified by `primitive_quantity_keys()`. Likewise, in ``flux_map``,
   /// the passive scalar keys should occur after the keys specified by
   /// `integration_quantity_keys()`.
-  ///
-  /// @note It's alright for arrays in `priml_map` and `primr_map` to have the
-  /// shapes of cell-centered arrays. In this case, the function effectively
-  /// treats such arrays as if their `subarray` method were invoked, where
-  /// `CSlice(0,-1)` is specified for the `dim` axis and
-  /// `CSlice(nullptr,nullptr)` is specified for other axes. This logic also
-  /// applies to the other arrays (other than those contained by `flux_map`)
-  /// that are passed as arguments.
   virtual void solve
   (const EnzoEFltArrayMap &prim_map_l, const EnzoEFltArrayMap &prim_map_r,
    EnzoEFltArrayMap &flux_map, const int dim, const EnzoEquationOfState *eos,
