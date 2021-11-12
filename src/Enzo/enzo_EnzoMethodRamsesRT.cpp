@@ -723,6 +723,9 @@ double EnzoMethodRamsesRT::sigma_vernier (double energy, int type) throw()
     break;      
   }
 
+  // return 0 if below ionization threshold
+  if (energy < e_th) return 0.0;
+
   float x, y, fy;
   x = energy/e0 - y0;
   y = sqrt(x*x + y1*y1);
@@ -749,17 +752,12 @@ void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * 
   
   //enzo_float * density = (enzo_float *) field.values("density");
 
-  //TODO: Only call get_cross_section here every N cycles, where N is an input parameter.
-  //      Also only call if igroup=0 so that it only gets called once
   std::vector<std::string> chemistry_fields = {"HI_density", 
                                                "HeI_density", "HeII_density"};
   std::vector<double> masses = {cello::mass_hydrogen,
                       4*cello::mass_hydrogen, 4*cello::mass_hydrogen};
 
-  //----------------------------------
  
- 
-
   //it's okay to use the same cross section for both attenuation (affects N) and 
   //radiation pressure (affects F) because F and N have approximately the 
   //same spectral shape.
