@@ -67,11 +67,16 @@ public: // interface
 
 protected: // methods
 
+  double integrate_simpson(double a, double b, int n, 
+               std::function<double(double,double,double,int)> f,double v1,double v2,int v3) throw();
+
+  double planck_function(double nu, double T, double clight, int dependent_variable) throw();
+
   //--------- INJECTION STEP -------
 
   double get_star_temperature(double M) throw();
 
-  void get_radiation_blackbody(enzo_float * N, int i, double T, 
+  void get_radiation_blackbody(EnzoBlock * enzo_block, enzo_float * N, int i, double T, 
              double freq_lower, double freq_upper, double dt, double clight, double f_esc) throw();
 
   void inject_photons(EnzoBlock * enzo_block) throw();
@@ -111,10 +116,6 @@ protected: // methods
               double clight, int i) throw(); 
 
   double sigma_vernier (double energy, int type) throw();
-
-  void get_cross_sections( EnzoBlock * enzo_block, int type ) throw(); 
-
-  void get_mean_photon_energy (EnzoBlock * enzo_block) throw();
 
   void compute_ (Block * block) throw();
 

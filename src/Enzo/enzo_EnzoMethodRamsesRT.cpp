@@ -8,6 +8,8 @@
 #include "cello.hpp"
 
 #include "enzo.hpp"
+
+//#define DEBUG_PRINT_GROUP_PARAMETERS
 //----------------------------------------------------------------------
 
 EnzoMethodRamsesRT ::EnzoMethodRamsesRT(const int N_groups, const double clight)
@@ -176,6 +178,52 @@ double EnzoMethodRamsesRT::timestep ( Block * block ) const throw()
   return h_min / (3*enzo_config->method_ramses_rt_clight);//clight_);
 }
 
+//-----------------------------------------------------------------------
+
+double EnzoMethodRamsesRT::integrate_simpson(double a, double b,
+                    int n, // Number of intervals
+                    std::function<double(double,double,double,int)> f, double v1, double v2, int v3) throw()
+{
+    //TODO (?): The elegant thing to do here would be to somehow let the parameter f be a 
+    //          variadic function, and take va_list as a parameter instead of (v1,v2,v3,...). 
+    //          If I'm only using this to integrate planck functions though, I probably don't need to 
+    //          waste time making this as general as possible
+              
+    // solve 1D integral using composite simpson's rule
+    double h = (b - a) / n;
+
+    // Internal sample points, there should be n - 1 of them
+    double sum_odds = 0.0;
+    for (int i = 1; i < n; i += 2)
+    {
+        sum_odds += f(a + i * h, v1, v2, v3);
+    }
+    double sum_evens = 0.0;
+    for (int i = 2; i < n; i += 2)
+    {
+        sum_evens += f(a + i * h, v1, v2, v3);
+    }
+
+    return (f(a,v1,v2,v3) + f(b,v1,v2,v3) + 2 * sum_evens + 4 * sum_odds) * h / 3;
+}
+
+double EnzoMethodRamsesRT::planck_function(double nu, double T, double clight, int dependent_variable) throw()
+{
+  double prefactor = 0.0;
+  switch (dependent_variable)
+  {
+    case 0: //photon density
+       prefactor = 8*cello::pi*nu*nu / (clight*clight*clight); 
+       break;
+    case 1: //energy density
+       prefactor = 8*cello::pi*cello::hplanck*nu*nu*nu / (clight*clight*clight); 
+       break;
+  }
+  
+  return prefactor / ( pow(cello::e, cello::hplanck*nu/(cello::kboltz*T)) -1 );
+
+}
+
 //-------------------------- INJECTION STEP ----------------------------
 double EnzoMethodRamsesRT::get_star_temperature(double M) throw()
 {
@@ -196,17 +244,101 @@ double EnzoMethodRamsesRT::get_star_temperature(double M) throw()
   return pow( L/(4*cello::pi*R*R*cello::sigma_SF), 0.25);
 }
 
-void EnzoMethodRamsesRT::get_radiation_blackbody(enzo_float * N, int i, double T, 
+void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_float * N, int i, double T, 
                    double freq_lower, double freq_upper, double dt, double clight, double f_esc) throw()
 {
-  double freq_center = freq_lower + 0.5 * (freq_upper - freq_lower);
-  // need to replace this with a better integration method 
+  int n = 10; // number of partitions for simpson's method
+
+  //need to use lambda expression to pass in planck_function() function as a parameter
+  //because member function in c++ are automatically attached to the `this` pointer,
+  //so you need to capture `this` in order for the compiler to know which function
+  //to point to
+  
+  if (freq_lower == 0.0) freq_lower = 1; //planck function undefined at zero
+                                         //1 Hz is a very small frequency compared to ~1e16 Hz
+                                         
+  double N_integrated = integrate_simpson(freq_lower,freq_upper,n, 
+                 [this](double a, double b, double c, int d) {return planck_function(a,b,c,d);},
+                 T,clight,0); 
+  double E_integrated = integrate_simpson(freq_lower,freq_upper,n, 
+                 [this](double a, double b, double c, int d) {return planck_function(a,b,c,d);},
+                 T,clight,1);
  
-  // integrate planck function. This version gives units of photon_density / time 
-  N[i] = f_esc*(freq_upper-freq_lower) * 8*cello::pi*freq_center*freq_center / (clight*clight*clight) 
-         / ( pow(cello::e, cello::hplanck*freq_center/(cello::kboltz*T)) -1 );
-  //N[i] += N_per_t * f_esc;// * dt * f_esc;
-  //N[i] = 1e16;
+  N[i] = f_esc * N_integrated; 
+ 
+  // "integrate" by just drawing a rectangle through the midpoint
+  //double freq_center = freq_lower + 0.5 * (freq_upper - freq_lower);
+  //N[i] = f_esc*(freq_upper-freq_lower) * 8*cello::pi*freq_center*freq_center / (clight*clight*clight) 
+  //      / ( pow(cello::e, cello::hplanck*freq_center/(cello::kboltz*T)) -1 );
+
+   
+   //for testing
+   //N[i] = 1e16;
+   std::vector<std::string> chemistry_fields = {"HI_density", 
+                                               "HeI_density", "HeII_density"};
+   std::vector<double> masses = {cello::mass_hydrogen,
+                      4*cello::mass_hydrogen, 4*cello::mass_hydrogen};
+
+   //Calculate photon group attributes----
+#ifdef DEBUG_PRINT_GROUP_PARAMETERS
+   if (enzo_block->method_ramses_rt_igroup > 0) std::cout << "~~~~~~" << std::endl;
+#endif
+   Scalar<double> scalar = enzo_block->data()->scalar_double(); 
+ 
+   //eq. B3 ----> int(E_nu dnu) / int(N_nu dnu)
+   *(scalar.value( scalar.index("eps_" + 
+                  std::to_string(enzo_block->method_ramses_rt_igroup)) ))
+                              =
+                 E_integrated / N_integrated; 
+
+   for (int j=0; j<chemistry_fields.size(); j++) {
+
+     //TODO: Need to average sigma_ij over all stars in the simulation. See eq. B6-B8
+  
+     // eq. B4 ----> int(sigma_nuj * N_nu dnu)/int(N_nu dnu)
+     *(scalar.value( scalar.index("sigN_" + std::to_string(enzo_block->method_ramses_rt_igroup) 
+                               + std::to_string(j)) )) 
+                                     =
+            integrate_simpson(freq_lower,freq_upper,n, 
+                 [this,j](double nu, double b, double c, int d){
+                   return sigma_vernier(cello::hplanck*nu / cello::erg_eV, j)*planck_function(nu,b,c,d);
+                 },
+                 T,clight,0) / N_integrated;
+
+     // eq. B5 ----> int(sigma_nuj * E_nu dnu)/int(E_nu dnu)
+     *(scalar.value( scalar.index("sigE_" + std::to_string(enzo_block->method_ramses_rt_igroup) 
+                              + std::to_string(j)) ))
+                                     =
+            integrate_simpson(freq_lower,freq_upper,n, 
+                 [this,j](double nu, double b, double c, int d){
+                   return sigma_vernier(cello::hplanck*nu / cello::erg_eV, j)*planck_function(nu,b,c,d);
+                 },
+                 T,clight,1) / E_integrated;
+#ifdef DEBUG_PRINT_GROUP_PARAMETERS
+
+     const EnzoConfig * enzo_config = enzo::config();
+     
+     std::cout<<'['  << enzo_config->method_ramses_rt_bin_lower[enzo_block->method_ramses_rt_igroup] 
+              << ", " << enzo_config->method_ramses_rt_bin_upper[enzo_block->method_ramses_rt_igroup]
+              << "] " << j
+              << ' '  << *(scalar.value( scalar.index("sigN_" + 
+                          std::to_string(enzo_block->method_ramses_rt_igroup) + std::to_string(j)) ))
+              << ' '  << *(scalar.value( scalar.index("sigE_" + 
+                          std::to_string(enzo_block->method_ramses_rt_igroup) + std::to_string(j)) )) 
+              << ' '  << *(scalar.value( scalar.index("eps_" + 
+                          std::to_string(enzo_block->method_ramses_rt_igroup) ))) / cello::erg_eV
+              << std::endl;  
+#endif         
+
+
+   // for testing
+   //*(scalar.value( scalar.index("sigN_" + std::to_string(enzo_block->method_ramses_rt_igroup) 
+   //                           + std::to_string(j)) )) = enzo_block->method_ramses_rt_igroup * 2e-14; 
+
+  }
+  //----------------------------------
+  
+
 }
 
 void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
@@ -223,7 +355,11 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
   field.dimensions(0,&mx, &my, &mz); //field dimensions, including ghost zones
   int gx,gy,gz;
   field.ghost_depth(0,&gx, &gy, &gz);
-   
+  
+  int idx = 1;
+  int idy = mx;
+  int idz = mx*my;
+ 
   const int rank = ((mz == 1) ? ((my == 1) ? 1 : 2) : 3);
  
   double xm,ym,zm;
@@ -242,6 +378,21 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
   // get relevant field variables
   enzo_float * N  = (enzo_float *) field.values(
         "photon_density_"+std::to_string(enzo_block->method_ramses_rt_igroup));
+ 
+  std::vector<std::string> chemistry_fields = {"HI_density", 
+                                               "HeI_density", "HeII_density"};
+  std::vector<double> masses = {cello::mass_hydrogen,
+                      4*cello::mass_hydrogen, 4*cello::mass_hydrogen};
+
+
+  /*
+  enzo_float * Fx  = (enzo_float *) field.values(
+        "flux_x_"+std::to_string(enzo_block->method_ramses_rt_igroup));
+  enzo_float * Fy  = (enzo_float *) field.values(
+        "flux_y_"+std::to_string(enzo_block->method_ramses_rt_igroup));
+  enzo_float * Fz  = (enzo_float *) field.values(
+        "flux_z_"+std::to_string(enzo_block->method_ramses_rt_igroup));
+  */
 
   Particle particle = enzo_block->data()->particle();
   int it = particle.type_index("star");
@@ -259,6 +410,11 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
   const int dp = particle.stride(it, ia_x);
 
   const int nb = particle.num_batches(it);
+
+  double freq_lower = (enzo_config->method_ramses_rt_bin_lower)[enzo_block->method_ramses_rt_igroup] * cello::erg_eV / cello::hplanck;
+  double freq_upper = (enzo_config->method_ramses_rt_bin_upper)[enzo_block->method_ramses_rt_igroup] * cello::erg_eV / cello::hplanck;
+
+  double clight = enzo_config->method_ramses_rt_clight;   
 
   for (int ib=0; ib<nb; ib++){
     enzo_float *px=0, *py=0, *pz=0;
@@ -301,12 +457,37 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
       
       // Get temperature of star 
 
-      double freq_lower = (enzo_config->method_ramses_rt_bin_lower)[enzo_block->method_ramses_rt_igroup] * cello::erg_eV / cello::hplanck;
-      double freq_upper = (enzo_config->method_ramses_rt_bin_upper)[enzo_block->method_ramses_rt_igroup] * cello::erg_eV / cello::hplanck;
       double T = get_star_temperature(pmass[ipdm]);
 
-      get_radiation_blackbody(N, i, T, freq_lower, freq_upper, dt, enzo_config->method_ramses_rt_clight,f_esc);
-      
+      get_radiation_blackbody(enzo_block, N, i, T, freq_lower, freq_upper, dt, clight,f_esc);
+      //TODO: Only call get_cross_section here every N cycles, where N is an input parameter.
+      //      Also only call if igroup=0 so that it only gets called once
+     
+
+      /*
+      // initialize fluxes within a radius of one cell
+      for (int k_=iz-1; k_<=iz+1;k_++) {
+        for (int j_=iy-1; j_<=iy+1;j_++) {
+          for (int i_=ix-1; i_<=ix+1;i_++) {
+            int index = INDEX(i_,j_,k_,mx,my);
+            if (index == i) continue;
+            double distsqr = (i_-ix)*(i_-ix)*hx*hx + (j_-iy)*(i_-iy)*hy*hy + (k_-iz)*(k_-iz)*hz*hz;
+                        
+            N[index]  = N[i]/27;//distsqr;
+            
+            Fx[index] = (i_-ix); //i_-ix is either +- 1, so this gives direction of flux
+            Fy[index] = (j_-iy);
+            Fz[index] = (k_-iz);
+          
+            // normalize fluxes 
+            double Ftot = Fx[index]*Fx[index] + Fy[index]*Fy[index] + Fz[index]*Fz[index];                      
+            Fx[index] *= clight*N[index]/Ftot; 
+            Fy[index] *= clight*N[index]/Ftot;
+            Fz[index] *= clight*N[index]/Ftot; 
+         }
+        }
+      }
+      */
 //      N[i] += f_esc * injection_rate * dt * inv_vol; // photons/s * timestep / volume
 
  
@@ -554,44 +735,6 @@ double EnzoMethodRamsesRT::sigma_vernier (double energy, int type) throw()
 
 }
 
-//------------------------
-
-void EnzoMethodRamsesRT::get_cross_sections (EnzoBlock * enzo_block, int j) throw()
-{
-  const EnzoConfig * enzo_config = enzo::config();
-  double E_low  = (enzo_config->method_ramses_rt_bin_lower)[enzo_block->method_ramses_rt_igroup];
-  double E_high = (enzo_config->method_ramses_rt_bin_upper)[enzo_block->method_ramses_rt_igroup]; 
-  double E_mid  = E_low + 0.5*(E_high-E_low);
-
-  //TODO: Need to calculate sigma_ij by averaging over the SED of the star. See eq. B3-B5
-  double sigma_ij = sigma_vernier(E_mid, j); 
-
-  //TODO: Need to average sigma_ij over all stars in the simulation. See eq. B6-B8
-  
-  Scalar<double> scalar = enzo_block->data()->scalar_double();
-  *(scalar.value( scalar.index("sigN_" + std::to_string(enzo_block->method_ramses_rt_igroup) 
-                               + std::to_string(j)) )) = sigma_ij;
-
-  *(scalar.value( scalar.index("sigE_" + std::to_string(enzo_block->method_ramses_rt_igroup) 
-                              + std::to_string(j)) )) = sigma_ij;
-}
-
-//--------------------------
-
-void EnzoMethodRamsesRT::get_mean_photon_energy (EnzoBlock * enzo_block) throw()
-{
-  //TODO: This currently just approximates the average photon energy within group i as the midpoint.
-  //      Need to integrate over each star's SED, and then average over all stars.
-  const EnzoConfig * enzo_config = enzo::config();
-  double E_low  = (enzo_config->method_ramses_rt_bin_lower)[enzo_block->method_ramses_rt_igroup];
-  double E_high = (enzo_config->method_ramses_rt_bin_upper)[enzo_block->method_ramses_rt_igroup]; 
-  double E_mid  = E_low + 0.5*(E_high-E_low);
-
-  Scalar<double> scalar = enzo_block->data()->scalar_double();
-  *(scalar.value( scalar.index("eps_" + 
-                  std::to_string(enzo_block->method_ramses_rt_igroup)) )) = E_mid;  
-}
-
 //---------------------------------
 
 void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * N, 
@@ -613,12 +756,6 @@ void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * 
   std::vector<double> masses = {cello::mass_hydrogen,
                       4*cello::mass_hydrogen, 4*cello::mass_hydrogen};
 
-  //Calculate photon group attributes----
-  get_mean_photon_energy (enzo_block);
-  for (int j=0; j<chemistry_fields.size(); j++) {
-      enzo_float * density_j = (enzo_float *) field.values(chemistry_fields[j]);
-      get_cross_sections(enzo_block, j);
-  }
   //----------------------------------
  
  
@@ -769,6 +906,13 @@ void EnzoMethodRamsesRT::call_inject_photons(EnzoBlock * enzo_block) throw()
 {
   const EnzoConfig * enzo_config = enzo::config();
   enzo_block->method_ramses_rt_igroup = 0;
+
+#ifdef DEBUG_PRINT_GROUP_PARAMETERS
+  //for printing out table of group parameters
+  std::cout<<"[E_lower, E_upper] (eV); j; sigN_ij; sigE_ij; eps_i" << std::endl;
+  std::cout<<"---------------------------------------------------" << std::endl;  
+#endif 
+ 
   for (int i=0; i<enzo_config->method_ramses_rt_N_groups; i++) {
     this->inject_photons(enzo_block);
     enzo_block->method_ramses_rt_igroup += 1;
