@@ -91,6 +91,7 @@ public: // interface
   CelloArray<enzo_float, 3> at(const std::string& key) noexcept
     { return at_(key); }
 
+  /// Checks whether the container holds the specified key
   bool contains(const std::string& key) const noexcept{
     return (str_index_map_.find(key) != str_index_map_.cend());
   }
@@ -110,7 +111,7 @@ public: // interface
   std::size_t size() const noexcept { return str_index_map_.size(); }
 
   /// Return the name of the instance (if it has one)
-  const std::string& name() noexcept {return name_;}
+  const std::string& name() const noexcept {return name_;}
 
   /// Returns the length along a given dimension of each contained array
   ///
@@ -138,10 +139,15 @@ public: // interface
   /// Utility method offered for debugging purposes to check whether the
   /// key-order matches expectations.
   ///
-  /// When raise_err is true, this will raise a fatal error if the order
-  /// doesn't match
+  /// @param ref The list of reference keys
+  /// @param raise_err When true, this will raise a fatal error if the order
+  ///    doesn't match
+  /// @param allow_smaller_ref When `true`, the key-order is only compared for
+  ///    first `ref.size()`. When `false` (the default), the map must have the
+  ///    same number of keys as `ref`.
   bool validate_key_order(const std::vector<std::string> &ref,
-			  bool raise_err) const noexcept;
+			  bool raise_err, bool allow_smaller_ref = false)
+    const noexcept;
 
 private: // helper methods
 

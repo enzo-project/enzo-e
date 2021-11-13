@@ -491,12 +491,22 @@ void EnzoRiemannImpl<ImplFunctor>::check_key_order_
     return vec1;
   };
 
-  // This could be implemented far more efficiently (but it's just for
-  // debugging)
   str_vec_t standard_keys =
     prim ? primitive_quantity_keys() : integration_quantity_keys();
-  str_vec_t all_keys = concat(standard_keys, passive_list);
-  map.validate_key_order(all_keys, true);
+  // confirm that the first `standard_keys.size()` keys of map have the same
+  // order as `standard_keys`
+  map.validate_key_order(standard_keys, true, true);
+
+  // confirm that all keys in passive_list also appear in map
+  // (for now, we'll be permissive about the order of these keys)
+  for (const auto& key : passive_list){
+    if (!map.contains(key)){
+      const std::string &name = map.name();
+      ERROR2("EnzoRiemannImpl<ImplFunctor>::check_key_order_",
+             "The \"%s\" map is missing a \"%s\" passive scalar key",
+             name.c_str(), key.c_str());
+    }
+  }
 }
 
 #endif /* ENZO_ENZO_RIEMANN_IMPL_HPP */

@@ -98,7 +98,8 @@ EnzoEFltArrayMap::EnzoEFltArrayMap(std::string name,
 //----------------------------------------------------------------------
 
 bool EnzoEFltArrayMap::validate_key_order(const std::vector<std::string> &ref,
-					  bool raise_err) const noexcept
+					  bool raise_err,
+                                          bool allow_smaller_ref) const noexcept
 {
 
   std::string name_string =
@@ -117,7 +118,7 @@ bool EnzoEFltArrayMap::validate_key_order(const std::vector<std::string> &ref,
     }
   }
 
-  if (ref.size() != keys_.size()){
+  if ((!allow_smaller_ref) && (ref.size() != keys_.size())){
     if (raise_err){
       print_summary();
       ERROR3("EnzoEFltArrayMap::validate_key_order",
