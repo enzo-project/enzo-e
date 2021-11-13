@@ -245,8 +245,44 @@ Overview
 The basic unit that get's operated on by these operation classes
 are instances of the ``EnzoEFltArrayMap`` class. As the name may
 suggest, these classes serve as a map/dictionary of instances of
-``EFlt3DArray``.
+``EFlt3DArray`` (or equivalently, instances of
+``CelloArray<enzo_float,3>``).
 
+This class provides some atypical features that are useful for our
+applications:
+
+  * All values have the same shape.
+
+  * All key-value pairs must be specified at construction. After construction:
+
+      * key-value pairs can't be inserted/deleted.
+
+      * the ``EFlt3DArray`` associated a with a key can't be overwritten with a
+        different with a different ``EFlt3DArray``
+
+      * Of course, the elements of the contained ``EFlt3DArray`` can still be
+        modified.
+
+  * The user specifies the ordering of the keys at construction (this
+    facillitates several future optimizations)
+
+Among other things, these features let this class act like a dynamically
+configurable "struct of arrays".
+
+Some other noteworthy features/properties of this class include:
+
+  * this class provides a ``subarray_map`` method, that returns a new
+    map of subarrays based on CSlice arguments
+
+  * invoking the copy constructor of ``EnzoEFltArrayMap`` effectively
+    produces shallow copies. (This is a natural consequnce of the
+    ``CelloArray``\'s pointer semantics. The same would be true for
+    standard library containers holding ``CelloArray``\s)
+
+  * A ``const EnzoEFltArrayMap`` is effectively read-only. While
+    element-access of ``EnzoEFltArrayMap`` yields a
+    ``CelloArray<enzo_float,3>``, element access of a ``const
+    EnzoEFltArrayMap`` yields a ``CelloArray<const enzo_float,3>``
 
 Specific Usage
 ~~~~~~~~~~~~~~
@@ -309,12 +345,6 @@ Below, we provide a description of the main uses of
        advected scalars and primitive quantities. Then, these are
        frequently passed to ``EnzoRiemann`` to compute fluxes for
        the integration quantities and passively advected scalars.
-     * Although this inherently represents data centered on the faces of
-       the mesh, the contained arrays should formally have the shape required
-       to hold cell-centered data. This is done to facillitate the reuse of
-       these maps to hold reconstructed fields along each dimension. This
-       means that there is always some unused allocated memory at the end of
-       one of the dimensions.
 
   5. Maps of Riemann Flux fields
 
