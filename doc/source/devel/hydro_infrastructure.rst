@@ -590,51 +590,70 @@ The factory method requires that we specify the name of the solver (via
 ``solver``), whether magnetic fields are present (via ``mhd``), and whether
 the internal energy flux must be computed (via ``internal_energy``).
 
-An instance of ``EnzoRiemann`` specifies the required non-passive
-integration quantities with:
+An instance of ``EnzoRiemann`` specifies the expected non-passive keys
+(and key-order) that the ``flux_map`` argument should have when passed to its
+``solve`` method (these keys correspond to integration quantities).
 
 .. code-block:: c++
 
-   const std::vector<std::string> integration_quantities() const;
+   const std::vector<std::string> integration_quantity_keys() const;
 
-and the required non-passive primitives with:
+The following method specifies the expected non-passive keys (and key-order)
+that the ``priml_map`` and ``primr_map`` arguments should have when passed
+an ``EnzoRiemann``\'s ``solve`` method (these keys correspond to primitive
+quantities).
 
 .. code-block:: c++
 
-   const std::vector<std::string> primitive_quantites() const;
+   const std::vector<std::string> primitive_quantity_keys() const;
 
 
 The main interface function of ``EnzoRiemann`` is:
 
 .. code-block:: c++
 
-   void solve(EnzoEFltArrayMap &prim_map_l, EnzoEFltArrayMap &prim_map_r,
+   void solve(const EnzoEFltArrayMap &prim_map_l,
+              const EnzoEFltArrayMap &prim_map_r,
               EnzoEFltArrayMap &flux_map, int dim, EnzoEquationOfState *eos,
               int stale_depth, const str_vec_t &passive_list,
-              EFlt3DArray *interface_velocity) const;
+              const CelloArray<enzo_float,3> * const interface_velocity) const;
 
 In this function, the ``prim_map_l`` and ``prim_map_r`` arguments are
 references to the ``EnzoEFltArrayMap`` objects holding the arrays of
-reconstructed left/right primitive quantities. These maps should have
-entries for each primitive listed by
-``EnzoRiemann::primitive_quantities()`` and passive scalar in
-``passive_list``. The ``flux_map`` argument holds the face-centered
-arrays where the computed fluxes for each integration quantity are
-written. This should have entries for each quantity listed in
-``EnzoRiemann::integration_quantities()`` and passive in
-``passive_list``. ``dim`` indicates the dimension along which the flux
-should be computed (0,1,2 corresponds to x,y,z).
+reconstructed left/right primitive quantities. The ``flux_map``
+argument holds the face-centered arrays where the computed fluxes for
+each integration quantity are written. ``dim`` indicates the dimension
+along which the flux should be computed (0,1,2 corresponds to x,y,z).
 ``interface_velocity`` is an optional argument used to specify a
 pointer to an array that can be used to store interface velocity
 values computed by the Riemann Solver (this is primarily used for
 computing internal energy source terms when the dual energy formalism
 is in use).
 
+Some additional notes:
+
+  *  The first ``EnzoRiemann::primitive_quantity_keys().size()`` keys of
+     ``prim_map_l`` and ``prim_map_r`` should match the values and order of
+     ``EnzoRiemann::primitive_quantity_keys()``.
+
+  * Likewise, the first ``EnzoRiemann::integration_quantity_keys().size()``
+    keys of ``flux_map`` should match the values and order of
+    ``EnzoRiemann::integration_quantity_keys()``.
+
+  * ``prim_map_l``, ``prim_map_r``, and ``flux_map`` should also each contain
+    keys for each of the passive scalars in ``passive_list`` (the order of
+    these is not currently enforced).
+
+  * All of the arrays in ``prim_map_l``, ``prim_map_r``, and ``flux_map``
+    should have the same shape. If ``interface_velocity`` is specified, it's
+    should also have that shape.
+
+
 
 Implementation Notes: ``EnzoRiemannImpl``
 -----------------------------------------
 
-Historically, in many hydro codes (including Enzo) there is a lot of code
+Traditionally, in many hydro codes (including Enzo) there is a lot of code
 duplication between implementations of different types of Riemann Solvers
 (e.g. converting left/right primitives to left/right conserved quantities
 and computing left/right fluxes). To try to reduce some of this
@@ -655,8 +674,14 @@ template class ``EnzoRiemannLUT<InputLUT>`` that primarily
     ``"internal_energy"``, are not directly specified by the lookup table,
     but ``EnzoRiemannImpl<ImplFunctor>`` accounts for this.
   * Serves as a compile-time lookup table. It statically maps the names
-    of the all of the components of the relevant actively advected
+    of all of the components of the relevant actively advected
     integration quantities to unique array indices.
+
+As an aside, the key-ordering requirements for ``EnzoRiemann::solve``
+ensure that the order of arrays in ``EnzoEFltArrayMap``
+reflects the order of items in the lookup table. (Internally,
+``EnzoRiemannImpl`` permutes the order of vector-components in order
+to preserve symmetry).
 
 See :ref:`EnzoRiemannLUT-section`
 for a more detailed description of ``EnzoRiemannLUT<InputLUT>`` and
@@ -841,7 +866,9 @@ included in the table. Their values are satisfy the following conditions:
 The lookup table is always expected to include density and the 3 velocity
 components. Although it may not be strictly enforced (yet), the lookup
 table is also expected to include either all 3 components of a vector
-quantity or None of them.
+quantity or None of them. Additionally, the ``k``\th component of a vector
+quantity is expected to have a value that is 1 larger than that of the
+``j``\th component and 2 larger than the ``i``\th component.
 
 This template class also provides a handful of helpful static methods to
 programmatically probe the table's contents at runtime and validate that
@@ -928,6 +955,11 @@ computing fluxes for such quantities, modifications must be made to
 either ``EnzoRiemannImpl`` or the ``ImplFunctor`` of an existing
 solver. Alternatively, for certain quantities, a brand new solver
 may need to be introduced.
+
+When adding a new integration vector quantity, you also need to add a
+few lines to the main for-loop of ``EnzoRiemannImpl`` for copying
+values to ``wl``/``wr`` and from ``fluxes`` (The existing code doing
+this for the velocity and magnetic fields should be used as a guide).
 
 Adding new solvers
 ------------------
