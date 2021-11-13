@@ -160,13 +160,11 @@ the row for the "velocity" quantity registers the ``"velocity_x"``,
 
 At present, the registry currently provides operations:
 
-  * for building ``Grouping`` objects that contain registered quantity
-    fields.
   * to access quantity properties registerred in ``FIELD_TABLE`` at
     runtime
-  * provide a list of known groups that can be used in the input file
+  * to provide a list of known groups that can be used in the input file
     to identify fields as passively advected scalars (as of now, the
-    only such group is ``"colour"``).
+    only such group is ``"color"``).
 
 ==============
 General Design
