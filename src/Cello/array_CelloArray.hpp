@@ -448,14 +448,13 @@ public: // interface
   CelloArray(CelloArray<T,D>&& other) : CelloArray() {swap(*this,other);}
 
   // Destructor
-  ~CelloArray() { cleanup_helper_();}
+  ~CelloArray() = default;
 
   /// Copy assignment operator. Makes *this a shallow copy of other.
   ///
   /// (The contents of any previously created shallow copies or subarrays of
   /// *this are unaffected by this method)
   CelloArray<T,D>& operator=(const CelloArray<T,D>& other){
-    this->cleanup_helper_();
     this->shallow_copy_init_helper_(other.shared_data_, other.offset_,
                                     other.shape_, other.stride_);
     return *this;
@@ -584,16 +583,20 @@ protected:
 
   /// Assists with the initialization of the CelloArray instances
   void init_helper_(const std::shared_ptr<T> &shared_data,
-		    const intp shape_arr[D], const intp offset);
-
-  // Assists with the destruction of CelloArray
-  inline void cleanup_helper_(){ }
+		    const intp shape_arr[D], const intp offset,
+                    bool require_valid_data = true);
 
   /// helps initialize CelloArray instances by shallow copy
   void shallow_copy_init_helper_(const std::shared_ptr<T> &shared_data_o,
                                  intp offset_o, const intp shape_o[D],
                                  const intp stride_o[D]) {
-    init_helper_(shared_data_o, shape_o, offset_o);
+    // if `*this` wasn't initialized, we won't require `shared_data` to be a
+    // non-empty/non-null pointer. This let's us write code where we might
+    // conditionally initialize a ``const CelloArray`` using a ternary operator
+    // (in the null-case, we would need to copy a default constructed array).
+    bool require_valid_data = !(this->is_null());
+    init_helper_(shared_data_o, shape_o, offset_o, require_valid_data);
+
     // stride_ is copied from other, not initialized from shape_, in order to
     // appropriately handle cases where other is a subarray
     for (std::size_t i = 0; i<D; i++){ stride_[i] = stride_o[i]; }
@@ -628,8 +631,10 @@ private: // attributes
 
 template<typename T, std::size_t D>
 void CelloArray<T,D>::init_helper_(const std::shared_ptr<T> &shared_data,
-                                   const intp shape_arr[D], const intp offset){
-  if ((shared_data.get() == nullptr) || (shared_data.use_count() == 0)){
+                                   const intp shape_arr[D], const intp offset,
+                                   bool require_valid_data /* = true*/){
+  if (require_valid_data & ((shared_data.get() == nullptr) ||
+                            (shared_data.use_count() == 0)   )){
     ERROR("CelloArray::init_helper_",
           "shared_data must not hold a NULL pointer or be empty. The "
           "current array is probably being moved/copied from an "
