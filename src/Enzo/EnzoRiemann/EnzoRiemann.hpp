@@ -5,11 +5,28 @@
 /// @date     Thurs May 2 2019
 /// @brief    [\ref Enzo] Implementation of the Riemann Solver abstract base
 /// class. This class should be subclassed to implement various riemann solvers.
+///
+/// This header also serves as the public header of the EnzoRiemann sublibrary.
+/// No other headers from this library should be included outside of this
+/// directory
 
 #ifndef ENZO_ENZO_RIEMANN_HPP
 #define ENZO_ENZO_RIEMANN_HPP
 
+// the following include statement is here because this file acts as the public
+// header file for the EnzoRiemann library
+#include "enzo_riemann.decl.h"
 
+// an alternative to having ``EnzoRiemann`` inherit from PUP::able is to define
+// a global function ``void operator|(PUP::er &p,EnzoRiemann* &ptr_ref)`` to
+// use for serialization.
+// - When packing up, the function would just need to pack up the parameters
+//   passed to the factory method.
+// - Then, when unpacking, the function would just need to call the factory
+//   method for unpacking.
+// The benefit of this approach is that we could avoid making this library a
+// charm++ module (which significantly simplifies building/linking this
+// library)
 
 class EnzoRiemann : public PUP::able
 {

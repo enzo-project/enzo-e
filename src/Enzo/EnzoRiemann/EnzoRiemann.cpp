@@ -10,6 +10,31 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
+// public header:
+#include "EnzoRiemann.hpp"
+
+// private headers:
+#include "EnzoRiemannLUT.hpp"
+#include "EnzoRiemannUtils.hpp"
+#include "EnzoRiemannImpl.hpp"
+#include "EnzoRiemannHLL.hpp"
+#include "EnzoRiemannHLLC.hpp"
+#include "EnzoRiemannHLLD.hpp"
+
+//----------------------------------------------------------------------
+
+// make sure to include the following 2 headers AFTER the headers for all of
+// the Riemann Solver have been included
+
+// Introduces some definations related to the pup-routines for each of the
+// templated Riemann Solvers
+#define CK_TEMPLATES_ONLY
+#include "enzo_riemann.def.h"
+#undef CK_TEMPLATES_ONLY
+
+// Introduces some code related to the enzo_riemann module, itself
+#include "enzo_riemann.def.h"
+
 //----------------------------------------------------------------------
 
 EnzoRiemann* EnzoRiemann::construct_riemann(const std::string& solver, const bool mhd,

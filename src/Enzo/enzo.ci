@@ -7,6 +7,8 @@
 
 module enzo {
 
+  extern module enzo_riemann;
+
   initnode void register_method_turbulence(void);
   initnode void mutex_init();
   initnode void mutex_init_bcg_iter();
@@ -105,15 +107,6 @@ module enzo {
   PUPable EnzoReconstructorPLM<PLM_EnzoRKLimiter>;
   // EnzoReconstructorPLMAthenaLim
   PUPable EnzoReconstructorPLM<PLM_AthenaLimiter>;
-
-  // EnzoRiemannHLLMHD
-  PUPable EnzoRiemannImpl<HLLImpl<DavisWavespeed<MHDLUT>>>;
-  // EnzoRiemannHLLE
-  PUPable EnzoRiemannImpl<HLLImpl<EinfeldtWavespeed<HydroLUT>>>;
-  // EnzoRiemannHLLEMHD
-  PUPable EnzoRiemannImpl<HLLImpl<EinfeldtWavespeed<MHDLUT>>>;
-  PUPable EnzoRiemannImpl<HLLCImpl>; //EnzoRiemannHLLC
-  PUPable EnzoRiemannImpl<HLLDImpl>; //EnzoRiemannHLLD
 
   PUPable EnzoMethodStarMaker;
   PUPable EnzoMethodStarMakerStochasticSF;
