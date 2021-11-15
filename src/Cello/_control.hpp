@@ -27,7 +27,5 @@ enum sync_id {
 // Component class includes
 //----------------------------------------------------------------------
 
-#include "control_Control.hpp"
-
 #endif /* _CONTROL_HPP */
 
