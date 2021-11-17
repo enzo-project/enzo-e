@@ -280,13 +280,8 @@ void Block::adapt_refine_()
 	 cycle_,time_,dt_,
 	 narray, array, refresh_fine,
 	 27,
-#ifdef OLD_ADAPT
          &child_face_level_curr_.data()[27*IC3(ic3)],
-#endif
-#ifdef NEW_ADAPT
-         adapt_.vector_face_level(Adapt::LevelType::next).data(),
-         //         face_level_next_.data(),
-#endif
+         &adapt_,
 	 cello::simulation());
 
       delete [] array;

@@ -98,6 +98,20 @@ Index Index::index_child (int icx, int icy, int icz, int min_level) const
 
 //----------------------------------------------------------------------
 
+void Index::index_level (int i3[3], int level) const
+{
+  int a3[3];
+  int t3[3];
+  array (a3,a3+1,a3+2);
+  tree  (t3,t3+1,t3+2);
+
+  i3[0] = (a3[0] << level) + (t3[0] >> (INDEX_BITS_TREE - level));
+  i3[1] = (a3[1] << level) + (t3[1] >> (INDEX_BITS_TREE - level));
+  i3[2] = (a3[2] << level) + (t3[2] >> (INDEX_BITS_TREE - level));
+}
+
+//----------------------------------------------------------------------
+
 bool Index::is_on_boundary (int axis, int face, int narray) const
 {
 
@@ -234,6 +248,92 @@ void Index::array (int * ix, int *iy, int *iz) const
 
 //----------------------------------------------------------------------
 
+int Index::adjacency (Index index, int rank) const
+{
+
+  const int L1 = level();
+  const int L2 = index.level();
+  const int LM = std::max(L1,L2);
+
+  int l1[3],l2[3];
+  index_level(l1,LM);
+  index.index_level(l2,LM);
+  const int s1 = 1<<(LM-L1);
+  const int s2 = 1<<(LM-L2);
+
+  int r1[3] = {l1[0]+s1,
+               l1[1]+s1,
+               l1[2]+s1};
+  int r2[3] = {l2[0]+s2,
+               l2[1]+s2,
+               l2[2]+s2};
+
+  // touch
+  int  in3[3] =
+    { (l1[0] <= l2[0] && r2[0] <= r1[0]) ||
+      (l2[0] <= l1[0] && r1[0] <= r2[0]) ? 1:0,
+      (l1[1] <= l2[1] && r2[1] <= r1[1]) ||
+      (l2[1] <= l1[1] && r1[1] <= r2[1]) ? 1:0,
+      (l1[2] <= l2[2] && r2[2] <= r1[2]) ||
+      (l2[2] <= l1[2] && r1[2] <= r2[2]) ? 1:0 };
+   
+  int it3[3] =  {(r1[0] == l2[0] || l1[0] == r2[0]) ? 1:0,
+                 (r1[1] == l2[1] || l1[1] == r2[1]) ? 1:0,
+                 (r1[2] == l2[2] || l1[2] == r2[2]) ? 1:0};
+
+  int ie3[3] = { it3[0] + in3[0] == 0 ? 1 : 0,
+                 it3[1] + in3[1] == 0 ? 1 : 0,
+                 it3[2] + in3[2] == 0 ? 1 : 0 };
+
+  int in=0;
+  for (int i=0; i<rank; i++) in += in3[i];
+
+  return (ie3[0] || ie3[1] || ie3[2]) ? -1 : in;
+}
+
+//----------------------------------------------------------------------
+
+void Index::categorize (Index index, int rank, int im3[3], int ip3[3])
+{
+  int a1[3];
+  int t1[3];
+  array (a1,a1+1,a1+2);
+  tree  (t1,t1+1,t1+2);
+  int a2[3];
+  int t2[3];
+  index.array (a2,a2+1,a2+2);
+  index.tree  (t2,t2+1,t2+2);
+
+  int L1 = this->level();
+  int L2 = index.level();
+  const int LM = std::max(L1,L2);
+  int i1[3],i2[3];
+  for (int i=0; i<rank; i++) {
+    t1[i] = (t1[i] >> (INDEX_BITS_TREE - L1));
+    t2[i] = (t2[i] >> (INDEX_BITS_TREE - L2));
+
+    i1[i] = (a1[i] << LM) + t1[i];
+    i2[i] = (a2[i] << LM) + t2[i];
+
+    if (L1 >= L2) {
+      i1[i] *= 2;
+      i2[i] *= 2;
+    }
+    im3[i] = i2[i] - i1[i] + 1;
+    if (L2 == L1) {
+      ip3[i] = im3[i] + 2;
+    } else if (L2 == L1 + 1) {
+      ip3[i] = im3[i] + 1;
+    } else if (L2 == L1 - 1) {
+      ip3[i] = im3[i] + 4;
+    }
+    im3[i] = std::max(0,im3[i]);
+    ip3[i] = std::min(4,ip3[i]);
+  }
+}
+
+//----------------------------------------------------------------------
+
 int Index::level () const
 {
   const unsigned nb = 1 << INDEX_BITS_LEVEL;
@@ -318,6 +418,22 @@ void Index::set_child(int level, int ix, int iy, int iz, int min_level)
     a_[1].array = (a_[1].array & mask) | (iy<<shift);
     a_[2].array = (a_[2].array & mask) | (iz<<shift);
   }
+}
+
+//----------------------------------------------------------------------
+
+void Index::print (std::string msg,int level) const
+{
+  int ia3[3],it3[3],il3[3];
+  
+  array(ia3,ia3+1,ia3+2);
+  tree(it3,it3+1,it3+2);
+  index_level (il3,level);
+  int r = 1 << (level - this->level());
+  CkPrintf ("INDEX_PRINT %s L%d A %d %d %d tree %X %X %X index(%d) [%d %d %d] - [%d %d %d]\n",
+            msg.c_str(),this->level(),
+            ia3[0],ia3[1],ia3[2],it3[0],it3[1],it3[2],level,
+            il3[0],il3[1],il3[2],il3[0]+r,il3[1]+r,il3[2]+r);
 }
 
 //----------------------------------------------------------------------

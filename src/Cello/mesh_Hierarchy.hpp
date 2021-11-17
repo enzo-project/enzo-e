@@ -42,7 +42,7 @@ public: // interface
       root_size_[axis] = 0;
       lower_[axis] = 0.0;
       upper_[axis] = 0.0;
-      blocking_[axis] = 0.0;
+      blocking_[axis] = 0;
       periodicity_[axis] = false;
     }
   }

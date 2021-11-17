@@ -209,12 +209,8 @@ void Factory::create_block
  int cycle, double time, double dt,
  int narray, char * array, int refresh_type,
  int num_face_level,
-#ifdef OLD_ADAPT
  int * face_level,
-#endif
-#ifdef NEW_ADAPT
- int * face_level_parent,
-#endif
+ Adapt * adapt,
  Simulation * simulation
  ) const throw()
 {
@@ -228,23 +224,29 @@ void Factory::create_block
   // ENTRY: level > 0 block array insert
   // --------------------------------------------------
 
-#ifdef NEW_ADAPT  
-  int * face_level = new int[27];
-  int level = index.level();
-  int cx,cy,cz;
-  index.child(level,&cx,&cy,&cz);
-  for (int iz=0; iz<3; iz++) {
-    int ipz=(iz+1+cz) / 2;
-    for (int iy=0; iy<3; iy++) {
-      int ipy=(iy+1+cy) / 2;
-      for (int ix=0; ix<3; ix++) {
-        int ipx=(ix+1+cx) / 2;
-        int i=ix+3*(iy+3*iz);
-        int ip=ipx+3*(ipy+3*ipz);
-        face_level[i] = face_level_parent[ip];
-      }
-    }
-  }
+#ifdef NEW_ADAPT
+  int * face_level_new = new int[27];
+  std::fill_n(face_level_new,27,INDEX_UNDEFINED_LEVEL);
+  // for (int i=1; i<adapt->num_neighbors(); i++) {
+  //   Index index_neighbor = adapt->index(i);
+  // }
+  
+  // int * face_level_new = new int[27];
+  // int level = index.level();
+  // int cx,cy,cz;
+  // index.child(level,&cx,&cy,&cz);
+  // for (int iz=0; iz<3; iz++) {
+  //   int ipz=(iz+1+cz) / 2;
+  //   for (int iy=0; iy<3; iy++) {
+  //     int ipy=(iy+1+cy) / 2;
+  //     for (int ix=0; ix<3; ix++) {
+  //       int ipx=(ix+1+cx) / 2;
+  //       int i=ix+3*(iy+3*iz);
+  //       int ip=ipx+3*(ipy+3*ipz);
+  //       face_level_new[i] = face_level_new_parent[ip];
+  //     }
+  //   }
+  // }
 #endif  
 
   MsgRefine * msg = new MsgRefine 

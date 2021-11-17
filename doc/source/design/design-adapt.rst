@@ -123,43 +123,47 @@ To reduce the complexity of the already over-burdened `Block` classes,
 we introduce an `Adapt` class to maintain and update level bounds for
 a `Block` and its neighbors.
 
-`void allocate_level_bounds (int num_neighbors)`
+``void set_rank (int rank)``
+
+   Set dimensionality of the problem :math:`1 \leq \mbox{rank} \leq 3`.
+
+``void allocate_neighbors (int num_indices)``
 
    (Re)allocate storage for level bounds assuming `num_neighbors`
    adjacent Blocks. Includes extra element for the Block's own level
    bounds.
 
-`void set_initial_level_bounds (int i, Index index, int level_min, int level_max)`
+``void set_initial_level_bounds (Index index, int level_curr, int level_want, bool is_sibling)``
 
    Initialize the level bounds for the current Block. Index i=0 is
    reserved for the Block itself; other indices are arbitrary, but
    typically ordered according to the ItNeighbor iterator.
 
-`void update_level_bounds (Index index, int level_min, int level_max)`
+``void update_level_bounds (Index index, int level_min, int level_max)``
 
    Update a Block neighbor's current level bounds, presumably from
    updated bounds received by the neighboring Block. 
 
-`bool evaluate_level_bounds ()`
+``bool evaluate_level_bounds ()``
 
    Update the Block's own level bounds given the current list
    of neighbor level bounds. Returns true iff the values change,
    which can be used to determine whether or not to update
    its neighbors with new level bounds.
 
-`bool is_committed(int i = 0)`
+``bool is_committed(int i = 0)``
 
    Return whether the given Block (the default is the block itself) is
    "committed"; that is, whether its minimum and maximum level bounds
    are the same. This can be used to signal that the Block's level
    is finally determined, and can thus call a global reduction.
 
-`void get_level_bounds (int * min, int * max, int i = 0)`
+``void get_level_bounds (int * min, int * max, int i = 0)``
 
    Return the current level bounds of the given Block (default is the
    block itself.)
 
-`int index (Index index)`
+``int index (Index index)``
 
    Return the element of the vector storing the neighboring Block
    level bounds, where 0 is reserved for the Block itself.

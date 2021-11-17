@@ -81,13 +81,15 @@ Block::Block ( MsgRefine * msg )
   init_refresh_();
 
   usesAtSync = true;
-  init (msg->index_,
+  init_refine_ (msg->index_,
 	msg->nx_, msg->ny_, msg->nz_,
 	msg->num_field_blocks_,
 	msg->num_adapt_steps_,
 	msg->cycle_, msg->time_,  msg->dt_,
 	0, NULL, msg->refresh_type_,
 	msg->num_face_level_, msg->face_level_);
+
+  init_adapt_();
 
   index_.array(array_,array_+1,array_+2);
 
@@ -132,7 +134,6 @@ Block::Block ( process_type ip_source )
 {
 
   init_refresh_();
-
   usesAtSync = true;
 
   performance_start_(perf_block);
@@ -150,13 +151,15 @@ void Block::p_set_msg_refine(MsgRefine * msg)
 {
   performance_start_(perf_block);
 
-  init (msg->index_,
+  init_refine_ (msg->index_,
 	msg->nx_, msg->ny_, msg->nz_,
 	msg->num_field_blocks_,
 	msg->num_adapt_steps_,
 	msg->cycle_, msg->time_,  msg->dt_,
 	0, NULL, msg->refresh_type_,
 	msg->num_face_level_, msg->face_level_);
+
+  init_adapt_();
 
 #ifdef TRACE_BLOCK
   {
@@ -172,7 +175,7 @@ void Block::p_set_msg_refine(MsgRefine * msg)
 
 //----------------------------------------------------------------------
 
-void Block::init
+void Block::init_refine_
 (
  Index index,
  int nx, int ny, int nz,
@@ -709,8 +712,8 @@ Block::Block ()
     index_solver_(),
     refresh_()
 {
-
   init_refresh_();
+  init_adapt_();
   
   for (int i=0; i<3; i++) array_[i]=0;
 }
@@ -745,14 +748,52 @@ Block::Block (CkMigrateMessage *m)
     index_solver_(),
     refresh_()
 {
-
   init_refresh_();
+  init_adapt_();
 
 #ifdef TRACE_BLOCK
   CkPrintf ("TRACE_BLOCK Block(CkMigrateMessage*)\n");
   fflush(stdout);
 #endif  
   
+}
+
+//----------------------------------------------------------------------
+
+void Block::init_adapt_()
+{
+  if (index_.level() == 0) {
+    const int rank = cello::rank();
+
+    adapt_.set_rank(rank);
+    const int ifmx = -1;
+    const int ifpx = +1;
+    const int ifmy = (rank >= 2) ? -1 : 0;
+    const int ifpy = (rank >= 2) ? +1 : 0;
+    const int ifmz = (rank >= 3) ? -1 : 0;
+    const int ifpz = (rank >= 3) ? +1 : 0;
+    int count = 0;
+    int na3[3];
+    cello::hierarchy()->root_blocks(na3,na3+1,na3+2);
+    int if3[3];
+    int k=0;
+    int v3[3];
+    index_.values(v3);
+    adapt_.set_index(index_);
+    for (if3[2]=ifmz; if3[2]<=ifpz; ++if3[2]) {
+      for (if3[1]=ifmy; if3[1]<=ifpy; ++if3[1]) {
+        for (if3[0]=ifmx; if3[0]<=ifpx; ++if3[0]) {
+          if (if3[0] || if3[1] || if3[2]) {
+            Index index_neighbor = index_.index_neighbor(if3,na3);
+            index_neighbor.values(v3);
+            adapt_.insert_neighbor(index_neighbor);
+          }
+          ++count;
+        }
+      }
+    }
+    count--; // don't count self
+  }
 }
 
 //----------------------------------------------------------------------
@@ -1199,7 +1240,7 @@ void Block::debug_faces_(const char * mesg)
 	  }
 	}
       }
-#endif      
+#endif
 #ifdef CELLO_DEBUG
       fprintf (fp_debug,"\n");
       fflush(fp_debug);

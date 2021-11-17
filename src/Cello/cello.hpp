@@ -720,6 +720,7 @@ namespace cello {
   int             rank ();
   /// Return the number of children each Block may have
   int             num_children();
+  int             num_children(int rank);
   /// Return the number of Blocks on this process
   size_t          num_blocks_process();
   /// Return the cell volume at the given level relative to the root level

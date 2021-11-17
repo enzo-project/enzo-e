@@ -192,12 +192,8 @@ void EnzoFactory::create_block
  int cycle, double time, double dt,
  int narray, char * array, int refresh_type,
  int num_face_level,
-#ifdef OLD_ADAPT
  int * face_level,
-#endif
-#ifdef NEW_ADAPT
- int * face_level_parent,
-#endif
+ Adapt * adapt,
  Simulation * simulation
  ) const throw()
 {
@@ -208,46 +204,99 @@ void EnzoFactory::create_block
 
   CProxy_EnzoBlock enzo_block_array = (CProxy_EnzoBlock) block_array;
 
-#ifdef NEW_ADAPT  
-  int * face_level = new int[27];
-  int level = index.level();
-  int cx,cy,cz;
-  index.child(level,&cx,&cy,&cz);
-  for (int iz=0; iz<3; iz++) {
-    int ipz=(iz+1+cz) / 2;
-    for (int iy=0; iy<3; iy++) {
-      int ipy=(iy+1+cy) / 2;
-      for (int ix=0; ix<3; ix++) {
-        int ipx=(ix+1+cx) / 2;
-        int i=ix+3*(iy+3*iz);
-        int ip=ipx+3*(ipy+3*ipz);
-        face_level[i] = face_level_parent[ip];
+  const int rank = cello::rank();
+
+  int iym=(rank >= 2) ? 0 : 1;
+  int iyp=(rank >= 2) ? 3 : 2;
+  int izm=(rank >= 3) ? 0 : 1;
+  int izp=(rank >= 3) ? 3 : 2;
+#ifdef NEW_ADAPT
+  CkPrintf ("adapt %p\n",adapt); fflush(stdout);
+
+  char buffer[80];
+  int v3[3];
+  index.values(v3);
+  sprintf (buffer,"Adapt [ %8X %8X %8X ]\n",v3[0],v3[1],v3[2]);
+  adapt->print(buffer);
+
+  int * face_level_new = new int[27];
+  std::fill_n(face_level_new,27,INDEX_UNDEFINED_LEVEL);
+
+  for (int i=0; i<adapt->num_neighbors(); i++) {
+    Index index_neighbor = adapt->index(i);
+    int level = index_neighbor.level();
+    int im3[3]={0,0,0},ip3[3]={1,1,1};
+    index.categorize (index_neighbor,rank,im3,ip3);
+    for (int iz=im3[2]; iz<ip3[2]; iz++) {
+      for (int iy=im3[1]; iy<ip3[1]; iy++) {
+        for (int ix=im3[0]; ix<ip3[0]; ix++) {
+          const int i = ix + 3*(iy + 3*iz);
+          face_level_new[i] = level;
+        }
       }
     }
   }
-  // Increment faces internal to block (including self) to be in fine level 
-  for (int iz=0; iz<2; iz++) {
-    for (int iy=0; iy<2; iy++) {
-      for (int ix=0; ix<2; ix++) {
-        int i = (ix+1-cx) + 3*( (iy+1-cy) + 3*(iz+1-cz));
-        ++ face_level[i];
-      }
-    }
-  }
+
+  CkPrintf ("TRACE %d\n",__LINE__); fflush(stdout);
+
+  // int level = index.level();
+  // int cx,cy,cz;
+  // index.child(level,&cx,&cy,&cz);
+  // for (int iz=izm; iz<3; iz++) {
+  //   int ipz=(iz+1+cz) / 2;
+  //   for (int iy=iym; iy<3; iy++) {
+  //     int ipy=(iy+1+cy) / 2;
+  //     for (int ix=0; ix<3; ix++) {
+  //       int ipx=(ix+1+cx) / 2;
+  //       int i=ix+3*(iy+3*iz);
+  //       int ip=ipx+3*(ipy+3*ipz);
+  //       face_level[i] = face_level_parent[ip];
+  //     }
+  //   }
+  // }
+  // // Increment faces internal to block (including self) to be in fine level 
+  // iyp=(rank >= 2) ? 2 : 1;
+  // izp=(rank >= 3) ? 2 : 1;
+  // for (int iz=0; iz<izp; iz++) {
+  //   for (int iy=0; iy<iyp; iy++) {
+  //     for (int ix=0; ix<2; ix++) {
+  //       int i = (ix+1-cx) + 3*( (iy+1-cy) + 3*(iz+1-cz));
+  //       ++ face_level[i];
+  //     }
+  //   }
+  // }
 #endif
 #ifdef DEBUG_NEW_ADAPT  
+  iym=(rank >= 2) ? 0 : 1;
+  iyp=(rank >= 2) ? 3 : 2;
+  izm=(rank >= 3) ? 0 : 1;
+  izp=(rank >= 3) ? 3 : 2;
   int nb3[3] = {2,2,1};
-  index.print("enzo factory",2,2,nb3,true);
-  int iz = 1;
-  for (int iy=0; iy<3; iy++) {
-    for (int ix=0; ix<3; ix++) {
-      int i=ix+3*(iy+3*iz);
-      CkPrintf ("%1d",face_level[i]);
+  index.print("face level",2,2,nb3,true);
+  for (int iz=izm; iz<izp; iz++) {
+    for (int iy=iym; iy<iyp; iy++) {
+      for (int ix=0; ix<3; ix++) {
+        int i=ix+3*(iy+3*iz);
+        CkPrintf ("%1d",face_level[i]);
+      }
     }
   }
-  
   CkPrintf ("\n");
-#endif  
+#ifdef NEW_ADAPT
+  // CkPrintf ("Child %d %d %d\n",cx,cy,cz);
+  // index.print("face level parent",2,2,nb3,true);
+  // for (int iz=izm; iz<izp; iz++) {
+  //   for (int iy=iym; iy<iyp; iy++) {
+  //     for (int ix=0; ix<3; ix++) {
+  //       int i=ix+3*(iy+3*iz);
+  //       CkPrintf ("%1d",face_level_parent[i]);
+  //     }
+  //   }
+  // }
+  // CkPrintf ("\n");
+#endif  /* NEW_ADAPT */
+  
+#endif /* DEBUG_NEW!_ADAPT */
   MsgRefine * msg = new MsgRefine 
     (index,
      nx,ny,nz,

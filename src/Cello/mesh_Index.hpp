@@ -78,6 +78,9 @@ public:
   /// default is root level
   Index index_ancestor (int level_ancestor = 0, int min_level = 0) const;
 
+  /// Return offset of block in given level
+  void index_level (int i3[3], int level) const;
+
   /// Whether the face is on the domain boundary
   bool is_on_boundary 
   (int axis, int face, int narray) const;
@@ -93,7 +96,26 @@ public:
   /// (array (0 0 0), level 0)
   bool is_root() const;
 
-  /// Return the level of this node
+  /// Whether indices are siblings (have the same parent)
+  bool is_sibling (Index index) const
+  {
+    const int level = this->level();
+    if (level != index.level()) return false;
+    return (level > 0) ? (index_parent() == index.index_parent()) : false;
+  }
+
+  /// Return the dimensionality of shared face (0 corner, 1 edge, 2
+  /// plane), or -1 if disjoint
+  int adjacency (Index index, int rank) const;
+
+  /// Get index limits (im3[],ip3[]) in [0,4) categorizing block adjacency.
+  /// E.g. left neighbor in same level (0,1) - (1,3), right-bottom child (2,1) - (3,2),
+  /// non-adjacent indices (0,0) - (0,0) (or similar empty range). Similar
+  /// to 4x4x4 array categorization in control_refresh.cpp for particles. Used
+  /// in Adapt class.
+  void categorize (Index index, int rank, int im3[3], int ip3[3]);
+
+  /// Return refinement level of the Index
   int level() const;
 
   /// Return the packed bit index for the given axis
@@ -134,6 +156,16 @@ public:
   /// Set the child indicies of this node in the parent
   void set_child(int level, int ix, int iy=0, int iz=0, int min_level = 0);
 
+  /// Set this Index to be the given child of the index
+  void push_child(int ix, int iy=0, int iz=0, int min_level = 0)
+  {
+    const int level = this->level();
+    set_level (level+1);
+    set_child (level+1,ix,iy,iz,min_level);
+  }
+
+  void print (std::string msg, int level) const;
+    
   void print (const char * msg,
 	      int max_level,
 	      int rank,

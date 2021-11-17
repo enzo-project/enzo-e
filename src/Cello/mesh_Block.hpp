@@ -46,17 +46,6 @@ public: // interface
   /// Initialize Block using MsgRefine returned by creating process
   virtual void p_set_msg_refine(MsgRefine * msg);
 
-
-  // Initialize
-  void init (
-   Index index,
-   int nx, int ny, int nz,
-   int num_field_blocks,
-   int num_adapt_steps,
-   int cycle, double time, double dt,
-   int narray, char * array, int refresh_type,
-   int num_face_level, int * face_level);
-
   /// Destructor
   virtual ~Block();
 
@@ -142,12 +131,12 @@ public: // interface
   const Index & index() const
   { return index_; }
 
-  
   int face_level (const int if3[3]) const
   { return adapt_.face_level(if3,Adapt::LevelType::curr); }
 
   int face_level (int axis, int face) const
   { return adapt_.face_level(axis,face,Adapt::LevelType::curr); }
+
 
 #ifdef OLD_ADAPT
   int child_face_level (const int ic3[3], const int if3[3]) const
@@ -155,16 +144,14 @@ public: // interface
 
   int child_face_level_next (const int ic3[3], const int if3[3]) const
   { return child_face_level_next_[ICF3(ic3,if3)]; }
-#endif /* OLD_ADAPT */
 
-#ifdef OLD_ADAPT
   void set_child_face_level_curr (const int ic3[3], const int if3[3], int level)
   { child_face_level_curr_[ICF3(ic3,if3)] = level;  }
 
   void set_child_face_level_next (const int ic3[3], const int if3[3], int level)
   { child_face_level_next_[ICF3(ic3,if3)] = level; }
-#endif /* OLD_ADAPT */
 
+#endif
   //----------------------------------------------------------------------
   // GENERAL
   //----------------------------------------------------------------------
@@ -175,7 +162,7 @@ public: // interface
   std::string name () const throw();
   /// Return the name of the block with the given index
   std::string name(Index index) const throw();
-  
+
   /// Return the size the Block array
   void size_array (int * nx, int * ny = 0, int * nz = 0) const throw();
 
@@ -197,9 +184,8 @@ public: // interface
 
   void update_levels_ ()
   {
-    adapt_.update_curr_from_next();
-
 #ifdef OLD_ADAPT
+    adapt_.update_curr_from_next();
     child_face_level_curr_ = child_face_level_next_;
 #endif /* OLD_ADAPT */
 
@@ -217,6 +203,19 @@ public: // interface
 #ifdef OLD_ADAPT
   void initialize_child_face_levels_();
 #endif /* OLD_ADAPT */
+
+  // Initialize after refinement
+  void init_refine_ (
+   Index index,
+   int nx, int ny, int nz,
+   int num_field_blocks,
+   int num_adapt_steps,
+   int cycle, double time, double dt,
+   int narray, char * array, int refresh_type,
+   int num_face_level, int * face_level);
+
+  /// Initialize Adapt class for neighbor connectivity
+  void init_adapt_();
 
   /// Initialize arrays for refresh
   void init_refresh_();
@@ -260,17 +259,17 @@ public: // interface
   {
     initial_exit_();  delete msg;
   }
-  
+
   void initial_exit_();
   void p_initial_exit()
   { initial_exit_(); }
 
   void r_initial_new_continue(CkReductionMsg * msg)
   { delete msg; initial_new_continue_(); }
-  
+
   /// Return after performing any Refresh operations
   void initial_new_continue_();
-  
+
   /// Return the currently active Initial index
   int index_initial() const throw()
   { return index_initial_; }
@@ -532,17 +531,17 @@ public:
   int refresh_load_field_faces_ (Refresh & refresh);
   /// Scatter particles in ghost zones to neighbors
   int refresh_load_particle_faces_ (Refresh & refresh, const bool copy = false);
-  
+
   int refresh_delete_particle_copies_   (Refresh * refresh);
   int delete_particle_copies_ (int it);
 
   /// Send flux data to neighbors
   int refresh_load_flux_faces_ (Refresh & refresh);
-  
+
   void refresh_load_field_face_
   (Refresh & refresh, int refresh_type, Index index, int if3[3], int ic3[3]);
   /// Send particles in list to corresponding indices
-  void particle_send_(Refresh & refresh, int nl,Index index_list[], 
+  void particle_send_(Refresh & refresh, int nl,Index index_list[],
                       ParticleData * particle_list[]);
   void refresh_load_flux_face_
   (Refresh & refresh, int refresh_type, Index index, int if3[3], int ic3[3]);
@@ -562,7 +561,7 @@ public:
   void p_method_output_write (MsgOutput * msg);
   void r_method_output_continue(CkReductionMsg * msg);
   void r_method_output_done(CkReductionMsg * msg);
-  
+
 protected:
 
   //--------------------------------------------------
