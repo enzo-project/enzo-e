@@ -118,12 +118,22 @@ if __name__ == '__main__':
     elif nproc == 1:
         executable = enzoe_binary
     else:
+        if 'CHARM_HOME' in os.environ:
+            charm_binary = os.path.join(os.environ['CHARM_HOME'],
+                                        'bin/charmrun')
+            assert os.access(charm_binary, os.X_OK)
+        elif shutil.which('charmrun') is not None:
+            charm_binary = 'charmrun' # it's in our path
+        else:
+            raise RuntimeError("Could not find the charmrun binary. Use the "
+                               "CHARM_HOME environment variable to help "
+                               "specify its location.")
         charm_args = os.environ.get('CHARM_ARGS')
         if charm_args is None:
-            executable_template = 'charmrun +p{:d} ' + enzoe_binary
+            executable_template = charm_binary + ' +p{:d} ' + enzoe_binary
         else:
             executable_template \
-                = ' '.join(['charmrun', charm_args, '+p{:d}', 'bin/enzo-e'])
+                = ' '.join([charm_binary, charm_args, '+p{:d}', 'bin/enzo-e'])
         executable = executable_template.format(nproc)
 
     with testing_context():
