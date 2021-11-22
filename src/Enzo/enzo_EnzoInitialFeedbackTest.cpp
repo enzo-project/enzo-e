@@ -5,6 +5,8 @@
 /// @date
 /// @brief    [\ref Enzo] Initialization routine for Feedback test problem
 
+#include <fstream>
+
 #include "cello.hpp"
 #include "enzo.hpp"
 
