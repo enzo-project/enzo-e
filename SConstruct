@@ -11,6 +11,14 @@ import socket
 new_adapt = 0
 
 #----------------------------------------------------------------------
+# Whether to bypass passing MsgRefine directly to Block constructor
+# or request from separate entry method to bypass Charm++ memory
+# leak bug
+#----------------------------------------------------------------------
+
+bug_fix_150 = 1
+
+#----------------------------------------------------------------------
 # Maximum number of procesess per shared-memory node (can be larger than needed)
 #----------------------------------------------------------------------
 
@@ -302,6 +310,9 @@ else:
 
 defines.append(define_int_size)
 
+if (bug_fix_150 == 1):
+   defines.append('BUG_FIX_150')
+   
 defines.append({'CONFIG_NODE_SIZE' : node_size })
 defines.append({'CONFIG_NODE_SIZE_3' : node_size*3 })
 
@@ -586,10 +597,14 @@ if (have_git == 1):
 else:     
    build_dir = 'build'
 
-if (new_adapt == 1):
-     build_dir = "build-new-adapt"
-else:
-     build_dir = "build-old-adapt"
+if (new_adapt == 1 and bug_fix_150 == 1):
+     build_dir = "build-new-adapt-bug-1"
+elif (new_adapt == 1 and bug_fix_150 == 0):
+     build_dir = "build-old-adapt-bug-0"
+elif (new_adapt == 0 and bug_fix_150 == 1):
+     build_dir = "build-old-adapt-bug-1"
+elif (new_adapt == 0 and bug_fix_150 == 0):
+     build_dir = "build-old-adapt-bug-0"
      
 SConscript( 'src/SConscript',variant_dir=build_dir)
 SConscript('test/SConscript')

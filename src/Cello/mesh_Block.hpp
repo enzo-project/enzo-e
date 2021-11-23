@@ -36,15 +36,16 @@ class Block : public CBase_Block
 
 public: // interface
 
+#ifdef BUG_FIX_150
+  /// create a Block whose MsgRefine is on the creating process
+  Block ( process_type ip_source );
+  /// Initialize Block using MsgRefine returned by creating process
+  virtual void p_set_msg_refine(MsgRefine * msg);
+#else
   /// create a Block with the given block count, lower extent, block
   /// size, and number of field blocks
   Block ( MsgRefine * msg );
-
-  /// create a Block whose MsgRefine is on the creating process
-  Block ( process_type ip_source );
-
-  /// Initialize Block using MsgRefine returned by creating process
-  virtual void p_set_msg_refine(MsgRefine * msg);
+#endif
 
   /// Destructor
   virtual ~Block();
@@ -152,11 +153,13 @@ public: // interface
   { child_face_level_next_[ICF3(ic3,if3)] = level; }
 
 #endif
+
+  /// Verify that new and old adapt neighbors match
+  void verify_neighbors();
+
   //----------------------------------------------------------------------
   // GENERAL
   //----------------------------------------------------------------------
-
-  Index neighbor_ (const int if3[3], Index * ind = 0) const;
 
   /// Return the name of the block
   std::string name () const throw();
@@ -229,9 +232,10 @@ public: // interface
 
   /// Return an iterator over neighbors
 
-  ItNeighbor it_neighbor(int min_face_rank, Index index,
-			 int neighbor_type,
-			 int min_level = 0,
+  ItNeighbor it_neighbor(Index index,
+                         int min_face_rank = -1,
+			 int neighbor_type = neighbor_leaf,
+			 int min_level = INDEX_UNDEFINED_LEVEL,
 			 int root_level = 0) throw();
 
   //--------------------------------------------------
@@ -338,6 +342,7 @@ public: // interface
 
 protected: // methods
 
+  Index neighbor_ (const int if3[3], Index * ind = 0) const;
   /// Enter control compute phase
   void compute_enter_();
   /// Initiate computing the sequence of Methods

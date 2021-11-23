@@ -21,15 +21,15 @@
 // #define BLOCK  "B0:100_0:101"
 
 #ifdef DEBUG_CONTROL 
-# define TRACE_CONTROL(A)						\
-  if (std::string(BLOCK)=="all" || name_==BLOCK) {                      \
-    CkPrintf ("%d %s %s TRACE_CONTROL %s \n",				\
-              CkMyPe(),__FILE__,					\
-              name_.c_str(), A);                                        \
-    fflush(stdout);                                                     \
+# define TRACE_CONTROL(A)                       \
+  {                                             \
+    CkPrintf ("%d %s %s TRACE_CONTROL %s \n",   \
+              CkMyPe(),__FILE__,                \
+              name_.c_str(), A);                \
+    fflush(stdout);                             \
   }
 # define TRACE_SYNC(A)                                          \
-  if (std::string(BLOCK)=="all" || name_==BLOCK) {              \
+  {                                                             \
     CkPrintf ("%d %s %s TRACE_CONTROL %s entry %d id %d\n",	\
               CkMyPe(),__FILE__,                                \
               name_.c_str(), A,entry_point,id_sync);            \
@@ -66,6 +66,8 @@ void Block::adapt_exit_()
 #endif  
   TRACE_CONTROL("adapt_exit");
 
+  //  verify_neighbors();
+  
   control_sync_quiescence(CkIndex_Main::p_output_enter());
 }
 
@@ -217,7 +219,8 @@ void Block::control_sync_neighbor(int entry_point, int id_sync,
 
   const int min_level = cello::config()->mesh_min_level;
   
-  ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_,neighbor_type,min_level,root_level);
+  ItNeighbor it_neighbor = this->it_neighbor
+    (index_,min_face_rank,neighbor_type,min_level,root_level);
 
   int of3[3];  // ignored
   while (it_neighbor.next(of3)) {

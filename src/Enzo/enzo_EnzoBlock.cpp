@@ -165,54 +165,54 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
 
 //----------------------------------------------------------------------
 
-EnzoBlock::EnzoBlock
-( MsgRefine * msg )
-  : CBase_EnzoBlock ( msg ),
-    dt(dt_),
-    redshift(0.0)
+#ifdef BUG_FIX_150
+EnzoBlock::EnzoBlock( process_type ip_source)
+  : CBase_EnzoBlock ( ip_source ),
+#else
+    EnzoBlock::EnzoBlock ( MsgRefine * msg )
+    : CBase_EnzoBlock ( msg ),
+#endif
+  dt(dt_),
+  redshift(0.0)
+
+#ifdef BUG_FIX_150
+{
+}
+#else
 {
   initialize_enzo_();
   initialize();
-#ifdef TRACE_BLOCK
-  CkPrintf ("%d index TRACE_BLOCK EnzoBlock(MsgRefine)  %d %d %d \n",
-            CkMyPe(), index_[0],index_[1],index_[2]);
-  msg->print();
-#endif
-#ifdef DEBUG_ENZO_BLOCK
-  CkPrintf ("%d %p END TRACE_BLOCK EnzoBlock(msg)\n",CkMyPe(),(void *)this);
-  EnzoBlock::print();
-#endif
+  Block::initialize();
 }
+
+#endif
 
 //----------------------------------------------------------------------
 
-EnzoBlock::EnzoBlock
-( process_type ip_source)
-  : CBase_EnzoBlock ( ip_source ),
-    dt(dt_),
-    redshift(0.0)
-{
-#ifdef TRACE_BLOCK
-  CkPrintf ("%d index TRACE_BLOCK EnzoBlock(%d)  %d %d %d \n",
-            CkMyPe(),ip_source,
-	    index_[0],index_[1],index_[2]);
-#endif
-}
-
-//----------------------------------------------------------------------
+#ifdef BUG_FIX_150
 
 void EnzoBlock::p_set_msg_refine(MsgRefine * msg)
 {
+#ifdef TRACE_BLOCK  
+  CkPrintf ("TRACE_BLOCK EnzoBlock::p_set_msg_refine()\n");
+  fflush(stdout);
+#endif  
   Block::p_set_msg_refine(msg);
   initialize_enzo_();
   initialize();
   Block::initialize();
 }
 
+#endif
+
 //----------------------------------------------------------------------
 
 void EnzoBlock::initialize_enzo_()
 {
+#ifdef TRACE_BLOCK  
+  CkPrintf ("TRACE_BLOCK EnzoBlock::initialize_enzo_()\n");
+  fflush(stdout);
+#endif  
   int v3[3];
   thisIndex.values(v3);
   for (int i=0; i<MAX_DIMENSION; i++) {

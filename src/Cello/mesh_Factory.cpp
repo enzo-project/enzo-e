@@ -13,7 +13,7 @@
 Hierarchy * Factory::create_hierarchy
 ( int refinement, int min_level, int max_level) const throw ()
 {
-  return new Hierarchy (this,refinement, min_level, max_level); 
+  return new Hierarchy (this,refinement, min_level, max_level);
 }
 
 //----------------------------------------------------------------------
@@ -28,7 +28,7 @@ void Factory::pup (PUP::er &p)
   PUP::able::pup(p);
 
   //  p | bound_arrays_;
-  
+
 }
 
 //----------------------------------------------------------------------
@@ -76,7 +76,7 @@ CProxy_Block Factory::new_block_proxy
 }
 
 //----------------------------------------------------------------------
-  
+
 void Factory::create_block_array
 (
  DataMsg * data_msg,
@@ -103,7 +103,7 @@ void Factory::create_block_array
 
 	Index index(ix,iy,iz);
 
-	MsgRefine * msg = new MsgRefine 
+	MsgRefine * msg = new MsgRefine
 	  (index,
 	   nx,ny,nz,
 	   num_field_data,
@@ -113,9 +113,12 @@ void Factory::create_block_array
 	   num_face_level, face_level);
 
 	msg->set_data_msg(data_msg);
+#ifdef BUG_FIX_150
 	cello::simulation()->set_msg_refine (index,msg);
 	proxy_block[index].insert (process_type(CkMyPe()));
-
+#else
+	proxy_block[index].insert (msg);
+#endif
 	// --------------------------------------------------
 
       }
@@ -166,14 +169,14 @@ void Factory::create_subblock_array
 	for (int iz=0; iz<nbz; iz++) {
 
 	  int shift = -level;
-	  
+
 	  Index index(ix<<shift,iy<<shift,iz<<shift);
 
 	  index.set_level(level);
 
 	  TRACE3 ("inserting %d %d %d",ix,iy,iz);
-  
-	  MsgRefine * msg = new MsgRefine 
+
+	  MsgRefine * msg = new MsgRefine
 	    (index,
 	     nx,ny,nz,
 	     num_field_blocks,
@@ -184,10 +187,12 @@ void Factory::create_subblock_array
 
 	  msg->set_data_msg(data_msg);
 
-	  cello::simulation()->set_msg_refine (index,msg);
-
+#ifdef BUG_FIX_150
+          cello::simulation()->set_msg_refine (index,msg);
           block_array[index].insert (process_type(CkMyPe()));
-
+#else
+          block_array[index].insert (msg);
+#endif
 	  // --------------------------------------------------
 
 	}
@@ -208,8 +213,10 @@ void Factory::create_block
  int count_adapt,
  int cycle, double time, double dt,
  int narray, char * array, int refresh_type,
+#ifdef OLD_ADAPT
  int num_face_level,
  int * face_level,
+#endif
  Adapt * adapt,
  Simulation * simulation
  ) const throw()
@@ -225,13 +232,13 @@ void Factory::create_block
   // --------------------------------------------------
 
 #ifdef NEW_ADAPT
-  int * face_level_new = new int[27];
-  std::fill_n(face_level_new,27,INDEX_UNDEFINED_LEVEL);
+  const int num_face_level = 27;
+  int * face_level = new int[num_face_level];
+  std::fill_n(face_level,num_face_level,INDEX_UNDEFINED_LEVEL);
   // for (int i=1; i<adapt->num_neighbors(); i++) {
   //   Index index_neighbor = adapt->index(i);
   // }
-  
-  // int * face_level_new = new int[27];
+  // int * face_level = new int[27];
   // int level = index.level();
   // int cx,cy,cz;
   // index.child(level,&cx,&cy,&cz);
@@ -243,25 +250,32 @@ void Factory::create_block
   //       int ipx=(ix+1+cx) / 2;
   //       int i=ix+3*(iy+3*iz);
   //       int ip=ipx+3*(ipy+3*ipz);
-  //       face_level_new[i] = face_level_new_parent[ip];
+  //       face_level[i] = face_level_parent[ip];
   //     }
   //   }
   // }
-#endif  
+#endif
 
-  MsgRefine * msg = new MsgRefine 
+  MsgRefine * msg = new MsgRefine
     (index,
      nx,ny,nz,
      num_field_data,
      count_adapt,
      cycle,time,dt,
      refresh_type,
-     num_face_level, face_level);
+     num_face_level, face_level
+#ifdef NEW_ADAPT
+     , adapt
+#endif
+     );
 
   msg->set_data_msg (data_msg);
 
+#ifdef BUG_FIX_150
   cello::simulation()->set_msg_refine (index,msg);
-
   block_array[index].insert (process_type(CkMyPe()));
+#else
+  block_array[index].insert (msg);
+#endif
 }
 

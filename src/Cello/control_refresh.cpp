@@ -82,7 +82,7 @@ void Block::refresh_start (int id_refresh, int callback)
     }
 
     const int count = count_field + count_particle + count_flux;
-    
+
     // Make sure sync counter is not active
     ASSERT4 ("Block::refresh_start()",
 	     "refresh[%d] sync object %p is active (%d/%d)",
@@ -142,11 +142,11 @@ void Block::refresh_wait (int id_refresh, int callback)
 
     // unpack message data into Block data
     msg->update(data());
-      
+
     delete msg;
     sync->advance();
   }
-    
+
   // clear the message queue
 
   refresh_msg_list_[id_refresh].resize(0);
@@ -183,7 +183,7 @@ void Block::refresh_check_done (int id_refresh)
     // reset sync counter
     sync->reset();
     sync->set_stop(0);
-    
+
     // reset refresh state to inactive
 
     sync->set_state(RefreshState::INACTIVE);
@@ -192,7 +192,7 @@ void Block::refresh_check_done (int id_refresh)
     // interpolations)
 
     refresh_coarse_apply_(refresh);
-      
+
     // Call callback
 
     refresh_exit(*refresh);
@@ -212,14 +212,14 @@ void Block::p_refresh_recv (MsgRefresh * msg_refresh)
 
     // unpack message data into Block data if ready
     msg_refresh->update(data());
-      
+
     delete msg_refresh;
 
     sync->advance();
 
     // check if it's the last message processed
     refresh_check_done(id_refresh);
-  
+
   } else {
 
     // save message if not ready
@@ -258,9 +258,9 @@ int Block::refresh_load_field_faces_ (Refresh & refresh)
     // Loop over neighbor leaf Blocks (not necessarily same level)
 
     const int min_level = cello::config()->mesh_min_level;
-    
+
     ItNeighbor it_neighbor =
-      this->it_neighbor(min_face_rank,index_,
+      this->it_neighbor(index_,min_face_rank,
 			neighbor_type,min_level,refresh.root_level());
 
     int if3[3];
@@ -274,7 +274,7 @@ int Block::refresh_load_field_faces_ (Refresh & refresh)
       const int level = this->level();
       const int level_face = it_neighbor.face_level();
 
-      const int refresh_type = 
+      const int refresh_type =
 	(level_face == level - 1) ? refresh_coarse :
 	(level_face == level)     ? refresh_same :
 	(level_face == level + 1) ? refresh_fine : refresh_unknown;
@@ -317,7 +317,7 @@ int Block::refresh_load_field_faces_ (Refresh & refresh)
 
       // count all faces if not a leaf, else don't count if face level
       // is less than this block's level
-      
+
       if ( ! is_leaf() || face_level(if3) >= level()) {
 	
 	Index index_face = it_face.index();
@@ -339,7 +339,7 @@ void Block::refresh_load_field_face_
   Index index_neighbor,  int if3[3], int ic3[3])
 {
   // create refresh message
-  
+
   MsgRefresh * msg_refresh = new MsgRefresh;
 
   // create field face
@@ -380,7 +380,7 @@ int Block::refresh_load_coarse_face_
   if ((pad > 0) && (level != level_face)) {
 
     // Create box_face
-    
+
     const int rank = cello::rank();
     int n3[3];
     data()->field().size(n3,n3+1,n3+2);
@@ -394,15 +394,15 @@ int Block::refresh_load_coarse_face_
     Box box_sr (rank,n3,g3);
     Box box_se (rank,n3,g3);
     Box box_er (rank,n3,g3);
-    
+
     // Create iterator over extra blocks
-    
+
     ItNeighbor it_extra =
-      this->it_neighbor(refresh.min_face_rank(),index_,
+      this->it_neighbor(index_,refresh.min_face_rank(),
                         refresh.neighbor_type(),
                         cello::config()->mesh_min_level,
                         refresh.root_level());
-    
+
       // ... determine intersection region
 
     const bool l_send = (level < level_face);
@@ -411,7 +411,7 @@ int Block::refresh_load_coarse_face_
     int jf3[3] = { l_send ? if3[0] : -if3[0],
                    l_send ? if3[1] : -if3[1],
                    l_send ? if3[2] : -if3[2] };
-    
+
     box_sr.set_block(BoxType_receive,+1,jf3,ic3);
     box_sr.set_padding(pad);
 
@@ -426,7 +426,7 @@ int Block::refresh_load_coarse_face_
     int iam3[3],iap3[3];
     int ifms3[3],ifps3[3];
     int ifmr3[3],ifpr3[3];
-    
+
     if (l_send) {
 
       bool lpad;
@@ -447,26 +447,26 @@ int Block::refresh_load_coarse_face_
 
       // only count receives
       count ++;
-      
+
     }
-      
+
     if (l_send) {
 
       // SENDER LOOP OVER EXTRA BLOCKS
-      
+
       int ef3[3];
       while (it_extra.next(ef3)) {
 
         const Index index_extra = it_extra.index();
         const int   level_extra = it_extra.face_level();
-        
+
         int ec3[3] = {0,0,0};
         if (level_extra > level) {
           index_extra.child(level_extra,ec3,ec3+1,ec3+2);
         }
-        
+
         // ... skip extra block if it's the same as the neighbor
-        
+
         bool l_valid_level = (std::abs(level_extra - level) <= 1);
 
         if (index_extra != index_neighbor && l_valid_level) {
@@ -482,13 +482,13 @@ int Block::refresh_load_coarse_face_
           if (overlap) {
 
           if (level_extra == level) {
-          
+
               // this block sends; extra block is coarse
-          
+
               // handle contribution of this block Bs to Be -> br
 
               int if3_er[3] = { if3[0]-ef3[0], if3[1]-ef3[1], if3[2]-ef3[2] };
-                                    
+
 
               // Box Bs | Be -> br
               box_er.set_block(BoxType_receive,+1,if3_er,ic3);
@@ -499,9 +499,9 @@ int Block::refresh_load_coarse_face_
 
               box_er.compute_region();
 
-              
+
               int if3_es[3] = {-ef3[0], -ef3[1], -ef3[2] };
-              
+
               box_er.set_block(BoxType_extra,0,if3_es,ic3); // ic3 ignored
 
               bool lpad;
@@ -529,14 +529,14 @@ int Block::refresh_load_coarse_face_
           } // overlap
         } // ! match
       } // while (it_extra.next())
-      
+
     } else if (l_recv) {
 
       // RECEIVER LOOP OVER EXTRA BLOCKS
 
       int ef3[3];
       while (it_extra.next(ef3)) {
-        
+
         const Index index_extra = it_extra.index();
         const int   level_extra = it_extra.face_level();
 
@@ -551,7 +551,7 @@ int Block::refresh_load_coarse_face_
 
         if (index_extra != index_neighbor && l_valid_level) {
 
-        
+
           // *** count expected receive from Be or be ***
 
           // ... determine overlap of extra block with intersection region
@@ -565,7 +565,7 @@ int Block::refresh_load_coarse_face_
             }
           }
           box_sr.set_block (BoxType_extra,(level_extra-level_send), if3_se,ec3);
-        
+
           int tm3[3],tp3[3];
           bool lpad;
 
@@ -574,7 +574,7 @@ int Block::refresh_load_coarse_face_
           if (overlap) {
 
             ++count;
-            
+
             if (level_extra == level) {
 
               // handle contribution of this block br to Bs -> be
@@ -725,7 +725,7 @@ void Block::refresh_coarse_apply_ (Refresh * refresh)
   const int pad = refresh->coarse_padding(prolong);
 
   if (pad > 0) {
-  
+
     const int min_face_rank = refresh->min_face_rank();
     const int neighbor_type = refresh->neighbor_type();
     const int root_level    = refresh->root_level();
@@ -735,16 +735,16 @@ void Block::refresh_coarse_apply_ (Refresh * refresh)
         neighbor_type == neighbor_tree) {
 
       ItNeighbor it_neighbor =
-        this->it_neighbor(min_face_rank,index_,neighbor_type,
+        this->it_neighbor(index_,min_face_rank,neighbor_type,
                           min_level,root_level);
-    
+
       const int level = this->level();
-    
+
       int if3[3];
       while (it_neighbor.next(if3)) {
 
         int of3[3] = {-if3[0],-if3[1],-if3[2]};
-      
+
         const int level_face = it_neighbor.face_level();
 
         if (level == level_face + 1) {
@@ -752,7 +752,7 @@ void Block::refresh_coarse_apply_ (Refresh * refresh)
           const auto & field_list_src = refresh->field_list_src();
           const auto & field_list_dst = refresh->field_list_dst();
           const int nf = field_list_src.size();
-        
+
           // Create Box to find loop limits for copying own values
           int n3[3];
           Field field = this->data()->field();
@@ -790,14 +790,14 @@ void Block::refresh_coarse_apply_ (Refresh * refresh)
             int m3_f[3];
             field.coarse_dimensions(i_f,m3_c,m3_c+1,m3_c+2);
             field.dimensions(index_field_src,&m3_f[0],&m3_f[1],&m3_f[2]);
-            
+
             cello_float * field_values_src =
               (cello_float *) field.values(index_field_src);
             cello_float * field_values_dst =
               (cello_float *) field.values(index_field_dst);
             cello_float * coarse_field_src =
               (cello_float *) field.coarse_values(index_field_src);
-              
+
             const float r = n3_f[0] / n3_c[0];
             const cello_float rr = (r == 1) ? 1.0 : 1.0/cello::num_children();
 
@@ -805,7 +805,7 @@ void Block::refresh_coarse_apply_ (Refresh * refresh)
             ASSERT1 ("Block::refresh_coarse_apply",
                      "Field-to-coarse array axis ratio r=%g is not 1.0 or 2.0",
                      r, (r==1.0 || r==2.0));
-#endif    
+#endif
 
             const int if0 = i3_f[0] + m3_f[0]*(i3_f[1] + m3_f[1]*i3_f[2]);
             const int ic0 = i3_c[0] + m3_c[0]*(i3_c[1] + m3_c[1]*i3_c[2]);
@@ -837,7 +837,7 @@ void Block::refresh_coarse_apply_ (Refresh * refresh)
 
             int ip3_c[3],np3_c[3];
             int ip3_f[3],np3_f[3];
-            
+
             Box box_p (rank,n3,g3);
             int ic3[3];
             index_.child(level,ic3,ic3+1,ic3+2);
@@ -887,7 +887,7 @@ int Block::refresh_load_particle_faces_ (Refresh & refresh, const bool copy)
   std::fill_n (particle_list,npa,nullptr);
 
   Index * index_list = new Index[npa];
-  
+
   // Sort particles that have left the Block into 4x4x4 array
   // corresponding to neighbors
 
@@ -918,7 +918,7 @@ void Block::particle_send_
     Index index           = index_list[il];
     ParticleData * p_data = particle_list[il];
     Particle particle_send (p_descr,p_data);
-    
+
     const int id_refresh = refresh.id();
     CHECK_ID(id_refresh);
 
@@ -939,7 +939,7 @@ void Block::particle_send_
       thisProxy[index].p_refresh_recv (msg_refresh);
 
     } else if (p_data) {
-      
+
       MsgRefresh * msg_refresh = new MsgRefresh;
       msg_refresh->set_data_msg (nullptr);
       msg_refresh->set_refresh_id (id_refresh);
@@ -956,7 +956,7 @@ void Block::particle_send_
 
 //----------------------------------------------------------------------
 
-int Block::particle_load_faces_ (int npa, 
+int Block::particle_load_faces_ (int npa,
 				 ParticleData * particle_list[],
 				 ParticleData * particle_array[],
 				 Index index_list[],
@@ -984,13 +984,13 @@ int Block::particle_load_faces_ (int npa,
   //     +---+   5   +---+
   //     | 4 |       | 6 |
   // +---+---+===+===+---+
-  // |       ||     ||    
+  // |       ||     ||
   // |   2   +       +   3
-  // |       ||     ||    
+  // |       ||     ||
   // +-------+=======+-------+
-  //         |            
-  //     0   |            
-  //                 1   
+  //         |
+  //     0   |
+  //                 1
   //
   // Then the particle data array will be:
   //
@@ -1036,19 +1036,19 @@ int Block::particle_load_faces_ (int npa,
 //----------------------------------------------------------------------
 
 int Block::particle_create_array_neighbors_
-(Refresh * refresh, 
+(Refresh * refresh,
  ParticleData * particle_array[],
  ParticleData * particle_list[],
  Index index_list[],
  const bool copy)
-{ 
+{
   const int rank = cello::rank();
   const int level = this->level();
 
   const int min_face_rank = refresh->min_face_rank();
 
   ItNeighbor it_neighbor =
-    this->it_neighbor(min_face_rank,index_, neighbor_leaf,0,0);
+    this->it_neighbor(index_, min_face_rank,neighbor_leaf,0,0);
 
   int il = 0;
 
@@ -1059,7 +1059,7 @@ int Block::particle_create_array_neighbors_
 
     int ic3[3] = {0,0,0};
 
-    const int refresh_type = 
+    const int refresh_type =
       (level_face == level - 1) ? refresh_coarse :
       (level_face == level)     ? refresh_same :
       (level_face == level + 1) ? refresh_fine : refresh_unknown;
@@ -1101,7 +1101,7 @@ int Block::particle_create_array_neighbors_
       }
     }
   }
-  
+
   return il;
 }
 
@@ -1162,7 +1162,7 @@ void Block::particle_apply_periodic_update_
   // Compute position updates for particles crossing periodic boundaries
 
   ItNeighbor it_neighbor =
-    this->it_neighbor(min_face_rank,index_, neighbor_leaf,0,0);
+    this->it_neighbor(index_, min_face_rank,neighbor_leaf,0,0);
 
   int il=0;
 
@@ -1174,7 +1174,7 @@ void Block::particle_apply_periodic_update_
     int ic3[3];
     it_neighbor.child(ic3);
 
-    const int refresh_type = 
+    const int refresh_type =
       (level_face == level - 1) ? refresh_coarse :
       (level_face == level)     ? refresh_same :
       (level_face == level + 1) ? refresh_fine : refresh_unknown;
@@ -1230,7 +1230,7 @@ void Block::particle_scatter_neighbors_
 {
   const int rank = cello::rank();
 
-  //     ... get Block bounds 
+  //     ... get Block bounds
   double xm,ym,zm;
   double xp,yp,zp;
   lower(&xm,&ym,&zm);
@@ -1255,7 +1255,7 @@ void Block::particle_scatter_neighbors_
 
     // (...positions may use absolute coordinates (float) or
     // block-local coordinates (int))
-    const bool is_float = 
+    const bool is_float =
       (cello::type_is_float(particle.attribute_type(it,ia_x)));
 
     // (...stride may be != 1 if particle attributes are interleaved)
@@ -1282,7 +1282,7 @@ void Block::particle_scatter_neighbors_
 
       bool * mask = new bool[np];
       int * index = new int[np];
-      
+
       for (int ip=0; ip<np; ip++) {
 
 	double x = is_float ? 2.0*(xa[ip*d]-x0)/xl : xa[ip*d];
@@ -1296,7 +1296,7 @@ void Block::particle_scatter_neighbors_
 	if (! (0 <= ix && ix < 4) ||
 	    ! (0 <= iy && iy < 4) ||
 	    ! (0 <= iz && iz < 4)) {
-	  
+	
 	  CkPrintf ("%d ix iy iz %d %d %d\n",CkMyPe(),ix,iy,iz);
 	  CkPrintf ("%d x y z %f %f %f\n",CkMyPe(),x,y,z);
 	  CkPrintf ("%d xa ya za %f %f %f\n",CkMyPe(),xa[ip*d],ya[ip*d],za[ip*d]);
@@ -1341,13 +1341,13 @@ int Block::refresh_load_flux_faces_ (Refresh & refresh)
 
   const int min_face_rank = cello::rank() - 1;
   const int neighbor_type = neighbor_leaf;
-  
+
   // Loop over neighbor leaf Blocks (not necessarily same level)
 
   const int min_level = cello::config()->mesh_min_level;
-    
+
   ItNeighbor it_neighbor =
-    this->it_neighbor(min_face_rank,index_,
+    this->it_neighbor(index_,min_face_rank,
                       neighbor_type,min_level,refresh.root_level());
 
   int if3[3];
@@ -1361,7 +1361,7 @@ int Block::refresh_load_flux_faces_ (Refresh & refresh)
     const int level = this->level();
     const int level_face = it_neighbor.face_level();
 
-    const int refresh_type = 
+    const int refresh_type =
       (level_face < level) ? refresh_coarse :
       (level_face > level) ? refresh_fine : refresh_same;
 
@@ -1397,7 +1397,7 @@ void Block::refresh_load_flux_face_
   // neighbor is coarser
   DataMsg * data_msg = new DataMsg;
   FluxData * flux_data = data()->flux_data();
-  
+
   const bool is_new = true;
   if (refresh_type == refresh_coarse) {
     // neighbor is coarser
@@ -1415,7 +1415,7 @@ void Block::refresh_load_flux_face_
 
   const int id_refresh = refresh.id();
   CHECK_ID(id_refresh);
-  
+
   ASSERT1 ("Block::refresh_load_flux_face_()",
            "id_refresh %d of refresh object is out of range",
            id_refresh,

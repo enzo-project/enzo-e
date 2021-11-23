@@ -116,6 +116,11 @@ void Monitor::header () const
 #else
   print ("Define","NEW_ADAPT    %s","no");
 #endif  
+#ifdef BUG_FIX_150
+  print ("Define","BUG_FIX_150  %s","Yes");
+#else
+  print ("Define","BUG_FIX_150  %s","no");
+#endif  
   print ("CHARM","CkNumPes()           %d",CkNumPes());
   print ("CHARM","CkNumNodes()         %d",CkNumNodes());
 }

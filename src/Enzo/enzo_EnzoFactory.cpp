@@ -10,6 +10,7 @@
 #include "charm_enzo.hpp"
 
 // #define DEBUG_NEW_ADAPT
+// #define TRACE_FACTORY
 
 //----------------------------------------------------------------------
 
@@ -61,7 +62,9 @@ void EnzoFactory::create_block_array
  int num_field_blocks
  ) const throw()
 {
-
+#ifdef TRACE_FACTORY
+  CkPrintf ("TRACE_FACTORY create_block_array %d %d %d\n",nbx,nby,nbz);
+#endif  
   CProxy_EnzoBlock enzo_block_array = enzo::block_array();
 
   int count_adapt;
@@ -89,9 +92,12 @@ void EnzoFactory::create_block_array
 
 	msg->set_data_msg(data_msg);
 
+#ifdef BUG_FIX_150
 	enzo::simulation()->set_msg_refine (index,msg);
 	enzo_block_array[index].insert (process_type(CkMyPe()));
-
+#else
+	enzo_block_array[index].insert (msg);
+#endif
 	// --------------------------------------------------
 
       }
@@ -112,6 +118,9 @@ void EnzoFactory::create_subblock_array
  int nx, int ny, int nz,
  int num_field_blocks) const throw()
 {
+#ifdef TRACE_FACTORY
+  CkPrintf ("TRACE_FACTORY create_subblock_array %d %d %d\n",nbx,nby,nbz);
+#endif  
   TRACE8("EnzoFactory::create_subblock_array(min_level %d na(%d %d %d) n(%d %d %d) num_field_blocks %d",
 	 min_level,nbx,nby,nbz,nx,ny,nz,num_field_blocks);
 
@@ -148,7 +157,7 @@ void EnzoFactory::create_subblock_array
 	for (int iz=0; iz<nbz; iz++) {
 
 	  int shift = -level;
-	  
+ 
 	  Index index(ix<<shift,iy<<shift,iz<<shift);
 
 	  index.set_level(level);
@@ -166,9 +175,12 @@ void EnzoFactory::create_subblock_array
 
 	  msg->set_data_msg(data_msg);
 
+#ifdef BUG_FIX_150
 	  enzo::simulation()->set_msg_refine (index,msg);
 	  enzo_block_array[index].insert (process_type(CkMyPe()));
-
+#else
+	  enzo_block_array[index].insert (msg);
+#endif
 	  // --------------------------------------------------
 
 	}
@@ -191,12 +203,18 @@ void EnzoFactory::create_block
  int count_adapt,
  int cycle, double time, double dt,
  int narray, char * array, int refresh_type,
+#ifdef OLD_ADAPT   
  int num_face_level,
  int * face_level,
+#endif 
  Adapt * adapt,
  Simulation * simulation
  ) const throw()
 {
+#ifdef TRACE_FACTORY
+  CkPrintf ("TRACE_FACTORY create_block %d %d %d\n");
+  index.print("TRACE_FACTORY create_block",2);
+#endif  
 
   TRACE3("EnzoFactory::create_block(%d %d %d)",nx,ny,nz);
   TRACE2("EnzoFactory::create_block() num_field_blocks %d  count_adapt %d",
@@ -217,21 +235,36 @@ void EnzoFactory::create_block
   int v3[3];
   index.values(v3);
   sprintf (buffer,"Adapt [ %8X %8X %8X ]\n",v3[0],v3[1],v3[2]);
-  adapt->print(buffer);
+  //  adapt->print(buffer);
 
-  int * face_level_new = new int[27];
-  std::fill_n(face_level_new,27,INDEX_UNDEFINED_LEVEL);
+  const int num_face_level = 27;
+  int * face_level = new int[num_face_level];
+  std::fill_n(face_level,27,INDEX_UNDEFINED_LEVEL);
 
+  index.print("index",2);
+  CkPrintf ("DEBUG num_neighbors %d\n",adapt->num_neighbors());
+
+  int na3[3];
+  bool p3[3];
+  cello::hierarchy()->root_blocks(na3,na3+1,na3+2);
+  cello::hierarchy()->get_periodicity(p3,p3+1,p3+2);
+  if (!p3[0]) na3[0] = 0;
+  if (!p3[1]) na3[1] = 0;
+  if (!p3[2]) na3[2] = 0;
+  
   for (int i=0; i<adapt->num_neighbors(); i++) {
     Index index_neighbor = adapt->index(i);
+    index_neighbor.print("index_neighbor",2);
     int level = index_neighbor.level();
     int im3[3]={0,0,0},ip3[3]={1,1,1};
-    index.categorize (index_neighbor,rank,im3,ip3);
+    index.categorize (index_neighbor,rank,im3,ip3,na3);
+    CkPrintf ("DEBUG_ADAPT categorize %d: %d:%d %d:%d %d:%d\n",
+              i,im3[0],ip3[0],im3[1],ip3[1],im3[2],ip3[2]);
     for (int iz=im3[2]; iz<ip3[2]; iz++) {
       for (int iy=im3[1]; iy<ip3[1]; iy++) {
         for (int ix=im3[0]; ix<ip3[0]; ix++) {
           const int i = ix + 3*(iy + 3*iz);
-          face_level_new[i] = level;
+          face_level[i] = level;
         }
       }
     }
@@ -304,12 +337,16 @@ void EnzoFactory::create_block
      count_adapt,
      cycle,time,dt,
      refresh_type,
-     num_face_level, face_level);
+     num_face_level, face_level,
+     adapt);
 
   msg->set_data_msg(data_msg);
 
+#ifdef BUG_FIX_150
   enzo::simulation()->set_msg_refine (index,msg);
-
   enzo_block_array[index].insert ( process_type(CkMyPe()) );
+#else
+  enzo_block_array[index].insert (msg);
+#endif
 }
 

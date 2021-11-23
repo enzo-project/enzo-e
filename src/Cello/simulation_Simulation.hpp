@@ -63,6 +63,7 @@ public: // interface
   // BLOCK INITIALIZATION WITH MsgRefine
   //----------------------------------------------------------------------
 
+#ifdef BUG_FIX_150
   /// Request by newly created Block to get its MsgRefine object
   virtual void p_get_msg_refine(Index index);
 
@@ -70,6 +71,7 @@ public: // interface
   void set_msg_refine (Index index, MsgRefine *);
   /// Return MsgRefine * for a newly created Block and remove from list
   MsgRefine * get_msg_refine (Index index);
+#endif
 
   //----------------------------------------------------------------------
   // ACCESSOR FUNCTIONS
@@ -537,7 +539,9 @@ protected: // attributes
   /// Saved latest checkpoint directory for creating symlink
   char dir_checkpoint_[256];
 
+#ifdef BUG_FIX_150
   std::map<Index,MsgRefine *> msg_refine_map_;
+#endif
 
   /// Currently active output object
   int index_output_;

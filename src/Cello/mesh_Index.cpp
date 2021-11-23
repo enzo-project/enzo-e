@@ -250,7 +250,6 @@ void Index::array (int * ix, int *iy, int *iz) const
 
 int Index::adjacency (Index index, int rank) const
 {
-
   const int L1 = level();
   const int L2 = index.level();
   const int LM = std::max(L1,L2);
@@ -276,7 +275,7 @@ int Index::adjacency (Index index, int rank) const
       (l2[1] <= l1[1] && r1[1] <= r2[1]) ? 1:0,
       (l1[2] <= l2[2] && r2[2] <= r1[2]) ||
       (l2[2] <= l1[2] && r1[2] <= r2[2]) ? 1:0 };
-   
+
   int it3[3] =  {(r1[0] == l2[0] || l1[0] == r2[0]) ? 1:0,
                  (r1[1] == l2[1] || l1[1] == r2[1]) ? 1:0,
                  (r1[2] == l2[2] || l1[2] == r2[2]) ? 1:0};

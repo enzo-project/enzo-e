@@ -91,9 +91,12 @@ module mesh {
 
   array[Index] Block {
 
-    entry Block (MsgRefine * msg);
+#ifdef BUG_FIX_150
     entry Block (process_type ip_source);
     entry void p_set_msg_refine(MsgRefine * msg);
+#else
+    entry Block (MsgRefine * msg);
+#endif
     entry Block();
 
     //--------------------------------------------------

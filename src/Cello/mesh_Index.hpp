@@ -16,9 +16,9 @@ class NodeBits {
 
 public:
   
-  unsigned  tree : INDEX_BITS_TREE; 
   unsigned level : INDEX_BITS_LEVEL; 
   unsigned array : INDEX_BITS_ARRAY;
+  unsigned  tree : INDEX_BITS_TREE; 
 
   // maximum INDEX_BITS_TREE levels / bits
   // L    T
@@ -53,26 +53,26 @@ public:
 
   Index();
 
-  Index(int ix, int iy, int iz);
+  Index(int iax, int iay, int iaz);
 
   bool operator == (const Index & index) const;
 
   bool operator != (const Index & index) const;
 
-  int operator [] (std::size_t i) const
+  inline int operator [] (std::size_t i) const
   { return v_[i]; }
 
   void clear () ;
-  
+
   Index index_parent (int min_level = 0) const;
 
-  Index index_child (const int ic3[3], int min_level=0) const
+  inline Index index_child (const int ic3[3], int min_level=0) const
   { return index_child(ic3[0],ic3[1],ic3[2],min_level); }
 
   Index index_child (int icx, int icy, int icz, int min_level = 0) const;
 
   /// Return the index for the given neighbor
-  Index index_neighbor (const int if3[3], const int n3[3]) const;
+  Index index_neighbor (const int if3[3], const int na3[3]) const;
 
   /// Return the index of the ancestor in the given level_ancestor <= level
   /// default is root level
@@ -86,7 +86,7 @@ public:
   (int axis, int face, int narray) const;
 
   /// Whether the face is on the domain boundary
-  bool is_on_boundary (const int if3[3], const int n3[3]) const;
+  bool is_on_boundary (const int if3[3], const int na3[3]) const;
 
   /// Whether an index is in the same subtree relative to a given
   /// root level
@@ -122,7 +122,7 @@ public:
   // unsigned value (int axis) const;
 
   /// Set the Index according to raw bit values
-  void set_values (const int v3[3])
+  inline void set_values (const int v3[3])
   {
     v_[0] = v3[0];
     v_[1] = v3[1];
@@ -130,7 +130,7 @@ public:
   }
 
   /// Return the packed bit index for the given axis
-  void values (int v3[3]) const
+  inline void values (int v3[3]) const
   { v3[0] = v_[0];
     v3[1] = v_[1];
     v3[2] = v_[2];
@@ -141,27 +141,30 @@ public:
   void set_level(int level);
 
   /// Return the indices of the level-0 node containing this node
-  void array (int * ix, int *iy, int *iz) const;
+  void array (int * iax, int *iay, int *iaz) const;
 
   /// Accumulate array part of an index
-  void set_array(int ix, int iy, int iz);
+  void set_array(int iax, int iay, int iaz);
 
   /// Return the packed tree bits for each axis
   void tree (int * bx = 0, int *by = 0, int *bz = 0,
              int level=INDEX_UNDEFINED_LEVEL) const;
   
   /// child index of this node in parent
-  void child (int level, int * ix, int * iy, int * iz, int min_level = 0) const;
+  void child (int level, int * icx, int * icy, int * icz,
+              int min_level = 0) const;
 
   /// Set the child indicies of this node in the parent
-  void set_child(int level, int ix, int iy=0, int iz=0, int min_level = 0);
+  void set_child(int level, int icx, int icy=0, int icz=0,
+                 int min_level = 0);
 
   /// Set this Index to be the given child of the index
-  void push_child(int ix, int iy=0, int iz=0, int min_level = 0)
+  inline void push_child(int icx, int icy=0, int icz=0,
+                  int min_level = 0)
   {
     const int level = this->level();
     set_level (level+1);
-    set_child (level+1,ix,iy,iz,min_level);
+    set_child (level+1,icx,icy,icz,min_level);
   }
 
   void print (std::string msg, int level) const;
@@ -172,7 +175,6 @@ public:
 	      const int nb3[3],
 	      bool no_nl,
 	      void * simulation = 0) const;
-  
 
   void write (int ip,
 	      const char * msg,
@@ -184,11 +186,15 @@ public:
 
   /// Comparison operator required for Charm++ pup()
   friend bool operator < (const Index & x, const Index & y) {
-    if (x.v_[2] < y.v_[2]) return true;
-    if (x.v_[2] > y.v_[2]) return false;
-    if (x.v_[1] < y.v_[1]) return true;
-    if (x.v_[1] > y.v_[1]) return false;
-    return  (x.v_[0] < y.v_[0]);
+    Index a = x;
+    Index b = y;
+    a.clean_();
+    b.clean_();
+    if (a.v_[2] < b.v_[2]) return true;
+    if (a.v_[2] > b.v_[2]) return false;
+    if (a.v_[1] < b.v_[1]) return true;
+    if (a.v_[1] > b.v_[1]) return false;
+    return  (a.v_[0] < b.v_[0]);
   }
 
   ///--------------------

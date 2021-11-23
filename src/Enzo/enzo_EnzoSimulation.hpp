@@ -40,8 +40,10 @@ public: // functions
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
+#ifdef BUG_FIX_150
   /// Request by newly created EnzoBlock to get its MsgRefine object
   virtual void p_get_msg_refine(Index index);
+#endif
 
   /// Barrier after constructor to ensure all EnzoSimulation objects created
   void r_startup_begun (CkReductionMsg *);

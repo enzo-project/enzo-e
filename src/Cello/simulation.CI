@@ -18,8 +18,10 @@ module simulation {
 
     entry Simulation (const char filename[n], int n); // [S0]
 
+#ifdef BUG_FIX_150
     entry void p_get_msg_refine (Index);
-    
+#endif
+
     entry void r_initialize_block_array (CkReductionMsg * msg);    // [SC2]
 
     entry void s_write (); // [SC6]

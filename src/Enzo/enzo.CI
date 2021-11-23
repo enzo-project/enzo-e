@@ -149,15 +149,20 @@ module enzo {
 
     entry void r_startup_begun (CkReductionMsg *);
 
+#ifdef BUG_FIX_150
     entry void p_get_msg_refine(Index index);
-  }
+#endif
+}
 
   array[Index] EnzoBlock : Block {
 
-    entry EnzoBlock (MsgRefine * msg);
+#ifdef BUG_FIX_150
     entry EnzoBlock (process_type ip_source);
-    entry EnzoBlock();
     entry void p_set_msg_refine (MsgRefine * msg);
+#else
+    entry EnzoBlock (MsgRefine * msg);
+#endif
+    entry EnzoBlock();
 
     // EnzoMethodTurbulence synchronization entry methods
     entry void p_method_turbulence_end(CkReductionMsg *msg);

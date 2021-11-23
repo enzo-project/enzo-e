@@ -274,12 +274,14 @@ void Simulation::pup (PUP::er &p)
 
   PUParray(p,dir_checkpoint_,256);
 
+#ifdef BUG_FIX_150
   ASSERT1("Simulation::pup()",
 	  "msg_refine_map_ is assumed to be empty but has size %lu",
 	  msg_refine_map_.size(),
 	  (msg_refine_map_.size() == 0));
-	  
+
   //  p | msg_refine_map_;
+#endif
   p | index_output_;
   p | num_solver_iter_;
   p | max_solver_iter_;
@@ -298,6 +300,8 @@ void Simulation::finalize() throw()
 }
 
 //----------------------------------------------------------------------
+
+#ifdef BUG_FIX_150
 
 void Simulation::p_get_msg_refine(Index index)
 {
@@ -344,6 +348,7 @@ MsgRefine * Simulation::get_msg_refine(Index index)
   return msg;
 }
 
+#endif
 //======================================================================
 
 void Simulation::initialize_simulation_() throw()

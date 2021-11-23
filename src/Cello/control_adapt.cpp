@@ -18,6 +18,17 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
+// #define TRACE_ADAPT
+
+#ifdef TRACE_ADAPT
+#   undef TRACE_ADAPT
+#   define TRACE_ADAPT(MSG,BLOCK) \
+  CkPrintf ("TRACE_ADAPT %s %s\n",BLOCK->name().c_str(),std::string(MSG).c_str()); \
+  fflush(stdout);
+#else
+#   define TRACE_ADAPT(MSG,BLOCK) /* ... */
+#endif
+
 //======================================================================
 
 /// @brief First function in the adapt phase: apply local refinement criteria.
@@ -28,6 +39,7 @@
 
 void Block::adapt_enter_()
 {
+  TRACE_ADAPT("adapt_enter_",this);
   if ( do_adapt_()) {
 
     adapt_begin_();
@@ -43,10 +55,14 @@ void Block::adapt_enter_()
 
 void Block::adapt_begin_()
 {
+  TRACE_ADAPT("adapt_begin_",this);
   cello::simulation()->set_phase(phase_adapt);
 
   const int level_maximum = cello::config()->mesh_max_level;
 
+#ifdef NEW_ADAPT
+  adapt_.reset_neighbors();
+#endif  
   level_next_ = adapt_compute_desired_level_(level_maximum);
 
   const int min_face_rank = cello::config()->adapt_min_face_rank;
@@ -66,6 +82,7 @@ void Block::adapt_begin_()
 /// detection.
 void Block::adapt_called_()
 {
+  TRACE_ADAPT("adapt_called_",this);
   adapt_send_level();
 
   control_sync_quiescence (CkIndex_Main::p_adapt_next());
@@ -82,6 +99,7 @@ void Block::adapt_called_()
 /// adapt_end_().
 void Block::adapt_next_()
 {
+  TRACE_ADAPT("adapt_next_",this);
   update_levels_();
 
   if (is_leaf()) {
@@ -96,6 +114,7 @@ void Block::adapt_next_()
 
 void Block::adapt_update_()
 {
+  TRACE_ADAPT("adapt_update_",this);
   if (index_.is_root()) thisProxy.doneInserting();
 
   adapt_end_();
@@ -114,6 +133,7 @@ void Block::adapt_update_()
 /// been deleted.
 void Block::adapt_end_()
 {
+  TRACE_ADAPT("adapt_end_",this);
   adapt_.reset_face_level(Adapt::LevelType::last);
 
   sync_coarsen_.reset();
@@ -158,6 +178,7 @@ bool Block::do_adapt_()
 /// @return The desired level based on local refinement criteria.
 int Block::adapt_compute_desired_level_(int level_maximum)
 {
+  TRACE_ADAPT("adapt_compute_desired_level_",this);
   if (! is_leaf()) return adapt_same;
 
   int adapt = adapt_unknown;
@@ -250,7 +271,7 @@ void Block::adapt_refine_()
       cello::field_descr()->ghost_depth(0,g3,g3+1,g3+2);
       Refresh * refresh = new Refresh;
       refresh->add_all_data();
-      FieldFace * field_face = create_face 
+      FieldFace * field_face = create_face
 	(if3,ic3,g3, refresh_fine, refresh, true);
 
       // Create data message object to send
@@ -279,8 +300,10 @@ void Block::adapt_refine_()
 	 adapt_step_,
 	 cycle_,time_,dt_,
 	 narray, array, refresh_fine,
+#ifdef OLD_ADAPT
 	 27,
          &child_face_level_curr_.data()[27*IC3(ic3)],
+#endif 
          &adapt_,
 	 cello::simulation());
 
@@ -418,10 +441,7 @@ void Block::adapt_send_level()
 {
   if (!is_leaf()) return;
   const int level = this->level();
-  const int min_face_rank = cello::config()->adapt_min_face_rank;
-  const int min_level     = cello::config()->mesh_min_level;
-  ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_,
-					     neighbor_leaf,min_level,0);
+  ItNeighbor it_neighbor = this->it_neighbor(index_);
   int of3[3];
 
   while (it_neighbor.next(of3)) {

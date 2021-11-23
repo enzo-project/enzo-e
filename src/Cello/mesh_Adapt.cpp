@@ -11,7 +11,7 @@
 
 bool Adapt::insert_neighbor (Index index, bool is_sibling)
 {
-  const bool found = is_neighbor_(index);
+  const bool found = is_neighbor(index);
 
   if (! found) {
     index_map_[index] = neighbor_list_.size();
@@ -29,13 +29,24 @@ bool Adapt::insert_neighbor (Index index, bool is_sibling)
 bool Adapt::delete_neighbor (Index index)
 {
   int i;
-  const bool found = is_neighbor_(index,&i);
+  const bool found = is_neighbor(index,&i);
 
   // If found...
   if (found) {
     delete_neighbor_(i);
   }
   return found;
+}
+
+//----------------------------------------------------------------------
+
+void Adapt::reset_neighbors ()
+{
+  const int n = num_neighbors();
+
+  for (int i=0; i<n; i++) {
+    reset_neighbor_(i);
+  }
 }
 
 //----------------------------------------------------------------------
@@ -250,6 +261,15 @@ void Adapt::print(std::string message) const
 {
   CkPrintf ("DEBUG_ADAPT adapt.print %s\n",message.c_str());
   const int n = num_neighbors();
+#ifdef OLD_ADAPT
+  CkPrintf ("DEBUG_ADAPT    |face_level| = %d\n",face_level_[0].size());
+  for (int i=0; i<face_level_[0].size(); i++) {
+    CkPrintf ("   %d: %d %d %d\n",i,
+              face_level_[0].at(0),
+              face_level_[0].at(1),
+              face_level_[0].at(2));
+  }
+#endif  
   CkPrintf ("DEBUG_ADAPT    num_neighbors %d\n",n);
   int v3[3];
   index_.values(v3);
@@ -280,7 +300,75 @@ void Adapt::print(std::string message) const
 
 //======================================================================
 
-bool Adapt::is_neighbor_ (Index index, int * ip) const
+int Adapt::data_size () const
+{
+  int size = 0;
+
+  SIZE_VECTOR_TYPE(size,int,face_level_[0]);
+  SIZE_VECTOR_TYPE(size,int,face_level_[1]);
+  SIZE_VECTOR_TYPE(size,int,face_level_[2]);
+  SIZE_SCALAR_TYPE(size,int,rank_);
+  SIZE_SCALAR_TYPE(size,int,num_children_);
+  SIZE_SCALAR_TYPE(size,int,level_now_);
+  SIZE_SCALAR_TYPE(size,int,level_min_);
+  SIZE_SCALAR_TYPE(size,int,level_max_);
+  SIZE_SCALAR_TYPE(size,bool,i_can_coarsen_);
+  SIZE_SET_TYPE(size,Index,index_set_);
+  SIZE_MAP_TYPE(size,Index,int,index_map_);
+  SIZE_VECTOR_TYPE(size,NeighborInfo,neighbor_list_);
+  SIZE_SCALAR_TYPE(size,Index,index_);
+
+  return size;
+}
+
+// ----------------------------------------------------------------------
+
+char * Adapt::save_data (char * buffer) const
+{
+  char * pc = buffer;
+
+  SAVE_VECTOR_TYPE(pc,int,face_level_[0]);
+  SAVE_VECTOR_TYPE(pc,int,face_level_[1]);
+  SAVE_VECTOR_TYPE(pc,int,face_level_[2]);
+  SAVE_SCALAR_TYPE(pc,int,rank_);
+  SAVE_SCALAR_TYPE(pc,int,num_children_);
+  SAVE_SCALAR_TYPE(pc,int,level_now_);
+  SAVE_SCALAR_TYPE(pc,int,level_min_);
+  SAVE_SCALAR_TYPE(pc,int,level_max_);
+  SAVE_SCALAR_TYPE(pc,bool,i_can_coarsen_);
+  SAVE_SET_TYPE(pc,Index,index_set_);
+  SAVE_MAP_TYPE(pc,Index,int,index_map_);
+  SAVE_VECTOR_TYPE(pc,NeighborInfo,neighbor_list_);
+  SAVE_SCALAR_TYPE(pc,Index,index_);
+
+  return pc;
+}
+
+// ----------------------------------------------------------------------
+
+char * Adapt::load_data (char * buffer)
+{
+  char * pc = buffer;
+  LOAD_VECTOR_TYPE(pc,int,face_level_[0]);
+  LOAD_VECTOR_TYPE(pc,int,face_level_[1]);
+  LOAD_VECTOR_TYPE(pc,int,face_level_[2]);
+  LOAD_SCALAR_TYPE(pc,int,rank_);
+  LOAD_SCALAR_TYPE(pc,int,num_children_);
+  LOAD_SCALAR_TYPE(pc,int,level_now_);
+  LOAD_SCALAR_TYPE(pc,int,level_min_);
+  LOAD_SCALAR_TYPE(pc,int,level_max_);
+  LOAD_SCALAR_TYPE(pc,bool,i_can_coarsen_);
+  LOAD_SET_TYPE(pc,Index,index_set_);
+  LOAD_MAP_TYPE(pc,Index,int,index_map_);
+  LOAD_VECTOR_TYPE(pc,NeighborInfo,neighbor_list_);
+  LOAD_SCALAR_TYPE(pc,Index,index_);
+
+  return pc;
+}
+
+//======================================================================
+
+bool Adapt::is_neighbor (Index index, int * ip) const
 {
   // Search for index
   int i;
@@ -305,6 +393,16 @@ void Adapt::delete_neighbor_ (int i)
   }
   // ... and resize
   neighbor_list_.resize(n-1);
+}
+
+//----------------------------------------------------------------------
+
+void Adapt::reset_neighbor_ (int i)
+{
+  NeighborInfo & neighbor = neighbor_list_[i];
+  neighbor.level_min_ = neighbor.level_now_ - 1;
+  neighbor.level_max_ = neighbor.level_now_ + 1;
+  neighbor.can_coarsen_ = false;
 }
 
 //----------------------------------------------------------------------

@@ -19,22 +19,22 @@ public: // interface
   Adapt ()
     : rank_(0)
   {
-#ifdef OLD_ADAPT
+    //#ifdef OLD_ADAPT
     face_level_[0].resize(27);
     face_level_[1].resize(27);
     face_level_[2].resize(27*8);
     reset_face_level(LevelType::curr);
     reset_face_level(LevelType::next);
     reset_face_level(LevelType::last);
-#endif
+    //#endif
   }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   {
-#ifdef OLD_ADAPT
+    //#ifdef OLD_ADAPT
     PUParray(p,face_level_,3);
-#endif
+    //#endif
 
     p | rank_;
     p | num_children_;
@@ -53,7 +53,7 @@ public: // interface
 
   //----------------------------------------------------------------------
 
-#ifdef OLD_ADAPT
+  // #ifdef OLD_ADAPT
   /// Set level for the block in the given face and (neighbor's) child
   void set_face_level (const int if3[3], LevelType level_type,int level)
   {
@@ -124,7 +124,7 @@ public: // interface
     reset_face_level(LevelType::next);
     reset_face_level(LevelType::last);
   }
-#endif /* OLD_ADAPT */
+  // #endif /* OLD_ADAPT */
 
   // OLD API
   //======================================================================
@@ -144,6 +144,9 @@ public: // interface
   /// Insert the given neighbor into the list of neighbors. Return
   /// true if successful and false if neighbor already inserted
   bool insert_neighbor  (Index index, bool is_sibling);
+
+  /// Reset neighbor level bounds for next adapt phase
+  void reset_neighbors ();
 
   /// Delete the given neighbor from list of neighbors. Return true if
   /// successful and false if neighbor not found.
@@ -205,54 +208,32 @@ public: // interface
   inline Index index(int i) const { return neighbor_list_.at(i).index_; }
   void print(std::string message) const;
 
-private: // methods
+  ///--------------------
+  /// PACKING / UNPACKING
+  ///--------------------
+  
+  /// Return the number of bytes required to serialize the data object
+  int data_size () const;
+
+  /// Serialize the object into the provided empty memory buffer.
+  char * save_data (char * buffer) const;
+
+  /// Restore the object from the provided initialized memory buffer data.
+  char * load_data (char * buffer);
 
   /// Return whether the index is in the list of neighbors, and return
-  /// its index if it is (or one past last indicex if not)
-  bool is_neighbor_ (Index index, int * ip = 0) const;
+  /// its index if it is (or one past last index if not)
+  bool is_neighbor (Index index, int * ip = 0) const;
+
+private: // methods
 
   void copy_ (const Adapt & adapt);
 
   void delete_neighbor_ (int i);
+
+  void reset_neighbor_ (int i);
   
 private: // attributes
-
-#ifdef OLD_ADAPT
-  // NOTE: change pup() function whenever attributes change
-  std::vector<int> face_level_[3];
-#endif
-
-  /// Dimensionality of the problem
-    int rank_;
-  
-    /// Number of children per block; set using cello::num_children() but
-    /// may be updated for testing via set_rank
-    int num_children_;
-
-    int level_now_;
-    int level_min_;
-    int level_max_;
-
-    /// Current (starting) level for neighbors
-    //  std::vector<int> level_now_;
-
-    /// Level bounds for neighbors
-    //  std::vector<int> level_min_;
-    //  std::vector<int> level_max_;
-
-    /// Whether the neighbor block is a sibling (shares same coarse
-    /// parent)
-    //  std::vector<bool> is_sibling_;
-
-    /// Whether the sibling block could coarsen if all of its siblings
-    /// can coarsen.
-    //  std::vector<bool> can_coarsen_;
-
-    bool i_can_coarsen_;
-
-    /// Mapping of neighbor (and self) index to level bound arrays
-    std::set<Index> index_set_;
-    std::map<Index,int> index_map_;
 
   /// List of neighbor indices (and self)
   class NeighborInfo {
@@ -274,9 +255,30 @@ private: // attributes
     bool can_coarsen_;
   };
     
+  // #ifdef OLD_ADAPT
+  // NOTE: change pup() function whenever attributes change
+  std::vector<int> face_level_[3];
+  // #endif
+
+  /// Dimensionality of the problem
+  int rank_;
+  
+  /// Number of children per block; set using cello::num_children() but
+  /// may be updated for testing via set_rank
+  int num_children_;
+
+  int level_now_;
+  int level_min_;
+  int level_max_;
+
+  bool i_can_coarsen_;
+
+  /// Mapping of neighbor (and self) index to level bound arrays
+  std::set<Index> index_set_;
+  std::map<Index,int> index_map_;
+
   std::vector<NeighborInfo> neighbor_list_;
 
-  //  std::vector<Index>  index_list_;
   Index index_;
 };
 

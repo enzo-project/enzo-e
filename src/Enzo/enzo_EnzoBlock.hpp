@@ -99,15 +99,17 @@ public:
 
 public: // interface
 
-  /// Initialize the EnzoBlock chare array
-  EnzoBlock ( MsgRefine * msg );
-
+#ifdef BUG_FIX_150  
   /// Initialize the EnzoBlock chare array
   EnzoBlock ( process_type ip_source );
-  
   /// Initialize EnzoBlock using MsgRefine returned by creating process
   virtual void p_set_msg_refine(MsgRefine * msg);
-  
+#else
+  /// Initialize the EnzoBlock chare array
+  EnzoBlock ( MsgRefine * msg );
+#endif
+
+
   /// Initialize an empty EnzoBlock
   EnzoBlock()
     :  CBase_EnzoBlock(),
