@@ -115,7 +115,22 @@ protected: // methods
               enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz, 
               double clight, int i) throw(); 
 
+  double get_beta (double T, int species) throw();
+
+  double get_alpha (double T, int species, char rec_case) throw();
+
+  int get_b_boolean (double E_lower, double E_upper, int species) throw();
+
+  void recombination_photons (EnzoBlock * enzo_block, enzo_float * N, 
+                              enzo_float * T, int i, double E_lower, double E_upper) throw();
+
+  void recombination_chemistry (EnzoBlock * enzo_block) throw();
+
   double sigma_vernier (double energy, int type) throw();
+
+  void get_photoionization_rates (EnzoBlock * enzo_block) throw();
+
+  void get_photoheating_rate (EnzoBlock * enzo_block) throw();
 
   void compute_ (Block * block) throw();
 

@@ -740,9 +740,230 @@ double EnzoMethodRamsesRT::sigma_vernier (double energy, int type) throw()
 
 //---------------------------------
 
+void EnzoMethodRamsesRT::get_photoionization_rates (EnzoBlock * enzo_block) throw() 
+{
+  // first half of eq. A21 
+}
+
+//---------------------------------
+
+void EnzoMethodRamsesRT::get_photoheating_rate (EnzoBlock * enzo_block) throw()
+{
+  // equation A16
+}
+
+//---------------------------------
+double EnzoMethodRamsesRT::get_beta (double T, int species) throw()
+{
+  // Return collisional ionization rate coefficients according to appendix E1
+
+  double a,b;
+  switch (species) {
+    case 0: // HI
+      a = 5.85e-11;
+      b = 157809.1;
+      break;  
+    case 1: // HeI
+      a = 2.38e-11;
+      b = 285335.4;
+      break;
+    case 2: // HeII
+      a = 5.68e-12;
+      b = 631515;
+      break;
+  }
+ 
+  return a*sqrt(T)/(1+sqrt(T/1e5)) * pow(cello::e,-b/T);
+}
+
+//---------------------------------
+
+double EnzoMethodRamsesRT::get_alpha (double T, int species, char rec_case) throw()
+{
+  // Return recombination rate coefficients according to appendix E2
+  // Takes temperature, species, and recombination type (case A or B) 
+  // and spits out the rate coefficient
+  
+  double lambda, lambda_0;
+  double a,b,c,d;
+  
+  switch (rec_case) {
+    case 'A': // case A recombination
+      switch (species) {
+        case 0: // HII + e -> HI + photon
+          lambda = 315614 / T;
+          lambda_0 = 0.522;
+          a = 1.269e-13;
+          b = 1.503;
+          c = 0.47;
+          d = 1.923;
+          break;
+        case 1: // HeII + e -> HeI + photon
+          lambda = 570670 / T;
+          return 3e-14 * pow(lambda,0.654);
+        case 2: // HeIII + e -> HeII + photon
+          lambda = 1263030 / T;
+          lambda_0 = 0.522;
+          a = 2.538e-13;
+          b = 1.503;
+          c = 0.47;
+          d = 1.923;
+          break;
+      }    
+
+      break;
+
+    case 'B': // case B recombination
+      switch (species) {
+        case 0: // HII + e -> HI + photon
+          lambda = 315614 / T;
+          lambda_0 = 2.74;
+          a = 2.753e-14;
+          b = 1.5;
+          c = 0.407;
+          d = 2.242;
+          break;
+        case 1: // HeII + e -> HeI + photon
+          lambda = 570670 / T;
+          return 1.26e-14 * pow(lambda,0.75);
+        case 2: // HeIII + e -> HeII + photon
+          lambda = 1263030 / T;
+          lambda_0 = 2.74;
+          a = 5.506e-14;
+          b = 1.5;
+          c = 0.407;
+          d = 2.242;
+          break;
+      }    
+
+      break;
+
+  } 
+ 
+  return a * pow(lambda,b) * pow( 1+pow(lambda/lambda_0,c), -d); 
+}
+
+//---------------------------------
+int EnzoMethodRamsesRT::get_b_boolean (double E_lower, double E_upper, int species) throw()
+{
+  // boolean 1 or 0 which specifies whether or not photon from given recombination
+  // lies within given energy range
+ 
+  // QUESTION: What do I do if case A recombination is in the group, but case B is not???
+  //           What energy do I use for case B recombination??
+ 
+  // On-the-spot approximation assumes all recombination photons get absorbed immediately
+  //     -> b = 0
+  //
+  // Case B recombination energies are just the ionization energies
+
+  switch (species) { // species after recombination
+    case 0: // HI
+      if ( (E_lower <= 13.6 ) && (13.6  < E_upper)) return 1;
+    case 1: // HeI
+      if ( (E_lower <= 24.59) && (24.59 < E_upper)) return 1;
+    case 2: // HeII
+      if ( (E_lower <= 54.42) && (54.42 < E_upper)) return 1;
+  }
+  
+  // if energy not in this group, return 0
+  return 0;
+}
+
+//---------------------------------
+
+
+void EnzoMethodRamsesRT::recombination_photons (EnzoBlock * enzo_block, enzo_float * N, 
+                                                enzo_float * T, int i, double E_lower, double E_upper) throw()
+{
+  // update photon_density to account for recombination (2nd half of eq 25).
+  // this is called once for each group.
+
+  Field field = enzo_block->data()->field();
+  int igroup = enzo_block->method_ramses_rt_igroup;
+
+  if (!field.is_field("density")) return;
+  
+  //enzo_float * density = (enzo_float *) field.values("density");
+  enzo_float * e_density = (enzo_float *) field.values("e_density");
+
+  std::vector<std::string> chemistry_fields = {"HI_density", 
+                                               "HeI_density", "HeII_density"};
+
+  double dN_dt = 0.0;
+  for (int j=0; j<chemistry_fields.size(); j++) {  
+    enzo_float * density_j = (enzo_float *) field.values(chemistry_fields[j]);     
+    int b = get_b_boolean(E_lower, E_upper, j);
+  
+    //TODO: To speed things up, could just have get_alpha return alpha_A - alpha_B
+    double alpha_A = get_alpha(T[i], j, 'A');
+    double alpha_B = get_alpha(T[i], j, 'B');     
+
+    dN_dt += b*(alpha_A-alpha_B) * density_j[i]*e_density[i];
+  }
+  
+  N [i] += dN_dt * enzo_block->dt;
+}
+
+//---------------------------------
+
+void EnzoMethodRamsesRT::recombination_chemistry (EnzoBlock * enzo_block) throw()
+{
+  // update density fields to account for recombination (2nd half of eqs. 28-30).
+  // this does a sum over all groups
+  // Grackle handles collisional ionization and photoionization (have to feed it photoionization rates though)
+  Field field = enzo_block->data()->field();
+  int mx,my,mz;  
+  field.dimensions(0,&mx, &my, &mz); //field dimensions, including ghost zones
+  int gx,gy,gz;
+  field.ghost_depth(0,&gx, &gy, &gz);
+   
+  double xm,ym,zm;
+  double xp,yp,zp;
+  enzo_block->lower(&xm,&ym,&zm);
+  enzo_block->upper(&xp,&yp,&zp);
+
+
+  enzo_float * HI_density    = (enzo_float *) field.values("HI_density");
+  enzo_float * HII_density   = (enzo_float *) field.values("HII_density");
+  enzo_float * HeI_density   = (enzo_float *) field.values("HeI_density");
+  enzo_float * HeII_density  = (enzo_float *) field.values("HeII_density");
+  enzo_float * HeIII_density = (enzo_float *) field.values("HeIII_density");
+  enzo_float * e_density     = (enzo_float *) field.values("e_density");
+
+  enzo_float * temperature = (enzo_float *) field.values("temperature");
+
+  for (int iz=gz; iz<mz-gz; iz++) {
+    for (int iy=gy; iy<my-gy; iy++) {
+      for (int ix=gx; ix<mx-gx; ix++) {
+        int i = INDEX(ix,iy,iz,mx,my); //index of current cell
+         
+        double alphaA_HII   = get_alpha(temperature[i],0,'A');
+        double alphaA_HeII  = get_alpha(temperature[i],1,'A');
+        double alphaA_HeIII = get_alpha(temperature[i],2,'A');
+        
+        // eq. 28
+        HII_density  [i] -= HII_density[i]*alphaA_HII*e_density[i] * enzo_block->dt;
+
+        //eq. 29
+        HeII_density [i] += (HeIII_density[i]*alphaA_HeIII - HeII_density[i]*alphaA_HeII) 
+                                  *e_density[i] * enzo_block->dt;
+
+        //eq. 30
+        HeIII_density[i] -= HeIII_density[i]*alphaA_HeIII*e_density[i] * enzo_block->dt;
+      }
+    }
+  } 
+
+}
+
+//---------------------------------
+
 void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * N, 
                      enzo_float * Fx, enzo_float * Fy, enzo_float * Fz, double clight, int i) throw()
 {
+  // TODO: Need to also update photon density field and to account for recombinations (2nd half of eq. 25)
+  //       Right now, this only accounts for attenuation (first half)
   const EnzoConfig * enzo_config = enzo::config();
   
   Field field = enzo_block->data()->field();
@@ -809,13 +1030,19 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
   // array incremenent (because 3D array of field values are flattened to 1D)
   const int idx = 1;
   const int idy = mx;
-  const int idz = mx*my;  
+  const int idz = mx*my; 
+
+  // energy bounds for this group
+  double E_lower = enzo_config->method_ramses_rt_bin_lower[enzo_block->method_ramses_rt_igroup]; 
+  double E_upper = enzo_config->method_ramses_rt_bin_upper[enzo_block->method_ramses_rt_igroup]; 
 
   std::string istring = std::to_string(enzo_block->method_ramses_rt_igroup);
   enzo_float * N  = (enzo_float *) field.values("photon_density_" + istring);
   enzo_float * Fx = (enzo_float *) field.values("flux_x_" + istring);
   enzo_float * Fy = (enzo_float *) field.values("flux_y_" + istring);
   enzo_float * Fz = (enzo_float *) field.values("flux_z_" + istring);
+
+  enzo_float * T = (enzo_float *) field.values("temperature");
 
   const int m = mx*my*mz;
   // extra copy of fields needed to store
@@ -871,8 +1098,14 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
         // now get updated photon densities
         Nnew[i] += N_update;
  
-        // add interactions with matter, ignoring chemistry for now. Chemistry due to RT can be handled by Grackle 
-        add_attenuation(enzo_block, Nnew, Fxnew, Fynew, Fznew, enzo_config->method_ramses_rt_clight, i);        
+        // add interactions with matter 
+        add_attenuation(enzo_block, Nnew, Fxnew, Fynew, Fznew, enzo_config->method_ramses_rt_clight, i); 
+
+        // update photon density due to recombinations
+        // TODO: Only do this if not using on-the-spot approximation
+        recombination_photons(enzo_block, Nnew, T, i, E_lower, E_upper);
+             
+
       }
     }   
   } 
@@ -927,8 +1160,13 @@ void EnzoMethodRamsesRT::call_solve_transport_eqn(EnzoBlock * enzo_block) throw(
   enzo_block->method_ramses_rt_igroup = 0;
   for (int i=0; i<enzo_config->method_ramses_rt_N_groups;i++) {
     this->solve_transport_eqn(enzo_block);
+
+    //TODO: Calculate photoheating/ionization rates here
+    //      Involves sum over groups, accumulate sum in this loop
     enzo_block->method_ramses_rt_igroup += 1;
   }
+  // update chemistry fields to account for recombinations
+  recombination_chemistry(enzo_block); 
 }
 
 void EnzoBlock::p_method_ramses_rt_solve_transport_eqn()
