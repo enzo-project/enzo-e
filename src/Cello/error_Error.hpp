@@ -310,7 +310,7 @@ namespace cello {
    const char * message,
    ...);
 
-  void error();
+  [[ noreturn ]] void error();
 }
 
 #endif /* ERROR_ERROR_HPP */
