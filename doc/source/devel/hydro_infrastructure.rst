@@ -160,7 +160,7 @@ the row for the "velocity" quantity registers the ``"velocity_x"``,
 
 At present, the registry currently provides operations:
 
-  * to access quantity properties registerred in ``FIELD_TABLE`` at
+  * to access quantity properties registered in ``FIELD_TABLE`` at
     runtime
   * to provide a list of known groups that can be used in the input file
     to identify fields as passively advected scalars (as of now, the
@@ -186,8 +186,7 @@ classes include:
     converting the integration quantities or primitives)
 
   * ``EnzoReconstructor`` - encapsulates interpolation algorithms to
-    reconstruct left/right interface states of from cell-centered
-    values
+    reconstruct left/right interface states of cell-centered values
 
   * ``EnzoRiemann`` - encapsulates various Rimann Solver algorithms
 
@@ -218,7 +217,7 @@ actually specify the non-passive integration quantities and
 non-passive primitives that they require. This difference exists
 because the operations encapsulated by ``EnzoReconstructor`` and
 ``EnzoIntegrationQuanUpdate`` can be applied to individual quantities
-in far a more independent manner.
+in a far more independent manner.
 
 Because all fields storing passively advected scalars are not
 necessarily known when initializing a hydro/MHD integrator (i.e.
@@ -278,7 +277,7 @@ Below, we provide a description of the main uses of
 
   2. Map of cell-centered primitive quantities.
 
-     * This map is used to pass temporarily store the cell-centered
+     * This map is used to temporarily store the cell-centered
        primitive quantities for use in reconstruction.
 
      * This also contains key-value pairs for passively advected
@@ -288,8 +287,8 @@ Below, we provide a description of the main uses of
      * Quantities in both the primitive map and integration map should
        NOT be aliases of each other. They should be deepcopies instead.
 
-  3. Map of temporary cell-centered for tracking the total change
-     in a quantity over a timestep.
+  3. Map of temporary cell-centered values for tracking the total
+     change in a quantity over a timestep.
 
      * This map holds key-array pairs named for all integration
        quantities. For each (partial) timestep, these arrays are used
@@ -304,7 +303,7 @@ Below, we provide a description of the main uses of
      * 2 instances of ``EnzoEFltArrayMap`` are used to respectively
        hold the reconstructed left and right interface primitive
        quantities. This should share have the same keys that are
-       described for the first second category of maps.
+       described for the second category of maps.
      * These maps are frequently passed to instances of
        ``EnzoReconstructor`` to store the reconstructed passively
        advected scalars and primitive quantities. Then, these are
@@ -328,7 +327,7 @@ Below, we provide a description of the main uses of
        ``i``, then an array used to store fluxes along axis ``i`` should
        hold ``n-1`` elements along axis ``i``.
      * This should have all of the same keys that are in the the first
-       categroy of maps.
+       category of maps.
      * This kind of map should contain keys named for all passively advected
        scalars and registered integration quantities. The set of keys in these
        maps should be identical to the set of keys in the first category of
@@ -987,7 +986,7 @@ unimportant
 
 The following method is used to compute the change in (the conserved
 form of) the integration and passively advected quantites due to the
-flux divergence along dimension ``dim`` over the (partial) imestep
+flux divergence along dimension ``dim`` over the (partial) timestep
 ``dt``. The arrays in ``dUcons_map`` are used to accumulate the total
 changes in these quantities. ``passive_list`` lists the names (keys)
 of the passively advected scalars.
