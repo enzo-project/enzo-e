@@ -28,7 +28,7 @@ struct HydroLUT {
 	      velocity_j,
 	      velocity_k,
 	      total_energy,
-	      NEQ};
+	      num_entries};
 
   // in the future, automatically calculate the following
   static const std::size_t specific_start = 1;
@@ -49,7 +49,7 @@ struct MHDLUT{
 	      velocity_j,
 	      velocity_k,
 	      total_energy,
-	      NEQ};
+	      num_entries};
   // in the future, automatically calculate the following
   static const std::size_t specific_start = 4;
 };
@@ -333,11 +333,13 @@ void EnzoRiemannImpl<ImplFunctor>::solve
   check_key_order_(flux_map, false, passive_list);
 #endif
 
-  const std::array<CelloArray<const enzo_float, 3>, LUT::NEQ> wl_arrays =
-    enzo_riemann_utils::array_from_map<LUT>(prim_map_l);
-  const std::array<CelloArray<const enzo_float, 3>, LUT::NEQ> wr_arrays =
-    enzo_riemann_utils::array_from_map<LUT>(prim_map_r);
-  const std::array<CelloArray<enzo_float, 3>, LUT::NEQ> flux_arrays =
+  
+
+  const std::array<CelloArray<const enzo_float, 3>, LUT::num_entries>
+    wl_arrays = enzo_riemann_utils::array_from_map<LUT>(prim_map_l);
+  const std::array<CelloArray<const enzo_float, 3>, LUT::num_entries> wr_arrays
+    = enzo_riemann_utils::array_from_map<LUT>(prim_map_r);
+  const std::array<CelloArray<enzo_float, 3>, LUT::num_entries> flux_arrays =
     enzo_riemann_utils::array_from_map<LUT>(flux_map);
 
   // determine mapping between vector components of the external arrays and the

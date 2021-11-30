@@ -14,7 +14,7 @@
 /// @brief   Specialization of std::array to be used to hold enzo_floats
 ///          associated with lookup tables (used with Riemann solvers)
 template<class LUT>
-using lutarray = std::array<enzo_float, LUT::NEQ>;
+using lutarray = std::array<enzo_float, LUT::num_entries>;
 
 //----------------------------------------------------------------------
 
@@ -68,7 +68,7 @@ namespace LUTIndexForward_ {
   #undef ENTRY
 
   // forward number of equations
-  CREATE_ENUM_VALUE_FORWARDER(NEQ);
+  CREATE_ENUM_VALUE_FORWARDER(num_entries);
 
   // forward the first index holding specific quantities
   CREATE_ENUM_VALUE_FORWARDER(specific_start);
@@ -115,8 +115,8 @@ struct EnzoRiemannLUT{
   /// These feature are provided via the definition of publicly accessible
   /// integer constants in every specialization of the template class. All
   /// specializations have:
-  ///    - a constant called `NEQ` equal to the number of integration quantity
-  ///      components included in the lookup table
+  ///    - a constant called `num_entries` equal to the number of integration
+  ///      quantity components included in the lookup table
   ///    - a constant called `specific_start` equal to the number of components
   ///      of conserved integration quantities included in the lookup table
   ///    - `qkey` constants, which include constants named for the components
@@ -133,7 +133,7 @@ struct EnzoRiemannLUT{
   ///    - All constants named for conserved integration quantities have unique
   ///      integer values in the internal `[0,specific_start)`
   ///    - All constants named for specific integration quantities have unique
-  ///      integer values in the interval `[specific_start, NEQ)`
+  ///      integer values in the interval `[specific_start, num_entries)`
   ///
   /// The lookup table is always expected to include density and the 3 velocity
   /// components. Although it may not be strictly enforced (yet), the lookup
@@ -146,7 +146,7 @@ struct EnzoRiemannLUT{
   /// programmatically probe the table's contents at runtime and validate that
   /// the above requirements are specified.
   ///
-  /// @tparam InputLUT Type that defines the `NEQ` constant, the
+  /// @tparam InputLUT Type that defines the `num_entries` constant, the
   ///     `specific_start` constant, and the `qkey` constants that correspond
   ///     to the actively advected integration quantities that are actually
   ///     included in the lookup table. All of the constant values will be
@@ -164,7 +164,7 @@ struct EnzoRiemannLUT{
   /// @code
   ///      struct MyIntLUT {
   ///        enum vals { density=0, velocity_i, velocity_j, velocity_k,
-  ///                    total_energy, NEQ, specific_start = 1};
+  ///                    total_energy, num_entries, specific_start = 1};
   ///      };
   /// @endcode
   /// To access the index associated with density or the jth component of
@@ -179,7 +179,7 @@ struct EnzoRiemannLUT{
   /// have a companion array. For convenience, the alias template
   /// `lutarray<LUT>` type is defined. The type,
   /// `lutarray<EnzoRiemannLUT<InputLUT>>` is an alias of the type
-  /// `std::array<enzo_float, EnzoRiemannLUT<InputLUT>::NEQ>;`.
+  /// `std::array<enzo_float, EnzoRiemannLUT<InputLUT>::num_entries>;`.
   ///
   /// @par
   /// As an example, imagine that the total kinetic energy density needs to be
@@ -232,7 +232,7 @@ struct EnzoRiemannLUT{
   ///        for (std::size_t i = 0; i < LUT::specific_start; i++) {
   ///          cons[i] = integr[i];
   ///        }
-  ///        for (std::size_t i = LUT::specific_start; i < LUT::NEQ; i++) {
+  ///        for (std::size_t i=LUT::specific_start; i<LUT::num_entries; i++){
   ///          cons[i] = integr[i] * integr[LUT::density];
   ///        }
   ///        return cons;
@@ -259,8 +259,8 @@ public:
 
   /// The total number of entries in the InputLUT (with non-negative indices).
   /// (defaults to -1 if not explicitly set in InputLUT)
-  static constexpr std::size_t NEQ =
-    LUTIndexForward_::forward_NEQ<InputLUT>::value;
+  static constexpr std::size_t num_entries =
+    LUTIndexForward_::forward_num_entries<InputLUT>::value;
 
   // perform some sanity checks:
   static_assert(qkey::density >= 0,
@@ -271,8 +271,8 @@ public:
                 "InputLUT must have entries for each velocity component.");
   static_assert(specific_start > 0,
                 "InputLUT::specific_start was not set to a positive value");
-  static_assert(specific_start < NEQ,
-                "InputLUT::NEQ was not set to a value exceeding "
+  static_assert(specific_start < num_entries,
+                "InputLUT::num_entries was not set to a value exceeding "
                 "InputLUT::specific_start");
 
 private:
@@ -344,16 +344,16 @@ void EnzoRiemannLUT<InputLUT>::validate()
   noexcept
 { 
   // the elements in the array are default-initialized (they are each "")
-  std::array<std::string, EnzoRiemannLUT<InputLUT>::NEQ> entry_names;
+  std::array<std::string, EnzoRiemannLUT<InputLUT>::num_entries> entry_names;
 
   // define a lambda function to execute for every member of lut
   auto fn = [&](std::string name, int index)
     {
-      if ((index >= 0) && (index >= EnzoRiemannLUT<InputLUT>::NEQ)) {
+      if ((index >= 0) && (index >= EnzoRiemannLUT<InputLUT>::num_entries)) {
         ERROR3("EnzoRiemannLUT<InputLUT>::validate",
                ("The value of %s, %d, is greater than or equal to "
-                "InputLUT::NEQ, %d"),
-               name.c_str(), index, EnzoRiemannLUT<InputLUT>::NEQ);
+                "InputLUT::num_entries, %d"),
+               name.c_str(), index, EnzoRiemannLUT<InputLUT>::num_entries);
       } else if (index >= 0) {
         if (entry_names[index] != ""){
           ERROR3("EnzoRiemannLUT<InputLUT>::validate",
@@ -368,14 +368,15 @@ void EnzoRiemannLUT<InputLUT>::validate()
   EnzoRiemannLUT<InputLUT>::for_each_entry(fn);
 
   std::size_t max_conserved =  0;
-  std::size_t min_specific =  EnzoRiemannLUT<InputLUT>::NEQ;
+  std::size_t min_specific =  EnzoRiemannLUT<InputLUT>::num_entries;
 
   for (std::size_t i = 0; i < entry_names.size(); i++){
     std::string name = entry_names[i];
     if (name == ""){
       ERROR2("EnzoRiemannLUT<InputLUT>::validate",
-             "The value of NEQ, %d, is wrong. There is no entry for index %d",
-             (int)EnzoRiemannLUT<InputLUT>::NEQ, (int)i);
+             "The value of num_entries, %d, is wrong. There is no entry for "
+             "index %d",
+             (int)EnzoRiemannLUT<InputLUT>::num_entries, (int)i);
     }
 
     std::string quantity =
@@ -398,8 +399,8 @@ void EnzoRiemannLUT<InputLUT>::validate()
     } else if (((i+1) == entry_names.size()) &&
                (category != FieldCat::specific)) {
       ERROR("EnzoRiemannLUT<InputLUT>::validate",
-            ("the lookup table's entry for the index InputLUT::NEQ-1 should "
-             "correspond to a specific quantity"));
+            ("the lookup table's entry for the index InputLUT::num_entries-1 "
+             "should correspond to a specific quantity"));
     }
 
     switch(category){

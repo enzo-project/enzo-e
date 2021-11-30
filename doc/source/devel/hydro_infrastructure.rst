@@ -809,7 +809,7 @@ The expected function signature of the ``operator()`` method is as follows:
 This function is called at every cell-interface and returns an array
 holding the Riemann Flux at a given cell-interface. Note that
 ``lutarray<ImplFunctor::LUT>`` is actually an alias for
-``std::array<enzo_float, ImplFunctor::LUT::NEQ>``. Each of these
+``std::array<enzo_float, ImplFunctor::LUT::num_entries>``. Each of these
 arrays hold values associated with the components of each relevant
 actively advected integration/primitive quantity and are organized
 according to ``ImplFunctor::LUT`` (again, see
@@ -868,8 +868,8 @@ These feature are provided via the definition of publicly accessible
 integer constants in every specialization of the template class. All
 specializations have:
 
-    * a constant called ``NEQ`` equal to the number of integration quantity
-      components included in the lookup table
+    * a constant called ``num_entries`` equal to the number of integration
+      quantity components included in the lookup table
 
     * a constant called ``specific_start`` equal to the number of components
       of conserved integration quantities included in the lookup table
@@ -891,7 +891,7 @@ included in the table. Their values are satisfy the following conditions:
       integer values in the internal ``[0,specific_start)``
 
     * All constants named for specific integration quantities have unique
-      integer values in the interval ``[specific_start, NEQ)``
+      integer values in the interval ``[specific_start, num_entries)``
 
 The lookup table is always expected to include density and the 3 velocity
 components. Although it may not be strictly enforced (yet), the lookup
@@ -911,7 +911,7 @@ let's assume that we have a class ``MyIntegLUT`` that is defined as:
 
    struct MyIntegLUT {
      enum vals { density=0, velocity_i, velocity_j, velocity_k,
-                 total_energy, NEQ, specific_start = 1};
+                 total_energy, num_entries, specific_start = 1};
    };
 
 The template specialization ``EnzoRiemannLUT<MyIntegLUT>`` assumes that
@@ -934,7 +934,7 @@ It makes more sense to talk about the use of this template class when we
 have a companion array. For convenience, the alias template
 ``lutarray<LUT>`` type is defined. The type,
 ``lutarray<EnzoRiemannLUT<InputLUT>>`` is an alias of the type
-``std::array<enzo_float, EnzoRiemannLUT<InputLUT>::NEQ>;``.
+``std::array<enzo_float, EnzoRiemannLUT<InputLUT>::num_entries>;``.
 
 As an example, imagine that the total kinetic energy density needs to be
 computed at a single location from an values stored in an array, ``integ``,

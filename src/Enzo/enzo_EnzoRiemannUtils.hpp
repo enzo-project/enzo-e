@@ -80,7 +80,7 @@ namespace enzo_riemann_utils{
     }
 
     // the remainder of the values are specific quantities
-    for (std::size_t i = LUT::specific_start; i < LUT::NEQ; i++) {
+    for (std::size_t i = LUT::specific_start; i < LUT::num_entries; i++) {
       cons[i] = prim[i] * prim[LUT::density];
     }
 
@@ -243,7 +243,7 @@ namespace enzo_riemann_utils{
   inline std::vector<std::string> get_quantity_keys(const bool prim) noexcept
   {
     // initialize out as a vector of empty strings
-    std::vector<std::string> out(LUT::NEQ);
+    std::vector<std::string> out(LUT::num_entries);
 
     EnzoPermutedCoordinates coord(0); // map i,j,k to x,y,z
     // define a lambda function to execute for every member of lut. For each
@@ -271,20 +271,20 @@ namespace enzo_riemann_utils{
   /// stopgap solution until we fully support implemntation of EFlt3DArray
   /// with 4D CelloArrays
   template<class LUT>
-  inline std::array<CelloArray<const enzo_float, 3>,LUT::NEQ> array_from_map
-  (const EnzoEFltArrayMap& map) noexcept
+  inline std::array<CelloArray<const enzo_float, 3>, LUT::num_entries>
+  array_from_map(const EnzoEFltArrayMap& map) noexcept
   {
-    std::array<CelloArray<const enzo_float, 3>, LUT::NEQ> out;
-    for (std::size_t i = 0; i < LUT::NEQ; i++) { out[i] = map[i]; }
+    std::array<CelloArray<const enzo_float, 3>, LUT::num_entries> out;
+    for (std::size_t i = 0; i < LUT::num_entries; i++) { out[i] = map[i]; }
     return out;
   }
 
   template<class LUT>
-  inline std::array<CelloArray<enzo_float, 3>,LUT::NEQ> array_from_map
+  inline std::array<CelloArray<enzo_float, 3>,LUT::num_entries> array_from_map
   (EnzoEFltArrayMap& map) noexcept
   {
-    std::array<CelloArray<enzo_float, 3>, LUT::NEQ> out;
-    for (std::size_t i = 0; i < LUT::NEQ; i++) { out[i] = map[i]; }
+    std::array<CelloArray<enzo_float, 3>, LUT::num_entries> out;
+    for (std::size_t i = 0; i < LUT::num_entries; i++) { out[i] = map[i]; }
     return out;
   }
 
@@ -293,7 +293,7 @@ namespace enzo_riemann_utils{
   /// @def      LUT_TRANSFER_T_SCALAR
   /// @brief    Part of the LUT_TRANSFER group of macros that are used to copy
   ///           scalar actively advected values between a
-  ///           std::array<enzo_float, LUT::NEQ> and a given
+  ///           std::array<enzo_float, LUT::num_entries> and a given
   ///           location in a list of 3D external arrays. These macros simply
   ///           ignore the vector quantities (since that involves some level of
   ///           permutation)
@@ -315,7 +315,7 @@ namespace enzo_riemann_utils{
   template<class LUT>
   void transfer_scalars_to_lutarray
   (const int dim, const int iz, const int iy, const int ix,
-   const std::array<CelloArray<const enzo_float, 3>, LUT::NEQ>& external,
+   const std::array<CelloArray<const enzo_float, 3>,LUT::num_entries>& external,
    lutarray<LUT> &dest)
     noexcept
   {
@@ -334,7 +334,7 @@ namespace enzo_riemann_utils{
   template<class LUT>
   inline void transfer_scalars_from_lutarray
   (const int dim, const int iz, const int iy, const int ix,
-   const std::array<CelloArray<enzo_float, 3>, LUT::NEQ>& external,
+   const std::array<CelloArray<enzo_float, 3>, LUT::num_entries>& external,
    const lutarray<LUT> src) noexcept
   {
     #define ENTRY(name, math_type, category, if_advection)                    \
