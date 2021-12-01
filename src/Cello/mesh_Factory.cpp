@@ -110,7 +110,7 @@ void Factory::create_block_array
 	   count_adapt = 0,
 	   cycle,time,dt,
 	   refresh_same,
-	   num_face_level, face_level);
+	   num_face_level, face_level, nullptr);
 
 	msg->set_data_msg(data_msg);
 #ifdef BUG_FIX_150
@@ -183,7 +183,7 @@ void Factory::create_subblock_array
 	     count_adapt = 0,
 	     cycle,time,dt,
 	     refresh_same,
-	     num_face_level, face_level);
+	     num_face_level, face_level, nullptr);
 
 	  msg->set_data_msg(data_msg);
 
@@ -263,10 +263,7 @@ void Factory::create_block
      count_adapt,
      cycle,time,dt,
      refresh_type,
-     num_face_level, face_level
-#ifdef NEW_ADAPT
-     , adapt
-#endif
+     num_face_level, face_level, adapt
      );
 
   msg->set_data_msg (data_msg);

@@ -350,7 +350,7 @@ enum type_enum {
 #define SAVE_SCALAR_TYPE(POINTER,TYPE,VALUE)    \
   {                                             \
     int n;                                      \
-    memcpy(POINTER,&VALUE,n=sizeof(TYPE));	\
+    memcpy(POINTER,&(VALUE),n=sizeof(TYPE));	\
     (POINTER) += n;                             \
   }
 
@@ -459,27 +459,32 @@ enum type_enum {
 
 #define SIZE_OBJECT_PTR_TYPE(COUNT,TYPE,OBJECT_PTR)     \
   {                                                     \
-  int have_data = ((OBJECT_PTR) != nullptr);            \
-  SIZE_SCALAR_TYPE(COUNT,int,have_data);                \
-  if (have_data) {                                      \
-    (COUNT) += (OBJECT_PTR)->data_size();               \
+    int have_data = ((OBJECT_PTR) != nullptr);          \
+    (COUNT) += sizeof(int);                             \
+    if (have_data) {                                    \
+      (COUNT) += (OBJECT_PTR)->data_size();             \
+    }                                                   \
   }
 
 #define SAVE_OBJECT_PTR_TYPE(POINTER,TYPE,OBJECT_PTR)   \
   {                                                     \
-  int have_data = ((OBJECT_PTR) != nullptr);            \
-  SAVE_SCALAR_TYPE(POINTER,int,have_data);              \
-  if (have_data) {                                      \
-    (POINTER) = (OBJECT_PTR)->save_data(POINTER);       \
+    int have_data = ((OBJECT_PTR) != nullptr);          \
+    memcpy ((POINTER),&have_data,sizeof(int));          \
+    (POINTER) += sizeof(int);                           \
+    if (have_data) {                                    \
+      (POINTER) = (OBJECT_PTR)->save_data(POINTER);     \
+    }                                                   \
   }
 
 #define LOAD_OBJECT_PTR_TYPE(POINTER,TYPE,OBJECT_PTR)   \
   {                                                     \
-  int have_data;                                        \
-  LOAD_SCALAR_TYPE(POINTER,int,have_data);              \
-  if (have_data) {                                      \
-    (OBJECT_PTR) = new TYPE;                            \
-    (POINTER) = (OBJECT_PTR)->load_data(POINTER);       \
+    int have_data;                                      \
+    memcpy(&have_data,(POINTER),sizeof(int));           \
+    (POINTER) += sizeof(int);                           \
+    if (have_data) {                                    \
+      (OBJECT_PTR) = new TYPE;                          \
+      (POINTER) = (OBJECT_PTR)->load_data(POINTER);     \
+    }                                                   \
   }
 
 //--------------------------------------------------

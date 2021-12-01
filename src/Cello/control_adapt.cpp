@@ -736,7 +736,8 @@ void Block::adapt_coarsen_()
 
   const int nf = adapt_.size_face_level(Adapt::LevelType::curr);
 
-  MsgCoarsen * msg = new MsgCoarsen (nf,adapt_.vector_face_level(Adapt::LevelType::curr),ic3);
+  MsgCoarsen * msg = new MsgCoarsen
+    (nf,adapt_.vector_face_level(Adapt::LevelType::curr),ic3,&adapt_);
   msg->set_data_msg (data_msg);
 
   thisProxy[index_parent].p_adapt_recv_child (msg);

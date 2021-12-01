@@ -9,7 +9,7 @@
 #include "charm.hpp"
 #include "charm_simulation.hpp"
 
-//#define DEBUG_MSG_REFINE
+// #define DEBUG_MSG_REFINE
 
 //----------------------------------------------------------------------
 
@@ -30,13 +30,13 @@ MsgRefine::MsgRefine()
     refresh_type_(refresh_unknown),
     num_face_level_(0),
     face_level_(nullptr),
-    adapt_(nullptr),
+    adapt_parent_(nullptr),
     buffer_(nullptr)
 {
-  ++counter[cello::index_static()]; 
-#ifdef DEBUG_MSG_REFINE  
-  CkPrintf ("%d %s:%d DEBUG_MSG_REFINE creating %p\n",CkMyPe(),__FILE__,__LINE__,this);
-#endif  
+  ++counter[cello::index_static()];
+#ifdef DEBUG_MSG_REFINE
+  CkPrintf ("%d %s:%d DEBUG_MSG_REFINE creating %p adapt null\n",CkMyPe(),__FILE__,__LINE__,(void*)this);
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -46,9 +46,9 @@ MsgRefine::MsgRefine
  int nx, int ny, int nz,
  int num_field_blocks, int num_adapt_steps,
  int cycle, double time, double dt, int refresh_type,
- int num_face_level, int * face_level
- , Adapt * adapt
- ) 
+ int num_face_level, int * face_level,
+ Adapt * adapt_parent
+ )
   : CMessage_MsgRefine(),
     is_local_(true),
     data_msg_(nullptr),
@@ -61,13 +61,13 @@ MsgRefine::MsgRefine
     refresh_type_(refresh_type),
     num_face_level_(num_face_level),
     face_level_(new int[num_face_level]),
-    adapt_(nullptr),
+    adapt_parent_(adapt_parent),
     buffer_(nullptr)
-{  
-   ++counter[cello::index_static()]; 
-#ifdef DEBUG_MSG_REFINE  
-  CkPrintf ("%d %s:%d DEBUG_MSG_REFINE creating %p\n",CkMyPe(),__FILE__,__LINE__,this);
-#endif  
+{
+   ++counter[cello::index_static()];
+#ifdef DEBUG_MSG_REFINE
+   CkPrintf ("%d %s:%d DEBUG_MSG_REFINE creating %p %p\n",CkMyPe(),__FILE__,__LINE__,(void*)this,(void*)adapt_parent);
+#endif
 
   for (int i=0; i<num_face_level_; i++) {
     face_level_[i] = face_level[i];
@@ -79,9 +79,9 @@ MsgRefine::MsgRefine
 MsgRefine::~MsgRefine()
 {
   --counter[cello::index_static()];
-#ifdef DEBUG_MSG_REFINE  
+#ifdef DEBUG_MSG_REFINE
   CkPrintf ("%d %s:%d DEBUG_MSG_REFINE destroying %p\n",CkMyPe(),__FILE__,__LINE__,this);
-#endif  
+#endif
 
   delete data_msg_;
   data_msg_ = 0;
@@ -93,13 +93,13 @@ MsgRefine::~MsgRefine()
 
 //----------------------------------------------------------------------
 
-void MsgRefine::set_data_msg  (DataMsg * data_msg) 
+void MsgRefine::set_data_msg  (DataMsg * data_msg)
 {
-#ifdef DEBUG_MSG_REFINE  
+#ifdef DEBUG_MSG_REFINE
   CkPrintf ("%d %p %s:%d DEBUG_MSG_REFINE MsgRefine::set_data_msg()\n",
 	    CkMyPe(),this,__FILE__,__LINE__);
   fflush(stdout);
-#endif  
+#endif
   if (data_msg_) {
     WARNING ("MsgRefine::set_data_msg()",
 	     "overwriting existing data_msg_");
@@ -113,13 +113,13 @@ void MsgRefine::set_data_msg  (DataMsg * data_msg)
 void * MsgRefine::pack (MsgRefine * msg)
 {
 
-#ifdef DEBUG_MSG_REFINE  
+#ifdef DEBUG_MSG_REFINE
   CkPrintf ("%d %s:%d DEBUG_MSG_REFINE packing %p\n",CkMyPe(),__FILE__,__LINE__,msg);
-#endif  
+#endif
 
   // WARNING("MsgRefine::pack()",
   // 	  "message already has a buffer allocated");
-  
+
   if (msg->buffer_ != nullptr) return msg->buffer_;
 
   int size = 0;
@@ -135,16 +135,16 @@ void * MsgRefine::pack (MsgRefine * msg)
   size += sizeof(int);     // attribute-07
   size += sizeof(int);   // attribute-08
   size += sizeof(int);   // attribute-09
-  size += sizeof(int); // adapt_is_null
-  if (msg->adapt_) {
-    size += msg->adapt_->data_size();
-  }
+
+  // Adapt class
+  SIZE_OBJECT_PTR_TYPE(size,Adapt,msg->adapt_parent_);
+ 
   size += msg->num_face_level_ * sizeof(int); // attribute-10
 
   size += sizeof(int);  // element-11
 
   int have_data = (msg->data_msg_ != nullptr);
-#ifdef DEBUG_MSG_REFINE  
+#ifdef DEBUG_MSG_REFINE
   CkPrintf ("%d DEBUG_MSG_REFINE %s:%d msg->data_msg_ = %p\n",CkMyPe(),__FILE__,__LINE__,msg->data_msg_);
   fflush(stdout);
 #endif  
@@ -197,13 +197,8 @@ void * MsgRefine::pack (MsgRefine * msg)
   (*pi++) = msg->refresh_type_; // attribute-08
 
   // Adapt class
-  int adapt_is_null = (msg->adapt_ == nullptr);
-  (*pi++) = adapt_is_null;
-  if (msg->adapt_ != nullptr) {
-    pc = msg->adapt_->save_data(pc);
-  } else {
-  }
-
+  SAVE_OBJECT_PTR_TYPE(pc,Adapt,msg->adapt_parent_);
+  
   (*pi++) = msg->num_face_level_; // attribute-09
   for (int i=0; i<msg->num_face_level_; i++) {
     (*pi++) = msg->face_level_[i]; // attribute-10
@@ -282,13 +277,7 @@ MsgRefine * MsgRefine::unpack(void * buffer)
   msg->refresh_type_ = (*pi++);     // attribute-08
 
   // Adapt class
-  int adapt_is_null = (*pi++);
-  if (adapt_is_null) {
-    msg->adapt_ = nullptr;
-  } else {
-    msg->adapt_ = new Adapt;
-    pc = msg->adapt_->load_data(pc);
-  }
+  LOAD_OBJECT_PTR_TYPE(pc,Adapt,msg->adapt_parent_);
 
   msg->num_face_level_ = (*pi++);   // attribute-09
   if (msg->num_face_level_ > 0) {
@@ -380,6 +369,8 @@ void MsgRefine::update (Data * data)
   }
 }
 
+//----------------------------------------------------------------------
+
 void MsgRefine::print()
 {
   CkPrintf ("bool is_local_ = %d\n", is_local_);
@@ -395,5 +386,5 @@ void MsgRefine::print()
   CkPrintf ("int refresh_type_ = %d\n",refresh_type_);
   CkPrintf ("int num_face_level_ = %d\n",num_face_level_);
   CkPrintf ("int * face_level_ = %p\n",(void*)face_level_);
-  adapt_->print("MsgRefine");
+  adapt_parent_->print("MsgRefine");
 }

@@ -88,7 +88,8 @@ void EnzoFactory::create_block_array
 	   count_adapt = 0,
 	   cycle,time,dt,
 	   refresh_same,
-	   num_face_level, face_level);
+	   num_face_level, face_level,
+           nullptr);
 
 	msg->set_data_msg(data_msg);
 
@@ -171,7 +172,8 @@ void EnzoFactory::create_subblock_array
 	     count_adapt=0,
 	     cycle,time,dt,
 	     refresh_same,
-	     num_face_level, face_level);
+	     num_face_level, face_level,
+             nullptr);
 
 	  msg->set_data_msg(data_msg);
 

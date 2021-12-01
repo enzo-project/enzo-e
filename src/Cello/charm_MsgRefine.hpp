@@ -32,8 +32,7 @@ public: // interface
    int cycle, double time, double dt,
    int refresh_type,
    int num_face_level, int * face_level,
-   Adapt * adapt = nullptr
-   ) ;
+   Adapt * adapt_parent) ;
 
   virtual ~MsgRefine();
 
@@ -92,7 +91,8 @@ protected: // attributes
   int refresh_type_;     // attribute-08
   int num_face_level_;   // attribute-09
   int * face_level_;     // attribute-10
-  Adapt * adapt_;        // attribute-11
+  /// Mesh connectivity of parent block to update child's
+  Adapt * adapt_parent_;        // attribute-11
 
   /// Saved Charm++ buffers for deleting after unpack()
   void * buffer_;

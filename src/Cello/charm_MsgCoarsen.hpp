@@ -10,11 +10,12 @@
 
 #include "cello.hpp"
 
-class ParticleData;
-class FieldData;
-class FieldFace;
+class Adapt;
 class Data;
 class DataMsg;
+class FieldData;
+class FieldFace;
+class ParticleData;
 
 class MsgCoarsen : public CMessage_MsgCoarsen {
 
@@ -24,7 +25,8 @@ public: // interface
 
   MsgCoarsen();
 
-  MsgCoarsen( int num_face_level, std::vector<int> & face_level, int ic3[3]);
+  MsgCoarsen( int num_face_level, std::vector<int> & face_level, int ic3[3],
+              Adapt * adapt_child);
 
   virtual ~MsgCoarsen();
 
@@ -50,6 +52,8 @@ public: // interface
   /// Return the face_level_ attribute
   int * face_level() { return face_level_; }
 
+  Adapt * adapt_child() const { return adapt_child_; }
+  
 public: // static methods
 
   /// Pack data to serialize
@@ -69,6 +73,9 @@ protected: // attributes
   /// Saved Charm++ buffer for deleting after unpack()
   void * buffer_;
 
+  /// Mesh connectivity of child block to update parent's
+  Adapt * adapt_child_;
+  
   /// MsgRefine-specific attributes
 
   int num_face_level_;
