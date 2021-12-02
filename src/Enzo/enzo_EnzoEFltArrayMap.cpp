@@ -26,28 +26,6 @@ namespace{ // define some local helper functions
     return out;
   }
 
-  void confirm_shared_shape_(const char* func_name,
-			     const std::vector<std::string> &keys,
-                             const std::vector<EFlt3DArray> &arrays){
-    if (arrays.size() > 0){
-      int ref_mz = arrays[0].shape(0);
-      int ref_my = arrays[0].shape(1);
-      int ref_mx = arrays[0].shape(2);
-      for (std::size_t i = 1; i < arrays.size(); i++){
-        int mz = arrays[i].shape(0);
-        int my = arrays[i].shape(1);
-        int mx = arrays[i].shape(2);
-
-        ASSERT8(func_name,
-                ("The shapes, (mz, my, mx), of the %s and %s arrays are "
-                 "(%d, %d, %d) and (%d, %d, %d). The shapes must be the same"),
-                keys[0].c_str(), keys[i].c_str(),
-                ref_mz, ref_my, ref_mx, mz, my, mx,
-                ((ref_mz == mz) && (ref_my == my) && (ref_mx == mx)));
-      }
-    }
-  }
-
 }
 
 //----------------------------------------------------------------------
@@ -55,44 +33,26 @@ namespace{ // define some local helper functions
 EnzoEFltArrayMap::EnzoEFltArrayMap(std::string name,
                                    const std::vector<std::string> &keys,
                                    const std::array<int,3>& shape)
-  : name_(name)
-{
-  // copy the contents of keys to keys_
-  keys_ = keys;
-
-  // initialize str_index_map_
-  str_index_map_ = init_str_index_map_(keys);
-
-  // initialize arrays_
-  arrays_.reserve(keys.size());
-  for (const std::string& key : keys){
-    arrays_.push_back(EFlt3DArray(shape[0], shape[1], shape[2]));
-  }
-}
+  : name_(name),
+    str_index_map_(init_str_index_map_(keys)),
+    keys_(keys),
+    arrays_(keys.size(), shape)
+{ }
 
 //----------------------------------------------------------------------
 
 EnzoEFltArrayMap::EnzoEFltArrayMap(std::string name,
                                    const std::vector<std::string> &keys,
                                    const std::vector<EFlt3DArray> &arrays)
-  : name_(name)
+  : name_(name),
+    str_index_map_(init_str_index_map_(keys)),
+    keys_(keys),
+    arrays_(arrays)
 {
   ASSERT2("EnzoEFltArrayMap::EnzoEFltArrayMap",
           "keys and arrays have lengths %zu and %zu. They should be the same",
           (std::size_t)keys.size(), (std::size_t)arrays.size(),
           keys.size() == arrays.size());
-
-  // copy the contents of keys to keys_
-  keys_ = keys;
-
-  // initialize str_index_map_
-  str_index_map_ = init_str_index_map_(keys);
-
-  // validate that each entry in arrays_ has the same shape.
-  confirm_shared_shape_("EnzoEFltArrayMap::EnzoEFltArrayMap", keys, arrays);
-
-  // copy the contents of arrays to arrays_
-  arrays_ = arrays;
 }
 
 //----------------------------------------------------------------------
@@ -217,37 +177,13 @@ void EnzoEFltArrayMap::print_summary() const noexcept
 
 //----------------------------------------------------------------------
 
-int EnzoEFltArrayMap::array_shape(unsigned int dim) const noexcept{
-  if (size() == 0){
-    ERROR("EnzoEFltArrayMap::array_shape",
-          "EnzoEFltArrayMap contains 0 arrays");
-  }
-  return arrays_[0].shape(dim);
-}
-
-//----------------------------------------------------------------------
-
-// There might be some benefit to not directly constructing subarrays and lazily
-// evaluating them instead in the output array
-static inline std::vector<EFlt3DArray> make_subarrays_
-(const std::vector<EFlt3DArray>& arrays,
- const CSlice &slc_z, const CSlice &slc_y, const CSlice &slc_x)
-{
-  std::vector<EFlt3DArray> out;
-  out.reserve(arrays.size());
-  for (const EFlt3DArray& arr : arrays){
-    out.push_back(arr.subarray(slc_z, slc_y, slc_x));
-  }
-  return out;
-}
-
 EnzoEFltArrayMap EnzoEFltArrayMap::subarray_map(const CSlice &slc_z,
                                                 const CSlice &slc_y,
                                                 const CSlice &slc_x,
                                                 const std::string& name)
 {
   return EnzoEFltArrayMap(name, str_index_map_, keys_,
-                          make_subarrays_(arrays_, slc_z, slc_y, slc_x));
+                          arrays_.subarray_collec(slc_z, slc_y, slc_x));
 }
 
 const EnzoEFltArrayMap EnzoEFltArrayMap::subarray_map
@@ -255,7 +191,7 @@ const EnzoEFltArrayMap EnzoEFltArrayMap::subarray_map
  const std::string& name) const
 {
   return EnzoEFltArrayMap(name, str_index_map_, keys_,
-                          make_subarrays_(arrays_, slc_z, slc_y, slc_x));
+                          arrays_.subarray_collec(slc_z, slc_y, slc_x));
 }
 
 //----------------------------------------------------------------------
@@ -278,8 +214,4 @@ void EnzoEFltArrayMap::validate_invariants_() const noexcept
              "the ordering"), keys_[i].c_str(),
             result->second == i);
   }
-  
-  // validate that each entry in arrays_ has the same shape.
-  confirm_shared_shape_("EnzoEFltArrayMap::validate_invariants_",
-                        keys_, arrays_);
 }
