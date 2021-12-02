@@ -288,11 +288,15 @@ void EnzoRiemannImpl<ImplFunctor>::solve
 
   ImplFunctor func;
 
+  // preload shape of arrays (to inform compiler they won't change)
+  const int mz = flux_arrays[0].shape(0);
+  const int my = flux_arrays[0].shape(1);
+  const int mx = flux_arrays[0].shape(2);
   // compute the flux at all non-stale cell interfaces
   const int sd = stale_depth;
-  for (int iz = sd; iz < flux_arrays[0].shape(0) - sd; iz++) {
-    for (int iy = sd; iy < flux_arrays[0].shape(1) - sd; iy++) {
-      for (int ix = sd; ix < flux_arrays[0].shape(2) - sd; ix++) {
+  for (int iz = sd; iz < mz - sd; iz++) {
+    for (int iy = sd; iy < my - sd; iy++) {
+      for (int ix = sd; ix < mx - sd; ix++) {
 
         // get the local values of the fluid fields
         lutarray<LUT> wl, wr;
