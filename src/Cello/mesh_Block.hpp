@@ -132,11 +132,11 @@ public: // interface
   const Index & index() const
   { return index_; }
 
-  int face_level (const int if3[3]) const
-  { return adapt_.face_level(if3,Adapt::LevelType::curr); }
+  int face_level (Index index, const int if3[3]) const
+  { return adapt_.face_level(index,if3,Adapt::LevelType::curr); }
 
-  int face_level (int axis, int face) const
-  { return adapt_.face_level(axis,face,Adapt::LevelType::curr); }
+  int face_level (Index index, int axis, int face) const
+  { return adapt_.face_level(index,axis,face,Adapt::LevelType::curr); }
 
 
 #ifdef OLD_ADAPT
@@ -466,12 +466,14 @@ public:
   (Index index_debug,
    int ic3[3],
    int if3[3],
-   int level_now, int level_new);
+   int level_now, int level_new,
+   int level_max, bool can_coarsen);
 
   void p_adapt_recv_child (MsgCoarsen * msg);
 
-  void adapt_recv (const int of3[3], const int ic3[3],
-		   int level_face_new, int level_relative);
+  void adapt_recv (Index index_send, const int of3[3], const int ic3[3],
+		   int level_face_new, int level_relative,
+                   int level_max, bool can_coarsen);
 
   void adapt_send_level();
 

@@ -61,6 +61,7 @@ PARALLEL_MAIN_BEGIN
 
   const int num_runs = 100;
   const int run_length = 52;
+  const int MAX_LEVEL = 100;
 
   for (int run=0; run<num_runs; run++) {
 
@@ -101,6 +102,8 @@ PARALLEL_MAIN_BEGIN
     for (int i=0; i<n; i++) {
       adapt[i] = new Adapt;
       adapt[i]->set_rank(1);
+      adapt[i]->set_max_level(MAX_LEVEL);
+      adapt[i]->set_index(index[i]);
     }
 
     // Initialize level bounds for each "block"
@@ -110,12 +113,11 @@ PARALLEL_MAIN_BEGIN
       int ip = i0 + 1;
       int im = i0 - 1;
       // initialize indices
-      adapt[i0] -> set_index(index[i0]);
       // initialize level bounds
       int min = level_want[i0];
       int now = level_curr[i0];
       int max = level_curr[i0] + 1;
-      adapt[i0]->initialize_self (index[i0],min, now, max);
+      adapt[i0]->initialize_self (index[i0],min, now);
       if (im >= 0) {
         adapt[i0]->insert_neighbor (index[im],(i0%2==1));
       }

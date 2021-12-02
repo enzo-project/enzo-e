@@ -64,7 +64,7 @@ public: // interface
 
   /// Return the level of the current face
   int face_level () const  throw () 
-  { return block_->face_level(of3_); }
+  { return block_->face_level(index(),of3_); }
 
   void child(int ic3[3]) const ;
 

@@ -412,7 +412,8 @@ void MethodFluxCorrect::flux_correct_(Block * block)
     bool perform_correction[3][2];
     for (int axis=0; axis < 3; axis++){
       for (int face = 0; face < 2; face++){
-        if ((axis < rank) && (block->face_level(axis,face) > level)){
+        Index index; // TEMPORARY
+        if ((axis < rank) && (block->face_level(index,axis,face) > level)){
           perform_correction[axis][face] = true;
         } else {
           perform_correction[axis][face] = false;

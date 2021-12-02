@@ -106,7 +106,7 @@ public:
 
   /// Return the dimensionality of shared face (0 corner, 1 edge, 2
   /// plane), or -1 if disjoint
-  int adjacency (Index index, int rank) const;
+  int adjacency (Index index, int rank, const int p3[3]) const;
 
   /// Get index limits (im3[],ip3[]) in [0,4) categorizing block adjacency.
   /// E.g. left neighbor in same level (0,1) - (1,3), right-bottom child (2,1) - (3,2),

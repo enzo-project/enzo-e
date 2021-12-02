@@ -413,28 +413,29 @@ void OutputImage::write_block ( const Block *  block ) throw()
 
     int xm=(ixm+ixp)/2;
     int ym=(iym+iyp)/2;
+    Index index_temp;
     if (face_rank_ <= 1) {
       {
 	int if3[3] = {-1,0,0};
-	int face_level = block->face_level(if3);
+	int face_level = block->face_level(index_temp,if3);
 	double face_color = mesh_color_(face_level,0);
 	reduce_box_filled_(image_mesh_,ixm+1,ixm+2,ym-1,ym+1, face_color);
       }
       {
 	int if3[3] = {1,0,0};
-	int face_level = block->face_level(if3);
+	int face_level = block->face_level(index_temp,if3);
 	double face_color = mesh_color_(face_level,0);
 	reduce_box_filled_(image_mesh_,ixp-2,ixp-1,ym-1,ym+1, face_color);
       }
       {
 	int if3[3] = {0,-1,0};
-	int face_level = block->face_level(if3);
+	int face_level = block->face_level(index_temp,if3);
 	double face_color = mesh_color_(face_level,0);
 	reduce_box_filled_(image_mesh_,xm-1,xm+1,iym+1,iym+2, face_color);
       }
       {
 	int if3[3] = {0,1,0};
-	int face_level = block->face_level(if3);
+	int face_level = block->face_level(index_temp,if3);
 	double face_color = mesh_color_(face_level,0);
 	reduce_box_filled_(image_mesh_,xm-1,xm+1,iyp-2,iyp-1, face_color);
       }
@@ -442,25 +443,25 @@ void OutputImage::write_block ( const Block *  block ) throw()
     if (face_rank_ <= 0) {
       {
 	int if3[3] = {-1,-1,0};
-	int face_level = block->face_level(if3);
+	int face_level = block->face_level(index_temp,if3);
 	double face_color = mesh_color_(face_level,0);
 	reduce_box_filled_(image_mesh_,ixm+1,ixm+2,iym+1,iym+2, face_color);
       }
       {
 	int if3[3] = {1,-1,0};
-	int face_level = block->face_level(if3);
+	int face_level = block->face_level(index_temp,if3);
 	double face_color = mesh_color_(face_level,0);
 	reduce_box_filled_(image_mesh_,ixp-2,ixp-1,iym+1,iym+2, face_color);
       }
       {
 	int if3[3] = {-1,1,0};
-	int face_level = block->face_level(if3);
+	int face_level = block->face_level(index_temp,if3);
 	double face_color = mesh_color_(face_level,0);
 	reduce_box_filled_(image_mesh_,ixm+1,ixm+2,iyp-2,iyp-1, face_color);
       }
       {
 	int if3[3] = {1,1,0};
-	int face_level = block->face_level(if3);
+	int face_level = block->face_level(index_temp,if3);
 	double face_color = mesh_color_(face_level,0);
 	reduce_box_filled_(image_mesh_,ixp-2,ixp-1,iyp-2,iyp-1, face_color);
       }

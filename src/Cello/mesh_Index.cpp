@@ -248,7 +248,7 @@ void Index::array (int * ix, int *iy, int *iz) const
 
 //----------------------------------------------------------------------
 
-int Index::adjacency (Index index, int rank) const
+int Index::adjacency (Index index, int rank, const int p3[3]) const
 {
   const int L1 = level();
   const int L2 = index.level();
