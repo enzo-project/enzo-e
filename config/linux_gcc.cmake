@@ -9,10 +9,14 @@ if(NOT __processedUserDefaults)
   set(CMAKE_CXX_COMPILER g++ CACHE STRING "")
   set(CMAKE_C_COMPILER gcc CACHE STRING "")
   set(CMAKE_Fortran_COMPILER gfortran CACHE STRING "")
+  # Note (12/2021): passing -march=native to gfortran seems to slow down the
+  # PPM solver
   set(CMAKE_Fortran_FLAGS "-ffixed-line-length-132" CACHE STRING "Default Fortran flags")
 
   # Set some architecture-specific optimization flags
-  set(__ARCH_C_OPT_FLAGS "-O3 -DNDEBUG -funroll-loops -ffast-math")
+  # (in the future, we might want to excercise more control over the targetted
+  # instruction set to a higher level)
+  set(__ARCH_C_OPT_FLAGS "-O3 -fopenmp-simd -march=native -DNDEBUG -funroll-loops -ffast-math")
 
   set(CMAKE_C_FLAGS_RELEASE "${__ARCH_C_OPT_FLAGS}")
   set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g ${__ARCH_C_OPT_FLAGS}")

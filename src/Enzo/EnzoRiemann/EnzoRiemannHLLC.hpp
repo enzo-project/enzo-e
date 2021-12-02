@@ -25,7 +25,7 @@ public:
   using WaveSpeedFunctor = EinfeldtWavespeed<HydroLUT>;
   using LUT = typename WaveSpeedFunctor::LUT;
 
-  lutarray<LUT> operator()
+  FORCE_INLINE lutarray<LUT> operator()
   (const lutarray<LUT> flux_l, const lutarray<LUT> flux_r,
    const lutarray<LUT> prim_l, const lutarray<LUT> prim_r,
    const lutarray<LUT> cons_l, const lutarray<LUT> cons_r,
@@ -34,9 +34,9 @@ public:
    enzo_float &vi_bar) const noexcept
   {
 
-    ASSERT("HLLCImpl::calc_riemann_fluxes",
-	   "HLLC should not be used for barotropic fluids",
-	   !barotropic_eos);
+    //ASSERT("HLLCImpl::calc_riemann_fluxes",
+    //	   "HLLC should not be used for barotropic fluids",
+    //	   !barotropic_eos);
 
     enzo_float cs_l,cs_r;
     WaveSpeedFunctor wave_speeds;

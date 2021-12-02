@@ -296,6 +296,7 @@ void EnzoRiemannImpl<ImplFunctor>::solve
   const int sd = stale_depth;
   for (int iz = sd; iz < mz - sd; iz++) {
     for (int iy = sd; iy < my - sd; iy++) {
+      #pragma omp simd
       for (int ix = sd; ix < mx - sd; ix++) {
 
         // get the local values of the fluid fields

@@ -20,11 +20,13 @@ if(NOT __processedUserDefaults)
   set(CMAKE_C_FLAGS "-Wall" CACHE STRING "Default C flags")
   set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}" CACHE STRING "Default C++ flags")
 
-  # add flag to all compilers to optimize the build for the local machine's
-  # architecture (e.g. so that it can use extra SIMD instructions, like AVX2,
-  # when available). If you don't want this, feel free to comment this out
-  # (In the future, we may want to control this at a higher level)
-  add_compile_options(-xHost)
+  # Set some architecture-specific optimization flags
+  set(__ARCH_C_OPT_FLAGS "-O3 -DNDEBUG -qno-openmp -qopenmp-simd -xHost")
+
+  set(CMAKE_C_FLAGS_RELEASE "${__ARCH_C_OPT_FLAGS}")
+  set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g ${__ARCH_C_OPT_FLAGS}")
+  set(CMAKE_CXX_FLAGS_RELEASE "${__ARCH_C_OPT_FLAGS}")
+  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g ${__ARCH_C_OPT_FLAGS}")
 
   # Setting package paths (e.g., Grackle)
 
