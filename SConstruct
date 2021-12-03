@@ -594,18 +594,14 @@ Export('use_papi')
 if (have_git == 1):
    branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).rstrip()
    build_dir = 'build-' + branch.decode('utf-8')
-else:     
+else:
    build_dir = 'build'
 
-if (new_adapt == 1 and bug_fix_150 == 1):
-     build_dir = "build-new-adapt-bug-1"
-elif (new_adapt == 1 and bug_fix_150 == 0):
-     build_dir = "build-old-adapt-bug-0"
-elif (new_adapt == 0 and bug_fix_150 == 1):
-     build_dir = "build-old-adapt-bug-1"
-elif (new_adapt == 0 and bug_fix_150 == 0):
-     build_dir = "build-old-adapt-bug-0"
-     
+if (new_adapt == 1):
+     build_dir = "build-adapt-1"
+elif (new_adapt == 0):
+     build_dir = "build-adapt-0"
+
 SConscript( 'src/SConscript',variant_dir=build_dir)
 SConscript('test/SConscript')
 

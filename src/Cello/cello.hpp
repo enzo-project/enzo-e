@@ -43,6 +43,7 @@
 // #define DEBUG_CHECK
 
 class Block;
+class Boundary;
 class Config;
 class CProxy_Block;
 class FieldDescr;
@@ -741,6 +742,8 @@ namespace cello {
   CProxy_Block    block_array();
   /// Return a pointor to the Problem object defining the problem being solved
   Problem *       problem();
+  /// Return a pointor to the ith Bounday object
+  Boundary *      boundary(int i);
   /// Return a pointer to the Hierarchy object defining the mesh hierarchy
   Hierarchy *     hierarchy();
   /// Return a pointer to the Config object containing user parameters values

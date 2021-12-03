@@ -97,6 +97,9 @@ void Factory::create_block_array
   int num_face_level = 0;
   int * face_level = 0;
 
+#ifdef DEBUG_ADAPT
+  CkPrintf ("TRACE_FACTORY %s:%d\n",__FILE__,__LINE__); fflush(stdout);
+#endif
   for (int ix=0; ix<nbx; ix++) {
     for (int iy=0; iy<nby; iy++) {
       for (int iz=0; iz<nbz; iz++) {
@@ -164,7 +167,10 @@ void Factory::create_subblock_array
     int num_face_level = 0;
     int * face_level = 0;
 
-    for (int ix=0; ix<nbx; ix++) {
+#ifdef DEBUG_ADAPT  
+  CkPrintf ("TRACE_FACTORY %s:%d\n",__FILE__,__LINE__); fflush(stdout);
+#endif
+  for (int ix=0; ix<nbx; ix++) {
       for (int iy=0; iy<nby; iy++) {
 	for (int iz=0; iz<nbz; iz++) {
 
@@ -256,6 +262,9 @@ void Factory::create_block
   // }
 #endif
 
+#ifdef DEBUG_ADAPT  
+  CkPrintf ("TRACE_FACTORY %s:%d\n",__FILE__,__LINE__); fflush(stdout);
+#endif
   MsgRefine * msg = new MsgRefine
     (index,
      nx,ny,nz,
@@ -263,8 +272,7 @@ void Factory::create_block
      count_adapt,
      cycle,time,dt,
      refresh_type,
-     num_face_level, face_level, adapt
-     );
+     num_face_level, face_level, adapt);
 
   msg->set_data_msg (data_msg);
 

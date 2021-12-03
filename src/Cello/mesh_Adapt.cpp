@@ -264,26 +264,22 @@ void Adapt::get_level_bounds
 
 //----------------------------------------------------------------------
 
-bool Adapt::get_neighbor_level_bounds
+void Adapt::get_neighbor_level_bounds
 (Index index, int * level_min, int * level_max, bool * can_coarsen) const
 {
-  bool found = false;
   for (int i=0; i<num_neighbors(); i++) {
     auto & neighbor = neighbor_list_[i];
     if (index == neighbor_list_[i].index_) {
-      found = true;
       (*level_min)   = neighbor.level_min_;
       (*level_max)   = neighbor.level_max_;
       (*can_coarsen) = neighbor.can_coarsen_;
     }
   }
-  return found;
 }
 
 //----------------------------------------------------------------------
 
 void Adapt::print(std::string message, Block * block) const
-  
 {
   char prefix[255];
   if (block) {
@@ -383,7 +379,6 @@ char * Adapt::load_data (char * buffer)
   LOAD_SCALAR_TYPE(pc,int,max_level_);
   LOAD_SCALAR_TYPE(pc,LevelInfo,self_);
   LOAD_VECTOR_TYPE(pc,LevelInfo,neighbor_list_);
-
 
   return pc;
 }

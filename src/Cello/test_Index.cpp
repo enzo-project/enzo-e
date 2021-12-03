@@ -399,7 +399,9 @@ PARALLEL_MAIN_BEGIN
     unit_assert (!b[i].is_sibling(a[i]));
 
     unit_func ("adjacency");
-    unit_assert (a[i].adjacency(b[i],2) == 1);
+    int p3[3] = { 4, 2, 1};
+    unit_assert (a[i].adjacency(b[i],2,p3) == 1);
+    unit_assert (a[i].adjacency(b[i],2,p3,0,-1) == 1);
 
     unit_func ("index_level");
     int ia[3],ib[3];
@@ -436,7 +438,7 @@ PARALLEL_MAIN_BEGIN
     unit_assert (!b[i].is_sibling(a[i]));
 
     unit_func ("adjacency");
-    unit_assert (a[i].adjacency(b[i],2) == 1);
+    unit_assert (a[i].adjacency(b[i],2,p3) == 1);
 
     unit_func ("index_level");
     a[i].index_level(ia,1);
@@ -470,7 +472,7 @@ PARALLEL_MAIN_BEGIN
     unit_assert (ip3[2]==2);
 
     unit_func ("adjacency");
-    unit_assert (a[i].adjacency(b[i],2) == 2);
+    unit_assert (a[i].adjacency(b[i],2,p3) == 2);
 
     unit_func ("is_sibling");
     unit_assert (!a[i].is_sibling(b[i]));

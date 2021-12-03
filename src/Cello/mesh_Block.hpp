@@ -182,17 +182,9 @@ public: // interface
   /// Return which block faces lie along a domain boundary
   void is_on_boundary (bool boundary[3][2]) const throw();
 
-  /// Return which faces are periodic
-  void periodicity (bool periodic[3]) const;
-
-  void update_levels_ ()
-  {
-#ifdef OLD_ADAPT
-    adapt_.update_curr_from_next();
-    child_face_level_curr_ = child_face_level_next_;
-#endif /* OLD_ADAPT */
-
-  }
+  /// Update local level bounds and refine/coarsen neighbor indices in
+  /// Adapt
+  void update_levels_ ();
 
   bool is_child_ (const Index & index) const
   {
@@ -215,10 +207,11 @@ public: // interface
    int num_adapt_steps,
    int cycle, double time, double dt,
    int narray, char * array, int refresh_type,
-   int num_face_level, int * face_level);
+   int num_face_level, int * face_level,
+   Adapt * adapt);
 
   /// Initialize Adapt class for neighbor connectivity
-  void init_adapt_();
+  void init_adapt_(Adapt * adapt_parent);
 
   /// Initialize arrays for refresh
   void init_refresh_();
@@ -855,25 +848,6 @@ protected: // functions
 
   /// Update boundary conditions
   void update_boundary_ ();
-
-  /// Boundary is a boundary face
-  bool is_boundary_face_(int of3[3],
-			 bool boundary[3][2],
-			 bool periodic[3],
-			 bool update[3][2]) const
-  {
-
-    bool skip = false;
-    for (int axis=0; axis<3; axis++) {
-      if (of3[axis] != 0) {
-	int face=(of3[axis]+1)/2;
-	if ( (! periodic[axis]) &&
-	     update[axis][face] &&
-	     boundary[axis][face]) skip = true;
-      }
-    }
-    return skip;
-  }
 
   /// Set the current refresh object
   void set_refresh (Refresh * refresh)

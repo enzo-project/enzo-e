@@ -244,28 +244,35 @@ namespace cello {
 
   const Config * config()
   {
-    return simulation() ? simulation()->config() : NULL;
+    return simulation() ? simulation()->config() : nullptr;
   }
 
   //---------------------------------------------------------------------- 
 
   const Parameters * parameters()
   {
-    return simulation() ? simulation()->parameters() : NULL;
+    return simulation() ? simulation()->parameters() : nullptr;
   }
 
   //---------------------------------------------------------------------- 
 
   Problem * problem()
   {
-    return simulation() ? simulation()->problem() : NULL;
+    return simulation() ? simulation()->problem() : nullptr;
+  }
+
+  //---------------------------------------------------------------------- 
+
+  Boundary * boundary(int i)
+  {
+    return problem() ? problem()->boundary(i) : nullptr;
   }
 
   //---------------------------------------------------------------------- 
 
   Hierarchy * hierarchy()
   {
-    return simulation() ? simulation()->hierarchy() : NULL;
+    return simulation() ? simulation()->hierarchy() : nullptr;
   }
 
   //---------------------------------------------------------------------- 
@@ -351,28 +358,28 @@ namespace cello {
 
   Output * output(int index)
   {
-    return problem() ? problem()->output(index) : NULL;
+    return problem() ? problem()->output(index) : nullptr;
   }
 
   //---------------------------------------------------------------------- 
 
   Solver * solver(int index)
   {
-    return problem() ? problem()->solver(index) : NULL;
+    return problem() ? problem()->solver(index) : nullptr;
   }
 
   //---------------------------------------------------------------------- 
 
   Units * units()
   {
-    return problem() ? problem()->units() : NULL;
+    return problem() ? problem()->units() : nullptr;
   }
 
   //----------------------------------------------------------------------
 
   Refresh * refresh(int ir)
   {
-    return simulation() ? &simulation()->refresh_list(ir) : NULL;
+    return simulation() ? &simulation()->refresh_list(ir) : nullptr;
   }
 
   //----------------------------------------------------------------------

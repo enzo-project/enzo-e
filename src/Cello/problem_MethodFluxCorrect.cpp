@@ -420,7 +420,6 @@ void MethodFluxCorrect::flux_correct_(Block * block)
         }
       }
     }
-
     int i_f_density = -1; // will be used to store i_f for density
     for (int i_f=0; i_f<nf; i_f++) {
       const int index_field = flux_data->index_field(i_f);

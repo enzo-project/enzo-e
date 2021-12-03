@@ -731,6 +731,21 @@ void Simulation::initialize_hierarchy_() throw()
 			   config_->mesh_root_blocks[1],
 			   config_->mesh_root_blocks[2]);
 
+  bool is_periodic[3] = { false, false, false };
+  int ib=0;
+  for (Boundary * boundary = cello::boundary(ib); boundary; ib++) {
+    boundary->periodicity(is_periodic);
+  }
+  auto & root_blocks = config_->mesh_root_blocks;
+  int periodicity[3] =
+    {is_periodic[0] ? root_blocks[0] : 0,
+     is_periodic[1] ? root_blocks[1] : 0,
+     is_periodic[2] ? root_blocks[2] : 0 };
+
+  hierarchy_->set_periodicity
+    (periodicity[0],
+     periodicity[1],
+     periodicity[2]);
 }
 
 //----------------------------------------------------------------------

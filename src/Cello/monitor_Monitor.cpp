@@ -112,14 +112,14 @@ void Monitor::header () const
   print ("Define","CONFIG_SMP_MODE     %s","no");
 #endif  
 #ifdef NEW_ADAPT
-  print ("Define","NEW_ADAPT    %s","Yes");
+  print ("Define","NEW_ADAPT           %s","Yes");
 #else
-  print ("Define","NEW_ADAPT    %s","no");
+  print ("Define","NEW_ADAPT           %s","no");
 #endif  
 #ifdef BUG_FIX_150
-  print ("Define","BUG_FIX_150  %s","Yes");
+  print ("Define","BUG_FIX_150         %s","Yes");
 #else
-  print ("Define","BUG_FIX_150  %s","no");
+  print ("Define","BUG_FIX_150         %s","no");
 #endif  
   print ("CHARM","CkNumPes()           %d",CkNumPes());
   print ("CHARM","CkNumNodes()         %d",CkNumNodes());

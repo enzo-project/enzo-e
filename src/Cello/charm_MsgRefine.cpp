@@ -33,10 +33,10 @@ MsgRefine::MsgRefine()
     adapt_parent_(nullptr),
     buffer_(nullptr)
 {
-  ++counter[cello::index_static()];
-#ifdef DEBUG_MSG_REFINE
+  ++counter[cello::index_static()]; 
+#ifdef DEBUG_MSG_REFINE  
   CkPrintf ("%d %s:%d DEBUG_MSG_REFINE creating %p adapt null\n",CkMyPe(),__FILE__,__LINE__,(void*)this);
-#endif
+#endif  
 }
 
 //----------------------------------------------------------------------
@@ -48,7 +48,7 @@ MsgRefine::MsgRefine
  int cycle, double time, double dt, int refresh_type,
  int num_face_level, int * face_level,
  Adapt * adapt_parent
- )
+ ) 
   : CMessage_MsgRefine(),
     is_local_(true),
     data_msg_(nullptr),
@@ -64,10 +64,10 @@ MsgRefine::MsgRefine
     adapt_parent_(adapt_parent),
     buffer_(nullptr)
 {
-   ++counter[cello::index_static()];
-#ifdef DEBUG_MSG_REFINE
+   ++counter[cello::index_static()]; 
+#ifdef DEBUG_MSG_REFINE  
    CkPrintf ("%d %s:%d DEBUG_MSG_REFINE creating %p %p\n",CkMyPe(),__FILE__,__LINE__,(void*)this,(void*)adapt_parent);
-#endif
+#endif  
 
   for (int i=0; i<num_face_level_; i++) {
     face_level_[i] = face_level[i];
@@ -198,7 +198,7 @@ void * MsgRefine::pack (MsgRefine * msg)
 
   // Adapt class
   SAVE_OBJECT_PTR_TYPE(pc,Adapt,msg->adapt_parent_);
-  
+
   (*pi++) = msg->num_face_level_; // attribute-09
   for (int i=0; i<msg->num_face_level_; i++) {
     (*pi++) = msg->face_level_[i]; // attribute-10

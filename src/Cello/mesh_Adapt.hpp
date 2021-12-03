@@ -254,7 +254,7 @@ public: // interface
   (int * level_min, int * level_max, bool * can_coarsen) const;
 
   /// Return the current level bounds for the specified neighbor
-  bool get_neighbor_level_bounds
+  void get_neighbor_level_bounds
   (Index index, int * level_min, int * level_max, bool * can_coarsen) const;
   
   /// Return the minimum level for the given block

@@ -115,9 +115,10 @@ Block::Block ( MsgRefine * msg )
 	msg->num_adapt_steps_,
 	msg->cycle_, msg->time_,  msg->dt_,
 	0, NULL, msg->refresh_type_,
-	msg->num_face_level_, msg->face_level_);
+        msg->num_face_level_, msg->face_level_,
+        msg->adapt_);
 
-  init_adapt_();
+  init_adapt_(msg->adapt_);
 
   apply_initial_(msg);
 
@@ -145,9 +146,10 @@ void Block::p_set_msg_refine(MsgRefine * msg)
 	msg->num_adapt_steps_,
 	msg->cycle_, msg->time_,  msg->dt_,
 	0, NULL, msg->refresh_type_,
-	msg->num_face_level_, msg->face_level_);
+	msg->num_face_level_, msg->face_level_,
+        msg->adapt_parent_);
 
-  init_adapt_();
+  init_adapt_(msg->adapt_parent_);
 
 #ifdef TRACE_BLOCK
   {
@@ -180,8 +182,16 @@ void Block::init_refine_
  int num_adapt_steps,
  int cycle, double time, double dt,
  int narray, char * array, int refresh_type,
- int num_face_level, int * face_level)
+ int num_face_level, int * face_level,
+ Adapt * adapt)
 {
+#ifdef DEBUG_ADAPT
+  if (adapt)
+    adapt->print("init_refine",index);
+  else
+    CkPrintf ("Block::init_refine_ adapt = nullptr level %d\n",index.level());
+#endif
+
   index_ = index;
   cycle_ = cycle;
   time_ = time;
@@ -408,10 +418,10 @@ ItFace Block::it_face
 {
   int rank = cello::rank();
   int n3[3];
+  int p3[3];
   size_array(n3,n3+1,n3+2);
-  bool periodic[3];
-  periodicity(periodic);
-  return ItFace (rank,min_face_rank,periodic,n3,index,ic3,if3);
+  cello::hierarchy()->get_periodicity(p3,p3+1,p3+2);
+  return ItFace (rank,min_face_rank,p3,n3,index,ic3,if3);
 }
 
 //----------------------------------------------------------------------
@@ -429,11 +439,10 @@ ItNeighbor Block::it_neighbor (Index index,
   }
   int n3[3];
   size_array(&n3[0],&n3[1],&n3[2]);
-  bool periodic[3];
-  periodicity(periodic);
-
+  int p3[3];
+  cello::hierarchy()->get_periodicity(p3,p3+1,p3+2);
   return ItNeighbor
-    (this,min_face_rank,periodic,n3,index,
+    (this,min_face_rank,p3,n3,index,
      neighbor_type,min_level,coarse_level);
 }
 
@@ -462,21 +471,6 @@ Solver * Block::solver () throw ()
   Problem * problem = cello::problem();
   Solver * solver = problem->solver(index_solver());
   return solver;
-}
-
-//----------------------------------------------------------------------
-
-void Block::periodicity (bool p3[3]) const
-{
-  for (int axis=0; axis<3; axis++) {
-    p3[axis] = false;
-  }
-  int index_boundary = 0;
-  Problem * problem = cello::problem();
-  Boundary * boundary;
-  while ( (boundary = problem->boundary(index_boundary++)) ) {
-    boundary->periodicity(p3);
-  }
 }
 
 //----------------------------------------------------------------------
@@ -726,7 +720,7 @@ Block::Block ()
     refresh_()
 {
   init_refresh_();
-  init_adapt_();
+  init_adapt_(nullptr);
 
   for (int i=0; i<3; i++) array_[i]=0;
 }
@@ -762,7 +756,7 @@ Block::Block (CkMigrateMessage *m)
     refresh_()
 {
   init_refresh_();
-  init_adapt_();
+  init_adapt_(nullptr);
 
 #ifdef TRACE_BLOCK
   CkPrintf ("TRACE_BLOCK Block(CkMigrateMessage*)\n"); // 0
@@ -773,43 +767,60 @@ Block::Block (CkMigrateMessage *m)
 
 //----------------------------------------------------------------------
 
-void Block::init_adapt_()
+void Block::init_adapt_(Adapt * adapt_parent)
 {
+  const int level = index_.level();
 #ifdef TRACE_BLOCK
-  CkPrintf ("TRACE_BLOCK %s Block::init_adapt_()\n",name().c_str()); // 0
+  CkPrintf ("TRACE_BLOCK %s Block::init_adapt_() level %d\n",name().c_str(),level); // 0
   fflush(stdout);
 #endif
-  if (index_.level() == 0) {
-    const int rank = cello::rank();
 
-    adapt_.set_rank(rank);
+  const int rank = cello::rank();
+  adapt_.set_rank(rank);
+  adapt_.set_max_level(cello::config()->mesh_max_level);
+  adapt_.set_index(index_);
+
+  const bool initial_cycle =
+    (cello::simulation()->cycle() == cello::config()->initial_cycle);
+
+  if ( (level <= 0) && initial_cycle ) {
+    // If root-level (or below) block in first simulation cycle,
+    // initialize neighbors to be all adjacent root-level blocks
     const int ifmx = -1;
     const int ifpx = +1;
     const int ifmy = (rank >= 2) ? -1 : 0;
     const int ifpy = (rank >= 2) ? +1 : 0;
     const int ifmz = (rank >= 3) ? -1 : 0;
     const int ifpz = (rank >= 3) ? +1 : 0;
-    int count = 0;
     int na3[3];
     cello::hierarchy()->root_blocks(na3,na3+1,na3+2);
     int if3[3];
     int k=0;
-    int v3[3];
-    index_.values(v3);
-    adapt_.set_index(index_);
     for (if3[2]=ifmz; if3[2]<=ifpz; ++if3[2]) {
       for (if3[1]=ifmy; if3[1]<=ifpy; ++if3[1]) {
         for (if3[0]=ifmx; if3[0]<=ifpx; ++if3[0]) {
           if (if3[0] || if3[1] || if3[2]) {
             Index index_neighbor = index_.index_neighbor(if3,na3);
-            index_neighbor.values(v3);
             adapt_.insert_neighbor(index_neighbor);
           }
-          ++count;
         }
       }
     }
-    count--; // don't count self
+  } else if (level > 0) {
+    // else if a refined Block, initialize adapt from its incoming
+    // parent block
+#ifdef DEBUG_ADAPT
+    adapt_.print("init_adapt child before",this);
+#endif
+    int ic3[3];
+    index_.child(level,ic3,ic3+1,ic3+2);
+    adapt_.refine(*adapt_parent,ic3);
+#ifdef DEBUG_ADAPT
+    CkPrintf ("DEBUG_ADAPT %s Block() level > 0\n",
+              name().c_str());
+    adapt_parent->print("init_adapt parent");
+    adapt_.print("init_adapt child after",this);
+#endif    
   }
 }
 
@@ -1256,9 +1267,9 @@ void Block::debug_faces_(const char * mesg)
 
       for (if3[0]=-1; if3[0]<=1; if3[0]++) {
 #ifdef CELLO_DEBUG
-	fprintf (fp_debug,(ic3[1]==1) ? "%d " : "  ",face_level(if3));
+	fprintf (fp_debug,(ic3[1]==1) ? "%d " : "  ",face_level(index_,if3));
 #endif
-	PARALLEL_PRINTF ((ic3[1]==1) ? "%d " : "  ",face_level(if3));
+	PARALLEL_PRINTF ((ic3[1]==1) ? "%d " : "  ",face_level(index_,if3));
       }
 #ifdef CELLO_DEBUG
       fprintf (fp_debug,"| ");

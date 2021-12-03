@@ -75,6 +75,9 @@ void EnzoFactory::create_block_array
   int num_face_level = 0;
   int * face_level = 0;
 
+#ifdef TRACE_FACTORY
+  CkPrintf ("TRACE_FACTORY %s:%d\n",__FILE__,__LINE__); fflush(stdout);
+#endif
   for (int ix=0; ix<nbx; ix++) {
     for (int iy=0; iy<nby; iy++) {
       for (int iz=0; iz<nbz; iz++) {
@@ -153,6 +156,9 @@ void EnzoFactory::create_subblock_array
     int num_face_level = 0;
     int * face_level = 0;
 
+#ifdef TRACE_FACTORY
+    CkPrintf ("TRACE_FACTORY %s:%d\n",__FILE__,__LINE__); fflush(stdout);
+#endif
     for (int ix=0; ix<nbx; ix++) {
       for (int iy=0; iy<nby; iy++) {
 	for (int iz=0; iz<nbz; iz++) {
@@ -231,8 +237,10 @@ void EnzoFactory::create_block
   int izm=(rank >= 3) ? 0 : 1;
   int izp=(rank >= 3) ? 3 : 2;
 #ifdef NEW_ADAPT
+#ifdef TRACE_FACTORY
   CkPrintf ("adapt %p\n",adapt); fflush(stdout);
-
+#endif
+  
   char buffer[80];
   int v3[3];
   index.values(v3);
@@ -249,7 +257,7 @@ void EnzoFactory::create_block
   int na3[3];
   bool p3[3];
   cello::hierarchy()->root_blocks(na3,na3+1,na3+2);
-  cello::hierarchy()->get_periodicity(p3,p3+1,p3+2);
+  cello::hierarchy()->get_periodicity(p3,p3+1,p3+2);  
   if (!p3[0]) na3[0] = 0;
   if (!p3[1]) na3[1] = 0;
   if (!p3[2]) na3[2] = 0;
@@ -259,7 +267,7 @@ void EnzoFactory::create_block
     index_neighbor.print("index_neighbor",2);
     int level = index_neighbor.level();
     int im3[3]={0,0,0},ip3[3]={1,1,1};
-    index.categorize (index_neighbor,rank,im3,ip3,na3);
+    index.categorize (index_neighbor,rank,im3,ip3);
     CkPrintf ("DEBUG_ADAPT categorize %d: %d:%d %d:%d %d:%d\n",
               i,im3[0],ip3[0],im3[1],ip3[1],im3[2],ip3[2]);
     for (int iz=im3[2]; iz<ip3[2]; iz++) {
@@ -332,6 +340,10 @@ void EnzoFactory::create_block
 #endif  /* NEW_ADAPT */
   
 #endif /* DEBUG_NEW!_ADAPT */
+
+#ifdef DEBUG_NEW_ADAPT
+  CkPrintf ("TRACE_FACTORY %s:%d\n",__FILE__,__LINE__); fflush(stdout);
+#endif
   MsgRefine * msg = new MsgRefine 
     (index,
      nx,ny,nz,

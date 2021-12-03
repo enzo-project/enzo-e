@@ -43,7 +43,7 @@ public: // interface
       lower_[axis] = 0.0;
       upper_[axis] = 0.0;
       blocking_[axis] = 0;
-      periodicity_[axis] = false;
+      periodicity_[axis] = 0;
     }
   }
   
@@ -101,7 +101,7 @@ public: // interface
   }
 
   /// Return the periodicity of the boundary conditions for domain axes
-  void get_periodicity (bool * px, bool * py=0, bool * pz=0)
+  void get_periodicity (int * px, int * py=0, int * pz=0)
   {
     if (px) (*px) = periodicity_[0];
     if (py) (*py) = periodicity_[1];
@@ -251,7 +251,7 @@ protected: // attributes
   int blocking_[3];
 
   /// Periodicity of boundary conditions on faces
-  bool periodicity_[3];
+  int periodicity_[3];
 
 public: // static attributes
 

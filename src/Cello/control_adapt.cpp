@@ -20,6 +20,7 @@
 
 // #define TRACE_ADAPT
 // #define CHECK_ADAPT
+// #define DEBUG_ADAPT
 
 #ifdef TRACE_ADAPT
 #   undef TRACE_ADAPT
@@ -60,12 +61,19 @@ void Block::adapt_begin_()
   cello::simulation()->set_phase(phase_adapt);
 
   const int level_maximum = cello::config()->mesh_max_level;
-
-  adapt_.reset_bounds();
-  level_next_ = adapt_compute_desired_level_(level_maximum);
-
   const int min_face_rank = cello::config()->adapt_min_face_rank;
 
+  // Evaluate local mesh refinement criteria
+  level_next_ = adapt_compute_desired_level_(level_maximum);
+
+  // Reset adapt level bounds for next adapt phase
+  adapt_.reset_bounds();
+  adapt_.initialize_self(index_,level_next_,index_.level());
+
+#ifdef DEBUG_ADAPT  
+  adapt_.print("adapt_begin",this);
+  CkPrintf ("DEBUG_ADAPT %s level_next = %d\n",name().c_str(),level_next_);
+#endif 
   control_sync_neighbor (CkIndex_Block::p_adapt_called(),
 			 sync_id_adapt_begin,
 			 min_face_rank,
@@ -110,14 +118,51 @@ void Block::adapt_next_()
 }
 
 //----------------------------------------------------------------------
+void Block::update_levels_ ()
+{
+#ifdef OLD_ADAPT
+  adapt_.update_curr_from_next();
+  child_face_level_curr_ = child_face_level_next_;
+#endif /* OLD_ADAPT */
+  std::vector<Index> index_list;
+  // Save list of indices before updating them
+  const int n = adapt_.num_neighbors();
+  index_list.resize(n);
+  for (int i=0; i<n; i++) {
+    index_list[i] = adapt_.index(i);
+  }
+  // Loop through neighbor levels and refine/coarsen as needed
+  for (int i=0; i<n; i++) {
+    int level_min;
+    int level_max;
+    bool can_coarsen;
+    adapt_.get_neighbor_level_bounds
+      (index_list[i],&level_min,&level_max,&can_coarsen);
+#ifdef DEBUG_ADAPT
+    CkPrintf ("%s Index %s [%d %d] %d]\n",
+              name().c_str(),name(index_list[i]).c_str(),
+              level_min,level_max,can_coarsen?1:0);
+#endif
+    if (level_min > index_list[i].level()) {
+      // level_min is larger, must refine
+      adapt_.refine_neighbor(index_list[i],this);
+    } else if (level_min < index_list[i].level() && can_coarsen) {
+      // level_min is smaller and can coarsen
+      adapt_.coarsen_neighbor(index_list[i]);
+    }
+  }
+}
+
+//----------------------------------------------------------------------
 
 void Block::adapt_update_()
 {
   TRACE_ADAPT("adapt_update_",this);
   if (index_.is_root()) thisProxy.doneInserting();
-
+#ifdef DEBUG_ADAPT  
+  adapt_.print("adapt_update",this);
+#endif
   adapt_end_();
-  
 }
 
 //----------------------------------------------------------------------
@@ -497,6 +542,7 @@ void Block::p_adapt_recv_level
  bool can_coarsen
  )
 {
+  TRACE_ADAPT("adapt_recv_level",this);
   performance_start_(perf_adapt_update);
 
   if (index_send.level() != level_face_curr) {
@@ -765,6 +811,7 @@ void Block::adapt_coarsen_()
 
   MsgCoarsen * msg = new MsgCoarsen
     (nf,adapt_.vector_face_level(Adapt::LevelType::curr),ic3,&adapt_);
+
   msg->set_data_msg (data_msg);
 
   thisProxy[index_parent].p_adapt_recv_child (msg);
@@ -778,9 +825,10 @@ void Block::p_adapt_recv_child (MsgCoarsen * msg)
 {
 
   performance_start_(perf_adapt_update);
-
   msg->update(data());
-
+#ifdef DEBUG_ADAPT
+  msg->adapt_child()->print("adapt_recv_child");
+#endif
   int * ic3 = msg->ic3();
 #ifdef OLD_ADAPT
   int * child_face_level_curr = msg->face_level();
@@ -797,6 +845,7 @@ void Block::p_adapt_recv_child (MsgCoarsen * msg)
     int level_child = child_face_level_curr[IF3(of3)];
     set_child_face_level_curr(ic3,of3,level_child);
   }
+#endif
 
   // copy face level array
   ItFace it_face = this->it_face(min_face_rank,index_);
@@ -808,7 +857,6 @@ void Block::p_adapt_recv_child (MsgCoarsen * msg)
         (it_face.index(),opf3,Adapt::LevelType::curr,level_child);
     }
   }
-#endif
 
   // I am a leaf on the wind
   is_leaf_=true;
@@ -864,8 +912,10 @@ void Block::initialize_child_face_levels_()
       Index in = neighbor_ (if3,&index_child);
       Index inp = in.index_parent();
       // Determine level for the child's face
+      const int level_face =
+        adapt_.face_level(in.index_parent(),ip3,Adapt::LevelType::curr);
       int level_child_face = (inp == thisIndex) ?
-	level + 1 : adapt_.face_level(in.index_parent(),ip3,Adapt::LevelType::curr);
+        (level + 1) : level_face;
       set_child_face_level_curr(ic3,if3, level_child_face);
     }
 
