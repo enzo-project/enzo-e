@@ -315,7 +315,7 @@ public:
 /// @class    EnzoRiemannHLLD
 /// @ingroup  Enzo
 /// @brief    [\ref Enzo] Encapsulates HLLD approximate Riemann Solver
-using EnzoRiemannHLLD = EnzoRiemannImpl<HLLDImpl>;
+using EnzoRiemannHLLD = EnzoRiemannImplOld<HLLDImpl>;
 
 
 #endif /* ENZO_ENZO_RIEMANN_HLLD_HPP */

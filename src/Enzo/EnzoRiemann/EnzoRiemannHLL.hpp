@@ -280,7 +280,7 @@ public:
 ///           solver using Einfeldt's wavespeed estimator) for MHD. The same
 ///           wavespeed estimator is used in Athena's MHD HLLE Riemann Solver
 using EnzoRiemannHLLEMHD =
-  EnzoRiemannImpl<HLLImpl<EinfeldtWavespeed<MHDLUT>>>;
+  EnzoRiemannImplOld<HLLImpl<EinfeldtWavespeed<MHDLUT>>>;
 
 // @class    EnzoRiemannHLLE
 /// @ingroup  Enzo
@@ -288,14 +288,14 @@ using EnzoRiemannHLLEMHD =
 ///           solver using Einfeldt's wavespeed estimator). The same wavespeed
 ///           estimator is used in Athena's MHD HLLE Riemann Solver
 using EnzoRiemannHLLE =
-  EnzoRiemannImpl<HLLImpl<EinfeldtWavespeed<HydroLUT>>>;
+  EnzoRiemannImplOld<HLLImpl<EinfeldtWavespeed<HydroLUT>>>;
 
 /// @class    EnzoRiemannHLLMHD
 /// @ingroup  Enzo
 /// @brief    [\ref Enzo] Encapsulates HLL approximate Riemann Solver using
 ///           the Davis MHD wavespeed estimator. The same wavespeed estimator
 ///           is used in Enzo's Runge-Kutta MHD HLL Riemann Solver
-using EnzoRiemannHLLMHD = EnzoRiemannImpl<HLLImpl<DavisWavespeed<MHDLUT>>>;
+using EnzoRiemannHLLMHD = EnzoRiemannImplOld<HLLImpl<DavisWavespeed<MHDLUT>>>;
 
 // To define a Riemann Solver for cosmic ray transport, define a separate
 // WaveSpeedFunctor struct and define a separate HLL Riemann Solver (maybe

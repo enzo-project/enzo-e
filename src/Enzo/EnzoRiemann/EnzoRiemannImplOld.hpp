@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoRiemannImpl.hpp
+/// @file     enzo_EnzoRiemannImplOld.hpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Thurs May 16 2019
 /// @brief    [\ref Enzo] Implementation of RiemannImpl, which is a class
@@ -108,9 +108,9 @@ using riemann_function_call_signature =
 //----------------------------------------------------------------------
 
 template <class ImplFunctor>
-class EnzoRiemannImpl : public EnzoRiemann
+class EnzoRiemannImplOld : public EnzoRiemann
 {
-  /// @class    EnzoRiemannImpl
+  /// @class    EnzoRiemannImplOld
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Provides implementation of approximate Riemann
   ///           Solvers
@@ -161,11 +161,11 @@ public: // interface
   ///
   /// @param internal_energy Indicates whether internal_energy is an
   ///     integration quantity.
-  EnzoRiemannImpl(const EnzoRiemann::FactoryArgs factory_args,
+  EnzoRiemannImplOld(const EnzoRiemann::FactoryArgs factory_args,
                   bool internal_energy);
 
   /// Virtual destructor
-  virtual ~EnzoRiemannImpl(){ };
+  virtual ~EnzoRiemannImplOld(){ };
 
   void solve (const EnzoEFltArrayMap &prim_map_l,
 	      const EnzoEFltArrayMap &prim_map_r,
@@ -198,7 +198,7 @@ protected: //attributes
 //----------------------------------------------------------------------
 
 template <class ImplFunctor>
-EnzoRiemannImpl<ImplFunctor>::EnzoRiemannImpl
+EnzoRiemannImplOld<ImplFunctor>::EnzoRiemannImplOld
 (const EnzoRiemann::FactoryArgs factory_args,
  const bool internal_energy)
   : EnzoRiemann(factory_args)
@@ -208,7 +208,7 @@ EnzoRiemannImpl<ImplFunctor>::EnzoRiemannImpl
   primitive_quantity_keys_ = enzo_riemann_utils::get_quantity_keys<LUT>(true);
 
   for (std::string key : integration_quantity_keys_){
-    ASSERT("EnzoRiemannImpl::EnzoRiemannImpl",
+    ASSERT("EnzoRiemannImplOld::EnzoRiemannImplOld",
 	   "No support for a LUT directly containing \"internal_energy\"",
 	   key != "internal_energy");
   }
@@ -222,7 +222,7 @@ EnzoRiemannImpl<ImplFunctor>::EnzoRiemannImpl
 //----------------------------------------------------------------------
 
 template <class ImplFunctor>
-void EnzoRiemannImpl<ImplFunctor>::solve
+void EnzoRiemannImplOld<ImplFunctor>::solve
 (const EnzoEFltArrayMap &prim_map_l, const EnzoEFltArrayMap &prim_map_r,
  EnzoEFltArrayMap &flux_map, const int dim, const EnzoEquationOfState *eos,
  const int stale_depth, const str_vec_t &passive_list,
@@ -238,7 +238,7 @@ void EnzoRiemannImpl<ImplFunctor>::solve
 
   // When barotropic equations of state are eventually introduced, all eos
   // dependencies should be moved up here
-  ASSERT("EnzoRiemannImpl::solve", "currently no support for barotropic eos",
+  ASSERT("EnzoRiemannImplOld::solve", "currently no support for barotropic eos",
 	 !barotropic);
 
   // TODO: Add special handling for barotropic equations of state
