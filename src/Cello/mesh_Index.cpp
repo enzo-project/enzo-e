@@ -100,14 +100,17 @@ Index Index::index_child (int icx, int icy, int icz, int min_level) const
 
 void Index::index_level (int i3[3], int level) const
 {
-  int a3[3];
-  int t3[3];
-  array (a3,a3+1,a3+2);
-  tree  (t3,t3+1,t3+2);
+  i3[0] = index_level(level,0);
+  i3[1] = index_level(level,1);
+  i3[2] = index_level(level,2);
+}
 
-  i3[0] = (a3[0] << level) + (t3[0] >> (INDEX_BITS_TREE - level));
-  i3[1] = (a3[1] << level) + (t3[1] >> (INDEX_BITS_TREE - level));
-  i3[2] = (a3[2] << level) + (t3[2] >> (INDEX_BITS_TREE - level));
+//----------------------------------------------------------------------
+
+int Index::index_level (int level, int axis) const
+{
+  return (a_[axis].array << level)
+    +    (a_[axis].tree  >> (INDEX_BITS_TREE - level));
 }
 
 //----------------------------------------------------------------------
@@ -292,6 +295,31 @@ int Index::adjacency (Index index, int rank, const int p3[3]) const
 
 //----------------------------------------------------------------------
 
+int Index::adjacency (Index index, int rank, const int p3[3], int axis, int face) const
+{
+  const int L1 = level();
+  const int L2 = index.level();
+  const int LM = std::max(L1,L2);
+
+  int l1,l2;
+  index_level(l1,LM);
+  index.index_level(l2,LM);
+  const int s1 = 1<<(LM-L1);
+  const int s2 = 1<<(LM-L2);
+
+  int r1 = l1+s1;
+  int r2 = l2+s2;
+
+  int in = (l1 <= l2 && r2 <= r1)
+    ||     (l2 <= l1 && r1 <= r2);
+  int it = (r1 == l2 || l1 == r2);
+  int ie = ! ( in || it );
+
+  return (ie) ? -1 : in ? 1:0;
+}
+
+//----------------------------------------------------------------------
+
 void Index::categorize (Index index, int rank, int im3[3], int ip3[3])
 {
   int a1[3];
@@ -429,9 +457,9 @@ void Index::print (std::string msg,int level) const
   tree(it3,it3+1,it3+2);
   index_level (il3,level);
   int r = 1 << (level - this->level());
-  CkPrintf ("INDEX_PRINT %s L%d A %d %d %d tree %X %X %X index(%d) [%d %d %d] - [%d %d %d]\n",
+  CkPrintf ("INDEX_PRINT %s L%d A %d %d %d tree %X %X %X  [%d %d %d] - [%d %d %d]\n",
             msg.c_str(),this->level(),
-            ia3[0],ia3[1],ia3[2],it3[0],it3[1],it3[2],level,
+            ia3[0],ia3[1],ia3[2],it3[0],it3[1],it3[2],
             il3[0],il3[1],il3[2],il3[0]+r,il3[1]+r,il3[2]+r);
 }
 
