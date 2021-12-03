@@ -86,7 +86,7 @@ struct EinfeldtWavespeed
     enzo_float ptot_l = pressure_l;
     enzo_float ptot_r = pressure_r;
 
-    if (LUT::has_bfields()){
+    if (LUT::has_bfields){
       ptot_l += enzo_riemann_utils::mag_pressure<LUT>(wl);
       ptot_r += enzo_riemann_utils::mag_pressure<LUT>(wr);
     }
@@ -100,7 +100,8 @@ struct EinfeldtWavespeed
     enzo_float h_roe = (sqrtrho_l * h_l + sqrtrho_r * h_r) * inv_sqrtrho_tot;
 
     enzo_float c_roe;
-    if (LUT::has_bfields()){
+    if (LUT::has_bfields){
+      // I've confirmed that the unused branch is thrown away at compile time
       c_roe = roe_cfast_(wl, wr, sqrtrho_l, sqrtrho_r, inv_sqrtrho_tot, v_roe2,
                          h_roe, gamma);
     } else {
@@ -117,8 +118,9 @@ struct EinfeldtWavespeed
   /// @param v_roe2 The squared magnitude of the roe averaged velocity
   /// @param h_roe The Roe averaged specific enthalpy.
   /// @param gamma The adiabatic index
-  inline enzo_float roe_cs_(const enzo_float v_roe2, const enzo_float h_roe,
-                     const enzo_float gamma) const throw()
+  FORCE_INLINE enzo_float roe_cs_(const enzo_float v_roe2,
+                                  const enzo_float h_roe,
+                                  const enzo_float gamma) const throw()
   {
     enzo_float tiny2 = 0.;
     enzo_float temp = h_roe - 0.5 * v_roe2;
@@ -127,11 +129,14 @@ struct EinfeldtWavespeed
 
   /// Return the fast magnetosonic speed needed to get the max and min
   /// eigenvalues for Roe's matrix for adiabatic Magnetohydrodynamics
-  inline enzo_float roe_cfast_(const lutarray<LUT> wl, const lutarray<LUT> wr,
-                        const enzo_float sqrtrho_l, const enzo_float sqrtrho_r,
-                        const enzo_float inv_sqrtrho_tot,
-                        const enzo_float v_roe2, const enzo_float h_roe,
-                        const enzo_float gamma) const throw()
+  FORCE_INLINE enzo_float roe_cfast_(const lutarray<LUT> wl,
+                                     const lutarray<LUT> wr,
+                                     const enzo_float sqrtrho_l,
+                                     const enzo_float sqrtrho_r,
+                                     const enzo_float inv_sqrtrho_tot,
+                                     const enzo_float v_roe2,
+                                     const enzo_float h_roe,
+                                     const enzo_float gamma) const throw()
   {
     // Roe-averaged density & B-field (formulas different velocity & enthalpy)
     enzo_float rho_roe = sqrtrho_l*sqrtrho_r;

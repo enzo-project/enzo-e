@@ -284,10 +284,11 @@ private:
 
 public: //associated static functions
 
-  /// returns whether the LUT has any bfields
-  static constexpr bool has_bfields(){
-    return (qkey::bfield_i>=0) || (qkey::bfield_j>=0) || (qkey::bfield_k>=0);
-  }
+  /// indicates whether the LUT has any bfields
+  static constexpr bool has_bfields =
+    std::integral_constant<bool, ((qkey::bfield_i>=0) ||
+                                  (qkey::bfield_j>=0) ||
+                                  (qkey::bfield_k>=0))>::value;
 
   /// for each actively advected scalar integration quantity and component of
   /// an actively advected vector integration quantity in FIELD_TABLE, this

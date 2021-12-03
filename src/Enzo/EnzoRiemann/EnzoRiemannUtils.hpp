@@ -114,18 +114,15 @@ namespace enzo_riemann_utils{
     enzo_float bj = (LUT::bfield_j >= 0) ? prim_vals[LUT::bfield_j] : 0;
     enzo_float bk = (LUT::bfield_k >= 0) ? prim_vals[LUT::bfield_k] : 0;
 
-    // TODO: optimize calc of cs2 to omit sqrt and pow
-    //       can also skip the calculation of B2 by checking if
-    //       LUT::bfield_i, LUT::bfield_j, LUT::bfield_k are all negative
+    // TODO: optimize calc of cs2 to omit sqrt and pow in MHD case
     const enzo_float cs = EOSStructIdeal::sound_speed(prim_vals[LUT::density],
                                                 pressure, gamma);
-    const enzo_float cs2 = std::pow(cs,2);
     const enzo_float B2 = (bi*bi + bj*bj + bk *bk);
-    if (B2 == 0){
-      return std::sqrt(cs2);
-    }
-    enzo_float va2 = B2/prim_vals[LUT::density];
     // TODO: replace va2 * cos2 with va2_cos2 = bi*bi/prim_vals[LUT::density]
+    //     then, we no longer need to compute B2 or branch in the MHD case
+    if ((!LUT::has_bfields) || (B2 == 0)){ return cs; }
+    const enzo_float cs2 = std::pow(cs,2);
+    enzo_float va2 = B2/prim_vals[LUT::density];
     enzo_float cos2 = bi*bi / B2;
     return std::sqrt(0.5*(va2+cs2+std::sqrt(std::pow(cs2+va2,2) -
                                             4.*cs2*va2*cos2)));
@@ -145,16 +142,12 @@ namespace enzo_riemann_utils{
     enzo_float bj = (LUT::bfield_j >= 0) ? prim_vals[LUT::bfield_j] : 0;
     enzo_float bk = (LUT::bfield_k >= 0) ? prim_vals[LUT::bfield_k] : 0;
 
-    // TODO: optimize calc of cs2 to omit sqrt and pow
-    //       can also skip the calculation of B2 by checking if
-    //       LUT::bfield_i, LUT::bfield_j, LUT::bfield_k are all negative
+    // TODO: optimize calc of cs2 to omit sqrt and pow in MHD case
     const enzo_float cs = EOSStructIdeal::sound_speed(prim_vals[LUT::density],
                                                 pressure, gamma);
-    const enzo_float cs2 = std::pow(cs,2);
     const enzo_float B2 = (bi*bi + bj*bj + bk *bk);
-    if (B2 == 0){
-      return std::sqrt(cs2);
-    }
+    if (!LUT::has_bfields){ return cs; }
+    const enzo_float cs2 = std::pow(cs,2);
     enzo_float va2 = B2/prim_vals[LUT::density];
     return std::sqrt(0.5*(va2+cs2+std::sqrt(std::pow(cs2+va2,2) -
                                             4.*cs2*va2*cos2)));

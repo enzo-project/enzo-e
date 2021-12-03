@@ -315,7 +315,7 @@ void EnzoRiemannImpl<ImplFunctor>::solve
         wr[LUT::velocity_j] = wr_arrays[external_velocity_j](iz,iy,ix);
         wr[LUT::velocity_k] = wr_arrays[external_velocity_k](iz,iy,ix);
 
-        if (LUT::has_bfields()){
+        if (LUT::has_bfields){
           wl[LUT::bfield_i] = wl_arrays[external_bfield_i](iz,iy,ix);
           wl[LUT::bfield_j] = wl_arrays[external_bfield_j](iz,iy,ix);
           wl[LUT::bfield_k] = wl_arrays[external_bfield_k](iz,iy,ix);
@@ -356,7 +356,7 @@ void EnzoRiemannImpl<ImplFunctor>::solve
         flux_arrays[external_velocity_i](iz,iy,ix) = fluxes[LUT::velocity_i];
         flux_arrays[external_velocity_j](iz,iy,ix) = fluxes[LUT::velocity_j];
         flux_arrays[external_velocity_k](iz,iy,ix) = fluxes[LUT::velocity_k];
-        if (LUT::has_bfields()){
+        if (LUT::has_bfields){
           flux_arrays[external_bfield_i](iz,iy,ix) = fluxes[LUT::bfield_i];
           flux_arrays[external_bfield_j](iz,iy,ix) = fluxes[LUT::bfield_j];
           flux_arrays[external_bfield_k](iz,iy,ix) = fluxes[LUT::bfield_k];
@@ -376,7 +376,7 @@ void EnzoRiemannImpl<ImplFunctor>::solve
                                               flux_arrays[LUT::density],
                                               stale_depth, passive_list);
 
-  if (LUT::has_bfields()){
+  if (LUT::has_bfields){
     // If Dedner Fluxes are required, they might get handled here
   }
 }
