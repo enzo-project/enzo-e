@@ -78,6 +78,13 @@ inline void operator|(PUP::er &p, chemistry_data &c){
  p | c.radiative_transfer_hydrogen_only;
  p | c.self_shielding_method;
  p | c.H2_self_shielding;
+ p | c.h2_charge_exchange_rate;
+ p | c.h2_dust_rate;
+ p | c.h2_h_cooling_rate;
+ p | c.collisional_excitation_rates;
+ p | c.collisional_ionisation_rates;
+ p | c.recombination_cooling_rates;
+ p | c.bremsstrahlung_cooling_rates;
 }
 #endif
 
