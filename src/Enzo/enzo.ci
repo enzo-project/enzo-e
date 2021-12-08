@@ -7,8 +7,6 @@
 
 module enzo {
 
-  extern module enzo_riemann;
-
   initnode void register_method_turbulence(void);
   initnode void mutex_init();
   initnode void mutex_init_bcg_iter();

@@ -5,9 +5,6 @@
 # to the public header file, EnzoRiemann.hpp, should require the rest of the
 # Enzo layer to be rebuilt
 
-include(charm)
-addCharmModule( "enzo_riemann" ) # generate header files from enzo_riemann.ci
-
 file(GLOB RIEMANN_SRC_FILES ./EnzoRiemann*.cpp ./EnzoRiemann*.hpp)
 add_library(riemann STATIC ${RIEMANN_SRC_FILES})
 # the following line is *ONLY* required because this library includes
@@ -20,7 +17,6 @@ add_library(riemann STATIC ${RIEMANN_SRC_FILES})
 target_link_libraries(riemann PRIVATE ${External_LIBS})
 
 add_dependencies(riemann
-  enzo_riemannCharmModule
   enzoCharmModule
   main_enzoCharmModule
   simulationCharmModule
@@ -33,12 +29,6 @@ target_include_directories (riemann
                               # "EnzoRiemann.hpp"
                               # (also specifies the location of the library's
                               # private header files)
-  ${CMAKE_CURRENT_BINARY_DIR} # this is public to inform the compiler where to
-                              # search for "enzo_riemann.def.h", which is
-                              # included by the public header file
-                              # (also informs the comiler where to find
-                              # "enzo_riemann.def.h", which should only be
-                              # included within a source file of this library)
   PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/.. # for including "enzo.hpp"
   ${CMAKE_CURRENT_BINARY_DIR}/.. # for including "enzo.decl.hpp" (implicitly

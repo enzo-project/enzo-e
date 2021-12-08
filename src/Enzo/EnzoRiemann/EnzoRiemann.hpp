@@ -13,22 +13,13 @@
 #ifndef ENZO_ENZO_RIEMANN_HPP
 #define ENZO_ENZO_RIEMANN_HPP
 
-// the following include statement is here because this file acts as the public
-// header file for the EnzoRiemann library
-#include "enzo_riemann.decl.h"
 
-// an alternative to having ``EnzoRiemann`` inherit from PUP::able is to define
-// a global function ``void operator|(PUP::er &p,EnzoRiemann* &ptr_ref)`` to
-// use for serialization.
-// - When packing up, the function would just need to pack up the parameters
-//   passed to the factory method.
-// - Then, when unpacking, the function would just need to call the factory
-//   method for unpacking.
-// The benefit of this approach is that we could avoid making this library a
-// charm++ module (which significantly simplifies building/linking this
-// library)
+// The conventional approach of having EnzoRiemann inherit from PUP::able
+// (and making this library into a charm++ module) complicates the build-system
+// to some extent. Instead, we have defined defined the global ``operator|``
+// function to encapsulate the PUP functionality
 
-class EnzoRiemann : public PUP::able
+class EnzoRiemann
 {
   /// @class    EnzoRiemann
   /// @ingroup  Enzo
@@ -36,37 +27,52 @@ class EnzoRiemann : public PUP::able
 
 public: // interface
 
-  /// Factory method for constructing the EnzoRiemann object. (The signature
-  /// may need to be modified as additional physics get added)
-  ///
-  /// @param solver The name of the Riemann solver to use. Valid names include
-  ///     "hll", "hlle", and "hlld"
-  /// @param mhd Indicates whether magnetic fields are present
-  /// @param internal_energy Indicates whether the internal energy is an
-  ///     integration quantity
-  static EnzoRiemann* construct_riemann(const std::string& solver, const bool mhd,
-                                        const bool internal_energy);
+  struct FactoryArgs{
+    /// @class    EnzoRiemannFactoryArgs
+    /// @ingroup  Enzo
+    /// @brief    [\ref Enzo] Stores arguments for EnzoRiemann's factory method
 
-  EnzoRiemann() noexcept
+    /// The name of the Riemann solver to use. Valid names include
+    /// "hll", "hlle", and "hlld"
+    std::string solver;
+    /// Indicates whether magnetic fields are present
+    bool mhd;
+    /// Indicates if the specific internal energy is an integration quantity
+    bool internal_energy;
+  };
+
+  /// Factory method for constructing the EnzoRiemann object.
+  static EnzoRiemann* construct_riemann(const FactoryArgs& factory_args)
+    noexcept;
+
+  /// friend function that implements CHARM++ Pack / Unpack functionality
+  friend inline void operator|(PUP::er &p, EnzoRiemann*& riemann_ptr){
+    bool is_nullptr = (riemann_ptr == nullptr);
+    p|is_nullptr;
+    if (!is_nullptr){
+      FactoryArgs factory_args;
+      if (!p.isUnpacking()){ factory_args = riemann_ptr->factory_args_; }
+
+      // NOTE: change this function when the members of FactoryArgs change
+      p | factory_args.solver;
+      p | factory_args.mhd;
+      p | factory_args.internal_energy;
+
+      if (p.isUnpacking()){
+        riemann_ptr = EnzoRiemann::construct_riemann(factory_args);
+      }
+    } else {
+      riemann_ptr = nullptr;
+    }
+  }
+
+  EnzoRiemann(const FactoryArgs& factory_args) noexcept
+    : factory_args_(factory_args)
   {}
 
   /// Virtual destructor
   virtual ~EnzoRiemann()
   {}
-
-  /// CHARM++ PUP::able declaration
-  PUPable_abstract(EnzoRiemann);
-
-  /// CHARM++ migration constructor for PUP::able
-  EnzoRiemann (CkMigrateMessage *m)
-    : PUP::able(m)
-  {  }
-
-  /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p)
-  {
-    PUP::able::pup(p);
-  }
 
   /// Computes the Riemann Fluxes for each conserved field along a given
   /// dimension, dim
@@ -116,6 +122,10 @@ public: // interface
   /// keys for the primitives that are required to compute the flux)
   virtual const std::vector<std::string> primitive_quantity_keys()
     const noexcept = 0;
+
+private:
+  /// this is only stored to facilitate (de-)serialization
+  FactoryArgs factory_args_;
 };
 
 #endif /* ENZO_ENZO_RIEMANN_HPP */

@@ -23,54 +23,41 @@
 
 //----------------------------------------------------------------------
 
-// make sure to include the following 2 headers AFTER the headers for all of
-// the Riemann Solver have been included
-
-// Introduces some definations related to the pup-routines for each of the
-// templated Riemann Solvers
-#define CK_TEMPLATES_ONLY
-#include "enzo_riemann.def.h"
-#undef CK_TEMPLATES_ONLY
-
-// Introduces some code related to the enzo_riemann module, itself
-#include "enzo_riemann.def.h"
-
-//----------------------------------------------------------------------
-
-EnzoRiemann* EnzoRiemann::construct_riemann(const std::string& solver, const bool mhd,
-                                            const bool internal_energy)
+EnzoRiemann* EnzoRiemann::construct_riemann
+(const EnzoRiemann::FactoryArgs& factory_args) noexcept
 {
   // determine the type of solver to construct:
   // convert string to lower case (https://stackoverflow.com/a/313990)
-  std::string formatted(solver.size(), ' ');
-  std::transform(solver.begin(), solver.end(), formatted.begin(),
-		 ::tolower);
+  std::string formatted(factory_args.solver.size(), ' ');
+  std::transform(factory_args.solver.begin(), factory_args.solver.end(),
+                 formatted.begin(), ::tolower);
   EnzoRiemann* out = nullptr; // set to NULL to suppress compiler warnings
 
   if (formatted == "hll"){
     ASSERT("EnzoRiemann::construct_riemann",
            ("An \"HLL\" Riemann solver without magnetic fields isn't "
-            "currently supported."), mhd);
-    out = new EnzoRiemannHLLMHD(internal_energy);
+            "currently supported."), factory_args.mhd);
+    out = new EnzoRiemannHLLMHD(factory_args, factory_args.internal_energy);
 
   } else if (formatted == "hlle"){
-    if (mhd){
-      out = new EnzoRiemannHLLEMHD(internal_energy);
+    if (factory_args.mhd){
+      out = new EnzoRiemannHLLEMHD(factory_args, factory_args.internal_energy);
     } else {
       ERROR("EnzoRiemann::construct_riemann",
             "The \"HLLE\" Riemann solver without magnetic fields is untested");
-      out = new EnzoRiemannHLLE(internal_energy);
+      out = new EnzoRiemannHLLE(factory_args, factory_args.internal_energy);
     }
 
   } else if (formatted == std::string("hllc")){
     ASSERT("EnzoRiemann::construct_riemann",
-           "The \"HLLC\" Riemann Solver can't support mhd", !mhd);
-    out = new EnzoRiemannHLLC(internal_energy);
+           "The \"HLLC\" Riemann Solver can't support mhd", !factory_args.mhd);
+    out = new EnzoRiemannHLLC(factory_args, factory_args.internal_energy);
 
   } else if (formatted == std::string("hlld")){
     ASSERT("EnzoRiemann::construct_riemann",
-           "The \"HLLD\" Riemann Solver requires magnetic fields", mhd);
-    out = new EnzoRiemannHLLD(internal_energy);
+           "The \"HLLD\" Riemann Solver requires magnetic fields",
+           factory_args.mhd);
+    out = new EnzoRiemannHLLD(factory_args, factory_args.internal_energy);
 
   } else {
     ERROR("EnzoRiemann::construct_riemann",

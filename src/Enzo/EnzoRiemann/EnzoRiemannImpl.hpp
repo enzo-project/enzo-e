@@ -161,21 +161,11 @@ public: // interface
   ///
   /// @param internal_energy Indicates whether internal_energy is an
   ///     integration quantity.
-  EnzoRiemannImpl(bool internal_energy);
+  EnzoRiemannImpl(const EnzoRiemann::FactoryArgs factory_args,
+                  bool internal_energy);
 
   /// Virtual destructor
   virtual ~EnzoRiemannImpl(){ };
-
-  /// CHARM++ PUP::able declaration
-  PUPable_decl_template(EnzoRiemannImpl<ImplFunctor>);
-
-  /// CHARM++ migration constructor for PUP::able
-  EnzoRiemannImpl (CkMigrateMessage *m)
-    : EnzoRiemann(m)
-  {  }
-
-  /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p);
 
   void solve (const EnzoEFltArrayMap &prim_map_l,
 	      const EnzoEFltArrayMap &prim_map_r,
@@ -222,8 +212,10 @@ protected: //attributes
 //----------------------------------------------------------------------
 
 template <class ImplFunctor>
-EnzoRiemannImpl<ImplFunctor>::EnzoRiemannImpl(const bool internal_energy)
-  : EnzoRiemann()
+EnzoRiemannImpl<ImplFunctor>::EnzoRiemannImpl
+(const EnzoRiemann::FactoryArgs factory_args,
+ const bool internal_energy)
+  : EnzoRiemann(factory_args)
 {
   integration_quantity_keys_ =
     enzo_riemann_utils::get_quantity_keys<LUT>(false);
@@ -239,18 +231,6 @@ EnzoRiemannImpl<ImplFunctor>::EnzoRiemannImpl(const bool internal_energy)
   if (calculate_internal_energy_flux_) {
     integration_quantity_keys_.push_back("internal_energy");
   }
-}
-
-//----------------------------------------------------------------------
-
-template <class ImplFunctor>
-void EnzoRiemannImpl<ImplFunctor>::pup (PUP::er &p)
-{
-  EnzoRiemann::pup(p);
-
-  p|integration_quantity_keys_;
-  p|primitive_quantity_keys_;
-  p|calculate_internal_energy_flux_;
 }
 
 //----------------------------------------------------------------------
