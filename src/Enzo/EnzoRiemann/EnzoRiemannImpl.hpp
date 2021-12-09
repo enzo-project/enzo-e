@@ -180,20 +180,6 @@ public: // interface
   const std::vector<std::string> primitive_quantity_keys() const noexcept
   { return primitive_quantity_keys_; }
 
-protected : //methods
-  
-  /// Computes the fluxes for the passively advected quantites.
-  void solve_passive_advection_(const EnzoEFltArrayMap &prim_map_l,
-                                const EnzoEFltArrayMap &prim_map_r,
-                                EnzoEFltArrayMap &flux_map,
-				const EFlt3DArray &density_flux,
-                                const int stale_depth,
-                                const str_vec_t &passive_list) const throw();
-
-  /// debugging method (checks that the order of keys matches expectations
-  void check_key_order_(const EnzoEFltArrayMap &map, bool prim,
-			const str_vec_t &passive_list) const noexcept;
-
 protected: //attributes
 
   /// expected keys (and key-order) that the `solve` method expects the
@@ -231,37 +217,6 @@ EnzoRiemannImpl<ImplFunctor>::EnzoRiemannImpl
   if (calculate_internal_energy_flux_) {
     integration_quantity_keys_.push_back("internal_energy");
   }
-}
-
-//----------------------------------------------------------------------
-
-/// computes the flux of a passive scalar at a given cell interface.
-///
-/// @param left,right The passive scalars (as mass fractions) on the left and
-///    right sides of the cell interface
-/// @param density_flux The density flux at the local interface
-static inline enzo_float calc_passive_scalar_flux_(const enzo_float left,
-                                                   const enzo_float right,
-                                                   const enzo_float density_flux){
-  // next line is equivalent to: upwind = (density_flux > 0) ? left : right;
-  // but is branchless
-  enzo_float upwind = (density_flux > 0) * left + (density_flux <= 0) * right;
-  return upwind * density_flux;
-}
-
-//----------------------------------------------------------------------
-
-static inline enzo_float passive_eint_flux_(const enzo_float density_l,
-                                            const enzo_float pressure_l,
-                                            const enzo_float density_r,
-                                            const enzo_float pressure_r,
-                                            const enzo_float gamma,
-                                            const enzo_float density_flux){
-  enzo_float eint_l = EOSStructIdeal::specific_eint(density_l, pressure_l,
-                                                    gamma);
-  enzo_float eint_r = EOSStructIdeal::specific_eint(density_r, pressure_r,
-                                                    gamma);
-  return calc_passive_scalar_flux_(eint_l, eint_r, density_flux);
 }
 
 //----------------------------------------------------------------------
@@ -404,7 +359,7 @@ void EnzoRiemannImpl<ImplFunctor>::solve
 
         if (calculate_internal_energy_flux){
           velocity_i_bar_array(iz,iy,ix) = interface_velocity_i;
-          internal_energy_flux(iz,iy,ix) = passive_eint_flux_
+          internal_energy_flux(iz,iy,ix) = enzo_riemann_utils::passive_eint_flux
             (wl[LUT::density], pressure_l, wr[LUT::density], pressure_r,
              gamma, fluxes[LUT::density]);
         }
@@ -412,86 +367,12 @@ void EnzoRiemannImpl<ImplFunctor>::solve
     }
   }
 
-  solve_passive_advection_(prim_map_l, prim_map_r, flux_map,
-  			   flux_arrays[LUT::density], stale_depth,
-                           passive_list);
+  enzo_riemann_utils::solve_passive_advection(prim_map_l, prim_map_r, flux_map,
+                                              flux_arrays[LUT::density],
+                                              stale_depth, passive_list);
 
   if (LUT::has_bfields()){
     // If Dedner Fluxes are required, they might get handled here
-  }
-}
-
-//----------------------------------------------------------------------
-
-template <class ImplFunctor>
-void EnzoRiemannImpl<ImplFunctor>::solve_passive_advection_
-(const EnzoEFltArrayMap &prim_map_l, const EnzoEFltArrayMap &prim_map_r,
- EnzoEFltArrayMap &flux_map, const EFlt3DArray &density_flux,
- const int stale_depth, const str_vec_t &passive_list) const throw()
-{
-  const std::size_t num_keys = passive_list.size();
-  if (num_keys == 0) {return;}
-
-  // This was essentially transcribed from hydro_rk in Enzo:
-
-  // load array of fields
-  CelloArray<const enzo_float, 3> *wl_arrays =
-    new CelloArray<const enzo_float, 3>[num_keys];
-  CelloArray<const enzo_float, 3> *wr_arrays =
-    new CelloArray<const enzo_float, 3>[num_keys];
-  EFlt3DArray *flux_arrays = new EFlt3DArray[num_keys];
-
-  for (std::size_t ind=0; ind<num_keys; ind++){
-    wl_arrays[ind] = prim_map_l.at(passive_list[ind]);
-    wr_arrays[ind] = prim_map_r.at(passive_list[ind]);
-    flux_arrays[ind] = flux_map.at(passive_list[ind]);
-  }
-  const int sd = stale_depth;
-  for (int iz = sd; iz < density_flux.shape(0) - sd; iz++) {
-    for (int iy = sd; iy < density_flux.shape(1) - sd; iy++) {
-
-      for (int key_ind=0; key_ind<num_keys; key_ind++){
-        for (int ix = sd; ix < density_flux.shape(2) - sd; ix++) {
-          const enzo_float dens_flux = density_flux(iz,iy,ix);
-          const enzo_float wl = wl_arrays[key_ind](iz,iy,ix);
-          const enzo_float wr = wr_arrays[key_ind](iz,iy,ix);
-          flux_arrays[key_ind](iz,iy,ix) =
-            calc_passive_scalar_flux_(wl, wr, dens_flux);
-	}
-      }
-
-    }
-  }
-  delete[] wl_arrays; delete[] wr_arrays; delete[] flux_arrays;
-}
-
-//----------------------------------------------------------------------
-
-template <class ImplFunctor>
-void EnzoRiemannImpl<ImplFunctor>::check_key_order_
-(const EnzoEFltArrayMap &map, bool prim, const str_vec_t &passive_list)
-  const noexcept
-{
-  auto concat = [](str_vec_t vec1, const str_vec_t& vec2){
-    vec1.insert( vec1.end(), vec2.begin(), vec2.end() );
-    return vec1;
-  };
-
-  str_vec_t standard_keys =
-    prim ? primitive_quantity_keys() : integration_quantity_keys();
-  // confirm that the first `standard_keys.size()` keys of map have the same
-  // order as `standard_keys`
-  map.validate_key_order(standard_keys, true, true);
-
-  // confirm that all keys in passive_list also appear in map
-  // (for now, we'll be permissive about the order of these keys)
-  for (const auto& key : passive_list){
-    if (!map.contains(key)){
-      const std::string &name = map.name();
-      ERROR2("EnzoRiemannImpl<ImplFunctor>::check_key_order_",
-             "The \"%s\" map is missing a \"%s\" passive scalar key",
-             name.c_str(), key.c_str());
-    }
   }
 }
 

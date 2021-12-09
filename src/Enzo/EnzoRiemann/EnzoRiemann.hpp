@@ -124,6 +124,12 @@ public: // interface
     const noexcept = 0;
 
 private:
+
+  /// debugging method (checks that the order of keys matches expectations
+  void check_key_order_(const EnzoEFltArrayMap &map, bool prim,
+			const str_vec_t &passive_list) const noexcept;
+
+private:
   /// this is only stored to facilitate (de-)serialization
   FactoryArgs factory_args_;
 };

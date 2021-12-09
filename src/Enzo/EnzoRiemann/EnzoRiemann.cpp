@@ -66,3 +66,26 @@ EnzoRiemann* EnzoRiemann::construct_riemann
 
   return out;
 }
+
+//----------------------------------------------------------------------
+
+void EnzoRiemann::check_key_order_(const EnzoEFltArrayMap &map, bool prim,
+                                   const str_vec_t &passive_list) const noexcept
+{
+  str_vec_t standard_keys =
+    prim ? primitive_quantity_keys() : integration_quantity_keys();
+  // confirm that the first `standard_keys.size()` keys of map have the same
+  // order as `standard_keys`
+  map.validate_key_order(standard_keys, true, true);
+
+  // confirm that all keys in passive_list also appear in map
+  // (for now, we'll be permissive about the order of these keys)
+  for (const auto& key : passive_list){
+    if (!map.contains(key)){
+      const std::string &name = map.name();
+      ERROR2("EnzoRiemannImpl<ImplFunctor>::check_key_order_",
+             "The \"%s\" map is missing a \"%s\" passive scalar key",
+             name.c_str(), key.c_str());
+    }
+  }
+}

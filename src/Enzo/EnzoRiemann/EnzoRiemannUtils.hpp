@@ -345,6 +345,102 @@ namespace enzo_riemann_utils{
     #undef ENTRY
   }
 
+
+  //----------------------------------------------------------------------
+
+  /// computes the flux of a passive scalar at a given cell interface.
+  ///
+  /// @param left,right The passive scalars (as mass fractions) on the left and
+  ///    right sides of the cell interface
+  /// @param density_flux The density flux at the local interface
+  static inline enzo_float calc_passive_scalar_flux_
+  (const enzo_float left, const enzo_float right,
+   const enzo_float density_flux) noexcept
+  {
+    // next line is equivalent to: upwind = (density_flux > 0) ? left : right;
+    // but is branchless
+    enzo_float upwind = (density_flux > 0) * left + (density_flux <= 0) * right;
+    return upwind * density_flux;
+  }
+
+  //----------------------------------------------------------------------
+
+  /// computes the flux of the specific internal energy at a given cell
+  /// interface while treating the specific internal energy as a passive scalar
+  static inline enzo_float passive_eint_flux(const enzo_float density_l,
+                                             const enzo_float pressure_l,
+                                             const enzo_float density_r,
+                                             const enzo_float pressure_r,
+                                             const enzo_float gamma,
+                                             const enzo_float density_flux)
+    noexcept
+  {
+    enzo_float eint_l = EOSStructIdeal::specific_eint(density_l, pressure_l,
+                                                      gamma);
+    enzo_float eint_r = EOSStructIdeal::specific_eint(density_r, pressure_r,
+                                                      gamma);
+    return calc_passive_scalar_flux_(eint_l, eint_r, density_flux);
+  }
+
+  //----------------------------------------------------------------------
+
+  /// compute the flux of the passively advected scalar quantities
+  ///
+  /// @param[in]  priml_map,primr_map Maps of arrays holding the left/right
+  ///     reconstructed face-centered primitives.
+  /// @param[out] flux_map Holds arrays where the calculated fluxes for the
+  ///     integration quantities will be stored.
+  /// @param[in]  density_flux Array of density fluxes at each location. This
+  ///     This probably aliases the array returned by `flux_map["density"]`
+  /// @param[in]  stale_depth indicates the current stale_depth.
+  /// @param[in]  passive_list A list of keys for passive scalars.
+  ///
+  /// @note
+  /// The arrays in `priml_map`, `primr_map`, and `flux_map` should all have
+  /// the same shape as `density_flux`.
+  static void solve_passive_advection
+  (const EnzoEFltArrayMap &prim_map_l, const EnzoEFltArrayMap &prim_map_r,
+   EnzoEFltArrayMap &flux_map,
+   const CelloArray<const enzo_float,3> &density_flux,
+   const int stale_depth, const str_vec_t &passive_list) noexcept
+  {
+    const std::size_t num_keys = passive_list.size();
+    if (num_keys == 0) {return;}
+
+    // This was essentially transcribed from hydro_rk in Enzo:
+
+    // load array of fields
+    CelloArray<const enzo_float, 3> *wl_arrays =
+      new CelloArray<const enzo_float, 3>[num_keys];
+    CelloArray<const enzo_float, 3> *wr_arrays =
+      new CelloArray<const enzo_float, 3>[num_keys];
+    EFlt3DArray *flux_arrays = new EFlt3DArray[num_keys];
+
+    for (std::size_t ind=0; ind<num_keys; ind++){
+      wl_arrays[ind] = prim_map_l.at(passive_list[ind]);
+      wr_arrays[ind] = prim_map_r.at(passive_list[ind]);
+      flux_arrays[ind] = flux_map.at(passive_list[ind]);
+    }
+    const int sd = stale_depth;
+    for (int iz = sd; iz < density_flux.shape(0) - sd; iz++) {
+      for (int iy = sd; iy < density_flux.shape(1) - sd; iy++) {
+
+        for (int key_ind=0; key_ind<num_keys; key_ind++){
+          for (int ix = sd; ix < density_flux.shape(2) - sd; ix++) {
+            const enzo_float dens_flux = density_flux(iz,iy,ix);
+            const enzo_float wl = wl_arrays[key_ind](iz,iy,ix);
+            const enzo_float wr = wr_arrays[key_ind](iz,iy,ix);
+            flux_arrays[key_ind](iz,iy,ix) =
+              calc_passive_scalar_flux_(wl, wr, dens_flux);
+          }
+        }
+
+      }
+    }
+    delete[] wl_arrays; delete[] wr_arrays; delete[] flux_arrays;
+
+  }
+
 }
 
 #endif /* ENZO_ENZO_RIEMANN_UTILS_HPP */
