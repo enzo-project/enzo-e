@@ -193,21 +193,15 @@ void EnzoRiemannImplNew<ImplFunctor>::solve
   const int my = flux_map.array_shape(1);
   const int mx = flux_map.array_shape(2);
 
-  // Check if the internal energy flux must be computed and then initialize the
-  // appropriate array
+  // The strategy is to allocate some scratch space for internal_energy_flux &
+  // velocity_i_bar_array, even if we don't care about dual-energy in order to
+  // avoid branching.
+  const bool calculate_internal_energy_flux = calculate_internal_energy_flux_;
   EFlt3DArray internal_energy_flux, velocity_i_bar_array;
-  if ((calculate_internal_energy_flux_) && (interface_velocity == nullptr)){
-    ERROR("EnzoRiemannImplNew::solve",
-          "interface_velocity is expected to be non-NULL when computing the "
-          "internal energy flux");
-  } else if (calculate_internal_energy_flux_) {
-    internal_energy_flux = flux_map.at("internal_energy");
-    velocity_i_bar_array = *interface_velocity;
-  } else {
-    // TODO: preallocate scratch space
-    internal_energy_flux = EFlt3DArray(mz,my,mx);
-    velocity_i_bar_array = EFlt3DArray(mz,my,mx);
-  }
+  enzo_riemann_utils::prep_dual_energy_arrays_(calculate_internal_energy_flux,
+                                               flux_map, interface_velocity,
+                                               internal_energy_flux,
+                                               velocity_i_bar_array);
 
 #ifdef RIEMANN_DEBUG
   check_key_order_(prim_map_l, true, passive_list);
