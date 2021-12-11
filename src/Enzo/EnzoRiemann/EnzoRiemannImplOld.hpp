@@ -247,20 +247,15 @@ void EnzoRiemannImplOld<ImplFunctor>::solve
   const CelloArray<const enzo_float, 3> pressure_array_r =
     prim_map_r.at("pressure");
 
-  // Check if the internal energy flux must be computed and then initialize the
-  // appropriate array
+  // The strategy is to allocate some scratch space for internal_energy_flux &
+  // velocity_i_bar_array, even if we don't care about dual-energy in order to
+  // avoid branching.
   const bool calculate_internal_energy_flux = calculate_internal_energy_flux_;
-  if ((calculate_internal_energy_flux) && (interface_velocity == nullptr)){
-    ERROR("EnzoRiemannImpl::solve",
-          "interface_velocity is expected to be non-NULL when computing the "
-          "internal energy flux");
-  }
-  // TODO: check if falling back to default constructor actually introduces a
-  // branch in the for-loop. (if so consider using scratch space, instead)
-  const EFlt3DArray internal_energy_flux = (calculate_internal_energy_flux) ?
-    flux_map.at("internal_energy") : EFlt3DArray();
-  const EFlt3DArray velocity_i_bar_array = (calculate_internal_energy_flux) ?
-    *interface_velocity : EFlt3DArray();
+  EFlt3DArray internal_energy_flux, velocity_i_bar_array;
+  enzo_riemann_utils::prep_dual_energy_arrays_(calculate_internal_energy_flux,
+                                               flux_map, interface_velocity,
+                                               internal_energy_flux,
+                                               velocity_i_bar_array);
 
 #ifdef RIEMANN_DEBUG
   check_key_order_(prim_map_l, true, passive_list);
@@ -362,12 +357,12 @@ void EnzoRiemannImplOld<ImplFunctor>::solve
           flux_arrays[external_bfield_k](iz,iy,ix) = fluxes[LUT::bfield_k];
         }
 
-        if (calculate_internal_energy_flux){
-          velocity_i_bar_array(iz,iy,ix) = interface_velocity_i;
-          internal_energy_flux(iz,iy,ix) = enzo_riemann_utils::passive_eint_flux
-            (wl[LUT::density], pressure_l, wr[LUT::density], pressure_r,
-             gamma, fluxes[LUT::density]);
-        }
+
+        velocity_i_bar_array(iz,iy,ix) = interface_velocity_i;
+        internal_energy_flux(iz,iy,ix) = enzo_riemann_utils::passive_eint_flux
+          (wl[LUT::density], pressure_l, wr[LUT::density], pressure_r,
+           gamma, fluxes[LUT::density]);
+
       }
     }
   }

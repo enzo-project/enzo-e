@@ -434,6 +434,55 @@ namespace enzo_riemann_utils{
 
   }
 
+
+  //----------------------------------------------------------------------
+
+#ifndef CONFIG_SMP_MODE
+  static EFlt3DArray scratch_ie_flux_;
+  static EFlt3DArray scratch_velocity_i_bar_array_;
+#endif
+
+  /// dumb helper function for setting up arrays for holding the
+  /// internal_energy_flux and velocity_i_bar_array
+  ///
+  /// To simplify things, we want to always provide arrays for storing this
+  /// data, even if we don't technically need it, in order to avoid branching
+  ///
+  /// This handles things in a fairly silly way, but we are defining it to help
+  /// us compare between the various approaches
+  static void prep_dual_energy_arrays_
+  (bool calculate_internal_energy_flux,
+   EnzoEFltArrayMap &flux_map,
+   const CelloArray<enzo_float,3> * const interface_velocity,
+   CelloArray<enzo_float,3>& internal_energy_flux,
+   CelloArray<enzo_float,3>& velocity_i_bar_array)
+  {
+    if ((calculate_internal_energy_flux) && (interface_velocity == nullptr)){
+      ERROR("EnzoRiemannImpl2::solve",
+            "interface_velocity is expected to be non-NULL when computing the "
+            "internal energy flux");
+    } else if (calculate_internal_energy_flux) {
+      internal_energy_flux = flux_map.at("internal_energy");
+      velocity_i_bar_array = *interface_velocity;
+    } else {
+      int mz = flux_map.array_shape(0);
+      int my = flux_map.array_shape(1);
+      int mx = flux_map.array_shape(2);
+#ifndef CONFIG_SMP_MODE
+      if (scratch_ie_flux_.is_null()){
+        scratch_ie_flux_ = EFlt3DArray(mz,my,mx);
+        scratch_velocity_i_bar_array_ = EFlt3DArray(mz,my,mx);
+      }
+      internal_energy_flux = scratch_ie_flux_;
+      velocity_i_bar_array = scratch_velocity_i_bar_array_;
+#else
+      // TODO: preallocate scratch space
+      internal_energy_flux = EFlt3DArray(mz,my,mx);
+      velocity_i_bar_array = EFlt3DArray(mz,my,mx);
+#endif
+    }
+  }
+
 }
 
 #endif /* ENZO_ENZO_RIEMANN_UTILS_HPP */
