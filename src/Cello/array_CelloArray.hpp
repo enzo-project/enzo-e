@@ -11,6 +11,8 @@
 #include <limits>
 #include <memory>
 
+#include "cello_defines.hpp"
+
 #ifndef ARRAY_CELLO_ARRAY_HPP
 #define ARRAY_CELLO_ARRAY_HPP
 
@@ -476,7 +478,7 @@ public: // interface
   /// @param args The indices for each dimension of the array. The number of
   ///     provided indices must match the number of array dimensions, D.
   template<typename... Args, REQUIRE_INT(Args)>
-  T& operator() (Args... args) const noexcept {
+  FORCE_INLINE T& operator() (Args... args) const noexcept {
     static_assert(D==sizeof...(args),
 		  "Number of indices don't match number of dimensions");
     CHECK_BOUNDND(shape_, args)
@@ -485,7 +487,8 @@ public: // interface
   }
 
   // Specialized implementation for 3D arrays (to reduce compile time)
-  T& operator() (const int k, const int j, const int i) const noexcept {
+  FORCE_INLINE T& operator() (const int k, const int j, const int i) const
+    noexcept {
     static_assert(D==3, "3 indices should only be specified for 3D arrays");
     CHECK_BOUND3D(shape_, k, j, i)
     CHECK_IF_FINITE(shared_data_.get()[offset_ + k*stride_[0] + j*stride_[1] + i])

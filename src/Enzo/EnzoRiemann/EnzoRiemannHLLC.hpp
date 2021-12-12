@@ -41,7 +41,10 @@ public:
     const enzo_float gamma = config.gamma;
 
     // load primitives:
-    auto load_prim = [=](const CelloArray<const enzo_float,4>& prim_arr)
+    // TODO: __attribute__((always_inline)) is required for icc
+    //  - return to this and either manually inline or introduce a macro
+    //    that specifies that the lambda should be inlined
+    auto load_prim = [=](const CelloArray<const enzo_float,4>& prim_arr) __attribute__((always_inline))
     {
       lutarray<LUT> out;
       out[LUT::density]      = prim_arr(LUT::density,iz,iy,ix);

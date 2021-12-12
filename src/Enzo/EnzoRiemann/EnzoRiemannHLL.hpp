@@ -40,11 +40,11 @@ struct EinfeldtWavespeed
 
   using LUT = EnzoRiemannLUT<inputLUT>;
 
-  inline void operator()(const lutarray<LUT> wl, const lutarray<LUT> wr,
-                  const lutarray<LUT> Ul, const lutarray<LUT> Ur,
-                  enzo_float pressure_l, enzo_float pressure_r,
-                  const enzo_float gamma,
-                  enzo_float *bp, enzo_float *bm) const noexcept
+  FORCE_INLINE void operator()(const lutarray<LUT> wl, const lutarray<LUT> wr,
+                               const lutarray<LUT> Ul, const lutarray<LUT> Ur,
+                               enzo_float pressure_l, enzo_float pressure_r,
+                               const enzo_float gamma,
+                               enzo_float *bp, enzo_float *bm) const noexcept
   {
     // Calculate wavespeeds as specified by S4.3.1 of Stone+08
     // if LM and L0 are max/min eigenvalues of Roe's matrix:
@@ -242,8 +242,11 @@ public:
 
     const enzo_float gamma = config.gamma;
 
-    // load primitives:
-    auto load_prim = [=](const CelloArray<const enzo_float,4>& prim_arr)
+    // load primitives into local variables
+    // TODO: __attribute__((always_inline)) is required for icc
+    //  - return to this and either manually inline or introduce a macro
+    //    that specifies that the lambda should be inlined
+    auto load_prim = [=](const CelloArray<const enzo_float,4>& prim_arr) __attribute__((always_inline))
     {
       lutarray<LUT> out;
       out[LUT::density]      = prim_arr(LUT::density,iz,iy,ix);
@@ -251,9 +254,9 @@ public:
       out[LUT::velocity_j]   = prim_arr(external_velocity_j,iz,iy,ix);
       out[LUT::velocity_k]   = prim_arr(external_velocity_k,iz,iy,ix);
       if (LUT::has_bfields){
-        out[LUT::bfield_i] = prim_arr(external_bfield_i,iz,iy,ix);
-        out[LUT::bfield_j] = prim_arr(external_bfield_j,iz,iy,ix);
-        out[LUT::bfield_k] = prim_arr(external_bfield_k,iz,iy,ix);
+        out[LUT::bfield_i]   = prim_arr(external_bfield_i,iz,iy,ix);
+        out[LUT::bfield_j]   = prim_arr(external_bfield_j,iz,iy,ix);
+        out[LUT::bfield_k]   = prim_arr(external_bfield_k,iz,iy,ix);
       }
       // this actually stores pressure:
       out[LUT::total_energy] = prim_arr(LUT::total_energy,iz,iy,ix);

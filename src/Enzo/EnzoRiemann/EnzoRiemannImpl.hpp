@@ -161,6 +161,14 @@ public: // interface
 
 protected: //attributes
 
+  /// Actually executes the Riemann Solver
+  ///
+  /// @note
+  /// for purposes of getting icc to vectorize code, it seems to be important
+  /// that this method's contents are separated from `EnzoRiemannImpl::solve`
+  static void solve_(const KernelConfig config,
+                     const int stale_depth) noexcept;
+
   /// expected keys (and key-order) that the `solve` method expects the
   /// `flux_map` argument to have
   std::vector<std::string> integration_quantity_keys_;
@@ -219,11 +227,6 @@ void EnzoRiemannImpl<ImplFunctor>::solve
   ASSERT("EnzoRiemannImpl::solve", "currently no support for barotropic eos",
 	 !barotropic);
 
-  // preload shape of arrays (to inform compiler they won't change)
-  const int mz = flux_map.array_shape(0);
-  const int my = flux_map.array_shape(1);
-  const int mx = flux_map.array_shape(2);
-
   // The strategy is to allocate some scratch space for internal_energy_flux &
   // velocity_i_bar_array, even if we don't care about dual-energy in order to
   // avoid branching.
@@ -247,18 +250,8 @@ void EnzoRiemannImpl<ImplFunctor>::solve
                             gamma,
                             internal_energy_flux,
                             velocity_i_bar_array};
-  const ImplFunctor kernel{config};
 
-  // compute the flux at all non-stale cell interfaces
-  const int sd = stale_depth;
-  for (int iz = sd; iz < mz - sd; iz++) {
-    for (int iy = sd; iy < my - sd; iy++) {
-      #pragma omp simd
-      for (int ix = sd; ix < mx - sd; ix++) {
-        kernel(iz,iy,ix);
-      }
-    }
-  }
+  solve_(config, stale_depth);
 
   enzo_riemann_utils::solve_passive_advection(prim_map_l, prim_map_r, flux_map,
                                               flux_map.at("density"),
@@ -268,6 +261,30 @@ void EnzoRiemannImpl<ImplFunctor>::solve
     // If Dedner Fluxes are required, they might get handled here
   }
 
+}
+
+//----------------------------------------------------------------------
+
+template <class ImplFunctor>
+void EnzoRiemannImpl<ImplFunctor>::solve_
+(const KernelConfig config, const int stale_depth) noexcept
+{
+  const ImplFunctor kernel{config};
+
+  // preload shape of arrays (to inform compiler they won't change)
+  const int mz = config.flux_arr.shape(1);
+  const int my = config.flux_arr.shape(2);
+  const int mx = config.flux_arr.shape(3);
+
+  // compute the flux at all non-stale cell interfaces
+  for (int iz = stale_depth; iz < mz - stale_depth; iz++) {
+    for (int iy = stale_depth; iy < my - stale_depth; iy++) {
+      #pragma omp simd
+      for (int ix = stale_depth; ix < mx - stale_depth; ix++) {
+        kernel(iz,iy,ix);
+      }
+    }
+  }
 }
 
 #endif /* ENZO_ENZO_RIEMANN_IMPL_HPP */
