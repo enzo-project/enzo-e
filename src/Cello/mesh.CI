@@ -176,12 +176,13 @@ module mesh {
     entry void r_adapt_enter(CkReductionMsg *);
     entry void p_adapt_end();
     entry void p_adapt_update();
+    entry void r_adapt_next(CkReductionMsg *);
     entry void p_adapt_next();
     entry void p_adapt_called();
     entry void p_adapt_exit();
     entry void p_adapt_delete();
     entry void p_adapt_recv_level
-      (Index index, int ic3[3], int if3[3], int level_now,
+      (int adapt_step,Index index, int ic3[3], int if3[3], int level_now,
        int level_min,int level_max,bool can_coarsen);
     entry void p_adapt_recv_child (MsgCoarsen * msg);
 

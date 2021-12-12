@@ -10,6 +10,8 @@
 
 //----------------------------------------------------------------------
 
+// #define TRACE_BLOCK
+
 #include "enzo.decl.h"
 
 class EnzoBlock : public CBase_EnzoBlock
@@ -117,6 +119,9 @@ public: // interface
        redshift(0.0)
   {
     performance_start_(perf_block);
+#ifdef TRACE_BLOCK  
+    CkPrintf ("%d %p TRACE_BLOCK EnzoBlock()\n",CkMyPe(),(void *)this);
+#endif  
     for (int i=0; i<MAX_DIMENSION; i++) {
       GridLeftEdge[i] = 0; 
       GridDimension[i] = 0; 
@@ -133,6 +138,10 @@ public: // interface
       dt(0.0),
       redshift(0.0)
   {
+#ifdef TRACE_BLOCK  
+    CkPrintf ("%d %p TRACE_BLOCK %s EnzoBlock(CkMigrateMessage)\n",
+              CkMyPe(),(void *)this, name(thisIndex).c_str());
+#endif  
     performance_start_(perf_block);
     TRACE("CkMigrateMessage");
     for (int i=0; i<MAX_DIMENSION; i++) {

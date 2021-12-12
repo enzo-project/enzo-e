@@ -52,9 +52,8 @@ public: // interface
 
   /// Copy constructor
   Block(const Block & block)
-    : adapt_()
   /// @param     block  Object being copied
-  {  copy_(block);  }
+  { copy_(block);  }
 
   /// Assignment operator
   Block & operator = (const Block & block)
@@ -139,7 +138,6 @@ public: // interface
   { return adapt_.face_level(index,axis,face,Adapt::LevelType::curr); }
 
 
-#ifdef OLD_ADAPT
   int child_face_level (const int ic3[3], const int if3[3]) const
   { return child_face_level_curr_[ICF3(ic3,if3)]; }
 
@@ -152,7 +150,6 @@ public: // interface
   void set_child_face_level_next (const int ic3[3], const int if3[3], int level)
   { child_face_level_next_[ICF3(ic3,if3)] = level; }
 
-#endif
 
   /// Verify that new and old adapt neighbors match
   void verify_neighbors();
@@ -195,9 +192,7 @@ public: // interface
   }
 
   /// Initialize child face levels given own face levels
-#ifdef OLD_ADAPT
   void initialize_child_face_levels_();
-#endif /* OLD_ADAPT */
 
   // Initialize after refinement
   void init_refine_ (
@@ -417,6 +412,14 @@ public:
     performance_start_(perf_adapt_apply_sync);
   }
 
+  void r_adapt_next(CkReductionMsg * msg)
+  {
+    performance_start_(perf_adapt_update);
+    delete msg;
+    adapt_next_();
+    performance_stop_(perf_adapt_update);
+    performance_start_(perf_adapt_update_sync);
+  }
   void p_adapt_next ()
   {
     performance_start_(perf_adapt_update);
@@ -456,7 +459,8 @@ public:
   /// Parent tells child to delete itself
   void p_adapt_delete();
   void p_adapt_recv_level
-  (Index index_debug,
+  (int adapt_step,
+   Index index_debug,
    int ic3[3],
    int if3[3],
    int level_now, int level_new,
@@ -918,13 +922,11 @@ protected: // attributes
   /// Adapt object
   Adapt adapt_;
 
-#ifdef OLD_ADAPT
   /// current level of neighbors accumulated from children that can coarsen
   std::vector<int> child_face_level_curr_;
 
   /// new level of neighbors accumulated from children that can coarsen
   std::vector<int> child_face_level_next_;
-#endif /* OLD_ADAPT */
 
   /// Can coarsen only if all children can coarsen
   int count_coarsen_;

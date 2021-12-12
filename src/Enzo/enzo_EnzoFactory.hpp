@@ -73,10 +73,8 @@ public: // interface
    int count_adapt,
    int cycle, double time, double dt,
    int narray, char * array, int refresh_type,
-#ifdef OLD_ADAPT   
    int num_face_level,
    int * face_level,
-#endif   
    Adapt * adapt,
    Simulation * simulation = 0
 ) const throw();

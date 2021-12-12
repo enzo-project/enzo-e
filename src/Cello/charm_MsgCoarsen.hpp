@@ -21,6 +21,8 @@ class MsgCoarsen : public CMessage_MsgCoarsen {
 
 public: // interface
 
+  friend class Block;
+
   static long counter[CONFIG_NODE_SIZE];
 
   MsgCoarsen();

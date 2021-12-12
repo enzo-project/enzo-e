@@ -485,6 +485,8 @@ enum type_enum {
     if (have_data) {                                    \
       (OBJECT_PTR) = new TYPE;                          \
       (POINTER) = (OBJECT_PTR)->load_data(POINTER);     \
+    } else {                                            \
+      (OBJECT_PTR) = nullptr;                           \
     }                                                   \
   }
 

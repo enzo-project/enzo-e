@@ -211,10 +211,8 @@ void EnzoFactory::create_block
  int count_adapt,
  int cycle, double time, double dt,
  int narray, char * array, int refresh_type,
-#ifdef OLD_ADAPT   
  int num_face_level,
  int * face_level,
-#endif 
  Adapt * adapt,
  Simulation * simulation
  ) const throw()
@@ -232,118 +230,6 @@ void EnzoFactory::create_block
 
   const int rank = cello::rank();
 
-  int iym=(rank >= 2) ? 0 : 1;
-  int iyp=(rank >= 2) ? 3 : 2;
-  int izm=(rank >= 3) ? 0 : 1;
-  int izp=(rank >= 3) ? 3 : 2;
-#ifdef NEW_ADAPT
-#ifdef TRACE_FACTORY
-  CkPrintf ("adapt %p\n",adapt); fflush(stdout);
-#endif
-  
-  char buffer[80];
-  int v3[3];
-  index.values(v3);
-  sprintf (buffer,"Adapt [ %8X %8X %8X ]\n",v3[0],v3[1],v3[2]);
-  //  adapt->print(buffer);
-
-  const int num_face_level = 27;
-  int * face_level = new int[num_face_level];
-  std::fill_n(face_level,27,INDEX_UNDEFINED_LEVEL);
-
-  index.print("index",2);
-  CkPrintf ("DEBUG num_neighbors %d\n",adapt->num_neighbors());
-
-  int na3[3];
-  bool p3[3];
-  cello::hierarchy()->root_blocks(na3,na3+1,na3+2);
-  cello::hierarchy()->get_periodicity(p3,p3+1,p3+2);  
-  if (!p3[0]) na3[0] = 0;
-  if (!p3[1]) na3[1] = 0;
-  if (!p3[2]) na3[2] = 0;
-  
-  for (int i=0; i<adapt->num_neighbors(); i++) {
-    Index index_neighbor = adapt->index(i);
-    index_neighbor.print("index_neighbor",2);
-    int level = index_neighbor.level();
-    int im3[3]={0,0,0},ip3[3]={1,1,1};
-    index.categorize (index_neighbor,rank,im3,ip3);
-    CkPrintf ("DEBUG_ADAPT categorize %d: %d:%d %d:%d %d:%d\n",
-              i,im3[0],ip3[0],im3[1],ip3[1],im3[2],ip3[2]);
-    for (int iz=im3[2]; iz<ip3[2]; iz++) {
-      for (int iy=im3[1]; iy<ip3[1]; iy++) {
-        for (int ix=im3[0]; ix<ip3[0]; ix++) {
-          const int i = ix + 3*(iy + 3*iz);
-          face_level[i] = level;
-        }
-      }
-    }
-  }
-
-  CkPrintf ("TRACE %d\n",__LINE__); fflush(stdout);
-
-  // int level = index.level();
-  // int cx,cy,cz;
-  // index.child(level,&cx,&cy,&cz);
-  // for (int iz=izm; iz<3; iz++) {
-  //   int ipz=(iz+1+cz) / 2;
-  //   for (int iy=iym; iy<3; iy++) {
-  //     int ipy=(iy+1+cy) / 2;
-  //     for (int ix=0; ix<3; ix++) {
-  //       int ipx=(ix+1+cx) / 2;
-  //       int i=ix+3*(iy+3*iz);
-  //       int ip=ipx+3*(ipy+3*ipz);
-  //       face_level[i] = face_level_parent[ip];
-  //     }
-  //   }
-  // }
-  // // Increment faces internal to block (including self) to be in fine level 
-  // iyp=(rank >= 2) ? 2 : 1;
-  // izp=(rank >= 3) ? 2 : 1;
-  // for (int iz=0; iz<izp; iz++) {
-  //   for (int iy=0; iy<iyp; iy++) {
-  //     for (int ix=0; ix<2; ix++) {
-  //       int i = (ix+1-cx) + 3*( (iy+1-cy) + 3*(iz+1-cz));
-  //       ++ face_level[i];
-  //     }
-  //   }
-  // }
-#endif
-#ifdef DEBUG_NEW_ADAPT  
-  iym=(rank >= 2) ? 0 : 1;
-  iyp=(rank >= 2) ? 3 : 2;
-  izm=(rank >= 3) ? 0 : 1;
-  izp=(rank >= 3) ? 3 : 2;
-  int nb3[3] = {2,2,1};
-  index.print("face level",2,2,nb3,true);
-  for (int iz=izm; iz<izp; iz++) {
-    for (int iy=iym; iy<iyp; iy++) {
-      for (int ix=0; ix<3; ix++) {
-        int i=ix+3*(iy+3*iz);
-        CkPrintf ("%1d",face_level[i]);
-      }
-    }
-  }
-  CkPrintf ("\n");
-#ifdef NEW_ADAPT
-  // CkPrintf ("Child %d %d %d\n",cx,cy,cz);
-  // index.print("face level parent",2,2,nb3,true);
-  // for (int iz=izm; iz<izp; iz++) {
-  //   for (int iy=iym; iy<iyp; iy++) {
-  //     for (int ix=0; ix<3; ix++) {
-  //       int i=ix+3*(iy+3*iz);
-  //       CkPrintf ("%1d",face_level_parent[i]);
-  //     }
-  //   }
-  // }
-  // CkPrintf ("\n");
-#endif  /* NEW_ADAPT */
-  
-#endif /* DEBUG_NEW!_ADAPT */
-
-#ifdef DEBUG_NEW_ADAPT
-  CkPrintf ("TRACE_FACTORY %s:%d\n",__FILE__,__LINE__); fflush(stdout);
-#endif
   MsgRefine * msg = new MsgRefine 
     (index,
      nx,ny,nz,

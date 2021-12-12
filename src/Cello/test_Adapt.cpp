@@ -6,10 +6,10 @@
 #define NEW_ADAPT_TESTS
 //----------------------------------------------------------------------
 
-bool all_committed(int n, Adapt ** adapt)
+bool all_converged(int n, Adapt ** adapt)
 {
   for (int i=0; i<n; i++) {
-    if (!adapt[i]->is_committed()) return false;
+    if (!adapt[i]->is_converged()) return false;
   }
   return true;
 }
@@ -44,7 +44,7 @@ void print_levels (int n, Adapt ** adapt, int min_level, int max_level,
     CkPrintf ("|\n");
   }
   CkPrintf ("C");
-  for (int i0=0; i0<n; i0++) CkPrintf (i0%2?"%1X ":"%1X",adapt[i0]->is_committed()?1:0);
+  for (int i0=0; i0<n; i0++) CkPrintf (i0%2?"%1X ":"%1X",adapt[i0]->is_converged()?1:0);
   CkPrintf ("\n");
 }
 
@@ -133,12 +133,12 @@ PARALLEL_MAIN_BEGIN
 
     print_levels(n,adapt,min_level,max_level,level_curr,level_want);
 
-    unit_func("is_committed()");
+    unit_func("is_converged()");
 
     // Update neighbor level bounds
 
     int iteration = 0;
-    while (! all_committed(n,adapt) && iteration < 10) {
+    while (! all_converged(n,adapt) && iteration < 10) {
       for (int i0=0; i0<n; i0++) {
         int level_min,level_max;
         bool can_coarsen;
@@ -192,7 +192,7 @@ PARALLEL_MAIN_BEGIN
     unit_assert(pairs == true);
     if (!pairs || !valid) {
       CkPrintf ("ERROR: C ");
-      for (int i0=0; i0<n; i0++) CkPrintf (i0%2?"%1X ":"%1X",adapt[i0]->is_committed()?1:0);
+      for (int i0=0; i0<n; i0++) CkPrintf (i0%2?"%1X ":"%1X",adapt[i0]->is_converged()?1:0);
       CkPrintf ("\n");
     }
     for (int i=0; i<n; i++) {
@@ -293,19 +293,25 @@ PARALLEL_MAIN_BEGIN
 
   int ic3[3] = {0,0,0};
   ic3[0] = 0; ic3[1] = 0;
+  adapt_refine[0].set_rank(2);
   adapt_refine[0].refine(adapt, ic3);
   adapt_refine[0].print("REFINE-00");
   ic3[0] = 1; ic3[1] = 0;
+  adapt_refine[1].set_rank(2);
   adapt_refine[1].refine(adapt, ic3);
   adapt_refine[1].print("REFINE-10");
   ic3[0] = 0; ic3[1] = 1;
+  adapt_refine[2].set_rank(2);
   adapt_refine[2].refine(adapt, ic3);
   adapt_refine[2].print("REFINE-01");
   ic3[0] = 1; ic3[1] = 1;
+  adapt_refine[3].set_rank(2);
   adapt_refine[3].refine(adapt, ic3);
   adapt_refine[3].print("REFINE-11");
 
   Adapt adapt_coarsen;
+
+  adapt_coarsen.set_rank(2);
 
   adapt_coarsen.coarsen(adapt_refine[0]);
   adapt_coarsen.print("COARSEN-00");

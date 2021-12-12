@@ -38,23 +38,11 @@ public: // interface
 
   /// Constructor
   Adapt ()
+    : valid_(false),
+      rank_(0),
+      min_level_(0),
+      max_level_(0)
   {
-    face_level_[0].resize(27);
-    face_level_[1].resize(27);
-    face_level_[2].resize(27*8);
-    reset_face_level(LevelType::curr);
-    reset_face_level(LevelType::next);
-    reset_face_level(LevelType::last);
-  }
-
-  /// Constructor
-  Adapt (int rank, Index index, int max_level, int periodicity[3])
-  {
-    set_rank(rank);
-    set_index(index);
-    set_max_level(max_level);
-    set_periodicity(periodicity);
-    
     face_level_[0].resize(27);
     face_level_[1].resize(27);
     face_level_[2].resize(27*8);
@@ -68,8 +56,10 @@ public: // interface
   {
     PUParray(p,face_level_,3);
 
+    p | valid_;
     p | rank_;
     PUParray (p,periodicity_,3);
+    p | min_level_;
     p | max_level_;
     p | self_;
     p | neighbor_list_;
@@ -80,16 +70,9 @@ public: // interface
 
   //----------------------------------------------------------------------
 
-  // #ifdef OLD_ADAPT
   /// Set level for the block in the given face and (neighbor's) child
   void set_face_level (Index index, const int if3[3], LevelType level_type,
-                       int level_min, int level_max, bool can_coarsen)
-  {
-    check_neighbor_(index);
-    update_neighbor (index, level_min, level_max, can_coarsen);
-
-    set_face_level(index,if3,level_type,level_min);
-  }
+                       int level_min, int level_max, bool can_coarsen);
 
   /// Set level for the block in the given face and (neighbor's) child
   void set_face_level (Index index, const int if3[3], LevelType level_type,
@@ -101,12 +84,7 @@ public: // interface
 
   /// Set level for the block in the given face and (neighbor's) child
   void set_face_level_last (Index index, const int ic3[3], const int if3[3],
-                            int level_min, int level_max, bool can_coarsen)
-  {
-    update_neighbor (index, level_min, level_max, can_coarsen);
-    check_neighbor_(index);
-    set_face_level_last(index,ic3,if3,level_min);
-  }
+                            int level_min, int level_max, bool can_coarsen);
 
   /// Set level for the block in the given face and (neighbor's) child
   void set_face_level_last (Index index, const int ic3[3], const int if3[3],
@@ -183,8 +161,18 @@ public: // interface
 
   /// Set rank. No range checking, rank must be 1 <= rank <= 3
   inline void set_rank (int rank)
-  { rank_ = rank; }
-  inline void set_periodicity (int periodicity[3])
+  {
+    rank_ = rank;
+    set_valid(true);
+  }
+
+  inline void set_valid (bool valid)
+  { valid_ = valid; }
+
+  inline bool is_valid () const
+  { return valid_; }
+  
+  inline void set_periodicity (const int periodicity[3])
   {
     periodicity_[0] = periodicity[0];
     periodicity_[1] = periodicity[1];
@@ -193,11 +181,17 @@ public: // interface
   /// Set the maximum allowable refinement level
   inline void set_max_level (int max_level)
   { max_level_ = max_level; }
+  /// Set the minimum allowable refinement level
+  inline void set_min_level (int min_level)
+  { min_level_ = min_level; }
 
 
   /// Set the ith index, where i=0 is the block's own index
   inline void set_index(Index index)
-  { self_.index_ = index; }
+  {
+    self_.index_ = index;
+    self_.level_now_ = index.level();
+  }
 
   inline bool insert_neighbor (Index index)
   { return insert_neighbor (index,self_.index_.is_sibling(index)); }
@@ -214,7 +208,7 @@ public: // interface
   bool delete_neighbor  (Index index);
 
   /// Replace the neighboring block with refined neighbors
-  bool refine_neighbor  (Index index, Block * block = nullptr);
+  bool refine_neighbor  (Index index);
 
   /// Replace the neighboring block with a coarsened neighbor. May
   /// delete any neighboring sibling blocks, and may be called
@@ -242,11 +236,11 @@ public: // interface
   bool update_bounds ();
 
   /// Return whether the given Block (the default is the block itself)
-  /// is “committed”; that is, whether its minimum and maximum level
+  /// is converged; that is, whether its minimum and maximum level
   /// bounds are the same. This can be used to signal that the Block’s
   /// level is finally determined, and can thus call a global
   /// reduction.
-  bool is_committed() const;
+  bool is_converged() const;
 
   /// Return the current level bounds of the given Block (default is
   /// the block itself.)
@@ -316,15 +310,18 @@ private: // methods
 private: // attributes
 
   /// List of neighbor indices (and self)
-  // #ifdef OLD_ADAPT
   // NOTE: change pup() function whenever attributes change
   std::vector<int> face_level_[3];
-  // #endif
 
+  /// Whether this Adapt class is valid; used for resetting existing
+  /// Adapt
+  bool valid_;
   /// Dimensionality of the problem
   int rank_;
   /// Periodicity
   int periodicity_[3];
+  /// Minimum refinement level
+  int min_level_;
   /// Maximum refinement level
   int max_level_;
   /// Level bound information for this block

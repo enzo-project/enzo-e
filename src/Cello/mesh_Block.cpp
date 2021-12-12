@@ -68,10 +68,8 @@ Block::Block ( MsgRefine * msg )
     sync_count_(),
     sync_max_(),
     adapt_(),
-#ifdef OLD_ADAPT
     child_face_level_curr_(),
     child_face_level_next_(),
-#endif /* OLD_ADAPT */
     count_coarsen_(0),
     adapt_step_(0),
     coarsened_(false),
@@ -85,9 +83,9 @@ Block::Block ( MsgRefine * msg )
 #ifdef TRACE_BLOCK
 
 #ifdef BUG_FIX_150
-  CkPrintf ("%d TRACE_BLOCK Block::Block(ip)\n",  CkMyPe());
+  CkPrintf ("%d TRACE_BLOCK %s Block::Block(ip)\n",  CkMyPe(),name(thisIndex).c_str());
 #else
-  CkPrintf ("%d TRACE_BLOCK Block::Block(MsgRefine)\n",  CkMyPe());
+  CkPrintf ("%d TRACE_BLOCK %s Block::Block(MsgRefine)\n",  CkMyPe(),name(thisIndex).c_str());
 #endif
 
 #endif
@@ -118,7 +116,7 @@ Block::Block ( MsgRefine * msg )
         msg->num_face_level_, msg->face_level_,
         msg->adapt_);
 
-  init_adapt_(msg->adapt_);
+  init_adapt_(msg->adapt_parent_);
 
   apply_initial_(msg);
 
@@ -185,12 +183,6 @@ void Block::init_refine_
  int num_face_level, int * face_level,
  Adapt * adapt)
 {
-#ifdef DEBUG_ADAPT
-  if (adapt)
-    adapt->print("init_refine",index);
-  else
-    CkPrintf ("Block::init_refine_ adapt = nullptr level %d\n",index.level());
-#endif
 
   index_ = index;
   cycle_ = cycle;
@@ -244,34 +236,25 @@ void Block::init_refine_
 
   if (num_face_level == 0) {
 
-    adapt_.reset_face_level (Adapt::LevelType::curr);
-
-#ifdef OLD_ADAPT
     child_face_level_curr_.resize(cello::num_children()*27);
-#endif
+
+    adapt_.reset_face_level (Adapt::LevelType::curr);
 
   } else {
 
-#ifdef OLD_ADAPT
     child_face_level_curr_.resize(cello::num_children()*num_face_level);
-#endif
+
     adapt_.copy_face_level(Adapt::LevelType::curr,face_level);
 
   }
 
-#ifdef OLD_ADAPT
   for (size_t i=0; i<child_face_level_curr_.size(); i++)
     child_face_level_curr_[i] = 0;
-#endif
 
-#ifdef OLD_ADAPT
   initialize_child_face_levels_();
-#endif
 
   adapt_.update_next_from_curr();
-#ifdef OLD_ADAPT
   child_face_level_next_ = child_face_level_curr_;
-#endif
 
   const int level = this->level();
 
@@ -384,10 +367,8 @@ void Block::pup(PUP::er &p)
   p | sync_count_;
   p | sync_max_;
   p | adapt_;
-#ifdef OLD_ADAPT
   p | child_face_level_curr_;
   p | child_face_level_next_;
-#endif /* OLD_ADAPT */
   p | count_coarsen_;
   p | adapt_step_;
   p | coarsened_;
@@ -489,10 +470,8 @@ void Block::print () const
   CkPrintf ("stop_ = %d\n",stop_);
   CkPrintf ("index_initial_ = %d\n",index_initial_);
   CkPrintf ("children_.size() = %lu\n",children_.size());
-#ifdef OLD_ADAPT
   CkPrintf ("child_face_level_curr_.size() = %lu\n",child_face_level_curr_.size());
   CkPrintf ("child_face_level_next_.size() = %lu\n",child_face_level_next_.size());
-#endif /* OLD_ADAPT */
   CkPrintf ("count_coarsen_ = %d\n",count_coarsen_);
   CkPrintf ("adapt_step_ = %d\n",adapt_step_);
   CkPrintf ("coarsened_ = %d\n",coarsened_);
@@ -705,10 +684,8 @@ Block::Block ()
     sync_count_(),
     sync_max_(),
     adapt_(),
-#ifdef OLD_ADAPT
     child_face_level_curr_(),
     child_face_level_next_(),
-#endif /* OLD_ADAPT */
     count_coarsen_(0),
     adapt_step_(0),
     coarsened_(false),
@@ -719,6 +696,10 @@ Block::Block ()
     index_solver_(),
     refresh_()
 {
+#ifdef TRACE_BLOCK
+  CkPrintf ("%d TRACE_BLOCK %s Block::Block()\n",
+            CkMyPe(),name(thisIndex).c_str());
+#endif
   init_refresh_();
   init_adapt_(nullptr);
 
@@ -741,10 +722,8 @@ Block::Block (CkMigrateMessage *m)
     sync_count_(),
     sync_max_(),
     adapt_(),
-#ifdef OLD_ADAPT
     child_face_level_curr_(),
     child_face_level_next_(),
-#endif /* OLD_ADAPT */
     count_coarsen_(0),
     adapt_step_(0),
     coarsened_(false),
@@ -755,14 +734,12 @@ Block::Block (CkMigrateMessage *m)
     index_solver_(),
     refresh_()
 {
+#ifdef TRACE_BLOCK
+  CkPrintf ("%d TRACE_BLOCK %s Block::Block(CkMigrateMessage)\n",
+            CkMyPe(),name(thisIndex).c_str());
+#endif
   init_refresh_();
   init_adapt_(nullptr);
-
-#ifdef TRACE_BLOCK
-  CkPrintf ("TRACE_BLOCK Block(CkMigrateMessage*)\n"); // 0
-  fflush(stdout);
-#endif
-
 }
 
 //----------------------------------------------------------------------
@@ -771,14 +748,23 @@ void Block::init_adapt_(Adapt * adapt_parent)
 {
   const int level = index_.level();
 #ifdef TRACE_BLOCK
-  CkPrintf ("TRACE_BLOCK %s Block::init_adapt_() level %d\n",name().c_str(),level); // 0
+  CkPrintf ("%d TRACE_BLOCK %s Block::init_adapt_() level %d\n",CkMyPe(),name().c_str(),level); // 0
   fflush(stdout);
 #endif
 
+  
   const int rank = cello::rank();
+  int p3[3];
+  cello::hierarchy()->get_periodicity(p3,p3+1,p3+2);
   adapt_.set_rank(rank);
   adapt_.set_max_level(cello::config()->mesh_max_level);
   adapt_.set_index(index_);
+  adapt_.set_periodicity(p3);
+  adapt_.set_valid(true);
+#ifdef TRACE_BLOCK
+  CkPrintf ("TRACE_BLOCK %s Block::init_adapt_() set valid %p\n",name().c_str(),(void *)&adapt_);
+  fflush(stdout);
+#endif
 
   const bool initial_cycle =
     (cello::simulation()->cycle() == cello::config()->initial_cycle);
@@ -818,7 +804,7 @@ void Block::init_adapt_(Adapt * adapt_parent)
 #ifdef DEBUG_ADAPT
     CkPrintf ("DEBUG_ADAPT %s Block() level > 0\n",
               name().c_str());
-    adapt_parent->print("init_adapt parent");
+    adapt_parent->print("init_adapt parent",this);
     adapt_.print("init_adapt child after",this);
 #endif    
   }
@@ -1275,7 +1261,6 @@ void Block::debug_faces_(const char * mesg)
       fprintf (fp_debug,"| ");
 #endif
       PARALLEL_PRINTF ("| ") ;
-#ifdef OLD_ADAPT
       for (ic3[0]=0; ic3[0]<2; ic3[0]++) {
 	for (if3[0]=-1; if3[0]<=1; if3[0]++) {
 	  for (if3[0]=-1; if3[0]<=1; if3[0]++) {
@@ -1286,11 +1271,9 @@ void Block::debug_faces_(const char * mesg)
 	  }
 	}
       }
-#endif
 #ifdef CELLO_DEBUG
       fprintf (fp_debug,"| ");
 #endif
-#ifdef OLD_ADAPT
       PARALLEL_PRINTF ("| ");
       for (ic3[0]=0; ic3[0]<2; ic3[0]++) {
 	for (if3[0]=-1; if3[0]<=1; if3[0]++) {
@@ -1302,7 +1285,6 @@ void Block::debug_faces_(const char * mesg)
 	  }
 	}
       }
-#endif
 #ifdef CELLO_DEBUG
       fprintf (fp_debug,"\n");
       fflush(fp_debug);

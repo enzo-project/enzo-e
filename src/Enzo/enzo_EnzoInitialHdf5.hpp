@@ -96,6 +96,7 @@ protected: // functions
     } else if (type_data == type_double) {
       data = (char *)new double [n];
     } else {
+      data = nullptr;
       ERROR1 ("EnzoInitialHdf5::allocate_array_()",
               "Unsupported data type %d",type_data);
     }
