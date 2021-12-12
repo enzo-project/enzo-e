@@ -6,14 +6,54 @@
 /// @brief    [\ref Enzo] Implementation of RiemannImpl, which is a class
 /// template that can be specialized to implement various Riemann solvers.
 
-#ifndef ENZO_ENZO_RIEMANN_IMPL2_HPP
-#define ENZO_ENZO_RIEMANN_IMPL2_HPP
+#ifndef ENZO_ENZO_RIEMANN_IMPL_HPP
+#define ENZO_ENZO_RIEMANN_IMPL_HPP
 
 #include <pup_stl.h>
-#include <cstdint> // used to check that static methods are defined
+#include <type_traits>
+#include <functional> // used to check function signature
 
 // defining RIEMANN_DEBUG adds some extra error checking, useful for debugging
 //#define RIEMANN_DEBUG
+
+//----------------------------------------------------------------------
+
+struct HydroLUT {
+  /// @class    HydroLUT
+  /// @ingroup  Enzo
+  /// @brief    [\ref Enzo] Encapsulates a compile-time LUT for pure
+  ///           hydrodynamics that is used for implementing Riemann Solvers
+
+  enum vals { density=0,
+	      velocity_i,
+	      velocity_j,
+	      velocity_k,
+	      total_energy,
+	      num_entries};
+
+  // in the future, automatically calculate the following
+  static const std::size_t specific_start = 1;
+};
+
+//----------------------------------------------------------------------
+
+struct MHDLUT{
+  /// @class    MHDLUT
+  /// @ingroup  Enzo
+  /// @brief    [\ref Enzo] Encapsulates a compile-time LUT for MHD that is
+  ///           that is to be used for implementing Riemann Solvers
+  enum vals { density=0,
+	      bfield_i,
+	      bfield_j,
+	      bfield_k,
+	      velocity_i,
+	      velocity_j,
+	      velocity_k,
+	      total_energy,
+	      num_entries};
+  // in the future, automatically calculate the following
+  static const std::size_t specific_start = 4;
+};
 
 //----------------------------------------------------------------------
 
@@ -56,7 +96,7 @@ struct KernelConfig{
 //----------------------------------------------------------------------
 
 template <class ImplFunctor>
-class EnzoRiemannImplNew : public EnzoRiemann
+class EnzoRiemannImpl : public EnzoRiemann
 {
   /// @class    EnzoRiemannImpl
   /// @ingroup  Enzo
@@ -65,42 +105,33 @@ class EnzoRiemannImplNew : public EnzoRiemann
   ///
   /// @tparam ImplFunctor The functor used to specialize `EnzoRiemannImpl`. The
   ///     functor must provide a public member type called `LUT`, which is a
-  ///     specialization of `EnzoRiemannLUT<InputLUT>`. It must also be default
-  ///     constructible and provide a public `operator()` method. For details
-  ///     about the method's expected signature, see the documentation for
-  ///     `riemann_function_call_signature`.
+  ///     specialization of `EnzoRiemannLUT<InputLUT>`. It must also support
+  ///     initialization from KernelConfig and provide a public `operator()`
+  ///     method which accepts 3 integer indices.
   ///
   /// EnzoRiemannImpl factors out the repeated code between different
   /// approximate Riemann Solvers (e.g. HLLE, HLLC, HLLD and possibly LLF &
   /// Roe solvers).
   ///
   /// To define a new RiemannSolver using `EnzoRiemann`:
-  ///   1. Define a new `ImplFunctor` (e.g. `HLLDImpl`).
+  ///   1. Define a new `ImplFunctor` (e.g. `HLLKernel`).
   ///   2. It might be useful to define an alias name for the specialization of
   ///      `EnzoRiemannImpl` that uses the new `ImplFunctor`
-  ///      (e.g. `using EnzoRiemannHLLD = EnzoRiemannImpl<HLLDImpl>;`).
-  ///   3. Then add the particlular specialization to enzo.CI (e.g. add the
-  ///      line: `PUPable EnzoRiemannImpl<HLLDImpl>;`)
-  ///   4. Update `EnzoRiemann::construct_riemann` to construct the Riemann
+  ///      (e.g. `using EnzoRiemannHLLD = EnzoRiemannImpl<HLLKernel>;`).
+  ///   3. Update `EnzoRiemann::construct_riemann` to construct the Riemann
   ///      Solver when the correct name is specified.
-  ///   5. Update the documentation with the name of the newly available
+  ///   4. Update the documentation with the name of the newly available
   ///      RiemannSolver
 
   using LUT = typename ImplFunctor::LUT;
 
-  //static_assert(std::is_default_constructible<ImplFunctor>::value,
-  //		"ImplFunctor is not default constructable");
-
   // Check whether ImplFunctor's operator() method has the expected signature
   // and raise an error message if it doesn't:
-  //   - first, define a struct (has_expected_functor_sig_) to check if
-  //     ImplFunctor's operator() method has the expected signature. This needs
-  //     to happen in the current scope because the signature depends on LUT
-  //DEFINE_HAS_INSTANCE_METHOD(has_expected_functor_sig_, operator(),
-  //                           riemann_function_call_signature<LUT>);
-  //static_assert(has_expected_functor_sig_<ImplFunctor>::value,
-  //		"ImplFunctor's operator() method doesn't have the correct "
-  //		"function signature");
+  static_assert(std::is_convertible<ImplFunctor&&,
+                                    std::function<void(int, int, int)>>::value,
+                "ImplFunctor must define the method: "
+                "void ImplFunctor::operator() (int,int,int)");
+
 
 
 public: // interface
@@ -109,11 +140,11 @@ public: // interface
   ///
   /// @param internal_energy Indicates whether internal_energy is an
   ///     integration quantity.
-  EnzoRiemannImplNew(const EnzoRiemann::FactoryArgs factory_args,
-                   bool internal_energy);
+  EnzoRiemannImpl(const EnzoRiemann::FactoryArgs factory_args,
+                  bool internal_energy);
 
   /// Virtual destructor
-  virtual ~EnzoRiemannImplNew(){ };
+  virtual ~EnzoRiemannImpl(){ };
 
   void solve (const EnzoEFltArrayMap &prim_map_l,
 	      const EnzoEFltArrayMap &prim_map_r,
@@ -146,7 +177,7 @@ protected: //attributes
 //----------------------------------------------------------------------
 
 template <class ImplFunctor>
-EnzoRiemannImplNew<ImplFunctor>::EnzoRiemannImplNew
+EnzoRiemannImpl<ImplFunctor>::EnzoRiemannImpl
 (const EnzoRiemann::FactoryArgs factory_args,const bool internal_energy)
   : EnzoRiemann(factory_args)
 {
@@ -155,7 +186,7 @@ EnzoRiemannImplNew<ImplFunctor>::EnzoRiemannImplNew
   primitive_quantity_keys_ = enzo_riemann_utils::get_quantity_keys<LUT>(true);
 
   for (std::string key : integration_quantity_keys_){
-    ASSERT("EnzoRiemannImplNew::EnzoRiemannImplNew",
+    ASSERT("EnzoRiemannImpl::EnzoRiemannImpl",
 	   "No support for a LUT directly containing \"internal_energy\"",
 	   key != "internal_energy");
   }
@@ -169,7 +200,7 @@ EnzoRiemannImplNew<ImplFunctor>::EnzoRiemannImplNew
 //----------------------------------------------------------------------
 
 template <class ImplFunctor>
-void EnzoRiemannImplNew<ImplFunctor>::solve
+void EnzoRiemannImpl<ImplFunctor>::solve
 (const EnzoEFltArrayMap &prim_map_l, const EnzoEFltArrayMap &prim_map_r,
  EnzoEFltArrayMap &flux_map, const int dim, const EnzoEquationOfState *eos,
  const int stale_depth, const str_vec_t &passive_list,
@@ -185,7 +216,7 @@ void EnzoRiemannImplNew<ImplFunctor>::solve
 
   // When barotropic equations of state are eventually introduced, all eos
   // dependencies should be moved up here
-  ASSERT("EnzoRiemannImplNew::solve", "currently no support for barotropic eos",
+  ASSERT("EnzoRiemannImpl::solve", "currently no support for barotropic eos",
 	 !barotropic);
 
   // preload shape of arrays (to inform compiler they won't change)
@@ -239,4 +270,4 @@ void EnzoRiemannImplNew<ImplFunctor>::solve
 
 }
 
-#endif /* ENZO_ENZO_RIEMANN_IMPL2_HPP */
+#endif /* ENZO_ENZO_RIEMANN_IMPL_HPP */

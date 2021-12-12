@@ -19,23 +19,23 @@
 
 struct HLLDImpl
 {
-  /// @class    EnzoRiemannHLLD
+  /// @class    HLLDImpl
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Encapsulates operations of HLLD approximate Riemann
   /// Solver
 public:
+  const KernelConfig config;
 
+public:
   using LUT = EnzoRiemannLUT<MHDLUT>;
 
-  lutarray<LUT> operator()
+  FORCE_INLINE lutarray<LUT> helper_
   (const lutarray<LUT> flux_l, const lutarray<LUT> flux_r,
    const lutarray<LUT> prim_l, const lutarray<LUT> prim_r,
    const lutarray<LUT> cons_l, const lutarray<LUT> cons_r,
    enzo_float pressure_l, enzo_float pressure_r,
-   bool barotropic_eos, enzo_float gamma, enzo_float isothermal_cs,
-   enzo_float &vi_bar) const noexcept
+   enzo_float gamma, enzo_float &vi_bar) const noexcept
   {
-    // This method makes use of the member variables Us and Uss
     // Note that ETA_TOLERANCE is bigger than the tolerance was for the
     // original implementation.
 
@@ -287,11 +287,92 @@ public:
     return fluxes;
   }
 
+  void operator()(const int iz,
+                  const int iy,
+                  const int ix) const noexcept
+  {
+    // Note that ETA_TOLERANCE is bigger than the tolerance was for the
+    // original implementation.
+
+    const int external_velocity_i = config.dim + LUT::velocity_i;
+    const int external_velocity_j = ((config.dim+1)%3) + LUT::velocity_i;
+    const int external_velocity_k = ((config.dim+2)%3) + LUT::velocity_i;
+    const int external_bfield_i = config.dim + LUT::bfield_i;
+    const int external_bfield_j = ((config.dim+1)%3) + LUT::bfield_i;
+    const int external_bfield_k = ((config.dim+2)%3) + LUT::bfield_i;
+
+    const enzo_float gamma = config.gamma;
+
+    // load primitives into local variables
+    // TODO: __attribute__((always_inline)) is required for icc
+    //  - return to this and either manually inline or introduce a macro
+    //    that specifies that the lambda should be inlined
+    auto load_prim = [=](const CelloArray<const enzo_float,4>& prim_arr) __attribute__((always_inline))
+    {
+      lutarray<LUT> out;
+      out[LUT::density]      = prim_arr(LUT::density,iz,iy,ix);
+      out[LUT::velocity_i]   = prim_arr(external_velocity_i,iz,iy,ix);
+      out[LUT::velocity_j]   = prim_arr(external_velocity_j,iz,iy,ix);
+      out[LUT::velocity_k]   = prim_arr(external_velocity_k,iz,iy,ix);
+      if (LUT::has_bfields){
+        out[LUT::bfield_i]   = prim_arr(external_bfield_i,iz,iy,ix);
+        out[LUT::bfield_j]   = prim_arr(external_bfield_j,iz,iy,ix);
+        out[LUT::bfield_k]   = prim_arr(external_bfield_k,iz,iy,ix);
+      }
+      // this actually stores pressure:
+      out[LUT::total_energy] = prim_arr(LUT::total_energy,iz,iy,ix);
+      return out;
+    };
+
+    const lutarray<LUT> prim_l = load_prim(config.prim_arr_l);
+    const lutarray<LUT> prim_r = load_prim(config.prim_arr_r);
+
+    // load left and right pressure values
+    const enzo_float pressure_l = prim_l[LUT::total_energy];
+    const enzo_float pressure_r = prim_r[LUT::total_energy];
+
+    // get the conserved quantities
+    const lutarray<LUT> cons_l
+      = enzo_riemann_utils::compute_conserved<LUT>(prim_l, gamma);
+    const lutarray<LUT> cons_r
+      = enzo_riemann_utils::compute_conserved<LUT>(prim_r, gamma);
+
+    // compute the interface fluxes
+    const lutarray<LUT> flux_l
+      = enzo_riemann_utils::active_fluxes<LUT>(prim_l, cons_l, pressure_l);
+    const lutarray<LUT> flux_r
+      = enzo_riemann_utils::active_fluxes<LUT>(prim_r, cons_r, pressure_r);
+
+    enzo_float vi_bar;
+    lutarray<LUT> fluxes = helper_(flux_l, flux_r, prim_l, prim_r,
+                                   cons_l, cons_r, pressure_l, pressure_r,
+                                   gamma, vi_bar);
+
+    // now, update flux_arr
+    config.flux_arr(LUT::density,iz,iy,ix) = fluxes[LUT::density];
+    config.flux_arr(external_velocity_i,iz,iy,ix) = fluxes[LUT::velocity_i];
+    config.flux_arr(external_velocity_j,iz,iy,ix) = fluxes[LUT::velocity_j];
+    config.flux_arr(external_velocity_k,iz,iy,ix) = fluxes[LUT::velocity_k];
+    config.flux_arr(external_bfield_i,iz,iy,ix) = fluxes[LUT::bfield_i];
+    config.flux_arr(external_bfield_j,iz,iy,ix) = fluxes[LUT::bfield_j];
+    config.flux_arr(external_bfield_k,iz,iy,ix) = fluxes[LUT::bfield_k];
+    config.flux_arr(LUT::total_energy,iz,iy,ix) = fluxes[LUT::total_energy];
+
+    // finally, deal with dual energy stuff.
+    // compute internal energy flux, assuming passive advection
+    // (this was not handled with the rest of the fluxes)
+    config.internal_energy_flux_arr(iz,iy,ix) =
+      enzo_riemann_utils::passive_eint_flux
+      (prim_l[LUT::density], pressure_l, prim_r[LUT::density], pressure_r,
+       gamma, config.flux_arr(LUT::density,iz,iy,ix));
+    config.velocity_i_bar_arr(iz,iy,ix) = vi_bar;
+  }
+
   lutarray<LUT> setup_cons_ast_( const enzo_float speed,
-			       const enzo_float rho, const enzo_float vy,
-			       const enzo_float vz, const enzo_float etot,
-			       const enzo_float Bx, const enzo_float By,
-			       const enzo_float Bz) const noexcept
+                                 const enzo_float rho, const enzo_float vy,
+                                 const enzo_float vz, const enzo_float etot,
+                                 const enzo_float Bx, const enzo_float By,
+                                 const enzo_float Bz) const noexcept
   {
 
     // Helper function that factors out the filling of the of the asterisked
@@ -311,11 +392,10 @@ public:
 
 };
 
-
 /// @class    EnzoRiemannHLLD
 /// @ingroup  Enzo
 /// @brief    [\ref Enzo] Encapsulates HLLD approximate Riemann Solver
-using EnzoRiemannHLLD = EnzoRiemannImplOld<HLLDImpl>;
+using EnzoRiemannHLLD = EnzoRiemannImpl<HLLDImpl>;
 
 
 #endif /* ENZO_ENZO_RIEMANN_HLLD_HPP */

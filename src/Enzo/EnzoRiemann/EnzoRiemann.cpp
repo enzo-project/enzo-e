@@ -16,17 +16,10 @@
 // private headers:
 #include "EnzoRiemannLUT.hpp"
 #include "EnzoRiemannUtils.hpp"
-#include "EnzoRiemannImplOld.hpp"
+#include "EnzoRiemannImpl.hpp"
 #include "EnzoRiemannHLL.hpp"
 #include "EnzoRiemannHLLC.hpp"
 #include "EnzoRiemannHLLD.hpp"
-
-//----------------------------------------------------------------------
-
-
-#include "EnzoRiemann/EnzoRiemannImplNew.hpp"
-#include "EnzoRiemann/EnzoRiemannHLL2.hpp"
-#include "EnzoRiemann/EnzoRiemannHLLC2.hpp"
 
 //----------------------------------------------------------------------
 
@@ -44,22 +37,21 @@ EnzoRiemann* EnzoRiemann::construct_riemann
     ASSERT("EnzoRiemann::construct_riemann",
            ("An \"HLL\" Riemann solver without magnetic fields isn't "
             "currently supported."), factory_args.mhd);
-    out = new EnzoRiemannHLLMHD2(factory_args, factory_args.internal_energy);
+    out = new EnzoRiemannHLLMHD(factory_args, factory_args.internal_energy);
 
   } else if (formatted == "hlle"){
     if (factory_args.mhd){
-      out = new EnzoRiemannHLLEMHD2(factory_args, factory_args.internal_energy);
+      out = new EnzoRiemannHLLEMHD(factory_args, factory_args.internal_energy);
     } else {
       ERROR("EnzoRiemann::construct_riemann",
             "The \"HLLE\" Riemann solver without magnetic fields is untested");
-      out = new EnzoRiemannHLLE2(factory_args, factory_args.internal_energy);
+      out = new EnzoRiemannHLLE(factory_args, factory_args.internal_energy);
     }
 
   } else if (formatted == std::string("hllc")){
     ASSERT("EnzoRiemann::construct_riemann",
            "The \"HLLC\" Riemann Solver can't support mhd", !factory_args.mhd);
-    out = new EnzoRiemannHLLC2(factory_args,
-                               factory_args.internal_energy);
+    out = new EnzoRiemannHLLC(factory_args, factory_args.internal_energy);
 
   } else if (formatted == std::string("hlld")){
     ASSERT("EnzoRiemann::construct_riemann",

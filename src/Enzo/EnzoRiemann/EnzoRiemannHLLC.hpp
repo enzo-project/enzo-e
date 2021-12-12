@@ -14,29 +14,57 @@
 #ifndef ENZO_ENZO_RIEMANN_HLLC_HPP
 #define ENZO_ENZO_RIEMANN_HLLC_HPP
 
-struct HLLCImpl
+struct HLLCKernel
 {
-  /// @class    EnzoRiemannHLLC
+  /// @class    HLLCKernel
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Encapsulates operations of HLLC approximate Riemann
   /// Solver. This should not be used with isothermal equations of state.
+
+public:
+  const KernelConfig config;
+
 public:
 
   using WaveSpeedFunctor = EinfeldtWavespeed<HydroLUT>;
   using LUT = typename WaveSpeedFunctor::LUT;
 
-  FORCE_INLINE lutarray<LUT> operator()
-  (const lutarray<LUT> flux_l, const lutarray<LUT> flux_r,
-   const lutarray<LUT> prim_l, const lutarray<LUT> prim_r,
-   const lutarray<LUT> cons_l, const lutarray<LUT> cons_r,
-   enzo_float pressure_l, enzo_float pressure_r,
-   bool barotropic_eos, enzo_float gamma, enzo_float isothermal_cs,
-   enzo_float &vi_bar) const noexcept
+  FORCE_INLINE void operator()(const int iz,
+                               const int iy,
+                               const int ix) const noexcept
   {
 
-    //ASSERT("HLLCImpl::calc_riemann_fluxes",
-    //	   "HLLC should not be used for barotropic fluids",
-    //	   !barotropic_eos);
+    const int external_velocity_i = config.dim + LUT::velocity_i;
+    const int external_velocity_j = ((config.dim+1)%3) + LUT::velocity_i;
+    const int external_velocity_k = ((config.dim+2)%3) + LUT::velocity_i;
+
+    const enzo_float gamma = config.gamma;
+
+    // load primitives:
+    auto load_prim = [=](const CelloArray<const enzo_float,4>& prim_arr)
+    {
+      lutarray<LUT> out;
+      out[LUT::density]      = prim_arr(LUT::density,iz,iy,ix);
+      out[LUT::velocity_i]   = prim_arr(external_velocity_i,iz,iy,ix);
+      out[LUT::velocity_j]   = prim_arr(external_velocity_j,iz,iy,ix);
+      out[LUT::velocity_k]   = prim_arr(external_velocity_k,iz,iy,ix);
+      // this actually stores pressure:
+      out[LUT::total_energy] = prim_arr(LUT::total_energy,iz,iy,ix);
+      return out;
+    };
+
+    const lutarray<LUT> prim_l = load_prim(config.prim_arr_l);
+    const lutarray<LUT> prim_r = load_prim(config.prim_arr_r);
+
+    // load left and right pressure values
+    const enzo_float pressure_l = prim_l[LUT::total_energy];
+    const enzo_float pressure_r = prim_r[LUT::total_energy];
+
+    // get the conserved quantities
+    const lutarray<LUT> cons_l
+      = enzo_riemann_utils::compute_conserved<LUT>(prim_l, gamma);
+    const lutarray<LUT> cons_r
+      = enzo_riemann_utils::compute_conserved<LUT>(prim_r, gamma);
 
     enzo_float cs_l,cs_r;
     WaveSpeedFunctor wave_speeds;
@@ -86,7 +114,6 @@ public:
 
 
     // Compute the left and right fluxes along the characteristics.
-    // TODO: remove redundancy with precalculation of fluxes
 
     enzo_float momentumi_l = cons_l[LUT::velocity_i];
     enzo_float momentumi_r = cons_r[LUT::velocity_i];
@@ -114,30 +141,33 @@ public:
     efr = (cons_r[LUT::total_energy] * (prim_r[LUT::velocity_i] - bp)
 	   + pressure_r * prim_r[LUT::velocity_i]);
 
-
-    // originally, internal energy flux would be dealt with here (it's treated
-    // as a passively advected scalar). Now, it's handled separately
-
-    // An aside: compute the interface velocity (that might be used to compute
-    // the internal energy source term)
-    vi_bar = (sl * (prim_l[LUT::velocity_i] - bm) +
-	      sr * (prim_r[LUT::velocity_i] - bp));
-
-    lutarray<LUT> fluxes;
     // compute HLLC Flux at interface (without diffusion)
-    fluxes[LUT::density] = sl*dfl + sr*dfr;
-    fluxes[LUT::velocity_i] = sl*ufl + sr*ufr;
-    fluxes[LUT::velocity_j] = sl*vfl + sr*vfr;
-    fluxes[LUT::velocity_k] = sl*wfl + sr*wfr;
-    fluxes[LUT::total_energy] = sl*efl + sr*efr;
+    config.flux_arr(LUT::density,iz,iy,ix) = sl*dfl + sr*dfr;
+    config.flux_arr(external_velocity_i,iz,iy,ix) = sl*ufl + sr*ufr;
+    config.flux_arr(external_velocity_j,iz,iy,ix) = sl*vfl + sr*vfr;
+    config.flux_arr(external_velocity_k,iz,iy,ix) = sl*wfl + sr*wfr;
+    config.flux_arr(LUT::total_energy,iz,iy,ix) = sl*efl + sr*efr;
 
     // Add the weighted contribution of the flux along the contact for
     // velocity_i and total_energy
     // (if you break 10.44 into 2 fractions, we are adding the right one)
-    fluxes[LUT::velocity_i] += (sm * cp);
-    fluxes[LUT::total_energy] += (sm * cp * cw);
+    config.flux_arr(external_velocity_i,iz,iy,ix) += (sm * cp);
+    config.flux_arr(LUT::total_energy,iz,iy,ix) += (sm * cp * cw);
 
-    return fluxes;
+
+    // finally, deal with dual energy stuff:
+    // compute passive advection internal energy flux
+    config.internal_energy_flux_arr(iz,iy,ix) =
+      enzo_riemann_utils::passive_eint_flux
+      (prim_l[LUT::density], pressure_l, prim_r[LUT::density], pressure_r,
+       gamma, config.flux_arr(LUT::density,iz,iy,ix));
+
+    // An aside: compute the interface velocity (this is used to compute the
+    // internal energy source term)
+    config.velocity_i_bar_arr(iz,iy,ix) =
+      (sl * (prim_l[LUT::velocity_i] - bm) +
+       sr * (prim_r[LUT::velocity_i] - bp));
+
   }
 
 };
@@ -145,6 +175,6 @@ public:
 /// @class    EnzoRiemannHLLC
 /// @ingroup  Enzo
 /// @brief    [\ref Enzo] Encapsulates HLLC approximate Riemann Solver
-using EnzoRiemannHLLC = EnzoRiemannImplOld<HLLCImpl>;
+using EnzoRiemannHLLC = EnzoRiemannImpl<HLLCKernel>;
 
 #endif /* ENZO_ENZO_RIEMANN_HLLC_HPP */
