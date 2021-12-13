@@ -36,11 +36,12 @@ void EnzoBfieldMethodCT::register_target_block_
     }
 
     // get the standard size of cell-centered fields
-    int mz = bfieldi_l_[0].shape(0); // interface bfield_z cell-centered along z
-    int my = bfieldi_l_[0].shape(1); // interface bfield_y cell-centered along y
+    // interface bfield_x is cell-centered along y and z
+    const int mz = bfieldi_l_[0].shape(0);
+    const int my = bfieldi_l_[0].shape(1);
     // interface bfield_x is face-centered along x (and the array includes
     // values on external faces of the grid)
-    int mx = bfieldi_l_[0].shape(2) - 1;
+    const int mx = bfieldi_l_[0].shape(2) - 1;
 
     // allocate arrays to hold weight values for each dimension. For a given
     // dimension, the array tracks the upwind/downwind direction on the cell
@@ -202,7 +203,7 @@ void EnzoBfieldMethodCT::identify_upwind(const EnzoEFltArrayMap &flux_map,
 //----------------------------------------------------------------------
 
 void EnzoBfieldMethodCT::update_all_bfield_components
-(EnzoEFltArrayMap &cur_prim_map, EnzoEFltArrayMap &xflux_map,
+(EnzoEFltArrayMap &cur_integration_map, EnzoEFltArrayMap &xflux_map,
  EnzoEFltArrayMap &yflux_map, EnzoEFltArrayMap &zflux_map,
  EnzoEFltArrayMap &out_centered_bfield_map, enzo_float dt,
  int stale_depth) noexcept
@@ -224,12 +225,11 @@ void EnzoBfieldMethodCT::update_all_bfield_components
   }
 
   // First, compute the edge-centered Electric fields (each time, it uses
-  // the current integrable quantities)
-  EnzoBfieldMethodCT::compute_all_edge_efields(cur_prim_map, xflux_map,
-                                                     yflux_map, zflux_map,
-                                                     center_efield_,
-                                                     edge_efield_l_, weight_l_,
-                                                     stale_depth);
+  // the current integration quantities)
+  EnzoBfieldMethodCT::compute_all_edge_efields(cur_integration_map, xflux_map,
+                                               yflux_map, zflux_map,
+                                               center_efield_, edge_efield_l_,
+                                               weight_l_, stale_depth);
 
   // Update longitudinal B-field (add source terms of constrained transport)
   for (int dim = 0; dim<3; dim++){
@@ -250,7 +250,7 @@ void EnzoBfieldMethodCT::update_all_bfield_components
 //----------------------------------------------------------------------
 
 void EnzoBfieldMethodCT::compute_center_efield
-(int dim, EFlt3DArray &efield, const EnzoEFltArrayMap &prim_map,
+(const int dim, EFlt3DArray &efield, const EnzoEFltArrayMap &integration_map,
  int stale_depth)
 {
   const std::string v_names[3] = {"velocity_x", "velocity_y", "velocity_z"};
@@ -261,10 +261,10 @@ void EnzoBfieldMethodCT::compute_center_efield
   int k = coord.k_axis();
 
   // Load the jth and kth components of the velocity and cell-centered bfield
-  EFlt3DArray velocity_j = prim_map.at(v_names[j]);
-  EFlt3DArray velocity_k = prim_map.at(v_names[k]);
-  EFlt3DArray bfield_j = prim_map.at(b_names[j]);
-  EFlt3DArray bfield_k = prim_map.at(b_names[k]);
+  EFlt3DArray velocity_j = integration_map.at(v_names[j]);
+  EFlt3DArray velocity_k = integration_map.at(v_names[k]);
+  EFlt3DArray bfield_j = integration_map.at(b_names[j]);
+  EFlt3DArray bfield_k = integration_map.at(b_names[k]);
 
   for (int iz=stale_depth; iz<efield.shape(0)-stale_depth; iz++) {
     for (int iy=stale_depth; iy<efield.shape(1)-stale_depth; iy++) {
@@ -530,15 +530,15 @@ void EnzoBfieldMethodCT::compute_edge_efield
 //----------------------------------------------------------------------
 
 void EnzoBfieldMethodCT::compute_all_edge_efields
-  (EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &xflux_map,
+  (EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &xflux_map,
    EnzoEFltArrayMap &yflux_map, EnzoEFltArrayMap &zflux_map,
    EFlt3DArray &center_efield, std::array<EFlt3DArray,3> &edge_efield_l,
    std::array<EFlt3DArray,3> &weight_l, int stale_depth)
 {
 
   for (int i = 0; i < 3; i++){
-    EnzoBfieldMethodCT::compute_center_efield(i, center_efield, prim_map,
-                                                    stale_depth);
+    EnzoBfieldMethodCT::compute_center_efield(i, center_efield,
+                                              integration_map, stale_depth);
 
     EnzoEFltArrayMap *jflux_map;
     EnzoEFltArrayMap *kflux_map;
