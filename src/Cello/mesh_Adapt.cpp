@@ -7,6 +7,15 @@
 
 #include "mesh.hpp"
 
+// #define TRACE_REFINE
+// #define WRITE_COARSEN
+// #define WRITE_REFINE
+// #define WRITE_CYCLE 1
+
+// #define TRACE_NEIGHBOR
+
+// #define ENABLE_ASSERT
+
 //----------------------------------------------------------------------
 
 void Adapt::set_face_level (Index index, const int if3[3], LevelType level_type,
@@ -29,9 +38,27 @@ void Adapt::set_face_level_last (Index index, const int ic3[3], const int if3[3]
 
 //----------------------------------------------------------------------
 
-bool Adapt::insert_neighbor (Index index, bool is_sibling)
+bool Adapt::insert_neighbor (Index index, bool is_sibling, Block * block)
 {
+#ifdef TRACE_NEIGHBOR
+  CkPrintf ("DEBUG_NEIGHBOR insert_neighbor %s : %s\n",
+            block->name().c_str(),
+            block->name(index).c_str());
+#endif
   const bool found = is_neighbor(index);
+
+#ifdef ENABLE_ASSERT
+  ASSERT("Adapt::insert_neighbor()",
+         "Inserting block as its own neighbor",
+         index != self_.index_);
+
+  ASSERT2("Adapt::insert_neighbor()",
+         "%s Inserting parent %s as its own neighbor",
+          block->name().c_str(),
+          block->name(index).c_str(),
+          (self_.index_.level() == 0 ||
+           index != self_.index_.index_parent(min_level_)));
+#endif
 
   if (! found) {
     const int level = index.level();
@@ -45,8 +72,13 @@ bool Adapt::insert_neighbor (Index index, bool is_sibling)
 
 //----------------------------------------------------------------------
 
-bool Adapt::delete_neighbor (Index index)
+bool Adapt::delete_neighbor (Index index, Block * block)
 {
+#ifdef TRACE_NEIGHBOR
+  CkPrintf ("DEBUG_NEIGHBOR delete_neighbor %s : %s\n",
+            block->name().c_str(),
+            block->name(index).c_str());
+#endif
   int i;
   const bool found = is_neighbor(index,&i);
 
@@ -77,9 +109,14 @@ void Adapt::reset_bounds()
 
 //----------------------------------------------------------------------
 
-bool Adapt::refine_neighbor (Index index)
+void Adapt::refine_neighbor (Index index, Block * block)
 {
-  const bool success = delete_neighbor(index);
+#ifdef TRACE_REFINE
+  CkPrintf ("TRACE_REFINE %s refine_neighbor %s\n",
+            block->name().c_str(),
+            block->name(index).c_str());
+#endif
+  const bool success = delete_neighbor(index,block);
   if (success) {
     const int cxp = 2;
     const int cyp = (rank_ >= 2) ? 2 : 1;
@@ -90,59 +127,84 @@ bool Adapt::refine_neighbor (Index index)
           Index index_child = index.index_child(icx,icy,icz);
           int adj = self_.index_.adjacency(index_child,rank_,periodicity_);
           if (adj >= 0) {
-            bool s = insert_neighbor(index_child);
+            bool s = insert_neighbor(index_child,block);
           }
         }
       }
     }
   }
-  return success;
 }
 
 //----------------------------------------------------------------------
 
-bool Adapt::coarsen_neighbor (Index index)
+void Adapt::coarsen_neighbor (Index index,Block * block)
 {
-  const bool success = delete_neighbor(index);
-  if (success) {
-    Index index_parent = index.index_parent();
-    const int n = neighbor_list_.size();
+#ifdef TRACE_REFINE
+  CkPrintf ("TRACE_REFINE %s coarsen_neighbor %s\n",
+            block->name().c_str(),
+            block->name(index).c_str());
+#endif
+  // can't coarsen if neighbor sibling
+  if ( ! self_.index_.is_sibling(index)) {
+    int n = num_neighbors();
     // delete all neighbors contained in index parent
+    auto neighbors = index_neighbors();
     for (int i=0; i<n; i++) {
-      const Index & index_sibling = neighbor_list_[i].index_;
-      if (index_sibling.level() > 0 &&
-          (index_sibling.index_parent() == index_parent)) {
-        delete_neighbor (index_sibling);
+      const Index index_sibling = neighbors[i];
+      if (index.is_sibling(index_sibling)) {
+        delete_neighbor (index_sibling,block);
       }
     }
     // insert parent (if not already inserted)
-    insert_neighbor (index_parent);
+    Index index_parent = index.index_parent(min_level_);
+    insert_neighbor (index_parent,block);
   }
-  return success;
 }
 
 //----------------------------------------------------------------------
 
-void Adapt::refine (const Adapt & adapt_parent, int ic3[3])
+void Adapt::refine (const Adapt & adapt_parent, int ic3[3], Block * block)
 {
+#ifdef TRACE_REFINE
+  {
+    CkPrintf ("TRACE_REFINE %s refine parent %s\n",
+              block->name().c_str(),
+              block->name(adapt_parent.index()).c_str());
+  
+    const int n = num_neighbors();
+    for (int i=0; i<n; i++) {
+      const Index index_neighbor = adapt_parent.neighbor_list_[i].index_;
+      CkPrintf ("DEBUG_REFINE %s neighbor %d %s\n",
+                block->name().c_str(),i,
+                block->name(index_neighbor).c_str());
+    }
+  }
+#endif
   Index index_parent = adapt_parent.index();
 
   self_.index_ = index_parent.index_child(ic3);
 
   // insert adjacent neighbors
-  const int n = adapt_parent.neighbor_list_.size();
-  for (int i=0; i<n; i++) {
-    const Index & index_neighbor = adapt_parent.neighbor_list_[i].index_;
+  const int np = adapt_parent.neighbor_list_.size();
+  for (int i=0; i<np; i++) {
+    const Index index_neighbor = adapt_parent.neighbor_list_[i].index_;
     const int adj = self_.index_.adjacency(index_neighbor,rank_,periodicity_);
+#ifdef TRACE_REFINE
+    CkPrintf ("DEBUG_REFINE refine %s : parent %s - neighbor %s adj %d\n",
+              block->name(self_.index_).c_str(),
+              block->name(index_parent).c_str(),
+              block->name(index_neighbor).c_str(),
+              adj);
+#endif
     if (adj >= 0) {
-      insert_neighbor(index_neighbor);
+      insert_neighbor(index_neighbor,block);
     }
   }
 
   // add siblings
   const int level = index_parent.level();
   Index index_sibling = self_.index_;
-  
+
   index_sibling.set_level(level+1);
   const int icyp = (rank_ >= 2 ? 2:1);
   const int iczp = (rank_ >= 3 ? 2:1);
@@ -151,46 +213,68 @@ void Adapt::refine (const Adapt & adapt_parent, int ic3[3])
       for (int icx=0; icx<2; icx++) {
         index_sibling.set_child(level+1,icx,icy,icz);
         if ( ! (icx==ic3[0] && icy== ic3[1] && icz==ic3[2])) {
-          insert_neighbor(index_sibling);
+          insert_neighbor(index_sibling,block);
         }
       }
     }
   }
+#ifdef WRITE_COARSEN
+  write("refine",block,WRITE_CYCLE);
+#endif
+
 }
 
 //----------------------------------------------------------------------
 
-void Adapt::coarsen (const Adapt & adapt_child)
+void Adapt::coarsen (const Adapt & adapt_child, Block * block)
 {
-  if (! valid_) {
-    // First time called
-    set_valid(true);
-    copy_(adapt_child);
-    // update index_
-    self_.index_ = self_.index_.index_parent();
+#ifdef TRACE_REFINE
+  CkPrintf ("TRACE_REFINE %s coarsen child %s\n",
+            block->name().c_str(),
+            block->name(adapt_child.index()).c_str());
+#endif
+  Index index_child = adapt_child.index();
 
-    // delete previous siblings (neighbors whose parent is self)
+  if (! valid_) {
+    // First time called copy all child neighbors
+    copy_(adapt_child);
+    valid_ = true;
+    self_.index_ = self_.index_.index_parent(min_level_);
+
+    // remove any blocks internal to this one (siblings to child block)
     const int n = adapt_child.neighbor_list_.size();
     for (int i=0; i<n; i++) {
-      const Index & index_neighbor = adapt_child.neighbor_list_[i].index_;
-      if (self_.index_.is_sibling(index_neighbor)) {
-        delete_neighbor (index_neighbor);
+      const Index index_neighbor = adapt_child.neighbor_list_[i].index_;
+      if (index_child.is_sibling(index_neighbor)) {
+        delete_neighbor (index_neighbor,block);
       }
     }
-
   } else {
-    // Subsequent time called
-
-    // insert non-siblings
+    // not first time called--insert non-sibling neighbors of child block
     const int n = adapt_child.neighbor_list_.size();
     for (int i=0; i<n; i++) {
-      const Index & index_neighbor = adapt_child.neighbor_list_[i].index_;
-      if (! self_.index_.is_sibling(index_neighbor)) {
-        insert_neighbor (index_neighbor);
+      const Index index_neighbor = adapt_child.neighbor_list_[i].index_;
+#ifdef TRACE_REFINE
+      CkPrintf ("DEBUG_COARSEN %s adapt_child %s child %s : %d %s\n",
+                block->name(self_.index_).c_str(),
+                block->name(adapt_child.index()).c_str(),
+                block->name(index_child).c_str(),
+                i,
+                block->name(index_neighbor).c_str());
+#endif
+      const bool not_sibling = ! index_child.is_sibling(index_neighbor);
+      if (not_sibling) {
+        insert_neighbor (index_neighbor,block);
       }
     }
   }
+
+#ifdef WRITE_COARSEN
+  write("coarsen",block,WRITE_CYCLE);
+#endif
+
 }
+
 
 //----------------------------------------------------------------------
 
@@ -218,7 +302,7 @@ void Adapt::update_neighbor
 
 //----------------------------------------------------------------------
 
-bool Adapt::update_bounds ()
+bool Adapt::update_bounds (Block * block)
 {
   // Save values to test later if changed
   const int level_min = self_.level_min_;
@@ -247,13 +331,15 @@ bool Adapt::update_bounds ()
   // adjust for coarsening: can only coarsen if all siblings can coarsen
 
   const bool want_to_coarsen = (self_.level_min_ < self_.level_now_);
+  int count_coarsen = 0;
+  bool cannot_coarsen = false;
   if ( want_to_coarsen && self_.can_coarsen_) {
+    // count self
+    ++count_coarsen;
     // block can coarsen, check that all neighbors can as well
-    int count_coarsen = 1;
-    bool cannot_coarsen = false;
     for (int i=0; i<n; i++) {
-      //      if (self_.index_.is_sibling(neighbor_list_[i].index_)) {
-      if (neighbor_list_[i].is_sibling_) {
+      //      if (neighbor_list_[i].is_sibling_) {
+      if (self_.index_.is_sibling(neighbor_list_[i].index_)) {
         if (neighbor_list_[i].can_coarsen_) {
           ++count_coarsen;
         }
@@ -272,9 +358,12 @@ bool Adapt::update_bounds ()
     }
   }
 
-  return ( (self_.level_min_ != level_min) ||
-           (self_.level_max_ != level_max) ||
-           (self_.can_coarsen_ != can_coarsen) );
+  const bool changed =
+    (self_.level_min_ != level_min) ||
+    (self_.level_max_ != level_max) ||
+    (self_.can_coarsen_ != can_coarsen);
+
+  return ( changed );
 }
 
 //----------------------------------------------------------------------
@@ -307,6 +396,18 @@ void Adapt::get_neighbor_level_bounds
       (*can_coarsen) = neighbor.can_coarsen_;
     }
   }
+}
+
+//----------------------------------------------------------------------
+
+
+std::vector<Index> Adapt::index_neighbors() const
+{
+  std::vector<Index> index_list;
+  const int n = num_neighbors();
+  index_list.resize(n);
+  for (int i=0; i<n; i++) index_list[i] = index(i);
+  return index_list;
 }
 
 //----------------------------------------------------------------------
@@ -368,6 +469,27 @@ void Adapt::print(std::string message, Block * block) const
               info.is_sibling_?1:0,
               info.can_coarsen_?1:0);
     fflush(stdout);
+  }
+}
+
+//----------------------------------------------------------------------
+
+void Adapt::write(std::string root, Block * block, int cycle_start)
+{
+  const int cycle = cello::simulation()->cycle();
+  if (cycle >= cycle_start) {
+    char filename[80];
+    sprintf (filename,"%d-%s.%s",cycle,root.c_str(),block->name().c_str());
+
+    CkPrintf ("%s\n",filename);
+
+    FILE * fp = fopen (filename,"w");
+    const int n = neighbor_list_.size();
+    for (int i=0; i<n; i++) {
+      fprintf (fp,"%s\n",
+               block->name(neighbor_list_[i].index_).c_str());
+    }
+    fclose(fp);
   }
 }
 

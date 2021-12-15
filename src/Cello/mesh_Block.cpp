@@ -757,6 +757,7 @@ void Block::init_adapt_(Adapt * adapt_parent)
   int p3[3];
   cello::hierarchy()->get_periodicity(p3,p3+1,p3+2);
   adapt_.set_rank(rank);
+  adapt_.set_min_level(cello::config()->mesh_min_level);
   adapt_.set_max_level(cello::config()->mesh_max_level);
   adapt_.set_index(index_);
   adapt_.set_periodicity(p3);
@@ -787,7 +788,7 @@ void Block::init_adapt_(Adapt * adapt_parent)
         for (if3[0]=ifmx; if3[0]<=ifpx; ++if3[0]) {
           if (if3[0] || if3[1] || if3[2]) {
             Index index_neighbor = index_.index_neighbor(if3,na3);
-            adapt_.insert_neighbor(index_neighbor);
+            adapt_.insert_neighbor(index_neighbor,this);
           }
         }
       }
@@ -800,7 +801,7 @@ void Block::init_adapt_(Adapt * adapt_parent)
 #endif
     int ic3[3];
     index_.child(level,ic3,ic3+1,ic3+2);
-    adapt_.refine(*adapt_parent,ic3);
+    adapt_.refine(*adapt_parent,ic3,this);
 #ifdef DEBUG_ADAPT
     CkPrintf ("DEBUG_ADAPT %s Block() level > 0\n",
               name().c_str());

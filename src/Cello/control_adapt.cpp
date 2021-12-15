@@ -20,12 +20,15 @@
 
 // #define CHECK_RANGE
 // #define TRACE_ADAPT
+// #define DEBUG_ADAPT
 // #define CHECK_ADAPT_SEND
 // #define CHECK_ADAPT_NEXT
-// #define DEBUG_ADAPT
+
+// #define WRITE_NEIGHBORS
+
+// #define DEBUG_CYCLE_START 114
 
 #ifdef TRACE_ADAPT
-#define DEBUG_CYCLE_START 0
 #   undef TRACE_ADAPT
 #   define TRACE_ADAPT(MSG,BLOCK) \
   if (BLOCK->cycle() >= DEBUG_CYCLE_START) {                    \
@@ -40,7 +43,7 @@
 #endif
 
 #ifdef CHECK_RANGE
-#define DEBUG_CYCLE_START 16
+#define DEBUG_CYCLE_START 105
 #   undef CHECK_RANGE
 #   define CHECK_RANGE(BLOCK,level_min,level_max)       \
   if (BLOCK->cycle() >= DEBUG_CYCLE_START) {            \
@@ -55,6 +58,7 @@
 #else
 #   define CHECK_RANGE(BLOCK,level_min,level_max) /* ... */
 #endif
+
 
 //======================================================================
 
@@ -88,14 +92,18 @@ void Block::adapt_begin_()
 
   if (is_leaf()) {
 
-    // Evaluate local mesh refinement criteria
+#ifdef WRITE_NEIGHBORS
+    adapt_.write("adapt",this,DEBUG_CYCLE_START);
+#endif
+
+  // Evaluate local mesh refinement criteria
     const int level_maximum = cello::config()->mesh_max_level;
     level_next_ = adapt_compute_desired_level_(level_maximum);
 
     // Reset adapt level bounds for next adapt phase
     adapt_.reset_bounds();
     adapt_.initialize_self(index_,level_next_,index_.level());
-    adapt_.update_bounds();
+    adapt_.update_bounds(this);
   }
 #ifdef DEBUG_ADAPT  
   CkPrintf ("DEBUG_ADAPT %s level_next = %d\n",name().c_str(),level_next_);
@@ -151,7 +159,7 @@ void Block::adapt_next_()
 
 #ifdef CHECK_ADAPT_NEXT
   {
-    adapt_.update_bounds();
+    adapt_.update_bounds(this);
     int level_min;
     int level_max;
     bool can_coarsen;
@@ -216,10 +224,18 @@ void Block::update_levels_ ()
 #endif
     if (level_min > index_list[i].level()) {
       // level_min is larger, must refine
-      adapt_.refine_neighbor(index_list[i]);
+#ifdef DEBUG_ADAPT
+      CkPrintf ("DEBUG_COARSEN refine_neighbor %s : %s\n",
+                name().c_str(),name(index_list[i]).c_str());
+#endif
+      adapt_.refine_neighbor(index_list[i],this);
     } else if (level_min < index_list[i].level() && can_coarsen) {
       // level_min is smaller and can coarsen
-      adapt_.coarsen_neighbor(index_list[i]);
+#ifdef DEBUG_ADAPT
+      CkPrintf ("DEBUG_COARSEN coarsen_neighbor %s : %s\n",
+                name().c_str(),name(index_list[i]).c_str());
+#endif
+      adapt_.coarsen_neighbor(index_list[i],this);
     }
   }
 }
@@ -559,7 +575,7 @@ void Block::adapt_send_level()
   int level_min;
   int level_max;
   bool can_coarsen;
-  adapt_.update_bounds();
+  adapt_.update_bounds(this);
   adapt_.get_level_bounds(&level_min,&level_max,&can_coarsen);
   CHECK_RANGE(this,level_min,level_max);
 
@@ -626,8 +642,12 @@ void Block::p_adapt_recv_level
  bool can_coarsen
  )
 {
-  if (adapt_step != adapt_step_) return;
-  
+  //  if (adapt_step != adapt_step_) return;
+
+  ASSERT4("Block::p_adapt_recv_level()",
+          "Mismatch in %s : %s adapt_recv_level actuale %d != expected %d\n",
+          name().c_str(),name(index_send).c_str(),adapt_step,adapt_step_,
+          adapt_step == adapt_step_);
   TRACE_ADAPT("adapt_recv_level",this);
   int level_min,level_max;
 #ifdef DEBUG_ADAPT
@@ -636,7 +656,7 @@ void Block::p_adapt_recv_level
   adapt_.get_level_bounds(&level_min_old,&level_max_old,&can_coarsen_old);
 #endif  
   adapt_.update_neighbor (index_send,level_face_new,level_face_max,can_coarsen);
-  const bool changed = adapt_.update_bounds();
+  const bool changed = adapt_.update_bounds(this);
   adapt_.get_level_bounds(&level_min,&level_max,&can_coarsen);
 #ifdef DEBUG_ADAPT
   if (changed) {
@@ -768,7 +788,8 @@ void Block::p_adapt_recv_level
     }
 
     // cannot if nephew not also coarsening
-    if (is_nephew && (level_face_new > level)) {
+    //    if (is_nephew && (level_face_new > level)) {
+    if (is_nephew) {
       can_coarsen = false;
     }
 
@@ -961,7 +982,7 @@ void Block::p_adapt_recv_child (MsgCoarsen * msg)
   ItFace it_face_child = this->it_face(min_face_rank,index_child);
   int of3[3];
 
-  adapt_.coarsen(*msg->adapt_child_);
+  adapt_.coarsen(*msg->adapt_child_,this);
 
   while (it_face_child.next(of3)) {
     int level_child = child_face_level_curr[IF3(of3)];

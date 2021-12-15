@@ -9,7 +9,6 @@
 
 #include "charm_enzo.hpp"
 
-// #define DEBUG_NEW_ADAPT
 // #define TRACE_FACTORY
 
 //----------------------------------------------------------------------

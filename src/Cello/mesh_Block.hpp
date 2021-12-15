@@ -777,6 +777,8 @@ public: // virtual functions
 
   void print () const;
 
+  const Adapt * adapt() const { return & adapt_; }
+
 protected: // functions
 
   /// Return the child adjacent to the given child in the direction of
