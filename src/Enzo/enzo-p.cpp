@@ -64,7 +64,7 @@ PARALLEL_MAIN_BEGIN
   CkPrintf ("PNG_1_5_X\n");
 #endif
   
-  feenableexcept(FE_INVALID | FE_OVERFLOW);
+  //  feenableexcept(FE_INVALID | FE_OVERFLOW);
   
   // Check parameter file
 
