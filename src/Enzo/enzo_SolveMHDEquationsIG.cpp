@@ -22,7 +22,7 @@
 
 //----------------------------------------------------------------------
 
-#define DEBUG_FIELDS
+// #define DEBUG_FIELDS
 
 #ifdef DEBUG_FIELDS
 #   define CHECK_FIELD(VALUES,NAME)             \
@@ -40,8 +40,8 @@
        for (int ix=gx; ix<mx-gx; ix++) {                        \
          const int i=ix+mx*(iy+my*iz);                          \
          avg += VALUES[i];                                      \
-         max = std::max(max,VALUES[i]);                         \
-         min = std::min(min,VALUES[i]);                         \
+         max = std::max(double(max),double(VALUES[i]));         \
+         min = std::min(double(min),double(VALUES[i]));         \
          count++;                                               \
        }                                                        \
      }                                                          \
