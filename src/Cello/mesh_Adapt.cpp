@@ -16,6 +16,8 @@
 
 // #define ENABLE_ASSERT
 
+// #define DEBUG_COARSEN
+
 //----------------------------------------------------------------------
 
 void Adapt::set_face_level (Index index, const int if3[3], LevelType level_type,
@@ -254,7 +256,7 @@ void Adapt::coarsen (const Adapt & adapt_child, Block * block)
     const int n = adapt_child.neighbor_list_.size();
     for (int i=0; i<n; i++) {
       const Index index_neighbor = adapt_child.neighbor_list_[i].index_;
-#ifdef TRACE_REFINE
+#ifdef DEBUG_COARSEN
       CkPrintf ("DEBUG_COARSEN %s adapt_child %s child %s : %d %s\n",
                 block->name(self_.index_).c_str(),
                 block->name(adapt_child.index()).c_str(),
@@ -323,6 +325,7 @@ bool Adapt::update_bounds (Block * block)
   level_max_new = std::max(level_min_new,neighbor_max-1);
 
   self_.can_coarsen_ = (level_max_new == self_.level_now_ - 1);
+
   // Reset level_max to >= level_now pending checking all sibling can
   // coarsen
   self_.level_min_ = level_min_new;
@@ -333,20 +336,34 @@ bool Adapt::update_bounds (Block * block)
   const bool want_to_coarsen = (self_.level_min_ < self_.level_now_);
   int count_coarsen = 0;
   bool cannot_coarsen = false;
+#ifdef DEBUG_COARSEN
+  CkPrintf ("DEBUG_COARSEN %s want %d can %d\n",
+            block->name().c_str(),want_to_coarsen,self_.can_coarsen_);
+#endif
   if ( want_to_coarsen && self_.can_coarsen_) {
     // count self
     ++count_coarsen;
     // block can coarsen, check that all neighbors can as well
     for (int i=0; i<n; i++) {
-      //      if (neighbor_list_[i].is_sibling_) {
-      if (self_.index_.is_sibling(neighbor_list_[i].index_)) {
-        if (neighbor_list_[i].can_coarsen_) {
+      const auto & neighbor = neighbor_list_[i];
+      if (self_.index_.is_sibling(neighbor.index_)) {
+        if (neighbor.can_coarsen_) {
           ++count_coarsen;
         }
-        if (neighbor_list_[i].level_min_ >= self_.level_now_) {
+        if (neighbor.level_min_ >= self_.level_now_) {
           cannot_coarsen = true;
         }
+#ifdef DEBUG_COARSEN
+        CkPrintf ("DEBUG_COARSEN %s : sibling %s count %d cannot %d\n",
+                  block->name().c_str(),
+                  block->name(neighbor.index_).c_str(),
+                  count_coarsen,cannot_coarsen?1:0);
+#endif
+      } else if (self_.index_.is_nibling(neighbor.index_)) {
+          // cannot coarsen if sibling is refined
+          cannot_coarsen = true;
       }
+
     }
     if (count_coarsen == cello::num_children(rank_)) {
       // Can coarsen if all siblings can coarsen (count includes self)
@@ -363,6 +380,13 @@ bool Adapt::update_bounds (Block * block)
     (self_.level_max_ != level_max) ||
     (self_.can_coarsen_ != can_coarsen);
 
+#ifdef DEBUG_COARSEN
+  CkPrintf ("DEBUG_COARSEN %s : [%d %d] C%d\n",
+            block->name().c_str(),
+            self_.level_min_,
+            self_.level_max_,
+            self_.can_coarsen_?1:0);
+#endif
   return ( changed );
 }
 

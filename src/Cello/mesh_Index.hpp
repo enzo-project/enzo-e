@@ -101,8 +101,15 @@ public:
   bool is_sibling (Index index) const
   {
     const int level = this->level();
-    return (level > 0 && index.level() > 0) ?
+    return (level >= 1 && index.level() >= 1) ?
       (index_parent() == index.index_parent()) : false;
+  }
+  /// Whether index is a "nibling" (child of a sibling)
+  bool is_nibling (Index index) const
+  {
+    const int level = this->level();
+    return (level >= 1 && index.level() >= 2) ?
+      (index_parent() == index.index_parent().index_parent()) : false;
   }
 
   /// Return the dimensionality of shared face (0 corner, 1 edge, 2

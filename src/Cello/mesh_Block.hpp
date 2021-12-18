@@ -936,6 +936,10 @@ protected: // attributes
   /// Number of adapt steps in the adapt phase
   int adapt_step_;
 
+  /// Whether contribute() has been called in adapt. Used to
+  /// prevent multiple calls per step.
+  bool adapt_balanced_;
+
   /// whether Block has been coarsened and should be deleted
   bool coarsened_;
 

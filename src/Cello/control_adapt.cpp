@@ -18,47 +18,29 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
-// #define CHECK_RANGE
 // #define TRACE_ADAPT
+// #define TRACE_REFINE
+// #define TRACE_COARSEN
 // #define DEBUG_ADAPT
-// #define CHECK_ADAPT_SEND
-// #define CHECK_ADAPT_NEXT
 
 // #define WRITE_NEIGHBORS
 
-// #define DEBUG_CYCLE_START 114
+#define DEBUG_CYCLE_START 0
 
 #ifdef TRACE_ADAPT
 #   undef TRACE_ADAPT
 #   define TRACE_ADAPT(MSG,BLOCK) \
   if (BLOCK->cycle() >= DEBUG_CYCLE_START) {                    \
-    CkPrintf ("TRACE_ADAPT %s %s %d\n",         \
+    CkPrintf ("TRACE_ADAPT %s %s count %d balanced %d\n",         \
               BLOCK->name().c_str(),            \
               std::string(MSG).c_str(),         \
-              BLOCK->adapt_step_);              \
+              BLOCK->adapt_step_,               \
+              BLOCK->adapt_balanced_?1:0 );     \
     fflush(stdout);                             \
   }
 #else
 #   define TRACE_ADAPT(MSG,BLOCK) /* ... */
 #endif
-
-#ifdef CHECK_RANGE
-#define DEBUG_CYCLE_START 105
-#   undef CHECK_RANGE
-#   define CHECK_RANGE(BLOCK,level_min,level_max)       \
-  if (BLOCK->cycle() >= DEBUG_CYCLE_START) {            \
-    if (level_min > level_max) {                        \
-      CkPrintf ("CHECK_RANGE %s :%d [%d %d]\n",         \
-                BLOCK->name().c_str(),                  \
-                __LINE__,                               \
-                level_min,level_max);                   \
-    }                                                   \
-    fflush(stdout);                                     \
-  }
-#else
-#   define CHECK_RANGE(BLOCK,level_min,level_max) /* ... */
-#endif
-
 
 //======================================================================
 
@@ -130,7 +112,8 @@ void Block::adapt_called_()
     CkCallback callback = CkCallback
       (CkIndex_Block::r_adapt_next(nullptr), 
        proxy_array());
-    TRACE_ADAPT("r_adapt_next calling contribute",this);
+    adapt_balanced_ = true;
+    TRACE_ADAPT("calling contribute not leaf",this);
     contribute(callback);
     return;
   }
@@ -154,42 +137,26 @@ void Block::adapt_called_()
 /// adapt_end_().
 void Block::adapt_next_()
 {
-  TRACE_ADAPT("adapt_next_",this);
+  TRACE_ADAPT("adapt_next contribute called_",this);
   update_levels_();
 
-#ifdef CHECK_ADAPT_NEXT
-  {
-    adapt_.update_bounds(this);
-    int level_min;
-    int level_max;
-    bool can_coarsen;
-    adapt_.get_level_bounds(&level_min,&level_max,&can_coarsen);
-    bool error = false;
-    if ( ! (level_min == level_next_) ) {
-      error = true;
-      CkPrintf ("ERROR NEXT %s: OLD != NEW\n",name().c_str());
-      fflush(stdout);
-      adapt_.print("ERROR",this);
-      WARNING2("adapt_next_()",
-              "Mismatch between level_min old %d and new %d",
-              level_next_,level_min);
-    }
-    if ( level_min != level_max) {
-      error = true;
-      CkPrintf ("ERROR NEXT %s: MIN != MAX\n",name().c_str());
-      fflush(stdout);
-      adapt_.print("ERROR",this);
-      WARNING2("adapt_next()",
-               "Block level bounds %d and %d have not converged",
-               level_min,level_max);
-    }
-    ASSERT("adapt_next","Adapt error",!error);
-  }
+#ifdef NEW_ADAPT
+  level_next_ = adapt_.level_min();
 #endif
-
+  
   if (is_leaf()) {
-    if (level() < level_next_) adapt_refine_();
-    if (level() > level_next_) adapt_coarsen_();
+    if (level() < level_next_) {
+#ifdef TRACE_REFINE
+      CkPrintf ("TRACE_REFINE %s\n",name().c_str());
+#endif
+      adapt_refine_();
+    }
+    if (level() > level_next_) {
+#ifdef TRACE_COARSEN
+      CkPrintf ("TRACE_COARSEN %s\n",name().c_str());
+#endif
+      adapt_coarsen_();
+    }
   }
   control_sync_quiescence (CkIndex_Main::p_adapt_update());
 
@@ -216,25 +183,11 @@ void Block::update_levels_ ()
     bool can_coarsen;
     adapt_.get_neighbor_level_bounds
       (index_list[i],&level_min,&level_max,&can_coarsen);
-#ifdef DEBUG_ADAPT
-    CHECK_RANGE(this,level_min,level_max);
-    CkPrintf ("%s Index %s [%d %d] %d]\n",
-              name().c_str(),name(index_list[i]).c_str(),
-              level_min,level_max,can_coarsen?1:0);
-#endif
     if (level_min > index_list[i].level()) {
       // level_min is larger, must refine
-#ifdef DEBUG_ADAPT
-      CkPrintf ("DEBUG_COARSEN refine_neighbor %s : %s\n",
-                name().c_str(),name(index_list[i]).c_str());
-#endif
       adapt_.refine_neighbor(index_list[i],this);
     } else if (level_min < index_list[i].level() && can_coarsen) {
       // level_min is smaller and can coarsen
-#ifdef DEBUG_ADAPT
-      CkPrintf ("DEBUG_COARSEN coarsen_neighbor %s : %s\n",
-                name().c_str(),name(index_list[i]).c_str());
-#endif
       adapt_.coarsen_neighbor(index_list[i],this);
     }
   }
@@ -271,7 +224,9 @@ void Block::adapt_end_()
   const bool is_first_cycle = (initial_cycle == cycle());
   const int level_maximum = cello::config()->mesh_max_level;
 
-  bool adapt_again = (is_first_cycle && (adapt_step_++ < level_maximum));
+  bool adapt_again = (is_first_cycle && (adapt_step_ < level_maximum));
+  adapt_step_++;
+  adapt_balanced_ = false;
 
   if (adapt_again) {
     control_sync_quiescence (CkIndex_Main::p_adapt_enter());
@@ -577,19 +532,6 @@ void Block::adapt_send_level()
   bool can_coarsen;
   adapt_.update_bounds(this);
   adapt_.get_level_bounds(&level_min,&level_max,&can_coarsen);
-  CHECK_RANGE(this,level_min,level_max);
-
-#ifdef CHECK_ADAPT_SEND
-  if ( ! (level_min == level_next_) ) {
-    CkPrintf ("ERROR SEND: %s\n",name().c_str());
-    fflush(stdout);
-    adapt_.print("ERROR",this);
-    ASSERT2("adapt_send_level()",
-            "Mismatch between level_min old %d and new %d",
-            level_next_,level_min,
-            (level_min == level_next_));
-  }
-#endif
 
   while (it_neighbor.next(of3)) {
     Index index_neighbor = it_neighbor.index();
@@ -605,14 +547,26 @@ void Block::adapt_send_level()
 #endif
   }
 #ifdef NEW_ADAPT
-  if (adapt_.is_converged()) {
+  if (adapt_.is_converged() && ! adapt_balanced_) {
+    adapt_balanced_ = true;
     CkCallback callback = CkCallback
-      (CkIndex_Block::r_adapt_next(nullptr), 
+      (CkIndex_Block::r_adapt_next(nullptr),
        proxy_array());
-    TRACE_ADAPT("r_adapt_next calling contribute",this);
+    TRACE_ADAPT("calling contribute leaf",this);
+
+#ifdef TRACE_REFINE
+    if (adapt_.level_min() > level) {
+      CkPrintf ("TRACE_REFINE %s\n",name().c_str());
+    }
+#endif
+#ifdef TRACE_COARSEN
+    if (adapt_.level_min() < level) {
+      CkPrintf ("TRACE_COARSEN %s\n",name().c_str());
+    }
+#endif
     contribute(callback);
   }
-#endif  
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -645,28 +599,14 @@ void Block::p_adapt_recv_level
   //  if (adapt_step != adapt_step_) return;
 
   ASSERT4("Block::p_adapt_recv_level()",
-          "Mismatch in %s : %s adapt_recv_level actuale %d != expected %d\n",
+          "Mismatch in %s : %s adapt_recv_level actual %d != expected %d\n",
           name().c_str(),name(index_send).c_str(),adapt_step,adapt_step_,
           adapt_step == adapt_step_);
   TRACE_ADAPT("adapt_recv_level",this);
   int level_min,level_max;
-#ifdef DEBUG_ADAPT
-  int level_min_old,level_max_old;
-  bool can_coarsen_old;
-  adapt_.get_level_bounds(&level_min_old,&level_max_old,&can_coarsen_old);
-#endif  
   adapt_.update_neighbor (index_send,level_face_new,level_face_max,can_coarsen);
   const bool changed = adapt_.update_bounds(this);
   adapt_.get_level_bounds(&level_min,&level_max,&can_coarsen);
-#ifdef DEBUG_ADAPT
-  if (changed) {
-    CkPrintf ("DEBUG_ADAPT %s : %s updating level bounds [%d %d C%d] -> [%d %d C%d]\n",
-              name().c_str(),
-              name(index_send).c_str(),
-              level_min_old,level_max_old,can_coarsen_old,
-              level_min,level_max,can_coarsen);
-  }
-#endif
 
   ASSERT2("p_adapt_recv_level()",
           "Index level %d and indicated level %d mismatch",
@@ -674,12 +614,6 @@ void Block::p_adapt_recv_level
           level_face_curr == index_send.level());
   performance_start_(perf_adapt_update);
 
-#ifdef DEBUG_ADAPT
-  CkPrintf ("DEBUG_ADAPT p_adapt_receive_level [%d %d] old [%d %d] changed %d %s < %s  [%d %d] C%d\n",
-            level_min,level_max,
-            level_min_old,level_max_old,changed?1:0,
-            name().c_str(),name(index_send).c_str(),level_face_new,level_face_max,can_coarsen);
-#endif
   if (index_send.level() != level_face_curr) {
     PARALLEL_PRINTF
       ("%d level mismatch between index_send (%d) and level_face_curr (%d)",
@@ -697,9 +631,6 @@ void Block::p_adapt_recv_level
   if (skip_face_update) {
     performance_stop_(perf_adapt_update);
     performance_start_(perf_adapt_update_sync);
-#ifdef DEBUG_ADAPT
-    CkPrintf ("DEBUG_ADAPT %s skip face update\n",name().c_str());
-#endif
     return;
   }
 #endif
@@ -804,12 +735,6 @@ void Block::p_adapt_recv_level
   // notify neighbors if level_next has changed
 #ifdef OLD_ADAPT
   if (level_next != level_next_) {
-#ifdef DEBUG_ADAPT
-    CkPrintf ("DEBUG_ADAPT %s : %s updating level_next_ %d -> %d\n",
-              name().c_str(),
-              name(index_send).c_str(),
-              level_next_,level_next);
-#endif
     ASSERT2 ("Block::p_adapt_recv_level()",
 	     "level_next %d level_next_ %d\n", level_next,level_next_,
 	     level_next > level_next_);
@@ -971,9 +896,6 @@ void Block::p_adapt_recv_child (MsgCoarsen * msg)
 
   performance_start_(perf_adapt_update);
   msg->update(data());
-#ifdef DEBUG_ADAPT
-  msg->adapt_child()->print("adapt_recv_child");
-#endif
   int * ic3 = msg->ic3();
   int * child_face_level_curr = msg->face_level();
   // copy child face level array
