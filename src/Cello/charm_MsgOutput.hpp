@@ -41,8 +41,8 @@ public: // interface
   {
     ++counter[cello::index_static()];
     copy_(msg_output);
-    cello::hex_string(tag_,TAG_LEN); // add new tag for new message
-  };
+    cello::hex_string(tag_,TAG_LEN); // add new tag for new message 
+ };
 
   MsgOutput & operator = (const MsgOutput & msg_output)
   {

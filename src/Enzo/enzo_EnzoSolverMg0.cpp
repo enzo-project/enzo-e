@@ -342,11 +342,11 @@ void EnzoSolverMg0::begin_solve(EnzoBlock * enzo_block,
 
 
     int level = enzo_block->level();
-    if ( ! (coarse_level_ <= level && level <= max_level_) ) {
+    if ( coarse_level_ <= level && level <= max_level_) {
+      restrict_recv(enzo_block,nullptr);
+    } else {
       SOLVER_CONTROL(enzo_block,"min","max", "CALL_COARSE_SOLVER_1");
       call_coarse_solver(enzo_block);
-    } else {
-      restrict_recv(enzo_block,nullptr);
     }
 
   }
@@ -1025,7 +1025,7 @@ FieldMsg * EnzoSolverMg0::pack_correction_
 
   // Create a FieldMsg for sending data to parent
   // (note: charm messages not deleted on send; are deleted on receive)
-    
+ 
   FieldMsg * msg  = new (narray) FieldMsg;
 
   /// WARNING: double copy

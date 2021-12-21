@@ -458,6 +458,8 @@ public:
 
   /// Parent tells child to delete itself
   void p_adapt_delete();
+
+#ifdef OLD_ADAPT
   void p_adapt_recv_level
   (int adapt_step,
    Index index_debug,
@@ -465,7 +467,20 @@ public:
    int if3[3],
    int level_now, int level_new,
    int level_max, bool can_coarsen);
-
+#endif
+#ifdef NEW_ADAPT
+  void p_adapt_recv_level (MsgAdapt *);
+  void adapt_check_messages_();
+  void adapt_recv_level();
+#endif
+  void adapt_recv_level
+  (int adapt_step,
+   Index index_debug,
+   int ic3[3],
+   int if3[3],
+   int level_now, int level_new,
+   int level_max, bool can_coarsen);
+  
   void p_adapt_recv_child (MsgCoarsen * msg);
 
   void adapt_recv (Index index_send, const int of3[3], const int ic3[3],
@@ -479,6 +494,9 @@ protected:
   void adapt_enter_();
   void adapt_begin_ ();
   void adapt_next_ ();
+#ifdef NEW_ADAPT
+  void adapt_balanced_();
+#endif  
   void adapt_end_ ();
   void adapt_update_();
   void adapt_exit_();
@@ -909,7 +927,9 @@ protected: // attributes
   /// Index of current initialization routine
   int index_initial_;
 
+  //--------------------------------------------------
   /// MESH REFINEMENT
+  //--------------------------------------------------
 
   /// list of child nodes
   std::vector<Index> children_;
@@ -938,10 +958,16 @@ protected: // attributes
 
   /// Whether contribute() has been called in adapt. Used to
   /// prevent multiple calls per step.
-  bool adapt_balanced_;
+  bool adapt_ready_;
 
+#ifdef NEW_ADAPT  
+  /// Buffer for incoming MsgAdapt objects 
+  std::vector < MsgAdapt * > adapt_msg_list_;
+#endif
   /// whether Block has been coarsened and should be deleted
   bool coarsened_;
+
+  //--------------------------------------------------
 
   /// Whether Block is a leaf node during adapt phase (stored not
   /// computed to avoid race condition bug #30)

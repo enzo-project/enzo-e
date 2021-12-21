@@ -9,6 +9,7 @@
 
 #ifndef MESH_ADAPT_HPP
 #define MESH_ADAPT_HPP
+
 class Adapt {
 
   /// @class    Adapt
@@ -241,6 +242,11 @@ public: // interface
   /// level is finally determined, and can thus call a global
   /// reduction.
   bool is_converged() const;
+
+  /// Return whether all neighbors are converged. This is used to
+  /// ensure call to contribute happens only after all expected
+  /// neighbor messages have been received
+  bool neighbors_converged() const;
 
   /// Return the current level bounds of the given Block (default is
   /// the block itself.)

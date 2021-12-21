@@ -399,6 +399,20 @@ bool Adapt::is_converged() const
 
 //----------------------------------------------------------------------
 
+bool Adapt::neighbors_converged() const
+{
+  const int n = neighbor_list_.size();
+  bool converged = true;
+  for (int i=0; i<n; i++) {
+    const auto & neighbor = neighbor_list_[i];
+    converged = converged && 
+      (neighbor.level_min_ == neighbor.level_max_);
+  }
+  return converged;
+}
+
+//----------------------------------------------------------------------
+
 void Adapt::get_level_bounds
 (int * level_min, int * level_max, bool * can_coarsen) const
 {

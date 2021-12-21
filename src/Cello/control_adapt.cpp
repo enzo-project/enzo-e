@@ -31,11 +31,11 @@
 #   undef TRACE_ADAPT
 #   define TRACE_ADAPT(MSG,BLOCK) \
   if (BLOCK->cycle() >= DEBUG_CYCLE_START) {                    \
-    CkPrintf ("TRACE_ADAPT %s %s count %d balanced %d\n",         \
+    CkPrintf ("TRACE_ADAPT %s %s count %d ready %d\n",         \
               BLOCK->name().c_str(),            \
               std::string(MSG).c_str(),         \
               BLOCK->adapt_step_,               \
-              BLOCK->adapt_balanced_?1:0 );     \
+              BLOCK->adapt_ready_?1:0 );     \
     fflush(stdout);                             \
   }
 #else
@@ -87,9 +87,9 @@ void Block::adapt_begin_()
     adapt_.initialize_self(index_,level_next_,index_.level());
     adapt_.update_bounds(this);
   }
-#ifdef DEBUG_ADAPT  
+#ifdef DEBUG_ADAPT
   CkPrintf ("DEBUG_ADAPT %s level_next = %d\n",name().c_str(),level_next_);
-#endif 
+#endif
   const int min_face_rank = cello::config()->adapt_min_face_rank;
   control_sync_neighbor (CkIndex_Block::p_adapt_called(),
 			 sync_id_adapt_begin,
@@ -109,12 +109,7 @@ void Block::adapt_called_()
   TRACE_ADAPT("adapt_called_",this);
 #ifdef NEW_ADAPT  
   if (! is_leaf()) {
-    CkCallback callback = CkCallback
-      (CkIndex_Block::r_adapt_next(nullptr), 
-       proxy_array());
-    adapt_balanced_ = true;
-    TRACE_ADAPT("calling contribute not leaf",this);
-    contribute(callback);
+    adapt_balanced_();
     return;
   }
 #endif  
@@ -126,6 +121,18 @@ void Block::adapt_called_()
 #endif  
 }
 
+//----------------------------------------------------------------------
+#ifdef NEW_ADAPT
+void Block::adapt_balanced_()
+{
+  TRACE_ADAPT("calling contribute leaf",this);
+  CkCallback callback = CkCallback
+    (CkIndex_Block::r_adapt_next(nullptr), 
+     proxy_array());
+  adapt_ready_ = true;
+  contribute(callback);
+}
+#endif
 //----------------------------------------------------------------------
 
 /// @brief Third step of the adapt phase: coarsen or refine according
@@ -226,7 +233,9 @@ void Block::adapt_end_()
 
   bool adapt_again = (is_first_cycle && (adapt_step_ < level_maximum));
   adapt_step_++;
-  adapt_balanced_ = false;
+#ifdef NEW_ADAPT  
+  adapt_ready_ = false;
+#endif  
 
   if (adapt_again) {
     control_sync_quiescence (CkIndex_Main::p_adapt_enter());
@@ -521,6 +530,7 @@ void Block::adapt_delete_child_(Index index_child)
 
 void Block::adapt_send_level()
 {
+#ifdef OLD_ADAPT
   TRACE_ADAPT("adapt_send_level",this);
   if (!is_leaf()) return;
   const int level = this->level();
@@ -537,35 +547,56 @@ void Block::adapt_send_level()
     Index index_neighbor = it_neighbor.index();
     int ic3[3];
     it_neighbor.child(ic3);
-#ifdef OLD_ADAPT
+#ifdef DEBUG_ADAPT
+    CkPrintf ("DEBUG_ADAPT %s : %s send_level of3 %d %d %dic3 %d %d %d\n",
+              name().c_str(),name(index_neighbor).c_str(),
+              of3[0],of3[1],of3[2],ic3[0],ic3[1],ic3[2]);
+#endif
     thisProxy[index_neighbor].p_adapt_recv_level
       (adapt_step_,index_,ic3,of3,level,level_next_,level_max,can_coarsen);
-#endif
-#ifdef NEW_ADAPT
-    thisProxy[index_neighbor].p_adapt_recv_level
-      (adapt_step_,index_,ic3,of3,level,level_min,level_max,can_coarsen);
-#endif
   }
-#ifdef NEW_ADAPT
-  if (adapt_.is_converged() && ! adapt_balanced_) {
-    adapt_balanced_ = true;
-    CkCallback callback = CkCallback
-      (CkIndex_Block::r_adapt_next(nullptr),
-       proxy_array());
-    TRACE_ADAPT("calling contribute leaf",this);
+#endif
 
-#ifdef TRACE_REFINE
-    if (adapt_.level_min() > level) {
-      CkPrintf ("TRACE_REFINE %s\n",name().c_str());
-    }
+
+#ifdef NEW_ADAPT  
+  adapt_ready_ = true;
+  TRACE_ADAPT("adapt_send_level",this);
+  if (!is_leaf()) return;
+  const int level = this->level();
+
+  int level_min;
+  int level_max;
+  bool can_coarsen;
+  adapt_.update_bounds(this);
+  adapt_.get_level_bounds(&level_min,&level_max,&can_coarsen);
+
+  ItNeighbor it_neighbor = this->it_neighbor(index_);
+  int of3[3];
+  while (it_neighbor.next(of3)) {
+    Index index_neighbor = it_neighbor.index();
+
+    int ic3[3];
+    it_neighbor.child(ic3);
+    // int level_neighbor = index_neighbor.level();
+    // if (level > level_neighbor) {
+    //   index_.child(level,ic3,ic3+1,ic3+2);
+    // } else if (level < level_neighbor) {
+    //   index_neighbor.child(level_neighbor,ic3,ic3+1,ic3+2);
+    // } else {
+    //   ic3[0]=ic3[1]=ic3[2]=0;
+    // }
+
+    MsgAdapt * msg = new MsgAdapt
+      (adapt_step_,index_,ic3,of3,level,level_min,level_max,can_coarsen);
+
+#ifdef DEBUG_ADAPT
+    CkPrintf ("DEBUG_ADAPT %s : %s send_level of3 %d %d %dic3 %d %d %d\n",
+              name().c_str(),name(index_neighbor).c_str(),
+              of3[0],of3[1],of3[2],ic3[0],ic3[1],ic3[2]);
 #endif
-#ifdef TRACE_COARSEN
-    if (adapt_.level_min() < level) {
-      CkPrintf ("TRACE_COARSEN %s\n",name().c_str());
-    }
-#endif
-    contribute(callback);
+    thisProxy[index_neighbor].p_adapt_recv_level (msg);
   }
+  adapt_recv_level();
 #endif
 }
 
@@ -584,7 +615,78 @@ void Block::adapt_send_level()
 /// level_next
 /// level_next_
 /// level
+#ifdef OLD_ADAPT
 void Block::p_adapt_recv_level
+(
+ int adapt_step,
+ Index index_send,
+ int ic3[3],
+ int if3[3],
+ int level_face_curr,
+ int level_face_new,
+ int level_face_max,
+ bool can_coarsen
+ )
+{
+  adapt_recv_level
+    (
+     adapt_step,
+     index_send,
+     ic3,
+     if3,
+     level_face_curr,
+     level_face_new,
+     level_face_max,
+     can_coarsen);
+}
+#endif
+#ifdef NEW_ADAPT
+void Block::p_adapt_recv_level (MsgAdapt * msg)
+{
+  if (!adapt_ready_) {
+    // save message for later
+    adapt_msg_list_.push_back(msg);
+  } else {
+    adapt_check_messages_();
+    adapt_recv_level
+      (
+       msg->adapt_step_,
+       msg->index_,
+       msg->ic3_,
+       msg->of3_,
+       msg->level_now_,
+       msg->level_min_,
+       msg->level_max_,
+       msg->can_coarsen_);
+    delete msg;
+  }
+}
+
+void Block::adapt_recv_level()
+{
+  // Process any saved messages
+  adapt_check_messages_();
+}
+
+void Block::adapt_check_messages_()
+{
+  for (int i=0; i<adapt_msg_list_.size(); i++) {
+    MsgAdapt * msg = adapt_msg_list_[i];
+    adapt_recv_level (
+       msg->adapt_step_,
+       msg->index_,
+       msg->ic3_,
+       msg->of3_,
+       msg->level_now_,
+       msg->level_min_,
+       msg->level_max_,
+       msg->can_coarsen_);
+  }
+  adapt_msg_list_.clear();
+}
+#endif
+
+void Block::adapt_recv_level
 (
  int adapt_step,
  Index index_send,
@@ -746,6 +848,11 @@ void Block::p_adapt_recv_level
 #endif
     adapt_send_level();
   }
+#ifdef NEW_ADAPT
+  if (adapt_.neighbors_converged()) {
+    adapt_balanced_();
+  }
+#endif 
   performance_stop_(perf_adapt_update);
   performance_start_(perf_adapt_update_sync);
 }

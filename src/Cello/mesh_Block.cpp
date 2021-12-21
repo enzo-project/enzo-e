@@ -72,7 +72,7 @@ Block::Block ( MsgRefine * msg )
     child_face_level_next_(),
     count_coarsen_(0),
     adapt_step_(0),
-    adapt_balanced_(false),
+    adapt_ready_(false),
     coarsened_(false),
     is_leaf_(true),
     age_(0),
@@ -190,7 +190,7 @@ void Block::init_refine_
   time_ = time;
   dt_ = dt;
   adapt_step_ = num_adapt_steps;
-  adapt_balanced_ = false;
+  adapt_ready_ = false;
 
 #ifdef TRACE_BLOCK
   CkPrintf ("TRACE_BLOCK %s init_refine_ face_level %p\n",name().c_str(),
@@ -373,7 +373,7 @@ void Block::pup(PUP::er &p)
   p | child_face_level_next_;
   p | count_coarsen_;
   p | adapt_step_;
-  p | adapt_balanced_;
+  p | adapt_ready_;
   p | coarsened_;
   p | is_leaf_;
   p | age_;
@@ -477,7 +477,7 @@ void Block::print () const
   CkPrintf ("child_face_level_next_.size() = %lu\n",child_face_level_next_.size());
   CkPrintf ("count_coarsen_ = %d\n",count_coarsen_);
   CkPrintf ("adapt_step_ = %d\n",adapt_step_);
-  CkPrintf ("adapt_balanced_ = %s\n",adapt_balanced_?"true":"false");
+  CkPrintf ("adapt_ready_ = %s\n",adapt_ready_?"true":"false");
   CkPrintf ("coarsened_ = %d\n",coarsened_);
   CkPrintf ("is_leaf_ = %d\n",is_leaf_);
   CkPrintf ("age_ = %d\n",age_);
@@ -692,7 +692,7 @@ Block::Block ()
     child_face_level_next_(),
     count_coarsen_(0),
     adapt_step_(0),
-    adapt_balanced_(false),
+    adapt_ready_(false),
     coarsened_(false),
     is_leaf_(true),
     age_(0),
@@ -731,7 +731,7 @@ Block::Block (CkMigrateMessage *m)
     child_face_level_next_(),
     count_coarsen_(0),
     adapt_step_(0),
-    adapt_balanced_(false),
+    adapt_ready_(false),
     coarsened_(false),
     is_leaf_(true),
     age_(0),
@@ -1149,7 +1149,7 @@ void Block::copy_(const Block & block) throw()
   dt_         = block.dt_;
   stop_       = block.stop_;
   adapt_step_ = block.adapt_step_;
-  adapt_balanced_ = block.adapt_balanced_;
+  adapt_ready_ = block.adapt_ready_;
   coarsened_  = block.coarsened_;
 }
 

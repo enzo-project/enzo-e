@@ -19,6 +19,9 @@ module mesh {
   initnode void mutex_init_field_face();
 
   readonly int MsgCoarsen::counter[CONFIG_NODE_SIZE];
+#ifdef NEW_ADAPT
+  readonly int MsgAdapt::counter[CONFIG_NODE_SIZE];
+#endif
   readonly int MsgInitial::counter[CONFIG_NODE_SIZE];
   readonly int MsgOutput::counter[CONFIG_NODE_SIZE];
   readonly int MsgRefine::counter[CONFIG_NODE_SIZE];
@@ -82,7 +85,9 @@ module mesh {
   message FieldMsg {
     char a[];
   };
-
+#ifdef NEW_ADAPT
+  message MsgAdapt;
+#endif 
   message MsgCoarsen;
   message MsgInitial;
   message MsgOutput;
@@ -181,9 +186,14 @@ module mesh {
     entry void p_adapt_called();
     entry void p_adapt_exit();
     entry void p_adapt_delete();
+#ifdef OLD_ADAPT
     entry void p_adapt_recv_level
       (int adapt_step,Index index, int ic3[3], int if3[3], int level_now,
        int level_min,int level_max,bool can_coarsen);
+#endif
+#ifdef NEW_ADAPT
+    entry void p_adapt_recv_level (MsgAdapt *);
+#endif
     entry void p_adapt_recv_child (MsgCoarsen * msg);
 
     //--------------------------------------------------
