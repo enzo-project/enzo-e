@@ -154,18 +154,22 @@ sources_test =        [Glob('test_Unit*cpp')]
 env.CharmBuilder(['main_enzo.decl.h','main_enzo.def.h'],
 	'main_enzo.ci',ARG = 'main_enzo')
 env.CppBuilder('main_enzo.ci','main_enzo.CI',ARG = 'main_enzo')
+Depends('main_enzo.ci','main_include.h')
 
 env.CharmBuilder(['main.decl.h','main.def.h'],
 	'main.ci',ARG = 'main')
 env.CppBuilder('main.ci','main.CI',ARG = 'main')
+Depends('main.ci','main_include.h')
 
 env.CharmBuilder (['main_simulation.decl.h','main_simulation.def.h'],
         'main_simulation.ci', ARG = 'main_simulation')
 env.CppBuilder('main_simulation.ci','main_simulation.CI',ARG = 'main_simulation')
+Depends('main_simulation.ci','main_include.h')
 
 env.CharmBuilder(['main_mesh.decl.h','main_mesh.def.h'],
 	'main_mesh.ci',ARG = 'main_mesh')
 env.CppBuilder('main_mesh.ci','main_mesh.CI',ARG = 'main_mesh')
+Depends('main_mesh.ci','main_include.h')
 
 env.CharmBuilder(['mesh.decl.h','mesh.def.h'],
 	'mesh.ci',ARG = 'mesh')
