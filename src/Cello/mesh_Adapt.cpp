@@ -141,8 +141,8 @@ void Adapt::refine_neighbor (Index index, Block * block)
 
 void Adapt::coarsen_neighbor (Index index,Block * block)
 {
-#ifdef TRACE_REFINE
-  CkPrintf ("TRACE_REFINE %s coarsen_neighbor %s\n",
+#ifdef TRACE_COARSEN
+  CkPrintf ("TRACE_COARSEN %s coarsen_neighbor %s\n",
             block->name().c_str(),
             block->name(index).c_str());
 #endif
@@ -220,6 +220,9 @@ void Adapt::refine (const Adapt & adapt_parent, int ic3[3], Block * block)
       }
     }
   }
+  // Delete parent if it is a neighbor (e.g. periodic
+  // b.c. with blocking == 1 along an axis
+  delete_neighbor(index_parent,block);
 #ifdef WRITE_COARSEN
   write("refine",block,WRITE_CYCLE);
 #endif
@@ -230,8 +233,8 @@ void Adapt::refine (const Adapt & adapt_parent, int ic3[3], Block * block)
 
 void Adapt::coarsen (const Adapt & adapt_child, Block * block)
 {
-#ifdef TRACE_REFINE
-  CkPrintf ("TRACE_REFINE %s coarsen child %s\n",
+#ifdef TRACE_COARSEN
+  CkPrintf ("TRACE_COARSEN %s coarsen child %s\n",
             block->name().c_str(),
             block->name(adapt_child.index()).c_str());
 #endif
@@ -404,9 +407,10 @@ bool Adapt::neighbors_converged() const
   const int n = neighbor_list_.size();
   bool converged = true;
   for (int i=0; i<n; i++) {
-    const auto & neighbor = neighbor_list_[i];
+    bool is_self = self_.index_ == neighbor_list_[i].index_;
+    const auto & neighbor = is_self ? self_ : neighbor_list_[i];
     converged = converged && 
-      (neighbor.level_min_ == neighbor.level_max_);
+       (neighbor.level_min_ == neighbor.level_max_);
   }
   return converged;
 }
@@ -467,6 +471,11 @@ void Adapt::print(std::string message, Block * block) const
   for (int i=0; i<face_level_[1].size(); i++) {
     CkPrintf ("%d ", face_level_[1].at(i));
   }
+  CkPrintf ("\n");
+  CkPrintf ("DEBUG_ADAPT periodicity %d %d %d\n",
+            periodicity_[0],
+            periodicity_[1],
+            periodicity_[2]);
   for (int i=0; i<face_level_[2].size(); i++) {
     if (i%27==0) CkPrintf ("\nDEBUG_ADAPT face_level last: ");
     CkPrintf ("%2d ", face_level_[2].at(i));

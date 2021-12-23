@@ -51,13 +51,23 @@ public: // interface
     ic3_[0] = ic3[0];
     ic3_[1] = ic3[1];
     ic3_[2] = ic3[2];
-    of3_[0] = of3[0];
-    of3_[1] = of3[1];
-    of3_[2] = of3[2];
+    ofv_[0].resize(1);
+    ofv_[1].resize(1);
+    ofv_[2].resize(1);
+    ofv_[0][0] = of3[0];
+    ofv_[1][0] = of3[1];
+    ofv_[2][0] = of3[2];
     ++counter[cello::index_static()]; 
   }
 
-  virtual ~MsgAdapt();
+  void add_face(int of3[3])
+  {
+    ofv_[0].push_back(of3[0]);
+    ofv_[1].push_back(of3[1]);
+    ofv_[2].push_back(of3[2]);
+  }
+
+    virtual ~MsgAdapt();
 
   /// Copy constructor
   MsgAdapt(const MsgAdapt & data_msg) throw()
@@ -90,7 +100,7 @@ protected: // attributes
   int adapt_step_;
   Index index_;
   int ic3_[3];
-  int of3_[3];
+  std::vector<int> ofv_[3];
   int level_now_;
   int level_min_;
   int level_max_;

@@ -1122,7 +1122,7 @@ void Block::particle_determine_periodic_update_
   int p3[3];
   //  cello::hierarchy()->get_periodicity(p3);
 //  int p3[3];
-  cello::hierarchy()->get_periodicity(p3,p3+1,p3+2);
+  cello::hierarchy()->periodicity(p3,p3+1,p3+2);
 
   //     ... boundary
   bool b32[3][2];

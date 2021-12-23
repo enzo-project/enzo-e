@@ -29,14 +29,16 @@
 
 #ifdef TRACE_ADAPT
 #   undef TRACE_ADAPT
-#   define TRACE_ADAPT(MSG,BLOCK) \
-  if (BLOCK->cycle() >= DEBUG_CYCLE_START) {                    \
-    CkPrintf ("TRACE_ADAPT %s %s count %d ready %d\n",         \
-              BLOCK->name().c_str(),            \
-              std::string(MSG).c_str(),         \
-              BLOCK->adapt_step_,               \
-              BLOCK->adapt_ready_?1:0 );     \
-    fflush(stdout);                             \
+#   define TRACE_ADAPT(MSG,BLOCK)                                       \
+  if (BLOCK->cycle() >= DEBUG_CYCLE_START) {                            \
+    CkPrintf ("TRACE_ADAPT %s %s step %d ready %d self conv %d neighb conv %d\n", \
+              BLOCK->name().c_str(),                                    \
+              std::string(MSG).c_str(),                                 \
+              BLOCK->adapt_step_,                                       \
+              BLOCK->adapt_ready_?1:0 ,                                 \
+              BLOCK->adapt_.is_converged()?1:0,                         \
+              BLOCK->adapt_.neighbors_converged()?1:0);                 \
+    fflush(stdout);                                                     \
   }
 #else
 #   define TRACE_ADAPT(MSG,BLOCK) /* ... */
@@ -109,7 +111,8 @@ void Block::adapt_called_()
   TRACE_ADAPT("adapt_called_",this);
 #ifdef NEW_ADAPT  
   if (! is_leaf()) {
-    adapt_balanced_();
+    TRACE_ADAPT("adapt_barrier [not leaf]",this);
+    adapt_barrier_();
     return;
   }
 #endif  
@@ -123,14 +126,17 @@ void Block::adapt_called_()
 
 //----------------------------------------------------------------------
 #ifdef NEW_ADAPT
-void Block::adapt_balanced_()
+void Block::adapt_barrier_()
 {
-  TRACE_ADAPT("calling contribute leaf",this);
-  CkCallback callback = CkCallback
-    (CkIndex_Block::r_adapt_next(nullptr), 
-     proxy_array());
-  adapt_ready_ = true;
-  contribute(callback);
+  if (! adapt_balanced_) {
+    adapt_balanced_ = true;
+    TRACE_ADAPT("calling contribute",this);
+    CkCallback callback = CkCallback
+      (CkIndex_Block::r_adapt_next(nullptr), 
+       proxy_array());
+    adapt_ready_ = true;
+    contribute(callback);
+  }
 }
 #endif
 //----------------------------------------------------------------------
@@ -235,6 +241,7 @@ void Block::adapt_end_()
   adapt_step_++;
 #ifdef NEW_ADAPT  
   adapt_ready_ = false;
+  adapt_balanced_ = false;
 #endif  
 
   if (adapt_again) {
@@ -310,6 +317,7 @@ int Block::adapt_compute_desired_level_(int level_maximum)
 
 void Block::adapt_refine_()
 {
+  TRACE_ADAPT("adapt_refine",this);
   Monitor * monitor = cello::monitor();
   if (monitor->is_verbose()) {
     char buffer [80];
@@ -423,6 +431,7 @@ void Block::adapt_refine_()
 
   adapt_.set_valid(false);
   is_leaf_ = false;
+  TRACE_ADAPT("adapt_refine exit",this);
 }
 
 //----------------------------------------------------------------------
@@ -572,8 +581,22 @@ void Block::adapt_send_level()
 
   ItNeighbor it_neighbor = this->it_neighbor(index_);
   int of3[3];
+  std::map<Index,int> index_count;
+  std::map<Index,bool> index_first;
   while (it_neighbor.next(of3)) {
     Index index_neighbor = it_neighbor.index();
+    index_first[index_neighbor] = true;
+    ++index_count[index_neighbor];
+  }
+
+  std::map<Index,MsgAdapt *> msg_map;
+
+  while (it_neighbor.next(of3)) {
+
+    Index index_neighbor = it_neighbor.index();
+
+    // Skip self if own neighbor (e.g. single-block periodic b.c.)
+    if (index_neighbor == index_) continue;
 
     int ic3[3];
     it_neighbor.child(ic3);
@@ -585,17 +608,29 @@ void Block::adapt_send_level()
     // } else {
     //   ic3[0]=ic3[1]=ic3[2]=0;
     // }
+    if (index_first[index_neighbor]) {
 
-    MsgAdapt * msg = new MsgAdapt
-      (adapt_step_,index_,ic3,of3,level,level_min,level_max,can_coarsen);
+      msg_map[index_neighbor] = new MsgAdapt
+        (adapt_step_,index_,ic3,of3,level,level_min,level_max,can_coarsen);
+      index_first[index_neighbor] = false;
+    } else {
+      msg_map[index_neighbor]->add_face(of3);
+    }
 
 #ifdef DEBUG_ADAPT
     CkPrintf ("DEBUG_ADAPT %s : %s send_level of3 %d %d %dic3 %d %d %d\n",
               name().c_str(),name(index_neighbor).c_str(),
               of3[0],of3[1],of3[2],ic3[0],ic3[1],ic3[2]);
 #endif
-    thisProxy[index_neighbor].p_adapt_recv_level (msg);
+    if (--index_count[index_neighbor] == 0) {
+#ifdef DEBUG_ADAPT
+      CkPrintf ("DEBUG_ADAPT %s : %s send_level sending message\n",
+                name().c_str(),name(index_neighbor).c_str());
+#endif
+      thisProxy[index_neighbor].p_adapt_recv_level (msg_map[index_neighbor]);
+    }
   }
+  TRACE_ADAPT("calling adapt_recv_level",this);
   adapt_recv_level();
 #endif
 }
@@ -628,12 +663,25 @@ void Block::p_adapt_recv_level
  bool can_coarsen
  )
 {
+  std::vector<int> ofv[3];
+  ofv[0].clear();
+  ofv[1].clear();
+  ofv[2].clear();
+  ofv[0].push_back(if3[0]);
+  ofv[1].push_back(if3[1]);
+  ofv[2].push_back(if3[2]);
+#ifdef DEBUG_ADAPT
+  CkPrintf ("DEBUG_ADAPT p_adapt_recv_level if3 = %d %d %d\n",
+            if3[0],if3[1],if3[2]);
+  CkPrintf ("DEBUG_ADAPT p_adapt_recv_level ofv = %d %d %d\n",
+            ofv[0][0],ofv[1][0],ofv[2][0]);
+#endif
   adapt_recv_level
     (
      adapt_step,
      index_send,
      ic3,
-     if3,
+     ofv,
      level_face_curr,
      level_face_new,
      level_face_max,
@@ -653,7 +701,7 @@ void Block::p_adapt_recv_level (MsgAdapt * msg)
        msg->adapt_step_,
        msg->index_,
        msg->ic3_,
-       msg->of3_,
+       msg->ofv_,
        msg->level_now_,
        msg->level_min_,
        msg->level_max_,
@@ -666,6 +714,10 @@ void Block::adapt_recv_level()
 {
   // Process any saved messages
   adapt_check_messages_();
+  if (adapt_.neighbors_converged() && adapt_.is_converged()) {
+    TRACE_ADAPT("adapt_barrier [self]",this);
+    adapt_barrier_();
+  }
 }
 
 void Block::adapt_check_messages_()
@@ -673,14 +725,14 @@ void Block::adapt_check_messages_()
   for (int i=0; i<adapt_msg_list_.size(); i++) {
     MsgAdapt * msg = adapt_msg_list_[i];
     adapt_recv_level (
-       msg->adapt_step_,
-       msg->index_,
-       msg->ic3_,
-       msg->of3_,
-       msg->level_now_,
-       msg->level_min_,
-       msg->level_max_,
-       msg->can_coarsen_);
+                      msg->adapt_step_,
+                      msg->index_,
+                      msg->ic3_,
+                      msg->ofv_,
+                      msg->level_now_,
+                      msg->level_min_,
+                      msg->level_max_,
+                      msg->can_coarsen_);
   }
   adapt_msg_list_.clear();
 }
@@ -691,168 +743,171 @@ void Block::adapt_recv_level
  int adapt_step,
  Index index_send,
  int ic3[3],
- int if3[3],
+ std::vector<int> ofv[3],
  int level_face_curr,
  int level_face_new,
  int level_face_max,
  bool can_coarsen
  )
 {
-  //  if (adapt_step != adapt_step_) return;
+  bool changed = false;
+  int level_min;
+  for (int i=0; i<ofv[0].size(); i++) {
 
-  ASSERT4("Block::p_adapt_recv_level()",
-          "Mismatch in %s : %s adapt_recv_level actual %d != expected %d\n",
-          name().c_str(),name(index_send).c_str(),adapt_step,adapt_step_,
-          adapt_step == adapt_step_);
-  TRACE_ADAPT("adapt_recv_level",this);
-  int level_min,level_max;
-  adapt_.update_neighbor (index_send,level_face_new,level_face_max,can_coarsen);
-  const bool changed = adapt_.update_bounds(this);
-  adapt_.get_level_bounds(&level_min,&level_max,&can_coarsen);
+    int if3[3] = {ofv[0][i],ofv[1][i],ofv[2][i]};
+#ifdef DEBUG_ADAPT
+    CkPrintf ("DEBUG_ADAPT adapt_recv_level if3 %d %d %d\n",
+              if3[0],if3[1],if3[2]);
+#endif
+    //  if (adapt_step != adapt_step_) return;
 
-  ASSERT2("p_adapt_recv_level()",
-          "Index level %d and indicated level %d mismatch",
-          index_send.level(),level_face_curr,
-          level_face_curr == index_send.level());
-  performance_start_(perf_adapt_update);
+    ASSERT4("Block::p_adapt_recv_level()",
+            "Mismatch in %s : %s adapt_recv_level actual %d != expected %d\n",
+            name().c_str(),name(index_send).c_str(),adapt_step,adapt_step_,
+            adapt_step == adapt_step_);
+    TRACE_ADAPT("adapt_recv_level",this);
+    int level_max;
+    adapt_.update_neighbor (index_send,level_face_new,level_face_max,can_coarsen);
+    changed = changed || adapt_.update_bounds(this);
+    
+    adapt_.get_level_bounds(&level_min,&level_max,&can_coarsen);
 
-  if (index_send.level() != level_face_curr) {
-    PARALLEL_PRINTF
-      ("%d level mismatch between index_send (%d) and level_face_curr (%d)",
-       __LINE__,index_send.level(), level_face_curr);
-    int nb3[3] = {2,2,2};
-    index_.print("index_",-1,2,nb3,false,cello::simulation());
-    index_send.print("index_",-1,2,nb3,false,cello::simulation());
-  }
+    ASSERT2("p_adapt_recv_level()",
+            "Index level %d and indicated level %d mismatch",
+            index_send.level(),level_face_curr,
+            level_face_curr == index_send.level());
+    performance_start_(perf_adapt_update);
+
+    if (index_send.level() != level_face_curr) {
+      PARALLEL_PRINTF
+        ("%d level mismatch between index_send (%d) and level_face_curr (%d)",
+         __LINE__,index_send.level(), level_face_curr);
+      int nb3[3] = {2,2,2};
+      index_.print("index_",-1,2,nb3,false,cello::simulation());
+      index_send.print("index_",-1,2,nb3,false,cello::simulation());
+    }
 
 #ifdef OLD_ADAPT  
-  // note face_level_last_ initialized as -1, in which case won't skip
-  const bool skip_face_update =
-    (level_face_new <= adapt_.face_level_last(index_send,ic3,if3));
+    // note face_level_last_ initialized as -1, in which case won't skip
+    const bool skip_face_update =
+      (level_face_new <= adapt_.face_level_last(index_send,ic3,if3));
 
-  if (skip_face_update) {
-    performance_stop_(perf_adapt_update);
-    performance_start_(perf_adapt_update_sync);
-    return;
-  }
+    if (skip_face_update) {
+      performance_stop_(perf_adapt_update);
+      performance_start_(perf_adapt_update_sync);
+      return;
+    }
 #endif
-  adapt_.set_face_level_last 
-    (index_send,ic3,if3, level_face_new,level_face_max, can_coarsen);
+    adapt_.set_face_level_last 
+      (index_send,ic3,if3, level_face_new,level_face_max, can_coarsen);
 
-  int level_next = level_next_;
+    int level_next = level_next_;
 
-  const int level = this->level();
+    const int level = this->level();
 
-  const int of3[3] = {-if3[0],-if3[1],-if3[2] };
+    if ( ! is_leaf()) {
 
-  if ( ! is_leaf()) {
-
-    ERROR1 ("Block::p_adapt_recv_level()",
-	    "Block %s is not a leaf",
-	    name().c_str());
-  }
-
-
-  if (level_face_curr == level) {
-
-    adapt_recv(index_send,of3,ic3,level_face_new,0,level_face_max,can_coarsen);
-
-  } else if ( level_face_curr == level + 1 ) {
-
-    adapt_recv(index_send,of3,ic3,level_face_new,+1,level_face_max,can_coarsen);
-
-  } else if ( level_face_curr == level - 1 ) {
-
-    adapt_recv(index_send,of3,ic3,level_face_new,-1,level_face_max,can_coarsen);
-
-  } else  {
-
-    WARNING2 ("Block::notify_neighbor()",
-	      "level %d and face level %d differ by more than 1",
-	      level,level_face_curr);
-  }
-
-  // If this block wants to coarsen, then
-  //
-  //    1. all siblings must be able to coarsen as well, and
-  //
-  //    2. all non-sibling (nephew) must not be going to a level
-  //       finer than the current level (otherwise a level jump will
-  //       occur).
-  //
-  // If either of these cases is true, then change the desired level
-  // to the current level (neither coarsen nor refine) and re-send
-  // desired level to neighbors
-
-  const bool is_coarsening = (level_next < level);
-
-  // The calling block is a sibling if it has the same parent
-
-  bool is_sibling = false;
-
-  if (level > 0 && index_send.level() > 0) {
-    Index parent      = index_.    index_parent();
-    Index send_parent = index_send.index_parent();
-    is_sibling = (parent == send_parent);
-  }
-
-  // The calling block is a nephew if it is a child of a sibling
-
-  bool is_nephew = false;
-
-  if (level > 0 && index_send.level() > 1) {
-    Index parent             = index_    .index_parent();
-    Index send_parent_parent = index_send.index_parent().index_parent();
-    is_nephew = (parent == send_parent_parent);
-  }
-
-  const bool is_finer_neighbor = (level_face_new > level_next);
-
-  // If want to coarsen, then ensure that all siblings want to coarsen too
-
-  if (is_coarsening) {
-
-    // assume we can coarsen
-    bool can_coarsen = true;
-
-    // cannot if neighbor is sibling and not coarsening
-    if (is_sibling && is_finer_neighbor) {
-      can_coarsen = false;
+      ERROR1 ("Block::p_adapt_recv_level()",
+              "Block %s is not a leaf",
+              name().c_str());
     }
 
-    // cannot if nephew not also coarsening
-    //    if (is_nephew && (level_face_new > level)) {
-    if (is_nephew) {
-      can_coarsen = false;
+    const int of3[3] = {-if3[0],-if3[1],-if3[2] };
+
+    ASSERT2("adapt_recv_level()",
+            "level_face_curr %d and level %d differ by more than one",
+            level_face_curr,level,
+            std::abs(level_face_curr - level) <= 1);
+
+    const int level_diff = (level_face_curr - level);
+
+    adapt_recv(index_send,of3,ic3,level_face_new,level_diff,
+               level_face_max,can_coarsen);
+
+    // If this block wants to coarsen, then
+    //
+    //    1. all siblings must be able to coarsen as well, and
+    //
+    //    2. all non-sibling (nephew) must not be going to a level
+    //       finer than the current level (otherwise a level jump will
+    //       occur).
+    //
+    // If either of these cases is true, then change the desired level
+    // to the current level (neither coarsen nor refine) and re-send
+    // desired level to neighbors
+
+    const bool is_coarsening = (level_next < level);
+
+    // The calling block is a sibling if it has the same parent
+
+    bool is_sibling = false;
+
+    if (level > 0 && index_send.level() > 0) {
+      Index parent      = index_.    index_parent();
+      Index send_parent = index_send.index_parent();
+      is_sibling = (parent == send_parent);
     }
 
-    if (! can_coarsen) {
-      level_next = level;
+    // The calling block is a nephew if it is a child of a sibling
+
+    bool is_nephew = false;
+
+    if (level > 0 && index_send.level() > 1) {
+      Index parent             = index_    .index_parent();
+      Index send_parent_parent = index_send.index_parent().index_parent();
+      is_nephew = (parent == send_parent_parent);
     }
-  }
 
-  // restrict new level to within 1 of neighbor
-  level_next = std::max(level_next,level_face_new - 1);
+    const bool is_finer_neighbor = (level_face_new > level_next);
 
-  // notify neighbors if level_next has changed
+    // If want to coarsen, then ensure that all siblings want to coarsen too
+
+    if (is_coarsening) {
+
+      // assume we can coarsen
+      bool can_coarsen = true;
+
+      // cannot if neighbor is sibling and not coarsening
+      if (is_sibling && is_finer_neighbor) {
+        can_coarsen = false;
+      }
+
+      // cannot if nephew not also coarsening
+      //    if (is_nephew && (level_face_new > level)) {
+      if (is_nephew) {
+        can_coarsen = false;
+      }
+
+      if (! can_coarsen) {
+        level_next = level;
+      }
+    }
+
+    // restrict new level to within 1 of neighbor
+    level_next = std::max(level_next,level_face_new - 1);
+
+    // notify neighbors if level_next has changed
 #ifdef OLD_ADAPT
-  if (level_next != level_next_) {
-    ASSERT2 ("Block::p_adapt_recv_level()",
-	     "level_next %d level_next_ %d\n", level_next,level_next_,
-	     level_next > level_next_);
-    level_next_ = level_next;
+    if (level_next != level_next_) {
+      ASSERT2 ("Block::p_adapt_recv_level()",
+               "level_next %d level_next_ %d\n", level_next,level_next_,
+               level_next > level_next_);
+      level_next_ = level_next;
+      adapt_send_level();
+    }
 #endif
+  }
 #ifdef NEW_ADAPT
   if (changed) {
     level_next_ = level_min;
-#endif
     adapt_send_level();
   }
-#ifdef NEW_ADAPT
-  if (adapt_.neighbors_converged()) {
-    adapt_balanced_();
+  TRACE_ADAPT("testing convergence",this);
+  if (adapt_.neighbors_converged() && adapt_.is_converged()) {
+    TRACE_ADAPT("adapt_barrier [recv_level]",this);
+    adapt_barrier_();
   }
-#endif 
+#endif
   performance_stop_(perf_adapt_update);
   performance_start_(perf_adapt_update_sync);
 }
@@ -861,7 +916,8 @@ void Block::adapt_recv_level
 
 void Block::adapt_recv
 ( Index index_send,
-  const int of3[3], const int ic3[3], int level_face_new, int level_relative,
+  const int of3[3],
+  const int ic3[3], int level_face_new, int level_relative,
   int level_max, bool can_coarsen)
 {
 
@@ -888,20 +944,20 @@ void Block::adapt_recv
       ItFace it_face = this->it_face(min_face_rank,index_child,jc3,of3);
 
       if (level_relative == 0) {
-	while (it_face.next(kf3)) {
-	  set_child_face_level_next(jc3,kf3,level_face_new);
-	}
+        while (it_face.next(kf3)) {
+          set_child_face_level_next(jc3,kf3,level_face_new);
+        }
       } else if (level_relative == +1) {
-	while (it_face.next(kf3)) {
+        while (it_face.next(kf3)) {
 
-	  Index in = neighbor_(kf3,&index_child);
+          Index in = neighbor_(kf3,&index_child);
 
-	  Index index_neighbor = neighbor_(of3).index_child(ic3);
+          Index index_neighbor = neighbor_(of3).index_child(ic3);
 
-	  if (in == index_neighbor) {
-	    set_child_face_level_next(jc3,kf3,level_face_new);
-	  }
-	}
+          if (in == index_neighbor) {
+            set_child_face_level_next(jc3,kf3,level_face_new);
+          }
+        }
       }
     }
 
@@ -925,13 +981,13 @@ void Block::adapt_recv
       int jc3[3];
       while (it_child.next(jc3)) {
 
-	Index index_child = index_.index_child(jc3);
-	ItFace it_face_child = this->it_face(min_face_rank,index_child,jc3,jf3);
+        Index index_child = index_.index_child(jc3);
+        ItFace it_face_child = this->it_face(min_face_rank,index_child,jc3,jf3);
 
-	int kf3[3];
-	while (it_face_child.next(kf3)) {
-	  set_child_face_level_next(jc3,kf3,level_face_new);
-	}
+        int kf3[3];
+        while (it_face_child.next(kf3)) {
+          set_child_face_level_next(jc3,kf3,level_face_new);
+        }
       }
     }
   }
@@ -1000,6 +1056,7 @@ void Block::adapt_coarsen_()
 
 void Block::p_adapt_recv_child (MsgCoarsen * msg)
 {
+  TRACE_ADAPT("p_adapt_recv_child",this);
 
   performance_start_(perf_adapt_update);
   msg->update(data());

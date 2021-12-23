@@ -477,7 +477,7 @@ public:
   (int adapt_step,
    Index index_debug,
    int ic3[3],
-   int if3[3],
+   std::vector<int> if3[3],
    int level_now, int level_new,
    int level_max, bool can_coarsen);
   
@@ -495,7 +495,7 @@ protected:
   void adapt_begin_ ();
   void adapt_next_ ();
 #ifdef NEW_ADAPT
-  void adapt_balanced_();
+  void adapt_barrier_();
 #endif  
   void adapt_end_ ();
   void adapt_update_();
@@ -960,8 +960,11 @@ protected: // attributes
   /// prevent multiple calls per step.
   bool adapt_ready_;
 
-#ifdef NEW_ADAPT  
-  /// Buffer for incoming MsgAdapt objects 
+  /// Whether block has reached level consensus for the balancing step
+  bool adapt_balanced_;
+
+#ifdef NEW_ADAPT
+  /// Buffer for incoming MsgAdapt objects
   std::vector < MsgAdapt * > adapt_msg_list_;
 #endif
   /// whether Block has been coarsened and should be deleted

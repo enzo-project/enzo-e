@@ -172,7 +172,7 @@ public: // interface
 
   inline bool is_valid () const
   { return valid_; }
-  
+
   inline void set_periodicity (const int periodicity[3])
   {
     periodicity_[0] = periodicity[0];

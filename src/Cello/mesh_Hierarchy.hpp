@@ -101,7 +101,7 @@ public: // interface
   }
 
   /// Return the periodicity of the boundary conditions for domain axes
-  void get_periodicity (int * px, int * py=0, int * pz=0)
+  void periodicity (int * px, int * py=0, int * pz=0)
   {
     if (px) (*px) = periodicity_[0];
     if (py) (*py) = periodicity_[1];

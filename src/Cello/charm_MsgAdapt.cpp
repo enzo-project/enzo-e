@@ -36,7 +36,9 @@ void * MsgAdapt::pack (MsgAdapt * msg)
   SIZE_SCALAR_TYPE(size,int,   msg->adapt_step_);
   SIZE_SCALAR_TYPE(size,Index, msg->index_);
   SIZE_ARRAY_TYPE (size,int,   msg->ic3_,3);
-  SIZE_ARRAY_TYPE (size,int,   msg->of3_,3);
+  SIZE_VECTOR_TYPE(size,int,   msg->ofv_[0]);
+  SIZE_VECTOR_TYPE(size,int,   msg->ofv_[1]);
+  SIZE_VECTOR_TYPE(size,int,   msg->ofv_[2]);
   SIZE_SCALAR_TYPE(size,int,   msg->level_now_);
   SIZE_SCALAR_TYPE(size,int,   msg->level_min_);
   SIZE_SCALAR_TYPE(size,int,   msg->level_max_);
@@ -63,7 +65,9 @@ void * MsgAdapt::pack (MsgAdapt * msg)
   SAVE_SCALAR_TYPE(pc,int,   msg->adapt_step_);
   SAVE_SCALAR_TYPE(pc,Index, msg->index_);
   SAVE_ARRAY_TYPE (pc,int,   msg->ic3_,3);
-  SAVE_ARRAY_TYPE (pc,int,   msg->of3_,3);
+  SAVE_VECTOR_TYPE(pc,int,   msg->ofv_[0]);
+  SAVE_VECTOR_TYPE(pc,int,   msg->ofv_[1]);
+  SAVE_VECTOR_TYPE(pc,int,   msg->ofv_[2]);
   SAVE_SCALAR_TYPE(pc,int,   msg->level_now_);
   SAVE_SCALAR_TYPE(pc,int,   msg->level_min_);
   SAVE_SCALAR_TYPE(pc,int,   msg->level_max_);
@@ -107,7 +111,9 @@ MsgAdapt * MsgAdapt::unpack(void * buffer)
   LOAD_SCALAR_TYPE(pc,int,   msg->adapt_step_);
   LOAD_SCALAR_TYPE(pc,Index, msg->index_);
   LOAD_ARRAY_TYPE (pc,int,   msg->ic3_,3);
-  LOAD_ARRAY_TYPE (pc,int,   msg->of3_,3);
+  LOAD_VECTOR_TYPE(pc,int,   msg->ofv_[0]);
+  LOAD_VECTOR_TYPE(pc,int,   msg->ofv_[1]);
+  LOAD_VECTOR_TYPE(pc,int,   msg->ofv_[2]);
   LOAD_SCALAR_TYPE(pc,int,   msg->level_now_);
   LOAD_SCALAR_TYPE(pc,int,   msg->level_min_);
   LOAD_SCALAR_TYPE(pc,int,   msg->level_max_);

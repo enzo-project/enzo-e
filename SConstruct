@@ -8,7 +8,7 @@ import socket
 # USER CONFIGURATION
 #======================================================================
 
-new_adapt = 0
+new_adapt = 1
 
 #----------------------------------------------------------------------
 # Whether to bypass passing MsgRefine directly to Block constructor

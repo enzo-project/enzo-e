@@ -73,6 +73,7 @@ Block::Block ( MsgRefine * msg )
     count_coarsen_(0),
     adapt_step_(0),
     adapt_ready_(false),
+    adapt_balanced_(false),
     coarsened_(false),
     is_leaf_(true),
     age_(0),
@@ -191,6 +192,7 @@ void Block::init_refine_
   dt_ = dt;
   adapt_step_ = num_adapt_steps;
   adapt_ready_ = false;
+  adapt_balanced_ = false;
 
 #ifdef TRACE_BLOCK
   CkPrintf ("TRACE_BLOCK %s init_refine_ face_level %p\n",name().c_str(),
@@ -374,6 +376,7 @@ void Block::pup(PUP::er &p)
   p | count_coarsen_;
   p | adapt_step_;
   p | adapt_ready_;
+  p | adapt_balanced_;
   p | coarsened_;
   p | is_leaf_;
   p | age_;
@@ -404,7 +407,7 @@ ItFace Block::it_face
   int n3[3];
   int p3[3];
   size_array(n3,n3+1,n3+2);
-  cello::hierarchy()->get_periodicity(p3,p3+1,p3+2);
+  cello::hierarchy()->periodicity(p3,p3+1,p3+2);
   return ItFace (rank,min_face_rank,p3,n3,index,ic3,if3);
 }
 
@@ -424,7 +427,7 @@ ItNeighbor Block::it_neighbor (Index index,
   int n3[3];
   size_array(&n3[0],&n3[1],&n3[2]);
   int p3[3];
-  cello::hierarchy()->get_periodicity(p3,p3+1,p3+2);
+  cello::hierarchy()->periodicity(p3,p3+1,p3+2);
   return ItNeighbor
     (this,min_face_rank,p3,n3,index,
      neighbor_type,min_level,coarse_level);
@@ -478,6 +481,7 @@ void Block::print () const
   CkPrintf ("count_coarsen_ = %d\n",count_coarsen_);
   CkPrintf ("adapt_step_ = %d\n",adapt_step_);
   CkPrintf ("adapt_ready_ = %s\n",adapt_ready_?"true":"false");
+  CkPrintf ("adapt_balanced_ = %s\n",adapt_balanced_?"true":"false");
   CkPrintf ("coarsened_ = %d\n",coarsened_);
   CkPrintf ("is_leaf_ = %d\n",is_leaf_);
   CkPrintf ("age_ = %d\n",age_);
@@ -693,6 +697,7 @@ Block::Block ()
     count_coarsen_(0),
     adapt_step_(0),
     adapt_ready_(false),
+    adapt_balanced_(false),
     coarsened_(false),
     is_leaf_(true),
     age_(0),
@@ -732,6 +737,7 @@ Block::Block (CkMigrateMessage *m)
     count_coarsen_(0),
     adapt_step_(0),
     adapt_ready_(false),
+    adapt_balanced_(false),
     coarsened_(false),
     is_leaf_(true),
     age_(0),
@@ -760,8 +766,10 @@ void Block::init_adapt_(Adapt * adapt_parent)
 
   
   const int rank = cello::rank();
-  int p3[3];
-  cello::hierarchy()->get_periodicity(p3,p3+1,p3+2);
+  int p3[3],b3[3];
+  cello::hierarchy()->periodicity(p3,p3+1,p3+2);
+  cello::hierarchy()->root_blocks(b3,b3+1,b3+2);
+  
   adapt_.set_rank(rank);
   adapt_.set_min_level(cello::config()->mesh_min_level);
   adapt_.set_max_level(cello::config()->mesh_max_level);
@@ -779,21 +787,34 @@ void Block::init_adapt_(Adapt * adapt_parent)
   if ( (level <= 0) && initial_cycle ) {
     // If root-level (or below) block in first simulation cycle,
     // initialize neighbors to be all adjacent root-level blocks
-    const int ifmx = -1;
-    const int ifpx = +1;
-    const int ifmy = (rank >= 2) ? -1 : 0;
-    const int ifpy = (rank >= 2) ? +1 : 0;
-    const int ifmz = (rank >= 3) ? -1 : 0;
-    const int ifpz = (rank >= 3) ? +1 : 0;
-    int na3[3];
-    cello::hierarchy()->root_blocks(na3,na3+1,na3+2);
+    int nb3[3],np3[3],ib3[3];
+    cello::hierarchy()->root_blocks(nb3,nb3+1,nb3+2);
+    cello::hierarchy()->periodicity(np3,np3+1,np3+2);
+    index_.array(ib3,ib3+1,ib3+2);
+    // Initialize face index loop limits
+    int ifm3[3],ifp3[3];
+    for (int i=0; i<3; i++) {
+      if (i < rank) {
+        if (np3[i]) {
+          // If periodic then block always has neighbor
+          ifm3[i] = -1;
+          ifp3[i] = +1;
+        } else {
+          // If not periodic then no block neighbor at domain ends
+          ifm3[i] = (ib3[i] - 1 >= 0)     ? -1 : 0;
+          ifp3[i] = (ib3[i] + 1 < nb3[i]) ? +1 : 0;
+        }
+      } else {
+        // limits 0 for unused dimensions
+        ifm3[i] = ifp3[i] = 0;
+      }
+    }
     int if3[3];
-    int k=0;
-    for (if3[2]=ifmz; if3[2]<=ifpz; ++if3[2]) {
-      for (if3[1]=ifmy; if3[1]<=ifpy; ++if3[1]) {
-        for (if3[0]=ifmx; if3[0]<=ifpx; ++if3[0]) {
+    for (if3[2]=ifm3[2]; if3[2]<=ifp3[2]; ++if3[2]) {
+      for (if3[1]=ifm3[1]; if3[1]<=ifp3[1]; ++if3[1]) {
+        for (if3[0]=ifm3[0]; if3[0]<=ifp3[0]; ++if3[0]) {
           if (if3[0] || if3[1] || if3[2]) {
-            Index index_neighbor = index_.index_neighbor(if3,na3);
+            Index index_neighbor = index_.index_neighbor(if3,nb3);
             adapt_.insert_neighbor(index_neighbor,this);
           }
         }
@@ -1150,6 +1171,7 @@ void Block::copy_(const Block & block) throw()
   stop_       = block.stop_;
   adapt_step_ = block.adapt_step_;
   adapt_ready_ = block.adapt_ready_;
+  adapt_balanced_ = block.adapt_balanced_;
   coarsened_  = block.coarsened_;
 }
 
