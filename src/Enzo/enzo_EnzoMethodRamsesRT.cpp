@@ -740,19 +740,90 @@ double EnzoMethodRamsesRT::sigma_vernier (double energy, int type) throw()
 
 //---------------------------------
 
-void EnzoMethodRamsesRT::get_photoionization_rates (EnzoBlock * enzo_block) throw() 
+void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo_block, double clight) throw() 
 {
-  // first half of eq. A21 
+  // Calculates photoionization and heating rates in each cell according to RAMSES-RT prescription
+  // TODO: Make ionization rates fields and enforce that they exist
+
+  const EnzoConfig * enzo_config = enzo::config();
+
+  Field field = enzo_block->data()->field();
+  Scalar<double> scalar = enzo_block->data()->scalar_double(); 
+
+  int mx,my,mz;  
+  field.dimensions(0,&mx, &my, &mz); //field dimensions, including ghost zones
+  int gx,gy,gz;
+  field.ghost_depth(0,&gx, &gy, &gz);
+   
+  double xm,ym,zm;
+  double xp,yp,zp;
+  enzo_block->lower(&xm,&ym,&zm);
+  enzo_block->upper(&xp,&yp,&zp);
+
+  enzo_float * e_density     = (enzo_float *) field.values("e_density");
+  enzo_float * HI_density    = (enzo_float *) field.values("HI_density");
+  enzo_float * HeI_density   = (enzo_float *) field.values("HeI_density");
+  enzo_float * HeII_density  = (enzo_float *) field.values("HeII_density");
+  enzo_float * temperature   = (enzo_float *) field.values("temperature");
+  
+  enzo_float * RT_HI_ionization_rate   = (enzo_float *) field.values("RT_HI_ionization_rate");
+  enzo_float * RT_HeI_ionization_rate  = (enzo_float *) field.values("RT_HeI_ionization_rate");
+  enzo_float * RT_HeII_ionization_rate = (enzo_float *) field.values("RT_HeII_ionization_rate");
+
+  enzo_float * RT_heating_rate = (enzo_float *) field.values("RT_heating_rate");
+
+  std::vector<enzo_float*> chemistry_fields = {HI_density, HeI_density, HeII_density};
+
+  std::vector<enzo_float*> ionization_rate_fields = {RT_HI_ionization_rate, 
+                               RT_HeI_ionization_rate, RT_HeII_ionization_rate};
+
+  std::vector<double> Eion = {13.6, 24.59, 54.42};
+
+  std::vector<enzo_float*> photon_densities = {};
+  for (int igroup=0; igroup<enzo_config->method_ramses_rt_N_groups; igroup++) { 
+    photon_densities.push_back( (enzo_float *) field.values("photon_density_" + std::to_string(igroup))) ;
+  }
+
+  // loop through cells
+  for (int iz=gz; iz<mz-gz; iz++) {
+    for (int iy=gy; iy<my-gy; iy++) {
+      for (int ix=gx; ix<mx-gx; ix++) {
+        int i = INDEX(ix,iy,iz,mx,my); //index of current cell
+        
+        double heating_rate = 0.0; 
+        for (int j=0; j<3; j++) { //loop over species
+          double beta = get_beta(temperature[i], j); 
+          double ionization_rate = beta * e_density[i];
+          for (int igroup=0; igroup<enzo_config->method_ramses_rt_N_groups; igroup++) { //loop over groups
+
+            std::string igroup_s = std::to_string(igroup);
+            std::string j_s = std::to_string(j);
+
+            double sigmaN = *(scalar.value( scalar.index("sigN_" + igroup_s + j_s ))); 
+
+            double sigmaE = *(scalar.value( scalar.index("sigE_" + igroup_s + j_s ))); 
+
+            double eps    = *(scalar.value( scalar.index("eps_" + igroup_s ))); 
+ 
+            double N_i = (photon_densities[igroup])[i];
+            ionization_rate += sigmaN*clight*N_i; 
+            
+            heating_rate += clight*N_i*(eps*sigmaE - Eion[j]*sigmaN); // Equation A16           
+          }
+          heating_rate *= (chemistry_fields[j])[i]; // multiply by species density
+
+          (ionization_rate_fields[j])[i] = ionization_rate; //update fields with new value
+        }
+        RT_heating_rate[i] = heating_rate;
+      }
+    }
+  } 
+
+ 
 }
 
 //---------------------------------
 
-void EnzoMethodRamsesRT::get_photoheating_rate (EnzoBlock * enzo_block) throw()
-{
-  // equation A16
-}
-
-//---------------------------------
 double EnzoMethodRamsesRT::get_beta (double T, int species) throw()
 {
   // Return collisional ionization rate coefficients according to appendix E1
@@ -1161,12 +1232,17 @@ void EnzoMethodRamsesRT::call_solve_transport_eqn(EnzoBlock * enzo_block) throw(
   for (int i=0; i<enzo_config->method_ramses_rt_N_groups;i++) {
     this->solve_transport_eqn(enzo_block);
 
-    //TODO: Calculate photoheating/ionization rates here
-    //      Involves sum over groups, accumulate sum in this loop
     enzo_block->method_ramses_rt_igroup += 1;
   }
   // update chemistry fields to account for recombinations
-  recombination_chemistry(enzo_block); 
+  recombination_chemistry(enzo_block);
+
+  // Calculate photoheating and photoionization rate
+  
+  //TODO: Make reduced clight parameter hang off of EnzoBlock class so 
+  //that we don't have to make it a parameter for every function and 
+  //can access it without it being erased after refresh
+  get_photoionization_and_heating_rates(enzo_block, cello::clight);
 }
 
 void EnzoBlock::p_method_ramses_rt_solve_transport_eqn()

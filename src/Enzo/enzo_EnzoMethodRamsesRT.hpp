@@ -128,9 +128,7 @@ protected: // methods
 
   double sigma_vernier (double energy, int type) throw();
 
-  void get_photoionization_rates (EnzoBlock * enzo_block) throw();
-
-  void get_photoheating_rate (EnzoBlock * enzo_block) throw();
+  void get_photoionization_and_heating_rates (EnzoBlock * enzo_block, double clight) throw();
 
   void compute_ (Block * block) throw();
 
