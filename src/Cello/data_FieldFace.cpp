@@ -10,7 +10,6 @@
 
 #define FORTRAN_STORE
 // #define DEBUG_NEW_BOX
-
 // #define TRACE_FIELD_FACE
 // #define TRACE_PROLONG
 //======================================================================
@@ -251,15 +250,16 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
 
     int m3[3],g3[3],c3[3];
 
-    field.dimensions(index_field,&m3[0],&m3[1],&m3[2]);
-    field.ghost_depth(index_field,&g3[0],&g3[1],&g3[2]);
-    field.centering(index_field,&c3[0],&c3[1],&c3[2]);
+    field.dimensions (index_field,m3,m3+1,m3+2);
+    field.ghost_depth(index_field,g3,g3+1,g3+2);
+    field.centering  (index_field,c3,c3+1,c3+2);
 
     const bool accumulate = refresh_->accumulate(i_f);
 
     int i3[3], n3[3];
     field.size(n3,n3+1,n3+2);
     Box box(rank_,n3,g3);
+    box.set_centering(c3);
     set_box_(&box);
 
     box_adjust_accumulate_(&box,accumulate,g3);
@@ -275,7 +275,7 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
       CkPrintf ("DEBUG_NEW_BOX face_to_array() %d %d %d\n",i3[0],i3[1],i3[2]);
       CkPrintf ("DEBUG_NEW_BOX face_to_array() %d %d %d\n",n3[0],n3[1],n3[2]);
     }
-#endif    
+#endif
 
     // scale by density if needed to convert to conservative form
     mul_by_density_(field,index_field,i3,n3,m3);
@@ -342,9 +342,9 @@ void FieldFace::array_to_face (char * array, Field field) throw()
 
     int m3[3],g3[3],c3[3];
 
-    field.dimensions(index_field,&m3[0],&m3[1],&m3[2]);
-    field.ghost_depth(index_field,&g3[0],&g3[1],&g3[2]);
-    field.centering(index_field,&c3[0],&c3[1],&c3[2]);
+    field.dimensions (index_field,m3,m3+1,m3+2);
+    field.ghost_depth(index_field,g3,g3+1,g3+2);
+    field.centering  (index_field,c3,c3+1,c3+2);
 
     const bool accumulate = refresh_->accumulate(i_f);
 
@@ -356,6 +356,7 @@ void FieldFace::array_to_face (char * array, Field field) throw()
     field.size(n3,n3+1,n3+2);
     Box box (rank_,n3,g3);
     set_box_(&box);
+    box.set_centering(c3);
     invert_face();
 
     box_adjust_accumulate_(&box,accumulate,g3);
@@ -463,6 +464,7 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
 
     Box box (rank_,n3,g3);
     set_box_(&box);
+    box.set_centering(c3);
 
     box_adjust_accumulate_(&box,accumulate,g3);
 
@@ -579,21 +581,23 @@ int FieldFace::num_bytes_array(Field field) throw()
     precision_type precision = field.precision(index_field);
     int bytes_per_element = cello::sizeof_precision (precision);
 
-    int m3[3],g3[3],c3[3];
+    int m3[3],n3[3],g3[3],c3[3];
 
-    field.dimensions (index_field,&m3[0],&m3[1],&m3[2]);
-    field.ghost_depth(index_field,&g3[0],&g3[1],&g3[2]);
-    field.centering(index_field,&c3[0],&c3[1],&c3[2]);
+    field.dimensions (index_field,m3,m3+1,m3+2);
+    field.size                   (n3,n3+1,n3+2);
+    field.ghost_depth(index_field,g3,g3+1,g3+2);
+    field.centering  (index_field,c3,c3+1,c3+2);
 
     const bool accumulate = refresh_->accumulate(i_f);
 
-    int i3[3], n3[3];
-    field.size(n3,n3+1,n3+2);
     Box box (rank_,n3,g3);
     set_box_(&box);
+    box.set_centering(c3);
+
+    box_adjust_accumulate_(&box,accumulate,g3);
 
     bool lpad;
-    box_adjust_accumulate_(&box,accumulate,g3);
+    int i3[3];
     TRACE_ONCE;
     box.get_start_size(i3,n3,BlockType::send,BlockType::send,lpad=true);
     
