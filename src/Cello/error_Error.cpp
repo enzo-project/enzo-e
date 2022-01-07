@@ -69,7 +69,7 @@ extern void cello::message
 
 //----------------------------------------------------------------------
 
-void cello::error()
+[[ noreturn ]] void cello::error()
 {
   const int buffer_size = 64;
 
