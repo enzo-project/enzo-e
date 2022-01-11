@@ -273,6 +273,9 @@ public: // interface
       initial_IG_recent_SF_bin_size(5.0),
       initial_IG_recent_SF_SFR(2.0),
       initial_IG_recent_SF_seed(12345),
+      // EnzoInitialMergeStarsTest
+      initial_merge_stars_test_mass_1(0.0),
+      initial_merge_stars_test_mass_2(0.0),
       // EnzoProlong
       interpolation_method(""),
       // EnzoMethodCheckGravity
@@ -388,6 +391,10 @@ public: // interface
       method_background_acceleration_angular_momentum[axis] = 0;
 
       initial_feedback_test_position[axis] = 0.5;
+      initial_merge_stars_test_pos_1[axis] = 0.0;
+      initial_merge_stars_test_pos_2[axis] = 0.0;
+      initial_merge_stars_test_vel_1[axis] = 0.0;
+      initial_merge_stars_test_vel_2[axis] = 0.0;
     }
     method_background_acceleration_angular_momentum[2] = 1;
   }
@@ -605,6 +612,14 @@ public: // attributes
   double                     initial_IG_recent_SF_bin_size;
   double                     initial_IG_recent_SF_SFR;
   int                        initial_IG_recent_SF_seed;
+
+  // EnzoInitialMergeStarsTest
+  double                     initial_merge_stars_test_pos_1[3];
+  double                     initial_merge_stars_test_pos_2[3];
+  double                     initial_merge_stars_test_vel_1[3];
+  double                     initial_merge_stars_test_vel_2[3];
+  double                     initial_merge_stars_test_mass_1;
+  double                     initial_merge_stars_test_mass_2;
 
   /// EnzoProlong
   std::string                interpolation_method;

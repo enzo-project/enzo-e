@@ -178,6 +178,9 @@ EnzoConfig::EnzoConfig() throw ()
   initial_IG_recent_SF_bin_size(5.0),
   initial_IG_recent_SF_SFR(2.0),
   initial_IG_recent_SF_seed(12345),
+  // EnzoInitialMergeStarsTest
+  initial_merge_stars_test_mass_1(0.0),
+  initial_merge_stars_test_mass_2(0.0),
   // EnzoProlong
   interpolation_method(""),
   // EnzoMethodCheckGravity
@@ -291,6 +294,10 @@ EnzoConfig::EnzoConfig() throw ()
     method_background_acceleration_angular_momentum[i] = 0;
 
     initial_feedback_test_position[i] = 0.5;
+    initial_merge_stars_test_pos_1[i] = 0.0;
+    initial_merge_stars_test_pos_2[i] = 0.0;
+    initial_merge_stars_test_vel_1[i] = 0.0;
+    initial_merge_stars_test_vel_2[i] = 0.0;
   }
 
   method_background_acceleration_angular_momentum[2] = 1;
@@ -501,6 +508,13 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_soup_pressure_in;
   p | initial_soup_pressure_out;
   p | initial_soup_density;
+
+  PUParray(p,initial_merge_stars_test_pos_1,3);
+  PUParray(p,initial_merge_stars_test_pos_2,3);
+  PUParray(p,initial_merge_stars_test_vel_1,3);
+  PUParray(p,initial_merge_stars_test_vel_2,3);
+  p | initial_merge_stars_test_mass_1;
+  p | initial_merge_stars_test_mass_2;
 
   p | interpolation_method;
 
@@ -1062,6 +1076,23 @@ void EnzoConfig::read(Parameters * p) throw()
   initial_feedback_test_metal_fraction = p->value_float
     ("Initial:feedback_test:metal_fraction", 0.01);
 
+  for (int axis = 0; axis<3; axis++){
+    initial_merge_stars_test_pos_1[axis] = p->list_value_float
+      (axis, "Initial:merge_stars_test:pos_1",0.0);
+    initial_merge_stars_test_pos_2[axis] = p->list_value_float
+      (axis, "Initial:merge_stars_test:pos_2",0.0);
+    initial_merge_stars_test_vel_1[axis] = p->list_value_float
+      (axis, "Initial:merge_stars_test:vel_1",0.0);
+    initial_merge_stars_test_vel_2[axis] = p->list_value_float
+      (axis, "Initial:merge_stars_test:vel_2",0.0);
+  }
+
+  initial_merge_stars_test_mass_1 = p->value_float
+    ("Initial:merge_stars_test:mass_1",0.0);
+
+  initial_merge_stars_test_mass_2 = p->value_float
+    ("Initial:merge_stars_test:mass_2",0.0);
+  
   method_check_gravity_particle_type = p->value_string
     ("Method:check_gravity:particle_type","dark");
 

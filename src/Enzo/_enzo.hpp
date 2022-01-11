@@ -201,6 +201,7 @@ extern "C" {
 #include "enzo_EnzoInitialTurbulence.hpp"
 #include "enzo_EnzoInitialIsolatedGalaxy.hpp"
 #include "enzo_EnzoInitialBurkertBodenheimer.hpp"
+#include "enzo_EnzoInitialMergeStarsTest.hpp"
 
 #include "enzo_EnzoRefineShock.hpp"
 #include "enzo_EnzoRefineParticleMass.hpp"

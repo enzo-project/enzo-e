@@ -65,6 +65,7 @@ module enzo {
   PUPable EnzoInitialSoup;
   PUPable EnzoInitialTurbulence;
   PUPable EnzoInitialIsolatedGalaxy;
+  PUPable EnzoInitialMergeStarsTest;
 
   PUPable EnzoRefineShock;
   PUPable EnzoRefineParticleMass;

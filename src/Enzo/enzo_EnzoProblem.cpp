@@ -235,7 +235,10 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_burkertbodenheimer_densityprofile);
   } else if (type == "isolated_galaxy") {
     initial = new EnzoInitialIsolatedGalaxy (enzo_config);
-  } else {
+  } else if (type == "merge_stars_test") {
+    initial = new EnzoInitialMergeStarsTest (enzo_config);
+  }
+  else {
     initial = Problem::create_initial_
       (type,index,config,parameters);
   }
