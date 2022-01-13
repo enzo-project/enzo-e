@@ -373,6 +373,7 @@ public: // interface
     CkPrintf ("     accumulate: %d\n",accumulate_);
     CkPrintf ("     sync_type: %d\n",sync_type_);
     CkPrintf ("     sync_id: %d\n",sync_id_);
+    CkPrintf ("     id_refresh: %d\n",id_refresh_);
     CkPrintf ("     active: %d\n",active_);
     CkPrintf ("     callback: %d\n",callback_);
     CkPrintf ("     root_level: %d\n",root_level_);

@@ -21,6 +21,7 @@
 // #define TRACE_ADAPT
 // #define TRACE_REFINE
 // #define TRACE_COARSEN
+// #define TRACE_DONE_INSERTING
 // #define DEBUG_ADAPT
 
 // #define WRITE_NEIGHBORS
@@ -109,36 +110,29 @@ void Block::adapt_begin_()
 void Block::adapt_called_()
 {
   TRACE_ADAPT("adapt_called_",this);
-#ifdef NEW_ADAPT  
   if (! is_leaf()) {
     TRACE_ADAPT("adapt_barrier [not leaf]",this);
     adapt_barrier_();
     return;
   }
-#endif  
   adapt_send_level();
 
-#ifdef OLD_ADAPT
-  TRACE_ADAPT("p_adapt_next calling QD",this);
-  control_sync_quiescence (CkIndex_Main::p_adapt_next());
-#endif  
 }
 
 //----------------------------------------------------------------------
-#ifdef NEW_ADAPT
 void Block::adapt_barrier_()
 {
   if (! adapt_balanced_) {
     adapt_balanced_ = true;
     TRACE_ADAPT("calling contribute",this);
+    int changed = (is_leaf() && (level() != level_next_)) ? 1 : 0;
     CkCallback callback = CkCallback
       (CkIndex_Block::r_adapt_next(nullptr), 
        proxy_array());
     adapt_ready_ = true;
-    contribute(callback);
+    contribute(sizeof(int),&changed,CkReduction::sum_int, callback);
   }
 }
-#endif
 //----------------------------------------------------------------------
 
 /// @brief Third step of the adapt phase: coarsen or refine according
@@ -153,9 +147,7 @@ void Block::adapt_next_()
   TRACE_ADAPT("adapt_next contribute called_",this);
   update_levels_();
 
-#ifdef NEW_ADAPT
   level_next_ = adapt_.level_min();
-#endif
   
   if (is_leaf()) {
     if (level() < level_next_) {
@@ -211,7 +203,12 @@ void Block::update_levels_ ()
 void Block::adapt_update_()
 {
   TRACE_ADAPT("adapt_update_",this);
-  if (index_.is_root()) thisProxy.doneInserting();
+  if (index_.is_root() && (adapt_changed_ != 0)) {
+#ifdef TRACE_DONE_INSERTING
+    CkPrintf ("TRACE_DONE_INSERTING\n");
+#endif
+    thisProxy.doneInserting();
+  }
   adapt_end_();
 }
 
@@ -239,10 +236,8 @@ void Block::adapt_end_()
 
   bool adapt_again = (is_first_cycle && (adapt_step_ < level_maximum));
   adapt_step_++;
-#ifdef NEW_ADAPT  
   adapt_ready_ = false;
   adapt_balanced_ = false;
-#endif  
 
   if (adapt_again) {
     control_sync_quiescence (CkIndex_Main::p_adapt_enter());
@@ -539,35 +534,7 @@ void Block::adapt_delete_child_(Index index_child)
 
 void Block::adapt_send_level()
 {
-#ifdef OLD_ADAPT
-  TRACE_ADAPT("adapt_send_level",this);
-  if (!is_leaf()) return;
-  const int level = this->level();
-  ItNeighbor it_neighbor = this->it_neighbor(index_);
-  int of3[3];
 
-  int level_min;
-  int level_max;
-  bool can_coarsen;
-  adapt_.update_bounds(this);
-  adapt_.get_level_bounds(&level_min,&level_max,&can_coarsen);
-
-  while (it_neighbor.next(of3)) {
-    Index index_neighbor = it_neighbor.index();
-    int ic3[3];
-    it_neighbor.child(ic3);
-#ifdef DEBUG_ADAPT
-    CkPrintf ("DEBUG_ADAPT %s : %s send_level of3 %d %d %dic3 %d %d %d\n",
-              name().c_str(),name(index_neighbor).c_str(),
-              of3[0],of3[1],of3[2],ic3[0],ic3[1],ic3[2]);
-#endif
-    thisProxy[index_neighbor].p_adapt_recv_level
-      (adapt_step_,index_,ic3,of3,level,level_next_,level_max,can_coarsen);
-  }
-#endif
-
-
-#ifdef NEW_ADAPT  
   adapt_ready_ = true;
   TRACE_ADAPT("adapt_send_level",this);
   if (!is_leaf()) return;
@@ -632,63 +599,8 @@ void Block::adapt_send_level()
   }
   TRACE_ADAPT("calling adapt_recv_level",this);
   adapt_recv_level();
-#endif
 }
 
-//----------------------------------------------------------------------
-
-/// @brief Entry function for receiving desired level of a neighbor
-///
-/// @param index_send      mesh index of the calling neighbor
-/// @param ic3             child indices of neighbor if it's in a finer level
-/// @param if3             face (inward) shared with neighbor
-/// @param level_face_curr neighbor's current level
-/// @param level_face_new  neighbor's desired level
-///
-/// level_face_curr
-/// level_face_new
-/// level_next
-/// level_next_
-/// level
-#ifdef OLD_ADAPT
-void Block::p_adapt_recv_level
-(
- int adapt_step,
- Index index_send,
- int ic3[3],
- int if3[3],
- int level_face_curr,
- int level_face_new,
- int level_face_max,
- bool can_coarsen
- )
-{
-  std::vector<int> ofv[3];
-  ofv[0].clear();
-  ofv[1].clear();
-  ofv[2].clear();
-  ofv[0].push_back(if3[0]);
-  ofv[1].push_back(if3[1]);
-  ofv[2].push_back(if3[2]);
-#ifdef DEBUG_ADAPT
-  CkPrintf ("DEBUG_ADAPT p_adapt_recv_level if3 = %d %d %d\n",
-            if3[0],if3[1],if3[2]);
-  CkPrintf ("DEBUG_ADAPT p_adapt_recv_level ofv = %d %d %d\n",
-            ofv[0][0],ofv[1][0],ofv[2][0]);
-#endif
-  adapt_recv_level
-    (
-     adapt_step,
-     index_send,
-     ic3,
-     ofv,
-     level_face_curr,
-     level_face_new,
-     level_face_max,
-     can_coarsen);
-}
-#endif
-#ifdef NEW_ADAPT
 void Block::p_adapt_recv_level (MsgAdapt * msg)
 {
   if (!adapt_ready_) {
@@ -736,7 +648,6 @@ void Block::adapt_check_messages_()
   }
   adapt_msg_list_.clear();
 }
-#endif
 
 void Block::adapt_recv_level
 (
@@ -787,17 +698,6 @@ void Block::adapt_recv_level
       index_send.print("index_",-1,2,nb3,false,cello::simulation());
     }
 
-#ifdef OLD_ADAPT  
-    // note face_level_last_ initialized as -1, in which case won't skip
-    const bool skip_face_update =
-      (level_face_new <= adapt_.face_level_last(index_send,ic3,if3));
-
-    if (skip_face_update) {
-      performance_stop_(perf_adapt_update);
-      performance_start_(perf_adapt_update_sync);
-      return;
-    }
-#endif
     adapt_.set_face_level_last 
       (index_send,ic3,if3, level_face_new,level_face_max, can_coarsen);
 
@@ -887,17 +787,7 @@ void Block::adapt_recv_level
     level_next = std::max(level_next,level_face_new - 1);
 
     // notify neighbors if level_next has changed
-#ifdef OLD_ADAPT
-    if (level_next != level_next_) {
-      ASSERT2 ("Block::p_adapt_recv_level()",
-               "level_next %d level_next_ %d\n", level_next,level_next_,
-               level_next > level_next_);
-      level_next_ = level_next;
-      adapt_send_level();
-    }
-#endif
   }
-#ifdef NEW_ADAPT
   if (changed) {
     level_next_ = level_min;
     adapt_send_level();
@@ -907,7 +797,6 @@ void Block::adapt_recv_level
     TRACE_ADAPT("adapt_barrier [recv_level]",this);
     adapt_barrier_();
   }
-#endif
   performance_stop_(perf_adapt_update);
   performance_start_(perf_adapt_update_sync);
 }

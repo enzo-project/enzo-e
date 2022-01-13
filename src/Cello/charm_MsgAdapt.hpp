@@ -5,8 +5,6 @@
 /// @date     2021-12-18
 /// @brief    [\ref Charm] Declaration of the MsgAdapt Charm++ Message
 
-#ifdef NEW_ADAPT
-
 #ifndef CHARM_MSG_ADAPT_HPP
 #define CHARM_MSG_ADAPT_HPP
 
@@ -113,5 +111,3 @@ protected: // attributes
 };
 
 #endif /* CHARM_MSG_HPP */
-
-#endif /* NEW_ADAPT */

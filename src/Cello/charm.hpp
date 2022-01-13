@@ -16,9 +16,7 @@
 #include "charm_MappingTree.hpp"
 
 #include "charm_FieldMsg.hpp"
-#ifdef NEW_ADAPT
 #include "charm_MsgAdapt.hpp"
-#endif
 #include "charm_MsgCoarsen.hpp"
 #include "charm_MsgInitial.hpp"
 #include "charm_MsgOutput.hpp"

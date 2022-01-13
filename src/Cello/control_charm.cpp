@@ -14,24 +14,28 @@
 #include "charm_mesh.hpp"
 
 // #define DEBUG_REFRESH
+#define TRACE_CONTROL
 // #define DEBUG_CONTROL
 // #define TRACE_CONTRIBUTE
 // #define DEBUG_ADAPT
 
 // #define BLOCK  "B0:100_0:101"
 
-#ifdef DEBUG_CONTROL 
-# define TRACE_CONTROL(A)                       \
-  {                                             \
-    CkPrintf ("%d %s %s TRACE_CONTROL %s \n",   \
-              CkMyPe(),__FILE__,                \
-              name_.c_str(), A);                \
-    fflush(stdout);                             \
+
+#ifdef TRACE_CONTROL
+# define TRACE_BLOCK (name() == "B00_11")
+# undef TRACE_CONTROL
+# define TRACE_CONTROL(A)                               \
+  if (TRACE_BLOCK) {                                    \
+    CkPrintf ("%d %s:%d %s TRACE_CONTROL %s \n",        \
+              CkMyPe(),__FILE__,__LINE__,               \
+              name_.c_str(), A);                        \
+    fflush(stdout);                                     \
   }
 # define TRACE_SYNC(A)                                          \
-  {                                                             \
-    CkPrintf ("%d %s %s TRACE_CONTROL %s entry %d id %d\n",	\
-              CkMyPe(),__FILE__,                                \
+  if (TRACE_BLOCK) {                                            \
+    CkPrintf ("%d %s:%d %s TRACE_SYNC %s entry %d id %d\n",	\
+              CkMyPe(),__FILE__,__LINE__,                       \
               name_.c_str(), A,entry_point,id_sync);            \
     fflush(stdout);                                             \
   }
@@ -113,7 +117,7 @@ void Block::stopping_exit_()
   if (stop_) {
 
 #ifdef TRACE_CONTRIBUTE  
-  CkPrintf ("%s %s:%d DEBUG_CONTRIBUTE calling r_exit()\n",
+    CkPrintf ("%s %s:%d DEBUG_CONTRIBUTE calling r_exit()\n",
 	    name().c_str(),__FILE__,__LINE__); fflush(stdout);
 #endif  
     control_sync_barrier (CkIndex_Block::r_exit(NULL));
@@ -233,7 +237,7 @@ void Block::control_sync_neighbor(int entry_point, int id_sync,
     CkPrintf ("%s DEBUG_CONTROL calling p_control_sync_count (%d %d 0)\n",
 	      name().c_str(),entry_point,id_sync);
     fflush(stdout);
-#endif    
+#endif
     thisProxy[index_neighbor].p_control_sync_count(entry_point,id_sync,0);
 
   }
@@ -241,8 +245,8 @@ void Block::control_sync_neighbor(int entry_point, int id_sync,
     CkPrintf ("%s DEBUG_CONTROL calling p_control_sync_count count %d (%d %d 0)\n",
 	      name().c_str(),num_neighbors, entry_point,id_sync);
     fflush(stdout);
-#endif    
-  control_sync_count (entry_point,id_sync,num_neighbors + 1);
+#endif
+    control_sync_count (entry_point, id_sync,num_neighbors + 1);
 
 }
 

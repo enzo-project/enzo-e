@@ -5,8 +5,6 @@
 /// @date     2015-12-22
 /// @brief    [\ref Charm] Declaration of the MsgAdapt Charm++ message
 
-#ifdef NEW_ADAPT
-
 #include "data.hpp"
 #include "charm.hpp"
 #include "charm_simulation.hpp"
@@ -144,6 +142,3 @@ void MsgAdapt::print (const char * msg)
   //  CkPrintf ("%d \n",ip);
   fflush(stdout);
 }
-
-#endif /* NEW_ADAPT */
-

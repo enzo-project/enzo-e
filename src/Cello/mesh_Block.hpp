@@ -415,14 +415,8 @@ public:
   void r_adapt_next(CkReductionMsg * msg)
   {
     performance_start_(perf_adapt_update);
+    adapt_changed_ = *((int * )msg->getData());
     delete msg;
-    adapt_next_();
-    performance_stop_(perf_adapt_update);
-    performance_start_(perf_adapt_update_sync);
-  }
-  void p_adapt_next ()
-  {
-    performance_start_(perf_adapt_update);
     adapt_next_();
     performance_stop_(perf_adapt_update);
     performance_start_(perf_adapt_update_sync);
@@ -459,20 +453,10 @@ public:
   /// Parent tells child to delete itself
   void p_adapt_delete();
 
-#ifdef OLD_ADAPT
-  void p_adapt_recv_level
-  (int adapt_step,
-   Index index_debug,
-   int ic3[3],
-   int if3[3],
-   int level_now, int level_new,
-   int level_max, bool can_coarsen);
-#endif
-#ifdef NEW_ADAPT
   void p_adapt_recv_level (MsgAdapt *);
   void adapt_check_messages_();
   void adapt_recv_level();
-#endif
+
   void adapt_recv_level
   (int adapt_step,
    Index index_debug,
@@ -494,9 +478,7 @@ protected:
   void adapt_enter_();
   void adapt_begin_ ();
   void adapt_next_ ();
-#ifdef NEW_ADAPT
   void adapt_barrier_();
-#endif  
   void adapt_end_ ();
   void adapt_update_();
   void adapt_exit_();
@@ -520,7 +502,7 @@ public:
   void p_control_sync_count(int entry_point, int id, int count)
   {
     performance_start_(perf_control);
-    control_sync_count(entry_point,id, count);
+    control_sync_count(entry_point, id, count);
     performance_stop_(perf_control);
   }
 
@@ -689,7 +671,12 @@ public:
   }
 
   /// Quiescence before load balancing
-  void p_stopping_balance();
+  void p_stopping_load_balance()
+  { stopping_load_balance_(); }
+  void r_stopping_load_balance(CkReductionMsg * msg)
+  { delete msg;
+    stopping_load_balance_();
+  }
 
   /// Exit the stopping phase
   void p_stopping_exit ()
@@ -710,6 +697,7 @@ protected:
   void stopping_enter_();
   void stopping_begin_();
   void stopping_balance_();
+  void stopping_load_balance_();
   void stopping_exit_();
 
 public:
@@ -963,10 +951,12 @@ protected: // attributes
   /// Whether block has reached level consensus for the balancing step
   bool adapt_balanced_;
 
-#ifdef NEW_ADAPT
+  /// Number of blocks that have refined or coarsened in this phase
+  int adapt_changed_;
+
   /// Buffer for incoming MsgAdapt objects
   std::vector < MsgAdapt * > adapt_msg_list_;
-#endif
+
   /// whether Block has been coarsened and should be deleted
   bool coarsened_;
 

@@ -8,8 +8,6 @@ import socket
 # USER CONFIGURATION
 #======================================================================
 
-new_adapt = 1
-
 #----------------------------------------------------------------------
 # Whether to bypass passing MsgRefine directly to Block constructor
 # or request from separate entry method to bypass Charm++ memory
@@ -320,11 +318,6 @@ defines.append(define_png)
 
 charm_perf = ''
 
-if (new_adapt == 1):
-     defines.append('NEW_ADAPT')
-if (new_adapt == 0):
-     defines.append('OLD_ADAPT')
-
 if (use_projections == 1):
      defines.append(define_projections)
      charm_perf = '-tracemode projections'
@@ -596,11 +589,6 @@ if (have_git == 1):
    build_dir = 'build-' + branch.decode('utf-8')
 else:
    build_dir = 'build'
-
-if (new_adapt == 1):
-     build_dir = "build-adapt-1"
-elif (new_adapt == 0):
-     build_dir = "build-adapt-0"
 
 SConscript( 'src/SConscript',variant_dir=build_dir)
 SConscript('test/SConscript')

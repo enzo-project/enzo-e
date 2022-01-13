@@ -13,6 +13,9 @@
 // #define TRACE_BLOCK
 // #define TRACE_ADAPT
 
+// #define TRACE_REFINE
+// #define TRACE_COARSEN
+
 // #define DEBUG_ADAPT
 // #define DEBUG_FIELD_FACE
 // #define DEBUG_FACE
@@ -74,6 +77,7 @@ Block::Block ( MsgRefine * msg )
     adapt_step_(0),
     adapt_ready_(false),
     adapt_balanced_(false),
+    adapt_changed_(0),
     coarsened_(false),
     is_leaf_(true),
     age_(0),
@@ -98,7 +102,6 @@ Block::Block ( MsgRefine * msg )
   usesAtSync = true;
 
   thisIndex.array(array_,array_+1,array_+2);
-
 #ifdef BUG_FIX_150
 
   proxy_simulation[ip_source].p_get_msg_refine(thisIndex);
@@ -168,6 +171,10 @@ void Block::p_set_msg_refine(MsgRefine * msg)
   }
 #endif
 
+#ifdef TRACE_REFINE
+  CkPrintf ("TRACE_REFINE %s\n",name().c_str());
+  fflush(stdout);
+#endif
 }
 
 #endif
@@ -193,6 +200,7 @@ void Block::init_refine_
   adapt_step_ = num_adapt_steps;
   adapt_ready_ = false;
   adapt_balanced_ = false;
+  adapt_changed_ = 0;
 
 #ifdef TRACE_BLOCK
   CkPrintf ("TRACE_BLOCK %s init_refine_ face_level %p\n",name().c_str(),
@@ -377,6 +385,8 @@ void Block::pup(PUP::er &p)
   p | adapt_step_;
   p | adapt_ready_;
   p | adapt_balanced_;
+  p | adapt_changed_;
+  // std::vector < MsgAdapt * > adapt_msg_list_;
   p | coarsened_;
   p | is_leaf_;
   p | age_;
@@ -393,6 +403,9 @@ void Block::pup(PUP::er &p)
     if (simulation != NULL) simulation->data_insert_block(this);
   }
   p | refresh_sync_list_;
+
+  //  std::vector < std::vector <MsgRefresh * > > refresh_msg_list_;
+
 }
 
 //----------------------------------------------------------------------
@@ -482,6 +495,7 @@ void Block::print () const
   CkPrintf ("adapt_step_ = %d\n",adapt_step_);
   CkPrintf ("adapt_ready_ = %s\n",adapt_ready_?"true":"false");
   CkPrintf ("adapt_balanced_ = %s\n",adapt_balanced_?"true":"false");
+  CkPrintf ("adapt_changed_ = %d\n",adapt_changed_);
   CkPrintf ("coarsened_ = %d\n",coarsened_);
   CkPrintf ("is_leaf_ = %d\n",is_leaf_);
   CkPrintf ("age_ = %d\n",age_);
@@ -586,6 +600,10 @@ Block::~Block()
 {
   Simulation * simulation = cello::simulation();
 
+#ifdef TRACE_COARSEN
+      CkPrintf ("TRACE_COARSEN %s\n",name().c_str());
+      fflush(stdout);
+#endif
 #ifdef TRACE_BLOCK
   CkPrintf ("%d %s TRACE_BLOCK Block::~Block())\n",  CkMyPe(),name_.c_str()); // 0
 #endif
@@ -698,6 +716,7 @@ Block::Block ()
     adapt_step_(0),
     adapt_ready_(false),
     adapt_balanced_(false),
+    adapt_changed_(0),
     coarsened_(false),
     is_leaf_(true),
     age_(0),
@@ -738,6 +757,7 @@ Block::Block (CkMigrateMessage *m)
     adapt_step_(0),
     adapt_ready_(false),
     adapt_balanced_(false),
+    adapt_changed_(0),
     coarsened_(false),
     is_leaf_(true),
     age_(0),
@@ -1172,6 +1192,7 @@ void Block::copy_(const Block & block) throw()
   adapt_step_ = block.adapt_step_;
   adapt_ready_ = block.adapt_ready_;
   adapt_balanced_ = block.adapt_balanced_;
+  adapt_changed_ = block.adapt_changed_;
   coarsened_  = block.coarsened_;
 }
 
