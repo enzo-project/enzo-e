@@ -652,15 +652,12 @@ void FieldData::coarse_dimensions
 {
   // Determine augmented coarse block size 
 
+  //    get block centering (cx,cy,cz)
   //    get block size (nx,ny,nz)
+  int cx,cy,cz;
+  field_descr->centering (id_field,&cx,&cy,&cz);
   int nx,ny,nz;
   size (&nx,&ny,&nz);
-  ASSERT3 ("FieldData::coarse_dimensions()",
-          "Block axis sizes (%d %d %d) must be even (or one)",
-          nx,ny,nz,
-          ((nx%2)==0) &&
-          (((ny%2)==0) || (ny==1)) &&
-          (((nz%2)==0) || (nz==1)));
 
   //    get ghost size (gx,gy,gz)
   int gx,gy,gz;
@@ -669,10 +666,6 @@ void FieldData::coarse_dimensions
   if ((gx%2) == 1) gx++;
   if ((gy%2) == 1) gy++;
   if ((gz%2) == 1) gz++;
-
-  //    get block centering (cx,cy,cz)
-  int cx,cy,cz;
-  field_descr->centering (id_field,&cx,&cy,&cz);
 
   //    compute coarse block size
   if (mcx) (*mcx) = (nx!=1) ? nx/2 + (gx + 2*(gx%1)) + cx + 2 : 1;

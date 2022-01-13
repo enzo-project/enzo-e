@@ -99,7 +99,7 @@ module enzo {
   PUPable EnzoMethodMHDVlct;
 
   PUPable EnzoEOSIdeal;
-  PUPable EnzoIntegrableUpdate;
+  PUPable EnzoIntegrationQuanUpdate;
   PUPable EnzoReconstructorNN;
   // EnzoReconstructorPLMEnzoRKLim
   PUPable EnzoReconstructorPLM<PLM_EnzoRKLimiter>;
@@ -165,7 +165,7 @@ module enzo {
     entry EnzoBlock();
 
     // EnzoMethodTurbulence synchronization entry methods
-    entry void p_method_turbulence_end(CkReductionMsg *msg);
+    entry void r_method_turbulence_end(CkReductionMsg *msg);
 
     entry void p_initial_hdf5_recv(MsgInitial * msg_initial);
 

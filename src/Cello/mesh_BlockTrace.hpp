@@ -4,6 +4,15 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2021-04-21
 /// @brief    [\ref Mesh] Declaration of the BlockTrace class
+///
+/// This class is used by MethodOutput to help in performing a
+/// sequential depth-first traversal of a section of a parallel
+/// distributed array of octrees.  It stores the "trace" (sequence of
+/// ancestors) of Index's from the root block to the current Block in
+/// the traversal, provides a method for updating the trace for the
+/// next() Block in the octree, and stores the tree's root block
+/// (index_root) and "home" block (the assigned block performing the
+/// writing in MethodOutput)
 
 #ifndef MESH_BLOCK_TRACE_HPP
 #define MESH_BLOCK_TRACE_HPP
@@ -12,7 +21,7 @@ class BlockTrace {
 
   /// @class    BlockTrace
   /// @ingroup  Mesh
-  /// @brief    [\ref Mesh] 
+  /// @brief    [\ref Mesh]
 
 public: // interface
 
@@ -115,11 +124,11 @@ public: // interface
   /// Return the home Index of the BlockTrace
   Index home ()
   { return index_home_; }
-  
+
   /// Return the top (current) Index of the BlockTrace
   Index top ()
   { return (index_stack_.size() > 0) ? index_stack_.back() : index_root_; }
-  
+
   bool is_empty()
   { return index_stack_.size() > 0; }
 
@@ -179,7 +188,7 @@ private: // attributes
   int index_min_[3];
   int index_max_[3];
   int index_curr_[3];
-  
+
   /// Stack of last visited child indices
   std::vector <int>   child_stack_;
 

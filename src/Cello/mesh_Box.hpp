@@ -33,7 +33,8 @@ public: // interface
       child_(),
       block_start_(),
       region_start_(),
-      region_stop_()
+      region_stop_(),
+      centering_()
   {
     for (int i=0; i<2; i++) {
       level_[i] = 0;
@@ -69,6 +70,7 @@ public: // interface
     p | pad_;
     PUParray(p,region_start_,3);
     PUParray(p,region_stop_,3);
+    PUParray(p,centering_,3);
 
   }
 
@@ -116,6 +118,14 @@ public: // interface
     for (int i=0; i<rank_; i++) {
       coarse_size_[i] = coarse_size[i];
       coarse_ghost_[i] = coarse_ghost[i];
+    }
+  }
+
+  /// Set field centering
+  inline void set_centering (int centering[3])
+  {
+    for (int i=0; i<rank_; i++) {
+      centering_[i] = centering[i];
     }
   }
 
@@ -234,6 +244,8 @@ private: // attributes
   int region_start_[3];
   int region_stop_[3];
 
+  /// Centering of field variables in cell (0 = centered; 1 = non-centered)
+  int centering_[3];
 };
 
 #endif /* MESH_BOX_HPP */

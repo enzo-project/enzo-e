@@ -40,7 +40,7 @@ char * BlockTrace::save_data (char * buffer) const
            "Expecting buffer size %d actual size %d",
            data_size(),(pc-buffer),
            (data_size() == (pc-buffer)));
-    
+
   return pc;
 }
 
