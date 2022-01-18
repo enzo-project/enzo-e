@@ -358,6 +358,8 @@ public: // interface
       method_vlct_mhd_choice(""),
       method_vlct_dual_energy(false),
       method_vlct_dual_energy_eta(0.0),
+      // EnzoMethodMergeStars
+      method_merge_stars_merging_radius_cells(0.0),
       // EnzoProlong
       prolong_enzo_type(),
       prolong_enzo_positive(true),
@@ -728,6 +730,9 @@ public: // attributes
   // unlike ppm, only use a single eta value. It should have a default value
   // closer to method_ppm_dual_energy_eta1
   double                     method_vlct_dual_energy_eta;
+
+  /// EnzoMethodMergeStars
+  double                     method_merge_stars_merging_radius_cells;
 
 
   std::string                prolong_enzo_type;

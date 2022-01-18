@@ -263,6 +263,8 @@ EnzoConfig::EnzoConfig() throw ()
   method_vlct_mhd_choice(""),
   method_vlct_dual_energy(false),
   method_vlct_dual_energy_eta(0.0),
+  /// EnzoMethodMergeStars
+  method_merge_stars_merging_radius_cells(0.0),
   /// EnzoProlong
   prolong_enzo_type(),
   prolong_enzo_positive(true),
@@ -590,6 +592,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_vlct_mhd_choice;
   p | method_vlct_dual_energy;
   p | method_vlct_dual_energy_eta;
+
+  p | method_merge_stars_merging_radius_cells;
 
   p | prolong_enzo_type;
   p | prolong_enzo_positive;
@@ -1277,6 +1281,9 @@ void EnzoConfig::read(Parameters * p) throw()
   if (uses_vlct && (method_vlct_mhd_choice == "")){
     ERROR("EnzoConfig::read", "Method:mhd_vlct:mhd_choice was not specified");
   }
+
+  method_merge_stars_merging_radius_cells = p->value_float
+    ("Method:merge_stars:merging_radius_cells",8.0);
 
   //--------------------------------------------------
   // Physics

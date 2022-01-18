@@ -2,6 +2,7 @@
 
 /// @file     mesh_Block.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
+/// @author   Stefan Arridge (stefan.arridge@gmail.com)
 /// @date     Fri Apr  2 14:09:42 PDT 2010
 /// @brief    [\ref Mesh] Declaration of the Block class
 
@@ -567,9 +568,10 @@ public:
   int new_refresh_load_field_faces_ (Refresh & refresh);
   /// Scatter particles in ghost zones to neighbors
   int new_refresh_load_particle_faces_ (Refresh & refresh, const bool copy = false);
-  int new_refresh_delete_particle_copies_   (Refresh * refresh);
 
-  int delete_particle_copies_ (int it);
+  /// Deletes all 'out-of-bounds' particles on the block, and for all the in-bounds
+  /// particles, sets the 'is_copy' attribute to false
+  int delete_non_local_particles_ (int it);
 
   /// Send flux data to neighbors
   int new_refresh_load_flux_faces_ (Refresh & refresh);
@@ -651,7 +653,7 @@ protected:
   (Refresh * refresh,
    ParticleData * particle_array[],
    ParticleData * particle_list[],
-   Index index_list[], const bool copy = false);
+   Index index_list[]);
 
   /// Computes updates to positions (dpx[i],dpy[i],dpz[i]) for faces that
   /// cross periodic domain boundaries

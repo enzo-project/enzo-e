@@ -672,6 +672,10 @@ Method * EnzoProblem::create_method_
     // need a similar type swtich as in star maker
     method = new EnzoMethodDistributedFeedback();
 
+  } else if (name == "merge_stars") {
+
+    method = new EnzoMethodMergeStars();
+
   } else {
 
     // Fallback to Cello method's

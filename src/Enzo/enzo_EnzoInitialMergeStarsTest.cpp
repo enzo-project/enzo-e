@@ -91,7 +91,7 @@ void EnzoInitialMergeStarsTest::enforce_block
   int ia_vx = particle.attribute_index (it, "vx");
   int ia_vy = particle.attribute_index (it, "vy");
   int ia_vz = particle.attribute_index (it, "vz");
-  int ia_loc  = particle.attribute_index (it, "is_local");
+  int ia_copy  = particle.attribute_index (it, "is_copy");
   int ia_id   = particle.attribute_index (it, "id");
 
   int ib  = 0; // batch counter
@@ -106,7 +106,7 @@ void EnzoInitialMergeStarsTest::enforce_block
   enzo_float * pvx  = 0;
   enzo_float * pvy  = 0;
   enzo_float * pvz  = 0;
-  int64_t * is_local = 0;
+  int64_t * is_copy = 0;
   int64_t * id = 0;
 
   // for both particles, check if their positions are within the 
@@ -129,7 +129,7 @@ void EnzoInitialMergeStarsTest::enforce_block
     pvx   = (enzo_float *) particle.attribute_array(it, ia_vx, ib);
     pvy   = (enzo_float *) particle.attribute_array(it, ia_vy, ib);
     pvz   = (enzo_float *) particle.attribute_array(it, ia_vz, ib);
-    is_local   = (int64_t *) particle.attribute_array(it, ia_loc, ib);
+    is_copy   = (int64_t *) particle.attribute_array(it, ia_copy, ib);
 
     id[ipp] = 0;
     pmass[ipp] = mass_1_;
@@ -139,7 +139,7 @@ void EnzoInitialMergeStarsTest::enforce_block
     pvx[ipp]   = vel_1_[0];
     pvy[ipp]   = vel_1_[1];
     pvz[ipp]   = vel_1_[2];
-    is_local[ipp] = 1;
+    is_copy[ipp] = 1;
   
   
   } // if particle 1 in block
@@ -161,7 +161,7 @@ void EnzoInitialMergeStarsTest::enforce_block
     pvx   = (enzo_float *) particle.attribute_array(it, ia_vx, ib);
     pvy   = (enzo_float *) particle.attribute_array(it, ia_vy, ib);
     pvz   = (enzo_float *) particle.attribute_array(it, ia_vz, ib);
-    is_local   = (int64_t *) particle.attribute_array(it, ia_loc, ib);
+    is_copy   = (int64_t *) particle.attribute_array(it, ia_copy, ib);
 
     id[ipp] = 0;
     pmass[ipp] = mass_2_;
@@ -171,7 +171,7 @@ void EnzoInitialMergeStarsTest::enforce_block
     pvx[ipp]   = vel_2_[0];
     pvy[ipp]   = vel_2_[1];
     pvz[ipp]   = vel_2_[2];
-    is_local[ipp] = 1;
+    is_copy[ipp] = 1;
   
   
   } // if particle 2 in block
