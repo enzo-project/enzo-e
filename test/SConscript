@@ -43,7 +43,9 @@ enzo_bin = bin_path + '/enzo-e'
 # h5topng
 
 #----------------------------------------------------------------------
-SConscript('Balance/SConscript')
+### TEMPORARILY DISABLED: pending addressing Issue 135
+### https://github.com/enzo-project/enzo-e/issues/135
+### SConscript('Balance/SConscript')
 #----------------------------------------------------------------------
 
 #----------------------------------------------------------------------

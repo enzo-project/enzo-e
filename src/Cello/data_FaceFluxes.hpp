@@ -14,7 +14,7 @@ class FaceFluxes {
 
   /// @class    FaceFluxes
   /// @ingroup  Data
-  /// @brief    [\ref Data] 
+  /// @brief    [\ref Data]
 
 public: // interface
 
@@ -28,7 +28,7 @@ public: // interface
       fluxes_(nullptr)
   {
   }
-  
+
   /// Create a FaceFluxes object for the given face, field, and block
   /// size. Optionally include centering adjustment (0 <= cx,cy,cz <=
   /// 1) for facet-, edge-, or corner-located field values
@@ -51,7 +51,7 @@ public: // interface
   {
     deallocate_storage();
   }
-  
+
   /// CHARM++ Pack / Unpack method
   void pup (PUP::er &p);
 
@@ -79,7 +79,7 @@ public: // interface
       fluxes_ = nullptr;
     }
   }
-  
+
   /// Set flux array values to 0.0
   void clear()
   {
@@ -93,8 +93,8 @@ public: // interface
   /// Return the associated Field index
   int index_field () const
   { return index_field_; }
-  
-    
+
+
   /// Return the array dimensions of the flux array, including any
   /// adjustments for centering. Indexing is ix + mx*(iy + my*iz).
   int get_size (int *pmx=0, int *pmy=0, int *pmz=0) const
@@ -108,32 +108,32 @@ public: // interface
     if (pmz) (*pmz) = mz;
     return (mx*my*mz);
   }
-   
-  /// Copy flux values from an array to the FluxFaces flux
+
+  /// Copy flux values from an array to the FaceFluxes flux
   /// array. Array element array[ix*dx + iy*dy + iz*dz] should
   /// correspond to flux value (ix,iy,iz), where (0,0,0) <= (ix,iy,iz)
   /// < (mx,my,mz).
   void set_flux_array
   ( std::vector<cello_float> array, int dx, int dy, int dz);
-  
+
   /// Return the array of fluxes and associated strides (dx,dy,dz)
   /// such that the (ix,iy,iz) flux value is fluxes[ix*dx + iy*dy +
   /// iz*dz], where (0,0,0) <= (ix,iy,iz) < (mx,my,mz).
   cello_float * flux_array (int * dx=0, int * dy=0, int * dz=0);
-  
+
   /// Used for coarsening fine-level fluxes to match coarse level
   /// fluxes. Arguments (cx,cy,cz) specify the child indices of the
   /// block within its parent (not to be confused with centering
   /// (cx_,cy_,cz_); flux array size is kept the same, with offset
   /// determined by child indices
   void coarsen (int cx, int cy, int cz, int rank);
-  
+
   /// Add FaceFluxes object to this one. Used for accumulating fluxes
   /// with finer time steps until they match the coarser time
   /// step. Assumes spacially-conforming FaceFlux objects
   void accumulate
   (const FaceFluxes & face_fluxes, int cx, int cy, int cz, int rank);
-  
+
   /// Scale the fluxes array by a scalar constant.
   FaceFluxes & operator *= (double weight);
 
@@ -174,7 +174,7 @@ public: // interface
   char * load_data (char * buffer);
 
   void print (Block * block, std::string message);
-  
+
 private: // attributes
 
   // NOTE: change pup() method whenever attributes change
@@ -194,7 +194,7 @@ private: // attributes
 
   /// Whether fluxes_ array is allocated locally or by parent FluxData
   int delete_fluxes_;
-  
+
   // Array of fluxes ix + mx*(iy+my*iz)
   cello_float * fluxes_;
 
