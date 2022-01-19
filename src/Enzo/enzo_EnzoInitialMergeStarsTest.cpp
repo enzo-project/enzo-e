@@ -21,24 +21,37 @@
  (const EnzoConfig * enzo_config) throw()
     : Initial (enzo_config->initial_cycle, enzo_config->initial_time)
   {
-    pos_1_[0] = enzo_config->initial_merge_stars_test_pos_1[0];
-    pos_1_[1] = enzo_config->initial_merge_stars_test_pos_1[1];
-    pos_1_[2] = enzo_config->initial_merge_stars_test_pos_1[2];
+    particle_data_filename_ = 
+    enzo_config->initial_merge_stars_test_particle_data_filename;
+
+    std::string line;
+    std::ifstream inFile(particle_data_filename_);
+
     
-    pos_2_[0] = enzo_config->initial_merge_stars_test_pos_2[0];
-    pos_2_[1] = enzo_config->initial_merge_stars_test_pos_2[1];
-    pos_2_[2] = enzo_config->initial_merge_stars_test_pos_2[2];
-    
-    vel_1_[0] = enzo_config->initial_merge_stars_test_vel_1[0];
-    vel_1_[1] = enzo_config->initial_merge_stars_test_vel_1[1];
-    vel_1_[2] = enzo_config->initial_merge_stars_test_vel_1[2];
-    
-    vel_2_[0] = enzo_config->initial_merge_stars_test_vel_2[0];
-    vel_2_[1] = enzo_config->initial_merge_stars_test_vel_2[1];
-    vel_2_[2] = enzo_config->initial_merge_stars_test_vel_2[2];
-  
-    mass_1_ = enzo_config->initial_merge_stars_test_mass_1;
-    mass_2_ = enzo_config->initial_merge_stars_test_mass_2;
+    n_particles_ = 0;
+
+    while (std::getline(inFile,line)){
+      ++n_particles_;
+      // Assume each line provides data for one particle
+      // Each row must have 7 columns, for mass, x, y, z,
+      // vx, vy, vz, respectively
+      std::istringstream stream(line);
+      double mass, x, y, z, vx, vy, vz;
+      stream >> mass >> x >> y >> z >> vx >> vy >> vz;
+      mass_data_.push_back(mass);
+      x_data_.push_back(x);
+      y_data_.push_back(y);
+      z_data_.push_back(z);
+      vx_data_.push_back(vx);
+      vy_data_.push_back(vy);
+      vz_data_.push_back(vz);
+    }
+
+    ASSERT("EnzoInitialMergeStarsTest",
+           "Error: No particle data found",
+            n_particles_ != 0);
+
+    return;
   }
 
 void EnzoInitialMergeStarsTest::pup (PUP::er &p)
@@ -49,12 +62,15 @@ void EnzoInitialMergeStarsTest::pup (PUP::er &p)
 
   Initial::pup(p);
 
-  PUParray(p,pos_1_,3);
-  PUParray(p,pos_2_,3);
-  PUParray(p,vel_1_,3);
-  PUParray(p,vel_2_,3);
-  p | mass_1_;
-  p | mass_2_;
+  p | particle_data_filename_;
+  p | mass_data_;
+  p | x_data_;
+  p | y_data_;
+  p | z_data_;
+  p | vx_data_;
+  p | vy_data_;
+  p | vz_data_;
+  p | n_particles_;
   
 }
 
@@ -109,73 +125,45 @@ void EnzoInitialMergeStarsTest::enforce_block
   int64_t * is_copy = 0;
   int64_t * id = 0;
 
-  // for both particles, check if their positions are within the 
-  // bounds of the block. If so, add the particle to this block
+  /* Loop through all particles and check if their positions are within 
+  // bounds of the block. If so, add the particle to this block */
 
-  if (block->check_position_in_block(pos_1_[0],pos_1_[1],pos_1_[2])){
+  for (int i = 0 ; i < n_particles_; ++i){
+
+    if (block->check_position_in_block(x_data_[i],
+                                       y_data_[i],
+                                       z_data_[i])){
   
-    // Add particle 1 to this block
-    int new_particle_index = particle.insert_particles(it, 1);
-    // Add particle to simulation
-    enzo_simulation->data_insert_particles(1);
+      // Add particle to this block
+      int new_particle_index = particle.insert_particles(it, 1);
+      // Add particle to simulation
+      enzo_simulation->data_insert_particles(1);
     
-    particle.index(new_particle_index,&ib,&ipp);
+      particle.index(new_particle_index,&ib,&ipp);
 
-    id   = (int64_t *) particle.attribute_array(it, ia_id, ib);
-    pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib);
-    px    = (enzo_float *) particle.attribute_array(it, ia_x, ib);
-    py    = (enzo_float *) particle.attribute_array(it, ia_y, ib);
-    pz    = (enzo_float *) particle.attribute_array(it, ia_z, ib);
-    pvx   = (enzo_float *) particle.attribute_array(it, ia_vx, ib);
-    pvy   = (enzo_float *) particle.attribute_array(it, ia_vy, ib);
-    pvz   = (enzo_float *) particle.attribute_array(it, ia_vz, ib);
-    is_copy   = (int64_t *) particle.attribute_array(it, ia_copy, ib);
+      id   = (int64_t *) particle.attribute_array(it, ia_id, ib);
+      pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib);
+      px    = (enzo_float *) particle.attribute_array(it, ia_x, ib);
+      py    = (enzo_float *) particle.attribute_array(it, ia_y, ib);
+      pz    = (enzo_float *) particle.attribute_array(it, ia_z, ib);
+      pvx   = (enzo_float *) particle.attribute_array(it, ia_vx, ib);
+      pvy   = (enzo_float *) particle.attribute_array(it, ia_vy, ib);
+      pvz   = (enzo_float *) particle.attribute_array(it, ia_vz, ib);
+      is_copy   = (int64_t *) particle.attribute_array(it, ia_copy, ib);
 
-    id[ipp] = 0;
-    pmass[ipp] = mass_1_;
-    px[ipp]    = pos_1_[0];
-    py[ipp]    = pos_1_[1];
-    pz[ipp]    = pos_1_[2];
-    pvx[ipp]   = vel_1_[0];
-    pvy[ipp]   = vel_1_[1];
-    pvz[ipp]   = vel_1_[2];
-    is_copy[ipp] = 1;
-  
-  
-  } // if particle 1 in block
+      id[ipp] = i+1; // Want IDs to range from 1 to n_particles_;
+      pmass[ipp] = mass_data_[i];
+      px[ipp]    = x_data_[i];
+      py[ipp]    = y_data_[i];
+      pz[ipp]    = z_data_[i];
+      pvx[ipp]   = vx_data_[i];
+      pvy[ipp]   = vy_data_[i];
+      pvz[ipp]   = vz_data_[i];
+      is_copy[ipp] = 1;
+   
+    } // if particle in block
 
-  if (block->check_position_in_block(pos_2_[0],pos_2_[1],pos_2_[2])){
-  
-    // Add particle 1 to this block
-    int new_particle_index = particle.insert_particles(it, 1);
-    // Add particle to simulation
-    enzo_simulation->data_insert_particles(1);
-    
-    particle.index(new_particle_index,&ib,&ipp);
-
-    id   = (int64_t *) particle.attribute_array(it, ia_id, ib);
-    pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib);
-    px    = (enzo_float *) particle.attribute_array(it, ia_x, ib);
-    py    = (enzo_float *) particle.attribute_array(it, ia_y, ib);
-    pz    = (enzo_float *) particle.attribute_array(it, ia_z, ib);
-    pvx   = (enzo_float *) particle.attribute_array(it, ia_vx, ib);
-    pvy   = (enzo_float *) particle.attribute_array(it, ia_vy, ib);
-    pvz   = (enzo_float *) particle.attribute_array(it, ia_vz, ib);
-    is_copy   = (int64_t *) particle.attribute_array(it, ia_copy, ib);
-
-    id[ipp] = 0;
-    pmass[ipp] = mass_2_;
-    px[ipp]    = pos_2_[0];
-    py[ipp]    = pos_2_[1];
-    pz[ipp]    = pos_2_[2];
-    pvx[ipp]   = vel_2_[0];
-    pvy[ipp]   = vel_2_[1];
-    pvz[ipp]   = vel_2_[2];
-    is_copy[ipp] = 1;
-  
-  
-  } // if particle 2 in block
-
+  } // Loop over particle data
   return;
 }
 

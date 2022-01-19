@@ -43,23 +43,20 @@ public: // interface
 
 private: // attributes
 
-  // Position of first particle
-  double pos_1_[3];
+  // File containing particle data
+  std::string particle_data_filename_;
 
-  // Position of second particle
-  double pos_2_[3];
+  // Used to store particle data read in from file
+  std::vector<double> mass_data_; 
+  std::vector<double> x_data_; 
+  std::vector<double> y_data_; 
+  std::vector<double> z_data_; 
+  std::vector<double> vx_data_; 
+  std::vector<double> vy_data_; 
+  std::vector<double> vz_data_; 
 
-  // Velocity of first particle
-  double vel_1_[3];
-
-  // Velocity of second particle
-  double vel_2_[3];
-
-  // Mass of first particle
-  double mass_1_;
-
-  // Mass of second particle
-  double mass_2_;
+  // Number of particles
+  int n_particles_;
 
 };
 
