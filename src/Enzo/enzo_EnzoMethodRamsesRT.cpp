@@ -10,6 +10,13 @@
 #include "enzo.hpp"
 
 //#define DEBUG_PRINT_GROUP_PARAMETERS
+//#define DEBUG_RECOMBINATION
+//#define DEBUG_ALPHA
+//#define DEBUG_RATES
+//#define DEBUG_INJECTION
+//#define DEBUG_TRANSPORT
+
+//#define FLAT_RADIATION_SPECTRUM
 //----------------------------------------------------------------------
 
 EnzoMethodRamsesRT ::EnzoMethodRamsesRT(const int N_groups, const double clight)
@@ -459,7 +466,15 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
 
       double T = get_star_temperature(pmass[ipdm]);
 
+#ifndef FLAT_RADIATION_SPECTRUM 
       get_radiation_blackbody(enzo_block, N, i, T, freq_lower, freq_upper, dt, clight,f_esc);
+#else
+      N[i] = 1e45 * inv_vol;
+#endif
+     
+#ifdef DEBUG_INJECTION
+     std::cout << "N[i] = " << N[i] << " T = " << T << " " << std::endl;
+#endif
       //TODO: Only call get_cross_section here every N cycles, where N is an input parameter.
       //      Also only call if igroup=0 so that it only gets called once
      
@@ -743,6 +758,8 @@ double EnzoMethodRamsesRT::sigma_vernier (double energy, int type) throw()
 void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo_block, double clight) throw() 
 {
   // Calculates photoionization and heating rates in each cell according to RAMSES-RT prescription
+  // heating rates in erg s^-1 cm^-3
+  // photoionization rates in s^-1
   // TODO: Make ionization rates fields and enforce that they exist
 
   const EnzoConfig * enzo_config = enzo::config();
@@ -777,7 +794,8 @@ void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo
   std::vector<enzo_float*> ionization_rate_fields = {RT_HI_ionization_rate, 
                                RT_HeI_ionization_rate, RT_HeII_ionization_rate};
 
-  std::vector<double> Eion = {13.6, 24.59, 54.42};
+  std::vector<double> Eion = {13.6*cello::erg_eV, 24.59*cello::erg_eV, 54.42*cello::erg_eV};
+  std::vector<int> N_nucleons = {1,4,4};
 
   std::vector<enzo_float*> photon_densities = {};
   for (int igroup=0; igroup<enzo_config->method_ramses_rt_N_groups; igroup++) { 
@@ -806,15 +824,22 @@ void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo
             double eps    = *(scalar.value( scalar.index("eps_" + igroup_s ))); 
  
             double N_i = (photon_densities[igroup])[i];
+            double n_j = (chemistry_fields[j])[i] / (N_nucleons[j]*cello::mass_hydrogen); //number density of species j
             ionization_rate += sigmaN*clight*N_i; 
             
-            heating_rate += clight*N_i*(eps*sigmaE - Eion[j]*sigmaN); // Equation A16           
+            heating_rate += n_j*clight*N_i*(eps*sigmaE - Eion[j]*sigmaN); // Equation A16
+#ifdef DEBUG_RATES 
+            std::cout << "i = " << i << "; heating_rate = " << heating_rate << "; n_j = " << n_j << 
+            "; N_i = " << N_i << "; eps = " << eps << "; Ediff = " << (eps*sigmaE - Eion[j]*sigmaN) <<  std::endl;
+#endif          
           }
-          heating_rate *= (chemistry_fields[j])[i]; // multiply by species density
-
           (ionization_rate_fields[j])[i] = ionization_rate; //update fields with new value
         }
+        
         RT_heating_rate[i] = heating_rate;
+#ifdef DEBUG_RATES
+        std::cout << "RT_heating_rate[i] = " << RT_heating_rate[i] << "; RT_HI_ionization_rate[i] = " << (ionization_rate_fields[0])[i] << std::endl;
+#endif 
       }
     }
   } 
@@ -910,7 +935,9 @@ double EnzoMethodRamsesRT::get_alpha (double T, int species, char rec_case) thro
       break;
 
   } 
- 
+#ifdef DEBUG_ALPHA
+  std::cout << "a = " << a << "; lamdba = " << lambda << "; T = " << T << std::endl;
+#endif 
   return a * pow(lambda,b) * pow( 1+pow(lambda/lambda_0,c), -d); 
 }
 
@@ -971,8 +998,11 @@ void EnzoMethodRamsesRT::recombination_photons (EnzoBlock * enzo_block, enzo_flo
     double alpha_B = get_alpha(T[i], j, 'B');     
 
     dN_dt += b*(alpha_A-alpha_B) * density_j[i]*e_density[i];
+#ifdef DEBUG_RECOMBINATION
+    std::cout << "alpha_A = " << alpha_A << "; alpha_B = " << alpha_B << "; density_j = " << "b = " << b << std::endl;
+#endif
   }
-  
+ 
   N [i] += dN_dt * enzo_block->dt;
 }
 
@@ -1168,6 +1198,10 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
          
         // now get updated photon densities
         Nnew[i] += N_update;
+
+#ifdef DEBUG_TRANSPORT
+        std::cout << "i = " << i << "; Nnew[i] = " << Nnew[i] << "; N_update = " << N_update << "; hx = " << hx << "; dt = " << dt << std::endl;
+#endif
  
         // add interactions with matter 
         add_attenuation(enzo_block, Nnew, Fxnew, Fynew, Fznew, enzo_config->method_ramses_rt_clight, i); 
@@ -1192,6 +1226,9 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
         Fx[i] = Fxnew[i];
         Fy[i] = Fynew[i];
         Fz[i] = Fznew[i];
+   
+        if (N [i] < 1e-16) N [i] = 1e-16;
+
       }
     }
   } 
@@ -1242,6 +1279,8 @@ void EnzoMethodRamsesRT::call_solve_transport_eqn(EnzoBlock * enzo_block) throw(
   //TODO: Make reduced clight parameter hang off of EnzoBlock class so 
   //that we don't have to make it a parameter for every function and 
   //can access it without it being erased after refresh
+
+  //TODO: Make photoionization/heating/chemistry optional 
   get_photoionization_and_heating_rates(enzo_block, cello::clight);
 }
 
@@ -1337,8 +1376,7 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
       for (int j=0; j<m; j++)
       {
         // initialize fields to zero 
-        // TODO: check whether value parameter is set to choose whether or not to do this,
-        // since we could also initialize the fields with the value parameter. 
+        // TODO: write a problem initializer so that we don't have to do this 
         N_i [j] = 1e-16;
         Fx_i[j] = 1e-16;
         Fy_i[j] = 1e-16;

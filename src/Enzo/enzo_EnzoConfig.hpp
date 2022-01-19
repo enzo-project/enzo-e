@@ -313,6 +313,7 @@ public: // interface
       method_star_maker_maximum_star_mass(1.0E4),    // maximum star particle mass in solar masses
 
       // EnzoMethodRamsesRT
+      method_ramses_rt(false),
       method_ramses_rt_N_groups(1), // # of frequency bins
       method_ramses_rt_min_freq(0.0), // lower bound of freq. bins
       method_ramses_rt_max_freq(0.0), // upper bound of freq. bins
@@ -648,7 +649,8 @@ public: // attributes
   bool                      method_feedback_use_ionization_feedback;
 
   /// EnzoMethodRamsesRT
-  
+ 
+  bool                      method_ramses_rt; 
   int                       method_ramses_rt_N_groups;
   double                    method_ramses_rt_min_freq;
   double                    method_ramses_rt_max_freq;

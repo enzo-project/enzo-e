@@ -402,15 +402,18 @@ void EnzoMethodGrackle::setup_grackle_fields(EnzoBlock * enzo_block,
   grackle_fields_->volumetric_heating_rate = volumetric_heating_rate;
   grackle_fields_->specific_heating_rate   = specific_heating_rate;
 
-//  RADIATIVE TRANSFER PARAMETERS
-//  Get value if it's there, otherwise initialize as NULL
-//  if (method_ramses_rt) {
-//    grackle_fields_->RT_heating_rate = NULL;
-//    grackle_fields_->RT_HI_ionization_rate = NULL;
-//    grackle_fields_->RT_HeI_ionization_rate = NULL;
-//    grackle_fields_->RT_HeII_ionization_rate = NULL;
-//    grackle_fields_->RT_H2_dissociation_rate = NULL;
-//  }
+  //  RADIATIVE TRANSFER HEATING AND IONIZATION RATES
+  if (enzo::config()->method_ramses_rt) {
+    grackle_fields_->RT_heating_rate = field.is_field("RT_heating_rate") ?
+                       (gr_float *) field.values("RT_heating_rate", i_hist)     : NULL;
+    grackle_fields_->RT_HI_ionization_rate = field.is_field("RT_HI_ionization_rate") ?
+                       (gr_float *) field.values("RT_HI_ionization_rate", i_hist)     : NULL;
+    grackle_fields_->RT_HeI_ionization_rate =field.is_field("RT_HeI_ionization_rate") ?
+                       (gr_float *) field.values("RT_HeI_ionization_rate", i_hist)     : NULL;
+    grackle_fields_->RT_HeII_ionization_rate = field.is_field("RT_HeII_ionization_rate") ?
+                       (gr_float *) field.values("RT_HeII_ionization_rate", i_hist)     : NULL;
+    grackle_fields_->RT_H2_dissociation_rate = NULL;
+  }
   return;
 }
 

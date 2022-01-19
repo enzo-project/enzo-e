@@ -207,6 +207,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_use_ionization_feedback(false),
   method_feedback_time_first_sn(-1), // in Myr
   // EnzoMethodRamsesRT
+  method_ramses_rt(false),
   method_ramses_rt_N_groups(1), // # of frequency bins
   method_ramses_rt_min_freq(0.0), // lower bound of freq. bins
   method_ramses_rt_max_freq(0.0), // upper bound of freq. bins
@@ -538,6 +539,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_feedback_use_ionization_feedback;
   p | method_feedback_time_first_sn;
 
+  p | method_ramses_rt;
   p | method_ramses_rt_N_groups;
   p | method_ramses_rt_min_freq;
   p | method_ramses_rt_max_freq;
@@ -1133,6 +1135,11 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_feedback_use_ionization_feedback = p->value_logical
     ("Method:feedback:use_ionization_feedback", false);
+  
+
+  for (size_t i=0; i<method_list.size(); i++) {
+    if (method_list[i] == "ramses_rt") method_ramses_rt=true;
+  }
 
   method_ramses_rt_N_groups = p->value_integer
     ("Method:ramses_rt:N_groups",1);
@@ -1586,6 +1593,9 @@ void EnzoConfig::read(Parameters * p) throw()
     // sure to set the below parameter to match the Enzo-E
     // parameter for turning RT on / off:
     //   method_grackle_chemistry->use_radiative_transfer = ENZO_E_PARAMETER_NAME;
+    method_grackle_chemistry->use_radiative_transfer = p->value_integer
+     ("Method:grackle:use_radiative_transfer",method_ramses_rt);
+      
 
   }
 #endif /* CONFIG_USE_GRACKLE */
