@@ -320,13 +320,17 @@ void EnzoMethodMergeStars::compute_(Block * block)
   free(group_size);
   free(group_list);
   delete [] particle_coordinates_block_units;
-  
+#ifdef DEBUG_MERGESTARS
+  CkPrintf("Block %s: After merging, num_particles = %d \n",
+	   block->name().c_str(),particle.num_particles(it));
+#endif
   // Now we delete particles we marked as non-local.
   int delete_count = enzo_block->delete_non_local_particles_(it);
   cello::simulation()->data_delete_particles(delete_count);
       
 #ifdef DEBUG_MERGESTARS
-  CkPrintf("After merging, num_particles = %d \n", particle.num_particles(it));
+  CkPrintf("Block %s: After deletion, num_particles = %d \n",
+	   block->name().c_str(),particle.num_particles(it));
 #endif
   return;
       

@@ -159,7 +159,7 @@ void EnzoInitialMergeStarsTest::enforce_block
       pvx[ipp]   = vx_data_[i];
       pvy[ipp]   = vy_data_[i];
       pvz[ipp]   = vz_data_[i];
-      is_copy[ipp] = 1;
+      is_copy[ipp] = 0;
    
     } // if particle in block
 
