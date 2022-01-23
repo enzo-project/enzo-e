@@ -717,7 +717,7 @@ void Config::read_mesh_ (Parameters * p) throw()
     }  
     if ( (ax%2 != 0) || (ay%2 != 0) && (az%2 != 0) ) {
       ERROR3 ("Config::read",
-  		      "Dimensions of the active zone on each block (%d, %d, %d) should each be even" ,
+  		      "Dimensions of the active zone on each block (%d, %d, %d) should each be even for AMR simulations" ,
 		      ax, ay, az);
     }  
   }
