@@ -712,7 +712,7 @@ void Config::read_mesh_ (Parameters * p) throw()
   if ( mesh_max_level > 0 ) {
     if ( !(ax >= 2*field_ghost_depth[0] && ay >= 2*field_ghost_depth[1] && az >= 2*field_ghost_depth[2] ) ) {
       ERROR3 ("Config::read", 
-		"Dimensions of the active zone on each block (%d, %d, %d) should be at least double the size of the ghost depth: ", 
+		"Dimensions of the active zone on each block (%d, %d, %d) should be at least double the size of the ghost depth for AMR simulations: ", 
 		ax, ay, az);
     }  
     if ( (ax%2 != 0) || (ay%2 != 0) && (az%2 != 0) ) {
