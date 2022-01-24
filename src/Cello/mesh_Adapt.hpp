@@ -170,9 +170,6 @@ public: // interface
   inline void set_valid (bool valid)
   { valid_ = valid; }
 
-  inline bool is_valid () const
-  { return valid_; }
-
   inline void set_periodicity (const int periodicity[3])
   {
     periodicity_[0] = periodicity[0];
@@ -194,33 +191,33 @@ public: // interface
     self_.level_now_ = index.level();
   }
 
-  inline bool insert_neighbor (Index index,Block * block)
-  { return insert_neighbor (index,self_.index_.is_sibling(index),block); }
+  inline bool insert_neighbor (Index index)
+  { return insert_neighbor (index,self_.index_.is_sibling(index)); }
 
   /// Insert the given neighbor into the list of neighbors. Return
   /// true if successful and false if neighbor already inserted
-  bool insert_neighbor  (Index index, bool is_sibling,Block * block);
+  bool insert_neighbor  (Index index, bool is_sibling);
+
+  /// Delete the given neighbor from list of neighbors. Return true if
+  /// successful and false if neighbor not found.
+  bool delete_neighbor  (Index index);
 
   /// Reset self and level bounds for next adapt phase
   void reset_bounds();
 
-  /// Delete the given neighbor from list of neighbors. Return true if
-  /// successful and false if neighbor not found.
-  bool delete_neighbor  (Index index, Block * block);
-
   /// Replace the neighboring block with refined neighbors
-  void refine_neighbor  (Index index, Block * block);
+  void refine_neighbor  (Index index);
 
   /// Replace the neighboring block with a coarsened neighbor. May
   /// delete any neighboring sibling blocks, and may be called
   /// separately for siblings
-  void coarsen_neighbor  (Index index, Block * block);
+  void coarsen_neighbor  (Index index);
 
   /// Refine self, replacing blocks non-adjacent blocks with siblings
-  void refine (const Adapt & adapt_parent, int ic3[3], Block * block);
+  void refine (const Adapt & adapt_parent, int ic3[3]);
 
   /// Coarsen self, replacing blocks non-adjacent blocks with siblings
-  void coarsen (const Adapt & adapt_child, Block * block);
+  void coarsen (const Adapt & adapt_child);
 
   void initialize_self
   (Index index, int level_min, int level_now);
@@ -234,7 +231,7 @@ public: // interface
   /// neighbor level bounds. Returns true iff the values change, which
   /// can be used to determine whether or not to update its neighbors
   /// with new level bounds.
-  bool update_bounds (Block * block);
+  bool update_bounds();
 
   /// Return whether the given Block (the default is the block itself)
   /// is converged; that is, whether its minimum and maximum level
@@ -256,10 +253,6 @@ public: // interface
   /// Return the current level bounds for the specified neighbor
   void get_neighbor_level_bounds
   (Index index, int * level_min, int * level_max, bool * can_coarsen) const;
-
-  /// Return vector of neighbor indices (used to get copy before
-  /// modifying list in loop)
-  std::vector<Index> index_neighbors() const;
 
   /// Return the minimum level for the given block
   inline int level_min() const {return self_.level_min_; }
@@ -294,6 +287,10 @@ public: // interface
   bool is_neighbor (Index index, int * ip = 0) const;
 
 private: // methods
+
+  /// Return vector of neighbor indices (used to get copy before
+  /// modifying list in loop)
+  std::vector<Index> index_neighbors_() const;
 
   void copy_ (const Adapt & adapt);
 

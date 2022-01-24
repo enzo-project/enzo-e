@@ -53,13 +53,13 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-  
+
   /// Initialize a Block
   virtual void enforce_block
   ( Block * block, const Hierarchy * hierarchy ) throw();
 
   void recv_data (Block * block, MsgInitial * msg_initial);
-  
+
   void copy_dataset_to_field_
   (Block * block,
    std::string field_name, int type_data,

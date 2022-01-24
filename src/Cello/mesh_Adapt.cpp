@@ -7,24 +7,12 @@
 
 #include "mesh.hpp"
 
-// #define TRACE_REFINE
-// #define WRITE_COARSEN
-// #define WRITE_REFINE
-// #define WRITE_CYCLE 1
-
-// #define TRACE_NEIGHBOR
-
-// #define ENABLE_ASSERT
-
-// #define DEBUG_COARSEN
-
 //----------------------------------------------------------------------
 
 void Adapt::set_face_level (Index index, const int if3[3], LevelType level_type,
                             int level_min, int level_max, bool can_coarsen)
 {
   check_neighbor_(index);
-  //  update_neighbor (index, level_min, level_max, can_coarsen,block);
   set_face_level(index,if3,level_type,level_min);
 }
 
@@ -33,34 +21,15 @@ void Adapt::set_face_level (Index index, const int if3[3], LevelType level_type,
 void Adapt::set_face_level_last (Index index, const int ic3[3], const int if3[3],
                                  int level_min, int level_max, bool can_coarsen)
 {
-  //  update_neighbor (index, level_min, level_max, can_coarsen,block);
   check_neighbor_(index);
   set_face_level_last(index,ic3,if3,level_min);
 }
 
 //----------------------------------------------------------------------
 
-bool Adapt::insert_neighbor (Index index, bool is_sibling, Block * block)
+bool Adapt::insert_neighbor (Index index, bool is_sibling)
 {
-#ifdef TRACE_NEIGHBOR
-  CkPrintf ("DEBUG_NEIGHBOR insert_neighbor %s : %s\n",
-            block->name().c_str(),
-            block->name(index).c_str());
-#endif
   const bool found = is_neighbor(index);
-
-#ifdef ENABLE_ASSERT
-  ASSERT("Adapt::insert_neighbor()",
-         "Inserting block as its own neighbor",
-         index != self_.index_);
-
-  ASSERT2("Adapt::insert_neighbor()",
-         "%s Inserting parent %s as its own neighbor",
-          block->name().c_str(),
-          block->name(index).c_str(),
-          (self_.index_.level() == 0 ||
-           index != self_.index_.index_parent(min_level_)));
-#endif
 
   if (! found) {
     const int level = index.level();
@@ -74,13 +43,8 @@ bool Adapt::insert_neighbor (Index index, bool is_sibling, Block * block)
 
 //----------------------------------------------------------------------
 
-bool Adapt::delete_neighbor (Index index, Block * block)
+bool Adapt::delete_neighbor (Index index)
 {
-#ifdef TRACE_NEIGHBOR
-  CkPrintf ("DEBUG_NEIGHBOR delete_neighbor %s : %s\n",
-            block->name().c_str(),
-            block->name(index).c_str());
-#endif
   int i;
   const bool found = is_neighbor(index,&i);
 
@@ -111,14 +75,9 @@ void Adapt::reset_bounds()
 
 //----------------------------------------------------------------------
 
-void Adapt::refine_neighbor (Index index, Block * block)
+void Adapt::refine_neighbor (Index index)
 {
-#ifdef TRACE_REFINE
-  CkPrintf ("TRACE_REFINE %s refine_neighbor %s\n",
-            block->name().c_str(),
-            block->name(index).c_str());
-#endif
-  const bool success = delete_neighbor(index,block);
+  const bool success = delete_neighbor(index);
   if (success) {
     const int cxp = 2;
     const int cyp = (rank_ >= 2) ? 2 : 1;
@@ -129,7 +88,7 @@ void Adapt::refine_neighbor (Index index, Block * block)
           Index index_child = index.index_child(icx,icy,icz);
           int adj = self_.index_.adjacency(index_child,rank_,periodicity_);
           if (adj >= 0) {
-            bool s = insert_neighbor(index_child,block);
+            bool s = insert_neighbor(index_child);
           }
         }
       }
@@ -139,49 +98,31 @@ void Adapt::refine_neighbor (Index index, Block * block)
 
 //----------------------------------------------------------------------
 
-void Adapt::coarsen_neighbor (Index index,Block * block)
+void Adapt::coarsen_neighbor (Index index)
 {
-#ifdef TRACE_COARSEN
-  CkPrintf ("TRACE_COARSEN %s coarsen_neighbor %s\n",
-            block->name().c_str(),
-            block->name(index).c_str());
-#endif
   // can't coarsen if neighbor sibling
   if ( ! self_.index_.is_sibling(index)) {
     int n = num_neighbors();
     // delete all neighbors contained in index parent
-    auto neighbors = index_neighbors();
+    // (note: use copy of neighbor list to avoid issues with looping
+    // over data-structure that is actively being modified)
+    auto neighbors = index_neighbors_();
     for (int i=0; i<n; i++) {
       const Index index_sibling = neighbors[i];
       if (index.is_sibling(index_sibling)) {
-        delete_neighbor (index_sibling,block);
+        delete_neighbor (index_sibling);
       }
     }
     // insert parent (if not already inserted)
     Index index_parent = index.index_parent(min_level_);
-    insert_neighbor (index_parent,block);
+    insert_neighbor (index_parent);
   }
 }
 
 //----------------------------------------------------------------------
 
-void Adapt::refine (const Adapt & adapt_parent, int ic3[3], Block * block)
+void Adapt::refine (const Adapt & adapt_parent, int ic3[3])
 {
-#ifdef TRACE_REFINE
-  {
-    CkPrintf ("TRACE_REFINE %s refine parent %s\n",
-              block->name().c_str(),
-              block->name(adapt_parent.index()).c_str());
-  
-    const int n = num_neighbors();
-    for (int i=0; i<n; i++) {
-      const Index index_neighbor = adapt_parent.neighbor_list_[i].index_;
-      CkPrintf ("DEBUG_REFINE %s neighbor %d %s\n",
-                block->name().c_str(),i,
-                block->name(index_neighbor).c_str());
-    }
-  }
-#endif
   Index index_parent = adapt_parent.index();
 
   self_.index_ = index_parent.index_child(ic3);
@@ -191,15 +132,8 @@ void Adapt::refine (const Adapt & adapt_parent, int ic3[3], Block * block)
   for (int i=0; i<np; i++) {
     const Index index_neighbor = adapt_parent.neighbor_list_[i].index_;
     const int adj = self_.index_.adjacency(index_neighbor,rank_,periodicity_);
-#ifdef TRACE_REFINE
-    CkPrintf ("DEBUG_REFINE refine %s : parent %s - neighbor %s adj %d\n",
-              block->name(self_.index_).c_str(),
-              block->name(index_parent).c_str(),
-              block->name(index_neighbor).c_str(),
-              adj);
-#endif
     if (adj >= 0) {
-      insert_neighbor(index_neighbor,block);
+      insert_neighbor(index_neighbor);
     }
   }
 
@@ -215,29 +149,20 @@ void Adapt::refine (const Adapt & adapt_parent, int ic3[3], Block * block)
       for (int icx=0; icx<2; icx++) {
         index_sibling.set_child(level+1,icx,icy,icz);
         if ( ! (icx==ic3[0] && icy== ic3[1] && icz==ic3[2])) {
-          insert_neighbor(index_sibling,block);
+          insert_neighbor(index_sibling);
         }
       }
     }
   }
   // Delete parent if it is a neighbor (e.g. periodic
   // b.c. with blocking == 1 along an axis
-  delete_neighbor(index_parent,block);
-#ifdef WRITE_COARSEN
-  write("refine",block,WRITE_CYCLE);
-#endif
-
+  delete_neighbor(index_parent);
 }
 
 //----------------------------------------------------------------------
 
-void Adapt::coarsen (const Adapt & adapt_child, Block * block)
+void Adapt::coarsen (const Adapt & adapt_child)
 {
-#ifdef TRACE_COARSEN
-  CkPrintf ("TRACE_COARSEN %s coarsen child %s\n",
-            block->name().c_str(),
-            block->name(adapt_child.index()).c_str());
-#endif
   Index index_child = adapt_child.index();
 
   if (! valid_) {
@@ -251,7 +176,7 @@ void Adapt::coarsen (const Adapt & adapt_child, Block * block)
     for (int i=0; i<n; i++) {
       const Index index_neighbor = adapt_child.neighbor_list_[i].index_;
       if (index_child.is_sibling(index_neighbor)) {
-        delete_neighbor (index_neighbor,block);
+        delete_neighbor (index_neighbor);
       }
     }
   } else {
@@ -259,25 +184,12 @@ void Adapt::coarsen (const Adapt & adapt_child, Block * block)
     const int n = adapt_child.neighbor_list_.size();
     for (int i=0; i<n; i++) {
       const Index index_neighbor = adapt_child.neighbor_list_[i].index_;
-#ifdef DEBUG_COARSEN
-      CkPrintf ("DEBUG_COARSEN %s adapt_child %s child %s : %d %s\n",
-                block->name(self_.index_).c_str(),
-                block->name(adapt_child.index()).c_str(),
-                block->name(index_child).c_str(),
-                i,
-                block->name(index_neighbor).c_str());
-#endif
       const bool not_sibling = ! index_child.is_sibling(index_neighbor);
       if (not_sibling) {
-        insert_neighbor (index_neighbor,block);
+        insert_neighbor (index_neighbor);
       }
     }
   }
-
-#ifdef WRITE_COARSEN
-  write("coarsen",block,WRITE_CYCLE);
-#endif
-
 }
 
 
@@ -307,7 +219,7 @@ void Adapt::update_neighbor
 
 //----------------------------------------------------------------------
 
-bool Adapt::update_bounds (Block * block)
+bool Adapt::update_bounds()
 {
   // Save values to test later if changed
   const int level_min = self_.level_min_;
@@ -339,10 +251,6 @@ bool Adapt::update_bounds (Block * block)
   const bool want_to_coarsen = (self_.level_min_ < self_.level_now_);
   int count_coarsen = 0;
   bool cannot_coarsen = false;
-#ifdef DEBUG_COARSEN
-  CkPrintf ("DEBUG_COARSEN %s want %d can %d\n",
-            block->name().c_str(),want_to_coarsen,self_.can_coarsen_);
-#endif
   if ( want_to_coarsen && self_.can_coarsen_) {
     // count self
     ++count_coarsen;
@@ -356,12 +264,6 @@ bool Adapt::update_bounds (Block * block)
         if (neighbor.level_min_ >= self_.level_now_) {
           cannot_coarsen = true;
         }
-#ifdef DEBUG_COARSEN
-        CkPrintf ("DEBUG_COARSEN %s : sibling %s count %d cannot %d\n",
-                  block->name().c_str(),
-                  block->name(neighbor.index_).c_str(),
-                  count_coarsen,cannot_coarsen?1:0);
-#endif
       } else if (self_.index_.is_nibling(neighbor.index_)) {
           // cannot coarsen if sibling is refined
           cannot_coarsen = true;
@@ -383,13 +285,6 @@ bool Adapt::update_bounds (Block * block)
     (self_.level_max_ != level_max) ||
     (self_.can_coarsen_ != can_coarsen);
 
-#ifdef DEBUG_COARSEN
-  CkPrintf ("DEBUG_COARSEN %s : [%d %d] C%d\n",
-            block->name().c_str(),
-            self_.level_min_,
-            self_.level_max_,
-            self_.can_coarsen_?1:0);
-#endif
   return ( changed );
 }
 
@@ -438,18 +333,6 @@ void Adapt::get_neighbor_level_bounds
       (*can_coarsen) = neighbor.can_coarsen_;
     }
   }
-}
-
-//----------------------------------------------------------------------
-
-
-std::vector<Index> Adapt::index_neighbors() const
-{
-  std::vector<Index> index_list;
-  const int n = num_neighbors();
-  index_list.resize(n);
-  for (int i=0; i<n; i++) index_list[i] = index(i);
-  return index_list;
 }
 
 //----------------------------------------------------------------------
@@ -650,4 +533,17 @@ void Adapt::copy_ (const Adapt & adapt)
   self_ =          adapt.self_;
   neighbor_list_ = adapt.neighbor_list_;
 }
+
+//----------------------------------------------------------------------
+
+std::vector<Index> Adapt::index_neighbors_() const
+{
+  std::vector<Index> index_list;
+  const int n = num_neighbors();
+  index_list.resize(n);
+  for (int i=0; i<n; i++) index_list[i] = index(i);
+  return index_list;
+}
+
+
 

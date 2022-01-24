@@ -88,7 +88,7 @@ void Block::adapt_begin_()
     // Reset adapt level bounds for next adapt phase
     adapt_.reset_bounds();
     adapt_.initialize_self(index_,level_next_,index_.level());
-    adapt_.update_bounds(this);
+    adapt_.update_bounds();
   }
 #ifdef DEBUG_ADAPT
   CkPrintf ("DEBUG_ADAPT %s level_next = %d\n",name().c_str(),level_next_);
@@ -190,10 +190,10 @@ void Block::update_levels_ ()
       (index_list[i],&level_min,&level_max,&can_coarsen);
     if (level_min > index_list[i].level()) {
       // level_min is larger, must refine
-      adapt_.refine_neighbor(index_list[i],this);
+      adapt_.refine_neighbor(index_list[i]);
     } else if (level_min < index_list[i].level() && can_coarsen) {
       // level_min is smaller and can coarsen
-      adapt_.coarsen_neighbor(index_list[i],this);
+      adapt_.coarsen_neighbor(index_list[i]);
     }
   }
 }
@@ -543,7 +543,7 @@ void Block::adapt_send_level()
   int level_min;
   int level_max;
   bool can_coarsen;
-  adapt_.update_bounds(this);
+  adapt_.update_bounds();
   adapt_.get_level_bounds(&level_min,&level_max,&can_coarsen);
 
   ItNeighbor it_neighbor = this->it_neighbor(index_);
@@ -678,9 +678,11 @@ void Block::adapt_recv_level
             adapt_step == adapt_step_);
     TRACE_ADAPT("adapt_recv_level",this);
     int level_max;
-    adapt_.update_neighbor (index_send,level_face_new,level_face_max,can_coarsen);
-    changed = changed || adapt_.update_bounds(this);
-    
+
+    adapt_.update_neighbor
+      (index_send,level_face_new,level_face_max,can_coarsen);
+    changed = changed || adapt_.update_bounds();
+
     adapt_.get_level_bounds(&level_min,&level_max,&can_coarsen);
 
     ASSERT2("p_adapt_recv_level()",
@@ -698,7 +700,7 @@ void Block::adapt_recv_level
       index_send.print("index_",-1,2,nb3,false,cello::simulation());
     }
 
-    adapt_.set_face_level_last 
+    adapt_.set_face_level_last
       (index_send,ic3,if3, level_face_new,level_face_max, can_coarsen);
 
     int level_next = level_next_;
@@ -957,7 +959,7 @@ void Block::p_adapt_recv_child (MsgCoarsen * msg)
   ItFace it_face_child = this->it_face(min_face_rank,index_child);
   int of3[3];
 
-  adapt_.coarsen(*msg->adapt_child_,this);
+  adapt_.coarsen(*msg->adapt_child_);
 
   while (it_face_child.next(of3)) {
     int level_child = child_face_level_curr[IF3(of3)];

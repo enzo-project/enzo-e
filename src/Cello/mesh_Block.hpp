@@ -459,7 +459,7 @@ public:
 
   void adapt_recv_level
   (int adapt_step,
-   Index index_debug,
+   Index index_send,
    int ic3[3],
    std::vector<int> if3[3],
    int level_now, int level_new,
@@ -818,8 +818,6 @@ protected: // functions
 	     -1 <= if3[1] && if3[1] <= 1 &&
 	     -1 <= if3[2] && if3[2] <= 1);
   }
-
-  void debug_faces_(const char * mesg);
 
   std::string id_ () const throw ()
   {
