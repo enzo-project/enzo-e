@@ -451,10 +451,16 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     int nzi=mz-gz-1;
     int i0 = 0;
     int i1 = 1;
-    enzo_float hxf = hx;
-    enzo_float hyf = hy;
-    enzo_float hzf = hz;
-    enzo_float dtf = dt;
+
+    /* Stefan: Not sure if these next four lines are correct
+       Include the factors of cosmo_a for consistency with 
+       previous version. Also, not sure why dtf is
+       initialised with the value of alpha_.
+     */
+    enzo_float hxf = hx * cosmo_a;
+    enzo_float hyf = hy * cosmo_a;
+    enzo_float hzf = hz * cosma_a;
+    enzo_float dtf = alpha_;
 
     enzo_float * vxf = (enzo_float *) field.values("velocity_x");
     enzo_float * vyf = (enzo_float *) field.values("velocity_y");
