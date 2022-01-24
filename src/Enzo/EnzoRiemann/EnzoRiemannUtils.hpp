@@ -117,15 +117,16 @@ namespace enzo_riemann_utils{
     // TODO: optimize calc of cs2 to omit sqrt and pow in MHD case
     const enzo_float cs = EOSStructIdeal::sound_speed(prim_vals[LUT::density],
                                                 pressure, gamma);
+
+    if (!LUT::has_bfields){ return cs; }
+
     const enzo_float B2 = (bi*bi + bj*bj + bk *bk);
-    // TODO: replace va2 * cos2 with va2_cos2 = bi*bi/prim_vals[LUT::density]
-    //     then, we no longer need to compute B2 or branch in the MHD case
-    if ((!LUT::has_bfields) || (B2 == 0)){ return cs; }
+    const enzo_float inv_density = 1.0/prim_vals[LUT::density];
+    const enzo_float va2 = B2 * inv_density;
+    const enzo_float va2_cos2 = bi*bi * inv_density;
     const enzo_float cs2 = std::pow(cs,2);
-    enzo_float va2 = B2/prim_vals[LUT::density];
-    enzo_float cos2 = bi*bi / B2;
     return std::sqrt(0.5*(va2+cs2+std::sqrt(std::pow(cs2+va2,2) -
-                                            4.*cs2*va2*cos2)));
+                                            4.*cs2*va2_cos2)));
   }
 
   //----------------------------------------------------------------------
