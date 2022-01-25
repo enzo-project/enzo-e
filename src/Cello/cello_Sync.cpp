@@ -9,6 +9,19 @@
 #include "cello.hpp"
 #include "charm.hpp"
 
+// #define TRACE_SYNC
+// #define CHECK_OVER_COUNT
+
+#ifdef TRACE_SYNC
+#  undef TRACE_SYNC
+#  define TRACE_SYNC(MSG)                                               \
+  CkPrintf ("TRACE_SYNC %s :%d %d/%d %d\n",                             \
+            MSG,__LINE__,index_curr_,index_stop_,is_done_);\
+  fflush(stdout);
+#else
+#  define TRACE_SYNC(MSG) /* ... */
+#endif
+
 Sync::Sync (int index_stop)
   : is_done_(0),
     index_stop_(index_stop),
@@ -33,9 +46,13 @@ bool Sync::next () throw()
 {
   advance_();
   check_done_();
-  return (index_curr_ == 0 && is_done_ == true);
+  TRACE_SYNC("next");
+#ifdef CHECK_OVER_COUNT
+  return is_done_;
+#else  
+  return (index_curr_ == 0) && is_done_;
+#endif  
 }
-
 
 //----------------------------------------------------------------------
 
@@ -43,45 +60,57 @@ void Sync::advance () throw()
 {
   advance_();
   check_done_();
+  TRACE_SYNC("advance");
 }
 
 //----------------------------------------------------------------------
 
 void Sync::advance_() throw()
 {
-  if (index_stop_ > 0) {
-    index_curr_ = (index_stop_ + (index_curr_-1) + 1) % index_stop_ + 1;  
-  } else {
-    // stop is not known yet
-    ++ index_curr_;
-  }
+  ++ index_curr_;
 }
 
 //----------------------------------------------------------------------
 
 void Sync::check_done_() throw()
 {
-  if ( (index_curr_ == index_stop_) && 
-       (index_stop_ > 0) ) {
-    index_curr_ = 0;
-    is_done_ = true;
+  if (index_stop_ > 0) {
+    if (index_curr_ == index_stop_) {
+      // reached stopping value
+#ifndef CHECK_OVER_COUNT      
+      index_curr_ = 0;
+#endif      
+      is_done_ = true;
+    }
+    if (index_curr_ > index_stop_) {
+      // exceded stopping value: error!
+      ERROR2("Sync::check_done_()",
+             "Incrementing sync counter %d beyond limit %d",
+             index_curr_,index_stop_);
+    }
   }
 }
 //----------------------------------------------------------------------
 
 bool Sync::is_done () const throw()
-{ return is_done_;  }
+{ return is_done_; }
 
 //----------------------------------------------------------------------
 
 void Sync::set_stop (int stop) throw ()
-{ index_stop_ = stop; }
+{
+  index_stop_ = stop;
+  TRACE_SYNC("set_stop");
+}
 
 
 //----------------------------------------------------------------------
 
 void Sync::inc_stop (int increment) throw ()
-{ index_stop_ += increment; }
+{
+  index_stop_ += increment;
+  TRACE_SYNC("inc_stop");
+}
 
 //----------------------------------------------------------------------
 int Sync::value () const
@@ -95,5 +124,7 @@ int Sync::stop () const throw ()
 void Sync::reset () throw () 
 { index_curr_ = 0;
   index_stop_ = 0;
-  is_done_ = 0;}
+  is_done_ = 0;
+  TRACE_SYNC("reset");
+}
 

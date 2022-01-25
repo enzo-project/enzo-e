@@ -9,6 +9,9 @@
 #ifndef PROBLEM_REFRESH_HPP
 #define PROBLEM_REFRESH_HPP
 
+class Box;
+class Prolong;
+class Restrict;
 class Refresh : public PUP::able {
 
   /// @class    Refresh
@@ -37,7 +40,8 @@ public: // interface
     callback_(0) ,
     root_level_(0),
     id_refresh_(-1),
-    id_solver_(-1)
+    id_prolong_(0),
+    id_restrict_(0)
   {
   }
 
@@ -67,7 +71,8 @@ public: // interface
       callback_(0),
       root_level_(0),
       id_refresh_(-1),
-      id_solver_(-1)
+      id_prolong_(0),
+      id_restrict_(0)
   {
   }
 
@@ -95,7 +100,8 @@ public: // interface
     callback_(0),
     root_level_(0),
     id_refresh_(-1),
-    id_solver_(-1)
+    id_prolong_(-1),
+    id_restrict_(-1)
   {
   }
 
@@ -123,7 +129,8 @@ public: // interface
     p | callback_;
     p | root_level_;
     p | id_refresh_;
-    p | id_solver_;
+    p | id_prolong_;
+    p | id_restrict_;
   }
 
   //--------------------------------------------------
@@ -181,17 +188,21 @@ public: // interface
   { return (all_fields_ || (field_list_src_.size() > 0)); }
 
   /// Return the list of source fields participating in the Refresh operation
-  std::vector<int> & field_list_src()
-  { return field_list_src_; }
+  std::vector<int> field_list_src() const;
 
   /// Return the list of destination fields participating in the
   /// Refresh operation
-  std::vector<int> & field_list_dst()
-  { return field_list_dst_; }
+  std::vector<int> field_list_dst() const;
 
   //--------------------------------------------------
   // PARTICLE METHODS
   //--------------------------------------------------
+
+  /// Add specified fields
+  void set_particle_list (std::vector<int> particle_list)
+  {
+    particle_list_ = particle_list;
+  }
 
   /// Add the given particle type to the list
   void add_particle(int id_particle, bool copy = false) {
@@ -274,11 +285,19 @@ public: // interface
   void set_root_level(int root_level)
   { root_level_ = root_level; }
 
+  /// Set minimum face rank
+  void set_min_face_rank (int min_face_rank)
+  { min_face_rank_ = min_face_rank; }
+  
   /// Return the current minimum rank (dimension) of faces to refresh
   /// e.g. 0: everything, 1: omit corners, 2: omit corners and edges
   int min_face_rank() const
   { return min_face_rank_; }
 
+  /// Set the ghost depth
+  void set_ghost_depth(int ghost_depth)
+  { ghost_depth_ = ghost_depth; }
+  
   /// Return the data field ghost depth
   int ghost_depth() const
   { return ghost_depth_; }
@@ -293,17 +312,23 @@ public: // interface
   /// Return whether to add neighbor face values to ghost zones or to
   /// copy them.  NOTE only accumulates if source field is different
   /// from destination field
-  bool accumulate() const
+  bool accumulate(int i_f) const
   {
-    return accumulate_;
+    return accumulate_ && (field_list_src_[i_f] != field_list_dst_[i_f]);
   }
 
+  //  bool accumulate() const
+  //  { return accumulate_; }
+  
   /// Set whether to add neighbor face values to ghost zones instead of
   /// copying them.
   void set_accumulate(bool accumulate)
   {
     accumulate_ = accumulate;
   }
+
+  // Boxes
+  void box_accumulate_adjust (Box * box, int if3[3], int g3[3]);
 
   //----------------
   // Synchronization
@@ -319,6 +344,9 @@ public: // interface
 
   int sync_exit() const
   { return 3*sync_id_+2; }
+
+  /// Return the sync object associated with this refresh object
+  Sync * sync( Block * block );
 
   void print() const
   {
@@ -386,22 +414,34 @@ public: // interface
     }
   }
 
-  /// Set the new refresh id in new_refresh_list_[]
+  /// Set the new refresh id in refresh_list_[]
   void set_id(int id_refresh)
   { id_refresh_ = id_refresh; }
 
-  /// return the new refresh id in new_refresh_list_[]
+  /// return the new refresh id in refresh_list_[]
   int id() const
   { return id_refresh_; }
 
-  /// Set the solver id in Problem::solver(id)
-  void set_solver_id(int id_solver)
-  { id_solver_ = id_solver; }
+  /// Return whether the prolongation requires padded coarse array
+  int coarse_padding(const Prolong * prolong) const;
 
-  /// return the solver id (-1 if not initialized)
-  int solver_id() const
-  { return id_solver_; }
+  /// Set the prolongation operator for refresh
+  void set_prolong (int id_prolong)
+  { id_prolong_ = id_prolong; }
+  
+  /// Return the prolongation operator for refresh
+  Prolong * prolong ();
+  /// Return the prolongation id
+  int index_prolong () const
+  { return id_prolong_; }
 
+  /// Set the restriction operator for refresh
+  void set_restrict (int id_restrict)
+  { id_restrict_ = id_restrict; }
+  
+  /// Return the restriction operator for refresh
+  Restrict * restrict ();
+  
   //--------------------------------------------------
 
   /// Return the number of bytes required to serialize the data object
@@ -478,11 +518,12 @@ private: // attributes
   /// Coarse level for neighbor_tree type
   int root_level_;
 
-  /// ID in new_refresh_list_[]
+  /// ID in refresh_list_[]
   int id_refresh_;
 
-  /// ID of calling Solver
-  int id_solver_;
+  /// ids of interpolation and restriction operators
+  int id_prolong_;
+  int id_restrict_;
 };
 
 #endif /* PROBLEM_REFRESH_HPP */

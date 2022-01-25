@@ -40,7 +40,7 @@ public: // virtual methods
   { return "comoving_expansion"; }
 
   /// Compute maximum timestep for this method
-  virtual double timestep ( Block * block) const throw();
+  virtual double timestep ( Block * block) throw();
 
 private: // attributes
 

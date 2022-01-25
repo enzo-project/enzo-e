@@ -62,7 +62,7 @@ void Block::compute_next_ ()
     
     cello::refresh(ir_post)->set_active (is_leaf());
     
-    new_refresh_start (ir_post,CkIndex_Block::p_compute_continue());
+    refresh_start (ir_post,CkIndex_Block::p_compute_continue());
     
   } else {
 
@@ -75,7 +75,6 @@ void Block::compute_next_ ()
 
 void Block::compute_continue_ ()
 {
-  //  this->debug_new_refresh(__FILE__,__LINE__);
   performance_start_(perf_compute,__FILE__,__LINE__);
 #ifdef DEBUG_COMPUTE
   if (cycle() >= CYCLE)
@@ -93,7 +92,6 @@ void Block::compute_continue_ ()
     (schedule->write_this_cycle(cycle_,time_));
 
   if (is_scheduled) {
-
     TRACE2 ("Block::compute_continue() method = %d %p\n",
 	    index_method_,method); fflush(stdout);
 
@@ -145,6 +143,9 @@ void Block::compute_end_ ()
 
   // Push back fields if saving old ones
   data()->field().save_history(time_);
+
+  // delete fluxes
+  data()->flux_data()->deallocate();
 
   // Update block cycle and time
   set_cycle (cycle_ + 1);

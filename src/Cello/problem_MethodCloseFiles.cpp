@@ -29,7 +29,7 @@ MethodCloseFiles::MethodCloseFiles
     seconds_delay_(seconds_delay),
     group_size_(group_size)
 {
-  cello::simulation()->new_refresh_set_name(ir_post_,"close_files");
+  cello::simulation()->refresh_set_name(ir_post_,"close_files");
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
 }

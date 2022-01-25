@@ -310,7 +310,7 @@ EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
   // const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
   //                           enzo_sync_id_method_feedback);
   // refresh(ir)->add_all_fields();
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
 
@@ -1534,7 +1534,7 @@ void EnzoMethodDistributedFeedback::compute_coefficients(
   return;
 }
 
-double EnzoMethodDistributedFeedback::timestep (Block * block) const throw()
+double EnzoMethodDistributedFeedback::timestep (Block * block) throw()
 {
   // In general this is not needed, but could imagine putting timestep
   // limiters in situations where, for example, one would want

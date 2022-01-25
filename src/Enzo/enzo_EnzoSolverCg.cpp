@@ -8,6 +8,38 @@
 #include "enzo.hpp"
 #include "enzo.decl.h"
 
+// #define COPY_FIELD
+
+//----------------------------------------------------------------------
+
+#ifdef COPY_FIELD
+#  undef COPY_FIELD
+#   define COPY_FIELD(BLOCK,MSG,ID,COPY)                        \
+  {                                                             \
+  Field field = BLOCK->data()->field();                         \
+  enzo_float* X      = (enzo_float*) field.values(ID);          \
+  enzo_float* X_bcg  = (enzo_float*) field.values(COPY);        \
+  const int m = mx_*my_*mz_;                                    \
+  if (X_bcg) for (int i=0; i<m; i++)  X_bcg[i] = X[i];          \
+  long double sum=0.0,min=1e100,max=-1e100;                     \
+  int count = 0;                                                \
+  for (int iz=gz_; iz<mz_-gz_; iz++) {                          \
+    for (int iy=gy_; iy<my_-gy_; iy++) {                        \
+      for (int ix=gx_; ix<mx_-gx_; ix++) {                      \
+        int i=ix+mx_*(iy+my_*iz);                               \
+        sum += X[i];                                            \
+        min = std::min(min,(long double)X[i]);                  \
+        max = std::max(max,(long double)X[i]);                  \
+        count++;                                                \
+      }                                                         \
+    }                                                           \
+  }                                                             \
+  CkPrintf ("DEBUG_COPY_FIELD %s %s [%Lg %Lg %Lg]\n",           \
+    BLOCK->name().c_str(),COPY,min,sum/count,max);              \
+  }
+#else
+#   define COPY_FIELD(BLOCK,MSG,ID,COPY) /* ... */   
+#endif
 //----------------------------------------------------------------------
 
 EnzoSolverCg::EnzoSolverCg 
@@ -17,6 +49,8 @@ EnzoSolverCg::EnzoSolverCg
  int monitor_iter,
  int restart_cycle,
  int solve_type,
+ int index_prolong,
+ int index_restrict,
  int min_level, int max_level,
  int iter_max, double res_tol,
  int index_precon
@@ -27,6 +61,8 @@ EnzoSolverCg::EnzoSolverCg
 	   monitor_iter,
 	   restart_cycle,
 	   solve_type,
+           index_prolong,
+           index_restrict,
 	   min_level,
 	   max_level),
     A_(NULL),
@@ -61,40 +97,29 @@ EnzoSolverCg::EnzoSolverCg
   if (! local_) {
 
     Refresh * refresh = cello::refresh(ir_post_);
-    cello::simulation()->new_refresh_set_name(ir_post_,name);
+    cello::simulation()->refresh_set_name(ir_post_,name);
     
     refresh->add_field (ix_);
-    refresh->add_field (id_);
-    refresh->add_field (ir_);
-    refresh->add_field (iy_);
-    refresh->add_field (iz_);
 
   //--------------------------------------------------
 
-    ir_matvec_ = add_new_refresh_();
-    cello::simulation()->new_refresh_set_name(ir_post_,name+":matvec");
+    ir_matvec_ = add_refresh_();
+    cello::simulation()->refresh_set_name(ir_post_,name+":matvec");
 
     Refresh * refresh_matvec = cello::refresh(ir_matvec_);
 
     refresh_matvec->add_field (id_);
-    refresh_matvec->add_field (ir_);
-    refresh_matvec->add_field (iy_);
-    refresh_matvec->add_field (iz_);
 
     refresh_matvec->set_callback(CkIndex_EnzoBlock::p_solver_cg_matvec());
     
   //--------------------------------------------------
 
-    ir_loop_2_ = add_new_refresh_();
-    cello::simulation()->new_refresh_set_name(ir_post_,name+":loop_2");
+    ir_loop_2_ = add_refresh_();
+    cello::simulation()->refresh_set_name(ir_post_,name+":loop_2");
 
     Refresh * refresh_loop_2 = cello::refresh(ir_loop_2_);
 
-    refresh_loop_2->add_field (ix_);
     refresh_loop_2->add_field (id_);
-    refresh_loop_2->add_field (ir_);
-    refresh_loop_2->add_field (iy_);
-    refresh_loop_2->add_field (iz_);
 
     refresh_loop_2->set_callback(CkIndex_EnzoBlock::p_solver_cg_loop_2());
     
@@ -166,7 +191,6 @@ void EnzoSolverCg::apply ( std::shared_ptr<Matrix> A, Block * block) throw()
   field.size           (&nx_,&ny_,&nz_);
   field.dimensions (ib_,&mx_,&my_,&mz_);
   field.ghost_depth(ib_,&gx_,&gy_,&gz_);
-
   EnzoBlock * enzo_block = enzo::block(block);
 
   // assumes all fields involved in calculation have same precision
@@ -204,6 +228,8 @@ void EnzoSolverCg::compute_ (EnzoBlock * enzo_block) throw()
   enzo_float * R = (enzo_float*) field.values(ir_);
   enzo_float * D = (enzo_float*) field.values(id_);
   enzo_float * Z = (enzo_float*) field.values(iz_);
+
+  COPY_FIELD(enzo_block,"compute_",ib_,"B0_bcg");
 
   if (is_finest_(enzo_block)) {
 
@@ -277,7 +303,7 @@ void EnzoSolverCg::loop_0a
   
   refresh->set_active(is_finest_(enzo_block));
 
-  enzo_block->new_refresh_start
+  enzo_block->refresh_start
     (ir_matvec_, CkIndex_EnzoBlock::p_solver_cg_matvec());
 }
 
@@ -311,7 +337,7 @@ void EnzoSolverCg::loop_0b
 
   refresh->set_active(is_finest_(enzo_block));
 
-  enzo_block->new_refresh_start
+  enzo_block->refresh_start
     (ir_matvec_, CkIndex_EnzoBlock::p_solver_cg_matvec());
 }
 
@@ -422,7 +448,7 @@ void EnzoSolverCg::loop_2a (EnzoBlock * enzo_block) throw()
   
   refresh->set_active(is_finest_(enzo_block));
 
-  enzo_block->new_refresh_start
+  enzo_block->refresh_start
     (ir_loop_2_, CkIndex_EnzoBlock::p_solver_cg_loop_2());
 }
 

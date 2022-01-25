@@ -2,6 +2,7 @@
 import fileinput
 import matplotlib
 import matplotlib.pyplot as plt
+import re
 
 # 10:101
 #           a = 1
@@ -13,11 +14,9 @@ import matplotlib.pyplot as plt
 #
 def decode_block(block_name):
     prefix="B"
-    dimension = block_name.count("_") + 1
     indices = block_name[len(prefix):].split("_")
     lower=[0,0,0]
     upper=[0,0,0]
-    level=[0,0,0]
     index_axis = 0
     while index_axis < len(indices):
         index = indices[index_axis]
@@ -53,31 +52,36 @@ def decode_block(block_name):
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
-xmin=10000; xmax=0
-ymin=10000; ymax=0
+xmin=10000; xmax=-10000
+ymin=10000; ymax=-10000
 colormap = ['red','orange','green','blue','magenta','cyan']
 lines = []
 for line in fileinput.input():
       lines.append(line)
 max_level = 10
 
-for plotlevel in xrange(0,max_level):
-
-
+for plotlevel in range(0,max_level):
       for line in lines:
-        [level,lower, upper] = decode_block(line.split()[0])
-        if (level == plotlevel):
-            nc = len(colormap)
-            r = matplotlib.patches.Rectangle ( (lower[0],lower[1]), 
-                                               (upper[0]-lower[0]), 
-                                               (upper[1]-lower[1]), 
-                                               fill=False,
-                                               edgecolor=colormap[level % nc])
-            xmin = min(xmin,lower[0])
-            ymin = min(ymin,lower[1])
-            xmax = max(xmax,upper[0])
-            ymax = max(ymax,upper[1])
-            ax.add_patch(r)
+          line_list = line.split();
+          for word in line_list:
+              if (re.search(r'^B0+',word) or
+                  re.search(r'^B1+',word) or
+                  re.search(r'^B:+',word) or
+                  re.search(r'^B_+',word)):
+
+                  [level,lower, upper] = decode_block(word)
+                  if (level == plotlevel):
+                      nc = len(colormap)
+                      r = matplotlib.patches.Rectangle ( (lower[0],lower[1]), 
+                                                         (upper[0]-lower[0]), 
+                                                         (upper[1]-lower[1]), 
+                                                         fill=True,
+                                                         edgecolor=colormap[level % nc])
+                      xmin = min(xmin,lower[0])
+                      ymin = min(ymin,lower[1])
+                      xmax = max(xmax,upper[0])
+                      ymax = max(ymax,upper[1])
+                      ax.add_patch(r)
 
 xsize = xmax - xmin
 ysize = ymax - ymin

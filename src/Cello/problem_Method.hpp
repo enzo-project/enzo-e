@@ -50,7 +50,7 @@ public: // virtual functions
   virtual std::string name () throw () = 0;
 
   /// Compute maximum timestep for this method
-  virtual double timestep (Block * block) const throw()
+  virtual double timestep (Block * block) throw()
   { return std::numeric_limits<double>::max(); }
 
   /// Resume computation after a reduction
@@ -61,7 +61,7 @@ public: // virtual functions
   }
 
   /// Add a new refresh object
-  int add_new_refresh_ (int neighbor_type = neighbor_leaf);
+  int add_refresh_ (int neighbor_type = neighbor_leaf);
 
   /// Return the index for the main post-refresh object
   int refresh_id_post() const;
@@ -72,13 +72,6 @@ public: // virtual functions
 
   /// Set schedule
   void set_schedule (Schedule * schedule) throw();
-
-  /// Define required fields for method
-  void define_fields () throw();
-
-  /// Define certain field groupings if necessary
-  void define_group_fields (std::vector<std::string> group_fields,
-                            std::string groupname) throw();
 
   double courant() const throw ()
   { return courant_; }
@@ -116,12 +109,6 @@ protected: // attributes
 
   /// Default refresh type
   int neighbor_type_;
-
-  /// List of fields required for the Method
-  std::vector<std::string> required_fields_;
-
-  /// Specifies centering of required fields that are not cell-centered
-  std::map<std::string, std::array<int,3>> field_centering_;
 
 };
 

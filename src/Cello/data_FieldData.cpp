@@ -8,6 +8,7 @@
 #include "cello.hpp"
 #include "data.hpp"
 
+// #define DEBUG_COARSE_ARRAY
 //----------------------------------------------------------------------
 
 FieldData::FieldData 
@@ -16,13 +17,15 @@ FieldData::FieldData
  int nx, int ny, int nz 
  ) throw()
   : array_permanent_(),
-    array_temporary_(),
     temporary_size_(),
+    array_temporary_(),
     offsets_(),
     ghosts_allocated_(true),
     history_id_(),
     history_time_(),
-    units_scaling_()
+    units_scaling_(),
+    coarse_dimensions_(),
+    array_coarse_()
 {
   if (nx != 0) {
     size_[0] = nx;
@@ -37,6 +40,7 @@ FieldData::FieldData
   // Initialize history temporary fields
 
   if (field_descr) set_history_(field_descr);
+
 }
 
 //----------------------------------------------------------------------
@@ -49,6 +53,11 @@ FieldData::~FieldData() throw()
     array_temporary_[i] = NULL;
     temporary_size_[i] = 0;
   }
+  for (size_t i=0; i<array_coarse_.size(); i++) {
+    delete [] array_coarse_[i];
+    array_coarse_[i] = NULL;
+    coarse_dimensions_[i] = 0;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -60,8 +69,8 @@ void FieldData::pup(PUP::er &p)
   PUParray(p,size_,3);
 
   p | array_permanent_;
-  p | temporary_size_;
 
+  p | temporary_size_;
   int nt = temporary_size_.size();
   p | nt;
   if (p.isUnpacking()) {
@@ -76,18 +85,28 @@ void FieldData::pup(PUP::er &p)
       PUParray(p,array_temporary_[i],n);
     }
   }  
-  static bool warn[CONFIG_NODE_SIZE] = {false};
-  const int in = cello::index_static();
-  if (! warn[in]) {
-    WARNING("FieldData::pup()",
-  	    "Skipping array_temporary_");
-    warn[in] = true;
+
+  p | coarse_dimensions_;
+  int nc = coarse_dimensions_.size();
+  p | nc;
+  if (p.isUnpacking()) {
+    array_coarse_.resize(nc,0);
   }
+  for (int i=0; i<nc; i++) {
+    int n = coarse_dimensions_[i];
+    if (n > 0) {
+      if (p.isUnpacking()) {
+	array_coarse_[i] = new char[n];
+      }
+      PUParray(p,array_coarse_[i],n);
+    }
+  }  
   p | offsets_;
   p | ghosts_allocated_;
   p | history_id_;
   p | history_time_;
   p | units_scaling_;
+
 }
 
 
@@ -164,6 +183,29 @@ char * FieldData::values
     }
   }
   return values;
+}
+
+//----------------------------------------------------------------------
+
+const char * FieldData::coarse_values
+( const FieldDescr * field_descr,
+  int id_field, int index_history ) const throw ()
+{
+  return (const char *)
+    ((FieldData *)this) -> coarse_values(field_descr,id_field, index_history);
+}
+
+//----------------------------------------------------------------------
+
+char * FieldData::coarse_values
+(const FieldDescr * field_descr,
+ int id_field, int index_history ) throw ()
+{
+#ifdef DEBUG_COARSE_ARRAY
+      CkPrintf ("DEBUG_COARSE_ARRAY %p returning %p[%d]\n",
+                (void*)this,(void *)array_coarse_[id_field],id_field);
+#endif
+  return array_coarse_[id_field];
 }
 
 //----------------------------------------------------------------------
@@ -304,6 +346,8 @@ void FieldData::allocate_permanent
     return;
   }
 
+  allocate_coarse(field_descr);
+
   ghosts_allocated_ = ghosts_allocated;
 
   int padding   = field_descr->padding();
@@ -312,7 +356,7 @@ void FieldData::allocate_permanent
   int array_size = 0;
 
   for (int id_field=0; id_field<field_descr->field_count(); id_field++) {
-
+    
     // Increment array_size, including padding and alignment adjustment
 
     int nx,ny,nz;       // not needed
@@ -378,6 +422,8 @@ void FieldData::allocate_temporary (const FieldDescr * field_descr,
 				    int id_field) throw ()
 
 {
+  allocate_coarse(field_descr,id_field);
+  
   int index_field = id_field - field_descr->num_permanent();
   if (! (index_field < int(array_temporary_.size()))) {
     array_temporary_.resize(index_field+1, 0);
@@ -407,9 +453,63 @@ void FieldData::allocate_temporary (const FieldDescr * field_descr,
 
 //----------------------------------------------------------------------
 
+void FieldData::allocate_coarse (const FieldDescr * field_descr) throw ()
+
+{
+  const int num_fields = field_descr->field_count();
+
+  if (! (num_fields < int(array_coarse_.size()))) {
+      array_coarse_.resize(num_fields, nullptr);
+      coarse_dimensions_. resize(num_fields, 0);
+  }
+
+  for (int id_field=0; id_field<num_fields; id_field++) {
+    allocate_coarse(field_descr,id_field);
+  }
+}
+
+//----------------------------------------------------------------------
+
+void FieldData::allocate_coarse (const FieldDescr * field_descr, int id_field) throw ()
+
+{
+  if (! ((id_field+1) < int(array_coarse_.size()))) {
+      array_coarse_.resize((id_field+1), nullptr);
+      coarse_dimensions_. resize((id_field+1), 0);
+  }
+
+  if (array_coarse_[id_field] == nullptr) {
+    int mx,my,mz;
+    coarse_dimensions(field_descr,id_field,&mx,&my,&mz);
+    int m = mx*my*mz;
+    precision_type precision = field_descr->precision(id_field);
+    if (precision == precision_single) {
+      array_coarse_[id_field] = (char*) new float [m];
+      coarse_dimensions_[id_field] = m*sizeof(float);
+      for (int i=0; i<m; i++) ((float*) array_coarse_[id_field])[i] = 0.0;
+    } else if (precision == precision_double) {
+      array_coarse_[id_field] = (char*) new double [m];
+      coarse_dimensions_[id_field] = m*sizeof(double);
+      for (int i=0; i<m; i++) ((double*) array_coarse_[id_field])[i] = 0.0;
+    } else if (precision == precision_quadruple) {
+      array_coarse_[id_field] = (char*) new long double [m];
+      coarse_dimensions_[id_field] = m*sizeof(long double);
+      for (int i=0; i<m; i++) ((long double*) array_coarse_[id_field])[i] = 0.0;
+    } else {
+      WARNING("FieldData::allocate_coarse",
+              "Calling allocate_coarse() on already-allocated Field");
+    }
+
+  }
+}
+
+//----------------------------------------------------------------------
+
 void FieldData::deallocate_temporary (const FieldDescr * field_descr,
 				      int id_field) throw()
 {
+  allocate_coarse(field_descr,id_field);
+
   int index_field = id_field - field_descr->num_permanent();
 
   if (! (index_field < int(array_temporary_.size()))) {
@@ -428,6 +528,27 @@ void FieldData::deallocate_temporary (const FieldDescr * field_descr,
   array_temporary_[index_field] = 0;
   temporary_size_ [index_field] = 0;
 
+}
+
+//----------------------------------------------------------------------
+
+void FieldData::deallocate_coarse () throw()
+{
+  for (size_t index_field=0; index_field<array_coarse_.size(); index_field++) {
+    deallocate_coarse(index_field);
+  }
+
+}
+
+//----------------------------------------------------------------------
+
+void FieldData::deallocate_coarse (int index_field) throw()
+{
+  if (index_field < (int)array_coarse_.size()) {
+    delete [] array_coarse_[index_field];
+    array_coarse_[index_field] = nullptr;
+    coarse_dimensions_ [index_field] = 0;
+  }
 }
 //----------------------------------------------------------------------
 
@@ -466,6 +587,8 @@ void FieldData::deallocate_permanent () throw()
 {
   if ( permanent_allocated() ) {
 
+    deallocate_coarse();
+    
     array_permanent_.clear();
     offsets_.clear();
   }
@@ -514,6 +637,40 @@ int FieldData::field_size
   if (nz) bytes_total *= (*nz);
 
   return bytes_total;
+}
+
+//----------------------------------------------------------------------
+
+void FieldData::coarse_dimensions
+(
+ const FieldDescr * field_descr,
+ int                id_field,
+ int              * mcx,
+ int              * mcy,
+ int              * mcz
+ ) const throw()
+{
+  // Determine augmented coarse block size 
+
+  //    get block centering (cx,cy,cz)
+  //    get block size (nx,ny,nz)
+  int cx,cy,cz;
+  field_descr->centering (id_field,&cx,&cy,&cz);
+  int nx,ny,nz;
+  size (&nx,&ny,&nz);
+
+  //    get ghost size (gx,gy,gz)
+  int gx,gy,gz;
+  field_descr->ghost_depth (id_field,&gx,&gy,&gz);
+  //    (round ghost zones up to nearest even number)
+  if ((gx%2) == 1) gx++;
+  if ((gy%2) == 1) gy++;
+  if ((gz%2) == 1) gz++;
+
+  //    compute coarse block size
+  if (mcx) (*mcx) = (nx!=1) ? nx/2 + (gx + 2*(gx%1)) + cx + 2 : 1;
+  if (mcy) (*mcy) = (ny!=1) ? ny/2 + (gy + 2*(gy%1)) + cy + 2 : 1;
+  if (mcz) (*mcz) = (nz!=1) ? nz/2 + (gz + 2*(gz%1)) + cz + 2 : 1;
 }
 
 //----------------------------------------------------------------------

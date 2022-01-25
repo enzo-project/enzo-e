@@ -14,8 +14,8 @@
 //----------------------------------------------------------------------
 
 Output::Output (int index, const Factory * factory) throw()
-  : file_(0),           // Initialization deferred
-    schedule_(0),
+  : file_(nullptr),           // Initialization deferred
+    schedule_(nullptr),
     sync_write_(1),     // default process-per-stride
     index_(index),
     cycle_(0),
@@ -25,11 +25,11 @@ Output::Output (int index, const Factory * factory) throw()
     file_args_(),       // set_filename()
     dir_name_(""),     // set_dirname()
     dir_args_(),       // set_dirname()
-    io_block_(0),
-    it_field_index_(0),        // set_it_index_field()
-    io_field_data_(0),
-    it_particle_index_(0),        // set_it_index_particle()
-    io_particle_data_(0),
+    io_block_(nullptr),
+    io_field_data_(nullptr),
+    io_particle_data_(nullptr),
+    it_field_index_(nullptr),        // set_it_index_field()
+    it_particle_index_(nullptr),        // set_it_index_particle()
     stride_write_(1), // default one file per process
     stride_wait_(1) // default all can write at once
 
@@ -43,11 +43,13 @@ Output::Output (int index, const Factory * factory) throw()
 
 Output::~Output () throw()
 {
-  delete schedule_;  schedule_ = 0;
-  delete file_;      file_ = 0;
-  delete it_field_index_;  it_field_index_ = 0;
-  delete it_particle_index_;  it_particle_index_ = 0;
-  delete io_block_;  io_block_ = 0;
+  delete schedule_;          schedule_ = nullptr;
+  delete file_;              file_ = nullptr;
+  delete io_block_;          io_block_ = nullptr;
+  delete io_field_data_;     io_field_data_ = nullptr;
+  delete io_particle_data_;  io_particle_data_ = nullptr;
+  delete it_field_index_;    it_field_index_ = nullptr;
+  delete it_particle_index_; it_particle_index_ = nullptr;
 }
 
 //----------------------------------------------------------------------
@@ -61,8 +63,6 @@ void Output::pup (PUP::er &p)
 
   PUP::able::pup(p);
 
-  bool up = p.isUnpacking();
-
   WARNING ("Output::pup","skipping file_");
   //    p | *file_;
   p | schedule_; // PUP::able
@@ -75,11 +75,13 @@ void Output::pup (PUP::er &p)
   p | file_args_;
   p | dir_name_;
   p | dir_args_;
+
   p | io_block_;
-  p | it_field_index_;
   p | io_field_data_;
-  p | it_particle_index_;
   p | io_particle_data_;
+  p | it_field_index_;
+  p | it_particle_index_;
+
   p | stride_write_;
   p | stride_wait_;
 

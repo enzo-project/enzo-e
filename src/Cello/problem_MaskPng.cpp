@@ -92,7 +92,9 @@ void MaskPng::evaluate (bool * mask, double t,
       int i_png = ix_png + nx_*(iy_png);
       for (int iz=0; iz<nz; iz++) {
 	int i_mask = ix + ndx*(iy + ndy*iz);
-	mask[i_mask] = mask_[i_png];
+	mask[i_mask] =
+          (xm_ <= x && x <= xp_) &&
+          (ym_ <= y && y <= yp_) ? mask_[i_png] : false;
       }
     }
   }
