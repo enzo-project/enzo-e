@@ -235,7 +235,39 @@ void EnzoMethodGrackle::setup_grackle_units (double current_time,
     enzo_float cosmo_dt = 0.0;
 
     EnzoPhysicsCosmology * cosmology = enzo::cosmology();
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //
+    //Some blocks are coming in with current_time = 0, when time doesn't start at 0 for cosmo sims
+    //This results in the expansion factor being passed in as 0, which screws up Grackle's internal units and gives "NaN in edot[1]" warning for every cell in a loop
+    //I believe that this is the result of calling virtual functions (e.g. enzo_units->length, density, etc.) in the constructor. 
+    //An easy workaround is to just explicitly copy the formulae for cosmology units here. Should find a more elegant solution in the future.
 
+    if (current_time == 0) {
+       current_time = cosmology->time_from_redshift(enzo::config()->physics_cosmology_initial_redshift);
+    }
+
+
+  //put into cosmology units
+  //initialize_grackle_chemistry_data() is first called before cosmology units are applied during initial cycle
+  double current_redshift = cosmology->redshift_from_time(current_time);
+
+  grackle_units->density_units  = 1.8788e-29*enzo::config()->physics_cosmology_omega_matter_now*
+      pow(enzo::config()->physics_cosmology_hubble_constant_now,2)*
+      pow(1 + current_redshift,3);
+  grackle_units->length_units   = cello::Mpc_cm*enzo::config()->physics_cosmology_comoving_box_size/
+      enzo::config()->physics_cosmology_hubble_constant_now/
+      (1.0 + current_redshift);
+  grackle_units->time_units     = 2.519445e17/sqrt(enzo::config()->physics_cosmology_omega_matter_now)/
+      enzo::config()->physics_cosmology_hubble_constant_now/
+      pow(1.0 + enzo::config()->physics_cosmology_initial_redshift,1.5);
+
+  grackle_units->velocity_units = 1.22475e7*enzo::config()->physics_cosmology_comoving_box_size*
+      sqrt(enzo::config()->physics_cosmology_omega_matter_now)*
+      sqrt(1.0 + enzo::config()->physics_cosmology_initial_redshift);
+
+    //
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //
     cosmology->compute_expansion_factor(&cosmo_a, &cosmo_dt, current_time);
     grackle_units->a_units
          = 1.0 / (1.0 + enzo_config->physics_cosmology_initial_redshift);
