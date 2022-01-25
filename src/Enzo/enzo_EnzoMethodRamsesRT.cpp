@@ -179,10 +179,12 @@ double EnzoMethodRamsesRT::timestep ( Block * block ) const throw()
   if (rank >= 3) h_min = std::min(h_min,hz);
 
   const EnzoConfig * enzo_config = enzo::config();
-  //EnzoUnits * enzo_units = enzo::units();
+  EnzoUnits * enzo_units = enzo::units();
 
   //enzo_block = enzo::block(block);
-  return h_min / (3*enzo_config->method_ramses_rt_clight);//clight_);
+  return h_min / (3*cello::clight / enzo_units->velocity());//clight_);
+  //double dt_cgs = h_min*enzo_units->length() / (3*cello::clight);
+  //return dt_cgs / enzo_units->time();
 }
 
 //-----------------------------------------------------------------------
@@ -252,8 +254,14 @@ double EnzoMethodRamsesRT::get_star_temperature(double M) throw()
 }
 
 void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_float * N, int i, double T, 
-                   double freq_lower, double freq_upper, double dt, double clight, double f_esc) throw()
+                   double freq_lower, double freq_upper, double clight, double f_esc) throw()
 {
+  // Does all calculations in CGS, then converts to whatever unit system at the end
+  EnzoUnits * enzo_units = enzo::units();
+  double lunit = enzo_units->length(); 
+  double tunit = enzo_units->time();
+  double eunit = enzo_units->mass() * lunit*lunit / (tunit*tunit);
+
   int n = 10; // number of partitions for simpson's method
 
   //need to use lambda expression to pass in planck_function() function as a parameter
@@ -271,7 +279,7 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_fl
                  [this](double a, double b, double c, int d) {return planck_function(a,b,c,d);},
                  T,clight,1);
  
-  N[i] = f_esc * N_integrated; 
+
  
   // "integrate" by just drawing a rectangle through the midpoint
   //double freq_center = freq_lower + 0.5 * (freq_upper - freq_lower);
@@ -296,7 +304,9 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_fl
    *(scalar.value( scalar.index("eps_" + 
                   std::to_string(enzo_block->method_ramses_rt_igroup)) ))
                               =
-                 E_integrated / N_integrated; 
+                 E_integrated / N_integrated / eunit;
+   
+ 
 
    for (int j=0; j<chemistry_fields.size(); j++) {
 
@@ -310,7 +320,7 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_fl
                  [this,j](double nu, double b, double c, int d){
                    return sigma_vernier(cello::hplanck*nu / cello::erg_eV, j)*planck_function(nu,b,c,d);
                  },
-                 T,clight,0) / N_integrated;
+                 T,clight,0) / N_integrated / (lunit*lunit);
 
      // eq. B5 ----> int(sigma_nuj * E_nu dnu)/int(E_nu dnu)
      *(scalar.value( scalar.index("sigE_" + std::to_string(enzo_block->method_ramses_rt_igroup) 
@@ -320,7 +330,12 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_fl
                  [this,j](double nu, double b, double c, int d){
                    return sigma_vernier(cello::hplanck*nu / cello::erg_eV, j)*planck_function(nu,b,c,d);
                  },
-                 T,clight,1) / E_integrated;
+                 T,clight,1) / E_integrated / (lunit*lunit);
+
+
+
+  N[i] = f_esc * N_integrated * lunit*lunit*lunit;
+ 
 #ifdef DEBUG_PRINT_GROUP_PARAMETERS
 
      const EnzoConfig * enzo_config = enzo::config();
@@ -355,6 +370,7 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
   // copy/pasted from enzo_EnzoMethodFeedback::compute_()
 
   const EnzoConfig * enzo_config = enzo::config();
+  EnzoUnits * enzo_units = enzo::units();
   double f_esc = 1.0; // enzo_config->method_radiation_injection_escape_fraction;
 
   Field field = enzo_block->data()->field();
@@ -386,11 +402,6 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
   enzo_float * N  = (enzo_float *) field.values(
         "photon_density_"+std::to_string(enzo_block->method_ramses_rt_igroup));
  
-  std::vector<std::string> chemistry_fields = {"HI_density", 
-                                               "HeI_density", "HeII_density"};
-  std::vector<double> masses = {cello::mass_hydrogen,
-                      4*cello::mass_hydrogen, 4*cello::mass_hydrogen};
-
 
   /*
   enzo_float * Fx  = (enzo_float *) field.values(
@@ -406,7 +417,7 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
   
   // if no stars, don't do anything
   if (particle.num_particles(it) == 0) return;
-  
+
   const int ia_m = particle.attribute_index (it, "mass");
 
   const int ia_x = (rank >= 1) ? particle.attribute_index (it, "x") : -1;
@@ -421,7 +432,7 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
   double freq_lower = (enzo_config->method_ramses_rt_bin_lower)[enzo_block->method_ramses_rt_igroup] * cello::erg_eV / cello::hplanck;
   double freq_upper = (enzo_config->method_ramses_rt_bin_upper)[enzo_block->method_ramses_rt_igroup] * cello::erg_eV / cello::hplanck;
 
-  double clight = enzo_config->method_ramses_rt_clight;   
+  double clight = cello::clight;   
 
   for (int ib=0; ib<nb; ib++){
     enzo_float *px=0, *py=0, *pz=0;
@@ -464,10 +475,10 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
       
       // Get temperature of star 
 
-      double T = get_star_temperature(pmass[ipdm]);
+      double T = get_star_temperature(pmass[ipdm]*enzo_units->mass());
 
 #ifndef FLAT_RADIATION_SPECTRUM 
-      get_radiation_blackbody(enzo_block, N, i, T, freq_lower, freq_upper, dt, clight,f_esc);
+      get_radiation_blackbody(enzo_block, N, i, T, freq_lower, freq_upper, clight,f_esc);
 #else
       N[i] = 1e45 * inv_vol;
 #endif
@@ -518,14 +529,14 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
 //----------------------------------------------------------------------
 
 double EnzoMethodRamsesRT::flux_function (double U_l, double U_lplus1,
-					   double Q_l, double Q_lplus1,  
+					   double Q_l, double Q_lplus1,double clight,  
 					   std::string type) 
 					   throw()
 {
   // returns face-flux of a cell at index idx
   const EnzoConfig * enzo_config = enzo::config();
   if (type == "GLF") {
-    return 0.5*(  Q_l+Q_lplus1 - enzo_config->method_ramses_rt_clight*(U_lplus1-U_l) ); 
+    return 0.5*(  Q_l+Q_lplus1 - clight*(U_lplus1-U_l) ); 
   }
 
   else {
@@ -536,12 +547,12 @@ double EnzoMethodRamsesRT::flux_function (double U_l, double U_lplus1,
 }
 
 double EnzoMethodRamsesRT::deltaQ_faces (double U_l, double U_lplus1, double U_lminus1,
-                                                  double Q_l, double Q_lplus1, double Q_lminus1)
-                                                  throw()
+                                                  double Q_l, double Q_lplus1, double Q_lminus1,
+                                                  double clight) throw()
 {
   // calls flux_function(), and calculates Q_{i-1/2} - Q_{i+1/2}
   
-  return flux_function(U_lminus1, U_l, Q_lminus1, Q_l, "GLF") - flux_function(U_l, U_lplus1, Q_l, Q_lplus1, "GLF"); 
+  return flux_function(U_lminus1, U_l, Q_lminus1, Q_l, clight, "GLF") - flux_function(U_l, U_lplus1, Q_l, Q_lplus1,clight, "GLF"); 
 }
 
 
@@ -558,7 +569,7 @@ void EnzoMethodRamsesRT::get_reduced_variables (double * chi, double (*n)[3], in
 }
 
 void EnzoMethodRamsesRT::get_pressure_tensor (EnzoBlock * enzo_block, 
-                       enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz) 
+                       enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz, double clight) 
                        throw()
 {
   Field field = enzo_block->data()->field();
@@ -592,7 +603,7 @@ void EnzoMethodRamsesRT::get_pressure_tensor (EnzoBlock * enzo_block,
     for (int ix=gx-1; ix<mx-gx+1; ix++) {
       int i = INDEX(ix,iy,iz,mx,my); //index of current cell
       double chi, n[3]; 
-      get_reduced_variables( &chi, &n, i, enzo_config->method_ramses_rt_clight, 
+      get_reduced_variables( &chi, &n, i, clight, 
                             N, Fx, Fy, Fz);
       P00[i] = N[i] * ( 0.5*(1.0-chi) + 0.5*(3.0*chi - 1)*n[0]*n[0] );
       P10[i] = N[i] * 0.5*(3.0*chi - 1)*n[1]*n[0];
@@ -631,61 +642,61 @@ void EnzoMethodRamsesRT::get_U_update (EnzoBlock * enzo_block, double * N_update
 
   // if rank >= 1
   *N_update += dt/hx * deltaQ_faces( N[i],  N[i+idx],  N[i-idx],
-                                   Fx[i], Fx[i+idx], Fx[i-idx] );
+                                   Fx[i], Fx[i+idx], Fx[i-idx], clight );
     
   *Fx_update += dt/hx * deltaQ_faces(Fx[i], Fx[i+idx], Fx[i-idx],
                                    clight*clight*P00[i],
                                    clight*clight*P00[i+idx],
-                                   clight*clight*P00[i-idx] );
+                                   clight*clight*P00[i-idx], clight );
 
   // if rank >= 2
   *N_update += dt/hy * deltaQ_faces( N[i],  N[i+idy],  N[i-idy],
-                                   Fy[i], Fy[i+idy], Fy[i-idy] ); 
+                                   Fy[i], Fy[i+idy], Fy[i-idy], clight ); 
     
   *Fx_update += dt/hy * deltaQ_faces(Fx[i], Fx[i+idy], Fx[i-idy],
                                    clight*clight*P10[i],
                                    clight*clight*P10[i+idy],
-                                   clight*clight*P10[i-idy] );
+                                   clight*clight*P10[i-idy], clight );
 
   *Fy_update += dt/hx * deltaQ_faces(Fy[i], Fy[i+idx], Fy[i-idx],
                                    clight*clight*P01[i],
                                    clight*clight*P01[i+idx],
-                                   clight*clight*P01[i-idx] );
+                                   clight*clight*P01[i-idx], clight );
 
   *Fy_update += dt/hy * deltaQ_faces(Fy[i], Fy[i+idy], Fy[i-idy],
                                    clight*clight*P11[i],
                                    clight*clight*P11[i+idy],
-                                   clight*clight*P11[i-idy] );
+                                   clight*clight*P11[i-idy], clight );
 
 
    // if rank >= 3
   *N_update += dt/hz * deltaQ_faces( N[i],  N[i+idz],  N[i-idz],
-                                   Fz[i], Fz[i+idz], Fz[i-idz] );
+                                   Fz[i], Fz[i+idz], Fz[i-idz], clight );
 
   *Fx_update += dt/hz * deltaQ_faces(Fx[i], Fx[i+idz], Fx[i-idz],
                                    clight*clight*P20[i],
                                    clight*clight*P20[i+idz],
-                                   clight*clight*P20[i-idz] );
+                                   clight*clight*P20[i-idz], clight );
 
   *Fy_update += dt/hz * deltaQ_faces(Fy[i], Fy[i+idz], Fy[i-idz],
                                    clight*clight*P21[i],
                                    clight*clight*P21[i+idz],
-                                   clight*clight*P21[i-idz]);
+                                   clight*clight*P21[i-idz], clight);
 
   *Fz_update += dt/hx * deltaQ_faces(Fz[i], Fz[i+idx], Fz[i-idx],
                                    clight*clight*P02[i],
                                    clight*clight*P02[i+idx],
-                                   clight*clight*P02[i-idx]);
+                                   clight*clight*P02[i-idx], clight);
 
   *Fz_update += dt/hy * deltaQ_faces(Fz[i], Fz[i+idy], Fz[i-idy],
                                    clight*clight*P12[i],
                                    clight*clight*P12[i+idy],
-                                   clight*clight*P12[i-idy]);
+                                   clight*clight*P12[i-idy], clight);
 
   *Fz_update += dt/hz * deltaQ_faces(Fz[i], Fz[i+idz], Fz[i-idz],
                                    clight*clight*P22[i],
                                    clight*clight*P22[i+idz],
-                                   clight*clight*P22[i-idz]);
+                                   clight*clight*P22[i-idz], clight);
 
 
 }
@@ -760,9 +771,11 @@ void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo
   // Calculates photoionization and heating rates in each cell according to RAMSES-RT prescription
   // heating rates in erg s^-1 cm^-3
   // photoionization rates in s^-1
-  // TODO: Make ionization rates fields and enforce that they exist
+  // TODO: Do this calculation in either CGS or code units and then do necessary unit conversions
+  //       in EnzoMethodGrackle when accessing ionization and heating rate fields?
 
   const EnzoConfig * enzo_config = enzo::config();
+  EnzoUnits * enzo_units = enzo::units();
 
   Field field = enzo_block->data()->field();
   Scalar<double> scalar = enzo_block->data()->scalar_double(); 
@@ -794,8 +807,17 @@ void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo
   std::vector<enzo_float*> ionization_rate_fields = {RT_HI_ionization_rate, 
                                RT_HeI_ionization_rate, RT_HeII_ionization_rate};
 
+  // Need to convert everything back to CGS because that's how Grackle expects ionization/heating rates
+  double lunit = enzo_units->length();
+  double tunit = enzo_units->time();
+  double munit = enzo_units->mass();
+  double eunit = munit * lunit*lunit / (tunit*tunit);
+  double volunit = lunit*lunit*lunit;
+  double rhounit = enzo_units->density();
+
   std::vector<double> Eion = {13.6*cello::erg_eV, 24.59*cello::erg_eV, 54.42*cello::erg_eV};
-  std::vector<int> N_nucleons = {1,4,4};
+  double mH = cello::mass_hydrogen;
+  std::vector<double> masses = {mH,4*mH,4*mH};
 
   std::vector<enzo_float*> photon_densities = {};
   for (int igroup=0; igroup<enzo_config->method_ramses_rt_N_groups; igroup++) { 
@@ -807,24 +829,24 @@ void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo
     for (int iy=gy; iy<my-gy; iy++) {
       for (int ix=gx; ix<mx-gx; ix++) {
         int i = INDEX(ix,iy,iz,mx,my); //index of current cell
-        
+        double nHI = HI_density[i] * rhounit / mH; 
         double heating_rate = 0.0; 
         for (int j=0; j<3; j++) { //loop over species
           double beta = get_beta(temperature[i], j); 
-          double ionization_rate = beta * e_density[i];
+          double ionization_rate = beta * e_density[i]*rhounit;
           for (int igroup=0; igroup<enzo_config->method_ramses_rt_N_groups; igroup++) { //loop over groups
 
             std::string igroup_s = std::to_string(igroup);
             std::string j_s = std::to_string(j);
 
-            double sigmaN = *(scalar.value( scalar.index("sigN_" + igroup_s + j_s ))); 
+            double sigmaN = *(scalar.value( scalar.index("sigN_" + igroup_s + j_s ))) * lunit*lunit; 
 
-            double sigmaE = *(scalar.value( scalar.index("sigE_" + igroup_s + j_s ))); 
+            double sigmaE = *(scalar.value( scalar.index("sigE_" + igroup_s + j_s ))) * lunit*lunit; 
 
-            double eps    = *(scalar.value( scalar.index("eps_" + igroup_s ))); 
+            double eps    = *(scalar.value( scalar.index("eps_" + igroup_s ))) * eunit; 
  
-            double N_i = (photon_densities[igroup])[i];
-            double n_j = (chemistry_fields[j])[i] / (N_nucleons[j]*cello::mass_hydrogen); //number density of species j
+            double N_i = (photon_densities[igroup])[i] / volunit;
+            double n_j = (chemistry_fields[j])[i] * rhounit / (masses[j]); //number density of species j
             ionization_rate += sigmaN*clight*N_i; 
             
             heating_rate += n_j*clight*N_i*(eps*sigmaE - Eion[j]*sigmaN); // Equation A16
@@ -833,10 +855,10 @@ void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo
             "; N_i = " << N_i << "; eps = " << eps << "; Ediff = " << (eps*sigmaE - Eion[j]*sigmaN) <<  std::endl;
 #endif          
           }
-          (ionization_rate_fields[j])[i] = ionization_rate; //update fields with new value
+          (ionization_rate_fields[j])[i] = ionization_rate * tunit; //update fields with new value, put ionization rates in 1/time_units
         }
         
-        RT_heating_rate[i] = heating_rate;
+        RT_heating_rate[i] = heating_rate / nHI;
 #ifdef DEBUG_RATES
         std::cout << "RT_heating_rate[i] = " << RT_heating_rate[i] << "; RT_HI_ionization_rate[i] = " << (ionization_rate_fields[0])[i] << std::endl;
 #endif 
@@ -979,6 +1001,8 @@ void EnzoMethodRamsesRT::recombination_photons (EnzoBlock * enzo_block, enzo_flo
 
   Field field = enzo_block->data()->field();
   int igroup = enzo_block->method_ramses_rt_igroup;
+  EnzoUnits * enzo_units = enzo::units();
+  double Tunit = enzo_units->temperature();
 
   if (!field.is_field("density")) return;
   
@@ -989,13 +1013,14 @@ void EnzoMethodRamsesRT::recombination_photons (EnzoBlock * enzo_block, enzo_flo
                                                "HeI_density", "HeII_density"};
 
   double dN_dt = 0.0;
+  double alpha_units = enzo_units->volume() / enzo_units->time();
   for (int j=0; j<chemistry_fields.size(); j++) {  
     enzo_float * density_j = (enzo_float *) field.values(chemistry_fields[j]);     
     int b = get_b_boolean(E_lower, E_upper, j);
   
     //TODO: To speed things up, could just have get_alpha return alpha_A - alpha_B
-    double alpha_A = get_alpha(T[i], j, 'A');
-    double alpha_B = get_alpha(T[i], j, 'B');     
+    double alpha_A = get_alpha(T[i]*Tunit, j, 'A') / alpha_units;
+    double alpha_B = get_alpha(T[i]*Tunit, j, 'B') / alpha_units;     
 
     dN_dt += b*(alpha_A-alpha_B) * density_j[i]*e_density[i];
 #ifdef DEBUG_RECOMBINATION
@@ -1034,14 +1059,16 @@ void EnzoMethodRamsesRT::recombination_chemistry (EnzoBlock * enzo_block) throw(
 
   enzo_float * temperature = (enzo_float *) field.values("temperature");
 
+  EnzoUnits * enzo_units = enzo::units();
+  double alpha_units = enzo_units->volume() / enzo_units->time();
   for (int iz=gz; iz<mz-gz; iz++) {
     for (int iy=gy; iy<my-gy; iy++) {
       for (int ix=gx; ix<mx-gx; ix++) {
         int i = INDEX(ix,iy,iz,mx,my); //index of current cell
          
-        double alphaA_HII   = get_alpha(temperature[i],0,'A');
-        double alphaA_HeII  = get_alpha(temperature[i],1,'A');
-        double alphaA_HeIII = get_alpha(temperature[i],2,'A');
+        double alphaA_HII   = get_alpha(temperature[i],0,'A')/alpha_units;
+        double alphaA_HeII  = get_alpha(temperature[i],1,'A')/alpha_units;
+        double alphaA_HeIII = get_alpha(temperature[i],2,'A')/alpha_units;
         
         // eq. 28
         HII_density  [i] -= HII_density[i]*alphaA_HII*e_density[i] * enzo_block->dt;
@@ -1066,6 +1093,7 @@ void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * 
   // TODO: Need to also update photon density field and to account for recombinations (2nd half of eq. 25)
   //       Right now, this only accounts for attenuation (first half)
   const EnzoConfig * enzo_config = enzo::config();
+  EnzoUnits * enzo_units = enzo::units();
   
   Field field = enzo_block->data()->field();
   int igroup = enzo_block->method_ramses_rt_igroup;
@@ -1076,8 +1104,8 @@ void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * 
 
   std::vector<std::string> chemistry_fields = {"HI_density", 
                                                "HeI_density", "HeII_density"};
-  std::vector<double> masses = {cello::mass_hydrogen,
-                      4*cello::mass_hydrogen, 4*cello::mass_hydrogen};
+  double mH = cello::mass_hydrogen / enzo_units->mass();
+  std::vector<double> masses = {mH,4*mH, 4*mH};
 
  
   //it's okay to use the same cross section for both attenuation (affects N) and 
@@ -1089,11 +1117,9 @@ void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * 
   for (int j=0; j<chemistry_fields.size(); j++) {  
     enzo_float * density_j = (enzo_float *) field.values(chemistry_fields[j]);     
     double sigN_ij = *(scalar.value( scalar.index("sigN_" + std::to_string(igroup) + std::to_string(j)) ));
-    
     d_dt += density_j[i] / masses[j] * clight*sigN_ij;
   }
   
-
   N [i] -= d_dt*N [i] * enzo_block->dt;
   Fx[i] -= d_dt*Fx[i] * enzo_block->dt;
   Fy[i] -= d_dt*Fy[i] * enzo_block->dt;
@@ -1114,6 +1140,7 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
   // photon group i
  
   const EnzoConfig * enzo_config = enzo::config();
+  EnzoUnits * enzo_units = enzo::units();
 
   Field field = enzo_block->data()->field();
   int mx,my,mz;  
@@ -1133,7 +1160,7 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
   const int idy = mx;
   const int idz = mx*my; 
 
-  // energy bounds for this group
+  // energy bounds for this group (leave in eV)
   double E_lower = enzo_config->method_ramses_rt_bin_lower[enzo_block->method_ramses_rt_igroup]; 
   double E_upper = enzo_config->method_ramses_rt_bin_upper[enzo_block->method_ramses_rt_igroup]; 
 
@@ -1153,16 +1180,6 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
   enzo_float * Fynew = new enzo_float[m];
   enzo_float * Fznew = new enzo_float[m];
  
-  for (int i=0; i<m; i++)
-  {
-    if (N [i] < 1e-16) N [i] = 1e-16;
- 
-    Nnew [i] = N [i];
-    Fxnew[i] = Fx[i];
-    Fynew[i] = Fy[i];
-    Fznew[i] = Fz[i];
-  }
-
   double dt = enzo_block->dt;
   double hx = (xp-xm)/(mx-2*gx);
   double hy = (yp-ym)/(my-2*gy);
@@ -1175,10 +1192,34 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
   // if 2D, gz = 0 by default (I think) and mz = 1, so the outermost loop
   // would just be for (int iz=0, iz<1, iz++)
 
-  //calculate the pressure tensor
-  get_pressure_tensor(enzo_block, N, Fx, Fy, Fz);
+
 
   //if (true) get_group_attributes(); // if (enzo_block->cycle % attribute_cycle_step == 0)
+  double lunit = enzo_units->length();
+  double tunit = enzo_units->time();
+
+  double clight = cello::clight * tunit/lunit;
+
+  // everything in cgs
+  //double clight = cello::clight;
+  //hx *= lunit;
+  //hy *= lunit;
+  //hz *= lunit; 
+  //dt *= tunit;
+
+  for (int i=0; i<m; i++)
+  {
+    if (N [i] < 1e-16) N [i] = 1e-16;
+ 
+    Nnew [i] = N [i];
+    Fxnew[i] = Fx[i];
+    Fynew[i] = Fy[i];
+    Fznew[i] = Fz[i];
+  }
+
+
+  //calculate the pressure tensor
+  get_pressure_tensor(enzo_block, N, Fx, Fy, Fz, clight);
 
   for (int iz=gz; iz<mz-gz; iz++) {
     for (int iy=gy; iy<my-gy; iy++) {
@@ -1187,7 +1228,7 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
         double N_update=0, Fx_update=0, Fy_update=0, Fz_update=0;
       
         get_U_update( enzo_block, &N_update, &Fx_update, &Fy_update, &Fz_update,
-                             N, Fx, Fy, Fz, hx, hy, hz, dt, enzo_config->method_ramses_rt_clight,
+                             N, Fx, Fy, Fz, hx, hy, hz, dt, clight,
                              i, idx, idy, idz ); 
 
         // get updated fluxes
@@ -1204,7 +1245,7 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
 #endif
  
         // add interactions with matter 
-        add_attenuation(enzo_block, Nnew, Fxnew, Fynew, Fznew, enzo_config->method_ramses_rt_clight, i); 
+        add_attenuation(enzo_block, Nnew, Fxnew, Fynew, Fznew, clight, i); 
 
         // update photon density due to recombinations
         // TODO: Only do this if not using on-the-spot approximation
@@ -1227,7 +1268,7 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
         Fy[i] = Fynew[i];
         Fz[i] = Fznew[i];
    
-        if (N [i] < 1e-16) N [i] = 1e-16;
+       // if (N [i] < 1e-16) N [i] = 1e-16;
 
       }
     }

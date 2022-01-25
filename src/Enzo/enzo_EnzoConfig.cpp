@@ -81,6 +81,12 @@ EnzoConfig::EnzoConfig() throw ()
   initial_grackle_test_reset_energies(0),
 #endif /* CONFIG_USE_GRACKLE */
   initial_feedback_test_density(),
+  initial_feedback_test_HI_density(),
+  initial_feedback_test_HII_density(),
+  initial_feedback_test_HeI_density(),
+  initial_feedback_test_HeII_density(),
+  initial_feedback_test_HeIII_density(),
+  initial_feedback_test_e_density(),
   initial_feedback_test_star_mass(),
   initial_feedback_test_temperature(),
   initial_feedback_test_from_file(),
@@ -466,6 +472,12 @@ void EnzoConfig::pup (PUP::er &p)
 
   PUParray(p, initial_feedback_test_position,3);
   p | initial_feedback_test_density;
+  p | initial_feedback_test_HI_density;
+  p | initial_feedback_test_HII_density;
+  p | initial_feedback_test_HeI_density;
+  p | initial_feedback_test_HeII_density;
+  p | initial_feedback_test_HeIII_density;
+  p | initial_feedback_test_e_density;
   p | initial_feedback_test_star_mass;
   p | initial_feedback_test_temperature;
   p | initial_feedback_test_from_file;
@@ -1068,6 +1080,24 @@ void EnzoConfig::read(Parameters * p) throw()
   }
   initial_feedback_test_density = p->value_float
     ("Initial:feedback_test:density", 1.0E-24);
+
+  initial_feedback_test_HI_density = p->value_float
+    ("Initial:feedback_test:HI_density", 1.0E-24);
+
+  initial_feedback_test_HII_density = p->value_float
+    ("Initial:feedback_test:HII_density", 1.0E-100);
+
+  initial_feedback_test_HeI_density = p->value_float
+    ("Initial:feedback_test:HeI_density", 1.0E-100);
+
+  initial_feedback_test_HeII_density = p->value_float
+    ("Initial:feedback_test:HeII_density", 1.0E-100);
+
+  initial_feedback_test_HeIII_density = p->value_float
+    ("Initial:feedback_test:HeIII_density", 1.0E-100);
+
+  initial_feedback_test_e_density = p->value_float
+    ("Initial:feedback_test:e_density", 1.0E-100);
 
   initial_feedback_test_star_mass = p->value_float
     ("Initial:feedback_test:star_mass", 1000.0);

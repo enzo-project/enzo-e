@@ -93,6 +93,14 @@ void EnzoInitialFeedbackTest::enforce_block
   enzo_float * ge = (enzo_float *) field.values("internal_energy");
   enzo_float * te = (enzo_float *) field.values("total_energy");
 
+  enzo_float * d_HI = (enzo_float *) field.values("HI_density");
+  enzo_float * d_HII = (enzo_float *) field.values("HII_density");
+  enzo_float * d_HeI = (enzo_float *) field.values("HeI_density");
+  enzo_float * d_HeII = (enzo_float *) field.values("HeII_density");
+  enzo_float * d_HeIII = (enzo_float *) field.values("HeIII_density");
+  enzo_float * d_electron = (enzo_float *) field.values("e_density");
+  enzo_float * temperature = (enzo_float *) field.values("temperature");
+
   enzo_float * v3[3] = { (enzo_float *) field.values("velocity_x"),
                          (enzo_float *) field.values("velocity_y"),
                          (enzo_float *) field.values("velocity_z")};
@@ -128,6 +136,13 @@ void EnzoInitialFeedbackTest::enforce_block
          int i = INDEX(ix,iy,iz,ngx,ngy);
 
          d[i]  = enzo_config->initial_feedback_test_density / enzo_units->density();
+         d_HI[i]  = enzo_config->initial_feedback_test_HI_density / enzo_units->density();
+         d_HII[i]  = enzo_config->initial_feedback_test_HII_density / enzo_units->density();
+         d_HeI[i]  = enzo_config->initial_feedback_test_HeI_density / enzo_units->density();
+         d_HeII[i]  = enzo_config->initial_feedback_test_HeII_density / enzo_units->density();
+         d_HeIII[i]  = enzo_config->initial_feedback_test_HeIII_density / enzo_units->density();
+         d_electron[i]  = enzo_config->initial_feedback_test_e_density / enzo_units->density();
+         temperature[i] = enzo_config->initial_feedback_test_temperature / enzo_units->temperature();
 
          for (int dim = 0; dim < 3; dim++) v3[dim][i] = 0.0;
 

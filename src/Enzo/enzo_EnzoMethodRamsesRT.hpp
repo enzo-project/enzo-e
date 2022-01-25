@@ -77,7 +77,7 @@ protected: // methods
   double get_star_temperature(double M) throw();
 
   void get_radiation_blackbody(EnzoBlock * enzo_block, enzo_float * N, int i, double T, 
-             double freq_lower, double freq_upper, double dt, double clight, double f_esc) throw();
+             double freq_lower, double freq_upper, double clight, double f_esc) throw();
 
   void inject_photons(EnzoBlock * enzo_block) throw();
 
@@ -87,19 +87,19 @@ protected: // methods
 
   double flux_function (double U_l, double U_lplus1,
                         double Q_l, double Q_lplus1,
-                        std::string type) throw();
+                        double clight, std::string type) throw();
 
   double deltaQ_faces (double U_l, double U_lplus1, double U_lminus1, 
-                       double Q_l, double Q_lplus1, double Q_lminus1)
-                       throw();
+                       double Q_l, double Q_lplus1, double Q_lminus1,
+                       double clight) throw();
 
   void get_reduced_variables (double * chi_idx, double (*n_idx)[3], int i, double clight,
                               enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz) 
                               throw(); 
 
   void get_pressure_tensor (EnzoBlock * enzo_block, 
-                       enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz)
-                       throw();
+                       enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz,
+                       double clight) throw();
 
   void get_U_update (EnzoBlock * enzo_block, double * N_update, 
                        double * Fx_update, double * Fy_update, double * Fz_update, 
