@@ -201,6 +201,9 @@ void MethodOutput::compute_continue(Block * block)
   FileHdf5 * file = file_open_(block,a3);
 
   // Open *.block_list file and save FILE pointer
+  int count = file_count_(block);
+  std::string file_name = cello::expand_name(&file_name_,count,block);
+
   ScalarData<void *> * scalar_void = block->data()->scalar_data_void();
   FILE ** fp_block_list =
     (FILE **) scalar_void->value(cello::scalar_descr_void(),is_block_list_);
