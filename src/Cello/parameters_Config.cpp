@@ -880,7 +880,7 @@ void Config::read_method_ (Parameters * p) throw()
     }
     method_output_all_blocks[index_method] =
       p->value_logical(full_name+":all_blocks",true);
-    
+
     method_prolong[index_method] =
       p->value_string(full_name+":prolong","linear");
 
@@ -888,14 +888,14 @@ void Config::read_method_ (Parameters * p) throw()
     method_ghost_depth[index_method] =
       p->value_integer(full_name+":ghost_depth",0);
     method_min_face_rank[index_method] =
-      p->value_integer(full_name+"min_face_rank",0); // default 0 all faces
+      p->value_integer(full_name+":min_face_rank",0); // default 0 all faces
     method_all_fields[index_method] =
-      p->value_logical(full_name+"all_fields",false);
+      p->value_logical(full_name+":all_fields",false);
     method_all_particles[index_method] =
-      p->value_logical(full_name+"all_particles",false);
+      p->value_logical(full_name+":all_particles",false);
 
-  // Read specified timestep, if any (for MethodTrace)
-    method_timestep[index_method] = p->value_float  
+    // Read specified timestep, if any (for MethodTrace)
+    method_timestep[index_method] = p->value_float
       (full_name + ":timestep",std::numeric_limits<double>::max());
 
     method_trace_name[index_method] = p->value_string

@@ -125,6 +125,9 @@ protected: // attributes
   /// Block Scalar int for counting files
   int is_count_;
 
+  /// Block Scalar pointers for fp_file_list and fp_block_list files
+  int is_block_list_;
+
   /// Factory for creating Io objects
   union {
     const Factory * factory_;
@@ -135,6 +138,4 @@ protected: // attributes
   /// Whether to output all blocks or just leaf-blocks
   bool all_blocks_;
 };
-
-
 #endif /* PROBLEM_METHOD_OUTPUT_HPP */

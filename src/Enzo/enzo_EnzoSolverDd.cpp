@@ -223,8 +223,6 @@ void EnzoSolverDd::call_coarse_solver(EnzoBlock * enzo_block) throw()
   Solver * solve_coarse = cello::solver(index_solve_coarse_);
 
   solve_coarse->set_sync_id (enzo_sync_id_solver_dd_coarse);
-  CkPrintf ("DEBUG_REFRESH set_callback %s %d [CkIndex_EnzoBlock::p_solver_dd_solve_coarse()]\n",
-            name().c_str(),CkIndex_EnzoBlock::p_solver_dd_solve_coarse());
   solve_coarse->set_callback(CkIndex_EnzoBlock::p_solver_dd_solve_coarse());
 
   solve_coarse->set_field_x (ixc_);

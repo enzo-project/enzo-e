@@ -9,6 +9,8 @@
 #include "charm_simulation.hpp"
 #include "test.hpp"
 
+#define TRACE_OUTPUT
+
 //----------------------------------------------------------------------
 
 MethodOutput::MethodOutput
@@ -36,6 +38,7 @@ MethodOutput::MethodOutput
       all_particles_(all_particles),
       blocking_(),
       is_count_(-1),
+      is_block_list_(-1),
       factory_(factory),
       all_blocks_(all_blocks)
 {
@@ -81,6 +84,22 @@ MethodOutput::MethodOutput
     }
   }
 
+  // Create field list if all_fields_
+  if (all_fields_ && field_list_.size() == 0) {
+    int nf = cello::field_descr()->field_count();
+    for (int i_f=0; i_f<nf; i_f++) {
+      field_list_.push_back(i_f);
+    }
+  }
+
+  // Create particle list if all_particles_
+  if (all_particles_ && particle_list_.size() == 0) {
+    int np = cello::particle_descr()->num_types();
+    for (int i_p=0; i_p<np; i_p++) {
+      particle_list_.push_back(i_p);
+    }
+  }
+
   ASSERT("MethodOutput()",
          "MethodOutput requires either field_list or particle_list "
          "to be non-empty",
@@ -92,8 +111,11 @@ MethodOutput::MethodOutput
   blocking_[1] = blocking_y;
   blocking_[2] = blocking_z;
 
-  is_count_ = cello::scalar_descr_int()->new_value("method_output:count");
+  ScalarDescr * sdi = cello::scalar_descr_int();
+  is_count_ = sdi->new_value("method_output:count");
 
+  ScalarDescr * sdp = cello::scalar_descr_void();
+  is_block_list_ = sdp->new_value("method_output:block_list");
 }
 
 //----------------------------------------------------------------------
@@ -118,9 +140,9 @@ void MethodOutput::pup (PUP::er &p)
   p | all_particles_;
   PUParray(p,blocking_,3);
   p | is_count_;
+  p | is_block_list_;
   p | factory_nonconst_;
   p | all_blocks_;
-
 }
 
 //----------------------------------------------------------------------
@@ -178,6 +200,21 @@ void MethodOutput::compute_continue(Block * block)
 
   FileHdf5 * file = file_open_(block,a3);
 
+  // Open *.block_list file and save FILE pointer
+  ScalarData<void *> * scalar_void = block->data()->scalar_data_void();
+  FILE ** fp_block_list =
+    (FILE **) scalar_void->value(cello::scalar_descr_void(),is_block_list_);
+  *fp_block_list = fopen ((file_name+".block_list").c_str(),"w");
+
+  // Write and close file_list file
+  FILE * fp_file_list = fopen ((file_name+".file_list").c_str(),"w");
+  fprintf (fp_file_list,"%s\n",file_name.c_str());
+  fclose(fp_file_list);
+
+  // Restore working directory now that files are created
+  // (changed for block_list and file_list files in file_open_())
+  chdir ("..");
+
   // Create output message
   MsgOutput * msg_output = new MsgOutput(bt,this,file);
 
@@ -208,6 +245,13 @@ void MethodOutput::compute_continue(Block * block)
     FileHdf5 * file = msg_output->file();
     file->file_close();
     delete file;
+
+    // Close *.block_list file
+    ScalarData<void *> * scalar_void = block->data()->scalar_data_void();
+    FILE ** fp_block_list = (FILE **)
+      scalar_void->value(cello::scalar_descr_void(),is_block_list_);
+    fclose(*fp_block_list);
+    *fp_block_list = nullptr;
 
     // Delete message
     delete msg_output;
@@ -297,6 +341,15 @@ void MethodOutput::write(Block * block, MsgOutput * msg_output_in )
     // Close file
     FileHdf5 * file = msg_output->file();
     file->file_close();
+    delete file;
+
+    // Close *.block_list file
+    ScalarData<void *> * scalar_void = block->data()->scalar_data_void();
+    FILE ** fp_block_list = (FILE **)
+      scalar_void->value(cello::scalar_descr_void(),is_block_list_);
+    fclose(*fp_block_list);
+    *fp_block_list = nullptr;
+
     compute_done(block);
   } else {
     msg_output->del_block();
@@ -357,6 +410,10 @@ FileHdf5 * MethodOutput::file_open_(Block * block, int a3[3])
   // Create File
   FileHdf5 * file = new FileHdf5 (path_name, file_name);
   file->file_create();
+
+  // Change directory for file_list and block_list files
+  chdir (path_name.c_str());
+
   return file;
 }
 
@@ -393,6 +450,12 @@ void MethodOutput::file_write_block_
   IoBlock * io_block = (is_local) ?
     factory_->create_io_block() : msg_output->io_block();
   if (is_local) io_block->set_block(block);
+
+  // Write Block name to block_list file
+  ScalarData<void *> * scalar_void = block->data()->scalar_data_void();
+  FILE ** fp_block_list = (FILE **)
+    scalar_void->value(cello::scalar_descr_void(),is_block_list_);
+  fprintf(*fp_block_list,"%s\n",block_name.c_str());
 
   double block_lower[3];
   double block_upper[3];
