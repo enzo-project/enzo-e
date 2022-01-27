@@ -2,6 +2,7 @@ include "input/FluxCorrect/inclined_contact.incl"
 
  Method {
      list = [ "ppm", "flux_correct" ];
+
      ppm {
          courant = 0.8;
          diffusion = false;
@@ -10,3 +11,4 @@ include "input/FluxCorrect/inclined_contact.incl"
          steepening = false;
      }
  }
+

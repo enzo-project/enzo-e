@@ -10,15 +10,15 @@
 //----------------------------------------------------------------------
 
 IoParticleData::IoParticleData() throw ()
-  : Io(1),
+  : Io(),
     particle_data_(0),
     particle_index_(0)
 
 {
-  meta_name_.push_back("particle_num_types");
-  meta_name_.push_back("array_size");
-  meta_name_.push_back("num_particles");
-  meta_name_.push_back("ghosts_allocated");
+  // meta_name_.push_back("particle_num_types");
+  // meta_name_.push_back("array_size");
+  // meta_name_.push_back("num_particles");
+  // meta_name_.push_back("ghosts_allocated");
 }
 
 //----------------------------------------------------------------------
@@ -50,8 +50,7 @@ void IoParticleData::meta_value
 //----------------------------------------------------------------------
 
 void IoParticleData::field_array
-(int index,
- void ** buffer, std::string * name, int * type,
+(void ** buffer, std::string * name, int * type,
  int * nxd, int * nyd, int * nzd,
  int * nx,  int * ny,  int * nz) throw()
 {

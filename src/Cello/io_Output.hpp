@@ -42,8 +42,8 @@ public: // functions
   /// Charm++ PUP::able migration constructor
   Output (CkMigrateMessage *m)
     : PUP::able(m),
-      file_(0),           // Initialization deferred
-      schedule_(0),
+      file_(nullptr),           // Initialization deferred
+      schedule_(nullptr),
       sync_write_(1),     // default process-per-stride
       index_(0),
       cycle_(0),
@@ -53,11 +53,11 @@ public: // functions
       file_args_(),       // set_filename()
       dir_name_(""),     // set_dirname()
       dir_args_(),
-      io_block_(0),
-      it_field_index_(0),        // set_it_index_field()
-      io_field_data_(0),
-      it_particle_index_(0),        // set_it_index_particle()
-      io_particle_data_(0),
+      io_block_(nullptr),
+      io_field_data_(nullptr),
+      io_particle_data_(nullptr),
+      it_field_index_(nullptr),        // set_it_index_field()
+      it_particle_index_(nullptr),        // set_it_index_particle()
       stride_write_(1),// default one file per process
       stride_wait_(0) // default no synchronization of writes
   { }
@@ -75,20 +75,12 @@ public: // functions
 
   /// Set dir name
   void set_dir (std::string dir_name,
-		  std::vector<std::string> dir_args) throw()
+                std::vector<std::string> dir_args) throw()
   {
     dir_name_ = dir_name;
     dir_args_ = dir_args;
   }
 
-  /// Set field iterator
-  void set_it_field_index (ItIndex * it_index) throw()
-  { it_field_index_ = it_index; }
-
-  /// Set particle iterator
-  void set_it_particle_index (ItIndex * it_index) throw()
-  { it_particle_index_ = it_index; }
-  
   /// Return the IoBlock object
   IoBlock * io_block () const throw()
   { return io_block_; }
@@ -101,6 +93,14 @@ public: // functions
   IoParticleData * io_particle_data () const throw()
   { return io_particle_data_; }
 
+  /// Set field iterator
+  void set_it_field_index (ItIndex * it_index) throw()
+  { it_field_index_ = it_index; }
+
+  /// Set particle iterator
+  void set_it_particle_index (ItIndex * it_index) throw()
+  { it_particle_index_ = it_index; }
+  
   /// Return the File object pointer
   File * file() throw() 
   { return file_; }
@@ -306,17 +306,17 @@ protected: // attributes
   /// I/O Block data accessor
   IoBlock * io_block_;
 
-  /// Iterator over field indices
-  ItIndex * it_field_index_;
-
   /// I/O FieldData data accessor
   IoFieldData * io_field_data_;
 
-  /// Iterator over particle type indices
-  ItIndex * it_particle_index_;
-
   /// I/O ParticleData data accessor
   IoParticleData * io_particle_data_;
+
+  /// Iterator over field indices
+  ItIndex * it_field_index_;
+
+  /// Iterator over particle type indices
+  ItIndex * it_particle_index_;
 
   /// Only processes with id's divisible by stride_write_ writes
   /// (1: all processes write; 2: 0,2,4,... write; np: root process writes)

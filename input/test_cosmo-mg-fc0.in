@@ -20,14 +20,14 @@ Solver {
          monitor_iter = 1;
          post_smooth = "mg_post";
          pre_smooth = "mg_pre";
-         res_tol = 0.01000000000000000;
+         res_tol = 0.1000000000000000;
          solve_type = "level";
          type = "mg0";
      };
      mg_coarse {
          iter_max = 100;
          monitor_iter = 1;
-         res_tol = 0.01000000000000000;
+         res_tol = 0.1000000000000000;
          solve_type = "block";
          type = "cg";
      };

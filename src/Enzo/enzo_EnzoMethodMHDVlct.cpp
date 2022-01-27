@@ -117,7 +117,7 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   }
 
   // Finally, initialize the default Refresh object
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   // Need to refresh all fields because the fields holding passively advected
   // scalars won't necessarily be known until after all Methods have been
@@ -247,10 +247,8 @@ void EnzoMethodMHDVlct::save_fluxes_for_corrections_
     left_ff->get_size(&mx,&my,&mz);
 
     int dx_l,dy_l,dz_l,    dx_r,dy_r,dz_r;
-    enzo_float* left_dest =
-      (enzo_float *)left_ff->flux_array(&dx_l,&dy_l,&dz_l).data();
-    enzo_float* right_dest =
-      (enzo_float *)right_ff->flux_array(&dx_r,&dy_r,&dz_r).data();
+    enzo_float* left_dest = left_ff->flux_array(&dx_l,&dy_l,&dz_l);
+    enzo_float* right_dest = right_ff->flux_array(&dx_r,&dy_r,&dz_r);
 
     // NOTE: dx_l/dx_r, dy_l/dy_r, dz_l/dz_r have the wrong value when
     // dim is 0, 1, or 2 respectively. In each case the variables are equal to
@@ -314,8 +312,10 @@ static void allocate_FC_flux_buffer_(Block * block) throw()
 
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
+  int single_flux_array = enzo::config()->method_flux_correct_single_array;
+
   // this needs to be allocated every cycle
-  block->data()->flux_data()->allocate (nx,ny,nz,field_list);
+  block->data()->flux_data()->allocate (nx,ny,nz,field_list,single_flux_array);
 }
 
 //----------------------------------------------------------------------
@@ -658,7 +658,7 @@ void EnzoMethodMHDVlct::setup_arrays_
 
 //----------------------------------------------------------------------
 
-double EnzoMethodMHDVlct::timestep ( Block * block ) const throw()
+double EnzoMethodMHDVlct::timestep ( Block * block ) throw()
 {
   // analogous to ppm timestep calulation, probably want to require that cfast
   // is no smaller than some tiny positive number.

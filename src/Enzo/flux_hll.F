@@ -9,7 +9,7 @@ c////////////////////////  SUBROUTINE FLUX_HLL \\\\\\\\\\\\\\\\\\\\\\\\
      &     idiff, idual, eta1, ifallback,
      &     dls, drs, pls, prs, uls, urs, vls, vrs, wls, wrs, gels, gers,
      &     df, uf, vf, wf, ef, gef, ges,
-     &     ncolor, colslice, colls, colrs, colf
+     &     ncolor, colslice, colls, colrs, colf, ierror
      &     )
 
 c  RIEMANN SOLVER USING HLL APPROXIMATION
@@ -58,7 +58,7 @@ c-----------------------------------------------------------------------
 #define FORTRAN
 #include "fortran_types.h"
 c
-      INTG_PREC ijkn
+      INTG_PREC ijkn,ierror
       parameter (ijkn=MAX_ANY_SINGLE_DIRECTION)
 c-----------------------------------------------------------------------
 c
@@ -340,8 +340,10 @@ c
                write (6,*) 'flux_hll: eslice < 0: ', i, j
                write (6,*) qc*(ef(i,j)-ef(i+1,j)),
      &              eslice(i,j)*dslice(i,j)
+               ierror = ENZO_ERROR_FLUX_HLL_ESLICE
             else
                write (6,*) 'flux_hll: dnu <= 0:', i, j
+               ierror = ENZO_ERROR_FLUX_HLL_DSLICE
             endif
             write (6,*) 'a', dslice(i,j) + df(i,j)-df(i+1,j),
      $           df(i,j)-df(i+1,j), dslice(i,j), dt/dx(i), dt
@@ -407,7 +409,8 @@ c
      $              colrs(i+1,j,n)
                write(6,*) 'f', uls(i-1,j),uls(i,j),uls(i+1,j)
                write(6,*) 'g', urs(i-1,j),urs(i,j),urs(i+1,j)
-
+               print*, 'WARNING_MESSAGE'
+               ierror = ENZO_ERROR_FLUX_HLL_COLOR
             endif
          enddo
       enddo

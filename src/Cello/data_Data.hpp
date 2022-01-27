@@ -225,7 +225,7 @@ public: // interface
       (cello::scalar_descr_void (),
        &scalar_data_void_); }
 
-  
+
 private: // functions
 
   void copy_(const Data & data) throw();

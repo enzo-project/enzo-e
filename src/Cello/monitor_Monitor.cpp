@@ -102,11 +102,6 @@ void Monitor::header () const
 #ifdef CONFIG_HAVE_VERSION_CONTROL
   print ("Define","CHANGESET           %s",CELLO_CHANGESET);
 #endif
-#ifdef NEW_OUTPUT  
-  print ("Define","NEW_OUTPUT          %s","Yes");
-#else
-  print ("Define","NEW_OUTPUT          %s","no");
-#endif  
   print ("Define","CHARM_PATH          %s",CHARM_PATH);
   print ("Define","CHARM_VERSION       %d",CHARM_VERSION);
   print ("Define","CHARM_BUILD         %s",CHARM_BUILD);
@@ -115,6 +110,11 @@ void Monitor::header () const
   print ("Define","CONFIG_SMP_MODE     %s","Yes");
 #else
   print ("Define","CONFIG_SMP_MODE     %s","no");
+#endif  
+#ifdef NEW_ADAPT
+  print ("Define","NEW_ADAPT    %s","Yes");
+#else
+  print ("Define","NEW_ADAPT    %s","no");
 #endif  
   print ("CHARM","CkNumPes()           %d",CkNumPes());
   print ("CHARM","CkNumNodes()         %d",CkNumNodes());

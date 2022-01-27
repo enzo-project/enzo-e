@@ -33,10 +33,16 @@
  }
 
  Initial {
-     list = [ "value", "music", "cosmology" ];
-     music {
+
+     # "new" initialization required for "hdf5" Initial type
+     # (supports communication, but currently limited to unigrid)
+
+     new = true;
+     
+     list = [ "hdf5", "cosmology" ];
+     hdf5 {
+         format = "music";
          FD {
-             coords = "tzyx";
              dataset = "GridDensity";
              dimensions = "Dimensions";
              file = "input/GridParticles/GridDensity";
@@ -44,7 +50,6 @@
              type = "field";
          };
          FVX {
-             coords = "tzyx";
              dataset = "GridVelocities_x";
              dimensions = "Dimensions";
              file = "input/GridParticles/GridVelocities_x";
@@ -52,7 +57,6 @@
              type = "field";
          };
          FVY {
-             coords = "tzyx";
              dataset = "GridVelocities_y";
              dimensions = "Dimensions";
              file = "input/GridParticles/GridVelocities_y";
@@ -60,7 +64,6 @@
              type = "field";
          };
          FVZ {
-             coords = "tzyx";
              dataset = "GridVelocities_z";
              dimensions = "Dimensions";
              file = "input/GridParticles/GridVelocities_z";
@@ -69,7 +72,6 @@
          };
          PVX {
              attribute = "vx";
-             coords = "tzyx";
              dataset = "ParticleVelocities_x";
              file = "input/GridParticles/ParticleVelocities_x";
              name = "dark";
@@ -77,7 +79,6 @@
          };
          PVY {
              attribute = "vy";
-             coords = "tzyx";
              dataset = "ParticleVelocities_y";
              file = "input/GridParticles/ParticleVelocities_y";
              name = "dark";
@@ -85,7 +86,6 @@
          };
          PVZ {
              attribute = "vz";
-             coords = "tzyx";
              dataset = "ParticleVelocities_z";
              file = "input/GridParticles/ParticleVelocities_z";
              name = "dark";
@@ -93,7 +93,6 @@
          };
          PX {
              attribute = "x";
-             coords = "tzyx";
              dataset = "ParticleDisplacements_x";
              file = "input/GridParticles/ParticleDisplacements_x";
              name = "dark";
@@ -101,7 +100,6 @@
          };
          PY {
              attribute = "y";
-             coords = "tzyx";
              dataset = "ParticleDisplacements_y";
              file = "input/GridParticles/ParticleDisplacements_y";
              name = "dark";
@@ -109,7 +107,6 @@
          };
          PZ {
              attribute = "z";
-             coords = "tzyx";
              dataset = "ParticleDisplacements_z";
              file = "input/GridParticles/ParticleDisplacements_z";
              name = "dark";
@@ -328,7 +325,7 @@
          position = [ "x", "y", "z" ];
 	 velocity = [ "vx", "vy", "vz" ];
          constants = [ "mass", "double", .8382456140 ];
-
+         group_list = [ "has_mass" ];
      }
  }
 

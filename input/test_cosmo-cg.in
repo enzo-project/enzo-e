@@ -11,7 +11,7 @@ include "input/test_cosmo.incl"
      cg {
          iter_max = 100;
          monitor_iter = 10;
-         res_tol = 0.01000000000000000;
+         res_tol = 0.1000000000000000;
          type = "cg";
      };
  }

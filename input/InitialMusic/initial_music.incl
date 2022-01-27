@@ -41,7 +41,7 @@
      }
   }
 
-# The simulation stops after 10 cycles
+# The simulation stops after the specified number of cycles
 
   Stopping { cycle = 0;   }
 
@@ -222,9 +222,6 @@
        field_list = ["density"];
        image_size = [ 256,256];
        schedule { var =  "cycle"; step = 1;  }
-       image_specify_bounds = true;
-       image_min=5.0;
-       image_max=6.0;
        include "input/Colormap/colormap_blackbody.incl"
     }
 

@@ -14,7 +14,15 @@
 
       gamma = 1.6666666666666667;
       ghost_depth = 4; # needs to be 4 for flux corrections
-   }
+
+      #--------------------------------------------------
+      # JB: TEMPORARY CHANGE: bypassing default "enzo" prolongation
+      # JB: since it does not yet interpolate conserved quantities
+      # JB: jobordner@ucsd.edu 210914
+      prolong = "linear";
+      # JB: TEMPORARY CHANGE
+      #--------------------------------------------------
+ }
 
  Group {
      list = [ "conserved", "make_field_conservative" ];

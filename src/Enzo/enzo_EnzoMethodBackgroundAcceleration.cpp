@@ -42,7 +42,7 @@ EnzoMethodBackgroundAcceleration::EnzoMethodBackgroundAcceleration
   // Do not need to refresh acceleration fields in this method
   // since we do not need to know any ghost zone information
   //
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_field(iax);
   refresh->add_field(iay);
@@ -411,7 +411,7 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
   return;
 }
 
-double EnzoMethodBackgroundAcceleration::timestep (Block * block) const throw()
+double EnzoMethodBackgroundAcceleration::timestep (Block * block) throw()
 {
   // Use the same timestep check as implemented for gravity. This
   // just goes through the acceleration fields and checkes to make

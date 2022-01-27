@@ -7,14 +7,26 @@
 
 #include "data.hpp"
 
+// #define TRACE_FACE_FLUXES
+
+#ifdef TRACE_FACE_FLUXES
+#   undef TRACE_FACE_FLUXES
+#   define TRACE_FACE_FLUXES(MSG) CkPrintf ("%d TRACE_FACE_FLUXES %s\n",CkMyPe(),MSG);
+#else
+#   define TRACE_FACE_FLUXES(MSG) /* ... */
+#endif
+
+//----------------------------------------------------------------------
+
 FaceFluxes::FaceFluxes (Face face, int index_field,
                         int nx, int ny, int nz,
                         int cx, int cy, int cz)
   : face_(face),
-    fluxes_(),
     index_field_(index_field),
     nx_(nx),ny_(ny),nz_(nz),
-    cx_(cx),cy_(cy),cz_(cz)
+    cx_(cx),cy_(cy),cz_(cz),
+    delete_fluxes_(false),
+    fluxes_(nullptr)
 {
   int fx,fy,fz; // face
   face.get_face(&fx,&fy,&fz);
@@ -39,8 +51,6 @@ void FaceFluxes::pup (PUP::er &p)
 
   p | face_;
 
-  p | fluxes_;
-
   p | index_field_;
 
   p | nx_;
@@ -50,6 +60,25 @@ void FaceFluxes::pup (PUP::er &p)
   p | cx_;
   p | cy_;
   p | cz_;
+
+  p | delete_fluxes_;
+  
+  int fluxes_allocated = (fluxes_ != nullptr);
+  p | fluxes_allocated;
+  if (fluxes_allocated) {
+    if (delete_fluxes_) {
+      // depends on nx,ny,nz,cx,cy,cz
+      int size = get_size();
+      p | size;
+      if (p.isUnpacking()) allocate_storage();
+      PUParray(p,fluxes_,size);
+    } else {
+      // all Block fluxes_ points into single array: PUP values
+      // handled by parent FluxData object
+    }
+  } else {
+    fluxes_ = nullptr;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -57,21 +86,17 @@ void FaceFluxes::pup (PUP::er &p)
 void FaceFluxes::set_flux_array ( std::vector<cello_float> array,
                                   int dx, int dy, int dz)
 {
+  TRACE_FACE_FLUXES("set_flux_array()");
   int mx,my,mz;
   get_size(&mx,&my,&mz);
   ASSERT5("FaceFluxes::set_flux_array",
           "Input array size %lu is smaller than required %d = %d * %d *%d",
           array.size(),mx*my*mz,mx,my,mz,
-          (array.size() >= mx*my*mz) );
+          ((int)array.size() >= mx*my*mz) );
   ASSERT4("FaceFluxes::set_flux_array",
           "Input array size %lu is too small for strides (dx,dy,dz)=(%d,%d,%d)",
           array.size(),dx,dy,dz,
-          (array.size() >= (mx-1)*dx+(my-1)*dy+(mz-1)*dz) );
-
-  ASSERT5("FaceFluxes::set_flux_array",
-          "Flux array size %lu is smaller than required %d = %d * %d *%d",
-          fluxes_.size(),mx*my*mz,mx,my,mz,
-          (fluxes_.size() >= mx*my*mz) );
+          ((int)array.size() >= (mx-1)*dx+(my-1)*dy+(mz-1)*dz) );
 
   for (int iz=0; iz<mz; iz++) {
     for (int iy=0; iy<my; iy++) {
@@ -86,8 +111,9 @@ void FaceFluxes::set_flux_array ( std::vector<cello_float> array,
   
 //----------------------------------------------------------------------
 
-std::vector<cello_float> & FaceFluxes::flux_array (int * dx, int * dy, int *dz)
+cello_float * FaceFluxes::flux_array (int * dx, int * dy, int *dz)
 {
+  TRACE_FACE_FLUXES("flux_array()");
   int mx,my,mz;
   get_size(&mx,&my,&mz);
   if (dx) (*dx) = 1;
@@ -101,11 +127,13 @@ std::vector<cello_float> & FaceFluxes::flux_array (int * dx, int * dy, int *dz)
 
 void FaceFluxes::coarsen (int cx, int cy, int cz, int rank)
 {
-  std::vector<cello_float> fluxes_fine = fluxes_;
-  std::fill(fluxes_.begin(),fluxes_.end(),0.0);
-
+  TRACE_FACE_FLUXES("coarsen()");
   int mxf,myf,mzf;
-  get_size(&mxf,&myf,&mzf);
+  int m = get_size(&mxf,&myf,&mzf);
+  
+  cello_float * fluxes_fine = new cello_float[m];
+  std::copy_n(fluxes_,m,fluxes_fine);
+  std::fill_n(fluxes_,m,0.0);
 
   const int mxc = (nx_ > 1) ? (nx_/2 + cx_) : 1;
   const int myc = (ny_ > 1) ? (ny_/2 + cy_) : 1;
@@ -217,7 +245,8 @@ void FaceFluxes::coarsen (int cx, int cy, int cz, int rank)
             rank);
 
   }
-  
+
+  delete [] fluxes_fine;
 }
   
 //----------------------------------------------------------------------
@@ -225,6 +254,7 @@ void FaceFluxes::coarsen (int cx, int cy, int cz, int rank)
 void FaceFluxes::accumulate
 (const FaceFluxes & ff_2, int cx,int cy, int cz, int rank)
 {
+  TRACE_FACE_FLUXES("accumulate()");
   FaceFluxes & ff_1 = *this;
 
   int mx1,my1,mz1;
@@ -249,6 +279,7 @@ void FaceFluxes::accumulate
 
 FaceFluxes & FaceFluxes::operator *= (double weight)
 {
+  TRACE_FACE_FLUXES("operator *=()");
   int mx,my,mz;
   get_size(&mx,&my,&mz);
   const int m=mx*my*mz;
@@ -262,15 +293,20 @@ FaceFluxes & FaceFluxes::operator *= (double weight)
 
 int FaceFluxes::data_size () const
 {
+  TRACE_FACE_FLUXES("data_size()");
   int size = 0;
 
   size += face_.data_size();
-  size += sizeof(int);    // std::vector<cello_float> fluxes_;
-  int n = fluxes_.size();
-  size += n*sizeof(cello_float);
-  size += sizeof(int);    // int index_field_;
-  size += 3*sizeof(int);  // int nx_,ny_,nz_;
-  size += 3*sizeof(int);  // int cx_,cy_,cz_;
+  SIZE_SCALAR_TYPE(size,int,index_field_);
+  SIZE_SCALAR_TYPE(size,int,nx_);
+  SIZE_SCALAR_TYPE(size,int,ny_);
+  SIZE_SCALAR_TYPE(size,int,nz_);
+  SIZE_SCALAR_TYPE(size,int,cx_);
+  SIZE_SCALAR_TYPE(size,int,cy_);
+  SIZE_SCALAR_TYPE(size,int,cz_);
+  SIZE_SCALAR_TYPE(size,int,delete_fluxes_);
+  
+  SIZE_ARRAY_TYPE(size,cello_float,fluxes_,get_size());
 
   return size;
 }
@@ -279,6 +315,7 @@ int FaceFluxes::data_size () const
 
 char * FaceFluxes::save_data (char * buffer) const
 {
+  TRACE_FACE_FLUXES("save_data()");
   union {
     int  * pi;
     char * pc;
@@ -289,19 +326,17 @@ char * FaceFluxes::save_data (char * buffer) const
   pc = (char *) buffer;
 
   pc = face_.save_data(pc);
-  int n = fluxes_.size();
-  (*pi++) = n;
-  for (int i=0; i<n; i++) {
-    (*pcf++) = fluxes_[i];
-  }
-  (*pi++) = index_field_;
-  (*pi++) = nx_;
-  (*pi++) = ny_;
-  (*pi++) = nz_;
-  (*pi++) = cx_;
-  (*pi++) = cy_;
-  (*pi++) = cz_;
 
+  SAVE_SCALAR_TYPE(pc,int,index_field_);
+  SAVE_SCALAR_TYPE(pc,int,nx_);
+  SAVE_SCALAR_TYPE(pc,int,ny_);
+  SAVE_SCALAR_TYPE(pc,int,nz_);
+  SAVE_SCALAR_TYPE(pc,int,cx_);
+  SAVE_SCALAR_TYPE(pc,int,cy_);
+  SAVE_SCALAR_TYPE(pc,int,cz_);
+  SAVE_SCALAR_TYPE(pc,int,delete_fluxes_);
+
+  SAVE_ARRAY_TYPE(pc,cello_float,fluxes_,get_size());
   
   ASSERT2("FaceFluxes::save_data()",
 	  "Buffer has size %ld but expecting size %d",
@@ -315,6 +350,7 @@ char * FaceFluxes::save_data (char * buffer) const
 
 char * FaceFluxes::load_data (char * buffer)
 {
+  TRACE_FACE_FLUXES("load_data()");
   union {
     int  * pi;
     char * pc;
@@ -325,23 +361,45 @@ char * FaceFluxes::load_data (char * buffer)
   pc = (char *) buffer;
 
   pc = face_.load_data(pc);
-  int n = (*pi++);
-  fluxes_.resize(n);
-  for (int i=0; i<n; i++) {
-    fluxes_[i] = (*pcf++);
-  }
-  index_field_ = (*pi++);
-  nx_ = (*pi++);
-  ny_ = (*pi++);
-  nz_ = (*pi++);
-  cx_ = (*pi++);
-  cy_ = (*pi++);
-  cz_ = (*pi++);
-
+  
+  LOAD_SCALAR_TYPE(pc,int,index_field_);
+  LOAD_SCALAR_TYPE(pc,int,nx_);
+  LOAD_SCALAR_TYPE(pc,int,ny_);
+  LOAD_SCALAR_TYPE(pc,int,nz_);
+  LOAD_SCALAR_TYPE(pc,int,cx_);
+  LOAD_SCALAR_TYPE(pc,int,cy_);
+  LOAD_SCALAR_TYPE(pc,int,cz_);
+  LOAD_SCALAR_TYPE(pc,int,delete_fluxes_);
+  delete_fluxes_ = true;
+  fluxes_ = new cello_float [get_size()];
+  LOAD_ARRAY_TYPE(pc,cello_float,fluxes_,get_size());
   ASSERT2("FaceFluxes::load_data()",
 	  "Buffer has size %ld but expecting size %d",
 	  (pc-buffer),data_size(),
 	  ((pc-buffer) == data_size()));
 
   return pc;
+}
+
+//----------------------------------------------------------------------
+
+void FaceFluxes::print (Block * block, std::string message)
+{
+  cello_float min=1e30, max=-1e30, avg=0.0;
+  int mx,my,mz;
+  const int n = get_size(&mx,&my,&mz);
+  for (int iz=0; iz<mz; iz++) {
+    for (int iy=0; iy<my; iy++) {
+      for (int ix=0; ix<mx; ix++) {
+        const int i = ix + mx*(iy+my*iz);
+        min = std::min(min,fluxes_[i]);
+        avg += fluxes_[i];
+        max = std::max(max,fluxes_[i]);
+      }
+    }
+  }
+  avg /= mx*my*mz;
+  CkPrintf ("FaceFluxes::print %s %p %s %d %d %d %g %g %g\n",
+            block->name().c_str(),(void *)fluxes_,
+            message.c_str(),mx,my,mz,min,avg,max);
 }

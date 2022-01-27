@@ -6,7 +6,7 @@ is_arch_valid = 1
 
 #
 #flags_arch = '-g -fprofile-arcs -ftest-coverage' # gcov
-flags_arch = '-O3 -g -ffast-math -funroll-loops -fPIC -pedantic'
+flags_arch = '-O3 -Wall -g -ffast-math -funroll-loops -fPIC -pedantic'
 #flags_arch = '-Wall -O1 -g -fPIC -pedantic'
 #flags_arch = '-Wall -O0 -g'
 #flags_arch = '-O3 -pg -g'
@@ -64,3 +64,14 @@ boost_inc = os.getenv('BOOST_INC', '/usr/include/boost')
 boost_lib = os.getenv('BOOST_LIB', '/usr/lib/x86_64-linux-gnu')
 
 grackle_path = grackle_path_search(home)
+
+cello_var = os.environ.get('CELLO_VAR',"net")
+
+if (cello_var == "net"):
+    parallel_run = charm_path + "/bin/charmrun +p4 "
+    parallel_arg = " "
+    smp = 0
+elif (cello_var == "net-smp"):
+    parallel_run = charm_path + "/bin/charmrun +p4 "
+    parallel_arg = " ++ppn 4 "
+    smp = 1

@@ -280,11 +280,3 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
 
   return;
 }
-
-/*
-   Defaults to parent class timestep if nothing declared here
-double EnzoMethodStarMakerStochasticSF::timestep ( Block *block) const throw()
-{
-  return std::numeric_limits<double>::max();
-}
-*/

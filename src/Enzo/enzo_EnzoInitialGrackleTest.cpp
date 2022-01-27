@@ -200,11 +200,10 @@ void EnzoInitialGrackleTest::enforce_block
 
   // Finally compute temperature and pressure if fields are tracked
   // for output
-  const int in = cello::index_static();
   int comoving_coordinates = enzo_config->physics_cosmology;
   if (pressure){
-    EnzoComputePressure compute_pressure (EnzoBlock::Gamma[in],
-                                          comoving_coordinates);
+    const enzo_float gamma = EnzoBlock::Gamma[cello::index_static()];
+    EnzoComputePressure compute_pressure (gamma,comoving_coordinates);
 
     // Note: using compute_ method to avoid re-generating grackle_fields
     //       struct. Otherwise, one could just do:
@@ -236,6 +235,9 @@ void EnzoInitialGrackleTest::enforce_block
   }
 
   EnzoMethodGrackle::delete_grackle_fields(&grackle_fields_);
+
+
+  block->initial_done();
 
   return;
 #endif /* CONFIG_USE_GRACKLE */

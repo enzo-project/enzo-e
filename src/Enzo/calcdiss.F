@@ -454,7 +454,7 @@ c
 
             do i=i1-1, i2+1
 
-               is = i + sign(two, pslice(i+1,j) - pslice(i-1,j))
+               is = i + int(sign(two, pslice(i+1,j) - pslice(i-1,j)))
 
                omega(i) = max(0._RKIND, omega1 * (omega2 
      &              - (pslice(i+1,j) - pslice(i-1,j))
@@ -507,8 +507,8 @@ c
                if (de2 .ne. 0._RKIND) dee = de1/de2
                omega_tilde = max( dpp , dee )
 c
-               ism = i + sign(two, dp1)        ! post-shock
-               isp = i - sign(two, dp1)        ! upstream
+               ism = i + int(sign(two, dp1))        ! post-shock
+               isp = i - int(sign(two, dp1))        ! upstream
                s   =   - sign(one, dp1)        ! i+s - zone upstream from i
                if (dp1 .eq. 0._RKIND)  s = 0._RKIND
 c

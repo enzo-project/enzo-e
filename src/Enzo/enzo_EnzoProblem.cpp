@@ -92,7 +92,24 @@ Initial * EnzoProblem::create_initial_
 
   const EnzoConfig * enzo_config = enzo::config();
 
-  if (type == "music") {
+  if (type == "hdf5") {
+
+    initial = new EnzoInitialHdf5
+      (cycle,time,
+       enzo_config->initial_hdf5_max_level,
+       enzo_config->initial_hdf5_format,
+       enzo_config->initial_hdf5_blocking,
+       enzo_config->initial_hdf5_field_files,
+       enzo_config->initial_hdf5_field_datasets,
+       enzo_config->initial_hdf5_field_coords,
+       enzo_config->initial_hdf5_field_names,
+       enzo_config->initial_hdf5_particle_files,
+       enzo_config->initial_hdf5_particle_datasets,
+       enzo_config->initial_hdf5_particle_coords,
+       enzo_config->initial_hdf5_particle_types,
+       enzo_config->initial_hdf5_particle_attributes);
+
+  } else if (type == "music") {
 
     initial = new EnzoInitialMusic
       (cycle,time,enzo_config,config->mesh_max_initial_level);
@@ -263,9 +280,9 @@ Stopping * EnzoProblem::create_stopping_
 Refine * EnzoProblem::create_refine_
 (
  std::string        type,
+ int                index,
  Config *           config,
- Parameters *       parameters,
- int                index
+ Parameters *       parameters
  ) throw ()
 {
 
@@ -307,7 +324,7 @@ Refine * EnzoProblem::create_refine_
        config->adapt_level_exponent[index] );
 
   } else {
-    return Problem::create_refine_(type,config,parameters,index);
+    return Problem::create_refine_(type,index,config,parameters);
   }
 }
 
@@ -315,8 +332,8 @@ Refine * EnzoProblem::create_refine_
 
 Solver * EnzoProblem::create_solver_
 ( std::string  solver_type,
-  Config * config,
-  int index_solver) throw ()
+  int index_solver,
+  Config * config) throw ()
 /// @param solver_type   Name of the solver to create
 /// @param config Configuration parameters class
 {
@@ -344,10 +361,16 @@ Solver * EnzoProblem::create_solver_
     solve_type = solve_unknown;
   }
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("DEBUG_NEW_REFRESH create solver %s\n",
-	    enzo_config->solver_list[index_solver].c_str());
-#endif
+  Prolong * prolong = create_prolong_
+    (enzo_config->solver_prolong[index_solver],config);
+  Restrict * restrict = create_restrict_
+    (enzo_config->solver_restrict[index_solver],config);
+
+  const int index_prolong = prolong_list_.size();
+  const int index_restrict = restrict_list_.size();
+  prolong_list_.push_back(prolong);
+  restrict_list_.push_back(restrict);
+
   if (solver_type == "cg") {
 
     solver = new EnzoSolverCg
@@ -357,6 +380,8 @@ Solver * EnzoProblem::create_solver_
        enzo_config->solver_monitor_iter[index_solver],
        enzo_config->solver_restart_cycle[index_solver],
        solve_type,
+       index_prolong,
+       index_restrict,
        enzo_config->solver_min_level[index_solver],
        enzo_config->solver_max_level[index_solver],
        enzo_config->solver_iter_max[index_solver],
@@ -365,11 +390,6 @@ Solver * EnzoProblem::create_solver_
 
   } else if (solver_type == "dd") {
 
-    Restrict * restrict =
-      create_restrict_ (enzo_config->solver_restrict[index_solver],config);
-    Prolong * prolong =
-      create_prolong_  (enzo_config->solver_prolong[index_solver],config);
-
     solver = new EnzoSolverDd
       (enzo_config->solver_list[index_solver],
        enzo_config->solver_field_x[index_solver],
@@ -377,23 +397,26 @@ Solver * EnzoProblem::create_solver_
        enzo_config->solver_monitor_iter[index_solver],
        enzo_config->solver_restart_cycle[index_solver],
        solve_type,
+       index_prolong,
+       index_restrict,
        enzo_config->solver_min_level[index_solver],
        enzo_config->solver_max_level[index_solver],
        enzo_config->solver_coarse_solve[index_solver],
        enzo_config->solver_domain_solve[index_solver],
        enzo_config->solver_last_smooth[index_solver],
-       restrict,  prolong,
        enzo_config->solver_coarse_level[index_solver]);
 
   } else if (solver_type == "bicgstab") {
 
-      solver = new EnzoSolverBiCgStab
+    solver = new EnzoSolverBiCgStab
       (enzo_config->solver_list[index_solver],
        enzo_config->solver_field_x[index_solver],
        enzo_config->solver_field_b[index_solver],
        enzo_config->solver_monitor_iter[index_solver],
        enzo_config->solver_restart_cycle[index_solver],
        solve_type,
+       index_prolong,
+       index_restrict,
        enzo_config->solver_min_level[index_solver],
        enzo_config->solver_max_level[index_solver],
        enzo_config->solver_iter_max[index_solver],
@@ -409,7 +432,9 @@ Solver * EnzoProblem::create_solver_
        enzo_config->solver_field_b[index_solver],
        enzo_config->solver_monitor_iter[index_solver],
        enzo_config->solver_restart_cycle[index_solver],
-       solve_type);
+       solve_type,
+       index_prolong,
+       index_restrict);
 
   } else if (solver_type == "jacobi") {
 
@@ -420,15 +445,12 @@ Solver * EnzoProblem::create_solver_
        enzo_config->solver_monitor_iter[index_solver],
        enzo_config->solver_restart_cycle[index_solver],
        solve_type,
+       index_prolong,
+       index_restrict,
        enzo_config->solver_weight[index_solver],
        enzo_config->solver_iter_max[index_solver]);
 
   } else if (solver_type == "mg0") {
-
-    Restrict * restrict =
-      create_restrict_ (enzo_config->solver_restrict[index_solver],config);
-    Prolong * prolong =
-      create_prolong_  (enzo_config->solver_prolong[index_solver],config);
 
     solver = new EnzoSolverMg0
       (enzo_config->solver_list[index_solver],
@@ -437,6 +459,8 @@ Solver * EnzoProblem::create_solver_
        enzo_config->solver_monitor_iter[index_solver],
        enzo_config->solver_restart_cycle[index_solver],
        solve_type,
+       index_prolong,
+       index_restrict,
        enzo_config->solver_min_level[index_solver],
        enzo_config->solver_max_level[index_solver],
        enzo_config->solver_iter_max[index_solver],
@@ -445,12 +469,11 @@ Solver * EnzoProblem::create_solver_
        enzo_config->solver_coarse_solve[index_solver],
        enzo_config->solver_post_smooth[index_solver],
        enzo_config->solver_last_smooth[index_solver],
-       restrict,  prolong,
        enzo_config->solver_coarse_level[index_solver]);
 
   } else {
     // Not an Enzo Solver--try base class Cello Solver
-    solver = Problem::create_solver_ (solver_type,config, index_solver);
+    solver = Problem::create_solver_ (solver_type, index_solver,config);
   }
 
   ASSERT1 ("EnzoProblem::create_solver()",
@@ -516,12 +539,12 @@ Compute * EnzoProblem::create_compute
 
 Method * EnzoProblem::create_method_
 ( std::string  name,
+  int index_method,
   Config * config,
-  int index_method) throw ()
+  const Factory * factory) throw ()
 /// @param name   Name of the method to create
 /// @param config Configuration parameters class
 {
-
   Method * method = 0;
 
   const EnzoConfig * enzo_config = enzo::config();
@@ -559,6 +582,7 @@ Method * EnzoProblem::create_method_
        enzo_config->method_hydro_riemann_solver
        );
 */
+
   } else if (name == "ppml") {
 
     method = new EnzoMethodPpml;
@@ -597,11 +621,6 @@ Method * EnzoProblem::create_method_
        enzo_config->method_turbulence_mach_number,
        enzo_config->physics_cosmology);
 
-  } else if (name == "check_gravity") {
-
-    method = new EnzoMethodCheckGravity
-      (enzo_config->method_check_gravity_particle_type);
-
   } else if (name == "cosmology") {
 
     method = new EnzoMethodCosmology;
@@ -623,12 +642,20 @@ Method * EnzoProblem::create_method_
 	     solver_name.c_str(),
 	     0 <= index_solver && index_solver < enzo_config->num_solvers);
 
-  method = new EnzoMethodGravity
+    Prolong * prolong = create_prolong_
+      (config->method_prolong[index_method],config);
+
+    const int index_prolong = prolong_list_.size();
+    prolong_list_.push_back(prolong);
+  
+    method = new EnzoMethodGravity
       (
        enzo_config->solver_index.at(solver_name),
        enzo_config->method_gravity_grav_const,
        enzo_config->method_gravity_order,
-       enzo_config->method_gravity_accumulate);
+       enzo_config->method_gravity_accumulate,
+       index_prolong
+       );
 
   } else if (name == "mhd_vlct") {
 
@@ -678,7 +705,8 @@ Method * EnzoProblem::create_method_
   } else {
 
     // Fallback to Cello method's
-    method = Problem::create_method_ (name,config, index_method);
+    method = Problem::create_method_ (name, index_method,config,
+                                      enzo::simulation()->factory());
 
   }
 
@@ -710,7 +738,8 @@ Prolong * EnzoProblem::create_prolong_
   if (type == "enzo") {
     prolong = new EnzoProlong
       (enzo_config->prolong_enzo_type,
-       enzo_config->prolong_enzo_positive);
+       enzo_config->prolong_enzo_positive,
+       enzo_config->prolong_enzo_use_linear);
   } else {
     prolong = Problem::create_prolong_(type,config);
   }
@@ -794,15 +823,7 @@ Restrict * EnzoProblem::create_restrict_
 
   Restrict * restrict = 0;
 
-  if (type == "enzo") {
-
-    restrict = new EnzoRestrict (enzo::config()->interpolation_method);
-
-  } else {
-
-    restrict = Problem::create_restrict_(type,config);
-
-  }
+  restrict = Problem::create_restrict_(type,config);
 
   return restrict;
 

@@ -31,9 +31,8 @@ public: // interface
   void pup (PUP::er &p) 
   { TRACEPUP; Prolong::pup(p); }
 
-  /// Prolong fine Field values in the child block (icx,icy,icz) to parent
-
-  virtual int apply
+  /// Prolong coarse Field values to fine values
+  virtual void apply
   ( precision_type precision,
     void *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
     const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
@@ -42,10 +41,27 @@ public: // interface
   /// Return the name identifying the prolongation operator
   virtual std::string name () const { return "linear"; }
 
+  virtual bool array_sizes_valid (int n3_f[3], int n3_c[3], int * o3) const
+  {
+    // fine array must have even axes
+    const bool is_even =
+      ( n3_f[0]%1==0) &&
+      ((n3_f[1]%1==0) || n3_f[1]==1) &&
+      ((n3_f[2]%1==0) || n3_f[2]==1);
+
+    // fine size must be twice coarse size
+    const bool match =
+      (n3_f[0] == 2*n3_c[0]) &&
+      ((n3_f[1] == 2*n3_c[1]) || (n3_f[1]==1 && n3_c[1]==1)) &&
+      ((n3_f[2] == 2*n3_c[2]) || (n3_f[2]==1 && n3_c[2]==1));
+      
+    return (is_even) && (match);
+  }
+  
 private: // functions
 
   template <class T>  
-  int apply_
+  void apply_
   ( T *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
     const T * values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
     bool accumulate = false);

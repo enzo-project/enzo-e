@@ -33,7 +33,7 @@ public: // interface
 
   /// Prolong fine Field values in the child block (icx,icy,icz) to parent
 
-  virtual int apply
+  virtual void apply
   ( precision_type precision,
     void *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
     const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
@@ -45,7 +45,7 @@ public: // interface
 private: // functions
 
   template <class T>  
-  int apply_
+  void apply_
   ( T *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
     const T * values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
     bool accumulate = false);

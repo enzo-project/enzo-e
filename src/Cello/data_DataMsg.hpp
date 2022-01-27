@@ -22,13 +22,24 @@ public: // interface
   DataMsg() 
     : field_face_(nullptr),
       field_face_delete_   (false),
-      field_data_(nullptr),
+      field_data_u_(nullptr),
       field_data_delete_   (false),
       particle_data_(nullptr),
       particle_data_delete_(false),
       face_fluxes_list_(),
-      face_fluxes_delete_()
+      face_fluxes_delete_(),
+      coarse_field_buffer_(),
+      coarse_field_list_src_(),
+      coarse_field_list_dst_()
   {
+    for (int i=0; i<3; i++) {
+      iam3_cf_[i]  =0;
+      iap3_cf_[i]  =0;
+      ifms3_cf_[i]  =0;
+      ifps3_cf_[i]  =0;
+      ifmr3_cf_[i]  =0;
+      ifpr3_cf_[i]  =0;
+    }
     ++counter[cello::index_static()]; 
   }
 
@@ -41,13 +52,14 @@ public: // interface
       field_face_ = nullptr;
     }
     if (field_data_delete_) {
-      delete field_data_;
-      field_data_ = nullptr;
+      delete field_data_u_;
+      field_data_u_ = nullptr;
     }
     if (particle_data_delete_) {
       delete particle_data_;
       particle_data_ = nullptr;
     }
+    
     for (size_t i=0; i<face_fluxes_list_.size(); i++) {
       if (face_fluxes_delete_[i]) {
         delete face_fluxes_list_[i];
@@ -56,6 +68,9 @@ public: // interface
     }
     face_fluxes_list_.clear();
     face_fluxes_delete_.clear();
+    coarse_field_buffer_.clear();
+    coarse_field_list_src_.clear();
+    coarse_field_list_dst_.clear();
   }
 
   /// Copy constructor
@@ -66,10 +81,13 @@ public: // interface
 
   /// Assignment operator
   DataMsg & operator= (const DataMsg & data_msg) throw()
-  { return *this; }
+  {
+    ERROR("DataMsg::operator=()",
+          "This method should not be called");
+    return *this;
+  }
 
   void pup(PUP::er &p) {
-    TRACEPUP;
     WARNING("DataMsg::pup()",
 	    "DataMsg::pup() should never be called!");
   }
@@ -93,17 +111,17 @@ public: // interface
 
   /// Return the serialized FieldFace array
   char * field_array () 
-  { return field_array_; }
+  { return field_array_u_; }
 
 
   /// Return the FieldData
   FieldData * field_data () 
-  { return field_data_; }
+  { return field_data_u_; }
 
   /// Set the FieldData object
   void set_field_data    (FieldData * field_data, bool is_new) 
   {
-    field_data_ = field_data;
+    field_data_u_ = field_data;
     field_data_delete_ = is_new;
   }
 
@@ -157,6 +175,20 @@ public: // interface
     face_fluxes_delete_[i] = is_new;
   }
 
+  /// ------------------
+  /// COARSE FACE ARRAYS
+  /// ------------------
+
+  /// Initialize the  coarse face arrays to send to neighbors
+  void set_coarse_array
+  (Field field,
+   int iam3[3],int iap3[3],
+   int ifms3[3],int ifps3[3],
+   int ifmr3[3],int ifpr3[3],
+   const std::vector<int> & field_list_src,
+   const std::vector<int> & field_list_dst,
+   std::string debug_block_recv);
+
   ///--------------------
   /// PACKING / UNPACKING
   ///--------------------
@@ -178,58 +210,53 @@ public: // interface
   void update (Data * data, bool is_local);
 
   /// Debugging
-  void print ()
-  {
-    const int ip=CkMyPe();
-    char buf[81];
-    
-    snprintf (buf,80,"%d %p TRACE_DATA_MSG TRACE_DATA_MSG",ip,(void*)this);
-    CkPrintf ("%s field_face_    = %p\n",buf,(void*)field_face_);
-    CkPrintf ("%s field_data_    = %p\n",buf,(void*)field_data_);
-    CkPrintf ("%s particle_data_ = %p\n",buf,(void*)particle_data_);
-    CkPrintf ("%s particle_data_delete_ = %d\n",buf,particle_data_delete_?1:0);
-    CkPrintf ("%s |face_fluxes_list_| = %lu\n",
-              buf,face_fluxes_list_.size());
-    CkPrintf ("%s |face_fluxes_delete_| = %lu\n",
-              buf,face_fluxes_delete_.size());
-    CkPrintf ("%s field_face_delete_ = %d\n",buf,field_face_delete_?1:0);
-    CkPrintf ("%s field_data_delete_ = %d\n",buf,field_data_delete_?1:0);
-    fflush(stdout);
+  void print (const char * message) const;
 
-  }
-public: // static methods
-
-  
 protected: // attributes
 
   /// Field Face Data
   FieldFace * field_face_;
-  /// Whethere FieldFace data should be deleted in destructor
+  /// Whether FieldFace data should be deleted in destructor
   bool field_face_delete_;
 
   /// Field data
   union {
 
     /// Field data if local
-    FieldData * field_data_;
+    FieldData * field_data_u_;
 
     /// packed source field data if remote
-    char * field_array_;
+    char * field_array_u_;
 
   };
-  /// Whethere FieldData data should be deleted in destructor
+  /// Whether FieldData data should be deleted in destructor
   bool field_data_delete_;
   
   /// Particle data
   ParticleData * particle_data_;
-  /// Whethere Particle data should be deleted in destructor
+  /// Whether Particle data should be deleted in destructor
   bool particle_data_delete_;
 
   /// Flux faces (array for each field)
   std::vector<FaceFluxes *> face_fluxes_list_;
-  
+
   /// Whether Flux data should be deleted in destructor
   std::vector<bool> face_fluxes_delete_;
+
+  /// Padded coarse array values for prolongation operators that
+  /// requiring extra layers of cells around the interpoltaed region
+  std::vector<cello_float> coarse_field_buffer_;
+  /// List of field indices for coarse fields; src / dst for
+  /// accum=true
+  std::vector<int> coarse_field_list_src_;
+  std::vector<int> coarse_field_list_dst_;
+
+  /// loop limits of the coarse-block array section
+  int iam3_cf_[3], iap3_cf_[3];
+  /// loop limits for the sending field
+  int ifms3_cf_[3], ifps3_cf_[3];
+  /// loop limits for the receiving field
+  int ifmr3_cf_[3], ifpr3_cf_[3];
 
 };
 
