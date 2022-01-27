@@ -168,7 +168,7 @@ struct EinfeldtWavespeed
 template<class inputLUT>
 struct DavisWavespeed
 {
-  /// @class    DavisHLLEWavespeed
+  /// @class    DavisWavespeed
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Encapsulates one of the wavespeed estimators
   ///           described by Davis 1998. It was used in Enzo's Runge-Kutta MHD
@@ -214,9 +214,9 @@ public:
 template <class WaveSpeedFunctor>
 struct HLLImpl
 {
-  /// @class    EnzoRiemannHLLE
+  /// @class    HLLImpl
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] Encapsulates operations of HLLE approximate Riemann
+  /// @brief    [\ref Enzo] Encapsulates operations of HLL approximate Riemann
   /// Solver. 
 public:
 

@@ -21,15 +21,15 @@ public: // interface
 
   /// Create a new Solver
   Solver (std::string name,
-	  std::string field_x,
-	  std::string field_b,
-	  int monitor_iter,
-	  int restart_cycle,
-	  int solve_type,
+          std::string field_x,
+          std::string field_b,
+          int monitor_iter,
+          int restart_cycle,
+          int solve_type,
           int index_prolong,
           int index_restrict,
-	  int min_level = 0,
-	  int max_level = std::numeric_limits<int>::max()) throw();
+          int min_level = 0,
+          int max_level = std::numeric_limits<int>::max()) throw();
 
   /// Create an uninitialized Solver
   Solver () throw();

@@ -15,8 +15,8 @@ class Box {
 
   /// @class    Box
   /// @ingroup  Mesh
-  /// @brief    [\ref Mesh] 
-  
+  /// @brief    [\ref Mesh]
+
 public: // interface
 
   /// Constructor
@@ -33,7 +33,8 @@ public: // interface
       child_(),
       block_start_(),
       region_start_(),
-      region_stop_()
+      region_stop_(),
+      centering_()
   {
     for (int i=0; i<2; i++) {
       level_[i] = 0;
@@ -47,7 +48,7 @@ public: // interface
       coarse_ghost_[i] = ghost_depth_[i]/2 + ghost_depth_[i]%1 + 1;
     }
   }
-  
+
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   {
@@ -69,6 +70,7 @@ public: // interface
     p | pad_;
     PUParray(p,region_start_,3);
     PUParray(p,region_stop_,3);
+    PUParray(p,centering_,3);
 
   }
 
@@ -84,7 +86,7 @@ public: // interface
     child_[bt][2] = child[2];
     compute_block_start(bt);
   }
-  
+
   /// Set number of ghost zones 0 < g <= ghost_depth to receive
   /// Default ghost_depth
   inline void set_recv_ghosts (int ghost_depth_recv[3])
@@ -93,7 +95,7 @@ public: // interface
     ghost_depth_recv_[1] = ghost_depth_recv[1];
     ghost_depth_recv_[2] = ghost_depth_recv[2];
   }
-  
+
   /// Set number of ghost zones 0 <= g <= ghost_depth to include from the
   /// send block, e.g. for accumulate.  Default 0.
   inline void set_send_ghosts (int ghost_depth_send[3])
@@ -109,13 +111,21 @@ public: // interface
   {
     pad_ = pad;
   }
-  
+
   /// Set coarse field size
   inline void set_coarse (int coarse_size[3], int coarse_ghost[3])
   {
     for (int i=0; i<rank_; i++) {
       coarse_size_[i] = coarse_size[i];
       coarse_ghost_[i] = coarse_ghost[i];
+    }
+  }
+
+  /// Set field centering
+  inline void set_centering (int centering[3])
+  {
+    for (int i=0; i<rank_; i++) {
+      centering_[i] = centering[i];
     }
   }
 
@@ -168,7 +178,7 @@ public: // interface
     CkPrintf ("BOX\n");
     CkPrintf ("BOX: region_start_ %d %d %d\n",
               region_start_[0],region_start_[1],region_start_[2]);
-    
+
     CkPrintf ("BOX: region_stop_ %d %d %d\n",
               region_stop_[0],region_stop_[1],region_stop_[2]);
     CkPrintf ("Box----------------\n");
@@ -190,7 +200,7 @@ private: // attributes
 
   /// Spacial dimension of the boxes, at most three
   int rank_;
-  
+
   /// Size of blocks
   int block_size_[3];
 
@@ -207,7 +217,7 @@ private: // attributes
 
   /// Size of coarse fields
   int coarse_size_[3];
-  
+
   /// Depth of coarse field ghosts
   int coarse_ghost_[3];
 
@@ -217,22 +227,24 @@ private: // attributes
 
   /// Relative refinement level of recv block relative to the send block
   int level_[2];
-  
+
   /// Face along which the receive-block is located (-1,0,1)^3
   int face_[2][3];
 
   /// Child index of send-block or receive block, whichever is finer
   /// (not accessed if both in same level)
   int child_[2][3];
-  
+
   /// Starting index of the neighbor (send) block relative to the
   /// receive block
   int block_start_[2][3];
-  
+
   /// Starting and stopping indices of the send-recv intersection region
   int region_start_[3];
   int region_stop_[3];
 
+  /// Centering of field variables in cell (0 = centered; 1 = non-centered)
+  int centering_[3];
 };
 
 #endif /* MESH_BOX_HPP */
