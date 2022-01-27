@@ -101,7 +101,7 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   scratch_space_ = nullptr;
 
   // Finally, initialize the default Refresh object
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   // Need to refresh all fields because the fields holding passively advected
   // scalars won't necessarily be known until after all Methods have been
@@ -451,7 +451,7 @@ void EnzoMethodMHDVlct::compute_flux_
 
 //----------------------------------------------------------------------
 
-double EnzoMethodMHDVlct::timestep ( Block * block ) const throw()
+double EnzoMethodMHDVlct::timestep ( Block * block ) throw()
 {
   // analogous to ppm timestep calulation, probably want to require that cfast
   // is no smaller than some tiny positive number.

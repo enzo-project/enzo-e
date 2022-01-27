@@ -110,7 +110,7 @@
 
    Output {
 
-      list = ["d_x","d_y","d_z","dump"];
+      list = ["d_x","d_y","d_z"];
 
       dump {
         field_list = ["density"];

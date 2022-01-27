@@ -53,9 +53,6 @@ public:
   virtual std::string particle_type () throw()
   { return "star";}
 
-  // Compute the maximum timestep for this method
-  virtual double timestep ( Block * block) const throw();
-
 //  static void convert_densities_to_fraction(EnzoBlock * enzo_block,
 //                                            int direction) throw();
 

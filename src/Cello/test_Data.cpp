@@ -19,8 +19,6 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("Data");
 
-  ParticleDescr * particle_descr = new ParticleDescr;
-
   Data * data = new Data 
     ( 3,4,5,1,
      -1.0, 2.0,

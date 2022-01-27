@@ -25,68 +25,73 @@ const char * solve_string[] = {
 //======================================================================
 
 Solver::Solver (std::string name,
-		std::string field_x,
-		std::string field_b,
-		int monitor_iter,
-		int restart_cycle,
-		int solve_type,
-		int min_level,
-		int max_level) throw()
+                std::string field_x,
+                std::string field_b,
+                int monitor_iter,
+                int restart_cycle,
+                int solve_type,
+                int index_prolong,
+                int index_restrict,
+                int min_level,
+                int max_level) throw()
   : PUP::able(),
-  name_(name),
-  ix_(-1),ib_(-1),
-  monitor_iter_(monitor_iter),
-  restart_cycle_(restart_cycle),
-  callback_(0),
-  index_(0),
-  min_level_(min_level),
-  max_level_(max_level),
-  id_sync_(0),
-  solve_type_(solve_type),
-  ir_post_(-1)
+    name_(name),
+    ix_(-1),ib_(-1),
+    monitor_iter_(monitor_iter),
+    restart_cycle_(restart_cycle),
+    callback_(0),
+    index_(0),
+    min_level_(min_level),
+    max_level_(max_level),
+    id_sync_(0),
+    solve_type_(solve_type),
+    index_prolong_(index_prolong),
+    index_restrict_(index_restrict),
+    ir_post_(-1)
 {
   FieldDescr * field_descr = cello::field_descr();
   ix_ = field_descr->field_id(field_x);
   ib_ = field_descr->field_id(field_b);
-  ir_post_ = add_new_refresh_();
-  cello::refresh(ir_post_)->set_callback(CkIndex_Block::p_refresh_exit());
+  ir_post_ = add_refresh_();
 }
 
 //----------------------------------------------------------------------
 
 Solver::Solver () throw()
   : PUP::able(),
-  name_(""),
-  ix_(-1),ib_(-1),
-  monitor_iter_(0),
-  restart_cycle_(1),
-  callback_(0),
-  index_(0),
-  min_level_(0),
-  max_level_(std::numeric_limits<int>::max()),
-  id_sync_(0),
-  solve_type_(solve_leaf),
-  ir_post_(-1)
+    name_(""),
+    ix_(-1),ib_(-1),
+    monitor_iter_(0),
+    restart_cycle_(1),
+    callback_(0),
+    index_(0),
+    min_level_(0),
+    max_level_(std::numeric_limits<int>::max()),
+    id_sync_(0),
+    solve_type_(solve_leaf),
+    index_prolong_(0),
+    index_restrict_(0),
+    ir_post_(-1)
 {
-  ir_post_ = add_new_refresh_();
-  cello::refresh(ir_post_)->set_callback(CkIndex_Block::p_refresh_exit());
+  ir_post_ = add_refresh_();
 }
 
 //----------------------------------------------------------------------
 
-int Solver::add_new_refresh_ ()
+int Solver::add_refresh_ ()
 {
-  // set Solver::ir_post_
-
   const int * g3 = cello::config()->field_ghost_depth;
   const int ghost_depth = std::max(g3[0],std::max(g3[1],g3[2]));
   const int min_face_rank = cello::config()->adapt_min_face_rank;
 
-  // Set default refresh object
-  Refresh refresh_default
+  // Create new refresh object
+  Refresh refresh
     (ghost_depth,min_face_rank, neighbor_type_(), sync_type_(), 0);
 
-  return cello::simulation()->new_register_refresh(refresh_default);
+  refresh.set_prolong(index_prolong_);
+  refresh.set_restrict(index_restrict_);
+
+  return cello::simulation()->new_register_refresh(refresh);
 }
 
 //======================================================================

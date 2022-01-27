@@ -277,6 +277,8 @@ void EnzoInitialShockTube::enforce_block
 
   // Compute the Cell-Centered B-fields
   EnzoInitialBCenter::initialize_bfield_center(block);
+
+  block->initial_done();
 }
 
 //----------------------------------------------------------------------

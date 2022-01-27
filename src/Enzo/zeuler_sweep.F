@@ -196,6 +196,7 @@ c
             vslice(k,i) = u(i,j,k)
             wslice(k,i) = v(i,j,k)
             if (dslice(k,i) < 0.0) then
+               ierror = ENZO_ERROR_ZEULER_DSLICE
                print*, 'zeuler_sweep dslice ',i,j,k,dslice(k,i)
                if (num_ie_error .ge. 0) then
                   num_ie_error = num_ie_error + 1
@@ -203,8 +204,10 @@ c
                   ie_error_y(num_ie_error) = j
                   ie_error_z(num_ie_error) = k
                endif
+               return
             end if
             if (eslice(k,i) < 0.0) then
+               ierror = ENZO_ERROR_ZEULER_ESLICE
                print*, 'zeuler_sweep eslice ',i,j,k,eslice(k,i)
                if (num_ie_error .ge. 0) then
                   num_ie_error = num_ie_error + 1
@@ -212,6 +215,7 @@ c
                   ie_error_y(num_ie_error) = j
                   ie_error_z(num_ie_error) = k
                endif
+               return
             end if
          enddo
          if (gravity .eq. 1) then
@@ -223,13 +227,15 @@ c
             do k=1, kn
                geslice(k,i) = ge(i,j,k)
                if (geslice(k,i) < 0.0) then
-                  print*, 'xeuler_sweep geslice ',i,j,k,geslice(k,i)
+                  ierror = ENZO_ERROR_ZEULER_GESLICE
+                  print*, 'zeuler_sweep geslice ',i,j,k,geslice(k,i)
                   if (num_ie_error .ge. 0) then
                      num_ie_error = num_ie_error + 1
                      ie_error_x(num_ie_error) = i
                      ie_error_y(num_ie_error) = j
                      ie_error_z(num_ie_error) = k
                   endif
+                  return
                end if
             enddo
          endif
@@ -244,7 +250,6 @@ c
 c  Compute the pressure on a slice
 c
       if (idual .eq. 1) then
-         ierror = 3
          call pgas2d_dual(
      &        dslice, eslice, geslice, pslice, 
      &        uslice, vslice, wslice, eta1, eta2,
@@ -316,7 +321,6 @@ c
 c  If necessary, recompute the pressure to correctly set ge and e
 c
       if (idual .eq. 1) then
-         ierror = 3
          call pgas2d_dual
      &     (dslice, eslice, geslice, pslice, 
      &     uslice, vslice, wslice, eta1, eta2,

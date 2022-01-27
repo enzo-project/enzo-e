@@ -8,16 +8,13 @@ Solver {
      list = [ "bcg", "diagonal" ];
      bcg {
          iter_max = 200;
-         res_tol = 0.01;                  
-         monitor_iter = 1;
+         res_tol = 0.02;                  
+         monitor_iter = 10;
          type = "bicgstab";
-         precondition = "diagonal_D";
+         precondition = "diagonal";
      };
      diagonal {
         type = "diagonal";
      }
- }
- Field {
-    list += ["diagonal"];
  }
 

@@ -10,7 +10,7 @@ c
      $     dls, drs, pls, prs, gels, gers, 
      $     uls, urs, vls, vrs, wls, wrs, pbar, ubar,
      $     df, ef, uf, vf, wf, gef, ges,
-     $     ncolor, colslice, colls, colrs, colf, axis
+     $     ncolor, colslice, colls, colrs, colf, ierror
      $     )
 c
 c-----------------------------------------------------------------------
@@ -31,7 +31,7 @@ c                         own routine
 c
       implicit none
 #include "fortran_types.h"
-      INTG_PREC ijkn
+      INTG_PREC ijkn, ierror
       parameter (ijkn=MAX_ANY_SINGLE_DIRECTION)
 c
 c-----------------------------------------------------------------------
@@ -70,10 +70,8 @@ c
 c
 c-----------------------------------------------------------------------
 c
-      integer axis
       qa = (gamma + 1._RKIND)/(2._RKIND*gamma)
       qb = (gamma - 1._RKIND)/(gamma + 1._RKIND)
-
 c
 c  Loop over sweep lines (in this slice)
 c
@@ -225,7 +223,8 @@ c
      &       -db(i)*ub(i)*dt/dx(i) .gt. dslice(i,j) .or.
      &        db(i)*ub(i)*dt/dx(i) .gt. dslice(i-1,j)     ) then
             write(6,1010) i,j,ubar(i,j),ub(i),db(i),
-     &              dslice(i,j),dslice(i-1,j)
+     &           dslice(i,j),dslice(i-1,j)
+            ierror = ENZO_ERROR_FLUX_TWOSHOCK_1
  1010       format('cav:',2i6,8g12.4)
             ub(i) = 0._RKIND
          endif
@@ -409,12 +408,13 @@ c
                 write (6,*) eb(i-1), eb(i), eb(i+1)
                 write (6,*) dueb(i-1), dueb(i), dueb(i+1)
                 write (6,*) upb(i-1), upb(i), upb(i+1)
+                ierror = ENZO_ERROR_FLUX_TWOSHOCK_ESLICE
              else
                 write (6,*) 'flux_twoshock: dnu <= 0:', i, j
+                ierror = ENZO_ERROR_FLUX_TWOSHOCK_DSLICE
              endif
              write (6,*) 'a', df(i,j)-df(i+1,j), dslice(i,j), 
      $            dt/dx(i), dt, lbar(i),l0(i)
-             write (6,*) 'axis',axis
              write (6,*) 'b', db(i-1), db(i), db(i+1)
              write (6,*) 'c', ub(i-1), ub(i), ub(i+1)
              write (6,*) 'd', pb(i-1), pb(i), pb(i+1)
@@ -441,7 +441,8 @@ c             if (gravity .eq. 1)
 c     &        write (6,*) grslice(i-1,j), grslice(i,j), grslice(i+1,j)
              if (ifallback.eq.0) then
                 write(0,*) 'stop in euler with e < 0'
-C                ERROR_MESSAGE
+                ierror = ENZO_ERROR_FLUX_TWOSHOCK_FALLBACK
+                print*, 'ERROR_MESSAGE'
              else
                 print*, 'WARNING'
                 write(0,*) 'Falling back to a more diffusive Riemann',
@@ -452,7 +453,7 @@ C                ERROR_MESSAGE
      $               idiff, idual, eta1, ifallback,
      $               dls, drs, pls, prs, uls, urs, vls, vrs, wls, wrs,
      $               gels, gers, df, uf, vf, wf, ef, gef, ges, 
-     $               ncolor, colslice, colls, colrs, colf)
+     $               ncolor, colslice, colls, colrs, colf, ierror)
              endif
           endif
        enddo

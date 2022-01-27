@@ -19,7 +19,11 @@ class MethodDebug : public Method
 public: // interface
 
   /// Create a new MethodDebug
-  MethodDebug (int num_fields) throw();
+  MethodDebug
+  (int num_fields,
+   bool l_print,
+   bool l_coarse,
+   bool l_ghost) throw();
 
   /// Destructor
   virtual ~MethodDebug() throw()
@@ -42,6 +46,9 @@ public: // interface
     p | field_min_;
     p | field_max_;
     p | field_count_;
+    p | l_print_;
+    p | l_coarse_;
+    p | l_ghost_;
   };
 
   void compute_continue_sum_fields ( Block * block, CkReductionMsg * msg) throw();
@@ -61,6 +68,9 @@ protected: // attributes
   std::vector<long double> field_min_;
   std::vector<long double> field_max_;
   std::vector<long double> field_count_;
+  bool l_print_;
+  bool l_coarse_;
+  bool l_ghost_;
 };
 
 

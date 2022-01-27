@@ -36,7 +36,7 @@ EnzoProlongPoisson::EnzoProlongPoisson() throw()
 
 //----------------------------------------------------------------------
 
-int EnzoProlongPoisson::apply 
+void EnzoProlongPoisson::apply 
 ( precision_type precision,
   void *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
   const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
@@ -52,15 +52,15 @@ int EnzoProlongPoisson::apply
 	 im3_c[1],n3_c[1]+im3_c[1],
 	 im3_c[2],n3_c[2]+im3_c[2]);
 
-  return apply_((enzo_float *)       values_f, nd3_f, im3_f, n3_f,
-		(const enzo_float *) values_c, nd3_c, im3_c, n3_c,
-		accumulate);
+  apply_((enzo_float *)       values_f, nd3_f, im3_f, n3_f,
+         (const enzo_float *) values_c, nd3_c, im3_c, n3_c,
+         accumulate);
 
 }
 
 //----------------------------------------------------------------------
 
-int EnzoProlongPoisson::apply_
+void EnzoProlongPoisson::apply_
 (       enzo_float * values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
   const enzo_float * values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
 	bool accumulate)
@@ -103,16 +103,8 @@ int EnzoProlongPoisson::apply_
 	values_f[i_f] = ( c1[icx]*values_c[i_c] + 
 			  c2[icx]*values_c[i_c+dx_c]);
 
-	if (positive_ && (values_f[i_f] < 0)) {
-	  // revert to poisson
-	  int icc = i_c + (icx/2)*dx_c;
-	  values_f[i_f] = values_c[icc];	  
-	}
       }
     }
-
-    return (sizeof(enzo_float) * n3_c[0]);
-
 
   } else if (n3_f[2] == 1) {
 
@@ -137,16 +129,10 @@ int EnzoProlongPoisson::apply_
 		c2[icx]*c1[icy]*values_c[i_c+dx_c] +
 		c1[icx]*c2[icy]*values_c[i_c     +dy_c] +
 		c2[icx]*c2[icy]*values_c[i_c+dx_c+dy_c]);
-	    if (positive_ && (values_f[i_f] < 0)) {
-	      // revert to poisson
-	      int icc = i_c + (icx/2)*dx_c + (icy/2)*dy_c;
-	      values_f[i_f] = values_c[icc];	  
-	    }
 	  }
 	}
       }
     }
-    return (sizeof(enzo_float) * n3_c[0]*n3_c[1]);
 
   } else {
 
@@ -191,9 +177,6 @@ int EnzoProlongPoisson::apply_
       }
     }
   }
-
-  return (sizeof(enzo_float) * n3_c[0]*n3_c[1]*n3_c[2]);
-
 }
 
 //======================================================================

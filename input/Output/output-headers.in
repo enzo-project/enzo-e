@@ -24,7 +24,6 @@
      ghost_depth = 4;
      list = [ "density", "velocity_x", "velocity_y", "total_energy", "internal_energy", "pressure" ];
      padding = 0;
-     prolong = "linear";
  }
 
  Initial {

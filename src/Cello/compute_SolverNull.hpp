@@ -1,7 +1,7 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     compute_SolverNull.hpp 
-/// @author   James Bordner (jobordner@ucsd.edu) 
+/// @file     compute_SolverNull.hpp
+/// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2018-02-26
 /// @brief    [\ref Compute] Declaration for the SolverNull class
 
@@ -20,13 +20,15 @@ public: // interface
 
   /// Create a new SolverNull
   SolverNull (std::string name,
-	      std::string field_x,
-	      std::string field_b,
-	      int monitor_iter,
-	      int restart_cycle,
-	      int solve_type,
-	      int min_level = -std::numeric_limits<int>::max(),
-	      int max_level = std::numeric_limits<int>::max()) throw();
+              std::string field_x,
+              std::string field_b,
+              int monitor_iter,
+              int restart_cycle,
+              int solve_type,
+              int index_prolong,
+              int index_restrict,
+              int min_level = -std::numeric_limits<int>::max(),
+              int max_level = std::numeric_limits<int>::max()) throw();
 
   /// Create an uninitialized SolverNull
   SolverNull () throw()
@@ -43,7 +45,7 @@ public: // interface
   SolverNull (CkMigrateMessage *m)
     : Solver(m)
   { }
-  
+
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 

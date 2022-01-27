@@ -52,6 +52,10 @@ public: // virtual functions
   /// Close the file
   virtual void file_close () throw() = 0;
   
+  /// Read scalar metadata item associated with the file
+  virtual void file_read_scalar
+  ( void * buffer, std::string name,  int * s_type) throw() = 0;
+
   /// Read a metadata item associated with the file
   virtual void file_read_meta
   ( void * buffer, std::string name,  int * s_type,

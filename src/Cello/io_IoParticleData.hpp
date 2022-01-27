@@ -41,7 +41,9 @@ public: // interface
 
   /// Set ParticleData
   void set_particle_data (ParticleData * particle_data) throw()
-  { particle_data_ = particle_data;};
+  {
+    particle_data_ = particle_data;
+  };
 
 #include "_io_Io_common.hpp"
 
