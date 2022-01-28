@@ -387,6 +387,26 @@ is specified.`
 :e:`This can be used to specify a background velocity along v0 for
 HD linear waves.`
 
+merge_stars_test
+----------------
+
+The :p:`merge_stars_test' Initial subgroup is used to read and initialise
+particle data from a text file. It is designed to be run with a small number of
+particles, in order to check conservation of mass and momentum (and potentially
+other quantities) when running with the ``"merge_stars"`` method. The data are
+assumed to be arranged into seven columns, corresponding to mass, the x,y,z
+coordinates and the x,y,z-components of velocity, respectively. Each row
+corresponds to one star particle.
+
+:Parameter:  :p:`Initial` : :p:`merge_stars_test` : :p:`particle_data_filename`
+:Summary: :s:`Name of the file to read from.`
+:Type:    :t:`string`
+:Default: :d:`none`
+:Scope:   :z:`Enzo`
+
+:e:`Must point to a valid text file, with data arranged in seven columns seperated by blank space`
+
+
 music
 -----
 
