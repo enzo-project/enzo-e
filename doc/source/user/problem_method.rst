@@ -556,6 +556,49 @@ acceleration fields.
 ``"trace"``: tracer particles
 =============================
 
-Moves tracer particles given the velocity field.    
+Moves tracer particles given the velocity field.
+
+
+``"merge_stars"``: merge stars
+==============================
+
+Merges together star particles which are separated by less than a given
+"merging radius". This is done by copying all star particles to / from
+all neighbouring blocks. A Friend-of-Friends algorithm is used to
+partition particles into groups, where all particles within a given group
+are separated by less than a merging radius. If a group has more than one
+particle, one of the particles has its properties changed: its position
+becomes that of the centre-of-mass of the group, and it takes the total
+mass, momentum and mass fraction of the whole group.
+In addition, its 'lifetime' attribute is set to be the maximum of the group,
+its 'creation_time' attribute is set to be the minimum of the group, and its
+'id' attribute is set to the minimum of the group. Other particles in the
+group are marked for deletion. The final step is for each block to delete
+all the remaining star particles which are 'out-of-bounds' of the block.
+
+This procedure cannot handle the case where particles originally
+from non-neighbouring blocks are put into the same FoF group. If this is
+found to occur, the program stops and prints an error message. This situation
+is unlikely to happen, unless the merging radius is too large relative
+to the block size.
+
+Currently this will only run in unigrid mode.
+
+parameters
+----------
+
+.. list-table:: Method ``merge_stars`` parameters
+   :widths: 10 5 1 30
+   :header-rows: 1
+   
+   * - Parameter
+     - Type
+     - Default
+     - Description
+   * - ``"merging_radius_cells"``
+     - `float`
+     - `4.0`
+     - `The merging radius relative to the cell-width`
+
    
 
