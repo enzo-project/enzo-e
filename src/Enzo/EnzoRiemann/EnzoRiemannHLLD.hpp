@@ -1,14 +1,10 @@
-// See LICENSE_CELLO file for license and copyright information
+// See LICENSE_ATHENAPP file for license and copyright information
 
 /// @file     enzo_EnzoRiemannHLLD.hpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Thurs May 2 2019
 /// @brief    [\ref Enzo] Enzo's HLLD approximate Riemann Solver. Ported from
-/// the original Enzo's Riemann_HLLD_MHD.C, written by J. S. Oishi
-
-// this implementation returns identical values to the implementation used in
-// Athena for most cases. In the other cases, there are small floating point
-// errors.
+/// Athena++
 
 // Currently, eint fluxes are computed by assuming that specific internal
 // energy is a passive scalar. It may be worth considering the calculation of
@@ -17,9 +13,15 @@
 #ifndef ENZO_ENZO_RIEMANN_HLLD_HPP
 #define ENZO_ENZO_RIEMANN_HLLD_HPP
 
-struct HLLDImpl
+#ifndef SQR
+#define SQR(x) ( (x)*(x) )
+#endif
+
+#define SMALL_NUMBER 1.0e-8
+
+struct HLLDKernel
 {
-  /// @class    HLLDImpl
+  /// @class    HLLDKernel
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Encapsulates operations of HLLD approximate Riemann
   /// Solver
@@ -27,117 +29,394 @@ public:
   const KernelConfig config;
 
 public:
-  using LUT = EnzoRiemannLUT<MHDLUT>;
 
-  FORCE_INLINE lutarray<LUT> helper_
-  (const lutarray<LUT> flux_l, const lutarray<LUT> flux_r,
-   const lutarray<LUT> prim_l, const lutarray<LUT> prim_r,
-   const lutarray<LUT> cons_l, const lutarray<LUT> cons_r,
-   enzo_float pressure_l, enzo_float pressure_r,
-   enzo_float gamma, enzo_float &vi_bar) const noexcept
+  using WaveSpeedFunctor = EinfeldtWavespeed<MHDLUT>;
+  using LUT = typename WaveSpeedFunctor::LUT;
+
+  struct Cons1D { enzo_float d, mx, my, mz, e, by, bz; };
+
+  FORCE_INLINE void operator()(const int iz,
+                               const int iy,
+                               const int ix) const noexcept
   {
-    // Note that ETA_TOLERANCE is bigger than the tolerance was for the
-    // original implementation.
+    const int external_velocity_i = config.dim + LUT::velocity_i;
+    const int external_velocity_j = ((config.dim+1)%3) + LUT::velocity_i;
+    const int external_velocity_k = ((config.dim+2)%3) + LUT::velocity_i;
+    const int external_bfield_i = config.dim + LUT::bfield_i;
+    const int external_bfield_j = ((config.dim+1)%3) + LUT::bfield_i;
+    const int external_bfield_k = ((config.dim+2)%3) + LUT::bfield_i;
 
-    lutarray<LUT> Us, Uss, fluxes;
+    const enzo_float gamma = config.gamma;
+    const enzo_float igm1 = 1.0 / (gamma - 1.0);
 
-    enzo_float etot_l,etot_r, rho_l, rho_r;
-    enzo_float vx_l, vy_l, vz_l, vx_r, vy_r, vz_r;
-    enzo_float Bx_l, Bx_r,Bx, By_l, Bz_l, By_r, Bz_r, Bv_l, Bv_r, p_l, p_r;
-    enzo_float pt_l, pt_r;
-    enzo_float l_coef, r_coef;
-    enzo_float rho_ls, rho_rs, vy_ls, vy_rs, vz_ls, vz_rs, vv_ls, vv_rs;
-    enzo_float By_ls, By_rs, Bz_ls, Bz_rs, Bv_ls, Bv_rs, bb_ls, bb_rs;
-    enzo_float etot_ls, etot_rs, pt_s;
-    enzo_float vy_ss, vz_ss, By_ss, Bz_ss, Bv_ss;
-    enzo_float etot_lss, etot_rss, rho_savg;
+    lutarray<LUT> flxi;      // temporary variable to store flux
+    lutarray<LUT> wli, wri;  // Left, Right reconstructed primitive
+    enzo_float spd[5];       // signal speeds, left to right
 
-    // when the dual energy formalism is in use, the internal energy is treated
-    // as a passively advected scalar and handled separately.
-    //
-    // In reality, this is not a fully self-consistent treatment of internal
-    // energy. Unlike the HLL/HLLC solvers which assumes that the intermediate
-    // states have a single constant thermal pressure, the HLLD solver assumes
-    // that these states share a single constant total pressure (thermal +
-    // magnetic). Thus a more nuanced approach can be taken.
-    //
-    // Such an approach should be pursued by defining a new LUT class that
-    // includes internal energy as an actively advected quantity.
+    Cons1D ul,ur;                 // L/R states, conserved variables (computed)
+    Cons1D ulst,uldst,urdst,urst; // Conserved variable for all states
+    Cons1D fl,fr;                 // Fluxes for left & right states
 
-    enzo_float S_l, S_r, S_ls, S_rs, S_M; // wave speeds
-    enzo_float cf_l, cf_r, sam, sap; // fast speeds
+    //--- Step 1.  Load L/R states into local variables
 
-    // First, compute Fl and Ul
-    rho_l  = prim_l[LUT::density];
-    p_l    = pressure_l;
-    vx_l   = prim_l[LUT::velocity_i];
-    vy_l   = prim_l[LUT::velocity_j];
-    vz_l   = prim_l[LUT::velocity_k];
-    Bx_l   = prim_l[LUT::bfield_i];
-    By_l   = prim_l[LUT::bfield_j];
-    Bz_l   = prim_l[LUT::bfield_k];
+    wli[LUT::density]      = config.prim_arr_l(LUT::density,iz,iy,ix);
+    wli[LUT::velocity_i]   = config.prim_arr_l(external_velocity_i,iz,iy,ix);
+    wli[LUT::velocity_j]   = config.prim_arr_l(external_velocity_j,iz,iy,ix);
+    wli[LUT::velocity_k]   = config.prim_arr_l(external_velocity_k,iz,iy,ix);
+    wli[LUT::bfield_i]     = config.prim_arr_l(external_bfield_i,iz,iy,ix);
+    wli[LUT::bfield_j]     = config.prim_arr_l(external_bfield_j,iz,iy,ix);
+    wli[LUT::bfield_k]     = config.prim_arr_l(external_bfield_k,iz,iy,ix);
+    // the following actually stores pressure, not total_energy
+    wli[LUT::total_energy] = config.prim_arr_l(LUT::total_energy,iz,iy,ix);
 
-    Bv_l = Bx_l * vx_l + By_l * vy_l + Bz_l * vz_l;
-    etot_l = cons_l[LUT::total_energy];
-    pt_l = p_l + enzo_riemann_utils::mag_pressure<LUT>(prim_l);
-    cf_l = enzo_riemann_utils::fast_magnetosonic_speed<LUT>(prim_l, pressure_l,
-                                                            gamma);
+    wri[LUT::density]      = config.prim_arr_r(LUT::density,iz,iy,ix);
+    wri[LUT::velocity_i]   = config.prim_arr_r(external_velocity_i,iz,iy,ix);
+    wri[LUT::velocity_j]   = config.prim_arr_r(external_velocity_j,iz,iy,ix);
+    wri[LUT::velocity_k]   = config.prim_arr_r(external_velocity_k,iz,iy,ix);
+    wri[LUT::bfield_i]     = config.prim_arr_r(external_bfield_i,iz,iy,ix);
+    wri[LUT::bfield_j]     = config.prim_arr_r(external_bfield_j,iz,iy,ix);
+    wri[LUT::bfield_k]     = config.prim_arr_r(external_bfield_k,iz,iy,ix);
+    // the following actually stores pressure, not total_energy
+    wri[LUT::total_energy] = config.prim_arr_r(LUT::total_energy,iz,iy,ix);
 
-    // load wr and compute the fast magnetosonic speed
-    rho_r   = prim_r[LUT::density];
-    p_r     = pressure_r;
-    vx_r    = prim_r[LUT::velocity_i];
-    vy_r    = prim_r[LUT::velocity_j];
-    vz_r    = prim_r[LUT::velocity_k];
-    Bx_r    = prim_r[LUT::bfield_i];
-    By_r    = prim_r[LUT::bfield_j];
-    Bz_r    = prim_r[LUT::bfield_k];
 
-    Bv_r = Bx_r * vx_r + By_r * vy_r + Bz_r * vz_r;
-    etot_r = cons_r[LUT::total_energy];
-    pt_r = p_r + enzo_riemann_utils::mag_pressure<LUT>(prim_r);
-    cf_r = enzo_riemann_utils::fast_magnetosonic_speed<LUT>(prim_r, pressure_r,
-                                                            gamma);
+    // load left and right pressure values
+    const enzo_float pressure_l = wli[LUT::total_energy];
+    const enzo_float pressure_r = wri[LUT::total_energy];
 
-    //
-    //wave speeds
-    //
+    const enzo_float bxi = wli[LUT::bfield_i]; // == wri[LUT::bfield_i]
 
-    if (Bx_l == Bx_r){
-      Bx = Bx_l;
+    // Compute L/R states for selected conserved variables
+    enzo_float bxsq = bxi*bxi;
+    // group transverse vector components for floating-point associativity
+    // symmetry
+    // magnetic pressure (l/r):
+    enzo_float pbl = 0.5*(bxsq + (SQR(wli[LUT::bfield_j]) +
+                                  SQR(wli[LUT::bfield_k])));
+    enzo_float pbr = 0.5*(bxsq + (SQR(wri[LUT::bfield_j]) +
+                                  SQR(wri[LUT::bfield_k])));
+    // kinetic energy:
+    enzo_float kel = 0.5*wli[LUT::density]*(SQR(wli[LUT::velocity_i]) +
+                                            (SQR(wli[LUT::velocity_j]) +
+                                             SQR(wli[LUT::velocity_k])));
+    enzo_float ker = 0.5*wri[LUT::density]*(SQR(wri[LUT::velocity_i]) +
+                                            (SQR(wri[LUT::velocity_j]) +
+                                             SQR(wri[LUT::velocity_k])));
+
+    ul.d  = wli[LUT::density];
+    ul.mx = wli[LUT::velocity_i]*ul.d;
+    ul.my = wli[LUT::velocity_j]*ul.d;
+    ul.mz = wli[LUT::velocity_k]*ul.d;
+    ul.e  = pressure_l*igm1 + kel + pbl;
+    ul.by = wli[LUT::bfield_j];
+    ul.bz = wli[LUT::bfield_k];
+
+    ur.d  = wri[LUT::density];
+    ur.mx = wri[LUT::velocity_i]*ur.d;
+    ur.my = wri[LUT::velocity_j]*ur.d;
+    ur.mz = wri[LUT::velocity_k]*ur.d;
+    ur.e  = pressure_r*igm1 + ker + pbr;
+    ur.by = wri[LUT::bfield_j];
+    ur.bz = wri[LUT::bfield_k];
+
+    //--- Step 2.  Compute L & R wave speeds according to Miyoshi & Kusano, eqn. (67)
+
+    using enzo_riemann_utils::fast_magnetosonic_speed;
+    enzo_float cfl = fast_magnetosonic_speed<LUT>(wli, pressure_l, gamma);
+    enzo_float cfr = fast_magnetosonic_speed<LUT>(wri, pressure_r, gamma);
+
+    spd[0] = std::min( wli[LUT::velocity_i]-cfl, wri[LUT::velocity_i]-cfr );
+    spd[4] = std::max( wli[LUT::velocity_i]+cfl, wri[LUT::velocity_i]+cfr );
+
+    // Code analogous to the following block was commented out:
+    // enzo_float cfmax = std::max(cfl,cfr);
+    // if (wli[LUT::velocity_i] <= wri[LUT::velocity_i]) {
+    //   spd[0] = wli[LUT::velocity_i] - cfmax;
+    //   spd[4] = wri[LUT::velocity_i] + cfmax;
+    // } else {
+    //   spd[0] = wri[LUT::velocity_i] - cfmax;
+    //   spd[4] = wli[LUT::velocity_i] + cfmax;
+    // }
+
+    //--- Step 3.  Compute L/R fluxes
+
+    enzo_float ptl = pressure_l + pbl; // total pressures L,R
+    enzo_float ptr = pressure_r + pbr;
+
+    fl.d  = ul.mx;
+    fl.mx = ul.mx*wli[LUT::velocity_i] + ptl - bxsq;
+    fl.my = ul.my*wli[LUT::velocity_i] - bxi*ul.by;
+    fl.mz = ul.mz*wli[LUT::velocity_i] - bxi*ul.bz;
+    fl.e  = wli[LUT::velocity_i]*(ul.e + ptl - bxsq) - bxi*(wli[LUT::velocity_j]*ul.by +
+                                                            wli[LUT::velocity_k]*ul.bz);
+    fl.by = ul.by*wli[LUT::velocity_i] - bxi*wli[LUT::velocity_j];
+    fl.bz = ul.bz*wli[LUT::velocity_i] - bxi*wli[LUT::velocity_k];
+
+    fr.d  = ur.mx;
+    fr.mx = ur.mx*wri[LUT::velocity_i] + ptr - bxsq;
+    fr.my = ur.my*wri[LUT::velocity_i] - bxi*ur.by;
+    fr.mz = ur.mz*wri[LUT::velocity_i] - bxi*ur.bz;
+    fr.e  = wri[LUT::velocity_i]*(ur.e + ptr - bxsq) - bxi*(wri[LUT::velocity_j]*ur.by +
+                                                            wri[LUT::velocity_k]*ur.bz);
+    fr.by = ur.by*wri[LUT::velocity_i] - bxi*wri[LUT::velocity_j];
+    fr.bz = ur.bz*wri[LUT::velocity_i] - bxi*wri[LUT::velocity_k];
+
+    //--- Step 4.  Compute middle and Alfven wave speeds
+
+    enzo_float sdl = spd[0] - wli[LUT::velocity_i];  // S_i-u_i (i=L or R)
+    enzo_float sdr = spd[4] - wri[LUT::velocity_i];
+
+    // S_M: eqn (38) of Miyoshi & Kusano
+    // (KGF): group ptl, ptr terms for floating-point associativity symmetry
+    spd[2] = (sdr*ur.mx - sdl*ul.mx + (ptl - ptr))/(sdr*ur.d - sdl*ul.d);
+
+    enzo_float sdml   = spd[0] - spd[2];  // S_i-S_M (i=L or R)
+    enzo_float sdmr   = spd[4] - spd[2];
+    enzo_float sdml_inv = 1.0/sdml;
+    enzo_float sdmr_inv = 1.0/sdmr;
+    // eqn (43) of Miyoshi & Kusano
+    ulst.d = ul.d * sdl * sdml_inv;
+    urst.d = ur.d * sdr * sdmr_inv;
+    enzo_float ulst_d_inv = 1.0/ulst.d;
+    enzo_float urst_d_inv = 1.0/urst.d;
+    enzo_float sqrtdl = std::sqrt(ulst.d);
+    enzo_float sqrtdr = std::sqrt(urst.d);
+
+    // eqn (51) of Miyoshi & Kusano
+    spd[1] = spd[2] - std::abs(bxi)/sqrtdl;
+    spd[3] = spd[2] + std::abs(bxi)/sqrtdr;
+
+    //--- Step 5.  Compute intermediate states
+    // eqn (23) explicitly becomes eq (41) of Miyoshi & Kusano
+    // place an assertion that ptstl==ptstr
+    enzo_float ptstl = ptl + ul.d*sdl*(spd[2]-wli[LUT::velocity_i]);
+    enzo_float ptstr = ptr + ur.d*sdr*(spd[2]-wri[LUT::velocity_i]);
+    // the following 2 equations had issues when averaged
+    // enzo_float ptstl = ptl + ul.d*sdl*(sdl-sdml); 
+    // enzo_float ptstr = ptr + ur.d*sdr*(sdr-sdmr);
+    enzo_float ptst = 0.5*(ptstr + ptstl);  // total pressure (star state)
+
+    // ul* - eqn (39) of M&K
+    ulst.mx = ulst.d * spd[2];
+    if (std::abs(ul.d*sdl*sdml-bxsq) < (SMALL_NUMBER)*ptst) {
+      // Degenerate case
+      ulst.my = ulst.d * wli[LUT::velocity_j];
+      ulst.mz = ulst.d * wli[LUT::velocity_k];
+
+      ulst.by = ul.by;
+      ulst.bz = ul.bz;
     } else {
-      Bx = 0.5*(Bx_l + Bx_r);
+      // eqns (44) and (46) of M&K
+      enzo_float tmp = bxi*(sdl - sdml)/(ul.d*sdl*sdml - bxsq);
+      ulst.my = ulst.d * (wli[LUT::velocity_j] - ul.by*tmp);
+      ulst.mz = ulst.d * (wli[LUT::velocity_k] - ul.bz*tmp);
+
+      // eqns (45) and (47) of M&K
+      tmp = (ul.d*SQR(sdl) - bxsq)/(ul.d*sdl*sdml - bxsq);
+      ulst.by = ul.by * tmp;
+      ulst.bz = ul.bz * tmp;
     }
-    // first, outermost wave speeds
-    // simplest choice from Miyoshi & Kusano (2005)
-    S_l = std::min(vx_l, vx_r) - std::max(cf_l, cf_r);
-    S_r = std::max(vx_l, vx_r) + std::max(cf_l, cf_r);
+    // v_i* dot B_i*
+    // (KGF): group transverse momenta terms for floating-point associativity symmetry
+    enzo_float vbstl = (ulst.mx*bxi + (ulst.my*ulst.by +
+                                       ulst.mz*ulst.bz)) * ulst_d_inv;
+    // eqn (48) of M&K
+    // (KGF): group transverse by, bz terms for floating-point associativity symmetry
+    ulst.e = (sdl*ul.e - ptl*wli[LUT::velocity_i] + ptst*spd[2] +
+              bxi*(wli[LUT::velocity_i]*bxi +
+                   (wli[LUT::velocity_j]*ul.by + wli[LUT::velocity_k]*ul.bz)
+                   - vbstl))*sdml_inv;
 
-    // if S_l>0 or S_r<0, no need to go further (the internal energy is also
-    // automatically handled if the dual energy formalism is in use)
-    if (S_l > 0) {
-      for (std::size_t field = 0; field<LUT::num_entries; field++){
-	fluxes[field] = flux_l[field];
-      }
-      vi_bar =  prim_l[LUT::velocity_i];
-      return fluxes;
-    } else if (S_r < 0) {
-      for (std::size_t field = 0; field<LUT::num_entries; field++){
-	fluxes[field] = flux_r[field];
-      }
-      vi_bar =  prim_r[LUT::velocity_i];
-      return fluxes;
-    } 
+    // ur* - eqn (39) of M&K
+    urst.mx = urst.d * spd[2];
+    if (std::abs(ur.d*sdr*sdmr - bxsq) < (SMALL_NUMBER)*ptst) {
+      // Degenerate case
+      urst.my = urst.d * wri[LUT::velocity_j];
+      urst.mz = urst.d * wri[LUT::velocity_k];
 
-    // next, the middle (contact) wave
-    S_M = ((S_r - vx_r)*rho_r*vx_r - (S_l - vx_l)*
-	   rho_l*vx_l - pt_r + pt_l)/((S_r - vx_r)*
-				      rho_r - (S_l - vx_l)*rho_l);
+      urst.by = ur.by;
+      urst.bz = ur.bz;
+    } else {
+      // eqns (44) and (46) of M&K
+      enzo_float tmp = bxi*(sdr - sdmr)/(ur.d*sdr*sdmr - bxsq);
+      urst.my = urst.d * (wri[LUT::velocity_j] - ur.by*tmp);
+      urst.mz = urst.d * (wri[LUT::velocity_k] - ur.bz*tmp);
 
-    // Brief segue to compute vx (velocity component normal to the interface).
+      // eqns (45) and (47) of M&K
+      tmp = (ur.d*SQR(sdr) - bxsq)/(ur.d*sdr*sdmr - bxsq);
+      urst.by = ur.by * tmp;
+      urst.bz = ur.bz * tmp;
+    }
+    // v_i* dot B_i*
+    // (KGF): group transverse momenta terms for floating-point associativity symmetry
+    enzo_float vbstr = (urst.mx*bxi+(urst.my*urst.by+
+                                     urst.mz*urst.bz))*urst_d_inv;
+    // eqn (48) of M&K
+    // (KGF): group transverse by, bz terms for floating-point associativity symmetry
+    urst.e = (sdr*ur.e - ptr*wri[LUT::velocity_i] + ptst*spd[2] +
+              bxi*(wri[LUT::velocity_i]*bxi +
+                   (wri[LUT::velocity_j]*ur.by +
+                    wri[LUT::velocity_k]*ur.bz) - vbstr))*sdmr_inv;
+    // ul** and ur** - if Bx is near zero, same as *-states
+    if (0.5*bxsq < (SMALL_NUMBER)*ptst) {
+      uldst = ulst;
+      urdst = urst;
+    } else {
+      enzo_float invsumd = 1.0/(sqrtdl + sqrtdr);
+      enzo_float bxsig = (bxi > 0.0 ? 1.0 : -1.0);
+
+      uldst.d = ulst.d;
+      urdst.d = urst.d;
+
+      uldst.mx = ulst.mx;
+      urdst.mx = urst.mx;
+
+      // eqn (59) of M&K
+      enzo_float tmp = invsumd*(sqrtdl*(ulst.my*ulst_d_inv) +
+                                sqrtdr*(urst.my*urst_d_inv) +
+                                bxsig*(urst.by - ulst.by));
+      uldst.my = uldst.d * tmp;
+      urdst.my = urdst.d * tmp;
+
+      // eqn (60) of M&K
+      tmp = invsumd*(sqrtdl*(ulst.mz*ulst_d_inv) +
+                     sqrtdr*(urst.mz*urst_d_inv) +
+                     bxsig*(urst.bz - ulst.bz));
+      uldst.mz = uldst.d * tmp;
+      urdst.mz = urdst.d * tmp;
+
+      // eqn (61) of M&K
+      tmp = invsumd*(sqrtdl*urst.by + sqrtdr*ulst.by +
+                     bxsig*sqrtdl*sqrtdr*((urst.my*urst_d_inv) -
+                                          (ulst.my*ulst_d_inv)));
+      uldst.by = urdst.by = tmp;
+
+      // eqn (62) of M&K
+      tmp = invsumd*(sqrtdl*urst.bz + sqrtdr*ulst.bz +
+                     bxsig*sqrtdl*sqrtdr*((urst.mz*urst_d_inv) -
+                                          (ulst.mz*ulst_d_inv)));
+      uldst.bz = urdst.bz = tmp;
+
+      // eqn (63) of M&K
+      tmp = spd[2]*bxi + (uldst.my*uldst.by + uldst.mz*uldst.bz)/uldst.d;
+      uldst.e = ulst.e - sqrtdl*bxsig*(vbstl - tmp);
+      urdst.e = urst.e + sqrtdr*bxsig*(vbstr - tmp);
+    }
+
+    //--- Step 6.  Compute flux
+    uldst.d = spd[1] * (uldst.d - ulst.d);
+    uldst.mx = spd[1] * (uldst.mx - ulst.mx);
+    uldst.my = spd[1] * (uldst.my - ulst.my);
+    uldst.mz = spd[1] * (uldst.mz - ulst.mz);
+    uldst.e = spd[1] * (uldst.e - ulst.e);
+    uldst.by = spd[1] * (uldst.by - ulst.by);
+    uldst.bz = spd[1] * (uldst.bz - ulst.bz);
+
+    ulst.d = spd[0] * (ulst.d - ul.d);
+    ulst.mx = spd[0] * (ulst.mx - ul.mx);
+    ulst.my = spd[0] * (ulst.my - ul.my);
+    ulst.mz = spd[0] * (ulst.mz - ul.mz);
+    ulst.e = spd[0] * (ulst.e - ul.e);
+    ulst.by = spd[0] * (ulst.by - ul.by);
+    ulst.bz = spd[0] * (ulst.bz - ul.bz);
+
+    urdst.d = spd[3] * (urdst.d - urst.d);
+    urdst.mx = spd[3] * (urdst.mx - urst.mx);
+    urdst.my = spd[3] * (urdst.my - urst.my);
+    urdst.mz = spd[3] * (urdst.mz - urst.mz);
+    urdst.e = spd[3] * (urdst.e - urst.e);
+    urdst.by = spd[3] * (urdst.by - urst.by);
+    urdst.bz = spd[3] * (urdst.bz - urst.bz);
+
+    urst.d = spd[4] * (urst.d  - ur.d);
+    urst.mx = spd[4] * (urst.mx - ur.mx);
+    urst.my = spd[4] * (urst.my - ur.my);
+    urst.mz = spd[4] * (urst.mz - ur.mz);
+    urst.e = spd[4] * (urst.e - ur.e);
+    urst.by = spd[4] * (urst.by - ur.by);
+    urst.bz = spd[4] * (urst.bz - ur.bz);
+
+    if (spd[0] >= 0.0) {
+      // return Fl if flow is supersonic
+      flxi[LUT::density] = fl.d;
+      flxi[LUT::velocity_i] = fl.mx;
+      flxi[LUT::velocity_j] = fl.my;
+      flxi[LUT::velocity_k] = fl.mz;
+      flxi[LUT::total_energy] = fl.e;
+      flxi[LUT::bfield_j] = fl.by;
+      flxi[LUT::bfield_k] = fl.bz;
+    } else if (spd[4] <= 0.0) {
+      // return Fr if flow is supersonic
+      flxi[LUT::density] = fr.d;
+      flxi[LUT::velocity_i] = fr.mx;
+      flxi[LUT::velocity_j] = fr.my;
+      flxi[LUT::velocity_k] = fr.mz;
+      flxi[LUT::total_energy] = fr.e;
+      flxi[LUT::bfield_j] = fr.by;
+      flxi[LUT::bfield_k] = fr.bz;
+    } else if (spd[1] >= 0.0) {
+      // return Fl*
+      flxi[LUT::density] = fl.d  + ulst.d;
+      flxi[LUT::velocity_i] = fl.mx + ulst.mx;
+      flxi[LUT::velocity_j] = fl.my + ulst.my;
+      flxi[LUT::velocity_k] = fl.mz + ulst.mz;
+      flxi[LUT::total_energy] = fl.e  + ulst.e;
+      flxi[LUT::bfield_j] = fl.by + ulst.by;
+      flxi[LUT::bfield_k] = fl.bz + ulst.bz;
+    } else if (spd[2] >= 0.0) {
+      // return Fl**
+      flxi[LUT::density] = fl.d  + ulst.d + uldst.d;
+      flxi[LUT::velocity_i] = fl.mx + ulst.mx + uldst.mx;
+      flxi[LUT::velocity_j] = fl.my + ulst.my + uldst.my;
+      flxi[LUT::velocity_k] = fl.mz + ulst.mz + uldst.mz;
+      flxi[LUT::total_energy] = fl.e  + ulst.e + uldst.e;
+      flxi[LUT::bfield_j] = fl.by + ulst.by + uldst.by;
+      flxi[LUT::bfield_k] = fl.bz + ulst.bz + uldst.bz;
+    } else if (spd[3] > 0.0) {
+      // return Fr**
+      flxi[LUT::density] = fr.d + urst.d + urdst.d;
+      flxi[LUT::velocity_i] = fr.mx + urst.mx + urdst.mx;
+      flxi[LUT::velocity_j] = fr.my + urst.my + urdst.my;
+      flxi[LUT::velocity_k] = fr.mz + urst.mz + urdst.mz;
+      flxi[LUT::total_energy] = fr.e + urst.e + urdst.e;
+      flxi[LUT::bfield_j] = fr.by + urst.by + urdst.by;
+      flxi[LUT::bfield_k] = fr.bz + urst.bz + urdst.bz;
+    } else {
+      // return Fr*
+      flxi[LUT::density] = fr.d  + urst.d;
+      flxi[LUT::velocity_i] = fr.mx + urst.mx;
+      flxi[LUT::velocity_j] = fr.my + urst.my;
+      flxi[LUT::velocity_k] = fr.mz + urst.mz;
+      flxi[LUT::total_energy] = fr.e  + urst.e;
+      flxi[LUT::bfield_j] = fr.by + urst.by;
+      flxi[LUT::bfield_k] = fr.bz + urst.bz;
+    }
+
+    config.flux_arr(LUT::density,iz,iy,ix) = flxi[LUT::density];
+    config.flux_arr(external_velocity_i,iz,iy,ix) = flxi[LUT::velocity_i];
+    config.flux_arr(external_velocity_j,iz,iy,ix) = flxi[LUT::velocity_j];
+    config.flux_arr(external_velocity_k,iz,iy,ix) = flxi[LUT::velocity_k];
+    config.flux_arr(external_bfield_i,iz,iy,ix) = 0.0;
+    config.flux_arr(external_bfield_j,iz,iy,ix) = flxi[LUT::bfield_j];
+    config.flux_arr(external_bfield_k,iz,iy,ix) = flxi[LUT::bfield_k];
+    config.flux_arr(LUT::total_energy,iz,iy,ix) = flxi[LUT::total_energy];
+
+    // finally, deal with dual energy stuff.
+    // compute internal energy flux, assuming passive advection
+    // (this was not handled with the rest of the fluxes)
+    config.internal_energy_flux_arr(iz,iy,ix) =
+      enzo_riemann_utils::passive_eint_flux
+      (wli[LUT::density], pressure_l, wri[LUT::density], pressure_r,
+       config.gamma, config.flux_arr(LUT::density,iz,iy,ix));
+
+    // compute vi_bar, velocity component normal to the interface
+    // for simplicity, we adopt the shorthand:
+    //     - wli[LUT::velocity_i] <--> vx_L
+    //     - wri[LUT::velocity_i] <--> vx_R
+    // 
     // Following the convention from Enzo's flux_hllc.F:
-    //     - when S_l > 0 use vi_bar = vx_L [see above]
-    //     - when S_r < 0 use vi_bar = vx_R [see above]
+    //     - when S_l > 0 use vi_bar = vx_L
+    //     - when S_r < 0 use vi_bar = vx_R
     //     - otherwise, linearly interpolate the velocity at x=0 (the cell
     //       interface) at time t (which cancels out) between the (x,v) points:
     //         (S_l*t, vx_L) and (S_M*t, S_M)  if S_l <= 0 & S_M >= 0
@@ -149,253 +428,27 @@ public:
     // completely consistent, we should just use S_M. This lack of consistency
     // also explains why we don't worry about the intermediate alfven waves for
     // computing vi_bar (they have definition of vx other than vx = S_M).
-    l_coef = (S_l - vx_l)/(S_l - S_M);
-    r_coef = (S_r - vx_r)/(S_r - S_M);
-    if (S_M >=0){
-      vi_bar = S_M * l_coef;
+    const enzo_float S_M = spd[2];
+    const enzo_float S_l = spd[0];
+    const enzo_float S_r = spd[4];
+
+    const enzo_float l_coef = (S_l - wli[LUT::velocity_i])/(S_l - S_M);
+    const enzo_float r_coef = (S_r - wri[LUT::velocity_i])/(S_r - S_M);
+    if (S_l > 0) {
+      config.velocity_i_bar_arr(iz,iy,ix) = wli[LUT::velocity_i];
+    } else if (S_r < 0) {
+      config.velocity_i_bar_arr(iz,iy,ix) = wri[LUT::velocity_i];
+    } else if (S_M >=0){
+      config.velocity_i_bar_arr(iz,iy,ix) = S_M * l_coef;
     } else {
-      vi_bar = S_M * r_coef;
+      config.velocity_i_bar_arr(iz,iy,ix) = S_M * r_coef;
     }
-
-    // finally, compute the sppeds of the intermediate (Alfven) waves
-    rho_ls = rho_l * l_coef;
-    rho_rs = rho_r * r_coef;
-
-    S_ls = S_M - std::fabs(Bx)/std::sqrt(rho_ls);
-    S_rs = S_M + std::fabs(Bx)/std::sqrt(rho_rs);
-
-    pt_s = ((S_r -  vx_r) * rho_r*pt_l - (S_l - vx_l) * rho_l * pt_r +
-	    rho_l*rho_r*(S_r - vx_r)*(S_l - vx_l)*
-	    (vx_r - vx_l))/((S_r - vx_r)*rho_r - (S_l - vx_l)*rho_l);
-
-    sam = vx_l - cf_l;
-    sap = vx_l + cf_l;
-      
-    if ((std::fabs(S_M - vx_l) <= ETA_TOLERANCE) and 
-        (std::fabs(By_l) <= ETA_TOLERANCE) and 
-        (std::fabs(Bz_l) <= ETA_TOLERANCE) and 
-        (Bx*Bx >= gamma * p_l) and
-        ((std::fabs(S_l - sam) <= ETA_TOLERANCE) or
-	 (std::fabs(S_l - sap) <= ETA_TOLERANCE)) ) {
-      vy_ls = vy_l;
-      vz_ls = vz_l;
-      By_ls = By_l;
-      Bz_ls = Bz_l;
-    } else {
-      vv_ls = (S_M - vx_l)/(rho_l*(S_l - vx_l)*(S_l - S_M) - Bx*Bx);
-      bb_ls = ((rho_l*(S_l - vx_l)*(S_l - vx_l) - Bx*Bx) /
-	       (rho_l*(S_l - vx_l)*(S_l - S_M) - Bx*Bx));
-      vy_ls = vy_l - Bx * By_l * vv_ls;
-      By_ls = By_l * bb_ls;
-      vz_ls = vz_l - Bx * Bz_l * vv_ls;
-      Bz_ls = Bz_l * bb_ls;
-    }
-
-    sam = vx_r - cf_r;
-    sap = vx_r + cf_r;
-
-    if ((std::fabs(S_M - vx_r) <= ETA_TOLERANCE) and 
-        (std::fabs(By_r) <= ETA_TOLERANCE) and 
-        (std::fabs(Bz_r) <= ETA_TOLERANCE) and 
-        (Bx*Bx >= gamma * p_r) and
-        ((std::fabs(S_r - sam) <= ETA_TOLERANCE) or
-	 (std::fabs(S_r - sap) <= ETA_TOLERANCE)) ) {
-      vy_rs = vy_r;
-      vz_rs = vz_r;
-      By_rs = By_r;
-      Bz_rs = Bz_r;
-    } else {
-      vv_rs = (S_M - vx_r)/(rho_r*(S_r - vx_r)*(S_r - S_M) - Bx*Bx);
-      bb_rs = ((rho_r*(S_r - vx_r)*(S_r - vx_r) - Bx*Bx)/
-	       (rho_r*(S_r - vx_r)*(S_r - S_M) - Bx*Bx));
-      vy_rs = vy_r - Bx * By_r * vv_rs;
-      vz_rs = vz_r - Bx * Bz_r * vv_rs;
-      By_rs = By_r * bb_rs;
-      Bz_rs = Bz_r * bb_rs;
-    }
-    Bv_ls = S_M * Bx + vy_ls * By_ls + vz_ls * Bz_ls;
-    Bv_rs = S_M * Bx + vy_rs * By_rs + vz_rs * Bz_rs;
-
-    etot_ls = ((S_l - vx_l)*etot_l - pt_l*vx_l + pt_s * S_M +
-	       Bx*(Bv_l - Bv_ls))/(S_l - S_M);
-    etot_rs = ((S_r - vx_r)*etot_r - pt_r*vx_r + pt_s * S_M +
-	       Bx*(Bv_r - Bv_rs))/(S_r - S_M);
-
-    // compute the fluxes based on the wave speeds
-    if (S_l <= 0 && S_ls >= 0) {
-      // USE F_ls
-      Us = setup_cons_ast_(S_M, rho_ls, vy_ls, vz_ls, etot_ls, Bx,
-			   By_ls, Bz_ls);
-
-      for (std::size_t field = 0; field<LUT::num_entries; field++){
-	fluxes[field] = flux_l[field] + S_l*(Us[field] - cons_l[field]);
-      }
-      return fluxes;
-    } else if (S_rs <= 0 && S_r >= 0) {
-      // USE F_rs
-      Us = setup_cons_ast_(S_M, rho_rs, vy_rs, vz_rs, etot_rs, Bx,
-			   By_rs, Bz_rs);
-
-      for (std::size_t field = 0; field<LUT::num_entries; field++){
-	fluxes[field] = flux_r[field] + S_r*(Us[field] - cons_r[field]);
-      }
-      return fluxes;
-    }
-
-    enzo_float sign_Bx = (Bx>0) ? 1. : -1.;
-
-    //do U** stuff
-    rho_savg = std::sqrt(rho_ls) + std::sqrt(rho_rs);
-    vy_ss = (std::sqrt(rho_ls) * vy_ls + std::sqrt(rho_rs) * vy_rs +
-	     (By_rs - By_ls) * sign_Bx)/rho_savg;
-    vz_ss = (std::sqrt(rho_ls) * vz_ls + std::sqrt(rho_rs) * vz_rs +
-	     (Bz_rs - Bz_ls) * sign_Bx)/rho_savg;
-    By_ss = (std::sqrt(rho_ls) * By_rs + std::sqrt(rho_rs) * By_ls +
-	     std::sqrt(rho_ls * rho_rs) * (vy_rs - vy_ls) * sign_Bx)/rho_savg;
-    Bz_ss = (std::sqrt(rho_ls) * Bz_rs + std::sqrt(rho_rs) * Bz_ls +
-	     std::sqrt(rho_ls * rho_rs) * (vz_rs - vz_ls) * sign_Bx)/rho_savg;
-    Bv_ss = S_M * Bx + vy_ss * By_ss + vz_ss * Bz_ss;
-    etot_lss = etot_ls - std::sqrt(rho_ls) * (Bv_ls - Bv_ss) * sign_Bx;
-    etot_rss = etot_rs + std::sqrt(rho_rs) * (Bv_rs - Bv_ss) * sign_Bx;
-
-    if (S_ls <= 0 && S_M >= 0) {
-      // USE F_lss
-      Us = setup_cons_ast_(S_M, rho_ls, vy_ls, vz_ls, etot_ls,
-			   Bx, By_ls, Bz_ls);
-      Uss = setup_cons_ast_(S_M, rho_ls, vy_ss, vz_ss, etot_lss,
-			    Bx, By_ss, Bz_ss);
-
-      for (std::size_t field = 0; field<LUT::num_entries; field++){
-	fluxes[field] = (flux_l[field] + S_ls*Uss[field] -
-			 (S_ls - S_l)*Us[field] - S_l*cons_l[field]);
-      }
-      return fluxes;
-    } else if (S_M <= 0 && S_rs >= 0) {
-      // USE F_rss
-      Us = setup_cons_ast_(S_M, rho_rs, vy_rs, vz_rs, etot_rs,
-			   Bx, By_rs, Bz_rs);
-      Uss = setup_cons_ast_(S_M, rho_rs, vy_ss, vz_ss, etot_rss,
-			    Bx, By_ss, Bz_ss);
-
-      for (std::size_t field = 0; field<LUT::num_entries; field++){
-	fluxes[field] = (flux_r[field] + S_rs*Uss[field] -
-			 (S_rs - S_r)*Us[field] - S_r*cons_r[field]);
-      }
-      return fluxes;
-    }
-    // include this to avoid getting yelled at
-    return fluxes;
   }
-
-  void operator()(const int iz,
-                  const int iy,
-                  const int ix) const noexcept
-  {
-    // Note that ETA_TOLERANCE is bigger than the tolerance was for the
-    // original implementation.
-
-    const int external_velocity_i = config.dim + LUT::velocity_i;
-    const int external_velocity_j = ((config.dim+1)%3) + LUT::velocity_i;
-    const int external_velocity_k = ((config.dim+2)%3) + LUT::velocity_i;
-    const int external_bfield_i = config.dim + LUT::bfield_i;
-    const int external_bfield_j = ((config.dim+1)%3) + LUT::bfield_i;
-    const int external_bfield_k = ((config.dim+2)%3) + LUT::bfield_i;
-
-    const enzo_float gamma = config.gamma;
-
-    // load primitives into local variables
-    // TODO: __attribute__((always_inline)) is required for icc
-    //  - return to this and either manually inline or introduce a macro
-    //    that specifies that the lambda should be inlined
-    auto load_prim = [=](const CelloArray<const enzo_float,4>& prim_arr) __attribute__((always_inline))
-    {
-      lutarray<LUT> out;
-      out[LUT::density]      = prim_arr(LUT::density,iz,iy,ix);
-      out[LUT::velocity_i]   = prim_arr(external_velocity_i,iz,iy,ix);
-      out[LUT::velocity_j]   = prim_arr(external_velocity_j,iz,iy,ix);
-      out[LUT::velocity_k]   = prim_arr(external_velocity_k,iz,iy,ix);
-      if (LUT::has_bfields){
-        out[LUT::bfield_i]   = prim_arr(external_bfield_i,iz,iy,ix);
-        out[LUT::bfield_j]   = prim_arr(external_bfield_j,iz,iy,ix);
-        out[LUT::bfield_k]   = prim_arr(external_bfield_k,iz,iy,ix);
-      }
-      // this actually stores pressure:
-      out[LUT::total_energy] = prim_arr(LUT::total_energy,iz,iy,ix);
-      return out;
-    };
-
-    const lutarray<LUT> prim_l = load_prim(config.prim_arr_l);
-    const lutarray<LUT> prim_r = load_prim(config.prim_arr_r);
-
-    // load left and right pressure values
-    const enzo_float pressure_l = prim_l[LUT::total_energy];
-    const enzo_float pressure_r = prim_r[LUT::total_energy];
-
-    // get the conserved quantities
-    const lutarray<LUT> cons_l
-      = enzo_riemann_utils::compute_conserved<LUT>(prim_l, gamma);
-    const lutarray<LUT> cons_r
-      = enzo_riemann_utils::compute_conserved<LUT>(prim_r, gamma);
-
-    // compute the interface fluxes
-    const lutarray<LUT> flux_l
-      = enzo_riemann_utils::active_fluxes<LUT>(prim_l, cons_l, pressure_l);
-    const lutarray<LUT> flux_r
-      = enzo_riemann_utils::active_fluxes<LUT>(prim_r, cons_r, pressure_r);
-
-    enzo_float vi_bar;
-    lutarray<LUT> fluxes = helper_(flux_l, flux_r, prim_l, prim_r,
-                                   cons_l, cons_r, pressure_l, pressure_r,
-                                   gamma, vi_bar);
-
-    // now, update flux_arr
-    config.flux_arr(LUT::density,iz,iy,ix) = fluxes[LUT::density];
-    config.flux_arr(external_velocity_i,iz,iy,ix) = fluxes[LUT::velocity_i];
-    config.flux_arr(external_velocity_j,iz,iy,ix) = fluxes[LUT::velocity_j];
-    config.flux_arr(external_velocity_k,iz,iy,ix) = fluxes[LUT::velocity_k];
-    config.flux_arr(external_bfield_i,iz,iy,ix) = fluxes[LUT::bfield_i];
-    config.flux_arr(external_bfield_j,iz,iy,ix) = fluxes[LUT::bfield_j];
-    config.flux_arr(external_bfield_k,iz,iy,ix) = fluxes[LUT::bfield_k];
-    config.flux_arr(LUT::total_energy,iz,iy,ix) = fluxes[LUT::total_energy];
-
-    // finally, deal with dual energy stuff.
-    // compute internal energy flux, assuming passive advection
-    // (this was not handled with the rest of the fluxes)
-    config.internal_energy_flux_arr(iz,iy,ix) =
-      enzo_riemann_utils::passive_eint_flux
-      (prim_l[LUT::density], pressure_l, prim_r[LUT::density], pressure_r,
-       gamma, config.flux_arr(LUT::density,iz,iy,ix));
-    config.velocity_i_bar_arr(iz,iy,ix) = vi_bar;
-  }
-
-  lutarray<LUT> setup_cons_ast_( const enzo_float speed,
-                                 const enzo_float rho, const enzo_float vy,
-                                 const enzo_float vz, const enzo_float etot,
-                                 const enzo_float Bx, const enzo_float By,
-                                 const enzo_float Bz) const noexcept
-  {
-
-    // Helper function that factors out the filling of the of the asterisked
-    // and double asterisked conserved quantities
-    // The dual energy formalism is explicitly handled outside of this function
-    lutarray<LUT> out;
-    out[LUT::density] = rho;
-    out[LUT::velocity_i] = rho * speed;
-    out[LUT::velocity_j] = rho * vy;
-    out[LUT::velocity_k] = rho * vz;
-    out[LUT::total_energy] = etot;
-    out[LUT::bfield_i] = Bx;
-    out[LUT::bfield_j] = By;
-    out[LUT::bfield_k] = Bz;
-    return out;
-  }
-
 };
 
 /// @class    EnzoRiemannHLLD
 /// @ingroup  Enzo
 /// @brief    [\ref Enzo] Encapsulates HLLD approximate Riemann Solver
-using EnzoRiemannHLLD = EnzoRiemannImpl<HLLDImpl>;
-
+using EnzoRiemannHLLD = EnzoRiemannImpl<HLLDKernel>;
 
 #endif /* ENZO_ENZO_RIEMANN_HLLD_HPP */

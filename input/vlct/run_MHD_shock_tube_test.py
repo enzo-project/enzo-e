@@ -78,11 +78,11 @@ def analyze_tests():
     # use 1 block - if we use more than one block, it's unclear to me if it's
     # ok to have round-off errors)
 
-    r.append(err_compare(0.012524502240006011,"x"))
+    r.append(err_compare(0.012523489882320429, "x"))
     r.append(err_compare(0.0, "x", std_dev=True))
-    r.append(err_compare(0.012524502240005972,"y"))
+    r.append(err_compare(0.012523489882320308, "y"))
     r.append(err_compare(0.0, "y", std_dev=True))
-    r.append(err_compare(0.012524502240005921,"z"))
+    r.append(err_compare(0.012523489882320315, "z"))
     r.append(err_compare(0.0, "z", std_dev=True))
 
     n_passed = np.sum(r)

@@ -16,7 +16,11 @@ if(NOT __processedUserDefaults)
   # Set some architecture-specific optimization flags
   # (in the future, we might want to excercise more control over the targetted
   # instruction set to a higher level)
-  set(__ARCH_C_OPT_FLAGS "-O3 -fopenmp-simd -march=native -DNDEBUG -funroll-loops -fno-trapping-math -fno-math-errno -fno-signed-zeros")
+
+  # if we use -fno-math-errno, that cause 1D MHD shock tube problems to have
+  # slightly different L1 error norms for the VL+CT solver, depending on the
+  # position in the transverse direction (see MHD_shock_tube_test)
+  set(__ARCH_C_OPT_FLAGS "-O3 -fopenmp-simd -march=native -DNDEBUG -funroll-loops -fno-trapping-math -fno-signed-zeros")
 
   set(CMAKE_C_FLAGS_RELEASE "${__ARCH_C_OPT_FLAGS}")
   set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g ${__ARCH_C_OPT_FLAGS}")
