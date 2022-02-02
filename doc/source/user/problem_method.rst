@@ -597,7 +597,7 @@ parameters
      - Description
    * - ``"merging_radius_cells"``
      - `float`
-     - `4.0`
+     - `8.0`
      - `The merging radius relative to the cell-width`
 
    
