@@ -6,7 +6,7 @@ if [ ! -f particles.dat ]
 then
     echo "Generating ICs"
     
-    python ics.py -r 4.0e6 -m 2.0e36 -c 1.5e7 1.5e7 1.5e7 -d 2.0e8 2.0e8 2.0e8 -i 1.0e8 -n 1000
+    python ics.py -r 4.0e16 -m 2.0e36 -c 1.5e17 1.5e17 1.5e17 -d 2.0e8 2.0e8 2.0e8 -i 1.0e8 -n 1000
 fi
 
 echo "Running the Merge Stars Test"

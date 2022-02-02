@@ -16,7 +16,7 @@ env['clocal_cmd'] = '++local'
 
 date_cmd = 'echo $TARGET > test/STATUS; echo "-------------------"; date +"%Y-%m-%d %H:%M:%S";'
 
-merge_stars_1 = Builder(action = "$COPY_PARTICLE_DATA ; $RMIN; " + date_cmd + serial_run + "  $SOURCE  $clocal_cmd > $TARGET 2>&1; $CPIN; $COPY")
+merge_stars_1 = Builder(action = "$COPY_PARTICLE_DATA ; $RMIN; " + date_cmd + serial_run + "  $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'MergeStars1' : merge_stars_1 } )
 env_merge_stars_1  = env.Clone(
 		   COPY_PARTICLE_DATA = 'cp input/MergeStars/particles.dat ./',
