@@ -240,6 +240,7 @@ extern "C" {
 #include "enzo_EnzoMethodTurbulence.hpp"
 #include "enzo_EnzoMethodStarMaker.hpp"
 #include "enzo_EnzoMethodStarMakerStochasticSF.hpp"
+#include "enzo_EnzoMethodStarMakerSTARSS.hpp"
 #include "enzo_EnzoMethodMHDVlct.hpp"
 
 #include "enzo_EnzoMatrixDiagonal.hpp"
