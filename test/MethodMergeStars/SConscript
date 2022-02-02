@@ -1,0 +1,54 @@
+Import('env')
+Import('parallel_run')
+Import('serial_run')
+Import('ip_charm')
+Import('bin_path')
+Import('test_path')
+import os
+#----------------------------------------------------------------------
+# defines
+#----------------------------------------------------------------------
+
+env['CPIN'] = 'touch parameters.out; mv parameters.out ${TARGET}.in'
+env['RMIN'] = 'rm -f parameters.out'
+env['clocal_cmd'] = '++local'
+
+
+date_cmd = 'echo $TARGET > test/STATUS; echo "-------------------"; date +"%Y-%m-%d %H:%M:%S";'
+
+merge_stars_1 = Builder(action = "$COPY_PARTICLE_DATA ; $RMIN; " + date_cmd + serial_run + "  $SOURCE  $clocal_cmd > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'MergeStars1' : merge_stars_1 } )
+env_merge_stars_1  = env.Clone(
+		   COPY_PARTICLE_DATA = 'cp input/MergeStars/particles.dat ./',
+		   COPY = 'mkdir -p ' + test_path + '/MethodMergeStars/merge_stars_1; mv `ls *.png *.h5` ' + test_path + '/MethodMergeStars/merge_stars_1')
+
+merge_stars_8 = Builder(action = "$COPY_PARTICLE_DATA ; $RMIN; " + date_cmd + parallel_run + "  $SOURCE  $clocal_cmd $ARGS  > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'MergeStars8' : merge_stars_8 } )
+env_merge_stars_8  = env.Clone(
+		   COPY_PARTICLE_DATA = 'cp input/MergeStars/particles.dat ./',
+		   COPY = 'mkdir -p ' + test_path + '/MethodMergeStars/merge_stars_8; mv `ls *.png *.h5` ' + test_path + '/MethodMergeStars/merge_stars_8')
+
+merge_stars_16 = Builder(action = "$COPY_PARTICLE_DATA ; $RMIN; " + date_cmd + parallel_run + "  $SOURCE  $clocal_cmd $ARGS  > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'MergeStars16' : merge_stars_16 } )
+env_merge_stars_16  = env.Clone(
+		   COPY_PARTICLE_DATA = 'cp input/MergeStars/particles.dat ./',
+		   COPY = 'mkdir -p ' + test_path + '/MethodMergeStars/merge_stars_16; mv `ls *.png *.h5` ' + test_path + '/MethodMergeStars/merge_stars_16')
+
+merge_stars_1 = env_merge_stars_1.MergeStars1 (
+     'test_method_merge_stars-1.unit',
+     bin_path + '/enzo-e',
+     ARGS='input/MergeStars/merge_stars_test-1.in')
+
+merge_stars_8 = env_merge_stars_8.MergeStars8 (
+     'test_method_merge_stars-8.unit',
+     bin_path + '/enzo-e',
+     ARGS='input/MergeStars/merge_stars_test-8.in')
+
+merge_stars_16 = env_merge_stars_16.MergeStars16 (
+     'test_method_merge_stars-16.unit',
+     bin_path + '/enzo-e',
+     ARGS='input/MergeStars/merge_stars_test-16.in')
+
+Clean(merge_stars_1,[Glob('#/' + test_path + 'Dir_Merge-Stars-1'),'#/particles.dat'])
+Clean(merge_stars_8,[Glob('#/' + test_path + 'Dir_Merge-Stars-8')])
+Clean(merge_stars_16,[Glob('#/' + test_path + 'Dir_Merge-Stars-16')])
