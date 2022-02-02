@@ -214,7 +214,7 @@ int ParticleData::insert_particles
     int np_this = std::min(mb-ip_start,np_left);
 
     // resize arrays for a new batch if needed
-    if ( ip_start == 0) {
+    if (ip_start == 0 && num_particles(particle_descr,it,ib_this) != 0) {
 
       ASSERT1("ParticleData::insert_particles",
 	     "Trying to insert negative particles: ib_this = %d",
