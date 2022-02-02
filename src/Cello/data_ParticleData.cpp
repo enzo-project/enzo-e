@@ -1179,7 +1179,7 @@ void ParticleData::resize_attribute_array_
     np = particle_descr->batch_size();
   }
 
-  long new_size = mp*(np) + (PARTICLE_ALIGN - 1) ;
+  long unsigned new_size = mp*(np) + (PARTICLE_ALIGN - 1) ;
 
   if (attribute_array_[it][ib].size() != new_size) {
 

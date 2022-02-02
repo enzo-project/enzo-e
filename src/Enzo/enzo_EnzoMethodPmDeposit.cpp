@@ -35,22 +35,19 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
   : Method(),
     alpha_(alpha)
 {
-
-  this->required_fields_ = std::vector<std::string>
-                             {"density",
-                              "density_total","density_particle",
-                              "density_particle_accumulate"};
   const int rank = cello::rank();
 
-  if (rank >= 0) this->required_fields_.push_back("velocity_x");
-  if (rank >= 1) this->required_fields_.push_back("velocity_y");
-  if (rank >= 2) this->required_fields_.push_back("velocity_z");
-
-  this->define_fields();
+  cello::define_field ("density");
+  cello::define_field ("density_total");
+  cello::define_field ("density_particle");
+  cello::define_field ("density_particle_accumulate");
+  if (rank >= 1) cello::define_field ("velocity_x");
+  if (rank >= 2) cello::define_field ("velocity_y");
+  if (rank >= 3) cello::define_field ("velocity_z");
 
   // Initialize default Refresh object
 
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
 
   Refresh * refresh = cello::refresh(ir_post_);
 
@@ -415,6 +412,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     if (rank >= 3) for (int i=0; i<m; i++) vz[i] = vzf[i];
     else           for (int i=0; i<m; i++) vz[i] = 0.0;
 
+    
     FORTRAN_NAME(dep_grid_cic)(de,de_gas,temp,
 			       vx, vy, vz,
 			       &dtf, rfield, &rank,
@@ -447,20 +445,14 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     delete [] vz;
 
     delete [] de_gas;
-
-    double sum_de_p = 0.0;
-    for (int i=0; i<mx*my*mz; i++) sum_de_p += de_p[i];
-
   }
 
-
   block->compute_done();
-
 }
 
 //----------------------------------------------------------------------
 
-double EnzoMethodPmDeposit::timestep ( Block * block ) const throw()
+double EnzoMethodPmDeposit::timestep ( Block * block ) throw()
 {
   double dt = std::numeric_limits<double>::max();
 

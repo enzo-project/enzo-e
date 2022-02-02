@@ -66,8 +66,8 @@ void EnzoInitialImplosion2::enforce_block
   // WARNING("EnzoInitialImplosion2",
   // 		  "Assumes same ghost zone depth for all fields");
 
-  const int in = cello::index_static();
-
+  const enzo_float gamma = EnzoBlock::Gamma[cello::index_static()];
+    
   int mx,my;
   field.dimensions(0,&mx,&my);
 
@@ -80,13 +80,16 @@ void EnzoInitialImplosion2::enforce_block
 	d[i]  = 0.125;
 	vx[i] = 0.0;
 	vy[i] = 0.0;
-	te[i] = 0.14 / ((EnzoBlock::Gamma[in] - 1.0) * d[i]);
+	te[i] = 0.14 / ((gamma - 1.0) * d[i]);
       } else {
 	d[i]  = 1.0;
 	vx[i] = 0.0;
 	vy[i] = 0.0;
-	te[i] = 1.0 / ((EnzoBlock::Gamma[in] - 1.0) * d[i]);
+	te[i] = 1.0 / ((gamma - 1.0) * d[i]);
       }
     }
   }
+
+  block->initial_done();
+
 }

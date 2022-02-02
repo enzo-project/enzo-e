@@ -1,0 +1,85 @@
+* Enzo-E/Cello Tools
+
+   This directory contains numerous command-line tools of varying degree
+   of uselessness and uptodatedness.  Awk scripts in the awk directory
+   are typically called from higher-level batch scripts, though
+   can be called directly.
+
+  - [ ] check-ppm.sh :: compare PPM files in Enzo-E with ENZO's
+       requires editing directory paths, and files have likely been
+       renamed.
+  
+  - [ ] awk/perf-summary.awk :: Summarizes performance of a simulation
+       Partes the output of a simulation, providing a summary of its
+       performance.  May be out-of-date with current output format,
+       and computations should be double-checked for accuracy.
+
+  - [ ] awk/valgrind-org.awk :: Convert valgrind output to org-mode
+       Converts the output of e.g. "valgrind --leak-check=full ..." to
+       emacs org-mode format as a collapsable list of todo items.
+
+  - [ ] awk/diff-org.awk :: Convert "git diff" output to org-mode
+
+       Converts the output of "git diff" to org-mode format as a
+       collapsable list of TODO items.  Useful for code reviews of
+       changes before commiting and pushing to a remote repository.
+       Includes sections for unstaged and staged files.
+
+  - [ ] awk/grep-org.awk :: Convert "grep -n" output to org-mode
+
+       Converts the output of "grep -n <text> <file-glob> to org-mode
+       format as a collapsable list of TODO items with links to the
+       matching lines in the file.  Useful, for example, for finding all occurrences of
+       identifiers in source code, and keeping track of user operations
+       on them, e.g. renaming.
+
+  - [ ] awk/error-org.awk :: Convert compiler (gcc) errors to org-mode
+
+       Converts the error messages in output of a source code build to
+       org-mode as a collapsable list of TODO items with links to the
+       lines in the files indicated by the error message.  Called by
+       build.sh.
+
+  - [ ] awk/gdb-org.awk :: Convert gdb frame info to org-mode
+
+       Converts the stack trace output of "where" in gdb to org-mode
+       as a collapsable list of TODO items with links to the lines in
+       the files associated with each call in the stack.
+
+  - [ ] awk/warning-org.awk :: Convert compiler (gcc) warnings to org-made
+
+       Converts the warning messages in output of a source code build
+       to org-mode as a collapsable list of TODO items with links to
+       the lines in the files indicated by the warning message.
+       Called by build.sh.
+
+  - [ ] ch-perf.sh :: Create performance plots (broken)
+
+       Parses output from Enzo-E output to create performance plots
+       of time for different phases of a simulation.  Old and some
+       phases are not supported, breaking the generation of plots,
+       though some data files are created in perf/ which may be useful.
+
+  - [ ] plot_mesh.py :: Plots mesh associated with a list of Block names
+
+       Given a list of block names (B1:10_0:01) plot the associated mesh
+       hierarchy.
+
+  - [ ] grep-org.sh :: Create grep.org org-mode file of grep output
+
+       Single-line call to awk/grep-org.awk
+
+** Obsolete
+
+   The following tools are obsolete and have been deleted 210415
+
+   - ch-swf.sh (SWF is an obsolete format)
+   - log-org.sh (for hg not git, and limited usefulness)
+   - plot_msg.sh (calls deleted script; accesses obsolete .cellorc
+     directory)
+   - awk/perf-blocks.awk (doesn't work, and not sure what it's
+     supposed to do anyway)
+   - awk/doxygen-org.awk (just converted warning messages from
+     doxygen to org-mode)
+   - ls-org.sh + awk/ls-org.awk (org-mode of ls, not real useful and buggy)
+   - colormap_gen.py (obsolete and broken python2 script)

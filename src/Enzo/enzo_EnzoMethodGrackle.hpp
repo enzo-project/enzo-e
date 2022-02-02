@@ -107,11 +107,11 @@ public: // interface
   { return "grackle"; }
 
   /// Compute maximum timestep for this method
-  virtual double timestep ( Block * block) const throw();
+  virtual double timestep ( Block * block) throw();
 
 #ifdef CONFIG_USE_GRACKLE
 
-  static void define_required_grackle_fields();
+  void define_required_grackle_fields();
 
   void initialize_grackle_chemistry_data(double current_time,
                                          bool preinitialized_units = false);
@@ -139,31 +139,31 @@ public: // interface
   static void update_grackle_density_fields(EnzoBlock * enzo_block,
                                    grackle_field_data * grackle_fields) throw();
 
-  static void delete_grackle_fields(grackle_field_data * grackle_fields_) throw() {
-      grackle_fields_->density         = NULL;
-      grackle_fields_->internal_energy = NULL;
-      grackle_fields_->x_velocity      = NULL;
-      grackle_fields_->y_velocity      = NULL;
-      grackle_fields_->z_velocity      = NULL;
-      grackle_fields_->HI_density      = NULL;
-      grackle_fields_->HII_density     = NULL;
-      grackle_fields_->HeI_density     = NULL;
-      grackle_fields_->HeII_density    = NULL;
-      grackle_fields_->HeIII_density   = NULL;
-      grackle_fields_->e_density       = NULL;
-      grackle_fields_->HM_density      = NULL;
-      grackle_fields_->H2I_density     = NULL;
-      grackle_fields_->H2II_density    = NULL;
-      grackle_fields_->DI_density      = NULL;
-      grackle_fields_->DII_density     = NULL;
-      grackle_fields_->HDI_density     = NULL;
-      grackle_fields_->metal_density   = NULL;
-      grackle_fields_->volumetric_heating_rate = NULL;
-      grackle_fields_->specific_heating_rate   = NULL;
+  static void delete_grackle_fields(grackle_field_data * grackle_fields) throw() {
+      grackle_fields->density         = NULL;
+      grackle_fields->internal_energy = NULL;
+      grackle_fields->x_velocity      = NULL;
+      grackle_fields->y_velocity      = NULL;
+      grackle_fields->z_velocity      = NULL;
+      grackle_fields->HI_density      = NULL;
+      grackle_fields->HII_density     = NULL;
+      grackle_fields->HeI_density     = NULL;
+      grackle_fields->HeII_density    = NULL;
+      grackle_fields->HeIII_density   = NULL;
+      grackle_fields->e_density       = NULL;
+      grackle_fields->HM_density      = NULL;
+      grackle_fields->H2I_density     = NULL;
+      grackle_fields->H2II_density    = NULL;
+      grackle_fields->DI_density      = NULL;
+      grackle_fields->DII_density     = NULL;
+      grackle_fields->HDI_density     = NULL;
+      grackle_fields->metal_density   = NULL;
+      grackle_fields->volumetric_heating_rate = NULL;
+      grackle_fields->specific_heating_rate   = NULL;
 
-      delete [] grackle_fields_->grid_dimension; grackle_fields_->grid_dimension = NULL;
-      delete [] grackle_fields_->grid_start;     grackle_fields_->grid_start      = NULL;
-      delete [] grackle_fields_->grid_end;       grackle_fields_->grid_end        = NULL;
+      delete [] grackle_fields->grid_dimension; grackle_fields->grid_dimension = NULL;
+      delete [] grackle_fields->grid_start;     grackle_fields->grid_start      = NULL;
+      delete [] grackle_fields->grid_end;       grackle_fields->grid_end        = NULL;
 
       return;
  }
@@ -227,7 +227,6 @@ protected: // methods
   code_units grackle_units_;
   chemistry_data_storage grackle_rates_;
   double time_grackle_data_initialized_;
-
 #endif
 
 };

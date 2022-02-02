@@ -33,7 +33,7 @@ EnzoMethodMergeStars::EnzoMethodMergeStars()
   merging_radius_cells_ = enzo_config->method_merge_stars_merging_radius_cells;
 
   // Refresh copies all star particles from neighbouring blocks
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   ParticleDescr * particle_descr = cello::particle_descr();
   refresh->add_particle(particle_descr->type_index("star"));

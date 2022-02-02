@@ -12,7 +12,7 @@ class EnzoSolverCg : public Solver {
 
   /// @class    EnzoSolverCg
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] 
+  /// @brief    [\ref Enzo]
 
 public: // interface
 
@@ -22,18 +22,20 @@ public: // interface
 		int monitor_iter,
 		int restart_cycle,
 		int solve_type,
+		int index_prolong,
+		int index_restrict,
 		int min_level,
 		int max_level,
-		int iter_max, 
+		int iter_max,
 		double res_tol,
 		int index_precon);
 
   /// Constructor
   EnzoSolverCg() throw()
-  : Solver(), 
+  : Solver(),
     A_(NULL),
     index_precon_(-1),
-    iter_max_(0), 
+    iter_max_(0),
     ir_(-1), id_(-1), iy_(-1), iz_(-1),
     nx_(0),ny_(0),nz_(0),
     mx_(0),my_(0),mz_(0),
@@ -47,7 +49,6 @@ public: // interface
     local_(false),
     ir_matvec_(-1),
     ir_loop_2_(-1)
-    
   {};
 
   /// Charm++ PUP::able declarations
@@ -55,10 +56,10 @@ public: // interface
 
   /// Charm++ PUP::able migration constructor
   EnzoSolverCg (CkMigrateMessage *m)
-    : Solver(m), 
+    : Solver(m),
       A_(NULL),
       index_precon_(-1),
-      iter_max_(0), 
+      iter_max_(0),
       ir_(-1), id_(-1), iy_(-1), iz_(-1),
       nx_(0),ny_(0),nz_(0),
       mx_(0),my_(0),mz_(0),
@@ -72,7 +73,7 @@ public: // interface
       local_(false),
       ir_matvec_(-1),
       ir_loop_2_(-1)
-      
+
   {}
 
   /// Assignment operator
@@ -87,12 +88,12 @@ public: // virtual functions
 
   /// Solve the linear system Ax = b
   virtual void apply ( std::shared_ptr<Matrix> A, Block * block) throw();
-  
+
   /// Type of this solver
   virtual std::string type() const { return "cg"; }
 
   //--------------------------------------------------
-  
+
 public: // virtual functions
 
   /// Continuation after global reduction
@@ -175,9 +176,9 @@ protected: // methods
 
   /// Shift Field so that sum(x) == 0
   void shift_local_(int ix, EnzoBlock * enzo_block);
-  
+
   void monitor_output_(EnzoBlock *);
-  
+
 protected: // attributes
 
   // NOTE: change pup() function whenever attributes change

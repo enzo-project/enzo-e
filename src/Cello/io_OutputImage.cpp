@@ -8,20 +8,32 @@
 #include "cello.hpp"
 #include "io.hpp"
 
+// #define TRACE_MEMORY
+
+//----------------------------------------------------------------------
+#ifdef TRACE_MEMORY
+#  undef TRACE_MEMORY
+#  define TRACE_MEMORY(MSG,BYTES) CkPrintf \
+  ("TRACE_MEMORY %d : %d %s : %lu\n",                                   \
+   CkMyPe(),__LINE__,(MSG),(long unsigned)(BYTES));                     \
+  fflush(stdout);
+#else
+#  define TRACE_MEMORY(MSG,BYTES) /* ... */
+#endif
+
 //----------------------------------------------------------------------
 
 OutputImage::OutputImage(int index,
 			 const Factory * factory,
 			 int process_count,
-			 int nx0, int ny0, int nz0,
-			 int nxb, int nyb, int nzb,
+			 const int root_size_in[3],
+			 const int root_blocks_in[3],
 			 int min_level, int max_level, int leaf_only,
 			 std::string image_type,
-			 int image_size_x, int image_size_y,
+			 int image_size[2],
 			 std::string image_reduce_type,
 			 std::string image_mesh_color,
 			 std::string color_particle_attribute,
-			 int         image_block_size,
 			 double image_lower[],
 			 double image_upper[],
 			 int face_rank,
@@ -29,27 +41,32 @@ OutputImage::OutputImage(int index,
 			 bool image_log,
 			 bool image_abs,
 			 bool ghost,
+                         bool use_min_max,
 			 double min_value, double max_value) throw ()
 : Output(index,factory),
-    image_data_(NULL),
-    image_mesh_(NULL),
-    color_particle_attribute_(color_particle_attribute),
-    axis_(axis),
-    min_value_(min_value),max_value_(max_value),
-    nxi_(image_size_x),
-    nyi_(image_size_y),
-    png_(NULL),
-    image_type_(image_type),
-    face_rank_(face_rank),
-    image_log_(image_log),
-    image_abs_(image_abs),
-    ghost_(ghost),
-    min_level_(min_level),
-    max_level_(max_level),
-    leaf_only_(leaf_only)
-
+  image_data_(NULL),
+  image_mesh_(NULL),
+  color_particle_attribute_(color_particle_attribute),
+  axis_(axis),
+  use_min_max_(use_min_max),
+  min_value_(min_value),
+  max_value_(max_value),
+  png_(NULL),
+  image_type_(image_type),
+  face_rank_(face_rank),
+  image_log_(image_log),
+  image_abs_(image_abs),
+  include_ghost_(ghost),
+  min_level_(min_level),
+  max_level_(max_level),
+  leaf_only_(leaf_only)
 {
-
+  int root_size[3] =
+    {root_size_in[0], root_size_in[1], root_size_in[2]};
+  int root_blocks[3] =
+    {root_blocks_in[0], root_blocks_in[1], root_blocks_in[2]};
+  image_size_[0] = image_size[0];
+  image_size_[1] = image_size[1];
   if      (image_reduce_type=="min") { op_reduce_ = reduce_min; }
   else if (image_reduce_type=="max") { op_reduce_ = reduce_max; }
   else if (image_reduce_type=="avg") { op_reduce_ = reduce_avg; }
@@ -69,24 +86,23 @@ OutputImage::OutputImage(int index,
 	    image_mesh_color.c_str());
   }
 
-  int nl = image_block_size * (1 << max_level_); // image size factor
-
-  if (ghost_) {
-    if (nx0>1) nx0*=2;
-    if (ny0>1) ny0*=2;
-    if (nz0>1) nz0*=2;
+  const int rank = cello::rank();
+  if (include_ghost_) {
+    for (int i=0; i<rank; i++) {
+      root_size[i] *= 2;
+    }
   }
 
-  if (nxi_ == 0) nxi_ = (type_is_mesh_()) ? 2*nl * nxb + 1 : nl * nx0;
-  if (nyi_ == 0) nyi_ = (type_is_mesh_()) ? 2*nl * nyb + 1 : nl * ny0;
+  if (image_size_[0] == 0) image_size_[0] = (type_is_mesh_()) ? 2 * root_blocks[0] + 1 : root_size[0];
+  if (image_size_[1] == 0) image_size_[1] = (type_is_mesh_()) ? 2* root_blocks[1] + 1 : root_size[1];
 
   int ngx,ngy,ngz;
   FieldDescr * field_descr = cello::field_descr();
   field_descr->ghost_depth(0,&ngx,&ngy,&ngz);
 
-  if (! type_is_mesh_() && ghost_) {
-    nxi_ += 2*nxb*ngx*nl;
-    nyi_ += 2*nyb*ngy*nl;
+  if (! type_is_mesh_() && include_ghost_) {
+    image_size_[0] += 2*root_blocks[0]*ngx;
+    image_size_[1] += 2*root_blocks[1]*ngy;
   }
 
   // Override default Output::stride_write_: only root writes
@@ -96,17 +112,17 @@ OutputImage::OutputImage(int index,
   stride_wait_ = 1;
 
   // Set default color map to be black and white
-  map_r_.resize(2);
-  map_g_.resize(2);
-  map_b_.resize(2);
+  colormap_[0].resize(2);
+  colormap_[1].resize(2);
+  colormap_[2].resize(2);
 
-  map_r_[0] = 0.0;
-  map_g_[0] = 0.0;
-  map_b_[0] = 0.0;
+  colormap_[0][0] = 0.0;
+  colormap_[1][0] = 0.0;
+  colormap_[2][0] = 0.0;
 
-  map_r_[1] = 1.0;
-  map_g_[1] = 1.0;
-  map_b_[1] = 1.0;
+  colormap_[0][1] = 1.0;
+  colormap_[1][1] = 1.0;
+  colormap_[2][1] = 1.0;
 
   for (int axis=0; axis<3; axis++) {
     image_lower_[axis] = image_lower[axis];
@@ -118,6 +134,10 @@ OutputImage::OutputImage(int index,
 
 OutputImage::~OutputImage() throw ()
 {
+  TRACE_MEMORY("delete png_",image_size_[0]*image_size_[1]);
+  TRACE_MEMORY("delete image_data_",image_size_[0]*image_size_[1]*sizeof(double));
+  TRACE_MEMORY("delete image_mesh_",image_size_[0]*image_size_[1]*sizeof(double));
+
   delete png_;
   png_ = NULL;
   delete [] image_data_;
@@ -134,21 +154,18 @@ void OutputImage::pup (PUP::er &p)
 
   Output::pup(p);
 
-  p | map_r_;
-  p | map_g_;
-  p | map_b_;
-  p | op_reduce_;
-  p | mesh_color_type_;
-  p | color_particle_attribute_;
-  p | axis_;
-  p | nxi_;
-  p | nyi_;
+  p | colormap_[0];
+  p | colormap_[1];
+  p | colormap_[2];
 
   int has_data = (image_data_ != NULL);
   p | has_data;
   if (has_data) {
-    if (p.isUnpacking()) image_data_ = new double [nxi_*nyi_];
-    PUParray(p,image_data_,nxi_*nyi_);
+    if (p.isUnpacking()) {
+      TRACE_MEMORY("new image_data",image_size_[0]*image_size_[1]*sizeof(double));
+      image_data_ = new double [image_size_[0]*image_size_[1]];
+    }
+    PUParray(p,image_data_,image_size_[0]*image_size_[1]);
   } else {
     image_data_ = NULL;
   }
@@ -156,44 +173,45 @@ void OutputImage::pup (PUP::er &p)
   int has_mesh = (image_mesh_ != NULL);
   p | has_mesh;
   if (has_mesh) {
-    if (p.isUnpacking()) image_mesh_ = new double [nxi_*nyi_];
-    PUParray(p,image_mesh_,nxi_*nyi_);
+    if (p.isUnpacking()) {
+      TRACE_MEMORY("new image_mesh",image_size_[0]*image_size_[1]*sizeof(double));
+      image_mesh_ = new double [image_size_[0]*image_size_[1]];
+    }
+    PUParray(p,image_mesh_,image_size_[0]*image_size_[1]);
   } else {
     image_mesh_ = NULL;
   }
+  p | op_reduce_;
+  p | mesh_color_type_;
+  p | color_particle_attribute_;
+  p | axis_;
+  p | use_min_max_;
+  p | min_value_;
+  p | max_value_;
+  PUParray(p,image_size_,2);
 
   WARNING("OutputImage::pup","skipping png");
   // p | *png_;
   if (p.isUnpacking()) png_ = NULL;
   p | image_type_;
-  p | min_level_;
-  p | max_level_;
-  p | leaf_only_;
   p | face_rank_;
   p | image_log_;
   p | image_abs_;
+  p | include_ghost_;
+  p | min_level_;
+  p | max_level_;
+  p | leaf_only_;
   PUParray(p,image_lower_,3);
   PUParray(p,image_upper_,3);
-  p | ghost_;
 }
 
 //----------------------------------------------------------------------
 
-void OutputImage::set_colormap
-(int n, double * map_r, double * map_g, double * map_b) throw()
+void OutputImage::set_colormap( std::vector<float>colormap[3])
 {
-  // Copy rbg lists
-
-  map_r_.resize(n);
-  map_g_.resize(n);
-  map_b_.resize(n);
-
-  for (int i=0; i<n; i++) {
-    map_r_[i] = map_r[i];
-    map_g_[i] = map_g[i];
-    map_b_[i] = map_b[i];
+  for (int i=0; i<3; i++) {
+    colormap_[i] = colormap[i];
   }
-
 }
 
 //======================================================================
@@ -302,10 +320,10 @@ void OutputImage::write_block ( const Block *  block ) throw()
   // image extents of box
   int ixm, ixp;
   int iym, iyp;
-  ixm = (bm3[IX]-dm3[IX])/(dp3[IX]-dm3[IX])*nxi_;
-  iym = (bm3[IY]-dm3[IY])/(dp3[IY]-dm3[IY])*nyi_;
-  ixp = (bp3[IX]-dm3[IX])/(dp3[IX]-dm3[IX])*nxi_;
-  iyp = (bp3[IY]-dm3[IY])/(dp3[IY]-dm3[IY])*nyi_;
+  ixm = (bm3[IX]-dm3[IX])/(dp3[IX]-dm3[IX])*image_size_[0];
+  iym = (bm3[IY]-dm3[IY])/(dp3[IY]-dm3[IY])*image_size_[1];
+  ixp = (bp3[IX]-dm3[IX])/(dp3[IX]-dm3[IX])*image_size_[0];
+  iyp = (bp3[IY]-dm3[IY])/(dp3[IY]-dm3[IY])*image_size_[1];
 
   double h3[3];
   block->cell_width(h3,h3+1,h3+2);
@@ -333,9 +351,8 @@ void OutputImage::write_block ( const Block *  block ) throw()
 
       // add block contribution to image
 
-      const char * field_values = (ghost_) ?
-	field.values(index_field) :
-	field.unknowns(index_field);
+      const char * field_values = (include_ghost_) ?
+        field.values(index_field) : field.unknowns(index_field);
 
       float  * field_float  = (float*)field_values;
       double * field_double = (double*)field_values;
@@ -346,9 +363,9 @@ void OutputImage::write_block ( const Block *  block ) throw()
       if (rank >= 2 && (std::abs(dm3[IZ] - dp3[IZ]) < h3[IZ])) factor = 1.0;
 
       int m3[3];
-      m3[0] = ghost_ ? nd3[0] : nb3[0];
-      m3[1] = ghost_ ? nd3[1] : nb3[1];
-      m3[2] = ghost_ ? nd3[2] : nb3[2];
+      m3[0] = include_ghost_ ? nd3[0] : nb3[0];
+      m3[1] = include_ghost_ ? nd3[1] : nb3[1];
+      m3[2] = include_ghost_ ? nd3[2] : nb3[2];
       for (int ix=0; ix<m3[IX]; ix++) {
 	double x = bm3[IX] + (ix+0.5)*(bp3[IX]-bm3[IX])/m3[IX];
 	int jxm = ixm +  ix   *(ixp-ixm)/m3[IX];
@@ -491,8 +508,8 @@ void OutputImage::write_block ( const Block *  block ) throw()
  	double x = xa[ip*dp];
  	double y = ya[ip*dp];
  	double value = (ia_color == -1) ? 1.0 : pa[ip*da];
-	double tx = nxi_*(x - xdm)/(xdp-xdm) - 0.5;
-	double ty = nyi_*(y - ydm)/(ydp-ydm) - 0.5;
+	double tx = image_size_[0]*(x - xdm)/(xdp-xdm) - 0.5;
+	double ty = image_size_[1]*(y - ydm)/(ydp-ydm) - 0.5;
 	int ix0 = floor(tx);
 	int iy0 = floor(ty);
 	int ix1 = ix0+1;
@@ -539,17 +556,18 @@ void OutputImage::write_particle_data
 void OutputImage::prepare_remote (int * n, char ** buffer) throw()
 {
   int size = 0;
-  int nx = nxi_;
-  int ny = nyi_;
+  int nx = image_size_[0];
+  int ny = image_size_[1];
 
   // Determine buffer size
 
-  size += 2*sizeof(int);        // nxi_, nyi_
+  size += 2*sizeof(int);        // image_size_[0], image_size_[1]
   size += nx*ny*sizeof(double); // image_data_
   size += nx*ny*sizeof(double); // image_mesh_
   (*n) = size;
 
   // Allocate buffer (deallocated in cleanup_remote())
+  TRACE_MEMORY("new buffer",size);
   (*buffer) = new char [ size ];
 
   union {
@@ -608,6 +626,7 @@ void OutputImage::update_remote  ( int m, char * buffer) throw()
 
 void OutputImage::cleanup_remote  (int * n, char ** buffer) throw()
 {
+  TRACE_MEMORY("delete buffer",*n);
   delete [] (*buffer);
   (*buffer) = NULL;
 }
@@ -652,7 +671,8 @@ void OutputImage::png_create_ (std::string filename) throw()
 {
   if (is_writer()) {
     const char * file_name = strdup(filename.c_str());
-    png_ = new pngwriter(nxi_, nyi_,0,file_name);
+    TRACE_MEMORY("new png_",image_size_[0]*image_size_[1]);
+    png_ = new pngwriter(image_size_[0], image_size_[1],0,file_name);
     free ((void *)file_name);
   }
 }
@@ -663,6 +683,7 @@ void OutputImage::png_close_ () throw()
 {
   if (is_writer()) {
     png_->close();
+    TRACE_MEMORY("delete png_",image_size_[0]*image_size_[1]);
     delete png_;
     png_ = 0;
   }
@@ -676,8 +697,10 @@ void OutputImage::image_create_ () throw()
 	 "image_ already created",
 	 image_data_ == NULL || image_mesh_ == NULL);
 
-  image_data_  = new double [nxi_*nyi_];
-  image_mesh_  = new double [nxi_*nyi_];
+  TRACE_MEMORY("new image_data_",image_size_[0]*image_size_[1]*sizeof(double));
+  TRACE_MEMORY("new image_mesh_",image_size_[0]*image_size_[1]*sizeof(double));
+  image_data_  = new double [image_size_[0]*image_size_[1]];
+  image_mesh_  = new double [image_size_[0]*image_size_[1]];
 
   const double min = std::numeric_limits<double>::max();
   const double max = -min;
@@ -699,8 +722,8 @@ void OutputImage::image_create_ () throw()
     break;
   }
 
-  for (int i=0; i<nxi_*nyi_; i++) image_data_[i] = value0;
-  for (int i=0; i<nxi_*nyi_; i++) image_mesh_[i] = value0;
+  for (int i=0; i<image_size_[0]*image_size_[1]; i++) image_data_[i] = value0;
+  for (int i=0; i<image_size_[0]*image_size_[1]; i++) image_mesh_[i] = value0;
 
 }
 
@@ -710,41 +733,41 @@ void OutputImage::image_write_ () throw()
 {
   // simplified variable names
 
-  int mx = nxi_;
-  int my = nyi_;
+  int mx = image_size_[0];
+  int my = image_size_[1];
   int m  = mx*my;
 
-  double min,max;
-
-
-  min = std::numeric_limits<double>::max();
-  max = -min;
+  double min = std::numeric_limits<double>::max();
+  double max = -std::numeric_limits<double>::max();
 
   // Compute min and max
 
-  if (image_log_) {
-    for (int i=0; i<m; i++) {
-      min = MIN(min,log(data_(i)));
-      max = MAX(max,log(data_(i)));
-    }
-  } else if (image_abs_) {
-    for (int i=0; i<m; i++) {
-      min = MIN(min,fabs(data_(i)));
-      max = MAX(max,fabs(data_(i)));
-    }
+  if (use_min_max_) {
+
+    min = MIN(min,min_value_);
+    max = MAX(max,max_value_);
+
   } else {
-    for (int i=0; i<m; i++) {
-      min = MIN(min,data_(i));
-      max = MAX(max,data_(i));
+
+    if (image_log_) {
+      for (int i=0; i<m; i++) {
+        min = MIN(min,log(fabs(data_(i))));
+        max = MAX(max,log(fabs(data_(i))));
+      }
+    } else if (image_abs_) {
+      for (int i=0; i<m; i++) {
+        min = MIN(min,fabs(data_(i)));
+        max = MAX(max,fabs(data_(i)));
+      }
+    } else { 
+      for (int i=0; i<m; i++) {
+        min = MIN(min,data_(i));
+        max = MAX(max,data_(i));
+      }
     }
   }
 
-  // Use min/max if specified
-
-  min = MIN(min,min_value_);
-  max = MAX(max,max_value_);
-
-  size_t n = map_r_.size();
+  size_t n = colormap_[0].size();
 
   // loop over pixels (ix,iy)
 
@@ -757,7 +780,7 @@ void OutputImage::image_write_ () throw()
       double value = data_(i);
 
       if (image_abs_) value = fabs(value);
-      if (image_log_) value = log(value);
+      if (image_log_) value = log(fabs(value));
 
       double r=0.0,g=0.0,b=0.0;
 
@@ -770,7 +793,7 @@ void OutputImage::image_write_ () throw()
 	// map v to lower colormap index
 	size_t k =  (n - 1)*(value - min) / (max-min);
 
-	// prevent k == map_.size()-1, which happens if value == max
+	// prevent k == colormap_[0].size()-1, which happens if value == max
 
 	if (k > n - 2) k = n-2;
 
@@ -780,9 +803,9 @@ void OutputImage::image_write_ () throw()
 
 	double ratio = (value - lo) / (hi-lo);
 
-	r = (1-ratio)*map_r_[k] + ratio*map_r_[k+1];
-	g = (1-ratio)*map_g_[k] + ratio*map_g_[k+1];
-	b = (1-ratio)*map_b_[k] + ratio*map_b_[k+1];
+	r = (1-ratio)*colormap_[0][k] + ratio*colormap_[0][k+1];
+	g = (1-ratio)*colormap_[1][k] + ratio*colormap_[1][k+1];
+	b = (1-ratio)*colormap_[2][k] + ratio*colormap_[2][k+1];
 
 	png_->plot      (ix+1, iy+1, r,g,b);
 
@@ -824,9 +847,11 @@ void OutputImage::image_close_ () throw()
 	 "image_ already created",
 	 image_data_ != NULL || image_mesh_ != NULL);
 
+  TRACE_MEMORY("delete image_data",image_size_[0]*image_size_[1]*sizeof(double));
   delete [] image_data_;
   image_data_ = nullptr;
 
+  TRACE_MEMORY("delete image_mesh",image_size_[0]*image_size_[1]*sizeof(double));
   delete [] image_mesh_;
   image_mesh_ = nullptr;
 }
@@ -836,15 +861,15 @@ void OutputImage::image_close_ () throw()
 void OutputImage::reduce_point_
 (double * data, int ix, int iy, double value, double alpha) throw()
 {
-  if ( ! (0 <= ix && ix < nxi_)) return;
-  if ( ! (0 <= iy && iy < nyi_)) return;
+  if ( ! (0 <= ix && ix < image_size_[0])) return;
+  if ( ! (0 <= iy && iy < image_size_[1])) return;
 
   if ( ! (0.0 <= alpha && alpha <= 1.0)) {
     WARNING1 ("OutputImage::reduce_point_()",
 	     "Alpha %g is not between 0.0 and 1.0",
 	      alpha);
   }
-  const int i = ix + nxi_*iy;
+  const int i = ix + image_size_[0]*iy;
 
   double value_new = 0.0;
 

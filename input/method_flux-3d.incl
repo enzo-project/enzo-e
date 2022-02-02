@@ -20,6 +20,9 @@ Domain {
      make_field_conservative {
          field_list += ["velocity_z" ];
      }
+     conserved {
+         field_list += ["velocity_z" ];
+     }        
  }
 
  Initial {

@@ -69,14 +69,12 @@ PARALLEL_MAIN_BEGIN
 
   char ma_char   [mx*my];
   int  ma_int    [mx*my];
-  long ma_long   [mx*my];
   long ma_long_long   [mx*my];
   float ma_float  [mx*my];
   double ma_double[mx*my];
 
   char mb_char   [mx*my];
   int mb_int    [mx*my];
-  long mb_long   [mx*my];
   long mb_long_long   [mx*my];
   float mb_float  [mx*my];
   double mb_double[mx*my];
@@ -86,14 +84,12 @@ PARALLEL_MAIN_BEGIN
       int i = ix + mx*iy;
       ma_char[i]   = ix*5 - iy*13;
       ma_int[i]    = ix*5 - iy*13;
-      ma_long[i]   = ix*5 - iy*13;
       ma_long_long[i]   = ix*5 - iy*13;
       ma_float[i]  = ix*5 - iy*13;
       ma_double[i] = ix*5 - iy*13;
 
       mb_char[i]   = 0;
       mb_int[i]    = 0;
-      mb_long[i]   = 0;
       mb_long_long[i]   = 0;
       mb_float[i]  = 0;
       mb_double[i] = 0;

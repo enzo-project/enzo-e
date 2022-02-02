@@ -135,4 +135,7 @@ void EnzoInitialPpmlTest::enforce_block
       }
     }
   }
+
+  block->initial_done();
+
 }

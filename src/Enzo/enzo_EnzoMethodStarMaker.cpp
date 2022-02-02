@@ -32,7 +32,7 @@ EnzoMethodStarMaker::EnzoMethodStarMaker
   //                           enzo_sync_id_method_star_maker);
   // refresh(ir)->add_all_fields();
 
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
 
   Refresh * refresh = cello::refresh(ir_post_);
 
@@ -90,11 +90,7 @@ void EnzoMethodStarMaker::compute ( Block *block) throw()
   return;
 }
 
-// Required
-double EnzoMethodStarMaker::timestep ( Block *block) const throw()
-{
-  return std::numeric_limits<double>::max();
-}
+//----------------------------------------------------------------------
 
 void EnzoMethodStarMaker::rescale_densities(EnzoBlock * enzo_block,
                                             const int index,

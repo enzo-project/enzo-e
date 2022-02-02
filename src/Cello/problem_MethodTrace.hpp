@@ -50,7 +50,7 @@ public: // interface
 public: // virtual functions
 
   /// Compute maximum timestep for this method
-  virtual double timestep (Block * block) const throw();
+  virtual double timestep (Block * block) throw();
 
   /// Apply the method to advance a block one timestep 
 

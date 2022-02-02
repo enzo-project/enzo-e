@@ -37,20 +37,20 @@ void EnzoProlongMC1::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-int EnzoProlongMC1::apply 
+void EnzoProlongMC1::apply 
 ( precision_type precision,
   void *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
   const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
   bool accumulate)
 {
-  return apply_( (enzo_float * )       values_f, nd3_f, im3_f, n3_f,
-		 (const enzo_float * ) values_c, nd3_c, im3_c, n3_c,
-		 accumulate);
+  apply_( (enzo_float * )       values_f, nd3_f, im3_f, n3_f,
+          (const enzo_float * ) values_c, nd3_c, im3_c, n3_c,
+          accumulate);
 }
 
 //----------------------------------------------------------------------
 
-int EnzoProlongMC1::apply_
+void EnzoProlongMC1::apply_
 ( enzo_float *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
   const enzo_float * values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
   bool accumulate)
@@ -86,9 +86,6 @@ int EnzoProlongMC1::apply_
     }
 
     delete [] work;
-
-    return (sizeof(enzo_float) * n3_c[0]);
-
 
   } else if (n3_f[2] == 1) {
 
@@ -143,16 +140,12 @@ int EnzoProlongMC1::apply_
 
     delete [] work;
   
-    return (sizeof(enzo_float) * n3_c[0]*n3_c[1]);
-
   } else {
 
     ERROR("EnzoProlongMC1",
 	  "3D not implemented yet");
 
     delete [] work;
-
-    return (sizeof(enzo_float) * n3_c[0]*n3_c[1]*n3_c[2]);
   }
 
 }  
