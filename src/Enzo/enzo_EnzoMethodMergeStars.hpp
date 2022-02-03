@@ -53,16 +53,16 @@ protected: // methods
 
   void get_particle_coordinates_block_units_
                                 (EnzoBlock * enzo_block, int it,
-                                double * particle_coordinates_block_units,
-                                double * merging_radius_block_units);
+                                enzo_float * particle_coordinates_block_units,
+                                enzo_float * merging_radius_block_units);
 
-  bool particles_in_neighbouring_blocks_(double * particle_coordinates,
+  bool particles_in_neighbouring_blocks_(enzo_float * particle_coordinates,
 					int ** group_lists,int * group_sizes,
 					int i);
   
 protected: // attributes
 
-  double merging_radius_cells_;
+  enzo_float merging_radius_cells_;
 };
 
 #endif /* EnzoMethodMergeStars */
