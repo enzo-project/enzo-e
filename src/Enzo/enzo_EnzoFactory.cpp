@@ -95,7 +95,7 @@ void EnzoFactory::create_block_array
 
 	msg->set_data_msg(data_msg);
 
-#ifdef BUG_FIX_150
+#ifdef BYPASS_CHARM_MEM_LEAK
 	enzo::simulation()->set_msg_refine (index,msg);
 	enzo_block_array[index].insert (process_type(CkMyPe()));
 #else
@@ -182,7 +182,7 @@ void EnzoFactory::create_subblock_array
 
 	  msg->set_data_msg(data_msg);
 
-#ifdef BUG_FIX_150
+#ifdef BYPASS_CHARM_MEM_LEAK
 	  enzo::simulation()->set_msg_refine (index,msg);
 	  enzo_block_array[index].insert (process_type(CkMyPe()));
 #else
@@ -241,7 +241,7 @@ void EnzoFactory::create_block
 
   msg->set_data_msg(data_msg);
 
-#ifdef BUG_FIX_150
+#ifdef BYPASS_CHARM_MEM_LEAK
   enzo::simulation()->set_msg_refine (index,msg);
   enzo_block_array[index].insert ( process_type(CkMyPe()) );
 #else

@@ -63,7 +63,7 @@ public: // interface
   // BLOCK INITIALIZATION WITH MsgRefine
   //----------------------------------------------------------------------
 
-#ifdef BUG_FIX_150
+#ifdef BYPASS_CHARM_MEM_LEAK
   /// Request by newly created Block to get its MsgRefine object
   virtual void p_get_msg_refine(Index index);
 
@@ -539,7 +539,7 @@ protected: // attributes
   /// Saved latest checkpoint directory for creating symlink
   char dir_checkpoint_[256];
 
-#ifdef BUG_FIX_150
+#ifdef BYPASS_CHARM_MEM_LEAK
   std::map<Index,MsgRefine *> msg_refine_map_;
 #endif
 

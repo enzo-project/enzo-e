@@ -36,7 +36,7 @@ const char * phase_name[] = {
 
 //----------------------------------------------------------------------
 
-#ifdef BUG_FIX_150
+#ifdef BYPASS_CHARM_MEM_LEAK
 Block::Block ( process_type ip_source )
 #else
 Block::Block ( MsgRefine * msg )
@@ -76,7 +76,7 @@ Block::Block ( MsgRefine * msg )
   usesAtSync = true;
 
   thisIndex.array(array_,array_+1,array_+2);
-#ifdef BUG_FIX_150
+#ifdef BYPASS_CHARM_MEM_LEAK
 
   proxy_simulation[ip_source].p_get_msg_refine(thisIndex);
 
@@ -103,7 +103,7 @@ Block::Block ( MsgRefine * msg )
 
 //----------------------------------------------------------------------
 
-#ifdef BUG_FIX_150
+#ifdef BYPASS_CHARM_MEM_LEAK
 
 void Block::p_set_msg_refine(MsgRefine * msg)
 {

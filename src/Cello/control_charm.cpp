@@ -14,7 +14,7 @@
 #include "charm_mesh.hpp"
 
 // #define DEBUG_REFRESH
-#define TRACE_CONTROL
+// #define TRACE_CONTROL
 // #define DEBUG_CONTROL
 // #define TRACE_CONTRIBUTE
 // #define DEBUG_ADAPT

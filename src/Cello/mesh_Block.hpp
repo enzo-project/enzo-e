@@ -36,7 +36,7 @@ class Block : public CBase_Block
 
 public: // interface
 
-#ifdef BUG_FIX_150
+#ifdef BYPASS_CHARM_MEM_LEAK
   /// create a Block whose MsgRefine is on the creating process
   Block ( process_type ip_source );
   /// Initialize Block using MsgRefine returned by creating process

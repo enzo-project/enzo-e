@@ -165,7 +165,7 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
 
 //----------------------------------------------------------------------
 
-#ifdef BUG_FIX_150
+#ifdef BYPASS_CHARM_MEM_LEAK
 EnzoBlock::EnzoBlock( process_type ip_source)
   : CBase_EnzoBlock ( ip_source ),
 #else
@@ -179,9 +179,9 @@ EnzoBlock::EnzoBlock( process_type ip_source)
 #ifdef TRACE_BLOCK  
 CkPrintf ("%d %p TRACE_BLOCK %s EnzoBlock(ip)\n",
           CkMyPe(),(void *)this,name(thisIndex).c_str());
-#endif  
+#endif
 
-#ifdef BUG_FIX_150
+#ifdef BYPASS_CHARM_MEM_LEAK
 #else
   initialize_enzo_();
   initialize();
@@ -191,7 +191,7 @@ CkPrintf ("%d %p TRACE_BLOCK %s EnzoBlock(ip)\n",
 
 //----------------------------------------------------------------------
 
-#ifdef BUG_FIX_150
+#ifdef BYPASS_CHARM_MEM_LEAK
 
 void EnzoBlock::p_set_msg_refine(MsgRefine * msg)
 {
