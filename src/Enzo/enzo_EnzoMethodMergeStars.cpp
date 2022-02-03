@@ -78,10 +78,10 @@ void EnzoMethodMergeStars::compute_(Block * block)
   EnzoBlock * enzo_block = enzo::block(block);
   
   // Get width of block in x-direction, used to mark particles for deletion
-  enzo_float block_xm, block_ym, block_zm, block_xp, block_yp, block_zp;
+  double block_xm, block_ym, block_zm, block_xp, block_yp, block_zp;
   enzo_block->lower(&block_xm,&block_ym,&block_zm);
   enzo_block->upper(&block_xp,&block_yp,&block_zp);
-  enzo_float block_width_x = block_xp - block_xm;
+  double block_width_x = block_xp - block_xm;
   Particle particle = enzo_block->data()->particle();
   int it = particle.type_index("star");
   int num_particles = particle.num_particles(it);
@@ -202,7 +202,7 @@ void EnzoMethodMergeStars::compute_(Block * block)
       enzo_float px1 = px[ip1*dp];
       enzo_float py1 = py[ip1*dp];
       enzo_float pz1 = pz[ip1*dp];
-      enzo_float pos1[3] = {px1,py1,pz1};
+      double     pos1[3] = {px1,py1,pz1};
       enzo_float pvx1 = pvx[ip1*dv];
       enzo_float pvy1 = pvy[ip1*dv];
       enzo_float pvz1 = pvz[ip1*dv];
@@ -240,7 +240,7 @@ void EnzoMethodMergeStars::compute_(Block * block)
 	enzo_float pvx2 = pvx[ip2*dv];
 	enzo_float pvy2 = pvy[ip2*dv];
 	enzo_float pvz2 = pvz[ip2*dv];
-	enzo_float pos2[3] = {px2,py2,pz2};
+	double     pos2[3] = {px2,py2,pz2};
 	enzo_float plifetime2 = plifetime[ip2*dl];
 	enzo_float pcreation2 = pcreation[ip2*dc];
 	enzo_float pmetal2 = pmetal[ip2*dmf];
@@ -258,7 +258,7 @@ void EnzoMethodMergeStars::compute_(Block * block)
 	
 #endif
 	// Get the nearest periodic image of particle 2 to particle 1
-	enzo_float npi[3];
+	double npi[3];
 	hierarchy->get_nearest_periodic_image(pos2,pos1,npi);
 	
 	// Compute new properties of 'particle 1'
@@ -308,7 +308,7 @@ void EnzoMethodMergeStars::compute_(Block * block)
       
       pmass[ip1*dm] = pmass1;
       
-      enzo_float folded_pos[3];
+      double folded_pos[3];
       pos1[0] = px1;
       pos1[1] = py1;
       pos1[2] = pz1;
@@ -366,26 +366,26 @@ void EnzoMethodMergeStars::get_particle_coordinates_block_units_
   Hierarchy * hierarchy = cello::hierarchy();
   
   // Get dimensions of block
-  enzo_float block_xm, block_ym, block_zm, block_xp, block_yp, block_zp;
+  double block_xm, block_ym, block_zm, block_xp, block_yp, block_zp;
   enzo_block->lower(&block_xm,&block_ym,&block_zm);
   enzo_block->upper(&block_xp,&block_yp,&block_zp);
 
   // Get the cell width, must be the same in all dimensions
-  enzo_float cell_width_x, cell_width_y, cell_width_z;
+  double cell_width_x, cell_width_y, cell_width_z;
   enzo_block->cell_width(&cell_width_x,&cell_width_y,&cell_width_z);
 
   // We assume that blocks are always cubes, should put in a check
   // somewhere else to make sure this is always the case
-  const enzo_float block_width = block_xp - block_xm;
+  const double block_width = block_xp - block_xm;
 
   // Get the merging radius in block units
   *merging_radius_block_units = merging_radius_cells_ * cell_width_x / block_width;
 
   // Get the coordinates of the centre of the block
-  const enzo_float block_centre_x = 0.5 * (block_xm + block_xp);
-  const enzo_float block_centre_y = 0.5 * (block_ym + block_yp);
-  const enzo_float block_centre_z = 0.5 * (block_zm + block_zp);
-  enzo_float block_centre[3] = {block_centre_x,block_centre_y,block_centre_z};
+  const double block_centre_x = 0.5 * (block_xm + block_xp);
+  const double block_centre_y = 0.5 * (block_ym + block_yp);
+  const double block_centre_z = 0.5 * (block_zm + block_zp);
+  double block_centre[3] = {block_centre_x,block_centre_y,block_centre_z};
   
   Particle particle = enzo_block->data()->particle();
   const int ia_x = particle.attribute_index (it, "x");
@@ -415,8 +415,8 @@ void EnzoMethodMergeStars::get_particle_coordinates_block_units_
     // Get the nearest periodic image to the block centre. If
     // boundary conditions are non-periodic, this just returns the particle
     // coordinates
-    enzo_float npi[3];
-    enzo_float pos[3] = {px[ip_batch*dp],py[ip_batch*dp],pz[ip_batch*dp]};
+    double npi[3];
+    double pos[3] = {px[ip_batch*dp],py[ip_batch*dp],pz[ip_batch*dp]};
     hierarchy->get_nearest_periodic_image(pos,block_centre,npi);
 
     // Now we can set particle coordinates in block units
