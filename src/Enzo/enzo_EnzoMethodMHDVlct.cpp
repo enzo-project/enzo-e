@@ -41,7 +41,8 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
 				      double pressure_floor,
 				      std::string mhd_choice,
 				      bool dual_energy_formalism,
-				      double dual_energy_formalism_eta)
+				      double dual_energy_formalism_eta,
+				      bool store_fluxes_for_corrections)
   : Method()
 {
   // Initialize equation of state (check the validity of quantity floors)
@@ -96,6 +97,13 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
     bfield_method_->check_required_fields();
   } else {
     bfield_method_ = nullptr;
+  }
+
+  store_fluxes_for_corrections_ = store_fluxes_for_corrections;
+  if (store_fluxes_for_corrections){
+    ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
+           "Flux corrections are currently only supported in hydro-mode",
+           mhd_choice_ == bfield_choice::no_bfield);
   }
 
   scratch_space_ = nullptr;
@@ -173,6 +181,7 @@ void EnzoMethodMHDVlct::pup (PUP::er &p)
   p|integration_field_list_;
   p|primitive_field_list_;
   p|lazy_passive_list_;
+  p|store_fluxes_for_corrections_;
 }
 
 //----------------------------------------------------------------------
@@ -209,8 +218,116 @@ EnzoVlctScratchSpace* EnzoMethodMHDVlct::get_scratch_ptr_
 
 //----------------------------------------------------------------------
 
+void EnzoMethodMHDVlct::save_fluxes_for_corrections_
+(Block * block, const EnzoEFltArrayMap &flux_map, int dim, double cell_width,
+ double dt) const noexcept
+{
+
+  Field field = block->data()->field();
+
+  // load the cell-centered shape and the ghost depth
+  int density_field_id = field.field_id("density");
+  int cc_mx, cc_my, cc_mz; // the values are ordered as x,y,z
+  field.dimensions(density_field_id, &cc_mx, &cc_my, &cc_mz);
+  int gx, gy, gz;
+  field.ghost_depth(density_field_id, &gx, &gy, &gz);
+
+  double dt_dxi = dt/cell_width;
+
+  FluxData * flux_data = block->data()->flux_data();
+  const int nf = flux_data->num_fields();
+
+  for (int i_f = 0; i_f < nf; i_f++) {
+    const int index_field = flux_data->index_field(i_f);
+    const std::string field_name = field.field_name(index_field);
+
+    // note the field_name is the same as the key
+    CelloArray<const enzo_float, 3> flux_arr = flux_map.at(field_name);
+
+    FaceFluxes * left_ff = flux_data->block_fluxes(dim,0,i_f);
+    FaceFluxes * right_ff = flux_data->block_fluxes(dim,1,i_f);
+
+    int mx, my, mz;
+    left_ff->get_size(&mx,&my,&mz);
+
+    int dx_l,dy_l,dz_l,    dx_r,dy_r,dz_r;
+    enzo_float* left_dest = left_ff->flux_array(&dx_l,&dy_l,&dz_l);
+    enzo_float* right_dest = right_ff->flux_array(&dx_r,&dy_r,&dz_r);
+
+    // NOTE: dx_l/dx_r, dy_l/dy_r, dz_l/dz_r have the wrong value when
+    // dim is 0, 1, or 2 respectively. In each case the variables are equal to
+    // 1 when they should be 0.
+
+    if (dim == 0){
+      int left_ix = gx-1;
+      int right_ix = cc_mx-gx-1;
+
+      for (int iz = 0; iz < mz; iz++){
+        for (int iy = 0; iy < my; iy++){
+          left_dest[dz_l*iz + dy_l*iy]
+            = dt_dxi* flux_arr(gz+iz, gy+iy, left_ix);
+          right_dest[dz_r*iz + dy_r*iy]
+            = dt_dxi* flux_arr(gz+iz, gy+iy, right_ix);
+        }
+      }
+
+    } else if (dim == 1) {
+      int left_iy = gy-1;
+      int right_iy = cc_my-gy-1;
+
+      for (int iz = 0; iz < mz; iz++){
+        for (int ix = 0; ix < mx; ix++){
+          left_dest[dz_l*iz + dx_l*ix]
+            = dt_dxi* flux_arr(gz+iz, left_iy, gx+ix);
+          right_dest[dz_l*iz + dx_l*ix]
+            = dt_dxi* flux_arr(gz+iz, right_iy, gx+ix);
+        }
+      }
+    } else {
+      int left_iz = gz-1;
+      int right_iz = cc_mz-gz-1;
+
+      for (int iy = 0; iy < my; iy++){
+        for (int ix = 0; ix < mx; ix++){
+          left_dest[dy_l*iy + dx_l*ix]
+            = dt_dxi* flux_arr(left_iz, gy + iy, gx+ix);
+          right_dest[dy_l*iy + dx_l*ix]
+            = dt_dxi* flux_arr(right_iz, gy + iy, gx+ix);
+        }
+      }
+
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
+static void allocate_FC_flux_buffer_(Block * block) throw()
+{
+  Field field = block->data()->field();
+  // this could be better integrated with fields required by the solver
+  auto field_names = field.groups()->group_list("conserved");
+  const int nf = field_names.size();
+  std::vector<int> field_list;
+  field_list.resize(nf);
+  for (int i=0; i<nf; i++) {
+    field_list[i] = field.field_id(field_names[i]);
+  }
+
+  int nx,ny,nz;
+  field.size(&nx,&ny,&nz);
+  int single_flux_array = enzo::config()->method_flux_correct_single_array;
+
+  // this needs to be allocated every cycle
+  block->data()->flux_data()->allocate (nx,ny,nz,field_list,single_flux_array);
+}
+
+//----------------------------------------------------------------------
+
 void EnzoMethodMHDVlct::compute ( Block * block) throw()
 {
+  if (store_fluxes_for_corrections_){ allocate_FC_flux_buffer_(block); }
+
   if (block->is_leaf()) {
     // Check that the mesh size and ghost depths are appropriate
     check_mesh_and_ghost_size_(block);
@@ -332,6 +449,20 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
                       pl_map, pr_map, *(flux_maps[dim]), dUcons_map,
                       interface_vel_arr_ptr, *reconstructor, bfield_method_,
                       stale_depth, passive_list);
+      }
+
+      if (i == 1 && store_fluxes_for_corrections_) {
+        // Dual Energy Formalism Note:
+        // - the interface velocities on the edge of the blocks will be
+        //   different if using SMR/AMR. This means that the internal energy
+        //   source terms won't be fully self-consistent along the edges. This
+        //   same effect is also present in the Ppm Solver
+        save_fluxes_for_corrections_(block, xflux_map, 0, cell_widths[0],
+				     cur_dt);
+        save_fluxes_for_corrections_(block, yflux_map, 1, cell_widths[1],
+				     cur_dt);
+        save_fluxes_for_corrections_(block, zflux_map, 2, cell_widths[2],
+				     cur_dt);
       }
 
       // increment the stale_depth
