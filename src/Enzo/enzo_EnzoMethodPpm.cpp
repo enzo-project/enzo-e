@@ -34,9 +34,10 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodPpm::EnzoMethodPpm ()
+EnzoMethodPpm::EnzoMethodPpm (bool store_fluxes_for_corrections)
   : Method(),
-    comoving_coordinates_(enzo::config()->physics_cosmology)
+    comoving_coordinates_(enzo::config()->physics_cosmology),
+    store_fluxes_for_corrections_(store_fluxes_for_corrections)
 {
 
   const int rank = cello::rank();
@@ -92,6 +93,7 @@ void EnzoMethodPpm::pup (PUP::er &p)
   Method::pup(p);
 
   p | comoving_coordinates_;
+  p | store_fluxes_for_corrections_;
 }
 
 //----------------------------------------------------------------------
@@ -113,21 +115,22 @@ void EnzoMethodPpm::compute ( Block * block) throw()
   if (rank >= 3) COPY_FIELD(block,"acceleration_z","acceleration_z_in");
 #endif
 
-  Field field = block->data()->field();
-
-  auto field_names = field.groups()->group_list("conserved");
-  const int nf = field_names.size();
-  std::vector<int> field_list;
-  field_list.resize(nf);
-  for (int i=0; i<nf; i++) {
-    field_list[i] = field.field_id(field_names[i]);
-  }
-
-  int nx,ny,nz;
-  field.size(&nx,&ny,&nz);
   int single_flux_array = enzo::config()->method_flux_correct_single_array;
+  if (store_fluxes_for_corrections_){
+    Field field = block->data()->field();
 
-  block->data()->flux_data()->allocate (nx,ny,nz,field_list,single_flux_array);
+    auto field_names = field.groups()->group_list("conserved");
+    const int nf = field_names.size();
+    std::vector<int> field_list;
+    field_list.resize(nf);
+    for (int i=0; i<nf; i++) {
+      field_list[i] = field.field_id(field_names[i]);
+    }
+
+    int nx,ny,nz;
+    field.size(&nx,&ny,&nz);
+    block->data()->flux_data()->allocate(nx,ny,nz,field_list,single_flux_array);
+  }
 
   if (block->is_leaf()) {
 
