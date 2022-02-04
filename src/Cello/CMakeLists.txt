@@ -60,3 +60,7 @@ target_link_libraries(test_monitor PUBLIC monitor test_Unit cello parallel error
 target_include_directories (test_monitor PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CHARM_INCLUDE_DIRS})
 target_link_options(test_monitor PRIVATE ${Cello_TARGET_LINK_OPTIONS})
 
+add_executable(test_CArrCollec test_CArrCollec.cpp)
+target_link_libraries(test_CArrCollec PUBLIC monitor test_Unit cello parallel error Boost::filesystem)
+target_include_directories (test_CArrCollec PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CHARM_INCLUDE_DIRS})
+target_link_options(test_CArrCollec PRIVATE ${Cello_TARGET_LINK_OPTIONS})
