@@ -14,7 +14,7 @@ import yt
 
 yt.mylog.setLevel(30) # set yt log level to "WARNING"
 
-from testing_utils import prep_cur_dir, EnzoEWrapper
+from testing_utils import testing_context, EnzoEWrapper
 
 def run_tests(executable):
 
@@ -99,20 +99,17 @@ def cleanup():
             shutil.rmtree(dir_name)
 
 if __name__ == '__main__':
-    executable = 'bin/enzo-e'
+    executable = os.environ.get('ENZOE_BIN', 'bin/enzo-e')
 
-    # this script can either be called from the base repository or from
-    # the subdirectory: input/vlct
-    prep_cur_dir(executable)
+    with testing_context():
+        # run the tests
+        tests_complete = run_tests(executable)
 
-    # run the tests
-    tests_complete = run_tests(executable)
+        # analyze the tests
+        tests_passed = analyze_tests()
 
-    # analyze the tests
-    tests_passed = analyze_tests()
-
-    # cleanup the tests
-    cleanup()
+        # cleanup the tests
+        cleanup()
 
     if tests_passed:
         sys.exit(0)

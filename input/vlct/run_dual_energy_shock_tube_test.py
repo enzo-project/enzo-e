@@ -30,7 +30,7 @@ import shutil
 import subprocess
 import math
 
-from testing_utils import prep_cur_dir, EnzoEWrapper, CalcTableL1Norm
+from testing_utils import testing_context, EnzoEWrapper, CalcTableL1Norm
 from run_MHD_shock_tube_test import analyze_shock
 
 def run_tests(executable):
@@ -50,8 +50,7 @@ def analyze_tests():
                       'sod_shock_tube_t0.25_res128.csv')
     verbose_l1_calc = False # Print out command line call
     verbose_analyze = False # Print out summaries of passed tests
-    l1_functor = CalcTableL1Norm("tools/l1_error_norm.py",
-                                 default_ref_table = ref_table_path,
+    l1_functor = CalcTableL1Norm(default_ref_table = ref_table_path,
                                  verbose = verbose_l1_calc)
     kwargs = dict(
         target_template = 'method_vlct-1-sod_{}_de_M10_0.25/',
@@ -112,31 +111,41 @@ if __name__ == '__main__':
             + "number of processes. {:d} arguments ".format(len(sys.argv)-1)
             + "were provided")
 
+    enzoe_binary = os.environ.get('ENZOE_BIN', 'bin/enzo-e')
+
     if nproc <= 0:
         raise ValueError("number of processes must be a positive integer")
     elif nproc == 1:
-        executable = 'bin/enzo-e'
+        executable = enzoe_binary
     else:
+        if 'CHARM_HOME' in os.environ:
+            charm_binary = os.path.join(os.environ['CHARM_HOME'],
+                                        'bin/charmrun')
+            assert os.access(charm_binary, os.X_OK)
+        elif shutil.which('charmrun') is not None:
+            charm_binary = 'charmrun' # it's in our path
+        else:
+            raise RuntimeError("Could not find the charmrun binary. Use the "
+                               "CHARM_HOME environment variable to help "
+                               "specify its location.")
         charm_args = os.environ.get('CHARM_ARGS')
         if charm_args is None:
-            executable_template = 'charmrun +p{:d} bin/enzo-e'
+            executable_template = charm_binary + ' +p{:d} ' + enzoe_binary
         else:
             executable_template \
-                = ' '.join(['charmrun', charm_args, '+p{:d}', 'bin/enzo-e'])
+                = ' '.join([charm_binary, charm_args, '+p{:d}', 'bin/enzo-e'])
         executable = executable_template.format(nproc)
 
-    # this script can either be called from the base repository or from
-    # the subdirectory: input/vlct
-    prep_cur_dir('bin/enzo-e')
+    with testing_context():
 
-    # run the tests
-    run_tests(executable)
+        # run the tests
+        run_tests(executable)
 
-    # analyze the tests
-    tests_passed = analyze_tests()
+        # analyze the tests
+        tests_passed = analyze_tests()
 
-    # cleanup the tests
-    cleanup()
+        # cleanup the tests
+        cleanup()
 
     if tests_passed:
         sys.exit(0)
