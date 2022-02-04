@@ -1,0 +1,1 @@
+#cmakedefine CELLO_CXX "@CMAKE_CXX_COMPILER@"
