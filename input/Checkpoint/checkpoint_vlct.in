@@ -22,6 +22,7 @@
       list = ["mhd_vlct"];
       mhd_vlct{
          courant = 0.4;
+         mhd_choice = "no_bfield";
          riemann_solver = "hllc";
          half_dt_reconstruct_method = "nn";
          full_dt_reconstruct_method = "plm";

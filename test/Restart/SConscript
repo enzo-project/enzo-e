@@ -58,13 +58,15 @@ env_mv_out=env.Clone(COPY = 'mv *.png *.h5 Dir_* ' + test_path)
 # setup the checkpoint-restart tests
 import os, os.path
 if use_valgrind == 0:
+    import sys
+    python_path = sys.executable
 
     # All of the SCons paths are given relative to main-directory.
     # This tool is meant to be executed from within the current directory.
     # With that in mind, we need to adjust the paths in the commands
-    _cmd = ('../../tools/ckpt_restart_test.py $TEST_NAME '
-            '--input ../../$INPUTFILE --output ../../$TARGET '
-            '--include-directive-root ../../ --restart_cycle $RESTART_CYCLE '
+    _cmd = (python_path + ' ../../tools/ckpt_restart_test.py $TEST_NAME '
+            '--input ../../$INPUTFILE --output ../../$TARGET ' +
+            '--include-directive-root ../../ --restart_cycle $RESTART_CYCLE ' +
             '--stop_cycle $STOP_CYCLE --enzo ../../$SOURCE')
 
     _parallel_run_parts = parallel_run.split()
