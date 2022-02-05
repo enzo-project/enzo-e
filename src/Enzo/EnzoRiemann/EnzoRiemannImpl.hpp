@@ -144,7 +144,7 @@ public: // interface
                   bool internal_energy);
 
   /// Virtual destructor
-  virtual ~EnzoRiemannImpl(){ };
+  virtual ~EnzoRiemannImpl(){ delete scratch_ptr_; };
 
   void solve (const EnzoEFltArrayMap &prim_map_l,
 	      const EnzoEFltArrayMap &prim_map_r,
@@ -159,7 +159,7 @@ public: // interface
   const std::vector<std::string> primitive_quantity_keys() const noexcept
   { return primitive_quantity_keys_; }
 
-protected: //attributes
+private: // helper methods
 
   /// Actually executes the Riemann Solver
   ///
@@ -168,6 +168,8 @@ protected: //attributes
   /// that this method's contents are separated from `EnzoRiemannImpl::solve`
   static void solve_(const KernelConfig config,
                      const int stale_depth) noexcept;
+
+private: //attributes
 
   /// expected keys (and key-order) that the `solve` method expects the
   /// `flux_map` argument to have
@@ -180,6 +182,9 @@ protected: //attributes
 
   /// Tracks whether the internal energy needs to be computed
   bool calculate_internal_energy_flux_;
+
+  /// Holds lazily allocated scratch arrays
+  enzo_riemann_utils::ScratchArrays_* scratch_ptr_;
 };
 
 //----------------------------------------------------------------------
@@ -203,6 +208,8 @@ EnzoRiemannImpl<ImplFunctor>::EnzoRiemannImpl
   if (calculate_internal_energy_flux_) {
     integration_quantity_keys_.push_back("internal_energy");
   }
+
+  scratch_ptr_ = new enzo_riemann_utils::ScratchArrays_();
 }
 
 //----------------------------------------------------------------------
@@ -234,6 +241,7 @@ void EnzoRiemannImpl<ImplFunctor>::solve
   EFlt3DArray internal_energy_flux, velocity_i_bar_array;
   enzo_riemann_utils::prep_dual_energy_arrays_(calculate_internal_energy_flux,
                                                flux_map, interface_velocity,
+                                               scratch_ptr_,
                                                internal_energy_flux,
                                                velocity_i_bar_array);
 

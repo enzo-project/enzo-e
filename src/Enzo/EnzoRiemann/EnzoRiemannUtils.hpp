@@ -357,23 +357,65 @@ namespace enzo_riemann_utils{
 
   //----------------------------------------------------------------------
 
-#ifndef CONFIG_SMP_MODE
-  static EFlt3DArray scratch_ie_flux_;
-  static EFlt3DArray scratch_velocity_i_bar_array_;
-#endif
+  class ScratchArrays_{
+
+    /// @class    ScratchArrays_
+    /// @ingroup  Enzo
+    /// @brief    [\ref Enzo] Manages the lifetime of lazily initialized
+    ///           scratch arrays
+    ///
+    /// These arrays are only used to avoid some branching. They will only ever
+    /// hold garbage data
+
+  public:
+    ScratchArrays_() = default;
+
+    /// Load scratch-space arrays
+    ///
+    /// If the scratch-space arrays have not been pre-allocated, they will be
+    /// allocated by this method
+    void get_arrays(int mx, int my, int mz,
+                    CelloArray<enzo_float,3>& internal_energy_flux,
+                    CelloArray<enzo_float,3>& velocity_i_bar_array) noexcept
+    {
+      if (internal_energy_flux_.is_null()){
+        // make the scratch space bigger than necessary (since the shape will
+        // change slightly every time that they are used)
+        //
+        // given `dim` we could be more precise about the max shape
+        internal_energy_flux_ = EFlt3DArray(mz+1,my+1,mx+1);
+        velocity_i_bar_array_ = EFlt3DArray(mz+1,my+1,mx+1);
+      }
+
+      ASSERT("ScratchArrays_::get_arrays",
+             "preallocated scratch-arrays are too small",
+             (mz <= internal_energy_flux_.shape(0)) &
+             (my <= internal_energy_flux_.shape(1)) &
+             (mx <= internal_energy_flux_.shape(2)));
+
+      internal_energy_flux = internal_energy_flux_.subarray
+        (CSlice(0, mz),CSlice(0,my),CSlice(0,mx));
+      velocity_i_bar_array = velocity_i_bar_array_.subarray
+        (CSlice(0, mz),CSlice(0,my),CSlice(0,mx));
+    }
+
+  private: // attributes
+
+    CelloArray<enzo_float,3> internal_energy_flux_;
+    CelloArray<enzo_float,3> velocity_i_bar_array_;
+  };
+
+  //----------------------------------------------------------------------
 
   /// dumb helper function for setting up arrays for holding the
   /// internal_energy_flux and velocity_i_bar_array
   ///
   /// To simplify things, we want to always provide arrays for storing this
   /// data, even if we don't technically need it, in order to avoid branching
-  ///
-  /// This handles things in a fairly silly way, but we are defining it to help
-  /// us compare between the various approaches
   static void prep_dual_energy_arrays_
-  (bool calculate_internal_energy_flux,
-   EnzoEFltArrayMap &flux_map,
+  (bool calculate_internal_energy_flux, EnzoEFltArrayMap &flux_map,
    const CelloArray<enzo_float,3> * const interface_velocity,
+   ScratchArrays_ * ptr,
    CelloArray<enzo_float,3>& internal_energy_flux,
    CelloArray<enzo_float,3>& velocity_i_bar_array)
   {
@@ -388,18 +430,8 @@ namespace enzo_riemann_utils{
       int mz = flux_map.array_shape(0);
       int my = flux_map.array_shape(1);
       int mx = flux_map.array_shape(2);
-#ifndef CONFIG_SMP_MODE
-      if (scratch_ie_flux_.is_null()){
-        scratch_ie_flux_ = EFlt3DArray(mz,my,mx);
-        scratch_velocity_i_bar_array_ = EFlt3DArray(mz,my,mx);
-      }
-      internal_energy_flux = scratch_ie_flux_;
-      velocity_i_bar_array = scratch_velocity_i_bar_array_;
-#else
-      // TODO: preallocate scratch space
-      internal_energy_flux = EFlt3DArray(mz,my,mx);
-      velocity_i_bar_array = EFlt3DArray(mz,my,mx);
-#endif
+
+      ptr->get_arrays(mx, my, mz, internal_energy_flux, velocity_i_bar_array);
     }
   }
 
