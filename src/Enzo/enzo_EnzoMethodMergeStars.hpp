@@ -51,12 +51,11 @@ protected: // methods
 
   void compute_(Block * block);
 
-  void get_particle_coordinates_block_units_
-                                (EnzoBlock * enzo_block, int it,
-                                enzo_float * particle_coordinates_block_units,
-                                enzo_float * merging_radius_block_units);
+  void get_particle_coordinates_(EnzoBlock * enzo_block, int it,
+				enzo_float * particle_coordinates);
 
-  bool particles_in_neighbouring_blocks_(enzo_float * particle_coordinates,
+  bool particles_in_neighbouring_blocks_(EnzoBlock * enzo_block,
+					 enzo_float * particle_coordinates,
 					int ** group_lists,int * group_sizes,
 					int i);
   

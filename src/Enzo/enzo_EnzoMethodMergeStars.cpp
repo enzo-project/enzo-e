@@ -22,6 +22,11 @@ int FofList(int, enzo_float *, enzo_float, int *, int **, int ***);
 EnzoMethodMergeStars::EnzoMethodMergeStars()
   : Method()
 {
+  // This method requires three dimensions.
+  ASSERT("EnzoMethodMergeStars::EnzoMethodMergeStars()",
+	 "EnzoMethodMergeStars requires that we run a 3D problem (Domain: rank = 3)",
+	 cello::rank());
+  
   const EnzoConfig * enzo_config = enzo::config();
   ASSERT("EnzoMethodMergeStars::EnzoMethodMergeStars()",
 	 "EnzoMethodMergeStars requires unigrid mode (Adapt : max_level = 0). "
@@ -81,7 +86,8 @@ void EnzoMethodMergeStars::compute_(Block * block)
   double block_xm, block_ym, block_zm, block_xp, block_yp, block_zp;
   enzo_block->lower(&block_xm,&block_ym,&block_zm);
   enzo_block->upper(&block_xp,&block_yp,&block_zp);
-  double block_width_x = block_xp - block_xm;
+  const double block_width_x = block_xp - block_xm;
+  
   Particle particle = enzo_block->data()->particle();
   int it = particle.type_index("star");
   int num_particles = particle.num_particles(it);
@@ -131,27 +137,31 @@ void EnzoMethodMergeStars::compute_(Block * block)
   int ** group_lists;
   
   // Array containing particle positions in 'block units'
-  enzo_float * particle_coordinates_block_units = new enzo_float[3 * num_particles];
+  enzo_float * particle_coordinates = new enzo_float[3 * num_particles];
       
-  // Merging radius in 'block units'
-  enzo_float merging_radius_block_units;
+  // Fill in particle coordinates array.
+  // This handles periodic boundary conditions, by taking the periodic
+  // image of particle positions if necessary.
   
-  // Fill in particle coordinates array and get value for merging radius
-  // in 'block units', i.e., centre of block is at (0,0,0) and the block
-  // has unit side length. This also handles periodic boundary conditions,
-  // by taking the periodic image of particle positions if necessary.
-  get_particle_coordinates_block_units_(enzo_block, it,
-					particle_coordinates_block_units,
-					&merging_radius_block_units);
+  get_particle_coordinates_(enzo_block, it, particle_coordinates);
+
+  // Get the max cell width (across three dimensional axes), used to calculate
+  // the merging radius
+  
+  double cell_width_x, cell_width_y,cell_width_z;
+  enzo_block->cell_width(&cell_width_x,&cell_width_y,&cell_width_z);
+  const double max_cell_width = std::max(
+				std::max(cell_width_x,cell_width_y),
+				cell_width_z);
+  const enzo_float merging_radius = merging_radius_cells_ * max_cell_width;
 
   // FofList runs the Friends-of-Friends algorithm on particle positions
   // (given by the particle_coordinates_block_units array), with
   // merging_radius_block_units as the linking length. This function
   // fills in the (already allocated) group_index array, and allocates
   // and fills in the group_size and group_lists arrays.
-  
-  int ngroups = FofList(num_particles, particle_coordinates_block_units,
-			merging_radius_block_units, 
+
+  int ngroups = FofList(num_particles, particle_coordinates,merging_radius, 
 			group_index, &group_size, &group_lists);
   
 #ifdef DEBUG_MERGESTARS
@@ -167,8 +177,7 @@ void EnzoMethodMergeStars::compute_(Block * block)
 #endif
 
     // Only need to merge particles if there are two or more particles in the
-    // group
-    
+    // group 
     if (group_size[i] > 1){
       
       ASSERT("EnzoMethodMergeStars::compute_()",
@@ -177,7 +186,7 @@ void EnzoMethodMergeStars::compute_(Block * block)
 	     "dealt with we exit the program here. This has likely "
 	     "happened because the merging radius is too large in "
 	     "comparison to the block size.",
-	     particles_in_neighbouring_blocks_(particle_coordinates_block_units,
+	     particles_in_neighbouring_blocks_(enzo_block,particle_coordinates,
 					       group_lists,group_size,i));
       
       // ib1 and ip1 index the first particle in this group
@@ -334,14 +343,15 @@ void EnzoMethodMergeStars::compute_(Block * block)
   delete [] group_index;
   free(group_size);
   free(group_lists);
-  delete [] particle_coordinates_block_units;
+  delete [] particle_coordinates;
   
 #ifdef DEBUG_MERGESTARS
   CkPrintf("Block %s: After merging, num_particles = %d \n",
 	   block->name().c_str(),particle.num_particles(it));
 #endif
   
-  // Now we delete particles we marked as non-local.
+  // Now we delete non-local particles, i.e. particles with positions out-of-bounds
+  // of the block.
   int delete_count = enzo_block->delete_non_local_particles_(it);
   cello::simulation()->data_delete_particles(delete_count);
       
@@ -354,34 +364,21 @@ void EnzoMethodMergeStars::compute_(Block * block)
       
 }
 
-// This fills an array, which must have already been allocated with length
-// 3 * num_particles, with particle coordinates in 'block units'. This means
-// that the centre of the block has coordinates (0,0,0), and a block has unit
-// side length. This also takes care of periodic boundary conditions.
-void EnzoMethodMergeStars::get_particle_coordinates_block_units_
+// This fills a 1D array, which must have already been allocated with length
+// 3 * num_particles, with x, y, z coordinates of star particles in the block.
+// This also takes care of periodic boundary conditions by taking the nearest
+// periodic image of coordinates if necessary.
+
+void EnzoMethodMergeStars::get_particle_coordinates_
   (EnzoBlock * enzo_block, int it,
-   enzo_float * particle_coordinates_block_units,
-   enzo_float * merging_radius_block_units)
+   enzo_float * particle_coordinates)
 {
   Hierarchy * hierarchy = cello::hierarchy();
   
-  // Get dimensions of block
+  // Get coordinates of the centre of the block
   double block_xm, block_ym, block_zm, block_xp, block_yp, block_zp;
   enzo_block->lower(&block_xm,&block_ym,&block_zm);
   enzo_block->upper(&block_xp,&block_yp,&block_zp);
-
-  // Get the cell width, must be the same in all dimensions
-  double cell_width_x, cell_width_y, cell_width_z;
-  enzo_block->cell_width(&cell_width_x,&cell_width_y,&cell_width_z);
-
-  // We assume that blocks are always cubes, should put in a check
-  // somewhere else to make sure this is always the case
-  const double block_width = block_xp - block_xm;
-
-  // Get the merging radius in block units
-  *merging_radius_block_units = merging_radius_cells_ * cell_width_x / block_width;
-
-  // Get the coordinates of the centre of the block
   const double block_centre_x = 0.5 * (block_xm + block_xp);
   const double block_centre_y = 0.5 * (block_ym + block_yp);
   const double block_centre_z = 0.5 * (block_zm + block_zp);
@@ -419,14 +416,11 @@ void EnzoMethodMergeStars::get_particle_coordinates_block_units_
     double pos[3] = {px[ip_batch*dp],py[ip_batch*dp],pz[ip_batch*dp]};
     hierarchy->get_nearest_periodic_image(pos,block_centre,npi);
 
-    // Now we can set particle coordinates in block units
+    // Now we can set particle coordinates
 
-    particle_coordinates_block_units[3*ip_block]
-                             = (npi[0] - block_centre[0]) / block_width;
-    particle_coordinates_block_units[3*ip_block + 1]
-                             = (npi[1] - block_centre[1]) / block_width; 
-    particle_coordinates_block_units[3*ip_block + 2]
-                             = (npi[2] - block_centre[2]) / block_width; 
+    particle_coordinates[3*ip_block]     = npi[0];
+    particle_coordinates[3*ip_block + 1] = npi[1];
+    particle_coordinates[3*ip_block + 2] = npi[2];
     
   } // ip_block loop
   
@@ -436,51 +430,62 @@ void EnzoMethodMergeStars::get_particle_coordinates_block_units_
 // Checks if all the particles within a group (specified by group_index)
 // are in neighbouring blocks
 bool EnzoMethodMergeStars::particles_in_neighbouring_blocks_
-(enzo_float * particle_coordinates,
+(EnzoBlock * enzo_block,
+ enzo_float * particle_coordinates,
  int ** group_lists, int * group_size,
  int group_index)
 {
   bool return_val = 1;
-  // Loop over all pairs of particles
+  
+  // Get block widths and block centre
+  double block_xm, block_ym, block_zm, block_xp, block_yp, block_zp;
+  enzo_block->lower(&block_xm,&block_ym,&block_zm);
+  enzo_block->upper(&block_xp,&block_yp,&block_zp);
+  const double block_width_x = block_xp - block_xm;
+  const double block_width_y = block_yp - block_ym;
+  const double block_width_z = block_zp - block_zm;
+  
+  // Loop over all particles, getting their positions in a block-centred
+  // frame-of-reference, where the 'left' and 'right' faces of the block, in all
+  // 3 dimensions, have coordinates 0 and 1 respectively. Checking if a particle
+  // is in the block is equivalent to its x,y,z coordinates in this
+  // frame-of-reference being between 0 and 1.
   for (int j = 0; j < group_size[group_index]; j++){
     const int ind_1 = group_lists[group_index][j];
-    const enzo_float px1 = particle_coordinates[3*ind_1];
-    const enzo_float py1 = particle_coordinates[3*ind_1 + 1];
-    const enzo_float pz1 = particle_coordinates[3*ind_1 + 2];
+    
+    const enzo_float px1 =
+      (particle_coordinates[3*ind_1]     - block_xm) / block_width_x;
+    const enzo_float py1 =
+      (particle_coordinates[3*ind_1 + 1] - block_ym) / block_width_y;
+    const enzo_float pz1 =
+      (particle_coordinates[3*ind_1 + 2] - block_zm) / block_width_z;
+
+    // if particle is in bounds, then there is no problem, don't
+    // need to check all the pairs containing this particle
+    if (px1 > 0.0 && px1 < 1.0 &&
+	py1 > 0.0 && py1 < 1.0 &&
+	pz1 > 0.0 && pz1 < 1.0) continue;
+    
+    // Otherwise need to loop over all particles which have not already
+    // been considered, checking if the pair (j,k) are on non-neighbouring
+    // blocks.
     for (int k = j; k < group_size[group_index]; k++){
       const int ind_2 = group_lists[group_index][k];
-      const enzo_float px2 = particle_coordinates[3*ind_2];
-      const enzo_float py2 = particle_coordinates[3*ind_2 + 1];
-      const enzo_float pz2 = particle_coordinates[3*ind_2 + 2];
+      const enzo_float px2 =
+	(particle_coordinates[3*ind_2]     - block_xm) / block_width_x;
+      const enzo_float py2 =
+	(particle_coordinates[3*ind_2 + 1] - block_ym) / block_width_y;
+      const enzo_float pz2 =
+	(particle_coordinates[3*ind_2 + 2] - block_zm) / block_width_z;
 
-      // in block units, just need to check if one of the pair is less than -0.5, and
-      // the other greater than 0.5, for each coordinate
-      if (px1 < -0.5 && px2 > 0.5){
-	return_val = 0;
-	break; // break out of the k loop
-      }
-
-      if (px2 < -0.5 && px1 > 0.5){
-	return_val = 0;
-	break; // break out of the k loop
-      }
-
-      if (py1 < -0.5 && py2 > 0.5){
-	return_val = 0;
-	break; // break out of the k loop
-      }
-
-      if (py2 < -0.5 && py1 > 0.5){
-	return_val = 0;
-	break; // break out of the k loop
-      }
-
-      if (pz1 < -0.5 && pz2 > 0.5){
-	return_val = 0;
-	break; // break out of the k loop
-      }
-
-      if (pz2 < -0.5 && pz1 > 0.5){
+      // In each dimension, check if the coordinate of one of pair is less than 0
+      // and the other greater than 1.
+      if (px1 < 0.0 && px2 > 1.0 ||
+	  px2 < 0.0 && px1 > 1.0 ||
+	  py1 < 0.0 && py2 > 1.0 ||
+	  py2 < 0.0 && py1 > 1.0 ||
+	  pz1 < 0.0 && pz2 > 1.0 ||
+	  pz2 < 0.0 && pz1 > 1.0) {
 	return_val = 0;
 	break; // break out of the k loop
       }
