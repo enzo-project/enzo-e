@@ -36,7 +36,7 @@
       // Each row must have 7 columns, for mass, x, y, z,
       // vx, vy, vz, respectively
       std::istringstream stream(line);
-      double mass, x, y, z, vx, vy, vz;
+      enzo_float mass, x, y, z, vx, vy, vz;
       stream >> mass >> x >> y >> z >> vx >> vy >> vz;
       mass_data_.push_back(mass);
       x_data_.push_back(x);
@@ -85,7 +85,7 @@ void EnzoInitialMergeStarsTest::enforce_block
   ASSERT("EnzoInitialMergeStarsTest",
   	 "Block does not exist",
   	 block != NULL);
-  
+
   EnzoSimulation * enzo_simulation = enzo::simulation();
   // Block extents
   double bxm,bym,bzm;
@@ -133,12 +133,12 @@ void EnzoInitialMergeStarsTest::enforce_block
     if (block->check_position_in_block(x_data_[i],
                                        y_data_[i],
                                        z_data_[i])){
-  
+
       // Add particle to this block
       int new_particle_index = particle.insert_particles(it, 1);
+     
       // Add particle to simulation
       enzo_simulation->data_insert_particles(1);
-    
       particle.index(new_particle_index,&ib,&ipp);
 
       id   = (int64_t *) particle.attribute_array(it, ia_id, ib);

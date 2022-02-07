@@ -47,13 +47,13 @@ private: // attributes
   std::string particle_data_filename_;
 
   // Used to store particle data read in from file
-  std::vector<double> mass_data_; 
-  std::vector<double> x_data_; 
-  std::vector<double> y_data_; 
-  std::vector<double> z_data_; 
-  std::vector<double> vx_data_; 
-  std::vector<double> vy_data_; 
-  std::vector<double> vz_data_; 
+  std::vector<enzo_float> mass_data_; 
+  std::vector<enzo_float> x_data_; 
+  std::vector<enzo_float> y_data_; 
+  std::vector<enzo_float> z_data_; 
+  std::vector<enzo_float> vx_data_; 
+  std::vector<enzo_float> vy_data_; 
+  std::vector<enzo_float> vz_data_; 
 
   // Number of particles
   int n_particles_;
