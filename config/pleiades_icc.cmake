@@ -16,6 +16,10 @@ if(NOT __processedUserDefaults)
 
   # Setting package paths (e.g., Grackle)
 
+  # Setting test environment
+  set(PARALLEL_LAUNCHER "mpiexec" CACHE STRING "Use mpiexec for launching parallel tests")
+  set(PARALLEL_LAUNCHER_NPROC_ARG "-np" CACHE STRING "Default option to set num procs")
+
   # Mark done
   set(__processedUserDefaults ON)
 
