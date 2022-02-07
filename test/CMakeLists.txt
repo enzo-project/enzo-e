@@ -27,3 +27,9 @@ endfunction()
 setup_test_serial(Heat-1 MethodHeat/Heat-1  input/Heat/method_heat-1.in)
 setup_test_parallel(Heat-8 MethodHeat/Heat-8  input/Heat/method_heat-8.in)
 
+# Convert markdown file to html file for more flexible viewing
+configure_file(${CMAKE_SOURCE_DIR}/test/TEST_RESULTS.md ${PROJECT_BINARY_DIR}/TEST_RESULTS.md COPYONLY)
+add_custom_target(process_test_results
+                  pandoc -s -o TEST_RESULTS.html --metadata title="Enzo-E Test Results" TEST_RESULTS.md
+                  WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+

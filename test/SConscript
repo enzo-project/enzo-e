@@ -106,11 +106,6 @@ SConscript('MethodCosmology/SConscript')
 SConscript('MethodFluxCorrect/SConscript')
 
 #----------------------------------------------------------------------
-# METHOD HEAT TESTS
-#----------------------------------------------------------------------
-SConscript('MethodHeat/SConscript')
-
-#----------------------------------------------------------------------
 # METHOD PPM TESTS
 #----------------------------------------------------------------------
 SConscript('MethodPpm/SConscript')
