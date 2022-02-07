@@ -105,7 +105,8 @@ public: // interface
 		    double pressure_floor,
 		    std::string mhd_choice,
 		    bool dual_energy_formalism,
-		    double dual_energy_formalism_eta);
+		    double dual_energy_formalism_eta,
+		    bool store_fluxes_for_corrections);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodMHDVlct);
@@ -122,7 +123,8 @@ public: // interface
       bfield_method_(nullptr),
       integration_field_list_(),
       primitive_field_list_(),
-      lazy_passive_list_()
+      lazy_passive_list_(),
+      store_fluxes_for_corrections_(false)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -222,6 +224,28 @@ protected: // methods
    EnzoBfieldMethod *bfield_method, const int stale_depth,
    const str_vec_t& passive_list) const noexcept;
 
+  /// Saves the fluxes (for a given dimension, `dim`), computed at the faces
+  /// between the active and the ghost zones to `block->data()->flux_data()`
+  /// for later use in flux corrections.
+  ///
+  /// This function technically saves the value of the flux multiplied by dt
+  /// and divided by the cell_width along dimension `dim`.
+  ///
+  /// @note
+  /// This does not currently support flux-correction equivalents for magnetic
+  /// fields.
+  ///
+  /// @param[out] block holds the flux_data object where the fluxes are saved.
+  /// @param[in]  flux_map contains the fluxes along that are to be saved.
+  /// @param[in]  dim indicates the dimension that the fluxes in `flux_map`
+  ///     were computed along. Values of 0, 1, and 2 correspond to the x, y,
+  ///     and z directions, respectively.
+  /// @param[in]  cell_width is the width of a cell along the dimension `dim`
+  /// @param[in]  dt is the value of the current timestep
+  void save_fluxes_for_corrections_
+  (Block * block, const EnzoEFltArrayMap &flux_map, int dim, double cell_width,
+   double dt) const noexcept;
+
   /// Setup arrays used throughout `compute`. This includes both arrays that
   /// wrap Cello fields AND temporary arrays used as scratch space.
   ///
@@ -291,6 +315,9 @@ protected: // attributes
 
   /// Lazy initializer of the list of fields holding passive scalars
   EnzoLazyPassiveScalarFieldList lazy_passive_list_;
+
+  /// Indicates whether fluxes should be stored for flux corrections
+  bool store_fluxes_for_corrections_;
 };
 
 #endif /* ENZO_ENZO_METHOD_VLCT_HPP */

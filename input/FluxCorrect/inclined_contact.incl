@@ -1,0 +1,86 @@
+ Boundary {
+     type = "periodic";
+ }
+
+
+ Domain {
+      lower = [0.0, 0.0, 0.0];
+      upper = [3.0, 1.5, 1.5];
+ }
+
+ Field {
+      list = ["density", "pressure", "velocity_x", "velocity_y", "velocity_z",
+	      "total_energy", "internal_energy"];
+
+      gamma = 1.6666666666666667;
+      ghost_depth = 4; # needs to be 4 for flux corrections
+
+      #--------------------------------------------------
+      # JB: TEMPORARY CHANGE: bypassing default "enzo" prolongation
+      # JB: since it does not yet interpolate conserved quantities
+      # JB: jobordner@ucsd.edu 210914
+      prolong = "linear";
+      # JB: TEMPORARY CHANGE
+      #--------------------------------------------------
+ }
+
+ Group {
+     list = [ "conserved", "make_field_conservative" ];
+     conserved {
+         field_list = [ "density", "total_energy", "velocity_x", "velocity_y",
+                        "velocity_z" ];
+     }
+     make_field_conservative {
+         field_list = [ "velocity_x", "velocity_y", "velocity_z",
+                        "total_energy" ];
+     }
+ }
+
+ Mesh {
+     root_blocks = [ 4, 1, 1 ];
+     root_rank = 3;
+     root_size = [ 32, 16, 16];
+ }
+
+ Initial {
+
+      list = ["inclined_wave"];
+
+      inclined_wave{
+         # For coordinates x0, x1, x2 - a wave is initialized along x0
+	 # To transform x, y, z to x0, x1, x2:
+	 #    1. Rotate x-y axis about the z-axis by angle -beta (rotate
+	 #       clockwise). The rotated y-axis is now the x1-axis
+	 #    2. Rotate the z-axis and the rotated x axis about the x1-axis
+	 #       by angle -alpha (rotate clock-wise).
+         alpha = 0.7297276562269663; # sin(alpha) = 2/3
+	 beta  = 1.1071487177940904; # sin(beta) =  2/sqrt(5)
+
+         lambda = 1.; #wavelength
+
+         # amplitude of the linear wave (has no effect on circularly
+	 # polarized alfven wave)
+	 amplitude = 1.e-6;
+
+	 # set the sign of the wave speed. default is true
+	 # (doesn't accomplish anything for circularly polarized Alfven waves)
+	 positive_vel = true;
+
+
+         # set the type of wave. Allowed choices are:
+	 #    - "circ_alfven" (circularly polarized traveling Alfven wave)
+	 #    - "alfven" (Alfven wave)
+	 #    - "mhd_entropy" (mhd entropy wave)
+	 #    - "fast" (fast magnetosonic wave)
+	 #    - "slow" (slow magnetosonic wave)
+	 #    - "sound" (sound wave)
+	 #    - "hd_entropy" (hd entropy wave pertubed along v0)
+	 #    - "hd_transv_entropy_v1" (hd entropy wave perturbed along v1)
+	 #    - "hd_transv_entropy_v2" (hd entropy wave perturbed along v2)
+	 wave_type = "hd_entropy";
+       }
+ }
+
+ Stopping {
+     time = 1.0;
+ }
