@@ -262,6 +262,7 @@ elif (arch == "faraday_gnu"):  from faraday_gnu  import *
 elif (arch == "faraday_gnu_debug"):  from faraday_gnu_debug  import *
 elif (arch == "frontera_gcc"): from frontera_gcc import *
 elif (arch == "frontera_icc"): from frontera_icc import *
+elif (arch == "expanse_icc"):  from expanse_icc  import *
 elif (arch == "mf_gnu"):       from mf_gnu       import *
 elif (arch == "mf_gnu_debug"): from mf_gnu_debug import *
 elif (arch == "stampede_gnu"): from stampede_gnu import *

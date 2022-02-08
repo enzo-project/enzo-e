@@ -235,7 +235,38 @@ void EnzoMethodGrackle::setup_grackle_units (double current_time,
     enzo_float cosmo_dt = 0.0;
 
     EnzoPhysicsCosmology * cosmology = enzo::cosmology();
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    //put into cosmology units
+    //
+
+    // Conversions are done explicitly here because this function is called in the constructor, which can lead to issues
+    // when calling virtual functions (e.g. enzo_units->length, density, etc.)
+    // Formulae are copied from src/Enzo/enzo_EnzoPhysicsCosmology.hpp
+
+    if (current_time == 0) {
+       current_time = cosmology->time_from_redshift(enzo::config()->physics_cosmology_initial_redshift);
+    }
+
+  double current_redshift = cosmology->redshift_from_time(current_time);
+
+  grackle_units->density_units  = 1.8788e-29*enzo::config()->physics_cosmology_omega_matter_now*
+      pow(enzo::config()->physics_cosmology_hubble_constant_now,2)*
+      pow(1 + current_redshift,3);
+  grackle_units->length_units   = cello::Mpc_cm*enzo::config()->physics_cosmology_comoving_box_size/
+      enzo::config()->physics_cosmology_hubble_constant_now/
+      (1.0 + current_redshift);
+  grackle_units->time_units     = 2.519445e17/sqrt(enzo::config()->physics_cosmology_omega_matter_now)/
+      enzo::config()->physics_cosmology_hubble_constant_now/
+      pow(1.0 + enzo::config()->physics_cosmology_initial_redshift,1.5);
+
+  grackle_units->velocity_units = 1.22475e7*enzo::config()->physics_cosmology_comoving_box_size*
+      sqrt(enzo::config()->physics_cosmology_omega_matter_now)*
+      sqrt(1.0 + enzo::config()->physics_cosmology_initial_redshift);
+
+    //
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //
     cosmology->compute_expansion_factor(&cosmo_a, &cosmo_dt, current_time);
     grackle_units->a_units
          = 1.0 / (1.0 + enzo_config->physics_cosmology_initial_redshift);
@@ -383,6 +414,7 @@ void EnzoMethodGrackle::update_grackle_density_fields(
 
   double tiny_number = 1.0E-10;
 
+  const EnzoConfig * enzo_config = enzo::config();
   chemistry_data * grackle_chemistry =
     enzo::config()->method_grackle_chemistry;
 
@@ -411,6 +443,10 @@ void EnzoMethodGrackle::update_grackle_density_fields(
           grackle_fields->DII_density[i]   = grackle_fields->density[i] * tiny_number;
           grackle_fields->HDI_density[i]   = grackle_fields->density[i] * tiny_number;
         }
+
+       if (grackle_chemistry->metal_cooling == 1){
+          grackle_fields->metal_density[i] = grackle_fields->density[i] * enzo_config->method_grackle_metallicity_floor*cello::metallicity_solar;
+       }
 
       }
     }
@@ -557,6 +593,41 @@ double EnzoMethodGrackle::timestep ( Block * block ) throw()
   return dt * courant_;
 }
 
+//----------------------------------------------------------------------
+//
+#ifdef CONFIG_USE_GRACKLE
+void EnzoMethodGrackle::enforce_metallicity_floor(EnzoBlock * enzo_block) throw()
+{
+  // MUST have metal_density field tracked
+  Field field = enzo_block->data()->field();
+  enzo_float * density = (enzo_float*) field.values("density");
+  enzo_float * metal_density  = (enzo_float*) field.values("metal_density");
+
+  int gx,gy,gz;
+  field.ghost_depth (0,&gx,&gy,&gz);
+
+  int nx,ny,nz;
+  field.size (&nx,&ny,&nz);
+
+  int ngx = nx + 2*gx;
+  int ngy = ny + 2*gy;
+  int ngz = nz + 2*gz;
+
+  const EnzoConfig * enzo_config = enzo::config();
+  double Z_floor = enzo_config->method_grackle_metallicity_floor; 
+
+  for (int iz=0; iz<ngz; iz++){
+    for (int iy=0; iy<ngy; iy++){
+      for (int ix=0; ix<ngx; ix++){
+        int i = INDEX(ix,iy,iz,ngx,ngy);
+        double Z = metal_density[i] / density[i] / cello::metallicity_solar;
+        if (Z < Z_floor) metal_density[i] *= Z_floor/Z;
+      }
+    }
+  }     
+  return;
+}
+#endif
 //----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_GRACKLE

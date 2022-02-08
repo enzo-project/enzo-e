@@ -198,6 +198,8 @@ public: // interface
 			    "local_calculate_temperature");
   }
 
+  void enforce_metallicity_floor(EnzoBlock * enzo_block) throw();
+
 #endif
 
 protected: // methods
