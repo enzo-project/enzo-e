@@ -44,19 +44,19 @@ Particle {
     list = ["star"];
     batch_size = 4096;
     star {
-        attributes = [ "x", "double",
-                       "y", "double",
-                       "z", "double",
-                       "vx", "double",
-                       "vy", "double",
-                       "vz", "double",
-                       "ax", "double",
-                       "ay", "double",
-                       "az", "double",
-                       "mass", "double",
-		       "lifetime" , "double",
-		       "creation_time", "double",
-		       "metal_fraction", "double",
+        attributes = [ "x", "default",
+                       "y", "default",
+                       "z", "default",
+                       "vx", "default",
+                       "vy", "default",
+                       "vz", "default",
+                       "ax", "default",
+                       "ay", "default",
+                       "az", "default",
+                       "mass", "default",
+		       "lifetime" , "default",
+		       "creation_time", "default",
+		       "metal_fraction", "default",
 		       "is_copy", "int64",
 		       "id" , "int64"];
         position = [ "x", "y", "z" ];
@@ -69,11 +69,7 @@ Particle {
 
 
  Method {
-   
-     gravity {
-         solver = "bcg";
-     };
-
+  
      list = ["pm_update","merge_stars"];		
      pm_update {
          max_dt = 1e7;
@@ -104,20 +100,6 @@ Particle {
     
      list = ["data"];
      
- }
-
- Solver {
-     bcg {
-         iter_max = 200;
-         monitor_iter = 1;
-         precondition = "diagonal_D";
-         res_tol = 0.01000000000000000;
-         type = "bicgstab";
-     };
-     diagonal {
-         type = "diagonal";
-     };
-     list = [ "bcg", "diagonal" ];
  }
 
  Stopping {
