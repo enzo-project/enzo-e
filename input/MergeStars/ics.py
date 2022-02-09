@@ -105,15 +105,18 @@ parser.add_argument(
 
 args = vars(parser.parse_args())
 
+## set seed
+np.random.seed(args["seed"])
 
+## generate random numbers
 rand = np.random.rand(args["n_particles"],3)
 
 # (r,theta,phi polar coordinates)
-# First column is r
+# Use first column to get r
 r = args["radius"] * np.cbrt(rand[:,0])
-# second column is theta
+# Use second column to get theta
 theta = np.arccos(1 - 2*rand[:,1])
-# third column is phi
+# Use third column to get phi
 phi = 2*np.pi*rand[:,2]
 
 # convert to cartesian coordinates
