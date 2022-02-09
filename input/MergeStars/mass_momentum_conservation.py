@@ -1,3 +1,20 @@
+# mass_momentum_conservation.py takes as input the directories
+# generated when Enzo-E runs the test problem, which contain snapshots of the
+# particle data at regular time intervals. The script uses yt to read the
+# data and calculates the total mass, total x/y/z-momentum and total number
+# of particles in each snapshot. It then uses matplotlib to generate a figure
+# with three panels, showing the mass error, momentum error, and number of
+# particles plotted against the number of cycles (i.e. timesteps). The mass
+# / momentum error at a given cycle is defined as the difference between the total
+# mass / momentum at a given cycle and the initial total mass / momentum,
+# divided by the initial total mass / momentum. This figure is useful for
+# checking if particles are indeed merging (shown by decrease in particle number
+# with time) and whether mass and momentum are being properly conserved.
+# This script is designed to be run
+# with MPI as "mpirun -np X python mass_momentum_conservation.py", with X
+# the number of processes.
+# For further details run "python mass_momentum_conservation.py -h".
+
 import yt
 import matplotlib.pyplot as plt
 import numpy as np

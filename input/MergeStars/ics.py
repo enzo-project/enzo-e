@@ -1,3 +1,11 @@
+# ics.py generates a text file (called particles.dat by default)
+# with particle data which can be used to initialise
+# the merge stars test problem in Enzo-E. More specifically, it creates star
+# particles with constant masses, with random positions uniformly distributed
+# in a sphere, and initial velocities all of the same magnitude with directions
+# directed towards the centre of the sphere, plus an additional (optional)
+# constant drift velocity. For more details run "python ics.py -h".
+
 import numpy as np
 import argparse as ap
 

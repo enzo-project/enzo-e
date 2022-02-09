@@ -1,3 +1,13 @@
+# images.py takes as input the directories generated when Enzo-E runs the test
+# problem, which contain snapshots of the particle data at regular time intervals.
+# The script uses yt to read the data and then uses matplotlib to make scatter
+# plots of the x and y coordinates of the particles, outputting a series of
+# image files, with each image corresponding to a particular snapshot. These
+# images are useful to check whether the initial conditions were set up
+# correctly and if Enzo-E ran as expected. This script is designed to be run
+# with MPI as "mpirun -np X python images.py", with X the number of processes.
+# For further details run "python images.py -h".
+
 import yt
 import matplotlib.pyplot as plt
 import argparse as ap
