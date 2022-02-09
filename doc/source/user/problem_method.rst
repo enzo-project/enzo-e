@@ -582,7 +582,25 @@ found to occur, the program stops and prints an error message. This situation
 is unlikely to happen, unless the merging radius is too large relative
 to the block size.
 
-Currently this will only run in unigrid mode.
+Currently this will only run in unigrid mode. This is because when a block
+calls this method, it assumes that all neighbouring blocks have the same size,
+or equivalently, on the same refinement level.
+For this reason, there is a check in the constructor of EnzoMethodMergeStars
+for whether ``"Adapt: max_level"`` is equal to zero. In future, we plan to
+implement an accretion method, which will require a refinement condition that
+any block containing an accreting particle, or neighbouring such a block, needs
+to be on the highest level of refinement. In this case, the assumption that
+blocks containing accreting particles (which we want to merge together), and
+blocks neighbouring such blocks, are all on the same level of refinement
+would be valid.
+
+WARNING: there is currently a memory leak issue when running with this method
+which can cause Enzo-E to crash in mysterious ways. If this problem is
+encountered, it is advised to increase the batch size parameter
+(``"Particle:batch_size"``) by a factor of a few
+before attempting to run again. To be completely safe, the user can set a
+batch size larger than the total number of star particles in the whole
+simulation, which should be feasible for small test problems.
 
 parameters
 ----------
