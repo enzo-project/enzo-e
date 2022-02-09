@@ -329,7 +329,6 @@ int Block::refresh_load_field_faces_ (Refresh & refresh)
 
 //----------------------------------------------------------------------
 
-
 void Block::refresh_load_field_face_
 ( Refresh & refresh,  int refresh_type,
   Index index_neighbor,  int if3[3], int ic3[3])
