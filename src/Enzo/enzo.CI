@@ -48,16 +48,17 @@ module enzo {
   PUPable EnzoFactory;
 
   PUPable EnzoInitialBCenter;
+  PUPable EnzoInitialBurkertBodenheimer;
   PUPable EnzoInitialCloud;
   PUPable EnzoInitialCollapse;
   PUPable EnzoInitialCosmology;
-  PUPable EnzoInitialHdf5;
   PUPable EnzoInitialFeedbackTest;
-  PUPable EnzoInitialInclinedWave;
+  PUPable EnzoInitialHdf5;
   PUPable EnzoInitialImplosion2;
+  PUPable EnzoInitialInclinedWave;
+  PUPable EnzoInitialIsolatedGalaxy;
   PUPable EnzoInitialMusic;
   PUPable EnzoInitialPm;
-  PUPable EnzoInitialBurkertBodenheimer;
   PUPable EnzoInitialPpmlTest;
   PUPable EnzoInitialSedovArray2;
   PUPable EnzoInitialSedovArray3;
@@ -65,7 +66,6 @@ module enzo {
   PUPable EnzoInitialShockTube;
   PUPable EnzoInitialSoup;
   PUPable EnzoInitialTurbulence;
-  PUPable EnzoInitialIsolatedGalaxy;
 
   PUPable IoEnzoBlock;
 
@@ -231,5 +231,13 @@ module enzo {
     entry void p_solver_mg0_restrict_recv(FieldMsg * msg);
 
   };
+
+  array[1D] IoEnzoReader : IoReader {
+    entry IoEnzoReader();
+  };
+
+  array[1D] IoEnzoWriter : IoWriter {
+    entry IoEnzoWriter();
+  }
 
 };

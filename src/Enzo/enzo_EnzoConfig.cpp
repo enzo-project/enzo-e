@@ -46,6 +46,15 @@ EnzoConfig::EnzoConfig() throw ()
   physics_gravity(false),
   // EnzoInitialBCenter
   initial_bcenter_update_etot(false),
+  // EnzoInitialBurkertBodenheimer
+  initial_burkertbodenheimer_rank(0),
+  initial_burkertbodenheimer_radius_relative(0.0),
+  initial_burkertbodenheimer_particle_ratio(0.0),
+  initial_burkertbodenheimer_mass(0.0),
+  initial_burkertbodenheimer_temperature(0.0),
+  initial_burkertbodenheimer_densityprofile(1),
+  initial_burkertbodenheimer_rotating(true),
+  initial_burkertbodenheimer_outer_velocity(-1),
   // EnzoInitialCloud
   initial_cloud_subsample_n(0),
   initial_cloud_radius(0.),
@@ -128,15 +137,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_pm_field(""),
   initial_pm_mpp(0.0),
   initial_pm_level(0),
-  // EnzoInitialBurkertBodenheimer
-  initial_burkertbodenheimer_rank(0),
-  initial_burkertbodenheimer_radius_relative(0.0),
-  initial_burkertbodenheimer_particle_ratio(0.0),
-  initial_burkertbodenheimer_mass(0.0),
-  initial_burkertbodenheimer_temperature(0.0),
-  initial_burkertbodenheimer_densityprofile(1),
-  initial_burkertbodenheimer_rotating(true),
-  initial_burkertbodenheimer_outer_velocity(-1),
   // EnzoInitialSedov[23]
   initial_sedov_rank(0),
   initial_sedov_radius_relative(0.0),
@@ -645,44 +645,44 @@ void EnzoConfig::read(Parameters * p) throw()
 
   read_field_(p);
 
+  read_initial_bcenter_(p);
+  read_initial_burkertbodenheimer_(p);
+  read_initial_cloud_(p);
   read_initial_collapse_(p);
   read_initial_cosmology_(p);
+  read_initial_feedback_test_(p);
   read_initial_grackle_(p);
   read_initial_hdf5_(p);
+  read_initial_inclined_wave_(p);
+  read_initial_isolated_galaxy_(p);
   read_initial_music_(p);
   read_initial_pm_(p);
-  read_initial_inclined_wave_(p);
-  read_initial_burkertbodenheimer_(p);
   read_initial_sedov_(p);
   read_initial_sedov_random_(p);
   read_initial_shock_tube_(p);
-  read_initial_bcenter_(p);
-  read_initial_cloud_(p);
   read_initial_soup_(p);
   read_initial_turbulence_(p);
-  read_initial_isolated_galaxy_(p);
-  read_initial_feedback_test_(p);
-  
-  read_method_grackle_(p);
-  read_method_feedback_(p);
-  read_method_star_maker_(p);
+
   read_method_background_acceleration_(p);
-  read_method_vlct_(p);
+  read_method_feedback_(p);
+  read_method_grackle_(p);
   read_method_gravity_(p);
   read_method_heat_(p);
   read_method_pm_deposit_(p);
   read_method_pm_update_(p);
   read_method_ppm_(p);
+  read_method_star_maker_(p);
   read_method_turbulence_(p);
-  
+  read_method_vlct_(p);
+
   read_physics_(p);
-  
+
   read_prolong_enzo_(p);
-  
+
   read_solvers_(p);
-  
+
   read_stopping_(p);
-  
+
 
   TRACE("END   EnzoConfig::read()");
 }
@@ -691,7 +691,7 @@ void EnzoConfig::read(Parameters * p) throw()
 
 void EnzoConfig::read_adapt_(Parameters *p)
 {
-  
+
   adapt_mass_type.resize(num_adapt);
 
   for (int ia=0; ia<num_adapt; ia++) {
@@ -781,7 +781,7 @@ void EnzoConfig::read_initial_hdf5_(Parameters * p)
     initial_hdf5_blocking[i] =
       p->list_value_integer(i,name_initial+"blocking",1);
   }
-  
+
   const int num_files = p->list_length (name_initial + "file_list");
 
   for (int index_file=0; index_file<num_files; index_file++) {
@@ -798,7 +798,7 @@ void EnzoConfig::read_initial_hdf5_(Parameters * p)
     if (type == "particle") {
 
       const std::string attribute = p->value_string (file_id+"attribute","");
-      
+
       initial_hdf5_particle_files.     push_back(file);
       initial_hdf5_particle_datasets.  push_back(dataset);
       initial_hdf5_particle_coords.    push_back(coords);
@@ -829,7 +829,7 @@ void EnzoConfig::read_initial_music_(Parameters * p)
   const int num_files = p->list_length (name_initial + "file_list");
 
   for (int index_file=0; index_file<num_files; index_file++) {
-    
+
     std::string file_id = name_initial +
       p->list_value_string (index_file,name_initial+"file_list") + ":";
 
@@ -890,7 +890,7 @@ void EnzoConfig::read_initial_pm_(Parameters * p)
 //----------------------------------------------------------------------
 
 void EnzoConfig::read_initial_burkertbodenheimer_(Parameters * p)
-{  
+{
   // Burkert Bodenheimer initialization
 
   initial_burkertbodenheimer_rank =  p->value_integer("Initial:burkertbodenheimer:rank",0);
@@ -920,7 +920,7 @@ void EnzoConfig::read_initial_burkertbodenheimer_(Parameters * p)
 //----------------------------------------------------------------------
 
 void EnzoConfig::read_initial_inclined_wave_(Parameters * p)
-{  
+{
 
   // InitialInclinedWave initialization
 
@@ -965,7 +965,7 @@ void EnzoConfig::read_initial_sedov_(Parameters * p)
 //----------------------------------------------------------------------
 
 void EnzoConfig::read_initial_sedov_random_(Parameters * p)
-{  
+{
   initial_sedov_random_array[0] =
     p->list_value_integer (0,"Initial:sedov_random:array",1);
   initial_sedov_random_array[1] =
@@ -1073,7 +1073,7 @@ void EnzoConfig::read_initial_cloud_(Parameters * p)
 //----------------------------------------------------------------------
 
 void EnzoConfig::read_initial_soup_(Parameters * p)
-{  
+{
   // InitialSoup initialization
 
   initial_soup_rank      = p->value_integer ("Initial:soup:rank",0);
@@ -1213,7 +1213,7 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
 
 {
   method_grackle_use_grackle = false;
-  
+
 #ifdef CONFIG_USE_GRACKLE
 
   /// Grackle parameters
@@ -1404,7 +1404,7 @@ void EnzoConfig::read_method_feedback_(Parameters * p)
 
 void EnzoConfig::read_method_star_maker_(Parameters * p)
 {
-  
+
   method_star_maker_type = p->value_string
     ("Method:star_maker:type","stochastic");
 
@@ -1610,7 +1610,6 @@ void EnzoConfig::read_method_ppm_(Parameters * p)
 
 void EnzoConfig::read_method_turbulence_(Parameters * p)
 {
-  
   method_turbulence_edot = p->value_float
     ("Method:turbulence:edot",-1.0);
   method_turbulence_mach_number = p->value_float

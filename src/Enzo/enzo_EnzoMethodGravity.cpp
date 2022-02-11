@@ -85,13 +85,13 @@ EnzoMethodGravity::EnzoMethodGravity
     // EnzoProlong does not work with accumulate!
     std::string prolong_name =
       cello::problem()->prolong(index_prolong_)->name();
-    
+
     ASSERT1("EnzoMethodGravity::EnzoMethodGravity()",
            "Requesting accumulated particle mass refresh: "
            "rerun with parameter Method : %s : prolong = \"linear\"",
             name().c_str(),
             (prolong_name != "enzo"));
-    
+
     refresh->set_accumulate(true);
     refresh->add_field_src_dst
       ("density_particle","density_particle_accumulate");

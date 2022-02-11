@@ -17,67 +17,67 @@ class Parameters;
 #ifdef CONFIG_USE_GRACKLE
 // Operator to allow Grackle's chemistry data to PUP
 inline void operator|(PUP::er &p, chemistry_data &c){
- // all values are single ints, floats, or doubles with the
- // exception of grackle_data_file
- p | c.use_grackle;
- p | c.with_radiative_cooling;
- p | c.primordial_chemistry;
- p | c.dust_chemistry;
- p | c.metal_cooling;
- p | c.UVbackground;
+  // all values are single ints, floats, or doubles with the
+  // exception of grackle_data_file
+  p | c.use_grackle;
+  p | c.with_radiative_cooling;
+  p | c.primordial_chemistry;
+  p | c.dust_chemistry;
+  p | c.metal_cooling;
+  p | c.UVbackground;
 
- bool skip_strlen = (p.isUnpacking() || c.grackle_data_file == NULL);
- int length = (skip_strlen) ? 0 : strlen(c.grackle_data_file);
- p | length;
- if (length > 0){
-   if (p.isUnpacking()){
-     c.grackle_data_file=new char[length+1];
-   }
-   PUParray(p, c.grackle_data_file,length+1);
- } else {
-   c.grackle_data_file = NULL;
- }
+  bool skip_strlen = (p.isUnpacking() || c.grackle_data_file == NULL);
+  int length = (skip_strlen) ? 0 : strlen(c.grackle_data_file);
+  p | length;
+  if (length > 0){
+    if (p.isUnpacking()){
+      c.grackle_data_file=new char[length+1];
+    }
+    PUParray(p, c.grackle_data_file,length+1);
+  } else {
+    c.grackle_data_file = NULL;
+  }
 
- p | c.cmb_temperature_floor;
- p | c.Gamma;
- p | c.h2_on_dust;
- p | c.use_dust_density_field;
- p | c.photoelectric_heating;
- p | c.photoelectric_heating_rate;
- p | c.use_isrf_field;
- p | c.interstellar_radiation_field;
- p | c.use_volumetric_heating_rate;
- p | c.use_specific_heating_rate;
- p | c.three_body_rate;
- p | c.cie_cooling;
- p | c.h2_optical_depth_approximation;
- p | c.ih2co;
- p | c.ipiht;
- p | c.HydrogenFractionByMass;
- p | c.DeuteriumToHydrogenRatio;
- p | c.SolarMetalFractionByMass;
- p | c.local_dust_to_gas_ratio;
- p | c.NumberOfTemperatureBins;
- p | c.CaseBRecombination;
- p | c.TemperatureStart;
- p | c.TemperatureEnd;
- p | c.NumberOfDustTemperatureBins;
- p | c.DustTemperatureStart;
- p | c.DustTemperatureEnd;
- p | c.Compton_xray_heating;
- p | c.LWbackground_sawtooth_suppression;
- p | c.LWbackground_intensity;
- p | c.UVbackground_redshift_on;
- p | c.UVbackground_redshift_off;
- p | c.UVbackground_redshift_fullon;
- p | c.UVbackground_redshift_drop;
- p | c.cloudy_electron_fraction_factor;
- p | c.use_radiative_transfer;
- p | c.radiative_transfer_coupled_rate_solver;
- p | c.radiative_transfer_intermediate_step;
- p | c.radiative_transfer_hydrogen_only;
- p | c.self_shielding_method;
- p | c.H2_self_shielding;
+  p | c.cmb_temperature_floor;
+  p | c.Gamma;
+  p | c.h2_on_dust;
+  p | c.use_dust_density_field;
+  p | c.photoelectric_heating;
+  p | c.photoelectric_heating_rate;
+  p | c.use_isrf_field;
+  p | c.interstellar_radiation_field;
+  p | c.use_volumetric_heating_rate;
+  p | c.use_specific_heating_rate;
+  p | c.three_body_rate;
+  p | c.cie_cooling;
+  p | c.h2_optical_depth_approximation;
+  p | c.ih2co;
+  p | c.ipiht;
+  p | c.HydrogenFractionByMass;
+  p | c.DeuteriumToHydrogenRatio;
+  p | c.SolarMetalFractionByMass;
+  p | c.local_dust_to_gas_ratio;
+  p | c.NumberOfTemperatureBins;
+  p | c.CaseBRecombination;
+  p | c.TemperatureStart;
+  p | c.TemperatureEnd;
+  p | c.NumberOfDustTemperatureBins;
+  p | c.DustTemperatureStart;
+  p | c.DustTemperatureEnd;
+  p | c.Compton_xray_heating;
+  p | c.LWbackground_sawtooth_suppression;
+  p | c.LWbackground_intensity;
+  p | c.UVbackground_redshift_on;
+  p | c.UVbackground_redshift_off;
+  p | c.UVbackground_redshift_fullon;
+  p | c.UVbackground_redshift_drop;
+  p | c.cloudy_electron_fraction_factor;
+  p | c.use_radiative_transfer;
+  p | c.radiative_transfer_coupled_rate_solver;
+  p | c.radiative_transfer_intermediate_step;
+  p | c.radiative_transfer_hydrogen_only;
+  p | c.self_shielding_method;
+  p | c.H2_self_shielding;
 }
 #endif
 
@@ -138,6 +138,15 @@ public: // interface
       physics_gravity(false),
       // EnzoInitialBCenter
       initial_bcenter_update_etot(false),
+      // EnzoInitialBurkertBodenheimer
+      initial_burkertbodenheimer_rank(0),
+      initial_burkertbodenheimer_radius_relative(0.0),
+      initial_burkertbodenheimer_particle_ratio(0.0),
+      initial_burkertbodenheimer_mass(0.0),
+      initial_burkertbodenheimer_temperature(0.0),
+      initial_burkertbodenheimer_densityprofile(1),
+      initial_burkertbodenheimer_rotating(true),
+      initial_burkertbodenheimer_outer_velocity(-1),
       // EnzoInitialCloud
       initial_cloud_subsample_n(0),
       initial_cloud_radius(0.),
@@ -220,14 +229,6 @@ public: // interface
       initial_pm_field(""),
       initial_pm_mpp(0.0),
       initial_pm_level(0),
-      initial_burkertbodenheimer_rank(0),
-      initial_burkertbodenheimer_radius_relative(0.0),
-      initial_burkertbodenheimer_particle_ratio(0.0),
-      initial_burkertbodenheimer_mass(0.0),
-      initial_burkertbodenheimer_temperature(0.0),
-      initial_burkertbodenheimer_densityprofile(1),
-      initial_burkertbodenheimer_rotating(true),
-      initial_burkertbodenheimer_outer_velocity(-1),
       // EnzoInitialSedovArray[23]
       initial_sedov_rank(0),
       initial_sedov_radius_relative(0.0),
@@ -410,37 +411,37 @@ protected: // methods
   void read_adapt_(Parameters *);
 
   void read_field_(Parameters *);
-  
+
+  void read_initial_bcenter_(Parameters *);
+  void read_initial_burkertbodenheimer_(Parameters *);
+  void read_initial_cloud_(Parameters *);
   void read_initial_collapse_(Parameters *);
   void read_initial_cosmology_(Parameters *);
+  void read_initial_feedback_test_(Parameters *);
   void read_initial_grackle_(Parameters *);
   void read_initial_hdf5_(Parameters *);
+  void read_initial_inclined_wave_(Parameters *);
+  void read_initial_isolated_galaxy_(Parameters *);
   void read_initial_music_(Parameters *);
   void read_initial_pm_(Parameters *);
-  void read_initial_inclined_wave_(Parameters *);
-  void read_initial_burkertbodenheimer_(Parameters *);
   void read_initial_sedov_(Parameters *);
   void read_initial_sedov_random_(Parameters *);
   void read_initial_shock_tube_(Parameters *);
-  void read_initial_bcenter_(Parameters *);
-  void read_initial_cloud_(Parameters *);
   void read_initial_soup_(Parameters *);
   void read_initial_turbulence_(Parameters *);
-  void read_initial_isolated_galaxy_(Parameters *);
-  void read_initial_feedback_test_(Parameters *);
-  
-  void read_method_grackle_(Parameters *);
-  void read_method_feedback_(Parameters *);
-  void read_method_star_maker_(Parameters *);
+
   void read_method_background_acceleration_(Parameters *);
-  void read_method_vlct_(Parameters *);
+  void read_method_feedback_(Parameters *);
+  void read_method_grackle_(Parameters *);
   void read_method_gravity_(Parameters *);
   void read_method_heat_(Parameters *);
   void read_method_pm_deposit_(Parameters *);
   void read_method_pm_update_(Parameters *);
   void read_method_ppm_(Parameters *);
+  void read_method_star_maker_(Parameters *);
   void read_method_turbulence_(Parameters *);
-  
+  void read_method_vlct_(Parameters *);
+
   void read_physics_(Parameters *);
 
   void read_prolong_enzo_(Parameters *);
@@ -448,8 +449,8 @@ protected: // methods
   void read_solvers_(Parameters *);
 
   void read_stopping_(Parameters *);
-  
-  
+
+
 public: // attributes
 
   // NOTE: change pup() function whenever attributes change
@@ -495,6 +496,17 @@ public: // attributes
 
   /// EnzoInitialBCenter;
   bool                       initial_bcenter_update_etot;
+
+  /// EnzoInitialBurkertBodenheimer
+  int                        initial_burkertbodenheimer_rank;
+  int                        initial_burkertbodenheimer_array[3];
+  double                     initial_burkertbodenheimer_radius_relative;
+  double                     initial_burkertbodenheimer_particle_ratio;
+  double                     initial_burkertbodenheimer_mass;
+  double                     initial_burkertbodenheimer_temperature;
+  int                        initial_burkertbodenheimer_densityprofile;
+  bool                       initial_burkertbodenheimer_rotating;
+  double                     initial_burkertbodenheimer_outer_velocity;
 
   /// EnzoInitialCloud;
   int                        initial_cloud_subsample_n;
@@ -583,17 +595,6 @@ public: // attributes
   std::string                initial_pm_field;
   double                     initial_pm_mpp;
   int                        initial_pm_level;
-
-   /// EnzoInitialBurkertBodenheimer
-  int                        initial_burkertbodenheimer_rank;
-  int                        initial_burkertbodenheimer_array[3];
-  double                     initial_burkertbodenheimer_radius_relative;
-  double                     initial_burkertbodenheimer_particle_ratio;
-  double                     initial_burkertbodenheimer_mass;
-  double                     initial_burkertbodenheimer_temperature;
-  int                        initial_burkertbodenheimer_densityprofile;
-  bool                       initial_burkertbodenheimer_rotating;
-  double                     initial_burkertbodenheimer_outer_velocity;
 
   /// EnzoInitialSedovArray[23]
   int                        initial_sedov_rank;
@@ -773,7 +774,7 @@ public: // attributes
   std::string                prolong_enzo_type;
   bool                       prolong_enzo_positive;
   bool                       prolong_enzo_use_linear;
-  
+
   ///==============
   /// EnzoSolverMg0
   ///==============

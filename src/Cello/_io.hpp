@@ -38,6 +38,9 @@ enum meta_type {
 #include "io_IoHierarchy.hpp"
 #include "io_IoParticleData.hpp"
 
+#include "io_IoReader.hpp"
+#include "io_IoWriter.hpp"
+
 #include "io_Input.hpp"
 #include "io_InputData.hpp"
 

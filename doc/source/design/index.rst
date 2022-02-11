@@ -13,5 +13,5 @@ Cello, including flux-correction, IO, and ghost zone refresh.
    :glob:
    :titlesonly:
    :numbered:
-      
+
    design-*

@@ -83,6 +83,9 @@ void Config::pup (PUP::er &p)
   p | initial_cycle;
   p | initial_time;
 
+  p | initial_restart;
+  p | initial_restart_file_name;
+
   p | initial_trace_name;
   p | initial_trace_field;
   p | initial_trace_mpp;
@@ -175,6 +178,7 @@ void Config::pup (PUP::er &p)
   p | output_stride_wait;
   p | output_field_list;
   p | output_particle_list;
+  p | output_checkpoint_file;
   p | output_name;
   p | index_schedule;
   p | schedule_list;
@@ -212,10 +216,6 @@ void Config::pup (PUP::er &p)
   
   p | num_physics;
   p | physics_list;
-
-  // Restart
-
-  p | restart_file;
 
   // Solvers
   
@@ -270,7 +270,6 @@ void Config::read(Parameters * p) throw()
   read_particle_(p);
   read_performance_(p);
   read_physics_(p);
-  read_restart_(p);
   read_stopping_(p);
   read_testing_(p);
   read_units_(p);
@@ -642,6 +641,11 @@ void Config::read_initial_ (Parameters * p) throw()
 
   }
 
+  // Restart
+
+  initial_restart =          p->value_logical ("Initial:restart",false);
+  initial_restart_file_name = p->value_string ("Initial:restart_file_name","");
+
   // InitialTrace
   initial_trace_name = p->value_string ("Initial:trace:name","trace");
   initial_trace_field = p->value_string ("Initial:trace:field","");
@@ -649,8 +653,6 @@ void Config::read_initial_ (Parameters * p) throw()
   initial_trace_dx = p->list_value_integer (0,"Initial:trace:stride",1);
   initial_trace_dy = p->list_value_integer (1,"Initial:trace:stride",1);
   initial_trace_dz = p->list_value_integer (2,"Initial:trace:stride",1);
-
-  
 }
 
 //----------------------------------------------------------------------
@@ -1397,13 +1399,6 @@ void Config::read_physics_ (Parameters * p) throw()
     physics_list[index_physics] = name;
 
   }
-}
-
-//----------------------------------------------------------------------
-
-void Config::read_restart_ (Parameters * p) throw()
-{
-  restart_file = p->value_string("Restart:file","");
 }
 
 //----------------------------------------------------------------------

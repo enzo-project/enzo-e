@@ -490,6 +490,24 @@ protected:
 public:
 
   //--------------------------------------------------
+  // RESTART
+  //--------------------------------------------------
+
+  void r_restart_enter(CkReductionMsg * msg)
+  {
+    //    performance_start_(perf_restart);
+    delete msg;
+    restart_enter_();
+    //    performance_stop_(perf_restart);
+    //    performance_start_(perf_restart_sync);
+  }
+
+protected:
+  void restart_enter_();
+
+public:
+
+  //--------------------------------------------------
   // CONTROL AND SYNCHRONIZATION
   //--------------------------------------------------
 

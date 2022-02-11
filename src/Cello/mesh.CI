@@ -59,6 +59,8 @@ module mesh {
   PUPable MethodOutput;
   PUPable MethodRefresh;
   PUPable MethodTrace;
+  PUPable OrderingRootBlocks;
+  PUPable OrderingHilbert;
   PUPable OutputCheckpoint;
   PUPable OutputData;
   PUPable OutputImage;
@@ -186,6 +188,12 @@ module mesh {
     entry void p_adapt_recv_child (MsgCoarsen * msg);
 
     //--------------------------------------------------
+    // *** RESTART
+    //--------------------------------------------------
+
+    entry void r_restart_enter(CkReductionMsg *);
+
+    //--------------------------------------------------
     // *** REFRESH
     //--------------------------------------------------
 
@@ -196,5 +204,14 @@ module mesh {
 
   };
 
+  // Chare array for reading data files
+  array[1D] IoReader {
+     entry IoReader();
+  };
+
+  // Chare array for writing data files
+  array[1D] IoWriter {
+     entry IoWriter();
+  };
 }
 

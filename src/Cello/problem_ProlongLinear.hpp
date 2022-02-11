@@ -9,9 +9,7 @@
 #define PROBLEM_PROLONG_LINEAR_HPP
 
 class ProlongLinear : public Prolong 
-
 {
-
   /// @class    ProlongLinear
   /// @ingroup  Problem
   /// @brief    [\ref Problem] 

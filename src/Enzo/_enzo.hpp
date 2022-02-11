@@ -173,6 +173,8 @@ extern "C" {
 #include "enzo_EnzoBlock.hpp"
 
 #include "enzo_IoEnzoBlock.hpp"
+#include "enzo_IoEnzoReader.hpp"
+#include "enzo_IoEnzoWriter.hpp"
 
 #include "enzo_EnzoFieldArrayFactory.hpp"
 #include "enzo_EnzoEFltArrayMap.hpp"

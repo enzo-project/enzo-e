@@ -64,14 +64,14 @@ public: // virtual functions
 
 private: // private functions
 
-  /// Read the restart_file_ and update Simulation::config() with
+  /// Read the checkpoint_file_ and update Simulation::config() with
   /// updated values
   void update_config_();
 
   private: // attributes
 
   /// Name of parameter file to read on restart for updated parameters
-  std::string restart_file_;
+  std::string checkpoint_file_;
 
 };
 
