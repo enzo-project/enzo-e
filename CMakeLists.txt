@@ -264,6 +264,12 @@ if (use_papi)
   endif()
 endif()
 
+option(USE_SIMD "Use OpenMP SIMD directives. Also enables value-unsafe floating-point optimizations which may already be enable on some compilers (like icc)." OFF)
+include("cmake/EnableOMPSIMD.cmake")
+if (USE_SIMD)
+  enableOMPSIMD()
+endif()
+
 # Include machine file second time (if used initially) to set additional options that may depend
 # on global (default) options, such as USE_DOUBLE_PREC
 if (__processedUserDefaults)

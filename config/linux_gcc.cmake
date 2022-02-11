@@ -13,19 +13,19 @@ if(NOT __processedUserDefaults)
   # PPM solver
   set(CMAKE_Fortran_FLAGS "-ffixed-line-length-132" CACHE STRING "Default Fortran flags")
 
-  # Set some architecture-specific optimization flags
-  # (in the future, we might want to excercise more control over the targetted
-  # instruction set to a higher level)
+  # add optional flags to C and C++ compilers that provide useful warnings
+  set(CMAKE_C_FLAGS "-Wall" CACHE STRING "Default C flags")
+  set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}" CACHE STRING "Default C++ flags")
 
-  # if we use -fno-math-errno, that cause 1D MHD shock tube problems to have
-  # slightly different L1 error norms for the VL+CT solver, depending on the
-  # position in the transverse direction (see MHD_shock_tube_test)
-  set(__ARCH_C_OPT_FLAGS "-O3 -fopenmp-simd -march=native -DNDEBUG -funroll-loops -fno-trapping-math -fno-signed-zeros")
+  # these flag(s) are currently only used when using openmp-simd optimizations
+  # (to specify available/prefered instruction sets).
+  # This particular value tells the compiler to optimize the code for the
+  # instruction set of the machine used to compile the code.
+  set(CONFIG_ARCH_FLAGS "-march=native")
 
-  set(CMAKE_C_FLAGS_RELEASE "${__ARCH_C_OPT_FLAGS}")
-  set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g ${__ARCH_C_OPT_FLAGS}")
-  set(CMAKE_CXX_FLAGS_RELEASE "${__ARCH_C_OPT_FLAGS}")
-  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g ${__ARCH_C_OPT_FLAGS}")
+  # maybe we should add the following flags at a higher level...
+  string(APPEND CMAKE_C_FLAGS " -funroll-loops")
+  string(APPEND CMAKE_CXX_FLAGS " -funroll-loops")
 
   # Setting package paths (e.g., Grackle)
 

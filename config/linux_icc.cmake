@@ -20,13 +20,11 @@ if(NOT __processedUserDefaults)
   set(CMAKE_C_FLAGS "-Wall" CACHE STRING "Default C flags")
   set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}" CACHE STRING "Default C++ flags")
 
-  # Set some architecture-specific optimization flags
-  set(__ARCH_C_OPT_FLAGS "-O3 -DNDEBUG -qno-openmp -qopenmp-simd -xHost")
-
-  set(CMAKE_C_FLAGS_RELEASE "${__ARCH_C_OPT_FLAGS}")
-  set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g ${__ARCH_C_OPT_FLAGS}")
-  set(CMAKE_CXX_FLAGS_RELEASE "${__ARCH_C_OPT_FLAGS}")
-  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g ${__ARCH_C_OPT_FLAGS}")
+  # these flag(s) are currently only used when using openmp-simd optimizations
+  # (to specify available/prefered instruction sets).
+  # This particular value tells the compiler to optimize the code for the
+  # instruction set of the machine used to compile the code.
+  set(CONFIG_ARCH_FLAGS "-xHost")
 
   # Setting package paths (e.g., Grackle)
 

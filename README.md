@@ -109,6 +109,7 @@ functional) (basic time data on root processor is still output)" ON
 -` use_jemalloc "Use the jemalloc library for memory allocation" OFF
 - `smp` "Use Charm++ in SMP mode." OFF
 - `use_papi` "Use the PAPI performance API" OFF
+- `USE_SIMD` Use OpenMP-SIMD directives (this does not link to the OpenMP runtime). This also enables value-unsafe optimizations floating-point operations (i.e. `-ffast-math`), if they were not already enabled (e.g. they're enabled by default for intel compilers).
 - `PARALLEL_LAUNCHER` "Launcher to use for parallel tests" `charmrun`
 - `PARALLEL_LAUNCHER_NPROC_ARG` "Argument to set number of processing elements for parallel launcher" `+p` (for use with `charmrun`)
 - `PARALLEL_LAUNCHER_NPROC` "Number of processors to run parallel unit tests" 4
