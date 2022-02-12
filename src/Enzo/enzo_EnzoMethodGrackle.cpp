@@ -235,38 +235,20 @@ void EnzoMethodGrackle::setup_grackle_units (double current_time,
     enzo_float cosmo_dt = 0.0;
 
     EnzoPhysicsCosmology * cosmology = enzo::cosmology();
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    //put into cosmology units
-    //
-
-    // Conversions are done explicitly here because this function is called in the constructor, which can lead to issues
-    // when calling virtual functions (e.g. enzo_units->length, density, etc.)
-    // Formulae are copied from src/Enzo/enzo_EnzoPhysicsCosmology.hpp
+    // Have to explicitly initialize current_time and current_redshift here because this function is called in the constructor, 
+    // which leads to issues when calling virtual functions (e.g. enzo_units->length, density, etc.)
 
     if (current_time == 0) {
        current_time = cosmology->time_from_redshift(enzo::config()->physics_cosmology_initial_redshift);
+       cosmology->set_current_redshift(cosmology->redshift_from_time(current_time));
     }
 
-  double current_redshift = cosmology->redshift_from_time(current_time);
+    grackle_units->density_units  = cosmology->density_units(); 
+    grackle_units->length_units = cosmology->length_units();
+    grackle_units->time_units  = cosmology->time_units();
+    grackle_units->velocity_units = cosmology->velocity_units();
 
-  grackle_units->density_units  = 1.8788e-29*enzo::config()->physics_cosmology_omega_matter_now*
-      pow(enzo::config()->physics_cosmology_hubble_constant_now,2)*
-      pow(1 + current_redshift,3);
-  grackle_units->length_units   = cello::Mpc_cm*enzo::config()->physics_cosmology_comoving_box_size/
-      enzo::config()->physics_cosmology_hubble_constant_now/
-      (1.0 + current_redshift);
-  grackle_units->time_units     = 2.519445e17/sqrt(enzo::config()->physics_cosmology_omega_matter_now)/
-      enzo::config()->physics_cosmology_hubble_constant_now/
-      pow(1.0 + enzo::config()->physics_cosmology_initial_redshift,1.5);
-
-  grackle_units->velocity_units = 1.22475e7*enzo::config()->physics_cosmology_comoving_box_size*
-      sqrt(enzo::config()->physics_cosmology_omega_matter_now)*
-      sqrt(1.0 + enzo::config()->physics_cosmology_initial_redshift);
-
-    //
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    //
     cosmology->compute_expansion_factor(&cosmo_a, &cosmo_dt, current_time);
     grackle_units->a_units
          = 1.0 / (1.0 + enzo_config->physics_cosmology_initial_redshift);
@@ -445,7 +427,7 @@ void EnzoMethodGrackle::update_grackle_density_fields(
         }
 
        if (grackle_chemistry->metal_cooling == 1){
-          grackle_fields->metal_density[i] = grackle_fields->density[i] * enzo_config->method_grackle_metallicity_floor*cello::metallicity_solar;
+          grackle_fields->metal_density[i] = grackle_fields->density[i] * enzo_config->method_grackle_metallicity_floor * cello::metallicity_solar;
        }
 
       }

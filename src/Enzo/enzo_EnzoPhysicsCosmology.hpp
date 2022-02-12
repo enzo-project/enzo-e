@@ -180,14 +180,17 @@ public: // interface
   void compute_expansion_factor
   (enzo_float *cosmo_a, enzo_float *cosmo_dadt, enzo_float time) const;
 
+  /// Return current density units scaling (requires set_current_time())
+  double density_units() const
+  {
+    return 1.8788e-29*omega_matter_now_*pow(hubble_constant_now_,2)*
+                      pow(1 + current_redshift_,3);
+  }
   /// Return current mass units scaling (requires set_current_time())
   double mass_units() const
   {
-    double density = 1.8788e-29*omega_matter_now_*
-      pow(hubble_constant_now_,2)*
-      pow(1 + current_redshift_,3);
     double length = length_units();
-    return density * length * length * length;
+    return density_units() * length * length * length;
   }
 
   /// Return current length units scaling (requires set_current_time())
