@@ -621,7 +621,7 @@ void EnzoMethodGrackle::enforce_metallicity_floor(EnzoBlock * enzo_block) throw(
       for (int ix=0; ix<ngx; ix++){
         int i = INDEX(ix,iy,iz,ngx,ngy);
         double Z = metal_density[i] / density[i] / cello::metallicity_solar;
-        if (Z < Z_floor) metal_density[i] *= Z_floor/Z;
+        if (Z < Z_floor) metal_density[i] *= density[i] * Z_floor * cello::metallicity_solar;
       }
     }
   }     

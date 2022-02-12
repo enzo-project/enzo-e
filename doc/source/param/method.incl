@@ -248,6 +248,15 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 
 ----
 
+:Parameter:  :p:`Method` : :p:`grackle` : :p:`metallicity_floor`
+:Summary: :s:`Minimum metallicity in solar units`
+:Type:    :t:`float`
+:Default: :d:`0.0`
+:Scope:     :z:`Enzo`
+
+:e:`Minimum metallicity in solar units. Must evolve the "metal_density" field in order to use this parameter. `
+----
+
 :Parameter:  :p:`Method` : :p:`grackle` : :p:`with_radiative_cooling`
 :Summary:    :s:`Include radiative cooling`
 :Type:       :t:`logical`
