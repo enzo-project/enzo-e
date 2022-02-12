@@ -102,38 +102,6 @@ Components of the new I/O approach include
 ----------
 Interfaces
 ----------
-
-InitialRestart class
---------------------
-
-.. glossary::
-
-   ``MethodCheckpoint::MethodCheckpoint()``
-   *Create a new MethodCheckpoint object*
-
-----
-
-
-MethodOutput class
-------------------
-
-.. glossary::
-
-   ``MethodCheckpoint::MethodCheckpoint()``
-   *Create a new MethodCheckpoint object*
-
-----
-
-MethodOutput class
-------------------
-
-----
-
-.. glossary::
-
-   ``MethodCheckpoint::MethodCheckpoint()``
-   *Create a new MethodCheckpoint object*
-
 =============
 Communication
 =============
