@@ -334,12 +334,18 @@ namespace enzo_riemann_utils{
       wr_arrays[ind] = prim_map_r.at(passive_list[ind]);
       flux_arrays[ind] = flux_map.at(passive_list[ind]);
     }
-    const int sd = stale_depth;
-    for (int iz = sd; iz < density_flux.shape(0) - sd; iz++) {
-      for (int iy = sd; iy < density_flux.shape(1) - sd; iy++) {
 
-        for (int key_ind=0; key_ind<num_keys; key_ind++){
-          for (int ix = sd; ix < density_flux.shape(2) - sd; ix++) {
+    // preload shape of arrays (to inform compiler they won't change)
+    const int mz = density_flux.shape(0);
+    const int my = density_flux.shape(1);
+    const int mx = density_flux.shape(2);
+
+    for (int iz = stale_depth; iz < mz - stale_depth; iz++) {
+      for (int iy = stale_depth; iy < my - stale_depth; iy++) {
+
+        for (std::size_t key_ind = 0; key_ind < num_keys; key_ind++){
+          #pragma omp simd
+          for (int ix = stale_depth; ix < mx - stale_depth; ix++) {
             const enzo_float dens_flux = density_flux(iz,iy,ix);
             const enzo_float wl = wl_arrays[key_ind](iz,iy,ix);
             const enzo_float wr = wr_arrays[key_ind](iz,iy,ix);
