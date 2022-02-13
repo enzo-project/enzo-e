@@ -57,6 +57,7 @@ struct MHDLUT{
 
 //----------------------------------------------------------------------
 
+template<typename EOSStructT>
 struct KernelConfig{
   /// @class    KernelConfig
   /// @ingroup  Enzo
@@ -76,11 +77,8 @@ struct KernelConfig{
   const CelloArray<const enzo_float,4> prim_arr_l;
   const CelloArray<const enzo_float,4> prim_arr_r;
 
-  // EOS related parameters:
-
-  /// specifies the adiabatic index (if we support barotropic EOSs, we may need
-  /// to support isothermal sound-speed in the future)
-  const enzo_float gamma;
+  // EOS Struct Object
+  const EOSStructT eos;
 
   // Dual-Energy Related Parameters:
 
@@ -124,6 +122,7 @@ class EnzoRiemannImpl : public EnzoRiemann
   ///      RiemannSolver
 
   using LUT = typename ImplFunctor::LUT;
+  using EOSStructT = typename ImplFunctor::EOSStructT;
 
   // Check whether ImplFunctor's operator() method has the expected signature
   // and raise an error message if it doesn't:
@@ -166,7 +165,7 @@ private: // helper methods
   /// @note
   /// for purposes of getting icc to vectorize code, it seems to be important
   /// that this method's contents are separated from `EnzoRiemannImpl::solve`
-  static void solve_(const KernelConfig config,
+  static void solve_(const KernelConfig<EOSStructT> config,
                      const int stale_depth) noexcept;
 
 private: //attributes
@@ -222,17 +221,13 @@ void EnzoRiemannImpl<ImplFunctor>::solve
  const CelloArray<enzo_float,3> * const interface_velocity) const
 {
 
-  const bool barotropic = eos->is_barotropic();
-  // if not barotropic then the following doesn't have to be reasonable
-  const enzo_float isothermal_cs = eos->get_isothermal_sound_speed();
-  // If barotropic, then the following doesn't have to be a reasonable value
-  // (this will have to be tweaked when we introduce species that modify gamma)
+  // Currently just going to assume that we have an Ideal Equation of State
+  // (should probably test that...)
   const enzo_float gamma = eos->get_gamma();
+  const EOSStructIdeal eos_struct = {gamma};
 
-  // When barotropic equations of state are eventually introduced, all eos
-  // dependencies should be moved up here
-  ASSERT("EnzoRiemannImpl::solve", "currently no support for barotropic eos",
-	 !barotropic);
+  static_assert(std::is_same<EOSStructIdeal, EOSStructT>::value,
+                "We currently assume that all EOSs are ideal");
 
   // The strategy is to allocate some scratch space for internal_energy_flux &
   // velocity_i_bar_array, even if we don't care about dual-energy in order to
@@ -251,13 +246,13 @@ void EnzoRiemannImpl<ImplFunctor>::solve
   check_key_order_(flux_map, false, passive_list);
 #endif
 
-  const KernelConfig config{dim,
-                            flux_map.get_backing_array(),
-                            prim_map_l.get_backing_array(),
-                            prim_map_r.get_backing_array(),
-                            gamma,
-                            internal_energy_flux,
-                            velocity_i_bar_array};
+  const KernelConfig<EOSStructT> config = {dim,
+                                           flux_map.get_backing_array(),
+                                           prim_map_l.get_backing_array(),
+                                           prim_map_r.get_backing_array(),
+                                           eos_struct,
+                                           internal_energy_flux,
+                                           velocity_i_bar_array};
 
   solve_(config, stale_depth);
 
@@ -275,7 +270,8 @@ void EnzoRiemannImpl<ImplFunctor>::solve
 
 template <class ImplFunctor>
 void EnzoRiemannImpl<ImplFunctor>::solve_
-(const KernelConfig config, const int stale_depth) noexcept
+(const KernelConfig<EOSStructT> config, const int stale_depth)
+  noexcept
 {
   const ImplFunctor kernel{config};
 

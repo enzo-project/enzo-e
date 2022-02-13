@@ -25,15 +25,17 @@ struct HLLDKernel
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Encapsulates operations of HLLD approximate Riemann
   /// Solver
-public:
-  const KernelConfig config;
 
-public:
-
-  using WaveSpeedFunctor = EinfeldtWavespeed<MHDLUT>;
-  using LUT = typename WaveSpeedFunctor::LUT;
+public: // typedefs
+  using LUT = EnzoRiemannLUT<MHDLUT>;
+  using EOSStructT = EOSStructIdeal;
 
   struct Cons1D { enzo_float d, mx, my, mz, e, by, bz; };
+
+public: // fields
+  const KernelConfig<EOSStructT> config;
+
+public: // methods
 
   FORCE_INLINE void operator()(const int iz,
                                const int iy,
@@ -46,7 +48,7 @@ public:
     const int external_bfield_j = ((config.dim+1)%3) + LUT::bfield_i;
     const int external_bfield_k = ((config.dim+2)%3) + LUT::bfield_i;
 
-    const enzo_float gamma = config.gamma;
+    const enzo_float gamma = config.eos.get_gamma();
     const enzo_float igm1 = 1.0 / (gamma - 1.0);
 
     lutarray<LUT> flxi;      // temporary variable to store flux
@@ -122,8 +124,8 @@ public:
     //--- Step 2.  Compute L & R wave speeds according to Miyoshi & Kusano, eqn. (67)
 
     using enzo_riemann_utils::fast_magnetosonic_speed;
-    enzo_float cfl = fast_magnetosonic_speed<LUT>(wli, pressure_l, gamma);
-    enzo_float cfr = fast_magnetosonic_speed<LUT>(wri, pressure_r, gamma);
+    enzo_float cfl = fast_magnetosonic_speed<LUT>(wli, pressure_l, config.eos);
+    enzo_float cfr = fast_magnetosonic_speed<LUT>(wri, pressure_r, config.eos);
 
     spd[0] = std::min( wli[LUT::velocity_i]-cfl, wri[LUT::velocity_i]-cfr );
     spd[4] = std::max( wli[LUT::velocity_i]+cfl, wri[LUT::velocity_i]+cfr );
@@ -407,7 +409,7 @@ public:
     config.internal_energy_flux_arr(iz,iy,ix) =
       enzo_riemann_utils::passive_eint_flux
       (wli[LUT::density], pressure_l, wri[LUT::density], pressure_r,
-       config.gamma, config.flux_arr(LUT::density,iz,iy,ix));
+       config.eos, config.flux_arr(LUT::density,iz,iy,ix));
 
     // compute vi_bar, velocity component normal to the interface
     // for simplicity, we adopt the shorthand:

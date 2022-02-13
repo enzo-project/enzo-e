@@ -39,11 +39,12 @@ struct EinfeldtWavespeed
   /// robust method and recommend it in most cases
 
   using LUT = EnzoRiemannLUT<inputLUT>;
+  using EOSStructT = EOSStructIdeal;
 
   FORCE_INLINE void operator()(const lutarray<LUT> wl, const lutarray<LUT> wr,
                                const lutarray<LUT> Ul, const lutarray<LUT> Ur,
                                enzo_float pressure_l, enzo_float pressure_r,
-                               const enzo_float gamma,
+                               const EOSStructT& eos,
                                enzo_float *bp, enzo_float *bm) const noexcept
   {
     // Calculate wavespeeds as specified by S4.3.1 of Stone+08
@@ -59,8 +60,8 @@ struct EinfeldtWavespeed
     // note: fast_magnetosonic_speed_ simply returns sound speeds when there
     // are no magnetic fields.
     using enzo_riemann_utils::fast_magnetosonic_speed;
-    enzo_float c_l = fast_magnetosonic_speed<LUT>(wl, pressure_l, gamma);
-    enzo_float c_r = fast_magnetosonic_speed<LUT>(wr, pressure_r, gamma);
+    enzo_float c_l = fast_magnetosonic_speed<LUT>(wl, pressure_l, eos);
+    enzo_float c_r = fast_magnetosonic_speed<LUT>(wr, pressure_r, eos);
 
     enzo_float left_speed = (wl[LUT::velocity_i] - c_l);
     enzo_float right_speed = (wr[LUT::velocity_i] + c_r);
@@ -99,6 +100,7 @@ struct EinfeldtWavespeed
     enzo_float h_r = (Ur[LUT::total_energy] + ptot_r) / wr[LUT::density];
     enzo_float h_roe = (sqrtrho_l * h_l + sqrtrho_r * h_r) * inv_sqrtrho_tot;
 
+    const enzo_float gamma = eos.get_gamma();
     enzo_float c_roe;
     if (LUT::has_bfields){
       // I've confirmed that the unused branch is thrown away at compile time
@@ -186,11 +188,12 @@ struct DavisWavespeed
 public:
 
   using LUT = EnzoRiemannLUT<inputLUT>;
+  using EOSStructT = EOSStructIdeal;
 
   void operator()(const lutarray<LUT> wl, const lutarray<LUT> wr,
                   const lutarray<LUT> Ul, const lutarray<LUT> Ur,
                   enzo_float pressure_l, enzo_float pressure_r,
-                  const enzo_float gamma,
+                  const EOSStructT& eos,
                   enzo_float *bp, enzo_float *bm) const noexcept
   {
     // Should be relatively easy to adapt and make compatible with barotropic
@@ -200,8 +203,8 @@ public:
     // compute left and right fast magnetosonic speed assuming that cos2 = 1
     // not sure why cos2 = 1 was chosen, (cos2 = 0, would yield faster speeds)
     using enzo_riemann_utils::fast_magnetosonic_speed;
-    enzo_float c_l = fast_magnetosonic_speed<LUT>(wl, pressure_l, gamma, 1);
-    enzo_float c_r = fast_magnetosonic_speed<LUT>(wr, pressure_r, gamma, 1);
+    enzo_float c_l = fast_magnetosonic_speed<LUT, 1>(wl, pressure_l, eos);
+    enzo_float c_r = fast_magnetosonic_speed<LUT, 1>(wr, pressure_r, eos);
 
     enzo_float lp_l = wl[LUT::velocity_i] + c_l;
     enzo_float lm_l = wl[LUT::velocity_i] - c_l;
@@ -222,12 +225,15 @@ struct HLLKernel
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Encapsulates operations of HLL approximate Riemann
   /// Solver.
-public:
-  const KernelConfig config;
 
-public:
-
+public: // typedefs
   using LUT = typename WaveSpeedFunctor::LUT;
+  using EOSStructT = typename WaveSpeedFunctor::EOSStructT;
+
+public: // fields
+  const KernelConfig<EOSStructT> config;
+
+public: // methods
 
   FORCE_INLINE void operator()(const int iz,
                                const int iy,
@@ -239,8 +245,6 @@ public:
     const int external_bfield_i = config.dim + LUT::bfield_i;
     const int external_bfield_j = ((config.dim+1)%3) + LUT::bfield_i;
     const int external_bfield_k = ((config.dim+2)%3) + LUT::bfield_i;
-
-    const enzo_float gamma = config.gamma;
 
     // load primitives into local variables
     lutarray<LUT> prim_l;
@@ -275,9 +279,9 @@ public:
 
     // get the conserved quantities
     const lutarray<LUT> cons_l
-      = enzo_riemann_utils::compute_conserved<LUT>(prim_l, gamma);
+      = enzo_riemann_utils::compute_conserved<LUT>(prim_l, config.eos);
     const lutarray<LUT> cons_r
-      = enzo_riemann_utils::compute_conserved<LUT>(prim_r, gamma);
+      = enzo_riemann_utils::compute_conserved<LUT>(prim_r, config.eos);
 
     // compute the interface fluxes
     const lutarray<LUT> flux_l
@@ -290,8 +294,8 @@ public:
     enzo_float bp, bm;
 
     // Compute wave speeds
-    wave_speeds(prim_l, prim_r, cons_l, cons_r, pressure_l, pressure_r, gamma,
-                &bp, &bm);
+    wave_speeds(prim_l, prim_r, cons_l, cons_r, pressure_l, pressure_r,
+                config.eos, &bp, &bm);
     bp = std::fmax(bp,0.0);
     bm = std::fmin(bm,0.0);
     enzo_float inv_speed_diff = 1./(bp - bm);
@@ -321,7 +325,7 @@ public:
     config.internal_energy_flux_arr(iz,iy,ix) =
       enzo_riemann_utils::passive_eint_flux
       (prim_l[LUT::density], pressure_l, prim_r[LUT::density], pressure_r,
-       gamma, config.flux_arr(LUT::density,iz,iy,ix));
+       config.eos, config.flux_arr(LUT::density,iz,iy,ix));
 
     // Estimate the value of the vi (ith component of velocity) which is used
     // to compute the internal energy source term. The following is adopted

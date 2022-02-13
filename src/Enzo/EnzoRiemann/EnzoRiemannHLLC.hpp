@@ -21,13 +21,15 @@ struct HLLCKernel
   /// @brief    [\ref Enzo] Encapsulates operations of HLLC approximate Riemann
   /// Solver. This should not be used with isothermal equations of state.
 
-public:
-  const KernelConfig config;
-
-public:
-
+public: // typedefs
   using WaveSpeedFunctor = EinfeldtWavespeed<HydroLUT>;
   using LUT = typename WaveSpeedFunctor::LUT;
+  using EOSStructT = EOSStructIdeal;
+
+public: // fields
+  const KernelConfig<EOSStructT> config;
+
+public: // methods
 
   FORCE_INLINE void operator()(const int iz,
                                const int iy,
@@ -37,8 +39,6 @@ public:
     const int external_velocity_i = config.dim + LUT::velocity_i;
     const int external_velocity_j = ((config.dim+1)%3) + LUT::velocity_i;
     const int external_velocity_k = ((config.dim+2)%3) + LUT::velocity_i;
-
-    const enzo_float gamma = config.gamma;
 
     // load primitives into local variables
     lutarray<LUT> prim_l;
@@ -63,14 +63,14 @@ public:
 
     // get the conserved quantities
     const lutarray<LUT> cons_l
-      = enzo_riemann_utils::compute_conserved<LUT>(prim_l, gamma);
+      = enzo_riemann_utils::compute_conserved<LUT>(prim_l, config.eos);
     const lutarray<LUT> cons_r
-      = enzo_riemann_utils::compute_conserved<LUT>(prim_r, gamma);
+      = enzo_riemann_utils::compute_conserved<LUT>(prim_r, config.eos);
 
     enzo_float cs_l,cs_r;
     WaveSpeedFunctor wave_speeds;
     wave_speeds(prim_l, prim_r, cons_l, cons_r, pressure_l, pressure_r,
-		gamma, &cs_r, &cs_l);
+		config.eos, &cs_r, &cs_l);
 
     enzo_float bm = std::fmin(cs_l, 0.0);
     enzo_float bp = std::fmax(cs_r, 0.0);
@@ -161,7 +161,7 @@ public:
     config.internal_energy_flux_arr(iz,iy,ix) =
       enzo_riemann_utils::passive_eint_flux
       (prim_l[LUT::density], pressure_l, prim_r[LUT::density], pressure_r,
-       gamma, config.flux_arr(LUT::density,iz,iy,ix));
+       config.eos, config.flux_arr(LUT::density,iz,iy,ix));
 
     // An aside: compute the interface velocity (this is used to compute the
     // internal energy source term)

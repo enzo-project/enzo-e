@@ -18,32 +18,7 @@
 
 //----------------------------------------------------------------------
 
-struct EOSStructIdeal{
-  // In the future it might make sense to use this under the hood of the
-  // EnzoEOSIdeal class.
-  //
-  // It might also make sense to make this into POD struct that get's passed to
-  // an Impl Functor's operator() method. If the structure is simple enough,
-  // the overhead of constructing/destroying can be optimized out
-
-  static inline enzo_float specific_eint(const enzo_float density,
-                                         const enzo_float pressure,
-                                         const enzo_float gamma) noexcept
-  { return pressure / ( (gamma - 1.0) * density); }
-
-  static inline enzo_float eint_dens(const enzo_float density, const enzo_float pressure,
-                                     const enzo_float gamma) noexcept
-  { return pressure / (gamma - 1.0); }
-
-  static inline enzo_float sound_speed(const enzo_float density, const enzo_float pressure,
-                                       const enzo_float gamma) noexcept
-  { return std::sqrt(gamma * pressure / density); }
-
-};
-
-//----------------------------------------------------------------------
-
-namespace enzo_riemann_utils{
+namespace{
 
   /// computes the squared magnitude of a 3D vector
   ///
@@ -59,7 +34,99 @@ namespace enzo_riemann_utils{
                                             enzo_float k) noexcept
   { return ((i*i) + ((j*j) + (k*k))); }
 
-  //----------------------------------------------------------------------
+}
+
+//----------------------------------------------------------------------
+
+struct EOSStructIdeal{
+  /// @class    EOSStructIdeal
+  /// @ingroup  Enzo
+  /// @brief    [\ref Enzo] Encapsulates the equation of state for an ideal gas
+  ///           (a.k.a. a calorically perfect gas).
+  ///
+  /// The plan is to replace EnzoEOSIdeal with new, lighter-weight machinery
+  /// that makes use of structs like this one.
+  ///
+  /// Instances of this class are expected to typically be declared `const`
+  ///
+  /// @note
+  /// Currently all members are public so that this can act as an aggregate in
+  /// order to make constructors/destructors trivial (and cheap!).
+  ///
+  /// @note
+  /// For performance purposes, we may want to consider the inverse of
+  /// `(gamma - 1)` as a separate member.
+
+public:
+  /// stores the adiabtic index
+  enzo_float gamma;
+
+private:
+
+  /// computes the sound speed squared
+  FORCE_INLINE enzo_float sound_speed_sq_(const enzo_float density,
+                                          const enzo_float pressure) const
+    noexcept
+  { return gamma * pressure / density; }
+
+public:
+
+  /// returns the adiabatic index
+  FORCE_INLINE enzo_float get_gamma() const noexcept { return gamma; }
+
+  /// computes the specific internal energy
+  FORCE_INLINE enzo_float specific_eint(const enzo_float density,
+                                        const enzo_float pressure) const
+    noexcept
+  { return pressure / ( (gamma - 1.0) * density); }
+
+  /// computes the internal energy density
+  FORCE_INLINE enzo_float eint_dens(const enzo_float density,
+                                    const enzo_float pressure) const noexcept
+  { return pressure / (gamma - 1.0); }
+
+  /// computes the adiabatic sound speed
+  FORCE_INLINE enzo_float sound_speed(const enzo_float density,
+                                      const enzo_float pressure) const noexcept
+  { return std::sqrt(sound_speed_sq_(density, pressure)); }
+
+  /// computes the fast magnetosonic speed
+  ///
+  /// @tparam fixed_cos2 When set to -1, this has no effect. When set to 0 or
+  ///     to 1, this fixes cos2 to that value
+  ///
+  /// This method has been implemented so that it will return the correct
+  /// answer when all components of the magnetic field are set to 0.
+  template<int fixed_cos2 = -1>
+  inline enzo_float fast_magnetosonic_speed(const enzo_float density,
+                                            const enzo_float pressure,
+                                            const enzo_float bfield_i,
+                                            const enzo_float bfield_j,
+                                            const enzo_float bfield_k)
+    const noexcept
+  {
+    const enzo_float B2 = squared_mag_vec3D(bfield_i, bfield_j, bfield_k);
+    const enzo_float cs2 = sound_speed_sq_(density, pressure);
+
+    // the following branch is evaluated at compile-time
+    if ((fixed_cos2 == 0) | (fixed_cos2 == 1)){
+      enzo_float va2 = B2/density;
+      return std::sqrt(0.5*(va2+cs2+std::sqrt(std::pow(cs2+va2,2) -
+                                              4.*cs2*va2*fixed_cos2)));
+    } else {
+      const enzo_float inv_density = 1.0/density;
+      const enzo_float va2 = B2 * inv_density;
+      const enzo_float va2_cos2 = (bfield_i*bfield_i) * inv_density;
+      return std::sqrt(0.5*(va2+cs2+std::sqrt(std::pow(cs2+va2,2) -
+                                              4.*cs2*va2_cos2)));
+    }
+  }
+
+};
+
+//----------------------------------------------------------------------
+
+namespace enzo_riemann_utils{
 
   /// Computes the magnetic pressure
   ///
@@ -88,7 +155,7 @@ namespace enzo_riemann_utils{
   /// We might want to consolidate this with active_fluxes
   template <class LUT>
   inline lutarray<LUT> compute_conserved(const lutarray<LUT> prim,
-                                         const enzo_float gamma) noexcept
+                                         const EOSStructIdeal& eos) noexcept
   {
     lutarray<LUT> cons;
 
@@ -106,8 +173,7 @@ namespace enzo_riemann_utils{
     if (LUT::total_energy >= 0) { // overwrite the total energy index
       enzo_float density = prim[LUT::density];
       enzo_float pressure = prim[LUT::total_energy];
-      enzo_float internal_edens = EOSStructIdeal::eint_dens(density, pressure,
-                                                            gamma);
+      enzo_float internal_edens = eos.eint_dens(density, pressure);
 
       const enzo_float vi = prim[LUT::velocity_i];
       const enzo_float vj = prim[LUT::velocity_j];
@@ -125,53 +191,25 @@ namespace enzo_riemann_utils{
 
   //----------------------------------------------------------------------
 
-  template <class LUT>
+  /// computes the fast magnetosonic speed
+  ///
+  /// @tparam LUT the lookup table to use with prim_vals
+  /// @tparam fixed_cos2 When set to -1, this has no effect. When set to 0 or
+  ///     to 1, this fixes cos2 to that value
+  template <class LUT, int fixed_cos2 = -1>
   inline enzo_float fast_magnetosonic_speed(const lutarray<LUT> prim_vals,
                                             enzo_float pressure,
-                                            enzo_float gamma) noexcept
+                                            const EOSStructIdeal& eos) noexcept
   {
-    enzo_float bi = (LUT::bfield_i >= 0) ? prim_vals[LUT::bfield_i] : 0;
-    enzo_float bj = (LUT::bfield_j >= 0) ? prim_vals[LUT::bfield_j] : 0;
-    enzo_float bk = (LUT::bfield_k >= 0) ? prim_vals[LUT::bfield_k] : 0;
-
-    // TODO: optimize calc of cs2 to omit sqrt and pow in MHD case
-    const enzo_float cs = EOSStructIdeal::sound_speed(prim_vals[LUT::density],
-                                                pressure, gamma);
-
-    if (!LUT::has_bfields){ return cs; }
- 
-    const enzo_float B2 = squared_mag_vec3D(bi, bj, bk);
-    const enzo_float inv_density = 1.0/prim_vals[LUT::density];
-    const enzo_float va2 = B2 * inv_density;
-    const enzo_float va2_cos2 = (bi*bi) * inv_density;
-    const enzo_float cs2 = std::pow(cs,2);
-    return std::sqrt(0.5*(va2+cs2+std::sqrt(std::pow(cs2+va2,2) -
-                                            4.*cs2*va2_cos2)));
-  }
-
-  //----------------------------------------------------------------------
-
-  /// This function should be called when we to fix cos2 to some predetermined
-  /// value
-  template <class LUT>
-  inline enzo_float fast_magnetosonic_speed(const lutarray<LUT> prim_vals,
-                                            enzo_float pressure,
-                                            enzo_float gamma,
-                                            enzo_float cos2) noexcept
-  {
-    enzo_float bi = (LUT::bfield_i >= 0) ? prim_vals[LUT::bfield_i] : 0;
-    enzo_float bj = (LUT::bfield_j >= 0) ? prim_vals[LUT::bfield_j] : 0;
-    enzo_float bk = (LUT::bfield_k >= 0) ? prim_vals[LUT::bfield_k] : 0;
-
-    // TODO: optimize calc of cs2 to omit sqrt and pow in MHD case
-    const enzo_float cs = EOSStructIdeal::sound_speed(prim_vals[LUT::density],
-                                                pressure, gamma);
-    const enzo_float B2 = squared_mag_vec3D(bi, bj, bk);
-    if (!LUT::has_bfields){ return cs; }
-    const enzo_float cs2 = std::pow(cs,2);
-    enzo_float va2 = B2/prim_vals[LUT::density];
-    return std::sqrt(0.5*(va2+cs2+std::sqrt(std::pow(cs2+va2,2) -
-                                            4.*cs2*va2*cos2)));
+    if (!LUT::has_bfields){
+      return eos.sound_speed(prim_vals[LUT::density], pressure);
+    } else {
+      enzo_float bi = (LUT::bfield_i >= 0) ? prim_vals[LUT::bfield_i] : 0;
+      enzo_float bj = (LUT::bfield_j >= 0) ? prim_vals[LUT::bfield_j] : 0;
+      enzo_float bk = (LUT::bfield_k >= 0) ? prim_vals[LUT::bfield_k] : 0;
+      return eos.fast_magnetosonic_speed<fixed_cos2>(prim_vals[LUT::density],
+                                                     pressure, bi, bj, bk);
+    }
   }
 
   //----------------------------------------------------------------------
@@ -303,14 +341,12 @@ namespace enzo_riemann_utils{
                                              const enzo_float pressure_l,
                                              const enzo_float density_r,
                                              const enzo_float pressure_r,
-                                             const enzo_float gamma,
+                                             const EOSStructIdeal& eos,
                                              const enzo_float density_flux)
     noexcept
   {
-    enzo_float eint_l = EOSStructIdeal::specific_eint(density_l, pressure_l,
-                                                      gamma);
-    enzo_float eint_r = EOSStructIdeal::specific_eint(density_r, pressure_r,
-                                                      gamma);
+    enzo_float eint_l = eos.specific_eint(density_l, pressure_l);
+    enzo_float eint_r = eos.specific_eint(density_r, pressure_r);
     return calc_passive_scalar_flux_(eint_l, eint_r, density_flux);
   }
 
