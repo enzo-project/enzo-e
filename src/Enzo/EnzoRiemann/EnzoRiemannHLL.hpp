@@ -243,28 +243,31 @@ public:
     const enzo_float gamma = config.gamma;
 
     // load primitives into local variables
-    // TODO: __attribute__((always_inline)) is required for icc
-    //  - return to this and either manually inline or introduce a macro
-    //    that specifies that the lambda should be inlined
-    auto load_prim = [=](const CelloArray<const enzo_float,4>& prim_arr) __attribute__((always_inline))
-    {
-      lutarray<LUT> out;
-      out[LUT::density]      = prim_arr(LUT::density,iz,iy,ix);
-      out[LUT::velocity_i]   = prim_arr(external_velocity_i,iz,iy,ix);
-      out[LUT::velocity_j]   = prim_arr(external_velocity_j,iz,iy,ix);
-      out[LUT::velocity_k]   = prim_arr(external_velocity_k,iz,iy,ix);
-      if (LUT::has_bfields){
-        out[LUT::bfield_i]   = prim_arr(external_bfield_i,iz,iy,ix);
-        out[LUT::bfield_j]   = prim_arr(external_bfield_j,iz,iy,ix);
-        out[LUT::bfield_k]   = prim_arr(external_bfield_k,iz,iy,ix);
-      }
-      // this actually stores pressure:
-      out[LUT::total_energy] = prim_arr(LUT::total_energy,iz,iy,ix);
-      return out;
-    };
+    lutarray<LUT> prim_l;
+    prim_l[LUT::density]     = config.prim_arr_l(LUT::density,iz,iy,ix);
+    prim_l[LUT::velocity_i]  = config.prim_arr_l(external_velocity_i,iz,iy,ix);
+    prim_l[LUT::velocity_j]  = config.prim_arr_l(external_velocity_j,iz,iy,ix);
+    prim_l[LUT::velocity_k]  = config.prim_arr_l(external_velocity_k,iz,iy,ix);
+    if (LUT::has_bfields){
+      prim_l[LUT::bfield_i]  = config.prim_arr_l(external_bfield_i,iz,iy,ix);
+      prim_l[LUT::bfield_j]  = config.prim_arr_l(external_bfield_j,iz,iy,ix);
+      prim_l[LUT::bfield_k]  = config.prim_arr_l(external_bfield_k,iz,iy,ix);
+    }
+    // this actually stores pressure:
+    prim_l[LUT::total_energy]= config.prim_arr_l(LUT::total_energy,iz,iy,ix);
 
-    const lutarray<LUT> prim_l = load_prim(config.prim_arr_l);
-    const lutarray<LUT> prim_r = load_prim(config.prim_arr_r);
+    lutarray<LUT> prim_r;
+    prim_r[LUT::density]     = config.prim_arr_r(LUT::density,iz,iy,ix);
+    prim_r[LUT::velocity_i]  = config.prim_arr_r(external_velocity_i,iz,iy,ix);
+    prim_r[LUT::velocity_j]  = config.prim_arr_r(external_velocity_j,iz,iy,ix);
+    prim_r[LUT::velocity_k]  = config.prim_arr_r(external_velocity_k,iz,iy,ix);
+    if (LUT::has_bfields){
+      prim_r[LUT::bfield_i]  = config.prim_arr_r(external_bfield_i,iz,iy,ix);
+      prim_r[LUT::bfield_j]  = config.prim_arr_r(external_bfield_j,iz,iy,ix);
+      prim_r[LUT::bfield_k]  = config.prim_arr_r(external_bfield_k,iz,iy,ix);
+    }
+    // this actually stores pressure:
+    prim_r[LUT::total_energy]= config.prim_arr_r(LUT::total_energy,iz,iy,ix);
 
     // load left and right pressure values
     const enzo_float pressure_l = prim_l[LUT::total_energy];
