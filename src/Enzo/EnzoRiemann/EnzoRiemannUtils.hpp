@@ -45,13 +45,32 @@ struct EOSStructIdeal{
 
 namespace enzo_riemann_utils{
 
+  /// computes the squared magnitude of a 3D vector
+  ///
+  /// @note
+  /// This function uses parentheses to dictate the order of operations.
+  /// This is primarily done to take advantage of the `-fprotect-parens` flag
+  /// provided by several mainstream c++ compilers (e.g. gcc, clang, icpc).
+  /// This flag will honor the order of operations specified by parentheses
+  /// even when value-unsafe optimizations for floating-point operations are
+  /// enabled (e.g. -ffast-math).
+  FORCE_INLINE enzo_float squared_mag_vec3D(enzo_float i,
+                                            enzo_float j,
+                                            enzo_float k) noexcept
+  { return ((i*i) + ((j*j) + (k*k))); }
+
+  //----------------------------------------------------------------------
+
+  /// Computes the magnetic pressure
+  ///
+  /// This returns 0 when the LUT doesn't include magnetic fields
   template <class LUT>
   inline enzo_float mag_pressure(const lutarray<LUT> prim) noexcept
   {
     enzo_float bi = (LUT::bfield_i >= 0) ? prim[LUT::bfield_i] : 0;
     enzo_float bj = (LUT::bfield_j >= 0) ? prim[LUT::bfield_j] : 0;
     enzo_float bk = (LUT::bfield_k >= 0) ? prim[LUT::bfield_k] : 0;
-    return 0.5 * (bi*bi + bj*bj + bk *bk);
+    return 0.5 * squared_mag_vec3D(bi, bj, bk);
   }
 
   //----------------------------------------------------------------------
@@ -93,7 +112,8 @@ namespace enzo_riemann_utils{
       const enzo_float vi = prim[LUT::velocity_i];
       const enzo_float vj = prim[LUT::velocity_j];
       const enzo_float vk = prim[LUT::velocity_k];
-      const enzo_float kinetic_edens = 0.5 * density * (vi*vi + vj*vj + vk*vk);
+      const enzo_float kinetic_edens
+        = 0.5 * density * squared_mag_vec3D(vi, vj, vk);
 
       enzo_float magnetic_edens = mag_pressure<LUT>(prim);
 
@@ -119,11 +139,11 @@ namespace enzo_riemann_utils{
                                                 pressure, gamma);
 
     if (!LUT::has_bfields){ return cs; }
-
-    const enzo_float B2 = (bi*bi + bj*bj + bk *bk);
+ 
+    const enzo_float B2 = squared_mag_vec3D(bi, bj, bk);
     const enzo_float inv_density = 1.0/prim_vals[LUT::density];
     const enzo_float va2 = B2 * inv_density;
-    const enzo_float va2_cos2 = bi*bi * inv_density;
+    const enzo_float va2_cos2 = (bi*bi) * inv_density;
     const enzo_float cs2 = std::pow(cs,2);
     return std::sqrt(0.5*(va2+cs2+std::sqrt(std::pow(cs2+va2,2) -
                                             4.*cs2*va2_cos2)));
@@ -146,7 +166,7 @@ namespace enzo_riemann_utils{
     // TODO: optimize calc of cs2 to omit sqrt and pow in MHD case
     const enzo_float cs = EOSStructIdeal::sound_speed(prim_vals[LUT::density],
                                                 pressure, gamma);
-    const enzo_float B2 = (bi*bi + bj*bj + bk *bk);
+    const enzo_float B2 = squared_mag_vec3D(bi, bj, bk);
     if (!LUT::has_bfields){ return cs; }
     const enzo_float cs2 = std::pow(cs,2);
     enzo_float va2 = B2/prim_vals[LUT::density];
@@ -164,32 +184,31 @@ namespace enzo_riemann_utils{
                                      enzo_float pressure) noexcept
   {
     lutarray<LUT> fluxes;
-    enzo_float vi, vj, vk, p, Bi, Bj, Bk, etot, magnetic_pressure;
-    vi = prim[LUT::velocity_i];
-    vj = prim[LUT::velocity_j];
-    vk = prim[LUT::velocity_k];
+    enzo_float vi = prim[LUT::velocity_i];
+    enzo_float vj = prim[LUT::velocity_j];
+    enzo_float vk = prim[LUT::velocity_k];
 
-    Bi = (LUT::bfield_i >= 0) ? prim[LUT::bfield_i] : 0;
-    Bj = (LUT::bfield_j >= 0) ? prim[LUT::bfield_j] : 0;
-    Bk = (LUT::bfield_k >= 0) ? prim[LUT::bfield_k] : 0;
-    etot =  (LUT::total_energy >= 0) ? cons[LUT::total_energy] : 0;
-    
-    p = pressure;
+    enzo_float Bi = (LUT::bfield_i >= 0) ? prim[LUT::bfield_i] : 0;
+    enzo_float Bj = (LUT::bfield_j >= 0) ? prim[LUT::bfield_j] : 0;
+    enzo_float Bk = (LUT::bfield_k >= 0) ? prim[LUT::bfield_k] : 0;
+    enzo_float etot = (LUT::total_energy >= 0) ? cons[LUT::total_energy] : 0;
 
-    magnetic_pressure = mag_pressure<LUT>(prim);
+    enzo_float ptot = pressure + mag_pressure<LUT>(prim);
 
     // Compute Fluxes
     enzo_float mom_i = cons[LUT::velocity_i];
     fluxes[LUT::density] = mom_i;
 
     // Fluxes for Mx, My, Mz
-    fluxes[LUT::velocity_i] = mom_i*vi - Bi*Bi + p + magnetic_pressure;
+    fluxes[LUT::velocity_i] = mom_i*vi - Bi*Bi + ptot;
     fluxes[LUT::velocity_j] = mom_i*vj - Bj*Bi;
     fluxes[LUT::velocity_k] = mom_i*vk - Bk*Bi;
 
     // Flux for etot
-    fluxes[LUT::total_energy] = ((etot + p + magnetic_pressure)*vi
-                                 - (Bi*vi + Bj*vj + Bk*vk)*Bi);
+    if (LUT::total_energy >= 0) { 
+      fluxes[LUT::total_energy] = ((etot + ptot)*vi
+                                   - (Bi*vi + (Bj*vj + Bk*vk))*Bi);
+    }
 
     // Fluxes for Bi,Bj,Bk
     if (LUT::bfield_i >= 0) { fluxes[LUT::bfield_i] = 0; }
