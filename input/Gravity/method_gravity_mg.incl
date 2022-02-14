@@ -70,7 +70,6 @@ Field {
            "B" ];
 
    ghost_depth = 4;
-   prolong = "linear";
 }
 
 Monitor {

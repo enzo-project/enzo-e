@@ -65,28 +65,25 @@ private: // functions
   virtual Stopping * create_stopping_ 
   (std::string type, Config * config) throw ();
 
-  /// Create a Units object
-  virtual Units *  create_units_ 
-  (Config * config) throw ();
-
   /// Create named refine object
   virtual Refine * create_refine_ 
-  (std::string type, 
+  (std::string type,
+   int index, 
    Config * config, 
-   Parameters * parameters,
-   int index) throw ();
+   Parameters * parameters) throw ();
 
   /// Create named solver object
   virtual Solver * create_solver_ 
-  (std::string type, 
-   Config * config,
-   int index_solver) throw ();
+  (std::string type,
+   int index_solver, 
+   Config * config) throw ();
 
   /// Create named method object
   virtual Method * create_method_ 
-  (std::string type, 
+  (std::string type,
+   int index_method, 
    Config * config,
-   int index_method) throw ();
+   const Factory * factory) throw ();
 
   /// Create named interpolation object
   virtual Prolong * create_prolong_
@@ -95,6 +92,10 @@ private: // functions
   /// Create named restriction object
   virtual Restrict * create_restrict_
   (std::string type, Config * config) throw ();
+
+  /// Create a Units object
+  virtual Units *  create_units_ 
+  (Config * config) throw ();
 
 protected: // attributes
 

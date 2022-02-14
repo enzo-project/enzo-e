@@ -141,7 +141,6 @@
          dual_energy = false;
      }
    }
- include "input/flux_correct.incl"
 
    #--------------------------------------------------
    # Initial conditions as described in the header comment

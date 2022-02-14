@@ -12,16 +12,15 @@ module mesh {
   initnode void register_sum_long_double(void);
   initnode void register_sum_long_double_2(void);
   initnode void register_sum_long_double_3(void);
-  initnode void register_sum_long_double_4(void);
-  initnode void register_sum_long_double_5(void);
-  initnode void register_sum_long_double_6(void);
-  initnode void register_sum_long_double_7(void);
-  initnode void register_sum_long_double_8(void);
   initnode void register_sum_long_double_n(void);
 
   initnode void mutex_init_hierarchy();
+  initnode void mutex_init_initial_value();
+  initnode void mutex_init_field_face();
 
   readonly int MsgCoarsen::counter[CONFIG_NODE_SIZE];
+  readonly int MsgInitial::counter[CONFIG_NODE_SIZE];
+  readonly int MsgOutput::counter[CONFIG_NODE_SIZE];
   readonly int MsgRefine::counter[CONFIG_NODE_SIZE];
   readonly int MsgRefresh::counter[CONFIG_NODE_SIZE];
   readonly int DataMsg::counter[CONFIG_NODE_SIZE];
@@ -51,10 +50,13 @@ module mesh {
   PUPable ItIndexRange;
   PUPable MaskExpr;
   PUPable MaskPng;
+  PUPable MethodCheckpoint;
   PUPable MethodCloseFiles;
   PUPable MethodDebug;
   PUPable MethodFluxCorrect;
   PUPable MethodNull;
+  PUPable MethodOutput;
+  PUPable MethodRefresh;
   PUPable MethodTrace;
   PUPable OutputCheckpoint;
   PUPable OutputData;
@@ -82,8 +84,10 @@ module mesh {
   };
 
   message MsgCoarsen;
-  message MsgRefresh;
+  message MsgInitial;
+  message MsgOutput;
   message MsgRefine;
+  message MsgRefresh;
 
   array[Index] Block {
 
@@ -97,8 +101,9 @@ module mesh {
     //--------------------------------------------------
 
     entry void p_initial_exit();
-    entry void r_initial_exit(CkReductionMsg *);
     entry void r_end_initialize(CkReductionMsg *);
+    entry void r_initial_new_next(CkReductionMsg *);
+    entry void r_initial_new_continue(CkReductionMsg *);
 
     //--------------------------------------------------
     // *** OUTPUT ***
@@ -124,8 +129,15 @@ module mesh {
     entry void p_compute_exit();
     entry void r_compute_exit(CkReductionMsg *);
 
+    entry void r_method_checkpoint_continue(CkReductionMsg * msg);
+
     entry void p_method_flux_correct_refresh();
     entry void r_method_flux_correct_sum_fields(CkReductionMsg * msg);
+
+    entry void p_method_output_next(MsgOutput *);
+    entry void p_method_output_write(MsgOutput *);
+    entry void r_method_output_continue(CkReductionMsg * msg);
+    entry void r_method_output_done(CkReductionMsg * msg);
 
     entry void r_method_debug_sum_fields(CkReductionMsg * msg);
 
@@ -159,36 +171,21 @@ module mesh {
 
     entry void p_adapt_enter();
     entry void r_adapt_enter(CkReductionMsg *);
-
     entry void p_adapt_end();
-    entry void r_adapt_end(CkReductionMsg *);
-
+    entry void p_adapt_update();
     entry void p_adapt_next();
-    entry void r_adapt_next(CkReductionMsg *);
-
     entry void p_adapt_called();
-    entry void r_adapt_called(CkReductionMsg *);
-
     entry void p_adapt_exit();
-    entry void r_adapt_exit(CkReductionMsg *);
-
     entry void p_adapt_delete();
-
     entry void p_adapt_recv_level
       (Index index, int ic3[3], int if3[3], int level_now, int level_new);
-
     entry void p_adapt_recv_child (MsgCoarsen * msg);
 
     //--------------------------------------------------
     // *** REFRESH
     //--------------------------------------------------
 
-    entry void p_refresh_store (MsgRefresh * msg);
-    entry void p_refresh_continue();
-    entry void p_refresh_exit();
-    entry void r_refresh_exit(CkReductionMsg *);
-
-    entry void p_new_refresh_recv (MsgRefresh * msg);
+    entry void p_refresh_recv (MsgRefresh * msg);
 
     entry void p_refresh_child
       (int n, char a[n], int ic3[3]);

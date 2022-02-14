@@ -74,7 +74,7 @@ libs_parameters  = ['parameters'] + libs_error + libs_boost + ['cello']
 libs_simulation  = ['simulation','problem']
 libs_test        = ['test'] + libs_parallel + ['cello', 'data', 'simulation']
 
-libs_all = ['charm','control','simulation','compute','mesh','data','problem','io','disk','memory','parallel','parameters','error','monitor','performance','test','array','cello','external','png','hdf5'] + libs_papi + libs_boost
+libs_all = ['charm','control','simulation','compute','data','mesh','problem','io','disk','memory','parallel','parameters','error','monitor','performance','test','array','cello','external','png','hdf5'] + libs_papi + libs_boost
 libs_data   = libs_all
 libs_io     = libs_all
 libs_mesh   = libs_all
@@ -258,6 +258,8 @@ test_it_face     = env.Program (['test_ItFace.cpp', objs_mesh],
                                  LIBS=[libs_mesh, libs_test]) 
 test_it_child     = env.Program (['test_ItChild.cpp', objs_mesh],
                                  LIBS=[libs_mesh, libs_test]) 
+test_block_trace        = env.Program (['test_BlockTrace.cpp',objs_mesh],
+                                 LIBS=[libs_mesh,  libs_test])
 test_tree         = env.Program (['test_Tree.cpp',objs_mesh],
                                  LIBS=[libs_mesh,  libs_test])
 test_tree_density = env.Program (['test_TreeDensity.cpp',objs_mesh],
@@ -289,6 +291,8 @@ test_type         = env.Program (['test_Type.cpp', objs_mesh],
 test_mask         = env.Program (['test_Mask.cpp', objs_mesh],
                                  LIBS=[libs_mesh,  libs_test])
 test_value        = env.Program (['test_Value.cpp', objs_mesh],
+                                 LIBS=[libs_mesh,  libs_test])
+test_box        = env.Program (['test_Box.cpp', objs_mesh],
                                  LIBS=[libs_mesh,  libs_test])
 
 test_memory       = env.Program ('test_Memory.cpp',     LIBS=[libs_memory, libs_test])
@@ -341,10 +345,10 @@ binaries_data = [test_scalar_data,
                   test_field_face,
                   test_it_index,
 		  test_particle]
-binaries_problem = [test_mask,test_value,test_refresh]
+binaries_problem = [test_mask,test_value,test_refresh,test_box]
 binaries_io    = [test_colormap]
 binaries_memory  = [test_memory]
-binaries_mesh = [ test_data,test_tree,test_tree_density,test_sync,test_node,test_node_trace,test_it_node,test_index,test_face,test_face_fluxes,test_flux_data,test_prolong_linear,test_schedule,test_it_face,test_it_child]
+binaries_mesh = [ test_data,test_block_trace,test_tree,test_tree_density,test_sync,test_node,test_node_trace,test_it_node,test_index,test_face,test_face_fluxes,test_flux_data,test_prolong_linear,test_schedule,test_it_face,test_it_child]
 binaries_monitor = [test_monitor]
 
 objs_parallel.append(["main.cpp"])

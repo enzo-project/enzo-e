@@ -8,8 +8,6 @@
 #ifndef DATA_FIELD_FACE_HPP
 #define DATA_FIELD_FACE_HPP
 
-class Prolong;
-class Restrict;
 class Refresh;
 
 class FieldFace {
@@ -25,29 +23,8 @@ public: // interface
 
   /// Constructor of uninitialized FieldFace
 
-  FieldFace () throw()
-  : refresh_type_(refresh_unknown),
-    prolong_(NULL),
-    restrict_(NULL),
-    refresh_(NULL),
-    new_refresh_(false)
-  {
-#ifdef DEBUG_FIELD_FACE    
-    CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",
-	      CkMyPe(),__FILE__,__LINE__,this);
-#endif    
-    ++counter[cello::index_static()]; 
+  FieldFace (int rank) throw();
 
-    for (int i=0; i<3; i++) {
-      face_[i] = 0;
-      child_[i] = 0;
-    }
-
-  }
-
-  /// Constructor of initialized FieldFace
-  FieldFace (const Field & field) throw();
-     
   /// Destructor
   ~FieldFace() throw();
 
@@ -58,18 +35,24 @@ public: // interface
   FieldFace & operator= (const FieldFace & FieldFace) throw();
 
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p);
+  void pup (PUP::er &p);
 
   //----------------------------------------------------------------------
 
   /// Set whether or not to include ghost zones along each axis
-  inline void set_ghost (bool gx, bool gy = true, bool gz = true)
+  inline void set_ghost (int gx, int gy, int gz)
   {
     ghost_[0] = gx;
     ghost_[1] = gy;
     ghost_[2] = gz;
   }
 
+  void ghost (int *gx, int *gy, int *gz)
+  {
+    *gx = ghost_[0];
+    *gy = ghost_[1];
+    *gz = ghost_[2];
+  }
   /// Set the face
   inline void set_face (int fx, int fy = 0, int fz = 0)
   {
@@ -106,14 +89,12 @@ public: // interface
   void set_refresh_type (int refresh_type)
   {  refresh_type_ = refresh_type;  }
 
-  /// Set Prolong operation (default is Problem::prolong() )
-  void set_prolong (Prolong * prolong)
-  { prolong_ = prolong; }
-  
-  /// Set Restrict operation (default is Problem::restrict() )
-  void set_restrict (Restrict * restrict)
-  { restrict_ = restrict; }
+  Prolong * prolong ()
+  { return refresh_->prolong(); }
 
+  Restrict * restrict ()
+  { return refresh_->restrict(); }
+  
   /// Set the Refresh object 
   void set_refresh (Refresh * refresh, bool new_refresh)
   {
@@ -143,16 +124,6 @@ public: // interface
   /// Calculate the number of bytes needed
 
   int num_bytes_array (Field field) throw();
-
-  /// Compute loop limits for copy, load, or store if accumulate == false
-  void loop_limits
-  (int i3[3], int n3[3], const int m3[3], const int g3[3], const int c3[3],
-   int refresh_type);
-
-  /// Compute loop limits for copy, load, or store if accumulate == true
-  void loop_limits_accumulate
-  (int i3[3], int n3[3], const int m3[3], const int g3[3], const int c3[3],
-   int refresh_type);
 
   //--------------------------------------------------
 
@@ -201,11 +172,6 @@ private: // functions
 	      const T * vs, int ms3[3], int ns3[3], int is3[3],
 	      bool accumulate) throw();
 
-
-  std::vector<int> field_list_src_(Field field) const;
-  std::vector<int> field_list_dst_(Field field) const;
-  bool accumulate_(int index_src, int index_dst) const;
-
   /// Multiply the given field by density to convert to conservative
   /// form if needed
   void mul_by_density_
@@ -218,25 +184,28 @@ private: // functions
   (Field field, int index_field,
    const int i3[3], const int n3[3], const int m3[3]);
 
+  /// Initialize the associated Box object box_ using current attributes
+  void set_box_(Box * box);
+
+  /// Adjust box for accumulating values instead of assigning them
+  void box_adjust_accumulate_ (Box * box, int accumulate, int g3[3]);
+
 private: // attributes
 
+  /// Rank of the problem
+  int rank_;
+  
   /// Select face, including edges and corners (-1,-1,-1) to (1,1,1)
   int face_[3];
 
   /// Whether to include ghost zones along x,y,z axes
-  bool ghost_[3];
+  int ghost_[3];
 
   /// Child index (0,0,0) to (1,1,1) if restriction or prolongation are used
   int child_[3];
 
   /// Refresh type: fine, coarse, or same
   int refresh_type_;
-
-  /// Prolongation object
-  Prolong * prolong_;
-
-  /// Restriction object
-  Restrict * restrict_;
 
   /// Refresh object for lists of particles and fields to copy,
   /// and whether to copy or add

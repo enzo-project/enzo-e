@@ -17,21 +17,17 @@ class Io : public PUP::able {
 public: // interface
 
   /// Constructor
-  Io(size_t data_count = 0) throw();
+  Io() throw();
 
   /// Destructor
   virtual ~Io () throw ()
   {}
 
-  /// CHARM++ PUP::able declaration
+  /// CHARM++ function for determining the specific class in the class hierarchy
   PUPable_decl(Io);
 
-  /// CHARM++ migration constructor for PUP::able
-  Io (CkMigrateMessage *m)
-    : PUP::able(m),
-    data_count_(0),
-    meta_name_()
-  {  }
+  Io (CkMigrateMessage *m) : PUP::able(m) 
+  { TRACE("Io::Io(CkMigrateMessage*)"); }
 
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
@@ -40,9 +36,19 @@ public: // interface
     TRACEPUP;
 
     p | meta_name_;
-    p | data_count_;
 
   }
+
+  /// PACKING / UNPACKING
+  
+  /// Return the number of bytes required to serialize the data object
+  virtual int data_size () const;
+
+  /// Serialize the object into the provided empty memory buffer.
+  virtual char * save_data (char * buffer) const;
+
+  /// Restore the object from the provided initialized memory buffer data.
+  virtual char * load_data (char * buffer);
 
 #include "_io_Io_common.hpp"
 
@@ -50,19 +56,10 @@ public: // interface
   size_t meta_count() const throw()
   { return meta_name_.size(); }
 
-  /// Return number of data items associated with the associated class
-  size_t data_count() const throw()
-  { return data_count_; }
-
-  
 protected: // attributes
 
   /// Name of the metadata items
   std::vector <std::string> meta_name_;
-
-  /// Name of the data items
-  size_t data_count_;
-
 
 };
 

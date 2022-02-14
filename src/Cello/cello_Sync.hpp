@@ -73,7 +73,7 @@ public:
   { return state_; }
   inline void set_state (RefreshState state)
   { state_ = state; }
-  
+
 private: // methods
 
   /// Increment counter

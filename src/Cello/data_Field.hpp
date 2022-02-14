@@ -252,6 +252,14 @@ public: // interface
   const char * values (std::string name, int index_history=0) const throw ()
   { return field_data_->values(field_descr_,name,index_history); }
 
+  /// Return array for the corresponding coarse field
+  char * coarse_values (int id_field) throw ()
+  { return field_data_->coarse_values (field_descr_,id_field); }
+
+  /// Return array for the corresponding coarse field
+  const char * coarse_values (const FieldDescr *, int id_field) const throw ()
+  { return field_data_->coarse_values (field_descr_,id_field); }
+  
   /// Return array for the corresponding field, which does not contain
   /// ghosts whether they're allocated or not
   char * unknowns (int id_field, int index_history=0) throw ()
@@ -310,6 +318,19 @@ public: // interface
   void deallocate_temporary(int id) throw ()
   { field_data_->deallocate_temporary(field_descr_,id); }
 
+  /// Allocate storage for the coarse fields
+  void allocate_coarse() throw ()
+  { field_data_->allocate_coarse(field_descr_); }
+  void allocate_coarse(int id) throw ()
+  { field_data_->allocate_coarse(field_descr_,id); }
+
+  /// Deallocate storage for the coarse fields
+  void deallocate_coarse() throw ()
+  { field_data_->deallocate_coarse (); }
+  /// Deallocate storage for the coarse fields
+  void deallocate_coarse(int id) throw ()
+  { field_data_->deallocate_coarse (id); }
+  
   /// Reallocate storage for the field data, e.g. when changing
   /// from ghosts to non-ghosts [ costly for large blocks ]
   void reallocate_permanent(bool ghosts_allocated = false) throw()
@@ -327,6 +348,11 @@ public: // interface
   /// number of bytes n
   int field_size (int id, int *nx=0, int *ny=0, int *nz=0) const throw()
   { return field_data_->field_size(field_descr_,id,nx,ny,nz); }
+
+  /// Return the number of elements (nx,ny,nz) along each axis for
+  /// a coarse field
+  void coarse_dimensions (int id_field, int *nx=0, int *ny=0, int *nz=0) const throw()
+  { field_data_->coarse_dimensions (field_descr_,id_field, nx,ny,nz); }
 
   //----------------------------------------------------------------------
 

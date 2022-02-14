@@ -20,8 +20,7 @@ long MsgRefine::counter[CONFIG_NODE_SIZE] = {0};
 MsgRefine::MsgRefine()
   : CMessage_MsgRefine(),
     is_local_(true),
-    data_msg_(NULL),
-    buffer_(NULL),
+    data_msg_(nullptr),
     time_(-1.0), dt_(-1.0),
     index_(),
     nx_(-1), ny_(-1), nz_(-1),
@@ -29,7 +28,9 @@ MsgRefine::MsgRefine()
     num_adapt_steps_(-1),
     cycle_(-1),
     refresh_type_(refresh_unknown),
-    num_face_level_(0), face_level_(NULL)
+    num_face_level_(0),
+    face_level_(nullptr),
+    buffer_(nullptr)
 {
   ++counter[cello::index_static()]; 
 #ifdef DEBUG_MSG_REFINE  
@@ -47,8 +48,7 @@ MsgRefine::MsgRefine
  int num_face_level, int * face_level) 
   : CMessage_MsgRefine(),
     is_local_(true),
-    data_msg_(NULL),
-    buffer_(NULL),
+    data_msg_(nullptr),
     time_(time), dt_(dt),
     index_(index),
     nx_(nx), ny_(ny), nz_(nz),
@@ -56,8 +56,9 @@ MsgRefine::MsgRefine
     num_adapt_steps_(num_adapt_steps),
     cycle_(cycle),
     refresh_type_(refresh_type),
-  num_face_level_(num_face_level),
-  face_level_(new int[num_face_level])
+    num_face_level_(num_face_level),
+    face_level_(new int[num_face_level]),
+    buffer_(nullptr)
 {  
   ++counter[cello::index_static()]; 
 #ifdef DEBUG_MSG_REFINE  
@@ -115,7 +116,7 @@ void * MsgRefine::pack (MsgRefine * msg)
   // WARNING("MsgRefine::pack()",
   // 	  "message already has a buffer allocated");
   
-  if (msg->buffer_ != NULL) return msg->buffer_;
+  if (msg->buffer_ != nullptr) return msg->buffer_;
 
   int size = 0;
 
@@ -134,7 +135,7 @@ void * MsgRefine::pack (MsgRefine * msg)
 
   size += sizeof(int);  // element-11
 
-  int have_data = (msg->data_msg_ != NULL);
+  int have_data = (msg->data_msg_ != nullptr);
 #ifdef DEBUG_MSG_REFINE  
   CkPrintf ("%d DEBUG_MSG_REFINE %s:%d msg->data_msg_ = %p\n",CkMyPe(),__FILE__,__LINE__,msg->data_msg_);
   fflush(stdout);
@@ -192,7 +193,7 @@ void * MsgRefine::pack (MsgRefine * msg)
   }
 
   // data_msg_
-  have_data = (msg->data_msg_ != NULL);
+  have_data = (msg->data_msg_ != nullptr);
   (*pi++) = have_data;  // element-11
 
   if (have_data) {
@@ -270,7 +271,7 @@ MsgRefine * MsgRefine::unpack(void * buffer)
       msg->face_level_[i] = (*pi++); // attribute-10
     }
   } else {
-    msg->face_level_ = NULL;
+    msg->face_level_ = nullptr;
  }
   
   int have_data = (*pi++);   // element-11
@@ -280,7 +281,7 @@ MsgRefine * MsgRefine::unpack(void * buffer)
     msg->data_msg_ = new DataMsg;
     pc = msg->data_msg_->load_data(pc); // element-12
   } else {
-    msg->data_msg_ = NULL;
+    msg->data_msg_ = nullptr;
   }
 
   // 3. Save the input buffer for freeing later
@@ -302,7 +303,7 @@ void MsgRefine::update (Data * data)
   CkPrintf ("%d %s:%d DEBUG_MSG_REFINE updating %p\n",CkMyPe(),__FILE__,__LINE__,this);
 #endif  
 
-  if (data_msg_ == NULL) return;
+  if (data_msg_ == nullptr) return;
 
   Simulation * simulation  = cello::simulation();
   FieldDescr * field_descr = cello::field_descr();
@@ -314,7 +315,7 @@ void MsgRefine::update (Data * data)
   FieldFace    * ff = data_msg_->field_face();
   char         * fa = data_msg_->field_array();
 
-  if (pd != NULL) {
+  if (pd != nullptr) {
 
     // Insert new particles 
 
@@ -329,7 +330,7 @@ void MsgRefine::update (Data * data)
     data_msg_->delete_particle_data();
   }
 
-  if (fa != NULL) {
+  if (fa != nullptr) {
 
     if (is_local_) {
 

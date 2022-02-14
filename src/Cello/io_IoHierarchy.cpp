@@ -10,12 +10,17 @@
 //----------------------------------------------------------------------
 
 IoHierarchy::IoHierarchy(const Hierarchy * hierarchy) throw ()
-  : Io(),
-    hierarchy_((Hierarchy *)hierarchy)
+  : Io()
 {
   meta_name_.push_back("lower");
   meta_name_.push_back("upper");
   meta_name_.push_back("max_level");
+  int i;
+  for (i=0; i<3; i++) {
+    lower_[i] = hierarchy->lower_[i];
+    upper_[i] = hierarchy->upper_[i];
+  }
+  max_level_ = hierarchy->max_level_;
 }
 
 
@@ -32,19 +37,19 @@ void IoHierarchy::meta_value
 
   if (index == count++) {
 
-    *buffer = (void *) hierarchy_->lower_;
+    *buffer = (void *) lower_;
     *type   = type_double;
     *nxd     = 3;
     
   } else if (index == count++) {
 
-    *buffer = (void *) hierarchy_->upper_;
+    *buffer = (void *) upper_;
     *type   = type_double;
     *nxd     = 3;
 
   } else if (index == count++) {
 
-    *buffer = (void *) & hierarchy_->max_level_;
+    *buffer = (void *) & max_level_;
     *type   = type_int;
 
   }
@@ -53,8 +58,7 @@ void IoHierarchy::meta_value
 //----------------------------------------------------------------------
 
 void IoHierarchy::field_array
-(int index,
- void ** buffer, std::string * name, int * type,
+(void ** buffer, std::string * name, int * type,
  int * nxd, int * nyd, int * nzd,
  int * nx,  int * ny,  int * nz) throw()
 {

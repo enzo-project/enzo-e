@@ -240,7 +240,11 @@ void EnzoInitialIsolatedGalaxy::enforce_block
   //
   // Make sure we can operate on this block
   //
-  if (!block->is_leaf()) return;  // remove once parent-to-child particle ICs working
+  // remove once parent-to-child particle ICs working
+  if (!block->is_leaf()) {
+    block->initial_done();
+    return;
+  }
 
   Timer timer;
   timer.start();
@@ -496,6 +500,8 @@ void EnzoInitialIsolatedGalaxy::InitializeExponentialGasDistribution(Block * blo
       }
     }
   } // end loop over all cells
+
+  block->initial_done();
 
   return;
 }

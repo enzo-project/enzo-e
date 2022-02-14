@@ -53,7 +53,7 @@ public: // interface
   { return "null"; }
 
   /// Compute maximum timestep for this method
-  virtual double timestep ( Block * block) const throw()
+  virtual double timestep ( Block * block) throw()
   { return dt_; }
 
 protected: // attributes

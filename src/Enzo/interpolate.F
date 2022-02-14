@@ -4,6 +4,8 @@ c     See LICENSE_ENZO file for license and copyright information
 c=======================================================================
 c//////////////////////  SUBROUTINE INTERPOLATE  \\\\\\\\\\\\\\\\\\\\\\\
 c
+C #define DEBUG_INTERP
+      
       subroutine interpolate(ndim, parent, pdims, pstart, pend, refine,
      &                       grid, gdims, gstart, work, imethod,
      &                       iposflag, ierror)
@@ -51,20 +53,72 @@ c  arguements
 c
       integer imethod, iposflag, ndim, ierror
       integer pdims(ndim), pstart(ndim), pend(ndim), refine(ndim),
-     &        gdims(ndim), gstart(ndim)
+     &     gdims(ndim), gstart(ndim)
+      integer icx,icy
+      integer icxm,icym,iczm
+      integer ncx,ncy,ncz
+      integer ifx,ify
+      integer ifxm,ifym,ifzm
+      integer nfx,nfy,nfz
       ENZO_REAL    grid(1), parent(1), work(1)
 c
 c  locals
 c
-      integer i
+      integer i,ix,iy
 c
 c\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////////
 c=======================================================================
 c
 c  Error check for number of dimensions
 c
+#ifdef DEBUG_INTERP      
+      print*, 'ENZO_DEBUG interpolate'
+      print*, 'ENZO_DEBUG ndim = ',ndim
+      print*, 'ENZO_DEBUG parent = ',parent(1)
+      print*, 'ENZO_DEBUG pdims = ', pdims(1),pdims(2),pdims(3)
+      print*, 'ENZO_DEBUG pstart = ', pstart(1),pstart(2),pstart(3)
+      print*, 'ENZO_DEBUG pend = ', pend(1),pend(2),pend(3)
+      print*, 'ENZO_DEBUG refine, = ', refine(1),refine(2),refine(3)
+      print*, 'ENZO_DEBUG grid = ', grid(1)
+      print*, 'ENZO_DEBUG gdims = ', gdims(1),gdims(2),gdims(3)
+      print*, 'ENZO_DEBUG gstart = ', gstart(1),gstart(2),gstart(3)
+      print*, 'ENZO_DEBUG imethod = ', imethod
+      print*, 'ENZO_DEBUG iposflag = ', iposflag
+      flush(6)
+      print*
+      ncx = (pend(1)-pstart(1)+5)/2
+      ncy = (pend(2)-pstart(2)+5)/2
+      ncz = (pend(3)-pstart(3)+5)/2
+      nfx = (pend(1)-pstart(1)+1)
+      nfy = (pend(2)-pstart(2)+1)
+      nfz = (pend(3)-pstart(3)+1)
+      icxm = pstart(1)-1
+      icym = pstart(2)-1
+      iczm = pstart(3)-1
+      ifxm = gstart(1)
+      ifym = gstart(2)
+      ifzm = gstart(3)
+      print*, 'ENZO_DEBUG nc[xyz] = ',ncx,ncy,ncz
+      print*, 'ENZO_DEBUG nf[xyz] = ',nfx,nfy,nfz
+      print*, 'ENZO_DEBUG ic[xyz]m = ',icxm,icym,iczm
+      print*, 'ENZO_DEBUG if[xyz]m = ',ifxm,ifym,ifzm
+ 10   format (1x, 10f6.2)
+      print*, 'parent'
+      do icx=icxm,icxm+ncx-1
+         print 10,
+     $        (parent((icx-1)+pdims(1)*(icy-1)+1), icy=icym,icym+ncy-1)
+      end do
+      print*
+      print*, 'grid'
+      do ifx=ifxm,ifxm+nfx-1
+         print 10,
+     $        (grid((ifx-1)+pdims(1)*(ify-1)+1), ify=ifym,ifym+nfy-1)
+      end do
+      print*
+#endif      
       if (ndim .lt. 1 .or. ndim .gt. 3) then
          write (6,*) "INTERPOLATE: ERROR ndim =", ndim
+         ierror = ENZO_ERROR_INTERPOLATE_NDIM
 c         ERROR_MESSAGE
       endif
 c
@@ -72,17 +126,20 @@ c  Error check for interpolation method
 c
       if (imethod .lt. 0 .or. imethod .gt. 4) then
          write (6,*) "INTERPOLATE: ERROR imethod =", imethod
+         ierror = ENZO_ERROR_INTERPOLATE_METHOD
 c         ERROR_MESSAGE
       endif
 c
 c  Error check for bounds (must have one parent cell on each side)
 c
       do i = 1, ndim
+C         print*, 'DEBUG INTERPOLATE pdims pend',pdims(i),pend(i)
          if (pstart(i) .lt. refine(i) .or. 
      &       pend(i) .ge. (pdims(i)-1)*refine(i)) then
             write(6,1030) pstart(i), pend(i), pdims(i), i
  1030       format("INTERPOLATE: ERROR pstart =", i5, "  pend =", i5,
      &             "  pdims =", i5, "  i =", i2)
+            ierror = ENZO_ERROR_INTERPOLATE_PSTART_PEND
 c            ERROR_MESSAGE
          endif
       enddo
@@ -93,6 +150,7 @@ c
          if (int(pstart(i)/refine(i))*refine(i) .ne. pstart(i)) then
             write(6,*) "INTERPOLATE: ERROR pstart(i) =", pstart(i),
      &                 " refine(i) =", refine(i), " i =", i
+            ierror = ENZO_ERROR_INTERPOLATE_PSTART_REFINE
 c            ERROR_MESSAGE
          endif
       enddo
@@ -186,6 +244,7 @@ c
 #endif
          if (ndim .ne. 3) then
             write(6,*) 'INTERPOLATE: imethod=2 only for 3d'
+            ierror = ENZO_ERROR_INTERPOLATE_PSTART_IMETHOD2
 c            ERROR_MESSAGE
          endif
 c
@@ -228,5 +287,13 @@ c
 c
       endif
 c
+#ifdef DEBUG_INTERP      
+      print*, 'grid [exit]'
+      do ifx=ifxm,ifxm+nfx-1
+         print 10,
+     $        (grid((ifx-1)+pdims(1)*(ify-1)+1), ify=ifym,ifym+nfy-1)
+      end do
+      print*
+#endif      
       return
       end

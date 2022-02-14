@@ -1,18 +1,65 @@
 # This file defines some useful testing utilities shared between a couple of
 # regression testing scripts
 
+from contextlib import contextmanager
 import os
 import os.path
 import subprocess
 
 try:
-  basestring
+    basestring
 except NameError:
-  basestring = str
+    basestring = str
 
 import numpy as np
 
+# determine Enzo-E's root directory
+if "/input/vlct" ==  os.path.dirname(os.path.abspath(__file__))[-11:]:
+    # this will work even if this file is imported by modifying sys.path 
+    _ENZOE_ROOT_DIR = os.path.dirname(os.path.abspath(__file__))[:-11]
+else:
+    raise RuntimeError("testing_utils.py has been moved. Please update the "
+                       "logic for identifying the Enzo-E root directory")
+
+@contextmanager
+def testing_context(require_enzoe_inputdir = True):
+    """
+    Context manager to help prepare the current directory for running tests.
+
+    This mainly checks to see whether `./input` is a valid path
+      - if it doesn't exist, this creates a symlink to the input directory of 
+        enzo-e. Upon exitting this context, the symlink is deleted.
+      - if `./input` already exists and `require_enzoe_inputdir` is True, this 
+        ensures that the `./input` is the input directory in the root directory
+        of enzo-e or is a symlink to that directory
+    """
+    path = 'input'
+
+    cleanup = False
+    if os.path.isfile(path):  # path is allowed to be a symlink to a dir
+        raise RuntimeError('./' + path + ' is a path to a file.')
+    elif os.path.isdir(path): # path is allowed to be a symlink to a dir
+        realpath = os.path.abspath(os.path.realpath(path))
+        expected = os.path.abspath(os.path.join(_ENZOE_ROOT_DIR, 'input'))
+        if require_enzoe_inputdir and (realpath != expected):
+            raise RuntimeError('./' + path + " doesn't refer to " + expected)
+    elif os.path.islink(path):
+        raise RuntimeError('./' + path + ' is a broken link.')
+    else: # make a symlink to {_ENZOE_ROOT_DIR}/input
+        cleanup = True
+        os.symlink(src = os.path.join(_ENZOE_ROOT_DIR, path),
+                   dst = path, target_is_directory = True)
+
+    try:
+        yield None
+    finally:
+        if cleanup:
+            os.unlink(path)
+
 def prep_cur_dir(executable):
+    """
+    Helper function to prepare the current directory for running a test.
+    """
     cwd = os.getcwd()
     if cwd[-10:] == "input/vlct":
         os.chdir("../../")
@@ -27,15 +74,21 @@ def prep_cur_dir(executable):
 
 class _BaseCalcL1Norm(object):
     """
-    Base class used to define configurable functor objecst that encapsulate the
+    Base class used to define configurable functor objects that encapsulate the
     calls to the l1_error_norm script
     """
-    def __init__(self, script_path, default_fields = None, verbose = False):
-        self.script_path = script_path
+    def __init__(self, default_fields = None, verbose = False,
+                 script_path = None):
 
         self._check_field_container(default_fields, "default_fields")
         self.default_fields = default_fields
         self._verbose = verbose
+
+        if script_path is None:
+            self.script_path = os.path.join(_ENZOE_ROOT_DIR,
+                                            "tools/l1_error_norm.py")
+        else:
+            self.script_path = script_path
 
     def __call__(self, dir_name, *args, **kwargs):
         raise NotImplementedError("This must be implemented by subclasses")
@@ -89,15 +142,17 @@ class CalcSimL1Norm(_BaseCalcL1Norm):
 
     Parameters
     ----------
-    script_path : str
+    script_path : str, optional
         Path to the l1_error_norm script
     default_fields : list of strings, optional
         Default list of fields to use in L1 Error Norm calculation by default.
         This can been overwritten while calling the functor
     """
-    def __init__(self,script_path, default_fields = None, verbose = False):
-        super(CalcSimL1Norm, self).__init__(script_path, default_fields,
-                                            verbose)
+    def __init__(self, default_fields = None, verbose = False,
+                 script_path = None):
+        super(CalcSimL1Norm, self).__init__(default_fields = default_fields,
+                                            verbose = verbose,
+                                            script_path = script_path)
 
     def __call__(self, dir_name, dir_name2, res = None, fields = None):
         """
@@ -153,10 +208,12 @@ class CalcTableL1Norm(_BaseCalcL1Norm):
     verbose : bool, optional
         Default is False. When True, extra information is printed to stdout
     """
-    def __init__(self, script_path, default_fields = None, 
-                 default_ref_table = None, verbose = False):
-        super(CalcTableL1Norm,self).__init__(script_path, default_fields,
-                                             verbose)
+    def __init__(self, default_fields = None,
+                 default_ref_table = None, verbose = False,
+                 script_path = None):
+        super(CalcTableL1Norm,self).__init__(default_fields = default_fields,
+                                             verbose = verbose,
+                                             script_path = script_path)
         self.default_ref_table = default_ref_table
 
     def _handle_bkg_velocity(self,bkg_velocity, permute, axis):

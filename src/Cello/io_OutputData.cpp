@@ -39,7 +39,6 @@ OutputData::OutputData
   
   stride = config->output_stride_wait[index_];
   stride_wait_ = (stride == 0) ? 1 : stride;
-
 }
 
 //----------------------------------------------------------------------
@@ -70,9 +69,9 @@ void OutputData::open () throw()
 #ifdef TRACE_OUTPUT
     CkPrintf ("%d TRACE_OUTPUT OutputData::open()\n",CkMyPe());
 #endif    
-  std::string file_name = expand_name_(&file_name_,&file_args_);
+    std::string file_name = expand_name_(&file_name_,&file_args_);
 
-  std::string dir = directory();
+    std::string dir = directory();
 
   Monitor::instance()->print 
     ("Output","writing data file %s",
@@ -132,7 +131,6 @@ void OutputData::write_block ( const  Block * block ) throw()
   char line[256];
 
   std::string name_dir = expand_name_(&dir_name_,&dir_args_);
-
 
   // Write blocks text file
   std::string name_file;
@@ -226,34 +224,28 @@ void OutputData::write_field_data
   io_field_data()->set_field_data((FieldData*)field_data);
   io_field_data()->set_field_index(index_field);
 
-  FieldDescr * field_descr = cello::field_descr();
-  
-  for (size_t i=0; i<io_field_data()->data_count(); i++) {
+  void * buffer;
+  std::string name;
+  int type;
+  int nxd,nyd,nzd;  // Array dimension
+  int nx,ny,nz;     // Array size
 
-    void * buffer;
-    std::string name;
-    int type;
-    int nxd,nyd,nzd;  // Array dimension
-    int nx,ny,nz;     // Array size
+  io_field_data()->field_array(&buffer, &name, &type, 
+                               &nxd,&nyd,&nzd,
+                               &nx, &ny, &nz);
 
-    // Get ith FieldData data
-    io_field_data()->field_array(i, &buffer, &name, &type, 
-				 &nxd,&nyd,&nzd,
-				 &nx, &ny, &nz);
+  // Write FieldData data
 
-    // Write ith FieldData data
-
-    file_->mem_create(nx,ny,nz,nx,ny,nz,0,0,0);
-    if (nzd > 1) {
-      file_->data_create(name.c_str(),type,nzd,nyd,nxd,1,nz,ny,nx,1);
-    } else if (nyd > 1) {
-      file_->data_create(name.c_str(),type,nyd,nxd,  1,1,ny,nx, 1,1);
-    } else {
-      file_->data_create(name.c_str(),type,nxd,  1,  1,1,nx,  1,1,1);
-    }
-    file_->data_write(buffer);
-    file_->data_close();
+  file_->mem_create(nx,ny,nz,nx,ny,nz,0,0,0);
+  if (nzd > 1) {
+    file_->data_create(name.c_str(),type,nzd,nyd,nxd,1,nz,ny,nx,1);
+  } else if (nyd > 1) {
+    file_->data_create(name.c_str(),type,nyd,nxd,  1,1,ny,nx, 1,1);
+  } else {
+    file_->data_create(name.c_str(),type,nxd,  1,  1,1,nx,  1,1,1);
   }
+  file_->data_write(buffer);
+  file_->data_close();
 
 }
 

@@ -229,11 +229,12 @@ EnzoMethodFire2Feedback::EnzoMethodFire2Feedback
   EnzoUnits * enzo_units = enzo::units();
 
   // required fields
-  this->required_fields_ = std::vector<std::string>
-                           {"density","pressure","internal_energy",
-                            "total_energy"};
+  cello::define_field ("density");
+  cello::define_field ("pressure");
+  cello::define_field ("internal_energy");
+  cello::define_field ("total_energy");
 
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
 
@@ -627,7 +628,7 @@ void EnzoMethodFire2Feedback::deposit_feedbak (EnzoBlock * enzo_block,
 
 
 
-double EnzoMethodFire2Feedback::timestep (Block * block) const throw()
+double EnzoMethodFire2Feedback::timestep (Block * block) throw()
 {
   // In general this is not needed, but could imagine putting timestep
   // limiters in situations where, for example, one would want
