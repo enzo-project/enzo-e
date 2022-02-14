@@ -84,7 +84,7 @@ public: // interface
 
   /// Check if given constant exists for the given particle type
 
-  bool has_constant (int it, std::string constant) const;
+  bool is_constant (int it, std::string constant) const;
 
   //--------------------------------------------------
   // ATTRIBUTES

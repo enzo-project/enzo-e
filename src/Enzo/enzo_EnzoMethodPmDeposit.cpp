@@ -168,7 +168,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
       // Determine if particle has a constant mass, or if mass varies
       // and we need to use the mass attribute
-      if (particle.has_constant (it,"mass")){
+      if (particle.is_constant (it,"mass")){
 
         const int ic_mass = particle.constant_index (it, "mass");
         dens = *((enzo_float *)(particle.constant_value (it,ic_mass)));

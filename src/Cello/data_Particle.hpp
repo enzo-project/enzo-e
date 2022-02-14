@@ -204,8 +204,8 @@ public: // interface
 
   /// Check if given constant exists
 
-  bool has_constant(int it, std::string constant) const
-  { return particle_descr_->has_constant(it,constant); }
+  bool is_constant(int it, std::string constant) const
+  { return particle_descr_->is_constant(it,constant); }
 
 
   //--------------------------------------------------
