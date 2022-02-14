@@ -459,7 +459,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
      */
     enzo_float hxf = hx * cosmo_a;
     enzo_float hyf = hy * cosmo_a;
-    enzo_float hzf = hz * cosma_a;
+    enzo_float hzf = hz * cosmo_a;
     enzo_float dtf = alpha_;
 
     enzo_float * vxf = (enzo_float *) field.values("velocity_x");
