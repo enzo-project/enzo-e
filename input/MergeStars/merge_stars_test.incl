@@ -65,9 +65,6 @@ Particle {
     }
 }
 
-
-
-
  Method {
 
      list = ["pm_update","merge_stars"];		
@@ -81,25 +78,6 @@ Particle {
      
      };
 
- }
-
- Output {
-   
-     data {
-         dir = [ "./Dir_Merge-Stars-1_%04d", "cycle" ];
-         field_list = [ "acceleration_x", "acceleration_y", "acceleration_z",
-	 	      	"density_total", "potential" ];
-	 particle_list = ["star"];
-         name = [ "data-%04d-%04d.h5", "cycle", "proc" ];
-         schedule {
-             step = 1;
-             var = "cycle";
-         };
-         type = "data";
-     };
-    
-     list = ["data"];
-     
  }
 
 

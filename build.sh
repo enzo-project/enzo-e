@@ -286,5 +286,16 @@ if [ $target = "test" ] && [ "$CELLO_PREC" = "double" ]; then
         exit_status=1
     fi
 fi;
+
+if [ $target = "test" ]; then
+    echo ""
+    echo "--------------------"
+    echo "Attempting to run star merging tests."
+    ./input/MergeStars/run.sh
+    result_code=$?
+    if [ $result_code -gt 0 ]; then
+        exit_status=1
+    fi
+fi;
 echo "Done."
 exit $exit_status
