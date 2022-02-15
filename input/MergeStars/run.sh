@@ -6,6 +6,8 @@
 
 testPrefix="./input/MergeStars"
 
+mkdir -p test/MethodMergeStars
+
 if [[ ! -z "$PYTHON_VL_TEST_PREP" ]]; then
     echo ""
     echo "Preparing python environment for test"
@@ -32,7 +34,6 @@ fi
 # Now to run the actual tests:
 echo "Generating ICs for MergeStars Test"
 
-echo $testPrefix
 python $testPrefix/ics.py -r 4.0e16 -m 2.0e36 -c 1.5e17 1.5e17 1.5e17 -d 2.0e8 2.0e8 2.0e8 -i 1.0e8 -n 1000
 
 # Run serial test
@@ -61,12 +62,12 @@ mv mmc_serial.png test/MethodMergeStars/
 echo "Running Parallel MergeStars Test"
 charmrun +p4 ++local bin/enzo-e $testPrefix/merge_stars_test_parallel.in > test/MethodMergeStars/merge_stars_test_parallel.out 2>&1
 
-mpirun -np 4 python $testPrefix/images.py -i Dir_Merge_Stars_Parallel -o image_parallel > images_parallel.out 2>&1
+mpirun -np 4 python $testPrefix/images.py -i Dir_Merge_Stars_Parallel -o image_parallel > test/MethodMergeStars/images_parallel.out 2>&1
 
 mkdir -p test/MethodMergeStars/run_parallel
 mv image_parallel* test/MethodMergeStars/run_parallel/
 
-mpirun -np 4 python $testPrefix/mass_momentum_conservation.py -i Dir_Merge_Stars_Parallel -o mmc_parallel.png > mmc_parallel.out 2>&1
+mpirun -np 4 python $testPrefix/mass_momentum_conservation.py -i Dir_Merge_Stars_Parallel -o mmc_parallel.png > test/MethodMergeStars/mmc_parallel.out 2>&1
 
 ERR_CODE=$?
 if [ $ERR_CODE -gt 0 ]; then
