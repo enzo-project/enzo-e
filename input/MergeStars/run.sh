@@ -8,14 +8,6 @@ testPrefix="./input/MergeStars"
 
 mkdir -p test/MethodMergeStars
 
-echo $PYTHON_VL_TEST_PREP
-exit 1
-if [[ ! -z "$PYTHON_VL_TEST_PREP" ]]; then
-    echo ""
-    echo "Preparing python environment for test"
-    eval "$PYTHON_VL_TEST_PREP"
-fi
-
 echo "Checking that the python installation roughly matches test requirements"
 # One last set of crude checks to make sure that environment is not obviously
 # unfit for running the tests
@@ -29,6 +21,12 @@ fi
 YT_INSTALLED=$(pip list | grep "^yt" | wc -l )
 if [[ "$YT_INSTALLED" == "0" ]]; then
     echo "yt is not installed. It is required for running MergeStars tests"
+    exit 1
+fi
+
+MPI4PY_INSTALLED=$(pip list | grep "^mpi4py" | wc -l )
+if [[ "$MPI4PY_INSTALLED" == "0" ]]; then
+    echo "mpi4py is not installed. It is required for running MergeStars tests"
     exit 1
 fi
 
