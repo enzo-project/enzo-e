@@ -2,8 +2,14 @@
 # generated when Enzo-E runs the test problem, which contain snapshots of the
 # particle data at regular time intervals. The script uses yt to read the
 # data and calculates the total mass, total x/y/z-momentum and total number
-# of particles in each snapshot. It then uses matplotlib to generate a figure
-# with three panels, showing the mass error, momentum error, and number of
+# of particles in each snapshot. It then calculates the conservation error for these
+# quantities, and tests whether the absolute value is less than some tolerance,
+# which is set to 1e-6 by default. If the absolute value of the error is larger
+# than the tolerance for any snapshot, then the script returns an error code.
+
+# Finally, the script generates a figure
+# with three panels, showing the mass conservation error, momentum conservation
+# error, and number of
 # particles plotted against the number of cycles (i.e. timesteps). The mass
 # / momentum error at a given cycle is defined as the difference between the total
 # mass / momentum at a given cycle and the initial total mass / momentum,
