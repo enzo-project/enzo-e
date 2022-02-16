@@ -8,6 +8,8 @@ testPrefix="./input/MergeStars"
 
 mkdir -p test/MethodMergeStars
 
+echo $PYTHON_VL_TEST_PREP
+exit 1
 if [[ ! -z "$PYTHON_VL_TEST_PREP" ]]; then
     echo ""
     echo "Preparing python environment for test"
