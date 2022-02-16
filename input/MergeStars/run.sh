@@ -40,13 +40,20 @@ python $testPrefix/ics.py -r 4.0e16 -m 2.0e36 -c 1.5e17 1.5e17 1.5e17 -d 2.0e8 2
 echo "Running Serial MergeStars Test"
 bin/enzo-e $testPrefix/merge_stars_test_serial.in > test/MethodMergeStars/merge_stars_test_serial.out 2>&1
 
+cat test/MethodMergeStars/merge_stars_test_serial.out
+
 mpirun -np 4 python $testPrefix/images.py -i Dir_Merge_Stars_Serial -o image_serial > images_serial.out 2>&1
+
+cat test/MethodMergeStars/images_serial.out
 
 mkdir -p test/MethodMergeStars/run_serial
 mv image_serial* test/MethodMergeStars/run_serial/
 
-mpirun -np 4 python $testPrefix/mass_momentum_conservation.py -i Dir_Merge_Stars_Serial -o mmc_serial.png > mmc_serial.out 2>&1
+mpirun -np 4 python $testPrefix/mass_momentum_conservation.py -i Dir_Merge_Stars_Serial -o mmc_serial.png > test/MethodMergeStars/mmc_serial.out 2>&1
 
+cat test/MethodMergeStars/mmc_serial.out
+
+exit 1
 ERR_CODE=$?
 if [ $ERR_CODE -gt 0 ]; then
     SERIAL_FAILED=1
