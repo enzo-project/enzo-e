@@ -42,7 +42,7 @@ bin/enzo-e $testPrefix/merge_stars_test_serial.in > test/MethodMergeStars/merge_
 
 cat test/MethodMergeStars/merge_stars_test_serial.out
 
-mpirun -np 4 python $testPrefix/images.py -i Dir_Merge_Stars_Serial -o image_serial > images_serial.out 2>&1
+mpirun -np 4 python $testPrefix/images.py -i Dir_Merge_Stars_Serial -o image_serial > test/MethodMergeStars/images_serial.out 2>&1
 
 cat test/MethodMergeStars/images_serial.out
 
