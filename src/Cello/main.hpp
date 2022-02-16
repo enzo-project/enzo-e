@@ -91,7 +91,6 @@ public:
   void p_exit(int count);
 
   void p_checkpoint_output (int count, std::string dir_name);
-  void p_checkpoint_method (int count, std::string dir_name);
 
   void p_initial_exit();
   void p_adapt_enter();
@@ -104,6 +103,7 @@ public:
   void p_compute_exit();
   void p_output_enter ();
   void p_output_exit();
+  void p_restart_enter(std::string dir, std::string main);
   void p_stopping_enter();
   void p_stopping_balance();
   void p_text_file_write(int nd, char * dir,

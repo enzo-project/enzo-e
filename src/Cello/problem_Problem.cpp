@@ -874,11 +874,6 @@ Method * Problem::create_method_
        config->method_flux_correct_min_digits_fields[index_method],
        config->method_flux_correct_min_digits_values[index_method]);
 
-  } else if (name == "checkpoint") {
-
-    method = new MethodCheckpoint
-      ( config->method_path_name[index_method]);
-
   } else if (name == "output") {
 
     ASSERT("Problem::create_method_()",

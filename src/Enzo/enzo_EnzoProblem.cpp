@@ -596,7 +596,7 @@ Method * EnzoProblem::create_method_
        config->method_courant[index_method]);
 
 #ifdef CONFIG_USE_GRACKLE
-    //--------------------------------------------------
+
   } else if (name == "grackle") {
 
     method = new EnzoMethodGrackle
@@ -640,7 +640,7 @@ Method * EnzoProblem::create_method_
 
     const int index_prolong = prolong_list_.size();
     prolong_list_.push_back(prolong);
-  
+
     method = new EnzoMethodGravity
       (
        enzo_config->solver_index.at(solver_name),
@@ -693,6 +693,11 @@ Method * EnzoProblem::create_method_
 
     // need a similar type swtich as in star maker
     method = new EnzoMethodDistributedFeedback();
+
+  } else if (name == "check") {
+
+    // Method for checkpointing the simulation
+    method = new EnzoMethodWriteCheck();
 
   } else {
 

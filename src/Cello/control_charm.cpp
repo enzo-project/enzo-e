@@ -60,9 +60,6 @@ void Block::initial_exit_()
 
   bool initial_restart = cello::config()->initial_restart;
 
-  CkPrintf ("initial_restart = %d\n",initial_restart);
-  fflush(stdout);
-
   if (initial_restart) {
     control_sync_barrier (CkIndex_Block::r_restart_enter(NULL));
   } else {

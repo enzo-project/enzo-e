@@ -61,7 +61,8 @@ public: // interface
     initial_list(),
     initial_cycle(0),
     initial_restart(false),
-    initial_restart_file_name(""),
+    initial_restart_dir(""),
+    initial_restart_file(""),
     initial_time(0.0),
     initial_trace_name(""),
     initial_trace_field(""),
@@ -236,7 +237,8 @@ public: // interface
       initial_list(),
       initial_cycle(0),
       initial_restart(false),
-      initial_restart_file_name(""),
+      initial_restart_dir(""),
+      initial_restart_file(""),
       initial_time(0.0),
       initial_trace_name(""),
       initial_trace_field(""),
@@ -448,7 +450,8 @@ public: // attributes
 
   /// restart
   bool                       initial_restart;
-  std::string                initial_restart_file_name;
+  std::string                initial_restart_dir;
+  std::string                initial_restart_file;
 
   // InitialTrace
   std::string                initial_trace_name;

@@ -84,7 +84,8 @@ void Config::pup (PUP::er &p)
   p | initial_time;
 
   p | initial_restart;
-  p | initial_restart_file_name;
+  p | initial_restart_dir;
+  p | initial_restart_file;
 
   p | initial_trace_name;
   p | initial_trace_field;
@@ -643,8 +644,9 @@ void Config::read_initial_ (Parameters * p) throw()
 
   // Restart
 
-  initial_restart =          p->value_logical ("Initial:restart",false);
-  initial_restart_file_name = p->value_string ("Initial:restart_file_name","");
+  initial_restart =      p->value_logical ("Initial:restart",false);
+  initial_restart_dir  = p->value_string ("Initial:restart_dir","");
+  initial_restart_file = p->value_string ("Initial:restart_file","");
 
   // InitialTrace
   initial_trace_name = p->value_string ("Initial:trace:name","trace");

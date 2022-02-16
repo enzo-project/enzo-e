@@ -40,14 +40,14 @@ EnzoSimulation::EnzoSimulation
 #ifdef DEBUG_ENZO_SIMULATION
   CkPrintf ("%d DEBUG_ENZO_SIMULATION EnzoSimulation()\n",CkMyPe());
   fflush(stdout);
-#endif  
+#endif
 
   // Synchronize to ensure all EnzoSimulation objects exist before
   // reading parameters
 
   CkCallback callback (CkIndex_EnzoSimulation::r_startup_begun(NULL),
                        thisProxy);
-#ifdef TRACE_CONTRIBUTE  
+#ifdef TRACE_CONTRIBUTE
   CkPrintf ("%s:%d DEBUG_CONTRIBUTE\n",__FILE__,__LINE__); fflush(stdout);
 #endif
 

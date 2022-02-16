@@ -12,7 +12,6 @@
 
      entry void p_exit (int count_blocks);
 
-     entry void p_checkpoint_method(int count, std::string dir);
      entry void p_checkpoint_output(int count, std::string dir);
 
      entry void p_initial_exit();
@@ -26,6 +25,7 @@
      entry void p_compute_exit();
      entry void p_output_enter ();
      entry void p_output_exit();
+     entry void p_restart_enter(std::string dir, std::string file);
      entry void p_stopping_enter();
      entry void p_stopping_balance();
      entry void p_stopping_exit();
@@ -36,4 +36,3 @@
      entry void p_exit();
 
   };
-

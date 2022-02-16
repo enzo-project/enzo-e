@@ -328,8 +328,11 @@ void Block::initialize()
   CkPrintf ("TRACE_BLOCK %s initialize()\n",name().c_str());
   fflush(stdout);
 #endif
-  bool is_first_cycle = (cycle_ == cello::config()->initial_cycle);
-  if (! cello::config()->initial_new) {
+
+  const bool is_first_cycle = (cycle_ == cello::config()->initial_cycle);
+  const bool initial_new    = cello::config()->initial_new;
+
+  if (! initial_new) {
     if (is_first_cycle && level() <= 0) {
       CkCallback callback (CkIndex_Block::r_end_initialize(NULL), thisProxy);
 #ifdef TRACE_BLOCK
@@ -562,7 +565,8 @@ void Block::apply_initial_(MsgRefine * msg) throw ()
   CkPrintf ("TRACE_BLOCK %s apply_initial()\n",name().c_str());
   fflush(stdout);
 #endif
-  bool is_first_cycle =  (cycle_ == cello::config()->initial_cycle);
+  const bool is_first_cycle = (cycle_ == cello::config()->initial_cycle);
+  const bool initial_new    = cello::config()->initial_new;
 
   if (! is_first_cycle) {
     msg->update(data());
@@ -570,7 +574,7 @@ void Block::apply_initial_(MsgRefine * msg) throw ()
   } else {
     delete msg;
     TRACE("Block::apply_initial_()");
-    if (cello::config()->initial_new) {
+    if (initial_new) {
 
 #ifdef TRACE_BLOCK
       CkPrintf ("TRACE_BLOCK %s apply_initial() initial_new\n",name().c_str());

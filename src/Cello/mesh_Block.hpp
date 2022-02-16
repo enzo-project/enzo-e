@@ -240,9 +240,9 @@ public: // interface
   // INITIAL
   //--------------------------------------------------
 
-  /// Initiate computing the sequence of Methods
+  /// Initiate applying the sequence of Initial conditions
   void initial_new_begin_(int level);
-  /// Initiate computing the next Method in the sequence
+  /// Continue to the next Initial conditions object
   void r_initial_new_next(CkReductionMsg * msg)
   { delete msg; initial_new_next_(); }
   void initial_new_next_();
@@ -572,8 +572,6 @@ public:
 
   /// Get restricted data from child when it is deleted
   void p_refresh_child (int n, char a[],int ic3[3]);
-
-  void r_method_checkpoint_continue(CkReductionMsg * msg);
 
   void p_method_flux_correct_refresh();
   void r_method_flux_correct_sum_fields(CkReductionMsg * msg);

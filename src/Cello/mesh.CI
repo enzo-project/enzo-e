@@ -51,7 +51,6 @@ module mesh {
   PUPable ItIndexRange;
   PUPable MaskExpr;
   PUPable MaskPng;
-  PUPable MethodCheckpoint;
   PUPable MethodCloseFiles;
   PUPable MethodDebug;
   PUPable MethodFluxCorrect;
@@ -134,8 +133,6 @@ module mesh {
 
     entry void p_compute_exit();
     entry void r_compute_exit(CkReductionMsg *);
-
-    entry void r_method_checkpoint_continue(CkReductionMsg * msg);
 
     entry void p_method_flux_correct_refresh();
     entry void r_method_flux_correct_sum_fields(CkReductionMsg * msg);

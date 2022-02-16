@@ -235,6 +235,7 @@ extern "C" {
 #include "enzo_EnzoMethodGravity.hpp"
 #include "enzo_EnzoMethodHeat.hpp"
 #include "enzo_EnzoMethodHydro.hpp"
+#include "enzo_EnzoMethodMHDVlct.hpp"
 #include "enzo_EnzoMethodPmDeposit.hpp"
 #include "enzo_EnzoMethodPmUpdate.hpp"
 #include "enzo_EnzoMethodPpm.hpp"
@@ -242,7 +243,7 @@ extern "C" {
 #include "enzo_EnzoMethodTurbulence.hpp"
 #include "enzo_EnzoMethodStarMaker.hpp"
 #include "enzo_EnzoMethodStarMakerStochasticSF.hpp"
-#include "enzo_EnzoMethodMHDVlct.hpp"
+#include "enzo_EnzoMethodWriteCheck.hpp"
 
 #include "enzo_EnzoMatrixDiagonal.hpp"
 #include "enzo_EnzoMatrixIdentity.hpp"

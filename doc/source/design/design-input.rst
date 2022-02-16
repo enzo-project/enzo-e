@@ -41,67 +41,229 @@ parameters).
 Outline of new implementation
 -----------------------------
 
+The implementation will include modifications to how blocks are mapped
+to files, what data are written to the files, and how file I/O is
+parallelized.
+
 Ordering
 --------
 
 Our new approach will involve a generalization of the ``MethodOutput``
 method, but will enable load-balanced disk file through the use of
-block `orderings`. Currently, the ordering used in ``MethodOutput``,
-which is implicit and embedded in the code, is based on a regular
-partitioning of root-level blocks together with their descendents. Our
-new approach will factor out this ordering, and allow flexibility in
-defining other orderings, such as space-filling curves like Hilbert or
-Morton.
-
-AMR support
------------
-
-Our new approach must also be extended to allow reading files that
-contain full AMR hierarchies; currently, while Cello can write AMR
-data, it is limited to reading only unigrid data files in the MUSIC
-format. AMR support will be used for both data and checkpoint files.
+block `orderings` to define how blocks are mapped to files. Currently,
+the ordering used in ``MethodOutput``, which is implicit and embedded
+in the code, is based on a regular partitioning of root-level blocks
+together with their descendents. The updated implementation will
+factor out this ordering into an ``Ordering`` class, and allow
+flexibility in defining other orderings, such as space-filling curves
+like Hilbert or Morton.
 
 File content
 ------------
 
-Lastly, the content of the data files must be augmented to include all
-data required to recreate a previously saved AMR block array. This is
-required for both checkpoint/restart. Current data dump files do not
-include all required data, such as block connectivity, scalar
-data, and other Block attributes used internally.
+The content of the data files must be augmented to include all data
+required to recreate a previously saved AMR block array on restart.
+Current data dump files do not include all required data, such as
+block connectivity, scalar data, and other Block attributes used
+internally.
 
-Parallelization
----------------
+Control flow
+------------
 
 Another difference between the proposed and current designs are how
 individual tasks in an I/O operation are scheduled and synchronized.
-In the current approach, a subset of root blocks are defined to be
-"writers", and they control requesting and writing data from other
-blocks within their scope. In the new approach, a separate ``IoWrite``
-or ``IoRead`` chare array will be used instead, with different writers
-or readers used for different file types, e.g. ``IoReadCheck`` or
-``IoWriteData``.  Advantages are better load-balancing of I/O
-operations and decoupling I/O operations from the Block chare array,
-and allow multiple file operations to run concurrently. For EnzoBlock
-data, ``IoEnzoReader`` and ``IoEnzoWriter`` chare arrays are used.
+In the current approach, a subset of root blocks is defined to be
+"writers" or "readers", and they control requesting and writing data
+from other blocks within their assigned scope. In the new approach, a
+separate ``IoWriter`` or ``IoReader`` chare array will be used
+instead.  Advantages are better load-balancing of I/O operations, and
+decoupling of I/O operations from the Block chare array, which could
+improve load balancing. For Enzo-E checkpoint/restart data,
+``IoEnzoReader`` and ``IoEnzoWriter`` chare arrays are used.
 
 ======
 Design
 ======
 
+
 Components of the new I/O approach include
 
   1. Control management
-     InitialInput
-     MethodOutput
-  2. Control definition
-  3. Block-to-file mapping
-  4. File type definition
-  5. File operation implementation
+
+     * ``control_restart.cpp``
+
+        - ``Main::r_restart_enter()``
+        - ``Main::p_restart_done()``
+        - ``Main::restart_exit()``
+
+  2. New Classes
+
+     * ``EnzoMethodCheck``
+     * ``IoEnzoReader``
+        - ``IoEnzoReader::IoEnzoReader()``
+     * ``IoEnzoWriter``
+        - ``IoEnzoWriter::IoEnzoWriter()``
+     * ``IoReader``
+        - ``IoReader::IoReader()``
+     * ``IoWriter``
+        - ``IoWriter::IoWriter()``
+     * ``Ordering``
+     * ``OrderingHilbert``
+     * ``OrderingRootBlocks``
 
 ----------
-Interfaces
+Algorithms
 ----------
+
+Input algorithm
+---------------
+
+.. image:: io-input.png
+
+.. code-block:: C++
+
+    // Begin reading restart data and create the mesh hierarchy of
+    // EnzoBlocks. Replaces functionality of control_adapt.
+    entry void enzo_main::r_restart_enter(std::string file_hierarchy)
+    {
+       // open hierarchy file
+       // read hierarchy file
+       // create block_array
+       // create IoEnzoReader array
+       // initialize sync_file(num_io_reader)
+       for (i_f = files in restart) {
+          io_reader[i_f].insert(file_block);
+       }
+       // close hierarcy file
+    }
+
+.. code-block:: C++
+
+    // Read in a Block file and create all blocks in the file
+    IoEnzoReader::IoEnzoReader(file_block)
+    {
+       // open block file
+       // read block file
+       // initialize sync_block(num_blocks)
+       for (i_b = loop over blocks) {
+          // read Block data
+          // create Block, initialize, notify caller when done
+          enzo_factory.create_block(block_data, io_reader, i_f);
+       }
+       // close file
+    }
+
+.. code-block:: C++
+
+    // Initialize a block then notify caller when done
+    Block::Block (block_data, io_reader, i_f)
+    {
+       // initialize Block using block_data
+       io_reader[i_f].p_block_created(index);
+    }
+
+.. code-block:: C++
+
+    // After all blocks created, notify main when done
+    IoReader::p_block_created(Block index)
+    {
+       // Count blocks created
+       if (sync_block.done()) {
+          // After last block created, exit restart phase
+          enzo_main::p_restart_done();
+       }
+    }
+
+.. code-block:: C++
+
+    // After all files have been read, proceed with the simulation
+    main::p_restart_done() {
+       if (sync_file.done()) {
+          p_initial_done
+    }
+
+
+Output algorithm
+----------------
+
+.. image:: io-output.png
+
+.. code-block:: C++
+
+    // Begin writing a checkpoint file
+    entry void EnzoMethodCheckpoint::apply(Block)
+    {
+       contribute (enzo_main::r_checkpoint_enter(std::string file_hierarchy));
+    }
+
+    entry void enzo_main::r_checkpoint_enter(std::string file_hierarchy)
+    {
+       // create hierarchy file
+       // write hierarchy file
+       // create IoEnzoWriter array
+       // initialize sync_file(num_io_Writer)
+       // Start io_writer with writer blocks by asking
+       //    blocks to self-identify as writers
+       block_array.p_io_write_start(io_writer, ordering);
+    }
+
+    EnzoBlock::p_io_write_start(io_writer, ordering)
+    {
+       if (io_writer.is_start(index)) {
+       // determine index_file [0 .. num_io_writer) using num blocks and num files
+          EnzoBlock::io_write_next(io_writer, ordering, index_file)
+       }
+    }
+
+    EnzoBlock::[p_]io_write_next(io_writer, ordering, index_file)
+    {
+       // get next block index, and whether this is last block in file
+        io_writer[index_file].write_block(block_data,ordering, index_next, l_last_block);
+    }
+
+    // Write a Block's data, and request next Block if any, else close and return
+    IoEnzoWrite::write_block(block_data,ordering, index_next, l_is_first, l_is_last);
+    {
+       // if firstopen block file
+       // read block file
+       // initialize sync_block(num_blocks)
+       for (i_b = loop over blocks) {
+          // read Block data
+          // create Block, initialize, notify caller when done
+          enzo_factory.create_block(block_data, io_reader, i_f);
+       }
+       // close file
+    }
+
+    // Initialize a block then notify caller when done
+    Block::Block (block_data, io_reader, i_f)
+    {
+       // initialize Block using block_data
+       io_reader[i_f].p_block_created(index);
+    }
+
+    // After all blocks created, notify main when done
+    IoReader::p_block_created(Block index)
+    {
+       // Count blocks created
+       if (sync_block.done()) {
+          // After last block created, exit restart phase
+          enzo_main::p_restart_done();
+       }
+    }
+
+    // After all files have been read, proceed with the simulation
+    main::p_restart_done() {
+       if (sync_file.done()) {
+          p_initial_done
+    }
+
+-------
+Classes
+-------
+
+EnzoMethodInput
+
 =============
 Communication
 =============
