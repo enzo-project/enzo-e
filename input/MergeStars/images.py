@@ -38,30 +38,32 @@ parser.add_argument(
     """,
     required=True,
     type=str,
-) 
-args = vars(parser.parse_args())
-input_prefix = args["input_prefix"]
-output_prefix = args["output_prefix"]
-yt.enable_parallelism()
-ds_pattern = f"{input_prefix}_????/{input_prefix}_????.block_list"
-ts =  yt.DatasetSeries(ds_pattern)
+)
 
-storage = {}
-for ds in ts.piter():
-
-    box = ds.box(left_edge = -ds.domain_width/2.0,right_edge = ds.domain_width/2.0)
-    x = box["star","x"]
-    y = box["star","y"]
-    z = box["star","z"]
-    fig,ax = plt.subplots()
-    ax.plot(x,y,marker = "x",linestyle = "None")
-    ax.set_xlim(-ds.domain_width[0]/2.0,ds.domain_width[0]/2.0)
-    ax.set_ylim(-ds.domain_width[0]/2.0,ds.domain_width[0]/2.0)
-    ax.set_xlabel("x (cm)")
-    ax.set_ylabel("y (cm)")
-    current_cycle = ds.parameters["current_cycle"]
-    filename = f"{output_prefix}_{current_cycle}.png"
-    fig.savefig(filename)
-    plt.close(fig)
+if __name__ == "__main__":
+    args = vars(parser.parse_args())
+    input_prefix = args["input_prefix"]
+    output_prefix = args["output_prefix"]
+    yt.enable_parallelism()
+    ds_pattern = f"{input_prefix}_????/{input_prefix}_????.block_list"
+    ts =  yt.DatasetSeries(ds_pattern)
+    
+    storage = {}
+    for ds in ts.piter():
+        
+        box = ds.box(left_edge = -ds.domain_width/2.0,right_edge = ds.domain_width/2.0)
+        x = box["star","x"]
+        y = box["star","y"]
+        z = box["star","z"]
+        fig,ax = plt.subplots()
+        ax.plot(x,y,marker = "x",linestyle = "None")
+        ax.set_xlim(-ds.domain_width[0]/2.0,ds.domain_width[0]/2.0)
+        ax.set_ylim(-ds.domain_width[0]/2.0,ds.domain_width[0]/2.0)
+        ax.set_xlabel("x (cm)")
+        ax.set_ylabel("y (cm)")
+        current_cycle = ds.parameters["current_cycle"]
+        filename = f"{output_prefix}_{current_cycle}.png"
+        fig.savefig(filename)
+        plt.close(fig)
 
     

@@ -102,44 +102,45 @@ parser.add_argument(
     type=int,
 )
 
+if __name__ == "__main__":
+    args = vars(parser.parse_args())
+    
+    ## set seed
+    np.random.seed(args["seed"])
 
-args = vars(parser.parse_args())
+    ## generate random numbers
+    rand = np.random.rand(args["n_particles"],3)
 
-## set seed
-np.random.seed(args["seed"])
+    # (r,theta,phi polar coordinates)
+    # Use first column to get r
+    r = args["radius"] * np.cbrt(rand[:,0])
+    # Use second column to get theta
+    theta = np.arccos(1 - 2*rand[:,1])
+    # Use third column to get phi
+    phi = 2*np.pi*rand[:,2]
 
-## generate random numbers
-rand = np.random.rand(args["n_particles"],3)
+    # convert to cartesian coordinates
+    x = r*np.sin(theta)*np.cos(phi)
+    y = r*np.sin(theta)*np.sin(phi)
+    z = r*np.cos(theta)
 
-# (r,theta,phi polar coordinates)
-# Use first column to get r
-r = args["radius"] * np.cbrt(rand[:,0])
-# Use second column to get theta
-theta = np.arccos(1 - 2*rand[:,1])
-# Use third column to get phi
-phi = 2*np.pi*rand[:,2]
+    # get radial velocities
+    vx = -1 * args["infall_speed"] * x / r
+    vy = -1 * args["infall_speed"] * y / r
+    vz = -1 * args["infall_speed"] * z / r
 
-# convert to cartesian coordinates
-x = r*np.sin(theta)*np.cos(phi)
-y = r*np.sin(theta)*np.sin(phi)
-z = r*np.cos(theta)
+    # shift positions and velocities
+    x += args["centre"][0]
+    y += args["centre"][1]
+    z += args["centre"][2]
+    vx += args["drift_velocity"][0]
+    vy += args["drift_velocity"][1]
+    vz += args["drift_velocity"][2]
 
-# get radial velocities
-vx = -1 * args["infall_speed"] * x / r
-vy = -1 * args["infall_speed"] * y / r
-vz = -1 * args["infall_speed"] * z / r
+    # get masses
+    mass = np.full(args["n_particles"],args["mass"]/args["n_particles"])
 
-# shift positions and velocities
-x += args["centre"][0]
-y += args["centre"][1]
-z += args["centre"][2]
-vx += args["drift_velocity"][0]
-vy += args["drift_velocity"][1]
-vz += args["drift_velocity"][2]
-
-# get masses
-mass = np.full(args["n_particles"],args["mass"]/args["n_particles"])
-
-# make the file
-output = np.column_stack((mass,x,y,z,vx,vy,vz))
-np.savetxt(args["filename"],output)
+    # make the file
+    output = np.column_stack((mass,x,y,z,vx,vy,vz))
+    np.savetxt(args["filename"],output)
+    
