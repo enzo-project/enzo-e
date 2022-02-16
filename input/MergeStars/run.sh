@@ -53,7 +53,6 @@ mpirun -np 4 python $testPrefix/mass_momentum_conservation.py -i Dir_Merge_Stars
 
 cat test/MethodMergeStars/mmc_serial.out
 
-exit 1
 ERR_CODE=$?
 if [ $ERR_CODE -gt 0 ]; then
     SERIAL_FAILED=1

@@ -19,8 +19,8 @@ import yt
 import matplotlib.pyplot as plt
 import numpy as np
 import io
-from unyt import UnitSystem
 import argparse as ap
+import sys
 
 # matplotlib params
 params = {'axes.labelsize': 16,
@@ -71,6 +71,46 @@ parser.add_argument(
     default="mmc.png",
     type=str,
 )
+
+parser.add_argument(
+    "-t",
+    "--tolerance",
+    help="""
+    The error tolerance. If initial mass / momentum is greater than this value,
+    this script tests if the absolute difference between the total mass / momentum
+    in each snapshot and the initial mass / momentum, divided by the initial mass /
+    momentum, is less than the tolerance. If initial mass / momentum is smaller,
+    then just check the absolute difference.
+    """,
+    required=False,
+    default=1.0e-6,
+    type=float,
+)
+
+def test_error(quantity_list,tolerance):
+    
+    try:
+        return_val = True
+        error_list = []
+        initial_value = quantity_list[0]
+        if np.abs(initial_value) < tolerance:
+            for q in quantity_list:
+                error = q - initial_value
+                error_list.append(error)
+                if np.abs(error) > tolerance:
+                    return_val = False
+        else:
+            for q in quantity_list:
+                error = q / initial_value - 1.0
+                error_list.append(error)
+                if np.abs(error) > tolerance:
+                    return_val = False
+
+        return (error_list,return_val)
+    except:
+        print("Encounted error while trying to calculate error in quantity")
+        sys.exit(2)
+ 
 if __name__ == "__main__":
     
     args = vars(parser.parse_args())
@@ -104,8 +144,13 @@ if __name__ == "__main__":
             pz_list.append(pz)
             n_p_list.append(n_p)
 
+        mass_error, mass_error_pass = test_error(mass_list,args["tolerance"])
+        px_error, px_error_pass = test_error(px_list,args["tolerance"])
+        py_error, py_error_pass = test_error(py_list,args["tolerance"])
+        pz_error, pz_error_pass = test_error(pz_list,args["tolerance"])
+        
         fig,ax = plt.subplots(nrows = 3,sharex = True)
-        ax[0].plot(time_list,mass_list/mass_list[0] - 1.0)
+        ax[0].plot(time_list,mass_error)
         grid_line_positions = np.linspace(-0.1,0.1,11,endpoint = True)
         for y in grid_line_positions:
             ax[0].axhline(y = y,ls = "--",color = "k",linewidth = 0.5,alpha = 0.7)
@@ -114,15 +159,22 @@ if __name__ == "__main__":
         ax[0].set_ylim(-0.1,0.1)
         ax[0].set_ylabel("Total Mass Error")
 
-        ax[1].plot(time_list,px_list/px_list[0] - 1.0,label = r"$p_x$")
-        ax[1].plot(time_list,py_list/py_list[0] - 1.0,label = r"$p_y$",ls = "--")
+        ax[1].plot(time_list,px_error,label = r"$p_x$")
+        ax[1].plot(time_list,py_error,label = r"$p_y$",ls = "--")
+        ax[1].plot(time_list,pz_error,label = r"$p_z$",ls = ":")
         ax[1].set_ylim(-0.1,0.1)
-        ax[1].plot(time_list,pz_list/pz_list[0] - 1.0,label = r"$p_z$",ls = ":")
         ax[1].set_ylabel(r"Total Momentum Error")
         ax[1].legend(loc = 0)
         ax[2].plot(time_list,n_p_list)
         ax[2].set_ylabel("Number of Particles")
         ax[2].set_xlabel("Cycle number")
-
         fig.savefig(args["output"])
+        plt.close(fig)
+        if (mass_error_pass and px_error_pass and py_error_pass and pz_error_pass):
+            print("All quantities conserved. Test passed")
+            sys.exit(0)
+        else:
+            print("Not all quantities conserved. Test failed.")
+            sys.exit(1)
+
     
