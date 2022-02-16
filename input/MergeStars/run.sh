@@ -80,6 +80,8 @@ fi
 
 mv mmc_parallel.png test/MethodMergeStars/
 
+rm -r Dir*
+
 if [[ "$SERIAL_FAILED" -eq 0 && "$PARALLEL_FAILED" -eq 0 ]]; then
     echo "Both MergeStars tests have passed"
     exit 0
