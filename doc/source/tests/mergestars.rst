@@ -2,21 +2,12 @@
 Merge Stars Tests
 ------------------
 
-Tests of the enzo-e "merge stars" method with a problem involving a collapsing sphere of particles. Runs "pm update" and "merge stars" method with parameters set in the parameter files merge_stars_test-1.in, merge_stars_test-8.in, and merge_stars_test-16.in, in the directory: input/MergeStars. The test suite simply runs the test problems and checks whether enzo-e exits without returning an error code. In order to get more useful output from the tests, it is recommended to look at input/MergeStars/README and following the instructions there.  
+Two tests of the enzo-e "merge stars" method (the serial test and the parallel test). All the files necessary for running the tests can be found in input/MergeStars,
+and the tests can be run by executing input/MergeStars/run.sh from the top-level directory of the repository.
 
-method_merge_stars-1
-====================
-
-Tests merge stars method P=1
-
-
-method_merge_stars-8
-====================
-
-Tests merge stars method P=8
-
-method_merge_stars-16
-=====================
-
-Tests merge stars method P=16
- 
+Each test involves setting up initial conditions with 1000 star particles randomly distributed in a sphere, with velocities directed towards the centre of the sphere. The sphere as a whole also has an
+additional constant drift velocity. For the serial test, Enzo-E runs in serial mode with the parameter file merge_stars_test_serial.in. For the parallel test, Enzo-E is run using charm with
+4 processes with the parameter file merge_stars_test_parallel.in. The methods used are "pm update" and "merge stars", so that the particles all move with constant velocity until they are merged
+together. The python script input/MergeStars/mass_momentum_conservation.py then tests if mass and momentum are conserved across all the output snapshots, to within some tolerance,
+which depends on the precision specified by the $CELLO_PREC environment variable (1.0e-4 for single precision, 1.0e-6 for double precision).
+If all quantities are indeed conserved, the test passes, if not, the test fails. See input/MergeStars/README for further details on running the tests.
