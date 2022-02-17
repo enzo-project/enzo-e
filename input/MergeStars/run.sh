@@ -34,11 +34,20 @@ fi
 # Now to run the actual tests:
 echo "Generating ICs for MergeStars Test"
 
+# set tolerance level depending on whether Enzo-E was compiled with single or double precision
+
+if [ "$CELLO_PREC" == "double" ]; then
+    tolerance=1.0e-6
+else
+    tolerance=1.0e-4
+fi
+
+
 python $testPrefix/ics.py -r 4.0e16 -m 2.0e36 -c 1.5e17 1.5e17 1.5e17 -d 2.0e8 2.0e8 2.0e8 -i 1.0e8 -n 1000
 
 # Run serial test
 echo "Running Serial MergeStars Test"
-bin/enzo-e $testPrefix/merge_stars_test_serial.in > test/MethodMergeStars/merge_stars_test_serial.out 2>&1
+./bin/enzo-e $testPrefix/merge_stars_test_serial.in > test/MethodMergeStars/merge_stars_test_serial.out 2>&1
 
 cat test/MethodMergeStars/merge_stars_test_serial.out
 
@@ -49,7 +58,7 @@ cat test/MethodMergeStars/images_serial.out
 mkdir -p test/MethodMergeStars/run_serial
 mv image_serial* test/MethodMergeStars/run_serial/
 
-mpirun -np 4 python $testPrefix/mass_momentum_conservation.py -i Dir_Merge_Stars_Serial -o mmc_serial.png > test/MethodMergeStars/mmc_serial.out 2>&1
+mpirun -np 4 python $testPrefix/mass_momentum_conservation.py -i Dir_Merge_Stars_Serial -o mmc_serial.png -t $tolerance > test/MethodMergeStars/mmc_serial.out 2>&1
 
 
 
@@ -69,7 +78,7 @@ mv mmc_serial.png test/MethodMergeStars/
 # Run parallel test
 echo "Running Parallel MergeStars Test"
 echo $CHARM_HOME
-$CHARM_HOME/bin/charmrun +p4 ++local bin/enzo-e $testPrefix/merge_stars_test_parallel.in > test/MethodMergeStars/merge_stars_test_parallel.out 2>&1
+$CHARM_HOME/bin/charmrun +p4 ++local ./bin/enzo-e $testPrefix/merge_stars_test_parallel.in > test/MethodMergeStars/merge_stars_test_parallel.out 2>&1
 
 cat test/MethodMergeStars/merge_stars_test_parallel.out
 
@@ -80,7 +89,7 @@ cat test/MethodMergeStars/images_parallel.out
 mkdir -p test/MethodMergeStars/run_parallel
 mv image_parallel* test/MethodMergeStars/run_parallel/
 
-mpirun -np 4 python $testPrefix/mass_momentum_conservation.py -i Dir_Merge_Stars_Parallel -o mmc_parallel.png > test/MethodMergeStars/mmc_parallel.out 2>&1
+mpirun -np 4 python $testPrefix/mass_momentum_conservation.py -i Dir_Merge_Stars_Parallel -o mmc_parallel.png -t $tolerance > test/MethodMergeStars/mmc_parallel.out 2>&1
 
 
 
