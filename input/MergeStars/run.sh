@@ -68,7 +68,8 @@ mv mmc_serial.png test/MethodMergeStars/
 
 # Run parallel test
 echo "Running Parallel MergeStars Test"
-charmrun +p4 ++local bin/enzo-e $testPrefix/merge_stars_test_parallel.in > test/MethodMergeStars/merge_stars_test_parallel.out 2>&1
+echo $CHARM_HOME
+$CHARM_HOME/bin/charmrun +p4 ++local bin/enzo-e $testPrefix/merge_stars_test_parallel.in > test/MethodMergeStars/merge_stars_test_parallel.out 2>&1
 
 cat test/MethodMergeStars/merge_stars_test_parallel.out
 
@@ -96,7 +97,7 @@ cat test/MethodMergeStars/mmc_parallel.out
 
 mv mmc_parallel.png test/MethodMergeStars/
 
-rm -r Dir*
+#rm -r Dir*
 
 if [[ "$SERIAL_FAILED" -eq 0 && "$PARALLEL_FAILED" -eq 0 ]]; then
     echo "Both MergeStars tests have passed"
