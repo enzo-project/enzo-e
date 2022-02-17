@@ -51,7 +51,7 @@ mv image_serial* test/MethodMergeStars/run_serial/
 
 mpirun -np 4 python $testPrefix/mass_momentum_conservation.py -i Dir_Merge_Stars_Serial -o mmc_serial.png > test/MethodMergeStars/mmc_serial.out 2>&1
 
-cat test/MethodMergeStars/mmc_serial.out
+
 
 ERR_CODE=$?
 if [ $ERR_CODE -gt 0 ]; then
@@ -61,6 +61,8 @@ else
     SERIAL_FAILED=0
     echo "SERIAL MERGE STARS TEST PASSED"
 fi
+
+cat test/MethodMergeStars/mmc_serial.out
 
 mv mmc_serial.png test/MethodMergeStars/
 
@@ -79,7 +81,7 @@ mv image_parallel* test/MethodMergeStars/run_parallel/
 
 mpirun -np 4 python $testPrefix/mass_momentum_conservation.py -i Dir_Merge_Stars_Parallel -o mmc_parallel.png > test/MethodMergeStars/mmc_parallel.out 2>&1
 
-cat test/MethodMergeStars/mmc_parallel.out
+
 
 ERR_CODE=$?
 if [ $ERR_CODE -gt 0 ]; then
@@ -89,6 +91,8 @@ else
     PARALLEL_FAILED=0
     echo "PARALLEL MERGE STARS TEST PASSED"
 fi
+
+cat test/MethodMergeStars/mmc_parallel.out
 
 mv mmc_parallel.png test/MethodMergeStars/
 

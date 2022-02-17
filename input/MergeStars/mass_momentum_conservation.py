@@ -35,7 +35,6 @@ params = {'axes.labelsize': 16,
           'legend.fontsize': 16,
           'xtick.labelsize': 16,
           'ytick.labelsize': 16,
-          'text.usetex': True,
           'figure.figsize' : (7,12),
           'figure.subplot.left'    : 0.15,
           'figure.subplot.right'   : 0.95  ,
@@ -45,7 +44,6 @@ params = {'axes.labelsize': 16,
           'figure.subplot.hspace'  : 0.05  ,
           'lines.markersize' : 3.0,
           'lines.linewidth' : 2.0
-          #'text.latex.unicode': True
       }
 
 plt.rcParams.update(params)
