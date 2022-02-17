@@ -61,7 +61,9 @@ Executing run.sh (from the top-level directory of the repository) does the follo
 
 - Runs mass_momentum_conservation.py, producing an image file called mmc_serial.png /
   mmc_parallel.png for the serial/parallel runs respectively, storing
-  it in run_serial/run-8/run-16 as appropriate.
+  it in run_serial/run_parallel as appropriate. The tolerance (-t) parameter is set
+  to 1.0e-4 when Enzo-E is compiled with single precision ($CELLO_PREC=single), and
+  to 1.0e-6 when Enzo-E is compiled with double precision ($CELLO_PREC=double).
 
 - All the snapshot directories are deleted.
 
