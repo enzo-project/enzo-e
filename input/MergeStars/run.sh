@@ -68,7 +68,7 @@ mv mmc_serial.png test/MethodMergeStars/
 
 # Run parallel test
 echo "Running Parallel MergeStars Test"
-echo $CHARM_HOME
+
 $CHARM_HOME/bin/charmrun +p4 ++local ./bin/enzo-e $testPrefix/merge_stars_test_parallel.in > test/MethodMergeStars/merge_stars_test_parallel.out 2>&1
 
 mpirun -np 4 python $testPrefix/images.py -i Dir_Merge_Stars_Parallel -o image_parallel > test/MethodMergeStars/images_parallel.out 2>&1
