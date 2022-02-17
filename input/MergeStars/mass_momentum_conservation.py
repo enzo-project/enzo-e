@@ -165,9 +165,9 @@ if __name__ == "__main__":
         ax[0].set_ylim(-0.1,0.1)
         ax[0].set_ylabel("Total Mass Error")
 
-        ax[1].plot(time_list,px_error,label = r"$p_x$")
-        ax[1].plot(time_list,py_error,label = r"$p_y$",ls = "--")
-        ax[1].plot(time_list,pz_error,label = r"$p_z$",ls = ":")
+        ax[1].plot(time_list,px_error,label = "x-momentum")
+        ax[1].plot(time_list,py_error,label = "y-momentum",ls = "--")
+        ax[1].plot(time_list,pz_error,label = "z-momentum",ls = ":")
         ax[1].set_ylim(-0.1,0.1)
         ax[1].set_ylabel(r"Total Momentum Error")
         ax[1].legend(loc = 0)
