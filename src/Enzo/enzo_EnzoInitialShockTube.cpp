@@ -209,8 +209,8 @@ void EnzoInitialShockTube::enforce_block
   std::string bfields[3] = {"bfieldi_x","bfieldi_y","bfieldi_z"};
 
   Field field  = block->data()->field();
+  const ghost_choice include_gz = ghost_choice::include;
   EnzoPermutedCoordinates coord(aligned_ax_);
-  EnzoFieldArrayFactory array_factory(block);
 
   CSlice *l_slice = NULL;
   CSlice *r_slice = NULL;
@@ -229,34 +229,34 @@ void EnzoInitialShockTube::enforce_block
     enzo_float velocity_1 = cur_val_map->at("velocity_1") + trans_velocity;
     enzo_float velocity_2 = cur_val_map->at("velocity_2");
 
-    arr = array_factory.from_name("density");
+    arr = field.values_view<enzo_float>("density", include_gz);
     initializer_helper_(*cur_slice, cur_val_map->at("density"), arr);
 
-    arr = array_factory.from_name(velocities[coord.i_axis()]);
+    arr = field.values_view<enzo_float>(velocities[coord.i_axis()], include_gz);
     initializer_helper_(*cur_slice, velocity_0, arr);
 
-    arr = array_factory.from_name(velocities[coord.j_axis()]);
+    arr = field.values_view<enzo_float>(velocities[coord.j_axis()], include_gz);
     initializer_helper_(*cur_slice, velocity_1, arr);
 
-    arr = array_factory.from_name(velocities[coord.k_axis()]);
+    arr = field.values_view<enzo_float>(velocities[coord.k_axis()], include_gz);
     initializer_helper_(*cur_slice, velocity_2, arr);
 
-    arr = array_factory.from_name(bfields[coord.j_axis()]);
+    arr = field.values_view<enzo_float>(bfields[coord.j_axis()], include_gz);
     initializer_helper_(*cur_slice, cur_val_map->at("bfield_1"), arr);
 
-    arr = array_factory.from_name(bfields[coord.k_axis()]);
+    arr = field.values_view<enzo_float>(bfields[coord.k_axis()], include_gz);
     initializer_helper_(*cur_slice, cur_val_map->at("bfield_2"), arr);
 
     // (optionally) compute the specific internal energy
     enzo_float eint = (cur_val_map->at("pressure") /
 		       ((gamma_ - 1.) * cur_val_map->at("density")));
     if (field.is_field("internal_energy")){
-      arr = array_factory.from_name("internal_energy");
+      arr = field.values_view<enzo_float>("internal_energy", include_gz);
       initializer_helper_(*cur_slice, eint, arr);
     }
 
     // compute the specific total energy
-    arr = array_factory.from_name("total_energy");
+    arr = field.values_view<enzo_float>("total_energy", include_gz);
 
     enzo_float etot, v2, b2;
     v2 = (velocity_0 * velocity_0 + velocity_1 * velocity_1 +
@@ -269,7 +269,8 @@ void EnzoInitialShockTube::enforce_block
     initializer_helper_(*cur_slice, etot, arr);
   }
 
-  EFlt3DArray align_b_arr = array_factory.from_name(bfields[coord.i_axis()]);
+  EFlt3DArray align_b_arr = field.values_view<enzo_float>
+    (bfields[coord.i_axis()], include_gz);
   assign_uniform_value_(align_b_arr, aligned_bfield_val);
 
   delete l_slice;
