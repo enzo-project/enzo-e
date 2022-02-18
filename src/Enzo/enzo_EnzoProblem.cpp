@@ -694,7 +694,14 @@ Method * EnzoProblem::create_method_
   } else if (name == "feedback") {
 
     // need a similar type swtich as in star maker
-    method = new EnzoMethodDistributedFeedback();
+    if (enzo_config->method_feedback_method == "distributed"){
+      method = new EnzoMethodDistributedFeedback();
+    } else if (enzo_config->method_feedback_method == "STARSS" ||
+               enzo_config->method_feedback_method == "starss") {
+      method = new EnzoMethodFeedbackSTARSS();
+    }  else { // does not do anything
+      method = new EnzoMethodFeedback();
+    }
 
   } else {
 

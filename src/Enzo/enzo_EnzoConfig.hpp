@@ -297,6 +297,7 @@ public: // interface
       method_hydro_reconstruct_positive(false),
       method_hydro_riemann_solver(""),
       /// EnzoMethodFeedback
+      method_feedback_method(""),
       method_feedback_ejecta_mass(0.0),
       method_feedback_supernova_energy(1.0),
       method_feedback_ejecta_metal_fraction(0.0),
@@ -306,6 +307,14 @@ public: // interface
       method_feedback_ke_fraction(0.0),
       method_feedback_use_ionization_feedback(false),
       method_feedback_time_first_sn(-1.0), // in Myr
+      /// EnzoMethodFeedbackSTARSS
+      method_feedback_single_sn(0),
+      method_feedback_unrestricted_sn(0),
+      method_feedback_stellar_winds(0),
+      method_feedback_gas_return_fraction(0.0),
+      method_feedback_min_level(0),
+      method_feedback_analytic_SNR_shell_mass(0),
+      method_feedback_fade_SNR(0),
       /// EnzoMethodStarMaker
       method_star_maker_method(""),
       method_star_maker_use_density_threshold(true),           // check above density threshold before SF
@@ -694,6 +703,7 @@ public: // attributes
 
   /// EnzoMethodFeedback
 
+  std::string               method_feedback_method;
   double                    method_feedback_ejecta_mass;
   double                    method_feedback_supernova_energy;
   double                    method_feedback_ejecta_metal_fraction;
@@ -703,6 +713,16 @@ public: // attributes
   double                    method_feedback_radius;
   bool                      method_feedback_shift_cell_center;
   bool                      method_feedback_use_ionization_feedback;
+
+  /// EnzoMethodFeedbackSTARSS
+  
+  int                       method_feedback_single_sn;
+  int                       method_feedback_unrestricted_sn;
+  int                       method_feedback_stellar_winds;
+  double                    method_feedback_gas_return_fraction;
+  int                       method_feedback_min_level;
+  int                       method_feedback_analytic_SNR_shell_mass;
+  int                       method_feedback_fade_SNR;
 
   /// EnzoMethodStarMaker
 

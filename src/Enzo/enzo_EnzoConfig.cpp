@@ -204,6 +204,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_hydro_reconstruct_positive(0),
   method_hydro_riemann_solver(""),
   // EnzoMethodFeedback,
+  method_feedback_method(""),
   method_feedback_ejecta_mass(0.0),
   method_feedback_supernova_energy(1.0),
   method_feedback_ejecta_metal_fraction(0.0),
@@ -213,6 +214,14 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_ke_fraction(0.0),
   method_feedback_use_ionization_feedback(false),
   method_feedback_time_first_sn(-1), // in Myr
+  // EnzoMethodFeedbackSTARSS,
+  method_feedback_single_sn(0),
+  method_feedback_unrestricted_sn(0),
+  method_feedback_stellar_winds(0),
+  method_feedback_gas_return_fraction(0.0),
+  method_feedback_min_level(0),
+  method_feedback_analytic_SNR_shell_mass(0),
+  method_feedback_fade_SNR(0),
   // EnzoMethodStarMaker,
   method_star_maker_method(""),                              // star maker type to use
   method_star_maker_use_density_threshold(true),           // check above density threshold before SF
@@ -540,6 +549,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_hydro_reconstruct_positive;
   p | method_hydro_riemann_solver;
 
+  p | method_feedback_method;
   p | method_feedback_ejecta_mass;
   p | method_feedback_supernova_energy;
   p | method_feedback_ejecta_metal_fraction;
@@ -549,6 +559,14 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_feedback_ke_fraction;
   p | method_feedback_use_ionization_feedback;
   p | method_feedback_time_first_sn;
+
+  p | method_feedback_single_sn;
+  p | method_feedback_unrestricted_sn;
+  p | method_feedback_stellar_winds;
+  p | method_feedback_gas_return_fraction;
+  p | method_feedback_min_level;
+  p | method_feedback_analytic_SNR_shell_mass;
+  p | method_feedback_fade_SNR;
 
   p | method_star_maker_method;
   p | method_star_maker_use_density_threshold;
@@ -1387,6 +1405,9 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
 
 void EnzoConfig::read_method_feedback_(Parameters * p)
 {
+  method_feedback_method = p->value_string
+    ("Method:feedback:method","distributed");
+
   method_feedback_ejecta_mass = p->value_float
     ("Method:feedback:ejecta_mass",0.0);
 
@@ -1413,6 +1434,28 @@ void EnzoConfig::read_method_feedback_(Parameters * p)
 
   method_feedback_use_ionization_feedback = p->value_logical
     ("Method:feedback:use_ionization_feedback", false);
+
+  // MethodFeedbackSTARSS parameters
+  method_feedback_single_sn = p->value_integer
+    ("Method:feedback:single_sn",0);
+
+  method_feedback_unrestricted_sn = p->value_integer
+    ("Method:feedback:unrestricted_sn",0);
+
+  method_feedback_stellar_winds = p->value_integer
+    ("Method:feedback:stellar_winds",0);
+
+  method_feedback_gas_return_fraction = p->value_float
+    ("Method:feedback:gas_return_fraction",0.0);
+
+  method_feedback_min_level = p->value_integer
+    ("Method:feedback:min_level",0);
+
+  method_feedback_analytic_SNR_shell_mass = p->value_integer
+    ("Method:feedback:analytic_SNR_shell_mass",0);
+
+  method_feedback_fade_SNR = p->value_integer
+    ("Method:feedback:fade_SNR",0);
 }
 
 //----------------------------------------------------------------------
@@ -1420,76 +1463,44 @@ void EnzoConfig::read_method_feedback_(Parameters * p)
 void EnzoConfig::read_method_star_maker_(Parameters * p)
 {
   
-//  const EnzoConfig * enzo_config = enzo::config();
+  // all use_* parameters set to true by default. The thinking
+  // behind this is that any new star maker method that doesn't
+  // want to use e.g. cooling_time can just not call the
+  // EnzoMethodStarMaker::check_cooling_time() function
+  // in its main routine.
  
   method_star_maker_method = p->value_string
     ("Method:star_maker:method","stochastic");
 
-  // set defaults depending on method_star_maker_type 
-/*  
-  if (enzo_config->method_star_maker_type == "stochastic") {
-    method_star_maker_use_density_threshold = p->value_logical
-      ("Method:star_maker:use_density_threshold",true);
+  method_star_maker_use_density_threshold = p->value_logical
+    ("Method:star_maker:use_density_threshold",true);
 
-    method_star_maker_use_overdensity_threshold = p->value_logical
-      ("Method:star_maker:use_overdensity_threshold",false);
+  method_star_maker_use_overdensity_threshold = p->value_logical
+    ("Method:star_maker:use_overdensity_threshold",true);
 
-    method_star_maker_use_velocity_divergence = p->value_logical
-      ("Method:star_maker:use_velocity_divergence",true);
+  method_star_maker_use_velocity_divergence = p->value_logical
+    ("Method:star_maker:use_velocity_divergence",true);
 
-    method_star_maker_use_dynamical_time = p->value_logical
-      ("Method:star_maker:use_dynamical_time",true);
+  method_star_maker_use_dynamical_time = p->value_logical
+    ("Method:star_maker:use_dynamical_time",true);
 
-    method_star_maker_use_cooling_time = p->value_logical
-      ("Method:star_maker:use_cooling_time",true);
+  method_star_maker_use_cooling_time = p->value_logical
+    ("Method:star_maker:use_cooling_time",true);
 
-    method_star_maker_use_self_gravitating = p->value_logical
-      ("Method:star_maker:use_self_gravitating", false);
+  method_star_maker_use_self_gravitating = p->value_logical
+    ("Method:star_maker:use_self_gravitating", true);
 
-    method_star_maker_use_h2_self_shielding = p->value_logical
-      ("Method:star_maker:use_h2_self_shielding", false);
+  method_star_maker_use_h2_self_shielding = p->value_logical
+    ("Method:star_maker:use_h2_self_shielding", true);
 
-    method_star_maker_use_jeans_mass = p->value_logical
-      ("Method:star_maker:use_jeans_mass", false);
+  method_star_maker_use_jeans_mass = p->value_logical
+    ("Method:star_maker:use_jeans_mass", true);
 
-    method_star_maker_use_temperature_threshold = p->value_logical
-      ("Method:star_maker:use_temperature_threshold",false);
+  method_star_maker_use_temperature_threshold = p->value_logical
+    ("Method:star_maker:use_temperature_threshold",true);
 
-    method_star_maker_use_critical_metallicity = p->value_logical
-      ("Method:star_maker:use_critical_metallicity",false);
-  }
-*/
-//  else if (enzo_config->method_star_maker_type == "STARSS") {
-    method_star_maker_use_density_threshold = p->value_logical
-      ("Method:star_maker:use_density_threshold",false);
-
-    method_star_maker_use_overdensity_threshold = p->value_logical
-      ("Method:star_maker:use_overdensity_threshold",true);
-
-    method_star_maker_use_velocity_divergence = p->value_logical
-      ("Method:star_maker:use_velocity_divergence",true);
-
-    method_star_maker_use_dynamical_time = p->value_logical
-      ("Method:star_maker:use_dynamical_time",false);
-
-    method_star_maker_use_cooling_time = p->value_logical
-      ("Method:star_maker:use_cooling_time",true);
-
-    method_star_maker_use_self_gravitating = p->value_logical
-      ("Method:star_maker:use_self_gravitating", true);
-
-    method_star_maker_use_h2_self_shielding = p->value_logical
-      ("Method:star_maker:use_h2_self_shielding", true);
-
-    method_star_maker_use_jeans_mass = p->value_logical
-      ("Method:star_maker:use_jeans_mass", true);
-
-    method_star_maker_use_temperature_threshold = p->value_logical
-      ("Method:star_maker:use_temperature_threshold",false);
-
-    method_star_maker_use_critical_metallicity = p->value_logical
-      ("Method:star_maker:use_critical_metallicity",false);
-//  }
+  method_star_maker_use_critical_metallicity = p->value_logical
+    ("Method:star_maker:use_critical_metallicity",true);
 
   method_star_maker_number_density_threshold = p->value_float
     ("Method:star_maker:number_density_threshold",0.0);

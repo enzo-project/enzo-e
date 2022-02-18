@@ -35,7 +35,7 @@ EnzoMethodStarMakerSTARSS::EnzoMethodStarMakerSTARSS
   : EnzoMethodStarMaker()
 {
   // To Do: Make the seed an input parameter
-  srand(time(NULL)); // need randum number generator for later
+  //srand(time(NULL)); // need randum number generator for later
   return;
 }
 
@@ -128,8 +128,8 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
   enzo_float * pform  = 0;
   enzo_float * plifetime = 0;
 
-  // obtain the particle stride length
-  const int ps = particle.stride(it, ia_m);
+  // obtain the particle stride length (TODO: remove--don't need?)
+  //const int ps = particle.stride(it, ia_m);
 
   int rank = cello::rank();
 
@@ -169,7 +169,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
     (enzo_float *) field.values("density_particle_accumulate") : NULL;
 
 
-  const double Zsolar = 0.02;  // TODO: Update to more accurate value
+  //const double Zsolar = 0.02;  // TODO: Update to more accurate value
 
   // Idea for multi-metal species - group these using 'group'
   // class in IC parameter file and in SF / Feedback routines simply
@@ -177,6 +177,11 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
   // fields to assign particle chemical tags and deposit yields
 
   // compute the temperature (we need it here)
+  // TODO: Calling compute_temperature like this
+  // returns temperature in Kelvin--not code_temperature??
+  // EnzoMethodGrackle::claculate_temperature called
+  // without passing in grackle_units or grackle_fields.
+  // How does Grackle calculate temperatures? Tabulated?
   EnzoComputeTemperature compute_temperature
     (enzo_config->ppm_density_floor,
      enzo_config->ppm_temperature_floor,
@@ -202,7 +207,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         double ndens = rho_cgs / mean_particle_mass;
 
         double cell_mass  = density[i] *dx*dy*dz;
-        double metallicity = (metal) ? metal[i]/density[i]/Zsolar : 0.0;
+        double metallicity = (metal) ? metal[i]/density[i]/cello::metallicity_solar : 0.0;
 
         //
         // Apply the criteria for star formation
@@ -217,15 +222,16 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         if (this->use_density_threshold_) { 
           if (! this->check_number_density_threshold(ndens) ) continue;
           #ifdef DEBUG_SF_CRITERIA
-            std::cout << "number density threshold passed!" << std::endl;
+            std::cout << "ndens=" << ndens <<"; threshold passed!" << std::endl;
           #endif
         }
         else if (this->use_overdensity_threshold_){
           double dmean = (11*density[i] 
                     + density[i-idx] + density[i+idx] 
                     + density[i-idy] + density[i+idy]
-                    + density[i-idz] + density[i+idz]) / 17.0;
-          if (! this->check_overdensity_threshold(density[i]/dmean) ) continue;
+                    + density[i-idz] + density[i+idz]) / 16.0;
+          // TODO: Double check that code_density and overdensity are the same
+          if (! this->check_overdensity_threshold(dmean) ) continue;
          }
         
         // check velocity divergence < 0
@@ -240,7 +246,11 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
                                             i, idx, idy, idz, dx, dy, dz)) continue;
 
         // check that (T<10^4 K) or (dynamical_time < cooling_time)
+        // In order to check cooling time, must have use_temperature_threshold=true;
         double total_density = density[i] + density_particle_accumulate[i];
+        #ifdef DEBUG_SF_CRITERIA
+           std::cout << "temperature_code=" << temperature[i] << " temperature_K" << temperature[i]*Tunit << std::endl;
+        #endif
         if (! this->check_temperature(temperature[i], Tunit)) { // if T > 10^4 K
            if (enzo_config->method_grackle_chemistry) continue; //no hot gas forming stars!
            if (cooling_time){
@@ -292,8 +302,8 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         //  We convert a fixed portion of the baryon mass (or the calculated amount)
         //TODO: Difference between dt and dtFixed???
         
-        //double p_form = 1.0 - std::exp(-mass_should_form*dt/maximum_star_mass);
-        double p_form = 1.0; // always form star (for debugging purposes) 
+        double p_form = 1.0 - std::exp(-mass_should_form*dt/maximum_star_mass);
+        p_form = 1.0; // always form star (for debugging purposes) 
 
         double random = double(mt()) / double(mt.max()); 
 

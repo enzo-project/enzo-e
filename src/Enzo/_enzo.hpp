@@ -229,6 +229,7 @@ extern "C" {
 #include "enzo_EnzoMethodCosmology.hpp"
 #include "enzo_EnzoMethodFeedback.hpp"
 #include "enzo_EnzoMethodDistributedFeedback.hpp"
+#include "enzo_EnzoMethodFeedbackSTARSS.hpp"
 #include "enzo_EnzoMethodGrackle.hpp"
 #include "enzo_EnzoMethodGravity.hpp"
 #include "enzo_EnzoMethodHeat.hpp"
