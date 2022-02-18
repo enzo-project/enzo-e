@@ -180,6 +180,27 @@ mass deposited in the "density_particle" field may bleed into the
 first layer of ghost zones.  This parameter ensures that that mass
 will be included in "density_total".`
 
+----
+
+:Parameter:  :p:`Method` : :p:`gravity` : :p:`dt_max`
+:Summary: :s:`The maximum timestep returned by EnzoMethodGravity::timestep`
+:Type:    :t:`float`
+:Default: :d:`1.0e10`
+:Scope:     :z:`Enzo`
+
+:e:`The timestep returned by EnzoMethodGravity::timestep (when called on a
+block) is calculated as follows. First, the geometric mean of the cell-widths
+in all dimensions is found, which we call the "mean cell width". Next, the
+quantity "epsilon" is calculated, as the mean cell width divided by the square
+of dt_max. Then, the maximum acceleration magnitude across all cells in the
+block is found, which we call "a_mag_max". We then calculate the
+mean cell width divided by the sum of a_mag_max and epsilon. The timestep is
+then the square root of this quantity. This means that if all the accelerations
+are zero (such as at the first time step), the timestep is equal to dt_max.
+Defining the timestep in this way also means that the value of the
+timestep is independent of how the acceleration vectors are oriented relative
+to the mesh.`
+
 
 
 grackle
