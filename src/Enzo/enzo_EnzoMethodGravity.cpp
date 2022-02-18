@@ -371,28 +371,19 @@ double EnzoMethodGravity::timestep_ (Block * block) throw()
     for (int iy=gy; iy<my-gy; iy++) {
       for (int ix=gx; ix<mx-gx; ix++) {
 	int i=ix + mx*(iy + iz*my);
+#ifdef NEW_TIMESTEP
 	if (rank == 1) a_mag = std::abs(a3[0][i]);
 	if (rank == 2) a_mag = sqrt(a3[0][i] * a3[0][i] + a3[1][i] * a3[1][i]);
 	if (rank == 3) a_mag = sqrt(a3[0][i] * a3[0][i] + a3[1][i] * a3[1][i] + a3[2][i] * a3[2][i]);
-	  
-	a_mag_max = std::max(a_mag_max,a_mag);
-      }
-    }
-  }
 #else
-  for (int iz=gz; iz<mz-gz; iz++) {
-    for (int iy=gy; iy<my-gy; iy++) {
-      for (int ix=gx; ix<mx-gx; ix++) {
-	int i=ix + mx*(iy + iz*my);
 	if (rank == 1) a_mag = std::abs(ax[i]);
 	if (rank == 2) a_mag = sqrt(ax[i] * ax[i] + ay[i] * ay[i]);
 	if (rank == 3) a_mag = sqrt(ax[i] * ax[i] + ay[i] * ay[i] + az[i] * az[i]);
-	  
+#endif
 	a_mag_max = std::max(a_mag_max,a_mag);
       }
     }
   }
-#endif
   
   dt = sqrt(mean_cell_width / (a_mag_max + epsilon)) ;
 
