@@ -42,7 +42,7 @@ public:
   { return "feedback"; }
 
   // Compute the maximum timestep for this method
-  virtual double timestep (Block * block) const throw();
+  virtual double timestep (Block * block) throw();
 
   void add_ionization_feedback(Block * block,
                                double xpos, double ypos, double zpos,

@@ -19,6 +19,28 @@
 #   define TRACE_SOLVER(solver) /*  */ 
 #endif
 
+EnzoSolverDiagonal::EnzoSolverDiagonal
+(std::string name,
+ std::string field_x,
+ std::string field_b,
+ int monitor_iter,
+ int restart_cycle,
+ int solve_type,
+ int index_prolong,
+ int index_restrict) throw()
+  : Solver
+    (name,
+     field_x,
+     field_b,
+     monitor_iter,
+     restart_cycle,
+     solve_type,
+     index_prolong,
+     index_restrict)
+{
+  id_ = cello::field_descr()->insert_temporary();
+}
+
 //======================================================================
 
 void EnzoSolverDiagonal::apply (std::shared_ptr<Matrix> A, Block * block) throw()
@@ -55,16 +77,16 @@ void EnzoSolverDiagonal::compute_
 
   if (is_finest_(block)) {
 
+    field.allocate_temporary(id_);
+
     ///   - X = 0
     ///   - R = P = B ( residual with X = 0);
 
-    const int id = field.field_id("diagonal_D");
-
-    A->diagonal(id,block);
+    A->diagonal(id_,block);
 
     enzo_float * X = (enzo_float*) field.values(ix_);
     enzo_float * B = (enzo_float*) field.values(ib_);
-    enzo_float * D = (enzo_float*) field.values(id);
+    enzo_float * D = (enzo_float*) field.values(id_);
 
     for (int iz=0; iz<mz; iz++) {
       for (int iy=0; iy<my; iy++) {
@@ -74,6 +96,7 @@ void EnzoSolverDiagonal::compute_
 	}
       }
     }
+    field.deallocate_temporary(id_);
   }
   TRACE_SOLVER("compute_() EXIT");
 }

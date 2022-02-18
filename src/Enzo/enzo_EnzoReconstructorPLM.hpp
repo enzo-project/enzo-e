@@ -165,8 +165,8 @@ public: // interface
 
   void reconstruct_interface
   (EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
-   EnzoEFltArrayMap &primr_map, int dim, EnzoEquationOfState *eos,
-   int stale_depth, const str_vec_t& passive_list);
+   EnzoEFltArrayMap &primr_map, const int dim, const EnzoEquationOfState *eos,
+   const int stale_depth, const str_vec_t& passive_list);
 
   int total_staling_rate()
   { return 2; }
@@ -184,8 +184,8 @@ private:
 template <class Limiter>
 void EnzoReconstructorPLM<Limiter>::reconstruct_interface
 (EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
- EnzoEFltArrayMap &primr_map, int dim, EnzoEquationOfState *eos,
- int stale_depth, const str_vec_t& passive_list)
+ EnzoEFltArrayMap &primr_map, const int dim, const EnzoEquationOfState *eos,
+ const int stale_depth, const str_vec_t& passive_list)
 {
   EnzoPermutedCoordinates coord(dim);
   Limiter limiter_func = Limiter();
@@ -193,8 +193,8 @@ void EnzoReconstructorPLM<Limiter>::reconstruct_interface
 
   auto fn = [coord, limiter_func, theta_limiter, stale_depth,
              &prim_map, &priml_map, &primr_map](const std::string &key,
-                                                bool use_floor,
-                                                enzo_float prim_floor)
+                                                const bool use_floor,
+                                                const enzo_float prim_floor)
     {
       // Cast the problem as reconstructing values at:
       //   wl(k, j, i+3/2) and wr(k,j,i+1/2)

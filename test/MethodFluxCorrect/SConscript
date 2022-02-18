@@ -1,0 +1,51 @@
+Import('env')
+Import('parallel_run')
+Import('serial_run')
+Import('ip_charm')
+
+Import('bin_path')
+Import('test_path')
+Import('prec')
+
+#import os
+#----------------------------------------------------------
+#defines
+#----------------------------------------------------------
+
+env['CPIN'] = 'touch parameters.out; mv parameters.out ${TARGET}.in'
+env['RMIN'] = 'rm -f parameters.out'
+env['clocal_cmd'] = '++local'
+
+#charm_args = os.getenv('CHARM_ARGS','')
+
+env_mv_ppm1 = env.Clone(COPY = 'mkdir -p ' + test_path + '/MethodFluxCorrect/Inclined-Contact-SMR-Ppm; mv `ls *.png *.h5` ' + test_path + '/MethodFluxCorrect/Inclined-Contact-SMR-Ppm')
+
+env_mv_vl1 = env.Clone(COPY = 'mkdir -p ' + test_path + '/MethodFluxCorrect/Inclined-Contact-VL; mv `ls *.png *.h5` ' + test_path + '/MethodFluxCorrect/Inclined-Contact-VL')
+
+#-------------------------------------------------------------
+#load balancing
+#-------------------------------------------------------------
+
+assert prec in ['single', 'double']
+
+balance_ppm_1 = env_mv_ppm1.RunSerial (
+  'inclined_contact_smr_ppm.unit',
+  bin_path + '/enzo-e',
+  ARGS='input/FluxCorrect/inclined_contact_smr_ppm-%s.in' % prec)
+
+
+Clean(balance_ppm_1,
+     [Glob('#/' + test_path + '/Inclined-Contact-SMR-Ppm*.png'),
+      Glob('#/' + test_path + '/Inclined-Contact-SMR-Ppm*.h5')])
+
+
+
+
+balance_vl_1 = env_mv_vl1.RunSerial (
+  'inclined_contact_smr_vl.unit',
+  bin_path + '/enzo-e',
+  ARGS='input/FluxCorrect/inclined_contact_smr_vl-%s.in' % prec)
+
+Clean(balance_vl_1,
+     [Glob('#/' + test_path + '/Inclined-Contact-VL*.png'),
+      Glob('#/' + test_path + '/Inclined-Contact-VL*.h5')])

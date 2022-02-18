@@ -62,9 +62,6 @@ PARALLEL_MAIN_BEGIN
   int g3[3] = {1,0,2};
   int g4[3] = {0,0,0};
   int g5[3] = {3,3,3};
-  int t1[3] = {1,1,1};
-  int t2[3] = {2,2,2};
-  int t3[3] = {1,0,2};
 
   field_descr->set_ghost_depth(i1, g1[0],g1[1],g1[2]);
   field_descr->set_ghost_depth(i2, g2[0],g2[1],g2[2]);
@@ -86,7 +83,7 @@ PARALLEL_MAIN_BEGIN
   field_descr->set_centering(it3, 0, 0, 1);
 
   int nx,ny,nz;
-  nx=4; ny=5; nz=6;
+  nx=4; ny=8; nz=6;
   double xpm,ypm,zpm;
   xpm = -1.0;  ypm = -2.0, zpm = -3.0;
   double xpp,ypp,zpp;
@@ -169,9 +166,9 @@ PARALLEL_MAIN_BEGIN
   double      *v3,*u3;
   double      *v4,*u4;
   long double *v5,*u5;
-  float       *vt1,*ut1;
-  double      *vt2,*ut2;
-  double      *vt3,*ut3;
+  float       *vt1;
+  double      *vt2;
+  double      *vt3;
 
   unit_func("values");  // without ghosts
   

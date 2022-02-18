@@ -1,9 +1,10 @@
 #!/bin/bash
 #
-# Input environment variables
+# Input environment variables [optional]
 #
 #   CELLO_ARCH
 #   CELLO_PREC
+#   [CELLO_BUILD_NCORE]
 #
 # Output status files for ./build.sh test
 #
@@ -27,12 +28,13 @@ log="log.build"
 
 # Set to zero to use all avaiable cores.  To override, set to a non-zero value
 # or use CELLO_BUILD_NCORE environment variable
-proc=0
+proc=8
 if [[ ! -z ${CELLO_BUILD_NCORE} ]]; then
-   proc=${CELLO_BUILD_NCORE}
-elif [[ ${proc} -eq 0 ]]; then
-   # first command: Linux. second command: macOS
-   proc=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
+    proc=${CELLO_BUILD_NCORE}
+### JB: changing default to 8 to avoid using all cores on shared HPC's
+### elif [[ ${proc} -eq 0 ]]; then
+###    # first command: Linux. second command: macOS
+###    proc=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
 fi
 
 # set default target
@@ -172,7 +174,7 @@ printf "done\n"
 printf "done\n" >> $log
 
 # TESTS
-
+count_test_crashes=0
 if [ $target == "test" ]; then
 
     rm -f              test/STOP
@@ -182,27 +184,25 @@ if [ $target == "test" ]; then
    grep -rI "^ FAIL"       $subdir/*.unit > $dir/fail.$configure
    grep -rI "^ incomplete" $subdir/*.unit > $dir/incomplete.$configure
    grep -rI "^ pass"       $subdir/*.unit > $dir/pass.$configure
-   echo $dir
-   echo $subdir
    f=`wc -l < $dir/fail.$configure`
    i=`wc -l < $dir/incomplete.$configure`
    p=`wc -l < $dir/pass.$configure`
 
-   stop=`date +"%H:%M:%S"`
+    stop=`date +"%H:%M:%S"`
 
-   line="$stop ${configure_print} FAIL: $f Incomplete: $i Pass: $p "
+    line="$stop ${configure_print} FAIL: $f Incomplete: $i Pass: $p "
 
-   printf "%s %s %-12s %-6s %-6s %s %-2s %s %-2s %s %-4s %s %-2s\n" \
-        $line | tee $log
+    printf "%s %s %-12s %-6s %-6s %s %-2s %s %-2s %s %-4s %s %-2s\n" \
+           $line | tee $log
 
    for test in $subdir/*.unit; do
-      echo $test
       test_begin=`grep "UNIT TEST BEGIN" $test | wc -l`
       test_end=`grep "UNIT TEST END"   $test | wc -l`
 
       crash=$((test_begin - $test_end))
 
       if [ $crash != 0 ]; then
+         let "count_test_crashes++"
          line="   CRASH: $test\n"
          printf "$line"
          printf "$line" >> $log
@@ -210,15 +210,6 @@ if [ $target == "test" ]; then
    done
    
    echo "$stop" > test/STOP
-
-fi
-
-if [ x$CELLO_ARCH == "xncsa-bw" ]; then
-    echo "Relinking with static libpng15.a..."
-    build_dir="build"
-   /u/sciteam/bordner/Charm/charm/bin/charmc -language charm++ -tracemode projections -o $build_dir/charm/Enzo/enzo-e -g -g $build_dir/charm/Enzo/enzo-e.o $build_dir/charm/Cello/main_enzo.o -Llib/charm -L/opt/cray/hdf5/default/cray/74/lib -lcharm -lenzo -lsimulation -lproblem -lcomm -lmesh -lfield -lio -ldisk -lmemory -lparameters -lerror -lmonitor -lparallel -lperformance -ltest -lcello -lexternal -lhdf5 -lz /u/sciteam/bordner/lib/libpng15.a -lgfortran
-
-   mv $build_dir/charm/Enzo/enzo-e bin/charm
 
 fi
 
@@ -237,7 +228,7 @@ d=`date "+%H:%M:%S"`
 rm -f test/STATUS
 
 if [ ! -e $target ]; then
-   exit 1
+    exit 1
 fi
 
 # check for failures 
@@ -258,6 +249,7 @@ if [ $target == "test" ]; then
     
     echo "Test run summary"
     echo
+    echo "   Test runs crashed:   $count_test_crashes"
     echo "   Test runs attempted: $count_attempted"
     echo "   Test runs started:   $count_started"
     if [ $count_attempted -gt $count_started ]; then
@@ -273,7 +265,7 @@ if [ $target == "test" ]; then
     fi
     echo
 
-    if [ $f -gt 0 ] || [ $crash -gt 0 ] ; then
+    if [ $f -gt 0 ] || [ $count_test_crashes -gt 0 ] ; then
 	echo "Exiting testing with failures:"
 	echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 	cat "$dir/fail.$configure"

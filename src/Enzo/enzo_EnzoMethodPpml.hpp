@@ -38,7 +38,7 @@ public: // interface
   { return "ppml"; }
 
   /// Compute maximum timestep for this method
-  virtual double timestep ( Block * block) const throw();
+  virtual double timestep ( Block * block) throw();
 
 protected: // interface
 

@@ -78,6 +78,13 @@ inline void operator|(PUP::er &p, chemistry_data &c){
  p | c.radiative_transfer_hydrogen_only;
  p | c.self_shielding_method;
  p | c.H2_self_shielding;
+ p | c.h2_charge_exchange_rate;
+ p | c.h2_dust_rate;
+ p | c.h2_h_cooling_rate;
+ p | c.collisional_excitation_rates;
+ p | c.collisional_ionisation_rates;
+ p | c.recombination_cooling_rates;
+ p | c.bremsstrahlung_cooling_rates;
 }
 #endif
 
@@ -172,12 +179,25 @@ public: // interface
       initial_grackle_test_minimum_temperature(10.0),
       initial_grackle_test_reset_energies(0),
 #endif /* CONFIG_USE_GRACKLE */
+      // EnzoInitialFeedbackTest
       initial_feedback_test_density(),
       initial_feedback_test_star_mass(),
       initial_feedback_test_temperature(),
       initial_feedback_test_from_file(),
       initial_feedback_test_metal_fraction(),
-
+      // EnzoInitialHdf5
+      initial_hdf5_max_level(),
+      initial_hdf5_format(),
+      initial_hdf5_blocking(),
+      initial_hdf5_field_files(),
+      initial_hdf5_field_datasets(),
+      initial_hdf5_field_names(),
+      initial_hdf5_field_coords(),
+      initial_hdf5_particle_files(),
+      initial_hdf5_particle_datasets(),
+      initial_hdf5_particle_coords(),
+      initial_hdf5_particle_types(),
+      initial_hdf5_particle_attributes(),
       // EnzoInitialInclinedWave
       initial_inclinedwave_alpha(0.0),
       initial_inclinedwave_beta(0.0),
@@ -186,7 +206,6 @@ public: // interface
       initial_inclinedwave_parallel_vel(std::numeric_limits<double>::min()),
       initial_inclinedwave_positive_vel(true),
       initial_inclinedwave_wave_type(""),
-
       // EnzoInitialMusic
       initial_music_field_files(),
       initial_music_field_datasets(),
@@ -273,10 +292,6 @@ public: // interface
       initial_IG_recent_SF_bin_size(5.0),
       initial_IG_recent_SF_SFR(2.0),
       initial_IG_recent_SF_seed(12345),
-      // EnzoProlong
-      interpolation_method(""),
-      // EnzoMethodCheckGravity
-      method_check_gravity_particle_type(),
       // EnzoMethodHeat
       method_heat_alpha(0.0),
       // EnzoMethodHydro
@@ -311,15 +326,13 @@ public: // interface
       method_star_maker_efficiency(0.01),            // star maker efficiency
       method_star_maker_minimum_star_mass(1.0E4),    // minium star particle mass in solar masses
       method_star_maker_maximum_star_mass(1.0E4),    // maximum star particle mass in solar masses
-      // EnzoMethodNull
-      method_null_dt(0.0),
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
       // EnzoMethodGrackle
       method_grackle_use_grackle(false),
 #ifdef CONFIG_USE_GRACKLE
-      method_grackle_chemistry(),
+      method_grackle_chemistry(nullptr),
       method_grackle_use_cooling_timestep(false),
       method_grackle_radiation_redshift(-1.0),
 #endif
@@ -359,6 +372,7 @@ public: // interface
       // EnzoProlong
       prolong_enzo_type(),
       prolong_enzo_positive(true),
+      prolong_enzo_use_linear(false),
       // EnzoSolverMg0
       solver_pre_smooth(),
       solver_post_smooth(),
@@ -399,6 +413,51 @@ public: // interface
   /// Read values from the Parameters object
   void read (Parameters * parameters) throw();
 
+protected: // methods
+
+  void read_adapt_(Parameters *);
+
+  void read_field_(Parameters *);
+  
+  void read_initial_collapse_(Parameters *);
+  void read_initial_cosmology_(Parameters *);
+  void read_initial_grackle_(Parameters *);
+  void read_initial_hdf5_(Parameters *);
+  void read_initial_music_(Parameters *);
+  void read_initial_pm_(Parameters *);
+  void read_initial_inclined_wave_(Parameters *);
+  void read_initial_burkertbodenheimer_(Parameters *);
+  void read_initial_sedov_(Parameters *);
+  void read_initial_sedov_random_(Parameters *);
+  void read_initial_shock_tube_(Parameters *);
+  void read_initial_bcenter_(Parameters *);
+  void read_initial_cloud_(Parameters *);
+  void read_initial_soup_(Parameters *);
+  void read_initial_turbulence_(Parameters *);
+  void read_initial_isolated_galaxy_(Parameters *);
+  void read_initial_feedback_test_(Parameters *);
+  
+  void read_method_grackle_(Parameters *);
+  void read_method_feedback_(Parameters *);
+  void read_method_star_maker_(Parameters *);
+  void read_method_background_acceleration_(Parameters *);
+  void read_method_vlct_(Parameters *);
+  void read_method_gravity_(Parameters *);
+  void read_method_heat_(Parameters *);
+  void read_method_pm_deposit_(Parameters *);
+  void read_method_pm_update_(Parameters *);
+  void read_method_ppm_(Parameters *);
+  void read_method_turbulence_(Parameters *);
+  
+  void read_physics_(Parameters *);
+
+  void read_prolong_enzo_(Parameters *);
+
+  void read_solvers_(Parameters *);
+
+  void read_stopping_(Parameters *);
+  
+  
 public: // attributes
 
   // NOTE: change pup() function whenever attributes change
@@ -485,6 +544,21 @@ public: // attributes
   int                        initial_grackle_test_reset_energies;
 #endif /* CONFIG_USE_GRACKLE */
 
+  /// EnzoInitialHdf5
+
+  int                         initial_hdf5_max_level;
+  std::string                 initial_hdf5_format;
+  int                         initial_hdf5_blocking[3];
+  std::vector < std::string > initial_hdf5_field_files;
+  std::vector < std::string > initial_hdf5_field_datasets;
+  std::vector < std::string > initial_hdf5_field_names;
+  std::vector < std::string > initial_hdf5_field_coords;
+  std::vector < std::string > initial_hdf5_particle_files;
+  std::vector < std::string > initial_hdf5_particle_datasets;
+  std::vector < std::string > initial_hdf5_particle_coords;
+  std::vector < std::string > initial_hdf5_particle_types;
+  std::vector < std::string > initial_hdf5_particle_attributes;
+
   /// EnzoInitialInclinedWave
   double                     initial_inclinedwave_alpha;
   double                     initial_inclinedwave_beta;
@@ -500,7 +574,6 @@ public: // attributes
   std::vector < std::string > initial_music_field_datasets;
   std::vector < std::string > initial_music_field_names;
   std::vector < std::string > initial_music_field_coords;
-
   std::vector < std::string > initial_music_particle_files;
   std::vector < std::string > initial_music_particle_datasets;
   std::vector < std::string > initial_music_particle_coords;
@@ -607,12 +680,6 @@ public: // attributes
   double                     initial_IG_recent_SF_SFR;
   int                        initial_IG_recent_SF_seed;
 
-  /// EnzoProlong
-  std::string                interpolation_method;
-
-  /// EnzoMethodCheckGravity
-  std::string                method_check_gravity_particle_type;
-
   /// EnzoMethodHeat
   double                     method_heat_alpha;
 
@@ -652,11 +719,6 @@ public: // attributes
   double                    method_star_maker_efficiency;
   double                    method_star_maker_minimum_star_mass;
   double                    method_star_maker_maximum_star_mass;
-
-
-
-  /// EnzoMethodNull
-  double                     method_null_dt;
 
   /// EnzoMethodTurbulence
   double                     method_turbulence_edot;
@@ -719,7 +781,8 @@ public: // attributes
 
   std::string                prolong_enzo_type;
   bool                       prolong_enzo_positive;
-
+  bool                       prolong_enzo_use_linear;
+  
   ///==============
   /// EnzoSolverMg0
   ///==============

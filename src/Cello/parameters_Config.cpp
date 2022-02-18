@@ -9,6 +9,7 @@
 
 #include "cello.hpp"
 #include "parameters.hpp"
+#include <iostream>
 
 Config g_config;
 
@@ -78,9 +79,11 @@ void Config::pup (PUP::er &p)
   // Initial
 
   p | num_initial;
+  p | initial_new;
   p | initial_list;
   p | initial_cycle;
   p | initial_time;
+
   p | initial_trace_name;
   p | initial_trace_field;
   p | initial_trace_mpp;
@@ -109,15 +112,33 @@ void Config::pup (PUP::er &p)
   p | method_courant_global;
   p | method_list;
   p | method_schedule_index;
+  p | method_file_name;
+  p | method_path_name;
   p | method_close_files_seconds_stagger;
   p | method_close_files_seconds_delay;
   p | method_close_files_group_size;
   p | method_courant;
+  p | method_debug_print;
+  p | method_debug_coarse;
+  p | method_debug_ghost;
   p | method_flux_correct_group;
   p | method_flux_correct_enable;
-  p | method_flux_correct_min_digits;
+  p | method_flux_correct_min_digits_fields;
+  p | method_flux_correct_min_digits_values;
+  p | method_flux_correct_single_array;
+  p | method_field_list;
+  p | method_particle_list;
+  PUParray (p,method_output_blocking,3);
+  p | method_output_all_blocks;
+  p | method_prolong;
+  p | method_ghost_depth;
+  p | method_min_face_rank;
+  p | method_all_fields;
+  p | method_all_particles;
+
   p | method_timestep;
   p | method_trace_name;
+  p | method_type;
   p | method_null_dt;
 
   // Monitor
@@ -131,7 +152,6 @@ void Config::pup (PUP::er &p)
   p | output_list;
   p | output_type;
   p | output_axis;
-  p | output_image_block_size;
   p | output_colormap;
   p | output_image_lower;
   p | output_image_upper;
@@ -157,7 +177,7 @@ void Config::pup (PUP::er &p)
   p | output_field_list;
   p | output_particle_list;
   p | output_name;
-  p | index_schedule_;
+  p | index_schedule;
   p | schedule_list;
   p | schedule_type;
   p | schedule_var;
@@ -594,8 +614,7 @@ void Config::read_field_ (Parameters * p) throw()
 	    precision_str.c_str());
   }
 
-  field_prolong   = p->value_string ("Field:prolong","linear");
-
+  field_prolong   = p->value_string ("Field:prolong","enzo");
   field_restrict  = p->value_string ("Field:restrict","linear");
 }
 
@@ -610,6 +629,7 @@ void Config::read_initial_ (Parameters * p) throw()
   TRACE("Parameters: Initial");
   initial_cycle = p->value_integer("Initial:cycle",0);
   initial_time  = p->value_float  ("Initial:time",0.0);
+  initial_new = p->value_logical ("Initial:new",false);
 
   num_initial = p->list_length("Initial:list");
 
@@ -623,12 +643,15 @@ void Config::read_initial_ (Parameters * p) throw()
 
   }
 
+  // InitialTrace
   initial_trace_name = p->value_string ("Initial:trace:name","trace");
   initial_trace_field = p->value_string ("Initial:trace:field","");
   initial_trace_mpp = p->value_float ("Initial:trace:mass_per_particle",0.0);
   initial_trace_dx = p->list_value_integer (0,"Initial:trace:stride",1);
   initial_trace_dy = p->list_value_integer (1,"Initial:trace:stride",1);
   initial_trace_dz = p->list_value_integer (2,"Initial:trace:stride",1);
+
+  
 }
 
 //----------------------------------------------------------------------
@@ -691,6 +714,41 @@ void Config::read_mesh_ (Parameters * p) throw()
 
   mesh_min_level = p->value_integer("Adapt:min_level",0);
 
+  if ( mesh_min_level > 0 ) {
+    ERROR1 ("Config::read", 
+		    "The value of mesh_min_level: %d should be less than or equal to zero", 
+		    mesh_min_level);
+  }
+
+  // Handle 1D and 2D simulations by adjusting the number of cells along the extra dimensions
+  if (mesh_root_rank < 2) mesh_root_size[1] = 1;
+  if (mesh_root_rank < 3) mesh_root_size[2] = 1;
+
+  // Dimensions of the active zone on each block along each axis
+  int ax = mesh_root_size[0] / mesh_root_blocks[0]; 
+  int ay = mesh_root_size[1] / mesh_root_blocks[1];
+  int az = mesh_root_size[2] / mesh_root_blocks[2];
+
+  //  Constraints on the block size based on the ghost depth
+  if ( mesh_max_level > 0 ) {
+    if ( !(ax >= 2*field_ghost_depth[0] && ay >= 2*field_ghost_depth[1] && az >= 2*field_ghost_depth[2] ) ) {
+      ERROR3 ("Config::read", 
+		"Dimensions of the active zone on each block (%d, %d, %d) should be at least double the size of the ghost depth for AMR simulations: ", 
+		ax, ay, az);
+    }  
+    if ( (ax%2 != 0) || (ay%2 != 0) && (az%2 != 0) ) {
+      ERROR3 ("Config::read",
+  		      "Dimensions of the active zone on each block (%d, %d, %d) should each be even for AMR simulations" ,
+		      ax, ay, az);
+    }  
+  }
+  else if ( mesh_max_level == 0 ) {   
+    if ( !(ax >= field_ghost_depth[0] && ay >= field_ghost_depth[1] && az >= field_ghost_depth[2] ) ) {
+      ERROR3 ("Config::read",
+  		      "Dimensions of the active zone on each block (%d, %d, %d) should be at least as large as the ghost depth",
+		      ax, ay, az);
+    }  
+  }
 }
 
 //----------------------------------------------------------------------
@@ -707,15 +765,33 @@ void Config::read_method_ (Parameters * p) throw()
 
   method_list.   resize(num_method);
   method_courant.resize(num_method);
+  method_file_name.resize(num_method);
+  method_path_name.resize(num_method);
+  method_debug_print.resize(num_method);
+  method_debug_coarse.resize(num_method);
+  method_debug_ghost.resize(num_method);
   method_flux_correct_group.resize(num_method);
   method_flux_correct_enable.resize(num_method);
-  method_flux_correct_min_digits.resize(num_method);
+  method_flux_correct_min_digits_fields.resize(num_method);
+  method_flux_correct_min_digits_values.resize(num_method);
+  method_field_list.resize(num_method);
+  method_particle_list.resize(num_method);
+  method_output_blocking[0].resize(num_method);
+  method_output_blocking[1].resize(num_method);
+  method_output_blocking[2].resize(num_method);
+  method_output_all_blocks.resize(num_method);
+  method_prolong.resize(num_method);
+  method_ghost_depth.resize(num_method);
+  method_min_face_rank.resize(num_method);
+  method_all_fields.resize(num_method);
+  method_all_particles.resize(num_method);
   method_timestep.resize(num_method);
   method_schedule_index.resize(num_method);
   method_close_files_seconds_stagger.resize(num_method);
   method_close_files_seconds_delay.resize(num_method);
   method_close_files_group_size.resize(num_method);
   method_trace_name.resize(num_method);
+  method_type.resize(num_method);
   
   method_courant_global = p->value_float ("Method:courant",1.0);
   
@@ -743,6 +819,32 @@ void Config::read_method_ (Parameters * p) throw()
       method_schedule_index[index_method] = -1;
     }
 
+    // Read method file_name
+    if (p->type(full_name+":file_name") == parameter_string) {
+      method_file_name[index_method].push_back
+        (p->value_string(full_name+":file_name",""));
+    } else if (p->type(full_name+":file_name") == parameter_list) {
+      int size = p->list_length(full_name+":file_name");
+      if (size > 0) method_file_name[index_method].resize(size);
+      for (int i=0; i<size; i++) {
+        method_file_name[index_method][i] =
+          p->list_value_string(i,full_name+":file_name","");
+      }
+    }
+
+    // Read method path_name
+    if (p->type(full_name+":path_name") == parameter_string) {
+      method_path_name[index_method].push_back
+        (p->value_string(full_name+":path_name",""));
+    } else if (p->type(full_name+":path_name") == parameter_list) {
+      int size = p->list_length(full_name+":path_name");
+      if (size > 0) method_path_name[index_method].resize(size);
+      for (int i=0; i<size; i++) {
+        method_path_name[index_method][i] =
+          p->list_value_string(i,full_name+":path_name","");
+      }
+    }
+
     // Read throttling parameters for MethodCloseFiles
     method_close_files_seconds_stagger[index_method] = p->value_float
       (full_name + ":seconds_stagger",0.0);
@@ -754,20 +856,89 @@ void Config::read_method_ (Parameters * p) throw()
     // Read courant condition if any
     method_courant[index_method] = p->value_float  (full_name + ":courant",1.0);
 
+    // Read any MethodDebug parameters
+    method_debug_print[index_method] = p->value_logical
+      (full_name + ":print",false);
+    method_debug_coarse[index_method] = p->value_logical
+      (full_name + ":coarse",false);
+    method_debug_ghost[index_method] = p->value_logical
+      (full_name + ":ghost",false);
+
     // Read field group for flux correction
     method_flux_correct_group[index_method] =
       p->value_string (full_name + ":group","conserved");
     method_flux_correct_enable[index_method] =
       p->value_logical (full_name + ":enable",true);
-    method_flux_correct_min_digits[index_method] =
-      p->value_float (full_name + ":min_digits",0.0);
 
-    // Read specified timestep, if any (for MethodTrace)
+    std::string min_digits_name = full_name + ":min_digits";
+    if (p->type(min_digits_name) == parameter_float){
+      // backwards compatibility
+      method_flux_correct_min_digits_fields[index_method] = {"density"};
+      method_flux_correct_min_digits_values[index_method].push_back
+        (p->value_float (min_digits_name, 0.0));
+    } else if (p->type(min_digits_name) == parameter_list){
+      // load pairs of fields and min_digits
+      int list_length = p->list_length(min_digits_name);
+      ASSERT1("Config::read",
+              "The list assigned to %s must have a non-negative, even length",
+              min_digits_name.c_str(),
+              (list_length >= 0) && (list_length % 2 == 0));
+      for (int i =0; i < list_length; i+=2){
+        method_flux_correct_min_digits_fields[index_method].push_back
+          (p->list_value_string(i, min_digits_name));
+        method_flux_correct_min_digits_values[index_method].push_back
+          (p->list_value_float (i+1, min_digits_name, 0.0));
+      }
+    } else if (p->param(min_digits_name) != nullptr){
+      ERROR1("Config::read", "%s has an invalid type", min_digits_name.c_str());
+    }
+
+    method_flux_correct_single_array =
+      p->value_logical (full_name + ":single_array",true);
+
+    // Field and particle lists if needed by MethodRefresh
+    int n = p->list_length(full_name + ":field_list");
+    method_field_list[index_method].resize(n);
+    for (int i=0; i<n; i++) {
+      method_field_list[index_method][i] =
+        p->list_value_string(i,full_name+":field_list");
+    }
+    n = p->list_length(full_name + ":particle_list");
+    method_particle_list[index_method].resize(n);
+    for (int i=0; i<n; i++) {
+      method_particle_list[index_method][i] =
+        p->list_value_string(i,full_name+":particle_list");
+    }
+
+    for (int i=0; i<3; i++) {
+      method_output_blocking[i][index_method] =
+        p->list_value_integer(i,full_name+":blocking",1);
+    }
+    method_output_all_blocks[index_method] =
+      p->value_logical(full_name+":all_blocks",true);
+    
+    method_prolong[index_method] =
+      p->value_string(full_name+":prolong","linear");
+
+    // Read refresh method parameters
+    method_ghost_depth[index_method] =
+      p->value_integer(full_name+":ghost_depth",0);
+    method_min_face_rank[index_method] =
+      p->value_integer(full_name+"min_face_rank",0); // default 0 all faces
+    method_all_fields[index_method] =
+      p->value_logical(full_name+"all_fields",false);
+    method_all_particles[index_method] =
+      p->value_logical(full_name+"all_particles",false);
+
+  // Read specified timestep, if any (for MethodTrace)
     method_timestep[index_method] = p->value_float  
       (full_name + ":timestep",std::numeric_limits<double>::max());
 
     method_trace_name[index_method] = p->value_string
       (full_name + ":name", "trace");
+
+    method_type[index_method] = p->value_string
+      (full_name + ":type", name);
   }
   method_null_dt = p->value_float
     ("Method:null:dt",std::numeric_limits<double>::max());
@@ -805,7 +976,6 @@ void Config::read_output_ (Parameters * p) throw()
   output_list.resize(num_output);
   output_type.resize(num_output);
   output_axis.resize(num_output);
-  output_image_block_size.resize(num_output);
   output_colormap.resize(num_output);
   output_image_lower.resize(num_output);
   output_image_upper.resize(num_output);
@@ -931,9 +1101,6 @@ void Config::read_output_ (Parameters * p) throw()
       }
 
 
-      output_image_block_size[index_output] = 
-	p->value_integer("image_block_size",1);
-
       output_image_type[index_output] = p->value_string("image_type","data");
 
       output_image_log[index_output] = p->value_logical("image_log",false);
@@ -947,9 +1114,9 @@ void Config::read_output_ (Parameters * p) throw()
 
       output_image_size[index_output].resize(2);
       output_image_size[index_output][0] = 
-	p->list_value_integer(0,"image_size",0);
+	p->list_value_integer(0,"image_size",512);
       output_image_size[index_output][1] = 
-	p->list_value_integer(1,"image_size",0);
+	p->list_value_integer(1,"image_size",512);
 
       output_image_reduce_type[index_output] = 
 	p->value_string("image_reduce_type","sum");
@@ -1400,7 +1567,7 @@ void Config::read_testing_ (Parameters * p) throw()
 
 int Config::read_schedule_(Parameters * p, const std::string group)
 {
-  int index = index_schedule_;
+  int index = index_schedule;
 
   schedule_list.resize(index+1);
   schedule_type.resize(index+1);
@@ -1469,7 +1636,7 @@ int Config::read_schedule_(Parameters * p, const std::string group)
 	    schedule_type[index].c_str(),group.c_str());
   }
 
-  return index_schedule_++;
+  return index_schedule++;
 }
 //======================================================================
 

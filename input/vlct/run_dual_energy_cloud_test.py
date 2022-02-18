@@ -14,7 +14,7 @@ import yt
 
 yt.mylog.setLevel(30) # set yt log level to "WARNING"
 
-from testing_utils import prep_cur_dir, EnzoEWrapper
+from testing_utils import testing_context, EnzoEWrapper
 
 def run_tests(executable):
 
@@ -83,9 +83,9 @@ def analyze_tests():
     r += check_cloud_asym('hlld_cloud_0.0625/hlld_cloud_0.0625.block_list',
                           'hlld_cloud', 5.5e-13)
     r += check_cloud_asym('hllc_cloud_0.0625/hllc_cloud_0.0625.block_list',
-                          'hllc_cloud', 3.6e-13)
+                          'hllc_cloud', 3.8e-13)
     r += check_cloud_asym('hlle_cloud_0.0625/hlle_cloud_0.0625.block_list',
-                          'hlle_cloud', 3.e-13)
+                          'hlle_cloud', 3.2e-13)
     n_passed = np.sum(r)
     n_tests = len(r)
     print("{:d} Tests passed out of {:d} Tests.".format(n_passed,n_tests))
@@ -99,20 +99,17 @@ def cleanup():
             shutil.rmtree(dir_name)
 
 if __name__ == '__main__':
-    executable = 'bin/enzo-e'
+    executable = os.environ.get('ENZOE_BIN', 'bin/enzo-e')
 
-    # this script can either be called from the base repository or from
-    # the subdirectory: input/vlct
-    prep_cur_dir(executable)
+    with testing_context():
+        # run the tests
+        tests_complete = run_tests(executable)
 
-    # run the tests
-    tests_complete = run_tests(executable)
+        # analyze the tests
+        tests_passed = analyze_tests()
 
-    # analyze the tests
-    tests_passed = analyze_tests()
-
-    # cleanup the tests
-    cleanup()
+        # cleanup the tests
+        cleanup()
 
     if tests_passed:
         sys.exit(0)

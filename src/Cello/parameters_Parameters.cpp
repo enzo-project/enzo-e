@@ -806,7 +806,7 @@ void Parameters::list_evaluate_logical
 
 std::string Parameters::group(int i) const throw()
 {
-  return (i < current_group_.size()) ? current_group_[i] : "";
+  return (i < (int) current_group_.size()) ? current_group_[i] : "";
 }
 
 //----------------------------------------------------------------------
@@ -822,7 +822,7 @@ int Parameters::group_count() const throw()
 {
   // Find the parameter node for the current list of groups
   ParamNode * param_node = parameter_tree_;
-  for (int i=0; i<current_group_.size(); i++) {
+  for (size_t i=0; i<current_group_.size(); i++) {
     if (param_node->subnode(current_group_[i]) != 0) {
       param_node = param_node->subnode(current_group_[i]);
     }
@@ -835,9 +835,7 @@ int Parameters::group_count() const throw()
 
 void Parameters::group_push(std::string str) throw()
 {
-  int n = current_group_.size();
-  current_group_.resize(n + 1);
-  current_group_[n] = str;
+  current_group_.push_back(str);
 }
 
 //----------------------------------------------------------------------
@@ -872,7 +870,7 @@ void Parameters::group_set(int index, std::string group) throw()
 
 void Parameters::group_clear() throw ()
 {
-  current_group_.resize(0);
+  current_group_.clear();
 }
 
 //----------------------------------------------------------------------

@@ -30,13 +30,13 @@ public: // interface
    int monitor_iter,
    int restart_cycle,
    int solve_type,
+   int index_prolong,
+   int index_restrict,
    int min_level,
    int max_level,
    int index_solve_coarse,
    int index_solve_domain,
    int index_solve_smooth,
-   Restrict * restrict,
-   Prolong * prolong,
    int coarse_level) ;
 
   EnzoSolverDd() {};
@@ -51,16 +51,19 @@ public: // interface
        index_solve_coarse_(-1),
        index_solve_domain_(-1),
        index_solve_smooth_(-1),
-       restrict_(NULL),
-       prolong_(NULL),
+       index_prolong_(-1),
+       index_restrict_(-1),
        i_sync_restrict_(-1),
        i_sync_prolong_(-1),
-       i_msg_(-1),
+       i_msg_restrict_(),
+       i_msg_prolong_(-1),
        ixc_(-1),
        mx_(0),my_(0),mz_(0),
        gx_(0),gy_(0),gz_(0),
        coarse_level_(0)
-  {}
+  {
+    for (int i=0; i<cello::num_children(); i++) i_msg_restrict_[i] = -1;
+  }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
@@ -76,13 +79,13 @@ public: // interface
     p | index_solve_coarse_;
     p | index_solve_domain_;
     p | index_solve_smooth_;
-
-    p | restrict_;
-    p | prolong_;
+    p | index_prolong_;
+    p | index_restrict_;
 
     p | i_sync_restrict_;
     p | i_sync_prolong_;
-    p | i_msg_;
+    PUParray(p,i_msg_restrict_,8);
+    p | i_msg_prolong_;
 
     p | ixc_;
 
@@ -151,12 +154,20 @@ public: // methods
   /// End of solver
   void end(Block* block) throw();
   
-  /// Access the msg Scalar value for the Block
-  FieldMsg ** pmsg(Block * block)
+  /// Access the Field message for buffering prolongation data
+  FieldMsg ** pmsg_prolong(Block * block)
   {
     ScalarData<void *> * scalar_data = block->data()->scalar_data_void();
     ScalarDescr *        scalar_descr = cello::scalar_descr_void();
-    return (FieldMsg **)scalar_data->value(scalar_descr,i_msg_);
+    return (FieldMsg **)scalar_data->value(scalar_descr,i_msg_prolong_);
+  }
+  
+  /// Access the Field message for buffering restriction data
+  FieldMsg ** pmsg_restrict(Block * block, int ic)
+  {
+    ScalarData<void *> * scalar_data = block->data()->scalar_data_void();
+    ScalarDescr *        scalar_descr = cello::scalar_descr_void();
+    return (FieldMsg **)scalar_data->value(scalar_descr,i_msg_restrict_[ic]);
   }
   
   /// Access the prolong Sync Scalar value for the Block
@@ -190,22 +201,19 @@ protected: // attributes
   /// Matrix
   std::shared_ptr<Matrix> A_;
 
-  /// Indices for coarse solver, domain solver, and smoother
+  /// Indices for coarse solver, domain solver, and smoother, prolong, restrict
 
   int index_solve_coarse_;
   int index_solve_domain_;
   int index_solve_smooth_;
-  
-  /// Restriction
-  Restrict * restrict_;
-
-  /// Prolongation
-  Prolong * prolong_;
+  int index_prolong_;
+  int index_restrict_;
 
   /// MG scalar id's
   int i_sync_restrict_;
   int i_sync_prolong_;
-  int i_msg_;
+  int i_msg_restrict_[8];
+  int i_msg_prolong_;
 
   /// Solver-specific temporary fields
   int ixc_;

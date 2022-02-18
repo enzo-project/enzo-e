@@ -62,13 +62,13 @@ env.RunField ('test_Field.unit', bin_path + '/test_Field')
 
 balance_field_descr = env.RunFieldDescr (
     'test_FieldDescr.unit',
-    bin_path + '/test_fieldDescr')
+    bin_path + '/test_FieldDescr')
 
 #FieldDataLB
 
 balance_field_data = env_mv_data.RunFieldData (
     'test_FieldData.unit',
-    bin_path + '/FieldData')
+    bin_path + '/test_FieldData')
 
 #FieldFaceLB
 

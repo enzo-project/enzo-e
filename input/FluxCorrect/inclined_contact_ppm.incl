@@ -1,0 +1,14 @@
+include "input/FluxCorrect/inclined_contact.incl"
+
+ Method {
+     list = [ "ppm", "flux_correct" ];
+
+     ppm {
+         courant = 0.8;
+         diffusion = false;
+         dual_energy = false;
+         flattening = 0;
+         steepening = false;
+     }
+ }
+

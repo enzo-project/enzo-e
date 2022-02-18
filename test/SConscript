@@ -43,7 +43,9 @@ enzo_bin = bin_path + '/enzo-e'
 # h5topng
 
 #----------------------------------------------------------------------
-SConscript('Balance/SConscript')
+### TEMPORARILY DISABLED: pending addressing Issue 135
+### https://github.com/enzo-project/enzo-e/issues/135
+### SConscript('Balance/SConscript')
 #----------------------------------------------------------------------
 
 #----------------------------------------------------------------------
@@ -64,6 +66,11 @@ SConscript('DataComponent/SConscript')
 #----------------------------------------------------------------------
 SConscript('ErrorComponent/SConscript')
 #----------------------------------------------------------------------
+
+### env.RunSerial('test_Refresh.unit', bin_path + '/test_Refresh')
+### env.RunSerial('test_Mask.unit',    bin_path + '/test_Mask')
+### env.RunSerial('test_Value.unit',   bin_path + '/test_Value')
+### env.RunSerial('test_Box.unit',     bin_path + '/test_Box')
 
 #----------------------------------------------------------------------
 #INITIAL COMPONENT
@@ -86,10 +93,17 @@ SConscript('MemoryComponent/SConscript')
 #----------------------------------------------------------------------
 SConscript('MethodGravity/SConscript')
 
+### env.RunSerial('test_ProlongLinear.unit',  bin_path + '/test_ProlongLinear')
+
 #----------------------------------------------------------------------
 # METHOD COSMOLOGY TESTS
 #----------------------------------------------------------------------
 SConscript('MethodCosmology/SConscript')
+
+#----------------------------------------------------------------------
+# METHOD FLUX CORRECT TESTS
+#----------------------------------------------------------------------
+SConscript('MethodFluxCorrect/SConscript')
 
 #----------------------------------------------------------------------
 # METHOD HEAT TESTS
@@ -100,6 +114,164 @@ SConscript('MethodHeat/SConscript')
 # METHOD PPM TESTS
 #----------------------------------------------------------------------
 SConscript('MethodPpm/SConscript')
+
+### cosmo_cg = env_rm_png.RunParallel \
+###       ('test_cosmo-cg.unit',enzo_bin, ARGS='input/test_cosmo-cg.in')
+### 
+### cosmo_cg_restart = env_mv_out.RunParallel \
+###       ('test_cosmo-cg-restart.unit',enzo_bin, ARGS='+restart Checkpoint')
+### Clean(cosmo_cg,
+###       [Glob('#/' + test_path + '/Dir_COSMO_CG_*'),
+###        Glob('#/Dir_COSMO_CG_*')])
+### env.Requires(cosmo_cg_restart,cosmo_cg)
+###       
+### #--------------------------------------------------
+### 
+### cosmo_bcg = env_rm_png.RunParallel \
+###       ('test_cosmo-bcg.unit',enzo_bin, ARGS='input/test_cosmo-bcg.in')
+### 
+### Clean(cosmo_bcg,
+###       [Glob('#/' + test_path + '/Dir_COSMO_BCG_*'),
+###        Glob('#/Dir_COSMO_BCG_*')])
+### 
+### ### RESTART TEST DEACTIVATED PENDING RESOLUTION OF ISSUE #59
+### 
+### ### cosmo_bcg_restart = env_mv_out.RunParallel \
+### ###       ('test_cosmo-bcg-restart.unit',enzo_bin, ARGS='+restart Checkpoint')
+### ### Clean(cosmo_bcg_restart,
+### ###       [Glob('#/' + test_path + '/Dir_COSMO_BCG_*'),
+### ###        Glob('#/Dir_COSMO_BCG_*')])
+### ### env.Requires(cosmo_bcg_restart,cosmo_bcg)
+###       
+### #--------------------------------------------------
+### 
+### cosmo_mg = env_rm_png.RunParallel \
+###       ('test_cosmo-mg.unit',enzo_bin, ARGS='input/test_cosmo-mg.in')
+### 
+### cosmo_mg_restart = env_mv_out.RunParallel \
+###       ('test_cosmo-mg-restart.unit',enzo_bin, ARGS='+restart Checkpoint')
+### Clean(cosmo_mg,
+###       [Glob('#/' + test_path + '/Dir_COSMO_MG_*'),
+###        Glob('#/Dir_COSMO_MG_*')])
+### env.Requires(cosmo_mg_restart,cosmo_mg)
+###       
+### #--------------------------------------------------
+### 
+### cosmo_dd = env_rm_png.RunParallel \
+###       ('test_cosmo-dd.unit',enzo_bin, ARGS='input/test_cosmo-dd.in')
+### Clean(cosmo_dd,
+###       [Glob('#/' + test_path + '/Dir_COSMO_DD_*'),
+###        Glob('#/Dir_COSMO_DD_*')])
+### 
+### # RESTART TEST DEACTIVATED PENDING RESOLUTION OF ISSUE #59
+### 
+### ### cosmo_dd_restart = env_mv_out.RunParallel \
+### ###       ('test_cosmo-dd-restart.unit',enzo_bin, ARGS='+restart Checkpoint')
+### ### Clean(cosmo_dd,
+### ###       [Glob('#/' + test_path + '/Dir_COSMO_DD_*'),
+### ###        Glob('#/Dir_COSMO_DD_*')])
+### ### env.Requires(cosmo_dd_restart,cosmo_dd)
+###       
+### #--------------------------------------------------
+### 
+### cosmo_hg = env_rm_png.RunParallel \
+###       ('test_cosmo-hg.unit',enzo_bin, ARGS='input/test_cosmo-hg.in')
+### 
+### Clean(cosmo_hg,
+###       [Glob('#/' + test_path + '/Dir_COSMO_HG_*'),
+###        Glob('#/Dir_COSMO_HG_*')])
+### # RESTART TEST DEACTIVATED PENDING RESOLUTION OF ISSUE #59
+### 
+### ### cosmo_hg_restart = env_mv_out.RunParallel \
+### ###       ('test_cosmo-hg-restart.unit',enzo_bin, ARGS='+restart Checkpoint')
+### ### Clean(cosmo_hg,
+### ###       [Glob('#/' + test_path + '/Dir_COSMO_HG_*'),
+### ###        Glob('#/Dir_COSMO_HG_*')])
+### ### env.Requires(cosmo_hg_restart,cosmo_hg)
+### 
+### #----------------------------------------------------------------------
+### # MethodFluxCorrect tests
+### #----------------------------------------------------------------------
+### target_flux2_xm = env_mv_out.RunParallel \
+###     ('test_method_flux2-xm.unit',enzo_bin, ARGS='input/test-flux2-xm.in')
+### target_flux2_xp = env_mv_out.RunParallel \
+###     ('test_method_flux2-xp.unit',enzo_bin, ARGS='input/test-flux2-xp.in')
+### target_flux2_ym = env_mv_out.RunParallel \
+###     ('test_method_flux2-ym.unit',enzo_bin, ARGS='input/test-flux2-ym.in')
+### target_flux2_yp = env_mv_out.RunParallel \
+###     ('test_method_flux2-yp.unit',enzo_bin, ARGS='input/test-flux2-yp.in')
+### target_flux3_xm = env_mv_out.RunParallel \
+###     ('test_method_flux3-xm.unit',enzo_bin, ARGS='input/test-flux3-xm.in')
+### target_flux3_xp = env_mv_out.RunParallel \
+###     ('test_method_flux3-xp.unit',enzo_bin, ARGS='input/test-flux3-xp.in')
+### target_flux3_ym = env_mv_out.RunParallel \
+###     ('test_method_flux3-ym.unit',enzo_bin, ARGS='input/test-flux3-ym.in')
+### target_flux3_yp = env_mv_out.RunParallel \
+###     ('test_method_flux3-yp.unit',enzo_bin, ARGS='input/test-flux3-yp.in')
+### target_flux3_zm = env_mv_out.RunParallel \
+###     ('test_method_flux3-zm.unit',enzo_bin, ARGS='input/test-flux3-zm.in')
+### target_flux3_zp = env_mv_out.RunParallel \
+###     ('test_method_flux3-zp.unit',enzo_bin, ARGS='input/test-flux3-zp.in')
+### 
+### #----------------------------------------------------------------------
+### # MethodCollapse tests
+### #----------------------------------------------------------------------
+### 
+### if (prec == "double"):
+###     Clean(env_mv_out.RunParallel ('test_collapse-bcg2.unit',
+###                                   enzo_bin, 
+### 		                  ARGS='input/test_collapse-bcg2.in'),
+###           [Glob('#/' + test_path + '/Dir_Collapse_BCG2_*'),
+###                              Glob('#/Dir_Collapse_BCG2_*')]);
+###     Clean(env_mv_out.RunParallel ('test_collapse-dd2.unit',
+###                                   enzo_bin, 
+### 		                  ARGS='input/test_collapse-dd2.in'),
+###           [Glob('#/' + test_path + '/Dir_Collapse_DD2_*'),
+###                              Glob('#/Dir_Collapse_DD2_*')]);
+###     Clean(env_mv_out.RunParallel ('test_collapse-hg2.unit',
+###                                   enzo_bin, 
+### 		                  ARGS='input/test_collapse-hg2.in'),
+###           [Glob('#/' + test_path + '/Dir_Collapse_HG2_*'),
+###                              Glob('#/Dir_Collapse_HG2_*')])
+###     Clean(env_mv_out.RunParallel ('test_collapse-gas-bcg2.unit',
+###                                   enzo_bin, 
+### 		                  ARGS='input/test_collapse-gas-bcg2.in'),
+###           [Glob('#/' + test_path + '/Dir_Collapse_GAS-BCG2_*'),
+###                              Glob('#/Dir_Collapse_GAS-BCG2_*')])
+###     Clean(env_mv_out.RunParallel ('test_collapse-gas-dd2.unit',
+###                                   enzo_bin, 
+### 		                  ARGS='input/test_collapse-gas-dd2.in'),
+###           [Glob('#/' + test_path + '/Dir_Collapse_GAS-DD2_*'),
+###                              Glob('#/Dir_Collapse_GAS-DD2_*')])
+###     Clean(env_mv_out.RunParallel ('test_collapse-gas-hg2.unit',
+###                                   enzo_bin, 
+### 		                  ARGS='input/test_collapse-gas-hg2.in'),
+###           [Glob('#/' + test_path + '/Dir_Collapse_GAS-HG2_*'),
+###                              Glob('#/Dir_Collapse_GAS-HG2_*')])
+### 
+### #----------------------------------------------------------------------
+### # MethodHeat tests
+### #----------------------------------------------------------------------
+### 
+### # serial
+### Clean(env_mv_out.RunSerial ('test_method_heat-1.unit',enzo_bin, 
+### 		ARGS='input/method_heat-1.in'),
+###       [Glob('#/' + test_path + '/method_heat*-1*.png'),
+###        Glob('#/' + test_path + '/method_heat*-1*.h5')])
+### 
+### env.PngToGif ("method_heat-1.gif", "test_method_heat-1.unit", \
+###                 ARGS= test_path + "/method_heat*-1*.png");
+### 
+### # parallel
+### 
+### Clean(env_mv_out.RunParallel ('test_method_heat-8.unit',enzo_bin, 
+### 		ARGS='input/method_heat-8.in'),
+###       [Glob('#/' + test_path + '/method_heat*-8*.png'),
+###        Glob('#/' + test_path + '/method_heat*-8*.h5')])
+### 
+### env.PngToGif ("method_heat-8.gif", "test_method_heat-8.unit", \
+###                 ARGS= test_path + "/method_heat*-8-*.png");
+### 
 
 #----------------------------------------------------------------------
 # SERIAL RESTART
@@ -121,8 +293,27 @@ SConscript('MeshGeneration/SConscript')
 #----------------------------------------------------------------------
 SConscript('AmrPpm/SConscript')
 
-#----------------------------------------------------------------------
-#PERFORMANCE
+### Clean(env_mv_out.RunParallel ('test_adapt-L5-P1.unit',enzo_bin, 
+### 		ARGS='input/adapt-L5-P1.in'),
+###       [Glob('#/' + test_path + '/adapt-L5-P1*.png')])
+### env.PngToGif ("adapt-L5-P1-mesh.gif", "test_adapt-L5-P1.unit", \
+###                 ARGS= test_path + "/adapt-L5-P1-mesh-*.png");
+### env.PngToGif ("adapt-L5-P1-density.gif", "test_adapt-L5-P1.unit", \
+###                 ARGS= test_path + "/adapt-L5-P1-density-*.png");
+
+### #----------------------------------------------------------------------
+### # PERFORMANCE
+### #----------------------------------------------------------------------
+### 
+### Clean(env_mv_out.RunParallel ('test_initial_png.unit',
+### 		enzo_bin, 
+### 		ARGS='input/initial_png.in'),
+###       [Glob('#/' + test_path + '/initial_png.png'),
+###        'test_initial_png.unit'])
+### env.PngToGif ("initial_png.gif","test_initial_png.unit", \
+###                 ARGS= test_path + "/initial_png-??.png");
+
+
 #----------------------------------------------------------------------
 SConscript('Performance/SConscript')
 

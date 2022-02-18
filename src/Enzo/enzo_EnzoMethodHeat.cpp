@@ -17,12 +17,11 @@ EnzoMethodHeat::EnzoMethodHeat (double alpha, double courant)
     courant_(courant)
 {
 
-  this->required_fields_ = std::vector<std::string> {"temperature"};
-  this->define_fields();
+  cello::define_field ("temperature");
 
   // Initialize default Refresh object
 
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_field("temperature");
 
@@ -62,7 +61,7 @@ void EnzoMethodHeat::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodHeat::timestep ( Block * block ) const throw()
+double EnzoMethodHeat::timestep ( Block * block ) throw()
 {
   // initialize_(block);
 
@@ -88,7 +87,7 @@ double EnzoMethodHeat::timestep ( Block * block ) const throw()
 
 //======================================================================
 
-void EnzoMethodHeat::compute_ (Block * block,enzo_float * Unew) const throw()
+void EnzoMethodHeat::compute_ (Block * block,enzo_float * Unew) throw()
 {
   Data * data = block->data();
   Field field   =      data->field();
@@ -119,7 +118,7 @@ void EnzoMethodHeat::compute_ (Block * block,enzo_float * Unew) const throw()
 
   const int rank = ((mz == 1) ? ((my == 1) ? 1 : 2) : 3);
 
-  const double dt = timestep(block);
+  double dt = timestep(block);
 
   enzo_float * U = new enzo_float [m];
   for (int i=0; i<m; i++) U[i]=Unew[i];

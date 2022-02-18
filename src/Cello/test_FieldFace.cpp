@@ -128,30 +128,13 @@ bool test_field(T * values,
 				  nbx,nby,nbz,
 				  index_field,
 				  MD3,ND3);
-	if (values[i] != value) result = false;
+	if (values[i] != value) {
+          CkPrintf ("MISMATCH %d %d %d  %g != %g\n",ix,iy,iz,(double)values[i],value);
+          result = false;
+        }
       }
     }
   }
-  if (! result) {
-    PARALLEL_PRINTF ("mismatch block   (%d %d %d)\n", ibx,iby,ibz);
-    PARALLEL_PRINTF ("mismatch field    %d\n",        index_field);
-    PARALLEL_PRINTF ("mismatch size    (%d %d %d)\n", mdx,mdy,mdz);
-    for (int iz = 0; iz < mdz; iz++) {
-      for (int iy = 0; iy < mdy; iy++) {
-	for (int ix = 0; ix < mdx; ix++) {
-	  int i = ix + mdx * (iy + mdy * iz);
-	  double value = test_value(ix,iy,iz,
-				    gx,gy,gz,
-				    mdx,mdy,mdz,
-				    ibx,iby,ibz,
-				    nbx,nby,nbz,
-				    index_field,
-				    MD3,ND3);
-	}
-      }
-    }
-  }
-
   return result;
 }
 
@@ -295,15 +278,20 @@ PARALLEL_MAIN_BEGIN
 
   // initialize field ghost zone depths
 
-  field_descr->set_ghost_depth(0, 1,1,1);
-  field_descr->set_ghost_depth(1, 1,2,3);
-  field_descr->set_ghost_depth(2, 3,2,1);
-
+   const int g33[3][3] = { {1,1,1},
+                           {1,2,3},
+                           {3,2,1} };
+  // const int g33[3][3] = { {4,4,4},
+  //                         {4,4,4},
+  //                         {4,4,4} };
+  field_descr->set_ghost_depth(0, g33[0][0], g33[0][1], g33[0][2]);
+  field_descr->set_ghost_depth(1, g33[1][0], g33[1][1], g33[1][2]);
+  field_descr->set_ghost_depth(2, g33[2][0], g33[2][1], g33[2][2]);
 
   int nbx=2, nby=3, nbz=4;
   std::vector<FieldData *> field_data(nbx*nby*nbz);
 
-  int mx=5, my=6, mz=7;
+  int mx=4, my=6, mz=8;
 
   init_fields(field_descr,field_data.data(),nbx,nby,nbz,mx,my,mz);
 
@@ -341,14 +329,14 @@ PARALLEL_MAIN_BEGIN
 	  Field field_lower (field_descr,data_lower);
 	  Field field_upper (field_descr,data_upper);
 
-	  FieldFace face_lower (field_lower);
-	  FieldFace face_upper (field_upper);
+	  FieldFace face_lower (3);
+	  FieldFace face_upper (3);
 
 	  face_lower.set_refresh_type(refresh_same);
 	  face_upper.set_refresh_type(refresh_same);
 
-	  face_lower.set_ghost(true,true,true);
-	  face_upper.set_ghost(true,true,true);
+	  face_lower.set_ghost(g33[0][0],g33[0][1],g33[0][2]);
+	  face_upper.set_ghost(g33[0][0],g33[0][1],g33[0][2]);
 
 	  face_lower.set_face(ixp,iyp,izp);
 	  face_upper.set_face(ixm,iym,izm);
@@ -387,7 +375,7 @@ PARALLEL_MAIN_BEGIN
 	  unit_assert (buffer_next - buffer == nm);
 
 	  unit_func("load_data()");
-	  FieldFace new_face_lower;
+	  FieldFace new_face_lower (3);
 	  buffer_next = new_face_lower.load_data(buffer);
 	  unit_assert (buffer_next - buffer == nm);
 

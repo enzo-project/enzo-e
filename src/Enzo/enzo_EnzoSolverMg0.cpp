@@ -106,15 +106,17 @@
 #include "enzo.decl.h"
 
 // #define DEBUG_SOLVER_CONTROL
-#define CYCLE 000
 
+#define CYCLE 129
 #define AFTER_CYCLE(BLOCK,CYCLE) (BLOCK->cycle() >= CYCLE)
 
 #ifdef DEBUG_SOLVER_CONTROL
-#   define SOLVER_CONTROL(BLOCK,MIN,MAX,MESSAGE)			\
-  if (AFTER_CYCLE(BLOCK,CYCLE))						\
-    CkPrintf ("DEBUG_SOLVER_CONTROL %-4s %-10s %s\n",	\
-	      name_.c_str(),BLOCK->name().c_str(),MESSAGE);
+#   define SOLVER_CONTROL(BLOCK,MIN,MAX,MESSAGE)                \
+  if (AFTER_CYCLE(BLOCK,CYCLE)) {                               \
+    CkPrintf ("DEBUG_SOLVER_CONTROL %-4s %-10s %s\n",           \
+	      name_.c_str(),BLOCK->name().c_str(),MESSAGE);     \
+    fflush(stdout); \
+  }
 #else
 #   define SOLVER_CONTROL(BLOCK,MIN,MAX,MESSAGE) /* ... */
 #endif
@@ -128,6 +130,8 @@ EnzoSolverMg0::EnzoSolverMg0
  int monitor_iter,
  int restart_cycle,
  int solve_type,
+ int index_prolong,
+ int index_restrict,
  int min_level,
  int max_level,
  int iter_max,
@@ -136,8 +140,6 @@ EnzoSolverMg0::EnzoSolverMg0
  int index_solve_coarse,
  int index_smooth_post,
  int index_smooth_last,
- Restrict * restrict,
- Prolong * prolong,
  int coarse_level) 
   : Solver(name,
 	   field_x,
@@ -145,18 +147,18 @@ EnzoSolverMg0::EnzoSolverMg0
 	   monitor_iter,
 	   restart_cycle,
 	   solve_type,
+           index_prolong,
+           index_restrict,
 	   min_level,
 	   max_level),
     bs_(0), bc_(0),
     rr_(0), rr_local_(0), rr0_(0),
     res_tol_(res_tol),
-    A_(NULL),
+    A_(nullptr),
     index_smooth_pre_(index_smooth_pre),
     index_solve_coarse_(index_solve_coarse),
     index_smooth_post_(index_smooth_post),
     index_smooth_last_(index_smooth_last),
-    restrict_(restrict),
-    prolong_(prolong),
     iter_max_(iter_max), 
     ic_(-1), ir_(-1),
     mx_(0),my_(0),mz_(0),
@@ -170,7 +172,7 @@ EnzoSolverMg0::EnzoSolverMg0
 
 
   Refresh * refresh = cello::refresh(ir_post_);
-  cello::simulation()->new_refresh_set_name(ir_post_,name);
+  cello::simulation()->refresh_set_name(ir_post_,name);
 
   refresh->add_field (ix_);
   refresh->add_field (ir_);
@@ -184,21 +186,12 @@ EnzoSolverMg0::EnzoSolverMg0
   i_sync_prolong_  = scalar_descr_sync->new_value(name + ":prolong");
 
   ScalarDescr * scalar_descr_void = cello::scalar_descr_void();
-  i_msg_ = scalar_descr_void->new_value(name + ":msg");
+  i_msg_prolong_ = scalar_descr_void->new_value(name + ":msg_prolong");
+  for (int ic=0; ic<cello::num_children(); ic++) {
+    i_msg_restrict_[ic] = scalar_descr_void->new_value(name + ":msg_restrict");
+  }
 
 }
-
-//----------------------------------------------------------------------
-
-EnzoSolverMg0::~EnzoSolverMg0 () throw()
-{
-  delete prolong_;
-  delete restrict_;
-
-  prolong_ = NULL;
-  restrict_ = NULL;
-}
-
 
 //----------------------------------------------------------------------
 
@@ -217,7 +210,6 @@ void EnzoSolverMg0::apply ( std::shared_ptr<Matrix> A, Block * block) throw()
   rr_local_ = 0.0;
   rr0_ = 0.0;
   *piter(block) = 0.0;
-  *pmsg(block) = NULL;
 
   /// Current and initial residual norm R'*R
 
@@ -232,13 +224,11 @@ void EnzoSolverMg0::apply ( std::shared_ptr<Matrix> A, Block * block) throw()
   
   Sync * sync_restrict = psync_restrict(block);
 
-  sync_restrict->reset();
-  sync_restrict->set_stop(cello::num_children());
+  sync_restrict->set_stop(1 + cello::num_children()); // self and children
   
   Sync * sync_prolong = psync_prolong(block);
 
-  sync_prolong->reset();
-  sync_prolong->set_stop(2); // self and parent
+  sync_prolong->set_stop(1 + 1); // self and parent
 
   enter_solver_ (enzo_block);
 }
@@ -282,7 +272,7 @@ void EnzoSolverMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
     /// initiate callback for p_solver_begin_solve and contribute to
     /// sum and count
 
-    CkCallback callback(CkIndex_EnzoBlock::r_solver_mg0_begin_solve(NULL), 
+    CkCallback callback(CkIndex_EnzoBlock::r_solver_mg0_begin_solve(nullptr), 
 			enzo::block_array());
 
     SOLVER_CONTROL (enzo_block,"min","max","1 calling begin_solve_1 (shift)");
@@ -294,7 +284,7 @@ void EnzoSolverMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
 
     SOLVER_CONTROL(enzo_block,"min","max","2 calling begin_solve_2 (no shift)");
 
-    begin_solve (enzo_block,NULL);
+    begin_solve (enzo_block,nullptr);
 
   }
 
@@ -350,10 +340,13 @@ void EnzoSolverMg0::begin_solve(EnzoBlock * enzo_block,
 
   } else {
 
+
     int level = enzo_block->level();
     if ( ! (coarse_level_ <= level && level <= max_level_) ) {
       SOLVER_CONTROL(enzo_block,"min","max", "CALL_COARSE_SOLVER_1");
       call_coarse_solver(enzo_block);
+    } else {
+      restrict_recv(enzo_block,nullptr);
     }
 
   }
@@ -364,7 +357,7 @@ void EnzoSolverMg0::begin_solve(EnzoBlock * enzo_block,
 void EnzoSolverMg0::do_shift_(EnzoBlock * enzo_block,
 			      CkReductionMsg *msg) throw()
 {
-  if (msg != NULL) {
+  if (msg != nullptr) {
     
     long double* data = (long double*) msg->getData();
 
@@ -373,17 +366,6 @@ void EnzoSolverMg0::do_shift_(EnzoBlock * enzo_block,
 
     delete msg;
   } 
-  
-  if (A_->is_singular() && is_finest_(enzo_block)) {
-
-    // Shift B if needed to be in range(A) for periodic b.c.
-    
-    SOLVER_CONTROL(enzo_block,"fine","fine", "5 applying do_shift_2");
-
-    Field field = enzo_block->data()->field();
-
-    double shift = -bs_ / bc_;
-  }
 }   
    
 //----------------------------------------------------------------------
@@ -437,8 +419,6 @@ void EnzoSolverMg0::monitor_output_(EnzoBlock * enzo_block)
 {
   const int iter = *(piter(enzo_block));
 
-  const int level = enzo_block->level();
-
   const bool l_output =
     ( ( enzo_block->index().is_root()) &&
       ( (iter == 0))); // ||
@@ -458,7 +438,7 @@ void EnzoBlock::p_solver_mg0_solve_coarse()
   EnzoSolverMg0 * solver = 
     static_cast<EnzoSolverMg0*> (this->solver());
 
-  CkCallback callback(CkIndex_EnzoBlock::r_solver_mg0_barrier(NULL), 
+  CkCallback callback(CkIndex_EnzoBlock::r_solver_mg0_barrier(nullptr), 
 		      enzo::block_array());
   
   long double data[1] = {solver->rr_local()};
@@ -662,19 +642,26 @@ void EnzoSolverMg0::restrict_recv
 {
 
   SOLVER_CONTROL(enzo_block,"coarse","fine-1", "15 restrict_recv_1");
+  if (msg == nullptr)   SOLVER_CONTROL(enzo_block,"coarse","fine-1", "16 restrict_recv_1 nullptr");
 
   // Unpack "B" vector data from children
 
-  unpack_residual_(enzo_block,msg);
+  // Save field message from child
+  if (msg != nullptr) *pmsg_restrict(enzo_block,msg->child_index()) = msg;
 
-  // continue with EnzoSolverMg0
+  // Continue if all expected messages received
+  if (psync_restrict(enzo_block)->next() ) {
 
-  if (psync_restrict(enzo_block)->next())
-    {
-      SOLVER_CONTROL(enzo_block,"coarse","fine-1", "16 call begin_cycle_1");
-      begin_cycle_ (enzo_block);
+    // Restore saved messages then clear
+    for (int i=0; i<cello::num_children(); i++) {
+      msg = *pmsg_restrict(enzo_block,i);
+      *pmsg_restrict(enzo_block,i) = nullptr;
+      // Unpack field from message then delete message
+      unpack_residual_(enzo_block,msg);
     }
-
+  
+    begin_cycle_ (enzo_block);
+  }
 }
 
 //----------------------------------------------------------------------
@@ -703,7 +690,7 @@ void EnzoSolverMg0::prolong(EnzoBlock * enzo_block) throw()
 
   if (coarse_level_ < level && level <= max_level_) {
     SOLVER_CONTROL(enzo_block,"coarse","fine-1", "20 call prolong_recv_1");
-    enzo_block->solver_mg0_prolong_recv(NULL);
+    enzo_block->solver_mg0_prolong_recv(nullptr);
   } else {
   
     SOLVER_CONTROL(enzo_block,"coarse","fine-1", "19 call end_cycle_1");
@@ -768,17 +755,16 @@ void EnzoSolverMg0::prolong_recv
   // Save message
 
   // Return if not ready yet
-  if (msg != NULL) *pmsg(enzo_block) = msg;
+  if (msg != nullptr) *pmsg_prolong(enzo_block) = msg;
   
   if (! psync_prolong(enzo_block)->next() ) return;
-  // Restore saved message then clear
-  msg = *pmsg(enzo_block);
-  *pmsg(enzo_block) = NULL;
 
   SOLVER_CONTROL(enzo_block,"coarse+1","fine", "24 prolong_recv_3");
-  
-  // Unpack "C" vector data from children
 
+  // Restore saved message then clear
+  msg = *pmsg_prolong(enzo_block);
+  *pmsg_prolong(enzo_block) = nullptr;
+  // Unpack "C" vector data from children
   unpack_correction_(enzo_block,msg);
   
   Field field = enzo_block->data()->field();
@@ -828,8 +814,6 @@ void EnzoSolverMg0::post_smooth(EnzoBlock * enzo_block) throw()
 {
   SOLVER_CONTROL(enzo_block,"coarse+1","fine", "27 post_smooth_4");
 
-  const int level = enzo_block->level();
-
   if ( ! is_finest_(enzo_block) ) {
 
     SOLVER_CONTROL(enzo_block,"coarse","fine-1", "28 call prolong_send_3");
@@ -859,8 +843,6 @@ void EnzoSolverMg0::end_cycle(EnzoBlock * enzo_block) throw()
 
   const int iter = *piter(enzo_block);
 	    
-  const int level = enzo_block->level();
-
   const bool l_output =
     ( ( enzo_block->index().is_root()) &&
       ( (is_converged) || (is_diverged) ||
@@ -901,6 +883,8 @@ void EnzoSolverMg0::end_cycle(EnzoBlock * enzo_block) throw()
 	SOLVER_CONTROL(enzo_block,"coarse","fine-1", "34 call coarse_solver");
         SOLVER_CONTROL(enzo_block,"min","max", "CALL_COARSE_SOLVER_4");
 	call_coarse_solver(enzo_block);
+      } else {
+        restrict_recv(enzo_block,nullptr);
       }
 
     }
@@ -938,16 +922,18 @@ FieldMsg * EnzoSolverMg0::pack_residual_(EnzoBlock * enzo_block) throw()
   // <COMMON CODE> in restrict_send_() and prolong_send_()
   
   int if3[3] = {0,0,0};
-  bool lg3[3] = {false,false,false};
+  int g3[3] = {0,0,0};
   Refresh * refresh = new Refresh;
+  refresh->set_prolong(index_prolong_);
+  refresh->set_restrict(index_restrict_);
   refresh->add_field(ir_);
 
   // copy data from EnzoBlock to array via FieldFace
 
   FieldFace * field_face = enzo_block->create_face
-    (if3, ic3, lg3, refresh_coarse, refresh, true);
+    (if3, ic3, g3, refresh_coarse, refresh, true);
 
-  field_face->set_restrict(restrict_);
+  refresh->set_restrict(index_restrict_);
   
   int narray; 
   char * array;
@@ -984,8 +970,10 @@ void EnzoSolverMg0::unpack_residual_
 (EnzoBlock * enzo_block,FieldMsg * msg) throw()
 {
   int if3[3] = {0,0,0};
-  bool lg3[3] = {false,false,false};
+  int g3[3] = {0,0,0};
   Refresh * refresh = new Refresh;
+  refresh->set_prolong(index_prolong_);
+  refresh->set_restrict(index_restrict_);
   refresh->add_field(ib_);
 
   // copy data from msg to this EnzoBlock
@@ -993,9 +981,9 @@ void EnzoSolverMg0::unpack_residual_
   int * ic3 = msg->ic3;
 
   FieldFace * field_face = enzo_block->create_face 
-    (if3, ic3, lg3, refresh_coarse, refresh, true);
+    (if3, ic3, g3, refresh_coarse, refresh, true);
 
-  field_face->set_restrict(restrict_);
+  refresh->set_restrict(index_restrict_);
 
   Field field = enzo_block->data()->field();
   
@@ -1016,21 +1004,21 @@ FieldMsg * EnzoSolverMg0::pack_correction_
   // <COMMON CODE> in restrict_send_() and prolong_send_()
 
   int if3[3] = {0,0,0};
-  bool lg3[3] = {true,true,true};
+  int g3[3];
+  cello::field_descr()->ghost_depth(ix_,g3,g3+1,g3+2);
   Refresh * refresh = new Refresh;
+  refresh->set_prolong(index_prolong_);
+  refresh->set_restrict(index_restrict_);
   refresh->add_field(ix_);
     
   // copy data from EnzoBlock to array via FieldFace
 
   FieldFace * field_face = enzo_block->create_face
-    (if3, ic3, lg3, refresh_fine, refresh, true);
+    (if3, ic3, g3, refresh_fine, refresh, true);
 
   Field field = enzo_block->data()->field();
-  field_face->set_prolong(prolong_);
-
   int narray; 
   char * array;
-    
   field_face->face_to_array (field,&narray,&array);
 
   delete field_face;
@@ -1062,19 +1050,19 @@ void EnzoSolverMg0::unpack_correction_
 (EnzoBlock * enzo_block, FieldMsg * msg) throw()
 {
   int if3[3] = {0,0,0};
-  bool lg3[3] = {true,true,true};
+  int g3[3];
+  cello::field_descr()->ghost_depth(ic_,g3,g3+1,g3+2);
   Refresh * refresh = new Refresh;
+  refresh->set_prolong(index_prolong_);
+  refresh->set_restrict(index_restrict_);
   refresh->add_field(ic_);
 
   // copy data from msg to this EnzoBlock
 
   FieldFace * field_face = enzo_block->create_face 
-    (if3, msg->ic3, lg3, refresh_fine, refresh, true);
-
-  field_face->set_prolong(prolong_);
+    (if3, msg->ic3, g3, refresh_fine, refresh, true);
 
   Field field = enzo_block->data()->field();
-  
   field_face->array_to_face (msg->a, field);
 
   delete field_face;

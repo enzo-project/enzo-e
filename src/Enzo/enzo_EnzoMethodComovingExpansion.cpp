@@ -16,28 +16,25 @@ EnzoMethodComovingExpansion::EnzoMethodComovingExpansion
   : Method(),
     comoving_coordinates_(comoving_coordinates)
 {
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
 
   const int rank = cello::rank();
 
-  // Declare required fields
-  this->required_fields_ = std::vector<std::string>
-                        {"density","total_energy","internal_energy","pressure"};
-
-  if (rank >= 1) this->required_fields_.push_back("velocity_x");
-  if (rank >= 2) this->required_fields_.push_back("velocity_y");
-  if (rank >= 3) this->required_fields_.push_back("velocity_z");
-
-  // define required fields if they do not exist
-  this->define_fields();
+  cello::define_field ("density");
+  cello::define_field ("total_energy");
+  cello::define_field ("internal_energy");
+  cello::define_field ("pressure");
+  if (rank >= 1) cello::define_field ("velocity_x");
+  if (rank >= 2) cello::define_field ("velocity_y");
+  if (rank >= 3) cello::define_field ("velocity_z");
 
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_field("density");
   refresh->add_field("total_energy");
   refresh->add_field("internal_energy");
-  if (rank >= 1) refresh->add_field("velocity_x");
-  if (rank >= 2) refresh->add_field("velocity_y");
-  if (rank >= 3) refresh->add_field("velocity_z");
+  refresh->add_field("velocity_x");
+  refresh->add_field("velocity_y");
+  refresh->add_field("velocity_z");
 
   if ( ! comoving_coordinates_ ) {
     WARNING
@@ -218,7 +215,7 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodComovingExpansion::timestep( Block * block ) const throw()
+double EnzoMethodComovingExpansion::timestep( Block * block ) throw()
 {
 
   enzo_float dtExpansion = ENZO_HUGE_VAL;

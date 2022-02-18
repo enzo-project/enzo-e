@@ -39,18 +39,25 @@ EnzoMethodTurbulence::EnzoMethodTurbulence
 
   const int rank = cello::rank();
 
-  this->required_fields_ = std::vector<std::string> {"density",
-                                                     "temperature","total_energy"};
-
-  if (rank >= 0) this->required_fields_.insert(this->required_fields_.end(),{"velocity_x","driving_x"});
-  if (rank >= 1) this->required_fields_.insert(this->required_fields_.end(),{"velocity_y","driving_y"});
-  if (rank >= 2) this->required_fields_.insert(this->required_fields_.end(),{"velocity_z","driving_z"});
-
-  this->define_fields();
+  cello::define_field("density");
+  cello::define_field("temperature");
+  cello::define_field("total_energy");
+  if (rank >= 1) {
+    cello::define_field("velocity_x");
+    cello::define_field("acceleration_x");
+  }
+  if (rank >= 2) {
+    cello::define_field("velocity_y");
+    cello::define_field("acceleration_y");
+  }
+  if (rank >= 3) {
+    cello::define_field("velocity_z");
+    cello::define_field("acceleration_z");
+  }
 
   // Initialize default Refresh object
 
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
 
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
@@ -168,7 +175,7 @@ void EnzoMethodTurbulence::compute ( Block * block) throw()
     }
   }
 
-  CkCallback callback (CkIndex_EnzoBlock::p_method_turbulence_end(NULL),
+  CkCallback callback (CkIndex_EnzoBlock::r_method_turbulence_end(NULL),
 		       enzo_block->proxy_array());
   enzo_block->contribute(n*sizeof(double),g,r_method_turbulence_type,callback);
 }
@@ -204,7 +211,7 @@ CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs)
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::p_method_turbulence_end(CkReductionMsg * msg)
+void EnzoBlock::r_method_turbulence_end(CkReductionMsg * msg)
 {
   TRACE_TURBULENCE;
   performance_start_(perf_compute,__FILE__,__LINE__);
