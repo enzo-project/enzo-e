@@ -366,7 +366,6 @@ double EnzoMethodGravity::timestep_ (Block * block) throw()
   double a_mag_max = 0.0;
   double a_mag;
 
-#ifdef NEW_TIMESTEP
   for (int iz=gz; iz<mz-gz; iz++) {
     for (int iy=gy; iy<my-gy; iy++) {
       for (int ix=gx; ix<mx-gx; ix++) {
