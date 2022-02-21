@@ -1,9 +1,11 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file	enzo_EnzoMethodMergeStars.hpp
-/// @author     Stefan Arridge (stefan.arridge@gmail.com)
-/// @date
-/// @brief
+/// @file	  enzo_EnzoMethodMergeStars.hpp
+/// @author Stefan Arridge (stefan.arridge@gmail.com)
+/// @date   18 January 2022
+/// @brief  Implementation of EnzoMethodMergeStars class, a method for merging
+///         star particles separated by a distance less than the merging
+///         radius.
 
 #ifndef ENZO_ENZO_METHOD_MERGESTARS
 #define ENZO_ENZO_METHOD_MERGESTARS

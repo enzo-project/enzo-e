@@ -2,8 +2,10 @@
 
 /// @file   enzo_EnzoMethodMergeStars.cpp
 /// @author Stefan Arridge (stefan.arridge@gmail.com)
-/// @date
-/// @brief  Implements a star merging method class
+/// @date   18 January 2022
+/// @brief  Implementation of EnzoMethodMergeStars class, a method for merging
+///         star particles separated by a distance less than the merging
+///         radius.
 ///
 ///         After copying particles from
 ///         neighbouring blocks during the refresh, this method then uses an
