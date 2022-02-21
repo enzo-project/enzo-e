@@ -215,7 +215,6 @@ int ParticleData::insert_particles
 
     // resize arrays for a new batch if needed
     if (ip_start == 0) {
-      
       ASSERT1("ParticleData::insert_particles",
 	     "Trying to insert negative particles: ib_this = %d",
 	      ib_this, ib_this >= 0);
