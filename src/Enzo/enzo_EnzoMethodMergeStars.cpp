@@ -17,7 +17,6 @@
 
 //#define DEBUG_MERGESTARS
 
-int FofList(int, enzo_float *, enzo_float, int *, int **, int ***);
 
 EnzoMethodMergeStars::EnzoMethodMergeStars()
   : Method()
