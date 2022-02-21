@@ -1,3 +1,5 @@
+// See LICENSE_ENZO file for license and copyright information
+
 /* foflib.h
    Mark Krumholz, 3/20/00
    Modified by Mark Krumholz, 8/22/00
