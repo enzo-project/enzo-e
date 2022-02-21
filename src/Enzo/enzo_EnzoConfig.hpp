@@ -294,8 +294,6 @@ public: // interface
       initial_IG_recent_SF_seed(12345),
       // EnzoInitialMergeStarsTest
       initial_merge_stars_test_particle_data_filename(""),
-      // EnzoProlong
-      interpolation_method(""),
       // EnzoMethodCheckGravity
       method_check_gravity_particle_type(),
       // EnzoMethodHeat
