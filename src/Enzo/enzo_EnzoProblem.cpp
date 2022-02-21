@@ -707,7 +707,7 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "merge_stars") {
 
-    method = new EnzoMethodMergeStars();
+    method = new EnzoMethodMergeStars(enzo_config->method_merge_stars_merging_radius_cells);
 
   } else {
 

@@ -20,8 +20,9 @@
 //#define DEBUG_MERGESTARS
 
 
-EnzoMethodMergeStars::EnzoMethodMergeStars()
-  : Method()
+EnzoMethodMergeStars::EnzoMethodMergeStars(double merging_radius_cells)
+  : Method(),
+    merging_radius_cells_(merging_radius_cells)
 {
   // This method requires three dimensions.
   ASSERT("EnzoMethodMergeStars::EnzoMethodMergeStars()",
@@ -34,9 +35,6 @@ EnzoMethodMergeStars::EnzoMethodMergeStars()
 	 "In future, we may put in a refinement condition that blocks containing "
 	 "star particles or neighbouring such a block is at highest refinement "
 	 "level", enzo_config->mesh_max_level == 0);
-
-  // Merging radius is in units of the cell width. 
-  merging_radius_cells_ = enzo_config->method_merge_stars_merging_radius_cells;
 
   // Refresh copies all star particles from neighbouring blocks
   cello::simulation()->refresh_set_name(ir_post_,name());

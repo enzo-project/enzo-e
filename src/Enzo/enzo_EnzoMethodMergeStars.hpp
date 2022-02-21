@@ -19,7 +19,7 @@ class EnzoMethodMergeStars : public Method {
 public:
 
   // Create a new MergeStars object
-  EnzoMethodMergeStars();
+  EnzoMethodMergeStars(double merging_radius_cells);
 
   /// Destructor
   virtual ~EnzoMethodMergeStars() throw() {};
