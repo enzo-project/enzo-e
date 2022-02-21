@@ -692,9 +692,6 @@ public: // attributes
   // EnzoInitialMergeStarsTest
   std::string                initial_merge_stars_test_particle_data_filename;
 
-  /// EnzoProlong
-  std::string                interpolation_method;
-
   /// EnzoMethodCheckGravity
   std::string                method_check_gravity_particle_type;
 
