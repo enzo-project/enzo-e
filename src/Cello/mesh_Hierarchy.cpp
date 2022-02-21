@@ -310,7 +310,7 @@ void Hierarchy::create_subblock_array
 // --------------------------------------------------------------------
 
 void Hierarchy::get_nearest_periodic_image
-(double * x, double *y, double * npi) 
+(const double * x, const double *y, double * npi) const throw()
 
 {
   const int rank = cello::rank();
@@ -352,7 +352,7 @@ void Hierarchy::get_nearest_periodic_image
 // --------------------------------------------------------------------
 
 void Hierarchy::get_folded_position
-(double * x, double * folded_x)
+(const double * x, double * folded_x) const throw()
 
 {
   const int rank = cello::rank();
