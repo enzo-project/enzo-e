@@ -1122,10 +1122,10 @@ int Block::particle_create_array_neighbors_
 
     for (int iz=index_lower[2]; iz<index_upper[2]; iz++) {
       for (int iy=index_lower[1]; iy<index_upper[1]; iy++) {
-	for (int ix=index_lower[0]; ix<index_upper[0]; ix++) {
-	  int i=ix + 4*(iy + 4*iz);
-	  particle_array[i] = pd;
-	}
+	      for (int ix=index_lower[0]; ix<index_upper[0]; ix++) {
+	        int i=ix + 4*(iy + 4*iz);
+	        particle_array[i] = pd;
+	      }
       }
     }
   }
