@@ -586,7 +586,7 @@ Currently this will only run in unigrid mode. This is because when a block
 calls this method, it assumes that all neighbouring blocks have the same size,
 or equivalently, on the same refinement level.
 For this reason, there is a check in the constructor of EnzoMethodMergeStars
-for whether ``"Adapt: max_level"`` is equal to zero. In future, we plan to
+for whether ``"Adapt: max_level"`` is equal to zero. In the future, we plan to
 implement an accretion method, which will require a refinement condition that
 any block containing an accreting particle, or neighbouring such a block, needs
 to be on the highest level of refinement. In this case, the assumption that
