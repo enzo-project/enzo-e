@@ -41,7 +41,7 @@ EnzoMethodMergeStars::EnzoMethodMergeStars(double merging_radius_cells)
   Refresh * refresh = cello::refresh(ir_post_);
   ParticleDescr * particle_descr = cello::particle_descr();
   refresh->add_particle(particle_descr->type_index("star"));
-  refresh->set_copy();
+  refresh->set_particles_are_copied(true);
 }
 
 void EnzoMethodMergeStars::pup (PUP::er &p)

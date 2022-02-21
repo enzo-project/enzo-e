@@ -321,7 +321,7 @@ EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
   //
   const int it = particle_descr->type_index("star");
   refresh->add_particle(it);
-  refresh->set_copy();
+  refresh->set_particles_are_copied(true);
 
   FieldDescr * field_descr = cello::field_descr();
 

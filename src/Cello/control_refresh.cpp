@@ -67,7 +67,8 @@ void Block::refresh_start (int id_refresh, int callback)
     // send Particle face data
     int count_particle=0;
     if (refresh->any_particles()){
-      count_particle = refresh_load_particle_faces_(*refresh,refresh->copy());
+      count_particle = refresh_load_particle_faces_(*refresh,
+						    refresh->particles_are_copied());
     }
 
     // send Flux face data

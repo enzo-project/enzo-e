@@ -28,7 +28,7 @@ public: // interface
     field_list_dst_(),
     all_particles_(false),
     particle_list_(),
-    copy_(false),
+    particles_are_copied_(false),
     all_fluxes_(false),
     ghost_depth_(0),
     min_face_rank_(0),
@@ -58,7 +58,7 @@ public: // interface
       field_list_dst_(),
       all_particles_(false),
       particle_list_(),
-      copy_(false),
+      particles_are_copied_(false),
       all_fluxes_(false),
       ghost_depth_(ghost_depth),
       min_face_rank_(min_face_rank),
@@ -86,7 +86,7 @@ public: // interface
     field_list_dst_(),
     all_particles_(false),
     particle_list_(),
-    copy_(false),
+    particles_are_copied_(false),
     all_fluxes_(false),
     ghost_depth_(0),
     min_face_rank_(0),
@@ -114,7 +114,7 @@ public: // interface
     p | field_list_dst_;
     p | all_particles_;
     p | particle_list_;
-    p | copy_;
+    p | particles_are_copied_;
     p | all_fluxes_;
     p | ghost_depth_;
     p | min_face_rank_;
@@ -212,10 +212,12 @@ public: // interface
     all_particles_ = true;
   }
 
-  /// For all particle types participating in the refresh,
-  /// all particles are copied to all neighbouring blocks
-  void set_copy() {
-    copy_ = true;
+  /// Set the value for `particles_are_copied_` to be true
+  /// or false, which determines whether or not, for all
+  /// particle types participating in the refresh, all particles
+  /// are copied to all neighbouring blocks.
+  void set_particles_are_copied(bool particles_are_copied) {
+    particles_are_copied_ = particles_are_copied;
   }
 
   /// Return whether all particles are refreshed
@@ -225,8 +227,8 @@ public: // interface
   /// Return whether, for all particle types participating
   /// in the refresh, all particles are copied to all
   /// neighbouring blocks
-  bool copy() const
-  { return copy_; }
+  bool particles_are_copied() const
+  { return particles_are_copied_; }
 
   /// Return whether any particles are refreshed
   bool any_particles() const
@@ -471,9 +473,9 @@ private: // attributes
   /// Whether to refresh all particle types, ignoring particle_list_
   int all_particles_;
 
-  /// Whether, for all particle types participating in the refresh,
+  /// Whether or not, for all particle types participating in the refresh,
   /// all particles are copied to all neighbouring blocks
-  bool copy_;
+  bool particles_are_copied_;
   
   /// Indicies of particles to include
   std::vector <int> particle_list_;
