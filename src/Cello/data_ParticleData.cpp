@@ -357,7 +357,6 @@ void ParticleData::scatter
   const int na = particle_descr->num_attributes(it);
   int mp = particle_descr->particle_bytes(it);
   const int ib_src = ib;
-  
   int ia_copy = -1;
   int d_copy   = -1;
   if (particle_descr->is_attribute(it, "is_copy")) ia_copy = particle_descr->attribute_index(it,"is_copy");
