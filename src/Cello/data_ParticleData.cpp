@@ -305,8 +305,7 @@ void ParticleData::scatter
     for (int ip=0; ip<np; ip++) {
       ++np_array[index[ip]];
     }
-  }
-  else {
+  } else {
     if (copy){
       for (int ip=0; ip<np; ip++) {
         if (mask[ip]) {
