@@ -352,7 +352,6 @@ void ParticleData::scatter
       }
     }
   }
-  
   const bool interleaved = particle_descr->interleaved(it);
   const int na = particle_descr->num_attributes(it);
   int mp = particle_descr->particle_bytes(it);
