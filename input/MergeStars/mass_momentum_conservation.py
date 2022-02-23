@@ -120,64 +120,54 @@ if __name__ == "__main__":
     input_prefix = args["input_prefix"]
     yt.enable_parallelism()
     ds_pattern = f"{input_prefix}_????/{input_prefix}_????.block_list"
-    ts =  yt.DatasetSeries(ds_pattern)
 
-    storage = {}
-    for sto,ds in ts.piter(storage = storage):
+    cycle = []
+    mass = []
+    px   = []
+    py   = []
+    pz   = []
+    n_p  = []
+    
+    for ds in yt.DatasetSeries(ds_pattern):
         box = ds.box(left_edge = -ds.domain_width/2.0,right_edge = ds.domain_width/2.0)
-        mass = box["star","mass"].sum()
-        px = (box["star","mass"] * box["star","vx"]).sum()
-        py = (box["star","mass"] * box["star","vy"]).sum()
-        pz = (box["star","mass"] * box["star","vz"]).sum()
-        n_p = len(box["star","mass"])
-        sto.result = ds.parameters["current_cycle"],mass,px,py,pz,n_p
+        mass.append(box["star","mass"].sum())
+        px.append((box["star","mass"] * box["star","vx"]).sum())
+        py.append((box["star","mass"] * box["star","vy"]).sum())
+        pz.append((box["star","mass"] * box["star","vz"]).sum())
+        n_p.append(len(box["star","mass"]))
+        cycle.append(ds["current_cycle"])
 
-    time_list = []
-    mass_list = []
-    px_list = []
-    py_list = []
-    pz_list = []
-    n_p_list = []
-    if yt.is_root():
-        for i, (t,mass,px,py,pz,n_p) in sorted(storage.items()):
-            time_list.append(t)
-            mass_list.append(mass)
-            px_list.append(px)
-            py_list.append(py)
-            pz_list.append(pz)
-            n_p_list.append(n_p)
-
-        mass_error, mass_error_pass = test_error(mass_list,args["tolerance"])
-        px_error, px_error_pass = test_error(px_list,args["tolerance"])
-        py_error, py_error_pass = test_error(py_list,args["tolerance"])
-        pz_error, pz_error_pass = test_error(pz_list,args["tolerance"])
+    mass_error, mass_error_pass = test_error(mass,args["tolerance"])
+    px_error, px_error_pass = test_error(px,args["tolerance"])
+    py_error, py_error_pass = test_error(py,args["tolerance"])
+    pz_error, pz_error_pass = test_error(pz,args["tolerance"])
         
-        fig,ax = plt.subplots(nrows = 3,sharex = True)
-        ax[0].plot(time_list,mass_error)
-        grid_line_positions = np.linspace(-0.1,0.1,11,endpoint = True)
-        for y in grid_line_positions:
-            ax[0].axhline(y = y,ls = "--",color = "k",linewidth = 0.5,alpha = 0.7)
-            ax[1].axhline(y = y,ls = "--",color = "k",linewidth = 0.5,alpha = 0.7)
+    fig,ax = plt.subplots(nrows = 3,sharex = True)
+    ax[0].plot(cycle,mass_error)
+    grid_line_positions = np.linspace(-0.1,0.1,11,endpoint = True)
+    
+    for y in grid_line_positions:
+        ax[0].axhline(y = y,ls = "--",color = "k",linewidth = 0.5,alpha = 0.7)
+        ax[1].axhline(y = y,ls = "--",color = "k",linewidth = 0.5,alpha = 0.7)
 
-        ax[0].set_ylim(-0.1,0.1)
-        ax[0].set_ylabel("Total Mass Error")
-
-        ax[1].plot(time_list,px_error,label = "x-momentum")
-        ax[1].plot(time_list,py_error,label = "y-momentum",ls = "--")
-        ax[1].plot(time_list,pz_error,label = "z-momentum",ls = ":")
-        ax[1].set_ylim(-0.1,0.1)
-        ax[1].set_ylabel(r"Total Momentum Error")
-        ax[1].legend(loc = 0)
-        ax[2].plot(time_list,n_p_list)
-        ax[2].set_ylabel("Number of Particles")
-        ax[2].set_xlabel("Cycle number")
-        fig.savefig(args["output"])
-        plt.close(fig)
-        if (mass_error_pass and px_error_pass and py_error_pass and pz_error_pass):
-            print("All quantities conserved. Test passed")
-            sys.exit(0)
-        else:
-            print("Not all quantities conserved. Test failed.")
-            sys.exit(1)
+    ax[0].set_ylim(-0.1,0.1)
+    ax[0].set_ylabel("Total Mass Error")
+    ax[1].plot(cycle,px_error,label = "x-momentum")
+    ax[1].plot(cycle,py_error,label = "y-momentum",ls = "--")
+    ax[1].plot(cycle,pz_error,label = "z-momentum",ls = ":")
+    ax[1].set_ylim(-0.1,0.1)
+    ax[1].set_ylabel(r"Total Momentum Error")
+    ax[1].legend(loc = 0)
+    ax[2].plot(cycle,n_p)
+    ax[2].set_ylabel("Number of Particles")
+    ax[2].set_xlabel("Cycle number")
+    fig.savefig(args["output"])
+    plt.close(fig)
+    if (mass_error_pass and px_error_pass and py_error_pass and pz_error_pass):
+        print("All quantities conserved. Test passed")
+        sys.exit(0)
+    else:
+        print("Not all quantities conserved. Test failed.")
+        sys.exit(1)
 
     

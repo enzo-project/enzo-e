@@ -46,10 +46,7 @@ if __name__ == "__main__":
     output_prefix = args["output_prefix"]
     yt.enable_parallelism()
     ds_pattern = f"{input_prefix}_????/{input_prefix}_????.block_list"
-    ts =  yt.DatasetSeries(ds_pattern)
-    
-    storage = {}
-    for ds in ts.piter():
+    for ds in yt.DatasetSeries(ds_pattern):
         
         box = ds.box(left_edge = -ds.domain_width/2.0,right_edge = ds.domain_width/2.0)
         x = box["star","x"]
