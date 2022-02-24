@@ -261,11 +261,7 @@ bool ParticleDescr::is_attribute(int it, std::string attribute_name) const
     
   auto iter=attribute_index_[it].find(attribute_name);
 
-  int index = (iter != attribute_index_[it].end()) ? iter->second : -1;
-
-  static int count[CONFIG_NODE_SIZE] = {0};
-
-  return !((index == -1) && (count[cello::index_static()]++ < 10));
+  return iter != attribute_index_[it].end();
 }
 
 //----------------------------------------------------------------------
@@ -417,9 +413,8 @@ bool ParticleDescr::is_constant(int it, std::string constant_name) const
 
   auto iter=constant_index_[it].find(constant_name);
 
-  bool check = (iter != constant_index_[it].end()) ? true : false;
-
-  return check;
+  return iter != constant_index_[it].end();
+  
 }
 
 

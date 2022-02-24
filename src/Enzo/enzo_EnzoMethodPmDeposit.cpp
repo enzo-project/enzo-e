@@ -165,10 +165,10 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
                ((ba == 4) ? "single" : ((ba == 8) ? "double" : "quadruple")),
                ((be == 4) ? "single" : ((be == 8) ? "double" : "quadruple")),
                (ba == be));
+
  
       // Loop over batches
       for (int ib=0; ib<particle.num_batches(it); ib++) {
-	
       
         const int np = particle.num_particles(it,ib);
 
@@ -180,7 +180,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	  ASSERT1("EnzoMethodPmDeposit::compute",
 		  "Particle type %s has both a constant and an attribute called"
 		  "'mass'. Exiting.", particle.type_name(it).c_str(),
-		  particle.is_attribute(it,"mass"));
+		  !particle.is_attribute(it,"mass"));
 	  
 	  // In this case we fill the first np elements of pmass with the constant
 	  // value
@@ -209,7 +209,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
 
 	// Allocate particle masses to the grid with CIC scheme
-
         if (rank == 1) {
 
 	  const int ia_x  = particle.attribute_index(it,"x");
