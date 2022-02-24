@@ -556,6 +556,67 @@ acceleration fields.
 ``"trace"``: tracer particles
 =============================
 
-Moves tracer particles given the velocity field.    
+Moves tracer particles given the velocity field.
+
+
+``"merge_stars"``: merge stars
+==============================
+
+Merges together star particles which are separated by less than a given
+"merging radius". This is done by copying all star particles to / from
+all neighbouring blocks. A Friend-of-Friends algorithm is used to
+partition particles into groups, where all particles within a given group
+are separated by less than a merging radius. If a group has more than one
+particle, one of the particles has its properties changed: its position
+becomes that of the centre-of-mass of the group, and it takes the total
+mass, momentum and mass fraction of the whole group.
+In addition, its 'lifetime' attribute is set to be the maximum of the group,
+its 'creation_time' attribute is set to be the minimum of the group, and its
+'id' attribute is set to the minimum of the group. Other particles in the
+group are marked for deletion. The final step is for each block to delete
+all the remaining star particles which are 'out-of-bounds' of the block.
+
+This procedure cannot handle the case where particles originally
+from non-neighbouring blocks are put into the same FoF group. If this is
+found to occur, the program stops and prints an error message. This situation
+is unlikely to happen, unless the merging radius is too large relative
+to the block size.
+
+Currently this will only run in unigrid mode. This is because when a block
+calls this method, it assumes that all neighbouring blocks have the same size,
+or equivalently, on the same refinement level.
+For this reason, there is a check in the constructor of EnzoMethodMergeStars
+for whether ``"Adapt: max_level"`` is equal to zero. In the future, we plan to
+implement an accretion method, which will require a refinement condition that
+any block containing an accreting particle, or neighbouring such a block, needs
+to be on the highest level of refinement. In this case, the assumption that
+blocks containing accreting particles (which we want to merge together), and
+blocks neighbouring such blocks, are all on the same level of refinement
+would be valid.
+
+WARNING: there is currently a memory leak issue when running with this method
+which can cause Enzo-E to crash in mysterious ways. If this problem is
+encountered, it is advised to increase the batch size parameter
+(``"Particle:batch_size"``) by a factor of a few
+before attempting to run again. To be completely safe, the user can set a
+batch size larger than the total number of star particles in the whole
+simulation, which should be feasible for small test problems.
+
+parameters
+----------
+
+.. list-table:: Method ``merge_stars`` parameters
+   :widths: 10 5 1 30
+   :header-rows: 1
+   
+   * - Parameter
+     - Type
+     - Default
+     - Description
+   * - ``"merging_radius_cells"``
+     - `float`
+     - `8.0`
+     - `The merging radius relative to the cell-width`
+
    
 
