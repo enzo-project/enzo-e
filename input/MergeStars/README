@@ -1,0 +1,73 @@
+This directory contains various scripts and parameter files required to run the
+merge stars test problem.
+
+ics.py generates a text file (called particles.dat by default)
+with particle data which can be used to initialise
+the merge stars test problem in Enzo-E. More specifically, it creates star
+particles with constant masses, with random positions uniformly distributed
+in a sphere, and initial velocities all of the same magnitude with directions
+directed towards the centre of the sphere, plus an additional (optional)
+constant drift velocity. For more details run "python ics.py -h".
+
+images.py takes as input the directories generated when Enzo-E runs the test
+problem, which contain snapshots of the particle data at regular time intervals.
+The script uses yt to read the data and then uses matplotlib to make scatter
+plots of the x and y coordinates of the particles, outputting a series of
+image files, with each image corresponding to a particular snapshot. These
+images are useful to check whether the initial conditions were set up
+correctly and if Enzo-E ran as expected. This script is designed to be run
+with MPI as "mpirun -np X python images.py", with X the number of processes.
+For further details run "python images.py -h".
+
+mass_momentum_conservation.py takes as input the directories
+generated when Enzo-E runs the test problem, which contain snapshots of the
+particle data at regular time intervals. The script uses yt to read the
+data and calculates the total mass, total x/y/z-momentum and total number
+of particles in each snapshot. It then calculates the conservation error for these
+quantities, and tests whether the absolute value is less than some tolerance,
+which is a required input parameter. If the absolute value of the error is larger
+than the tolerance for any snapshot, then the script returns an error code.
+
+Finally, the script generates a figure
+with three panels, showing the mass conservation error, momentum conservation
+error, and number of
+particles plotted against the number of cycles (i.e. timesteps). The mass
+/ momentum error at a given cycle is defined as the difference between the total
+mass / momentum at a given cycle and the initial total mass / momentum,
+divided by the initial total mass / momentum. This figure is useful for
+checking if particles are indeed merging (shown by decrease in particle number
+with time) and whether mass and momentum are being properly conserved.
+This script is designed to be run
+with MPI as "mpirun -np X python mass_momentum_conservation.py", with X
+the number of processes.
+For further details run "python mass_momentum_conservation.py -h".
+
+The ".in" files are Enzo-E parameter files. Most of the parameters are defined in
+merge_stars_tes.incl, which is included by the .in files. The only difference is 
+the parameter which determines the names of the directories which Enzo-E
+generates to store snapshots.
+
+Executing run.sh (from the top-level directory of the repository) does the following:
+
+- Runs ics.py to generate particles.dat, which is used to generate the initial
+  conditions in Enzo-E.
+
+- Runs Enzo-E in serial mode and parallel mode (with 4 processes),
+  respectively taking merge_stars_test_serial.in merge_stars_test_parallel.in as
+  the input parameter file.
+
+- Runs images.py, storing the output images for the serial/parallel runs in
+  directories called run_serial/run_parallel respectively.
+
+- Runs mass_momentum_conservation.py, producing an image file called mmc_serial.png /
+  mmc_parallel.png for the serial/parallel runs respectively, storing
+  it in run_serial/run_parallel as appropriate. The tolerance (-t) parameter is set
+  to 1.0e-4 when Enzo-E is compiled with single precision ($CELLO_PREC=single), and
+  to 1.0e-6 when Enzo-E is compiled with double precision ($CELLO_PREC=double).
+
+- All the snapshot directories are deleted.
+
+- If both tests pass, run.sh returns 0, otherwise, it returns 1.
+
+NOTE: for run.sh to run successfully, the PATH environment variable must include the
+      path where the charmrun executable can be found.
