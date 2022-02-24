@@ -707,8 +707,15 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "merge_stars") {
 
-    method = new EnzoMethodMergeStars(enzo_config->method_merge_stars_merging_radius_cells);
+    method = new EnzoMethodMergeStars(
+		    enzo_config->method_merge_stars_merging_radius_cells
+				     );
 
+  } else if (name == "accretion_compute") {
+
+    method = new EnzoMethodAccretionCompute(
+		    enzo_config->method_accretion_compute_accretion_radius_cells
+					   );
   } else {
 
     // Fallback to Cello method's

@@ -374,6 +374,8 @@ public: // interface
       method_vlct_dual_energy_eta(0.0),
       // EnzoMethodMergeStars
       method_merge_stars_merging_radius_cells(0.0),
+      // EnzoMethodAccretionCompute
+      method_accretion_compute_accretion_radius_cells(0.0),
       // EnzoProlong
       prolong_enzo_type(),
       prolong_enzo_positive(true),
@@ -455,6 +457,7 @@ protected: // methods
   void read_method_ppm_(Parameters *);
   void read_method_turbulence_(Parameters *);
   void read_method_merge_stars_(Parameters *);
+  void read_method_accretion_compute_(Parameters *);
   
   void read_physics_(Parameters *);
 
@@ -793,7 +796,9 @@ public: // attributes
   /// EnzoMethodMergeStars
   double                     method_merge_stars_merging_radius_cells;
 
-
+  /// EnzoMethodMergeStars
+  double                     method_accretion_compute_accretion_radius_cells;
+  
   std::string                prolong_enzo_type;
   bool                       prolong_enzo_positive;
   bool                       prolong_enzo_use_linear;

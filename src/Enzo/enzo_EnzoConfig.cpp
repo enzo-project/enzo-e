@@ -271,6 +271,8 @@ EnzoConfig::EnzoConfig() throw ()
   method_vlct_dual_energy_eta(0.0),
   /// EnzoMethodMergeStars
   method_merge_stars_merging_radius_cells(0.0),
+  /// EnzoMethodAccretionCompute
+  method_accretion_compute_accretion_radius_cells(0.0),
   /// EnzoProlong
   prolong_enzo_type(),
   prolong_enzo_positive(true),
@@ -598,6 +600,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_vlct_dual_energy_eta;
 
   p | method_merge_stars_merging_radius_cells;
+  
+  p | method_accretion_compute_accretion_radius_cells;
 
   p | prolong_enzo_type;
   p | prolong_enzo_positive;
@@ -684,6 +688,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_ppm_(p);
   read_method_turbulence_(p);
   read_method_merge_stars_(p);
+  read_method_accretion_compute_(p);
   
   read_physics_(p);
   
@@ -1573,10 +1578,20 @@ void EnzoConfig::read_method_heat_(Parameters * p)
     ("Method:heat:alpha",1.0);
 }
 
+//----------------------------------------------------------------------
+
 void EnzoConfig::read_method_merge_stars_(Parameters * p)
 {
   method_merge_stars_merging_radius_cells = p->value_float
     ("Method:merge_stars:merging_radius_cells",8.0);
+}
+
+//----------------------------------------------------------------------
+
+void EnzoConfig::read_method_accretion_compute_(Parameters * p)
+{
+  method_merge_stars_merging_radius_cells = p->value_float
+    ("Method:accretion_compute:accretion_radius_cells",4.0);
 }
 
 //----------------------------------------------------------------------
