@@ -30,7 +30,7 @@
 :Default: :d:`"undefined"`
 :Scope:     :c:`Cello`
 
-:e:`Boundary conditions in Enzo-E include` :t:`"reflecting"` :e:`,` :t:`"outflow"` :e:`,` :t:`"inflow"` :e:`, and` :t:`"periodic"`.  :e:`Other boundary condition types can be implemented by either a) modifying the existing` :p:`EnzoBoundary` :e:`class or b) creating a new class inherited from the` :p:`Boundary` :e:`base class.`  :t:`"inflow"` :e:`boundary conditions additionally require` :p:`value` :e:`and` :p:`field_list` :e:`parameters.`
+:e:`Boundary conditions in Enzo-E include` :t:`"reflecting"` :e:`,` :t:`"outflow"` :e:`,` :t:`"inflow"` :e:`, and` :t:`"periodic"`.  :e:`Other boundary condition types can be implemented by either a) modifying the existing` :p:`EnzoBoundary` :e:`class or b) creating a new class inherited from the` :p:`Boundary` :e:`base class.`  :t:`"inflow"` :e:`boundary conditions additionally require` :p:`inflow` :e:`and` :p:`field_list` :e:`parameters.`
 
 ----
 
@@ -75,7 +75,7 @@
 
 ----
 
-:Parameter:  :p:`Boundary` : :g:`<condition>` : :p:`value`
+:Parameter:  :p:`Boundary` : :g:`<condition>` : :p:`inflow`
 :Summary:    :s:`Value for inflow boundary conditions`
 :Type:    :t:`float`
 :Type:    :t:`float-expr`
@@ -83,7 +83,7 @@
 :Default: :d:`[]`
 :Scope:     :c:`Cello`
 
-:e:`The` :p:`value` :e:`parameter is used to specify field values for` :p:`inflow` :e:`type boundary conditions.  The` :p:`value` :e:`parameter is used in conjunction with the` :p:`field_list` :e:`parameter.` :p:`value` :e:`may be of type` :t:`float`, :t:`float-expr`, :e:`or a list of alternating` :t:`float-expr` :e:`and` :t:`logical-expr` :e:`types`.  :t:`float-expr` :e:`may be a function of x, y, z, and t.  When a list is specified, the` :t:`logical-expr` :e:`is treated as a mask, similar to an 'if-then-else' clause`
+:e:`The` :p:`inflow` :e:`parameter is used to specify field values for` :p:`inflow` :e:`type boundary conditions.  The` :p:`inflow` :e:`parameter is used in conjunction with the` :p:`field_list` :e:`parameter.` :p:`inflow` :e:`may be of type` :t:`float`, :t:`float-expr`, :e:`or a list of alternating` :t:`float-expr` :e:`and` :t:`logical-expr` :e:`types`.  :t:`float-expr` :e:`may be a function of x, y, z, and t.  When a list is specified, the` :t:`logical-expr` :e:`is treated as a mask, similar to an 'if-then-else' clause`
 
    ::
 
@@ -92,7 +92,7 @@
           VELOCITY_Y {
              type = "inflow";
              field_list = "velocity_y";
-             value = [ -8.25*0.5,
+             inflow = [ -8.25*0.5,
                         ((x <= 0.166667) && (y <= 0.0) ) ||
                          (x <= 0.0) ||
                          ((x < 0.744017 + 11.547*t) && (y >= 1.0))
