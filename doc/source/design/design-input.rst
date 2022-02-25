@@ -120,11 +120,12 @@ Input algorithm
 
 .. image:: io-input.png
 
+// Begin reading restart data and create the mesh hierarchy of
+// EnzoBlocks. Replaces functionality of control_adapt.
+
 .. code-block:: C++
 
-    // Begin reading restart data and create the mesh hierarchy of
-    // EnzoBlocks. Replaces functionality of control_adapt.
-    entry void enzo_main::r_restart_enter(std::string file_hierarchy)
+    entry void main::r_restart_enter(std::string file_hierarchy)
     {
        // open hierarchy file
        // read hierarchy file
@@ -132,7 +133,7 @@ Input algorithm
        // create IoEnzoReader array
        // initialize sync_file(num_io_reader)
        for (i_f = files in restart) {
-          io_reader[i_f].insert(file_block);
+          io_reader[i_f].insert(file_name[i_f]);
        }
        // close hierarcy file
     }
@@ -165,23 +166,29 @@ Input algorithm
 .. code-block:: C++
 
     // After all blocks created, notify main when done
-    IoReader::p_block_created(Block index)
+    entry IoReader::p_block_created(Block index)
     {
        // Count blocks created
        if (sync_block.done()) {
           // After last block created, exit restart phase
-          enzo_main::p_restart_done();
+          main::p_restart_done();
        }
     }
 
 .. code-block:: C++
 
     // After all files have been read, proceed with the simulation
-    main::p_restart_done() {
+    entry main::p_restart_done()
+    {
        if (sync_file.done()) {
-          p_initial_done
+          restart_exit();
+       }
     }
 
+    void main::restart_exit()
+    {
+       // exit restart phase
+    }
 
 Output algorithm
 ----------------
@@ -191,71 +198,100 @@ Output algorithm
 .. code-block:: C++
 
     // Begin writing a checkpoint file
-    entry void EnzoMethodCheckpoint::apply(Block)
+    entry void EnzoMethodCheck::apply(Block)
     {
-       contribute (enzo_main::r_checkpoint_enter(std::string file_hierarchy));
+       contribute (main::r_check_enter(std::string file_hierarchy));
     }
 
-    entry void enzo_main::r_checkpoint_enter(std::string file_hierarchy)
+.. code-block:: C++
+
+    entry void main::r_check_enter(std::string file_hierarchy)
     {
        // create hierarchy file
        // write hierarchy file
        // create IoEnzoWriter array
-       // initialize sync_file(num_io_Writer)
-       // Start io_writer with writer blocks by asking
-       //    blocks to self-identify as writers
-       block_array.p_io_write_start(io_writer, ordering);
+       // initialize sync_writer(num_io_writer)
+       for (i_f = files in checkpoint) {
+          io_writer[i_f].insert(file_name[i_f]);
+       }
+       // [wait for IoWriters to all be created before proceeding]
     }
 
-    EnzoBlock::p_io_write_start(io_writer, ordering)
+.. code-block:: C++
+
+   IoEnzoWriter::IoEnzoWriter()
+   {
+      // open block file
+      // notify main that this IoWriter has been created
+      main.p_writer_created();
+   }
+
+.. code-block:: C++
+
+   entry void main::p_writer_created()
+   {
+      // after all writers check-in, get first blocks
+      if (sync_writer.done()) {
+         // initialize sync_file
+         // ask blocks to self-identify as the first block in a file
+         block_array.p_write_first();
+      }
+   }
+   
+.. code-block:: C++
+
+    entry void EnzoBlock::p_write_first(io_writer, ordering)
     {
-       if (io_writer.is_start(index)) {
-       // determine index_file [0 .. num_io_writer) using num blocks and num files
-          EnzoBlock::io_write_next(io_writer, ordering, index_file)
+       // if this block is first in the partitioned ordering,
+       // send data to assigned writer i_w
+       if (ordering.is_start(index, count)) {
+          write_next(io_writer,i_w);
        }
     }
 
-    EnzoBlock::[p_]io_write_next(io_writer, ordering, index_file)
+    void EnzoBlock::write_next(io_writer, i_w)
     {
-       // get next block index, and whether this is last block in file
-        io_writer[index_file].write_block(block_data,ordering, index_next, l_last_block);
+      // pack data
+      // determine next Block in the ordering, else signal if last
+      // send data to assigned io writer to output to file
+      io_writer[i_w].p_write(data_buffer, index_next, is_last)
     }
 
-    // Write a Block's data, and request next Block if any, else close and return
-    IoEnzoWrite::write_block(block_data,ordering, index_next, l_is_first, l_is_last);
-    {
-       // if firstopen block file
-       // read block file
-       // initialize sync_block(num_blocks)
-       for (i_b = loop over blocks) {
-          // read Block data
-          // create Block, initialize, notify caller when done
-          enzo_factory.create_block(block_data, io_reader, i_f);
-       }
-       // close file
-    }
+.. code-block:: C++
 
-    // Initialize a block then notify caller when done
-    Block::Block (block_data, io_reader, i_f)
+    entry void IoEnzoWrite::p_write(data_buffer,index_next, is_last);
     {
-       // initialize Block using block_data
-       io_reader[i_f].p_block_created(index);
-    }
-
-    // After all blocks created, notify main when done
-    IoReader::p_block_created(Block index)
-    {
-       // Count blocks created
-       if (sync_block.done()) {
-          // After last block created, exit restart phase
-          enzo_main::p_restart_done();
+       // unpack block data
+       // write block data to file
+       // request next block if any, else signal main we're done
+       if (is_last) {
+          // close file
+          main.p_check_done();
+       } else {
+          block_array[index_next].p_write_next();
        }
     }
 
-    // After all files have been read, proceed with the simulation
-    main::p_restart_done() {
+.. code-block:: C++
+
+    entry void EnzoBlock::p_write_next(io_writer, i_w)
+    {
+       write_next(io_writer, i_w);
+    }
+
+.. code-block:: C++
+
+    // After all files have been written, proceed with the simulation
+    entry void main::p_check_done()
+    {
        if (sync_file.done()) {
-          p_initial_done
+          check_exit();
+       }
+    }
+
+    void main::check_exit() {
+    {
+       // exit checkpoint phase
     }
 
 -------
