@@ -83,6 +83,7 @@ module enzo {
   PUPable EnzoMatrixIdentity;
 
   PUPable EnzoMethodBackgroundAcceleration;
+  PUPable EnzoMethodCheck;
   PUPable EnzoMethodFeedback;
   PUPable EnzoMethodDistributedFeedback;
 
@@ -117,7 +118,6 @@ module enzo {
 
   PUPable EnzoMethodStarMaker;
   PUPable EnzoMethodStarMakerStochasticSF;
-  PUPable EnzoMethodWriteCheck;
   
   PUPable EnzoBfieldMethodCT;
 

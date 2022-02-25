@@ -697,7 +697,7 @@ Method * EnzoProblem::create_method_
   } else if (name == "check") {
 
     // Method for checkpointing the simulation
-    method = new EnzoMethodWriteCheck();
+    method = new EnzoMethodCheck();
 
   } else {
 

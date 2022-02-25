@@ -1,29 +1,29 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoMethodWriteCheck.hpp
+/// @file     enzo_EnzoMethodCheck.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     2022-02-12
-/// @brief    [\ref Enzo] Implementation of EnzoMethodWriteCheck
+/// @brief    [\ref Enzo] Implementation of EnzoMethodCheck
 
-#ifndef ENZO_ENZO_METHOD_WRITE_CHECK_HPP
-#define ENZO_ENZO_METHOD_WRITE_CHECK_HPP
+#ifndef ENZO_ENZO_METHOD_CHECK_HPP
+#define ENZO_ENZO_METHOD_CHECK_HPP
 
-class EnzoMethodWriteCheck : public Method {
+class EnzoMethodCheck : public Method {
 
-  /// @class    EnzoMethodWriteCheck
+  /// @class    EnzoMethodCheck
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Write Enzo-E Checkpoint files
 
 public: // interface
 
-  /// Create a new EnzoMethodWriteCheck object
-  EnzoMethodWriteCheck();
+  /// Create a new EnzoMethodCheck object
+  EnzoMethodCheck();
 
   /// Charm++ PUP::able declarations
-  PUPable_decl(EnzoMethodWriteCheck);
+  PUPable_decl(EnzoMethodCheck);
   
   /// Charm++ PUP::able migration constructor
-  EnzoMethodWriteCheck (CkMigrateMessage *m)
+  EnzoMethodCheck (CkMigrateMessage *m)
     : Method (m)
   {}
 
@@ -42,4 +42,4 @@ protected: // interface
 
 };
 
-#endif /* ENZO_ENZO_METHOD_WRITE_CHECK_HPP */
+#endif /* ENZO_ENZO_METHOD_CHECK_HPP */

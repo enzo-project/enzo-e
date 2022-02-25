@@ -227,6 +227,7 @@ extern "C" {
 #include "enzo_EnzoBfieldMethodCT.hpp"
 #include "enzo_EnzoSourceInternalEnergy.hpp"
 
+#include "enzo_EnzoMethodCheck.hpp"
 #include "enzo_EnzoMethodComovingExpansion.hpp"
 #include "enzo_EnzoMethodCosmology.hpp"
 #include "enzo_EnzoMethodFeedback.hpp"
@@ -243,7 +244,6 @@ extern "C" {
 #include "enzo_EnzoMethodTurbulence.hpp"
 #include "enzo_EnzoMethodStarMaker.hpp"
 #include "enzo_EnzoMethodStarMakerStochasticSF.hpp"
-#include "enzo_EnzoMethodWriteCheck.hpp"
 
 #include "enzo_EnzoMatrixDiagonal.hpp"
 #include "enzo_EnzoMatrixIdentity.hpp"
