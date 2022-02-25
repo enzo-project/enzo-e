@@ -652,6 +652,18 @@ heat
 
 :e:`Thermal diffusivity parameter for the heat equation.`
 
+merge_stars
+-----------
+
+:Parameter:  :p:`Method` : :p:`merge_stars` : :p:`merging_radius_cells`
+:Summary:    :s:`The distance within which star particles merge with
+                 each other, relative to the cell width`
+:Type:       :t:`float`
+:Default:    :d:`8.0`
+:Scope:     :z:`Enzo`
+
+:e:`The distance within which star particles merge with each other,relative to the cell width.`
+
 mhd_vlct
 --------
 

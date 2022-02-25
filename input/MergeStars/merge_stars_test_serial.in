@@ -1,0 +1,21 @@
+include "input/MergeStars/merge_stars_test.incl"
+
+
+ Output {
+   
+     data {
+         dir = [ "./Dir_Merge_Stars_Serial_%04d", "cycle" ];
+         field_list = [ "acceleration_x", "acceleration_y", "acceleration_z",
+	 	      	"density_total", "potential" ];
+	 particle_list = ["star"];
+         name = [ "data-%04d-%04d.h5", "cycle", "proc" ];
+         schedule {
+             step = 10;
+             var = "cycle";
+         };
+         type = "data";
+     };
+    
+     list = ["data"];
+     
+ }

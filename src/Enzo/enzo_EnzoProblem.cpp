@@ -252,7 +252,10 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_burkertbodenheimer_densityprofile);
   } else if (type == "isolated_galaxy") {
     initial = new EnzoInitialIsolatedGalaxy (enzo_config);
-  } else {
+  } else if (type == "merge_stars_test") {
+    initial = new EnzoInitialMergeStarsTest (enzo_config);
+  }
+  else {
     initial = Problem::create_initial_
       (type,index,config,parameters);
   }
@@ -701,6 +704,10 @@ Method * EnzoProblem::create_method_
 
     // need a similar type swtich as in star maker
     method = new EnzoMethodDistributedFeedback();
+
+  } else if (name == "merge_stars") {
+
+    method = new EnzoMethodMergeStars(enzo_config->method_merge_stars_merging_radius_cells);
 
   } else {
 
