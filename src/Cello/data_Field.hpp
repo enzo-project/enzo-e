@@ -366,6 +366,23 @@ public: // interface
   void scale (int iy, long double a, int ix, bool ghosts = true ) throw()
   { field_data_->scale(field_descr_, iy,a,ix,ghosts); }
 
+  //--------------------------------------------------
+  /// Return the number of bytes required to serialize the data object
+  int data_size () const
+  { return field_data_->data_size (field_descr_); }
+
+  /// Serialize the object into the provided empty memory buffer.
+  /// Returns the next open position in the buffer to simplify
+  /// serializing multiple objects in one buffer.
+  char * save_data (char * buffer) const
+  { return field_data_->save_data (field_descr_,buffer); }
+
+  /// Restore the object from the provided initialized memory buffer data.
+  /// Returns the next open position in the buffer to simplify
+  /// serializing multiple objects in one buffer.
+  char * load_data (char * buffer)
+  { return field_data_->load_data (field_descr_,buffer); }
+
   //----------------------------------------------------------------------
 
   /// Print basic field characteristics for debugging
