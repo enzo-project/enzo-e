@@ -149,7 +149,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
       // Index for mass attribute / constant
       int im = 0;
 
-      if (particle.is_constant(it, "mass"))
+      if (particle.has_constant(it, "mass"))
 	pmass = new enzo_float[particle_descr->batch_size()];
       	
       // check correct precision for position
@@ -174,13 +174,13 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
 	// Particle masses can be either a constant value for all particles,
 	// or an attribrute array
-	if (particle.is_constant (it,"mass")){
+	if (particle.has_constant (it,"mass")){
 
 	  // Check if particle also has a mass attribute
 	  ASSERT1("EnzoMethodPmDeposit::compute",
 		  "Particle type %s has both a constant and an attribute called"
 		  "'mass'. Exiting.", particle.type_name(it).c_str(),
-		  !particle.is_attribute(it,"mass"));
+		  !particle.has_attribute(it,"mass"));
 	  
 	  // In this case we fill the first np elements of pmass with the constant
 	  // value
@@ -188,7 +188,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	  for (int ip = 0; ip<np; ip++)
 	    pmass[ip] = *((enzo_float *)(particle.constant_value (it,im)));
           
-        } else if (particle.is_attribute(it,"mass")) {
+        } else if (particle.has_attribute(it,"mass")) {
 
 	  // In this case we set pmass to point to the mass attribute array
 	  im = particle.attribute_index(it,"mass");
@@ -204,7 +204,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	// If mass is a constant, we simply loop through the pmass
 	// array, and so dm = 1. If its an attribute, we need to get
 	// the stride length
-	const int dm = particle.is_attribute(it,"mass") ?
+	const int dm = particle.has_attribute(it,"mass") ?
 	               particle.stride(it,im) : 1;
 
 
@@ -419,7 +419,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
       } // Loop over batches
       
       // If constant mass, delete the pmass array
-      if (particle.is_constant(it,"mass")) delete [] pmass;
+      if (particle.has_constant(it,"mass")) delete [] pmass;
       
     } // Loop over particle types in 'has_mass' group
     

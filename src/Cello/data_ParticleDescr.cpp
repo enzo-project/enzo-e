@@ -253,9 +253,9 @@ int ParticleDescr::attribute_index (int it, std::string attribute_name) const
 
 //----------------------------------------------------------------------
 
-bool ParticleDescr::is_attribute(int it, std::string attribute_name) const
+bool ParticleDescr::has_attribute(int it, std::string attribute_name) const
 {
-  ASSERT1("ParticleDescr::is_attribute",
+  ASSERT1("ParticleDescr::has_attribute",
           "Trying to access unknown particle type %d",
           it, (0 <= it && it < num_types()));
     
@@ -405,9 +405,9 @@ int ParticleDescr::constant_offset (int it, int ic) const
 
 //----------------------------------------------------------------------
 
-bool ParticleDescr::is_constant(int it, std::string constant_name) const
+bool ParticleDescr::has_constant(int it, std::string constant_name) const
 {
-  ASSERT1("ParticleDescr::constant_index",
+  ASSERT1("ParticleDescr::has_constant",
           "Trying to access unknown particle type %d",
           it, (0 <= it && it < num_types()));
 

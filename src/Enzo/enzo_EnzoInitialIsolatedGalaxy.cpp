@@ -795,11 +795,11 @@ void EnzoInitialIsolatedGalaxy::InitializeParticles(Block * block,
     int ia_to = -1;
     int ia_l = -1;
     int ia_metal = -1;
-    if (particle->is_attribute(it, "creation_time"))
+    if (particle->has_attribute(it, "creation_time"))
       ia_to = particle->attribute_index(it,"creation_time");
-    if (particle->is_attribute(it, "lifetime"))
+    if (particle->has_attribute(it, "lifetime"))
       ia_l = particle->attribute_index(it,"lifetime");
-    if (particle->is_attribute(it, "metal_fraction"))
+    if (particle->has_attribute(it, "metal_fraction"))
       ia_metal = particle->attribute_index(it,"metal_fraction");
 
     int ib  = 0; // batch counter
