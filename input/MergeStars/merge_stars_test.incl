@@ -61,7 +61,6 @@ Particle {
 		       "id" , "int64"];
         position = [ "x", "y", "z" ];
         velocity = [ "vx", "vy", "vz" ];
-        group_list = "is_gravitating";
     }
 }
 
