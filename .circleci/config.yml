@@ -126,7 +126,7 @@ commands:
             USE_DOUBLE=$(( 0 <<# parameters.usedouble >> + 1 <</ parameters.usedouble >> ))
 
             if [ ! -f << parameters.skipfile >> ]; then
-              cmake -DEnzo-E_CONFIG=linux_gcc -GNinja -DUSE_DOUBLE_PREC=<< parameters.usedouble >> -DUSE_GRACKLE=<< parameters.usegrackle >> -Bbuild -DPARALLEL_LAUNCHER_NPROC_ARG="++local;+p"
+              cmake -DEnzo-E_CONFIG=linux_gcc -GNinja -DUSE_DOUBLE_PREC=<< parameters.usedouble >> -DUSE_GRACKLE=<< parameters.usegrackle >> -Bbuild -DPARALLEL_LAUNCHER_NPROC_ARG="++local;+p" -DPython3_FIND_VIRTUALENV=ONLY
               cmake --build build -j 4
               source $HOME/venv/bin/activate
               if [[ $SKIP_TEST != 1 ]]; then
