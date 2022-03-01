@@ -27,8 +27,6 @@ import os.path
 import sys
 import numpy as np
 import shutil
-import subprocess
-import math
 
 from testing_utils import testing_context, EnzoEWrapper, CalcTableL1Norm
 from run_MHD_shock_tube_test import analyze_shock

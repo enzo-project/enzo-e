@@ -123,18 +123,22 @@ commands:
 
             # convert boolean parameter to an env var storing 0 or 1
             SKIP_TEST=$(( 0 <<# parameters.skiptest >> + 1 <</ parameters.skiptest >> ))
+            USE_DOUBLE=$(( 0 <<# parameters.usedouble >> + 1 <</ parameters.usedouble >> ))
 
             if [ ! -f << parameters.skipfile >> ]; then
               cmake -DEnzo-E_CONFIG=linux_gcc -GNinja -DUSE_DOUBLE_PREC=<< parameters.usedouble >> -DUSE_GRACKLE=<< parameters.usegrackle >> -Bbuild -DPARALLEL_LAUNCHER_NPROC_ARG="++local;+p"
               cmake --build build -j 4
               source $HOME/venv/bin/activate
               if [[ $SKIP_TEST != 1 ]]; then
-                 # the following environment variable indicates that the
-                 # parallel VL+CT test(s) are to be skipped
-                 export VL_PARALLEL_TEST_IP_CHARM=0
-                 cd build
-                 ctest --output-on-failure
-                 ninja process_test_results
+                cd build
+                # Run all tests excluding VLCT
+                ctest -E vlct --output-on-failure
+                # Run VLCT tests if using double prec (currently required)
+                if [[ $USE_DOUBLE == 1 ]]; then
+                  ctest -R vlct --output-on-failure
+                fi
+
+                ninja process_test_results
               fi
             fi
 

@@ -3,11 +3,10 @@
 # runs VLCT cloud tests that explicitly check whether the implementation of the
 # dual energy formalism appropriately maintain asymmetry.
 
-
+import argparse
 import os.path
 import sys
 import shutil
-import subprocess
 
 import numpy as np
 import yt
@@ -99,11 +98,13 @@ def cleanup():
             shutil.rmtree(dir_name)
 
 if __name__ == '__main__':
-    executable = os.environ.get('ENZOE_BIN', 'bin/enzo-e')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--launch_cmd', required=True,type=str)
+    args = parser.parse_args()
 
     with testing_context():
         # run the tests
-        tests_complete = run_tests(executable)
+        tests_complete = run_tests(args.launch_cmd)
 
         # analyze the tests
         tests_passed = analyze_tests()
