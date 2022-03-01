@@ -41,10 +41,9 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
   ParticleDescr * particle_descr = cello::particle_descr();
   Grouping * particle_groups = particle_descr->groups();
   const int num_is_grav = particle_groups->size("is_gravitating");
- 
   for (int ipt = 0; ipt < num_is_grav; ipt++) {
     const int it = particle_descr->type_index(particle_groups->item("is_gravitating",ipt));
-
+    
     // keep track of number of attributes or constants called "mass" or "density",
     // should be exactly 1
     int num_mass_or_dens = 0;
@@ -58,7 +57,7 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
             "must have either an attribute or a constant "
 	    "called either \"mass\" or \"density\". Exiting.",
 	    particle_descr->type_name(it).c_str(),
-	    num_mass_or_dens != 1);
+	    num_mass_or_dens == 1);
   }
   
   const int rank = cello::rank();
