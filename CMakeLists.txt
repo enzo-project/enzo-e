@@ -282,6 +282,11 @@ add_subdirectory(src/Enzo)
 add_subdirectory(src/External)
 
 include(CTest)
+find_package(Python3 REQUIRED)
+# Ensure all required packages are present
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/PythonModuleCheck.cmake)
+required_python_modules_found("yt")
+
 add_subdirectory(test)
 
 # now generate the the config
