@@ -54,8 +54,8 @@ STRING(REGEX REPLACE "<CMAKE_CXX_COMPILER>" "${CHARM_COMPILER}"
 
 # Need to process Grackle here as both Cello and Enzo-E depend on it
 option(USE_GRACKLE "Use Grackle Chemistry" ON)
-find_package(Grackle)
 if (USE_GRACKLE)
+  find_package(Grackle)
   if (Grackle_FOUND)
     # Setting global compile def as performance and simulation Cello libs need the var
     # We should discuss the use of a central config.hpp (similar to the existing
