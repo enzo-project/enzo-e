@@ -65,7 +65,7 @@ the number of dimensionsions of the array.
 
 At a high-level, this template class has semantics like a pointer or
 ``std::shared_ptr`` (there are also similarities to numpy's ,
-``ndarray``).  It's probably best to think of these objects as a
+``ndarray``).  These objects serve as a 
 smart-pointer with methods for treating the data as a specialized
 array.  These semantics explicitly differ from the C++ standard
 library containers (like ``std::vector``).
