@@ -36,6 +36,31 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
   : Method(),
     alpha_(alpha)
 {
+  // Check if particle types in "is_gravitating" group have either a mass
+  // or a constant called either "mass" or "density"
+  ParticleDescr * particle_descr = cello::particle_descr();
+  Grouping * particle_groups = particle_descr->groups();
+  const int num_is_grav = particle_groups->size("is_gravitating");
+ 
+  for (int ipt = 0; ipt < num_is_grav; ipt++) {
+    const int it = particle_descr->type_index(particle_groups->item("is_gravitating",ipt));
+
+    // keep track of number of attributes or constants called "mass" or "density",
+    // should be exactly 1
+    int num_mass_or_dens = 0;
+    if (particle_descr->has_constant (it,"mass")) ++num_mass_or_dens;
+    if (particle_descr->has_attribute (it,"mass")) ++num_mass_or_dens;
+    if (particle_descr->has_constant (it,"density")) ++num_mass_or_dens;
+    if (particle_descr->has_attribute (it,"density")) ++num_mass_or_dens;
+
+    ASSERT1("EnzoMethodPmDeposit::EnzoMethodPmDeposit",
+	    "Particle type %s, in the \"is_gravitating\" group, "
+            "must have either an attribute or a constant "
+	    "called either \"mass\" or \"density\". Exiting.",
+	    particle_descr->type_name(it).c_str(),
+	    num_mass_or_dens != 1);
+  }
+  
   const int rank = cello::rank();
 
   cello::define_field ("density");
@@ -176,26 +201,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	// First case: particle type has a constant called "mass"
 	if (particle.has_constant (it,"mass")){
 
-	  // Check if particle doesn't also have an attribute called "mass"
-	  ASSERT1("EnzoMethodPmDeposit::compute",
-		  "Particle type %s has both a constant and an attribute called"
-		  "'mass'. Exiting.", particle.type_name(it).c_str(),
-		  !particle.has_attribute(it,"mass"));
-
-	  // Check if particle doesn't also have a constant called "density"
-	  ASSERT1("EnzoMethodPmDeposit::compute",
-		  "Particle type %s has both a constant called 'mass' and a "
-		  "constant called 'density'. Exiting.",
-		  particle.type_name(it).c_str(),
-		  !particle.has_constant(it,"density"));
-
-	  // Check if particle doesn't also have an attribute called "density"
-	  ASSERT1("EnzoMethodPmDeposit::compute",
-		  "Particle type %s has both a constant called 'mass' and an "
-		  "attribute called 'density'. Exiting.",
-		  particle.type_name(it).c_str(),
-		  !particle.has_attribute(it,"density"));
-
 	  // In this case we fill the first np elements of pdens with the constant
 	  // mass value multiplied by inv_vol
 	  ind = particle.constant_index(it,"mass");
@@ -204,20 +209,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
           
         } else if (particle.has_attribute(it,"mass")) {
 
-	  // Check if particle doesn't also have a constant called "density"
-	  ASSERT1("EnzoMethodPmDeposit::compute",
-		  "Particle type %s has both an attribute called 'mass' and a "
-		  "constant called 'density'. Exiting.",
-		  particle.type_name(it).c_str(),
-		  !particle.has_constant(it,"density"));
-
-	  // Check if particle doesn't also have an attribute called "density"
-	  ASSERT1("EnzoMethodPmDeposit::compute",
-		  "Particle type %s has both an attribute called 'mass' and an "
-		  "attribute called 'density'. Exiting.",
-		  particle.type_name(it).c_str(),
-		  !particle.has_attribute(it,"density"));
-
 	  // In this case we set pdens to point to the mass attribute array
 	  // and then multiply all its elements by inv_vol
 	  ind = particle.attribute_index(it,"mass");
@@ -225,13 +216,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	  for (int ip = 0; ip<np; ip++)
 	    pdens[ip] *= inv_vol;
         } else if (particle.has_constant(it,"density")) {
-
-	  // Check if particle doesn't also have an attribute called "density"
-	  ASSERT1("EnzoMethodPmDeposit::compute",
-		  "Particle type %s has both a constant and an "
-		  "attribute called 'density'. Exiting.",
-		  particle.type_name(it).c_str(),
-		  !particle.has_attribute(it,"density"));
 	  
 	  // In this case we fill the first np elements of pdens with the constant
 	  // density value, and then rescale according to the refinement level
@@ -240,8 +224,9 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	    pdens[ip] = *((enzo_float *)(particle.constant_value (it,ind)));
 	    for (int j = 0; j<level*rank; j++) pdens[ip] *= 2.0;
 	  }
-	} else if (particle.has_attribute(it,"density")) {
-	  
+	} else {
+
+	  // Particle type must have an attribute called "density".
 	  // In this case we set pdens to point to the mass attribute array
 	  // and then rescale the values according to the refinement level 
 	  ind = particle.attribute_index(it,"density");
@@ -249,19 +234,11 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	  for (int ip = 0; ip<np ; ip++)
 	    for (int j = 0 ; j<level*rank; j++)
 	      pdens[ip] *= 2.0;
-	  
-	} else {
-
-	  ERROR1("EnzoMethodPmDeposit::compute",
-		"Particle type %s has neither a constant nor an attribute" 
-                "called 'mass' or `density', yet is in the "is_gravitating" group",
-		 particle.type_name(it).c_str());
 	}
 	
 	// If mass / density is a constant, we simply loop through the pdens
 	// array, and so dm = 1. If its an attribute, we need to get
 	// the stride length
-	
 	const int stride = (particle.has_attribute(it,"mass") ||
 			    particle.has_attribute(it,"density"))
 	                   ? particle.stride(it,ind) : 1;
