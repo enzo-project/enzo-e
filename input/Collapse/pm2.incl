@@ -45,7 +45,7 @@
       list += ["dark"];
 
       dark {
-          group_list = ["has_mass"];
+          group_list = ["is_gravitating"];
 
 	  attributes = ["x", "default",
                         "y", "default",

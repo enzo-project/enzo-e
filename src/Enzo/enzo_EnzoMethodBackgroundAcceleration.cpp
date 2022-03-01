@@ -314,14 +314,14 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
   ParticleDescr * particle_descr = cello::particle_descr();
   Grouping * particle_groups = particle_descr->groups();
 
-  int num_mass = particle_groups->size("has_mass");
+  int num_mass = particle_groups->size("is_gravitating");
 
   double dt_shift = 0.5 * dt;
 
   // Loop through particles to apply this to
   for (int ipt = 0; ipt < num_mass; ipt++){
 
-    std::string particle_type = particle_groups->item("has_mass",ipt);
+    std::string particle_type = particle_groups->item("is_gravitating",ipt);
     int it = particle->type_index(particle_type);
 
     if (particle->num_particles(it) > 0){

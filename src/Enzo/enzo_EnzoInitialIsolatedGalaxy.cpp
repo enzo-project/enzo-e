@@ -106,9 +106,9 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
   //           properly
   ParticleDescr * particle_descr = cello::particle_descr();
   if (this->stellar_disk_ || this->stellar_bulge_)
-      particle_descr->groups()->add("star","has_mass"); // hack
+      particle_descr->groups()->add("star","is_gravitating"); // hack
   if (this->live_dm_halo_)
-      particle_descr->groups()->add("dark","has_mass");
+      particle_descr->groups()->add("dark","is_gravitating");
 
   // Compute halo density / mass
   if ((this->gas_halo_density_ == 0.0) && this->gas_halo_mass_ > 0)

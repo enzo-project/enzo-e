@@ -134,17 +134,16 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
     const double dt = alpha_ * block->dt() / cosmo_a;
 
-    // Get the number of particle types in the 'has_mass' group
+    // Get the number of particle types in the "is_gravitating" group
     ParticleDescr * particle_descr = cello::particle_descr();
     Grouping * particle_groups = particle_descr->groups();
-    const int num_mass = particle_groups->size("has_mass");
+    const int num_is_grav = particle_groups->size("is_gravitating");
 
     enzo_float * pdens = NULL;
    
-    // Loop over all particles that have mass
-    // To do: rename has_mass to is_gravitating
-    for (int ipt = 0; ipt < num_mass; ipt++) {
-      const int it = particle.type_index(particle_groups->item("has_mass",ipt));
+    // Loop over particle types in "is_gravitating" group
+    for (int ipt = 0; ipt < num_is_grav; ipt++) {
+      const int it = particle.type_index(particle_groups->item("is_gravitating",ipt));
 
       // Index for mass / density attribute / constant
       int ind = 0;
@@ -255,7 +254,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
 	  ERROR1("EnzoMethodPmDeposit::compute",
 		"Particle type %s has neither a constant nor an attribute" 
-                "called 'mass' or `density', yet is in the 'has_mass' group",
+                "called 'mass' or `density', yet is in the "is_gravitating" group",
 		 particle.type_name(it).c_str());
 	}
 	
@@ -482,7 +481,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	  particle.has_constant(it,"density"))
 	delete [] pdens;
       
-    } // Loop over particle types in 'has_mass' group
+    } // Loop over particle types in "is_gravitating" group
     
     //--------------------------------------------------
     // Add gas density

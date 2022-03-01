@@ -325,7 +325,7 @@
          position = [ "x", "y", "z" ];
 	 velocity = [ "vx", "vy", "vz" ];
          constants = [ "mass", "double", .8382456140 ];
-         group_list = [ "has_mass" ];
+         group_list = [ "is_gravitating" ];
      }
  }
 
