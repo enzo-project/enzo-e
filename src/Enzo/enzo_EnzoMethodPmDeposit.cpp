@@ -8,7 +8,7 @@
 ///
 /// The EnzoMethodPmDeposit method computes a "density_total" field,
 /// which includes the "density" field plus mass from gravitating
-/// particles (particles in the "mass" group, e.g. "dark" matter
+/// particles (particles in the "is_gravitating" group, e.g. "dark" matter
 /// particles)
 
 #include "cello.hpp"
