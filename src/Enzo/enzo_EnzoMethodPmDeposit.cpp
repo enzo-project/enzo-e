@@ -44,8 +44,8 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
   for (int ipt = 0; ipt < num_is_grav; ipt++) {
     const int it = particle_descr->type_index(particle_groups->item("is_gravitating",ipt));
     
-    // keep track of number of attributes or constants called "mass" or "density",
-    // should be exactly 1
+    // Count number of attributes or constants called "mass" or "density",
+    // which should be equal to 1
     int num_mass_or_dens = 0;
     if (particle_descr->has_constant (it,"mass")) ++num_mass_or_dens;
     if (particle_descr->has_attribute (it,"mass")) ++num_mass_or_dens;
@@ -145,8 +145,8 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     if (rank >= 2) inv_vol /= hy;
     if (rank >= 3) inv_vol /= hz;
 
-    // for particle types that have a "density" attribute, we need
-    // to rescale densities according to the refinement level.
+    // Pre-compute the "density scale factor", which will be used in 
+    // for particle types with a density attribute / constant.
     const int level = block->level();
     double density_scale_factor = 1.0;
     for (int j = 0; j < rank*level; j++)
@@ -183,7 +183,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
       // array which will be later filled with a constant density value
       if (particle.has_constant(it, "mass") ||
 	  particle.has_constant(it,"density"))
-	pdens = new enzo_float[particle_descr->batch_size()];
+        pdens = new enzo_float[particle_descr->batch_size()];
       	
       // check correct precision for position
       int ia = particle.attribute_index(it,"x");
@@ -203,10 +203,10 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
       for (int ib=0; ib<particle.num_batches(it); ib++) {
       
         const int np = particle.num_particles(it,ib);
-
-	// First case: particle type has a constant called "mass"
+	      
 	if (particle.has_constant (it,"mass")){
-
+		
+	  // Particle type has constant called "mass".
 	  // In this case we fill the first np elements of pdens with the constant
 	  // mass value multiplied by inv_vol
 	  ind = particle.constant_index(it,"mass");
@@ -214,7 +214,8 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	    pdens[ip] = *((enzo_float *)(particle.constant_value (it,ind))) * inv_vol;
           
         } else if (particle.has_attribute(it,"mass")) {
-
+		
+          // Particle type has an attribute called "mass".
 	  // In this case we set pdens to point to the mass attribute array
 	  // and then multiply all its elements by inv_vol
 	  ind = particle.attribute_index(it,"mass");
@@ -223,6 +224,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	    pdens[ip] *= inv_vol;
         } else if (particle.has_constant(it,"density")) {
 	  
+	  // Particle type has a constant called "density".
 	  // In this case we fill the first np elements of pdens with the constant
 	  // density value, and then multiply by the density scale factor.
 	  ind = particle.constant_index(it,"density");
@@ -232,7 +234,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	  }
 	} else {
 
-	  // Particle type must have an attribute called "density".
+	  // Particle type has an attribute called "density".
 	  // In this case we set pdens to point to the mass attribute array
 	  // and then rescale the values by the density scale factor
 	  ind = particle.attribute_index(it,"density");
@@ -290,7 +292,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
       	   	        __FILE__,__LINE__,ix0,de_p[ix1]);
       	    }
 	    
-      	  } // np
+      	  } // Loop over particles in batch
 	  
         } else if (rank == 2) {
 
@@ -349,7 +351,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
       	      CkPrintf ("%s:%d ERROR: de_p %d %d = %f\n",
       		        __FILE__,__LINE__,ix1,iy1,de_p[ix1+mx*iy1]);
       	    }
-	  } // ip
+	  } // Loop over particles in batch
 
         } else if (rank == 3) {
 
@@ -453,7 +455,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 			__FILE__,__LINE__,
 			ix1,iy1,iz1,de_p[ix1+mx*(iy1+my*iz1)]);
 	    }
-          } // Loop over particle in batch
+          } // Loop over particles in batch
         } // if rank == 3
 	
       } // Loop over batches
@@ -461,7 +463,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
       // If constant mass, delete the pdens array
       if (particle.has_constant(it,"mass") ||
 	  particle.has_constant(it,"density"))
-	delete [] pdens;
+        delete [] pdens;
       
     } // Loop over particle types in "is_gravitating" group
     
