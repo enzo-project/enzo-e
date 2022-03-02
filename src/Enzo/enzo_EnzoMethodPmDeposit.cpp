@@ -106,8 +106,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     Field    field    (block->data()->field());
 
     int rank = cello::rank();
-    const int level = block->level();
-    
+  
     enzo_float * de_t = (enzo_float *)
       field.values("density_total");
     enzo_float * de_p = (enzo_float *)
@@ -139,12 +138,19 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     block->upper(&xp,&yp,&zp);
     block->cell_width(&hx,&hy,&hz);
 
-    // To calculate densities from particle masses, we need the inverse
-    // volume of each cell
+    // To calculate densities from particles with "mass" attributes
+    // or constants, we need the inverse volume of cells in this block.
     double inv_vol = 1.0;
     if (rank >= 1) inv_vol /= hx;
     if (rank >= 2) inv_vol /= hy;
     if (rank >= 3) inv_vol /= hz;
+
+    // for particle types that have a "density" attribute, we need
+    // to rescale densities according to the refinement level.
+    const int level = block->level();
+    double density_scale_factor = 1.0;
+    for (int j = 0; j < rank*level; j++)
+      density_scale_factor *= 2.0;
     
     // Get cosmological scale factors, if cosmology is turned on
     enzo_float cosmo_a=1.0;
@@ -163,6 +169,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     Grouping * particle_groups = particle_descr->groups();
     const int num_is_grav = particle_groups->size("is_gravitating");
 
+    // pdens will be set to point to array of particle densities.
     enzo_float * pdens = NULL;
    
     // Loop over particle types in "is_gravitating" group
@@ -217,22 +224,21 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
         } else if (particle.has_constant(it,"density")) {
 	  
 	  // In this case we fill the first np elements of pdens with the constant
-	  // density value, and then rescale according to the refinement level
+	  // density value, and then multiply by the density scale factor.
 	  ind = particle.constant_index(it,"density");
 	  for (int ip = 0; ip<np; ip++){
 	    pdens[ip] = *((enzo_float *)(particle.constant_value (it,ind)));
-	    for (int j = 0; j<level*rank; j++) pdens[ip] *= 2.0;
+	    pdens[ip] *= density_scale_factor;
 	  }
 	} else {
 
 	  // Particle type must have an attribute called "density".
 	  // In this case we set pdens to point to the mass attribute array
-	  // and then rescale the values according to the refinement level 
+	  // and then rescale the values by the density scale factor
 	  ind = particle.attribute_index(it,"density");
 	  pdens = (enzo_float *) particle.attribute_array( it, ind, ib);
-	  for (int ip = 0; ip<np ; ip++)
-	    for (int j = 0 ; j<level*rank; j++)
-	      pdens[ip] *= 2.0;
+	  for (int ip = 0; ip<np ; ip++) pdens[ip] *= density_scale_factor;
+	  
 	}
 	
 	// If mass / density is a constant, we simply loop through the pdens
