@@ -22,6 +22,18 @@ EnzoInitialFeedbackTest::EnzoInitialFeedbackTest
   : Initial(config->initial_cycle, config->initial_time)
 {
 
+  // Check if star particles exist for this problem
+  ParticleDescr * particle_descr = cello::particle_descr();
+  ASSERT("EnzoInitialFeedbackTest",
+	 "Error: No star particle type",
+	 particle_descr->type_exists("star"));
+
+  // Check if start particles have a "mass" attribute
+  int it = particle_descr->type_index("star");
+  ASSERT("EnzoInitialFeedbackTest",
+	 "Error: star particle type does not have a mass attribute",
+	 particle_descr->has_attribute(it,"mass"));
+  
   if (config->initial_feedback_test_from_file){
     this->num_particles = nlines("initial_feedback_stars.in");
 
