@@ -446,31 +446,31 @@ void EnzoRiemannLUT<InputLUT>::validate()
   std::string prev_quantity = "";
 
   for (const auto& name : entry_names){
-    char component = EnzoCenteredFieldRegistry::try_get_vector_component(name,
-                                                                         true);
+    char component;
+    const std::string cur_quantity =
+      EnzoCenteredFieldRegistry::get_actively_advected_quantity_name
+      (name, true, &component);
+
     if (component == '\0'){ // name isn't a component of a vector
       prev_entry_vector_ax = '\0';
-      prev_quantity = "";
+      prev_quantity = ""; // we intentionally use an empty string
     } else {
-      std::string quantity =
-        EnzoCenteredFieldRegistry::get_actively_advected_quantity_name(name,
-                                                                       true);
-      if ( (component == 'j') && ((quantity != prev_quantity) ||
+      if ( (component == 'j') && ((cur_quantity != prev_quantity) ||
                                   (prev_entry_vector_ax != 'i')) ){
         ERROR2("EnzoRiemannLUT<InputLUT>::validate",
                "\"%s_j\" is expected to have an index that is 1 greater than "
                "the index of \"%s_i\".",
-               quantity.c_str(), quantity.c_str());
-      } else if ( (component == 'k') && ((quantity != prev_quantity) ||
+               cur_quantity.c_str(), cur_quantity.c_str());
+      } else if ( (component == 'k') && ((cur_quantity != prev_quantity) ||
                                          (prev_entry_vector_ax != 'j')) ){
         ERROR2("EnzoRiemannLUT<InputLUT>::validate",
                "\"%s_k\" is expected to have an index that is 1 greater than "
                "the index of \"%s_j\".",
-               quantity.c_str(), quantity.c_str());
+               cur_quantity.c_str(), cur_quantity.c_str());
       }
 
       prev_entry_vector_ax = component;
-      prev_quantity = quantity;
+      prev_quantity = cur_quantity;
     }
   }
 }
