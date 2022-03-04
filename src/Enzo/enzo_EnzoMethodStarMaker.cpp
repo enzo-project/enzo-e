@@ -23,9 +23,20 @@ EnzoMethodStarMaker::EnzoMethodStarMaker
 ()
   : Method()
 {
+  // Check if star particles exist for this problem
+  ParticleDescr * particle_descr = cello::particle_descr();
+  ASSERT("EnzoMethodStarMaker",
+	 "Error: No star particle type",
+	 particle_descr->type_exists("star"));
+
+  // Check if star particles have a "mass" attribute
+  int it = particle_descr->type_index("star");
+  ASSERT("EnzoMethodStarMaker",
+	 "Error: star particle type does not have a mass attribute",
+	 particle_descr->has_attribute(it,"mass"));
 
   const EnzoConfig * enzo_config = enzo::config();
-
+  
   // AJE: This was the old way this was done
   // Initialize default Refresh object
   // const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
