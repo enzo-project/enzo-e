@@ -48,6 +48,10 @@ public: // functions
   /// Barrier after constructor to ensure all EnzoSimulation objects created
   void r_startup_begun (CkReductionMsg *);
 
+  /// EnzoMethodCheck
+  void r_method_check_enter (CkReductionMsg *);
+  void p_writer_created(int num_files, std::string ordering);
+  
 public: // virtual functions
 
   /// Initialize the Enzo Simulation
@@ -62,6 +66,9 @@ private: // functions
 
 private: // attributes
 
+  /// Checkpoint synchronization (depreciated)
+  Sync sync_check_writer_created_;
+  Sync sync_check_done_;
 };
 
 #endif /* ENZO_ENZO_SIMULATION_CHARM_HPP */

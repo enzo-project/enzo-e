@@ -11,6 +11,8 @@ module enzo {
   initnode void mutex_init();
   initnode void mutex_init_bcg_iter();
 
+  //  readonly int EnzoMsgCheck::counter[CONFIG_NODE_SIZE];
+
   readonly EnzoConfig g_enzo_config;
   readonly int EnzoBlock::UseMinimumPressureSupport[CONFIG_NODE_SIZE];
   readonly enzo_float EnzoBlock::MinimumPressureSupportParameter[CONFIG_NODE_SIZE];
@@ -144,6 +146,10 @@ module enzo {
   extern module mesh;
 
   readonly CProxy_EnzoSimulation proxy_enzo_simulation;
+  readonly CProxy_IoEnzoReader   proxy_io_enzo_reader;
+  readonly CProxy_IoEnzoWriter   proxy_io_enzo_writer;
+
+  //----------------------------------------------------------------------
 
   group [migratable] EnzoSimulation : Simulation {
 
@@ -154,7 +160,12 @@ module enzo {
 #ifdef BUG_FIX_150
     entry void p_get_msg_refine(Index index);
 #endif
+    // EnzoMethodCheck
+    entry void r_method_check_enter(CkReductionMsg *);
+    entry void p_writer_created(int num_files, std::string ordering);
 }
+
+  //----------------------------------------------------------------------
 
   array[Index] EnzoBlock : Block {
 
@@ -174,6 +185,8 @@ module enzo {
     // EnzoMethodGravity synchronization entry methods
     entry void p_method_gravity_continue();
     entry void p_method_gravity_end();
+
+    entry void p_check_write_first(int num_files, std::string ordering);
 
     // EnzoSolverCg synchronization entry methods
 
@@ -240,6 +253,7 @@ module enzo {
 
   array[1D] IoEnzoWriter : IoWriter {
     entry IoEnzoWriter();
+    entry void p_write();
   }
 
 };

@@ -190,8 +190,8 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
         int np = particle.num_particles(it,ib);
 
-        // Find the mass of each particle. If cosntant generate array of
-        // constant values in order to simply code below
+        // Find the mass of each particle. If constant generate array of
+        // constant values in order to simplify code below
         enzo_float * pdens = NULL;
         if (ia_m > 0){
           pdens = (enzo_float *) particle.attribute_array( it, ia_m, ib);
@@ -203,11 +203,11 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
         if (rank == 1) {
 
-    	    const int ia_x  = particle.attribute_index(it,"x");
-	        const int ia_vx = particle.attribute_index(it,"vx");
+          const int ia_x  = particle.attribute_index(it,"x");
+          const int ia_vx = particle.attribute_index(it,"vx");
 
-	        enzo_float * xa =  (enzo_float *)particle.attribute_array (it,ia_x,ib);
-	        enzo_float * vxa = (enzo_float *)particle.attribute_array (it,ia_vx,ib);
+          enzo_float * xa =  (enzo_float *)particle.attribute_array (it,ia_x,ib);
+          enzo_float * vxa = (enzo_float *)particle.attribute_array (it,ia_vx,ib);
 
       	  const int dp =  particle.stride(it,ia_x);
       	  const int dv =  particle.stride(it,ia_vx);
@@ -216,13 +216,13 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
           CkPrintf ("DEBUG_COLLAPSE vxa[0] = %lg\n",vxa[0]);
 #endif
 
-	        for (int ip=0; ip<np; ip++) {
+          for (int ip=0; ip<np; ip++) {
 
       	    double x = xa[ip*dp] + vxa[ip*dv]*dt;
 
       	    double tx = nx*(x - xm) / (xp - xm) - 0.5;
 
-        	  int ix0 = gx + floor(tx);
+            int ix0 = gx + floor(tx);
 
       	    int ix1 = ix0 + 1;
 

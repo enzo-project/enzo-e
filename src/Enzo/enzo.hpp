@@ -33,8 +33,8 @@
 #include "_parameters.hpp"
 #include "_performance.hpp"
 #include "_problem.hpp"
-#include "_mesh.hpp"
 #include "_data.hpp"
+#include "_mesh.hpp"
 #include "_simulation.hpp"
 #include "_disk.hpp"
 #include "_io.hpp"
@@ -56,17 +56,19 @@ class EnzoUnits;
 
 /// Namespace for Enzo global constants and accessor functions
 namespace enzo {
-  EnzoProblem * problem();
-  EnzoSimulation * simulation();
-  EnzoPhysicsCosmology * cosmology();
+  EnzoProblem *             problem();
+  EnzoSimulation *          simulation();
+  EnzoPhysicsCosmology *    cosmology();
   const EnzoMethodGrackle * grackle_method();
-  EnzoUnits * units();
-  const EnzoConfig * config();
-  CProxy_EnzoBlock block_array();
-  EnzoBlock * block ( Block * block);
+  EnzoUnits *               units();
+  const EnzoConfig *        config();
+  CProxy_EnzoBlock          block_array();
+  EnzoBlock *               block ( Block * block);
 }
 
 extern CProxy_EnzoSimulation proxy_enzo_simulation;
+extern CProxy_IoEnzoWriter proxy_io_enzo_writer;
+extern CProxy_IoEnzoReader proxy_io_enzo_reader;
 extern void mutex_init();
 extern void mutex_init_bcg_iter();
 #endif /* ENZO_HPP */

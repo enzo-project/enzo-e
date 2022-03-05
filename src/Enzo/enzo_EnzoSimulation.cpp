@@ -24,6 +24,8 @@
 #include "simulation.hpp"
 
 CProxy_EnzoSimulation proxy_enzo_simulation;
+CProxy_IoEnzoWriter   proxy_io_enzo_writer;
+CProxy_IoEnzoReader   proxy_io_enzo_reader;
 
 //----------------------------------------------------------------------
 

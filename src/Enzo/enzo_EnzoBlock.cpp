@@ -172,8 +172,7 @@ EnzoBlock::EnzoBlock( process_type ip_source)
     EnzoBlock::EnzoBlock ( MsgRefine * msg )
     : CBase_EnzoBlock ( msg ),
 #endif
-  dt(dt_),
-  redshift(0.0)
+    redshift(0.0)
 
 {
 #ifdef TRACE_BLOCK  

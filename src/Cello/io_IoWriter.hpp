@@ -29,10 +29,14 @@ public: // interface
   void pup (PUP::er &p) 
   {
     TRACEPUP;
-    CBase_IoWriter::pup(p); 
+    CBase_IoWriter::pup(p);
   }
 
-  
+public: // entry methods
+
+  void p_write()
+  { CkPrintf ("DEBUG_IO IoWriter::p_write()\n"); }
+
 private: // functions
 
 

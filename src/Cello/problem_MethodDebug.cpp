@@ -101,7 +101,7 @@ void MethodDebug::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------
 
-void Block::Block::r_method_debug_sum_fields(CkReductionMsg * msg)
+void Block::r_method_debug_sum_fields(CkReductionMsg * msg)
 {
   static_cast<MethodDebug*>
     (this->method())->compute_continue_sum_fields(this,msg);

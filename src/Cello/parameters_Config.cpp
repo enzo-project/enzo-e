@@ -162,6 +162,7 @@ void Config::pup (PUP::er &p)
   p | output_image_log;
   p | output_image_abs;
   p | output_image_mesh_color;
+  p | output_image_mesh_order;
   p | output_image_color_particle_attribute;
   p | output_image_size;
   p | output_image_reduce_type;
@@ -951,6 +952,7 @@ void Config::read_output_ (Parameters * p) throw()
   output_image_log.resize(num_output);
   output_image_abs.resize(num_output);
   output_image_mesh_color.resize(num_output);
+  output_image_mesh_order.resize(num_output);
   output_image_color_particle_attribute.resize(num_output);
   output_image_size.resize(num_output);
   output_image_reduce_type.resize(num_output);
@@ -1076,6 +1078,8 @@ void Config::read_output_ (Parameters * p) throw()
 
       output_image_mesh_color[index_output] = 
 	p->value_string("image_mesh_color","level");
+      output_image_mesh_order[index_output] = 
+	p->value_string("image_mesh_order","none");
 
       output_image_color_particle_attribute[index_output] = 
 	p->value_string("image_color_particle_attribute","");

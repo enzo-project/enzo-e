@@ -112,11 +112,6 @@ class Tree;
 #include "mesh_Hierarchy.hpp"
 #include "mesh_Factory.hpp"
 
-// Orderings of blocks
-#include "mesh_Ordering.hpp"
-#include "mesh_OrderingHilbert.hpp"
-#include "mesh_OrderingRootBlocks.hpp"
-
 // Tree and components (not used in Cello)
 #include "mesh_Node.hpp"
 #include "mesh_NodeTrace.hpp"

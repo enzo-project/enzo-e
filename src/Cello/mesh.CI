@@ -55,11 +55,10 @@ module mesh {
   PUPable MethodDebug;
   PUPable MethodFluxCorrect;
   PUPable MethodNull;
+  PUPable MethodOrderMorton;
   PUPable MethodOutput;
   PUPable MethodRefresh;
   PUPable MethodTrace;
-  PUPable OrderingRootBlocks;
-  PUPable OrderingHilbert;
   PUPable OutputCheckpoint;
   PUPable OutputData;
   PUPable OutputImage;
@@ -137,6 +136,11 @@ module mesh {
     entry void p_method_flux_correct_refresh();
     entry void r_method_flux_correct_sum_fields(CkReductionMsg * msg);
 
+    entry void r_method_order_morton_continue(CkReductionMsg * msg);
+    entry void r_method_order_morton_complete(CkReductionMsg * msg);
+    entry void p_method_order_morton_weight(int ic3[3], int weight, Index index);
+    entry void p_method_order_morton_index(int index, int count);
+
     entry void p_method_output_next(MsgOutput *);
     entry void p_method_output_write(MsgOutput *);
     entry void r_method_output_continue(CkReductionMsg * msg);
@@ -209,6 +213,7 @@ module mesh {
   // Chare array for writing data files
   array[1D] IoWriter {
      entry IoWriter();
+     entry void p_write();
   };
 }
 

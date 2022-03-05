@@ -53,8 +53,6 @@ void print_levels (int n, Adapt ** adapt, int min_level, int max_level,
 PARALLEL_MAIN_BEGIN
 {
 
-  PARALLEL_INIT;
-
   unit_init(0,1);
 
   unit_class("Adapt");

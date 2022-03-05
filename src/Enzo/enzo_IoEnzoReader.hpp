@@ -18,7 +18,9 @@ public: // interface
 
   /// Constructor
   IoEnzoReader() throw()
-  { }
+  {
+    CkPrintf ("%d IoEnzoReader()\n",CkMyPe());
+  }
 
   /// CHARM++ migration constructor
   IoEnzoReader(CkMigrateMessage *m) : CBase_IoReader(m) {}

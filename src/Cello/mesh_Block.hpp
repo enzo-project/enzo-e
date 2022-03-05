@@ -577,6 +577,11 @@ public:
   void r_method_flux_correct_sum_fields(CkReductionMsg * msg);
   void r_method_debug_sum_fields(CkReductionMsg * msg);
 
+  void r_method_order_morton_continue(CkReductionMsg * msg);
+  void r_method_order_morton_complete(CkReductionMsg * msg);
+  void p_method_order_morton_weight(int ic3[3], int weight, Index index);
+  void p_method_order_morton_index(int index, int count);
+
   void p_method_output_next (MsgOutput * msg);
   void p_method_output_write (MsgOutput * msg);
   void r_method_output_continue(CkReductionMsg * msg);
@@ -925,7 +930,7 @@ protected: // attributes
 
   /// Current stopping criteria
   bool stop_;
-
+  
   //--------------------------------------------------
 
   /// Index of current initialization routine

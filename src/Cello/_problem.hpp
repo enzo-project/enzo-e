@@ -69,6 +69,7 @@ extern void method_close_files_mutex_init();
 #include "problem_MethodDebug.hpp"
 #include "problem_MethodFluxCorrect.hpp"
 #include "problem_MethodNull.hpp"
+#include "problem_MethodOrderMorton.hpp"
 #include "problem_MethodOutput.hpp"
 #include "problem_MethodRefresh.hpp"
 #include "problem_MethodTrace.hpp"

@@ -11,6 +11,7 @@
 
 #define TRACE_OUTPUT
 
+// #define BYPASS_BLOCK_TRACE
 //----------------------------------------------------------------------
 
 MethodOutput::MethodOutput
@@ -304,7 +305,11 @@ void MethodOutput::next(Block * block, MsgOutput * msg_output_in )
 
   if (all_blocks_ || is_leaf) {
     // if leaf (or writing all blocks), copy data to msg and send to writer
+#ifdef BYPASS_BLOCK_TRACE
+    Index index_home = block->index().next(rank,na3,block->is_leaf());
+#else
     Index index_home = bt->home();
+#endif
     DataMsg * data_msg = create_data_msg_(block);
     msg_output->set_data_msg(data_msg);
     msg_output->set_block(block,factory_);

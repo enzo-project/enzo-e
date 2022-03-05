@@ -234,6 +234,14 @@ public: /// entry methods
   void p_method_gravity_end();
 
   //--------------------------------------------------
+  /// Checkpoint
+  //--------------------------------------------------
+
+  /// Call to Block array to self-identify as "first" when writing
+  /// checkpoint files based on Ordering object
+  void p_check_write_first(int num_files, std::string ordering);
+  
+  //--------------------------------------------------
 
   /// EnzoSolverCg entry method: DOT ==> refresh P
   void r_solver_cg_loop_0a (CkReductionMsg * msg);

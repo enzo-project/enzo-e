@@ -170,7 +170,6 @@ EnzoSolverMg0::EnzoSolverMg0
   ir_ = cello::field_descr()->insert_temporary();
   ic_ = cello::field_descr()->insert_temporary();
 
-
   Refresh * refresh = cello::refresh(ir_post_);
   cello::simulation()->refresh_set_name(ir_post_,name);
 

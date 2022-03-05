@@ -175,6 +175,11 @@ public:
     set_child (level+1,icx,icy,icz,min_level);
   }
 
+  /// Return the "next" Index in the hierarchy, given the
+  /// dimensionality, array size, and whether the corresponding block is a leaf or
+  /// not
+  Index next (int rank, const int na3[3], bool is_leaf);
+  
   void print (std::string msg, int level) const;
     
   void print (const char * msg,

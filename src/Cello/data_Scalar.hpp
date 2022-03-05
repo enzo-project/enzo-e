@@ -16,7 +16,7 @@ class Scalar {
 
   /// @class    Scalar
   /// @ingroup  Data
-  /// @brief    [\ref Data] 
+  /// @brief    [\ref Data]
 
 public: // interface
 
@@ -31,12 +31,12 @@ public: // interface
   Scalar(const Scalar<T> & scalar) throw()
   {
     scalar_descr_ = scalar.scalar_descr_;
-    scalar_data_ = scalar.scalar_data_; 
+    scalar_data_ = scalar.scalar_data_;
   }
 
   /// Assignment operator
   Scalar & operator= (const Scalar<T> & scalar) throw()
-  { 
+  {
     scalar_descr_ = scalar.scalar_descr_;
     scalar_data_ = scalar.scalar_data_;
     return *this;
@@ -57,27 +57,27 @@ public: // interface
       warn[in] = true;
     }
   };
-  
+
   /// Return the scalar descriptor for this scalar
   ScalarDescr * scalar_descr() { return scalar_descr_; }
 
   /// Return the scalar data for this scalar
   ScalarData<T> * scalar_data() { return scalar_data_; }
 
-  void set_scalar_data(ScalarData<T> * scalar_data) 
+  void set_scalar_data(ScalarData<T> * scalar_data)
   { scalar_data_ = scalar_data; }
 
-  void set_scalar_descr(ScalarDescr * scalar_descr) 
+  void set_scalar_descr(ScalarDescr * scalar_descr)
   { scalar_descr_ = scalar_descr; }
 
 
   //--------------------------------------------------
   // ScalarDescr
   //--------------------------------------------------
-  
-  /// Reserve space for a new scalar
-  int new_value (std::string name)
-  { return scalar_descr_->new_value (name); }
+
+  /// Reserve space for a new scalar (or array if n>1)
+  int new_value (std::string name, int n=1)
+  { return scalar_descr_->new_value (name,n); }
 
   /// Return the *first* index of the named scalar
   int index (std::string name) const
@@ -87,10 +87,15 @@ public: // interface
   std::string name (int index) const
   { return scalar_descr_->name(index); }
 
-  /// Return the number of values currently stored
+  /// Return the length of the given scalar if array
+  int length (int index) const
+  { return scalar_descr_->length(index); }
+
+  /// Return the number of variables currently stored (including scalar
+  /// array elements)
   int size() const
   { return scalar_descr_->size(); }
-  
+
   //--------------------------------------------------
   // ScalarData
   //--------------------------------------------------
@@ -98,7 +103,7 @@ public: // interface
   /// Allocate scalars
   void allocate()
   { return scalar_data_->allocate(scalar_descr_); }
-    
+
   /// Return the specified scalar value
   T * value (int index)
   { return scalar_data_->value(scalar_descr_,index); }

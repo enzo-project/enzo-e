@@ -233,6 +233,7 @@ namespace cello {
     }
     return scalar_descr_void_[in];
   }
+
   //---------------------------------------------------------------------- 
 
   CProxy_Block block_array()

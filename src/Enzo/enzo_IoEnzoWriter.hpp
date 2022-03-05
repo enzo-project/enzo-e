@@ -12,20 +12,24 @@ class IoEnzoWriter : public CBase_IoWriter {
 
   /// @class    IoEnzoWriter
   /// @ingroup  Io
-  /// @brief    [\ref Io] 
+  /// @brief    [\ref Io]
 
 public: // interface
 
   /// Constructor
-  IoEnzoWriter() throw()
-  { }
+  IoEnzoWriter() throw();
 
   /// CHARM++ migration constructor
   IoEnzoWriter(CkMigrateMessage *m) : CBase_IoWriter(m) {}
 
   /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p) 
+  void pup (PUP::er &p)
   { TRACEPUP; CBase_IoWriter::pup(p); }
+
+public: // entry methods
+
+  void p_write()
+  { CkPrintf ("DEBUG_IO IoEnzoWriter::p_write()\n"); }
 
 private: // functions
 

@@ -80,7 +80,7 @@ void MethodFluxCorrect::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------
 
-void Block::Block::p_method_flux_correct_refresh()
+void Block::p_method_flux_correct_refresh()
 {
   static_cast<MethodFluxCorrect*>
     (this->method())->compute_continue_refresh(this);
@@ -164,7 +164,7 @@ void MethodFluxCorrect::compute_continue_refresh( Block * block ) throw()
 
 //----------------------------------------------------------------------
 
-void Block::Block::r_method_flux_correct_sum_fields(CkReductionMsg * msg)
+void Block::r_method_flux_correct_sum_fields(CkReductionMsg * msg)
 {
   static_cast<MethodFluxCorrect*>
     (this->method())->compute_continue_sum_fields(this,msg);

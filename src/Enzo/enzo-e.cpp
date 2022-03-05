@@ -47,7 +47,9 @@
 //----------------------------------------------------------------------
 
 extern CProxy_EnzoSimulation proxy_enzo_simulation;
-extern CProxy_Simulation proxy_simulation;
+extern CProxy_Simulation     proxy_simulation;
+extern CProxy_IoEnzoWriter   proxy_io_enzo_writer;
+extern CProxy_IoEnzoReader   proxy_io_enzo_reader;
 
 //----------------------------------------------------------------------
 PARALLEL_MAIN_BEGIN

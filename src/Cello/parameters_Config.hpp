@@ -60,10 +60,10 @@ public: // interface
     initial_new(false),
     initial_list(),
     initial_cycle(0),
+    initial_time(0.0),
     initial_restart(false),
     initial_restart_dir(""),
     initial_restart_file(""),
-    initial_time(0.0),
     initial_trace_name(""),
     initial_trace_field(""),
     initial_trace_mpp(0.0),
@@ -122,6 +122,7 @@ public: // interface
     output_image_log(),
     output_image_abs(),
     output_image_mesh_color(),
+    output_image_mesh_order(),
     output_image_color_particle_attribute(),
     output_image_size(),
     output_image_reduce_type(),
@@ -236,10 +237,10 @@ public: // interface
       initial_new(false),
       initial_list(),
       initial_cycle(0),
+      initial_time(0.0),
       initial_restart(false),
       initial_restart_dir(""),
       initial_restart_file(""),
-      initial_time(0.0),
       initial_trace_name(""),
       initial_trace_field(""),
       initial_trace_mpp(0.0),
@@ -297,6 +298,7 @@ public: // interface
       output_image_log(),
       output_image_abs(),
       output_image_mesh_color(),
+      output_image_mesh_order(),
       output_image_color_particle_attribute(),
       output_image_size(),
       output_image_reduce_type(),
@@ -535,6 +537,7 @@ public: // attributes
   std::vector < char >        output_image_log;
   std::vector < char >        output_image_abs;
   std::vector < std::string > output_image_mesh_color;
+  std::vector < std::string > output_image_mesh_order;
   std::vector < std::string > output_image_color_particle_attribute;
   std::vector < std::vector <int> > output_image_size;
   std::vector < std::string>  output_image_reduce_type;
