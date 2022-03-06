@@ -197,11 +197,17 @@ Calling ``arr.subarray(Args... args)`` returns a (mostly contiguous) view
 of a subarray specified by ``args``, where ``args`` represent the slices
 along each dimension. Each ``arg`` should be an instance of ``CSlice`` and
 the number of ``args`` **must** match the number of dimensions of the array.
-Calling ``arr.subarray()`` without any arguments returns a shallow copy
-
 ``CSlice`` is a class that represents the start and stop points
-along a given dimension. The constructor standard is simply:
+along a given dimension. The standard constructor is simply:
 ``CSlice(int start, int stop)``.
+
+As an aside, when ``arr`` has 2 or more dimensions, ``arr.subarray``
+has an overload that accepts a single integer argument ``i``. The
+returned subarray is roughly equivalent to the view returned by
+``arr.subarray(CSlice(i,i+1), ...)`` where the omitted arguments are
+slices that include all of the elements along the corresponding
+dimensions. The *only* difference is that the resulting array has 1
+fewer dimensions than ``arr``.
 
 Subarray Examples
 ~~~~~~~~~~~~~~~~~
