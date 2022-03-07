@@ -303,7 +303,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         //TODO: Difference between dt and dtFixed???
         
         double p_form = 1.0 - std::exp(-mass_should_form*dt/maximum_star_mass);
-        p_form = 1.0; // always form star (for debugging purposes) 
+        //p_form = 1.0; // always form star (for debugging purposes) 
 
         double random = double(mt()) / double(mt.max()); 
 

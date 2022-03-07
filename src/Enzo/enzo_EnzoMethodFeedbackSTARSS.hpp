@@ -81,7 +81,8 @@ protected:
 
   int sf_minimum_level_;
   int single_sn_;
-  int NEvents; // TODO: initialize this with a parameter
+  int NEvents=1; // TODO: initialize this with a parameter
+  // setting NEvents = 1 sets off SN immediately after star formation
 
   // Refresh ID
   int ir_feedback_;

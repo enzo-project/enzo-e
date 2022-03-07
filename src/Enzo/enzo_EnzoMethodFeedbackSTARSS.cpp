@@ -119,7 +119,6 @@ int EnzoMethodFeedbackSTARSS::determineWinds(double age, double * eWinds, double
     double wind_factor = 0.0;
     double e_factor = 0.0;
 
-
     if (mass_Msun > 11 && oldEnough){
 
         if (0.001 < age && age < 1.0){
@@ -179,9 +178,9 @@ void EnzoMethodFeedbackSTARSS::transformComovingWithStar(enzo_float * density,
     //       field for the sake of depositing momentum easily 
     for (int ind = 0; ind<size; ind++) {
       double mult = density[ind];
-      velocity_x[ind] = velocity_x[ind]-up;
-      velocity_y[ind] = velocity_y[ind]-vp;
-      velocity_z[ind] = velocity_z[ind]-wp;
+      velocity_x[ind] = (velocity_x[ind]-up)*mult;
+      velocity_y[ind] = (velocity_y[ind]-vp)*mult;
+      velocity_z[ind] = (velocity_z[ind]-wp)*mult;
     }
   }
 
@@ -190,9 +189,9 @@ void EnzoMethodFeedbackSTARSS::transformComovingWithStar(enzo_float * density,
     // back to "lab" frame
     for (int ind = 0; ind<size; ind++) {
       double mult = 1/density[ind];
-      velocity_x[ind] = velocity_x[ind] + up;
-      velocity_y[ind] = velocity_y[ind] + vp;
-      velocity_z[ind] = velocity_z[ind] + wp;
+      velocity_x[ind] = velocity_x[ind]*mult + up;
+      velocity_y[ind] = velocity_y[ind]*mult + vp;
+      velocity_z[ind] = velocity_z[ind]*mult + wp;
     }
   }
 
@@ -251,13 +250,13 @@ void EnzoMethodFeedbackSTARSS::createCouplingParticles(EnzoBlock * enzo_block, c
     pge   = (enzo_float *) particle.attribute_array(it, ia_ge, ib);
     pmz   = (enzo_float *) particle.attribute_array(it, ia_mz, ib);
 
-    pmass[io] = coupledMetals * mult;
+    pmass[io] = coupledMass * mult;
     px[io] = xcp[ip];
     py[io] = ycp[ip];
     pz[io] = zcp[ip];
-    p_px[io] = coupledMomenta * mult * unitx[ip];
-    p_py[io] = coupledMomenta * mult * unity[ip];
-    p_pz[io] = coupledMomenta * mult * unitz[ip];
+    p_px[io] = coupledMomenta * unitx[ip];
+    p_py[io] = coupledMomenta * unity[ip];
+    p_pz[io] = coupledMomenta * unitz[ip];
     pe[io] = coupledEnergy * mult;
     pge[io] = coupledGasEnergy * mult;
     pmz[io] = coupledMetals * mult;
@@ -274,6 +273,11 @@ void EnzoMethodFeedbackSTARSS::createCouplingParticles(EnzoBlock * enzo_block, c
   int count = enzo_block->delete_particle_copies_(it);
   cello::simulation()->data_delete_particles(count);
 } 
+
+extern "C" void FORTRAN_NAME(cic_deposit)
+  ( enzo_float (*px)[26], enzo_float (*py)[26], enzo_float (*pz)[26], const int * rank,
+    const int * nCouple, enzo_float (*mass)[26], enzo_float * field, enzo_float (*left_edge)[3],
+    int * mx, int * my, int * mz, double * hx, const double * cloudsize );
 // =============================================================================
 // =============================================================================
 // =============================================================================
@@ -294,6 +298,10 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
   cello::define_field ("internal_energy");
   cello::define_field ("total_energy");
 
+  //this->required_fields_ = std::vector<std::string> {
+  //      "density", "pressure", "internal_energy", "total_energy"
+  //};
+
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
@@ -302,15 +310,28 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
   single_sn_        = enzo_config->method_feedback_single_sn;
 
   // Initialize refresh object
-  /*
+  /* 
   ir_feedback_ = add_new_refresh_();
   cello::simulation()->new_refresh_set_name(ir_feedback_,name());
-  Refresh * refresh = cello::refresh(ir_feedback_);
+  Refresh * refresh_fb = cello::refresh(ir_feedback_);
   
-  refresh->set_accumulate(true);
-  refresh->add_field_src_dst
-    ("","");
+  refresh_fb->set_accumulate(true);
+  refresh_fb->add_field_src_dst
+    ("density","density_accumulate");
+  refresh_fb->add_field_src_dst
+    ("velocity_x","velocity_x_accumulate"); 
+  refresh_fb->add_field_src_dst
+    ("velocity_y","velocity_y_accumulate"); 
+  refresh_fb->add_field_src_dst
+    ("velocity_z","velocity_z_accumulate"); 
+  refresh_fb->add_field_src_dst
+    ("total_energy","total_energy_accumulate"); 
+  refresh_fb->add_field_src_dst
+    ("internal_energy","internal_energy_accumulate");
+  refresh_fb->add_field_src_dst
+    ("metal_density","metal_density_accumulate");
   */
+  //refresh_fb->set_callback(CkIndex_EnzoBlock::) 
   std::mt19937 mt(std::time(nullptr)); // initialize random function
 
   return;
@@ -473,8 +494,6 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
         int iy       = ((int) floor(ycell + 0.5));
         int iz       = ((int) floor(zcell + 0.5));
 
-        // do cell shifting here if we need to... assume not for now ...
-
         int index = INDEX(ix,iy,iz,mx,my); // 1D cell index of star position
 
         //if(pmass[ipdm] * enzo_units->mass_units() / cello::mass_solar
@@ -609,7 +628,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   double munit = enzo_units->mass();
   double tunit = enzo_units->time();
   double Tunit = enzo_units->temperature();
-  double eunit = vunit*vunit; // energy/mass
+  double eunit = munit*vunit*vunit; // energy
 
   const EnzoConfig * enzo_config = enzo::config();
   bool AnalyticSNRShellMass = enzo_config->method_feedback_analytic_SNR_shell_mass;
@@ -624,13 +643,14 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   enzo_block->data()->lower(&xm,&ym,&zm);
   enzo_block->data()->upper(&xp_,&yp_,&zp_);
   field.cell_width(xm,xp_,&hx,ym,yp_,&hy,zm,zp_,&hz);
+  const int rank = cello::rank();
 
   mx = nx + 2*gx;
   my = ny + 2*gy;
   mz = nz + 2*gz;
 
   double size = mx*my*mz;
-  double cell_volume = hx*hy*hz;
+  double cell_volume = hx*hy*hz * enzo_units->volume();
 
   enzo_float * d           = (enzo_float *) field.values("density");
   enzo_float * te          = (enzo_float *) field.values("total_energy");
@@ -648,7 +668,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
                                // in units of dx. Since the cloud forms a sphere shell, stretchFactor > 1 is not recommended
 
   const int nCouple = 26; // 3x3x3 cube minus central cell
-  const float A = stretch_factor * hx;
+  const double A = stretch_factor * hx;
 
   /*
       Make a cloud of coupling particles;
@@ -726,7 +746,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
       } 
     }
   }
-
+  
   v_mean *= vunit / 27; // cm/s!
   Z_mean *= 1/(27 * cello::metallicity_solar); // Zsun
   mu_mean /= 27;
@@ -887,11 +907,10 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
     else { // if winds
       coupledMomenta = sqrt(ejectaMass*cello::mass_solar * 0.5 * ejectaEnergy)/cello::mass_solar/1e5;
     }
-  //TODO:: check that all "MassUnit" references are consistent with redefinition in Enzo code
   #ifdef DEBUG_FEEDBACK_STARSS
     CkPrintf("STARSS_FB: Calculated p = %e (sq_fact = %e; p_f = %e; p_t = %e; mcell = %e; mcpl = %e)\n",
-       coupledMomenta, (d_mean / rhounit * munit) / ejectaMass * 63, p_free, 
-       pTerminal, d_mean / rhounit * munit, ejectaMass/27.0);  
+       coupledMomenta, (d_mean * cell_volume/cello::mass_solar) / ejectaMass * 63, p_free, 
+       pTerminal, d_mean * cell_volume /cello::mass_solar, ejectaMass/27.0);  
   #endif
 
   /*
@@ -1021,10 +1040,8 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   coupledMetals += ejectaMetals;
 
 #ifdef DEBUG_FEEDBACK_STARSS
-  CkPrintf("STARSS_FB: Coupled Metals: %e %e %e", ejectaMetals, shellMetals, coupledMetals);
+  CkPrintf("STARSS_FB: Coupled Metals: %e %e %e\n", ejectaMetals, shellMetals, coupledMetals);
 #endif
-
-  // TODO: Add criticalDebug flag that compares pre and post feedback field sums (see original Enzo code)
 
   if (!winds) coupledEnergy = std::min((nSNII + nSNIA) * 1e51, eKinetic);
 
@@ -1052,8 +1069,6 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
           CkPrintf("STARSS: Baryon Prior: d_Msun = %e, mc = %e, ms = %e, m_z = %e, z = %e\n",
                    d[flat] * munit/cello::mass_solar, centralMass, shellMass, shellMetals, pre_z_frac);
         #endif
-          //TODO: There are some weird (density - mass) things in this part of the Enzo code
-          //      Fixed here, but should double check 
           d[flat] = std::max(dpre - remainMass/27.0, (1.0-maxEvacFraction)*dpre);
           minusRho    += dpre - d[flat];
           msubtracted += dpre - d[flat];
@@ -1105,60 +1120,182 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   
   } // endif minusM != coupledMass - ejectaMass
 
+#ifdef DEBUG_FEEDBACK_STARSS
+  CkPrintf("STARSS_FB: Before unit conversions -- coupledEnergy = %e; coupledGasEnergy = %e;\n"
+           "           coupledMass = %e; coupledMetals = %e; coupledMomenta = %e\n",
+                       coupledEnergy, coupledGasEnergy, coupledMass, coupledMetals,
+                       coupledMomenta);
+  CkPrintf("STARSS_FB: Units -- munit = %e; vunit = %e; Tunit = %e\n"
+           "                    eunit = %e; rhounit = %e; lunit = %e\n",
+                       munit, vunit, Tunit, eunit, rhounit, lunit);
+#endif
   //put everything back into code units before CIC
   //these values correspond to TOTAL (energy, mass, etc.)
-  //over all the coupling particles. 
-  coupledEnergy /= eunit;
+  //over all the coupling particles.
+  //Note that coupledMass and coupledMetals are densities.
+
+  coupledEnergy /= eunit; // coupledEnergy is kinetic energy at this point
   coupledGasEnergy /= eunit;
   coupledMass /= (munit/cello::mass_solar);
   coupledMetals /= (munit/cello::mass_solar);
-  coupledMomenta /= (munit * vunit / 1e5); 
+  coupledMomenta /= (munit/cello::mass_solar * vunit / 1e5 / sqrt(nCouple) ); 
+
+  coupledEnergy += coupledGasEnergy;
 
   // Create SN coupling particles
-#ifdef DEBUG_FEEDBACK_STARSS
-  CkPrintf("STARSS_FB: Creating coupling particles...\n");
-#endif
+//#ifdef DEBUG_FEEDBACK_STARSS
+//  CkPrintf("STARSS_FB: Creating coupling particles...\n");
+//#endif
 
-  this->createCouplingParticles(enzo_block, nCouple, coupledEnergy, coupledGasEnergy,
-                                coupledMass, coupledMetals, coupledMomenta,
-                                CloudParticlePositionX,CloudParticlePositionY,CloudParticlePositionZ,  
-                                CloudParticleVectorX,CloudParticleVectorY,CloudParticleVectorZ);
+  //this->createCouplingParticles(enzo_block, nCouple, coupledEnergy, coupledGasEnergy,
+  //                             coupledMass, coupledMetals, coupledMomenta,
+  //                              CloudParticlePositionX,CloudParticlePositionY,CloudParticlePositionZ,  
+  //                              CloudParticleVectorX,CloudParticleVectorY,CloudParticleVectorZ);
 
-  // CIC deposit coupling particles 
+
+  // transform specific energy to energy before deposition
+
+  for (int i=0; i<mx*my*mz; i++)
+  {
+    te[i] *= (d[i]*hx*hy*hz);
+    ge[i] *= (d[i]*hx*hy*hz);
+  }
+
+  enzo_float coupledMass_list[nCouple], coupledMetals_list[nCouple];
+  enzo_float coupledMomenta_x[nCouple], coupledMomenta_y[nCouple], coupledMomenta_z[nCouple];
+  enzo_float coupledEnergy_list[nCouple], coupledGasEnergy_list[nCouple];
+
+  std::fill_n(coupledMass_list  ,nCouple,  coupledMass/nCouple);
+  std::fill_n(coupledMetals_list,nCouple,coupledMetals/nCouple);
+
+  for (int n=0; n<nCouple; n++)
+  {
+    coupledMass_list[n] = coupledMass/nCouple;
+    coupledMetals_list[n] = coupledMetals/nCouple;
+    coupledMomenta_x[n] = coupledMomenta/nCouple*CloudParticleVectorX[n];
+    coupledMomenta_y[n] = coupledMomenta/nCouple*CloudParticleVectorY[n];
+    coupledMomenta_z[n] = coupledMomenta/nCouple*CloudParticleVectorZ[n];
+    coupledEnergy_list[n] = coupledEnergy/nCouple;
+    coupledGasEnergy_list[n] = coupledGasEnergy/nCouple;
+  }
+
 #ifdef DEBUG_FEEDBACK_STARSS
+  double sumEnergy=0.0, sumMomenta=0.0, sumMass=0.0, sumMetals=0.0, sumInternal=0.0; 
+  for (int i=0; i<mx*my*mz; i++) 
+  {
+    sumEnergy += te[i];
+    sumInternal += ge[i];
+    sumMomenta += vx[i]*vx[i];
+    sumMomenta += vy[i]*vy[i];
+    sumMomenta += vz[i]*vz[i];
+    sumMass += d[i];
+    sumMetals += mf[i]; 
+  }
+ 
+  sumMomenta = sqrt(sumMomenta);
+
+  CkPrintf("STARSS_FB: Total before deposition -- Energy = %e;\n"
+           "                                     Internal energy = %e;\n" 
+           "                                     P = %e;\n"
+           "                                     Mass (actually density) = %e\n"
+           "                                     Metal Mass (actually density) = %e\n",
+            sumEnergy, sumInternal, sumMomenta, sumMass, sumMetals);
+  CkPrintf("STARSS_FB: source cell internal_energy = %e; total_energy = %e\n", ge[index], te[index]);
   CkPrintf("STARSS_FB: CIC depositing coupling particles...\n");
+  CkPrintf("STARSS_FB: Depositing (code units) -- coupledEnergy = %e; coupledGasEnergy = %e;\n"
+           "           coupledMass = %e; coupledMetals = %e; coupledMomenta = %e\n",
+                       coupledEnergy, coupledGasEnergy, coupledMass, coupledMetals,
+                       coupledMomenta);
+
+
 #endif
-  EnzoComputeCicInterp interp_d ("density", "starss_coupling", "mass" , 0.0);
-  EnzoComputeCicInterp interp_px ("velocity_x", "starss_coupling", "px" , 0.0);
-  EnzoComputeCicInterp interp_py ("velocity_y", "starss_coupling", "py" , 0.0);
-  EnzoComputeCicInterp interp_pz ("velocity_z", "starss_coupling", "pz" , 0.0);
-  EnzoComputeCicInterp interp_e ("total_energy", "starss_coupling", "energy" , 0.0);
-  EnzoComputeCicInterp interp_ie ("internal_energy", "starss_coupling", "gas_energy" , 0.0);
-  EnzoComputeCicInterp interp_md ("metal_density", "starss_coupling", "metal_mass" , 0.0);
 
-  interp_d.compute(block);
-  interp_px.compute(block);
-  interp_py.compute(block);
-  interp_pz.compute(block);
-  interp_e.compute(block);
-  interp_ie.compute(block);
-  interp_md.compute(block);
+  enzo_float left_edge[3] = {xm-gx*hx, ym-gy*hy, zm-gz*hz};
 
-  // delete coupling particles
+  // CIC deposit coupling particles
+  //
+  FORTRAN_NAME(cic_deposit)
+  (&CloudParticlePositionX, &CloudParticlePositionY,
+   &CloudParticlePositionZ, &rank, &nCouple, &coupledMass_list, d, &left_edge,
+   &mx, &my, &mz, &hx, &A);
+
+  FORTRAN_NAME(cic_deposit)
+  (&CloudParticlePositionX, &CloudParticlePositionY,
+   &CloudParticlePositionZ, &rank, &nCouple, &coupledMomenta_x, vx, &left_edge,
+   &mx, &my, &mz, &hx, &A);
+
+  FORTRAN_NAME(cic_deposit)
+  (&CloudParticlePositionX, &CloudParticlePositionY,
+   &CloudParticlePositionZ, &rank, &nCouple, &coupledMomenta_y, vy, &left_edge,
+   &mx, &my, &mz, &hx, &A);
+
+  FORTRAN_NAME(cic_deposit)
+  (&CloudParticlePositionX, &CloudParticlePositionY,
+   &CloudParticlePositionZ, &rank, &nCouple, &coupledMomenta_z, vz, &left_edge,
+   &mx, &my, &mz, &hx, &A);
+
+  FORTRAN_NAME(cic_deposit)
+  (&CloudParticlePositionX, &CloudParticlePositionY,
+   &CloudParticlePositionZ, &rank, &nCouple, &coupledMetals_list, mf, &left_edge,
+   &mx, &my, &mz, &hx, &A);
+
+
+  FORTRAN_NAME(cic_deposit)
+  (&CloudParticlePositionX, &CloudParticlePositionY,
+   &CloudParticlePositionZ, &rank, &nCouple, &coupledEnergy_list, te, &left_edge,
+   &mx, &my, &mz, &hx, &A);
+
+  FORTRAN_NAME(cic_deposit)
+  (&CloudParticlePositionX, &CloudParticlePositionY,
+   &CloudParticlePositionZ, &rank, &nCouple, &coupledGasEnergy_list, ge, &left_edge,
+   &mx, &my, &mz, &hx, &A);
+
+
 #ifdef DEBUG_FEEDBACK_STARSS
-  CkPrintf("STARSS_FB: Deleting coupling particles...\n");
-#endif
-  this->deleteCouplingParticles(enzo_block);
+  sumEnergy=sumMomenta=sumMass=sumMetals=sumInternal=0.0; 
+  for (int i=0; i<mx*my*mz; i++) 
+  {
+    sumEnergy += te[i]; // *d[i]*cell_volume/enzo_units->volume();
+    sumInternal += ge[i];// *d[i]*cell_volume/enzo_units->volume();
+    sumMomenta += vx[i]*vx[i];
+    sumMomenta += vy[i]*vy[i];
+    sumMomenta += vz[i]*vz[i];
+    sumMass += d[i];
+    sumMetals += mf[i];
+  }
+ 
+  sumMomenta = sqrt(sumMomenta);
 
-#ifdef DEBUG_FEEDBACK_STARSS
-  CkPrintf("STARSS_FB: Updating velocity fields to account for momentum deposition...\n");
+  CkPrintf("STARSS_FB: Total after deposition -- Energy = %e;\n"
+           "                                     Internal energy = %e;\n" 
+           "                                     P = %e;\n"
+           "                                     Mass (actually density) = %e;\n"
+           "                                     Metal Mass (actually density) = %e\n",
+            sumEnergy, sumInternal, sumMomenta, sumMass, sumMetals);
+  //CkPrintf("STARSS_FB: Deleting coupling particles...\n");
 #endif
+
+
+  // transform back to specific energy
+  for (int i=0; i<mx*my*mz; i++)
+  {
+    te[i] /= (d[i]*hx*hy*hz);
+    ge[i] /= (d[i]*hx*hy*hz);
+  }
+
+
+  //this->deleteCouplingParticles(enzo_block);
+
+//#ifdef DEBUG_FEEDBACK_STARSS
+  //CkPrintf("STARSS_FB: Updating velocity fields to account for momentum deposition...\n");
+//#endif
 
 
   // transform velocities back to "lab" frame
   // convert velocity (actually momentum at the moment) field back to velocity 
   this->transformComovingWithStar(d,vx,vy,vz,up,vp,wp,mx,my,mz, -1);
 
+// TODO: Update multispecies fields within deposited cells to be consistent with added mass
 
 #ifdef DEBUG_FEEDBACK_STARSS
   CkPrintf("STARSS_FB: Refreshing fields...\n");
@@ -1166,6 +1303,8 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   // refresh
   // TODO: What is the correct way to refresh+add a velocity field?
   //       Does it automatically get converted to momentum??
+  //       -- for enzo_prolong need to convert velocity->momentum
+  //          linear interpolation does this automatically
 //#endif
 }
 
