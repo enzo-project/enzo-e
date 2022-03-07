@@ -105,6 +105,10 @@ public: // interface
   /// keys specified by `primitive_quantity_keys()`. Likewise, in ``flux_map``,
   /// the passive scalar keys should occur after the keys specified by
   /// `integration_quantity_keys()`.
+  ///
+  /// @note This function expects that calling the `contiguous_arrays()`
+  /// instance method for `prim_map_l`, `prim_map_r`, and `flux_map` will
+  /// return `true` in each case.
   virtual void solve
   (const EnzoEFltArrayMap &prim_map_l, const EnzoEFltArrayMap &prim_map_r,
    EnzoEFltArrayMap &flux_map, const int dim, const EnzoEquationOfState *eos,
