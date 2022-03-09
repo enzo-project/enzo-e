@@ -12,6 +12,18 @@ EnzoMethodFeedback::EnzoMethodFeedback
 ()
   : Method()
 {
+  // Check if star particles exist for this problem
+  ParticleDescr * particle_descr = cello::particle_descr();
+  ASSERT("EnzoMethodFeedback",
+	 "Error: No star particle type",
+	 particle_descr->type_exists("star"));
+
+  // Check if star particles have a "mass" attribute
+  int it = particle_descr->type_index("star");
+  ASSERT("EnzoMethodFeedback",
+	 "Error: star particle type does not have a mass attribute",
+	 particle_descr->has_attribute(it,"mass"));
+
   FieldDescr * field_descr = cello::field_descr();
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();

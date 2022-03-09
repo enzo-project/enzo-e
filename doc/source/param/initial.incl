@@ -398,6 +398,9 @@ assumed to be arranged into seven columns, corresponding to mass, the x,y,z
 coordinates and the x,y,z-components of velocity, respectively. Each row
 corresponds to one star particle.
 
+Note: star particles must have a ``"mass"`` attribute if this initializer is
+used.
+
 :Parameter:  :p:`Initial` : :p:`merge_stars_test` : :p:`particle_data_filename`
 :Summary: :s:`Name of the file to read from.`
 :Type:    :t:`string`

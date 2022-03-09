@@ -57,6 +57,37 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
 (const EnzoConfig * config) throw()
 : Initial(config->initial_cycle, config->initial_time)
 {
+  if (this->stellar_disk_ || this->stellar_bulge_) {
+    
+    // Check if star particles exist for this problem
+    ParticleDescr * particle_descr = cello::particle_descr();
+    ASSERT("EnzoInitialIsolatedGalaxy",
+	   "Error: No star particle type",
+	   particle_descr->type_exists("star"));
+    
+    // Check if star particles have a "mass" attribute
+    int it = particle_descr->type_index("star");
+    ASSERT("EnzoInitialIsolatedGalaxy",
+	   "Error: star particle type does not have a mass attribute",
+	   particle_descr->has_attribute(it,"mass"));
+  }
+
+  if (this->live_dm_halo_){
+
+    // Check if dark particles exist for this problem
+    ParticleDescr * particle_descr = cello::particle_descr();
+    ASSERT("EnzoInitialIsolatedGalaxy",
+	   "Error: No dark particle type",
+	   particle_descr->type_exists("dark"));
+    
+    // Check if dark particles have a "mass" attribute
+    int it = particle_descr->type_index("dark");
+    ASSERT("EnzoInitialIsolatedGalaxy",
+	   "Error: dark particle type does not have a mass attribute",
+	   particle_descr->has_attribute(it,"mass"));
+    
+  }
+
   // read in parameter settings from config and
   // set corresponding member variables
   for(int i = 0; i < 3; i ++){
@@ -106,9 +137,9 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
   //           properly
   ParticleDescr * particle_descr = cello::particle_descr();
   if (this->stellar_disk_ || this->stellar_bulge_)
-      particle_descr->groups()->add("star","has_mass"); // hack
+      particle_descr->groups()->add("star","is_gravitating"); // hack
   if (this->live_dm_halo_)
-      particle_descr->groups()->add("dark","has_mass");
+      particle_descr->groups()->add("dark","is_gravitating");
 
   // Compute halo density / mass
   if ((this->gas_halo_density_ == 0.0) && this->gas_halo_mass_ > 0)
@@ -795,11 +826,11 @@ void EnzoInitialIsolatedGalaxy::InitializeParticles(Block * block,
     int ia_to = -1;
     int ia_l = -1;
     int ia_metal = -1;
-    if (particle->is_attribute(it, "creation_time"))
+    if (particle->has_attribute(it, "creation_time"))
       ia_to = particle->attribute_index(it,"creation_time");
-    if (particle->is_attribute(it, "lifetime"))
+    if (particle->has_attribute(it, "lifetime"))
       ia_l = particle->attribute_index(it,"lifetime");
-    if (particle->is_attribute(it, "metal_fraction"))
+    if (particle->has_attribute(it, "metal_fraction"))
       ia_metal = particle->attribute_index(it,"metal_fraction");
 
     int ib  = 0; // batch counter

@@ -635,7 +635,7 @@ int Block::delete_non_local_particles_(int it){
 	  "This function has been called for particle type"
 	  " %s, which has no is_copy attribute",
 	  particle.type_name(it),
-	  particle.is_attribute(it,"is_copy"));
+	  particle.has_attribute(it,"is_copy"));
 
   const int rank = cello::rank();
 
@@ -1269,7 +1269,7 @@ void Block::particle_scatter_neighbors_
 	       "Trying to copy particle type %s, but it has no"
 	       "is_copy attribute",
 	       particle.type_name(it),
-	       particle.is_attribute(it,"is_copy"));
+	       particle.has_attribute(it,"is_copy"));
 
        int ia_copy = particle.attribute_index(it, "is_copy");
        int d_copy = particle.stride(it,ia_copy);

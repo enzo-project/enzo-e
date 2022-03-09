@@ -518,12 +518,27 @@ fields
 
 particles
 ---------
+
+For a given particle type to be deposited to the total density field,
+it must be part of the ``"is_gravitating"`` group, and must have
+exactly one of the following: an attribute called ``"mass"``, a
+constant called ``"mass"``, an attribute called ``"density"``, or
+a constant called ``"density"``.
+
+In the ``"mass"`` case, the value of the attribute / constant is
+divided by the cell volume to get a density quantity, before being
+deposited on to the grid via a CIC interpolation scheme.
+
+In the ``"density"`` case, the value of the attribute / constant is
+multiplied by ``2^(rank*level)``, before likewise being deposited
+on to the grid.
    
 ``"pm_update"``: particle-mesh
 ==============================
 
 Particle-mesh ("PM") method component to update particle positions
-given acceleration fields
+given acceleration fields. Only particle types in the ``"is_gravitating"``
+group are updated.
    
 ``"heat"``: heat equation
 =========================
@@ -575,6 +590,9 @@ its 'creation_time' attribute is set to be the minimum of the group, and its
 'id' attribute is set to the minimum of the group. Other particles in the
 group are marked for deletion. The final step is for each block to delete
 all the remaining star particles which are 'out-of-bounds' of the block.
+
+Star particles must have an attribute called ``"mass"`` if this method
+is used.
 
 This procedure cannot handle the case where particles originally
 from non-neighbouring blocks are put into the same FoF group. If this is
