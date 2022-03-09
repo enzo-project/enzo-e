@@ -344,6 +344,7 @@ public: // interface
       method_gravity_grav_const(0.0),
       method_gravity_solver(""),
       method_gravity_order(4),
+      method_gravity_dt_max(1.0e10),
       method_gravity_accumulate(false),
       // EnzoMethodBackgroundAcceleration
       method_background_acceleration_type(""),
@@ -752,6 +753,7 @@ public: // attributes
   double                     method_gravity_grav_const;
   std::string                method_gravity_solver;
   int                        method_gravity_order;
+  double                     method_gravity_dt_max;
   bool                       method_gravity_accumulate;
 
   /// EnzoMethodBackgroundAcceleration
