@@ -39,6 +39,8 @@ inline void operator|(PUP::er &p, chemistry_data &c){
  }
 
  p | c.cmb_temperature_floor;
+ p | c.h2_charge_exchange_rate;
+ p | c.h2_h_cooling_rate;
  p | c.Gamma;
  p | c.h2_on_dust;
  p | c.use_dust_density_field;
@@ -315,6 +317,7 @@ public: // interface
       method_feedback_min_level(0),
       method_feedback_analytic_SNR_shell_mass(0),
       method_feedback_fade_SNR(0),
+      method_feedback_NEvents(0),
       /// EnzoMethodStarMaker
       method_star_maker_method(""),
       method_star_maker_use_density_threshold(true),           // check above density threshold before SF
@@ -335,6 +338,7 @@ public: // interface
       method_star_maker_minimum_star_mass(1.0E4),    // minium star particle mass in solar masses
       method_star_maker_maximum_star_mass(1.0E4),    // maximum star particle mass in solar masses
       method_star_maker_min_level(0), // minimum refinement level for star formation
+      method_star_maker_turn_off_probability(false),
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
@@ -723,6 +727,7 @@ public: // attributes
   int                       method_feedback_min_level;
   int                       method_feedback_analytic_SNR_shell_mass;
   int                       method_feedback_fade_SNR;
+  int                       method_feedback_NEvents;
 
   /// EnzoMethodStarMaker
 
@@ -746,6 +751,7 @@ public: // attributes
   double                    method_star_maker_minimum_star_mass;
   double                    method_star_maker_maximum_star_mass;
   int                       method_star_maker_min_level;
+  bool                      method_star_maker_turn_off_probability;
 
   /// EnzoMethodTurbulence
   double                     method_turbulence_edot;

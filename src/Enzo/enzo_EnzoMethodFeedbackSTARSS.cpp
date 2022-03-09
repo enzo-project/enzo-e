@@ -292,15 +292,17 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
   EnzoUnits * enzo_units = enzo::units();
 
   // required fields
-  // TODO: Add the rest of the required fields 
-  cello::define_field ("density");
-  cello::define_field ("pressure");
-  cello::define_field ("internal_energy");
-  cello::define_field ("total_energy");
+  cello::define_field("density");
+  cello::define_field("pressure");
+  cello::define_field("internal_energy");
+  cello::define_field("total_energy");
+  cello::define_field("velocity_x");
+  cello::define_field("velocity_y");
+  cello::define_field("velocity_z");
+  cello::define_field("metal_density");
 
-  //this->required_fields_ = std::vector<std::string> {
-  //      "density", "pressure", "internal_energy", "total_energy"
-  //};
+  
+  cello::define_field_in_group("metal_density","color");
 
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
@@ -310,12 +312,20 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
   single_sn_        = enzo_config->method_feedback_single_sn;
 
   // Initialize refresh object
-  /* 
-  ir_feedback_ = add_new_refresh_();
-  cello::simulation()->new_refresh_set_name(ir_feedback_,name());
-  Refresh * refresh_fb = cello::refresh(ir_feedback_);
-  
+  cello::define_field("density_accumulate");
+  cello::define_field("velocity_x_accumulate");
+  cello::define_field("velocity_y_accumulate");
+  cello::define_field("velocity_z_accumulate");
+  cello::define_field("total_energy_accumulate");
+  cello::define_field("internal_energy_accumulate");
+  cello::define_field("metal_density_accumulate"); 
+
+  ir_feedback_ = add_refresh_();
+  cello::simulation()->refresh_set_name(ir_feedback_,name()+":add");
+  Refresh * refresh_fb = cello::refresh(ir_feedback_); 
+
   refresh_fb->set_accumulate(true);
+
   refresh_fb->add_field_src_dst
     ("density","density_accumulate");
   refresh_fb->add_field_src_dst
@@ -330,10 +340,14 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
     ("internal_energy","internal_energy_accumulate");
   refresh_fb->add_field_src_dst
     ("metal_density","metal_density_accumulate");
-  */
-  //refresh_fb->set_callback(CkIndex_EnzoBlock::) 
+ 
+  refresh_fb->set_callback(CkIndex_EnzoBlock::p_method_feedback_starss_end());
+ 
   std::mt19937 mt(std::time(nullptr)); // initialize random function
-
+  
+  // initialize NEvents parameter (mainly for testing). Sets off 'NEvents' supernovae,
+  // with at most one supernova per star particle per cycle.
+  this->NEvents = enzo_config->method_feedback_NEvents; 
   return;
 }
 
@@ -348,6 +362,7 @@ void EnzoMethodFeedbackSTARSS::pup (PUP::er &p)
   p | sf_minimum_level_;
   p | single_sn_;
   p | NEvents;
+  p | ir_feedback_;
 
   return;
 }
@@ -362,6 +377,70 @@ void EnzoMethodFeedbackSTARSS::compute (Block * block) throw()
   block->compute_done();
 
   return;
+}
+
+void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) throw()
+{
+  int mx, my, mz, gx, gy, gz, nx, ny, nz;
+  Field field = enzo_block->data()->field();
+  field.size(&nx,&ny,&nz);
+  field.ghost_depth(0,&gx,&gy,&gz);
+
+  mx = nx + 2*gx;
+  my = ny + 2*gy;
+  mz = nz + 2*gz;
+
+  // add accumulated values over and reset them to zero
+
+  enzo_float * d  = (enzo_float *) field.values("density");
+  enzo_float * te = (enzo_float *) field.values("total_energy");
+  enzo_float * ge = (enzo_float *) field.values("internal_energy");
+  enzo_float * mf = (enzo_float *) field.values("metal_density");
+  enzo_float * vx = (enzo_float *) field.values("velocity_x");
+  enzo_float * vy = (enzo_float *) field.values("velocity_y");
+  enzo_float * vz = (enzo_float *) field.values("velocity_z");
+ 
+  enzo_float * d_a  = (enzo_float *) field.values("density_accumulate");
+  enzo_float * te_a = (enzo_float *) field.values("total_energy_accumulate");
+  enzo_float * ge_a = (enzo_float *) field.values("internal_energy_accumulate");
+  enzo_float * mf_a = (enzo_float *) field.values("metal_density_accumulate");
+  enzo_float * vx_a = (enzo_float *) field.values("velocity_x_accumulate");
+  enzo_float * vy_a = (enzo_float *) field.values("velocity_y_accumulate");
+  enzo_float * vz_a = (enzo_float *) field.values("velocity_z_accumulate");
+  
+  for (int iz=gz; iz<nz+gz; iz++){
+    for (int iy=gy; iy<ny+gy; iy++){
+      for (int ix=gx; ix<nx+gx; ix++){
+        int i = INDEX(ix,iy,iz,mx,my);
+        double M_scale = d_a[i]/d[i];
+        d [i] +=  d_a[i];
+        mf[i] += mf_a[i];
+        te[i] += te_a[i] * M_scale;
+        ge[i] += ge_a[i] * M_scale;
+        vx[i] += vx_a[i] * M_scale;
+        vy[i] += vy_a[i] * M_scale;
+        vz[i] += vz_a[i] * M_scale;
+       
+        //TODO: Do new fields get automatically initialized to zero??
+        //      easy to check (pretty sure they do) 
+         d_a[i] = 0;
+        mf_a[i] = 0;
+        te_a[i] = 0;
+        ge_a[i] = 0;
+        vx_a[i] = 0;
+        vy_a[i] = 0;
+        vz_a[i] = 0;
+      }
+    }
+  }
+
+}
+void EnzoBlock::p_method_feedback_starss_end() 
+{  
+  EnzoMethodFeedbackSTARSS * method = static_cast<EnzoMethodFeedbackSTARSS*> (this->method());
+  method->add_accumulate_fields(this);
+
+  this->compute_done();
 }
 
 void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
@@ -425,7 +504,12 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
   int numSN = 0; // counter of SN events
   int count = 0; // counter of particles
 
-  if (particle.num_particles(it) <= 0) return; // nothing to do here
+  if (particle.num_particles(it) <= 0){
+    // refresh
+    return;
+    //cello::refresh(ir_feedback_)->set_active(true);//enzo_block->is_leaf());
+    //enzo_block->refresh_start(ir_feedback_, CkIndex_EnzoBlock::p_method_feedback_starss_end());
+  }
 
   const int ia_m = particle.attribute_index (it, "mass");
   const int ia_x  = particle.attribute_index (it, "x");
@@ -478,7 +562,7 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
       int ipdl = ip*dl; // lifetime
       int ipdc = ip*dc; // creation time
       int ipdmf = ip*dmf; // metallicity
-      int ipsn  = ip*dsn; // number of SNe coutner
+      int ipsn  = ip*dsn; // number of SNe counter
 
       if (pmass[ipdm] > 0.0 && plifetime[ipdl] > 0.0){
         const double age = (current_time - pcreation[ipdc]) * enzo_units->time() / cello::Myr_s;
@@ -592,7 +676,9 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
               count, numSN, 0.00);
   }
 
-  return;
+  // refresh
+  //cello::refresh(ir_feedback_)->set_active(true); //enzo_block->is_leaf());
+  //enzo_block->refresh_start(ir_feedback_, CkIndex_EnzoBlock::p_method_feedback_starss_end());
 }
 
 
@@ -643,13 +729,28 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   enzo_block->data()->lower(&xm,&ym,&zm);
   enzo_block->data()->upper(&xp_,&yp_,&zp_);
   field.cell_width(xm,xp_,&hx,ym,yp_,&hy,zm,zp_,&hz);
-  const int rank = cello::rank();
 
   mx = nx + 2*gx;
   my = ny + 2*gy;
   mz = nz + 2*gz;
 
   double size = mx*my*mz;
+
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
+  enzo_float cosmo_a = 1.0;
+
+  const int rank = cello::rank();
+
+  if (cosmology) {
+    enzo_float cosmo_dadt = 0.0;
+    double dt    = block->dt();
+    double current_time = block->time();
+    cosmology->compute_expansion_factor(&cosmo_a,&cosmo_dadt,current_time+0.5*dt);
+    if (rank >= 1) hx *= cosmo_a;
+    if (rank >= 2) hy *= cosmo_a;
+    if (rank >= 3) hz *= cosmo_a;
+  }
+
   double cell_volume = hx*hy*hz * enzo_units->volume();
 
   enzo_float * d           = (enzo_float *) field.values("density");
@@ -1300,11 +1401,28 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 #ifdef DEBUG_FEEDBACK_STARSS
   CkPrintf("STARSS_FB: Refreshing fields...\n");
 #endif
+
+//  if (enzo_config->field_prolong == "enzo") {
+    // TODO: scale velocity fields by mass before refreshing. How 
+    //       do I make sure neighboring blocks' velocity fields
+    //       are also converted to momentum before refresh??
+    //
+    //       Refresh is only needed to catch rare-ish edge cases of stars exploding right
+    //       on the border of two blocks. Assuming the gas mass of the ghost cell after deposition
+    //       and its corresponding active cell in the neighboring black are close to eachother, not converting
+    //       velocity->momentum and specific energy->energy shouldn't create a *huge* error. This algorithm only
+    //       deposits ~Msun to a cell, so should be okay-ish. 
+    //
+    // currently done automatically for linear interpolation
+    // but not EnzoProlong.
+    //
+    // TODO: Remove this if/when automatic scaling is
+    //       added to EnzoProlong
+    
+//  }
+
+
   // refresh
-  // TODO: What is the correct way to refresh+add a velocity field?
-  //       Does it automatically get converted to momentum??
-  //       -- for enzo_prolong need to convert velocity->momentum
-  //          linear interpolation does this automatically
 //#endif
 }
 

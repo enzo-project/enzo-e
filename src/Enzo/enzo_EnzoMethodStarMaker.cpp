@@ -15,7 +15,7 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
-// #define DEBUG_SF
+#define DEBUG_SF
 
 //-------------------------------------------------------------------
 
@@ -51,7 +51,6 @@ EnzoMethodStarMaker::EnzoMethodStarMaker
   star_particle_max_mass_    = enzo_config->method_star_maker_maximum_star_mass;
   use_dynamical_time_        = enzo_config->method_star_maker_use_dynamical_time;
 
-  // WH TODO: Add these parameters to EnzoConfig. Copy code from MechStars_checkCreationCriteria.C
   use_overdensity_threshold_ = enzo_config->method_star_maker_use_overdensity_threshold;
   overdensity_threshold_     = enzo_config->method_star_maker_overdensity_threshold;
   use_critical_metallicity_  = enzo_config->method_star_maker_use_critical_metallicity;
@@ -205,6 +204,9 @@ int EnzoMethodStarMaker::check_number_density_threshold(
 
 int EnzoMethodStarMaker::check_overdensity_threshold(const double &rho)
 {
+  //#ifdef DEBUG_SF
+  //  CkPrintf("MethodStarMaker -- overdensity = %f\n", rho);
+  //#endif
   return !(this->use_overdensity_threshold_) +  
           (rho >= this->overdensity_threshold_);
 }
@@ -230,21 +232,23 @@ int EnzoMethodStarMaker::check_self_gravitating(
   // Frobenius norm of the velocity gradient tensor
   div_v_norm2 = (pow(vx[index+dix] - vx[index-dix], 2) +
                  pow(vy[index+dix] - vy[index-dix], 2) +
-                 pow(vz[index+dix] - vz[index-dix], 2)) / dx2 +
+                 pow(vz[index+dix] - vz[index-dix], 2)) / (4*dx2) +
                 (pow(vx[index+diy] - vx[index-diy], 2) +
                  pow(vy[index+diy] - vy[index-diy], 2) +
-                 pow(vz[index+diy] - vz[index-diy], 2)) / dy2 +
+                 pow(vz[index+diy] - vz[index-diy], 2)) / (4*dy2) +
                 (pow(vx[index+diz] - vx[index-diz], 2) +
                  pow(vy[index+diz] - vy[index-diz], 2) +
-                 pow(vz[index+diz] - vz[index-diz], 2)) / dz2;
-  div_v_norm2 *= (vunit*vunit);
+                 pow(vz[index+diz] - vz[index-diz], 2)) / (4*dz2);
+  div_v_norm2 *= (vunit*vunit); 
 
   // constant for testing. TODO: change to variable
   const double gamma = 5.0 / 3.0;
-  //cs2 = (gamma * cello::kboltz * temperature*Tunit) / mean_particle_mass;
   cs2 = (gamma * cello::kboltz * temperature) / mean_particle_mass;
 
   alpha = (div_v_norm2 + cs2/dx2) / (8 * cello::pi * cello::grav_constant * density*rhounit);
+  #ifdef DEBUG_SF
+    CkPrintf("MethodStarMaker -- alpha = %f\n",alpha); 
+  #endif
   return (alpha < 1);
 
 }
@@ -266,14 +270,17 @@ double EnzoMethodStarMaker::h2_self_shielding_factor(
 
   const double rho_cgs = rho[index] * dunit;
 
-  grad_rho = sqrt(pow((rho[index+dix] - rho[index-dix]) / dx, 2) +
-                  pow((rho[index+diy] - rho[index-diy]) / dy, 2) +
-                  pow((rho[index+diz] - rho[index-diz]) / dz, 2));
+  grad_rho = sqrt(pow((rho[index+dix] - rho[index-dix]) / (2*dx), 2) +
+                  pow((rho[index+diy] - rho[index-diy]) / (2*dy), 2) +
+                  pow((rho[index+diz] - rho[index-diz]) / (2*dz), 2));
   grad_rho *= dunit / lunit;
-  tau = 434.8 * rho_cgs * (dx + rho_cgs / grad_rho);  // 434.8 cm^2 / g
+  tau = 434.8 * rho_cgs * (dx*lunit + rho_cgs / grad_rho);  // 434.8 cm^2 / g
   phi = 0.756 * pow(1.0 + 3.1 * metallicity, 0.365);
   psi = (0.6 * tau * (0.01 + metallicity)) / (log(1.0 + 0.6*phi + 0.01*phi*phi));
   f_shield = 1.0 - 3.0 / (1.0 + 4.0*psi);
+  #ifdef DEBUG_SF
+    CkPrintf("MethodStarMaker -- f_shield = %f\n",f_shield); 
+  #endif
   return f_shield;
 
 }
@@ -295,6 +302,9 @@ int EnzoMethodStarMaker::check_jeans_mass(
   double m_jeans = (cello::pi/6) * pow(cs2, 1.5) / 
                    (pow(cello::grav_constant, 1.5) * sqrt(density*rhounit));
   double m_jcrit = MAX(minimum_jeans_mass, m_jeans);
+  #ifdef DEBUG_SF
+    CkPrintf("MethodStarMaker -- jeans_mass = %f\n",m_jeans); 
+  #endif
   return (mass*munit < m_jcrit);
 }
 
@@ -332,6 +342,10 @@ int EnzoMethodStarMaker::check_velocity_divergence(
    if (vy) div += (vy[index+diy] - vy[index-diy]) / 2.0; // in units of dy
    if (vz) div += (vz[index+diz] - vz[index-diz]) / 2.0; // in units of dz
 
+  #ifdef DEBUG_SF
+    CkPrintf("MethodStarMakerSTARSS -- velocity_divergence = %f\n",div); 
+  #endif
+
    return div < 0;
 }
 
@@ -356,6 +370,9 @@ int EnzoMethodStarMaker::check_cooling_time(const double &cooling_time,const dou
   }
 
   double dynamical_time = pow(3.0*cello::pi/32.0/cello::grav_constant/(total_density*rhounit),0.5); //s
+  #ifdef DEBUG_SF
+    CkPrintf("MethodStarMakerSTARSS -- cooling_time = %f, dynamical_time = %f\n",cooling_time*tunit, dynamical_time); 
+  #endif
   return cooling_time*tunit < dynamical_time;
   
 }
@@ -363,13 +380,18 @@ int EnzoMethodStarMaker::check_cooling_time(const double &cooling_time,const dou
 int EnzoMethodStarMaker::check_metallicity(const double &Z) 
 {
   // Enforce a critical metallicity for star formation
+  #ifdef DEBUG_SF
+    CkPrintf("MethodStarMaker -- Z = %f, Zcrit = %f\n",Z, critical_metallicity_); 
+  #endif
   return !(this->use_critical_metallicity_) +
           (Z >= critical_metallicity_);
 }
 
 int EnzoMethodStarMaker::check_temperature(const double &T, const double Tunit)
 {
+  #ifdef DEBUG_SF
+    CkPrintf("MethodStarMaker -- T = %f, Tcrit = %f\n", T, temperature_threshold_); 
+  #endif
   return !(this->use_temperature_threshold_) +
-          //(T*Tunit < temperature_threshold_);
           (T < temperature_threshold_);
 }

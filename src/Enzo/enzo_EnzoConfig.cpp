@@ -222,6 +222,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_min_level(0),
   method_feedback_analytic_SNR_shell_mass(0),
   method_feedback_fade_SNR(0),
+  method_feedback_NEvents(0),
   // EnzoMethodStarMaker,
   method_star_maker_method(""),                              // star maker type to use
   method_star_maker_use_density_threshold(true),           // check above density threshold before SF
@@ -242,6 +243,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_star_maker_minimum_star_mass(1.0E4),    // minimum star particle mass in solar masses
   method_star_maker_maximum_star_mass(1.0E4),    // maximum star particle mass in solar masses
   method_star_maker_min_level(0), // minimum AMR level for star formation
+  method_star_maker_turn_off_probability(false),
   // EnzoMethodTurbulence
   method_turbulence_edot(0.0),
   method_turbulence_mach_number(0.0),
@@ -588,6 +590,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_star_maker_minimum_star_mass;
   p | method_star_maker_maximum_star_mass;
   p | method_star_maker_min_level;
+  p | method_star_maker_turn_off_probability;
 
   p | method_turbulence_edot;
 
@@ -1301,6 +1304,14 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
       ("Method:grackle:cmb_temperature_floor",
        method_grackle_chemistry->cmb_temperature_floor);
 
+    method_grackle_chemistry->h2_charge_exchange_rate = p->value_integer
+      ("Method:grackle:h2_charge_exchange_rate",
+       method_grackle_chemistry->h2_charge_exchange_rate);
+
+    method_grackle_chemistry->h2_h_cooling_rate = p->value_integer
+      ("Method:grackle:h2_h_cooling_rate",
+       method_grackle_chemistry->h2_h_cooling_rate);
+
     std::string grackle_data_file_ = p->value_string
       ("Method:grackle:data_file", "");
     ASSERT("EnzoConfig::read",
@@ -1456,6 +1467,9 @@ void EnzoConfig::read_method_feedback_(Parameters * p)
 
   method_feedback_fade_SNR = p->value_integer
     ("Method:feedback:fade_SNR",0);
+
+  method_feedback_NEvents = p->value_integer
+    ("Method:feedback:NEvents",0);
 }
 
 //----------------------------------------------------------------------
@@ -1506,10 +1520,10 @@ void EnzoConfig::read_method_star_maker_(Parameters * p)
     ("Method:star_maker:number_density_threshold",0.0);
 
   method_star_maker_overdensity_threshold = p->value_float
-    ("Method:star_maker:number_density_threshold",0.0);
+    ("Method:star_maker:overdensity_threshold",0.0);
 
   method_star_maker_temperature_threshold = p->value_float
-    ("Method:star_maker:number_density_threshold",1.0E4);
+    ("Method:star_maker:temperature_threshold",1.0E4);
 
   method_star_maker_critical_metallicity = p->value_float
     ("Method:star_maker:critical_metallicity",0.0);
@@ -1528,6 +1542,9 @@ void EnzoConfig::read_method_star_maker_(Parameters * p)
   
   method_star_maker_min_level = p->value_integer
     ("Method:star_maker:min_level",0);
+
+  method_star_maker_turn_off_probability = p->value_logical
+    ("Method:star_maker:turn_off_probability",false);
 }
 
 //----------------------------------------------------------------------

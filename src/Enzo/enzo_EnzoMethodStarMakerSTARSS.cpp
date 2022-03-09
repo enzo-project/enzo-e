@@ -90,10 +90,23 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
   double dx, dy, dz;
   block->cell_width(&dx, &dy, &dz);
 
+  const int rank = cello::rank();
+
+  double dt    = enzo_block->dt;
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
+  if (cosmology) {
+    enzo_float cosmo_a = 1.0;
+    enzo_float cosmo_dadt = 0.0;
+    double current_time = enzo_block->time();
+    cosmology->compute_expansion_factor(&cosmo_a,&cosmo_dadt,current_time+0.5*dt);
+    if (rank >= 1) dx *= cosmo_a;
+    if (rank >= 2) dy *= cosmo_a;
+    if (rank >= 3) dz *= cosmo_a;
+  }
+
   double lx, ly, lz;
   block->lower(&lx,&ly,&lz);
 
-  double dt = enzo_block->dt;
   // declare particle position arrays
   //  default particle type is "star", but this will default
   //  to subclass particle_type
@@ -130,8 +143,6 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 
   // obtain the particle stride length (TODO: remove--don't need?)
   //const int ps = particle.stride(it, ia_m);
-
-  int rank = cello::rank();
 
   int gx,gy,gz;
   field.ghost_depth (0, &gx, &gy, &gz);
@@ -215,25 +226,22 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         
         // calculate baryon overdensity
         // take a local mean, but weight the central cell more
-        // TODO: better overdensity calculation???
         
         // either use number density threshold or overdensity threshold
         // defaults to number density if both density and overdensity are set to 1
         if (this->use_density_threshold_) { 
           if (! this->check_number_density_threshold(ndens) ) continue;
-          #ifdef DEBUG_SF_CRITERIA
-            std::cout << "ndens=" << ndens <<"; threshold passed!" << std::endl;
-          #endif
         }
         else if (this->use_overdensity_threshold_){
-          double dmean = (11*density[i] 
+          double dmean = (10*density[i] 
                     + density[i-idx] + density[i+idx] 
                     + density[i-idy] + density[i+idy]
-                    + density[i-idz] + density[i+idz]) / 16.0;
-          // TODO: Double check that code_density and overdensity are the same
+                    + density[i-idz] + density[i+idz]) / 17.0;
           if (! this->check_overdensity_threshold(dmean) ) continue;
+          #ifdef DEBUG_SF_CRITERIA 
+            CkPrintf("MethodFeedbackSTARSS -- overdensity threshold passed! rho=%f\n",dmean);
+          #endif
          }
-        
         // check velocity divergence < 0
         if (! this->check_velocity_divergence(velocity_x, velocity_y,
                                               velocity_z, i,
@@ -248,41 +256,35 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         // check that (T<10^4 K) or (dynamical_time < cooling_time)
         // In order to check cooling time, must have use_temperature_threshold=true;
         double total_density = density[i] + density_particle_accumulate[i];
-        #ifdef DEBUG_SF_CRITERIA
-           std::cout << "temperature_code=" << temperature[i] << " temperature_K" << temperature[i]*Tunit << std::endl;
-        #endif
+
         if (! this->check_temperature(temperature[i], Tunit)) { // if T > 10^4 K
            if (enzo_config->method_grackle_chemistry) continue; //no hot gas forming stars!
            if (cooling_time){
              if (! this->check_cooling_time(cooling_time[i], total_density, tunit, rhounit)) continue;
            }
         }
-
         // check that M > Mjeans
         if (! check_jeans_mass(temperature[i], mean_particle_mass, density[i], cell_mass,
                                Tunit,munit,rhounit )) continue;     
-
+        
         // check that H2 self shielded fraction f_shield > 0
         double f_shield = this->h2_self_shielding_factor(density,metallicity,
                      rhounit,lunit,i,idx,idy,idz,dx,dy,dz); 
         if (f_shield < 0) continue;
-
         // check that Z > Z_crit
         if (! check_metallicity(metallicity)) continue;
-
 
 //-----------------------------------CREATION ROUTINE-------------------------------
       
         #ifdef DEBUG_SF_CRITERIA
-           std::cout << "criteria passed... forming star!" << std::endl;
+           CkPrintf("MethodStarMakerSTARSS -- SF criteria passed in cell %d\n", i);
         #endif 
         // If cell passed all of the tests, form a star
-
         double tdyn = sqrt(3.0 * cello::pi / 32.0 / cello::grav_constant /
-                      (density[i] * rhounit));
+                      (density[i] * rhounit)) / tunit; //dynamical time in code units (not used anywhere)
  
         //free fall time in code units
-        double tff = pow(3*(cello::pi/(32*cello::grav_constant*density[i]*rhounit)),0.5)/tunit;        
+        double tff = sqrt(3*cello::pi/(32*cello::grav_constant*density[i]*rhounit))/tunit;        
        /* Determine Mass of new particle
                 WARNING: this removes the mass of the formed particle from the
                          host cell.  If your simulation has very small (>15 Msun) baryon mass
@@ -292,31 +294,41 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         double maximum_star_mass = enzo_config->method_star_maker_maximum_star_mass;
         double minimum_star_mass = enzo_config->method_star_maker_minimum_star_mass;
          
-        if (maximum_star_mass < 0)
+        if (maximum_star_mass < 0){
             maximum_star_mass = this->maximum_star_fraction_ * cell_mass * munit_solar; //Msun
+        }
 
-        double mass_should_form = std::min(f_shield * cell_mass*munit_solar / divisor,
-                                      this->maximum_star_fraction_*cell_mass*munit_solar / divisor);//Msun
+        double mass_should_form = std::min(f_shield,this->maximum_star_fraction_) * 
+                                    cell_mass*munit_solar / divisor;
         // Probability has the last word
         // FIRE-2 uses p = 1 - exp (-MassShouldForm*dt / M_gas_particle) to convert a whole particle to star particle
         //  We convert a fixed portion of the baryon mass (or the calculated amount)
         //TODO: Difference between dt and dtFixed???
-        
+       
         double p_form = 1.0 - std::exp(-mass_should_form*dt/maximum_star_mass);
-        //p_form = 1.0; // always form star (for debugging purposes) 
+
+        if (enzo_config->method_star_maker_turn_off_probability) p_form = 1.0;
+
+        #ifdef DEBUG_SF_CRITERIA
+          CkPrintf("MethodStarMakerSTARSS -- mass_should_form = %f; p_form = %f\n", mass_should_form, p_form);
+          CkPrintf("MethodStarMakerSTARSS -- cell_mass = %f Msun; divisor = %f\n", cell_mass*munit_solar,divisor);
+        #endif
 
         double random = double(mt()) / double(mt.max()); 
 
         /* New star is mass_should_form up to `conversion_fraction` * baryon mass of the cell, but at least 15 msun */       
         double new_mass = std::min(mass_should_form/munit_solar, maximum_star_mass/munit_solar);
-        //std::cout << "cell mass=" << cell_mass*munit_solar << "; new_mass=" << new_mass*munit_solar << std::endl;
+        std::cout << "cell mass=" << cell_mass*munit_solar << "; new_mass=" << new_mass*munit_solar << std::endl;
         //std::cout << "p_form=" << p_form << "; random=" << random << "; dt=" << dt << std::endl; 
         if (
                  (new_mass * munit_solar < minimum_star_mass) // too small
                  || (random > p_form) // too unlikely
-                 || (new_mass > cell_mass) // too big compared to cell
-           )
-           continue;
+                 || (new_mass > cell_mass) // too big compared to cell    
+           ) 
+           {
+             CkPrintf("MethodStarMakerSTARSS -- star mass is either too big, too small, or failed the dice roll\n");
+             continue;
+           }
 
         count++; // time to form a star! 
 

@@ -70,6 +70,8 @@ public:
                                   const enzo_float up, const enzo_float vp, const enzo_float wp,
                                   const int mx, const int my, const int mz, int direction) const throw();
 
+   void add_accumulate_fields(EnzoBlock * enzo_block) throw();
+
    void createCouplingParticles(EnzoBlock * enzo_block, const int nCouple,
                                 double coupledEnergy, double coupledGasEnergy, 
                                 double coupledMass, double coupledMetals, double coupledMomenta,
@@ -81,9 +83,8 @@ protected:
 
   int sf_minimum_level_;
   int single_sn_;
-  int NEvents=1; // TODO: initialize this with a parameter
-  // setting NEvents = 1 sets off SN immediately after star formation
-
+  int NEvents;
+ 
   // Refresh ID
   int ir_feedback_;
 
