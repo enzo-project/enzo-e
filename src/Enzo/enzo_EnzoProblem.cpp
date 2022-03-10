@@ -254,8 +254,15 @@ Initial * EnzoProblem::create_initial_
     initial = new EnzoInitialIsolatedGalaxy (enzo_config);
   } else if (type == "merge_stars_test") {
     initial = new EnzoInitialMergeStarsTest (enzo_config);
-  }
-  else {
+  } else if (type == "accretion_test") {
+    initial = new EnzoInitialAccretionTest
+      (cycle, time,
+       enzo_config->initial_accretion_test_star_position,
+       enzo_config->initial_accretion_test_star_velocity,
+       enzo_config->initial_accretion_test_star_mass,
+       enzo_config->initial_accretion_test_gas_density,
+       enzo_config->initial_accretion_test_gas_pressure);
+  } else {
     initial = Problem::create_initial_
       (type,index,config,parameters);
   }
