@@ -37,7 +37,7 @@ EnzoMethodAccretionCompute::EnzoMethodAccretionCompute(double accretion_radius_c
 	 "(4 by default)",
          accretion_radius_cells_ <= min_ghost_depth);
 
-  // Check if merge_stars method is also being used and if it comes just before
+  // Check if merge_stars method is also being used and if it comes before
   // accretion_compute in the method list
   const EnzoProblem * enzo_problem = enzo::problem();
   size_t i = 0;
@@ -55,12 +55,13 @@ EnzoMethodAccretionCompute::EnzoMethodAccretionCompute(double accretion_radius_c
   }
 
   ASSERT("EnzoMethodAccretionCompute::EnzoMethodAccretionCompute() ",
-	 "Accretion method requires running with MergeStars method also.",
+	 "Accretion method requires running with merge_stars method also.",
          merge_stars_found);
 
   ASSERT("EnzoMethodAccretionCompute::EnzoMethodAccretionCompute() ",
-	 "Accretion method requires running with MergeStars method also.",
-	 accretion_compute_index == merge_stars_index + 1);
+	 "merge_stars method needs to come before accretion_compute method "
+	 "in the list of methods.",
+	 accretion_compute_index > merge_stars_index);
 
   // Check if merging radius is at least twice that of the accretion
   // radius
