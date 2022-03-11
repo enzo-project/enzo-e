@@ -788,6 +788,8 @@ namespace cello {
   /// Return the ScalarDescr object defining Block pointer Scalar data
   /// values
   ScalarDescr *   scalar_descr_void();
+  /// Return the ScalarDescr object defining Block index Scalar data values
+  ScalarDescr *   scalar_descr_index();
 
   /// Return the ith Output object
   Output *        output (int index);

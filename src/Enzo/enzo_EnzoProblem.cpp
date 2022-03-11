@@ -678,7 +678,7 @@ Method * EnzoProblem::create_method_
     }
 
     method = new EnzoMethodBackgroundAcceleration
-          (zero_acceleration);
+      (zero_acceleration);
 
   } else if (name == "star_maker") {
 
@@ -697,7 +697,9 @@ Method * EnzoProblem::create_method_
   } else if (name == "check") {
 
     // Method for checkpointing the simulation
-    method = new EnzoMethodCheck();
+    method = new EnzoMethodCheck
+      (enzo_config->method_check_num_files,
+       enzo_config->method_check_ordering);
 
   } else {
 

@@ -7,8 +7,7 @@
 
 #ifndef ENZO_IO_ENZO_WRITER_HPP
 #define ENZO_IO_ENZO_WRITER_HPP
-
-class IoEnzoWriter : public CBase_IoWriter {
+class IoEnzoWriter : public CBase_IoEnzoWriter {
 
   /// @class    IoEnzoWriter
   /// @ingroup  Io
@@ -16,20 +15,35 @@ class IoEnzoWriter : public CBase_IoWriter {
 
 public: // interface
 
+  /// Defaut Constructor
+  IoEnzoWriter() throw()
+  : CBase_IoEnzoWriter(),
+    num_files_(0),
+    ordering_("")
+  {  }
+
   /// Constructor
-  IoEnzoWriter() throw();
+  IoEnzoWriter(int num_files, std::string ordering) throw();
 
   /// CHARM++ migration constructor
-  IoEnzoWriter(CkMigrateMessage *m) : CBase_IoWriter(m) {}
+  IoEnzoWriter(CkMigrateMessage *m) : CBase_IoEnzoWriter(m) {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
-  { TRACEPUP; CBase_IoWriter::pup(p); }
+  {
+    TRACEPUP; CBase_IoEnzoWriter::pup(p);
+
+    p | num_files_;
+    p | ordering_;
+  }
 
 public: // entry methods
 
-  void p_write()
-  { CkPrintf ("DEBUG_IO IoEnzoWriter::p_write()\n"); }
+  void p_write(int index_file, std::string name_this, std::string name_next,
+               Index index_this, Index index_next, int index,
+               bool is_last);
+
+  // void r_created(CkReductionMsg *msg);
 
 private: // functions
 
@@ -37,6 +51,8 @@ private: // functions
 private: // attributes
 
   // NOTE: change pup() function whenever attributes change
+  int num_files_;
+  std::string ordering_;
 
 };
 

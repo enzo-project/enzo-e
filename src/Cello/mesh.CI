@@ -213,7 +213,6 @@ module mesh {
   // Chare array for writing data files
   array[1D] IoWriter {
      entry IoWriter();
-     entry void p_write();
   };
 }
 

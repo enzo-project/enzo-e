@@ -192,6 +192,9 @@ EnzoConfig::EnzoConfig() throw ()
   initial_IG_recent_SF_bin_size(5.0),
   initial_IG_recent_SF_SFR(2.0),
   initial_IG_recent_SF_seed(12345),
+  // EnzoMethodCheck
+  method_check_num_files(1),
+  method_check_ordering("order_morton"),
   // EnzoMethodHeat
   method_heat_alpha(0.0),
   // EnzoMethodHydro
@@ -522,6 +525,9 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_soup_pressure_out;
   p | initial_soup_density;
 
+  p | method_check_num_files;
+  p | method_check_ordering;
+  
   p | method_heat_alpha;
 
   p | method_hydro_method;
@@ -664,6 +670,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_turbulence_(p);
 
   read_method_background_acceleration_(p);
+  read_method_check_(p);
   read_method_feedback_(p);
   read_method_grackle_(p);
   read_method_gravity_(p);
@@ -1545,6 +1552,16 @@ void EnzoConfig::read_method_gravity_(Parameters * p)
 
   method_gravity_accumulate = p->value_logical
     ("Method:gravity:accumulate",true);
+}
+
+//----------------------------------------------------------------------
+
+void EnzoConfig::read_method_check_(Parameters * p)
+{
+  method_check_num_files = p->value_integer
+    ("Method:check:num_files",1);
+  method_check_ordering = p->value_string
+    ("Method:check:ordering","order_morton");
 }
 
 //----------------------------------------------------------------------

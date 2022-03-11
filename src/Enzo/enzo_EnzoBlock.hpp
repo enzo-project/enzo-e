@@ -240,7 +240,13 @@ public: /// entry methods
   /// Call to Block array to self-identify as "first" when writing
   /// checkpoint files based on Ordering object
   void p_check_write_first(int num_files, std::string ordering);
-  
+
+  /// Call to single Block to return data for checkpoint
+  void p_check_write_next(int num_files, std::string ordering);
+
+  /// Exit EnzoMethodCheck
+  void p_check_done();
+
   //--------------------------------------------------
 
   /// EnzoSolverCg entry method: DOT ==> refresh P
@@ -345,8 +351,21 @@ public: /// entry methods
     CkPrintf ("CellWidth[] = %g %g %g\n",CellWidth[0],CellWidth[1],CellWidth[2]);
   }
 
-protected: // attributes
+protected: // methods
 
+  void check_get_parameters_
+  ( int num_files,
+    std::string ordering,
+    Index &       index_this,
+    Index &       index_next,
+    std::string & name_this,
+    std::string & name_next,
+    int &         index_block,
+    int &         index_file,
+    bool &        is_first,
+    bool &        is_last);
+
+protected: // attributes
 
 public: // attributes (YIKES!)
 

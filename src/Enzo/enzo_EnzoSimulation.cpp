@@ -77,6 +77,11 @@ void EnzoSimulation::pup (PUP::er &p)
 
   TRACEPUP;
 
+  p | sync_check_writer_created_;
+  p | sync_check_done_;
+  p | check_ordering_;
+  p | check_num_files_;
+
   if (p.isUnpacking()) {
     EnzoBlock::initialize(enzo::config());
   }

@@ -52,6 +52,7 @@ Simulation::Simulation
   scalar_descr_int_(NULL),
   scalar_descr_sync_(NULL),
   scalar_descr_void_(NULL),
+  scalar_descr_index_(NULL),
   field_descr_(NULL),
   particle_descr_(NULL),
   sync_output_begin_(),
@@ -115,6 +116,7 @@ Simulation::Simulation()
   scalar_descr_int_(NULL),
   scalar_descr_sync_(NULL),
   scalar_descr_void_(NULL),
+  scalar_descr_index_(NULL),
   field_descr_(NULL),
   particle_descr_(NULL),
   sync_output_begin_(),
@@ -166,6 +168,7 @@ Simulation::Simulation (CkMigrateMessage *m)
     scalar_descr_int_(NULL),
     scalar_descr_sync_(NULL),
     scalar_descr_void_(NULL),
+    scalar_descr_index_(NULL),
     field_descr_(NULL),
     particle_descr_(NULL),
     sync_output_begin_(),
@@ -243,6 +246,8 @@ void Simulation::pup (PUP::er &p)
   p | *scalar_descr_sync_;
   if (up) scalar_descr_void_ = new ScalarDescr;
   p | *scalar_descr_void_;
+  if (up) scalar_descr_index_ = new ScalarDescr;
+  p | *scalar_descr_index_;
 
   if (up) field_descr_ = new FieldDescr;
   p | *field_descr_;
@@ -494,6 +499,7 @@ void Simulation::initialize_data_descr_() throw()
   scalar_descr_int_         = new ScalarDescr;
   scalar_descr_sync_        = new ScalarDescr;
   scalar_descr_void_        = new ScalarDescr;
+  scalar_descr_index_       = new ScalarDescr;
 
   //--------------------------------------------------
   // parameter: Field : list

@@ -643,10 +643,11 @@ void OutputImage::cleanup_remote  (int * n, char ** buffer) throw()
 double OutputImage::mesh_color_(const Block * block, int level) const
 {
   double value = 0;
+  // Determine 0.0 <= value <= 1.0
   if (mesh_color_type_ == mesh_color_level) {
-    value = (1.0+level);
+    value = 1.0*level/max_level_;
   } else if (mesh_color_type_ == mesh_color_process) {
-    value = (1.0+CkMyPe())/(CkNumPes());
+    value = (CkMyPe())/(CkNumPes()-1.0);
   } else if (mesh_color_type_ == mesh_color_age) {
     const int age = block->age(); 
     value = 1.0 / (0.01*age + 1.0);
@@ -654,14 +655,20 @@ double OutputImage::mesh_color_(const Block * block, int level) const
     int is_i = cello::scalar_descr_int()->index(mesh_color_order_+":index");
     int is_n = cello::scalar_descr_int()->index(mesh_color_order_+":count");
     ScalarData<int> * scalar_data = ((Block *)block)->data()->scalar_data_int();
-    size_t n = colormap_[0].size();
     int index = *scalar_data->value(cello::scalar_descr_int(),is_i);
     int count = *scalar_data->value(cello::scalar_descr_int(),is_n);
-    value = (count) > 0 ? 1.0*n*index/count : 0;
+    value = (count) > 0 ? 1.0*index/(count-1.0) : 0;
   } else {
     ERROR1 ("OutputImage::mesh_color_()",
 	    "Unknown mesh_color_type_ %d",
 	    mesh_color_type_);
+  }
+  // Scale value by [min_value, max_value] if needed, else scale by [0
+  // : num_colors ]
+  if (use_min_max_) {
+    value = (max_value_-min_value_)*value + min_value_;
+  } else {
+    value *= (colormap_[0].size() + 1);
   }
   return value;
 }

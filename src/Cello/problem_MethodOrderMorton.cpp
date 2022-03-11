@@ -21,11 +21,12 @@ MethodOrderMorton::MethodOrderMorton(int min_level) throw ()
   refresh->add_field("density");
 
   /// Create Scalar data for ordering index
-  is_index_       = cello::scalar_descr_int()->new_value(name() + ":index");
-  is_count_   = cello::scalar_descr_int()->new_value(name() + ":count");
-  is_weight_      = cello::scalar_descr_int()->new_value(name() + ":weight");
-  is_weight_child_ = cello::scalar_descr_int()->new_value(name() + ":weight_child",
-                                                          cello::num_children());
+  const int n = cello::num_children();
+  is_index_        = cello::scalar_descr_int()->new_value(name() + ":index");
+  is_count_        = cello::scalar_descr_int()->new_value(name() + ":count");
+  is_next_         = cello::scalar_descr_index()->new_value(name() + ":next");
+  is_weight_       = cello::scalar_descr_int()->new_value(name() + ":weight");
+  is_weight_child_ = cello::scalar_descr_int()->new_value(name() + ":weight_child",n);
   is_sync_index_  = cello::scalar_descr_sync()->new_value(name() + ":sync_index");
   is_sync_weight_ = cello::scalar_descr_sync()->new_value(name() + ":sync_weight");
 }
@@ -36,6 +37,8 @@ void MethodOrderMorton::compute (Block * block) throw()
 {
   // Initialize counters, then barrier to ensure counters initialized
   // before first entry method can arrive
+  Sync * sync_index = psync_index_(block);
+  Sync * sync_weight = psync_weight_(block);
 
   *pindex_(block) = 0;
   *pcount_(block) = 0;
@@ -43,10 +46,14 @@ void MethodOrderMorton::compute (Block * block) throw()
   for (int i=0; i<cello::num_children(); i++) {
     *pweight_child_(block,i) = 0;
   }
-  psync_index_(block)->set_stop(1 + 1);
-  psync_weight_(block)->set_stop(1 + cello::num_children());
+  sync_index->reset();
+  sync_weight->reset();
+  sync_index->set_stop(1 + 1);
+  sync_weight->set_stop(1 + cello::num_children());
+
   CkCallback callback (CkIndex_Block::r_method_order_morton_continue(nullptr),
                        block->proxy_array());
+
   block->contribute (callback);
 
 }
@@ -112,7 +119,7 @@ void MethodOrderMorton::recv_weight
     int i = ic3[0] + 2*(ic3[1]+2*ic3[2]);
     *pweight_child_(block,i) = weight;
   }
-  if (psync_weight_(block)->next()) {
+  if ((!block->is_leaf()) && psync_weight_(block)->next()) {
     // Forward weight to parent when computed
     int ic3[3] = {0,0,0};
     block->index().child(block->level(),ic3,ic3+1,ic3+2,min_level_);
@@ -148,8 +155,13 @@ void MethodOrderMorton::recv_index
 (Block * block, int index, int count, bool self)
 {
   if (!self) {
-    *pindex_(block)     = index;
+    const int rank = cello::rank();
+    int na3[3];
+    cello::simulation()->hierarchy()->root_blocks(na3,na3+1,na3+2);
+    Index index_next = block->index().next(rank,na3,block->is_leaf(),min_level_);
+    *pindex_(block) = index;
     *pcount_(block) = count;
+    *pnext_(block) = index_next;
   }
   if (psync_index_(block)->next()) {
     send_index(block,index, count, false);
@@ -192,6 +204,15 @@ int * MethodOrderMorton::pcount_(Block * block)
   Scalar<int> scalar(cello::scalar_descr_int(),
                      block->data()->scalar_data_int());
   return scalar.value(is_count_);
+}
+
+//----------------------------------------------------------------------
+
+Index * MethodOrderMorton::pnext_(Block * block)
+{
+  Scalar<Index> scalar(cello::scalar_descr_index(),
+                     block->data()->scalar_data_index());
+  return scalar.value(is_next_);
 }
 
 //----------------------------------------------------------------------

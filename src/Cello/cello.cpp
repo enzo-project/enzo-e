@@ -233,6 +233,16 @@ namespace cello {
     }
     return scalar_descr_void_[in];
   }
+  ScalarDescr * scalar_descr_index()
+  {
+    static ScalarDescr * scalar_descr_index_[CONFIG_NODE_SIZE] = {nullptr};
+    const int in = cello::index_static();
+    if (scalar_descr_index_[in] == nullptr) {
+      scalar_descr_index_[in] = simulation() ?
+        simulation()->scalar_descr_index() : new ScalarDescr;
+    }
+    return scalar_descr_index_[in];
+  }
 
   //---------------------------------------------------------------------- 
 

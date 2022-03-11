@@ -18,9 +18,10 @@ public: // interface
 
   /// Constructor
   IoReader() throw()
+  : CBase_IoReader()
   { }
 
-  /// CHARM++ migration constructor for PUP::able
+  /// CHARM++ migration constructor
   IoReader (CkMigrateMessage *m) :
     CBase_IoReader(m)
   { }
@@ -33,7 +34,6 @@ public: // interface
   }
 
 private: // functions
-
 
 private: // attributes
 

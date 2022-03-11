@@ -9,11 +9,13 @@
 #ifndef ENZO_ENZO_SIMULATION_CHARM_HPP
 #define ENZO_ENZO_SIMULATION_CHARM_HPP
 
+class CProxy_IoEnzoWriter;
+
 #include "charm++.h"
 #include "enzo.decl.h"
 
+
 class EnzoSimulation : public CBase_EnzoSimulation
-			    
 {
 
   /// @class    EnzoSimulation
@@ -30,7 +32,7 @@ public: // functions
   EnzoSimulation() : CBase_EnzoSimulation() {}
 
   /// CHARM++ Migration constructor
-  EnzoSimulation(CkMigrateMessage * m) : CBase_EnzoSimulation(m)  
+  EnzoSimulation(CkMigrateMessage * m) : CBase_EnzoSimulation(m)
   {
   };
 
@@ -50,8 +52,11 @@ public: // functions
 
   /// EnzoMethodCheck
   void r_method_check_enter (CkReductionMsg *);
-  void p_writer_created(int num_files, std::string ordering);
-  
+  void p_writer_created (CProxy_IoEnzoWriter);
+  void p_check_continue (CProxy_IoEnzoWriter);
+  void r_check_write (CkReductionMsg *);
+  void p_check_done();
+
 public: // virtual functions
 
   /// Initialize the Enzo Simulation
@@ -69,6 +74,8 @@ private: // attributes
   /// Checkpoint synchronization (depreciated)
   Sync sync_check_writer_created_;
   Sync sync_check_done_;
+  std::string check_ordering_;
+  int         check_num_files_;
 };
 
 #endif /* ENZO_ENZO_SIMULATION_CHARM_HPP */

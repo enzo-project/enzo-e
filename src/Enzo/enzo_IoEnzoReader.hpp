@@ -8,7 +8,7 @@
 #ifndef ENZO_IO_ENZO_READER_HPP
 #define ENZO_IO_ENZO_READER_HPP
 
-class IoEnzoReader : public CBase_IoReader {
+class IoEnzoReader : public CBase_IoEnzoReader {
 
   /// @class    IoEnzoReader
   /// @ingroup  Io
@@ -23,11 +23,11 @@ public: // interface
   }
 
   /// CHARM++ migration constructor
-  IoEnzoReader(CkMigrateMessage *m) : CBase_IoReader(m) {}
+  IoEnzoReader(CkMigrateMessage *m) : CBase_IoEnzoReader(m) {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 
-  { TRACEPUP; CBase_IoReader::pup(p); }
+  { TRACEPUP; CBase_IoEnzoReader::pup(p); }
 
 private: // functions
 

@@ -438,18 +438,14 @@ void Index::set_child(int level, int ix, int iy, int iz, int min_level)
 
 //----------------------------------------------------------------------
 
-Index Index::next (int rank, const int na3[3], bool is_leaf)
+Index Index::next (int rank, const int na3[3], bool is_leaf, int min_level) const
 {
-  // should never be negative level
-  ASSERT1 ("Index::index_parent",
-	  "shouldn't call next() on index with negative level %d",
-	   level(), level() >= 0);
   // make a copy
   Index index_next = *this;
 
   if (! is_leaf) {
 
-    index_next.push_child(0,0,0);
+    index_next.push_child(0,0,0,min_level);
 
   } else { // is_leaf
     // find the first ancestor (including self) that has child[k]=0 for
@@ -457,14 +453,14 @@ Index Index::next (int rank, const int na3[3], bool is_leaf)
     int ia3[3], ic3[3] = {0,0,0};
     int level=index_next.level();
     index_next.array (ia3,ia3+1,ia3+2);
-    if (level>0) index_next.child (level,ic3,ic3+1,ic3+2);
+    if (level>0) index_next.child (level,ic3,ic3+1,ic3+2,min_level);
     bool last = (level==0) || (ic3[0] && (rank<2 || ic3[1]) && (rank<3 || ic3[2]));
     while (level > 0 && last) {
-      index_next = index_next.index_parent();
+      index_next = index_next.index_parent(min_level);
       level=index_next.level();
       index_next.array (ia3,ia3+1,ia3+2);
       ic3[0]=ic3[1]=ic3[2]=0;
-      if (level>0) index_next.child (level,ic3,ic3+1,ic3+2);
+      if (level>0) index_next.child (level,ic3,ic3+1,ic3+2,min_level);
       last = (level==0) || (ic3[0] && (rank<2 || ic3[1]) && (rank<3 || ic3[2]));
     }
     // ASSERT (level == 0) || (! last)
@@ -489,7 +485,7 @@ Index Index::next (int rank, const int na3[3], bool is_leaf)
           ic3[2] = (ic3[2]+1) % 2;
         }
       }
-      index_next.set_child(level,ic3[0],ic3[1],ic3[2]);
+      index_next.set_child(level,ic3[0],ic3[1],ic3[2],min_level);
     }
   }
   return index_next;

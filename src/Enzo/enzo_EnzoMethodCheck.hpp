@@ -1,7 +1,7 @@
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoMethodCheck.hpp
-/// @author   James Bordner (jobordner@ucsd.edu) 
+/// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2022-02-12
 /// @brief    [\ref Enzo] Implementation of EnzoMethodCheck
 
@@ -17,11 +17,11 @@ class EnzoMethodCheck : public Method {
 public: // interface
 
   /// Create a new EnzoMethodCheck object
-  EnzoMethodCheck();
+  EnzoMethodCheck(int num_files, std::string ordering);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodCheck);
-  
+
   /// Charm++ PUP::able migration constructor
   EnzoMethodCheck (CkMigrateMessage *m)
     : Method (m)
@@ -32,13 +32,19 @@ public: // interface
 
 public: // virtual methods
 
-  /// Apply the method to advance a block one timestep 
+  /// Apply the method to advance a block one timestep
   virtual void compute( Block * block) throw();
 
-  virtual std::string name () throw () 
+  virtual std::string name () throw ()
   { return "check"; }
 
 protected: // interface
+
+  /// Number of files to write EnzoBlock data to
+  int num_files_;
+
+  /// Ordering method for EnzoBlocks; default "order_morton"
+  std::string ordering_;
 
 };
 

@@ -34,6 +34,7 @@ public: // interface
     Method::pup(p);
     p | is_index_;
     p | is_count_;
+    p | is_next_;
     p | is_weight_;
     p | is_weight_child_;
     p | is_sync_index_;
@@ -64,6 +65,9 @@ private: // methods
   /// Return the pointer to the number of Block indices
   int * pcount_(Block * block);
 
+  /// Return the pointer to the Index of the "next" block
+  Index * pnext_(Block * block);
+
   /// Return the pointer to the Block's weight (including self)
   int * pweight_(Block * block);
 
@@ -87,6 +91,8 @@ private: // attributes
   int is_index_;
   /// Block Scalar<int> count
   int is_count_;
+  /// Block Scalar<Index> next
+  int is_next_;
   /// Block Scalar<int> weight (#decendent blocks + self)
   int is_weight_;
   /// Block Scalar<int> child weight (array of size cello::num_children())

@@ -178,7 +178,7 @@ public:
   /// Return the "next" Index in the hierarchy, given the
   /// dimensionality, array size, and whether the corresponding block is a leaf or
   /// not
-  Index next (int rank, const int na3[3], bool is_leaf);
+  Index next (int rank, const int na3[3], bool is_leaf, int min_level) const;
   
   void print (std::string msg, int level) const;
     

@@ -108,6 +108,8 @@ public: // interface
   { return scalar_descr_sync_; }
   ScalarDescr * scalar_descr_void() throw()
   { return scalar_descr_void_; }
+  ScalarDescr * scalar_descr_index() throw()
+  { return scalar_descr_index_; }
 
   /// Return the field descriptor
   FieldDescr * field_descr() const throw()
@@ -513,13 +515,14 @@ protected: // attributes
   /// AMR hierarchy
   Hierarchy * hierarchy_;
 
-  /// Scalar descriptors
+  /// Scalar descriptors (yuck)
   ScalarDescr * scalar_descr_long_double_;
   ScalarDescr * scalar_descr_double_;
   ScalarDescr * scalar_descr_int_;
   ScalarDescr * scalar_descr_sync_;
   ScalarDescr * scalar_descr_void_;
-  
+  ScalarDescr * scalar_descr_index_;
+
   /// Field descriptor
   FieldDescr * field_descr_;
 

@@ -286,6 +286,9 @@ public: // interface
       initial_IG_recent_SF_bin_size(5.0),
       initial_IG_recent_SF_SFR(2.0),
       initial_IG_recent_SF_seed(12345),
+      // EnzoMethodCheck
+      method_check_num_files(1),
+      method_check_ordering("order_morton"),
       // EnzoMethodHeat
       method_heat_alpha(0.0),
       // EnzoMethodHydro
@@ -431,6 +434,7 @@ protected: // methods
   void read_initial_turbulence_(Parameters *);
 
   void read_method_background_acceleration_(Parameters *);
+  void read_method_check_(Parameters *);
   void read_method_feedback_(Parameters *);
   void read_method_grackle_(Parameters *);
   void read_method_gravity_(Parameters *);
@@ -672,6 +676,10 @@ public: // attributes
   double                     initial_IG_recent_SF_bin_size;
   double                     initial_IG_recent_SF_SFR;
   int                        initial_IG_recent_SF_seed;
+
+  /// EnzoMethodCheck
+  int                        method_check_num_files;
+  std::string                method_check_ordering;
 
   /// EnzoMethodHeat
   double                     method_heat_alpha;
