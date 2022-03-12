@@ -137,12 +137,21 @@ if grackle_data_dir != '' and use_grackle:
 
     # Part 3 of 3: Measure the field summary statistics and compare against
     # a table of reference values
+    _dict_to_json_cmd_arg = lambda d: "'" + str(d).replace('\'', '"') + "'"
     if prec == 'double':
         _ref_tab = test_path + '/MethodGrackle/ref_general_grackle-double.csv'
-        atol, rtol = 1e-15, 1e-14
+        atol = 0
+        # these should be flexible for different compiler versions
+        rtol = _dict_to_json_cmd_arg({"min" : 5e-15, "max" : 5e-6,
+                                      "mean" : 5e-8,
+                                      "standard_deviation" : 5e-8})
     else:
         _ref_tab = test_path + '/MethodGrackle/ref_general_grackle-single.csv'
-        atol, rtol = 1e-7, 1e-6
+        atol = 0
+        # the following may need to be relaxed for different compiler versions
+        rtol = _dict_to_json_cmd_arg(
+            dict((k, 1e-7) for k in ["min","max","mean","standard_deviation"])
+        )
 
     _compare_log_path = test_path + '/MethodGrackle/grackle_general_cmp.log'
     general_grackle = env.CompareFieldSummary(
@@ -160,5 +169,3 @@ if grackle_data_dir != '' and use_grackle:
     # commands from the root directory:
     #   $ ./build.sh test/MethodGrackle/grackle_general_simulation.log
     #   $ python tools/field_summary.py measure -f pressure,temperature,cooling_time test/MethodGrackle/GeneralGrackle-500.00/GeneralGrackle-500.00.block_list -o test/MethodGrackle/ref_general_grackle-double.csv
-
-print(os.getcwd())

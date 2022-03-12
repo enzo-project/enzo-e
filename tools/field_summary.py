@@ -27,6 +27,8 @@ _TABLE_DTYPE_ARGS = [
     ('standard_deviation', 'f8')
 ]
 
+_TABLE_COLS = frozenset(col for col, _ in _TABLE_DTYPE_ARGS)
+
 _FIXED_COL_UNITS = dict((col, 'code_length') for col,_ in _TABLE_DTYPE_ARGS \
                         if col[-5:] in ['_xloc', '_yloc', '_zloc'])
 
@@ -168,9 +170,7 @@ def test_equivalent_field_tables(cur_field_table, ref_field_table,
     else:
         tr = test_report
 
-    tr.write(
-        'Comparing Field Tables (atol = {}, rtol = {})\n'.format(atol,rtol)
-    )
+    tr.write('Comparing Field Tables\n')
 
     # first check that table properties are consistent
     consistent_table_prop = _check_consistent_cols_and_names(cur_field_table,
@@ -184,18 +184,24 @@ def test_equivalent_field_tables(cur_field_table, ref_field_table,
         'General table properties are consistent. Proceeding with comparison\n'
     )
 
-    # Now actually verify equality of properties
     colnames = tuple(ref_field_table.dtype.fields.keys())
+
+    filtered_colnames = list(filter(lambda col: col != 'name', colnames))
+    for tol, tolname in [(atol, 'atol'), (rtol, 'rtol')]:
+        tr.write(f'{tolname} = {tol.represent_as_string(filtered_colnames)}\n')
+
+    # Now actually verify equality of properties
     comparison_arr = np.empty((len(cur_field_table), len(colnames)),
-                              dtype = np.bool)
+                              dtype = np.bool_)
     for j,col in enumerate(colnames):
         if col == "name":
             comparison_arr[:,j] = True
         else:
             cur_vals = cur_field_table[col]
             ref_vals = ref_field_table[col]
-            comparison_arr[:,j] = np.isclose(cur_vals, ref_vals, rtol = rtol,
-                                             atol = atol, equal_nan = False)
+            comparison_arr[:,j] = np.isclose(cur_vals, ref_vals,
+                                             rtol = rtol[col], atol = atol[col],
+                                             equal_nan = False)
 
     all_consistent_vals = True
     # Finally check comparison results on a row-by-row basis
@@ -249,6 +255,53 @@ def _main_measure(args):
         print(output.getvalue())
     output.close()
 
+class ToleranceConfig:
+    def __init__(self, fallback_tol, col_specific_vals):
+        self._fallback_tol = fallback_tol
+        self._col_specific_vals = col_specific_vals
+
+    def __getitem__(self, key):
+        return self._col_specific_vals.get(key, self._fallback_tol)
+
+    def represent_as_string(self, colnames):
+        if len(self._col_specific_vals) == 0:
+            return str(self._fallback_tol)
+        else:
+            return str(dict((col,self[col]) for col in colnames))
+
+def _process_tol_args(arg_namespace):
+    # Process the tolerance arguments. They can be a string encoding an
+    # - int or float (this applies to all columns)
+    # - JSON object that assoicates tolerances with columns of the summary
+    #   table (columns without entries have a tolerance of 0)
+
+    def _process(tol_name):
+        try:
+            tmp = json.loads(getattr(arg_namespace, tol_name))
+        except json.JSONDecodeError:
+            tmp = None
+
+        if isinstance(tmp, (float, int)):
+            return ToleranceConfig(fallback_tol = tmp, col_specific_vals = {})
+
+        elif isinstance(tmp, dict):
+            for col, val in tmp.items(): # check contents of dict
+                if col not in _TABLE_COLS:
+                    raise ValueError(f"{tol_name} specified for unknown table "
+                                     f"column: {col}")
+                elif not isinstance(val, (int,float)):
+                    raise ValueError(f"{tol_name} for '{col}', {val}, isn't "
+                                     "an int or float")
+            return ToleranceConfig(fallback_tol = 0., col_specific_vals = tmp)
+
+        else:
+            raise ValueError(
+                f"{tol_name} option expects an int/float or a JSON object "
+                "that pairs summary table column-names with int/floats. \n"
+                f"Received: '{getattr(arg_namespace, tol_name)}'"
+            )
+    return _process('atol'), _process('rtol')
+
 
 def _main_cmp(args):
     # Program to use by the cmp subcommand. Just construct the field summary
@@ -256,6 +309,8 @@ def _main_cmp(args):
     print("Loading the reference table to identify the fields that are to be "
           "summarized")
     ref_field_table = read_field_summary(args.ref)
+
+    atol,rtol = _process_tol_args(args)
 
     field_names = ref_field_table['name'].tolist()
     print("Measuring the Field Summary Properties")
@@ -272,8 +327,7 @@ def _main_cmp(args):
         print("Comparing field summary tables")
         test_rslt = test_equivalent_field_tables(cur_field_table,
                                                  ref_field_table,
-                                                 atol = args.atol,
-                                                 rtol = args.rtol,
+                                                 atol = atol, rtol = rtol,
                                                  test_report = tr)
         if test_rslt:
             print("Field summary tables are consistent")
@@ -327,13 +381,21 @@ cmp_parser.add_argument(
     help = ('Path to file where a properly formatted test report describing '
             'the sucess of the comparison should be written.')
 )
-cmp_parser.add_argument(
-    '--rtol', required = True, action = 'store', type = float,
-    help = "Relative tolerance"
+
+_extended_explanation = (
+    'This expects a single tolerance value (an integer/floating point value) '
+    'that is used for all comparing values from any column of the '
+    'summary-table. Alternatively, this can accept a JSON object that pairs '
+    'column-names with the individual tolerance values. When a tolerance '
+    'valueIf a tolerance value isn\'t provided, it defaults to 0.'
 )
 cmp_parser.add_argument(
-    '--atol', required = True, action = 'store', type = float,
-    help = "Absolute tolerance"
+    '--rtol', action = 'store', default = '0',
+    help = f"Relative tolerance. {_extended_explanation}"
+)
+cmp_parser.add_argument(
+    '--atol', action = 'store', default = '0',
+    help = f"Absolute tolerance. {_extended_explanation}"
 )
 
 cmp_parser.set_defaults(func = _main_cmp)

@@ -5,6 +5,7 @@ Import('ip_charm')
 
 Import('bin_path')
 Import('test_path')
+Import('prec')
 
 #----------------------------------------------------------
 #defines
@@ -37,35 +38,38 @@ env_mv_cosmology_8 = env.Clone(COPY = 'mkdir -p ' + test_path + '/MethodCosmolog
 #-------------------------------------------------------------
 #load balancing
 #-------------------------------------------------------------
+if prec == 'double':
+    # as documented in ISSUE #154, there are some issues with running cosmology
+    # tests in single-precision mode. This test has been disabled for now.
 
-#serial
-balance_cosmology_1 = env_mv_cosmology_1.RunCosmology_1 (
-     'test_method_cosmology-1.unit',
-     bin_path + '/enzo-e',
-     ARGS='input/Cosmology/method_cosmology-1.in')
+    #serial
+    balance_cosmology_1 = env_mv_cosmology_1.RunCosmology_1 (
+         'test_method_cosmology-1.unit',
+         bin_path + '/enzo-e',
+         ARGS='input/Cosmology/method_cosmology-1.in')
 
-Clean(balance_cosmology_1,
-     [Glob('#/' + test_path + '/Dir_COSMO-1'),
-      Glob('#/' + test_path + '/Dir_COSMO-1')])
+    Clean(balance_cosmology_1,
+         [Glob('#/' + test_path + '/Dir_COSMO-1'),
+          Glob('#/' + test_path + '/Dir_COSMO-1')])
 
-#env.MakeMovie("method_cosmology-1.swf", "test_method_cosmology-1.unit", \
-#              ARGS = test_path + '/method_cosmology-1*.png");
-#env.PngToGif("method_cosmology-1.gif", "test_method_cosmology-1.unit", \
-#              ARGS = test_path + '/method_cosmology-1*.png");
+    #env.MakeMovie("method_cosmology-1.swf", "test_method_cosmology-1.unit", \
+    #              ARGS = test_path + '/method_cosmology-1*.png");
+    #env.PngToGif("method_cosmology-1.gif", "test_method_cosmology-1.unit", \
+    #              ARGS = test_path + '/method_cosmology-1*.png");
 
 
-#parallel
+    #parallel
 
-balance_cosmology_8 = env_mv_cosmology_8.RunCosmology_8 (
-     'test_method_cosmology-8.unit',
-     bin_path + '/enzo-e',
-     ARGS='input/Cosmology/method_cosmology-8.in')
+    balance_cosmology_8 = env_mv_cosmology_8.RunCosmology_8 (
+         'test_method_cosmology-8.unit',
+         bin_path + '/enzo-e',
+         ARGS='input/Cosmology/method_cosmology-8.in')
 
-Clean(balance_cosmology_8,
-     [Glob('#/' + test_path + '/Dir_COSMO-8'),
-      Glob('#/' + test_path + '/Dir_COSMO-8')])
+    Clean(balance_cosmology_8,
+         [Glob('#/' + test_path + '/Dir_COSMO-8'),
+          Glob('#/' + test_path + '/Dir_COSMO-8')])
 
-#env.MakeMovie("method_cosmology-8.swf", "test_method_cosmology-8.unit", \
-#              ARGS = test_path + '/method_cosmology-8*.png");
-#env.PngToGif("method_cosmology-8.gif", "test_method_cosmology-8.unit", \
-#              ARGS = test_path + '/method_cosmology-8*.png");
+    #env.MakeMovie("method_cosmology-8.swf", "test_method_cosmology-8.unit", \
+    #              ARGS = test_path + '/method_cosmology-8*.png");
+    #env.PngToGif("method_cosmology-8.gif", "test_method_cosmology-8.unit", \
+    #              ARGS = test_path + '/method_cosmology-8*.png");
