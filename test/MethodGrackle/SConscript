@@ -115,6 +115,11 @@ if grackle_data_dir != '' and use_grackle:
         COPY = ('rm -rf ' + test_path + '/MethodGrackle/GeneralGrackle-*; ' +
                 'mv `ls -d GeneralGrackle-*` ' + test_path + '/MethodGrackle/')
     )
+    _blocklist_fname = 'GeneralGrackle-500.00/GeneralGrackle-500.00.block_list'
+    SideEffect(
+        '#/' + test_path + '/MethodGrackle/' + _blocklist_fname,
+        "grackle_general_simulation.log"
+    )
     Clean(grackle_cooling_dt,
           [Glob('#/' + test_path + '/MethodGrackle/GrackleGeneral-*'),
            _full_path_to_node(grackle_general_simulation)]
@@ -134,7 +139,7 @@ if grackle_data_dir != '' and use_grackle:
     _compare_log_path = test_path + '/MethodGrackle/grackle_general_cmp.log'
     general_grackle = env.CompareFieldSummary(
         target = 'grackle_general.unit',
-        source = 'GeneralGrackle-500.00/GeneralGrackle-500.00.block_list',
+        source = _blocklist_fname,
         REF_TABLE = _ref_tab,
         ATOL = atol,
         RTOL = rtol,
