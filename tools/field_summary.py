@@ -61,7 +61,7 @@ def _get_sim_props(ds, field_names):
             fluid_type = elem
     assert fluid_type is not None
 
-    ds.create_field_info()
+    ds.field_list # this is necessary for initializing ds.field_info
     field_units = {}
     for field in field_names:
         dflt_units = ds.field_info[(fluid_type,field)].units

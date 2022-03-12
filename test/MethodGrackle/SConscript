@@ -50,7 +50,7 @@ if grackle_data_dir != '' and use_grackle:
     )
     _cmd = ("python {_script_path} cmp $SOURCE --ref $REF_TABLE "
             "--report $TARGET --rtol $RTOL --atol $ATOL "
-            "> $LOG_FILE 2>&1").format(_script_path = _script_path)
+            "> $LOG_FILE").format(_script_path = _script_path)
     compare_field_summary = Builder(action = _cmd)
 
     # now add these builders to the environment and clone the environment
