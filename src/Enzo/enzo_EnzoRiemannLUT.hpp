@@ -98,42 +98,42 @@ struct EnzoRiemannLUT{
   /// @class    EnzoRiemannLUT
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Provides a compile-time lookup table that maps the
-  ///           components of a subset of the actively advected quantities from
-  ///           FIELD_TABLE to unique indices
+  ///           components of a subset of the actively advected integration
+  ///           quantities from FIELD_TABLE to unique indices
   ///
   /// This is a template class that provides the following features at compile
   /// time:
   ///    - a lookup table (LUT) that maps the names of components of a subset
-  ///      of the actively advected quantities defined in FIELD_TABLE to
-  ///      unique, contiguous indices.
+  ///      of the actively advected integration quantities defined in
+  ///      FIELD_TABLE to unique, contiguous indices.
   ///    - the number of quantity components included in the table
-  ///    - a way to iterate over just the conserved quantities or specific
+  ///    - a way to iterate over just the conserved or specific integration
   ///      quantities values that are stored in an array using these mapping
-  ///    - a way to query which of the actively advected quantities in
-  ///      FIELD_TABLE are not included in the LUT
+  ///    - a way to query which of the actively advected integration quantities
+  ///      in FIELD_TABLE are not included in the LUT
   ///
   /// These feature are provided via the definition of publicly accessible
   /// integer constants in every specialization of the template class. All
   /// specializations have:
-  ///    - a constant called `NEQ` equal to the number of quantity
+  ///    - a constant called `NEQ` equal to the number of integration quantity
   ///      components included in the lookup table
   ///    - a constant called `specific_start` equal to the number of components
-  ///      of conserved quantities included in the lookup table
+  ///      of conserved integration quantities included in the lookup table
   ///    - `qkey` constants, which include constants named for the components
-  ///      of ALL actively advected quantities in FIELD_TABLE. A constant
-  ///      associated with a SCALAR quantity, `{qname}`, is simply called
-  ///      `{qname}` while constants associated with a vector quantity
-  ///      `{qname}` are called `{qname}_i`, `{qname}_j`, and `{qname}_k`.
+  ///      of ALL actively advected integration quantities in FIELD_TABLE. A
+  ///      constant associated with a SCALAR quantity, `{qname}`, is simply
+  ///      called `{qname}` while constants associated with a vector quantity,
+  ///      `{qname}`, are called `{qname}_i`, `{qname}_j`, and `{qname}_k`.
   ///
   /// The `qkey` constants serve as both the keys of the lookup table and a
   /// way to check whether a component of an actively advected quantity is
-  /// included in the table. Their values are satisfy the following conditions:
-  ///    - All constants named for values corresponding to quantities included
-  ///      in the table have values of `-1`
-  ///    - All constants named for conserved quantities have unique integer
-  ///      values in the internal `[0,specific_start)`
-  ///    - All constants named for specific quantities have unique integer
-  ///      values in the interval `[specific_start, NEQ)`
+  /// included in the table. Their values satisfy the following conditions:
+  ///    - All constants named for values corresponding to quantities NOT
+  ///      included in the lookup table have values of `-1`
+  ///    - All constants named for conserved integration quantities have unique
+  ///      integer values in the internal `[0,specific_start)`
+  ///    - All constants named for specific integration quantities have unique
+  ///      integer values in the interval `[specific_start, NEQ)`
   ///
   /// The lookup table is always expected to include density and the 3 velocity
   /// components. Although it may not be strictly enforced (yet), the lookup
@@ -145,16 +145,16 @@ struct EnzoRiemannLUT{
   /// the above requirements are specified.
   ///
   /// @tparam InputLUT Type that defines the `NEQ` constant, the
-  ///     `specific_start` constants and the `qkey` constants that correspond
-  ///     to the actively advected quantities that are actually included in the
-  ///     lookup table. All of the constant values will be directly reused by
-  ///     the resulting template specialization and therefore must meet the
-  ///     criteria defined above. Any undefined `qkey` constants are assumed to
-  ///     not be included in the lookup table and will be defined within the
-  ///     template specialization to have values of `-1`. This type can be
-  ///     implemented with either an unscoped enum OR a class that includes
-  ///     some combination of publicly accessible unscoped enums and static
-  ///     constant member variables.
+  ///     `specific_start` constant, and the `qkey` constants that correspond
+  ///     to the actively advected integration quantities that are actually
+  ///     included in the lookup table. All of the constant values will be
+  ///     directly reused by the resulting template specialization and
+  ///     therefore must meet the criteria defined above. Any undefined `qkey`
+  ///     constants are assumed to not be included in the lookup table and will
+  ///     be defined within the template specialization to have values of `-1`.
+  ///     This type can be implemented with either an unscoped enum OR a class
+  ///     that includes some combination of publicly accessible unscoped enums
+  ///     and static constant member variables.
   ///
   /// @par Examples
   /// For the sake of the example, let's assume we have a type `MyInputLUT`
@@ -181,15 +181,15 @@ struct EnzoRiemannLUT{
   ///
   /// @par
   /// As an example, imagine that the total kinetic energy density needs to be
-  /// computed at a single location from an values stored in an array, `prim`,
-  /// of type `lutarray<EnzoRiemannLUT<MyInLUT>>`. The resulting code to
+  /// computed at a single location from the values stored in an array, `integ`,
+  /// of type `lutarray<EnzoRiemannLUT<MyIntLUT>>`. The resulting code to
   /// do that might look something like:
   /// @code
-  ///      using LUT = EnzoRiemannLUT<MyInLUT>;
-  ///      enzo_float v2 = (prim[LUT::velocity_i] * prim[LUT::velocity_i] +
-  ///                       prim[LUT::velocity_j] * prim[LUT::velocity_j] +
-  ///                       prim[LUT::velocity_k] * prim[LUT::velocity_k]);
-  ///      enzo_float kinetic = 0.5 * prim[LUT::density] * v2;
+  ///      using LUT = EnzoRiemannLUT<MyIntLUT>;
+  ///      enzo_float v2 = (integ[LUT::velocity_i] * integ[LUT::velocity_i] +
+  ///                       integ[LUT::velocity_j] * integ[LUT::velocity_j] +
+  ///                       integ[LUT::velocity_k] * integ[LUT::velocity_k]);
+  ///      enzo_float kinetic = 0.5 * integ[LUT::density] * v2;
   /// @endcode
   ///
   /// @par
@@ -218,20 +218,20 @@ struct EnzoRiemannLUT{
   ///
   /// @par
   /// This final example will show the value of grouping the conserved and
-  /// specific quantities. To implement some Riemann solvers, it is useful to
-  /// have a generic, reusable function that constructs an array of all
-  /// quantities that are in the lookup table in their conserved form. The
+  /// specific integration quantities. To implement some Riemann solvers, it is
+  /// useful to have a generic, reusable function that constructs an array of
+  /// all quantities that are in the lookup table in their conserved form. The
   /// following function was used to accomplish this at one point
   /// @code
   ///      template <class LUT>
-  ///      lutarray<LUT> compute_conserved(const lutarray<LUT> prim) noexcept
+  ///      lutarray<LUT> compute_conserved(const lutarray<LUT> integr) noexcept
   ///      {
   ///        lutarray<LUT> cons;
   ///        for (std::size_t i = 0; i < LUT::specific_start; i++) {
-  ///          cons[i] = prim[i];
+  ///          cons[i] = integr[i];
   ///        }
   ///        for (std::size_t i = LUT::specific_start; i < LUT::NEQ; i++) {
-  ///          cons[i] = prim[i] * prim[LUT::density];
+  ///          cons[i] = integr[i] * integr[LUT::density];
   ///        }
   ///        return cons;
   ///      }
@@ -249,8 +249,9 @@ public:
   };
 
   /// The entry with the minimum (non-negative) index corresponding to a
-  /// specific quantity. All conserved quantity entries must have smaller
-  /// indices (defaults to -1 if not explicitly specified in InputLUT)
+  /// specific integration quantity. All conserved integration quantity entries
+  /// must have smaller indices (defaults to -1 if not explicitly specified in
+  /// InputLUT)
   static constexpr std::size_t specific_start =
     LUTIndexForward_::forward_specific_start<InputLUT>::value;
 
@@ -281,16 +282,18 @@ private:
 
 public: //associated static functions
 
-  /// returns a set of integrable quantities included in the InputLUT
-  static std::set<std::string> quantity_names() noexcept;
+  /// returns a vector of integration quantity names included in the InputLUT
+  static std::vector<std::string> integration_quantity_names() noexcept;
 
   /// returns whether the LUT has any bfields
   static constexpr bool has_bfields(){
     return (qkey::bfield_i>=0) || (qkey::bfield_j>=0) || (qkey::bfield_k>=0);
   }
 
-  /// for each quantity in FIELD_TABLE, this passes the associated passes the
-  /// associated name and index from the wrapped InputLUT to the function `fn`
+  /// for each actively advected scalar integration quantity and component of
+  /// an actively advected vector integration quantity in FIELD_TABLE, this
+  /// passes the associated name and index from the wrapped InputLUT to the
+  /// function `fn`
   ///
   /// The function should expect (std::string name, int index). In cases where
   /// quantites in FIELD_TABLE do not appear in the wrapped InputLUT, an index
@@ -299,7 +302,7 @@ public: //associated static functions
   static void for_each_entry(Function fn) noexcept;
 
   /// a function that performs a check to make sure that the InputLUT satisfies
-  /// all assumptions. If it doesn't, an error is raised
+  /// all assumptions. If it doesn't, the program aborts (with an Error message)
   static void validate() noexcept;
 };
 
@@ -338,18 +341,23 @@ void EnzoRiemannLUT<LUT>::for_each_entry(Function fn) noexcept{
 //----------------------------------------------------------------------
 
 template <class InputLUT>
-std::set<std::string> EnzoRiemannLUT<InputLUT>::quantity_names() noexcept
+std::vector<std::string> EnzoRiemannLUT<InputLUT>::integration_quantity_names()
+  noexcept
 {
-  std::set<std::string> set;
+  std::vector<std::string> vec;
 
   auto fn = [&](std::string name, int index)
     {   
       if (index < 0) {return;}
-      set.insert(EnzoCenteredFieldRegistry::get_actively_advected_quantity_name
-                 (name,true));
+      std::string quantity =
+        EnzoCenteredFieldRegistry::get_actively_advected_quantity_name(name,
+                                                                       true);
+      if (std::find(vec.begin(), vec.end(), quantity) == vec.end()){
+        vec.push_back(quantity);
+      }
     };
   EnzoRiemannLUT<InputLUT>::for_each_entry(fn);
-  return set;
+  return vec;
 }
 
 //----------------------------------------------------------------------

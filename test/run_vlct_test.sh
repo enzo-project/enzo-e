@@ -58,6 +58,16 @@ if [[ "$YT_INSTALLED" == "0" ]]; then
     exit 1
 fi
 
+if [ ! -d ./test ]; then
+    if [ -e ./test ]; then
+        echo "A FILE called test exists that is not a directory"
+        exit 1
+    fi
+    echo "There is no directory called ./test - Creating it now"
+    mkdir test
+fi
+
+
 
 # Now to run the actual tests:
 

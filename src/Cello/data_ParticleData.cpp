@@ -214,8 +214,7 @@ int ParticleData::insert_particles
     int np_this = std::min(mb-ip_start,np_left);
 
     // resize arrays for a new batch if needed
-    if ( ip_start == 0) {
-
+    if (ip_start == 0) {
       ASSERT1("ParticleData::insert_particles",
 	     "Trying to insert negative particles: ib_this = %d",
 	      ib_this, ib_this >= 0);
@@ -299,23 +298,22 @@ void ParticleData::scatter
   std::vector<int> np_array(n,0);
 
   if (mask == NULL) {
-    if (copy) {
-      for (int ip=0; ip<np; ip++) {
-        for (int k = 0; k < n; k++){
-            if (particle_array[k] != NULL) ++np_array[k];
-        }
-      }
-    } else {
-      for (int ip=0; ip<np; ip++) {
-        ++np_array[index[ip]];
-      }
+
+    ASSERT("ParticleData::scatter",
+	   "This function was called with null mask and copy = true."
+	   "This is not allowed.",!copy);
+    for (int ip=0; ip<np; ip++) {
+      ++np_array[index[ip]];
     }
   } else {
     if (copy){
       for (int ip=0; ip<np; ip++) {
         if (mask[ip]) {
           for(int k = 0; k < n; k++){
-            if (particle_array[k] != NULL)  ++np_array[k];
+
+	    // Null pointers correspond to the original block,
+	    // we don't want to copy in this case.
+            if (particle_array[k] != NULL) ++np_array[k];
           }
         }
       }
@@ -326,96 +324,115 @@ void ParticleData::scatter
     }
   }
 
-  // insert uninitialized particles
+
   std::map<ParticleData *, int>  i_array;
   std::map<ParticleData *, bool> is_first;
+  std::map<ParticleData *, bool> been_copied;
   for (int k=0; k<n; k++) {
     ParticleData * pd = particle_array[k];
     is_first[pd] = true;
     i_array[pd] = 0;
   }
 
+  // insert uninitialized particles
   for (int k=0; k<n; k++) {
     ParticleData * pd = particle_array[k];
     if (np_array[k]>0 && pd) {
-      int i0 = pd->insert_particles (particle_descr,it,np_array[k]);
-      if (is_first[pd]) i_array[pd] = i0;
-      is_first[pd] = false;
+      if (copy){
+	if (is_first[pd]){
+	  int i0 = pd->insert_particles (particle_descr,it,np_array[k]);
+	  i_array[pd] = i0;
+	  is_first[pd] = false;
+	}
+      }
+      else{
+	int i0 = pd->insert_particles (particle_descr,it,np_array[k]);
+	if (is_first[pd]) i_array[pd] = i0;
+	is_first[pd] = false;
+      }
     }
   }
-
   const bool interleaved = particle_descr->interleaved(it);
   const int na = particle_descr->num_attributes(it);
   int mp = particle_descr->particle_bytes(it);
   const int ib_src = ib;
-
-  int ia_loc = -1;
-  int dloc   = -1;
-  if (particle_descr->is_attribute(it, "is_local")) ia_loc = particle_descr->attribute_index(it,"is_local");
-  if (ia_loc >= 0) dloc = particle_descr->stride(it, ia_loc);
-  int64_t *is_local=NULL;
-  int count=0;
+  int ia_copy = -1;
+  int d_copy   = -1;
+  if (particle_descr->is_attribute(it, "is_copy")) ia_copy = particle_descr->attribute_index(it,"is_copy");
+  if (ia_copy >= 0) d_copy = particle_descr->stride(it, ia_copy);
+  int64_t *is_copy=NULL;
+  
   for (int ip_src=0; ip_src<np; ip_src++) {
 
+    if (copy){
+      for (int k = 0; k < n; k++) been_copied[particle_array[k]] = false;
+    }
+    
     if ((mask == NULL) || mask[ip_src]) {
-      ++count;
+      
+      if (copy){
+	
+	for (int k = 0; k < n; k++){
+	  ParticleData * pd = particle_array[k];
 
-        if (copy){
-          for (int k = 0; k < n; k++){
-              ParticleData * pd = particle_array[k];
+	  // Null pointer corresponds to the original block. Don't want to copy
+	  // in this case.
+	  if (pd == NULL) continue;
+	  
+	  if (!been_copied[pd]){
+	    int i_dst = i_array[pd]++;
+	    int ib_dst,ip_dst;
+	    particle_descr->index(i_dst,&ib_dst,&ip_dst);
+	    is_copy = (int64_t *) pd->attribute_array(particle_descr,it,
+						    ia_copy,ib_dst);
+	  
+	    for (int ia=0; ia<na; ia++) {
+	      if (!interleaved)
+		mp = particle_descr->attribute_bytes(it,ia);
+	      int ny = particle_descr->attribute_bytes(it,ia);
+	      char * a_src = attribute_array
+		(particle_descr,it,ia,ib_src);
+	      char * a_dst = pd->attribute_array
+		(particle_descr,it,ia,ib_dst);
+	      for (int iy=0; iy<ny; iy++) {
+		a_dst [iy + mp*ip_dst] = a_src [iy + mp*ip_src];
+	      }
+	    }
+	    
+	    // This marks the newly created particle as a copy
+	    is_copy[ip_dst*d_copy] = true;
 
-              if (pd == NULL) continue;
+	    // Ensures we don't copy particles to the same block more than once
+	    been_copied[pd] = true;
+	    
+	  } // if (!been_copied[pd])
 
-              int i_dst = i_array[pd]++;
-              int ib_dst,ip_dst;
-              particle_descr->index(i_dst,&ib_dst,&ip_dst);
-              if (ia_loc >= 0) is_local = (int64_t *) pd->attribute_array(particle_descr,it,ia_loc,ib_dst);
-
-              for (int ia=0; ia<na; ia++) {
-    	           if (!interleaved)
-    	             mp = particle_descr->attribute_bytes(it,ia);
-    	           int ny = particle_descr->attribute_bytes(it,ia);
-    	           char * a_src = attribute_array
-    	             (particle_descr,it,ia,ib_src);
-    	           char * a_dst = pd->attribute_array
-    	               (particle_descr,it,ia,ib_dst);
-    	           for (int iy=0; iy<ny; iy++) {
-    	               a_dst [iy + mp*ip_dst] = a_src [iy + mp*ip_src];
-    	           }
-              }
-
-              if (ia_loc >= 0) is_local[ip_dst*dloc] = false;
-
-          }
-
-        } else {
-          int k = index[ip_src];
-          ParticleData * pd = particle_array[k];
-          int i_dst = i_array[pd]++;
-          int ib_dst,ip_dst;
-          particle_descr->index(i_dst,&ib_dst,&ip_dst);
-          if (ia_loc >= 0) is_local = (int64_t *) pd->attribute_array(particle_descr,it,ia_loc,ib_dst);
-
-          for (int ia=0; ia<na; ia++) {
-            if (!interleaved)
-              mp = particle_descr->attribute_bytes(it,ia);
-            int ny = particle_descr->attribute_bytes(it,ia);
-            char * a_src = attribute_array
-              (particle_descr,it,ia,ib_src);
-            char * a_dst = pd->attribute_array
-              (particle_descr,it,ia,ib_dst);
-            for (int iy=0; iy<ny; iy++) {
-              a_dst [iy + mp*ip_dst] = a_src [iy + mp*ip_src];
-            }
-          }
-
-          if (ia_loc >= 0) is_local[ip_dst*dloc] = true;
-        }
-
+	  
+	} // Loop over particle array
+	
+      } else {
+	
+	int k = index[ip_src];
+	ParticleData * pd = particle_array[k];
+	int i_dst = i_array[pd]++;
+	int ib_dst,ip_dst;
+	particle_descr->index(i_dst,&ib_dst,&ip_dst);
+	
+	for (int ia=0; ia<na; ia++) {
+	  if (!interleaved)
+	    mp = particle_descr->attribute_bytes(it,ia);
+	  int ny = particle_descr->attribute_bytes(it,ia);
+	  char * a_src = attribute_array
+	    (particle_descr,it,ia,ib_src);
+	  char * a_dst = pd->attribute_array
+	    (particle_descr,it,ia,ib_dst);
+	  for (int iy=0; iy<ny; iy++) {
+	    a_dst [iy + mp*ip_dst] = a_src [iy + mp*ip_src];
+	  }
+	}
+      }
     }
   }
-
-
 }
 
 //----------------------------------------------------------------------
@@ -1158,7 +1175,7 @@ void ParticleData::resize_attribute_array_
     np = particle_descr->batch_size();
   }
 
-  long new_size = mp*(np) + (PARTICLE_ALIGN - 1) ;
+  long unsigned new_size = mp*(np) + (PARTICLE_ALIGN - 1) ;
 
   if (attribute_array_[it][ib].size() != new_size) {
 

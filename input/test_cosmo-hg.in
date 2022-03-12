@@ -11,7 +11,7 @@ Adapt { min_level = -2; }
  Solver {
      coarse {
          iter_max = 100;
-         res_tol = 0.01000000000000000;
+         res_tol = 0.1000000000000000;
          solve_type = "block";
          type = "cg";
      };
@@ -20,7 +20,7 @@ Adapt { min_level = -2; }
          iter_max = 100;
          monitor_iter = 1;
          precondition = "mg";
-         res_tol = 0.01000000000000000;
+         res_tol = 0.1000000000000000;
 #         restart_cycle = 1000;
          type = "bicgstab";
      };

@@ -78,7 +78,7 @@ public: // interface
   virtual std::string name () throw()
   { return "background_acceleration"; }
 
-  virtual double timestep (Block * block) const throw();
+  virtual double timestep (Block * block) throw();
 
   // these don't need to be virtual
   virtual void PointMass( enzo_float * ax,
@@ -103,7 +103,6 @@ public: // interface
 
 protected: // methods
 
-  //double timestep_ (Block * block) const throw();
   void compute_ (Block *block) throw();
 
 protected: // attributes

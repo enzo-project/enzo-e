@@ -17,7 +17,7 @@ class EnzoMethodPpm : public Method {
 public: // interface
 
   /// Create a new EnzoMethodPpm object
-  EnzoMethodPpm();
+  EnzoMethodPpm(bool store_fluxes_for_corrections);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodPpm);
@@ -25,7 +25,8 @@ public: // interface
   /// Charm++ PUP::able migration constructor
   EnzoMethodPpm (CkMigrateMessage *m)
     : Method (m),
-      comoving_coordinates_(false)
+      comoving_coordinates_(false),
+      store_fluxes_for_corrections_(false)
   {}
 
   /// CHARM++ Pack / Unpack function
@@ -40,11 +41,12 @@ public: // virtual methods
   { return "ppm"; }
 
   /// Compute maximum timestep for this method
-  virtual double timestep ( Block * block) const throw();
+  virtual double timestep ( Block * block) throw();
 
 protected: // interface
 
   bool comoving_coordinates_;
+  bool store_fluxes_for_corrections_;
 };
 
 #endif /* ENZO_ENZO_METHOD_PPM_HPP */

@@ -33,23 +33,23 @@ public: // functions
   OutputImage(int index,
 	      const Factory * factory,
 	      int process_count,
-	      int nx0, int ny0, int nz0,
-	      int nxb, int nyb, int nzb,
-	      int min_level, int max_level, int leaf_only,
+	      const int root_size[3],
+	      const int root_blocks[3],
+	      int min_level, int max_level,
+              int leaf_only,
 	      std::string image_type,
-	      int         image_size_x,
-	      int         image_size_y,
+	      int         image_size[2],
 	      std::string image_reduce_type,
 	      std::string image_mesh_color,
 	      std::string image_color_particle_attribute,
-	      int         image_block_size,
 	      double      image_lower[],
 	      double      image_upper[],
 	      int face_rank,
 	      int axis,
 	      bool image_log,
 	      bool image_abs,
-	      bool ghost,
+	      bool include_ghost,
+              bool use_min_max,
 	      double min_value, double max_value) throw();
 
   /// OutputImage destructor: free allocated image data
@@ -61,7 +61,6 @@ public: // functions
   /// Charm++ PUP::able migration constructor
   OutputImage (CkMigrateMessage *m)
     : Output (m),
-      map_r_(),map_g_(),map_b_(),
       image_data_(NULL),
       image_mesh_(NULL),
       op_reduce_(reduce_unknown),
@@ -70,18 +69,19 @@ public: // functions
       axis_(axis_all),
       min_value_(std::numeric_limits<double>::max()),
       max_value_(-std::numeric_limits<double>::max()),
-      nxi_(0),
-      nyi_(0),
       png_(NULL),
       image_type_(""),
       face_rank_(0),
       image_log_(false),
       image_abs_(false),
-      ghost_(false),
+      include_ghost_(false),
       min_level_(0),
       max_level_(0),
       leaf_only_(false)
   {
+    colormap_[0].clear();
+    colormap_[1].clear();
+    colormap_[2].clear();
     for (int axis=0; axis<3; axis++) {
       image_lower_[axis] = -std::numeric_limits<double>::max();
       image_upper_[axis] =  std::numeric_limits<double>::max();
@@ -92,9 +92,7 @@ public: // functions
   void pup (PUP::er &p);
 
   // Set the image colormap
-  void set_colormap
-  (int n, double * map_r, double * map_g, double * map_b)
-  throw();
+  void set_colormap (std::vector<float> colormap[3]);
 
 public: // virtual functions
 
@@ -180,9 +178,7 @@ private: // functions
 private: // attributes
 
   /// Color map
-  std::vector<double> map_r_;
-  std::vector<double> map_g_;
-  std::vector<double> map_b_;
+  std::vector<float> colormap_[3];
 
   /// Current image for data
   double * image_data_;
@@ -203,12 +199,13 @@ private: // attributes
   axis_type axis_;
 
   /// Minimum and maximum values if specified
+  bool use_min_max_;
   double min_value_;
   double max_value_;
 
-  /// Current image size (depending on axis_)
-  int nxi_, nyi_;
-
+  /// Current image size in pixels
+  int image_size_[2];
+  
   /// Current pngwriter
   pngwriter * png_;
 
@@ -225,7 +222,7 @@ private: // attributes
   int image_abs_;
 
   /// Whether to include ghost zones
-  bool ghost_;
+  bool include_ghost_;
 
   /// Maximum mesh level of Block to output
   int min_level_;

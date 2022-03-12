@@ -206,6 +206,7 @@ c
             vslice(i,j) = v(i,j,k)
             wslice(i,j) = w(i,j,k)
             if (dslice(i,j) < 0.0) then
+               ierror = ENZO_ERROR_XEULER_DSLICE
                print*, 'xeuler_sweep dslice ',i,j,k,dslice(i,j)
                if (num_ie_error .ge. 0) then
                   num_ie_error = num_ie_error + 1
@@ -213,8 +214,10 @@ c
                   ie_error_y(num_ie_error) = j
                   ie_error_z(num_ie_error) = k
                endif
+               return
             end if
             if (eslice(i,j) < 0.0) then
+               ierror = ENZO_ERROR_XEULER_ESLICE
                print*, 'xeuler_sweep eslice ',i,j,k,eslice(i,j)
                if (num_ie_error .ge. 0) then
                   num_ie_error = num_ie_error + 1
@@ -222,6 +225,7 @@ c
                   ie_error_y(num_ie_error) = j
                   ie_error_z(num_ie_error) = k
                endif
+               return
             end if
          enddo
          if (gravity .eq. 1) then
@@ -233,6 +237,7 @@ c
             do i=1, in
                geslice(i,j) = ge(i,j,k)
                if (geslice(i,j) < 0.0) then
+                  ierror = ENZO_ERROR_XEULER_GESLICE
                   if (num_ie_error .ge. 0) then
                      print*, 'xeuler_sweep geslice ',i,j,k,geslice(i,j)
                      num_ie_error = num_ie_error + 1
@@ -240,6 +245,7 @@ c
                      ie_error_y(num_ie_error) = j
                      ie_error_z(num_ie_error) = k
                   endif
+                  return
                end if
             enddo
          endif
@@ -255,7 +261,6 @@ c  Compute the pressure on a slice
 c
       
       if (idual .eq. 1) then
-         ierror = 1
          call pgas2d_dual
      &        (dslice, eslice, geslice, pslice,
      &        uslice, vslice, wslice, eta1, eta2,
@@ -312,7 +317,7 @@ c
      &     dls, drs, pls, prs, gels, gers, uls, urs,
      &     vls, vrs, wls, wrs, pbar, ubar,
      &     df, ef, uf, vf, wf, gef, ges,
-     &     ncolor, colslice, colls, colrs, colf,0)
+     &     ncolor, colslice, colls, colrs, colf,ierror)
 c
 c  Compute Eulerian fluxes and update zones-centered quantities
 c
@@ -322,12 +327,11 @@ c
      &     in, jn, is, ie, j1, j2, dt, 
      &     gamma, idiff, gravity, idual, eta1, eta2,
      &     df, ef, uf, vf, wf, gef, ges,
-     &     ncolor, colslice, colf, SmallRho)
+     &     ncolor, colslice, colf, SmallRho,ierror)
 c     
 c  If necessary, recompute the pressure to correctly set ge and e
 c
       if (idual .eq. 1) then
-         ierror = 10
          call pgas2d_dual
      &     (dslice, eslice, geslice, pslice,
      &     uslice, vslice, wslice, eta1, eta2,

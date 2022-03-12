@@ -310,7 +310,7 @@ EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
   // const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
   //                           enzo_sync_id_method_feedback);
   // refresh(ir)->add_all_fields();
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
 
@@ -320,9 +320,8 @@ EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
   // Refresh copies of all star particles on neighboring grids
   //
   const int it = particle_descr->type_index("star");
-  const bool copy = true;
-  // copy all neighboring particles of this type (default false)
-  refresh->add_particle(it, copy);
+  refresh->add_particle(it);
+  refresh->set_particles_are_copied(true);
 
   FieldDescr * field_descr = cello::field_descr();
 
@@ -774,7 +773,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
 #ifdef DEBUG_FEEDBACK
     CkPrintf("DistributedFeedback (%s) ------------1------------ Number of local / total particles : %i %i\n",enzo_block->name().c_str(),particle.num_local_particles(it), particle.num_particles(it));
 #endif
-    int delete_count = enzo_block->delete_particle_copies_(it);
+    int delete_count = enzo_block->delete_non_local_particles_(it);
     cello::simulation()->data_delete_particles(delete_count);
 #ifdef DEBUG_FEEDBACK
     CkPrintf("DistributedFeedback (%s) ------------2------------ Number of local / total particles : %i %i\n",enzo_block->name().c_str(),particle.num_local_particles(it), particle.num_particles(it));
@@ -1534,7 +1533,7 @@ void EnzoMethodDistributedFeedback::compute_coefficients(
   return;
 }
 
-double EnzoMethodDistributedFeedback::timestep (Block * block) const throw()
+double EnzoMethodDistributedFeedback::timestep (Block * block) throw()
 {
   // In general this is not needed, but could imagine putting timestep
   // limiters in situations where, for example, one would want

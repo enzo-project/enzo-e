@@ -12,30 +12,44 @@
 
 //----------------------------------------------------------------------
 
-EnzoRiemann* EnzoRiemann::construct_riemann
-(std::vector<std::string> integrable_quantities, std::string solver)
+EnzoRiemann* EnzoRiemann::construct_riemann(const std::string& solver, const bool mhd,
+                                            const bool internal_energy)
 {
   // determine the type of solver to construct:
   // convert string to lower case (https://stackoverflow.com/a/313990)
   std::string formatted(solver.size(), ' ');
   std::transform(solver.begin(), solver.end(), formatted.begin(),
 		 ::tolower);
-  EnzoRiemann* out;
+  EnzoRiemann* out = nullptr; // set to NULL to suppress compiler warnings
 
-  // Eventually we may want to check for non-MHD Riemann solvers
-  if (formatted == std::string("hll")){
-    out = new EnzoRiemannHLLMHD(integrable_quantities);
-  } else if (formatted == std::string("hlle")){
-    out = new EnzoRiemannHLLEMHD(integrable_quantities);
+  if (formatted == "hll"){
+    ASSERT("EnzoRiemann::construct_riemann",
+           ("An \"HLL\" Riemann solver without magnetic fields isn't "
+            "currently supported."), mhd);
+    out = new EnzoRiemannHLLMHD(internal_energy);
+
+  } else if (formatted == "hlle"){
+    if (mhd){
+      out = new EnzoRiemannHLLEMHD(internal_energy);
+    } else {
+      ERROR("EnzoRiemann::construct_riemann",
+            "The \"HLLE\" Riemann solver without magnetic fields is untested");
+      out = new EnzoRiemannHLLE(internal_energy);
+    }
+
   } else if (formatted == std::string("hllc")){
-    out = new EnzoRiemannHLLC(integrable_quantities);
+    ASSERT("EnzoRiemann::construct_riemann",
+           "The \"HLLC\" Riemann Solver can't support mhd", !mhd);
+    out = new EnzoRiemannHLLC(internal_energy);
+
   } else if (formatted == std::string("hlld")){
-    // could possibly check that MHD fields are included
-    out = new EnzoRiemannHLLD(integrable_quantities);
+    ASSERT("EnzoRiemann::construct_riemann",
+           "The \"HLLD\" Riemann Solver requires magnetic fields", mhd);
+    out = new EnzoRiemannHLLD(internal_energy);
+
   } else {
     ERROR("EnzoRiemann::construct_riemann",
 	  "The only known solvers are HLL, HLLE, HLLC, & HLLD");
-    out = NULL;  // Deals with compiler warning
   }
 
   return out;

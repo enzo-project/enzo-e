@@ -85,10 +85,8 @@ enum enzo_sync_id {
   enzo_sync_id_solver_bicgstab_precon_2,
   enzo_sync_id_solver_bicgstab_loop_25,
   enzo_sync_id_solver_bicgstab_loop_85,
-  enzo_sync_id_solver_cg,
-  enzo_sync_id_solver_cg_loop_0a,
-  enzo_sync_id_solver_cg_loop_0b,
-  enzo_sync_id_solver_cg_loop_2a,
+  enzo_sync_id_solver_cg_matvec,
+  enzo_sync_id_solver_cg_loop_2,
   enzo_sync_id_solver_dd,
   enzo_sync_id_solver_dd_coarse,
   enzo_sync_id_solver_dd_domain,
@@ -117,7 +115,8 @@ enum return_enum {
   return_unknown,
   return_converged,
   return_diverged,
-  return_error
+  return_error,
+  return_bypass
 };
 
 //----------------------------------------------------------------------
@@ -188,8 +187,9 @@ extern "C" {
 #include "enzo_EnzoInitialCosmology.hpp"
 #include "enzo_EnzoInitialFeedbackTest.hpp"
 #include "enzo_EnzoInitialGrackleTest.hpp"
-#include "enzo_EnzoInitialInclinedWave.hpp"
+#include "enzo_EnzoInitialHdf5.hpp"
 #include "enzo_EnzoInitialImplosion2.hpp"
+#include "enzo_EnzoInitialInclinedWave.hpp"
 #include "enzo_EnzoInitialMusic.hpp"
 #include "enzo_EnzoInitialPm.hpp"
 #include "enzo_EnzoInitialPpmlTest.hpp"
@@ -201,6 +201,7 @@ extern "C" {
 #include "enzo_EnzoInitialTurbulence.hpp"
 #include "enzo_EnzoInitialIsolatedGalaxy.hpp"
 #include "enzo_EnzoInitialBurkertBodenheimer.hpp"
+#include "enzo_EnzoInitialMergeStarsTest.hpp"
 
 #include "enzo_EnzoRefineShock.hpp"
 #include "enzo_EnzoRefineParticleMass.hpp"
@@ -210,7 +211,7 @@ extern "C" {
 #include "enzo_EnzoLazyPassiveScalarFieldList.hpp"
 #include "enzo_EnzoEquationOfState.hpp"
 #include "enzo_EnzoEOSIdeal.hpp"
-#include "enzo_EnzoIntegrableUpdate.hpp"
+#include "enzo_EnzoIntegrationQuanUpdate.hpp"
 #include "enzo_EnzoReconstructor.hpp"
 #include "enzo_EnzoReconstructorNN.hpp"
 #include "enzo_EnzoReconstructorPLM.hpp"
@@ -225,7 +226,6 @@ extern "C" {
 #include "enzo_EnzoBfieldMethodCT.hpp"
 #include "enzo_EnzoSourceInternalEnergy.hpp"
 
-#include "enzo_EnzoMethodCheckGravity.hpp"
 #include "enzo_EnzoMethodComovingExpansion.hpp"
 #include "enzo_EnzoMethodCosmology.hpp"
 #include "enzo_EnzoMethodFeedback.hpp"
@@ -242,6 +242,7 @@ extern "C" {
 #include "enzo_EnzoMethodStarMaker.hpp"
 #include "enzo_EnzoMethodStarMakerStochasticSF.hpp"
 #include "enzo_EnzoMethodMHDVlct.hpp"
+#include "enzo_EnzoMethodMergeStars.hpp"
 
 #include "enzo_EnzoMatrixDiagonal.hpp"
 #include "enzo_EnzoMatrixIdentity.hpp"

@@ -29,9 +29,6 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("FaceFluxes");
 
-  const int num_normal=2;
-  const int normal[] = {+1,-1};
-
   const int num_level = 3;
   const int level_1[] = {1,2,3};
   const int level_2[] = {1,3,2};
@@ -74,14 +71,12 @@ PARALLEL_MAIN_BEGIN
           h3_1[1] = (rank >= 2) ? test.cell_width[1] : 0;
           h3_1[2] = (rank >= 3) ? test.cell_width[2] : 0;
           double h3_2[3] = {h3_1[0],h3_1[1],h3_1[2]};
-          const double dt1 =  test.time_step_1;
-          double dt2 =  test.time_step_2;
           const int cx = test.child[0];
           const int cy = (rank >= 2) ? test.child[1] : 0;
           const int cz = (rank >= 3) ? test.child[2] : 0;
 
-          if (L_1 < L_2) { h3_2[0]*=0.5; h3_2[1]*=0.5; h3_2[2]*=0.5; dt2*=0.5;}
-          if (L_1 > L_2) { h3_2[0]*=2.0; h3_2[1]*=2.0; h3_2[2]*=2.0; dt2*=2.0;}
+          if (L_1 < L_2) { h3_2[0]*=0.5; h3_2[1]*=0.5; h3_2[2]*=0.5;}
+          if (L_1 > L_2) { h3_2[0]*=2.0; h3_2[1]*=2.0; h3_2[2]*=2.0;}
           int fx = iaxis==0 ? iface*2-1 : 0;
           int fy = iaxis==1 ? iface*2-1 : 0;
           int fz = iaxis==2 ? iface*2-1 : 0;
@@ -152,12 +147,12 @@ PARALLEL_MAIN_BEGIN
 
           unit_func ("allocate()");
 
-          unit_assert(face_fluxes_1->flux_array().size() == 0);
-          unit_assert(face_fluxes_2->flux_array().size() == 0);
-          face_fluxes_1->allocate();
-          face_fluxes_2->allocate();
-          unit_assert(face_fluxes_1->flux_array().size() == mx*my*mz);
-          unit_assert(face_fluxes_2->flux_array().size() == mx*my*mz);
+          unit_assert(face_fluxes_1->flux_array() == nullptr);
+          unit_assert(face_fluxes_2->flux_array() == nullptr);
+          face_fluxes_1->allocate_storage();
+          face_fluxes_2->allocate_storage();
+          unit_assert(face_fluxes_1->get_size() == mx*my*mz);
+          unit_assert(face_fluxes_2->get_size() == mx*my*mz);
 
           unit_func("set_flux_array()"); 
 
@@ -191,11 +186,9 @@ PARALLEL_MAIN_BEGIN
 
 
           int dx1,dy1,dz1;
-          auto fluxes_1 = face_fluxes_1->flux_array(&dx1,&dy1,&dz1);
+          cello_float * fluxes_1 = face_fluxes_1->flux_array(&dx1,&dy1,&dz1);
           int dx2,dy2,dz2;
-          auto fluxes_2 = face_fluxes_2->flux_array(&dx2,&dy2,&dz2);
-          unit_assert (fluxes_1.size() == mx*my*mz);
-          unit_assert (fluxes_2.size() == mx*my*mz);
+          cello_float * fluxes_2 = face_fluxes_2->flux_array(&dx2,&dy2,&dz2);
 
           unit_func ("flux_array()");
           bool match_1 = true, match_2=true;
@@ -270,7 +263,7 @@ PARALLEL_MAIN_BEGIN
           {
             unit_func("operator  *=()");
 
-            auto & fluxes_1 = face_fluxes_1->flux_array(&dx1,&dy1,&dz1);
+            cello_float * fluxes_1 = face_fluxes_1->flux_array(&dx1,&dy1,&dz1);
             int mx1,my1,mz1;
             face_fluxes_1->get_size (&mx1,&my1,&mz1);
   
@@ -307,8 +300,8 @@ PARALLEL_MAIN_BEGIN
 
           {
 
-            auto & fluxes_1 = face_fluxes_1->flux_array(&dx1,&dy1,&dz1);
-            auto & fluxes_2 = face_fluxes_2->flux_array(&dx2,&dy2,&dz2);
+            cello_float * fluxes_1 = face_fluxes_1->flux_array(&dx1,&dy1,&dz1);
+            cello_float * fluxes_2 = face_fluxes_2->flux_array(&dx2,&dy2,&dz2);
 
             int mx1,my1,mz1;
             int mx2,my2,mz2;
@@ -389,7 +382,7 @@ PARALLEL_MAIN_BEGIN
 
             {
               double sum_abs = 0.0;
-              auto & fluxes_1 = face_fluxes_1->flux_array(&dx1,&dy1,&dz1);
+              cello_float * fluxes_1 = face_fluxes_1->flux_array(&dx1,&dy1,&dz1);
               for (int iz=0; iz<mz1; iz++) {
                 for (int iy=0; iy<my1; iy++) {
                   for (int ix=0; ix<mx1; ix++) {
@@ -405,7 +398,7 @@ PARALLEL_MAIN_BEGIN
       
             {
               double sum_abs = 0.0;
-              auto & fluxes_1 = face_fluxes_1->flux_array(&dx1,&dy1,&dz1);
+              cello_float * fluxes_1 = face_fluxes_1->flux_array(&dx1,&dy1,&dz1);
               for (int iz=0; iz<mz1; iz++) {
                 for (int iy=0; iy<my1; iy++) {
                   for (int ix=0; ix<mx1; ix++) {
@@ -419,7 +412,7 @@ PARALLEL_MAIN_BEGIN
 
             {
               double sum_abs = 0;
-              auto & fluxes_2 = face_fluxes_2->flux_array(&dx2,&dy2,&dz2);
+              cello_float * fluxes_2 = face_fluxes_2->flux_array(&dx2,&dy2,&dz2);
               for (int iz=0; iz<mz2; iz++) {
                 for (int iy=0; iy<my2; iy++) {
                   for (int ix=0; ix<mx2; ix++) {
@@ -433,7 +426,7 @@ PARALLEL_MAIN_BEGIN
             face_fluxes_2->clear();
             {
               double sum_abs = 0;
-              auto & fluxes_2 = face_fluxes_2->flux_array(&dx2,&dy2,&dz2);
+              cello_float * fluxes_2 = face_fluxes_2->flux_array(&dx2,&dy2,&dz2);
               for (int iz=0; iz<mz2; iz++) {
                 for (int iy=0; iy<my2; iy++) {
                   for (int ix=0; ix<mx2; ix++) {
@@ -449,11 +442,11 @@ PARALLEL_MAIN_BEGIN
     
           unit_func("deallocate()");
 
-          face_fluxes_1->deallocate();
-          face_fluxes_2->deallocate();
+          face_fluxes_1->deallocate_storage();
+          face_fluxes_2->deallocate_storage();
 
-          unit_assert (face_fluxes_1->flux_array().size() == 0);
-          unit_assert (face_fluxes_2->flux_array().size() == 0);
+          unit_assert (face_fluxes_1->flux_array() == nullptr);
+          unit_assert (face_fluxes_2->flux_array() == nullptr);
 
           delete face_fluxes_1;
           delete face_fluxes_2;

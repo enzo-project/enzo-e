@@ -64,7 +64,6 @@ c  locals
 c
       INTG_PREC i, j, im1, ip1
       R_PREC    demax, ge1, ge2, ke
-      INTG_PREC icall
 c
 c\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////
 c=======================================================================
@@ -76,9 +75,6 @@ C      print*, 'DEBUG_PRESSURE j1 j2 ',j1,j2
 C      print*, 'DEBUG_PRESSURE idim jdim ',idim,jdim
 C      print*, 'DEBUG_PRESSURE eta ',eta1,eta2
 C     print*, 'DEBUG_PRESSURE pmin ',pmin
-      icall = ierror
-      ierror = 0
-
       do j=j1,j2
          do i=i1,i2
 c
@@ -101,10 +97,10 @@ c             is > eta2 then use the gas energy computed from the total energy
 c             to update the specific energy (total energy is better).
 c
             if (geslice(i,j) .le. 0._RKIND) write(6,*) 
-     &            'pga:',icall,i,j,geslice(i,j),demax
+     &            'pga:',ierror,i,j,geslice(i,j),demax
             if (ge1*dslice(i,j)/demax .gt. eta2) geslice(i,j) = ge1
             if (geslice(i,j) .le. 0._RKIND) write(6,*) 
-     &           'pgb:',icall,i,j,
+     &           'pgb:',ierror,i,j,
      &           geslice(i,j),dslice(i,j),demax,eslice(i,j)
             if (geslice(i,j) .le. 0._RKIND) 
      &           ierror = ERROR_PGAS2D_DUAL_GE_LT_0

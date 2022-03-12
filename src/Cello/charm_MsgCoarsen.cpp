@@ -218,7 +218,6 @@ void MsgCoarsen::update (Data * data)
 
   if (data_msg_ == NULL) return;
 
-  Simulation * simulation  = cello::simulation();
   FieldDescr * field_descr = cello::field_descr();
  
   Field field_dst = data->field();
@@ -255,7 +254,6 @@ void MsgCoarsen::update (Data * data)
       delete ff;
 
     } else { // ! is_local_
-
 
       // Invert face since incoming not outgoing
 

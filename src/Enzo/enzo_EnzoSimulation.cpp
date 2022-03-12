@@ -49,7 +49,8 @@ EnzoSimulation::EnzoSimulation
                        thisProxy);
 #ifdef TRACE_CONTRIBUTE  
   CkPrintf ("%s:%d DEBUG_CONTRIBUTE\n",__FILE__,__LINE__); fflush(stdout);
-#endif  
+#endif
+
   contribute(callback);
 
 }

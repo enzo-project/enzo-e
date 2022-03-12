@@ -12,19 +12,21 @@ class EnzoSolverJacobi : public Solver {
 
   /// @class    EnzoSolverJacobi
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] 
+  /// @brief    [\ref Enzo]
 
 public: // interface
 
   /// Constructor
   EnzoSolverJacobi(std::string name,
-		   std::string field_x,
-		   std::string field_b,
-		   int monitor_iter,
-		   int restart_cycle,
-		   int solve_type,
-		   double weight=1.0,
-		   int iter_max = 1) throw();
+                   std::string field_x,
+                   std::string field_b,
+                   int monitor_iter,
+                   int restart_cycle,
+                   int solve_type,
+                   int index_prolong,
+                   int index_restrict,
+                   double weight=1.0,
+                   int iter_max = 1) throw();
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoSolverJacobi);
@@ -43,7 +45,7 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
-  { 
+  {
     TRACEPUP;
     Solver::pup(p);
 
@@ -65,9 +67,9 @@ public: // virtual methods
   virtual std::string type() const { return "jacobi"; }
 
   bool is_finest(Block * block) {return is_finest_(block); }
-  
+
 protected: // virtual methods
-  
+
   /// Whether Block is active
   virtual bool is_active_(Block * block) const
   {
@@ -87,15 +89,15 @@ protected: // virtual methods
       return Solver::is_finest_(block);
     }
   }
-  
+
 public: // methods
 
   /// Continue after refresh to perform Jacobi update
   void compute (Block * block);
-  
+
 protected: // methods
 
-  /// Implementation of solver() for given precision 
+  /// Implementation of solver() for given precision
   void apply_(Block * block);
 
   /// Refresh after computing
@@ -128,7 +130,7 @@ protected: // attributes
 
   /// Matrix A for smoothing A*X = B
   std::shared_ptr<Matrix> A_;
-  
+
   /// Field index for residual R
   int ir_;
 
@@ -140,7 +142,7 @@ protected: // attributes
 
   /// Scalar index for current iteration on a Block
   int i_iter_;
-  
+
   /// Number of iterations
   int n_;
 

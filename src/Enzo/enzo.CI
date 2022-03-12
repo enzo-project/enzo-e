@@ -51,6 +51,7 @@ module enzo {
   PUPable EnzoInitialCloud;
   PUPable EnzoInitialCollapse;
   PUPable EnzoInitialCosmology;
+  PUPable EnzoInitialHdf5;
   PUPable EnzoInitialFeedbackTest;
   PUPable EnzoInitialInclinedWave;
   PUPable EnzoInitialImplosion2;
@@ -65,6 +66,9 @@ module enzo {
   PUPable EnzoInitialSoup;
   PUPable EnzoInitialTurbulence;
   PUPable EnzoInitialIsolatedGalaxy;
+  PUPable EnzoInitialMergeStarsTest;
+
+  PUPable IoEnzoBlock;
 
   PUPable EnzoRefineShock;
   PUPable EnzoRefineParticleMass;
@@ -78,28 +82,26 @@ module enzo {
   PUPable EnzoMatrixLaplace;
   PUPable EnzoMatrixDiagonal;
   PUPable EnzoMatrixIdentity;
-  PUPable IoEnzoBlock;
 
   PUPable EnzoMethodBackgroundAcceleration;
   PUPable EnzoMethodFeedback;
   PUPable EnzoMethodDistributedFeedback;
 
-  PUPable EnzoMethodCheckGravity;
   PUPable EnzoMethodComovingExpansion;
   PUPable EnzoMethodCosmology;
   PUPable EnzoMethodGravity;
 
   PUPable EnzoMethodHeat;
-  PUPable EnzoMethodHydro;
   PUPable EnzoMethodPmDeposit;
   PUPable EnzoMethodPmUpdate;
   PUPable EnzoMethodPpm;
   PUPable EnzoMethodPpml;
   PUPable EnzoMethodTurbulence;
   PUPable EnzoMethodMHDVlct;
+  PUPable EnzoMethodMergeStars;
 
   PUPable EnzoEOSIdeal;
-  PUPable EnzoIntegrableUpdate;
+  PUPable EnzoIntegrationQuanUpdate;
   PUPable EnzoReconstructorNN;
   // EnzoReconstructorPLMEnzoRKLim
   PUPable EnzoReconstructorPLM<PLM_EnzoRKLimiter>;
@@ -160,7 +162,9 @@ module enzo {
     entry void p_set_msg_refine (MsgRefine * msg);
 
     // EnzoMethodTurbulence synchronization entry methods
-    entry void p_method_turbulence_end(CkReductionMsg *msg);
+    entry void r_method_turbulence_end(CkReductionMsg *msg);
+
+    entry void p_initial_hdf5_recv(MsgInitial * msg_initial);
 
     // EnzoMethodGravity synchronization entry methods
     entry void p_method_gravity_continue();

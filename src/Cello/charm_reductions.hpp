@@ -14,26 +14,6 @@ extern CkReductionMsg * sum_long_double_3(int n, CkReductionMsg ** msgs);
 extern CkReduction::reducerType sum_long_double_3_type;
 extern void register_sum_long_double_3(void);
 
-extern CkReductionMsg * sum_long_double_4(int n, CkReductionMsg ** msgs);
-extern CkReduction::reducerType sum_long_double_4_type;
-extern void register_sum_long_double_4(void);
-
-extern CkReductionMsg * sum_long_double_5(int n, CkReductionMsg ** msgs);
-extern CkReduction::reducerType sum_long_double_5_type;
-extern void register_sum_long_double_5(void);
-
-extern CkReductionMsg * sum_long_double_6(int n, CkReductionMsg ** msgs);
-extern CkReduction::reducerType sum_long_double_6_type;
-extern void register_sum_long_double_6(void);
-
-extern CkReductionMsg * sum_long_double_7(int n, CkReductionMsg ** msgs);
-extern CkReduction::reducerType sum_long_double_7_type;
-extern void register_sum_long_double_7(void);
-
-extern CkReductionMsg * sum_long_double_8(int n, CkReductionMsg ** msgs);
-extern CkReduction::reducerType sum_long_double_8_type;
-extern void register_sum_long_double_8(void);
-
 extern CkReductionMsg * sum_long_double_n(int n, CkReductionMsg ** msgs);
 extern CkReduction::reducerType sum_long_double_n_type;
 extern void register_sum_long_double_n(void);

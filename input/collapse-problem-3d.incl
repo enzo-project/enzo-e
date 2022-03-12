@@ -50,7 +50,7 @@ Method {
             "is_local", "default"
             ];
          constants = [ "mass", "default", 10.00000000000000 ];
-         groups = [ "has_mass" ];
+         group_list = [ "has_mass" ];
          position = [ "x", "y", "z" ];
          velocity = [ "vx", "vy", "vz" ];
      }

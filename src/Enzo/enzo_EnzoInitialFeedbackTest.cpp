@@ -5,6 +5,8 @@
 /// @date
 /// @brief    [\ref Enzo] Initialization routine for Feedback test problem
 
+#include <fstream>
+
 #include "cello.hpp"
 #include "enzo.hpp"
 
@@ -73,13 +75,18 @@ void EnzoInitialFeedbackTest::pup (PUP::er &p)
   return;
 }
 
+//----------------------------------------------------------------------
+
 void EnzoInitialFeedbackTest::enforce_block
 ( Block * block, const Hierarchy * hierarchy) throw()
 {
 
   ASSERT("EnzoInitialFeedbackTest","Block does not exist", block != NULL);
 
-  if( !(block->is_leaf())) return;
+  if( !(block->is_leaf())) {
+    block->initial_done();
+    return;
+  }
 
   EnzoBlock * enzo_block = enzo::block(block);
   const EnzoConfig * enzo_config = enzo::config();
@@ -246,8 +253,7 @@ void EnzoInitialFeedbackTest::enforce_block
     }
   }
 
-
-
+  block->initial_done();
 
   return;
 }

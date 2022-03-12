@@ -1,9 +1,10 @@
+# Checks how well flux corrections conserve quantities when using PPM solver.
 # To be used when Enzo-E is compiled with CELLO_PREC=single
 
 include "input/FluxCorrect/inclined_contact_ppm.incl"
 include "input/FluxCorrect/smr.incl"
 
- Method {
+Method {
      flux_correct {
          # Specify the minimum expected conserved digits for various fields
          # (for testing purposes). These expected min_digits values are set to

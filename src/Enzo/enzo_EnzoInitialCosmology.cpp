@@ -26,7 +26,6 @@ EnzoInitialCosmology::EnzoInitialCosmology
 void EnzoInitialCosmology::enforce_block
 ( Block * block, const Hierarchy * hierarchy ) throw()
 {
-
   EnzoUnits * units = enzo::units();
 
   // "If temperature is left unset, set it assuming that T=550 K at z=200"
@@ -72,5 +71,6 @@ void EnzoInitialCosmology::enforce_block
     }
   }
 
+  block->initial_done();
   
 }
