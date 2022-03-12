@@ -8,6 +8,11 @@ import yt
 from l1_error_norm import StoreCommaListAction
 from test_report import create_test_report, create_dummy_report
 
+if 'enzo_p' in yt.frontends.__dict__.keys():
+    _ENZOE_FLUID_TYPE = 'enzop' # for older versions of yt
+else:
+    _ENZOE_FLUID_TYPE = 'enzoe'
+
 _TABLE_DTYPE_ARGS = [
     ('name',  object),
     ('min', 'f8'),
@@ -19,7 +24,7 @@ _TABLE_DTYPE_ARGS = [
     ('max_yloc', 'f8'),
     ('max_zloc', 'f8'),
     ('mean', 'f8'),
-    ('variance', 'f8')
+    ('standard_deviation', 'f8')
 ]
 
 _FIXED_COL_UNITS = dict((col, 'code_length') for col,_ in _TABLE_DTYPE_ARGS \
@@ -29,7 +34,7 @@ _FIXED_COL_UNITS = dict((col, 'code_length') for col,_ in _TABLE_DTYPE_ARGS \
 _QUANTITY_ENTRY_SETS = [
     ('min_location', ('min', 'min_xloc', 'min_yloc', 'min_zloc'), {}),
     ('max_location', ('max', 'max_xloc', 'max_yloc', 'max_zloc'), {}),
-    ('weighted_variance', ('variance', 'mean'),
+    ('weighted_standard_deviation', ('standard_deviation', 'mean'),
      {'weight' : ("gas", "cell_volume")}),
 ]
 
@@ -54,17 +59,11 @@ def _get_sim_props(ds, field_names):
         code_unit_defs[unit] = [float(converted.v), str(converted.units)]
 
     # determine the default units of each field
-    fluid_type = None
-    for elem in ds.fluid_types:
-        if elem in ['enzoe','enzop']:
-            assert fluid_type is None
-            fluid_type = elem
-    assert fluid_type is not None
 
     ds.field_list # this is necessary for initializing ds.field_info
     field_units = {}
     for field in field_names:
-        dflt_units = ds.field_info[(fluid_type,field)].units
+        dflt_units = ds.field_info[_ENZOE_FLUID_TYPE,field].units
         # it may not be necessary to complete the following line
         converted = str(ds.quan(1.0, dflt_units).in_base('code').units)
         field_units[field] = converted
@@ -88,9 +87,16 @@ def measure_field_summary(target_path, field_names):
             assert colname not in computed_cols # sanity check
             computed_cols.add(colname)
 
+        if ((derived_quantity == 'weighted_standard_deviation') and
+            (not hasattr(ad.quantities, derived_quantity))):
+            # in older versions of yt, this quantity was mis-named (it still
+            # computes that weighted standard deviation)
+            derived_quantity = 'weighted_variance'
+
         func = getattr(ad.quantities,derived_quantity)
         for row_ind, field_name in enumerate(field_names):
-            rslt = func(field_name, **kwargs)
+            full_field_name = (_ENZOE_FLUID_TYPE, field_name)
+            rslt = func(full_field_name, **kwargs)
             for i,val in enumerate(rslt):
                 colname = colnames[i]
                 if colnames in _FIXED_COL_UNITS:
@@ -336,25 +342,3 @@ if __name__ == '__main__':
     args = parser.parse_args()
     main_func = args.func
     main_func(args)
-    
-    """
-    #print(colnames)
-    old_field_table = measure_field_summary(
-        './GRACKLE_TEST_000/GRACKLE_TEST_000.block_list', field_names
-    )
-
-    print("Constructing Field Summary Table:")
-    field_table = measure_field_summary(
-        './GRACKLE_TEST_010/GRACKLE_TEST_010.block_list', field_names
-    )
-    print(old_field_table == field_table)
-    #print(field_table)
-    #print(field_table['min','max'])
-
-    print("Comparing Field Summary Table:")
-
-    with create_test_report('my_report.unit', clobber = True) as tr:
-        test_rslt = test_equivalent_field_tables(old_field_table,field_table,
-                                                 atol = 1e-15, rtol = 1e-14,
-                                                 test_report = tr)
-    """

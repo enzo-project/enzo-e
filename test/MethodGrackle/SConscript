@@ -34,13 +34,13 @@ if grackle_data_dir != '' and use_grackle:
     _script_path = os.path.abspath(
         os.path.join(os.getcwd(), '../../tools/gen_grackle_testing_file.py')
     )
-    _cmd_template = ("python {_script_path} $SOURCE "
-                     "-d {grackle_data_dir}/CloudyData_UVB=HM2012_shielded.h5 "
-                     "--use-abs-paths -o $TARGET")
-    make_grackle_input = Builder(
-       action = _cmd_template.format(_script_path = _script_path,
-                                     grackle_data_dir = grackle_data_dir)
-    )
+    _cmd = (
+        "python {_script_path} $SOURCE "
+        "       -d {grackle_data_dir}/CloudyData_UVB=HM2012_shielded.h5 "
+        "       --use-abs-paths "
+        "       -o $TARGET"
+    ).format(_script_path = _script_path, grackle_data_dir = grackle_data_dir)
+    make_grackle_input = Builder(action = _cmd)
 
 
     # now prepare the builder that executes tools/field_summary.py (the script
@@ -48,10 +48,18 @@ if grackle_data_dir != '' and use_grackle:
     _script_path = os.path.abspath(
         os.path.join(os.getcwd(), '../../tools/field_summary.py')
     )
-    _cmd = ("python {_script_path} cmp $SOURCE --ref $REF_TABLE "
-            "--report $TARGET --rtol $RTOL --atol $ATOL "
-            "> $LOG_FILE").format(_script_path = _script_path)
-    compare_field_summary = Builder(action = _cmd)
+    _cmd = (
+        "rm --force $TARGET; "
+        "python {_script_path} cmp $SOURCE "
+        "       --ref $REF_TABLE "
+        "       --report $TARGET "
+        "       --rtol $RTOL --atol $ATOL "
+        "       > $LOG_FILE"
+    ).format(_script_path = _script_path)
+
+    compare_field_summary = Builder(
+        action = _cmd + "; awk '{ print \"    \", $0 }' $TARGET"
+    )
 
     # now add these builders to the environment and clone the environment
     env.Append(BUILDERS = {'MakeGrackleInput' : make_grackle_input,
