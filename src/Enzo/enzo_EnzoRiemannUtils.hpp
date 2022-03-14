@@ -210,8 +210,14 @@ namespace enzo_riemann_utils{
   inline std::string parse_mem_name_(std::string member_name,
                                      EnzoPermutedCoordinates coord)
   {
-    char component = EnzoCenteredFieldRegistry::try_get_vector_component
-      (member_name, true);
+    char component;
+
+    // this helper function is ONLY invoked in cases where we know member_name
+    // is guaranteed to correspond to an actively advected quantity (so we
+    // don't need to check the return value of the following function)
+    EnzoCenteredFieldRegistry::get_actively_advected_quantity_name
+      (member_name, true, &component);
+
     // return immediately, if not a vector component
     if (component == '\0') { return member_name; }
 

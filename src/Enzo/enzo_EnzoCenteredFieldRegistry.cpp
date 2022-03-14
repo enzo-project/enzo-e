@@ -68,8 +68,40 @@ bool EnzoCenteredFieldRegistry::quantity_properties
 
 //----------------------------------------------------------------------
 
+namespace{
+  /// Identifies the vector component (if any) associated with a name.
+  ///
+  /// For all names consisting of 3 or more characters, this checks whether the
+  /// last 2-characters in the string match a list of known suffixes (the
+  /// list's contents depend on the `ijk_suffix` parameter). Upon success, this
+  /// returns the character corresponding to the suffix. In all other cases,
+  /// this returns the null character, `'\0'`.
+  ///
+  /// @param name The name that will be checked
+  /// @param ijk_suffix When true, the suffixes are `{'_i', '_j', '_k'}`, and
+  ///     the function returns `'i'`, `'j'`, or `'k'` upon a successful match.
+  ///     Otherwise, the suffixes are `{'_x', '_y', '_z'}`, and the function
+  ///     returns `'x'`, `'y'`, or `'z'` upon a successful match.
+  char try_get_vector_component(const std::string& name,
+                                bool ijk_suffix) noexcept
+  {
+    const std::array<char,3> ref = {ijk_suffix ? 'i' : 'x',
+                                    ijk_suffix ? 'j' : 'y',
+                                    ijk_suffix ? 'k' : 'z'};
+    std::size_t len = name.length();
+    if ((len >= 3) && (name[len - 2] == '_')){
+        if (std::find(ref.begin(), ref.end(), name[len - 1]) != ref.end()){
+            return name[len - 1];
+        }
+    }
+    return '\0';
+  }
+}
+
+//----------------------------------------------------------------------
+
 std::string EnzoCenteredFieldRegistry::get_actively_advected_quantity_name
-(std::string name, bool ijk_suffix) noexcept
+(const std::string& name, bool ijk_suffix, char* vec_component_rslt) noexcept
 {
 
   // check if name matches the name of a scalar quantity)
@@ -78,20 +110,30 @@ std::string EnzoCenteredFieldRegistry::get_actively_advected_quantity_name
     FieldCat category;
     bool success = EnzoCenteredFieldRegistry::quantity_properties
       (name, &is_vector, &category, &actively_advected);
-    if (success && (!is_vector) && actively_advected) {return name;}
+
+    if (success && (!is_vector) && actively_advected) {
+      if (vec_component_rslt != nullptr) { *vec_component_rslt = '\0'; }
+      return name;
+    }
   }
 
   // next, check if name corresponds to a component of a vector quantity
-  if (try_get_vector_component(name, ijk_suffix) != '\0'){
+  const char vec_comp =  try_get_vector_component(name, ijk_suffix);
+  if (vec_comp != '\0'){
     std::string candidate = name.substr(0, name.length()-2);
 
     bool is_vector, actively_advected;
     FieldCat category;
     bool success = EnzoCenteredFieldRegistry::quantity_properties
       (candidate, &is_vector, &category, &actively_advected);
-    if (success && is_vector && actively_advected) {return candidate;}
+
+    if (success && is_vector && actively_advected) {
+      if (vec_component_rslt != nullptr) { *vec_component_rslt = vec_comp; }
+      return candidate;
+    }
   }
 
   // return empty string to indicate failure
+  if (vec_component_rslt != nullptr) { *vec_component_rslt = '\0'; }
   return "";
 }
