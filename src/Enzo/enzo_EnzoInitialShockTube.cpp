@@ -175,6 +175,19 @@ void setup_maps_(const std::map<std::string, enzo_float> &ref_map,
 
 //----------------------------------------------------------------------
 
+static inline void assign_uniform_value_(EFlt3DArray arr,
+                                         enzo_float val){
+  for (int iz=0; iz<arr.shape(0); iz++) {
+    for (int iy=0; iy<arr.shape(1); iy++) {
+      for (int ix=0; ix<arr.shape(2); ix++) {
+        arr(iz,iy,ix) = val;
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
 void EnzoInitialShockTube::enforce_block 
 ( Block * block, const Hierarchy  * hierarchy ) throw()
 {
@@ -257,7 +270,7 @@ void EnzoInitialShockTube::enforce_block
   }
 
   EFlt3DArray align_b_arr = array_factory.from_name(bfields[coord.i_axis()]);
-  align_b_arr.subarray() = aligned_bfield_val;
+  assign_uniform_value_(align_b_arr, aligned_bfield_val);
 
   delete l_slice;
   delete r_slice;
@@ -327,5 +340,5 @@ void EnzoInitialShockTube::initializer_helper_(CSlice &slice, enzo_float val,
   yslice = (aligned_ax_ == 1) ? slice : CSlice(0, arr.shape(1));
   zslice = (aligned_ax_ == 2) ? slice : CSlice(0, arr.shape(0));
 
-  arr.subarray(zslice, yslice, xslice) = val;
+  assign_uniform_value_(arr.subarray(zslice, yslice, xslice), val);
 }

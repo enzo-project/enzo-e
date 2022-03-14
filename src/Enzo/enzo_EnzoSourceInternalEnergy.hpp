@@ -81,9 +81,9 @@ public:
   ///     time after this function call.
   void calculate_source(const int dim, const double dt,
 			const enzo_float cell_width,
-                        EnzoEFltArrayMap &prim_map,
+                        const EnzoEFltArrayMap &prim_map,
                         EnzoEFltArrayMap &dUcons_map,
-                        EFlt3DArray &interface_velocity,
+                        const CelloArray<const enzo_float,3> &interface_velocity,
                         const EnzoEquationOfState *eos,
 			const int stale_depth)
     const throw();
