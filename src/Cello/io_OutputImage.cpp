@@ -82,7 +82,7 @@ OutputImage::OutputImage(int index,
   else if (image_mesh_color=="process") mesh_color_type_ = mesh_color_process;
   else if (image_mesh_color=="age")     mesh_color_type_ = mesh_color_age;
   else if (image_mesh_color=="order") {
-    mesh_color_type_   = mesh_color_order;
+    mesh_color_type_  = mesh_color_order;
     mesh_color_order_ = image_mesh_order;
   } else {
     ERROR1 ("OutputImage::OutputImage()",
@@ -657,7 +657,7 @@ double OutputImage::mesh_color_(const Block * block, int level) const
     ScalarData<int> * scalar_data = ((Block *)block)->data()->scalar_data_int();
     int index = *scalar_data->value(cello::scalar_descr_int(),is_i);
     int count = *scalar_data->value(cello::scalar_descr_int(),is_n);
-    value = (count) > 0 ? 1.0*index/(count-1.0) : 0;
+    value = (count) > 0 ? 1.0*index/count : 0;
   } else {
     ERROR1 ("OutputImage::mesh_color_()",
 	    "Unknown mesh_color_type_ %d",
@@ -668,7 +668,7 @@ double OutputImage::mesh_color_(const Block * block, int level) const
   if (use_min_max_) {
     value = (max_value_-min_value_)*value + min_value_;
   } else {
-    value *= (colormap_[0].size() + 1);
+    value *= (colormap_[0].size());
   }
   return value;
 }

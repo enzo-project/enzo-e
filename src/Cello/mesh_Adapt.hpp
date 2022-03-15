@@ -194,33 +194,33 @@ public: // interface
     self_.level_now_ = index.level();
   }
 
-  inline bool insert_neighbor (Index index,Block * block)
-  { return insert_neighbor (index,self_.index_.is_sibling(index),block); }
+  inline bool insert_neighbor (Index index)
+  { return insert_neighbor (index,self_.index_.is_sibling(index)); }
 
   /// Insert the given neighbor into the list of neighbors. Return
   /// true if successful and false if neighbor already inserted
-  bool insert_neighbor  (Index index, bool is_sibling,Block * block);
+  bool insert_neighbor  (Index index, bool is_sibling);
 
   /// Reset self and level bounds for next adapt phase
   void reset_bounds();
 
   /// Delete the given neighbor from list of neighbors. Return true if
   /// successful and false if neighbor not found.
-  bool delete_neighbor  (Index index, Block * block);
+  bool delete_neighbor  (Index index);
 
   /// Replace the neighboring block with refined neighbors
-  void refine_neighbor  (Index index, Block * block);
+  void refine_neighbor  (Index index);
 
   /// Replace the neighboring block with a coarsened neighbor. May
   /// delete any neighboring sibling blocks, and may be called
   /// separately for siblings
-  void coarsen_neighbor  (Index index, Block * block);
+  void coarsen_neighbor  (Index index);
 
   /// Refine self, replacing blocks non-adjacent blocks with siblings
-  void refine (const Adapt & adapt_parent, int ic3[3], Block * block);
+  void refine (const Adapt & adapt_parent, int ic3[3]);
 
   /// Coarsen self, replacing blocks non-adjacent blocks with siblings
-  void coarsen (const Adapt & adapt_child, Block * block);
+  void coarsen (const Adapt & adapt_child);
 
   void initialize_self
   (Index index, int level_min, int level_now);
@@ -234,7 +234,7 @@ public: // interface
   /// neighbor level bounds. Returns true iff the values change, which
   /// can be used to determine whether or not to update its neighbors
   /// with new level bounds.
-  bool update_bounds (Block * block);
+  bool update_bounds();
 
   /// Return whether the given Block (the default is the block itself)
   /// is converged; that is, whether its minimum and maximum level

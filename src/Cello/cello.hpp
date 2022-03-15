@@ -808,12 +808,14 @@ namespace cello {
 
   /// Return the file name for the format and given arguments
   std::string expand_name
-  (const std::vector <std::string> * file_name, int counter, Block * block);
+  (const std::vector <std::string> * file_name,
+   int counter, int cycle, double time);
 
   /// Return the path for this file group output.  Creates
   /// the subdirectories if they don't exist
-  std::string directory
-  (const std::vector <std::string> * path_name, int counter, Block * block);
+  std::string create_directory
+  (const std::vector <std::string> * path_name,
+   int counter, int cycle, double time);
 
   
 }

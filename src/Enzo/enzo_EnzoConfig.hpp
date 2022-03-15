@@ -289,6 +289,7 @@ public: // interface
       // EnzoMethodCheck
       method_check_num_files(1),
       method_check_ordering("order_morton"),
+      method_check_dir(),
       // EnzoMethodHeat
       method_heat_alpha(0.0),
       // EnzoMethodHydro
@@ -680,6 +681,7 @@ public: // attributes
   /// EnzoMethodCheck
   int                        method_check_num_files;
   std::string                method_check_ordering;
+  std::vector<std::string>   method_check_dir;
 
   /// EnzoMethodHeat
   double                     method_heat_alpha;

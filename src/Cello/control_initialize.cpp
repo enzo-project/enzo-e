@@ -64,7 +64,7 @@ void Simulation::initialize() throw()
   // using QD to ensure that initialize_hierarchy() is called
   // on all processors before Blocks are created
 
-  // Create the Block chare array
+  // Create the Block chare array and distribute proxy to all other processes
   CProxy_Block block_array;
   if (CkMyPe() == 0) {
     bool allocate_data = true;

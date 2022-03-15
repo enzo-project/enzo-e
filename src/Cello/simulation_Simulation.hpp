@@ -20,6 +20,7 @@ class Problem;
 class Schedule;
 
 #include <errno.h>
+#include <iostream>
 #include "mesh.decl.h"
 #include "simulation.decl.h"
 class Simulation : public CBase_Simulation 
@@ -280,6 +281,12 @@ public: // virtual functions
   void compute ();
 
   //--------------------------------------------------
+  // Restart
+  //--------------------------------------------------
+  
+  void p_restart_enter(std::string dir);
+  
+  //--------------------------------------------------
   // Monitor
   //--------------------------------------------------
 
@@ -442,6 +449,9 @@ protected: // functions
     }
   }
 
+  std::ofstream file_create_hierarchy_(std::vector<std::string> directory_format);
+  std::ifstream file_open_hierarchy_(std::string directory_name);
+
 protected: // attributes
 
 #if defined(CELLO_DEBUG) || defined(CELLO_VERBOSE)
@@ -552,6 +562,8 @@ protected: // attributes
   std::vector<int> num_solver_iter_;
   /// Max of solver iterations over blocks for solver i
   std::vector<int> max_solver_iter_;
+
+  static int file_counter_;
 };
 
 #endif /* SIMULATION_SIMULATION_HPP */

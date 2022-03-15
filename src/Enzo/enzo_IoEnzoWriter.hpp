@@ -23,7 +23,8 @@ public: // interface
   {  }
 
   /// Constructor
-  IoEnzoWriter(int num_files, std::string ordering) throw();
+  IoEnzoWriter(int num_files,
+               std::string ordering) throw();
 
   /// CHARM++ migration constructor
   IoEnzoWriter(CkMigrateMessage *m) : CBase_IoEnzoWriter(m) {}
@@ -51,9 +52,12 @@ private: // functions
 private: // attributes
 
   // NOTE: change pup() function whenever attributes change
-  int num_files_;
-  std::string ordering_;
 
+  /// Number of files in which to store Block data
+  int num_files_;
+
+  /// Block-ordering used for mapping blocks to files
+  std::string ordering_;
 };
 
 #endif /* ENZO_IO_ENZO_WRITER_HPP */

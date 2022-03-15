@@ -25,7 +25,6 @@
      entry void p_compute_exit();
      entry void p_output_enter ();
      entry void p_output_exit();
-     entry void p_restart_enter(std::string dir, std::string file);
      entry void p_stopping_enter();
      entry void p_stopping_balance();
      entry void p_stopping_exit();

@@ -202,8 +202,11 @@ void MethodOutput::compute_continue(Block * block)
   FileHdf5 * file = file_open_(block,a3);
 
   // Open *.block_list file and save FILE pointer
-  int count = file_count_(block);
-  std::string file_name = cello::expand_name(&file_name_,count,block);
+  const int count   = file_count_(block);
+  const int cycle   = block->cycle();
+  const double time = block->time();
+  std::string file_name = cello::expand_name
+    (&file_name_,count,cycle,time);
 
   ScalarData<void *> * scalar_void = block->data()->scalar_data_void();
   FILE ** fp_block_list =
@@ -402,12 +405,14 @@ FileHdf5 * MethodOutput::file_open_(Block * block, int a3[3])
   // Generate file path
   ScalarData<int> * scalar_int = block->data()->scalar_data_int();
   int * counter = scalar_int->value(cello::scalar_descr_int(),is_count_);
-  std::string path_name = cello::directory(&path_name_,(*counter),block);
+  std::string path_name = cello::create_directory
+    (&path_name_,(*counter),block->cycle(),block->time());
   (*counter)++;
 
   // Generate file name
   int count = file_count_(block);
-  std::string file_name = cello::expand_name(&file_name_,count,block);
+  std::string file_name = cello::expand_name
+    (&file_name_,count,block->cycle(),block->time());
 
   if (block->index().is_root()) {
     Monitor::instance()->print

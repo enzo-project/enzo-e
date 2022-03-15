@@ -195,6 +195,7 @@ EnzoConfig::EnzoConfig() throw ()
   // EnzoMethodCheck
   method_check_num_files(1),
   method_check_ordering("order_morton"),
+  method_check_dir(),
   // EnzoMethodHeat
   method_heat_alpha(0.0),
   // EnzoMethodHydro
@@ -527,6 +528,7 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | method_check_num_files;
   p | method_check_ordering;
+  p | method_check_dir;
   
   p | method_heat_alpha;
 
@@ -1558,10 +1560,24 @@ void EnzoConfig::read_method_gravity_(Parameters * p)
 
 void EnzoConfig::read_method_check_(Parameters * p)
 {
+  p->group_set(0,"Method");
+  p->group_push("check");
+
   method_check_num_files = p->value_integer
-    ("Method:check:num_files",1);
+    ("num_files",1);
   method_check_ordering = p->value_string
-    ("Method:check:ordering","order_morton");
+    ("ordering","order_morton");
+
+  if (p->type("dir") == parameter_string) {
+    method_check_dir.resize(1);
+    method_check_dir[0] = p->value_string("dir","");
+  } else if (p->type("dir") == parameter_list) {
+    int size = p->list_length("dir");
+    if (size > 0) method_check_dir.resize(size);
+    for (int i=0; i<size; i++) {
+      method_check_dir[i] = p->list_value_string(i,"dir","");
+    }
+  }
 }
 
 //----------------------------------------------------------------------

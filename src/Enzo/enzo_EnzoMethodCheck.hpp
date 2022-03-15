@@ -17,7 +17,8 @@ class EnzoMethodCheck : public Method {
 public: // interface
 
   /// Create a new EnzoMethodCheck object
-  EnzoMethodCheck(int num_files, std::string ordering);
+  EnzoMethodCheck(int num_files, std::string ordering,
+                  std::vector<std::string> directory);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodCheck);
@@ -45,6 +46,9 @@ protected: // interface
 
   /// Ordering method for EnzoBlocks; default "order_morton"
   std::string ordering_;
+
+  /// Disk directory for writing checkpoint files
+  std::vector<std::string> directory_;
 
 };
 

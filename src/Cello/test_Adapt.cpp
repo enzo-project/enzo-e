@@ -57,9 +57,9 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("Adapt");
 
-  const int num_runs = 100;
-  const int run_length = 52;
-  const int MAX_LEVEL = 100;
+  const int num_runs = 1;
+  const int run_length = 22;
+  const int MAX_LEVEL = 20;
 
   for (int run=0; run<num_runs; run++) {
 
@@ -183,11 +183,11 @@ PARALLEL_MAIN_BEGIN
     unit_func ("no level jumps");
     unit_assert(jumps == false);
     unit_func ("converged");
-    unit_assert(converged == true);
+    unit_assert(converged == true); // @@@@@
     unit_func ("no temporal jumps");
     unit_assert(valid == true);
     unit_func ("pairs");
-    unit_assert(pairs == true);
+    unit_assert(pairs == true); // @@@@@@@@@@
     if (!pairs || !valid) {
       CkPrintf ("ERROR: C ");
       for (int i0=0; i0<n; i0++) CkPrintf (i0%2?"%1X ":"%1X",adapt[i0]->is_converged()?1:0);

@@ -103,7 +103,6 @@ public:
   void p_compute_exit();
   void p_output_enter ();
   void p_output_exit();
-  void p_restart_enter(std::string dir, std::string main);
   void p_stopping_enter();
   void p_stopping_balance();
   void p_text_file_write(int nd, char * dir,

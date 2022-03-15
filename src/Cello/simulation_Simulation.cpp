@@ -799,7 +799,7 @@ void Simulation::p_set_block_array(CProxy_Block block_array)
   if (CkMyPe() != 0) hierarchy_->set_block_array(block_array);
 }
 
-  //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 void Simulation::deallocate_() throw()
 {

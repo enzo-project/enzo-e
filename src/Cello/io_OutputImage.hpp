@@ -67,6 +67,7 @@ public: // functions
       image_mesh_(NULL),
       op_reduce_(reduce_unknown),
       mesh_color_type_(mesh_color_unknown),
+      mesh_color_order_(),
       color_particle_attribute_(""),
       axis_(axis_all),
       min_value_(std::numeric_limits<double>::max()),
@@ -193,6 +194,7 @@ private: // attributes
 
   /// Color type for mesh images
   int mesh_color_type_;
+
   /// Block int Scalar for ordering when mesh_color_type_ = mesh_color_order
   std::string mesh_color_order_;
 

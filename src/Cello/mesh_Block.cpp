@@ -852,7 +852,7 @@ void Block::init_adapt_(Adapt * adapt_parent)
 #endif
     int ic3[3];
     index_.child(level,ic3,ic3+1,ic3+2);
-    adapt_.refine(*adapt_parent,ic3,this);
+    adapt_.refine(*adapt_parent,ic3);
 #ifdef DEBUG_ADAPT
     CkPrintf ("DEBUG_ADAPT %s Block() level > 0\n",
               name().c_str());

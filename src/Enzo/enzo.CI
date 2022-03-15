@@ -162,10 +162,8 @@ module enzo {
 #endif
     // EnzoMethodCheck
     entry void r_method_check_enter(CkReductionMsg *);
-    entry void p_writer_created (CProxy_IoEnzoWriter);
-    entry void p_check_continue (CProxy_IoEnzoWriter);
-    entry void r_check_write (CkReductionMsg *);
     entry void p_check_done();
+    entry void p_set_io_writer(CProxy_IoEnzoWriter io_writer);
 }
 
   //----------------------------------------------------------------------
@@ -258,7 +256,7 @@ module enzo {
 
   array[1D] IoEnzoWriter : IoWriter {
     entry IoEnzoWriter();
-    entry IoEnzoWriter(int, std::string);
+    entry IoEnzoWriter (int num_files, std::string ordering);
     entry void p_write(int index_file, std::string, std::string,
                        Index, Index, int, bool);
   }

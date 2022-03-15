@@ -52,10 +52,10 @@ public: // functions
 
   /// EnzoMethodCheck
   void r_method_check_enter (CkReductionMsg *);
-  void p_writer_created (CProxy_IoEnzoWriter);
-  void p_check_continue (CProxy_IoEnzoWriter);
-  void r_check_write (CkReductionMsg *);
   void p_check_done();
+  void p_set_io_writer(CProxy_IoEnzoWriter io_writer);
+  void set_sync_check_writer(int count)
+  { sync_check_writer_created_.set_stop(count); }
 
 public: // virtual functions
 
@@ -67,15 +67,19 @@ public: // virtual functions
 
 private: // functions
 
+
+private: // virtual functions
+
   virtual void initialize_config_() throw();
 
 private: // attributes
 
-  /// Checkpoint synchronization (depreciated)
-  Sync sync_check_writer_created_;
-  Sync sync_check_done_;
-  std::string check_ordering_;
-  int         check_num_files_;
+  /// Checkpoint synchronization
+  Sync                     sync_check_writer_created_;
+  Sync                     sync_check_done_;
+  int                      check_num_files_;
+  std::string              check_ordering_;
+  std::vector<std::string> check_directory_;
 };
 
 #endif /* ENZO_ENZO_SIMULATION_CHARM_HPP */

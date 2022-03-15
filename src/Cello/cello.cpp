@@ -430,7 +430,8 @@ namespace cello {
   (
    const std::vector<std::string> * file_format,
    int counter,
-   Block * block
+   int cycle,
+   double time
    )
   {
     if (file_format->size()==0) return "";
@@ -487,8 +488,8 @@ namespace cello {
       left  = left.substr(0,pos);
 
       strncpy (buffer, middle.c_str(),MAX_BUFFER);
-      if      (arg == "cycle") { sprintf (buffer_new,buffer, block->cycle()); }
-      else if (arg == "time")  { sprintf (buffer_new,buffer, block->time()); }
+      if      (arg == "cycle") { sprintf (buffer_new,buffer, cycle); }
+      else if (arg == "time")  { sprintf (buffer_new,buffer, time); }
       else if (arg == "count") { sprintf (buffer_new,buffer, counter); }
       else if (arg == "proc")  { sprintf (buffer_new,buffer, CkMyPe()); }
       else if (arg == "flipflop")  { sprintf (buffer_new,buffer, counter % 2); }
@@ -508,15 +509,16 @@ namespace cello {
 
   //----------------------------------------------------------------------
 
-  std::string directory
+  std::string create_directory
   (
    const std::vector<std::string> * path_format,
    int counter,
-   Block * block
+   int cycle,
+   double time
    )
   {
     std::string dir = ".";
-    std::string name_dir = expand_name(path_format,counter, block);
+    std::string name_dir = expand_name(path_format,counter, cycle, time);
 
     // Create subdirectory if any
     if (name_dir != "") {
@@ -526,7 +528,7 @@ namespace cello {
 
         boost::filesystem::create_directory(directory);
 
-        ASSERT1 ("cello::directory()",
+        ASSERT1 ("cello::create_directory()",
                  "Error creating directory %s",
                  name_dir.c_str(),
                  boost::filesystem::is_directory(directory));
