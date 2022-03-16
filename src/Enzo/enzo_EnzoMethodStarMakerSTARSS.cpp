@@ -27,7 +27,7 @@
 // Plan is to make this a separate class that inherits from the stochastic
 // algorithm.
 
-#define DEBUG_SF_CRITERIA
+//#define DEBUG_SF_CRITERIA
 //-------------------------------------------------------------------
 
 EnzoMethodStarMakerSTARSS::EnzoMethodStarMakerSTARSS
@@ -35,7 +35,19 @@ EnzoMethodStarMakerSTARSS::EnzoMethodStarMakerSTARSS
   : EnzoMethodStarMaker()
 {
   // To Do: Make the seed an input parameter
-  //srand(time(NULL)); // need randum number generator for later
+  cello::simulation()->refresh_set_name(ir_post_,name());
+  Refresh * refresh = cello::refresh(ir_post_);
+  refresh->add_all_fields();
+  refresh->add_all_particles();
+
+  ParticleDescr * particle_descr = cello::particle_descr();
+
+  //
+  // Refresh copies of all star particles on neighboring grids
+  //
+  //const int it = particle_descr->type_index("star");
+  //refresh->add_particle(it,true);
+  //refresh->all_particles_copy(true);
   return;
 }
 
@@ -92,18 +104,20 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 
   const int rank = cello::rank();
 
-  double dt    = enzo_block->dt;
+  double dt    = enzo_block->dt; // timestep in code units
+  enzo_float cosmo_a = 1.0;
+  enzo_float cosmo_dadt = 0.0;
   EnzoPhysicsCosmology * cosmology = enzo::cosmology();
+/*
   if (cosmology) {
-    enzo_float cosmo_a = 1.0;
-    enzo_float cosmo_dadt = 0.0;
     double current_time = enzo_block->time();
     cosmology->compute_expansion_factor(&cosmo_a,&cosmo_dadt,current_time+0.5*dt);
     if (rank >= 1) dx *= cosmo_a;
     if (rank >= 2) dy *= cosmo_a;
     if (rank >= 3) dz *= cosmo_a;
   }
-
+*/
+  double cell_volume = dx*dy*dz;
   double lx, ly, lz;
   block->lower(&lx,&ly,&lz);
 
@@ -217,7 +231,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         double mean_particle_mass = enzo_config->ppm_mol_weight * cello::mass_hydrogen;
         double ndens = rho_cgs / mean_particle_mass;
 
-        double cell_mass  = density[i] *dx*dy*dz;
+        double cell_mass  = density[i] * cell_volume;
         double metallicity = (metal) ? metal[i]/density[i]/cello::metallicity_solar : 0.0;
 
         //
@@ -238,9 +252,9 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
                     + density[i-idy] + density[i+idy]
                     + density[i-idz] + density[i+idz]) / 17.0;
           if (! this->check_overdensity_threshold(dmean) ) continue;
-          #ifdef DEBUG_SF_CRITERIA 
-            CkPrintf("MethodFeedbackSTARSS -- overdensity threshold passed! rho=%f\n",dmean);
-          #endif
+          //#ifdef DEBUG_SF_CRITERIA 
+          //  CkPrintf("MethodFeedbackSTARSS -- overdensity threshold passed! rho=%f\n",dmean);
+          //#endif
          }
         // check velocity divergence < 0
         if (! this->check_velocity_divergence(velocity_x, velocity_y,
@@ -298,35 +312,42 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
             maximum_star_mass = this->maximum_star_fraction_ * cell_mass * munit_solar; //Msun
         }
 
-        double mass_should_form = std::min(f_shield,this->maximum_star_fraction_) * 
-                                    cell_mass*munit_solar / divisor;
+        double bulk_SFR = f_shield * cell_mass*munit_solar/divisor;
+        double mass_should_form = bulk_SFR * dt*tunit/cello::Myr_s; //proposed stellar mass in Msun
+        //double mass_should_form = std::min(f_shield/divisor * dt*tunit/cello::Myr_s,
+        //                              this->maximum_star_fraction_) * cell_mass*munit_solar;                            
+        
         // Probability has the last word
         // FIRE-2 uses p = 1 - exp (-MassShouldForm*dt / M_gas_particle) to convert a whole particle to star particle
         //  We convert a fixed portion of the baryon mass (or the calculated amount)
         //TODO: Difference between dt and dtFixed???
        
-        double p_form = 1.0 - std::exp(-mass_should_form*dt/maximum_star_mass);
+        double p_form = 1.0 - std::exp(-mass_should_form/
+                (this->maximum_star_fraction_*cell_mass*munit_solar));
 
+        //double p_form = 1.0 - std::exp(-mass_should_form/maximum_star_mass);
         if (enzo_config->method_star_maker_turn_off_probability) p_form = 1.0;
 
         #ifdef DEBUG_SF_CRITERIA
           CkPrintf("MethodStarMakerSTARSS -- mass_should_form = %f; p_form = %f\n", mass_should_form, p_form);
           CkPrintf("MethodStarMakerSTARSS -- cell_mass = %f Msun; divisor = %f\n", cell_mass*munit_solar,divisor);
+          CkPrintf("MethodStarMakerSTARSS -- (ix, iy, iz) = (%d, %d, %d)\n", ix,iy,iz);
         #endif
 
         double random = double(mt()) / double(mt.max()); 
 
         /* New star is mass_should_form up to `conversion_fraction` * baryon mass of the cell, but at least 15 msun */       
+        //double new_mass = std::min(mass_should_form/munit_solar, maximum_star_mass/munit_solar);
         double new_mass = std::min(mass_should_form/munit_solar, maximum_star_mass/munit_solar);
-        std::cout << "cell mass=" << cell_mass*munit_solar << "; new_mass=" << new_mass*munit_solar << std::endl;
-        //std::cout << "p_form=" << p_form << "; random=" << random << "; dt=" << dt << std::endl; 
         if (
                  (new_mass * munit_solar < minimum_star_mass) // too small
                  || (random > p_form) // too unlikely
                  || (new_mass > cell_mass) // too big compared to cell    
            ) 
            {
+           #ifdef DEBUG_SF_CRITERIA
              CkPrintf("MethodStarMakerSTARSS -- star mass is either too big, too small, or failed the dice roll\n");
+           #endif
              continue;
            }
 
@@ -408,7 +429,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
   } // end loop iz
 
   if (count > 0){
-      std::cout << "Number of particles formed:   " << count << "\n";
+    CkPrintf("MethodStarMakerSTARSS -- Number of particles formed: %d\n", count);
   }
 
 // TODO: Set max_number_of_new_particles parameter????? 

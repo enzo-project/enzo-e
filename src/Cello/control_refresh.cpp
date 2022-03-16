@@ -1270,7 +1270,6 @@ void Block::particle_scatter_neighbors_
     for (int ib=0; ib<nb; ib++) {
 
       const int np = particle.num_particles(it,ib);
-
       // ...extract particle position arrays
 
       std::vector<double> xa(np,0.0);

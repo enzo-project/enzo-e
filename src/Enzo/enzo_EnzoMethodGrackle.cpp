@@ -417,6 +417,7 @@ void EnzoMethodGrackle::update_grackle_density_fields(
 
   chemistry_data * grackle_chemistry =
     enzo::config()->method_grackle_chemistry;
+  double metallicity_floor_ = enzo::config()->method_grackle_metallicity_floor;
 
   for (int iz = 0; iz<ngz; iz++){
     for (int iy=0; iy<ngy; iy++){
@@ -443,7 +444,9 @@ void EnzoMethodGrackle::update_grackle_density_fields(
           grackle_fields->DII_density[i]   = grackle_fields->density[i] * tiny_number;
           grackle_fields->HDI_density[i]   = grackle_fields->density[i] * tiny_number;
         }
-
+       if (grackle_chemistry->metal_cooling == 1){
+          grackle_fields->metal_density[i] = grackle_fields->density[i] * metallicity_floor_ * cello::metallicity_solar;
+       }
       }
     }
   }
@@ -592,6 +595,37 @@ double EnzoMethodGrackle::timestep ( Block * block ) throw()
 //----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_GRACKLE
+
+void EnzoMethodGrackle::enforce_metallicity_floor(EnzoBlock * enzo_block) throw()
+{
+  // MUST have metal_density field tracked
+  Field field = enzo_block->data()->field();
+  enzo_float * density = (enzo_float*) field.values("density");
+  enzo_float * metal_density  = (enzo_float*) field.values("metal_density");
+
+  int gx,gy,gz;
+  field.ghost_depth (0,&gx,&gy,&gz);
+
+  int nx,ny,nz;
+  field.size (&nx,&ny,&nz);
+
+  int ngx = nx + 2*gx;
+  int ngy = ny + 2*gy;
+  int ngz = nz + 2*gz;
+
+  const EnzoConfig * enzo_config = enzo::config();
+
+  for (int iz=0; iz<ngz; iz++){
+    for (int iy=0; iy<ngy; iy++){
+      for (int ix=0; ix<ngx; ix++){
+        int i = INDEX(ix,iy,iz,ngx,ngy);
+        double Z = metal_density[i] / density[i] / cello::metallicity_solar;
+        if (Z < enzo_config->method_grackle_metallicity_floor) metal_density[i] *= density[i] * enzo_config->method_grackle_metallicity_floor * cello::metallicity_solar;
+      }
+    }
+  }
+  return;
+}
 void EnzoMethodGrackle::ResetEnergies ( EnzoBlock * enzo_block) throw()
 {
    const EnzoConfig * enzo_config = enzo::config();

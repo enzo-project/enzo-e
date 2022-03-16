@@ -15,7 +15,7 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
-#define DEBUG_SF
+//#define DEBUG_SF
 
 //-------------------------------------------------------------------
 
@@ -343,7 +343,7 @@ int EnzoMethodStarMaker::check_velocity_divergence(
    if (vz) div += (vz[index+diz] - vz[index-diz]) / 2.0; // in units of dz
 
   #ifdef DEBUG_SF
-    CkPrintf("MethodStarMakerSTARSS -- velocity_divergence = %f\n",div); 
+    CkPrintf("MethodStarMaker -- velocity_divergence = %f\n",div); 
   #endif
 
    return div < 0;
@@ -371,7 +371,7 @@ int EnzoMethodStarMaker::check_cooling_time(const double &cooling_time,const dou
 
   double dynamical_time = pow(3.0*cello::pi/32.0/cello::grav_constant/(total_density*rhounit),0.5); //s
   #ifdef DEBUG_SF
-    CkPrintf("MethodStarMakerSTARSS -- cooling_time = %f, dynamical_time = %f\n",cooling_time*tunit, dynamical_time); 
+    CkPrintf("MethodStarMaker -- cooling_time = %f, dynamical_time = %f\n",cooling_time*tunit, dynamical_time); 
   #endif
   return cooling_time*tunit < dynamical_time;
   

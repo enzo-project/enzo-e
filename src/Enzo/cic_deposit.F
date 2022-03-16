@@ -155,7 +155,7 @@ c
          do n=1, npositions
 c     
 c     Compute the position of the central cell
-c     
+c    
             xpos = min(max((posx(n) - leftedge(1))*fact, half),edge1)
             ypos = min(max((posy(n) - leftedge(2))*fact, half),edge2)
             zpos = min(max((posz(n) - leftedge(3))*fact, half),edge3)
@@ -175,27 +175,33 @@ c
 c     
 c     Interpolate from field into sumfield
 c
-C            print*, 'DEBUG_CIC',dx,dy,dz
+c            print*, 'DEBUG_CIC ',dx,dy,dz,i1,j1,k1,field(0,0,0)
             field(i1  ,j1  ,k1  ) = field(i1  ,j1  ,k1  ) +
      &              mass(n)*     dx *     dy *    dz
+c            print*, 'DEBUG_CIC 181 ',i1+1,j1,k1
             field(i1+1,j1  ,k1  ) = field(i1+1,j1  ,k1  ) +
      &              mass(n)*(1._RKIND-dx)*     dy *    dz
+c            print*, 'DEBUG_CIC 184 ',i1,j1+1,k1
             field(i1  ,j1+1,k1  ) = field(i1  ,j1+1,k1  ) + 
      &              mass(n)*     dx *(1._RKIND-dy)*    dz
+c            print*, 'DEBUG_CIC 187 ',i1+1,j1+1,k1
             field(i1+1,j1+1,k1  ) = field(i1+1,j1+1,k1  ) +
      &              mass(n)*(1._RKIND-dx)*(1._RKIND-dy)*    dz
+c            print*, 'DEBUG_CIC 190 ',i1,j1,k1+1
             field(i1  ,j1  ,k1+1) = field(i1  ,j1  ,k1+1) +
      &              mass(n)*     dx *     dy *(1._RKIND-dz)
+c            print*, 'DEBUG_CIC 193 ',i1+1,j1,k1+1
             field(i1+1,j1  ,k1+1) = field(i1+1,j1  ,k1+1) +
      &              mass(n)*(1._RKIND-dx)*     dy *(1._RKIND-dz)
+c            print*, 'DEBUG_CIC 196 ',i1,j1+1,k1+1
             field(i1  ,j1+1,k1+1) = field(i1  ,j1+1,k1+1) + 
      &              mass(n)*     dx *(1._RKIND-dy)*(1._RKIND-dz)
+c            print*, 'DEBUG_CIC 199 ',i1+1,j1+1,k1+1
             field(i1+1,j1+1,k1+1) = field(i1+1,j1+1,k1+1) +
      &           mass(n)*(1._RKIND-dx)*(1._RKIND-dy)*(1._RKIND-dz)
 
 c     
          enddo
-      
       endif
 c
       return
