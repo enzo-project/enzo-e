@@ -321,9 +321,9 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
 
   // Initialize refresh object
   cello::define_field("density_deposit");
-  cello::define_field("momentum_x_deposit");
-  cello::define_field("momentum_y_deposit");
-  cello::define_field("momentum_z_deposit");
+  cello::define_field("velocity_x_deposit");
+  cello::define_field("velocity_y_deposit");
+  cello::define_field("velocity_z_deposit");
   cello::define_field("total_energy_deposit");
   cello::define_field("internal_energy_deposit");
   cello::define_field("metal_density_deposit"); 
@@ -453,7 +453,7 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
 //      for (int ix=gx; ix<nx+gx; ix++){
  //       int i = INDEX(ix,iy,iz,mx,my);
      for (int i=0; i<mx*my*mz; i++){      
- /*      
+/*       
         //if (d_a[i] > 0) {
         d [i] +=  d_dep[i];
         mf[i] += mf_dep[i];
@@ -474,6 +474,7 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
         vx_dep[i] = 0;
         vy_dep[i] = 0;
         vz_dep[i] = 0;
+
         //}
         }
 //      }
@@ -1418,15 +1419,17 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
     for (int iy=gy; iy<ny+gy; iy++){
       for (int ix=gx; ix<nx+gx; ix++){
         int i = INDEX(ix,iy,iz,mx,my);
-        d[i] += d_dep[i];
-        mf[i] += mf_dep[i];
+  
+         d[i] += d_dep[i];
+        mf[i] += mf_dep[i]; 
+        double cell_mass = d[i]*hx*hy*hz;
         
-        double cell_mass = d[i]*hx*hy*hz; 
-        te[i] += te_dep[i]/cell_mass;
-        ge[i] += ge_dep[i]/cell_mass;
+        te[i] += te_dep[i];// / cell_mass;
+        ge[i] += ge_dep[i];// / cell_mass;
         vx[i] += vx_dep[i];
         vy[i] += vy_dep[i];
         vz[i] += vz_dep[i];
+
 
          d_dep[i] = 0.0;
         mf_dep[i] = 0.0;
@@ -1434,7 +1437,8 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
         ge_dep[i] = 0.0;
         vx_dep[i] = 0.0;
         vy_dep[i] = 0.0;
-        vz_dep[i] = 0.0; 
+        vz_dep[i] = 0.0;
+ 
       }
     }
   }
