@@ -720,9 +720,14 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "accretion_compute") {
 
-    method = new EnzoMethodAccretionCompute(
-		    enzo_config->method_accretion_compute_accretion_radius_cells
-					   );
+    if (enzo_config->method_accretion_compute_type == "density_threshold")
+      method = new EnzoMethodAccretionComputeDensThresh(
+		       enzo_config->method_accretion_compute_accretion_radius_cells,
+		       enzo_config->method_accretion_compute_density_threshold
+							);
+    else method = new EnzoMethodAccretionCompute(
+		       enzo_config->method_accretion_compute_accretion_radius_cells
+						 );
   } else {
 
     // Fallback to Cello method's
