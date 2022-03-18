@@ -437,11 +437,15 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
       for (int i=0; i<mx*my*mz; i++){
        
         if (te_dep_c[i] <= 0) continue; 
+          double d_old = d[i];
 
           d [i] +=  d_dep_c[i];
+
+          double d_new = d[i];
+          double cell_mass = d_new*hx*hy*hz;
+
           mf[i] += mf_dep_c[i];
 
-          double cell_mass = d[i]*hx*hy*hz;
           double M_scale = d_dep_c[i]/d[i];
           te[i] += te_dep_c[i] / cell_mass; 
           ge[i] += ge_dep_c[i] / cell_mass;
@@ -449,7 +453,9 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
           vy[i] += vy_dep_c[i] * M_scale;
           vz[i] += vz_dep_c[i] * M_scale;
 
-      
+          // rescale color fields to account for new densities
+          EnzoMethodStarMaker::rescale_densities(enzo_block, i, d_new/d_old); 
+   
            d_dep[i] = 0;
           mf_dep[i] = 0;
           te_dep[i] = 0;
@@ -1422,16 +1428,23 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
     for (int iy=gy; iy<ny+gy; iy++){
       for (int ix=gx; ix<nx+gx; ix++){
         int i = INDEX(ix,iy,iz,mx,my);
-  
-         d[i] += d_dep[i];
+        double d_old = d[i]; 
+
+        d[i] += d_dep[i];
+        
+        double d_new = d[i];
+        double cell_mass = d_new*hx*hy*hz;
+
         mf[i] += mf_dep[i]; 
-        double cell_mass = d[i]*hx*hy*hz;
         
         te[i] += te_dep[i] / cell_mass;
         ge[i] += ge_dep[i] / cell_mass;
         vx[i] += vx_dep[i];
         vy[i] += vy_dep[i];
         vz[i] += vz_dep[i];
+        
+        // rescale color fields to account for new densities
+        EnzoMethodStarMaker::rescale_densities(enzo_block, i, d_new/d_old);
  
       }
     }
