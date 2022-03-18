@@ -334,47 +334,21 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
 
   refresh_fb->set_accumulate(true);
 
-  //TODO/NOTE: Current method of depositing momentum is to
-  //           deposit into "velocity_*_deposit" fields,
-  //           add to velocity_* fields (after converting to momentum),
-  //           and then convert both back to velocities.
-  //           There will be some error associated with refresh+accumulate
-  //           because the refresh operation doesn't automatically
-  //           scale velocity_*_deposit fields by mass when sending 
-  //           ghost zone data to the neighboring blocks, so you'll
-  //           be adding velocities when you should really be adding momenta.
-  //           Same goes for specific energy fields, when we're depositing
-  //           energies (i.e. not energy/mass). 
-  //
-  //           Assuming difference in mass between ghost zone and corresponding
-  //           active zone in neighboring block is small, the error will also be small.
-  //           This is tied to resolution though, where the error will likely get bigger
-  //           as resolution increases (because higher resolution means
-  //           smaller cells, which means less mass, which then means 
-  //           M_deposited/M_cell will be larger). Should fix this...
-  //           
-  //           -WH
+
   refresh_fb->add_field_src_dst
-    ("density_deposit","density");
-    //("density","density_accumulate");
+    ("density_deposit","density_deposit_copy");
   refresh_fb->add_field_src_dst
-    ("velocity_x_deposit", "velocity_x");
-    //("velocity_x","velocity_x_accumulate"); 
+    ("velocity_x_deposit", "velocity_x_deposit_copy");
   refresh_fb->add_field_src_dst
-    ("velocity_y_deposit", "velocity_y");
-    //("velocity_y","velocity_y_accumulate"); 
+    ("velocity_y_deposit", "velocity_y_deposit_copy");
   refresh_fb->add_field_src_dst
-    ("velocity_z_deposit","velocity_z");
-    //("velocity_z","velocity_z_accumulate"); 
+    ("velocity_z_deposit","velocity_z_deposit_copy");
   refresh_fb->add_field_src_dst
-    ("total_energy_deposit","total_energy");
-    //("total_energy","total_energy_accumulate"); 
+    ("total_energy_deposit","total_energy_deposit_copy");
   refresh_fb->add_field_src_dst
-    ("internal_energy_deposit","internal_energy");
-    //("internal_energy","internal_energy_accumulate");
+    ("internal_energy_deposit","internal_energy_deposit_copu");
   refresh_fb->add_field_src_dst
-    ("metal_density_deposit","metal_density");
-    //("metal_density","metal_density_accumulate");
+    ("metal_density_deposit","metal_density_deposit_copy");
  
   refresh_fb->set_callback(CkIndex_EnzoBlock::p_method_feedback_starss_end());
  
@@ -439,7 +413,7 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
   enzo_float * vx = (enzo_float *) field.values("velocity_x");
   enzo_float * vy = (enzo_float *) field.values("velocity_y");
   enzo_float * vz = (enzo_float *) field.values("velocity_z");
- 
+  
   enzo_float * d_dep  = (enzo_float *) field.values("density_deposit");
   enzo_float * te_dep = (enzo_float *) field.values("total_energy_deposit");
   enzo_float * ge_dep = (enzo_float *) field.values("internal_energy_deposit");
@@ -447,40 +421,69 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
   enzo_float * vx_dep = (enzo_float *) field.values("velocity_x_deposit");
   enzo_float * vy_dep = (enzo_float *) field.values("velocity_y_deposit");
   enzo_float * vz_dep = (enzo_float *) field.values("velocity_z_deposit");
-  
+
+  enzo_float * d_dep_c  = (enzo_float *) field.values("density_deposit_copy");
+  enzo_float * te_dep_c = (enzo_float *) field.values("total_energy_deposit_copy");
+  enzo_float * ge_dep_c = (enzo_float *) field.values("internal_energy_deposit_copy");
+  enzo_float * mf_dep_c = (enzo_float *) field.values("metal_density_deposit_copy");
+  enzo_float * vx_dep_c = (enzo_float *) field.values("velocity_x_deposit_copy");
+  enzo_float * vy_dep_c = (enzo_float *) field.values("velocity_y_deposit_copy");
+  enzo_float * vz_dep_c = (enzo_float *) field.values("velocity_z_deposit_copy");
+
 //  for (int iz=gz; iz<nz+gz; iz++){
 //    for (int iy=gy; iy<ny+gy; iy++){
 //      for (int ix=gx; ix<nx+gx; ix++){
- //       int i = INDEX(ix,iy,iz,mx,my);
-     for (int i=0; i<mx*my*mz; i++){      
-/*       
-        //if (d_a[i] > 0) {
-        d [i] +=  d_dep[i];
-        mf[i] += mf_dep[i];
+//        int i = INDEX(ix,iy,iz,mx,my);
+      for (int i=0; i<mx*my*mz; i++){
+       
+        if (te_dep_c[i] <= 0) continue; 
 
-        double cell_mass = d[i]*hx*hy*hz;
-        //double M_scale = d_dep[i]/d[i];
-        te[i] += te_dep[i] / cell_mass;  // * M_scale;//te_dep[i] * M_scale;
-        ge[i] += ge_dep[i] / cell_mass;// * M_scale;
-        vx[i] += vx_dep[i] / d[i];// * M_scale;
-        vy[i] += vy_dep[i] / d[i];// * M_scale;
-        vz[i] += vz_dep[i] / d[i];// * M_scale;
-*/
+          d [i] +=  d_dep_c[i];
+          mf[i] += mf_dep_c[i];
+
+          double cell_mass = d[i]*hx*hy*hz;
+          double M_scale = d_dep_c[i]/d[i];
+          te[i] += te_dep_c[i] / cell_mass; 
+          ge[i] += ge_dep_c[i] / cell_mass;
+          vx[i] += vx_dep_c[i] * M_scale;
+          vy[i] += vy_dep_c[i] * M_scale;
+          vz[i] += vz_dep_c[i] * M_scale;
+
       
-         d_dep[i] = 0;
-        mf_dep[i] = 0;
-        te_dep[i] = 0;
-        ge_dep[i] = 0;
-        vx_dep[i] = 0;
-        vy_dep[i] = 0;
-        vz_dep[i] = 0;
+           d_dep[i] = 0;
+          mf_dep[i] = 0;
+          te_dep[i] = 0;
+          ge_dep[i] = 0;
+          vx_dep[i] = 0;
+          vy_dep[i] = 0;
+          vz_dep[i] = 0;
 
-        //}
-        }
+           d_dep_c[i] = 0;
+          mf_dep_c[i] = 0;
+          te_dep_c[i] = 0;
+          ge_dep_c[i] = 0;
+          vx_dep_c[i] = 0;
+          vy_dep_c[i] = 0;
+          vz_dep_c[i] = 0;
+
+         }
+        
 //      }
 //    }
 //  }
+/*
+  const EnzoConfig * enzo_config = enzo::config();
 
+  // recompute the temperature
+  EnzoComputeTemperature compute_temperature
+    (enzo_config->ppm_density_floor,
+     enzo_config->ppm_temperature_floor,
+     enzo_config->ppm_mol_weight,
+     enzo_config->physics_cosmology);
+
+  compute_temperature.compute(enzo_block);
+*/
+  return;
 }
 void EnzoBlock::p_method_feedback_starss_end() 
 {  
@@ -551,13 +554,13 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
   int numSN = 0; // counter of SN events
   int count = 0; // counter of particles
  
-  if (particle.num_particles(it) <= 0){
+/*  if (particle.num_particles(it) <= 0){
     // refresh
     cello::refresh(ir_feedback_)->set_active(enzo_block->is_leaf());
     enzo_block->refresh_start(ir_feedback_, CkIndex_EnzoBlock::p_method_feedback_starss_end());
     return;
   }
-
+*/
   const int ia_m = particle.attribute_index (it, "mass");
   const int ia_x  = particle.attribute_index (it, "x");
   const int ia_y  = particle.attribute_index (it, "y");
@@ -765,8 +768,8 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   double lunit = enzo_units->length();
   double munit = enzo_units->mass();
   double tunit = enzo_units->time();
-  double Tunit = enzo_units->temperature();
   double eunit = munit*vunit*vunit; // energy
+  double Tunit = enzo_units->temperature();
 
   const EnzoConfig * enzo_config = enzo::config();
   bool AnalyticSNRShellMass = enzo_config->method_feedback_analytic_SNR_shell_mass;
@@ -1424,20 +1427,11 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
         mf[i] += mf_dep[i]; 
         double cell_mass = d[i]*hx*hy*hz;
         
-        te[i] += te_dep[i];// / cell_mass;
-        ge[i] += ge_dep[i];// / cell_mass;
+        te[i] += te_dep[i] / cell_mass;
+        ge[i] += ge_dep[i] / cell_mass;
         vx[i] += vx_dep[i];
         vy[i] += vy_dep[i];
         vz[i] += vz_dep[i];
-
-
-         d_dep[i] = 0.0;
-        mf_dep[i] = 0.0;
-        te_dep[i] = 0.0;
-        ge_dep[i] = 0.0;
-        vx_dep[i] = 0.0;
-        vy_dep[i] = 0.0;
-        vz_dep[i] = 0.0;
  
       }
     }
@@ -1486,7 +1480,27 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   // transform velocities back to "lab" frame
   // convert velocity (actually momentum at the moment) field back to velocity 
   this->transformComovingWithStar(d,vx,vy,vz,up,vp,wp,mx,my,mz, -1);
-  this->transformComovingWithStar(d,vx_dep,vy_dep,vz_dep,up,vp,wp,mx,my,mz, -1);
+  this->transformComovingWithStar(d_dep,vx_dep,vy_dep,vz_dep,up,vp,wp,mx,my,mz, -1);
+
+  for (int iz=gz; iz<nz+gz; iz++){
+    for (int iy=gy; iy<ny+gy; iy++){
+      for (int ix=gx; ix<nx+gx; ix++){
+        int i = INDEX(ix,iy,iz,mx,my);
+  
+         d_dep[i] = 0.0;
+        mf_dep[i] = 0.0;
+        te_dep[i] = 0.0;
+        ge_dep[i] = 0.0;
+        vx_dep[i] = 0.0;
+        vy_dep[i] = 0.0;
+        vz_dep[i] = 0.0;
+
+ 
+      }
+    }
+  }
+
+
 
 // TODO: Update multispecies fields within deposited cells to be consistent with added mass
 
