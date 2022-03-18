@@ -514,7 +514,8 @@ namespace cello {
    const std::vector<std::string> * path_format,
    int counter,
    int cycle,
-   double time
+   double time,
+   bool & already_exists
    )
   {
     std::string dir = ".";
@@ -522,9 +523,16 @@ namespace cello {
 
     // Create subdirectory if any
     if (name_dir != "") {
+
       dir = name_dir;
+
       boost::filesystem::path directory(name_dir);
-      if (! boost::filesystem::is_directory(directory)) {
+
+      if (boost::filesystem::is_directory(directory)) {
+
+        already_exists = true;
+
+      } else {
 
         boost::filesystem::create_directory(directory);
 

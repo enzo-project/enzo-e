@@ -164,6 +164,10 @@ module enzo {
     entry void r_method_check_enter(CkReductionMsg *);
     entry void p_check_done();
     entry void p_set_io_writer(CProxy_IoEnzoWriter io_writer);
+
+    // enzo_control_restart
+    entry void p_set_io_reader(CProxy_IoEnzoReader io_reader);
+    entry void p_restart_done();
 }
 
   //----------------------------------------------------------------------
@@ -187,9 +191,12 @@ module enzo {
     entry void p_method_gravity_continue();
     entry void p_method_gravity_end();
 
-    entry void p_check_write_first(int num_files, std::string ordering);
+    entry void p_check_write_first(int num_files, std::string ordering, std::string name_dir);
     entry void p_check_write_next (int num_files, std::string ordering);
     entry void p_check_done();
+
+    // restart
+    entry void p_restart_done();
 
     // EnzoSolverCg synchronization entry methods
 
@@ -252,13 +259,15 @@ module enzo {
 
   array[1D] IoEnzoReader : IoReader {
     entry IoEnzoReader();
+    entry IoEnzoReader(std::string);
   };
 
   array[1D] IoEnzoWriter : IoWriter {
     entry IoEnzoWriter();
     entry IoEnzoWriter (int num_files, std::string ordering);
     entry void p_write(int index_file, std::string, std::string,
-                       Index, Index, int, bool);
+                       Index, Index, int,
+                       bool, bool, std::string);
   }
 
 };

@@ -39,21 +39,21 @@ public: // interface
   }
 
   /// Return the ith metadata item associated with the EnzoBlock object
-  void meta_value 
-  (int index, 
+  void meta_value
+  (int index,
    void ** buffer, std::string * name, int * type,
    int * nxd=0, int * nyd=0, int * nzd=0) throw();
 
   /// Return the ith data item associated with the EnzoBlock object
-  void data_value 
-  (int index, 
+  void data_value
+  (int index,
    void ** buffer, std::string * name, int * type,
    int * nxd=0, int * nyd=0, int * nzd=0) throw();
 
   virtual void set_block (Block * block) throw();
 
   /// PACKING / UNPACKING
-  
+
   /// Return the number of bytes required to serialize the data object
   virtual int data_size () const;
 

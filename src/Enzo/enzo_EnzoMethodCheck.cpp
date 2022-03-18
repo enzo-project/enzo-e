@@ -16,11 +16,16 @@
 
 #ifdef TRACE
 #   undef TRACE
-#   define TRACE(MSG) \
+#   define TRACE(MSG)                                           \
   CkPrintf ("%d TRACE %s\n",CkMyPe(),std::string(MSG).c_str()); \
+  fflush(stdout);
+#   define TRACE_BLOCK(MSG,BLOCK)                              \
+  CkPrintf ("%d TRACE %s %s\n",CkMyPe(),BLOCK->name().c_str(), \
+            std::string(MSG).c_str());                         \
   fflush(stdout);
 #else
 #   define TRACE(MSG)  /* ... */
+#   define TRACE_BLOCK(MSG,BLOCK)  /* ... */
 #endif
 
 int Simulation::file_counter_ = 0;
@@ -34,7 +39,7 @@ EnzoMethodCheck::EnzoMethodCheck
     ordering_(ordering),
     directory_(directory)
 {
-  TRACE("[1]EnzoMethodCheck::EnzoMethodCheck()");
+  TRACE("[1] EnzoMethodCheck::EnzoMethodCheck()");
   Refresh * refresh = cello::refresh(ir_post_);
   cello::simulation()->refresh_set_name(ir_post_,name());
   refresh->add_field("density");
@@ -57,9 +62,7 @@ EnzoMethodCheck::EnzoMethodCheck
 //----------------------------------------------------------------------
 
 void EnzoSimulation::p_set_io_writer(CProxy_IoEnzoWriter io_enzo_writer)
-{
-  proxy_io_enzo_writer = io_enzo_writer;
-}
+{ proxy_io_enzo_writer = io_enzo_writer; }
 
 //----------------------------------------------------------------------
 
@@ -81,8 +84,7 @@ void EnzoMethodCheck::pup (PUP::er &p)
 
 void EnzoMethodCheck::compute ( Block * block) throw()
 {
-  CkPrintf ("EnzoMethodCheck::compute\n");
-  TRACE("[2]EnzoMethodCheck::compute()");
+  TRACE_BLOCK("[2] EnzoMethodCheck::compute()",block);
   CkCallback callback(CkIndex_EnzoSimulation::r_method_check_enter(NULL),0,
                       proxy_enzo_simulation);
   block->contribute(callback);
@@ -93,7 +95,7 @@ void EnzoMethodCheck::compute ( Block * block) throw()
 void EnzoSimulation::r_method_check_enter(CkReductionMsg *msg)
   // [ Called on ip=0 only ]
 {
-  TRACE("[3]EnzoSimulation::r_method_check_enter()");
+  TRACE("[3] EnzoSimulation::r_method_check_enter()");
   
   delete msg;
 
@@ -106,16 +108,36 @@ void EnzoSimulation::r_method_check_enter(CkReductionMsg *msg)
 
   /// Create the directory
 
-  std::ofstream file_hierarchy = file_create_hierarchy_(check_directory_);
+  bool already_exists = false;
+  
+  std::string name_dir = file_create_dir_(check_directory_,already_exists);
 
-  file_hierarchy << std::setfill('0');
-  int max_digits = log(check_num_files_-1)/log(10) + 1;
-  file_hierarchy << check_num_files_ << std::endl;
-  for (int i=0; i<check_num_files_; i++) {
-    file_hierarchy << "block_data-" << std::setw(max_digits) << i << ".h5" << std::endl;
+  if (already_exists) {
+    // Exit checkpoint if directory already exists
+    enzo::block_array().p_check_done();
+    
+  } else {
+    // Else start checkpoint
+
+    // Create hierarchy file if root writer
+
+    std::string name_file = name_dir + "/check.file_list";
+    std::ofstream stream_file_list (name_file);
+
+    ASSERT1("IoEnzoWriter",
+            "Cannot open hierarchy file %s for writing",
+            name_file,stream_file_list);
+
+    stream_file_list << std::setfill('0');
+    int max_digits = log(check_num_files_-1)/log(10) + 1;
+    stream_file_list << check_num_files_ << std::endl;
+    for (int i=0; i<check_num_files_; i++) {
+      stream_file_list << "block_data-" << std::setw(max_digits) << i << std::endl;
+    }
+
+    enzo::block_array().p_check_write_first
+      (check_num_files_, check_ordering_, name_dir);
   }
-
-  enzo::block_array().p_check_write_first(check_num_files_, check_ordering_);
   // Create IoEnzoWriter array. Synchronizes by calling
   // EnzoSimulation[0]::p_writer_created() when done
 
@@ -129,14 +151,14 @@ IoEnzoWriter::IoEnzoWriter
     num_files_(num_files),
     ordering_(ordering)
 {
-  TRACE("[4]IoEnzoWriter::IoEnzoWriter()");
+  TRACE("[4] IoEnzoWriter::IoEnzoWriter()");
 }
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::p_check_write_first(int num_files, std::string ordering)
+void EnzoBlock::p_check_write_first(int num_files, std::string ordering, std::string name_dir)
 {
-  TRACE("[8]EnzoBlock::p_check_write_first");
+  TRACE_BLOCK("[8] EnzoBlock::p_check_write_first",this);
   Index index_this, index_next;
   std::string name_this, name_next;
   int index_block, index_file;
@@ -152,7 +174,7 @@ void EnzoBlock::p_check_write_first(int num_files, std::string ordering)
   if (is_first) {
     proxy_io_enzo_writer[index_file].p_write
       (index_file, name_this,name_next, index_this,index_next,
-       index_block,is_last);
+       index_block,is_first,is_last,name_dir);
   }
 }
 
@@ -160,7 +182,7 @@ void EnzoBlock::p_check_write_first(int num_files, std::string ordering)
 
 void EnzoBlock::p_check_write_next(int num_files, std::string ordering)
 {
-  TRACE("[9]EnzoBlock::p_check_write_next");
+  TRACE_BLOCK("[9] EnzoBlock::p_check_write_next",this);
   Index index_this, index_next;
   std::string name_this, name_next;
   int index_block, index_file;
@@ -174,17 +196,26 @@ void EnzoBlock::p_check_write_next(int num_files, std::string ordering)
      is_first, is_last);
 
   proxy_io_enzo_writer[index_file].p_write
-    (index_file,name_this, name_next, index_this,index_next,index_block,is_last);
+    (index_file,name_this, name_next, index_this,index_next,index_block,
+     is_first,is_last,"");
 }
 
 //----------------------------------------------------------------------
 
 void IoEnzoWriter::p_write
 (int index_file, std::string name_this, std::string name_next,
- Index index_this, Index index_next,
- int index_block, bool is_last)
+ Index index_this, Index index_next, int index_block,
+ bool is_first, bool is_last, std::string name_dir)
 {
-  TRACE("[A]IoEnzoWriter::p_write");
+  // Write to block list file, opening or closing file as needed
+
+  if (is_first) stream_block_list_ = create_block_list_(name_dir);
+
+  write_block_list_(name_this);
+  
+  if (is_last) close_block_list_();
+
+  TRACE("[A] IoEnzoWriter::p_write_first");
   if (!is_last) {
     enzo::block_array()[index_next].p_check_write_next(num_files_, ordering_);
   } else {
@@ -194,9 +225,41 @@ void IoEnzoWriter::p_write
 
 //----------------------------------------------------------------------
 
+std::ofstream IoEnzoWriter::create_block_list_(std::string name_dir)
+{
+  // Create hierarchy file if root writer
+
+  char file_name[80];
+  sprintf (file_name,"%s/block_data-%d.block_list",
+           name_dir.c_str(),thisIndex);
+
+  std::ofstream stream_block_list (file_name);
+
+  ASSERT1("Simulation::create_block_list_",
+          "Cannot open block_list file %s for writing",
+          file_name,stream_block_list);
+
+  return stream_block_list;
+}
+
+//----------------------------------------------------------------------
+
+void IoEnzoWriter::write_block_list_(std::string block_name)
+{
+  stream_block_list_ << block_name << std::endl;
+}
+
+//----------------------------------------------------------------------
+
+void IoEnzoWriter::close_block_list_()
+{
+}
+
+//----------------------------------------------------------------------
+
 void EnzoSimulation::p_check_done()
 {
-  TRACE("[B]EnzoSimulation::p_check_done");
+  TRACE("[B] EnzoSimulation::p_check_done");
   if (sync_check_done_.next()) {
     enzo::block_array().p_check_done();
   }
@@ -206,7 +269,7 @@ void EnzoSimulation::p_check_done()
 
 void EnzoBlock::p_check_done()
 {
-  TRACE("[C]EnzoBlock::p_check_done");
+  TRACE_BLOCK("[C] EnzoBlock::p_check_done",this);
   compute_done();
 }
 
@@ -236,7 +299,7 @@ void EnzoBlock::check_get_parameters_
   const Index next   = *scalar_data_index->value(scalar_descr_index,is_next);
 
   const int rank = cello::rank();
-  Hierarchy * hierarchy = enzo::simulation()->hierarchy();
+  const Hierarchy * hierarchy = enzo::simulation()->hierarchy();
   int na3[3];
   hierarchy->root_blocks(na3,na3+1,na3+2);
 
@@ -251,36 +314,35 @@ void EnzoBlock::check_get_parameters_
   index_block    = *scalar_data_int->value(scalar_descr_int,is_index);
   index_file = index_block*num_files/count;
 
-  is_first = (index_block == 0) || (index_block*num_files/count != (index_block-1)*num_files/count);
-  is_last  = (index_block*num_files/count != (index_block+1)*num_files/count);
+  const int ib  = index_block;
+  const int ibm = index_block - 1;
+  const int ibp = index_block + 1;
+  const int nb = count;
+  const int nf = num_files;
+  is_first = (ib  == 0)  || (ib*nf/nb != (ibm)*nf/nb);
+  is_last  = (ibp == nb) || (ib*nf/nb != (ibp)*nf/nb);
 
 }
 
 //----------------------------------------------------------------------
 
-std::ofstream Simulation::file_create_hierarchy_
-(std::vector<std::string> directory_format)
+std::string Simulation::file_create_dir_
+(std::vector<std::string> directory_format, bool & already_exists)
 {
-  int counter = Simulation::file_counter_++;
-  int cycle = cello::simulation()->cycle();
-  double time = cello::simulation()->time();
-  cello::create_directory (&directory_format, counter,cycle,time);
+  const int counter = Simulation::file_counter_++;
+  const int cycle = cello::simulation()->cycle();
+  const double time = cello::simulation()->time();
 
-  ASSERT("Simulation::file_create_hierarchy_",
+  cello::create_directory
+    (&directory_format, counter,cycle,time,already_exists);
+
+  ASSERT("Simulation::file_create_dir_",
          "Directory name must be non-empty",
          directory_format[0] != "");
 
-  std::string name_dir = cello::expand_name(&directory_format,counter, cycle, time);
-  // Create hierarchy file if root writer
+  std::string name_dir = cello::expand_name
+    (&directory_format,counter, cycle, time);
 
-  std::string name_file = name_dir + "/check.file_list";
-
-  std::ofstream file_hierarchy (name_file);
-
-  ASSERT1("Simulation::file_create_hierarchy_",
-          "Cannot open hierarchy file %s for writing",
-          name_file.c_str(),file_hierarchy);
-
-  return file_hierarchy;
+  return name_dir;
 }
 

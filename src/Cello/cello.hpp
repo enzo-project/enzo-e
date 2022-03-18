@@ -815,7 +815,7 @@ namespace cello {
   /// the subdirectories if they don't exist
   std::string create_directory
   (const std::vector <std::string> * path_name,
-   int counter, int cycle, double time);
+   int counter, int cycle, double time, bool & already_exists);
 
   
 }

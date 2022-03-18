@@ -19,7 +19,8 @@ public: // interface
   IoEnzoWriter() throw()
   : CBase_IoEnzoWriter(),
     num_files_(0),
-    ordering_("")
+    ordering_(""),
+    stream_block_list_()
   {  }
 
   /// Constructor
@@ -42,14 +43,20 @@ public: // entry methods
 
   void p_write(int index_file, std::string name_this, std::string name_next,
                Index index_this, Index index_next, int index,
-               bool is_last);
+               bool is_first, bool is_last, std::string name_dir);
 
   // void r_created(CkReductionMsg *msg);
 
-private: // functions
+protected: // functions
 
+  void write_(int index_file, std::string name_this, std::string name_next,
+               Index index_this, Index index_next, int index,
+               bool is_last);
+  std::ofstream create_block_list_(std::string name_dir);
+  void write_block_list_(std::string block_name);
+  void close_block_list_();
 
-private: // attributes
+protected: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
@@ -58,6 +65,9 @@ private: // attributes
 
   /// Block-ordering used for mapping blocks to files
   std::string ordering_;
+
+  std::ofstream stream_block_list_;
+
 };
 
 #endif /* ENZO_IO_ENZO_WRITER_HPP */

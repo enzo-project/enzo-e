@@ -449,8 +449,9 @@ protected: // functions
     }
   }
 
-  std::ofstream file_create_hierarchy_(std::vector<std::string> directory_format);
-  std::ifstream file_open_hierarchy_(std::string directory_name);
+  std::string file_create_dir_(std::vector<std::string> directory_format,
+                               bool & already_exists);
+  std::ifstream file_open_file_list_(std::string name_dir);
 
 protected: // attributes
 
@@ -542,6 +543,9 @@ protected: // attributes
   /// Output synchronization (depreciated)
   Sync sync_output_begin_;
   Sync sync_output_write_;
+
+  /// Restart synchronization
+  Sync sync_restart_done_;
 
   /// Refresh phase lists
 

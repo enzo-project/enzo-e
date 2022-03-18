@@ -16,11 +16,12 @@ class IoEnzoReader : public CBase_IoEnzoReader {
 
 public: // interface
 
-  /// Constructor
+  /// Constructors
   IoEnzoReader() throw()
-  {
-    CkPrintf ("%d IoEnzoReader()\n",CkMyPe());
-  }
+    : CBase_IoEnzoReader()
+  { CkPrintf ("%d IoEnzoReader()\n",CkMyPe()); }
+
+  IoEnzoReader(std::string file_name) throw();
 
   /// CHARM++ migration constructor
   IoEnzoReader(CkMigrateMessage *m) : CBase_IoEnzoReader(m) {}
@@ -35,6 +36,7 @@ private: // functions
 private: // attributes
 
   // NOTE: change pup() function whenever attributes change
+  std::string file_name_;
 
 };
 

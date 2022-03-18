@@ -9,6 +9,7 @@
 #ifndef ENZO_ENZO_SIMULATION_CHARM_HPP
 #define ENZO_ENZO_SIMULATION_CHARM_HPP
 
+class CProxy_IoEnzoReader;
 class CProxy_IoEnzoWriter;
 
 #include "charm++.h"
@@ -53,9 +54,13 @@ public: // functions
   /// EnzoMethodCheck
   void r_method_check_enter (CkReductionMsg *);
   void p_check_done();
+  void p_set_io_reader(CProxy_IoEnzoReader io_reader);
   void p_set_io_writer(CProxy_IoEnzoWriter io_writer);
   void set_sync_check_writer(int count)
   { sync_check_writer_created_.set_stop(count); }
+
+  /// enzo_control_restart
+  void p_restart_done();
 
 public: // virtual functions
 

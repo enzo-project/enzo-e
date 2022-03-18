@@ -405,8 +405,9 @@ FileHdf5 * MethodOutput::file_open_(Block * block, int a3[3])
   // Generate file path
   ScalarData<int> * scalar_int = block->data()->scalar_data_int();
   int * counter = scalar_int->value(cello::scalar_descr_int(),is_count_);
+  bool already_exists = false;
   std::string path_name = cello::create_directory
-    (&path_name_,(*counter),block->cycle(),block->time());
+    (&path_name_,(*counter),block->cycle(),block->time(),already_exists);
   (*counter)++;
 
   // Generate file name
