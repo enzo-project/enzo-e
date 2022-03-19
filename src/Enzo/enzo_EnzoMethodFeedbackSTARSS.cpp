@@ -430,13 +430,40 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
   enzo_float * vy_dep_c = (enzo_float *) field.values("velocity_y_deposit_copy");
   enzo_float * vz_dep_c = (enzo_float *) field.values("velocity_z_deposit_copy");
 
+  double tiny_number = 1e-20;
 //  for (int iz=gz; iz<nz+gz; iz++){
 //    for (int iy=gy; iy<ny+gy; iy++){
 //      for (int ix=gx; ix<nx+gx; ix++){
 //        int i = INDEX(ix,iy,iz,mx,my);
       for (int i=0; i<mx*my*mz; i++){
-       
-        if (te_dep_c[i] <= 0) continue; 
+
+      #ifdef DEBUG_FEEDBACK_STARSS
+        if (isnan( d[i])) CkPrintf( "NaN in d\n");
+        if (isnan(te[i])) CkPrintf("NaN in te\n");
+        if (isnan(ge[i])) CkPrintf("NaN in ge\n");
+        if (isnan(mf[i])) CkPrintf("NaN in mf\n");
+        if (isnan(vx[i])) CkPrintf("NaN in vx\n");
+        if (isnan(vy[i])) CkPrintf("NaN in vy\n");
+        if (isnan(vz[i])) CkPrintf("NaN in vz\n");
+
+        if (isnan( d_dep_c[i])) CkPrintf( "NaN in d_dep_c\n");
+        if (isnan(te_dep_c[i])) CkPrintf("NaN in te_dep_c\n");
+        if (isnan(ge_dep_c[i])) CkPrintf("NaN in ge_dep_c\n");
+        if (isnan(mf_dep_c[i])) CkPrintf("NaN in mf_dep_c\n");
+        if (isnan(vx_dep_c[i])) CkPrintf("NaN in vx_dep_c\n");
+        if (isnan(vy_dep_c[i])) CkPrintf("NaN in vy_dep_c\n");
+        if (isnan(vz_dep_c[i])) CkPrintf("NaN in vz_dep_c\n");
+
+        if (isnan( d_dep[i])) CkPrintf( "NaN in d_dep\n");
+        if (isnan(te_dep[i])) CkPrintf("NaN in te_dep\n");
+        if (isnan(ge_dep[i])) CkPrintf("NaN in ge_dep\n");
+        if (isnan(mf_dep[i])) CkPrintf("NaN in mf_dep\n");
+        if (isnan(vx_dep[i])) CkPrintf("NaN in vx_dep\n");
+        if (isnan(vy_dep[i])) CkPrintf("NaN in vy_dep\n");
+        if (isnan(vz_dep[i])) CkPrintf("NaN in vz_dep\n");
+      #endif
+
+        if (te_dep_c[i] > tiny_number) { // if any deposition 
           double d_old = d[i];
 
           d [i] +=  d_dep_c[i];
@@ -455,25 +482,27 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
 
           // rescale color fields to account for new densities
           EnzoMethodStarMaker::rescale_densities(enzo_block, i, d_new/d_old); 
-   
-           d_dep[i] = 0;
-          mf_dep[i] = 0;
-          te_dep[i] = 0;
-          ge_dep[i] = 0;
-          vx_dep[i] = 0;
-          vy_dep[i] = 0;
-          vz_dep[i] = 0;
+         
+  
+           d_dep[i] = tiny_number;
+          mf_dep[i] = tiny_number;
+          te_dep[i] = tiny_number;
+          ge_dep[i] = tiny_number;
+          vx_dep[i] = tiny_number;
+          vy_dep[i] = tiny_number;
+          vz_dep[i] = tiny_number;
 
-           d_dep_c[i] = 0;
-          mf_dep_c[i] = 0;
-          te_dep_c[i] = 0;
-          ge_dep_c[i] = 0;
-          vx_dep_c[i] = 0;
-          vy_dep_c[i] = 0;
-          vz_dep_c[i] = 0;
+           d_dep_c[i] = tiny_number;
+          mf_dep_c[i] = tiny_number;
+          te_dep_c[i] = tiny_number;
+          ge_dep_c[i] = tiny_number;
+          vx_dep_c[i] = tiny_number;
+          vy_dep_c[i] = tiny_number;
+          vz_dep_c[i] = tiny_number;
+         }
 
          }
-        
+
 //      }
 //    }
 //  }
@@ -1386,6 +1415,18 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   enzo_float * vy_dep = (enzo_float *) field.values("velocity_y_deposit");
   enzo_float * vz_dep = (enzo_float *) field.values("velocity_z_deposit");
 
+  // initialize fields as tiny_number -- if d_dep=0 you get NaNs in TransformComovingWithStar
+
+  for (int i=0; i<size; i++){
+    d_dep[i] = tiny_number;
+    te_dep[i] = tiny_number;
+    ge_dep[i] = tiny_number;
+    mf_dep[i] = tiny_number;
+    vx_dep[i] = tiny_number;
+    vy_dep[i] = tiny_number;
+    vz_dep[i] = tiny_number;
+  }
+
   FORTRAN_NAME(cic_deposit)
   (&CloudParticlePositionX, &CloudParticlePositionY,
    &CloudParticlePositionZ, &rank, &nCouple, &coupledMass_list, d_dep, &left_edge,
@@ -1490,6 +1531,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 //#endif
 
 
+
   // transform velocities back to "lab" frame
   // convert velocity (actually momentum at the moment) field back to velocity 
   this->transformComovingWithStar(d,vx,vy,vz,up,vp,wp,mx,my,mz, -1);
@@ -1500,13 +1542,13 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
       for (int ix=gx; ix<nx+gx; ix++){
         int i = INDEX(ix,iy,iz,mx,my);
   
-         d_dep[i] = 0.0;
-        mf_dep[i] = 0.0;
-        te_dep[i] = 0.0;
-        ge_dep[i] = 0.0;
-        vx_dep[i] = 0.0;
-        vy_dep[i] = 0.0;
-        vz_dep[i] = 0.0;
+         d_dep[i] = tiny_number;
+        mf_dep[i] = tiny_number;
+        te_dep[i] = tiny_number;
+        ge_dep[i] = tiny_number;
+        vx_dep[i] = tiny_number;
+        vy_dep[i] = tiny_number;
+        vz_dep[i] = tiny_number;
 
  
       }
