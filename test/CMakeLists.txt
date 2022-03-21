@@ -36,10 +36,20 @@ function(setup_test_serial_python TESTNAME TESTDIR TESTSCRIPT)
 endfunction()
 
 function(setup_test_parallel_python TESTNAME TESTDIR TESTSCRIPT)
+  # construct a list of the various parts of the launch_cmd argument (this is
+  # necessary since PARALLEL_LAUNCHER_NPROC_ARG may itself be a list)
+  set(LAUNCH_CMD_LIST
+    ${PARALLEL_LAUNCHER}
+    ${PARALLEL_LAUNCHER_NPROC_ARG} ${PARALLEL_LAUNCHER_NPROC}
+    ${PROJECT_BINARY_DIR}/bin/enzo-e)
+  # now join the elements of LAUNCH_CMD_LIST into a single string so that the
+  # shell interprets the entire string as a single command line argument
+  LIST(JOIN LAUNCH_CMD_LIST " " LAUNCH_CMD)
+
   setup_test_dir(${TESTDIR})
   add_test(
     NAME ${TESTNAME}
-    COMMAND ${Python3_EXECUTABLE} ${TESTSCRIPT} "--launch_cmd=${PARALLEL_LAUNCHER} ${PARALLEL_LAUNCHER_NPROC_ARG} ${PARALLEL_LAUNCHER_NPROC} ${PROJECT_BINARY_DIR}/bin/enzo-e"
+    COMMAND ${Python3_EXECUTABLE} ${TESTSCRIPT} --launch_cmd ${LAUNCH_CMD}
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TESTDIR})
   set_tests_properties(${TESTNAME} PROPERTIES LABELS "parallel" )
 endfunction()

@@ -214,6 +214,14 @@ set(ip_charm "4" CACHE STRING "Number of processors to run parallel unit tests (
 set(PARALLEL_LAUNCHER ${CHARM_RUN} CACHE STRING "Launcher to use for parallel tests")
 set(PARALLEL_LAUNCHER_NPROC_ARG "+p" CACHE STRING "Argument to set number of processing elements for parallel launcher")
 set(PARALLEL_LAUNCHER_NPROC ${ip_charm} CACHE STRING "Number of processors to run parallel unit tests")
+if ("${PARALLEL_LAUNCHER_NPROC_ARG}" MATCHES "[ \t\r\n]")
+  message(FATAL_ERROR
+    "Whitespace should NOT be present in PARALLEL_LAUNCHER_NPROC_ARG.\n"
+    "If you want to use PARALLEL_LAUNCHER_NPROC_ARG to pass multiple "
+    "arguments to the launcher, use a semicolon to delimit each argument.\n"
+    "For example, instead of setting PARALLEL_LAUNCHER_NPROC_ARG to "
+    "\"++local +p\", set it equal to \"++local;+p\".")
+endif()
 
 
 option(have_git "Is this is a Git repository" ON)
