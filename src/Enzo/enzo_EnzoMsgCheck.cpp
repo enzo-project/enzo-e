@@ -1,34 +1,39 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     charm_MsgOutput.cpp
+/// @file     charm_EnzoMsgCheck.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     2015-12-22
-/// @brief    [\ref Charm] Declaration of the MsgOutput Charm++ message
+/// @date     2022-03-19
+/// @brief    [\ref Charm] Declaration of the EnzoMsgCheck Charm++ message
 
-#include "data.hpp"
-#include "charm.hpp"
-#include "charm_simulation.hpp"
-
-//----------------------------------------------------------------------
-
-long MsgOutput::counter[CONFIG_NODE_SIZE] = {0};
+#include "enzo.hpp"
+#include "charm_enzo.hpp"
 
 //----------------------------------------------------------------------
 
-MsgOutput::MsgOutput()
-  : CMessage_MsgOutput(),
+long EnzoMsgCheck::counter[CONFIG_NODE_SIZE] = {0};
+
+//----------------------------------------------------------------------
+
+EnzoMsgCheck::EnzoMsgCheck()
+  : CMessage_EnzoMsgCheck(),
     is_local_(true),
     index_send_(),
-    block_trace_(),
-    method_output_(nullptr),
-    file_(nullptr),
     data_msg_(nullptr),
     buffer_(nullptr),
-    tag_(),
-    io_block_(),
     block_name_(),
     block_lower_(),
-    block_upper_()
+    block_upper_(),
+    block_size_(),
+    tag_(),
+    io_block_(),
+    index_this_(),
+    index_next_(),
+    name_this_(),
+    name_next_(),
+    index_block_(),
+    is_first_(),
+    is_last_(),
+    name_dir_()
 {
   ++counter[cello::index_static()];
   cello::hex_string(tag_,TAG_LEN);
@@ -36,32 +41,7 @@ MsgOutput::MsgOutput()
 
 //----------------------------------------------------------------------
 
-MsgOutput::MsgOutput
-(
- BlockTrace block_trace,
- MethodOutput * method_output,
- FileHdf5 * file) 
-  : CMessage_MsgOutput(),
-    is_local_(true),
-    index_send_(),
-    block_trace_(block_trace),
-    method_output_(method_output),
-    file_(file),
-    data_msg_(nullptr),
-    buffer_(nullptr),
-    tag_(),
-    io_block_(),
-    block_name_(),
-    block_lower_(),
-    block_upper_()
-{
-  ++counter[cello::index_static()]; 
-  cello::hex_string(tag_,TAG_LEN);
-}
-
-//----------------------------------------------------------------------
-
-MsgOutput::~MsgOutput()
+EnzoMsgCheck::~EnzoMsgCheck()
 {
   --counter[cello::index_static()];
   CkFreeMsg (buffer_);
@@ -70,10 +50,10 @@ MsgOutput::~MsgOutput()
 
 //----------------------------------------------------------------------
 
-void MsgOutput::set_data_msg  (DataMsg * data_msg) 
+void EnzoMsgCheck::set_data_msg  (DataMsg * data_msg)
 {
   if (data_msg_) {
-    WARNING ("MsgOutput::set_data_msg()",
+    WARNING ("EnzoMsgCheck::set_data_msg()",
 	     "overwriting existing data_msg_");
     delete data_msg_;
   }
@@ -82,7 +62,7 @@ void MsgOutput::set_data_msg  (DataMsg * data_msg)
 
 //----------------------------------------------------------------------
 
-void * MsgOutput::pack (MsgOutput * msg)
+void * EnzoMsgCheck::pack (EnzoMsgCheck * msg)
 {
   // Return with buffer if already packed
   if (msg->buffer_ != nullptr) return msg->buffer_;
@@ -92,10 +72,7 @@ void * MsgOutput::pack (MsgOutput * msg)
   // determine buffer size
 
   SIZE_OBJECT_TYPE(size,msg->index_send_);
-  SIZE_OBJECT_TYPE(size,msg->block_trace_);
-  size += sizeof(void *); // method_output_
-  size += sizeof(void *); // file_
-  
+
   // data_msg_;
   int have_data = (msg->data_msg_ != nullptr);
   size += sizeof(int);
@@ -107,7 +84,8 @@ void * MsgOutput::pack (MsgOutput * msg)
   SIZE_STRING_TYPE(size,msg->block_name_);
   SIZE_ARRAY_TYPE(size,double,msg->block_lower_,3);
   SIZE_ARRAY_TYPE(size,double,msg->block_upper_,3);
-  
+  SIZE_ARRAY_TYPE(size,double,msg->block_upper_,3);
+
   SIZE_ARRAY_TYPE(size,char,msg->tag_,TAG_LEN+1);
 
   int have_io = (msg->io_block_ != nullptr);
@@ -116,27 +94,31 @@ void * MsgOutput::pack (MsgOutput * msg)
     SIZE_OBJECT_TYPE(size,*(msg->io_block_));
   }
 
+  SIZE_OBJECT_TYPE(size,msg->index_this_);
+  SIZE_OBJECT_TYPE(size,msg->index_next_);
+  SIZE_STRING_TYPE(size,msg->name_this_);
+  SIZE_STRING_TYPE(size,msg->name_next_);
+  SIZE_SCALAR_TYPE(size,int,msg->index_block_);
+  SIZE_SCALAR_TYPE(size,bool,msg->is_first_);
+  SIZE_SCALAR_TYPE(size,bool,msg->is_last_);
+  SIZE_STRING_TYPE(size,msg->name_dir_);
+
   //--------------------------------------------------
-  
+
   // allocate buffer using CkAllocBuffer()
 
   char * buffer = (char *) CkAllocBuffer (msg,size);
 
-  // serialize message data into buffer 
+  // serialize message data into buffer
 
   union {
     char * pc;
     int  * pi;
-    MethodOutput ** pm;
-    FileHdf5 ** pf;
   };
 
   pc = buffer;
 
   SAVE_OBJECT_TYPE(pc,msg->index_send_);
-  SAVE_OBJECT_TYPE(pc,msg->block_trace_);
-  (*pm++) = msg->method_output_;
-  (*pf++) = msg->file_;
 
   // data_msg_;
   have_data = (msg->data_msg_ != nullptr);
@@ -149,6 +131,7 @@ void * MsgOutput::pack (MsgOutput * msg)
   SAVE_STRING_TYPE(pc,msg->block_name_);
   SAVE_ARRAY_TYPE(pc,double,msg->block_lower_,3);
   SAVE_ARRAY_TYPE(pc,double,msg->block_upper_,3);
+  SAVE_ARRAY_TYPE(pc,double,msg->block_upper_,3);
 
   SAVE_ARRAY_TYPE(pc,char,msg->tag_,TAG_LEN+1);
 
@@ -158,7 +141,16 @@ void * MsgOutput::pack (MsgOutput * msg)
     SAVE_OBJECT_TYPE(pc,*(msg->io_block_));
   }
 
-  ASSERT2("MsgOutput::pack()",
+  SAVE_OBJECT_TYPE(pc,msg->index_this_);
+  SAVE_OBJECT_TYPE(pc,msg->index_next_);
+  SAVE_STRING_TYPE(pc,msg->name_this_);
+  SAVE_STRING_TYPE(pc,msg->name_next_);
+  SAVE_SCALAR_TYPE(pc,int,msg->index_block_);
+  SAVE_SCALAR_TYPE(pc,bool,msg->is_first_);
+  SAVE_SCALAR_TYPE(pc,bool,msg->is_last_);
+  SAVE_STRING_TYPE(pc,msg->name_dir_);
+
+  ASSERT2("EnzoMsgCheck::pack()",
 	  "buffer size mismatch %ld allocated %d packed",
 	  (pc - (char*)buffer),size,
 	  (pc - (char*)buffer) == size);
@@ -170,14 +162,14 @@ void * MsgOutput::pack (MsgOutput * msg)
 
 //----------------------------------------------------------------------
 
-MsgOutput * MsgOutput::unpack(void * buffer)
+EnzoMsgCheck * EnzoMsgCheck::unpack(void * buffer)
 {
 
   // Allocate storage using CkAllocBuffer (not new!)
 
-  MsgOutput * msg = (MsgOutput *) CkAllocBuffer (buffer,sizeof(MsgOutput));
+  EnzoMsgCheck * msg = (EnzoMsgCheck *) CkAllocBuffer (buffer,sizeof(EnzoMsgCheck));
 
-  msg = new ((void*)msg) MsgOutput;
+  msg = new ((void*)msg) EnzoMsgCheck;
 
   msg->is_local_ = false;
 
@@ -186,17 +178,12 @@ MsgOutput * MsgOutput::unpack(void * buffer)
   union {
     char   * pc;
     int    * pi;
-    MethodOutput ** pm;
-    FileHdf5 ** pf;
   };
 
   pc = (char *) buffer;
 
   LOAD_OBJECT_TYPE(pc,msg->index_send_);
-  LOAD_OBJECT_TYPE(pc,msg->block_trace_);
-  msg->method_output_ = (*pm++);
-  msg->file_          = (*pf++);
-  
+
   // data_msg_
   int have_data = (*pi++);
   if (have_data) {
@@ -210,6 +197,7 @@ MsgOutput * MsgOutput::unpack(void * buffer)
   LOAD_STRING_TYPE(pc,msg->block_name_);
   LOAD_ARRAY_TYPE(pc,double,msg->block_lower_,3);
   LOAD_ARRAY_TYPE(pc,double,msg->block_upper_,3);
+  LOAD_ARRAY_TYPE(pc,double,msg->block_upper_,3);
 
   LOAD_ARRAY_TYPE(pc,char,msg->tag_,TAG_LEN+1);
 
@@ -217,9 +205,18 @@ MsgOutput * MsgOutput::unpack(void * buffer)
   LOAD_SCALAR_TYPE(pc,int,have_io);
   if (have_io) {
     // create the correct IoBlock (IoBlock or IoEnzoBlock)
-    msg->io_block_ = msg->method_output_->factory()->create_io_block();
+    msg->io_block_ = enzo::factory()->create_io_block();
     LOAD_OBJECT_TYPE(pc,*(msg->io_block_));
   }
+
+  LOAD_OBJECT_TYPE(pc,msg->index_this_);
+  LOAD_OBJECT_TYPE(pc,msg->index_next_);
+  LOAD_STRING_TYPE(pc,msg->name_this_);
+  LOAD_STRING_TYPE(pc,msg->name_next_);
+  LOAD_SCALAR_TYPE(pc,int,msg->index_block_);
+  LOAD_SCALAR_TYPE(pc,bool,msg->is_first_);
+  LOAD_SCALAR_TYPE(pc,bool,msg->is_last_);
+  LOAD_STRING_TYPE(pc,msg->name_dir_);
 
   // Save the input buffer for freeing later
 
@@ -230,7 +227,7 @@ MsgOutput * MsgOutput::unpack(void * buffer)
 
 //----------------------------------------------------------------------
 
-void MsgOutput::update (Data * data)
+void EnzoMsgCheck::update (Data * data)
 {
   // return if no data to update
   if (data_msg_ == nullptr) return;
@@ -244,29 +241,30 @@ void MsgOutput::update (Data * data)
 
 //----------------------------------------------------------------------
 
-Index MsgOutput::index_send()
+Index EnzoMsgCheck::index_send()
 { return index_send_; }
 
 //----------------------------------------------------------------------
 
-void MsgOutput::set_index_send(Index index)
+void EnzoMsgCheck::set_index_send(Index index)
 { index_send_ = index; }
 
 //----------------------------------------------------------------------
 
-void MsgOutput::set_block (Block * block, const Factory * factory)
+void EnzoMsgCheck::set_block (Block * block)
 {
   block_name_ = block->name();
   block->data()->lower(block_lower_,block_lower_+1,block_lower_+2);
   block->data()->upper(block_upper_,block_upper_+1,block_upper_+2);
-  delete io_block_;
-  io_block_ = factory->create_io_block();
+  block->data()->field().size(block_size_,block_size_+1,block_size_+2);
+
+  io_block_ = enzo::factory()->create_io_block();
   io_block_->set_block(block);
 }
 
 //----------------------------------------------------------------------
 
-void MsgOutput::del_block()
+void EnzoMsgCheck::del_block()
 {
   delete data_msg_;
   data_msg_ = nullptr;
@@ -276,17 +274,14 @@ void MsgOutput::del_block()
 
 //----------------------------------------------------------------------
 
-void MsgOutput::print (const char * msg)
+void EnzoMsgCheck::print (const char * msg)
 {
-  CkPrintf ("MSG_OUTPUT====================\n");
-  CkPrintf ("MSG_OUTPUT tag %s %s\n",msg,tag_);
-  CkPrintf ("MSG_OUTPUT is_local %d\n",is_local_);
+  CkPrintf ("ENZO_MSG_CHECK====================\n");
+  CkPrintf ("ENZO_MSG_CHECK tag %s %s\n",msg,tag_);
+  CkPrintf ("ENZO_MSG_CHECK is_local %d\n",is_local_);
   int v3[3];
   index_send_.values(v3);
-  CkPrintf ("MSG_OUTPUT index_send values %d %d %d\n",v3[0],v3[1],v3[2]);
-  block_trace_.print(msg);
-  CkPrintf ("MSG_OUTPUT method_output_ %p\n",(void *)method_output_);
-  CkPrintf ("MSG_OUTPUT file_ %p\n",(void *)file_);
-  CkPrintf ("MSG_OUTPUT data_msg_ %p\n",(void *)data_msg_);
-  CkPrintf ("MSG_OUTPUT\n");
+  CkPrintf ("ENZO_MSG_CHECK index_send values %d %d %d\n",v3[0],v3[1],v3[2]);
+  CkPrintf ("ENZO_MSG_CHECK data_msg_ %p\n",(void *)data_msg_);
+  CkPrintf ("ENZO_MSG_CHECK\n");
 }

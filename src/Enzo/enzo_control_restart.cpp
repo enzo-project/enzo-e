@@ -24,6 +24,10 @@
 #   define TRACE(MSG) \
   CkPrintf ("%d TRACE %s\n",CkMyPe(),std::string(MSG).c_str()); \
   fflush(stdout);
+#   define TRACE_BLOCK(MSG,BLOCK)                                    \
+  CkPrintf ("%d TRACE %s %s\n",CkMyPe(),BLOCK->name().c_str(), \
+            std::string(MSG).c_str());                         \
+  fflush(stdout);
 #else
 #   define TRACE(MSG)  /* ... */
 #endif
@@ -33,7 +37,7 @@
 
 void Block::restart_enter_()
 {
-  TRACE("restart_enter_");
+  TRACE_BLOCK("restart_enter_",this);
   const std::string restart_dir  = cello::config()->initial_restart_dir;
   if (index_.is_root()) {
     proxy_simulation[0].p_restart_enter(restart_dir);
@@ -42,7 +46,7 @@ void Block::restart_enter_()
 
 //----------------------------------------------------------------------
 
-void Simulation::p_restart_enter (std::string restart_dir)
+void Simulation::p_restart_enter (std::string name_dir)
 {
   // [ Called on root ip only ]
 
@@ -50,59 +54,41 @@ void Simulation::p_restart_enter (std::string restart_dir)
   proxy_io_enzo_reader = CProxy_IoEnzoReader::ckNew();
   proxy_enzo_simulation.p_set_io_reader(proxy_io_enzo_reader);
 
-  // Open and read the checkpoint hierarchy file
-  std::ifstream file_hierarchy = file_open_file_list_(restart_dir);
+  // Open and read the checkpoint file_list file
+  std::ifstream stream_file_list = file_open_file_list_(name_dir);
   int num_files;
-  file_hierarchy >> num_files;
+  stream_file_list >> num_files;
 
   sync_restart_done_.set_stop(num_files);
-  
+
   // Insert an IoEnzoReader element for each file
   for (int i=0; i<num_files; i++) {
-    std::string file_name;
-    file_hierarchy >> file_name;
-    // Create ith io_reader to read file_name
-    proxy_io_enzo_reader[i].insert(file_name);
-    CkPrintf ("TRACE_RESTART file %d %s\n",i,file_name.c_str());
+    std::string name_file;
+    stream_file_list >> name_file;
+    // Create ith io_reader to read name_file
+    proxy_io_enzo_reader[i].insert(name_dir,name_file);
+    CkPrintf ("TRACE_RESTART file %d %s\n",i,name_file.c_str());
   }
 
   proxy_io_enzo_reader.doneInserting();
-
-  
-
-  // file_hierarchy << std::setfill('0');
-  // int max_digits = log(check_num_files_-1)/log(10) + 1;
-  // file_hierarchy << check_num_files_ << std::endl;
-  // for (int i=0; i<check_num_files_; i++) {
-  //   file_hierarchy << "block_data-" << std::setw(max_digits) << i << ".h5" << std::endl;
-  // }
-
-  // std::ifstream file_hierarchy = file_open_file_list_();
-  //  ocheck.file_list 
-  // open hierarchy file
-  CkPrintf ("%d DEBUG_RESTART restart_dir = %s\n",CkMyPe(),restart_dir.c_str());
-  // read hierarchy file
-  CkPrintf("%d Main::restart_enter_ read hierarchy file\n",CkMyPe());
-  // create block_array
-  CkPrintf("%d Main::restart_enter_ create block array\n",CkMyPe());
-  // create IoEnzoReader array
-  CkPrintf("%d Main::restart_enter_ create IoEnzoReader array\n",CkMyPe());
-  // initialize sync_file(num_io_reader)
-  //  for (i_f = files in restart) {
-  //    io_reader[i_f].insert(file_block);
-  //  }
-  // close hierarcy file
-  CkPrintf("%d restart_enter_ close hierarchy file\n",CkMyPe());
-  fflush(stdout);
 }
 
 //----------------------------------------------------------------------
 
-IoEnzoReader::IoEnzoReader(std::string file_name) throw()
+IoEnzoReader::IoEnzoReader(std::string name_dir, std::string name_file) throw()
   : CBase_IoEnzoReader(),
-    file_name_(file_name)
+    name_dir_(name_dir),
+    name_file_(name_file),
+    stream_block_list_()
 {
-  CkPrintf ("%d IoEnzoReader(%s)\n",CkMyPe(),file_name.c_str());
+  CkPrintf ("%d IoEnzoReader(%s,%s)\n",
+            CkMyPe(),name_dir.c_str(),name_file.c_str());
+  stream_block_list_ = open_block_list_(name_dir, name_file+".block_list");
+  for (std::string block_name; read_block_list_(block_name);) {
+    CkPrintf ("TRACE_RESTART IoEnzoReader %d %s\n",
+              thisIndex,block_name.c_str());
+  }
+  close_block_list_();
   proxy_enzo_simulation[0].p_restart_done();
 }
 //----------------------------------------------------------------------
@@ -124,7 +110,7 @@ void EnzoSimulation::p_restart_done()
 
 void EnzoBlock::p_restart_done()
 {
-  TRACE("EnzoBlock::p_restart_done()");
+  TRACE_BLOCK("EnzoBlock::p_restart_done()",this);
   adapt_exit_();
 }
 
@@ -134,13 +120,44 @@ std::ifstream Simulation::file_open_file_list_(std::string name_dir)
 {
   std::string name_file = name_dir + "/check.file_list";
 
-  std::ifstream file_hierarchy (name_file);
+  std::ifstream stream_file_list (name_file);
 
   ASSERT1("Simulation::file_copen_file_list_",
           "Cannot open hierarchy file %s for writing",
-          name_file.c_str(),file_hierarchy);
+          name_file.c_str(),stream_file_list);
 
-  return file_hierarchy;
+  return stream_file_list;
+}
+
+//----------------------------------------------------------------------
+
+std::ifstream IoEnzoReader::open_block_list_
+(std::string name_dir, std::string name_file)
+{
+  std::string name_file_full = name_dir + "/" + name_file;
+
+  std::ifstream stream_block_list (name_file_full);
+
+  ASSERT1("Simulation::create_block_list_",
+          "Cannot open block_list file %s for reading",
+          name_file_full.c_str(),stream_block_list);
+
+  return stream_block_list;
+}
+
+//----------------------------------------------------------------------
+
+bool IoEnzoReader::read_block_list_(std::string & block_name)
+{
+  bool value (stream_block_list_ >> block_name);
+  CkPrintf ("TRACE_RESTART read_block_list %s\n",block_name.c_str());
+  return value;
+}
+
+//----------------------------------------------------------------------
+
+void IoEnzoReader::close_block_list_()
+{
 }
 
 // //----------------------------------------------------------------------

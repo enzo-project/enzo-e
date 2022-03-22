@@ -17,8 +17,9 @@ class EnzoMethodCheck : public Method {
 public: // interface
 
   /// Create a new EnzoMethodCheck object
-  EnzoMethodCheck(int num_files, std::string ordering,
-                  std::vector<std::string> directory);
+  EnzoMethodCheck
+  (int num_files, std::string ordering,
+   std::vector<std::string> directory);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodCheck);
@@ -39,7 +40,11 @@ public: // virtual methods
   virtual std::string name () throw ()
   { return "check"; }
 
-protected: // interface
+protected: // methods
+
+  DataMsg * create_data_msg_ (Block * block);
+
+protected: // attributes
 
   /// Number of files to write EnzoBlock data to
   int num_files_;

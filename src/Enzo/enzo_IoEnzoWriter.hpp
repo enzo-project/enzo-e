@@ -20,7 +20,8 @@ public: // interface
   : CBase_IoEnzoWriter(),
     num_files_(0),
     ordering_(""),
-    stream_block_list_()
+    stream_block_list_(),
+    file_(nullptr)
   {  }
 
   /// Constructor
@@ -41,18 +42,18 @@ public: // interface
 
 public: // entry methods
 
-  void p_write(int index_file, std::string name_this, std::string name_next,
-               Index index_this, Index index_next, int index,
-               bool is_first, bool is_last, std::string name_dir);
+  void p_write(EnzoMsgCheck *);
 
   // void r_created(CkReductionMsg *msg);
 
 protected: // functions
 
-  void write_(int index_file, std::string name_this, std::string name_next,
-               Index index_this, Index index_next, int index,
-               bool is_last);
+  FileHdf5 * file_open_(std::string name_dir, std::string name_file);
   std::ofstream create_block_list_(std::string name_dir);
+  void file_write_hierarchy_();
+  void file_write_block_(EnzoMsgCheck * msg_check);
+  void write_meta_ ( FileHdf5 * file, Io * io, std::string type_meta );
+
   void write_block_list_(std::string block_name);
   void close_block_list_();
 
@@ -68,6 +69,7 @@ protected: // attributes
 
   std::ofstream stream_block_list_;
 
+  FileHdf5 * file_;
 };
 
 #endif /* ENZO_IO_ENZO_WRITER_HPP */

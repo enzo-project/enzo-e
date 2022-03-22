@@ -356,17 +356,10 @@ public: /// entry methods
 
 protected: // methods
 
-  void check_get_parameters_
-  ( int num_files,
-    std::string ordering,
-    Index &       index_this,
-    Index &       index_next,
-    std::string & name_this,
-    std::string & name_next,
-    int &         index_block,
-    int &         index_file,
-    bool &        is_first,
-    bool &        is_last);
+  /// Create EnzoMsgCheck, returning file file index
+  int create_msg_check_
+  ( EnzoMsgCheck ** msg_check, int num_files, std::string ordering,
+    std::string name_dir = "", bool * is_first = nullptr);
 
 protected: // attributes
 

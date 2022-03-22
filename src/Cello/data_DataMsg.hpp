@@ -216,6 +216,7 @@ protected: // attributes
 
   /// Field Face Data
   FieldFace * field_face_;
+
   /// Whether FieldFace data should be deleted in destructor
   bool field_face_delete_;
 

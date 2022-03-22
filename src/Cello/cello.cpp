@@ -183,6 +183,13 @@ namespace cello {
   }
 
   //---------------------------------------------------------------------- 
+
+  const Factory * factory()
+  {
+    return simulation()->factory();
+  }
+
+  //---------------------------------------------------------------------- 
   ScalarDescr * scalar_descr_double()
   {
     static ScalarDescr * scalar_descr_double_[CONFIG_NODE_SIZE] = {nullptr};

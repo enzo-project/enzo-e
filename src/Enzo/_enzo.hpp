@@ -249,6 +249,8 @@ extern "C" {
 #include "enzo_EnzoMatrixIdentity.hpp"
 #include "enzo_EnzoMatrixLaplace.hpp"
 
+#include "enzo_EnzoMsgCheck.hpp"
+
 #include "enzo_EnzoComputeAcceleration.hpp"
 #include "enzo_EnzoComputeCicInterp.hpp"
 #include "enzo_EnzoComputePressure.hpp"

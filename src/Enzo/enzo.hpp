@@ -49,6 +49,7 @@
 
 class CProxy_EnzoBlock;
 class EnzoConfig;
+class EnzoFactory;
 class EnzoPhysicsCosmology;
 class EnzoProblem;
 class EnzoSimulation;
@@ -58,6 +59,7 @@ class EnzoUnits;
 namespace enzo {
   EnzoProblem *             problem();
   EnzoSimulation *          simulation();
+  const EnzoFactory *       factory();
   EnzoPhysicsCosmology *    cosmology();
   const EnzoMethodGrackle * grackle_method();
   EnzoUnits *               units();

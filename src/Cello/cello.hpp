@@ -46,8 +46,9 @@ class Block;
 class Boundary;
 class Config;
 class CProxy_Block;
-class FieldDescr;
+class Factory;
 class Field;
+class FieldDescr;
 class Grouping;
 class Hierarchy;
 class Monitor;
@@ -740,6 +741,8 @@ namespace cello {
 
   /// Return a pointer to the Simulation object on this process
   Simulation *    simulation();
+  /// Return a pointer to the Factory object on this process
+  const Factory * factory();
   /// Return a proxy for the Block chare array of Blocks
   CProxy_Block    block_array();
   /// Return a pointor to the Problem object defining the problem being solved

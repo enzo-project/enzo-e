@@ -349,11 +349,11 @@ void DataMsg::update (Data * data, bool is_local)
     }
 
     cello::simulation()->data_insert_particles(count);
-    
+
   }
-  
+
   // Update fields
-  
+
   if (ff != nullptr && fa != nullptr) {
 
     Field field_dst = data->field();

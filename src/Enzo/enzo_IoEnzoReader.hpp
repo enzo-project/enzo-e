@@ -18,10 +18,14 @@ public: // interface
 
   /// Constructors
   IoEnzoReader() throw()
-    : CBase_IoEnzoReader()
+  : CBase_IoEnzoReader(),
+    name_dir_(),
+    name_file_(),
+    stream_block_list_()
   { CkPrintf ("%d IoEnzoReader()\n",CkMyPe()); }
 
-  IoEnzoReader(std::string file_name) throw();
+  IoEnzoReader(std::string name_dir,
+               std::string name_file) throw();
 
   /// CHARM++ migration constructor
   IoEnzoReader(CkMigrateMessage *m) : CBase_IoEnzoReader(m) {}
@@ -30,13 +34,20 @@ public: // interface
   void pup (PUP::er &p) 
   { TRACEPUP; CBase_IoEnzoReader::pup(p); }
 
-private: // functions
+  
+protected: // functions
 
+  std::ifstream open_block_list_(std::string name_dir, std::string name_file);
+  bool read_block_list_(std::string & block_name);
+  void close_block_list_();
 
 private: // attributes
 
   // NOTE: change pup() function whenever attributes change
-  std::string file_name_;
+  std::string name_dir_;
+  std::string name_file_;
+
+  std::ifstream stream_block_list_;
 
 };
 
