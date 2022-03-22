@@ -183,7 +183,8 @@ void EnzoMethodFeedbackSTARSS::transformComovingWithStar(enzo_float * density,
   {
     // to comoving with star
     // NOTE: This transforms the velocity field into a momentum
-    //       field for the sake of depositing momentum easily 
+    //       field for the sake of depositing momentum easily
+ 
     for (int ind = 0; ind<size; ind++) {
       double mult = density[ind];
       velocity_x[ind] = (velocity_x[ind]-up)*mult;
@@ -196,6 +197,7 @@ void EnzoMethodFeedbackSTARSS::transformComovingWithStar(enzo_float * density,
   {
     // back to "lab" frame
     for (int ind = 0; ind<size; ind++) {
+      if (density[ind] == tiny_number) continue;
       double mult = 1/density[ind];
       velocity_x[ind] = velocity_x[ind]*mult + up;
       velocity_y[ind] = velocity_y[ind]*mult + vp;
@@ -356,7 +358,8 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
   
   // initialize NEvents parameter (mainly for testing). Sets off 'NEvents' supernovae,
   // with at most one supernova per star particle per cycle.
-  this->NEvents = enzo_config->method_feedback_NEvents; 
+  this->NEvents = enzo_config->method_feedback_NEvents;
+  this->tiny_number = 1e-20; 
   return;
 }
 
@@ -372,6 +375,7 @@ void EnzoMethodFeedbackSTARSS::pup (PUP::er &p)
   p | single_sn_;
   p | NEvents;
   p | ir_feedback_;
+  p | tiny_number;
 
   return;
 }
@@ -390,6 +394,10 @@ void EnzoMethodFeedbackSTARSS::compute (Block * block) throw()
 
 void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) throw()
 {
+  double tiny_number = 1e-20; // have to redefine this here because this member 
+                              // gets sliced away after the refresh operation
+                              // TODO: Find more elegant solution. Maybe define
+                              // a macro instead
   int mx, my, mz, gx, gy, gz, nx, ny, nz;
 
   double xm, ym, zm, xp, yp, zp, hx, hy, hz;
@@ -430,7 +438,6 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
   enzo_float * vy_dep_c = (enzo_float *) field.values("velocity_y_deposit_copy");
   enzo_float * vz_dep_c = (enzo_float *) field.values("velocity_z_deposit_copy");
 
-  double tiny_number = 1e-20;
 //  for (int iz=gz; iz<nz+gz; iz++){
 //    for (int iy=gy; iy<ny+gy; iy++){
 //      for (int ix=gx; ix<nx+gx; ix++){
@@ -463,9 +470,9 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
         if (isnan(vz_dep[i])) CkPrintf("NaN in vz_dep\n");
       #endif
 
-        if (te_dep_c[i] > tiny_number) { // if any deposition 
+        if (te_dep_c[i] > 10*tiny_number) { // if any deposition 
           double d_old = d[i];
-
+          //std::cout << te_dep_c[i] << std::endl;
           d [i] +=  d_dep_c[i];
 
           double d_new = d[i];
@@ -482,7 +489,7 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
 
           // rescale color fields to account for new densities
           EnzoMethodStarMaker::rescale_densities(enzo_block, i, d_new/d_old); 
-         
+         }        
   
            d_dep[i] = tiny_number;
           mf_dep[i] = tiny_number;
@@ -499,9 +506,9 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
           vx_dep_c[i] = tiny_number;
           vy_dep_c[i] = tiny_number;
           vz_dep_c[i] = tiny_number;
-         }
+         
 
-         }
+       }
 
 //      }
 //    }
@@ -808,8 +815,6 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 
   const EnzoConfig * enzo_config = enzo::config();
   bool AnalyticSNRShellMass = enzo_config->method_feedback_analytic_SNR_shell_mass;
-
-  double tiny_number = 1e-20;
 
   // Obtain grid sizes and ghost sizes
   int mx, my, mz, gx, gy, gz, nx, ny, nz;
@@ -1541,7 +1546,6 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
     for (int iy=gy; iy<ny+gy; iy++){
       for (int ix=gx; ix<nx+gx; ix++){
         int i = INDEX(ix,iy,iz,mx,my);
-  
          d_dep[i] = tiny_number;
         mf_dep[i] = tiny_number;
         te_dep[i] = tiny_number;
@@ -1549,11 +1553,10 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
         vx_dep[i] = tiny_number;
         vy_dep[i] = tiny_number;
         vz_dep[i] = tiny_number;
-
  
       }
     }
-  }
+  } 
 
 
 
