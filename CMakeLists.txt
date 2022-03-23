@@ -100,8 +100,12 @@ set(Cello_TARGET_LINK_OPTIONS "")
 option(USE_DOUBLE_PREC "Use double precision. Turn off for single precision." ON)
 if (USE_DOUBLE_PREC)
   add_compile_definitions(CONFIG_PRECISION_DOUBLE)
+  # PREC_STRING is used during test setup
+  set(PREC_STRING "double")
 else()
   add_compile_definitions(CONFIG_PRECISION_SINGLE)
+  # PREC_STRING is used during test setup
+  set(PREC_STRING "single")
 endif()
 add_compile_definitions(SMALL_INTS)
 

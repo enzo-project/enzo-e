@@ -84,21 +84,6 @@ SConscript('IOComponent/SConscript')
 
 ### env.RunSerial('test_ProlongLinear.unit',  bin_path + '/test_ProlongLinear')
 
-#----------------------------------------------------------------------
-# METHOD COSMOLOGY TESTS
-#----------------------------------------------------------------------
-SConscript('MethodCosmology/SConscript')
-
-#----------------------------------------------------------------------
-# METHOD FLUX CORRECT TESTS
-#----------------------------------------------------------------------
-SConscript('MethodFluxCorrect/SConscript')
-
-#----------------------------------------------------------------------
-# METHOD PPM TESTS
-#----------------------------------------------------------------------
-SConscript('MethodPpm/SConscript')
-
 ### cosmo_cg = env_rm_png.RunParallel \
 ###       ('test_cosmo-cg.unit',enzo_bin, ARGS='input/test_cosmo-cg.in')
 ### 
