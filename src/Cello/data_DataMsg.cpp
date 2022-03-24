@@ -121,6 +121,7 @@ int DataMsg::data_size () const
   SIZE_SCALAR_TYPE(size,int,n_fa);
   SIZE_SCALAR_TYPE(size,int,n_pd);
   SIZE_SCALAR_TYPE(size,int,n_fd);
+  SIZE_SCALAR_TYPE(size,bool,particle_data_count_);
 
   size += n_ff;
   size += n_fa;
@@ -187,6 +188,7 @@ char * DataMsg::save_data (char * buffer) const
   SAVE_SCALAR_TYPE(pc,int,n_fa);
   SAVE_SCALAR_TYPE(pc,int,n_pa);
   SAVE_SCALAR_TYPE(pc,int,n_fd);
+  SAVE_SCALAR_TYPE(pc,bool,particle_data_count_);
 
   // save field face
   if (n_ff > 0) {
@@ -265,6 +267,7 @@ char * DataMsg::load_data (char * buffer)
   LOAD_SCALAR_TYPE(pc,int,n_fa);
   LOAD_SCALAR_TYPE(pc,int,n_pa);
   LOAD_SCALAR_TYPE(pc,int,n_fd);
+  LOAD_SCALAR_TYPE(pc,bool,particle_data_count_);
 
   // load field face
   if (n_ff > 0) {
@@ -291,7 +294,6 @@ char * DataMsg::load_data (char * buffer)
   } else {
     particle_data_ = nullptr;
   }
-
   // load flux data
   if (n_fd > 0) {
     face_fluxes_list_.resize(n_fd);
@@ -347,8 +349,8 @@ void DataMsg::update (Data * data, bool is_local)
     for (int it=0; it<particle.num_types(); it++) {
       count += particle.gather (it, 1, &pd);
     }
-
-    cello::simulation()->data_insert_particles(count);
+    if (particle_data_count_)
+      cello::simulation()->data_insert_particles(count);
 
   }
 

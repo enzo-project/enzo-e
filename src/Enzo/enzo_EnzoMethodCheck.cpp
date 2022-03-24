@@ -346,6 +346,10 @@ int EnzoBlock::create_msg_check_
 
   (*msg_check)->set_name_dir (name_dir);
 
+  DataMsg * data_msg = create_data_msg_();
+  (*msg_check)->set_data_msg(data_msg);
+
+
   return index_file;
 }
 
@@ -450,8 +454,6 @@ void IoEnzoWriter::file_write_block_ (EnzoMsgCheck * msg_check)
   Data * data;
   bool data_allocated (true);
 
-  // @@@@ DataMsg does not currently support num_field_data > 1
-  
   int num_field_data=1;
   data = new Data
     (size[0],size[1],size[2],
@@ -476,6 +478,7 @@ void IoEnzoWriter::file_write_block_ (EnzoMsgCheck * msg_check)
       FieldData * field_data = data->field_data(i_h);
       for (int i_f=0; i_f<nf; i_f++) {
         const int index_field = i_f;
+;
         IoFieldData * io_field_data = enzo::factory()->create_io_field_data();
 
         void * buffer;
@@ -581,7 +584,7 @@ void IoEnzoWriter::file_write_block_ (EnzoMsgCheck * msg_check)
 
 //----------------------------------------------------------------------
 
-DataMsg * EnzoMethodCheck::create_data_msg_ (Block * block)
+DataMsg * EnzoBlock::create_data_msg_ ()
 {
   int if3[3] = {0,0,0};
   int ic3[3] = {0,0,0};
@@ -605,17 +608,19 @@ DataMsg * EnzoMethodCheck::create_data_msg_ (Block * block)
   }
 
   // Create FieldFace object specifying fields to send
-  FieldFace * field_face = block->create_face
+  FieldFace * field_face = create_face
     (if3,ic3,g3, refresh_same, refresh, true);
 
   // Create data message object to send
-  DataMsg * data_msg = new DataMsg;
+  DataMsg *   data_msg   = new DataMsg;
   if (any_fields) {
+    FieldData * field_data = data()->field_data();
     data_msg -> set_field_face (field_face,true);
-    data_msg -> set_field_data (block->data()->field_data(),false);
+    data_msg -> set_field_data (field_data,false);
   }
   if (any_particles) {
-    data_msg -> set_particle_data (block->data()->particle_data(),false);
+    ParticleData * particle_data = data()->particle_data();
+    data_msg -> set_particle_data (particle_data,false);
   }
   return data_msg;
 }

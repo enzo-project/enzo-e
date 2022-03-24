@@ -60,7 +60,8 @@ EnzoSolverDd::EnzoSolverDd
       coarse_level_(coarse_level)
 {
 
-  ixc_ = cello::define_field("X_c");
+  /// Define temporary field "X_c" for coarse grid correction
+  ixc_ = cello::field_descr()->insert_temporary();
 
   /// Initialize default Refresh
 

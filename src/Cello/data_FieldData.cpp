@@ -691,7 +691,7 @@ void FieldData::print
   printf ("DEBUG message = %s\n",message);
   printf ("DEBUG filename = %s\n",filename);
 
-  FILE * fp = fopen (filename,"w");
+  FILE * fp = fopen (filename,"a");
 
   ASSERT("FieldData::print",
 	 "FieldData not allocated",

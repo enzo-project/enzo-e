@@ -119,7 +119,7 @@ Block::Block ( MsgRefine * msg )
 	msg->cycle_, msg->time_,  msg->dt_,
 	0, NULL, msg->refresh_type_,
         msg->num_face_level_, msg->face_level_,
-        msg->adapt_);
+        msg->adapt_parent_);
 
   init_adapt_(msg->adapt_parent_);
 

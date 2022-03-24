@@ -13,7 +13,7 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
-// #define DEBUG_INITIAL
+#define DEBUG_INITIAL
 
 #ifdef DEBUG_INITIAL
 #   define TRACE_INITIAL(MSG,BLOCK)                     \
@@ -115,7 +115,10 @@ void  Block::initial_new_next_()
 {
   TRACE_INITIAL("initial_new_next_()",this);
   Initial * initial = cello::problem()->initial(index_initial_);
-  if (initial) {
+  const bool initial_restart = cello::config()->initial_restart;
+
+  // Bypass initialization on restart (may want exceptions)
+  if (initial && (! initial_restart)) {
     initial->enforce_block(this,nullptr);
   } else {
     bool is_first_cycle = (cycle_ == cello::config()->initial_cycle);

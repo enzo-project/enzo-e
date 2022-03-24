@@ -67,7 +67,6 @@ void Simulation::p_restart_enter (std::string name_dir)
     stream_file_list >> name_file;
     // Create ith io_reader to read name_file
     proxy_io_enzo_reader[i].insert(name_dir,name_file);
-    CkPrintf ("TRACE_RESTART file %d %s\n",i,name_file.c_str());
   }
 
   proxy_io_enzo_reader.doneInserting();
@@ -81,13 +80,26 @@ IoEnzoReader::IoEnzoReader(std::string name_dir, std::string name_file) throw()
     name_file_(name_file),
     stream_block_list_()
 {
-  CkPrintf ("%d IoEnzoReader(%s,%s)\n",
-            CkMyPe(),name_dir.c_str(),name_file.c_str());
-  stream_block_list_ = open_block_list_(name_dir, name_file+".block_list");
+  stream_block_list_ = open_block_list_(name_dir, name_file);
+
+  // open the HDF5 file
+  file_ = file_open_(name_dir,name_file);
+
+  // Read global attributes
+  file_read_hierarchy_();
+
   for (std::string block_name; read_block_list_(block_name);) {
-    CkPrintf ("TRACE_RESTART IoEnzoReader %d %s\n",
-              thisIndex,block_name.c_str());
+    // For each Block in the file, read the block data and create the
+    // new Block
+    EnzoMsgCheck * msg_check = new EnzoMsgCheck;
+    file_read_block_ (msg_check, block_name);
   }
+
+  // close the HDF5 file
+  file_->data_close();
+  file_->file_close();
+  delete file_;
+
   close_block_list_();
   proxy_enzo_simulation[0].p_restart_done();
 }
@@ -134,7 +146,7 @@ std::ifstream Simulation::file_open_file_list_(std::string name_dir)
 std::ifstream IoEnzoReader::open_block_list_
 (std::string name_dir, std::string name_file)
 {
-  std::string name_file_full = name_dir + "/" + name_file;
+  std::string name_file_full = name_dir + "/" + name_file + ".block_list";
 
   std::ifstream stream_block_list (name_file_full);
 
@@ -147,10 +159,214 @@ std::ifstream IoEnzoReader::open_block_list_
 
 //----------------------------------------------------------------------
 
+void IoEnzoReader::file_read_hierarchy_()
+{
+  IoHierarchy io_hierarchy = (cello::hierarchy());
+  for (size_t i=0; i<io_hierarchy.meta_count(); i++) {
+
+    void * buffer;
+    std::string name;
+    int type_scalar;
+    int nx,ny,nz;
+
+    // Get object's ith metadata
+    io_hierarchy.meta_value(i,& buffer, &name, &type_scalar, &nx,&ny,&nz);
+
+    // Read object's ith metadata
+    file_->file_read_meta(buffer,name.c_str(),&type_scalar,&nx,&ny,&nz);
+  }
+}
+
+//----------------------------------------------------------------------
+
+void IoEnzoReader::file_read_block_
+(EnzoMsgCheck * msg_check,
+ std::string    name_block)
+{
+  // Open HDF5 group for the block
+  std::string group_name = "/" + name_block;
+  file_->group_chdir(group_name);
+  file_->group_open();
+
+  // Read the Block's attributes
+  IoBlock * io_block = enzo::factory()->create_io_block();
+  read_meta_(file_, io_block, "group");
+
+  // Create and allocate the data object
+  int nx,ny,nz;
+  int root_blocks[3];
+  int root_size[3];
+  double xm,ym,zm;
+  double xp,yp,zp;
+  Hierarchy * hierarchy = cello::hierarchy();
+  hierarchy->root_blocks(root_blocks,root_blocks+1,root_blocks+2);
+  hierarchy->root_size(root_size,root_size+1,root_size+2);
+  hierarchy->lower(&xm,&ym,&zm);
+  hierarchy->upper(&xp,&yp,&zp);
+  nx=root_size[0]/root_blocks[0];
+  ny=root_size[1]/root_blocks[1];
+  nz=root_size[2]/root_blocks[2];
+
+  int num_field_blocks = 1;
+  FieldDescr * field_descr = cello::field_descr();
+  ParticleDescr * particle_descr = cello::particle_descr();
+
+  Data * data = new Data
+    (nx, ny, nz, num_field_blocks, xm,xp, ym,yp, zm,zp,
+     field_descr, particle_descr);
+
+  data->allocate();
+
+  // Loop through fields and read them in
+
+  CkPrintf ("TRACE_RESTART field_count %d num_permanent %d\n",
+            field_descr->field_count(),
+            field_descr->num_permanent());
+
+  Field field = data->field();
+
+  for (int i_f=0; i_f<field_descr->num_permanent(); i_f++) {
+
+    const std::string field_name = field_descr->field_name(i_f);
+    int index_field = field_descr->field_id(field_name);
+
+    const std::string dataset_name = std::string("field_") + field_name;
+    int m4[4];
+    int type_data = type_unknown;
+    file_->data_open (dataset_name, &type_data,
+                      m4,m4+1,m4+2,m4+3);
+    int mx,my,mz;
+    int gx,gy,gz;
+
+    field.dimensions(index_field,&mx,&my,&mz);
+    field.ghost_depth(index_field,&gx,&gy,&gz);
+
+    double lower[3];
+    double upper[3];
+    io_block->lower(lower);
+    io_block->upper(upper);
+    char * buffer = field.values(field_name);
+
+    CkPrintf ("TRACE_RESTART block %s reading field %s\n",
+              name_block.c_str(),field_name.c_str());
+    fflush(stdout);
+    read_dataset_
+      (file_, buffer, type_data, nx,ny,nz,m4);
+
+    file_->data_close();
+
+    enzo_float * values = (enzo_float *)field.values(field_name);
+
+  }
+
+  // Read in particle data
+
+  Particle particle = data->particle();
+
+  // for each particle type
+  for (int it=0; it<particle_descr->num_types(); it++) {
+
+    const std::string particle_name = particle_descr->type_name(it);
+    // for each attribute of the particle type
+    const int na = particle_descr->num_attributes(it);
+    for (int ia=0; ia<na; ia++) {
+      const std::string attribute_name = particle_descr->attribute_name(it,ia);
+
+      const std::string dataset_name =
+        std::string("particle_") + particle_name + "_" + attribute_name;
+      int m4[4];
+      int type_data = type_unknown;
+      file_->data_open (dataset_name, &type_data,
+                        m4,m4+1,m4+2,m4+3);
+
+      const int np = m4[0];
+
+      // allocate particles at start once count is known
+      if (ia==0) {
+        CkPrintf ("IoEnzoReader %d inserting %d particles\n",thisIndex,np);
+        particle.insert_particles(it,np);
+      }
+
+      // read particle attribute into single array first...
+      union {
+        char * buffer;
+        float * buffer_single;
+        double * buffer_double;
+      };
+
+      buffer = file_->allocate_buffer(np,type_data);
+
+      CkPrintf ("TRACE_RESTART particle %d %s %d\n",
+                it,dataset_name.c_str(), np);
+      int nx=m4[0];
+      int ny=m4[1];
+      int nz=m4[2];
+      read_dataset_(file_, buffer, type_data, nx,ny,nz,m4);
+
+      // ...then copy to particle batches
+
+      if (type_data == type_single) {
+        copy_buffer_to_particle_attribute_
+          (buffer_single, particle, it, ia, np);
+      } else if (type_data == type_double) {
+        copy_buffer_to_particle_attribute_
+          (buffer_double, particle, it, ia, np);
+      }
+    }
+  }
+  file_->group_close();
+}
+
+//----------------------------------------------------------------------
+
+template <class T>
+void IoEnzoReader::copy_buffer_to_particle_attribute_
+(T * buffer, Particle particle, int it, int ia, int np)
+{
+  for (int ip=0; ip<np; ip++) {
+    int ib,io;
+    particle.index(ip,&ib,&io);
+    T * batch = (T *) particle.attribute_array(it,ia,ib);
+    batch[io] = buffer[ip];
+  }
+}
+
+//----------------------------------------------------------------------
+
+void IoEnzoReader::read_meta_
+( FileHdf5 * file, Io * io, std::string type_meta )
+{
+  for (size_t i=0; i<io->meta_count(); i++) {
+
+    void * buffer;
+    std::string name;
+    int type_scalar;
+    int nx,ny,nz;
+
+    // Get object's ith metadata
+    io->meta_value(i,& buffer, &name, &type_scalar, &nx,&ny,&nz);
+
+    // Read object's ith metadata
+    if ( type_meta == "group" ) {
+      file->group_read_meta(buffer,name.c_str(),&type_scalar,&nx,&ny,&nz);
+    } else if (type_meta == "file") {
+      file->file_read_meta(buffer,name.c_str(),&type_scalar,&nx,&ny,&nz);
+    } else {
+      ERROR1 ("MethodOutput::read_meta_()",
+              "Unknown type_meta \"%s\"",
+              type_meta.c_str());
+    }
+    // Get object's ith metadata
+
+    io->meta_value(i,& buffer, &name, &type_scalar, &nx,&ny,&nz);
+  }
+  ((IoEnzoBlock*)io)->print("EnzoBlock");
+}
+//----------------------------------------------------------------------
+
 bool IoEnzoReader::read_block_list_(std::string & block_name)
 {
   bool value (stream_block_list_ >> block_name);
-  CkPrintf ("TRACE_RESTART read_block_list %s\n",block_name.c_str());
   return value;
 }
 
@@ -160,37 +376,45 @@ void IoEnzoReader::close_block_list_()
 {
 }
 
-// //----------------------------------------------------------------------
+//----------------------------------------------------------------------
+FileHdf5 * IoEnzoReader::file_open_
+(std::string path_name, std::string file_name)
+{
+  // Create File
+  file_name = file_name + ".h5";
+  FileHdf5 * file = new FileHdf5 (path_name, file_name);
+  file->file_open();
 
-// void Block::restart_enter_()
-// {
-//   TRACE_ENZO_RESTART_BLOCK("restart_enter_",this);
-//   const std::string restart_dir  = cello::config()->initial_restart_dir;
-//   const std::string restart_file = cello::config()->initial_restart_file;
-//   if (index_.is_root()) {
-//     proxy_main.p_restart_enter(restart_dir,restart_file);
-//   }
-// }
+  return file;
+}
 
-// //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
-// void Main::p_restart_enter
-// (std::string restart_dir, std::string restart_file)
-// {
-//   // open hierarchy file
-//   TRACE_RESTART_MAIN("Main::restart_enter_ open hierarchy file");
-//   CkPrintf ("DEBUG_RESTART restart_dir = %s\n",restart_dir.c_str());
-//   CkPrintf ("DEBUG_RESTART restart_file = %s\n",restart_file.c_str());
-//   // read hierarchy file
-//   TRACE_RESTART_MAIN("Main::restart_enter_ read hierarchy file");
-//   // create block_array
-//   TRACE_RESTART_MAIN("Main::restart_enter_ create block array");
-//   // create IoEnzoReader array
-//   TRACE_RESTART_MAIN("Main::restart_enter_ create IoEnzoReader array");
-//   // initialize sync_file(num_io_reader)
-//   //  for (i_f = files in restart) {
-//   //    io_reader[i_f].insert(file_block);
-//   //  }
-//   // close hierarcy file
-//   TRACE_RESTART_MAIN("restart_enter_ close hierarchy file");
-// }
+void IoEnzoReader::read_dataset_
+(File * file, char * buffer, int type_data,
+ int nx, int ny, int nz,
+ int m4[4])
+{
+  // Read the domain dimensions
+
+  // field size
+  int n4[4];
+  n4[0] = n4[1] = n4[2] = n4[3] = 1;
+  n4[0] = nx;
+  n4[1] = ny;
+  n4[2] = nz;
+
+  // determine offsets
+  int o4[4] = {0,0,0,0};
+
+  // open the dataspace
+  file-> data_slice
+    (m4[0],m4[1],m4[2],m4[3],
+     n4[0],n4[1],n4[2],n4[3],
+     o4[0],o4[1],o4[2],o4[3]);
+
+  // create memory space
+  file->mem_create (nx,ny,nz,nx,ny,nz,0,0,0);
+
+  file->data_read (buffer);
+}

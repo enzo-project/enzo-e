@@ -26,6 +26,7 @@ public: // interface
       field_data_delete_   (false),
       particle_data_(nullptr),
       particle_data_delete_(false),
+      particle_data_count_(true),
       face_fluxes_list_(),
       face_fluxes_delete_(),
       coarse_field_buffer_(),
@@ -147,6 +148,10 @@ public: // interface
     particle_data_ = nullptr; 
   }
 
+  /// Set whether to count the particles when received
+  void set_particle_count (bool do_count)
+  { particle_data_count_ = do_count; }
+  
   /// --------------------
   /// FLUX DATA
   /// --------------------
@@ -237,6 +242,8 @@ protected: // attributes
   ParticleData * particle_data_;
   /// Whether Particle data should be deleted in destructor
   bool particle_data_delete_;
+  /// Whether Particle data should be counted in update(data)
+  bool particle_data_count_;
 
   /// Flux faces (array for each field)
   std::vector<FaceFluxes *> face_fluxes_list_;

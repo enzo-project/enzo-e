@@ -361,6 +361,9 @@ protected: // methods
   ( EnzoMsgCheck ** msg_check, int num_files, std::string ordering,
     std::string name_dir = "", bool * is_first = nullptr);
 
+  /// Create a DataMsg object for this block
+  DataMsg *create_data_msg_();
+
 protected: // attributes
 
 public: // attributes (YIKES!)

@@ -109,6 +109,7 @@ public: // interface
   void set_name_dir (std::string name_dir)
   { name_dir_ = name_dir; }
 
+  void set_io_block(IoBlock * io_block) { io_block_ = io_block; }
   IoBlock * io_block() { return io_block_; }
 
 public: // static methods

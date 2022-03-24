@@ -55,6 +55,17 @@ public: // interface
 
 #include "_io_Io_common.hpp"
   
+  void lower (double lower[3]) {
+    lower[0]=lower_[0];
+    lower[1]=lower_[1];
+    lower[2]=lower_[2];
+  }
+  void upper (double upper[3]) {
+    upper[0]=upper_[0];
+    upper[1]=upper_[1];
+    upper[2]=upper_[2];
+  }
+
   /// PACKING / UNPACKING
   
   /// Return the number of bytes required to serialize the data object

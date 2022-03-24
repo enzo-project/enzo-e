@@ -21,8 +21,9 @@ public: // interface
   : CBase_IoEnzoReader(),
     name_dir_(),
     name_file_(),
-    stream_block_list_()
-  { CkPrintf ("%d IoEnzoReader()\n",CkMyPe()); }
+    stream_block_list_(),
+    file_(nullptr)
+  { }
 
   IoEnzoReader(std::string name_dir,
                std::string name_file) throw();
@@ -37,9 +38,22 @@ public: // interface
   
 protected: // functions
 
+  FileHdf5 * file_open_(std::string name_dir, std::string name_file);
   std::ifstream open_block_list_(std::string name_dir, std::string name_file);
+  void file_read_hierarchy_();
+  void file_read_block_(EnzoMsgCheck * msg_check, std::string file_name);
+  void read_meta_ ( FileHdf5 * file, Io * io, std::string type_meta );
   bool read_block_list_(std::string & block_name);
   void close_block_list_();
+  void read_dataset_
+  (File * file, char * buffer, int type_data,
+   int nx, int ny, int nz,
+   int m4[4]);
+
+  template <class T>
+  void copy_buffer_to_particle_attribute_
+  (T * buffer, Particle particle, int it, int ia, int np);
+
 
 private: // attributes
 
@@ -49,6 +63,7 @@ private: // attributes
 
   std::ifstream stream_block_list_;
 
+  FileHdf5 * file_;
 };
 
 #endif /* ENZO_IO_ENZO_READER_HPP */
