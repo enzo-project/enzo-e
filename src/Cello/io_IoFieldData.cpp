@@ -115,13 +115,12 @@ void IoFieldData::field_array
 
   }
 }
+
 //----------------------------------------------------------------------
 
-void IoFieldData::particle_array 
-(int it, int ib, int ia,
- void ** buffer, std::string * name, int * type,
- int * n, int * k) throw()
+void IoFieldData::save_to (void * v)
 {
+  INCOMPLETE("IoFieldData::save_to()");
 }
 
 //----------------------------------------------------------------------

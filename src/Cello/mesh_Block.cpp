@@ -127,7 +127,6 @@ Block::Block ( MsgRefine * msg )
 
   performance_stop_(perf_block);
 
-  //  CkFreeMsg (msg);
 #endif
 }
 

@@ -53,8 +53,6 @@ public: // interface
   /// Set block
   virtual void set_block (Block * block) throw();
 
-#include "_io_Io_common.hpp"
-  
   void lower (double lower[3]) {
     lower[0]=lower_[0];
     lower[1]=lower_[1];
@@ -66,6 +64,8 @@ public: // interface
     upper[2]=upper_[2];
   }
 
+  void index(int index3[3]) { index3[0]=index_[0]; index3[1]=index_[1]; index3[2]=index_[2]; }
+  
   /// PACKING / UNPACKING
   
   /// Return the number of bytes required to serialize the data object
@@ -76,6 +76,15 @@ public: // interface
 
   /// Restore the object from the provided initialized memory buffer data.
   virtual char * load_data (char * buffer);
+
+  /// Return the ith metadata item associated with the object
+  virtual void meta_value 
+  (int index, 
+   void ** buffer, std::string * name, int * type,
+   int * nxd=0, int * nyd=0, int * nzd=0) throw();
+
+  /// Copy the values to the object
+  virtual void save_to (void *); 
 
   virtual void print(const char * msg)
   {

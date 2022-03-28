@@ -63,6 +63,9 @@ public: // interface
   /// Restore the object from the provided initialized memory buffer data.
   virtual char * load_data (char * buffer);
 
+  /// Copy the values to the object
+  virtual void save_to (void *); 
+
   virtual void print(const char * msg)
   {
     CkPrintf ("DEBUG_IO_ENZO_BLOCK %d %s\n",CkMyPe(),msg);
@@ -78,7 +81,7 @@ public: // interface
               enzo_GridEndIndex_[0], enzo_GridEndIndex_[1], enzo_GridEndIndex_[2]);
     CkPrintf ("DEBUG_IO_ENZO_BLOCK enzo_CellWidth_      %g %g %g\n",
               enzo_CellWidth_[0], enzo_CellWidth_[1], enzo_CellWidth_[2]);
-    CkPrintf ("DEBUG_IO_ENZO_BLOCK eonz_redshift_       %g\n",
+    CkPrintf ("DEBUG_IO_ENZO_BLOCK enzo_redshift_       %g\n",
               enzo_redshift_);
 
     IoBlock::print(msg);

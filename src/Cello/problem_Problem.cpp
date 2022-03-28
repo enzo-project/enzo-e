@@ -624,11 +624,7 @@ Initial * Problem::create_initial_
 
   Initial * initial = nullptr;
 
-  if (type == "file") {
-    initial = new InitialFile (parameters,
-			       config->initial_cycle,
-			       config->initial_time);;
-  } else if (type == "value") {
+  if (type == "value") {
     initial = new InitialValue(parameters,
 			       config->initial_cycle,
 			       config->initial_time);
@@ -916,6 +912,7 @@ Method * Problem::create_method_
 
     method = new MethodDebug
       (config->num_fields,
+       config->num_particles,
        config->method_debug_print[index_method],
        config->method_debug_coarse[index_method],
        config->method_debug_ghost[index_method]);

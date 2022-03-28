@@ -1,34 +1,34 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     io_IoHierarchy.hpp
+/// @file     io_IoSimulation.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     2011-10-06
-/// @brief    [\ref Io] Declaration of the IoHierarchy class
+/// @date     2022-03-24
+/// @brief    [\ref Io] Declaration of the IoSimulation class
 
-#ifndef IO_IO_HIERARCHY_HPP
-#define IO_IO_HIERARCHY_HPP
+#ifndef IO_IO_SIMULATION_HPP
+#define IO_IO_SIMULATION_HPP
 
-class Hierarchy;
+class Simulation;
 
-class IoHierarchy : public Io {
+class IoSimulation : public Io {
 
-  /// @class    IoHierarchy
+  /// @class    IoSimulation
   /// @ingroup  Io
-  /// @brief    [\ref Io] Class for linking between Hierarchy and Output classes
+  /// @brief    [\ref Io] Class for linking between Simulation and IO
 
 public: // interface
 
   /// Constructor
-  IoHierarchy(const Hierarchy * hierarchy) throw();
+  IoSimulation(const Simulation * simulation) throw();
 
   /// CHARM++ PUP::able declaration
-  PUPable_decl(IoHierarchy);
+  PUPable_decl(IoSimulation);
 
   /// CHARM++ migration constructor
-  IoHierarchy(CkMigrateMessage *m) : Io(m) {}
+  IoSimulation(CkMigrateMessage *m) : Io(m) {}
 
   /// Destructor
-  virtual ~IoHierarchy () throw()
+  virtual ~IoSimulation () throw()
   {}
 
   /// CHARM++ Pack / Unpack function
@@ -41,11 +41,11 @@ public: // interface
 
     Io::pup(p);
 
-    PUParray(p,lower_,3);
-    PUParray(p,upper_,3);
-    p | max_level_;
+    p | rank_; 
+    p | cycle_;
+    p | time_;
+    p | dt_;
   }
-
 
   /// Return the ith metadata item associated with the object
   virtual void meta_value 
@@ -58,11 +58,19 @@ public: // interface
 
 private: // attributes
 
-  double lower_[3];
-  double upper_[3];
-  int max_level_;
+  /// Rank of the simulation
+  int  rank_; 
+
+  /// Current cycle
+  int cycle_;
+
+  /// Current time
+  double time_;
+
+  /// Current timestep
+  double dt_;
 
 };
 
-#endif /* IO_IO_HIERARCHY_HPP */
+#endif /* IO_IO_SIMULATION_HPP */
 

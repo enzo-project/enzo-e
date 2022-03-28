@@ -62,6 +62,9 @@ public:
   inline int operator [] (std::size_t i) const
   { return v_[i]; }
 
+  inline int & operator [] (std::size_t i)
+  { return v_[i]; }
+
   void clear () ;
 
   Index index_parent (int min_level = 0) const;

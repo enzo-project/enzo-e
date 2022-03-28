@@ -109,6 +109,7 @@ public: // interface
 #else
   /// Initialize the EnzoBlock chare array
   EnzoBlock ( MsgRefine * msg );
+  EnzoBlock ( EnzoMsgCheck * msg );
 #endif
 
   /// Initialize an empty EnzoBlock
@@ -246,6 +247,9 @@ public: /// entry methods
 
   /// Exit EnzoMethodCheck
   void p_check_done();
+
+  /// Initialize restart data in existing Block (level == 0)
+  void p_restart_set_data(EnzoMsgCheck * );
 
   /// Exit restart
   void p_restart_done();

@@ -18,6 +18,39 @@
 #include "main.hpp"
 
 // #define TRACE
+// #define PRINT_FIELD
+
+#ifdef PRINT_FIELD
+#   undef PRINT_FIELD
+
+#   define PRINT_FIELD(MSG,FIELD,DATA)                                  \
+  {                                                                     \
+  Field field = DATA->field();                                          \
+  int mx,my,mz;                                                         \
+  int gx,gy,gz;                                                         \
+  int index_field = field.field_id(FIELD);                              \
+  field.dimensions(index_field,&mx,&my,&mz);                            \
+  field.ghost_depth(index_field,&gx,&gy,&gz);                           \
+  enzo_float * value = (enzo_float *)field.values(FIELD);               \
+  enzo_float min=1e30;                                                  \
+  enzo_float max=-1e30;                                                 \
+  enzo_float sum=0;                                                     \
+  for (int iz=gz; iz<mz-gz; iz++) {                                     \
+    for (int iy=gy; iy<my-gy; iy++) {                                   \
+      for (int ix=gx; ix<mx-gx; ix++) {                                 \
+        const int i=ix+mx*(iy+my*iz);                                   \
+        min=std::min(min,value[i]);                                        \
+        max=std::max(max,value[i]);                                        \
+        sum+=value[i];                                                     \
+      }                                                                 \
+    }                                                                   \
+  }                                                                     \
+  CkPrintf ("PRINT_FIELD %s %s  %g %g %g\n",MSG,FIELD,min,max,sum/((mx-2*gx)*(my-2*gy)*(mz-2*gz))); \
+  }
+#else
+#   define PRINT_FIELD(MSG,FIELD,DATA) /* ... */
+#endif
+
 
 #ifdef TRACE
 #   undef TRACE
@@ -85,14 +118,34 @@ IoEnzoReader::IoEnzoReader(std::string name_dir, std::string name_file) throw()
   // open the HDF5 file
   file_ = file_open_(name_dir,name_file);
 
+  sync_blocks_.reset();
+
   // Read global attributes
   file_read_hierarchy_();
 
   for (std::string block_name; read_block_list_(block_name);) {
+
+    // Increment block counter so know when to alert pe=0 when done
+    sync_blocks_.inc_stop(1);
+
     // For each Block in the file, read the block data and create the
     // new Block
     EnzoMsgCheck * msg_check = new EnzoMsgCheck;
     file_read_block_ (msg_check, block_name);
+
+    Index index;
+    int v3[3];
+    msg_check->io_block_->index(v3);
+    index.set_values(v3);
+    const int level = index.level();
+    msg_check->index_file_ = thisIndex;
+    if (level > 0) {
+    } else if (level == 0) {
+      enzo::block_array()[index].p_restart_set_data(msg_check);
+    } else {
+      // level < 0: done
+      block_ready_(block_name);
+    }
   }
 
   // close the HDF5 file
@@ -101,7 +154,30 @@ IoEnzoReader::IoEnzoReader(std::string name_dir, std::string name_file) throw()
   delete file_;
 
   close_block_list_();
-  proxy_enzo_simulation[0].p_restart_done();
+
+}
+
+//----------------------------------------------------------------------
+
+void EnzoBlock::p_restart_set_data(EnzoMsgCheck * msg_check)
+{
+  const int index_file = msg_check->index_file_;
+  msg_check->update(this);
+  PRINT_FIELD("recv","density",data());
+  delete msg_check;
+  proxy_io_enzo_reader[index_file].p_block_ready(name());
+}
+
+//----------------------------------------------------------------------
+
+void IoEnzoReader::p_block_ready(std::string block_name)
+{ block_ready_(block_name); }
+
+void IoEnzoReader::block_ready_(std::string block_name)
+{
+  if (sync_blocks_.next()) {
+    proxy_enzo_simulation[0].p_restart_done();
+  }
 }
 //----------------------------------------------------------------------
 
@@ -114,7 +190,6 @@ void EnzoSimulation::p_set_io_reader(CProxy_IoEnzoReader io_enzo_reader)
 
 void EnzoSimulation::p_restart_done()
 {
-  TRACE("EnzoSimulation::p_restart_done");
   if (sync_restart_done_.next()) {
     enzo::block_array().p_restart_done();
   }
@@ -161,6 +236,25 @@ std::ifstream IoEnzoReader::open_block_list_
 
 void IoEnzoReader::file_read_hierarchy_()
 {
+  // Simulation data
+  IoSimulation io_simulation = (cello::simulation());
+  for (size_t i=0; i<io_simulation.meta_count(); i++) {
+
+    void * buffer;
+    std::string name;
+    int type_scalar;
+    int nx,ny,nz;
+
+    // Get object's ith metadata
+    io_simulation.meta_value(i,& buffer, &name, &type_scalar, &nx,&ny,&nz);
+
+    // Read object's ith metadata
+    file_->file_read_meta(buffer,name.c_str(),&type_scalar,&nx,&ny,&nz);
+  }
+
+  io_simulation.save_to(cello::simulation());
+  
+  // Hierarchy data
   IoHierarchy io_hierarchy = (cello::hierarchy());
   for (size_t i=0; i<io_hierarchy.meta_count(); i++) {
 
@@ -175,6 +269,7 @@ void IoEnzoReader::file_read_hierarchy_()
     // Read object's ith metadata
     file_->file_read_meta(buffer,name.c_str(),&type_scalar,&nx,&ny,&nz);
   }
+  io_hierarchy.save_to(cello::hierarchy());
 }
 
 //----------------------------------------------------------------------
@@ -190,7 +285,11 @@ void IoEnzoReader::file_read_block_
 
   // Read the Block's attributes
   IoBlock * io_block = enzo::factory()->create_io_block();
+  msg_check->set_io_block(io_block);
   read_meta_(file_, io_block, "group");
+
+  DataMsg * data_msg = new DataMsg;
+  msg_check->data_msg_ = data_msg;
 
   // Create and allocate the data object
   int nx,ny,nz;
@@ -219,13 +318,25 @@ void IoEnzoReader::file_read_block_
 
   // Loop through fields and read them in
 
-  CkPrintf ("TRACE_RESTART field_count %d num_permanent %d\n",
-            field_descr->field_count(),
-            field_descr->num_permanent());
-
+  const int num_fields = field_descr->num_permanent();
   Field field = data->field();
 
-  for (int i_f=0; i_f<field_descr->num_permanent(); i_f++) {
+  if (num_fields > 0) {
+    // If any fields, add them to DataMsg
+    Refresh * refresh = new Refresh;
+    refresh->add_all_data();
+    FieldFace  * field_face = new FieldFace(cello::rank());
+
+    field_face -> set_refresh_type (refresh_same);
+    field_face -> set_child (0,0,0);
+    field_face -> set_face (0,0,0);
+    field_face -> set_ghost(true,true,true);
+    field_face -> set_refresh(refresh,true);
+
+    data_msg -> set_field_face (field_face,false);
+    data_msg -> set_field_data (data->field_data(),false);
+  }
+  for (int i_f=0; i_f<num_fields; i_f++) {
 
     const std::string field_name = field_descr->field_name(i_f);
     int index_field = field_descr->field_id(field_name);
@@ -247,15 +358,11 @@ void IoEnzoReader::file_read_block_
     io_block->upper(upper);
     char * buffer = field.values(field_name);
 
-    CkPrintf ("TRACE_RESTART block %s reading field %s\n",
-              name_block.c_str(),field_name.c_str());
-    fflush(stdout);
     read_dataset_
-      (file_, buffer, type_data, nx,ny,nz,m4);
+      (file_, buffer, type_data, mx,my,mz,m4);
 
+    PRINT_FIELD("send",field_name.c_str(),data);
     file_->data_close();
-
-    enzo_float * values = (enzo_float *)field.values(field_name);
 
   }
 
@@ -264,7 +371,12 @@ void IoEnzoReader::file_read_block_
   Particle particle = data->particle();
 
   // for each particle type
-  for (int it=0; it<particle_descr->num_types(); it++) {
+  const int num_types = particle_descr->num_types();
+  if (num_types > 0) {
+    // If any fields, add them to DataMsg
+    data_msg -> set_particle_data (particle.particle_data(),true);
+  }
+  for (int it=0; it<num_types; it++) {
 
     const std::string particle_name = particle_descr->type_name(it);
     // for each attribute of the particle type
@@ -283,7 +395,6 @@ void IoEnzoReader::file_read_block_
 
       // allocate particles at start once count is known
       if (ia==0) {
-        CkPrintf ("IoEnzoReader %d inserting %d particles\n",thisIndex,np);
         particle.insert_particles(it,np);
       }
 
@@ -296,8 +407,6 @@ void IoEnzoReader::file_read_block_
 
       buffer = file_->allocate_buffer(np,type_data);
 
-      CkPrintf ("TRACE_RESTART particle %d %s %d\n",
-                it,dataset_name.c_str(), np);
       int nx=m4[0];
       int ny=m4[1];
       int nz=m4[2];
@@ -360,7 +469,6 @@ void IoEnzoReader::read_meta_
 
     io->meta_value(i,& buffer, &name, &type_scalar, &nx,&ny,&nz);
   }
-  ((IoEnzoBlock*)io)->print("EnzoBlock");
 }
 //----------------------------------------------------------------------
 

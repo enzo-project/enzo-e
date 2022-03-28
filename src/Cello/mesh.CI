@@ -38,15 +38,14 @@ module mesh {
   PUPable Config;
   PUPable Factory;
   PUPable Initial;
-  PUPable InitialFile;
   PUPable InitialTrace;
   PUPable InitialValue;
-  PUPable InputData;
   PUPable Io;
   PUPable IoBlock;
   PUPable IoFieldData;
   PUPable IoHierarchy;
   PUPable IoParticleData;
+  PUPable IoSimulation;
   PUPable ItIndexList;
   PUPable ItIndexRange;
   PUPable MaskExpr;

@@ -390,7 +390,26 @@ FileHdf5 * IoEnzoWriter::file_open_
 
 void IoEnzoWriter::file_write_hierarchy_()
 {
+  IoSimulation io_simulation = (cello::simulation());
+
+  for (size_t i=0; i<io_simulation.meta_count(); i++) {
+
+    void * buffer;
+    std::string name;
+    int type_scalar;
+    int nx,ny,nz;
+
+    // Get object's ith metadata
+    io_simulation.meta_value(i,& buffer, &name, &type_scalar, &nx,&ny,&nz);
+
+    // Write object's ith metadata
+    file_->file_write_meta(buffer,name.c_str(),type_scalar,nx,ny,nz);
+  }
+
+  io_simulation.save_to(cello::simulation());
+
   IoHierarchy io_hierarchy = (cello::hierarchy());
+
   for (size_t i=0; i<io_hierarchy.meta_count(); i++) {
 
     void * buffer;
@@ -432,8 +451,6 @@ void IoEnzoWriter::file_write_block_ (EnzoMsgCheck * msg_check)
   //  const bool is_local = (msg_check == nullptr);
 
   IoBlock * io_block = msg_check->io_block();
-  CkPrintf ("TRACE_CHECK io_block = %p\n",(void*)io_block);
-  fflush(stdout);
   double * lower = msg_check->block_lower();
   double * upper = msg_check->block_upper();
   int * size     = msg_check->block_size();

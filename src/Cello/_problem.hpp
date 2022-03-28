@@ -59,7 +59,6 @@ extern void method_close_files_mutex_init();
 #include "problem_Stopping.hpp"
 #include "problem_Initial.hpp"
 #include "problem_InitialTrace.hpp"
-#include "problem_InitialFile.hpp"
 #include "problem_InitialValue.hpp"
 #include "problem_Boundary.hpp"
 #include "problem_BoundaryPeriodic.hpp"

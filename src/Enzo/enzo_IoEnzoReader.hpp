@@ -22,7 +22,8 @@ public: // interface
     name_dir_(),
     name_file_(),
     stream_block_list_(),
-    file_(nullptr)
+    file_(nullptr),
+    sync_blocks_()
   { }
 
   IoEnzoReader(std::string name_dir,
@@ -35,8 +36,11 @@ public: // interface
   void pup (PUP::er &p) 
   { TRACEPUP; CBase_IoEnzoReader::pup(p); }
 
-  
+  void p_block_ready(std::string);
+
 protected: // functions
+
+  void block_ready_(std::string);
 
   FileHdf5 * file_open_(std::string name_dir, std::string name_file);
   std::ifstream open_block_list_(std::string name_dir, std::string name_file);
@@ -54,7 +58,6 @@ protected: // functions
   void copy_buffer_to_particle_attribute_
   (T * buffer, Particle particle, int it, int ia, int np);
 
-
 private: // attributes
 
   // NOTE: change pup() function whenever attributes change
@@ -64,6 +67,8 @@ private: // attributes
   std::ifstream stream_block_list_;
 
   FileHdf5 * file_;
+
+  Sync sync_blocks_;
 };
 
 #endif /* ENZO_IO_ENZO_READER_HPP */

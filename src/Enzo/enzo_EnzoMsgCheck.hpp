@@ -48,6 +48,9 @@ public: // interface
   /// Copy data from this message into the provided Data object
   void update (Data * data);
 
+  /// Copy Block data from message into the provided Block
+  void update (EnzoBlock * block);
+
   /// Return the Index of the sending Block
   Index index_send();
 
@@ -143,7 +146,8 @@ protected: // methods
     index_block_ = enzo_msg_check.index_block_;
     is_first_    = enzo_msg_check.is_first_;
     is_last_     = enzo_msg_check.is_last_;
-    name_dir_     = enzo_msg_check.name_dir_;
+    name_dir_    = enzo_msg_check.name_dir_;
+    index_file_  = enzo_msg_check.index_file_;
   }
 
 protected: // attributes
@@ -185,6 +189,9 @@ protected: // attributes
   bool is_last_;
 
   std::string name_dir_;
+
+  /// Index for io_reader for restart
+  int index_file_;
 };
 
 #endif /* CHARM_ENZO_MSG_CHECK_HPP */

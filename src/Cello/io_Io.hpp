@@ -50,11 +50,22 @@ public: // interface
   /// Restore the object from the provided initialized memory buffer data.
   virtual char * load_data (char * buffer);
 
-#include "_io_Io_common.hpp"
+  /// Return the ith metadata item associated with the object
+  virtual void meta_value 
+  (int index, 
+   void ** buffer, std::string * name, int * type,
+   int * nxd=0, int * nyd=0, int * nzd=0) throw();
+
+  /// Copy the values to the object
+  virtual void save_to (void *)
+  { } 
+
+public: // interface
 
   /// Return number of metadata items associated with the associated class
   size_t meta_count() const throw()
   { return meta_name_.size(); }
+
 
 protected: // attributes
 

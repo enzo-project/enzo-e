@@ -13,7 +13,7 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
-#define DEBUG_INITIAL
+// #define DEBUG_INITIAL
 
 #ifdef DEBUG_INITIAL
 #   define TRACE_INITIAL(MSG,BLOCK)                     \

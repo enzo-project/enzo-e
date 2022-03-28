@@ -198,6 +198,7 @@ module enzo {
     entry void p_check_done();
 
     // restart
+    entry void p_restart_set_data(EnzoMsgCheck *);
     entry void p_restart_done();
 
     // EnzoSolverCg synchronization entry methods
@@ -262,6 +263,7 @@ module enzo {
   array[1D] IoEnzoReader : IoReader {
     entry IoEnzoReader();
     entry IoEnzoReader(std::string name_dir, std::string name_file);
+    entry void p_block_ready(std::string);
   };
 
   array[1D] IoEnzoWriter : IoWriter {

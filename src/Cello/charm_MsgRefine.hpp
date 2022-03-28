@@ -8,6 +8,8 @@
 #ifndef CHARM_MSG_REFINE_HPP
 #define CHARM_MSG_REFINE_HPP
 
+// #define DEBUG_MSG_REFINE
+
 #include "cello.hpp"
 
 class Adapt;
@@ -58,7 +60,7 @@ public: // interface
 
   /// Set the DataMsg object
   void set_data_msg (DataMsg * data_msg);
-  
+
   /// Update the Data with data stored in this message
   void update (Data * data);
 

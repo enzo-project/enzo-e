@@ -35,8 +35,9 @@ class Simulation : public CBase_Simulation
 
 public: // interface
 
-  /// Simulation constructor
+  friend class IoSimulation;
 
+  /// Simulation constructor
 
   Simulation
   ( const char *       parameter_file,

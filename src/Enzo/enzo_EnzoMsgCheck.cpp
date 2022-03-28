@@ -33,7 +33,8 @@ EnzoMsgCheck::EnzoMsgCheck()
     index_block_(),
     is_first_(),
     is_last_(),
-    name_dir_()
+    name_dir_(),
+    index_file_(-1)
 {
   ++counter[cello::index_static()];
   cello::hex_string(tag_,TAG_LEN);
@@ -102,6 +103,7 @@ void * EnzoMsgCheck::pack (EnzoMsgCheck * msg)
   SIZE_SCALAR_TYPE(size,bool,msg->is_first_);
   SIZE_SCALAR_TYPE(size,bool,msg->is_last_);
   SIZE_STRING_TYPE(size,msg->name_dir_);
+  SIZE_SCALAR_TYPE(size,int,msg->index_file_);
 
   //--------------------------------------------------
 
@@ -149,6 +151,7 @@ void * EnzoMsgCheck::pack (EnzoMsgCheck * msg)
   SAVE_SCALAR_TYPE(pc,bool,msg->is_first_);
   SAVE_SCALAR_TYPE(pc,bool,msg->is_last_);
   SAVE_STRING_TYPE(pc,msg->name_dir_);
+  SAVE_SCALAR_TYPE(pc,int,msg->index_file_);
 
   ASSERT2("EnzoMsgCheck::pack()",
 	  "buffer size mismatch %ld allocated %d packed",
@@ -217,12 +220,24 @@ EnzoMsgCheck * EnzoMsgCheck::unpack(void * buffer)
   LOAD_SCALAR_TYPE(pc,bool,msg->is_first_);
   LOAD_SCALAR_TYPE(pc,bool,msg->is_last_);
   LOAD_STRING_TYPE(pc,msg->name_dir_);
+  LOAD_SCALAR_TYPE(pc,int,msg->index_file_);
 
   // Save the input buffer for freeing later
 
   msg->buffer_ = buffer;
 
   return msg;
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMsgCheck::update (EnzoBlock * block)
+{
+  if (io_block_ != nullptr) {
+    io_block_->save_to(block);
+  }
+
+  update(block->data());
 }
 
 //----------------------------------------------------------------------

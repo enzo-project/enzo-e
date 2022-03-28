@@ -129,11 +129,9 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
     if (cosmology) {
-
       double time = block->time();
       double dt   = block->dt();
       cosmology->compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+alpha_*dt);
-
     }
     if (rank >= 1) hx *= cosmo_a;
     if (rank >= 2) hy *= cosmo_a;
@@ -334,8 +332,8 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
         	  double tx = nx*(x - xm) / (xp - xm) - 0.5;
         	  double ty = ny*(y - ym) / (yp - ym) - 0.5;
         	  double tz = nz*(z - zm) / (zp - zm) - 0.5;
-
-        	  int ix0 = gx + floor(tx);
+ 
+                  int ix0 = gx + floor(tx);
         	  int iy0 = gy + floor(ty);
         	  int iz0 = gz + floor(tz);
 
