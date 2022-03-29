@@ -139,12 +139,16 @@ IoEnzoReader::IoEnzoReader(std::string name_dir, std::string name_file) throw()
     index.set_values(v3);
     const int level = index.level();
     msg_check->index_file_ = thisIndex;
-    if (level > 0) {
-    } else if (level == 0) {
+    if (level <= 0) {
+
+      // Block exists--send its data
+
       enzo::block_array()[index].p_restart_set_data(msg_check);
+
     } else {
-      // level < 0: done
-      block_ready_(block_name);
+
+      // Block doesn't exist: create it and send its data
+
     }
   }
 
