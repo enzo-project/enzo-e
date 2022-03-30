@@ -25,7 +25,7 @@ if use_gfortran:
     f90 = 'gfortran'
     libpath_fortran = '/opt/apps/gcc/9.1.0/lib64'
     libs_fortran = ['gfortran']
-    flags_arch_fortran = '-ffixed-line-length-132'
+    flags_arch_fortran = '-ffixed-line-length-132 -frecursive'
     flags_prec_double = '-fdefault-real-8 -fdefault-double-8'
     flags_arch = '-O3 -Wall'
     flags_fc = ''

@@ -138,6 +138,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
   const int ia_metal = particle.attribute_index (it, "metal_fraction");
   const int ia_to    = particle.attribute_index (it, "creation_time");
   const int ia_l     = particle.attribute_index (it, "lifetime");
+  const int ia_lev   = particle.attribute_index (it, "creation_level");
 
   int ib  = 0; // batch counter
   int ipp = 0; // counter
@@ -154,6 +155,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
   enzo_float * pmetal = 0;
   enzo_float * pform  = 0;
   enzo_float * plifetime = 0;
+  enzo_float * plevel = 0;
 
   // obtain the particle stride length (TODO: remove--don't need?)
   //const int ps = particle.stride(it, ia_m);
@@ -409,10 +411,12 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         // finalize attributes
         plifetime = (enzo_float *) particle.attribute_array(it, ia_l, ib);
         pform     = (enzo_float *) particle.attribute_array(it, ia_to, ib);
+        plevel    = (enzo_float *) particle.attribute_array(it, ia_lev, ib);
 
         pform[io]     =  enzo_block->time();   // formation time
         //TODO: Need to have some way of calculating lifetime based on particle mass
         plifetime[io] =  25.0 * cello::Myr_s / enzo_units->time() ; // lifetime
+        plevel[io] = enzo_block->level();
 
         if (metal){
           pmetal     = (enzo_float *) particle.attribute_array(it, ia_metal, ib);

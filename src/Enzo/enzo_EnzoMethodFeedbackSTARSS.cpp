@@ -77,10 +77,13 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age, int* nSNII, int* nSNIA,
                 PII -= round;
             }
             if (PII > 1.0 && !enzo_config->method_feedback_unrestricted_sn){
-                ERROR("MethodFeedbackSTARSS::determineSN()", "PII too large!");
+                //ERROR("MethodFeedbackSTARSS::determineSN()", "PII too large!");
+                //if it wants to deposit > 1 SN per particle, but single_sn=true,
+                //only deposit 1 SN
+                PII = 1.0;
             }
             int psn = *nSNII;
-            if (random < PII){
+            if (random <= PII){
                 *nSNII = psn+1;
             }
         }
@@ -472,7 +475,6 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
 
         if (te_dep_c[i] > 10*tiny_number) { // if any deposition 
           double d_old = d[i];
-          //std::cout << te_dep_c[i] << std::endl;
           d [i] +=  d_dep_c[i];
 
           double d_new = d[i];
@@ -488,7 +490,9 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
           vz[i] += vz_dep_c[i] * M_scale;
 
           // rescale color fields to account for new densities
-          EnzoMethodStarMaker::rescale_densities(enzo_block, i, d_new/d_old); 
+          EnzoMethodStarMaker::rescale_densities(enzo_block, i, d_new/d_old);
+          // undo rescaling of metal_density field
+          mf[i] /= (d_new/d_old);
          }        
   
            d_dep[i] = tiny_number;
@@ -812,7 +816,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   double tunit = enzo_units->time();
   double eunit = munit*vunit*vunit; // energy
   double Tunit = enzo_units->temperature();
-
+  
   const EnzoConfig * enzo_config = enzo::config();
   bool AnalyticSNRShellMass = enzo_config->method_feedback_analytic_SNR_shell_mass;
 
@@ -846,7 +850,11 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
     if (rank >= 3) hz *= cosmo_a;
   }
 */
-  double cell_volume = hx*hy*hz * enzo_units->volume();
+  double cell_volume_code = hx*hy*hz;
+  double cell_volume = cell_volume_code*enzo_units->volume();
+
+  // conversion from code_density to mass in Msun
+  double rho_to_m = rhounit*cell_volume / cello::mass_solar;
 
   enzo_float * d           = (enzo_float *) field.values("density");
   enzo_float * te          = (enzo_float *) field.values("total_energy");
@@ -948,7 +956,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   v_mean *= vunit / 27; // cm/s!
   Z_mean *= 1/(27 * cello::metallicity_solar); // Zsun
   mu_mean /= 27;
-  d_mean *= rhounit/27; // g/cm^3 
+  d_mean *= rhounit/27; // g/cm^3
   n_mean = d_mean / (cello::mass_hydrogen/mu_mean);
 
 #ifdef DEBUG_FEEDBACK_STARSS
@@ -1125,8 +1133,9 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
    
   if (coupledEnergy > 0 && AnalyticSNRShellMass && !winds) 
   {
-    if (dx_eff < 1) 
-      shellMass = std::min(1e8, coupledMomenta / shellVelocity); //Msun
+    if (dx_eff < 1)
+       shellMass = 4*cello::pi/3 * d_mean * pow(cw_eff*cello::pc_cm,3) / cello::mass_solar; 
+      //shellMass = std::min(1e8, coupledMomenta / shellVelocity); //Msun
 
     else if (dx_eff < 1) {
       if (Z_Zsun > 0.01)
@@ -1149,14 +1158,14 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
               // only record if this cell would've been touched by CIC on star particle 
               // (estimated as the "blast interior")
               centralMass += d[flat];
-              centralMetals += mf[flat]; // TODO: original code had mass += density here for some reason 
+              centralMetals += mf[flat];
 
             } //endif flat < size 
           }
         }
       } // endfor ix_
       
-      centralMass *= munit / cello::mass_solar; // put into solar units
+      centralMass *= rho_to_m; // Mass in Msun
   
       if (shellMass > maxEvacFraction * centralMass) {
       #ifdef DEBUG_FEEDBACK_STARSS
@@ -1169,7 +1178,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
       
   } // endif coupledEnergy >0 && AnalyticSNRShellMass && !winds
   
-  double shellMetals = std::min(maxEvacFraction*centralMetals * munit/cello::mass_solar, 
+  double shellMetals = std::min(maxEvacFraction*centralMetals * rho_to_m, 
                                 Z_Zsun * cello::metallicity_solar * shellMass); //Msun
 
 #ifdef DEBUG_FEEDBACK_STARSS
@@ -1180,7 +1189,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 #endif
 
   double coupledMass = shellMass + ejectaMass;
-     
+ 
   eKinetic = coupledMomenta * coupledMomenta / (2.0 *(coupledMass)) * cello::mass_solar * 1e10;
   if (eKinetic > (nSNII+nSNIA) * 1e51 && !winds){
   #ifdef DEBUG_FEEDBACK_STARSS
@@ -1245,13 +1254,16 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 
   // Subtract shell mass from the central cells
   double minusRho=0, minusZ=0, msubtracted=0;
-  double remainMass=shellMass*cello::mass_solar/munit, remainZ = shellMetals*cello::mass_solar/munit;
+  double remainMass=shellMass/rho_to_m, remainZ = shellMetals/rho_to_m;
+    double sumpre = 0;
+    double sumpost= 0;
   bool massiveCell;
   if (shellMass > 0 && AnalyticSNRShellMass)
   {
     double zsubtracted=0;
     massiveCell=false;
     msubtracted=0;
+
     for (int ix_ = ix-1; ix_ <= ix+1; ix_++) {
       for (int iy_ = iy-1; iy_ <= iy+1; iy_++) {
         for (int iz_ = iz-1; iz_ <= iz+1; iz_++) {
@@ -1262,10 +1274,10 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
           double dpre = d[flat];
           double zpre = mf[flat];
           double pre_z_frac = zpre / dpre;
-
+          sumpre += dpre;
         #ifdef DEBUG_FEEDBACK_STARSS
           CkPrintf("STARSS: Baryon Prior: d_Msun = %e, mc = %e, ms = %e, m_z = %e, z = %e\n",
-                   d[flat] * munit/cello::mass_solar, centralMass, shellMass, shellMetals, pre_z_frac);
+                   d[flat] * rho_to_m, centralMass, shellMass, shellMetals, pre_z_frac);
         #endif
           d[flat] = std::max(dpre - remainMass/27.0, (1.0-maxEvacFraction)*dpre);
           minusRho    += dpre - d[flat];
@@ -1274,7 +1286,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
           mf[flat] = std::max(tiny_number, zpre - remainZ/27.0);
           minusZ      += zpre - mf[flat];
           zsubtracted += zpre - mf[flat];
-
+          sumpost += d[flat];
         } // endfor iz_
       } // endfor iy_
     } // endfor ix_
@@ -1282,11 +1294,10 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
     remainZ    -= zsubtracted;
   } // endif shellMass > 0 && AnalyticSNRShellMass
 
-  minusRho *= munit/cello::mass_solar; //Msun
-  minusZ   *= munit/cello::mass_solar; //Msun
+  minusRho *= rho_to_m; //Msun
+  minusZ   *= rho_to_m; //Msun
 
   double minusM = minusRho;
-
   if (minusM != coupledMass - ejectaMass && shellMass > 0 && AnalyticSNRShellMass)
   {
   #ifdef DEBUG_FEEDBACK_STARSS
@@ -1334,8 +1345,8 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 
   coupledEnergy /= eunit; // coupledEnergy is kinetic energy at this point
   coupledGasEnergy /= eunit;
-  coupledMass /= (munit/cello::mass_solar);
-  coupledMetals /= (munit/cello::mass_solar);
+  coupledMass /= rho_to_m; // This conversion must not actually put coupledMass into code density
+  coupledMetals /= rho_to_m;
   coupledMomenta /= (munit/cello::mass_solar * vunit / 1e5 / sqrt(nCouple) ); 
 
   coupledEnergy += coupledGasEnergy;
@@ -1363,8 +1374,8 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   enzo_float coupledMomenta_x[nCouple], coupledMomenta_y[nCouple], coupledMomenta_z[nCouple];
   enzo_float coupledEnergy_list[nCouple], coupledGasEnergy_list[nCouple];
 
-  std::fill_n(coupledMass_list  ,nCouple,  coupledMass/nCouple);
-  std::fill_n(coupledMetals_list,nCouple,coupledMetals/nCouple);
+  //std::fill_n(coupledMass_list  ,nCouple,  coupledMass/nCouple);
+  //std::fill_n(coupledMetals_list,nCouple,coupledMetals/nCouple);
 
   for (int n=0; n<nCouple; n++)
   {
@@ -1377,25 +1388,33 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
     coupledGasEnergy_list[n] = coupledGasEnergy/nCouple;
   }
 
+
 #ifdef DEBUG_FEEDBACK_STARSS
-  double sumEnergy=0.0, sumMomenta=0.0, sumMass=0.0, sumMetals=0.0, sumInternal=0.0; 
-  for (int i=0; i<mx*my*mz; i++) 
-  {
-    sumEnergy += te[i];
-    sumInternal += ge[i];
-    sumMomenta += vx[i]*vx[i];
-    sumMomenta += vy[i]*vy[i];
-    sumMomenta += vz[i]*vz[i];
-    sumMass += d[i];
-    sumMetals += mf[i]; 
+  double sumEnergy=0.0, sumMomenta=0.0, sumMass=0.0, sumMetals=0.0, sumInternal=0.0;
+  //for (int i=0; i<mx*my*mz; i++) 
+  //{
+  for (int iz=gz; iz<nz+gz; iz++){
+    for (int iy=gy; iy<ny+gy; iy++){
+      for (int ix=gx; ix<nx+gx; ix++){
+        int i = INDEX(ix,iy,iz,mx,my);
+        sumEnergy += te[i];
+        sumInternal += ge[i];
+        sumMomenta += vx[i]*vx[i];
+        sumMomenta += vy[i]*vy[i];
+        sumMomenta += vz[i]*vz[i];
+        sumMass += d[i];
+        sumMetals += mf[i]; 
+      }
+    }
   }
- 
+  double massBefore = sumMass*rho_to_m;
+  double metalsBefore = sumMetals*rho_to_m; 
   sumMomenta = sqrt(sumMomenta);
 
   CkPrintf("STARSS_FB: Total before deposition -- Energy = %e;\n"
            "                                     Internal energy = %e;\n" 
            "                                     P = %e;\n"
-           "                                     Mass (actually density) = %e\n"
+           "                                     Mass = %e\n"
            "                                     Metal Mass (actually density) = %e\n",
             sumEnergy, sumInternal, sumMomenta, sumMass, sumMetals);
   CkPrintf("STARSS_FB: source cell internal_energy = %e; total_energy = %e\n", ge[index], te[index]);
@@ -1470,16 +1489,21 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 
 
   //copy values for active zones (include ghost zones if > 1 block???)
+  double checksum_deposit = 0;
+  double checksum_energy_deposit = 0;
+  double checksum_before =0;
+  double checksum_after = 0;
   for (int iz=gz; iz<nz+gz; iz++){
     for (int iy=gy; iy<ny+gy; iy++){
       for (int ix=gx; ix<nx+gx; ix++){
         int i = INDEX(ix,iy,iz,mx,my);
         double d_old = d[i]; 
-
+        checksum_before += d_old*rho_to_m;
         d[i] += d_dep[i];
-        
+        checksum_after += d[i]*rho_to_m;
+        checksum_deposit += d_dep[i]*rho_to_m;
         double d_new = d[i];
-        double cell_mass = d_new*hx*hy*hz;
+        double cell_mass = d_new*cell_volume_code;
 
         mf[i] += mf_dep[i]; 
         
@@ -1490,33 +1514,45 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
         vz[i] += vz_dep[i];
         
         // rescale color fields to account for new densities
+        // don't need to rescale metal_density because we already deposited
+        // into this field
         EnzoMethodStarMaker::rescale_densities(enzo_block, i, d_new/d_old);
- 
+        // undo rescaling of metal_density field
+        mf[i] /= (d_new/d_old);
+        checksum_energy_deposit += te_dep[i]*eunit;
       }
     }
   }
-
 #ifdef DEBUG_FEEDBACK_STARSS
   sumEnergy=sumMomenta=sumMass=sumMetals=sumInternal=0.0; 
-  for (int i=0; i<mx*my*mz; i++) 
-  {
-    sumEnergy += te[i]; // *d[i]*cell_volume/enzo_units->volume();
-    sumInternal += ge[i];// *d[i]*cell_volume/enzo_units->volume();
-    sumMomenta += vx[i]*vx[i];
-    sumMomenta += vy[i]*vy[i];
-    sumMomenta += vz[i]*vz[i];
-    sumMass += d[i];
-    sumMetals += mf[i];
+  //for (int i=0; i<mx*my*mz; i++) 
+  for (int iz=gz; iz<nz+gz; iz++){
+    for (int iy=gy; iy<ny+gy; iy++){
+      for (int ix=gx; ix<nx+gx; ix++){
+        int i = INDEX(ix,iy,iz,mx,my);
+        sumEnergy += te[i]; // *d[i]*cell_volume/enzo_units->volume();
+        sumInternal += ge[i];// *d[i]*cell_volume/enzo_units->volume();
+        sumMomenta += vx[i]*vx[i];
+        sumMomenta += vy[i]*vy[i];
+        sumMomenta += vz[i]*vz[i];
+        sumMass += d[i];
+        sumMetals += mf[i];
+      } 
+    }
   }
- 
+  double massAfter = sumMass*rho_to_m;
+  double metalsAfter = sumMetals*rho_to_m; 
   sumMomenta = sqrt(sumMomenta);
 
   CkPrintf("STARSS_FB: Total after deposition -- Energy = %e;\n"
            "                                     Internal energy = %e;\n" 
            "                                     P = %e;\n"
-           "                                     Mass (actually density) = %e;\n"
-           "                                     Metal Mass (actually density) = %e\n",
+           "                                     Mass = %e;\n"
+           "                                     Metal Mass = %e\n",
             sumEnergy, sumInternal, sumMomenta, sumMass, sumMetals);
+
+  CkPrintf("STARSS_FB: Mass difference (Msun) = %e; coupledMass (Msun) = %e\n", massAfter-massBefore, coupledMass*rho_to_m);
+  CkPrintf("STARSS_FB: Metals difference (Msun) = %e; coupledMetals (Msun) = %e\n", metalsAfter-metalsBefore, coupledMetals*rho_to_m);
   //CkPrintf("STARSS_FB: Deleting coupling particles...\n");
 #endif
 

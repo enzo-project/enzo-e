@@ -128,11 +128,18 @@ void EnzoMethodStarMaker::rescale_densities(EnzoBlock * enzo_block,
   for (int ic = 0; ic < nc; ic++){
     enzo_float * cfield = (enzo_float *)
       field.values(field_groups->item("color",ic));
-
-    cfield[index] *= density_ratio;
+      cfield[index] *= density_ratio;
 
   }
-
+/*
+  for (int i=0; i<field.field_count(); i++) {
+    std::string name = field.field_name(i);
+    if (field.groups()->is_in(name,"color")) {
+      ((enzo_float *) field.values(name))[index] *= density_ratio;
+//      std::cout << i << ' ' << std::endl;
+    }
+  }
+*/
   return;
 }
 

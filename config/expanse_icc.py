@@ -2,8 +2,8 @@ import os
 from _common_search_paths import charm_path_search, grackle_path_search
 
 is_arch_valid = 1
-use_gfortran = 0
-smp = 0
+use_gfortran = 1
+smp = 1
 
 flags_arch = '-Wall -O3 -g'
 #flags_arch = '-fprofile-arcs -ftest-coverage'
@@ -31,7 +31,7 @@ if use_gfortran:
     f90 = 'gfortran'
     libpath_fortran = '/cm/shared/apps/spack/cpu/opt/spack/linux-centos8-zen/gcc-8.3.1/gcc-10.2.0-n7su7jf54rc7l2ozegds5xksy6qhrjin/lib64'
     libs_fortran = ['gfortran']
-    flags_arch_fortran = '-ffixed-line-length-132'
+    flags_arch_fortran = '-ffixed-line-length-132 -frecursive'
     flags_prec_double = '-fdefault-real-8 -fdefault-double-8'
     flags_arch = '-O3 -Wall'
     flags_fc = ''
