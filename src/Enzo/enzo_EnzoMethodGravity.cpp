@@ -34,7 +34,13 @@ EnzoMethodGravity::EnzoMethodGravity
     ir_exit_(-1),
     index_prolong_(index_prolong),
     dt_max_(dt_max)
-{
+{ 
+  // Check if the pm_deposit method is being used and preceeds the 
+  // gravity method.
+  ASSERT("EnzoMethodGravity",
+         "Error: pm_deposit method must preceed gravity method.",
+          enzo::problem()->method_preceeds("pm_deposit","gravity"));
+          
   // Change this if fields used in this routine change
   // declare required fields
   cello::define_field ("density");

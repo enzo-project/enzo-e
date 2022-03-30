@@ -35,6 +35,12 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
   : Method(),
     alpha_(alpha)
 {
+  // Check if the gravity method is being used and is preceeded by the 
+  // pm_deposit method.
+  ASSERT("EnzoMethodPmDeposit",
+         "Error: pm_deposit method must preceed gravity method.",
+          enzo::problem()->method_preceeds("pm_deposit","gravity"));
+  
   const int rank = cello::rank();
 
   cello::define_field ("density");
