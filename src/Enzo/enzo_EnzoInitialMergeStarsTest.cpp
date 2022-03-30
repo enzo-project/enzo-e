@@ -21,13 +21,26 @@
  (const EnzoConfig * enzo_config) throw()
     : Initial (enzo_config->initial_cycle, enzo_config->initial_time)
   {
+
+    // Check if the merge_stars method is being used
+    ASSERT("EnzoInitialMergeStarsTest",
+           "Error: merge_stars method is required when running with "
+           "the merge_stars_test initializer.",
+            enzo::problem()->method_exists("merge_stars"));
+
+    // Check if the pm_update method is being used
+    ASSERT("EnzoInitialMergeStarsTest",
+           "Error: pm_update method is required when running with "
+           "the merge_stars_test initializer.",
+            enzo::problem()->method_exists("pm_update"));
+
+
     particle_data_filename_ = 
     enzo_config->initial_merge_stars_test_particle_data_filename;
 
     std::string line;
     std::ifstream inFile(particle_data_filename_);
 
-    
     n_particles_ = 0;
 
     while (std::getline(inFile,line)){
