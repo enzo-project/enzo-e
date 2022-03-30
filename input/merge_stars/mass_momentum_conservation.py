@@ -1,7 +1,6 @@
 #!/bin/python
 
-# This file defines the function test_mass_momentum_conservation which has the
-# following behaviour:
+# This file defines the function test_mmc which has the following behaviour:
 # - takes as the prefix for the names of the directories generated when Enzo-E runs
 #   the merge_stars_test problem, which contain snapshots of the
 #   particle data at regular time intervals, a name for the image file which will be
@@ -17,9 +16,9 @@
 #   indeed merging (shown by decrease in particle number with time) and whether
 #   mass and momentum are being properly conserved.
 
-# test_mass_momentum_conservation can be imported by another script (as is done in
-# run_merge_stars_test.py), or it can be executed by running this file as a script,
-# with command line arguments being passed to test_mass_momentum_conservation.
+# test_mmc can be imported by another script (as is done in run_merge_stars_test.py), 
+# or it can be executed by running this file as a script, with command line arguments 
+# being passed to test_mmc.
 # For more information, run "python mass_momentum_conservation.py -h".
 
 import yt
@@ -55,7 +54,7 @@ def test_error(quantity_list,tolerance):
         print("Encounted error while trying to calculate error in quantity")
         sys.exit(2)
 
-def test_mmc_conservation(tolerance,input_prefix,output):
+def test_mmc(tolerance,input_prefix,output):
     
     ds_pattern = f"{input_prefix}_????/{input_prefix}_????.block_list"
 
@@ -171,9 +170,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     try:
-        if test_mmc_conservation(args.tolerance,
-                                 args.input_prefix,
-                                 args.output):
+        if test_mmc(args.tolerance,
+                    args.input_prefix,
+                    args.output):
             sys.exit(0)
         else:
             print("Test failed, mass and momentum not conserved")

@@ -22,7 +22,7 @@ run_merge_stars_test.py), or it can be executed by running images.py as a script
 with command line arguments being passed to make_images. 
 For more information, run "python images.py -h".
 
-mass_momentum_conservation.py defines the function test_mass_momentum_conservation
+mass_momentum_conservation.py defines the function test_mmc
 which has the following behaviour:
 - takes as the prefix for the names of the directories generated when Enzo-E runs
   the merge_stars_test problem, which contain snapshots of the
@@ -39,10 +39,10 @@ which has the following behaviour:
   indeed merging (shown by decrease in particle number with time) and whether
   mass and momentum are being properly conserved.
 
-test_mass_momentum_conservation can be imported by another script (as is done in
+test_mmc can be imported by another script (as is done in
 run_merge_stars_test.py), or it can be executed by running
-mass_momentum_conservation.py as a script, with command line arguments being
-passed to test_mass_momentum_conservation.
+mass_momentum_conservation.py as a script, with command line
+arguments being passed to test_mass_mmc.
 For more information, run "python mass_momentum_conservation.py -h".
 
 merge_stars_test.in is an Enzo-E parameter files. Passing this file as an argument

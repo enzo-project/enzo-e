@@ -43,7 +43,7 @@ import yt
 from testing_utils import testing_context
 from ics import make_ics
 from images import make_images
-from mass_momentum_conservation import test_mmc_conservation
+from mass_momentum_conservation import test_mmc
 
 yt.mylog.setLevel(30) # set yt log level to "WARNING"
 
@@ -64,9 +64,9 @@ def analyze_test(prec):
         tolerance = 1.0e-4
     
     try:
-        return test_mmc_conservation(tolerance,
-                                     input_prefix = "Dir_Merge_Stars",
-                                     output = "mmc.png")
+        return test_mmc(tolerance,
+                        input_prefix = "Dir_Merge_Stars",
+                        output = "mmc.png")
     except:
         print("Encountered error when trying to test mass and momentum conservation")
         return False
@@ -98,10 +98,10 @@ if __name__ == '__main__':
         # make images
         make_images(input_prefix = "Dir_Merge_Stars", output_prefix = "image")
         
-        # analyze the tests
+        # analyze the test
         tests_passed = analyze_test(args.prec)
     
-        # cleanup the tests
+        # cleanup
         cleanup()
 
     if tests_passed:
