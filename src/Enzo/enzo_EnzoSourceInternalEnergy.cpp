@@ -12,8 +12,9 @@
 
 void EnzoSourceInternalEnergy::calculate_source
 (const int dim, const double dt, const enzo_float cell_width,
- EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &dUcons_map,
- EFlt3DArray &interface_velocity, const EnzoEquationOfState *eos,
+ const EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &dUcons_map,
+ const CelloArray<const enzo_float,3> &interface_velocity,
+ const EnzoEquationOfState *eos,
  const int stale_depth) const throw()
 {
   // SANITY CHECKS:
@@ -45,24 +46,27 @@ void EnzoSourceInternalEnergy::calculate_source
   // load cell-centered quantities.
   // define: pressure_center(k,j,i)    ->  pressure(k,j,i+1)
   //         deint_dens_center(k,j,i)  ->  deint_dens(k,j,i+1)
-  EFlt3DArray pressure = prim_map.get("pressure", stale_depth);
-  EFlt3DArray pressure_center = coord.get_subarray(pressure, full_ax, full_ax,
-                                                   CSlice(1, -1));
+  const CelloArray<const enzo_float,3> pressure = prim_map.get
+    ("pressure", stale_depth);
+  const CelloArray<const enzo_float,3> pressure_center = coord.get_subarray
+    (pressure, full_ax, full_ax, CSlice(1, -1));
 
-  EFlt3DArray deint_dens = dUcons_map.get("internal_energy", stale_depth);
-  EFlt3DArray deint_dens_center = coord.get_subarray(deint_dens, full_ax,
-                                                     full_ax, CSlice(1, -1));
+  const CelloArray<enzo_float,3> deint_dens = dUcons_map.get
+    ("internal_energy", stale_depth);
+  const CelloArray<enzo_float,3> deint_dens_center = coord.get_subarray
+    (deint_dens, full_ax, full_ax, CSlice(1, -1));
 
   // remove staled zone from interface_velocity
   CSlice stale_slice(stale_depth,-stale_depth);
-  EFlt3DArray vel = interface_velocity.subarray(stale_slice, stale_slice,
-                                                stale_slice);
+  const CelloArray<const enzo_float,3> vel = interface_velocity.subarray
+    (stale_slice, stale_slice, stale_slice);
   // load the face-centered values of the ith velocity component
   // define: vl(k,j,i)                 ->  vel_i(k,j,i+1/2)
   //         vr(k,j,i)                 ->  vel_i(k,j,i+3/2)
-  EFlt3DArray vl = coord.get_subarray(vel, full_ax, full_ax, CSlice(0, -1));
-  EFlt3DArray vr = coord.get_subarray(vel, full_ax, full_ax,
-                                      CSlice(1, nullptr));
+  const CelloArray<const enzo_float,3> vl = coord.get_subarray
+    (vel, full_ax, full_ax, CSlice(0, -1));
+  const CelloArray<const enzo_float,3> vr = coord.get_subarray
+    (vel, full_ax, full_ax, CSlice(1, nullptr));
 
   // in the original flux_hll.F the floor was set to tiny (a small number)
   enzo_float p_floor = eos->get_pressure_floor();

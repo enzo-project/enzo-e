@@ -20,12 +20,11 @@ import sys
 
 import numpy as np
 
-from testing_utils import EnzoEWrapper, CalcSimL1Norm, isclose, prep_cur_dir
+from testing_utils import EnzoEWrapper, CalcSimL1Norm, isclose, testing_context
 
 data_dir_template = "method_vlct-1-{:s}_passive_soundN16-{:.1f}"
 
-calc_l1_norm = CalcSimL1Norm("tools/l1_error_norm.py",
-                             ["density","velocity_x","velocity_y","velocity_z",
+calc_l1_norm = CalcSimL1Norm(["density","velocity_x","velocity_y","velocity_z",
                               "total_energy","bfield_x","bfield_y","bfield_z",
                               "red"])
 
@@ -90,20 +89,18 @@ def cleanup():
 
 if __name__ == '__main__':
 
-    executable = 'bin/enzo-e'
+    executable = os.environ.get('ENZOE_BIN', 'bin/enzo-e')
 
-    # this script can either be called from the base repository or from
-    # the subdirectory: input/vlct
-    prep_cur_dir(executable)
+    with testing_context():
 
-    # run the tests
-    run_tests(executable)
+        # run the tests
+        run_tests(executable)
 
-    # analyze the tests
-    tests_passed = analyze_tests()
+        # analyze the tests
+        tests_passed = analyze_tests()
 
-    # cleanup the tests
-    cleanup()
+        # cleanup the tests
+        cleanup()
 
     if tests_passed:
         sys.exit(0)

@@ -70,7 +70,7 @@ Sending Block
 The sending block must send its data to the receiving block, as it
 does for all other refresh operations.  The main difference is it
 requires an additional layer of padding when sending.  This is handled
-in ``Block::refresh_load_field_face_````control_refresh.cpp``
+by the method ``Block::refresh_load_field_face_()`` in ``control_refresh.cpp``
 
 Extra Block
 ===========

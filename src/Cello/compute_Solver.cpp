@@ -25,15 +25,15 @@ const char * solve_string[] = {
 //======================================================================
 
 Solver::Solver (std::string name,
-		std::string field_x,
-		std::string field_b,
-		int monitor_iter,
-		int restart_cycle,
-		int solve_type,
+                std::string field_x,
+                std::string field_b,
+                int monitor_iter,
+                int restart_cycle,
+                int solve_type,
                 int index_prolong,
                 int index_restrict,
-		int min_level,
-		int max_level) throw()
+                int min_level,
+                int max_level) throw()
   : PUP::able(),
     name_(name),
     ix_(-1),ib_(-1),

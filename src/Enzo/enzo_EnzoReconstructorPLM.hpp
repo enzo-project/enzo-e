@@ -164,7 +164,7 @@ public: // interface
   };
 
   void reconstruct_interface
-  (EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
+  (const EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
    EnzoEFltArrayMap &primr_map, const int dim, const EnzoEquationOfState *eos,
    const int stale_depth, const str_vec_t& passive_list);
 
@@ -183,7 +183,7 @@ private:
 
 template <class Limiter>
 void EnzoReconstructorPLM<Limiter>::reconstruct_interface
-(EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
+(const EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
  EnzoEFltArrayMap &primr_map, const int dim, const EnzoEquationOfState *eos,
  const int stale_depth, const str_vec_t& passive_list)
 {
@@ -203,16 +203,19 @@ void EnzoReconstructorPLM<Limiter>::reconstruct_interface
       // define:   wc_left(k,j,i)   -> w(k,j,i)
       //           wc_center(k,j,i) -> w(k,j,i+1)
       //           wc_right(k,j,i)  -> w(k,j,i+2)
-      EFlt3DArray wc_left = prim_map.get(key, stale_depth);
-      EFlt3DArray wc_center = coord.left_edge_offset(wc_left, 0, 0, 1);
-      EFlt3DArray wc_right  = coord.left_edge_offset(wc_left, 0, 0, 2);
+      const CelloArray<const enzo_float,3> wc_left
+        = prim_map.get(key, stale_depth);
+      const CelloArray<const enzo_float,3> wc_center
+        = coord.left_edge_offset(wc_left, 0, 0, 1);
+      const CelloArray<const enzo_float,3> wc_right
+        = coord.left_edge_offset(wc_left, 0, 0, 2);
 
       // Prepare face-centered arrays
       // define:   wl_offset(k,j,i)-> wl(k,j,i+3/2)
       //           wr(k,j,i)       -> wr(k,j,i+1/2)
-      EFlt3DArray wr = primr_map.get(key,stale_depth);
-      EFlt3DArray wl = priml_map.get(key,stale_depth);
-      EFlt3DArray wl_offset = coord.left_edge_offset(wl, 0, 0, 1);
+      const EFlt3DArray wr = primr_map.get(key,stale_depth);
+      const EFlt3DArray wl = priml_map.get(key,stale_depth);
+      const EFlt3DArray wl_offset = coord.left_edge_offset(wl, 0, 0, 1);
 
       // At the interfaces between the first and second cell (second-to-
       // last and last cell), along a given axis, no need to worry about

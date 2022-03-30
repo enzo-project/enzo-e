@@ -97,7 +97,7 @@ void EnzoMethodGrackle::define_required_grackle_fields()
   // Primordial chemistry fields
 
   if (chemistry_level >= 1) {
-    cello::define_field_in_group ("density",       "color");
+    //    cello::define_field_in_group ("density",       "color");
     cello::define_field_in_group ("HI_density",    "color");
     cello::define_field_in_group ("HII_density",   "color");
     cello::define_field_in_group ("HeI_density",   "color");

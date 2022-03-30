@@ -9,6 +9,7 @@
 
 #include "cello.hpp"
 #include "parameters.hpp"
+#include <iostream>
 
 Config g_config;
 
@@ -716,6 +717,41 @@ void Config::read_mesh_ (Parameters * p) throw()
 
   mesh_min_level = p->value_integer("Adapt:min_level",0);
 
+  if ( mesh_min_level > 0 ) {
+    ERROR1 ("Config::read", 
+		    "The value of mesh_min_level: %d should be less than or equal to zero", 
+		    mesh_min_level);
+  }
+
+  // Handle 1D and 2D simulations by adjusting the number of cells along the extra dimensions
+  if (mesh_root_rank < 2) mesh_root_size[1] = 1;
+  if (mesh_root_rank < 3) mesh_root_size[2] = 1;
+
+  // Dimensions of the active zone on each block along each axis
+  int ax = mesh_root_size[0] / mesh_root_blocks[0]; 
+  int ay = mesh_root_size[1] / mesh_root_blocks[1];
+  int az = mesh_root_size[2] / mesh_root_blocks[2];
+
+  //  Constraints on the block size based on the ghost depth
+  if ( mesh_max_level > 0 ) {
+    if ( !(ax >= 2*field_ghost_depth[0] && ay >= 2*field_ghost_depth[1] && az >= 2*field_ghost_depth[2] ) ) {
+      ERROR3 ("Config::read", 
+		"Dimensions of the active zone on each block (%d, %d, %d) should be at least double the size of the ghost depth for AMR simulations: ", 
+		ax, ay, az);
+    }  
+    if ( (ax%2 != 0) || (ay%2 != 0) && (az%2 != 0) ) {
+      ERROR3 ("Config::read",
+  		      "Dimensions of the active zone on each block (%d, %d, %d) should each be even for AMR simulations" ,
+		      ax, ay, az);
+    }  
+  }
+  else if ( mesh_max_level == 0 ) {   
+    if ( !(ax >= field_ghost_depth[0] && ay >= field_ghost_depth[1] && az >= field_ghost_depth[2] ) ) {
+      ERROR3 ("Config::read",
+  		      "Dimensions of the active zone on each block (%d, %d, %d) should be at least as large as the ghost depth",
+		      ax, ay, az);
+    }  
+  }
 }
 
 //----------------------------------------------------------------------

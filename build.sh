@@ -174,7 +174,7 @@ printf "done\n"
 printf "done\n" >> $log
 
 # TESTS
-
+count_test_crashes=0
 if [ $target == "test" ]; then
 
     rm -f              test/STOP
@@ -202,6 +202,7 @@ if [ $target == "test" ]; then
       crash=$((test_begin - $test_end))
 
       if [ $crash != 0 ]; then
+         let "count_test_crashes++"
          line="   CRASH: $test\n"
          printf "$line"
          printf "$line" >> $log
@@ -248,6 +249,7 @@ if [ $target == "test" ]; then
     
     echo "Test run summary"
     echo
+    echo "   Test runs crashed:   $count_test_crashes"
     echo "   Test runs attempted: $count_attempted"
     echo "   Test runs started:   $count_started"
     if [ $count_attempted -gt $count_started ]; then
@@ -263,7 +265,7 @@ if [ $target == "test" ]; then
     fi
     echo
 
-    if [ $f -gt 0 ] || [ $crash -gt 0 ] ; then
+    if [ $f -gt 0 ] || [ $count_test_crashes -gt 0 ] ; then
 	echo "Exiting testing with failures:"
 	echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 	cat "$dir/fail.$configure"
@@ -281,6 +283,17 @@ if [ $target = "test" ] && [ "$CELLO_PREC" = "double" ]; then
     echo "--------------------"
     echo "Attempting to run VL+CT tests (only defined for double Precision)"
     ./test/run_vlct_test.sh
+    result_code=$?
+    if [ $result_code -gt 0 ]; then
+        exit_status=1
+    fi
+fi;
+
+if [ $target = "test" ]; then
+    echo ""
+    echo "--------------------"
+    echo "Attempting to run star merging tests."
+    ./input/MergeStars/run.sh
     result_code=$?
     if [ $result_code -gt 0 ]; then
         exit_status=1

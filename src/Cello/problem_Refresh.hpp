@@ -2,6 +2,7 @@
 
 /// @file     problem_Refresh.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
+/// @author   Stefan Arridge (stefan.arridge@gmail.com)
 /// @date     2014-11-04 22:24:46
 /// @brief    [\ref Problem] Declaration of the Refresh class
 ///
@@ -26,9 +27,8 @@ public: // interface
     field_list_src_(),
     field_list_dst_(),
     all_particles_(false),
-    all_particles_copy_(false),
     particle_list_(),
-    particle_list_copy_(),
+    particles_are_copied_(false),
     all_fluxes_(false),
     ghost_depth_(0),
     min_face_rank_(0),
@@ -57,9 +57,8 @@ public: // interface
       field_list_src_(),
       field_list_dst_(),
       all_particles_(false),
-      all_particles_copy_(false),
       particle_list_(),
-      particle_list_copy_(),
+      particles_are_copied_(false),
       all_fluxes_(false),
       ghost_depth_(ghost_depth),
       min_face_rank_(min_face_rank),
@@ -86,9 +85,8 @@ public: // interface
     field_list_src_(),
     field_list_dst_(),
     all_particles_(false),
-    all_particles_copy_(false),
     particle_list_(),
-    particle_list_copy_(),
+    particles_are_copied_(false),
     all_fluxes_(false),
     ghost_depth_(0),
     min_face_rank_(0),
@@ -115,9 +113,8 @@ public: // interface
     p | field_list_src_;
     p | field_list_dst_;
     p | all_particles_;
-    p | all_particles_copy_;
     p | particle_list_;
-    p | particle_list_copy_;
+    p | particles_are_copied_;
     p | all_fluxes_;
     p | ghost_depth_;
     p | min_face_rank_;
@@ -205,42 +202,41 @@ public: // interface
   }
 
   /// Add the given particle type to the list
-  void add_particle(int id_particle, bool copy = false) {
+  void add_particle(int id_particle) {
     all_particles_ = false;
     particle_list_.push_back(id_particle);
-    if (copy) particle_list_copy_.push_back(id_particle);
   }
 
   /// All particles types are refreshed
-  void add_all_particles(bool copy = false) {
+  void add_all_particles() {
     all_particles_ = true;
-    all_particles_copy_ = copy; // probably don't ever want to do this
+  }
+
+  /// Set the value for `particles_are_copied_` to be true
+  /// or false, which determines whether or not, for all
+  /// particle types participating in the refresh, all particles
+  /// are copied to all neighbouring blocks.
+  void set_particles_are_copied(bool particles_are_copied) {
+    particles_are_copied_ = particles_are_copied;
   }
 
   /// Return whether all particles are refreshed
   bool all_particles() const
   { return all_particles_; }
 
-  /// Return whether all particles are copied in refresh
-  bool all_particles_copy() const
-  { return all_particles_copy_; }
+  /// Return whether, for all particle types participating
+  /// in the refresh, all particles are copied to all
+  /// neighbouring blocks
+  bool particles_are_copied() const
+  { return particles_are_copied_; }
 
   /// Return whether any particles are refreshed
   bool any_particles() const
   { return (all_particles_ || (particle_list_.size() > 0)); }
 
-  /// Return whether any particles are copied in refresh
-  bool any_particles_copy() const
-  { return (all_particles_copy_ || (particle_list_copy_.size() > 0 )); }
-
   /// Return the list of particles participating in the Refresh operation
   std::vector<int> & particle_list() {
     return particle_list_;
-  }
-
-  /// Return the list of particles participating in the copy Refresh operation
-  std::vector<int> & particle_list_copy() {
-    return particle_list_copy_;
   }
 
   /// Add all data
@@ -478,15 +474,12 @@ private: // attributes
   /// Whether to refresh all particle types, ignoring particle_list_
   int all_particles_;
 
-  /// Whether to refresh all particle types and copy ALL particles to neighboring
-  /// grids, ignoring particle_list_copy_
-  int all_particles_copy_;
-
+  /// Whether or not, for all particle types participating in the refresh,
+  /// all particles are copied to all neighbouring blocks
+  bool particles_are_copied_;
+  
   /// Indicies of particles to include
   std::vector <int> particle_list_;
-
-  /// Indicies of particles to copy all to neighboring grids
-  std::vector <int> particle_list_copy_;
 
   /// Whether to refresh flux data
   int all_fluxes_;

@@ -780,43 +780,15 @@ public:
 
 //----------------------------------------------------------------------
 
-class BulkAssignmentTest{
-  // this is inspired by some tests that indicated that there were problems
-  // with the bulk assignment machinery
+class ElementwiseCopyTest{
+  // this tests `CelloArray.copy_to`
 
 public:
-
-  template<template<typename, std::size_t> class Builder>
-  void test_assign_from_scalar_(){
-    std::string func_name = "BulkAssignmentTest::test_assign_from_scalar_";
-
-    Builder<double, 2> builder(2,3);
-    CelloArray<double, 2> *arr_ptr = builder.get_arr();
-    (*arr_ptr)(0,2) = 97.25;
-
-    (*arr_ptr).subarray() = 57.24;
-
-    check_builder_arr(builder, std::vector<double>({57.24, 57.24, 57.24,
-                                                    57.24, 57.24, 57.24}),
-                      func_name);
-
-    (*arr_ptr).subarray(CSlice(0,2), CSlice(0,-1)) = -3;
-    check_builder_arr(builder, std::vector<double>({-3, -3, 57.24,
-                                                    -3, -3, 57.24}),
-                      func_name);
-
-    CelloArray<double, 2> subarray = arr_ptr->subarray(CSlice(0,2),
-                                                       CSlice(1,3));
-    subarray.subarray() = 15;
-    check_arr_vals(subarray,  std::vector<double>({15,15,15,15}), func_name);
-    check_builder_arr(builder, std::vector<double>({-3, 15, 15,
-                                                    -3, 15, 15}), func_name);
-  }
   
 
   template<template<typename, std::size_t> class Builder1,
            template<typename, std::size_t> class Builder2>
-  void test_assign_from_array_(){
+  void test_copy_to_normal_array_(){
     std::string func_name =
       ("BulkAssignmentTest::test_assign_from_array_<" +
        Builder1<double, 2>::name() + "," +
@@ -848,8 +820,8 @@ public:
                                                        -4, -5, -6}),
                       func_name);
 
-    // now lets try an assignment of a full array
-    (*arr_ptr_a).subarray() = *arr_ptr_2a;
+    // copy elements from *arr_ptr_2a to *arr_ptr_a
+    arr_ptr_2a->copy_to(*arr_ptr_a);
     (*arr_ptr_a)(1,1)= -36;
     check_builder_arr(builder_1, std::vector<double>({0,   1, 2,
                                                       3, -36, 5}), func_name);
@@ -857,21 +829,24 @@ public:
     check_builder_arr(builder_2a, std::vector<double>({0, 1, 2,
                                                        3, 4, 5}), func_name);
 
-    // now lets try another assignment
-    (*arr_ptr_a).subarray() = *arr_ptr_2b;
+    // copy elements from *arr_ptr_2b to *arr_ptr_a
+    arr_ptr_2b->copy_to(*arr_ptr_a);
     (*arr_ptr_a)(0,0)= 5;
     check_builder_arr(builder_1, std::vector<double>({ 5, -2, -3,
                                                       -4, -5, -6}), func_name);
-    // make sure array_2a is unaffected
+    // make sure array_2b is unaffected
     check_builder_arr(builder_2b, std::vector<double>({-1, -2, -3,
                                                        -4, -5, -6}),
                       func_name);
+    // for good measuer, confirm that array_2a is still unaffected
+    check_builder_arr(builder_2a, std::vector<double>({0, 1, 2,
+                                                       3, 4, 5}), func_name);
   }
 
 
   template<template<typename, std::size_t> class Builder1,
            template<typename, std::size_t> class Builder2>
-  void test_assign_subarrays_(){
+  void test_copy_to_subarrays_(){
     // These tests actually uncovered a longstanding bug
     std::string func_name =
       ("BulkAssignmentTest::test_assign_subarrays_<" +
@@ -915,8 +890,8 @@ public:
                                                     11, 12, 13}), func_name);
 
     // NOW TO ACTUALLY PERFORM A TEST
-    subarray_1.subarray() = subarray_2.subarray(CSlice(0,2),
-                                                CSlice(0,2));
+    subarray_2.subarray(CSlice(0,2),
+                        CSlice(0,2)).copy_to(subarray_1);
 
     check_arr_vals(subarray_1,  std::vector<double>({ 6,  7,
                                                      11, 12}), func_name);
@@ -943,9 +918,9 @@ public:
                                                      11, 12, 13}), func_name);
 
     // SECOND TEST:
-    subarray_1.subarray(CSlice(0,2),
-                        CSlice(0,2)) = subarray_2.subarray(CSlice(0,2),
-                                                           CSlice(1,3));
+    subarray_2.subarray(CSlice(0,2),
+                        CSlice(1,3)).copy_to(subarray_1.subarray(CSlice(0,2),
+                                                                 CSlice(0,2)));
     check_arr_vals(subarray_1, std::vector<double>({ 7,  8,
                                                     12, 13}), func_name);
     check_builder_arr(builder_1, std::vector<double>({0,  0,  0, 0,
@@ -957,18 +932,16 @@ public:
   }
 
   void run_tests(){
-    test_assign_from_scalar_<MemManagedArrayBuilder>();
-    test_assign_from_scalar_<PtrWrapArrayBuilder>();
 
-    test_assign_from_array_<MemManagedArrayBuilder,   PtrWrapArrayBuilder>();
-    test_assign_from_array_<   PtrWrapArrayBuilder,MemManagedArrayBuilder>();
-    test_assign_from_array_<MemManagedArrayBuilder,MemManagedArrayBuilder>();
-    test_assign_from_array_<   PtrWrapArrayBuilder,   PtrWrapArrayBuilder>();
+    test_copy_to_normal_array_<MemManagedArrayBuilder,   PtrWrapArrayBuilder>();
+    test_copy_to_normal_array_<   PtrWrapArrayBuilder,MemManagedArrayBuilder>();
+    test_copy_to_normal_array_<MemManagedArrayBuilder,MemManagedArrayBuilder>();
+    test_copy_to_normal_array_<   PtrWrapArrayBuilder,   PtrWrapArrayBuilder>();
 
-    test_assign_subarrays_<MemManagedArrayBuilder,MemManagedArrayBuilder>();
-    test_assign_subarrays_<MemManagedArrayBuilder,   PtrWrapArrayBuilder>();
-    test_assign_subarrays_<   PtrWrapArrayBuilder,MemManagedArrayBuilder>();
-    test_assign_subarrays_<   PtrWrapArrayBuilder,   PtrWrapArrayBuilder>();
+    test_copy_to_subarrays_<MemManagedArrayBuilder,MemManagedArrayBuilder>();
+    test_copy_to_subarrays_<MemManagedArrayBuilder,   PtrWrapArrayBuilder>();
+    test_copy_to_subarrays_<   PtrWrapArrayBuilder,MemManagedArrayBuilder>();
+    test_copy_to_subarrays_<   PtrWrapArrayBuilder,   PtrWrapArrayBuilder>();
   }
 
 
@@ -1010,6 +983,55 @@ public:
 
 };
 
+//----------------------------------------------------------------------
+
+class ImplicitCastingTests{
+  // these are tests that check that CelloArray<T,D> can be implicitly casted
+  // to CelloArray<const T,D>.
+
+private:
+  template<template<typename, std::size_t> class Builder>
+  void test_cast_(){
+
+    Builder<double, 2> builder(2,3);
+    CelloArray<double, 2> *arr_ptr_a = builder.get_arr();
+    (*arr_ptr_a)(0,2) = 97.25;
+
+    CelloArray<const double, 2> alias_1 = *arr_ptr_a;
+    check_expected_values_(*arr_ptr_a);
+    // it's not obvious that this last check is strictly necessary
+    check_subarray_values_(arr_ptr_a->subarray(CSlice(0,1),CSlice(1,3)));
+  }
+
+  void check_expected_values_(const CelloArray<const double, 2> &arr){
+    double expected[2][3] = {{0.0, 0.0, 97.25},
+                             {0.0, 0.0,  0.0 }};
+
+    for (int j = 0; j < 2; j++){
+      for (int i = 0; i < 3; i++){
+        ASSERT2("ImplicitCastingTests::check_expected_values_",
+                "The array has an unexpected value at (%d, %d)",
+                j,i,expected[j][i] == arr(j,i));
+      }
+    }
+  }
+
+  void check_subarray_values_(CelloArray<const double, 2> arr){
+    double expected[1][2] = {{0.0, 97.25}};
+
+    for (int i = 0; i < 2; i++){
+      ASSERT1("ImplicitCastingTests::check_expected_values_",
+              "The array has an unexpected value at (0, %d)",
+              i,expected[0][i] == arr(0,i));
+    }
+  }
+
+public:
+  void run_tests(){
+    test_cast_<MemManagedArrayBuilder>();
+    test_cast_<PtrWrapArrayBuilder>();
+  }
+};
 
 //----------------------------------------------------------------------
 
@@ -1080,6 +1102,15 @@ public:
            subarray1a.is_alias(arr_ptr->subarray(CSlice(0,2),
                                                  CSlice(1,2)))
            );
+
+    // Lastly, let's make sure that is_alias works if one argument is casted to
+    // be an array of constants
+    CelloArray<const double, 2> subarray1a_alias = subarray1a;
+    CelloArray<const double, 2> subarray2a_alias = subarray2a;
+    ASSERT("IsAliasTests::test_is_alias_", "The arrays are aliases.",
+           subarray1a_alias.is_alias(subarray2a));
+    ASSERT("IsAliasTests::test_is_alias_", "The arrays are aliases.",
+           subarray1a.is_alias(subarray2a_alias));
   }
 
   void run_tests(){
@@ -1112,11 +1143,14 @@ PARALLEL_MAIN_BEGIN
   VariableAssignmentTests var_assign_tests;
   var_assign_tests.run_tests();
 
-  BulkAssignmentTest bulk_assignment_tests;
-  bulk_assignment_tests.run_tests();
+  ElementwiseCopyTest elementwise_copy_tests;
+  elementwise_copy_tests.run_tests();
 
   PassByValueTests pass_by_val_tests;
   pass_by_val_tests.run_tests();
+
+  ImplicitCastingTests implicit_casting_tests;
+  implicit_casting_tests.run_tests();
 
   IsAliasTests is_alias_tests;
   is_alias_tests.run_tests();
