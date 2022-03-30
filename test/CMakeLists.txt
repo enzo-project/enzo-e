@@ -35,16 +35,19 @@ function(setup_test_parallel TESTNAME TESTDIR INFILE)
   set_tests_properties(${TESTNAME} PROPERTIES LABELS "parallel;enzo" )
 endfunction()
 
-# Test wrapper functions calling a script (e.g., to include output analysis)
+# Serial (single compute element) test wrapper functions calling a script (e.g., to include output analysis)
+# All optional argment (i.e., the ones not being named) are automatically passed to the command being called.
 function(setup_test_serial_python TESTNAME TESTDIR TESTSCRIPT)
   setup_test_dir(${TESTDIR})
   add_test(
     NAME ${TESTNAME}
-    COMMAND ${Python3_EXECUTABLE} ${TESTSCRIPT} --launch_cmd=${PROJECT_BINARY_DIR}/bin/enzo-e
+    COMMAND ${Python3_EXECUTABLE} ${TESTSCRIPT} --launch_cmd=${PROJECT_BINARY_DIR}/bin/enzo-e ${ARGN}
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TESTDIR})
   set_tests_properties(${TESTNAME} PROPERTIES LABELS "serial;enzo;regression" )
 endfunction()
 
+# Parallel (using multiple compute elements) test wrapper functions calling a script (e.g., to include output analysis)
+# All optional argment (i.e., the ones not being named) are automatically passed to the command being called.
 function(setup_test_parallel_python TESTNAME TESTDIR TESTSCRIPT)
   # construct a list of the various parts of the launch_cmd argument (this is
   # necessary since PARALLEL_LAUNCHER_NPROC_ARG may itself be a list)
@@ -59,7 +62,7 @@ function(setup_test_parallel_python TESTNAME TESTDIR TESTSCRIPT)
   setup_test_dir(${TESTDIR})
   add_test(
     NAME ${TESTNAME}
-    COMMAND ${Python3_EXECUTABLE} ${TESTSCRIPT} --launch_cmd ${LAUNCH_CMD}
+    COMMAND ${Python3_EXECUTABLE} ${TESTSCRIPT} --launch_cmd ${LAUNCH_CMD} ${ARGN}
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TESTDIR})
   set_tests_properties(${TESTNAME} PROPERTIES LABELS "parallel;enzo;regression" )
 endfunction()
@@ -96,8 +99,8 @@ setup_test_serial_python(vlct_passive_advect_sound vlct "input/vlct/run_passive_
 setup_test_parallel_python(vlct_dual_energy_shock_tube vlct "input/vlct/run_dual_energy_shock_tube_test.py")
 
 # merge_stars enzo-e tests
-setup_test_serial_python(merge_stars_serial merge_stars/serial "input/merge_stars/run_merge_stars_test.py")
-setup_test_parallel_python(merge_stars_parallel merge_stars/parallel "input/merge_stars/run_merge_stars_test.py")
+setup_test_serial_python(merge_stars_serial merge_stars/serial "input/merge_stars/run_merge_stars_test.py" "--prec=${PREC_STRING}")
+setup_test_parallel_python(merge_stars_parallel merge_stars/parallel "input/merge_stars/run_merge_stars_test.py" "--prec=${PREC_STRING}")
 
 # Convert markdown file to html file for more flexible viewing
 configure_file(${CMAKE_SOURCE_DIR}/test/TEST_RESULTS.md ${PROJECT_BINARY_DIR}/TEST_RESULTS.md COPYONLY)

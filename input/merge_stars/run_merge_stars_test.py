@@ -53,12 +53,12 @@ def run_test(executable):
     command = executable + ' ' + param_file
     subprocess.call(command,shell = True)
     
-def analyze_test():
+def analyze_test(prec):
 
     # set tolerance level depending on whether Enzo-E was compiled with single or
     # double precision
 
-    if os.environ["CELLO_PREC"] == "double":
+    if prec == "double":
         tolerance = 1.0e-6
     else:
         tolerance = 1.0e-4
@@ -83,6 +83,7 @@ def cleanup():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--launch_cmd', required=True,type=str)
+    parser.add_argument('--prec', choices=['double', 'single'], required=True, type=str)
     args = parser.parse_args()
 
     with testing_context():
@@ -98,7 +99,7 @@ if __name__ == '__main__':
         make_images(input_prefix = "Dir_Merge_Stars", output_prefix = "image")
         
         # analyze the tests
-        tests_passed = analyze_test()
+        tests_passed = analyze_test(args.prec)
     
         # cleanup the tests
         cleanup()
