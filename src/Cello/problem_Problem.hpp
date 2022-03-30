@@ -137,6 +137,14 @@ public: // interface
   /// Return the named method object if present
   Method * method (std::string name) const throw();
 
+  // Return whether a method object with given name exists for this problem
+  bool method_exists (std::string name) const throw();
+
+  // Returns true if method objects with both given names exist for this problem,
+  // and the method called "name1" preceeds the method called "name2" in the
+  // method list. Returns false otherwise.
+  bool method_preceeds(std::string name1, std::string name2) const throw();
+  
   /// Return the ith prolong object
   Prolong * prolong(size_t i = 0) const throw()
   { return (i < prolong_list_.size()) ? prolong_list_[i] : nullptr; }

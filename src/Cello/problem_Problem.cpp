@@ -832,6 +832,41 @@ Method * Problem::method (std::string name) const throw()
 
 //----------------------------------------------------------------------
 
+bool Problem::method_exists (std::string name) const throw()
+{
+  for (size_t i=0; i<method_list_.size(); i++) {
+    if (method_list_[i]->name() == name) return true;
+  }
+  return false;
+}
+
+//----------------------------------------------------------------------
+
+bool Problem::method_preceeds (std::string name1,
+                               std::string name2) const throw()
+{
+  size_t ind1 = 0;
+  size_t ind2 = 0;
+  bool method_1_found = false;
+  bool method_2_found = false;
+  for (size_t i=0; i<method_list_.size(); i++) {
+    if (method_list_[i]->name() == name1) {
+      ind1 = i;
+      method_1_found = true;
+    }
+    if (method_list_[i]->name() == name2) {
+      ind2 = i;
+      method_2_found = true;
+    }
+    if (method_1_found && method_2_found) break;
+  }
+
+  if (!(method_1_found && method_2_found)) return false;
+  else return ind1 < ind2;
+}
+
+//----------------------------------------------------------------------
+
 Compute * Problem::create_compute
   ( std::string name,
     Config * config ) throw ()
