@@ -842,7 +842,7 @@ bool Problem::method_exists (std::string name) const throw()
 
 //----------------------------------------------------------------------
 
-bool Problem::method_preceeds (std::string name1,
+bool Problem::method_precedes (std::string name1,
                                std::string name2) const throw()
 {
   size_t ind1 = 0;

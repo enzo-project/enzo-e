@@ -39,7 +39,7 @@ EnzoMethodGravity::EnzoMethodGravity
   // gravity method.
   ASSERT("EnzoMethodGravity",
          "Error: pm_deposit method must preceed gravity method.",
-          enzo::problem()->method_preceeds("pm_deposit","gravity"));
+          enzo::problem()->method_precedes("pm_deposit","gravity"));
           
   // Change this if fields used in this routine change
   // declare required fields

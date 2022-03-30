@@ -39,7 +39,7 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
   // pm_deposit method.
   ASSERT("EnzoMethodPmDeposit",
          "Error: pm_deposit method must preceed gravity method.",
-          enzo::problem()->method_preceeds("pm_deposit","gravity"));
+          enzo::problem()->method_precedes("pm_deposit","gravity"));
   
   const int rank = cello::rank();
 
