@@ -24,9 +24,7 @@ EnzoMethodAccretionCompute::EnzoMethodAccretionCompute(double accretion_radius_c
 	 "EnzoMethodMergeStars requires that we run a 3D problem (Domain: rank = 3)",
 	 cello::rank());
 
-  const EnzoConfig * enzo_config = enzo::config();
-
-  const int * ghost_depth = enzo_config->field_ghost_depth;
+  const int * ghost_depth = enzo::config()->field_ghost_depth;
   const int min_ghost_depth = std::min(ghost_depth[0],
 				       std::min(ghost_depth[1],ghost_depth[2]));
 
@@ -36,41 +34,6 @@ EnzoMethodAccretionCompute::EnzoMethodAccretionCompute(double accretion_radius_c
 	 "The accretion radius must be no greater than the ghost depth"
 	 "(4 by default)",
          accretion_radius_cells_ <= min_ghost_depth);
-
-  // Check if merge_stars method is also being used and if it comes before
-  // accretion_compute in the method list
-  const EnzoProblem * enzo_problem = enzo::problem();
-  size_t i = 0;
-  size_t merge_stars_index, accretion_compute_index;
-  bool merge_stars_found = false;
-  bool accretion_compute_found = false;
-  
-  while( enzo_problem->method(i) ){
-    if ( enzo_problem->method(i)->name() == "merge_stars" )
-      merge_stars_index = i;
-    if ( enzo_problem->method(i)->name() == "accretion_compute" )
-      accretion_compute_index = i;
-    if (merge_stars_found && accretion_compute_found) break;
-    ++i;
-  }
-
-  ASSERT("EnzoMethodAccretionCompute::EnzoMethodAccretionCompute() ",
-	 "Accretion method requires running with merge_stars method also.",
-         merge_stars_found);
-
-  ASSERT("EnzoMethodAccretionCompute::EnzoMethodAccretionCompute() ",
-	 "merge_stars method needs to come before accretion_compute method "
-	 "in the list of methods.",
-	 accretion_compute_index > merge_stars_index);
-
-  // Check if merging radius is at least twice that of the accretion
-  // radius
-  ASSERT("EnzoMethodAccretionCompute::EnzoMethodAccretionCompute() ",
-	 "Merging radius (Method:merge_stars:merging_radius_cells "
-	 "must be at least twice the accretion radius "
-	 "(Method:accretion_compute:accretion_radius).",
-	 enzo_config->method_merge_stars_merging_radius_cells >=
-	 2.0 * accretion_radius_cells_);
 
   // Refresh all fields
   cello::simulation()->refresh_set_name(ir_post_,name());
@@ -97,6 +60,29 @@ void EnzoMethodAccretionCompute::pup (PUP::er &p)
 
 void EnzoMethodAccretionCompute::compute ( Block *block) throw()
 {
+  if (enzo::simulation()->cycle() == enzo::config()->initial_cycle){
+    // Check if merge_stars method precedes accretion_compute method
+    ASSERT("EnzoMethodAccretionCompute",
+	   "merge_stars must precede accretion_compute",
+	   enzo::problem()->method_precedes("merge_stars",
+					    "accretion_compute"));
+
+    // Check if accretion_compute method precedes accretion_remove_gas
+    // method
+    ASSERT("EnzoMethodAccretionCompute",
+	   "accretion_compute must precede accretion_remove_gas",
+	   enzo::problem()->method_precedes("accretion_compute",
+					    "accretion_remove_gas"));
+
+    // Check if merging radius is at least twice that of the accretion
+    // radius
+    ASSERT("EnzoMethodAccretionCompute::EnzoMethodAccretionCompute() ",
+	   "Merging radius (Method:merge_stars:merging_radius_cells "
+	   "must be at least twice the accretion radius "
+	   "(Method:accretion_compute:accretion_radius).",
+	   enzo::config()->method_merge_stars_merging_radius_cells >=
+	   2.0 * accretion_radius_cells_);
+  }
 
   if (! block->is_leaf()) return;
 
