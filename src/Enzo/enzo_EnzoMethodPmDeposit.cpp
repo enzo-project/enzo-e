@@ -35,12 +35,6 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
   : Method(),
     alpha_(alpha)
 {
-  // Check if the gravity method is being used and is preceeded by the 
-  // pm_deposit method.
-  ASSERT("EnzoMethodPmDeposit",
-         "Error: pm_deposit method must preceed gravity method.",
-          enzo::problem()->method_precedes("pm_deposit","gravity"));
-  
   const int rank = cello::rank();
 
   cello::define_field ("density");
@@ -80,7 +74,14 @@ void EnzoMethodPmDeposit::pup (PUP::er &p)
 
 void EnzoMethodPmDeposit::compute ( Block * block) throw()
 {
-
+  if (enzo::simulation()->cycle() == enzo::config()->initial_cycle){
+    // Check if the gravity method is being used and is preceeded by the 
+    // pm_deposit method.
+    ASSERT("EnzoMethodPmDeposit",
+           "Error: pm_deposit method must preceed gravity method.",
+            enzo::problem()->method_precedes("pm_deposit","gravity"));
+  }
+  
   if (block->is_leaf()) {
 
     Particle particle (block->data()->particle());
