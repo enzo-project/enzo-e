@@ -728,6 +728,10 @@ Method * EnzoProblem::create_method_
     else method = new EnzoMethodAccretionCompute(
 		       enzo_config->method_accretion_compute_accretion_radius_cells
 						 );
+  } else if (name == "accretion_remove_gas") {
+
+    method = new EnzoMethodAccretionRemoveGas();
+    
   } else {
 
     // Fallback to Cello method's
