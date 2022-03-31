@@ -80,7 +80,7 @@ namespace enzo_riemann_utils{
     }
 
     // the remainder of the values are specific quantities
-    for (std::size_t i = LUT::specific_start; i < LUT::NEQ; i++) {
+    for (std::size_t i = LUT::specific_start; i < LUT::num_entries; i++) {
       cons[i] = prim[i] * prim[LUT::density];
     }
 
@@ -210,69 +210,145 @@ namespace enzo_riemann_utils{
   inline std::string parse_mem_name_(std::string member_name,
                                      EnzoPermutedCoordinates coord)
   {
+    char component;
+
+    // this helper function is ONLY invoked in cases where we know member_name
+    // is guaranteed to correspond to an actively advected quantity (so we
+    // don't need to check the return value of the following function)
+    EnzoCenteredFieldRegistry::get_actively_advected_quantity_name
+      (member_name, true, &component);
+
+    // return immediately, if not a vector component
+    if (component == '\0') { return member_name; }
+
+    std::string out = member_name.substr(0, member_name.length() - 1);
     char suffixes[3] {'x','y','z'};
-
-    std::size_t length = member_name.length();
-    if (length >= 2){
-      int suffix_index = 0;
-      std::string suffix = member_name.substr(length-2,2);
-      if (suffix == std::string("_i")){
-        suffix_index = coord.i_axis();
-      } else if (suffix == std::string("_j")){
-        suffix_index = coord.j_axis();
-      } else if (suffix == std::string("_k")){
-        suffix_index = coord.k_axis();
-      } else {
-        return member_name;
-      }
-
-      std::string key = member_name.substr(0,length-1);
-      key.push_back(suffixes[suffix_index]);
-      return key;
+    if (component == 'i'){
+      out.push_back(suffixes[coord.i_axis()]);
+    } else if (component == 'j'){
+      out.push_back(suffixes[coord.j_axis()]);
+    } else if (component == 'k'){
+      out.push_back(suffixes[coord.k_axis()]);
+    } else {
+      ERROR("enzo_riemann_utils::parse_mem_name_",
+	    "branch should be unreachable");
     }
-    return member_name;
+    return out;
   }
 
   //----------------------------------------------------------------------
 
-  /// Constructs an array of instances of EFlt3DArray that is organized
-  /// according to the LUT
+  /// Returns the keys corresponding to each entry in the LUT, (in the
+  /// order of the lookup table). For components of vector quantities, this
+  /// maps the i, j, and k components to the x, y, and z components
   ///
-  /// @param map The mapping that holds the array data
-  /// @param dim Optional integer specifying which dimension is the ith
-  ///   direction. This is used for mapping the i,j,k vector components listed
-  ///   in lut to the x,y,z field components. Values of 0, 1, and 2 correspond
-  ///   the ith direction pointing parallel to the x, y, and z directions,
-  ///   respectively. Note that each of the fields in grouping are assumed to
-  ///   be face-centered along this dimension (excluding the exterior faces of
-  ///   the mesh). This allows for appropriate loading of reconstructed fields.
+  /// @param prim When true, the function returns the keys for the primitive
+  ///   quantities. Otherwise, it returns the keys for the integration
+  ///   quantities.
   template<class LUT>
-  inline std::array<EFlt3DArray,LUT::NEQ> load_array_of_fields
-  (EnzoEFltArrayMap& map, const int dim, const bool prim) noexcept
+  inline std::vector<std::string> get_quantity_keys(const bool prim) noexcept
   {
-    std::array<EFlt3DArray,LUT::NEQ> arr;
-    // in the case where we don't have reconstructed values (dim = -1) we assume
-    // that the that i-axis is aligned with the x-axis
-    EnzoPermutedCoordinates coord( (dim == -1) ? 0 : dim);
+    // initialize out as a vector of empty strings
+    std::vector<std::string> out(LUT::num_entries);
 
+    EnzoPermutedCoordinates coord(0); // map i,j,k to x,y,z
     // define a lambda function to execute for every member of lut. For each
     // member in lut, its passed: 1. the member's name
     //                            2. the associated index
-    auto fn = [coord, prim, &arr, &map](const std::string& name,
-					const int index)
+    auto fn = [coord, prim, &out](const std::string& name, const int index)
       {
         if (index != -1){
           if (prim && (index == LUT::total_energy)){
-            arr[index] = map.at("pressure");
+            out[index] = "pressure";
           } else {
-            arr[index] = map.at(parse_mem_name_(name, coord));
+            out[index] = parse_mem_name_(name, coord);
           }
         }
       };
 
     LUT::for_each_entry(fn);
 
-    return arr;
+    return out;
+  }
+
+  //----------------------------------------------------------------------
+
+  /// Constructs an array of instances of EFlt3DArray this is something of a
+  /// stopgap solution until we fully support implemntation of EFlt3DArray
+  /// with 4D CelloArrays
+  template<class LUT>
+  inline std::array<CelloArray<const enzo_float, 3>, LUT::num_entries>
+  array_from_map(const EnzoEFltArrayMap& map) noexcept
+  {
+    std::array<CelloArray<const enzo_float, 3>, LUT::num_entries> out;
+    for (std::size_t i = 0; i < LUT::num_entries; i++) { out[i] = map[i]; }
+    return out;
+  }
+
+  template<class LUT>
+  inline std::array<CelloArray<enzo_float, 3>,LUT::num_entries> array_from_map
+  (EnzoEFltArrayMap& map) noexcept
+  {
+    std::array<CelloArray<enzo_float, 3>, LUT::num_entries> out;
+    for (std::size_t i = 0; i < LUT::num_entries; i++) { out[i] = map[i]; }
+    return out;
+  }
+
+  //----------------------------------------------------------------------
+
+  /// @def      LUT_TRANSFER_T_SCALAR
+  /// @brief    Part of the LUT_TRANSFER group of macros that are used to copy
+  ///           scalar actively advected values between a
+  ///           std::array<enzo_float, LUT::num_entries> and a given
+  ///           location in a list of 3D external arrays. These macros simply
+  ///           ignore the vector quantities (since that involves some level of
+  ///           permutation)
+  ///
+  /// The macro copies values from `src` to `dest`. When `src` (`dest`) is the
+  /// list of external arrays, `SRCSUF` (`DESTSUF`) should be the parentheses
+  /// enclosed indices of the arrays while `DESTSUF` (`SRCSUF`) should be passed
+  /// an empty argument.
+  #define LUT_TRANSFER_T_SCALAR(LUT, src, dest, SRCSUF, DESTSUF, name)        \
+    if (LUT::name != -1){ dest[LUT::name] DESTSUF = src[LUT::name] SRCSUF; }
+  #define LUT_TRANSFER_T_VECTOR(LUT, src, dest, SRCSUF, DESTSUF, name) /*...*/
+  #define LUT_TRANSFER_F_SCALAR(LUT, src, dest, SRCSUF, DESTSUF, name) /*...*/
+  #define LUT_TRANSFER_F_VECTOR(LUT, src, dest, SRCSUF, DESTSUF, name) /*...*/
+
+  //----------------------------------------------------------------------
+
+  /// transfers actively advected scalar quantities values from the specified
+  /// correct location in `external` to a 1D output array.
+  template<class LUT>
+  void transfer_scalars_to_lutarray
+  (const int dim, const int iz, const int iy, const int ix,
+   const std::array<CelloArray<const enzo_float, 3>,LUT::num_entries>& external,
+   lutarray<LUT> &dest)
+    noexcept
+  {
+    #define ENTRY(name, math_type, category, if_advection)                    \
+      LUT_TRANSFER_##if_advection##_##math_type (EnzoRiemannLUT<LUT>,         \
+                                                 external, dest, (iz,iy,ix), ,\
+                                                 name);
+    FIELD_TABLE
+    #undef ENTRY
+  }
+
+  //----------------------------------------------------------------------
+
+  /// transfers actively advected scalar quantities values from `src` to the
+  /// correct location in `external`.
+  template<class LUT>
+  inline void transfer_scalars_from_lutarray
+  (const int dim, const int iz, const int iy, const int ix,
+   const std::array<CelloArray<enzo_float, 3>, LUT::num_entries>& external,
+   const lutarray<LUT> src) noexcept
+  {
+    #define ENTRY(name, math_type, category, if_advection)                    \
+      LUT_TRANSFER_##if_advection##_##math_type (EnzoRiemannLUT<LUT>,         \
+                                                 src, external, , (iz,iy,ix), \
+                                                 name);
+    FIELD_TABLE
+    #undef ENTRY
   }
 
 }
