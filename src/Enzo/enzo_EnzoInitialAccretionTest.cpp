@@ -32,57 +32,6 @@ EnzoInitialAccretionTest::EnzoInitialAccretionTest
   star_velocity_[1] = star_velocity[1];
   star_velocity_[2] = star_velocity[2];
 
-  // Check if star particles exist for this problem
-  ParticleDescr * particle_descr = cello::particle_descr();
-  ASSERT("EnzoInitialAccretionTest",
-	 "Error: No star particle type",
-	 particle_descr->type_exists("star"));
-
-  // Check if star particles have a "mass" attribute
-  int it = particle_descr->type_index("star");
-  ASSERT("EnzoInitialAccretionTest",
-	 "Error: star particle type does not have a mass attribute",
-	 particle_descr->has_attribute(it,"mass"));
-
-  // Check if accretion_compute and accretion_remove_gas methods are also being used
-  const EnzoProblem * enzo_problem = enzo::problem();
-  size_t i = 0;
-  bool accretion_compute_found = false;
-  bool accretion_remove_gas_found = false;
-  while( enzo_problem->method(i) ){
-    if ( enzo_problem->method(i)->name() == "accretion_compute" )
-      accretion_compute_found == true;
-    else if ( enzo_problem->method(i)->name() == "accretion_remove_gas" )
-      accretion_remove_gas_found == true;
-    else continue;
-    if (accretion_compute_found && accretion_remove_gas_found) break;
-  }
-
-  ASSERT("EnzoInitialAccretionTest::EnzoInitialAccretionTest() ",
-	 "accretion_test initializer requires accretion_compute "
-	 "and accretion_remove_gas methods to run.",
-         accretion_compute_found && accretion_remove_gas_found);
-
-  // Check if the initial density and pressure are at least as large as the
-  // density and pressure floors set by the ppm solver
-
-  ASSERT("EnzoInitialAccretionTest::EnzoInitialAccretionTest() ",
-	 "Initial gas density must be at least as large as the density "
-	 "floor set by the ppm method",
-         gas_density >= enzo::config()->ppm_density_floor);
-
-  ASSERT("EnzoInitialAccretionTest::EnzoInitialAccretionTest() ",
-	 "Initial gas pressure must be at least as large as the pressure "
-	 "floor set by the ppm method",
-         gas_density >= enzo::config()->ppm_density_floor);
-
-  // Check if we have periodic boundary conditions
-  int px, py, pz;
-  cello::hierarchy()->get_periodicity(&px,&py,&pz);
-
-  ASSERT("EnzoInitialAccretionTest::EnzoInitialAccretionTest() ",
-	 "accretion_test requires periodic boundary conditions.",
-         px && py && pz);
 }
 
 void EnzoInitialAccretionTest::pup (PUP::er &p)
@@ -104,6 +53,54 @@ void EnzoInitialAccretionTest::enforce_block
 ( Block * block, Hierarchy * hierarchy ) throw()
 
 {
+  
+  // Check if star particles exist for this problem
+  ParticleDescr * particle_descr = cello::particle_descr();
+  ASSERT("EnzoInitialAccretionTest",
+	 "Error: No star particle type",
+	 particle_descr->type_exists("star"));
+
+  // Check if star particles have a "mass" attribute
+  int it = particle_descr->type_index("star");
+  ASSERT("EnzoInitialAccretionTest",
+	 "Error: star particle type does not have a mass attribute",
+	 particle_descr->has_attribute(it,"mass"));
+
+  // Check if accretion_compute and accretion_remove_gas methods are being used,
+  // and that accretion_compute precedes accretion_remove_gas
+  ASSERT("EnzoInitialAccretionTest",
+	 "If accretion_test initializer is used, the accretion_compute "
+	 "and accretion_remove_gas methods are required, and "
+	 "accretion_compute must precede accretion_remove_gas.",
+         enzo::problem()->method_precedes("accretion_compute",
+					  "accretion_remove_gas"));
+
+  // Check if ppm method is being used
+  ASSERT("EnzoInitialAccretionTest",
+	 "If accretion_test initializer is used, the ppm_method is "
+	 "required.",
+         enzo::problem()->method_exists("ppm"));
+
+  // Check if the initial density and pressure are at least as large as the
+  // density and pressure floors set by the ppm method
+
+  ASSERT("EnzoInitialAccretionTest",
+	 "Initial gas density must be at least as large as the density "
+	 "floor set by the ppm method",
+         gas_density_ >= enzo::config()->ppm_density_floor);
+
+  ASSERT("EnzoInitialAccretionTest",
+	 "Initial gas pressure must be at least as large as the pressure "
+	 "floor set by the ppm method",
+         gas_density_ >= enzo::config()->ppm_density_floor);
+
+  // Check if we have periodic boundary conditions
+  int px, py, pz;
+  cello::hierarchy()->get_periodicity(&px,&py,&pz);
+
+  ASSERT("EnzoInitialAccretionTest::EnzoInitialAccretionTest() ",
+	 "accretion_test requires periodic boundary conditions.",
+         px && py && pz);
   if (!block->is_leaf()) return;
   const EnzoConfig * enzo_config = enzo::config();
   ASSERT("EnzoInitialAccretionTest",
