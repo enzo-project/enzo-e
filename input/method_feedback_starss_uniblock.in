@@ -1,0 +1,4 @@
+include "method_feedback_starss.in"
+
+Mesh {root_blocks = [1,1,1];}
+Initial{feedback_test{position = [0.5,0.5,0.5];}}

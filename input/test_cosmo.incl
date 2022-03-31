@@ -142,7 +142,7 @@ Adapt {
  }
 
  Output {
-     list = [ "de", "depa", "ax", "dark", "mesh", "po", "check" ];
+     list = [ "de", "depa", "ax", "dark", "mesh", "po", "check", "hdf5" ];
      de {
          dir = [ "COSMO_CG_%04d", "cycle" ];
          field_list = [ "density" ];

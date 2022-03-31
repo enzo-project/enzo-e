@@ -1,0 +1,326 @@
+#
+#
+#  Very simple feedback test problem
+#
+#     Drops a star particle of desired mass
+#     into a unigrid, uniform domain. Commented-out
+#     Adapt blocks below can be used to add in AMR
+#     (static, nested grids or adaptive).
+#
+
+Adapt {
+  list = []; #["mask"];
+  mask {
+    type = "mask";
+    value = [1.0, y<=0.5, 0.0];
+  }
+     max_level = 1;
+ }
+
+Boundary {
+  type = "periodic";
+}
+
+Domain {
+    lower = [ 0.0, 0.0, 0.0];
+    upper = [ 1.0, 1.0, 1.0];
+}
+
+Mesh {
+  root_blocks = [2,2,2];
+  root_rank   = 3;
+  root_size   = [64,64,64]; # given length units, res = 1024 pc / 64 = 16 pc
+
+
+}
+
+Field {
+  alignment   = 8;
+  gamma       = 1.40;
+  ghost_depth = 4;
+
+  list = ["density", "internal_energy", "total_energy",
+          "metal_density", "velocity_x", "velocity_y", "velocity_z",
+          "pressure", "temperature","total_energy_accumulate"];
+  list += ["HI_density","HII_density","HeI_density","HeII_density","HeIII_density","e_density"];
+  #prolong = "linear";
+}
+Field {
+   list += ["density_deposit",
+            "total_energy_deposit",
+            "internal_energy_deposit",
+            "metal_density_deposit",
+            "velocity_x_deposit",
+            "velocity_y_deposit",
+            "velocity_z_deposit"
+           ];
+   list += ["density_deposit_copy",
+            "total_energy_deposit_copy",
+            "internal_energy_deposit_copy",
+            "metal_density_deposit_copy",
+            "velocity_x_deposit_copy",
+            "velocity_y_deposit_copy",
+            "velocity_z_deposit_copy"
+           ];
+}
+
+
+Group {
+  list = ["color","derived","conserved","make_field_conservative"];
+  
+  color {
+    field_list = ["metal_density"];
+    field_list += ["HI_density","HII_density","HeI_density","HeII_density","HeIII_density","e_density"];
+  }
+  derived {
+    field_list = ["temperature","pressure"];
+  }
+  conserved {
+    field_list = ["density", "HI_density", "HII_density", "HeI_density", "HeII_density", "HeIII_density", "e_density", "metal_density"];
+    field_list += ["velocity_x", "velocity_y", "velocity_z", "total_energy", "internal_energy"];
+  }
+  make_field_conservative {
+    field_list = ["velocity_x","velocity_y","velocity_z","total_energy","internal_energy"];
+    #field_list += ["velocity_x_deposit","velocity_y_deposit","velocity_z_deposit",
+    #               "total_energy_deposit","internal_energy_deposit"];
+  }
+
+}
+
+Method {
+  list = [ "ppm",  "grackle", "feedback"];
+
+  null {
+    dt = 10.0; # force a minimum dt - code units
+  };
+
+  flux_correct {enable=false;}
+
+  feedback {
+    method = "STARSS";
+    single_sn = 1;
+    unrestricted_sn = 0;
+    stellar_winds = 0;
+    gas_return_fraction = 0.0; # doesn't do anything
+    analytic_SNR_shell_mass = 1;
+    fade_SNR = 1;
+    NEvents = 1;
+
+
+  };
+  # star maker is turned on here as a method just to list and comment the parameters,
+  # but setting number density to something stupid so no stars actually form
+  star_maker {
+     type = "STARSS";
+     number_density_threshold = 1.0E10; # set arbitrarily high - just turns this off 
+     minimum_star_mass        = 1000.0; # have to set this for use with feedback routine at the moment
+                                        #   this sets the minimum star mass, but for the sake of stochastic
+                                        #   SF routine this IS the particle mass
+     use_density_threshold    = true  ; # check number density for SF (def true)
+     use_velocity_divergence  = true  ; # converging flow criterion   (def true)
+     use_dynamical_time       = true ;  # compute t_ff / t_dyn        (def true)
+     maximum_mass_fraction    = 0.5  ;  # maximum fraction of a cell that can be converted into stars
+                                        #    can be redundant with number density threshold depending
+                                        #    on rest of SF criteria and refinement criteria (default 0.5)
+     efficiency               = 0.02 ;  # efficiency per free fall time (default 0.01)
+     
+  };
+  ppm {
+        diffusion = true;
+        riemann_solver = "two_shock";
+        dual_energy = true;
+        flattening = 3;
+        steepening = true;
+        mol_weight = 1.2;
+        courant = 0.4;
+        density_floor = 1.0E-20;
+        number_density_floor = 1.0E-20;
+        pressure_floor = 1.0E-20;
+        temperature_floor = 1.0E-20;
+      };
+
+#
+#  add 'grackle' to list above to use and uncomment
+#
+  grackle {
+    data_file = "input/CloudyData_UVB=HM2012.h5";
+    with_radiative_cooling = 1;
+    metal_cooling = 1;
+    primordial_chemistry = 1;
+    UVbackground = 0;
+  } ;
+}
+
+Particle {
+    list = ["star"];
+
+    star {
+        attributes = [ "x", "double",
+                       "y", "double",
+                       "z", "double",
+                       "vx", "double",
+                       "vy", "double",
+                       "vz", "double",
+                       "ax", "double",
+                       "ay", "double",
+                       "az", "double",
+                       "mass", "double",
+                       "is_local", "double",
+                       "creation_time", "double",
+                       "lifetime", "double",
+                       "number_of_sn", "double",
+                       "metal_fraction", "double", 
+                       "id",             "double"];
+        position = [ "x", "y", "z" ];
+        velocity = [ "vx", "vy", "vz" ];
+        group_list = ["has_mass"];
+    }
+    starss_coupling {
+        attributes = [ "x", "double",
+                       "y", "double",
+                       "z", "double",
+                       "vx", "double",
+                       "vy", "double",
+                       "vz", "double",
+                       "px", "double",
+                       "py", "double",
+                       "pz", "double",
+                       "mass", "double",
+                       "is_local", "double",
+                       "energy", "double",
+                       "gas_energy", "double",
+                       "metal_mass", "double" ];
+        position = [ "x", "y", "z" ];
+        velocity = ["vx","vy","vz"];
+     }
+
+}
+Units {
+    length = 64.0 * 10.0 *3.0866E18; #half-parsec resolution 
+    time   = 3.15576E13; # 1 Myr
+    mass   = 1.9891E36;
+  }
+
+Initial {
+
+  list = ["feedback_test","value"]; # name of IC problem
+
+  feedback_test {
+    density    = 4.0*1.2E-24;             # uniform mass density for ICs
+    metal_fraction = 1e-2*0.012;
+    #position   = [0.25 + (0.5 - 0.25) / 2.0, 0.5 - (0.5 / 128.0) , 0.25 + (0.5 - 0.25) / 2.0]; # AMR high_to_low
+    #position   = [0.25 + (0.5 - 0.25) / 2.0, 0.5 + (0.5 / 64.0) , 0.25 + (0.5 - 0.25) / 2.0]; # AMR low_to_high
+    #position = [0.25, 0.5, 0.25]; # unigrid face
+    position = [0.5,0.5,0.5]; # unigrid corner (or one block)
+    #position = [0.25, 0.25, 0.25]; # unigrid multiblock center block   
+
+    temperature = 100.0;              # in K
+                                      #   particles are still local to each block and are kicked away from
+                                      #   boundaries if NxN feedback zone crosses a block boundary
+    star_mass  = 1000.0;                # particle mass in Msun
+  }
+
+#
+# use this to test with some KE on the grid to make (add 'value' to list above)
+# sure momentum and KE energy injection work in a flow
+ value {
+    #velocity_x = 1e-16;
+    #velocity_y = 1e-16;
+    #velocity_z = 1e-16;
+    HI_density    = 0.7   * 4.0*1.2E-24;
+    HII_density   = 1e-10 * 4.0*1.2E-24;
+    HeI_density   = 0.3   * 4.0*1.2E-24;
+    HeII_density  = 1e-10 * 4.0*1.2E-24;
+    HeIII_density = 1e-10 * 4.0*1.2E-24;
+    e_density     = 1e-10 * 4.0*1.2E-24;
+  } 
+
+}
+
+Output {
+    list = ["de","te","vy","mesh","data" ];
+     de {
+         dir = [ "FEEDBACK_TEST_%04d", "cycle" ];
+         field_list = [ "density" ];
+         image_ghost = false;
+         image_size = [ 512, 512 ];
+         image_type = "data";
+         name = [ "de-%04d.png", "cycle" ];
+         schedule {
+             start = 0; #1;
+             step = 1; #10;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     te {
+         dir = [ "FEEDBACK_TEST_%04d", "cycle" ];
+         field_list = [ "total_energy" ];
+         image_ghost = false;
+         image_size = [ 512, 512 ];
+         image_type = "data";
+         name = [ "te-%04d.png", "cycle" ];
+         schedule {
+             start = 0; #1;
+             step = 1; #10;
+             var = "cycle";
+         };
+         type = "image";
+     };
+
+     vy {
+         dir = [ "FEEDBACK_TEST_%04d", "cycle" ];
+         field_list = [ "velocity_y" ];
+         image_ghost = false;
+         image_size = [ 512, 512 ];
+         image_type = "data";
+         name = [ "vy-%04d.png", "cycle" ];
+         schedule {
+             start = 0; #1;
+             step = 1; #10;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     mesh {
+         colormap = [ 0.000000000000000, 0.000000000000000, 0.000000000000000, 0.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 0.000000000000000 ];
+         dir = [ "FEEDBACK_TEST_%04d", "cycle" ];
+         image_reduce_type = "max";
+         image_size = [ 1025, 1025 ];
+         image_type = "mesh";
+         name = [ "mesh-%02d.png", "count" ];
+         schedule {
+	     start = 0; #1;
+             step = 1; #10;
+             var = "cycle";
+         };
+         type = "image";
+     };
+
+
+
+    data {
+        field_list = [ "density" , "metal_density","velocity_x","velocity_y","velocity_z",
+                       "pressure", "temperature","total_energy","internal_energy","total_energy_accumulate"];
+
+        particle_list = ["star"];
+
+        dir   = ["FEEDBACK_TEST_%04d","cycle"];
+        name = [ "feedback-test-data-%04d-%03d.h5", "cycle", "proc" ];
+        type = "data";
+
+        # schedule the output based on 'var' and 'step'
+        #   step refers to the interval if 'var' to output on
+        schedule {
+             var   = "cycle";
+             start = 0; #1;
+             step  = 1; #10; #            time in code units (Myr)
+        }
+    };
+
+
+}
+
+Stopping {
+    cycle = 1; #401;
+}

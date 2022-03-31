@@ -367,6 +367,8 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         // pointer to mass array in block
         pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib);
 
+        // TODO: if cosmology: "mass" is actually mass
+        //       else: "mass" is density
         pmass[io] = new_mass;
         px = (enzo_float *) particle.attribute_array(it, ia_x, ib);
         py = (enzo_float *) particle.attribute_array(it, ia_y, ib);
@@ -415,7 +417,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 
         pform[io]     =  enzo_block->time();   // formation time
         //TODO: Need to have some way of calculating lifetime based on particle mass
-        plifetime[io] =  25.0 * cello::Myr_s / enzo_units->time() ; // lifetime
+        plifetime[io] =  25.0 * cello::Myr_s / enzo_units->time() ; // lifetime (not accessed for STARSS FB)
         plevel[io] = enzo_block->level();
 
         if (metal){
