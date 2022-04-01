@@ -720,7 +720,7 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "accretion_compute") {
 
-    if (enzo_config->method_accretion_compute_type == "density_threshold")
+    if (enzo_config->method_accretion_compute_flavor == "density_threshold")
       method = new EnzoMethodAccretionComputeDensThresh(
 		       enzo_config->method_accretion_compute_accretion_radius_cells,
 		       enzo_config->method_accretion_compute_density_threshold

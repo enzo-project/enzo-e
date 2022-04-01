@@ -278,7 +278,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_merge_stars_merging_radius_cells(0.0),
   /// EnzoMethodAccretionCompute
   method_accretion_compute_accretion_radius_cells(0.0),
-  method_accretion_compute_type(""),
+  method_accretion_compute_flavor(""),
   method_accretion_compute_density_threshold(0.0),
   /// EnzoProlong
   prolong_enzo_type(),
@@ -616,7 +616,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_merge_stars_merging_radius_cells;
   
   p | method_accretion_compute_accretion_radius_cells;
-  p | method_accretion_compute_type;
+  p | method_accretion_compute_flavor;
   p | method_accretion_compute_density_threshold;
 
   p | prolong_enzo_type;
@@ -1633,8 +1633,8 @@ void EnzoConfig::read_method_accretion_compute_(Parameters * p)
 {
   method_accretion_compute_accretion_radius_cells = p->value_float
     ("Method:accretion_compute:accretion_radius_cells",4.0);
-  method_accretion_compute_type = p->value_string
-    ("Method:accretion_compute:type","");
+  method_accretion_compute_flavor = p->value_string
+    ("Method:accretion_compute:flavor","");
   method_accretion_compute_density_threshold = p->value_float
     ("Method:accretion_compute:density_threshold",1.0e-6);
 }

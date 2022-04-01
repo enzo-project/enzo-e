@@ -381,7 +381,7 @@ public: // interface
       method_merge_stars_merging_radius_cells(0.0),
       // EnzoMethodAccretionCompute
       method_accretion_compute_accretion_radius_cells(0.0),
-      method_accretion_compute_type(""),
+      method_accretion_compute_flavor(""),
       method_accretion_compute_density_threshold(0.0),
       // EnzoProlong
       prolong_enzo_type(),
@@ -816,7 +816,7 @@ public: // attributes
 
   /// EnzoMethodAccretionCompute
   double                     method_accretion_compute_accretion_radius_cells;
-  std::string                method_accretion_compute_type;
+  std::string                method_accretion_compute_flavor;
   double                     method_accretion_compute_density_threshold;
   
   std::string                prolong_enzo_type;
