@@ -49,11 +49,12 @@ void EnzoInitialAccretionTest::pup (PUP::er &p)
   p | gas_pressure_;
 }
 
+
 void EnzoInitialAccretionTest::enforce_block
-( Block * block, Hierarchy * hierarchy ) throw()
+( Block * block, const Hierarchy * hierarchy ) throw()
 
 {
-  
+    
   // Check if star particles exist for this problem
   ParticleDescr * particle_descr = cello::particle_descr();
   ASSERT("EnzoInitialAccretionTest",
@@ -152,7 +153,7 @@ void EnzoInitialAccretionTest::enforce_block
 
   const enzo_float gamma = EnzoBlock::Gamma[cello::index_static()];
   
-  // Set total energy
+  // Set total energy and internal energy
   const enzo_float te_value = gas_pressure_ / ((gamma - 1.0) * gas_density_);
   std::fill_n(te,m,te_value);
 
@@ -173,12 +174,9 @@ void EnzoInitialAccretionTest::enforce_block
       const int ia_vx = particle.attribute_index (it, "vx");
       const int ia_vy = particle.attribute_index (it, "vy");
       const int ia_vz = particle.attribute_index (it, "vz");
+      int ia_copy  = particle.attribute_index (it, "is_copy");
+      int ia_id   = particle.attribute_index (it, "id");
 
-      // Attribrute stride lengths
-      const int dm   = particle.stride(it, ia_m);
-      const int dp   = particle.stride(it, ia_x);
-      const int dv   = particle.stride(it, ia_vx);
-  
       /// Initialise pointers for particle attribute arrays
       enzo_float * pmass = 0;
       enzo_float * px   = 0;
@@ -187,7 +185,8 @@ void EnzoInitialAccretionTest::enforce_block
       enzo_float * pvx  = 0;
       enzo_float * pvy  = 0;
       enzo_float * pvz  = 0;
-      int64_t * is_local = 0;
+      int64_t * is_copy = 0;
+      int64_t * id = 0;
      
       // insert particle
       int ib,ipp  = 0;
@@ -203,16 +202,20 @@ void EnzoInitialAccretionTest::enforce_block
       pvx   = (enzo_float *) particle.attribute_array(it, ia_vx, ib);
       pvy   = (enzo_float *) particle.attribute_array(it, ia_vy, ib);
       pvz   = (enzo_float *) particle.attribute_array(it, ia_vz, ib);
-
+      id   = (int64_t *) particle.attribute_array(it, ia_id, ib);
+      is_copy   = (int64_t *) particle.attribute_array(it, ia_copy, ib);
+      
       // Now assign values to attributes
-      pmass[ipp*dm] = star_mass_;
-      px[ipp*dp] = star_position_[0];
-      py[ipp*dp] = star_position_[1];
-      pz[ipp*dp] = star_position_[2];
-      pvx[ipp*dp] = star_velocity_[0];
-      pvy[ipp*dp] = star_velocity_[1];
-      pvz[ipp*dp] = star_velocity_[2];
-
+      pmass[0] = star_mass_;
+      px[0] = star_position_[0];
+      py[0] = star_position_[1];
+      pz[0] = star_position_[2];
+      pvx[0] = star_velocity_[0];
+      pvy[0] = star_velocity_[1];
+      pvz[0] = star_velocity_[2];
+      id[0] = 1;
+      is_copy[0] = 0;
+      
     } // Is there a particle to place in this block?
   return;
 }

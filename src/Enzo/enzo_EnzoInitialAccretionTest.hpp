@@ -16,7 +16,7 @@ class EnzoInitialAccretionTest : public Initial {
 
   /// @class    EnzoInitialAccretionTest
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] initial conditions for singular isothermal sphere problem
+  /// @brief    [\ref Enzo] initial conditions for accretion test problem
 
 public: // interface
 
@@ -29,9 +29,6 @@ public: // interface
    double gas_density,
    double gas_pressure
    ) throw();
-
-    /// Constructor
-  EnzoInitialAccretionTest(const EnzoConfig * enzo_config) throw();
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoInitialAccretionTest);
@@ -58,7 +55,10 @@ public: // interface
   /// Initialize the block
 
   virtual void enforce_block
-  ( Block * block, Hierarchy * hierarchy ) throw();
+  ( Block * block, const Hierarchy * hierarchy ) throw();
+
+  // Destructor
+  virtual ~EnzoInitialAccretionTest() throw() {};
 
   private: // attributes
   
