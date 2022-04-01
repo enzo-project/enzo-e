@@ -165,7 +165,7 @@ Particle {
 
      star_maker {
        # run the stochastic star formation algorithm taken from star_maker_ssn in Enzo
-       type = "stochastic";                # only available option at the moment
+       flavor = "stochastic";                # only available option at the moment
        number_density_threshold = 100.0;   # in 1/cm^3
        minimum_star_mass        = 1000.0;  # for the sake of this algorithm, this IS the
                                            # mass of the particle formed.
