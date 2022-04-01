@@ -36,7 +36,7 @@ public:
 
   /// Name
   virtual std::string name () throw()
-  { return "accretion_compute_dens_thresh"; }
+  { return "accretion_compute"; }
 
   /// Not sure if this is needed
   virtual std::string particle_type () throw()
