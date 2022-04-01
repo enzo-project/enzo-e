@@ -1263,7 +1263,7 @@ void EnzoConfig::read_initial_accretion_test_(Parameters * p)
   initial_accretion_test_gas_density = p->value_float
     ("Initial:accretion_test:gas_density",1.0e-6);
 
-  initial_accretion_test_gas_density = p->value_float
+  initial_accretion_test_gas_pressure = p->value_float
     ("Initial:accretion_test:gas_pressure",1.0e-6);
 }
 
