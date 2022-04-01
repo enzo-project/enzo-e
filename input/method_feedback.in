@@ -86,7 +86,7 @@ Method {
   # star maker is turned on here as a method just to list and comment the parameters,
   # but setting number density to something stupid so no stars actually form
   star_maker {
-     type = "stochastic";
+     flavor = "stochastic";
      number_density_threshold = 1.0E10; # set arbitrarily high - just turns this off 
      minimum_star_mass        = 1000.0; # have to set this for use with feedback routine at the moment
                                         #   this sets the minimum star mass, but for the sake of stochastic

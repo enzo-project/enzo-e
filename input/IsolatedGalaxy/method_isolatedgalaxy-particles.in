@@ -101,7 +101,7 @@
 #          }
 
       background_acceleration {
-          type = "GalaxyModel";
+          flavor = "GalaxyModel";
           DM_density     = 3.07199E-25 ;   # cgs - central density for 1E10 Msun NFW halo
           DM_mass        = -1.0 ;# 1.0E10; # set < 0 to use density, > 0 uses this instead of density
           DM_mass_radius = 45.0;           # kpc virial radius (or radius within which above mass refers to)
