@@ -123,18 +123,18 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
 
   Particle particle = enzo_block->data()->particle();
 
-  if (enzo_config->method_background_acceleration_type == "GalaxyModel"){
+  if (enzo_config->method_background_acceleration_flavor == "GalaxyModel"){
 
     this->GalaxyModel(ax, ay, az, &particle, rank,
                       cosmo_a, enzo_config, enzo_units, enzo_block->dt);
 
-  } else if (enzo_config->method_background_acceleration_type == "PointMass"){
+  } else if (enzo_config->method_background_acceleration_flavor == "PointMass"){
     this->PointMass(ax, ay, az, &particle, rank,
                     cosmo_a, enzo_config, enzo_units, enzo_block->dt);
   } else {
 
     ERROR("EnzoMethodBackgroundAcceleration::compute_()",
-          "Background acceleration type not recognized");
+          "Background acceleration flavor not recognized");
 
   }
 
