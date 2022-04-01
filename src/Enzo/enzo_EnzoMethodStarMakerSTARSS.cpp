@@ -27,7 +27,7 @@
 // Plan is to make this a separate class that inherits from the stochastic
 // algorithm.
 
-//#define DEBUG_SF_CRITERIA
+#define DEBUG_SF_CRITERIA
 //-------------------------------------------------------------------
 
 EnzoMethodStarMakerSTARSS::EnzoMethodStarMakerSTARSS
@@ -314,8 +314,8 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
             maximum_star_mass = this->maximum_star_fraction_ * cell_mass * munit_solar; //Msun
         }
 
-        double bulk_SFR = f_shield * cell_mass*munit_solar/divisor;
-        double mass_should_form = bulk_SFR * dt*tunit/cello::Myr_s; //proposed stellar mass in Msun
+        double bulk_SFR = f_shield * this->maximum_star_fraction_ * cell_mass*munit_solar/divisor;
+        //double mass_should_form = bulk_SFR * dt*tunit/cello::Myr_s; //proposed stellar mass in Msun
         //double mass_should_form = std::min(f_shield/divisor * dt*tunit/cello::Myr_s,
         //                              this->maximum_star_fraction_) * cell_mass*munit_solar;                            
         
@@ -324,23 +324,23 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         //  We convert a fixed portion of the baryon mass (or the calculated amount)
         //TODO: Difference between dt and dtFixed???
        
-        double p_form = 1.0 - std::exp(-mass_should_form/
+        double p_form = 1.0 - std::exp(-bulk_SFR*dt*(tunit/cello::Myr_s)/
                 (this->maximum_star_fraction_*cell_mass*munit_solar));
 
         //double p_form = 1.0 - std::exp(-mass_should_form/maximum_star_mass);
         if (enzo_config->method_star_maker_turn_off_probability) p_form = 1.0;
-
+/*
         #ifdef DEBUG_SF_CRITERIA
           CkPrintf("MethodStarMakerSTARSS -- mass_should_form = %f; p_form = %f\n", mass_should_form, p_form);
           CkPrintf("MethodStarMakerSTARSS -- cell_mass = %f Msun; divisor = %f\n", cell_mass*munit_solar,divisor);
           CkPrintf("MethodStarMakerSTARSS -- (ix, iy, iz) = (%d, %d, %d)\n", ix,iy,iz);
         #endif
-
+*/
         double random = double(mt()) / double(mt.max()); 
 
         /* New star is mass_should_form up to `conversion_fraction` * baryon mass of the cell, but at least 15 msun */       
         //double new_mass = std::min(mass_should_form/munit_solar, maximum_star_mass/munit_solar);
-        double new_mass = std::min(mass_should_form/munit_solar, maximum_star_mass/munit_solar);
+        double new_mass = std::min(f_shield*this->maximum_star_fraction_*cell_mass, maximum_star_mass/munit_solar);
         if (
                  (new_mass * munit_solar < minimum_star_mass) // too small
                  || (random > p_form) // too unlikely

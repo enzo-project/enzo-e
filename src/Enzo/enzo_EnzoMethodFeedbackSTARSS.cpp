@@ -527,7 +527,7 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
  
   }
   
-  CkPrintf("After refresh (block [%.3f, %.3f, %.3f]) -- beforeMass = %e, afterMass = %e, afterMass - beforeMass = %e\n", xm, ym, zm, beforeMass, afterMass, afterMass-beforeMass);
+  //CkPrintf("After refresh (block [%.3f, %.3f, %.3f]) -- beforeMass = %e, afterMass = %e, afterMass - beforeMass = %e\n", xm, ym, zm, beforeMass, afterMass, afterMass-beforeMass);
 
   return;
 }

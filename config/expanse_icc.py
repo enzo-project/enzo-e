@@ -2,8 +2,8 @@ import os
 from _common_search_paths import charm_path_search, grackle_path_search
 
 is_arch_valid = 1
-use_gfortran = 1
-smp = 1
+use_gfortran = 0
+smp = 0
 
 flags_arch = '-Wall -O3 -g'
 #flags_arch = '-fprofile-arcs -ftest-coverage'
