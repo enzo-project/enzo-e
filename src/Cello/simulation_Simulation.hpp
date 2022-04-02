@@ -71,6 +71,7 @@ public: // interface
 
   /// Set MsgRefine * for a newly created Block
   void set_msg_refine (Index index, MsgRefine *);
+
   /// Return MsgRefine * for a newly created Block and remove from list
   MsgRefine * get_msg_refine (Index index);
 #endif

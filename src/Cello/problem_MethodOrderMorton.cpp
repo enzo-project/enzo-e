@@ -7,6 +7,19 @@
 
 #include "problem.hpp"
 
+#define TRACE_ORDER
+
+#ifdef TRACE_ORDER
+#  define TRACE_ORDER_BLOCK(MSG,BLOCK)          \
+  CkPrintf ("TRACE_ORDER %s %s\n",              \
+            std::string(MSG).c_str(),           \
+            BLOCK->name().c_str());             \
+  fflush(stdout);
+#else
+#  define TRACE_ORDER_BLOCK(MSG,BLOCK) /* ... */
+#endif
+
+
 //----------------------------------------------------------------------
 
 MethodOrderMorton::MethodOrderMorton(int min_level) throw ()
@@ -37,6 +50,7 @@ void MethodOrderMorton::compute (Block * block) throw()
 {
   // Initialize counters, then barrier to ensure counters initialized
   // before first entry method can arrive
+  TRACE_ORDER_BLOCK("compute",block);
   Sync * sync_index = psync_index_(block);
   Sync * sync_weight = psync_weight_(block);
 
@@ -71,6 +85,7 @@ void Block::r_method_order_morton_continue(CkReductionMsg * msg)
 
 void MethodOrderMorton::compute_continue(Block * block)
 {
+  TRACE_ORDER_BLOCK("continue",block);
   send_weight(block, 0, true);
 }
 
@@ -88,6 +103,7 @@ void MethodOrderMorton::send_weight(Block * block, int weight_child, bool self)
   if ((!self || block->is_leaf()) && level > min_level_)  {
     const Index index_parent = block->index().index_parent(min_level_);
     block->index().child(level,ic3,ic3+1,ic3+2,min_level_);
+    TRACE_ORDER_BLOCK("send_weight",block);
     cello::block_array()[index_parent].p_method_order_morton_weight(ic3,weight,block->index());
     send_index(block, 0, 0, self);
   } else if (level == min_level_) {
@@ -113,6 +129,7 @@ void Block::p_method_order_morton_weight(int ic3[3], int weight, Index index_chi
 void MethodOrderMorton::recv_weight
 (Block * block, int ic3[3], int weight, bool self)
 {
+  TRACE_ORDER_BLOCK("recv_weight",block);
   // Update children weight if needed
   if (!self) {
     *pweight_(block) += weight;
@@ -139,6 +156,11 @@ void MethodOrderMorton::send_index
       ic3[1] = (ic>>1) & 1;
       ic3[2] = (ic>>2) & 1;
       Index index_child = block->index().index_child(ic3,min_level_);
+      {
+        char buffer[80];
+        sprintf (buffer,"send_index %d %d\n",index,count);
+        TRACE_ORDER_BLOCK(buffer,block);
+      }
       cello::block_array()[index_child].p_method_order_morton_index(index,count);
       index += *pweight_child_(block,ic);
     }
@@ -154,6 +176,11 @@ void Block::p_method_order_morton_index(int index, int count)
 void MethodOrderMorton::recv_index
 (Block * block, int index, int count, bool self)
 {
+  {
+    char buffer[80];
+    sprintf (buffer,"recv_index %d %d\n",index,count);
+    TRACE_ORDER_BLOCK(buffer,block);
+  }
   if (!self) {
     const int rank = cello::rank();
     int na3[3];
@@ -162,8 +189,16 @@ void MethodOrderMorton::recv_index
     *pindex_(block) = index;
     *pcount_(block) = count;
     *pnext_(block) = index_next;
+    CkPrintf ("TRACE_ORDER_MORTON %s %d %d %s\n",block->name().c_str(),
+              index,count,block->name(index_next).c_str());
+    fflush(stdout);
   }
   if (psync_index_(block)->next()) {
+    {
+      char buffer[80];
+      sprintf (buffer,"complete %d %d\n",index,count);
+      TRACE_ORDER_BLOCK(buffer,block);
+    } 
     send_index(block,index, count, false);
     CkCallback callback (CkIndex_Block::r_method_order_morton_complete(nullptr),
                        block->proxy_array());

@@ -21,6 +21,7 @@ EnzoMsgCheck::EnzoMsgCheck()
     data_msg_(nullptr),
     buffer_(nullptr),
     block_name_(),
+    block_level_(),
     block_lower_(),
     block_upper_(),
     block_size_(),
@@ -83,6 +84,7 @@ void * EnzoMsgCheck::pack (EnzoMsgCheck * msg)
 
   // Block name
   SIZE_STRING_TYPE(size,msg->block_name_);
+  SIZE_SCALAR_TYPE(size,int,msg->block_level_);
   SIZE_ARRAY_TYPE(size,double,msg->block_lower_,3);
   SIZE_ARRAY_TYPE(size,double,msg->block_upper_,3);
   SIZE_ARRAY_TYPE(size,double,msg->block_upper_,3);
@@ -131,6 +133,7 @@ void * EnzoMsgCheck::pack (EnzoMsgCheck * msg)
 
   // Block name
   SAVE_STRING_TYPE(pc,msg->block_name_);
+  SAVE_SCALAR_TYPE(pc,int,msg->block_level_);
   SAVE_ARRAY_TYPE(pc,double,msg->block_lower_,3);
   SAVE_ARRAY_TYPE(pc,double,msg->block_upper_,3);
   SAVE_ARRAY_TYPE(pc,double,msg->block_upper_,3);
@@ -198,6 +201,7 @@ EnzoMsgCheck * EnzoMsgCheck::unpack(void * buffer)
 
   // Block name
   LOAD_STRING_TYPE(pc,msg->block_name_);
+  LOAD_SCALAR_TYPE(pc,int,msg->block_level_);
   LOAD_ARRAY_TYPE(pc,double,msg->block_lower_,3);
   LOAD_ARRAY_TYPE(pc,double,msg->block_upper_,3);
   LOAD_ARRAY_TYPE(pc,double,msg->block_upper_,3);
@@ -236,7 +240,6 @@ void EnzoMsgCheck::update (EnzoBlock * block)
   if (io_block_ != nullptr) {
     io_block_->save_to(block);
   }
-
   update(block->data());
 }
 
@@ -269,6 +272,7 @@ void EnzoMsgCheck::set_index_send(Index index)
 void EnzoMsgCheck::set_block (Block * block)
 {
   block_name_ = block->name();
+  block_level_ = block->level();
   block->data()->lower(block_lower_,block_lower_+1,block_lower_+2);
   block->data()->upper(block_upper_,block_upper_+1,block_upper_+2);
   block->data()->field().size(block_size_,block_size_+1,block_size_+2);
@@ -295,8 +299,14 @@ void EnzoMsgCheck::print (const char * msg)
   CkPrintf ("ENZO_MSG_CHECK tag %s %s\n",msg,tag_);
   CkPrintf ("ENZO_MSG_CHECK is_local %d\n",is_local_);
   int v3[3];
-  index_send_.values(v3);
-  CkPrintf ("ENZO_MSG_CHECK index_send values %d %d %d\n",v3[0],v3[1],v3[2]);
+  index_this_.values(v3);
   CkPrintf ("ENZO_MSG_CHECK data_msg_ %p\n",(void *)data_msg_);
+  CkPrintf ("ENZO_MSG_CHECK io_block_ %p\n",(void *)io_block_);
+  CkPrintf ("ENZO_MSG_CHECK block_name_ %s\n",block_name_.c_str());
+  CkPrintf ("ENZO_MSG_CHECK block_level_ %d\n",block_level_);
+  CkPrintf ("ENZO_MSG_CHECK block_lower %g %g %g\n",
+            block_lower_[0],block_lower_[1],block_lower_[2]);
+  CkPrintf ("ENZO_MSG_CHECK block_upper %g %g %g\n",
+            block_upper_[0],block_upper_[1],block_upper_[2]);
   CkPrintf ("ENZO_MSG_CHECK\n");
 }

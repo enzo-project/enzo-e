@@ -46,6 +46,10 @@ public: // functions
 #ifdef BUG_FIX_150
   /// Request by newly created EnzoBlock to get its MsgRefine object
   virtual void p_get_msg_refine(Index index);
+
+  virtual void p_get_msg_check(Index index);
+  void set_msg_check (Index index, EnzoMsgCheck *);
+  EnzoMsgCheck * get_msg_check (Index index);
 #endif
 
   /// Barrier after constructor to ensure all EnzoSimulation objects created
@@ -85,6 +89,10 @@ private: // attributes
   int                      check_num_files_;
   std::string              check_ordering_;
   std::vector<std::string> check_directory_;
+
+#ifdef BUG_FIX_150
+  std::map<Index,EnzoMsgCheck *> msg_check_map_;
+#endif
 };
 
 #endif /* ENZO_ENZO_SIMULATION_CHARM_HPP */

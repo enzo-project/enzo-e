@@ -219,7 +219,7 @@ void IoEnzoWriter::p_write (EnzoMsgCheck * msg_check)
   }
 
   // Write block list
-  write_block_list_(name_this);
+  write_block_list_(name_this, msg_check->block_level());
 
   // Write Block to HDF5
   file_write_block_(msg_check);
@@ -258,9 +258,9 @@ std::ofstream IoEnzoWriter::create_block_list_(std::string name_dir)
 
 //----------------------------------------------------------------------
 
-void IoEnzoWriter::write_block_list_(std::string block_name)
+void IoEnzoWriter::write_block_list_(std::string block_name, int level)
 {
-  stream_block_list_ << block_name << "\n";
+  stream_block_list_ << block_name << " " << level << "\n";
 }
 
 //----------------------------------------------------------------------

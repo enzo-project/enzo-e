@@ -74,7 +74,8 @@ int EnzoBlock::NumberOfBaryonFields[CONFIG_NODE_SIZE];
 void EnzoBlock::initialize(const EnzoConfig * enzo_config)
 {
 #ifdef DEBUG_ENZO_BLOCK
-  CkPrintf ("%d DEBUG_ENZO_BLOCK EnzoBlock::initialize\n",CkMyPe());
+  CkPrintf ("%d DEBUG_ENZO_BLOCK [static] EnzoBlock::initialize()\n",
+            CkMyPe());
 #endif
   int gx = enzo_config->field_ghost_depth[0];
   int gy = enzo_config->field_ghost_depth[1];
@@ -166,8 +167,8 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
 //----------------------------------------------------------------------
 
 #ifdef BUG_FIX_150
-EnzoBlock::EnzoBlock( process_type ip_source)
-  : CBase_EnzoBlock ( ip_source ),
+EnzoBlock::EnzoBlock( process_type ip_source,  MsgType msg_type)
+  : CBase_EnzoBlock (ip_source, msg_type),
 #else
     EnzoBlock::EnzoBlock ( MsgRefine * msg )
     : CBase_EnzoBlock ( msg ),
@@ -176,15 +177,26 @@ EnzoBlock::EnzoBlock( process_type ip_source)
 
 {
 #ifdef TRACE_BLOCK  
-CkPrintf ("%d %p TRACE_BLOCK %s EnzoBlock(ip)\n",
-          CkMyPe(),(void *)this,name(thisIndex).c_str());
+  CkPrintf ("%d %p TRACE_BLOCK %s EnzoBlock(ip) msg_type %d\n",
+            CkMyPe(),(void *)this,name(thisIndex).c_str(),msg_type);
 #endif  
 
 #ifdef BUG_FIX_150
+  if (msg_type == MsgType::msg_check) {
+    proxy_enzo_simulation[ip_source].p_get_msg_check(thisIndex);
+  }
 #else
   initialize_enzo_();
   initialize();
   Block::initialize();
+  if (msg_type == MsgType::msg_check) {
+#ifdef TRACE_BLOCK  
+    CkPrintf ("%d %p :%d TRACE_BLOCK %s EnzoBlock restart_set_data_\n",
+              CkMyPe(),(void *)this,__LINE__,name(thisIndex).c_str());
+    fflush(stdout);
+#endif  
+    restart_set_data_(msg);
+  }
 #endif
 }
 
@@ -192,8 +204,35 @@ CkPrintf ("%d %p TRACE_BLOCK %s EnzoBlock(ip)\n",
 
 #ifdef BUG_FIX_150
 
+void EnzoBlock::p_set_msg_check(EnzoMsgCheck * msg)
+{
+  performance_start_(perf_block);
+
+#ifdef TRACE_BLOCK  
+    CkPrintf ("%d %p :%d TRACE_BLOCK %s EnzoBlock restart_set_data_\n",
+              CkMyPe(),(void *)this,__LINE__,name(thisIndex).c_str());
+    fflush(stdout);
+#endif  
+  initialize_enzo_();
+  initialize();
+  Block::initialize();
+  restart_set_data_(msg);
+#ifdef TRACE_BLOCK  
+  msg->print("recv 1");
+#endif
+}
+#endif
+
+//----------------------------------------------------------------------
+
+#ifdef BUG_FIX_150
 void EnzoBlock::p_set_msg_refine(MsgRefine * msg)
 {
+#ifdef TRACE_BLOCK  
+    CkPrintf ("%d %p :%d TRACE_BLOCK %s EnzoBlock p_set_msg_refine()\n",
+              CkMyPe(),(void *)this,__LINE__,name(thisIndex).c_str());
+    fflush(stdout);
+#endif  
   Block::p_set_msg_refine(msg);
   initialize_enzo_();
   initialize();

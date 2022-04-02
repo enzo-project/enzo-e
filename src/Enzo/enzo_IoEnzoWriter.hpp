@@ -54,7 +54,7 @@ protected: // functions
   void file_write_block_(EnzoMsgCheck * msg_check);
   void write_meta_ ( FileHdf5 * file, Io * io, std::string type_meta );
 
-  void write_block_list_(std::string block_name);
+  void write_block_list_(std::string block_name, int level);
   void close_block_list_();
 
 protected: // attributes

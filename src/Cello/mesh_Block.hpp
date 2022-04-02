@@ -39,7 +39,7 @@ public: // interface
 
 #ifdef BUG_FIX_150
   /// create a Block whose MsgRefine is on the creating process
-  Block ( process_type ip_source );
+  Block ( process_type ip_source, MsgType msg_type );
   /// Initialize Block using MsgRefine returned by creating process
   virtual void p_set_msg_refine(MsgRefine * msg);
 #else

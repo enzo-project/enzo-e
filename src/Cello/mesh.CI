@@ -92,7 +92,7 @@ module mesh {
   array[Index] Block {
 
 #ifdef BUG_FIX_150
-    entry Block (process_type ip_source);
+    entry Block (process_type ip_source,  MsgType msg_type);
     entry void p_set_msg_refine(MsgRefine * msg);
 #else
     entry Block (MsgRefine * msg);

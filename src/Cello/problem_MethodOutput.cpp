@@ -153,6 +153,16 @@ void MethodOutput::compute ( Block * block) throw()
   // barrier to ensure tree traversal doesn't reach a block
   // before the method has started
 
+  if (block->index().is_root()) {
+    // Create directory if any
+    ScalarData<int> * scalar_int = block->data()->scalar_data_int();
+    int * counter = scalar_int->value(cello::scalar_descr_int(),is_count_);
+    (*counter)++;
+    bool already_exists = false;
+    std::string path_name = cello::create_directory
+      (&path_name_,(*counter),block->cycle(),block->time(),already_exists);
+  }
+
   CkCallback callback(CkIndex_Block::r_method_output_continue(nullptr),
                       cello::block_array());
   block->contribute(callback);
@@ -406,10 +416,9 @@ FileHdf5 * MethodOutput::file_open_(Block * block, int a3[3])
   // Generate file path
   ScalarData<int> * scalar_int = block->data()->scalar_data_int();
   int * counter = scalar_int->value(cello::scalar_descr_int(),is_count_);
-  bool already_exists = false;
-  std::string path_name = cello::create_directory
-    (&path_name_,(*counter),block->cycle(),block->time(),already_exists);
-  (*counter)++;
+
+  std::string path_name = cello::expand_name
+    (&path_name_,(*counter),block->cycle(),block->time());
 
   // Generate file name
   int count = file_count_(block);

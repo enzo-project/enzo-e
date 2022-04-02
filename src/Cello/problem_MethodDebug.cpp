@@ -183,7 +183,7 @@ void MethodDebug::compute_continue
     for (int i_f=0; i_f<num_fields_; i_f++) {
       std::string name = field.field_name(i_f).c_str();
       cello::monitor()->print
-        ("Method", "Field %s min avg max %Lg %Lg %Lg",name.c_str(),
+        ("Method", "Field %s min avg max %20.16Lg %20.16Lg %20.16Lg",name.c_str(),
          field_min_[i_f],field_sum_[i_f]/field_count_[i_f],field_max_[i_f]);
     }
     for (int it=0; it<num_particles_; it++) {
@@ -191,7 +191,7 @@ void MethodDebug::compute_continue
         const char axis[3] = {'X','Y','Z'};
         const std::string name = particle.type_name(it).c_str();
         cello::monitor()->print
-          ("Method", "Particle %s %c min avg max %Lg %Lg %Lg",
+          ("Method", "Particle %s %c min avg max %20.16Lg %20.16Lg %20.16Lg",
            name.c_str(),axis[i],
            particle_min_[i][it],
            particle_sum_[i][it]/particle_count_[i][it],

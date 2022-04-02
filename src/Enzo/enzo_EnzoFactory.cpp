@@ -97,7 +97,7 @@ void EnzoFactory::create_block_array
 
 #ifdef BUG_FIX_150
 	enzo::simulation()->set_msg_refine (index,msg);
-	enzo_block_array[index].insert (process_type(CkMyPe()));
+	enzo_block_array[index].insert (process_type(CkMyPe()), MsgType::msg_refine);
 #else
 	enzo_block_array[index].insert (msg);
 #endif
@@ -184,7 +184,7 @@ void EnzoFactory::create_subblock_array
 
 #ifdef BUG_FIX_150
 	  enzo::simulation()->set_msg_refine (index,msg);
-	  enzo_block_array[index].insert (process_type(CkMyPe()));
+	  enzo_block_array[index].insert (process_type(CkMyPe()), MsgType::msg_refine);
 #else
 	  enzo_block_array[index].insert (msg);
 #endif
@@ -243,9 +243,37 @@ void EnzoFactory::create_block
 
 #ifdef BUG_FIX_150
   enzo::simulation()->set_msg_refine (index,msg);
-  enzo_block_array[index].insert ( process_type(CkMyPe()) );
+  enzo_block_array[index].insert ( process_type(CkMyPe()), MsgType::msg_refine );
 #else
   enzo_block_array[index].insert (msg);
+#endif
+}
+
+// //----------------------------------------------------------------------
+
+void EnzoFactory::create_block_check
+(
+ EnzoMsgCheck * msg_check,
+ CProxy_Block block_array,
+ Index index
+ ) const throw()
+{
+#ifdef TRACE_FACTORY
+  CkPrintf ("TRACE_FACTORY create_block %d %d %d\n");
+  index.print("TRACE_FACTORY create_block",2);
+#endif  
+
+  TRACE3("EnzoFactory::create_block(%d %d %d)",nx,ny,nz);
+  TRACE2("EnzoFactory::create_block() num_field_blocks %d  count_adapt %d",
+	 num_field_blocks,count_adapt);
+
+  CProxy_EnzoBlock enzo_block_array = (CProxy_EnzoBlock) block_array;
+
+#ifdef BUG_FIX_150
+  enzo::simulation()->set_msg_check (index,msg_check);
+  enzo_block_array[index].insert ( process_type(CkMyPe()), MsgType::msg_check );
+#else
+  enzo_block_array[index].insert (msg_check);
 #endif
 }
 

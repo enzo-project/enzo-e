@@ -118,7 +118,7 @@ void Factory::create_block_array
 	msg->set_data_msg(data_msg);
 #ifdef BUG_FIX_150
 	cello::simulation()->set_msg_refine (index,msg);
-	proxy_block[index].insert (process_type(CkMyPe()));
+	proxy_block[index].insert (process_type(CkMyPe()), MsgType::msg_refine);
 #else
 	proxy_block[index].insert (msg);
 #endif
@@ -195,7 +195,7 @@ void Factory::create_subblock_array
 
 #ifdef BUG_FIX_150
           cello::simulation()->set_msg_refine (index,msg);
-          block_array[index].insert (process_type(CkMyPe()));
+          block_array[index].insert (process_type(CkMyPe()),MsgType::msg_refine);
 #else
           block_array[index].insert (msg);
 #endif
@@ -251,7 +251,7 @@ void Factory::create_block
 
 #ifdef BUG_FIX_150
   cello::simulation()->set_msg_refine (index,msg);
-  block_array[index].insert (process_type(CkMyPe()));
+  block_array[index].insert (process_type(CkMyPe()),MsgType::msg_refine);
 #else
   block_array[index].insert (msg);
 #endif

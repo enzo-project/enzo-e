@@ -103,9 +103,11 @@ public: // interface
 
 #ifdef BUG_FIX_150  
   /// Initialize the EnzoBlock chare array
-  EnzoBlock ( process_type ip_source );
+  
+  EnzoBlock ( process_type ip_source, MsgType msg_type );
   /// Initialize EnzoBlock using MsgRefine returned by creating process
   virtual void p_set_msg_refine(MsgRefine * msg);
+  virtual void p_set_msg_check(EnzoMsgCheck * msg);
 #else
   /// Initialize the EnzoBlock chare array
   EnzoBlock ( MsgRefine * msg );
@@ -364,6 +366,9 @@ protected: // methods
   int create_msg_check_
   ( EnzoMsgCheck ** msg_check, int num_files, std::string ordering,
     std::string name_dir = "", bool * is_first = nullptr);
+
+  /// Initialize restart data in Block
+  void restart_set_data_(EnzoMsgCheck * );
 
   /// Create a DataMsg object for this block
   DataMsg *create_data_msg_();

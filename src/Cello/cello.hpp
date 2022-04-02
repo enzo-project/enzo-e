@@ -223,6 +223,10 @@ enum type_enum {
 #endif
 
 
+#ifdef BUG_FIX_150
+enum class MsgType { msg_refine, msg_check };
+#endif
+
 /// Length of hex message tags used for debugging
 #define TAG_LEN 8
 

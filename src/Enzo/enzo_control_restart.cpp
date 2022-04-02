@@ -19,39 +19,51 @@
 
 // #define TRACE
 // #define PRINT_FIELD
+// # define TRACE_SYNC
 
+//--------------------------------------------------
+#ifdef TRACE_SYNC
+#   undef TRACE_SYNC
+#   define TRACE_SYNC(SYNC,MSG)                                         \
+  CkPrintf ("TRACE_SYNC %p %s %d/%d\n", \
+            (void *)(&SYNC), std::string(MSG).c_str(),SYNC.value(),SYNC.stop()); \
+  fflush(stdout);
+#else
+#   define TRACE_SYNC(SYNC,MSG) /* ... */
+#endif
+//--------------------------------------------------
 #ifdef PRINT_FIELD
 #   undef PRINT_FIELD
 
 #   define PRINT_FIELD(MSG,FIELD,DATA)                                  \
   {                                                                     \
-  Field field = DATA->field();                                          \
-  int mx,my,mz;                                                         \
-  int gx,gy,gz;                                                         \
-  int index_field = field.field_id(FIELD);                              \
-  field.dimensions(index_field,&mx,&my,&mz);                            \
-  field.ghost_depth(index_field,&gx,&gy,&gz);                           \
-  enzo_float * value = (enzo_float *)field.values(FIELD);               \
-  enzo_float min=1e30;                                                  \
-  enzo_float max=-1e30;                                                 \
-  enzo_float sum=0;                                                     \
-  for (int iz=gz; iz<mz-gz; iz++) {                                     \
-    for (int iy=gy; iy<my-gy; iy++) {                                   \
-      for (int ix=gx; ix<mx-gx; ix++) {                                 \
-        const int i=ix+mx*(iy+my*iz);                                   \
-        min=std::min(min,value[i]);                                        \
-        max=std::max(max,value[i]);                                        \
-        sum+=value[i];                                                     \
+    Field field = DATA->field();                                        \
+    int mx,my,mz;                                                       \
+    int gx,gy,gz;                                                       \
+    int index_field = field.field_id(FIELD);                            \
+    field.dimensions(index_field,&mx,&my,&mz);                          \
+    field.ghost_depth(index_field,&gx,&gy,&gz);                         \
+    enzo_float * value = (enzo_float *)field.values(FIELD);             \
+    enzo_float min=1e30;                                                \
+    enzo_float max=-1e30;                                               \
+    enzo_float sum=0;                                                   \
+    for (int iz=gz; iz<mz-gz; iz++) {                                   \
+      for (int iy=gy; iy<my-gy; iy++) {                                 \
+        for (int ix=gx; ix<mx-gx; ix++) {                               \
+          const int i=ix+mx*(iy+my*iz);                                 \
+          min=std::min(min,value[i]);                                   \
+          max=std::max(max,value[i]);                                   \
+          sum+=value[i];                                                \
+        }                                                               \
       }                                                                 \
     }                                                                   \
-  }                                                                     \
-  CkPrintf ("PRINT_FIELD %s %s  %g %g %g\n",MSG,FIELD,min,max,sum/((mx-2*gx)*(my-2*gy)*(mz-2*gz))); \
+    CkPrintf ("PRINT_FIELD %s %s  %g %g %g\n",MSG,FIELD,min,max,sum/((mx-2*gx)*(my-2*gy)*(mz-2*gz))); \
+    fflush(stdout);                                                     \
   }
 #else
 #   define PRINT_FIELD(MSG,FIELD,DATA) /* ... */
 #endif
-
-
+//--------------------------------------------------
 #ifdef TRACE
 #   undef TRACE
 #   define TRACE(MSG) \
@@ -93,7 +105,7 @@ void Simulation::p_restart_enter (std::string name_dir)
   stream_file_list >> num_files;
 
   sync_restart_done_.set_stop(num_files);
-
+  TRACE_SYNC(sync_restart_done_,"sync_restart_done_ set_stop");
   // Insert an IoEnzoReader element for each file
   for (int i=0; i<num_files; i++) {
     std::string name_file;
@@ -119,6 +131,7 @@ IoEnzoReader::IoEnzoReader(std::string name_dir, std::string name_file) throw()
   file_ = file_open_(name_dir,name_file);
 
   sync_blocks_.reset();
+  TRACE_SYNC(sync_blocks_,"sync_blocks_ reset");
 
   // Read global attributes
   file_read_hierarchy_();
@@ -127,6 +140,7 @@ IoEnzoReader::IoEnzoReader(std::string name_dir, std::string name_file) throw()
 
     // Increment block counter so know when to alert pe=0 when done
     sync_blocks_.inc_stop(1);
+    TRACE_SYNC(sync_blocks_,"sync_blocks_ inc_stop(1)");
 
     // For each Block in the file, read the block data and create the
     // new Block
@@ -139,16 +153,29 @@ IoEnzoReader::IoEnzoReader(std::string name_dir, std::string name_file) throw()
     index.set_values(v3);
     const int level = index.level();
     msg_check->index_file_ = thisIndex;
+#ifdef TRACE
+    CkPrintf ("DEBUG_MSG_CHECK IoReader %d level %d\n",thisIndex,level);
+    fflush(stdout);
+    msg_check->print("send");
+#endif
     if (level <= 0) {
 
       // Block exists--send its data
-
+#ifdef TRACE
+      CkPrintf ("DEBUG_MSG_CHECK msg_check %p data %p\n",msg_check,msg_check->data_msg_);
+      fflush(stdout);
+#endif
       enzo::block_array()[index].p_restart_set_data(msg_check);
 
     } else {
 
-      // Block doesn't exist: create it and send its data
+      //      Block doesn't exist: create it and send its data
 
+      enzo::factory()->create_block_check
+        ( msg_check, enzo::block_array(),index );
+
+      // Also tell parent that it has children (surpise!)
+      Index index_parent = index.index_parent(cello::config()->mesh_min_level);
     }
   }
 
@@ -164,9 +191,16 @@ IoEnzoReader::IoEnzoReader(std::string name_dir, std::string name_file) throw()
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_restart_set_data(EnzoMsgCheck * msg_check)
+{ restart_set_data_ (msg_check); }
+
+void EnzoBlock::restart_set_data_(EnzoMsgCheck * msg_check)
 {
+  TRACE_BLOCK("EnzoBlock::restart_set_data()",this);
   const int index_file = msg_check->index_file_;
   msg_check->update(this);
+#ifdef TRACE
+  msg_check->print("recv 0");
+#endif
   PRINT_FIELD("recv","density",data());
   delete msg_check;
   proxy_io_enzo_reader[index_file].p_block_ready(name());
@@ -179,6 +213,8 @@ void IoEnzoReader::p_block_ready(std::string block_name)
 
 void IoEnzoReader::block_ready_(std::string block_name)
 {
+  TRACE("EnzoSimulation::[p_]block_ready_()");
+  TRACE_SYNC(sync_blocks_,"next");
   if (sync_blocks_.next()) {
     proxy_enzo_simulation[0].p_restart_done();
   }
@@ -187,6 +223,7 @@ void IoEnzoReader::block_ready_(std::string block_name)
 
 void EnzoSimulation::p_set_io_reader(CProxy_IoEnzoReader io_enzo_reader)
 {
+  TRACE("EnzoSimulation::p_set_io_reader()");
   proxy_io_enzo_reader = io_enzo_reader;
 }
 
@@ -194,6 +231,8 @@ void EnzoSimulation::p_set_io_reader(CProxy_IoEnzoReader io_enzo_reader)
 
 void EnzoSimulation::p_restart_done()
 {
+  TRACE("EnzoSimulation::p_restart_done()");
+  TRACE_SYNC(sync_restart_done_,"sync_restart_done_ next");
   if (sync_restart_done_.next()) {
     enzo::block_array().p_restart_done();
   }
@@ -257,7 +296,7 @@ void IoEnzoReader::file_read_hierarchy_()
   }
 
   io_simulation.save_to(cello::simulation());
-  
+
   // Hierarchy data
   IoHierarchy io_hierarchy = (cello::hierarchy());
   for (size_t i=0; i<io_hierarchy.meta_count(); i++) {

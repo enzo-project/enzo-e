@@ -53,7 +53,7 @@ const char * phase_name[] = {
 //----------------------------------------------------------------------
 
 #ifdef BUG_FIX_150
-Block::Block ( process_type ip_source )
+Block::Block ( process_type ip_source, MsgType msg_type )
 #else
 Block::Block ( MsgRefine * msg )
 #endif
@@ -104,7 +104,9 @@ Block::Block ( MsgRefine * msg )
   thisIndex.array(array_,array_+1,array_+2);
 #ifdef BUG_FIX_150
 
-  proxy_simulation[ip_source].p_get_msg_refine(thisIndex);
+  if (msg_type == MsgType::msg_refine) {
+    proxy_simulation[ip_source].p_get_msg_refine(thisIndex);
+  }
 
 #else
 

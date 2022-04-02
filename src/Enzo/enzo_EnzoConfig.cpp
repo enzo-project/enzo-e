@@ -1311,6 +1311,10 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
       ("Method:grackle:h2_optical_depth_approximation",
        method_grackle_chemistry->h2_optical_depth_approximation);
 
+    method_grackle_chemistry->h2_charge_exchange_rate = p->value_integer
+      ("Method:grackle:h2_charge_exchange_rate",
+       method_grackle_chemistry->h2_charge_exchange_rate);
+
     method_grackle_chemistry->photoelectric_heating = p->value_integer
       ("Method:grackle:photoelectric_heating",
        method_grackle_chemistry->photoelectric_heating);
@@ -1383,7 +1387,7 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
       ("Method:grackle:UVbackground_redshift_drop",
        method_grackle_chemistry->UVbackground_redshift_drop);
 
-    // When radiative transfer is eventually included, make
+  // When radiative transfer is eventually included, make
     // sure to set the below parameter to match the Enzo-E
     // parameter for turning RT on / off:
     //   method_grackle_chemistry->use_radiative_transfer = ENZO_E_PARAMETER_NAME;

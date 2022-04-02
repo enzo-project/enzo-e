@@ -68,6 +68,7 @@ public: // interface
   const char * tag() { return tag_;}
 
   std::string block_name() const  { return block_name_; }
+  int block_level() const  { return block_level_; }
 
   double * block_lower() { return block_lower_; }
   double * block_upper() { return block_upper_; }
@@ -131,7 +132,8 @@ protected: // methods
     index_send_    = enzo_msg_check.index_send_;
     data_msg_      = enzo_msg_check.data_msg_;
     buffer_        = nullptr;
-    block_name_     = enzo_msg_check.block_name_;
+    block_name_    = enzo_msg_check.block_name_;
+    block_level_   = enzo_msg_check.block_level_;
     for (int i=0; i<3; i++) {
       block_lower_[i]    = enzo_msg_check.block_lower_[i];
       block_upper_[i]    = enzo_msg_check.block_upper_[i];
@@ -169,9 +171,12 @@ protected: // attributes
 
   /// Data for the Block
   IoBlock * io_block_;
-  
+
   /// Block meta-data
   std::string block_name_;
+
+  /// Level of the block
+  int block_level_;
 
   /// Block extents
   double block_lower_[3];

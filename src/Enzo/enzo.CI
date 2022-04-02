@@ -163,6 +163,7 @@ module enzo {
 
 #ifdef BUG_FIX_150
     entry void p_get_msg_refine(Index index);
+    entry void p_get_msg_check(Index index);
 #endif
     // EnzoMethodCheck
     entry void r_method_check_enter(CkReductionMsg *);
@@ -179,10 +180,12 @@ module enzo {
   array[Index] EnzoBlock : Block {
 
 #ifdef BUG_FIX_150
-    entry EnzoBlock (process_type ip_source);
-    entry void p_set_msg_refine (MsgRefine * msg);
+    entry EnzoBlock (process_type ip_source, MsgType msg_type);
+    entry void p_set_msg_refine (MsgRefine    * msg);
+    entry void p_set_msg_check  (EnzoMsgCheck * msg);
 #else
-    entry EnzoBlock (MsgRefine * msg);
+    entry EnzoBlock (MsgRefine    * msg);
+    entry EnzoBlock (EnzoMsgCheck * msg);
 #endif
     entry EnzoBlock();
 
