@@ -7,7 +7,7 @@
 
 #include "problem.hpp"
 
-#define TRACE_ORDER
+// #define TRACE_ORDER
 
 #ifdef TRACE_ORDER
 #  define TRACE_ORDER_BLOCK(MSG,BLOCK)          \
@@ -189,9 +189,6 @@ void MethodOrderMorton::recv_index
     *pindex_(block) = index;
     *pcount_(block) = count;
     *pnext_(block) = index_next;
-    CkPrintf ("TRACE_ORDER_MORTON %s %d %d %s\n",block->name().c_str(),
-              index,count,block->name(index_next).c_str());
-    fflush(stdout);
   }
   if (psync_index_(block)->next()) {
     {

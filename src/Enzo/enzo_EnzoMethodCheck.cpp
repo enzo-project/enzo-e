@@ -12,20 +12,20 @@
 #include <iostream>
 #include <iomanip>
 
-// #define TRACE
+// #define TRACE_METHOD_CHECK
 
-#ifdef TRACE
-#   undef TRACE
-#   define TRACE(MSG)                                           \
-  CkPrintf ("%d TRACE %s\n",CkMyPe(),std::string(MSG).c_str()); \
+#ifdef TRACE_METHOD_CHECK
+#   undef TRACE_METHOD_CHECK
+#   define TRACE_CHECK(MSG)                                           \
+  CkPrintf ("%d TRACE_CHECK %s\n",CkMyPe(),std::string(MSG).c_str()); \
   fflush(stdout);
-#   define TRACE_BLOCK(MSG,BLOCK)                               \
-  CkPrintf ("%d TRACE %s %s\n",CkMyPe(),BLOCK->name().c_str(),  \
+#   define TRACE_CHECK_BLOCK(MSG,BLOCK)                               \
+  CkPrintf ("%d TRACE_CHECK %s %s\n",CkMyPe(),BLOCK->name().c_str(),  \
             std::string(MSG).c_str());                          \
   fflush(stdout);
 #else
-#   define TRACE(MSG)  /* ... */
-#   define TRACE_BLOCK(MSG,BLOCK)  /* ... */
+#   define TRACE_CHECK(MSG)  /* ... */
+#   define TRACE_CHECK_BLOCK(MSG,BLOCK)  /* ... */
 #endif
 
 int Simulation::file_counter_ = 0;
@@ -39,7 +39,7 @@ EnzoMethodCheck::EnzoMethodCheck
     ordering_(ordering),
     directory_(directory)
 {
-  TRACE("[1] EnzoMethodCheck::EnzoMethodCheck()");
+  TRACE_CHECK("[1] EnzoMethodCheck::EnzoMethodCheck()");
   Refresh * refresh = cello::refresh(ir_post_);
   cello::simulation()->refresh_set_name(ir_post_,name());
   refresh->add_field("density");
@@ -84,7 +84,7 @@ void EnzoMethodCheck::pup (PUP::er &p)
 
 void EnzoMethodCheck::compute ( Block * block) throw()
 {
-  TRACE_BLOCK("[2] EnzoMethodCheck::compute()",block);
+  TRACE_CHECK_BLOCK("[2] EnzoMethodCheck::compute()",block);
   CkCallback callback(CkIndex_EnzoSimulation::r_method_check_enter(NULL),0,
                       proxy_enzo_simulation);
   block->contribute(callback);
@@ -95,7 +95,7 @@ void EnzoMethodCheck::compute ( Block * block) throw()
 void EnzoSimulation::r_method_check_enter(CkReductionMsg *msg)
 // [ Called on ip=0 only ]
 {
-  TRACE("[3] EnzoSimulation::r_method_check_enter()");
+  TRACE_CHECK("[3] EnzoSimulation::r_method_check_enter()");
   
   delete msg;
 
@@ -152,7 +152,7 @@ IoEnzoWriter::IoEnzoWriter
     num_files_(num_files),
     ordering_(ordering)
 {
-  TRACE("[4] IoEnzoWriter::IoEnzoWriter()");
+  TRACE_CHECK("[4] IoEnzoWriter::IoEnzoWriter()");
 }
 
 //----------------------------------------------------------------------
@@ -160,7 +160,7 @@ IoEnzoWriter::IoEnzoWriter
 void EnzoBlock::p_check_write_first
 (int num_files, std::string ordering, std::string name_dir)
 {
-  TRACE_BLOCK("[8] EnzoBlock::p_check_write_first",this);
+  TRACE_CHECK_BLOCK("[8] EnzoBlock::p_check_write_first",this);
 
   EnzoMsgCheck * msg_check;
   bool is_first (false);
@@ -176,7 +176,7 @@ void EnzoBlock::p_check_write_first
 
 void EnzoBlock::p_check_write_next(int num_files, std::string ordering)
 {
-  TRACE_BLOCK("[9] EnzoBlock::p_check_write_next",this);
+  TRACE_CHECK_BLOCK("[9] EnzoBlock::p_check_write_next",this);
 
   std::string name_dir {""};
   EnzoMsgCheck * msg_check;
@@ -202,9 +202,6 @@ void IoEnzoWriter::p_write (EnzoMsgCheck * msg_check)
 
   // Write to block list file, opening or closing file as needed
 
-  CkPrintf ("TRACE_CHECK recv p_write first %d last %d name %s\n",
-            is_first?1:0,is_last?1:0,name_this.c_str());
-  
   if (is_first) {
     // Create block list
     stream_block_list_ = create_block_list_(name_dir);
@@ -231,7 +228,7 @@ void IoEnzoWriter::p_write (EnzoMsgCheck * msg_check)
     file_->file_close();
   }
 
-  TRACE("[A] IoEnzoWriter::p_write_first");
+  TRACE_CHECK("[A] IoEnzoWriter::p_write_first");
   if (!is_last) {
     enzo::block_array()[index_next].p_check_write_next(num_files_, ordering_);
   } else {
@@ -274,7 +271,7 @@ void IoEnzoWriter::close_block_list_()
 
 void EnzoSimulation::p_check_done()
 {
-  TRACE("[B] EnzoSimulation::p_check_done");
+  TRACE_CHECK("[B] EnzoSimulation::p_check_done");
   if (sync_check_done_.next()) {
     enzo::block_array().p_check_done();
   }
@@ -284,7 +281,7 @@ void EnzoSimulation::p_check_done()
 
 void EnzoBlock::p_check_done()
 {
-  TRACE_BLOCK("[C] EnzoBlock::p_check_done",this);
+  TRACE_CHECK_BLOCK("[C] EnzoBlock::p_check_done",this);
   compute_done();
 }
 
