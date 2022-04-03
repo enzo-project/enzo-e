@@ -23,7 +23,7 @@ public: // interface
   /// (The signature of this method may need to be modified)
   ///
   /// @param[in] active_primitive_keys A vector listing the names for each
-  ///     primitive quantity this are to be reconstructed. This should omit the
+  ///     primitive quantity that are to be reconstructed. This should omit the
   ///     names of the passively advected scalars.
   /// @param[in] name The name of the Riemann solver to use. Valid names
   ///     include "nn" and "plm"

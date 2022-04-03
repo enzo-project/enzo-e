@@ -648,7 +648,7 @@ Some additional notes:
     these is not currently enforced).
 
   * All of the arrays in ``prim_map_l``, ``prim_map_r``, and ``flux_map``
-    should have the same shape. If ``interface_velocity`` is specified, it's
+    should have the same shape. If ``interface_velocity`` is specified, it
     should also have that shape.
 
   * Calling the ``contiguous_arrays()`` instance method for ``prim_map_l``,
