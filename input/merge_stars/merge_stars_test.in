@@ -65,22 +65,41 @@ Particle {
     }
 }
 
- Method {
+Method {
 
-     list = ["pm_update","merge_stars"];		
-     pm_update {
-         max_dt = 1e7;
-     };
+    list = ["pm_update","merge_stars"];		
+    pm_update {
+        max_dt = 1e7;
+    };
 
-     merge_stars {
+    merge_stars {
 
-     merging_radius_cells = 0.1;
+    merging_radius_cells = 0.1;
      
-     };
+    };
 
- }
+}
 
 
- Stopping {
-   	time = 1e9;
- }
+Stopping {
+    time = 1e9;
+}
+
+Output {
+   
+    data {
+        dir = [ "./Dir_Merge_Stars_%04d", "cycle" ];
+        field_list = [ "acceleration_x", "acceleration_y", "acceleration_z",
+	 	      	"density_total", "potential" ];
+	particle_list = ["star"];
+        name = [ "data-%04d-%04d.h5", "cycle", "proc" ];
+        schedule {
+            step = 10;
+            var = "cycle";
+        };
+        type = "data";
+    };
+    
+    list = ["data"];
+     
+}

@@ -56,9 +56,9 @@ make
 Second, we install `Enzo-E` (in a different directory)
 
 ```bash
-git clone https://github.com/forrestglines/enzo-e.git
+git clone https://github.com/enzo-project/enzo-e.git
 cd enzo-e
-git checkout cmake
+git checkout cmake_new-output
 # Again, the directory name can be anything
 mkdir build-mpi
 cd build-mpi
@@ -204,9 +204,9 @@ make
 
 # Build Enzo-E
 cd ~/src
-git clone https://github.com/forrestglines/enzo-e.git
+git clone https://github.com/enzo-project/enzo-e.git
 cd enzo-e
-git checkout cmake
+git checkout cmake_new-output
 
 # Custom environment override for the cmake call specific to Pleiades system as
 # during the linking step (done with the `charmc` wrapper) the `mpicxx` wrapper is called,
@@ -258,9 +258,9 @@ make
 
 # Build Enzo-E
 cd ~/src
-git clone https://github.com/forrestglines/enzo-e.git
+git clone https://github.com/enzo-project/enzo-e.git
 cd enzo-e
-git checkout cmake
+git checkout cmake_new-output
 mkdir build-icc-mpi
 cd build-icc-mpi
 cmake -DCHARM_ROOT=${HOME}/src/charm/build-icc-mpi -DGrackle_ROOT=${HOME}/src/grackle/build-icc -DEnzo-E_CONFIG=frontera_icc ..

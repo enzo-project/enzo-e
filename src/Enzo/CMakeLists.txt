@@ -2,7 +2,7 @@
 include(charm)
 addCharmModule( "enzo" )
 
-file(GLOB SRC_FILES enzo*.cpp *F *enzo*hpp fortran.h fortran_types.h)
+file(GLOB SRC_FILES enzo*.cpp *F *enzo*hpp fortran.h fortran_types.h FofLib.cpp)
 
 # TODO(pgrete) Check if that file can be removed for good. It also not being used in the SCons build.
 # -> PPML_sub.F:(.text+0x5ebf): multiple definition of `qdd6_'; CMakeFiles/enzo-e.dir/PPML_QDD6.F.o:PPML_QDD6.F:(.text+0x0): first defined here

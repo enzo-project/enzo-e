@@ -17,6 +17,7 @@ if(NOT __processedUserDefaults)
   set(CMAKE_C_FLAGS "-Wall" CACHE STRING "Default C flags")
   set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}" CACHE STRING "Default C++ flags")
 
+
   # these flag(s) are currently only used when using openmp-simd optimizations
   # (to specify available/prefered instruction sets).
   # This particular value tells the compiler to optimize the code for the
