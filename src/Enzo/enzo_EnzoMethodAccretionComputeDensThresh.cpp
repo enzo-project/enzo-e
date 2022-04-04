@@ -47,7 +47,7 @@ void EnzoMethodAccretionComputeDensThresh::pup (PUP::er &p)
 
 void EnzoMethodAccretionComputeDensThresh::compute (Block * block) throw()
 {
- 
+
   if (block->is_leaf()){
     this->compute_(block);
   }
@@ -151,9 +151,9 @@ void EnzoMethodAccretionComputeDensThresh::compute_(Block * block)
 	  floor((pz[ip*dp] - first_cell_center_z + accretion_radius) / hz);
 
 	// Loop over all cells in this region
-	for (int ii = min_ind_x; ii < max_ind_x; ii++){
-	  for (int jj = min_ind_y; jj < max_ind_y; jj++){
-	    for (int kk = min_ind_z; ii < max_ind_z; kk++){
+	for (int kk = min_ind_z; kk <= max_ind_z; kk++){
+	  for (int jj = min_ind_y; jj <= max_ind_y; jj++){
+	    for (int ii = min_ind_x; ii <= max_ind_x; ii++){
 
 	      // Check if center of cell is within accretion radius of particle
 	      const double cell_center_x = first_cell_center_x + ii * hx;
@@ -167,13 +167,13 @@ void EnzoMethodAccretionComputeDensThresh::compute_(Block * block)
 
 	      if (r2 < accretion_radius * accretion_radius){
 		const int index = INDEX(ii,jj,kk,mx,my);
-
 		if (density[index] > density_threshold_){
-
-		  // Set density_accreted equal to minus the density removed
+		  
+		  // Set density_accreted equal to the density removed
 		  // Mass and momentum removed from gas is added to the star particle
 		  const enzo_float density_removed = density[index] - density_threshold_;
-		  density_accreted[index] = -density_removed;
+		  density_accreted[index] = density_removed;
+		  
 		  const double mass_removed = density_removed * cell_volume;
 		  const double momentum_removed_x = mass_removed * vx[index];
 		  const double momentum_removed_y = mass_removed * vx[index];
@@ -194,7 +194,7 @@ void EnzoMethodAccretionComputeDensThresh::compute_(Block * block)
 		  pvx[ip*dv] = new_particle_momentum_x / pmass[ip*dm];
 		  pvy[ip*dv] = new_particle_momentum_y / pmass[ip*dm];
 		  pvz[ip*dv] = new_particle_momentum_z / pmass[ip*dm];
-		  
+	    
 		} // if density[index] > density_threshold				
 	      } // if (r2 < accretion_radius * accretion_radius)      
 	    }
