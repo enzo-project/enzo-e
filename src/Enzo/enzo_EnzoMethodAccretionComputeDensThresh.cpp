@@ -176,8 +176,8 @@ void EnzoMethodAccretionComputeDensThresh::compute_(Block * block)
 		  
 		  const double mass_removed = density_removed * cell_volume;
 		  const double momentum_removed_x = mass_removed * vx[index];
-		  const double momentum_removed_y = mass_removed * vx[index];
-		  const double momentum_removed_z = mass_removed * vx[index];
+		  const double momentum_removed_y = mass_removed * vy[index];
+		  const double momentum_removed_z = mass_removed * vz[index];
 
 		  const double old_particle_momentum_x = pmass[ip*dm] * pvx[ip*dv];
 		  const double old_particle_momentum_y = pmass[ip*dm] * pvy[ip*dv];
