@@ -134,6 +134,8 @@ void EnzoInitialAccretionTest::enforce_block
 
   // Get pointers to fields
   enzo_float *  d = (enzo_float *) field.values ("density");
+  enzo_float *  da = (enzo_float *) field.values ("density_accreted");
+  enzo_float *  daa = (enzo_float *) field.values ("density_accreted_accumulate");
   enzo_float *  p = (enzo_float *) field.values ("pressure");
   enzo_float * te = (enzo_float *) field.values ("total_energy");
   enzo_float * ie = (enzo_float *) field.values ("internal_energy");
@@ -144,9 +146,12 @@ void EnzoInitialAccretionTest::enforce_block
   // Initialise pressure, internal_energy and velocity fields to zero.
   // (Not too sure why pressure and internal energy should be zero)
   std::fill_n(p,m,0.0);
+  std::fill_n(ie,m,0.0);
   std::fill_n(vx,m,0.0);
   std::fill_n(vy,m,0.0);
   std::fill_n(vz,m,0.0);
+  std::fill_n(da,m,0.0);
+  std::fill_n(daa,m,0.0);
 
   // Set density
   std::fill_n(d,m,gas_density_);
