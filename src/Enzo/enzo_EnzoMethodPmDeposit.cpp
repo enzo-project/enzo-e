@@ -155,7 +155,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     enzo_float cosmo_a=1.0;
     enzo_float cosmo_dadt=0.0;
     EnzoPhysicsCosmology * cosmology = enzo::cosmology();
-    
     if (cosmology) {
       cosmology->compute_expansion_factor(&cosmo_a,&cosmo_dadt,
 					  block->time() + alpha_*block->dt());
