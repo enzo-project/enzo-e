@@ -106,7 +106,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     Field    field    (block->data()->field());
 
     int rank = cello::rank();
-  
     enzo_float * de_t = (enzo_float *)
       field.values("density_total");
     enzo_float * de_p = (enzo_float *)
