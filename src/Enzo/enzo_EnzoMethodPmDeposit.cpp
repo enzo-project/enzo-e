@@ -273,7 +273,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	    int ix0 = gx + floor(tx);
 	    
       	    int ix1 = ix0 + 1;
-	    
       	    double x0 = 1.0 - (tx - floor(tx));
       	    double x1 = 1.0 - x0;
 	    
