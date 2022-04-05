@@ -295,7 +295,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
       	  const int ia_y  = particle.attribute_index(it,"y");
       	  const int ia_vx = particle.attribute_index(it,"vx");
       	  const int ia_vy = particle.attribute_index(it,"vy");
-	  
       	  // Batch arrays
       	  enzo_float * xa  = (enzo_float *)particle.attribute_array (it,ia_x,ib);
       	  enzo_float * ya  = (enzo_float *)particle.attribute_array (it,ia_y,ib);
