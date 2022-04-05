@@ -303,9 +303,9 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
       	  const int dp =  particle.stride(it,ia_x);
       	  const int dv =  particle.stride(it,ia_vx);
-	  
+
 	  for (int ip=0; ip<np; ip++) {
-	    
+
       	    double x = xa[ip*dp] + vxa[ip*dv]*dt;
       	    double y = ya[ip*dp] + vya[ip*dv]*dt;
 
