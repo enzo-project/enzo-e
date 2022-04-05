@@ -313,7 +313,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
       	    double ty = ny*(y - ym) / (yp - ym) - 0.5;
       	    int ix0 = gx + floor(tx);
       	    int iy0 = gy + floor(ty);
-	    
       	    int ix1 = ix0 + 1;
       	    int iy1 = iy0 + 1;
       	    double x0 = 1.0 - (tx - floor(tx));
