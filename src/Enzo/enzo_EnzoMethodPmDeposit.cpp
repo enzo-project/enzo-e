@@ -265,7 +265,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 #endif
 
 	  for (int ip=0; ip<np; ip++) {
-	    
       	    double x = xa[ip*dp] + vxa[ip*dv]*dt;
 
       	    double tx = nx*(x - xm) / (xp - xm) - 0.5;
