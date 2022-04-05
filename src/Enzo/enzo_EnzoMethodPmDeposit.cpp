@@ -320,7 +320,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
       	    int iy1 = iy0 + 1;
       	    double x0 = 1.0 - (tx - floor(tx));
       	    double y0 = 1.0 - (ty - floor(ty));
-	    
       	    double x1 = 1.0 - x0;
       	    double y1 = 1.0 - y0;
 	    
