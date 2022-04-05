@@ -253,7 +253,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
 	  const int ia_x  = particle.attribute_index(it,"x");
 	  const int ia_vx = particle.attribute_index(it,"vx");
-	  
+
 	  enzo_float * xa =  (enzo_float *)particle.attribute_array (it,ia_x,ib);
 	  enzo_float * vxa = (enzo_float *)particle.attribute_array (it,ia_vx,ib);
 
