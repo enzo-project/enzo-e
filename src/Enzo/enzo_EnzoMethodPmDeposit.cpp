@@ -277,7 +277,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
             de_p[ix0] += pdens[ip*stride]*x0;
             de_p[ix1] += pdens[ip*stride]*x1;
 
-	    if (de_p[ix0] < 0.0) {
+      	    if (de_p[ix0] < 0.0) {
       	      CkPrintf ("%s:%d ERROR: de_p %d = %f\n",
       	   	        __FILE__,__LINE__,ix0,de_p[ix0]);
       	    }
