@@ -259,7 +259,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
       	  const int dp =  particle.stride(it,ia_x);
       	  const int dv =  particle.stride(it,ia_vx);
-	  
 #ifdef DEBUG_COLLAPSE
           CkPrintf ("DEBUG_COLLAPSE vxa[0] = %lg\n",vxa[0]);
 #endif
