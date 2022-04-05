@@ -36,7 +36,6 @@ EnzoMethodStarMaker::EnzoMethodStarMaker
 	 particle_descr->has_attribute(it,"mass"));
 
   const EnzoConfig * enzo_config = enzo::config();
-  
   // AJE: This was the old way this was done
   // Initialize default Refresh object
   // const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
