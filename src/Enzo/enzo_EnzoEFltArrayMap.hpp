@@ -13,20 +13,6 @@
 ///     lead to some optimizations in the Riemann Solver if the values are
 ///     initialized in the order expected by the Riemann Solver
 ///
-/// If necessary, a number of optimizations could be made to the implementation
-/// that might make key lookups faster. These optimizations could take
-/// advantage of the following factors:
-///    - Entries are never deleted and the contents won't be resized (if a hash
-///      table can be resized, then the hash codes must stay the same or be
-///      recomputed). These factors probably make a custom hash table using
-///      open-addressing superior to std::map or std::unordered_map.
-///    - Assumptions about the max key size and the max capacity of the map.
-///      For example, if the max key size never exceeds ~22 characters and
-///      there are never more than ~128 entries, it would probably be optimal
-///      to store the strings in-place (improving cache locallity).
-/// It would also be worth considering whether linear search is faster (since
-/// the arrays are small.
-///
 /// To achieve similar results, instead of storing individual EFlt3DArrays
 /// within vectors, one large instance of CelloArray<enzo_float,4> could be
 /// stored. While that may help compiler optimizations, it may be too
@@ -92,9 +78,8 @@ public: // interface
     { return at_(key); }
 
   /// Checks whether the container holds the specified key
-  bool contains(const std::string& key) const noexcept{
-    return (str_index_map_.find(key) != str_index_map_.cend());
-  }
+  bool contains(const std::string& key) const noexcept
+  { return str_index_map_.contains(key); }
 
   /// Similar to `at`, but a slice of the array ommitting staled values is
   /// returned by value
@@ -154,12 +139,10 @@ private: // helper methods
   /// This private constructor is used by subarray_map. It can skip some
   /// unnecessary work relating to initialization
   EnzoEFltArrayMap(std::string name,
-                   const std::map<std::string, unsigned int> &str_index_map,
-                   const std::vector<std::string> &ordered_keys,
+                   const StringIndRdOnlyMap& str_index_map,
                    const std::vector<EFlt3DArray> &ordered_arrays)
     : name_(name),
       str_index_map_(str_index_map),
-      keys_(ordered_keys),
       arrays_(ordered_arrays)
   { validate_invariants_(); }
 
@@ -174,11 +157,9 @@ private: // helper methods
 private: // attributes
   // name_ is to help with debugging!
   std::string name_;
-  
+
   // str_index_map_ maps the keys to the index
-  std::map<std::string, unsigned int> str_index_map_;
-  // keys_ is the ordered list of keys
-  std::vector<std::string> keys_;
+  StringIndRdOnlyMap str_index_map_;
   // arrays_ is the ordered list of arrays_
   std::vector<EFlt3DArray> arrays_;
 };

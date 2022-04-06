@@ -12,22 +12,8 @@
 
 namespace{ // define some local helper functions
 
-  std::map<std::string, unsigned int> init_str_index_map_
-    (const std::vector<std::string> &keys)
-  {
-    std::map<std::string, unsigned int> out;
-    for (std::size_t i = 0; i < keys.size(); i++){
-      const std::string& key = keys[i];
-      ASSERT1("init_str_index_map_",
-              "There can't be more than 1 key called %s",
-              key.c_str(), out.find(key) == out.end());
-      out[key] = (unsigned int)i;
-    }
-    return out;
-  }
-
   void confirm_shared_shape_(const char* func_name,
-			     const std::vector<std::string> &keys,
+                             const StringIndRdOnlyMap& str_index_map,
                              const std::vector<EFlt3DArray> &arrays){
     if (arrays.size() > 0){
       int ref_mz = arrays[0].shape(0);
@@ -38,12 +24,16 @@ namespace{ // define some local helper functions
         int my = arrays[i].shape(1);
         int mx = arrays[i].shape(2);
 
-        ASSERT8(func_name,
-                ("The shapes, (mz, my, mx), of the %s and %s arrays are "
-                 "(%d, %d, %d) and (%d, %d, %d). The shapes must be the same"),
-                keys[0].c_str(), keys[i].c_str(),
-                ref_mz, ref_my, ref_mx, mz, my, mx,
-                ((ref_mz == mz) && (ref_my == my) && (ref_mx == mx)));
+        if (!((ref_mz == mz) && (ref_my == my) && (ref_mx == mx))){
+          std::string k_ref = str_index_map.key(0);
+          std::string k_cur = str_index_map.key(i);
+
+          ERROR8(func_name,
+                 ("The shapes, (mz, my, mx), of the %s and %s arrays are "
+                  "(%d, %d, %d) and (%d, %d, %d). The shapes must be equal"),
+                 k_ref.c_str(), k_cur.c_str(),
+                 ref_mz, ref_my, ref_mx, mz, my, mx);
+        }
       }
     }
   }
@@ -55,14 +45,9 @@ namespace{ // define some local helper functions
 EnzoEFltArrayMap::EnzoEFltArrayMap(std::string name,
                                    const std::vector<std::string> &keys,
                                    const std::array<int,3>& shape)
-  : name_(name)
+  : name_(name),
+    str_index_map_(keys)
 {
-  // copy the contents of keys to keys_
-  keys_ = keys;
-
-  // initialize str_index_map_
-  str_index_map_ = init_str_index_map_(keys);
-
   // initialize arrays_
   arrays_.reserve(keys.size());
   for (const std::string& key : keys){
@@ -75,21 +60,17 @@ EnzoEFltArrayMap::EnzoEFltArrayMap(std::string name,
 EnzoEFltArrayMap::EnzoEFltArrayMap(std::string name,
                                    const std::vector<std::string> &keys,
                                    const std::vector<EFlt3DArray> &arrays)
-  : name_(name)
+  : name_(name),
+    str_index_map_(keys)
 {
   ASSERT2("EnzoEFltArrayMap::EnzoEFltArrayMap",
           "keys and arrays have lengths %zu and %zu. They should be the same",
           (std::size_t)keys.size(), (std::size_t)arrays.size(),
           keys.size() == arrays.size());
 
-  // copy the contents of keys to keys_
-  keys_ = keys;
-
-  // initialize str_index_map_
-  str_index_map_ = init_str_index_map_(keys);
-
   // validate that each entry in arrays_ has the same shape.
-  confirm_shared_shape_("EnzoEFltArrayMap::EnzoEFltArrayMap", keys, arrays);
+  confirm_shared_shape_("EnzoEFltArrayMap::EnzoEFltArrayMap",
+                        str_index_map_, arrays);
 
   // copy the contents of arrays to arrays_
   arrays_ = arrays;
@@ -105,26 +86,27 @@ bool EnzoEFltArrayMap::validate_key_order(const std::vector<std::string> &ref,
   std::string name_string =
       (name_ == "") ? "" : (std::string(", \"") + name_ + std::string("\","));
 
-  for (std::size_t i =0; i < std::min(ref.size(),keys_.size()); i++){
-    bool equal = ref[i] == keys_[i];
+  for (std::size_t i =0; i < std::min(ref.size(),str_index_map_.size()); i++){
+    const std::string k = str_index_map_.key(i);
+    bool equal = ref[i] == k;
     if (!equal && raise_err){
       print_summary();
       ERROR4("EnzoEFltArrayMap::validate_key_order",
 	     ("keys of ArrayMap%s don't match expectations. At index %d, the "
 	      "key is \"%s\" when it's expected to be \"%s\"\n"),
-	     name_string.c_str(), (int)i, keys_[i].c_str(), ref[i].c_str());
+	     name_string.c_str(), (int)i, k.c_str(), ref[i].c_str());
     } else if (!equal){
       return false;
     }
   }
 
-  if ((!allow_smaller_ref) && (ref.size() != keys_.size())){
+  if ((!allow_smaller_ref) && (ref.size() != str_index_map_.size())){
     if (raise_err){
       print_summary();
       ERROR3("EnzoEFltArrayMap::validate_key_order",
 	     "ArrayMap%s doesn't have the expected number of keys. It has %d "
 	     "keys. It's expected to have %d",
-             name_string.c_str(), (int)ref.size(), (int)keys_.size());
+             name_string.c_str(), (int)ref.size(), (int)str_index_map_.size());
     } else {
       return false;
     }
@@ -136,14 +118,7 @@ bool EnzoEFltArrayMap::validate_key_order(const std::vector<std::string> &ref,
 
 CelloArray<enzo_float, 3> EnzoEFltArrayMap::at_(const std::string& key)
   const noexcept
-{
-  auto result = str_index_map_.find(key);
-  if (result == str_index_map_.cend()){
-    ERROR1("EnzoEFltArrayMap::at_", "map doesn't contain the key: \"%s\"",
-           key.c_str());
-  }
-  return arrays_[result->second];
-}
+{ return arrays_[str_index_map_.at(key)]; }
 
 //----------------------------------------------------------------------
 
@@ -208,8 +183,8 @@ void EnzoEFltArrayMap::print_summary() const noexcept
     }
 
     EFlt3DArray array = arrays_[i];
-    CkPrintf("\"%s\" : EFlt3DArray(%p)",
-             keys_[i].c_str(), (void*)array.data());
+    std::string key = str_index_map_.key(i);
+    CkPrintf("\"%s\" : EFlt3DArray(%p)", key.c_str(), (void*)array.data());
   }
   CkPrintf("}\n");
   fflush(stdout);
@@ -246,7 +221,7 @@ EnzoEFltArrayMap EnzoEFltArrayMap::subarray_map(const CSlice &slc_z,
                                                 const CSlice &slc_x,
                                                 const std::string& name)
 {
-  return EnzoEFltArrayMap(name, str_index_map_, keys_,
+  return EnzoEFltArrayMap(name, str_index_map_,
                           make_subarrays_(arrays_, slc_z, slc_y, slc_x));
 }
 
@@ -254,7 +229,7 @@ const EnzoEFltArrayMap EnzoEFltArrayMap::subarray_map
 (const CSlice &slc_z, const CSlice &slc_y, const CSlice &slc_x,
  const std::string& name) const
 {
-  return EnzoEFltArrayMap(name, str_index_map_, keys_,
+  return EnzoEFltArrayMap(name, str_index_map_,
                           make_subarrays_(arrays_, slc_z, slc_y, slc_x));
 }
 
@@ -263,23 +238,10 @@ const EnzoEFltArrayMap EnzoEFltArrayMap::subarray_map
 void EnzoEFltArrayMap::validate_invariants_() const noexcept
 {
   ASSERT("EnzoEFltArrayMap::validate_invariants_",
-         "str_index_map_, keys_, and arrays_ don't have the same length",
-         keys_.size() == arrays_.size() &&
-         keys_.size() == str_index_map_.size());
+         "str_index_map_ and arrays_ don't have the same length",
+         arrays_.size() == str_index_map_.size());
 
-  for (std::size_t i = 0; i < keys_.size(); i++){
-    auto result = str_index_map_.find(keys_[i]);
-    ASSERT1("EnzoEFltArrayMap::validate_invariants_",
-            "str_index_map_ is missing the key, \"%s\"", keys_[i].c_str(),
-            result != str_index_map_.cend());
-
-    ASSERT1("EnzoEFltArrayMap::validate_invariants_",
-            ("str_index_map_ and keys_ disagree on the location of \"%s\" in "
-             "the ordering"), keys_[i].c_str(),
-            result->second == i);
-  }
-  
   // validate that each entry in arrays_ has the same shape.
   confirm_shared_shape_("EnzoEFltArrayMap::validate_invariants_",
-                        keys_, arrays_);
+                        str_index_map_, arrays_);
 }

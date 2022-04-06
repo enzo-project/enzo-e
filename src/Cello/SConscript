@@ -310,6 +310,8 @@ test_papi        = env.Program('test_Papi.cpp',
 
 test_celloarray  = env.Program('test_CelloArray.cpp',
                                LIBS=[libs_array,libs_test])
+test_stringindmap  = env.Program('test_StringIndRdOnlyMap.cpp',
+                                LIBS=[libs_array,libs_test])
 
 libraries_charm   = env.Library ('charm',   objs_charm)
 libraries_control = env.Library ('control', objs_control)
@@ -334,7 +336,7 @@ libraries_test  = env.Library ('test', objs_test)
 
 binaries_cello = [test_type, test_class_size]
 
-binaries_array = [test_celloarray]
+binaries_array = [test_celloarray, test_stringindmap]
 binaries_disk  = [test_FileHdf5]
 binaries_error = [test_error]
 binaries_data = [test_scalar_data,
