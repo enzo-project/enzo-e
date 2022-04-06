@@ -12,6 +12,8 @@
 ///   - makes it easier to order the entries in an arbitrary order. This could
 ///     lead to some optimizations in the Riemann Solver if the values are
 ///     initialized in the order expected by the Riemann Solver
+///   - facillitates some optimizations that make instances relatively cheap to
+///     copy.
 ///
 /// To achieve similar results, instead of storing individual EFlt3DArrays
 /// within vectors, one large instance of CelloArray<enzo_float,4> could be
@@ -25,6 +27,30 @@ class EnzoEFltArrayMap {
   /// @class EnzoEFltArrayMap
   /// @ingroup Enzo
   /// @brief [\ref Enzo] Stores instances of EFlt3DArray
+
+public:
+
+  // the following encapsulates the functionallity necessary for storing the
+  // EFlt3DArray in a buffer whose lifetime is managed by a shared pointer
+  // (this functionallity is separated into its own class to minimize conflicts
+  // with an existing PR)
+  template<typename T>
+  struct SharedBuffer_{
+
+    SharedBuffer_() = default;
+    SharedBuffer_(std::size_t len) noexcept
+      : arr_(std::shared_ptr<T>(new T[len](), std::default_delete<T[]>())),
+        length_(len)
+    { }
+
+    const T& operator[](std::size_t i) const noexcept { return arr_.get()[i]; }
+    T& operator[](std::size_t i) noexcept { return arr_.get()[i]; }
+    std::size_t size() const noexcept {return length_;}
+
+  private:
+    std::shared_ptr<T> arr_;
+    std::size_t length_;
+  };
 
 public: // interface
 
@@ -140,7 +166,7 @@ private: // helper methods
   /// unnecessary work relating to initialization
   EnzoEFltArrayMap(std::string name,
                    const StringIndRdOnlyMap& str_index_map,
-                   const std::vector<EFlt3DArray> &ordered_arrays)
+                   const SharedBuffer_<EFlt3DArray> &ordered_arrays)
     : name_(name),
       str_index_map_(str_index_map),
       arrays_(ordered_arrays)
@@ -161,7 +187,7 @@ private: // attributes
   // str_index_map_ maps the keys to the index
   StringIndRdOnlyMap str_index_map_;
   // arrays_ is the ordered list of arrays_
-  std::vector<EFlt3DArray> arrays_;
+  SharedBuffer_<EFlt3DArray> arrays_;
 };
 
 #endif /* ENZO_ENZO_EFLT_ARRAY_MAP_HPP */
