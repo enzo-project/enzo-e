@@ -73,15 +73,20 @@ PARALLEL_MAIN_BEGIN
 #endif
   
 
-  // Check parameter file
+  // Check and parse arguments
 
-  if (PARALLEL_ARGC != 2) {
+  bool dryrun = false;
+  if (PARALLEL_ARGC > 2 && strcmp(PARALLEL_ARGV[2],"-dryrun")==0) {
+    dryrun = true;
+  } else if (PARALLEL_ARGC != 2) {
     // Print usage if wrong number of arguments
-   printf ("\nUsage: %s %s <parameter-file> [ +balancer <load-balancer> ]\n\n", 
-	     PARALLEL_RUN,PARALLEL_ARGV[0]);
+    printf ("\nUsage: %s %s <parameter-file> [ +balancer <load-balancer> ]\n\n", 
+             PARALLEL_RUN,PARALLEL_ARGV[0]);
     p_exit(1);
   }
-  
+
+  // Read parameter file
+
   const char * parameter_file = PARALLEL_ARGV[1];
 
   g_parameters.read(PARALLEL_ARGV[1]);
@@ -89,7 +94,7 @@ PARALLEL_MAIN_BEGIN
   g_parameters.write("parameters.libconfig",param_write_libconfig);
   g_parameters.write(stdout,param_write_monitor);
   g_enzo_config.read(&g_parameters);
-  
+
   // Initialize unit testing
 
   const int ip = CkMyPe();
@@ -103,6 +108,12 @@ PARALLEL_MAIN_BEGIN
   monitor_->set_mode (monitor_mode_root);
   monitor_->header();
   monitor_->print ("","BEGIN ENZO-E");
+
+  // Exit here if -dryrun
+  if (dryrun) {
+    monitor_->print ("ENZO-E","dryrun == true; exiting.");
+    p_exit(0);
+  }
 
   // Print initial baseline memory usage
 
