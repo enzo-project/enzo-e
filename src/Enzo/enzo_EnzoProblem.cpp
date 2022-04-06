@@ -99,6 +99,7 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_hdf5_max_level,
        enzo_config->initial_hdf5_format,
        enzo_config->initial_hdf5_blocking,
+       enzo_config->initial_hdf5_monitor_iter,
        enzo_config->initial_hdf5_field_files,
        enzo_config->initial_hdf5_field_datasets,
        enzo_config->initial_hdf5_field_coords,

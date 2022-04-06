@@ -50,6 +50,7 @@ Adapt {
      hdf5 {
          blocking = [2,4,1];
          format = "music";
+         monitor_iter = 1;
          FD {
              dataset = "GridDensity";
              file = "input/cosmo_grid_density.h5";

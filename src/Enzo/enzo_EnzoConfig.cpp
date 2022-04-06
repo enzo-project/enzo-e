@@ -99,6 +99,7 @@ EnzoConfig::EnzoConfig() throw ()
   initial_hdf5_max_level(),
   initial_hdf5_format(),
   initial_hdf5_blocking(),
+  initial_hdf5_monitor_iter(),
   initial_hdf5_field_files(),
   initial_hdf5_field_datasets(),
   initial_hdf5_field_names(),
@@ -443,6 +444,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_hdf5_max_level;
   p | initial_hdf5_format;
   PUParray(p, initial_hdf5_blocking,3);
+  p | initial_hdf5_monitor_iter;
   p | initial_hdf5_field_files;
   p | initial_hdf5_field_datasets;
   p | initial_hdf5_field_names;
@@ -803,6 +805,8 @@ void EnzoConfig::read_initial_hdf5_(Parameters * p)
     initial_hdf5_blocking[i] =
       p->list_value_integer(i,name_initial+"blocking",1);
   }
+
+  initial_hdf5_monitor_iter = p->value_integer (name_initial + "monitor_iter", 0);
 
   const int num_files = p->list_length (name_initial + "file_list");
 

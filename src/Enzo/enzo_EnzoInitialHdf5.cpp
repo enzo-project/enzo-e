@@ -18,6 +18,7 @@ EnzoInitialHdf5::EnzoInitialHdf5
  int max_level,
  std::string                 format,
  const int                   blocking[3],
+ int                         monitor_iter_,
  std::vector < std::string > field_files,
  std::vector < std::string > field_datasets,
  std::vector < std::string > field_coords,
@@ -30,6 +31,7 @@ EnzoInitialHdf5::EnzoInitialHdf5
    : Initial (cycle,time),
      max_level_(max_level),
      format_ (format),
+     monitor_iter_(monitor_iter_),
      field_files_ (field_files),
      field_datasets_ (field_datasets),
      field_coords_ (field_coords),
@@ -68,6 +70,9 @@ void EnzoInitialHdf5::pup (PUP::er &p)
   // NOTE: change this function whenever attributes change
 
   p | max_level_;
+  p | format_;
+  PUParray (p,blocking_,3);
+  p | monitor_iter_;
 
   p | field_files_;
   p | field_datasets_;
@@ -80,7 +85,6 @@ void EnzoInitialHdf5::pup (PUP::er &p)
   p | particle_types_;
   p | particle_attributes_;
   PUParray (p,particle_position_names_,3);
-  p | l_particle_displacements_;
 
 }
 
@@ -309,6 +313,21 @@ void EnzoInitialHdf5::recv_data (Block * block, MsgInitial * msg_initial)
     sync_msg->set_stop(count);
   }
 
+  /// Monitor input progress if monitor_iter_ != 0
+  static int count_monitor = 0;
+  static int count_monitor_out = 0;
+  const int blocking = (blocking_[0]*blocking_[1]*blocking_[2]-1);
+  if (monitor_iter_ &&
+      (msg_initial->data_type()!="field" &&
+       msg_initial->data_type()!="particle") &&
+      ((count_monitor == 0 || count_monitor == count-1) ||
+       ((count_monitor % (monitor_iter_*blocking)) == 0))) {
+    cello::monitor()->print("Initial", "hdf5 %d / %d",
+                            count_monitor_out,blocking);
+    count_monitor_out++;
+  }
+  count_monitor++;
+  
   // Copy data from message to block data
   if (msg_initial->data_type() == "field") {
     // extract parameters from MsgInitial

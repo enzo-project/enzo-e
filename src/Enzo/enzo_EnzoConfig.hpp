@@ -198,6 +198,7 @@ public: // interface
       initial_hdf5_max_level(),
       initial_hdf5_format(),
       initial_hdf5_blocking(),
+      initial_hdf5_monitor_iter(),
       initial_hdf5_field_files(),
       initial_hdf5_field_datasets(),
       initial_hdf5_field_names(),
@@ -573,6 +574,7 @@ public: // attributes
   int                         initial_hdf5_max_level;
   std::string                 initial_hdf5_format;
   int                         initial_hdf5_blocking[3];
+  int                         initial_hdf5_monitor_iter;
   std::vector < std::string > initial_hdf5_field_files;
   std::vector < std::string > initial_hdf5_field_datasets;
   std::vector < std::string > initial_hdf5_field_names;
