@@ -198,6 +198,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_check_num_files(1),
   method_check_ordering("order_morton"),
   method_check_dir(),
+  method_check_monitor_iter(0),
   // EnzoMethodHeat
   method_heat_alpha(0.0),
   // EnzoMethodHydro
@@ -536,6 +537,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_check_num_files;
   p | method_check_ordering;
   p | method_check_dir;
+  p | method_check_monitor_iter;
 
   p | method_heat_alpha;
 
@@ -1603,6 +1605,7 @@ void EnzoConfig::read_method_check_(Parameters * p)
       method_check_dir[i] = p->list_value_string(i,"dir","");
     }
   }
+  method_check_monitor_iter = p->value_integer("monitor_iter",0);
 }
 
 //----------------------------------------------------------------------

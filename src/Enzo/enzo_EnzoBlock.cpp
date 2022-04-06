@@ -220,6 +220,7 @@ void EnzoBlock::p_set_msg_check(EnzoMsgCheck * msg)
 #ifdef TRACE_BLOCK  
   msg->print("recv 1");
 #endif
+  performance_stop_(perf_block);
 }
 #endif
 

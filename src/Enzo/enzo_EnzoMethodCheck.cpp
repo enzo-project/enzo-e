@@ -33,7 +33,7 @@ int Simulation::file_counter_ = 0;
 //----------------------------------------------------------------------
 
 EnzoMethodCheck::EnzoMethodCheck
-(int num_files, std::string ordering, std::vector<std::string> directory)
+(int num_files, std::string ordering, std::vector<std::string> directory, int monitor_iter)
   : Method(),
     num_files_(num_files),
     ordering_(ordering),
@@ -49,7 +49,7 @@ EnzoMethodCheck::EnzoMethodCheck
     enzo::simulation()->set_sync_check_writer(num_files_);
 
     proxy_io_enzo_writer = CProxy_IoEnzoWriter::ckNew
-      (num_files, ordering, num_files);
+      (num_files, ordering,monitor_iter, num_files);
 
     proxy_io_enzo_writer.doneInserting();
 
@@ -147,10 +147,11 @@ void EnzoSimulation::r_method_check_enter(CkReductionMsg *msg)
 //----------------------------------------------------------------------
 
 IoEnzoWriter::IoEnzoWriter
-(int num_files, std::string ordering) throw ()
+(int num_files, std::string ordering, int monitor_iter) throw ()
   : CBase_IoEnzoWriter(),
     num_files_(num_files),
-    ordering_(ordering)
+    ordering_(ordering),
+    monitor_iter_(monitor_iter)
 {
   TRACE_CHECK("[4] IoEnzoWriter::IoEnzoWriter()");
 }
@@ -200,6 +201,11 @@ void IoEnzoWriter::p_write (EnzoMsgCheck * msg_check)
     (index_this,index_next,name_this,name_next,
      index_block,is_first,is_last,name_dir);
 
+  if (thisIndex == 0 && monitor_iter_ &&
+      ((is_first || is_last) || ((index_block % monitor_iter_) == 0))) {
+    cello::monitor()->print("Method", "check %d",index_block);
+  }
+  
   // Write to block list file, opening or closing file as needed
 
   if (is_first) {

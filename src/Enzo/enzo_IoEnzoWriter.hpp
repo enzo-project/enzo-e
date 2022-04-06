@@ -21,12 +21,14 @@ public: // interface
     num_files_(0),
     ordering_(""),
     stream_block_list_(),
-    file_(nullptr)
+    file_(nullptr),
+    monitor_iter_(0)
   {  }
 
   /// Constructor
   IoEnzoWriter(int num_files,
-               std::string ordering) throw();
+               std::string ordering,
+               int monitor_iter) throw();
 
   /// CHARM++ migration constructor
   IoEnzoWriter(CkMigrateMessage *m) : CBase_IoEnzoWriter(m) {}
@@ -38,6 +40,7 @@ public: // interface
 
     p | num_files_;
     p | ordering_;
+    p | monitor_iter_;
   }
 
 public: // entry methods
@@ -70,6 +73,10 @@ protected: // attributes
   std::ofstream stream_block_list_;
 
   FileHdf5 * file_;
+
+  /// How often to output write status wrt block indices in first
+  /// file; 0 for no output
+  int monitor_iter_;
 };
 
 #endif /* ENZO_IO_ENZO_WRITER_HPP */

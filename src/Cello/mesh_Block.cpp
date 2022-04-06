@@ -176,6 +176,7 @@ void Block::p_set_msg_refine(MsgRefine * msg)
   CkPrintf ("TRACE_REFINE %s\n",name().c_str());
   fflush(stdout);
 #endif
+  delete msg;
 }
 
 #endif
@@ -571,9 +572,7 @@ void Block::apply_initial_(MsgRefine * msg) throw ()
 
   if (! is_first_cycle) {
     msg->update(data());
-    delete msg;
   } else {
-    delete msg;
     TRACE("Block::apply_initial_()");
     if (initial_new) {
 

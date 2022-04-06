@@ -19,7 +19,8 @@ public: // interface
   /// Create a new EnzoMethodCheck object
   EnzoMethodCheck
   (int num_files, std::string ordering,
-   std::vector<std::string> directory);
+   std::vector<std::string> directory,
+   int monitor_iter);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodCheck);
@@ -54,7 +55,6 @@ protected: // attributes
 
   /// Disk directory for writing checkpoint files
   std::vector<std::string> directory_;
-
 };
 
 #endif /* ENZO_ENZO_METHOD_CHECK_HPP */

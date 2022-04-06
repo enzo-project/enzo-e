@@ -157,6 +157,7 @@ public: // interface
   CkPrintf ("%d %p TRACE_BLOCK EnzoBlock(CkMigrateMessage *)\n",CkMyPe(),(void *)this);
   print();
 #endif
+    performance_start_(perf_block);
   }
 
   /// Pack / unpack the EnzoBlock in a CHARM++ program

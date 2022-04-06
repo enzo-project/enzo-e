@@ -297,6 +297,7 @@ public: // interface
       method_check_num_files(1),
       method_check_ordering("order_morton"),
       method_check_dir(),
+      method_check_monitor_iter(0),
       // EnzoInitialMergeStarsTest
       initial_merge_stars_test_particle_data_filename(""),
       // EnzoMethodHeat
@@ -696,6 +697,7 @@ public: // attributes
   int                        method_check_num_files;
   std::string                method_check_ordering;
   std::vector<std::string>   method_check_dir;
+  int                        method_check_monitor_iter;
 
   // EnzoInitialMergeStarsTest
   std::string                initial_merge_stars_test_particle_data_filename;
