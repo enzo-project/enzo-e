@@ -57,36 +57,11 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
 (const EnzoConfig * config) throw()
 : Initial(config->initial_cycle, config->initial_time)
 {
-  if (this->stellar_disk_ || this->stellar_bulge_) {
-    
-    // Check if star particles exist for this problem
-    ParticleDescr * particle_descr = cello::particle_descr();
-    ASSERT("EnzoInitialIsolatedGalaxy",
-	   "Error: No star particle type",
-	   particle_descr->type_exists("star"));
-    
-    // Check if star particles have a "mass" attribute
-    int it = particle_descr->type_index("star");
-    ASSERT("EnzoInitialIsolatedGalaxy",
-	   "Error: star particle type does not have a mass attribute",
-	   particle_descr->has_attribute(it,"mass"));
-  }
+  if (this->stellar_disk_ || this->stellar_bulge_)
+    enzo::check_particle_attribute("star","mass");
 
-  if (this->live_dm_halo_){
-
-    // Check if dark particles exist for this problem
-    ParticleDescr * particle_descr = cello::particle_descr();
-    ASSERT("EnzoInitialIsolatedGalaxy",
-	   "Error: No dark particle type",
-	   particle_descr->type_exists("dark"));
-    
-    // Check if dark particles have a "mass" attribute
-    int it = particle_descr->type_index("dark");
-    ASSERT("EnzoInitialIsolatedGalaxy",
-	   "Error: dark particle type does not have a mass attribute",
-	   particle_descr->has_attribute(it,"mass"));
-    
-  }
+  if (this->live_dm_halo_)
+    enzo::check_particle_attribute("dark","mass");
 
   // read in parameter settings from config and
   // set corresponding member variables

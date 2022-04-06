@@ -302,18 +302,7 @@ EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
   : Method()
 {
 
-  // Check if star particles exist for this problem
-  ParticleDescr * particle_descr = cello::particle_descr();
-  ASSERT("EnzoMethodDistributedFeedback",
-	 "Error: No star particle type",
-	 particle_descr->type_exists("star"));
-
-  // Check if star particles have a "mass" attribute
-  int it = particle_descr->type_index("star");
-  ASSERT("EnzoMethodDistributedFeedback",
-	 "Error: star particle type does not have a mass attribute",
-	 particle_descr->has_attribute(it,"mass"));
-
+  enzo::check_particle_attribute("star","mass");
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
 
@@ -329,7 +318,7 @@ EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
   //
   // Refresh copies of all star particles on neighboring grids
   //
-  refresh->add_particle(it);
+  refresh->add_particle(cello::particle_descr()->type_index("star"));
   refresh->set_particles_are_copied(true);
 
   FieldDescr * field_descr = cello::field_descr();

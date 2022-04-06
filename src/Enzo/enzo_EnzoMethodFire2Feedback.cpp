@@ -224,17 +224,7 @@ EnzoMethodFire2Feedback::EnzoMethodFire2Feedback
 ()
   : Method()
 {
-  // Check if star particles exist for this problem
-  ParticleDescr * particle_descr = cello::particle_descr();
-  ASSERT("EnzoMethodFire2Feedback",
-	 "Error: No star particle type",
-	 particle_descr->type_exists("star"));
-
-  // Check if star particles have a "mass" attribute
-  int it = particle_descr->type_index("star");
-  ASSERT("EnzoMethodFire2Feedback",
-	 "Error: star particle type does not have a mass attribute",
-	 particle_descr->has_attribute(it,"mass"));
+  enzo::check_particle_attribute("star","mass");
 
   FieldDescr * field_descr = cello::field_descr();
   const EnzoConfig * enzo_config = enzo::config();
