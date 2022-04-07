@@ -76,24 +76,33 @@ void EnzoInitialAccretionTest::enforce_block
          enzo::problem()->method_precedes("accretion_compute",
 					  "accretion_remove_gas"));
 
-  // Check if ppm method is being used
+  // Check if mhd_vlct method is being used
   ASSERT("EnzoInitialAccretionTest",
-	 "If accretion_test initializer is used, the ppm_method is "
+	 "If accretion_test initializer is used, the mhd_vlct method is "
 	 "required.",
-         enzo::problem()->method_exists("ppm"));
+         enzo::problem()->method_exists("mhd_vlct"));
+
+  // Check that mhd_choice parameter is set to "no_bfield"
+  ASSERT("EnzoInitialAccretionTest",
+	 "Method:mhd_vlct:mhd_choice must be set to no_bfield",
+         enzo::config()->method_vlct_mhd_choice == "no_bfield");
+
+  // Check that riemann_solver parameter is set to "hllc"
+  ASSERT("EnzoInitialAccretionTest",
+	 "Method:mhd_vlct:mhd_choice must be set to hllc",
+         enzo::config()->method_vlct_riemann_solver == "hllc");
 
   // Check if the initial density and pressure are at least as large as the
-  // density and pressure floors set by the ppm method
-
+  // density and pressure floors set by mhd_vlct method
   ASSERT("EnzoInitialAccretionTest",
 	 "Initial gas density must be at least as large as the density "
 	 "floor set by the ppm method",
-         gas_density_ >= enzo::config()->ppm_density_floor);
+         gas_density_ >= enzo::config()->method_vlct_density_floor);
 
   ASSERT("EnzoInitialAccretionTest",
 	 "Initial gas pressure must be at least as large as the pressure "
 	 "floor set by the ppm method",
-         gas_density_ >= enzo::config()->ppm_density_floor);
+         gas_pressure_ >= enzo::config()->method_vlct_pressure_floor);
 
   // Check if we have periodic boundary conditions
   int px, py, pz;
@@ -143,8 +152,7 @@ void EnzoInitialAccretionTest::enforce_block
   enzo_float * vy = (enzo_float *) field.values ("velocity_y");
   enzo_float * vz = (enzo_float *) field.values ("velocity_z");
 
-  // Initialise pressure, internal_energy and velocity fields to zero.
-  // (Not too sure why pressure and internal energy should be zero)
+  // Initialise all fields to zero except for density and total_energy
   std::fill_n(p,m,0.0);
   std::fill_n(ie,m,0.0);
   std::fill_n(vx,m,0.0);

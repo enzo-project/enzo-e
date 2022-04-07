@@ -74,8 +74,17 @@ Particle {
 
 Method {
 
-    list = ["ppm","pm_update","merge_stars",
-    	    "accretion_compute","accretion_remove_gas"];		
+    list = ["mhd_vlct","pm_update","merge_stars",
+    	    "accretion_compute","accretion_remove_gas"];
+
+    mhd_vlct {
+      	    courant = 0.3;
+            mhd_choice = "no_bfield";	
+      	    density_floor = 1.0e-6;	
+	    pressure_floor = 1.0e-6;
+	    riemann_solver = "hllc";
+      };
+
     pm_update {
         max_dt = 1.0e-2;
     };
@@ -98,7 +107,7 @@ Output {
 	particle_list = ["star"];
         name = [ "data-%04d-%04d.h5", "cycle", "proc" ];
         schedule {
-            step = 1;
+            step = 10;
             var = "cycle";
         };
         type = "data";
