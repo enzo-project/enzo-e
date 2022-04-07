@@ -59,7 +59,7 @@ def test_mmc(tolerance,input_prefix,output):
     
     ds_pattern = f"{input_prefix}_????/{input_prefix}_????.block_list"
 
-    cycle = []
+    time = []
     gas_mass = []
     gas_px   = []
     gas_py   = []
@@ -82,7 +82,7 @@ def test_mmc(tolerance,input_prefix,output):
         star_px.append((box["star","mass"] * box["star","vx"]).sum())
         star_py.append((box["star","mass"] * box["star","vy"]).sum())
         star_pz.append((box["star","mass"] * box["star","vz"]).sum())
-        cycle.append(ds["current_cycle"])
+        time.append(ds.current_time)
 
     total_mass = [gm + sm for (gm,sm) in zip(gas_mass,star_mass)]
     total_px = [gpx + spx for (gpx,spx) in zip(gas_px,star_px)]
@@ -108,7 +108,7 @@ def test_mmc(tolerance,input_prefix,output):
               'legend.fontsize': 16,
               'xtick.labelsize': 16,
               'ytick.labelsize': 16,
-              'figure.figsize' : (7,9),
+              'figure.figsize' : (8,6),
               'figure.subplot.left'    : 0.15,
               'figure.subplot.right'   : 0.95  ,
               'figure.subplot.bottom'  : 0.25  ,
@@ -121,32 +121,21 @@ def test_mmc(tolerance,input_prefix,output):
 
     plt.rcParams.update(params)
 
-    err_lim_plot = 10.0 * tolerance
-    mass_label = f"Total mass error / {err_lim_plot:.2g}"
-    momentum_label = f"Total momentum error / {err_lim_plot:.2g}"
-    fig,ax = plt.subplots(nrows = 2,sharex = True)
-    grid_line_positions = np.linspace(-1.0,1.0,11,endpoint = True)
+    fig,ax = plt.subplots()
+    ax.plot(time, np.log10(np.abs(mass_error)),label = "Mass")
+    ax.set_ylim(-20,0)
+    ax.set_ylabel(r"$\log_{10} | Error |$")
+    ax.plot(time,np.log10(np.abs(px_error)) , ls = "--", label = "x-momentum")
+    ax.plot(time,np.log10(np.abs(py_error)) ,ls = "-.", label = "y-momentum")
+    ax.plot(time,np.log10(np.abs(pz_error)), ls = ":", label = "z-momentum")
     
-    for y in grid_line_positions:
-        ax[0].axhline(y = y,ls = "--",color = "k",linewidth = 0.5,alpha = 0.7)
-        ax[1].axhline(y = y,ls = "--",color = "k",linewidth = 0.5,alpha = 0.7)
-
-    
-    ax[0].plot(cycle, mass_error / err_lim_plot)
-    ax[0].axhline(y = 0.1, ls = "--", color = "r", alpha = 0.7)
-    ax[0].axhline(y = -0.1, ls = "--", color = "r", alpha = 0.7)
-    ax[0].set_ylim(-1.0,1.0)
-    ax[0].set_ylabel(mass_label)
-    ax[1].plot(cycle,px_error / err_lim_plot,label = "x-momentum")
-    ax[1].plot(cycle,py_error / err_lim_plot,label = "y-momentum",ls = "--")
-    ax[1].plot(cycle,pz_error / err_lim_plot,label = "z-momentum",ls = ":")
-    ax[1].axhline(y = 0.1, ls = "--", color = "r", alpha = 0.7)
-    ax[1].axhline(y = -0.1, ls = "--", color = "r", alpha = 0.7,label = "Tolerance")
-    ax[1].set_ylim(-1.0,1.0)
-    ax[1].set_ylabel(momentum_label)
-    ax[1].legend(loc = "upper left",bbox_to_anchor = (0.0,-0.2),ncol = 2)
-    ax[1].set_xlabel("Cycle")
-    
+    y_ticks = np.linspace(-20,0,11)
+    ax.set_yticks(y_ticks)
+    for y in y_ticks:
+        ax.axhline(y = y, ls = "--", color = "k", alpha = 0.5, linewidth = 0.5)
+    ax.set_xlabel("Time (seconds)")
+    ax.legend(loc = "upper left",bbox_to_anchor = [0.1,-0.15],ncol = 2)
+     
     fig.savefig(output)
     plt.close(fig)
 
@@ -204,8 +193,9 @@ if __name__ == "__main__":
                     args.output):
             test_passed = True
 
-    except:
+    except Exception as e:
         print("Encountered error when trying to test mass and momentum conservation")
+        print(e)
         sys.exit(2)
 
     if test_passed:
