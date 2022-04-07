@@ -81,7 +81,6 @@ public: // interface
     Method::pup(p);
 
     p | grackle_units_;
-
     double last_init_time = time_grackle_data_initialized_;
     p | last_init_time;
     if (p.isUnpacking()) {
@@ -168,6 +167,9 @@ public: // interface
       return;
  }
 
+  void enforce_metallicity_floor(EnzoBlock * enzo_block) throw();
+
+
   void calculate_cooling_time(Block * block, enzo_float* ct,
 			      code_units* grackle_units = NULL,
 			      grackle_field_data* grackle_fields = NULL,
@@ -198,9 +200,9 @@ public: // interface
 			    "local_calculate_temperature");
   }
 
-  void enforce_metallicity_floor(EnzoBlock * enzo_block) throw();
 
 #endif
+
 
 protected: // methods
 
@@ -229,6 +231,7 @@ protected: // methods
   code_units grackle_units_;
   chemistry_data_storage grackle_rates_;
   double time_grackle_data_initialized_;
+
 #endif
 
 };

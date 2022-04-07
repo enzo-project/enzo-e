@@ -41,14 +41,14 @@ EnzoMethodGrackle::EnzoMethodGrackle
   /// Define Grackle's internal data structures
   time_grackle_data_initialized_ = ENZO_FLOAT_UNDEFINED;
   initialize_grackle_chemistry_data(time);
-
+  
 #endif /* CONFIG_USE_GRACKLE */
 }
 
 //----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_GRACKLE
-
+ 
 void EnzoMethodGrackle::define_required_grackle_fields()
 {
   // Gather list of fields that MUST be defined for this method and
@@ -97,7 +97,6 @@ void EnzoMethodGrackle::define_required_grackle_fields()
   // Primordial chemistry fields
 
   if (chemistry_level >= 1) {
-    cello::define_field_in_group ("density",       "color");
     cello::define_field_in_group ("HI_density",    "color");
     cello::define_field_in_group ("HII_density",   "color");
     cello::define_field_in_group ("HeI_density",   "color");
@@ -576,8 +575,10 @@ double EnzoMethodGrackle::timestep ( Block * block ) throw()
 }
 
 //----------------------------------------------------------------------
-//
+
 #ifdef CONFIG_USE_GRACKLE
+
+
 void EnzoMethodGrackle::enforce_metallicity_floor(EnzoBlock * enzo_block) throw()
 {
   // MUST have metal_density field tracked
@@ -595,8 +596,7 @@ void EnzoMethodGrackle::enforce_metallicity_floor(EnzoBlock * enzo_block) throw(
   int ngy = ny + 2*gy;
   int ngz = nz + 2*gz;
 
-  const EnzoConfig * enzo_config = enzo::config();
-  double Z_floor = enzo_config->method_grackle_metallicity_floor; 
+  double Z_floor = enzo::config()->method_grackle_metallicity_floor; 
 
   for (int iz=0; iz<ngz; iz++){
     for (int iy=0; iy<ngy; iy++){
