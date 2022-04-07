@@ -646,6 +646,9 @@ void Block::adapt_check_messages_()
                       msg->level_max_,
                       msg->can_coarsen_);
   }
+  for (int i=0; i<adapt_msg_list_.size(); i++) {
+    delete adapt_msg_list_[i];
+  }
   adapt_msg_list_.clear();
 }
 

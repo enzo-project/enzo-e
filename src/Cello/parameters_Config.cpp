@@ -1522,10 +1522,21 @@ void Config::read_stopping_ (Parameters * p) throw()
     ( "Stopping:cycle" , std::numeric_limits<int>::max() );
   stopping_time  = p->value_float
     ( "Stopping:time" , std::numeric_limits<double>::max() );
-  stopping_seconds  = p->value_float
-    ( "Stopping:seconds" , std::numeric_limits<double>::max() );
-  stopping_interval = p->value_integer
-    ( "Stopping:interval" , 1);
+
+  if (p->type("Stopping:seconds") != parameter_unknown) {
+    stopping_seconds  = p->value_float
+      ( "Stopping:seconds" , std::numeric_limits<double>::max() );
+  } else if (p->type("Stopping:minutes") != parameter_unknown) {
+    stopping_seconds  = p->value_float
+      ( "Stopping:minutes" , std::numeric_limits<double>::max() );
+    stopping_seconds *= 60;
+  } else if (p->type("Stopping:hours") != parameter_unknown) {
+    stopping_seconds  = p->value_float
+      ( "Stopping:hours" , std::numeric_limits<double>::max() );
+    stopping_seconds *= 3600;
+  }
+
+  stopping_interval = p->value_integer ( "Stopping:interval" , 1);
 }
 
 void Config::read_units_ (Parameters * p) throw()
@@ -1582,6 +1593,8 @@ int Config::read_schedule_(Parameters * p, const std::string group)
   if      (schedule_var[index] == "cycle")    var_is_int = true;
   else if (schedule_var[index] == "time")     var_is_int = false;
   else if (schedule_var[index] == "seconds")  var_is_int = false;
+  else if (schedule_var[index] == "minutes")  var_is_int = false;
+  else if (schedule_var[index] == "hours")    var_is_int = false;
   else {
     ERROR2 ("Config::read",
 	    "Schedule variable %s is not recognized for parameter group %s",
