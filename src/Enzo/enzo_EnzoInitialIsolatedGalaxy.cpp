@@ -261,7 +261,8 @@ void EnzoInitialIsolatedGalaxy::enforce_block
 
 #ifdef CONFIG_USE_GRACKLE
    grackle_field_data grackle_fields_;
-   EnzoMethodGrackle::setup_grackle_fields(enzo_block, &grackle_fields_);
+   const EnzoMethodGrackle * grackle_method = enzo::grackle_method();
+   grackle_method->setup_grackle_fields(enzo_block, &grackle_fields_);
 #endif
 
   if (this->use_gas_particles_){
@@ -284,7 +285,7 @@ void EnzoInitialIsolatedGalaxy::enforce_block
 
     if (name == "grackle"){
 
-      EnzoMethodGrackle::update_grackle_density_fields(enzo_block,
+      grackle_method->update_grackle_density_fields(enzo_block,
                                                      &grackle_fields_);
     }
   }
@@ -309,7 +310,7 @@ void EnzoInitialIsolatedGalaxy::enforce_block
 //  InitializeParticles(block, &particle);
 
 #ifdef CONFIG_USE_GRACKLE
-  EnzoMethodGrackle::delete_grackle_fields(&grackle_fields_);
+  grackle_method->delete_grackle_fields(&grackle_fields_);
 #endif
 
   return;
