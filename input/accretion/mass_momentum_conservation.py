@@ -1,24 +1,22 @@
 #!/bin/python
 
 # This file defines the function test_mmc which has the following behaviour:
-# - takes as the prefix for the names of the directories generated when Enzo-E runs
-#   the accretion_test problem, which contain snapshots of the
-#   particle data at regular time intervals, a name for the image file which will be
-#   generated, and a value for the tolerance limit
-# - uses yt to read the data and calculates the total mass, total x/y/z-momentum
-#   and total number of particles in each snapshot. It then calculates the
-#   conservation error for these quantities, and tests whether the absolute value
-#   is less than the tolerance limit. If the absolute value of the error is larger
-#   than the tolerance for any snapshot, then the test fails.
-# - generates a figure with three panels, showing the mass conservation error,
-#   momentum conservation error, and number of particles plotted against the number
-#   of cycles (i.e. timesteps).  This figure is useful for checking if particles are
-#   indeed merging (shown by decrease in particle number with time) and whether
-#   mass and momentum are being properly conserved.
+# - takes as arguments the prefix for the names of the directories generated
+#   when Enzo-E runs the accretion_test problem, which contain snapshots of
+#   the field data particle data at regular time intervals, a name for the
+#   file to which the plot will be saved, and a value for the tolerance limit.
+# - uses yt to read the data and calculates the total mass, total
+#   x/y/z-momentum and total number of particles in each snapshot. It then
+#   calculates the conservation error for these quantities, and tests whether
+#   the absolute value is always less than the tolerance limit.
+#   If the absolute value of the error is larger than the tolerance for any
+#   snapshot, then the test fails.
+# - generates a plot showing the log of the absolute values of the mass and
+#   momentum conservation errors against time.
 
-# test_mmc can be imported by another script (as is done in run_accretion_test.py), 
-# or it can be executed by running this file as a script, with command line arguments 
-# being passed to test_mmc.
+# test_mmc can be imported by another script (as is done in
+# run_accretion_test.py), or it can be executed by running this file as a script,
+# with command line arguments being passed to test_mmc.
 # For more information, run "python mass_momentum_conservation.py -h".
 
 import yt
@@ -99,6 +97,12 @@ def test_mmc(tolerance,input_prefix,output):
     print(f"Maximum y momentum error = {np.max(np.abs(py_error))}")
     print(f"Maximum z momentum error = {np.max(np.abs(pz_error))}")
 
+    # replace zeros with a small number. Helpful for plotting purposes
+    mass_error[mass_error == 0] = 1.0e-100
+    px_error[px_error == 0] = 1.0e-100
+    py_error[py_error == 0] = 1.0e-100
+    pz_error[pz_error == 0] = 1.0e-100
+
     ### make the figure
     
     # set matplotlib params
@@ -122,9 +126,9 @@ def test_mmc(tolerance,input_prefix,output):
     plt.rcParams.update(params)
 
     fig,ax = plt.subplots()
-    ax.plot(time, np.log10(np.abs(mass_error)),label = "Mass")
     ax.set_ylim(-20,0)
     ax.set_ylabel(r"$\log_{10} | Error |$")
+    ax.plot(time, np.log10(np.abs(mass_error)),label = "Mass")
     ax.plot(time,np.log10(np.abs(px_error)) , ls = "--", label = "x-momentum")
     ax.plot(time,np.log10(np.abs(py_error)) ,ls = "-.", label = "y-momentum")
     ax.plot(time,np.log10(np.abs(pz_error)), ls = ":", label = "z-momentum")
@@ -155,8 +159,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "-i",
         "--input_prefix",
-        help="The prefix for the directories containing snapshots",
-        required=True,
+        help="""
+        The prefix for the directories containing snapshots.
+        Default = \"Dir_Accretion_Test\".
+        """,
+        required=False,
+        default="Dir_Accretion_Test"
         type=str,
     )
     
@@ -178,7 +186,7 @@ if __name__ == "__main__":
         this script tests if the absolute difference between the 
         total mass / momentum in each snapshot and the initial mass / momentum, 
         divided by the initial mass / momentum, is less than the tolerance.
-        If initial mass / momentum is smaller, then just check the absolute 
+        If initial mass / momentum is smaller, then just checks the absolute 
         difference.
         """,
         required=True,
@@ -194,7 +202,7 @@ if __name__ == "__main__":
             test_passed = True
 
     except Exception as e:
-        print("Encountered error when trying to test mass and momentum conservation")
+        print("Encountered error when trying to test mass and momentum conservation:")
         print(e)
         sys.exit(2)
 
