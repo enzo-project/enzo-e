@@ -126,7 +126,6 @@ public: // interface
   { return particle_descr_->num_attributes(it); }
 
   /// Check if particle type has an attribute with given name
-  
   bool has_attribute (int it, std::string attribute) const
   { return particle_descr_->has_attribute(it,attribute); }
 
