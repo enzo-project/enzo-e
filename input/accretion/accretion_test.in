@@ -102,7 +102,7 @@ Stopping {
 Output {
    
     data {
-        dir = [ "./Dir_Accretion_%04d", "cycle" ];
+        dir = [ "./Dir_Accretion_Test_%04d", "cycle" ];
         field_list = ["density", "velocity_x", "velocity_y", "velocity_z"];
 	particle_list = ["star"];
         name = [ "data-%04d-%04d.h5", "cycle", "proc" ];
