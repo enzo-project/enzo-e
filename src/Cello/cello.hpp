@@ -789,6 +789,8 @@ namespace cello {
   ScalarDescr *   scalar_descr_double();
   /// Return the ScalarDescr object defining Block int Scalar data values
   ScalarDescr *   scalar_descr_int();
+  /// Return the ScalarDescr object defining Block long long Scalar data values
+  ScalarDescr *   scalar_descr_long_long();
   /// Return the ScalarDescr object defining Block Sync counter Scalar
   /// data values
   ScalarDescr *   scalar_descr_sync();

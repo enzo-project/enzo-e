@@ -78,7 +78,7 @@ public: // interface
                        Index index_next,
                        std::string name_this,
                        std::string name_next,
-                       int index_block,
+                       long long index_block,
                        bool is_first,
                        bool is_last)
   {
@@ -95,7 +95,7 @@ public: // interface
                        Index & index_next,
                        std::string & name_this,
                        std::string & name_next,
-                       int & index_block,
+                       long long & index_block,
                        bool & is_first,
                        bool & is_last,
                        std::string & name_dir)
@@ -189,7 +189,7 @@ protected: // attributes
   Index index_next_;
   std::string name_this_;
   std::string name_next_;
-  int index_block_;
+  long long index_block_;
   bool is_first_;
   bool is_last_;
 

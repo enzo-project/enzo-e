@@ -654,9 +654,9 @@ double OutputImage::mesh_color_(const Block * block, int level) const
   } else if (mesh_color_type_ == mesh_color_order) {
     int is_i = cello::scalar_descr_int()->index(mesh_color_order_+":index");
     int is_n = cello::scalar_descr_int()->index(mesh_color_order_+":count");
-    ScalarData<int> * scalar_data = ((Block *)block)->data()->scalar_data_int();
-    int index = *scalar_data->value(cello::scalar_descr_int(),is_i);
-    int count = *scalar_data->value(cello::scalar_descr_int(),is_n);
+    ScalarData<long long> * scalar_data = ((Block *)block)->data()->scalar_data_long_long();
+    long long index = *scalar_data->value(cello::scalar_descr_long_long(),is_i);
+    long long count = *scalar_data->value(cello::scalar_descr_long_long(),is_n);
     value = (count) > 0 ? 1.0*index/count : 0;
   } else {
     ERROR1 ("OutputImage::mesh_color_()",

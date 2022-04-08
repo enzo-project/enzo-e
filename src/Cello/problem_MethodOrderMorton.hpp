@@ -60,19 +60,19 @@ public: // virtual methods
 private: // methods
 
   /// Return the pointer to the Block's Morton ordering index 
-  int * pindex_(Block * block);
+  long long * pindex_(Block * block);
 
   /// Return the pointer to the number of Block indices
-  int * pcount_(Block * block);
+  long long * pcount_(Block * block);
 
   /// Return the pointer to the Index of the "next" block
   Index * pnext_(Block * block);
 
   /// Return the pointer to the Block's weight (including self)
-  int * pweight_(Block * block);
+  long long * pweight_(Block * block);
 
   /// Return the pointer to the given Block's child weight
-  int * pweight_child_(Block * block, int index);
+  long long * pweight_child_(Block * block, int index);
 
   /// Return the pointer to the Block's Morton ordering index 
   Sync * psync_index_(Block * block);

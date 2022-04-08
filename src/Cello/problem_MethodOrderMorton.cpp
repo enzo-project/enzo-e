@@ -222,19 +222,19 @@ void MethodOrderMorton::compute_complete(Block * block)
 
 //======================================================================
 
-int * MethodOrderMorton::pindex_(Block * block)
+long long * MethodOrderMorton::pindex_(Block * block)
 {
-  Scalar<int> scalar(cello::scalar_descr_int(),
-                     block->data()->scalar_data_int());
+  Scalar<long long> scalar(cello::scalar_descr_long_long(),
+                     block->data()->scalar_data_long_long());
   return scalar.value(is_index_);
 }
 
 //----------------------------------------------------------------------
 
-int * MethodOrderMorton::pcount_(Block * block)
+long long * MethodOrderMorton::pcount_(Block * block)
 {
-  Scalar<int> scalar(cello::scalar_descr_int(),
-                     block->data()->scalar_data_int());
+  Scalar<long long> scalar(cello::scalar_descr_long_long(),
+                     block->data()->scalar_data_long_long());
   return scalar.value(is_count_);
 }
 
@@ -258,19 +258,19 @@ Sync * MethodOrderMorton::psync_index_(Block * block)
 
 //----------------------------------------------------------------------
 
-int * MethodOrderMorton::pweight_(Block * block)
+long long * MethodOrderMorton::pweight_(Block * block)
 {
-  Scalar<int> scalar(cello::scalar_descr_int(),
-                     block->data()->scalar_data_int());
+  Scalar<long long> scalar(cello::scalar_descr_long_long(),
+                     block->data()->scalar_data_long_long());
   return scalar.value(is_weight_);
 }
 
 //----------------------------------------------------------------------
 
-int * MethodOrderMorton::pweight_child_(Block * block, int i)
+long long * MethodOrderMorton::pweight_child_(Block * block, int i)
 {
-  Scalar<int> scalar(cello::scalar_descr_int(),
-                     block->data()->scalar_data_int());
+  Scalar<long long> scalar(cello::scalar_descr_long_long(),
+                     block->data()->scalar_data_long_long());
   return scalar.value(is_weight_child_)+i;
 }
 

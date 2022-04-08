@@ -101,7 +101,7 @@ void * EnzoMsgCheck::pack (EnzoMsgCheck * msg)
   SIZE_OBJECT_TYPE(size,msg->index_next_);
   SIZE_STRING_TYPE(size,msg->name_this_);
   SIZE_STRING_TYPE(size,msg->name_next_);
-  SIZE_SCALAR_TYPE(size,int,msg->index_block_);
+  SIZE_SCALAR_TYPE(size,long long,msg->index_block_);
   SIZE_SCALAR_TYPE(size,bool,msg->is_first_);
   SIZE_SCALAR_TYPE(size,bool,msg->is_last_);
   SIZE_STRING_TYPE(size,msg->name_dir_);
@@ -150,7 +150,7 @@ void * EnzoMsgCheck::pack (EnzoMsgCheck * msg)
   SAVE_OBJECT_TYPE(pc,msg->index_next_);
   SAVE_STRING_TYPE(pc,msg->name_this_);
   SAVE_STRING_TYPE(pc,msg->name_next_);
-  SAVE_SCALAR_TYPE(pc,int,msg->index_block_);
+  SAVE_SCALAR_TYPE(pc,long long,msg->index_block_);
   SAVE_SCALAR_TYPE(pc,bool,msg->is_first_);
   SAVE_SCALAR_TYPE(pc,bool,msg->is_last_);
   SAVE_STRING_TYPE(pc,msg->name_dir_);
@@ -220,7 +220,7 @@ EnzoMsgCheck * EnzoMsgCheck::unpack(void * buffer)
   LOAD_OBJECT_TYPE(pc,msg->index_next_);
   LOAD_STRING_TYPE(pc,msg->name_this_);
   LOAD_STRING_TYPE(pc,msg->name_next_);
-  LOAD_SCALAR_TYPE(pc,int,msg->index_block_);
+  LOAD_SCALAR_TYPE(pc,long long,msg->index_block_);
   LOAD_SCALAR_TYPE(pc,bool,msg->is_first_);
   LOAD_SCALAR_TYPE(pc,bool,msg->is_last_);
   LOAD_STRING_TYPE(pc,msg->name_dir_);

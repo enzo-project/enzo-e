@@ -107,6 +107,8 @@ public: // interface
   { return scalar_descr_double_; }
   ScalarDescr * scalar_descr_int() throw()
   { return scalar_descr_int_; }
+  ScalarDescr * scalar_descr_long_long() throw()
+  { return scalar_descr_long_long_; }
   ScalarDescr * scalar_descr_sync() throw()
   { return scalar_descr_sync_; }
   ScalarDescr * scalar_descr_void() throw()
@@ -532,6 +534,7 @@ protected: // attributes
   ScalarDescr * scalar_descr_long_double_;
   ScalarDescr * scalar_descr_double_;
   ScalarDescr * scalar_descr_int_;
+  ScalarDescr * scalar_descr_long_long_;
   ScalarDescr * scalar_descr_sync_;
   ScalarDescr * scalar_descr_void_;
   ScalarDescr * scalar_descr_index_;

@@ -50,6 +50,7 @@ Simulation::Simulation
   scalar_descr_long_double_(NULL),
   scalar_descr_double_(NULL),
   scalar_descr_int_(NULL),
+  scalar_descr_long_long_(NULL),
   scalar_descr_sync_(NULL),
   scalar_descr_void_(NULL),
   scalar_descr_index_(NULL),
@@ -114,6 +115,7 @@ Simulation::Simulation()
   scalar_descr_long_double_(NULL),
   scalar_descr_double_(NULL),
   scalar_descr_int_(NULL),
+  scalar_descr_long_long_(NULL),
   scalar_descr_sync_(NULL),
   scalar_descr_void_(NULL),
   scalar_descr_index_(NULL),
@@ -166,6 +168,7 @@ Simulation::Simulation (CkMigrateMessage *m)
     scalar_descr_long_double_(NULL),
     scalar_descr_double_(NULL),
     scalar_descr_int_(NULL),
+    scalar_descr_long_long_(NULL),
     scalar_descr_sync_(NULL),
     scalar_descr_void_(NULL),
     scalar_descr_index_(NULL),
@@ -242,6 +245,8 @@ void Simulation::pup (PUP::er &p)
   p | *scalar_descr_double_;
   if (up) scalar_descr_int_ = new ScalarDescr;
   p | *scalar_descr_int_;
+  if (up) scalar_descr_long_long_ = new ScalarDescr;
+  p | *scalar_descr_long_long_;
   if (up) scalar_descr_sync_ = new ScalarDescr;
   p | *scalar_descr_sync_;
   if (up) scalar_descr_void_ = new ScalarDescr;
@@ -497,6 +502,7 @@ void Simulation::initialize_data_descr_() throw()
   scalar_descr_long_double_ = new ScalarDescr;
   scalar_descr_double_      = new ScalarDescr;
   scalar_descr_int_         = new ScalarDescr;
+  scalar_descr_long_long_   = new ScalarDescr;
   scalar_descr_sync_        = new ScalarDescr;
   scalar_descr_void_        = new ScalarDescr;
   scalar_descr_index_       = new ScalarDescr;

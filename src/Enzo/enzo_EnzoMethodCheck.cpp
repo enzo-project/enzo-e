@@ -193,7 +193,7 @@ void IoEnzoWriter::p_write (EnzoMsgCheck * msg_check)
 {
   std::string name_this, name_next;
   Index index_this, index_next;
-  int index_block;
+  long long index_block;
   bool is_first, is_last;
   std::string name_dir;
 
@@ -300,14 +300,14 @@ int EnzoBlock::create_msg_check_
   bool *          is_first
   )
 {
-  ScalarData<int> *   scalar_data_int    = data()->scalar_data_int();
-  ScalarDescr *       scalar_descr_int   = cello::scalar_descr_int();
+  ScalarData<long long> *   scalar_data_long_long    = data()->scalar_data_long_long();
+  ScalarDescr *       scalar_descr_long_long   = cello::scalar_descr_long_long();
   ScalarData<Index> * scalar_data_index  = data()->scalar_data_index();
   ScalarDescr *       scalar_descr_index = cello::scalar_descr_index();
-  const int is_index = scalar_descr_int->index(ordering+":index");
-  const int is_count = scalar_descr_int->index(ordering+":count");
-  const int is_next  = scalar_descr_index->index(ordering+":next");
-  const int count    = *scalar_data_int->value(scalar_descr_int,is_count);
+  const long long is_index = scalar_descr_long_long->index(ordering+":index");
+  const long long is_count = scalar_descr_long_long->index(ordering+":count");
+  const long long is_next  = scalar_descr_index->index(ordering+":next");
+  const long long count    = *scalar_data_long_long->value(scalar_descr_long_long,is_count);
   const Index next   = *scalar_data_index->value(scalar_descr_index,is_next);
 
   const int rank = cello::rank();
@@ -319,7 +319,8 @@ int EnzoBlock::create_msg_check_
 
   Index index_this, index_next;
   std::string name_this, name_next;
-  int index_block, index_file;
+  long long index_block;
+  int index_file;
   bool is_last;
 
   index_this = this->index();
@@ -328,14 +329,14 @@ int EnzoBlock::create_msg_check_
   name_this = this->name();
   name_next = this->name(index_next);
 
-  index_block    = *scalar_data_int->value(scalar_descr_int,is_index);
+  index_block    = *scalar_data_long_long->value(scalar_descr_long_long,is_index);
   index_file = index_block*num_files/count;
 
-  const int ib  = index_block;
-  const int ibm = index_block - 1;
-  const int ibp = index_block + 1;
-  const int nb = count;
-  const int nf = num_files;
+  const long long ib  = index_block;
+  const long long ibm = index_block - 1;
+  const long long ibp = index_block + 1;
+  const long long nb = count;
+  const long long nf = num_files;
   if (is_first) { (*is_first) = (ib  == 0)  || (ib*nf/nb != (ibm)*nf/nb); }
   is_last  = (ibp == nb) || (ib*nf/nb != (ibp)*nf/nb);
 
@@ -436,7 +437,7 @@ void IoEnzoWriter::file_write_block_ (EnzoMsgCheck * msg_check)
   Index  index_next;
   std::string  name_block;
   std::string  name_next;
-  int  block_order;
+  long long  block_order;
   bool  is_first;
   bool  is_last;
   std::string  name_dir;
