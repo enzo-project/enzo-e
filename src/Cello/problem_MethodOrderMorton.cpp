@@ -35,11 +35,11 @@ MethodOrderMorton::MethodOrderMorton(int min_level) throw ()
 
   /// Create Scalar data for ordering index
   const int n = cello::num_children();
-  is_index_        = cello::scalar_descr_int()->new_value(name() + ":index");
-  is_count_        = cello::scalar_descr_int()->new_value(name() + ":count");
+  is_index_        = cello::scalar_descr_long_long()->new_value(name() + ":index");
+  is_count_        = cello::scalar_descr_long_long()->new_value(name() + ":count");
   is_next_         = cello::scalar_descr_index()->new_value(name() + ":next");
-  is_weight_       = cello::scalar_descr_int()->new_value(name() + ":weight");
-  is_weight_child_ = cello::scalar_descr_int()->new_value(name() + ":weight_child",n);
+  is_weight_       = cello::scalar_descr_long_long()->new_value(name() + ":weight");
+  is_weight_child_ = cello::scalar_descr_long_long()->new_value(name() + ":weight_child",n);
   is_sync_index_  = cello::scalar_descr_sync()->new_value(name() + ":sync_index");
   is_sync_weight_ = cello::scalar_descr_sync()->new_value(name() + ":sync_weight");
 }

@@ -1523,6 +1523,8 @@ void Config::read_stopping_ (Parameters * p) throw()
   stopping_time  = p->value_float
     ( "Stopping:time" , std::numeric_limits<double>::max() );
 
+  stopping_seconds = std::numeric_limits<double>::max();
+
   if (p->type("Stopping:seconds") != parameter_unknown) {
     stopping_seconds  = p->value_float
       ( "Stopping:seconds" , std::numeric_limits<double>::max() );
