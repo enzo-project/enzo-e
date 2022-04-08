@@ -496,6 +496,12 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
     "Error in local_solve_chemistry.\n");
   }
 
+  if (enzo::config()->method_grackle_metallicity_floor > 0.0)
+  {
+     enforce_metallicity_floor(enzo_block);
+  }
+
+
   /* Correct total energy for changes in internal energy */
   gr_float * v3[3];
   v3[0] = grackle_fields.x_velocity;

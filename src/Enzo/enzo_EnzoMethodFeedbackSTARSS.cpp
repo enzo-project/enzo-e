@@ -81,6 +81,7 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age, int* nSNII, int* nSNIA,
                 //if it wants to deposit > 1 SN per particle, but single_sn=true,
                 //only deposit 1 SN
                 PII = 1.0;
+                *nSNII = 0;
             }
             int psn = *nSNII;
             if (random <= PII){

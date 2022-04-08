@@ -228,7 +228,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 
         int i = INDEX(ix,iy,iz,mx,my);//ix + mx*(iy + my*iz);
 
-        // need to compute this better for Grackle fields (on to-do list)
+        // TODO: need to compute this better for Grackle fields (on to-do list)
         double rho_cgs = density[i] * enzo_units->density();
         double mean_particle_mass = enzo_config->ppm_mol_weight * cello::mass_hydrogen;
         double ndens = rho_cgs / mean_particle_mass;
@@ -249,11 +249,11 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
           if (! this->check_number_density_threshold(ndens) ) continue;
         }
         else if (this->use_overdensity_threshold_){
-          double dmean = (10*density[i] 
-                    + density[i-idx] + density[i+idx] 
-                    + density[i-idy] + density[i+idy]
-                    + density[i-idz] + density[i+idz]) / 17.0;
-          if (! this->check_overdensity_threshold(dmean) ) continue;
+          //double dmean = (10*density[i] 
+          //          + density[i-idx] + density[i+idx] 
+          //          + density[i-idy] + density[i+idy]
+          //          + density[i-idz] + density[i+idz]) / 17.0;
+          if (! this->check_overdensity_threshold(density[i]) ) continue;
           //#ifdef DEBUG_SF_CRITERIA 
           //  CkPrintf("MethodFeedbackSTARSS -- overdensity threshold passed! rho=%f\n",dmean);
           //#endif
@@ -422,7 +422,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 
         if (metal){
           pmetal     = (enzo_float *) particle.attribute_array(it, ia_metal, ib);
-          pmetal[io] = metal[i] / density[i];
+          pmetal[io] = metal[i] / density[i]; // in ABSOLUTE units
         }
 
         // Remove mass from grid and rescale fraction fields
