@@ -427,7 +427,6 @@ void EnzoMethodGrackle::update_grackle_density_fields(
 
 void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
 {
-
   const EnzoConfig * enzo_config = enzo::config();
 
   Field field = enzo_block->data()->field();
@@ -446,6 +445,11 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
 
   /* Set code units for use in grackle */
   grackle_field_data grackle_fields;
+
+  ASSERT("EnzoMethodGrackle::compute_",
+         "The implementation currently requires that the dual-energy-formalism"
+         "is in use",
+         enzo::uses_dual_energy_formalism(true));
 
   setup_grackle_units(enzo_block, &this->grackle_units_);
   setup_grackle_fields(enzo_block, &grackle_fields);
