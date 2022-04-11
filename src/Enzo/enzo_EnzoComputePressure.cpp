@@ -134,7 +134,8 @@ void EnzoComputePressure::compute_pressure
  bool mhd,
  bool dual_energy,
  double gamma,
- int stale_depth /* 0 */
+ int stale_depth, /* 0 */
+ bool ignore_grackle /*false*/
 #ifdef CONFIG_USE_GRACKLE
  , code_units * grackle_units, /*nullptr*/
  grackle_field_data * grackle_fields /*nullptr*/
@@ -142,7 +143,7 @@ void EnzoComputePressure::compute_pressure
  ) throw()
 {
 
-  if (enzo::config()->method_grackle_use_grackle){
+  if (enzo::config()->method_grackle_use_grackle & !ignore_grackle){
 #ifdef CONFIG_USE_GRACKLE
     // the following assertion is not strictly necessary (the problem will be
     // caught later in EnzoMethodGrackle), but this is more informative...

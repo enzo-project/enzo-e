@@ -97,7 +97,6 @@ void EnzoMethodGrackle::define_required_grackle_fields()
   // Primordial chemistry fields
 
   if (chemistry_level >= 1) {
-    cello::define_field_in_group ("density",       "color");
     cello::define_field_in_group ("HI_density",    "color");
     cello::define_field_in_group ("HII_density",   "color");
     cello::define_field_in_group ("HeI_density",   "color");
@@ -231,6 +230,11 @@ void EnzoMethodGrackle::setup_grackle_units (double current_time,
   grackle_units->a_units       = 1.0;
   grackle_units->a_value       = 1.0;
   if (grackle_units->comoving_coordinates){
+    if (current_time < 0){
+      ERROR("EnzoMethodGrackle::setup_grackle_units",
+            "A valid current_time value is required");
+    }
+
     enzo_float cosmo_a  = 1.0;
     enzo_float cosmo_dt = 0.0;
 
@@ -247,6 +251,22 @@ void EnzoMethodGrackle::setup_grackle_units (double current_time,
   }
 
   return;
+}
+
+#endif
+
+//----------------------------------------------------------------------------
+
+#ifdef CONFIG_USE_GRACKLE
+
+void EnzoMethodGrackle::setup_grackle_units (const EnzoFieldAdaptor& fadaptor,
+                                             code_units * grackle_units
+                                             ) throw()
+{
+  const EnzoConfig * config = enzo::config();
+    double current_time =
+      (config->physics_cosmology) ? fadaptor.compute_time() : -1.0;
+    setup_grackle_units(current_time, grackle_units);
 }
 
 #endif
@@ -355,6 +375,14 @@ void EnzoMethodGrackle::update_grackle_density_fields(
   // over individual species fields should adapt this function
   // in their initialization routines.
 
+  grackle_field_data tmp_grackle_fields;
+  bool cleanup_grackle_fields = false;
+  if (grackle_fields == nullptr){
+    grackle_fields = &tmp_grackle_fields;
+    setup_grackle_fields(enzo_block, grackle_fields);
+    cleanup_grackle_fields = true;
+  }
+
   Field field = enzo_block->data()->field();
 
   int gx,gy,gz;
@@ -400,6 +428,10 @@ void EnzoMethodGrackle::update_grackle_density_fields(
 
       }
     }
+  }
+
+  if (cleanup_grackle_fields){
+    EnzoMethodGrackle::delete_grackle_fields(grackle_fields);
   }
 
   return;

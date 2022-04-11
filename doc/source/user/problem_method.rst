@@ -535,6 +535,72 @@ A sample Method for implementing forward-euler to solve the heat equation.
 
 Calls methods provided by the external Grackle 3.0 chemistry and
 cooling library.
+
+Compatability with hydro/mhd solvers
+------------------------------------
+
+The ``"grackle"`` method is compatible with both the ``"ppm"`` and the
+``"mhd_vlct"`` methods. The convention is to list the hydro method
+before ``"grackle"`` in the ``Field:list`` parameter.  This
+configuration performs advection and radiative cooling in an
+operator-split manner (*Note: there isn't currently support for
+performing radiative cooling during the predictor step of the
+VL+CT solver*).
+
+Integration with hydro-solvers is self-consistent when
+``Field:Grackle:primordial_chemistry`` has values of ``0`` or ``1``.
+However, the integration is somewhat inconsistent when the parameter
+exceeds ``1``. While users shouldn't be too concerned about this
+latter scenario unless they are simulating conditions where
+:math:`{\rm H}_2` makes up a significant fraction of the gas density,
+we describe the inconsistencies in greater detail below.
+
+When ``Field:Grackle:primordial_chemistry > 1``, the Grackle library
+explicitly models chemistry involving :math:`{\rm H}_2` and how it
+modifies the adiabtic index. Grackle's routines treat
+:math:`\gamma_0`, the "nominal adiabatic index" specified by
+``Field:gamma``, as the adiabatic index for all monatomic species
+(this should be ``5.0/3.0``). To that end, Grackle supplies functions
+that can effectively be represented as :math:`\gamma(e, n_{{\rm H}_2},
+n_{\rm other})` and :math:`p(\rho, e, n_{{\rm H}_2}, n_{\rm
+other})`. In these formulas:
+
+- :math:`p`, :math:`\rho` and :math:`e` correspond to the quantities
+  held by the ``pressure``, ``density`` and ``internal_energy``
+  fields.  *(Note: the* :math:`\gamma` *function's dependence on*
+  :math:`e` *accounts for the dependence of* :math:`\gamma_{{\rm
+  H}_2}` *on temperature)*
+
+- :math:`n_{{\rm H}_2}` specifies the number density of
+  :math:`{\rm H}_2`. :math:`n_{\rm other}` specifies a selection of
+  the other primordial species (that roughly approximate the total
+  number density). In practice, these are computed from passively
+  advected species fields.
+
+There are handful of locations within the ``"ppm"`` and
+``"mhd_vlct"`` methods where this treatment is relevant:
+
+1. **Computing the timestep:** each hydro/mhd
+   method uses the :math:`p(\rho, e, n_{{\rm H}_2}, n_{\rm other})`
+   function for the pressure values. However, they both use
+   :math:`\gamma_0` in other places.
+
+2. **Pre-reconstruction pressure calculation:** each hydro/mhd
+   solver internally computes the pressure that is to be reconstructed
+   with :math:`p=(\gamma_0 - 1)e\rho`.
+
+3. **Riemann Solver:** in each hydro/mhd solver, the Riemann Solver
+   completely ignore the grackle supplied functions.
+
+4. **VL+CT Energy floor and DE synchronization:** the internal energy
+   floor is computed from the pressure floor using: :math:`e_{\rm
+   floor} = \frac{p_{\rm floor}}{(\gamma_0 - 1)\rho}` (thus,
+   :math:`p_{\rm floor}` may exceed :math:`p(\rho, e_{\rm floor},
+   \ldots)`). Additionally, synchronizing the internal energy with
+   total energy relies on :math:`\gamma_0`.
+
+5. **PPM reconstruction:** uses :math:`\gamma_0`.
+
    
 ``"comoving_expansion"``: comoving expansion
 ============================================

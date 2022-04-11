@@ -116,12 +116,18 @@ public: // interface
   void initialize_grackle_chemistry_data(double current_time,
                                          bool preinitialized_units = false);
 
+  /// sets up grackle units
+  ///
+  /// @param[in]  current_time The current time. A negative value can be passed
+  ///     if the current value is not known or convenient to get. In that case,
+  ///     the program will abort if the current time is needed (i.e. because
+  ///     this is a cosmological simulation)
+  /// @param[out] grackle_units The object pointed to by this pointer is set up
   static void setup_grackle_units (double current_time,
                                    code_units * grackle_units) throw();
 
   static void setup_grackle_units(const EnzoFieldAdaptor& fadaptor,
-                                  code_units * grackle_units) throw()
-  { setup_grackle_units(fadaptor.compute_time(), grackle_units); }
+                                  code_units * grackle_units) throw();
 
   static void setup_grackle_fields(const EnzoFieldAdaptor& fadaptor,
                                    grackle_field_data * grackle_fields,
@@ -136,8 +142,9 @@ public: // interface
                          grackle_fields, 0, false);
   }
 
-  static void update_grackle_density_fields(EnzoBlock * enzo_block,
-                                   grackle_field_data * grackle_fields) throw();
+  static void update_grackle_density_fields
+  (EnzoBlock * enzo_block,
+   grackle_field_data * grackle_fields = nullptr) throw();
 
   static void delete_grackle_fields(grackle_field_data * grackle_fields) throw() {
       grackle_fields->density         = NULL;
