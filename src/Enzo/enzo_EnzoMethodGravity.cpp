@@ -34,7 +34,7 @@ EnzoMethodGravity::EnzoMethodGravity
     ir_exit_(-1),
     index_prolong_(index_prolong),
     dt_max_(dt_max)
-{
+{         
   // Change this if fields used in this routine change
   // declare required fields
   cello::define_field ("density");
@@ -113,6 +113,15 @@ EnzoMethodGravity::EnzoMethodGravity
 
 void EnzoMethodGravity::compute(Block * block) throw()
 {
+  if (enzo::simulation()->cycle() == enzo::config()->initial_cycle){
+  
+    // Check if the pm_deposit method is being used and precedes the 
+    // gravity method.
+    ASSERT("EnzoMethodGravity",
+           "Error: pm_deposit method must precede gravity method.",
+            enzo::problem()->method_precedes("pm_deposit","gravity"));
+  }
+  
   // Initialize the linear system
 
   Field field = block->data()->field();
