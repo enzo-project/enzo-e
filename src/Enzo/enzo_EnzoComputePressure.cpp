@@ -143,17 +143,21 @@ void EnzoComputePressure::compute_pressure
 {
 
   if (enzo::config()->method_grackle_use_grackle){
-    /*
 #ifdef CONFIG_USE_GRACKLE
+    ASSERT("EnzoMethodGrackle::calculate_pressure",
+           "until PR #106 is merged into grackle, stale_depth must be 0 since "
+           "grackle's local_calculate_pressure ignores the grid_start and "
+           "grid_stop members of grackle_field_data",
+           stale_depth == 0);
+    // TODO: check strides!
     const EnzoMethodGrackle* grackle_method = enzo::grackle_method();
-    grackle_method->calculate_pressure(block, p, grackle_units,
-				       grackle_fields, i_hist_);
+    grackle_method->calculate_pressure(fadaptor, p.data(), grackle_units,
+				       grackle_fields);
 #else
     ERROR("EnzoComputePressure::compute_()",
           "Attempting to compute pressure with method Grackle " 
           "but Enzo-E has not been compiled with Grackle (set use_grackle = 1) \n");
 #endif
-    */
   } else {
 
     using RdOnlyEFltArr = CelloArray<const enzo_float, 3>;

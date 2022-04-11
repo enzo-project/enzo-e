@@ -119,22 +119,21 @@ public: // interface
   static void setup_grackle_units (double current_time,
                                    code_units * grackle_units) throw();
 
-  static void setup_grackle_units(EnzoBlock * enzo_block,
-                                  code_units * grackle_units,
-                                  int i_hist = 0 ) throw()
-  {
-    double compute_time;
-    if (i_hist == 0) {
-      compute_time = enzo_block->time();
-    } else {
-      compute_time = enzo_block->data()->field().history_time(i_hist);
-    }
-    setup_grackle_units(compute_time, grackle_units);
-  }
+  static void setup_grackle_units(const EnzoFieldAdaptor& fadaptor,
+                                  code_units * grackle_units) throw()
+  { setup_grackle_units(fadaptor.compute_time(), grackle_units); }
+
+  static void setup_grackle_fields(const EnzoFieldAdaptor& fadaptor,
+                                   grackle_field_data * grackle_fields,
+                                   bool omit_cell_width = false ) throw();
 
   static void setup_grackle_fields(EnzoBlock * enzo_block,
                                    grackle_field_data * grackle_fields,
-                                   int i_hist = 0 ) throw();
+                                   int i_hist = 0 ) throw()
+  {
+    setup_grackle_fields(EnzoFieldAdaptor((Block*) enzo_block, i_hist),
+                         grackle_fields, false);
+  }
 
   static void update_grackle_density_fields(EnzoBlock * enzo_block,
                                    grackle_field_data * grackle_fields) throw();
@@ -168,33 +167,36 @@ public: // interface
       return;
  }
 
-  void calculate_cooling_time(Block * block, enzo_float* ct,
+  void calculate_cooling_time(const EnzoFieldAdaptor& fadaptor, enzo_float* ct,
 			      code_units* grackle_units = NULL,
-			      grackle_field_data* grackle_fields = NULL,
-			      int i_hist = 0) const throw()
+			      grackle_field_data* grackle_fields = NULL)
+    const throw()
   {
-    compute_local_property_(block, ct, grackle_units, grackle_fields, i_hist,
-			    &local_calculate_cooling_time,
+    compute_local_property_(fadaptor, ct, grackle_units, grackle_fields,
+                            &local_calculate_cooling_time,
 			    "local_calculate_cooling_time");
   }
 
-  void calculate_pressure(Block * block, enzo_float* pressure,
+  void calculate_pressure(const EnzoFieldAdaptor& fadaptor,
+                          enzo_float* pressure,
 			  code_units* grackle_units = NULL,
-			  grackle_field_data* grackle_fields = NULL,
-			  int i_hist = 0) const throw()
+			  grackle_field_data* grackle_fields = NULL)
+    const throw()
   {
-    compute_local_property_(block, pressure, grackle_units, grackle_fields,
-			    i_hist, &local_calculate_pressure,
+    compute_local_property_(fadaptor, pressure, grackle_units, grackle_fields,
+			    &local_calculate_pressure,
 			    "local_calculate_pressure");
   }
 
-  void calculate_temperature(Block * block, enzo_float* temperature,
+  void calculate_temperature(const EnzoFieldAdaptor& fadaptor,
+                             enzo_float* temperature,
 			     code_units* grackle_units = NULL,
-			     grackle_field_data* grackle_fields = NULL,
-			     int i_hist = 0) const throw()
+			     grackle_field_data* grackle_fields = NULL)
+    const throw()
   {
-    compute_local_property_(block, temperature, grackle_units, grackle_fields,
-			    i_hist, &local_calculate_temperature,
+    compute_local_property_(fadaptor, temperature, grackle_units,
+                            grackle_fields,
+			    &local_calculate_temperature,
 			    "local_calculate_temperature");
   }
 
@@ -207,9 +209,10 @@ protected: // methods
 #ifdef CONFIG_USE_GRACKLE
 
   // when grackle_units is NULL, new values are temporarily allocated
-  void compute_local_property_(Block * block, enzo_float* values,
+  void compute_local_property_(const EnzoFieldAdaptor& fadaptor,
+                               enzo_float* values,
 			       code_units* grackle_units,
-			       grackle_field_data* grackle_fields, int i_hist,
+			       grackle_field_data* grackle_fields,
 			       grackle_local_property_func func,
 			       std::string func_name) const throw();
 
