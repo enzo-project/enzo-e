@@ -5,8 +5,6 @@
 /// @date     2021-10-20
 /// @brief    [\ref Mesh] Declaration of the Adapt class
 
-// #define CHECK_ADAPT
-
 #ifndef MESH_ADAPT_HPP
 #define MESH_ADAPT_HPP
 
@@ -72,32 +70,30 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Set level for the block in the given face and (neighbor's) child
-  void set_face_level (Index index, const int if3[3], LevelType level_type,
+  void set_face_level (const int if3[3], LevelType level_type,
                        int level_min, int level_max, bool can_coarsen);
 
   /// Set level for the block in the given face and (neighbor's) child
-  void set_face_level (Index index, const int if3[3], LevelType level_type,
+  void set_face_level (const int if3[3], LevelType level_type,
                        int level_min)
   {
-    check_neighbor_(index);
     face_level_[int(level_type)][IF3(if3)] = level_min;
   }
 
   /// Set level for the block in the given face and (neighbor's) child
-  void set_face_level_last (Index index, const int ic3[3], const int if3[3],
+  void set_face_level_last (const int ic3[3], const int if3[3],
                             int level_min, int level_max, bool can_coarsen);
 
   /// Set level for the block in the given face and (neighbor's) child
-  void set_face_level_last (Index index, const int ic3[3], const int if3[3],
+  void set_face_level_last (const int ic3[3], const int if3[3],
                             int level_min)
   {
-    check_neighbor_(index);
     face_level_[int(LevelType::last)][ICF3(ic3,if3)] = level_min;
   }
 
   /// Return the current level_now for the block in the given face and
   /// (neighbor's) child
-  int face_level (Index index, const int if3[3],LevelType level_type) const
+  int face_level (const int if3[3],LevelType level_type) const
   {
     ASSERT("Adapt::face_level",
            "face_level() called with LevelType::last",
@@ -105,17 +101,17 @@ public: // interface
     return face_level_[int(level_type)][IF3(if3)];
   }
 
-  int face_level (Index index, int axis, int face, LevelType level_type) const
+  int face_level (int axis, int face, LevelType level_type) const
   {
     ASSERT("Adapt::face_level",
            "face_level() called with LevelType::last",
            (level_type != LevelType::last));
     int if3[3];
     cello::af_to_xyz(axis,face,if3);
-    return face_level(index,if3,level_type);
+    return face_level(if3,level_type);
   }
 
-  int face_level_last (Index index, const int ic3[3], const int if3[3]) const
+  int face_level_last (const int ic3[3], const int if3[3]) const
   {
     return face_level_[int(LevelType::last)][ICF3(ic3,if3)];
   }
@@ -160,7 +156,9 @@ public: // interface
 
   //======================================================================
 
-  /// Set rank. No range checking, rank must be 1 <= rank <= 3
+  /// Set rank. No range checking, rank must be 1 <= rank <= 3. This
+  /// is only here so it can be called by test code outside of Cello,
+  /// otherwise it would just use cello::rank()
   inline void set_rank (int rank)
   {
     rank_ = rank;
@@ -295,18 +293,6 @@ private: // methods
   void copy_ (const Adapt & adapt);
 
   void delete_neighbor_ (int i);
-
-  void check_neighbor_(Index index)
-  {
-#ifdef CHECK_ADAPT
-    if (!is_neighbor(index)) {
-      print("check_neighbor");
-      index_.print("check index_",2);
-      index.print("check index",2);
-      ASSERT("check_neighbor()","Index is not a neighbor",false);
-    }
-#endif
-  }
 
   LevelInfo * neighbor_ (Index index)
   {

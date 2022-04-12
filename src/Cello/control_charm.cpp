@@ -266,7 +266,7 @@ void Block::control_sync_face(int entry_point, int id_sync, int min_face_rank)
   while (it_face.next(of3)) {
 
     // Only count face if a Block exists in the level
-    if (face_level(it_face.index(),of3) >= level()) {
+    if (face_level(of3) >= level()) {
       ++num_faces;
 
       Index index_face = it_face.index();

@@ -9,20 +9,18 @@
 
 //----------------------------------------------------------------------
 
-void Adapt::set_face_level (Index index, const int if3[3], LevelType level_type,
+void Adapt::set_face_level (const int if3[3], LevelType level_type,
                             int level_min, int level_max, bool can_coarsen)
 {
-  check_neighbor_(index);
-  set_face_level(index,if3,level_type,level_min);
+  set_face_level(if3,level_type,level_min);
 }
 
 //----------------------------------------------------------------------
 
-void Adapt::set_face_level_last (Index index, const int ic3[3], const int if3[3],
+void Adapt::set_face_level_last (const int ic3[3], const int if3[3],
                                  int level_min, int level_max, bool can_coarsen)
 {
-  check_neighbor_(index);
-  set_face_level_last(index,ic3,if3,level_min);
+  set_face_level_last(ic3,if3,level_min);
 }
 
 //----------------------------------------------------------------------

@@ -61,7 +61,7 @@ bool ItNeighbor::next_ ()
 Index ItNeighbor::index() const
 {
   Index index_neighbor = index_.index_neighbor(of3_,n3_);
-  int face_level = block_->face_level(index_neighbor,of3_);
+  int face_level = block_->face_level(of3_);
   if (face_level == level_) {
     return index_neighbor;
   } else if (face_level == level_ + 1) {
@@ -69,19 +69,6 @@ Index ItNeighbor::index() const
   } else if (face_level == level_ - 1) {
     return index_neighbor.index_parent();
   } else {
-    // int n = block_->adapt()->num_neighbors();
-    // for (int i=0; i<n; i++) {
-    //   CkPrintf ("ERROR_NEIGHBOR %s : %d %s\n",
-    //             block_->name().c_str(),
-    //             i,block_->name(block_->adapt()->index(i)).c_str());
-    // }
-    // fflush(stdout);
-    // ERROR7("ItNeighbor::index()",
-    //          "block %s neighbor %s: of3 %d %d %d face_level %d and block level %d differ by more than one",
-    //        block_->name().c_str(),
-    //        block_->name(index_neighbor).c_str(),
-    //        of3_[0],of3_[1],of3_[2],
-    //        face_level,level_);
     return index_neighbor;
   }
 }

@@ -701,7 +701,7 @@ void Block::adapt_recv_level
     }
 
     adapt_.set_face_level_last
-      (index_send,ic3,if3, level_face_new,level_face_max, can_coarsen);
+      (ic3,if3, level_face_new,level_face_max, can_coarsen);
 
     int level_next = level_next_;
 
@@ -821,7 +821,7 @@ void Block::adapt_recv
     // possibly multiple faces of multiple children are updated.
 
     adapt_.set_face_level
-      (index_send,of3, Adapt::LevelType::next,
+      (of3, Adapt::LevelType::next,
        level_face_new,level_max,can_coarsen);
 
     ItChild it_child (rank,of3);
@@ -864,7 +864,7 @@ void Block::adapt_recv
     int jf3[3];
     while (it_face.next(jf3)) {
 
-      adapt_.set_face_level (it_face.index(),jf3, Adapt::LevelType::next,
+      adapt_.set_face_level (jf3, Adapt::LevelType::next,
                              level_face_new,level_max,can_coarsen);
 
       ItChild it_child (rank,jf3);
@@ -973,7 +973,7 @@ void Block::p_adapt_recv_child (MsgCoarsen * msg)
     int opf3[3];
     if (parent_face_(opf3,of3,ic3)) {
       adapt_.set_face_level
-        (it_face.index(),opf3,Adapt::LevelType::curr,level_child);
+        (opf3,Adapt::LevelType::curr,level_child);
     }
   }
 
@@ -1031,7 +1031,7 @@ void Block::initialize_child_face_levels_()
       Index inp = in.index_parent();
       // Determine level for the child's face
       const int level_face =
-        adapt_.face_level(in.index_parent(),ip3,Adapt::LevelType::curr);
+        adapt_.face_level(ip3,Adapt::LevelType::curr);
       int level_child_face = (inp == thisIndex) ?
         (level + 1) : level_face;
       set_child_face_level_curr(ic3,if3, level_child_face);

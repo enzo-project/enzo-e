@@ -131,11 +131,11 @@ public: // interface
   const Index & index() const
   { return index_; }
 
-  int face_level (Index index, const int if3[3]) const
-  { return adapt_.face_level(index,if3,Adapt::LevelType::curr); }
+  int face_level (const int if3[3]) const
+  { return adapt_.face_level(if3,Adapt::LevelType::curr); }
 
-  int face_level (Index index, int axis, int face) const
-  { return adapt_.face_level(index,axis,face,Adapt::LevelType::curr); }
+  int face_level (int axis, int face) const
+  { return adapt_.face_level(axis,face,Adapt::LevelType::curr); }
 
 
   int child_face_level (const int ic3[3], const int if3[3]) const

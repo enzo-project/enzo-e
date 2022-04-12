@@ -6,7 +6,11 @@ In the *adapt phase*, blocks may refine or coarsen to adapt to the
 evolving resolution requirements of a simulation.  The main
 complication is enforcing the "level-jump" condition, which prohibits
 adjacent blocks from being in non-consecutive mesh refinement levels.
-
+(Blocks are partitioned into "levels" based on how refined they are:
+more highly-refined blocks are in higher-numbered levels, with the
+"root-level" of the simulation defined as "level 0".  The difference
+in resolution between any pair of successive levels L and L+1 (the
+"refinement factor") is always 2 in Enzo-E.)
 
 Maintaining the level-jump conditions may require refining blocks that
 would not otherwise be refined, or may require not coarsening blocks
@@ -65,16 +69,15 @@ Cello, users still occasionally ran into issues of level-jumps in the
 resulting mesh hierarchy.
 
 Miller's algorithm avoids using quiescence detection in favor of a
-more direct approach.  First, as with the previous algorithm, each
-block evaluates its local adapt criteria to determine whether it needs
-to refine, stay in the same level, or can coarsen.  Next, both lower
-and upper bounds on mesh levels are determined for each block and
-communicated with neighbors.  Bounds for a block may be adjusted as
-newer updated bounds arrive from neighboring blocks.  When a block's
-minimum and maximum levels match, the block's next level is decided.
-All leaf blocks are guaranteed to reach this state, which can be
-proven by induction on the mesh level starting with the finest level
-(See Miller 2016).
+more direct approach.  First, each block evaluates its local adapt
+criteria to determine whether it needs to refine, stay in the same
+level, or can coarsen.  Next, both lower and upper bounds on mesh
+levels are determined for each block and communicated with neighbors.
+Bounds for a block may be adjusted as newer updated bounds arrive from
+neighboring blocks.  When a block's minimum and maximum levels match,
+the block's next level is decided.  All leaf blocks are guaranteed to
+reach this state, which can be proven by induction on the mesh level
+starting with the finest level (See Miller 2016).
 
 Before presenting the algorithm, we define the following notation:
 
@@ -101,16 +104,15 @@ initially one level of refinement more than the current level (or the
 maximum allowed level in the simulation.)
 
 The balancing step of the algorithm proceeds by alternately sending a
-block's level bounds to its neighbors, and updating the block's level
-bounds given received updated bounds from its neighbors. Bounds are updated
+block's level bounds to its neighbors, and, having received updated
+bounds from its neighbors, updating the block's own level bounds. Bounds are updated
 according to the following:
 
 :math:`\underline{L}_{i,s+1}^{k+1} \leftarrow \max ( \underline{L}_{i,s}^{k+1}, \max_j (\underline{L}_{j,s}^{k+1} - 1))`
 
 :math:`\bar{L}_{i,s+1}^{k+1} \leftarrow \max ( \underline{L}_{i,s}^{k+1}, \max_j(\bar{L}_{j,s}^{k+1} - 1))`
 
-The lower bound, which acts like the current desired level in the
-previous algorithm, is updated if any neighbor's minimum bound is
+The lower bound is updated if any neighbor's minimum bound is
 greater than one plus the block's current minimum bound.  The maximum
 bound, which is used to determine when the balancing algorithm
 terminates, is defined as the maximum of the minimum bound, and the
@@ -130,14 +132,19 @@ for a Block and its neighbors. The ``Adapt`` class keeps track of the
 current level bounds of all neighboring blocks, which is redundantly
 stored as a list of ``LevelInfo`` objects for each neighboring Block,
 and a ``face_level_`` vector of the current level in the direction of
-each face (represented as a tuple of values -1, 0, or 1, and is
-accessed e.g. during flux-correction). Below summarizes the API for
+each face. (The "face_level_" representation is a carry-over from the
+previous algorithm, but was retained because it simplifies code that
+needs to access a neighbor's level given the neighbor's relative
+direction rather than absolute Index). Below summarizes the API for
 the newer ``LevelInfo`` section, which is used to collectively
 determine the next level for all blocks in the mesh.
 
 ``void set_rank (int rank)``
 
-   Set dimensionality of the problem :math:`1 \leq \mbox{rank} \leq 3`.
+   Set dimensionality of the problem :math:`1 \leq \mbox{rank} \leq
+   3`. Only required for initialization in test code, since Cello
+   initializes it using `cello::rank()`.
+
 
 ``void set_valid (bool valid)``
 
@@ -215,7 +222,7 @@ determine the next level for all blocks in the mesh.
    Initialize the adapt object with the given Block index and level
    bounds.
 
-   ``void update_neighbor(Index index, int level_min, int level_max, bool can_coarsen)``
+``void update_neighbor(Index index, int level_min, int level_max, bool can_coarsen)``
 
    Update the specified neighbor block's level bounds and "can_coarsen"
    attribute.
