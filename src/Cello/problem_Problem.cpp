@@ -723,8 +723,8 @@ bool Problem::method_exists(const std::string& name) const throw() {
 
 bool Problem::method_precedes(const std::string& name1,
                               const std::string& name2) const throw() {
-  size_t ind1 = 0;
-  size_t ind2 = 0;
+  size_t ind_1 = 0;
+  size_t ind_2 = 0;
 
   bool method_1_found = false;
   bool method_2_found = false;
