@@ -42,15 +42,12 @@ class Stopping;
 class Units;
 class Compute;
 
-class Problem : public PUP::able
-{
-
+class Problem : public PUP::able {
   /// @class    Problem
   /// @ingroup  Problem
-  /// @brief    [\ref Problem] 
+  /// @brief    [\ref Problem]
 
-public: // interface
-
+ public:  // interface
   /// Constructor
   Problem() throw();
 
@@ -62,236 +59,202 @@ public: // interface
 
   /// CHARM++ migration constructor for PUP::able
 
-  Problem (CkMigrateMessage *m)
-    : PUP::able(m),
-      boundary_list_(),
-      is_periodic_(false),
-      initial_list_(),
-      physics_list_(),
-      refine_list_(),
-      stopping_(nullptr),
-      solver_list_(),
-      method_list_(),
-      output_list_(),
-      prolong_list_(),
-      restrict_list_(),
-      units_(nullptr),
-      index_refine_(0),
-      index_output_(0),
-      index_boundary_(0)
-  {}
+  Problem(CkMigrateMessage *m)
+      : PUP::able(m),
+        boundary_list_(),
+        is_periodic_(false),
+        initial_list_(),
+        physics_list_(),
+        refine_list_(),
+        stopping_(nullptr),
+        solver_list_(),
+        method_list_(),
+        output_list_(),
+        prolong_list_(),
+        restrict_list_(),
+        units_(nullptr),
+        index_refine_(0),
+        index_output_(0),
+        index_boundary_(0) {}
 
   /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p);
+  void pup(PUP::er &p);
 
   /// Return the boundary object
-  Boundary * boundary(int i) const throw()
-  { if (i==-1) i = index_boundary_;
-    return (0 <= i && i < (int)boundary_list_.size()) ? boundary_list_[i] : nullptr; 
+  Boundary *boundary(int i) const throw() {
+    if (i == -1) i = index_boundary_;
+    return (0 <= i && i < (int)boundary_list_.size()) ? boundary_list_[i]
+                                                      : nullptr;
   }
 
   /// Return whether the problem is periodic
-  bool is_periodic () const throw() 
-  { return is_periodic_; }
+  bool is_periodic() const throw() { return is_periodic_; }
 
   /// Return the ith initialization object
-  Initial *  initial(size_t i) const throw()
-  {
-    return (i < initial_list_.size()) ? initial_list_[i] : nullptr; 
+  Initial *initial(size_t i) const throw() {
+    return (i < initial_list_.size()) ? initial_list_[i] : nullptr;
   }
 
   /// Return the ith physics object
-  Physics * physics(size_t i) const throw()
-  {
-    return (i < physics_list_.size()) ? physics_list_[i] : nullptr; 
+  Physics *physics(size_t i) const throw() {
+    return (i < physics_list_.size()) ? physics_list_[i] : nullptr;
   }
 
   /// Return the named physics object if present
-  Physics * physics (std::string type) const throw();
+  Physics *physics(std::string type) const throw();
 
   /// Return the ith refine object
-  Refine *  refine(int i) const throw()
-  {
+  Refine *refine(int i) const throw() {
     if (i == -1) i = index_refine_;
-    return (0 <= i && i < (int)refine_list_.size()) ? refine_list_[i] : nullptr; 
+    return (0 <= i && i < (int)refine_list_.size()) ? refine_list_[i] : nullptr;
   }
 
   /// Return the ith output object
-  Output * output(int i) const throw()
-  { 
+  Output *output(int i) const throw() {
     if (i == -1) i = index_output_;
-    return (0 <= i && i < (int)output_list_.size()) ? output_list_[i] : nullptr; 
+    return (0 <= i && i < (int)output_list_.size()) ? output_list_[i] : nullptr;
   }
 
   /// Return the ith solver object
-  Solver * solver(size_t i) const throw()
-  { return (i < solver_list_.size()) ? solver_list_[i] : nullptr; }
+  Solver *solver(size_t i) const throw() {
+    return (i < solver_list_.size()) ? solver_list_[i] : nullptr;
+  }
 
-  int num_solvers () const throw()
-  { return solver_list_.size(); }
-  
+  int num_solvers() const throw() { return solver_list_.size(); }
+
   /// Return the ith method object
-  Method * method(size_t i) const throw() 
-  { return (i < method_list_.size()) ? method_list_[i] : nullptr; }
+  Method *method(size_t i) const throw() {
+    return (i < method_list_.size()) ? method_list_[i] : nullptr;
+  }
 
   /// Return the named method object if present
-  Method * method (std::string name) const throw();
+  Method *method(std::string name) const throw();
 
   // Return whether a method object with given name exists for this problem
-  bool method_exists (std::string name) const throw();
+  bool method_exists(const std::string &name) const throw();
 
-  // Returns true if method objects with both given names exist for this problem,
-  // and the method called "name1" precedes the method called "name2" in the
-  // method list. Returns false otherwise.
-  bool method_precedes(std::string name1, std::string name2) const throw();
+  // Returns true if method objects with both given names appear once (and
+  // only once) in the method list, and method called "name1" precedes the
+  // method called "name2". Returns false otherwise.
+  bool method_precedes(const std::string &name1, const std::string &name2) const
+      throw();
 
   /// Return the ith prolong object
-  Prolong * prolong(size_t i = 0) const throw()
-  { return (i < prolong_list_.size()) ? prolong_list_[i] : nullptr; }
+  Prolong *prolong(size_t i = 0) const throw() {
+    return (i < prolong_list_.size()) ? prolong_list_[i] : nullptr;
+  }
 
   /// Return the ith restrict object
-  Restrict * restrict(size_t i = 0) const throw()
-  { return (i < restrict_list_.size()) ? restrict_list_[i] : nullptr; }
+  Restrict *restrict(size_t i = 0) const throw() {
+    return (i < restrict_list_.size()) ? restrict_list_[i] : nullptr;
+  }
 
   //--------------------------------------------------
   // OUTPUT
   //--------------------------------------------------
 
   /// reset output index to 0
-  void output_reset() throw()
-  { index_output_ = -1; }
+  void output_reset() throw() { index_output_ = -1; }
 
   /// Process the next output object if any, else proceed with simulation
-  void output_next(Simulation * simulation) throw();
+  void output_next(Simulation *simulation) throw();
 
   /// Reduce output, using p_output_write to send data to writing processes
-  void output_wait(Simulation * simulation) throw();
-  
+  void output_wait(Simulation *simulation) throw();
+
   /// Receive data from non-writing process, write to disk, close, and
   /// proceed with next output
-  void output_write (Simulation * simulation, int n, char * buffer) throw();
+  void output_write(Simulation *simulation, int n, char *buffer) throw();
 
   /// Return the stopping object
-  Stopping * stopping() const throw() { return stopping_; }
+  Stopping *stopping() const throw() { return stopping_; }
 
   /// Return the Units object
-  Units * units() const throw() { return units_; }
-  
+  Units *units() const throw() { return units_; }
+
   /// Initialize the boundary conditions object
-  void initialize_boundary(Config * config, 
-			   Parameters * parameters) throw();
+  void initialize_boundary(Config *config, Parameters *parameters) throw();
 
   /// Initialize the initial conditions object
-  void initialize_initial(Config * config,
-			  Parameters * parameters) throw();
+  void initialize_initial(Config *config, Parameters *parameters) throw();
 
   /// Initialize any physics-related objects
-  void initialize_physics(Config * config,
-			  Parameters * parameters) throw();
+  void initialize_physics(Config *config, Parameters *parameters) throw();
 
   /// Initialize the refine object
-  void initialize_refine(Config * config,
-			 Parameters * parameters) throw();
+  void initialize_refine(Config *config, Parameters *parameters) throw();
 
   /// Initialize the stopping object
-  void initialize_stopping(Config * config ) throw();
+  void initialize_stopping(Config *config) throw();
 
   /// Initialize the output objects
-  void initialize_output(Config * config,
-			 const Factory * factory) throw();
+  void initialize_output(Config *config, const Factory *factory) throw();
 
   /// Initialize the method objects
-  void initialize_method(Config * config,
-			 const Factory * factory) throw();
+  void initialize_method(Config *config, const Factory *factory) throw();
 
   /// Initialize Solver objects
-  void initialize_solver(Config * config) throw();
-  
+  void initialize_solver(Config *config) throw();
+
   /// Initialize the prolong objects
-  void initialize_prolong(Config * config) throw();
+  void initialize_prolong(Config *config) throw();
 
   /// Initialize the restrict objects
-  void initialize_restrict(Config * config) throw();
+  void initialize_restrict(Config *config) throw();
 
   /// Initialize the units object
-  void initialize_units(Config * config ) throw();
+  void initialize_units(Config *config) throw();
 
   /// Create named compute object
-  virtual Compute *  create_compute
-  (std::string type,
-   Config * config) throw();
+  virtual Compute *create_compute(std::string type, Config *config) throw();
 
-protected: // functions
-
+ protected:  // functions
   /// Deallocate components
   void deallocate_() throw();
 
   /// Create named boundary object
-  virtual Boundary * create_boundary_
-  (std::string type,
-   int index,
-   Config * config,
-   Parameters * parameters
-   ) throw ();
+  virtual Boundary *create_boundary_(std::string type, int index,
+                                     Config *config,
+                                     Parameters *parameters) throw();
 
   /// Create named initialization object
-  virtual Initial *  create_initial_ 
-  (std::string type, 
-   int index,
-   Config * config,
-   Parameters * parameters) throw ();
+  virtual Initial *create_initial_(std::string type, int index, Config *config,
+                                   Parameters *parameters) throw();
 
   /// Create named physics object
-  virtual Physics *  create_physics_ 
-  (std::string type, 
-   int index,
-   Config * config,
-   Parameters * parameters) throw ();
+  virtual Physics *create_physics_(std::string type, int index, Config *config,
+                                   Parameters *parameters) throw();
 
   /// Create named stopping object
-  virtual Stopping * create_stopping_ 
-  (std::string type, Config * config) throw ();
+  virtual Stopping *create_stopping_(std::string type, Config *config) throw();
 
   /// Create named refine object
-  virtual Refine * create_refine_ 
-  (std::string type,
-   int index,
-   Config * config, 
-   Parameters * parameters) throw ();
+  virtual Refine *create_refine_(std::string type, int index, Config *config,
+                                 Parameters *parameters) throw();
 
   /// Create named solver object
-  virtual Solver *   create_solver_
-  (std::string type,
-   int index_solver,
-   Config * config) throw ();
+  virtual Solver *create_solver_(std::string type, int index_solver,
+                                 Config *config) throw();
 
   /// Create named method object
-  virtual Method *   create_method_
-  (std::string type,
-   int index_method,
-   Config * config,
-   const Factory * factory) throw ();
+  virtual Method *create_method_(std::string type, int index_method,
+                                 Config *config,
+                                 const Factory *factory) throw();
 
   /// Create named output object
-  virtual Output *   create_output_  
-  (std::string type,
-   int index,
-   Config * config,
-   const Factory * ) throw ();
+  virtual Output *create_output_(std::string type, int index, Config *config,
+                                 const Factory *) throw();
 
   /// Create named prolongation object
-  virtual Prolong * create_prolong_ 
-  (std::string type, Config * config) throw ();
+  virtual Prolong *create_prolong_(std::string type, Config *config) throw();
 
   /// Create named restrictation object
-  virtual Restrict * create_restrict_ 
-  (std::string type, Config * config) throw ();
+  virtual Restrict *create_restrict_(std::string type, Config *config) throw();
 
   /// Create named units object
-  virtual Units * create_units_ (Config * config) throw ();
+  virtual Units *create_units_(Config *config) throw();
 
-protected: // attributes
-
+ protected:  // attributes
   /// Boundary conditions object for each (axis,face)
   std::vector<Boundary *> boundary_list_;
 
@@ -308,7 +271,7 @@ protected: // attributes
   std::vector<Refine *> refine_list_;
 
   /// Stopping criteria
-  Stopping * stopping_;
+  Stopping *stopping_;
 
   /// List of solver objects
   std::vector<Solver *> solver_list_;
@@ -326,8 +289,8 @@ protected: // attributes
   std::vector<Restrict *> restrict_list_;
 
   /// Units
-  Units * units_;
-  
+  Units *units_;
+
   /// Index of currently active Refine object
   int index_refine_;
 
@@ -336,8 +299,6 @@ protected: // attributes
 
   /// Index of currently active Boundary object
   int index_boundary_;
-
 };
 
 #endif /* PROBLEM_PROBLEM_HPP */
-
