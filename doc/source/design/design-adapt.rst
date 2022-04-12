@@ -132,7 +132,7 @@ for a Block and its neighbors. The ``Adapt`` class keeps track of the
 current level bounds of all neighboring blocks, which is redundantly
 stored as a list of ``LevelInfo`` objects for each neighboring Block,
 and a ``face_level_`` vector of the current level in the direction of
-each face. (The "face_level_" representation is a carry-over from the
+each face. (The `face_level_` representation is a carry-over from the
 previous algorithm, but was retained because it simplifies code that
 needs to access a neighbor's level given the neighbor's relative
 direction rather than absolute Index). Below summarizes the API for
