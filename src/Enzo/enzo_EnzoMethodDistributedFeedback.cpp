@@ -301,8 +301,7 @@ EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
 ()
   : Method()
 {
-
-  enzo::check_particle_attribute("star","mass");
+  cello::particle_descr()->check_particle_attribute("star","mass");
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
 

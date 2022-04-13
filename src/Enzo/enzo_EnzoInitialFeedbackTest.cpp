@@ -22,8 +22,8 @@ EnzoInitialFeedbackTest::EnzoInitialFeedbackTest
   : Initial(config->initial_cycle, config->initial_time)
 {
 
-  enzo::check_particle_attribute("star","mass");
-  
+  cello::particle_descr()->check_particle_attribute("star","mass");
+
   if (config->initial_feedback_test_from_file){
     this->num_particles = nlines("initial_feedback_stars.in");
 

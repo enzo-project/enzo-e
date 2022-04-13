@@ -24,13 +24,12 @@ EnzoMethodMergeStars::EnzoMethodMergeStars(double merging_radius_cells)
   : Method(),
     merging_radius_cells_(merging_radius_cells)
 {
-  enzo::check_particle_attribute("star","mass");
-
+  cello::particle_descr()->check_particle_attribute("star","mass");
   // This method requires three dimensions.
   ASSERT("EnzoMethodMergeStars::EnzoMethodMergeStars()",
 	 "EnzoMethodMergeStars requires that we run a 3D problem (Domain: rank = 3)",
 	 cello::rank());
-  
+
   const EnzoConfig * enzo_config = enzo::config();
   ASSERT("EnzoMethodMergeStars::EnzoMethodMergeStars()",
 	 "EnzoMethodMergeStars requires unigrid mode (Adapt : max_level = 0). "

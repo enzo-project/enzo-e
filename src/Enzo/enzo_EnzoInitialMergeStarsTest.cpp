@@ -17,18 +17,18 @@
 
 //----------------------------------------------------------------------
 
- EnzoInitialMergeStarsTest::EnzoInitialMergeStarsTest 
+ EnzoInitialMergeStarsTest::EnzoInitialMergeStarsTest
  (const EnzoConfig * enzo_config) throw()
     : Initial (enzo_config->initial_cycle, enzo_config->initial_time)
   {
-    enzo::check_particle_attribute("star","mass");
-    
-    particle_data_filename_ = 
+    cello::particle_descr()->check_particle_attribute("star","mass");
+
+    particle_data_filename_ =
     enzo_config->initial_merge_stars_test_particle_data_filename;
 
     std::string line;
     std::ifstream inFile(particle_data_filename_);
-    
+
     n_particles_ = 0;
 
     while (std::getline(inFile,line)){

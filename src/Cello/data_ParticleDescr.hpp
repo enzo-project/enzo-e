@@ -46,7 +46,7 @@ public: // interface
   /// Return whether the particle type exists
 
   bool type_exists (std::string type) const;
-  
+
   /// Return the name of the given particle type given its index
 
   std::string type_name (int index) const;
@@ -119,6 +119,9 @@ public: // interface
   /// Define which attributes represent velocity coordinates (-1 if not defined)
   void set_velocity (int it, int ix, int iy=-1, int iz=-1);
 
+  /// Checks whether particle type has an attribute with given name
+  void check_particle_attribute(const std::string& type,
+				const std::string& attribute);
   //--------------------------------------------------
   // INTERLEAVING
   //--------------------------------------------------
@@ -274,7 +277,7 @@ private: // attributes
   /// different for different blocks.  Referenced as [it][ia]
 
   std::vector < std::vector <int> > attribute_offset_;
-
+  
   //--------------------------------------------------
   // GROUPING
   //--------------------------------------------------

@@ -64,11 +64,6 @@ namespace enzo {
   const EnzoConfig * config();
   CProxy_EnzoBlock block_array();
   EnzoBlock * block ( Block * block);
-
-  // Checks if given particle type exists and has an attribute
-  // of given name
-  void check_particle_attribute(std::string type,
-				std::string attribute);
 }
 
 extern CProxy_EnzoSimulation proxy_enzo_simulation;
