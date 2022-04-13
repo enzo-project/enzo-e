@@ -54,10 +54,6 @@ void EnzoMethodAccretionCompute::pup (PUP::er &p)
   return;
 }
 
-//------------------------------------------------------------------
-//   This does nothing at the moment - business is done in derived
-//   classes
-
 void EnzoMethodAccretionCompute::compute ( Block *block) throw()
 {
   if (enzo::simulation()->cycle() == enzo::config()->initial_cycle){
