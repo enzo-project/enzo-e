@@ -246,6 +246,7 @@ extern "C" {
 #include "enzo_EnzoMethodMergeStars.hpp"
 #include "enzo_EnzoMethodAccretionCompute.hpp"
 #include "enzo_EnzoMethodAccretionComputeDensThresh.hpp"
+#include "enzo_EnzoMethodAccretionComputeBondiHoyle.hpp"
 #include "enzo_EnzoMethodAccretionRemoveGas.hpp"
 
 #include "enzo_EnzoMatrixDiagonal.hpp"
