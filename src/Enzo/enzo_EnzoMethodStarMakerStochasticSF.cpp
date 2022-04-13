@@ -178,7 +178,7 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
         if (! this->check_self_gravitating( mean_particle_mass, rho_cgs, temperature[i],
                                             velocity_x, velocity_y, velocity_z,
                                             enzo_units->length(), enzo_units->velocity(),
-                                            enzo_units->density(), enzo_units->temperature(),
+                                            enzo_units->density(),
                                             i, 1, mx, mx*my, dx, dy, dz)) continue;
 
         // AJE: TO DO ---

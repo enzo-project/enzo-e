@@ -221,7 +221,7 @@ int EnzoMethodStarMaker::check_overdensity_threshold(const double &rho)
 int EnzoMethodStarMaker::check_self_gravitating(
                 const double mean_particle_mass, const double density, const enzo_float temperature,
                 enzo_float *vx, enzo_float *vy, enzo_float *vz,
-                const double lunit, const double vunit, const double rhounit, const double Tunit,
+                const double lunit, const double vunit, const double rhounit,
                 const int &index, const int &dix, const int &diy, const int &diz,
                 const double dx, const double dy, const double dz)
 {
@@ -295,7 +295,7 @@ double EnzoMethodStarMaker::h2_self_shielding_factor(
 int EnzoMethodStarMaker::check_jeans_mass(
   const double temperature, const double mean_particle_mass,
   const double density, const double mass,
-  const double Tunit, const double munit, const double rhounit
+  const double munit, const double rhounit
 )
 {
   if (!use_jeans_mass_)
@@ -303,7 +303,6 @@ int EnzoMethodStarMaker::check_jeans_mass(
 
   const double gamma = 5.0 / 3.0;
   const double minimum_jeans_mass = 1000 * cello::mass_solar;
-  //double cs2 = (gamma * cello::kboltz * temperature*Tunit) / mean_particle_mass;
   double cs2 = (gamma * cello::kboltz * temperature) / mean_particle_mass;
 
   double m_jeans = (cello::pi/6) * pow(cs2, 1.5) / 
@@ -394,7 +393,7 @@ int EnzoMethodStarMaker::check_metallicity(const double &Z)
           (Z >= critical_metallicity_);
 }
 
-int EnzoMethodStarMaker::check_temperature(const double &T, const double Tunit)
+int EnzoMethodStarMaker::check_temperature(const double &T)
 {
   #ifdef DEBUG_SF
     CkPrintf("MethodStarMaker -- T = %f, Tcrit = %f\n", T, temperature_threshold_); 

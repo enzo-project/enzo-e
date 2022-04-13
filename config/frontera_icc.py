@@ -1,8 +1,8 @@
 import os
 
 is_arch_valid = 1
-use_gfortran = 1
-smp = 1
+use_gfortran = 0
+smp = 0
 
 #python_lt_27 = 1
 
@@ -47,6 +47,6 @@ papi_inc = home + '/include'
 papi_lib = home + '/lib'
 
 png_path     = '/usr/lib64'
-grackle_path = home + '/local'
+grackle_path = os.environ['GRACKLE_HOME'] #home + '/local'
 
 node_size = 56

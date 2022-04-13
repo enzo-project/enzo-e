@@ -78,7 +78,7 @@ protected: // methods
     const double mean_particle_mass, const double density,
     const enzo_float temperature,
     enzo_float *vx, enzo_float *vy, enzo_float *vz,
-    const double lunit, const double vunit, const double rhounit, const double Tunit,
+    const double lunit, const double vunit, const double rhounit, 
     const int &index, const int &dix, const int &diy, const int &diz,
     const double dx, const double dy, const double dz);
   double h2_self_shielding_factor(
@@ -89,11 +89,11 @@ protected: // methods
   int check_jeans_mass(
     const double temperature, const double mean_particle_mass,
     const double density, const double mass,
-    const double Tunit, const double munit, const double rhounit);
+    const double munit, const double rhounit);
   int check_cooling_time(const double &cooling_time, const double &total_density,
     const double rhounit, const double tunit);
   int check_metallicity(const double &Z);
-  int check_temperature(const double &T, const double Tunit);
+  int check_temperature(const double &T);
 
 
 protected: // attributes
