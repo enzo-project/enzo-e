@@ -141,12 +141,6 @@ void EnzoFactory::create_subblock_array
     if (nby > 1) nby = ceil(0.5*nby);
     if (nbz > 1) nbz = ceil(0.5*nbz);
 
-    // CProxy_MappingTree array_map  = CProxy_MappingTree::ckNew(nbx,nby,nbz);
-    CProxy_MappingArray array_map  = CProxy_MappingArray::ckNew(nbx,nby,nbz);
-
-    CkArrayOptions opts;
-    opts.setMap(array_map);
-
     int count_adapt;
 
     int    cycle = 0;

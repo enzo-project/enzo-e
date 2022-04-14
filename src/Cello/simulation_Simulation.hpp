@@ -21,6 +21,7 @@ class Schedule;
 
 #include <errno.h>
 #include <iostream>
+#include <fstream>
 #include "mesh.decl.h"
 #include "simulation.decl.h"
 class Simulation : public CBase_Simulation 
@@ -281,15 +282,16 @@ public: // virtual functions
   //--------------------------------------------------
   // Compute
   //--------------------------------------------------
-  
+
   void compute ();
 
   //--------------------------------------------------
   // Restart
   //--------------------------------------------------
-  
+
   void p_restart_enter(std::string dir);
-  
+  void r_restart_start(CkReductionMsg *);
+
   //--------------------------------------------------
   // Monitor
   //--------------------------------------------------
@@ -573,6 +575,9 @@ protected: // attributes
   std::vector<int> max_solver_iter_;
 
   static int file_counter_;
+  std::string restart_directory_;
+  int         restart_num_files_;
+  std::ifstream restart_stream_file_list_;
 };
 
 #endif /* SIMULATION_SIMULATION_HPP */

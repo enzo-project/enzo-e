@@ -104,13 +104,26 @@ void MethodOrderMorton::send_weight(Block * block, int weight_child, bool self)
     const Index index_parent = block->index().index_parent(min_level_);
     block->index().child(level,ic3,ic3+1,ic3+2,min_level_);
     TRACE_ORDER_BLOCK("send_weight",block);
-    cello::block_array()[index_parent].p_method_order_morton_weight(ic3,weight,block->index());
+    cello::block_array()[index_parent].p_method_order_morton_weight
+      (ic3,weight,block->index());
     send_index(block, 0, 0, self);
   } else if (level == min_level_) {
+
+    const int rank = cello::rank();
+    int na3[3];
+    cello::simulation()->hierarchy()->root_blocks(na3,na3+1,na3+2);
+    Index index_next = block->index().next
+      (rank,na3,block->is_leaf(),min_level_);
+
+    *pindex_(block) = 0;
+    *pcount_(block) = 0;
+    *pnext_(block) = index_next;
+
     send_index(block, 0, weight, self);
     if (!self) {
-      CkCallback callback (CkIndex_Block::r_method_order_morton_complete(nullptr),
-                           block->proxy_array());
+      CkCallback callback
+        (CkIndex_Block::r_method_order_morton_complete (nullptr),
+         block->proxy_array());
       block->contribute (callback);
     }
   }
@@ -156,11 +169,6 @@ void MethodOrderMorton::send_index
       ic3[1] = (ic>>1) & 1;
       ic3[2] = (ic>>2) & 1;
       Index index_child = block->index().index_child(ic3,min_level_);
-      {
-        char buffer[80];
-        sprintf (buffer,"send_index %d %d\n",index,count);
-        TRACE_ORDER_BLOCK(buffer,block);
-      }
       cello::block_array()[index_child].p_method_order_morton_index(index,count);
       index += *pweight_child_(block,ic);
     }

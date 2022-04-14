@@ -10,6 +10,7 @@
 #include "charm.hpp"
 #include "charm_enzo.hpp"
 #include <iostream>
+#include <sstream>
 #include <iomanip>
 
 // #define TRACE_METHOD_CHECK
@@ -48,15 +49,19 @@ EnzoMethodCheck::EnzoMethodCheck
 
     enzo::simulation()->set_sync_check_writer(num_files_);
 
+    CProxy_MappingIo io_map  = CProxy_MappingIo::ckNew(num_files);
+
+    CkArrayOptions opts(num_files);
+    opts.setMap(io_map);
+  
     proxy_io_enzo_writer = CProxy_IoEnzoWriter::ckNew
-      (num_files, ordering,monitor_iter, num_files);
+      (num_files, ordering,monitor_iter, opts);
 
     proxy_io_enzo_writer.doneInserting();
 
     proxy_enzo_simulation.p_set_io_writer(proxy_io_enzo_writer);
 
   }
-
 }
 
 //----------------------------------------------------------------------
@@ -209,12 +214,19 @@ void IoEnzoWriter::p_write (EnzoMsgCheck * msg_check)
   // Write to block list file, opening or closing file as needed
 
   if (is_first) {
-    // Create block list
-    stream_block_list_ = create_block_list_(name_dir);
 
     // Create HDF5 file
-    char name_file[80];
-    sprintf (name_file,"block_data-%d.h5", thisIndex);
+
+    std::stringstream stream_block_list;
+    stream_block_list << std::setfill('0');
+    int max_digits = log(num_files_-1)/log(10) + 1;
+    stream_block_list << "block_data-" << std::setw(max_digits) << thisIndex;
+
+    // Create block list
+    stream_block_list_ = create_block_list_
+      (name_dir,stream_block_list.str()+".block_list");
+
+    std::string name_file = stream_block_list.str() + ".h5";
     file_ = file_open_(name_dir,name_file);
 
     // Write HDF5 header meta data
@@ -244,17 +256,13 @@ void IoEnzoWriter::p_write (EnzoMsgCheck * msg_check)
 
 //----------------------------------------------------------------------
 
-std::ofstream IoEnzoWriter::create_block_list_(std::string name_dir)
+std::ofstream IoEnzoWriter::create_block_list_(std::string name_dir, std::string name_file)
 {
-  char file_name[80];
-  sprintf (file_name,"%s/block_data-%d.block_list",
-           name_dir.c_str(),thisIndex);
-
-  std::ofstream stream_block_list (file_name);
+  std::ofstream stream_block_list (name_dir + "/" + name_file);
 
   ASSERT1("Simulation::create_block_list_",
           "Cannot open block_list file %s for writing",
-          file_name,stream_block_list);
+          name_file,stream_block_list);
 
   return stream_block_list;
 }
@@ -297,7 +305,7 @@ int EnzoBlock::create_msg_check_
 ( EnzoMsgCheck ** msg_check,
   int num_files, std::string ordering,
   std::string name_dir,
-  bool *          is_first
+  bool * is_first
   )
 {
   ScalarData<long long> *   scalar_data_long_long    = data()->scalar_data_long_long();

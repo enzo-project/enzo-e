@@ -13,6 +13,7 @@
 #include "mesh_Index.hpp"
 #include "charm_reductions.hpp"
 #include "charm_MappingArray.hpp"
+#include "charm_MappingIo.hpp"
 #include "charm_MappingTree.hpp"
 
 #include "charm_FieldMsg.hpp"

@@ -52,7 +52,7 @@ public: // entry methods
 protected: // functions
 
   FileHdf5 * file_open_(std::string name_dir, std::string name_file);
-  std::ofstream create_block_list_(std::string name_dir);
+  std::ofstream create_block_list_(std::string name_dir, std::string name_file);
   void file_write_hierarchy_();
   void file_write_block_(EnzoMsgCheck * msg_check);
   void write_meta_ ( FileHdf5 * file, Io * io, std::string type_meta );

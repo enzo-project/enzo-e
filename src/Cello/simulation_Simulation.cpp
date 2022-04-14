@@ -61,7 +61,11 @@ Simulation::Simulation
   refresh_list_(),
   index_output_(-1),
   num_solver_iter_(),
-  max_solver_iter_()
+  max_solver_iter_(),
+  restart_directory_(),
+  restart_num_files_(),
+  restart_stream_file_list_()
+  
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
@@ -126,7 +130,10 @@ Simulation::Simulation()
   refresh_list_(),
   index_output_(-1),
   num_solver_iter_(),
-  max_solver_iter_()
+  max_solver_iter_(),
+  restart_directory_(),
+  restart_num_files_(),
+  restart_stream_file_list_()
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
@@ -179,7 +186,11 @@ Simulation::Simulation (CkMigrateMessage *m)
     refresh_list_(),
     index_output_(-1),
     num_solver_iter_(),
-    max_solver_iter_()
+    max_solver_iter_(),
+    restart_directory_(),
+    restart_num_files_(),
+    restart_stream_file_list_()
+
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
@@ -295,6 +306,9 @@ void Simulation::pup (PUP::er &p)
   p | index_output_;
   p | num_solver_iter_;
   p | max_solver_iter_;
+  p | restart_directory_;
+  p | restart_num_files_;
+
 }
 
 //----------------------------------------------------------------------

@@ -24,10 +24,7 @@ public: // interface
     stream_block_list_(),
     file_(nullptr),
     sync_blocks_()
-  { }
-
-  IoEnzoReader(std::string name_dir,
-               std::string name_file) throw();
+  {  }
 
   /// CHARM++ migration constructor
   IoEnzoReader(CkMigrateMessage *m) : CBase_IoEnzoReader(m) {}
@@ -35,6 +32,9 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 
   { TRACEPUP; CBase_IoEnzoReader::pup(p); }
+
+  void p_initialize(std::string name_dir,
+                    std::string name_file) throw();
 
   void p_block_ready(std::string);
 
@@ -47,7 +47,7 @@ protected: // functions
   void file_read_hierarchy_();
   void file_read_block_(EnzoMsgCheck * msg_check, std::string file_name);
   void read_meta_ ( FileHdf5 * file, Io * io, std::string type_meta );
-  bool read_block_list_(std::string & block_name);
+  bool read_block_list_(std::string & block_name, int & level);
   void close_block_list_();
   void read_dataset_
   (File * file, char * buffer, int type_data,

@@ -267,7 +267,7 @@ module enzo {
 
   array[1D] IoEnzoReader : IoReader {
     entry IoEnzoReader();
-    entry IoEnzoReader(std::string name_dir, std::string name_file);
+    entry void p_initialize(std::string, std::string);
     entry void p_block_ready(std::string);
   };
 
