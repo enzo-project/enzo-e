@@ -32,7 +32,7 @@ EnzoMethodMergeStars::EnzoMethodMergeStars(double merging_radius_cells)
   ASSERT(
       "EnzoMethodMergeStars::EnzoMethodMergeStars()",
       "EnzoMethodMergeStars requires unigrid mode (Adapt : max_level = 0). "
-      "In future, we may put in a refinement condition that blocks containing "
+      "In future, we will put in a refinement condition that blocks containing "
       "star particles are at the highest refinement level.",
       enzo::config()->mesh_max_level == 0);
 
@@ -57,7 +57,13 @@ void EnzoMethodMergeStars::pup(PUP::er &p) {
 
 void EnzoMethodMergeStars::compute(Block *block) throw() {
 
-  if (block->is_leaf()) {
+  // Only call compute_ if block is at highest refinement level.
+  // Currently this method can only be used if refinement is turned off
+  // (unigrid mode), but in future, we will have a refinement condition
+  // which forces blocks containing accreting star particles to be
+  // at the highest refinement level, and using this method will
+  // require this refinement condition to be activated.
+  if (block->level() == enzo::config()->mesh_max_level) {
     this->compute_(block);
   }
   block->compute_done();
