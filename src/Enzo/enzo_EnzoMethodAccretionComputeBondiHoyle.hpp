@@ -17,7 +17,8 @@ class EnzoMethodAccretionComputeBondiHoyle : public EnzoMethodAccretionCompute {
 public:
   
   // Constructor
-  EnzoMethodAccretionComputeBondiHoyle(double accretion_radius_cells);
+  EnzoMethodAccretionComputeBondiHoyle(double accretion_radius_cells,
+				       double density_threshold);
 
   // Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodAccretionComputeBondiHoyle);

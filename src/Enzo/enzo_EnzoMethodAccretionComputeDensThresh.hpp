@@ -43,13 +43,6 @@ private:
 
   void compute_(Block * block);
 
-  // attributes
-
-  // The "density threshold" parameter: within the accretion zone around a star
-  // particle, the density is reduced to the treshold, and the mass and momentum
-  // lost by the gas is added to the star
-  double density_threshold_;
-
 };
 
 #endif // ENZO_ENZO_METHOD_ACCRETION_COMPUTE_DENS_THRESH

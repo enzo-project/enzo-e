@@ -727,11 +727,14 @@ Method * EnzoProblem::create_method_
 							);
     } else if (enzo_config->method_accretion_compute_flavor == "bondi_hoyle") {
       method = new EnzoMethodAccretionComputeBondiHoyle(
-		       enzo_config->method_accretion_compute_accretion_radius_cells
+		       enzo_config->method_accretion_compute_accretion_radius_cells,
+		       enzo_config->method_accretion_compute_density_threshold
 							);
     } else {
       method = new EnzoMethodAccretionCompute(
-		       enzo_config->method_accretion_compute_accretion_radius_cells
+		       enzo_config->method_accretion_compute_accretion_radius_cells,
+		       enzo_config->method_accretion_compute_density_threshold
+					      
 					      );
     }
   } else if (name == "accretion_remove_gas") {

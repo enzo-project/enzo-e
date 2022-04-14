@@ -17,16 +17,10 @@
 EnzoMethodAccretionComputeDensThresh::EnzoMethodAccretionComputeDensThresh
 (double accretion_radius_cells,
  double density_threshold)
-  : EnzoMethodAccretionCompute(accretion_radius_cells),
-    density_threshold_(density_threshold)
+  : EnzoMethodAccretionCompute(accretion_radius_cells,
+			       density_threshold)
 {
-  // Check if density threshold is at least as large as the density floor
-  // set by the ppm method
-  ASSERT("EnzoMethodAccretionComputeDensThresh::EnzoMethodAccretionComputeDensThresh",
-	 "Density threshold must be at least as large as the density "
-	 "floor set by the ppm method",
-         density_threshold_ >= enzo::config()->ppm_density_floor);
-
+  
 }
 
 //-------------------------------------------------------------------
@@ -38,7 +32,6 @@ void EnzoMethodAccretionComputeDensThresh::pup (PUP::er &p)
   TRACEPUP;
 
   EnzoMethodAccretionCompute::pup(p); // call parent class pup
-  p | density_threshold_;
 
   return;
 }

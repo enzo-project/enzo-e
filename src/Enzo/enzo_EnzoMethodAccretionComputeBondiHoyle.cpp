@@ -14,8 +14,10 @@
 //------------------------------------------------------------------
 
 EnzoMethodAccretionComputeBondiHoyle::EnzoMethodAccretionComputeBondiHoyle
-(double accretion_radius_cells)
-  : EnzoMethodAccretionCompute(accretion_radius_cells)
+(double accretion_radius_cells,
+ double density_threshold)
+  : EnzoMethodAccretionCompute(accretion_radius_cells,
+			       density_threshold)
 {
 
 }

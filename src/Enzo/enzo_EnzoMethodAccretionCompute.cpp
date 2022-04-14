@@ -15,10 +15,20 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
-EnzoMethodAccretionCompute::EnzoMethodAccretionCompute(double accretion_radius_cells)
+EnzoMethodAccretionCompute::EnzoMethodAccretionCompute
+(double accretion_radius_cells,
+ double density_threshold)
   : Method(),
-    accretion_radius_cells_(accretion_radius_cells)
+    accretion_radius_cells_(accretion_radius_cells),
+    density_threshold_(density_threshold)
 {
+  // Check if density threshold is at least as large as the density floor
+  // set by the VL+CT method
+  ASSERT("EnzoMethodAccretionComputeDensThresh::EnzoMethodAccretionComputeDensThresh",
+	 "Density threshold must be at least as large as the density "
+	 "floor set by the VL+CT method",
+         density_threshold_ >= enzo::config()->method_vlct_density_floor);
+
   // This method requires three dimensions.
   ASSERT("EnzoMethodMergeStars::EnzoMethodMergeStars()",
 	 "EnzoMethodMergeStars requires that we run a 3D problem (Domain: rank = 3)",
@@ -101,4 +111,11 @@ void EnzoMethodAccretionCompute::do_checks_() throw()
 	   "(Method:accretion_compute:accretion_radius).",
 	   enzo::config()->method_merge_stars_merging_radius_cells >=
 	   2.0 * accretion_radius_cells_);
+
+    // Check if VL+CT method is being used.
+    ASSERT("EnzoMethodAccretionCompute::EnzoMethodAccretionCompute() ",
+	   "accretion_compute requires vlct method. (note: at the "
+	   "moment this means that cosmology can't be used in "
+	   "combination with accretion.",
+	   enzo::problem()->method_exists("vlct"));
 }
