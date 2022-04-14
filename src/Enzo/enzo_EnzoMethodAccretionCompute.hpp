@@ -42,7 +42,7 @@ public:
   void pup (PUP::er &p);
 
   /// Apply the method
-  virtual void compute( Block * block) throw();
+  virtual void compute ( Block * block) throw();
 
   /// Name
   virtual std::string name () throw()
@@ -56,7 +56,13 @@ public:
   virtual double timestep ( Block * block) const throw();
 
   
-protected: // attributes
+protected:
+
+  // methods
+  // Checks to be performed at initial cycle
+  void do_checks_() throw();
+
+  // attributes
 
   // The accretion radius relative to the cell width
   double accretion_radius_cells_;

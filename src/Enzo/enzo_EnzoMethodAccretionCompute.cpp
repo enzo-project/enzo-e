@@ -61,9 +61,25 @@ void EnzoMethodAccretionCompute::pup (PUP::er &p)
   return;
 }
 
-void EnzoMethodAccretionCompute::compute ( Block *block) throw()
+
+//------------------------------------------------------------------
+//   This does nothing - business is done in derived
+//   classes
+void EnzoMethodAccretionCompute::compute(Block *block) throw() {
+
+  block->compute_done();
+
+  return;
+}
+
+// Required
+double EnzoMethodAccretionCompute::timestep ( Block *block) const throw()
 {
-  if (enzo::simulation()->cycle() == enzo::config()->initial_cycle){
+  return std::numeric_limits<double>::max();
+}
+
+void EnzoMethodAccretionCompute::do_checks_() throw()
+{
     // Check if merge_stars method precedes accretion_compute method
     ASSERT("EnzoMethodAccretionCompute",
 	   "merge_stars must precede accretion_compute",
@@ -85,17 +101,4 @@ void EnzoMethodAccretionCompute::compute ( Block *block) throw()
 	   "(Method:accretion_compute:accretion_radius).",
 	   enzo::config()->method_merge_stars_merging_radius_cells >=
 	   2.0 * accretion_radius_cells_);
-  }
-
-  if (! block->is_leaf()) return;
-
-  block->compute_done();
-
-  return;
-}
-
-// Required
-double EnzoMethodAccretionCompute::timestep ( Block *block) const throw()
-{
-  return std::numeric_limits<double>::max();
 }

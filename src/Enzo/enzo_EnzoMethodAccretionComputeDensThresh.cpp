@@ -48,6 +48,9 @@ void EnzoMethodAccretionComputeDensThresh::pup (PUP::er &p)
 void EnzoMethodAccretionComputeDensThresh::compute (Block * block) throw()
 {
 
+  if (enzo::simulation()->cycle() == enzo::config()->initial_cycle)
+    do_checks_();
+
   if (block->is_leaf()){
     this->compute_(block);
   }
@@ -60,7 +63,8 @@ void EnzoMethodAccretionComputeDensThresh::compute (Block * block) throw()
 
 void EnzoMethodAccretionComputeDensThresh::compute_(Block * block)
 
-{ 
+{
+
   // Get pointers to field data
   Field field = block->data()->field();
   const int id   = field.field_id("density");
