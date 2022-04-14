@@ -51,9 +51,16 @@ void EnzoMethodAccretionComputeDensThresh::compute (Block * block) throw()
   if (enzo::simulation()->cycle() == enzo::config()->initial_cycle)
     do_checks_();
 
-  if (block->is_leaf()){
+  // Only call compute_ if block is at highest refinement level.
+  // Currently this method can only be used if refinement is turned off
+  // (unigrid mode), but in future, we will have a refinement condition
+  // which forces blocks containing accreting star particles to be
+  // at the highest refinement level, and using this method will
+  // require this refinement condition to be activated.
+  if (block->level() == enzo::config()->mesh_max_level) {
     this->compute_(block);
   }
+
   block->compute_done();
 
   return;
