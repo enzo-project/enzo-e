@@ -720,14 +720,20 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "accretion_compute") {
 
-    if (enzo_config->method_accretion_compute_flavor == "density_threshold")
+    if (enzo_config->method_accretion_compute_flavor == "density_threshold") {
       method = new EnzoMethodAccretionComputeDensThresh(
 		       enzo_config->method_accretion_compute_accretion_radius_cells,
 		       enzo_config->method_accretion_compute_density_threshold
 							);
-    else method = new EnzoMethodAccretionCompute(
+    } else if (enzo_config->method_accretion_compute_flavor == "bondi_hoyle") {
+      method = new EnzoMethodAccretionComputeBondiHoyle(
 		       enzo_config->method_accretion_compute_accretion_radius_cells
-						 );
+							);
+    } else {
+      method = new EnzoMethodAccretionCompute(
+		       enzo_config->method_accretion_compute_accretion_radius_cells
+					      );
+    }
   } else if (name == "accretion_remove_gas") {
 
     method = new EnzoMethodAccretionRemoveGas();
