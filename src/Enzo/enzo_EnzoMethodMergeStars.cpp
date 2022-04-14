@@ -29,14 +29,12 @@ EnzoMethodMergeStars::EnzoMethodMergeStars(double merging_radius_cells)
          "= 3)",
          cello::rank());
 
-  const EnzoConfig *enzo_config = enzo::config();
   ASSERT(
       "EnzoMethodMergeStars::EnzoMethodMergeStars()",
       "EnzoMethodMergeStars requires unigrid mode (Adapt : max_level = 0). "
       "In future, we may put in a refinement condition that blocks containing "
-      "star particles or neighbouring such a block is at highest refinement "
-      "level",
-      enzo_config->mesh_max_level == 0);
+      "star particles are at the highest refinement level.",
+      enzo::config()->mesh_max_level == 0);
 
   // Refresh copies all star particles from neighbouring blocks
   cello::simulation()->refresh_set_name(ir_post_, name());

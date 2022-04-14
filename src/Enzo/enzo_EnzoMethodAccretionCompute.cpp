@@ -24,6 +24,13 @@ EnzoMethodAccretionCompute::EnzoMethodAccretionCompute(double accretion_radius_c
 	 "EnzoMethodMergeStars requires that we run a 3D problem (Domain: rank = 3)",
 	 cello::rank());
 
+  ASSERT(
+      "EnzoMethodAccretionCompute::EnzoMethodAccretionCompute()",
+      "EnzoMethodAccretionCompute requires unigrid mode (Adapt : max_level = 0). "
+      "In future, we may put in a refinement condition that blocks containing "
+      "star particles are at the highest refinement level.",
+      enzo::config()->mesh_max_level == 0);
+
   const int * ghost_depth = enzo::config()->field_ghost_depth;
   const int min_ghost_depth = std::min(ghost_depth[0],
 				       std::min(ghost_depth[1],ghost_depth[2]));
