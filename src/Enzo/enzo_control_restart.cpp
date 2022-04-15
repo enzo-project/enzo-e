@@ -17,9 +17,9 @@
 #include "charm_mesh.hpp"
 #include "main.hpp"
 
-// #define TRACE
+// #define TRACE_BLOCK
 // #define TRACE_HDF5
-// #define PRINT_FIELD
+// #define PRINT_FIELD_RESTART
 // # define TRACE_SYNC
 
 //--------------------------------------------------
@@ -33,10 +33,10 @@
 #   define TRACE_SYNC(SYNC,MSG) /* ... */
 #endif
 //--------------------------------------------------
-#ifdef PRINT_FIELD
-#   undef PRINT_FIELD
+#ifdef PRINT_FIELD_RESTART
+#   undef PRINT_FIELD_RESTART
 
-#   define PRINT_FIELD(MSG,FIELD,DATA)                                  \
+#   define PRINT_FIELD_RESTART(MSG,FIELD,DATA)                                  \
   {                                                                     \
     Field field = DATA->field();                                        \
     int mx,my,mz;                                                       \
@@ -58,24 +58,25 @@
         }                                                               \
       }                                                                 \
     }                                                                   \
-    CkPrintf ("PRINT_FIELD %s %s  %g %g %g\n",MSG,FIELD,min,max,sum/((mx-2*gx)*(my-2*gy)*(mz-2*gz))); \
+    CkPrintf ("PRINT_FIELD_RESTART %s %s  %g %g %g\n",MSG,FIELD,min,max,sum/((mx-2*gx)*(my-2*gy)*(mz-2*gz))); \
     fflush(stdout);                                                     \
   }
 #else
-#   define PRINT_FIELD(MSG,FIELD,DATA) /* ... */
+#   define PRINT_FIELD_RESTART(MSG,FIELD,DATA) /* ... */
 #endif
 //--------------------------------------------------
-#ifdef TRACE
-#   undef TRACE
-#   define TRACE(MSG) \
-  CkPrintf ("%d TRACE %s\n",CkMyPe(),std::string(MSG).c_str()); \
+#ifdef TRACE_BLOCK
+#   undef TRACE_BLOCK
+#   define TRACE_RESTART(MSG) \
+  CkPrintf ("%d TRACE_RESTART %s\n",CkMyPe(),std::string(MSG).c_str()); \
   fflush(stdout);
 #   define TRACE_BLOCK(MSG,BLOCK)                                    \
-  CkPrintf ("%d TRACE %s %s\n",CkMyPe(),BLOCK->name().c_str(), \
+  CkPrintf ("%d TRACE_RESTART %s %s\n",CkMyPe(),BLOCK->name().c_str(), \
             std::string(MSG).c_str());                         \
   fflush(stdout);
 #else
-#   define TRACE(MSG)  /* ... */
+#   define TRACE_RESTART(MSG)  /* ... */
+#   define TRACE_BLOCK(MSG,BLOCK) /* ... */
 #endif
 
 
@@ -121,7 +122,7 @@ void Simulation::p_restart_enter (std::string name_dir)
 
 void EnzoSimulation::p_set_io_reader(CProxy_IoEnzoReader io_enzo_reader)
 {
-  TRACE("EnzoSimulation::p_set_io_reader()");
+  TRACE_RESTART("EnzoSimulation::p_set_io_reader()");
   proxy_io_enzo_reader = io_enzo_reader;
   CkCallback callback(CkIndex_Simulation::r_restart_start(NULL),0,
                       proxy_simulation);
@@ -152,7 +153,6 @@ void IoEnzoReader::p_initialize
 {
   name_dir_ = name_dir;
   name_file_ = name_file;
-  CkPrintf ("IoEnzoReader %d %d\n",CkMyPe(),thisIndex);
   stream_block_list_ = open_block_list_(name_dir, name_file);
 
   // open the HDF5 file
@@ -187,18 +187,9 @@ void IoEnzoReader::p_initialize
     index.set_values(v3);
     const int level = index.level();
     msg_check->index_file_ = thisIndex;
-#ifdef TRACE
-    CkPrintf ("DEBUG_MSG_CHECK IoReader %d level %d == %d\n",thisIndex,level,level_block);
-    fflush(stdout);
-    msg_check->print("send");
-#endif
     if (level <= 0) {
 
       // Block exists--send its data
-#ifdef TRACE
-      CkPrintf ("DEBUG_MSG_CHECK msg_check %p data %p\n",msg_check,msg_check->data_msg_);
-      fflush(stdout);
-#endif
       enzo::block_array()[index].p_restart_set_data(msg_check);
 
     } else {
@@ -238,10 +229,7 @@ void EnzoBlock::restart_set_data_(EnzoMsgCheck * msg_check)
   TRACE_BLOCK("EnzoBlock::restart_set_data()",this);
   const int index_file = msg_check->index_file_;
   msg_check->update(this);
-#ifdef TRACE
-  msg_check->print("recv 0");
-#endif
-  PRINT_FIELD("recv","density",data());
+  PRINT_FIELD_RESTART("recv","density",data());
   delete msg_check;
   proxy_io_enzo_reader[index_file].p_block_ready(name());
 }
@@ -253,7 +241,7 @@ void IoEnzoReader::p_block_ready(std::string block_name)
 
 void IoEnzoReader::block_ready_(std::string block_name)
 {
-  TRACE("EnzoSimulation::[p_]block_ready_()");
+  TRACE_RESTART("EnzoSimulation::[p_]block_ready_()");
   TRACE_SYNC(sync_blocks_,"next");
   if (sync_blocks_.next()) {
     proxy_enzo_simulation[0].p_restart_done();
@@ -263,7 +251,7 @@ void IoEnzoReader::block_ready_(std::string block_name)
 
 void EnzoSimulation::p_restart_done()
 {
-  TRACE("EnzoSimulation::p_restart_done()");
+  TRACE_RESTART("EnzoSimulation::p_restart_done()");
   TRACE_SYNC(sync_restart_done_,"sync_restart_done_ next");
   if (sync_restart_done_.next()) {
     enzo::block_array().p_restart_done();
@@ -454,7 +442,7 @@ void IoEnzoReader::file_read_block_
     read_dataset_
       (file_, buffer, type_data, mx,my,mz,m4);
 
-    PRINT_FIELD("send",field_name.c_str(),data);
+    PRINT_FIELD_RESTART("send",field_name.c_str(),data);
 #ifdef TRACE_HDF5
     CkPrintf ("%d TRACE_HDF5 data_close[%d]\n",
               CkNumPes(),thisIndex);
