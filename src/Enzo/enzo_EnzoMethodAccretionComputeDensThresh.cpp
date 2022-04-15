@@ -16,9 +16,13 @@
 
 EnzoMethodAccretionComputeDensThresh::EnzoMethodAccretionComputeDensThresh
 (double accretion_radius_cells,
- double density_threshold)
+ double density_threshold,
+ double max_mass_fraction,
+ bool   conserve_angular_momentum)
   : EnzoMethodAccretionCompute(accretion_radius_cells,
-			       density_threshold)
+			       density_threshold,
+			       max_mass_fraction,
+			       conserve_angular_momentum)
 {
   
 }

@@ -25,7 +25,9 @@ public:
 
   // Constructor
   EnzoMethodAccretionCompute(double accretion_radius_cells,
-			     double density_threshold);
+			     double density_threshold,
+			     double max_mass_fraction,
+			     bool conserve_angular_momentum);
 
   /// Destructor
   virtual ~EnzoMethodAccretionCompute() throw() {};
@@ -55,10 +57,11 @@ public:
   // Compute the maximum timestep for this method
   virtual double timestep ( Block * block) const throw();
 
-  
+
 protected:
 
   // methods
+
   // Checks to be performed at initial cycle
   void do_checks_() throw();
 
@@ -75,14 +78,21 @@ protected:
   // "density_threshold" accretion: for all cells in
   // accretion zone, if the density in a cell is higher
   // than density_threshold_, the density is reduced to
-  // the value of density_threshold_, and the removed
-  // mass and momentum is added to the star particle
-  //
-  // "bondi_hoyle" accretion: the value of
-  // density_threshold_ sets a lower limit for the gas
-  // density field after accretion, and so in effect puts
-  // a limit on how much gas a star particle can accrete.
+  // max(density_threshold_,(1-max_mass_fraction_)*density_)
+
+  // For other accretion methods, it is the minimum value
+  // that the gas density in any cell can take after accretion.
   double density_threshold_;
+
+  // The maximum fraction of mass that can be accreted from a cell
+  // in one timestep
+  double max_mass_fraction_;
+
+  // If true, angular momentum of the gas in the accretion zone
+  // (with respect to the star particle) is conserved during accretion
+  // (See Bleuler and Teyssier 2014, MNRAS 445, 4015–4036 and
+  // Krumholz+ 2004, ApJ, 611, 399 for details).
+  bool conserve_angular_momentum_;
 
 };
 

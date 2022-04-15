@@ -17,10 +17,14 @@
 
 EnzoMethodAccretionCompute::EnzoMethodAccretionCompute
 (double accretion_radius_cells,
- double density_threshold)
+ double density_threshold,
+ double max_mass_fraction,
+ bool   conserve_angular_momentum)
   : Method(),
     accretion_radius_cells_(accretion_radius_cells),
-    density_threshold_(density_threshold)
+    density_threshold_(density_threshold),
+    max_mass_fraction_(max_mass_fraction),
+    conserve_angular_momentum_(conserve_angular_momentum)
 {
   // Check if density threshold is at least as large as the density floor
   // set by the VL+CT method
@@ -67,7 +71,10 @@ void EnzoMethodAccretionCompute::pup (PUP::er &p)
   Method::pup(p);
 
   p | accretion_radius_cells_;
- 
+  p | density_threshold_;
+  p | max_mass_fraction_;
+  p | conserve_angular_momentum_;
+
   return;
 }
 

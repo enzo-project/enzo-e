@@ -383,6 +383,8 @@ public: // interface
       method_accretion_compute_accretion_radius_cells(0.0),
       method_accretion_compute_flavor(""),
       method_accretion_compute_density_threshold(0.0),
+      method_accretion_compute_max_mass_fraction(0.0),
+      method_accretion_compute_conserve_angular_momentum(false),
       // EnzoProlong
       prolong_enzo_type(),
       prolong_enzo_positive(true),
@@ -818,6 +820,8 @@ public: // attributes
   double                     method_accretion_compute_accretion_radius_cells;
   std::string                method_accretion_compute_flavor;
   double                     method_accretion_compute_density_threshold;
+  double                     method_accretion_compute_max_mass_fraction;
+  bool                       method_accretion_compute_conserve_angular_momentum;
   
   std::string                prolong_enzo_type;
   bool                       prolong_enzo_positive;
