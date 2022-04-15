@@ -56,10 +56,11 @@ EnzoMethodAccretionCompute::EnzoMethodAccretionCompute
 	 "(4 by default)",
          accretion_radius_cells_ <= min_ghost_depth);
 
-  // Refresh all fields
+  // Refresh all fields and star particles
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
+  refresh->add_particle(cello::particle_descr()->type_index("star"));
 }
 
 void EnzoMethodAccretionCompute::pup (PUP::er &p)
