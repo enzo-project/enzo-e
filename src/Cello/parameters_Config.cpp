@@ -65,7 +65,6 @@ void Config::pup (PUP::er &p)
 
   p | num_fields;
   p | field_list;
-  p | field_index;
   p | field_alignment;
   PUParray(p,field_centering,3);
   PUParray(p,field_ghost_depth,3);
@@ -510,6 +509,8 @@ void Config::read_field_ (Parameters * p) throw()
 
   field_list.resize(num_fields);
 
+  std::map<std::string, int> field_index;
+
   for (int i=0; i<num_fields; i++) {
     field_list[i] = p->list_value_string(i, "Field:list");
     field_index[field_list[i]] = i;
@@ -575,17 +576,16 @@ void Config::read_field_ (Parameters * p) throw()
 
   int num_groups = p->list_length("Group:list");
 
-  const std::map<std::string,int>& field_index_ref = field_index;
-  auto find_field_index = [&field_index_ref](const std::string& field,
-                                             const std::string& group) -> int
+  auto find_field_index = [&field_index](const std::string& field,
+                                         const std::string& group) -> int
     {
-      // NEVER use field_index[field] to access the index of a field unless
-      // you're certain field_index already contains an entry for field. In
+      // don't use field_index[field] to access the index of a field because
+      // we're not certain field_index already contains an entry for field. In
       // the case where field_index doesn't already contain an entry for field,
       // then an entry is created (with an incorrect index)
 
-      auto search = field_index_ref.find(field);
-      if (search == field_index_ref.end()){
+      auto search = field_index.find(field);
+      if (search == field_index.end()){
         ERROR2("Config::read_field_",
                ("Can't add the \"%s\" field to the \"%s\" group because the "
                 "field has not been defined"),

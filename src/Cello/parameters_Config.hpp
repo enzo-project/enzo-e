@@ -48,7 +48,6 @@ public: // interface
     boundary_field_list(),
     num_fields(0),
     field_list(),
-    field_index(),
     field_alignment(0),
     field_padding(0),
     field_history(0),
@@ -222,7 +221,6 @@ public: // interface
       boundary_field_list(),
       num_fields(0),
       field_list(),
-      field_index(),
       field_alignment(0),
       field_padding(0),
       field_history(0),
@@ -425,7 +423,6 @@ public: // attributes
 
   int                        num_fields;
   std::vector<std::string>   field_list;
-  std::map<std::string,int>  field_index;
   int                        field_alignment;
   std::vector<int>           field_centering [3];
   int                        field_ghost_depth[3];
