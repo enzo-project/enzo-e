@@ -258,6 +258,7 @@ void EnzoMethodGrackle::setup_grackle_units (double current_time,
 void EnzoMethodGrackle::setup_grackle_fields
 (const EnzoFieldAdaptor& fadaptor,
  grackle_field_data * grackle_fields,
+ int stale_depth, /* default: 0 */
  bool omit_cell_width /* default false */
  ) throw()
 {
@@ -271,6 +272,23 @@ void EnzoMethodGrackle::setup_grackle_fields
   fadaptor.get_grackle_field_grid_props(grackle_fields->grid_dimension,
                                         grackle_fields->grid_start,
                                         grackle_fields->grid_end);
+
+  if (stale_depth > 0){
+    ERROR("EnzoMethodGrackle::setup_grackle_fields", "untested");
+    for (int i = 1; i <= grackle_fields->grid_rank; i++){
+      grackle_fields->grid_start[i-1] += stale_depth;
+      grackle_fields->grid_end[i-1] -= stale_depth;
+
+      // reminder for following check: grackle_fields->grid_end is inclusive
+      if (grackle_fields->grid_end[i-1] < grackle_fields->grid_start[i-1]){
+        ERROR("EnzoMethodGrackle::setup_grackle_fields",
+              "stale_depth is too large");
+      }
+    }
+  } else if (stale_depth < 0){
+    ERROR("EnzoMethodGrackle::setup_grackle_fields",
+          "can't handle negative stale_depth");
+  }
 
   if (omit_cell_width){
     grackle_fields->grid_dx = 0.0;
@@ -508,7 +526,8 @@ double EnzoMethodGrackle::timestep ( Block * block ) throw()
       delete_cooling_time = true;
     }
 
-    calculate_cooling_time(EnzoFieldAdaptor(block,0), cooling_time, NULL, NULL);
+    calculate_cooling_time(EnzoFieldAdaptor(block,0), cooling_time, 0,
+                           nullptr, nullptr);
 
     // make sure to exclude the ghost zone. Because there is no refresh before
     // this method is called (at least during the very first cycle) - this can
@@ -624,13 +643,11 @@ void EnzoMethodGrackle::ResetEnergies ( EnzoBlock * enzo_block) throw()
 //----------------------------------------------------------------------
 
 void EnzoMethodGrackle::compute_local_property_
-(const EnzoFieldAdaptor& fadaptor, enzo_float* values,
+(const EnzoFieldAdaptor& fadaptor, enzo_float* values, int stale_depth,
  code_units* grackle_units, grackle_field_data* grackle_fields,
  grackle_local_property_func func, std::string func_name) const throw()
 {
   const EnzoConfig * enzo_config = enzo::config();
-
-  // TODO: check strides!
 
   code_units cur_grackle_units_;
   grackle_field_data cur_grackle_fields;
@@ -650,8 +667,23 @@ void EnzoMethodGrackle::compute_local_property_
 
     grackle_fields  = &cur_grackle_fields;
     EnzoMethodGrackle::setup_grackle_fields(fadaptor, grackle_fields,
-					    omit_cell_width);
+                                            stale_depth, omit_cell_width);
     delete_grackle_fields = true;
+  }
+
+  for (int i = 1; i <= grackle_fields->grid_rank; i++){
+    int ax_start = grackle_fields->grid_start[i-1];
+    int ax_end = grackle_fields->grid_end[i-1];
+    int ax_dim = grackle_fields->grid_dimension[i-1];
+
+    // currently, Grackle's local_calculate_pressure, local_calculate_gamma,
+    // & local_calculate_temperature functions ignore grid_start & grid_end
+    // This assertion makes sure users won't get unexpected results...
+    ASSERT("EnzoMethodGrackle::compute_local_property_",
+           ("until PR #106 is merged into Grackle, we require "
+            "grackle_fields->grid_start & grackle_fields->grid_end to include "
+            "all data"),
+           (ax_start == 0) & ((ax_end+1) == ax_dim));
   }
 
   // because this function is const-qualified, grackle_rates_ currently has

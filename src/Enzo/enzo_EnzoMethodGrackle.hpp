@@ -125,6 +125,7 @@ public: // interface
 
   static void setup_grackle_fields(const EnzoFieldAdaptor& fadaptor,
                                    grackle_field_data * grackle_fields,
+                                   int stale_depth = 0,
                                    bool omit_cell_width = false ) throw();
 
   static void setup_grackle_fields(EnzoBlock * enzo_block,
@@ -132,7 +133,7 @@ public: // interface
                                    int i_hist = 0 ) throw()
   {
     setup_grackle_fields(EnzoFieldAdaptor((Block*) enzo_block, i_hist),
-                         grackle_fields, false);
+                         grackle_fields, 0, false);
   }
 
   static void update_grackle_density_fields(EnzoBlock * enzo_block,
@@ -168,35 +169,35 @@ public: // interface
  }
 
   void calculate_cooling_time(const EnzoFieldAdaptor& fadaptor, enzo_float* ct,
-			      code_units* grackle_units = NULL,
-			      grackle_field_data* grackle_fields = NULL)
+                              int stale_depth = 0,
+			      code_units* grackle_units = nullptr,
+			      grackle_field_data* grackle_fields = nullptr)
     const throw()
   {
-    compute_local_property_(fadaptor, ct, grackle_units, grackle_fields,
-                            &local_calculate_cooling_time,
+    compute_local_property_(fadaptor, ct, stale_depth, grackle_units,
+                            grackle_fields, &local_calculate_cooling_time,
 			    "local_calculate_cooling_time");
   }
 
   void calculate_pressure(const EnzoFieldAdaptor& fadaptor,
-                          enzo_float* pressure,
-			  code_units* grackle_units = NULL,
-			  grackle_field_data* grackle_fields = NULL)
+                          enzo_float* pressure, int stale_depth = 0,
+			  code_units* grackle_units = nullptr,
+			  grackle_field_data* grackle_fields = nullptr)
     const throw()
   {
-    compute_local_property_(fadaptor, pressure, grackle_units, grackle_fields,
-			    &local_calculate_pressure,
+    compute_local_property_(fadaptor, pressure, stale_depth, grackle_units,
+                            grackle_fields, &local_calculate_pressure,
 			    "local_calculate_pressure");
   }
 
   void calculate_temperature(const EnzoFieldAdaptor& fadaptor,
-                             enzo_float* temperature,
-			     code_units* grackle_units = NULL,
-			     grackle_field_data* grackle_fields = NULL)
+                             enzo_float* temperature, int stale_depth = 0,
+			     code_units* grackle_units = nullptr,
+			     grackle_field_data* grackle_fields = nullptr)
     const throw()
   {
-    compute_local_property_(fadaptor, temperature, grackle_units,
-                            grackle_fields,
-			    &local_calculate_temperature,
+    compute_local_property_(fadaptor, temperature, stale_depth, grackle_units,
+                            grackle_fields, &local_calculate_temperature,
 			    "local_calculate_temperature");
   }
 
@@ -210,7 +211,7 @@ protected: // methods
 
   // when grackle_units is NULL, new values are temporarily allocated
   void compute_local_property_(const EnzoFieldAdaptor& fadaptor,
-                               enzo_float* values,
+                               enzo_float* values, int stale_depth,
 			       code_units* grackle_units,
 			       grackle_field_data* grackle_fields,
 			       grackle_local_property_func func,

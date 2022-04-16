@@ -74,7 +74,7 @@ void EnzoComputeCoolingTime::compute_(Block * block,
          enzo::config()->method_grackle_use_grackle );
   const EnzoMethodGrackle* grackle_method = enzo::grackle_method();
   grackle_method->calculate_cooling_time(EnzoFieldAdaptor(block, i_hist_), ct,
-                                         grackle_units, grackle_fields);
+                                         0, grackle_units, grackle_fields);
 }
 
 #endif

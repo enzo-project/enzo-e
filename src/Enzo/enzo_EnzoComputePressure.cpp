@@ -144,15 +144,22 @@ void EnzoComputePressure::compute_pressure
 
   if (enzo::config()->method_grackle_use_grackle){
 #ifdef CONFIG_USE_GRACKLE
+    // the following assertion is not strictly necessary (the problem will be
+    // caught later in EnzoMethodGrackle), but this is more informative...
     ASSERT("EnzoMethodGrackle::calculate_pressure",
            "until PR #106 is merged into grackle, stale_depth must be 0 since "
            "grackle's local_calculate_pressure ignores the grid_start and "
            "grid_stop members of grackle_field_data",
            stale_depth == 0);
-    // TODO: check strides!
+
+    if (!fadaptor.consistent_with_field_strides(p)){
+      ERROR("EnzoMethodGrackle::calculate_pressure",
+            "When using grackle to compute pressure, the output array must "
+            "have identical strides to the fields.");
+    }
     const EnzoMethodGrackle* grackle_method = enzo::grackle_method();
-    grackle_method->calculate_pressure(fadaptor, p.data(), grackle_units,
-				       grackle_fields);
+    grackle_method->calculate_pressure(fadaptor, p.data(), stale_depth,
+                                       grackle_units, grackle_fields);
 #else
     ERROR("EnzoComputePressure::compute_()",
           "Attempting to compute pressure with method Grackle " 
