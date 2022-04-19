@@ -50,13 +50,11 @@ const char * phase_name[] = {
   "exit"
 };
 
-//----------------------------------------------------------------------
-
+//======================================================================
 #ifdef BUG_FIX_150
+//======================================================================
+
 Block::Block ( process_type ip_source, MsgType msg_type )
-#else
-Block::Block ( MsgRefine * msg )
-#endif
   : CBase_Block(),
     data_(NULL),
     child_data_(NULL),
@@ -88,11 +86,7 @@ Block::Block ( MsgRefine * msg )
 {
 #ifdef TRACE_BLOCK
 
-#ifdef BUG_FIX_150
   CkPrintf ("%d TRACE_BLOCK %s Block::Block(ip)\n",  CkMyPe(),name(thisIndex).c_str());
-#else
-  CkPrintf ("%d TRACE_BLOCK %s Block::Block(MsgRefine)\n",  CkMyPe(),name(thisIndex).c_str());
-#endif
 
 #endif
 
@@ -102,39 +96,14 @@ Block::Block ( MsgRefine * msg )
   usesAtSync = true;
 
   thisIndex.array(array_,array_+1,array_+2);
-#ifdef BUG_FIX_150
 
   if (msg_type == MsgType::msg_refine) {
     proxy_simulation[ip_source].p_get_msg_refine(thisIndex);
   }
 
-#else
-
-#ifdef TRACE_BLOCK
-  CkPrintf ("DEBUG_BLOCK Block(msg) face_level %p\n",
-            msg->face_level_);
-#endif
-  init_refine_ (msg->index_,
-	msg->nx_, msg->ny_, msg->nz_,
-	msg->num_field_blocks_,
-	msg->num_adapt_steps_,
-	msg->cycle_, msg->time_,  msg->dt_,
-	0, NULL, msg->refresh_type_,
-        msg->num_face_level_, msg->face_level_,
-        msg->adapt_parent_);
-
-  init_adapt_(msg->adapt_parent_);
-
-  apply_initial_(msg);
-
-  performance_stop_(perf_block);
-
-#endif
 }
 
 //----------------------------------------------------------------------
-
-#ifdef BUG_FIX_150
 
 void Block::p_set_msg_refine(MsgRefine * msg)
 {
@@ -179,7 +148,75 @@ void Block::p_set_msg_refine(MsgRefine * msg)
   delete msg;
 }
 
+//======================================================================
+#else /* not BUG_FIX_150 */
+//======================================================================
+
+Block::Block ( MsgRefine * msg )
+  : CBase_Block(),
+    data_(NULL),
+    child_data_(NULL),
+    level_next_(0),
+    cycle_(0),
+    time_(0.0),
+    dt_(0.0),
+    stop_(false),
+    index_initial_(0),
+    children_(),
+    sync_coarsen_(),
+    sync_count_(),
+    sync_max_(),
+    adapt_(),
+    child_face_level_curr_(),
+    child_face_level_next_(),
+    count_coarsen_(0),
+    adapt_step_(0),
+    adapt_ready_(false),
+    adapt_balanced_(false),
+    adapt_changed_(0),
+    coarsened_(false),
+    is_leaf_(true),
+    age_(0),
+    name_(""),
+    index_method_(-1),
+    index_solver_(),
+    refresh_()
+{
+#ifdef TRACE_BLOCK
+
+  CkPrintf ("%d TRACE_BLOCK %s Block::Block(MsgRefine)\n",  CkMyPe(),name(thisIndex).c_str());
+
 #endif
+
+  performance_start_(perf_block);
+
+  init_refresh_();
+  usesAtSync = true;
+
+  thisIndex.array(array_,array_+1,array_+2);
+#ifdef TRACE_BLOCK
+  CkPrintf ("DEBUG_BLOCK Block(msg) face_level %p\n",
+            msg->face_level_);
+#endif
+  init_refine_ (msg->index_,
+	msg->nx_, msg->ny_, msg->nz_,
+	msg->num_field_blocks_,
+	msg->num_adapt_steps_,
+	msg->cycle_, msg->time_,  msg->dt_,
+	0, NULL, msg->refresh_type_,
+        msg->num_face_level_, msg->face_level_,
+        msg->adapt_parent_);
+
+  init_adapt_(msg->adapt_parent_);
+
+  apply_initial_(msg);
+  
+  performance_stop_(perf_block);
+
+}
+//======================================================================
+#endif /* BUG_FIX_150 */
+//======================================================================
 
 //----------------------------------------------------------------------
 

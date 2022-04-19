@@ -9,7 +9,7 @@
 #include "charm_simulation.hpp"
 #include "test.hpp"
 
-#define TRACE_OUTPUT
+// #define TRACE_OUTPUT
 
 // #define BYPASS_BLOCK_TRACE
 //----------------------------------------------------------------------

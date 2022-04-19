@@ -163,9 +163,6 @@ public: // interface
   /// Pack / unpack the EnzoBlock in a CHARM++ program
   void pup(PUP::er &p);
 
-  /// Implementation of initialization in constructors
-  void initialize_enzo_();
-
   /// Destructor
   virtual ~EnzoBlock();
 

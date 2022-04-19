@@ -194,12 +194,11 @@ void IoEnzoReader::p_initialize
 
     } else {
 
-      //      Block doesn't exist: create it and send its data
-
+      // Block doesn't exist: create it and send its data
       enzo::factory()->create_block_check
         ( msg_check, enzo::block_array(),index );
 
-      // Also tell parent that it has children (surpise!)
+      // Also tell parent that it has children (surprise!)
       Index index_parent = index.index_parent(cello::config()->mesh_min_level);
     }
   }
