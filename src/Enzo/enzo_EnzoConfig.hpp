@@ -78,6 +78,13 @@ inline void operator|(PUP::er &p, chemistry_data &c){
  p | c.radiative_transfer_hydrogen_only;
  p | c.self_shielding_method;
  p | c.H2_self_shielding;
+ p | c.h2_charge_exchange_rate;
+ p | c.h2_dust_rate;
+ p | c.h2_h_cooling_rate;
+ p | c.collisional_excitation_rates;
+ p | c.collisional_ionisation_rates;
+ p | c.recombination_cooling_rates;
+ p | c.bremsstrahlung_cooling_rates;
 }
 #endif
 
@@ -285,6 +292,10 @@ public: // interface
       initial_IG_recent_SF_bin_size(5.0),
       initial_IG_recent_SF_SFR(2.0),
       initial_IG_recent_SF_seed(12345),
+      // EnzoInitialMergeStarsTest
+      initial_merge_stars_test_particle_data_filename(""),
+      // EnzoMethodCheckGravity
+      method_check_gravity_particle_type(),
       // EnzoMethodHeat
       method_heat_alpha(0.0),
       // EnzoMethodHydro
@@ -333,6 +344,7 @@ public: // interface
       method_gravity_grav_const(0.0),
       method_gravity_solver(""),
       method_gravity_order(4),
+      method_gravity_dt_max(1.0e10),
       method_gravity_accumulate(false),
       // EnzoMethodBackgroundAcceleration
       method_background_acceleration_type(""),
@@ -361,6 +373,8 @@ public: // interface
       method_vlct_mhd_choice(""),
       method_vlct_dual_energy(false),
       method_vlct_dual_energy_eta(0.0),
+      // EnzoMethodMergeStars
+      method_merge_stars_merging_radius_cells(0.0),
       // EnzoProlong
       prolong_enzo_type(),
       prolong_enzo_positive(true),
@@ -428,6 +442,7 @@ protected: // methods
   void read_initial_turbulence_(Parameters *);
   void read_initial_isolated_galaxy_(Parameters *);
   void read_initial_feedback_test_(Parameters *);
+  void read_initial_merge_stars_test_(Parameters *);
   
   void read_method_grackle_(Parameters *);
   void read_method_feedback_(Parameters *);
@@ -440,6 +455,7 @@ protected: // methods
   void read_method_pm_update_(Parameters *);
   void read_method_ppm_(Parameters *);
   void read_method_turbulence_(Parameters *);
+  void read_method_merge_stars_(Parameters *);
   
   void read_physics_(Parameters *);
 
@@ -672,6 +688,12 @@ public: // attributes
   double                     initial_IG_recent_SF_SFR;
   int                        initial_IG_recent_SF_seed;
 
+  // EnzoInitialMergeStarsTest
+  std::string                initial_merge_stars_test_particle_data_filename;
+
+  /// EnzoMethodCheckGravity
+  std::string                method_check_gravity_particle_type;
+
   /// EnzoMethodHeat
   double                     method_heat_alpha;
 
@@ -728,6 +750,7 @@ public: // attributes
   double                     method_gravity_grav_const;
   std::string                method_gravity_solver;
   int                        method_gravity_order;
+  double                     method_gravity_dt_max;
   bool                       method_gravity_accumulate;
 
   /// EnzoMethodBackgroundAcceleration
@@ -768,6 +791,9 @@ public: // attributes
   // unlike ppm, only use a single eta value. It should have a default value
   // closer to method_ppm_dual_energy_eta1
   double                     method_vlct_dual_energy_eta;
+
+  /// EnzoMethodMergeStars
+  double                     method_merge_stars_merging_radius_cells;
 
 
   std::string                prolong_enzo_type;

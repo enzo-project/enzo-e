@@ -40,7 +40,7 @@ bool grackle_variable_gamma_(){
 //----------------------------------------------------------------------
 
 void EnzoEOSIdeal::primitive_from_integration
-(EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &primitive_map,
+(const EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &primitive_map,
  const int stale_depth, const str_vec_t &passive_list) const
 {
   if (grackle_variable_gamma_()){
@@ -48,7 +48,7 @@ void EnzoEOSIdeal::primitive_from_integration
 	  "Doesn't currently support spatial variations in gamma");
   }
 
-  EFlt3DArray density = integration_map.at("density");
+  const CelloArray<const enzo_float, 3> density = integration_map.at("density");
   const int mz = density.shape(0);
   const int my = density.shape(1);
   const int mx = density.shape(2);
@@ -64,8 +64,8 @@ void EnzoEOSIdeal::primitive_from_integration
       continue;
     }
 
-    EFlt3DArray integ_array = integration_map.at(key);
-    EFlt3DArray prim_array = primitive_map.at(key);
+    const CelloArray<const enzo_float, 3> integ_array = integration_map.at(key);
+    const CelloArray<enzo_float, 3> prim_array = primitive_map.at(key);
 
 #ifdef DEBUG_MATCHING_ARRAY_SHAPES
     ASSERT6("EnzoEOSIdeal::primitive_from_integration",
@@ -91,8 +91,9 @@ void EnzoEOSIdeal::primitive_from_integration
   // Convert the passive scalars from conserved-form (i.e. a density) to
   // specific-form (mass fractions)
   for (const std::string& key : passive_list){
-    EFlt3DArray cur_conserved = integration_map.at(key);
-    EFlt3DArray out_specific = primitive_map.at(key);
+    const CelloArray<const enzo_float, 3> cur_conserved
+      = integration_map.at(key);
+    const CelloArray<enzo_float, 3> out_specific = primitive_map.at(key);
 
     for (int iz = stale_depth; iz < mz - stale_depth; iz++) {
       for (int iy = stale_depth; iy < my - stale_depth; iy++) {
@@ -112,7 +113,7 @@ void EnzoEOSIdeal::primitive_from_integration
 //----------------------------------------------------------------------
 
 void EnzoEOSIdeal::pressure_from_integration
-(EnzoEFltArrayMap &integration_map, const EFlt3DArray &pressure,
+(const EnzoEFltArrayMap &integration_map, const EFlt3DArray &pressure,
  const int stale_depth) const
 {
 
@@ -130,43 +131,45 @@ void EnzoEOSIdeal::pressure_from_integration
 	  "Not equipped to handle grackle and spatially variable gamma");
   }
 
-  const bool idual = this->uses_dual_energy_formalism();
-  const bool mag = (integration_map.contains("bfield_x") ||
-                    integration_map.contains("bfield_y") ||
-                    integration_map.contains("bfield_z"));
-
-  // rather than slicing out the unstaled regions, we may want use the full
-  // array and adjust the iteration limits accordingly.
-
-  EFlt3DArray density, vx, vy, vz, eint, etot, bx, by, bz;
-  density = integration_map.get("density", stale_depth);
-
-  if (idual){
-    eint = integration_map.get("internal_energy", stale_depth);
-  } else {
-    etot = integration_map.get("total_energy", stale_depth);
-    vx = integration_map.get("velocity_x", stale_depth);
-    vy = integration_map.get("velocity_y", stale_depth);
-    vz = integration_map.get("velocity_z", stale_depth);
-    if (mag){
-      bx = integration_map.get("bfield_x", stale_depth);
-      by = integration_map.get("bfield_y", stale_depth);
-      bz = integration_map.get("bfield_z", stale_depth);
-    }
-  }
-
-  CSlice unstaled(stale_depth,-stale_depth);
-  EFlt3DArray p = pressure.subarray(unstaled, unstaled, unstaled);
   enzo_float gm1 = get_gamma() - 1.;
 
-  for (int iz=0; iz<density.shape(0); iz++) {
-    for (int iy=0; iy<density.shape(1); iy++) {
-      for (int ix=0; ix<density.shape(2); ix++) {
+  using RdOnlyEFlt3DArray = CelloArray<const enzo_float, 3>;
+  const RdOnlyEFlt3DArray density = integration_map.at("density");
 
-	if (idual){
-	  p(iz,iy,ix) = gm1 * density(iz,iy,ix) * eint(iz,iy,ix);
-	} else {
-          enzo_float v2 = (vx(iz,iy,ix) * vx(iz,iy,ix) +
+  if (this->uses_dual_energy_formalism()){
+
+    const RdOnlyEFlt3DArray eint = integration_map.at("internal_energy");
+
+    for (int iz=stale_depth; iz<(density.shape(0)-stale_depth); iz++) {
+      for (int iy=stale_depth; iy<(density.shape(1)-stale_depth); iy++) {
+	for (int ix=stale_depth; ix<(density.shape(2)-stale_depth); ix++) {
+	  pressure(iz,iy,ix) = gm1 * density(iz,iy,ix) * eint(iz,iy,ix);
+	}
+      }
+    }
+
+  } else { // not using dual energy formalism
+
+    const RdOnlyEFlt3DArray etot = integration_map.at("total_energy");
+    const RdOnlyEFlt3DArray vx = integration_map.at("velocity_x");
+    const RdOnlyEFlt3DArray vy = integration_map.at("velocity_y");
+    const RdOnlyEFlt3DArray vz = integration_map.at("velocity_z");
+
+    const bool mag = (integration_map.contains("bfield_x") ||
+		      integration_map.contains("bfield_y") ||
+		      integration_map.contains("bfield_z"));
+
+    const RdOnlyEFlt3DArray bx =
+      (mag) ? integration_map.at("bfield_x") : RdOnlyEFlt3DArray();
+    const RdOnlyEFlt3DArray by =
+      (mag) ? integration_map.at("bfield_y") : RdOnlyEFlt3DArray();
+    const RdOnlyEFlt3DArray bz =
+      (mag) ? integration_map.at("bfield_z") : RdOnlyEFlt3DArray();
+
+    for (int iz=stale_depth; iz<(density.shape(0)-stale_depth); iz++) {
+      for (int iy=stale_depth; iy<(density.shape(1)-stale_depth); iy++) {
+	for (int ix=stale_depth; ix<(density.shape(2)- stale_depth); ix++) {
+	  enzo_float v2 = (vx(iz,iy,ix) * vx(iz,iy,ix) +
 			   vy(iz,iy,ix) * vy(iz,iy,ix) +
 			   vz(iz,iy,ix) * vz(iz,iy,ix));
           enzo_float temp = (etot(iz,iy,ix) - 0.5 * v2) * density(iz,iy,ix);
@@ -176,11 +179,11 @@ void EnzoEOSIdeal::pressure_from_integration
                              bz(iz,iy,ix) * bz(iz,iy,ix));
             temp -= 0.5*b2;
           }
-          p(iz,iy,ix) = gm1 * temp;
+          pressure(iz,iy,ix) = gm1 * temp;
 	}
-
       }
     }
+
   }
 }
 
@@ -203,20 +206,22 @@ void EnzoEOSIdeal::apply_floor_to_energy_and_sync
   // in hydro_rk, eta was set equal to eta1 (it didn't use eta2 at all)
   const double eta = dual_energy_formalism_eta_;
 
-  EFlt3DArray density, vx, vy, vz, etot, eint, bx, by, bz;
-  density = integration_map.get("density", stale_depth);
-  vx = integration_map.get("velocity_x", stale_depth);
-  vy = integration_map.get("velocity_y", stale_depth);
-  vz = integration_map.get("velocity_z", stale_depth);
-  etot = integration_map.get("total_energy", stale_depth);
-  if (idual){
-    eint = integration_map.get("internal_energy", stale_depth);
-  }
-  if (mag){
-    bx = integration_map.get("bfield_x", stale_depth);
-    by = integration_map.get("bfield_y", stale_depth);
-    bz = integration_map.get("bfield_z", stale_depth);
-  }
+  const EFlt3DArray etot = integration_map.at("total_energy");
+  const EFlt3DArray eint =
+    (idual) ? integration_map.at("internal_energy") : EFlt3DArray();
+
+  using RdOnlyEFlt3DArray = CelloArray<const enzo_float, 3>;
+  const RdOnlyEFlt3DArray density = integration_map.at("density");
+  const RdOnlyEFlt3DArray vx = integration_map.at("velocity_x");
+  const RdOnlyEFlt3DArray vy = integration_map.at("velocity_y");
+  const RdOnlyEFlt3DArray vz = integration_map.at("velocity_z");
+
+  const RdOnlyEFlt3DArray bx = (mag) ?
+    RdOnlyEFlt3DArray(integration_map.at("bfield_x")) : RdOnlyEFlt3DArray();
+  const RdOnlyEFlt3DArray by = (mag) ?
+    RdOnlyEFlt3DArray(integration_map.at("bfield_y")) : RdOnlyEFlt3DArray();
+  const RdOnlyEFlt3DArray bz = (mag) ?
+    RdOnlyEFlt3DArray(integration_map.at("bfield_z")) : RdOnlyEFlt3DArray();
 
   float ggm1 = get_gamma()*(get_gamma() - 1.);
   enzo_float pressure_floor = get_pressure_floor();
@@ -229,9 +234,9 @@ void EnzoEOSIdeal::apply_floor_to_energy_and_sync
   // half_factor = 0 when eta = 0.
   const double half_factor = (eta != 0.) ? 0.5 : 0.;
 
-  for (int iz=0; iz<density.shape(0); iz++) {
-    for (int iy=0; iy<density.shape(1); iy++) {
-      for (int ix=0; ix<density.shape(2); ix++) {
+   for (int iz = stale_depth; iz < (density.shape(0) - stale_depth); iz++) {
+    for (int iy = stale_depth; iy < (density.shape(1) - stale_depth); iy++) {
+      for (int ix = stale_depth; ix < (density.shape(2) - stale_depth); ix++) {
 
 	enzo_float inv_rho = 1./density(iz,iy,ix);
 	enzo_float eint_floor = pressure_floor*inv_gm1*inv_rho;

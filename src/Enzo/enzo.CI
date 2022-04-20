@@ -66,6 +66,7 @@ module enzo {
   PUPable EnzoInitialSoup;
   PUPable EnzoInitialTurbulence;
   PUPable EnzoInitialIsolatedGalaxy;
+  PUPable EnzoInitialMergeStarsTest;
 
   PUPable IoEnzoBlock;
 
@@ -97,6 +98,7 @@ module enzo {
   PUPable EnzoMethodPpml;
   PUPable EnzoMethodTurbulence;
   PUPable EnzoMethodMHDVlct;
+  PUPable EnzoMethodMergeStars;
 
   PUPable EnzoEOSIdeal;
   PUPable EnzoIntegrationQuanUpdate;

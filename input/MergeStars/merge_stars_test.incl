@@ -1,0 +1,86 @@
+ Adapt {
+     max_level = 0;
+     min_level = 0;
+ }
+
+ Boundary {
+     type = "periodic";
+ }
+
+
+Domain {
+     lower = [ -2.0e17, -2.0e17, -2.0e17];
+     rank = 3;
+     upper = [ 2.0e17, 2.0e17, 2.0e17 ];
+ }
+
+ Field {
+     alignment = 8;
+     gamma = 1.0000001;
+     ghost_depth = 4;
+     courant = 0.3;
+     history = 1;
+     list = [ "density", "velocity_x", "velocity_y", "velocity_z", "acceleration_x", "acceleration_y", "acceleration_z", "total_energy", "internal_energy", "pressure", "density_total", "density_particle", "density_particle_accumulate", "potential", "density_gas", "X", "B", "X_copy", "B_copy", "potential_copy","diagonal" ];
+     padding = 0;
+     dual_energy = true;
+     diffusion = true;
+ }
+
+ Initial {
+     merge_stars_test {
+     	 particle_data_filename = "particles.dat";
+     };
+     list = [ "merge_stars_test" ];
+ }
+
+ Mesh {
+     root_blocks = [ 4, 4, 4 ];
+     root_rank = 3;
+     root_size = [64, 64, 64];
+ }
+
+
+Particle {
+    list = ["star"];
+    batch_size = 4096;
+    star {
+        attributes = [ "x", "default",
+                       "y", "default",
+                       "z", "default",
+                       "vx", "default",
+                       "vy", "default",
+                       "vz", "default",
+                       "ax", "default",
+                       "ay", "default",
+                       "az", "default",
+                       "mass", "default",
+		       "lifetime" , "default",
+		       "creation_time", "default",
+		       "metal_fraction", "default",
+		       "is_copy", "int64",
+		       "id" , "int64"];
+        position = [ "x", "y", "z" ];
+        velocity = [ "vx", "vy", "vz" ];
+        group_list = "has_mass";
+    }
+}
+
+ Method {
+
+     list = ["pm_update","merge_stars"];		
+     pm_update {
+         max_dt = 1e7;
+     };
+
+     merge_stars {
+
+     merging_radius_cells = 0.1;
+     
+     };
+
+ }
+
+
+ Stopping {
+   	time = 1e9;
+ }

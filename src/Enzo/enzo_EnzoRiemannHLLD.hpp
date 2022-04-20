@@ -116,13 +116,13 @@ public:
     // if S_l>0 or S_r<0, no need to go further (the internal energy is also
     // automatically handled if the dual energy formalism is in use)
     if (S_l > 0) {
-      for (std::size_t field = 0; field<LUT::NEQ; field++){
+      for (std::size_t field = 0; field<LUT::num_entries; field++){
 	fluxes[field] = flux_l[field];
       }
       vi_bar =  prim_l[LUT::velocity_i];
       return fluxes;
     } else if (S_r < 0) {
-      for (std::size_t field = 0; field<LUT::NEQ; field++){
+      for (std::size_t field = 0; field<LUT::num_entries; field++){
 	fluxes[field] = flux_r[field];
       }
       vi_bar =  prim_r[LUT::velocity_i];
@@ -227,7 +227,7 @@ public:
       Us = setup_cons_ast_(S_M, rho_ls, vy_ls, vz_ls, etot_ls, Bx,
 			   By_ls, Bz_ls);
 
-      for (std::size_t field = 0; field<LUT::NEQ; field++){
+      for (std::size_t field = 0; field<LUT::num_entries; field++){
 	fluxes[field] = flux_l[field] + S_l*(Us[field] - cons_l[field]);
       }
       return fluxes;
@@ -236,7 +236,7 @@ public:
       Us = setup_cons_ast_(S_M, rho_rs, vy_rs, vz_rs, etot_rs, Bx,
 			   By_rs, Bz_rs);
 
-      for (std::size_t field = 0; field<LUT::NEQ; field++){
+      for (std::size_t field = 0; field<LUT::num_entries; field++){
 	fluxes[field] = flux_r[field] + S_r*(Us[field] - cons_r[field]);
       }
       return fluxes;
@@ -265,7 +265,7 @@ public:
       Uss = setup_cons_ast_(S_M, rho_ls, vy_ss, vz_ss, etot_lss,
 			    Bx, By_ss, Bz_ss);
 
-      for (std::size_t field = 0; field<LUT::NEQ; field++){
+      for (std::size_t field = 0; field<LUT::num_entries; field++){
 	fluxes[field] = (flux_l[field] + S_ls*Uss[field] -
 			 (S_ls - S_l)*Us[field] - S_l*cons_l[field]);
       }
@@ -277,7 +277,7 @@ public:
       Uss = setup_cons_ast_(S_M, rho_rs, vy_ss, vz_ss, etot_rss,
 			    Bx, By_ss, Bz_ss);
 
-      for (std::size_t field = 0; field<LUT::NEQ; field++){
+      for (std::size_t field = 0; field<LUT::num_entries; field++){
 	fluxes[field] = (flux_r[field] + S_rs*Uss[field] -
 			 (S_rs - S_r)*Us[field] - S_r*cons_r[field]);
       }

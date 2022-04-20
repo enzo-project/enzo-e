@@ -252,7 +252,10 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_burkertbodenheimer_densityprofile);
   } else if (type == "isolated_galaxy") {
     initial = new EnzoInitialIsolatedGalaxy (enzo_config);
-  } else {
+  } else if (type == "merge_stars_test") {
+    initial = new EnzoInitialMergeStarsTest (enzo_config);
+  }
+  else {
     initial = Problem::create_initial_
       (type,index,config,parameters);
   }
@@ -547,11 +550,16 @@ Method * EnzoProblem::create_method_
 
   const EnzoConfig * enzo_config = enzo::config();
 
+  // The following 2 lines may need to be updated in the future
+  const std::vector<std::string>& mlist = enzo_config->method_list;
+  const bool store_fluxes_for_corrections =
+    std::find(mlist.begin(), mlist.end(), "flux_correct") != mlist.end();
+
   TRACE1("EnzoProblem::create_method %s",name.c_str());
 
   if (name == "ppm") {
 
-    method = new EnzoMethodPpm;
+    method = new EnzoMethodPpm(store_fluxes_for_corrections);
 /*
   } else if (name == "hydro") {
 
@@ -647,8 +655,8 @@ Method * EnzoProblem::create_method_
        enzo_config->method_gravity_grav_const,
        enzo_config->method_gravity_order,
        enzo_config->method_gravity_accumulate,
-       index_prolong
-       );
+       index_prolong,
+       enzo_config->method_gravity_dt_max);
 
   } else if (name == "mhd_vlct") {
 
@@ -662,7 +670,8 @@ Method * EnzoProblem::create_method_
        enzo_config->method_vlct_pressure_floor,
        enzo_config->method_vlct_mhd_choice,
        enzo_config->method_vlct_dual_energy,
-       enzo_config->method_vlct_dual_energy_eta);
+       enzo_config->method_vlct_dual_energy_eta,
+       store_fluxes_for_corrections);
 
   } else if (name == "background_acceleration") {
 
@@ -693,6 +702,10 @@ Method * EnzoProblem::create_method_
 
     // need a similar type swtich as in star maker
     method = new EnzoMethodDistributedFeedback();
+
+  } else if (name == "merge_stars") {
+
+    method = new EnzoMethodMergeStars(enzo_config->method_merge_stars_merging_radius_cells);
 
   } else {
 

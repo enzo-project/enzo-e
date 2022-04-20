@@ -345,7 +345,7 @@ ItFace Block::it_face
   int n3[3];
   int p3[3];
   size_array(n3,n3+1,n3+2);
-  cello::hierarchy()->periodicity(p3,p3+1,p3+2);
+  cello::hierarchy()->get_periodicity(p3,p3+1,p3+2);
   return ItFace (rank,min_face_rank,p3,n3,index,ic3,if3);
 }
 
@@ -365,7 +365,7 @@ ItNeighbor Block::it_neighbor (Index index,
   int n3[3];
   size_array(&n3[0],&n3[1],&n3[2]);
   int p3[3];
-  cello::hierarchy()->periodicity(p3,p3+1,p3+2);
+  cello::hierarchy()->get_periodicity(p3,p3+1,p3+2);
   return ItNeighbor
     (this,min_face_rank,p3,n3,index,
      neighbor_type,min_level,coarse_level);
@@ -671,7 +671,7 @@ void Block::init_adapt_(Adapt * adapt_parent)
   const int rank = cello::rank();
 
   int p3[3],b3[3];
-  cello::hierarchy()->periodicity(p3,p3+1,p3+2);
+  cello::hierarchy()->get_periodicity(p3,p3+1,p3+2);
   cello::hierarchy()->root_blocks(b3,b3+1,b3+2);
 
   adapt_.set_rank(rank);
@@ -689,7 +689,7 @@ void Block::init_adapt_(Adapt * adapt_parent)
     // initialize neighbors to be all adjacent root-level blocks
     int nb3[3],np3[3],ib3[3];
     cello::hierarchy()->root_blocks(nb3,nb3+1,nb3+2);
-    cello::hierarchy()->periodicity(np3,np3+1,np3+2);
+    cello::hierarchy()->get_periodicity(np3,np3+1,np3+2);
     index_.array(ib3,ib3+1,ib3+2);
     // Initialize face index loop limits
     int ifm3[3],ifp3[3];

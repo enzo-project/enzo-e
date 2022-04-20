@@ -317,8 +317,9 @@ namespace cello {
   (std::string field_name, std::string group_name,
    int cx, int cy, int cz)
   {
-    define_field (field_name,cx,cy,cz);
+    int out = define_field (field_name,cx,cy,cz);
     field_groups()->add(field_name,group_name);
+    return out;
   }
  
   //---------------------------------------------------------------------- 

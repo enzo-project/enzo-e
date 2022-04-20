@@ -12,32 +12,23 @@
 
 //----------------------------------------------------------------------
 
-static void build_field_l_(const std::vector<std::string> &quantity_l,
-                           std::vector<std::string> &field_l)
+static void check_field_l_(std::vector<std::string> &field_l)
 {
-  for (const std::string& quantity : quantity_l){
-    bool success, is_vector;
-    success = EnzoCenteredFieldRegistry::quantity_properties (quantity,
-                                                              &is_vector);
-
-    ASSERT1("build_field_l_",
-            ("\"%s\" is not registered in EnzoCenteredFieldRegistry"),
-            quantity.c_str(), success);
-
-    if (is_vector){
-      field_l.push_back(quantity + "_x");
-      field_l.push_back(quantity + "_y");
-      field_l.push_back(quantity + "_z");
-    } else {
-      field_l.push_back(quantity);
-    }
-  }
-
   FieldDescr * field_descr = cello::field_descr();
   for (const std::string& field : field_l){
     ASSERT1("EnzoMethodMHDVlct", "\"%s\" must be a permanent field",
 	    field.c_str(), field_descr->is_field(field));
   }
+}
+
+//----------------------------------------------------------------------
+
+// concatenate 2 vectors of strings
+static str_vec_t concat_str_vec_(const str_vec_t& vec1, const str_vec_t& vec2){
+  str_vec_t out(vec2);
+  out.reserve(vec1.size() + vec2.size());
+  out.insert(out.begin(),vec1.begin(), vec1.end());
+  return out;
 }
 
 //----------------------------------------------------------------------
@@ -50,7 +41,8 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
 				      double pressure_floor,
 				      std::string mhd_choice,
 				      bool dual_energy_formalism,
-				      double dual_energy_formalism_eta)
+				      double dual_energy_formalism_eta,
+				      bool store_fluxes_for_corrections)
   : Method()
 {
   // Initialize equation of state (check the validity of quantity floors)
@@ -77,24 +69,23 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
     (rsolver, mhd_choice_ != bfield_choice::no_bfield,
      eos_->uses_dual_energy_formalism());
 
-  // determine integration and primitive quantities
-  std::vector<std::string> integration_quantities, primitive_quantities;
-  integration_quantities = riemann_solver_->integration_quantities();
-  primitive_quantities = riemann_solver_->primitive_quantities();
+  // determine integration and primitive field list
+  integration_field_list_ = riemann_solver_->integration_quantity_keys();
+  primitive_field_list_ = riemann_solver_->primitive_quantity_keys();
 
   // Initialize the remaining component objects
   half_dt_recon_ = EnzoReconstructor::construct_reconstructor
-    (primitive_quantities, half_recon_name, (enzo_float)theta_limiter);
+    (primitive_field_list_, half_recon_name, (enzo_float)theta_limiter);
   full_dt_recon_ = EnzoReconstructor::construct_reconstructor
-    (primitive_quantities, full_recon_name, (enzo_float)theta_limiter);
-  
+    (primitive_field_list_, full_recon_name, (enzo_float)theta_limiter);
+
   integration_quan_updater_ =
-    new EnzoIntegrationQuanUpdate(integration_quantities, true);
+    new EnzoIntegrationQuanUpdate(integration_field_list_, true);
 
   // Determine the lists of fields that are required to hold the integration
   // quantities and primitives and ensure that they are defined
-  build_field_l_(integration_quantities, integration_field_list_);
-  build_field_l_(primitive_quantities, primitive_field_list_);
+  check_field_l_(integration_field_list_);
+  check_field_l_(primitive_field_list_);
 
   // make sure "pressure" is defined (it's needed to compute the timestep)
   FieldDescr * field_descr = cello::field_descr();
@@ -107,6 +98,15 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   } else {
     bfield_method_ = nullptr;
   }
+
+  store_fluxes_for_corrections_ = store_fluxes_for_corrections;
+  if (store_fluxes_for_corrections){
+    ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
+           "Flux corrections are currently only supported in hydro-mode",
+           mhd_choice_ == bfield_choice::no_bfield);
+  }
+
+  scratch_space_ = nullptr;
 
   // Finally, initialize the default Refresh object
   cello::simulation()->refresh_set_name(ir_post_,name());
@@ -151,6 +151,9 @@ EnzoMethodMHDVlct::~EnzoMethodMHDVlct()
   delete full_dt_recon_;
   delete riemann_solver_;
   delete integration_quan_updater_;
+  if (scratch_space_ != nullptr){
+    delete scratch_space_;
+  }
   if (bfield_method_ != nullptr){
     delete bfield_method_;
   }
@@ -171,11 +174,14 @@ void EnzoMethodMHDVlct::pup (PUP::er &p)
   p|full_dt_recon_;
   p|riemann_solver_;
   p|integration_quan_updater_;
+  // skip scratch_space_. This will be freshly constructed the first time that
+  // the compute method is called.
   p|mhd_choice_;
   p|bfield_method_;
   p|integration_field_list_;
   p|primitive_field_list_;
   p|lazy_passive_list_;
+  p|store_fluxes_for_corrections_;
 }
 
 //----------------------------------------------------------------------
@@ -183,90 +189,191 @@ void EnzoMethodMHDVlct::pup (PUP::er &p)
 EnzoEFltArrayMap EnzoMethodMHDVlct::get_integration_map_
 (Block * block,  const str_vec_t *passive_list) const noexcept
 {
-  EnzoEFltArrayMap map("integration");
+  str_vec_t field_list = (passive_list == nullptr) ? integration_field_list_ :
+    concat_str_vec_(integration_field_list_, *passive_list);
+
   EnzoFieldArrayFactory array_factory(block,0);
-  for (const std::string& field_name : integration_field_list_){
-    ASSERT1("EnzoMethodMHDVlct::get_integration_map_",
-            "EnzoEFltArrayMap can't hold more than one key called \"%s\"",
-            field_name.c_str(), !map.contains(field_name));
-    map[field_name] = array_factory.from_name(field_name);
+  std::vector<EFlt3DArray> arrays;
+  arrays.reserve(field_list.size());
+  for (const std::string& field_name : field_list){
+    arrays.push_back(array_factory.from_name(field_name));
   }
 
-  if (passive_list != nullptr){
-    for (const std::string& field_name : (*passive_list)){
-      ASSERT1("EnzoMethodMHDVlct::get_integration_map_",
-              "EnzoEFltArrayMap can't hold more than one key called \"%s\"",
-              field_name.c_str(), !map.contains(field_name));
-      map[field_name] = array_factory.from_name(field_name);
+  return EnzoEFltArrayMap("integration",field_list,arrays);
+}
+
+//----------------------------------------------------------------------
+
+EnzoVlctScratchSpace* EnzoMethodMHDVlct::get_scratch_ptr_
+(const std::array<int,3>& field_shape, const str_vec_t& passive_list) noexcept
+{
+  if (scratch_space_ == nullptr){
+    scratch_space_ = new EnzoVlctScratchSpace
+      (field_shape, integration_field_list_, primitive_field_list_,
+       integration_quan_updater_->integration_keys(), passive_list,
+       eos_->uses_dual_energy_formalism());
+  }
+  return scratch_space_;
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodMHDVlct::save_fluxes_for_corrections_
+(Block * block, const EnzoEFltArrayMap &flux_map, int dim, double cell_width,
+ double dt) const noexcept
+{
+
+  Field field = block->data()->field();
+
+  // load the cell-centered shape and the ghost depth
+  int density_field_id = field.field_id("density");
+  int cc_mx, cc_my, cc_mz; // the values are ordered as x,y,z
+  field.dimensions(density_field_id, &cc_mx, &cc_my, &cc_mz);
+  int gx, gy, gz;
+  field.ghost_depth(density_field_id, &gx, &gy, &gz);
+
+  double dt_dxi = dt/cell_width;
+
+  FluxData * flux_data = block->data()->flux_data();
+  const int nf = flux_data->num_fields();
+
+  for (int i_f = 0; i_f < nf; i_f++) {
+    const int index_field = flux_data->index_field(i_f);
+    const std::string field_name = field.field_name(index_field);
+
+    // note the field_name is the same as the key
+    CelloArray<const enzo_float, 3> flux_arr = flux_map.at(field_name);
+
+    FaceFluxes * left_ff = flux_data->block_fluxes(dim,0,i_f);
+    FaceFluxes * right_ff = flux_data->block_fluxes(dim,1,i_f);
+
+    int mx, my, mz;
+    left_ff->get_size(&mx,&my,&mz);
+
+    int dx_l,dy_l,dz_l,    dx_r,dy_r,dz_r;
+    enzo_float* left_dest = left_ff->flux_array(&dx_l,&dy_l,&dz_l);
+    enzo_float* right_dest = right_ff->flux_array(&dx_r,&dy_r,&dz_r);
+
+    // NOTE: dx_l/dx_r, dy_l/dy_r, dz_l/dz_r have the wrong value when
+    // dim is 0, 1, or 2 respectively. In each case the variables are equal to
+    // 1 when they should be 0.
+
+    if (dim == 0){
+      int left_ix = gx-1;
+      int right_ix = cc_mx-gx-1;
+
+      for (int iz = 0; iz < mz; iz++){
+        for (int iy = 0; iy < my; iy++){
+          left_dest[dz_l*iz + dy_l*iy]
+            = dt_dxi* flux_arr(gz+iz, gy+iy, left_ix);
+          right_dest[dz_r*iz + dy_r*iy]
+            = dt_dxi* flux_arr(gz+iz, gy+iy, right_ix);
+        }
+      }
+
+    } else if (dim == 1) {
+      int left_iy = gy-1;
+      int right_iy = cc_my-gy-1;
+
+      for (int iz = 0; iz < mz; iz++){
+        for (int ix = 0; ix < mx; ix++){
+          left_dest[dz_l*iz + dx_l*ix]
+            = dt_dxi* flux_arr(gz+iz, left_iy, gx+ix);
+          right_dest[dz_l*iz + dx_l*ix]
+            = dt_dxi* flux_arr(gz+iz, right_iy, gx+ix);
+        }
+      }
+    } else {
+      int left_iz = gz-1;
+      int right_iz = cc_mz-gz-1;
+
+      for (int iy = 0; iy < my; iy++){
+        for (int ix = 0; ix < mx; ix++){
+          left_dest[dy_l*iy + dx_l*ix]
+            = dt_dxi* flux_arr(left_iz, gy + iy, gx+ix);
+          right_dest[dy_l*iy + dx_l*ix]
+            = dt_dxi* flux_arr(right_iz, gy + iy, gx+ix);
+        }
+      }
+
     }
   }
-  return map;
+}
+
+//----------------------------------------------------------------------
+
+static void allocate_FC_flux_buffer_(Block * block) throw()
+{
+  Field field = block->data()->field();
+  // this could be better integrated with fields required by the solver
+  auto field_names = field.groups()->group_list("conserved");
+  const int nf = field_names.size();
+  std::vector<int> field_list;
+  field_list.resize(nf);
+  for (int i=0; i<nf; i++) {
+    field_list[i] = field.field_id(field_names[i]);
+  }
+
+  int nx,ny,nz;
+  field.size(&nx,&ny,&nz);
+  int single_flux_array = enzo::config()->method_flux_correct_single_array;
+
+  // this needs to be allocated every cycle
+  block->data()->flux_data()->allocate (nx,ny,nz,field_list,single_flux_array);
 }
 
 //----------------------------------------------------------------------
 
 void EnzoMethodMHDVlct::compute ( Block * block) throw()
 {
+  if (store_fluxes_for_corrections_){ allocate_FC_flux_buffer_(block); }
+
   if (block->is_leaf()) {
     // Check that the mesh size and ghost depths are appropriate
     check_mesh_and_ghost_size_(block);
 
-    // declaring Maps of arrays and stand-alone arrays that wrap existing
-    // fields and/or serve as scratch space.
+    // load the list of keys for the passively advected scalars
+    const str_vec_t passive_list = *(lazy_passive_list_.get_list());
 
-    // map that holds arrays wrapping the Cello Fields holding each of the
-    // integration quantities. Additionally, this also includes temporary
-    // arrays used to hold the specific form of the passive scalar
-    EnzoEFltArrayMap integration_map; // this will be overwritten
+    // initialize map that holds arrays wrapping the Cello Fields holding each
+    // of the integration quantities. Additionally, this also includes
+    // temporary arrays used to hold the specific form of the passive scalar
+    EnzoEFltArrayMap integration_map = get_integration_map_(block,
+                                                            &passive_list);
+
+    // get maps of arrays and stand-alone arrays that serve as scratch space.
+    // (first, retrieve the pointer to the scratch space struct)
+    const std::array<int,3> shape = {integration_map.at("density").shape(0),
+                                     integration_map.at("density").shape(1),
+                                     integration_map.at("density").shape(2)};
+    EnzoVlctScratchSpace* const scratch = get_scratch_ptr_(shape, passive_list);
 
     // map used for storing integration values at the half time-step. This
     // includes key,array pairs for each entry in integration_map (there should
     // be no aliased fields shared between maps)
-    EnzoEFltArrayMap temp_integration_map("temp_integration");
+    EnzoEFltArrayMap temp_integration_map = scratch->temp_integration_map;
 
     // Map of arrays used to temporarily store the cell-centered primitive
     // quantities that are subsequently reconstructed. This includes arrays for
     // storing the specific form of each of the passively advected scalars.
-    EnzoEFltArrayMap primitive_map("primitive");
-
-    // map holding the arrays wrapping each fields corresponding to a passively
-    // advected scalar. The scalar is in conserved form.
-    EnzoEFltArrayMap conserved_passive_scalar_map; // this will be overwritten
+    EnzoEFltArrayMap primitive_map = scratch->primitive_map;
 
     // holds left and right reconstructed primitives (scratch-space)
-    EnzoEFltArrayMap priml_map("priml");
-    EnzoEFltArrayMap primr_map("primr");
+    EnzoEFltArrayMap priml_map = scratch->priml_map;
+    EnzoEFltArrayMap primr_map = scratch->primr_map;
 
     // maps used to store fluxes (in the future, these will wrap FluxData
     // entries)
-    EnzoEFltArrayMap xflux_map("xflux");
-    EnzoEFltArrayMap yflux_map("yflux");
-    EnzoEFltArrayMap zflux_map("zflux");
+    EnzoEFltArrayMap xflux_map = scratch->xflux_map;
+    EnzoEFltArrayMap yflux_map = scratch->yflux_map;
+    EnzoEFltArrayMap zflux_map = scratch->zflux_map;
 
     // map of arrays  used to accumulate the changes to the conserved forms of
     // the integration quantities and passively advected scalars. In other
     // words, at the start of the (partial) timestep, the fields are all set to
     // zero and are used to accumulate the flux divergence and source terms. If
     // CT is used, it won't have space to store changes in the magnetic fields.
-    EnzoEFltArrayMap dUcons_map("dUcons");
-
-    setup_arrays_(block, integration_map, temp_integration_map, primitive_map,
-                  priml_map, primr_map,  xflux_map, yflux_map, zflux_map,
-                  dUcons_map);
-
-    // Setup a pointer to an array that used to store interface velocity fields
-    // from computed by the Riemann Solver (to use in the calculation of the
-    // internal energy source term). If the dual energy formalism is not in
-    // use, don't actually allocate the array and set the pointer to NULL.
-    EFlt3DArray interface_velocity_arr, *interface_velocity_arr_ptr;
-    if (eos_->uses_dual_energy_formalism()){
-      EFlt3DArray density = integration_map.at("density");
-      interface_velocity_arr = EFlt3DArray(density.shape(0), density.shape(1),
-                                           density.shape(2));
-      interface_velocity_arr_ptr = &interface_velocity_arr;
-    } else {
-      interface_velocity_arr_ptr = nullptr;
-    }
+    EnzoEFltArrayMap dUcons_map = scratch->dUcons_map;
 
     // allocate constrained transport object
     if (bfield_method_ != nullptr) {
@@ -301,8 +408,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // set all elements of the arrays in dUcons_map to 0 (throughout the rest
       // of the current loop, flux divergence and source terms will be
       // accumulated in these arrays)
-      integration_quan_updater_->clear_dUcons_map
-        (dUcons_map, 0., *(lazy_passive_list_.get_list()));
+      integration_quan_updater_->clear_dUcons_map(dUcons_map, 0., passive_list);
 
       // Compute the primitive quantities from the integration quantites
       // This basically copies all quantities that are both and an integration
@@ -310,22 +416,54 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // conserved-form to specific-form (i.e. from density to mass fraction).
       // For a non-barotropic gas, this also computes pressure
       eos_->primitive_from_integration(cur_integration_map, primitive_map,
-                                       stale_depth,
-                                       *(lazy_passive_list_.get_list()));
+                                       stale_depth, passive_list);
 
       // Compute flux along each dimension
-      compute_flux_(0, cur_dt, cell_widths[0], primitive_map,
-                    priml_map, primr_map, xflux_map, dUcons_map,
-                    interface_velocity_arr_ptr, *reconstructor, bfield_method_,
-                    stale_depth, *(lazy_passive_list_.get_list()));
-      compute_flux_(1, cur_dt, cell_widths[1], primitive_map,
-                    priml_map, primr_map, yflux_map, dUcons_map,
-                    interface_velocity_arr_ptr, *reconstructor, bfield_method_,
-                    stale_depth, *(lazy_passive_list_.get_list()));
-      compute_flux_(2, cur_dt, cell_widths[2], primitive_map,
-                    priml_map, primr_map, zflux_map, dUcons_map,
-                    interface_velocity_arr_ptr, *reconstructor, bfield_method_,
-                    stale_depth, *(lazy_passive_list_.get_list()));
+      EnzoEFltArrayMap *flux_maps[3] = {&xflux_map, &yflux_map, &zflux_map};
+
+      for (int dim = 0; dim < 3; dim++){
+        // trim the shape of priml_map and primr_map (they're bigger than
+        // necessary so that they can be reused for each dim).
+        CSlice x_slc = (dim == 0) ? CSlice(0,-1) : CSlice(0, nullptr);
+        CSlice y_slc = (dim == 1) ? CSlice(0,-1) : CSlice(0, nullptr);
+        CSlice z_slc = (dim == 2) ? CSlice(0,-1) : CSlice(0, nullptr);
+
+        EnzoEFltArrayMap pl_map = priml_map.subarray_map(z_slc, y_slc, x_slc);
+        EnzoEFltArrayMap pr_map = primr_map.subarray_map(z_slc, y_slc, x_slc);
+
+        EFlt3DArray *interface_vel_arr_ptr, sliced_interface_vel_arr;
+        if (eos_->uses_dual_energy_formalism()){
+          // trim scratch-array for storing interface velocity values (computed
+          // by the Riemann Solver). This is used in the calculation of the
+          // internal energy source term). As with priml_map and primr_map, the
+          // array is bigger than necessary so it can be reused for each dim
+          sliced_interface_vel_arr =
+            scratch->interface_vel_arr.subarray(z_slc, y_slc, x_slc);
+          interface_vel_arr_ptr = &sliced_interface_vel_arr;
+        } else {
+          // no scratch-space was allocated, so we just pass a nullptr
+          interface_vel_arr_ptr = nullptr;
+        }
+
+        compute_flux_(dim, cur_dt, cell_widths[dim], primitive_map,
+                      pl_map, pr_map, *(flux_maps[dim]), dUcons_map,
+                      interface_vel_arr_ptr, *reconstructor, bfield_method_,
+                      stale_depth, passive_list);
+      }
+
+      if (i == 1 && store_fluxes_for_corrections_) {
+        // Dual Energy Formalism Note:
+        // - the interface velocities on the edge of the blocks will be
+        //   different if using SMR/AMR. This means that the internal energy
+        //   source terms won't be fully self-consistent along the edges. This
+        //   same effect is also present in the Ppm Solver
+        save_fluxes_for_corrections_(block, xflux_map, 0, cell_widths[0],
+				     cur_dt);
+        save_fluxes_for_corrections_(block, yflux_map, 1, cell_widths[1],
+				     cur_dt);
+        save_fluxes_for_corrections_(block, zflux_map, 2, cell_widths[2],
+				     cur_dt);
+      }
 
       // increment the stale_depth
       stale_depth+=reconstructor->immediate_staling_rate();
@@ -350,7 +488,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // with the internal energy)
       integration_quan_updater_->update_quantities
         (integration_map, dUcons_map, out_integration_map, eos_, stale_depth,
-         *(lazy_passive_list_.get_list()));
+         passive_list);
 
       // increment stale_depth since the inner values have been updated
       // but the outer values have not
@@ -391,9 +529,9 @@ void EnzoMethodMHDVlct::compute_flux_
  EnzoEFltArrayMap &primitive_map,
  EnzoEFltArrayMap &priml_map, EnzoEFltArrayMap &primr_map,
  EnzoEFltArrayMap &flux_map, EnzoEFltArrayMap &dUcons_map,
- EFlt3DArray *interface_velocity_arr_ptr, EnzoReconstructor &reconstructor,
- EnzoBfieldMethod *bfield_method, const int stale_depth,
- const str_vec_t& passive_list) const noexcept
+ const EFlt3DArray* const interface_velocity_arr_ptr,
+ EnzoReconstructor &reconstructor, EnzoBfieldMethod *bfield_method,
+ const int stale_depth, const str_vec_t& passive_list) const noexcept
 {
 
   // First, reconstruct the left and right interface values
@@ -440,89 +578,6 @@ void EnzoMethodMHDVlct::compute_flux_
   if (bfield_method != nullptr){
     bfield_method->identify_upwind(flux_map, dim, cur_stale_depth);
   }
-}
-
-//----------------------------------------------------------------------
-
-static void add_temporary_arrays_to_map_
-(EnzoEFltArrayMap &map, const std::array<int,3> &shape,
- const std::vector<std::string>* const nonpassive_names,
- const str_vec_t* const passive_lists)
-{
-
-  if (nonpassive_names != nullptr){
-    for (const std::string& name : (*nonpassive_names)){
-      map[name] = EFlt3DArray(shape[0], shape[1], shape[2]);
-    }
-  }
-
-  if (passive_lists != nullptr){
-    for (const std::string& key : (*passive_lists)){
-      map[key] = EFlt3DArray(shape[0], shape[1], shape[2]);
-    }
-  }
-}
-
-//----------------------------------------------------------------------
-
-void EnzoMethodMHDVlct::setup_arrays_
-(Block *block, EnzoEFltArrayMap &integration_map,
- EnzoEFltArrayMap &temp_integration_map, EnzoEFltArrayMap &primitive_map,
- EnzoEFltArrayMap &priml_map, EnzoEFltArrayMap &primr_map,
- EnzoEFltArrayMap &xflux_map, EnzoEFltArrayMap &yflux_map,
- EnzoEFltArrayMap &zflux_map, EnzoEFltArrayMap &dUcons_map) noexcept
-{
-
-  // allocate stuff! Make sure to do it in a way such that we don't have to
-  // separately deallocate it!
-
-  // First, setup integration_map
-  integration_map = get_integration_map_
-    (block, (lazy_passive_list_.get_list()).get());
-
-  const std::array<int,3> shape = {integration_map.at("density").shape(0),
-				   integration_map.at("density").shape(1),
-				   integration_map.at("density").shape(2)};
-
-  // Next, setup temp_integration_map
-  add_temporary_arrays_to_map_(temp_integration_map, shape,
-                               &integration_field_list_,
-                               (lazy_passive_list_.get_list()).get());
-
-  // Prepare arrays to hold fluxes. It should include keys for all integration
-  // quantities actively (including passively advected scalars)
-  EnzoEFltArrayMap* flux_maps[3] = {&zflux_map, &yflux_map, &xflux_map};
-  for (std::size_t i = 0; i < 3; i++){
-    std::array<int,3> cur_shape = shape; // makes a deep copy
-    cur_shape[i] -= 1;
-    add_temporary_arrays_to_map_(*(flux_maps[i]), cur_shape,
-                                 &integration_field_list_,
-                                 (lazy_passive_list_.get_list()).get());
-  }
-
-  // Prepare fields used to accumulate all changes to the integration
-  // quantities (including passively advected scalars). If CT is in use,
-  // dUcons_group should not have storage for magnetic fields since CT
-  // independently updates magnetic fields (this exclusion is implicitly
-  // handled by integration_quan_updater_)
-  std::vector<std::string> tmp = integration_quan_updater_->integration_keys();
-  add_temporary_arrays_to_map_(dUcons_map, shape, &tmp,
-                               (lazy_passive_list_.get_list()).get());
-
-  // Setup primitive_map
-  add_temporary_arrays_to_map_(primitive_map, shape,
-                               &primitive_field_list_,
-                               (lazy_passive_list_.get_list()).get());
-
-  // Prepare maps for holding the left and right reconstructed primitives.
-  // As necessary, we pretend that these are centered along:
-  //   - z and have shape (mz-1,  my,  mx)
-  //   - y and have shape (  mz,my-1,  mx)
-  //   - x and have shape (  mz,  my,mx-1)
-  add_temporary_arrays_to_map_(priml_map, shape, &primitive_field_list_,
-                               (lazy_passive_list_.get_list()).get());
-  add_temporary_arrays_to_map_(primr_map, shape, &primitive_field_list_,
-                               (lazy_passive_list_.get_list()).get());
 }
 
 //----------------------------------------------------------------------
