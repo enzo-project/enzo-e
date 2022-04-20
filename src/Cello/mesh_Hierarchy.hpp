@@ -42,8 +42,8 @@ public: // interface
       root_size_[axis] = 0;
       lower_[axis] = 0.0;
       upper_[axis] = 0.0;
-      blocking_[axis] = 0.0;
-      periodicity_[axis] = false;
+      blocking_[axis] = 0;
+      periodicity_[axis] = 0;
     }
   }
   
@@ -269,7 +269,7 @@ protected: // attributes
   int blocking_[3];
 
   /// Periodicity of boundary conditions on faces
-  bool periodicity_[3];
+  int periodicity_[3];
 
 public: // static attributes
 
