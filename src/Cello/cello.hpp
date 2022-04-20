@@ -223,7 +223,7 @@ enum type_enum {
 #endif
 
 
-#ifdef BUG_FIX_150
+#ifdef BYPASS_CHARM_MEM_LEAK
 enum class MsgType { msg_refine, msg_check };
 #endif
 

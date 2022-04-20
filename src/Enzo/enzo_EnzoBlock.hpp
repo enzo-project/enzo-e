@@ -101,7 +101,7 @@ public:
 
 public: // interface
 
-#ifdef BUG_FIX_150  
+#ifdef BYPASS_CHARM_MEM_LEAK
   /// Initialize the EnzoBlock chare array
   
   EnzoBlock ( process_type ip_source, MsgType msg_type );
@@ -121,9 +121,9 @@ public: // interface
        redshift(0.0)
   {
     performance_start_(perf_block);
-#ifdef TRACE_BLOCK  
+#ifdef TRACE_BLOCK
     CkPrintf ("%d %p TRACE_BLOCK EnzoBlock()\n",CkMyPe(),(void *)this);
-#endif  
+#endif
     for (int i=0; i<MAX_DIMENSION; i++) {
       GridLeftEdge[i] = 0;
       GridDimension[i] = 0;
@@ -140,10 +140,10 @@ public: // interface
       dt(0.0),
       redshift(0.0)
   {
-#ifdef TRACE_BLOCK  
+#ifdef TRACE_BLOCK
     CkPrintf ("%d %p TRACE_BLOCK %s EnzoBlock(CkMigrateMessage)\n",
               CkMyPe(),(void *)this, name(thisIndex).c_str());
-#endif  
+#endif
     performance_start_(perf_block);
     TRACE("CkMigrateMessage");
     for (int i=0; i<MAX_DIMENSION; i++) {

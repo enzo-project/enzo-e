@@ -89,7 +89,7 @@ void EnzoSimulation::pup (PUP::er &p)
 }
 
 //----------------------------------------------------------------------
-#ifdef BUG_FIX_150
+#ifdef BYPASS_CHARM_MEM_LEAK
 
 void EnzoSimulation::p_get_msg_refine(Index index)
 {

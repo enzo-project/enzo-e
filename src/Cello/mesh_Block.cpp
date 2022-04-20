@@ -10,22 +10,6 @@
 #include "main.hpp"
 #include "charm_simulation.hpp"
 
-// #define TRACE_BLOCK
-// #define TRACE_ADAPT
-
-// #define TRACE_REFINE
-// #define TRACE_COARSEN
-
-// #define DEBUG_ADAPT
-// #define DEBUG_FIELD_FACE
-// #define DEBUG_FACE
-
-#ifdef DEBUG_FACE
-#   define DEBUG_FACES(MSG) debug_faces_(MSG)
-#else
-#   define DEBUG_FACES(MSG) /* ... */
-#endif
-
 // KEEP CONSISTENT WITH _comm.hpp: phase_type
 const char * phase_name[] = {
   "unknown",
@@ -51,7 +35,7 @@ const char * phase_name[] = {
 };
 
 //======================================================================
-#ifdef BUG_FIX_150
+#ifdef BYPASS_CHARM_MEM_LEAK
 //======================================================================
 
 Block::Block ( process_type ip_source, MsgType msg_type )
@@ -109,10 +93,6 @@ void Block::p_set_msg_refine(MsgRefine * msg)
 {
   performance_start_(perf_block);
 
-#ifdef TRACE_BLOCK
-  CkPrintf ("DEBUG_BLOCK p_set_msg_refine msg->face_level_ %p\n",
-            msg->face_level_);
-#endif
   init_refine_ (msg->index_,
 	msg->nx_, msg->ny_, msg->nz_,
 	msg->num_field_blocks_,
@@ -123,13 +103,6 @@ void Block::p_set_msg_refine(MsgRefine * msg)
         msg->adapt_parent_);
 
   init_adapt_(msg->adapt_parent_);
-
-#ifdef TRACE_BLOCK
-  {
-  CkPrintf ("%d %s index TRACE_BLOCK p_set_msg_refine(MsgRefine)\n",
-            CkMyPe(),name(msg->index_).c_str());
-  }
-#endif
 
   apply_initial_(msg);
 
@@ -149,7 +122,7 @@ void Block::p_set_msg_refine(MsgRefine * msg)
 }
 
 //======================================================================
-#else /* not BUG_FIX_150 */
+#else /* not BYPASS_CHARM_MEM_LEAK */
 //======================================================================
 
 Block::Block ( MsgRefine * msg )
@@ -215,7 +188,7 @@ Block::Block ( MsgRefine * msg )
 
 }
 //======================================================================
-#endif /* BUG_FIX_150 */
+#endif /* BYPASS_CHARM_MEM_LEAK */
 //======================================================================
 
 //----------------------------------------------------------------------
@@ -240,11 +213,6 @@ void Block::init_refine_
   adapt_ready_ = false;
   adapt_balanced_ = false;
   adapt_changed_ = 0;
-
-#ifdef TRACE_BLOCK
-  CkPrintf ("TRACE_BLOCK %s init_refine_ face_level %p\n",name().c_str(),
-            (void *)face_level);
-#endif
 
   // Enable Charm++ AtSync() dynamic load balancing
 
@@ -327,11 +295,6 @@ void Block::init_refine_
     FieldFace * field_face = create_face
       (if3, ic3, g3, refresh_fine, refresh, true);
 
-#ifdef DEBUG_FIELD_FACE
-  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",
-            CkMyPe(),__FILE__,__LINE__,(void*)field_face);
-#endif
-
     // Copy refined field data
     field_face -> array_to_face (array, data()->field());
 
@@ -354,9 +317,6 @@ void Block::init_refine_
 
   // Do not migrate the root Block (0,0,0) level (0)
   setMigratable(! index_.is_root());
-
-  DEBUG_FACES("Block()");
-
 }
 
 //----------------------------------------------------------------------
@@ -374,10 +334,6 @@ void Block::initialize()
   if (! initial_new) {
     if (is_first_cycle && level() <= 0) {
       CkCallback callback (CkIndex_Block::r_end_initialize(NULL), thisProxy);
-#ifdef TRACE_BLOCK
-      CkPrintf ("%s %s:%d DEBUG_CONTRIBUTE r_end_initialize()\n",
-                name().c_str(),__FILE__,__LINE__); fflush(stdout);
-#endif
       contribute(0,0,CkReduction::concat,callback);
     }
   }
@@ -437,8 +393,6 @@ void Block::pup(PUP::er &p)
   p | index_solver_;
   p | refresh_;
   // SKIP method_: initialized when needed
-
-  if (up) DEBUG_FACES("PUP");
 
   if (up) {
     Simulation * simulation = cello::simulation();
@@ -613,10 +567,6 @@ void Block::apply_initial_(MsgRefine * msg) throw ()
     TRACE("Block::apply_initial_()");
     if (initial_new) {
 
-#ifdef TRACE_BLOCK
-      CkPrintf ("TRACE_BLOCK %s apply_initial() initial_new\n",name().c_str());
-      fflush(stdout);
-#endif
       initial_new_begin_(0);
 
     } else {
@@ -625,10 +575,6 @@ void Block::apply_initial_(MsgRefine * msg) throw ()
       index_initial_ = 0;
       Problem * problem = cello::problem();
       while (Initial * initial = problem->initial(index_initial_)) {
-#ifdef TRACE_BLOCK
-        CkPrintf ("TRACE_BLOCK %s apply_initial %p()\n",name().c_str(),(void*)initial);
-        fflush(stdout);
-#endif
         initial->enforce_block(this,cello::hierarchy());
         index_initial_++;
       }
@@ -640,14 +586,6 @@ void Block::apply_initial_(MsgRefine * msg) throw ()
 Block::~Block()
 {
   Simulation * simulation = cello::simulation();
-
-#ifdef TRACE_COARSEN
-      CkPrintf ("TRACE_COARSEN %s\n",name().c_str());
-      fflush(stdout);
-#endif
-#ifdef TRACE_BLOCK
-  CkPrintf ("%d %s TRACE_BLOCK Block::~Block())\n",  CkMyPe(),name_.c_str()); // 0
-#endif
 
   Monitor * monitor = simulation ? simulation->monitor() : NULL;
 
@@ -676,10 +614,6 @@ Block::~Block()
 
     FieldFace * field_face = create_face
       ( if3,ic3,g3,refresh_coarse,refresh,true);
-#ifdef DEBUG_FIELD_FACE
-    CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",
-              CkMyPe(),__FILE__,__LINE__,(void*)field_face);
-#endif
 
     field_face->face_to_array(data()->field(),&n,&array);
     delete field_face;
@@ -723,10 +657,6 @@ void Block::p_refresh_child
 
   FieldFace * field_face = create_face
     (if3, ic3, g3, refresh_coarse,refresh,true);
-#ifdef DEBUG_FIELD_FACE
-  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",
-            CkMyPe(),__FILE__,__LINE__,(void*)field_face);
-#endif
 
   field_face -> array_to_face (buffer, data()->field());
   delete field_face;
@@ -766,10 +696,6 @@ Block::Block ()
     index_solver_(),
     refresh_()
 {
-#ifdef TRACE_BLOCK
-  CkPrintf ("%d TRACE_BLOCK %s Block::Block()\n",
-            CkMyPe(),name(thisIndex).c_str());
-#endif
   init_refresh_();
   init_adapt_(nullptr);
 
@@ -807,10 +733,6 @@ Block::Block (CkMigrateMessage *m)
     index_solver_(),
     refresh_()
 {
-#ifdef TRACE_BLOCK
-  CkPrintf ("%d TRACE_BLOCK %s Block::Block(CkMigrateMessage)\n",
-            CkMyPe(),name(thisIndex).c_str());
-#endif
   init_refresh_();
   init_adapt_(nullptr);
 }
@@ -820,27 +742,18 @@ Block::Block (CkMigrateMessage *m)
 void Block::init_adapt_(Adapt * adapt_parent)
 {
   const int level = index_.level();
-#ifdef TRACE_BLOCK
-  CkPrintf ("%d TRACE_BLOCK %s Block::init_adapt_() level %d\n",CkMyPe(),name().c_str(),level); // 0
-  fflush(stdout);
-#endif
-
-  
   const int rank = cello::rank();
+
   int p3[3],b3[3];
   cello::hierarchy()->get_periodicity(p3,p3+1,p3+2);
   cello::hierarchy()->root_blocks(b3,b3+1,b3+2);
-  
+
   adapt_.set_rank(rank);
   adapt_.set_min_level(cello::config()->mesh_min_level);
   adapt_.set_max_level(cello::config()->mesh_max_level);
   adapt_.set_index(index_);
   adapt_.set_periodicity(p3);
   adapt_.set_valid(true);
-#ifdef TRACE_BLOCK
-  CkPrintf ("TRACE_BLOCK %s Block::init_adapt_() set valid %p\n",name().c_str(),(void *)&adapt_);
-  fflush(stdout);
-#endif
 
   const bool initial_cycle =
     (cello::simulation()->cycle() == cello::config()->initial_cycle);
@@ -876,7 +789,7 @@ void Block::init_adapt_(Adapt * adapt_parent)
         for (if3[0]=ifm3[0]; if3[0]<=ifp3[0]; ++if3[0]) {
           if (if3[0] || if3[1] || if3[2]) {
             Index index_neighbor = index_.index_neighbor(if3,nb3);
-            adapt_.insert_neighbor(index_neighbor,this);
+            adapt_.insert_neighbor(index_neighbor);
           }
         }
       }
@@ -884,9 +797,6 @@ void Block::init_adapt_(Adapt * adapt_parent)
   } else if (level > 0) {
     // else if a refined Block, initialize adapt from its incoming
     // parent block
-#ifdef DEBUG_ADAPT
-    adapt_.print("init_adapt child before",this);
-#endif
     int ic3[3];
     index_.child(level,ic3,ic3+1,ic3+2);
     adapt_.refine(*adapt_parent,ic3);
@@ -903,9 +813,6 @@ void Block::init_adapt_(Adapt * adapt_parent)
 
 void Block::init_refresh_()
 {
-#ifdef TRACE_BLOCK
-  CkPrintf ("TRACE_BLOCK init_refresh\n");
-#endif
   const int count = cello::simulation()->refresh_count();
   refresh_sync_list_.resize(count);
   refresh_msg_list_.resize(count);
@@ -1073,10 +980,6 @@ FieldFace * Block::create_face
  int refresh_type, Refresh * refresh, bool new_refresh) const
 {
   FieldFace  * field_face = new FieldFace(cello::rank());
-#ifdef DEBUG_FIELD_FACE
-  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",
-            CkMyPe(),__FILE__,__LINE__,(void*)field_face);
-#endif
 
   field_face -> set_refresh_type (refresh_type);
   field_face -> set_child (ic3[0],ic3[1],ic3[2]);
@@ -1120,10 +1023,6 @@ void Block::is_on_boundary (bool is_boundary[3][2]) const throw()
 void Block::verify_neighbors()
 {
   if (! is_leaf()) return;
-#ifdef TRACE_ADAPT
-  CkPrintf ("TRACE_ADAPT verify_neighbors %s\n",name().c_str());
-  fflush(stdout);
-#endif
 
   ItNeighbor it_neighbor = this->it_neighbor(index_);
 
@@ -1139,10 +1038,6 @@ void Block::verify_neighbors()
 
   while (it_neighbor.next(tf3)) {
      Index index_neighbor = it_neighbor.index();
-#ifdef TRACE_ADAPT
-     CkPrintf ("   TRACE_ADAPT %s\n",name(index_neighbor).c_str());
-     fflush(stdout);
-#endif
      char buffer[256];
      snprintf (buffer,80,"%s Neighbor mismatch between Adapt and face_level_",
                name().c_str());
@@ -1324,68 +1219,5 @@ bool Block::check_position_in_block
         ((z >= zm) && (z < zp))) result = true;
 
   return result;
-}
-
-//----------------------------------------------------------------------
-
-void Block::debug_faces_(const char * mesg)
-{
-#ifdef DEBUG_ADAPT
-
-#ifdef CELLO_DEBUG
-  FILE * fp_debug = simulation()->fp_debug();
-#endif
-  int if3[3] = {0};
-  int ic3[3] = {0};
-
-  for (ic3[1]=1; ic3[1]>=0; ic3[1]--) {
-    for (if3[1]=1; if3[1]>=-1; if3[1]--) {
-
-      PARALLEL_PRINTF ("%s ",name().c_str());
-
-      for (if3[0]=-1; if3[0]<=1; if3[0]++) {
-#ifdef CELLO_DEBUG
-	fprintf (fp_debug,(ic3[1]==1) ? "%d " : "  ",face_level(index_,if3));
-#endif
-	PARALLEL_PRINTF ((ic3[1]==1) ? "%d " : "  ",face_level(index_,if3));
-      }
-#ifdef CELLO_DEBUG
-      fprintf (fp_debug,"| ");
-#endif
-      PARALLEL_PRINTF ("| ") ;
-      for (ic3[0]=0; ic3[0]<2; ic3[0]++) {
-	for (if3[0]=-1; if3[0]<=1; if3[0]++) {
-	  for (if3[0]=-1; if3[0]<=1; if3[0]++) {
-#ifdef CELLO_DEBUG
-	    fprintf (fp_debug,"%d ",child_face_level(ic3,if3));
-#endif
-	    PARALLEL_PRINTF ("%d ",child_face_level(ic3,if3));
-	  }
-	}
-      }
-#ifdef CELLO_DEBUG
-      fprintf (fp_debug,"| ");
-#endif
-      PARALLEL_PRINTF ("| ");
-      for (ic3[0]=0; ic3[0]<2; ic3[0]++) {
-	for (if3[0]=-1; if3[0]<=1; if3[0]++) {
-	  for (if3[0]=-1; if3[0]<=1; if3[0]++) {
-#ifdef CELLO_DEBUG
-	    fprintf (fp_debug,"%d ",child_face_level_next(ic3,if3));
-#endif
-	    PARALLEL_PRINTF ("%d ",child_face_level_next(ic3,if3));
-	  }
-	}
-      }
-#ifdef CELLO_DEBUG
-      fprintf (fp_debug,"\n");
-      fflush(fp_debug);
-#endif
-      PARALLEL_PRINTF ("\n");
-      fflush(stdout);
-
-    }
-  }
-#endif
 }
 

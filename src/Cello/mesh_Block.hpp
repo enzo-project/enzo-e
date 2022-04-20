@@ -37,7 +37,7 @@ class Block : public CBase_Block
 
 public: // interface
 
-#ifdef BUG_FIX_150
+#ifdef BYPASS_CHARM_MEM_LEAK
   /// create a Block whose MsgRefine is on the creating process
   Block ( process_type ip_source, MsgType msg_type );
   /// Initialize Block using MsgRefine returned by creating process
@@ -132,11 +132,11 @@ public: // interface
   const Index & index() const
   { return index_; }
 
-  int face_level (Index index, const int if3[3]) const
-  { return adapt_.face_level(index,if3,Adapt::LevelType::curr); }
+  int face_level (const int if3[3]) const
+  { return adapt_.face_level(if3,Adapt::LevelType::curr); }
 
-  int face_level (Index index, int axis, int face) const
-  { return adapt_.face_level(index,axis,face,Adapt::LevelType::curr); }
+  int face_level (int axis, int face) const
+  { return adapt_.face_level(axis,face,Adapt::LevelType::curr); }
 
 
   int child_face_level (const int ic3[3], const int if3[3]) const
@@ -460,7 +460,7 @@ public:
 
   void adapt_recv_level
   (int adapt_step,
-   Index index_debug,
+   Index index_send,
    int ic3[3],
    std::vector<int> if3[3],
    int level_now, int level_new,
@@ -842,8 +842,6 @@ protected: // functions
 	     -1 <= if3[1] && if3[1] <= 1 &&
 	     -1 <= if3[2] && if3[2] <= 1);
   }
-
-  void debug_faces_(const char * mesg);
 
   std::string id_ () const throw ()
   {

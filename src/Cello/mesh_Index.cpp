@@ -309,47 +309,6 @@ int Index::adjacency (Index index, int rank, const int p3[3]) const
 
 //----------------------------------------------------------------------
 
-void Index::categorize (Index index, int rank, int im3[3], int ip3[3])
-{
-  int a1[3];
-  int t1[3];
-  array (a1,a1+1,a1+2);
-  tree  (t1,t1+1,t1+2);
-  int a2[3];
-  int t2[3];
-  index.array (a2,a2+1,a2+2);
-  index.tree  (t2,t2+1,t2+2);
-
-  int L1 = this->level();
-  int L2 = index.level();
-  const int LM = std::max(L1,L2);
-  int i1[3],i2[3];
-  for (int i=0; i<rank; i++) {
-    t1[i] = (t1[i] >> (INDEX_BITS_TREE - L1));
-    t2[i] = (t2[i] >> (INDEX_BITS_TREE - L2));
-
-    i1[i] = (a1[i] << LM) + t1[i];
-    i2[i] = (a2[i] << LM) + t2[i];
-
-    if (L1 >= L2) {
-      i1[i] *= 2;
-      i2[i] *= 2;
-    }
-    im3[i] = i2[i] - i1[i] + 1;
-    if (L2 == L1) {
-      ip3[i] = im3[i] + 2;
-    } else if (L2 == L1 + 1) {
-      ip3[i] = im3[i] + 1;
-    } else if (L2 == L1 - 1) {
-      ip3[i] = im3[i] + 4;
-    }
-    im3[i] = std::max(0,im3[i]);
-    ip3[i] = std::min(4,ip3[i]);
-  }
-}
-
-//----------------------------------------------------------------------
-
 int Index::level () const
 {
   const unsigned nb = 1 << INDEX_BITS_LEVEL;

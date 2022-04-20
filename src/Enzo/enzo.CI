@@ -161,7 +161,7 @@ module enzo {
 
     entry void r_startup_begun (CkReductionMsg *);
 
-#ifdef BUG_FIX_150
+#ifdef BYPASS_CHARM_MEM_LEAK
     entry void p_get_msg_refine(Index index);
     entry void p_get_msg_check(Index index);
 #endif
@@ -175,11 +175,10 @@ module enzo {
     entry void p_restart_done();
 }
 
-  //----------------------------------------------------------------------
-
+  //----------------------------------------------------------------------%
   array[Index] EnzoBlock : Block {
 
-#ifdef BUG_FIX_150
+#ifdef BYPASS_CHARM_MEM_LEAK
     entry EnzoBlock (process_type ip_source, MsgType msg_type);
     entry void p_set_msg_refine (MsgRefine    * msg);
     entry void p_set_msg_check  (EnzoMsgCheck * msg);

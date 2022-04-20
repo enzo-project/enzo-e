@@ -31,8 +31,8 @@
   CkPrintf ("TRACE_PROLONG %s:%d %s %s mf %d %d %d nf %d %d %d if %d %d %d\n",__FILE__,__LINE__,MSG, PROLONG->name().c_str(), \
             mf3[0],mf3[1],mf3[2],nf3[0],nf3[1],nf3[2],if3[0],if3[1],if3[2]); \
   CkPrintf ("TRACE_PROLONG %s:%d %s %s mc %d %d %d nc %d %d %d ic %d %d %d\n",__FILE__,__LINE__,MSG, PROLONG->name().c_str(), \
-    mc3[0],mc3[1],mc3[2],nc3[0],nc3[1],nc3[2],ic3[0],ic3[1],ic3[2]);    \
-  
+            mc3[0],mc3[1],mc3[2],nc3[0],nc3[1],nc3[2],ic3[0],ic3[1],ic3[2]); \
+
 #else
 #  undef TRACE_PROLONG
 #  define TRACE_PROLONG(MSG,PROLONG,mf3,if3,nf3,mc3,ic3,nc3) /* ... */
@@ -167,12 +167,12 @@ void Block::refresh_check_done (int id_refresh)
 	  (sync->state() != RefreshState::INACTIVE) );
 
   if ( (sync->stop()==0) ||
-      (sync->is_done() && (sync->state() == RefreshState::READY))) {
+       (sync->is_done() && (sync->state() == RefreshState::READY))) {
 
     // Make sure incoming message queue is empty
 
     ASSERT2("Block::refresh_wait()",
-	   "Refresh %d message list has size %lu instead of 0",
+            "Refresh %d message list has size %lu instead of 0",
 	    id_refresh,refresh_msg_list_[id_refresh].size(),
 	    (refresh_msg_list_[id_refresh].size() == 0));
 
@@ -314,8 +314,7 @@ int Block::refresh_load_field_faces_ (Refresh & refresh)
       // count all faces if not a leaf, else don't count if face level
       // is less than this block's level
 
-      Index index_face = it_face.index();
-      if ( ! is_leaf() || face_level(index_face,if3) >= level()) {
+      if ( ! is_leaf() || face_level(if3) >= level()) {
 	Index index_face = it_face.index();
 	int ic3[3] = {0,0,0};
 	refresh_load_field_face_ (refresh,refresh_same,index_face,if3,ic3);
@@ -399,7 +398,7 @@ int Block::refresh_load_coarse_face_
                         cello::config()->mesh_min_level,
                         refresh.root_level());
 
-      // ... determine intersection region
+    // ... determine intersection region
 
     const bool l_send = (level < level_face);
     const bool l_recv = (level > level_face);
@@ -477,7 +476,7 @@ int Block::refresh_load_coarse_face_
             (tm3,tp3,BlockType::extra,BlockType::extra,lpad=true);
           if (overlap) {
 
-          if (level_extra == level) {
+            if (level_extra == level) {
 
               // this block sends; extra block is coarse
 
@@ -644,7 +643,7 @@ int Block::delete_non_local_particles_(int it){
   double xp,yp,zp;
   lower(&xm,&ym,&zm);
   upper(&xp,&yp,&zp);
-  
+
   // find block center (x0,y0,z0) and width (xl,yl,zl)
   const double x0 = 0.5*(xm+xp);
   const double y0 = 0.5*(ym+yp);
@@ -652,7 +651,7 @@ int Block::delete_non_local_particles_(int it){
   const double xl = xp-xm;
   const double yl = yp-ym;
   const double zl = zp-zm;
-  
+
   int count = 0;
 
   const int ia_x  = particle.attribute_position(it,0);
@@ -661,7 +660,7 @@ int Block::delete_non_local_particles_(int it){
   // block-local coordinates (int))
   const bool is_float =
     (cello::type_is_float(particle.attribute_type(it,ia_x)));
-  
+
   // (...stride may be != 1 if particle attributes are interleaved)
   const int d  = particle.stride(it,ia_x);
 
@@ -678,13 +677,13 @@ int Block::delete_non_local_particles_(int it){
     if (np == 0) continue;
 
     // ...extract particle position arrays
-	
+
     std::vector<double> xa(np,0.0);
     std::vector<double> ya(np,0.0);
     std::vector<double> za(np,0.0);
 
     particle.position(it,ib,xa.data(),ya.data(),za.data());
-	
+
     is_copy = (int64_t *) particle.attribute_array(it, ia_copy, ib);
 
     // Mask will be used to delete particles
@@ -696,7 +695,7 @@ int Block::delete_non_local_particles_(int it){
       double x = is_float ? 2.0*(xa[ip*d]-x0)/xl : xa[ip*d];
       double y = is_float ? 2.0*(ya[ip*d]-y0)/yl : ya[ip*d];
       double z = is_float ? 2.0*(za[ip*d]-z0)/zl : za[ip*d];
-      
+
       int ix = (rank >= 1) ? (x + 2) : 0;
       int iy = (rank >= 2) ? (y + 2) : 0;
       int iz = (rank >= 3) ? (z + 2) : 0;
@@ -1074,7 +1073,7 @@ int Block::particle_create_array_neighbors_
  ParticleData * particle_array[],
  ParticleData * particle_list[],
  Index index_list[])
-{ 
+{
   const int rank = cello::rank();
   const int level = this->level();
 
@@ -1123,10 +1122,10 @@ int Block::particle_create_array_neighbors_
 
     for (int iz=index_lower[2]; iz<index_upper[2]; iz++) {
       for (int iy=index_lower[1]; iy<index_upper[1]; iy++) {
-	      for (int ix=index_lower[0]; ix<index_upper[0]; ix++) {
-	        int i=ix + 4*(iy + 4*iz);
-	        particle_array[i] = pd;
-	      }
+        for (int ix=index_lower[0]; ix<index_upper[0]; ix++) {
+          int i=ix + 4*(iy + 4*iz);
+          particle_array[i] = pd;
+        }
       }
     }
   }
@@ -1149,8 +1148,6 @@ void Block::particle_determine_periodic_update_
 
   //     ... periodicity
   int p3[3];
-  //  cello::hierarchy()->get_periodicity(p3);
-//  int p3[3];
   cello::hierarchy()->get_periodicity(p3,p3+1,p3+2);
 
   //     ... boundary
@@ -1234,7 +1231,7 @@ void Block::particle_apply_periodic_update_
     if ( ((rank >= 1) && dpx[il] != 0.0) ||
 	 ((rank >= 2) && dpy[il] != 0.0) ||
 	 ((rank >= 3) && dpz[il] != 0.0) ) {
-	
+
       // ... for each particle type
       const int nt = particle_neighbor.num_types();
       for (int it=0; it<nt; it++) {
@@ -1261,57 +1258,57 @@ void Block::particle_scatter_neighbors_
 {
   if (copy){
 
-     // Loop over particle types
-     for (auto it_type=type_list.begin(); it_type!=type_list.end(); it_type++) {
+    // Loop over particle types
+    for (auto it_type=type_list.begin(); it_type!=type_list.end(); it_type++) {
 
-       int it = *it_type;
-       
-       ASSERT1("Block::particle_scatter_neighbors_",
-	       "Trying to copy particle type %s, but it has no"
-	       "is_copy attribute",
-	       particle.type_name(it),
-	       particle.is_attribute(it,"is_copy"));
+      int it = *it_type;
 
-       int ia_copy = particle.attribute_index(it, "is_copy");
-       int d_copy = particle.stride(it,ia_copy);
-       int64_t * is_copy;
-       
-       const int nb = particle.num_batches(it);
+      ASSERT1("Block::particle_scatter_neighbors_",
+              "Trying to copy particle type %s, but it has no"
+              "is_copy attribute",
+              particle.type_name(it),
+              particle.is_attribute(it,"is_copy"));
 
-       // Loop over batches
-       for (int ib=0; ib<nb; ib++) {
+      int ia_copy = particle.attribute_index(it, "is_copy");
+      int d_copy = particle.stride(it,ia_copy);
+      int64_t * is_copy;
 
-	 const int np = particle.num_particles(it,ib);
+      const int nb = particle.num_batches(it);
 
-	 if (np == 0) continue;
+      // Loop over batches
+      for (int ib=0; ib<nb; ib++) {
 
-	 is_copy = (int64_t *) particle.attribute_array(it, ia_copy, ib);
+        const int np = particle.num_particles(it,ib);
 
-	 // ...initialize mask used for copying
-	 bool * mask = new bool[np];
-	 // Index array not needed for copying
-	 int * index = nullptr;
+        if (np == 0) continue;
 
-	 // Loop over particles in this batch and fill in the mask
-	 for (int ip=0; ip<np; ip++) mask[ip] = !is_copy[ip*d_copy];
-	 
-	 // ...scatter particles to particle array
-	 particle.scatter  (it,ib,np,mask,index,npa,particle_array, copy);
-	 
-	 delete [] mask;
-       } // Loop over batches
-     } // Loop over particle types
+        is_copy = (int64_t *) particle.attribute_array(it, ia_copy, ib);
+
+        // ...initialize mask used for copying
+        bool * mask = new bool[np];
+        // Index array not needed for copying
+        int * index = nullptr;
+
+        // Loop over particles in this batch and fill in the mask
+        for (int ip=0; ip<np; ip++) mask[ip] = !is_copy[ip*d_copy];
+
+        // ...scatter particles to particle array
+        particle.scatter  (it,ib,np,mask,index,npa,particle_array, copy);
+
+        delete [] mask;
+      } // Loop over batches
+    } // Loop over particle types
   } // if (copy)
 
   else {
     const int rank = cello::rank();
-    
+
     //     ... get Block bounds
     double xm,ym,zm;
     double xp,yp,zp;
     lower(&xm,&ym,&zm);
     upper(&xp,&yp,&zp);
-    
+
     // find block center (x0,y0,z0) and width (xl,yl,zl)
     const double x0 = 0.5*(xm+xp);
     const double y0 = 0.5*(ym+yp);
@@ -1319,10 +1316,9 @@ void Block::particle_scatter_neighbors_
     const double xl = xp-xm;
     const double yl = yp-ym;
     const double zl = zp-zm;
-    
+
     int count = 0;
     // ...for each particle type to be moved
-    
     for (auto it_type=type_list.begin(); it_type!=type_list.end(); it_type++) {
 
       int it = *it_type;
@@ -1333,45 +1329,45 @@ void Block::particle_scatter_neighbors_
       // block-local coordinates (int))
       const bool is_float =
 	(cello::type_is_float(particle.attribute_type(it,ia_x)));
-      
+
       // (...stride may be != 1 if particle attributes are interleaved)
       const int d  = particle.stride(it,ia_x);
-      
+
       // ...for each batch of particles
-      
+
       const int nb = particle.num_batches(it);
-      
+
       for (int ib=0; ib<nb; ib++) {
-	
+
 	const int np = particle.num_particles(it,ib);
-	
+
 	if (np == 0) continue;
-	
+
 	// ...extract particle position arrays
-	
+
 	std::vector<double> xa(np,0.0);
 	std::vector<double> ya(np,0.0);
 	std::vector<double> za(np,0.0);
-	
+
 	particle.position(it,ib,xa.data(),ya.data(),za.data());
-	
+
 	// ...initialize mask used for scatter and delete
 	// ...and corresponding particle indices
-	
+
 	bool * mask = new bool[np];
 	int * index = new int[np];
-      
+
 	for (int ip=0; ip<np; ip++) {
 
 	  // look at block scatter children for help?
 	  double x = is_float ? 2.0*(xa[ip*d]-x0)/xl : xa[ip*d];
 	  double y = is_float ? 2.0*(ya[ip*d]-y0)/yl : ya[ip*d];
 	  double z = is_float ? 2.0*(za[ip*d]-z0)/zl : za[ip*d];
-	  
+
 	  int ix = (rank >= 1) ? (x + 2) : 0;
 	  int iy = (rank >= 2) ? (y + 2) : 0;
 	  int iz = (rank >= 3) ? (z + 2) : 0;
-	
+
 	  if (! (0 <= ix && ix < 4) ||
 	      ! (0 <= iy && iy < 4) ||
 	      ! (0 <= iz && iz < 4)) {
@@ -1397,15 +1393,15 @@ void Block::particle_scatter_neighbors_
 
 	// ...scatter particles to particle array
 	particle.scatter  (it,ib,np,mask,index,npa,particle_array, copy);
-	
+
 	// ... delete scattered particles if moved
 	count += particle.delete_particles (it,ib,mask);
-	
+
 	delete [] mask;
 	delete [] index;
       } // Loop over batches
     } // Loop over particle types
-    
+
     cello::simulation()->data_delete_particles(count);
 
   } // else

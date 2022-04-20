@@ -9,12 +9,14 @@ import socket
 #======================================================================
 
 #----------------------------------------------------------------------
-# Whether to bypass passing MsgRefine directly to Block constructor
-# or request from separate entry method to bypass Charm++ memory
-# leak bug
-#----------------------------------------------------------------------
+# Whether to bypass passing MsgRefine directly to Block constructor,
+# or request it from a separate entry method to bypass a Charm++
+# memory leak. This should only be set to 0 after (and if) the bug is
+# addressed in Charm++, or when explicitly testing a Charm++ build for
+# this bug.
+# ----------------------------------------------------------------------
 
-bug_fix_150 = 1
+bypass_charm_mem_leak = 1
 
 #----------------------------------------------------------------------
 # Maximum number of procesess per shared-memory node (can be larger than needed)
@@ -308,9 +310,9 @@ else:
 
 defines.append(define_int_size)
 
-if (bug_fix_150 == 1):
-   defines.append('BUG_FIX_150')
-   
+if (bypass_charm_mem_leak == 1):
+   defines.append('BYPASS_CHARM_MEM_LEAK')
+
 defines.append({'CONFIG_NODE_SIZE' : node_size })
 defines.append({'CONFIG_NODE_SIZE_3' : node_size*3 })
 

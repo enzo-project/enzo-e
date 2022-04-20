@@ -380,16 +380,6 @@ PARALLEL_MAIN_BEGIN
     a[i].push_child(1,0);
     b[i].push_child(0,0,0);
 
-    int im3[3] = {0};
-    int ip3[3] = {0};
-    a[i].categorize(b[i],2,im3,ip3);
-
-    unit_func ("categorize");
-    unit_assert (im3[0]==3);
-    unit_assert (ip3[0]==4);
-    unit_assert (im3[1]==1);
-    unit_assert (ip3[1]==3);
-
     unit_func ("is_sibling");
     unit_assert (!a[i].is_sibling(b[i]));
     unit_assert (!b[i].is_sibling(a[i]));
@@ -420,14 +410,6 @@ PARALLEL_MAIN_BEGIN
 
     b[i].push_child(0,1);
 
-    a[i].categorize(b[i],2,im3,ip3);
-
-    unit_func ("categorize");
-    unit_assert (im3[0]==3);
-    unit_assert (ip3[0]==4);
-    unit_assert (im3[1]==2);
-    unit_assert (ip3[1]==3);
-
     unit_func ("is_sibling");
     unit_assert (!a[i].is_sibling(b[i]));
     unit_assert (!b[i].is_sibling(a[i]));
@@ -455,16 +437,6 @@ PARALLEL_MAIN_BEGIN
     b[i].set_array (4,3,2);
 
     b[i].push_child(1,1,0);
-
-    a[i].categorize(b[i],3,im3,ip3);
-
-    unit_func ("categorize");
-    unit_assert (im3[0]==2);
-    unit_assert (ip3[0]==3);
-    unit_assert (im3[1]==2);
-    unit_assert (ip3[1]==3);
-    unit_assert (im3[2]==1);
-    unit_assert (ip3[2]==2);
 
     unit_func ("adjacency");
     unit_assert (a[i].adjacency(b[i],2,p3) == 2);

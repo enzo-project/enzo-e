@@ -15,10 +15,10 @@ class NodeBits {
   // original order ATL crashed in Charm++ during load balancing
 
 public:
-  
-  unsigned level : INDEX_BITS_LEVEL; 
+
+  unsigned level : INDEX_BITS_LEVEL;
   unsigned array : INDEX_BITS_ARRAY;
-  unsigned  tree : INDEX_BITS_TREE; 
+  unsigned  tree : INDEX_BITS_TREE;
 
   // maximum INDEX_BITS_TREE levels / bits
   // L    T
@@ -40,7 +40,7 @@ class Index {
   // 96 bits total
   // Array index 10x3   30 1024
   // Tree  index 20x3   60 20 levels
-  // Level index  6x1   32 + sign for sub-root blocks      
+  // Level index  6x1   32 + sign for sub-root blocks
   //       [       |       |       |        )
   // a_[0] [AAAAAAAAAATTTTTTTTTTTTTTTTTTTTLL)
   // a_[1] [AAAAAAAAAATTTTTTTTTTTTTTTTTTTTLL)
@@ -86,7 +86,7 @@ public:
   int index_level (int level,int axis) const;
 
   /// Whether the face is on the domain boundary
-  bool is_on_boundary 
+  bool is_on_boundary
   (int axis, int face, int narray) const;
 
   /// Whether the face is on the domain boundary
@@ -95,19 +95,19 @@ public:
   /// Whether an index is in the same subtree relative to a given
   /// root level
   bool is_in_same_subtree (Index index, int min_level = 0, int root_level = 0);
-  
+
   /// Return whether this is the "root" node in the array of octrees
   /// (array (0 0 0), level 0)
   bool is_root() const;
 
-  /// Whether indices are siblings (have the same parent)
+  /// Whether given `index` is a sibling (has the same parent as this Index)
   bool is_sibling (Index index) const
   {
     const int level = this->level();
     return (level >= 1 && index.level() >= 1) ?
       (index_parent() == index.index_parent()) : false;
   }
-  /// Whether index is a "nibling" (child of a sibling)
+  /// Whether given `index` is a "nibling" (child of a sibling of this Index)
   bool is_nibling (Index index) const
   {
     const int level = this->level();
@@ -118,13 +118,6 @@ public:
   /// Return the dimensionality of shared face (0 corner, 1 edge, 2
   /// plane), or -1 if disjoint
   int adjacency (Index index, int rank, const int p3[3]) const;
-
-  /// Get index limits (im3[],ip3[]) in [0,4) categorizing block adjacency.
-  /// E.g. left neighbor in same level (0,1) - (1,3), right-bottom child (2,1) - (3,2),
-  /// non-adjacent indices (0,0) - (0,0) (or similar empty range). Similar
-  /// to 4x4x4 array categorization in control_refresh.cpp for particles. Used
-  /// in Adapt class.
-  void categorize (Index index, int rank, int im3[3], int ip3[3]);
 
   /// Return refinement level of the Index
   int level() const;
@@ -160,7 +153,7 @@ public:
   /// Return the packed tree bits for each axis
   void tree (int * bx = 0, int *by = 0, int *bz = 0,
              int level=INDEX_UNDEFINED_LEVEL) const;
-  
+
   /// child index of this node in parent
   void child (int level, int * icx, int * icy, int * icz,
               int min_level = 0) const;
@@ -184,7 +177,7 @@ public:
   Index next (int rank, const int na3[3], bool is_leaf, int min_level) const;
   
   void print (std::string msg, int level) const;
-    
+
   void print (const char * msg,
 	      int max_level,
 	      int rank,
@@ -216,7 +209,7 @@ public:
   ///--------------------
   /// PACKING / UNPACKING
   ///--------------------
-  
+
   /// Return the number of bytes required to serialize the data object
   int data_size () const;
 
@@ -256,7 +249,6 @@ private: // attributes
 #ifndef TEST
 // public:
 //   void pup(PUP::er &p) {
-    
 //   }
 PUPbytes(NodeBits)
 #endif

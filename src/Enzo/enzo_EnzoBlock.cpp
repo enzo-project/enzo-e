@@ -167,7 +167,7 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
 //----------------------------------------------------------------------
 
 //======================================================================
-#ifdef BUG_FIX_150
+#ifdef BYPASS_CHARM_MEM_LEAK
 //======================================================================
 
 EnzoBlock::EnzoBlock( process_type ip_source,  MsgType msg_type)
@@ -192,14 +192,6 @@ void EnzoBlock::p_set_msg_check(EnzoMsgCheck * msg)
 {
   performance_start_(perf_block);
 
-#ifdef TRACE_BLOCK
-    CkPrintf ("%d %p :%d TRACE_BLOCK %s EnzoBlock restart_set_data_\n",
-              CkMyPe(),(void *)this,__LINE__,name(thisIndex).c_str());
-    fflush(stdout);
-#endif
-#ifdef TRACE_BLOCK
-  msg->print("recv 1");
-#endif
   restart_set_data_(msg);
   initialize();
   Block::initialize();
@@ -221,7 +213,7 @@ void EnzoBlock::p_set_msg_refine(MsgRefine * msg)
 }
 
 //======================================================================
-#else /* not BUG_FIX_150 */
+#else /* not BYPASS_CHARM_MEM_LEAK */
 //======================================================================
 
 EnzoBlock::EnzoBlock ( MsgRefine * msg )
