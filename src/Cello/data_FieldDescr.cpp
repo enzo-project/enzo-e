@@ -145,7 +145,6 @@ void FieldDescr::ghost_depth
 
 int FieldDescr::insert_permanent(const std::string & field_name) throw()
 {
-
   bool permanent;
 
   int id = insert_(field_name, permanent = true);

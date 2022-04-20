@@ -435,18 +435,18 @@ void EnzoMethodTurbulenceOU::compute_shift
         (enzo_float *) field.values("bfieldy_rz"),
         (enzo_float *) field.values("bfieldz_rz") };
 
-    CHECK_FIELD(field_bfield,"bfieldx");
-    CHECK_FIELD(field_bfield,"bfieldy");
-    CHECK_FIELD(field_bfield,"bfieldz");
-    CHECK_FIELD(field_work_2,"bfieldx_rx");
-    CHECK_FIELD(field_work_3,"bfieldx_ry");
-    CHECK_FIELD(field_work_3,"bfieldx_rz");
-    CHECK_FIELD(field_work_2,"bfieldy_rx");
-    CHECK_FIELD(field_work_3,"bfieldy_ry");
-    CHECK_FIELD(field_work_3,"bfieldy_rz");
-    CHECK_FIELD(field_work_2,"bfieldz_rx");
-    CHECK_FIELD(field_work_3,"bfieldz_ry");
-    CHECK_FIELD(field_work_3,"bfieldz_rz");
+    CHECK_FIELD(bfield[0],"bfieldx");
+    CHECK_FIELD(bfield[1],"bfieldy");
+    CHECK_FIELD(bfield[2],"bfieldz");
+    CHECK_FIELD(bfield_rx[0],"bfieldx_rx");
+    CHECK_FIELD(bfield_ry[1],"bfieldx_ry");
+    CHECK_FIELD(bfield_rz[2],"bfieldx_rz");
+    CHECK_FIELD(bfield_rx[0],"bfieldy_rx");
+    CHECK_FIELD(bfield_ry[1],"bfieldy_ry");
+    CHECK_FIELD(bfield_rz[2],"bfieldy_rz");
+    CHECK_FIELD(bfield_rx[0],"bfieldz_rx");
+    CHECK_FIELD(bfield_ry[1],"bfieldz_ry");
+    CHECK_FIELD(bfield_rz[2],"bfieldz_rz");
     
     int mx,my,mz;
     int nx,ny,nz;
