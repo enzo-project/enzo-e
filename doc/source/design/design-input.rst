@@ -118,7 +118,10 @@ Algorithms
 Input algorithm
 ---------------
 
-.. image:: io-input.png
+..
+   .. image:: io-input.png
+
+.. image:: io-read.png
 
 // Begin reading restart data and create the mesh hierarchy of
 // EnzoBlocks. Replaces functionality of control_adapt.
