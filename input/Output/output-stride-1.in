@@ -1,0 +1,13 @@
+# Problem: Output stride test
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/Output/output-stride.incl"
+
+Output {
+
+    stride {
+       stride_write = 1;
+       name = ["output-stride-1-p%1d-%02d.h5","proc","cycle"];
+    }
+
+}

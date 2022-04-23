@@ -26,8 +26,10 @@ public: // interface
   virtual ~IoParticleData() throw()
   {}
 
+  /// CHARM++ PUP::able declaration
   PUPable_decl(IoParticleData);
 
+  /// CHARM++ migration constructor
   IoParticleData(CkMigrateMessage *m) : Io(m) {}
 
   /// CHARM++ Pack / Unpack function
@@ -43,8 +45,14 @@ public: // interface
     particle_data_ = particle_data;
   };
 
-#include "_io_Io_common.hpp"
+  /// Return the ith metadata item associated with the object
+  virtual void meta_value 
+  (int index, 
+   void ** buffer, std::string * name, int * type,
+   int * nxd=0, int * nyd=0, int * nzd=0) throw();
 
+  /// Copy the values to the object
+  virtual void save_to (void *); 
   
 protected: // functions
 

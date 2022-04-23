@@ -1,0 +1,55 @@
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     simulation.ci
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2011-05-09
+/// @brief    CHARM++ Simulation process group
+
+module simulation {
+
+  extern module mesh;
+
+
+  readonly CProxy_Simulation proxy_simulation;
+
+  initnode void method_close_files_mutex_init();
+
+  group [migratable] Simulation {
+
+    entry Simulation (const char filename[n], int n); // [S0]
+
+#ifdef BYPASS_CHARM_MEM_LEAK
+    entry void p_get_msg_refine (Index);
+#endif
+
+    entry void r_initialize_block_array (CkReductionMsg * msg);    // [SC2]
+
+    entry void s_write (); // [SC6]
+    entry void r_write (CkReductionMsg * msg); // [SC7]
+    entry void r_write_checkpoint_output ();
+
+    entry void r_restart_start(CkReductionMsg *);
+    entry void p_restart_enter(std::string dir);
+
+    entry void p_output_write (int n, char buffer[n]); // [SC8]
+    entry void r_output_barrier (CkReductionMsg * msg);
+    entry void p_output_start (int index_output);
+
+    entry void r_monitor_performance_reduce (CkReductionMsg * msg); // [SC9]
+    entry void p_monitor_performance();
+
+    entry void p_set_block_array (CProxy_Block block_array);
+
+  };
+
+  /// Initial mapping of array elements
+  group [migratable] MappingArray : CkArrayMap {
+    entry MappingArray(int, int, int);
+  };
+  group [migratable] MappingTree : CkArrayMap {
+    entry MappingTree(int, int, int);
+  };
+  group [migratable] MappingIo : CkArrayMap {
+    entry MappingIo(int);
+  };
+}

@@ -183,6 +183,13 @@ namespace cello {
   }
 
   //---------------------------------------------------------------------- 
+
+  const Factory * factory()
+  {
+    return simulation()->factory();
+  }
+
+  //---------------------------------------------------------------------- 
   ScalarDescr * scalar_descr_double()
   {
     static ScalarDescr * scalar_descr_double_[CONFIG_NODE_SIZE] = {nullptr};
@@ -213,6 +220,16 @@ namespace cello {
     }
     return scalar_descr_int_[in];
   }
+  ScalarDescr * scalar_descr_long_long()
+  {
+    static ScalarDescr * scalar_descr_long_long_[CONFIG_NODE_SIZE] = {nullptr};
+    const long long in = cello::index_static();
+    if (scalar_descr_long_long_[in] == nullptr) {
+      scalar_descr_long_long_[in] = simulation() ?
+        simulation()->scalar_descr_long_long() : new ScalarDescr;
+    }
+    return scalar_descr_long_long_[in];
+  }
   ScalarDescr * scalar_descr_sync()
   {
     static ScalarDescr * scalar_descr_sync_[CONFIG_NODE_SIZE] = {nullptr};
@@ -233,6 +250,17 @@ namespace cello {
     }
     return scalar_descr_void_[in];
   }
+  ScalarDescr * scalar_descr_index()
+  {
+    static ScalarDescr * scalar_descr_index_[CONFIG_NODE_SIZE] = {nullptr};
+    const int in = cello::index_static();
+    if (scalar_descr_index_[in] == nullptr) {
+      scalar_descr_index_[in] = simulation() ?
+        simulation()->scalar_descr_index() : new ScalarDescr;
+    }
+    return scalar_descr_index_[in];
+  }
+
   //---------------------------------------------------------------------- 
 
   CProxy_Block block_array()
@@ -244,28 +272,35 @@ namespace cello {
 
   const Config * config()
   {
-    return simulation() ? simulation()->config() : NULL;
+    return simulation() ? simulation()->config() : nullptr;
   }
 
   //---------------------------------------------------------------------- 
 
   const Parameters * parameters()
   {
-    return simulation() ? simulation()->parameters() : NULL;
+    return simulation() ? simulation()->parameters() : nullptr;
   }
 
   //---------------------------------------------------------------------- 
 
   Problem * problem()
   {
-    return simulation() ? simulation()->problem() : NULL;
+    return simulation() ? simulation()->problem() : nullptr;
+  }
+
+  //---------------------------------------------------------------------- 
+
+  Boundary * boundary(int i)
+  {
+    return problem() ? problem()->boundary(i) : nullptr;
   }
 
   //---------------------------------------------------------------------- 
 
   Hierarchy * hierarchy()
   {
-    return simulation() ? simulation()->hierarchy() : NULL;
+    return simulation() ? simulation()->hierarchy() : nullptr;
   }
 
   //---------------------------------------------------------------------- 
@@ -286,6 +321,43 @@ namespace cello {
   Grouping * field_groups()
   { return field_descr()->groups(); }
     
+  //---------------------------------------------------------------------- 
+
+  int define_field (std::string field_name, int cx, int cy, int cz)
+  {
+    FieldDescr * field_descr = cello::field_descr();
+    Config   * config  = (Config *) cello::config();
+    if( ! field_descr->is_field( field_name )){
+      const int id_field = field_descr->insert_permanent( field_name );
+ 
+      field_descr->set_precision(id_field, config->field_precision);
+ 
+      if ( cx != 0 || cy != 0 || cz != 0 ) {
+        field_descr->set_centering(id_field, cx, cy, cz);
+      }
+    }
+    return field_descr->field_id(field_name);
+  }
+ 
+  //---------------------------------------------------------------------- 
+ 
+  int define_field_in_group
+  (std::string field_name, std::string group_name,
+   int cx, int cy, int cz)
+  {
+    int out = define_field (field_name,cx,cy,cz);
+    field_groups()->add(field_name,group_name);
+    return out;
+  }
+ 
+  //---------------------------------------------------------------------- 
+  void finalize_fields ()
+  {
+    FieldDescr * field_descr = cello::field_descr();
+    Config   * config  = (Config *) cello::config();
+    field_descr->reset_history(config->field_history);
+  }
+
   //---------------------------------------------------------------------- 
 
   Monitor * monitor()
@@ -315,28 +387,28 @@ namespace cello {
 
   Output * output(int index)
   {
-    return problem() ? problem()->output(index) : NULL;
+    return problem() ? problem()->output(index) : nullptr;
   }
 
   //---------------------------------------------------------------------- 
 
   Solver * solver(int index)
   {
-    return problem() ? problem()->solver(index) : NULL;
+    return problem() ? problem()->solver(index) : nullptr;
   }
 
   //---------------------------------------------------------------------- 
 
   Units * units()
   {
-    return problem() ? problem()->units() : NULL;
+    return problem() ? problem()->units() : nullptr;
   }
 
   //----------------------------------------------------------------------
 
   Refresh * refresh(int ir)
   {
-    return simulation() ? &simulation()->refresh_list(ir) : NULL;
+    return simulation() ? &simulation()->refresh_list(ir) : nullptr;
   }
 
   //----------------------------------------------------------------------
@@ -349,11 +421,12 @@ namespace cello {
   //----------------------------------------------------------------------
 
   int num_children()
-  {
-    int r = rank();
-    return (r==1) ? 2 : ( (r==2) ? 4 : 8 );
-  }
-  
+  { return 1 << rank(); }
+
+  //----------------------------------------------------------------------
+
+  int num_children(int r)
+  { return (1 << r); }
 
   //----------------------------------------------------------------------
 
@@ -375,7 +448,8 @@ namespace cello {
   (
    const std::vector<std::string> * file_format,
    int counter,
-   Block * block
+   int cycle,
+   double time
    )
   {
     if (file_format->size()==0) return "";
@@ -432,8 +506,8 @@ namespace cello {
       left  = left.substr(0,pos);
 
       strncpy (buffer, middle.c_str(),MAX_BUFFER);
-      if      (arg == "cycle") { sprintf (buffer_new,buffer, block->cycle()); }
-      else if (arg == "time")  { sprintf (buffer_new,buffer, block->time()); }
+      if      (arg == "cycle") { sprintf (buffer_new,buffer, cycle); }
+      else if (arg == "time")  { sprintf (buffer_new,buffer, time); }
       else if (arg == "count") { sprintf (buffer_new,buffer, counter); }
       else if (arg == "proc")  { sprintf (buffer_new,buffer, CkMyPe()); }
       else if (arg == "flipflop")  { sprintf (buffer_new,buffer, counter % 2); }
@@ -453,25 +527,34 @@ namespace cello {
 
   //----------------------------------------------------------------------
 
-  std::string directory
+  std::string create_directory
   (
    const std::vector<std::string> * path_format,
    int counter,
-   Block * block
+   int cycle,
+   double time,
+   bool & already_exists
    )
   {
     std::string dir = ".";
-    std::string name_dir = expand_name(path_format,counter, block);
+    std::string name_dir = expand_name(path_format,counter, cycle, time);
 
     // Create subdirectory if any
     if (name_dir != "") {
+
       dir = name_dir;
+
       boost::filesystem::path directory(name_dir);
-      if (! boost::filesystem::is_directory(directory)) {
+
+      if (boost::filesystem::is_directory(directory)) {
+
+        already_exists = true;
+
+      } else {
 
         boost::filesystem::create_directory(directory);
 
-        ASSERT1 ("cello::directory()",
+        ASSERT1 ("cello::create_directory()",
                  "Error creating directory %s",
                  name_dir.c_str(),
                  boost::filesystem::is_directory(directory));

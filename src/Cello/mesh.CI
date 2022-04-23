@@ -19,6 +19,7 @@ module mesh {
   initnode void mutex_init_field_face();
 
   readonly int MsgCoarsen::counter[CONFIG_NODE_SIZE];
+  readonly int MsgAdapt::counter[CONFIG_NODE_SIZE];
   readonly int MsgInitial::counter[CONFIG_NODE_SIZE];
   readonly int MsgOutput::counter[CONFIG_NODE_SIZE];
   readonly int MsgRefine::counter[CONFIG_NODE_SIZE];
@@ -36,25 +37,24 @@ module mesh {
   PUPable ColormapRGB;
   PUPable Config;
   PUPable Factory;
+  PUPable Initial;
+  PUPable InitialTrace;
+  PUPable InitialValue;
   PUPable Io;
   PUPable IoBlock;
   PUPable IoFieldData;
-  PUPable IoParticleData;
   PUPable IoHierarchy;
-  PUPable Initial;
-  PUPable InitialFile;
-  PUPable InitialTrace;
-  PUPable InitialValue;
-  PUPable InputData;
+  PUPable IoParticleData;
+  PUPable IoSimulation;
   PUPable ItIndexList;
   PUPable ItIndexRange;
   PUPable MaskExpr;
   PUPable MaskPng;
-  PUPable MethodCheckpoint;
   PUPable MethodCloseFiles;
   PUPable MethodDebug;
   PUPable MethodFluxCorrect;
   PUPable MethodNull;
+  PUPable MethodOrderMorton;
   PUPable MethodOutput;
   PUPable MethodRefresh;
   PUPable MethodTrace;
@@ -82,7 +82,7 @@ module mesh {
   message FieldMsg {
     char a[];
   };
-
+  message MsgAdapt;
   message MsgCoarsen;
   message MsgInitial;
   message MsgOutput;
@@ -91,9 +91,12 @@ module mesh {
 
   array[Index] Block {
 
-    entry Block (MsgRefine * msg);
-    entry Block (process_type ip_source);
+#ifdef BYPASS_CHARM_MEM_LEAK
+    entry Block (process_type ip_source,  MsgType msg_type);
     entry void p_set_msg_refine(MsgRefine * msg);
+#else
+    entry Block (MsgRefine * msg);
+#endif
     entry Block();
 
     //--------------------------------------------------
@@ -129,10 +132,13 @@ module mesh {
     entry void p_compute_exit();
     entry void r_compute_exit(CkReductionMsg *);
 
-    entry void r_method_checkpoint_continue(CkReductionMsg * msg);
-
     entry void p_method_flux_correct_refresh();
     entry void r_method_flux_correct_sum_fields(CkReductionMsg * msg);
+
+    entry void r_method_order_morton_continue(CkReductionMsg * msg);
+    entry void r_method_order_morton_complete(CkReductionMsg * msg);
+    entry void p_method_order_morton_weight(int ic3[3], int weight, Index index);
+    entry void p_method_order_morton_index(int index, int count);
 
     entry void p_method_output_next(MsgOutput *);
     entry void p_method_output_write(MsgOutput *);
@@ -150,7 +156,8 @@ module mesh {
     entry void p_stopping_enter();
     entry void r_stopping_enter(CkReductionMsg *);
  
-    entry void p_stopping_balance();
+    entry void p_stopping_load_balance();
+    entry void r_stopping_load_balance(CkReductionMsg *);
 
     entry void p_stopping_exit();
     entry void r_stopping_exit(CkReductionMsg *);
@@ -173,13 +180,18 @@ module mesh {
     entry void r_adapt_enter(CkReductionMsg *);
     entry void p_adapt_end();
     entry void p_adapt_update();
-    entry void p_adapt_next();
+    entry void r_adapt_next(CkReductionMsg *);
     entry void p_adapt_called();
     entry void p_adapt_exit();
     entry void p_adapt_delete();
-    entry void p_adapt_recv_level
-      (Index index, int ic3[3], int if3[3], int level_now, int level_new);
+    entry void p_adapt_recv_level (MsgAdapt *);
     entry void p_adapt_recv_child (MsgCoarsen * msg);
+
+    //--------------------------------------------------
+    // *** RESTART
+    //--------------------------------------------------
+
+    entry void r_restart_enter(CkReductionMsg *);
 
     //--------------------------------------------------
     // *** REFRESH
@@ -192,5 +204,14 @@ module mesh {
 
   };
 
+  // Chare array for reading data files
+  array[1D] IoReader {
+     entry IoReader();
+  };
+
+  // Chare array for writing data files
+  array[1D] IoWriter {
+     entry IoWriter();
+  };
 }
 

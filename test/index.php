@@ -18,10 +18,10 @@ printf ("%s",$dir);
    ?>
    </head>
    <body>
-   <h1>Enzo-P / Cello Test Results</h1>
+   <h1>Enzo-E / Cello Test Results</h1>
 <table>
 <tr>
-<th class=cello colspan=2><center><b>Enzo-P/Cello</b></center></th>
+<th class=cello colspan=2><center><b>Enzo-E/Cello</b></center></th>
     <th class=charm colspan="2"><center><b>Charm++</b></center></th>
     </tr>
     <tr>
@@ -571,20 +571,20 @@ if (file_exists("STATUS"))  {
   printf ("<tr><th>\n");
 }
 
-printf ("</th><td class=center colspan=5><em><a href=\"#enzop\">Enzo-P application tests</a></em></td></tr>\n");
+printf ("</th><td class=center colspan=5><em><a href=\"#enzoe\">Enzo-E application tests</a></em></td></tr>\n");
 
 test_summary("Method: ppm",
              array("method_ppm-1","method_ppm-8"),
-             array("enzo-p",  "enzo-p"),'test');
+             array("enzo-e",  "enzo-e"),'test');
 
 test_summary("Method: ppml",
              array("method_ppml-1","method_ppml-8",
                    "method_ppml-test-1","method_ppml-test-8"),
-             array("enzo-p",  "enzo-p", "enzo-p", "enzo-p"),'test');
+             array("enzo-e",  "enzo-e", "enzo-e", "enzo-e"),'test');
 
 test_summary("Method: heat",
              array("method_heat-1","method_heat-8"),
-             array("enzo-p",  "enzo-p"),'test');
+             array("enzo-e",  "enzo-e"),'test');
 
 test_summary("Method: flux_correct",
              array("method_flux2-xm","method_flux2-xp",
@@ -592,33 +592,35 @@ test_summary("Method: flux_correct",
                    "method_flux3-xm","method_flux3-xp",
                    "method_flux3-ym","method_flux3-yp",
                    "method_flux3-zm","method_flux3-zp"),
-             array("enzo-p","enzo-p",
-                   "enzo-p","enzo-p",
-                   "enzo-p","enzo-p",
-                   "enzo-p","enzo-p",
-                   "enzo-p","enzo-p"),
+             array("enzo-e","enzo-e",
+                   "enzo-e","enzo-e",
+                   "enzo-e","enzo-e",
+                   "enzo-e","enzo-e",
+                   "enzo-e","enzo-e"),
              'test');
 
 test_summary("Problem: collapse",
          array("collapse-bcg2",    "collapse-dd2",    "collapse-hg2",
                "collapse-gas-bcg2","collapse-gas-dd2","collapse-gas-hg2"),
-         array("enzo-p","enzo-p","enzo-p","enzo-p","enzo-p","enzo-p"),'test');
+         array("enzo-e","enzo-e","enzo-e","enzo-e","enzo-e","enzo-e"),'test');
 
 test_summary("Problem: cosmology",
              array("cosmo-cg","cosmo-bcg","cosmo-mg","cosmo-dd","cosmo-hg",
                    "cosmo-cg","cosmo-bcg","cosmo-mg","cosmo-dd","cosmo-hg",
                    "cosmo-cg","cosmo-bcg","cosmo-mg","cosmo-dd","cosmo-hg"),
-             array("enzo-p",  "enzo-p",   "enzo-p",  "enzo-p",  "enzo-p",
-                   "enzo-p",  "enzo-p",   "enzo-p",  "enzo-p",  "enzo-p",
-                   "enzo-p",  "enzo-p",   "enzo-p",  "enzo-p",  "enzo-p"),'test');
+             array("enzo-e",  "enzo-e",   "enzo-e",  "enzo-e",  "enzo-e",
+                   "enzo-e",  "enzo-e",   "enzo-e",  "enzo-e",  "enzo-e",
+                   "enzo-e",  "enzo-e",   "enzo-e",  "enzo-e",  "enzo-e"),'test');
 
 test_summary("Checkpoint",
 	     array("checkpoint_ppm-1","checkpoint_ppm-8","restart_ppm-1","restart_ppm-8"),
-	     array("enzo-p",  "enzo-p", "enzo-p", "enzo-p"),'test');
+	     array("enzo-e",  "enzo-e", "enzo-e", "enzo-e"),'test');
 
 test_summary("Adapt", 
-	     array("adapt-L5-P1"),
-	     array("enzo-p"),'test');
+	     array("mesh-balanced"),
+	     array("enzo-e"),'test');
+//	     array("adapt-L5-P1"),
+//	     array("enzo-p"),'test');
 
 test_summary("Balance", 
 	     array("balance_none",
@@ -626,8 +628,8 @@ test_summary("Balance",
 		   "balance_greedy",
 		   "balance_refine",
 		   "balance_rotate"),
-	     array("enzo-p", "enzo-p", "enzo-p", "enzo-p",
-		   "enzo-p"),'test/Balance');
+	     array("enzo-e", "enzo-e", "enzo-e", "enzo-e",
+		   "enzo-e"),'test/Balance');
 
 test_summary("Boundary", 
 	     array("boundary_reflecting-2d",
@@ -636,8 +638,8 @@ test_summary("Boundary",
 		   "boundary_reflecting-3d",
 		   "boundary_periodic-3d",
 		   "boundary_outflow-3d"),
-	     array("enzo-p", "enzo-p", "enzo-p",
-		   "enzo-p", "enzo-p", "enzo-p"),'test');
+	     array("enzo-e", "enzo-e", "enzo-e",
+		   "enzo-e", "enzo-e", "enzo-e"),'test');
 
 
 test_summary("Initial", 
@@ -652,15 +654,15 @@ test_summary("Initial",
          "initial_music-141",
          "initial_music-114"
          ),
-         array("enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p"),'test');
+         array("enzo-e", "enzo-e", "enzo-e", "enzo-e", "enzo-e", "enzo-e", "enzo-e", "enzo-e", "enzo-e", "enzo-e"),'test');
 
 test_summary("Output", 
 	     array("output-stride-1","output-stride-2","output-stride-4"),
-	     array("enzo-p","enzo-p","enzo-p"),'test');
+	     array("enzo-e","enzo-e","enzo-e"),'test');
 
 test_summary("Particle", 
 	     array("particle-x","particle-y","particle-xy","particle-circle","particle-amr-static","particle-amr-dynamic"),
-	     array("enzo-p","enzo-p","enzo-p","enzo-p","enzo-p","enzo-p"),'test');
+	     array("enzo-e","enzo-e","enzo-e","enzo-e","enzo-e","enzo-e"),'test');
 
 //----------------------------------------------------------------------
 // row_divider($num_types);
@@ -736,13 +738,13 @@ printf ("</tr></table></br>\n");
 
 //======================================================================
 
-     echo "<a name=\"enzop\"><h1>Enzo-P application tests</h1>";
+     echo "<a name=\"enzoe\"><h1>Enzo-E application tests</h1>";
 
 test_group("Method: ppm");
 
 ?>
 
-Method-PPM tests serve to test basic PPM functionality in Enzo-P.  A
+Method-PPM tests serve to test basic PPM functionality in Enzo-E.  A
 small implosion problem is run for 400 cycles, first with
   one block (1,1) then eight blocks (2,4).
 <p>
@@ -762,7 +764,7 @@ small implosion problem is run for 400 cycles, first with
 
 begin_hidden("method_ppm-1", "PPM (serial)");
 
-tests("Enzo","enzo-p","test_method_ppm-1","PPM 1 block","");
+tests("Enzo","enzo-e","test_method_ppm-1","PPM 1 block","");
 
 test_table ("-","method_ppm-1",
 	    array("000000","000200","000400"), $types);
@@ -773,7 +775,7 @@ end_hidden("method_ppm-1");
 
 begin_hidden("method_ppm-8", "PPM (parallel)");
 
-tests("Enzo","enzo-p","test_method_ppm-8","PPM 8 blocks","");
+tests("Enzo","enzo-e","test_method_ppm-8","PPM 8 blocks","");
 
 ?>
 See <a href="http://client64-249.sdsc.edu/cello-bug/show_bug.cgi?id=19">Bug #19</a> for "final time" discrepency between serial and parallel PPM runs. </p>
@@ -791,7 +793,7 @@ test_group("Method: ppml");
 
 ?>
 
-Method-PPML tests serve to test basic PPML functionality in Enzo-P.  A
+Method-PPML tests serve to test basic PPML functionality in Enzo-E.  A
 small high-density sphere is run for 50 cycles, first with one 
 block (1,1,1) then eight blocks (2,2,2).
 
@@ -799,7 +801,7 @@ block (1,1,1) then eight blocks (2,2,2).
 
   begin_hidden("method_ppml-1", "PPML (serial)");
 
-tests("Enzo","enzo-p","test_method_ppml-1","PPML 1 block","");
+tests("Enzo","enzo-e","test_method_ppml-1","PPML 1 block","");
 
 test_table ("-","method_ppml-1-x",
 	    array("0000","0010","0020","0030","0040"), $types);
@@ -812,7 +814,7 @@ end_hidden ("method_ppml-1");
 
 begin_hidden("method_ppml-8", "PPML (parallel)");
 
-tests("Enzo","enzo-p","test_method_ppml-8","PPML 8 blocks","");
+tests("Enzo","enzo-e","test_method_ppml-8","PPML 8 blocks","");
 
 test_table ("-","method_ppml-8-x",
 	    array("0000","0010","0020","0030","0040"), $types);
@@ -825,7 +827,7 @@ end_hidden ("method_ppml-8");
 
   begin_hidden("method_ppml-1", "PPML (serial)");
 
-tests("Enzo","enzo-p","test_method_ppml-test-1","PPML-TEST 1 block","");
+tests("Enzo","enzo-e","test_method_ppml-test-1","PPML-TEST 1 block","");
 
 test_table ("-","method_ppml-test-1-x",
 	    array("0000","0010","0020","0030","0040"), $types);
@@ -838,7 +840,7 @@ end_hidden ("method_ppml-test-1");
 
 begin_hidden("method_ppml-test-8", "PPML-TEST (parallel)");
 
-tests("Enzo","enzo-p","test_method_ppml-test-8","PPML-TEST 8 blocks","");
+tests("Enzo","enzo-e","test_method_ppml-test-8","PPML-TEST 8 blocks","");
 
 test_table ("-","method_ppml-test-8-x",
 	    array("0000","0010","0020","0030","0040"), $types);
@@ -856,7 +858,7 @@ test_group("Method: heat");
 ?>
 
 Method-heat tests serve to test basic functionality of the "heat" method
-in Enzo-P.
+in Enzo-E.
 
 </p>
 
@@ -865,7 +867,7 @@ in Enzo-P.
 
   begin_hidden("method_heat-1", "HEAT (serial)");
 
-tests("Enzo","enzo-p","test_method_heat-1","HEAT 1 block","");
+tests("Enzo","enzo-e","test_method_heat-1","HEAT 1 block","");
 
 test_table ("-","method_heat-temp-1",
 	    array("000000","000200","000400"), $types);
@@ -876,7 +878,7 @@ end_hidden ("method_heat-1");
 
   begin_hidden("method_heat-8", "HEAT (parallel)");
 
-tests("Enzo","enzo-p","test_method_heat-8","HEAT 8 block","");
+tests("Enzo","enzo-e","test_method_heat-8","HEAT 8 block","");
 
 test_table ("-","method_heat-temp-8",
 	    array("000000","000200","000400"), $types);
@@ -884,8 +886,6 @@ test_table ("-","method_heat-mesh-8",
 	    array("000000","000200","000400"), $types);
 
 end_hidden ("method_heat-8");
-
-//======================================================================
 
 test_group("Method: flux_correct");
 
@@ -899,18 +899,18 @@ Flux-correction tests check how effectively the flux-correction method maintains
 
 
   begin_hidden("method_flux2", "FLUX_CORRECT 2D V=(-1,0)");
-  tests("Enzo","enzo-p","test_method_flux2-xm","FLUX_CORRECT 2D V=(-1,0)","");
-  tests("Enzo","enzo-p","test_method_flux2-xp","FLUX_CORRECT 2D V=(+1,0)","");
-  tests("Enzo","enzo-p","test_method_flux2-ym","FLUX_CORRECT 2D V=(0,-1)","");
-  tests("Enzo","enzo-p","test_method_flux2-yp","FLUX_CORRECT 2D V=(0,+1)","");
+  tests("Enzo","enzo-e","test_method_flux2-xm","FLUX_CORRECT 2D V=(-1,0)","");
+  tests("Enzo","enzo-e","test_method_flux2-xp","FLUX_CORRECT 2D V=(+1,0)","");
+  tests("Enzo","enzo-e","test_method_flux2-ym","FLUX_CORRECT 2D V=(0,-1)","");
+  tests("Enzo","enzo-e","test_method_flux2-yp","FLUX_CORRECT 2D V=(0,+1)","");
   end_hidden("method_flux2");
   begin_hidden("method_flux3", "FLUX_CORRECT 3D V=(-1,0)");
-  tests("Enzo","enzo-p","test_method_flux3-xm","FLUX_CORRECT 3D V=(-1,0,0)","");
-  tests("Enzo","enzo-p","test_method_flux3-xp","FLUX_CORRECT 3D V=(+1,0,0)","");
-  tests("Enzo","enzo-p","test_method_flux3-ym","FLUX_CORRECT 3D V=(0,-1,0)","");
-  tests("Enzo","enzo-p","test_method_flux3-yp","FLUX_CORRECT 3D V=(0,+1,0)","");
-  tests("Enzo","enzo-p","test_method_flux3-zm","FLUX_CORRECT 3D V=(0,0,-1)","");
-  tests("Enzo","enzo-p","test_method_flux3-zp","FLUX_CORRECT 3D V=(0,0,+1)","");
+  tests("Enzo","enzo-e","test_method_flux3-xm","FLUX_CORRECT 3D V=(-1,0,0)","");
+  tests("Enzo","enzo-e","test_method_flux3-xp","FLUX_CORRECT 3D V=(+1,0,0)","");
+  tests("Enzo","enzo-e","test_method_flux3-ym","FLUX_CORRECT 3D V=(0,-1,0)","");
+  tests("Enzo","enzo-e","test_method_flux3-yp","FLUX_CORRECT 3D V=(0,+1,0)","");
+  tests("Enzo","enzo-e","test_method_flux3-zm","FLUX_CORRECT 3D V=(0,0,-1)","");
+  tests("Enzo","enzo-e","test_method_flux3-zp","FLUX_CORRECT 3D V=(0,0,+1)","");
   end_hidden("flux3");
 
 
@@ -934,7 +934,7 @@ Spherical collapse tests for varying linear solvers.  Currently 2D only to keep 
 
 begin_hidden("collapse-bcg2", "COLLAPSE (Particles) (BiCG-STAB Solver)");
 
-tests("Enzo","enzo-p","test_collapse-bcg2","2D AMR Collapse (BiCG-STAB Solver)","");
+tests("Enzo","enzo-e","test_collapse-bcg2","2D AMR Collapse (BiCG-STAB Solver)","");
 
 test_table ("_","Dir_Collapse-BCG2",
       array("0007/dark",
@@ -983,7 +983,7 @@ end_hidden("collapse-bcg2");
 
 begin_hidden("collapse-dd2", "COLLAPSE (Particles) (DD Solver)");
 
-tests("Enzo","enzo-p","test_collapse-dd2","2D AMR Collapse (Norman DD Solver)","");
+tests("Enzo","enzo-e","test_collapse-dd2","2D AMR Collapse (Norman DD Solver)","");
 
 test_table ("_","Dir_Collapse-DD2",
       array("0007/dark",
@@ -1032,7 +1032,7 @@ end_hidden("collapse-dd2");
 
 begin_hidden("collapse-hg2", "COLLAPSE (Particles) (HG Solver)");
 
-tests("Enzo","enzo-p","test_collapse-hg2","2D AMR Collapse (Reynolds HG Solver)","");
+tests("Enzo","enzo-e","test_collapse-hg2","2D AMR Collapse (Reynolds HG Solver)","");
 
 test_table ("_","Dir_Collapse-HG2",
       array("0007/dark",
@@ -1085,7 +1085,7 @@ end_hidden("collapse-hg2");
 
 begin_hidden("collapse-gas-bcg2", "GAS COLLAPSE (Gas) (BiCG-STAB Solver)");
 
-tests("Enzo","enzo-p","test_collapse-gas-bcg2","2D AMR Collapse (BiCG-STAB Solver)","");
+tests("Enzo","enzo-e","test_collapse-gas-bcg2","2D AMR Collapse (BiCG-STAB Solver)","");
 
 test_table ("_","Dir_Collapse-GAS-BCG2",
       array("0010/density",
@@ -1136,7 +1136,7 @@ end_hidden("collapse-gas-bcg2");
 
 begin_hidden("collapse-gas-dd2", "GAS COLLAPSE (Gas) (DD Solver)");
 
-tests("Enzo","enzo-p","test_collapse-gas-dd2","2D AMR Collapse (Norman DD Solver)","");
+tests("Enzo","enzo-e","test_collapse-gas-dd2","2D AMR Collapse (Norman DD Solver)","");
 
 test_table ("_","Dir_Collapse-GAS-DD2",
       array("0010/density",
@@ -1187,7 +1187,7 @@ end_hidden("collapse-gas-dd2");
 
 begin_hidden("collapse-gas-hg2", "GAS COLLAPSE (Gas) (HG Solver)");
 
-tests("Enzo","enzo-p","test_collapse-gas-hg2","2D AMR Collapse (Reynolds HG Solver)","");
+tests("Enzo","enzo-e","test_collapse-gas-hg2","2D AMR Collapse (Reynolds HG Solver)","");
 
 test_table ("_","Dir_Collapse-GAS-HG2",
       array("0010/density",
@@ -1252,7 +1252,7 @@ method using various linear solvers, both unigrid and AMR.
 
 begin_hidden("cosmo-cg", "COSMOLOGY (CG solver)");
 
-tests("Enzo","enzo-p","test_cosmo-cg","COSMOLOGY (Unigrid CG)","");
+tests("Enzo","enzo-e","test_cosmo-cg","COSMOLOGY (Unigrid CG)","");
 
 test_table ("_","Dir_COSMO_CG",
       array("0020/dark-01",
@@ -1292,7 +1292,7 @@ end_hidden("cosmo-cg");
 
 begin_hidden("cosmo-mg", "COSMOLOGY (MG solver)");
 
-tests("Enzo","enzo-p","test_cosmo-mg","COSMOLOGY_MG","");
+tests("Enzo","enzo-e","test_cosmo-mg","COSMOLOGY_MG","");
 
 test_table ("_","Dir_COSMO_MG",
       array("0020/dark-01",
@@ -1335,7 +1335,7 @@ end_hidden("cosmo-mg");
 
 begin_hidden("cosmo-bcg", "COSMOLOGY (BCG solver)");
 
-tests("Enzo","enzo-p","test_cosmo-bcg","COSMOLOGY_BCG","");
+tests("Enzo","enzo-e","test_cosmo-bcg","COSMOLOGY_BCG","");
 
 test_table ("_","Dir_COSMO_BCG",
       array("0020/dark-01",
@@ -1378,7 +1378,7 @@ end_hidden("cosmo-bcg");
 
 begin_hidden("cosmo-dd", "COSMOLOGY (DD solver)");
 
-tests("Enzo","enzo-p","test_cosmo-dd","COSMOLOGY_DD","");
+tests("Enzo","enzo-e","test_cosmo-dd","COSMOLOGY_DD","");
 
 test_table ("_","Dir_COSMO_DD",
       array("0020/dark-01",
@@ -1421,7 +1421,7 @@ end_hidden("cosmo-dd");
 
 begin_hidden("cosmo-hg", "COSMOLOGY (HG solver)");
 
-tests("Enzo","enzo-p","test_cosmo-hg","COSMOLOGY_HG","");
+tests("Enzo","enzo-e","test_cosmo-hg","COSMOLOGY_HG","");
 
 test_table ("_","Dir_COSMO_HG",
       array("0020/dark-01",
@@ -1468,8 +1468,8 @@ test_group("Checkpoint");
 
 begin_hidden("checkpoint_ppm-1","Checkpoint/Restart (serial)");
 
-tests("Enzo","enzo-p","test_checkpoint_ppm-1","Checkpoint P=1","");
-tests("Enzo","enzo-p","test_restart_ppm-1","Restart P=1","");
+tests("Enzo","enzo-e","test_checkpoint_ppm-1","Checkpoint P=1","");
+tests("Enzo","enzo-e","test_restart_ppm-1","Restart P=1","");
 test_table ("-","checkpoint_ppm-1",  array("000010","000020"), $types);
 
 end_hidden("checkpoint_ppm-1");
@@ -1479,8 +1479,8 @@ end_hidden("checkpoint_ppm-1");
 begin_hidden("checkpoint_ppm-8","Checkpoint/Restart (parallel)");
 
 
-tests("Enzo","enzo-p","test_checkpoint_ppm-8","Checkpoint P=8","");
-tests("Enzo","enzo-p","test_restart_ppm-8","Restart P=8","");
+tests("Enzo","enzo-e","test_checkpoint_ppm-8","Checkpoint P=8","");
+tests("Enzo","enzo-e","test_restart_ppm-8","Restart P=8","");
 test_table ("-","checkpoint_ppm-8",  array("000010","000020"), $types);
 
 end_hidden("checkpoint_ppm-8");
@@ -1491,7 +1491,7 @@ test_group("Adapt");
 
 begin_hidden("adapt-L5-P1", "Adapt");
 
-tests("Enzo","enzo-p","test_adapt-L5-P1","Level 5","");
+tests("Enzo","enzo-e","test_adapt-L5-P1","Level 5","");
 
 test_table ("-","adapt-L5-P1-mesh",
 	    array("0.00","0.01","0.02","0.03", "0.04","0.05"), $types);
@@ -1513,7 +1513,7 @@ test_group("Balance");
 
 begin_hidden("balance_none", "None");
 
-tests("Enzo","enzo-p","test_balance_none","None","Balance");
+tests("Enzo","enzo-e","test_balance_none","None","Balance");
 test_table ("-","Balance/None/balance-mesh",
 	    array("00020"), $types);
 test_table ("-","Balance/None/balance-de",
@@ -1523,7 +1523,7 @@ end_hidden("balance_none");
 
 begin_hidden("balance_rotate", "RotateLB");
 
-tests("Enzo","enzo-p","test_balance_rotate","Rotate","Balance");
+tests("Enzo","enzo-e","test_balance_rotate","Rotate","Balance");
 test_table ("-","Balance/Rotate/balance-mesh",
 	    array("00020"), $types);
 test_table ("-","Balance/Rotate/balance-de",
@@ -1533,7 +1533,7 @@ end_hidden("balance_rotate");
 
 begin_hidden("balance_greedy", "GreedyLB");
 
-tests("Enzo","enzo-p","test_balance_greedy","Greedy","Balance");
+tests("Enzo","enzo-e","test_balance_greedy","Greedy","Balance");
 test_table ("-","Balance/Greedy/balance-mesh",
 	    array("00020"), $types);
 test_table ("-","Balance/Greedy/balance-de",
@@ -1543,7 +1543,7 @@ end_hidden("balance_greedy");
 
 begin_hidden("balance_rand_cent", "RandCentLB");
 
-tests("Enzo","enzo-p","test_balance_rand_cent","RandCent","Balance");
+tests("Enzo","enzo-e","test_balance_rand_cent","RandCent","Balance");
 test_table ("-","Balance/RandCent/balance-mesh",
 	    array("00020"), $types);
 test_table ("-","Balance/RandCent/balance-de",
@@ -1553,7 +1553,7 @@ end_hidden("balance_rand_cent");
 
 begin_hidden("balance_refine", "RefineLB");
 
-tests("Enzo","enzo-p","test_balance_refine","Refine","Balance");
+tests("Enzo","enzo-e","test_balance_refine","Refine","Balance");
 test_table ("-","Balance/Refine/balance-mesh",
 	    array("00020"), $types);
 test_table ("-","Balance/Refine/balance-de",
@@ -1567,21 +1567,21 @@ test_group("Boundary");
 
 begin_hidden("boundary_reflecting_2d", "2D Reflecting");
 
-tests("Enzo","enzo-p","test_boundary_reflecting-2d","Reflecting 2D","");
+tests("Enzo","enzo-e","test_boundary_reflecting-2d","Reflecting 2D","");
 test_table ("-","boundary_reflecting-2d",
 	    array("0000","0100","0200","0300","0400"), $types);
 end_hidden("boundary_reflecting_2d");
 
 begin_hidden("boundary_periodic_2d", "2D Periodic");
 
-tests("Enzo","enzo-p","test_boundary_periodic-2d","Periodic 2D","");
+tests("Enzo","enzo-e","test_boundary_periodic-2d","Periodic 2D","");
 test_table ("-","boundary_periodic-2d",
 	    array("0000","0100","0200","0300","0400"), $types);
 end_hidden("boundary_periodic_2d");
 
 begin_hidden("boundary_outflow_2d", "2D Outflow");
 
-tests("Enzo","enzo-p","test_boundary_outflow-2d","Outflow 2D","");
+tests("Enzo","enzo-e","test_boundary_outflow-2d","Outflow 2D","");
 test_table ("-","boundary_outflow-2d",
 	    array("0000","0100","0200","0300","0400"), $types);
 end_hidden("boundary_outflow_2d");
@@ -1589,7 +1589,6 @@ end_hidden("boundary_outflow_2d");
 //----------------------------------------------------------------------
 
 begin_hidden("boundary_reflecting_3d", "3D Reflecting");
-tests("Enzo","enzo-p","test_boundary_reflecting-3d","Reflecting 3D","");
 test_table ("-","boundary_reflecting-3d",
 	    array("0000","0020","0040","0060","0080"), $types);
 end_hidden("boundary_reflecting_3d");
@@ -1612,7 +1611,7 @@ test_group("Initial");
 test_subgroup ("InitialValue with PNG mask");
 begin_hidden("initial_mask","png mask initial conditions");
 
-tests("Enzo","enzo-p","test_initial_png","","");
+tests("Enzo","enzo-e","test_initial_png","","");
 test_table ("-","initial_png",
 	    array("00","10","20","30","40", "50"), $types);
 end_hidden("initial_mask");
@@ -1620,15 +1619,15 @@ end_hidden("initial_mask");
 test_subgroup ("EnzoInitialMusic");
 begin_hidden("initial_music-111","MUSIC initial conditions");
 
-tests("Enzo","enzo-p","test_initial_music-111","MUSIC (1,1,1) blocking","");
-tests("Enzo","enzo-p","test_initial_music-222","MUSIC (2,2,2) blocking","");
-tests("Enzo","enzo-p","test_initial_music-444","MUSIC (4,4,4) blocking","");
-tests("Enzo","enzo-p","test_initial_music-211","MUSIC (2,1,1) blocking","");
-tests("Enzo","enzo-p","test_initial_music-121","MUSIC (1,2,1) blocking","");
-tests("Enzo","enzo-p","test_initial_music-112","MUSIC (1,1,2) blocking","");
-tests("Enzo","enzo-p","test_initial_music-411","MUSIC (4,1,1) blocking","");
-tests("Enzo","enzo-p","test_initial_music-141","MUSIC (1,4,1) blocking","");
-tests("Enzo","enzo-p","test_initial_music-114","MUSIC (1,1,4) blocking","");
+tests("Enzo","enzo-e","test_initial_music-111","MUSIC (1,1,1) blocking","");
+tests("Enzo","enzo-e","test_initial_music-222","MUSIC (2,2,2) blocking","");
+tests("Enzo","enzo-e","test_initial_music-444","MUSIC (4,4,4) blocking","");
+tests("Enzo","enzo-e","test_initial_music-211","MUSIC (2,1,1) blocking","");
+tests("Enzo","enzo-e","test_initial_music-121","MUSIC (1,2,1) blocking","");
+tests("Enzo","enzo-e","test_initial_music-112","MUSIC (1,1,2) blocking","");
+tests("Enzo","enzo-e","test_initial_music-411","MUSIC (4,1,1) blocking","");
+tests("Enzo","enzo-e","test_initial_music-141","MUSIC (1,4,1) blocking","");
+tests("Enzo","enzo-e","test_initial_music-114","MUSIC (1,1,4) blocking","");
 test_table ("-","de",
 array("111-00","222-00","444-00","211-00","121-00","112-00","411-00","141-00","114-00"), $types);
 test_table ("-","vx",
@@ -1643,15 +1642,15 @@ end_hidden("initial_mask");
 
 test_group("Output");
 begin_hidden("output_stride_1", "Stride 1");
-tests("Enzo","enzo-p","test_output-stride-1","","");
+tests("Enzo","enzo-e","test_output-stride-1","","");
 test_table_blocks ("output-stride-1", array("00","10","20"),$types);
 end_hidden("output_stride_1");
 begin_hidden("output_stride_2", "Stride 2");
-tests("Enzo","enzo-p","test_output-stride-2","","");
+tests("Enzo","enzo-e","test_output-stride-2","","");
 test_table_blocks ("output-stride-2",  array("00","10","20"), $types);
 end_hidden("output_stride_2");
 begin_hidden("output_stride_4", "Stride 4");
-tests("Enzo","enzo-p","test_output-stride-4","","");
+tests("Enzo","enzo-e","test_output-stride-4","","");
 test_table_blocks ("output-stride-4",  array("00","10","20"), $types);
 end_hidden("output_stride_4");
 
@@ -1663,12 +1662,12 @@ tests("Cello","test_Particle","test_Particle","","");
 end_hidden("particle");
 
 begin_hidden("particle-x", "Particle (vx,vy) = (1,0)");
-tests("Enzo","enzo-p","test_particle-x","","");
+tests("Enzo","enzo-e","test_particle-x","","");
 test_table ("-","particle-x", array("000","003","006","009"),$types);
 end_hidden("particle-x");
 
 begin_hidden("particle-y", "Particle (vx,vy) = (0,1)");
-tests("Enzo","enzo-p","test_particle-y","","");
+tests("Enzo","enzo-e","test_particle-y","","");
 test_table ("-","particle-y", array("000","003","006","009"),$types);
 end_hidden("particle-y");
 
@@ -1678,18 +1677,18 @@ test_table ("-","particle-xy", array("000","003","006","009"),$types);
 end_hidden("particle-xy");
 
 begin_hidden("particle-circle", "Particle (vx,vy) = (-y,x)");
-tests("Enzo","enzo-p","test_particle-circle","","");
+tests("Enzo","enzo-e","test_particle-circle","","");
 test_table ("-","particle-circle", array("000","100","200","300","400","500"),$types);
 end_hidden("particle-circle");
 
 begin_hidden("particle-amr-static", "Particle (vx,vy) = (-y,x)");
-tests("Enzo","enzo-p","test_particle-amr-static","","");
+tests("Enzo","enzo-e","test_particle-amr-static","","");
 test_table ("-","particle-amr-static-mesh", array("000","032","064","096","128","160","192","224","256"),$types);
 test_table ("-","particle-amr-static", array("000","032","064","096","128","160","192","224","256"),$types);
 end_hidden("particle-amr-static");
 
 begin_hidden("particle-amr-dynamic", "Particle (vx,vy) = (-y,x)");
-tests("Enzo","enzo-p","test_particle-amr-dynamic","","");
+tests("Enzo","enzo-e","test_particle-amr-dynamic","","");
 test_table ("-","particle-amr-dynamic-mesh",  array("000","032","064","096","128","160","192","224","256"),$types);
 test_table ("-","particle-amr-dynamic",  array("000","032","064","096","128","160","192","224","256"),$types);
 end_hidden("particle-amr-dynamic");

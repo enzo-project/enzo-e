@@ -75,16 +75,17 @@ void Output::pup (PUP::er &p)
   p | file_args_;
   p | dir_name_;
   p | dir_args_;
+
   p | io_block_;
   p | io_field_data_;
   p | io_particle_data_;
   p | it_field_index_;
   p | it_particle_index_;
+
   p | stride_write_;
   p | stride_wait_;
 
 }
-
 
 //----------------------------------------------------------------------
 

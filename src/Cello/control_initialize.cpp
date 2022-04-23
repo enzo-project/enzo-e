@@ -47,14 +47,16 @@ void Simulation::initialize() throw()
   problem_->initialize_units (config_);
   problem_->initialize_physics (config_,parameters_);
   problem_->initialize_boundary(config_,parameters_);
-  problem_->initialize_initial (config_,parameters_);
-  problem_->initialize_refine  (config_,parameters_);
-  problem_->initialize_stopping(config_);
   problem_->initialize_prolong (config_);
   problem_->initialize_restrict (config_);
+  problem_->initialize_initial(config_,parameters_);
   problem_->initialize_method  (config_,factory());
-  problem_->initialize_output  (config_,factory());
   problem_->initialize_solver  (config_);
+  problem_->initialize_refine  (config_,parameters_);
+  problem_->initialize_stopping(config_);
+  problem_->initialize_output  (config_,factory());
+
+  cello::finalize_fields();
 
   initialize_hierarchy_();
 
@@ -62,7 +64,7 @@ void Simulation::initialize() throw()
   // using QD to ensure that initialize_hierarchy() is called
   // on all processors before Blocks are created
 
-  // Create the Block chare array
+  // Create the Block chare array and distribute proxy to all other processes
   CProxy_Block block_array;
   if (CkMyPe() == 0) {
     bool allocate_data = true;
@@ -113,7 +115,10 @@ void  Block::initial_new_next_()
 {
   TRACE_INITIAL("initial_new_next_()",this);
   Initial * initial = cello::problem()->initial(index_initial_);
-  if (initial) {
+  const bool initial_restart = cello::config()->initial_restart;
+
+  // Bypass initialization on restart (may want exceptions)
+  if (initial && (! initial_restart)) {
     initial->enforce_block(this,nullptr);
   } else {
     bool is_first_cycle = (cycle_ == cello::config()->initial_cycle);

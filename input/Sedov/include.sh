@@ -16,7 +16,7 @@ rm -rf $rundir
 mkdir $rundir
 cd $rundir
 
-enzorun=$cello/bin/enzo-p
+enzorun=$cello/bin/enzo-e
 charmrun=$charm/bin/charmrun
 input=sedov.in
 output=out.sedov
@@ -28,18 +28,18 @@ cp $enzorun .
 
 if [ $H == "sdsc-gordon" ]; then
 
-   $charmrun ++mpiexec +p$P ./enzo-p $input >& $output
+   $charmrun ++mpiexec +p$P ./enzo-e $input >& $output
 
 elif [ $H == "sdsc-gedeckt" ]; then
 
-   $charmrun +p$P ./enzo-p $input >& $output
+   $charmrun +p$P ./enzo-e $input >& $output
 
 elif [ $H == "ncsa-bw" ]; then
 
     . /opt/modules/default/init/bash
    source $HOME/bin/cmod.sh
 
-   aprun -n $P -d 2 ./enzo-p $input >& $output
+   aprun -n $P -d 2 ./enzo-e $input >& $output
 
 fi
 

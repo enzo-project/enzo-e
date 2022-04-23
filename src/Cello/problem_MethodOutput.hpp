@@ -1,7 +1,7 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     problem_MethodOutput.hpp 
-/// @author   James Bordner (jobordner@ucsd.edu) 
+/// @file     problem_MethodOutput.hpp
+/// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2021-03-09
 /// @brief    [\ref Problem] Declaration for the MethodOutput class
 
@@ -56,7 +56,11 @@ public: // interface
   void pup (PUP::er &p);
 
   void compute_continue (Block * block);
+
+  /// Handle the next (non-writer) block in the octree traversal
   void next (Block * block, MsgOutput *);
+
+  /// Write the block's data
   void write (Block * block, MsgOutput *);
 
   const Factory * factory () const
@@ -64,13 +68,12 @@ public: // interface
 
   public: // virtual functions
 
-  /// Apply the method to advance a block one timestep 
-
+  /// Apply the method to advance a block one timestep
   virtual void compute ( Block * block) throw();
 
   /// barrier before exiting
   void compute_done (Block * block);
-  
+
   /// Return the name of this MethodOutput
   virtual std::string name () throw ()
   { return "output"; }
@@ -87,7 +90,7 @@ protected: // functions
   int file_count_(Block * block);
   void write_meta_ ( FileHdf5 * file, Io * io, std::string type_meta );
   DataMsg * create_data_msg_ (Block * block);
-  
+
 protected: // attributes
 
   /// File name and format
@@ -95,7 +98,7 @@ protected: // attributes
 
   /// Path name and format
   std::vector <std::string> path_name_;
-  
+
   /// List of id's of fields to output
   std::vector<int> field_list_;
 
@@ -122,6 +125,9 @@ protected: // attributes
   /// Block Scalar int for counting files
   int is_count_;
 
+  /// Block Scalar pointers for fp_file_list and fp_block_list files
+  int is_block_list_;
+
   /// Factory for creating Io objects
   union {
     const Factory * factory_;
@@ -132,6 +138,4 @@ protected: // attributes
   /// Whether to output all blocks or just leaf-blocks
   bool all_blocks_;
 };
-
-
 #endif /* PROBLEM_METHOD_OUTPUT_HPP */

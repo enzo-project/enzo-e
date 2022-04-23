@@ -1,0 +1,24 @@
+# Checks how well flux corrections conserve quantities when using PPM solver.
+# To be used when Enzo-E is compiled with CELLO_PREC=double
+
+include "input/FluxCorrect/inclined_contact_ppm.incl"
+include "input/FluxCorrect/smr.incl"
+
+Method {
+     flux_correct {
+         # Specify the minimum expected conserved digits for various fields
+         # (for testing purposes). These expected min_digits values are set to
+         # within ~0.10 of the minimum digits measured from full simulations.
+	 # Builds on some machines achieve significantly better conservation
+	 # than builds on other machines.
+         #
+         # NOTE: For each fields in the "make_field_conservative" group, this
+         # technically, the minimum conserved digits applies to the
+         # conservation of that field multiplied by the "density" field
+         min_digits = ["density", 16.0,
+                       "total_energy", 15.8,
+                       "velocity_x", 15.9,
+                       "velocity_y", 15.9,
+                       "velocity_z", 15.7];
+     }
+ }

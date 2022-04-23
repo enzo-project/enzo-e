@@ -1,4 +1,4 @@
-Enzo-P Output
+Enzo-E Output
 -------------
 
 The output log is useful for monitoring different aspects of the
@@ -23,11 +23,11 @@ configuration settings:
     0 00000.02  
     0 00000.02  [*] CONFIG_USE_PAPI
 
-Here this shows that Enzo-P was compiled using single precision
+Here this shows that Enzo-E was compiled using single precision
 floating point data, MPI was used, and the optional PAPI performance
 API was used.
 
-Next, Enzo-P displays all parameters as they are accessed in the code:
+Next, Enzo-E displays all parameters as they are accessed in the code:
 
   :: 
 
@@ -78,7 +78,7 @@ a line including the type of output and the file name:
     0 00000.04  Output      writing image file E-010.png
 
 When the simulation concludes, various components may output status
-information.  For example, if Enzo-P was compiled using the optional
+information.  For example, if Enzo-E was compiled using the optional
 PAPI library, a brief performance summary is displayed:
 
   ::

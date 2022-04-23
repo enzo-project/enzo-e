@@ -14,25 +14,21 @@
 PARALLEL_MAIN_BEGIN
 {
 
-  PARALLEL_INIT;
-
   unit_init(0,1);
 
 #define N 8
   Index i8[N+1];
 
   int trace[][3] = { {0,0,0},
-		       {1,0,0},
-		       {0,1,0},
-		       {0,0,1},
-		       {0,1,1},
-		       {1,0,1},
-		       {1,1,0},
-		       {1,1,1} };
+                     {1,0,0},
+                     {0,1,0},
+                     {0,0,1},
+                     {0,1,1},
+                     {1,0,1},
+                     {1,1,0},
+                     {1,1,1} };
 
-  
   // Number of bits (not array size)
-  
   int nb3[3] = {3,4,2};
   int na3[3] = {1<<nb3[0], 1<<nb3[1], 1<<nb3[2]};
 
@@ -365,15 +361,302 @@ PARALLEL_MAIN_BEGIN
   }
 
   //==================================================
-  // Subtree
+  // Categorize
   //==================================================
 
-  //  unit_func ("is_in_same_subtree");
+  {
+    Index a[10],b[10];
 
-  //  unit_assert(false);
+    // +-------+-------+
+    // |   |   |   |   |
+    // +---+---+---+---+
+    // |   | a | b |   |
+    // +---+---+---+---+
+
+    int i = 0;
+    a[i].set_array (2,3,0);
+    b[i].set_array(3,3,0);
+
+    a[i].push_child(1,0);
+    b[i].push_child(0,0,0);
+
+    unit_func ("is_sibling");
+    unit_assert (!a[i].is_sibling(b[i]));
+    unit_assert (!b[i].is_sibling(a[i]));
+
+    unit_func ("adjacency");
+    int p3[3] = { 4, 2, 1};
+    unit_assert (a[i].adjacency(b[i],2,p3) == 1);
+
+    unit_func ("index_level");
+    int ia[3],ib[3];
+    a[i].index_level(ia,1);
+    b[i].index_level(ib,1);
+    unit_assert(ia[0]==5);
+    unit_assert(ia[1]==6);
+    unit_assert(ib[0]==6);
+    unit_assert(ib[1]==6);
+    
+    // +-------+-------+
+    // |       | b |   |
+    // +   a   +---+---+
+    // |       |   |   |
+    // +---+---+---+---+
+
+    i = 1;
+
+    a[i].set_array (2,3,0);
+    b[i].set_array(3,3,0);
+
+    b[i].push_child(0,1);
+
+    unit_func ("is_sibling");
+    unit_assert (!a[i].is_sibling(b[i]));
+    unit_assert (!b[i].is_sibling(a[i]));
+
+    unit_func ("adjacency");
+    unit_assert (a[i].adjacency(b[i],2,p3) == 1);
+
+    unit_func ("index_level");
+    a[i].index_level(ia,1);
+    b[i].index_level(ib,1);
+    unit_assert(ia[0]==4);
+    unit_assert(ia[1]==6);
+    unit_assert(ib[0]==6);
+    unit_assert(ib[1]==7);
+
+    // +-------+
+    // |   | b |
+    // |   a---+
+    // |       |
+    // +---+---+
+
+    i = 2;
+
+    a[i].set_array (4,3,2);
+    b[i].set_array (4,3,2);
+
+    b[i].push_child(1,1,0);
+
+    unit_func ("adjacency");
+    unit_assert (a[i].adjacency(b[i],2,p3) == 2);
+
+    unit_func ("is_sibling");
+    unit_assert (!a[i].is_sibling(b[i]));
+    unit_assert (!b[i].is_sibling(a[i]));
+
+    unit_func ("index_level");
+    a[i].index_level(ia,1);
+    b[i].index_level(ib,1);
+    unit_assert(ia[0]==8);
+    unit_assert(ia[1]==6);
+    unit_assert(ia[2]==4);
+    unit_assert(ib[0]==9);
+    unit_assert(ib[1]==7);
+    unit_assert(ib[2]==4);
+  }
+
+  //==================================================
+  // next()
+  //==================================================
+
+  {
+    // root-level next
+    unit_func("next");
+    const int array[3] = {2,4,6};
+    Index I1,J1;
+    Index I2,J2;
+    Index I3,J3;
+
+    // [X] level 0 1D
+
+    I1.set_array(0,0,0);
+    J1.set_array(1,0,0);
+    unit_assert(I1.next(1,array,true) == J1);
+
+    I1.set_array(1,0,0);
+    J1.set_array(0,0,0);
+    unit_assert(I1.next(1,array,true) == J1);
+
+    // [X] level 0 2D
+    I2.set_array(0,3,0);
+    J2.set_array(1,3,0);
+    unit_assert(I2.next(2,array,true) == J2);
+
+    I2.set_array(1,2,0);
+    J2.set_array(0,3,0);
+    unit_assert(I2.next(2,array,true) == J2);
+
+    I2.set_array(1,3,0);
+    J2.set_array(0,0,0);
+    unit_assert(I2.next(2,array,true) == J2);
+
+    // [X] level 0 3D
+    I3.set_array(0,0,0);
+    J3.set_array(1,0,0);
+    unit_assert(I3.next(3,array,true) == J3);
+
+    I3.set_array(1,2,0);
+    J3.set_array(0,3,0);
+    unit_assert(I3.next(3,array,true) == J3);
+
+    I3.set_array(1,3,3);
+    J3.set_array(0,0,4);
+    unit_assert(I3.next(3,array,true) == J3);
+
+    I3.set_array(1,3,5);
+    J3.set_array(0,0,0);
+    unit_assert(I3.next(3,array,true) == J3);
+
+    // [X] level 1 1D
+
+    I1.set_level(1);
+    J1.set_level(1);
+    I1.set_array(1,0,0);
+    J1.set_array(1,0,0);
+    I1.set_child(1, 0);
+    J1.set_child(1, 1);
+
+    unit_assert(I1.next(1,array,true) == J1);
+
+    //----------
+
+    I1.set_level(1);
+    J1.set_level(0);
+    I1.set_array(0,0,0);
+    J1.set_array(1,0,0);
+    I1.set_child(1, 1);
+
+    unit_assert(I1.next(1,array,true) == J1);
+
+    // [X] level 1 2D
+
+    I2.set_level(1);
+    J2.set_level(1);
+    I2.set_array(0,3,0);
+    J2.set_array(0,3,0);
+    I2.set_child(1, 1, 0);
+    J2.set_child(1, 0, 1);
+
+    unit_assert(I2.next(2,array,true) == J2);
+
+    //----------
+
+    I2.set_level(1);
+    J2.set_level(1);
+    I2.set_array(0,3,0);
+    J2.set_array(0,3,0);
+    I2.set_child(1, 0, 1);
+    J2.set_child(1, 1, 1);
+
+    unit_assert(I2.next(2,array,true) == J2);
+
+    //----------
+
+    I2.set_level(1);
+    J2.set_level(0);
+    I2.set_array(0,1,0);
+    J2.set_array(1,1,0);
+    I2.set_child(1, 1, 1);
+
+    unit_assert(I2.next(2,array,true) == J2);
+
+    //----------
+
+    I2.set_level(1);
+    J2.set_level(0);
+    I2.set_array(1,1,0);
+    J2.set_array(0,2,0);
+    I2.set_child(1, 1, 1);
+
+    unit_assert(I2.next(2,array,true) == J2);
+
+    // [ ] level 1 3D
+
+    I2.set_level(1);
+    J2.set_level(1);
+    I2.set_array(0,3,0);
+    J2.set_array(0,3,0);
+    I2.set_child(1, 1, 0);
+    J2.set_child(1, 0, 1);
+
+    unit_assert(I2.next(3,array,true) == J2);
+
+    //----------
+
+    I2.set_level(1);
+    J2.set_level(1);
+    I2.set_array(0,2,1);
+    J2.set_array(0,2,1);
+    I2.set_child(1, 0,1,1);
+    J2.set_child(1, 1,1,1);
+
+    unit_assert(I2.next(3,array,true) == J2);
+
+    //----------
+
+    I2.set_level(1);
+    J2.set_level(0);
+    I2.set_array(0,1,2);
+    J2.set_array(1,1,2);
+    I2.set_child(1, 1,1,1);
+
+    unit_assert(I2.next(3,array,true) == J2);
+
+    //----------
+
+    I2.set_level(1);
+    J2.set_level(0);
+    I2.set_array(1,2,3);
+    J2.set_array(0,3,3);
+    I2.set_child(1, 1,1,1);
+
+    unit_assert(I2.next(3,array,true) == J2);
+
+    // [ ] level 2 1D
+
+    //    I1.set_array(0,0,0);
+    //    J1.set_array(1,0,0);
+    //    unit_assert(I1.next(1,array,true) == J1);
+
+    //    I1.set_array(1,0,0);
+    //    J1.set_array(0,0,0);
+    //    unit_assert(I1.next(1,array,true) == J1);
+
+    // [ ] level 2 2D
+    //    I2.set_array(0,3,0);
+    //    J2.set_array(1,3,0);
+    //    unit_assert(I2.next(2,array,true) == J2);
+
+    //    I2.set_array(1,2,0);
+    //    J2.set_array(0,3,0);
+    //    unit_assert(I2.next(2,array,true) == J2);
+
+    //    I2.set_array(1,3,0);
+    //    J2.set_array(0,0,0);
+    //    unit_assert(I2.next(2,array,true) == J2);
+
+    // [ ] level 2 3D
+    //    I3.set_array(0,0,0);
+    //    J3.set_array(1,0,0);
+    //    unit_assert(I3.next(3,array,true) == J3);
+
+    //    I3.set_array(1,2,0);
+    //    J3.set_array(0,3,0);
+    //    unit_assert(I3.next(3,array,true) == J3);
+
+    //    I3.set_array(1,3,3);
+    //    J3.set_array(0,0,4);
+    //    unit_assert(I3.next(3,array,true) == J3);
+
+    //    I3.set_array(1,3,5);
+    //    J3.set_array(0,0,0);
+    //    unit_assert(I3.next(3,array,true) == J3);
+
+  }
+
 
   unit_finalize();
-
   exit_();
 }
 

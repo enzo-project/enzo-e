@@ -14,8 +14,7 @@ listed; for example, a parameter may only be valid if some other
 parameter is set to a certain value.
 
 If you find any errors in the documentation, or have any specific
-suggestions, please contact the documentation maintainer at
-jobordner@ucsd.edu.
+suggestions, please contact the Enzo Project developers at `github <https://github.com/enzo-project>`_.
 
 -----
 Adapt
@@ -53,7 +52,7 @@ specifies boundary conditions for some subset of the domain.  The
 :p:`axis` and :p:`face` parameters are available to restrict boundary
 conditions to a subset of faces, whereas the :p:`mask` parameter is
 available for even finer control of mixed boundary conditions, which
-may be time-dependent.  Inflow boundary conditions use the :p:`value`
+may be time-dependent.  Inflow boundary conditions use the :p:`inflow`
 parameter to specify field values at the boundary.
 
 .. include:: boundary.incl

@@ -25,8 +25,10 @@ public: // interface
   virtual ~IoFieldData() throw()
   {}
 
+  /// CHARM++ PUP::able declaration
   PUPable_decl(IoFieldData);
 
+  /// CHARM++ migration constructor
   IoFieldData(CkMigrateMessage *m) : Io(m) {}
 
   /// CHARM++ Pack / Unpack function
@@ -41,9 +43,21 @@ public: // interface
   { field_data_ = field_data;};
 
 
-#include "_io_Io_common.hpp"
+  /// Return the ith data item associated with the object
+  virtual void field_array 
+  (void ** buffer, std::string * name, int * type,
+   int * nxd=0, int * nyd=0, int * nzd=0,
+   int * nx=0,  int * ny=0,  int * nz=0) throw();
 
-  
+  /// Return the ith metadata item associated with the object
+  virtual void meta_value 
+  (int index, 
+   void ** buffer, std::string * name, int * type,
+   int * nxd=0, int * nyd=0, int * nzd=0) throw();
+
+  /// Copy the values to the object
+  virtual void save_to (void *); 
+
 protected: // functions
 
   /// Current FieldData

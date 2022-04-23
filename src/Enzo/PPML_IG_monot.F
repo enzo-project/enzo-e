@@ -20,7 +20,10 @@ c     See LICENSE_PPML file for license and copyright information
       
       ENZO_REAL uwl,uwr,vx1,vx2,vx3,vx4,vx5,vl1,vr1,dml,gamma
       ENZO_REAL dmr,dwl,dwr,sjn,sjm,sjx,sjy,uvr,uvl,Xmedian 
+      ENZO_REAL o1
 
+      o1 = 1.0d0
+      
       Do i=1,Nx  
          Do m=1,8
             qxl(i,m)=0.
@@ -185,7 +188,7 @@ c     See LICENSE_PPML file for license and copyright information
                uwl=q4(m)-q3(m)
                uwr=q3(m)-q2(m)
                
-               u1(m)=0.5d0*(SIGN(1.d0,uwl)+SIGN(1.d0,uwr))*
+               u1(m)=0.5d0*(SIGN(o1,uwl)+SIGN(o1,uwr))*
      &              min(abs(uwl),abs(uwr))
 
             Enddo
@@ -211,7 +214,7 @@ c     See LICENSE_PPML file for license and copyright information
                uwl=q4(m)-q3(m)
                uwr=q3(m)-q2(m)
 
-               u1(m)=0.5d0*(SIGN(1.d0,uwl)+SIGN(1.d0,uwr))*
+               u1(m)=0.5d0*(SIGN(o1,uwl)+SIGN(o1,uwr))*
      &              min(abs(uwl),abs(uwr))
 
             Enddo

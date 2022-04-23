@@ -14,12 +14,12 @@
 /    ENZO_SUCCESS or ENZO_FAIL
 /
 ************************************************************************/
- 
+
 // Solve the MHD equations with the solver, saving the subgrid fluxes
 
 #include "cello.hpp"
 
-#include "enzo.hpp" 
+#include "enzo.hpp"
 
 #define DEBUG_FIELDS
 #ifdef DEBUG_FIELDS
@@ -54,27 +54,27 @@
 
 int EnzoBlock::SolveMHDEquations( enzo_float dt )
 {
- 
+
   /* exit if not 3D */
 
   // @@ assert GridRank == 3
-  //  if (GridRank != 3) 
+  //  if (GridRank != 3)
   //    my_exit(EXIT_ENZO_FAILURE);
 
   const int in = cello::index_static();
   if (NumberOfBaryonFields[in] > 0) {
- 
+
     /* initialize */
- 
+
     int dim, i,  size;
     Elong_int GridGlobalStart[MAX_DIMENSION];
- 
+
     /* Compute size (in floats) of the current grid. */
- 
-      size = 1;
+
+    size = 1;
     for (dim = 0; dim < GridRank[in]; dim++)
       size *= GridDimension[dim];
- 
+
     /* Get easy to handle pointers for each variable. */
 
 
@@ -111,7 +111,6 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
     enzo_float *bfieldy_rz = (enzo_float *) field.values ("bfieldy_rz");
     enzo_float *bfieldz_rz = (enzo_float *) field.values ("bfieldz_rz");
 
-
     CHECK_FIELD(density,"density");
     CHECK_FIELD(velox,"velox");
     CHECK_FIELD(veloy,"veloy");
@@ -140,23 +139,24 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
     CHECK_FIELD(bfieldx_rz,"bfieldx_rz");
     CHECK_FIELD(bfieldy_rz,"bfieldy_rz");
     CHECK_FIELD(bfieldz_rz,"bfieldz_rz");
+
     /* compute global start index for left edge of entire grid
        (including boundary zones) */
- 
+
      for (dim = 0; dim < GridRank[in]; dim++)
        GridGlobalStart[dim] =
      	NINT((GridLeftEdge[dim] - DomainLeftEdge[in*3+dim])/CellWidth[dim]) -
      	GridStartIndex[dim];
- 
+
     /* fix grid quantities so they are defined to at least 3 dims */
- 
+
     for (i = GridRank[in]; i < 3; i++) {
       GridDimension[i]   = 1;
       GridStartIndex[i]  = 0;
       GridEndIndex[i]    = 0;
       GridGlobalStart[i] = 0;
     }
- 
+
     /* allocate temporary space for solver */
 
     int k = 0;
@@ -233,33 +233,33 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
 
     // enzo_float *standard = NULL;
     //    if (NumberOfSubgrids > 0) standard = SubgridFluxes[0]->LeftFluxes[0][0];
- 
+
     // for (subgrid = 0; subgrid < NumberOfSubgrids; subgrid++)
     //   for (dim = 0; dim < GridRank[in]; dim++) {
- 
+
         /* Set i,j dimensions of 2d flux slice (this works even if we
            are in 1 or 2d) the correspond to the dimensions of the global
            indicies.  I.e. for dim = 0, the plane is dims 1,2
                            for dim = 1, the plane is dims 0,2
                            for dim = 2, the plane is dims 0,1 */
- 
+
 // 	idim = (dim == 0) ? 1 : 0;
 // 	jdim = (dim == 2) ? 1 : 2;
- 
+
         /* Set the index (along the dimension perpindicular to the flux
            plane) of the left and right flux planes.  The index is zero
            based from the left side of the entire grid. */
- 
+
  	// leftface[subgrid*3+dim] =
  	//   SubgridFluxes[subgrid]->LeftFluxStartGlobalIndex[dim][dim] -
  	//     GridGlobalStart[dim];
  	// rightface[subgrid*3+dim] =
  	//   SubgridFluxes[subgrid]->RightFluxStartGlobalIndex[dim][dim] -
  	//     GridGlobalStart[dim];   // (+1 done by fortran code)
- 
+
         /* set the start and end indicies (zero based on entire grid)
            of the 2d flux plane. */
- 
+
 // 	istart[subgrid*3+dim] =
 // 	  SubgridFluxes[subgrid]->RightFluxStartGlobalIndex[dim][idim] -
 // 	    GridGlobalStart[idim];
@@ -272,13 +272,13 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
 // 	jend[subgrid*3+dim] =
 // 	  SubgridFluxes[subgrid]->RightFluxEndGlobalIndex[dim][jdim] -
 // 	    GridGlobalStart[jdim];
- 
+
 //         /* Compute offset from the standard pointer to the start of
 //            each set of flux data.  This is done to compensate for
 //            fortran's inability to handle arrays of pointers or structs.
 // 	   NOTE: This pointer arithmetic is illegal; some other way should
 // 	   be found to do it (like write higher level ppm stuff in c++). */
- 
+
 // 	dnindex[subgrid*6+dim*2] =
 // 	  SubgridFluxes[subgrid]->LeftFluxes[0][dim]  - standard;
 // 	dnindex[subgrid*6+dim*2+1] =
@@ -307,14 +307,14 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
 // 	  SubgridFluxes[subgrid]->LeftFluxes[6][dim]  - standard;
 // 	bzindex[subgrid*6+dim*2+1] =
 // 	  SubgridFluxes[subgrid]->RightFluxes[6][dim] - standard;
- 
+
       // }
- 
+
     /* If using comoving coordinates, multiply dx by a(n+1/2).
        In one fell swoop, this recasts the equations solved by solver
        in comoving form (except for the expansion terms which are taken
        care of elsewhere). */
- 
+
     /* Create a cell width array to pass (and convert to absolute coords). */
     // this is not going to work for cosmology right away !AK
 
@@ -326,9 +326,9 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
       else
 	CellWidthTemp[dim] = 1.0;
     }
- 
+
     /* Prepare Gravity. */
- 
+
     /* call a Fortran routine to actually compute the hydro equations
        on this grid.
        Notice that it is hard-wired for three dimensions, but it does
@@ -338,7 +338,7 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
 
     /* current PPML implementation only supports 3D and does not
        support color fields */
-    
+
     enzo_float *velocity_x      = (enzo_float *) field.values ("velocity_x");
     enzo_float *velocity_y      = (enzo_float *) field.values ("velocity_y");
     enzo_float *velocity_z      = (enzo_float *) field.values ("velocity_z");
@@ -353,7 +353,7 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
       std::copy_n(velocity_y,m,veloy);
       std::copy_n(velocity_z,m,veloz);
     }
-    
+
     FORTRAN_NAME(ppml)
       (density,velox,   veloy,   veloz,   bfieldx,   bfieldy,   bfieldz,
        dens_rx,velox_rx,veloy_rx,veloz_rx,bfieldx_rx,bfieldy_rx,bfieldz_rx,
@@ -372,6 +372,7 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
        h1,h2,h3,h4,h5,h6,h7,
        ex,ey,ez,
        qu1,qu2,qu3,qu4,qu5,qu6,qu7);
+
     /* deallocate temporary space for solver */
  
     if (have_velocity) {
@@ -381,11 +382,11 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
     }
 
     delete [] temp;
- 
+
     delete [] leftface;
- 
+
   }  // end: if (NumberOfBaryonFields > 0)
- 
+
   return ENZO_SUCCESS;
  
 }

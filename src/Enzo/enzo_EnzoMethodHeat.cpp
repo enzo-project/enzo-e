@@ -11,16 +11,20 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodHeat::EnzoMethodHeat (double alpha, double courant) 
+EnzoMethodHeat::EnzoMethodHeat (double alpha, double courant)
   : Method(),
     alpha_(alpha),
     courant_(courant)
 {
+
+  cello::define_field ("temperature");
+
   // Initialize default Refresh object
 
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_field("temperature");
+
 }
 
 //----------------------------------------------------------------------
@@ -140,7 +144,7 @@ void EnzoMethodHeat::compute_ (Block * block,enzo_float * Unew) throw()
 
 	enzo_float Uxx = dxi*(U[i-idx] - 2*U[i] + U[i+idx]);
 	enzo_float Uyy = dyi*(U[i-idy] - 2*U[i] + U[i+idy]);
-	
+
 	Unew[i] = U[i] + alpha_*dt*(Uxx + Uyy);
 
       }

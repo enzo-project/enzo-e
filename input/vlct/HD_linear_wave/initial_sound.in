@@ -1,0 +1,21 @@
+
+# Initial Conditions and Stopping Condition for Linear Sound Wave
+
+   include "input/vlct/HD_linear_wave/common.in"
+
+   Initial{
+      inclined_wave{
+	 # set the type of wave. Allowed choices are:
+	 #    - "circ_alfven" (circularly polarized traveling Alfven wave)
+	 #    - "alfven" (Alfven wave)
+	 #    - "mhd_entropy" (mhd entropy wave)
+	 #    - "fast" (fast magnetosonic wave)
+	 #    - "slow" (slow magnetosonic wave)
+	 #    - "sound" (sound wave)
+	 #    - "hd_entropy" (hd entropy wave pertubed along v0)
+	 #    - "hd_transv_entropy_v1" (hd entropy wave perturbed along v1)
+	 #    - "hd_transv_entropy_v2" (hd entropy wave perturbed along v2)
+	 wave_type = "sound";
+      };
+      
+   }

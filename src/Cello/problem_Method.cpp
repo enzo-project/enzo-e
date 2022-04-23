@@ -3,7 +3,7 @@
 /// @file     problem_Method.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2015-09-04
-/// @brief    
+/// @brief
 
 #include "problem.hpp"
 
@@ -66,10 +66,9 @@ int Method::refresh_id_post() const
 //----------------------------------------------------------------------
 
 void Method::set_schedule (Schedule * schedule) throw()
-{ 
+{
   if (schedule_) delete schedule_;
   schedule_ = schedule;
 }
 
 //======================================================================
-

@@ -9,6 +9,7 @@
 
 #include "cello.hpp"
 #include "parameters.hpp"
+#include <iostream>
 
 Config g_config;
 
@@ -64,7 +65,6 @@ void Config::pup (PUP::er &p)
 
   p | num_fields;
   p | field_list;
-  p | field_index;
   p | field_alignment;
   PUParray(p,field_centering,3);
   PUParray(p,field_ghost_depth,3);
@@ -82,6 +82,9 @@ void Config::pup (PUP::er &p)
   p | initial_list;
   p | initial_cycle;
   p | initial_time;
+
+  p | initial_restart;
+  p | initial_restart_dir;
 
   p | initial_trace_name;
   p | initial_trace_field;
@@ -122,7 +125,8 @@ void Config::pup (PUP::er &p)
   p | method_debug_ghost;
   p | method_flux_correct_group;
   p | method_flux_correct_enable;
-  p | method_flux_correct_min_digits;
+  p | method_flux_correct_min_digits_fields;
+  p | method_flux_correct_min_digits_values;
   p | method_flux_correct_single_array;
   p | method_field_list;
   p | method_particle_list;
@@ -133,8 +137,10 @@ void Config::pup (PUP::er &p)
   p | method_min_face_rank;
   p | method_all_fields;
   p | method_all_particles;
+
   p | method_timestep;
   p | method_trace_name;
+  p | method_type;
   p | method_null_dt;
 
   // Monitor
@@ -155,6 +161,7 @@ void Config::pup (PUP::er &p)
   p | output_image_log;
   p | output_image_abs;
   p | output_image_mesh_color;
+  p | output_image_mesh_order;
   p | output_image_color_particle_attribute;
   p | output_image_size;
   p | output_image_reduce_type;
@@ -172,6 +179,7 @@ void Config::pup (PUP::er &p)
   p | output_stride_wait;
   p | output_field_list;
   p | output_particle_list;
+  p | output_checkpoint_file;
   p | output_name;
   p | index_schedule;
   p | schedule_list;
@@ -209,10 +217,6 @@ void Config::pup (PUP::er &p)
   
   p | num_physics;
   p | physics_list;
-
-  // Restart
-
-  p | restart_file;
 
   // Solvers
   
@@ -267,7 +271,6 @@ void Config::read(Parameters * p) throw()
   read_particle_(p);
   read_performance_(p);
   read_physics_(p);
-  read_restart_(p);
   read_stopping_(p);
   read_testing_(p);
   read_units_(p);
@@ -506,6 +509,8 @@ void Config::read_field_ (Parameters * p) throw()
 
   field_list.resize(num_fields);
 
+  std::map<std::string, int> field_index;
+
   for (int i=0; i<num_fields; i++) {
     field_list[i] = p->list_value_string(i, "Field:list");
     field_index[field_list[i]] = i;
@@ -569,7 +574,25 @@ void Config::read_field_ (Parameters * p) throw()
 
   // Add fields to groups (Group : <group_name> : field_list)
 
-  int num_groups = p->list_length("Group:list"); 
+  int num_groups = p->list_length("Group:list");
+
+  auto find_field_index = [&field_index](const std::string& field,
+                                         const std::string& group) -> int
+    {
+      // don't use field_index[field] to access the index of a field because
+      // we're not certain field_index already contains an entry for field. In
+      // the case where field_index doesn't already contain an entry for field,
+      // then an entry is created (with an incorrect index)
+
+      auto search = field_index.find(field);
+      if (search == field_index.end()){
+        ERROR2("Config::read_field_",
+               ("Can't add the \"%s\" field to the \"%s\" group because the "
+                "field has not been defined"),
+               field.c_str(), group.c_str());
+      }
+      return search->second;
+    };
 
   for (int index_group = 0; index_group < num_groups; index_group++) {
 
@@ -582,13 +605,13 @@ void Config::read_field_ (Parameters * p) throw()
       const int n = p->list_length(param);
       for (int i=0; i<n; i++) {
 	std::string field = p->list_value_string(i,param);
-	const int index_field = field_index[field];
+	const int index_field = find_field_index(field,group);
 	field_group_list[index_field].push_back(group);
       }
     } else if (p->type(param) == parameter_string) {
       // field_list is a string
       std::string field = p->value_string(param);
-      const int index_field = field_index[field];
+      const int index_field = find_field_index(field,group);
       field_group_list[index_field].push_back(group);
     }
   }
@@ -639,6 +662,11 @@ void Config::read_initial_ (Parameters * p) throw()
 
   }
 
+  // Restart
+
+  initial_restart      = p->value_logical ("Initial:restart",false);
+  initial_restart_dir  = p->value_string  ("Initial:restart_dir","");
+
   // InitialTrace
   initial_trace_name = p->value_string ("Initial:trace:name","trace");
   initial_trace_field = p->value_string ("Initial:trace:field","");
@@ -646,8 +674,6 @@ void Config::read_initial_ (Parameters * p) throw()
   initial_trace_dx = p->list_value_integer (0,"Initial:trace:stride",1);
   initial_trace_dy = p->list_value_integer (1,"Initial:trace:stride",1);
   initial_trace_dz = p->list_value_integer (2,"Initial:trace:stride",1);
-
-  
 }
 
 //----------------------------------------------------------------------
@@ -710,6 +736,41 @@ void Config::read_mesh_ (Parameters * p) throw()
 
   mesh_min_level = p->value_integer("Adapt:min_level",0);
 
+  if ( mesh_min_level > 0 ) {
+    ERROR1 ("Config::read", 
+		    "The value of mesh_min_level: %d should be less than or equal to zero", 
+		    mesh_min_level);
+  }
+
+  // Handle 1D and 2D simulations by adjusting the number of cells along the extra dimensions
+  if (mesh_root_rank < 2) mesh_root_size[1] = 1;
+  if (mesh_root_rank < 3) mesh_root_size[2] = 1;
+
+  // Dimensions of the active zone on each block along each axis
+  int ax = mesh_root_size[0] / mesh_root_blocks[0]; 
+  int ay = mesh_root_size[1] / mesh_root_blocks[1];
+  int az = mesh_root_size[2] / mesh_root_blocks[2];
+
+  //  Constraints on the block size based on the ghost depth
+  if ( mesh_max_level > 0 ) {
+    if ( !(ax >= 2*field_ghost_depth[0] && ay >= 2*field_ghost_depth[1] && az >= 2*field_ghost_depth[2] ) ) {
+      ERROR3 ("Config::read", 
+		"Dimensions of the active zone on each block (%d, %d, %d) should be at least double the size of the ghost depth for AMR simulations: ", 
+		ax, ay, az);
+    }  
+    if ( (ax%2 != 0) || (ay%2 != 0) && (az%2 != 0) ) {
+      ERROR3 ("Config::read",
+  		      "Dimensions of the active zone on each block (%d, %d, %d) should each be even for AMR simulations" ,
+		      ax, ay, az);
+    }  
+  }
+  else if ( mesh_max_level == 0 ) {   
+    if ( !(ax >= field_ghost_depth[0] && ay >= field_ghost_depth[1] && az >= field_ghost_depth[2] ) ) {
+      ERROR3 ("Config::read",
+  		      "Dimensions of the active zone on each block (%d, %d, %d) should be at least as large as the ghost depth",
+		      ax, ay, az);
+    }  
+  }
 }
 
 //----------------------------------------------------------------------
@@ -733,7 +794,8 @@ void Config::read_method_ (Parameters * p) throw()
   method_debug_ghost.resize(num_method);
   method_flux_correct_group.resize(num_method);
   method_flux_correct_enable.resize(num_method);
-  method_flux_correct_min_digits.resize(num_method);
+  method_flux_correct_min_digits_fields.resize(num_method);
+  method_flux_correct_min_digits_values.resize(num_method);
   method_field_list.resize(num_method);
   method_particle_list.resize(num_method);
   method_output_blocking[0].resize(num_method);
@@ -751,6 +813,7 @@ void Config::read_method_ (Parameters * p) throw()
   method_close_files_seconds_delay.resize(num_method);
   method_close_files_group_size.resize(num_method);
   method_trace_name.resize(num_method);
+  method_type.resize(num_method);
   
   method_courant_global = p->value_float ("Method:courant",1.0);
   
@@ -828,8 +891,30 @@ void Config::read_method_ (Parameters * p) throw()
       p->value_string (full_name + ":group","conserved");
     method_flux_correct_enable[index_method] =
       p->value_logical (full_name + ":enable",true);
-    method_flux_correct_min_digits[index_method] =
-      p->value_float (full_name + ":min_digits",0.0);
+
+    std::string min_digits_name = full_name + ":min_digits";
+    if (p->type(min_digits_name) == parameter_float){
+      // backwards compatibility
+      method_flux_correct_min_digits_fields[index_method] = {"density"};
+      method_flux_correct_min_digits_values[index_method].push_back
+        (p->value_float (min_digits_name, 0.0));
+    } else if (p->type(min_digits_name) == parameter_list){
+      // load pairs of fields and min_digits
+      int list_length = p->list_length(min_digits_name);
+      ASSERT1("Config::read",
+              "The list assigned to %s must have a non-negative, even length",
+              min_digits_name.c_str(),
+              (list_length >= 0) && (list_length % 2 == 0));
+      for (int i =0; i < list_length; i+=2){
+        method_flux_correct_min_digits_fields[index_method].push_back
+          (p->list_value_string(i, min_digits_name));
+        method_flux_correct_min_digits_values[index_method].push_back
+          (p->list_value_float (i+1, min_digits_name, 0.0));
+      }
+    } else if (p->param(min_digits_name) != nullptr){
+      ERROR1("Config::read", "%s has an invalid type", min_digits_name.c_str());
+    }
+
     method_flux_correct_single_array =
       p->value_logical (full_name + ":single_array",true);
 
@@ -853,7 +938,7 @@ void Config::read_method_ (Parameters * p) throw()
     }
     method_output_all_blocks[index_method] =
       p->value_logical(full_name+":all_blocks",true);
-    
+
     method_prolong[index_method] =
       p->value_string(full_name+":prolong","linear");
 
@@ -861,18 +946,21 @@ void Config::read_method_ (Parameters * p) throw()
     method_ghost_depth[index_method] =
       p->value_integer(full_name+":ghost_depth",0);
     method_min_face_rank[index_method] =
-      p->value_integer(full_name+"min_face_rank",0); // default 0 all faces
+      p->value_integer(full_name+":min_face_rank",0); // default 0 all faces
     method_all_fields[index_method] =
-      p->value_logical(full_name+"all_fields",false);
+      p->value_logical(full_name+":all_fields",false);
     method_all_particles[index_method] =
-      p->value_logical(full_name+"all_particles",false);
+      p->value_logical(full_name+":all_particles",false);
 
-  // Read specified timestep, if any (for MethodTrace)
-    method_timestep[index_method] = p->value_float  
+    // Read specified timestep, if any (for MethodTrace)
+    method_timestep[index_method] = p->value_float
       (full_name + ":timestep",std::numeric_limits<double>::max());
 
     method_trace_name[index_method] = p->value_string
       (full_name + ":name", "trace");
+
+    method_type[index_method] = p->value_string
+      (full_name + ":type", name);
   }
   method_null_dt = p->value_float
     ("Method:null:dt",std::numeric_limits<double>::max());
@@ -904,9 +992,6 @@ void Config::read_output_ (Parameters * p) throw()
 
   num_output = p->list_length("list");
 
-  p->group_set(0,"Output");
-
-
   output_list.resize(num_output);
   output_type.resize(num_output);
   output_axis.resize(num_output);
@@ -917,6 +1002,7 @@ void Config::read_output_ (Parameters * p) throw()
   output_image_log.resize(num_output);
   output_image_abs.resize(num_output);
   output_image_mesh_color.resize(num_output);
+  output_image_mesh_order.resize(num_output);
   output_image_color_particle_attribute.resize(num_output);
   output_image_size.resize(num_output);
   output_image_reduce_type.resize(num_output);
@@ -1042,6 +1128,8 @@ void Config::read_output_ (Parameters * p) throw()
 
       output_image_mesh_color[index_output] = 
 	p->value_string("image_mesh_color","level");
+      output_image_mesh_order[index_output] = 
+	p->value_string("image_mesh_order","none");
 
       output_image_color_particle_attribute[index_output] = 
 	p->value_string("image_color_particle_attribute","");
@@ -1371,13 +1459,6 @@ void Config::read_physics_ (Parameters * p) throw()
 
 //----------------------------------------------------------------------
 
-void Config::read_restart_ (Parameters * p) throw()
-{
-  restart_file = p->value_string("Restart:file","");
-}
-
-//----------------------------------------------------------------------
-
 void Config::read_solver_ (Parameters * p) throw()
 {
   //--------------------------------------------------
@@ -1460,10 +1541,23 @@ void Config::read_stopping_ (Parameters * p) throw()
     ( "Stopping:cycle" , std::numeric_limits<int>::max() );
   stopping_time  = p->value_float
     ( "Stopping:time" , std::numeric_limits<double>::max() );
-  stopping_seconds  = p->value_float
-    ( "Stopping:seconds" , std::numeric_limits<double>::max() );
-  stopping_interval = p->value_integer
-    ( "Stopping:interval" , 1);
+
+  stopping_seconds = std::numeric_limits<double>::max();
+
+  if (p->type("Stopping:seconds") != parameter_unknown) {
+    stopping_seconds  = p->value_float
+      ( "Stopping:seconds" , std::numeric_limits<double>::max() );
+  } else if (p->type("Stopping:minutes") != parameter_unknown) {
+    stopping_seconds  = p->value_float
+      ( "Stopping:minutes" , std::numeric_limits<double>::max() );
+    stopping_seconds *= 60;
+  } else if (p->type("Stopping:hours") != parameter_unknown) {
+    stopping_seconds  = p->value_float
+      ( "Stopping:hours" , std::numeric_limits<double>::max() );
+    stopping_seconds *= 3600;
+  }
+
+  stopping_interval = p->value_integer ( "Stopping:interval" , 1);
 }
 
 void Config::read_units_ (Parameters * p) throw()
@@ -1520,6 +1614,8 @@ int Config::read_schedule_(Parameters * p, const std::string group)
   if      (schedule_var[index] == "cycle")    var_is_int = true;
   else if (schedule_var[index] == "time")     var_is_int = false;
   else if (schedule_var[index] == "seconds")  var_is_int = false;
+  else if (schedule_var[index] == "minutes")  var_is_int = false;
+  else if (schedule_var[index] == "hours")    var_is_int = false;
   else {
     ERROR2 ("Config::read",
 	    "Schedule variable %s is not recognized for parameter group %s",

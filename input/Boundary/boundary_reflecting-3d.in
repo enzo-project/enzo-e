@@ -1,0 +1,9 @@
+include "input/Boundary/sphere.incl"
+
+Boundary { type = "reflecting"; }
+
+Output { 
+   cycle_step {  
+      name = ["boundary_reflecting-3d-%04d.png","cycle"]; 
+   } 
+}

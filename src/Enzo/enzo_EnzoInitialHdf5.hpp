@@ -22,6 +22,7 @@ public: // interface
                   int max_level,
                   std::string                 format,
                   const int                   blocking[3],
+                  int                         monitor_iter,
                   std::vector < std::string > field_files,
                   std::vector < std::string > field_datasets,
                   std::vector < std::string > field_coords,
@@ -53,13 +54,13 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-  
+
   /// Initialize a Block
   virtual void enforce_block
   ( Block * block, const Hierarchy * hierarchy ) throw();
 
   void recv_data (Block * block, MsgInitial * msg_initial);
-  
+
   void copy_dataset_to_field_
   (Block * block,
    std::string field_name, int type_data,
@@ -78,16 +79,16 @@ public: // interface
    int nx, int ny, int nz,
    double h4[4], int IX, int IY, int IZ);
 
+protected: // functions
+ 
 /// Access the Sync counter for messages
-  Sync * psync_msg(Block * block)
+  Sync * psync_msg_(Block * block)
   {
     ScalarData<Sync> * scalar_data = block->data()->scalar_data_sync();
     ScalarDescr *      scalar_descr = cello::scalar_descr_sync();
     return scalar_data->value(scalar_descr,i_sync_msg_);
   }
 
-protected: // functions
-  
   char * allocate_array_ (int n, int type_data)
   {
     char * data;
@@ -96,6 +97,7 @@ protected: // functions
     } else if (type_data == type_double) {
       data = (char *)new double [n];
     } else {
+      data = nullptr;
       ERROR1 ("EnzoInitialHdf5::allocate_array_()",
               "Unsupported data type %d",type_data);
     }
@@ -161,6 +163,10 @@ protected: // attributes
   /// blocks within a partition are read from a single root-level
   /// Block
   int         blocking_[3];
+
+  /// Parameter for controling monitoring of progress
+  int         monitor_iter_;
+
   vecstr_type field_files_;
   vecstr_type field_datasets_;
   vecstr_type field_coords_;
@@ -174,8 +180,9 @@ protected: // attributes
   bool l_particle_displacements_;
   std::string particle_position_names_[3];
 
-  /// Count number of expected incoming messages if not a reader, to
-  /// call initial_done() when sync counter reached
+  /// Index of the Sync object for counting incoming messages if not
+  /// a reader; used to call initial_done() (only) after all expected
+  /// messages have been received
   int i_sync_msg_;
 };
 

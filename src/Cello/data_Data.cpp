@@ -44,6 +44,7 @@ Data::Data(int nx, int ny, int nz,
   upper_[0] = xp;
   upper_[1] = yp;
   upper_[2] = zp;
+
 }
 
 //----------------------------------------------------------------------
@@ -141,6 +142,7 @@ void Data::allocate () throw()
   scalar_data_long_double_.allocate(cello::scalar_descr_long_double());
   scalar_data_double_     .allocate(cello::scalar_descr_double());
   scalar_data_int_        .allocate(cello::scalar_descr_int());
+  scalar_data_long_long_  .allocate(cello::scalar_descr_long_long());
   scalar_data_sync_       .allocate(cello::scalar_descr_sync());
   scalar_data_void_       .allocate(cello::scalar_descr_void());
   // allocate Block Field storage

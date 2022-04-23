@@ -91,7 +91,6 @@ double EnzoMethodPpml::timestep (Block * block) throw()
   //  float afloat = float(a);
  
   /* 1) Compute Courant condition for baryons. */
-
   const int in = cello::index_static();
 
   if (EnzoBlock::NumberOfBaryonFields[in] > 0) {

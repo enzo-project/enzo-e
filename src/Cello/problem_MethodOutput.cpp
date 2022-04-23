@@ -9,6 +9,9 @@
 #include "charm_simulation.hpp"
 #include "test.hpp"
 
+// #define TRACE_OUTPUT
+
+// #define BYPASS_BLOCK_TRACE
 //----------------------------------------------------------------------
 
 MethodOutput::MethodOutput
@@ -36,6 +39,7 @@ MethodOutput::MethodOutput
       all_particles_(all_particles),
       blocking_(),
       is_count_(-1),
+      is_block_list_(-1),
       factory_(factory),
       all_blocks_(all_blocks)
 {
@@ -81,19 +85,38 @@ MethodOutput::MethodOutput
     }
   }
 
+  // Create field list if all_fields_
+  if (all_fields_ && field_list_.size() == 0) {
+    int nf = cello::field_descr()->field_count();
+    for (int i_f=0; i_f<nf; i_f++) {
+      field_list_.push_back(i_f);
+    }
+  }
+
+  // Create particle list if all_particles_
+  if (all_particles_ && particle_list_.size() == 0) {
+    int np = cello::particle_descr()->num_types();
+    for (int i_p=0; i_p<np; i_p++) {
+      particle_list_.push_back(i_p);
+    }
+  }
+
   ASSERT("MethodOutput()",
          "MethodOutput requires either field_list or particle_list "
          "to be non-empty",
          (all_fields || all_particles ||
           field_list.size() > 0 || particle_list.size() > 0));
-         
+
   // initialize blocking partition
   blocking_[0] = blocking_x;
   blocking_[1] = blocking_y;
   blocking_[2] = blocking_z;
 
-  is_count_ = cello::scalar_descr_int()->new_value("method_output:count");
-  
+  ScalarDescr * sdi = cello::scalar_descr_int();
+  is_count_ = sdi->new_value("method_output:count");
+
+  ScalarDescr * sdp = cello::scalar_descr_void();
+  is_block_list_ = sdp->new_value("method_output:block_list");
 }
 
 //----------------------------------------------------------------------
@@ -118,9 +141,9 @@ void MethodOutput::pup (PUP::er &p)
   p | all_particles_;
   PUParray(p,blocking_,3);
   p | is_count_;
+  p | is_block_list_;
   p | factory_nonconst_;
   p | all_blocks_;
-
 }
 
 //----------------------------------------------------------------------
@@ -130,7 +153,17 @@ void MethodOutput::compute ( Block * block) throw()
   // barrier to ensure tree traversal doesn't reach a block
   // before the method has started
 
-  CkCallback callback(CkIndex_Block::r_method_output_continue(nullptr), 
+  if (block->index().is_root()) {
+    // Create directory if any
+    ScalarData<int> * scalar_int = block->data()->scalar_data_int();
+    int * counter = scalar_int->value(cello::scalar_descr_int(),is_count_);
+    (*counter)++;
+    bool already_exists = false;
+    std::string path_name = cello::create_directory
+      (&path_name_,(*counter),block->cycle(),block->time(),already_exists);
+  }
+
+  CkCallback callback(CkIndex_Block::r_method_output_continue(nullptr),
                       cello::block_array());
   block->contribute(callback);
 
@@ -149,62 +182,99 @@ void Block::r_method_output_continue(CkReductionMsg *msg)
 
 void MethodOutput::compute_continue(Block * block)
 {
-  if (is_writer_(block->index())) {
+  // called by Block::r_method_output_continue()
 
-    int a3[3];
-    block->index().array(a3,a3+1,a3+2);
-    
-    int root_blocks[3];
-    cello::hierarchy()->root_blocks
-      (root_blocks,root_blocks+1,root_blocks+2);
-    
-    int index_min[3] = {a3[0],a3[1],a3[2]};
-    int index_max[3] = {std::min(a3[0] + blocking_[0],root_blocks[0]),
-                        std::min(a3[1] + blocking_[1],root_blocks[1]),
-                        std::min(a3[2] + blocking_[2],root_blocks[2])};
-    
-    BlockTrace bt (cello::rank(),index_min,index_max);
-
-    FileHdf5 * file = file_open_(block,a3);
-    
-    // Create output message
-    MsgOutput * msg_output = new MsgOutput(bt,this,file);
-
-    msg_output->set_index_send (block->index());
-    // Get its block_trace object
-    BlockTrace * block_trace = msg_output->block_trace();
-
-    file_write_hierarchy_(file);
-    
-    if (all_blocks_ || block->is_leaf()) {
-
-      msg_output->set_block(block,factory_);
-      file_write_block_(file,block,nullptr);
-
-    }
-    
-    if ( ! block_trace->next(block->is_leaf())) {
-      Index index_next = block_trace->top();
-      msg_output->del_block();
-      cello::block_array()[index_next].p_method_output_next(msg_output);
-      
-    } else {
-      // Close file
-      FileHdf5 * file = msg_output->file();
-      file->file_close();
-      delete file;
-
-      // Delete message
-      delete msg_output;
-      msg_output = nullptr;
-
-      // Exit MethodOutput
-      compute_done(block);
-    }
+  // negative level blocks do not participate...
+  if (block->level() < 0) {
+    compute_done(block);
+    return;
+  }
+  // non-writers wait until called later...
+  if (! is_writer_(block->index()) ) {
+    return;
   }
 
-  if (block->level() < 0) {
-    // negative level blocks do not participate
+  // otherwise this block is a writer, so start writing
+  int a3[3];
+  block->index().array(a3,a3+1,a3+2);
+
+  int root_blocks[3];
+  cello::hierarchy()->root_blocks
+    (root_blocks,root_blocks+1,root_blocks+2);
+
+  int index_min[3] = {a3[0],a3[1],a3[2]};
+  int index_max[3] = {std::min(a3[0] + blocking_[0],root_blocks[0]),
+                      std::min(a3[1] + blocking_[1],root_blocks[1]),
+                      std::min(a3[2] + blocking_[2],root_blocks[2])};
+
+  BlockTrace bt (cello::rank(),index_min,index_max);
+
+  FileHdf5 * file = file_open_(block,a3);
+
+  // Open *.block_list file and save FILE pointer
+  const int count   = file_count_(block);
+  const int cycle   = block->cycle();
+  const double time = block->time();
+  std::string file_name = cello::expand_name
+    (&file_name_,count,cycle,time);
+
+  ScalarData<void *> * scalar_void = block->data()->scalar_data_void();
+  FILE ** fp_block_list =
+    (FILE **) scalar_void->value(cello::scalar_descr_void(),is_block_list_);
+  *fp_block_list = fopen ((file_name+".block_list").c_str(),"w");
+
+  // Write and close file_list file
+  FILE * fp_file_list = fopen ((file_name+".file_list").c_str(),"w");
+  fprintf (fp_file_list,"%s\n",file_name.c_str());
+  fclose(fp_file_list);
+
+  // Restore working directory now that files are created
+  // (changed for block_list and file_list files in file_open_())
+  chdir ("..");
+
+  // Create output message
+  MsgOutput * msg_output = new MsgOutput(bt,this,file);
+
+  msg_output->set_index_send (block->index());
+  // Get its block_trace object
+  BlockTrace * block_trace = msg_output->block_trace();
+
+  // write hierarchy meta-data to file
+  file_write_hierarchy_(file);
+
+  if (all_blocks_ || block->is_leaf()) {
+    // write this (writer) block's data to file
+    msg_output->set_block(block,factory_);
+    file_write_block_(file,block,nullptr);
+
+  }
+
+  // Check if any non-writer blocks
+  if ( ! block_trace->next(block->is_leaf())) {
+    Index index_next = block_trace->top();
+    msg_output->del_block();
+    // Initiate traversing distributed octree forest to request
+    // blocks to send their data to this writer block to write
+    cello::block_array()[index_next].p_method_output_next(msg_output);
+
+  } else {
+    // Close file
+    FileHdf5 * file = msg_output->file();
+    file->file_close();
+    delete file;
+
+    // Close *.block_list file
+    ScalarData<void *> * scalar_void = block->data()->scalar_data_void();
+    FILE ** fp_block_list = (FILE **)
+      scalar_void->value(cello::scalar_descr_void(),is_block_list_);
+    fclose(*fp_block_list);
+    *fp_block_list = nullptr;
+
+    // Delete message
+    delete msg_output;
+    msg_output = nullptr;
+
+    // Exit MethodOutput
     compute_done(block);
   }
 }
@@ -230,13 +300,17 @@ void Block::p_method_output_write (MsgOutput * msg_output)
 //----------------------------------------------------------------------
 
 void MethodOutput::next(Block * block, MsgOutput * msg_output_in )
+// Process the next block in the depth-first distributed octree forest
+// traversal.  Send data to writer if a leaf, or go directly to the
+// next Block in the traversal if not
 {
-  // Copy incoming message and delete old (cannot reuse!)
+
+  // copy incoming message and delete old (cannot reuse!)
   MsgOutput * msg_output = new MsgOutput (*msg_output_in);
 
   delete msg_output_in;
   msg_output_in = nullptr;
-  
+
   const bool is_leaf = block->is_leaf();
   BlockTrace * bt = msg_output->block_trace();
   bt->next(block->is_leaf());
@@ -244,8 +318,13 @@ void MethodOutput::next(Block * block, MsgOutput * msg_output_in )
 
   if (all_blocks_ || is_leaf) {
     // if leaf (or writing all blocks), copy data to msg and send to writer
+#ifdef BYPASS_BLOCK_TRACE
+    Index index_home = block->index().next(rank,na3,block->is_leaf());
+#else
     Index index_home = bt->home();
+#endif
     DataMsg * data_msg = create_data_msg_(block);
+    data_msg->set_particle_count(false);
     msg_output->set_data_msg(data_msg);
     msg_output->set_block(block,factory_);
     cello::block_array()[index_home].p_method_output_write(msg_output);
@@ -256,15 +335,16 @@ void MethodOutput::next(Block * block, MsgOutput * msg_output_in )
     cello::block_array()[index_next].p_method_output_next(msg_output);
   }
   compute_done(block);
-
 }
 
 //----------------------------------------------------------------------
 
 void MethodOutput::write(Block * block, MsgOutput * msg_output_in )
+// Writes incoming data from the distributed octree forest traversal,
+// and continues to the next block in the distributed octree forest
+// traversal (if any)
 {
   // Write the block data
-  
   FileHdf5 * file = msg_output_in->file();
   file_write_block_(file,block,msg_output_in);
 
@@ -283,11 +363,20 @@ void MethodOutput::write(Block * block, MsgOutput * msg_output_in )
     // Close file
     FileHdf5 * file = msg_output->file();
     file->file_close();
+    delete file;
+
+    // Close *.block_list file
+    ScalarData<void *> * scalar_void = block->data()->scalar_data_void();
+    FILE ** fp_block_list = (FILE **)
+      scalar_void->value(cello::scalar_descr_void(),is_block_list_);
+    fclose(*fp_block_list);
+    *fp_block_list = nullptr;
+
     compute_done(block);
   } else {
     msg_output->del_block();
     cello::block_array()[index_next].p_method_output_next(msg_output);
-  }  
+  }
 }
 
 //----------------------------------------------------------------------
@@ -310,7 +399,7 @@ void Block::r_method_output_done(CkReductionMsg *msg)
 
 //======================================================================
 
-int MethodOutput::is_writer_ (Index index) 
+int MethodOutput::is_writer_ (Index index)
 {
   int a3[3];
   index.array(a3,a3+1,a3+2);
@@ -327,15 +416,17 @@ FileHdf5 * MethodOutput::file_open_(Block * block, int a3[3])
   // Generate file path
   ScalarData<int> * scalar_int = block->data()->scalar_data_int();
   int * counter = scalar_int->value(cello::scalar_descr_int(),is_count_);
-  std::string path_name = cello::directory(&path_name_,(*counter),block);
-  (*counter)++;
+
+  std::string path_name = cello::expand_name
+    (&path_name_,(*counter),block->cycle(),block->time());
 
   // Generate file name
   int count = file_count_(block);
-  std::string file_name = cello::expand_name(&file_name_,count,block);
+  std::string file_name = cello::expand_name
+    (&file_name_,count,block->cycle(),block->time());
 
   if (block->index().is_root()) {
-    Monitor::instance()->print 
+    Monitor::instance()->print
       ("Output","MethodOutput writing data file %s",
        (path_name + "/" + file_name).c_str());
   }
@@ -343,6 +434,10 @@ FileHdf5 * MethodOutput::file_open_(Block * block, int a3[3])
   // Create File
   FileHdf5 * file = new FileHdf5 (path_name, file_name);
   file->file_create();
+
+  // Change directory for file_list and block_list files
+  chdir (path_name.c_str());
+
   return file;
 }
 
@@ -380,23 +475,23 @@ void MethodOutput::file_write_block_
     factory_->create_io_block() : msg_output->io_block();
   if (is_local) io_block->set_block(block);
 
+  // Write Block name to block_list file
+  ScalarData<void *> * scalar_void = block->data()->scalar_data_void();
+  FILE ** fp_block_list = (FILE **)
+    scalar_void->value(cello::scalar_descr_void(),is_block_list_);
+  fprintf(*fp_block_list,"%s\n",block_name.c_str());
+
   double block_lower[3];
   double block_upper[3];
   if (is_local) {
     block->lower(block_lower,block_lower+1,block_lower+2);
     block->upper(block_upper,block_upper+1,block_upper+2);
   }
-    
+
   double * lower = (is_local)?
     block_lower : msg_output->block_lower();
   double * upper = (is_local)?
     block_upper : msg_output->block_upper();
-
-  // Generate path name
-
-  const int count = file_count_(block);
-  std::string path_name = cello::expand_name(&path_name_,count,block);
-  std::string file_name = cello::expand_name(&file_name_,count,block);
 
   // Create file group for block
 
@@ -409,10 +504,8 @@ void MethodOutput::file_write_block_
 
   write_meta_ (file, io_block, "group");
 
-  // Call write(block) on base Output object
-
   // Create new data object to hold MsgOutput/DataMsg fields and particles
-  
+
   int nx,ny,nz;
   int num_field_data = 1;
   block->data()->field().size(&nx,&ny,&nz);
@@ -435,12 +528,12 @@ void MethodOutput::file_write_block_
 
     // Allocate fields
     data->allocate();
-    
+
     msg_output->update(data);
   }
-  
+
   // Write Block Field data
-  
+
   FieldData * field_data = data->field_data();
 
   for (int i_f=0; i_f<field_list_.size(); i_f++) {
@@ -455,7 +548,7 @@ void MethodOutput::file_write_block_
 
     io_field_data->set_field_data((FieldData*)field_data);
     io_field_data->set_field_index(index_field);
-    
+
     io_field_data->field_array
       (&buffer, &name, &type, &mx,&my,&mz, &nx,&ny,&nz);
 
@@ -481,7 +574,7 @@ void MethodOutput::file_write_block_
 
     // Get particle type for it'th element of the particle output list
     const int it = particle_list_[i_p];
-  
+
     // get the number of particle batches and attributes
     const int nb = particle.num_batches(it);
     const int na = particle.num_attributes(it);
@@ -497,7 +590,7 @@ void MethodOutput::file_write_block_
       const std::string name = "particle_"
         +                particle.type_name(it) + "_"
         +                particle.attribute_name(it,ia);
-    
+
       const int type = particle.attribute_type(it,ia);
 
       // create the disk array
@@ -531,8 +624,8 @@ void MethodOutput::file_write_block_
         file->mem_close();
       }
 
-      // check that the number of particles equals the number written 
-    
+      // check that the number of particles equals the number written
+
       ASSERT2 ("OutputData::write_particle_data()",
                "Particle count mismatch %d particles %d written",
                np,i0,
@@ -591,13 +684,11 @@ int MethodOutput::file_count_(Block * block)
   iz /= blocking_[2];
   return (ix + mx*(iy + my*iz));
 }
- 
+
 //----------------------------------------------------------------------
 
 DataMsg * MethodOutput::create_data_msg_ (Block * block)
 {
-  // Create FieldFace for interpolating field data to child ic3[]
-
   // set face for entire block data
   int if3[3] = {0,0,0};
   // [set child index even though not accessed]
@@ -623,7 +714,7 @@ DataMsg * MethodOutput::create_data_msg_ (Block * block)
     // no fields
     any_fields = false;
   }
-  
+
   // Initialize refresh particles
   bool any_particles = true;
   if (all_particles_) {
@@ -638,12 +729,12 @@ DataMsg * MethodOutput::create_data_msg_ (Block * block)
   }
 
   // Create FieldFace object specifying fields to send
-  FieldFace * field_face = block->create_face 
+  FieldFace * field_face = block->create_face
     (if3,ic3,g3, refresh_same, refresh, true);
 
   int gx=-1,gy=-1,gz=-1;
   field_face->ghost(&gx,&gy,&gz);
-  
+
   // Create data message object to send
   DataMsg * data_msg = new DataMsg;
   if (any_fields) {
@@ -655,4 +746,3 @@ DataMsg * MethodOutput::create_data_msg_ (Block * block)
   }
   return data_msg;
 }
-

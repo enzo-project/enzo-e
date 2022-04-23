@@ -1,5 +1,5 @@
+#define FORTRAN
 #include "fortran.h"
-#define FORTRAN      
 c=======================================================================
 c////////////////////////  SUBROUTINE FLUX_HLL \\\\\\\\\\\\\\\\\\\\\\\\
 
@@ -382,7 +382,7 @@ c     &        write (6,*) grslice(i-1,j), grslice(i,j), grslice(i+1,j)
             if (ifallback .eq. 1) 
      $           write(0,*) 'Cannot fallback anymore.  Already in HLL.'
             write(0,*) 'stop in euler with e < 0'
-            print*, 'ERROR_MESSAGE'
+C            ERROR_MESSAGE
          endif
       enddo
 c
@@ -393,6 +393,7 @@ c
             if (colslice(i,j,n) +
      $           (colf(i,j,n)-colf(i+1,j,n))/dx(i)
      $           .lt. 0._RKIND) then
+               print*, 'WARNING'
                write(6,*) 'flux_hll: negative color',i,j,n
                write(6,*) 'a', dx(i), colf(i-1,j,n),colf(i,j,n),
      $              colf(i+1,j,n)

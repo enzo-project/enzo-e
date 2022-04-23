@@ -10,14 +10,23 @@
 //----------------------------------------------------------------------
 
 void BoundaryValue::pup (PUP::er &p)
-  {
-    // NOTE: change this function whenever attributes change
-    Boundary::pup(p); 
-    TRACEPUP; 
+{
+  // NOTE: change this function whenever attributes change
+  Boundary::pup(p); 
+  TRACEPUP; 
 
+  int has_value = (value_!=NULL);
+  p | has_value;
+  if (has_value){
+    if (p.isUnpacking()){
+      value_ = new Value;
+    }
     p | *value_;
-    p | field_list_;
+  } else {
+    value_ = NULL;
   }
+  p | field_list_;
+}
 
 //----------------------------------------------------------------------
 

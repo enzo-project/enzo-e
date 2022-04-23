@@ -4,6 +4,15 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2021-04-21
 /// @brief    [\ref Mesh] Declaration of the BlockTrace class
+///
+/// This class is used by MethodOutput to help in performing a
+/// sequential depth-first traversal of a section of a parallel
+/// distributed array of octrees.  It stores the "trace" (sequence of
+/// ancestors) of Index's from the root block to the current Block in
+/// the traversal, provides a method for updating the trace for the
+/// next() Block in the octree, and stores the tree's root block
+/// (index_root) and "home" block (the assigned block performing the
+/// writing in MethodOutput)
 
 #ifndef MESH_BLOCK_TRACE_HPP
 #define MESH_BLOCK_TRACE_HPP
@@ -12,7 +21,7 @@ class BlockTrace {
 
   /// @class    BlockTrace
   /// @ingroup  Mesh
-  /// @brief    [\ref Mesh] 
+  /// @brief    [\ref Mesh]
 
 public: // interface
 
@@ -22,7 +31,8 @@ public: // interface
 
   /// Constructor for BlockTrace object with given root Index
   BlockTrace(int rank, int index_min[3], int index_max[3]) throw()
-    : index_home_(),
+    : rank_(rank),
+      index_home_(),
       index_root_(),
       index_min_(),
       index_max_(),
@@ -42,13 +52,12 @@ public: // interface
             "rank must satisfy 1 <= rank = %d <= 3",
             rank,
             (1 <= rank && rank <= 3));
-    num_children_ = (rank == 1) ? 2 : (rank == 2) ? 4 : 8;
   }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   {
-    p | num_children_;
+    p | rank_;
     p | index_home_;
     p | index_root_;
     p | child_stack_;
@@ -61,9 +70,10 @@ public: // interface
   bool next (bool is_leaf)
   {
     if (is_leaf) {
+      const int num_children = (rank_ == 1) ? 2 : (rank_ == 2) ? 4 : 8;
       // If this is a leaf node
       while ((child_stack_.size() > 0) &&
-             child_stack_.back() >= (num_children_ - 1)) {
+             child_stack_.back() >= (num_children - 1)) {
         // ... back up to first incompletely visited node or root
         child_stack_.pop_back();
         index_stack_.pop_back();
@@ -115,13 +125,10 @@ public: // interface
   /// Return the home Index of the BlockTrace
   Index home ()
   { return index_home_; }
-  
+
   /// Return the top (current) Index of the BlockTrace
   Index top ()
   { return (index_stack_.size() > 0) ? index_stack_.back() : index_root_; }
-  
-  bool is_empty()
-  { return index_stack_.size() > 0; }
 
   void print (const char * message)
   {
@@ -166,8 +173,8 @@ private: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
-  /// Number of child Blocks for each Block, computed from rank parameter
-  int num_children_;
+  /// Dimensionality of the problem
+  int rank_;
 
   /// Home Index of the array-of-trees section being traversed
   Index index_home_;
@@ -179,7 +186,7 @@ private: // attributes
   int index_min_[3];
   int index_max_[3];
   int index_curr_[3];
-  
+
   /// Stack of last visited child indices
   std::vector <int>   child_stack_;
 

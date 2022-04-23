@@ -471,7 +471,7 @@ void Problem::initialize_method
   
   for (size_t index_method=0; index_method < num_method ; index_method++) {
 
-    std::string name = config->method_list[index_method];
+    std::string name = config->method_type[index_method];
 
     Method * method = create_method_(name, index_method, config, factory);
 
@@ -624,11 +624,7 @@ Initial * Problem::create_initial_
 
   Initial * initial = nullptr;
 
-  if (type == "file") {
-    initial = new InitialFile (parameters,
-			       config->initial_cycle,
-			       config->initial_time);;
-  } else if (type == "value") {
+  if (type == "value") {
     initial = new InitialValue(parameters,
 			       config->initial_cycle,
 			       config->initial_time);
@@ -832,6 +828,50 @@ Method * Problem::method (std::string name) const throw()
 
 //----------------------------------------------------------------------
 
+bool Problem::method_exists(const std::string& name) const throw() {
+  for (size_t i = 0; i < method_list_.size(); i++) {
+    if (method_list_[i]->name() == name) return true;
+  }
+  return false;
+}
+
+//----------------------------------------------------------------------
+
+bool Problem::method_precedes(const std::string& name1,
+                              const std::string& name2) const throw() {
+  size_t ind_1 = 0;
+  size_t ind_2 = 0;
+
+  bool method_1_found = false;
+  bool method_2_found = false;
+
+  bool no_repeats = true;
+  for (size_t i = 0; i < method_list_.size(); i++) {
+    if (method_list_[i]->name() == name1) {
+      if (method_1_found) {
+        no_repeats = false;
+        break;
+      } else {
+        method_1_found = true;
+        ind_1 = i;
+      }
+    }
+    if (method_list_[i]->name() == name2) {
+      if (method_2_found) {
+        no_repeats = false;
+        break;
+      } else {
+        method_2_found = true;
+        ind_2 = i;
+      }
+    }
+  }
+
+  return no_repeats && method_1_found && method_2_found && (ind_1 < ind_2);
+}
+
+//----------------------------------------------------------------------
+
 Compute * Problem::create_compute
   ( std::string name,
     Config * config ) throw ()
@@ -871,12 +911,8 @@ Method * Problem::create_method_
     method = new MethodFluxCorrect
       (config->method_flux_correct_group[index_method],
        config->method_flux_correct_enable[index_method],
-       config->method_flux_correct_min_digits[index_method]);
-
-  } else if (name == "checkpoint") {
-
-    method = new MethodCheckpoint
-      ( config->method_path_name[index_method]);
+       config->method_flux_correct_min_digits_fields[index_method],
+       config->method_flux_correct_min_digits_values[index_method]);
 
   } else if (name == "output") {
 
@@ -902,6 +938,10 @@ Method * Problem::create_method_
         config->method_output_blocking[1][index_method],
         config->method_output_blocking[2][index_method]);
 
+  } else if (name == "order_morton") {
+
+    method = new MethodOrderMorton(config->mesh_min_level);
+
   } else if (name == "refresh") {
 
     method = new MethodRefresh
@@ -916,6 +956,7 @@ Method * Problem::create_method_
 
     method = new MethodDebug
       (config->num_fields,
+       config->num_particles,
        config->method_debug_print[index_method],
        config->method_debug_coarse[index_method],
        config->method_debug_ghost[index_method]);
@@ -965,6 +1006,7 @@ Output * Problem::create_output_
                                   config->output_image_size[index][1] };
     std::string image_reduce_type = config->output_image_reduce_type[index];
     std::string image_mesh_color  = config->output_image_mesh_color[index];
+    std::string image_mesh_order  = config->output_image_mesh_order[index];
     std::string image_color_particle_attribute =
       config->output_image_color_particle_attribute[index];
     double      image_min = config->output_image_min[index];
@@ -995,6 +1037,7 @@ Output * Problem::create_output_
 			      image_size,
 			      image_reduce_type,
 			      image_mesh_color,
+			      image_mesh_order,
 			      image_color_particle_attribute,
 			      image_lower, image_upper,
 			      image_face_rank,

@@ -18,6 +18,7 @@ EnzoInitialHdf5::EnzoInitialHdf5
  int max_level,
  std::string                 format,
  const int                   blocking[3],
+ int                         monitor_iter_,
  std::vector < std::string > field_files,
  std::vector < std::string > field_datasets,
  std::vector < std::string > field_coords,
@@ -30,6 +31,7 @@ EnzoInitialHdf5::EnzoInitialHdf5
    : Initial (cycle,time),
      max_level_(max_level),
      format_ (format),
+     monitor_iter_(monitor_iter_),
      field_files_ (field_files),
      field_datasets_ (field_datasets),
      field_coords_ (field_coords),
@@ -51,7 +53,7 @@ EnzoInitialHdf5::EnzoInitialHdf5
     particle_position_names_[2] = "ParticleDisplacements_z";
     for (int i=0; i<field_coords.size(); i++)  field_coords_[i] = "tzyx";
     for (int i=0; i<particle_coords.size(); i++) particle_coords_[i] = "tzyx";
-      
+
   } else {
     ERROR1 ("EnzoInitialHdf5::EnzoInitialHdf5()",
             "Unsupported format '%s'",
@@ -68,7 +70,10 @@ void EnzoInitialHdf5::pup (PUP::er &p)
   // NOTE: change this function whenever attributes change
 
   p | max_level_;
-  
+  p | format_;
+  PUParray (p,blocking_,3);
+  p | monitor_iter_;
+
   p | field_files_;
   p | field_datasets_;
   p | field_coords_;
@@ -80,7 +85,6 @@ void EnzoInitialHdf5::pup (PUP::er &p)
   p | particle_types_;
   p | particle_attributes_;
   PUParray (p,particle_position_names_,3);
-  p | l_particle_displacements_;
 
 }
 
@@ -91,13 +95,13 @@ void EnzoInitialHdf5::enforce_block
 {
   if (! (0 <= block->level() && block->level() <= max_level_) ) {
     // if level not in range, then return and call initial_done()
-    block->initial_done(); 
+    block->initial_done();
     return;
   } else if (! is_reader_(block->index())) {
     // else if not reader, will be expected to receive data from a reader, so
     // return and sit back and wait, but /don't/ call initial_done() until
     // your reader says you're ready
-    Sync * sync_msg = psync_msg(block);
+    Sync * sync_msg = psync_msg_(block);
     return;
   }
 
@@ -113,7 +117,7 @@ void EnzoInitialHdf5::enforce_block
   int gx,gy,gz;
   int n4[4],IX,IY,IZ;
   double h4[4];
-  
+
   field.dimensions (0,&mx,&my,&mz);
   field.size         (&nx,&ny,&nz);
   field.ghost_depth(0,&gx,&gy,&gz);
@@ -138,24 +142,24 @@ void EnzoInitialHdf5::enforce_block
     if (CHECK_COSMO_PARAMS) {
       check_cosmology_(file);
     }
-    
+
     // Open the dataset
-    
+
     int m4[4] = {0,0,0,0};
     int type_data = type_unknown;
     file-> data_open (field_datasets_[index], &type_data,
                       m4,m4+1,m4+2,m4+3);
-    
+
     ASSERT1("EnzoInitialHdf5::enforce_block()",
            "Unsupported type_data %d",
             type_data,
             ( (type_data == type_single) ||
               (type_data == type_double) ) );
-           
-    // Count number of messages to send per block
-    ++count_messages; 
 
-    // Loop over root-level blocks in range of this writer
+    // Count number of messages to send per block
+    ++count_messages;
+
+    // Loop over root-level blocks in range of this reader
     for (int ax=array_lower[0]; ax<array_upper[0]; ax++) {
       for (int ay=array_lower[1]; ay<array_upper[1]; ay++) {
         for (int az=array_lower[2]; az<array_upper[2]; az++) {
@@ -175,9 +179,9 @@ void EnzoInitialHdf5::enforce_block
             copy_dataset_to_field_
               (block, field_names_[index],type_data,
                data,mx,my,mz,nx,ny,nz,gx,gy,gz,n4,IX,IY);
-            
+
           } else {
-            
+
             // remote block: pack message and send
             MsgInitial * msg_initial = new MsgInitial;
             msg_initial->set_dataset (n4,h4,nx,ny,nz,IX,IY,IZ);
@@ -185,9 +189,9 @@ void EnzoInitialHdf5::enforce_block
               (field_names_[index],data,nx*ny*nz,type_data);
             enzo::block_array()[index_block].p_initial_hdf5_recv(msg_initial);
           }
-            
+
           delete_array_ (&data,type_data);
-          
+
         }
       }
     }
@@ -197,7 +201,7 @@ void EnzoInitialHdf5::enforce_block
   }
 
   // Read in particle files
-  
+
   for (size_t index=0; index<particle_files_.size(); index++) {
 
     FileHdf5 * file = new FileHdf5 ("./",particle_files_[index]);
@@ -222,9 +226,9 @@ void EnzoInitialHdf5::enforce_block
               (type_data == type_double) ) );
 
     // Count number of messages to send per block
-    ++count_messages; 
+    ++count_messages;
 
-    // Loop over root-level blocks in range of this writer
+    // Loop over root-level blocks in range of this reader
     for (int ax=array_lower[0]; ax<array_upper[0]; ax++) {
       for (int ay=array_lower[1]; ay<array_upper[1]; ay++) {
         for (int az=array_lower[2]; az<array_upper[2]; az++) {
@@ -250,9 +254,9 @@ void EnzoInitialHdf5::enforce_block
                data,
                nx,ny,nz,
                h4,IX,IY,IZ);
-            
+
           } else {
-            
+
             // remote block: pack message and send
             MsgInitial * msg_initial = new MsgInitial;
             msg_initial->set_dataset (n4,h4,nx,ny,nz,IX,IY,IZ);
@@ -260,9 +264,9 @@ void EnzoInitialHdf5::enforce_block
               (particle_types_[index],
                particle_attributes_[index],
                data,nx*ny*nz,type_data);
-            
+
             enzo::block_array()[index_block].p_initial_hdf5_recv(msg_initial);
-            
+
           }
           delete_array_ (&data,type_data);
         }
@@ -287,7 +291,6 @@ void EnzoInitialHdf5::enforce_block
       }
     }
   }
-  
   block->initial_done();
 }
 
@@ -304,12 +307,27 @@ void EnzoBlock::p_initial_hdf5_recv(MsgInitial * msg_initial)
 void EnzoInitialHdf5::recv_data (Block * block, MsgInitial * msg_initial)
 {
   // Exit when count reached (set_stop() may be called at any time)
-  Sync * sync_msg = psync_msg(block);
+  Sync * sync_msg = psync_msg_(block);
   int count = msg_initial->count();
   if ( count > 0) {
     sync_msg->set_stop(count);
   }
 
+  /// Monitor input progress if monitor_iter_ != 0
+  static int count_monitor = 0;
+  static int count_monitor_out = 0;
+  const int blocking = (blocking_[0]*blocking_[1]*blocking_[2]-1);
+  if (monitor_iter_ &&
+      (msg_initial->data_type()!="field" &&
+       msg_initial->data_type()!="particle") &&
+      ((count_monitor == 0 || count_monitor == count-1) ||
+       ((count_monitor % (monitor_iter_*blocking)) == 0))) {
+    cello::monitor()->print("Initial", "hdf5 %d / %d",
+                            count_monitor_out,blocking);
+    count_monitor_out++;
+  }
+  count_monitor++;
+  
   // Copy data from message to block data
   if (msg_initial->data_type() == "field") {
     // extract parameters from MsgInitial
@@ -344,7 +362,7 @@ void EnzoInitialHdf5::recv_data (Block * block, MsgInitial * msg_initial)
     int nx,ny,nz;
     int IX,IY,IZ;
     msg_initial->get_dataset (n4,h4,&nx,&ny,&nz,&IX,&IY,&IZ);
-    
+
     std::string particle_type, particle_attribute;
     char * data;
     int data_size, data_precision;
@@ -362,9 +380,9 @@ void EnzoInitialHdf5::recv_data (Block * block, MsgInitial * msg_initial)
        (char *)data,
        nx,ny,nz,
        h4,IX,IY,IZ);
-    
+
   }
-  
+
   if (sync_msg->next()) {
     // reset for next call (note not resetting at start since may get
     // called after messages received)
@@ -459,7 +477,7 @@ void EnzoInitialHdf5::copy_dataset_to_particle_
             particle.type_name(it).c_str(),
             particle.attribute_name(it,ia).c_str());
   }
-    
+
   // update positions with displacements if needed
 
   double lower_block[3];
@@ -544,7 +562,7 @@ void EnzoInitialHdf5::read_dataset_
            (((*IX)<4)&&((*IY)<4)&&((*IZ)<4)) &&
            (((*IX) != (*IY)) || ((*IY)==-1 && (*IZ) == -1)) &&
            (((*IX) != (*IY) && (*IY) != (*IZ)) || ((*IZ) == -1)));
-    
+
   // field size
   n4[0] = n4[1] = n4[2] = n4[3] = 1;
   n4[(*IX)] = nx;
@@ -572,7 +590,7 @@ void EnzoInitialHdf5::read_dataset_
   // create memory space
   // (fields was n4[(*IX)],n4[(*IY)],n4[(*IZ)])
   file->mem_create (nx,ny,nz,nx,ny,nz,0,0,0);
-    
+
   // input domain size
 
   const int n = nx*ny*nz;
@@ -659,7 +677,7 @@ void EnzoInitialHdf5::check_cosmology_(File * file) const
       // parameter file to machine precision assumes "MUSIC" format with
       // single-precision attributes To disable, set CHECK_COSMO_PARAMS
       // define to "false" above
-    
+
       int type = type_unknown;
       float dx,h0,omega_b,omega_m,omega_v,vfact;
       file->file_read_scalar(&dx, "dx", &type);
@@ -691,4 +709,4 @@ void EnzoInitialHdf5::check_cosmology_(File * file) const
               (cosmo->omega_lambda_now(),enzo_float(omega_v)) < roundoff);
     }
   }
-}  
+}

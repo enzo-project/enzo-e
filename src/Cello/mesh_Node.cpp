@@ -77,7 +77,7 @@ int Node::coarsen (int c)
 
 Node * Node::child (int k)
 {
-  return (child_array_.size() != 0) ? &child_array_.at(k) : 0;
+  return (child_array_.size() != 0) ? &child_array_.at(k) : nullptr;
 }
 
 //======================================================================

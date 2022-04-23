@@ -1,4 +1,3 @@
-#include "fortran.h"
 #define FORTRAN
 c=======================================================================
 c//////////////////////  SUBROUTINE PGAS2D_DUAL  \\\\\\\\\\\\\\\\\\\\\\\
@@ -70,7 +69,6 @@ c\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////
 c=======================================================================
 c
 c  compute the pressure
-
 C      print*, 'DEBUG_PRESSURE pgas2d_dual.F'
 C      print*, 'DEBUG_PRESSURE i1 i2 ',i1,i2
 C      print*, 'DEBUG_PRESSURE j1 j2 ',j1,j2

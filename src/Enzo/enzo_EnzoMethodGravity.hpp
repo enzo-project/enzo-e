@@ -28,14 +28,16 @@ public: // interface
 		    double grav_const,
 		    int order,
 		    bool accumulate,
-                    int index_prolong);
+		    int index_prolong,
+		    double dt_max);
 
   EnzoMethodGravity()
     : index_solver_(-1),
       grav_const_(0.0),
       order_(4),
       ir_exit_(-1),
-      index_prolong_(0)
+      index_prolong_(0),
+      dt_max_(0.0)
   {};
 
   /// Destructor
@@ -51,8 +53,9 @@ public: // interface
       grav_const_(0.0),
       order_(4),
       ir_exit_(-1),
-      index_prolong_(0)
-      
+      index_prolong_(0),
+      dt_max_(0.0)
+
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -70,6 +73,7 @@ public: // interface
     p | index_solver_;
     p | grav_const_;
     p | order_;
+    p | dt_max_;
     p | ir_exit_;
 
   }
@@ -100,7 +104,7 @@ protected: // attributes
   /// Solver index for the linear solver used to compute the potential
   int index_solver_;
 
-  /// Gas constant, e.g. 6.67384e-8 (cgs)
+  /// Gravity constant, e.g. 6.67384e-8 (cgs)
   double grav_const_;
 
   /// Order of Laplacian and acceleration computation: 2 or 4
@@ -112,6 +116,9 @@ protected: // attributes
 
   /// Prolongation
   int index_prolong_;
+
+  /// Maximum timestep
+  double dt_max_;
 };
 
 

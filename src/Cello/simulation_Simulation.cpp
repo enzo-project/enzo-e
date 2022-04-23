@@ -50,8 +50,10 @@ Simulation::Simulation
   scalar_descr_long_double_(NULL),
   scalar_descr_double_(NULL),
   scalar_descr_int_(NULL),
+  scalar_descr_long_long_(NULL),
   scalar_descr_sync_(NULL),
   scalar_descr_void_(NULL),
+  scalar_descr_index_(NULL),
   field_descr_(NULL),
   particle_descr_(NULL),
   sync_output_begin_(),
@@ -59,7 +61,11 @@ Simulation::Simulation
   refresh_list_(),
   index_output_(-1),
   num_solver_iter_(),
-  max_solver_iter_()
+  max_solver_iter_(),
+  restart_directory_(),
+  restart_num_files_(),
+  restart_stream_file_list_()
+  
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
@@ -113,8 +119,10 @@ Simulation::Simulation()
   scalar_descr_long_double_(NULL),
   scalar_descr_double_(NULL),
   scalar_descr_int_(NULL),
+  scalar_descr_long_long_(NULL),
   scalar_descr_sync_(NULL),
   scalar_descr_void_(NULL),
+  scalar_descr_index_(NULL),
   field_descr_(NULL),
   particle_descr_(NULL),
   sync_output_begin_(),
@@ -122,7 +130,10 @@ Simulation::Simulation()
   refresh_list_(),
   index_output_(-1),
   num_solver_iter_(),
-  max_solver_iter_()
+  max_solver_iter_(),
+  restart_directory_(),
+  restart_num_files_(),
+  restart_stream_file_list_()
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
@@ -164,8 +175,10 @@ Simulation::Simulation (CkMigrateMessage *m)
     scalar_descr_long_double_(NULL),
     scalar_descr_double_(NULL),
     scalar_descr_int_(NULL),
+    scalar_descr_long_long_(NULL),
     scalar_descr_sync_(NULL),
     scalar_descr_void_(NULL),
+    scalar_descr_index_(NULL),
     field_descr_(NULL),
     particle_descr_(NULL),
     sync_output_begin_(),
@@ -173,7 +186,11 @@ Simulation::Simulation (CkMigrateMessage *m)
     refresh_list_(),
     index_output_(-1),
     num_solver_iter_(),
-    max_solver_iter_()
+    max_solver_iter_(),
+    restart_directory_(),
+    restart_num_files_(),
+    restart_stream_file_list_()
+
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
@@ -239,10 +256,14 @@ void Simulation::pup (PUP::er &p)
   p | *scalar_descr_double_;
   if (up) scalar_descr_int_ = new ScalarDescr;
   p | *scalar_descr_int_;
+  if (up) scalar_descr_long_long_ = new ScalarDescr;
+  p | *scalar_descr_long_long_;
   if (up) scalar_descr_sync_ = new ScalarDescr;
   p | *scalar_descr_sync_;
   if (up) scalar_descr_void_ = new ScalarDescr;
   p | *scalar_descr_void_;
+  if (up) scalar_descr_index_ = new ScalarDescr;
+  p | *scalar_descr_index_;
 
   if (up) field_descr_ = new FieldDescr;
   p | *field_descr_;
@@ -274,15 +295,20 @@ void Simulation::pup (PUP::er &p)
 
   PUParray(p,dir_checkpoint_,256);
 
+#ifdef BYPASS_CHARM_MEM_LEAK
   ASSERT1("Simulation::pup()",
 	  "msg_refine_map_ is assumed to be empty but has size %lu",
 	  msg_refine_map_.size(),
 	  (msg_refine_map_.size() == 0));
-	  
+
   //  p | msg_refine_map_;
+#endif
   p | index_output_;
   p | num_solver_iter_;
   p | max_solver_iter_;
+  p | restart_directory_;
+  p | restart_num_files_;
+
 }
 
 //----------------------------------------------------------------------
@@ -298,6 +324,8 @@ void Simulation::finalize() throw()
 }
 
 //----------------------------------------------------------------------
+
+#ifdef BYPASS_CHARM_MEM_LEAK
 
 void Simulation::p_get_msg_refine(Index index)
 {
@@ -344,6 +372,7 @@ MsgRefine * Simulation::get_msg_refine(Index index)
   return msg;
 }
 
+#endif
 //======================================================================
 
 void Simulation::initialize_simulation_() throw()
@@ -487,8 +516,10 @@ void Simulation::initialize_data_descr_() throw()
   scalar_descr_long_double_ = new ScalarDescr;
   scalar_descr_double_      = new ScalarDescr;
   scalar_descr_int_         = new ScalarDescr;
+  scalar_descr_long_long_   = new ScalarDescr;
   scalar_descr_sync_        = new ScalarDescr;
   scalar_descr_void_        = new ScalarDescr;
+  scalar_descr_index_       = new ScalarDescr;
 
   //--------------------------------------------------
   // parameter: Field : list
@@ -726,6 +757,17 @@ void Simulation::initialize_hierarchy_() throw()
 			   config_->mesh_root_blocks[1],
 			   config_->mesh_root_blocks[2]);
 
+  bool lp3[3] = { false, false, false };
+  int index_boundary = 0;
+  auto & root_blocks = config_->mesh_root_blocks;
+  Boundary * boundary;
+  while ( (boundary = cello::boundary(index_boundary++)) ) {
+    boundary->periodicity(lp3);
+  }
+  int p3[3] = {lp3[0] ? root_blocks[0] : 0,
+               lp3[1] ? root_blocks[1] : 0,
+               lp3[2] ? root_blocks[2] : 0 };
+  hierarchy_->set_periodicity (p3[0],p3[1],p3[2]);
 }
 
 //----------------------------------------------------------------------
@@ -777,7 +819,7 @@ void Simulation::p_set_block_array(CProxy_Block block_array)
   if (CkMyPe() != 0) hierarchy_->set_block_array(block_array);
 }
 
-  //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 void Simulation::deallocate_() throw()
 {

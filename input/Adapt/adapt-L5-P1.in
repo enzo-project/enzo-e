@@ -1,0 +1,34 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/Adapt/adapt.incl"
+
+Mesh    { 
+   root_size   = [32,32];
+}
+
+include "input/Adapt/initial_square.incl"
+
+Adapt {  max_level = 5; }
+
+Output {
+    de { name = ["adapt-L5-P1-de-%04.2f.png", "time"]; }
+    te { name = ["adapt-L5-P1-te-%04.2f.png", "time"]; }
+    vx { name = ["adapt-L5-P1-vx-%04.2f.png", "time"]; }
+    vy { name = ["adapt-L5-P1-vy-%04.2f.png", "time"]; }
+    mesh { name = ["adapt-L5-P1-mesh-%04.2f.png", "time"]; 
+           image_max = 6.0;
+         }
+}
+
+Method {
+   list += ["output"];
+   output {
+      schedule { var = "cycle"; step = 20; }
+      blocking = [1,2];
+      path_name = ["Dir_New-%04d","cycle"];
+      file_name = ["density-%d.h5","count"];
+      field_list = ["density" ];
+      ghost_depth = 4;
+   }
+}

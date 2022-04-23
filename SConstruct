@@ -8,7 +8,15 @@ import socket
 # USER CONFIGURATION
 #======================================================================
 
-new_adapt = 1
+#----------------------------------------------------------------------
+# Whether to bypass passing MsgRefine directly to Block constructor,
+# or request it from a separate entry method to bypass a Charm++
+# memory leak. This should only be set to 0 after (and if) the bug is
+# addressed in Charm++, or when explicitly testing a Charm++ build for
+# this bug.
+# ----------------------------------------------------------------------
+
+bypass_charm_mem_leak = 1
 
 #----------------------------------------------------------------------
 # Maximum number of procesess per shared-memory node (can be larger than needed)
@@ -155,10 +163,10 @@ if (arch == 'unknown' and "CELLO_ARCH" in os.environ):
 if (prec == 'unknown' and "CELLO_PREC" in os.environ):
      prec = os.environ["CELLO_PREC"]
 
-print 
+print()
 print("    CELLO_ARCH scons arch=",arch)
 print("    CELLO_PREC scons prec=",prec)
-print 
+print()
 
 #----------------------------------------------------------------------
 # CONFIGURATION DEFINES
@@ -246,14 +254,15 @@ if   (arch == "gordon_gnu"):   from gordon_gnu   import *
 elif (arch == "gordon_intel"): from gordon_intel import *
 elif (arch == "gordon_pgi"):   from gordon_pgi   import *
 elif (arch == "comet_gnu"):    from comet_gnu    import *
-elif (arch == "linux_gnu"):    from linux_gnu    import *
 elif (arch == "linux_clang"):  from linux_clang  import *
 elif (arch == "linux_gcc_9"):  from linux_gcc_9  import *
-elif (arch == "linux_intel"):  from linux_intel  import *
-elif (arch == "linux_yt"):     from linux_yt     import *
+elif (arch == "linux_gnu"):    from linux_gnu    import *
 elif (arch == "linux_gprof"):  from linux_gprof  import *
+elif (arch == "linux_illium"): from linux_illium import *
+elif (arch == "linux_intel"):  from linux_intel  import *
 elif (arch == "linux_mpe"):    from linux_mpe    import *
 elif (arch == "linux_tau"):    from linux_tau    import *
+elif (arch == "linux_yt"):     from linux_yt     import *
 elif (arch == "ncsa_bw"):      from ncsa_bw      import *
 elif (arch == "ncsa_bw_net"):  from ncsa_bw_net  import *
 elif (arch == "ncsa_bw_smp"):  from ncsa_bw_smp  import *
@@ -265,10 +274,12 @@ elif (arch == "mf_gnu"):       from mf_gnu       import *
 elif (arch == "mf_gnu_debug"): from mf_gnu_debug import *
 elif (arch == "stampede_gnu"): from stampede_gnu import *
 elif (arch == "stampede_intel"): from stampede_intel import *
+elif (arch == "frontera_intel"): from frontera_intel import *
 elif (arch == "davros_gnu"):   from davros_gnu   import *
 elif (arch == "davros_gnu_debug"):  from davros_gnu_debug  import *
 elif (arch == "darwin_gnu"):   from darwin_gnu   import *
 elif (arch == "darwin_homebrew"):   from darwin_homebrew   import *
+elif (arch == "msu_hpcc_gcc"): from msu_hpcc_gcc   import *
 
 #======================================================================
 # END ARCHITECTURE SETTINGS
@@ -290,14 +301,17 @@ if (prec == 'single' or prec == 'double'):
      defines.append(define[prec])
 else:
      print("Unrecognized precision ",prec)
-     print
+     print()
      print("Valid precisions are 'single' and 'double'")
-     print
+     print()
      print("The precision is set using the environment variable $CELLO_PREC")
      print("or by using 'scons prec=<precision>")
      sys.exit(1)
 
 defines.append(define_int_size)
+
+if (bypass_charm_mem_leak == 1):
+   defines.append('BYPASS_CHARM_MEM_LEAK')
 
 defines.append({'CONFIG_NODE_SIZE' : node_size })
 defines.append({'CONFIG_NODE_SIZE_3' : node_size*3 })
@@ -305,9 +319,6 @@ defines.append({'CONFIG_NODE_SIZE_3' : node_size*3 })
 defines.append(define_png)
 
 charm_perf = ''
-
-if (new_adapt == 1):
-     defines.append('NEW_ADAPT')
 
 if (use_projections == 1):
      defines.append(define_projections)
@@ -385,6 +396,7 @@ Export('test_path')
 Export('ip_charm')
 Export('smp')
 Export('prec')
+Export('use_valgrind')
 
 
 cpppath     = [inc_path]
@@ -492,7 +504,7 @@ cello_def.write ("#define CELLO_ARCH "
 cello_def.write ("#define CELLO_PREC "
 		"\""+prec+"\"\n")
 cello_def.write ("#define CELLO_CC "
-		"\""+cc+"\"\n")	
+		"\""+cc+"\"\n")
 cello_def.write ("#define CELLO_CFLAGS "
 		"\""+cflags+"\"\n")
 cello_def.write ("#define CELLO_CPPDEFINES "
@@ -500,7 +512,7 @@ cello_def.write ("#define CELLO_CPPDEFINES "
 cello_def.write ("#define CELLO_CPPPATH "
 		"\""+" ".join(map(str,cpppath))+"\"\n")
 cello_def.write ("#define CELLO_CXX "
-		"\""+cxx+"\"\n")	
+		"\""+cxx+"\"\n")
 cello_def.write ("#define CELLO_CXXFLAGS "
 		"\""+cxxflags+"\"\n")
 cello_def.write ("#define CELLO_FORTRANFLAGS "
@@ -531,12 +543,12 @@ cello_def.write ("#define CHARM_PATH \"" + charm_path + "\"\n" )
 #----------
 
 if (have_git):
-      
+
    git_changeset = str(subprocess.check_output(["git", "rev-parse", "HEAD"]).rstrip())
    cello_def.write ("#define CELLO_CHANGESET \""+git_changeset+"\"\n" )
 
 else:
-        
+
    cello_def.write ("#define CELLO_CHANGESET \"unknown\"\n" )
 
 #----------
@@ -576,9 +588,10 @@ Export('use_papi')
 
 if (have_git == 1):
    branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).rstrip()
+   build_dir = 'build-' + branch.decode('utf-8')
+else:
+   build_dir = 'build'
 
-build_dir = 'build'
-   
 SConscript( 'src/SConscript',variant_dir=build_dir)
 SConscript('test/SConscript')
 
@@ -593,7 +606,7 @@ Clean('.','src-html')
 Clean('.','src-latex')
 Clean('.','src-xml')
 
-# files left behind by enzo-p
+# files left behind by enzo-e
 Clean('.','Checkpoint')
 Clean('.','parameters.out')
 Clean('.','parameters.libconfig')
@@ -603,7 +616,7 @@ Clean('.','parameters.libconfig')
 #======================================================================
 
 # env = Environment(tools=['default', 'packaging'])
-# title = 'Enzo-P / Cello Extreme AMR Astrophysics and Cosmology'
+# title = 'Enzo-E / Cello Extreme AMR Astrophysics and Cosmology'
 # env.Package( NAME           = 'cello',
 #              VERSION        = '0.5.0',
 #              PACKAGEVERSION = 0,

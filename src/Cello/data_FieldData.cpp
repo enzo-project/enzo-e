@@ -652,15 +652,12 @@ void FieldData::coarse_dimensions
 {
   // Determine augmented coarse block size 
 
+  //    get block centering (cx,cy,cz)
   //    get block size (nx,ny,nz)
+  int cx,cy,cz;
+  field_descr->centering (id_field,&cx,&cy,&cz);
   int nx,ny,nz;
   size (&nx,&ny,&nz);
-  ASSERT3 ("FieldData::coarse_dimensions()",
-          "Block axis sizes (%d %d %d) must be even (or one)",
-          nx,ny,nz,
-          ((nx%2)==0) &&
-          (((ny%2)==0) || (ny==1)) &&
-          (((nz%2)==0) || (nz==1)));
 
   //    get ghost size (gx,gy,gz)
   int gx,gy,gz;
@@ -669,10 +666,6 @@ void FieldData::coarse_dimensions
   if ((gx%2) == 1) gx++;
   if ((gy%2) == 1) gy++;
   if ((gz%2) == 1) gz++;
-
-  //    get block centering (cx,cy,cz)
-  int cx,cy,cz;
-  field_descr->centering (id_field,&cx,&cy,&cz);
 
   //    compute coarse block size
   if (mcx) (*mcx) = (nx!=1) ? nx/2 + (gx + 2*(gx%1)) + cx + 2 : 1;
@@ -698,7 +691,7 @@ void FieldData::print
   printf ("DEBUG message = %s\n",message);
   printf ("DEBUG filename = %s\n",filename);
 
-  FILE * fp = fopen (filename,"w");
+  FILE * fp = fopen (filename,"a");
 
   ASSERT("FieldData::print",
 	 "FieldData not allocated",
@@ -1045,6 +1038,95 @@ void FieldData::units_scale_code (const FieldDescr * field_descr, int id, double
 
     units_scaling_[id] = 1.0;
   }
+}
+
+//----------------------------------------------------------------------
+
+int FieldData::data_size (FieldDescr * field_descr) const
+{
+
+  int size = 0;
+
+  SIZE_ARRAY_TYPE(size,int,size_,3);
+  SIZE_VECTOR_TYPE(size,char,array_permanent_);
+  //SIZE_VECTOR_TYPE(size,int,temporary_size_);
+  //SIZE_VECTOR_ARRAY_TYPEstd::vector<char *> array_temporary_;
+  SIZE_VECTOR_TYPE(size,int,offsets_);
+  SIZE_SCALAR_TYPE(size,bool,ghosts_allocated_);
+  SIZE_VECTOR_TYPE(size,int,history_id_);
+  SIZE_VECTOR_TYPE(size,double,history_time_);
+  SIZE_VECTOR_TYPE(size,double,units_scaling_);
+  SIZE_VECTOR_TYPE(size,int,coarse_dimensions_);
+  /// Coarse fields with one ghost zone for padded Prolong
+  //  std::vector<char *> array_coarse_;
+
+  return size;
+}
+
+//----------------------------------------------------------------------
+
+char * FieldData::save_data (FieldDescr * field_descr,
+				char * buffer) const
+{
+  union {
+    int  * pi;
+    char * pc;
+  };
+
+  pc = (char *) buffer;
+
+  SAVE_ARRAY_TYPE(pc,int,size_,3);
+  SAVE_VECTOR_TYPE(pc,char,array_permanent_);
+  //SAVE_VECTOR_TYPE(pc,int,temporary_size_);
+  //SAVE_VECTOR_ARRAY_TYPEstd::vector<char *> array_temporary_;
+  SAVE_VECTOR_TYPE(pc,int,offsets_);
+  SAVE_SCALAR_TYPE(pc,bool,ghosts_allocated_);
+  SAVE_VECTOR_TYPE(pc,int,history_id_);
+  SAVE_VECTOR_TYPE(pc,double,history_time_);
+  SAVE_VECTOR_TYPE(pc,double,units_scaling_);
+  SAVE_VECTOR_TYPE(pc,int,coarse_dimensions_);
+  /// Coarse fields with one ghost zone for padded Prolong
+  //  std::vector<char *> array_coarse_;
+
+  ASSERT2("FieldData::save_data()",
+	  "Buffer has size %ld but expecting size %d",
+	  (pc-buffer),data_size(field_descr),
+	  ((pc-buffer) == data_size(field_descr)));
+
+  return pc;
+}
+
+//----------------------------------------------------------------------
+
+char * FieldData::load_data (FieldDescr * field_descr,
+				char * buffer)
+{
+  union {
+    int  * pi;
+    char * pc;
+  };
+
+  pc = (char *) buffer;
+
+  LOAD_ARRAY_TYPE(pc,int,size_,3);
+  LOAD_VECTOR_TYPE(pc,char,array_permanent_);
+  //LOAD_VECTOR_TYPE(pc,int,temporary_size_);
+  //LOAD_VECTOR_ARRAY_TYPEstd::vector<char *> array_temporary_;
+  LOAD_VECTOR_TYPE(pc,int,offsets_);
+  LOAD_SCALAR_TYPE(pc,bool,ghosts_allocated_);
+  LOAD_VECTOR_TYPE(pc,int,history_id_);
+  LOAD_VECTOR_TYPE(pc,double,history_time_);
+  LOAD_VECTOR_TYPE(pc,double,units_scaling_);
+  LOAD_VECTOR_TYPE(pc,int,coarse_dimensions_);
+  /// Coarse fields with one ghost zone for padded Prolong
+  //  std::vector<char *> array_coarse_;
+
+  ASSERT2("FieldData::load_data()",
+	  "Buffer has size %ld but expecting size %d",
+	  (pc-buffer),data_size(field_descr),
+	  ((pc-buffer) == data_size(field_descr)));
+  
+  return pc;
 }
 
 //======================================================================

@@ -11,24 +11,27 @@ list is applied in the order specified.  Possible methods include:`
   * :t:`"comoving_expansion"` :e:`adds comoving expansion terms to the
     physical variables.`
   * :t:`"cosmology"` :e:`for writing redshift to monitor output.`
+  * :t:`"flux_correct"` :e:`for performing flux corrections when using AMR.`
   * :t:`"grackle"` :e:`for heating and cooling methods in the Enzo
     Grackle library`
   * :t:`"gravity"` :e:`solves for the gravitational potential given gas
     and particle density fields.`
   * :t:`"heat"` :e:`for the forward-Euler heat-equation solver, which
     is used primarily for demonstrating how new Methods are
-    implemented in Enzo-P`
+    implemented in Enzo-E`
   * :t:`"pm_deposit"` :e:`deposits "dark" particle density into
     "density_particle" field using CIC for "gravity" method.`
   * :t:`"pm_update"` :e:`moves cosmological "dark" particles based on
     positions, velocities, and accelerations.`  **This will be phased out
     in favor of a more general "move_particles" method.**
-  * :t:`"ppm"` :e:`for Enzo-P's PPM hydrodynamics method.`  *This may be
+  * :t:`"ppm"` :e:`for Enzo-E's PPM hydrodynamics method.`  *This may be
     phased out in favor of using a more general "hydro" method
     instead, with a specific hydro solver specified.*
   * :t:`"ppml"` :e:`for the PPML ideal MHD solver.`  *This may be phased
     out in favor of using a more general "mhd" method instead, with a
     specific mhd solver specified.*
+  * :t:`"mhd_vlct"` :e:`for the VL + CT (van Leer + Constrained Transport) MHD
+    solver.`
   * :t:`"trace"` :e:`for moving tracer particles.`  **This will be phased
     out in favor of a more general "move_particles" method.**
   * :t:`"turbulence"` :e:`computes random forcing for turbulence
@@ -72,6 +75,64 @@ flux_correct
 
 :e:`Flux correction must be applied to conserved fields in AMR simulations to maintain conserved quantities across mesh resolution jumps.  This parameter selects the group of fields to which the "flux_correct" method will be applied.`
 
+:e:`Fields that store a conserved quantity divided by density`
+(e.g. ``"total_energy"``, ``"velocity_x"``) :e:`have special
+handling. Such fields must be included in both the group specified by
+this parameter AND the` ``"make_field_conservative"`` :e:`group. Flux
+corrections are applied to an element of such fields according to the
+following procedure:`
+
+  1. :e:`The element is multiplied by the corresponding element of
+     the` ``"density"`` :e:`field (before the flux corrections are
+     applied to the` ``"density"`` :e:`field).`
+
+  2. :e:`Flux corrections are applied to the product from step 1.`
+
+  3. :e:`Finally, the element in the original field is assigned the
+     value computed in step 2 divided by the corresponding element
+     from the` ``"density"`` :e:`field (after flux corrections are
+     applied to the` ``"density"`` :e:`field).`
+
+:e:`An error will be raised if these special fields are detected, and
+the` ``"density"`` :e:`field is not included in the group specified by
+this parameter.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`flux_correct` : :p:`min_digits`
+:Summary: :s:`Number of digits expected to be conserved by fields in tests`
+:Type:    :t:`list`
+:Default: :d:`[]`
+:Scope:     :z:`Cello`
+
+:e:`Specifies the minimum number of digits that are expected to be conserved
+by fields. This is used for testing purposes (the simulation will
+check at each timestep whether this expectation has been met). Entries of this list should alternate between the name of fields (a string) and the expected number of conserved digits for that field (a float).`
+
+:e:`The example provided below indicates that the` ``"density"`` :e:`field and the product of the` ``"density"`` :e:`&` ``"velocity_x"`` :e:`fields are expected to be conserved to` ``7.1`` :e:`and` ``4.9`` :e:`digits, respectively`::
+
+     Method {
+        flux_correct {
+           min_digits = ["density", 7.1,
+                         "velocity_x", 4.9];
+        }
+     }
+
+     Group {
+        list = [ "conserved", "make_field_conservative" ];
+        conserved {
+           field_list = [ "density", "velocity_x"];
+        }
+        make_field_conservative {
+           field_list = [ "velocity_x"];
+        }
+     }
+
+:e:`For the sake of backwards compatibility, this parameter can be
+assigned a single float (that is not in a list). In this case, the
+value is assumed to be the expected minimum number of digits conserved
+by the` ``"density"`` :e:`field.` *(Support for this type of parameter
+may be removed in the future)*
 
 gravity
 -------
@@ -118,6 +179,27 @@ are available; valid values are 2, 4, or 6.`
 mass deposited in the "density_particle" field may bleed into the
 first layer of ghost zones.  This parameter ensures that that mass
 will be included in "density_total".`
+
+----
+
+:Parameter:  :p:`Method` : :p:`gravity` : :p:`dt_max`
+:Summary: :s:`The maximum timestep returned by EnzoMethodGravity::timestep`
+:Type:    :t:`float`
+:Default: :d:`1.0e10`
+:Scope:     :z:`Enzo`
+
+:e:`The timestep returned by EnzoMethodGravity::timestep (when called on a
+block) is calculated as follows. First, the geometric mean of the cell-widths
+in all dimensions is found, which we call the "mean cell width". Next, the
+quantity "epsilon" is calculated, as the mean cell width divided by the square
+of dt_max. Then, the maximum acceleration magnitude across all cells in the
+block is found, which we call "a_mag_max". We then calculate the
+mean cell width divided by the sum of a_mag_max and epsilon. The timestep is
+then the square root of this quantity. This means that if all the accelerations
+are zero (such as at the first time step), the timestep is equal to dt_max.
+Defining the timestep in this way also means that the value of the
+timestep is independent of how the acceleration vectors are oriented relative
+to the mesh.`
 
 
 
@@ -570,6 +652,23 @@ heat
 
 :e:`Thermal diffusivity parameter for the heat equation.`
 
+merge_stars
+-----------
+
+:Parameter:  :p:`Method` : :p:`merge_stars` : :p:`merging_radius_cells`
+:Summary:    :s:`The distance within which star particles merge with
+                 each other, relative to the cell width`
+:Type:       :t:`float`
+:Default:    :d:`8.0`
+:Scope:     :z:`Enzo`
+
+:e:`The distance within which star particles merge with each other,relative to the cell width.`
+
+mhd_vlct
+--------
+
+.. include:: method_mhd_vlct.incl
+
 null
 ----
 
@@ -616,4 +715,3 @@ turbulence
 :Default: :d:`0.0`
 :Scope:     :z:`Enzo`
 :Todo: :o:`write`
-

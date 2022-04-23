@@ -9,10 +9,6 @@
 
 #include "enzo.decl.h"
 
-#define CK_TEMPLATES_ONLY
-#include "enzo.def.h"
-#undef CK_TEMPLATES_ONLY
-
 // #define DEBUG_SOLVER
 
 #ifdef DEBUG_SOLVER
@@ -42,7 +38,7 @@ EnzoSolverDiagonal::EnzoSolverDiagonal
      index_prolong,
      index_restrict)
 {
-  id_ = cello::field_descr()->insert_temporary("diagonal");
+  id_ = cello::field_descr()->insert_temporary();
 }
 
 //======================================================================

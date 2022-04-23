@@ -8,6 +8,8 @@
 #ifndef ENZO_ENZO_FACTORY_HPP
 #define ENZO_ENZO_FACTORY_HPP
 
+class EnzoMsgCheck;
+
 class EnzoFactory : public Factory {
 
   /// @class    EnzoFactory
@@ -73,10 +75,18 @@ public: // interface
    int count_adapt,
    int cycle, double time, double dt,
    int narray, char * array, int refresh_type,
-   int num_face_level, int * face_level,
+   int num_face_level,
+   int * face_level,
+   Adapt * adapt,
    Simulation * simulation = 0
-) const throw();
+   ) const throw();
 
+  void create_block_check
+  (
+   EnzoMsgCheck * msg_check,
+   CProxy_Block block_array,
+   Index index
+   ) const throw();
 };
 
 #endif /* ENZO_ENZO_FACTORY_HPP */

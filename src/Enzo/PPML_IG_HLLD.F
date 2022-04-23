@@ -211,6 +211,9 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(5)*(vb - vbz))/(sa - sm)
         integer nt
 	ENZO_REAL ql(8),qr(8),q(8),qlm(8),qrm(8),bs(3)
         ENZO_REAL sl,sr,xs,xt,r1,r5,vm,r8,sa,sn,tm,vz,sm,gamma
+	ENZO_REAL o1
+
+	o1 = 1.0d0
 
         call prim_ig(gamma,ql,qlm) 
         call prim_ig(gamma,qr,qrm) 
@@ -227,7 +230,7 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(5)*(vb - vbz))/(sa - sm)
 	   vm = qlm(2)*qlm(5) + qlm(3)*qlm(6) + qlm(4)*qlm(7)
 	   r8 = ql(8)
 	   sa = sl
-	   sn = sign(1.d0,r5+bs(1)) 
+	   sn = sign(o1,r5+bs(1)) 
 	   tm = -1.
 
 	else
@@ -237,7 +240,7 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(5)*(vb - vbz))/(sa - sm)
 	   vm = qrm(2)*qrm(5) + qrm(3)*qrm(6) + qrm(4)*qrm(7)
 	   r8 = qr(8)
 	   sa = sr
-	   sn = sign(1.d0,r5+bs(1)) 
+	   sn = sign(o1,r5+bs(1)) 
 	   tm = 1.
 
 	endif
@@ -501,6 +504,9 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(6)*(vb - vbz))/(sa - sm)
         integer nt
 	ENZO_REAL ql(8),qr(8),q(8),qlm(8),qrm(8),bs(3)
         ENZO_REAL sl,sr,xs,xt,r1,r6,vm,r8,sa,sn,tm,vz,sm,gamma
+	ENZO_REAL o1
+
+	o1 = 1.0d0
 
         call prim_ig(gamma,ql,qlm) 
         call prim_ig(gamma,qr,qrm) 
@@ -517,7 +523,7 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(6)*(vb - vbz))/(sa - sm)
 	vm = qlm(2)*qlm(5) + qlm(3)*qlm(6) + qlm(4)*qlm(7)
 	r8 = ql(8)
 	sa = sl
-	sn = sign(1.d0,r6+bs(2)) 
+	sn = sign(o1,r6+bs(2)) 
 	tm = -1.
 
 	else
@@ -527,7 +533,7 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(6)*(vb - vbz))/(sa - sm)
 	vm = qrm(2)*qrm(5) + qrm(3)*qrm(6) + qrm(4)*qrm(7)
 	r8 = qr(8)
 	sa = sr
-	sn = sign(1.d0,r6+bs(2)) 
+	sn = sign(o1,r6+bs(2)) 
 	tm = 1.
 
 	endif
@@ -793,6 +799,9 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(7)*(vb - vbz))/(sa - sm)
 	integer nt
 	ENZO_REAL ql(8),qr(8),q(8),qlm(8),qrm(8),bs(3)
 	ENZO_REAL sl,sr,xs,xt,r1,r7,vm,r8,sa,sn,tm,vz,sm,gamma
+	ENZO_REAL o1
+
+	o1 = 1.0d0
 
         call prim_ig(gamma,ql,qlm) 
         call prim_ig(gamma,qr,qrm) 
@@ -809,7 +818,7 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(7)*(vb - vbz))/(sa - sm)
 	   vm = qlm(2)*qlm(5) + qlm(3)*qlm(6) + qlm(4)*qlm(7)
 	   r8 = ql(8)
 	   sa = sl
-	   sn = sign(1.d0,r7+bs(3)) 
+	   sn = sign(o1,r7+bs(3)) 
 	   tm = -1.
 
 	else
@@ -819,7 +828,7 @@ c	qz(8)=(slu*qa(8) - pta*ua + ptz*sm + qa(7)*(vb - vbz))/(sa - sm)
 	   vm = qrm(2)*qrm(5) + qrm(3)*qrm(6) + qrm(4)*qrm(7)
 	   r8 = qr(8)
 	   sa = sr
-	   sn = sign(1.d0,r7+bs(3)) 
+	   sn = sign(o1,r7+bs(3)) 
 	   tm = 1.
 
 	endif

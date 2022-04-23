@@ -15,7 +15,7 @@
 // #define DEBUG_FLUX
 //----------------------------------------------------------------------
 
-int EnzoBlock::SolveHydroEquations 
+int EnzoBlock::SolveHydroEquations
 (
  enzo_float time,
  enzo_float dt,
@@ -33,7 +33,7 @@ int EnzoBlock::SolveHydroEquations
   field.ghost_depth(0,&gx,&gy,&gz);
   field.dimensions(0,&mx,&my,&mz);
 
-#ifdef IE_ERROR_FIELD  
+#ifdef IE_ERROR_FIELD
   int num_ie_error = 0;
   int *ie_error_x = new int [mx*my*mz];
   int *ie_error_y = new int [mx*my*mz];
@@ -44,8 +44,8 @@ int EnzoBlock::SolveHydroEquations
   int *ie_error_y = nullptr;
   int *ie_error_z = nullptr;
 #endif
-  
-  
+
+
   //------------------------------
   // Prepare color field parameters
   //------------------------------
@@ -65,7 +65,7 @@ int EnzoBlock::SolveHydroEquations
        index_field++) {
     std::string name = field.field_name(index_field);
     if (field.groups()->is_in(name,"color")) {
-      coloff[index_color++] 
+      coloff[index_color++]
 	= (enzo_float *)(field.values(index_field)) - colorpt;
     }
 
@@ -109,11 +109,11 @@ int EnzoBlock::SolveHydroEquations
     for (int i=0; i<size; i++) velocity_z[i] = 0.0;
   }
 
-  enzo_float * acceleration_x  = field.is_field("acceleration_x") ? 
+  enzo_float * acceleration_x  = field.is_field("acceleration_x") ?
     (enzo_float *) field.values("acceleration_x") : NULL;
-  enzo_float * acceleration_y  = field.is_field("acceleration_y") ? 
+  enzo_float * acceleration_y  = field.is_field("acceleration_y") ?
     (enzo_float *)field.values("acceleration_y") : NULL;
-  enzo_float * acceleration_z  = field.is_field("acceleration_z") ? 
+  enzo_float * acceleration_z  = field.is_field("acceleration_z") ?
     (enzo_float *)field.values("acceleration_z") : NULL;
 
 
@@ -201,7 +201,7 @@ int EnzoBlock::SolveHydroEquations
     int * flux_index = 0;
     const int index_field = flux_data->index_field(i_f);
     const std::string field_name = field.field_name(index_field);
-    
+
     if (field_name == "density")         flux_index = dindex;
     if (field_name == "velocity_x")      flux_index = uindex;
     if (field_name == "velocity_y")      flux_index = vindex;
@@ -262,10 +262,10 @@ int EnzoBlock::SolveHydroEquations
   for (dim = 0; dim < MAX_DIMENSION; dim++) {
     CellWidthTemp[dim] = new enzo_float [GridDimension[dim]];
     if (dim < rank) {
-      for (int i=0; i<GridDimension[dim]; i++) 
+      for (int i=0; i<GridDimension[dim]; i++)
 	CellWidthTemp[dim][i] = (cosmo_a*CellWidth[dim]);
     } else {
-      for (int i=0; i<GridDimension[dim]; i++) 
+      for (int i=0; i<GridDimension[dim]; i++)
 	CellWidthTemp[dim][i] = 1.0;
     }
   }
@@ -287,7 +287,7 @@ int EnzoBlock::SolveHydroEquations
     (
      density, total_energy, velocity_x, velocity_y, velocity_z,
      internal_energy,
-     &gravity_on, 
+     &gravity_on,
      acceleration_x,
      acceleration_y,
      acceleration_z,
@@ -316,7 +316,7 @@ int EnzoBlock::SolveHydroEquations
 #endif  
 
 
-#ifdef IE_ERROR_FIELD  
+#ifdef IE_ERROR_FIELD
   if (num_ie_error > 0) {
     CkPrintf ("DEBUG_IE_ERROR num_ie_error = %d\n",num_ie_error);
 
@@ -333,17 +333,6 @@ int EnzoBlock::SolveHydroEquations
   }
 #endif
 
-#ifdef DEBUG_FLUX
-  for (int i_f=0; i_f<nf; i_f++) {
-    for (int axis=0; axis<rank; axis++) {
-      for (int face=0; face<2; face++) {
-        FaceFluxes * ff = flux_data->block_fluxes(axis,face,i_f);
-        ff->print(this,"SolveHydroEquations");
-      }
-    }
-  }
-#endif
-  
   for (dim = 0; dim < MAX_DIMENSION; dim++) {
     delete [] CellWidthTemp[dim];
   }
@@ -357,12 +346,12 @@ int EnzoBlock::SolveHydroEquations
   delete [] array;
 
   delete [] coloff;
-#ifdef IE_ERROR_FIELD  
+#ifdef IE_ERROR_FIELD
   delete [] ie_error_x;
   delete [] ie_error_y;
   delete [] ie_error_z;
-#endif  
-  
+#endif
+
   return ENZO_SUCCESS;
 
 }

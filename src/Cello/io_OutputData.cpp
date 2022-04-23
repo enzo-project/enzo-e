@@ -12,7 +12,7 @@
 
 //----------------------------------------------------------------------
 
-// #define TRACE_OUTPUT
+//#define TRACE_OUTPUT
 
 OutputData::OutputData
 (
@@ -108,14 +108,18 @@ void OutputData::finalize () throw ()
 void OutputData::write_hierarchy ( const Hierarchy  * hierarchy ) throw()
 {
 #ifdef TRACE_OUTPUT
-    CkPrintf ("%d TRACE_OUTPUT OutputData::write_hierarchy()\n",CkMyPe());
+  CkPrintf ("%d TRACE_OUTPUT OutputData::write_hierarchy()\n",CkMyPe());
 #endif    
+
+  Simulation * simulation = cello::simulation();
+  IoSimulation io_simulation(simulation);
+  write_meta (&io_simulation);
+  //  Output::write_simulation(simulation);
+
   IoHierarchy io_hierarchy(hierarchy);
-
   write_meta (&io_hierarchy);
-
   Output::write_hierarchy(hierarchy);
-  
+
 }
 
 //----------------------------------------------------------------------
@@ -170,8 +174,9 @@ void OutputData::write_block ( const  Block * block ) throw()
 			       strlen(file)+1, file,
 			       strlen(line)+1, line,
 			       count);
+
     
-    // Contribute to DIR.file_list file
+  // Contribute to DIR.file_list file
 
   if (text_block_count_ == 0) {
       

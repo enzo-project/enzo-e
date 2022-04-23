@@ -12,17 +12,17 @@ class EnzoSolverDiagonal : public Solver {
 
   /// @class    EnzoSolverDiagonal
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] 
+  /// @brief    [\ref Enzo]
 
 public: // interface
 
   /// Constructor
   EnzoSolverDiagonal(std::string name,
-		     std::string field_x,
-		     std::string field_b,
-		     int monitor_iter,
-		     int restart_cycle,
-		     int solve_type,
+                     std::string field_x,
+                     std::string field_b,
+                     int monitor_iter,
+                     int restart_cycle,
+                     int solve_type,
                      int index_prolong,
                      int index_restrict) throw();
 
@@ -48,12 +48,12 @@ public: // virtual functions
 
   /// Solve the linear system Ax = b
   virtual void apply ( std::shared_ptr<Matrix> A, Block * block) throw();
-  
+
   /// Type of this solver
   virtual std::string type() const { return "diagonal"; }
 
   //--------------------------------------------------
-  
+
 public: // virtual functions
 
 protected: // methods

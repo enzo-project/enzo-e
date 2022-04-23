@@ -15,3 +15,5 @@ refinement criteria, etc.
    initial
    adapt
    method
+   array
+   hydro_infrastructure

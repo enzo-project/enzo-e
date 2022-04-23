@@ -33,6 +33,7 @@ OutputImage::OutputImage(int index,
 			 int image_size[2],
 			 std::string image_reduce_type,
 			 std::string image_mesh_color,
+			 std::string image_mesh_order,
 			 std::string color_particle_attribute,
 			 double image_lower[],
 			 double image_upper[],
@@ -67,7 +68,7 @@ OutputImage::OutputImage(int index,
     {root_blocks_in[0], root_blocks_in[1], root_blocks_in[2]};
   image_size_[0] = image_size[0];
   image_size_[1] = image_size[1];
-  if      (image_reduce_type=="min") { op_reduce_ = reduce_min; } 
+  if      (image_reduce_type=="min") { op_reduce_ = reduce_min; }
   else if (image_reduce_type=="max") { op_reduce_ = reduce_max; }
   else if (image_reduce_type=="avg") { op_reduce_ = reduce_avg; }
   else if (image_reduce_type=="sum") { op_reduce_ = reduce_sum; }
@@ -80,7 +81,10 @@ OutputImage::OutputImage(int index,
   if      (image_mesh_color=="level")   mesh_color_type_ = mesh_color_level;
   else if (image_mesh_color=="process") mesh_color_type_ = mesh_color_process;
   else if (image_mesh_color=="age")     mesh_color_type_ = mesh_color_age;
-  else {
+  else if (image_mesh_color=="order") {
+    mesh_color_type_  = mesh_color_order;
+    mesh_color_order_ = image_mesh_order;
+  } else {
     ERROR1 ("OutputImage::OutputImage()",
 	    "Unrecognized output_image_mesh_color %s",
 	    image_mesh_color.c_str());
@@ -104,7 +108,7 @@ OutputImage::OutputImage(int index,
     image_size_[0] += 2*root_blocks[0]*ngx;
     image_size_[1] += 2*root_blocks[1]*ngy;
   }
-  
+
   // Override default Output::stride_write_: only root writes
   set_stride_write (process_count);
   // Let all processes contribute data when its available
@@ -181,9 +185,9 @@ void OutputImage::pup (PUP::er &p)
   } else {
     image_mesh_ = NULL;
   }
-  
   p | op_reduce_;
   p | mesh_color_type_;
+  p | mesh_color_order_;
   p | color_particle_attribute_;
   p | axis_;
   p | use_min_max_;
@@ -233,9 +237,9 @@ void OutputImage::open () throw()
     std::string file_name = expand_name_ (&file_name_,&file_args_);
 
     std::string dir_name = directory();
-    
+
     // Create png object
-    Monitor::instance()->print ("Output","writing image file %s", 
+    Monitor::instance()->print ("Output","writing image file %s",
 				(dir_name + "/" + file_name).c_str());
     png_create_(dir_name + "/" + file_name);
     if (chmod (dir_name.c_str(),0755) == -1) {
@@ -273,7 +277,7 @@ void OutputImage::write_block ( const Block *  block ) throw()
   if (! is_active_(block) ) return;
 
   Field field = ((Data *)block->data())->field();
-  
+
   const int rank = cello::rank();
 
   ASSERT("OutputImage::write_block",
@@ -298,7 +302,7 @@ void OutputImage::write_block ( const Block *  block ) throw()
 
   it_field_index_->first();
 
-  int index_field = (it_field_index_->size() > 0) 
+  int index_field = (it_field_index_->size() > 0)
     ? it_field_index_->value() : -1;
 
   // extents of domain
@@ -328,7 +332,7 @@ void OutputImage::write_block ( const Block *  block ) throw()
 
   double h3[3];
   block->cell_width(h3,h3+1,h3+2);
-  
+
   if (type_is_data_()) {
 
     if (index_field >= 0) {
@@ -352,10 +356,8 @@ void OutputImage::write_block ( const Block *  block ) throw()
 
       // add block contribution to image
 
-      const char * field_values;
-      field_values = (include_ghost_) ? 
-        field.values(index_field) :
-        field.unknowns(index_field);
+      const char * field_values = (include_ghost_) ?
+        field.values(index_field) : field.unknowns(index_field);
 
       float  * field_float  = (float*)field_values;
       double * field_double = (double*)field_values;
@@ -364,7 +366,7 @@ void OutputImage::write_block ( const Block *  block ) throw()
 
       double factor = (nb3[IZ] > 1) ? 1.0 / pow(2.0,1.0*level) : 1.0;
       if (rank >= 2 && (std::abs(dm3[IZ] - dp3[IZ]) < h3[IZ])) factor = 1.0;
-      
+
       int m3[3];
       m3[0] = include_ghost_ ? nd3[0] : nb3[0];
       m3[1] = include_ghost_ ? nd3[1] : nb3[1];
@@ -405,7 +407,7 @@ void OutputImage::write_block ( const Block *  block ) throw()
 
     // value for mesh
     double value = 0;
-    value = mesh_color_(level,block->age());
+    value = mesh_color_(block,block->level());
 
     if (face_rank_ >= 1) {
       reduce_box_filled_(image_mesh_,ixm,ixp,iym,iyp,value);
@@ -420,25 +422,25 @@ void OutputImage::write_block ( const Block *  block ) throw()
       {
 	int if3[3] = {-1,0,0};
 	int face_level = block->face_level(if3);
-	double face_color = mesh_color_(face_level,0);
+	double face_color = mesh_color_(block,face_level);
 	reduce_box_filled_(image_mesh_,ixm+1,ixm+2,ym-1,ym+1, face_color);
       }
       {
 	int if3[3] = {1,0,0};
 	int face_level = block->face_level(if3);
-	double face_color = mesh_color_(face_level,0);
+	double face_color = mesh_color_(block,face_level);
 	reduce_box_filled_(image_mesh_,ixp-2,ixp-1,ym-1,ym+1, face_color);
       }
       {
 	int if3[3] = {0,-1,0};
 	int face_level = block->face_level(if3);
-	double face_color = mesh_color_(face_level,0);
+	double face_color = mesh_color_(block,face_level);
 	reduce_box_filled_(image_mesh_,xm-1,xm+1,iym+1,iym+2, face_color);
       }
       {
 	int if3[3] = {0,1,0};
 	int face_level = block->face_level(if3);
-	double face_color = mesh_color_(face_level,0);
+	double face_color = mesh_color_(block,face_level);
 	reduce_box_filled_(image_mesh_,xm-1,xm+1,iyp-2,iyp-1, face_color);
       }
     }
@@ -446,25 +448,25 @@ void OutputImage::write_block ( const Block *  block ) throw()
       {
 	int if3[3] = {-1,-1,0};
 	int face_level = block->face_level(if3);
-	double face_color = mesh_color_(face_level,0);
+	double face_color = mesh_color_(block,face_level);
 	reduce_box_filled_(image_mesh_,ixm+1,ixm+2,iym+1,iym+2, face_color);
       }
       {
 	int if3[3] = {1,-1,0};
 	int face_level = block->face_level(if3);
-	double face_color = mesh_color_(face_level,0);
+	double face_color = mesh_color_(block,face_level);
 	reduce_box_filled_(image_mesh_,ixp-2,ixp-1,iym+1,iym+2, face_color);
       }
       {
 	int if3[3] = {-1,1,0};
 	int face_level = block->face_level(if3);
-	double face_color = mesh_color_(face_level,0);
+	double face_color = mesh_color_(block,face_level);
 	reduce_box_filled_(image_mesh_,ixm+1,ixm+2,iyp-2,iyp-1, face_color);
       }
       {
 	int if3[3] = {1,1,0};
 	int face_level = block->face_level(if3);
-	double face_color = mesh_color_(face_level,0);
+	double face_color = mesh_color_(block,face_level);
 	reduce_box_filled_(image_mesh_,ixp-2,ixp-1,iyp-2,iyp-1, face_color);
       }
     }
@@ -536,7 +538,7 @@ void OutputImage::write_block ( const Block *  block ) throw()
 
 void OutputImage::write_field_data
 (
- const FieldData * field_data,  
+ const FieldData * field_data,
  int index_field) throw()
 {
   WARNING("OutputImage::write_field_data",
@@ -547,7 +549,7 @@ void OutputImage::write_field_data
 
 void OutputImage::write_particle_data
 (
- const ParticleData * particle_data,  
+ const ParticleData * particle_data,
  int index_particle) throw()
 {
   WARNING("OutputImage::write_particle_data",
@@ -586,7 +588,7 @@ void OutputImage::prepare_remote (int * n, char ** buffer) throw()
 
   for (int k=0; k<nx*ny; k++) *p.d++ = image_data_[k];
   for (int k=0; k<nx*ny; k++) *p.d++ = image_mesh_[k];
-  
+
 }
 
 //----------------------------------------------------------------------
@@ -605,7 +607,7 @@ void OutputImage::update_remote  ( int m, char * buffer) throw()
   const int ny = *p.i++;
 
   const int n = nx*ny;
-  
+
   if (op_reduce_ == reduce_min) {
     for (int k=0; k<n; k++) image_data_[k] = std::min(image_data_[k],*p.d++);
     for (int k=0; k<n; k++) image_mesh_[k] = std::min(image_mesh_[k],*p.d++);
@@ -637,20 +639,37 @@ void OutputImage::cleanup_remote  (int * n, char ** buffer) throw()
 
 //======================================================================
 
-double OutputImage::mesh_color_(int level,int age) const
+double OutputImage::mesh_color_(const Block * block, int level) const
 {
+  double value = 0;
+  // Determine 0.0 <= value <= 1.0
   if (mesh_color_type_ == mesh_color_level) {
-    return (1.0+level);
+    value = 1.0*level/max_level_;
   } else if (mesh_color_type_ == mesh_color_process) {
-    return (1.0+CkMyPe())/(CkNumPes());
+    value = (CkMyPe())/(CkNumPes()-1.0);
   } else if (mesh_color_type_ == mesh_color_age) {
-    return 1.0 / (0.01*age + 1.0);
+    const int age = block->age(); 
+    value = 1.0 / (0.01*age + 1.0);
+  } else if (mesh_color_type_ == mesh_color_order) {
+    int is_i = cello::scalar_descr_int()->index(mesh_color_order_+":index");
+    int is_n = cello::scalar_descr_int()->index(mesh_color_order_+":count");
+    ScalarData<long long> * scalar_data = ((Block *)block)->data()->scalar_data_long_long();
+    long long index = *scalar_data->value(cello::scalar_descr_long_long(),is_i);
+    long long count = *scalar_data->value(cello::scalar_descr_long_long(),is_n);
+    value = (count) > 0 ? 1.0*index/count : 0;
   } else {
     ERROR1 ("OutputImage::mesh_color_()",
 	    "Unknown mesh_color_type_ %d",
 	    mesh_color_type_);
-    return 0;
   }
+  // Scale value by [min_value, max_value] if needed, else scale by [0
+  // : num_colors ]
+  if (use_min_max_) {
+    value = (max_value_-min_value_)*value + min_value_;
+  } else {
+    value *= (colormap_[0].size());
+  }
+  return value;
 }
 
 //----------------------------------------------------------------------
@@ -711,17 +730,17 @@ void OutputImage::image_create_ () throw()
   double value0;
 
   switch (op_reduce_) {
-  case reduce_min: 
+  case reduce_min:
     value0 = min;
     break;
-  case reduce_max: 
+  case reduce_max:
     value0 = max;
     break;
-  case reduce_avg: 
-  case reduce_sum: 
+  case reduce_avg:
+  case reduce_sum:
   case reduce_set:
-  default:         
-    value0 = 0; 
+  default:
+    value0 = 0;
     break;
   }
 
@@ -813,7 +832,7 @@ void OutputImage::image_write_ () throw()
 	png_->plot      (ix+1, iy+1, r,g,b);
 
       } else {
-	
+
 	// red if out of bounds
 	png_->plot(ix+1, iy+1, 1.0, 0.0, 0.0);
 
@@ -821,7 +840,7 @@ void OutputImage::image_write_ () throw()
 
       // Plot pixel
     }
-  }      
+  }
 
 }
 
@@ -831,9 +850,9 @@ double OutputImage::data_(int index) const
 {
   if (type_is_mesh_() && type_is_data_())
     return (image_data_[index] + 0.2*image_mesh_[index])/1.2;
-  else if (type_is_data_()) 
+  else if (type_is_data_())
     return image_data_[index];
-  else  if (type_is_mesh_()) 
+  else  if (type_is_mesh_())
     return image_mesh_[index];
   else {
     ERROR ("OutputImage::data_()",
@@ -861,7 +880,7 @@ void OutputImage::image_close_ () throw()
 
 //----------------------------------------------------------------------
 
-void OutputImage::reduce_point_ 
+void OutputImage::reduce_point_
 (double * data, int ix, int iy, double value, double alpha) throw()
 {
   if ( ! (0 <= ix && ix < image_size_[0])) return;
@@ -875,15 +894,15 @@ void OutputImage::reduce_point_
   const int i = ix + image_size_[0]*iy;
 
   double value_new = 0.0;
-  
+
   switch (op_reduce_) {
   case reduce_min:
     value_new = alpha*value + (1-alpha)*(data[i]);
-    data[i] = std::min(data[i],value_new); 
+    data[i] = std::min(data[i],value_new);
     break;
   case reduce_max:
     value_new = alpha*value + (1-alpha)*(data[i]);
-    data[i] = std::max(data[i],value_new); 
+    data[i] = std::max(data[i],value_new);
     break;
   case reduce_avg:
   case reduce_sum:
@@ -899,9 +918,9 @@ void OutputImage::reduce_point_
 //----------------------------------------------------------------------
 
 void OutputImage::reduce_line_
-(double * data, 
- int ix0, int ix1, 
- int iy0, int iy1, 
+(double * data,
+ int ix0, int ix1,
+ int iy0, int iy1,
  double value, double alpha)
 {
   if (ix1 < ix0) { int t = ix1; ix1 = ix0; ix0 = t; }
@@ -910,7 +929,7 @@ void OutputImage::reduce_line_
   int dx = ix1 - ix0;
   int dy = iy1 - iy0;
   double err = 0.0;
-  
+
   if (dx >= dy) {
     double derr = fabs(1.0*dy/dx);
     int iy = iy0;
@@ -939,7 +958,7 @@ void OutputImage::reduce_line_
 //----------------------------------------------------------------------
 
 void OutputImage::reduce_line_x_
-(double * data, 
+(double * data,
  int ixm, int ixp,
  int iy,
  double value, double alpha)
@@ -974,7 +993,7 @@ void OutputImage::reduce_line_y_
 void OutputImage::reduce_box_
 (double * data,
  int ixm, int ixp,
- int iym, int iyp, 
+ int iym, int iyp,
  double value, reduce_type reduce, double alpha)
 {
   reduce_type reduce_save = op_reduce_;
@@ -989,9 +1008,9 @@ void OutputImage::reduce_box_
 //----------------------------------------------------------------------
 
 void OutputImage::reduce_box_filled_
-(double * data, 
+(double * data,
  int ixm, int ixp,
- int iym, int iyp, 
+ int iym, int iyp,
  double value, double alpha)
 {
   for (int ix=ixm; ix<=ixp; ++ix) {

@@ -48,6 +48,7 @@ public: // interface
       scalar_data_long_double_(),
       scalar_data_double_(),
       scalar_data_int_(),
+      scalar_data_long_long_(),
       scalar_data_sync_(),
       scalar_data_void_()
   {
@@ -82,6 +83,7 @@ public: // interface
     p | scalar_data_long_double_;
     p | scalar_data_double_;
     p | scalar_data_int_;
+    p | scalar_data_long_long_;
     p | scalar_data_sync_;
     //    p | scalar_data_void_;
     static bool warn[CONFIG_NODE_SIZE] = {false};
@@ -202,10 +204,14 @@ public: // interface
   { return &scalar_data_long_double_; }
   ScalarData<int> * scalar_data_int ()
   { return &scalar_data_int_; }
+  ScalarData<long long> * scalar_data_long_long ()
+  { return &scalar_data_long_long_; }
   ScalarData<Sync> * scalar_data_sync ()
   { return &scalar_data_sync_; }
   ScalarData<void *> * scalar_data_void ()
   { return &scalar_data_void_; }
+  ScalarData<Index> * scalar_data_index ()
+  { return &scalar_data_index_; }
 
   /// Return the Scalar objects
   Scalar<long double> scalar_long_double()
@@ -216,6 +222,10 @@ public: // interface
   { return Scalar<int>
       (cello::scalar_descr_int(),
        &scalar_data_int_); }
+  Scalar<long long> scalar_long_long()
+  { return Scalar<long long>
+      (cello::scalar_descr_long_long(),
+       &scalar_data_long_long_); }
   Scalar<Sync> scalar_sync()
   { return Scalar<Sync>
       (cello::scalar_descr_sync(),
@@ -224,6 +234,10 @@ public: // interface
   { return Scalar<void *>
       (cello::scalar_descr_void (),
        &scalar_data_void_); }
+  Scalar<Index> scalar_index()
+  { return Scalar<Index>
+      (cello::scalar_descr_index(),
+       &scalar_data_index_); }
 
 
 private: // functions
@@ -248,8 +262,10 @@ private: // attributes
   ScalarData<long double> scalar_data_long_double_;
   ScalarData<double>      scalar_data_double_;
   ScalarData<int>         scalar_data_int_;
+  ScalarData<long long>   scalar_data_long_long_;
   ScalarData<Sync>        scalar_data_sync_;
   ScalarData<void *>      scalar_data_void_;
+  ScalarData<Index>       scalar_data_index_;
 
   /// Lower extent of the box associated with the block [computable]
   double lower_[3];

@@ -1,0 +1,35 @@
+Import('env')
+Import('serial_run')
+Import('parallel_run')
+Import('ip_charm')
+Import('bin_path')
+Import('test_path')
+
+
+#-----------------------------------------------------
+# Defines
+#-----------------------------------------------------
+
+env['CPIN'] = 'touch parameters.out; mv parameters.out ${TARGET}.in'
+env['RMIN'] = 'rm -f parameters.out'
+
+date_cmd = 'echo $TARGET > test/STATUS; echo "-------------------"; date +"%Y-%m-%d %H:%M:%S";'
+
+run_parameters = Builder(action = "$RMIN ; " + date_cmd + serial_run + " $SOURCE $ARGS > $TARGET 2>&1; $CPIN; $COPY")
+env.Append(BUILDERS = { 'RunParameters' : run_parameters})
+env_mv_parameters = env.Clone(COPY = 'mkdir -p ' + test_path + '/ParametersComponent/Parameters; mv `ls *.png *h5` ' + test_path + '/ParametersComponent/Parameters')
+
+#------------------------------------------------------
+# Load Balancing
+#------------------------------------------------------
+
+# ParametersLB
+balance_parameters = env_mv_parameters.RunParameters(
+      'test_parameters.unit',
+      bin_path + '/test_Parameters')
+
+Clean(balance_parameters,
+     ['#/test.in',
+      '#/test/test.in',
+      '#/test/test1.out',
+      '#/test/test2.out'])

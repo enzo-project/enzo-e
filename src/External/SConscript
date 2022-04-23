@@ -1,13 +1,4 @@
 #------------------------------
-# DIRECTORIES
-#------------------------------
-
-
-Import('grackle_path')
-if grackle_path is not None:
-	SConscript(grackle_path + '/SConscript')
-
-#------------------------------
 # IMPORTS
 #------------------------------
 
