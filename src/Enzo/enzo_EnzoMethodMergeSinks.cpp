@@ -1,10 +1,10 @@
 /// See LICENSE_CELLO file for license and copyright information
 
-/// @file   enzo_EnzoMethodMergeStars.cpp
+/// @file   enzo_EnzoMethodMergeSinks.cpp
 /// @author Stefan Arridge (stefan.arridge@gmail.com)
 /// @date   18 January 2022
-/// @brief  Implementation of EnzoMethodMergeStars class, a method for merging
-///         star particles separated by a distance less than the merging
+/// @brief  Implementation of EnzoMethodMergeSinks class, a method for merging
+///         sink particles separated by a distance less than the merging
 ///         radius.
 ///
 ///         After copying particles from
@@ -17,34 +17,34 @@
 #include "FofLib.hpp"
 #include <time.h>
 
-//#define DEBUG_MERGESTARS
+//#define DEBUG_MERGESINKS
 
 
-EnzoMethodMergeStars::EnzoMethodMergeStars(double merging_radius_cells)
+EnzoMethodMergeSinks::EnzoMethodMergeSinks(double merging_radius_cells)
   : Method(),
     merging_radius_cells_(merging_radius_cells)
 {
   // This method requires three dimensions.
-  ASSERT("EnzoMethodMergeStars::EnzoMethodMergeStars()",
-	 "EnzoMethodMergeStars requires that we run a 3D problem (Domain: rank = 3)",
+  ASSERT("EnzoMethodMergeSinks::EnzoMethodMergeSinks()",
+	 "EnzoMethodMergeSinks requires that we run a 3D problem (Domain: rank = 3)",
 	 cello::rank());
   
   const EnzoConfig * enzo_config = enzo::config();
-  ASSERT("EnzoMethodMergeStars::EnzoMethodMergeStars()",
-	 "EnzoMethodMergeStars requires unigrid mode (Adapt : max_level = 0). "
+  ASSERT("EnzoMethodMergeSinks::EnzoMethodMergeSinks()",
+	 "EnzoMethodMergeSinks requires unigrid mode (Adapt : max_level = 0). "
 	 "In future, we may put in a refinement condition that blocks containing "
-	 "star particles or neighbouring such a block is at highest refinement "
+	 "sink particles or neighbouring such a block is at highest refinement "
 	 "level", enzo_config->mesh_max_level == 0);
 
-  // Refresh copies all star particles from neighbouring blocks
+  // Refresh copies all sink particles from neighbouring blocks
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   ParticleDescr * particle_descr = cello::particle_descr();
-  refresh->add_particle(particle_descr->type_index("star"));
+  refresh->add_particle(particle_descr->type_index("sink"));
   refresh->set_particles_are_copied(true);
 }
 
-void EnzoMethodMergeStars::pup (PUP::er &p)
+void EnzoMethodMergeSinks::pup (PUP::er &p)
 {
   // NOTE: Change this function whenever attributes change
 
@@ -58,7 +58,7 @@ void EnzoMethodMergeStars::pup (PUP::er &p)
 }
 
 
-void EnzoMethodMergeStars::compute ( Block *block) throw()
+void EnzoMethodMergeSinks::compute ( Block *block) throw()
 {
 
   
@@ -71,12 +71,12 @@ void EnzoMethodMergeStars::compute ( Block *block) throw()
 }
 
 // Required
-double EnzoMethodMergeStars::timestep ( Block *block) const throw()
+double EnzoMethodMergeSinks::timestep ( Block *block) const throw()
 {
   return std::numeric_limits<double>::max();
 }
 
-void EnzoMethodMergeStars::compute_(Block * block)
+void EnzoMethodMergeSinks::compute_(Block * block)
 {
   Hierarchy * hierarchy = cello::hierarchy();  
   EnzoBlock * enzo_block = enzo::block(block);
@@ -88,10 +88,10 @@ void EnzoMethodMergeStars::compute_(Block * block)
   const double block_width_x = block_xp - block_xm;
   
   Particle particle = enzo_block->data()->particle();
-  int it = particle.type_index("star");
+  int it = particle.type_index("sink");
   int num_particles = particle.num_particles(it);
   
-#ifdef DEBUG_MERGESTARS
+#ifdef DEBUG_MERGESINKS
   CkPrintf("In total, there are %d particles on Block %s \n",num_particles,
 	   block->name().c_str());
 #endif
@@ -155,22 +155,22 @@ void EnzoMethodMergeStars::compute_(Block * block)
   const enzo_float merging_radius = merging_radius_cells_ * max_cell_width;
 
   // FofList runs the Friends-of-Friends algorithm on particle positions
-  // (given by the particle_coordinates_block_units array), with
-  // merging_radius_block_units as the linking length. This function
-  // fills in the (already allocated) group_index array, and allocates
+  // (given by the particle_coordinates  array),with the linking length
+  // equal to the merging radius. This function fills in the
+  // previously allocated) group_index array, and allocates
   // and fills in the group_size and group_lists arrays.
 
   int ngroups = FofList(num_particles, particle_coordinates,merging_radius, 
 			group_index, &group_size, &group_lists);
   
-#ifdef DEBUG_MERGESTARS
+#ifdef DEBUG_MERGESINKS
   CkPrintf("The %d particles on Block %s are in %d FoF groups \n",num_particles,
 	   block->name().c_str(),ngroups);
 #endif 
   
   for (int i = 0; i < ngroups; i++){
     
-#ifdef DEBUG_MERGESTARS
+#ifdef DEBUG_MERGESINKS
     CkPrintf("Group %d out of %d on block %s: Group size = %d \n",i+1, ngroups,
 	     block->name().c_str(),group_size[i]);
 #endif
@@ -179,8 +179,8 @@ void EnzoMethodMergeStars::compute_(Block * block)
     // group 
     if (group_size[i] > 1){
       
-      ASSERT("EnzoMethodMergeStars::compute_()",
-	     "There is a FoF group containing a pair of star particles "
+      ASSERT("EnzoMethodMergeSinks::compute_()",
+	     "There is a FoF group containing a pair of sink particles "
 	     "in non-neighbouring blocks. Since this cannot be properly "
 	     "dealt with we exit the program here. This has likely "
 	     "happened because the merging radius is too large in "
@@ -257,7 +257,7 @@ void EnzoMethodMergeStars::compute_(Block * block)
 	enzo_float f1 = pmass1 / (pmass1 + pmass2);
 	enzo_float f2 = 1.0 - f1;
 	
-#ifdef DEBUG_MERGESTARS
+#ifdef DEBUG_MERGESINKS
 	CkPrintf("Merger in Group %d: \n Particle 1: Mass = %g, "
 		 "Position = (%g,%g,%g), ID = %ld \n"
 		 "Particle 2: Mass = %g, "
@@ -282,7 +282,7 @@ void EnzoMethodMergeStars::compute_(Block * block)
 	pid1 = std::min(pid1,pid2);
 	pmass1 += pmass2;
 	
-#ifdef DEBUG_MERGESTARS
+#ifdef DEBUG_MERGESINKS
 	CkPrintf("Particle number %d in group %d out of %d on Block %s "
 		 "is merged into 0th particle. New properties of 0th particle: "
 		 "Mass = %g. Position = (%g,%g,%g)\n",
@@ -344,7 +344,7 @@ void EnzoMethodMergeStars::compute_(Block * block)
   free(group_lists);
   delete [] particle_coordinates;
   
-#ifdef DEBUG_MERGESTARS
+#ifdef DEBUG_MERGESINKS
   CkPrintf("Block %s: After merging, num_particles = %d \n",
 	   block->name().c_str(),particle.num_particles(it));
 #endif
@@ -354,7 +354,7 @@ void EnzoMethodMergeStars::compute_(Block * block)
   int delete_count = enzo_block->delete_non_local_particles_(it);
   cello::simulation()->data_delete_particles(delete_count);
       
-#ifdef DEBUG_MERGESTARS
+#ifdef DEBUG_MERGESINKS
   CkPrintf("Block %s: After deletion, num_particles = %d \n",
 	   block->name().c_str(),particle.num_particles(it));
 #endif
@@ -364,11 +364,11 @@ void EnzoMethodMergeStars::compute_(Block * block)
 }
 
 // This fills a 1D array, which must have already been allocated with length
-// 3 * num_particles, with x, y, z coordinates of star particles in the block.
+// 3 * num_particles, with x, y, z coordinates of sink particles in the block.
 // This also takes care of periodic boundary conditions by taking the nearest
 // periodic image of coordinates if necessary.
 
-void EnzoMethodMergeStars::get_particle_coordinates_
+void EnzoMethodMergeSinks::get_particle_coordinates_
   (EnzoBlock * enzo_block, int it,
    enzo_float * particle_coordinates)
 {
@@ -428,7 +428,7 @@ void EnzoMethodMergeStars::get_particle_coordinates_
 
 // Checks if all the particles within a group (specified by group_index)
 // are in neighbouring blocks
-bool EnzoMethodMergeStars::particles_in_neighbouring_blocks_
+bool EnzoMethodMergeSinks::particles_in_neighbouring_blocks_
 (EnzoBlock * enzo_block,
  enzo_float * particle_coordinates,
  int ** group_lists, int * group_size,
