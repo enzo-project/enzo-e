@@ -58,11 +58,15 @@ void MethodDebug::compute ( Block * block) throw()
   const int num_reduce = 4*(num_fields_+3*num_particles_);
   long double * reduce = new long double [1+num_reduce];
   reduce[0] = num_reduce+1;
-  for (int i=1; i<num_reduce+1; i++) {
-    reduce[i] = std::numeric_limits<long double>::max();
-    reduce[i] = -std::numeric_limits<long double>::max();
-    reduce[i] = 0;
-    reduce[i] = 0;
+  const int kmin=0;
+  const int kmax=1;
+  const int ksum=2;
+  const int knum=3;
+  for (knt k=1; k<num_reduce; k+=4) {
+    reduce[k+kmin] = std::numeric_limits<long double>::max();
+    reduce[k+kmax] = -std::numeric_limits<long double>::max();
+    reduce[k+ksum] = 0;
+    reduce[k+knum] = 0;
   }
 
   if (block->is_leaf()) {
@@ -85,10 +89,10 @@ void MethodDebug::compute ( Block * block) throw()
         for (int iy=gy; iy<my-gy; iy++) {
           for (int ix=gx; ix<mx-gx; ix++) {
             int i=ix + mx*(iy + my*iz);
-            reduce[k] = std::min(reduce[k],(long double)(values[i]));
-            reduce[k+1] = std::max(reduce[k+1],(long double)(values[i]));
-            reduce[k+2] += values[i];
-            reduce[k+3] += rel_vol;
+            reduce[k+kmin] = std::min(reduce[k],(long double)(values[i]));
+            reduce[k+kmax] = std::max(reduce[k+1],(long double)(values[i]));
+            reduce[k+ksum] += values[i];
+            reduce[k+knum] += rel_vol;
           }
         }
       }
@@ -110,10 +114,10 @@ void MethodDebug::compute ( Block * block) throw()
         for (int i=0; i<cello::rank(); i++) {
           for (int ip=0; ip<np; ip++) {
             double value = position[i][ip];
-            reduce[k+4*i+0] = std::min(reduce[k+4*i+0],(long double)(value));
-            reduce[k+4*i+1] = std::max(reduce[k+4*i+1],(long double)(value));
-            reduce[k+4*i+2] += value;
-            reduce[k+4*i+3] += 1;
+            reduce[k+4*i+kmin] = std::min(reduce[k+4*i+0],(long double)(value));
+            reduce[k+4*i+kmax] = std::max(reduce[k+4*i+1],(long double)(value));
+            reduce[k+4*i+ksum] += value;
+            reduce[k+4*i+knum] += 1;
           }
         }
       }
@@ -183,7 +187,7 @@ void MethodDebug::compute_continue
     for (int i_f=0; i_f<num_fields_; i_f++) {
       std::string name = field.field_name(i_f).c_str();
       cello::monitor()->print
-        ("Method", "Field %s min avg max %20.16Lg %20.16Lg %20.16Lg",name.c_str(),
+        ("Method", "Field %s min %20.16Lg avg %20.16Lg max %20.16Lg",name.c_str(),
          field_min_[i_f],field_sum_[i_f]/field_count_[i_f],field_max_[i_f]);
     }
     for (int it=0; it<num_particles_; it++) {
