@@ -695,9 +695,9 @@ straight-forward:
 
   1. An instance of ``KernelConfig<Kernel::EOSStructT>`` is created.
 
-  2. The ``Kernel`` is constructed and exectued at each cell-interface
+  2. The ``Kernel`` is constructed and executed at each cell-interface
 
-  3. The fluxes are computed for passively advected scalars are computed
+  3. The fluxes for passively advected scalars are computed
      (this step is completely independent of the choice of ``Kernel``).
 
 

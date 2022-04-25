@@ -16,7 +16,7 @@
 
 // The conventional approach of having EnzoRiemann inherit from PUP::able
 // (and making this library into a charm++ module) complicates the build-system
-// to some extent. Instead, we have defined defined the global ``operator|``
+// to some extent. Instead, we have defined the global ``operator|``
 // function to encapsulate the PUP functionality
 
 class EnzoRiemann

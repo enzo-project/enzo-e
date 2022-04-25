@@ -786,7 +786,7 @@ instance.
 
      .. code-block:: c++
 
-       EnzoEFltArrayMap unnamed_scratch_arr_map(key_l, shape;
+       EnzoEFltArrayMap unnamed_scratch_arr_map(key_l, shape);
 
 Element Access
 ~~~~~~~~~~~~~~

@@ -3,7 +3,7 @@
 /// @file     enzo_EnzoRiemannHLL2.hpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Thurs May 2 2019
-/// @brief    [\ref Enzo] Implementation of HLLE approximate Riemann Solver
+/// @brief    [\ref Enzo] Implementation of HLL approximate Riemann Solver
 
 #ifndef ENZO_ENZO_RIEMANN_HLL_HPP
 #define ENZO_ENZO_RIEMANN_HLL_HPP

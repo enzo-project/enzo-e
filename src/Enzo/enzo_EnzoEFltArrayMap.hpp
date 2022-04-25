@@ -10,7 +10,7 @@
 /// contained arrays can't be mutated. This choice:
 ///   - facillitates enforcement that all contained arrays have a fixed shape
 ///   - makes it easier to order the entries in an arbitrary order. This
-///     facillitates optimizations in the Riemann Solver when the values are
+///     facilitates optimizations in the Riemann Solver when the values are
 ///     initialized in the order expected by the Riemann Solver
 ///
 /// If necessary, a number of optimizations could be made to the implementation
