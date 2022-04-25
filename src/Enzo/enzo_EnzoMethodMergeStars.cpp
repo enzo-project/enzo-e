@@ -295,7 +295,7 @@ void EnzoMethodMergeStars::compute_(Block * block)
 	// when we call particle->delete_non_local_particles_, this particle
 	// is deleted. Yes, I know its a bit of a hack
 
-	px[ip2*dp] += 2.0 * block_width_x;
+	px[ip2*dp] += 3.0 * block_width_x;
 	
       } // Loop over particles in group
       
