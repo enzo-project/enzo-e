@@ -62,7 +62,7 @@ void MethodDebug::compute ( Block * block) throw()
   const int kmax=1;
   const int ksum=2;
   const int knum=3;
-  for (knt k=1; k<num_reduce; k+=4) {
+  for (int k=1; k<num_reduce; k+=4) {
     reduce[k+kmin] = std::numeric_limits<long double>::max();
     reduce[k+kmax] = -std::numeric_limits<long double>::max();
     reduce[k+ksum] = 0;
