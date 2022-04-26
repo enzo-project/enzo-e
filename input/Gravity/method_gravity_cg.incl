@@ -34,7 +34,7 @@ Mesh {
 }
 
 Method {
-    list = ["gravity", "ppm"]; 
+    list = ["pm_deposit", "gravity", "ppm"]; 
 
     gravity {
        solver = "cg";    	    

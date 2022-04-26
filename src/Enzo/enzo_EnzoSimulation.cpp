@@ -81,6 +81,7 @@ void EnzoSimulation::pup (PUP::er &p)
 }
 
 //----------------------------------------------------------------------
+#ifdef BYPASS_CHARM_MEM_LEAK
 
 void EnzoSimulation::p_get_msg_refine(Index index)
 {
@@ -89,6 +90,7 @@ void EnzoSimulation::p_get_msg_refine(Index index)
   CProxy_EnzoBlock enzo_block_array = (CProxy_EnzoBlock)hierarchy_->block_array();
   enzo_block_array[index].p_set_msg_refine(msg);
 }
+#endif
 
 //----------------------------------------------------------------------
 

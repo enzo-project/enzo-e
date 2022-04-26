@@ -189,7 +189,6 @@ void MethodFluxCorrect::compute_continue_sum_fields
   
   if (block->index().is_root()) {
 
-    const int index_density = field.field_id("density");
     // for each conserved field
     for (int i_f=0; i_f<nf; i_f++) {
 
@@ -419,7 +418,6 @@ void MethodFluxCorrect::flux_correct_(Block * block)
         }
       }
     }
-
     int i_f_density = -1; // will be used to store i_f for density
     for (int i_f=0; i_f<nf; i_f++) {
       const int index_field = flux_data->index_field(i_f);
