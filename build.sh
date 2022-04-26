@@ -292,8 +292,8 @@ fi;
 if [ $target = "test" ]; then
     echo ""
     echo "--------------------"
-    echo "Attempting to run star merging tests."
-    ./input/MergeStars/run.sh
+    echo "Attempting to run merge_sinks tests."
+    ./test/run_merge_sinks_tests.sh
     result_code=$?
     if [ $result_code -gt 0 ]; then
         exit_status=1
