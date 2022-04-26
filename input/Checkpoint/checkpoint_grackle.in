@@ -73,8 +73,12 @@
    # but not everything
     color {
        field_list = [
-              "HI_density",
-              "HII_density",
+# because the entries for the first 2 fields were purposefully commented out
+# from Field::list, we need to comment them out here too (you can't add a
+# non-existant field to a group). This is okay: when EnzoMethodGrackle creates
+# these missing fields, it will automatically add them to the "color" group
+#              "HI_density",
+#              "HII_density",
               "HM_density",
               "HeI_density",
               "HeII_density",

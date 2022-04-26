@@ -22,13 +22,13 @@ PARALLEL_MAIN_BEGIN
   Index i8[N+1];
 
   int trace[][3] = { {0,0,0},
-		       {1,0,0},
-		       {0,1,0},
-		       {0,0,1},
-		       {0,1,1},
-		       {1,0,1},
-		       {1,1,0},
-		       {1,1,1} };
+                     {1,0,0},
+                     {0,1,0},
+                     {0,0,1},
+                     {0,1,1},
+                     {1,0,1},
+                     {1,1,0},
+                     {1,1,1} };
 
   
   // Number of bits (not array size)
@@ -365,12 +365,101 @@ PARALLEL_MAIN_BEGIN
   }
 
   //==================================================
-  // Subtree
+  // Categorize
   //==================================================
 
-  //  unit_func ("is_in_same_subtree");
+  {
+    Index a[10],b[10];
 
-  //  unit_assert(false);
+    // +-------+-------+
+    // |   |   |   |   |
+    // +---+---+---+---+
+    // |   | a | b |   |
+    // +---+---+---+---+
+
+    int i = 0;
+    a[i].set_array (2,3,0);
+    b[i].set_array(3,3,0);
+
+    a[i].push_child(1,0);
+    b[i].push_child(0,0,0);
+
+    unit_func ("is_sibling");
+    unit_assert (!a[i].is_sibling(b[i]));
+    unit_assert (!b[i].is_sibling(a[i]));
+
+    unit_func ("adjacency");
+    int p3[3] = { 4, 2, 1};
+    unit_assert (a[i].adjacency(b[i],2,p3) == 1);
+    unit_assert (a[i].adjacency(b[i],2,p3,0,-1) == 1);
+
+    unit_func ("index_level");
+    int ia[3],ib[3];
+    a[i].index_level(ia,1);
+    b[i].index_level(ib,1);
+    unit_assert(ia[0]==5);
+    unit_assert(ia[1]==6);
+    unit_assert(ib[0]==6);
+    unit_assert(ib[1]==6);
+    
+    // +-------+-------+
+    // |       | b |   |
+    // +   a   +---+---+
+    // |       |   |   |
+    // +---+---+---+---+
+
+    i = 1;
+
+    a[i].set_array (2,3,0);
+    b[i].set_array(3,3,0);
+
+    b[i].push_child(0,1);
+
+    unit_func ("is_sibling");
+    unit_assert (!a[i].is_sibling(b[i]));
+    unit_assert (!b[i].is_sibling(a[i]));
+
+    unit_func ("adjacency");
+    unit_assert (a[i].adjacency(b[i],2,p3) == 1);
+
+    unit_func ("index_level");
+    a[i].index_level(ia,1);
+    b[i].index_level(ib,1);
+    unit_assert(ia[0]==4);
+    unit_assert(ia[1]==6);
+    unit_assert(ib[0]==6);
+    unit_assert(ib[1]==7);
+
+    // +-------+
+    // |   | b |
+    // |   a---+
+    // |       |
+    // +---+---+
+
+    i = 2;
+
+    a[i].set_array (4,3,2);
+    b[i].set_array (4,3,2);
+
+    b[i].push_child(1,1,0);
+
+    unit_func ("adjacency");
+    unit_assert (a[i].adjacency(b[i],2,p3) == 2);
+
+    unit_func ("is_sibling");
+    unit_assert (!a[i].is_sibling(b[i]));
+    unit_assert (!b[i].is_sibling(a[i]));
+
+    unit_func ("index_level");
+    a[i].index_level(ia,1);
+    b[i].index_level(ib,1);
+    unit_assert(ia[0]==8);
+    unit_assert(ia[1]==6);
+    unit_assert(ia[2]==4);
+    unit_assert(ib[0]==9);
+    unit_assert(ib[1]==7);
+    unit_assert(ib[2]==4);
+  }
 
   unit_finalize();
 
