@@ -79,8 +79,7 @@ setup_test_serial(GravityCg-1 MethodGravity/GravityCg-1  input/Gravity/method_gr
 setup_test_parallel(GravityCg-8 MethodGravity/GravityCg-8  input/Gravity/method_gravity_cg-8.in)
 
 # Cosmology enzo-e tests
-setup_test_serial(Cosmology-1 MethodCosmology/Cosmology-1  input/Cosmology/method_cosmology-1.in)
-setup_test_parallel(Cosmology-8 MethodCosmology/Cosmology-8  input/Cosmology/method_cosmology-8.in)
+# Needs to be updated, see https://github.com/enzo-project/enzo-e/issues/156
 
 # Flux correction enzo-e tests
 setup_test_serial(FluxCorrect-SMR-PPM MethodFluxCorrect/Inclined-Contact-SMR-Ppm input/FluxCorrect/inclined_contact_smr_ppm-${PREC_STRING}.in)

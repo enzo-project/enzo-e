@@ -109,10 +109,14 @@ else()
 endif()
 add_compile_definitions(SMALL_INTS)
 
-
-option(new_adapt "Temporary setting for using new Output implementation" ON)
-if (new_adapt)
-  add_compile_definitions(NEW_ADAPT)
+# Whether to bypass passing MsgRefine directly to Block constructor,
+# or request it from a separate entry method to bypass a Charm++
+# memory leak. This should only be set to 0 after (and if) the bug is
+# addressed in Charm++, or when explicitly testing a Charm++ build for
+# this bug.
+option(bypass_charm_mem_leak "Temporary setting to bypass Charm++ bug" ON)
+if (bypass_charm_mem_leak)
+  add_compile_definitions(BYPASS_CHARM_MEM_LEAK)
 endif()
 
 set(node_size "64" CACHE STRING "Maximum number of procesess per shared-memory node (can be larger than needed)")
