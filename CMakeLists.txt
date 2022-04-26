@@ -117,6 +117,7 @@ add_compile_definitions(SMALL_INTS)
 option(bypass_charm_mem_leak "Temporary setting to bypass Charm++ bug" ON)
 if (bypass_charm_mem_leak)
   add_compile_definitions(BYPASS_CHARM_MEM_LEAK)
+  set(CHARM_PREPROC_DEFS ${CHARM_PREPROC_DEFS} "-DBYPASS_CHARM_MEM_LEAK ")
 endif()
 
 set(node_size "64" CACHE STRING "Maximum number of procesess per shared-memory node (can be larger than needed)")
