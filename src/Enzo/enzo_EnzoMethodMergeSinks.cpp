@@ -96,259 +96,261 @@ void EnzoMethodMergeSinks::compute_(Block * block)
 	   block->name().c_str());
 #endif
 
-  // Declare pointers to particle attributes
-  enzo_float *px, *py, *pz, *pvx, *pvy, *pvz;
-  enzo_float *plifetime, *pcreation, *pmass, *pmetal;
-  int64_t *pid;
+  // Only need to consider merging if number of particles is greater than 1
+  if (num_particles > 1){
+
+    // Declare pointers to particle attributes
+    enzo_float *px, *py, *pz, *pvx, *pvy, *pvz;
+    enzo_float *plifetime, *pcreation, *pmass, *pmetal;
+    int64_t *pid;
 
     // Get attribute indices
-  const int ia_m   = particle.attribute_index (it, "mass");
-  const int ia_x   = particle.attribute_index (it, "x");
-  const int ia_y   = particle.attribute_index (it, "y");
-  const int ia_z   = particle.attribute_index (it, "z");
-  const int ia_vx  = particle.attribute_index (it, "vx");
-  const int ia_vy  = particle.attribute_index (it, "vy");
-  const int ia_vz  = particle.attribute_index (it, "vz");
-  const int ia_l   = particle.attribute_index (it, "lifetime");
-  const int ia_c   = particle.attribute_index (it, "creation_time");
-  const int ia_mf  = particle.attribute_index (it, "metal_fraction");
-  const int ia_id  = particle.attribute_index(it,"id");
+    const int ia_m   = particle.attribute_index (it, "mass");
+    const int ia_x   = particle.attribute_index (it, "x");
+    const int ia_y   = particle.attribute_index (it, "y");
+    const int ia_z   = particle.attribute_index (it, "z");
+    const int ia_vx  = particle.attribute_index (it, "vx");
+    const int ia_vy  = particle.attribute_index (it, "vy");
+    const int ia_vz  = particle.attribute_index (it, "vz");
+    const int ia_l   = particle.attribute_index (it, "lifetime");
+    const int ia_c   = particle.attribute_index (it, "creation_time");
+    const int ia_mf  = particle.attribute_index (it, "metal_fraction");
+    const int ia_id  = particle.attribute_index(it,"id");
 
-  // Attribrute stride lengths
-  const int dm   = particle.stride(it, ia_m);
-  const int dp   = particle.stride(it, ia_x);
-  const int dv   = particle.stride(it, ia_vx);
-  const int dl   = particle.stride(it, ia_l);
-  const int dc   = particle.stride(it, ia_c);
-  const int dmf  = particle.stride(it, ia_mf);
-  const int did  = particle.stride(it, ia_id);
+    // Attribrute stride lengths
+    const int dm   = particle.stride(it, ia_m);
+    const int dp   = particle.stride(it, ia_x);
+    const int dv   = particle.stride(it, ia_vx);
+    const int dl   = particle.stride(it, ia_l);
+    const int dc   = particle.stride(it, ia_c);
+    const int dmf  = particle.stride(it, ia_mf);
+    const int did  = particle.stride(it, ia_id);
 
-  // Array giving the FoF group number of each particle
-  int * group_index = new int[num_particles];
+    // Array giving the FoF group number of each particle
+    int * group_index = new int[num_particles];
 
-  // group_sizes will be an array giving the number of particles in each
-  // group
-  int *  group_size;
-
-  // group_lists will be an 'array of arrays'. Each element will be an
-  // array containing the indices of particles belonging to a particular
-  // group
-  int ** group_lists;
-
-  // Array containing particle positions in 'block units'
-  enzo_float * particle_coordinates = new enzo_float[3 * num_particles];
-
-  // Fill in particle coordinates array.
-  // This handles periodic boundary conditions, by taking the periodic
-  // image of particle positions if necessary.
-
-  get_particle_coordinates_(enzo_block, it, particle_coordinates);
-
-  // Get the max cell width (across three dimensional axes), used to calculate
-  // the merging radius
-
-  double cell_width_x, cell_width_y,cell_width_z;
-  enzo_block->cell_width(&cell_width_x,&cell_width_y,&cell_width_z);
-  const double max_cell_width = std::max(
-				std::max(cell_width_x,cell_width_y),
-				cell_width_z);
-  const enzo_float merging_radius = merging_radius_cells_ * max_cell_width;
-
-  // FofList runs the Friends-of-Friends algorithm on particle positions
-  // (given by the particle_coordinates  array),with the linking length
-  // equal to the merging radius. This function fills in the
-  // previously allocated) group_index array, and allocates
-  // and fills in the group_size and group_lists arrays.
-
-  int ngroups = FofList(num_particles, particle_coordinates,merging_radius, 
-			group_index, &group_size, &group_lists);
-
-#ifdef DEBUG_MERGESINKS
-  CkPrintf("The %d particles on Block %s are in %d FoF groups \n",num_particles,
-	   block->name().c_str(),ngroups);
-#endif
-
-  for (int i = 0; i < ngroups; i++){
-
-#ifdef DEBUG_MERGESINKS
-    CkPrintf("Group %d out of %d on block %s: Group size = %d \n",i+1, ngroups,
-	     block->name().c_str(),group_size[i]);
-#endif
-
-    // Only need to merge particles if there are two or more particles in the
+    // group_sizes will be an array giving the number of particles in each
     // group
-    if (group_size[i] > 1){
+    int *  group_size;
 
-      ASSERT("EnzoMethodMergeSinks::compute_()",
-	     "There is a FoF group containing a pair of sink particles "
-	     "in non-neighbouring blocks. Since this cannot be properly "
-	     "dealt with we exit the program here. This has likely "
-	     "happened because the merging radius is too large in "
-	     "comparison to the block size.",
-	     particles_in_neighbouring_blocks_(enzo_block,particle_coordinates,
-					       group_lists,group_size,i));
+    // group_lists will be an 'array of arrays'. Each element will be an
+    // array containing the indices of particles belonging to a particular
+    // group
+    int ** group_lists;
 
-      // ib1 and ip1 index the first particle in this group
-      int ib1, ip1;
-      particle.index(group_lists[i][0],&ib1,&ip1);
+    // Array containing particle positions in 'block units'
+    enzo_float * particle_coordinates = new enzo_float[3 * num_particles];
 
-      // We get the attribrutes of this particle and store them in a new
-      // variable
-      pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib1);
-      px = (enzo_float *) particle.attribute_array(it, ia_x, ib1);
-      py = (enzo_float *) particle.attribute_array(it, ia_y, ib1);
-      pz = (enzo_float *) particle.attribute_array(it, ia_z, ib1);
-      pvx = (enzo_float *) particle.attribute_array(it, ia_vx, ib1);
-      pvy = (enzo_float *) particle.attribute_array(it, ia_vy, ib1);
-      pvz = (enzo_float *) particle.attribute_array(it, ia_vz, ib1);
-      plifetime = (enzo_float *) particle.attribute_array(it, ia_l, ib1);
-      pcreation = (enzo_float *) particle.attribute_array(it, ia_c, ib1);
-      pmetal    = (enzo_float *) particle.attribute_array(it, ia_mf, ib1);
-      pid = (int64_t *) particle.attribute_array(it, ia_id, ib1);
+    // Fill in particle coordinates array.
+    // This handles periodic boundary conditions, by taking the periodic
+    // image of particle positions if necessary.
 
-      enzo_float pmass1 = pmass[ip1*dm];
-      enzo_float px1 = px[ip1*dp];
-      enzo_float py1 = py[ip1*dp];
-      enzo_float pz1 = pz[ip1*dp];
-      double     pos1[3] = {px1,py1,pz1};
-      enzo_float pvx1 = pvx[ip1*dv];
-      enzo_float pvy1 = pvy[ip1*dv];
-      enzo_float pvz1 = pvz[ip1*dv];
-      enzo_float plifetime1 = plifetime[ip1*dl];
-      enzo_float pcreation1 = pcreation[ip1*dc];
-      enzo_float pmetal1 = pmetal[ip1*dmf];
-      int64_t    pid1    = pid[ip1*did];
+    get_particle_coordinates_(enzo_block, it, particle_coordinates);
 
-      // now loop over the rest of the particles in this group, and merge
-      // them in to the first particle
+    // Get the max cell width (across three dimensional axes), used to calculate
+    // the merging radius
 
-      for (int j = 1; j < group_size[i]; j++){
+    double cell_width_x, cell_width_y,cell_width_z;
+    enzo_block->cell_width(&cell_width_x,&cell_width_y,&cell_width_z);
+    const double max_cell_width =
+      std::max(std::max(cell_width_x,cell_width_y),cell_width_z);
+    const enzo_float merging_radius = merging_radius_cells_ * max_cell_width;
 
-	// ib2 and ip2 are used to index the other particles in this group
-	int ib2, ip2;
-	particle.index(group_lists[i][j],&ib2,&ip2);
+    // FofList runs the Friends-of-Friends algorithm on particle positions
+    // (given by the particle_coordinates  array),with the linking length
+    // equal to the merging radius. This function fills in the
+    // previously allocated) group_index array, and allocates
+    // and fills in the group_size and group_lists arrays.
 
-	// get attributes of this particle
-	pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib2);
-	px = (enzo_float *) particle.attribute_array(it, ia_x, ib2);
-	py = (enzo_float *) particle.attribute_array(it, ia_y, ib2);
-	pz = (enzo_float *) particle.attribute_array(it, ia_z, ib2);
-	pvx = (enzo_float *) particle.attribute_array(it, ia_vx, ib2);
-	pvy = (enzo_float *) particle.attribute_array(it, ia_vy, ib2);
-	pvz = (enzo_float *) particle.attribute_array(it, ia_vz, ib2);
-	plifetime = (enzo_float *) particle.attribute_array(it, ia_l, ib2);
-	pcreation = (enzo_float *) particle.attribute_array(it, ia_c, ib2);
-	pmetal    = (enzo_float *) particle.attribute_array(it, ia_mf, ib2);
-	pid    = (int64_t *) particle.attribute_array(it, ia_id, ib2);
-
-	enzo_float pmass2 = pmass[ip2*dm];
-	enzo_float px2 = px[ip2*dp];
-	enzo_float py2 = py[ip2*dp];
-	enzo_float pz2 = pz[ip2*dp];
-	enzo_float pvx2 = pvx[ip2*dv];
-	enzo_float pvy2 = pvy[ip2*dv];
-	enzo_float pvz2 = pvz[ip2*dv];
-	double     pos2[3] = {px2,py2,pz2};
-	enzo_float plifetime2 = plifetime[ip2*dl];
-	enzo_float pcreation2 = pcreation[ip2*dc];
-	enzo_float pmetal2 = pmetal[ip2*dmf];
-	int64_t    pid2 = pid[ip2*did];
-
-	enzo_float f1 = pmass1 / (pmass1 + pmass2);
-	enzo_float f2 = 1.0 - f1;
+    int ngroups = FofList(num_particles, particle_coordinates,merging_radius,
+			  group_index, &group_size, &group_lists);
 
 #ifdef DEBUG_MERGESINKS
-	CkPrintf("Merger in Group %d: \n Particle 1: Mass = %g, "
-		 "Position = (%g,%g,%g), ID = %ld \n"
-		 "Particle 2: Mass = %g, "
-		 "Position = (%g,%g,%g), ID = %ld \n", i+1, pmass1,
-		 px1,py1,pz1,pid1,pmass2,px2,py2,pz2,pid2);
-
+    CkPrintf("The %d particles on Block %s are in %d FoF groups \n",num_particles,
+	     block->name().c_str(),ngroups);
 #endif
-	// Get the nearest periodic image of particle 2 to particle 1
-	double npi[3];
-	hierarchy->get_nearest_periodic_image(pos2,pos1,npi);
 
-	// Compute new properties of 'particle 1'
-	px1 = f1 * px1 + f2 * npi[0];
-	py1 = f1 * py1 + f2 * npi[1];
-	pz1 = f1 * pz1 + f2 * npi[2];
-	pvx1 = f1 * pvx1 + f2 * pvx2;
-	pvy1 = f1 * pvy1 + f2 * pvy2;
-	pvz1 = f1 * pvz1 + f2 * pvz2;
-	plifetime1 = std::min(plifetime1, plifetime2);
-	pcreation1 = std::min(pcreation1, pcreation2);
-	pmetal1 = f1 * pmetal1 + f2 * pmetal2;
-	pid1 = std::min(pid1,pid2);
-	pmass1 += pmass2;
+    for (int i = 0; i < ngroups; i++){
 
 #ifdef DEBUG_MERGESINKS
-	CkPrintf("Particle number %d in group %d out of %d on Block %s "
-		 "is merged into 0th particle. New properties of 0th particle: "
-		 "Mass = %g. Position = (%g,%g,%g)\n",
-		 j,i,ngroups, block->name().c_str(),pmass1,px1,py1,pz1);
+      CkPrintf("Group %d out of %d on block %s: Group size = %d \n",i+1, ngroups,
+	       block->name().c_str(),group_size[i]);
 #endif
 
+      // Only need to merge particles if there are two or more particles in the
+      // group
+      if (group_size[i] > 1){
 
-	// To mark this particle for deletion after it has been merged into
-	// another particle, we shift its position out of the block, so that
-	// when we call particle->delete_non_local_particles_, this particle
-	// is deleted. Yes, I know its a bit of a hack
+	ASSERT("EnzoMethodMergeSinks::compute_()",
+	       "There is a FoF group containing a pair of sink particles "
+	       "in non-neighbouring blocks. Since this cannot be properly "
+	       "dealt with we exit the program here. This has likely "
+	       "happened because the merging radius is too large in "
+	       "comparison to the block size.",
+	       particles_in_neighbouring_blocks_(enzo_block,particle_coordinates,
+						 group_lists,group_size,i));
 
-	px[ip2*dp] += 3.0 * block_width_x;
+	// ib1 and ip1 index the first particle in this group
+	int ib1, ip1;
+	particle.index(group_lists[i][0],&ib1,&ip1);
 
-      } // Loop over particles in group
+	// We get the attribrutes of this particle and store them in a new
+	// variable
+	pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib1);
+	px = (enzo_float *) particle.attribute_array(it, ia_x, ib1);
+	py = (enzo_float *) particle.attribute_array(it, ia_y, ib1);
+	pz = (enzo_float *) particle.attribute_array(it, ia_z, ib1);
+	pvx = (enzo_float *) particle.attribute_array(it, ia_vx, ib1);
+	pvy = (enzo_float *) particle.attribute_array(it, ia_vy, ib1);
+	pvz = (enzo_float *) particle.attribute_array(it, ia_vz, ib1);
+	plifetime = (enzo_float *) particle.attribute_array(it, ia_l, ib1);
+	pcreation = (enzo_float *) particle.attribute_array(it, ia_c, ib1);
+	pmetal    = (enzo_float *) particle.attribute_array(it, ia_mf, ib1);
+	pid = (int64_t *) particle.attribute_array(it, ia_id, ib1);
 
-      // Set new properties for the first particle in the group, into which
-      // the other particles have been merged.
+	enzo_float pmass1 = pmass[ip1*dm];
+	enzo_float px1 = px[ip1*dp];
+	enzo_float py1 = py[ip1*dp];
+	enzo_float pz1 = pz[ip1*dp];
+	double     pos1[3] = {px1,py1,pz1};
+	enzo_float pvx1 = pvx[ip1*dv];
+	enzo_float pvy1 = pvy[ip1*dv];
+	enzo_float pvz1 = pvz[ip1*dv];
+	enzo_float plifetime1 = plifetime[ip1*dl];
+	enzo_float pcreation1 = pcreation[ip1*dc];
+	enzo_float pmetal1 = pmetal[ip1*dmf];
+	int64_t    pid1    = pid[ip1*did];
 
-      pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib1);
-      px = (enzo_float *) particle.attribute_array(it, ia_x, ib1);
-      py = (enzo_float *) particle.attribute_array(it, ia_y, ib1);
-      pz = (enzo_float *) particle.attribute_array(it, ia_z, ib1);
-      pvx = (enzo_float *) particle.attribute_array(it, ia_vx, ib1);
-      pvy = (enzo_float *) particle.attribute_array(it, ia_vy, ib1);
-      pvz = (enzo_float *) particle.attribute_array(it, ia_vz, ib1);
-      plifetime = (enzo_float *) particle.attribute_array(it, ia_l, ib1);
-      pcreation = (enzo_float *) particle.attribute_array(it, ia_c, ib1);
-      pmetal    = (enzo_float *) particle.attribute_array(it, ia_mf, ib1);
-      pid    = (int64_t *) particle.attribute_array(it, ia_id, ib1);
+	// now loop over the rest of the particles in this group, and merge
+	// them in to the first particle
 
-      pmass[ip1*dm] = pmass1;
+	for (int j = 1; j < group_size[i]; j++){
 
-      double folded_pos[3];
-      pos1[0] = px1;
-      pos1[1] = py1;
-      pos1[2] = pz1;
-      // Fold position within the domain if periodic boundary positions
-      hierarchy->get_folded_position(pos1,folded_pos);
-      px[ip1*dp] = folded_pos[0];
-      py[ip1*dp] = folded_pos[1];
-      pz[ip1*dp] = folded_pos[2];
-      pvx[ip1*dv] = pvx1;
-      pvy[ip1*dv] = pvy1;
-      pvz[ip1*dv] = pvz1;
-      plifetime[ip1*dl] = plifetime1;
-      pcreation[ip1*dc] = pcreation1;
-      pmetal[ip1*dmf] = pmetal1;
-      pid[ip1*did] = pid1;
+	  // ib2 and ip2 are used to index the other particles in this group
+	  int ib2, ip2;
+	  particle.index(group_lists[i][j],&ib2,&ip2);
 
-    }// if (group_size[i] > 1)
+	  // get attributes of this particle
+	  pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib2);
+	  px = (enzo_float *) particle.attribute_array(it, ia_x, ib2);
+	  py = (enzo_float *) particle.attribute_array(it, ia_y, ib2);
+	  pz = (enzo_float *) particle.attribute_array(it, ia_z, ib2);
+	  pvx = (enzo_float *) particle.attribute_array(it, ia_vx, ib2);
+	  pvy = (enzo_float *) particle.attribute_array(it, ia_vy, ib2);
+	  pvz = (enzo_float *) particle.attribute_array(it, ia_vz, ib2);
+	  plifetime = (enzo_float *) particle.attribute_array(it, ia_l, ib2);
+	  pcreation = (enzo_float *) particle.attribute_array(it, ia_c, ib2);
+	  pmetal    = (enzo_float *) particle.attribute_array(it, ia_mf, ib2);
+	  pid    = (int64_t *) particle.attribute_array(it, ia_id, ib2);
 
-  }// Loop over Fof groups
+	  enzo_float pmass2 = pmass[ip2*dm];
+	  enzo_float px2 = px[ip2*dp];
+	  enzo_float py2 = py[ip2*dp];
+	  enzo_float pz2 = pz[ip2*dp];
+	  enzo_float pvx2 = pvx[ip2*dv];
+	  enzo_float pvy2 = pvy[ip2*dv];
+	  enzo_float pvz2 = pvz[ip2*dv];
+	  double     pos2[3] = {px2,py2,pz2};
+	  enzo_float plifetime2 = plifetime[ip2*dl];
+	  enzo_float pcreation2 = pcreation[ip2*dc];
+	  enzo_float pmetal2 = pmetal[ip2*dmf];
+	  int64_t    pid2 = pid[ip2*did];
 
-  // Delete the dynamically allocated arrays
-
-  delete [] group_index;
-  free(group_size);
-  free(group_lists);
-  delete [] particle_coordinates;
+	  enzo_float f1 = pmass1 / (pmass1 + pmass2);
+	  enzo_float f2 = 1.0 - f1;
 
 #ifdef DEBUG_MERGESINKS
-  CkPrintf("Block %s: After merging, num_particles = %d \n",
-	   block->name().c_str(),particle.num_particles(it));
+	  CkPrintf("Merger in Group %d: \n Particle 1: Mass = %g, "
+		   "Position = (%g,%g,%g), ID = %ld \n"
+		   "Particle 2: Mass = %g, "
+		   "Position = (%g,%g,%g), ID = %ld \n", i+1, pmass1,
+		   px1,py1,pz1,pid1,pmass2,px2,py2,pz2,pid2);
+
+#endif
+	  // Get the nearest periodic image of particle 2 to particle 1
+	  double npi[3];
+	  hierarchy->get_nearest_periodic_image(pos2,pos1,npi);
+
+	  // Compute new properties of 'particle 1'
+	  px1 = f1 * px1 + f2 * npi[0];
+	  py1 = f1 * py1 + f2 * npi[1];
+	  pz1 = f1 * pz1 + f2 * npi[2];
+	  pvx1 = f1 * pvx1 + f2 * pvx2;
+	  pvy1 = f1 * pvy1 + f2 * pvy2;
+	  pvz1 = f1 * pvz1 + f2 * pvz2;
+	  plifetime1 = std::min(plifetime1, plifetime2);
+	  pcreation1 = std::min(pcreation1, pcreation2);
+	  pmetal1 = f1 * pmetal1 + f2 * pmetal2;
+	  pid1 = std::min(pid1,pid2);
+	  pmass1 += pmass2;
+
+#ifdef DEBUG_MERGESINKS
+	  CkPrintf("Particle number %d in group %d out of %d on Block %s "
+		   "is merged into 0th particle. New properties of 0th particle: "
+		   "Mass = %g. Position = (%g,%g,%g)\n",
+		   j,i,ngroups, block->name().c_str(),pmass1,px1,py1,pz1);
 #endif
 
+
+	  // To mark this particle for deletion after it has been merged into
+	  // another particle, we shift its position out of the block, so that
+	  // when we call particle->delete_non_local_particles_, this particle
+	  // is deleted. Yes, I know its a bit of a hack
+
+	  px[ip2*dp] += 3.0 * block_width_x;
+
+	} // Loop over particles in group
+
+	// Set new properties for the first particle in the group, into which
+	// the other particles have been merged.
+
+	pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib1);
+	px = (enzo_float *) particle.attribute_array(it, ia_x, ib1);
+	py = (enzo_float *) particle.attribute_array(it, ia_y, ib1);
+	pz = (enzo_float *) particle.attribute_array(it, ia_z, ib1);
+	pvx = (enzo_float *) particle.attribute_array(it, ia_vx, ib1);
+	pvy = (enzo_float *) particle.attribute_array(it, ia_vy, ib1);
+	pvz = (enzo_float *) particle.attribute_array(it, ia_vz, ib1);
+	plifetime = (enzo_float *) particle.attribute_array(it, ia_l, ib1);
+	pcreation = (enzo_float *) particle.attribute_array(it, ia_c, ib1);
+	pmetal    = (enzo_float *) particle.attribute_array(it, ia_mf, ib1);
+	pid    = (int64_t *) particle.attribute_array(it, ia_id, ib1);
+
+	pmass[ip1*dm] = pmass1;
+
+	double folded_pos[3];
+	pos1[0] = px1;
+	pos1[1] = py1;
+	pos1[2] = pz1;
+	// Fold position within the domain if periodic boundary positions
+	hierarchy->get_folded_position(pos1,folded_pos);
+	px[ip1*dp] = folded_pos[0];
+	py[ip1*dp] = folded_pos[1];
+	pz[ip1*dp] = folded_pos[2];
+	pvx[ip1*dv] = pvx1;
+	pvy[ip1*dv] = pvy1;
+	pvz[ip1*dv] = pvz1;
+	plifetime[ip1*dl] = plifetime1;
+	pcreation[ip1*dc] = pcreation1;
+	pmetal[ip1*dmf] = pmetal1;
+	pid[ip1*did] = pid1;
+
+      }// if (group_size[i] > 1)
+
+    }// Loop over Fof groups
+
+    // Delete the dynamically allocated arrays
+
+    delete [] group_index;
+    free(group_size);
+    free(group_lists);
+    delete [] particle_coordinates;
+#ifdef DEBUG_MERGESINKS
+    CkPrintf("Block %s: After merging, num_particles = %d \n",
+	     block->name().c_str(),particle.num_particles(it));
+#endif
+
+  } // If (num_particles > 1)
   // Now we delete non-local particles, i.e. particles with positions out-of-bounds
   // of the block.
   int delete_count = enzo_block->delete_non_local_particles_(it);
@@ -363,7 +365,7 @@ void EnzoMethodMergeSinks::compute_(Block * block)
 
 }
 
-// This fills a 1D array, which must have already been allocated with length
+// This fills a 1D array, which must have been previously allocated with length
 // 3 * num_particles, with x, y, z coordinates of sink particles in the block.
 // This also takes care of periodic boundary conditions by taking the nearest
 // periodic image of coordinates if necessary.
