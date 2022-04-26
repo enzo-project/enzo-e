@@ -55,12 +55,20 @@ target_link_libraries(simulation HDF5_C)
 addCelloLib(test_Unit "")
 
 # Unit tests
-add_executable(test_monitor test_Monitor.cpp)
-target_link_libraries(test_monitor PUBLIC monitor test_Unit cello parallel error Boost::filesystem)
-target_include_directories (test_monitor PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CHARM_INCLUDE_DIRS})
-target_link_options(test_monitor PRIVATE ${Cello_TARGET_LINK_OPTIONS})
 
-add_executable(test_memory test_Memory.cpp)
-target_link_libraries(test_memory PUBLIC memory test_Unit cello parallel error monitor Boost::filesystem)
-target_include_directories (test_memory PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CHARM_INCLUDE_DIRS})
-target_link_options(test_memory PRIVATE ${Cello_TARGET_LINK_OPTIONS})
+function(addUnitTestBinary BINNAME SRCS LIBS)
+  # Arguments:
+  #   BINNAME:   Name of the test binary to build
+  #   SRCS:      Source files
+  #   LIBS: Extra libraries required
+
+  add_executable(${BINNAME} ${SRCS})
+  target_link_libraries(${BINNAME} PUBLIC ${LIBS} test_Unit cello parallel error monitor Boost::filesystem)
+  target_include_directories (${BINNAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CHARM_INCLUDE_DIRS})
+  target_link_options(${BINNAME} PRIVATE ${Cello_TARGET_LINK_OPTIONS})
+
+endfunction(addUnitTestBinary)
+
+addUnitTestBinary(test_memory "test_Memory.cpp" "memory")
+addUnitTestBinary(test_monitor "test_Monitor.cpp" "monitor")
+#addUnitTestBinary(test_cello_array "test_CelloArray.cpp;array.hpp;array_CelloArray.hpp" "mesh")

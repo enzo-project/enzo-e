@@ -67,29 +67,39 @@ function(setup_test_parallel_python TESTNAME TESTDIR TESTSCRIPT)
   set_tests_properties(${TESTNAME} PROPERTIES LABELS "parallel;enzo;regression" )
 endfunction()
 
-# Heat conduction enzo-e tests
+############################### UNIT TESTS ####################################
+# The following tests are self-contained binary of individual components
+
+#setup_test_unit(Array ArrayComponent/Array test_cello_array)
+setup_test_unit(Memory MemoryComponent/Memory test_memory)
+setup_test_unit(Monitor MonitorComponent/Monitor test_monitor)
+#setup_test_unit( Component/ test_)
+
+############################### ENZO-E TESTS ##################################
+# The following tests will call the enzo-e binary in one way or the other,
+# i.e., rely on an input file (and potentially include post-processing of the
+# results in python)
+
+# Heat conduction
 setup_test_serial(Heat-1 MethodHeat/Heat-1  input/Heat/method_heat-1.in)
 setup_test_parallel(Heat-8 MethodHeat/Heat-8  input/Heat/method_heat-8.in)
 
-# Memory component load balancing unit test
-setup_test_unit(Memory MemoryComponent/Memory  test_memory)
-
-# Gravity enzo-e tests
+# Gravity
 setup_test_serial(GravityCg-1 MethodGravity/GravityCg-1  input/Gravity/method_gravity_cg-1.in)
 setup_test_parallel(GravityCg-8 MethodGravity/GravityCg-8  input/Gravity/method_gravity_cg-8.in)
 
-# Cosmology enzo-e tests
+# Cosmology
 # Needs to be updated, see https://github.com/enzo-project/enzo-e/issues/156
 
-# Flux correction enzo-e tests
+# Flux correction
 setup_test_serial(FluxCorrect-SMR-PPM MethodFluxCorrect/Inclined-Contact-SMR-Ppm input/FluxCorrect/inclined_contact_smr_ppm-${PREC_STRING}.in)
 setup_test_serial(FluxCorrect-SMR-VL MethodFluxCorrect/Inclined-Contact-VL input/FluxCorrect/inclined_contact_smr_vl-${PREC_STRING}.in)
 
-# PPM enzo-e tests
+# PPM
 setup_test_serial(PPM-1 MethodPPM/Ppm-1  input/PPM/method_ppm-1.in)
 setup_test_parallel(PPM-8 MethodPPM/Ppm-8  input/PPM/method_ppm-8.in)
 
-# VLCT enzo-e tests
+# VLCT
 setup_test_serial_python(vlct_dual_energy_cloud vlct "input/vlct/run_dual_energy_cloud_test.py")
 setup_test_serial_python(vlct_MHD_shock_tube vlct "input/vlct/run_MHD_shock_tube_test.py")
 setup_test_serial_python(vlct_MHD_linear_wave vlct "input/vlct/run_MHD_linear_wave_test.py")
@@ -97,7 +107,7 @@ setup_test_serial_python(vlct_HD_linear_wave vlct "input/vlct/run_HD_linear_wave
 setup_test_serial_python(vlct_passive_advect_sound vlct "input/vlct/run_passive_advect_sound_test.py")
 setup_test_parallel_python(vlct_dual_energy_shock_tube vlct "input/vlct/run_dual_energy_shock_tube_test.py")
 
-# merge_stars enzo-e tests
+# merge_stars
 setup_test_serial_python(merge_stars_serial merge_stars/serial "input/merge_stars/run_merge_stars_test.py" "--prec=${PREC_STRING}")
 setup_test_parallel_python(merge_stars_parallel merge_stars/parallel "input/merge_stars/run_merge_stars_test.py" "--prec=${PREC_STRING}")
 
