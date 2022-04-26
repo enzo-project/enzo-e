@@ -121,10 +121,10 @@ Input algorithm
 ..
    .. image:: io-input.png
 
-..
-   .. image:: io-read.png
+.. image:: io-read.png
 
-.. uml::
+..
+   .. uml::
    @startuml
 
    box "Simulation array" #Pink
