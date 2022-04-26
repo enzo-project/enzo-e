@@ -93,6 +93,7 @@ commands:
             pip install --upgrade wheel
             pip install --upgrade setuptools
             pip install sphinx sphinx_rtd_theme
+            pip install plantuml
 
   configure-build-system:
     description: "Modifies the SConstruct file to use grackle or not."
