@@ -244,7 +244,7 @@ char * FluxData::load_data (char * buffer)
     // Initialize FaceFlux pointers if needed
     const int nf = field_list_.size();
     size_t size = 0;
-    for (unsigned i_f=0; i_f<nf; i_f++) {
+    for (int i_f=0; i_f<nf; i_f++) {
       for (int axis=0; axis<3; axis++) {
         for (int face=0; face<2; face++) {
           cello_float * flux_data = flux_vector_.data();

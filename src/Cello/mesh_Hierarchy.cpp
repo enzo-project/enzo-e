@@ -56,6 +56,7 @@ Hierarchy::Hierarchy
     lower_[i] = 0.0;
     upper_[i] = 1.0;
     blocking_[i] = 0;
+    periodicity_[i] = 0;
   }
 }
 

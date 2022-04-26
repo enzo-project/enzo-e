@@ -22,7 +22,7 @@ public: // interface
   (
    Block * block,
    int min_face_rank,
-   bool periodic[3],
+   int periodic[3],
    int n3[3],
    Index index,
    int neighbor_type,
@@ -126,7 +126,7 @@ private: // attributes
   int min_face_rank_;
 
   /// Whether domain is periodic along each face & axis
-  bool periodic_[3];
+  int periodic_[3];
 
   /// Size of the block array
   int n3_[3];
