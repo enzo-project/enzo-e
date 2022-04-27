@@ -293,7 +293,7 @@ if [ $target = "test" ]; then
     echo ""
     echo "--------------------"
     echo "Attempting to run merge_sinks tests."
-    ./test/run_merge_sinks_tests.sh
+    ./test/run_merge_sinks_test.sh
     result_code=$?
     if [ $result_code -gt 0 ]; then
         exit_status=1
