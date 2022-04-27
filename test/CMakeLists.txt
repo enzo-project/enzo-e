@@ -71,7 +71,19 @@ endfunction()
 # The following tests are self-contained binary of individual components
 
 setup_test_unit(Array ArrayComponent/Array test_cello_array)
+setup_test_unit(CelloType Cello/Type test_type)
+setup_test_unit(Data-Field DataComponent/Field test_field)
+setup_test_unit(Data-Field-Data DataComponent/FieldData test_field_data)
+setup_test_unit(Data-Field-Descr DataComponent/FieldDescr test_field_descr)
+setup_test_unit(Data-Field-Face DataComponent/FieldFace test_field_face)
+setup_test_unit(Data-Grouping DataComponent/Grouping test_grouping)
+setup_test_unit(Data-ItIndex DataComponent/ItIndex test_itindex)
+setup_test_unit(Data-Particle DataComponentParticle/ test_particle)
+setup_test_unit(Data-Scalar DataComponent/Scalar test_scalar)
+setup_test_unit(EnzoUnits UnitsComponent/EnzoUnits test_enzo_units)
 setup_test_unit(Error ErrorComponent/Error test_error)
+setup_test_unit(Schedule IOComponent/Schedule test_schedule)
+setup_test_unit(Colormap IOComponent/Colormap test_colormap)
 setup_test_unit(Memory MemoryComponent/Memory test_memory)
 setup_test_unit(Monitor MonitorComponent/Monitor test_monitor)
 #setup_test_unit( Component/ test_)
@@ -81,13 +93,16 @@ setup_test_unit(Monitor MonitorComponent/Monitor test_monitor)
 # i.e., rely on an input file (and potentially include post-processing of the
 # results in python)
 
-# Heat conduction
-setup_test_serial(Heat-1 MethodHeat/Heat-1  input/Heat/method_heat-1.in)
-setup_test_parallel(Heat-8 MethodHeat/Heat-8  input/Heat/method_heat-8.in)
+# AMR PPM Adapt
+setup_test_parallel(AmrPpm AmrPpm/Adapt  input/Adapt/adapt-L5-P1.in)
 
-# Gravity
-setup_test_serial(GravityCg-1 MethodGravity/GravityCg-1  input/Gravity/method_gravity_cg-1.in)
-setup_test_parallel(GravityCg-8 MethodGravity/GravityCg-8  input/Gravity/method_gravity_cg-8.in)
+# Boundaries
+setup_test_parallel(Bound-Reflect-2D BoundaryConditions/Reflecting-2D  input/Boundary/boundary_reflecting-2d.in)
+setup_test_parallel(Bound-Periodic-2D BoundaryConditions/Periodic-2D  input/Boundary/boundary_periodic-2d.in)
+setup_test_parallel(Bound-Outflow-2D BoundaryConditions/Outflow-2D  input/Boundary/boundary_outflow-2d.in)
+setup_test_parallel(Bound-Reflect-3D BoundaryConditions/Reflecting-3D  input/Boundary/boundary_reflecting-3d.in)
+setup_test_parallel(Bound-Periodic-3D BoundaryConditions/Periodic-3D  input/Boundary/boundary_periodic-3d.in)
+setup_test_parallel(Bound-Outflow-3D BoundaryConditions/Outflow-3D  input/Boundary/boundary_outflow-3d.in)
 
 # Cosmology
 # Needs to be updated, see https://github.com/enzo-project/enzo-e/issues/156
@@ -95,6 +110,42 @@ setup_test_parallel(GravityCg-8 MethodGravity/GravityCg-8  input/Gravity/method_
 # Flux correction
 setup_test_serial(FluxCorrect-SMR-PPM MethodFluxCorrect/Inclined-Contact-SMR-Ppm input/FluxCorrect/inclined_contact_smr_ppm-${PREC_STRING}.in)
 setup_test_serial(FluxCorrect-SMR-VL MethodFluxCorrect/Inclined-Contact-VL input/FluxCorrect/inclined_contact_smr_vl-${PREC_STRING}.in)
+
+# Gravity
+setup_test_serial(GravityCg-1 MethodGravity/GravityCg-1  input/Gravity/method_gravity_cg-1.in)
+setup_test_parallel(GravityCg-8 MethodGravity/GravityCg-8  input/Gravity/method_gravity_cg-8.in)
+
+# Heat conduction
+setup_test_serial(Heat-1 MethodHeat/Heat-1  input/Heat/method_heat-1.in)
+setup_test_parallel(Heat-8 MethodHeat/Heat-8  input/Heat/method_heat-8.in)
+
+# Initial
+setup_test_serial(Music-111 InitialMusic/Music-111  input/InitialMusic/initial_music-111.in)
+setup_test_serial(Music-222 InitialMusic/Music-222  input/InitialMusic/initial_music-222.in)
+setup_test_serial(Music-444 InitialMusic/Music-444  input/InitialMusic/initial_music-444.in)
+setup_test_serial(Music-211 InitialMusic/Music-211  input/InitialMusic/initial_music-211.in)
+setup_test_serial(Music-121 InitialMusic/Music-121  input/InitialMusic/initial_music-121.in)
+setup_test_serial(Music-112 InitialMusic/Music-112  input/InitialMusic/initial_music-112.in)
+setup_test_serial(Music-411 InitialMusic/Music-411  input/InitialMusic/initial_music-411.in)
+setup_test_serial(Music-141 InitialMusic/Music-141  input/InitialMusic/initial_music-141.in)
+setup_test_serial(Music-114 InitialMusic/Music-114  input/InitialMusic/initial_music-114.in)
+
+# Output
+setup_test_parallel(Output-Stride-1 Output/Output-Stride-1  input/Output/output-stride-1.in)
+setup_test_parallel(Output-Stride-2 Output/Output-Stride-2  input/Output/output-stride-2.in)
+setup_test_parallel(Output-Stride-4 Output/Output-Stride-4  input/Output/output-stride-4.in)
+setup_test_parallel(Output-Headers  Output/Output-Headers   input/Output/output-headers.in)
+
+# Particles
+setup_test_parallel(Particle-X  Particles/X   input/Particle/test_particle-x.in)
+setup_test_parallel(Particle-Y  Particles/Y   input/Particle/test_particle-y.in)
+setup_test_parallel(Particle-XY  Particles/XY   input/Particle/test_particle-xy.in)
+setup_test_parallel(Particle-Circle  Particles/Circle   input/Particle/test_particle-circle.in)
+setup_test_parallel(Particle-AMR-Static Particles/AMR-Static   input/Particle/test_particle-amr-static.in)
+setup_test_parallel(Particle-AMR-Dynamic Particles/AMR-Dynamic   input/Particle/test_particle-amr-dynamic.in)
+
+# Performance
+setup_test_parallel(Performance-Initial-PNG  Performance/InitialPng   input/HelloWorld/initial_png.in)
 
 # PPM
 setup_test_serial(PPM-1 MethodPPM/Ppm-1  input/PPM/method_ppm-1.in)

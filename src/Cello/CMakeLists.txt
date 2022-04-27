@@ -78,7 +78,11 @@ function(addUnitTestBinary BINNAME SRCS LIBS)
 
 endfunction(addUnitTestBinary)
 
+addUnitTestBinary(test_cello_array "test_CelloArray.cpp" "array")
+addUnitTestBinary(test_colormap "test_Colormap.cpp" "io")
 addUnitTestBinary(test_error "test_Error.cpp" "error")
+addUnitTestBinary(test_field "test_Field.cpp" "")
 addUnitTestBinary(test_memory "test_Memory.cpp" "memory")
 addUnitTestBinary(test_monitor "test_Monitor.cpp" "monitor")
-addUnitTestBinary(test_cello_array "test_CelloArray.cpp" "array")
+addUnitTestBinary(test_particle "test_Particle.cpp" "")
+#addUnitTestBinary(test_ "test_.cpp" "")
