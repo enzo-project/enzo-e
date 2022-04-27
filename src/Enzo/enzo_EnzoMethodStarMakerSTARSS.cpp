@@ -449,16 +449,18 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 
         plevel[io] = enzo_block->level(); // formation level
 
-        if (metal){
-          pmetal     = (enzo_float *) particle.attribute_array(it, ia_metal, ib);
-          pmetal[io] = metal[i] / density[i]; // in ABSOLUTE units
-        }
-
         // Remove mass from grid and rescale fraction fields
         double scale = (1.0 - new_mass / cell_mass);
         density[i] *= scale;
         // rescale color fields too 
         this->rescale_densities(enzo_block, i, scale);
+
+        if (metal){
+          metal /= scale; // undo metal_density rescaling because we can directly subtract correct amount
+          pmetal     = (enzo_float *) particle.attribute_array(it, ia_metal, ib);
+          pmetal[io] = metal[i] / density[i]; // in ABSOLUTE units
+          metal[i] -= pmetal[io] * pmass[io]/cell_volume;
+        }
       }
     }
   } // end loop iz
