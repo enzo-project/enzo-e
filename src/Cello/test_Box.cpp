@@ -26,6 +26,25 @@ PARALLEL_MAIN_BEGIN
   // linear / enzo
   // refine parent-child (0,0)
 
+  {
+    int n3[3] = {2,2,2};
+    int g3[3] = {1,1,1};
+    Box adapt(2,n3,g3);
+    BoxType box_type = BoxType_receive;
+    int level = 0;
+    int if3[3] = {0,-1,0};
+    int ic3[3] = {0,0,0};
+    adapt.set_block(box_type,level,if3,ic3);
+    adapt.compute_region();
+    adapt.print("adapt");
+    int im3[3],ip3[3];
+    bool lpad=false;
+    adapt.get_start_stop(im3,ip3,BlockType::none,BlockType::receive,lpad);
+    CkPrintf ("im3 %d %d %d ip3 %d %d %d\n",
+              im3[0],im3[1],im3[2],
+              ip3[0],ip3[1],ip3[2]);
+    exit_();
+  }
   { 
     Box * box000_l0 = new Box (2,n,g4);
     Box * box000_l1 = new Box (2,n,g4);

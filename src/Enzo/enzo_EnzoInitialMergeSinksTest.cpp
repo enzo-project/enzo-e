@@ -79,7 +79,17 @@ void EnzoInitialMergeSinksTest::pup (PUP::er &p)
 void EnzoInitialMergeSinksTest::enforce_block
 (Block * block, const Hierarchy * hierarchy ) throw()
 {
+  // Check if the merge_stars method is being used
+  ASSERT("EnzoInitialMergeStarsTest",
+         "Error: merge_stars method is required when running with "
+         "the merge_stars_test initializer.",
+         enzo::problem()->method_exists("merge_stars"));
 
+  // Check if the pm_update method is being used
+  ASSERT("EnzoInitialMergeStarsTest",
+         "Error: pm_update method is required when running with "
+         "the merge_stars_test initializer.",
+         enzo::problem()->method_exists("pm_update"));
   if (!block->is_leaf()) return;
 
   ASSERT("EnzoInitialMergeSinksTest",

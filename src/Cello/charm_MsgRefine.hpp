@@ -10,6 +10,7 @@
 
 #include "cello.hpp"
 
+class Adapt;
 class Block;
 class Data;
 class DataMsg;
@@ -19,6 +20,7 @@ class MsgRefine : public CMessage_MsgRefine {
 public: // interface
 
   friend class Block;
+
   static long counter[CONFIG_NODE_SIZE];
 
   MsgRefine();
@@ -30,7 +32,8 @@ public: // interface
    int num_adapt_steps,
    int cycle, double time, double dt,
    int refresh_type,
-   int num_face_level, int * face_level) ;
+   int num_face_level, int * face_level,
+   Adapt * adapt_parent) ;
 
   virtual ~MsgRefine();
 
@@ -59,22 +62,8 @@ public: // interface
   /// Update the Data with data stored in this message
   void update (Data * data);
 
-  void print()
-  {
-    CkPrintf ("bool is_local_ = %d\n", is_local_);
-    CkPrintf ("double time_ = %g\n", time_);
-    CkPrintf ("double dt_ = %g\n", dt_);
-    CkPrintf ("DataMsg * data_msg_ = %p\n", (void*)data_msg_);
-    CkPrintf ("void * buffer_ = %p\n",buffer_);
-    CkPrintf ("\n");
-    CkPrintf ("int nx_, ny_, nz_ = %d %d %d\n",nx_, ny_, nz_);
-    CkPrintf ("int num_field_blocks_ = %d\n",num_field_blocks_);
-    CkPrintf ("int num_adapt_steps_ = %d\n",num_adapt_steps_);
-    CkPrintf ("int cycle_ = %d\n",cycle_);
-    CkPrintf ("int refresh_type_ = %d\n",refresh_type_);
-    CkPrintf ("int num_face_level_ = %d\n",num_face_level_);
-    CkPrintf ("int * face_level_ = %p\n",(void*)face_level_);
-  }
+  void print();
+  
 public: // static methods
 
   /// Pack data to serialize
@@ -103,6 +92,8 @@ protected: // attributes
   int refresh_type_;     // attribute-08
   int num_face_level_;   // attribute-09
   int * face_level_;     // attribute-10
+  /// Mesh connectivity of parent block to update child's
+  Adapt * adapt_parent_;        // attribute-11
 
   /// Saved Charm++ buffers for deleting after unpack()
   void * buffer_;

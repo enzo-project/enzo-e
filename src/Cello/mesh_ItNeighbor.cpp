@@ -6,14 +6,14 @@
 /// @brief    Implementation of the ItNeighbor class
 
 #include "mesh.hpp"
-// #define DEBUG_IT_NEIGHBOR
+
 //----------------------------------------------------------------------
 
 ItNeighbor::ItNeighbor
 (
  Block * block,
  int min_face_rank,
- bool periodic[3],
+ int periodic[3],
  int n3[3],
  Index index,
  int neighbor_type,
@@ -53,10 +53,6 @@ bool ItNeighbor::next_ ()
   do {
     increment_();
   } while ( ! valid_() );
-#ifdef DEBUG_IT_NEIGHBOR  
-  CkPrintf ("DEBUG_IT_NEIGHBOR %s  %d %d %d  %d\n",
-	    block_->name().c_str(),of3_[0],of3_[1],of3_[2],face_level());
-#endif    
   return (! is_reset()) ;
 }
 
@@ -64,8 +60,8 @@ bool ItNeighbor::next_ ()
 
 Index ItNeighbor::index() const
 {
-  int face_level = block_->face_level(of3_);
   Index index_neighbor = index_.index_neighbor(of3_,n3_);
+  int face_level = block_->face_level(of3_);
   if (face_level == level_) {
     return index_neighbor;
   } else if (face_level == level_ + 1) {
@@ -73,9 +69,6 @@ Index ItNeighbor::index() const
   } else if (face_level == level_ - 1) {
     return index_neighbor.index_parent();
   } else {
-    ERROR4("ItNeighbor::index()",
-	   "index %s level %d: face_level %d and block level %d differ by more than one",
-	   block_->name().c_str(),index_.level(),face_level,level_);
     return index_neighbor;
   }
 }
@@ -209,7 +202,6 @@ void ItNeighbor::set_first_child_()
 
 bool ItNeighbor::valid_()
 {
- 
   if (is_reset()) return true;
 
   // Check that face rank is in range
@@ -265,7 +257,7 @@ bool ItNeighbor::valid_()
     for (int axis=0; axis<rank_; axis++) {
       if (if3[axis] == -1 && ic3_[axis] != 0) valid = false;
       if (if3[axis] ==  1 && ic3_[axis] != 1) valid = false;
-      if (valid == false) return false;
+      if (! valid) return false;
     }
 
   } else if (face_level() < level_) {
@@ -280,9 +272,8 @@ bool ItNeighbor::valid_()
     for (int axis=0; axis<rank_; axis++) {
       if  (of3_[axis] == +1 && ic3[axis] == 0) valid = false;
       if  (of3_[axis] == -1 && ic3[axis] == 1) valid = false;
-      if (valid == false) return false;
+      if (! valid) return false;
     }
-
   }
 
   return true;

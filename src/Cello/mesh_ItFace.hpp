@@ -20,7 +20,7 @@ public: // interface
   /// Constructor
   ItFace(int rank,
 	 int rank_limit,
-	 bool periodic[3],
+	 int periodic[3],
 	 int n3[3],
 	 Index index,
 	 const int * ic3=0,

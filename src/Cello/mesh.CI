@@ -19,6 +19,7 @@ module mesh {
   initnode void mutex_init_field_face();
 
   readonly int MsgCoarsen::counter[CONFIG_NODE_SIZE];
+  readonly int MsgAdapt::counter[CONFIG_NODE_SIZE];
   readonly int MsgInitial::counter[CONFIG_NODE_SIZE];
   readonly int MsgOutput::counter[CONFIG_NODE_SIZE];
   readonly int MsgRefine::counter[CONFIG_NODE_SIZE];
@@ -82,7 +83,7 @@ module mesh {
   message FieldMsg {
     char a[];
   };
-
+  message MsgAdapt;
   message MsgCoarsen;
   message MsgInitial;
   message MsgOutput;
@@ -91,9 +92,12 @@ module mesh {
 
   array[Index] Block {
 
-    entry Block (MsgRefine * msg);
+#ifdef BYPASS_CHARM_MEM_LEAK
     entry Block (process_type ip_source);
     entry void p_set_msg_refine(MsgRefine * msg);
+#else
+    entry Block (MsgRefine * msg);
+#endif
     entry Block();
 
     //--------------------------------------------------
@@ -150,7 +154,8 @@ module mesh {
     entry void p_stopping_enter();
     entry void r_stopping_enter(CkReductionMsg *);
  
-    entry void p_stopping_balance();
+    entry void p_stopping_load_balance();
+    entry void r_stopping_load_balance(CkReductionMsg *);
 
     entry void p_stopping_exit();
     entry void r_stopping_exit(CkReductionMsg *);
@@ -173,12 +178,11 @@ module mesh {
     entry void r_adapt_enter(CkReductionMsg *);
     entry void p_adapt_end();
     entry void p_adapt_update();
-    entry void p_adapt_next();
+    entry void r_adapt_next(CkReductionMsg *);
     entry void p_adapt_called();
     entry void p_adapt_exit();
     entry void p_adapt_delete();
-    entry void p_adapt_recv_level
-      (Index index, int ic3[3], int if3[3], int level_now, int level_new);
+    entry void p_adapt_recv_level (MsgAdapt *);
     entry void p_adapt_recv_child (MsgCoarsen * msg);
 
     //--------------------------------------------------

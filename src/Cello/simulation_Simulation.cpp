@@ -274,12 +274,14 @@ void Simulation::pup (PUP::er &p)
 
   PUParray(p,dir_checkpoint_,256);
 
+#ifdef BYPASS_CHARM_MEM_LEAK
   ASSERT1("Simulation::pup()",
 	  "msg_refine_map_ is assumed to be empty but has size %lu",
 	  msg_refine_map_.size(),
 	  (msg_refine_map_.size() == 0));
-	  
+
   //  p | msg_refine_map_;
+#endif
   p | index_output_;
   p | num_solver_iter_;
   p | max_solver_iter_;
@@ -298,6 +300,8 @@ void Simulation::finalize() throw()
 }
 
 //----------------------------------------------------------------------
+
+#ifdef BYPASS_CHARM_MEM_LEAK
 
 void Simulation::p_get_msg_refine(Index index)
 {
@@ -344,6 +348,7 @@ MsgRefine * Simulation::get_msg_refine(Index index)
   return msg;
 }
 
+#endif
 //======================================================================
 
 void Simulation::initialize_simulation_() throw()
@@ -726,6 +731,17 @@ void Simulation::initialize_hierarchy_() throw()
 			   config_->mesh_root_blocks[1],
 			   config_->mesh_root_blocks[2]);
 
+  bool lp3[3] = { false, false, false };
+  int index_boundary = 0;
+  auto & root_blocks = config_->mesh_root_blocks;
+  Boundary * boundary;
+  while ( (boundary = cello::boundary(index_boundary++)) ) {
+    boundary->periodicity(lp3);
+  }
+  int p3[3] = {lp3[0] ? root_blocks[0] : 0,
+               lp3[1] ? root_blocks[1] : 0,
+               lp3[2] ? root_blocks[2] : 0 };
+  hierarchy_->set_periodicity (p3[0],p3[1],p3[2]);
 }
 
 //----------------------------------------------------------------------

@@ -7,7 +7,7 @@
 
 #include "cello.hpp"
 
-#include "monitor.hpp" 
+#include "monitor.hpp"
 
 #include "auto_config.def"
 
@@ -20,7 +20,7 @@ Monitor::Monitor()
     mode_(monitor_mode_root),
     verbose_(false),
     group_default_(monitor_mode_all)
-{ 
+{
   timer_->start();
 
   // turn off debugging
@@ -50,13 +50,13 @@ void Monitor::header () const
   print (""," `Y8bood8P'  `Y8bod8P' o888o o888o `Y8bod8P' ");
   print (""," ");
   print ("","A Parallel Adaptive Mesh Refinement Framework");
-  print (""," ");  
+  print (""," ");
   print ("","  Laboratory for Computational Astrophysics");
   print ("","        San Diego Supercomputer Center");
   print ("","     University of California, San Diego");
-  print (""," ");  
+  print (""," ");
   print ("","See 'LICENSE_CELLO' for software license information");
-  print (""," ");  
+  print (""," ");
 
   // Get date text
 
@@ -64,7 +64,7 @@ void Monitor::header () const
   struct tm * t;
   time(&rawtime);
   t = localtime (&rawtime);
-  const char * month[] = 
+  const char * month[] =
     {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
 
   print ("","BEGIN CELLO: %s %02d %02d:%02d:%02d",
@@ -110,12 +110,12 @@ void Monitor::header () const
   print ("Define","CONFIG_SMP_MODE     %s","Yes");
 #else
   print ("Define","CONFIG_SMP_MODE     %s","no");
-#endif  
-#ifdef NEW_ADAPT
-  print ("Define","NEW_ADAPT    %s","Yes");
+#endif
+#ifdef BYPASS_CHARM_MEM_LEAK
+  print ("Define","BYPASS_CHARM_MEM_LEAK %s","Yes");
 #else
-  print ("Define","NEW_ADAPT    %s","no");
-#endif  
+  print ("Define","BYPASS_CHARM_MEM_LEAK %s","no");
+#endif
   print ("CHARM","CkNumPes()           %d",CkNumPes());
   print ("CHARM","CkNumNodes()         %d",CkNumNodes());
 }
@@ -124,12 +124,12 @@ void Monitor::header () const
 
 int Monitor::is_active(const char * component) const throw ()
 {
-  if (mode_ == monitor_mode_none)                   
+  if (mode_ == monitor_mode_none)
     return false;
 
-  if (mode_ == monitor_mode_root && CkMyPe() != 0) 
+  if (mode_ == monitor_mode_root && CkMyPe() != 0)
     return false;
-  
+
   auto it_active = group_mode_.find(component);
 
   bool in_list = (it_active != group_mode_.end());
@@ -139,7 +139,7 @@ int Monitor::is_active(const char * component) const throw ()
 
 //----------------------------------------------------------------------
 
-void Monitor::write 
+void Monitor::write
 ( FILE * fp, const char * component, const char * format,  ... ) const
 {
 
@@ -161,7 +161,7 @@ void Monitor::write
 
 //----------------------------------------------------------------------
 
-void Monitor::verbose 
+void Monitor::verbose
 ( FILE * fp, const char * component, const char * format,  ... ) const
 {
 
@@ -188,7 +188,7 @@ void Monitor::write_ (FILE * fp, const char * component, const char * message) c
   // Get parallel process text
 
   char process[MONITOR_LENGTH] = "";
-    
+
   sprintf (process,"%0d",CkMyPe());
 
   // Get time
@@ -197,14 +197,14 @@ void Monitor::write_ (FILE * fp, const char * component, const char * message) c
 
   snprintf (time,10,"%08.2f",timer_->value());
 
-  // Print 
+  // Print
 
   const char newline = (strcmp(message,"")==0) ? ' ' : '\n';
   if (fp == stdout) {
-    PARALLEL_PRINTF 
+    PARALLEL_PRINTF
       ("%s %s %s %s%c",     process, time, component, message,newline);
   } else {
-    fprintf 
+    fprintf
       (fp,"%s %s %s %s%c",  process, time, component, message,newline);
   }
 }
@@ -223,7 +223,7 @@ void Monitor::write_verbatim
     // Get parallel process text
 
     char buffer_process[MONITOR_LENGTH] = "";
-    
+
     sprintf (buffer_process,"%0d",CkMyPe());
 
     // Get time
@@ -232,14 +232,14 @@ void Monitor::write_verbatim
 
     snprintf (buffer_time,10,"%08.2f",timer_->value());
 
-    // Print 
+    // Print
 
     if (fp == stdout) {
-      PARALLEL_PRINTF 
+      PARALLEL_PRINTF
 	("%s %s %s %s\n",
 	 buffer_process, buffer_time, component, message);
     } else {
-      fprintf 
+      fprintf
 	(fp,"%s %s %s %s\n",
 	 buffer_process, buffer_time, component, message);
     }

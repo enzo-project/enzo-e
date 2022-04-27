@@ -135,7 +135,8 @@ public: // interface
   /// Determine send/recv intersection region
   void compute_region();
 
-  /// Get send/box (recv/extra) intersection loop limits for the specified block
+  /// Get send/box (recv/extra) intersection loop limits for the
+  /// specified block
   bool get_start_stop
   (int index_start[3], int index_stop[3],
    BlockType block_intersect, BlockType block_coords, bool lpad);
