@@ -28,6 +28,7 @@
 // algorithm.
 
 #define DEBUG_SF_CRITERIA
+// #define DEBUG_SF_CRITERIA_EXTRA
 //-------------------------------------------------------------------
 
 EnzoMethodStarMakerSTARSS::EnzoMethodStarMakerSTARSS
@@ -180,6 +181,34 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
   enzo_float * density_particle_accumulate = field.is_field("density_particle_accumulate") ?
     (enzo_float *) field.values("density_particle_accumulate") : NULL;
 
+  enzo_float * dHI    = field.is_field("HI_density") ? 
+          (enzo_float*) field.values("HI_density") : NULL;
+  enzo_float * dHII   = field.is_field("HII_density") ? 
+          (enzo_float*) field.values("HII_density") : NULL;
+  enzo_float * dHeI   = field.is_field("HeI_density") ? 
+          (enzo_float*) field.values("HeI_density") : NULL;
+  enzo_float * dHeII  = field.is_field("HeII_density") ? 
+          (enzo_float*) field.values("HeII_density") : NULL;
+  enzo_float * dHeIII = field.is_field("HeIII_density") ? 
+          (enzo_float*) field.values("HeIII_density") : NULL;
+  enzo_float * d_el   = field.is_field("e_density") ?
+          (enzo_float*) field.values("e_density") : NULL;
+ 
+  enzo_float * dH2I   = field.is_field("H2I_density") ? 
+          (enzo_float*) field.values("H2I_density") : NULL;
+  enzo_float * dH2II  = field.is_field("H2II_density") ? 
+          (enzo_float*) field.values("H2II_density") : NULL;
+  enzo_float * dHM    = field.is_field("HM_density") ? 
+          (enzo_float*) field.values("HM_density") : NULL;
+
+  enzo_float * dDI    = field.is_field("DI_density") ? 
+         (enzo_float *) field.values("DI_density") : NULL;
+  enzo_float * dDII   = field.is_field("DII_density") ? 
+         (enzo_float *) field.values("DII_density") : NULL;
+  enzo_float * dHDI   = field.is_field("HDI_density") ? 
+         (enzo_float *) field.values("HDI_density") : NULL;
+
+
 
   // compute the temperature (we need it here)
   // TODO: Calling compute_temperature like this
@@ -195,16 +224,39 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 
   compute_temperature.compute(enzo_block);
 
+  chemistry_data * grackle_chemistry =
+    enzo::config()->method_grackle_chemistry;
+
+  int primordial_chemistry = grackle_chemistry->primordial_chemistry;
+  int mu = enzo_config->ppm_mol_weight;
   // iterate over all cells (not including ghost zones)
   for (int iz=gz; iz<nz+gz; iz++){
     for (int iy=gy; iy<ny+gy; iy++){
       for (int ix=gx; ix<nx+gx; ix++){
 
         int i = INDEX(ix,iy,iz,mx,my);//ix + mx*(iy + my*iz);
+        
+     /*
+        // compute MMW -- TODO: Make EnzoComputeMeanMolecularWeight class and reference
+        // mu_field here
+        if (primordial_chemistry == 0) mu = enzo_config->ppm_mol_weight;
+        else {
+          mu = d_el[i] + dHI[i] + dHII[i] + 0.25*(dHeI[i]+dHeII[i]+dHeIII[i]);
+
+          if (primordial_chemistry > 1) {
+            mu += dHM[i] + 0.5*(dH2I[i]+dH2II[i]);
+          }
+          if (primordial_chemistry > 2) {
+            mu += 0.5*(dDI[i] + dDII[i]) + dHDI[i]/3.0;
+          }
+        }
+        mu /= density[i]; 
+        mu = 1.0/mu;
+    */
 
         // TODO: need to compute this better for Grackle fields (on to-do list)
         double rho_cgs = density[i] * enzo_units->density();
-        double mean_particle_mass = enzo_config->ppm_mol_weight * cello::mass_hydrogen;
+        double mean_particle_mass = mu * cello::mass_hydrogen;
         double ndens = rho_cgs / mean_particle_mass;
 
         double cell_mass  = density[i] * cell_volume;
@@ -229,12 +281,20 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         if (! this->check_velocity_divergence(velocity_x, velocity_y,
                                               velocity_z, i,
                                               idx, idy, idz)) continue;
+      
+        #ifdef DEBUG_SF_CRITERIA_EXTRA
+           CkPrintf("MethodStarMakerSTARSS -- div(v) < 0 in cell %d\n", i);
+        #endif 
 
         // check that alpha < 0
         if (! this->check_self_gravitating(mean_particle_mass, density[i], temperature[i],
                                             velocity_x, velocity_y, velocity_z,
                                             lunit, vunit, rhounit,
                                             i, idx, idy, idz, dx, dy, dz)) continue;
+
+        #ifdef DEBUG_SF_CRITERIA_EXTRA
+           CkPrintf("MethodStarMakerSTARSS -- alpha < 1 in cell %d\n", i);
+        #endif 
 
         // check that (T<Tcrit) or (dynamical_time < cooling_time)
         // In order to check cooling time, must have use_temperature_threshold=true;
@@ -248,7 +308,11 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         }
         // check that M > Mjeans
         if (! check_jeans_mass(temperature[i], mean_particle_mass, density[i], cell_mass,
-                               munit,rhounit )) continue;     
+                               munit,rhounit )) continue;
+
+        #ifdef DEBUG_SF_CRITERIA_EXTRA
+           CkPrintf("MethodStarMakerSTARSS -- M > M_jeans in cell %d\n", i);
+        #endif     
         
         // check that H2 self shielded fraction f_shield > 0
         double f_shield = this->h2_self_shielding_factor(density,metallicity,
@@ -315,6 +379,9 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
            }
 
         count++; // time to form a star! 
+        #ifdef DEBUG_SF_CRITERIA
+          CkPrintf("MethodStarMakerSTARSS -- Forming star in gas with number density %f cm^-3\n", ndens);
+        #endif
 
         // now create a star particle
         int my_particle = particle.insert_particles(it, 1);

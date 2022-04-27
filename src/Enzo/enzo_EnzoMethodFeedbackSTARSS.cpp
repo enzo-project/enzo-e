@@ -51,25 +51,22 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age, int* nSNII, int* nSNIA,
         }
         if (3.401 <= age && age< 10.37)
         {
-                RII = 5.408e-4;
-                RIA = 0.0;
+            RII = 5.408e-4;
+            RIA = 0.0;
         }
         if (10.37 <= age && age < 37.53)
         {
-                RII = 2.516e-4;
-                RIA = 0.0;
+            RII = 2.516e-4;
+            RIA = 0.0;
         }
         if (37.53 <= age)
         {
-                RII = 0.0;
-                RIA = 5.3e-8+1.6e-5*exp(-0.5*pow((age-50.0)/10.0, 2));
+            RII = 0.0;
+            RIA = 5.3e-8+1.6e-5*exp(-0.5*pow((age-50.0)/10.0, 2));
         }
-	//        fprintf(stdout, "Rates: %f %f %f\n", age, RII, RIA);
         /* rates -> probabilities */
         if (RII > 0){
-        // printf("Zcpl = %e", zCouple);
             PII = RII * mass_Msun / cello::Myr_s *tunit*dt;
-            // printf("PII =%f\n %f %e %f\n", PII, RII, massmass_solar, age);
             double random = double(mt())/double(mt.max());
             if (PII > 1.0 && enzo_config->method_feedback_unrestricted_sn){
                 int round = (int)PII;
@@ -78,8 +75,9 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age, int* nSNII, int* nSNIA,
             }
             if (PII > 1.0 && !enzo_config->method_feedback_unrestricted_sn){
                 //ERROR("MethodFeedbackSTARSS::determineSN()", "PII too large!");
-                //if it wants to deposit > 1 SN per particle, but single_sn=true,
-                //only deposit 1 SN
+                //if it wants to do > 1 SN per particle, but single_sn=true,
+                //only do 1 SN
+
                 PII = 1.0;
                 *nSNII = 0;
             }
@@ -92,8 +90,6 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age, int* nSNII, int* nSNIA,
           CkPrintf("MethodFeedbackSTARSS::determineSN() -- mass_Msun = %f; age = %f; RII = %f; RIA = %f\n",
                     mass_Msun, age, RII, RIA);
         #endif
-        // printf("RANDOM = %f\n", random);
-        // printf("N SNII=%d\n",*nSNII);
 
         if (RIA > 0){
             PIA = RIA*mass_Msun / cello::Myr_s *tunit*dt;
@@ -109,8 +105,6 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age, int* nSNII, int* nSNIA,
 
             if (random < PIA)
                 *nSNIA = psn+1;
-            // if (*nSNIA > 0)
-            //     fprintf(stdout, "PIA = %f\n", PIA);
         }
         #ifdef DEBUG_FEEDBACK_STARSS
           CkPrintf("MethodFeedbackSTARSS::determineSN() -- PII = %f; PIA = %f\n", PII, PIA);
@@ -134,7 +128,7 @@ int EnzoMethodFeedbackSTARSS::determineWinds(double age, double * eWinds, double
     if (mass_Msun > 11 && oldEnough){
 
         if (0.001 < age && age < 1.0){
-            wind_factor =4.763 * std::min((0.01 + metallicity_Zsun), 1.0) ;
+            wind_factor = 4.763 * std::min((0.01 + metallicity_Zsun), 1.0);
         }
         if (1 <= age && age < 3.5){
             wind_factor = 4.763*std::min(0.01+metallicity_Zsun, 1.0)* 
@@ -145,8 +139,8 @@ int EnzoMethodFeedbackSTARSS::determineWinds(double age, double * eWinds, double
         
         }
         if (age < 100){
-            float d = powl(1+age/2.5, 1.4);
-            float a50 = powl(double(age)/10.0, 5.0);
+            double d = powl(1+age/2.5, 1.4);
+            double a50 = powl(double(age)/10.0, 5.0);
             e_factor = 5.94e4 / d + a50 +4.83;
             
         }
@@ -154,8 +148,8 @@ int EnzoMethodFeedbackSTARSS::determineWinds(double age, double * eWinds, double
             e_factor = 4.83;
             wind_factor = 0.42*pow(age/1000, -1.1)/(19.81/log(age));
         }
-        windM = mass_Msun * wind_factor; //Msun/Gyr
-        windM = windM*dt*tunit/(1e3 * cello::Myr_s); //Msun
+        windM = mass_Msun * wind_factor; // Msun/Gyr
+        windM = windM*dt*tunit/(1e3 * cello::Myr_s); // Msun
         // if (debug) printf("First winds mass = %e\nFrom wf = %f, dt=%f Z = %e\n", windM, wind_factor, dtFixed, zZsun);
         //printf("eFactor = %f age = %f\n", e_factor, age);
         if (windM > mass_Msun){
@@ -199,7 +193,7 @@ void EnzoMethodFeedbackSTARSS::transformComovingWithStar(enzo_float * density,
 
   else if (direction < 0)
   {
-    // back to "lab" frame
+    // back to "lab" frame. Convert momentum field back to velocity
     for (int ind = 0; ind<size; ind++) {
       if (density[ind] == tiny_number) continue;
       double mult = 1/density[ind];
@@ -217,6 +211,8 @@ void EnzoMethodFeedbackSTARSS::createCouplingParticles(EnzoBlock * enzo_block, c
                                  enzo_float * xcp, enzo_float * ycp, enzo_float * zcp,
                                  enzo_float * unitx, enzo_float * unity, enzo_float * unitz) const throw()
 {
+  // NOTE: not used anymore -- can delete. This just created coupling particles as actual cello particles
+  // instead of just a list of values to feed into cic routine
   Particle particle = enzo_block->data()->particle();
 
   const int it = particle.type_index("starss_coupling");
@@ -279,6 +275,7 @@ void EnzoMethodFeedbackSTARSS::createCouplingParticles(EnzoBlock * enzo_block, c
 
  void EnzoMethodFeedbackSTARSS::deleteCouplingParticles(EnzoBlock * enzo_block) const throw()
 {
+  // NOTE: Not used anymore -- can delete.
   Particle particle = enzo_block->data()->particle();
 
   const int it = particle.type_index("starss_coupling");
@@ -334,12 +331,23 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
   cello::define_field("internal_energy_deposit");
   cello::define_field("metal_density_deposit"); 
 
+  // Deposition across grid boundaries is handled using refresh with set_accumulate=true.
+  // The set_accumulate flag tells Cello to include ghost zones in the refresh operation,
+  // and adds the ghost zone values from the "src" field to the corresponding active zone
+  // values in the "dst" field.
+ 
+  // I'm currently using two initially empty fields for each field that SNe directly affect.
+  // CIC deposition directly modifies the *_deposit fields (including ghost zones). The ghost zone
+  // values are then sent to the *deposit_copy fields during the refresh operation. Values are then
+  // copied back to the original field. I can't just set the original field as "dst" because I'm
+  // depositing momentum and energy, while the actual fields that are being pushed around by Cello
+  // are velocty and specific energy (so I need to scale by mass first).
+  
   ir_feedback_ = add_refresh_();
   cello::simulation()->refresh_set_name(ir_feedback_,name()+":add");
   Refresh * refresh_fb = cello::refresh(ir_feedback_); 
 
   refresh_fb->set_accumulate(true);
-
 
   refresh_fb->add_field_src_dst
     ("density_deposit","density_deposit_copy");
@@ -547,7 +555,7 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
   // some constants here that might get moved to parameters or something else
   const float SNII_ejecta_mass = 10.5;
   const float SNIa_ejecta_mass = 1.4;
-  const float z_solar          = cello::metallicity_solar; //0.02 // Solar metal fraction (fire2)
+  const float z_solar          = cello::metallicity_solar; //Solar metal fraction (0.012)
   //-----------------------------------------------------
 
   EnzoBlock * enzo_block = enzo::block(block);
@@ -588,14 +596,7 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
 
   int numSN = 0; // counter of SN events
   int count = 0; // counter of particles
-/* 
-  if (particle.num_particles(it) <= 0){
-    // refresh
-    cello::refresh(ir_feedback_)->set_active(enzo_block->is_leaf());
-    enzo_block->refresh_start(ir_feedback_, CkIndex_EnzoBlock::p_method_feedback_starss_end());
-    return;
-  }
-*/
+
 /*
   // check sums
   double cell_volume = hx*hy*hz * enzo_units->volume();
@@ -740,7 +741,7 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
 
 
           determineWinds(age, &windEnergy, &windMass, &windMetals,
-                         pmass[ipdm] * pmass[ipdm] * enzo_units->mass() / cello::mass_solar,
+                         pmass[ipdm] * enzo_units->mass() / cello::mass_solar,
                          starZ, enzo_units->time(), block->dt());
 
           /* Error messages go here */
@@ -803,7 +804,6 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   /*
    This routine will create a cube of coupling particles, where we determine
       the feedback quantities.  The vertices of the cube are ~coupled particles
-      and all have radius dx from the source particle.
       Each vertex particle will then be CIC deposited to the grid!
   */
   EnzoBlock * enzo_block = enzo::block(block);
@@ -835,21 +835,8 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 
   double size = mx*my*mz;
 
-  //EnzoPhysicsCosmology * cosmology = enzo::cosmology();
-  //enzo_float cosmo_a = 1.0;
-
   const int rank = cello::rank();
-/*
-  if (cosmology) {
-    enzo_float cosmo_dadt = 0.0;
-    double dt    = block->dt();
-    double current_time = block->time();
-    cosmology->compute_expansion_factor(&cosmo_a,&cosmo_dadt,current_time+0.5*dt);
-    if (rank >= 1) hx *= cosmo_a;
-    if (rank >= 2) hy *= cosmo_a;
-    if (rank >= 3) hz *= cosmo_a;
-  }
-*/
+
   double cell_volume_code = hx*hy*hz;
   double cell_volume = cell_volume_code*enzo_units->volume();
 
@@ -866,10 +853,36 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 
   enzo_float * mf          = (enzo_float *) field.values("metal_density");
 
+  enzo_float * dHI    = field.is_field("HI_density") ? 
+          (enzo_float*) field.values("HI_density") : NULL;
+  enzo_float * dHII   = field.is_field("HII_density") ? 
+          (enzo_float*) field.values("HII_density") : NULL;
+  enzo_float * dHeI   = field.is_field("HeI_density") ? 
+          (enzo_float*) field.values("HeI_density") : NULL;
+  enzo_float * dHeII  = field.is_field("HeII_density") ? 
+          (enzo_float*) field.values("HeII_density") : NULL;
+  enzo_float * dHeIII = field.is_field("HeIII_density") ? 
+          (enzo_float*) field.values("HeIII_density") : NULL;
+  enzo_float * d_el   = field.is_field("e_density") ?
+          (enzo_float*) field.values("e_density") : NULL;
+ 
+  enzo_float * dH2I   = field.is_field("H2I_density") ? 
+          (enzo_float*) field.values("H2I_density") : NULL;
+  enzo_float * dH2II  = field.is_field("H2II_density") ? 
+          (enzo_float*) field.values("H2II_density") : NULL;
+  enzo_float * dHM    = field.is_field("HM_density") ? 
+          (enzo_float*) field.values("HM_density") : NULL;
+
+  enzo_float * dDI    = field.is_field("DI_density") ? 
+         (enzo_float *) field.values("DI_density") : NULL;
+  enzo_float * dDII   = field.is_field("DII_density") ? 
+         (enzo_float *) field.values("DII_density") : NULL;
+  enzo_float * dHDI   = field.is_field("HDI_density") ? 
+         (enzo_float *) field.values("HDI_density") : NULL;
+
   const int index = INDEX(ix,iy,iz,mx,my);
 
-  int stretch_factor = 1.0;  //1.5/sin(M_PI/10.0);  // How far should cloud particles be from their host
-                               // in units of dx. Since the cloud forms a sphere shell, stretchFactor > 1 is not recommended
+  int stretch_factor = 1.0;  
 
   const int nCouple = 26; // 3x3x3 cube minus central cell
   const double A = stretch_factor * hx;
@@ -904,7 +917,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
       CloudParticlePositionX[cpInd] = xp - CloudParticleVectorX[cpInd]*inv_norm * A;
       CloudParticlePositionY[cpInd] = yp - CloudParticleVectorY[cpInd]*inv_norm * A;
       CloudParticlePositionZ[cpInd] = zp - CloudParticleVectorZ[cpInd]*inv_norm * A;
-      weightsVector[cpInd] = 1.0; //0.5 * (1. - 1. / (1. + 1. / 4. / cello::pi / 26. / xbaMag / cello::pi));
+      weightsVector[cpInd] = 1.0; 
       /* turn the vectors back into unit-vectors */
       CloudParticleVectorZ[cpInd] *= inv_norm;
       CloudParticleVectorY[cpInd] *= inv_norm;
@@ -926,8 +939,6 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 
 /* AJE LEFT OFF HERE */
 
-//TODO: Add refresh here after actual deposition
-
      /* 
          transform to comoving with the star and transform velocities to momenta
          for easy momentum deposition, since the fluid variable that PPM pushes
@@ -942,12 +953,29 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
      M_shell > 0 iff v_shell > v_gas 
   */ 
   double Z_mean=0, d_mean=0, n_mean=0, v_mean=0, mu_mean=0;
+  double mu=0;
+  chemistry_data * grackle_chemistry =
+    enzo::config()->method_grackle_chemistry;
+  int primordial_chemistry = grackle_chemistry->primordial_chemistry;
   for (int ix_ = ix-1; ix_ < ix+2; ix_++) {
     for (int iy_ = iy-1; iy_ < iy+2; iy_++) {
       for (int iz_ = iz-1; iz_ < iz+2; iz_++) {
         int ind = INDEX(ix_,iy_,iz_, mx,my);
         Z_mean += mf[ind] / d[ind];
-        mu_mean += enzo_config->ppm_mol_weight; // TODO: make EnzoComputeMolecularWeight? 
+        // TODO: make EnzoComputeMolecularWeight, and just access mu_field here.
+        if (primordial_chemistry == 0) mu = enzo_config->ppm_mol_weight;
+        else {
+          mu = d_el[ind] + dHI[ind] + dHII[ind] + 0.25*(dHeI[ind]+dHeII[ind]+dHeIII[ind]);
+
+          if (primordial_chemistry > 1) {
+            mu += dHM[ind] + 0.5*(dH2I[ind]+dH2II[ind]);
+          }
+          if (primordial_chemistry > 2) {
+            mu += 0.5*(dDI[ind] + dDII[ind]) + dHDI[ind]/3.0;
+          }
+        }
+        mu /= d[ind]; // divide by density to get ~
+        mu_mean += mu; 
         d_mean += d[ind];
       } 
     }
