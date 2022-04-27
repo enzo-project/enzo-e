@@ -70,7 +70,8 @@ endfunction()
 ############################### UNIT TESTS ####################################
 # The following tests are self-contained binary of individual components
 
-#setup_test_unit(Array ArrayComponent/Array test_cello_array)
+setup_test_unit(Array ArrayComponent/Array test_cello_array)
+setup_test_unit(Error ErrorComponent/Error test_error)
 setup_test_unit(Memory MemoryComponent/Memory test_memory)
 setup_test_unit(Monitor MonitorComponent/Monitor test_monitor)
 #setup_test_unit( Component/ test_)
