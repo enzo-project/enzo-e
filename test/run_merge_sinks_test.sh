@@ -75,7 +75,7 @@ echo ""
 echo "Executing parallel tests"
 echo ""
 echo "Beginning to run the parallel stationary merge sinks test"
-python $testPrefix/run_merge_sinks_test.py --launch_cmd "charmrun +p4 ++local ./bin/enzo-e" --prec $CELLO_PREC --ics_type stationary
+python $testPrefix/run_merge_sinks_test.py --launch_cmd "$CHARM_HOME/bin/charmrun +p4 ++local ./bin/enzo-e" --prec $CELLO_PREC --ics_type stationary
 ERR_CODE=$?				   
 if [ $ERR_CODE -gt 0 ]; then
     ((PARALLEL_FAILED++))
