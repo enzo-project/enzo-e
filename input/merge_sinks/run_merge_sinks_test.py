@@ -58,7 +58,7 @@ def run_test(executable):
     command = executable + ' ' + param_file
     subprocess.call(command,shell = True)
 
-    def analyze_test(prec):
+def analyze_test(prec):
 
     # set tolerance level depending on whether Enzo-E was compiled with single or
     # double precision
