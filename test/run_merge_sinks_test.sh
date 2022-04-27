@@ -75,8 +75,8 @@ echo ""
 echo "Executing parallel tests"
 echo ""
 echo "Beginning to run the parallel stationary merge sinks test"
-python $testPrefix/run_merge_sinks_test.py --launch_cmd "$CHARM_HOME/bin/charmrun +p4 ++local ./bin/enzo-e" --prec $CELLO_PREC --ics_type stationary
-ERR_CODE=$?				   
+python $testPrefix/run_merge_sinks_test.py --launch_cmd "$CHARM_HOME/bin/charmrun +p4 ++local ./bin/enzo-e" --prec $CELLO_PREC --ics_type stationary > test/merge_sinks_stationary_parallel.test-log 2>&1
+ERR_CODE=$?
 if [ $ERR_CODE -gt 0 ]; then
     ((PARALLEL_FAILED++))
     echo "FAILED"
@@ -84,15 +84,15 @@ else
     echo "PASSED"
 fi
 
-# echo "Beginning to run the parallel drifting merge sinks test"
-# python $testPrefix/run_merge_sinks_test.py --launch_cmd "charmrun +p4 ++local ./bin/enzo-e" --prec $CELLO_PREC --ics_type drift > test/merge_sinks_drift_parallel.test-log 2>&1
-# ERR_CODE=$?				   
-# if [ $ERR_CODE -gt 0 ]; then
-#     ((PARALLEL_FAILED++))
-#     echo "FAILED"
-# else
-#     echo "PASSED"
-# fi
+echo "Beginning to run the parallel drifting merge sinks test"
+python $testPrefix/run_merge_sinks_test.py --launch_cmd "$CHARM_HOME/bin/charmrun +p4 ++local ./bin/enzo-e" --prec $CELLO_PREC --ics_type drift > test/merge_sinks_drift_parallel.test-log 2>&1
+ERR_CODE=$?
+if [ $ERR_CODE -gt 0 ]; then
+    ((PARALLEL_FAILED++))
+    echo "FAILED"
+else
+    echo "PASSED"
+fi
 
 N_PARALLEL_TESTS=2
 echo ""
