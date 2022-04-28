@@ -132,7 +132,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
   int ib  = 0; // batch counter
   int ipp = 0; // counter
 
-  /// pointers for particle attribut arrays (later)
+  /// pointers for particle attribute arrays (later)
   enzo_float * pmass = 0;
   enzo_float * px   = 0;
   enzo_float * py   = 0;
@@ -228,7 +228,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
     enzo::config()->method_grackle_chemistry;
 
   int primordial_chemistry = grackle_chemistry->primordial_chemistry;
-  int mu = enzo_config->ppm_mol_weight;
+  double mu = enzo_config->ppm_mol_weight;
   // iterate over all cells (not including ghost zones)
   for (int iz=gz; iz<nz+gz; iz++){
     for (int iy=gy; iy<ny+gy; iy++){

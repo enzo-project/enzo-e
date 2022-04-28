@@ -399,8 +399,6 @@ void EnzoMethodFeedbackSTARSS::compute (Block * block) throw()
     this->compute_(block);
   }
 
-  block->compute_done();
-
   return;
 }
 
@@ -545,6 +543,7 @@ void EnzoBlock::p_method_feedback_starss_end()
   EnzoMethodFeedbackSTARSS * method = static_cast<EnzoMethodFeedbackSTARSS*> (this->method());
   method->add_accumulate_fields(this);
 
+  compute_done();
   return;
 }
 

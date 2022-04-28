@@ -88,7 +88,7 @@ Group {
 }
 
 Method {
-  list = [ "ppm",  "grackle", "feedback"];
+  list = [ "ppm", "grackle", "feedback"];
 
   null {
     dt = 10.0; # force a minimum dt - code units
@@ -322,5 +322,5 @@ Output {
 }
 
 Stopping {
-    cycle = 1; #401;
+    cycle = 10; #401;
 }
