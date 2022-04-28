@@ -394,9 +394,9 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         // pointer to mass array in block
         pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib);
 
-        // TODO: if cosmology: "mass" is actually mass??
-        //       else: "mass" is density???
-        pmass[io] = new_mass;
+        // TODO: saving particle mass as density. May need to update this in the future
+        //       when PR #89 passes 
+        pmass[io] = new_mass / cell_volume;
         px = (enzo_float *) particle.attribute_array(it, ia_x, ib);
         py = (enzo_float *) particle.attribute_array(it, ia_y, ib);
         pz = (enzo_float *) particle.attribute_array(it, ia_z, ib);
@@ -456,10 +456,10 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         this->rescale_densities(enzo_block, i, scale);
 
         if (metal){
-          metal /= scale; // undo metal_density rescaling because we can directly subtract correct amount
+          metal[i] /= scale; // undo metal_density rescaling because we can directly subtract correct amount
           pmetal     = (enzo_float *) particle.attribute_array(it, ia_metal, ib);
           pmetal[io] = metal[i] / density[i]; // in ABSOLUTE units
-          metal[i] -= pmetal[io] * pmass[io]/cell_volume;
+          metal[i] -= pmetal[io] * new_mass/cell_volume;
         }
       }
     }

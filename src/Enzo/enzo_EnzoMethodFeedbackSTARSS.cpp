@@ -563,6 +563,9 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
   Particle particle = enzo_block->data()->particle();
   EnzoUnits * enzo_units = enzo::units();
 
+  double munit = enzo_units->mass();
+  double tunit = enzo_units->time();
+
   double current_time  = block->time();
 
   Field field = enzo_block->data()->field();
@@ -608,6 +611,9 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
   }
   CkPrintf("(block [%.3f, %.3f, %.3f]) totalMass before feedback: %e Msun\n", xm, ym,zm, totalMass); 
 */
+
+  double cell_volume = hx*hy*hz;
+
   const int ia_m = particle.attribute_index (it, "mass");
   const int ia_x  = particle.attribute_index (it, "x");
   const int ia_y  = particle.attribute_index (it, "y");
@@ -661,6 +667,9 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
       int ipdmf = ip*dmf; // metallicity
       int ipsn  = ip*dsn; // number of SNe counter
 
+      // TODO: Assumes particle mass is saved as density. Change when PR #89 passes
+      double pmass_solar = pmass[ipdm]*cell_volume * munit/cello::mass_solar;
+
       if (pmass[ipdm] > 0.0 && plifetime[ipdl] > 0.0){
         const double age = (current_time - pcreation[ipdc]) * enzo_units->time() / cello::Myr_s;
         count++; // increment particles examined here
@@ -691,8 +700,8 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
 
           /* Determine SN events from rates (currently taken from Hopkins 2018) */
 
-          determineSN(age, &nSNII, &nSNIa, pmass[ipdm] * enzo_units->mass() / cello::mass_solar,
-                      enzo_units->time(), block->dt());
+          determineSN(age, &nSNII, &nSNIa, pmass_solar,
+                      tunit, block->dt());
 
           numSN += nSNII + nSNIa;
 #ifdef DEBUG_FEEDBACK_STARSS
@@ -741,8 +750,8 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
 
 
           determineWinds(age, &windEnergy, &windMass, &windMetals,
-                         pmass[ipdm] * enzo_units->mass() / cello::mass_solar,
-                         starZ, enzo_units->time(), block->dt());
+                         pmass_solar,
+                         starZ, tunit, block->dt());
 
           /* Error messages go here */
 
@@ -753,14 +762,15 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
             this->deposit_feedback( block, windEnergy, windMass, windMetals,
                                     pvx[ipdv],pvy[ipdv],pvz[ipdv],
                                     px[ipdp],py[ipdp],pz[ipdp],
-                                    ix, iy, iz, 1, 0, 0, 0.0); // removed P3
+                                    ix, iy, iz, 1, 0, 0, starZ); // removed P3
 
           } // if wind mass > 0
         } // if winds
 
+        // TODO: Assumes particle mass is density. Update when PR #89 passes
         pmass[ipdm] -= std::max(0.0,
                        (windMass + SNMassEjected) /
-                       (enzo_units->mass()/cello::mass_solar));
+                       (munit/cello::mass_solar)) / cell_volume;
 
 
         //
