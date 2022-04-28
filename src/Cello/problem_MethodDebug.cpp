@@ -89,7 +89,7 @@ void MethodDebug::compute ( Block * block) throw()
               reduce[4*index_field+2],reduce[4*index_field+3],reduce[4*index_field+1]);
   }    
 #endif    
-  
+
   CkCallback callback (CkIndex_Block::r_method_debug_sum_fields(NULL), 
                        block->proxy_array());
 

@@ -26,6 +26,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import io
 import argparse as ap
+import sys
 
 ############################################################################
 
@@ -52,7 +53,7 @@ def test_error(quantity_list,tolerance):
         return (error_list,return_val)
     except:
         print("Encounted error while trying to calculate error in quantity")
-        sys.exit(2)
+        sys.exit(1)
 
 def test_mmc(tolerance,input_prefix,output):
     
@@ -122,7 +123,7 @@ def test_mmc(tolerance,input_prefix,output):
     ax[2].set_xlabel("Cycle number")
     fig.savefig(output)
     plt.close(fig)
-    
+    print(f"Saved plot to {output}")
     return mass_error_pass and px_error_pass and py_error_pass and pz_error_pass
 
 if __name__ == "__main__":
@@ -168,18 +169,21 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    
+    test_passed = False
     try:
         if test_mmc(args.tolerance,
                     args.input_prefix,
                     args.output):
-            sys.exit(0)
-        else:
-            print("Test failed, mass and momentum not conserved")
-            sys.exit(3)
+            test_passed = True
 
     except:
         print("Encountered error when trying to test mass and momentum conservation")
-        sys.exit(4)
+        sys.exit(2)
 
-    
+    if test_passed:
+        print("Test passed!")
+        sys.exit(0)
+    else:
+        print("Test failed, mass and momentum not conserved")
+        sys.exit(3)
+

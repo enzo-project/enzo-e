@@ -142,15 +142,20 @@ module enzo {
 
     entry void r_startup_begun (CkReductionMsg *);
 
+#ifdef BYPASS_CHARM_MEM_LEAK
     entry void p_get_msg_refine(Index index);
-  }
+#endif
+}
 
   array[Index] EnzoBlock : Block {
 
-    entry EnzoBlock (MsgRefine * msg);
+#ifdef BYPASS_CHARM_MEM_LEAK
     entry EnzoBlock (process_type ip_source);
-    entry EnzoBlock();
     entry void p_set_msg_refine (MsgRefine * msg);
+#else
+    entry EnzoBlock (MsgRefine * msg);
+#endif
+    entry EnzoBlock();
 
     // EnzoMethodTurbulence synchronization entry methods
     entry void r_method_turbulence_end(CkReductionMsg *msg);

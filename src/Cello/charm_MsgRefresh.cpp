@@ -9,8 +9,6 @@
 #include "charm.hpp"
 #include "charm_simulation.hpp"
 
-// #undef TRACE_MSG_REFRESH
-
 //----------------------------------------------------------------------
 
 long MsgRefresh::counter[CONFIG_NODE_SIZE] = { };
@@ -23,11 +21,6 @@ MsgRefresh::MsgRefresh()
       id_refresh_(-1),
       data_msg_(nullptr),
       buffer_(nullptr)
-#ifdef TRACE_MSG_REFRESH      
-    ,
-      name_block_(),
-      name_type_()
-#endif      
 {
   ++counter[cello::index_static()];
 }
@@ -64,15 +57,9 @@ void * MsgRefresh::pack (MsgRefresh * msg)
   int size = 0;
 
   size += sizeof(int); // id_refresh
-  
-#ifdef TRACE_MSG_REFRESH      
-  size += sizeof(int) + msg->name_block_.size()*sizeof(char);
-  size += sizeof(int) + msg->name_type_.size()*sizeof(char);
-#endif
-  
   size += sizeof(int);  // have_data
   int have_data = (msg->data_msg_ != nullptr);
-  
+
   if (have_data) {
     // data_msg_
     size += msg->data_msg_->data_size();
@@ -97,15 +84,6 @@ void * MsgRefresh::pack (MsgRefresh * msg)
 
   (*pi++) = msg->id_refresh_;
 
-#ifdef TRACE_MSG_REFRESH
-  int n=msg->name_block_.size();
-  (*pi++) = n;
-  for (int i=0; i<n; i++) (*pc++) = msg->name_block_[i];
-  n=msg->name_type_.size();
-  (*pi++) = n;
-  for (int i=0; i<n; i++) (*pc++) = msg->name_type_[i];
-#endif  
-  
   have_data = (msg->data_msg_ != nullptr);
   (*pi++) = have_data;
   if (have_data) {
@@ -150,22 +128,6 @@ MsgRefresh * MsgRefresh::unpack(void * buffer)
 
   msg->id_refresh_ = (*pi++) ;
 
-#ifdef TRACE_MSG_REFRESH      
-  int n = (*pi++);
-  msg->name_block_="";
-  for (int i=0; i<n; i++) {
-    const std::string s(1,(*pc++));
-    msg->name_block_.append(s);
-  }
-
-  n = (*pi++);
-  msg->name_type_="";
-  for (int i=0; i<n; i++) {
-    const std::string s(1,(*pc++));
-    msg->name_type_.append(s);
-  }
-#endif  
-  
   int have_data = (*pi++);
   if (have_data) {
     msg->data_msg_ = new DataMsg;

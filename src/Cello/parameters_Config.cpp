@@ -65,7 +65,6 @@ void Config::pup (PUP::er &p)
 
   p | num_fields;
   p | field_list;
-  p | field_index;
   p | field_alignment;
   PUParray(p,field_centering,3);
   PUParray(p,field_ghost_depth,3);
@@ -510,6 +509,8 @@ void Config::read_field_ (Parameters * p) throw()
 
   field_list.resize(num_fields);
 
+  std::map<std::string, int> field_index;
+
   for (int i=0; i<num_fields; i++) {
     field_list[i] = p->list_value_string(i, "Field:list");
     field_index[field_list[i]] = i;
@@ -573,7 +574,25 @@ void Config::read_field_ (Parameters * p) throw()
 
   // Add fields to groups (Group : <group_name> : field_list)
 
-  int num_groups = p->list_length("Group:list"); 
+  int num_groups = p->list_length("Group:list");
+
+  auto find_field_index = [&field_index](const std::string& field,
+                                         const std::string& group) -> int
+    {
+      // don't use field_index[field] to access the index of a field because
+      // we're not certain field_index already contains an entry for field. In
+      // the case where field_index doesn't already contain an entry for field,
+      // then an entry is created (with an incorrect index)
+
+      auto search = field_index.find(field);
+      if (search == field_index.end()){
+        ERROR2("Config::read_field_",
+               ("Can't add the \"%s\" field to the \"%s\" group because the "
+                "field has not been defined"),
+               field.c_str(), group.c_str());
+      }
+      return search->second;
+    };
 
   for (int index_group = 0; index_group < num_groups; index_group++) {
 
@@ -586,13 +605,13 @@ void Config::read_field_ (Parameters * p) throw()
       const int n = p->list_length(param);
       for (int i=0; i<n; i++) {
 	std::string field = p->list_value_string(i,param);
-	const int index_field = field_index[field];
+	const int index_field = find_field_index(field,group);
 	field_group_list[index_field].push_back(group);
       }
     } else if (p->type(param) == parameter_string) {
       // field_list is a string
       std::string field = p->value_string(param);
-      const int index_field = field_index[field];
+      const int index_field = find_field_index(field,group);
       field_group_list[index_field].push_back(group);
     }
   }

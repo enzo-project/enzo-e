@@ -20,7 +20,6 @@
      entry void p_adapt_called();
      entry void p_adapt_end();
      entry void p_adapt_update();
-     entry void p_adapt_next();
      entry void p_adapt_exit();
      entry void p_compute_enter();
      entry void p_compute_continue();
