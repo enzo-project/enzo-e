@@ -4,7 +4,7 @@
 /// @author   Stefan Arridge (stefan.arridge@gmail.com)
 /// @date     2021-03-21
 /// @brief    Implementation of EnzoInitialAccretionTest, an initializer for an
-///           accretion test problem, which puts an accreting star particle with
+///           accretion test problem, which puts an accreting sink particle with
 ///           a given initial position and velocity in a static medium of gas with
 ///           constant density and internal energy.
 
@@ -23,9 +23,9 @@ public: // interface
   /// CHARM++ constructor
   EnzoInitialAccretionTest
   (int cycle, double time,
-   const double star_position[3],
-   const double star_velocity[3],
-   double star_mass,
+   const double sink_position[3],
+   const double sink_velocity[3],
+   double sink_mass,
    double gas_density,
    double gas_pressure
    ) throw();
@@ -36,17 +36,17 @@ public: // interface
   /// CHARM++ migration constructor
   EnzoInitialAccretionTest(CkMigrateMessage *m)
     : Initial (m),
-      star_mass_(0.0),
+      sink_mass_(0.0),
       gas_density_(0.0),
       gas_pressure_(0.0)
   {
-    star_position_[0] = 0.0;
-    star_position_[1] = 0.0;
-    star_position_[2] = 0.0;
+    sink_position_[0] = 0.0;
+    sink_position_[1] = 0.0;
+    sink_position_[2] = 0.0;
 
-    star_velocity_[0] = 0.0;
-    star_velocity_[1] = 0.0;
-    star_velocity_[2] = 0.0;
+    sink_velocity_[0] = 0.0;
+    sink_velocity_[1] = 0.0;
+    sink_velocity_[2] = 0.0;
   }
 
   /// CHARM++ Pack / Unpack function
@@ -62,14 +62,14 @@ public: // interface
 
   private: // attributes
   
-  /// Initial position of the star particle
-  double star_position_[3];
+  /// Initial position of the sink particle
+  double sink_position_[3];
 
-  /// Initial velocity of the star particle
-  double star_velocity_[3];
+  /// Initial velocity of the sink particle
+  double sink_velocity_[3];
 
-  /// Initial mass of the star particle
-  double star_mass_;
+  /// Initial mass of the sink particle
+  double sink_mass_;
 
   /// Initial constant density of the gas
   double gas_density_;

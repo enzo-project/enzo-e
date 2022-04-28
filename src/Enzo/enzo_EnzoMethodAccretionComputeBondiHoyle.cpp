@@ -49,7 +49,7 @@ void EnzoMethodAccretionComputeBondiHoyle::compute (Block * block) throw()
   // Only call compute_ if block is at highest refinement level.
   // Currently this method can only be used if refinement is turned off
   // (unigrid mode), but in future, we will have a refinement condition
-  // which forces blocks containing accreting star particles to be
+  // which forces blocks containing accreting sink particles to be
   // at the highest refinement level, and using this method will
   // require this refinement condition to be activated.
   //if (block->level() == enzo::config()->mesh_max_level) {
@@ -97,7 +97,7 @@ void EnzoMethodAccretionComputeBondiHoyle::compute (Block * block) throw()
 //   const double cell_volume_cgs = hx_cgs * hy_cgs * hz_cgs;
 
 //   Particle particle = block->data()->particle();
-//   int it = particle.type_index("star");
+//   int it = particle.type_index("sink");
 //   int num_particles = particle.num_particles(it);
 
 //   if (num_particles > 0) {

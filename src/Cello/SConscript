@@ -154,18 +154,22 @@ sources_test =        [Glob('test_Unit*cpp')]
 env.CharmBuilder(['main_enzo.decl.h','main_enzo.def.h'],
 	'main_enzo.ci',ARG = 'main_enzo')
 env.CppBuilder('main_enzo.ci','main_enzo.CI',ARG = 'main_enzo')
+Depends('main_enzo.ci','main_include.h')
 
 env.CharmBuilder(['main.decl.h','main.def.h'],
 	'main.ci',ARG = 'main')
 env.CppBuilder('main.ci','main.CI',ARG = 'main')
+Depends('main.ci','main_include.h')
 
 env.CharmBuilder (['main_simulation.decl.h','main_simulation.def.h'],
         'main_simulation.ci', ARG = 'main_simulation')
 env.CppBuilder('main_simulation.ci','main_simulation.CI',ARG = 'main_simulation')
+Depends('main_simulation.ci','main_include.h')
 
 env.CharmBuilder(['main_mesh.decl.h','main_mesh.def.h'],
 	'main_mesh.ci',ARG = 'main_mesh')
 env.CppBuilder('main_mesh.ci','main_mesh.CI',ARG = 'main_mesh')
+Depends('main_mesh.ci','main_include.h')
 
 env.CharmBuilder(['mesh.decl.h','mesh.def.h'],
 	'mesh.ci',ARG = 'mesh')
@@ -173,6 +177,7 @@ env.CppBuilder('mesh.ci','mesh.CI',ARG = 'mesh')
 
 env.CharmBuilder(['simulation.decl.h','simulation.def.h'],
 	'simulation.ci',ARG='simulation')
+env.CppBuilder('simulation.ci','simulation.CI',ARG = 'mesh')
 
 includes_main.append(['main_include.h'])
 includes_main.append(['main_enzo.decl.h','main_enzo.def.h'])
@@ -294,6 +299,8 @@ test_value        = env.Program (['test_Value.cpp', objs_mesh],
                                  LIBS=[libs_mesh,  libs_test])
 test_box        = env.Program (['test_Box.cpp', objs_mesh],
                                  LIBS=[libs_mesh,  libs_test])
+test_adapt        = env.Program (['test_Adapt.cpp', objs_mesh],
+                                 LIBS=[libs_mesh,  libs_test])
 
 test_memory       = env.Program ('test_Memory.cpp',     LIBS=[libs_memory, libs_test])
 test_monitor      = env.Program ('test_Monitor.cpp',    LIBS=[libs_monitor,libs_test])
@@ -348,7 +355,7 @@ binaries_data = [test_scalar_data,
 binaries_problem = [test_mask,test_value,test_refresh,test_box]
 binaries_io    = [test_colormap]
 binaries_memory  = [test_memory]
-binaries_mesh = [ test_data,test_block_trace,test_tree,test_tree_density,test_sync,test_node,test_node_trace,test_it_node,test_index,test_face,test_face_fluxes,test_flux_data,test_prolong_linear,test_schedule,test_it_face,test_it_child]
+binaries_mesh = [ test_data,test_block_trace,test_tree,test_tree_density,test_sync,test_node,test_node_trace,test_it_node,test_index,test_face,test_face_fluxes,test_flux_data,test_prolong_linear,test_schedule,test_it_face,test_it_child,test_adapt]
 binaries_monitor = [test_monitor]
 
 objs_parallel.append(["main.cpp"])

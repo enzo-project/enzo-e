@@ -32,7 +32,6 @@ void IoEnzoBlock::set_block (Block * block) throw()
 
   IoBlock::set_block (block);
 
-  int i;
   EnzoBlock * enzo_block = static_cast<EnzoBlock*>(block);
   
   enzo_dt_ = enzo_block->dt;

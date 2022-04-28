@@ -1,34 +1,34 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file	  enzo_EnzoMethodMergeStars.hpp
+/// @file   enzo_EnzoMethodMergeSinks.hpp
 /// @author Stefan Arridge (stefan.arridge@gmail.com)
 /// @date   18 January 2022
-/// @brief  Implementation of EnzoMethodMergeStars class, a method for merging
-///         star particles separated by a distance less than the merging
+/// @brief  Implementation of EnzoMethodMergeSinks class, a method for merging
+///         sink particles separated by a distance less than the merging
 ///         radius.
 
-#ifndef ENZO_ENZO_METHOD_MERGESTARS
-#define ENZO_ENZO_METHOD_MERGESTARS
+#ifndef ENZO_ENZO_METHOD_MERGESINKS
+#define ENZO_ENZO_METHOD_MERGESINKS
 
-class EnzoMethodMergeStars : public Method {
+class EnzoMethodMergeSinks : public Method {
 
-  /// @class   EnzoMethodMergeStars
+  /// @class   EnzoMethodMergeSinks
   /// @ingroup Enzo
-  /// @brief   [\ref Enzo] Encapsulate Merge Star Routines
+  /// @brief   [\ref Enzo] Encapsulate Merge Sink Routines
 
 public:
 
-  // Create a new MergeStars object
-  EnzoMethodMergeStars(double merging_radius_cells);
+  // Create a new MergeSinks object
+  EnzoMethodMergeSinks(double merging_radius_cells);
 
   /// Destructor
-  virtual ~EnzoMethodMergeStars() throw() {};
+  virtual ~EnzoMethodMergeSinks() throw() {};
 
   /// Charm++ Pup::able declarations
-  PUPable_decl(EnzoMethodMergeStars);
+  PUPable_decl(EnzoMethodMergeSinks);
 
   /// Charm++ PUP::able migration constructor
-  EnzoMethodMergeStars (CkMigrateMessage *m)
+  EnzoMethodMergeSinks (CkMigrateMessage *m)
     : Method (m)
     {  }
 
@@ -40,11 +40,11 @@ public:
 
   /// Name
   virtual std::string name () throw()
-  { return "merge_stars"; }
+  { return "merge_sinks"; }
 
   /// Not sure if this is needed
   virtual std::string particle_type () throw()
-  { return "star";}
+  { return "sink";}
 
   // Compute the maximum timestep for this method
   virtual double timestep ( Block * block) const throw();
@@ -66,4 +66,4 @@ protected: // attributes
   enzo_float merging_radius_cells_;
 };
 
-#endif /* EnzoMethodMergeStars */
+#endif /* EnzoMethodMergeSinks */

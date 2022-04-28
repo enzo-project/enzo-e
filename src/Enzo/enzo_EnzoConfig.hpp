@@ -292,10 +292,10 @@ public: // interface
       initial_IG_recent_SF_bin_size(5.0),
       initial_IG_recent_SF_SFR(2.0),
       initial_IG_recent_SF_seed(12345),
-      // EnzoInitialMergeStarsTest
-      initial_merge_stars_test_particle_data_filename(""),
+      // EnzoInitialMergeSinksTest
+      initial_merge_sinks_test_particle_data_filename(""),
       // EnzoInitialAccretionTest
-      initial_accretion_test_star_mass(0.0),
+      initial_accretion_test_sink_mass(0.0),
       initial_accretion_test_gas_density(0.0),
       initial_accretion_test_gas_pressure(0.0),
       // EnzoMethodCheckGravity
@@ -377,8 +377,8 @@ public: // interface
       method_vlct_mhd_choice(""),
       method_vlct_dual_energy(false),
       method_vlct_dual_energy_eta(0.0),
-      // EnzoMethodMergeStars
-      method_merge_stars_merging_radius_cells(0.0),
+      // EnzoMethodMergeSinks
+      method_merge_sinks_merging_radius_cells(0.0),
       // EnzoMethodAccretionCompute
       method_accretion_compute_accretion_radius_cells(0.0),
       method_accretion_compute_flavor(""),
@@ -415,8 +415,8 @@ public: // interface
       initial_collapse_array[axis] = 0;
       initial_IG_center_position[axis] = 0.5;
       initial_IG_bfield[axis]         = 0.0;
-      initial_accretion_test_star_position[axis] = 0.0;
-      initial_accretion_test_star_velocity[axis] = 0.0;
+      initial_accretion_test_sink_position[axis] = 0.0;
+      initial_accretion_test_sink_velocity[axis] = 0.0;
       method_background_acceleration_center[axis] = 0.5;
       method_background_acceleration_angular_momentum[axis] = 0;
 
@@ -454,7 +454,7 @@ protected: // methods
   void read_initial_turbulence_(Parameters *);
   void read_initial_isolated_galaxy_(Parameters *);
   void read_initial_feedback_test_(Parameters *);
-  void read_initial_merge_stars_test_(Parameters *);
+  void read_initial_merge_sinks_test_(Parameters *);
   void read_initial_accretion_test_(Parameters *);
   
   void read_method_grackle_(Parameters *);
@@ -468,7 +468,7 @@ protected: // methods
   void read_method_pm_update_(Parameters *);
   void read_method_ppm_(Parameters *);
   void read_method_turbulence_(Parameters *);
-  void read_method_merge_stars_(Parameters *);
+  void read_method_merge_sinks_(Parameters *);
   void read_method_accretion_compute_(Parameters *);
   
   void read_physics_(Parameters *);
@@ -702,13 +702,13 @@ public: // attributes
   double                     initial_IG_recent_SF_SFR;
   int                        initial_IG_recent_SF_seed;
 
-  // EnzoInitialMergeStarsTest
-  std::string                initial_merge_stars_test_particle_data_filename;
+  // EnzoInitialMergeSinksTest
+  std::string                initial_merge_sinks_test_particle_data_filename;
 
   // EnzoInitialAccretionTest
-  double                     initial_accretion_test_star_position[3];
-  double                     initial_accretion_test_star_velocity[3];
-  double                     initial_accretion_test_star_mass;
+  double                     initial_accretion_test_sink_position[3];
+  double                     initial_accretion_test_sink_velocity[3];
+  double                     initial_accretion_test_sink_mass;
   double                     initial_accretion_test_gas_density;
   double                     initial_accretion_test_gas_pressure;
 
@@ -813,8 +813,8 @@ public: // attributes
   // closer to method_ppm_dual_energy_eta1
   double                     method_vlct_dual_energy_eta;
 
-  /// EnzoMethodMergeStars
-  double                     method_merge_stars_merging_radius_cells;
+  /// EnzoMethodMergeSinks
+  double                     method_merge_sinks_merging_radius_cells;
 
   /// EnzoMethodAccretionCompute
   double                     method_accretion_compute_accretion_radius_cells;

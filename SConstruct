@@ -8,7 +8,15 @@ import socket
 # USER CONFIGURATION
 #======================================================================
 
-new_adapt = 1
+#----------------------------------------------------------------------
+# Whether to bypass passing MsgRefine directly to Block constructor,
+# or request it from a separate entry method to bypass a Charm++
+# memory leak. This should only be set to 0 after (and if) the bug is
+# addressed in Charm++, or when explicitly testing a Charm++ build for
+# this bug.
+# ----------------------------------------------------------------------
+
+bypass_charm_mem_leak = 1
 
 #----------------------------------------------------------------------
 # Maximum number of procesess per shared-memory node (can be larger than needed)
@@ -302,15 +310,15 @@ else:
 
 defines.append(define_int_size)
 
+if (bypass_charm_mem_leak == 1):
+   defines.append('BYPASS_CHARM_MEM_LEAK')
+
 defines.append({'CONFIG_NODE_SIZE' : node_size })
 defines.append({'CONFIG_NODE_SIZE_3' : node_size*3 })
 
 defines.append(define_png)
 
 charm_perf = ''
-
-if (new_adapt == 1):
-     defines.append('NEW_ADAPT')
 
 if (use_projections == 1):
      defines.append(define_projections)
@@ -581,9 +589,9 @@ Export('use_papi')
 if (have_git == 1):
    branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).rstrip()
    build_dir = 'build-' + branch.decode('utf-8')
-else:     
+else:
    build_dir = 'build'
-   
+
 SConscript( 'src/SConscript',variant_dir=build_dir)
 SConscript('test/SConscript')
 

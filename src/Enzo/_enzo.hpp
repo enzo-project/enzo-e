@@ -201,7 +201,7 @@ extern "C" {
 #include "enzo_EnzoInitialTurbulence.hpp"
 #include "enzo_EnzoInitialIsolatedGalaxy.hpp"
 #include "enzo_EnzoInitialBurkertBodenheimer.hpp"
-#include "enzo_EnzoInitialMergeStarsTest.hpp"
+#include "enzo_EnzoInitialMergeSinksTest.hpp"
 #include "enzo_EnzoInitialAccretionTest.hpp"
 
 #include "enzo_EnzoRefineShock.hpp"
@@ -243,7 +243,7 @@ extern "C" {
 #include "enzo_EnzoMethodStarMaker.hpp"
 #include "enzo_EnzoMethodStarMakerStochasticSF.hpp"
 #include "enzo_EnzoMethodMHDVlct.hpp"
-#include "enzo_EnzoMethodMergeStars.hpp"
+#include "enzo_EnzoMethodMergeSinks.hpp"
 #include "enzo_EnzoMethodAccretionCompute.hpp"
 #include "enzo_EnzoMethodAccretionComputeDensThresh.hpp"
 #include "enzo_EnzoMethodAccretionComputeBondiHoyle.hpp"

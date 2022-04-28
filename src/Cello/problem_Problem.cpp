@@ -832,9 +832,8 @@ Method * Problem::method (std::string name) const throw()
 
 //----------------------------------------------------------------------
 
-bool Problem::method_exists (std::string name) const throw()
-{
-  for (size_t i=0; i<method_list_.size(); i++) {
+bool Problem::method_exists(const std::string& name) const throw() {
+  for (size_t i = 0; i < method_list_.size(); i++) {
     if (method_list_[i]->name() == name) return true;
   }
   return false;
@@ -842,27 +841,37 @@ bool Problem::method_exists (std::string name) const throw()
 
 //----------------------------------------------------------------------
 
-bool Problem::method_precedes (std::string name1,
-                               std::string name2) const throw()
-{
-  size_t ind1 = 0;
-  size_t ind2 = 0;
+bool Problem::method_precedes(const std::string& name1,
+                              const std::string& name2) const throw() {
+  size_t ind_1 = 0;
+  size_t ind_2 = 0;
+
   bool method_1_found = false;
   bool method_2_found = false;
-  for (size_t i=0; i<method_list_.size(); i++) {
+
+  bool no_repeats = true;
+  for (size_t i = 0; i < method_list_.size(); i++) {
     if (method_list_[i]->name() == name1) {
-      ind1 = i;
-      method_1_found = true;
+      if (method_1_found) {
+        no_repeats = false;
+        break;
+      } else {
+        method_1_found = true;
+        ind_1 = i;
+      }
     }
     if (method_list_[i]->name() == name2) {
-      ind2 = i;
-      method_2_found = true;
+      if (method_2_found) {
+        no_repeats = false;
+        break;
+      } else {
+        method_2_found = true;
+        ind_2 = i;
+      }
     }
-    if (method_1_found && method_2_found) break;
   }
 
-  if (!(method_1_found && method_2_found)) return false;
-  else return ind1 < ind2;
+  return no_repeats && method_1_found && method_2_found && (ind_1 < ind_2);
 }
 
 //----------------------------------------------------------------------

@@ -5,7 +5,7 @@
 /// @date       24 February 2022
 /// @brief  Implementation of EnzoMethodAccretionCompute, a base class
 ///         for "accretion compute" methods. These methods compute
-///         the accretion rate onto star particles, and change the properties
+///         the accretion rate onto sink particles, and change the properties
 ///         of the particles accordingly. Gas density is reduced by setting values
 ///         for the "density_accreted" field. The "accretion_remove_gas" method
 ///         then subtracts density_accreted from the gas density field
@@ -18,7 +18,7 @@ class EnzoMethodAccretionCompute : public Method {
   /// @class   EnzoMethodAccretionCompute
   /// @ingroup Enzo
   /// @brief   [\ref Enzo] Base class for AccretionCompute methods, which add
-  ///          mass to star particles and set negative values for density_accreted
+  ///          mass to sink particles and set negative values for density_accreted
   ///          field within an accretion zone.
 
 public:
@@ -52,7 +52,7 @@ public:
 
   /// Not sure if this is needed
   virtual std::string particle_type () throw()
-  { return "star";}
+  { return "sink";}
 
   // Compute the maximum timestep for this method
   virtual double timestep ( Block * block) const throw();
@@ -89,7 +89,7 @@ protected:
   double max_mass_fraction_;
 
   // If true, angular momentum of the gas in the accretion zone
-  // (with respect to the star particle) is conserved during accretion
+  // (with respect to the sink particle) is conserved during accretion
   // (See Bleuler and Teyssier 2014, MNRAS 445, 4015–4036 and
   // Krumholz+ 2004, ApJ, 611, 399 for details).
   bool conserve_angular_momentum_;

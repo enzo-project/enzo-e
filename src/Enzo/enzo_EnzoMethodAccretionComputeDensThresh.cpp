@@ -6,9 +6,9 @@
 /// @brief      Implementation of EnzoMethodAccretionComputeDensThresh, a class
 ///             from EnzoMethodAccretionCompute.
 ///             This method reduces the gas density in the accretion zone around
-///             a star particle to
+///             a sink particle to
 ///             max(density_threshold_,(1-max_mass_fraction)*density),
-///             and adds mass and momentum lost by the gas to the star particle.
+///             and adds mass and momentum lost by the gas to the sink particle.
 
 #include "cello.hpp"
 #include "enzo.hpp"
@@ -52,7 +52,7 @@ void EnzoMethodAccretionComputeDensThresh::compute (Block * block) throw()
   // Only call compute_ if block is at highest refinement level.
   // Currently this method can only be used if refinement is turned off
   // (unigrid mode), but in future, we will have a refinement condition
-  // which forces blocks containing accreting star particles to be
+  // which forces blocks containing accreting sink particles to be
   // at the highest refinement level, and using this method will
   // require this refinement condition to be activated.
   if (block->level() == enzo::config()->mesh_max_level) {
@@ -113,7 +113,7 @@ void EnzoMethodAccretionComputeDensThresh::compute_(Block * block)
   field.ghost_depth(0,&gx,&gy,&gz);
 
   Particle particle = block->data()->particle();
-  int it = particle.type_index("star");
+  int it = particle.type_index("sink");
   int num_particles = particle.num_particles(it);
 
   if (num_particles > 0) {

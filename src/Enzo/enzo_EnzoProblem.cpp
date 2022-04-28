@@ -252,14 +252,14 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_burkertbodenheimer_densityprofile);
   } else if (type == "isolated_galaxy") {
     initial = new EnzoInitialIsolatedGalaxy (enzo_config);
-  } else if (type == "merge_stars_test") {
-    initial = new EnzoInitialMergeStarsTest (enzo_config);
+  } else if (type == "merge_sinks_test") {
+    initial = new EnzoInitialMergeSinksTest (enzo_config);
   } else if (type == "accretion_test") {
     initial = new EnzoInitialAccretionTest
       (cycle, time,
-       enzo_config->initial_accretion_test_star_position,
-       enzo_config->initial_accretion_test_star_velocity,
-       enzo_config->initial_accretion_test_star_mass,
+       enzo_config->initial_accretion_test_sink_position,
+       enzo_config->initial_accretion_test_sink_velocity,
+       enzo_config->initial_accretion_test_sink_mass,
        enzo_config->initial_accretion_test_gas_density,
        enzo_config->initial_accretion_test_gas_pressure);
   } else {
@@ -350,8 +350,6 @@ Solver * EnzoProblem::create_solver_
   const EnzoConfig * enzo_config = enzo::config();
 
   Solver * solver = NULL;
-
-  int rank = config->mesh_root_rank;
 
   // Set solve type if not default "on_leaves" (solve_leaf)
 
@@ -712,10 +710,10 @@ Method * EnzoProblem::create_method_
     // need a similar type swtich as in star maker
     method = new EnzoMethodDistributedFeedback();
 
-  } else if (name == "merge_stars") {
+  } else if (name == "merge_sinks") {
 
-    method = new EnzoMethodMergeStars(
-		    enzo_config->method_merge_stars_merging_radius_cells
+    method = new EnzoMethodMergeSinks(
+		    enzo_config->method_merge_sinks_merging_radius_cells
 				     );
 
   } else if (name == "accretion_compute") {
@@ -743,7 +741,7 @@ Method * EnzoProblem::create_method_
 					      );
     }
   } else if (name == "accretion_remove_gas") {
-
+    
     method = new EnzoMethodAccretionRemoveGas();
     
   } else {

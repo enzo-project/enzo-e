@@ -5,7 +5,7 @@
 /// @date   24 February 2022
 /// @brief  Implementation of EnzoMethodAccretionCompute, a base class
 ///         for "accretion compute" methods. These methods compute
-///         the accretion rate onto star particles, and change the properties
+///         the accretion rate onto sink particles, and change the properties
 ///         of the particles accordingly. Gas density is reduced by setting
 ///         negative values for the "density_accreted" field. The
 ///         "accretion_remove_gas" method then subtracts off density_accreted
@@ -34,15 +34,15 @@ EnzoMethodAccretionCompute::EnzoMethodAccretionCompute
          density_threshold_ >= enzo::config()->method_vlct_density_floor);
 
   // This method requires three dimensions.
-  ASSERT("EnzoMethodMergeStars::EnzoMethodMergeStars()",
-	 "EnzoMethodMergeStars requires that we run a 3D problem (Domain: rank = 3)",
+  ASSERT("EnzoMethodMergeSinks::EnzoMethodMergeSinks()",
+	 "EnzoMethodMergeSinks requires that we run a 3D problem (Domain: rank = 3)",
 	 cello::rank());
 
   ASSERT(
       "EnzoMethodAccretionCompute::EnzoMethodAccretionCompute()",
       "EnzoMethodAccretionCompute requires unigrid mode (Adapt : max_level = 0). "
       "In future, we may put in a refinement condition that blocks containing "
-      "star particles are at the highest refinement level.",
+      "sink particles are at the highest refinement level.",
       enzo::config()->mesh_max_level == 0);
 
   const int * ghost_depth = enzo::config()->field_ghost_depth;
@@ -56,11 +56,11 @@ EnzoMethodAccretionCompute::EnzoMethodAccretionCompute
 	 "(4 by default)",
          accretion_radius_cells_ <= min_ghost_depth);
 
-  // Refresh all fields and star particles
+  // Refresh all fields and sink particles
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
-  refresh->add_particle(cello::particle_descr()->type_index("star"));
+  refresh->add_particle(cello::particle_descr()->type_index("sink"));
 }
 
 void EnzoMethodAccretionCompute::pup (PUP::er &p)
@@ -98,10 +98,10 @@ double EnzoMethodAccretionCompute::timestep ( Block *block) const throw()
 
 void EnzoMethodAccretionCompute::do_checks_() throw()
 {
-    // Check if merge_stars method precedes accretion_compute method
+    // Check if merge_sinks method precedes accretion_compute method
     ASSERT("EnzoMethodAccretionCompute",
-	   "merge_stars must precede accretion_compute",
-	   enzo::problem()->method_precedes("merge_stars",
+	   "merge_sinks must precede accretion_compute",
+	   enzo::problem()->method_precedes("merge_sinks",
 					    "accretion_compute"));
 
     // Check if accretion_compute method precedes accretion_remove_gas
@@ -114,10 +114,10 @@ void EnzoMethodAccretionCompute::do_checks_() throw()
     // Check if merging radius is at least twice that of the accretion
     // radius
     ASSERT("EnzoMethodAccretionCompute::EnzoMethodAccretionCompute() ",
-	   "Merging radius (Method:merge_stars:merging_radius_cells "
+	   "Merging radius (Method:merge_sinks:merging_radius_cells "
 	   "must be at least twice the accretion radius "
 	   "(Method:accretion_compute:accretion_radius).",
-	   enzo::config()->method_merge_stars_merging_radius_cells >=
+	   enzo::config()->method_merge_sinks_merging_radius_cells >=
 	   2.0 * accretion_radius_cells_);
 
     // Check if VL+CT method is being used.

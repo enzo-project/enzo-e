@@ -6,8 +6,8 @@
 /// @brief      Implementation of EnzoMethodAccretionComputeDensThresh, a class
 ///             from EnzoMethodAccretionCompute.
 ///             This method reduces the gas density in the accretion zone around
-///             a star particle to a value set by density_threshold_,
-///             and adds mass and momentum lost by the gas to the star particle.
+///             a sink particle to a value set by density_threshold_,
+///             and adds mass and momentum lost by the gas to the sink particle.
 
 #ifndef ENZO_ENZO_METHOD_ACCRETION_COMPUTE_DENS_THRESH
 #define ENZO_ENZO_METHOD_ACCRETION_COMPUTE_DENS_THRESH

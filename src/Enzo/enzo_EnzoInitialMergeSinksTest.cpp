@@ -1,10 +1,10 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoInitialMergeStarsTest.cpp
+/// @file     enzo_EnzoInitialMergeSinksTest.cpp
 /// @author   Stefan Arridge (stefan.arridge@gmail.com)
 /// @date     2022-01-06
-/// @brief    Implementation of test problem for the "merge stars" method.
-///           Sets up two star particles with positions, velocities, and masses
+/// @brief    Implementation of test problem for the "merge sinks" method.
+///           Creates sink particles with positions, velocities, and masses
 ///           given in the parameter file
 ///
 
@@ -17,44 +17,45 @@
 
 //----------------------------------------------------------------------
 
-EnzoInitialMergeStarsTest::EnzoInitialMergeStarsTest(
-    const EnzoConfig *enzo_config) throw()
-    : Initial(enzo_config->initial_cycle, enzo_config->initial_time) {
+ EnzoInitialMergeSinksTest::EnzoInitialMergeSinksTest 
+ (const EnzoConfig * enzo_config) throw()
+    : Initial (enzo_config->initial_cycle, enzo_config->initial_time)
+  {
+    particle_data_filename_ = 
+    enzo_config->initial_merge_sinks_test_particle_data_filename;
 
-  enzo::check_particle_attribute("star", "mass");
+    std::string line;
+    std::ifstream inFile(particle_data_filename_);
 
-  particle_data_filename_ =
-      enzo_config->initial_merge_stars_test_particle_data_filename;
+    
+    n_particles_ = 0;
 
-  std::string line;
-  std::ifstream inFile(particle_data_filename_);
+    while (std::getline(inFile,line)){
+      ++n_particles_;
+      // Assume each line provides data for one particle
+      // Each row must have 7 columns, for mass, x, y, z,
+      // vx, vy, vz, respectively
+      std::istringstream stream(line);
+      enzo_float mass, x, y, z, vx, vy, vz;
+      stream >> mass >> x >> y >> z >> vx >> vy >> vz;
+      mass_data_.push_back(mass);
+      x_data_.push_back(x);
+      y_data_.push_back(y);
+      z_data_.push_back(z);
+      vx_data_.push_back(vx);
+      vy_data_.push_back(vy);
+      vz_data_.push_back(vz);
+    }
 
-  n_particles_ = 0;
+    ASSERT("EnzoInitialMergeSinksTest",
+           "Error: No particle data found",
+            n_particles_ != 0);
 
-  while (std::getline(inFile, line)) {
-    ++n_particles_;
-    // Assume each line provides data for one particle
-    // Each row must have 7 columns, for mass, x, y, z,
-    // vx, vy, vz, respectively
-    std::istringstream stream(line);
-    enzo_float mass, x, y, z, vx, vy, vz;
-    stream >> mass >> x >> y >> z >> vx >> vy >> vz;
-    mass_data_.push_back(mass);
-    x_data_.push_back(x);
-    y_data_.push_back(y);
-    z_data_.push_back(z);
-    vx_data_.push_back(vx);
-    vy_data_.push_back(vy);
-    vz_data_.push_back(vz);
+    return;
   }
 
-  ASSERT("EnzoInitialMergeStarsTest", "Error: No particle data found",
-         n_particles_ != 0);
-
-  return;
-}
-
-void EnzoInitialMergeStarsTest::pup(PUP::er &p) {
+void EnzoInitialMergeSinksTest::pup (PUP::er &p)
+{
   // NOTE: update whenever attributes change
 
   TRACEPUP;
@@ -74,24 +75,25 @@ void EnzoInitialMergeStarsTest::pup(PUP::er &p) {
 
 //----------------------------------------------------------------------
 
-void EnzoInitialMergeStarsTest::enforce_block(
-    Block *block, const Hierarchy *hierarchy) throw() {
-
-  // Check if the merge_stars method is being used
-  ASSERT("EnzoInitialMergeStarsTest",   
-         "Error: merge_stars method is required when running with "
-         "the merge_stars_test initializer.",
-         enzo::problem()->method_exists("merge_stars"));
+void EnzoInitialMergeSinksTest::enforce_block
+(Block * block, const Hierarchy * hierarchy ) throw()
+{
+  // Check if the merge_sinks method is being used
+  ASSERT("EnzoInitialMergeSinksTest",
+         "Error: merge_sinks method is required when running with "
+         "the merge_sinks_test initializer.",
+         enzo::problem()->method_exists("merge_sinks"));
 
   // Check if the pm_update method is being used
-  ASSERT("EnzoInitialMergeStarsTest",
+  ASSERT("EnzoInitialMergeSinksTest",
          "Error: pm_update method is required when running with "
-         "the merge_stars_test initializer.",
-          enzo::problem()->method_exists("pm_update"));
-
+         "the merge_sinks_test initializer.",
+         enzo::problem()->method_exists("pm_update"));
   if (!block->is_leaf()) return;
 
-  ASSERT("EnzoInitialMergeStarsTest", "Block does not exist", block != NULL);
+  ASSERT("EnzoInitialMergeSinksTest",
+  	 "Block does not exist",
+  	 block != NULL);
 
   EnzoSimulation *enzo_simulation = enzo::simulation();
   // Block extents
@@ -105,7 +107,7 @@ void EnzoInitialMergeStarsTest::enforce_block(
   ParticleDescr *particle_descr = cello::particle_descr();
   Particle particle = block->data()->particle();
 
-  int it = particle_descr->type_index("star");
+  int it = particle_descr->type_index("sink");
 
   int ia_m = particle.attribute_index(it, "mass");
   int ia_x = particle.attribute_index(it, "x");

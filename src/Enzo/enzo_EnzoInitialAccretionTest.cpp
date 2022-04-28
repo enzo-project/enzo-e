@@ -4,7 +4,7 @@
 /// @author   Stefan Arridge (stefan.arridge@gmail.com)
 /// @date     2022-03-09
 /// @brief    Implementation of EnzoInitialAccretionTest, an initializer for an
-///           accretion test problem, which puts an accreting star particle with
+///           accretion test problem, which puts an accreting sink particle with
 ///           a given initial position and velocity in a static medium.
 ///
 
@@ -14,23 +14,23 @@
 
 EnzoInitialAccretionTest::EnzoInitialAccretionTest
   (int cycle, double time,
-   const double star_position[3],
-   const double star_velocity[3],
-   double star_mass,
+   const double sink_position[3],
+   const double sink_velocity[3],
+   double sink_mass,
    double gas_density,
    double gas_pressure
    ) throw()
     : Initial(cycle,time),
-      star_mass_(star_mass),
+      sink_mass_(sink_mass),
       gas_density_(gas_density),
       gas_pressure_(gas_pressure)
 {
-  star_position_[0] = star_position[0];
-  star_position_[1] = star_position[1];
-  star_position_[2] = star_position[2];
-  star_velocity_[0] = star_velocity[0];
-  star_velocity_[1] = star_velocity[1];
-  star_velocity_[2] = star_velocity[2];
+  sink_position_[0] = sink_position[0];
+  sink_position_[1] = sink_position[1];
+  sink_position_[2] = sink_position[2];
+  sink_velocity_[0] = sink_velocity[0];
+  sink_velocity_[1] = sink_velocity[1];
+  sink_velocity_[2] = sink_velocity[2];
 
 }
 
@@ -42,9 +42,9 @@ void EnzoInitialAccretionTest::pup (PUP::er &p)
 
   Initial::pup(p);
 
-  PUParray(p,star_position_,3);
-  PUParray(p,star_velocity_,3);
-  p | star_mass_;
+  PUParray(p,sink_position_,3);
+  PUParray(p,sink_velocity_,3);
+  p | sink_mass_;
   p | gas_density_;
   p | gas_pressure_;
 }
@@ -55,7 +55,7 @@ void EnzoInitialAccretionTest::enforce_block
 
 {
 
-  enzo::check_particle_attribute("star","mass");
+  enzo::check_particle_attribute("sink","mass");
 
   // Check if accretion_compute and accretion_remove_gas methods are being used,
   // and that accretion_compute precedes accretion_remove_gas
@@ -160,16 +160,16 @@ void EnzoInitialAccretionTest::enforce_block
   const enzo_float te_value = gas_pressure_ / ((gamma - 1.0) * gas_density_);
   std::fill_n(te,m,te_value);
 
-  // Create star particle if its position is in the block
-  if (block->check_position_in_block(star_position_[0],
-				     star_position_[1],
-				     star_position_[2]))
+  // Create sink particle if its position is in the block
+  if (block->check_position_in_block(sink_position_[0],
+				     sink_position_[1],
+				     sink_position_[2]))
     {
       ParticleDescr * particle_descr = cello::particle_descr();
       Particle particle              = block->data()->particle();
 
       // Attribute indices
-      const int it   = particle.type_index("star");
+      const int it   = particle.type_index("sink");
       const int ia_m = particle.attribute_index (it, "mass");
       const int ia_x = particle.attribute_index (it, "x");
       const int ia_y = particle.attribute_index (it, "y");
@@ -209,13 +209,13 @@ void EnzoInitialAccretionTest::enforce_block
       is_copy   = (int64_t *) particle.attribute_array(it, ia_copy, ib);
       
       // Now assign values to attributes
-      pmass[0] = star_mass_;
-      px[0] = star_position_[0];
-      py[0] = star_position_[1];
-      pz[0] = star_position_[2];
-      pvx[0] = star_velocity_[0];
-      pvy[0] = star_velocity_[1];
-      pvz[0] = star_velocity_[2];
+      pmass[0] = sink_mass_;
+      px[0] = sink_position_[0];
+      py[0] = sink_position_[1];
+      pz[0] = sink_position_[2];
+      pvx[0] = sink_velocity_[0];
+      pvy[0] = sink_velocity_[1];
+      pvz[0] = sink_velocity_[2];
       id[0] = 1;
       is_copy[0] = 0;
       

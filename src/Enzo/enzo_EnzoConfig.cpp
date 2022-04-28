@@ -192,10 +192,10 @@ EnzoConfig::EnzoConfig() throw ()
   initial_IG_recent_SF_bin_size(5.0),
   initial_IG_recent_SF_SFR(2.0),
   initial_IG_recent_SF_seed(12345),  
-  // EnzoInitialMergeStarsTest
-  initial_merge_stars_test_particle_data_filename(""),
+  // EnzoInitialMergeSinksTest
+  initial_merge_sinks_test_particle_data_filename(""),
   // EnzoInitialAccretionTest
-  initial_accretion_test_star_mass(0.0),
+  initial_accretion_test_sink_mass(0.0),
   initial_accretion_test_gas_density(0.0),
   initial_accretion_test_gas_pressure(0.0),
   // EnzoMethodHeat
@@ -274,8 +274,8 @@ EnzoConfig::EnzoConfig() throw ()
   method_vlct_mhd_choice(""),
   method_vlct_dual_energy(false),
   method_vlct_dual_energy_eta(0.0),
-  /// EnzoMethodMergeStars
-  method_merge_stars_merging_radius_cells(0.0),
+  /// EnzoMethodMergeSinks
+  method_merge_sinks_merging_radius_cells(0.0),
   /// EnzoMethodAccretionCompute
   method_accretion_compute_accretion_radius_cells(0.0),
   method_accretion_compute_flavor(""),
@@ -537,11 +537,11 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_soup_pressure_out;
   p | initial_soup_density;
 
-  p | initial_merge_stars_test_particle_data_filename;
+  p | initial_merge_sinks_test_particle_data_filename;
 
-  PUParray(p,initial_accretion_test_star_position,3);
-  PUParray(p,initial_accretion_test_star_velocity,3);
-  p | initial_accretion_test_star_mass;
+  PUParray(p,initial_accretion_test_sink_position,3);
+  PUParray(p,initial_accretion_test_sink_velocity,3);
+  p | initial_accretion_test_sink_mass;
   p | initial_accretion_test_gas_density;
   p | initial_accretion_test_gas_pressure;
 
@@ -615,7 +615,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_vlct_dual_energy;
   p | method_vlct_dual_energy_eta;
 
-  p | method_merge_stars_merging_radius_cells;
+  p | method_merge_sinks_merging_radius_cells;
   
   p | method_accretion_compute_accretion_radius_cells;
   p | method_accretion_compute_flavor;
@@ -694,7 +694,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_turbulence_(p);
   read_initial_isolated_galaxy_(p);
   read_initial_feedback_test_(p);
-  read_initial_merge_stars_test_(p);
+  read_initial_merge_sinks_test_(p);
   read_initial_accretion_test_(p);
   
   read_method_grackle_(p);
@@ -708,7 +708,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_pm_update_(p);
   read_method_ppm_(p);
   read_method_turbulence_(p);
-  read_method_merge_stars_(p);
+  read_method_merge_sinks_(p);
   read_method_accretion_compute_(p);
   
   read_physics_(p);
@@ -1243,26 +1243,26 @@ void EnzoConfig::read_initial_feedback_test_(Parameters * p)
     ("Initial:feedback_test:metal_fraction", 0.01);
 }
 
-void EnzoConfig::read_initial_merge_stars_test_(Parameters * p)
+void EnzoConfig::read_initial_merge_sinks_test_(Parameters * p)
 {
-  initial_merge_stars_test_particle_data_filename= p->value_string
-    ("Initial:merge_stars_test:particle_data_filename","");
+  initial_merge_sinks_test_particle_data_filename= p->value_string
+    ("Initial:merge_sinks_test:particle_data_filename","");
 }
 
 void EnzoConfig::read_initial_accretion_test_(Parameters * p)
 {
   for (int axis=0; axis<3; axis++){
-    initial_accretion_test_star_position[axis] = p->list_value_float
-      (axis, "Initial:accretion_test:star_position", 0.0);
+    initial_accretion_test_sink_position[axis] = p->list_value_float
+      (axis, "Initial:accretion_test:sink_position", 0.0);
   }
 
   for (int axis=0; axis<3; axis++){
-    initial_accretion_test_star_velocity[axis] = p->list_value_float
-      (axis, "Initial:accretion_test:star_velocity", 0.0);
+    initial_accretion_test_sink_velocity[axis] = p->list_value_float
+      (axis, "Initial:accretion_test:sink_velocity", 0.0);
   }
 
-  initial_accretion_test_star_mass = p->value_float
-    ("Initial:accretion_test:star_mass",0.0);
+  initial_accretion_test_sink_mass = p->value_float
+    ("Initial:accretion_test:sink_mass",0.0);
 
   initial_accretion_test_gas_density = p->value_float
     ("Initial:accretion_test:gas_density",1.0e-6);
@@ -1625,10 +1625,10 @@ void EnzoConfig::read_method_heat_(Parameters * p)
 
 //----------------------------------------------------------------------
 
-void EnzoConfig::read_method_merge_stars_(Parameters * p)
+void EnzoConfig::read_method_merge_sinks_(Parameters * p)
 {
-  method_merge_stars_merging_radius_cells = p->value_float
-    ("Method:merge_stars:merging_radius_cells",8.0);
+  method_merge_sinks_merging_radius_cells = p->value_float
+    ("Method:merge_sinks:merging_radius_cells",8.0);
 }
 
 //----------------------------------------------------------------------

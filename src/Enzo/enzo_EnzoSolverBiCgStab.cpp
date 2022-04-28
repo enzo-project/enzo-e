@@ -1606,6 +1606,7 @@ void EnzoSolverBiCgStab::loop_14(EnzoBlock* block,
     (CkIndex_EnzoBlock::r_solver_bicgstab_loop_15(NULL), 
      block->proxy_array());
 
+  
 #ifdef DEBUG_CALLBACK    
     CkPrintf ("DEBUG_CALLBACK %s:%d %d\n",
 	      __FILE__,__LINE__,CkIndex_EnzoBlock::r_solver_bicgstab_loop_15(NULL));

@@ -74,8 +74,6 @@ EnzoMethodPpm::EnzoMethodPpm (bool store_fluxes_for_corrections)
   refresh->add_field("acceleration_y");
   refresh->add_field("acceleration_z");
 
-  FieldDescr * field_descr = cello::field_descr();
-
   // add all color fields to refresh
   refresh->add_all_fields("color");
 
