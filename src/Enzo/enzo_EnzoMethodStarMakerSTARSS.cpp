@@ -165,6 +165,9 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
   enzo_float * density     = (enzo_float *) field.values("density");
   enzo_float * temperature = (enzo_float *) field.values("temperature");
 
+  enzo_float * total_energy = (enzo_float *) field.values("total_energy");
+  enzo_float * potential    = (enzo_float *) field.values("potential");
+
   enzo_float * velocity_x = (rank >= 1) ?
     (enzo_float *)field.values("velocity_x") : NULL;
   enzo_float * velocity_y = (rank >= 2) ?
@@ -286,11 +289,13 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
            CkPrintf("MethodStarMakerSTARSS -- div(v) < 0 in cell %d\n", i);
         #endif 
 
-        // check that alpha < 0
-        if (! this->check_self_gravitating(mean_particle_mass, density[i], temperature[i],
-                                            velocity_x, velocity_y, velocity_z,
-                                            lunit, vunit, rhounit,
-                                            i, idx, idy, idz, dx, dy, dz)) continue;
+        // check that alpha < 1
+        if (! this->check_self_gravitating_new(total_energy[i], potential[i])) continue;
+ 
+        //if (! this->check_self_gravitating(mean_particle_mass, density[i], temperature[i],
+        //                                    velocity_x, velocity_y, velocity_z,
+        //                                    lunit, vunit, rhounit,
+        //                                    i, idx, idy, idz, dx, dy, dz)) continue;
 
         #ifdef DEBUG_SF_CRITERIA_EXTRA
            CkPrintf("MethodStarMakerSTARSS -- alpha < 1 in cell %d\n", i);
@@ -396,7 +401,9 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 
         // TODO: saving particle mass as density. May need to update this in the future
         //       when PR #89 passes 
-        pmass[io] = new_mass / cell_volume;
+        //pmass[io] = new_mass / cell_volume;
+
+        pmass[io] = new_mass;
         px = (enzo_float *) particle.attribute_array(it, ia_x, ib);
         py = (enzo_float *) particle.attribute_array(it, ia_y, ib);
         pz = (enzo_float *) particle.attribute_array(it, ia_z, ib);
@@ -449,18 +456,18 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 
         plevel[io] = enzo_block->level(); // formation level
 
+        if (metal){
+          pmetal     = (enzo_float *) particle.attribute_array(it, ia_metal, ib);
+          pmetal[io] = metal[i] / density[i]; // in ABSOLUTE units
+        }
+
         // Remove mass from grid and rescale fraction fields
         double scale = (1.0 - new_mass / cell_mass);
         density[i] *= scale;
         // rescale color fields too 
         this->rescale_densities(enzo_block, i, scale);
 
-        if (metal){
-          metal[i] /= scale; // undo metal_density rescaling because we can directly subtract correct amount
-          pmetal     = (enzo_float *) particle.attribute_array(it, ia_metal, ib);
-          pmetal[io] = metal[i] / density[i]; // in ABSOLUTE units
-          metal[i] -= pmetal[io] * new_mass/cell_volume;
-        }
+
       }
     }
   } // end loop iz

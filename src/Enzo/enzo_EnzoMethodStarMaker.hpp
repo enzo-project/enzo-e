@@ -74,6 +74,7 @@ protected: // methods
                 const int &index, const int &dix, const int &diy,
                 const int &diz);
   int check_mass(const double &m);
+
   int check_self_gravitating(
     const double mean_particle_mass, const double density,
     const enzo_float temperature,
@@ -81,6 +82,8 @@ protected: // methods
     const double lunit, const double vunit, const double rhounit, 
     const int &index, const int &dix, const int &diy, const int &diz,
     const double dx, const double dy, const double dz);
+
+  int check_self_gravitating_new(const double total_energy, const double potential);
   double h2_self_shielding_factor(
     enzo_float *rho, const double metallicity,
     const double dunit, const double lunit,

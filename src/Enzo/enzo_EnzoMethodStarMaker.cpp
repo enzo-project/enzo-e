@@ -218,6 +218,21 @@ int EnzoMethodStarMaker::check_overdensity_threshold(const double &rho)
           (rho >= this->overdensity_threshold_);
 }
 
+
+int EnzoMethodStarMaker::check_self_gravitating_new(const double total_energy, const double potential)
+{
+
+  if (!this->use_self_gravitating_)
+    return 1;
+
+  #ifdef DEBUG_SF
+    CkPrintf("MethodStarMaker -- alpha = %f\n",total_energy/potential); 
+  #endif
+
+  return (total_energy/potential < 1);
+
+}
+
 int EnzoMethodStarMaker::check_self_gravitating(
                 const double mean_particle_mass, const double density, const enzo_float temperature,
                 enzo_float *vx, enzo_float *vy, enzo_float *vz,
@@ -256,6 +271,7 @@ int EnzoMethodStarMaker::check_self_gravitating(
   #ifdef DEBUG_SF
     CkPrintf("MethodStarMaker -- alpha = %f\n",alpha); 
   #endif
+
   return (alpha < 1);
 
 }

@@ -455,6 +455,10 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
   double afterMass = 0.0;
   double rho_to_m = rhounit*cell_volume / cello::mass_solar;
 
+#ifdef DEBUG_FEEDBACK_STARSS
+  bool print_edge_deposit = true; 
+#endif
+
   for (int iz=gz; iz<nz+gz; iz++){
     for (int iy=gy; iy<ny+gy; iy++){
       for (int ix=gx; ix<nx+gx; ix++){
@@ -486,7 +490,13 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
       #endif
 
         beforeMass += d[i] * rho_to_m;
-        if (te_dep_c[i] > 10*tiny_number) { // if any deposition 
+        if (te_dep_c[i] > 10*tiny_number) { // if any deposition
+        #ifdef DEBUG_FEEDBACK_STARSS
+          if (print_edge_deposit) {
+            CkPrintf("MethodFeedbackSTARSS -- At least one supernova deposited across grid boundaries in block [%.3f, %.3f, %.3f])", xm, ym, zm);  
+            print_edge_deposit = false;       
+          }
+        #endif 
           double d_old = d[i];
           
           d [i] +=  d_dep_c[i];
@@ -667,7 +677,9 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
       int ipsn  = ip*dsn; // number of SNe counter
 
       // TODO: Assumes particle mass is saved as density. Change when PR #89 passes
-      double pmass_solar = pmass[ipdm]*cell_volume * munit/cello::mass_solar;
+      //double pmass_solar = pmass[ipdm]*cell_volume * munit/cello::mass_solar;
+
+      double pmass_solar = pmass[ipdm] * munit/cello::mass_solar;
 
       if (pmass[ipdm] > 0.0 && plifetime[ipdl] > 0.0){
         const double age = (current_time - pcreation[ipdc]) * enzo_units->time() / cello::Myr_s;
@@ -1532,7 +1544,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
    &mx, &my, &mz, &hx, &A);
 
 
-  //copy values for active zones (include ghost zones if > 1 block???)
+  //copy values for active zones
   double checksum_deposit = 0;
   double checksum_energy_deposit = 0;
   double checksum_before =0;
