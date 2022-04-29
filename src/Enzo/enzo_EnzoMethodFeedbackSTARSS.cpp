@@ -676,7 +676,6 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
       int ipdmf = ip*dmf; // metallicity
       int ipsn  = ip*dsn; // number of SNe counter
 
-      // TODO: Assumes particle mass is saved as density. Change when PR #89 passes
       //double pmass_solar = pmass[ipdm]*cell_volume * munit/cello::mass_solar;
 
       double pmass_solar = pmass[ipdm] * munit/cello::mass_solar;
@@ -778,10 +777,9 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
           } // if wind mass > 0
         } // if winds
 
-        // TODO: Assumes particle mass is density. Update when PR #89 passes
         pmass[ipdm] -= std::max(0.0,
                        (windMass + SNMassEjected) /
-                       (munit/cello::mass_solar)) / cell_volume;
+                       (munit/cello::mass_solar)); // / cell_volume;
 
 
         //
