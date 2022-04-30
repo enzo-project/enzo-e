@@ -21,6 +21,7 @@
 //#ifdef NOTDEFINED // for now... since not done coding
 
 #define DEBUG_FEEDBACK_STARSS
+#define DEBUG_FEEDBACK_STARSS_ACCUMULATE
 
 // =============================================================================
 // splice these off to a different file (later)
@@ -317,7 +318,7 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
 
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
-  refresh->add_all_fields();
+  //refresh->add_all_fields();
   
   sf_minimum_level_ = enzo_config->method_feedback_min_level;
   single_sn_        = enzo_config->method_feedback_single_sn;
@@ -491,9 +492,9 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
 
         beforeMass += d[i] * rho_to_m;
         if (te_dep_c[i] > 10*tiny_number) { // if any deposition
-        #ifdef DEBUG_FEEDBACK_STARSS
+        #ifdef DEBUG_FEEDBACK_STARSS_ACCUMULATE
           if (print_edge_deposit) {
-            CkPrintf("MethodFeedbackSTARSS -- At least one supernova deposited across grid boundaries in block [%.3f, %.3f, %.3f])", xm, ym, zm);  
+            CkPrintf("MethodFeedbackSTARSS: At least one supernova deposited across grid boundaries in block [%.3f, %.3f, %.3f])\n", xm, ym, zm);  
             print_edge_deposit = false;       
           }
         #endif 
@@ -543,9 +544,10 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
     vz_dep_c[i] = tiny_number;
  
   }
-  
-  //CkPrintf("After refresh (block [%.3f, %.3f, %.3f]) -- beforeMass = %e, afterMass = %e, afterMass - beforeMass = %e\n", xm, ym, zm, beforeMass, afterMass, afterMass-beforeMass);
-
+ 
+#ifdef DEBUG_FEEDBACK_STARSS_ACCUMULATE 
+  CkPrintf("MethodFeedbackSTARSS: After refresh (block [%.3f, %.3f, %.3f]) -- beforeMass = %e, afterMass = %e, afterMass - beforeMass = %e\n", xm, ym, zm, beforeMass, afterMass, afterMass-beforeMass);
+#endif
   return;
 }
 void EnzoBlock::p_method_feedback_starss_end() 

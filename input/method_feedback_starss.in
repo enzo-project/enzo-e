@@ -322,5 +322,5 @@ Output {
 }
 
 Stopping {
-    cycle = 10; #401;
+    cycle = 1; #401;
 }
