@@ -49,9 +49,10 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
     enzo_float * velocity_z      = (enzo_float*) field.values("velocity_z");
 
     /* Set minimum GE. */
- 
+
+    const enzo_float gamma = enzo::fluid_props()->gamma();
     MinimumSupportEnergyCoefficient =
-      GravitationalConstant[in]/(4.0*cello::pi) / (cello::pi * (Gamma[in]*(Gamma[in]-1.0))) *
+      GravitationalConstant[in]/(4.0*cello::pi) / (cello::pi * (gamma*(gamma-1.0))) *
       CosmoFactor * MinimumPressureSupportParameter[in] *
       CellWidth[0] * CellWidth[0];
 

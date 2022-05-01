@@ -53,7 +53,6 @@ public:
   // Physics
 
   static int PressureFree[CONFIG_NODE_SIZE];
-  static enzo_float Gamma[CONFIG_NODE_SIZE];
   static enzo_float GravitationalConstant[CONFIG_NODE_SIZE];
 
   // Problem-specific
@@ -71,15 +70,6 @@ public:
   //  static int ProcessorNumber;
 
   // Numerics
-
-  static int DualEnergyFormalism[CONFIG_NODE_SIZE];
-  static enzo_float DualEnergyFormalismEta1[CONFIG_NODE_SIZE];
-  static enzo_float DualEnergyFormalismEta2[CONFIG_NODE_SIZE];
-
-  static enzo_float pressure_floor[CONFIG_NODE_SIZE];
-  static enzo_float density_floor[CONFIG_NODE_SIZE];
-  static enzo_float number_density_floor[CONFIG_NODE_SIZE];
-  static enzo_float temperature_floor[CONFIG_NODE_SIZE];
 
   static enzo_float InitialRedshift[CONFIG_NODE_SIZE];
   static enzo_float InitialTimeInCodeUnits[CONFIG_NODE_SIZE];
