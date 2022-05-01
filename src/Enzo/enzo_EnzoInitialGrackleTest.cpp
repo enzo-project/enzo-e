@@ -159,6 +159,7 @@ void EnzoInitialGrackleTest::enforce_block
 
   /* Set internal energy and temperature */
   enzo_float mu = enzo_config->ppm_mol_weight;
+  const enzo_float nominal_gamma = enzo::fluid_props()->gamma();
 
   for (int iz=0; iz<nz+gz; iz++){ // Metallicity
     for (int iy=0; iy<ny+gy; iy++) { // Temperature
@@ -189,7 +190,7 @@ void EnzoInitialGrackleTest::enforce_block
 
         grackle_fields_.internal_energy[i] = pow(10.0, ((temperature_slope * (iy-gy)) +
                                       log10(enzo_config->initial_grackle_test_minimum_temperature)))/
-                             mu / enzo_units->temperature() / (enzo_config->field_gamma - 1.0);
+                             mu / enzo_units->temperature() / (nominal_gamma - 1.0);
         total_energy[i]    = grackle_fields_.internal_energy[i];
       }
     }

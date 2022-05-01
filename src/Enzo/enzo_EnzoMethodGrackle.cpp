@@ -617,6 +617,8 @@ void EnzoMethodGrackle::ResetEnergies ( EnzoBlock * enzo_block) throw()
      (enzo_config->initial_grackle_test_maximum_temperature/
       enzo_config->initial_grackle_test_minimum_temperature) / double(ny);
 
+   const enzo_float nominal_gamma = enzo::fluid_props()->gamma();
+
    for (int iz=gz; iz<nz+gz; iz++){ // Metallicity
      for (int iy=gy; iy<ny+gy; iy++) { // Temperature
        for (int ix=gx; ix<nx+gx; ix++) { // H Number Density
@@ -637,7 +639,7 @@ void EnzoMethodGrackle::ResetEnergies ( EnzoBlock * enzo_block) throw()
 
          internal_energy[i] = pow(10.0, ((temperature_slope * (iy-gy)) +
                               log10(enzo_config->initial_grackle_test_minimum_temperature)))/
-                              mu / enzo_units->temperature() / (enzo_config->field_gamma - 1.0);
+                              mu / enzo_units->temperature() / (nominal_gamma - 1.0);
          total_energy[i] = internal_energy[i];
 
        }

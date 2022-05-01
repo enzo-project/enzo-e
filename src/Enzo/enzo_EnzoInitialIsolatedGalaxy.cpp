@@ -132,7 +132,7 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
   this->uniform_density_    = config->field_uniform_density / enzo_units->density();
   this->dual_energy_        = field_descr->is_field("internal_energy") &&
                               field_descr->is_field("total_energy");
-  this->gamma_              = config->field_gamma;
+  this->gamma_              = enzo::fluid_props()->gamma();
   this->mu_                 = config->ppm_mol_weight;
 
   // read in data for initialization

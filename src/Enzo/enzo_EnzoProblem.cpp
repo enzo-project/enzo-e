@@ -181,7 +181,7 @@ Initial * EnzoProblem::create_initial_
   } else if (type == "cosmology") {
     initial = new EnzoInitialCosmology
       (cycle,time,
-       enzo_config->field_gamma,
+       enzo::fluid_props()->gamma(),
        enzo_config->initial_cosmology_temperature
        );
   } else if (type == "inclined_wave") {
@@ -189,7 +189,7 @@ Initial * EnzoProblem::create_initial_
       (cycle, time,
        enzo_config->initial_inclinedwave_alpha,
        enzo_config->initial_inclinedwave_beta,
-       enzo_config->field_gamma,
+       enzo::fluid_props()->gamma(),
        enzo_config->initial_inclinedwave_amplitude,
        enzo_config->initial_inclinedwave_lambda,
        enzo_config->initial_inclinedwave_parallel_vel,
@@ -201,7 +201,7 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_turbulence_density,
        enzo_config->initial_turbulence_pressure,
        enzo_config->initial_turbulence_temperature,
-       enzo_config->field_gamma);
+       enzo::fluid_props()->gamma());
   } else if (type == "pm") {
     std::string param_str = "Initial:" + config->initial_list[index] + ":mask";
     initial = new EnzoInitialPm
@@ -214,7 +214,7 @@ Initial * EnzoProblem::create_initial_
     initial = new EnzoInitialPpmlTest (cycle,time,enzo_config);
   } else if (type == "shock_tube") {
     initial = new EnzoInitialShockTube
-      (enzo_config->field_gamma,
+      (enzo::fluid_props()->gamma(),
        cycle, time,
        enzo_config->initial_shock_tube_setup_name,
        enzo_config->initial_shock_tube_aligned_ax,
@@ -298,7 +298,7 @@ Refine * EnzoProblem::create_refine_
        config->adapt_max_coarsen[index],
        config->adapt_min_refine2[index],
        config->adapt_max_coarsen2[index],
-       enzo_config->field_gamma,
+       enzo::fluid_props()->gamma(),
        enzo_config->physics_cosmology,
        config->adapt_max_level[index],
        config->adapt_include_ghosts[index],
@@ -512,7 +512,7 @@ Compute * EnzoProblem::create_compute
 
   } else if (name == "pressure"){
 
-    compute = new EnzoComputePressure(enzo_config->field_gamma,
+    compute = new EnzoComputePressure(enzo::fluid_props()->gamma(),
                                       enzo_config->physics_cosmology);
 
 #ifdef CONFIG_USE_GRACKLE
@@ -565,7 +565,7 @@ Method * EnzoProblem::create_method_
 
     method = new EnzoMethodHydro
       (enzo_config->method_hydro_method,
-       enzo_config->field_gamma,
+       enzo::fluid_props()->gamma(),
        enzo_config->physics_gravity,
        enzo_config->physics_cosmology,
        enzo_config->method_hydro_dual_energy,
