@@ -664,13 +664,8 @@ Method * EnzoProblem::create_method_
       (enzo_config->method_vlct_riemann_solver,
        enzo_config->method_vlct_half_dt_reconstruct_method,
        enzo_config->method_vlct_full_dt_reconstruct_method,
-       enzo_config->field_gamma,
        enzo_config->method_vlct_theta_limiter,
-       enzo_config->method_vlct_density_floor,
-       enzo_config->method_vlct_pressure_floor,
        enzo_config->method_vlct_mhd_choice,
-       enzo_config->method_vlct_dual_energy,
-       enzo_config->method_vlct_dual_energy_eta,
        store_fluxes_for_corrections);
 
   } else if (name == "background_acceleration") {

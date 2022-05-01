@@ -36,20 +36,31 @@ static str_vec_t concat_str_vec_(const str_vec_t& vec1, const str_vec_t& vec2){
 EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
 				      std::string half_recon_name,
 				      std::string full_recon_name,
-				      double gamma, double theta_limiter,
-				      double density_floor,
-				      double pressure_floor,
+				      double theta_limiter,
 				      std::string mhd_choice,
-				      bool dual_energy_formalism,
-				      double dual_energy_formalism_eta,
 				      bool store_fluxes_for_corrections)
   : Method()
 {
+  // check compatability with EnzoPhysicsFluidProps
+  EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
+  const EnzoDualEnergyConfig& de_config = fluid_props->dual_energy_config();
+  ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
+         "selected formulation of dual energy formalism is incompatible",
+         de_config.is_disabled() | de_config.modern_formulation());
+  const EnzoFluidFloorConfig& fluid_floor_config
+    = fluid_props->fluid_floor_config();
+  ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
+         "density and pressure floors must be defined",
+         fluid_floor_config.has_density_floor() &
+         fluid_floor_config.has_pressure_floor());
+
   // Initialize equation of state (check the validity of quantity floors)
-  EnzoEquationOfState::check_floor(density_floor);
-  EnzoEquationOfState::check_floor(pressure_floor);
-  eos_ = new EnzoEOSIdeal(gamma, density_floor, pressure_floor,
-			  dual_energy_formalism, dual_energy_formalism_eta);
+  enzo_float de_eta = 0.0;
+  bool dual_energy_formalism = de_config.modern_formulation(&de_eta);
+  enzo_float density_floor = fluid_floor_config.density();
+  enzo_float pressure_floor = fluid_floor_config.pressure();
+  eos_ = new EnzoEOSIdeal(fluid_props->gamma(), density_floor, pressure_floor,
+			  dual_energy_formalism, de_eta);
 
 #ifdef CONFIG_USE_GRACKLE
   if (enzo::config()->method_grackle_use_grackle){

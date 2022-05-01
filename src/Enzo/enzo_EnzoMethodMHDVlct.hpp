@@ -104,12 +104,8 @@ public: // interface
   EnzoMethodMHDVlct(std::string rsolver,
 		    std::string half_recon_name,
 		    std::string full_recon_name,
-		    double gamma, double theta_limiter,
-		    double density_floor,
-		    double pressure_floor,
+		    double theta_limiter,
 		    std::string mhd_choice,
-		    bool dual_energy_formalism,
-		    double dual_energy_formalism_eta,
 		    bool store_fluxes_for_corrections);
 
   /// Charm++ PUP::able declarations
