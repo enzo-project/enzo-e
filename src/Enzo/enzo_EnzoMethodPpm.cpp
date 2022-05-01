@@ -145,7 +145,7 @@ void EnzoMethodPpm::compute ( Block * block) throw()
     //
     // // restore energy consistency if dual energy formalism used
     //
-    // if (enzo::config()->ppm_dual_energy) {
+    // if (enzo::fluid_props()->dual_energy_config().bryan95_formulation()) {
     //   int mx,my,mz;
     //   field.dimensions(0,&mx,&my,&mz);
     //   const int m = mx*my*mz;

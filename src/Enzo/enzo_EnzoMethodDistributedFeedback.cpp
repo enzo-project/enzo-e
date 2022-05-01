@@ -320,14 +320,19 @@ EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
   refresh->add_particle(cello::particle_descr()->type_index("star"));
   refresh->set_particles_are_copied(true);
 
-  FieldDescr * field_descr = cello::field_descr();
-
-
-  dual_energy_         = field_descr->is_field("internal_energy") &&
-                         field_descr->is_field("total_energy");
-
-
-  // enzo_config->ppm_dual_energy;
+  const EnzoDualEnergyConfig& de_config
+    = enzo::fluid_props()->dual_energy_config();
+  if (de_config.bryan95_formulation()){
+    dual_energy_ = true;
+  } else if (de_config.is_disabled()){
+    dual_energy_ = false;
+  } else { // de_config.modern_formulation() == true
+    // I doubt this case has issues, but raise error to be safe
+    ERROR("EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback",
+          "this class is untested with this formulation of the dual energy "
+          "formalism");
+    dual_energy_ = true;
+  }
 
 
   // Fraction of total energy to deposit as kinetic rather than thermal energy

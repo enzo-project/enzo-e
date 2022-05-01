@@ -120,7 +120,13 @@ int EnzoBlock::SolveHydroEquations
   /* Determine if Gamma should be a scalar or a field. */
 
   const int in = cello::index_static();
-  enzo_float gamma = enzo::fluid_props()->gamma();
+  const EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
+  enzo_float gamma = fluid_props->gamma();
+
+  enzo_float dual_eta1, dual_eta2;
+  const bool idual_ = fluid_props->dual_energy_config().bryan95_formulation
+    (&dual_eta1, &dual_eta2);
+  int idual = (int) idual_;
 
   /* Set minimum support. */
 
@@ -300,8 +306,7 @@ int EnzoBlock::SolveHydroEquations
      &PressureFree[in],
      &iconsrec, &iposrec,
      &PPMDiffusionParameter[in], &PPMSteepeningParameter[in],
-     &DualEnergyFormalism[in], &DualEnergyFormalismEta1[in],
-     &DualEnergyFormalismEta2[in],
+     &idual, &dual_eta1, &dual_eta2,
      &NumberOfSubgrids, leftface, rightface,
      istart, iend, jstart, jend,
      flux_array, dindex, Eindex, uindex, vindex, windex,

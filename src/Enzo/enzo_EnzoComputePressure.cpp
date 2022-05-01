@@ -128,7 +128,9 @@ void EnzoComputePressure::compute_(Block * block,
     int m = (nx+2*gx) * (ny+2*gy) * (nz+2*gz);
     enzo_float gm1 = gamma_ - 1.0;
 
-    if (enzo::config()->ppm_dual_energy) {
+    bool using_de = !enzo::fluid_props()->dual_energy_config().is_disabled();
+
+    if (using_de) {
 
       for (int i=0; i<m; i++) {
         p[i] = gm1 * d[i] * ie[i];

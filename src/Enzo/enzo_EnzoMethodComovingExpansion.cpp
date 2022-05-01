@@ -189,11 +189,26 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
         pressure = pressure_now;
       }
 
+      int idual;
+      const EnzoDualEnergyConfig& de_config
+        = enzo::fluid_props()->dual_energy_config();
+      if (de_config.bryan95_formulation()){
+        idual = 1;
+      } else if (de_config.is_disabled()){
+        idual = 0;
+      } else { // de_config.modern_formulation() == true
+        // I doubt this case has issues, but raise error to be safe
+        ERROR("EnzoMethodComovingExpansion::compute",
+              "the method is untested with this formulation of the dual "
+              "energy formalism");
+        idual = 1;
+      }
+
       /* Call fortran routine to do the real work. */
 
       FORTRAN_NAME(expand_terms)
 	(
-	 &rank, &m, &EnzoBlock::DualEnergyFormalism[in], &Coefficient,
+	 &rank, &m, &idual, &Coefficient,
 	 (int*) &HydroMethod, &gamma,
 	 pressure,
 	 density_new, total_energy_new, internal_energy_new,
