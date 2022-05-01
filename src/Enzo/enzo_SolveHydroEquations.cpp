@@ -120,6 +120,7 @@ int EnzoBlock::SolveHydroEquations
   /* Determine if Gamma should be a scalar or a field. */
 
   const int in = cello::index_static();
+  enzo_float gamma = enzo::fluid_props()->gamma();
 
   /* Set minimum support. */
 
@@ -291,7 +292,7 @@ int EnzoBlock::SolveHydroEquations
      acceleration_x,
      acceleration_y,
      acceleration_z,
-     &Gamma[in], &dt, &cycle_,
+     &gamma, &dt, &cycle_,
      CellWidthTemp[0], CellWidthTemp[1], CellWidthTemp[2],
      &rank, &GridDimension[0], &GridDimension[1],
      &GridDimension[2], GridStartIndex, GridEndIndex,

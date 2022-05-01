@@ -232,9 +232,9 @@ double EnzoMethodPpm::timestep ( Block * block ) throw()
   /* Compute the pressure. */
 
   const int in = cello::index_static();
+  enzo_float gamma = enzo::fluid_props()->gamma();
 
-  EnzoComputePressure compute_pressure
-    (EnzoBlock::Gamma[in],comoving_coordinates_);
+  EnzoComputePressure compute_pressure(gamma, comoving_coordinates_);
   compute_pressure.compute(enzo_block);
 
   Field field = enzo_block->data()->field();
@@ -265,7 +265,7 @@ double EnzoMethodPpm::timestep ( Block * block ) throw()
 			&enzo_block->CellWidth[0],
 			&enzo_block->CellWidth[1],
 			&enzo_block->CellWidth[2],
-			&EnzoBlock::Gamma[in], &EnzoBlock::PressureFree[in], &cosmo_a,
+			&gamma, &EnzoBlock::PressureFree[in], &cosmo_a,
 			density, pressure,
 			velocity_x,
 			velocity_y,

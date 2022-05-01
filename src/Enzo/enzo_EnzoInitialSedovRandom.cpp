@@ -97,7 +97,7 @@ void EnzoInitialSedovRandom::enforce_block
   const double sedov_radius = radius_relative_/array_[0];
   const double sedov_radius_2 = sedov_radius*sedov_radius;
 
-  const enzo_float gamma = EnzoBlock::Gamma[cello::index_static()];
+  const enzo_float gamma = enzo::fluid_props()->gamma();
 
   const double sedov_te_in = pressure_in_  / ((gamma - 1.0) * density_);
   const double sedov_te_out= pressure_out_ / ((gamma - 1.0) * density_);

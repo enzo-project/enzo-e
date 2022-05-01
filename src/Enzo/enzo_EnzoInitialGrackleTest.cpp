@@ -199,7 +199,7 @@ void EnzoInitialGrackleTest::enforce_block
   // for output
   int comoving_coordinates = enzo_config->physics_cosmology;
   if (pressure){
-    const enzo_float gamma = EnzoBlock::Gamma[cello::index_static()];
+    const enzo_float gamma = enzo::fluid_props()->gamma();
     EnzoComputePressure compute_pressure (gamma,comoving_coordinates);
 
     // Note: using compute_ method to avoid re-generating grackle_fields

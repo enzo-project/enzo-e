@@ -116,9 +116,7 @@ void EnzoInitialBurkertBodenheimer::enforce_block
 
   // Initialize Fields
 
-  const int in = cello::index_static();
-
-  const double gamma = EnzoBlock::Gamma[in];
+  const double gamma = enzo::fluid_props()->gamma();;
   //const double energy = (1e-3*(cello::kboltz)*temperature_ / ((gamma - 1.0) * (1.0 * cello::mass_hydrogen)))/enzo_units->energy();
   const double energy = (temperature_/enzo_units->temperature()) / ((gamma-1.0)) / enzo_config->ppm_mol_weight;
 

@@ -113,6 +113,7 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
       /* If we can, compute the pressure at the mid-point.
       	 We can, because we will always have an old baryon field now. */
       const int in = cello::index_static();
+      enzo_float gamma = enzo::fluid_props()->gamma();
 
       // hard-code hydromethod for PPM for now
       int HydroMethod = 0;
@@ -163,16 +164,14 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
 
       // Compute the pressure *now*
       enzo_float * pressure_now     = (enzo_float *) field.values("pressure");
-      EnzoComputePressure compute_pressure (EnzoBlock::Gamma[in],
-                                            comoving_coordinates_);
+      EnzoComputePressure compute_pressure (gamma, comoving_coordinates_);
       compute_pressure.compute(block, pressure_now);
 
       // If history is present, compute time-centered pressure
       enzo_float * pressure = NULL;
 
       if (has_history) {
-        EnzoComputePressure compute_pressure_old (EnzoBlock::Gamma[in],
-                                                 comoving_coordinates_);
+        EnzoComputePressure compute_pressure_old (gamma, comoving_coordinates_);
         compute_pressure_old.set_history(i_old);
 
         pressure = new enzo_float[m];
@@ -195,7 +194,7 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
       FORTRAN_NAME(expand_terms)
 	(
 	 &rank, &m, &EnzoBlock::DualEnergyFormalism[in], &Coefficient,
-	 (int*) &HydroMethod, &EnzoBlock::Gamma[in],
+	 (int*) &HydroMethod, &gamma,
 	 pressure,
 	 density_new, total_energy_new, internal_energy_new,
 	 velocity_x_new, velocity_y_new, velocity_z_new,
