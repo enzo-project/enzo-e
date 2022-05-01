@@ -503,12 +503,8 @@ Compute * EnzoProblem::create_compute
 
   if (name == "temperature") {
 
-    compute = new EnzoComputeTemperature(
-                        enzo_config->ppm_density_floor,
-                        enzo_config->ppm_temperature_floor,
-                        enzo_config->ppm_mol_weight,
-                        enzo_config->physics_cosmology);
-
+    compute = new EnzoComputeTemperature(enzo::fluid_props(),
+                                         enzo_config->physics_cosmology);
 
   } else if (name == "pressure"){
 

@@ -143,11 +143,8 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
   // fields to assign particle chemical tags and deposit yields
 
   // compute the temperature (we need it here)
-  EnzoComputeTemperature compute_temperature
-    (enzo_config->ppm_density_floor,
-     enzo_config->ppm_temperature_floor,
-     enzo_config->ppm_mol_weight,
-     enzo_config->physics_cosmology);
+  EnzoComputeTemperature compute_temperature(enzo::fluid_props(),
+                                             enzo_config->physics_cosmology);
 
   compute_temperature.compute(enzo_block);
 

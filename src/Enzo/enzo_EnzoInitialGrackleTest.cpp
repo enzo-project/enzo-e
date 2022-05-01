@@ -219,11 +219,8 @@ void EnzoInitialGrackleTest::enforce_block
   }
 
   if (temperature){
-    EnzoComputeTemperature compute_temperature
-      (enzo_config->ppm_density_floor,
-       enzo_config->ppm_temperature_floor,
-       enzo_config->ppm_mol_weight,
-       comoving_coordinates);
+    EnzoComputeTemperature compute_temperature(enzo::fluid_props(),
+                                               comoving_coordinates);
 
     compute_temperature.compute_(enzo_block,
                                  temperature,
