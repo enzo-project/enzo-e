@@ -40,6 +40,13 @@ EnzoMethodPpm::EnzoMethodPpm (bool store_fluxes_for_corrections)
     store_fluxes_for_corrections_(store_fluxes_for_corrections)
 {
 
+  // check compatability with EnzoPhysicsFluidProps
+  EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
+  const EnzoDualEnergyConfig& de_config = fluid_props->dual_energy_config();
+  ASSERT("EnzoMethodPpm::EnzoMethodPpm",
+         "selected formulation of dual energy formalism is incompatible",
+         de_config.is_disabled() | de_config.bryan95_formulation());
+
   const int rank = cello::rank();
 
   cello::define_field("density");

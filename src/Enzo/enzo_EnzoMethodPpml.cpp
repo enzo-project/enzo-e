@@ -22,6 +22,12 @@ EnzoMethodPpml::EnzoMethodPpml()
 
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
+
+  // check compatability with EnzoPhysicsFluidProps
+  EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
+  const EnzoDualEnergyConfig& de_config = fluid_props->dual_energy_config();
+  ASSERT("EnzoMethodPpml::EnzoMethodPpml",
+         "incompatible with dual energy formalism", de_config.is_disabled());
 }
 
 //----------------------------------------------------------------------
