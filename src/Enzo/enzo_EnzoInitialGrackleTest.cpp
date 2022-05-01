@@ -158,7 +158,7 @@ void EnzoInitialGrackleTest::enforce_block
   }
 
   /* Set internal energy and temperature */
-  enzo_float mu = enzo_config->ppm_mol_weight;
+  enzo_float mu = enzo::fluid_props()->mol_weight();
   const enzo_float nominal_gamma = enzo::fluid_props()->gamma();
 
   for (int iz=0; iz<nz+gz; iz++){ // Metallicity

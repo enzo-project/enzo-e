@@ -886,15 +886,16 @@ void EnzoMethodDistributedFeedback::add_ionization_feedback(
 
   // Case B recombination, assuming T = 10^4 K
   const float alpha = 2.60E-13; // cm^3 / s
+  const double mol_weight = (double)enzo::fluid_props()->mol_weight();
 
   // AE: possibly actually compute mu from species fields
-  double ndens = d[index] * enzo_units->density() / enzo_config->ppm_mol_weight / cello::mass_hydrogen;
+  double ndens = d[index] * enzo_units->density() / mol_weight / cello::mass_hydrogen;
 
   double stromgren_radius = std::pow( (3.0 * s49_tot * 1.0E49) /
                             (4.0 * cello::pi * alpha * ndens*ndens),1.0/3.0);
   double stromgren_volume = (4.0/3.0)*cello::pi*stromgren_radius*stromgren_radius*stromgren_radius;
   stromgren_volume        /= (enzo_units->length()*enzo_units->length()*enzo_units->length());
-  double ionized          = cello::kboltz * 1.0E4 / std::min(0.6,enzo_config->ppm_mol_weight) /
+  double ionized          = cello::kboltz * 1.0E4 / std::min(0.6,mol_weight) /
                             cello::mass_hydrogen / (enzo_units->length()*enzo_units->length()) *
                             enzo_units->time() * enzo_units->time();
 
@@ -1087,6 +1088,8 @@ void EnzoMethodDistributedFeedback::inject_feedback(
     ke_before[i] = 0.0; metal_local[i] = 0.0;
   }
 
+  const double mu_cell = (double)enzo::fluid_props()->mol_weight();
+
   if (ke_f < 0){
 
     // calculate variable kinetic energy fraction
@@ -1105,8 +1108,6 @@ void EnzoMethodDistributedFeedback::inject_feedback(
           int index = INDEX(i,j,k,mx,my);
 
           if ( (index < 0) || (index >= mx*my*mz)) continue;
-
-          double mu_cell  = enzo_config->ppm_mol_weight;
 
           avg_z += metal[index]; // need to divide by d_tot below
           avg_n += d[index] / mu_cell;

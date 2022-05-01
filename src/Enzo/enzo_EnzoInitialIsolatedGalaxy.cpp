@@ -133,7 +133,7 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
   this->dual_energy_        = field_descr->is_field("internal_energy") &&
                               field_descr->is_field("total_energy");
   this->gamma_              = enzo::fluid_props()->gamma();
-  this->mu_                 = config->ppm_mol_weight;
+  this->mu_                 = enzo::fluid_props()->mol_weight();
 
   // read in data for initialization
   this->ntypes_            = 0;              // num of IC particle types

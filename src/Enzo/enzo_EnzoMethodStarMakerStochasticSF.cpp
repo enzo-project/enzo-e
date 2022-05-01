@@ -137,6 +137,7 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
     (enzo_float *) field.values("metal_density") : NULL;
 
   const double Zsolar = 0.02;  // TODO: Update to more accurate value
+  const double nominal_mol_weight = (double)enzo::fluid_props()->mol_weight();
 
   // Idea for multi-metal species - group these using 'group'
   // class in IC parameter file and in SF / Feedback routines simply
@@ -162,7 +163,7 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
 
         // need to compute this better for Grackle fields (on to-do list)
         double rho_cgs = density[i] * enzo_units->density();
-        double mean_particle_mass = enzo_config->ppm_mol_weight * cello::mass_hydrogen;
+        double mean_particle_mass = nominal_mol_weight * cello::mass_hydrogen;
         double ndens = rho_cgs / mean_particle_mass;
 
         double mass  = density[i] *dx*dy*dz * enzo_units->mass() / cello::mass_solar;
