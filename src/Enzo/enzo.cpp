@@ -22,6 +22,15 @@ namespace enzo {
     return (EnzoPhysicsCosmology *) problem()->physics("cosmology");
   }
 
+  EnzoPhysicsFluidProps * fluid_props()
+  {
+    Physics* out = problem()->physics("fluid_props");
+    // handling in EnzoProblem::initialize_physics_coda_ should ensure that
+    // this is never a nullptr
+    ASSERT("enzo::fluid_props", "Something went wrong", out != nullptr);
+    return (EnzoPhysicsFluidProps *) out;
+  }
+
   const EnzoMethodGrackle * grackle_method()
   {
     if (!enzo::config()->method_grackle_use_grackle) {return NULL;}

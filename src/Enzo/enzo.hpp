@@ -59,6 +59,7 @@ namespace enzo {
   EnzoProblem * problem();
   EnzoSimulation * simulation();
   EnzoPhysicsCosmology * cosmology();
+  EnzoPhysicsFluidProps * fluid_props();
   const EnzoMethodGrackle * grackle_method();
   EnzoUnits * units();
   const EnzoConfig * config();

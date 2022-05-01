@@ -97,6 +97,10 @@ private: // functions
   virtual Units *  create_units_ 
   (Config * config) throw ();
 
+  /// Method that gets called at the end of initialize_physics
+  virtual void initialize_physics_coda_(Config * config,
+                                        Parameters * parameters) throw();
+
 protected: // attributes
 
 };

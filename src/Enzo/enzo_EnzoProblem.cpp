@@ -781,6 +781,10 @@ Physics * EnzoProblem::create_physics_
        enzo_config->physics_cosmology_final_redshift
        );
 
+  } else if (type == "fluid_props") {
+
+    physics = new EnzoPhysicsFluidProps();
+
   } else {
 
     physics = Problem::create_physics_
@@ -789,6 +793,30 @@ Physics * EnzoProblem::create_physics_
 
   return physics;
 
+}
+
+//----------------------------------------------------------------------
+
+void EnzoProblem::initialize_physics_coda_(Config * config,
+                                           Parameters * parameters) throw()
+{
+  // if EnzoPhysicsFluidProps doesn't already exist, initialize it
+  if (physics("fluid_props") == nullptr){
+    physics_list_.push_back(create_physics_("fluid_props",
+                                            physics_list_.size(),
+                                            config, parameters));
+  }
+
+  // in the future, we might want to move the following snippet from
+  // EnzoSimulation::r_startup_begun to this function:
+  //   EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology *)
+  //     problem()->physics("cosmology");
+  //  if (cosmology) {
+  //    EnzoUnits * units = (EnzoUnits *) problem()->units();
+  //    units->set_cosmology(cosmology);
+  //  }
+  // Doing this could resolve some issues encountered in EnzoMethodGrackle more
+  // elegantly that the existing work-around
 }
 
 //----------------------------------------------------------------------
