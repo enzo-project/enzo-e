@@ -290,13 +290,16 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         #endif 
 
         // check that alpha < 1
-        if (! this->check_self_gravitating_new(total_energy[i], potential[i])) continue;
- 
-        //if (! this->check_self_gravitating(mean_particle_mass, density[i], temperature[i],
-        //                                    velocity_x, velocity_y, velocity_z,
-        //                                    lunit, vunit, rhounit,
-        //                                    i, idx, idy, idz, dx, dy, dz)) continue;
+        if (enzo_config->method_star_maker_use_altAlpha) {
+          if (! this->check_self_gravitating_new(total_energy[i], potential[i])) continue;
+        }
 
+        else {
+          if (! this->check_self_gravitating(mean_particle_mass, density[i], temperature[i],
+                                             velocity_x, velocity_y, velocity_z,
+                                             lunit, vunit, rhounit,
+                                             i, idx, idy, idz, dx, dy, dz)) continue;
+        }
         #ifdef DEBUG_SF_CRITERIA_EXTRA
            CkPrintf("MethodStarMakerSTARSS -- alpha < 1 in cell %d\n", i);
         #endif 

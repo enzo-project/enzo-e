@@ -225,6 +225,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_NEvents(0),
   // EnzoMethodStarMaker,
   method_star_maker_method(""),                              // star maker type to use
+  method_star_maker_use_altAlpha(false),
   method_star_maker_use_density_threshold(true),           // check above density threshold before SF
   method_star_maker_use_velocity_divergence(true),         // check for converging flow before SF
   method_star_maker_use_dynamical_time(true),              // compute t_ff / t_dyn. Otherwise take as 1.0
@@ -573,6 +574,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_feedback_NEvents;
 
   p | method_star_maker_method;
+  p | method_star_maker_use_altAlpha;
   p | method_star_maker_use_density_threshold;
   p | method_star_maker_use_overdensity_threshold;
   p | method_star_maker_use_temperature_threshold;
@@ -1492,6 +1494,9 @@ void EnzoConfig::read_method_star_maker_(Parameters * p)
  
   method_star_maker_method = p->value_string
     ("Method:star_maker:method","stochastic");
+
+  method_star_maker_use_altAlpha = p->value_logical
+    ("Method:star_maker:use_altAlpha",false);
 
   method_star_maker_use_density_threshold = p->value_logical
     ("Method:star_maker:use_density_threshold",true);

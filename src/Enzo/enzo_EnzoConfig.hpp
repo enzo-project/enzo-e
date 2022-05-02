@@ -320,6 +320,7 @@ public: // interface
       method_feedback_NEvents(0),
       /// EnzoMethodStarMaker
       method_star_maker_method(""),
+      method_star_maker_use_altAlpha(false), // alternate virial parameter calculation
       method_star_maker_use_density_threshold(true),           // check above density threshold before SF
       method_star_maker_use_velocity_divergence(true),         // check for converging flow before SF
       method_star_maker_use_dynamical_time(true),
@@ -733,6 +734,7 @@ public: // attributes
   /// EnzoMethodStarMaker
 
   std::string               method_star_maker_method;
+  bool                      method_star_maker_use_altAlpha;
   bool                      method_star_maker_use_density_threshold;
   bool                      method_star_maker_use_overdensity_threshold;
   bool                      method_star_maker_use_temperature_threshold;
