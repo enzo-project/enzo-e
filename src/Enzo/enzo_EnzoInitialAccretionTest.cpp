@@ -57,13 +57,13 @@ void EnzoInitialAccretionTest::enforce_block
 
   enzo::check_particle_attribute("sink","mass");
 
-  // Check if accretion_compute and accretion_remove_gas methods are being used,
-  // and that accretion_compute precedes accretion_remove_gas
+  // Check if accretion and accretion_remove_gas methods are being used,
+  // and that accretion precedes accretion_remove_gas
   ASSERT("EnzoInitialAccretionTest",
-	 "If accretion_test initializer is used, the accretion_compute "
+	 "If accretion_test initializer is used, the accretion "
 	 "and accretion_remove_gas methods are required, and "
-	 "accretion_compute must precede accretion_remove_gas.",
-         enzo::problem()->method_precedes("accretion_compute",
+	 "accretion must precede accretion_remove_gas.",
+         enzo::problem()->method_precedes("accretion",
 					  "accretion_remove_gas"));
 
   // Check if mhd_vlct method is being used

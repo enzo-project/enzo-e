@@ -716,28 +716,28 @@ Method * EnzoProblem::create_method_
 		    enzo_config->method_merge_sinks_merging_radius_cells
 				     );
 
-  } else if (name == "accretion_compute") {
+  } else if (name == "accretion") {
 
-    if (enzo_config->method_accretion_compute_flavor == "density_threshold") {
-      method = new EnzoMethodAccretionComputeDensThresh(
-		       enzo_config->method_accretion_compute_accretion_radius_cells,
-		       enzo_config->method_accretion_compute_density_threshold,
-		       enzo_config->method_accretion_compute_max_mass_fraction,
-		       enzo_config->method_accretion_compute_conserve_angular_momentum
+    if (enzo_config->method_accretion_flavor == "density_threshold") {
+      method = new EnzoMethodAccretionDensThresh(
+		       enzo_config->method_accretion_accretion_radius_cells,
+		       enzo_config->method_accretion_density_threshold,
+		       enzo_config->method_accretion_max_mass_fraction,
+		       enzo_config->method_accretion_conserve_angular_momentum
 							);
-    } else if (enzo_config->method_accretion_compute_flavor == "bondi_hoyle") {
-      method = new EnzoMethodAccretionComputeBondiHoyle(
-		       enzo_config->method_accretion_compute_accretion_radius_cells,
-		       enzo_config->method_accretion_compute_density_threshold,
-		       enzo_config->method_accretion_compute_max_mass_fraction,
-		       enzo_config->method_accretion_compute_conserve_angular_momentum
+    } else if (enzo_config->method_accretion_flavor == "bondi_hoyle") {
+      method = new EnzoMethodAccretionBondiHoyle(
+		       enzo_config->method_accretion_accretion_radius_cells,
+		       enzo_config->method_accretion_density_threshold,
+		       enzo_config->method_accretion_max_mass_fraction,
+		       enzo_config->method_accretion_conserve_angular_momentum
 							);
     } else {
-      method = new EnzoMethodAccretionCompute(
-		       enzo_config->method_accretion_compute_accretion_radius_cells,
-		       enzo_config->method_accretion_compute_density_threshold,
-		       enzo_config->method_accretion_compute_max_mass_fraction,
-		       enzo_config->method_accretion_compute_conserve_angular_momentum
+      method = new EnzoMethodAccretion(
+		       enzo_config->method_accretion_accretion_radius_cells,
+		       enzo_config->method_accretion_density_threshold,
+		       enzo_config->method_accretion_max_mass_fraction,
+		       enzo_config->method_accretion_conserve_angular_momentum
 					      );
     }
   } else if (name == "accretion_remove_gas") {

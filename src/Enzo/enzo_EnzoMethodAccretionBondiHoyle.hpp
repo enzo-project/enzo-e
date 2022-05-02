@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file	enzo_EnzoMethodAccretionComputeBondiHoyle.hpp
+/// @file	enzo_EnzoMethodAccretionBondiHoyle.hpp
 /// @author     Stefan Arridge (stefan.arridge@gmail.com)
 /// @author     John Regan (john.regan@mu.ie)
 /// @date       13 April 2022
@@ -9,25 +9,25 @@
 
 
 
-#ifndef ENZO_ENZO_METHOD_ACCRETION_COMPUTE_BONDI_HOYLE
-#define ENZO_ENZO_METHOD_ACCRETION_COMPUTE_BONDI_HOYLE
+#ifndef ENZO_ENZO_METHOD_ACCRETION_BONDI_HOYLE
+#define ENZO_ENZO_METHOD_ACCRETION_BONDI_HOYLE
 
-class EnzoMethodAccretionComputeBondiHoyle : public EnzoMethodAccretionCompute {
+class EnzoMethodAccretionBondiHoyle : public EnzoMethodAccretion {
   
 public:
   
   // Constructor
-  EnzoMethodAccretionComputeBondiHoyle(double accretion_radius_cells,
-				       double density_threshold,
-				       double max_mass_fraction,
-				       bool conserve_angular_momentum);
+  EnzoMethodAccretionBondiHoyle(double accretion_radius_cells,
+				double density_threshold,
+				double max_mass_fraction,
+				bool conserve_angular_momentum);
 
   // Charm++ PUP::able declarations
-  PUPable_decl(EnzoMethodAccretionComputeBondiHoyle);
+  PUPable_decl(EnzoMethodAccretionBondiHoyle);
 
   // Charm++ PUP::able declarations
-  EnzoMethodAccretionComputeBondiHoyle (CkMigrateMessage *m)
-   : EnzoMethodAccretionCompute (m)
+  EnzoMethodAccretionBondiHoyle (CkMigrateMessage *m)
+   : EnzoMethodAccretion (m)
    {  }
 
   /// Charm++ Pack / Unpack function
@@ -100,4 +100,4 @@ public:
 };
 
 
-#endif /* EnzoMethodAccretionComputeBondiHoyle */
+#endif // ENZO_ENZO_METHOD_ACCRETION_BONDI_HOYLE

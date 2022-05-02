@@ -1,10 +1,10 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file	enzo_EnzoMethodAccretionCompute.hpp
+/// @file	enzo_EnzoMethodAccretion.hpp
 /// @author     Stefan Arridge (stefan.arridge@gmail.com)
 /// @date       10 March 2022
-/// @brief      Implementation of EnzoMethodAccretionComputeDensThresh, a class
-///             from EnzoMethodAccretionCompute.
+/// @brief      Implementation of EnzoMethodAccretionDensThresh, a class
+///             from EnzoMethodAccretion.
 ///             This method reduces the gas density in the accretion zone around
 ///             a sink particle to
 ///             max(density_threshold_,(1-max_mass_fraction)*density),
@@ -15,35 +15,35 @@
 
 //------------------------------------------------------------------
 
-EnzoMethodAccretionComputeDensThresh::EnzoMethodAccretionComputeDensThresh
+EnzoMethodAccretionDensThresh::EnzoMethodAccretionDensThresh
 (double accretion_radius_cells,
  double density_threshold,
  double max_mass_fraction,
  bool   conserve_angular_momentum)
-  : EnzoMethodAccretionCompute(accretion_radius_cells,
-			       density_threshold,
-			       max_mass_fraction_,
-			       conserve_angular_momentum)
+  : EnzoMethodAccretion(accretion_radius_cells,
+			density_threshold,
+			max_mass_fraction_,
+			conserve_angular_momentum)
 {
 
 }
 
 //-------------------------------------------------------------------
 
-void EnzoMethodAccretionComputeDensThresh::pup (PUP::er &p)
+void EnzoMethodAccretionDensThresh::pup (PUP::er &p)
 {
   // NOTE: Change this function whenever attributes change
 
   TRACEPUP;
 
-  EnzoMethodAccretionCompute::pup(p); // call parent class pup
+  EnzoMethodAccretion::pup(p); // call parent class pup
 
   return;
 }
 
 //--------------------------------------------------------------------
 
-void EnzoMethodAccretionComputeDensThresh::compute (Block * block) throw()
+void EnzoMethodAccretionDensThresh::compute (Block * block) throw()
 {
 
   if (enzo::simulation()->cycle() == enzo::config()->initial_cycle)
@@ -66,7 +66,7 @@ void EnzoMethodAccretionComputeDensThresh::compute (Block * block) throw()
 
 //-------------------------------------------------------------------------
 
-void EnzoMethodAccretionComputeDensThresh::compute_(Block * block)
+void EnzoMethodAccretionDensThresh::compute_(Block * block)
 
 {
 

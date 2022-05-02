@@ -1,42 +1,42 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file	enzo_EnzoMethodAccretionCompute.hpp
+/// @file	enzo_EnzoMethodAccretion.hpp
 /// @author     Stefan Arridge (stefan.arridge@gmail.com)
 /// @date       24 February 2022
-/// @brief  Implementation of EnzoMethodAccretionCompute, a base class
-///         for "accretion compute" methods. These methods compute
+/// @brief  Implementation of EnzoMethodAccretion, a base class
+///         for accretion methods. These methods compute
 ///         the accretion rate onto sink particles, and change the properties
 ///         of the particles accordingly. Gas density is reduced by setting values
 ///         for the "density_accreted" field. The "accretion_remove_gas" method
 ///         then subtracts density_accreted from the gas density field
 
-#ifndef ENZO_ENZO_METHOD_ACCRETION_COMPUTE
-#define ENZO_ENZO_METHOD_ACCRETION_COMPUTE
+#ifndef ENZO_ENZO_METHOD_ACCRETION
+#define ENZO_ENZO_METHOD_ACCRETION
 
-class EnzoMethodAccretionCompute : public Method {
+class EnzoMethodAccretion : public Method {
 
-  /// @class   EnzoMethodAccretionCompute
+  /// @class   EnzoMethodAccretion
   /// @ingroup Enzo
-  /// @brief   [\ref Enzo] Base class for AccretionCompute methods, which add
+  /// @brief   [\ref Enzo] Base class for Accretion methods, which add
   ///          mass to sink particles and set negative values for density_accreted
   ///          field within an accretion zone.
 
 public:
 
   // Constructor
-  EnzoMethodAccretionCompute(double accretion_radius_cells,
-			     double density_threshold,
-			     double max_mass_fraction,
-			     bool conserve_angular_momentum);
+  EnzoMethodAccretion(double accretion_radius_cells,
+		      double density_threshold,
+		      double max_mass_fraction,
+		      bool conserve_angular_momentum);
 
   /// Destructor
-  virtual ~EnzoMethodAccretionCompute() throw() {};
+  virtual ~EnzoMethodAccretion() throw() {};
 
   /// Charm++ Pup::able declarations
-  PUPable_decl(EnzoMethodAccretionCompute);
+  PUPable_decl(EnzoMethodAccretion);
 
   /// Charm++ PUP::able migration constructor
-  EnzoMethodAccretionCompute (CkMigrateMessage *m)
+  EnzoMethodAccretion (CkMigrateMessage *m)
     : Method (m)
     {  }
 
@@ -48,7 +48,7 @@ public:
 
   /// Name
   virtual std::string name () throw()
-  { return "accretion_compute"; }
+  { return "accretion"; }
 
   /// Not sure if this is needed
   virtual std::string particle_type () throw()
@@ -96,4 +96,4 @@ protected:
 
 };
 
-#endif /* EnzoMethodAccretionCompute */
+#endif // ENZO_ENZO_METHOD_ACCRETION

@@ -100,9 +100,9 @@ module enzo {
   PUPable EnzoMethodTurbulence;
   PUPable EnzoMethodMHDVlct;
   PUPable EnzoMethodMergeSinks;
-  PUPable EnzoMethodAccretionCompute;
-  PUPable EnzoMethodAccretionComputeDensThresh;
-  PUPable EnzoMethodAccretionComputeBondiHoyle;
+  PUPable EnzoMethodAccretion;
+  PUPable EnzoMethodAccretionDensThresh;
+  PUPable EnzoMethodAccretionBondiHoyle;
   PUPable EnzoMethodAccretionRemoveGas;			
 
   PUPable EnzoEOSIdeal;

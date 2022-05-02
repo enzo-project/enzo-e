@@ -277,11 +277,11 @@ EnzoConfig::EnzoConfig() throw ()
   /// EnzoMethodMergeSinks
   method_merge_sinks_merging_radius_cells(0.0),
   /// EnzoMethodAccretionCompute
-  method_accretion_compute_accretion_radius_cells(0.0),
-  method_accretion_compute_flavor(""),
-  method_accretion_compute_density_threshold(0.0),
-  method_accretion_compute_max_mass_fraction(0.0),
-  method_accretion_compute_conserve_angular_momentum(false),
+  method_accretion_accretion_radius_cells(0.0),
+  method_accretion_flavor(""),
+  method_accretion_density_threshold(0.0),
+  method_accretion_max_mass_fraction(0.0),
+  method_accretion_conserve_angular_momentum(false),
   /// EnzoProlong
   prolong_enzo_type(),
   prolong_enzo_positive(true),
@@ -617,11 +617,11 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | method_merge_sinks_merging_radius_cells;
   
-  p | method_accretion_compute_accretion_radius_cells;
-  p | method_accretion_compute_flavor;
-  p | method_accretion_compute_density_threshold;
-  p | method_accretion_compute_max_mass_fraction;
-  p | method_accretion_compute_conserve_angular_momentum;
+  p | method_accretion_accretion_radius_cells;
+  p | method_accretion_flavor;
+  p | method_accretion_density_threshold;
+  p | method_accretion_max_mass_fraction;
+  p | method_accretion_conserve_angular_momentum;
 
   p | prolong_enzo_type;
   p | prolong_enzo_positive;
@@ -709,7 +709,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_ppm_(p);
   read_method_turbulence_(p);
   read_method_merge_sinks_(p);
-  read_method_accretion_compute_(p);
+  read_method_accretion_(p);
   
   read_physics_(p);
   
@@ -1633,18 +1633,18 @@ void EnzoConfig::read_method_merge_sinks_(Parameters * p)
 
 //----------------------------------------------------------------------
 
-void EnzoConfig::read_method_accretion_compute_(Parameters * p)
+void EnzoConfig::read_method_accretion_(Parameters * p)
 {
-  method_accretion_compute_accretion_radius_cells = p->value_float
-    ("Method:accretion_compute:accretion_radius_cells",4.0);
-  method_accretion_compute_flavor = p->value_string
-    ("Method:accretion_compute:flavor","");
-  method_accretion_compute_density_threshold = p->value_float
-    ("Method:accretion_compute:density_threshold",1.0e-6);
-  method_accretion_compute_max_mass_fraction = p->value_float
-    ("Method:accretion_compute:max_mass_fraction",0.25);
-    method_accretion_compute_max_mass_fraction = p->value_logical
-    ("Method:accretion_compute:conserve_angular_momentum",true);
+  method_accretion_accretion_radius_cells = p->value_float
+    ("Method:accretion:accretion_radius_cells",4.0);
+  method_accretion_flavor = p->value_string
+    ("Method:accretion:flavor","");
+  method_accretion_density_threshold = p->value_float
+    ("Method:accretion:density_threshold",1.0e-6);
+  method_accretion_max_mass_fraction = p->value_float
+    ("Method:accretion:max_mass_fraction",0.25);
+    method_accretion_max_mass_fraction = p->value_logical
+    ("Method:accretion:conserve_angular_momentum",true);
 }
 
 //----------------------------------------------------------------------

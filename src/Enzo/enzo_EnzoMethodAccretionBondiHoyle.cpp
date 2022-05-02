@@ -1,6 +1,6 @@
 /// See LICENSE_CELLO file for license and copyright information
 
-/// @file	enzo_EnzoMethodAccretionComputeBondiHoyle.cpp
+/// @file	enzo_EnzoMethodAccretionBondiHoyle.cpp
 /// @author     Stefan Arridge (stefan.arridge@gmail.com)
 /// @author     John Regan (john.regan@mu.ie)
 /// @date
@@ -13,35 +13,35 @@
 
 //------------------------------------------------------------------
 
-EnzoMethodAccretionComputeBondiHoyle::EnzoMethodAccretionComputeBondiHoyle
+EnzoMethodAccretionBondiHoyle::EnzoMethodAccretionBondiHoyle
 (double accretion_radius_cells,
  double density_threshold,
  double max_mass_fraction,
  bool conserve_angular_momentum)
-  : EnzoMethodAccretionCompute(accretion_radius_cells,
-			       density_threshold,
-			       max_mass_fraction,
-			       conserve_angular_momentum)
+  : EnzoMethodAccretion(accretion_radius_cells,
+			density_threshold,
+			max_mass_fraction,
+			conserve_angular_momentum)
 {
 
 }
 
 //-------------------------------------------------------------------
 
-void EnzoMethodAccretionComputeBondiHoyle::pup (PUP::er &p)
+void EnzoMethodAccretionBondiHoyle::pup (PUP::er &p)
 {
   // NOTE: Change this function whenever attributes change
 
   TRACEPUP;
 
-  EnzoMethodAccretionCompute::pup(p); // call parent class pup
+  EnzoMethodAccretion::pup(p); // call parent class pup
 
   return;
 }
 
 //--------------------------------------------------------------------
 
-void EnzoMethodAccretionComputeBondiHoyle::compute (Block * block) throw()
+void EnzoMethodAccretionBondiHoyle::compute (Block * block) throw()
 {
   if (enzo::simulation()->cycle() == enzo::config()->initial_cycle)
     do_checks_();
@@ -62,7 +62,7 @@ void EnzoMethodAccretionComputeBondiHoyle::compute (Block * block) throw()
 
 //-------------------------------------------------------------------------
 
-// void EnzoMethodAccretionComputeBondiHoyle::compute_(Block * block)
+// void EnzoMethodAccretionBondiHoyle::compute_(Block * block)
 
 // {
 //   // Get pointers to field data
@@ -207,7 +207,7 @@ void EnzoMethodAccretionComputeBondiHoyle::compute (Block * block) throw()
 // // ------------------------------------------------------------------------------------
 
 // const std::vector<int>
-// EnzoMethodAccretionComputeBondiHoyle::get_host_cell_indices_
+// EnzoMethodAccretionBondiHoyle::get_host_cell_indices_
 // (const Block * block, enzo_float x, enzo_float y, enzo_float z) throw()
 
 // {
@@ -240,7 +240,7 @@ void EnzoMethodAccretionComputeBondiHoyle::compute (Block * block) throw()
 // // -------------------------------------------------------------------------------------------
 
 // std::pair<const std::vector<int>,const std::vector<double>>
-// EnzoMethodAccretionComputeBondiHoyle::get_accretion_zone_
+// EnzoMethodAccretionBondiHoyle::get_accretion_zone_
 // (const Block * block, enzo_float x, enzo_float y, enzo_float z) throw()
 
 // {
@@ -376,7 +376,7 @@ void EnzoMethodAccretionComputeBondiHoyle::compute (Block * block) throw()
 
 // // ----------------------------------------------------------------------------------
 
-// const std::vector<double> EnzoMethodAccretionComputeBondiHoyle::compute_weights_
+// const std::vector<double> EnzoMethodAccretionBondiHoyle::compute_weights_
 // (const Block * block,
 //  const std::vector<double>& r2_vec,
 //  const double r_BH) throw()
@@ -414,7 +414,7 @@ void EnzoMethodAccretionComputeBondiHoyle::compute (Block * block) throw()
 // // ----------------------------------------------------------------------------------------
 
 // const std::vector<enzo_float>
-// EnzoMethodAccretionComputeBondiHoyle::compute_mass_removed_
+// EnzoMethodAccretionBondiHoyle::compute_mass_removed_
 // (Block * block,
 //  const std::vector<enzo_float>& weights,
 //  const std::vector<int>& acc_zone_indices,
@@ -456,7 +456,7 @@ void EnzoMethodAccretionComputeBondiHoyle::compute (Block * block) throw()
 // // -----------------------------------------------------------------------------------------
 
 // const std::vector<enzo_float>
-// EnzoMethodAccretionComputeBondiHoyle::compute_momentum_removed_
+// EnzoMethodAccretionBondiHoyle::compute_momentum_removed_
 // (const Block * block, const std::vector<enzo_float>& mass_removed) throw();
 
 // // ----------------------------------------------------------------------------------------
