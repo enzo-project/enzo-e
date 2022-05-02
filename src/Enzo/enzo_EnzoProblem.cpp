@@ -754,10 +754,9 @@ Physics * EnzoProblem::create_physics_
 {
 
   Physics * physics = NULL;
+  const EnzoConfig * enzo_config = enzo::config();
 
   if (type == "cosmology") {
-
-    const EnzoConfig * enzo_config = enzo::config();
 
     physics = new EnzoPhysicsCosmology
       (
@@ -774,7 +773,13 @@ Physics * EnzoProblem::create_physics_
 
   } else if (type == "fluid_props") {
 
-    physics = new EnzoPhysicsFluidProps();
+    physics = new EnzoPhysicsFluidProps
+      (
+       enzo_config->physics_fluid_props_de_config,
+       enzo_config->physics_fluid_props_fluid_floor_config,
+       enzo_config->field_gamma,
+       enzo_config->ppm_mol_weight
+       );
 
   } else {
 

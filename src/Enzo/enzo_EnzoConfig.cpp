@@ -18,16 +18,9 @@ EnzoConfig::EnzoConfig() throw ()
   :
   adapt_mass_type(0),
   ppm_diffusion(false),
-  ppm_dual_energy(false),
-  ppm_dual_energy_eta_1(0.0),
-  ppm_dual_energy_eta_2(0.0),
   ppm_flattening(0),
   ppm_minimum_pressure_support_parameter(0),
-  ppm_number_density_floor(0.0),
-  ppm_density_floor(0.0),
-  ppm_pressure_floor(0.0),
   ppm_pressure_free(false),
-  ppm_temperature_floor(0.0),
   ppm_steepening(false),
   ppm_use_minimum_pressure_support(false),
   ppm_mol_weight(0.0),
@@ -43,6 +36,10 @@ EnzoConfig::EnzoConfig() throw ()
   physics_cosmology_max_expansion_rate(0.0),
   physics_cosmology_initial_redshift(0.0),
   physics_cosmology_final_redshift(0.0),
+  // FluidProps
+  physics_fluid_props_de_config(),
+  physics_fluid_props_fluid_floor_config(),
+  // Gravity
   physics_gravity(false),
   // EnzoInitialBCenter
   initial_bcenter_update_etot(false),
@@ -265,11 +262,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_vlct_half_dt_reconstruct_method(""),
   method_vlct_full_dt_reconstruct_method(""),
   method_vlct_theta_limiter(0.0),
-  method_vlct_density_floor(0.0),
-  method_vlct_pressure_floor(0.0),
   method_vlct_mhd_choice(""),
-  method_vlct_dual_energy(false),
-  method_vlct_dual_energy_eta(0.0),
   /// EnzoMethodMergeStars
   method_merge_sinks_merging_radius_cells(0.0),
   /// EnzoProlong
@@ -338,16 +331,9 @@ void EnzoConfig::pup (PUP::er &p)
   p | adapt_mass_type;
 
   p | ppm_diffusion;
-  p | ppm_dual_energy;
-  p | ppm_dual_energy_eta_1;
-  p | ppm_dual_energy_eta_2;
   p | ppm_flattening;
   p | ppm_minimum_pressure_support_parameter;
-  p | ppm_number_density_floor;
-  p | ppm_density_floor;
-  p | ppm_pressure_floor;
   p | ppm_pressure_free;
-  p | ppm_temperature_floor;
   p | ppm_steepening;
   p | ppm_use_minimum_pressure_support;
   p | ppm_mol_weight;
@@ -365,6 +351,9 @@ void EnzoConfig::pup (PUP::er &p)
   p | physics_cosmology_max_expansion_rate;
   p | physics_cosmology_initial_redshift;
   p | physics_cosmology_final_redshift;
+
+  p | physics_fluid_props_de_config;
+  p | physics_fluid_props_fluid_floor_config;
 
   p | physics_gravity;
 
@@ -593,11 +582,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_vlct_half_dt_reconstruct_method;
   p | method_vlct_full_dt_reconstruct_method;
   p | method_vlct_theta_limiter;
-  p | method_vlct_density_floor;
-  p | method_vlct_pressure_floor;
   p | method_vlct_mhd_choice;
-  p | method_vlct_dual_energy;
-  p | method_vlct_dual_energy_eta;
 
   p | method_merge_sinks_merging_radius_cells;
 
@@ -686,9 +671,9 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_ppm_(p);
   read_method_turbulence_(p);
   read_method_merge_sinks_(p);
-  
+
   read_physics_(p);
-  
+
   read_prolong_enzo_(p);
   
   read_solvers_(p);
@@ -1524,14 +1509,6 @@ void EnzoConfig::read_method_vlct_(Parameters * p)
     ("Method:mhd_vlct:full_dt_reconstruct_method","plm");
   method_vlct_theta_limiter = p->value_float
     ("Method:mhd_vlct:theta_limiter", 1.5);
-  method_vlct_density_floor = p->value_float
-    ("Method:mhd_vlct:density_floor", 0.0);
-  method_vlct_pressure_floor = p->value_float
-    ("Method:mhd_vlct:pressure_floor", 0.0);
-  method_vlct_dual_energy = p->value_logical
-    ("Method:mhd_vlct:dual_energy", false);
-  method_vlct_dual_energy_eta = p->value_float
-    ("Method:mhd_vlct:dual_energy_eta", 0.001);
 
   // we should raise an error if mhd_choice is not specified
   bool uses_vlct = false;
@@ -1606,26 +1583,12 @@ void EnzoConfig::read_method_ppm_(Parameters * p)
 
   ppm_diffusion = p->value_logical
     ("Method:ppm:diffusion", false);
-  ppm_dual_energy = p->value_logical
-    ("Method:ppm:dual_energy",false);
-  ppm_dual_energy_eta_1 = p->value_float
-    ("Method:ppm:dual_energy_eta_1", 0.001);
-  ppm_dual_energy_eta_2 = p->value_float
-    ("Method:ppm:dual_energy_eta_2", 0.1);
   ppm_flattening = p->value_integer
     ("Method:ppm:flattening", 3);
   ppm_minimum_pressure_support_parameter = p->value_integer
     ("Method:ppm:minimum_pressure_support_parameter",100);
-  ppm_number_density_floor = p->value_float
-    ("Method:ppm:number_density_floor", floor_default);
-  ppm_density_floor = p->value_float
-    ("Method:ppm:density_floor", floor_default);
-  ppm_pressure_floor = p->value_float
-    ("Method:ppm:pressure_floor", floor_default);
   ppm_pressure_free = p->value_logical
     ("Method:ppm:pressure_free",false);
-  ppm_temperature_floor = p->value_float
-    ("Method:ppm:temperature_floor", floor_default);
   ppm_steepening = p->value_logical
     ("Method:ppm:steepening", false);
   ppm_use_minimum_pressure_support = p->value_logical
@@ -1692,12 +1655,207 @@ void EnzoConfig::read_physics_(Parameters * p)
 
     }
 
+    if (physics_list[index_physics] == "fluid_prop"){
+      ERROR("EnzoConfig::read_physics_",
+            "\"fluid_prop\" is a typo for \"fluid_props\"");
+    }
+
     if (physics_list[index_physics] == "gravity") {
 
       physics_gravity = true;
 
     }
   }
+
+  // this is intentionally done outside of the for-loop (for
+  // backwards-compatability purposes)
+  read_physics_fluid_props_(p);
+}
+
+//----------------------------------------------------------------------
+
+namespace{
+
+  void check_valid_params_(const std::vector<std::string>& names,
+                           const std::vector<std::string>& valid_params,
+                           const std::string type)
+  {
+    for (const std::string& name : names){
+      auto rslt = std::find(valid_params.cbegin(), valid_params.cend(), name);
+      if (rslt == valid_params.cend()){
+        ERROR2("expected_group_params_",
+               "\"Physics:fluid_props:dual_energy:%s\" is invalid when "
+               "\"Physics:fluid_props:dual_energy:type\" is \"%s\"",
+               name.c_str(), type.c_str());
+      }
+    }
+  }
+
+  //----------------------------------------------------------------------
+
+  EnzoDualEnergyConfig parse_de_config_(Parameters * p,
+                                        const std::string& hydro_type)
+  {
+    EnzoDualEnergyConfig out = EnzoDualEnergyConfig::build_disabled();
+
+    // fetch names of parameters in Physics:fluid_props:floors. If any of them
+    // exist, let's parse them
+    p->group_set(0, "Physics");
+    p->group_set(1, "fluid_props");
+    p->group_set(2, "dual_energy");
+    std::vector<std::string> names = p->leaf_parameter_names();
+
+    bool missing_de_config = names.size() == 0;
+    if (!missing_de_config){
+      Param* type_param = p->param("Physics:fluid_props:dual_energy:type");
+      if (std::find(names.begin(), names.end(), "type") == names.end()){
+        ERROR("parse_de_config_",
+              "Physics:fluid_props:dual_energy must have a \"type\" parameter");
+      }
+      std::string type = p->value_string
+        ("Physics:fluid_props:dual_energy:type", "");
+
+      if (type == "disabled"){
+        check_valid_params_(names, {"type"}, type);
+        out = EnzoDualEnergyConfig::build_disabled();
+      } else if (type == "modern"){
+        check_valid_params_(names, {"type", "eta"}, type);
+        out = EnzoDualEnergyConfig::build_modern_formulation
+          (p->value_float("Physics:fluid_props:dual_energy:eta", 0.001));
+      } else if (type == "bryan95"){
+        check_valid_params_(names, {"type", "eta_1", "eta_2"}, type);
+        out = EnzoDualEnergyConfig::build_bryan95_formulation
+          (p->value_float("Physics:fluid_props:dual_energy:eta_1", 0.001),
+           p->value_float("Physics:fluid_props:dual_energy:eta_2", 0.1));
+      } else {
+        ERROR1("parse_de_config_",
+               "\"Physics:fluid_props:dual_energy:type\" is invalid: \"%s\"",
+               type.c_str());
+      }
+    }
+
+    if (hydro_type != ""){
+      std::string legacy_de_param = "Method:" + hydro_type + ":dual_energy";
+      bool legacy_param_exists = p->param(legacy_de_param) != nullptr;
+
+      if (legacy_param_exists & !missing_de_config){
+        ERROR1("parse_de_config_",
+               "legacy parameter, \"%s\", duplicates other parameters",
+               legacy_de_param.c_str());
+      } else if (legacy_param_exists) {
+        WARNING1("parse_de_config_",
+                 "\"%s\" is a legacy parameter that will be deprecated",
+                 legacy_de_param.c_str());
+        bool use_de = p->value_logical(legacy_de_param, false);
+        if (!use_de){
+          out = EnzoDualEnergyConfig::build_disabled();
+        } else if (hydro_type == "ppm"){
+          out = EnzoDualEnergyConfig::build_bryan95_formulation
+            (p->value_float("Method:ppm:dual_energy_eta_1", 0.001),
+             p->value_float("Method:ppm:dual_energy_eta_2", 0.1));
+        } else {
+          out = EnzoDualEnergyConfig::build_modern_formulation
+            (p->value_float("Method:mhd_vlct:dual_energy_eta", 0.001));
+        }
+      }
+    }
+    return out;
+  }
+
+  //----------------------------------------------------------------------
+
+  EnzoFluidFloorConfig parse_fluid_floor_config_(Parameters * p,
+                                                 const std::string& hydro_type)
+  {
+    // initialize default values (a value <= 0 means there is no floor)
+    double density_floor = 0.0;
+    double pressure_floor = 0.0;
+    double temperature_floor = 0.0;
+
+    auto get_ptr_to_floor_var = [&](const std::string name)
+      {
+        if (name == "density") { return &density_floor; }
+        if (name == "pressure") { return &pressure_floor; }
+        if (name == "temperature") { return &temperature_floor; }
+        return (double*)nullptr;
+      };
+
+    // fetch names of parameters in Physics:fluid_props:floors. If any of them
+    // exist, let's parse them
+    p->group_set(0, "Physics");
+    p->group_set(1, "fluid_props");
+    p->group_set(2, "floors");
+    std::vector<std::string> floor_l = p->leaf_parameter_names();
+
+    const bool no_legacy = (floor_l.size() > 0);
+    if (no_legacy){
+      for (const std::string& name : floor_l){
+        double* ptr = get_ptr_to_floor_var(name);
+        if (ptr == nullptr){
+          ERROR1("EnzoConfig::read_physics_fluid_props_",
+                 "no support for placing a floor on \"%s\"", name.c_str());
+        } else {
+          *ptr = p->value_float(p->full_name(name));
+        } 
+      }
+    }
+
+    // now let's consider the legacy options (for the appropriate hydro solver).
+    // if there were no parameters in Physics:fluid_props:floors, let's parse
+    // them. Otherwise, let's raise an error
+    const std::vector<std::array<std::string,3>> legacy_params =
+      {{"density", "ppm", "density_floor"},
+       {"pressure", "ppm", "pressure_floor"},
+       {"temperature", "ppm", "temperature_floor"},
+       {"density", "mhd_vlct", "density_floor"},
+       {"pressure", "mhd_vlct", "pressure_floor"}};
+
+    for (const std::array<std::string,3>& triple : legacy_params){
+      if (hydro_type != triple[1]) {continue;}
+      std::string full_name = "Method:" + triple[1] + ":" + triple[2];
+      if (p->param(full_name) == nullptr) {continue;}
+      if (no_legacy){
+        ERROR1("EnzoConfig::read_physics_fluid_props_",
+               "legacy parameter \"%s\" is invalid since the "
+               "\"Physics:fluid_props:floors\" parameters are specified",
+               full_name.c_str());
+      } else {
+        WARNING2("EnzoConfig::read_physics_fluid_props_",
+                 "\"%s\" is a deprecated parameter (it will be removed in the "
+                 "future). Use \"Physics:fluid_props:floors:%s\" instead.",
+                 full_name.c_str(), triple[0].c_str());
+        *(get_ptr_to_floor_var(triple[0])) = p->value_float(full_name);
+      }
+    }
+
+    return {density_floor, pressure_floor, temperature_floor};
+  }
+}
+
+//----------------------------------------------------------------------
+
+void EnzoConfig::read_physics_fluid_props_(Parameters * p)
+{
+  // determine the hydro method (if any) so we know which legacy parameters to
+  // look for.
+  const std::vector<std::string>& mlist = this->method_list;
+  bool has_ppm = std::find(mlist.begin(), mlist.end(), "ppm") != mlist.end();
+  bool has_vlct = std::find(mlist.begin(), mlist.end(),
+                            "mhd_vlct") != mlist.end();
+  std::string hydro_type = "";
+  if (has_ppm & has_vlct){
+    ERROR("EnzoConfig::read_physics_fluid_props_",
+          "a simulation can't use ppm and vlct solvers at once");
+  } else if (has_ppm){
+    hydro_type = "ppm";
+  } else if (has_vlct){
+    hydro_type = "mhd_vlct";
+  }
+
+  physics_fluid_props_de_config = parse_de_config_(p, hydro_type);
+
+  physics_fluid_props_fluid_floor_config =
+    parse_fluid_floor_config_(p, hydro_type);
 }
 
 //----------------------------------------------------------------------

@@ -19,8 +19,16 @@ class EnzoPhysicsFluidProps : public Physics {
 
 public: // interface
 
-  /// Constructor - this needs to be refactored in the future.
-  EnzoPhysicsFluidProps() noexcept;
+  /// Constructor
+  EnzoPhysicsFluidProps(const EnzoDualEnergyConfig& de_config,
+                        const EnzoFluidFloorConfig& fluid_floor_config,
+                        enzo_float gamma, enzo_float mol_weight) noexcept
+  : Physics(),
+    de_config_(de_config),
+    fluid_floor_config_(fluid_floor_config),
+    gamma_(gamma),
+    mol_weight_(mol_weight)
+  { }
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoPhysicsFluidProps);
