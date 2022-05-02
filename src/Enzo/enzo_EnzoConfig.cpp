@@ -23,8 +23,6 @@ EnzoConfig::EnzoConfig() throw ()
   ppm_pressure_free(false),
   ppm_steepening(false),
   ppm_use_minimum_pressure_support(false),
-  ppm_mol_weight(0.0),
-  field_gamma(0.0),
   field_uniform_density(1.0),
   physics_cosmology(false),
   physics_cosmology_hubble_constant_now(0.0),
@@ -39,6 +37,8 @@ EnzoConfig::EnzoConfig() throw ()
   // FluidProps
   physics_fluid_props_de_config(),
   physics_fluid_props_fluid_floor_config(),
+  physics_fluid_props_gamma(0.0),
+  physics_fluid_props_mol_weight(0.0),
   // Gravity
   physics_gravity(false),
   // EnzoInitialBCenter
@@ -336,9 +336,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | ppm_pressure_free;
   p | ppm_steepening;
   p | ppm_use_minimum_pressure_support;
-  p | ppm_mol_weight;
 
-  p | field_gamma;
   p | field_uniform_density;
 
   p | physics_cosmology;
@@ -354,6 +352,8 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | physics_fluid_props_de_config;
   p | physics_fluid_props_fluid_floor_config;
+  p | physics_fluid_props_gamma;
+  p | physics_fluid_props_mol_weight;
 
   p | physics_gravity;
 
@@ -658,6 +658,9 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_isolated_galaxy_(p);
   read_initial_feedback_test_(p);
   read_initial_merge_sinks_test_(p);
+
+  // it's important for read_physics_ to precede read_method_grackle_
+  read_physics_(p);
   
   read_method_grackle_(p);
   read_method_feedback_(p);
@@ -671,8 +674,6 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_ppm_(p);
   read_method_turbulence_(p);
   read_method_merge_sinks_(p);
-
-  read_physics_(p);
 
   read_prolong_enzo_(p);
   
@@ -708,7 +709,6 @@ void EnzoConfig::read_adapt_(Parameters *p)
 
 void EnzoConfig::read_field_(Parameters *p)
 {
-  field_gamma = p->value_float ("Field:gamma",5.0/3.0);
   field_uniform_density = p->value_float ("Field:uniform_density",1.0);
 }
 
@@ -1234,7 +1234,7 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
     method_grackle_chemistry->use_grackle = method_grackle_use_grackle;
 
     // Copy over parameters from Enzo-E to Grackle
-    method_grackle_chemistry->Gamma = p->value_float ("Field:gamma",5.0/3.0);
+    method_grackle_chemistry->Gamma = physics_fluid_props_gamma;
 
     //
     method_grackle_use_cooling_timestep = p->value_logical
@@ -1593,8 +1593,6 @@ void EnzoConfig::read_method_ppm_(Parameters * p)
     ("Method:ppm:steepening", false);
   ppm_use_minimum_pressure_support = p->value_logical
     ("Method:ppm:use_minimum_pressure_support",false);
-  ppm_mol_weight = p->value_float
-    ("Method:ppm:mol_weight",0.6);
 }
 
 //----------------------------------------------------------------------
@@ -1744,7 +1742,7 @@ namespace{
                legacy_de_param.c_str());
       } else if (legacy_param_exists) {
         WARNING1("parse_de_config_",
-                 "\"%s\" is a legacy parameter that will be deprecated",
+                 "\"%s\" is a legacy parameter that will be removed",
                  legacy_de_param.c_str());
         bool use_de = p->value_logical(legacy_de_param, false);
         if (!use_de){
@@ -1852,10 +1850,53 @@ void EnzoConfig::read_physics_fluid_props_(Parameters * p)
     hydro_type = "mhd_vlct";
   }
 
+  // determine the dual energy formalism configuration
   physics_fluid_props_de_config = parse_de_config_(p, hydro_type);
 
+  // determine the fluid floor configuration
   physics_fluid_props_fluid_floor_config =
     parse_fluid_floor_config_(p, hydro_type);
+
+  // determine adiabatic index (in the future, this logic will be revisited)
+  {
+    double default_val = 5.0/3.0;
+    double legacy_value = p->value_float("Field:gamma", -1);
+    double actual_value = p->value_float("Physics:fluid_props:eos:gamma", -1);
+
+    if (legacy_value == -1) {
+      if (actual_value == -1) { actual_value = default_val; }
+      physics_fluid_props_gamma = actual_value;
+    } else if (actual_value == -1) {
+      WARNING("EnzoConfig::read_physics_fluid_props_",
+              "\"Field:gamma\" is a legacy parameter that will be removed.");
+      physics_fluid_props_gamma = legacy_value;
+    } else {
+      ERROR("EnzoConfig::read_physics_fluid_props_",
+            "\"Field:gamma\" isn't valid since "
+            "\"Physics:fluid_props:eos:gamma\" is specified.");
+    }
+  }
+
+  // determine molecular weight
+  {
+    double default_val = 0.6;
+    double legacy_value = p->value_float("Method:ppm:mol_weight", -1);
+    double actual_value = p->value_float("Physics:fluid_props:mol_weight", -1);
+
+    if (legacy_value == -1) {
+      if (actual_value == -1) { actual_value = default_val; }
+      physics_fluid_props_mol_weight = actual_value;
+    } else if (actual_value == -1) {
+      WARNING("EnzoConfig::read_physics_fluid_props_",
+              "\"Method:ppm:mol_weight\" is a legacy parameter that will be "
+              "removed.");
+      physics_fluid_props_mol_weight = legacy_value;
+    } else {
+      ERROR("EnzoConfig::read_physics_fluid_props_",
+            "\"Method:ppm:mol_weight\" isn't valid since "
+            "\"Physics:fluid_props:mol_weight\" is specified.");
+    }
+  }
 }
 
 //----------------------------------------------------------------------

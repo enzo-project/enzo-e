@@ -121,8 +121,6 @@ public: // interface
       ppm_pressure_free(false),
       ppm_steepening(false),
       ppm_use_minimum_pressure_support(false),
-      ppm_mol_weight(0.0),
-      field_gamma(0.0),
       field_uniform_density(1.0),
       // Cosmology
       physics_cosmology(false),
@@ -138,6 +136,8 @@ public: // interface
       // FluidProps
       physics_fluid_props_de_config(),
       physics_fluid_props_fluid_floor_config(),
+      physics_fluid_props_gamma(0.0),
+      physics_fluid_props_mol_weight(0.0),
       // Gravity
       physics_gravity(false),
       // EnzoInitialBCenter
@@ -476,9 +476,7 @@ public: // attributes
   bool                       ppm_pressure_free;
   bool                       ppm_steepening;
   bool                       ppm_use_minimum_pressure_support;
-  double                     ppm_mol_weight;
 
-  double                     field_gamma;
   double                     field_uniform_density;
 
   /// Cosmology
@@ -496,6 +494,8 @@ public: // attributes
   /// FluidProps
   EnzoDualEnergyConfig       physics_fluid_props_de_config;
   EnzoFluidFloorConfig       physics_fluid_props_fluid_floor_config;
+  double                     physics_fluid_props_gamma;
+  double                     physics_fluid_props_mol_weight;
 
   /// Gravity
   bool                       physics_gravity;

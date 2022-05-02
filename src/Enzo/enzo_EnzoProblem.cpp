@@ -777,8 +777,8 @@ Physics * EnzoProblem::create_physics_
       (
        enzo_config->physics_fluid_props_de_config,
        enzo_config->physics_fluid_props_fluid_floor_config,
-       enzo_config->field_gamma,
-       enzo_config->ppm_mol_weight
+       enzo_config->physics_fluid_props_gamma,
+       enzo_config->physics_fluid_props_mol_weight
        );
 
   } else {
