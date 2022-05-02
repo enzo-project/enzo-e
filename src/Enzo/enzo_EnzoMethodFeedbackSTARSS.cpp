@@ -494,7 +494,7 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
         if (te_dep_c[i] > 10*tiny_number) { // if any deposition
         #ifdef DEBUG_FEEDBACK_STARSS_ACCUMULATE
           if (print_edge_deposit) {
-            CkPrintf("MethodFeedbackSTARSS: At least one supernova deposited across grid boundaries in block [%.3f, %.3f, %.3f])\n", xm, ym, zm);  
+            CkPrintf("MethodFeedbackSTARSS: At least one supernova deposited across grid boundaries into block [%.3f, %.3f, %.3f])\n", xm, ym, zm);  
             print_edge_deposit = false;       
           }
         #endif 
@@ -622,6 +622,26 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
   }
   CkPrintf("(block [%.3f, %.3f, %.3f]) totalMass before feedback: %e Msun\n", xm, ym,zm, totalMass); 
 */
+
+  enzo_float * d_dep  = (enzo_float *) field.values("density_deposit");
+  enzo_float * te_dep = (enzo_float *) field.values("total_energy_deposit");
+  enzo_float * ge_dep = (enzo_float *) field.values("internal_energy_deposit");
+  enzo_float * mf_dep = (enzo_float *) field.values("metal_density_deposit");
+  enzo_float * vx_dep = (enzo_float *) field.values("velocity_x_deposit");
+  enzo_float * vy_dep = (enzo_float *) field.values("velocity_y_deposit");
+  enzo_float * vz_dep = (enzo_float *) field.values("velocity_z_deposit");
+
+  // initialize deposit fields as tiny_number -- if d_dep=0 you get NaNs in TransformComovingWithStar
+
+  for (int i=0; i<mx*my*mz; i++){
+    d_dep[i] = tiny_number;    
+    te_dep[i] = tiny_number;    
+    ge_dep[i] = tiny_number;
+    mf_dep[i] = tiny_number;
+    vx_dep[i] = tiny_number;
+    vy_dep[i] = tiny_number;
+    vz_dep[i] = tiny_number;
+  }
 
   double cell_volume = hx*hy*hz;
 
@@ -1394,9 +1414,9 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 
   coupledEnergy /= eunit; // coupledEnergy is kinetic energy at this point
   coupledGasEnergy /= eunit;
-  coupledMass /= rho_to_m; // This conversion must not actually put coupledMass into code density
+  coupledMass /= rho_to_m; // put coupledMass into code density units
   coupledMetals /= rho_to_m;
-  coupledMomenta /= (munit/cello::mass_solar * vunit / 1e5 / sqrt(nCouple) ); 
+  coupledMomenta /= sqrt(nCouple) * (rho_to_m * vunit / 1e5 ); 
 
   coupledEnergy += coupledGasEnergy;
 
@@ -1413,18 +1433,9 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 
   // transform specific energy to energy before deposition
 
-//  for (int i=0; i<mx*my*mz; i++)
-//  {
-//    te[i] *= (d[i]*hx*hy*hz);
-//    ge[i] *= (d[i]*hx*hy*hz);
-//  }
-
   enzo_float coupledMass_list[nCouple], coupledMetals_list[nCouple];
   enzo_float coupledMomenta_x[nCouple], coupledMomenta_y[nCouple], coupledMomenta_z[nCouple];
   enzo_float coupledEnergy_list[nCouple], coupledGasEnergy_list[nCouple];
-
-  //std::fill_n(coupledMass_list  ,nCouple,  coupledMass/nCouple);
-  //std::fill_n(coupledMetals_list,nCouple,coupledMetals/nCouple);
 
   for (int n=0; n<nCouple; n++)
   {
@@ -1488,24 +1499,6 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   enzo_float * vy_dep = (enzo_float *) field.values("velocity_y_deposit");
   enzo_float * vz_dep = (enzo_float *) field.values("velocity_z_deposit");
 
-  // initialize fields as tiny_number -- if d_dep=0 you get NaNs in TransformComovingWithStar
-
-//  for (int iz=gz; iz<nz+gz; iz++){
-//    for (int iy=gy; iy<ny+gy; iy++){
-//      for (int ix=gx; ix<nx+gx; ix++){
-//        int i = INDEX(ix,iy,iz,mx,my);
-  for (int i=0; i<size; i++){ //TODO: shouldn't loop through ghost zones here
-        d_dep[i] = tiny_number;     // in case particle blows up and does stellar winds
-        te_dep[i] = tiny_number;    // on the edge of a block
-        ge_dep[i] = tiny_number;
-        mf_dep[i] = tiny_number;
-        vx_dep[i] = tiny_number;
-        vy_dep[i] = tiny_number;
-        vz_dep[i] = tiny_number;
-  }
-//      }
-//    }
-//  }
 
   FORTRAN_NAME(cic_deposit)
   (&CloudParticlePositionX, &CloudParticlePositionY,
@@ -1596,6 +1589,8 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
       } 
     }
   }
+#endif
+
   double massAfter = sumMass*rho_to_m;
   double metalsAfter = sumMetals*rho_to_m; 
   sumMomenta = sqrt(sumMomenta);
@@ -1609,24 +1604,6 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 
   CkPrintf("STARSS_FB (block [%.3f, %.3f, %.3f]): Mass difference (Msun) = %e; coupledMass (Msun) = %e\n", xm, ym, zm, massAfter-massBefore, coupledMass*rho_to_m);
   CkPrintf("STARSS_FB (block [%.3f, %.3f, %.3f]): Metals difference (Msun) = %e; coupledMetals (Msun) = %e\n", xm, ym, zm, metalsAfter-metalsBefore, coupledMetals*rho_to_m);
-  //CkPrintf("STARSS_FB: Deleting coupling particles...\n");
-#endif
-
-
-  // transform back to specific energy
-//  for (int i=0; i<mx*my*mz; i++)
-//  {
-//    te[i] /= (d[i]*hx*hy*hz);
-//    ge[i] /= (d[i]*hx*hy*hz);
-//  }
-
-
-  //this->deleteCouplingParticles(enzo_block);
-
-//#ifdef DEBUG_FEEDBACK_STARSS
-  //CkPrintf("STARSS_FB: Updating velocity fields to account for momentum deposition...\n");
-//#endif
-
 
 
   // transform velocities back to "lab" frame
@@ -1634,6 +1611,13 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   this->transformComovingWithStar(d,vx,vy,vz,up,vp,wp,mx,my,mz, -1);
   this->transformComovingWithStar(d_dep,vx_dep,vy_dep,vz_dep,up,vp,wp,mx,my,mz, -1);
 
+  // convert deposited energies to specific energy
+  //for (int i=0; i<size; i++) {
+  //  te_dep[i] /= cell_mass;
+  //  ge_dep[i] /= cell_mass;
+  // }
+
+  // clear active zone values of deposit fields
   for (int iz=gz; iz<nz+gz; iz++){
     for (int iy=gy; iy<ny+gy; iy++){
       for (int ix=gx; ix<nx+gx; ix++){
