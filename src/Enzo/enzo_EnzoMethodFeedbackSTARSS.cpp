@@ -318,7 +318,7 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
 
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
-  //refresh->add_all_fields();
+  refresh->add_all_fields();
   
   sf_minimum_level_ = enzo_config->method_feedback_min_level;
   single_sn_        = enzo_config->method_feedback_single_sn;
@@ -400,6 +400,7 @@ void EnzoMethodFeedbackSTARSS::compute (Block * block) throw()
     this->compute_(block);
   }
 
+  block->compute_done();
   return;
 }
 
@@ -555,7 +556,7 @@ void EnzoBlock::p_method_feedback_starss_end()
   EnzoMethodFeedbackSTARSS * method = static_cast<EnzoMethodFeedbackSTARSS*> (this->method());
   method->add_accumulate_fields(this);
 
-  compute_done();
+  //compute_done();
   return;
 }
 
