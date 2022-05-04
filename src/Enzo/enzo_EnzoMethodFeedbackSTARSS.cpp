@@ -922,6 +922,15 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   enzo_float * dHDI   = field.is_field("HDI_density") ? 
          (enzo_float *) field.values("HDI_density") : NULL;
 
+  // "deposit" fields
+  enzo_float * d_dep  = (enzo_float *) field.values("density_deposit");
+  enzo_float * te_dep = (enzo_float *) field.values("total_energy_deposit");
+  enzo_float * ge_dep = (enzo_float *) field.values("internal_energy_deposit");
+  enzo_float * mf_dep = (enzo_float *) field.values("metal_density_deposit");
+  enzo_float * vx_dep = (enzo_float *) field.values("velocity_x_deposit");
+  enzo_float * vy_dep = (enzo_float *) field.values("velocity_y_deposit");
+  enzo_float * vz_dep = (enzo_float *) field.values("velocity_z_deposit");
+
   const int index = INDEX(ix,iy,iz,mx,my);
 
   int stretch_factor = 1.0;  
@@ -1325,8 +1334,6 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   // Subtract shell mass from the central cells
   double minusRho=0, minusZ=0, msubtracted=0;
   double remainMass=shellMass/rho_to_m, remainZ = shellMetals/rho_to_m;
-    double sumpre = 0;
-    double sumpost= 0;
   bool massiveCell;
   if (shellMass > 0 && AnalyticSNRShellMass)
   {
@@ -1344,30 +1351,21 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
           double dpre = d[flat];
           double zpre = mf[flat];
           double pre_z_frac = zpre / dpre;
-          sumpre += dpre;
         #ifdef DEBUG_FEEDBACK_STARSS
           CkPrintf("STARSS: Baryon Prior: d_Msun = %e, mc = %e, ms = %e, m_z = %e, z = %e\n",
                    d[flat] * rho_to_m, centralMass, shellMass, shellMetals, pre_z_frac);
         #endif
-          // since "velocity" field is carrying momentum density right now, need to 
-          // account for the change in density to keep everything consistent 
-          vx[flat] /= d[flat];
-          vy[flat] /= d[flat];
-          vz[flat] /= d[flat];
 
-          d[flat] = std::max(dpre - remainMass/27.0, (1.0-maxEvacFraction)*dpre);
+          // subtract values from the "deposit" fields
+          d_dep[flat] -= std::min(remainMass/27.0, maxEvacFraction*dpre);
 
-          vx[flat] *= d[flat];
-          vy[flat] *= d[flat];
-          vz[flat] *= d[flat];
+          minusRho    += -1*d_dep[flat];
+          msubtracted += -1*d_dep[flat];
+         
+          mf_dep[flat] -= std::min(remainZ/27.0, zpre - tiny_number); 
 
-          minusRho    += dpre - d[flat];
-          msubtracted += dpre - d[flat];
-          
-          mf[flat] = std::max(tiny_number, zpre - remainZ/27.0);
-          minusZ      += zpre - mf[flat];
-          zsubtracted += zpre - mf[flat];
-          sumpost += d[flat];
+          minusZ      += -1*mf_dep[flat];
+          zsubtracted += -1*mf_dep[flat];
         } // endfor iz_
       } // endfor iy_
     } // endfor ix_
@@ -1501,13 +1499,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   //enzo_float left_edge[3] = {xm, ym, zm};
   // CIC deposit coupling particles
   //
-  enzo_float * d_dep  = (enzo_float *) field.values("density_deposit");
-  enzo_float * te_dep = (enzo_float *) field.values("total_energy_deposit");
-  enzo_float * ge_dep = (enzo_float *) field.values("internal_energy_deposit");
-  enzo_float * mf_dep = (enzo_float *) field.values("metal_density_deposit");
-  enzo_float * vx_dep = (enzo_float *) field.values("velocity_x_deposit");
-  enzo_float * vy_dep = (enzo_float *) field.values("velocity_y_deposit");
-  enzo_float * vz_dep = (enzo_float *) field.values("velocity_z_deposit");
+
 
 
   FORTRAN_NAME(cic_deposit)
@@ -1619,7 +1611,22 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   // transform velocities back to "lab" frame
   // convert velocity (actually momentum at the moment) field back to velocity 
   this->transformComovingWithStar(d,vx,vy,vz,up,vp,wp,mx,my,mz, -1);
-  this->transformComovingWithStar(d_dep,vx_dep,vy_dep,vz_dep,up,vp,wp,mx,my,mz, -1);
+
+  // define temporary field and CIC deposit to store just the shell density for converting deposited momenta
+  // back to velocities. TODO: Is there a better way to do this?
+  enzo_float * d_shell = new enzo_float[size];
+  
+  FORTRAN_NAME(cic_deposit)
+  (&CloudParticlePositionX, &CloudParticlePositionY,
+   &CloudParticlePositionZ, &rank, &nCouple, &coupledMass_list, d_shell, &left_edge,
+   &mx, &my, &mz, &hx, &A);
+
+  for (int i=0; i<size; i++) {
+    if (d_shell[i] < tiny_number) d_shell[i] = tiny_number;
+  }
+  
+  this->transformComovingWithStar(d_shell,vx_dep,vy_dep,vz_dep,up,vp,wp,mx,my,mz, -1);
+  delete [] d_shell;
 
   // convert deposited energies to specific energy
   //for (int i=0; i<size; i++) {
