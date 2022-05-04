@@ -21,7 +21,7 @@
 //#ifdef NOTDEFINED // for now... since not done coding
 
 #define DEBUG_FEEDBACK_STARSS
-#define DEBUG_FEEDBACK_STARSS_ACCUMULATE
+//#define DEBUG_FEEDBACK_STARSS_ACCUMULATE
 
 // =============================================================================
 // splice these off to a different file (later)
@@ -1349,7 +1349,18 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
           CkPrintf("STARSS: Baryon Prior: d_Msun = %e, mc = %e, ms = %e, m_z = %e, z = %e\n",
                    d[flat] * rho_to_m, centralMass, shellMass, shellMetals, pre_z_frac);
         #endif
+          // since "velocity" field is carrying momentum density right now, need to 
+          // account for the change in density to keep everything consistent 
+          vx[flat] /= d[flat];
+          vy[flat] /= d[flat];
+          vz[flat] /= d[flat];
+
           d[flat] = std::max(dpre - remainMass/27.0, (1.0-maxEvacFraction)*dpre);
+
+          vx[flat] *= d[flat];
+          vy[flat] *= d[flat];
+          vz[flat] *= d[flat];
+
           minusRho    += dpre - d[flat];
           msubtracted += dpre - d[flat];
           
@@ -1411,13 +1422,13 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   //put everything back into code units before CIC
   //these values correspond to TOTAL (energy, mass, etc.)
   //over all the coupling particles.
-  //Note that coupledMass and coupledMetals are densities.
 
   coupledEnergy /= eunit; // coupledEnergy is kinetic energy at this point
   coupledGasEnergy /= eunit;
   coupledMass /= rho_to_m; // put coupledMass into code density units
   coupledMetals /= rho_to_m;
-  coupledMomenta /= sqrt(nCouple) * (rho_to_m * vunit / 1e5 ); 
+  //coupledMomenta /= sqrt(nCouple) * (rho_to_m * vunit / 1e5 );
+  coupledMomenta /= (rho_to_m * vunit / 1e5 ); // put coupledMomenta into code momentum density units 
 
   coupledEnergy += coupledGasEnergy;
 
@@ -1431,8 +1442,6 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   //                              CloudParticlePositionX,CloudParticlePositionY,CloudParticlePositionZ,  
   //                              CloudParticleVectorX,CloudParticleVectorY,CloudParticleVectorZ);
 
-
-  // transform specific energy to energy before deposition
 
   enzo_float coupledMass_list[nCouple], coupledMetals_list[nCouple];
   enzo_float coupledMomenta_x[nCouple], coupledMomenta_y[nCouple], coupledMomenta_z[nCouple];
