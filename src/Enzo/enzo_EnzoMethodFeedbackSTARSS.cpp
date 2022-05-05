@@ -206,6 +206,18 @@ void EnzoMethodFeedbackSTARSS::transformComovingWithStar(enzo_float * density,
 
 }
 
+double EnzoMethodFeedbackSTARSS::Window(double xd, double yd, double zd, double width) const throw()
+{
+    float wx = 0, wy = 0, wz = 0;
+    if (std::abs(xd) <= width)
+            wx = 1.0 - std::abs(xd)/width;
+    if (std::abs(yd) <= width)
+            wy = 1.0 - std::abs(yd)/width;
+    if (std::abs(zd) <= width)
+            wz = 1.0 - std::abs(zd)/width;
+    return wx * wy * wz;
+}
+
 void EnzoMethodFeedbackSTARSS::createCouplingParticles(EnzoBlock * enzo_block, const int nCouple,
                                  double coupledEnergy, double coupledGasEnergy,
                                  double coupledMass, double coupledMetals, double coupledMomenta,
@@ -1347,7 +1359,15 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
           int flat = INDEX(ix_,iy_,iz_,mx,my);
           
           if ( !(flat > 0 && flat < size) ) continue; // TODO: do I even need this?
-          
+
+          // cell left edges for CiC (starting from ghost zones)
+          double xcell = xm + (ix_+0.5 - gx)*hx; 
+          double ycell = ym + (iy_+0.5 - gy)*hy;
+          double zcell = zm + (iz_+0.5 - gz)*hz;
+
+          double window = Window(xp-xcell, yp-ycell, zp-zcell, hx);
+          if (window <= 0) continue;
+
           double dpre = d[flat];
           double zpre = mf[flat];
           double pre_z_frac = zpre / dpre;
@@ -1357,12 +1377,12 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
         #endif
 
           // subtract values from the "deposit" fields
-          d_dep[flat] -= std::min(remainMass/27.0, maxEvacFraction*dpre);
+          d_dep[flat] -= std::min(window * remainMass, maxEvacFraction*dpre);
 
           minusRho    += -1*d_dep[flat];
           msubtracted += -1*d_dep[flat];
          
-          mf_dep[flat] -= std::min(remainZ/27.0, zpre - tiny_number); 
+          mf_dep[flat] -= std::min(window*remainZ, zpre - tiny_number); 
 
           minusZ      += -1*mf_dep[flat];
           zsubtracted += -1*mf_dep[flat];

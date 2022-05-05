@@ -72,6 +72,9 @@ public:
 
    void add_accumulate_fields(EnzoBlock * enzo_block) throw();
 
+   // window function for calculating CiC fractions. May make more sense to put this in Cello somewhere
+   double Window(double xd, double yd, double zd, double width) const throw();
+
    void createCouplingParticles(EnzoBlock * enzo_block, const int nCouple,
                                 double coupledEnergy, double coupledGasEnergy, 
                                 double coupledMass, double coupledMetals, double coupledMomenta,
