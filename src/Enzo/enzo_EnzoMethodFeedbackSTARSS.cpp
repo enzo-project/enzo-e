@@ -196,7 +196,7 @@ void EnzoMethodFeedbackSTARSS::transformComovingWithStar(enzo_float * density,
   {
     // back to "lab" frame. Convert momentum field back to velocity
     for (int ind = 0; ind<size; ind++) {
-      if (density[ind] == tiny_number) continue;
+      if (density[ind] <= 10*tiny_number) continue;
       double mult = 1/density[ind];
       velocity_x[ind] = velocity_x[ind]*mult + up;
       velocity_y[ind] = velocity_y[ind]*mult + vp;
@@ -376,6 +376,8 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
     ("internal_energy_deposit","internal_energy_deposit_copy");
   refresh_fb->add_field_src_dst
     ("metal_density_deposit","metal_density_deposit_copy");
+  refresh_fb->add_field_src_dst
+    ("SN_shell_density", "SN_shell_density_copy");
  
   refresh_fb->set_callback(CkIndex_EnzoBlock::p_method_feedback_starss_end());
  
@@ -462,6 +464,9 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
   enzo_float * vy_dep_c = (enzo_float *) field.values("velocity_y_deposit_copy");
   enzo_float * vz_dep_c = (enzo_float *) field.values("velocity_z_deposit_copy");
 
+  enzo_float * d_shell   = (enzo_float *) field.values("SN_shell_density");
+  enzo_float * d_shell_c = (enzo_float *) field.values("SN_shell_density_copy");
+
   EnzoUnits * enzo_units = enzo::units();
   double cell_volume = hx*hy*hz * enzo_units->volume();
   double rhounit = enzo_units->density();
@@ -520,7 +525,7 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
 
           mf[i] += mf_dep_c[i];
 
-          double M_scale = d_dep_c[i]/d[i];
+          double M_scale = d_shell_c[i]/d[i];
           te[i] += te_dep_c[i] / cell_mass; 
           ge[i] += ge_dep_c[i] / cell_mass;
           vx[i] += vx_dep_c[i] * M_scale;
@@ -547,6 +552,7 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
     vx_dep[i] = tiny_number;
     vy_dep[i] = tiny_number;
     vz_dep[i] = tiny_number;
+    d_shell[i] = tiny_number;
 
      d_dep_c[i] = tiny_number;
     mf_dep_c[i] = tiny_number;
@@ -555,6 +561,7 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
     vx_dep_c[i] = tiny_number;
     vy_dep_c[i] = tiny_number;
     vz_dep_c[i] = tiny_number;
+    d_shell_c[i] = tiny_number;
  
   }
  
@@ -644,6 +651,8 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
   enzo_float * vy_dep = (enzo_float *) field.values("velocity_y_deposit");
   enzo_float * vz_dep = (enzo_float *) field.values("velocity_z_deposit");
 
+  enzo_float * d_shell   = (enzo_float *) field.values("SN_shell_density");
+
   // initialize deposit fields as tiny_number -- if d_dep=0 you get NaNs in TransformComovingWithStar
 
   for (int i=0; i<mx*my*mz; i++){
@@ -654,6 +663,7 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
     vx_dep[i] = tiny_number;
     vy_dep[i] = tiny_number;
     vz_dep[i] = tiny_number;
+    d_shell[i] = tiny_number;
   }
 
   double cell_volume = hx*hy*hz;
@@ -887,7 +897,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   my = ny + 2*gy;
   mz = nz + 2*gz;
 
-  double size = mx*my*mz;
+  int size = mx*my*mz;
 
   const int rank = cello::rank();
 
@@ -943,6 +953,9 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   enzo_float * vy_dep = (enzo_float *) field.values("velocity_y_deposit");
   enzo_float * vz_dep = (enzo_float *) field.values("velocity_z_deposit");
 
+  // holds just shell densities (used for refresh+accumulate)
+  enzo_float * d_shell   = (enzo_float *) field.values("SN_shell_density");
+
   const int index = INDEX(ix,iy,iz,mx,my);
 
   int stretch_factor = 1.0;  
@@ -977,9 +990,9 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
       /* in this cloud, take the coupling particle position as 0.5, 0.5, 0.5 */
       // get position, adding the width of ghost zones. Adding ghost zone width
       // because cic_deposit.F  
-      CloudParticlePositionX[cpInd] = xp - CloudParticleVectorX[cpInd]*inv_norm * A;
-      CloudParticlePositionY[cpInd] = yp - CloudParticleVectorY[cpInd]*inv_norm * A;
-      CloudParticlePositionZ[cpInd] = zp - CloudParticleVectorZ[cpInd]*inv_norm * A;
+      CloudParticlePositionX[cpInd] = xp + CloudParticleVectorX[cpInd]*inv_norm * A;
+      CloudParticlePositionY[cpInd] = yp + CloudParticleVectorY[cpInd]*inv_norm * A;
+      CloudParticlePositionZ[cpInd] = zp + CloudParticleVectorZ[cpInd]*inv_norm * A;
       weightsVector[cpInd] = 1.0; 
       /* turn the vectors back into unit-vectors */
       CloudParticleVectorZ[cpInd] *= inv_norm;
@@ -1382,7 +1395,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
           minusRho    += -1*d_dep[flat];
           msubtracted += -1*d_dep[flat];
          
-          mf_dep[flat] -= std::min(window*remainZ, zpre - tiny_number); 
+          mf_dep[flat] -= std::min(window * remainZ, zpre - tiny_number); 
 
           minusZ      += -1*mf_dep[flat];
           zsubtracted += -1*mf_dep[flat];
@@ -1445,8 +1458,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   coupledGasEnergy /= eunit;
   coupledMass /= rho_to_m; // put coupledMass into code density units
   coupledMetals /= rho_to_m;
-  //coupledMomenta /= sqrt(nCouple) * (rho_to_m * vunit / 1e5 );
-  coupledMomenta /= (rho_to_m * vunit / 1e5 ); // put coupledMomenta into code momentum density units 
+  coupledMomenta /= (rho_to_m * vunit / 1e5); // put coupledMomenta into code momentum density units 
 
   coupledEnergy += coupledGasEnergy;
 
@@ -1558,6 +1570,11 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
    &CloudParticlePositionZ, &rank, &nCouple, &coupledGasEnergy_list, ge_dep, &left_edge,
    &mx, &my, &mz, &hx, &A);
 
+  FORTRAN_NAME(cic_deposit)
+  (&CloudParticlePositionX, &CloudParticlePositionY,
+   &CloudParticlePositionZ, &rank, &nCouple, &coupledMass_list, d_shell, &left_edge,
+   &mx, &my, &mz, &hx, &A);
+
 
   //copy values for active zones
   double checksum_deposit = 0;
@@ -1631,22 +1648,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   // transform velocities back to "lab" frame
   // convert velocity (actually momentum at the moment) field back to velocity 
   this->transformComovingWithStar(d,vx,vy,vz,up,vp,wp,mx,my,mz, -1);
-
-  // define temporary field and CIC deposit to store just the shell density for converting deposited momenta
-  // back to velocities. TODO: Is there a better way to do this?
-  enzo_float * d_shell = new enzo_float[size];
-  
-  FORTRAN_NAME(cic_deposit)
-  (&CloudParticlePositionX, &CloudParticlePositionY,
-   &CloudParticlePositionZ, &rank, &nCouple, &coupledMass_list, d_shell, &left_edge,
-   &mx, &my, &mz, &hx, &A);
-
-  for (int i=0; i<size; i++) {
-    if (d_shell[i] < tiny_number) d_shell[i] = tiny_number;
-  }
-  
   this->transformComovingWithStar(d_shell,vx_dep,vy_dep,vz_dep,up,vp,wp,mx,my,mz, -1);
-  delete [] d_shell;
 
   // convert deposited energies to specific energy
   //for (int i=0; i<size; i++) {
@@ -1666,7 +1668,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
         vx_dep[i] = tiny_number;
         vy_dep[i] = tiny_number;
         vz_dep[i] = tiny_number;
- 
+        d_shell[i] = tiny_number; 
       }
     }
   } 
