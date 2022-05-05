@@ -525,17 +525,21 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
 
           mf[i] += mf_dep_c[i];
 
-          double M_scale = d_shell_c[i]/d[i];
-          te[i] += te_dep_c[i] / cell_mass; 
-          ge[i] += ge_dep_c[i] / cell_mass;
-          vx[i] += vx_dep_c[i] * M_scale;
-          vy[i] += vy_dep_c[i] * M_scale;
-          vz[i] += vz_dep_c[i] * M_scale;
+          double M_scale_tot = d_new / d_old;
+          double M_scale_shell = d_shell_c[i]/d[i];
+
+          // NOTE: Here, te_dep_c and ge_dep_c are carrying "energy" (not specific energy)
+          //       and vx_dep_c, vy_dep_c, and vy_dep_c are carrying velocity of the shell (not momentum density)
+          te[i] = te[i] / M_scale_tot + te_dep_c[i] / cell_mass; 
+          ge[i] = ge[i] / M_scale_tot + ge_dep_c[i] / cell_mass;
+          vx[i] += vx_dep_c[i] * M_scale_shell;
+          vy[i] += vy_dep_c[i] * M_scale_shell;
+          vz[i] += vz_dep_c[i] * M_scale_shell;
 
           // rescale color fields to account for new densities
-          EnzoMethodStarMaker::rescale_densities(enzo_block, i, d_new/d_old);
+          EnzoMethodStarMaker::rescale_densities(enzo_block, i, M_scale_tot);
           // undo rescaling of metal_density field
-          mf[i] /= (d_new/d_old);
+          mf[i] /= M_scale_tot;
     
          }        
         
@@ -1441,6 +1445,8 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   
   } // endif minusM != coupledMass - ejectaMass
 
+  coupledEnergy += coupledGasEnergy;
+
 #ifdef DEBUG_FEEDBACK_STARSS
   CkPrintf("STARSS_FB: Before unit conversions -- coupledEnergy = %e; coupledGasEnergy = %e;\n"
            "           coupledMass = %e; coupledMetals = %e; coupledMomenta = %e\n",
@@ -1460,7 +1466,6 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   coupledMetals /= rho_to_m;
   coupledMomenta /= (rho_to_m * vunit / 1e5); // put coupledMomenta into code momentum density units 
 
-  coupledEnergy += coupledGasEnergy;
 
   // Create SN coupling particles
 //#ifdef DEBUG_FEEDBACK_STARSS
@@ -1592,14 +1597,16 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
         checksum_deposit += d_dep[i]*rho_to_m;
         double d_new = d[i];
         double cell_mass = d_new*cell_volume_code;
+        double M_scale = d_new / d_old;
 
         mf[i] += mf_dep[i]; 
-        
-        te[i] += te_dep[i] / cell_mass;
-        ge[i] += ge_dep[i] / cell_mass;
-        vx[i] += vx_dep[i];
-        vy[i] += vy_dep[i];
-        vz[i] += vz_dep[i];
+
+        // need to rescale specific energies + momenta to account for added mass
+        te[i] = te[i]/M_scale + te_dep[i] / cell_mass;
+        ge[i] = ge[i]/M_scale + ge_dep[i] / cell_mass;
+        vx[i] = vx[i]*M_scale + vx_dep[i];
+        vy[i] = vy[i]*M_scale + vy_dep[i];
+        vz[i] = vz[i]*M_scale + vz_dep[i];
         
         // rescale color fields to account for new densities
         // don't need to rescale metal_density because we already deposited
