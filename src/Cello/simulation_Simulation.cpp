@@ -58,6 +58,8 @@ Simulation::Simulation
   particle_descr_(NULL),
   sync_output_begin_(),
   sync_output_write_(),
+  sync_restart_created_(),
+  sync_restart_next_(),
   refresh_list_(),
   index_output_(-1),
   num_solver_iter_(),
@@ -127,6 +129,8 @@ Simulation::Simulation()
   particle_descr_(NULL),
   sync_output_begin_(),
   sync_output_write_(),
+  sync_restart_created_(),
+  sync_restart_next_(),
   refresh_list_(),
   index_output_(-1),
   num_solver_iter_(),
@@ -183,6 +187,8 @@ Simulation::Simulation (CkMigrateMessage *m)
     particle_descr_(NULL),
     sync_output_begin_(),
     sync_output_write_(),
+    sync_restart_created_(),
+    sync_restart_next_(),
     refresh_list_(),
     index_output_(-1),
     num_solver_iter_(),
@@ -278,6 +284,8 @@ void Simulation::pup (PUP::er &p)
 
   p | sync_output_begin_;
   p | sync_output_write_;
+  p | sync_restart_created_;
+  p | sync_restart_next_;
 
   if (up) sync_output_begin_.set_stop(0);
   if (up) sync_output_write_.set_stop(0);

@@ -24,8 +24,9 @@ IoEnzoBlock::IoEnzoBlock() throw ()
   meta_name_.push_back("enzo_GridEndIndex");
   meta_name_.push_back("enzo_CellWidth");
   meta_name_.push_back("enzo_redshift");
-  
 }
+
+//----------------------------------------------------------------------
 
 void IoEnzoBlock::set_block (Block * block) throw()
 {

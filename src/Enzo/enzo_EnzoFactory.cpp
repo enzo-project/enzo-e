@@ -9,6 +9,7 @@
 
 #include "charm_enzo.hpp"
 
+// #define DEBUG_FACTORY
 // #define TRACE_FACTORY
 
 //----------------------------------------------------------------------
@@ -207,7 +208,8 @@ void EnzoFactory::create_block
  int num_face_level,
  int * face_level,
  Adapt * adapt,
- Simulation * simulation
+ Simulation * simulation,
+ int io_reader
  ) const throw()
 {
 #ifdef TRACE_FACTORY
@@ -223,7 +225,15 @@ void EnzoFactory::create_block
 
   const int rank = cello::rank();
 
-  MsgRefine * msg = new MsgRefine 
+#ifdef DEBUG_FACTORY
+  CkPrintf ("EnzoFactory::create_block: ");
+  for (int i=0; i<num_face_level; i++) {
+    CkPrintf ("%d ",face_level[i]);
+  }
+  CkPrintf ("\n");
+#endif
+
+   MsgRefine * msg = new MsgRefine 
     (index,
      nx,ny,nz,
      num_field_blocks,
@@ -231,7 +241,8 @@ void EnzoFactory::create_block
      cycle,time,dt,
      refresh_type,
      num_face_level, face_level,
-     adapt);
+     adapt,
+     io_reader);
 
   msg->set_data_msg(data_msg);
 

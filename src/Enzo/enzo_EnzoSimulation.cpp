@@ -33,7 +33,11 @@ EnzoSimulation::EnzoSimulation
 (
  const char         parameter_file[],
  int                n)
-  : CBase_EnzoSimulation(parameter_file, n)
+  : CBase_EnzoSimulation(parameter_file, n),
+    check_num_files_(0),
+    check_ordering_(""),
+    check_directory_(),
+    restart_level_(0)
 {
 #ifdef CHECK_MEMORY
   mtrace();
@@ -82,6 +86,7 @@ void EnzoSimulation::pup (PUP::er &p)
   p | check_num_files_;
   p | check_ordering_;
   p | check_directory_;
+  p | restart_level_;
 
   if (p.isUnpacking()) {
     EnzoBlock::initialize(enzo::config());

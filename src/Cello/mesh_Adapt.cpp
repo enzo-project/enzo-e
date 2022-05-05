@@ -346,7 +346,7 @@ std::vector<Index> Adapt::index_neighbors() const
 
 //----------------------------------------------------------------------
 
-void Adapt::print(std::string message, Block * block) const
+void Adapt::print(std::string message, const Block * block) const
 {
   char prefix[255];
   if (block) {
@@ -413,7 +413,7 @@ void Adapt::print(std::string message, Block * block) const
 
 //----------------------------------------------------------------------
 
-void Adapt::write(std::string root, Block * block, int cycle_start)
+void Adapt::write(std::string root, const Block * block, int cycle_start) const
 {
   const int cycle = cello::simulation()->cycle();
   if (cycle >= cycle_start) {

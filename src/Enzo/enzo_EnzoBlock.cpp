@@ -203,13 +203,22 @@ void EnzoBlock::p_set_msg_check(EnzoMsgCheck * msg)
 void EnzoBlock::p_set_msg_refine(MsgRefine * msg)
 {
 #ifdef TRACE_BLOCK
-    CkPrintf ("%d %p :%d TRACE_BLOCK %s EnzoBlock p_set_msg_refine()\n",
-              CkMyPe(),(void *)this,__LINE__,name(thisIndex).c_str());
-    fflush(stdout);
+  CkPrintf ("%d %p :%d TRACE_BLOCK %s EnzoBlock p_set_msg_refine()\n",
+            CkMyPe(),(void *)this,__LINE__,name(thisIndex).c_str());
+  fflush(stdout);
 #endif
+  int io_reader = msg->restart_io_reader_;
   Block::p_set_msg_refine(msg);
   initialize();
   Block::initialize();
+  // If refined block and restarting, notify file reader block is created
+#ifdef DEBUG_ENZO_BLOCK
+  CkPrintf ("DEBUG_BLOCK EnzoBlock::p_set_msg_refine()\n");
+  print();
+#endif  
+  if ((cello::config()->initial_restart) && (index_.level() > 0)) {
+    proxy_io_enzo_reader[io_reader].p_block_created();
+  }
 }
 
 //======================================================================
@@ -226,8 +235,13 @@ EnzoBlock::EnzoBlock ( MsgRefine * msg )
             CkMyPe(),(void *)this,name(thisIndex).c_str());
 #endif
 
+  int io_reader = msg->restart_io_reader_;
   initialize();
   Block::initialize();
+  // If refined block and restarting, notify file reader block is created
+  if ((cello::config()->initial_restart) && (index_.level() > 0)) {
+    proxy_io_enzo_reader[io_reader].p_block_created();
+  }
   delete msg;
 }
 

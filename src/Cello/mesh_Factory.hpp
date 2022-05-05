@@ -93,7 +93,8 @@ public: // interface
    int num_face_level,
    int * face_level,
    Adapt * adapt,
-   Simulation * simulation = 0
+   Simulation * simulation = 0,
+   int io_reader = -1
    ) const throw();
 
 // NEW CODE: See 161206 notes: implementing data objects bound with

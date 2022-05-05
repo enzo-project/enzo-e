@@ -62,9 +62,12 @@ public: // functions
   void p_set_io_writer(CProxy_IoEnzoWriter io_writer);
   void set_sync_check_writer(int count)
   { sync_check_writer_created_.set_stop(count); }
+  void p_io_reader_created();
 
-  /// enzo_control_restart
-  void p_restart_done();
+  /// Read in and initialize the next refinement level from a checkpoint;
+  /// or exit if done
+  void p_restart_next_level();
+  void p_restart_level_created();
 
 public: // virtual functions
 
@@ -90,6 +93,8 @@ private: // attributes
   std::string              check_ordering_;
   std::vector<std::string> check_directory_;
 
+  /// Current restart level
+  int restart_level_; 
 #ifdef BYPASS_CHARM_MEM_LEAK
   std::map<Index,EnzoMsgCheck *> msg_check_map_;
 #endif

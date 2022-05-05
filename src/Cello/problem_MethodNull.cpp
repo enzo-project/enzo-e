@@ -7,7 +7,9 @@
 #include "problem.hpp"
 
 void MethodNull::compute( Block * block) throw()
-{  block->compute_done(); }
+{
+  block->compute_done();
+}
 
 //======================================================================
 

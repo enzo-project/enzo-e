@@ -222,7 +222,8 @@ void Factory::create_block
  int num_face_level,
  int * face_level,
  Adapt * adapt,
- Simulation * simulation
+ Simulation * simulation,
+ int io_reader
  ) const throw()
 {
 
@@ -245,7 +246,8 @@ void Factory::create_block
      count_adapt,
      cycle,time,dt,
      refresh_type,
-     num_face_level, face_level, adapt);
+     num_face_level, face_level, adapt,
+     io_reader);
 
   msg->set_data_msg (data_msg);
 

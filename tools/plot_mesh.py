@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import fileinput
 import matplotlib
 import matplotlib.pyplot as plt

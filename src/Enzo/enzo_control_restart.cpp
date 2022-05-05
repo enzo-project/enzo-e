@@ -18,9 +18,8 @@
 #include "main.hpp"
 
 // #define TRACE_BLOCK
-// #define TRACE_HDF5
 // #define PRINT_FIELD_RESTART
-// # define TRACE_SYNC
+// #define TRACE_SYNC
 
 //--------------------------------------------------
 #ifdef TRACE_SYNC
@@ -67,19 +66,26 @@
 //--------------------------------------------------
 #ifdef TRACE_BLOCK
 #   undef TRACE_BLOCK
-#   define TRACE_RESTART(MSG) \
-  CkPrintf ("%d TRACE_RESTART %s\n",CkMyPe(),std::string(MSG).c_str()); \
+#   define TRACE_BLOCK(MSG,BLOCK)                                       \
+  CkPrintf ("%d TRACE_RESTART BLOCK       %s %s\n",CkMyPe(),BLOCK->name().c_str(), \
+            std::string(MSG).c_str());                                  \
   fflush(stdout);
-#   define TRACE_BLOCK(MSG,BLOCK)                                    \
-  CkPrintf ("%d TRACE_RESTART %s %s\n",CkMyPe(),BLOCK->name().c_str(), \
-            std::string(MSG).c_str());                         \
+#   define TRACE_READER(MSG,READER)                                     \
+  CkPrintf ("%d TRACE_RESTART READER    %s %d\n",                          \
+            CkMyPe(),std::string(MSG).c_str(),READER->thisIndex);       \
+  fflush(stdout);
+#   define TRACE_SIMULATION(MSG,SIMULATION)                             \
+  CkPrintf ("%d TRACE_RESTART SIMULATION %s %d\n",                      \
+            CkMyPe(),std::string(MSG).c_str(),SIMULATION->thisIndex);   \
   fflush(stdout);
 #else
-#   define TRACE_RESTART(MSG)  /* ... */
 #   define TRACE_BLOCK(MSG,BLOCK) /* ... */
+#   define TRACE_READER(MSG,READER)  /* ... */
+#   define TRACE_SIMULATION(MSG,READER)  /* ... */
 #endif
 
-
+//----------------------------------------------------------------------
+// STARTUP
 //----------------------------------------------------------------------
 
 void Block::restart_enter_()
@@ -95,6 +101,7 @@ void Block::restart_enter_()
 
 void Simulation::p_restart_enter (std::string name_dir)
 {
+  TRACE_SIMULATION("p_restart_enter_",this);
   // [ Called on root ip only ]
 
   restart_directory_ = name_dir;
@@ -104,7 +111,10 @@ void Simulation::p_restart_enter (std::string name_dir)
   restart_stream_file_list_ >> restart_num_files_;
 
   // set synchronization
-  sync_restart_done_.set_stop(restart_num_files_);
+  TRACE_SYNC(sync_restart_created_,"sync_restart_created_ set_stop()");
+  sync_restart_created_.set_stop(restart_num_files_);
+  TRACE_SYNC(sync_restart_next_,"sync_restart_next_ set_stop()");
+  sync_restart_next_.set_stop(restart_num_files_);
 
   // Create new empty IoEnzoReader chare array and distribute to other processing elements
   CProxy_MappingIo io_map  = CProxy_MappingIo::ckNew(restart_num_files_);
@@ -113,16 +123,42 @@ void Simulation::p_restart_enter (std::string name_dir)
   opts.setMap(io_map);
   // create array
   proxy_io_enzo_reader = CProxy_IoEnzoReader::ckNew(opts);
-  // distribute array proxy to other simulation objects
-  proxy_enzo_simulation.p_set_io_reader(proxy_io_enzo_reader);
+}
 
+//----------------------------------------------------------------------
+
+IoEnzoReader::IoEnzoReader()
+  : CBase_IoEnzoReader(),
+    name_dir_(),
+    name_file_(),
+    max_level_(),
+    stream_block_list_(),
+    file_(nullptr),
+    sync_blocks_(),
+    io_msg_check_()
+{
+  
+  proxy_enzo_simulation.p_io_reader_created();
+}
+
+//----------------------------------------------------------------------
+
+void EnzoSimulation::p_io_reader_created()
+{
+  TRACE_SIMULATION("p_io_reader_created",this);
+  // Wait for all io_readers to be created
+  TRACE_SYNC(sync_restart_created_,"sync_restart_created_ next()");
+  if (sync_restart_created_.next()) {
+    // distribute array proxy to other simulation objects
+    proxy_enzo_simulation.p_set_io_reader(proxy_io_enzo_reader);
+  }
 }
 
 //----------------------------------------------------------------------
 
 void EnzoSimulation::p_set_io_reader(CProxy_IoEnzoReader io_enzo_reader)
 {
-  TRACE_RESTART("EnzoSimulation::p_set_io_reader()");
+  TRACE_SIMULATION("EnzoSimulation::p_set_io_reader()",this);
   proxy_io_enzo_reader = io_enzo_reader;
   CkCallback callback(CkIndex_Simulation::r_restart_start(NULL),0,
                       proxy_simulation);
@@ -133,88 +169,135 @@ void EnzoSimulation::p_set_io_reader(CProxy_IoEnzoReader io_enzo_reader)
 
 void Simulation::r_restart_start (CkReductionMsg * msg)
 {
+  TRACE_SIMULATION("EnzoSimulation::r_restart_start()",this);
   delete msg;
   // [ Called on root ip only ]
 
-  TRACE_SYNC(sync_restart_done_,"sync_restart_done_ set_stop");
   // Insert an IoEnzoReader element for each file
+  const int max_level = cello::config()->mesh_max_level;
   for (int i=0; i<restart_num_files_; i++) {
-    std::string name_file;
-    restart_stream_file_list_ >> name_file;
+    std::string restart_file;
+    restart_stream_file_list_ >> restart_file;
     // Create ith io_reader to read name_file
-    proxy_io_enzo_reader[i].p_initialize(restart_directory_,name_file);
+    proxy_io_enzo_reader[i].p_init_root
+      (restart_directory_,restart_file,max_level);
   }
 }
 
 //----------------------------------------------------------------------
+// LEVEL 0
+//----------------------------------------------------------------------
 
-void IoEnzoReader::p_initialize
-(std::string name_dir, std::string name_file) throw()
+void IoEnzoReader::p_init_root
+(std::string name_dir, std::string name_file, int max_level)
 {
-  name_dir_ = name_dir;
+  TRACE_READER("p_init_root()",this);
+  // save initialization parameters
+  name_dir_  = name_dir;
   name_file_ = name_file;
-  stream_block_list_ = open_block_list_(name_dir, name_file);
+  max_level_ = max_level;
+
+  io_msg_check_.resize(max_level+1);
+
+  stream_block_list_ = stream_open_blocks_(name_dir, name_file);
 
   // open the HDF5 file
-#ifdef TRACE_HDF5
-  CkPrintf ("%d TRACE_HDF5 file_open[%d] (%s,%s)\n",
-            CkNumPes(),thisIndex,name_dir.c_str(),name_file.c_str());
-#endif
-  file_ = file_open_(name_dir,name_file);
+  file_open_block_list_(name_dir,name_file);
 
   sync_blocks_.reset();
-  TRACE_SYNC(sync_blocks_,"sync_blocks_ reset");
+  TRACE_SYNC(sync_blocks_,"sync_blocks_ reset()");
 
   // Read global attributes
   file_read_hierarchy_();
 
-  int level_block;
-  std::string block_name;
-  while (read_block_list_(block_name,level_block)) {
+  std::vector<std::string> block_name_list;
+  std::vector<int>         block_level_list;
+  std::vector<int> blocks_in_level;
+  blocks_in_level.resize(max_level+1);
+  {
+    std::string block_name;
+    int block_level;
+    // Read list of blocks and associated refinement levels
+    while (read_block_list_(block_name,block_level)) {
+
+      // save block name and level
+      block_name_list.push_back(block_name);
+      block_level_list.push_back(block_level);
+
+      if (block_level <= 0) {
+        // count root-level blocks for synchronization
+        // (including negative level blocks)
+        ++ sync_blocks_;
+        TRACE_SYNC(sync_blocks_,"sync_blocks_ inc_stop(1)");
+      } else {
+        // count blocks per refined level for array allocation below
+        ++blocks_in_level[block_level];
+      }
+    }
+  }
+  // Allocate io_msg_check_ array
+  io_msg_check_.resize(max_level+1);
+  for (int level=1; level<=max_level; level++) {
+    io_msg_check_[level].resize(blocks_in_level[level]);
+  }
+
+  // initialize vector of array offsets into io_msg_check_ for each level
+  std::vector<int> level_index;
+  level_index.resize(max_level+1);
+  std::fill(level_index.begin(), level_index.end(), 0);
+
+  // Save block's meta-data and initialize root-level blocks
+  for (int i=0; i<block_name_list.size(); i++) {
 
     // Increment block counter so know when to alert pe=0 when done
-    sync_blocks_.inc_stop(1);
-    TRACE_SYNC(sync_blocks_,"sync_blocks_ inc_stop(1)");
+    const int block_level = block_level_list[i];
+    std::string block_name = block_name_list[i];
+    int i_level = level_index[std::max(block_level,0)]++;
 
     // For each Block in the file, read the block data and create the
     // new Block
+    
     EnzoMsgCheck * msg_check = new EnzoMsgCheck;
-    file_read_block_ (msg_check, block_name);
 
-    Index index;
+    // Save msg_check for later if block is in a refined level
+    if (block_level > 0) {
+      io_msg_check_[block_level][i_level] = msg_check;
+    }
+
+    // create new IoEnzoBlock object for root blocks, use io_msg_check_
+    // element for refined blocks
+    IoEnzoBlock * io_enzo_block = new IoEnzoBlock;
+
+    file_read_block_ (msg_check, block_name, io_enzo_block);
+
+    // save this file IoReader index
+    msg_check->index_file_ = thisIndex;
+
+    // get Block's index
     int v3[3];
     msg_check->io_block_->index(v3);
+    Index index;
     index.set_values(v3);
-    const int level = index.level();
-    msg_check->index_file_ = thisIndex;
-    if (level <= 0) {
+
+    // if non-refined block, initialize
+    if (block_level <= 0) {
 
       // Block exists--send its data
       enzo::block_array()[index].p_restart_set_data(msg_check);
 
     } else {
 
-      // Block doesn't exist: create it and send its data
-      enzo::factory()->create_block_check
-        ( msg_check, enzo::block_array(),index );
+      // // Block doesn't exist: create it and send its data
+      // enzo::factory()->create_block_check
+      //   ( msg_check, enzo::block_array(),index );
 
-      // Also tell parent that it has children (surprise!)
-      Index index_parent = index.index_parent(cello::config()->mesh_min_level);
+      // // Also tell parent that it has children (surprise!)
+      // Index index_parent = index.index_parent(cello::config()->mesh_min_level);
     }
   }
 
   // close the HDF5 file
-#ifdef TRACE_HDF5
-  CkPrintf ("%d TRACE_HDF5 data_close[%d]\n", CkNumPes(),thisIndex);
-#endif
-  file_->data_close();
-#ifdef TRACE_HDF5
-  CkPrintf ("%d TRACE_HDF5 file_close[%d]\n", CkNumPes(),thisIndex);
-#endif
-  file_->file_close();
-  delete file_;
-
-  close_block_list_();
+  file_close_block_list_();
 
 }
 
@@ -228,34 +311,194 @@ void EnzoBlock::restart_set_data_(EnzoMsgCheck * msg_check)
   TRACE_BLOCK("EnzoBlock::restart_set_data()",this);
   const int index_file = msg_check->index_file_;
   msg_check->update(this);
+  msg_check->get_adapt(adapt_);
+
   PRINT_FIELD_RESTART("recv","density",data());
   delete msg_check;
-  proxy_io_enzo_reader[index_file].p_block_ready(name());
+  proxy_io_enzo_reader[index_file].p_block_ready();
 }
 
 //----------------------------------------------------------------------
 
-void IoEnzoReader::p_block_ready(std::string block_name)
-{ block_ready_(block_name); }
+void IoEnzoReader::p_block_ready()
+{ block_ready_(); }
 
-void IoEnzoReader::block_ready_(std::string block_name)
+void IoEnzoReader::block_ready_()
 {
-  TRACE_RESTART("EnzoSimulation::[p_]block_ready_()");
-  TRACE_SYNC(sync_blocks_,"next");
+  TRACE_READER("[p_]block_ready()",this);
+  TRACE_SYNC(sync_blocks_,"sync_blocks_ next()");
+  // Wait for all of the reader's blocks in the current level to be
+  // ready
   if (sync_blocks_.next()) {
-    proxy_enzo_simulation[0].p_restart_done();
+    proxy_enzo_simulation[0].p_restart_next_level();
   }
+}
+
+//----------------------------------------------------------------------
+
+void EnzoSimulation::p_restart_next_level()
+{
+  // [ Called on root ip only ]
+  TRACE_SIMULATION("EnzoSimulation::p_restart_next_level()",this);
+  TRACE_SYNC(sync_restart_next_,"sync_restart_next_ next()");
+  if (sync_restart_next_.next()) {
+    const int max_level = cello::config()->mesh_max_level;
+    if (++restart_level_ <= max_level) {
+      proxy_io_enzo_reader.p_create_level(restart_level_);
+    } else {
+      enzo::block_array().doneInserting();
+      enzo::block_array().p_restart_done();
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+// LEVEL K
+//----------------------------------------------------------------------
+
+void IoEnzoReader::p_create_level (int level)
+{
+  TRACE_READER("p_create_level()",this);
+  const int num_blocks = io_msg_check_[level].size();
+  TRACE_SYNC(sync_blocks_,"sync_blocks_ reset()");
+  sync_blocks_.reset();
+  TRACE_SYNC(sync_blocks_,"sync_blocks_ set_stop()");
+  sync_blocks_.set_stop(num_blocks+1);
+  for (int i=0; i<num_blocks; i++) {
+    IoBlock * io_block = io_msg_check_[level][i]->io_block();
+    int i3[3];
+    io_block->index(i3);
+    Index index;
+    index.set_values(i3);
+    index.print("p_create_level",index.level());
+    Index index_parent = index.index_parent();
+    int ic3[3];
+    index.child(level,ic3,ic3+1,ic3+2);
+    enzo::block_array()[index_parent].p_restart_refine(ic3,thisIndex);
+  }
+  // self
+  block_created_();
 }
 //----------------------------------------------------------------------
 
-void EnzoSimulation::p_restart_done()
+void EnzoBlock::p_restart_refine(int ic3[3],int io_reader)
 {
-  TRACE_RESTART("EnzoSimulation::p_restart_done()");
-  TRACE_SYNC(sync_restart_done_,"sync_restart_done_ next");
-  if (sync_restart_done_.next()) {
-    enzo::block_array().p_restart_done();
+  TRACE_BLOCK("EnzoBlock::p_restart_refine()",this);
+  int nx,ny,nz;
+  data()->field_data()->size(&nx,&ny,&nz);
+
+  Index index_child = index_.index_child(ic3);
+
+  // // If child doesn't exist yet
+
+  // if ( ! is_child_(index_child) ) {
+
+  // Create FieldFace for interpolating field data to child ic3[]
+
+  int if3[3] = {0,0,0};
+  int g3[3];
+  cello::field_descr()->ghost_depth(0,g3,g3+1,g3+2);
+  Refresh * refresh = new Refresh;
+  refresh->add_all_data();
+  FieldFace * field_face = create_face
+    (if3,ic3,g3, refresh_fine, refresh, true);
+
+  // Create data message object to send
+  DataMsg * data_msg = new DataMsg;
+
+  // @@@ should be true but ~FieldFace() crashes
+  data_msg -> set_field_face (field_face,false);
+  data_msg -> set_field_data (data()->field_data(),false);
+
+  const Factory * factory = cello::simulation()->factory();
+
+  // Create the child object with interpolated data
+
+  int narray = 0;
+  char * array = 0;
+  int num_field_data = 1;
+
+  factory->create_block
+    (
+     data_msg,
+     thisProxy, index_child,
+     nx,ny,nz,
+     num_field_data,
+     adapt_step_,
+     cycle_,time_,dt_,
+     narray, array, refresh_fine,
+     27,
+     &child_face_level_curr_.data()[27*IC3(ic3)],
+     &adapt_,
+     cello::simulation(),
+     io_reader);
+
+  delete [] array;
+  array = 0;
+
+  children_.push_back(index_child);
+
+  // }
+  adapt_.set_valid(false);
+  is_leaf_ = false;
+  
+}
+
+//----------------------------------------------------------------------
+
+void IoEnzoReader::p_block_created()
+{ block_created_(); }
+
+void IoEnzoReader::block_created_()
+{
+  TRACE_READER("p_block_created()",this);
+  TRACE_SYNC(sync_blocks_,"sync_blocks_ next()");
+  if (sync_blocks_.next()) {
+    proxy_enzo_simulation[0].p_restart_level_created();
   }
 }
+
+//----------------------------------------------------------------------
+
+void EnzoSimulation::p_restart_level_created()
+{
+  TRACE_SIMULATION("EnzoSimulation::p_restart_level_created()",this);
+  TRACE_SYNC(sync_restart_created_,"sync_restart_created_ next()");
+  if (sync_restart_created_.next()) {
+    proxy_io_enzo_reader.p_init_level(restart_level_);
+  }
+}
+
+//----------------------------------------------------------------------
+
+void IoEnzoReader::p_init_level (int level)
+{
+  TRACE_READER("p_init_level()",this);
+  const int num_blocks = io_msg_check_[level].size();
+  TRACE_SYNC(sync_blocks_,"sync_blocks_ reset()");
+  sync_blocks_.reset();
+  TRACE_SYNC(sync_blocks_,"sync_blocks_ set_stop()");
+  sync_blocks_.set_stop(num_blocks+1);
+  // Loop through blocks in the given level
+  for (int i=0; i<num_blocks; i++) {
+
+    // Get the current Block's index
+    IoBlock * io_block = io_msg_check_[level][i]->io_block();
+    int i3[3];
+    io_block->index(i3);
+    Index index;
+    index.set_values(i3);
+
+    EnzoMsgCheck * msg_check = new EnzoMsgCheck;
+
+    msg_check->index_file_ = thisIndex;
+    enzo::block_array()[index].p_restart_set_data(msg_check);
+  }
+  // self + 1
+  block_ready_();
+}
+
+//----------------------------------------------------------------------
 
 void EnzoBlock::p_restart_done()
 {
@@ -272,7 +515,7 @@ std::ifstream Simulation::file_open_file_list_(std::string name_dir)
   std::ifstream stream_file_list (name_file);
 
   ASSERT1("Simulation::file_copen_file_list_",
-          "Cannot open hierarchy file %s for writing",
+          "Cannot open hierarchy file %s for reading",
           name_file.c_str(),stream_file_list);
 
   return stream_file_list;
@@ -280,7 +523,7 @@ std::ifstream Simulation::file_open_file_list_(std::string name_dir)
 
 //----------------------------------------------------------------------
 
-std::ifstream IoEnzoReader::open_block_list_
+std::ifstream IoEnzoReader::stream_open_blocks_
 (std::string name_dir, std::string name_file)
 {
   std::string name_file_full = name_dir + "/" + name_file + ".block_list";
@@ -311,9 +554,6 @@ void IoEnzoReader::file_read_hierarchy_()
     io_simulation.meta_value(i,& buffer, &name, &type_scalar, &nx,&ny,&nz);
 
     // Read object's ith metadata
-#ifdef TRACE_HDF5
-    CkPrintf ("%d TRACE_HDF5 [simulation] file_read_meta[%d] %s\n", CkNumPes(),thisIndex,name.c_str());
-#endif
     file_->file_read_meta(buffer,name.c_str(),&type_scalar,&nx,&ny,&nz);
   }
 
@@ -332,9 +572,6 @@ void IoEnzoReader::file_read_hierarchy_()
     io_hierarchy.meta_value(i,& buffer, &name, &type_scalar, &nx,&ny,&nz);
 
     // Read object's ith metadata
-#ifdef TRACE_HDF5
-    CkPrintf ("%d TRACE_HDF5 [hierarchy] file_read_meta[%d] %s\n", CkNumPes(),thisIndex,name.c_str());
-#endif
     file_->file_read_meta(buffer,name.c_str(),&type_scalar,&nx,&ny,&nz);
   }
   io_hierarchy.save_to(cello::hierarchy());
@@ -344,25 +581,22 @@ void IoEnzoReader::file_read_hierarchy_()
 
 void IoEnzoReader::file_read_block_
 (EnzoMsgCheck * msg_check,
- std::string    name_block)
+ std::string    name_block,
+ IoEnzoBlock *  io_block)
 {
   // Open HDF5 group for the block
   std::string group_name = "/" + name_block;
-#ifdef TRACE_HDF5
-    CkPrintf ("%d TRACE_HDF5 group_chdir[%d] %s\n",
-              CkNumPes(),thisIndex,group_name.c_str());
-#endif
   file_->group_chdir(group_name);
-#ifdef TRACE_HDF5
-    CkPrintf ("%d TRACE_HDF5 group_open[%d]\n",
-              CkNumPes(),thisIndex);
-#endif
   file_->group_open();
 
   // Read the Block's attributes
-  IoBlock * io_block = enzo::factory()->create_io_block();
   msg_check->set_io_block(io_block);
   read_meta_(file_, io_block, "group");
+
+  // Read block Adapt
+  int type, size;
+  file_->group_read_meta
+    (msg_check->adapt_buffer_,"adapt_buffer",&type,&size);
 
   DataMsg * data_msg = new DataMsg;
   msg_check->data_msg_ = data_msg;
@@ -420,10 +654,6 @@ void IoEnzoReader::file_read_block_
     const std::string dataset_name = std::string("field_") + field_name;
     int m4[4];
     int type_data = type_unknown;
-#ifdef TRACE_HDF5
-    CkPrintf ("%d TRACE_HDF5 data_open[%d] %s\n",
-              CkNumPes(),thisIndex,dataset_name.c_str());
-#endif
     file_->data_open (dataset_name, &type_data,
                       m4,m4+1,m4+2,m4+3);
     int mx,my,mz;
@@ -438,14 +668,10 @@ void IoEnzoReader::file_read_block_
     io_block->upper(upper);
     char * buffer = field.values(field_name);
 
-    read_dataset_
-      (file_, buffer, type_data, mx,my,mz,m4);
+    file_read_dataset_
+      (buffer, type_data, mx,my,mz,m4);
 
     PRINT_FIELD_RESTART("send",field_name.c_str(),data);
-#ifdef TRACE_HDF5
-    CkPrintf ("%d TRACE_HDF5 data_close[%d]\n",
-              CkNumPes(),thisIndex);
-#endif
     file_->data_close();
 
   }
@@ -472,10 +698,6 @@ void IoEnzoReader::file_read_block_
         std::string("particle_") + particle_name + "_" + attribute_name;
       int m4[4];
       int type_data = type_unknown;
-#ifdef TRACE_HDF5
-    CkPrintf ("%d TRACE_HDF5 data_open[%d] %s\n",
-              CkNumPes(),thisIndex,dataset_name.c_str());
-#endif
       file_->data_open (dataset_name, &type_data,
                         m4,m4+1,m4+2,m4+3);
 
@@ -493,16 +715,12 @@ void IoEnzoReader::file_read_block_
         double * buffer_double;
       };
 
-#ifdef TRACE_HDF5
-    CkPrintf ("%d TRACE_HDF5 allocate_buffer[%d] %d\n",
-              CkNumPes(),thisIndex,np);
-#endif
       buffer = file_->allocate_buffer(np,type_data);
 
       int nx=m4[0];
       int ny=m4[1];
       int nz=m4[2];
-      read_dataset_(file_, buffer, type_data, nx,ny,nz,m4);
+      file_read_dataset_(buffer, type_data, nx,ny,nz,m4);
 
       // ...then copy to particle batches
 
@@ -515,10 +733,6 @@ void IoEnzoReader::file_read_block_
       }
     }
   }
-#ifdef TRACE_HDF5
-    CkPrintf ("%d TRACE_HDF5 group_close[%d]\n",
-              CkNumPes(),thisIndex);
-#endif
   file_->group_close();
 }
 
@@ -575,27 +789,19 @@ bool IoEnzoReader::read_block_list_(std::string & block_name, int & level)
 }
 
 //----------------------------------------------------------------------
-
-void IoEnzoReader::close_block_list_()
-{
-}
-
-//----------------------------------------------------------------------
-FileHdf5 * IoEnzoReader::file_open_
+void IoEnzoReader::file_open_block_list_
 (std::string path_name, std::string file_name)
 {
   // Create File
   file_name = file_name + ".h5";
-  FileHdf5 * file = new FileHdf5 (path_name, file_name);
-  file->file_open();
-
-  return file;
+  file_ = new FileHdf5 (path_name, file_name);
+  file_->file_open();
 }
 
 //----------------------------------------------------------------------
 
-void IoEnzoReader::read_dataset_
-(File * file, char * buffer, int type_data,
+void IoEnzoReader::file_read_dataset_
+(char * buffer, int type_data,
  int nx, int ny, int nz,
  int m4[4])
 {
@@ -612,13 +818,22 @@ void IoEnzoReader::read_dataset_
   int o4[4] = {0,0,0,0};
 
   // open the dataspace
-  file-> data_slice
+  file_-> data_slice
     (m4[0],m4[1],m4[2],m4[3],
      n4[0],n4[1],n4[2],n4[3],
      o4[0],o4[1],o4[2],o4[3]);
 
   // create memory space
-  file->mem_create (nx,ny,nz,nx,ny,nz,0,0,0);
+  file_->mem_create (nx,ny,nz,nx,ny,nz,0,0,0);
 
-  file->data_read (buffer);
+  file_->data_read (buffer);
 }
+//----------------------------------------------------------------------
+
+void IoEnzoReader::file_close_block_list_()
+{
+  file_->data_close();
+  file_->file_close();
+  delete file_;
+}
+
