@@ -26,12 +26,16 @@ EnzoMethodMergeSinks::EnzoMethodMergeSinks(double merging_radius_cells)
 {
   // This method requires three dimensions.
   ASSERT("EnzoMethodMergeSinks::EnzoMethodMergeSinks()",
-	 "EnzoMethodMergeSinks requires that we run a 3D problem (Domain: rank = 3)",
+	 "EnzoMethodMergeSinks requires that we run a 3D problem (Domain:rank = 3)",
 	 cello::rank());
 
   const EnzoConfig * enzo_config = enzo::config();
   ASSERT("EnzoMethodMergeSinks::EnzoMethodMergeSinks()",
-	 "EnzoMethodMergeSinks requires unigrid mode (Adapt : max_level = 0). "
+	 "EnzoMethodMergeSinks requires that Adapt:min_face_rank = 0.",
+	 enzo_config->adapt_min_face_rank == 0);
+
+  ASSERT("EnzoMethodMergeSinks::EnzoMethodMergeSinks()",
+	 "EnzoMethodMergeSinks requires unigrid mode (Adapt:max_level = 0). "
 	 "In future, we may put in a refinement condition that blocks containing "
 	 "sink particles or neighbouring such a block is at highest refinement "
 	 "level", enzo_config->mesh_max_level == 0);
