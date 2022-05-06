@@ -334,6 +334,7 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
   
   sf_minimum_level_ = enzo_config->method_feedback_min_level;
   single_sn_        = enzo_config->method_feedback_single_sn;
+  // TODO: Make "deposit" fields temporary fields
 
   // Initialize refresh object
   cello::define_field("density_deposit");
@@ -482,7 +483,7 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
     for (int iy=gy; iy<ny+gy; iy++){
       for (int ix=gx; ix<nx+gx; ix++){
         int i = INDEX(ix,iy,iz,mx,my);
-      #ifdef DEBUG_FEEDBACK_STARSS
+      #ifdef DEBUG_FEEDBACK_STARSS_ACCUMULATE
         if (isnan( d[i])) CkPrintf( "NaN in d\n");
         if (isnan(te[i])) CkPrintf("NaN in te\n");
         if (isnan(ge[i])) CkPrintf("NaN in ge\n");
@@ -510,7 +511,7 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
 
         beforeMass += d[i] * rho_to_m;
         if (te_dep_c[i] > 10*tiny_number) { // if any deposition
-        #ifdef DEBUG_FEEDBACK_STARSS_ACCUMULATE
+        #ifdef DEBUG_FEEDBACK_STARSS
           if (print_edge_deposit) {
             CkPrintf("MethodFeedbackSTARSS: At least one supernova deposited across grid boundaries into block [%.3f, %.3f, %.3f])\n", xm, ym, zm);  
             print_edge_deposit = false;       
@@ -549,23 +550,23 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
   }
 
   for (int i=0; i<mx*my*mz; i++){
-     d_dep[i] = tiny_number;
-    mf_dep[i] = tiny_number;
-    te_dep[i] = tiny_number;
-    ge_dep[i] = tiny_number;
-    vx_dep[i] = tiny_number;
-    vy_dep[i] = tiny_number;
-    vz_dep[i] = tiny_number;
-    d_shell[i] = tiny_number;
+     d_dep[i] = 0;
+    mf_dep[i] = 0;
+    te_dep[i] = 0;
+    ge_dep[i] = 0;
+    vx_dep[i] = 0;
+    vy_dep[i] = 0;
+    vz_dep[i] = 0;
+    d_shell[i] = 0;
 
-     d_dep_c[i] = tiny_number;
-    mf_dep_c[i] = tiny_number;
-    te_dep_c[i] = tiny_number;
-    ge_dep_c[i] = tiny_number;
-    vx_dep_c[i] = tiny_number;
-    vy_dep_c[i] = tiny_number;
-    vz_dep_c[i] = tiny_number;
-    d_shell_c[i] = tiny_number;
+     d_dep_c[i] = 0;
+    mf_dep_c[i] = 0;
+    te_dep_c[i] = 0;
+    ge_dep_c[i] = 0;
+    vx_dep_c[i] = 0;
+    vy_dep_c[i] = 0;
+    vz_dep_c[i] = 0;
+    d_shell_c[i] = 0;
  
   }
  
@@ -948,14 +949,24 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   enzo_float * dHDI   = field.is_field("HDI_density") ? 
          (enzo_float *) field.values("HDI_density") : NULL;
 
-  // "deposit" fields
-  enzo_float * d_dep  = (enzo_float *) field.values("density_deposit");
-  enzo_float * te_dep = (enzo_float *) field.values("total_energy_deposit");
-  enzo_float * ge_dep = (enzo_float *) field.values("internal_energy_deposit");
-  enzo_float * mf_dep = (enzo_float *) field.values("metal_density_deposit");
-  enzo_float * vx_dep = (enzo_float *) field.values("velocity_x_deposit");
-  enzo_float * vy_dep = (enzo_float *) field.values("velocity_y_deposit");
-  enzo_float * vz_dep = (enzo_float *) field.values("velocity_z_deposit");
+  // "deposit" fields that hold running total for all exploding particles in this block
+  enzo_float *  d_dep_tot = (enzo_float *) field.values("density_deposit");
+  enzo_float * te_dep_tot = (enzo_float *) field.values("total_energy_deposit");
+  enzo_float * ge_dep_tot = (enzo_float *) field.values("internal_energy_deposit");
+  enzo_float * mf_dep_tot = (enzo_float *) field.values("metal_density_deposit");
+  enzo_float * vx_dep_tot = (enzo_float *) field.values("velocity_x_deposit");
+  enzo_float * vy_dep_tot = (enzo_float *) field.values("velocity_y_deposit");
+  enzo_float * vz_dep_tot = (enzo_float *) field.values("velocity_z_deposit");
+
+  // allocate temporary deposit fields 
+  // TODO: maybe don't need full field, since deposition only happens in 27 cells??
+  enzo_float *  d_dep = new enzo_float[size]; 
+  enzo_float * te_dep = new enzo_float[size];
+  enzo_float * ge_dep = new enzo_float[size];
+  enzo_float * mf_dep = new enzo_float[size];
+  enzo_float * vx_dep = new enzo_float[size];
+  enzo_float * vy_dep = new enzo_float[size];
+  enzo_float * vz_dep = new enzo_float[size];
 
   // holds just shell densities (used for refresh+accumulate)
   enzo_float * d_shell   = (enzo_float *) field.values("SN_shell_density");
@@ -1026,7 +1037,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
      */
   
   this->transformComovingWithStar(d,vx,vy,vz,up,vp,wp,mx,my,mz, 1);
-
+  this->transformComovingWithStar(d_shell,vx_dep_tot,vy_dep_tot,vz_dep_tot,up,vp,wp,mx,my,mz, 1);
   /* 
      Use averaged quantities across multiple cells so that deposition is stable.
      vmean is used to determine whether the supernova shell calculation should proceed:
@@ -1586,44 +1597,46 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   double checksum_energy_deposit = 0;
   double checksum_before =0;
   double checksum_after = 0;
-  for (int iz=gz; iz<nz+gz; iz++){
-    for (int iy=gy; iy<ny+gy; iy++){
-      for (int ix=gx; ix<nx+gx; ix++){
-        int i = INDEX(ix,iy,iz,mx,my);
-        double d_old = d[i]; 
-        checksum_before += d_old*rho_to_m;
-        d[i] += d_dep[i];
-        checksum_after += d[i]*rho_to_m;
-        checksum_deposit += d_dep[i]*rho_to_m;
-        double d_new = d[i];
-        double cell_mass = d_new*cell_volume_code;
-        double M_scale = d_new / d_old;
+  for (int i=0; i<size; i++){
+    double d_old = d[i]; 
+    checksum_before += d_old*rho_to_m;
+    d[i] += d_dep[i];
+    checksum_after += d[i]*rho_to_m;
+    checksum_deposit += d_dep[i]*rho_to_m;
+    double d_new = d[i];
+    double cell_mass = d_new*cell_volume_code;
+    double M_scale = d_new / d_old;
 
-        mf[i] += mf_dep[i]; 
+    mf[i] += mf_dep[i]; 
 
-        // need to rescale specific energies + momenta to account for added mass
-        te[i] = te[i]/M_scale + te_dep[i] / cell_mass;
-        ge[i] = ge[i]/M_scale + ge_dep[i] / cell_mass;
-        vx[i] = vx[i]*M_scale + vx_dep[i];
-        vy[i] = vy[i]*M_scale + vy_dep[i];
-        vz[i] = vz[i]*M_scale + vz_dep[i];
-        
-        // rescale color fields to account for new densities
-        // don't need to rescale metal_density because we already deposited
-        // into this field
-        EnzoMethodStarMaker::rescale_densities(enzo_block, i, d_new/d_old);
-        // undo rescaling of metal_density field
-        mf[i] /= (d_new/d_old);
-        checksum_energy_deposit += te_dep[i]*eunit;
-      }
-    }
+    // need to rescale specific energies to account for added mass
+    te[i] = te[i]/M_scale + te_dep[i] / cell_mass;
+    ge[i] = ge[i]/M_scale + ge_dep[i] / cell_mass;
+    vx[i] += vx_dep[i];
+    vy[i] += vy_dep[i];
+    vz[i] += vz_dep[i];
+     
+    // rescale color fields to account for new densities
+    // don't need to rescale metal_density because we already deposited
+    // into this field
+    EnzoMethodStarMaker::rescale_densities(enzo_block, i, d_new/d_old);
+    // undo rescaling of metal_density field
+    mf[i] /= (d_new/d_old);
+    checksum_energy_deposit += te_dep[i]*eunit;
+
+    // add deposited quantities to running total
+     d_dep_tot[i] += d_dep[i];
+    mf_dep_tot[i] += mf_dep[i];
+    te_dep_tot[i] += te_dep[i];
+    ge_dep_tot[i] += ge_dep[i];
+    vx_dep_tot[i] += vx_dep[i];
+    vy_dep_tot[i] += vy_dep[i];
+    vz_dep_tot[i] += vz_dep[i];   
   }
+
 #ifdef DEBUG_FEEDBACK_STARSS
   sumEnergy=sumMomenta=sumMass=sumMetals=sumInternal=0.0; 
-  //for (int i=0; i<mx*my*mz; i++) 
-  for (int iz=gz; iz<nz+gz; iz++){
-    for (int iy=gy; iy<ny+gy; iy++){
-      for (int ix=gx; ix<nx+gx; ix++){
+  for (int i=0; i<mx*my*mz; i++) { 
         int i = INDEX(ix,iy,iz,mx,my);
         sumEnergy += te[i]; // *d[i]*cell_volume/enzo_units->volume();
         sumInternal += ge[i];// *d[i]*cell_volume/enzo_units->volume();
@@ -1632,8 +1645,6 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
         sumMomenta += vz[i]*vz[i];
         sumMass += d[i];
         sumMetals += mf[i];
-      } 
-    }
   }
 #endif
 
@@ -1653,9 +1664,9 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 
 
   // transform velocities back to "lab" frame
-  // convert velocity (actually momentum at the moment) field back to velocity 
+  // convert velocity (actually momentum density at the moment) field back to velocity 
   this->transformComovingWithStar(d,vx,vy,vz,up,vp,wp,mx,my,mz, -1);
-  this->transformComovingWithStar(d_shell,vx_dep,vy_dep,vz_dep,up,vp,wp,mx,my,mz, -1);
+  this->transformComovingWithStar(d_shell,vx_dep_tot,vy_dep_tot,vz_dep_tot,up,vp,wp,mx,my,mz, -1);
 
   // convert deposited energies to specific energy
   //for (int i=0; i<size; i++) {
@@ -1663,24 +1674,14 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   //  ge_dep[i] /= cell_mass;
   // }
 
-  // clear active zone values of deposit fields
-  for (int iz=gz; iz<nz+gz; iz++){
-    for (int iy=gy; iy<ny+gy; iy++){
-      for (int ix=gx; ix<nx+gx; ix++){
-        int i = INDEX(ix,iy,iz,mx,my);
-         d_dep[i] = tiny_number;
-        mf_dep[i] = tiny_number;
-        te_dep[i] = tiny_number;
-        ge_dep[i] = tiny_number;
-        vx_dep[i] = tiny_number;
-        vy_dep[i] = tiny_number;
-        vz_dep[i] = tiny_number;
-        d_shell[i] = tiny_number; 
-      }
-    }
-  } 
-
-
+  // clear temporary fields 
+  delete []  d_dep;
+  delete [] mf_dep;
+  delete [] te_dep;
+  delete [] ge_dep;
+  delete [] vx_dep;
+  delete [] vy_dep;
+  delete [] vz_dep;
 }
 
 
