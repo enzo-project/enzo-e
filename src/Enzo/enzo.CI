@@ -180,6 +180,9 @@ module enzo {
     entry void p_method_gravity_continue();
     entry void p_method_gravity_end();
 
+    // EnzoMethodAccretion synchronization entry methods
+    entry void p_method_accretion_end();
+
     // EnzoSolverCg synchronization entry methods
 
     entry void p_solver_cg_matvec();

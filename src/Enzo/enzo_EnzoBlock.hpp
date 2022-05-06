@@ -235,6 +235,12 @@ public: /// entry methods
 
   //--------------------------------------------------
 
+  /// Synchronize for accumulate refresh before adding the
+  /// sink fields.
+  void p_method_accretion_end();
+
+  // ------------------------------------------------
+  
   /// EnzoSolverCg entry method: DOT ==> refresh P
   void r_solver_cg_loop_0a (CkReductionMsg * msg);
 

@@ -17,9 +17,9 @@ class EnzoMethodAccretion : public Method {
 
   /// @class   EnzoMethodAccretion
   /// @ingroup Enzo
-  /// @brief   [\ref Enzo] Base class for Accretion methods, which add
-  ///          mass to sink particles and set negative values for density_accreted
-  ///          field within an accretion zone.
+  /// @brief   [\ref Enzo] Base class for accretion methods, which add
+  ///          mass and momentum to sink particles while removing it from the gas
+  ///          within an accretion zone around the sink particle.
 
 public:
 
@@ -57,6 +57,9 @@ public:
   // Compute the maximum timestep for this method
   virtual double timestep ( Block * block) const throw();
 
+  // Update fields representing fluid quantities with the "source fields".
+  void add_source_fields(EnzoBlock * enzo_block) throw();
+
 
 protected:
 
@@ -93,6 +96,9 @@ protected:
   // (See Bleuler and Teyssier 2014, MNRAS 445, 4015–4036 and
   // Krumholz+ 2004, ApJ, 611, 399 for details).
   bool conserve_angular_momentum_;
+
+  // ID for this method's "accumulate refresh"
+  int ir_accretion_;
 
 };
 
