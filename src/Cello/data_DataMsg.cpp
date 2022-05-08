@@ -450,8 +450,14 @@ void DataMsg::print (const char * message) const
             message,(void*)field_data_u_);
   CkPrintf ("%s DATA_MSG particle_data_ = %p\n",
             message,(void*)particle_data_);
+  if (particle_data_) {
+    CkPrintf ("%s DATA_MSG num-particles = %d\n",
+              message,particle_data_->num_particles(cello::particle_descr()));
+  }
   CkPrintf ("%s DATA_MSG particle_data_delete_ = %d\n",
             message,particle_data_delete_?1:0);
+  CkPrintf ("%s DATA_MSG particle_data_count_ = %d\n",
+            message,particle_data_count_?1:0);
   CkPrintf ("%s DATA_MSG |face_fluxes_list_| = %lu\n",
             message,face_fluxes_list_.size());
   CkPrintf ("%s DATA_MSG |face_fluxes_delete_| = %lu\n",

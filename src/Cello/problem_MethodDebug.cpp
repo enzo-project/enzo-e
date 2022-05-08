@@ -9,6 +9,7 @@
 #include "charm_simulation.hpp"
 #include "test.hpp"
 
+// #define DEBUG_DEBUG
 //----------------------------------------------------------------------
 
 MethodDebug::MethodDebug
@@ -129,7 +130,36 @@ void MethodDebug::compute ( Block * block) throw()
             k,num_reduce+1,(k == num_reduce+1));
   }
 
-  CkCallback callback (CkIndex_Block::r_method_debug_sum_fields(NULL),
+#ifdef DEBUG_DEBUG  
+  {
+    int id = 0;
+    Field field = block->data()->field();
+    for (int i_f=0; i_f<num_fields_; i_f++) {
+      std::string name = field.field_name(i_f).c_str();
+      cello::monitor()->print
+        ("Method", "Field %s %s min %Lg max %Lg sum %Lg cnt %Lg",
+         name.c_str(),block->name().c_str(),
+         reduce[id],reduce[id+1],reduce[id+2],reduce[id+3]);
+      id+=4;
+    }
+    Particle particle = block->data()->particle();
+    for (int it=0; it<num_particles_; it++) {
+      const std::string name = particle.type_name(it).c_str();
+      cello::monitor()->print
+        ("Method", "Particle %s %s num_particles %d",
+         name.c_str(),block->name().c_str(),particle.num_particles(it));
+      for (int i=0; i<3; i++) {
+        const char axis[3] = {'X','Y','Z'};
+        cello::monitor()->print
+          ("Method", "Particle %s %c %s min %Lg max %Lg sum %Lg cnt %Lg",
+           name.c_str(),axis[i],block->name().c_str(),
+           reduce[id],reduce[id+1],reduce[id+2],reduce[id+3]);
+        id+=4;
+      }
+    }
+  }
+#endif
+    CkCallback callback (CkIndex_Block::r_method_debug_sum_fields(NULL),
                        block->proxy_array());
 
   block->contribute

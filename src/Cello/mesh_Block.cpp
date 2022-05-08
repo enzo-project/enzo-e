@@ -476,7 +476,7 @@ Solver * Block::solver () throw ()
 void Block::print () const
 {
   CkPrintf ("--------------------\n");
-  CkPrintf ("PRINT_BLOCK name_ = %s\n",name_.c_str());
+  CkPrintf ("PRINT_BLOCK name_ = %s\n",name().c_str());
   CkPrintf ("PRINT_BLOCK data_ = %p\n",(void*)data_);
   CkPrintf ("PRINT_BLOCK child_data_ = %p\n",(void*)child_data_);
   int v3[3];index().values(v3);

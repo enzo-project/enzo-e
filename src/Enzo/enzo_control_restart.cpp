@@ -17,6 +17,7 @@
 #include "charm_mesh.hpp"
 #include "main.hpp"
 
+// #define DEBUG_RESTART
 // #define TRACE_BLOCK
 // #define PRINT_FIELD_RESTART
 // #define TRACE_SYNC
@@ -283,6 +284,10 @@ void IoEnzoReader::p_init_root
     if (block_level <= 0) {
 
       // Block exists--send its data
+#ifdef DEBUG_RESTART
+      msg_check->print("send");
+      msg_check->data_msg_->print("send");
+#endif
       enzo::block_array()[index].p_restart_set_data(msg_check);
 
     } else {
@@ -304,7 +309,13 @@ void IoEnzoReader::p_init_root
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_restart_set_data(EnzoMsgCheck * msg_check)
-{ restart_set_data_ (msg_check); }
+{
+#ifdef DEBUG_RESTART
+  msg_check->print("recv");
+  msg_check->data_msg_->print("read");
+#endif
+  restart_set_data_ (msg_check);
+}
 
 void EnzoBlock::restart_set_data_(EnzoMsgCheck * msg_check)
 {
@@ -359,18 +370,15 @@ void EnzoSimulation::p_restart_next_level()
 void IoEnzoReader::p_create_level (int level)
 {
   TRACE_READER("p_create_level()",this);
-  const int num_blocks = io_msg_check_[level].size();
-  TRACE_SYNC(sync_blocks_,"sync_blocks_ reset()");
+  const int num_blocks_level = io_msg_check_[level].size();
   sync_blocks_.reset();
-  TRACE_SYNC(sync_blocks_,"sync_blocks_ set_stop()");
-  sync_blocks_.set_stop(num_blocks+1);
-  for (int i=0; i<num_blocks; i++) {
+  sync_blocks_.set_stop(num_blocks_level+1);
+  for (int i=0; i<num_blocks_level; i++) {
     IoBlock * io_block = io_msg_check_[level][i]->io_block();
     int i3[3];
     io_block->index(i3);
     Index index;
     index.set_values(i3);
-    index.print("p_create_level",index.level());
     Index index_parent = index.index_parent();
     int ic3[3];
     index.child(level,ic3,ic3+1,ic3+2);
@@ -474,24 +482,28 @@ void EnzoSimulation::p_restart_level_created()
 void IoEnzoReader::p_init_level (int level)
 {
   TRACE_READER("p_init_level()",this);
-  const int num_blocks = io_msg_check_[level].size();
+  const int num_blocks_level = io_msg_check_[level].size();
   TRACE_SYNC(sync_blocks_,"sync_blocks_ reset()");
   sync_blocks_.reset();
   TRACE_SYNC(sync_blocks_,"sync_blocks_ set_stop()");
-  sync_blocks_.set_stop(num_blocks+1);
+  sync_blocks_.set_stop(num_blocks_level+1);
   // Loop through blocks in the given level
-  for (int i=0; i<num_blocks; i++) {
+  for (int i=0; i<num_blocks_level; i++) {
+
+    EnzoMsgCheck * msg_check = io_msg_check_[level][i];
 
     // Get the current Block's index
-    IoBlock * io_block = io_msg_check_[level][i]->io_block();
+    IoBlock * io_block = msg_check->io_block();
     int i3[3];
     io_block->index(i3);
     Index index;
     index.set_values(i3);
 
-    EnzoMsgCheck * msg_check = new EnzoMsgCheck;
-
     msg_check->index_file_ = thisIndex;
+#ifdef DEBUG_RESTART
+    msg_check->print("send");
+    msg_check->data_msg_->print("send");
+#endif
     enzo::block_array()[index].p_restart_set_data(msg_check);
   }
   // self + 1
@@ -671,7 +683,6 @@ void IoEnzoReader::file_read_block_
     file_read_dataset_
       (buffer, type_data, mx,my,mz,m4);
 
-    PRINT_FIELD_RESTART("send",field_name.c_str(),data);
     file_->data_close();
 
   }
@@ -704,6 +715,10 @@ void IoEnzoReader::file_read_block_
       const int np = m4[0];
 
       // allocate particles at start once count is known
+#ifdef DEBUG_RESTART
+      CkPrintf ("DEBUG_RESTART num_particles %s %d:%d %d\n",
+                name_block.c_str(),it,ia,np);
+#endif
       if (ia==0) {
         particle.insert_particles(it,np);
       }
@@ -730,6 +745,10 @@ void IoEnzoReader::file_read_block_
       } else if (type_data == type_double) {
         copy_buffer_to_particle_attribute_
           (buffer_double, particle, it, ia, np);
+      } else {
+        ERROR1 ("IoEnzoReader::file_read_block_()",
+                "Unsupported particle type_data %d",
+                type_data);
       }
     }
   }

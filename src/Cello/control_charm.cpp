@@ -23,7 +23,7 @@
 
 
 #ifdef TRACE_CONTROL
-# define TRACE_BLOCK (cycle()>=85)
+# define TRACE_BLOCK (cycle()>=104)
 # undef TRACE_CONTROL
 # define TRACE_CONTROL(A)                               \
   if (TRACE_BLOCK) {                                    \

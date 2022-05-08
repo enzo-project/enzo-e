@@ -212,11 +212,7 @@ void EnzoBlock::p_set_msg_refine(MsgRefine * msg)
   initialize();
   Block::initialize();
   // If refined block and restarting, notify file reader block is created
-#ifdef DEBUG_ENZO_BLOCK
-  CkPrintf ("DEBUG_BLOCK EnzoBlock::p_set_msg_refine()\n");
-  print();
-#endif  
-  if ((cello::config()->initial_restart) && (index_.level() > 0)) {
+  if (io_reader >= 0) {
     proxy_io_enzo_reader[io_reader].p_block_created();
   }
 }

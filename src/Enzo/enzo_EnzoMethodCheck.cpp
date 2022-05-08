@@ -483,7 +483,7 @@ void IoEnzoWriter::file_write_block_ (EnzoMsgCheck * msg_check)
   // Write block Adapt
 
   file_->group_write_meta
-    (msg_check->adapt_buffer_,"adapt_buffer",type_char,ADAPT_BUFFER_SIZE);
+    (msg_check->adapt_buffer_,"adapt_buffer",type_int,ADAPT_BUFFER_SIZE);
 
   // // Create new data object to hold EnzoMsgCheck/DataMsg fields and particles
 

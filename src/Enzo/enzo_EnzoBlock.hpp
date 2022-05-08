@@ -351,8 +351,8 @@ public: /// entry methods
   void p_solver_mg0_restrict_recv(FieldMsg * msg);
 
 
-  void print() const {
-    Block::print();
+  virtual void print() const {
+    CkPrintf ("PRINT_ENZO_BLOCK name = %s\n",name().c_str());
     CkPrintf ("PRINT_ENZO_BLOCK dt = %g\n",dt);
     CkPrintf ("PRINT_ENZO_BLOCK redshift = %g\n",redshift);
     CkPrintf ("PRINT_ENZO_BLOCK GridLeftEdge[] = %g %g %g\n",GridLeftEdge[0],GridLeftEdge[1],GridLeftEdge[2]);
@@ -360,6 +360,7 @@ public: /// entry methods
     CkPrintf ("PRINT_ENZO_BLOCK GridStartIndex[] = %d %d %d\n",GridStartIndex[0],GridStartIndex[1],GridStartIndex[2]);
     CkPrintf ("PRINT_ENZO_BLOCK GridEndIndex[] = %d %d %d\n",GridEndIndex[0],GridEndIndex[1],GridEndIndex[2]);
     CkPrintf ("PRINT_ENZO_BLOCK CellWidth[] = %g %g %g\n",CellWidth[0],CellWidth[1],CellWidth[2]);
+    Block::print();
   }
 
 protected: // methods
