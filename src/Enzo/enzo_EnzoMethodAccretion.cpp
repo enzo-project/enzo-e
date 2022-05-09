@@ -19,12 +19,14 @@ EnzoMethodAccretion::EnzoMethodAccretion
 (double accretion_radius_cells,
  double density_threshold,
  double max_mass_fraction,
- bool   conserve_angular_momentum)
+ bool   conserve_angular_momentum,
+ double ang_mom_threshold_radius_cells)
   : Method(),
     accretion_radius_cells_(accretion_radius_cells),
     density_threshold_(density_threshold),
     max_mass_fraction_(max_mass_fraction),
     conserve_angular_momentum_(conserve_angular_momentum),
+    ang_mom_threshold_radius_cells_(ang_mom_threshold_radius_cells),
     ir_accretion_(-1)
 {
   // Check if density threshold is at least as large as the density floor
@@ -39,11 +41,21 @@ EnzoMethodAccretion::EnzoMethodAccretion
 	 "EnzoMethodAccretion requires that we run a 3D problem (Domain: rank = 3)",
 	 cello::rank());
 
+  // Check if Adapt:min_face_rank is 0.
+  ASSERT("EnzoMethodAccretion",
+	 "Adapt:min_face_rank parameter must be equal to 0.",
+	 enzo::config()->adapt_min_face_rank == 0);
+  
   ASSERT("EnzoMethodAccretion::EnzoMethodAccretion()",
 	 "EnzoMethodAccretion requires unigrid mode (Adapt : max_level = 0). "
 	 "In future, we may put in a refinement condition that blocks containing "
 	 "sink particles are at the highest refinement level.",
 	 enzo::config()->mesh_max_level == 0);
+
+  // Check that ang_mom_threshold_radius_cells_ is between 0.0 and 0.5
+  ASSERT("EnzoMethodAccretion::EnzoMethodAccretion()",
+	 "Method:accretion:ang_mom_threshold_radius_cells must be less than 0.5.",
+	 ang_mom_threshold_radius_cells_ > 0.0 && ang_mom_threshold_radius_cells_ < 0.5);
 
   const int * ghost_depth = enzo::config()->field_ghost_depth;
   const int min_ghost_depth = std::min(ghost_depth[0],
@@ -53,7 +65,7 @@ EnzoMethodAccretion::EnzoMethodAccretion
   // any of the ghost depths
   ASSERT("EnzoMethodAccretion::EnzoMethodAccretion() ",
 	 "The accretion radius must be no greater than the ghost depth"
-	 "(4 by default)",
+	 "(4 cells by default)",
 	 accretion_radius_cells_ <= min_ghost_depth);
 
   // define required fields
@@ -67,7 +79,6 @@ EnzoMethodAccretion::EnzoMethodAccretion
   cello::define_field("mom_dens_z_source_accumulate");
   cello::define_field("te_dens_source");
   cello::define_field("te_dens_source_accumulate");
-
 
   // if sink particles have a "metal_fraction" attribute, then
   // define a "metal_density" field
@@ -119,6 +130,7 @@ void EnzoMethodAccretion::pup (PUP::er &p)
   p | density_threshold_;
   p | max_mass_fraction_;
   p | conserve_angular_momentum_;
+  p | ang_mom_threshold_radius_cells_;
   p | ir_accretion_;
 
   return;
@@ -229,11 +241,6 @@ void EnzoMethodAccretion::do_checks_() throw()
 	   "merge_sinks must precede accretion_compute",
 	   enzo::problem()->method_precedes("merge_sinks",
 					    "accretion_compute"));
-
-    // Check if Adapt:min_face_rank is 0.
-    ASSERT("EnzoMethodAccretion",
-	   "Adapt:min_face_rank parameter must be equal to 0.",
-	   enzo::config()->adapt_min_face_rank == 0);
 
     // Check if merging radius is at least twice that of the accretion
     // radius

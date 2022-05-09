@@ -282,6 +282,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_accretion_density_threshold(0.0),
   method_accretion_max_mass_fraction(0.0),
   method_accretion_conserve_angular_momentum(false),
+  method_accretion_ang_mom_threshold_radius_cells(0.0),
   /// EnzoProlong
   prolong_enzo_type(),
   prolong_enzo_positive(true),
@@ -622,6 +623,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_accretion_density_threshold;
   p | method_accretion_max_mass_fraction;
   p | method_accretion_conserve_angular_momentum;
+  p | method_accretion_ang_mom_threshold_radius_cells;
 
   p | prolong_enzo_type;
   p | prolong_enzo_positive;
@@ -1643,8 +1645,8 @@ void EnzoConfig::read_method_accretion_(Parameters * p)
     ("Method:accretion:density_threshold",1.0e-6);
   method_accretion_max_mass_fraction = p->value_float
     ("Method:accretion:max_mass_fraction",0.25);
-    method_accretion_max_mass_fraction = p->value_logical
-    ("Method:accretion:conserve_angular_momentum",true);
+  method_accretion_ang_mom_threshold_radius_cells = p->value_float
+    ("Method:accretion:ang_mom_threshold_radius_cells",1.0e-6);
 }
 
 //----------------------------------------------------------------------

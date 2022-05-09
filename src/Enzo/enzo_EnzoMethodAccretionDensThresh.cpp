@@ -19,11 +19,13 @@ EnzoMethodAccretionDensThresh::EnzoMethodAccretionDensThresh
 (double accretion_radius_cells,
  double density_threshold,
  double max_mass_fraction,
- bool   conserve_angular_momentum)
+ bool   conserve_angular_momentum,
+ double ang_mom_threshold_radius_cells)
   : EnzoMethodAccretion(accretion_radius_cells,
 			density_threshold,
 			max_mass_fraction_,
-			conserve_angular_momentum)
+			conserve_angular_momentum,
+			ang_mom_threshold_radius_cells)
 {
 
 }
@@ -77,8 +79,11 @@ void EnzoMethodAccretionDensThresh::compute_(Block * block)
     double hx, hy, hz;
     block->cell_width(&hx, &hy, &hz);
     const double min_cell_width = std::min(hx,std::min(hy,hz));
-    const double accretion_radius_ = accretion_radius_cells_ * min_cell_width;
+    const double accretion_radius = accretion_radius_cells_ * min_cell_width;
 
+    // Set ang_mom_threshold_radius to be ang_mom_threshold_radius_cells_ multiplied
+    // by the minimum cell width.
+    const double ang_mom_threshold_radius = ang_mom_threshold_radius_cells_ * min_cell_width;
     // Also need the field dimensions
     int mx, my, mz;
     field.dimensions (0, &mx, &my, &mz);
@@ -93,7 +98,10 @@ void EnzoMethodAccretionDensThresh::compute_(Block * block)
 
 	// Create an EnzoSinkParticle object
 	EnzoSinkParticle sp =
-	  EnzoSinkParticle(block,ib,ip,accretion_radius_cells_,conserve_angular_momentum_);
+	  EnzoSinkParticle(block,ib,ip,
+			   accretion_radius,
+			   conserve_angular_momentum_,
+			   ang_mom_threshold_radius);
 
 	// Loop over all cells which contain the accretion zone
 	for (int k = sp.min_ind_z(); k <= sp.max_ind_z(); k++){
@@ -102,7 +110,9 @@ void EnzoMethodAccretionDensThresh::compute_(Block * block)
 
 	      // Check if cell is in accretion zone
 	      double norm_disp_x, norm_disp_y, norm_disp_z;
+	      bool outside_ang_mom_threshold;
 	      if (sp.cell_in_accretion_zone(i, j, k,
+					    &outside_ang_mom_threshold,
 					    &norm_disp_x,
 					    &norm_disp_y,
 					    &norm_disp_z)) {
@@ -119,7 +129,8 @@ void EnzoMethodAccretionDensThresh::compute_(Block * block)
 			    index,
 			    norm_disp_x,
 			    norm_disp_y,
-			    norm_disp_z);
+			    norm_disp_z,
+			    outside_ang_mom_threshold);
 
 		} // if density is above threshold
 	      } // if cell is in accretion zone

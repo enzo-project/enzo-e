@@ -385,6 +385,7 @@ public: // interface
       method_accretion_density_threshold(0.0),
       method_accretion_max_mass_fraction(0.0),
       method_accretion_conserve_angular_momentum(false),
+      method_accretion_ang_mom_threshold_radius_cells(0.0),
       // EnzoProlong
       prolong_enzo_type(),
       prolong_enzo_positive(true),
@@ -822,6 +823,7 @@ public: // attributes
   double                     method_accretion_density_threshold;
   double                     method_accretion_max_mass_fraction;
   bool                       method_accretion_conserve_angular_momentum;
+  bool                       method_accretion_ang_mom_threshold_radius_cells;
   
   std::string                prolong_enzo_type;
   bool                       prolong_enzo_positive;

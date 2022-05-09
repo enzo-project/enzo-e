@@ -22,41 +22,64 @@ class EnzoSinkParticle {
 public:
 
   /// Constructor
-  /// Arguments: block                     - valid pointer to a block
-  ///            ib                        - batch index
-  ///            ip                        - index of particle within batch
-  ///            accretion_radius          - radius of accretion zone
-  ///            conserve_angular_momentum - whether angular momentum of gas is conserved
-  ///                                        during accretion
+  /// Arguments: `block`                     - valid pointer to a block
+  ///            `ib`                        - batch index
+  ///            `ip`                        - index of particle within batch
+  ///            `accretion_radius`          - radius of accretion zone
+  ///            `conserve_angular_momentum` - whether angular momentum of gas is conserved
+  ///                                          during accretion
+  ///            `ang_mom_threshold_radius`  - the angular momentum threshold radius used by
+  ///                                          the accretion method. Only used if
+  ///                                          conserve_angular_momentum is true.
   EnzoSinkParticle(Block * block,
 		   int ib,
 		   int ip,
-		   int accretion_radius,
-		   bool conserve_angular_momentum);
+		   double accretion_radius,
+		   bool conserve_angular_momentum,
+		   double ang_mom_threshold_radius);
 
   /// Destructor
   virtual ~EnzoSinkParticle() throw() {};
 
-
-  /// Returns whether cell with indices i,j,k is in the accretion zone.
-  /// If angular momentum of gas is conserved, this function also 
-  /// sets norm_disp_x/y/z to be the x/y/z components of the normalised
-  /// displacement vector of the cell center relative to the particle
-  /// position, i.e., it is a unit vector pointing from the particle to the
-  /// center of the cell.
+  /// `i`,`j`,`k` are the (3D) indices of a cell.
+  ///
+  /// Function computes whether cell is inside accretion zone of sink particle.
+  ///
+  /// If cell is inside accretion zone and `conserve_angular_momentum_` is true,
+  /// this function computes whether the distance from the cell to the sink particle
+  /// is larger / smaller than the angular momentum threshold radius, and sets
+  /// `outside_ang_mom_threshold` to true / false in each case.
+  ///
+  /// If cell is inside accretion zone and `conserve_angular_momentum_` and
+  /// `outside_ang_mom_threshold` are both true, this function sets `norm_disp_x/y/z`
+  /// to be the x/y/z components of the normalised displacement vector of the cell
+  /// center relative to the particl position, i.e., it is a unit vector pointing
+  /// from the particle to the center of the cell.
+  
   bool cell_in_accretion_zone(int i, int j, int k,
+			      bool* outside_ang_mom_threshold,
 			      double* norm_disp_x,
 			      double* norm_disp_y,
 			      double* norm_disp_z) throw();
 
-  /// Takes as arguments the density change in a cell and its index, and the components
-  /// of the normalised displacement vector of the cell center relative to the particle
-  /// position, although if conserve_angular_momentum_ is false, these arguments are not
-  /// used. This function updates the sink particle data, specifically, the total mass
-  /// and momentum changes, and computes values for the source fields for the cell
-  /// specified by `index`.
+  /// `density_change` is the change in density in given cell (specified by `index`)
+  /// due to accretion.
+  ///
+  /// `index` is the (1D) index of the cell.
+  /// 
+  /// `outside_ang_mom_threshold` is true / false if the distance of the cell from the sink
+  /// particle is larger / smaller than the angular momentum threshold radius. Ignored if
+  /// `conserve_angular_momentum_` is false.
+  ///
+  /// `norm_disp_x/y/z` are the x/y/z components of the normalised displacement vector of
+  /// the cell center relative to the particle position. Ignored unless
+  /// `conserve_angular_momentum and `outside_ang_mom_threshold` are both true.
+  ///
+  /// This function updates the sink particle date and computes values for the source fields
+  /// in the given cell (specified by `index`).
   void update(enzo_float density_change,
 	      int index,
+	      bool outside_ang_mom_threshold,
 	      double norm_disp_x,
 	      double norm_disp_y,
 	      double norm_disp_z) throw();
@@ -86,10 +109,16 @@ protected:
   const int particle_index_;
 
   /// The radius of the accretion zone.
-  double accretion_radius_;
+  const double accretion_radius_;
 
-  /// Whether angular momentum is conserved
+  /// Whether angular momentum of the gas is conserved during accretion
   const bool conserve_angular_momentum_;
+
+  /// If `conserve_angular_momentum_` is true, then the angular momentum of gas
+  /// in a given cell is conserved if and only if the distance of the cell from the
+  /// particle is greater than `ang_mom_threshold_radius`.
+  /// If `conserve_angular_momentum_` is false, this attribute is ignored.
+  const double ang_mom_threshold_radius_;
 
   /// Cell indices which bound the accretion zone
   int min_ind_x_, max_ind_x_;

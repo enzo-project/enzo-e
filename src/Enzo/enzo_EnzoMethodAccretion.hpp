@@ -27,7 +27,8 @@ public:
   EnzoMethodAccretion(double accretion_radius_cells,
 		      double density_threshold,
 		      double max_mass_fraction,
-		      bool conserve_angular_momentum);
+		      bool conserve_angular_momentum,
+		      double angular_momentum_threshold);
 
   /// Destructor
   virtual ~EnzoMethodAccretion() throw() {};
@@ -73,7 +74,7 @@ protected:
   // The accretion radius relative to the cell width
   double accretion_radius_cells_;
 
-  // density_threshold_ has a different interpretation
+  // `density_threshold_` has a different interpretation
   // depending on the flavor of accretion used. In all
   // cases, it has to be at least as large as the
   // density floor imposed by the VL+CT method.
@@ -96,6 +97,14 @@ protected:
   // (See Bleuler and Teyssier 2014, MNRAS 445, 4015–4036 and
   // Krumholz+ 2004, ApJ, 611, 399 for details).
   bool conserve_angular_momentum_;
+
+  // This attribute specifies the angular momentum threshold radius in terms
+  // of the minimum cell width at the highest level of refinement.
+  // If `conserve_angular_momentum_` is true, then the angular momentum of the gas
+  // in a given cell is conserved if and only if its distance from the
+  // sink particle is greater than the angular momentum threshold radius.
+  // If `conserve_angular_momentum_` is false, this attribute is ignored.
+  double ang_mom_threshold_radius_cells_;
 
   // ID for this method's "accumulate refresh"
   int ir_accretion_;

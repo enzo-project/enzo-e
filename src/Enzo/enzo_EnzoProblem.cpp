@@ -723,21 +723,24 @@ Method * EnzoProblem::create_method_
 		       enzo_config->method_accretion_accretion_radius_cells,
 		       enzo_config->method_accretion_density_threshold,
 		       enzo_config->method_accretion_max_mass_fraction,
-		       enzo_config->method_accretion_conserve_angular_momentum
+		       enzo_config->method_accretion_conserve_angular_momentum,
+		       enzo_config->method_accretion_ang_mom_threshold_radius_cells
 							);
     } else if (enzo_config->method_accretion_flavor == "bondi_hoyle") {
       method = new EnzoMethodAccretionBondiHoyle(
 		       enzo_config->method_accretion_accretion_radius_cells,
 		       enzo_config->method_accretion_density_threshold,
 		       enzo_config->method_accretion_max_mass_fraction,
-		       enzo_config->method_accretion_conserve_angular_momentum
+		       enzo_config->method_accretion_conserve_angular_momentum,
+		       enzo_config->method_accretion_ang_mom_threshold_radius_cells
 							);
     } else {
       method = new EnzoMethodAccretion(
 		       enzo_config->method_accretion_accretion_radius_cells,
 		       enzo_config->method_accretion_density_threshold,
 		       enzo_config->method_accretion_max_mass_fraction,
-		       enzo_config->method_accretion_conserve_angular_momentum
+		       enzo_config->method_accretion_conserve_angular_momentum,
+		       enzo_config->method_accretion_ang_mom_threshold_radius_cells
 					      );
     }
   } else if (name == "accretion_remove_gas") {

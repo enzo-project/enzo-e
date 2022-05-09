@@ -15,13 +15,15 @@ EnzoSinkParticle::EnzoSinkParticle
 (Block * block,
  int ib,
  int ip,
- int accretion_radius,
- bool conserve_angular_momentum)
+ double accretion_radius,
+ bool conserve_angular_momentum,
+ double ang_mom_threshold_radius)
   : block_(block),
     batch_index_(ib),
     particle_index_(ip),
     accretion_radius_(accretion_radius),
     conserve_angular_momentum_(conserve_angular_momentum),
+    ang_mom_threshold_radius_(ang_mom_threshold_radius),
     total_mass_change_(0.0),
     total_momentum_x_change_(0.0),
     total_momentum_y_change_(0.0),
@@ -90,6 +92,7 @@ EnzoSinkParticle::EnzoSinkParticle
 // -------------------------------------------------------------------------------------------
 
 bool EnzoSinkParticle::cell_in_accretion_zone(int i, int j, int k,
+					      bool* outside_ang_mom_threshold,
 					      double* norm_disp_x,
 					      double* norm_disp_y,
 					      double* norm_disp_z) throw() {
@@ -120,9 +123,10 @@ bool EnzoSinkParticle::cell_in_accretion_zone(int i, int j, int k,
   // of the normalized displacement vector
   if (conserve_angular_momentum_){
      const double r = sqrt(r2);
-     *norm_disp_x = disp_x / r;
-     *norm_disp_y = disp_y / r;
-     *norm_disp_z = disp_z / r;
+     *outside_ang_mom_threshold = (r > ang_mom_threshold_radius_);
+     *norm_disp_x = outside_ang_mom_threshold ? disp_x / r : 0.0;
+     *norm_disp_y = outside_ang_mom_threshold ? disp_y / r : 0.0;
+     *norm_disp_z = outside_ang_mom_threshold ? disp_z / r : 0.0;
   }
 
   // Return whether or not cell is in accretion zone
@@ -134,10 +138,10 @@ bool EnzoSinkParticle::cell_in_accretion_zone(int i, int j, int k,
 
 void EnzoSinkParticle::update(enzo_float density_change,
 			      int index,
+			      bool outside_ang_mom_threshold,
 			      double norm_disp_x,
 			      double norm_disp_y,
 			      double norm_disp_z) throw() {
-
   int it = cello::particle_descr()->type_index("sink");
 
   // Get pointers to field data
@@ -178,7 +182,7 @@ void EnzoSinkParticle::update(enzo_float density_change,
   enzo_float momentum_x_change;
   enzo_float momentum_y_change;
   enzo_float momentum_z_change;
-  if (conserve_angular_momentum_){
+  if (conserve_angular_momentum_ && outside_ang_mom_threshold){
 
     // Get radial component of velocity
     // Technically, what I call the "radial velocity"
