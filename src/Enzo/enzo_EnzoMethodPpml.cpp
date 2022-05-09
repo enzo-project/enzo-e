@@ -41,13 +41,14 @@ void EnzoMethodPpml::pup (PUP::er &p)
 void EnzoMethodPpml::compute ( Block * block ) throw()
 {
 
-  if (!block->is_leaf()) return;
+  if (block->is_leaf()) {
 
-  EnzoBlock * enzo_block = enzo::block(block);
+    EnzoBlock * enzo_block = enzo::block(block);
+    enzo_block->SolveMHDEquations ( block->dt() );
 
-  enzo_block->SolveMHDEquations ( block->dt() );
+  }
 
-  enzo_block->compute_done();
+  block->compute_done();
 
 }
 

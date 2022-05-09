@@ -552,7 +552,8 @@ protected: // attributes
   Sync sync_output_write_;
 
   /// Restart synchronization
-  Sync sync_restart_done_;
+  Sync sync_restart_created_;
+  Sync sync_restart_next_;
 
   /// Refresh phase lists
 

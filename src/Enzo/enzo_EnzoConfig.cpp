@@ -225,7 +225,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_use_ionization_feedback(false),
   method_feedback_time_first_sn(-1), // in Myr
   // EnzoMethodStarMaker,
-  method_star_maker_type(""),                              // star maker type to use
+  method_star_maker_flavor(""),                              // star maker type to use
   method_star_maker_use_density_threshold(true),           // check above density threshold before SF
   method_star_maker_use_velocity_divergence(true),         // check for converging flow before SF
   method_star_maker_use_dynamical_time(true),              // compute t_ff / t_dyn. Otherwise take as 1.0
@@ -269,7 +269,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_gravity_dt_max(0.0),
   method_gravity_accumulate(false),
   /// EnzoMethodBackgroundAcceleration
-  method_background_acceleration_type(""),
+  method_background_acceleration_flavor(""),
   method_background_acceleration_mass(0.0),
   method_background_acceleration_DM_mass(0.0),
   method_background_acceleration_DM_density(0.0),
@@ -584,7 +584,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_feedback_use_ionization_feedback;
   p | method_feedback_time_first_sn;
 
-  p | method_star_maker_type;
+  p | method_star_maker_flavor;
   p | method_star_maker_use_density_threshold;
   p | method_star_maker_use_velocity_divergence;
   p | method_star_maker_use_dynamical_time;
@@ -608,7 +608,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_gravity_dt_max;
   p | method_gravity_accumulate;
 
-  p | method_background_acceleration_type;
+  p | method_background_acceleration_flavor;
   p | method_background_acceleration_mass;
   p | method_background_acceleration_DM_mass;
   p | method_background_acceleration_DM_density;
@@ -1479,9 +1479,9 @@ void EnzoConfig::read_method_feedback_(Parameters * p)
 
 void EnzoConfig::read_method_star_maker_(Parameters * p)
 {
-
-  method_star_maker_type = p->value_string
-    ("Method:star_maker:type","stochastic");
+  
+  method_star_maker_flavor = p->value_string
+    ("Method:star_maker:flavor","stochastic");
 
   method_star_maker_use_density_threshold = p->value_logical
     ("Method:star_maker:use_density_threshold",true);
@@ -1520,8 +1520,8 @@ void EnzoConfig::read_method_star_maker_(Parameters * p)
 
 void EnzoConfig::read_method_background_acceleration_(Parameters * p)
 {
-  method_background_acceleration_type = p->value_string
-   ("Method:background_acceleration:type","unknown");
+  method_background_acceleration_flavor = p->value_string
+   ("Method:background_acceleration:flavor","unknown");
 
   method_background_acceleration_mass = p->value_float
    ("Method:background_acceleration:mass",0.0);

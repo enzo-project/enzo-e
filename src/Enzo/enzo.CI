@@ -177,7 +177,9 @@ module enzo {
 
     // enzo_control_restart
     entry void p_set_io_reader(CProxy_IoEnzoReader io_reader);
-    entry void p_restart_done();
+    entry void p_io_reader_created();
+    entry void p_restart_next_level();
+    entry void p_restart_level_created();
 }
 
   //----------------------------------------------------------------------%
@@ -211,6 +213,7 @@ module enzo {
     entry void p_check_done();
 
     // restart
+    entry void p_restart_refine (int ic3[3], int io_reader);
     entry void p_restart_set_data(EnzoMsgCheck *);
     entry void p_restart_done();
 
@@ -275,8 +278,11 @@ module enzo {
 
   array[1D] IoEnzoReader : IoReader {
     entry IoEnzoReader();
-    entry void p_initialize(std::string, std::string);
-    entry void p_block_ready(std::string);
+    entry void p_init_root(std::string, std::string, int level);
+    entry void p_create_level(int level);
+    entry void p_init_level(int level);
+    entry void p_block_created();
+    entry void p_block_ready();
   };
 
   array[1D] IoEnzoWriter : IoWriter {

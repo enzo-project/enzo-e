@@ -624,7 +624,6 @@ int Block::refresh_load_coarse_face_
 
 //----------------------------------------------------------------------
 
-
 int Block::delete_non_local_particles_(int it){
 
   Particle particle (cello::particle_descr(),

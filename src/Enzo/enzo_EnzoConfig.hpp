@@ -326,7 +326,7 @@ public: // interface
       method_feedback_use_ionization_feedback(false),
       method_feedback_time_first_sn(-1.0), // in Myr
       /// EnzoMethodStarMaker
-      method_star_maker_type(""),
+      method_star_maker_flavor(""),
       method_star_maker_use_density_threshold(true),           // check above density threshold before SF
       method_star_maker_use_velocity_divergence(true),         // check for converging flow before SF
       method_star_maker_use_dynamical_time(true),              //
@@ -370,7 +370,7 @@ public: // interface
       method_gravity_dt_max(1.0e10),
       method_gravity_accumulate(false),
       // EnzoMethodBackgroundAcceleration
-      method_background_acceleration_type(""),
+      method_background_acceleration_flavor(""),
       method_background_acceleration_mass(0.0),
       method_background_acceleration_DM_mass(0.0),
       method_background_acceleration_DM_density(0.0),
@@ -754,7 +754,7 @@ public: // attributes
 
   /// EnzoMethodStarMaker
 
-  std::string               method_star_maker_type;
+  std::string               method_star_maker_flavor;
   bool                      method_star_maker_use_density_threshold;
   bool                      method_star_maker_use_velocity_divergence;
   bool                      method_star_maker_use_dynamical_time;
@@ -805,7 +805,7 @@ public: // attributes
 
   /// EnzoMethodBackgroundAcceleration
 
-  std::string                method_background_acceleration_type;
+  std::string                method_background_acceleration_flavor;
   double                     method_background_acceleration_mass;
   double                     method_background_acceleration_DM_mass;
   double                     method_background_acceleration_DM_density;

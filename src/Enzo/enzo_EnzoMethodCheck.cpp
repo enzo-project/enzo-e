@@ -358,6 +358,8 @@ int EnzoBlock::create_msg_check_
 
   (*msg_check)->set_name_dir (name_dir);
 
+  (*msg_check)->set_adapt(adapt_);
+  
   DataMsg * data_msg = create_data_msg_();
   (*msg_check)->set_data_msg(data_msg);
 
@@ -477,6 +479,11 @@ void IoEnzoWriter::file_write_block_ (EnzoMsgCheck * msg_check)
   // Write block meta data
 
   write_meta_ (file_, io_block, "group");
+
+  // Write block Adapt
+
+  file_->group_write_meta
+    (msg_check->adapt_buffer_,"adapt_buffer",type_int,ADAPT_BUFFER_SIZE);
 
   // // Create new data object to hold EnzoMsgCheck/DataMsg fields and particles
 

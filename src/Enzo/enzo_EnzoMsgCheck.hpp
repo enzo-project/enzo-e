@@ -11,6 +11,8 @@
 #include "enzo.hpp"
 #include "charm_enzo.hpp"
 
+#define ADAPT_BUFFER_SIZE 800
+
 class EnzoBlock;
 
 class EnzoMsgCheck : public CMessage_EnzoMsgCheck {
@@ -110,6 +112,18 @@ public: // interface
     name_dir = name_dir_;
   }
 
+  void set_adapt (const Adapt & adapt) {
+    int size = adapt.data_size();
+    ASSERT2 ("EnzoMsgCheck::set_adapt()",
+             "ADAPT_BUFFER_SIZE %d is too small for Adapt object of size %d",
+             sizeof(int)*ADAPT_BUFFER_SIZE,size,
+             size <= sizeof(int)*ADAPT_BUFFER_SIZE);
+    adapt.save_data((char *)((int*)adapt_buffer_));
+  }
+
+  void get_adapt (Adapt & adapt) {
+    adapt.load_data((char *)((int*)adapt_buffer_));
+  }
   void set_name_dir (std::string name_dir)
   { name_dir_ = name_dir; }
 
@@ -149,6 +163,8 @@ protected: // methods
     is_first_    = enzo_msg_check.is_first_;
     is_last_     = enzo_msg_check.is_last_;
     name_dir_    = enzo_msg_check.name_dir_;
+    std::copy_n ( enzo_msg_check.adapt_buffer_, ADAPT_BUFFER_SIZE,
+                  adapt_buffer_);
     index_file_  = enzo_msg_check.index_file_;
   }
 
@@ -195,6 +211,9 @@ protected: // attributes
 
   std::string name_dir_;
 
+  /// Array holding serialized Array object
+  int adapt_buffer_[ADAPT_BUFFER_SIZE];
+  
   /// Index for io_reader for restart
   int index_file_;
 };

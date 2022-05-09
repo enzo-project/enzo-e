@@ -805,7 +805,7 @@ public: // virtual functions
    Refresh * refresh,
    bool new_refresh) const;
 
-  void print () const;
+  virtual void print () const;
 
   const Adapt * adapt() const { return & adapt_; }
 

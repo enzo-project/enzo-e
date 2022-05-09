@@ -23,7 +23,7 @@
 
 
 #ifdef TRACE_CONTROL
-# define TRACE_BLOCK (name() == "B00_11")
+# define TRACE_BLOCK (cycle()>=104)
 # undef TRACE_CONTROL
 # define TRACE_CONTROL(A)                               \
   if (TRACE_BLOCK) {                                    \

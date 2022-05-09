@@ -30,10 +30,6 @@ void Block::compute_enter_ ()
 
 void Block::compute_begin_ ()
 {
-#ifdef DEBUG_COMPUTE
-  if (cycle() >= CYCLE)
-    CkPrintf ("%d %s DEBUG_COMPUTE Block::compute_begin_()\n", CkMyPe(),name().c_str());
-#endif
 
   cello::simulation()->set_phase(phase_compute);
 
@@ -59,11 +55,11 @@ void Block::compute_next_ ()
 #endif
 
     int ir_post = method->refresh_id_post();
-    
+
     cello::refresh(ir_post)->set_active (is_leaf());
-    
+
     refresh_start (ir_post,CkIndex_Block::p_compute_continue());
-    
+
   } else {
 
     compute_end_();

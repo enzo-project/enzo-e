@@ -421,18 +421,18 @@ enum class MsgType { msg_refine, msg_check };
 
 //--------------------------------------------------
 
-#define SIZE_VECTOR_TYPE(COUNT,TYPE,VECTOR)     \
-  {						\
-    (COUNT) += sizeof(int);			\
-    (COUNT) += sizeof(TYPE)*(VECTOR).size();    \
-  }
-#define SAVE_VECTOR_TYPE(POINTER,TYPE,VECTOR)                   \
+#define SIZE_VECTOR_TYPE(COUNT,TYPE,VECTOR)                     \
   {                                                             \
-    int size = (VECTOR).size();                                 \
-    memcpy(POINTER,&size, sizeof(int));                         \
-    (POINTER) += sizeof(int);                                   \
-    memcpy(POINTER,(TYPE*)&(VECTOR)[0],size*sizeof(TYPE));      \
-    (POINTER) += size*sizeof(TYPE);                           \
+    (COUNT) += sizeof(int);                                     \
+    (COUNT) += sizeof(TYPE)*(VECTOR).size();                    \
+  }
+#define SAVE_VECTOR_TYPE(POINTER,TYPE,VECTOR)                           \
+  {                                                                     \
+  int size = (VECTOR).size();                                           \
+  memcpy(POINTER,&size, sizeof(int));                                   \
+  (POINTER) += sizeof(int);                                             \
+  memcpy(POINTER,(TYPE*)&(VECTOR)[0],size*sizeof(TYPE));                \
+  (POINTER) += size*sizeof(TYPE);                                       \
   }
 #define LOAD_VECTOR_TYPE(POINTER,TYPE,VECTOR)                   \
   {                                                             \

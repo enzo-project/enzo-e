@@ -34,6 +34,8 @@ const char * phase_name[] = {
   "exit"
 };
 
+// #define TRACE_BLOCK
+
 //======================================================================
 #ifdef BYPASS_CHARM_MEM_LEAK
 //======================================================================
@@ -472,31 +474,32 @@ Solver * Block::solver () throw ()
 //----------------------------------------------------------------------
 
 void Block::print () const
-
 {
-  CkPrintf ("data_ = %p\n",(void*)data_);
-  CkPrintf ("child_data_ = %p\n",(void*)child_data_);
+  CkPrintf ("--------------------\n");
+  CkPrintf ("PRINT_BLOCK name_ = %s\n",name().c_str());
+  CkPrintf ("PRINT_BLOCK data_ = %p\n",(void*)data_);
+  CkPrintf ("PRINT_BLOCK child_data_ = %p\n",(void*)child_data_);
   int v3[3];index().values(v3);
-  CkPrintf ("index_ = %0x %0x %0x\n",v3[0],v3[1],v3[2]);
-  CkPrintf ("level_next_ = %d\n",level_next_);
-  CkPrintf ("cycle_ = %d\n",cycle_);
-  CkPrintf ("time_ = %f\n",time_);
-  CkPrintf ("dt_ = %f\n",dt_);
-  CkPrintf ("stop_ = %d\n",stop_);
-  CkPrintf ("index_initial_ = %d\n",index_initial_);
-  CkPrintf ("children_.size() = %lu\n",children_.size());
-  CkPrintf ("child_face_level_curr_.size() = %lu\n",child_face_level_curr_.size());
-  CkPrintf ("child_face_level_next_.size() = %lu\n",child_face_level_next_.size());
-  CkPrintf ("count_coarsen_ = %d\n",count_coarsen_);
-  CkPrintf ("adapt_step_ = %d\n",adapt_step_);
-  CkPrintf ("adapt_ready_ = %s\n",adapt_ready_?"true":"false");
-  CkPrintf ("adapt_balanced_ = %s\n",adapt_balanced_?"true":"false");
-  CkPrintf ("adapt_changed_ = %d\n",adapt_changed_);
-  CkPrintf ("coarsened_ = %d\n",coarsened_);
-  CkPrintf ("is_leaf_ = %d\n",is_leaf_);
-  CkPrintf ("age_ = %d\n",age_);
-  CkPrintf ("name_ = %s\n",name_.c_str());
-  CkPrintf ("index_method_ = %d\n",index_method_);
+  CkPrintf ("PRINT_BLOCK index_ = %0x %0x %0x\n",v3[0],v3[1],v3[2]);
+  CkPrintf ("PRINT_BLOCK level_next_ = %d\n",level_next_);
+  CkPrintf ("PRINT_BLOCK cycle_ = %d\n",cycle_);
+  CkPrintf ("PRINT_BLOCK time_ = %f\n",time_);
+  CkPrintf ("PRINT_BLOCK dt_ = %f\n",dt_);
+  CkPrintf ("PRINT_BLOCK stop_ = %d\n",stop_);
+  CkPrintf ("PRINT_BLOCK index_initial_ = %d\n",index_initial_);
+  CkPrintf ("PRINT_BLOCK children_.size() = %lu\n",children_.size());
+  CkPrintf ("PRINT_BLOCK child_face_level_curr_.size() = %lu\n",child_face_level_curr_.size());
+  CkPrintf ("PRINT_BLOCK child_face_level_next_.size() = %lu\n",child_face_level_next_.size());
+  CkPrintf ("PRINT_BLOCK count_coarsen_ = %d\n",count_coarsen_);
+  CkPrintf ("PRINT_BLOCK adapt_step_ = %d\n",adapt_step_);
+  CkPrintf ("PRINT_BLOCK adapt_ready_ = %s\n",adapt_ready_?"true":"false");
+  CkPrintf ("PRINT_BLOCK adapt_balanced_ = %s\n",adapt_balanced_?"true":"false");
+  CkPrintf ("PRINT_BLOCK adapt_changed_ = %d\n",adapt_changed_);
+  CkPrintf ("PRINT_BLOCK coarsened_ = %d\n",coarsened_);
+  CkPrintf ("PRINT_BLOCK is_leaf_ = %d\n",is_leaf_);
+  CkPrintf ("PRINT_BLOCK age_ = %d\n",age_);
+  CkPrintf ("PRINT_BLOCK index_method_ = %d\n",index_method_);
+  adapt_.print("Adapt",this);
   //  CkPrintf ("index_solver_ = %d\n",index_solver());
 }
 

@@ -346,13 +346,13 @@ std::vector<Index> Adapt::index_neighbors() const
 
 //----------------------------------------------------------------------
 
-void Adapt::print(std::string message, Block * block) const
+void Adapt::print(std::string message, const Block * block) const
 {
   char prefix[255];
   if (block) {
-    sprintf (prefix,"%d PRINT_ADAPT %s %s %p",CkMyPe(),block->name().c_str(),message.c_str(),(void*)this);
+    sprintf (prefix,"%d DEBUG_ADAPT %s %s %p",CkMyPe(),block->name().c_str(),message.c_str(),(void*)this);
   } else {
-    sprintf (prefix,"PRINT_ADAPT %s",message.c_str());
+    sprintf (prefix,"DEBUG_ADAPT %s",message.c_str());
   }
   CkPrintf ("DEBUG_ADAPT face_level curr: ");
   for (int i=0; i<face_level_[0].size(); i++) {
@@ -413,7 +413,7 @@ void Adapt::print(std::string message, Block * block) const
 
 //----------------------------------------------------------------------
 
-void Adapt::write(std::string root, Block * block, int cycle_start)
+void Adapt::write(std::string root, const Block * block, int cycle_start) const
 {
   const int cycle = cello::simulation()->cycle();
   if (cycle >= cycle_start) {
