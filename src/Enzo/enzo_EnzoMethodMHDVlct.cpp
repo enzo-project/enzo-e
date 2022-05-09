@@ -338,19 +338,22 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // initialize map that holds arrays wrapping the Cello Fields holding each
     // of the integration quantities. Additionally, this also includes
     // temporary arrays used to hold the specific form of the passive scalar
-    EnzoEFltArrayMap integration_map = get_integration_map_(block,
-                                                            &passive_list);
+    //
+    // by the very end of EnzoMethodMHDVlct::compute, the arrays in this map
+    // will be updated with their new values
+    EnzoEFltArrayMap external_integration_map = get_integration_map_
+      (block, &passive_list);
 
     // get maps of arrays and stand-alone arrays that serve as scratch space.
     // (first, retrieve the pointer to the scratch space struct)
-    const std::array<int,3> shape = {integration_map.at("density").shape(0),
-                                     integration_map.at("density").shape(1),
-                                     integration_map.at("density").shape(2)};
+    const std::array<int,3> shape = {external_integration_map.array_shape(0),
+                                     external_integration_map.array_shape(1),
+                                     external_integration_map.array_shape(2)};
     EnzoVlctScratchSpace* const scratch = get_scratch_ptr_(shape, passive_list);
 
     // map used for storing integration values at the half time-step. This
-    // includes key,array pairs for each entry in integration_map (there should
-    // be no aliased fields shared between maps)
+    // includes key,array pairs for each entry in external_integration_map
+    // (there should be no aliased arrays shared between maps)
     EnzoEFltArrayMap temp_integration_map = scratch->temp_integration_map;
 
     // Map of arrays used to temporarily store the cell-centered primitive
@@ -375,6 +378,12 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // CT is used, it won't have space to store changes in the magnetic fields.
     EnzoEFltArrayMap dUcons_map = scratch->dUcons_map;
 
+    // initialize the map that wraps the fields holding the acceleration
+    // components (these are nominally computed from gravity). This data is
+    // used for the gravity source term calculation. An empty map indicates
+    // that the gravity source term is not included.
+    const EnzoEFltArrayMap accel_map = EnzoEFltArrayMap();
+
     // allocate constrained transport object
     if (bfield_method_ != nullptr) {
       bfield_method_->register_target_block(block);
@@ -393,9 +402,9 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     for (int i=0;i<2;i++){
       double cur_dt = (i == 0) ? dt/2. : dt;
       EnzoEFltArrayMap& cur_integration_map =
-        (i == 0) ? integration_map      : temp_integration_map;
+        (i == 0) ? external_integration_map : temp_integration_map;
       EnzoEFltArrayMap& out_integration_map =
-        (i == 0) ? temp_integration_map :      integration_map;
+        (i == 0) ? temp_integration_map     : external_integration_map;
 
       EnzoReconstructor *reconstructor;
 
@@ -468,7 +477,9 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // increment the stale_depth
       stale_depth+=reconstructor->immediate_staling_rate();
 
-      // This is where source terms should be computed (added to dUcons_group)
+      // Compute the source terms (use them to update dUcons_group)
+      compute_source_terms_(cur_dt, i == 1, external_integration_map,
+                            primitive_map, accel_map, dUcons_map, stale_depth);
 
       // Update Bfields
       if (bfield_method_ != nullptr) {
@@ -487,8 +498,8 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // total energy (and if necessary the total energy can be synchronized
       // with the internal energy)
       integration_quan_updater_->update_quantities
-        (integration_map, dUcons_map, out_integration_map, eos_, stale_depth,
-         passive_list);
+        (external_integration_map, dUcons_map, out_integration_map, eos_,
+         stale_depth, passive_list);
 
       // increment stale_depth since the inner values have been updated
       // but the outer values have not
@@ -577,6 +588,41 @@ void EnzoMethodMHDVlct::compute_flux_
   // Finally, have bfield_method record the upwind direction (for handling CT)
   if (bfield_method != nullptr){
     bfield_method->identify_upwind(flux_map, dim, cur_stale_depth);
+  }
+}
+
+//----------------------------------------------------------------------
+
+// todo: need to add this to header!
+void EnzoMethodMHDVlct::compute_source_terms_
+(const double cur_dt, const bool full_timestep,
+ const EnzoEFltArrayMap &orig_integration_map,
+ const EnzoEFltArrayMap &primitive_map,
+ const EnzoEFltArrayMap &accel_map,
+ EnzoEFltArrayMap &dUcons_map,  const int stale_depth) const noexcept
+{
+  // As we add more source terms, we may want to store them in a vector instead
+  // of manually invoking them
+
+  // add any source-terms that are used for partial and full timesteps
+  // (there aren't any right now...)
+
+  // add any source-terms that are only included for full-timestep
+  if (full_timestep & (accel_map.size() != 0)){
+    // include gravity source terms.
+    //
+    // The inclusion of these terms are not based on any external paper. Thus,
+    // we include the following bullets to explain our thought process:
+    // - to be safe, we will use the density & velocity values from the start
+    //   of the timestep to compute the source terms.
+    // - we should reconsider this choice if we later decide to include the
+    //   source term for both the partial & full timesteps.
+    // - to include the source term during the partial & full timesteps, we
+    //   would probably want to recompute the gravitational potential and
+    //   acceleration fields at the partial timestep
+    EnzoSourceGravity gravity_source;
+    gravity_source.calculate_source(cur_dt, orig_integration_map, dUcons_map,
+                                    accel_map, eos_, stale_depth);
   }
 }
 

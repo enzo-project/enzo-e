@@ -225,6 +225,13 @@ protected: // methods
    EnzoReconstructor &reconstructor, EnzoBfieldMethod *bfield_method,
    const int stale_depth, const str_vec_t& passive_list) const noexcept;
 
+  void compute_source_terms_
+  (const double cur_dt, const bool full_timestep,
+   const EnzoEFltArrayMap &orig_integration_map,
+   const EnzoEFltArrayMap &primitive_map,
+   const EnzoEFltArrayMap &accel_map,
+   EnzoEFltArrayMap &dU_cons,  const int stale_depth) const noexcept;
+
   /// Saves the fluxes (for a given dimension, `dim`), computed at the faces
   /// between the active and the ghost zones to `block->data()->flux_data()`
   /// for later use in flux corrections.
