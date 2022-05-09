@@ -56,11 +56,11 @@ public:
   /// used. This function updates the sink particle data, specifically, the total mass
   /// and momentum changes, and computes values for the source fields for the cell
   /// specified by `index`.
-  void update_quantities(enzo_float density_change,
-			 int index,
-			 double norm_disp_x,
-			 double norm_disp_y,
-			 double norm_disp_z) throw();
+  void update(enzo_float density_change,
+	      int index,
+	      double norm_disp_x,
+	      double norm_disp_y,
+	      double norm_disp_z) throw();
 
   /// Writes particle data to the attribute arrays
   void write_particle_data() throw();

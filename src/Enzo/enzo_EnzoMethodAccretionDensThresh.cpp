@@ -109,11 +109,11 @@ void EnzoMethodAccretionDensThresh::compute_(Block * block)
 
 		  // Update sink particle data and source fields due to accretion
 		  // from this cell
-		  sp.update_quantities(density_change,
-				       index,
-				       norm_disp_x,
-				       norm_disp_y,
-				       norm_disp_z);
+		  sp.update(density_change,
+			    index,
+			    norm_disp_x,
+			    norm_disp_y,
+			    norm_disp_z);
 
 		} // if density is above threshold
 	      } // if cell is in accretion zone

@@ -71,7 +71,6 @@ EnzoSinkParticle::EnzoSinkParticle
    accretion_rate_ = paccrate[particle_index_ * daccrate];
    metal_fraction_ = metals ? pmetalfrac[particle_index_ * dmf] : 0.0;
 
-
    // Set accretion radius to be accretion_radius_cells_ multipled by minimum cell width
    double hx, hy, hz;
    block_->cell_width(&hx, &hy, &hz);
@@ -137,11 +136,11 @@ bool EnzoSinkParticle::cell_in_accretion_zone(int i, int j, int k,
 
 // ---------------------------------------------------------------------------------------------
 
-void EnzoSinkParticle::update_quantities(enzo_float density_change,
-					 int index,
-					 double norm_disp_x,
-					 double norm_disp_y,
-					 double norm_disp_z) throw() {
+void EnzoSinkParticle::update(enzo_float density_change,
+			      int index,
+			      double norm_disp_x,
+			      double norm_disp_y,
+			      double norm_disp_z) throw() {
 
   int it = cello::particle_descr()->type_index("sink");
 
