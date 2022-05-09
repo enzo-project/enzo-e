@@ -71,7 +71,8 @@ endfunction()
 # The following tests are self-contained binary of individual components
 
 setup_test_unit(Array ArrayComponent/Array test_cello_array)
-# Need to reintroduce followin tests once dependency hell is resolved
+# TODO(need help) Need to reintroduce following tests once dependency hell is resolved,
+# see commented unit tests in src/Cello/CMakeLists.txt
 #setup_test_unit(CelloType Cello/Type test_type)
 #setup_test_unit(Data-Field DataComponent/Field test_field)
 #setup_test_unit(Data-Field-Data DataComponent/FieldData test_field_data)
