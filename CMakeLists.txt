@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.16)
 
 # Machine config needs to be imported before project() to properly
 # set compilers this way.
@@ -299,11 +299,29 @@ add_subdirectory(src/Enzo)
 add_subdirectory(src/External)
 
 include(CTest)
-find_package(Python3 REQUIRED)
-# Ensure all required packages are present
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/PythonModuleCheck.cmake)
-required_python_modules_found("yt")
 
+option(USE_PYTHON_BASED_TESTS "Includes tests that require Python and yt" ON)
+if (USE_PYTHON_BASED_TESTS)
+  find_package(Python3)
+  if (Python3_FOUND)
+    message(STATUS
+      "   IMPORTANT: Make sure this is the Python version you want "
+      "to use. If not, e.g., because you want to use a conda or virtualenv based "
+      "version, try setting `-DPython3_FIND_VIRTUALENV=ONLY` or "
+      "`-DPython3_EXECUTABLE=/path/to/desired/python`."
+      )
+
+    # Ensure all required packages are present
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/PythonModuleCheck.cmake)
+    required_python_modules_found("yt")
+  else()
+    message(FATAL_ERROR
+     "You asked to include Python/yt based tests, but no Python installation was found. "
+     "You can either disable those tests by setting `-DUSE_PYTHON_BASED_TESTS=OFF` or "
+     "install a Python distribution with yt (recommended)."
+     )
+  endif()
+endif()
 add_subdirectory(test)
 
 # now generate the the config
