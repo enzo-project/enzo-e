@@ -513,7 +513,7 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
         if (te_dep_c[i] > 10*tiny_number) { // if any deposition
         #ifdef DEBUG_FEEDBACK_STARSS
           if (print_edge_deposit) {
-            CkPrintf("MethodFeedbackSTARSS: At least one supernova deposited across grid boundaries into block [%.3f, %.3f, %.3f])\n", xm, ym, zm);  
+            CkPrintf("MethodFeedbackSTARSS: At least one event (SN, winds, or both) deposited across grid boundaries into block [%.3f, %.3f, %.3f])\n", xm, ym, zm);  
             print_edge_deposit = false;       
           }
         #endif 

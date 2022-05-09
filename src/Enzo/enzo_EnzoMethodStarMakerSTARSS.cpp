@@ -386,89 +386,119 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
              continue;
            }
 
-        count++; // time to form a star! 
+        int n_newStars = 1; // track how many stars to form
+        double mFirmed = 0.0; // track total mass formed thus far
+        double massPerStar = new_mass;
+        double max_massPerStar = 5e3; // TODO: either make this a new parameter or replace 'maximum_star_mass'
+        double mass_split = 1e3; 
+        if (new_mass * munit_solar > max_massPerStar) { //
+          // for large particles, split them into several 1e3-ish Msun particles 
+          // that have slightly different birth times,
+          // spread over three dynamical times
+          // TODO: Enforce that if dt < 3 dynamical times, new star particles form in the next timestep
+          //       Can do this by creating the particle so we can still access it at the next timestep,
+          //       but not assigning it a mass until it's actually supposed to form
+         
+          n_newStars = std::floor(new_mass * munit_solar / mass_split);
+          massPerStar = new_mass / n_newStars;
         #ifdef DEBUG_SF_CRITERIA
-          CkPrintf("MethodStarMakerSTARSS -- Forming star in gas with number density %f cm^-3\n", ndens);
+          CkPrintf("MethodStarMakerSTARSS -- Predicted cluster mass %1.3e Msun > %1.3e Msun;" 
+                                             "splitting into %d particles with mass %1.3e Msun",
+                                             new_mass*munit_solar, max_massPerStar, n_newStars, massPerStar);
         #endif
+        } 
+          for (int n=0; n<n_newStars; n++) {
+            double ctime = enzo_block->time(); 
+            if (n > 0) {
+              double mod = n * 3.0 * tff/tunit/n_newStars;
+              ctime += mod;
+            }
+            count++; // time to form a star!
+      
+          #ifdef DEBUG_SF_CRITERIA
+            CkPrintf("MethodStarMakerSTARSS -- Forming star in gas with number density %f cm^-3\n", ndens);
+          #endif
 
-        // now create a star particle
-        int my_particle = particle.insert_particles(it, 1);
+          // now create a star particle
+          int my_particle = particle.insert_particles(it, 1);
 
-        // For the inserted particle, obtain the batch number (ib)
-        // and the particle index (ipp)
-        particle.index(my_particle, &ib, &ipp);
+          // For the inserted particle, obtain the batch number (ib)
+          // and the particle index (ipp)
+          particle.index(my_particle, &ib, &ipp);
 
-        int io = ipp; // ipp*ps
-        // pointer to mass array in block
-        pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib);
+          int io = ipp; // ipp*ps
+          // pointer to mass array in block
+          pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib);
 
-        // TODO: saving particle mass as density. May need to update this in the future
-        //       when PR #89 passes 
-        //pmass[io] = new_mass / cell_volume;
+          // TODO: saving particle mass as density. May need to update this in the future
+          //       when PR #89 passes 
+          //pmass[io] = new_mass / cell_volume;
 
-        pmass[io] = new_mass;
-        px = (enzo_float *) particle.attribute_array(it, ia_x, ib);
-        py = (enzo_float *) particle.attribute_array(it, ia_y, ib);
-        pz = (enzo_float *) particle.attribute_array(it, ia_z, ib);
+          pmass[io] = massPerStar;
+          px = (enzo_float *) particle.attribute_array(it, ia_x, ib);
+          py = (enzo_float *) particle.attribute_array(it, ia_y, ib);
+          pz = (enzo_float *) particle.attribute_array(it, ia_z, ib);
 
-        // give it position at center of host cell
-        px[io] = lx + (ix - gx + 0.5) * dx;
-        py[io] = ly + (iy - gy + 0.5) * dy;
-        pz[io] = lz + (iz - gz + 0.5) * dz;
+          // give it position at center of host cell
+          px[io] = lx + (ix - gx + 0.5) * dx;
+          py[io] = ly + (iy - gy + 0.5) * dy;
+          pz[io] = lz + (iz - gz + 0.5) * dz;
 
-        pvx = (enzo_float *) particle.attribute_array(it, ia_vx, ib);
-        pvy = (enzo_float *) particle.attribute_array(it, ia_vy, ib);
-        pvz = (enzo_float *) particle.attribute_array(it, ia_vz, ib);
+          pvx = (enzo_float *) particle.attribute_array(it, ia_vx, ib);
+          pvy = (enzo_float *) particle.attribute_array(it, ia_vy, ib);
+          pvz = (enzo_float *) particle.attribute_array(it, ia_vz, ib);
 
-        // average particle velocity over many cells to prevent runaway
-        double rhosum = 0.0;
-        double vx = 0.0;
-        double vy = 0.0;
-        double vz = 0.0;
-        for (int ix_=std::max(0,ix-3); ix_ <= std::min(ix+3,mx); ix_++) {
-            for (int iy_=std::max(0,iy-3); iy_ <= std::min(iy+3,my); iy_++) {
-                for (int iz_=std::max(0,iz-3); iz_ <= std::min(iz+3,mz); iz_++) {
-                    int i_ = INDEX(ix_,iy_,iz_,mx,my);
-                    vx += velocity_x[i_]*density[i_];
-                    vy += velocity_y[i_]*density[i_];
-                    vz += velocity_z[i_]*density[i_];
-                    rhosum += density[i_];
-                }
-            } 
-        }
-        vx /= rhosum;
-        vy /= rhosum;
-        vz /= rhosum;
+          // average particle velocity over many cells to prevent runaway
+          double rhosum = 0.0;
+          double vx = 0.0;
+          double vy = 0.0;
+          double vz = 0.0;
+          for (int ix_=std::max(0,ix-3); ix_ <= std::min(ix+3,mx); ix_++) {
+              for (int iy_=std::max(0,iy-3); iy_ <= std::min(iy+3,my); iy_++) {
+                  for (int iz_=std::max(0,iz-3); iz_ <= std::min(iz+3,mz); iz_++) {
+                      int i_ = INDEX(ix_,iy_,iz_,mx,my);
+                      vx += velocity_x[i_]*density[i_];
+                      vy += velocity_y[i_]*density[i_];
+                      vz += velocity_z[i_]*density[i_];
+                      rhosum += density[i_];
+                  }
+              } 
+          }  
+          vx /= rhosum;
+          vy /= rhosum;
+          vz /= rhosum;
 
-        // TODO: Make this an input parameter
-        double max_velocity = 150e5/vunit; 
+          // TODO: Make this an input parameter
+          double max_velocity = 150e5/vunit; 
 
-        pvx[io] = vx;
-        pvy[io] = vy;
-        pvz[io] = vz;
+          pvx[io] = vx;
+          pvy[io] = vy;
+          pvz[io] = vz;
 
-        // finalize attributes
-        plifetime = (enzo_float *) particle.attribute_array(it, ia_l, ib);
-        pform     = (enzo_float *) particle.attribute_array(it, ia_to, ib);
-        plevel    = (enzo_float *) particle.attribute_array(it, ia_lev, ib);
+          // finalize attributes
+          plifetime = (enzo_float *) particle.attribute_array(it, ia_l, ib);
+          pform     = (enzo_float *) particle.attribute_array(it, ia_to, ib);
+          plevel    = (enzo_float *) particle.attribute_array(it, ia_lev, ib);
 
-        pform[io]     =  enzo_block->time();   // formation time
+          pform[io]     =  ctime;   // formation time
 
-        //TODO: Need to have some way of calculating lifetime based on particle mass
-        plifetime[io] =  25.0 * cello::Myr_s / enzo_units->time() ; // lifetime (not accessed for STARSS FB)
+          //TODO: Need to have some way of calculating lifetime based on particle mass
+          plifetime[io] =  25.0 * cello::Myr_s / enzo_units->time() ; // lifetime (not accessed for STARSS FB)
 
-        plevel[io] = enzo_block->level(); // formation level
+          plevel[io] = enzo_block->level(); // formation level
 
-        if (metal){
-          pmetal     = (enzo_float *) particle.attribute_array(it, ia_metal, ib);
-          pmetal[io] = metal[i] / density[i]; // in ABSOLUTE units
-        }
+          if (metal){
+            pmetal     = (enzo_float *) particle.attribute_array(it, ia_metal, ib);
+            pmetal[io] = metal[i] / density[i]; // in ABSOLUTE units
+          }
 
-        // Remove mass from grid and rescale fraction fields
-        double scale = (1.0 - new_mass / cell_mass);
-        density[i] *= scale;
-        // rescale color fields too 
-        this->rescale_densities(enzo_block, i, scale);
+          // Remove mass from grid and rescale fraction fields
+          double scale = (1.0 - pmass[io] / cell_mass);
+          density[i] *= scale;
+          // rescale color fields too 
+          this->rescale_densities(enzo_block, i, scale);
+
+        } // end loop through particles created in this cell
 
 
       }
