@@ -25,14 +25,13 @@ public:
   /// Arguments: block                     - valid pointer to a block
   ///            ib                        - batch index
   ///            ip                        - index of particle within batch
-  ///            accretion_radius_cells    - radius of accretion zone in terms of the cell
-  ///                                      - width at the highest level of refinement.
+  ///            accretion_radius          - radius of accretion zone
   ///            conserve_angular_momentum - whether angular momentum of gas is conserved
   ///                                        during accretion
   EnzoSinkParticle(Block * block,
 		   int ib,
 		   int ip,
-		   int accretion_radius_cells,
+		   int accretion_radius,
 		   bool conserve_angular_momentum);
 
   /// Destructor
@@ -86,11 +85,7 @@ protected:
   /// The index of the particle within the batch
   const int particle_index_;
 
-  /// The radius of the accretion zone in terms of the cell width
-  /// at the highest level of refinement
-  const double accretion_radius_cells_;
-
-  /// The accretion radius in code units.
+  /// The radius of the accretion zone.
   double accretion_radius_;
 
   /// Whether angular momentum is conserved

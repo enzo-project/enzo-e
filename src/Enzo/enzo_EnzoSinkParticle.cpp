@@ -15,12 +15,12 @@ EnzoSinkParticle::EnzoSinkParticle
 (Block * block,
  int ib,
  int ip,
- int accretion_radius_cells,
+ int accretion_radius,
  bool conserve_angular_momentum)
   : block_(block),
     batch_index_(ib),
     particle_index_(ip),
-    accretion_radius_cells_(accretion_radius_cells),
+    accretion_radius_(accretion_radius),
     conserve_angular_momentum_(conserve_angular_momentum),
     total_mass_change_(0.0),
     total_momentum_x_change_(0.0),
@@ -71,17 +71,13 @@ EnzoSinkParticle::EnzoSinkParticle
    accretion_rate_ = paccrate[particle_index_ * daccrate];
    metal_fraction_ = metals ? pmetalfrac[particle_index_ * dmf] : 0.0;
 
-   // Set accretion radius to be accretion_radius_cells_ multipled by minimum cell width
-   double hx, hy, hz;
-   block_->cell_width(&hx, &hy, &hz);
-   const double min_cell_width = std::min(hx,std::min(hy,hz));
-   accretion_radius_ = accretion_radius_cells_ * min_cell_width;
-
    // Find the bounding region of the accretion zone
    double xm, ym, zm;
    block_->data()->lower(&xm,&ym,&zm);
    int gx, gy, gz;
    block_->data()->field().ghost_depth(0,&gx,&gy,&gz);
+   double hx, hy, hz;
+   block->cell_width(&hx, &hy, &hz);
 
    min_ind_x_ = ceil((x_ - xm - accretion_radius_) / hx - 0.5) + gx;
    min_ind_y_ = ceil((y_ - ym - accretion_radius_) / hy - 0.5) + gy;

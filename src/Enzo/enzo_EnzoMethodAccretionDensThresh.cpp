@@ -73,6 +73,12 @@ void EnzoMethodAccretionDensThresh::compute_(Block * block)
     Field field = block->data()->field();
     enzo_float * density = (enzo_float*) field.values("density");
 
+    // Set accretion radius to be accretion_radius_cells_ multipled by minimum cell width
+    double hx, hy, hz;
+    block->cell_width(&hx, &hy, &hz);
+    const double min_cell_width = std::min(hx,std::min(hy,hz));
+    const double accretion_radius_ = accretion_radius_cells_ * min_cell_width;
+
     // Also need the field dimensions
     int mx, my, mz;
     field.dimensions (0, &mx, &my, &mz);
