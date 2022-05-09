@@ -692,7 +692,7 @@ Method * EnzoProblem::create_method_
   } else if (name == "star_maker") {
 
     // should generalize this to enable multiple maker types
-    if (enzo_config->method_star_maker_type == "stochastic"){
+    if (enzo_config->method_star_maker_flavor == "stochastic"){
       method = new EnzoMethodStarMakerStochasticSF();
     } else{ // does not do anything
       method = new EnzoMethodStarMaker();
