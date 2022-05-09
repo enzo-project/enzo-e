@@ -43,10 +43,10 @@ class StringIndRdOnlyMap{
   /// shared_ptr. There is no downside to doing this since the hash table
   /// can never be mutated after it is constructed.
   ///
-  /// We implement our own simple hash-table instead of using one the standard
+  /// We implement our own simple hash-table instead of using one of the standard
   /// library datastructures (i.e. ``std::map``) to avoid an extra level of
   /// indirection. This uses a simple open-addressed hash-table (with linear
-  /// probing to address collisions). Since we don't allow the contents be
+  /// probing to address collisions). Since we don't allow the contents to be
   /// mutated, most of the negatives of an open-addressed hash-table do not
   /// apply.
   ///
