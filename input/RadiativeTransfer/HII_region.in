@@ -1,0 +1,286 @@
+#
+#
+#  Very simple feedback test problem
+#
+#     Drops a star particle of desired mass
+#     into a unigrid, uniform domain. Commented-out
+#     Adapt blocks below can be used to add in AMR
+#     (static, nested grids or adaptive).
+#
+
+#Adapt {
+#     list = ["mass"];
+#     mass {
+#         field_list = [ "density" ];
+#         max_coarsen = 1.0E-4; # 1.0E4 solar masses
+#         min_refine  = 1.0E-4;  # 1.0E4 solar masses
+#         type = "mass";
+#
+#         mass_type = "baryon"; # options are currently dark and baryon
+#     };
+#     max_level = 1;
+#}
+
+Boundary {
+  type = "outflow";
+}
+
+Domain {
+    lower = [ 0.0, 0.0, 0.0];
+    upper = [ 1.0,1.0,1.0];
+    #upper = [10.0*3.1596E18,10.0*3.1596E18,10.0*3.1596E18];
+    #upper = [1e2, 1e2, 1e2];
+}
+
+Mesh {
+  root_blocks = [1,1,1];
+  root_rank   = 3;
+  root_size   = [64, 64, 64]; # given length units, res = 1024 pc / 64 = 16 pc
+}
+
+ Units {
+    length = 3.086e18;    # 1 pc
+    #length = 100.0;
+    #mass = 2e33;
+    #time = 1.0;
+    time = 3.154e13; #Myr in seconds
+    #time   = 10539291151.9;   # length / clight
+    #density   = 1.674e-24; #mH/cm^3
+  }
+
+Field {
+  alignment   = 8;
+  gamma       = 1.40;
+  ghost_depth = 4;
+
+  list = ["density", "internal_energy", "total_energy",
+          "velocity_x", "velocity_y", "velocity_z",
+          "pressure", "temperature", "photon_density", "flux_x", "flux_y", "flux_z"];
+  list += ["metal_density"];
+  list += ["HI_density","HII_density","HeI_density","HeII_density","HeIII_density","e_density"];
+  list += ["RT_heating_rate","RT_HI_ionization_rate","RT_HeI_ionization_rate","RT_HeII_ionization_rate"]; 
+}
+
+Group {
+  list = ["color"];
+  
+  color {
+    field_list = ["HI_density","HII_density","HeI_density","HeII_density","HeIII_density","e_density"];
+  }
+  derived {
+    field_list = ["temperature","pressure"];
+  }
+
+}
+
+Method {
+  #list = [ "ramses_rt","grackle" ];
+  list = ["ramses_rt"];
+  ramses_rt {
+      clight = 29979245800.0;
+      N_groups = 1;
+      bin_lower = [13.5];
+      bin_upper = [13.7];
+      }
+ grackle {
+      data_file = "fuck"; #need to specify something even if it's not going to use a data file
+      with_radiative_cooling = 1;
+      primordial_chemistry   = 1;
+      metal_cooling          = 0;
+      UVbackground           = 0;
+      self_shielding_method  = 0;
+      HydrogenFractionByMass = 1.0;
+      use_cooling_timestep   = false;
+      }
+
+}
+
+Particle {
+    list = ["star"];
+
+    star {
+        attributes = [ "x", "double",
+                       "y", "double",
+                       "z", "double",
+                       "vx", "double",
+                       "vy", "double",
+                       "vz", "double",
+                       "ax", "double",
+                       "ay", "double",
+                       "az", "double",
+                       "id", "double",
+                       "mass", "double",
+                       "is_local", "double",
+                       "creation_time", "double",
+                       "lifetime", "double",
+                       "metal_fraction", "double" ];
+        position = [ "x", "y", "z" ];
+        velocity = [ "vx", "vy", "vz" ];
+        groups = ["has_mass"];
+    }
+}
+
+
+Initial {
+
+  list = ["feedback_test"]; # name of IC problem
+
+  value {
+    temperature = 1e4; #k
+    #HI_density = 100.0;
+    #HII_density = 1e-16;
+    #HeI_density = 1e-16;
+    #HeII_density = 1e-16;
+    #HeIII_density = 1e-16;
+    #e_density = 1e-16;
+
+    HI_density = 100.0*1.674e-24;
+    HII_density = 1e-100;
+    HeI_density = 1e-100;
+    HeII_density = 1e-100;
+    HeIII_density = 1e-100;
+    e_density = 1e-100;
+
+  }
+  feedback_test {
+    density    = 1e2*1.67e-24;             # uniform mass density for ICs
+    HI_density = 1e2*1.674e-24;
+    HII_density = 1e-100*1.674e-24;
+    HeI_density = 1e-100*1.674e-24;
+    HeII_density = 1e-100*1.674e-24;
+    HeIII_density = 1e-100*1.674e-24;
+    e_density = 1e-100*1.674e-24;
+    position   = [0.5,0.5,0.5];
+    temperature = 1e4;              # in K
+                                      #   particles are still local to each block and are kicked away from
+                                      #   boundaries if NxN feedback zone crosses a block boundary
+    star_mass  = 1000.0;                # particle mass in Msun
+  }
+
+#
+# use this to test with some KE on the grid to make (add 'value' to list above)
+# sure momentum and KE energy injection work in a flow
+# value {
+#    velocity_x = 0.1;
+#  }
+
+}
+
+Output {
+     list = [ "N", "Fx", "Fy", "Fz", "e", "HI", "HII", "mesh", "hdf5"  ];
+     N {
+         dir = ["HII_REGION"];
+         field_list = [ "photon_density" ];
+         name = [ "RT_N-%04d.png", "cycle" ];
+         image_size = [512,512];
+         image_log = false;
+         include "schedule_cycle.incl"; 
+         type = "image";
+         image_type = "data";
+         include "/home/whick002/enzo-e/input/Colormap/colormap_rainbow.incl";
+     }
+     Fx {
+         dir = ["HII_REGION"];
+         field_list = [ "flux_x" ];
+         name = [ "RT_Fx-%04d.png", "cycle" ];
+         image_size = [512,512];
+         image_log = false;
+         include "schedule_cycle.incl"; 
+         type = "image";
+
+         #include "/home/whick002/enzo-e/input/Colormap/colormap_rainbow.incl";
+     }
+
+     Fy {
+         dir = ["HII_REGION"];
+         field_list = [ "flux_y" ];
+         name = [ "RT_Fy-%04d.png", "cycle" ];
+         image_size = [512,512];
+         image_log = false;
+         include "schedule_cycle.incl"; 
+         type = "image";
+
+         #include "/home/whick002/enzo-e/input/Colormap/colormap_rainbow.incl";
+     }
+
+     Fz {
+         dir = ["HII_REGION"];
+         field_list = [ "flux_z" ];
+         name = [ "RT_Fz-%04d.png", "cycle" ];
+         image_size = [512,512];
+         image_log = false;
+         include "schedule_cycle.incl"; 
+         type = "image";
+         #include "/home/whick002/enzo-e/input/Colormap/colormap_rainbow.incl";
+
+    };
+    HI {     
+         dir = ["HII_REGION"];
+         field_list = [ "HI_density" ];
+         name = [ "RT_HI-%04d.png", "cycle" ];
+         image_size = [512,512];
+         image_log = false;
+         include "schedule_cycle.incl"; 
+         type = "image";
+         image_type = "data";
+         #include "/home/whick002/enzo-e/input/Colormap/colormap_rainbow.incl";
+    }
+    HII {
+         dir = ["HII_REGION"];
+         field_list = [ "HII_density" ];
+         name = [ "RT_HII-%04d.png", "cycle" ];
+         image_size = [512,512];
+         image_log = false;
+         include "schedule_cycle.incl"; 
+         type = "image";
+         image_type = "data";
+         #include "/home/whick002/enzo-e/input/Colormap/colormap_rainbow.incl";
+     }
+     e   {    
+         dir = ["HII_REGION"];
+         field_list = [ "e_density" ];
+         name = [ "RT_e-%04d.png", "cycle" ];
+         image_size = [512,512];
+         image_log = false;
+         include "schedule_cycle.incl"; 
+         type = "image";
+         image_type = "data";
+         #include "/home/whick002/enzo-e/input/Colormap/colormap_rainbow.incl";
+     }
+     mesh {
+         dir = ["HII_REGION"];
+         field_list = [ "photon_density" ];
+         name = [ "RT_N_mesh-%04d.png", "cycle" ];
+         image_size = [512,512];
+         image_log = false;
+         include "schedule_cycle.incl"; 
+         type = "image";
+         image_type = "mesh";
+         include "/home/whick002/enzo-e/input/Colormap/colormap_rainbow.incl";
+     }
+    hdf5 {
+    field_list = [ "photon_density", "flux_x", "flux_y", "flux_z" ];
+    field_list += [ "density","HI_density","HII_density","HeI_density","HeII_density","HeIII_density","e_density"
+                   ,"temperature","pressure"];
+    field_list += ["RT_heating_rate","RT_HI_ionization_rate","RT_HeI_ionization_rate","RT_HeII_ionization_rate"];
+   # field_list += [ "photon_density_0",
+   #                 "photon_density_1",
+   #                 "photon_density_2",
+   #                 "photon_density_3",
+   #                 "photon_density_4",
+   #                 "photon_density_5",
+   #                 "photon_density_6",
+   #                 "photon_density_7",
+   #                 "photon_density_8",
+   #                 "photon_density_9"];
+        dir = ["HII_REGION-data-%04d","cycle"];
+        name = [ "data-%03d-%02d.h5", "count", "proc" ];
+        include "schedule_cycle.incl"; 
+        type = "data";
+    };
+
+}
+
+Stopping {
+  cycle = 100;
+}

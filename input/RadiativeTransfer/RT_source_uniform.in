@@ -1,0 +1,51 @@
+include "RT_with_source.in"
+
+Initial {
+ list = ["feedback_test","value"];
+ value {
+     density = 1e-100; #1e14*1.67e-24;
+     HI_density = 1e-100; #1e14*1.67e-24;
+     HII_density = 1e-100;
+     HeI_density = 1e-100;
+     HeII_density = 1e-100;
+     HeIII_density = 1e-100;
+     e_density = 1e-100;
+ }
+
+}
+
+
+
+Method {
+ list += ["grackle"];
+
+}
+Output {
+     list += ["density", "hdf5"];
+     N  {dir = ["UNIFORM_DENSITY"]; schedule {step=1;}}
+     Fx {dir = ["UNIFORM_DENSITY"];}
+     Fy {dir = ["UNIFORM_DENSITY"];}
+     Fz {dir = ["UNIFORM_DENSITY"];}
+     mesh {dir = ["UNIFORM_DENSITY"];}
+     hdf5 {dir = ["UNIFORM_DENSITY-data-%04d","cycle"];}
+
+     density {
+         dir = ["UNIFORM_DENSITY"];
+         field_list = [ "density" ];
+         name = [ "RT_density-%04d.png", "cycle" ];
+         image_size = [512,512];
+         image_log = false;
+         schedule {
+             step = 10;
+             var = "cycle";
+         }
+         type = "image";
+         image_type = "data";
+         include "/home/whick002/enzo-e/input/Colormap/colormap_rainbow.incl";
+     }
+
+}
+
+Stopping {
+  cycle = 300;
+}

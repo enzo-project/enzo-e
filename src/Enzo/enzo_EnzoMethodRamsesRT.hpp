@@ -57,6 +57,18 @@ public: // interface
 
 
   //--------- CONTROL FLOW --------
+  //compute_ -> call_inject_photons -> inject_photons ->
+  //  refresh -> solve_transport_eqn -> 
+  //  recombination_chemistry, get_photoionization_and_heating_rates 
+  //  (rates passed into Grackle in EnzoMethodGrackle)
+  //
+  //inject_photons -> get_star_temperature, get_radiation_blackbody
+  //                  get_radiation_blackbody -> integrate_simpson(planck_function)
+  //
+  //recombination_chemistry -> get_alpha 
+  //
+  //get_photoionization_and_heating_rates -> get_beta                
+
 
   // calls inject_photons(), then does a refresh
   void call_inject_photons(EnzoBlock * enzo_block) throw();
