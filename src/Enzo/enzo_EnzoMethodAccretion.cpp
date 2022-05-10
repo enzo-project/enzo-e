@@ -45,12 +45,18 @@ EnzoMethodAccretion::EnzoMethodAccretion
   ASSERT("EnzoMethodAccretion",
 	 "Adapt:min_face_rank parameter must be equal to 0.",
 	 enzo::config()->adapt_min_face_rank == 0);
-  
+
+  // Check if we are running in unigrid mode (will get rid of this in future)
   ASSERT("EnzoMethodAccretion::EnzoMethodAccretion()",
 	 "EnzoMethodAccretion requires unigrid mode (Adapt : max_level = 0). "
 	 "In future, we may put in a refinement condition that blocks containing "
 	 "sink particles are at the highest refinement level.",
 	 enzo::config()->mesh_max_level == 0);
+
+  // Check that max_mass_fraction_ is between 0 and 1
+  ASSERT("EnzoMethodAccretion::EnzoMethodAccretion()",
+	 "Method:accretion:max_mass_fraction must be between 0 and 1 inclusive.",
+	  max_mass_fraction_>= 0.0 && max_mass_fraction <= 1.0);
 
   // Check that ang_mom_threshold_radius_cells_ is between 0.0 and 0.5
   ASSERT("EnzoMethodAccretion::EnzoMethodAccretion()",
