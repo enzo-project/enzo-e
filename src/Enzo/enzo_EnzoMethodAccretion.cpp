@@ -60,7 +60,8 @@ EnzoMethodAccretion::EnzoMethodAccretion
 
   // Check that ang_mom_threshold_radius_cells_ is between 0.0 and 0.5
   ASSERT("EnzoMethodAccretion::EnzoMethodAccretion()",
-	 "Method:accretion:ang_mom_threshold_radius_cells must be less than 0.5.",
+	 "Method:accretion:ang_mom_threshold_radius_cells must be strictly greater "
+         "than 0.0 and strictly less than 0.5.",
 	 ang_mom_threshold_radius_cells_ > 0.0 && ang_mom_threshold_radius_cells_ < 0.5);
 
   const int * ghost_depth = enzo::config()->field_ghost_depth;
