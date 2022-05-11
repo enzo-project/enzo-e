@@ -10,15 +10,14 @@ covers downloading the source code, porting the code to new platforms,
 configuring and compiling the code, and running a sample test problem.
 
 Other pages are available for helping to get started on specific
-architectures, including the "Comet" supercomputer at San Diego
-Supercomputing Center (SDSC), and the NSF Petascale supercomputer "Blue
-Waters" at the National Center for Supercomputing Applications (NCSA).
+architectures, including the "Frontera" supercomputer at TACC and the
+"Pleiades" supercomputer at NASA.
 
 .. toctree::
    :maxdepth: 1
 	   
-   getting_started_comet
-   getting_started_blue_waters
+   getting_started_pleiades
+   getting_started_frontera
 
 Downloading
 ===========
