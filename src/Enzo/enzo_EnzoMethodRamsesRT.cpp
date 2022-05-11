@@ -9,6 +9,9 @@
 
 #include "enzo.hpp"
 
+//#define DEBUG_TURN_OFF_ATTENUATION
+//#define DEBUG_TURN_OFF_CHEMISTRY
+
 //#define DEBUG_PRINT_GROUP_PARAMETERS
 //#define DEBUG_RECOMBINATION
 //#define DEBUG_ALPHA
@@ -182,10 +185,7 @@ double EnzoMethodRamsesRT::timestep ( Block * block ) const throw()
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
 
-  //enzo_block = enzo::block(block);
-  return h_min / (3*cello::clight / enzo_units->velocity());//clight_);
-  //double dt_cgs = h_min*enzo_units->length() / (3*cello::clight);
-  //return dt_cgs / enzo_units->time();
+  return h_min / (3*cello::clight / enzo_units->velocity());
 }
 
 //-----------------------------------------------------------------------
@@ -766,8 +766,10 @@ double EnzoMethodRamsesRT::sigma_vernier (double energy, int type) throw()
 void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo_block, double clight) throw() 
 {
   // Calculates photoionization and heating rates in each cell according to RAMSES-RT prescription
-  // heating rates in erg s^-1 cm^-3
-  // photoionization rates in s^-1
+  // See pg. 14 of https://grackle.readthedocs.io/_/downloads/en/latest/pdf/ for relavent Grackle
+  // parameters. 
+  // ionization rates should be in code_time^-1
+  // heating rates should be in erg s^-1 cm^-3 
   // TODO: Do this calculation in either CGS or code units and then do necessary unit conversions
   //       in EnzoMethodGrackle when accessing ionization and heating rate fields?
 
@@ -804,7 +806,6 @@ void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo
   std::vector<enzo_float*> ionization_rate_fields = {RT_HI_ionization_rate, 
                                RT_HeI_ionization_rate, RT_HeII_ionization_rate};
 
-  // Need to convert everything back to CGS because that's how Grackle expects ionization/heating rates
   double lunit = enzo_units->length();
   double tunit = enzo_units->time();
   double munit = enzo_units->mass();
@@ -812,10 +813,14 @@ void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo
   double volunit = lunit*lunit*lunit;
   double rhounit = enzo_units->density();
   double Tunit = enzo_units->temperature();
+  double Nunit = 1/volunit;
 
   std::vector<double> Eion = {13.6*cello::erg_eV, 24.59*cello::erg_eV, 54.42*cello::erg_eV};
   double mH = cello::mass_hydrogen;
+  double mEl = cello::mass_electron;
   std::vector<double> masses = {mH,4*mH,4*mH};
+
+  double mH_mEl = mH/cello::mass_electron;
 
   std::vector<enzo_float*> photon_densities = {};
   for (int igroup=0; igroup<enzo_config->method_ramses_rt_N_groups; igroup++) { 
@@ -831,23 +836,23 @@ void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo
         double heating_rate = 0.0; 
         for (int j=0; j<3; j++) { //loop over species
           double beta = get_beta(temperature[i]*Tunit, j); 
-          double ionization_rate = beta * e_density[i]*rhounit;
+          double ionization_rate = beta * e_density[i] * rhounit / mEl; // beta*n_e in s^-1
           for (int igroup=0; igroup<enzo_config->method_ramses_rt_N_groups; igroup++) { //loop over groups
 
             std::string igroup_s = std::to_string(igroup);
             std::string j_s = std::to_string(j);
 
-            double sigmaN = *(scalar.value( scalar.index("sigN_" + igroup_s + j_s ))) * lunit*lunit; 
-
-            double sigmaE = *(scalar.value( scalar.index("sigE_" + igroup_s + j_s ))) * lunit*lunit; 
-
-            double eps    = *(scalar.value( scalar.index("eps_" + igroup_s ))) * eunit; 
+            double sigmaN = *(scalar.value( scalar.index("sigN_" + igroup_s + j_s ))) * lunit*lunit; // cm^2 
+            double sigmaE = *(scalar.value( scalar.index("sigE_" + igroup_s + j_s ))) * lunit*lunit; // cm^2
+            double eps    = *(scalar.value( scalar.index("eps_" + igroup_s ))) * eunit; // erg 
  
-            double N_i = (photon_densities[igroup])[i] / volunit;
-            double n_j = (chemistry_fields[j])[i] * rhounit / (masses[j]); //number density of species j
-            ionization_rate += sigmaN*clight*N_i; 
+            double N_i = (photon_densities[igroup])[i] * Nunit; // cm^-3
+            double n_j = (chemistry_fields[j])[i] * rhounit / masses[j]; //number density of species j
             
-            heating_rate += n_j*clight*N_i*(eps*sigmaE - Eion[j]*sigmaN); // Equation A16
+            // NOTE: clight is passed into this function in cgs
+            ionization_rate += sigmaN*clight*N_i; 
+            heating_rate    += n_j*clight*N_i*(eps*sigmaE - Eion[j]*sigmaN); // Equation A16
+
 #ifdef DEBUG_RATES 
             std::cout << "i = " << i << "; heating_rate = " << heating_rate << "; n_j = " << n_j << 
             "; N_i = " << N_i << "; eps = " << eps << "; Ediff = " << (eps*sigmaE - Eion[j]*sigmaN) <<  std::endl;
@@ -856,7 +861,7 @@ void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo
           (ionization_rate_fields[j])[i] = ionization_rate * tunit; //update fields with new value, put ionization rates in 1/time_units
         }
         
-        RT_heating_rate[i] = heating_rate / nHI;
+        RT_heating_rate[i] = heating_rate / nHI; // * eunit/volunit/tunit; //put into code units
 #ifdef DEBUG_RATES
         std::cout << "RT_heating_rate[i] = " << RT_heating_rate[i] << "; RT_HI_ionization_rate[i] = " << (ionization_rate_fields[0])[i] << std::endl;
 #endif 
@@ -1001,6 +1006,7 @@ void EnzoMethodRamsesRT::recombination_photons (EnzoBlock * enzo_block, enzo_flo
   int igroup = enzo_block->method_ramses_rt_igroup;
   EnzoUnits * enzo_units = enzo::units();
   double Tunit = enzo_units->temperature();
+  double munit = enzo_units->mass();
 
   if (!field.is_field("density")) return;
   
@@ -1009,6 +1015,10 @@ void EnzoMethodRamsesRT::recombination_photons (EnzoBlock * enzo_block, enzo_flo
 
   std::vector<std::string> chemistry_fields = {"HI_density", 
                                                "HeI_density", "HeII_density"};
+  double mH  = cello::mass_hydrogen / munit; // code units
+  double mEl = cello::mass_electron / munit;
+
+  std::vector<double> masses = {mH,4*mH, 4*mH};
 
   double dN_dt = 0.0;
   double alpha_units = enzo_units->volume() / enzo_units->time();
@@ -1020,12 +1030,17 @@ void EnzoMethodRamsesRT::recombination_photons (EnzoBlock * enzo_block, enzo_flo
     double alpha_A = get_alpha(T[i]*Tunit, j, 'A') / alpha_units;
     double alpha_B = get_alpha(T[i]*Tunit, j, 'B') / alpha_units;     
 
-    dN_dt += b*(alpha_A-alpha_B) * density_j[i]*e_density[i];
+    double n_j = density_j[i]/masses[j];
+    double n_e = e_density[i]/mEl;
+    dN_dt += b*(alpha_A-alpha_B) * n_j*n_e;
 #ifdef DEBUG_RECOMBINATION
-    std::cout << "alpha_A = " << alpha_A << "; alpha_B = " << alpha_B << "; density_j = " << "b = " << b << std::endl;
+    CkPrintf("MethodRamsesRT::recombination_photons -- j=%d; alpha_A = %1.3e; alpha_B = %1.3e; n_j = %1.3e; n_e = %1.3e; b_boolean = %d\n", j, alpha_A, alpha_B, n_j, n_e, b);
 #endif
   }
- 
+
+#ifdef DEBUG_RECOMBINATION
+  CkPrintf("MethodRamsesRT::recombination_photons -- dN_dt[i] = %1.3e", dN_dt);
+#endif 
   N [i] += dN_dt * enzo_block->dt;
 }
 
@@ -1047,6 +1062,7 @@ void EnzoMethodRamsesRT::recombination_chemistry (EnzoBlock * enzo_block) throw(
   enzo_block->lower(&xm,&ym,&zm);
   enzo_block->upper(&xp,&yp,&zp);
 
+  double dt = enzo_block->dt;
 
   enzo_float * HI_density    = (enzo_float *) field.values("HI_density");
   enzo_float * HII_density   = (enzo_float *) field.values("HII_density");
@@ -1059,7 +1075,12 @@ void EnzoMethodRamsesRT::recombination_chemistry (EnzoBlock * enzo_block) throw(
 
   EnzoUnits * enzo_units = enzo::units();
   double Tunit = enzo_units->temperature();
+  double munit = enzo_units->mass();
+  double rhounit = enzo_units->density();
   double alpha_units = enzo_units->volume() / enzo_units->time();
+
+  double mH_mEl = cello::mass_hydrogen / cello::mass_electron;
+ 
   for (int iz=gz; iz<mz-gz; iz++) {
     for (int iy=gy; iy<my-gy; iy++) {
       for (int ix=gx; ix<mx-gx; ix++) {
@@ -1068,16 +1089,17 @@ void EnzoMethodRamsesRT::recombination_chemistry (EnzoBlock * enzo_block) throw(
         double alphaA_HII   = get_alpha(temperature[i]*Tunit,0,'A')/alpha_units;
         double alphaA_HeII  = get_alpha(temperature[i]*Tunit,1,'A')/alpha_units;
         double alphaA_HeIII = get_alpha(temperature[i]*Tunit,2,'A')/alpha_units;
-        
+  
+                     
         // eq. 28
-        HII_density  [i] -= HII_density[i]*alphaA_HII*e_density[i] * enzo_block->dt;
+        HII_density  [i] -= HII_density[i]*alphaA_HII*e_density[i]*mH_mEl * dt;
 
         //eq. 29
         HeII_density [i] += (HeIII_density[i]*alphaA_HeIII - HeII_density[i]*alphaA_HeII) 
-                                  *e_density[i] * enzo_block->dt;
+                                  *e_density[i]*4*mH_mEl * dt;
 
         //eq. 30
-        HeIII_density[i] -= HeIII_density[i]*alphaA_HeIII*e_density[i] * enzo_block->dt;
+        HeIII_density[i] -= HeIII_density[i]*alphaA_HeIII*e_density[i]*4*mH_mEl * dt;
       }
     }
   } 
@@ -1093,7 +1115,11 @@ void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * 
   //       Right now, this only accounts for attenuation (first half)
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
-  
+  double dt = enzo_block->dt;
+  double tunit = enzo_units->time();  
+  double rhounit = enzo_units->density();
+  double munit = enzo_units->mass();
+
   Field field = enzo_block->data()->field();
   int igroup = enzo_block->method_ramses_rt_igroup;
 
@@ -1103,9 +1129,8 @@ void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * 
 
   std::vector<std::string> chemistry_fields = {"HI_density", 
                                                "HeI_density", "HeII_density"};
-  double mH = cello::mass_hydrogen / enzo_units->mass();
+  double mH = cello::mass_hydrogen / munit;
   std::vector<double> masses = {mH,4*mH, 4*mH};
-  //std::vector<int> masses = {1,4,4};
  
   //it's okay to use the same cross section for both attenuation (affects N) and 
   //radiation pressure (affects F) because F and N have approximately the 
@@ -1114,19 +1139,27 @@ void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * 
   Scalar<double> scalar = enzo_block->data()->scalar_double();
   double d_dt = 0.0;
   for (int j=0; j<chemistry_fields.size(); j++) {  
-    enzo_float * density_j = (enzo_float *) field.values(chemistry_fields[j]);     
+    enzo_float * density_j = (enzo_float *) field.values(chemistry_fields[j]);
+    double n_j = density_j[i] / masses[j];     
     double sigN_ij = *(scalar.value( scalar.index("sigN_" + std::to_string(igroup) + std::to_string(j)) ));
-    d_dt += density_j[i] / masses[j] * clight*sigN_ij;
+    d_dt += n_j * clight*sigN_ij; // code_time^-1
     //std::cout << density_j[i] << ' ' <<  masses[j] << ' ' << clight << ' ' << sigN_ij << std::endl;
   }
  
 #ifdef DEBUG_ATTENUATION
-  std::cout << "i=" << i << "; d_dt=" << d_dt << "; N[i] = " << N[i] << "; Fx[i] = " << Fx[i] << "; dt = " << enzo_block->dt << std::endl;
-#endif  
-  N [i] -= d_dt*N [i] * enzo_block->dt;
-  Fx[i] -= d_dt*Fx[i] * enzo_block->dt;
-  Fy[i] -= d_dt*Fy[i] * enzo_block->dt;
-  Fz[i] -= d_dt*Fz[i] * enzo_block->dt; 
+  // NOTE d_dt * dt > 1 must be true. If this is happening, it is likely that your timestep is too large.
+  //                                  This can be fixed by either increasing resolution, decreasing global timestep,
+  //                                  or subcycling RT.
+  if (d_dt * dt > 1) {
+    CkPrintf("MethodRamsesRT::add_attenuation() -- WARNING: d_dt*dt = %f (> 1)\n", d_dt*dt);
+    CkPrintf("i=%d; d_dt=%e; N[i] = %e; Fx[i] = %e; dt = %e\n",i, d_dt, N[i], Fx[i], dt);
+  }
+#endif 
+ 
+  N [i] -= d_dt*N [i] * dt;
+  Fx[i] -= d_dt*Fx[i] * dt;
+  Fy[i] -= d_dt*Fy[i] * dt;
+  Fz[i] -= d_dt*Fz[i] * dt; 
   
 }
 
@@ -1200,6 +1233,7 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
   //if (true) get_group_attributes(); // if (enzo_block->cycle % attribute_cycle_step == 0)
   double lunit = enzo_units->length();
   double tunit = enzo_units->time();
+  double Nunit = 1/enzo_units->volume();
 
   double clight = cello::clight * tunit/lunit;
 
@@ -1245,18 +1279,21 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
         // can occasionally end up in situations where
         // N[i] is slightly negative due to roundoff error.
         // Make it a small positive number instead 
-        if (Nnew[i] < 1e-16*lunit*lunit*lunit) Nnew[i] = 1e-16*lunit*lunit*lunit;
+        if (Nnew[i] < 1e-16) Nnew[i] = 1e-16 / Nunit;
 
-#ifdef DEBUG_TRANSPORT
+      #ifdef DEBUG_TRANSPORT
         std::cout << "i = " << i << "; Nnew[i] = " << Nnew[i] << "; N_update = " << N_update << "; Fx_update = " << Fx_update << "; hx = " << hx << "; dt = " << dt << std::endl;
-#endif
- 
+      #endif
+
+      #ifndef DEBUG_TURN_OFF_ATTENUATION 
         // add interactions with matter 
         add_attenuation(enzo_block, Nnew, Fxnew, Fynew, Fznew, clight, i); 
+      #endif
+        if (Nnew[i] < 1e-16) Nnew[i] = 1e-16 / Nunit;
 
         // update photon density due to recombinations
         // TODO: Only do this if not using on-the-spot approximation
-        //recombination_photons(enzo_block, Nnew, T, i, E_lower, E_upper);
+        recombination_photons(enzo_block, Nnew, T, i, E_lower, E_upper);
              
 
       }
@@ -1321,6 +1358,8 @@ void EnzoMethodRamsesRT::call_solve_transport_eqn(EnzoBlock * enzo_block) throw(
 
     enzo_block->method_ramses_rt_igroup += 1;
   }
+
+#ifndef DEBUG_TURN_OFF_CHEMISTRY
   // update chemistry fields to account for recombinations
   recombination_chemistry(enzo_block);
 
@@ -1332,6 +1371,7 @@ void EnzoMethodRamsesRT::call_solve_transport_eqn(EnzoBlock * enzo_block) throw(
 
   //TODO: Make photoionization/heating/chemistry optional 
   get_photoionization_and_heating_rates(enzo_block, cello::clight);
+#endif
 }
 
 //-------------------------------
@@ -1433,10 +1473,10 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
       {
         // initialize fields to zero 
         // TODO: write a problem initializer so that we don't have to do this 
-        N_i [j] = 1e-16;// / Nunit;
-        Fx_i[j] = 1e-16;// / Funit;
-        Fy_i[j] = 1e-16; /// Funit;
-        Fz_i[j] = 1e-16;// / Funit; 
+        N_i [j] = 1e-16 / Nunit;
+        Fx_i[j] = 1e-16 / Funit;
+        Fy_i[j] = 1e-16 / Funit;
+        Fz_i[j] = 1e-16 / Funit; 
       }    
     }
   }

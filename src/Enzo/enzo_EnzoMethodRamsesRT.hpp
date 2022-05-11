@@ -58,9 +58,10 @@ public: // interface
 
   //--------- CONTROL FLOW --------
   //compute_ -> call_inject_photons -> inject_photons ->
-  //  refresh -> solve_transport_eqn -> 
-  //  recombination_chemistry, get_photoionization_and_heating_rates 
+  //  refresh -> call_solve_transport_eqn -> 
+  //  solve_transport_eqn, recombination_chemistry, get_photoionization_and_heating_rates 
   //  (rates passed into Grackle in EnzoMethodGrackle)
+  //  solve_transport_eqn -> add_attenuation
   //
   //inject_photons -> get_star_temperature, get_radiation_blackbody
   //                  get_radiation_blackbody -> integrate_simpson(planck_function)
