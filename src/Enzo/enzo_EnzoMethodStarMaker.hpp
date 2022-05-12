@@ -104,6 +104,7 @@ protected: // attributes
   bool use_density_threshold_;
   bool use_velocity_divergence_;
   bool use_self_gravitating_;
+  bool use_altAlpha_;
   bool use_h2_self_shielding_;
   bool use_jeans_mass_;
   bool use_overdensity_threshold_;

@@ -42,6 +42,7 @@ EnzoMethodStarMaker::EnzoMethodStarMaker
   use_density_threshold_     = enzo_config->method_star_maker_use_density_threshold;
   use_velocity_divergence_   = enzo_config->method_star_maker_use_velocity_divergence;
   use_self_gravitating_      = enzo_config->method_star_maker_use_self_gravitating;
+  use_altAlpha_              = enzo_config->method_star_maker_use_altAlpha;
   use_h2_self_shielding_     = enzo_config->method_star_maker_use_h2_self_shielding;
   use_jeans_mass_            = enzo_config->method_star_maker_use_jeans_mass;
   number_density_threshold_  = enzo_config->method_star_maker_number_density_threshold;

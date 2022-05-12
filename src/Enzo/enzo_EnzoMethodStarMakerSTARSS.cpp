@@ -172,7 +172,9 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
   enzo_float * temperature = (enzo_float *) field.values("temperature");
 
   enzo_float * total_energy = (enzo_float *) field.values("total_energy");
-  //enzo_float * potential    = (enzo_float *) field.values("potential");
+  
+  enzo_float * potential    = field.is_field("potential_copy") ? 
+          (enzo_float *) field.values("potential_copy") : NULL;
 
   enzo_float * velocity_x = (rank >= 1) ?
     (enzo_float *)field.values("velocity_x") : NULL;
@@ -218,6 +220,16 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
          (enzo_float *) field.values("HDI_density") : NULL;
 
 
+  bool use_altAlpha = this->use_altAlpha_;
+  #ifndef DEBUG_COPY_POTENTIAL
+    if (use_altAlpha) {
+      CkPrintf("MethodStarMaker -- WARNING: use_altAlpha = true, "
+               "      but DEBUG_COPY_POTENTIAL flag is not "
+               "      set in EnzoMethodGravity.\n"
+               "      Defaulting to use_altAlpha = false\n");
+      use_altAlpha = false;
+    }
+  #endif
 
   // compute the temperature (we need it here)
   // TODO: Calling compute_temperature like this
@@ -296,13 +308,10 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         #endif 
 
         // check that alpha < 1
-        if (enzo_config->method_star_maker_use_altAlpha) {
-          // approximate grav potential of cell, taking r = dx
-          // NOTE: potential field is currently cleared at the end of EnzoMethodGravity.
-          //       Can just access it here if we decide to either not clear or 
-          //       make a copy (DEBUG_COPY_POTENTIAL).
-          double potential_i = cello::grav_constant * cell_mass*munit / (dx*lunit) / eunit;
-          if (! this->check_self_gravitating_new(total_energy[i], potential_i)) continue;
+        if (use_altAlpha) {
+          // NOTE: this requires the DEBUG_COPY_POTENTIAL flag to be set in EnzoMethodGravity
+          // TODO: Make copying potential an input parameter instead of debug flag?
+          if (! this->check_self_gravitating_new(total_energy[i], potential[i])) continue;
         }
 
         else {
