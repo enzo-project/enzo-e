@@ -166,7 +166,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
   enzo_float * temperature = (enzo_float *) field.values("temperature");
 
   enzo_float * total_energy = (enzo_float *) field.values("total_energy");
-  enzo_float * potential    = (enzo_float *) field.values("potential");
+  //enzo_float * potential    = (enzo_float *) field.values("potential");
 
   enzo_float * velocity_x = (rank >= 1) ?
     (enzo_float *)field.values("velocity_x") : NULL;
@@ -291,7 +291,12 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 
         // check that alpha < 1
         if (enzo_config->method_star_maker_use_altAlpha) {
-          if (! this->check_self_gravitating_new(total_energy[i], potential[i])) continue;
+          // approximate grav potential of cell, taking r = dx
+          // NOTE: potential field is currently cleared at the end of EnzoMethodGravity.
+          //       Can just access it here if we decide to either not clear or 
+          //       make a copy (DEBUG_COPY_POTENTIAL).
+          double potential_i = cello::grav_constant * cell_mass*munit / (dx*lunit);
+          if (! this->check_self_gravitating_new(total_energy[i], potential_i)) continue;
         }
 
         else {
@@ -402,9 +407,9 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
           n_newStars = std::floor(new_mass * munit_solar / mass_split);
           massPerStar = new_mass / n_newStars;
         #ifdef DEBUG_SF_CRITERIA
-          CkPrintf("MethodStarMakerSTARSS -- Predicted cluster mass %1.3e Msun > %1.3e Msun;" 
-                                             "splitting into %d particles with mass %1.3e Msun",
-                                             new_mass*munit_solar, max_massPerStar, n_newStars, massPerStar);
+          CkPrintf("MethodStarMakerSTARSS -- Predicted cluster mass %1.3e Msun > %1.3e Msun;\n" 
+                   "                         splitting into %d particles with mass %1.3e Msun\n",
+                                             new_mass*munit_solar, max_massPerStar, n_newStars, massPerStar*munit_solar);
         #endif
         } 
           for (int n=0; n<n_newStars; n++) {
@@ -440,6 +445,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
           pz = (enzo_float *) particle.attribute_array(it, ia_z, ib);
 
           // give it position at center of host cell
+          // TODO: Calculate CM instead?
           px[io] = lx + (ix - gx + 0.5) * dx;
           py[io] = ly + (iy - gy + 0.5) * dy;
           pz[io] = lz + (iz - gz + 0.5) * dz;
@@ -493,6 +499,8 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
           }
 
           // Remove mass from grid and rescale fraction fields
+          // TODO: Remove mass using CiC instead? Should do this if particle's initial position
+          //       isn't cell-centered
           double scale = (1.0 - pmass[io] / cell_mass);
           density[i] *= scale;
           // rescale color fields too 

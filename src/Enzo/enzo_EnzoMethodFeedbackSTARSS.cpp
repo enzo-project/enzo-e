@@ -511,7 +511,7 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
 
         beforeMass += d[i] * rho_to_m;
         if (te_dep_c[i] > 10*tiny_number) { // if any deposition
-        #ifdef DEBUG_FEEDBACK_STARSS
+        #ifdef DEBUG_FEEDBACK_STARSS_ACCUMULATE
           if (print_edge_deposit) {
             CkPrintf("MethodFeedbackSTARSS: At least one event (SN, winds, or both) deposited across grid boundaries into block [%.3f, %.3f, %.3f])\n", xm, ym, zm);  
             print_edge_deposit = false;       
@@ -548,7 +548,7 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
       }
     }
   }
-
+/*
   for (int i=0; i<mx*my*mz; i++){
      d_dep[i] = 0;
     mf_dep[i] = 0;
@@ -569,7 +569,7 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
     d_shell_c[i] = 0;
  
   }
- 
+ */
 #ifdef DEBUG_FEEDBACK_STARSS_ACCUMULATE 
   CkPrintf("MethodFeedbackSTARSS: After refresh (block [%.3f, %.3f, %.3f]) -- beforeMass = %e, afterMass = %e, afterMass - beforeMass = %e\n", xm, ym, zm, beforeMass, afterMass, afterMass-beforeMass);
 #endif
@@ -656,8 +656,16 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
   enzo_float * vy_dep = (enzo_float *) field.values("velocity_y_deposit");
   enzo_float * vz_dep = (enzo_float *) field.values("velocity_z_deposit");
 
-  enzo_float * d_shell   = (enzo_float *) field.values("SN_shell_density");
+  enzo_float * d_dep_c  = (enzo_float *) field.values("density_deposit_copy");
+  enzo_float * te_dep_c = (enzo_float *) field.values("total_energy_deposit_copy");
+  enzo_float * ge_dep_c = (enzo_float *) field.values("internal_energy_deposit_copy");
+  enzo_float * mf_dep_c = (enzo_float *) field.values("metal_density_deposit_copy");
+  enzo_float * vx_dep_c = (enzo_float *) field.values("velocity_x_deposit_copy");
+  enzo_float * vy_dep_c = (enzo_float *) field.values("velocity_y_deposit_copy");
+  enzo_float * vz_dep_c = (enzo_float *) field.values("velocity_z_deposit_copy");
 
+  enzo_float * d_shell   = (enzo_float *) field.values("SN_shell_density");
+  enzo_float * d_shell_c   = (enzo_float *) field.values("SN_shell_density_copy");
   // initialize deposit fields as tiny_number -- if d_dep=0 you get NaNs in TransformComovingWithStar
 
   for (int i=0; i<mx*my*mz; i++){
@@ -669,6 +677,14 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
     vy_dep[i] = tiny_number;
     vz_dep[i] = tiny_number;
     d_shell[i] = tiny_number;
+
+    te_dep_c[i] = 0;    
+    ge_dep_c[i] = 0;
+    mf_dep_c[i] = 0;
+    vx_dep_c[i] = 0;
+    vy_dep_c[i] = 0;
+    vz_dep_c[i] = 0;
+    d_shell_c[i] = 0;
   }
 
   double cell_volume = hx*hy*hz;
