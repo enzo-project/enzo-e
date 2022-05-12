@@ -94,6 +94,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
   double rhounit = enzo_units->density();
   double munit = enzo_units->mass();
   double munit_solar = munit / cello::mass_solar;
+  double eunit = vunit*vunit; // specific energy units
 
   Particle particle = enzo_block->data()->particle();
   Field field = enzo_block->data()->field();
@@ -295,7 +296,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
           // NOTE: potential field is currently cleared at the end of EnzoMethodGravity.
           //       Can just access it here if we decide to either not clear or 
           //       make a copy (DEBUG_COPY_POTENTIAL).
-          double potential_i = cello::grav_constant * cell_mass*munit / (dx*lunit);
+          double potential_i = cello::grav_constant * cell_mass*munit / (dx*lunit) / eunit;
           if (! this->check_self_gravitating_new(total_energy[i], potential_i)) continue;
         }
 

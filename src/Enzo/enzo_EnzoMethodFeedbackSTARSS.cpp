@@ -899,7 +899,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   double lunit = enzo_units->length();
   double munit = enzo_units->mass();
   double tunit = enzo_units->time();
-  double eunit = munit*vunit*vunit; // energy
+  double eunit = munit*vunit*vunit; // energy units (NOTE: not specific energy) 
   double Tunit = enzo_units->temperature();
   
   const EnzoConfig * enzo_config = enzo::config();
