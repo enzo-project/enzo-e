@@ -823,7 +823,7 @@ public: // attributes
   double                     method_accretion_density_threshold;
   double                     method_accretion_max_mass_fraction;
   bool                       method_accretion_conserve_angular_momentum;
-  bool                       method_accretion_ang_mom_threshold_radius_cells;
+  double                     method_accretion_ang_mom_threshold_radius_cells;
   
   std::string                prolong_enzo_type;
   bool                       prolong_enzo_positive;

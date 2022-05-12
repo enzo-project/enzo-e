@@ -1645,8 +1645,11 @@ void EnzoConfig::read_method_accretion_(Parameters * p)
     ("Method:accretion:density_threshold",1.0e-6);
   method_accretion_max_mass_fraction = p->value_float
     ("Method:accretion:max_mass_fraction",0.25);
+  method_accretion_conserve_angular_momentum = p->value_logical
+    ("Method:accretion:conserve_angular_momentum",false);
   method_accretion_ang_mom_threshold_radius_cells = p->value_float
     ("Method:accretion:ang_mom_threshold_radius_cells",1.0e-6);
+
 }
 
 //----------------------------------------------------------------------
