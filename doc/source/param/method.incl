@@ -663,13 +663,14 @@ pm_deposit
 ----------
 
 :Parameter:  :p:`Method` : :p:`pm_deposit` : :p:`alpha`
-:Summary:    :s:`Compute potential at time t + alpha*dt`
+:Summary:    :s:`Compute the total gravitating density field at time t + alpha*dt`
 :Type:       :t:`float`
 :Default:    :d:`0.5`
 :Scope:     :z:`Enzo`
 
 :e:`Sets the factor defining at what time to deposit mass into the
-density_total field.  The default is 0.5, meaning t + 0.5*dt.`
+density_total field.  The default is 0.5, meaning density_total is
+computed at t + 0.5*dt.`
 
 ppm
 ---
