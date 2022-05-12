@@ -29,13 +29,13 @@
 
 #define DEBUG_SF_CRITERIA
 // #define DEBUG_SF_CRITERIA_EXTRA
+//#define DEBUG_STORE_INITIAL_PROPERTIES
 //-------------------------------------------------------------------
 
 EnzoMethodStarMakerSTARSS::EnzoMethodStarMakerSTARSS
 ()
   : EnzoMethodStarMaker()
 {
-  // To Do: Make the seed an input parameter
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
@@ -43,12 +43,6 @@ EnzoMethodStarMakerSTARSS::EnzoMethodStarMakerSTARSS
 
   ParticleDescr * particle_descr = cello::particle_descr();
 
-  //
-  // Refresh copies of all star particles on neighboring grids
-  //
-  //const int it = particle_descr->type_index("star");
-  //refresh->add_particle(it,true);
-  //refresh->all_particles_copy(true);
   return;
 }
 
@@ -73,6 +67,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
   // Loop through the grid and check star formation criteria
   // stochastically form stars if zone meets these criteria
 
+  // TODO: Make random seed an input parameter
   std::mt19937 mt(std::time(nullptr));
   int count = 0;
 
@@ -123,6 +118,16 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
   const int ia_vx = particle.attribute_index (it, "vx");
   const int ia_vy = particle.attribute_index (it, "vy");
   const int ia_vz = particle.attribute_index (it, "vz");
+
+  #ifdef DEBUG_STORE_INITIAL_PROPERTIES 
+    const int ia_m_0 = particle.attribute_index (it, "mass_0");
+    const int ia_x_0 = particle.attribute_index (it, "x_0");
+    const int ia_y_0 = particle.attribute_index (it, "y_0");
+    const int ia_z_0 = particle.attribute_index (it, "z_0");
+    const int ia_vx_0 = particle.attribute_index (it, "vx_0");
+    const int ia_vy_0 = particle.attribute_index (it, "vy_0");
+    const int ia_vz_0 = particle.attribute_index (it, "vz_0");
+  #endif
 
   // additional particle attributes
   const int ia_metal = particle.attribute_index (it, "metal_fraction");
@@ -506,6 +511,24 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
           density[i] *= scale;
           // rescale color fields too 
           this->rescale_densities(enzo_block, i, scale);
+
+          #ifdef DEBUG_STORE_INITIAL_PROPERTIES 
+            enzo_float * pmass0 = (enzo_float *) particle.attribute_array(it, ia_m_0 , ib);
+            enzo_float * px0    = (enzo_float *) particle.attribute_array(it, ia_x_0 , ib);
+            enzo_float * py0    = (enzo_float *) particle.attribute_array(it, ia_y_0 , ib);
+            enzo_float * pz0    = (enzo_float *) particle.attribute_array(it, ia_z_0 , ib);
+            enzo_float * pvx0   = (enzo_float *) particle.attribute_array(it, ia_vx_0, ib);
+            enzo_float * pvy0   = (enzo_float *) particle.attribute_array(it, ia_vy_0, ib);
+            enzo_float * pvz0   = (enzo_float *) particle.attribute_array(it, ia_vz_0, ib);
+
+            pmass0[io] = pmass[io];
+            px0 [io] = px[io];
+            py0 [io] = py[io];
+            pz0 [io] = pz[io];
+            pvx0[io] = pvx[io];
+            pvy0[io] = pvy[io];
+            pvz0[io] = pvz[io];
+          #endif
 
         } // end loop through particles created in this cell
 
