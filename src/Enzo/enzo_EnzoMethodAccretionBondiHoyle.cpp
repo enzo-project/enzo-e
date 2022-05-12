@@ -46,7 +46,7 @@ void EnzoMethodAccretionBondiHoyle::pup (PUP::er &p)
 void EnzoMethodAccretionBondiHoyle::compute (Block * block) throw()
 {
   if (enzo::simulation()->cycle() == enzo::config()->initial_cycle)
-    do_checks_();
+    do_checks_(block);
 
   // Only call compute_ if block is at highest refinement level.
   // Currently this method can only be used if refinement is turned off

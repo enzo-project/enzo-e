@@ -61,7 +61,7 @@ EnzoMethodAccretion::EnzoMethodAccretion
   // Check that ang_mom_threshold_radius_cells_ is between 0.0 and 0.5
   ASSERT("EnzoMethodAccretion::EnzoMethodAccretion()",
 	 "Method:accretion:ang_mom_threshold_radius_cells must be strictly greater "
-         "than 0.0 and strictly less than 0.5.",
+	 "than 0.0 and strictly less than 0.5.",
 	 ang_mom_threshold_radius_cells_ > 0.0 && ang_mom_threshold_radius_cells_ < 0.5);
 
   const int * ghost_depth = enzo::config()->field_ghost_depth;
@@ -241,7 +241,7 @@ double EnzoMethodAccretion::timestep ( Block *block) const throw()
   return std::numeric_limits<double>::max();
 }
 
-void EnzoMethodAccretion::do_checks_() throw()
+void EnzoMethodAccretion::do_checks_(const Block *block) throw()
 {
     // Check if merge_sinks method precedes accretion_compute method
     ASSERT("EnzoMethodAccretion",
@@ -264,6 +264,57 @@ void EnzoMethodAccretion::do_checks_() throw()
 	   "moment this means that cosmology can't be used in "
 	   "combination with accretion.",
 	   enzo::problem()->method_exists("vlct"));
+
+    // The accretion radius must be at least as large as half the
+    // diagonal width of a cell, to ensure that at least one cell
+    // center is always within the accretion zone.
+    // To check this, we compute the diagonal cell width divided by
+    // the minimum cell width. accretion_radius_cells_ must be at least
+    // half of this value.
+    // In addition, since accretion_radius_cells_ must be less that the
+    // minimum ghost depth, this value must be less that twice the
+    // minimum ghost depth.
+
+    // Get the cell widths
+    double hx, hy, hz;
+    block->cell_width(&hx, &hy, &hz);
+    const double min_cell_width = std::min(hx,std::min(hy,hz));
+
+    // Compute diagonal cell width divided by the minimum cell width,
+    // note that this ratio is the same at all refinement levels.
+    const double diagonal_over_minimum =
+      sqrt(hx * hx + hy * hy + hz * hz) / min_cell_width;
+
+    // Get the minimum ghost depth
+    const int * ghost_depth = enzo::config()->field_ghost_depth;
+    const int min_ghost_depth = std::min(ghost_depth[0],
+				       std::min(ghost_depth[1],ghost_depth[2]));
+
+    // Check that diagonal_over_minimum is less than twice the
+    // minimum ghost depth.
+    ASSERT2("EnzoMethodAccretion::EnzoMethodAccretion() ",
+	    "The diagonal cell width divided by the minimum "
+	    "cell width is %g, and the minimum ghost depth "
+	    "is %d. The former must be less than twice the "
+	    "latter. It is advised to adjust this by changing "
+	    "the dimensions of the root level mesh, via the "
+	    "Mesh:root_size parameter.",
+	    diagonal_over_minimum, min_ghost_depth,
+	    diagonal_over_minimum < 2 * min_ghost_depth);
+
+    // Check that diagonal_over_minimum is less than twice
+    // accretion_radius_cells_.
+    ASSERT2("EnzoMethodAccretion::EnzoMethodAccretion() ",
+	    "The diagonal cell width divided by the minimum "
+	    "cell width is %g, and accretion_radius_cells "
+	    "is %g. The former must be less than twice the "
+	    "latter. It is advised to adjust this either "
+	    "by changing the dimensions of the root level "
+	    "mesh, via the Mesh:root_size parameter, or by "
+	    "changing the accretion:accretion_radius_cells "
+	    "parameter",
+	    diagonal_over_minimum, accretion_radius_cells_,
+	    diagonal_over_minimum < 2.0 * accretion_radius_cells_);
 
     return;
 }

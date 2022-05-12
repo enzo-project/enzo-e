@@ -49,7 +49,7 @@ void EnzoMethodAccretionDensThresh::compute (Block * block) throw()
 {
 
   if (enzo::simulation()->cycle() == enzo::config()->initial_cycle)
-    do_checks_();
+    do_checks_(block);
 
   if (block->is_leaf()) {
     this->compute_(block);

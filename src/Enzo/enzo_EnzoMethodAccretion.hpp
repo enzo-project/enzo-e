@@ -67,7 +67,7 @@ protected:
   // methods
 
   // Checks to be performed at initial cycle
-  void do_checks_() throw();
+  void do_checks_(const Block* block) throw();
 
   // attributes
 
