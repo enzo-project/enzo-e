@@ -51,6 +51,8 @@ inline void operator|(PUP::er &p, chemistry_data &c){
  p | c.three_body_rate;
  p | c.cie_cooling;
  p | c.h2_optical_depth_approximation;
+ p | c.h2_charge_exchange_rate;
+ p | c.h2_h_cooling_rate;
  p | c.ih2co;
  p | c.ipiht;
  p | c.HydrogenFractionByMass;

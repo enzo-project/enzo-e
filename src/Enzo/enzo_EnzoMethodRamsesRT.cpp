@@ -90,6 +90,11 @@ EnzoMethodRamsesRT ::EnzoMethodRamsesRT(const int N_groups, const double clight)
     if (rank >= 3) refresh->add_field("flux_z_" + istring);   
   }
 
+  //TODO: Add specific fields rather than refreshing everything here
+  //      need to add chemistry fields and maybe ionization/heating rates
+  //
+  
+  refresh->add_all_fields();
   // Initialize Refresh object for after injection step 
   ir_injection_ = add_new_refresh_();
 
@@ -264,6 +269,7 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_fl
   double eunit = enzo_units->mass() * lunit*lunit / (tunit*tunit);
 
   int n = 10; // number of partitions for simpson's method
+              // TODO: Make this a parameter??
 
   //need to use lambda expression to pass in planck_function() function as a parameter
   //because member function in c++ are automatically attached to the `this` pointer,
@@ -304,6 +310,8 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_fl
    for (int j=0; j<chemistry_fields.size(); j++) {
 
      //TODO: Need to average sigma_ij over all stars in the simulation. See eq. B6-B8
+     //      Could be more computationally efficient in Enzo-E/Cello to average over
+     //      star particles in each block separately and leave it at that.
   
      // eq. B4 ----> int(sigma_nuj * N_nu dnu)/int(N_nu dnu)
      *(scalar.value( scalar.index("sigN_" + std::to_string(enzo_block->method_ramses_rt_igroup) 
@@ -485,7 +493,9 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
 #endif
       //TODO: Only call get_cross_section here every N cycles, where N is an input parameter.
       //      Also only call if igroup=0 so that it only gets called once
+      //
      
+      //TODO: Add flux to more than one cell. Will have to use refresh+accumulate to handle edge cases
 
       /*
       // initialize fluxes within a radius of one cell
@@ -768,6 +778,7 @@ void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo
   // Calculates photoionization and heating rates in each cell according to RAMSES-RT prescription
   // See pg. 14 of https://grackle.readthedocs.io/_/downloads/en/latest/pdf/ for relavent Grackle
   // parameters. 
+  // ionization -- first term of eq.
   // ionization rates should be in code_time^-1
   // heating rates should be in erg s^-1 cm^-3 
   // TODO: Do this calculation in either CGS or code units and then do necessary unit conversions
@@ -835,8 +846,9 @@ void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo
         double nHI = HI_density[i] * rhounit / mH; 
         double heating_rate = 0.0; 
         for (int j=0; j<3; j++) { //loop over species
-          double beta = get_beta(temperature[i]*Tunit, j); 
-          double ionization_rate = beta * e_density[i] * rhounit / mEl; // beta*n_e in s^-1
+          //double beta = get_beta(temperature[i]*Tunit, j); 
+          //double ionization_rate = beta * e_density[i] * rhounit / mEl; // beta*n_e in s^-1
+          double ionization_rate = 0.0;
           for (int igroup=0; igroup<enzo_config->method_ramses_rt_N_groups; igroup++) { //loop over groups
 
             std::string igroup_s = std::to_string(igroup);
@@ -863,7 +875,7 @@ void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo
         
         RT_heating_rate[i] = heating_rate / nHI; // * eunit/volunit/tunit; //put into code units
 #ifdef DEBUG_RATES
-        std::cout << "RT_heating_rate[i] = " << RT_heating_rate[i] << "; RT_HI_ionization_rate[i] = " << (ionization_rate_fields[0])[i] << std::endl;
+        std::cout << "RT_heating_rate[i] = " << RT_heating_rate[i] << " erg/cm^3/s; RT_HI_ionization_rate[i] = " << (ionization_rate_fields[0])[i] << " s^-1" << std::endl;
 #endif 
       }
     }
@@ -1383,7 +1395,7 @@ void EnzoBlock::p_method_ramses_rt_solve_transport_eqn()
 
   // sum group fields and end compute()
   // TODO: Make tracking integrated group fields optional?
-  // Move compute_done() call to after chemistry step once that's started 
+   
   method->sum_group_fields(this); 
   this->compute_done(); 
 }

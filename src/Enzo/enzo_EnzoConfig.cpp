@@ -1547,6 +1547,14 @@ void EnzoConfig::read(Parameters * p) throw()
       ("Method:grackle:h2_optical_depth_approximation",
         method_grackle_chemistry->h2_optical_depth_approximation);
 
+    method_grackle_chemistry->h2_charge_exchange_rate = p->value_integer
+      ("Method:grackle:h2_charge_exchange_rate",
+        method_grackle_chemistry->h2_charge_exchange_rate);
+
+    method_grackle_chemistry->h2_h_cooling_rate = p->value_integer
+      ("Method:grackle:h2_h_cooling_rate",
+        method_grackle_chemistry->h2_h_cooling_rate);
+
     method_grackle_chemistry->photoelectric_heating = p->value_integer
       ("Method:grackle:photoelectric_heating",
         method_grackle_chemistry->photoelectric_heating);
