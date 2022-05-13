@@ -491,6 +491,9 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 
           // TODO: Make this an input parameter
           double max_velocity = 150e5/vunit; 
+          if (std::abs(vx) > max_velocity) vx = vx/std::abs(vx) * max_velocity; 
+          if (std::abs(vy) > max_velocity) vy = vy/std::abs(vy) * max_velocity;
+          if (std::abs(vz) > max_velocity) vz = vz/std::abs(vz) * max_velocity;
 
           pvx[io] = vx;
           pvy[io] = vy;
