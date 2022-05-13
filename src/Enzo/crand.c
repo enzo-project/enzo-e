@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "cnames.h"
+#include "enzo_defines.hpp"
 
 int curr_rand_seed = 0;
 
@@ -26,6 +27,10 @@ double randomnr()
 int crandseed()
 {
   return curr_rand_seed;
+}
+void FORTRAN_NAME(setcrandseed)(int * rand_seed)
+{
+  curr_rand_seed = *rand_seed;
 }
 
 void seedrang( int* ss )

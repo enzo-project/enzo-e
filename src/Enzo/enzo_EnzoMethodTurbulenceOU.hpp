@@ -48,7 +48,7 @@ public: // interface
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodTurbulenceOU);
-  
+
   /// Charm++ PUP::able migration constructor
   EnzoMethodTurbulenceOU (CkMigrateMessage *m)
     : Method (m)
@@ -56,7 +56,7 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-  
+
   /// Apply the method to advance a block one timestep 
   virtual void compute( Block * block) throw();
 
@@ -87,7 +87,11 @@ private: // attributes
   double totemp_;
   bool update_solution_;
 
-  // True only on first block's call on a node each cycle
+  int is_NModes_;
+  int is_Ndims_;
+
+  // True only on first block's call on a node each cycle to avoid
+  // excessive calls
   static int iupdate_phases_;
 
 };

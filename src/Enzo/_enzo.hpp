@@ -161,6 +161,8 @@ extern "C" {
 #include "enzo_EnzoBlock.hpp"
 
 #include "enzo_IoEnzoBlock.hpp"
+#include "enzo_IoEnzoSimulation.hpp"
+
 #include "enzo_IoEnzoReader.hpp"
 #include "enzo_IoEnzoWriter.hpp"
 

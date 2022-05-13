@@ -15,10 +15,10 @@ C     **********************************************************************
      &     cello_mach,
      &     cello_read_sol,
      &     cello_sol_weight)
-      
+
       implicit none
       include 'turbforcingOU.h'
-C     
+C
       integer :: cello_is_root
       integer :: cello_rank
       real*8 :: cello_domain_size(3)
@@ -32,12 +32,12 @@ C
       integer :: cello_read_sol
       real*8 :: cello_sol_weight
       integer :: modes_input
-C     
+C
       real*8 :: Mach, gamma, P0, rho0, c_s, Edot
       real*8 :: kmax, kmin, boxSize(3), kx, ky, kz, kk, kc, amp
       integer :: ikmax(3), ikx, iky, ikz, N, i, j
       real*8 :: RandomPhase, argx(3)
-      real*8, parameter :: PI_2 = 3.14159265358979323846d0*2.d0 
+      real*8, parameter :: PI_2 = 3.14159265358979323846d0*2.d0
       integer :: myid, seed, modesPerK
       logical :: apply_injection_rate
 
@@ -56,14 +56,14 @@ C
          boxVolume = boxSize(1) * boxSize(2)
       else
          stop "only dim=2 or dim=3 is supported"
-      endif        
+      endif
 
       Edot = cello_injection_rate
       SolWeight = cello_sol_weight
       Mach = cello_mach
       kmin = cello_kfi
       kmax = cello_kfa
-      
+
       P0 = 1.d0
       totTime = 0d0
       rho0 = 1.d0
@@ -78,7 +78,7 @@ C
 
       ikmax(1:3) = nint(boxSize(1:3)*(kmax/PI_2))
       if (Ndims.eq.2) ikmax(3) = 0
-      
+
       NModes = 0
       do ikx = 0, ikmax(1)
          kx = PI_2*dble(ikx)/boxSize(1)
@@ -86,30 +86,30 @@ C
             ky = PI_2*dble(iky)/boxSize(2)
             do ikz = 0, ikmax(3)
                kz = PI_2*dble(ikz)/boxSize(3)
-               
+
                kk = sqrt(kx*kx + ky*ky + kz*kz)
-               
+
                if((kk.ge.kmin).and.(kk.le.kmax)) then
                   NModes = NModes + modesPerK
                endif
-               
+
             enddo
          enddo
       enddo
 
       allocate(Mode(3,NModes))
       allocate(OUPhase(2,3,NModes), Ampl(NModes), Phase(2,3,NModes))
-      
+
       if (Ndims.eq.3) then
-         WeightNorm = 
+         WeightNorm =
      &        1.d0/sqrt(1.d0-2.d0*SolWeight+3.d0*SolWeight**2)
       else
-         WeightNorm = 
+         WeightNorm =
      &        1.d0/sqrt(1.d0-2.d0*SolWeight+2.d0*SolWeight**2)
       endif
 
       WeightNorm = WeightNorm * 2.d0 / sqrt(dble(NModes))
-      
+
       N = 0
       do ikx = 0, ikmax(1)
          kx = PI_2*dble(ikx)/boxSize(1)
@@ -117,9 +117,9 @@ C
             ky = PI_2*dble(iky)/boxSize(2)
             do ikz = 0, ikmax(3)
                kz = PI_2*dble(ikz)/boxSize(3)
-               
+
                kk = sqrt(kx*kx + ky*ky + kz*kz)
-               
+
                if((kk.ge.kmin).and.(kk.le.kmax)) then
                   amp = 1.d0 - 4.d0*(kk-kc)**2/(kmax-kmin)**2
 
@@ -128,7 +128,7 @@ C
                   Mode(1,N) = kx
                   Mode(2,N) = ky
                   Mode(3,N) = kz
-                  
+
                   N = N + 1
                   Ampl(N) = amp
                   Mode(1,N) = kx
@@ -149,7 +149,7 @@ C
                      Mode(3,N) = -kz
                   endif
                endif
-               
+
             enddo
          enddo
       enddo
@@ -168,7 +168,7 @@ C         print *, 'cello_read_sol = ',cello_read_sol
 C      endif
 
       if (cello_read_sol .ne. 0) then
-         open (42, file='OUturb.bin', form='UNFORMATTED', 
+         open (42, file='OUturb.bin', form='UNFORMATTED',
      &        access='STREAM', action='read')
          read (42) modes_input
          if (modes_input .ne. NModes) then
@@ -188,14 +188,14 @@ C      endif
                OUPhase(2,i,j) = RandomPhase()*OUVar
             enddo
          enddo
-         
+
          call calcPhases()
       endif
-      
+
       end subroutine
 
 
-C     **********************************************************************      
+C     **********************************************************************
       subroutine saveTurbForcingOUState(myid, nameSuffix)
       implicit none
       include 'turbforcingOU.h'
@@ -225,33 +225,33 @@ C     **********************************************************************
       real*8 function RandomPhase()
       implicit none
       real*8 r0, r1, randomnr
-      real*8, parameter :: PI_2 = 3.14159265358979323846d0*2.d0 
-      
+      real*8, parameter :: PI_2 = 3.14159265358979323846d0*2.d0
+
       r0 = randomnr()
       r1 = randomnr()
-      
+
       RandomPhase = sqrt(-2.d0*log(r0))*cos(PI_2*r1)
-      end function 
+      end function
 C     **********************************************************************
-      subroutine calcPhases()   
+      subroutine calcPhases()
       implicit none
       include 'turbforcingOU.h'
       integer :: i, j
       real*8 :: ka, kb, kk, kk1, diva, divb, curla, curlb
-      
+
       do j = 1, NModes
          ka = 0d0
          kb = 0d0
          kk = 0d0
-         
+
          do i = 1, Ndims
             kk = kk + Mode(i,j)**2
             ka = ka + Mode(i,j)*OUPhase(2,i,j)
             kb = kb + Mode(i,j)*OUPhase(1,i,j)
          enddo
-         
+
          kk1 = 1.d0/kk
-         
+
          do i = 1, Ndims
             diva = Mode(i,j)*ka*kk1
             divb = Mode(i,j)*kb*kk1
@@ -260,17 +260,17 @@ C     **********************************************************************
             Phase(1,i,j) = SolWeight*curla + (1.d0 - SolWeight)*divb
             Phase(2,i,j) = SolWeight*curlb + (1.d0 - SolWeight)*diva
          enddo
-         
-      enddo      
-      
+
+      enddo
+
       end subroutine
 C     **********************************************************************
-      subroutine updatePhases()   
+      subroutine updatePhases()
       implicit none
       include 'turbforcingOU.h'
       real*8 :: damping, dfact, RandomPhase
-      integer :: i, j, n
-      
+      integer :: i, j, n,crandseed
+
       damping = exp(-DtFreq/TDecay)
       dfact = sqrt(1.d0 - damping**2)
       do j = 1, NModes
@@ -281,7 +281,67 @@ C     **********************************************************************
             enddo
          enddo
       enddo
-      end subroutine      
+      print*, 'randseed=',crandseed()
+      end subroutine
+C     **********************************************************************
+      subroutine cello_turbou_state_size(n_real_state,n_integer_state)
+      implicit none
+      include 'turbforcingOU.h'
+      integer :: n_real_state, n_integer_state
+      n_real_state = 1+2*(NModes*2*3)
+      n_integer_state = 2
+
+      end subroutine
+C     **********************************************************************
+      subroutine cello_get_turbou_state(real_state,integer_state)
+      implicit none
+      integer num_modes
+      real*8 :: real_state(2*3*num_modes)
+      integer :: integer_state(*),crandseed
+      include 'turbforcingOU.h'
+      integer i,j,k,n
+
+      integer_state(1) = NModes
+      integer_state(2) = crandseed()
+
+      k=1
+      real_state(k) = totTime
+      k=k+1
+      do j = 1, NModes
+         do i = 1, 3
+            do n = 1, 2
+               real_state(k) = OUPhase(n,i,j)
+               real_state(k+1) = Phase(n,i,j)
+               k=k+2
+            enddo
+         enddo
+      enddo
+      end subroutine
+C     **********************************************************************
+      subroutine cello_put_turbou_state(real_state,integer_state)
+      implicit none
+      integer num_modes
+      real*8 :: real_state(2*3*num_modes)
+      integer :: integer_state(*)
+      include 'turbforcingOU.h'
+      integer i,j,k,n
+
+      NModes = integer_state(1)
+      call setcrandseed (integer_state(2))
+
+      k=1
+      TotTime = real_state(k)
+      k=k+1
+      do j = 1, NModes
+         do i = 1, 3
+            do n = 1, 2
+               OUPhase(n,i,j) = real_state(k)
+               Phase  (n,i,j) = real_state(k+1)
+               k=k+2
+            enddo
+         enddo
+      enddo
+      end subroutine
 C     **********************************************************************
 c     3D Turbulent forcing source term
 c     Updates res:    res = res + source*dt
@@ -339,8 +399,8 @@ c***********************************************************************
       real*8 :: rho, time, dt, dumx, acc(3), da(3), kr, de
       logical :: update_sol, apply_injection_rate
       real*8 :: timeUpdate
-      
-      if(cello_apply_forcing .eq. 0) return 
+
+      if(cello_apply_forcing .eq. 0) return
       apply_injection_rate = (cello_apply_injection_rate .ne. 0)
 
       ol2 = cello_olap/2
@@ -348,12 +408,11 @@ c***********************************************************************
       if (nk.eq.1) ol2k = 0
 
       timeUpdate = (floor(time / DtFreq)+1)*DtFreq
-      
+
       if ( cello_update_phases.ne.0. ) then
          totTime = totTime + dt
          if ( (time       .le. timeUpdate) .and.
      &        (timeUpdate .lt. time + dt)) then
-            print*, 'Updating phases'
             call updatePhases()
             call calcPhases()
             totTime = totTime - DtFreq
@@ -364,14 +423,14 @@ c***********************************************************************
       do k=1,nk
          do j=1,nj
             do i=1,ni
-               
-               acc = 0d0        
+
+               acc = 0d0
                do m=1, NModes
                   kr = 0d0
                   do dir=1,3
                      kr = kr + Mode(dir,m)*grid(dir,i,j,k)
                   enddo
-                  
+
                   acc(1:3) = acc(1:3) + Ampl(m)*( Phase(1,1:3,m)*cos(kr) -
      &                 Phase(2,1:3,m)*sin(kr) )
                enddo
@@ -381,7 +440,7 @@ c***********************************************************************
                if ((k.ge.1+ol2k).and.(k.le.nk-ol2k).and.
      &              (j.ge.1+ol2).and.(j.le.nj-ol2).and.
      &              (i.ge.1+ol2).and.(i.le.ni-ol2)) then
-                  rho = field_density(i,j,k) 
+                  rho = field_density(i,j,k)
                   r_gv(1:3) = r_gv(1:3) + acc*rho
                   r_gv(4) = r_gv(4) + rho
                endif
@@ -420,14 +479,14 @@ c     jac         - jacobian
       real*8 :: field_momentum_y(mx,my,mz)
       real*8 :: field_momentum_z(mx,my,mz)
       real*8 :: field_jacobian(mx,my,mz)
-      real*8 :: wk(3,mx,my,mz) 
+      real*8 :: wk(3,mx,my,mz)
       real*8 :: cello_injection_rate
       logical :: update_sol, apply_injection_rate
       real*8 :: r_gv(4), r_av(2)
 
       real*8 :: da(3), acc(3), Edot
       integer ol2, ol2k
-C     
+C
 C     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 C     force total impulse to zero using reduction r_gv
 C     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -440,11 +499,11 @@ C     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
             enddo
          enddo
       enddo
-      
+
       apply_injection_rate = (cello_apply_injection_rate .ne. 0)
 
       if (apply_injection_rate) then
-         
+
 C     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 C     compute r_av reduction
 C     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -527,17 +586,17 @@ C======================================================================
       real*8 :: resid_momentum_z(mx,my,mz)
       real*8 :: resid_energy(mx,my,mz)
       real*8 :: dt
-      real*8 :: field_temperature(mx,my,mz), wk(3,mx,my,mz) 
+      real*8 :: field_temperature(mx,my,mz), wk(3,mx,my,mz)
       real*8 :: turbAcc(4, mx,my,mz)
       real*8 :: cello_injection_rate
       real*8 :: cello_totemp
       logical :: update_sol, apply_injection_rate
       real*8 :: r_av(2)
-      
+
       real*8 :: deTurb, rho, du(3), Acorr, acc(3), de, Edot, gamma, E0
       real*8 :: gm1, hc_alpha, hc_sigma, totemp
       integer nd1, cooling_term
-      
+
       apply_injection_rate = (cello_apply_injection_rate .ne. 0)
 
       if (apply_injection_rate) then
@@ -557,8 +616,8 @@ C     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 C     use computed Acorr
 C     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
       cooling_term = cello_cooling_term
-      
-      if (cooling_term.eq.-1) then 
+
+      if (cooling_term.eq.-1) then
 ! backwards compatibility for "apply_cooling" option
          if (cello_apply_cooling .eq. 0) then
             cooling_term = 0
@@ -577,12 +636,12 @@ C     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
                rho = field_density(i,j,k)
                if (Ndims.eq.2) then
                   deTurb = dot_product(du(1:Ndims),du(1:Ndims))*
-     &                 0.5d0*rho + 
+     &                 0.5d0*rho +
      &                 (field_momentum_x(i,j,k) * du(1) +
      &                 field_momentum_y(i,j,k) * du(2))
                else if (Ndims.eq.3) then
                   deTurb = dot_product(du(1:Ndims),du(1:Ndims))*
-     &                 0.5d0*rho + 
+     &                 0.5d0*rho +
      &                 (field_momentum_x(i,j,k) * du(1) +
      &                 field_momentum_y(i,j,k) * du(2) +
      &                 field_momentum_z(i,j,k) * du(3))
@@ -605,7 +664,7 @@ C     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
             enddo
          enddo
       enddo
-      
+
       if(update_sol) then
          field_density = field_density + resid_density
          field_momentum_x = field_momentum_x + resid_momentum_x
@@ -617,13 +676,13 @@ C     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
       endif
 
       contains
-c     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+c     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       real*8 function solveQuadEquation(a, b, c)
       real*8 :: a, b, c, sd
       sd = sqrt(b * b - 4 * a * c)
       solveQuadEquation = (sd - b) / (2.d0 * a)
       end function
-c     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+c     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       real*8 function addCooling(deTurb, rho, E, temp)
       external cooling_F2, cooling_F6, cooling_F40
       integer, parameter :: iTask = 1, iOpt = 0, NRW = 32, NIW = 21
@@ -634,10 +693,10 @@ c     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
       select case (cooling_term)
       case (0)
-c     No cooling        
+c     No cooling
          addCooling = deTurb
       case (1)
-c     Empiric cooling formula        
+c     Empiric cooling formula
          T = temp*2.d3          ! Convert to SI
 
          addCooling = deTurb - dt * ngas * rho*
@@ -690,7 +749,7 @@ c     Stiff version of case 3 => use ODE solver (for testing)
             iState = 2
             GOTO 040
          ENDIF
-         addCooling = Y(1) - E 
+         addCooling = Y(1) - E
 !     print *, IW(11), addCooling,
 !     &  (E0 +  deTurb/(dt * hc_alpha) - E)*(1.0 - exp(-hc_alpha * dt))
       case (5)
@@ -723,7 +782,7 @@ c     Stiff version of case 5 => use ODE solver
       end select
 
       end function
-c     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+c     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       end subroutine
 C     **********************************************************************
       subroutine cooling_F2(NEQ, tm, Y, Ydot)
@@ -773,4 +832,4 @@ C     **********************************************************************
       hc_alpha = Y(4)
 
       Ydot(1) = deTurbDot - hc_alpha  * (Y(1) - E0)
-      end subroutine      
+      end subroutine

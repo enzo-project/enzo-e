@@ -59,6 +59,7 @@ class EnzoUnits;
 namespace enzo {
   EnzoProblem *             problem();
   EnzoSimulation *          simulation();
+  IoEnzoSimulation *        io_simulation();
   const EnzoFactory *       factory();
   EnzoPhysicsCosmology *    cosmology();
   const EnzoMethodGrackle * grackle_method();

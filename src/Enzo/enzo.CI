@@ -73,6 +73,7 @@ module enzo {
   PUPable EnzoInitialTurbulenceMhdIT;
 
   PUPable IoEnzoBlock;
+  PUPable IoEnzoSimulation;
 
   PUPable EnzoRefineShock;
   PUPable EnzoRefineParticleMass;

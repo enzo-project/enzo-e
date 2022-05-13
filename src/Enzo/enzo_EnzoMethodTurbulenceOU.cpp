@@ -10,7 +10,6 @@
 #include "enzo.hpp"
 #include "charm_enzo.hpp"
 
-#define CALL_FORTRAN
 // #define DEBUG_FIELDS
 
 #ifdef DEBUG_FIELDS
@@ -54,7 +53,7 @@ EnzoMethodTurbulenceOU::EnzoMethodTurbulenceOU
  bool apply_forcing,
  bool apply_injection_rate,
  int cooling_term,
- double hc_alpha, 
+ double hc_alpha,
  double hc_sigma,
  double injection_rate,
  double kfi,
@@ -102,7 +101,7 @@ EnzoMethodTurbulenceOU::EnzoMethodTurbulenceOU
   refresh->add_field ("work_6");
 
   // Call fortran initializer
-  
+
   double domain_size[3] =
     { domain_upper[0]-domain_lower[0],
       domain_upper[1]-domain_lower[1],
@@ -112,7 +111,7 @@ EnzoMethodTurbulenceOU::EnzoMethodTurbulenceOU
   int rank = cello::rank();
   int iapply_injection_rate = apply_injection_rate_ ? 1 : 0;
   int iread_sol = read_sol_ ? 1 : 0;
-#ifdef CALL_FORTRAN    
+
   FORTRAN_NAME(cello_init_turbulence_ou)
     (&is_root,                  // (*)
      &rank,                     // (*)
@@ -126,7 +125,42 @@ EnzoMethodTurbulenceOU::EnzoMethodTurbulenceOU
      &mach_,                    // (*)
      &iread_sol,                // (*)
      &sol_weight_);             // (*)
-#endif  
+
+  // Save phase state in EnzoSimulation so behavior after checkpoint/restart
+  // are consistent
+  enzo::simulation()->get_turbou_state();
+}
+
+//----------------------------------------------------------------------
+
+void EnzoSimulation::get_turbou_state()
+{
+  // Create scalar variables for storing state for checkpoint/restart
+
+  // Allocate state arrays if needed
+  if (turbou_real_state_.size() == 0) {
+    int n_size_double, n_size_int;
+    FORTRAN_NAME(cello_turbou_state_size)(&n_size_double,&n_size_int);
+    turbou_real_state_.resize(n_size_double);
+    turbou_int_state_.resize(n_size_int);
+  }
+
+  // Save state to arrays
+  FORTRAN_NAME(cello_get_turbou_state)
+    (turbou_real_state_.data(), turbou_int_state_.data());
+}
+
+//----------------------------------------------------------------------
+
+void EnzoSimulation::put_turbou_state()
+{
+  // Create scalar variables for storing state for checkpoint/restart
+
+  // Save arrays to state
+  if (turbou_real_state_.size() > 0) {
+    FORTRAN_NAME(cello_put_turbou_state)
+      (turbou_real_state_.data(), turbou_int_state_.data());
+  }
 }
 
 //----------------------------------------------------------------------
@@ -163,7 +197,7 @@ void EnzoMethodTurbulenceOU::compute ( Block * block) throw()
 {
   long double r_gvld1[5] = {4.0, 0.0, 0.0, 0.0, 0.0};
   if (block->is_leaf()) {
-#ifdef CALL_FORTRAN    
+
     Field field = block->data()->field();
     int mx,my,mz;
     int nx,ny,nz;
@@ -242,10 +276,14 @@ void EnzoMethodTurbulenceOU::compute ( Block * block) throw()
        &olap_,
        r_gv
        );
+
+    // Save Fortran phase and random number state for checkpointing
+    if (EnzoMethodTurbulenceOU::iupdate_phases_ == 1)
+      enzo::simulation()->put_turbou_state();
+
     EnzoMethodTurbulenceOU::iupdate_phases_ = 0;
 
     FIELD_STATS("density force stop ",field_density,mx,my,mz,gx,gy,gz);
-#endif    
 
     for (int i=0; i<4; i++) r_gvld1[i+1] = r_gv[i];
 
@@ -301,7 +339,6 @@ void EnzoMethodTurbulenceOU::compute_shift
 
   if (enzo_block->is_leaf()) {
   
-#ifdef CALL_FORTRAN    
     double * w;
     int iupdate_sol = update_solution_ ? 1 : 0;
     int iapply_cooling = apply_cooling_ ? 1 : 0;
@@ -409,7 +446,7 @@ void EnzoMethodTurbulenceOU::compute_shift
     FIELD_STATS("work_2 shift stop ",field_work_2,mx,my,mz,gx,gy,gz);
     FIELD_STATS("work_3 shift stop ",field_work_3,mx,my,mz,gx,gy,gz);
     delete [] array_work;
-#endif  
+
   }
 
   Field field = enzo_block->data()->field();
@@ -515,7 +552,6 @@ void EnzoMethodTurbulenceOU::compute_update
   for (int i=0; i<n; i++) r_avld0[i] = data[id++];
   delete msg;
 
-#ifdef CALL_FORTRAN    
   double dt   = cello::simulation()->dt();
   int iupdate_sol = update_solution_ ? 1 : 0;
   int iapply_cooling = apply_cooling_ ? 1 : 0;
@@ -658,7 +694,6 @@ void EnzoMethodTurbulenceOU::compute_update
   FIELD_STATS("momentum_y update stop ",field_momentum_y,mx,my,mz,gx,gy,gz);
   FIELD_STATS("momentum_z update stop ",field_momentum_z,mx,my,mz,gx,gy,gz);
   FIELD_STATS("energy update stop ",field_energy,mx,my,mz,gx,gy,gz);
-#endif
 
   // revert to code units
   for (int iz=0; iz<mz; iz++) {

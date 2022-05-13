@@ -64,6 +64,15 @@ extern "C" void FORTRAN_NAME(cello_init_turbulence_ou)
    int * read_sol,
    double * sol_weight);
 
+extern "C" int FORTRAN_NAME(cello_turbou_state_size)
+  (int * n_buffer_real, int * n_buffer_int);
+
+extern "C" void FORTRAN_NAME(cello_get_turbou_state)
+  (double * buffer_real, int * buffer_int);
+
+extern "C" void FORTRAN_NAME(cello_put_turbou_state)
+  (double * buffer_real, int * buffer_int);
+
 extern "C" void FORTRAN_NAME(turbforceou)
   (int * mx, int * my, int * mz,
    int * ni, int * nj, int * nk,

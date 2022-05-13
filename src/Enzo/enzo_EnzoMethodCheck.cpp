@@ -404,7 +404,7 @@ FileHdf5 * IoEnzoWriter::file_open_
 
 void IoEnzoWriter::file_write_hierarchy_()
 {
-  IoSimulation io_simulation = (cello::simulation());
+  IoEnzoSimulation io_simulation (enzo::simulation());
 
   for (size_t i=0; i<io_simulation.meta_count(); i++) {
 
