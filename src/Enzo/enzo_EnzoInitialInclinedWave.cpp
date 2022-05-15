@@ -336,52 +336,27 @@ protected:
 
 //----------------------------------------------------------------------
 
-class CircAlfvenVelocityInit : public VectorInit {
+template<class F>
+class WrapperVectorInit : public VectorInit{
+
 public:
-  CircAlfvenVelocityInit(double v0,
-			 double lambda)
-    :VectorInit(),
-     v0_(v0),
-     lambda_(lambda)
+  WrapperVectorInit(F functor)
+    : functor_(functor)
   {}
 
   void operator() (double x0, double x1, double x2,
-		   double &v0, double &v1, double &v2)
-  {
-    v0 = v0_;
-    v1 = 0.1 * std::sin(2. * cello::pi * x0/ lambda_);
-    v2 = 0.1 * std::cos(2. * cello::pi * x0/ lambda_);
-  }
+                   double &v0, double &v1, double &v2)
+  { functor_(x0,x1,x2, v0,v1,v2); }
 
 protected:
-  // velocity along axis 0
-  double v0_;
-  // wavelength
-  double lambda_;
+  F functor_;
 };
 
 //----------------------------------------------------------------------
 
-class CircAlfvenVectorPotentialInit : public VectorInit {
-public:
-  CircAlfvenVectorPotentialInit(double lambda)
-    :VectorInit(),
-     lambda_(lambda)
-  {}
-
-  void operator() (double x0, double x1, double x2,
-		   double &v0, double &v1, double &v2)
-  {
-    v0 = (x2 * 0.1 * std::sin(2. * cello::pi * x0/ lambda_) -
-	  x1 * 0.1 * std::cos(2. * cello::pi * x0/ lambda_));
-    v1 = 0.0;
-    v2 = x1;
-  }
-
-protected:
-  // wavelength
-  double lambda_;
-};
+template<class F>
+static WrapperVectorInit<F>* alloc_vector_init_wrapper_(F &functor)
+{ return new WrapperVectorInit<F>(functor); }
 
 //----------------------------------------------------------------------
 
@@ -572,8 +547,6 @@ static void setup_fluid_(Block *block, HydroInitPack hydro_init_pack,
                          MeshPos &pos, int mx, int my, int mz, double gamma)
 {
   Field field = block->data()->field();
-
-  volatile HydroInitPack hydro_init_pack_cpy = hydro_init_pack;
 
   EFlt3DArray density, specific_total_energy;
   EnzoFieldArrayFactory array_factory(block);
@@ -805,11 +778,17 @@ HydroInitPack EnzoInitialInclinedWave::prepare_jeans_initializers_
   ASSERT("EnzoInitialInclinedWave::prepare_jeans_initializers_",
          "The gravity method must be used with the jeans wave.",
          enzo::problem()->method_exists("gravity"));
+  ASSERT("EnzoInitialInclinedWave::prepare_jeans_initializers_",
+         "There currently isn't support for specifying a velocity with a "
+         "Jeans wave wave",
+         pos_vel_);
 
   // this was originally based on the description in section 4.2 of Mullen,
-  // Hanawa, & Gammie (2021). Unfortunately we encountered some problems with
-  // initializing the velocity. We had more luck taking the initial velocity
-  // frp,Athena
+  // Hanawa, & Gammie (2021). Unfortunately, we encountered problems with
+  // implementing those equations (we have subsequently confirmed that the
+  // problem was a transcription error related to initializing pressure).
+  // The current implementation uses the same initial conditions as Athena and
+  // (earlier versions of) Athena++
   double lambda = lambda_;
   double wave_number = (2*cello::pi/lambda);
 
@@ -837,12 +816,12 @@ HydroInitPack EnzoInitialInclinedWave::prepare_jeans_initializers_
   // -> lambda > lambda_J, the Jeans wave is unstable
   //
   // to initialize the problem, we need: sqrt(|angular_freq^2| / wave_number^2)
-  // -> this is essentially just just the magnitude of the group velocity
-  //    (recall: v_group = angular_freq / wave_number)
-  // -> v_group = sqrt(|cs_0^2 * (1 - (lambda / lambda_J)^2)|). Recall that
+  // -> this is essentially just just the magnitude of the phase velocity
+  //    (recall: v_phase = angular_freq / wave_number)
+  // -> v_phase = sqrt(|cs_0^2 * (1 - (lambda / lambda_J)^2)|). Recall that
   //    our choice of initial condtions give: cs_0^2 = 1
 
-  double v_group = std::sqrt(std::fabs(1 - (lambda*lambda) / lambda_J_sq));
+  double v_phase = std::sqrt(std::fabs(1 - (lambda*lambda) / lambda_J_sq));
   if (is_root_block) {
     double angular_freq_sq =
       wave_number*wave_number * (1.0 - (lambda*lambda)/ lambda_J_sq);
@@ -854,11 +833,11 @@ HydroInitPack EnzoInitialInclinedWave::prepare_jeans_initializers_
   }
 
   // the modern version of Athena++ uses the following initializer. When the
-  // test was originally introduced to Athena++ (for use with their Multigrid
-  // gravity solver), the amplitude^2 term was not present. The amplitude^2
-  // term also was not present in the C-version of Athena. The amplitude^2 term
-  // only got introduced to Athena++ in a commit related to introducing a FFT
-  // gravity solver.
+  // Jeans wave test was originally introduced to Athena++ (for use with their
+  // Multigrid gravity solver), the amplitude^2 term was not present. The
+  // amplitude^2 term also was not present in the C-version of Athena. The
+  // amplitude^2 term only got introduced to Athena++ in a commit related to
+  // introducing a FFT gravity solver.
   //
   //  double amplitude = amplitude_;
   //  Rotation rot(alpha_, beta_);
@@ -884,7 +863,7 @@ HydroInitPack EnzoInitialInclinedWave::prepare_jeans_initializers_
 
 
   // coefficient for momentum component along axis 0
-  double mom0_coef = (stable_wave) ? 0.0 : density_bkg * v_group;
+  double mom0_coef = (stable_wave) ? 0.0 : density_bkg * v_phase;
   VectorInit* momentum_init = new RotatedVectorInit
     (alpha_, beta_, new LinearVectorInit(0.0, 0.0, 0.0,
                                          mom0_coef, 0.0, 0.0,
@@ -915,10 +894,21 @@ HydroInitPack EnzoInitialInclinedWave::prepare_MHD_initializers_
            "polarized Alfven wave with a negative velocity.",
            pos_vel_);
 
-    // construct vector potential initializer
+    // Construct vector potential initializer. This was defined such that
+    // B0 = 1.0, B1 = 0.1 * sin(2*pi*x0/lambda), B2 = 0.1 * cos(2*pi*x0/lambda)
+    auto a_func_ = [=](double x0, double x1, double x2,
+                       double &A0, double &A1, double &A2)
+      {
+        A0 = (x2 * 0.1 * std::sin(2. * cello::pi * x0/ lambda_) -
+              x1 * 0.1 * std::cos(2. * cello::pi * x0/ lambda_));
+        A1 = 0.0;
+        A2 = x1;
+      };
     *a_init = new RotatedVectorInit(alpha_,beta_,
-				    new CircAlfvenVectorPotentialInit(lambda));
+                                    alloc_vector_init_wrapper_(a_func_));
 
+    // construct hydro initializers
+    //
     // it's important that we define the hydro initializers in primitive form
     // - doing so let's us force pressure to be 0.1 and then dynamically
     //   compute the total energy based on the already initialized Bfield
@@ -931,11 +921,21 @@ HydroInitPack EnzoInitialInclinedWave::prepare_MHD_initializers_
     //   isn't ideal since Gardiner & Stone (2008) explicitly states that the
     //   truncation error of B_perp**2/P is important
 
-    // construct hydro initializers
+    // density is 1.0 everywhere
     ScalarInit* rho_init = new LinearScalarInit(1.0,0.0,0.0,lambda);
-    VectorInit* velocity_init = new RotatedVectorInit
-      (alpha_,beta_, new CircAlfvenVelocityInit(0.0, lambda));
+    // pressure is 0.1 everywhere
     ScalarInit* pressure_init = new LinearScalarInit(0.1,0.0,0.0,lambda);
+
+    auto vel_func_ = [=](double x0, double x1, double x2,
+                         double &vel_0, double &vel_1, double &vel_2)
+      {
+        vel_0 = 0.0;
+        vel_1 = 0.1 * std::sin(2. * cello::pi * x0/ lambda);
+        vel_2 = 0.1 * std::cos(2. * cello::pi * x0/ lambda);
+      };
+    VectorInit* velocity_init = new RotatedVectorInit
+      (alpha_,beta_, alloc_vector_init_wrapper_(vel_func_));
+
     return HydroInitPack(rho_init, velocity_init, pressure_init,
                          InitializerForm::primitive);
   } else {
