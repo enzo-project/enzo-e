@@ -16,14 +16,10 @@
 EnzoMethodAccretionBondiHoyle::EnzoMethodAccretionBondiHoyle
 (double accretion_radius_cells,
  double density_threshold,
- double max_mass_fraction,
- bool conserve_angular_momentum,
- double ang_mom_threshold_radius_cells)
+ double max_mass_fraction)
   : EnzoMethodAccretion(accretion_radius_cells,
 			density_threshold,
-			max_mass_fraction,
-			conserve_angular_momentum,
-			ang_mom_threshold_radius_cells)
+			max_mass_fraction)
 {
 
 }

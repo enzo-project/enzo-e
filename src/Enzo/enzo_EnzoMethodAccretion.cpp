@@ -18,15 +18,11 @@
 EnzoMethodAccretion::EnzoMethodAccretion
 (double accretion_radius_cells,
  double density_threshold,
- double max_mass_fraction,
- bool   conserve_angular_momentum,
- double ang_mom_threshold_radius_cells)
+ double max_mass_fraction)
   : Method(),
     accretion_radius_cells_(accretion_radius_cells),
     density_threshold_(density_threshold),
     max_mass_fraction_(max_mass_fraction),
-    conserve_angular_momentum_(conserve_angular_momentum),
-    ang_mom_threshold_radius_cells_(ang_mom_threshold_radius_cells),
     ir_accretion_(-1)
 {
   // Check if density threshold is at least as large as the density floor
@@ -57,12 +53,6 @@ EnzoMethodAccretion::EnzoMethodAccretion
   ASSERT("EnzoMethodAccretion::EnzoMethodAccretion()",
 	 "Method:accretion:max_mass_fraction must be between 0 and 1 inclusive.",
 	  max_mass_fraction_ >= 0.0 && max_mass_fraction_ <= 1.0);
-
-  // Check that ang_mom_threshold_radius_cells_ is between 0.0 and 0.5
-  ASSERT("EnzoMethodAccretion::EnzoMethodAccretion()",
-	 "Method:accretion:ang_mom_threshold_radius_cells must be strictly greater "
-	 "than 0.0 and strictly less than 0.5.",
-	 ang_mom_threshold_radius_cells_ > 0.0 && ang_mom_threshold_radius_cells_ < 0.5);
 
   const int * ghost_depth = enzo::config()->field_ghost_depth;
   const int min_ghost_depth = std::min(ghost_depth[0],
@@ -125,8 +115,6 @@ void EnzoMethodAccretion::pup (PUP::er &p)
   p | accretion_radius_cells_;
   p | density_threshold_;
   p | max_mass_fraction_;
-  p | conserve_angular_momentum_;
-  p | ang_mom_threshold_radius_cells_;
   p | ir_accretion_;
 
   return;

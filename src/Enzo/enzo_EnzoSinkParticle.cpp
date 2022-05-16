@@ -15,15 +15,11 @@ EnzoSinkParticle::EnzoSinkParticle
 (Block * block,
  int ib,
  int ip,
- double accretion_radius,
- bool conserve_angular_momentum,
- double ang_mom_threshold_radius)
+ double accretion_radius)
   : block_(block),
     batch_index_(ib),
     particle_index_(ip),
     accretion_radius_(accretion_radius),
-    conserve_angular_momentum_(conserve_angular_momentum),
-    ang_mom_threshold_radius_(ang_mom_threshold_radius),
     total_mass_change_(0.0),
     total_momentum_x_change_(0.0),
     total_momentum_y_change_(0.0),
@@ -91,13 +87,8 @@ EnzoSinkParticle::EnzoSinkParticle
 
 // -------------------------------------------------------------------------------------------
 
-bool EnzoSinkParticle::cell_in_accretion_zone(int i, int j, int k,
-					      bool* outside_ang_mom_threshold,
-					      double* norm_disp_x,
-					      double* norm_disp_y,
-					      double* norm_disp_z) throw() {
-
-
+bool EnzoSinkParticle::cell_in_accretion_zone(int i, int j, int k) throw()
+{
   double hx, hy, hz;
   block_->cell_width(&hx, &hy, &hz);
   double xm, ym, zm;
@@ -119,16 +110,6 @@ bool EnzoSinkParticle::cell_in_accretion_zone(int i, int j, int k,
   // Compute the square of the magnitude of this vector
   const double r2 = disp_x * disp_x + disp_y * disp_y + disp_z * disp_z;
 
-  // If angular momentum of gas is conserved, we need to compute the components
-  // of the normalized displacement vector
-  if (conserve_angular_momentum_){
-     const double r = sqrt(r2);
-     *outside_ang_mom_threshold = (r > ang_mom_threshold_radius_);
-     *norm_disp_x = outside_ang_mom_threshold ? disp_x / r : 0.0;
-     *norm_disp_y = outside_ang_mom_threshold ? disp_y / r : 0.0;
-     *norm_disp_z = outside_ang_mom_threshold ? disp_z / r : 0.0;
-  }
-
   // Return whether or not cell is in accretion zone
   return (r2 < accretion_radius_ * accretion_radius_);
 
@@ -136,12 +117,8 @@ bool EnzoSinkParticle::cell_in_accretion_zone(int i, int j, int k,
 
 // ---------------------------------------------------------------------------------------------
 
-void EnzoSinkParticle::update(enzo_float density_change,
-			      int index,
-			      bool outside_ang_mom_threshold,
-			      double norm_disp_x,
-			      double norm_disp_y,
-			      double norm_disp_z) throw() {
+void EnzoSinkParticle::update(enzo_float density_change, int index) throw() {
+
   int it = cello::particle_descr()->type_index("sink");
 
   // Get pointers to field data
@@ -182,33 +159,11 @@ void EnzoSinkParticle::update(enzo_float density_change,
   enzo_float momentum_x_change;
   enzo_float momentum_y_change;
   enzo_float momentum_z_change;
-  if (conserve_angular_momentum_ && outside_ang_mom_threshold){
 
-    // Get radial component of velocity
-    // Technically, what I call the "radial velocity"
-    // is really the radial velocity in the frame of reference
-    // where the particle is at rest, plus the particle's
-    // velocity.
-    const double vx_gas_radial = (vx_gas[index] - vx_) * norm_disp_x + vx_;
-    const double vy_gas_radial = (vy_gas[index] - vy_) * norm_disp_y + vy_;
-    const double vz_gas_radial = (vz_gas[index] - vz_) * norm_disp_z + vz_;
-
-    // Only the radial momentum of gas is changed (due to mass loss).
-    // This momentum is added to particle
-    momentum_x_change = mass_change * vx_gas_radial;
-    momentum_y_change = mass_change * vy_gas_radial;
-    momentum_z_change = mass_change * vz_gas_radial;
-
-  } else {
-
-    // In this case, we don't change the velocity of the gas, so
-    // momentum change of particle just depends on the mass removed
-    // from the gas
-    momentum_x_change = mass_change * vx_gas[index];
-    momentum_y_change = mass_change * vy_gas[index];
-    momentum_z_change = mass_change * vz_gas[index];
-
-  }
+  // Compute change in momentum of particle due to accretion from this cell
+  momentum_x_change = mass_change * vx_gas[index];
+  momentum_y_change = mass_change * vy_gas[index];
+  momentum_z_change = mass_change * vz_gas[index];
 
   // Update total particle momentum change
   total_momentum_x_change_ += momentum_x_change;

@@ -19,9 +19,7 @@ public:
   // Constructor
   EnzoMethodAccretionDensThresh(double accretion_radius_cells,
 				double density_threshold,
-				double max_mass_fraction,
-				bool conserve_angular_momentum,
-				double ang_mom_threshold_radius_cells);
+				double max_mass_fraction);
 
   /// Charm++ Pup::able declarations
   PUPable_decl(EnzoMethodAccretionDensThresh);
