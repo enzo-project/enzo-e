@@ -56,7 +56,7 @@ EnzoMethodAccretion::EnzoMethodAccretion
   // Check that max_mass_fraction_ is between 0 and 1
   ASSERT("EnzoMethodAccretion::EnzoMethodAccretion()",
 	 "Method:accretion:max_mass_fraction must be between 0 and 1 inclusive.",
-	  max_mass_fraction_>= 0.0 && max_mass_fraction <= 1.0);
+	  max_mass_fraction_ >= 0.0 && max_mass_fraction_ <= 1.0);
 
   // Check that ang_mom_threshold_radius_cells_ is between 0.0 and 0.5
   ASSERT("EnzoMethodAccretion::EnzoMethodAccretion()",
@@ -75,7 +75,7 @@ EnzoMethodAccretion::EnzoMethodAccretion
 	 "(4 cells by default)",
 	 accretion_radius_cells_ <= min_ghost_depth);
 
-  // define required fields
+  // Define required fields
   cello::define_field("density_source");
   cello::define_field("density_source_accumulate");
   cello::define_field("mom_dens_x_source");
@@ -84,18 +84,9 @@ EnzoMethodAccretion::EnzoMethodAccretion
   cello::define_field("mom_dens_y_source_accumulate");
   cello::define_field("mom_dens_z_source");
   cello::define_field("mom_dens_z_source_accumulate");
-  cello::define_field("te_dens_source");
-  cello::define_field("te_dens_source_accumulate");
-
-  // if sink particles have a "metal_fraction" attribute, then
-  // define a "metal_density" field
-  int it = cello::particle_descr()->type_index("sink");
-  if (cello::particle_descr()->has_attribute(it,"metal_fraction")){
-      cello::define_field("metal_density");
-      cello::define_field_in_group("metal_density","color");
-  }
 
   // Initial refresh: refresh all fields and sink particles
+  int it = cello::particle_descr()->type_index("sink");
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
@@ -109,17 +100,15 @@ EnzoMethodAccretion::EnzoMethodAccretion
 
   refresh_accretion->set_accumulate(true);
   refresh_accretion->add_field_src_dst
-    ("density_source","density_source_accumulate");
-  if (conserve_angular_momentum_){
-    refresh_accretion->add_field_src_dst
+     ("density_source","density_source_accumulate");
+  refresh_accretion->add_field_src_dst
     ("mom_dens_x_source","mom_dens_x_source_accumulate");
-    refresh_accretion->add_field_src_dst
+  refresh_accretion->add_field_src_dst
     ("mom_dens_y_source","mom_dens_y_source_accumulate");
-    refresh_accretion->add_field_src_dst
+  refresh_accretion->add_field_src_dst
     ("mom_dens_z_source","mom_dens_z_source_accumulate");
-    refresh_accretion->add_field_src_dst
+  refresh_accretion->add_field_src_dst
     ("te_dens_source","te_dens_source_accumulate");
-  }
 
   refresh_accretion->set_callback(CkIndex_EnzoBlock::p_method_accretion_end());
 
@@ -158,14 +147,15 @@ void EnzoMethodAccretion::compute(Block *block) throw() {
 void EnzoBlock::p_method_accretion_end()
 {
   EnzoMethodAccretion * method = static_cast<EnzoMethodAccretion*> (this->method());
-  method->add_source_fields(this);
+  method->update_fields(this);
   compute_done();
   return;
 }
 
 //--------------------------------------------------------------------------------------------
-void EnzoMethodAccretion::add_source_fields(EnzoBlock * enzo_block) throw()
+void EnzoMethodAccretion::update_fields(EnzoBlock * enzo_block) throw()
 {
+
   Field field = enzo_block->data()->field();
   int gx,gy,gz;
   int mx,my,mz;
@@ -177,6 +167,14 @@ void EnzoMethodAccretion::add_source_fields(EnzoBlock * enzo_block) throw()
   enzo_float * vy = (enzo_float*) field.values("velocity_y");
   enzo_float * vz = (enzo_float*) field.values("velocity_z");
   enzo_float * specific_te = (enzo_float*) field.values("total_energy");
+
+  bool mhd = (enzo::config()->method_vlct_mhd_choice != "no_bfield");
+  enzo_float * bx  = mhd ? (enzo_float*) field.values("bfield_x") : nullptr;
+  enzo_float * by  = mhd ? (enzo_float*) field.values("bfield_y") : nullptr;
+  enzo_float * bz  = mhd ? (enzo_float*) field.values("bfield_z") : nullptr;
+  enzo_float * bix = mhd ? (enzo_float*) field.values("bfieldi_x") : nullptr;
+  enzo_float * biy = mhd ? (enzo_float*) field.values("bfieldi_y") : nullptr;
+  enzo_float * biz = mhd ? (enzo_float*) field.values("bfieldi_z") : nullptr;
 
   enzo_float * density_source = (enzo_float*) field.values("density_source");
   enzo_float * density_source_accumulate =
@@ -190,48 +188,72 @@ void EnzoMethodAccretion::add_source_fields(EnzoBlock * enzo_block) throw()
   enzo_float * mom_dens_z_source = (enzo_float*) field.values("mom_dens_z_source");
   enzo_float * mom_dens_z_source_accumulate =
     (enzo_float*) field.values("mom_dens_z_source_accumulate");
-  enzo_float * te_dens_source = (enzo_float*) field.values("te_dens_source");
-  enzo_float * te_dens_source_accumulate =
-    (enzo_float*) field.values("te_dens_source_accumulate");
 
-  // Loop over all cells, adding on the "source" and "source_accumulate" fields
-  // and rescaling where appropriate. "source" and "source_accumulate" fields
-  // are then set to zero, ready for the next cycle.
-  for (int i = 0; i < mx * my * mz; i++){
+  // Loop over all active cells, and update the density, velocity, and
+  // energy fields, and magnetic fields if necessary
+  for (int iz = gz; iz < mz - gz; iz++){
+    for (int iy = gy; iy < my - gy; iy++){
+      for (int ix = gx; ix < mx - gx; ix++){
 
-    // Update density
-    const enzo_float old_dens = density[i];
-    density[i] += density_source[i] + density_source_accumulate[i];
+	const int i = INDEX(ix,iy,iz,mx,my);
+
+	// Update density
+	const enzo_float old_dens = density[i];
+	density[i] += density_source[i] + density_source_accumulate[i];
+
+	// Update color fields
+	EnzoMethodStarMaker::rescale_densities(enzo_block,i,density[i] / old_dens);
+
+	// Update velocity
+	const enzo_float old_vx = vx[i];
+	const enzo_float new_mom_dens_x =
+	  old_dens * old_vx + mom_dens_x_source[i] + mom_dens_x_source_accumulate[i];
+	vx[i] = new_mom_dens_x / density[i];
+	const enzo_float old_vy = vy[i];
+	const enzo_float new_mom_dens_y =
+	  old_dens * old_vy + mom_dens_y_source[i] + mom_dens_y_source_accumulate[i];
+	vy[i] = new_mom_dens_y / density[i];
+	const enzo_float old_vz = vz[i];
+	const enzo_float new_mom_dens_z =
+	  old_dens * old_vz + mom_dens_z_source[i] + mom_dens_z_source_accumulate[i];
+	vz[i] = new_mom_dens_z / density[i];
+
+	// Change in specific total energy is just due to change in specific kinetic
+	// energy
+	const enzo_float old_specific_ke =
+	  0.5 * ( old_vx * old_vx + old_vy * old_vy + old_vz * old_vz );
+	const enzo_float new_specific_ke =
+	  0.5 * ( vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i] );
+	const enzo_float old_specific_te = specific_te[i];
+	specific_te[i] += new_specific_ke - old_specific_ke;
+
+	// If we have magnetic fields, rescale them to ensure that the specific
+	// magnetic energy stays the same.
+	if (mhd) {
+	  const enzo_float scaling_factor = sqrt(density[i] / old_dens);
+	  bx[i]  *= scaling_factor;
+	  by[i]  *= scaling_factor;
+	  bz[i]  *= scaling_factor;
+	  bix[i] *= scaling_factor;
+	  biy[i] *= scaling_factor;
+	  biz[i] *= scaling_factor;
+	}
+      }
+    }
+  } // Loop over active cells
+
+  // Loop over all cells (including ghost zones), setting all the "source" and
+  // "source accumulate" fields to zero, ready for the next cycle.
+  for (int i = 0; i < mx*my*mz; i++){
     density_source[i] = 0.0;
     density_source_accumulate[i] = 0.0;
-
-    // Update color fields
-    EnzoMethodStarMaker::rescale_densities(enzo_block,i,density[i] / old_dens);
-
-    // Update velocity and total energy fields
-    const enzo_float new_mom_dens_x =
-      old_dens * vx[i] + mom_dens_x_source[i] + mom_dens_x_source_accumulate[i];
-    vx[i] = new_mom_dens_x / density[i];
     mom_dens_x_source[i] = 0.0;
     mom_dens_x_source_accumulate[i] = 0.0;
-    const enzo_float new_mom_dens_y =
-      old_dens * vx[i] + mom_dens_y_source[i] + mom_dens_y_source_accumulate[i];
-    vx[i] = new_mom_dens_y / density[i];
     mom_dens_y_source[i] = 0.0;
     mom_dens_y_source_accumulate[i] = 0.0;
-    const enzo_float new_mom_dens_z =
-	old_dens * vx[i] + mom_dens_z_source[i] + mom_dens_z_source_accumulate[i];
-    vx[i] = new_mom_dens_z / density[i];
     mom_dens_z_source[i] = 0.0;
     mom_dens_z_source_accumulate[i] = 0.0;
-    const enzo_float new_te_dens =
-      old_dens * specific_te[i] + te_dens_source[i] + te_dens_source_accumulate[i];
-    specific_te[i] = new_te_dens / density[i];
-    te_dens_source[i] = 0.0;
-    te_dens_source_accumulate[i] = 0.0;
-
-  } // Loop over cells
-
+  }
   return;
 }
 
@@ -243,11 +265,11 @@ double EnzoMethodAccretion::timestep ( Block *block) const throw()
 
 void EnzoMethodAccretion::do_checks_(const Block *block) throw()
 {
-    // Check if merge_sinks method precedes accretion_compute method
+    // Check if merge_sinks method precedes accretion method
     ASSERT("EnzoMethodAccretion",
 	   "merge_sinks must precede accretion_compute",
 	   enzo::problem()->method_precedes("merge_sinks",
-					    "accretion_compute"));
+					    "accretion"));
 
     // Check if merging radius is at least twice that of the accretion
     // radius
@@ -260,10 +282,10 @@ void EnzoMethodAccretion::do_checks_(const Block *block) throw()
 
     // Check if VL+CT method is being used.
     ASSERT("EnzoMethodAccretion::EnzoMethodAccretion() ",
-	   "accretion_compute requires vlct method. (note: at the "
+	   "accretion requires vlct method. (note: at the "
 	   "moment this means that cosmology can't be used in "
 	   "combination with accretion.",
-	   enzo::problem()->method_exists("vlct"));
+	   enzo::problem()->method_exists("mhd_vlct"));
 
     // The accretion radius must be at least as large as half the
     // diagonal width of a cell, to ensure that at least one cell

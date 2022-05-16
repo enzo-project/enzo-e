@@ -743,10 +743,6 @@ Method * EnzoProblem::create_method_
 		       enzo_config->method_accretion_ang_mom_threshold_radius_cells
 					      );
     }
-  } else if (name == "accretion_remove_gas") {
-    
-    method = new EnzoMethodAccretionRemoveGas();
-    
   } else {
 
     // Fallback to Cello method's

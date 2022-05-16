@@ -39,7 +39,7 @@ public:
 
   /// Name
   virtual std::string name () throw()
-   { return "accretion_compute";}
+   { return "accretion";}
   
 // protected: // methods
 

@@ -147,10 +147,11 @@ void EnzoSinkParticle::update(enzo_float density_change,
   // Get pointers to field data
   Field field = block_->data()->field();
 
-  enzo_float * density       = (enzo_float*) field.values("density");
-  enzo_float * vx            = (enzo_float*) field.values("velocity_x");
-  enzo_float * vy            = (enzo_float*) field.values("velocity_y");
-  enzo_float * vz            = (enzo_float*) field.values("velocity_z");
+  enzo_float * density     = (enzo_float*) field.values("density");
+  enzo_float * vx_gas      = (enzo_float*) field.values("velocity_x");
+  enzo_float * vy_gas      = (enzo_float*) field.values("velocity_y");
+  enzo_float * vz_gas      = (enzo_float*) field.values("velocity_z");
+
   enzo_float * metal_density =
     cello::particle_descr()->has_attribute(it,"metal_fraction") ?
     (enzo_float*) field.values("metal_density") : nullptr;
@@ -159,7 +160,6 @@ void EnzoSinkParticle::update(enzo_float density_change,
   enzo_float * mom_dens_x_source = (enzo_float*) field.values("mom_dens_x_source");
   enzo_float * mom_dens_y_source = (enzo_float*) field.values("mom_dens_y_source");
   enzo_float * mom_dens_z_source = (enzo_float*) field.values("mom_dens_z_source");
-  enzo_float * te_dens_source    = (enzo_float*) field.values("te_dens_source");
 
   // Get the cell volume
   double hx, hy, hz;
@@ -189,24 +189,24 @@ void EnzoSinkParticle::update(enzo_float density_change,
     // is really the radial velocity in the frame of reference
     // where the particle is at rest, plus the particle's
     // velocity.
-    const double vx_radial = (vx[index] - vx_) * norm_disp_x + vx_;
-    const double vy_radial = (vy[index] - vy_) * norm_disp_y + vy_;
-    const double vz_radial = (vz[index] - vz_) * norm_disp_z + vz_;
+    const double vx_gas_radial = (vx_gas[index] - vx_) * norm_disp_x + vx_;
+    const double vy_gas_radial = (vy_gas[index] - vy_) * norm_disp_y + vy_;
+    const double vz_gas_radial = (vz_gas[index] - vz_) * norm_disp_z + vz_;
 
     // Only the radial momentum of gas is changed (due to mass loss).
     // This momentum is added to particle
-    momentum_x_change = mass_change * vx_radial;
-    momentum_y_change = mass_change * vy_radial;
-    momentum_z_change = mass_change * vz_radial;
+    momentum_x_change = mass_change * vx_gas_radial;
+    momentum_y_change = mass_change * vy_gas_radial;
+    momentum_z_change = mass_change * vz_gas_radial;
 
   } else {
 
     // In this case, we don't change the velocity of the gas, so
     // momentum change of particle just depends on the mass removed
     // from the gas
-    momentum_x_change = mass_change * vx[index];
-    momentum_y_change = mass_change * vy[index];
-    momentum_z_change = mass_change * vz[index];
+    momentum_x_change = mass_change * vx_gas[index];
+    momentum_y_change = mass_change * vy_gas[index];
+    momentum_z_change = mass_change * vz_gas[index];
 
   }
 
@@ -215,30 +215,12 @@ void EnzoSinkParticle::update(enzo_float density_change,
   total_momentum_y_change_ += momentum_y_change;
   total_momentum_z_change_ += momentum_z_change;
 
-  // Set "mom_dens_source" fields to minus the particle's momentum change
-  mom_dens_x_source[index] = -momentum_x_change;
-  mom_dens_y_source[index] = -momentum_y_change;
-  mom_dens_z_source[index] = -momentum_z_change;
+  // Set "mom_dens_source" fields to minus the particle's
+  // momentum change divided by cell volume
+  mom_dens_x_source[index] = -momentum_x_change / cell_volume;
+  mom_dens_y_source[index] = -momentum_y_change / cell_volume;
+  mom_dens_z_source[index] = -momentum_z_change / cell_volume;
 
-  // Also need to compute change in specific kinetic energy
-  const double old_specific_ke =
-    0.5 * density[index] * ( vx[index] * vx[index] +
-			     vy[index] * vy[index] +
-			     vz[index] * vz[index] );
-
-  const double new_vx =
-    (density[index] * vx[index] - momentum_x_change) / (density[index] - density_change);
-  const double new_vy =
-    (density[index] * vy[index] - momentum_y_change) / (density[index] - density_change);
-  const double new_vz =
-    (density[index] * vz[index] - momentum_z_change) / (density[index] - density_change);
-
-  const double new_specific_ke =
-    0.5 * (density[index] - density_change) * ( new_vx * new_vx +
-						new_vy * new_vy +
-						new_vz * new_vz );
-
-  te_dens_source[index] = new_specific_ke - old_specific_ke;
   return;
 }
 

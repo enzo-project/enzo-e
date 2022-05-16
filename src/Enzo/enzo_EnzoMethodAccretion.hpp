@@ -58,8 +58,8 @@ public:
   // Compute the maximum timestep for this method
   virtual double timestep ( Block * block) const throw();
 
-  // Update fields representing fluid quantities with the "source fields".
-  void add_source_fields(EnzoBlock * enzo_block) throw();
+  // Update fields representing fluid quantities.
+  void update_fields(EnzoBlock * enzo_block) throw();
 
 
 protected:

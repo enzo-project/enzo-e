@@ -57,14 +57,11 @@ void EnzoInitialAccretionTest::enforce_block
 
   enzo::check_particle_attribute("sink","mass");
 
-  // Check if accretion and accretion_remove_gas methods are being used,
-  // and that accretion precedes accretion_remove_gas
-  ASSERT("EnzoInitialAccretionTest",
-	 "If accretion_test initializer is used, the accretion "
-	 "and accretion_remove_gas methods are required, and "
-	 "accretion must precede accretion_remove_gas.",
-         enzo::problem()->method_precedes("accretion",
-					  "accretion_remove_gas"));
+  // Check if accretion method is being used
+    ASSERT("EnzoInitialAccretionTest",
+	   "If accretion_test initializer is used, the accretion "
+	   "method is required.",
+	   enzo::problem()->method_exists("accretion"));
 
   // Check if mhd_vlct method is being used
   ASSERT("EnzoInitialAccretionTest",
@@ -132,15 +129,24 @@ void EnzoInitialAccretionTest::enforce_block
 		   bzm,bzp,&hz);
 
   // Get pointers to fields
-  enzo_float *  d = (enzo_float *) field.values ("density");
-  enzo_float *  da = (enzo_float *) field.values ("density_accreted");
-  enzo_float *  daa = (enzo_float *) field.values ("density_accreted_accumulate");
-  enzo_float *  p = (enzo_float *) field.values ("pressure");
-  enzo_float * te = (enzo_float *) field.values ("total_energy");
-  enzo_float * ie = (enzo_float *) field.values ("internal_energy");
-  enzo_float * vx = (enzo_float *) field.values ("velocity_x");
-  enzo_float * vy = (enzo_float *) field.values ("velocity_y");
-  enzo_float * vz = (enzo_float *) field.values ("velocity_z");
+  enzo_float *  d   = (enzo_float *) field.values ("density");
+  enzo_float *  p   = (enzo_float *) field.values ("pressure");
+  enzo_float * te   = (enzo_float *) field.values ("total_energy");
+  enzo_float * ie   = (enzo_float *) field.values ("internal_energy");
+  enzo_float * vx   = (enzo_float *) field.values ("velocity_x");
+  enzo_float * vy   = (enzo_float *) field.values ("velocity_y");
+  enzo_float * vz   = (enzo_float *) field.values ("velocity_z");
+
+  enzo_float *  ds   = (enzo_float *) field.values ("density_source");
+  enzo_float *  dsa  = (enzo_float *) field.values ("density_source_accumulate");
+  enzo_float *  mxs  = (enzo_float *) field.values ("mom_dens_x_source");
+  enzo_float *  mxsa = (enzo_float *) field.values ("mom_dens_x_source_accumulate");
+  enzo_float *  mys  = (enzo_float *) field.values ("mom_dens_y_source");
+  enzo_float *  mysa = (enzo_float *) field.values ("mom_dens_y_source_accumulate");
+  enzo_float *  mzs  = (enzo_float *) field.values ("mom_dens_z_source");
+  enzo_float *  mzsa = (enzo_float *) field.values ("mom_dens_z_source_accumulate");
+  enzo_float *  tes  = (enzo_float *) field.values ("te_dens_source");
+  enzo_float *  tesa = (enzo_float *) field.values ("te_dens_source_accumulate");
 
   // Initialise all fields to zero except for density and total_energy
   std::fill_n(p,m,0.0);
@@ -148,8 +154,16 @@ void EnzoInitialAccretionTest::enforce_block
   std::fill_n(vx,m,0.0);
   std::fill_n(vy,m,0.0);
   std::fill_n(vz,m,0.0);
-  std::fill_n(da,m,0.0);
-  std::fill_n(daa,m,0.0);
+  std::fill_n(ds,m,0.0);
+  std::fill_n(dsa,m,0.0);
+  std::fill_n(mxs,m,0.0);
+  std::fill_n(mxsa,m,0.0);
+  std::fill_n(mys,m,0.0);
+  std::fill_n(mysa,m,0.0);
+  std::fill_n(mzs,m,0.0);
+  std::fill_n(mzsa,m,0.0);
+  std::fill_n(tes,m,0.0);
+  std::fill_n(tesa,m,0.0);
 
   // Set density
   std::fill_n(d,m,gas_density_);

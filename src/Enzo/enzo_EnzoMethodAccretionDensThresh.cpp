@@ -23,7 +23,7 @@ EnzoMethodAccretionDensThresh::EnzoMethodAccretionDensThresh
  double ang_mom_threshold_radius_cells)
   : EnzoMethodAccretion(accretion_radius_cells,
 			density_threshold,
-			max_mass_fraction_,
+			max_mass_fraction,
 			conserve_angular_momentum,
 			ang_mom_threshold_radius_cells)
 {
