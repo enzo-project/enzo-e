@@ -63,14 +63,14 @@ def analyze_test(prec):
     
     try:
         return test_mmc(tolerance,
-                        input_prefix = "Dir_Accretion",
+                        input_prefix = "Dir_Accretion_Test",
                         output = "mmc.png")
     except:
         print("Encountered error when trying to test mass and momentum conservation")
         return False
 
 def cleanup():
-    dir_list = glob.glob("Dir_Accretion*")
+    dir_list = glob.glob("Dir_Accretion_Test*")
     for dir_name in dir_list:
         if os.path.isdir(dir_name):
             shutil.rmtree(dir_name)
@@ -90,7 +90,9 @@ if __name__ == '__main__':
         run_test(args.launch_cmd)
 
         # make images
-        make_images(input_prefix = "Dir_Accretion", output_prefix = "image")
+        make_images(input_prefix = "Dir_Accretion_Test",
+                    output_prefix = "image",
+                    z_slice = -0.5)
         
         # analyze the test
         tests_passed = analyze_test(args.prec)

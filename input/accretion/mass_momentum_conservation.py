@@ -62,11 +62,11 @@ def test_mmc(tolerance,input_prefix,output):
     gas_px   = []
     gas_py   = []
     gas_pz   = []
-    star_pz   = []
-    star_mass = []
-    star_px   = []
-    star_py   = []
-    star_pz   = []
+    sink_pz   = []
+    sink_mass = []
+    sink_px   = []
+    sink_py   = []
+    sink_pz   = []
     
     for ds in yt.DatasetSeries(ds_pattern):
         box = ds.box(left_edge = -ds.domain_width/2.0,
@@ -76,16 +76,16 @@ def test_mmc(tolerance,input_prefix,output):
         gas_px.append((data["gas","mass"] * data["gas","velocity_x"]).sum())
         gas_py.append((data["gas","mass"] * data["gas","velocity_y"]).sum())
         gas_pz.append((data["gas","mass"] * data["gas","velocity_z"]).sum())
-        star_mass.append(box["star","mass"].sum())
-        star_px.append((box["star","mass"] * box["star","vx"]).sum())
-        star_py.append((box["star","mass"] * box["star","vy"]).sum())
-        star_pz.append((box["star","mass"] * box["star","vz"]).sum())
+        sink_mass.append(box["sink","mass"].sum())
+        sink_px.append((box["sink","mass"] * box["sink","vx"]).sum())
+        sink_py.append((box["sink","mass"] * box["sink","vy"]).sum())
+        sink_pz.append((box["sink","mass"] * box["sink","vz"]).sum())
         time.append(ds.current_time)
 
-    total_mass = [gm + sm for (gm,sm) in zip(gas_mass,star_mass)]
-    total_px = [gpx + spx for (gpx,spx) in zip(gas_px,star_px)]
-    total_py = [gpy + spy for (gpy,spy) in zip(gas_py,star_py)]
-    total_pz = [gpz + spz for (gpz,spz) in zip(gas_pz,star_pz)]
+    total_mass = [gm + sm for (gm,sm) in zip(gas_mass,sink_mass)]
+    total_px = [gpx + spx for (gpx,spx) in zip(gas_px,sink_px)]
+    total_py = [gpy + spy for (gpy,spy) in zip(gas_py,sink_py)]
+    total_pz = [gpz + spz for (gpz,spz) in zip(gas_pz,sink_pz)]
 
     mass_error, mass_error_pass = test_error(total_mass,tolerance)
     px_error, px_error_pass = test_error(total_px,tolerance)
@@ -164,7 +164,7 @@ if __name__ == "__main__":
         Default = \"Dir_Accretion_Test\".
         """,
         required=False,
-        default="Dir_Accretion_Test"
+        default="Dir_Accretion_Test",
         type=str,
     )
     

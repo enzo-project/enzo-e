@@ -5,7 +5,7 @@
 # problem, which contain snapshots of the particle data and field data
 # at regular time intervals.
 # It then uses yt make slice images of the density field, also showing the
-# position of the star particle. A series of image files are created, with
+# position of the sink particle. A series of image files are created, with
 # each image corresponding to a particular snapshot. These images are useful
 # to check whether the
 # initial conditions were set up correctly and if Enzo-E ran as expected.
@@ -30,10 +30,10 @@ def make_images(input_prefix,output_prefix,z_slice):
         
         box = ds.box(left_edge = -ds.domain_width/2.0,
                      right_edge = ds.domain_width/2.0)
-        star_positions = [s for s in zip(box["star","x"],
-                                         box["star","y"],
-                                         box["star","z"])]
-        for s in star_positions:
+        sink_positions = [s for s in zip(box["sink","x"],
+                                         box["sink","y"],
+                                         box["sink","z"])]
+        for s in sink_positions:
             slc.annotate_marker(s,
                                 coord_system = "data",
                                 plot_args = {'color':"k"})
@@ -51,7 +51,7 @@ if __name__ == "__main__":
         description="""
         Reads a data directory containing a series of snapshots of the 
         AccretionTest problem and makes an image showing a slice of the 
-        density field and the x and y position of the star particle,
+        density field and the x and y position of the sink particle,
         making a separate image for each snapshot.
         """
     )
@@ -81,7 +81,7 @@ if __name__ == "__main__":
         The z-coordinate of the density slice.
         """,
         required=True,
-        type=str,
+        type=float,
     )
 
     args = parser.parse_args()
