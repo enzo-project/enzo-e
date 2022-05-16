@@ -132,7 +132,6 @@ void EnzoInitialAccretionTest::enforce_block
   enzo_float *  d   = (enzo_float *) field.values ("density");
   enzo_float *  p   = (enzo_float *) field.values ("pressure");
   enzo_float * te   = (enzo_float *) field.values ("total_energy");
-  enzo_float * ie   = (enzo_float *) field.values ("internal_energy");
   enzo_float * vx   = (enzo_float *) field.values ("velocity_x");
   enzo_float * vy   = (enzo_float *) field.values ("velocity_y");
   enzo_float * vz   = (enzo_float *) field.values ("velocity_z");
@@ -145,12 +144,9 @@ void EnzoInitialAccretionTest::enforce_block
   enzo_float *  mysa = (enzo_float *) field.values ("mom_dens_y_source_accumulate");
   enzo_float *  mzs  = (enzo_float *) field.values ("mom_dens_z_source");
   enzo_float *  mzsa = (enzo_float *) field.values ("mom_dens_z_source_accumulate");
-  enzo_float *  tes  = (enzo_float *) field.values ("te_dens_source");
-  enzo_float *  tesa = (enzo_float *) field.values ("te_dens_source_accumulate");
 
   // Initialise all fields to zero except for density and total_energy
   std::fill_n(p,m,0.0);
-  std::fill_n(ie,m,0.0);
   std::fill_n(vx,m,0.0);
   std::fill_n(vy,m,0.0);
   std::fill_n(vz,m,0.0);
@@ -162,8 +158,6 @@ void EnzoInitialAccretionTest::enforce_block
   std::fill_n(mysa,m,0.0);
   std::fill_n(mzs,m,0.0);
   std::fill_n(mzsa,m,0.0);
-  std::fill_n(tes,m,0.0);
-  std::fill_n(tesa,m,0.0);
 
   // Set density
   std::fill_n(d,m,gas_density_);
