@@ -32,6 +32,12 @@ EnzoMethodAccretion::EnzoMethodAccretion
 	 "floor set by the VL+CT method",
 	 density_threshold_ >= enzo::config()->method_vlct_density_floor);
 
+  // Check that mhd_choice parameter is set to "no_bfield"
+  ASSERT("EnzoMethodAccretion::EnzoMethodAccretion",
+	 "Accretion method requires that we run with the mhd_vlct method in pure "
+	 "hydro mode, i.e. that Method:mhd_vlct:mhd_choice is set to no_bfield",
+	 enzo::config()->method_vlct_mhd_choice == "no_bfield");
+
   // This method requires three dimensions.
   ASSERT("EnzoMethodAccretion::EnzoMethodAccretion()",
 	 "EnzoMethodAccretion requires that we run a 3D problem (Domain: rank = 3)",
@@ -156,14 +162,6 @@ void EnzoMethodAccretion::update_fields(EnzoBlock * enzo_block) throw()
   enzo_float * vz = (enzo_float*) field.values("velocity_z");
   enzo_float * specific_te = (enzo_float*) field.values("total_energy");
 
-  bool mhd = (enzo::config()->method_vlct_mhd_choice != "no_bfield");
-  enzo_float * bx  = mhd ? (enzo_float*) field.values("bfield_x") : nullptr;
-  enzo_float * by  = mhd ? (enzo_float*) field.values("bfield_y") : nullptr;
-  enzo_float * bz  = mhd ? (enzo_float*) field.values("bfield_z") : nullptr;
-  enzo_float * bix = mhd ? (enzo_float*) field.values("bfieldi_x") : nullptr;
-  enzo_float * biy = mhd ? (enzo_float*) field.values("bfieldi_y") : nullptr;
-  enzo_float * biz = mhd ? (enzo_float*) field.values("bfieldi_z") : nullptr;
-
   enzo_float * density_source = (enzo_float*) field.values("density_source");
   enzo_float * density_source_accumulate =
     (enzo_float*) field.values("density_source_accumulate");
@@ -215,17 +213,6 @@ void EnzoMethodAccretion::update_fields(EnzoBlock * enzo_block) throw()
 	const enzo_float old_specific_te = specific_te[i];
 	specific_te[i] += new_specific_ke - old_specific_ke;
 
-	// If we have magnetic fields, rescale them to ensure that the specific
-	// magnetic energy stays the same.
-	if (mhd) {
-	  const enzo_float scaling_factor = sqrt(density[i] / old_dens);
-	  bx[i]  *= scaling_factor;
-	  by[i]  *= scaling_factor;
-	  bz[i]  *= scaling_factor;
-	  bix[i] *= scaling_factor;
-	  biy[i] *= scaling_factor;
-	  biz[i] *= scaling_factor;
-	}
       }
     }
   } // Loop over active cells
