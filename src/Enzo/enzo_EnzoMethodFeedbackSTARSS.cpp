@@ -21,6 +21,7 @@
 //#ifdef NOTDEFINED // for now... since not done coding
 
 #define DEBUG_FEEDBACK_STARSS
+//#define DEBUG_FEEDBACK_STARSS_SN
 //#define DEBUG_FEEDBACK_STARSS_ACCUMULATE
 
 // =============================================================================
@@ -87,7 +88,7 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age, int* nSNII, int* nSNIA,
                 *nSNII = psn+1;
             }
         }
-        #ifdef DEBUG_FEEDBACK_STARSS
+        #ifdef DEBUG_FEEDBACK_STARSS_SN
           CkPrintf("MethodFeedbackSTARSS::determineSN() -- mass_Msun = %f; age = %f; RII = %f; RIA = %f\n",
                     mass_Msun, age, RII, RIA);
         #endif
@@ -107,7 +108,7 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age, int* nSNII, int* nSNIA,
             if (random < PIA)
                 *nSNIA = psn+1;
         }
-        #ifdef DEBUG_FEEDBACK_STARSS
+        #ifdef DEBUG_FEEDBACK_STARSS_SN
           CkPrintf("MethodFeedbackSTARSS::determineSN() -- PII = %f; PIA = %f\n", PII, PIA);
         #endif
     }
@@ -1147,8 +1148,8 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 
   // fading radius of a supernova, using gas energy of the host cell and ideal gas approximations
 
-  double T = ge[index] / d[index] * Tunit;
-  double cSound = sqrt(cello::kboltz*T/cello::mass_hydrogen) / 1e5; // km/s
+  double T = 2 * ge[index]*mu_mean/3 * Tunit; // Tunit is mH/kboltz * vunit^2
+  double cSound = sqrt(cello::kboltz*T/(mu_mean*cello::mass_hydrogen)) / 1e5; // km/s
   double r_fade = std::max(66.0*pow(ejectaEnergy/1e51, 0.32)*pow(n_mean, -0.37)*pow(cSound/10, -2.0/5.0), 
                            CoolingRadius * 1.5);
   double fadeRatio = cellwidth/r_fade;

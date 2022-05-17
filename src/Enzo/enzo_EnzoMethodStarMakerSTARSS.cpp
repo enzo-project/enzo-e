@@ -219,7 +219,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
   enzo_float * dHDI   = field.is_field("HDI_density") ? 
          (enzo_float *) field.values("HDI_density") : NULL;
 
-
+/*
   bool use_altAlpha = this->use_altAlpha_;
   #ifndef DEBUG_COPY_POTENTIAL
     if (use_altAlpha) {
@@ -230,6 +230,20 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
       use_altAlpha = false;
     }
   #endif
+*/
+  if (use_altAlpha_) {
+    // "potential_copy" field holds potential in proper coordinates,
+    //  need to convert back to comoving. Would probably be better to
+    //  just store "potential_copy" in comoving in EnzoMethodGravity
+    if (cosmology) {
+      enzo_float cosmo_a = 1.0;
+      enzo_float cosmo_dadt = 0.0;
+      double dt   = enzo_block->timestep();
+      double time = enzo_block->time();
+      cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*dt);
+      for (int i=0; i<mx*my*mz; i++) potential[i] *= cosmo_a;
+    }
+  }
 
   // compute the temperature (we need it here)
   // TODO: Calling compute_temperature like this
@@ -308,7 +322,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         #endif 
 
         // check that alpha < 1
-        if (use_altAlpha) {
+        if (use_altAlpha_) {
           // NOTE: this requires the DEBUG_COPY_POTENTIAL flag to be set in EnzoMethodGravity
           // TODO: Make copying potential an input parameter instead of debug flag?
           if (! this->check_self_gravitating_new(total_energy[i], potential[i])) continue;
