@@ -4,13 +4,10 @@
 /// @author Stefan Arridge (stefan.arridge@gmail.com)
 /// @date   24 February 2022
 /// @brief  Implementation of EnzoMethodAccretion, a base class
-///         for "accretion compute" methods. These methods compute
-///         the accretion rate onto sink particles, and change the properties
-///         of the particles accordingly. Gas density is reduced by setting
-///         negative values for the "density_accreted" field. The
-///         "accretion_remove_gas" method then subtracts off density_accreted
-///         from the gas density field
-
+///         for "accretion" methods. These methods compute
+///         the accretion rate onto sink particles, remove mass,
+///         momentum, and energy from the gas, and add mass and
+///         momentum to the sink particle.
 
 #include "cello.hpp"
 #include "enzo.hpp"
@@ -25,19 +22,6 @@ EnzoMethodAccretion::EnzoMethodAccretion
     max_mass_fraction_(max_mass_fraction),
     ir_accretion_(-1)
 {
-  // Check if density threshold is at least as large as the density floor
-  // set by the VL+CT method
-  ASSERT("EnzoMethodAccretion::EnzoMethodAccretion",
-	 "Density threshold must be at least as large as the density "
-	 "floor set by the VL+CT method",
-	 density_threshold_ >= enzo::config()->method_vlct_density_floor);
-
-  // Check that mhd_choice parameter is set to "no_bfield"
-  ASSERT("EnzoMethodAccretion::EnzoMethodAccretion",
-	 "Accretion method requires that we run with the mhd_vlct method in pure "
-	 "hydro mode, i.e. that Method:mhd_vlct:mhd_choice is set to no_bfield",
-	 enzo::config()->method_vlct_mhd_choice == "no_bfield");
-
   // This method requires three dimensions.
   ASSERT("EnzoMethodAccretion::EnzoMethodAccretion()",
 	 "EnzoMethodAccretion requires that we run a 3D problem (Domain: rank = 3)",
@@ -255,12 +239,24 @@ void EnzoMethodAccretion::do_checks_(const Block *block) throw()
 	   enzo::config()->method_merge_sinks_merging_radius_cells >=
 	   2.0 * accretion_radius_cells_);
 
-    // Check if VL+CT method is being used.
+    // Check if either PPM or VL+CT method is being used.
     ASSERT("EnzoMethodAccretion::EnzoMethodAccretion() ",
 	   "accretion requires vlct method. (note: at the "
 	   "moment this means that cosmology can't be used in "
 	   "combination with accretion.",
-	   enzo::problem()->method_exists("mhd_vlct"));
+	   enzo::problem()->method_exists("mhd_vlct") ||
+	   enzo::problem()->method_exists("ppm"));
+
+    // Check if density threshold is at least as large as the density floor
+    // set by the hydro method.
+    const double density_floor = enzo::problem()->method_exists("mhd_vlct") ?
+      enzo::config()->method_vlct_density_floor :
+      enzo::config()->method_ppm_density_floor ;
+
+    ASSERT("EnzoMethodAccretion::EnzoMethodAccretion",
+	   "Density threshold must be at least as large as the density "
+	   "floor set by the VL+CT method",
+	   density_threshold_ >= density_floor);
 
     // The accretion radius must be at least as large as half the
     // diagonal width of a cell, to ensure that at least one cell
