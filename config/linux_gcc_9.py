@@ -18,7 +18,7 @@ flags_arch = '-O3 -Wall -g -ffast-math -funroll-loops -fPIC'
 #flags_link_charm = '-fprofile-arcs' # gcov
 
 #optional fortran flag
-flags_arch_fortran = '-ffixed-line-length-132 -Wmaybe-uninitialized -finit-real=snan -ffpe-trap=invalid,zero,overflow -std=legacy '
+flags_arch_fortran = '-ffixed-line-length-132 -std=legacy '
 
 cc  = 'gcc '
 f90 = 'gfortran'

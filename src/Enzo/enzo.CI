@@ -181,6 +181,7 @@ module enzo {
     entry void p_io_reader_created();
     entry void p_restart_next_level();
     entry void p_restart_level_created();
+    entry void p_restart_get_io_simulation(int n, char buffer[n]);
 }
 
   //----------------------------------------------------------------------%

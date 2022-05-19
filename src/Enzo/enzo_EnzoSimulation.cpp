@@ -37,8 +37,13 @@ EnzoSimulation::EnzoSimulation
     check_num_files_(0),
     check_ordering_(""),
     check_directory_(),
-    restart_level_(0)
+    restart_level_(0),
+    turbou_real_state_(),
+    turbou_int_state_()
 {
+  // Set turbulence state arrays to non-0 for checkpoint/restart to work
+  turbou_real_state_.push_back(0.0);
+  turbou_int_state_.push_back(0);
 #ifdef CHECK_MEMORY
   mtrace();
 #endif

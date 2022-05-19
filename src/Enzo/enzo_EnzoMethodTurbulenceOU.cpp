@@ -113,22 +113,18 @@ EnzoMethodTurbulenceOU::EnzoMethodTurbulenceOU
   int iread_sol = read_sol_ ? 1 : 0;
 
   FORTRAN_NAME(cello_init_turbulence_ou)
-    (&is_root,                  // (*)
-     &rank,                     // (*)
-     domain_size,               // (*)
-     &gamma_,                   // (*)
-     &iapply_injection_rate,    // (*)
-     &cooling_term_,            // (*)
-     &injection_rate_,          // (*)
-     &kfi_,                     // (*)
-     &kfa_,                     // (*)
-     &mach_,                    // (*)
-     &iread_sol,                // (*)
-     &sol_weight_);             // (*)
-
-  // Save phase state in EnzoSimulation so behavior after checkpoint/restart
-  // are consistent
-  enzo::simulation()->get_turbou_state();
+    (&is_root,
+     &rank,
+     domain_size,
+     &gamma_,
+     &iapply_injection_rate,
+     &cooling_term_,
+     &injection_rate_,
+     &kfi_,
+     &kfa_,
+     &mach_,
+     &iread_sol,
+     &sol_weight_);
 }
 
 //----------------------------------------------------------------------
@@ -138,10 +134,12 @@ void EnzoSimulation::get_turbou_state()
   // Create scalar variables for storing state for checkpoint/restart
 
   // Allocate state arrays if needed
-  if (turbou_real_state_.size() == 0) {
-    int n_size_double, n_size_int;
-    FORTRAN_NAME(cello_turbou_state_size)(&n_size_double,&n_size_int);
+  int n_size_double, n_size_int;
+  FORTRAN_NAME(cello_turbou_state_size)(&n_size_double,&n_size_int);
+  if (turbou_real_state_.size() < n_size_double) {
     turbou_real_state_.resize(n_size_double);
+  }
+  if (turbou_int_state_.size() < n_size_int) {
     turbou_int_state_.resize(n_size_int);
   }
 
@@ -178,7 +176,7 @@ void EnzoMethodTurbulenceOU::pup (PUP::er &p)
   p | apply_forcing_;
   p | apply_injection_rate_;
   p | cooling_term_;
-  p | hc_alpha_; 
+  p | hc_alpha_;
   p | hc_sigma_;
   p | injection_rate_;
   p | kfi_;
@@ -196,7 +194,14 @@ void EnzoMethodTurbulenceOU::pup (PUP::er &p)
 void EnzoMethodTurbulenceOU::compute ( Block * block) throw()
 {
   long double r_gvld1[5] = {4.0, 0.0, 0.0, 0.0, 0.0};
+
   if (block->is_leaf()) {
+
+    // Restore Fortran phase arrays if restarting
+    if (enzo::config()->initial_restart &&
+        EnzoMethodTurbulenceOU::iupdate_phases_ == 1) {
+      enzo::simulation()->put_turbou_state();
+    }
 
     Field field = block->data()->field();
     int mx,my,mz;
@@ -217,7 +222,7 @@ void EnzoMethodTurbulenceOU::compute ( Block * block) throw()
 
     double * field_density = (double *)field.values("density");
     CHECK_FIELD(field_density,"density");
-   
+
     double xm,ym,zm;
     double xp,yp,zp;
     block->lower(&xm,&ym,&zm);
@@ -254,7 +259,7 @@ void EnzoMethodTurbulenceOU::compute ( Block * block) throw()
         }
       }
     }
-    
+
     FIELD_STATS("density force start",field_density,mx,my,mz,gx,gy,gz);
     // index of first non-ghost value
     const int i0 = gx + mx*(gy + my*gz);
@@ -264,7 +269,7 @@ void EnzoMethodTurbulenceOU::compute ( Block * block) throw()
        &nx, &ny, &nz,
        field_density+i0,
        grid+3*i0,
-       array_work+i0, &time, &dt, 
+       array_work+i0, &time, &dt,
        &iupdate_sol,
        &iapply_cooling,
        &iapply_forcing,
@@ -276,10 +281,6 @@ void EnzoMethodTurbulenceOU::compute ( Block * block) throw()
        &olap_,
        r_gv
        );
-
-    // Save Fortran phase and random number state for checkpointing
-    if (EnzoMethodTurbulenceOU::iupdate_phases_ == 1)
-      enzo::simulation()->put_turbou_state();
 
     EnzoMethodTurbulenceOU::iupdate_phases_ = 0;
 
@@ -298,15 +299,15 @@ void EnzoMethodTurbulenceOU::compute ( Block * block) throw()
     delete [] grid;
 
   }
-  
+
   CkCallback callback = CkCallback
-    (CkIndex_EnzoBlock::r_method_turbulence_ou_shift(nullptr), 
+    (CkIndex_EnzoBlock::r_method_turbulence_ou_shift(nullptr),
      enzo::block_array());
   int n = 4;
-  
-  block->contribute((n+1)*sizeof(long double), r_gvld1, 
+
+  block->contribute((n+1)*sizeof(long double), r_gvld1,
                     sum_long_double_n_type, callback);
-  
+
 }
 
 //----------------------------------------------------------------------
@@ -338,7 +339,7 @@ void EnzoMethodTurbulenceOU::compute_shift
   r_avld1[0] = num_reduce;
 
   if (enzo_block->is_leaf()) {
-  
+
     double * w;
     int iupdate_sol = update_solution_ ? 1 : 0;
     int iapply_cooling = apply_cooling_ ? 1 : 0;
@@ -360,7 +361,7 @@ void EnzoMethodTurbulenceOU::compute_shift
     CHECK_FIELD(field_momentum_y,"velocity_y");
     CHECK_FIELD(field_momentum_z,"velocity_z");
     CHECK_FIELD(field_jacobian,"jacobian");
-    
+
     // convert to conservative form
     int mx,my,mz;
     int nx,ny,nz;
@@ -484,7 +485,7 @@ void EnzoMethodTurbulenceOU::compute_shift
     CHECK_FIELD(bfield_rx[0],"bfieldz_rx");
     CHECK_FIELD(bfield_ry[1],"bfieldz_ry");
     CHECK_FIELD(bfield_rz[2],"bfieldz_rz");
-    
+
     int mx,my,mz;
     int nx,ny,nz;
     int gx,gy,gz;
@@ -521,12 +522,11 @@ void EnzoMethodTurbulenceOU::compute_shift
   } else {
     r_avld1[3] = r_avld1[4] = 0.0;
   }
-  
 
   CkCallback callback = CkCallback
-    (CkIndex_EnzoBlock::r_method_turbulence_ou_update(nullptr), 
+    (CkIndex_EnzoBlock::r_method_turbulence_ou_update(nullptr),
      enzo::block_array());
-  enzo_block->contribute((num_reduce+1)*sizeof(long double), r_avld1, 
+  enzo_block->contribute((num_reduce+1)*sizeof(long double), r_avld1,
                          sum_long_double_n_type, callback);
 }
 
@@ -730,6 +730,9 @@ void EnzoMethodTurbulenceOU::compute_update
   delete [] turbAcc;
 
   EnzoMethodTurbulenceOU::iupdate_phases_ = 1;
+
+  // Save Fortran phase and random number state for checkpointing
+  enzo::simulation()->get_turbou_state();
 
   enzo_block->compute_done();
 }

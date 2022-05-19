@@ -182,7 +182,8 @@ EnzoMsgCheck * EnzoMsgCheck::unpack(void * buffer)
 
   // Allocate storage using CkAllocBuffer (not new!)
 
-  EnzoMsgCheck * msg = (EnzoMsgCheck *) CkAllocBuffer (buffer,sizeof(EnzoMsgCheck));
+  EnzoMsgCheck * msg = (EnzoMsgCheck *) CkAllocBuffer
+    (buffer,sizeof(EnzoMsgCheck));
 
   msg = new ((void*)msg) EnzoMsgCheck;
 

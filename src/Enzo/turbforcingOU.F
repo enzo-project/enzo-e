@@ -281,7 +281,6 @@ C     **********************************************************************
             enddo
          enddo
       enddo
-      print*, 'randseed=',crandseed()
       end subroutine
 C     **********************************************************************
       subroutine cello_turbou_state_size(n_real_state,n_integer_state)

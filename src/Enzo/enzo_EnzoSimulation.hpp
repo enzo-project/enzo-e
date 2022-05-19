@@ -70,13 +70,14 @@ public: // functions
   /// or exit if done
   void p_restart_next_level();
   void p_restart_level_created();
+  void p_restart_get_io_simulation(int n, char * const buffer);
 
   /// Save or restore state for EnzoMethodTurbulenceOU for
   /// checkpoint/restart (implementation in
   /// enzo_EnzoMethodTurbulenceOU.cpp)
   void get_turbou_state();
   void put_turbou_state();
-  
+
 public: // virtual functions
 
   /// Initialize the Enzo Simulation
@@ -87,6 +88,7 @@ public: // virtual functions
 
 private: // functions
 
+  void restart_next_level_();
 
 private: // virtual functions
 
