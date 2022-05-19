@@ -59,13 +59,13 @@ EnzoSinkParticle::EnzoSinkParticle
    const int daccrate = particle.stride(it, ia_accrate);
    const int dmf      = metals ? particle.stride(it, ia_mf) : 0;
 
-   mass_           = pmass[particle_index_ * dm];
-   x_              = px[particle_index_ * dp];
-   y_              = py[particle_index_ * dp];
-   z_              = pz[particle_index_ * dp];
-   vx_             = pvx[particle_index_ * dv];
-   vy_             = pvy[particle_index_ * dv];
-   vz_             = pvz[particle_index_ * dv];
+   pmass_           = pmass[particle_index_ * dm];
+   px_              = px[particle_index_ * dp];
+   py_              = py[particle_index_ * dp];
+   pz_              = pz[particle_index_ * dp];
+   pvx_             = pvx[particle_index_ * dv];
+   pvy_             = pvy[particle_index_ * dv];
+   pvz_             = pvz[particle_index_ * dv];
    accretion_rate_ = paccrate[particle_index_ * daccrate];
    metal_fraction_ = metals ? pmetalfrac[particle_index_ * dmf] : 0.0;
 
@@ -77,12 +77,12 @@ EnzoSinkParticle::EnzoSinkParticle
    double hx, hy, hz;
    block->cell_width(&hx, &hy, &hz);
 
-   min_ind_x_ = ceil((x_ - xm - accretion_radius_) / hx - 0.5) + gx;
-   min_ind_y_ = ceil((y_ - ym - accretion_radius_) / hy - 0.5) + gy;
-   min_ind_z_ = ceil((z_ - zm - accretion_radius_) / hz - 0.5) + gz;
-   max_ind_x_ = floor((x_ - xm + accretion_radius_) / hx - 0.5) + gx;
-   max_ind_y_ = floor((y_ - ym + accretion_radius_) / hy - 0.5) + gy;
-   max_ind_z_ = floor((z_ - zm + accretion_radius_) / hz - 0.5) + gz;
+   min_ind_x_ = ceil((px_ - xm - accretion_radius_) / hx - 0.5) + gx;
+   min_ind_y_ = ceil((py_ - ym - accretion_radius_) / hy - 0.5) + gy;
+   min_ind_z_ = ceil((pz_ - zm - accretion_radius_) / hz - 0.5) + gz;
+   max_ind_x_ = floor((px_ - xm + accretion_radius_) / hx - 0.5) + gx;
+   max_ind_y_ = floor((py_ - ym + accretion_radius_) / hy - 0.5) + gy;
+   max_ind_z_ = floor((pz_ - zm + accretion_radius_) / hz - 0.5) + gz;
 }
 
 // -------------------------------------------------------------------------------------------
@@ -103,12 +103,43 @@ bool EnzoSinkParticle::cell_in_accretion_zone(int i, int j, int k) throw()
 
   // Get the components of the displacement vector of the center of the cell from
   // the particle
-  const double disp_x = cell_center_x - x_;
-  const double disp_y = cell_center_y - y_;
-  const double disp_z = cell_center_z - z_;
+  const double disp_x = cell_center_x - px_;
+  const double disp_y = cell_center_y - py_;
+  const double disp_z = cell_center_z - pz_;
 
   // Compute the square of the magnitude of this vector
   const double r2 = disp_x * disp_x + disp_y * disp_y + disp_z * disp_z;
+
+  // Return whether or not cell is in accretion zone
+  return (r2 < accretion_radius_ * accretion_radius_);
+
+}
+
+// -------------------------------------------------------------------------------------------
+
+bool EnzoSinkParticle::cell_in_accretion_zone(int i, int j, int k,
+					      double* r2) throw()
+{
+  double hx, hy, hz;
+  block_->cell_width(&hx, &hy, &hz);
+  double xm, ym, zm;
+  block_->data()->lower(&xm,&ym,&zm);
+  int gx, gy, gz;
+  block_->data()->field().ghost_depth(0,&gx,&gy,&gz);
+
+  // Find the coordinates of the center of the cell
+  const double cell_center_x = xm + (i - gx) * hx;
+  const double cell_center_y = ym + (j - gy) * hy;
+  const double cell_center_z = zm + (k - gz) * hz;
+
+  // Get the components of the displacement vector of the center of the cell from
+  // the particle
+  const double disp_x = cell_center_x - px_;
+  const double disp_y = cell_center_y - py_;
+  const double disp_z = cell_center_z - pz_;
+
+  // Compute the square of the magnitude of this vector
+  *r2 = disp_x * disp_x + disp_y * disp_y + disp_z * disp_z;
 
   // Return whether or not cell is in accretion zone
   return (r2 < accretion_radius_ * accretion_radius_);
@@ -211,14 +242,14 @@ void EnzoSinkParticle::write_particle_data() throw() {
   const int daccrate = particle.stride(it, ia_accrate);
   const int dmf      = metals ? particle.stride(it, ia_mf) : 0;
 
-  const enzo_float old_momentum_x = mass_ * vx_;
-  const enzo_float old_momentum_y = mass_ * vy_;
-  const enzo_float old_momentum_z = mass_ * vz_;
+  const enzo_float old_momentum_x = pmass_ * pvx_;
+  const enzo_float old_momentum_y = pmass_ * pvy_;
+  const enzo_float old_momentum_z = pmass_ * pvz_;
 
-  const enzo_float old_metal_mass = mass_ * metal_fraction_;
+  const enzo_float old_metal_mass = pmass_ * metal_fraction_;
 
   // Set new values for particle attributes
-  pmass[particle_index_ * dm] = mass_ + total_mass_change_;
+  pmass[particle_index_ * dm] = pmass_ + total_pmass_change_;
 
   pvx[particle_index_ * dv] =
     (old_momentum_x + total_momentum_x_change_) / pmass[particle_index_ * dm];
@@ -227,10 +258,10 @@ void EnzoSinkParticle::write_particle_data() throw() {
   pvz[particle_index_ * dv] =
     (old_momentum_z + total_momentum_z_change_) / pmass[particle_index_ * dm];
 
-  paccrate[particle_index_ * daccrate] = total_mass_change_ / block_->dt();
+  paccrate[particle_index_ * daccrate] = total_pmass_change_ / block_->dt();
 
   if (pmetalfrac) pmetalfrac[particle_index_ * dmf] =
-      (old_metal_mass + total_metal_mass_change_) / pmass[particle_index_ * dm];
+      (old_metal_mass + total_metal_pmass_change_) / pmass[particle_index_ * dm];
 
   return;
 }

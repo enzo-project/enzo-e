@@ -1,6 +1,6 @@
 /// See LICENSE_CELLO file for license and copyright information
 
-/// @file   enzo_EnzoMethodAccretion.cpp
+/// @file   enzo_EnzoSinkParticle.hpp
 /// @author Stefan Arridge (stefan.arridge@gmail.com)
 /// @date   5 May 2022
 /// @brief  Implementation of EnzoSinkParticle, a class which encapsulates
@@ -38,6 +38,13 @@ public:
   ///
   /// Function computes whether cell is inside accretion zone of sink particle.
   bool cell_in_accretion_zone(int i, int j, int k) throw();
+
+  /// `i`,`j`,`k` are the (3D) indices of a cell.
+  ///
+  /// Function computes whether cell is inside accretion zone of sink particle.
+  /// This version also sets r2 to be equal to the square of the distance of the
+  /// center of the cell from the sink particle.
+  bool cell_in_accretion_zone(int i, int j, int k, double* r2) throw();
 
   /// `density_change` is the change in density in given cell (specified by `index`)
   /// due to accretion.
@@ -81,9 +88,9 @@ protected:
   int min_ind_z_, max_ind_z_;
 
   /// Physical attributes of the particle
-  enzo_float mass_;
-  enzo_float x_, y_, z_;
-  enzo_float vx_, vy_, vz_;
+  enzo_float pmass_;
+  enzo_float px_, py_, pz_;
+  enzo_float pvx_, pvy_, pvz_;
   enzo_float metal_fraction_;
   enzo_float accretion_rate_;
 
