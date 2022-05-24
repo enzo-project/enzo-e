@@ -474,6 +474,7 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
   double rhounit = enzo_units->density();
   double beforeMass = 0.0;
   double afterMass = 0.0;
+  double maxEvacFraction = 0.75;
   double rho_to_m = rhounit*cell_volume / cello::mass_solar;
 
 #ifdef DEBUG_FEEDBACK_STARSS
@@ -520,12 +521,33 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
         #endif 
           double d_old = d[i];
           
-          d [i] +=  d_dep_c[i];
+          // Could have a race condition here where if one particle updates the density of a cell,
+          // that update won't get communicated to the other block until the end of the cycle.
+          // In rare cases, this could result in a cell having a negative density because "centralMass"
+          // and "centralMetals" in deposit_feedback() will be overpredicted going into the negative-mass
+          // CiC for clearing out gas from the central cell. Catch this case by setting density
+          // to (1-maxEvacFraction) * density[i] and metal_density to (1-maxEvacFraction) * metal_density[i] if
+          // either go negative.
+          // TODO: Find a better solution for this. The brute-force way would be to have a refresh
+          //       for each iteration of the loop over particles, but that seems a bit excessive and
+          //       would DEFINITELY slow things down.
+
+          if (d[i] + d_dep_c[i] < 0) {
+            d[i] *= 1-maxEvacFraction;
+          }
+          else {
+            d[i] += d_dep_c[i];
+          }
+
+          if (mf[i] + mf_dep_c[i] < 0) {
+            mf[i] *= 1-maxEvacFraction;
+          }
+          else {
+            mf[i] += mf_dep_c[i];
+          }
 
           double d_new = d[i];
           double cell_mass = d_new*hx*hy*hz;
-
-          mf[i] += mf_dep_c[i];
 
           double M_scale_tot = d_new / d_old;
           double M_scale_shell = d_shell_c[i]/d[i];
@@ -549,28 +571,7 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
       }
     }
   }
-/*
-  for (int i=0; i<mx*my*mz; i++){
-     d_dep[i] = 0;
-    mf_dep[i] = 0;
-    te_dep[i] = 0;
-    ge_dep[i] = 0;
-    vx_dep[i] = 0;
-    vy_dep[i] = 0;
-    vz_dep[i] = 0;
-    d_shell[i] = 0;
 
-     d_dep_c[i] = 0;
-    mf_dep_c[i] = 0;
-    te_dep_c[i] = 0;
-    ge_dep_c[i] = 0;
-    vx_dep_c[i] = 0;
-    vy_dep_c[i] = 0;
-    vz_dep_c[i] = 0;
-    d_shell_c[i] = 0;
- 
-  }
- */
 #ifdef DEBUG_FEEDBACK_STARSS_ACCUMULATE 
   CkPrintf("MethodFeedbackSTARSS: After refresh (block [%.3f, %.3f, %.3f]) -- beforeMass = %e, afterMass = %e, afterMass - beforeMass = %e\n", xm, ym, zm, beforeMass, afterMass, afterMass-beforeMass);
 #endif
@@ -1001,9 +1002,9 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
       from the host particles.
   */
 
-  enzo_float CloudParticleVectorX[] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-  enzo_float CloudParticleVectorY[] = {1, 1, 1, 0, 0, -1, -1, -1, 0, 1, 1, 1, 0, 0, -1, -1, -1, 1, 1, 1, 0, 0, -1, -1, -1, 0};
-  enzo_float CloudParticleVectorZ[] = {1, 0, -1, 1, -1, 1, 0, -1, 0, 1, 0, -1, 1, -1, 1, 0, -1, 1, 0, -1, 1, -1, 1, 0, -1, 0};
+  enzo_float CloudParticleVectorX[] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0,  0, 0,  0,  0,  0,  0, 1, 1,  1, 1,  1,  1,  1,  1, 1};
+  enzo_float CloudParticleVectorY[] = { 1,  1,  1,  0,  0, -1, -1, -1,  0, 1, 1,  1, 0,  0, -1, -1, -1, 1, 1,  1, 0,  0, -1, -1, -1, 0};
+  enzo_float CloudParticleVectorZ[] = { 1,  0, -1,  1, -1,  1,  0, -1,  0, 1, 0, -1, 1, -1,  1,  0, -1, 1, 0, -1, 1, -1,  1,  0, -1, 0};
   enzo_float weightsVector[nCouple];
   /* Set position of feedback cloud particles */
 
@@ -1591,7 +1592,6 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   (&CloudParticlePositionX, &CloudParticlePositionY,
    &CloudParticlePositionZ, &rank, &nCouple, &coupledMetals_list, mf_dep, &left_edge,
    &mx, &my, &mz, &hx, &A);
-
 
   FORTRAN_NAME(cic_deposit)
   (&CloudParticlePositionX, &CloudParticlePositionY,
