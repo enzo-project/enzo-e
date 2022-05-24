@@ -85,6 +85,13 @@ protected: // methods
 
   double planck_function(double nu, double T, double clight, int dependent_variable) throw();
 
+  const std::string sigN_string(int i, int j) throw()
+    {return "sigN_" + std::to_string(i) + std::to_string(j);}
+  const std::string sigE_string(int i, int j) throw()
+    {return "sigE_" + std::to_string(i) + std::to_string(j);}
+  const std::string eps_string (int i) throw()
+    {return "eps_"  + std::to_string(i);}
+
   //--------- INJECTION STEP -------
 
   double get_star_temperature(double M) throw();

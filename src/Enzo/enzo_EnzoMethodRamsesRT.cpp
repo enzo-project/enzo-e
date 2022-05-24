@@ -120,12 +120,11 @@ EnzoMethodRamsesRT ::EnzoMethodRamsesRT(const int N_groups, const double clight)
   
   int N_species_ = 3; //only three ionizable species (HI, HeI, HeII)
   for (int i=0; i<N_groups_; i++) {
-    std::string istring = std::to_string(i);
-    eps_ .push_back( scalar_descr->new_value("eps_" +istring ));
+    eps_ .push_back( scalar_descr->new_value( eps_string(i) ));
     for (int j=0; j<N_species_; j++) {
       std::string jstring = std::to_string(j);
-      sigN_.push_back( scalar_descr->new_value("sigN_"+istring+jstring ));
-      sigE_.push_back( scalar_descr->new_value("sigE_"+istring+jstring ));
+      sigN_.push_back( scalar_descr->new_value( sigN_string(i,j) ));
+      sigE_.push_back( scalar_descr->new_value( sigE_string(i,j) ));
     }
   }
 
@@ -277,19 +276,20 @@ void EnzoMethodRamsesRT::get_radiation_flat(EnzoBlock * enzo_block, enzo_float *
 
   // TODO: This loop only goes through primordial ionizable species. Update once support for
   //       > 6 species is added
+  int igroup = enzo_block->method_ramses_rt_igroup;
   for (int j; j<3; j++) {
-    double sigma_j = sigma_vernier(energy,j);
+    double sigma_j = sigma_vernier(energy,j); // cm^2
 
     #ifdef DEBUG_INJECTION
       CkPrintf("MethodRamsesRT::get_radiation_flat -- j = %d; energy = %f eV; sigma_j = %1.2e cm^2 \n", j, energy, sigma_j);
     #endif
 
-    *(scalar.value( scalar.index("sigN_" + std::to_string(enzo_block->method_ramses_rt_igroup) 
-                           + std::to_string(j)) )) = sigma_j / (lunit*lunit);
-    *(scalar.value( scalar.index("sigE_" + std::to_string(enzo_block->method_ramses_rt_igroup) 
-                           + std::to_string(j)) )) = sigma_j / (lunit*lunit);
-    *(scalar.value( scalar.index("eps_" + std::to_string(enzo_block->method_ramses_rt_igroup)) ))
-                                                   = energy * cello::erg_eV / eunit;
+    *(scalar.value( scalar.index(sigN_string(igroup, j) )))
+                                       = sigma_j / (lunit*lunit);
+    *(scalar.value( scalar.index(sigE_string(igroup, j) )))
+                                       = sigma_j / (lunit*lunit);
+    *(scalar.value( scalar.index( eps_string(igroup   ) )))
+                                       = energy * cello::erg_eV / eunit;
   }
 
   N[i] = intensity * inv_vol * dt;
@@ -342,8 +342,7 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_fl
    Scalar<double> scalar = enzo_block->data()->scalar_double(); 
  
    //eq. B3 ----> int(E_nu dnu) / int(N_nu dnu)
-   *(scalar.value( scalar.index("eps_" + 
-                  std::to_string(enzo_block->method_ramses_rt_igroup)) ))
+   *(scalar.value( scalar.index( eps_string(enzo_block->method_ramses_rt_igroup) ) ))
                               =
                  E_integrated / N_integrated / eunit;
    
@@ -356,8 +355,7 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_fl
      //      star particles in each block separately and leave it at that.
   
      // eq. B4 ----> int(sigma_nuj * N_nu dnu)/int(N_nu dnu)
-     *(scalar.value( scalar.index("sigN_" + std::to_string(enzo_block->method_ramses_rt_igroup) 
-                               + std::to_string(j)) )) 
+     *(scalar.value( scalar.index(sigN_string(enzo_block->method_ramses_rt_igroup, j) ) )) 
                                      =
             integrate_simpson(freq_lower,freq_upper,n, 
                  [this,j](double nu, double b, double c, int d){
@@ -366,8 +364,7 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_fl
                  T,clight,0) / N_integrated / (lunit*lunit);
 
      // eq. B5 ----> int(sigma_nuj * E_nu dnu)/int(E_nu dnu)
-     *(scalar.value( scalar.index("sigE_" + std::to_string(enzo_block->method_ramses_rt_igroup) 
-                              + std::to_string(j)) ))
+     *(scalar.value( scalar.index(sigE_string(enzo_block->method_ramses_rt_igroup, j)) ))
                                      =
             integrate_simpson(freq_lower,freq_upper,n, 
                  [this,j](double nu, double b, double c, int d){
@@ -902,12 +899,9 @@ void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo
           double ionization_rate = 0.0;
           for (int igroup=0; igroup<enzo_config->method_ramses_rt_N_groups; igroup++) { //loop over groups
 
-            std::string igroup_s = std::to_string(igroup);
-            std::string j_s = std::to_string(j);
-
-            double sigmaN = *(scalar.value( scalar.index("sigN_" + igroup_s + j_s ))) * lunit*lunit; // cm^2 
-            double sigmaE = *(scalar.value( scalar.index("sigE_" + igroup_s + j_s ))) * lunit*lunit; // cm^2
-            double eps    = *(scalar.value( scalar.index("eps_" + igroup_s ))) * eunit; // erg 
+            double sigmaN = *(scalar.value( scalar.index( sigN_string(igroup,j) ))) * lunit*lunit; // cm^2 
+            double sigmaE = *(scalar.value( scalar.index( sigE_string(igroup,j) ))) * lunit*lunit; // cm^2
+            double eps    = *(scalar.value( scalar.index(  eps_string(igroup  ) ))) * eunit; // erg 
  
             double N_i = (photon_densities[igroup])[i] * Nunit; // cm^-3
             double n_j = (chemistry_fields[j])[i] * rhounit / masses[j]; //number density of species j
@@ -1206,7 +1200,7 @@ void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * 
   for (int j=0; j<chemistry_fields.size(); j++) {  
     enzo_float * density_j = (enzo_float *) field.values(chemistry_fields[j]);
     double n_j = density_j[i] / masses[j];     
-    double sigN_ij = *(scalar.value( scalar.index("sigN_" + std::to_string(igroup) + std::to_string(j)) ));
+    double sigN_ij = *(scalar.value( scalar.index( sigN_string(igroup, j) )));
     d_dt += n_j * clight*sigN_ij; // code_time^-1
     //std::cout << density_j[i] << ' ' <<  masses[j] << ' ' << clight << ' ' << sigN_ij << std::endl;
   }
