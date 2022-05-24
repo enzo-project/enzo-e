@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file	enzo_EnzoMethodAccretion.hpp
+/// @file	enzo_EnzoMethodAccretionDensThresh.hpp
 /// @author     Stefan Arridge (stefan.arridge@gmail.com)
 /// @date       10 March 2022
 /// @brief      Implementation of EnzoMethodAccretionDensThresh, a class
