@@ -20,11 +20,11 @@ EnzoSinkParticle::EnzoSinkParticle
     batch_index_(ib),
     particle_index_(ip),
     accretion_radius_(accretion_radius),
-    total_mass_change_(0.0),
+    total_pmass_change_(0.0),
     total_momentum_x_change_(0.0),
     total_momentum_y_change_(0.0),
     total_momentum_z_change_(0.0),
-    total_metal_mass_change_(0.0)
+    total_pmetal_mass_change_(0.0)
 {
    // Read in the particle data
    Particle particle = block_->data()->particle();
@@ -67,7 +67,7 @@ EnzoSinkParticle::EnzoSinkParticle
    pvy_             = pvy[particle_index_ * dv];
    pvz_             = pvz[particle_index_ * dv];
    accretion_rate_ = paccrate[particle_index_ * daccrate];
-   metal_fraction_ = metals ? pmetalfrac[particle_index_ * dmf] : 0.0;
+   pmetal_fraction_ = metals ? pmetalfrac[particle_index_ * dmf] : 0.0;
 
    // Find the bounding region of the accretion zone
    double xm, ym, zm;
@@ -97,9 +97,9 @@ bool EnzoSinkParticle::cell_in_accretion_zone(int i, int j, int k) throw()
   block_->data()->field().ghost_depth(0,&gx,&gy,&gz);
 
   // Find the coordinates of the center of the cell
-  const double cell_center_x = xm + (i - gx) * hx;
-  const double cell_center_y = ym + (j - gy) * hy;
-  const double cell_center_z = zm + (k - gz) * hz;
+  const double cell_center_x = xm + (i - gx + 0.5) * hx;
+  const double cell_center_y = ym + (j - gy + 0.5) * hy;
+  const double cell_center_z = zm + (k - gz + 0.5) * hz;
 
   // Get the components of the displacement vector of the center of the cell from
   // the particle
@@ -128,9 +128,9 @@ bool EnzoSinkParticle::cell_in_accretion_zone(int i, int j, int k,
   block_->data()->field().ghost_depth(0,&gx,&gy,&gz);
 
   // Find the coordinates of the center of the cell
-  const double cell_center_x = xm + (i - gx) * hx;
-  const double cell_center_y = ym + (j - gy) * hy;
-  const double cell_center_z = zm + (k - gz) * hz;
+  const double cell_center_x = xm + (i - gx + 0.5) * hx;
+  const double cell_center_y = ym + (j - gy + 0.5) * hy;
+  const double cell_center_z = zm + (k - gz + 0.5) * hz;
 
   // Get the components of the displacement vector of the center of the cell from
   // the particle
@@ -142,7 +142,7 @@ bool EnzoSinkParticle::cell_in_accretion_zone(int i, int j, int k,
   *r2 = disp_x * disp_x + disp_y * disp_y + disp_z * disp_z;
 
   // Return whether or not cell is in accretion zone
-  return (r2 < accretion_radius_ * accretion_radius_);
+  return (*r2 < accretion_radius_ * accretion_radius_);
 
 }
 
@@ -176,11 +176,11 @@ void EnzoSinkParticle::update(enzo_float density_change, int index) throw() {
 
   // Get the mass change from this cell and update the total mass change
   const enzo_float mass_change = density_change * cell_volume;
-  total_mass_change_ += mass_change;
+  total_pmass_change_ += mass_change;
 
   // Update total metal mass change if required
   if (cello::particle_descr()->has_attribute(it,"metal_fraction"))
-    total_metal_mass_change_ = (density_change / density[index]) * metal_density[index];
+    total_pmetal_mass_change_ = (density_change / density[index]) * metal_density[index];
 
   // Set density_sink equal to minus the density change
   density_source[index] = -density_change;
@@ -246,7 +246,7 @@ void EnzoSinkParticle::write_particle_data() throw() {
   const enzo_float old_momentum_y = pmass_ * pvy_;
   const enzo_float old_momentum_z = pmass_ * pvz_;
 
-  const enzo_float old_metal_mass = pmass_ * metal_fraction_;
+  const enzo_float old_metal_mass = pmass_ * pmetal_fraction_;
 
   // Set new values for particle attributes
   pmass[particle_index_ * dm] = pmass_ + total_pmass_change_;
@@ -261,7 +261,7 @@ void EnzoSinkParticle::write_particle_data() throw() {
   paccrate[particle_index_ * daccrate] = total_pmass_change_ / block_->dt();
 
   if (pmetalfrac) pmetalfrac[particle_index_ * dmf] =
-      (old_metal_mass + total_metal_pmass_change_) / pmass[particle_index_ * dm];
+      (old_metal_mass + total_pmetal_mass_change_) / pmass[particle_index_ * dm];
 
   return;
 }

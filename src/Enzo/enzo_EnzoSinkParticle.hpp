@@ -91,16 +91,16 @@ protected:
   enzo_float pmass_;
   enzo_float px_, py_, pz_;
   enzo_float pvx_, pvy_, pvz_;
-  enzo_float metal_fraction_;
+  enzo_float pmetal_fraction_;
   enzo_float accretion_rate_;
 
   /// Total changes of physical attributes of sink particle
   /// due to accretion
-  enzo_float total_mass_change_;
+  enzo_float total_pmass_change_;
   enzo_float total_momentum_x_change_;
   enzo_float total_momentum_y_change_;
   enzo_float total_momentum_z_change_;
-  enzo_float total_metal_mass_change_;
+  enzo_float total_pmetal_mass_change_;
 };
 
 #endif // ENZO_ENZO_SINK_PARTICLE

@@ -251,7 +251,7 @@ void EnzoMethodAccretion::do_checks_(const Block *block) throw()
     // set by the hydro method.
     const double density_floor = enzo::problem()->method_exists("mhd_vlct") ?
       enzo::config()->method_vlct_density_floor :
-      enzo::config()->method_ppm_density_floor ;
+      enzo::config()->ppm_density_floor ;
 
     ASSERT("EnzoMethodAccretion::EnzoMethodAccretion",
 	   "Density threshold must be at least as large as the density "
