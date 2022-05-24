@@ -673,7 +673,7 @@ Method * EnzoProblem::create_method_
 
     method = new EnzoMethodRamsesRT(
                  enzo_config->method_ramses_rt_N_groups,
-                 enzo_config->method_ramses_rt_clight);
+                 enzo_config->method_ramses_rt_clight_frac);
   } else {
 
     // Fallback to Cello method's
