@@ -78,6 +78,8 @@ public: // interface
 
   void sum_group_fields (EnzoBlock * enzo_block) throw();
 
+  void set_global_averages (EnzoBlock * enzo_block, CkReductionMsg * msg) throw();
+
 protected: // methods
 
   double integrate_simpson(double a, double b, int n, 
@@ -97,7 +99,7 @@ protected: // methods
   double get_star_temperature(double M) throw();
 
   void get_radiation_flat(EnzoBlock * enzo_block, enzo_float * N, int i, double energy,
-             double dt, double inv_vol) throw();
+             double pmass, double dt, double inv_vol) throw();
 
   void get_radiation_blackbody(EnzoBlock * enzo_block, enzo_float * N, int i, double T, 
              double freq_lower, double freq_upper, double clight, double f_esc) throw();

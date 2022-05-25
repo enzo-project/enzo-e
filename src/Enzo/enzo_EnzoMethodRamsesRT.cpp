@@ -16,7 +16,7 @@
 //#define DEBUG_RECOMBINATION
 //#define DEBUG_ALPHA
 //#define DEBUG_RATES
-#define DEBUG_INJECTION
+//#define DEBUG_INJECTION
 //#define DEBUG_TRANSPORT
 //#define DEBUG_ATTENUATION
 
@@ -116,17 +116,28 @@ EnzoMethodRamsesRT ::EnzoMethodRamsesRT(const int N_groups, const double clight)
   refresh_injection->set_callback(CkIndex_EnzoBlock::p_method_ramses_rt_solve_transport_eqn()); 
   
   // store frequency group attributes as ScalarData variables
+  // variables with suffix "mL" store the numerators/denominator
+  // of eqs. (B6)-(B8). 
+  // mL = mass_star * luminosity_star 
   ScalarDescr * scalar_descr = cello::scalar_descr_double();
   
   int N_species_ = 3; //only three ionizable species (HI, HeI, HeII)
   for (int i=0; i<N_groups_; i++) {
     eps_ .push_back( scalar_descr->new_value( eps_string(i) ));
+    scalar_descr->new_value( eps_string(i) + "mL" );
+
     for (int j=0; j<N_species_; j++) {
       std::string jstring = std::to_string(j);
       sigN_.push_back( scalar_descr->new_value( sigN_string(i,j) ));
       sigE_.push_back( scalar_descr->new_value( sigE_string(i,j) ));
+
+      scalar_descr->new_value( sigN_string(i,j) + "mL" );
+      scalar_descr->new_value( sigE_string(i,j) + "mL" );
     }
   }
+  
+  scalar_descr->new_value("mL");
+
 
 }
 
@@ -258,7 +269,7 @@ double EnzoMethodRamsesRT::get_star_temperature(double M) throw()
 }
 
 void EnzoMethodRamsesRT::get_radiation_flat(EnzoBlock * enzo_block, enzo_float * N, int i, double energy,
-           double dt, double inv_vol) throw()
+           double pmass, double dt, double inv_vol) throw()
 {
   // 
   // energy is passed in with units of eV
@@ -272,7 +283,7 @@ void EnzoMethodRamsesRT::get_radiation_flat(EnzoBlock * enzo_block, enzo_float *
 
   Scalar<double> scalar = enzo_block->data()->scalar_double();
  
-  double intensity = enzo_config->method_ramses_rt_Nphotons_per_sec * enzo_units->time(); 
+  double luminosity = enzo_config->method_ramses_rt_Nphotons_per_sec * enzo_units->time(); 
 
   // TODO: This loop only goes through primordial ionizable species. Update once support for
   //       > 6 species is added
@@ -283,16 +294,19 @@ void EnzoMethodRamsesRT::get_radiation_flat(EnzoBlock * enzo_block, enzo_float *
     #ifdef DEBUG_INJECTION
       CkPrintf("MethodRamsesRT::get_radiation_flat -- j = %d; energy = %f eV; sigma_j = %1.2e cm^2 \n", j, energy, sigma_j);
     #endif
+   
+    // put into code units 
+    sigma_j /= lunit*lunit;
+    energy  *= cello::erg_eV / eunit;
 
-    *(scalar.value( scalar.index(sigN_string(igroup, j) )))
-                                       = sigma_j / (lunit*lunit);
-    *(scalar.value( scalar.index(sigE_string(igroup, j) )))
-                                       = sigma_j / (lunit*lunit);
-    *(scalar.value( scalar.index( eps_string(igroup   ) )))
-                                       = energy * cello::erg_eV / eunit;
+    *(scalar.value( scalar.index(sigN_string(igroup, j) + "mL" ))) += sigma_j * pmass*luminosity;
+    *(scalar.value( scalar.index(sigE_string(igroup, j) + "mL" ))) += sigma_j * pmass*luminosity;
+    *(scalar.value( scalar.index( eps_string(igroup   ) + "mL" ))) += energy  * pmass*luminosity;
+
+    *(scalar.value( scalar.index("mL") )) += pmass*luminosity;
   }
 
-  N[i] = intensity * inv_vol * dt;
+  N[i] = luminosity * inv_vol * dt;
   #ifdef DEBUG_INJECTION
     CkPrintf("MethodRamsesRT::get_radiation_flat -- N[i] = %1.2e code_length^-3 \n", N[i] / (lunit*lunit*lunit));
   #endif
@@ -336,9 +350,9 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_fl
                       4*cello::mass_hydrogen, 4*cello::mass_hydrogen};
 
    //Calculate photon group attributes----
-#ifdef DEBUG_PRINT_GROUP_PARAMETERS
-   if (enzo_block->method_ramses_rt_igroup > 0) std::cout << "~~~~~~" << std::endl;
-#endif
+//#ifdef DEBUG_PRINT_GROUP_PARAMETERS
+//   if (enzo_block->method_ramses_rt_igroup > 0) CkPrintf("~~~~~~\n");
+//#endif
    Scalar<double> scalar = enzo_block->data()->scalar_double(); 
  
    //eq. B3 ----> int(E_nu dnu) / int(N_nu dnu)
@@ -372,7 +386,7 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_fl
                  },
                  T,clight,1) / E_integrated / (lunit*lunit);
 
-
+/*
 #ifdef DEBUG_PRINT_GROUP_PARAMETERS
 
      const EnzoConfig * enzo_config = enzo::config();
@@ -388,7 +402,7 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_fl
                           std::to_string(enzo_block->method_ramses_rt_igroup) ))) / cello::erg_eV
               << std::endl;  
 #endif         
-
+*/
 
    // for testing
    //*(scalar.value( scalar.index("sigN_" + std::to_string(enzo_block->method_ramses_rt_igroup) 
@@ -538,7 +552,7 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
         get_radiation_blackbody(enzo_block, N, i, T, freq_lower, freq_upper, clight,f_esc);
       }
       else if (radiation_spectrum == "flat") {
-        get_radiation_flat(enzo_block, N, i, E_mean, dt, inv_vol);
+        get_radiation_flat(enzo_block, N, i, E_mean, pmass[ipdm], dt, inv_vol);
       }
      
       //TODO: Only call get_cross_section here every N cycles, where N is an input parameter.
@@ -577,9 +591,10 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
       // I don't have to directly alter the fluxes here because that naturally gets
       // taken care of during the transport step 
       
-    }
-  } 
-}
+    } // end loop over particles
+  }  // end loop over batches
+
+} // end function
 
 //---------------------------------------------------------------------
 
@@ -1381,24 +1396,122 @@ void EnzoMethodRamsesRT::call_inject_photons(EnzoBlock * enzo_block) throw()
 {
   const EnzoConfig * enzo_config = enzo::config();
   enzo_block->method_ramses_rt_igroup = 0;
-
+/*
 #ifdef DEBUG_PRINT_GROUP_PARAMETERS
   //for printing out table of group parameters
-  std::cout<<"[E_lower, E_upper] (eV); j; sigN_ij; sigE_ij; eps_i" << std::endl;
-  std::cout<<"---------------------------------------------------" << std::endl;  
+  CkPrintf("[E_lower, E_upper] (eV); j; sigN_ij; sigE_ij; eps_i\n");
+  CkPrintf("---------------------------------------------------\n");  
 #endif 
- 
-  for (int i=0; i<enzo_config->method_ramses_rt_N_groups; i++) {
+*/
+  const int N_groups = enzo_config->method_ramses_rt_N_groups;
+  const int N_species = 3; //TODO: update for > 6 species
+  for (int i=0; i<N_groups; i++) {
     this->inject_photons(enzo_block);
     enzo_block->method_ramses_rt_igroup += 1;
   }
-  // do refresh, start transport step once that's done
- 
-  cello::refresh(ir_injection_)->set_active(enzo_block->is_leaf()); 
+  // do global reduction of sigE, sigN, and eps over star particles
+  // then do refresh -> solve_transport_eqn()
+
+  // flattened array of sigN, epsN, and eps "mL" variables
+  std::vector<double> temp(1+N_groups+2*N_groups*N_species);
+
+  // fill temp with ScalarData values
+  Scalar<double> scalar = enzo_block->data()->scalar_double();
+
+  int index = 0;
+  temp[index] = *(scalar.value( scalar.index("mL") ));
+  for (int i=0; i<N_groups; i++) {
+    index = 1 + i;
+    temp[index] = *(scalar.value( scalar.index( eps_string(i) + "mL" )));
+  }
+  for (int i=0; i<N_groups; i++) {
+    for (int j=0; j<N_species; j++) {
+      index = 1 + N_groups + i*N_species + j;
+      temp[index] = *(scalar.value( scalar.index( sigN_string(i,j) + "mL" )));
+    }
+  }
+  for (int i=0; i<N_groups; i++) {
+    for (int j=0; j<N_species; j++) {
+      index = 1 + N_groups + N_groups*N_species + i*N_species + j;
+      temp[index] = *(scalar.value( scalar.index( sigE_string(i,j) + "mL" )));
+    }
+  }
+
+  CkCallback callback (CkIndex_EnzoBlock::p_method_ramses_rt_set_global_averages(NULL),
+           enzo_block->proxy_array());
+
+  enzo_block->contribute(temp, CkReduction::sum_double, callback);
+
+  //TODO: Only do global reduction once every N cycles. If not one of these cycles, just do refresh intead
+  //else {       
+  //  cello::refresh(ir_injection_)->set_active(enzo_block->is_leaf()); 
+  //  enzo_block->new_refresh_start(ir_injection_, CkIndex_EnzoBlock::p_method_ramses_rt_solve_transport_eqn());
+  //}
+}
+
+//-----------------------------------
+
+void EnzoBlock::p_method_ramses_rt_set_global_averages(CkReductionMsg * msg)
+{
+  EnzoMethodRamsesRT * method = static_cast<EnzoMethodRamsesRT*> (this->method()); 
+  method->set_global_averages(this, msg);
+}
+
+//----
+
+void EnzoMethodRamsesRT::set_global_averages(EnzoBlock * enzo_block, CkReductionMsg * msg) throw()
+{
+  double * temp = (double *)msg->getData(); // pointer to vector containing numerator/denominators
+                                            // of eqs. (B6)-(B8)
+
+  const EnzoConfig * enzo_config = enzo::config();
+  const int N_groups = enzo_config->method_ramses_rt_N_groups;
+  const int N_species = 3; //TODO: update for > 6 species
+
+  Scalar<double> scalar = enzo_block->data()->scalar_double();
+
+  int index = 0;
+  double mult = 1.0/temp[index]; // temp[0] holds the denominator -> sum(m*L)
+
+  for (int i=0; i<N_groups; i++) {
+    index = 1 + i;
+    // eq. B6 --> sum(eps*m*L) / sum(m*L)
+    *(scalar.value( scalar.index( eps_string(i) ))) = mult*temp[index];
+  }
+
+  for (int i=0; i<N_groups; i++) {
+    for (int j=0; j<N_species; j++) {
+      index = 1 + N_groups + i*N_species + j;
+      // eq. B7 --> sum(sigN*m*L) / sum(m*L)
+      *(scalar.value( scalar.index( sigN_string(i,j) ))) = mult*temp[index];
+    }
+  }
+
+  for (int i=0; i<N_groups; i++) {
+    for (int j=0; j<N_species; j++) {
+      index = 1 + N_groups + N_groups*N_species + i*N_species + j;
+      // eq. B8 --> sum(sigE*m*L) / sum(m*L)
+      *(scalar.value( scalar.index( sigE_string(i,j) ))) = mult*temp[index];
+    }
+  }
+
+#ifdef DEBUG_PRINT_GROUP_PARAMETERS
+  for (int i=0; i<N_groups; i++) {
+    for (int j=0; j<N_species; j++) {
+      CkPrintf("[i,j] = [%d,%d]; sigN = %1.2e; sigE = %1.2e; eps = %1.2e\n",i,j,
+               *(scalar.value( scalar.index( sigN_string(i,j) ))),
+               *(scalar.value( scalar.index( sigE_string(i,j) ))),
+               *(scalar.value( scalar.index(  eps_string(i)   ))) );
+    }
+  }
+#endif 
+  
+  cello::refresh(ir_injection_)->set_active(enzo_block->is_leaf());
   enzo_block->new_refresh_start(ir_injection_, CkIndex_EnzoBlock::p_method_ramses_rt_solve_transport_eqn());
 }
 
 //-----------------------------------
+
 void EnzoMethodRamsesRT::call_solve_transport_eqn(EnzoBlock * enzo_block) throw()
 {
   const EnzoConfig * enzo_config = enzo::config();
@@ -1532,6 +1645,22 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
       }    
     }
   }
+
+  // reset "mL" sums to zero
+  // TODO: only do this once every N cycles, where N is a parameter
+  Scalar<double> scalar = block->data()->scalar_double();
+  
+  int N_species_ = 3; //only three ionizable species (HI, HeI, HeII)
+  for (int i=0; i<N_groups_; i++) {
+    *(scalar.value( scalar.index( eps_string(i) + "mL" ))) = 0.0;
+    for (int j=0; j<N_species_; j++) {
+      *(scalar.value( scalar.index( sigN_string(i,j) + "mL" ))) = 0.0;
+      *(scalar.value( scalar.index( sigE_string(i,j) + "mL" ))) = 0.0;
+    }
+  }
+  *(scalar.value( scalar.index("mL") )) = 0.0;
+   
+  
 
   //start photon injection step
   //This function will start the transport step after a refresh

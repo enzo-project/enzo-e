@@ -220,6 +220,7 @@ public: /// entry methods
   //--------------------------------------------------
   //EnzoMethodRamsesRT
   void p_method_ramses_rt_solve_transport_eqn();
+  void p_method_ramses_rt_set_global_averages(CkReductionMsg * msg);
   //--------------------------------------------------
 
   /// EnzoSolverCg entry method: DOT ==> refresh P
