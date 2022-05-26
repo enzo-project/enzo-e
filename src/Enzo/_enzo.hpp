@@ -247,9 +247,8 @@ extern "C" {
 #include "enzo_EnzoMethodMHDVlct.hpp"
 #include "enzo_EnzoMethodMergeSinks.hpp"
 #include "enzo_EnzoMethodAccretion.hpp"
-#include "enzo_EnzoMethodAccretionDensThresh.hpp"
-#include "enzo_EnzoMethodAccretionBondiHoyle.hpp"
-#include "enzo_EnzoMethodAccretionRemoveGas.hpp"
+#include "enzo_EnzoMethodThresholdAccretion.hpp"
+#include "enzo_EnzoMethodBondiHoyleAccretion.hpp"
 
 #include "enzo_EnzoMatrixDiagonal.hpp"
 #include "enzo_EnzoMatrixIdentity.hpp"

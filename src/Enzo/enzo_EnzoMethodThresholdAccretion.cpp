@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file	enzo_EnzoMethodAccretionDensThresh.hpp
+/// @file	enzo_EnzoMethodThresholdAccretion.cpp
 /// @author     Stefan Arridge (stefan.arridge@gmail.com)
 /// @date       10 March 2022
-/// @brief      Implementation of EnzoMethodAccretionDensThresh, a class
+/// @brief      Implementation of EnzoMethodThresholdAccretion, a class
 ///             from EnzoMethodAccretion.
 ///             This method reduces the gas density in the accretion zone around
 ///             a sink particle to
@@ -15,7 +15,7 @@
 
 //-------------------------------------------------------------------------------------------
 
-EnzoMethodAccretionDensThresh::EnzoMethodAccretionDensThresh
+EnzoMethodThresholdAccretion::EnzoMethodThresholdAccretion
 (double accretion_radius_cells,
  double density_threshold,
  double max_mass_fraction)
@@ -28,7 +28,7 @@ EnzoMethodAccretionDensThresh::EnzoMethodAccretionDensThresh
 
 //---------------------------------------------------------------------------------------------
 
-void EnzoMethodAccretionDensThresh::pup (PUP::er &p)
+void EnzoMethodThresholdAccretion::pup (PUP::er &p)
 {
   // NOTE: Change this function whenever attributes change
 
@@ -41,7 +41,7 @@ void EnzoMethodAccretionDensThresh::pup (PUP::er &p)
 
 //---------------------------------------------------------------------------------------------
 
-void EnzoMethodAccretionDensThresh::compute (Block * block) throw()
+void EnzoMethodThresholdAccretion::compute (Block * block) throw()
 {
 
   if (enzo::simulation()->cycle() == enzo::config()->initial_cycle)
@@ -57,7 +57,7 @@ void EnzoMethodAccretionDensThresh::compute (Block * block) throw()
 
 //----------------------------------------------------------------------------------------------
 
-void EnzoMethodAccretionDensThresh::compute_(Block * block)
+void EnzoMethodThresholdAccretion::compute_(Block * block)
 
 {
   // Only need to do anything if there are sink particles on this block.

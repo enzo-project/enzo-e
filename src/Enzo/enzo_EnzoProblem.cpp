@@ -718,24 +718,24 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "accretion") {
 
-    if (enzo_config->method_accretion_flavor == "density_threshold") {
-      method = new EnzoMethodAccretionDensThresh(
+    if (enzo_config->method_accretion_flavor == "threshold") {
+      method = new EnzoMethodThresholdAccretion(
 		       enzo_config->method_accretion_accretion_radius_cells,
 		       enzo_config->method_accretion_density_threshold,
 		       enzo_config->method_accretion_max_mass_fraction
-							);
+						);
     } else if (enzo_config->method_accretion_flavor == "bondi_hoyle") {
-      method = new EnzoMethodAccretionBondiHoyle(
+      method = new EnzoMethodBondiHoyleAccretion(
 		       enzo_config->method_accretion_accretion_radius_cells,
 		       enzo_config->method_accretion_density_threshold,
 		       enzo_config->method_accretion_max_mass_fraction
-							);
+						 );
     } else {
       method = new EnzoMethodAccretion(
 		       enzo_config->method_accretion_accretion_radius_cells,
 		       enzo_config->method_accretion_density_threshold,
 		       enzo_config->method_accretion_max_mass_fraction
-					      );
+				       );
     }
   } else {
 

@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file	enzo_EnzoMethodAccretionBondiHoyle.hpp
+/// @file	enzo_EnzoMethodBondiHoyleAccretion.hpp
 /// @author     Stefan Arridge (stefan.arridge@gmail.com)
 /// @author     John Regan (john.regan@mu.ie)
 /// @date       13 April 2022
@@ -9,23 +9,23 @@
 
 
 
-#ifndef ENZO_ENZO_METHOD_ACCRETION_BONDI_HOYLE
-#define ENZO_ENZO_METHOD_ACCRETION_BONDI_HOYLE
+#ifndef ENZO_ENZO_METHOD_BONDI_HOYLE_ACCRETION
+#define ENZO_ENZO_METHOD_BONDI_HOYLE_ACCRETION
 
-class EnzoMethodAccretionBondiHoyle : public EnzoMethodAccretion {
+class EnzoMethodBondiHoyleAccretion : public EnzoMethodAccretion {
   
 public:
   
   // Constructor
-  EnzoMethodAccretionBondiHoyle(double accretion_radius_cells,
+  EnzoMethodBondiHoyleAccretion(double accretion_radius_cells,
 				double density_threshold,
 				double max_mass_fraction);
 
   // Charm++ PUP::able declarations
-  PUPable_decl(EnzoMethodAccretionBondiHoyle);
+  PUPable_decl(EnzoMethodBondiHoyleAccretion);
 
   // Charm++ PUP::able declarations
-  EnzoMethodAccretionBondiHoyle (CkMigrateMessage *m)
+  EnzoMethodBondiHoyleAccretion (CkMigrateMessage *m)
    : EnzoMethodAccretion (m)
    {  }
 
@@ -48,4 +48,4 @@ private:
 };
 
 
-#endif // ENZO_ENZO_METHOD_ACCRETION_BONDI_HOYLE
+#endif // ENZO_ENZO_METHOD_BONDI_HOYLE_ACCRETION

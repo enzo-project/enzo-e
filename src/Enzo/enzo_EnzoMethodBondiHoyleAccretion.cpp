@@ -1,6 +1,6 @@
 /// See LICENSE_CELLO file for license and copyright information
 
-/// @file	enzo_EnzoMethodAccretionBondiHoyle.cpp
+/// @file	enzo_EnzoMethodBondiHoyleAccretion.cpp
 /// @author     Stefan Arridge (stefan.arridge@gmail.com)
 /// @author     John Regan (john.regan@mu.ie)
 /// @date
@@ -13,7 +13,7 @@
 
 //------------------------------------------------------------------
 
-EnzoMethodAccretionBondiHoyle::EnzoMethodAccretionBondiHoyle
+EnzoMethodBondiHoyleAccretion::EnzoMethodBondiHoyleAccretion
 (double accretion_radius_cells,
  double density_threshold,
  double max_mass_fraction)
@@ -26,7 +26,7 @@ EnzoMethodAccretionBondiHoyle::EnzoMethodAccretionBondiHoyle
 
 //-------------------------------------------------------------------
 
-void EnzoMethodAccretionBondiHoyle::pup (PUP::er &p)
+void EnzoMethodBondiHoyleAccretion::pup (PUP::er &p)
 {
   // NOTE: Change this function whenever attributes change
 
@@ -39,7 +39,7 @@ void EnzoMethodAccretionBondiHoyle::pup (PUP::er &p)
 
 //--------------------------------------------------------------------
 
-void EnzoMethodAccretionBondiHoyle::compute (Block * block) throw()
+void EnzoMethodBondiHoyleAccretion::compute (Block * block) throw()
 {
 
   if (enzo::simulation()->cycle() == enzo::config()->initial_cycle)
@@ -55,7 +55,7 @@ void EnzoMethodAccretionBondiHoyle::compute (Block * block) throw()
 
 //-------------------------------------------------------------------------
 
-void EnzoMethodAccretionBondiHoyle::compute_(Block * block)
+void EnzoMethodBondiHoyleAccretion::compute_(Block * block)
 {
   // Only need to do anything if there are sink particles on this block.
   Particle particle = block->data()->particle();
