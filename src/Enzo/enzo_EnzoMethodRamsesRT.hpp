@@ -101,8 +101,9 @@ protected: // methods
   void get_radiation_flat(EnzoBlock * enzo_block, enzo_float * N, int i, double energy,
              double pmass, double dt, double inv_vol) throw();
 
-  void get_radiation_blackbody(EnzoBlock * enzo_block, enzo_float * N, int i, double T, 
-             double freq_lower, double freq_upper, double clight, double f_esc) throw();
+  void get_radiation_blackbody(EnzoBlock * enzo_block, enzo_float * N, int i, double pmass, 
+             double freq_lower, double freq_upper, double clight, double f_esc, 
+             double dt, double cell_volume) throw();
 
   void inject_photons(EnzoBlock * enzo_block) throw();
 
