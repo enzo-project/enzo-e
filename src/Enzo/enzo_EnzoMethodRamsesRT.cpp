@@ -320,7 +320,9 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_fl
                    double freq_lower, double freq_upper, double clight, double f_esc, 
                    double dt, double cell_volume) throw()
 {
-  // Does all calculations in CGS, then converts to whatever unit system at the end
+  // Does all calculations in CGS, then converts to code_units at the end
+  const EnzoConfig * enzo_config = enzo::config();
+
   EnzoUnits * enzo_units = enzo::units();
   double lunit = enzo_units->length(); 
   double tunit = enzo_units->time();
@@ -339,9 +341,11 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_fl
                                          //1 Hz is a very small frequency compared to ~1e16 Hz
                             
              
-  // Get temperature of star 
-  double T = get_star_temperature(pmass*munit);
- 
+  // Get temperature of star
+  double T = enzo_config -> method_ramses_rt_temperature_blackbody;
+  if (T < 0.0) { 
+    double T = get_star_temperature(pmass*munit);
+  }
                                          
   double N_integrated = integrate_simpson(freq_lower,freq_upper,n, 
                  [this](double a, double b, double c, int d) {return planck_function(a,b,c,d);},
@@ -399,7 +403,8 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_fl
   }
   
   #ifdef DEBUG_INJECTION
-    CkPrintf("MethodRamsesRT::get_radiation_blackbody -- N[i] = %1.2e code_length^-3, T = %1.2e K \n", N[i], T);
+    CkPrintf("MethodRamsesRT::get_radiation_blackbody -- N[i] = %1.2e cm^-3, T = %1.2e K, Ndot = %1.2e photons/s \n", 
+                     N[i]/(lunit*lunit*lunit), T, luminosity/tunit);
   #endif
 
 }

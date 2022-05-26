@@ -219,7 +219,8 @@ EnzoConfig::EnzoConfig() throw ()
   method_ramses_rt_max_freq(0.0), // upper bound of freq. bins
   method_ramses_rt_flux_function("GLF"), // which flux function to use
   method_ramses_rt_clight_frac(1.0), // reduced speed of light value to use
-  method_ramses_rt_radiation_spectrum("blackbody"), // Type of radiation spectrum to use for star particles 
+  method_ramses_rt_radiation_spectrum("blackbody"), // Type of radiation spectrum to use for star particles
+  method_ramses_rt_temperature_blackbody(-1.0),
   method_ramses_rt_Nphotons_per_sec(0.0), // mainly for testing. requires radiation_spectrum="flat"
   method_ramses_rt_bin_lower(),
   method_ramses_rt_bin_upper(),
@@ -560,6 +561,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_ramses_rt_flux_function;
   p | method_ramses_rt_clight_frac;
   p | method_ramses_rt_radiation_spectrum;
+  p | method_ramses_rt_temperature_blackbody;
   p | method_ramses_rt_Nphotons_per_sec;
   p | method_ramses_rt_bin_lower;
   p | method_ramses_rt_bin_upper;
@@ -1192,6 +1194,9 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_ramses_rt_radiation_spectrum = p->value_string
     ("Method:ramses_rt:radiation_spectrum","blackbody");
+
+  method_ramses_rt_temperature_blackbody = p->value_float
+    ("Method:ramses_rt:temperature_blackbody",-1.0);
 
   method_ramses_rt_Nphotons_per_sec = p->value_float
     ("Method:ramses_rt:Nphotons_per_sec",1.0);

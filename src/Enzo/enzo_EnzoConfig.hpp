@@ -328,6 +328,7 @@ public: // interface
       method_ramses_rt_flux_function(""), // which flux function to use
       method_ramses_rt_clight_frac(1.0), // fraction of speed of light value to use
       method_ramses_rt_radiation_spectrum("blackbody"), // Type of radiation spectrum to use for star particles 
+      method_ramses_rt_temperature_blackbody(-1.0), // requires radiation_spectrum="blackbody"
       method_ramses_rt_Nphotons_per_sec(0.0), // mainly for testing. requires radiation_spectrum="flat"
       method_ramses_rt_bin_lower(),
       method_ramses_rt_bin_upper(),
@@ -672,7 +673,8 @@ public: // attributes
   double                    method_ramses_rt_max_freq;
   std::string               method_ramses_rt_flux_function;
   double                    method_ramses_rt_clight_frac;
-  std::string               method_ramses_rt_radiation_spectrum; 
+  std::string               method_ramses_rt_radiation_spectrum;
+  double                    method_ramses_rt_temperature_blackbody; 
   double                    method_ramses_rt_Nphotons_per_sec;
   std::vector<double>       method_ramses_rt_bin_lower;
   std::vector<double>       method_ramses_rt_bin_upper;
