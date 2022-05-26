@@ -126,7 +126,7 @@ private:
   /// The square of the sound speed of the gas in the host cell
   double c_s_inf_2_;
 
-  /// Value of the accretion rate. Computed by compute_accretion_rate_().
+  /// Value of the accretion rate. Computed by set_accretion_rate_().
   /// This does not necessarily determine the total mass increase of the sink particle,
   /// since the actual density change of each cell will be limited by
   /// max_mass_fraction_ and density_threshold_
