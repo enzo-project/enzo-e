@@ -31,8 +31,8 @@ a 3D array of Sedov blast waves.
    Initialize an inclined wave test problem. (Primarily used for
    testing the VL+CT MHD solver).
 
-``"merge_stars_test"``
-   Initialise star particles with masses, positions, and velocities read
+``"merge_sinks_test"``
+   Initialise sink particles with masses, positions, and velocities read
    from a text file specified in the parameter file.
   
 ``"pm"``
