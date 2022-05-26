@@ -279,11 +279,13 @@ double s99_sn_metallicity(const double &t) {
 // ------------------------------- End S99 Stuff ------------------------------
 //
 
-EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback() : Method() {
-
-  enzo::check_particle_attribute("star", "mass");
-  const EnzoConfig *enzo_config = enzo::config();
-  EnzoUnits *enzo_units = enzo::units();
+EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
+()
+  : Method()
+{
+  cello::particle_descr()->check_particle_attribute("star","mass");
+  const EnzoConfig * enzo_config = enzo::config();
+  EnzoUnits * enzo_units = enzo::units();
 
   // AJE: This was the old way this was done:
   // Initialize default refresh object

@@ -520,18 +520,16 @@ particles
 ---------
 
 For a given particle type to be deposited to the total density field,
-it must be part of the ``"is_gravitating"`` group, and must have
-exactly one of the following: an attribute called ``"mass"``, a
-constant called ``"mass"``, an attribute called ``"density"``, or
-a constant called ``"density"``.
+it must be part of the ``"is_gravitating"`` group, and must have either
+an attribute called ``"mass"``, or a constant called ``"mass"``, but
+not both.
 
-In the ``"mass"`` case, the value of the attribute / constant is
-divided by the cell volume to get a density quantity, before being
-deposited on to the grid via a CIC interpolation scheme.
-
-In the ``"density"`` case, the value of the attribute / constant is
-multiplied by ``2^(rank*level)``, before likewise being deposited
-on to the grid.
+If ``"mass"`` is an attribute, we loop through the mass attribute array
+to get the mass of each particle; and if ``"mass"`` is a constant with a
+value specified in the input parameter file, the mass of each particle is
+equal to this value. In either case, the value of the divided by the cell
+volume to get a density quantity, which is deposited on to the grid via
+a CIC interpolation scheme.
    
 ``"pm_update"``: particle-mesh
 ==============================

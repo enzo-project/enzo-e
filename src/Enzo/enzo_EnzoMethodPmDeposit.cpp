@@ -27,34 +27,30 @@ extern "C" void FORTRAN_NAME(dep_grid_cic)(
 
 //----------------------------------------------------------------------
 
-EnzoMethodPmDeposit::EnzoMethodPmDeposit(double alpha)
-    : Method(), alpha_(alpha) {
-  // Check if particle types in "is_gravitating" group have either a mass
-  // or a constant called either "mass" or "density"
-  ParticleDescr *particle_descr = cello::particle_descr();
-  Grouping *particle_groups = particle_descr->groups();
+EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
+  : Method(),
+    alpha_(alpha)
+{
+  // Check if particle types in "is_gravitating" group have either a constant
+  // or an attribute called "mass" (but not both).
+  ParticleDescr * particle_descr = cello::particle_descr();
+  Grouping * particle_groups = particle_descr->groups();
   const int num_is_grav = particle_groups->size("is_gravitating");
   for (int ipt = 0; ipt < num_is_grav; ipt++) {
-    const int it = particle_descr->type_index(
-        particle_groups->item("is_gravitating", ipt));
-
-    // Count number of attributes or constants called "mass" or "density",
+    const int it = particle_descr->type_index(particle_groups->item("is_gravitating",ipt));
+    
+    // Count number of attributes or constants called "mass",
     // which should be equal to 1
-    int num_mass_or_dens = 0;
-    if (particle_descr->has_constant(it, "mass"))
-      ++num_mass_or_dens;
-    if (particle_descr->has_attribute(it, "mass"))
-      ++num_mass_or_dens;
-    if (particle_descr->has_constant(it, "density"))
-      ++num_mass_or_dens;
-    if (particle_descr->has_attribute(it, "density"))
-      ++num_mass_or_dens;
+    int num_mass = 0;
+    if (particle_descr->has_constant (it,"mass")) ++num_mass;
+    if (particle_descr->has_attribute (it,"mass")) ++num_mass;
 
     ASSERT1("EnzoMethodPmDeposit::EnzoMethodPmDeposit",
             "Particle type %s, in the \"is_gravitating\" group, "
             "must have either an attribute or a constant "
-            "called either \"mass\" or \"density\". Exiting.",
-            particle_descr->type_name(it).c_str(), num_mass_or_dens == 1);
+	    "called \"mass\" (but not both) . Exiting.",
+	    particle_descr->type_name(it).c_str(),
+	    num_mass == 1);
   }
 
   const int rank = cello::rank();
@@ -130,9 +126,9 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     // means EnzoMethodPmDeposit ("pm_deposit") currently CANNOT be
     // used without EnzoMethodGravity ("gravity")
 
-    const int m = mx * my * mz;
-    std::fill_n(de_p, m, 0.0);
-    std::fill_n(de_pa, m, 0.0);
+    const int m = mx*my*mz;
+    std::fill_n(de_p,m,0.0);
+    std::fill_n(de_pa,m,0.0);
 
     // Get block extents and cell widths
     double xm, ym, zm;
@@ -145,19 +141,9 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     // To calculate densities from particles with "mass" attributes
     // or constants, we need the inverse volume of cells in this block.
     double inv_vol = 1.0;
-    if (rank >= 1)
-      inv_vol /= hx;
-    if (rank >= 2)
-      inv_vol /= hy;
-    if (rank >= 3)
-      inv_vol /= hz;
-
-    // Pre-compute the "density scale factor", which will be used in
-    // for particle types with a density attribute / constant.
-    const int level = block->level();
-    double density_scale_factor = 1.0;
-    for (int j = 0; j < rank * level; j++)
-      density_scale_factor *= 2.0;
+    if (rank >= 1) inv_vol /= hx;
+    if (rank >= 2) inv_vol /= hy;
+    if (rank >= 3) inv_vol /= hz;
 
     // Get cosmological scale factors, if cosmology is turned on
     enzo_float cosmo_a = 1.0;
@@ -175,308 +161,288 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     Grouping *particle_groups = particle_descr->groups();
     const int num_is_grav = particle_groups->size("is_gravitating");
 
-    // pdens will be set to point to array of particle densities.
-    enzo_float *pdens = NULL;
+    // For particle types where "mass" is an attribute,
+    // pmass will be set to point to array of particle masses
+    // For particle types where "mass" is a constant,
+    // pmass will point to the constant value.
+    enzo_float * pmass = NULL;
+
+    // The for the mass "array" (if "mass" is a constant, then
+    // there won't be a mass array, and the stride will be set
+    // to zero.
+    int dm;
 
     // Loop over particle types in "is_gravitating" group
     for (int ipt = 0; ipt < num_is_grav; ipt++) {
       const int it =
           particle.type_index(particle_groups->item("is_gravitating", ipt));
 
-      // Index for mass / density attribute / constant
-      int ind = 0;
-
-      // If particle has constant called "mass" or "density", create an
-      // array which will be later filled with a constant density value
-      if (particle.has_constant(it, "mass") ||
-          particle.has_constant(it, "density"))
-        pdens = new enzo_float[particle_descr->batch_size()];
+      // Index for mass attribute / constant
+      int imass = 0;
 
       // check correct precision for position
-      int ia = particle.attribute_index(it, "x");
-      int ba = particle.attribute_bytes(it, ia); // "bytes (actual)"
-      int be = sizeof(enzo_float);               // "bytes (expected)"
+      int ia = particle.attribute_index(it,"x");
+      int ba = particle.attribute_bytes(it,ia); // "bytes (actual)"
+      int be = sizeof(enzo_float);                // "bytes (expected)"
 
-      ASSERT4("EnzoMethodPmUpdate::compute()",
-              "Particle type %s attribute %s defined as %s but expecting %s",
-              particle.type_name(it).c_str(),
-              particle.attribute_name(it, ia).c_str(),
-              ((ba == 4) ? "single" : ((ba == 8) ? "double" : "quadruple")),
-              ((be == 4) ? "single" : ((be == 8) ? "double" : "quadruple")),
-              (ba == be));
+      ASSERT4 ("EnzoMethodPmUpdate::compute()",
+	       "Particle type %s attribute %s defined as %s but expecting %s",
+	       particle.type_name(it).c_str(),
+	       particle.attribute_name(it,ia).c_str(),
+	       ((ba == 4) ? "single" : ((ba == 8) ? "double" : "quadruple")),
+	       ((be == 4) ? "single" : ((be == 8) ? "double" : "quadruple")),
+	       (ba == be));
+
 
       // Loop over batches
-      for (int ib = 0; ib < particle.num_batches(it); ib++) {
+      for (int ib=0; ib<particle.num_batches(it); ib++) {
 
-        const int np = particle.num_particles(it, ib);
+	const int np = particle.num_particles(it,ib);
 
-        if (particle.has_constant(it, "mass")) {
+	if (particle.has_attribute(it,"mass")) {
 
-          // Particle type has constant called "mass".
-          // In this case we fill the first np elements of pdens with the
-          // constant mass value multiplied by inv_vol
-          ind = particle.constant_index(it, "mass");
-          for (int ip = 0; ip < np; ip++)
-            pdens[ip] =
-                *((enzo_float *)(particle.constant_value(it, ind))) * inv_vol;
+	  // Particle type has an attribute called "mass".
+	  // In this case we set pmass to point to the mass attribute array
+	  // Also set dm to be the stride for the "mass" attribute
+	  imass = particle.attribute_index(it,"mass");
+	  pmass = (enzo_float *) particle.attribute_array( it, imass, ib);
+	  dm = particle.stride(it,imass);
 
-        } else if (particle.has_attribute(it, "mass")) {
+	} else {
 
-          // Particle type has an attribute called "mass".
-          // In this case we set pdens to point to the mass attribute array
-          // and then multiply all its elements by inv_vol
-          ind = particle.attribute_index(it, "mass");
-          pdens = (enzo_float *)particle.attribute_array(it, ind, ib);
-          for (int ip = 0; ip < np; ip++)
-            pdens[ip] *= inv_vol;
-        } else if (particle.has_constant(it, "density")) {
+	  // Particle type has a constant called "mass".
+	  // In this case we set pmass to point to the value
+	  // of the mass constant.
+	  // dm is set to 0, which will mean that we can loop through an
+	  // "array" of length 1.
+	  imass = particle.constant_index(it,"mass");
+	  pmass = (enzo_float*)particle.constant_value(it,imass);
+	  dm = 0;
+	}
 
-          // Particle type has a constant called "density".
-          // In this case we fill the first np elements of pdens with the
-          // constant density value, and then multiply by the density scale
-          // factor.
-          ind = particle.constant_index(it, "density");
-          for (int ip = 0; ip < np; ip++) {
-            pdens[ip] = *((enzo_float *)(particle.constant_value(it, ind)));
-            pdens[ip] *= density_scale_factor;
-          }
-        } else {
-
-          // Particle type has an attribute called "density".
-          // In this case we set pdens to point to the mass attribute array
-          // and then rescale the values by the density scale factor
-          ind = particle.attribute_index(it, "density");
-          pdens = (enzo_float *)particle.attribute_array(it, ind, ib);
-          for (int ip = 0; ip < np; ip++)
-            pdens[ip] *= density_scale_factor;
-        }
-
-        // If mass / density is a constant, we simply loop through the pdens
-        // array, and so dm = 1. If its an attribute, we need to get
-        // the stride length
-        const int stride = (particle.has_attribute(it, "mass") ||
-                            particle.has_attribute(it, "density"))
-                               ? particle.stride(it, ind)
-                               : 1;
-
-        // Deposit densities to the grid with CIC scheme
-        if (rank == 1) {
+	// Deposit densities to the grid with CIC scheme
+	if (rank == 1) {
 
           const int ia_x = particle.attribute_index(it, "x");
           const int ia_vx = particle.attribute_index(it, "vx");
 
-          enzo_float *xa = (enzo_float *)particle.attribute_array(it, ia_x, ib);
-          enzo_float *vxa =
-              (enzo_float *)particle.attribute_array(it, ia_vx, ib);
-
-          const int dp = particle.stride(it, ia_x);
-          const int dv = particle.stride(it, ia_vx);
-#ifdef DEBUG_COLLAPSE
-          CkPrintf("DEBUG_COLLAPSE vxa[0] = %lg\n", vxa[0]);
+	  enzo_float * xa =  (enzo_float *)particle.attribute_array (it,ia_x,ib);
+	  enzo_float * vxa = (enzo_float *)particle.attribute_array (it,ia_vx,ib);
+	  const int dp =  particle.stride(it,ia_x);
+	  const int dv =  particle.stride(it,ia_vx);
+#ifdef DEBUG_COLLAPS
+	  CkPrintf ("DEBUG_COLLAPSE vxa[0] = %lg\n",vxa[0]);
 #endif
 
-          for (int ip = 0; ip < np; ip++) {
-            double x = xa[ip * dp] + vxa[ip * dv] * dt;
+	  for (int ip=0; ip<np; ip++) {
+	    double x = xa[ip*dp] + vxa[ip*dv]*dt;
 
-            double tx = nx * (x - xm) / (xp - xm) - 0.5;
+	    double tx = nx*(x - xm) / (xp - xm) - 0.5;
 
-            int ix0 = gx + floor(tx);
+	    int ix0 = gx + floor(tx);
+	    int ix1 = ix0 + 1;
+	    double x0 = 1.0 - (tx - floor(tx));
+	    double x1 = 1.0 - x0;
 
-            int ix1 = ix0 + 1;
-            double x0 = 1.0 - (tx - floor(tx));
-            double x1 = 1.0 - x0;
+	    // Density is mass times inverse volume
+	    // If mass is a constant, then dm is 0, pmass[ip * dm] is pmass[0], which
+	    // just dereferences pmass.
+	    enzo_float pdens = pmass[ip*dm] * inv_vol;
+	    de_p[ix0] += pdens * x0;
+	    de_p[ix1] += pdens * x1;
 
-            de_p[ix0] += pdens[ip * stride] * x0;
-            de_p[ix1] += pdens[ip * stride] * x1;
+	    if (de_p[ix0] < 0.0)
+	      WARNING3("EnzoMethodPmDeposit",
+		       "Block %s: de_p[%d] = %g",
+		       block->name().c_str(),ix0,de_p[ix0]);
 
-            if (de_p[ix0] < 0.0)
-              WARNING3("EnzoMethodPmDeposit", "Block %s: de_p[%d] = %g",
-                       block->name().c_str(), ix0, de_p[ix0]);
+	    if (de_p[ix1] < 0.0)
+	      WARNING3("EnzoMethodPmDeposit",
+		       "Block %s: de_p[%d] = %g",
+		       block->name().c_str(),ix1,de_p[ix1]);
 
-            if (de_p[ix1] < 0.0)
-              WARNING3("EnzoMethodPmDeposit", "Block %s: de_p[%d] = %g",
-                       block->name().c_str(), ix1, de_p[ix1]);
+	  } // Loop over particles in batch
 
-          } // Loop over particles in batch
+	} else if (rank == 2) {
 
-        } else if (rank == 2) {
+	  const int ia_x  = particle.attribute_index(it,"x");
+	  const int ia_y  = particle.attribute_index(it,"y");
+	  const int ia_vx = particle.attribute_index(it,"vx");
+	  const int ia_vy = particle.attribute_index(it,"vy");
+	  // Batch arrays
+	  enzo_float * xa  = (enzo_float *)particle.attribute_array (it,ia_x,ib);
+	  enzo_float * ya  = (enzo_float *)particle.attribute_array (it,ia_y,ib);
+	  enzo_float * vxa = (enzo_float *)particle.attribute_array (it,ia_vx,ib);
+	  enzo_float * vya = (enzo_float *)particle.attribute_array (it,ia_vy,ib);
 
-          const int ia_x = particle.attribute_index(it, "x");
-          const int ia_y = particle.attribute_index(it, "y");
-          const int ia_vx = particle.attribute_index(it, "vx");
-          const int ia_vy = particle.attribute_index(it, "vy");
-          // Batch arrays
-          enzo_float *xa = (enzo_float *)particle.attribute_array(it, ia_x, ib);
-          enzo_float *ya = (enzo_float *)particle.attribute_array(it, ia_y, ib);
-          enzo_float *vxa =
-              (enzo_float *)particle.attribute_array(it, ia_vx, ib);
-          enzo_float *vya =
-              (enzo_float *)particle.attribute_array(it, ia_vy, ib);
+	  const int dp =  particle.stride(it,ia_x);
+	  const int dv =  particle.stride(it,ia_vx);
 
-          const int dp = particle.stride(it, ia_x);
-          const int dv = particle.stride(it, ia_vx);
+	  for (int ip=0; ip<np; ip++) {
 
-          for (int ip = 0; ip < np; ip++) {
+	    double x = xa[ip*dp] + vxa[ip*dv]*dt;
+	    double y = ya[ip*dp] + vya[ip*dv]*dt;
 
-            double x = xa[ip * dp] + vxa[ip * dv] * dt;
-            double y = ya[ip * dp] + vya[ip * dv] * dt;
+	    double tx = nx*(x - xm) / (xp - xm) - 0.5;
+	    double ty = ny*(y - ym) / (yp - ym) - 0.5;
+	    int ix0 = gx + floor(tx);
+	    int iy0 = gy + floor(ty);
+	    int ix1 = ix0 + 1;
+	    int iy1 = iy0 + 1;
+	    double x0 = 1.0 - (tx - floor(tx));
+	    double y0 = 1.0 - (ty - floor(ty));
+	    double x1 = 1.0 - x0;
+	    double y1 = 1.0 - y0;
 
-            double tx = nx * (x - xm) / (xp - xm) - 0.5;
-            double ty = ny * (y - ym) / (yp - ym) - 0.5;
-            int ix0 = gx + floor(tx);
-            int iy0 = gy + floor(ty);
-            int ix1 = ix0 + 1;
-            int iy1 = iy0 + 1;
-            double x0 = 1.0 - (tx - floor(tx));
-            double y0 = 1.0 - (ty - floor(ty));
-            double x1 = 1.0 - x0;
-            double y1 = 1.0 - y0;
+	    // Density is mass times inverse volume
+	    // If mass is a constant, then dm is 0, pmass[ip * dm] is pmass[0], which
+	    // just dereferences pmass.
+	    enzo_float pdens = pmass[ip*dm] * inv_vol;
+	    de_p[ix0+mx*iy0] += pdens * x0 * y0;
+	    de_p[ix1+mx*iy0] += pdens * x1 * y0;
+	    de_p[ix0+mx*iy1] += pdens * x0 * y1;
+	    de_p[ix1+mx*iy1] += pdens * x1 * y1;
 
-            de_p[ix0 + mx * iy0] += pdens[ip * stride] * x0 * y0;
-            de_p[ix1 + mx * iy0] += pdens[ip * stride] * x1 * y0;
-            de_p[ix0 + mx * iy1] += pdens[ip * stride] * x0 * y1;
-            de_p[ix1 + mx * iy1] += pdens[ip * stride] * x1 * y1;
+	    if (de_p[ix0+mx*iy0] < 0.0)
+	      WARNING4("EnzoMethodPmDeposit",
+		       "Block %s: de_p[%d,%d] = %g",
+		       block->name().c_str(),ix0,iy0,de_p[ix0+mx*iy0]);
 
-            if (de_p[ix0 + mx * iy0] < 0.0)
-              WARNING4("EnzoMethodPmDeposit", "Block %s: de_p[%d,%d] = %g",
-                       block->name().c_str(), ix0, iy0, de_p[ix0 + mx * iy0]);
+	    if (de_p[ix1+mx*iy0] < 0.0)
+	      WARNING4("EnzoMethodPmDeposit",
+		       "Block %s: de_p[%d,%d] = %g",
+		       block->name().c_str(),ix1,iy0,de_p[ix1+mx*iy0]);
 
-            if (de_p[ix1 + mx * iy0] < 0.0)
-              WARNING4("EnzoMethodPmDeposit", "Block %s: de_p[%d,%d] = %g",
-                       block->name().c_str(), ix1, iy0, de_p[ix1 + mx * iy0]);
+	    if (de_p[ix0+mx*iy1] < 0.0)
+	      WARNING4("EnzoMethodPmDeposit",
+		       "Block %s: de_p[%d,%d] = %g",
+		       block->name().c_str(),ix0,iy1,de_p[ix0+mx*iy1]);
 
-            if (de_p[ix0 + mx * iy1] < 0.0)
-              WARNING4("EnzoMethodPmDeposit", "Block %s: de_p[%d,%d] = %g",
-                       block->name().c_str(), ix0, iy1, de_p[ix0 + mx * iy1]);
+	    if (de_p[ix1+mx*iy1] < 0.0)
+	      WARNING4("EnzoMethodPmDeposit",
+		       "Block %s: de_p[%d,%d] = %g",
+		       block->name().c_str(),ix1,iy1,de_p[ix1+mx*iy1]);
 
-            if (de_p[ix1 + mx * iy1] < 0.0)
-              WARNING4("EnzoMethodPmDeposit", "Block %s: de_p[%d,%d] = %g",
-                       block->name().c_str(), ix1, iy1, de_p[ix1 + mx * iy1]);
 
-          } // Loop over particles in batch
+	  } // Loop over particles in batch
 
-        } else if (rank == 3) {
+	} else if (rank == 3) {
 
-          const int ia_x = particle.attribute_index(it, "x");
-          const int ia_y = particle.attribute_index(it, "y");
-          const int ia_z = particle.attribute_index(it, "z");
-          const int ia_vx = particle.attribute_index(it, "vx");
-          const int ia_vy = particle.attribute_index(it, "vy");
-          const int ia_vz = particle.attribute_index(it, "vz");
-          enzo_float *xa = (enzo_float *)particle.attribute_array(it, ia_x, ib);
-          enzo_float *ya = (enzo_float *)particle.attribute_array(it, ia_y, ib);
-          enzo_float *za = (enzo_float *)particle.attribute_array(it, ia_z, ib);
+	  const int ia_x  = particle.attribute_index(it,"x");
+	  const int ia_y  = particle.attribute_index(it,"y");
+	  const int ia_z  = particle.attribute_index(it,"z");
+	  const int ia_vx = particle.attribute_index(it,"vx");
+	  const int ia_vy = particle.attribute_index(it,"vy");
+	  const int ia_vz = particle.attribute_index(it,"vz");
+	  enzo_float * xa  = (enzo_float *) particle.attribute_array (it,ia_x,ib);
+	  enzo_float * ya  = (enzo_float *) particle.attribute_array (it,ia_y,ib);
+	  enzo_float * za  = (enzo_float *) particle.attribute_array (it,ia_z,ib);
 
-          // Particle batch velocities
-          enzo_float *vxa =
-              (enzo_float *)particle.attribute_array(it, ia_vx, ib);
-          enzo_float *vya =
-              (enzo_float *)particle.attribute_array(it, ia_vy, ib);
-          enzo_float *vza =
-              (enzo_float *)particle.attribute_array(it, ia_vz, ib);
+	  // Particle batch velocities
+	  enzo_float * vxa = (enzo_float *) particle.attribute_array (it,ia_vx,ib);
+	  enzo_float * vya = (enzo_float *) particle.attribute_array (it,ia_vy,ib);
+	  enzo_float * vza = (enzo_float *) particle.attribute_array (it,ia_vz,ib);
 
 #ifdef DEBUG_COLLAPSE
-          CkPrintf("DEBUG_COLLAPSE vxa[0] = %lg\n", vxa[0]);
+	  CkPrintf ("DEBUG_COLLAPSE vxa[0] = %lg\n",vxa[0]);
 #endif
 
-          const int dp = particle.stride(it, ia_x);
-          const int dv = particle.stride(it, ia_vx);
+	  const int dp =  particle.stride(it,ia_x);
+	  const int dv =  particle.stride(it,ia_vx);
 
-          for (int ip = 0; ip < np; ip++) {
+	  for (int ip=0; ip<np; ip++) {
 
-            // Copy batch particle velocities to temporary block field
-            // velocities
+	    // Copy batch particle velocities to temporary block field velocities
 
-            double x = xa[ip * dp] + vxa[ip * dv] * dt;
-            double y = ya[ip * dp] + vya[ip * dv] * dt;
-            double z = za[ip * dp] + vza[ip * dv] * dt;
+	    double x = xa[ip*dp] + vxa[ip*dv]*dt;
+	    double y = ya[ip*dp] + vya[ip*dv]*dt;
+	    double z = za[ip*dp] + vza[ip*dv]*dt;
 
-            double tx = nx * (x - xm) / (xp - xm) - 0.5;
-            double ty = ny * (y - ym) / (yp - ym) - 0.5;
-            double tz = nz * (z - zm) / (zp - zm) - 0.5;
+	    double tx = nx*(x - xm) / (xp - xm) - 0.5;
+	    double ty = ny*(y - ym) / (yp - ym) - 0.5;
+	    double tz = nz*(z - zm) / (zp - zm) - 0.5;
 
-            int ix0 = gx + floor(tx);
-            int iy0 = gy + floor(ty);
-            int iz0 = gz + floor(tz);
+	    int ix0 = gx + floor(tx);
+	    int iy0 = gy + floor(ty);
+	    int iz0 = gz + floor(tz);
 
-            int ix1 = ix0 + 1;
-            int iy1 = iy0 + 1;
-            int iz1 = iz0 + 1;
+	    int ix1 = ix0 + 1;
+	    int iy1 = iy0 + 1;
+	    int iz1 = iz0 + 1;
 
-            double x0 = 1.0 - (tx - floor(tx));
-            double y0 = 1.0 - (ty - floor(ty));
-            double z0 = 1.0 - (tz - floor(tz));
+	    double x0 = 1.0 - (tx - floor(tx));
+	    double y0 = 1.0 - (ty - floor(ty));
+	    double z0 = 1.0 - (tz - floor(tz));
 
-            double x1 = 1.0 - x0;
-            double y1 = 1.0 - y0;
-            double z1 = 1.0 - z0;
+	    double x1 = 1.0 - x0;
+	    double y1 = 1.0 - y0;
+	    double z1 = 1.0 - z0;
 
-            de_p[ix0 + mx * (iy0 + my * iz0)] +=
-                pdens[ip * stride] * x0 * y0 * z0;
-            de_p[ix1 + mx * (iy0 + my * iz0)] +=
-                pdens[ip * stride] * x1 * y0 * z0;
-            de_p[ix0 + mx * (iy1 + my * iz0)] +=
-                pdens[ip * stride] * x0 * y1 * z0;
-            de_p[ix1 + mx * (iy1 + my * iz0)] +=
-                pdens[ip * stride] * x1 * y1 * z0;
-            de_p[ix0 + mx * (iy0 + my * iz1)] +=
-                pdens[ip * stride] * x0 * y0 * z1;
-            de_p[ix1 + mx * (iy0 + my * iz1)] +=
-                pdens[ip * stride] * x1 * y0 * z1;
-            de_p[ix0 + mx * (iy1 + my * iz1)] +=
-                pdens[ip * stride] * x0 * y1 * z1;
-            de_p[ix1 + mx * (iy1 + my * iz1)] +=
-                pdens[ip * stride] * x1 * y1 * z1;
+	    // Density is mass times inverse volume
+	    // If mass is a constant, then dm is 0, pmass[ip * dm] is pmass[0], which
+	    // just dereferences pmass.
+	    enzo_float pdens = pmass[ip*dm] * inv_vol;
+	    de_p[ix0+mx*(iy0+my*iz0)] += pdens * x0 * y0 * z0;
+	    de_p[ix1+mx*(iy0+my*iz0)] += pdens * x1 * y0 * z0;
+	    de_p[ix0+mx*(iy1+my*iz0)] += pdens * x0 * y1 * z0;
+	    de_p[ix1+mx*(iy1+my*iz0)] += pdens * x1 * y1 * z0;
+	    de_p[ix0+mx*(iy0+my*iz1)] += pdens * x0 * y0 * z1;
+	    de_p[ix1+mx*(iy0+my*iz1)] += pdens * x1 * y0 * z1;
+	    de_p[ix0+mx*(iy1+my*iz1)] += pdens * x0 * y1 * z1;
+	    de_p[ix1+mx*(iy1+my*iz1)] += pdens * x1 * y1 * z1;
 
-            if (de_p[ix0 + mx * (iy0 + my * iz0)] < 0.0)
-              WARNING5("EnzoMethodPmDeposit", "Block %s: de_p[%d,%d,%d] = %g",
-                       block->name().c_str(), ix0, iy0, iz0,
-                       de_p[ix0 + mx * (iy0 + my * iz0)]);
+	    if (de_p[ix0+mx*(iy0+my*iz0)] < 0.0)
+	      WARNING5("EnzoMethodPmDeposit",
+		       "Block %s: de_p[%d,%d,%d] = %g",
+		       block->name().c_str(),ix0,iy0,iz0,
+		       de_p[ix0+mx*(iy0+my*iz0)]);
 
-            if (de_p[ix1 + mx * (iy0 + my * iz0)] < 0.0)
-              WARNING5("EnzoMethodPmDeposit", "Block %s: de_p[%d,%d,%d] = %g",
-                       block->name().c_str(), ix1, iy0, iz0,
-                       de_p[ix1 + mx * (iy0 + my * iz0)]);
+	    if (de_p[ix1+mx*(iy0+my*iz0)] < 0.0)
+	      WARNING5("EnzoMethodPmDeposit",
+		       "Block %s: de_p[%d,%d,%d] = %g",
+		       block->name().c_str(),ix1,iy0,iz0,
+		       de_p[ix1+mx*(iy0+my*iz0)]);
 
-            if (de_p[ix0 + mx * (iy1 + my * iz0)] < 0.0)
-              WARNING5("EnzoMethodPmDeposit", "Block %s: de_p[%d,%d,%d] = %g",
-                       block->name().c_str(), ix0, iy1, iz0,
-                       de_p[ix0 + mx * (iy1 + my * iz0)]);
+	    if (de_p[ix0+mx*(iy1+my*iz0)] < 0.0)
+	      WARNING5("EnzoMethodPmDeposit",
+		       "Block %s: de_p[%d,%d,%d] = %g",
+		       block->name().c_str(),ix0,iy1,iz0,
+		       de_p[ix0+mx*(iy1+my*iz0)]);
 
-            if (de_p[ix1 + mx * (iy1 + my * iz0)] < 0.0)
-              WARNING5("EnzoMethodPmDeposit", "Block %s: de_p[%d,%d,%d] = %g",
-                       block->name().c_str(), ix1, iy1, iz0,
-                       de_p[ix1 + mx * (iy1 + my * iz0)]);
+	    if (de_p[ix1+mx*(iy1+my*iz0)] < 0.0)
+	      WARNING5("EnzoMethodPmDeposit",
+		       "Block %s: de_p[%d,%d,%d] = %g",
+		       block->name().c_str(),ix1,iy1,iz0,
+		       de_p[ix1+mx*(iy1+my*iz0)]);
 
-            if (de_p[ix0 + mx * (iy0 + my * iz1)] < 0.0)
-              WARNING5("EnzoMethodPmDeposit", "Block %s: de_p[%d,%d,%d] = %g",
-                       block->name().c_str(), ix0, iy0, iz1,
-                       de_p[ix0 + mx * (iy0 + my * iz1)]);
+	    if (de_p[ix0+mx*(iy0+my*iz1)] < 0.0)
+	      WARNING5("EnzoMethodPmDeposit",
+		       "Block %s: de_p[%d,%d,%d] = %g",
+		       block->name().c_str(),ix0,iy0,iz1,
+		       de_p[ix0+mx*(iy0+my*iz1)]);
 
-            if (de_p[ix1 + mx * (iy0 + my * iz1)] < 0.0)
-              WARNING5("EnzoMethodPmDeposit", "Block %s: de_p[%d,%d,%d] = %g",
-                       block->name().c_str(), ix1, iy0, iz1,
-                       de_p[ix1 + mx * (iy0 + my * iz1)]);
+	    if (de_p[ix1+mx*(iy0+my*iz1)] < 0.0)
+	      WARNING5("EnzoMethodPmDeposit",
+		       "Block %s: de_p[%d,%d,%d] = %g",
+		       block->name().c_str(),ix1,iy0,iz1,
+		       de_p[ix1+mx*(iy0+my*iz1)]);
 
-            if (de_p[ix0 + mx * (iy1 + my * iz1)] < 0.0)
-              WARNING5("EnzoMethodPmDeposit", "Block %s: de_p[%d,%d,%d] = %g",
-                       block->name().c_str(), ix0, iy1, iz1,
-                       de_p[ix0 + mx * (iy1 + my * iz1)]);
+	    if (de_p[ix0+mx*(iy1+my*iz1)] < 0.0)
+	      WARNING5("EnzoMethodPmDeposit",
+		       "Block %s: de_p[%d,%d,%d] = %g",
+		       block->name().c_str(),ix0,iy1,iz1,
+		       de_p[ix0+mx*(iy1+my*iz1)]);
 
-            if (de_p[ix1 + mx * (iy1 + my * iz1)] < 0.0)
-              WARNING5("EnzoMethodPmDeposit", "Block %s: de_p[%d,%d,%d] = %g",
-                       block->name().c_str(), ix1, iy1, iz1,
-                       de_p[ix1 + mx * (iy1 + my * iz1)]);
+	    if (de_p[ix1+mx*(iy1+my*iz1)] < 0.0)
+	      WARNING5("EnzoMethodPmDeposit",
+		       "Block %s: de_p[%d,%d,%d] = %g",
+		       block->name().c_str(),ix1,iy1,iz1,
+		       de_p[ix1+mx*(iy1+my*iz1)]);
 
-          } // Loop over particles in batch
-        }   // if rank == 3
+	  } // Loop over particles in batch
+	} // if rank == 3
 
       } // Loop over batches
-
-      // If constant mass, delete the pdens array
-      if (particle.has_constant(it, "mass") ||
-          particle.has_constant(it, "density"))
-        delete[] pdens;
 
     } // Loop over particle types in "is_gravitating" group
 
@@ -513,47 +479,45 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     enzo_float hzf = hz * cosmo_a;
     enzo_float dtf = alpha_;
 
-    enzo_float *vxf = (enzo_float *)field.values("velocity_x");
-    enzo_float *vyf = (enzo_float *)field.values("velocity_y");
-    enzo_float *vzf = (enzo_float *)field.values("velocity_z");
+    enzo_float * vxf = (enzo_float *) field.values("velocity_x");
+    enzo_float * vyf = (enzo_float *) field.values("velocity_y");
+    enzo_float * vzf = (enzo_float *) field.values("velocity_z");
 
-    enzo_float *vx = new enzo_float[m];
-    enzo_float *vy = new enzo_float[m];
-    enzo_float *vz = new enzo_float[m];
+    enzo_float * vx = new enzo_float [m];
+    enzo_float * vy = new enzo_float [m];
+    enzo_float * vz = new enzo_float [m];
 
-    for (int i = 0; i < m; i++)
-      vx[i] = vxf[i];
+    for (int i=0; i<m; i++) vx[i] = vxf[i];
 
-    if (rank >= 2)
-      for (int i = 0; i < m; i++)
-        vy[i] = vyf[i];
-    else
-      for (int i = 0; i < m; i++)
-        vy[i] = 0.0;
+    if (rank >= 2) for (int i=0; i<m; i++) vy[i] = vyf[i];
+    else           for (int i=0; i<m; i++) vy[i] = 0.0;
 
-    if (rank >= 3)
-      for (int i = 0; i < m; i++)
-        vz[i] = vzf[i];
-    else
-      for (int i = 0; i < m; i++)
-        vz[i] = 0.0;
+    if (rank >= 3) for (int i=0; i<m; i++) vz[i] = vzf[i];
+    else           for (int i=0; i<m; i++) vz[i] = 0.0;
 
-    FORTRAN_NAME(dep_grid_cic)
-    (de, de_gas, temp, vx, vy, vz, &dtf, rfield, &rank, &hxf, &hyf, &hzf, &mx,
-     &my, &mz, &gxi, &gyi, &gzi, &nxi, &nyi, &nzi, &i0, &i0, &i0, &nx, &ny, &nz,
-     &i1, &i1, &i1);
 
-    for (int i = 0; i < mx * my * mz; i++) {
+    FORTRAN_NAME(dep_grid_cic)(de,de_gas,temp,
+			       vx, vy, vz,
+			       &dtf, rfield, &rank,
+			       &hxf,&hyf,&hzf,
+			       &mx,&my,&mz,
+			       &gxi,&gyi,&gzi,
+			       &nxi,&nyi,&nzi,
+			       &i0,&i0,&i0,
+			       &nx,&ny,&nz,
+			       &i1,&i1,&i1);
+
+    for (int i=0; i<mx*my*mz; i++) {
       de_t[i] = de_pa[i] = de_p[i];
     }
 
-    for (int iz = gz; iz < mz - gz; iz++) {
-      for (int iy = gy; iy < my - gy; iy++) {
-        for (int ix = gx; ix < mx - gx; ix++) {
-          int i = ix + mx * (iy + my * iz);
-          int ig = (ix - gx) + nx * ((iy - gy) + ny * (iz - gz));
-          de_t[i] += de_gas[ig];
-        }
+    for (int iz=gz; iz<mz-gz; iz++) {
+      for (int iy=gy; iy<my-gy; iy++) {
+	for (int ix=gx; ix<mx-gx; ix++) {
+	  int i = ix + mx*(iy + my*iz);
+	  int ig = (ix-gx) + nx*((iy-gy) + ny*(iz-gz));
+	  de_t[i] += de_gas[ig];
+	}
       }
     }
 

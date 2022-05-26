@@ -21,13 +21,14 @@
  (const EnzoConfig * enzo_config) throw()
     : Initial (enzo_config->initial_cycle, enzo_config->initial_time)
   {
+    cello::particle_descr()->check_particle_attribute("sink","mass");
+
     particle_data_filename_ = 
     enzo_config->initial_merge_sinks_test_particle_data_filename;
 
     std::string line;
     std::ifstream inFile(particle_data_filename_);
 
-    
     n_particles_ = 0;
 
     while (std::getline(inFile,line)){

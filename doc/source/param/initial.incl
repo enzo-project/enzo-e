@@ -401,7 +401,7 @@ corresponds to one sink particle.
 Note: sink particles must have a ``"mass"`` attribute if this initializer is
 used.
 
-:Parameter:  :p:`Initial` : :p:`merge_stars_test` : :p:`particle_data_filename`
+:Parameter:  :p:`Initial` : :p:`merge_sinks_test` : :p:`particle_data_filename`
 :Summary: :s:`Name of the file to read from.`
 :Type:    :t:`string`
 :Default: :d:`none`

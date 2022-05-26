@@ -19,9 +19,11 @@
 
 //-------------------------------------------------------------------
 
-EnzoMethodStarMaker::EnzoMethodStarMaker() : Method() {
-
-  enzo::check_particle_attribute("star", "mass");
+EnzoMethodStarMaker::EnzoMethodStarMaker
+()
+  : Method()
+{
+  cello::particle_descr()->check_particle_attribute("star","mass");
 
   const EnzoConfig *enzo_config = enzo::config();
   // AJE: This was the old way this was done

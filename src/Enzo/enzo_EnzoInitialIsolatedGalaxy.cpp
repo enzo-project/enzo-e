@@ -57,10 +57,10 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy(
     const EnzoConfig *config) throw()
     : Initial(config->initial_cycle, config->initial_time) {
   if (this->stellar_disk_ || this->stellar_bulge_)
-    enzo::check_particle_attribute("star", "mass");
+    cello::particle_descr()->check_particle_attribute("star","mass");
 
   if (this->live_dm_halo_)
-    enzo::check_particle_attribute("dark", "mass");
+    cello::particle_descr()->check_particle_attribute("dark","mass");
 
   // read in parameter settings from config and
   // set corresponding member variables

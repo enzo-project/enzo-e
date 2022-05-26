@@ -110,7 +110,7 @@
 
     Group {
         list = ["is_gravitating"];
-        has_mass {
+        is_gravitating {
            particle_list = ["dark","star"];
         }
     }

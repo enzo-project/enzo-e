@@ -49,13 +49,12 @@ void EnzoInitialAccretionTest::pup (PUP::er &p)
   p | gas_pressure_;
 }
 
-
 void EnzoInitialAccretionTest::enforce_block
 ( Block * block, const Hierarchy * hierarchy ) throw()
 
 {
 
-  enzo::check_particle_attribute("sink","mass");
+  cello::particle_descr()->check_particle_attribute("sink","mass");
 
   // Check if accretion method is being used
     ASSERT("EnzoInitialAccretionTest",

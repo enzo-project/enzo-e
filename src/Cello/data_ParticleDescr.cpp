@@ -316,6 +316,19 @@ void ParticleDescr::set_velocity (int it, int ix, int iy, int iz)
   attribute_velocity_[it][2] = iz;
 }
 
+void ParticleDescr::check_particle_attribute(const std::string& type,
+					     const std::string& attribute){
+
+  ASSERT1("ParticleDescr::check_particle_attribute",
+	  "Error: This problem requires %s particle_type.",
+	  type, type_exists(type));
+
+  int it = type_index(type);
+  ASSERT2("ParticleDescr::check_particle_attribute",
+	  "Error: This problem requires %s particles to have an "
+	  "attribute called %s.",
+	  type, attribute,has_attribute(it,attribute));
+}
 //----------------------------------------------------------------------
 // Constants
 //----------------------------------------------------------------------
