@@ -97,7 +97,7 @@
               "star_maker"];
 
       star_maker {
-                  type = "stochastic";
+                  flavor = "stochastic";
                   use_density_threshold    = true;
                   use_velocity_divergence  = false;
                   use_dynamical_time       = false;
@@ -132,7 +132,7 @@
       # values for the background NFW potential
       #    also can have background stellar bulge and / or stellar disk potential
       background_acceleration {
-          type = "GalaxyModel";
+          flavor = "GalaxyModel";
           DM_density     = -1.0   ;  # specify this OR mass - not both - mass_radius must be virial if this is used
           DM_mass        = 1.0E10;   # mass interior to below radius (in Msun) -  (this particular value is virial mass)
           DM_mass_radius = 45.0;     # radius (kpc) corresponding to above mass (this is virial)
@@ -172,11 +172,11 @@ Solver {
 #                        "ax", "single",
 #                        "ay", "single",
 #                        "az", "single" ,
+#                        "mass", "single",
 #                        "is_local", "single"];
 #         position = [ "x", "y", "z" ];
 #         velocity = [ "vx", "vy", "vz" ];
-#         group_list = ["has_mass"];
-#         constants = [ "mass", "single", .8382456140 ];
+#         group_list = ["is_gravitating"];
 #
 #     }
 
@@ -201,7 +201,7 @@ Solver {
 #                   IC routine to get star particles registered
 #                   in this group
 #
-         group_list = ["has_mass"];
+         group_list = ["is_gravitating"];
       }
   }
 

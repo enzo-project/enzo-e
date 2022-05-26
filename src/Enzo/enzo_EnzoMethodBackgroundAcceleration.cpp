@@ -123,18 +123,18 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
 
   Particle particle = enzo_block->data()->particle();
 
-  if (enzo_config->method_background_acceleration_type == "GalaxyModel"){
+  if (enzo_config->method_background_acceleration_flavor == "GalaxyModel"){
 
     this->GalaxyModel(ax, ay, az, &particle, rank,
                       cosmo_a, enzo_config, enzo_units, enzo_block->dt);
 
-  } else if (enzo_config->method_background_acceleration_type == "PointMass"){
+  } else if (enzo_config->method_background_acceleration_flavor == "PointMass"){
     this->PointMass(ax, ay, az, &particle, rank,
                     cosmo_a, enzo_config, enzo_units, enzo_block->dt);
   } else {
 
     ERROR("EnzoMethodBackgroundAcceleration::compute_()",
-          "Background acceleration type not recognized");
+          "Background acceleration flavor not recognized");
 
   }
 
@@ -309,19 +309,19 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
      }
   } // end loop over grid cells
 
-  // Update particle accelerations for particles with mass
+  // Update particle accelerations for gravitating particles
 
   ParticleDescr * particle_descr = cello::particle_descr();
   Grouping * particle_groups = particle_descr->groups();
 
-  int num_mass = particle_groups->size("has_mass");
+  int num_is_grav = particle_groups->size("is_gravitating");
 
   double dt_shift = 0.5 * dt;
 
   // Loop through particles to apply this to
-  for (int ipt = 0; ipt < num_mass; ipt++){
+  for (int ipt = 0; ipt < num_is_grav; ipt++){
 
-    std::string particle_type = particle_groups->item("has_mass",ipt);
+    std::string particle_type = particle_groups->item("is_gravitating",ipt);
     int it = particle->type_index(particle_type);
 
     if (particle->num_particles(it) > 0){

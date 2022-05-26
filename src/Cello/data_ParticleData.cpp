@@ -152,7 +152,7 @@ int ParticleData::num_local_particles
   for (int it = 0; it < particle_descr->num_types(); it++){
     int ia_c = -1;
     int cd = -1;
-    if (particle_descr->is_attribute(it, "is_local")) particle_descr->attribute_index(it, "is_local");
+    if (particle_descr->has_attribute(it, "is_local")) particle_descr->attribute_index(it, "is_local");
     if (ia_c >= 0) cd   = particle_descr->stride(it, ia_c);
     const int nb   = num_batches(it);
 
@@ -358,7 +358,7 @@ void ParticleData::scatter
   const int ib_src = ib;
   int ia_copy = -1;
   int d_copy   = -1;
-  if (particle_descr->is_attribute(it, "is_copy")) ia_copy = particle_descr->attribute_index(it,"is_copy");
+  if (particle_descr->has_attribute(it, "is_copy")) ia_copy = particle_descr->attribute_index(it,"is_copy");
   if (ia_copy >= 0) d_copy = particle_descr->stride(it, ia_copy);
   int64_t *is_copy=NULL;
   
