@@ -228,6 +228,7 @@ extern "C" {
 #include "enzo_EnzoSourceInternalEnergy.hpp"
 #include "enzo_EnzoSinkParticle.hpp"
 #include "enzo_EnzoBondiHoyleSinkParticle.hpp"
+#include "enzo_EnzoFluxSinkParticle.hpp"
 
 #include "enzo_EnzoMethodComovingExpansion.hpp"
 #include "enzo_EnzoMethodCosmology.hpp"
@@ -249,6 +250,7 @@ extern "C" {
 #include "enzo_EnzoMethodAccretion.hpp"
 #include "enzo_EnzoMethodThresholdAccretion.hpp"
 #include "enzo_EnzoMethodBondiHoyleAccretion.hpp"
+#include "enzo_EnzoMethodFluxAccretion.hpp"
 
 #include "enzo_EnzoMatrixDiagonal.hpp"
 #include "enzo_EnzoMatrixIdentity.hpp"

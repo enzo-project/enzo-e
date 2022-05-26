@@ -730,6 +730,12 @@ Method * EnzoProblem::create_method_
 		       enzo_config->method_accretion_density_threshold,
 		       enzo_config->method_accretion_max_mass_fraction
 						 );
+    } else if (enzo_config->method_accretion_flavor == "flux") {
+      method = new EnzoMethodFluxAccretion(
+		       enzo_config->method_accretion_accretion_radius_cells,
+		       enzo_config->method_accretion_density_threshold,
+		       enzo_config->method_accretion_max_mass_fraction
+						 );
     } else {
       method = new EnzoMethodAccretion(
 		       enzo_config->method_accretion_accretion_radius_cells,

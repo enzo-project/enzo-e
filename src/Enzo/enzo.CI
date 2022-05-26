@@ -67,7 +67,7 @@ module enzo {
   PUPable EnzoInitialTurbulence;
   PUPable EnzoInitialIsolatedGalaxy;
   PUPable EnzoInitialMergeSinksTest;
-  PUPable EnzoInitialAccretionTest;		
+  PUPable EnzoInitialAccretionTest;
 
   PUPable IoEnzoBlock;
 
@@ -103,6 +103,7 @@ module enzo {
   PUPable EnzoMethodAccretion;
   PUPable EnzoMethodThresholdAccretion;
   PUPable EnzoMethodBondiHoyleAccretion;
+  PUPable EnzoMethodFluxAccretion;
 
   PUPable EnzoEOSIdeal;
   PUPable EnzoIntegrationQuanUpdate;
