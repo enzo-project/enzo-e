@@ -18,7 +18,7 @@
 import yt
 import argparse as ap
 
-def make_images(input_prefix,output_prefix,z_slice):
+def make_images(input_prefix,output_prefix,z_slice,min_dens,max_dens):
     
     ds_pattern = f"{input_prefix}_????/{input_prefix}_????.block_list"
     center = [0.0,0.0,z_slice]
@@ -39,7 +39,7 @@ def make_images(input_prefix,output_prefix,z_slice):
                                 plot_args = {'color':"k"})
 
         slc.annotate_grids(linewidth = 0.5,alpha = 1.0)
-        slc.set_zlim(("gas","density"),1.0e-1,1.0)
+        slc.set_zlim(("gas","density"),min_dens,max_dens)
 
         current_cycle = ds.parameters["current_cycle"]
         filename = f"{output_prefix}_{current_cycle:03}.png"
@@ -79,6 +79,23 @@ if __name__ == "__main__":
         "--z_slice",
         help="""
         The z-coordinate of the density slice.
+        """,
+        required=True,
+        type=float,
+    )
+
+    parser.add_argument(
+        "--min_dens",
+        help="""
+        The minimum density shown in the images.
+        """,
+        required=True,
+        type=float,
+    )
+    parser.add_argument(
+        "--max_dens",
+        help="""
+        The maximum density shown in the images.
         """,
         required=True,
         type=float,
