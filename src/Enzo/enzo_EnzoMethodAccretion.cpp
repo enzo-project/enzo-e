@@ -232,7 +232,7 @@ void EnzoMethodAccretion::do_checks_(const Block *block) throw()
 
     // Check if merging radius is at least twice that of the accretion
     // radius
-    ASSERT("EnzoMethodAccretion::EnzoMethodAccretion() ",
+    ASSERT("EnzoMethodAccretion",
 	   "Merging radius (Method:merge_sinks:merging_radius_cells "
 	   "must be at least twice the accretion radius "
 	   "(Method:accretion_compute:accretion_radius).",
@@ -240,10 +240,8 @@ void EnzoMethodAccretion::do_checks_(const Block *block) throw()
 	   2.0 * accretion_radius_cells_);
 
     // Check if either PPM or VL+CT method is being used.
-    ASSERT("EnzoMethodAccretion::EnzoMethodAccretion() ",
-	   "accretion requires vlct method. (note: at the "
-	   "moment this means that cosmology can't be used in "
-	   "combination with accretion.",
+    ASSERT("EnzoMethodAccretion",
+	   "accretion requires ppm or vlct methods.",
 	   enzo::problem()->method_exists("mhd_vlct") ||
 	   enzo::problem()->method_exists("ppm"));
 
@@ -253,7 +251,7 @@ void EnzoMethodAccretion::do_checks_(const Block *block) throw()
       enzo::config()->method_vlct_density_floor :
       enzo::config()->ppm_density_floor ;
 
-    ASSERT("EnzoMethodAccretion::EnzoMethodAccretion",
+    ASSERT("EnzoMethodAccretion",
 	   "Density threshold must be at least as large as the density "
 	   "floor set by the VL+CT method",
 	   density_threshold_ >= density_floor);
@@ -285,7 +283,7 @@ void EnzoMethodAccretion::do_checks_(const Block *block) throw()
 
     // Check that diagonal_over_minimum is less than twice the
     // minimum ghost depth.
-    ASSERT2("EnzoMethodAccretion::EnzoMethodAccretion() ",
+    ASSERT2("EnzoMethodAccretion",
 	    "The diagonal cell width divided by the minimum "
 	    "cell width is %g, and the minimum ghost depth "
 	    "is %d. The former must be less than twice the "
@@ -297,7 +295,7 @@ void EnzoMethodAccretion::do_checks_(const Block *block) throw()
 
     // Check that diagonal_over_minimum is less than twice
     // accretion_radius_cells_.
-    ASSERT2("EnzoMethodAccretion::EnzoMethodAccretion() ",
+    ASSERT2("EnzoMethodAccretion",
 	    "The diagonal cell width divided by the minimum "
 	    "cell width is %g, and accretion_radius_cells "
 	    "is %g. The former must be less than twice the "
