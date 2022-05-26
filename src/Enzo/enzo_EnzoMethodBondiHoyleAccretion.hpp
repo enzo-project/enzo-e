@@ -8,7 +8,6 @@
 ///             See Krumholz+ 2004, ApJ, 611, 399 for details.
 
 
-
 #ifndef ENZO_ENZO_METHOD_BONDI_HOYLE_ACCRETION
 #define ENZO_ENZO_METHOD_BONDI_HOYLE_ACCRETION
 

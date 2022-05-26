@@ -3,7 +3,7 @@
 /// @file	enzo_EnzoMethodBondiHoyleAccretion.cpp
 /// @author     Stefan Arridge (stefan.arridge@gmail.com)
 /// @author     John Regan (john.regan@mu.ie)
-/// @date
+/// @date       13 April 2022
 /// @brief      Computes accretion rates according to Bondi-Hoyle model.
 ///             See Krumholz+ 2004, ApJ, 611, 399 for details.
 ///
