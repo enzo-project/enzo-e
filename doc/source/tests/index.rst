@@ -19,7 +19,7 @@ This testing section describes tests on enzo-e program
    hierarchy
    hydro
    initialmusic
-   mergestars
+   mergesinks
    methods
    output
    particle

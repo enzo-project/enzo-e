@@ -293,7 +293,7 @@ public: // interface
       initial_IG_recent_SF_SFR(2.0),
       initial_IG_recent_SF_seed(12345),
       // EnzoInitialMergeStarsTest
-      initial_merge_stars_test_particle_data_filename(""),
+      initial_merge_sinks_test_particle_data_filename(""),
       // EnzoMethodCheckGravity
       method_check_gravity_particle_type(),
       // EnzoMethodHeat
@@ -374,7 +374,7 @@ public: // interface
       method_vlct_dual_energy(false),
       method_vlct_dual_energy_eta(0.0),
       // EnzoMethodMergeStars
-      method_merge_stars_merging_radius_cells(0.0),
+      method_merge_sinks_merging_radius_cells(0.0),
       // EnzoProlong
       prolong_enzo_type(),
       prolong_enzo_positive(true),
@@ -442,7 +442,7 @@ protected: // methods
   void read_initial_turbulence_(Parameters *);
   void read_initial_isolated_galaxy_(Parameters *);
   void read_initial_feedback_test_(Parameters *);
-  void read_initial_merge_stars_test_(Parameters *);
+  void read_initial_merge_sinks_test_(Parameters *);
   
   void read_method_grackle_(Parameters *);
   void read_method_feedback_(Parameters *);
@@ -455,7 +455,7 @@ protected: // methods
   void read_method_pm_update_(Parameters *);
   void read_method_ppm_(Parameters *);
   void read_method_turbulence_(Parameters *);
-  void read_method_merge_stars_(Parameters *);
+  void read_method_merge_sinks_(Parameters *);
   
   void read_physics_(Parameters *);
 
@@ -689,7 +689,7 @@ public: // attributes
   int                        initial_IG_recent_SF_seed;
 
   // EnzoInitialMergeStarsTest
-  std::string                initial_merge_stars_test_particle_data_filename;
+  std::string                initial_merge_sinks_test_particle_data_filename;
 
   /// EnzoMethodCheckGravity
   std::string                method_check_gravity_particle_type;
@@ -793,7 +793,7 @@ public: // attributes
   double                     method_vlct_dual_energy_eta;
 
   /// EnzoMethodMergeStars
-  double                     method_merge_stars_merging_radius_cells;
+  double                     method_merge_sinks_merging_radius_cells;
 
 
   std::string                prolong_enzo_type;

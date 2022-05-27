@@ -2,7 +2,7 @@
 
 # This file defines the function test_mmc which has the following behaviour:
 # - takes as the prefix for the names of the directories generated when Enzo-E runs
-#   the merge_stars_test problem, which contain snapshots of the
+#   the merge_sinks_test problem, which contain snapshots of the
 #   particle data at regular time intervals, a name for the image file which will be
 #   generated, and a value for the tolerance limit
 # - uses yt to read the data and calculates the total mass, total x/y/z-momentum
@@ -16,7 +16,7 @@
 #   indeed merging (shown by decrease in particle number with time) and whether
 #   mass and momentum are being properly conserved.
 
-# test_mmc can be imported by another script (as is done in run_merge_stars_test.py), 
+# test_mmc can be imported by another script (as is done in run_merge_sinks_test.py), 
 # or it can be executed by running this file as a script, with command line arguments 
 # being passed to test_mmc.
 # For more information, run "python mass_momentum_conservation.py -h".
@@ -69,11 +69,11 @@ def test_mmc(tolerance,input_prefix,output):
     for ds in yt.DatasetSeries(ds_pattern):
         box = ds.box(left_edge = -ds.domain_width/2.0,
                      right_edge = ds.domain_width/2.0)
-        mass.append(box["star","mass"].sum())
-        px.append((box["star","mass"] * box["star","vx"]).sum())
-        py.append((box["star","mass"] * box["star","vy"]).sum())
-        pz.append((box["star","mass"] * box["star","vz"]).sum())
-        n_p.append(len(box["star","mass"]))
+        mass.append(box["sink","mass"].sum())
+        px.append((box["sink","mass"] * box["sink","vx"]).sum())
+        py.append((box["sink","mass"] * box["sink","vy"]).sum())
+        pz.append((box["sink","mass"] * box["sink","vz"]).sum())
+        n_p.append(len(box["sink","mass"]))
         cycle.append(ds["current_cycle"])
 
     mass_error, mass_error_pass = test_error(mass,tolerance)

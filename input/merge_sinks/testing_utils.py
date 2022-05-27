@@ -1,6 +1,6 @@
 # Modified version of input/vlct/testing_utils.py. D
 
-# Defines a context manager used by run_merge_stars_test.py
+# Defines a context manager used by run_merge_sinks_test.py
 
 from contextlib import contextmanager
 import os
@@ -14,11 +14,11 @@ except NameError:
 import numpy as np
 
 # determine Enzo-E's root directory
-if "/input/merge_stars" ==  os.path.dirname(os.path.abspath(__file__))[-18:]:
+if "/input/merge_sinks" ==  os.path.dirname(os.path.abspath(__file__))[-18:]:
     # this will work even if this file is imported by modifying sys.path 
     _ENZOE_ROOT_DIR = os.path.dirname(os.path.abspath(__file__))[:-18]
 else:
-    raise RuntimeError("run_merge_stars_test.py has been moved. "
+    raise RuntimeError("run_merge_sinks_test.py has been moved. "
                        "Please update the logic for identifying the Enzo-E "
                        "root directory")
 

@@ -10,7 +10,7 @@
 # correctly and if Enzo-E ran as expected.
 
 # make_images can be imported by another script (as is done in
-# run_merge_stars_test.py), or it can be executed by running this file as a script,
+# run_merge_sinks_test.py), or it can be executed by running this file as a script,
 # with command line arguments being passed to make_images. 
 # For more information, run "python images.py -h".
 
@@ -27,15 +27,15 @@ def make_images(input_prefix,output_prefix):
         
         box = ds.box(left_edge = -ds.domain_width/2.0,
                      right_edge = ds.domain_width/2.0)
-        x = box["star","x"]
-        y = box["star","y"]
-        z = box["star","z"]
+        x = box["sink","x"]
+        y = box["sink","y"]
+        z = box["sink","z"]
         fig,ax = plt.subplots()
         ax.plot(x,y,marker = "x",linestyle = "None")
         ax.set_xlim(-ds.domain_width[0]/2.0,ds.domain_width[0]/2.0)
         ax.set_ylim(-ds.domain_width[0]/2.0,ds.domain_width[0]/2.0)
-        ax.set_xlabel("x (cm)")
-        ax.set_ylabel("y (cm)")
+        ax.set_xlabel("x")
+        ax.set_ylabel("y")
         current_cycle = ds.parameters["current_cycle"]
         filename = f"{output_prefix}_{current_cycle}.png"
         fig.savefig(filename)
@@ -45,8 +45,8 @@ if __name__ == "__main__":
     
     parser = ap.ArgumentParser(
         description="""
-        Reads a data directory containing a series of snapshots of the MergeStarsTest
-        problem and plots the x and y positions of the star particles,
+        Reads a data directory containing a series of snapshots of the MergeSinksTest
+        problem and plots the x and y positions of the sink particles,
         making a separate image for each snapshot
         """
     )

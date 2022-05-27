@@ -57,7 +57,7 @@ Currently the Enzo-e testing infrastructure tests:
    hydro
    initialmusic
    methods
-   mergestars
+   mergesinks
    output
    particle
    performance

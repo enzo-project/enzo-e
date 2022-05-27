@@ -3,13 +3,13 @@
 # This file defines a function called make_ics, generates a text file
 # (called particles.dat by default)
 # with particle data which can be used to initialise
-# the merge stars test problem in Enzo-E. More specifically, it creates star
+# the merge sinks test problem in Enzo-E. More specifically, it creates sink
 # particles with constant masses, with random positions uniformly distributed
 # in a sphere, and initial velocities all of the same magnitude with directions
 # directed towards the centre of the sphere, plus an additional (optional)
 # constant drift velocity.
 
-# make_ics can be imported by another script (as is done in run_merge_stars_test.py),
+# make_ics can be imported by another script (as is done in run_merge_sinks_test.py),
 # or it can be executed by running this file as a script, with command line arguments
 # being passed to make_ics.
 # For more information, run "python ics.py -h".
@@ -17,9 +17,9 @@
 import numpy as np
 import argparse as ap
 
-def make_ics(radius = 4.0e16,
-             mass = 2.0e36,
-             infall_speed = 1.0e8,
+def make_ics(radius = 0.4,
+             mass = 1.0,
+             infall_speed = 1.0,
              n_particles = 1000,
              centre = [0.0,0.0,0.0],
              drift_velocity = [0.0,0.0,0.0],
@@ -69,7 +69,7 @@ if __name__ == "__main__":
 
     parser = ap.ArgumentParser(
     description="""
-    Generates ICs for a sphere of star particles with random positions, on radial
+    Generates ICs for a sphere of sink particles with random positions, on radial
     infalling tranjectories. 
     """
     )
@@ -122,7 +122,7 @@ if __name__ == "__main__":
         "-i",
         "--infall_speed",
         help="""
-        The infall speed of the star particles in cm/s
+        The infall speed of the sink particles in cm/s
         """,
         required=True,
         type=float,

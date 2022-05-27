@@ -1,32 +1,32 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoInitialMergeStarsTest.hpp
+/// @file     enzo_EnzoInitialMergeSinksTest.hpp
 /// @author   Stefan Arridge (stefan.arridge@gmail.com)
 /// @date     2022-01-06
-/// @brief    [\ref Enzo] Implementation of test problem for the "merge stars"
-///           method. Sets up two star particles with positions, velocities, and
+/// @brief    [\ref Enzo] Implementation of test problem for the "merge sinks"
+///           method. Creates sink particles with positions, velocities, and
 ///           masses given in the parameter file 
 
-#ifndef ENZO_ENZO_INITIAL_MERGE_STARS_TEST_HPP
-#define ENZO_ENZO_INITIAL_MERGE_STARS_TEST_HPP
+#ifndef ENZO_ENZO_INITIAL_MERGE_SINKS_TEST_HPP
+#define ENZO_ENZO_INITIAL_MERGE_SINKS_TEST_HPP
 
-class EnzoInitialMergeStarsTest : public Initial {
+class EnzoInitialMergeSinksTest : public Initial {
 
-  /// @class    EnzoInitialMergeStarsTest
+  /// @class    EnzoInitialMergeSinksTest
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] initial conditions for test problem for "merge stars"
+  /// @brief    [\ref Enzo] initial conditions for test problem for "merge sinks"
   ///           method
 
 public: // interface
 
   /// CHARM++ constructor
-  EnzoInitialMergeStarsTest(const EnzoConfig * enzo_config) throw();
+  EnzoInitialMergeSinksTest(const EnzoConfig * enzo_config) throw();
  
   /// CHARM++ PUP::able declaration
-  PUPable_decl(EnzoInitialMergeStarsTest);
+  PUPable_decl(EnzoInitialMergeSinksTest);
 
   /// CHARM++ migration constructor
-  EnzoInitialMergeStarsTest(CkMigrateMessage *m)
+  EnzoInitialMergeSinksTest(CkMigrateMessage *m)
     : Initial (m)
   { }
 
@@ -39,7 +39,7 @@ public: // interface
   ( Block * block, const Hierarchy * hierarchy ) throw();
 
   // Destructor
-  virtual ~EnzoInitialMergeStarsTest() throw() {};
+  virtual ~EnzoInitialMergeSinksTest() throw() {};
 
 private: // attributes
 
@@ -60,5 +60,5 @@ private: // attributes
 
 };
 
-#endif /* ENZO_ENZO_INITIAL_MERGE_STARS_TEST_HPP */
+#endif /* ENZO_ENZO_INITIAL_MERGE_SINKS_TEST_HPP */
 

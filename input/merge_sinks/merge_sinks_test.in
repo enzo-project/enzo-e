@@ -9,9 +9,9 @@
 
 
 Domain {
-     lower = [ -2.0e17, -2.0e17, -2.0e17];
+     lower = [ -2.0, -2.0, -2.0];
      rank = 3;
-     upper = [ 2.0e17, 2.0e17, 2.0e17 ];
+     upper = [ 2.0, 2.0, 2.0 ];
  }
 
  Field {
@@ -27,10 +27,10 @@ Domain {
  }
 
  Initial {
-     merge_stars_test {
+     merge_sinks_test {
      	 particle_data_filename = "particles.dat";
      };
-     list = [ "merge_stars_test" ];
+     list = [ "merge_sinks_test" ];
  }
 
  Mesh {
@@ -41,9 +41,9 @@ Domain {
 
 
 Particle {
-    list = ["star"];
+    list = ["sink"];
     batch_size = 4096;
-    star {
+    sink {
         attributes = [ "x", "default",
                        "y", "default",
                        "z", "default",
@@ -61,18 +61,17 @@ Particle {
 		       "id" , "int64"];
         position = [ "x", "y", "z" ];
         velocity = [ "vx", "vy", "vz" ];
-        group_list = "has_mass";
     }
 }
 
 Method {
 
-    list = ["pm_update","merge_stars"];		
+    list = ["pm_update","merge_sinks"];		
     pm_update {
-        max_dt = 1e7;
+        max_dt = 1.0e-2;
     };
 
-    merge_stars {
+    merge_sinks {
 
     merging_radius_cells = 0.1;
      
@@ -82,16 +81,17 @@ Method {
 
 
 Stopping {
-    time = 1e9;
+    time = 1.0;
 }
 
 Output {
    
     data {
-        dir = [ "./Dir_Merge_Stars_%04d", "cycle" ];
+    
+        dir = [ "./Dir_%04d", "cycle" ];
         field_list = [ "acceleration_x", "acceleration_y", "acceleration_z",
 	 	      	"density_total", "potential" ];
-	particle_list = ["star"];
+	particle_list = ["sink"];
         name = [ "data-%04d-%04d.h5", "cycle", "proc" ];
         schedule {
             step = 10;
