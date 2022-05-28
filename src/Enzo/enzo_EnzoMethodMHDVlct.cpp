@@ -99,6 +99,16 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
     bfield_method_ = nullptr;
   }
 
+  // Check that the (cell-centered) ghost depth is large enough
+  // Face-centered ghost depth could in principle be 1 smaller
+  int gx,gy,gz;
+  field_descr->ghost_depth(field_descr->field_id("density"), &gx, &gy, &gz);
+  int min_gdepth_req = (half_dt_recon_->total_staling_rate() +
+                        full_dt_recon_->total_staling_rate());
+  ASSERT1("EnzoMethodMHDVlct::compute", "ghost depth must be at least %d.",
+	  min_gdepth_req, std::min(gx, std::min(gy, gz)) >= min_gdepth_req);
+
+  // initialize other attributes
   store_fluxes_for_corrections_ = store_fluxes_for_corrections;
   if (store_fluxes_for_corrections){
     ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
@@ -326,12 +336,11 @@ static void allocate_FC_flux_buffer_(Block * block) throw()
 
 void EnzoMethodMHDVlct::compute ( Block * block) throw()
 {
+  if (block->cycle() == enzo::config()->initial_cycle) { post_init_checks_(); }
+
   if (store_fluxes_for_corrections_){ allocate_FC_flux_buffer_(block); }
 
   if (block->is_leaf()) {
-    // Check that the mesh size and ghost depths are appropriate
-    check_mesh_and_ghost_size_(block);
-
     // load the list of keys for the passively advected scalars
     const str_vec_t passive_list = *(lazy_passive_list_.get_list());
 
@@ -512,25 +521,36 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------
 
-void EnzoMethodMHDVlct::check_mesh_and_ghost_size_(Block *block) const noexcept
+void EnzoMethodMHDVlct::post_init_checks_() const noexcept
 {
-  Field field = block->data()->field();
+  ASSERT("EnzoMethodMHDVlct::post_init_checks_",
+         "This solver isn't currently compatible with cosmological sims",
+         enzo::cosmology() == nullptr);
 
-  // Check that the mesh size is appropriate
-  int nx,ny,nz;
-  field.size(&nx,&ny,&nz);
-  int gx,gy,gz;
-  field.ghost_depth(field.field_id("density"),&gx,&gy,&gz);
-  ASSERT("EnzoMethodMHDVlct::compute",
-	 "Active zones on each block must be >= ghost depth.",
-	 nx >= gx && ny >= gy && nz >= gz);
+  const Problem* problem = enzo::problem();
 
-  // Check that the (cell-centered) ghost depth is large enough
-  // Face-centered ghost could in principle be 1 smaller
-  int min_ghost_depth = (half_dt_recon_->total_staling_rate() +
-			 full_dt_recon_->total_staling_rate());
-  ASSERT1("EnzoMethodMHDVlct::compute", "ghost depth must be at least %d.",
-	  min_ghost_depth, std::min(nx, std::min(ny, nz)) >= min_ghost_depth);
+  // problems would arise in cosmological simulations if the gravity method
+  // precedes the VL+CT method.
+  ASSERT("EnzoMethodMHDVlct::post_init_checks_",
+         "this method can't precede the gravity method.",
+         problem->method_precedes("gravity", "mhd_vlct") |
+         (!problem->method_exists("gravity")) );
+
+  // the following checks address some problems I've encountered in the past
+  // (they probably need to be revisited when we add Bfield flux corrections)
+  bool fc_exists = problem->method_exists("flux_correct");
+  if (fc_exists & !problem->method_precedes("mhd_vlct", "flux_correct")) {
+    ERROR("EnzoMethodMHDVlct::post_init_checks_",
+          "this method can't precede the flux_correct method");
+  } else if (fc_exists & !store_fluxes_for_corrections_) {
+    ERROR("EnzoMethodMHDVlct::post_init_checks_",
+          "the flux_correct method exists, but this method isn't saving "
+          "fluxes to be used for corrections.");
+  } else if (store_fluxes_for_corrections_ & !fc_exists) {
+    ERROR("EnzoMethodMHDVlct::post_init_checks_",
+          "this method is saving fluxes for corrections, but the flux_correct "
+          "method doesn't exist");
+  }
 }
 
 //----------------------------------------------------------------------
@@ -593,7 +613,6 @@ void EnzoMethodMHDVlct::compute_flux_
 
 //----------------------------------------------------------------------
 
-// todo: need to add this to header!
 void EnzoMethodMHDVlct::compute_source_terms_
 (const double cur_dt, const bool full_timestep,
  const EnzoEFltArrayMap &orig_integration_map,
@@ -601,8 +620,8 @@ void EnzoMethodMHDVlct::compute_source_terms_
  const EnzoEFltArrayMap &accel_map,
  EnzoEFltArrayMap &dUcons_map,  const int stale_depth) const noexcept
 {
-  // As we add more source terms, we may want to store them in a vector instead
-  // of manually invoking them
+  // As we add more source terms, we may want to store them in a std::vector
+  // instead of manually invoking them
 
   // add any source-terms that are used for partial and full timesteps
   // (there aren't any right now...)
