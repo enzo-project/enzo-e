@@ -9,8 +9,10 @@
 # Specifically, this script:
 #   1.) Checks if that L1-norm of the error is appropriate for the inclined
 #       stable jeans wave for N=16 and N=32
+#
+# In the future, this should also be extended to test the PPM solver
 
-import os
+import argparse
 import os.path
 import shutil
 import sys
@@ -19,14 +21,22 @@ from functools import partial
 
 import numpy as np
 
-from testing_utils import \
-    CalcSimL1Norm, EnzoEWrapper, isclose, standard_analyze, testing_context
-
-from run_MHD_linear_wave_test import \
-    analyze_linwave, identical_l1_error_linwave
+# import testing utilities defined for VL+CT tests (this approach is very hacky
+# - we really need to revisit this in the future!)
+_LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
+_VLCT_DIR = os.path.join(_LOCAL_DIR, "../vlct")
+if os.path.isdir(_VLCT_DIR):
+    sys.path.insert(0, _VLCT_DIR)
+    from testing_utils import \
+        CalcSimL1Norm, EnzoEWrapper, isclose, standard_analyze, testing_context
+    from run_MHD_linear_wave_test import \
+        analyze_linwave, identical_l1_error_linwave
+else:
+    raise RuntimeError(f"expected VL+CT tests to be defined in {_VLCT_DIR}, "
+                       "but that that directory does not exist")
 
 def run_tests(executable):
-    temp = 'input/vlct/jeans_wave/vlct_stable_jeansN{:d}.in'
+    temp = 'input/Gravity/jeans_wave/vlct_stable_jeansN{:d}.in'
     call_test = EnzoEWrapper(executable,temp)
 
     call_test(16)
@@ -71,11 +81,13 @@ def cleanup():
 
 if __name__ == '__main__':
 
-    executable = os.environ.get('ENZOE_BIN', 'bin/enzo-e')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--launch_cmd', required=True,type=str)
+    args = parser.parse_args()
 
     with testing_context():
         # run the tests
-        tests_complete = run_tests(executable)
+        tests_complete = run_tests(args.launch_cmd)
 
         # analyze the tests
         tests_passed = analyze_tests()

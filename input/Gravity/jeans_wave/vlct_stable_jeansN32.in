@@ -1,4 +1,4 @@
-   include "input/vlct/jeans_wave/initial_jeans.incl"
+   include "input/Gravity/jeans_wave/initial_jeans.incl"
 
    Mesh {
       root_rank = 3; # 3D
