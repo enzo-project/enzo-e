@@ -28,8 +28,8 @@ EnzoMethodFluxAccretion::EnzoMethodFluxAccretion
 				       std::min(ghost_depth[1],ghost_depth[2]));
 
   ASSERT("EnzoMethodFluxAccretion::EnzoMethodFluxAccretion() ",
-	 "The accretion radius must be no greater than the ghost depth"
-	 "(4 cells by default)",
+	 "The accretion radius must be no greater than than the ghost depth minus one."
+	 "(ghost depth is 4 cells by default)",
 	 accretion_radius_cells_ <= min_ghost_depth - 1);
 
 }
