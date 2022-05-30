@@ -324,8 +324,8 @@
                         "is_local", "default"];
          position = [ "x", "y", "z" ];
 	 velocity = [ "vx", "vy", "vz" ];
-         constants = [ "mass", "default", .8382456140 ];
-         group_list = [ "has_mass" ];
+         constants = [ "mass", "double", 2.5581226e-5 ];
+         group_list = [ "is_gravitating" ];
      }
  }
 

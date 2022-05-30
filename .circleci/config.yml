@@ -7,7 +7,7 @@ commands:
       - run:
           name: "Set environment variables."
           command: |
-            echo 'export CHARM_VER=6.10.2' >> $BASH_ENV
+            echo 'export CHARM_VER=7.0.0' >> $BASH_ENV
             echo 'export LD_LIBRARY_PATH=$HOME/local/lib:$LD_LIBRARY_PATH' >> $BASH_ENV
             echo 'export CELLO_ARCH=linux_gnu' >> $BASH_ENV
             echo 'export CELLO_BUILD_NCORE=4' >> $BASH_ENV
@@ -87,12 +87,13 @@ commands:
           name: "Install dependencies for docs build."
           command: |
             sudo apt-get update
+            sudo apt-get install doxygen
             python3 -m venv $HOME/venv
             source $HOME/venv/bin/activate
             pip install --upgrade pip
             pip install --upgrade wheel
             pip install --upgrade setuptools
-            pip install sphinx sphinx_rtd_theme
+            pip install sphinx sphinx_rtd_theme breathe
 
   configure-build-system:
     description: "Modifies the SConstruct file to use grackle or not."

@@ -85,7 +85,9 @@ void Main::p_checkpoint_output(int count, std::string dir_name)
 #ifdef CHARM_ENZO
     CkPrintf ("Calling CkStartCheckpoint\n");
     CkCallback callback(CkIndex_EnzoSimulation::r_write_checkpoint_output(),proxy_simulation);
-    CkStartCheckpoint (dir_checkpoint_,callback,1);
+    CkStartCheckpoint (dir_checkpoint_,callback,false,1);
+    // "OLD" CHARM++ (version < 7.0.0) USE:
+    //CkStartCheckpoint (dir_checkpoint_,callback);
 #endif
   }
   // --------------------------------------------------
@@ -113,7 +115,9 @@ void Main::p_checkpoint_method(int count, std::string dir_name)
 #ifdef CHARM_ENZO
     CkPrintf ("Calling CkStartCheckpoint\n");
     CkCallback callback(CkIndex_EnzoSimulation::r_write_checkpoint_method(),proxy_simulation);
-    CkStartCheckpoint (dir_checkpoint_,callback,1);
+    CkStartCheckpoint (dir_checkpoint_,callback,false,1);
+    // "OLD" CHARM++ (version < 7.0.0) USE:
+    //CkStartCheckpoint (dir_checkpoint_,callback);
 #endif
   }
   // --------------------------------------------------
@@ -181,7 +185,7 @@ void Main::p_stopping_enter()
 void Main::p_stopping_balance()
 {
 #ifdef CHARM_ENZO
-  cello::block_array().p_stopping_balance();
+  cello::block_array().p_stopping_load_balance();
 #endif
 }
 
@@ -287,16 +291,6 @@ void Main::p_adapt_update()
 #ifdef CHARM_ENZO
   cello::block_array().p_adapt_update();
 #endif  
-}
-
-//----------------------------------------------------------------------
-
-void Main::p_adapt_next()
-{
-  TRACE_MAIN("p_adapt_next");
-#ifdef CHARM_ENZO
-  cello::block_array().p_adapt_next();
-#endif
 }
 
 //----------------------------------------------------------------------

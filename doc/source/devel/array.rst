@@ -63,9 +63,13 @@ The class template is formally defined as ``CelloArray<T,D>`` where
 ``T`` is the contained type (frequently ``enzo_float``) and ``D`` is
 the number of dimensionsions of the array.
 
-At a high level, the semantics of this template class resemble
-those of pointers and numpy's ``ndarray`` and differ from those of
-idiomatic C++ standard library containers (e.g. ``std::vector``).
+At a high-level, this template class has semantics like a pointer or
+``std::shared_ptr`` (there are also similarities to numpy's ,
+``ndarray``).  These objects serve as a 
+smart-pointer with methods for treating the data as a specialized
+array.  These semantics explicitly differ from the C++ standard
+library containers (like ``std::vector``).
+
 In other words, ``CelloArray<T,D>`` acts as an address
 for the underlying data. The copy constructor and copy
 assignment operation effectively make shallow copies and
@@ -73,6 +77,8 @@ deepcopies are made by explicitly invoking special methods. A
 consequnce of this is that any modifications made to the elements of
 an array within a function, where the array had been passed by value,
 will affect the value of the array outside of the function.
+We will return to this topic below in
+:ref:`CelloArray-Pointer-Semantics`
 
 To provide a more detailed description of ``CelloArray<T,D>``'s
 user interface it is most straightforward to describe the different
@@ -332,21 +338,11 @@ bugs, we require that any default-constructed ``CSlice`` must be
 assigned a non-default constructed value (or an error will be raised).
 
 
-Elementwise Assignment
-----------------------
+Copying Elements between arrays
+-------------------------------
 
-We also provide elementwise assignment (copying elements between arrays).
-To invoke this, ``arr.subarray(Arg... args)`` must appear on the LHS
-(left-hand side) of an ``=``. The expression on the RHS (right-hand) side
-can be either:
-
-  * A scalar of the type contained by ``arr``. In this case, all elements in
-    the resulting subarray are set equal to the scalar.
-
-  * Another array or subarray that contains the same type of elements as
-    ``arr`` (The dimensions & shape of the RHS array must match the LHS
-    subarray). In this case, the elements in the LHS subarray are each
-    set equal to the corresponding elements of the array on the RHS.
+We also provide the ``copy_to`` instance method in order to copy
+elements between elements between two ``CelloArray`` instances.
 
 An example is illustrated below:
 
@@ -356,19 +352,78 @@ An example is illustrated below:
    CelloArray<int,2> arr(data,3,4);
    // arr reflects: [[0,1,2,3],[4,5,6,7],[8,9,10,11]]
    CelloArray<int,2> arr2(2,2); // arr2 is initially [[0,0],[0,0]]
-   arr2.subarray(CSlice(0,2),
-                 CSlice(0,2)) = 7; //arr2 is now [[7,7],[7,7]]
-   // The previous 2 lines could be re-written as: arr2.subarray() = 7;
-   arr.subarray(CSlice(1,3), CSlice(0,2)) = arr2;
+   arr2(0,0) = 7;
+   arr2(0,1) = 7;
+   arr2(1,0) = 7;
+   arr2(1,1) = 7; // arr2 is now [[7,7],[7,7]]
+   arr2.copy_to(arr.subarray(CSlice(1,3), CSlice(0,2)));
    // arr now reflects: [[0,1,2,3],[7,7,6,7],[7,7,10,11]]
-   arr.subarray(CSlice(0,3), 
-                CSlice(1,3)) = arr.subarray(CSlice(0,3), CSlice(2,4));
-   // arr now reflects: [[1,2,3,3],[7,6,7,7],[7,10,11,11]]
-   CelloArray<int,2> arr3 = arr.subarray(CSlice(1,3), CSlice(2,4));
-   // arr3 is a view of the subarray: [[7,7],[11,11]] of arr
-   //arr3 = 17;   // This will not compile
-   arr3 = arr2; // arr3 is now a shallow copy of arr2 & arr is unchanged
+   arr2(0,1) = 4; // arr2 is now [[7,4],[7,7]] and arr is unaffected
 
+
+.. _CelloArray-Pointer-Semantics:
+
+Pointer Semantics
+-----------------
+
+The following table is provided to highlight some of the differences
+between the ``CelloArray``'s semantics and the semantics of a standard
+library container.
+
+
+.. list-table:: Semantic Comparison Table
+   :widths: 12 44 44
+   :header-rows: 1
+
+   * -
+     - ``CelloArray<T,D>`` Semantics
+     - Container Semantics
+   * - Null-State
+     - * a ``CelloArray<T, D>`` technically supports an "null" state,
+         which signals that it's uninitialized. (This is directly
+         analogous to a ``nullptr``).
+       * the ``CelloArray<T, D>::is_null()`` method is provided for checking
+         this condition.
+       * The default constructor will create an uninitialized CelloArray
+     - A container always has a valid state. A default-constructed container
+       is simply an empty container.
+
+   * - Copy constructor & assignment
+     - These are shallow copies
+     - These are deep copies
+
+   * - ``const`` correctness
+     - * like a ``float * const`` or a ``const
+         std::shared_ptr<float>``, a ``const CelloArray<float, N>``
+         points to values at a fixed location in memory. While the
+         memory address can’t be modified, the values stored at that
+         address can still be mutated.
+       * like a ``const float*`` or a ``std::shared_ptr<const
+         float>``, a ``CelloArray<const float, N>`` points to a region
+         in memory whose values cannot be modified. :superscript:`1` In
+         other words the compiler will raise errors if you try to
+         modify any of the values within the array.
+       * Note: a ``CelloArray<float, N>`` can be implicitly converted
+         to a ``CelloArray<const float, N>`` (e.g. you can pass the
+         former to a function that expecting the latter). It’s about
+         as seemless as converting a ``float*`` to a ``const
+         float*``. :superscript:`2`
+
+         (In contrast, ``std::const_pointer_cast`` is
+         required for converting a ``std::shared_ptr<float>`` to a
+         ``std::shared_ptr<const float>``)
+     - The contents of a ``const`` container are immutable. For example,
+       a ``const std::vector<float>``, won't let you modify it's values.
+
+:superscript:`1` For completeness, we note that there's technically
+nothing stopping you from having a ``CelloArray<float, N>`` that
+aliases the same data as a ``CelloArray<const float, N>``. In that
+case, you are could modify the values using the ``CelloArray<float,
+N>``.
+
+:superscript:`2` In contrast, ``std::const_pointer_cast`` is
+required for converting a ``std::shared_ptr<float>`` to a
+``std::shared_ptr<const float>``
 
 ===========
 Convenience
@@ -436,12 +491,12 @@ First is an the ``CelloArray`` version:
 
    void reconstruct_NN_x(EFlt3DArray &w, EFlt3DArray &wl, 
                          EFlt3DArray &wr){
-       wl.subarray() = w.subarray(CSlice(0,w.shape(0)),
-                                  CSlice(0,w.shape(1)),
-                                  CSlice(0,-1));
-       wr.subarray() = w.subarray(CSlice(0,w.shape(0)),
-                                  CSlice(0,w.shape(1)),
-                                  CSlice(1,w.shape(2)));
+       w.subarray(CSlice(0,w.shape(0)),
+                  CSlice(0,w.shape(1)),
+                  CSlice(0,-1)).copy_to(wl);
+       w.subarray(CSlice(0,w.shape(0)),
+                  CSlice(0,w.shape(1)),
+                  CSlice(1,w.shape(2))).copy_to(wr);
    }
 
 The analogous code using conventional pointer operations is:
@@ -451,7 +506,7 @@ The analogous code using conventional pointer operations is:
    typedef double enzo_float;
 
    void reconstruct_NN_x(enzo_float *w, enzo_float *wl, enzo_float *wr,
-                      int mx, int my, int mz){
+                         int mx, int my, int mz){
      int offset = 1;
      for (int iz=0; iz<mz-1; iz++) {
        for (int iy=0; iy<my-1; iy++) {

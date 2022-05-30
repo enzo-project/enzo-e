@@ -42,17 +42,17 @@ public: // interface
     ++counter[cello::index_static()];
     copy_(msg_output);
     cello::hex_string(tag_,TAG_LEN); // add new tag for new message
-  };
+ };
 
   MsgOutput & operator = (const MsgOutput & msg_output)
   {
     copy_(msg_output);
     return *this;
   }
-    
+
   /// Set the DataMsg object
   void set_data_msg (DataMsg * data_msg);
-  
+
   /// Copy data from this message into the provided Data object
   void update (Data * data);
 
@@ -64,7 +64,7 @@ public: // interface
 
   /// Return the FileHdf5 pointer (ONLY USABLE ON WRITER)
   FileHdf5 * file() { return file_; }
-  
+
   /// Set the sending index
   void set_index_send (Index index);
 
@@ -84,7 +84,7 @@ public: // interface
 
   double * block_lower() { return block_lower_; }
   double * block_upper() { return block_upper_; }
-  
+
 public: // static methods
 
   /// Pack data to serialize
@@ -112,7 +112,7 @@ protected: // methods
     }
     strncpy(tag_,msg_output.tag_,TAG_LEN);
   }
-  
+
 protected: // attributes
 
   /// Whether destination is local or remote
@@ -120,10 +120,10 @@ protected: // attributes
 
   /// Index of the sending Block
   Index index_send_;
-  
+
   /// Trace to currently active Block
   BlockTrace block_trace_;
-  
+
   /// Saved pointer to MethodOutput object (on writing Block only!)
   MethodOutput * method_output_;
 
@@ -141,14 +141,14 @@ protected: // attributes
 
   /// Data for the Block
   IoBlock * io_block_;
-  
+
   /// Block meta-data
   std::string block_name_;
 
   /// Block extents
   double block_lower_[3];
   double block_upper_[3];
-  
+
 };
 
 #endif /* CHARM_MSG_OUTPUT_HPP */

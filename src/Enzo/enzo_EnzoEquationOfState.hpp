@@ -111,7 +111,7 @@ public: // interface
   /// It's a not obvious to me that the EOS should necessarily be responsible
   /// for this operation.
   virtual void primitive_from_integration
-  (EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &primitive_map,
+  (const EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &primitive_map,
    const int stale_depth, const str_vec_t &passive_list) const =0;
 
   /// Computes thermal pressure from integration quantities
@@ -126,7 +126,8 @@ public: // interface
   /// This nominally should wrap EnzoComputePressure. But at the time of
   /// writing, it doesn't actually wrap EnzoComputePressure
   virtual void pressure_from_integration
-  (EnzoEFltArrayMap &integration_map, const EFlt3DArray &pressure,
+  (const EnzoEFltArrayMap &integration_map,
+   const CelloArray<enzo_float, 3> &pressure,
    const int stale_depth) const = 0;
 
   /// returns the density floor

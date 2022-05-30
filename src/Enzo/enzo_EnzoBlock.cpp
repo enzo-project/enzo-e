@@ -165,41 +165,33 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
 
 //----------------------------------------------------------------------
 
-EnzoBlock::EnzoBlock
-( MsgRefine * msg )
-  : CBase_EnzoBlock ( msg ),
-    dt(dt_),
-    redshift(0.0)
+#ifdef BYPASS_CHARM_MEM_LEAK
+EnzoBlock::EnzoBlock( process_type ip_source)
+  : CBase_EnzoBlock ( ip_source ),
+#else
+    EnzoBlock::EnzoBlock ( MsgRefine * msg )
+    : CBase_EnzoBlock ( msg ),
+#endif
+  dt(dt_),
+  redshift(0.0)
+
 {
+#ifdef TRACE_BLOCK  
+CkPrintf ("%d %p TRACE_BLOCK %s EnzoBlock(ip)\n",
+          CkMyPe(),(void *)this,name(thisIndex).c_str());
+#endif
+
+#ifdef BYPASS_CHARM_MEM_LEAK
+#else
   initialize_enzo_();
   initialize();
-#ifdef TRACE_BLOCK
-  CkPrintf ("%d index TRACE_BLOCK EnzoBlock(MsgRefine)  %d %d %d \n",
-            CkMyPe(), index_[0],index_[1],index_[2]);
-  msg->print();
-#endif
-#ifdef DEBUG_ENZO_BLOCK
-  CkPrintf ("%d %p END TRACE_BLOCK EnzoBlock(msg)\n",CkMyPe(),(void *)this);
-  EnzoBlock::print();
+  Block::initialize();
 #endif
 }
 
 //----------------------------------------------------------------------
 
-EnzoBlock::EnzoBlock
-( process_type ip_source)
-  : CBase_EnzoBlock ( ip_source ),
-    dt(dt_),
-    redshift(0.0)
-{
-#ifdef TRACE_BLOCK
-  CkPrintf ("%d index TRACE_BLOCK EnzoBlock(%d)  %d %d %d \n",
-            CkMyPe(),ip_source,
-	    index_[0],index_[1],index_[2]);
-#endif
-}
-
-//----------------------------------------------------------------------
+#ifdef BYPASS_CHARM_MEM_LEAK
 
 void EnzoBlock::p_set_msg_refine(MsgRefine * msg)
 {
@@ -208,6 +200,8 @@ void EnzoBlock::p_set_msg_refine(MsgRefine * msg)
   initialize();
   Block::initialize();
 }
+
+#endif
 
 //----------------------------------------------------------------------
 
@@ -228,10 +222,10 @@ void EnzoBlock::initialize_enzo_()
 
 EnzoBlock::~EnzoBlock()
 {
-#ifdef DEBUG_ENZO_BLOCK
-  CkPrintf ("%d %p TRACE_BLOCK ~EnzoBlock(...)\n",CkMyPe(),(void *)this);
-  print();
-#endif
+#ifdef TRACE_BLOCK  
+  CkPrintf ("%d %p TRACE_BLOCK %s ~EnzoBlock(...)\n",
+            CkMyPe(),(void *)this,name(thisIndex).c_str());
+#endif  
 }
 
 //----------------------------------------------------------------------

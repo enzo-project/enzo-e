@@ -113,6 +113,13 @@ EnzoMethodGravity::EnzoMethodGravity
 
 void EnzoMethodGravity::compute(Block * block) throw()
 {
+  if (enzo::simulation()->cycle() == enzo::config()->initial_cycle) {
+    // Check if the pm_deposit method is being used and precedes the
+    // gravity method.
+    ASSERT("EnzoMethodGravity",
+           "Error: pm_deposit method must precede gravity method.",
+           enzo::problem()->method_precedes("pm_deposit", "gravity"));
+  }
   // Initialize the linear system
 
   Field field = block->data()->field();
