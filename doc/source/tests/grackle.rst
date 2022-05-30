@@ -13,8 +13,11 @@ method_grackle_general
 
 This test compares the summary statistics computed for several grackle
 fields after a certain period of time to previously archived values.
-The simulation timesteps are much larger that the cooling/heating
-timescales, to help improve detection of problems related to SMP mode.
+
+The simulation timesteps are much larger that the cooling/heating.
+This makes it more likely that separate processing elements will
+execute grackle routines at the same time (thus increasing the chances
+of exposing hypothetical problems related to Grackle & SMP mode).
 
 This test is somewhat fragile given that upgrading Grackle versions could
 conceivably alter the field values. In the future it would be better to

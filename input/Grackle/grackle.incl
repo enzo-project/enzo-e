@@ -24,7 +24,7 @@
  Units {
     density = 1.6726219E-24;  # m_H in grams... so n = 1.0 cm^-3 for pure hydrogen
     time    = 3.15576E13;     # 1 Myr in seconds
-    length  = 3.086E16;       # 1 pc in cm - does not actually matter
+    length  = 3.086E16;       # 0.01 pc in cm - does not actually matter
  }
 
  Field {
@@ -41,21 +41,22 @@
 # creation of needed fields
 #              "HI_density",
 #              "HII_density",
-              "HM_density",
-              "HeI_density",
-              "HeII_density",
-              "HeIII_density",
-              "H2I_density",
-              "H2II_density",
-              "DI_density",
-              "DII_density",
-              "HDI_density",
-              "e_density",
-              "metal_density",
+#              "HM_density",
+#              "HeI_density",
+#              "HeII_density",
+#              "HeIII_density",
+#              "H2I_density",
+#              "H2II_density",
+#              "DI_density",
+#              "DII_density",
+#              "HDI_density",
+#              "e_density",
+#              "metal_density",
+# the following fields must be explicitly defined since
+# we want to add them to the "derived" group
               "cooling_time",  
               "temperature",
-              "pressure",
-              "gamma"
+              "pressure"
      ];
 
      padding = 0;
@@ -65,34 +66,34 @@
    list = ["color", "derived"];
    
    # fields that should be advected by hydro MUST be defined
-   # as color here. This is handled automatically in 
-   # EnzoMethodGrackle for the Grackle-specific fields (species)
-   # but not everything
+   # as color here.
+   # This is handled automatically in  EnzoMethodGrackle for
+   # the Grackle-specific fields (species). But, other
+   # passively advected fields must be added manually.
+   #
+   # As a test of the automatic field machinery, we comment
+   # out all of the grackle-specific-fields
     color {
-       field_list = [
-              "HI_density",
-              "HII_density",
-              "HM_density",
-              "HeI_density",
-              "HeII_density",
-              "HeIII_density",
-              "H2I_density",
-              "H2II_density",
-              "DI_density",
-              "DII_density",
-              "HDI_density",
-              "e_density",
-              "metal_density",
-              "cooling_time",
-              "temperature",
-              "pressure",
-              "gamma" ];
+       field_list = [];
+              #"HI_density",
+              #"HII_density",
+              #"HM_density",
+              #"HeI_density",
+              #"HeII_density",
+              #"HeIII_density",
+              #"H2I_density",
+              #"H2II_density",
+              #"DI_density",
+              #"DII_density",
+              #"HDI_density",
+              #"e_density",
+              #"metal_density"];
     }
 
-# derived fields grouping enables Enzo-E to ensure
+#  derived fields grouping enables Enzo-E to ensure
 #  that all derived fields are updated prior to output
 #  In order for this to work, these MUST have their own
-#  compute classes.
+#  compute classes. (these need to manually be added to the 
     derived {
         field_list = ["temperature",
                       "pressure",
@@ -195,9 +196,7 @@
               "metal_density",
               "cooling_time",
               "temperature",
-              "pressure",
-              "gamma"
-               ];
+              "pressure"];
 
          dir   = ["GRACKLE_TEST_%03d","cycle"];
          name = [ "method_grackle-1-%03d.h5", "proc" ];
