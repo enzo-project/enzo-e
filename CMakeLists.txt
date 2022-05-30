@@ -198,9 +198,6 @@ if (use_gprof)
 endif()
 
 
-option(use_valgrind "Run the test programs using valgrind to check for memory leaks" OFF)
-
-
 option(use_performance "Use Cello Performance class for collecting performance \
   data (currently requires global reductions, and may not be fully \
   functional) (basic time data on root processor is still output)" ON)
@@ -233,6 +230,16 @@ endif()
 option(have_git "Is this a Git repository" ON)
 if (have_git)
   add_compile_definitions(CONFIG_HAVE_VERSION_CONTROL)
+  # Extract current changeset.
+  # Note, this will only be called during initial configure so changes
+  # between configure and build may result in an outdated hash.
+  execute_process(
+      COMMAND
+        git rev-parse --short HEAD
+          RESULT_VARIABLE CHANGESET_RESULT
+          OUTPUT_VARIABLE CELLO_CHANGESET
+          OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
 endif()
 
 
@@ -321,9 +328,7 @@ if (USE_PYTHON_BASED_TESTS)
 endif()
 add_subdirectory(test)
 
+# extract compile defs from from Cello to populate config
+get_directory_property( CELLO_CPPDEFINES DIRECTORY src/Cello COMPILE_DEFINITIONS )
 # now generate the the config
 configure_file(auto_config.def.in auto_config.def @ONLY)
-message(STATUS
-  "Cello/Enzo-E configured as follows:\n"
-  "USE_GRACKLE = ${USE_GRACKLE}")
-

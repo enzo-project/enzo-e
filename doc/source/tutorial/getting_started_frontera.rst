@@ -40,7 +40,6 @@ Getting Started: Frontera
   cd ~/src
   git clone https://github.com/enzo-project/enzo-e.git
   cd enzo-e
-  git checkout cmake_new-output
   mkdir build-icc-mpi
   cd build-icc-mpi
   cmake -DCHARM_ROOT=${HOME}/src/charm/build-icc-mpi -DGrackle_ROOT=${HOME}/src/grackle/build-icc -DEnzo-E_CONFIG=frontera_icc ..

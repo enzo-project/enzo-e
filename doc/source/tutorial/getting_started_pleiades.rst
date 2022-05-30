@@ -40,7 +40,6 @@ Getting Started: Pleiades
   cd ~/src
   git clone https://github.com/enzo-project/enzo-e.git
   cd enzo-e
-  git checkout cmake_new-output
   # Custom environment override for the cmake call specific to Pleiades system as
   # during the linking step (done with the `charmc` wrapper) the `mpicxx` wrapper is called,
   # which, in turn, by default calls `g++` (but we need to link with `icpc` at the lowest level).

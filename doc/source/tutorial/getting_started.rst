@@ -31,9 +31,17 @@ repository `Enzo-E / Cello github repository
 
 
 Before compiling ``Enzo-E / Cello``, you may also need to download
-and install 1.``Charm++``, 2.``HDF5``, 3.``libpng``, 4.``libboost``, and 5.``cmake``:
+and install 1.``CMake``, 2.``Charm++``, 3.``HDF5``, 4.``libpng``, 5.``libboost``, and (optionally) 6.``Grackle``:
 
-1. Install ``Charm++``
+1. Install ``CMake``
+--------------------
+
+Most systems nowaways have ``CMake`` already installed.
+If not, you can get the binary distribution from the
+`CMake <https://cmake.org/download/>`_ website.
+
+
+2. Install ``Charm++``
 ----------------------
 
 First, we install the latest `Charm++`, which now also uses `cmake` as default
@@ -50,7 +58,7 @@ build system (as example we use the pure MPI backend).
   cmake -DNETWORK=mpi -DSMP=OFF ..
   make
 
-2. Install ``HDF5``
+3. Install ``HDF5``
 -------------------
 
 "`HDF5 <https://www.hdfgroup.org/HDF5/>`_ is a "data model, library, and
@@ -62,7 +70,7 @@ through your operating system distribution, otherwise it can be
 downloaded from the `HDF5 <https://www.hdfgroup.org/HDF5/>`_ website.
 Enzo-E / Cello currently uses the "serial" (non-MPI) version of HDF5.
 
-3. Install ``libpng``
+4. Install ``libpng``
 ---------------------
 
 "`libpng <https://www.libpng.org/pub/png/libpng.html>`_ is the official
@@ -73,7 +81,7 @@ available through your operating system distribution, otherwise it can
 be downloaded from the `libpng
 <https://www.libpng.org/pub/png/libpng.html>`_ website.
 
-4. Install ``libboost-dev``
+5. Install ``libboost-dev``
 ---------------------------
 
 "`Boost <https://www.boost.org/>`_ provides free peer-reviewed portable C++ source libraries."
@@ -81,13 +89,6 @@ be downloaded from the `libpng
 If ``libboost-dev`` is not already installed on your machine, it may be
 available through your operating system distribution, otherwise it can
 be downloaded from the `libboost <https://www.boost.org/>`_ website.
-
-5. Install ``cmake``
---------------------
-
-Most systems nowaways have ``cmake`` already installed.
-If not, you can get the binary distribution from the
-`cmake https://cmake.org/download/` website.
 
 6. Install Grackle
 ------------------
