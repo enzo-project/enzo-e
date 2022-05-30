@@ -31,7 +31,7 @@ repository `Enzo-E / Cello github repository
 
 
 Before compiling ``Enzo-E / Cello``, you may also need to download
-and install 1.``Charm++``, 2.``HDF5``, 3.``libpng``, 3.``libboost``, and 4.``cmake``:
+and install 1.``Charm++``, 2.``HDF5``, 3.``libpng``, 4.``libboost``, and 5.``cmake``:
 
 1. Install ``Charm++``
 ----------------------

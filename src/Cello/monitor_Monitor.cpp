@@ -118,7 +118,7 @@ void Monitor::header () const
 #else
   print ("Define","BYPASS_CHARM_MEM_LEAK %s","no");
 #endif
-#endif
+#endif /* THIS_NEEDS_TO_BE_INCLUDED_AGAIN_WHEN_AUTO_CONFIG_IS_POPULATED */
   print ("CHARM","CkNumPes()           %d",CkNumPes());
   print ("CHARM","CkNumNodes()         %d",CkNumNodes());
 }

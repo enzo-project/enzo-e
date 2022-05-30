@@ -199,9 +199,6 @@ endif()
 
 
 option(use_valgrind "Run the test programs using valgrind to check for memory leaks" OFF)
-if ()
-  add_compile_definitions()
-endif()
 
 
 option(use_performance "Use Cello Performance class for collecting performance \
@@ -233,7 +230,7 @@ if ("${PARALLEL_LAUNCHER_NPROC_ARG}" MATCHES "[ \t\r\n]")
 endif()
 
 
-option(have_git "Is this is a Git repository" ON)
+option(have_git "Is this a Git repository" ON)
 if (have_git)
   add_compile_definitions(CONFIG_HAVE_VERSION_CONTROL)
 endif()

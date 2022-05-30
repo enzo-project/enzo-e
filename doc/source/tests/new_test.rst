@@ -54,7 +54,7 @@ output directory, and (3) the Python script to be called.
 Note that the Python script now includes the input file(s) that should be called
 and the exit code of the script is used to determine pass/fail of the entire test.
 Also note that these two function take additional arguments that are being passed to the
-Pyton script.
+Python script.
 A sample case is ``setup_test_serial_python(merge_stars_serial merge_stars/serial "input/merge_stars/run_merge_stars_test.py" "--prec=${PREC_STRING}")``.
 We strongly encourage you to follow the overall structure used in the existing Python
 scripts when setting up a new test case.
