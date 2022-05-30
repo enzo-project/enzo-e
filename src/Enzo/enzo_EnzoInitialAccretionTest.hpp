@@ -27,7 +27,8 @@ public: // interface
    const double sink_velocity[3],
    double sink_mass,
    double gas_density,
-   double gas_pressure
+   double gas_pressure,
+   double gas_radial_velocity
    ) throw();
 
   /// CHARM++ PUP::able declaration
@@ -38,7 +39,8 @@ public: // interface
     : Initial (m),
       sink_mass_(0.0),
       gas_density_(0.0),
-      gas_pressure_(0.0)
+      gas_pressure_(0.0),
+      gas_radial_velocity_(0.0)
   {
     sink_position_[0] = 0.0;
     sink_position_[1] = 0.0;
@@ -76,6 +78,10 @@ public: // interface
 
   /// Initial constant pressure of the gas
   double gas_pressure_;
+
+  /// Initial radial velocity of the gas (with the origin being the sink particle's
+  /// initial position
+  double gas_radial_velocity_;
 
 };
 

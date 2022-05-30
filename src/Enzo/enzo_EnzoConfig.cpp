@@ -198,6 +198,7 @@ EnzoConfig::EnzoConfig() throw ()
   initial_accretion_test_sink_mass(0.0),
   initial_accretion_test_gas_density(0.0),
   initial_accretion_test_gas_pressure(0.0),
+  initial_accretion_test_gas_radial_velocity(0.0),
   // EnzoMethodHeat
   method_heat_alpha(0.0),
   // EnzoMethodHydro
@@ -543,6 +544,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_accretion_test_sink_mass;
   p | initial_accretion_test_gas_density;
   p | initial_accretion_test_gas_pressure;
+  p | initial_accretion_test_gas_radial_velocity;
 
   p | method_heat_alpha;
 
@@ -1267,6 +1269,9 @@ void EnzoConfig::read_initial_accretion_test_(Parameters * p)
 
   initial_accretion_test_gas_pressure = p->value_float
     ("Initial:accretion_test:gas_pressure",1.0e-6);
+
+  initial_accretion_test_gas_radial_velocity = p->value_float
+    ("Initial:accretion_test:gas_radial_velocity",0.0);
 }
 
 void EnzoConfig::read_method_grackle_(Parameters * p)

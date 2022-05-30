@@ -18,12 +18,14 @@ EnzoInitialAccretionTest::EnzoInitialAccretionTest
    const double sink_velocity[3],
    double sink_mass,
    double gas_density,
-   double gas_pressure
+   double gas_pressure,
+   double gas_radial_velocity
    ) throw()
     : Initial(cycle,time),
       sink_mass_(sink_mass),
       gas_density_(gas_density),
-      gas_pressure_(gas_pressure)
+      gas_pressure_(gas_pressure),
+      gas_radial_velocity_(gas_radial_velocity)
 {
   sink_position_[0] = sink_position[0];
   sink_position_[1] = sink_position[1];
@@ -66,29 +68,29 @@ void EnzoInitialAccretionTest::enforce_block
   ASSERT("EnzoInitialAccretionTest",
 	 "If accretion_test initializer is used, the mhd_vlct method is "
 	 "required.",
-         enzo::problem()->method_exists("mhd_vlct"));
+	 enzo::problem()->method_exists("mhd_vlct"));
 
   // Check that mhd_choice parameter is set to "no_bfield"
   ASSERT("EnzoInitialAccretionTest",
 	 "Method:mhd_vlct:mhd_choice must be set to no_bfield",
-         enzo::config()->method_vlct_mhd_choice == "no_bfield");
+	 enzo::config()->method_vlct_mhd_choice == "no_bfield");
 
   // Check that riemann_solver parameter is set to "hllc"
   ASSERT("EnzoInitialAccretionTest",
 	 "Method:mhd_vlct:mhd_choice must be set to hllc",
-         enzo::config()->method_vlct_riemann_solver == "hllc");
+	 enzo::config()->method_vlct_riemann_solver == "hllc");
 
   // Check if the initial density and pressure are at least as large as the
   // density and pressure floors set by mhd_vlct method
   ASSERT("EnzoInitialAccretionTest",
 	 "Initial gas density must be at least as large as the density "
 	 "floor set by the ppm method",
-         gas_density_ >= enzo::config()->method_vlct_density_floor);
+	 gas_density_ >= enzo::config()->method_vlct_density_floor);
 
   ASSERT("EnzoInitialAccretionTest",
 	 "Initial gas pressure must be at least as large as the pressure "
 	 "floor set by the ppm method",
-         gas_pressure_ >= enzo::config()->method_vlct_pressure_floor);
+	 gas_pressure_ >= enzo::config()->method_vlct_pressure_floor);
 
   // Check if we have periodic boundary conditions
   int px, py, pz;
@@ -96,13 +98,13 @@ void EnzoInitialAccretionTest::enforce_block
 
   ASSERT("EnzoInitialAccretionTest::EnzoInitialAccretionTest() ",
 	 "accretion_test requires periodic boundary conditions.",
-         px && py && pz);
+	 px && py && pz);
   if (!block->is_leaf()) return;
   const EnzoConfig * enzo_config = enzo::config();
   ASSERT("EnzoInitialAccretionTest",
 	 "Block does not exist",
 	 block != NULL);
-  
+
   // TODO: Check required fields?
 
   Field field = block->data()->field();
@@ -127,6 +129,8 @@ void EnzoInitialAccretionTest::enforce_block
 		   bym,byp,&hy,
 		   bzm,bzp,&hz);
 
+  const double min_cell_width = std::min(std::min(hx,hy),hz);
+
   // Get pointers to fields
   enzo_float *  d   = (enzo_float *) field.values ("density");
   enzo_float *  p   = (enzo_float *) field.values ("pressure");
@@ -144,11 +148,8 @@ void EnzoInitialAccretionTest::enforce_block
   enzo_float *  mzs  = (enzo_float *) field.values ("mom_dens_z_source");
   enzo_float *  mzsa = (enzo_float *) field.values ("mom_dens_z_source_accumulate");
 
-  // Initialise all fields to zero except for density and total_energy
+  // Initialise all fields to zero except for density, velocity, and total_energy
   std::fill_n(p,m,0.0);
-  std::fill_n(vx,m,0.0);
-  std::fill_n(vy,m,0.0);
-  std::fill_n(vz,m,0.0);
   std::fill_n(ds,m,0.0);
   std::fill_n(dsa,m,0.0);
   std::fill_n(mxs,m,0.0);
@@ -161,10 +162,45 @@ void EnzoInitialAccretionTest::enforce_block
   // Set density
   std::fill_n(d,m,gas_density_);
 
+  // Set velocity
+  // Velocity in each cell has magnitude of gas_radial_velocity_, but is
+  // directed towards the sink particle's initial position.
+  for (int iz = gz; iz < mz - gz; iz++){
+    for (int iy = gy; iy < my - gy; iy++){
+      for (int ix = gx; ix < mx - gx; ix++){
+
+	const int index = INDEX(ix,iy,iz,mx,my);
+	const double cell_center_x = bxm + (ix - gx + 0.5) * hx;
+	const double cell_center_y = bym + (iy - gy + 0.5) * hy;
+	const double cell_center_z = bzm + (iz - gz + 0.5) * hz;
+
+	const double r =
+	  sqrt((cell_center_x - sink_position_[0]) *
+	       (cell_center_x - sink_position_[0]) +
+	       (cell_center_y - sink_position_[1]) *
+	       (cell_center_y - sink_position_[1]) +
+	       (cell_center_z - sink_position_[2]) *
+	       (cell_center_z - sink_position_[2]));
+
+	if (r < 1.0e-6 * min_cell_width){
+	  // If cell very close to sink particle, set velocity to zero.
+	  vx[index] = 0.0;
+	  vy[index] = 0.0;
+	  vz[index] = 0.0;
+	} else {
+	  vx[index] = -gas_radial_velocity_ * (cell_center_x - sink_position_[0]) / r;
+	  vy[index] = -gas_radial_velocity_ * (cell_center_y - sink_position_[1]) / r;
+	  vz[index] = -gas_radial_velocity_ * (cell_center_z - sink_position_[2]) / r;
+	}
+      }
+    }
+  }
+
   const enzo_float gamma = EnzoBlock::Gamma[cello::index_static()];
-  
-  // Set total energy and internal energy
-  const enzo_float te_value = gas_pressure_ / ((gamma - 1.0) * gas_density_);
+
+  // Set total energy
+  const enzo_float te_value = gas_pressure_ / ((gamma - 1.0) * gas_density_) +
+    0.5 * gas_radial_velocity_ * gas_radial_velocity_;
   std::fill_n(te,m,te_value);
 
   // Create sink particle if its position is in the block
@@ -197,7 +233,7 @@ void EnzoInitialAccretionTest::enforce_block
       enzo_float * pvz  = 0;
       int64_t * is_copy = 0;
       int64_t * id = 0;
-     
+
       // insert particle
       int ib,ipp  = 0;
       const int new_particle = particle.insert_particles(it, 1);
@@ -214,7 +250,7 @@ void EnzoInitialAccretionTest::enforce_block
       pvz   = (enzo_float *) particle.attribute_array(it, ia_vz, ib);
       id   = (int64_t *) particle.attribute_array(it, ia_id, ib);
       is_copy   = (int64_t *) particle.attribute_array(it, ia_copy, ib);
-      
+
       // Now assign values to attributes
       pmass[0] = sink_mass_;
       px[0] = sink_position_[0];
@@ -225,7 +261,7 @@ void EnzoInitialAccretionTest::enforce_block
       pvz[0] = sink_velocity_[2];
       id[0] = 1;
       is_copy[0] = 0;
-      
+
     } // Is there a particle to place in this block?
   return;
 }

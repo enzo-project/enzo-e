@@ -298,6 +298,7 @@ public: // interface
       initial_accretion_test_sink_mass(0.0),
       initial_accretion_test_gas_density(0.0),
       initial_accretion_test_gas_pressure(0.0),
+      initial_accretion_test_gas_radial_velocity(0.0),
       // EnzoMethodCheckGravity
       method_check_gravity_particle_type(),
       // EnzoMethodHeat
@@ -710,6 +711,7 @@ public: // attributes
   double                     initial_accretion_test_sink_mass;
   double                     initial_accretion_test_gas_density;
   double                     initial_accretion_test_gas_pressure;
+  double                     initial_accretion_test_gas_radial_velocity;
 
   /// EnzoMethodCheckGravity
   std::string                method_check_gravity_particle_type;

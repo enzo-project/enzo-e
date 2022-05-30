@@ -261,7 +261,8 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_accretion_test_sink_velocity,
        enzo_config->initial_accretion_test_sink_mass,
        enzo_config->initial_accretion_test_gas_density,
-       enzo_config->initial_accretion_test_gas_pressure);
+       enzo_config->initial_accretion_test_gas_pressure,
+       enzo_config->initial_accretion_test_gas_radial_velocity);
   } else {
     initial = Problem::create_initial_
       (type,index,config,parameters);
