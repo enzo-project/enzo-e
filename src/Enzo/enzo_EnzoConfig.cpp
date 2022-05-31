@@ -1499,34 +1499,34 @@ void EnzoConfig::read_method_star_maker_(Parameters * p)
     ("Method:star_maker:use_altAlpha",false);
 
   method_star_maker_use_density_threshold = p->value_logical
-    ("Method:star_maker:use_density_threshold",true);
+    ("Method:star_maker:use_density_threshold",false);
 
   method_star_maker_use_overdensity_threshold = p->value_logical
-    ("Method:star_maker:use_overdensity_threshold",true);
+    ("Method:star_maker:use_overdensity_threshold",false);
 
   method_star_maker_use_velocity_divergence = p->value_logical
-    ("Method:star_maker:use_velocity_divergence",true);
+    ("Method:star_maker:use_velocity_divergence",false);
 
   method_star_maker_use_dynamical_time = p->value_logical
-    ("Method:star_maker:use_dynamical_time",true);
+    ("Method:star_maker:use_dynamical_time",false);
 
   method_star_maker_use_cooling_time = p->value_logical
-    ("Method:star_maker:use_cooling_time",true);
+    ("Method:star_maker:use_cooling_time",false);
 
   method_star_maker_use_self_gravitating = p->value_logical
-    ("Method:star_maker:use_self_gravitating", true);
+    ("Method:star_maker:use_self_gravitating", false);
 
   method_star_maker_use_h2_self_shielding = p->value_logical
-    ("Method:star_maker:use_h2_self_shielding", true);
+    ("Method:star_maker:use_h2_self_shielding", false);
 
   method_star_maker_use_jeans_mass = p->value_logical
-    ("Method:star_maker:use_jeans_mass", true);
+    ("Method:star_maker:use_jeans_mass", false);
 
   method_star_maker_use_temperature_threshold = p->value_logical
-    ("Method:star_maker:use_temperature_threshold",true);
+    ("Method:star_maker:use_temperature_threshold",false);
 
   method_star_maker_use_critical_metallicity = p->value_logical
-    ("Method:star_maker:use_critical_metallicity",true);
+    ("Method:star_maker:use_critical_metallicity",false);
 
   method_star_maker_number_density_threshold = p->value_float
     ("Method:star_maker:number_density_threshold",0.0);
