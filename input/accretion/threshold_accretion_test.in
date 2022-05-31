@@ -33,7 +33,7 @@ Domain {
  }
 
  Initial {
-     accretion_test
+     accretion_test {
 	sink_mass = 1.0;
 	sink_position = [-0.5,-0.5,-0.5];
 	sink_velocity = [1.0,1.0,0.0];
@@ -54,8 +54,8 @@ Particle {
     list = ["sink"];
     batch_size = 4096;
     sink {
-    	 attributes = [ "x", "default",
-                       "y", "default",
+	 attributes = ["x", "default",
+	               "y", "default",
                        "z", "default",
                        "vx", "default",
                        "vy", "default",
@@ -78,22 +78,22 @@ Particle {
 Method {
 
     list = ["mhd_vlct","pm_update","merge_sinks",
-    	    "accretion"];
+	    "accretion"];
 
     mhd_vlct {
-      	    courant = 0.3;
-            mhd_choice = "no_bfield";
-      	    density_floor = 1.0e-6;
+	    courant = 0.3;
+	    mhd_choice = "no_bfield";
+	    density_floor = 1.0e-6;
 	    pressure_floor = 1.0e-6;
 	    riemann_solver = "hllc";
       };
 
     pm_update {
-        max_dt = 1.0e-2;
+	    max_dt = 1.0e-2;
     };
 
 accretion {
-    	flavor = "density_threshold";
+	flavor = "threshold";
 	density_threshold = 1.0e-6;
 	}
 }
@@ -105,7 +105,7 @@ Stopping {
 Output {
 
     data {
-        dir = [ "./Dir_Accretion_Test_%04d", "cycle" ];
+        dir = [ "./Dir_%04d", "cycle" ];
         field_list = ["density", "velocity_x", "velocity_y", "velocity_z"];
 	particle_list = ["sink"];
         name = [ "data-%04d-%04d.h5", "cycle", "proc" ];

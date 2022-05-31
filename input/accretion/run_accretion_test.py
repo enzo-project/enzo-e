@@ -51,10 +51,10 @@ def run_test(executable,flavor):
     else:
         param_file = "input/accretion/flux_accretion_test.in"
 
-        command = executable + ' ' + param_file
+    command = executable + ' ' + param_file
     subprocess.call(command,shell = True)
 
-    def analyze_test(prec):
+def analyze_test(prec):
 
     # set tolerance level depending on whether Enzo-E was compiled with single or
     # double precision
@@ -64,7 +64,7 @@ def run_test(executable,flavor):
     else:
         tolerance = 1.0e-4
 
-        try:
+    try:
         return test_mmc(tolerance,
                         input_prefix = "Dir",
                         output = "mmc.png")
@@ -73,7 +73,7 @@ def run_test(executable,flavor):
         return False
 
 def cleanup():
-    dir_list = glob.glob("Dir_Accretion_Test*")
+    dir_list = glob.glob("Dir*")
     for dir_name in dir_list:
         if os.path.isdir(dir_name):
             shutil.rmtree(dir_name)

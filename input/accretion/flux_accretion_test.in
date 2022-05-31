@@ -33,12 +33,13 @@ Domain {
  }
 
  Initial {
-     accretion_test
+     accretion_test {
 	sink_mass = 1.0;
 	sink_position = [-0.5,-0.5,-0.5];
 	sink_velocity = [1.0,1.0,0.0];
 	gas_density = 1.0;
 	gas_pressure = 1.0;
+	gas_radial_velocity = 0.1;
      };
     list = [ "accretion_test" ];
  }
@@ -95,6 +96,7 @@ Method {
 accretion {
     	flavor = "flux";
 	density_threshold = 1.0e-6;
+	accretion_radius_cells = 3.0;
 	}
 }
 
@@ -105,7 +107,7 @@ Stopping {
 Output {
 
     data {
-        dir = [ "./Dir_Accretion_Test_%04d", "cycle" ];
+        dir = [ "./Dir_%04d", "cycle" ];
         field_list = ["density", "velocity_x", "velocity_y", "velocity_z"];
 	particle_list = ["sink"];
         name = [ "data-%04d-%04d.h5", "cycle", "proc" ];
