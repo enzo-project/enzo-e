@@ -43,6 +43,7 @@ What Tests are Currently Included
 Currently the Enzo-e testing infrastructure tests:
 
 .. toctree::
+   accretion
    adapt
    balance
    boundary

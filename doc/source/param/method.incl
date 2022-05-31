@@ -64,6 +64,49 @@ list is applied in the order specified.  Possible methods include:`
 the time step applied on top of any Field or Particle specific Courant
 safety factors.`
 
+accretion
+-----------
+
+:Parameter:  :p:`Method` : :p:`accretion` : :p:`accretion_radius_cells`
+:Summary:    :s:`The radius of the spherical accretion zone around each sink particle, in
+                 units of the minimum cell width.`
+:Type:       :t:`float`
+:Default:    :d:`4.0`
+:Scope:     :z:`Enzo`
+
+:e:`The accretion radius (i.e., the radius of the spherical accretion zone) in units of the minimum cell width (i.e., the minimum across all 3 dimensions), at the highest refinement level. Its value must be less than one fewer than the minimum ghost depth  for "flux" accretion, and less than the minimum ghost depth for other flavors of accretion. The ghost depth is 4 (along all axes) by default.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`accretion` : :p:`flavor`
+:Summary:    :s:`The flavor of accretion used.`
+:Type:       :t:`string`
+:Default:    :d:`""`
+:Scope:     :z:`Enzo`
+
+:e:`The flavor of accretion used, which can be either "threshold", "bondi_hoyle", or "flux". If this parameter is not set in the parameter file, or if some other string is provided, then the accretion method will be called but will do nothing.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`accretion` : :p:`density_threshold`
+:Summary:    :s:`The value of the accretion density threshold.`
+:Type:       :t:`float`
+:Default:    :d:`1.0e-6`
+:Scope:     :z:`Enzo`
+
+:e:`The value of the density threshold. The density in each cell in the accretion zone cannot go below this value during the accretion process. The value of this parameter must be greater than or equal to the value of the density floor imposed by the hydro method.`
+
+----
+
+
+:Parameter:  :p:`Method` : :p:`accretion` : :p:`max_mass_fraction`
+:Summary:    :s:`The maximum fraction of mass which can be accreted from a cell in one timestep.`
+:Type:       :t:`float`
+:Default:    :d:`0.25`
+:Scope:     :z:`Enzo`
+
+:e:`This parameter specifies the maximum fraction of mass which can be accreted from a cell in one timestep. This value of this parameter must be between 0 and 1.`
+
 flux_correct
 ------------
 

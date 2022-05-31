@@ -11,7 +11,12 @@ simulation.  They can be declared in the parameter file using Cello's
 such as "implosion_2d" for the "Implosion test", or "sedov_array_3d" for
 a 3D array of Sedov blast waves.
 
-``"cloud"``
+``"accretion_test"``
+   Initialize a sink particle with some mass, position, and velocity, in
+   a background medium of constant density and pressure, possibly with a
+   velocity directed towards the initial position of the sink particle.
+
+   ``"cloud"``
    Initialize a spherical cloud embedded in a hot wind.
 
 ``"collapse"``
@@ -34,8 +39,8 @@ a 3D array of Sedov blast waves.
 ``"merge_sinks_test"``
    Initialise sink particles with masses, positions, and velocities read
    from a text file specified in the parameter file.
-  
-``"pm"``
+
+   ``"pm"``
    Initialize ``"dark"`` matter particles in either a regular uniform
    array with one particle per cell, or randomly following the ``"density"``
    field distribution.

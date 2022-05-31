@@ -7,6 +7,7 @@ This testing section describes tests on enzo-e program
 .. toctree::
    testing_environment
    new_test
+   accretion
    adapt
    balance
    boundary
