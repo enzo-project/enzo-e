@@ -131,7 +131,7 @@ Particle {
      };
      list = [ "null",
               "ppm",
-              "grackle", "star_maker","feedback",
+              "grackle", #"star_maker","feedback",
               "pm_deposit", "gravity", "pm_update"];
 
      null {
@@ -139,7 +139,7 @@ Particle {
      };
 
      grackle {
-         data_file = "CloudyData_noUVB.h5";
+         data_file = "input/CloudyData_noUVB.h5";
          with_radiative_cooling = 1;
          primordial_chemistry   = 0;
          metal_cooling          = 1;
@@ -202,7 +202,7 @@ Particle {
          };
          type = "data";
      };
-     list = [ "data" ];
+     #list = [ "data" ];
  }
 
  Solver {

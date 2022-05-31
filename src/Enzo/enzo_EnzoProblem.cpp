@@ -694,6 +694,9 @@ Method * EnzoProblem::create_method_
     // should generalize this to enable multiple maker types
     if (enzo_config->method_star_maker_flavor == "stochastic"){
       method = new EnzoMethodStarMakerStochasticSF();
+    } else if (enzo_config->method_star_maker_flavor == "STARSS" || 
+               enzo_config->method_star_maker_flavor == "starss") {
+      method = new EnzoMethodStarMakerSTARSS(); 
     } else{ // does not do anything
       method = new EnzoMethodStarMaker();
     }
@@ -701,7 +704,14 @@ Method * EnzoProblem::create_method_
   } else if (name == "feedback") {
 
     // need a similar type swtich as in star maker
-    method = new EnzoMethodDistributedFeedback();
+    if (enzo_config->method_feedback_flavor == "distributed"){
+      method = new EnzoMethodDistributedFeedback();
+    } else if (enzo_config->method_feedback_flavor == "STARSS" ||
+               enzo_config->method_feedback_flavor == "starss") {
+      method = new EnzoMethodFeedbackSTARSS();
+    }  else { // does not do anything
+      method = new EnzoMethodFeedback();
+    }
 
   } else if (name == "merge_sinks") {
 

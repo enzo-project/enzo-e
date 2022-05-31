@@ -325,6 +325,9 @@ public: /// entry methods
   void solver_mg0_prolong_recv(FieldMsg * msg);
   void p_solver_mg0_restrict_recv(FieldMsg * msg);
 
+  // EnzoMethodFeedbackSTARSS
+
+  void p_method_feedback_starss_end();
 
   void print() {
     Block::print();

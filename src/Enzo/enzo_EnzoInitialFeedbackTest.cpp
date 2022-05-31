@@ -129,7 +129,7 @@ void EnzoInitialFeedbackTest::enforce_block
   int ngx = nx + 2*gx;
   int ngy = ny + 2*gy;
   int ngz = nz + 2*gz;
-
+ 
   for (int iz = 0; iz < ngz; iz++){
     for (int iy = 0; iy < ngy; iy++){
       for (int ix = 0; ix < ngx; ix++){
@@ -154,7 +154,7 @@ void EnzoInitialFeedbackTest::enforce_block
 
   // drop in a particle
 
-  if (enzo_block->level() != 0) return; // don't do particles below root grid
+  if (enzo_block->level() < 0) return; // don't do particles below root grid
 
   ParticleDescr * particle_descr = cello::particle_descr();
   Particle particle              = block->data()->particle();

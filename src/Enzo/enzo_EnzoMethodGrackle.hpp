@@ -168,6 +168,8 @@ public: // interface
       return;
  }
 
+  void enforce_metallicity_floor(EnzoBlock * enzo_block) throw();
+
   void calculate_cooling_time(Block * block, enzo_float* ct,
 			      code_units* grackle_units = NULL,
 			      grackle_field_data* grackle_fields = NULL,
