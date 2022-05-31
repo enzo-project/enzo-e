@@ -18,12 +18,17 @@
 
 #define FORTRAN_NAME(NAME) NAME##_
 
-extern "C" void FORTRAN_NAME(dep_grid_cic)(
-    enzo_float *de, enzo_float *de_t, enzo_float *temp, enzo_float *vx,
-    enzo_float *vy, enzo_float *vz, enzo_float *dt, enzo_float *rfield,
-    int *rank, enzo_float *hx, enzo_float *hy, enzo_float *hz, int *mx, int *my,
-    int *mz, int *gxi, int *gyi, int *gzi, int *nxi, int *nyi, int *nzi, int *,
-    int *, int *, int *nx, int *ny, int *nz, int *, int *, int *);
+extern "C" void  FORTRAN_NAME(dep_grid_cic)
+  (enzo_float * de,enzo_float * de_t,enzo_float * temp,
+   enzo_float * vx, enzo_float * vy, enzo_float * vz,
+   enzo_float * dt, enzo_float * rfield, int *rank,
+   enzo_float * hx, enzo_float * hy, enzo_float * hz,
+   int * mx,int * my,int * mz,
+   int * gxi,int * gyi,int * gzi,
+   int * nxi,int * nyi,int * nzi,
+   int * ,int * ,int * ,
+   int * nx,int * ny,int * nz,
+   int * ,int * ,int * );
 
 //----------------------------------------------------------------------
 
@@ -46,31 +51,28 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
     if (particle_descr->has_attribute (it,"mass")) ++num_mass;
 
     ASSERT1("EnzoMethodPmDeposit::EnzoMethodPmDeposit",
-            "Particle type %s, in the \"is_gravitating\" group, "
+	    "Particle type %s, in the \"is_gravitating\" group, "
             "must have either an attribute or a constant "
 	    "called \"mass\" (but not both) . Exiting.",
 	    particle_descr->type_name(it).c_str(),
 	    num_mass == 1);
   }
-
+  
   const int rank = cello::rank();
 
-  cello::define_field("density");
-  cello::define_field("density_total");
-  cello::define_field("density_particle");
-  cello::define_field("density_particle_accumulate");
-  if (rank >= 1)
-    cello::define_field("velocity_x");
-  if (rank >= 2)
-    cello::define_field("velocity_y");
-  if (rank >= 3)
-    cello::define_field("velocity_z");
+  cello::define_field ("density");
+  cello::define_field ("density_total");
+  cello::define_field ("density_particle");
+  cello::define_field ("density_particle_accumulate");
+  if (rank >= 1) cello::define_field ("velocity_x");
+  if (rank >= 2) cello::define_field ("velocity_y");
+  if (rank >= 3) cello::define_field ("velocity_z");
 
   // Initialize default Refresh object
 
-  cello::simulation()->refresh_set_name(ir_post_, name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
 
-  Refresh *refresh = cello::refresh(ir_post_);
+  Refresh * refresh = cello::refresh(ir_post_);
 
   refresh->add_field("density");
   refresh->add_field("velocity_x");
@@ -80,7 +82,8 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
 
 //----------------------------------------------------------------------
 
-void EnzoMethodPmDeposit::pup(PUP::er &p) {
+void EnzoMethodPmDeposit::pup (PUP::er &p)
+{
   // NOTE: change this function whenever attributes change
 
   TRACEPUP;
@@ -105,21 +108,23 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
   if (block->is_leaf()) {
 
-    Particle particle(block->data()->particle());
-    Field field(block->data()->field());
+    Particle particle (block->data()->particle());
+    Field    field    (block->data()->field());
 
     int rank = cello::rank();
-    enzo_float *de_t = (enzo_float *)field.values("density_total");
-    enzo_float *de_p = (enzo_float *)field.values("density_particle");
-    enzo_float *de_pa =
-        (enzo_float *)field.values("density_particle_accumulate");
+    enzo_float * de_t = (enzo_float *)
+      field.values("density_total");
+    enzo_float * de_p = (enzo_float *)
+      field.values("density_particle");
+    enzo_float * de_pa = (enzo_float *)
+      field.values("density_particle_accumulate");
 
-    int mx, my, mz;
-    field.dimensions(0, &mx, &my, &mz);
-    int nx, ny, nz;
-    field.size(&nx, &ny, &nz);
-    int gx, gy, gz;
-    field.ghost_depth(0, &gx, &gy, &gz);
+    int mx,my,mz;
+    field.dimensions(0,&mx,&my,&mz);
+    int nx,ny,nz;
+    field.size(&nx,&ny,&nz);
+    int gx,gy,gz;
+    field.ghost_depth(0,&gx,&gy,&gz);
 
     // NOTE: density_total is now cleared in EnzoMethodGravity to
     // instead of here to possible race conditions with refresh.  This
@@ -131,12 +136,12 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     std::fill_n(de_pa,m,0.0);
 
     // Get block extents and cell widths
-    double xm, ym, zm;
-    double xp, yp, zp;
-    double hx, hy, hz;
-    block->lower(&xm, &ym, &zm);
-    block->upper(&xp, &yp, &zp);
-    block->cell_width(&hx, &hy, &hz);
+    double xm,ym,zm;
+    double xp,yp,zp;
+    double hx,hy,hz;
+    block->lower(&xm,&ym,&zm);
+    block->upper(&xp,&yp,&zp);
+    block->cell_width(&hx,&hy,&hz);
 
     // To calculate densities from particles with "mass" attributes
     // or constants, we need the inverse volume of cells in this block.
@@ -146,19 +151,19 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     if (rank >= 3) inv_vol /= hz;
 
     // Get cosmological scale factors, if cosmology is turned on
-    enzo_float cosmo_a = 1.0;
-    enzo_float cosmo_dadt = 0.0;
-    EnzoPhysicsCosmology *cosmology = enzo::cosmology();
+    enzo_float cosmo_a=1.0;
+    enzo_float cosmo_dadt=0.0;
+    EnzoPhysicsCosmology * cosmology = enzo::cosmology();
     if (cosmology) {
-      cosmology->compute_expansion_factor(&cosmo_a, &cosmo_dadt,
-                                          block->time() + alpha_ * block->dt());
+      cosmology->compute_expansion_factor(&cosmo_a,&cosmo_dadt,
+					  block->time() + alpha_*block->dt());
     }
 
     const double dt = alpha_ * block->dt() / cosmo_a;
 
     // Get the number of particle types in the "is_gravitating" group
-    ParticleDescr *particle_descr = cello::particle_descr();
-    Grouping *particle_groups = particle_descr->groups();
+    ParticleDescr * particle_descr = cello::particle_descr();
+    Grouping * particle_groups = particle_descr->groups();
     const int num_is_grav = particle_groups->size("is_gravitating");
 
     // For particle types where "mass" is an attribute,
@@ -174,8 +179,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
     // Loop over particle types in "is_gravitating" group
     for (int ipt = 0; ipt < num_is_grav; ipt++) {
-      const int it =
-          particle.type_index(particle_groups->item("is_gravitating", ipt));
+      const int it = particle.type_index(particle_groups->item("is_gravitating",ipt));
 
       // Index for mass attribute / constant
       int imass = 0;
@@ -223,8 +227,8 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	// Deposit densities to the grid with CIC scheme
 	if (rank == 1) {
 
-          const int ia_x = particle.attribute_index(it, "x");
-          const int ia_vx = particle.attribute_index(it, "vx");
+	  const int ia_x  = particle.attribute_index(it,"x");
+	  const int ia_vx = particle.attribute_index(it,"vx");
 
 	  enzo_float * xa =  (enzo_float *)particle.attribute_array (it,ia_x,ib);
 	  enzo_float * vxa = (enzo_float *)particle.attribute_array (it,ia_vx,ib);
@@ -449,27 +453,27 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     //--------------------------------------------------
     // Add gas density
     //--------------------------------------------------
-    enzo_float *de = (enzo_float *)field.values("density");
+    enzo_float * de = (enzo_float *) field.values("density");
 
-    enzo_float *temp = new enzo_float[4 * m];
-    enzo_float *de_gas = new enzo_float[m];
-    enzo_float *rfield = new enzo_float[m];
+    enzo_float * temp =   new enzo_float [4*m];
+    enzo_float * de_gas = new enzo_float [m];
+    enzo_float * rfield = new enzo_float [m];
 
-    std::fill_n(temp, 4 * m, 0.0);
+    std::fill_n(temp, 4*m, 0.0);
     std::fill_n(de_gas, m, 0.0);
     std::fill_n(rfield, m, 0.0);
 
-    int gxi = gx;
-    int gyi = gy;
-    int gzi = gz;
-    int nxi = mx - gx - 1;
-    int nyi = my - gy - 1;
-    int nzi = mz - gz - 1;
+    int gxi=gx;
+    int gyi=gy;
+    int gzi=gz;
+    int nxi=mx-gx-1;
+    int nyi=my-gy-1;
+    int nzi=mz-gz-1;
     int i0 = 0;
     int i1 = 1;
 
     /* Stefan: Not sure if these next four lines are correct.
-       I include the factors of cosmo_a for consistency with
+       I include the factors of cosmo_a for consistency with 
        previous version. Also, not sure why dtf is
        initialised with the value of alpha_.
      */
@@ -521,13 +525,13 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
       }
     }
 
-    delete[] rfield;
-    delete[] temp;
-    delete[] vx;
-    delete[] vy;
-    delete[] vz;
+    delete [] rfield;
+    delete [] temp;
+    delete [] vx;
+    delete [] vy;
+    delete [] vz;
 
-    delete[] de_gas;
+    delete [] de_gas;
   }
 
   block->compute_done();
@@ -535,7 +539,8 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodPmDeposit::timestep(Block *block) throw() {
+double EnzoMethodPmDeposit::timestep ( Block * block ) throw()
+{
   double dt = std::numeric_limits<double>::max();
 
   return dt;

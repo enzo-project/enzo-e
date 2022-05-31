@@ -25,38 +25,37 @@ EnzoMethodStarMaker::EnzoMethodStarMaker
 {
   cello::particle_descr()->check_particle_attribute("star","mass");
 
-  const EnzoConfig *enzo_config = enzo::config();
+  const EnzoConfig * enzo_config = enzo::config();
   // AJE: This was the old way this was done
   // Initialize default Refresh object
   // const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
   //                           enzo_sync_id_method_star_maker);
   // refresh(ir)->add_all_fields();
 
-  cello::simulation()->refresh_set_name(ir_post_, name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
 
-  Refresh *refresh = cello::refresh(ir_post_);
+  Refresh * refresh = cello::refresh(ir_post_);
 
   refresh->add_all_fields();
 
   // Copy over parameters from config to local names here for convenience
-  use_density_threshold_ = enzo_config->method_star_maker_use_density_threshold;
-  use_velocity_divergence_ =
-      enzo_config->method_star_maker_use_velocity_divergence;
-  use_dynamical_time_ = enzo_config->method_star_maker_use_dynamical_time;
-  use_self_gravitating_ = enzo_config->method_star_maker_use_self_gravitating;
-  use_h2_self_shielding_ = enzo_config->method_star_maker_use_h2_self_shielding;
-  use_jeans_mass_ = enzo_config->method_star_maker_use_jeans_mass;
-  number_density_threshold_ =
-      enzo_config->method_star_maker_number_density_threshold;
-  efficiency_ = enzo_config->method_star_maker_efficiency;
-  maximum_star_fraction_ = enzo_config->method_star_maker_maximum_mass_fraction;
-  star_particle_min_mass_ = enzo_config->method_star_maker_minimum_star_mass;
-  star_particle_max_mass_ = enzo_config->method_star_maker_maximum_star_mass;
+  use_density_threshold_     = enzo_config->method_star_maker_use_density_threshold;
+  use_velocity_divergence_   = enzo_config->method_star_maker_use_velocity_divergence;
+  use_dynamical_time_        = enzo_config->method_star_maker_use_dynamical_time;
+  use_self_gravitating_      = enzo_config->method_star_maker_use_self_gravitating;
+  use_h2_self_shielding_     = enzo_config->method_star_maker_use_h2_self_shielding;
+  use_jeans_mass_            = enzo_config->method_star_maker_use_jeans_mass;
+  number_density_threshold_  = enzo_config->method_star_maker_number_density_threshold;
+  efficiency_                = enzo_config->method_star_maker_efficiency;
+  maximum_star_fraction_     = enzo_config->method_star_maker_maximum_mass_fraction;
+  star_particle_min_mass_    = enzo_config->method_star_maker_minimum_star_mass;
+  star_particle_max_mass_    = enzo_config->method_star_maker_maximum_star_mass;
 }
 
 //-------------------------------------------------------------------
 
-void EnzoMethodStarMaker::pup(PUP::er &p) {
+void EnzoMethodStarMaker::pup (PUP::er &p)
+{
   // NOTE: Change this function whenever attributes change
 
   TRACEPUP;
@@ -81,10 +80,10 @@ void EnzoMethodStarMaker::pup(PUP::er &p) {
 //------------------------------------------------------------------
 //   This does nothing at the moment - business is done in derived
 //   class (Currently EnzoMethodStarMakerStochasticSF)
-void EnzoMethodStarMaker::compute(Block *block) throw() {
+void EnzoMethodStarMaker::compute ( Block *block) throw()
+{
 
-  if (!block->is_leaf())
-    return;
+  if (! block->is_leaf()) return;
 
   block->compute_done();
 
@@ -93,9 +92,9 @@ void EnzoMethodStarMaker::compute(Block *block) throw() {
 
 //----------------------------------------------------------------------
 
-void EnzoMethodStarMaker::rescale_densities(
-    EnzoBlock *enzo_block, const int index,
-    const double density_ratio) throw() {
+void EnzoMethodStarMaker::rescale_densities(EnzoBlock * enzo_block,
+                                            const int index,
+                                            const double density_ratio) throw() {
 
   // Loop through all passive scalars (color fields)
   // which are mass fractions stored as densities, and rescale
@@ -113,14 +112,15 @@ void EnzoMethodStarMaker::rescale_densities(
 
   Field field = enzo_block->data()->field();
 
-  Grouping *field_groups = field.groups();
+  Grouping * field_groups = field.groups();
   int nc = field_groups->size("color");
 
-  for (int ic = 0; ic < nc; ic++) {
-    enzo_float *cfield =
-        (enzo_float *)field.values(field_groups->item("color", ic));
+  for (int ic = 0; ic < nc; ic++){
+    enzo_float * cfield = (enzo_float *)
+      field.values(field_groups->item("color",ic));
 
     cfield[index] *= density_ratio;
+
   }
 
   return;
@@ -180,22 +180,25 @@ void EnzoMethodStarMaker::convert_densities_to_fraction(EnzoBlock * enzo_block,
 
 // ---------------------------------------------------------
 
-int EnzoMethodStarMaker::check_number_density_threshold(const double &d) {
+int EnzoMethodStarMaker::check_number_density_threshold(
+                                                       const double &d
+                                                        ){
 
   ///  Apply the criteria that the local number density be greater
   ///  than the provided number density if use_density_threshold_ is
   ///  desired by the user.
 
   return !(this->use_density_threshold_) +
-         (d >= this->number_density_threshold_);
+          (d >= this->number_density_threshold_);
 }
 
 int EnzoMethodStarMaker::check_self_gravitating(
-    const double mean_particle_mass, const double rho_cgs,
-    const enzo_float temperature, enzo_float *vx, enzo_float *vy,
-    enzo_float *vz, const double lunit, const double vunit, const int &index,
-    const int &dix, const int &diy, const int &diz, const double dx,
-    const double dy, const double dz) {
+                const double mean_particle_mass, const double rho_cgs, const enzo_float temperature,
+                enzo_float *vx, enzo_float *vy, enzo_float *vz,
+                const double lunit, const double vunit,
+                const int &index, const int &dix, const int &diy, const int &diz,
+                const double dx, const double dy, const double dz)
+{
 
   if (!this->use_self_gravitating_)
     return 1;
@@ -203,107 +206,106 @@ int EnzoMethodStarMaker::check_self_gravitating(
   // Hopkins et al. (2013). Virial parameter: alpha < 1 -> self-gravitating
 
   double div_v_norm2, cs2, alpha;
-  double dx2 = dx * dx * lunit * lunit;
-  double dy2 = dy * dy * lunit * lunit;
-  double dz2 = dz * dz * lunit * lunit;
+  double dx2 = dx*dx * lunit*lunit;
+  double dy2 = dy*dy * lunit*lunit;
+  double dz2 = dz*dz * lunit*lunit;
 
   // Frobenius norm of the velocity gradient tensor
-  div_v_norm2 = (pow(vx[index + dix] - vx[index - dix], 2) +
-                 pow(vy[index + dix] - vy[index - dix], 2) +
-                 pow(vz[index + dix] - vz[index - dix], 2)) /
-                    dx2 +
-                (pow(vx[index + diy] - vx[index - diy], 2) +
-                 pow(vy[index + diy] - vy[index - diy], 2) +
-                 pow(vz[index + diy] - vz[index - diy], 2)) /
-                    dy2 +
-                (pow(vx[index + diz] - vx[index - diz], 2) +
-                 pow(vy[index + diz] - vy[index - diz], 2) +
-                 pow(vz[index + diz] - vz[index - diz], 2)) /
-                    dz2;
-  div_v_norm2 *= (vunit * vunit);
+  div_v_norm2 = (pow(vx[index+dix] - vx[index-dix], 2) +
+                 pow(vy[index+dix] - vy[index-dix], 2) +
+                 pow(vz[index+dix] - vz[index-dix], 2)) / dx2 +
+                (pow(vx[index+diy] - vx[index-diy], 2) +
+                 pow(vy[index+diy] - vy[index-diy], 2) +
+                 pow(vz[index+diy] - vz[index-diy], 2)) / dy2 +
+                (pow(vx[index+diz] - vx[index-diz], 2) +
+                 pow(vy[index+diz] - vy[index-diz], 2) +
+                 pow(vz[index+diz] - vz[index-diz], 2)) / dz2;
+  div_v_norm2 *= (vunit*vunit);
 
   // constant for testing. TODO: change to variable
   const double gamma = 5.0 / 3.0;
   cs2 = (gamma * cello::kboltz * temperature) / mean_particle_mass;
 
-  alpha = (div_v_norm2 + cs2 / dx2) /
-          (8 * cello::pi * cello::grav_constant * rho_cgs);
+  alpha = (div_v_norm2 + cs2/dx2) / (8 * cello::pi * cello::grav_constant * rho_cgs);
   return (alpha < 1);
+
 }
 
 double EnzoMethodStarMaker::h2_self_shielding_factor(
-    enzo_float *rho, const double metallicity, const double dunit,
-    const double lunit, const int &index, const int &dix, const int &diy,
-    const int &diz, const double dx, const double dy, const double dz) {
+                enzo_float *rho, const double metallicity,
+                const double dunit, const double lunit,
+                const int &index, const int &dix, const int &diy, const int &diz,
+                const double dx, const double dy, const double dz)
+{
 
   if (!this->use_h2_self_shielding_)
     return 1;
 
-  // Hopkins et al. (2017) and Krumholz & Gnedin (2011). Constant numbers come
-  // from their models and fits. Mass fraction that is self-shielded and able to
-  // cool. f_shield > 0
+  // Hopkins et al. (2017) and Krumholz & Gnedin (2011). Constant numbers come from their models and fits.
+  // Mass fraction that is self-shielded and able to cool. f_shield > 0
 
   double tau, phi, psi, f_shield, grad_rho;
 
   const double rho_cgs = rho[index] * dunit;
 
-  grad_rho = sqrt(pow((rho[index + dix] - rho[index - dix]) / dx, 2) +
-                  pow((rho[index + diy] - rho[index - diy]) / dy, 2) +
-                  pow((rho[index + diz] - rho[index - diz]) / dz, 2));
+  grad_rho = sqrt(pow((rho[index+dix] - rho[index-dix]) / dx, 2) +
+                  pow((rho[index+diy] - rho[index-diy]) / dy, 2) +
+                  pow((rho[index+diz] - rho[index-diz]) / dz, 2));
   grad_rho *= dunit / lunit;
-  tau = 434.8 * rho_cgs * (dx + rho_cgs / grad_rho); // 434.8 cm^2 / g
+  tau = 434.8 * rho_cgs * (dx + rho_cgs / grad_rho);  // 434.8 cm^2 / g
   phi = 0.756 * pow(1.0 + 3.1 * metallicity, 0.365);
-  psi = (0.6 * tau * (0.01 + metallicity)) /
-        (log(1.0 + 0.6 * phi + 0.01 * phi * phi));
-  f_shield = 1.0 - 3.0 / (1.0 + 4.0 * psi);
+  psi = (0.6 * tau * (0.01 + metallicity)) / (log(1.0 + 0.6*phi + 0.01*phi*phi));
+  f_shield = 1.0 - 3.0 / (1.0 + 4.0*psi);
   return f_shield;
+
 }
 
-int EnzoMethodStarMaker::check_jeans_mass(const double temperature,
-                                          const double mean_particle_mass,
-                                          const double rho_cgs,
-                                          const double mass) {
+int EnzoMethodStarMaker::check_jeans_mass(
+  const double temperature, const double mean_particle_mass,
+  const double rho_cgs, const double mass
+)
+{
   if (!use_jeans_mass_)
     return 1;
 
   const double gamma = 5.0 / 3.0;
   const double minimum_jeans_mass = 1000 * cello::mass_solar;
   double cs2 = (gamma * cello::kboltz * temperature) / mean_particle_mass;
-  double m_jeans = (cello::pi / 6) * pow(cs2, 1.5) /
-                   (pow(cello::grav_constant, 1.5) * sqrt(rho_cgs));
+  double m_jeans = (cello::pi/6) * pow(cs2, 1.5) / (pow(cello::grav_constant, 1.5) * sqrt(rho_cgs));
   double m_jcrit = MAX(minimum_jeans_mass, m_jeans);
   return (mass < m_jcrit);
 }
 
 int EnzoMethodStarMaker::check_velocity_divergence(
-    enzo_float *vx, enzo_float *vy, enzo_float *vz, const int &index,
-    const int &dix, const int &diy, const int &diz) {
+                enzo_float *vx, enzo_float *vy, enzo_float *vz,
+                const int &index, const int &dix, const int &diy,
+                const int &diz){
 
-  ///  Apply the criteria that the divergence of the velocity
-  ///  be negative, if so desired by user (use_velocity_divergence).
+    ///  Apply the criteria that the divergence of the velocity
+    ///  be negative, if so desired by user (use_velocity_divergence).
 
-  if (!(this->use_velocity_divergence_)) {
-    return 1.0;
-  }
+    if (!(this->use_velocity_divergence_)){
+      return 1.0;
+    }
 
-  int result = 0;
+    int result = 0;
 
-  if (vx) {
-    result = (vx[index + dix] - vx[index - dix] < 0) ? 1 : 0;
-  }
+    if(vx){
+      result = (vx[index+dix] - vx[index-dix] < 0) ? 1 : 0;
+    }
 
-  if (vy && result) {
-    result = (vy[index + diy] - vy[index - diy] < 0) ? 1 : 0;
-  }
+    if(vy && result){
+      result = (vy[index+diy] - vy[index-diy] < 0) ? 1 : 0;
+    }
 
-  if (vz && result) {
-    result = (vz[index + diz] - vz[index - diz] < 0) ? 1 : 0;
-  }
+    if(vz && result){
+      result = (vz[index+diz] - vz[index-diz] < 0) ? 1 : 0;
+    }
 
-  return result;
+    return result;
 }
 
-int EnzoMethodStarMaker::check_mass(const double &m) {
+int EnzoMethodStarMaker::check_mass(const double &m){
   /// Apply the condition that the mass of gas converted into
   /// stars in a single cell cannot exceed a certain fraction
   /// of that cell's mass. There does not need to be a check on
@@ -311,4 +313,5 @@ int EnzoMethodStarMaker::check_mass(const double &m) {
 
   int minlimit = ((maximum_star_fraction_ * m) > star_particle_min_mass_);
   return minlimit;
+
 }
