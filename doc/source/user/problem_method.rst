@@ -624,7 +624,7 @@ parameters
    :widths: 10 5 1 30
    :header-rows: 1
 
-* - Parameter
+   * - Parameter
      - Type
      - Default
      - Description
@@ -671,7 +671,7 @@ parameters
    :widths: 10 5 1 30
    :header-rows: 1
 
-* - Parameter
+   * - Parameter
      - Type
      - Default
      - Description
