@@ -2,13 +2,14 @@
 /// See LICENSE_CELLO file for license and copyright information
 
 /// @file	enzo_EnzoMethodFeedbackSTARSS.cpp
-/// @author     Andrew Emerick (aemerick11@gmail.com)
-//              Will Hicks (whicks@ucsd.edu)
+/// @author     Will Hicks (whicks@ucsd.edu)
+//              Andrew Emerick (aemerick11@gmail.com)
+//             
 /// @date
 /// @brief  Implements the STARSS model for stellar feedback
 ///         as implemented into Enzo as the MechStars model
-///         by Azton Wells. This is intended to be a direct copy-over of the
-///         MechStars methods.
+///         by Azton Wells. This is a direct copy-over of the
+///         MechStars methods, with small changes where necessary.
 ///         TODO: List differences / changes here
 ///
 
@@ -44,7 +45,6 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age, int* nSNII, int* nSNIA,
     double RII=0, RIA=0, PII=0, PIA=0, random = 0;
     if (enzo_config->method_feedback_single_sn && NEvents < 0)
     {
-        // printf("Calculating rates\n");
         /* age-dependent rates */
         if (age < 3.401)
         {
@@ -76,8 +76,7 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age, int* nSNII, int* nSNIA,
                 PII -= round;
             }
             if (PII > 1.0 && !enzo_config->method_feedback_unrestricted_sn){
-                //ERROR("MethodFeedbackSTARSS::determineSN()", "PII too large!");
-                //if it wants to do > 1 SN per particle, but single_sn=true,
+                //if it wants to do > 1 SN per particle, but unrestricted_sn=false,
                 //only do 1 SN
 
                 PII = 1.0;
@@ -152,8 +151,7 @@ int EnzoMethodFeedbackSTARSS::determineWinds(double age, double * eWinds, double
         }
         windM = mass_Msun * wind_factor; // Msun/Gyr
         windM = windM*dt*tunit/(1e3 * cello::Myr_s); // Msun
-        // if (debug) printf("First winds mass = %e\nFrom wf = %f, dt=%f Z = %e\n", windM, wind_factor, dtFixed, zZsun);
-        //printf("eFactor = %f age = %f\n", e_factor, age);
+
         if (windM > mass_Msun){
             CkPrintf("Winds too large Mw = %e, Mp = %e age=%f, Z = %e\n",
                 windM, mass_Msun, age, metallicity_Zsun);
@@ -182,7 +180,7 @@ void EnzoMethodFeedbackSTARSS::transformComovingWithStar(enzo_float * density,
   if (direction > 0)
   {
     // to comoving with star
-    // NOTE: This transforms the velocity field into a momentum
+    // NOTE: This transforms the velocity field into a momentum density
     //       field for the sake of depositing momentum easily
  
     for (int ind = 0; ind<size; ind++) {
@@ -218,86 +216,6 @@ double EnzoMethodFeedbackSTARSS::Window(double xd, double yd, double zd, double 
             wz = 1.0 - std::abs(zd)/width;
     return wx * wy * wz;
 }
-
-void EnzoMethodFeedbackSTARSS::createCouplingParticles(EnzoBlock * enzo_block, const int nCouple,
-                                 double coupledEnergy, double coupledGasEnergy,
-                                 double coupledMass, double coupledMetals, double coupledMomenta,
-                                 enzo_float * xcp, enzo_float * ycp, enzo_float * zcp,
-                                 enzo_float * unitx, enzo_float * unity, enzo_float * unitz) const throw()
-{
-  // NOTE: not used anymore -- can delete. This just created coupling particles as actual cello particles
-  // instead of just a list of values to feed into cic routine
-  Particle particle = enzo_block->data()->particle();
-
-  const int it = particle.type_index("starss_coupling");
-  int ib = 0; // batch counter
-  int ipp = 0; // counter
-
-  //TODO: rename mass attribute to density???
-  const int ia_m  = particle.attribute_index(it,"mass");
-  const int ia_x  = particle.attribute_index(it,"x");
-  const int ia_y  = particle.attribute_index(it,"y");
-  const int ia_z  = particle.attribute_index(it,"z");
-  const int ia_momentum_x  = particle.attribute_index(it,"px");
-  const int ia_momentum_y  = particle.attribute_index(it,"py");
-  const int ia_momentum_z  = particle.attribute_index(it,"pz"); 
-  const int ia_e  = particle.attribute_index(it,"energy");
-  const int ia_ge = particle.attribute_index(it,"gas_energy");
-  const int ia_mz = particle.attribute_index(it,"metal_mass");
-
-  enzo_float * pmass = 0;
-  enzo_float * px = 0;
-  enzo_float * py = 0;
-  enzo_float * pz = 0;
-  enzo_float * p_px = 0;
-  enzo_float * p_py = 0;
-  enzo_float * p_pz = 0;
-  enzo_float * pe = 0;
-  enzo_float * pge = 0;
-  enzo_float * pmz = 0;
-
-  double mult = 1.0/nCouple;
-
-  for (int ip = 0; ip < nCouple; ip++) {
-    int my_particle = particle.insert_particles(it,1);
-    particle.index(my_particle, &ib, &ipp);
-    int io = ipp;
-
-    pmass = (enzo_float *) particle.attribute_array(it, ia_m , ib);
-    px    = (enzo_float *) particle.attribute_array(it, ia_x , ib);
-    py    = (enzo_float *) particle.attribute_array(it, ia_y , ib);
-    pz    = (enzo_float *) particle.attribute_array(it, ia_z , ib);
-    p_px    = (enzo_float *) particle.attribute_array(it, ia_momentum_x , ib);
-    p_py    = (enzo_float *) particle.attribute_array(it, ia_momentum_y , ib);
-    p_pz    = (enzo_float *) particle.attribute_array(it, ia_momentum_z , ib);
-    pe    = (enzo_float *) particle.attribute_array(it, ia_e , ib);
-    pge   = (enzo_float *) particle.attribute_array(it, ia_ge, ib);
-    pmz   = (enzo_float *) particle.attribute_array(it, ia_mz, ib);
-
-    pmass[io] = coupledMass * mult;
-    px[io] = xcp[ip];
-    py[io] = ycp[ip];
-    pz[io] = zcp[ip];
-    p_px[io] = coupledMomenta * unitx[ip];
-    p_py[io] = coupledMomenta * unity[ip];
-    p_pz[io] = coupledMomenta * unitz[ip];
-    pe[io] = coupledEnergy * mult;
-    pge[io] = coupledGasEnergy * mult;
-    pmz[io] = coupledMetals * mult;
-  }
-}
-
- void EnzoMethodFeedbackSTARSS::deleteCouplingParticles(EnzoBlock * enzo_block) const throw()
-{
-  // NOTE: Not used anymore -- can delete.
-  Particle particle = enzo_block->data()->particle();
-
-  const int it = particle.type_index("starss_coupling");
-
-  const int nb = particle.num_batches(it);
-  int count = enzo_block->delete_particle_copies_(it);
-  cello::simulation()->data_delete_particles(count);
-} 
 
 extern "C" void FORTRAN_NAME(cic_deposit)
   ( enzo_float (*px)[26], enzo_float (*py)[26], enzo_float (*pz)[26], const int * rank,
@@ -470,7 +388,8 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
   enzo_float * d_shell_c = (enzo_float *) field.values("SN_shell_density_copy");
 
   EnzoUnits * enzo_units = enzo::units();
-  double cell_volume = hx*hy*hz * enzo_units->volume();
+  double cell_volume_code = hx*hy*hz;
+  double cell_volume = cell_volume_code * enzo_units->volume();
   double rhounit = enzo_units->density();
   double beforeMass = 0.0;
   double afterMass = 0.0;
@@ -528,9 +447,6 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
           // CiC for clearing out gas from the central cell. Catch this case by setting density
           // to (1-maxEvacFraction) * density[i] and metal_density to (1-maxEvacFraction) * metal_density[i] if
           // either go negative.
-          // TODO: Find a better solution for this. The brute-force way would be to have a refresh
-          //       for each iteration of the loop over particles, but that seems a bit excessive and
-          //       would DEFINITELY slow things down.
 
           if (d[i] + d_dep_c[i] < 0) {
             d[i] *= 1-maxEvacFraction;
@@ -552,10 +468,10 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
           double M_scale_tot = d_new / d_old;
           double M_scale_shell = d_shell_c[i]/d[i];
 
-          // NOTE: Here, te_dep_c and ge_dep_c are carrying "energy" (not specific energy)
+          // NOTE: Here, te_dep_c and ge_dep_c are carrying "energy density" (not specific energy)
           //       and vx_dep_c, vy_dep_c, and vy_dep_c are carrying velocity of the shell (not momentum density)
-          te[i] = te[i] / M_scale_tot + te_dep_c[i] / cell_mass; 
-          ge[i] = ge[i] / M_scale_tot + ge_dep_c[i] / cell_mass;
+          te[i] = te[i] / M_scale_tot + te_dep_c[i] * cell_volume_code/cell_mass; 
+          ge[i] = ge[i] / M_scale_tot + ge_dep_c[i] * cell_volume_code/cell_mass;
           vx[i] += vx_dep_c[i] * M_scale_shell;
           vy[i] += vy_dep_c[i] * M_scale_shell;
           vz[i] += vz_dep_c[i] * M_scale_shell;
@@ -638,18 +554,6 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
   int numSN = 0; // counter of SN events
   int count = 0; // counter of particles
 
-/*
-  // check sums
-  double cell_volume = hx*hy*hz * enzo_units->volume();
-  double rhounit = enzo_units->density();
-  double totalMass = 0.0;
-  double rho_to_m = rhounit*cell_volume / cello::mass_solar;
-  for (int i=0; i<mx*my*mz; i++){
-    totalMass += d[i]*rho_to_m; 
-  }
-  CkPrintf("(block [%.3f, %.3f, %.3f]) totalMass before feedback: %e Msun\n", xm, ym,zm, totalMass); 
-*/
-
   enzo_float * d_dep  = (enzo_float *) field.values("density_deposit");
   enzo_float * te_dep = (enzo_float *) field.values("total_energy_deposit");
   enzo_float * ge_dep = (enzo_float *) field.values("internal_energy_deposit");
@@ -668,6 +572,7 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
 
   enzo_float * d_shell   = (enzo_float *) field.values("SN_shell_density");
   enzo_float * d_shell_c   = (enzo_float *) field.values("SN_shell_density_copy");
+
   // initialize deposit fields as tiny_number -- if d_dep=0 you get NaNs in TransformComovingWithStar
 
   for (int i=0; i<mx*my*mz; i++){
@@ -735,7 +640,6 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
     int np = particle.num_particles(it,ib);
 
     for (int ip=0; ip<np; ip++){
-      // AE: Check and see if these actually differ.... (ask James?)
       int ipdp = ip*dp; // pos
       int ipdm = ip*dm; // mass
       int ipdv = ip*dv; // velocity
@@ -743,8 +647,6 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
       int ipdc = ip*dc; // creation time
       int ipdmf = ip*dmf; // metallicity
       int ipsn  = ip*dsn; // number of SNe counter
-
-      //double pmass_solar = pmass[ipdm]*cell_volume * munit/cello::mass_solar;
 
       double pmass_solar = pmass[ipdm] * munit/cello::mass_solar;
 
@@ -764,17 +666,11 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
 
         int index = INDEX(ix,iy,iz,mx,my); // 1D cell index of star position
 
-        //if(pmass[ipdm] * enzo_units->mass_units() / cello::mass_solar
-        //       < enzo_config->method_star_maker_minimum_star_mass){
-        //
-        //}
-        // skipping continual formation routines here (May need later)
-
         int nSNII = 0, nSNIa = 0;
         double SNMassEjected = 0.0, SNMetalEjected = 0.0;
 
         /* determine how many supernova events */
-        if (single_sn_){
+        if (single_sn_){ // TODO: There isn't any other option, just remove single_sn parameter?
 
           /* Determine SN events from rates (currently taken from Hopkins 2018) */
 
@@ -782,13 +678,12 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
                       tunit, block->dt());
 
           numSN += nSNII + nSNIa;
+
 #ifdef DEBUG_FEEDBACK_STARSS
           if (nSNII + nSNIa > 0){
             CkPrintf("MethodFeedbackSTARSS SNe %d %d level = %d age = %f\n", nSNII, nSNIa, block->level(), age);
           }
 #endif
-          /* AJE: Can I just change this to a single call to deposit feedback for
-                  the total ejecta of SNe and winds ? */
 
           if (nSNII+nSNIa > 0){
             /* set feedback properties based on number and types of SN */
@@ -799,12 +694,7 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
 
             const double starZ = pmetal[ipdmf] / z_solar;
 
-            // TODO:compute metal mass ejected here
-
-            //SNMetalEjected = ;
-
             /* Fixed mass ejecta */
-
 
             this->deposit_feedback( block, energySN, SNMassEjected, SNMetalEjected,
                                     pvx[ipdv],pvy[ipdv],pvz[ipdv],
@@ -813,8 +703,6 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
 
             // add counter for number of SNe for the particle
             psncounter[ipsn] += nSNII+nSNIa;
-
-
 
           } // if nSNII or nSNIa > 0
         } // if single SN
@@ -831,8 +719,6 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
                          pmass_solar,
                          starZ, tunit, block->dt());
 
-          /* Error messages go here */
-
           if (windMass > 0){
           #ifdef DEBUG_FEEDBACK_STARSS
             CkPrintf("STARSS_FB: Adding stellar winds...\n");
@@ -847,10 +733,7 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
 
         pmass[ipdm] -= std::max(0.0,
                        (windMass + SNMassEjected) /
-                       (munit/cello::mass_solar)); // / cell_volume;
-
-
-        //
+                       (munit/cello::mass_solar)); 
 
 
       } // if mass and lifetime > 0
@@ -976,8 +859,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   enzo_float * vy_dep_tot = (enzo_float *) field.values("velocity_y_deposit");
   enzo_float * vz_dep_tot = (enzo_float *) field.values("velocity_z_deposit");
 
-  // allocate temporary deposit fields 
-  // TODO: maybe don't need full field, since deposition only happens in 27 cells??
+  // allocate temporary deposit fields for this event 
   enzo_float *  d_dep = new enzo_float[size]; 
   enzo_float * te_dep = new enzo_float[size];
   enzo_float * ge_dep = new enzo_float[size];
@@ -1002,6 +884,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
       from the host particles.
   */
 
+  // TODO: Initialize this in a loop -- way cleaner
   enzo_float CloudParticleVectorX[] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0,  0, 0,  0,  0,  0,  0, 1, 1,  1, 1,  1,  1,  1,  1, 1};
   enzo_float CloudParticleVectorY[] = { 1,  1,  1,  0,  0, -1, -1, -1,  0, 1, 1,  1, 0,  0, -1, -1, -1, 1, 1,  1, 0,  0, -1, -1, -1, 0};
   enzo_float CloudParticleVectorZ[] = { 1,  0, -1,  1, -1,  1,  0, -1,  0, 1, 0, -1, 1, -1,  1,  0, -1, 1, 0, -1, 1, -1,  1,  0, -1, 0};
@@ -1046,8 +929,6 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
       }
   }
 
-/* AJE LEFT OFF HERE */
-
      /* 
          transform to comoving with the star and transform velocities to momenta
          for easy momentum deposition, since the fluid variable that PPM pushes
@@ -1071,7 +952,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
       for (int iz_ = iz-1; iz_ < iz+2; iz_++) {
         int ind = INDEX(ix_,iy_,iz_, mx,my);
         Z_mean += mf[ind] / d[ind];
-        // TODO: make EnzoComputeMolecularWeight, and just access mu_field here.
+        // TODO: make EnzoComputeMolecularWeight, and just access mu_field here?
         if (primordial_chemistry == 0) mu = enzo_config->ppm_mol_weight;
         else {
           mu = d_el[ind] + dHI[ind] + dHII[ind] + 0.25*(dHeI[ind]+dHeII[ind]+dHeIII[ind]);
@@ -1083,7 +964,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
             mu += 0.5*(dDI[ind] + dDII[ind]) + dHDI[ind]/3.0;
           }
         }
-        mu /= d[ind]; // divide by density to get ~
+        mu /= d[ind]; 
         mu_mean += mu; 
         d_mean += d[ind];
       } 
@@ -1120,7 +1001,6 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   // if we resolve free expansion, all energy is thermally coupled
   double p_free = sqrt(2*ejectaMass*cello::mass_solar*ejectaEnergy) / cello::mass_solar/1e5;
   double r_free = 2.75*pow(ejectaMass / 3 / n_mean, 1.0/3); // free expansion radius eq. 2
-  //bool use_free false; // could just deposit free expansion into host cell, really...
   
   double t3_sedov = pow(std::max(r_free, std::max(cellwidth, r_free)) * cello::pc_cm / 
                     (5.0 * cello::pc_cm * pow(ejectaEnergy / 1e51 / n_mean, 1.0 / 5.0)), 5./ 2.);
@@ -1162,9 +1042,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   double coupledMomenta = 0.0;
   double eKinetic = 0.0;
 
-  double cw_eff = cellwidth; // effective cell width couples to farther than just dx.
-                             // theres a lot of numerical fudge factors here because of that.
-                             // the actual coupling is between 2-3 dx, depending on position within the cell
+  double cw_eff = cellwidth;
 
   double dx_eff = cw_eff / CoolingRadius;
   double fader = cw_eff / r_fade;
@@ -1272,9 +1150,8 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   {
     if (dx_eff < 1)
        shellMass = 4*cello::pi/3 * d_mean * pow(cw_eff*cello::pc_cm,3) / cello::mass_solar; 
-      //shellMass = std::min(1e8, coupledMomenta / shellVelocity); //Msun
 
-    else if (dx_eff < 1) {
+    else if (dx_eff > 1) {
       if (Z_Zsun > 0.01)
         shellMass = 1.41e4*pow(ejectaEnergy/1e51, 6./7.) * pow(d_mean, -0.24) * pow(Z_Zsun, -0.27);
       else
@@ -1489,8 +1366,8 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   //these values correspond to TOTAL (energy, mass, etc.)
   //over all the coupling particles.
 
-  coupledEnergy /= eunit; // coupledEnergy is kinetic energy at this point
-  coupledGasEnergy /= eunit;
+  coupledEnergy /= eunit * cell_volume_code; // put energy into energy density units
+  coupledGasEnergy /= eunit * cell_volume_code;
   coupledMass /= rho_to_m; // put coupledMass into code density units
   coupledMetals /= rho_to_m;
   coupledMomenta /= (rho_to_m * vunit / 1e5); // put coupledMomenta into code momentum density units 
@@ -1627,8 +1504,8 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
     mf[i] += mf_dep[i]; 
 
     // need to rescale specific energies to account for added mass
-    te[i] = te[i]/M_scale + te_dep[i] / cell_mass;
-    ge[i] = ge[i]/M_scale + ge_dep[i] / cell_mass;
+    te[i] = te[i]/M_scale + te_dep[i] * cell_volume_code/cell_mass;
+    ge[i] = ge[i]/M_scale + ge_dep[i] * cell_volume_code/cell_mass;
     vx[i] += vx_dep[i];
     vy[i] += vy_dep[i];
     vz[i] += vz_dep[i];

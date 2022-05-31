@@ -75,13 +75,6 @@ public:
    // window function for calculating CiC fractions. May make more sense to put this in Cello somewhere
    double Window(double xd, double yd, double zd, double width) const throw();
 
-   void createCouplingParticles(EnzoBlock * enzo_block, const int nCouple,
-                                double coupledEnergy, double coupledGasEnergy, 
-                                double coupledMass, double coupledMetals, double coupledMomenta,
-                                enzo_float * xcp, enzo_float * ycp, enzo_float * zcp,
-                                enzo_float * unitx, enzo_float * unity, enzo_float * unitz) const throw();
-
-   void deleteCouplingParticles(EnzoBlock * enzo_block) const throw();
 protected:
 
   int sf_minimum_level_;
