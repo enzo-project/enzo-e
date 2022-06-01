@@ -33,8 +33,7 @@ void EnzoBfieldMethodCT::register_target_block_
   const std::string field_names[] = {"bfieldi_x", "bfieldi_y", "bfieldi_z"};
   Field field = block->data()->field();
   for (std::size_t i = 0; i<3; i++){
-    bfieldi_l_[i] = field.values_view<enzo_float>(field_names[i],
-                                                  ghost_choice::include);
+    bfieldi_l_[i] = field.values_view<enzo_float>(field_names[i]);
   }
 
   EnzoBlock *enzo_block = enzo::block(block);

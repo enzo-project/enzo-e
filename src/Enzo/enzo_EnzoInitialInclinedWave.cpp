@@ -407,10 +407,9 @@ void setup_bfield(Block * block, VectorInit *a, MeshPos &pos,
 	 field.is_field("bfieldi_y") &&
 	 field.is_field("bfieldi_z"));
 
-  const ghost_choice gchoice = ghost_choice::include;
-  EFlt3DArray bfieldi_x = field.values_view<enzo_float>("bfieldi_x", gchoice);
-  EFlt3DArray bfieldi_y = field.values_view<enzo_float>("bfieldi_y", gchoice);
-  EFlt3DArray bfieldi_z = field.values_view<enzo_float>("bfieldi_z", gchoice);
+  EFlt3DArray bfieldi_x = field.values_view<enzo_float>("bfieldi_x");
+  EFlt3DArray bfieldi_y = field.values_view<enzo_float>("bfieldi_y");
+  EFlt3DArray bfieldi_z = field.values_view<enzo_float>("bfieldi_z");
 
   if (a == NULL){
     for (int iz=0; iz<mz+1; iz++){
@@ -474,23 +473,22 @@ void setup_eint_(Block *block)
   // This operation could be split off and placed in a separate initializer
   Field field = block->data()->field();
 
-  const ghost_choice gchoice = ghost_choice::include;
   EFlt3DArray density, etot, eint;
-  density = field.values_view<enzo_float>("density", gchoice);
-  etot = field.values_view<enzo_float>("total_energy", gchoice);
-  eint = field.values_view<enzo_float>("internal_energy", gchoice);
+  density = field.values_view<enzo_float>("density");
+  etot = field.values_view<enzo_float>("total_energy");
+  eint = field.values_view<enzo_float>("internal_energy");
 
   EFlt3DArray velocity_x, velocity_y, velocity_z;
-  velocity_x = field.values_view<enzo_float>("velocity_x", gchoice);
-  velocity_y = field.values_view<enzo_float>("velocity_y", gchoice);
-  velocity_z = field.values_view<enzo_float>("velocity_z", gchoice);
+  velocity_x = field.values_view<enzo_float>("velocity_x");
+  velocity_y = field.values_view<enzo_float>("velocity_y");
+  velocity_z = field.values_view<enzo_float>("velocity_z");
 
   const bool mhd = field.is_field("bfield_x");
   EFlt3DArray bfield_x, bfield_y, bfield_z;
   if (mhd){
-    bfield_x = field.values_view<enzo_float>("bfield_x", gchoice);
-    bfield_y = field.values_view<enzo_float>("bfield_y", gchoice);
-    bfield_z = field.values_view<enzo_float>("bfield_z", gchoice);
+    bfield_x = field.values_view<enzo_float>("bfield_x");
+    bfield_y = field.values_view<enzo_float>("bfield_y");
+    bfield_z = field.values_view<enzo_float>("bfield_z");
   }
 
   for (int iz=0; iz<density.shape(0); iz++){
@@ -522,16 +520,14 @@ void setup_fluid(Block *block, ScalarInit *density_init,
 		 MeshPos &pos, int mx, int my, int mz, double gamma)
 {
   Field field = block->data()->field();
-  const ghost_choice gchoice = ghost_choice::include;
   EFlt3DArray density, specific_total_energy;
-  density = field.values_view<enzo_float>("density", gchoice);
-  specific_total_energy = field.values_view<enzo_float>("total_energy",
-                                                        gchoice);
+  density = field.values_view<enzo_float>("density");
+  specific_total_energy = field.values_view<enzo_float>("total_energy");
 
   EFlt3DArray velocity_x, velocity_y, velocity_z;
-  velocity_x = field.values_view<enzo_float>("velocity_x", gchoice);
-  velocity_y = field.values_view<enzo_float>("velocity_y", gchoice);
-  velocity_z = field.values_view<enzo_float>("velocity_z", gchoice);
+  velocity_x = field.values_view<enzo_float>("velocity_x");
+  velocity_y = field.values_view<enzo_float>("velocity_y");
+  velocity_z = field.values_view<enzo_float>("velocity_z");
 
   for (int iz=0; iz<mz; iz++){
     for (int iy=0; iy<my; iy++){
@@ -567,28 +563,25 @@ void setup_circ_polarized_alfven(Block *block, ScalarInit *density_init,
   // Gardiner & Stone (2008) explicitly as states that the truncation error of
   // B_perp**2/P is important
   Field field = block->data()->field();
-  const ghost_choice gchoice = ghost_choice::include;
 
   EFlt3DArray density, specific_total_energy;
-  density = field.values_view<enzo_float>("density", gchoice);
-  specific_total_energy = field.values_view<enzo_float>("total_energy",
-                                                        gchoice);
+  density = field.values_view<enzo_float>("density");
+  specific_total_energy = field.values_view<enzo_float>("total_energy");
 
   EFlt3DArray velocity_x, velocity_y, velocity_z;
-  velocity_x = field.values_view<enzo_float>("velocity_x", gchoice);
-  velocity_y = field.values_view<enzo_float>("velocity_y", gchoice);
-  velocity_z = field.values_view<enzo_float>("velocity_z", gchoice);
+  velocity_x = field.values_view<enzo_float>("velocity_x");
+  velocity_y = field.values_view<enzo_float>("velocity_y");
+  velocity_z = field.values_view<enzo_float>("velocity_z");
 
   EFlt3DArray bfield_x, bfield_y, bfield_z;
-  bfield_x = field.values_view<enzo_float>("bfield_x", gchoice);
-  bfield_y = field.values_view<enzo_float>("bfield_y", gchoice);
-  bfield_z = field.values_view<enzo_float>("bfield_z", gchoice);
+  bfield_x = field.values_view<enzo_float>("bfield_x");
+  bfield_y = field.values_view<enzo_float>("bfield_y");
+  bfield_z = field.values_view<enzo_float>("bfield_z");
 
   EFlt3DArray specific_internal_energy;
   const bool dual_energy = field.is_field("internal_energy");
   if (dual_energy){
-    specific_internal_energy = field.values_view<enzo_float>("internal_energy",
-                                                             gchoice);
+    specific_internal_energy = field.values_view<enzo_float>("internal_energy");
   }
   
 
