@@ -83,7 +83,8 @@ public: // interface
   /// @returns view of the specified field.
   template<class T>
   CelloArray<T, 3> values_view(const FieldDescr * field_descr,
-			       int id_field, ghost_choice choice,
+			       int id_field,
+                               ghost_choice choice = ghost_choice::include,
                                int history=0) throw()
   {
     using noconst_T = typename std::remove_cv<T>::type;
@@ -92,7 +93,8 @@ public: // interface
 
   template<class T>
   CelloArray<T, 3> values_view(const FieldDescr * field_descr,
-			       std::string name, ghost_choice choice,
+			       std::string name,
+                               ghost_choice choice = ghost_choice::include,
                                int history=0) throw()
   {
     return values_view<T>(field_descr, field_descr->field_id(name), choice,
@@ -101,7 +103,8 @@ public: // interface
 
   template<class T>
   CelloArray<const T, 3> values_view(const FieldDescr * field_descr,
-				     int id_field, ghost_choice choice,
+				     int id_field,
+                                     ghost_choice choice = ghost_choice::include,
                                      int history=0) const throw()
   {
     return const_cast<FieldData*>(this)->values_view<T>(field_descr, id_field,
@@ -110,7 +113,8 @@ public: // interface
 
   template<class T>
   CelloArray<const T, 3> values_view(const FieldDescr * field_descr,
-				     std::string name, ghost_choice choice,
+				     std::string name,
+                                     ghost_choice choice = ghost_choice::include,
 				     int history=0) const throw()
   {
     return values_view<T>(field_descr, field_descr->field_id(name), choice,
