@@ -82,13 +82,13 @@ void test_view_(Field& field, int id, std::string name = "",
         // first handle non-const Field stuff
         // load from id
         {
-          CelloArray<T, 3> view = field.values_view<T>(id, gchoice, history);
+          CelloArray<T, 3> view = field.view<T>(id, gchoice, history);
           passed &= check_view_props_(view, field, id, false, includes_ghost,
                                       history);
         }
         // load from field name (if it was provided)
         if (name != ""){
-          CelloArray<T, 3> view = field.values_view<T>(name, gchoice, history);
+          CelloArray<T, 3> view = field.view<T>(name, gchoice, history);
           passed &= check_view_props_(view, field, id, false, includes_ghost,
                                       history);
         }
@@ -97,7 +97,7 @@ void test_view_(Field& field, int id, std::string name = "",
         {
           const Field& const_field = field;
           CelloArray<const T, 3> view =
-            const_field.values_view<T>(id, gchoice, history);
+            const_field.view<T>(id, gchoice, history);
           passed &= check_view_props_(view, const_field, id, false,
                                       includes_ghost, history);
         }
@@ -744,7 +744,7 @@ PARALLEL_MAIN_BEGIN
     unit_assert ((ct3[0] == 3.00));
 
     // ---------------------------------------------------------------------
-    unit_func("values_view");
+    unit_func("view");
 
     for (int i = 0; i < 2; i++){
       for (int history_ind = 0; history_ind < 3; history_ind++){

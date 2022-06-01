@@ -28,10 +28,8 @@ void EnzoInitialBCenter::initialize_bfield_center( Block * block )
   const char* interface_names[3] = {"bfieldi_x","bfieldi_y","bfieldi_z"};
   Field field = block->data()->field();
   for (int i=0; i<3; i++){
-    EFlt3DArray bfieldc = field.values_view<enzo_float>(centered_names[i],
-                                                        ghost_choice::include);
-    EFlt3DArray bfieldi = field.values_view<enzo_float>(interface_names[i],
-                                                        ghost_choice::include);
+    EFlt3DArray bfieldc = field.view<enzo_float>(centered_names[i]);
+    EFlt3DArray bfieldi = field.view<enzo_float>(interface_names[i]);
     EnzoBfieldMethodCT::compute_center_bfield(i, bfieldc, bfieldi);
   }
 }
@@ -111,11 +109,10 @@ void EnzoInitialBCenter::initialize_bfield_interface( Block * block,
 						      CelloArray<double,3> &Az)
 {
 
-  EFlt3DArray bfieldi_x, bfieldi_y, bfieldi_z;
   Field field = block->data()->field();
-  bfieldi_x = field.values_view<enzo_float>("bfieldi_x", ghost_choice::include);
-  bfieldi_y = field.values_view<enzo_float>("bfieldi_y", ghost_choice::include);
-  bfieldi_z = field.values_view<enzo_float>("bfieldi_z", ghost_choice::include);
+  EFlt3DArray bfieldi_x = field.view<enzo_float>("bfieldi_x");
+  EFlt3DArray bfieldi_y = field.view<enzo_float>("bfieldi_y");
+  EFlt3DArray bfieldi_z = field.view<enzo_float>("bfieldi_z");
 
   double dx,dy,dz;
   block->data()->field_cell_width(&dx,&dy,&dz);
@@ -204,12 +201,11 @@ void EnzoInitialBCenter::enforce_block( Block * block,
     //     contributions other than magnetic fields
     //   - the density field is pre-initialized
 
-    EFlt3DArray density, etot, bx, by, bz;
-    density = field.values_view<enzo_float>("density", ghost_choice::include);
-    etot = field.values_view<enzo_float>("total_energy", ghost_choice::include);
-    bx = field.values_view<enzo_float>("bfield_x", ghost_choice::include);
-    by = field.values_view<enzo_float>("bfield_y", ghost_choice::include);
-    bz = field.values_view<enzo_float>("bfield_z", ghost_choice::include);
+    EFlt3DArray density = field.view<enzo_float>("density");
+    EFlt3DArray etot = field.view<enzo_float>("total_energy");
+    EFlt3DArray bx = field.view<enzo_float>("bfield_x");
+    EFlt3DArray by = field.view<enzo_float>("bfield_y");
+    EFlt3DArray bz = field.view<enzo_float>("bfield_z");
 
     for (int iz= 0; iz < density.shape(0); iz++){
       for (int iy= 0; iy < density.shape(1); iy++){

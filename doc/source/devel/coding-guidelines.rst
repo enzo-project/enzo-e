@@ -108,7 +108,7 @@ There are 2 approaches for accessing Cello Field block arrays.
   2. The preferred approach is to use the ``CelloArray`` multidimensional array templates that wrap the raw pointers managed by Cello.
      Using ``CelloArray``\s improve code clarity and safety.
      However, it may result in some performance degradation (benchmarks indicate that this is very marginal).
-     ``Field::values_view`` is used to help facillitate this approach.
+     ``Field::view`` is used to help facillitate this approach.
      For more details about ``CelloArray``\s, see :ref:`using-CelloArray`
 
 Below, we provide a table that summarizes the suggested names for Field-related variables used to access the array elements.
@@ -152,8 +152,9 @@ The preferred approach for accessing fields relies upon:
 .. code-block:: c++
 
    template<class T>
-   CelloArray<T,3> Field::values_view (int id_field, ghost_choice choice,
-                                       int index_history=0) throw ();
+   CelloArray<T,3> Field::view (int id_field,
+                                ghost_choice choice = ghost_choice::include,
+                                int index_history=0) throw ();
 
 This returns a `CelloArray` that acts as a view of the specified field.
 The meaning of the ``id_field`` and ``index_history`` arguments are unchanged from ``Field::values``.
@@ -163,13 +164,14 @@ The template parameter ``T`` specifies the expected datatype of the field.
 If the field does not have the expected datatype, the program will abort with an explanatory error message.
 While implementing a ``Method`` object in the ``Enzo`` layer, this parameter is frequently ``enzo_float``.
 
-The ``choice`` argument accepts the following values:
+By default, the returned ``CelloArray`` **always** include ghost zones.
+This behavior is controlled by the ``choice`` argument, which can be passed the following values:
 
-  * ``ghost_choice::include``: the returned view always includes ghost zones (the program aborts with an error message if ghost zones aren't allocated).
+  * ``ghost_choice::include``: the returned view always includes ghost zones (the program aborts with an error message if ghost zones aren't allocated). This is the default value.
   * ``ghost_choice::exclude``: the returned view always excludes ghost zones.
   * ``ghost_choice::permit``: the returned view includes ghost zones if they are allocated (replicating the behavior of ``Field::values``).
 
-Overloads are also provided for ``Field::values`` and ``Field::values_view`` that:
+Overloads are also provided for ``Field::values`` and ``Field::view`` that:
   * provide read-only access to field arrays from a ``const Field`` instance
   * let you replace the first argument with a string holding the field's name
 
@@ -202,7 +204,7 @@ Traditional Approach
 Preferred Approach
 ~~~~~~~~~~~~~~~~~~
 
-A shorter version of the following snippet is also possible where we pass ``ghost_choice::exclude`` (instead of ``ghost_choice::exclude``) to ``field.values_view`` to entirely exclude the ghost zone from the array.
+A shorter version of the following snippet is also possible where we pass ``ghost_choice::exclude`` as the second argument to ``field.view`` to entirely exclude the ghost zone from the array.
 
 .. code-block:: c++
 
@@ -211,8 +213,7 @@ A shorter version of the following snippet is also possible where we pass ``ghos
    int gx, gy, gz;
    field.ghost_depth(id, &gx, &gy, &gz);
 
-   CelloArray<enzo_float,3> d
-     = field.values_view<enzo_float>(id, ghost_choice::include);
+   CelloArray<enzo_float,3> d = field.view<enzo_float>(id);
 
    // we can get the array shape directly from the array (a minor design quirk
    // may make the arguments for the shape method seem a little unintuitive)
@@ -227,7 +228,9 @@ A shorter version of the following snippet is also possible where we pass ``ghos
        }
      }
    }
- 
+
+More code examples that use this functionallity can be found in the implementation of the ``EnzoInitialCloud`` and ``EnzoInitialBCenter`` classes
+
 ===================
 Accessing Particles
 ===================
