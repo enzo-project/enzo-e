@@ -267,38 +267,28 @@ public: // interface
   ///
   /// @returns view of the specified field.
   template<class T>
-  CelloArray<T, 3> values_view(int id_field,
-                               ghost_choice choice = ghost_choice::include,
-                               int index_history=0) throw()
-  {
-    return field_data_->values_view<T>(field_descr_, id_field, choice,
-                                       index_history);
-  }
+  CelloArray<T, 3> view(int id_field,
+                        ghost_choice choice = ghost_choice::include,
+                        int index_history=0) throw()
+  { return field_data_->view<T>(field_descr_,id_field,choice,index_history); }
 
   template<class T>
-  CelloArray<T, 3> values_view(std::string name,
-                               ghost_choice choice = ghost_choice::include,
-                               int index_history=0) throw()
-  {
-    return field_data_->values_view<T>(field_descr_,name,choice,index_history);
-  }
+  CelloArray<T, 3> view(std::string name,
+                        ghost_choice choice = ghost_choice::include,
+                        int index_history=0) throw()
+  { return field_data_->view<T>(field_descr_,name,choice,index_history); }
 
   template<class T>
-  CelloArray<const T, 3> values_view(int id_field,
-                                     ghost_choice choice = ghost_choice::include,
-				     int index_history=0) const throw()
-  {
-    return field_data_->values_view<T>(field_descr_, id_field, choice,
-                                       index_history);
-  }
+  CelloArray<const T, 3> view(int id_field,
+                              ghost_choice choice = ghost_choice::include,
+			      int index_history=0) const throw()
+  { return field_data_->view<T>(field_descr_,id_field,choice,index_history); }
 
   template<class T>
-  CelloArray<const T, 3> values_view(std::string name,
-                                     ghost_choice choice = ghost_choice::include,
-                                     int index_history=0) const throw()
-  {
-    return field_data_->values_view<T>(field_descr_,name,choice,index_history);
-  }
+  CelloArray<const T, 3> view(std::string name,
+                              ghost_choice choice = ghost_choice::include,
+                              int index_history=0) const throw()
+  { return field_data_->view<T>(field_descr_,name,choice,index_history); }
 
   /// Return array for the corresponding coarse field
   char * coarse_values (int id_field) throw ()

@@ -319,14 +319,14 @@ public:
     }
     Field field = block->data()->field();
     if (has_bfield_){
-      bfield_x = field.values_view<enzo_float>("bfield_x");
-      bfield_y = field.values_view<enzo_float>("bfield_y");
-      bfield_z = field.values_view<enzo_float>("bfield_z");
+      bfield_x = field.view<enzo_float>("bfield_x");
+      bfield_y = field.view<enzo_float>("bfield_y");
+      bfield_z = field.view<enzo_float>("bfield_z");
     }
     if (has_interface_bfield_){
-      bfieldi_x = field.values_view<enzo_float>("bfieldi_x");
-      bfieldi_y = field.values_view<enzo_float>("bfieldi_y");
-      bfieldi_z = field.values_view<enzo_float>("bfieldi_z");
+      bfieldi_x = field.view<enzo_float>("bfieldi_x");
+      bfieldi_y = field.view<enzo_float>("bfieldi_y");
+      bfieldi_z = field.view<enzo_float>("bfieldi_z");
     }
 
     if (initialize_uniform_bfield_){
@@ -446,11 +446,11 @@ void EnzoInitialCloud::enforce_block
 {
   Field field = block->data()->field();
 
-  EFlt3DArray density = field.values_view<enzo_float>("density");
-  EFlt3DArray velocity_x = field.values_view<enzo_float>("velocity_x");
-  EFlt3DArray velocity_y = field.values_view<enzo_float>("velocity_y");
-  EFlt3DArray velocity_z = field.values_view<enzo_float>("velocity_z");
-  EFlt3DArray total_energy = field.values_view<enzo_float>("total_energy");
+  EFlt3DArray density = field.view<enzo_float>("density");
+  EFlt3DArray velocity_x = field.view<enzo_float>("velocity_x");
+  EFlt3DArray velocity_y = field.view<enzo_float>("velocity_y");
+  EFlt3DArray velocity_z = field.view<enzo_float>("velocity_z");
+  EFlt3DArray total_energy = field.view<enzo_float>("total_energy");
 
   // Currently assume pressure equilibrium and pre-initialized uniform B-field
   SphereRegion sph(block->data(), subsample_n_, cloud_center_x_,
@@ -464,7 +464,7 @@ void EnzoInitialCloud::enforce_block
        field_descr->groups()->is_in("cloud_dye", "color"));
   EFlt3DArray cloud_dye_density;
   if (use_cloud_dye){
-    cloud_dye_density = field.values_view<enzo_float>("cloud_dye");
+    cloud_dye_density = field.view<enzo_float>("cloud_dye");
   }
 
   const bool set_metal_density
@@ -477,7 +477,7 @@ void EnzoInitialCloud::enforce_block
   }
   EFlt3DArray metal_density;
   if (set_metal_density){
-    metal_density = field.values_view<enzo_float>("metal_density");
+    metal_density = field.view<enzo_float>("metal_density");
   }
   
   // Handle magnetic fields (mhd indicates whether the fields are present)
@@ -497,7 +497,7 @@ void EnzoInitialCloud::enforce_block
   const bool use_random_factor = (perturb_stddev_ != 0);
 
   if (dual_energy){
-    internal_energy = field.values_view<enzo_float>("internal_energy");
+    internal_energy = field.view<enzo_float>("internal_energy");
     double temp = (eint_wind_ + 0.5*velocity_wind_*velocity_wind_ +
 		   mhd_handler.magnetic_edens_wind() / density_wind_);
     ASSERT2("EnzoInitialCloud::enforce_block",
