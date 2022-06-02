@@ -47,7 +47,7 @@ void EnzoBondiHoyleSinkParticle::init_() throw()
   decltype(acc_zone_1d_indices_.size()) current_vector_index = 0;
   decltype(acc_zone_1d_indices_.size()) host_cell_vector_index;
 
-  // Keep track of the sum of (un-normalized) sum of cell weights,
+  // Keep track of the sum of (un-normalized) cell weights,
   // will use this to normalize the weights later.
   double sum_of_cell_weights = 0.0;
 
@@ -130,9 +130,6 @@ void EnzoBondiHoyleSinkParticle::set_host_cell_indices_() throw()
   // Get the ghost depths
   int gx, gy, gz;
   field.ghost_depth(0,&gx,&gy,&gz);
-  double min_x = xm - gx * hx;
-  double min_y = ym - gy * hy;
-  double min_z = zm - gz * hz;
 
   host_cell_ix_ = floor((px_ - xm) / hx) + gx;
   host_cell_iy_ = floor((py_ - ym) / hy) + gy;
