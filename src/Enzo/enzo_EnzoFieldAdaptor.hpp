@@ -10,7 +10,7 @@
 ///
 /// The unorthodox implementation, strategy was chosen to try to minimize the
 /// cost of using this wrapper. A particular goal was to facillitate the
-/// `values_view` & `ptr_grackle` methods of `ArrayWrapper` & `BlockWrapper`
+/// `view` & `ptr_grackle` methods of `ArrayWrapper` & `BlockWrapper`
 /// to be inlined. (This would not be possible if the methods were implemented
 /// and called as virtual methods).
 
@@ -33,7 +33,7 @@ namespace enzo_field_adaptor_detail {
 
     ArrayMapWrapper(const EnzoEFltArrayMap& array_map);
 
-    inline CelloArray<const enzo_float, 3> values_view(const std::string& name)
+    inline CelloArray<const enzo_float, 3> view(const std::string& name)
       const noexcept
     { return array_map_[name]; }
     
@@ -64,11 +64,10 @@ namespace enzo_field_adaptor_detail {
   public:
     BlockWrapper(Block* block, int index_history);
 
-    inline CelloArray<const enzo_float, 3> values_view(const std::string& name)
+    inline CelloArray<const enzo_float, 3> view(const std::string& name)
       const noexcept
     {
-      return field_.values_view<enzo_float> (name, ghost_choice::include,
-                                             index_history_);
+      return field_.view<enzo_float>(name,ghost_choice::include,index_history_);
     }
 
     inline const enzo_float* ptr_grackle(const std::string& name) const noexcept
@@ -210,13 +209,13 @@ public:
   /// When a Field is being wrapped, the ghost zones are always excluded
   /// (if we want to make this configurable in the future, the choice should be
   /// passed to the appropriate constructor)
-  inline CelloArray<const enzo_float, 3> values_view(const std::string& name)
+  inline CelloArray<const enzo_float, 3> view(const std::string& name)
     const noexcept
   {
     if (holds_block_){
-      return reinterpret_cast<BlockWrapper*>(wrapper_)->values_view(name);
+      return reinterpret_cast<BlockWrapper*>(wrapper_)->view(name);
     } else {
-      return reinterpret_cast<ArrayMapWrapper*>(wrapper_)->values_view(name);
+      return reinterpret_cast<ArrayMapWrapper*>(wrapper_)->view(name);
     }
   }
 

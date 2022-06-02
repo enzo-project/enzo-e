@@ -170,7 +170,7 @@ void EnzoComputePressure::compute_pressure
 
     using RdOnlyEFltArr = CelloArray<const enzo_float, 3>;
 
-    const RdOnlyEFltArr d = fadaptor.values_view("density");
+    const RdOnlyEFltArr d = fadaptor.view("density");
 
     enzo_float gm1 = gamma - 1.0;
 
@@ -184,7 +184,7 @@ void EnzoComputePressure::compute_pressure
 
     if (dual_energy) {
 
-      const RdOnlyEFltArr ie = fadaptor.values_view("internal_energy");
+      const RdOnlyEFltArr ie = fadaptor.view("internal_energy");
 
       auto loop_body = [=](int iz, int iy, int ix)
         { p(iz,iy,ix) = gm1 * d(iz,iy,ix) * ie(iz,iy,ix); };
@@ -193,22 +193,22 @@ void EnzoComputePressure::compute_pressure
     } else { // not using dual energy formalism
 
       const int rank = cello::rank();
-      const RdOnlyEFltArr te = fadaptor.values_view("total_energy");
+      const RdOnlyEFltArr te = fadaptor.view("total_energy");
 
       // fetch velocity arrays
-      const RdOnlyEFltArr vx = fadaptor.values_view("velocity_x");
+      const RdOnlyEFltArr vx = fadaptor.view("velocity_x");
       const RdOnlyEFltArr vy = (rank >= 2)
-        ? fadaptor.values_view("velocity_y") : RdOnlyEFltArr();
+        ? fadaptor.view("velocity_y") : RdOnlyEFltArr();
       const RdOnlyEFltArr vz = (rank >= 3)
-        ? fadaptor.values_view("velocity_z") : RdOnlyEFltArr();
+        ? fadaptor.view("velocity_z") : RdOnlyEFltArr();
 
       // fetch bfield arrays
       const RdOnlyEFltArr bx = (mhd)
-        ? fadaptor.values_view("bfield_x") : RdOnlyEFltArr();
+        ? fadaptor.view("bfield_x") : RdOnlyEFltArr();
       const RdOnlyEFltArr by = (mhd & (rank >= 2))
-        ? fadaptor.values_view("bfield_y") : RdOnlyEFltArr();
+        ? fadaptor.view("bfield_y") : RdOnlyEFltArr();
       const RdOnlyEFltArr bz = (mhd & (rank >= 3))
-        ? fadaptor.values_view("bfield_z") : RdOnlyEFltArr();
+        ? fadaptor.view("bfield_z") : RdOnlyEFltArr();
 
       if (rank == 1) {
 
