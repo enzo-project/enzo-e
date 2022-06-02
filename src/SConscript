@@ -1,9 +1,0 @@
-Import('env')
-
-Import('bin_path')
-Import('inc_path')
-Import('lib_path')
-
-SConscript('Enzo/SConscript')
-SConscript('External/SConscript')
-SConscript('Cello/SConscript')

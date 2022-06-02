@@ -12,6 +12,7 @@
 #
 # We should probably try small convergence tests like Athena++
 
+import argparse
 import os
 import os.path
 import sys
@@ -101,13 +102,14 @@ def cleanup():
             shutil.rmtree(dir_name)
 
 if __name__ == '__main__':
-
-    executable = os.environ.get('ENZOE_BIN', 'bin/enzo-e')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--launch_cmd', required=True,type=str)
+    args = parser.parse_args()
 
     with testing_context():
 
         # run the tests
-        run_tests(executable)
+        run_tests(args.launch_cmd)
 
         # analyze the tests
         tests_passed = analyze_tests()

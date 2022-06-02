@@ -49,8 +49,8 @@ Method {
             "az", "default",
             "is_local", "default"
             ];
-         constants = [ "mass", "default", 10.00000000000000 ];
-         group_list = [ "has_mass" ];
+         constants = [ "density", "default", 10.00000000000000 ];
+         group_list = [ "is_gravitating" ];
          position = [ "x", "y", "z" ];
          velocity = [ "vx", "vy", "vz" ];
      }
