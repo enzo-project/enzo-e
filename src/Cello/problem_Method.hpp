@@ -43,17 +43,21 @@ public: // interface
 public: // virtual functions
 
   /// Apply the method to advance a block one timestep
-
   virtual void compute ( Block * block) throw() = 0;
 
   /// Return the name of this Method
   virtual std::string name () throw () = 0;
 
   /// Compute maximum timestep for this method
+  ///
+  /// The default implementation returns the maximum finite value of `double`
   virtual double timestep (Block * block) throw()
   { return std::numeric_limits<double>::max(); }
 
   /// Resume computation after a reduction
+  ///
+  /// This member function only typically needs to be implemented by Method
+  /// classes that employ reductions.
   virtual void compute_resume ( Block * block,
 				CkReductionMsg * msg) throw()
   {

@@ -234,3 +234,15 @@ More code examples that use this functionallity can be found in the implementati
 ===================
 Accessing Particles
 ===================
+
+===================
+Preprocessor Macros
+===================
+
+In case you add a new preprocessor macro or definition that is being used in a ``.ci`` file,
+you have to add it to the ``CHARM_PREPROC_DEFS`` list in the main ``CMakeLists.txt`` so that
+it is being used/forwarded when processing the ``.ci`` files.
+
+For example, for Grackle we set
+``set(CHARM_PREPROC_DEFS ${CHARM_PREPROC_DEFS} "-DCONFIG_USE_GRACKLE ")``, which appends to the
+existing list of defintions alredy stored in the ``CHARM_PREPROC_DEFS`` variable.

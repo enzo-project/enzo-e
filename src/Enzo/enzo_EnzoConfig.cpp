@@ -193,7 +193,7 @@ EnzoConfig::EnzoConfig() throw ()
   initial_IG_recent_SF_SFR(2.0),
   initial_IG_recent_SF_seed(12345),  
   // EnzoInitialMergeStarsTest
-  initial_merge_stars_test_particle_data_filename(""),
+  initial_merge_sinks_test_particle_data_filename(""),
   // EnzoMethodHeat
   method_heat_alpha(0.0),
   // EnzoMethodHydro
@@ -216,7 +216,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_use_ionization_feedback(false),
   method_feedback_time_first_sn(-1), // in Myr
   // EnzoMethodStarMaker,
-  method_star_maker_type(""),                              // star maker type to use
+  method_star_maker_flavor(""),                              // star maker type to use
   method_star_maker_use_density_threshold(true),           // check above density threshold before SF
   method_star_maker_use_velocity_divergence(true),         // check for converging flow before SF
   method_star_maker_use_dynamical_time(true),              // compute t_ff / t_dyn. Otherwise take as 1.0
@@ -244,7 +244,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_gravity_dt_max(0.0),
   method_gravity_accumulate(false),
   /// EnzoMethodBackgroundAcceleration
-  method_background_acceleration_type(""),
+  method_background_acceleration_flavor(""),
   method_background_acceleration_mass(0.0),
   method_background_acceleration_DM_mass(0.0),
   method_background_acceleration_DM_density(0.0),
@@ -271,7 +271,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_vlct_dual_energy(false),
   method_vlct_dual_energy_eta(0.0),
   /// EnzoMethodMergeStars
-  method_merge_stars_merging_radius_cells(0.0),
+  method_merge_sinks_merging_radius_cells(0.0),
   /// EnzoProlong
   prolong_enzo_type(),
   prolong_enzo_positive(true),
@@ -527,7 +527,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_soup_pressure_out;
   p | initial_soup_density;
 
-  p | initial_merge_stars_test_particle_data_filename;
+  p | initial_merge_sinks_test_particle_data_filename;
 
   p | method_heat_alpha;
 
@@ -550,7 +550,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_feedback_use_ionization_feedback;
   p | method_feedback_time_first_sn;
 
-  p | method_star_maker_type;
+  p | method_star_maker_flavor;
   p | method_star_maker_use_density_threshold;
   p | method_star_maker_use_velocity_divergence;
   p | method_star_maker_use_dynamical_time;
@@ -571,7 +571,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_gravity_dt_max;
   p | method_gravity_accumulate;
 
-  p | method_background_acceleration_type;
+  p | method_background_acceleration_flavor;
   p | method_background_acceleration_mass;
   p | method_background_acceleration_DM_mass;
   p | method_background_acceleration_DM_density;
@@ -599,7 +599,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_vlct_dual_energy;
   p | method_vlct_dual_energy_eta;
 
-  p | method_merge_stars_merging_radius_cells;
+  p | method_merge_sinks_merging_radius_cells;
 
   p | prolong_enzo_type;
   p | prolong_enzo_positive;
@@ -672,7 +672,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_turbulence_(p);
   read_initial_isolated_galaxy_(p);
   read_initial_feedback_test_(p);
-  read_initial_merge_stars_test_(p);
+  read_initial_merge_sinks_test_(p);
   
   read_method_grackle_(p);
   read_method_feedback_(p);
@@ -685,7 +685,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_pm_update_(p);
   read_method_ppm_(p);
   read_method_turbulence_(p);
-  read_method_merge_stars_(p);
+  read_method_merge_sinks_(p);
   
   read_physics_(p);
   
@@ -1219,10 +1219,10 @@ void EnzoConfig::read_initial_feedback_test_(Parameters * p)
     ("Initial:feedback_test:metal_fraction", 0.01);
 }
 
-void EnzoConfig::read_initial_merge_stars_test_(Parameters * p)
+void EnzoConfig::read_initial_merge_sinks_test_(Parameters * p)
 {
-  initial_merge_stars_test_particle_data_filename= p->value_string
-    ("Initial:merge_stars_test:particle_data_filename","");
+  initial_merge_sinks_test_particle_data_filename= p->value_string
+    ("Initial:merge_sinks_test:particle_data_filename","");
 }
 
 void EnzoConfig::read_method_grackle_(Parameters * p)
@@ -1421,8 +1421,8 @@ void EnzoConfig::read_method_feedback_(Parameters * p)
 void EnzoConfig::read_method_star_maker_(Parameters * p)
 {
   
-  method_star_maker_type = p->value_string
-    ("Method:star_maker:type","stochastic");
+  method_star_maker_flavor = p->value_string
+    ("Method:star_maker:flavor","stochastic");
 
   method_star_maker_use_density_threshold = p->value_logical
     ("Method:star_maker:use_density_threshold",true);
@@ -1461,8 +1461,8 @@ void EnzoConfig::read_method_star_maker_(Parameters * p)
 
 void EnzoConfig::read_method_background_acceleration_(Parameters * p)
 {
-  method_background_acceleration_type = p->value_string
-   ("Method:background_acceleration:type","unknown");
+  method_background_acceleration_flavor = p->value_string
+   ("Method:background_acceleration:flavor","unknown");
 
   method_background_acceleration_mass = p->value_float
    ("Method:background_acceleration:mass",0.0);
@@ -1577,10 +1577,10 @@ void EnzoConfig::read_method_heat_(Parameters * p)
     ("Method:heat:alpha",1.0);
 }
 
-void EnzoConfig::read_method_merge_stars_(Parameters * p)
+void EnzoConfig::read_method_merge_sinks_(Parameters * p)
 {
-  method_merge_stars_merging_radius_cells = p->value_float
-    ("Method:merge_stars:merging_radius_cells",8.0);
+  method_merge_sinks_merging_radius_cells = p->value_float
+    ("Method:merge_sinks:merging_radius_cells",8.0);
 }
 
 //----------------------------------------------------------------------

@@ -12,6 +12,7 @@
 #       pi/2 radians out of phase with the rest of the quantities
 
 
+import argparse
 import os
 import os.path
 import shutil
@@ -88,13 +89,14 @@ def cleanup():
             shutil.rmtree(dir_name)
 
 if __name__ == '__main__':
-
-    executable = os.environ.get('ENZOE_BIN', 'bin/enzo-e')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--launch_cmd', required=True,type=str)
+    args = parser.parse_args()
 
     with testing_context():
 
         # run the tests
-        run_tests(executable)
+        run_tests(args.launch_cmd)
 
         # analyze the tests
         tests_passed = analyze_tests()
