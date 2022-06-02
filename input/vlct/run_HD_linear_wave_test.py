@@ -12,6 +12,7 @@
 #   2.) Check that the L1-norm error is the same for left propagating and right
 #       propagating sound waves
 
+import argparse
 import os
 import os.path
 import shutil
@@ -114,12 +115,13 @@ def cleanup():
             shutil.rmtree(dir_name)
 
 if __name__ == '__main__':
-
-    executable = os.environ.get('ENZOE_BIN', 'bin/enzo-e')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--launch_cmd', required=True,type=str)
+    args = parser.parse_args()
 
     with testing_context():
         # run the tests
-        tests_complete = run_tests(executable)
+        tests_complete = run_tests(args.launch_cmd)
 
         # analyze the tests
         tests_passed = analyze_tests()
