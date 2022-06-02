@@ -94,8 +94,8 @@
     Particle {
         list = ["trace","dark","star"];
 
-        dark { group_list = ["has_mass"]; }
-        star { group_list = ["has_mass"]; }
+        dark { group_list = ["is_gravitating"]; }
+        star { group_list = ["is_gravitating"]; }
     }
 
 
@@ -109,8 +109,8 @@
     }
 
     Group {
-        list = ["has_mass"];
-        has_mass {
+        list = ["is_gravitating"];
+        is_gravitating {
            particle_list = ["dark","star"];
         }
     }

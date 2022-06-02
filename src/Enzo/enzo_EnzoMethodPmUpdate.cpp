@@ -46,11 +46,11 @@ EnzoMethodPmUpdate::EnzoMethodPmUpdate
   ParticleDescr * particle_descr = cello::particle_descr();
   Grouping * particle_groups = particle_descr->groups();
 
-  const int num_mass = particle_groups->size("has_mass");
+  const int num_is_grav = particle_groups->size("is_gravitating");
 
-  for (int ipt = 0; ipt < num_mass; ipt++)
+  for (int ipt = 0; ipt < num_is_grav; ipt++)
     refresh->add_particle
-      (particle_descr->type_index(particle_groups->item("has_mass",ipt)));
+      (particle_descr->type_index(particle_groups->item("is_gravitating",ipt)));
 
   // PM parameters initialized in EnzoBlock::initialize()
 }
@@ -77,9 +77,9 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
   ParticleDescr * particle_descr = cello::particle_descr();
   Grouping * particle_groups     = particle_descr->groups();
 
-  const int num_mass = particle_groups->size("has_mass");
+  const int num_is_grav = particle_groups->size("is_gravitating");
 
-  if (block->is_leaf() && num_mass > 0) {
+  if (block->is_leaf() && num_is_grav > 0) {
 
 #ifdef DEBUG_UPDATE
     double a3sum[3]={0.0};
@@ -113,9 +113,9 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 
     Particle particle = block->data()->particle();
 
-    for (int ipt = 0; ipt < num_mass; ipt++){
+    for (int ipt = 0; ipt < num_is_grav; ipt++){
 
-      std::string particle_type = particle_groups->item("has_mass",ipt);
+      std::string particle_type = particle_groups->item("is_gravitating",ipt);
       int it = particle.type_index (particle_type);
 
       //    double dt_shift = 0.0;
@@ -286,9 +286,9 @@ double EnzoMethodPmUpdate::timestep ( Block * block ) throw()
   ParticleDescr * particle_descr = cello::particle_descr();
   Grouping * particle_groups = particle_descr->groups();
 
-  const int num_mass = particle_groups->size("has_mass");
+  const int num_is_grav = particle_groups->size("is_gravitating");
 
-  if (block->is_leaf() && num_mass > 0) {
+  if (block->is_leaf() && num_is_grav > 0) {
 
     Particle particle = block->data()->particle();
 
@@ -319,9 +319,9 @@ double EnzoMethodPmUpdate::timestep ( Block * block ) throw()
       hz *= cosmo_a;
     }
 
-    for (int ipt = 0; ipt < num_mass; ipt++){
+    for (int ipt = 0; ipt < num_is_grav; ipt++){
 
-      std::string particle_type = particle_groups->item("has_mass",ipt);
+      std::string particle_type = particle_groups->item("is_gravitating",ipt);
       const int it = particle.type_index (particle_type);
       const int nb = particle.num_batches (it);
 

@@ -39,8 +39,6 @@ addCelloLib(data  "main_simulation.cpp;field_face_store.F")
 target_link_libraries(data HDF5_C mesh io parallel cello)
 addCelloLib(io    "main_simulation.cpp")
 target_link_libraries(io mesh HDF5_C)
-# need to figure out what to do with enzo from main_enzo in this src tree
-#addCelloLib(main  "")
 addCelloLib(memory "main.cpp" )
 target_link_libraries(memory error Boost::filesystem)
 addCelloLib(mesh "main_mesh.cpp" ) 
@@ -69,7 +67,7 @@ function(addUnitTestBinary BINNAME SRCS LIBS)
   # Arguments:
   #   BINNAME:   Name of the test binary to build
   #   SRCS:      Source files
-  #   LIBS: Extra libraries required
+  #   LIBS:      Extra libraries required
 
   add_executable(${BINNAME} ${SRCS})
   target_link_libraries(${BINNAME} PUBLIC ${LIBS} test_Unit parallel cello data simulation)
@@ -78,6 +76,17 @@ function(addUnitTestBinary BINNAME SRCS LIBS)
 
 endfunction(addUnitTestBinary)
 
+# TODO(need help) The following commented test binaries should be included once
+# someone figures out how to properly link them.
+# Once fixed, the associated units tests in test/CMakeLists.txt should be uncommented.
+#addUnitTestBinary(test_type "test_Type.cpp" "mesh")
+#addUnitTestBinary(test_field_data "test_Field.cpp" "")
+#addUnitTestBinary(test_field_descr "test_FieldDescr.cpp" "")
+#addUnitTestBinary(test_field_face "test_FieldFace.cpp" "")
+#addUnitTestBinary(test_grouping "test_Grouping.cpp" "")
+#addUnitTestBinary(test_itindex "test_ItIndex.cpp" "")
+#addUnitTestBinary(test_scalar "test_Scalar.cpp" "")
+#addUnitTestBinary(test_enzo_units "test_EnzoUnits.cpp" "")
 addUnitTestBinary(test_carrcollec test_CArrCollec.cpp "array")
 addUnitTestBinary(test_cello_array "test_CelloArray.cpp" "array")
 #addUnitTestBinary(test_colormap "test_Colormap.cpp" "io")

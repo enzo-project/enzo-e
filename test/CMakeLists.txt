@@ -71,7 +71,8 @@ endfunction()
 # The following tests are self-contained binary of individual components
 
 setup_test_unit(Array ArrayComponent/Array test_cello_array)
-# Need to reintroduce followin tests once dependency hell is resolved
+# TODO(need help) Need to reintroduce following tests once dependency hell is resolved,
+# see commented unit tests in src/Cello/CMakeLists.txt
 #setup_test_unit(CelloType Cello/Type test_type)
 #setup_test_unit(Data-Field DataComponent/Field test_field)
 #setup_test_unit(Data-Field-Data DataComponent/FieldData test_field_data)
@@ -152,17 +153,21 @@ setup_test_parallel(Performance-Initial-PNG  Performance/InitialPng   input/Hell
 setup_test_serial(PPM-1 MethodPPM/Ppm-1  input/PPM/method_ppm-1.in)
 setup_test_parallel(PPM-8 MethodPPM/Ppm-8  input/PPM/method_ppm-8.in)
 
-# VLCT
-setup_test_serial_python(vlct_dual_energy_cloud vlct "input/vlct/run_dual_energy_cloud_test.py")
-setup_test_serial_python(vlct_MHD_shock_tube vlct "input/vlct/run_MHD_shock_tube_test.py")
-setup_test_serial_python(vlct_MHD_linear_wave vlct "input/vlct/run_MHD_linear_wave_test.py")
-setup_test_serial_python(vlct_HD_linear_wave vlct "input/vlct/run_HD_linear_wave_test.py")
-setup_test_serial_python(vlct_passive_advect_sound vlct "input/vlct/run_passive_advect_sound_test.py")
-setup_test_parallel_python(vlct_dual_energy_shock_tube vlct "input/vlct/run_dual_energy_shock_tube_test.py")
+if (USE_PYTHON_BASED_TESTS)
+  # VLCT
+  setup_test_serial_python(vlct_dual_energy_cloud vlct "input/vlct/run_dual_energy_cloud_test.py")
+  setup_test_serial_python(vlct_MHD_shock_tube vlct "input/vlct/run_MHD_shock_tube_test.py")
+  setup_test_serial_python(vlct_MHD_linear_wave vlct "input/vlct/run_MHD_linear_wave_test.py")
+  setup_test_serial_python(vlct_HD_linear_wave vlct "input/vlct/run_HD_linear_wave_test.py")
+  setup_test_serial_python(vlct_passive_advect_sound vlct "input/vlct/run_passive_advect_sound_test.py")
+  setup_test_parallel_python(vlct_dual_energy_shock_tube vlct "input/vlct/run_dual_energy_shock_tube_test.py")
 
-# merge_stars
-setup_test_serial_python(merge_stars_serial merge_stars/serial "input/merge_stars/run_merge_stars_test.py" "--prec=${PREC_STRING}")
-setup_test_parallel_python(merge_stars_parallel merge_stars/parallel "input/merge_stars/run_merge_stars_test.py" "--prec=${PREC_STRING}")
+  # merge_sinks
+  setup_test_serial_python(merge_sinks_stationary_serial merge_sinks/stationary/serial "input/merge_sinks/run_merge_sinks_test.py" "--prec=${PREC_STRING}" "--ics_type=stationary")
+  setup_test_parallel_python(merge_sinks_stationary_parallel merge_sinks/stationary/parallel "input/merge_sinks/run_merge_sinks_test.py" "--prec=${PREC_STRING}" "--ics_type=stationary")
+  setup_test_serial_python(merge_sinks_drift_serial merge_sinks/drift/serial "input/merge_sinks/run_merge_sinks_test.py" "--prec=${PREC_STRING}" "--ics_type=drift")
+  setup_test_parallel_python(merge_sinks_drift_parallel merge_sinks/drift/parallel "input/merge_sinks/run_merge_sinks_test.py" "--prec=${PREC_STRING}" "--ics_type=drift")
+endif()
 
 # Convert markdown file to html file for more flexible viewing
 configure_file(${CMAKE_SOURCE_DIR}/test/TEST_RESULTS.md ${PROJECT_BINARY_DIR}/TEST_RESULTS.md COPYONLY)

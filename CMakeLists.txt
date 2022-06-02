@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.16)
 
 # Machine config needs to be imported before project() to properly
 # set compilers this way.
@@ -198,12 +198,6 @@ if (use_gprof)
 endif()
 
 
-option(use_valgrind "Run the test programs using valgrind to check for memory leaks" OFF)
-if ()
-  add_compile_definitions()
-endif()
-
-
 option(use_performance "Use Cello Performance class for collecting performance \
   data (currently requires global reductions, and may not be fully \
   functional) (basic time data on root processor is still output)" ON)
@@ -233,9 +227,19 @@ if ("${PARALLEL_LAUNCHER_NPROC_ARG}" MATCHES "[ \t\r\n]")
 endif()
 
 
-option(have_git "Is this is a Git repository" ON)
+option(have_git "Is this a Git repository" ON)
 if (have_git)
   add_compile_definitions(CONFIG_HAVE_VERSION_CONTROL)
+  # Extract current changeset.
+  # Note, this will only be called during initial configure so changes
+  # between configure and build may result in an outdated hash.
+  execute_process(
+      COMMAND
+        git rev-parse --short HEAD
+          RESULT_VARIABLE CHANGESET_RESULT
+          OUTPUT_VARIABLE CELLO_CHANGESET
+          OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
 endif()
 
 
@@ -305,16 +309,32 @@ add_subdirectory(src/Enzo)
 add_subdirectory(src/External)
 
 include(CTest)
-find_package(Python3 REQUIRED)
-# Ensure all required packages are present
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/PythonModuleCheck.cmake)
-required_python_modules_found("yt")
 
+option(USE_PYTHON_BASED_TESTS "Includes tests that require Python and yt" ON)
+if (USE_PYTHON_BASED_TESTS)
+  find_package(Python3)
+  if (Python3_FOUND)
+    message(STATUS
+      "   IMPORTANT: Make sure this is the Python version you want "
+      "to use. If not, e.g., because you want to use a conda or virtualenv based "
+      "version, try setting `-DPython3_FIND_VIRTUALENV=ONLY` or "
+      "`-DPython3_EXECUTABLE=/path/to/desired/python`."
+      )
+
+    # Ensure all required packages are present
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/PythonModuleCheck.cmake)
+    required_python_modules_found("yt;libconf;h5py")
+  else()
+    message(FATAL_ERROR
+     "You asked to include Python/yt based tests, but no Python installation was found. "
+     "You can either disable those tests by setting `-DUSE_PYTHON_BASED_TESTS=OFF` or "
+     "install a Python distribution with yt (recommended)."
+     )
+  endif()
+endif()
 add_subdirectory(test)
 
+# extract compile defs from from Cello to populate config
+get_directory_property( CELLO_CPPDEFINES DIRECTORY src/Cello COMPILE_DEFINITIONS )
 # now generate the the config
 configure_file(auto_config.def.in auto_config.def @ONLY)
-message(STATUS
-  "Cello/Enzo-E configured as follows:\n"
-  "USE_GRACKLE = ${USE_GRACKLE}")
-
