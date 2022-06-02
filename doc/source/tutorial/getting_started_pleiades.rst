@@ -8,7 +8,7 @@ Getting Started: Pleiades
   # Load more up-to-date software stack
   module use -a /nasa/modulefiles/testing
   module purge
-  module load pkgsrc/2021Q1 gcc/10.2 mpi-hpe/mpt.2.23 boost/1.75 comp-intel/2020.4.304 hdf5/1.12.0_serial pkgsrc/2021Q1
+  module load pkgsrc/2021Q1 gcc/10.2 mpi-hpe/mpt.2.23 boost/1.76 comp-intel/2020.4.304 hdf5/1.12.0_serial pkgsrc/2021Q1
   # Build Grackle (optional)
   # Following https://grackle.readthedocs.io/en/latest/Installation.html
   mkdir -p ~/src
@@ -40,7 +40,6 @@ Getting Started: Pleiades
   cd ~/src
   git clone https://github.com/enzo-project/enzo-e.git
   cd enzo-e
-  git checkout cmake_new-output
   # Custom environment override for the cmake call specific to Pleiades system as
   # during the linking step (done with the `charmc` wrapper) the `mpicxx` wrapper is called,
   # which, in turn, by default calls `g++` (but we need to link with `icpc` at the lowest level).

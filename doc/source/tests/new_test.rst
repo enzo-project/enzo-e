@@ -68,6 +68,9 @@ Again this function takes three arguments: (1) a short test name, (2) the output
 directory, and (3) the binary name to be called.
 A sample case is ``setup_test_unit(Array ArrayComponent/Array test_cello_array)``.
 
+Note, several units test are currently commented out as there are linking issues.
+For more information, see GitHub issue `#176 <https://github.com/enzo-project/enzo-e/issues/176>`_.
+
 Running Your New Test
 =====================
 

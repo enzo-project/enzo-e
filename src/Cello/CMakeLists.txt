@@ -39,8 +39,6 @@ addCelloLib(data  "main_simulation.cpp;field_face_store.F")
 target_link_libraries(data HDF5_C mesh io parallel cello)
 addCelloLib(io    "main_simulation.cpp")
 target_link_libraries(io mesh HDF5_C)
-# need to figure out what to do with enzo from main_enzo in this src tree
-#addCelloLib(main  "")
 addCelloLib(memory "main.cpp" )
 target_link_libraries(memory error Boost::filesystem)
 addCelloLib(mesh "main_mesh.cpp" ) 
