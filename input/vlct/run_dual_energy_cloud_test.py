@@ -80,7 +80,7 @@ def check_cloud_asym(fname, name, max_asym):
 def analyze_tests():
     r = []
     r += check_cloud_asym('hlld_cloud_0.0625/hlld_cloud_0.0625.block_list',
-                          'hlld_cloud', 5.9e-13)
+                          'hlld_cloud', 6.4e-13)
     r += check_cloud_asym('hllc_cloud_0.0625/hllc_cloud_0.0625.block_list',
                           'hllc_cloud', 3.8e-13)
     r += check_cloud_asym('hlle_cloud_0.0625/hlle_cloud_0.0625.block_list',
