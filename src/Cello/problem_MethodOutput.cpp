@@ -324,7 +324,6 @@ void MethodOutput::next(Block * block, MsgOutput * msg_output_in )
     Index index_home = bt->home();
 #endif
     DataMsg * data_msg = create_data_msg_(block);
-    data_msg->set_particle_count(false);
     msg_output->set_data_msg(data_msg);
     msg_output->set_block(block,factory_);
     cello::block_array()[index_home].p_method_output_write(msg_output);

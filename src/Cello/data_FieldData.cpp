@@ -375,7 +375,7 @@ void FieldData::allocate_permanent
   // Allocate the array
 
   array_permanent_.resize(array_size);
-
+  
   // Initialize field_begin
 
   int field_offset = align_padding_(alignment);
@@ -1049,8 +1049,6 @@ int FieldData::data_size (FieldDescr * field_descr) const
 
   SIZE_ARRAY_TYPE(size,int,size_,3);
   SIZE_VECTOR_TYPE(size,char,array_permanent_);
-  //SIZE_VECTOR_TYPE(size,int,temporary_size_);
-  //SIZE_VECTOR_ARRAY_TYPEstd::vector<char *> array_temporary_;
   SIZE_VECTOR_TYPE(size,int,offsets_);
   SIZE_SCALAR_TYPE(size,bool,ghosts_allocated_);
   SIZE_VECTOR_TYPE(size,int,history_id_);
@@ -1077,8 +1075,6 @@ char * FieldData::save_data (FieldDescr * field_descr,
 
   SAVE_ARRAY_TYPE(pc,int,size_,3);
   SAVE_VECTOR_TYPE(pc,char,array_permanent_);
-  //SAVE_VECTOR_TYPE(pc,int,temporary_size_);
-  //SAVE_VECTOR_ARRAY_TYPEstd::vector<char *> array_temporary_;
   SAVE_VECTOR_TYPE(pc,int,offsets_);
   SAVE_SCALAR_TYPE(pc,bool,ghosts_allocated_);
   SAVE_VECTOR_TYPE(pc,int,history_id_);
@@ -1110,8 +1106,6 @@ char * FieldData::load_data (FieldDescr * field_descr,
 
   LOAD_ARRAY_TYPE(pc,int,size_,3);
   LOAD_VECTOR_TYPE(pc,char,array_permanent_);
-  //LOAD_VECTOR_TYPE(pc,int,temporary_size_);
-  //LOAD_VECTOR_ARRAY_TYPEstd::vector<char *> array_temporary_;
   LOAD_VECTOR_TYPE(pc,int,offsets_);
   LOAD_SCALAR_TYPE(pc,bool,ghosts_allocated_);
   LOAD_VECTOR_TYPE(pc,int,history_id_);

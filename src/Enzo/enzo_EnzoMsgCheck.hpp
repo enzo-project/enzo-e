@@ -36,7 +36,7 @@ public: // interface
     ++counter[cello::index_static()];
     copy_(enzo_msg_check);
     cello::hex_string(tag_,TAG_LEN); // add new tag for new message
- };
+  }
 
   EnzoMsgCheck & operator = (const EnzoMsgCheck & enzo_msg_check)
   {

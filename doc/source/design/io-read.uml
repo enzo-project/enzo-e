@@ -21,6 +21,9 @@
    b0 -> s0 : p_restart_enter()
    s0 -> r0 ** : ckNew()
    s0 -> r1 **
+   r0 -> s0 : p_io_reader_created()
+   r1 -> s0
+   hnote over s0 : sync
    s0 <-> sk : p_set_io_reader()
    hnote over s0,sk : r_restart_start()
 

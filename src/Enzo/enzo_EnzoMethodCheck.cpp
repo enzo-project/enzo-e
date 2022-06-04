@@ -363,7 +363,6 @@ int EnzoBlock::create_msg_check_
   DataMsg * data_msg = create_data_msg_();
   (*msg_check)->set_data_msg(data_msg);
 
-
   return index_file;
 }
 

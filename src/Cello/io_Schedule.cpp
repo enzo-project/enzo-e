@@ -117,7 +117,8 @@ Schedule * Schedule::create
 
   if (var_cycle) schedule->set_type(schedule_type_cycle);
   if (var_time)  schedule->set_type(schedule_type_time);
-  if (var_seconds || var_minutes || var_hours)  schedule->set_type(schedule_type_seconds);
+  if (var_seconds || var_minutes || var_hours)
+    schedule->set_type(schedule_type_seconds);
 
   return schedule;
 

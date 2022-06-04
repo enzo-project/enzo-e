@@ -17,10 +17,10 @@
 #include "charm_mesh.hpp"
 #include "main.hpp"
 
-// #define DEBUG_RESTART
-// #define TRACE_BLOCK
+//  #define DEBUG_RESTART
+//  #define TRACE_BLOCK
 // #define PRINT_FIELD_RESTART
-// #define TRACE_SYNC
+//  #define TRACE_SYNC
 
 //--------------------------------------------------
 #ifdef TRACE_SYNC

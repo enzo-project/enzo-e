@@ -390,8 +390,8 @@ void MsgRefine::print()
   CkPrintf ("int num_adapt_steps_ = %d\n",num_adapt_steps_);
   CkPrintf ("int cycle_ = %d\n",cycle_);
   CkPrintf ("int refresh_type_ = %d\n",refresh_type_);
-  if (restart_io_reader_ >= 0) CkPrintf ("int restart_io_reader_ = %d\n",
-                                        restart_io_reader_);
+  if (restart_io_reader_ >= 0)
+    CkPrintf ("int restart_io_reader_ = %d\n",restart_io_reader_);
   CkPrintf ("int num_face_level_ = %d\n",num_face_level_);
   CkPrintf ("int * face_level_ = %p\n",(void*)face_level_);
   adapt_parent_->print("MsgRefine");

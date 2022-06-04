@@ -121,7 +121,6 @@ int DataMsg::data_size () const
   SIZE_SCALAR_TYPE(size,int,n_fa);
   SIZE_SCALAR_TYPE(size,int,n_pd);
   SIZE_SCALAR_TYPE(size,int,n_fd);
-  SIZE_SCALAR_TYPE(size,bool,particle_data_count_);
 
   size += n_ff;
   size += n_fa;
@@ -188,7 +187,6 @@ char * DataMsg::save_data (char * buffer) const
   SAVE_SCALAR_TYPE(pc,int,n_fa);
   SAVE_SCALAR_TYPE(pc,int,n_pa);
   SAVE_SCALAR_TYPE(pc,int,n_fd);
-  SAVE_SCALAR_TYPE(pc,bool,particle_data_count_);
 
   // save field face
   if (n_ff > 0) {
@@ -267,7 +265,6 @@ char * DataMsg::load_data (char * buffer)
   LOAD_SCALAR_TYPE(pc,int,n_fa);
   LOAD_SCALAR_TYPE(pc,int,n_pa);
   LOAD_SCALAR_TYPE(pc,int,n_fd);
-  LOAD_SCALAR_TYPE(pc,bool,particle_data_count_);
 
   // load field face
   if (n_ff > 0) {
@@ -331,7 +328,7 @@ char * DataMsg::load_data (char * buffer)
 
 //----------------------------------------------------------------------
 
-void DataMsg::update (Data * data, bool is_local)
+void DataMsg::update (Data * data, bool is_local, bool is_kept)
 {
   TRACE_DATA_MSG("update()");
   ParticleData * pd = particle_data_;
@@ -349,7 +346,7 @@ void DataMsg::update (Data * data, bool is_local)
     for (int it=0; it<particle.num_types(); it++) {
       count += particle.gather (it, 1, &pd);
     }
-    if (particle_data_count_)
+    if (is_kept)
       cello::simulation()->data_insert_particles(count);
 
   }
@@ -456,8 +453,6 @@ void DataMsg::print (const char * message) const
   }
   CkPrintf ("%s DATA_MSG particle_data_delete_ = %d\n",
             message,particle_data_delete_?1:0);
-  CkPrintf ("%s DATA_MSG particle_data_count_ = %d\n",
-            message,particle_data_count_?1:0);
   CkPrintf ("%s DATA_MSG |face_fluxes_list_| = %lu\n",
             message,face_fluxes_list_.size());
   CkPrintf ("%s DATA_MSG |face_fluxes_delete_| = %lu\n",
