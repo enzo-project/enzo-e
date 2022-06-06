@@ -87,6 +87,7 @@ Stopping {
 Output {
    
     data {
+    
         dir = [ "./Dir_%04d", "cycle" ];
         field_list = [ "acceleration_x", "acceleration_y", "acceleration_z",
 	 	      	"density_total", "potential" ];

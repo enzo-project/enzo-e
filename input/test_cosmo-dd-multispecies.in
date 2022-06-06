@@ -78,6 +78,10 @@ Method {
 
 
 Output {
+<<<<<<< HEAD
+=======
+     list = ["hdf5"];
+>>>>>>> 7e074f0c6ae4bf890478491a3bb02fb0c99daefe
      hdf5 {
           dir = ["Dir_COSMO_MULTI_%04d","cycle"];
           field_list += ["HI_density",

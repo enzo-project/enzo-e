@@ -71,9 +71,6 @@ int EnzoBlock::SolveHydroEquations
 
   }
 
-  // No subgrids, so colindex is NULL
-  // int *colindex         = NULL;
-
   /* Compute size (in enzo_floats) of the current grid. */
 
   int rank = cello::rank();
@@ -210,6 +207,11 @@ int EnzoBlock::SolveHydroEquations
     if (field_name == "velocity_z")      flux_index = windex;
     if (field_name == "total_energy")    flux_index = Eindex;
     if (field_name == "internal_energy") flux_index = geindex;
+    
+    if (field.groups()->is_in(field_name,"color")) {
+      flux_index = colindex + 3*2*index_color;
+      index_color++;
+    }
 
     if (field.groups()->is_in(field_name,"color")) {
       flux_index = colindex + 3*2*index_color;
