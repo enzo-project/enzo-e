@@ -90,7 +90,9 @@ public: // interface
    int count_adapt,
    int cycle, double time, double dt,
    int narray, char * array, int refresh_type,
-   int num_face_level, int * face_level,
+   int num_face_level,
+   int * face_level,
+   Adapt * adapt,
    Simulation * simulation = 0
    ) const throw();
 

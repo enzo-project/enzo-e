@@ -101,7 +101,7 @@
 #          }
 
       background_acceleration {
-          type = "GalaxyModel";
+          flavor = "GalaxyModel";
           DM_density     = 3.07199E-25 ;   # cgs - central density for 1E10 Msun NFW halo
           DM_mass        = -1.0 ;# 1.0E10; # set < 0 to use density, > 0 uses this instead of density
           DM_mass_radius = 45.0;           # kpc virial radius (or radius within which above mass refers to)
@@ -142,8 +142,8 @@
                         "is_local", "single"];
          position = [ "x", "y", "z" ];
          velocity = [ "vx", "vy", "vz" ];
-         group_list = ["has_mass"];
-#         constants = [ "mass", "single", .8382456140 ];
+         group_list = ["is_gravitating"];
+
 
      }
      }
@@ -158,11 +158,12 @@
 #                        "ax", "single",
 #                        "ay", "single",
 #                        "az", "single" ,
+			 "mass", "single",
 #                        "is_local", "single"];
 #         position = [ "x", "y", "z" ];
 #         velocity = [ "vx", "vy", "vz" ];
-#         group_list = ["has_mass"];
-         #constants = [ "mass", "single", .8382456140 ];
+#         group_list = ["is_gravitating"];
+
          
 #      }
 # }

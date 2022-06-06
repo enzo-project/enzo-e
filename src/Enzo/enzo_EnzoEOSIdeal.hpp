@@ -51,11 +51,12 @@ public: // interface
   void pup (PUP::er &p);
 
   void primitive_from_integration
-  (EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &primitive_map,
+  (const EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &primitive_map,
    const int stale_depth, const str_vec_t &passive_list) const;
 
   void pressure_from_integration
-  (EnzoEFltArrayMap &integration_map, const EFlt3DArray &pressure,
+  (const EnzoEFltArrayMap &integration_map,
+   const CelloArray<enzo_float, 3> &pressure,
    const int stale_depth) const;
 
   inline enzo_float get_density_floor() const { return density_floor_; }

@@ -10,6 +10,8 @@
 
 //----------------------------------------------------------------------
 
+// #define TRACE_BLOCK
+
 #include "enzo.decl.h"
 
 class EnzoBlock : public CBase_EnzoBlock
@@ -99,14 +101,15 @@ public:
 
 public: // interface
 
-  /// Initialize the EnzoBlock chare array
-  EnzoBlock ( MsgRefine * msg );
-
+#ifdef BYPASS_CHARM_MEM_LEAK
   /// Initialize the EnzoBlock chare array
   EnzoBlock ( process_type ip_source );
-
   /// Initialize EnzoBlock using MsgRefine returned by creating process
   virtual void p_set_msg_refine(MsgRefine * msg);
+#else
+  /// Initialize the EnzoBlock chare array
+  EnzoBlock ( MsgRefine * msg );
+#endif
 
   /// Initialize an empty EnzoBlock
   EnzoBlock()
@@ -115,6 +118,9 @@ public: // interface
        redshift(0.0)
   {
     performance_start_(perf_block);
+#ifdef TRACE_BLOCK
+    CkPrintf ("%d %p TRACE_BLOCK EnzoBlock()\n",CkMyPe(),(void *)this);
+#endif
     for (int i=0; i<MAX_DIMENSION; i++) {
       GridLeftEdge[i] = 0;
       GridDimension[i] = 0;
@@ -131,6 +137,10 @@ public: // interface
       dt(0.0),
       redshift(0.0)
   {
+#ifdef TRACE_BLOCK
+    CkPrintf ("%d %p TRACE_BLOCK %s EnzoBlock(CkMigrateMessage)\n",
+              CkMyPe(),(void *)this, name(thisIndex).c_str());
+#endif
     performance_start_(perf_block);
     TRACE("CkMigrateMessage");
     for (int i=0; i<MAX_DIMENSION; i++) {
