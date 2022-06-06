@@ -1,0 +1,25 @@
+include "input/test_cosmo-dd-multispecies.in"
+include "input/STARSS/SF_FB.incl"
+
+Method { 
+    list = [ "star_maker","feedback", "pm_deposit", "gravity", "ppm", "grackle", "pm_update", "comoving_expansion"];
+    output { particle_list += ["star"];}
+}
+
+Output {
+     hdf5 {
+          dir = ["Dir_COSMO_SF_FB_%04d","cycle"];
+          particle_list += ["star"]; 
+        }
+     de   { dir = [ "Dir_COSMO_SF_FB_%04d", "cycle" ]; }
+     depa { dir = [ "Dir_COSMO_SF_FB_%04d", "cycle" ]; }
+     ax   { dir = [ "Dir_COSMO_SF_FB_%04d", "cycle" ]; }
+     ay   { dir = [ "Dir_COSMO_SF_FB_%04d", "cycle" ]; }
+     az   { dir = [ "Dir_COSMO_SF_FB_%04d", "cycle" ]; }
+     dark { dir = [ "Dir_COSMO_SF_FB_%04d", "cycle" ]; }
+     mesh { dir = [ "Dir_COSMO_SF_FB_%04d", "cycle" ]; }
+     po   { dir = [ "Dir_COSMO_SF_FB_%04d", "cycle" ]; }
+     hdf5 { dir = [ "Dir_COSMO_SF_FB_%04d", "cycle" ]; }
+     dep  { dir = [ "Dir_COSMO_SF_FB_%04d", "cycle" ]; }
+     check { dir = [ "Dir_COSMO_SF_FB_%04d-checkpoint", "count" ]; }
+}

@@ -27,9 +27,9 @@
 // Plan is to make this a separate class that inherits from the stochastic
 // algorithm.
 
-#define DEBUG_SF_CRITERIA
+// #define DEBUG_SF_CRITERIA
 // #define DEBUG_SF_CRITERIA_EXTRA
-//#define DEBUG_STORE_INITIAL_PROPERTIES
+// #define DEBUG_STORE_INITIAL_PROPERTIES
 //-------------------------------------------------------------------
 
 EnzoMethodStarMakerSTARSS::EnzoMethodStarMakerSTARSS
@@ -245,12 +245,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
     }
   }
 
-  // compute the temperature (we need it here)
-  // TODO: Calling compute_temperature like this
-  // returns temperature in Kelvin--not code_temperature??
-  // EnzoMethodGrackle::claculate_temperature called
-  // without passing in grackle_units or grackle_fields.
-  // How does Grackle calculate temperatures? Tabulated?
+  // compute the temperature
   EnzoComputeTemperature compute_temperature
     (enzo_config->ppm_density_floor,
      enzo_config->ppm_temperature_floor,
@@ -271,7 +266,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 
         int i = INDEX(ix,iy,iz,mx,my);//ix + mx*(iy + my*iz);
         
-     /*
+     
         // compute MMW -- TODO: Make EnzoComputeMeanMolecularWeight class and reference
         // mu_field here
         if (primordial_chemistry == 0) mu = enzo_config->ppm_mol_weight;
@@ -287,7 +282,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         }
         mu /= density[i]; 
         mu = 1.0/mu;
-    */
+    
 
         // TODO: need to compute this better for Grackle fields (on to-do list)
         double rho_cgs = density[i] * enzo_units->density();

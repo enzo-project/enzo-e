@@ -1,0 +1,103 @@
+Particle {
+    list += ["star"];
+    star {
+        attributes = [ "x", "double",
+                       "y", "double",
+                       "z", "double",
+                       "vx", "double",
+                       "vy", "double",
+                       "vz", "double",
+                       "ax", "double",
+                       "ay", "double",
+                       "az", "double",
+                       "is_local", "double",
+                       "mass", "double",
+                       "creation_time", "double",
+                       "creation_level", "double",
+                       "lifetime", "double",
+                       "metal_fraction", "double",
+                       "number_of_sn", "int64" ];
+        position = [ "x", "y", "z" ];
+        velocity = [ "vx", "vy", "vz" ];
+        group_list = ["is_gravitating"];
+    }
+}
+
+Field {
+   list += ["density_deposit",
+            "total_energy_deposit",
+            "internal_energy_deposit",
+            "metal_density_deposit",
+            "velocity_x_deposit",
+            "velocity_y_deposit",
+            "velocity_z_deposit"
+           ];
+   list += ["density_deposit_copy",
+            "total_energy_deposit_copy",
+            "internal_energy_deposit_copy",
+            "metal_density_deposit_copy",
+            "velocity_x_deposit_copy",
+            "velocity_y_deposit_copy",
+            "velocity_z_deposit_copy"
+           ];
+   list += ["SN_shell_density", "SN_shell_density_copy"];
+}
+
+Method {
+     star_maker {
+       # run the stochastic star formation algorithm taken from star_maker_ssn in Enzo
+       flavor = "STARSS";              
+       overdensity_threshold = 512.0;   # in 1/cm^3
+       minimum_star_mass        = 150.0;
+       maximum_star_mass        = 1000.0;
+       number_density_threshold = 100.0;
+       temperature_threshold = 1e4;
+       critical_metallicity = 4.1e-8 / 0.012;
+       turn_off_probability = false;
+       min_level = 4;
+
+       use_altAlpha = false; # replace virial parameter calculation with total_energy/potential
+                             # requires DEBUG_COPY_POTENTIAL to be set in EnzoMethodGravity
+       use_density_threshold    = false  ;  # check number density for SF
+       use_overdensity_threshold= false;    # check overdensity 
+       use_velocity_divergence  = true ;  # converging flow criterion  
+       use_cooling_time       = false ; # check that cooling_time < dynamical_time
+       use_self_gravitating   = true; # check that alpha < 1 
+       use_h2_self_shielding  = false;
+       use_temperature_threshold = false;
+       use_critical_metallicity = false;
+       use_jeans_mass = true;
+       maximum_mass_fraction    = 0.2  ;   # maximum fraction of a cell that can be converted into stars
+                                           # can be redundant with number density threshold depending
+                                           # on rest of SF criteria and refinement criteria
+       efficiency               = 0.02 ;   # efficiency per free fall time
+     };
+
+  feedback {
+    flavor = "STARSS";
+    single_sn = 1;
+    unrestricted_sn = 1;
+    stellar_winds = 1;
+    gas_return_fraction = 0.0; # doesn't do anything
+    analytic_SNR_shell_mass = 1;
+    fade_SNR = 1;
+    NEvents = -1;
+
+     #distributed parameters
+     shift_cell_center = true;       # kick fb injection when close to grid boundary
+     time_first_sn     = 1.0;      # for testing - set time of first SN (in Myr) to not have to go through random number draws also triggers hard-coded progenitor mass and SN energy values (20 Msun star explosion)
+     #  ejecta_mass      = 10.0;     # solar masses - OLD PARAM - NOT USED
+     #  supernova_energy = 1.0;      # in 10^51 erg - OLD PARAM - NOT USED
+     ke_fraction      = 0.0;      # fraction of kinetic energy (otherwise thermal) - < 0 computes it self-consistently to attempt to fully resolve the SN
+     # ejecta_metal_fraction = 0.5;  # OLD PARAM - NOT USED
+     feedback_stencil      = 3;      # deposit feedback in a NxN CIC stencil centered on the particle - should work with any odd ineger, but not tested for anything other than 3
+     use_ionization_feedback = true;    # local (one zone) rad heating
+
+  };
+
+  output {
+    particle_list += ["star"];
+  }
+
+
+}
