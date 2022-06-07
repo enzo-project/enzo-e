@@ -160,7 +160,7 @@ Solver {
 
  Particle {
      list = ["star"];
-
+     mass_is_mass = true;
 #     Turn this on if using live DM
 #     dark {
 #         attributes = [ "x", "single",
