@@ -68,6 +68,7 @@ module enzo {
   PUPable EnzoInitialIsolatedGalaxy;
   PUPable EnzoInitialMergeSinksTest;
   PUPable EnzoInitialAccretionTest;
+  PUPable EnzoInitialShuCollapse;
 
   PUPable IoEnzoBlock;
 

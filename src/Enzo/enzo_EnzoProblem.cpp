@@ -263,6 +263,16 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_accretion_test_gas_density,
        enzo_config->initial_accretion_test_gas_pressure,
        enzo_config->initial_accretion_test_gas_radial_velocity);
+  } else if (type == "shu_collapse") {
+    initial = new EnzoInitialShuCollapse
+      (cycle, time,
+       enzo_config->initial_shu_collapse_center,
+       enzo_config->initial_shu_collapse_drift_velocity,
+       enzo_config->initial_shu_collapse_truncation_radius,
+       enzo_config->initial_shu_collapse_nominal_sound_speed,
+       enzo_config->initial_shu_collapse_instability_parameter,
+       enzo_config->initial_shu_collapse_central_sink_exists,
+       enzo_config->initial_shu_collapse_central_sink_mass);
   } else {
     initial = Problem::create_initial_
       (type,index,config,parameters);

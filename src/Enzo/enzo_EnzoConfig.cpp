@@ -199,6 +199,12 @@ EnzoConfig::EnzoConfig() throw ()
   initial_accretion_test_gas_density(0.0),
   initial_accretion_test_gas_pressure(0.0),
   initial_accretion_test_gas_radial_velocity(0.0),
+  // EnzoInitialShuCollapse
+  initial_shu_collapse_truncation_radius(0.0),
+  initial_shu_collapse_nominal_sound_speed(0.0),
+  initial_shu_collapse_instability_parameter(0.0),
+  initial_shu_collapse_central_sink_exists(false),
+  initial_shu_collapse_central_sink_mass(0.0),
   // EnzoMethodHeat
   method_heat_alpha(0.0),
   // EnzoMethodHydro
@@ -553,6 +559,14 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_accretion_test_gas_pressure;
   p | initial_accretion_test_gas_radial_velocity;
 
+  PUParray(p,initial_shu_collapse_center,3);
+  PUParray(p,initial_shu_collapse_drift_velocity,3);
+  p | initial_shu_collapse_truncation_radius;
+  p | initial_shu_collapse_nominal_sound_speed;
+  p | initial_shu_collapse_instability_parameter;
+  p | initial_shu_collapse_central_sink_exists;
+  p | initial_shu_collapse_central_sink_mass;
+
   p | method_heat_alpha;
 
   p | method_hydro_method;
@@ -710,6 +724,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_feedback_test_(p);
   read_initial_merge_sinks_test_(p);
   read_initial_accretion_test_(p);
+  read_initial_shu_collapse_(p);
   
   read_method_grackle_(p);
   read_method_feedback_(p);
@@ -1287,6 +1302,34 @@ void EnzoConfig::read_initial_accretion_test_(Parameters * p)
 
   initial_accretion_test_gas_radial_velocity = p->value_float
     ("Initial:accretion_test:gas_radial_velocity",0.0);
+}
+
+void EnzoConfig::read_initial_shu_collapse_(Parameters * p)
+{
+  for (int axis=0; axis<3; axis++){
+    initial_shu_collapse_center[axis] = p->list_value_float
+      (axis, "Initial:shu_collapse:center", 0.0);
+  }
+
+  for (int axis=0; axis<3; axis++){
+    initial_shu_collapse_drift_velocity[axis] = p->list_value_float
+      (axis, "Initial:shu_collapse:drift_velocity", 0.0);
+  }
+
+  initial_shu_collapse_truncation_radius = p->value_float
+    ("Initial:shu_collapse:truncation_radius",1.0);
+
+  initial_shu_collapse_nominal_sound_speed = p->value_float
+    ("Initial:shu_collapse:nominal_sound_speed",1.0);
+
+  initial_shu_collapse_instability_parameter = p->value_float
+    ("Initial:shu_collapse:instabilty_parameter",2.0);
+
+  initial_shu_collapse_central_sink_exists = p->value_logical
+    ("Initial:shu_collapse:central_sink_exists",false);
+
+  initial_shu_collapse_central_sink_mass = p->value_float
+    ("Initial:shu_collapse:central_sink_mass",0.0);
 }
 
 void EnzoConfig::read_method_grackle_(Parameters * p)
