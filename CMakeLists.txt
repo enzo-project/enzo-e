@@ -317,7 +317,7 @@ if (USE_PYTHON_BASED_TESTS)
 
     # Ensure all required packages are present
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/PythonModuleCheck.cmake)
-    required_python_modules_found("yt")
+    required_python_modules_found("yt;libconf;h5py")
   else()
     message(FATAL_ERROR
      "You asked to include Python/yt based tests, but no Python installation was found. "
