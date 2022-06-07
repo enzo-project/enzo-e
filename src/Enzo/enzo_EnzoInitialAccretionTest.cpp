@@ -66,10 +66,10 @@ void EnzoInitialAccretionTest::enforce_block
   cello::particle_descr()->check_particle_attribute("sink","id");
 
   // Check if accretion method is being used
-    ASSERT("EnzoInitialAccretionTest",
-	   "If accretion_test initializer is used, the accretion "
-	   "method is required.",
-	   enzo::problem()->method_exists("accretion"));
+  ASSERT("EnzoInitialAccretionTest",
+	 "If accretion_test initializer is used, the accretion "
+	 "method is required.",
+	 enzo::problem()->method_exists("accretion"));
 
   // Check if mhd_vlct method is being used
   ASSERT("EnzoInitialAccretionTest",
