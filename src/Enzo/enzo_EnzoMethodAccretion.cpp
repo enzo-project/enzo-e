@@ -253,7 +253,7 @@ void EnzoMethodAccretion::do_checks_(const Block *block) throw()
 
     ASSERT("EnzoMethodAccretion",
 	   "Density threshold must be at least as large as the density "
-	   "floor set by the VL+CT method",
+	   "floor set by the hydro method",
 	   density_threshold_ >= density_floor);
 
     // The accretion radius must be at least as large as half the

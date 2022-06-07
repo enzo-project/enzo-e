@@ -380,11 +380,18 @@ public: // interface
       method_vlct_dual_energy_eta(0.0),
       // EnzoMethodMergeSinks
       method_merge_sinks_merging_radius_cells(0.0),
-      // EnzoMethodAccretionCompute
+      // EnzoMethodAccretion
       method_accretion_accretion_radius_cells(0.0),
       method_accretion_flavor(""),
       method_accretion_density_threshold(0.0),
       method_accretion_max_mass_fraction(0.0),
+      // EnzoMethodSinkMaker
+      method_sink_maker_min_control_volume_cells(0.0),
+      method_sink_maker_max_control_volume_cells(0.0),
+      method_sink_maker_jeans_length_resolution_cells(0.0),
+      method_sink_maker_density_threshold(0.0),
+      method_sink_maker_max_mass_fraction(0.0),
+      method_sink_maker_min_sink_mass_solar(0.0),
       // EnzoProlong
       prolong_enzo_type(),
       prolong_enzo_positive(true),
@@ -470,6 +477,7 @@ protected: // methods
   void read_method_turbulence_(Parameters *);
   void read_method_merge_sinks_(Parameters *);
   void read_method_accretion_(Parameters *);
+  void read_method_sink_maker_(Parameters *);
   
   void read_physics_(Parameters *);
 
@@ -817,11 +825,19 @@ public: // attributes
   /// EnzoMethodMergeSinks
   double                     method_merge_sinks_merging_radius_cells;
 
-  /// EnzoMethodAccretionCompute
+  /// EnzoMethodAccretion
   double                     method_accretion_accretion_radius_cells;
   std::string                method_accretion_flavor;
   double                     method_accretion_density_threshold;
   double                     method_accretion_max_mass_fraction;
+
+  /// EnzoMethodSinkMaker
+  double                     method_sink_maker_min_control_volume_cells;
+  double                     method_sink_maker_max_control_volume_cells;
+  double                     method_sink_maker_jeans_length_resolution_cells;
+  double                     method_sink_maker_density_threshold;
+  double                     method_sink_maker_max_mass_fraction;
+  double                     method_sink_maker_min_sink_mass_solar;
   
   std::string                prolong_enzo_type;
   bool                       prolong_enzo_positive;

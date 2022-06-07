@@ -277,11 +277,18 @@ EnzoConfig::EnzoConfig() throw ()
   method_vlct_dual_energy_eta(0.0),
   /// EnzoMethodMergeSinks
   method_merge_sinks_merging_radius_cells(0.0),
-  /// EnzoMethodAccretionCompute
+  /// EnzoMethodAccretion
   method_accretion_accretion_radius_cells(0.0),
   method_accretion_flavor(""),
   method_accretion_density_threshold(0.0),
   method_accretion_max_mass_fraction(0.0),
+  /// EnzoMethodSinkMaker
+  method_sink_maker_min_control_volume_cells(0.0),
+  method_sink_maker_max_control_volume_cells(0.0),
+  method_sink_maker_jeans_length_resolution_cells(0.0),
+  method_sink_maker_density_threshold(0.0),
+  method_sink_maker_max_mass_fraction(0.0),
+  method_sink_maker_min_sink_mass_solar(0.0),
   /// EnzoProlong
   prolong_enzo_type(),
   prolong_enzo_positive(true),
@@ -623,6 +630,13 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_accretion_density_threshold;
   p | method_accretion_max_mass_fraction;
 
+  p | method_sink_maker_min_control_volume_cells,
+  p | method_sink_maker_max_control_volume_cells,
+  p | method_sink_maker_jeans_length_resolution_cells,
+  p | method_sink_maker_density_threshold,
+  p | method_sink_maker_max_mass_fraction,
+  p | method_sink_maker_min_sink_mass_solar,
+
   p | prolong_enzo_type;
   p | prolong_enzo_positive;
   p | prolong_enzo_use_linear;
@@ -710,6 +724,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_turbulence_(p);
   read_method_merge_sinks_(p);
   read_method_accretion_(p);
+  read_method_sink_maker_(p);
   
   read_physics_(p);
   
@@ -1646,6 +1661,25 @@ void EnzoConfig::read_method_accretion_(Parameters * p)
     ("Method:accretion:density_threshold",1.0e-6);
   method_accretion_max_mass_fraction = p->value_float
     ("Method:accretion:max_mass_fraction",0.25);
+
+}
+
+//----------------------------------------------------------------------
+
+void EnzoConfig::read_method_sink_maker_(Parameters * p)
+{
+  method_sink_maker_min_control_volume_cells = p->value_float
+    ("Method:sink_maker:min_control_volume_cells",1.0);
+  method_sink_maker_max_control_volume_cells = p->value_float
+      ("Method:sink_maker:max_control_volume_cells",4.0);
+  method_sink_maker_jeans_length_resolution_cells = p->value_float
+    ("Method:sink_maker:jeans_length_resolution_cells",4.0);
+  method_sink_maker_density_threshold = p->value_float
+    ("Method:sink_maker:density_threshold",1.0e-6);
+  method_sink_maker_max_mass_fraction = p->value_float
+    ("Method:sink_maker:max_mass_fraction",0.25);
+  method_sink_maker_min_sink_mass_solar = p->value_float
+    ("Method:sink_maker:min_sink_mass_solar",0.0);
 
 }
 

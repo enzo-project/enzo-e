@@ -104,6 +104,7 @@ module enzo {
   PUPable EnzoMethodThresholdAccretion;
   PUPable EnzoMethodBondiHoyleAccretion;
   PUPable EnzoMethodFluxAccretion;
+  PUPable EnzoMethodSinkMaker;
 
   PUPable EnzoEOSIdeal;
   PUPable EnzoIntegrationQuanUpdate;

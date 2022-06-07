@@ -251,6 +251,7 @@ extern "C" {
 #include "enzo_EnzoMethodThresholdAccretion.hpp"
 #include "enzo_EnzoMethodBondiHoyleAccretion.hpp"
 #include "enzo_EnzoMethodFluxAccretion.hpp"
+#include "enzo_EnzoMethodSinkMaker.hpp"
 
 #include "enzo_EnzoMatrixDiagonal.hpp"
 #include "enzo_EnzoMatrixIdentity.hpp"
