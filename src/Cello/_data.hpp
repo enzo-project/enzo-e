@@ -8,6 +8,23 @@
 #ifndef _DATA_HPP
 #define _DATA_HPP
 
+/// encapsulates choice of whether a field should include the ghost zone
+///
+/// These values are used as arguments for various functions/methods that
+/// retrieving data that correspond to a field. Unless stated otherwise, when a
+/// function accepts `ghost_choice::include` it should generally abort with an
+/// error if the ghost zones can't be included.
+///
+/// @note
+/// The fact that this is a scoped enum prevents these values from being
+/// implicitly cast to integers. This let's the compiler raise errors if
+/// argument order is permuted
+enum struct ghost_choice {
+  exclude, ///< exclude the ghost zone
+  include, ///< include the ghost zone
+  permit   ///< include the ghost zone, if allocated
+};
+
 //----------------------------------------------------------------------
 // System includes
 //----------------------------------------------------------------------
