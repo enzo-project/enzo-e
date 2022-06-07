@@ -234,9 +234,9 @@ EnzoConfig::EnzoConfig() throw ()
   // EnzoMethodStarMaker,
   method_star_maker_flavor(""),                              // star maker type to use
   method_star_maker_use_altAlpha(false),
-  method_star_maker_use_density_threshold(true),           // check above density threshold before SF
-  method_star_maker_use_velocity_divergence(true),         // check for converging flow before SF
-  method_star_maker_use_dynamical_time(true),              // compute t_ff / t_dyn. Otherwise take as 1.0
+  method_star_maker_use_density_threshold(false),           // check above density threshold before SF
+  method_star_maker_use_velocity_divergence(false),         // check for converging flow before SF
+  method_star_maker_use_dynamical_time(false),              // compute t_ff / t_dyn. Otherwise take as 1.0
   method_star_maker_use_cooling_time(false),                // check if t_cool < t_dyn
   method_star_maker_use_overdensity_threshold(false),
   method_star_maker_use_temperature_threshold(false),

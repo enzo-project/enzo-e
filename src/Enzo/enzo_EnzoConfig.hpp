@@ -337,9 +337,9 @@ public: // interface
       method_feedback_NEvents(0),
       /// EnzoMethodStarMaker
       method_star_maker_flavor(""),
-      method_star_maker_use_density_threshold(true),           // check above density threshold before SF
-      method_star_maker_use_velocity_divergence(true),         // check for converging flow before SF
-      method_star_maker_use_dynamical_time(true),              //
+      method_star_maker_use_density_threshold(false),           // check above density threshold before SF
+      method_star_maker_use_velocity_divergence(false),         // check for converging flow before SF
+      method_star_maker_use_dynamical_time(false),              //
       method_star_maker_use_altAlpha(false), // alternate virial parameter calculation
       method_star_maker_use_cooling_time(false), 
       method_star_maker_use_self_gravitating(false),           //

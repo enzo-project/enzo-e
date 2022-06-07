@@ -651,6 +651,16 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Todo: :o:`write`
 :Status:  **Not accessed**
 
+star_maker
+----------
+
+..include:: method_star_maker.incl
+
+feedback
+--------
+
+..include:: method_feedback.incl
+
 heat
 ----
 

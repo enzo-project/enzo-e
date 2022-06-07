@@ -249,7 +249,7 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
   
-  sf_minimum_level_ = enzo_config->method_feedback_min_level;
+  sf_minimum_level_ = enzo_config->method_star_maker_min_level;
   single_sn_        = enzo_config->method_feedback_single_sn;
   // TODO: Make "deposit" fields temporary fields
 
