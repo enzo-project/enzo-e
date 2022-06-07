@@ -106,8 +106,7 @@ There are 2 approaches for accessing Cello Field block arrays.
      These can be accessed with the ``Field::values`` method.
 
   2. The preferred approach is to use the ``CelloArray`` multidimensional array templates that wrap the raw pointers managed by Cello.
-     Using ``CelloArray``\s improve code clarity and safety.
-     However, it may result in some performance degradation (benchmarks indicate that this is very marginal).
+     Using ``CelloArray``\s improve code clarity and safety at the cost of very marginal losses in performance (according to benchmarks).
      ``Field::view`` is used to help facillitate this approach.
      For more details about ``CelloArray``\s, see :ref:`using-CelloArray`
 
