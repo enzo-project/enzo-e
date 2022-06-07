@@ -33,7 +33,6 @@ EnzoInitialAccretionTest::EnzoInitialAccretionTest
   sink_velocity_[0] = sink_velocity[0];
   sink_velocity_[1] = sink_velocity[1];
   sink_velocity_[2] = sink_velocity[2];
-
 }
 
 void EnzoInitialAccretionTest::pup (PUP::er &p)
@@ -55,14 +54,22 @@ void EnzoInitialAccretionTest::enforce_block
 ( Block * block, const Hierarchy * hierarchy ) throw()
 
 {
-
+  // Check sink particle attributes
   cello::particle_descr()->check_particle_attribute("sink","mass");
+  cello::particle_descr()->check_particle_attribute("sink","x");
+  cello::particle_descr()->check_particle_attribute("sink","y");
+  cello::particle_descr()->check_particle_attribute("sink","z");
+  cello::particle_descr()->check_particle_attribute("sink","vx");
+  cello::particle_descr()->check_particle_attribute("sink","vy");
+  cello::particle_descr()->check_particle_attribute("sink","vz");
+  cello::particle_descr()->check_particle_attribute("sink","is_copy");
+  cello::particle_descr()->check_particle_attribute("sink","id");
 
   // Check if accretion method is being used
-    ASSERT("EnzoInitialAccretionTest",
-	   "If accretion_test initializer is used, the accretion "
-	   "method is required.",
-	   enzo::problem()->method_exists("accretion"));
+  ASSERT("EnzoInitialAccretionTest",
+	 "If accretion_test initializer is used, the accretion "
+	 "method is required.",
+	 enzo::problem()->method_exists("accretion"));
 
   // Check if mhd_vlct method is being used
   ASSERT("EnzoInitialAccretionTest",

@@ -589,8 +589,11 @@ its 'creation_time' attribute is set to be the minimum of the group, and its
 group are marked for deletion. The final step is for each block to delete
 all the remaining sink particles which are 'out-of-bounds' of the block.
 
-Star particles must have an attribute called ``"mass"`` if this method
-is used.
+This method requires sink particles to have the following attributes: ``"mass"``, ``"x"``,
+``"y"``, ``"z"``, ``"vx"``, ``"vy"``, ``"vz"``, ``"is_copy"``, ``"id"``, ``"lifetime"``,
+and ``"creation_time"``. All these attributes must be of type ``"default"``, except for
+``"is_copy"`` and ``"id"`` which must be of type ``"int64"``. Furthermore, ``"is_copy"``
+must be initialized to 0 for all particles.
 
 This procedure cannot handle the case where particles originally
 from non-neighbouring blocks are put into the same FoF group. If this is
@@ -603,7 +606,7 @@ will only work correctly if all blocks containing sink particles are of the
 same size, or equivalently, on the same refinement level.
 For this reason, there is a check in the constructor of EnzoMethodMergeSinks
 for whether ``"Adapt: max_level"`` is equal to zero. In future, we plan to
-implement an accretion method, which will require a refinement condition that
+implement a refinement condition that
 any block containing a sink particle needs to be on the highest level of
 refinement. In this case, the assumption that
 blocks containing sink particles are all on the same level of refinement
@@ -663,6 +666,16 @@ Furthermore, the density change is limited in the same way as in ``"threshold"``
 
 This method can only be used if ``"merge_sinks"`` is also used, with ``"merge_sinks"`` preceding
 ``"accretion"``. In addition, this method requires the use of three spatial dimensions.
+
+This method requires the following fields (in addition to the fields required by the hydro
+method): ``"density_source"``, ``"density_source_accumulate"``, ``"mom_dens_x_source"``,
+``"mom_dens_x_source_accumulate"``, ``"mom_dens_y_source"``, ``"mom_dens_y_source_accumulate"``,
+``"mom_dens_z_source"``, and ``mom_dens_z_source_accumulate"``. In addition, if sink particles
+have a ``"metal_fraction"`` attribute, there must be a ``"metal_density"`` field.
+
+This method also requires sink particles to have the following attributes: ``"mass"``, ``"x"``,
+``"y"``, ``"z"``, ``"vx"``, ``"vy"``, ``"vz"``, and ``"accretion_rate"``, which must all be
+of type ``"default"``.
 
 parameters
 ----------

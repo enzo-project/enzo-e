@@ -171,6 +171,8 @@ jobs:
     docker:
       - image: cimg/python:3.7
 
+    resource_class: large
+
     working_directory: ~/enzo-e
 
     steps:

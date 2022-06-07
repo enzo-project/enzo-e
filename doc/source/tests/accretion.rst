@@ -8,7 +8,7 @@ Six tests of the enzo-e "accretion" method.
 
 - the threshold accretion parallel test
 
-  - the Bondi-Hoyle accretion serial test
+- the Bondi-Hoyle accretion serial test
 
 - the Bondi-Hoyle accretion parallel test
 

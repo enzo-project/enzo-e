@@ -16,7 +16,7 @@ a 3D array of Sedov blast waves.
    a background medium of constant density and pressure, possibly with a
    velocity directed towards the initial position of the sink particle.
 
-   ``"cloud"``
+``"cloud"``
    Initialize a spherical cloud embedded in a hot wind.
 
 ``"collapse"``
@@ -40,7 +40,7 @@ a 3D array of Sedov blast waves.
    Initialise sink particles with masses, positions, and velocities read
    from a text file specified in the parameter file.
 
-   ``"pm"``
+``"pm"``
    Initialize ``"dark"`` matter particles in either a regular uniform
    array with one particle per cell, or randomly following the ``"density"``
    field distribution.

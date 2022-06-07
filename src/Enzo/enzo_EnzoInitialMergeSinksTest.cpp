@@ -5,7 +5,7 @@
 /// @date     2022-01-06
 /// @brief    Implementation of test problem for the "merge sinks" method.
 ///           Creates sink particles with positions, velocities, and masses
-///           given in the parameter file
+///           given in the file specified by "Initial:merge_sinks_test:particle_data_filename"
 ///
 
 #include "cello.hpp"
@@ -17,13 +17,22 @@
 
 //----------------------------------------------------------------------
 
- EnzoInitialMergeSinksTest::EnzoInitialMergeSinksTest 
+ EnzoInitialMergeSinksTest::EnzoInitialMergeSinksTest
  (const EnzoConfig * enzo_config) throw()
     : Initial (enzo_config->initial_cycle, enzo_config->initial_time)
   {
+    // Check sink particle attributes
     cello::particle_descr()->check_particle_attribute("sink","mass");
+    cello::particle_descr()->check_particle_attribute("sink","x");
+    cello::particle_descr()->check_particle_attribute("sink","y");
+    cello::particle_descr()->check_particle_attribute("sink","z");
+    cello::particle_descr()->check_particle_attribute("sink","vx");
+    cello::particle_descr()->check_particle_attribute("sink","vy");
+    cello::particle_descr()->check_particle_attribute("sink","vz");
+    cello::particle_descr()->check_particle_attribute("sink","is_copy");
+    cello::particle_descr()->check_particle_attribute("sink","id");
 
-    particle_data_filename_ = 
+    particle_data_filename_ =
     enzo_config->initial_merge_sinks_test_particle_data_filename;
 
     std::string line;
@@ -49,8 +58,8 @@
     }
 
     ASSERT("EnzoInitialMergeSinksTest",
-           "Error: No particle data found",
-            n_particles_ != 0);
+	   "Error: No particle data found",
+	   n_particles_ != 0);
 
     return;
   }
@@ -72,7 +81,7 @@ void EnzoInitialMergeSinksTest::pup (PUP::er &p)
   p | vy_data_;
   p | vz_data_;
   p | n_particles_;
-  
+
 }
 
 //----------------------------------------------------------------------
@@ -82,20 +91,20 @@ void EnzoInitialMergeSinksTest::enforce_block
 {
   // Check if the merge_sinks method is being used
   ASSERT("EnzoInitialMergeSinksTest",
-         "Error: merge_sinks method is required when running with "
-         "the merge_sinks_test initializer.",
-         enzo::problem()->method_exists("merge_sinks"));
+	 "Error: merge_sinks method is required when running with "
+	 "the merge_sinks_test initializer.",
+	 enzo::problem()->method_exists("merge_sinks"));
 
   // Check if the pm_update method is being used
   ASSERT("EnzoInitialMergeSinksTest",
-         "Error: pm_update method is required when running with "
-         "the merge_sinks_test initializer.",
-         enzo::problem()->method_exists("pm_update"));
+	 "Error: pm_update method is required when running with "
+	 "the merge_sinks_test initializer.",
+	 enzo::problem()->method_exists("pm_update"));
   if (!block->is_leaf()) return;
 
   ASSERT("EnzoInitialMergeSinksTest",
-  	 "Block does not exist",
-  	 block != NULL);
+	 "Block does not exist",
+	 block != NULL);
 
   EnzoSimulation * enzo_simulation = enzo::simulation();
   // Block extents
@@ -136,18 +145,18 @@ void EnzoInitialMergeSinksTest::enforce_block
   int64_t * is_copy = 0;
   int64_t * id = 0;
 
-  /* Loop through all particles and check if their positions are within 
+  /* Loop through all particles and check if their positions are within
   // bounds of the block. If so, add the particle to this block */
 
   for (int i = 0 ; i < n_particles_; ++i){
 
     if (block->check_position_in_block(x_data_[i],
-                                       y_data_[i],
-                                       z_data_[i])){
+				       y_data_[i],
+				       z_data_[i])){
 
       // Add particle to this block
       int new_particle_index = particle.insert_particles(it, 1);
-     
+
       // Add particle to simulation
       enzo_simulation->data_insert_particles(1);
       particle.index(new_particle_index,&ib,&ipp);
@@ -171,11 +180,9 @@ void EnzoInitialMergeSinksTest::enforce_block
       pvy[ipp]   = vy_data_[i];
       pvz[ipp]   = vz_data_[i];
       is_copy[ipp] = 0;
-   
+
     } // if particle in block
 
   } // Loop over particle data
   return;
 }
-
-
