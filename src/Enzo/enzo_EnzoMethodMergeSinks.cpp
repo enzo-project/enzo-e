@@ -40,20 +40,6 @@ EnzoMethodMergeSinks::EnzoMethodMergeSinks(double merging_radius_cells)
 	 "sink particles or neighbouring such a block is at highest refinement "
 	 "level", enzo_config->mesh_max_level == 0);
 
-  // Check sink particle attributes
-  cello::particle_descr()->check_particle_attribute("sink","mass");
-  cello::particle_descr()->check_particle_attribute("sink","x");
-  cello::particle_descr()->check_particle_attribute("sink","y");
-  cello::particle_descr()->check_particle_attribute("sink","z");
-  cello::particle_descr()->check_particle_attribute("sink","vx");
-  cello::particle_descr()->check_particle_attribute("sink","vy");
-  cello::particle_descr()->check_particle_attribute("sink","vz");
-  cello::particle_descr()->check_particle_attribute("sink","is_copy");
-  cello::particle_descr()->check_particle_attribute("sink","id");
-  cello::particle_descr()->check_particle_attribute("sink","lifetime");
-  cello::particle_descr()->check_particle_attribute("sink","creation_time");
-  cello::particle_descr()->check_particle_attribute("sink","metal_fraction");
-
   // Refresh copies all sink particles from neighbouring blocks
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
@@ -78,7 +64,8 @@ void EnzoMethodMergeSinks::pup (PUP::er &p)
 
 void EnzoMethodMergeSinks::compute ( Block *block) throw()
 {
-
+  if (enzo::simulation()->cycle() == enzo::config()->initial_cycle)
+    do_checks_(block);
 
   if (block->is_leaf()){
     this->compute_(block);
@@ -135,13 +122,15 @@ void EnzoMethodMergeSinks::compute_(Block * block)
     const int ia_mf  = particle.attribute_index (it, "metal_fraction");
     const int ia_id  = particle.attribute_index(it,"id");
 
+    const bool metals = (ia_mf != -1);
+
     // Attribrute stride lengths
     const int dm   = particle.stride(it, ia_m);
     const int dp   = particle.stride(it, ia_x);
     const int dv   = particle.stride(it, ia_vx);
     const int dl   = particle.stride(it, ia_l);
     const int dc   = particle.stride(it, ia_c);
-    const int dmf  = particle.stride(it, ia_mf);
+    const int dmf  = (metals) ? particle.stride(it, ia_mf) : 0;
     const int did  = particle.stride(it, ia_id);
 
     // Array giving the FoF group number of each particle
@@ -223,7 +212,7 @@ void EnzoMethodMergeSinks::compute_(Block * block)
 	pvz = (enzo_float *) particle.attribute_array(it, ia_vz, ib1);
 	plifetime = (enzo_float *) particle.attribute_array(it, ia_l, ib1);
 	pcreation = (enzo_float *) particle.attribute_array(it, ia_c, ib1);
-	pmetal    = (enzo_float *) particle.attribute_array(it, ia_mf, ib1);
+	pmetal    = metals ? (enzo_float *) particle.attribute_array(it, ia_mf, ib1) : nullptr;
 	pid = (int64_t *) particle.attribute_array(it, ia_id, ib1);
 
 	enzo_float pmass1 = pmass[ip1*dm];
@@ -236,7 +225,7 @@ void EnzoMethodMergeSinks::compute_(Block * block)
 	enzo_float pvz1 = pvz[ip1*dv];
 	enzo_float plifetime1 = plifetime[ip1*dl];
 	enzo_float pcreation1 = pcreation[ip1*dc];
-	enzo_float pmetal1 = pmetal[ip1*dmf];
+	enzo_float pmetal1 = metals ? pmetal[ip1*dmf] : 0.0;
 	int64_t    pid1    = pid[ip1*did];
 
 	// now loop over the rest of the particles in this group, and merge
@@ -258,7 +247,7 @@ void EnzoMethodMergeSinks::compute_(Block * block)
 	  pvz = (enzo_float *) particle.attribute_array(it, ia_vz, ib2);
 	  plifetime = (enzo_float *) particle.attribute_array(it, ia_l, ib2);
 	  pcreation = (enzo_float *) particle.attribute_array(it, ia_c, ib2);
-	  pmetal    = (enzo_float *) particle.attribute_array(it, ia_mf, ib2);
+	  pmetal    = metals ? (enzo_float *) particle.attribute_array(it, ia_mf, ib2) : nullptr;
 	  pid    = (int64_t *) particle.attribute_array(it, ia_id, ib2);
 
 	  enzo_float pmass2 = pmass[ip2*dm];
@@ -271,7 +260,7 @@ void EnzoMethodMergeSinks::compute_(Block * block)
 	  double     pos2[3] = {px2,py2,pz2};
 	  enzo_float plifetime2 = plifetime[ip2*dl];
 	  enzo_float pcreation2 = pcreation[ip2*dc];
-	  enzo_float pmetal2 = pmetal[ip2*dmf];
+	  enzo_float pmetal2 = metals ? pmetal[ip2*dmf] : 0.0;
 	  int64_t    pid2 = pid[ip2*did];
 
 	  enzo_float f1 = pmass1 / (pmass1 + pmass2);
@@ -331,7 +320,7 @@ void EnzoMethodMergeSinks::compute_(Block * block)
 	pvz = (enzo_float *) particle.attribute_array(it, ia_vz, ib1);
 	plifetime = (enzo_float *) particle.attribute_array(it, ia_l, ib1);
 	pcreation = (enzo_float *) particle.attribute_array(it, ia_c, ib1);
-	pmetal    = (enzo_float *) particle.attribute_array(it, ia_mf, ib1);
+	pmetal    = metals ? (enzo_float *) particle.attribute_array(it, ia_mf, ib1) : nullptr;
 	pid    = (int64_t *) particle.attribute_array(it, ia_id, ib1);
 
 	pmass[ip1*dm] = pmass1;
@@ -350,7 +339,7 @@ void EnzoMethodMergeSinks::compute_(Block * block)
 	pvz[ip1*dv] = pvz1;
 	plifetime[ip1*dl] = plifetime1;
 	pcreation[ip1*dc] = pcreation1;
-	pmetal[ip1*dmf] = pmetal1;
+	if (metals) pmetal[ip1*dmf] = pmetal1;
 	pid[ip1*did] = pid1;
 
       }// if (group_size[i] > 1)
@@ -516,4 +505,24 @@ bool EnzoMethodMergeSinks::particles_in_neighbouring_blocks_
   } // j loop
 
   return return_val;
+}
+
+//------------------------------------------------------------------------------------------
+
+void EnzoMethodMergeSinks::do_checks_(const Block *block) throw() {
+
+  // Check sink particle attributes
+  cello::particle_descr()->check_particle_attribute("sink","mass");
+  cello::particle_descr()->check_particle_attribute("sink","x");
+  cello::particle_descr()->check_particle_attribute("sink","y");
+  cello::particle_descr()->check_particle_attribute("sink","z");
+  cello::particle_descr()->check_particle_attribute("sink","vx");
+  cello::particle_descr()->check_particle_attribute("sink","vy");
+  cello::particle_descr()->check_particle_attribute("sink","vz");
+  cello::particle_descr()->check_particle_attribute("sink","is_copy");
+  cello::particle_descr()->check_particle_attribute("sink","id");
+  cello::particle_descr()->check_particle_attribute("sink","lifetime");
+  cello::particle_descr()->check_particle_attribute("sink","creation_time");
+
+  return;
 }
