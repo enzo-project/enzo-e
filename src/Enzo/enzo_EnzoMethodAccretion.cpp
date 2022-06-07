@@ -307,5 +307,16 @@ void EnzoMethodAccretion::do_checks_(const Block *block) throw()
 	    diagonal_over_minimum, accretion_radius_cells_,
 	    diagonal_over_minimum < 2.0 * accretion_radius_cells_);
 
+    // Check sink particle attributes
+    cello::particle_descr()->check_particle_attribute("sink","mass");
+    cello::particle_descr()->check_particle_attribute("sink","x");
+    cello::particle_descr()->check_particle_attribute("sink","y");
+    cello::particle_descr()->check_particle_attribute("sink","z");
+    cello::particle_descr()->check_particle_attribute("sink","vx");
+    cello::particle_descr()->check_particle_attribute("sink","vy");
+    cello::particle_descr()->check_particle_attribute("sink","vz");
+    cello::particle_descr()->check_particle_attribute("sink","accretion_rate");
+    cello::particle_descr()->check_particle_attribute("sink","metal_fraction");
+
     return;
 }

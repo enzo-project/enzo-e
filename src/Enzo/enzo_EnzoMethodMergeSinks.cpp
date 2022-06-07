@@ -40,6 +40,20 @@ EnzoMethodMergeSinks::EnzoMethodMergeSinks(double merging_radius_cells)
 	 "sink particles or neighbouring such a block is at highest refinement "
 	 "level", enzo_config->mesh_max_level == 0);
 
+  // Check sink particle attributes
+  cello::particle_descr()->check_particle_attribute("sink","mass");
+  cello::particle_descr()->check_particle_attribute("sink","x");
+  cello::particle_descr()->check_particle_attribute("sink","y");
+  cello::particle_descr()->check_particle_attribute("sink","z");
+  cello::particle_descr()->check_particle_attribute("sink","vx");
+  cello::particle_descr()->check_particle_attribute("sink","vy");
+  cello::particle_descr()->check_particle_attribute("sink","vz");
+  cello::particle_descr()->check_particle_attribute("sink","is_copy");
+  cello::particle_descr()->check_particle_attribute("sink","id");
+  cello::particle_descr()->check_particle_attribute("sink","lifetime");
+  cello::particle_descr()->check_particle_attribute("sink","creation_time");
+  cello::particle_descr()->check_particle_attribute("sink","metal_fraction");
+
   // Refresh copies all sink particles from neighbouring blocks
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
