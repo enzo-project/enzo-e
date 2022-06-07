@@ -520,56 +520,74 @@ bool EnzoMethodSinkMaker::density_is_local_maximum_(Block * block, enzo_float je
 //-------------------------------------------------------------------------------------------
 
 
-void EnzoMethodSinkMaker::do_checks_(const Block *block) throw()
+void EnzoMethodSinkMaker::do_checks_(Block *block) throw()
 {
-    // Check if merge_sinks method precedes pm_update method
-    ASSERT("EnzoMethodSinkMaker",
-	   "sink_maker must precede pm_update",
-	   enzo::problem()->method_precedes("sink_maker",
-					    "pm_update"));
+  // Check sink particle attributes
+  cello::particle_descr()->check_particle_attribute("sink","mass");
+  cello::particle_descr()->check_particle_attribute("sink","x");
+  cello::particle_descr()->check_particle_attribute("sink","y");
+  cello::particle_descr()->check_particle_attribute("sink","z");
+  cello::particle_descr()->check_particle_attribute("sink","vx");
+  cello::particle_descr()->check_particle_attribute("sink","vy");
+  cello::particle_descr()->check_particle_attribute("sink","vz");
+  cello::particle_descr()->check_particle_attribute("sink","creation_time");
+  cello::particle_descr()->check_particle_attribute("sink","id");
+  cello::particle_descr()->check_particle_attribute("sink","is_copy");
 
-    // Check if either PPM or VL+CT method is being used.
-    ASSERT("EnzoMethodSinkMaker",
-	   "accretion requires ppm or vlct methods.",
-	   enzo::problem()->method_exists("mhd_vlct") ||
-	   enzo::problem()->method_exists("ppm"));
+  // If there is a "metal_density" field, check if sink particles have a
+  // "metal_fraction" attribute.
+  Field field = block->data()->field();
+  if (field.is_field("metal_density"))
+    cello::particle_descr()->check_particle_attribute("sink","metal_fraction");
 
-    // Check if density threshold is at least as large as the density floor
-    // set by the hydro method.
-    const double density_floor = enzo::problem()->method_exists("mhd_vlct") ?
-      enzo::config()->method_vlct_density_floor :
-      enzo::config()->ppm_density_floor ;
+  // Check if merge_sinks method precedes pm_update method
+  ASSERT("EnzoMethodSinkMaker",
+	 "sink_maker must precede pm_update",
+	 enzo::problem()->method_precedes("sink_maker",
+					  "pm_update"));
 
-    ASSERT("EnzoMethodSinkMaker",
-	   "Density threshold must be at least as large as the density "
-	   "floor set by the hydro method",
-	   density_threshold_ >= density_floor);
+  // Check if either PPM or VL+CT method is being used.
+  ASSERT("EnzoMethodSinkMaker",
+	 "accretion requires ppm or vlct methods.",
+	 enzo::problem()->method_exists("mhd_vlct") ||
+	 enzo::problem()->method_exists("ppm"));
 
-    // The minimum control volume radius is min_control_volume_cells_ times the maximum
-    // cell width. The maximum control volume radius is max_control_volume_cells_ times
-    // the minimum cell width. To ensure that the maximum control volume radius is
-    // greater than or equal to the minimum control volume radius, we check that the ratio of the
-    // maximum cell width to the minimum cell width is less than or equal to the ratio of
-    // max_control_volume_cells_ to min_control_volume_cells_.
-    // Note that the ratio of max cell width to min cell width is the same at all
-    // refinement levels.
+  // Check if density threshold is at least as large as the density floor
+  // set by the hydro method.
+  const double density_floor = enzo::problem()->method_exists("mhd_vlct") ?
+    enzo::config()->method_vlct_density_floor :
+    enzo::config()->ppm_density_floor ;
 
-    // Get the cell widths
-    double hx, hy, hz;
-    block->cell_width(&hx, &hy, &hz);
-    const double min_cell_width = std::min(hx,std::min(hy,hz));
-    const double max_cell_width = std::max(hx,std::max(hy,hz));
+  ASSERT("EnzoMethodSinkMaker",
+	 "Density threshold must be at least as large as the density "
+	 "floor set by the hydro method",
+	 density_threshold_ >= density_floor);
 
-    const double cell_width_ratio = max_cell_width / min_cell_width;
-    const double control_volume_ratio = max_control_volume_cells_ / min_control_volume_cells_;
+  // The minimum control volume radius is min_control_volume_cells_ times the maximum
+  // cell width. The maximum control volume radius is max_control_volume_cells_ times
+  // the minimum cell width. To ensure that the maximum control volume radius is
+  // greater than or equal to the minimum control volume radius, we check that the ratio of the
+  // maximum cell width to the minimum cell width is less than or equal to the ratio of
+  // max_control_volume_cells_ to min_control_volume_cells_.
+  // Note that the ratio of max cell width to min cell width is the same at all
+  // refinement levels.
 
-    ASSERT2("EnzoMethodSinkMaker",
-	    "Ratio of max cell width to min cell width must be less than or equal to the ratio "
-	    "of Method:sink_maker:max_control_volume_cells to "
-	    "Method:sink_maker:min_control_volume_cells. Currently, the former ratio "
-	    "is %g and the latter ratio is %g \n",
-	    cell_width_ratio, control_volume_ratio,
-	    cell_width_ratio <= control_volume_ratio);
+  // Get the cell widths
+  double hx, hy, hz;
+  block->cell_width(&hx, &hy, &hz);
+  const double min_cell_width = std::min(hx,std::min(hy,hz));
+  const double max_cell_width = std::max(hx,std::max(hy,hz));
 
-    return;
+  const double cell_width_ratio = max_cell_width / min_cell_width;
+  const double control_volume_ratio = max_control_volume_cells_ / min_control_volume_cells_;
+
+  ASSERT2("EnzoMethodSinkMaker",
+	  "Ratio of max cell width to min cell width must be less than or equal to the ratio "
+	  "of Method:sink_maker:max_control_volume_cells to "
+	  "Method:sink_maker:min_control_volume_cells. Currently, the former ratio "
+	  "is %g and the latter ratio is %g \n",
+	  cell_width_ratio, control_volume_ratio,
+	  cell_width_ratio <= control_volume_ratio);
+
+  return;
 }

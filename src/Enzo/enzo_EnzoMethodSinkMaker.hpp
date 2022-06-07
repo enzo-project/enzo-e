@@ -90,7 +90,7 @@ protected: // methods
 				 int ix, int iy, int iz) throw();
 
   /// Does various checks which need to be done at the first compute cycle
-  void do_checks_(const Block* block) throw();
+  void do_checks_(Block* block) throw();
 
 protected: // attributes
 
