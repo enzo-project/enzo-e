@@ -589,8 +589,11 @@ its 'creation_time' attribute is set to be the minimum of the group, and its
 group are marked for deletion. The final step is for each block to delete
 all the remaining sink particles which are 'out-of-bounds' of the block.
 
-Star particles must have an attribute called ``"mass"`` if this method
-is used.
+This method requires sink particles to have the following attributes: ``"mass"``, ``"x"``,
+``"y"``, ``"z"``, ``"vx"``, ``"vy"``, ``"vz"``, ``"is_copy"``, ``"id"``, ``"lifetime"``,
+and ``"creation_time"``. All these attributes must be of type ``"default"``, except for
+``"is_copy"`` and ``"id"`` which must be of type ``"int64"``. Furthermore, ``"is_copy"``
+must be initialized to 0 for all particles.
 
 This procedure cannot handle the case where particles originally
 from non-neighbouring blocks are put into the same FoF group. If this is
@@ -671,7 +674,8 @@ method): ``"density_source"``, ``"density_source_accumulate"``, ``"mom_dens_x_so
 have a ``"metal_fraction"`` attribute, there must be a ``"metal_density"`` field.
 
 This method also requires sink particles to have the following attributes: ``"mass"``, ``"x"``,
-``"y"``, ``"z"``, ``"vx"``, ``"vy"``, ``"vz"``, and ``"accretion_rate"``.
+``"y"``, ``"z"``, ``"vx"``, ``"vy"``, ``"vz"``, and ``"accretion_rate"``, which must all be
+of type ``"default"``.
 
 parameters
 ----------
