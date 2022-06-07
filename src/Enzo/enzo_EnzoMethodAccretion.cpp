@@ -316,7 +316,6 @@ void EnzoMethodAccretion::do_checks_(const Block *block) throw()
     cello::particle_descr()->check_particle_attribute("sink","vy");
     cello::particle_descr()->check_particle_attribute("sink","vz");
     cello::particle_descr()->check_particle_attribute("sink","accretion_rate");
-    cello::particle_descr()->check_particle_attribute("sink","metal_fraction");
 
     return;
 }
