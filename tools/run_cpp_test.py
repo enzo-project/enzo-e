@@ -26,7 +26,8 @@ parser.add_argument(
     help = "the C++ binary that is to be executed"
 )
 parser.add_argument(
-    "args", metavar = "ARGS", action = "store", nargs = '*', default = [],
+    "args_for_command", metavar = "ARGS", action = "store", nargs = '*',
+    default = [],
     help = "the arguments to the C++ binary that are to be executed"
 )
 
@@ -102,7 +103,8 @@ if __name__ == '__main__':
     else:
         dump_path = args.output_dump
 
-    success = execute_command(command = args.command, args = args.args,
+    success = execute_command(command = args.command,
+                              args = args.args_for_command,
                               output_dump = dump_path)
     if not success:
         out = 1
