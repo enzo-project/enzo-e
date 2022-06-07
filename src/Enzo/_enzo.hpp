@@ -229,6 +229,7 @@ extern "C" {
 #include "enzo_EnzoSinkParticle.hpp"
 #include "enzo_EnzoBondiHoyleSinkParticle.hpp"
 #include "enzo_EnzoFluxSinkParticle.hpp"
+#include "enzo_EnzoSourceGravity.hpp"
 
 #include "enzo_EnzoMethodComovingExpansion.hpp"
 #include "enzo_EnzoMethodCosmology.hpp"
