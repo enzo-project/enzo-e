@@ -6,32 +6,37 @@ function(setup_test_dir TESTDIR)
   file(CREATE_LINK ${PROJECT_SOURCE_DIR}/input ${PROJECT_BINARY_DIR}/test/${TESTDIR}/input SYMBOLIC)
 endfunction()
 
+set(CPP_TEST_RUNNER ${PROJECT_SOURCE_DIR}/tools/run_cpp_test.py)
+
 # Test wrapper function calling unit tests (separate binaries) directly
 function(setup_test_unit TESTNAME TESTDIR TESTBIN)
   setup_test_dir(${TESTDIR})
+  set(FULLTESTDIR ${PROJECT_BINARY_DIR}/test/${TESTDIR})
   add_test(
     NAME ${TESTNAME}
-    COMMAND ${TESTBIN}
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TESTDIR})
+    COMMAND ${Python3_EXECUTABLE} ${CPP_TEST_RUNNER} --output-dump ${FULLTESTDIR}/${TESTNAME}.log $<TARGET_FILE:${TESTBIN}>
+    WORKING_DIRECTORY ${FULLTESTDIR})
   set_tests_properties(${TESTNAME} PROPERTIES LABELS "serial;unit" )
 endfunction()
 
 # Test wrapper functions calling enzo-e directly
 function(setup_test_serial TESTNAME TESTDIR INFILE)
   setup_test_dir(${TESTDIR})
+  set(FULLTESTDIR ${PROJECT_BINARY_DIR}/test/${TESTDIR})
   add_test(
     NAME ${TESTNAME}
-    COMMAND enzo-e ${INFILE}
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TESTDIR})
+    COMMAND ${Python3_EXECUTABLE} ${CPP_TEST_RUNNER} --output-dump ${FULLTESTDIR}/${TESTNAME}.log $<TARGET_FILE:enzo-e> ${INFILE}
+    WORKING_DIRECTORY ${FULLTESTDIR})
   set_tests_properties(${TESTNAME} PROPERTIES LABELS "serial;enzo" )
 endfunction()
 
 function(setup_test_parallel TESTNAME TESTDIR INFILE)
   setup_test_dir(${TESTDIR})
+  set(FULLTESTDIR ${PROJECT_BINARY_DIR}/test/${TESTDIR})
   add_test(
     NAME ${TESTNAME}
-    COMMAND ${PARALLEL_LAUNCHER} ${PARALLEL_LAUNCHER_NPROC_ARG} ${PARALLEL_LAUNCHER_NPROC} ${PROJECT_BINARY_DIR}/bin/enzo-e ${INFILE}
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TESTDIR})
+    COMMAND ${Python3_EXECUTABLE} ${CPP_TEST_RUNNER} --output-dump ${FULLTESTDIR}/${TESTNAME}.log ${PARALLEL_LAUNCHER} ${PARALLEL_LAUNCHER_NPROC_ARG} ${PARALLEL_LAUNCHER_NPROC} $<TARGET_FILE:enzo-e> ${INFILE}
+    WORKING_DIRECTORY ${FULLTESTDIR})
   set_tests_properties(${TESTNAME} PROPERTIES LABELS "parallel;enzo" )
 endfunction()
 
@@ -153,7 +158,7 @@ setup_test_parallel(Performance-Initial-PNG  Performance/InitialPng   input/Hell
 setup_test_serial(PPM-1 MethodPPM/Ppm-1  input/PPM/method_ppm-1.in)
 setup_test_parallel(PPM-8 MethodPPM/Ppm-8  input/PPM/method_ppm-8.in)
 
-if (USE_PYTHON_BASED_TESTS)
+if (USE_YT_BASED_TESTS)
   # VLCT
   setup_test_serial_python(vlct_dual_energy_cloud vlct "input/vlct/run_dual_energy_cloud_test.py")
   setup_test_serial_python(vlct_MHD_shock_tube vlct "input/vlct/run_MHD_shock_tube_test.py")
