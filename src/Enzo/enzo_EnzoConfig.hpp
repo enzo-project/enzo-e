@@ -183,6 +183,12 @@ public: // interface
 #endif /* CONFIG_USE_GRACKLE */
       // EnzoInitialFeedbackTest
       initial_feedback_test_density(),
+      initial_feedback_test_HI_density(),
+      initial_feedback_test_HII_density(),
+      initial_feedback_test_HeI_density(),
+      initial_feedback_test_HeII_density(),
+      initial_feedback_test_HeIII_density(),
+      initial_feedback_test_e_density(),
       initial_feedback_test_star_mass(),
       initial_feedback_test_temperature(),
       initial_feedback_test_from_file(),
@@ -679,6 +685,12 @@ public: // attributes
 
   double                     initial_feedback_test_position[3];
   double                     initial_feedback_test_density;
+  double                     initial_feedback_test_HI_density;
+  double                     initial_feedback_test_HII_density;
+  double                     initial_feedback_test_HeI_density;
+  double                     initial_feedback_test_HeII_density;
+  double                     initial_feedback_test_HeIII_density;
+  double                     initial_feedback_test_e_density;
   double                     initial_feedback_test_star_mass;
   double                     initial_feedback_test_temperature;
   bool                       initial_feedback_test_from_file;

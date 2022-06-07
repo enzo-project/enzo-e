@@ -9,7 +9,7 @@
 #
 
 Adapt {
-  list = []; #["mask"];
+  list = []; 
   mask {
     type = "mask";
     value = [1.0, y<=0.5, 0.0];
@@ -27,7 +27,7 @@ Domain {
 }
 
 Mesh {
-  root_blocks = [2,2,2];
+  root_blocks = [4,4,4];
   root_rank   = 3;
   root_size   = [64,64,64]; # given length units, res = 1024 pc / 64 = 16 pc
 
@@ -40,10 +40,9 @@ Field {
   ghost_depth = 4;
 
   list = ["density", "internal_energy", "total_energy",
-          "metal_density", "velocity_x", "velocity_y", "velocity_z",
+          "velocity_x", "velocity_y", "velocity_z",
           "pressure", "temperature"];
-  list += ["HI_density","HII_density","HeI_density","HeII_density","HeIII_density","e_density"];
-  #prolong = "linear";
+  list += ["HI_density","HII_density","HeI_density","HeII_density","HeIII_density","e_density","metal_density"];
 }
 Field {
    list += ["density_deposit",
@@ -100,21 +99,9 @@ Method {
     single_sn = 1;
     unrestricted_sn = 1;
     stellar_winds = 1;
-    gas_return_fraction = 0.0; # doesn't do anything
     analytic_SNR_shell_mass = 1;
     fade_SNR = 1;
     NEvents = 1;
-
-     #distributed parameters
-     shift_cell_center = true;       # kick fb injection when close to grid boundary
-     time_first_sn     = 1.0;      # for testing - set time of first SN (in Myr) to not have to go through random number draws also triggers hard-coded progenitor mass and SN energy values (20 Msun star explosion)
-     #  ejecta_mass      = 10.0;     # solar masses - OLD PARAM - NOT USED 
-     #  supernova_energy = 1.0;      # in 10^51 erg - OLD PARAM - NOT USED
-     ke_fraction      = 0.0;      # fraction of kinetic energy (otherwise thermal) - < 0 computes it self-consistently to attempt to fully resolve the SN
-     # ejecta_metal_fraction = 0.5;  # OLD PARAM - NOT USED
-     feedback_stencil      = 3;      # deposit feedback in a NxN CIC stencil centered on the particle - should work with any odd ineger, but not tested for anything other than 3 
-     use_ionization_feedback = true;    # local (one zone) rad heating
-
   };
 
   ppm {
@@ -132,7 +119,7 @@ Method {
       };
 
   grackle {
-    data_file = "CloudyData_UVB=HM2012.h5";
+    data_file = "input/CloudyData_UVB=HM2012.h5";
     with_radiative_cooling = 1;
     metal_cooling = 1;
     primordial_chemistry = 1;
@@ -166,18 +153,26 @@ Particle {
     }
 }
 Units {
-    length = 64.0 * 10.0 *3.0866E18; #half-parsec resolution 
+    length = 64.0 * 20.0 *3.0866E18; #resolution in pc 
     time   = 3.15576E13; # 1 Myr
-    mass   = 1.9891E36;
+    #mass   = 1.9891E36;
+    density = 1.2E-24;
   }
 
 Initial {
 
-  list = ["feedback_test","value"]; # name of IC problem
+  list = ["feedback_test"]; # name of IC problem
 
   feedback_test {
-    density    = 100.0*1.2E-24;             # uniform mass density for ICs
+    density    = 4.0*1.2E-24; 
+    HI_density    = 0.7   * 4.0*1.2E-24;
+    HII_density   = 1e-10 * 4.0*1.2E-24;
+    HeI_density   = 0.3   * 4.0*1.2E-24;
+    HeII_density  = 1e-10 * 4.0*1.2E-24;
+    HeIII_density = 1e-10 * 4.0*1.2E-24;
+    e_density     = 1e-10 * 4.0*1.2E-24;           # uniform mass density for ICs
     metal_fraction = 1e-2*0.012;
+
     position = [0.5,0.5,0.5]; # unigrid corner (or one block)
 
     temperature = 100.0;              # in K
@@ -185,18 +180,6 @@ Initial {
                                       #   boundaries if NxN feedback zone crosses a block boundary
     star_mass  = 1000.0;                # particle mass in Msun
   }
-
-#
-# use this to test with some KE on the grid to make (add 'value' to list above)
-# sure momentum and KE energy injection work in a flow
- value {
-    HI_density    = 0.7   * 4.0*1.2E-24;
-    HII_density   = 1e-10 * 4.0*1.2E-24;
-    HeI_density   = 0.3   * 4.0*1.2E-24;
-    HeII_density  = 1e-10 * 4.0*1.2E-24;
-    HeIII_density = 1e-10 * 4.0*1.2E-24;
-    e_density     = 1e-10 * 4.0*1.2E-24;
-  } 
 
 }
 
@@ -278,6 +261,9 @@ Output {
     data {
         field_list = [ "density" , "metal_density","velocity_x","velocity_y","velocity_z",
                        "pressure", "temperature","total_energy","internal_energy"];
+
+        field_list += ["HI_density","HII_density","HeI_density","HeII_density","HeIII_density","e_density"];
+
 
         particle_list = ["star"];
 

@@ -893,15 +893,20 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   */ 
   double Z_mean=0, d_mean=0, n_mean=0, v_mean=0, mu_mean=0;
   double mu=0;
+
   chemistry_data * grackle_chemistry =
     enzo::config()->method_grackle_chemistry;
-  int primordial_chemistry = grackle_chemistry->primordial_chemistry;
+  int primordial_chemistry = 0;
+  if (grackle_chemistry) {
+    int primordial_chemistry = grackle_chemistry->primordial_chemistry;
+  }
+
   for (int ix_ = ix-1; ix_ < ix+2; ix_++) {
     for (int iy_ = iy-1; iy_ < iy+2; iy_++) {
       for (int iz_ = iz-1; iz_ < iz+2; iz_++) {
         int ind = INDEX(ix_,iy_,iz_, mx,my);
         Z_mean += mf[ind] / d[ind];
-        // TODO: make EnzoComputeMolecularWeight, and just access mu_field here?
+        // TODO: make EnzoComputeMolecularWeight, and access mu_field here?
         if (primordial_chemistry == 0) mu = enzo_config->ppm_mol_weight;
         else {
           mu = d_el[ind] + dHI[ind] + dHII[ind] + 0.25*(dHeI[ind]+dHeII[ind]+dHeIII[ind]);
@@ -914,7 +919,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
           }
         }
         mu /= d[ind]; 
-        mu_mean += mu; 
+        mu_mean += mu;
         d_mean += d[ind];
       } 
     }
@@ -1326,8 +1331,8 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   // these values correspond to TOTAL (energy, mass, momentum)
   // over all the coupling particles.
 
-  coupledEnergy /= eunit * cell_volume_code; // energy -> energy density
-  coupledGasEnergy /= eunit * cell_volume_code;
+  coupledEnergy /= (eunit * cell_volume_code); // energy -> energy density
+  coupledGasEnergy /= (eunit * cell_volume_code);
   coupledMass /= rho_to_m; // mass -> density
   coupledMetals /= rho_to_m;
   coupledMomenta /= (rho_to_m * vunit / 1e5); // momentum -> momentum_density 
