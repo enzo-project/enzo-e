@@ -31,9 +31,9 @@ void EnzoBfieldMethodCT::register_target_block_
   // setup bfieldi_l_ (initialize arrays that wrap the fields holding each
   // component of the interface centered magnetic field).
   const std::string field_names[] = {"bfieldi_x", "bfieldi_y", "bfieldi_z"};
-  EnzoFieldArrayFactory array_factory(block, 0); // stale_depth = 0
+  Field field = block->data()->field();
   for (std::size_t i = 0; i<3; i++){
-    bfieldi_l_[i] = array_factory.from_name(field_names[i]);
+    bfieldi_l_[i] = field.view<enzo_float>(field_names[i]);
   }
 
   EnzoBlock *enzo_block = enzo::block(block);

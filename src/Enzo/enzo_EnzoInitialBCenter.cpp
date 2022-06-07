@@ -26,10 +26,10 @@ void EnzoInitialBCenter::initialize_bfield_center( Block * block )
   // previously initialized face-centered B-fields
   const char* centered_names[3] = {"bfield_x","bfield_y","bfield_z"};
   const char* interface_names[3] = {"bfieldi_x","bfieldi_y","bfieldi_z"};
-  EnzoFieldArrayFactory array_factory(block);
+  Field field = block->data()->field();
   for (int i=0; i<3; i++){
-    EFlt3DArray bfieldc = array_factory.from_name(centered_names[i]);
-    EFlt3DArray bfieldi = array_factory.from_name(interface_names[i]);
+    EFlt3DArray bfieldc = field.view<enzo_float>(centered_names[i]);
+    EFlt3DArray bfieldi = field.view<enzo_float>(interface_names[i]);
     EnzoBfieldMethodCT::compute_center_bfield(i, bfieldc, bfieldi);
   }
 }
@@ -109,11 +109,10 @@ void EnzoInitialBCenter::initialize_bfield_interface( Block * block,
 						      CelloArray<double,3> &Az)
 {
 
-  EFlt3DArray bfieldi_x, bfieldi_y, bfieldi_z;
-  EnzoFieldArrayFactory array_factory(block);
-  bfieldi_x = array_factory.from_name("bfieldi_x");
-  bfieldi_y = array_factory.from_name("bfieldi_y");
-  bfieldi_z = array_factory.from_name("bfieldi_z");
+  Field field = block->data()->field();
+  EFlt3DArray bfieldi_x = field.view<enzo_float>("bfieldi_x");
+  EFlt3DArray bfieldi_y = field.view<enzo_float>("bfieldi_y");
+  EFlt3DArray bfieldi_z = field.view<enzo_float>("bfieldi_z");
 
   double dx,dy,dz;
   block->data()->field_cell_width(&dx,&dy,&dz);
@@ -128,13 +127,12 @@ void EnzoInitialBCenter::initialize_bfield_interface( Block * block,
 void EnzoInitialBCenter::enforce_block( Block * block,
 					const Hierarchy * hierarchy ) throw()
 {
+  Data* data = block->data();
+  Field field = data->field();
 
   // if specified, optionally initialize the face-centered magnetic field from
   // the vector potential
   if (values_[0] != nullptr || values_[1] != nullptr || values_[2] != nullptr){
-
-    Data* data = block->data();
-    Field field = data->field();
 
     double t = block->time();
     int nx, ny, nz; // number of cells per axis in the active zone
@@ -203,13 +201,11 @@ void EnzoInitialBCenter::enforce_block( Block * block,
     //     contributions other than magnetic fields
     //   - the density field is pre-initialized
 
-    EnzoFieldArrayFactory array_factory(block);
-    EFlt3DArray density, etot, bx, by, bz;
-    density = array_factory.from_name("density");
-    etot = array_factory.from_name("total_energy");
-    bx = array_factory.from_name("bfield_x");
-    by = array_factory.from_name("bfield_y");
-    bz = array_factory.from_name("bfield_z");
+    EFlt3DArray density = field.view<enzo_float>("density");
+    EFlt3DArray etot = field.view<enzo_float>("total_energy");
+    EFlt3DArray bx = field.view<enzo_float>("bfield_x");
+    EFlt3DArray by = field.view<enzo_float>("bfield_y");
+    EFlt3DArray bz = field.view<enzo_float>("bfield_z");
 
     for (int iz= 0; iz < density.shape(0); iz++){
       for (int iy= 0; iy < density.shape(1); iy++){

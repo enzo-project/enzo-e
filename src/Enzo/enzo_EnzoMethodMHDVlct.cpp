@@ -192,11 +192,11 @@ EnzoEFltArrayMap EnzoMethodMHDVlct::get_integration_map_
   str_vec_t field_list = (passive_list == nullptr) ? integration_field_list_ :
     concat_str_vec_(integration_field_list_, *passive_list);
 
-  EnzoFieldArrayFactory array_factory(block,0);
+  Field field = block->data()->field();
   std::vector<EFlt3DArray> arrays;
   arrays.reserve(field_list.size());
   for (const std::string& field_name : field_list){
-    arrays.push_back(array_factory.from_name(field_name));
+    arrays.push_back( field.view<enzo_float>(field_name) );
   }
 
   return EnzoEFltArrayMap("integration",field_list,arrays);
@@ -601,8 +601,8 @@ double EnzoMethodMHDVlct::timestep ( Block * block ) throw()
 
   // Compute thermal pressure (this presently requires that "pressure" is a
   // permanent field)
-  EnzoFieldArrayFactory array_factory(block);
-  EFlt3DArray pressure = array_factory.from_name("pressure");
+  Field field = block->data()->field();
+  EFlt3DArray pressure = field.view<enzo_float>("pressure");
   eos_->pressure_from_integration(integration_map, pressure, 0);
 
   // Now load other necessary quantities

@@ -201,6 +201,8 @@ char * FieldData::coarse_values
 (const FieldDescr * field_descr,
  int id_field, int index_history ) throw ()
 {
+  ASSERT("FieldData::coarse_values", "index_history must be 0",
+         index_history == 0);
 #ifdef DEBUG_COARSE_ARRAY
       CkPrintf ("DEBUG_COARSE_ARRAY %p returning %p[%d]\n",
                 (void*)this,(void *)array_coarse_[id_field],id_field);
@@ -1212,3 +1214,128 @@ void FieldData::set_history_(const FieldDescr * field_descr)
     }
   }
 }
+//----------------------------------------------------------------------
+
+namespace{
+
+  template<class T>
+  bool verify_type_(const FieldDescr * field_descr, int id_field) throw()
+  {
+    using nonconst_T = typename std::remove_cv<T>::type;
+    switch (field_descr->precision(id_field)) {
+    case precision_single:
+      if (!std::is_same<nonconst_T, float>::value){
+	ERROR1("verify_type_",
+	       "type template parameter is wrong. It should be `float` "
+	       "for field_id %d",
+	       id_field);
+      }
+      break;
+    case precision_double:
+      if (!std::is_same<nonconst_T, double>::value){
+	ERROR1("verify_type_",
+	       "type template parameter is wrong. It should be `double` "
+	       "for field_id %d",
+	       id_field);
+      }
+      break;
+    case precision_quadruple:
+      if (!std::is_same<nonconst_T, long double>::value){
+	ERROR1("verify_type_",
+	       "type template parameter is wrong. It should be `long double` "
+	       "for field_id %d",
+	       id_field);
+      }
+      break;
+    default:
+      ERROR2("verify_type_", "Unknown precision %d for field id %d",
+	     field_descr->precision(id_field),id_field);
+    }
+    return true;
+  }
+
+}// namespace
+
+//----------------------------------------------------------------------
+
+template<class T>
+CelloArray<T, 3> FieldData::make_view_
+(const FieldDescr * field_descr,
+ int id_field, ghost_choice choice,
+ int index_history,  bool coarse) throw()
+{
+  // check that T is consistent with field_descr->precision
+  verify_type_<T>(field_descr, id_field);
+
+  // get the pointer
+  char* ptr;
+  int mx, my, mz; // store the shape of the field
+  if (coarse) {
+
+    ASSERT("FieldData::make_view_",
+           "ghost_choice::include is required to load coarse field data",
+           choice == ghost_choice::include);
+    ptr = this->coarse_values(field_descr, id_field, index_history);
+    this->coarse_dimensions(field_descr, id_field, &mx, &my, &mz);
+
+  } else {
+
+    // get the pointer and determine if ghost zones are included
+    bool includes_ghost;
+    switch (choice){
+    case ghost_choice::permit:
+      ptr = this->values(field_descr, id_field, index_history);
+      includes_ghost = this->ghosts_allocated();
+      break;
+    case ghost_choice::include:
+      ptr = this->values(field_descr, id_field, index_history);
+      ASSERT("FieldData::make_view_",
+             ("ghost zones must be allocated when ghost_choice::include is "
+              "specified and loading non-coarse data"),
+             this->ghosts_allocated());
+      includes_ghost = true;
+      break;
+    case ghost_choice::exclude:
+      ptr = this->unknowns(field_descr, id_field, index_history);
+      includes_ghost = false;
+      break;
+    default:
+      ERROR("FieldData::make_view_",
+            "Encountered unhandled ghost_choice value");
+    }
+
+    // determine the shape of the output (including ghost zones)
+    this->dimensions(field_descr,id_field,&mx,&my,&mz);
+
+    if (!includes_ghost){ // subtract ghost depth from the shape
+      int gx, gy, gz;
+      field_descr->ghost_depth(id_field,&gx,&gy,&gz);
+
+      mx = (mx > 1) ? (mx - 2*gx) : mx;
+      my = (my > 1) ? (my - 2*gy) : my;
+      mz = (mz > 1) ? (mz - 2*gz) : mz;
+    }
+  }
+
+  if (ptr == nullptr){
+    const char* field_type = (coarse) ? "coarse field" : "field";
+    ERROR2("data_view_", "There is no %s with id %d", field_type, id_field);
+    // alternatively, we could just return CelloArray<T,3>()
+  }
+
+  return CelloArray<T, 3>(reinterpret_cast<T*>(ptr), mz, my, mx);
+}
+
+template CelloArray<float, 3> FieldData::make_view_
+(const FieldDescr * field_descr,
+ int id_field, ghost_choice choice,
+ int index_history, bool coarse) throw();
+template CelloArray<double, 3> FieldData::make_view_
+(const FieldDescr * field_descr,
+ int id_field, ghost_choice choice,
+ int index_history, bool coarse) throw();
+template CelloArray<long double, 3> FieldData::make_view_
+(const FieldDescr * field_descr,
+ int id_field, ghost_choice choice,
+ int index_history, bool coarse) throw();
+
