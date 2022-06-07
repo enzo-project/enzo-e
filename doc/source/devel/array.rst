@@ -1,3 +1,5 @@
+.. _using-CelloArray:
+
 ****************
 Using CelloArray
 ****************
