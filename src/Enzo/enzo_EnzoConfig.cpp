@@ -1323,7 +1323,7 @@ void EnzoConfig::read_initial_shu_collapse_(Parameters * p)
     ("Initial:shu_collapse:nominal_sound_speed",1.0);
 
   initial_shu_collapse_instability_parameter = p->value_float
-    ("Initial:shu_collapse:instabilty_parameter",2.0);
+    ("Initial:shu_collapse:instability_parameter",2.1);
 
   initial_shu_collapse_central_sink_exists = p->value_logical
     ("Initial:shu_collapse:central_sink_exists",false);
