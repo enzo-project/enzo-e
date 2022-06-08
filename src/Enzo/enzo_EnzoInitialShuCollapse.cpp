@@ -54,7 +54,7 @@ void EnzoInitialShuCollapse::pup (PUP::er &p)
 }
 
 void EnzoInitialShuCollapse::enforce_block
-( Block * block, Hierarchy * hierarchy ) throw()
+( Block * block, const Hierarchy * hierarchy ) throw()
 
 {
   // Check if we have periodic boundary conditions
@@ -165,31 +165,63 @@ void EnzoInitialShuCollapse::enforce_block
   block->cell_width(&hx, &hy, &hz);
 
   // Get pointers to fields
+  // It's likely that not all these fields are required for the problem, and that not all of
+  // the required fields need to be initialized, but let's just do it for safety.
   enzo_float *  d           = (enzo_float *) field.values ("density");
   enzo_float * dt           = (enzo_float *) field.values ("density_total");
   enzo_float * dp           = (enzo_float *) field.values ("density_particle");
   enzo_float * dpa          = (enzo_float *) field.values ("density_particle_accumulate");
+  enzo_float * dg           = (enzo_float *) field.values ("density_gas");
+  enzo_float * pm           = (enzo_float *) field.values ("particle_mass");
   enzo_float * po           = (enzo_float *) field.values ("potential");
+  enzo_float * po_temp      = (enzo_float *) field.values ("potential_temp");
+  enzo_float * po_copy      = (enzo_float *) field.values ("potential_copy");
   enzo_float * specific_te  = (enzo_float *) field.values ("total_energy");
+  enzo_float * pressure     = (enzo_float *) field.values ("pressure");
   enzo_float * ax           = (enzo_float *) field.values ("acceleration_x");
   enzo_float * ay           = (enzo_float *) field.values ("acceleration_y");
   enzo_float * az           = (enzo_float *) field.values ("acceleration_z");
   enzo_float * vx           = (enzo_float *) field.values ("velocity_x");
   enzo_float * vy           = (enzo_float *) field.values ("velocity_y");
   enzo_float * vz           = (enzo_float *) field.values ("velocity_z");
-  enzo_float *  x           = (enzo_float *) field.values ("X");
-  enzo_float *  b           = (enzo_float *) field.values ("B");
+  enzo_float * x            = (enzo_float *) field.values ("X");
+  enzo_float * x_copy       = (enzo_float *) field.values ("X_copy");
+  enzo_float * b            = (enzo_float *) field.values ("B");
+  enzo_float * b_copy       = (enzo_float *) field.values ("B_copy");
+  enzo_float * ds           = (enzo_float *) field.values ("density_source");
+  enzo_float * dsa          = (enzo_float *) field.values ("density_source_accumulate");
+  enzo_float * mdxs         = (enzo_float *) field.values ("mom_dens_x_source");
+  enzo_float * mdxsa        = (enzo_float *) field.values ("mom_dens_x_source_accumulate");
+  enzo_float * mdys         = (enzo_float *) field.values ("mom_dens_y_source");
+  enzo_float * mdysa        = (enzo_float *) field.values ("mom_dens_y_source_accumulate");
+  enzo_float * mdzs         = (enzo_float *) field.values ("mom_dens_z_source");
+  enzo_float * mdzsa        = (enzo_float *) field.values ("mom_dens_z_source_accumulate");
 
-  // For most of the fields, we initialise their values to zero
+  // For most of the fields, we initialise their values to zero everywhere
   std::fill_n(dt,m,0.0);
   std::fill_n(dp,m,0.0);
   std::fill_n(dpa,m,0.0);
+  std::fill_n(dg,m,0.0);
+  std::fill_n(pm,m,0.0);
   std::fill_n(po,m,0.0);
+  std::fill_n(po_temp,m,0.0);
+  std::fill_n(po_copy,m,0.0);
+  std::fill_n(pressure,m,0.0);
   std::fill_n(ax,m,0.0);
   std::fill_n(ay,m,0.0);
   std::fill_n(az,m,0.0);
   std::fill_n(x,m,0.0);
+  std::fill_n(x_copy,m,0.0);
   std::fill_n(b,m,0.0);
+  std::fill_n(b_copy,m,0.0);
+  std::fill_n(ds,m,0.0);
+  std::fill_n(dsa,m,0.0);
+  std::fill_n(mdxs,m,0.0);
+  std::fill_n(mdxsa,m,0.0);
+  std::fill_n(mdys,m,0.0);
+  std::fill_n(mdysa,m,0.0);
+  std::fill_n(mdzs,m,0.0);
+  std::fill_n(mdzsa,m,0.0);
 
   // Set velocity
   std::fill_n(vx,m,drift_velocity_[0]);
