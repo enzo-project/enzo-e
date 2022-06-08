@@ -153,6 +153,9 @@ setup_test_parallel(Performance-Initial-PNG  Performance/InitialPng   input/Hell
 setup_test_serial(PPM-1 MethodPPM/Ppm-1  input/PPM/method_ppm-1.in)
 setup_test_parallel(PPM-8 MethodPPM/Ppm-8  input/PPM/method_ppm-8.in)
 
+# GRACKLE
+setup_test_serial(CoolingTest_Grackle Grackle/CoolingTest input/Grackle/cooling_test_grackle.in)
+
 if (USE_PYTHON_BASED_TESTS)
   # VLCT
   setup_test_serial_python(vlct_dual_energy_cloud vlct "input/vlct/run_dual_energy_cloud_test.py")
