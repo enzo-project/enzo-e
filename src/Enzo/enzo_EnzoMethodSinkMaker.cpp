@@ -131,7 +131,7 @@ void EnzoMethodSinkMaker::compute_ ( Block *block) throw()
   const int ia_vz               = particle.attribute_index (it, "vz");
   const int ia_metal_fraction   = particle.attribute_index (it, "metal_fraction");
   const int ia_creation_time    = particle.attribute_index (it, "creation_time");
-  const int ia_id               = particle.attribute_index (it, "ID");
+  const int ia_id               = particle.attribute_index (it, "id");
   const int ia_copy             = particle.attribute_index (it, "is_copy");
 
   // Attribrute stride lengths
@@ -477,12 +477,12 @@ bool EnzoMethodSinkMaker::density_is_local_maximum_(Block * block, enzo_float je
 	     std::max(jeans_length, min_control_volume_cells_ * max_cell_width));
 
   // Get the "bounding indices" of the region containing the control volume
-  const int min_ind_x =  ceil(ix - control_volume_radius / hx) + gx;
-  const int min_ind_y =  ceil(iy - control_volume_radius / hy) + gy;
-  const int min_ind_z =  ceil(iz - control_volume_radius / hz) + gz;
-  const int max_ind_x = floor(ix + control_volume_radius / hx) + gx;
-  const int max_ind_y = floor(iy + control_volume_radius / hy) + gy;
-  const int max_ind_z = floor(iz + control_volume_radius / hz) + gz;
+  const int min_ind_x =  ceil(ix - control_volume_radius / hx);
+  const int min_ind_y =  ceil(iy - control_volume_radius / hy);
+  const int min_ind_z =  ceil(iz - control_volume_radius / hz);
+  const int max_ind_x = floor(ix + control_volume_radius / hx);
+  const int max_ind_y = floor(iy + control_volume_radius / hy);
+  const int max_ind_z = floor(iz + control_volume_radius / hz);
 
   // Index of the central cell
   const int central_cell_index = INDEX(ix,iy,iz,mx,my);
