@@ -44,7 +44,6 @@ Particle {
     list = ["sink"];
     mass_is_mass = true;
     batch_size = 4096;
-    mass_is_mass = true;
     sink {
         attributes = [ "x", "default",
                        "y", "default",
