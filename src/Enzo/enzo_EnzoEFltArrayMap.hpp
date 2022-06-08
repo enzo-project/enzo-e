@@ -9,8 +9,8 @@
 /// All insertions occur in the constructor, and the properties of the
 /// contained arrays can't be mutated. This choice:
 ///   - facillitates enforcement that all contained arrays have a fixed shape
-///   - makes it easier to order the entries in an arbitrary order. This could
-///     lead to some optimizations in the Riemann Solver if the values are
+///   - makes it easier to order the entries in an arbitrary order. This
+///     facilitates optimizations in the Riemann Solver when the values are
 ///     initialized in the order expected by the Riemann Solver
 ///
 /// If necessary, a number of optimizations could be made to the implementation
@@ -26,11 +26,6 @@
 ///      to store the strings in-place (improving cache locallity).
 /// It would also be worth considering whether linear search is faster (since
 /// the arrays are small.
-///
-/// To achieve similar results, instead of storing individual EFlt3DArrays
-/// within vectors, one large instance of CelloArray<enzo_float,4> could be
-/// stored. While that may help compiler optimizations, it may be too
-/// restrictive.
 
 #ifndef ENZO_ENZO_EFLT_ARRAY_MAP_HPP
 #define ENZO_ENZO_EFLT_ARRAY_MAP_HPP
@@ -121,7 +116,8 @@ public: // interface
   /// @note
   /// The program will fail if this method is invoked and the map holds zero
   /// elements.
-  int array_shape(unsigned int dim) const noexcept;
+  int array_shape(unsigned int dim) const noexcept
+  { return arrays_.array_shape(dim); }
 
   /// Return a new map holding subsections of each array held by the map
   ///
@@ -149,6 +145,23 @@ public: // interface
 			  bool raise_err, bool allow_smaller_ref = false)
     const noexcept;
 
+  /// Indicates if the contained arrays are stored in a single 4D array
+  /// (Alternatively they can be stored as an array of pointers)
+  bool contiguous_arrays() const noexcept { return arrays_.contiguous_items(); }
+
+  /// Returns a shallow copy of the 4D array holding each contained array.
+  ///
+  /// The `n`th 3D subarray of `arrmap.get_backing_array()` is always a perfect
+  /// alias of `arrmap[n]` (for any non-negative `n` less than `arrmap.size()`)
+  ///
+  /// @note
+  /// The program will abort if this method is called on an object for which
+  /// the `contiguous_arrays()` method returns `false`.
+  CelloArray<enzo_float, 4> get_backing_array() noexcept
+  { return arrays_.get_backing_array(); }
+  CelloArray<const enzo_float, 4> get_backing_array() const noexcept
+  { return arrays_.get_backing_array(); }
+
 private: // helper methods
 
   /// This private constructor is used by subarray_map. It can skip some
@@ -156,11 +169,11 @@ private: // helper methods
   EnzoEFltArrayMap(std::string name,
                    const std::map<std::string, unsigned int> &str_index_map,
                    const std::vector<std::string> &ordered_keys,
-                   const std::vector<EFlt3DArray> &ordered_arrays)
+                   CArrCollec<enzo_float>&& arrays)
     : name_(name),
       str_index_map_(str_index_map),
       keys_(ordered_keys),
-      arrays_(ordered_arrays)
+      arrays_(arrays)
   { validate_invariants_(); }
 
   void validate_invariants_() const noexcept;
@@ -179,8 +192,8 @@ private: // attributes
   std::map<std::string, unsigned int> str_index_map_;
   // keys_ is the ordered list of keys
   std::vector<std::string> keys_;
-  // arrays_ is the ordered list of arrays_
-  std::vector<EFlt3DArray> arrays_;
+  // arrays_ is the ordered collection of arrays_
+  CArrCollec<enzo_float> arrays_;
 };
 
 #endif /* ENZO_ENZO_EFLT_ARRAY_MAP_HPP */

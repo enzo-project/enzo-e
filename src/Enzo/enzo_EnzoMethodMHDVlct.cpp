@@ -66,8 +66,8 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   mhd_choice_ = parse_bfield_choice_(mhd_choice);
 
   riemann_solver_ = EnzoRiemann::construct_riemann
-    (rsolver, mhd_choice_ != bfield_choice::no_bfield,
-     eos_->uses_dual_energy_formalism());
+    ({rsolver, mhd_choice_ != bfield_choice::no_bfield,
+      eos_->uses_dual_energy_formalism()});
 
   // determine integration and primitive field list
   integration_field_list_ = riemann_solver_->integration_quantity_keys();

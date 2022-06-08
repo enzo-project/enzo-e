@@ -9,15 +9,24 @@ if(NOT __processedUserDefaults)
   set(CMAKE_CXX_COMPILER g++ CACHE STRING "")
   set(CMAKE_C_COMPILER gcc CACHE STRING "")
   set(CMAKE_Fortran_COMPILER gfortran CACHE STRING "")
+  # Note (12/2021): passing -march=native to gfortran seems to slow down the
+  # PPM solver
   set(CMAKE_Fortran_FLAGS "-ffixed-line-length-132" CACHE STRING "Default Fortran flags")
 
-  # Set some architecture-specific optimization flags
-  set(__ARCH_C_OPT_FLAGS "-O3 -DNDEBUG -funroll-loops")
+  # add optional flags to C and C++ compilers that provide useful warnings
+  set(CMAKE_C_FLAGS "-Wall" CACHE STRING "Default C flags")
+  set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}" CACHE STRING "Default C++ flags")
 
-  set(CMAKE_C_FLAGS_RELEASE "${__ARCH_C_OPT_FLAGS}")
-  set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g ${__ARCH_C_OPT_FLAGS}")
-  set(CMAKE_CXX_FLAGS_RELEASE "${__ARCH_C_OPT_FLAGS}")
-  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g ${__ARCH_C_OPT_FLAGS}")
+
+  # these flag(s) are currently only used when using openmp-simd optimizations
+  # (to specify available/prefered instruction sets).
+  # This particular value tells the compiler to optimize the code for the
+  # instruction set of the machine used to compile the code.
+  set(CONFIG_ARCH_FLAGS "-march=native")
+
+  # maybe we should add the following flags at a higher level...
+  string(APPEND CMAKE_C_FLAGS " -funroll-loops")
+  string(APPEND CMAKE_CXX_FLAGS " -funroll-loops")
 
   # Setting package paths (e.g., Grackle)
 
