@@ -728,6 +728,10 @@ void IoEnzoReader::file_read_block_
         char * buffer;
         float * buffer_single;
         double * buffer_double;
+        int8_t * buffer_int8;
+        int16_t * buffer_int16;
+        int32_t * buffer_int32;
+        int64_t * buffer_int64;
       };
 
       buffer = file_->allocate_buffer(np,type_data);
@@ -745,6 +749,18 @@ void IoEnzoReader::file_read_block_
       } else if (type_data == type_double) {
         copy_buffer_to_particle_attribute_
           (buffer_double, particle, it, ia, np);
+      } else if (type_data == type_int8) {
+        copy_buffer_to_particle_attribute_
+          (buffer_int8, particle, it, ia, np);
+      } else if (type_data == type_int16) {
+        copy_buffer_to_particle_attribute_
+          (buffer_int16, particle, it, ia, np);
+      } else if (type_data == type_int32) {
+        copy_buffer_to_particle_attribute_
+          (buffer_int32, particle, it, ia, np);
+      } else if (type_data == type_int64) {
+        copy_buffer_to_particle_attribute_
+          (buffer_int64, particle, it, ia, np);
       } else {
         ERROR1 ("IoEnzoReader::file_read_block_()",
                 "Unsupported particle type_data %d",

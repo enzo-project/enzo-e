@@ -181,6 +181,14 @@ public: // functions
       data = (char *)new float [n];
     } else if (type_data == type_double) {
       data = (char *)new double [n];
+    } else if (type_data == type_int8) {
+      data = (char *)new int8_t [n];
+    } else if (type_data == type_int16) {
+      data = (char *)new int16_t [n];
+    } else if (type_data == type_int32) {
+      data = (char *)new int32_t [n];
+    } else if (type_data == type_int64) {
+      data = (char *)new int64_t [n];
     } else {
       data = nullptr;
       ERROR1 ("EnzoInitialHdf5::allocate_array_()",
