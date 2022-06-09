@@ -123,9 +123,7 @@ The Enzo-E executable is built within ``bin/``.
 Configuration options
 ---------------------
 
-Current ``cmake`` options follow the notation of the SCons options (potentially 
-subject to change), i.e., the following (default value at the end of the line)
-is available:
+Current ``cmake`` options are the following (default value at the end of the line):
 
 * ``USE_GRACKLE`` "Use Grackle Chemistry" ON
 * ``USE_DOUBLE_PREC`` "Use double precision. Turn off for single precision." ON
