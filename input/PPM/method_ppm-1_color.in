@@ -1,0 +1,36 @@
+# Problem: 2D Implosion problem, with a color field
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/PPM/ppm.incl"
+
+Mesh { root_blocks    = [1,1]; }
+
+Field { list += ["green"]; }
+Group {
+    list = ["color", "conserved", "make_field_conservative"];
+    color {
+       field_list = ["green"];
+    }
+    conserved {
+       field_list += ["green"];
+    } 
+}
+
+Initial {
+    value {
+       green = [ 0.5*0.125, x + y < 0.5,
+                     0.5*1.0 ];
+      } 
+   }
+
+Output {
+    list = ["density","green","data"]; 
+    density { name = ["method_ppm_color_de-1-%06d.png", "cycle"]; } ;
+    data    { name = ["method_ppm_color-1-%02d-%06d.h5", "proc","cycle"]; field_list += ["green"]; }
+    green {
+        name = ["method_ppm_color_green-1-%06d.png", "cycle"];
+	type     = "image";
+        field_list = ["green"];
+        include "input/Schedule/schedule_cycle_10.incl"
+      }
+}
