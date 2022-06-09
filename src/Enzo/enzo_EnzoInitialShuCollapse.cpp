@@ -111,12 +111,6 @@ void EnzoInitialShuCollapse::enforce_block
 	   "method is required.",
 	   enzo::problem()->method_exists("sink_maker"));
 
-  // Check if accretion method is being used
-  ASSERT("EnzoInitialShuCollapse",
-	   "If shu_collapse initializer is used, the accretion "
-	   "method is required.",
-	   enzo::problem()->method_exists("accretion"));
-
   // Check if mhd_vlct method is being used
   ASSERT("EnzoInitialShuCollapse",
 	 "If shu_collapse initializer is used, the mhd_vlct method is "
