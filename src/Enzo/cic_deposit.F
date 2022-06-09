@@ -69,7 +69,7 @@ c
 
 !     write(0,*) npositions, leftedge, dim1, dim2, dim3, cellsize
 
-      print*, 'cic_deposit.F mass(1)=',mass(1)
+c      print*, 'cic_deposit.F mass(1)=',mass(1)
       fact = 1._PKIND/cellsize
       refine = cellsize/cloudsize
       half = 0.5001_PKIND/refine
@@ -175,28 +175,21 @@ c
 c     
 c     Interpolate from field into sumfield
 c
-c            print*, 'DEBUG_CIC ',dx,dy,dz,i1,j1,k1,field(0,0,0)
+c            print*, 'DEBUG_CIC ',dx,dy,dz,i1,j1,k1,field(i1,j1,k1)
             field(i1  ,j1  ,k1  ) = field(i1  ,j1  ,k1  ) +
      &              mass(n)*     dx *     dy *    dz
-c            print*, 'DEBUG_CIC 181 ',i1+1,j1,k1
             field(i1+1,j1  ,k1  ) = field(i1+1,j1  ,k1  ) +
      &              mass(n)*(1._RKIND-dx)*     dy *    dz
-c            print*, 'DEBUG_CIC 184 ',i1,j1+1,k1
             field(i1  ,j1+1,k1  ) = field(i1  ,j1+1,k1  ) + 
      &              mass(n)*     dx *(1._RKIND-dy)*    dz
-c            print*, 'DEBUG_CIC 187 ',i1+1,j1+1,k1
             field(i1+1,j1+1,k1  ) = field(i1+1,j1+1,k1  ) +
      &              mass(n)*(1._RKIND-dx)*(1._RKIND-dy)*    dz
-c            print*, 'DEBUG_CIC 190 ',i1,j1,k1+1
             field(i1  ,j1  ,k1+1) = field(i1  ,j1  ,k1+1) +
      &              mass(n)*     dx *     dy *(1._RKIND-dz)
-c            print*, 'DEBUG_CIC 193 ',i1+1,j1,k1+1
             field(i1+1,j1  ,k1+1) = field(i1+1,j1  ,k1+1) +
      &              mass(n)*(1._RKIND-dx)*     dy *(1._RKIND-dz)
-c            print*, 'DEBUG_CIC 196 ',i1,j1+1,k1+1
             field(i1  ,j1+1,k1+1) = field(i1  ,j1+1,k1+1) + 
      &              mass(n)*     dx *(1._RKIND-dy)*(1._RKIND-dz)
-c            print*, 'DEBUG_CIC 199 ',i1+1,j1+1,k1+1
             field(i1+1,j1+1,k1+1) = field(i1+1,j1+1,k1+1) +
      &           mass(n)*(1._RKIND-dx)*(1._RKIND-dy)*(1._RKIND-dz)
 

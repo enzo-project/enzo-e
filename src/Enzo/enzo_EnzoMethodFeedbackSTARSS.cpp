@@ -540,7 +540,7 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
     vz_dep[i] = tiny_number;
     d_shell[i] = tiny_number;
 
-    te_dep_c[i] = 0;    
+    te_dep_c[i] = 0;
     ge_dep_c[i] = 0;
     mf_dep_c[i] = 0;
     vx_dep_c[i] = 0;
@@ -821,6 +821,18 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   enzo_float * vx_dep = new enzo_float[size];
   enzo_float * vy_dep = new enzo_float[size];
   enzo_float * vz_dep = new enzo_float[size];
+
+  // initialize temporary deposit fields as zero
+  // Not doing so gives in screwy results
+  for (int i=0; i<size; i++) {
+    d_dep [i] = 0;
+    te_dep[i] = 0;
+    ge_dep[i] = 0;
+    mf_dep[i] = 0;
+    vx_dep[i] = 0;
+    vy_dep[i] = 0;
+    vz_dep[i] = 0;
+  }
 
   // holds just shell densities (used for refresh+accumulate)
   enzo_float * d_shell   = (enzo_float *) field.values("SN_shell_density");
@@ -1354,7 +1366,6 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
     coupledGasEnergy_list[n] = coupledGasEnergy/nCouple;
   }
 
-
   enzo_float left_edge[3] = {xm-gx*hx, ym-gy*hy, zm-gz*hz};
 
   // CiC deposit mass/energy/momentum
@@ -1435,7 +1446,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
     ge_dep_tot[i] += ge_dep[i];
     vx_dep_tot[i] += vx_dep[i];
     vy_dep_tot[i] += vy_dep[i];
-    vz_dep_tot[i] += vz_dep[i];   
+    vz_dep_tot[i] += vz_dep[i];  
   }
 
   // transform velocities back to "lab" frame
