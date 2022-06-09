@@ -26,7 +26,7 @@ parser.add_argument(
     help = "the C++ binary that is to be executed"
 )
 parser.add_argument(
-    "args_for_command", metavar = "ARGS", action = "store", nargs = '*',
+    "args_for_command", metavar = "ARGS", action = "store", nargs = argparse.REMAINDER,
     default = [],
     help = "the arguments to the C++ binary that are to be executed"
 )
