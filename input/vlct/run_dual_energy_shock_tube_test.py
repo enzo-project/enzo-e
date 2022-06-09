@@ -21,14 +21,12 @@
 # - This script expects to be called from the root level of the repository
 #   OR at the same level where its defined
 
-
+import argparse
 import os
 import os.path
 import sys
 import numpy as np
 import shutil
-import subprocess
-import math
 
 from testing_utils import testing_context, EnzoEWrapper, CalcTableL1Norm
 from run_MHD_shock_tube_test import analyze_shock
@@ -95,51 +93,14 @@ def cleanup():
             shutil.rmtree(dir_name)
 
 if __name__ == '__main__':
-
-    if len(sys.argv) == 1:
-        nproc = 1
-    elif len(sys.argv) == 2:
-        try:
-            nproc = int(sys.argv[1])
-        except:
-            raise ValueError(
-                "{} can take an optional positive integer ".format(sys.argv[0])
-                + "argument for specifying the use of multiple processes")
-    else:
-        raise ValueError(
-            "{} can take up to 1 argument to specify the ".format(sys.argv[0])
-            + "number of processes. {:d} arguments ".format(len(sys.argv)-1)
-            + "were provided")
-
-    enzoe_binary = os.environ.get('ENZOE_BIN', 'bin/enzo-e')
-
-    if nproc <= 0:
-        raise ValueError("number of processes must be a positive integer")
-    elif nproc == 1:
-        executable = enzoe_binary
-    else:
-        if 'CHARM_HOME' in os.environ:
-            charm_binary = os.path.join(os.environ['CHARM_HOME'],
-                                        'bin/charmrun')
-            assert os.access(charm_binary, os.X_OK)
-        elif shutil.which('charmrun') is not None:
-            charm_binary = 'charmrun' # it's in our path
-        else:
-            raise RuntimeError("Could not find the charmrun binary. Use the "
-                               "CHARM_HOME environment variable to help "
-                               "specify its location.")
-        charm_args = os.environ.get('CHARM_ARGS')
-        if charm_args is None:
-            executable_template = charm_binary + ' +p{:d} ' + enzoe_binary
-        else:
-            executable_template \
-                = ' '.join([charm_binary, charm_args, '+p{:d}', 'bin/enzo-e'])
-        executable = executable_template.format(nproc)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--launch_cmd', required=True,type=str)
+    args = parser.parse_args()
 
     with testing_context():
 
         # run the tests
-        run_tests(executable)
+        run_tests(args.launch_cmd)
 
         # analyze the tests
         tests_passed = analyze_tests()

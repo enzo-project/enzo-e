@@ -7,15 +7,12 @@ commands:
       - run:
           name: "Set environment variables."
           command: |
-            echo 'export CHARM_VER=6.10.2' >> $BASH_ENV
+            echo 'export CHARM_VER=7.0.0' >> $BASH_ENV
             echo 'export LD_LIBRARY_PATH=$HOME/local/lib:$LD_LIBRARY_PATH' >> $BASH_ENV
-            echo 'export CELLO_ARCH=linux_gnu' >> $BASH_ENV
-            echo 'export CELLO_BUILD_NCORE=4' >> $BASH_ENV
-            echo 'export CHARM_ARGS=++local' >> $BASH_ENV
             echo 'export HDF5_INC=/usr/include/hdf5/serial' >> $BASH_ENV
             echo 'export HDF5_LIB=/usr/lib/x86_64-linux-gnu' >> $BASH_ENV
-            echo 'export CHARM_HOME=$HOME/local/charm-v$CHARM_VER' >> $BASH_ENV
-            echo 'export GRACKLE_HOME=$HOME/local' >> $BASH_ENV
+            echo 'export CHARM_ROOT=$HOME/local/charm-v$CHARM_VER' >> $BASH_ENV
+            echo 'export Grackle_ROOT=$HOME/local' >> $BASH_ENV
             echo 'export GRACKLE_INPUT_DATA_DIR=$HOME/grackle/grackle_data_files/input/' >> $BASH_ENV
             # tag the tip so we can go back to it
             git tag tip
@@ -28,14 +25,9 @@ commands:
           command: |
             source $BASH_ENV
             sudo apt-get update
-            sudo apt-get install -y bc csh libhdf5-serial-dev gfortran libtool-bin libpapi-dev libpng-dev libboost-all-dev 
+            sudo apt-get install -y bc csh libhdf5-serial-dev gfortran libtool-bin libpapi-dev libpng-dev libboost-all-dev pandoc ninja-build cmake
             # apt-get installs hdf5 libraries with _serial
             sudo ln -s /usr/lib/x86_64-linux-gnu/libhdf5_serial.so /usr/lib/x86_64-linux-gnu/libhdf5.so
-            # install scons
-            python3 -m venv $HOME/venv
-            source $HOME/venv/bin/activate
-            pip install --upgrade pip
-            pip install scons
             # Install charm++
             mkdir -p $HOME/local
             if [ ! -f $HOME/local/charm-v$CHARM_VER/bin/charmrun ]; then
@@ -59,8 +51,8 @@ commands:
   install-grackle:
     description: "Install grackle."
     parameters:
-      prec:
-        type: string
+      usedouble:
+        type: boolean
 
     steps:
       - run:
@@ -71,7 +63,9 @@ commands:
             ./configure
             cd src/clib
             make machine-linux-gnu
-            if [ << parameters.prec >> == "single" ]; then
+            # convert boolean parameter to an env var storing 0 or 1
+            USE_DOUBLE=$(( 0 <<# parameters.usedouble >> + 1 <</ parameters.usedouble >> ))
+            if [[ $USE_DOUBLE != 1 ]]; then
               make precision-32
             fi
             make
@@ -87,44 +81,19 @@ commands:
           name: "Install dependencies for docs build."
           command: |
             sudo apt-get update
+            sudo apt-get install doxygen
             python3 -m venv $HOME/venv
             source $HOME/venv/bin/activate
             pip install --upgrade pip
             pip install --upgrade wheel
             pip install --upgrade setuptools
-            pip install sphinx sphinx_rtd_theme
-
-  configure-build-system:
-    description: "Modifies the SConstruct file to use grackle or not."
-    parameters:
-      usegrackle:
-        type: boolean
-        default: true
-    steps:
-      - run:
-          name: "Modify the use_grackle parameter in SConstruct."
-          command: |
-            # convert boolean parameter to an env var storing 0 or 1
-            USE_GRACKLE=$(( 0 <<# parameters.usegrackle >> + 1 <</ parameters.usegrackle >> ))
-
-            source $BASH_ENV
-            # to help make sure that this doesn't fall through the cracks if
-            # parts of the build system change, check the validity of the default
-            # value of the use_grackle parameter
-            DFLT_GRACKLE_VAL=$(sed -n 's/^use_grackle *= *//p' SConstruct)
-            if [[ "$DFLT_GRACKLE_VAL" != "0" && "$DFLT_GRACKLE_VAL" != "1" ]];
-            then
-                echo "The \"use_grackle\" parameter in SConstruct has an unexpected value"
-                exit 1;
-            fi
-            # now update SConstruct so that "use_grackle" is given the value of $USE_GRACKLE
-            sed -i "s/^use_grackle *=.*/use_grackle = ${USE_GRACKLE}/" SConstruct
+            pip install sphinx sphinx_rtd_theme breathe
 
   build-and-test:
     description: "Compile enzo-e and run tests."
     parameters:
-      prec:
-        type: string
+      usedouble:
+        type: boolean
       tag:
         type: string
         default: tip
@@ -147,9 +116,6 @@ commands:
               git checkout << parameters.tag >>
             fi
 
-      - configure-build-system:
-          usegrackle: << parameters.usegrackle >>
-
       - run:
           name: "Compile enzo-e and run tests."
           command: |
@@ -158,16 +124,22 @@ commands:
 
             # convert boolean parameter to an env var storing 0 or 1
             SKIP_TEST=$(( 0 <<# parameters.skiptest >> + 1 <</ parameters.skiptest >> ))
+            USE_DOUBLE=$(( 0 <<# parameters.usedouble >> + 1 <</ parameters.usedouble >> ))
 
             if [ ! -f << parameters.skipfile >> ]; then
-              export CELLO_PREC=<< parameters.prec >>
-              make
+              cmake -DEnzo-E_CONFIG=linux_gcc -GNinja -DUSE_DOUBLE_PREC=<< parameters.usedouble >> -DUSE_GRACKLE=<< parameters.usegrackle >> -Bbuild -DPARALLEL_LAUNCHER_NPROC_ARG="++local;+p" -DPython3_FIND_VIRTUALENV=ONLY
+              cmake --build build -j 4
               source $HOME/venv/bin/activate
               if [[ $SKIP_TEST != 1 ]]; then
-                 # the following environment variable indicates that the
-                 # parallel VL+CT test(s) are to be skipped
-                 export VL_PARALLEL_TEST_IP_CHARM=0
-                 make test
+                cd build
+                # Run all tests excluding VLCT
+                ctest -E vlct --output-on-failure
+                # Run VLCT tests if using double prec (currently required)
+                if [[ $USE_DOUBLE == 1 ]]; then
+                  ctest -R vlct --output-on-failure
+                fi
+
+                ninja process_test_results
               fi
             fi
 
@@ -184,8 +156,8 @@ commands:
 jobs:
   test-suite:
     parameters:
-      prec:
-        type: string
+      usedouble:
+        type: boolean
       usegrackle:
         type: boolean
       skiptest:
@@ -202,13 +174,13 @@ jobs:
 
       - restore_cache:
           name: "Restore dependencies cache."
-          key: dependencies-v2
+          key: dependencies-v3
 
       - install-dependencies
 
       - save_cache:
           name: "Save dependencies cache"
-          key: dependencies-v2
+          key: dependencies-v3
           paths:
             - ~/local
 
@@ -216,10 +188,10 @@ jobs:
           condition: << parameters.usegrackle >>
           steps:
             - install-grackle:
-                prec: << parameters.prec >>
+                usedouble: << parameters.usedouble >>
 
       - build-and-test:
-          prec: << parameters.prec >>
+          usedouble: << parameters.usedouble >>
           tag: tip
           skipfile: notafile
           usegrackle: << parameters.usegrackle >>
@@ -241,17 +213,17 @@ workflows:
      jobs:
        - test-suite:
            name: test-suite_single-prec
-           prec: single
+           usedouble: false
            usegrackle: true
            skiptest: false
        - test-suite:
            name: test-suite_double-prec
-           prec: double
+           usedouble: true
            usegrackle: true
            skiptest: false
        - docs-build
        - test-suite:
            name: build-no-grackle
-           prec: double
+           usedouble: true
            usegrackle: false
            skiptest: true

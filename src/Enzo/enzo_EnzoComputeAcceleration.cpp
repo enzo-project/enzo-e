@@ -210,11 +210,11 @@ void EnzoComputeAcceleration::compute_(Block * block)
   ParticleDescr * particle_descr = cello::particle_descr();
   Grouping * particle_groups = particle_descr->groups();
 
-  const int num_mass = particle_groups->size("has_mass");
+  const int num_is_grav = particle_groups->size("is_gravitating");
 
-  for (int ipt = 0; ipt < num_mass; ipt++){
+  for (int ipt = 0; ipt < num_is_grav; ipt++){
 
-    std::string particle_type = particle_groups->item("has_mass",ipt);
+    std::string particle_type = particle_groups->item("is_gravitating",ipt);
     const int it = particle.type_index(particle_type);
 
     if (particle.num_particles(it) > 0) {

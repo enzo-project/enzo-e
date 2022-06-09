@@ -47,7 +47,7 @@
       list += ["dark"];
 
       dark {
-          group_list = ["has_mass"];
+          group_list = ["is_gravitating"];
 
 	  attributes = ["x", "default",
                         "y", "default",
@@ -60,7 +60,7 @@
                         "az", "default",
                         "is_local", "default"];
 
-          constants = ["mass", "double", 2e33];
+          constants = ["density", "double", 2e33];
           position = ["x","y","z"];
       }
 		    

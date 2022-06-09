@@ -129,6 +129,33 @@ void compare_against_arr_(CelloArray<double, 2> &arr2d,
 
 //----------------------------------------------------------------------
 
+void compare_against_arr_(CelloArray<double, 1> &arr,
+                          std::vector<double> ref,
+                          std::string func_name,
+                          const char* file, int line){
+
+  int mx = arr.shape(0);
+
+  bool all_match = true;
+
+  for(int ix=0; ix<mx; ix++){
+    int index = ix;
+    bool match = (arr(ix) == ref[index]);
+    if (!match){
+      if (all_match){
+        CkPrintf("\nUnequal Array Element Error in %s:\n",
+                 func_name.c_str());
+      }
+      all_match = false;
+      CkPrintf("Expected %e at (%d). Got: %e\n",
+               ref[index], ix, arr(ix));
+    }
+  }
+  Unit::instance()->assertion(all_match, file, line, true);
+}
+
+//----------------------------------------------------------------------
+
 template<typename Builder>
 void compare_builder_arr_(Builder &builder, std::vector<double> ref,
                           std::string func_name,
@@ -1123,6 +1150,89 @@ public:
 
 //----------------------------------------------------------------------
 
+class SubarrayTests{
+  // Many of the preceeding implicitly checked whether the subarray method
+  // works (assuming that the array's rank remains the same).
+  //
+  // These tests try to reduce the rank of the array
+
+private:
+
+  // an array of 0 should be passed to this function
+  void pass_by_val(CelloArray<double,2> arr,std::string func_name){
+    // sanity check:
+    check_arr_vals(arr, std::vector<double>({ 0, 0, 0,
+                                              0, 0, 0}), func_name.c_str());
+    arr(0,1) = 1;
+    check_arr_vals(arr, std::vector<double>({ 0, 1, 0,
+                                              0, 0, 0}), func_name.c_str());
+  }
+public:
+
+  template<template<typename, std::size_t> class Builder>
+  void test_reduced_rank_subarray_(){
+    Builder<double, 2> builder(2,3);
+    CelloArray<double, 2> *arr_ptr = builder.get_arr();
+
+    double val = 0;
+    for (int iy = 0; iy<2; iy++){
+      for (int ix = 0; ix <3; ix++){
+        (*arr_ptr)(iy,ix) = val;
+        val++;
+      }
+    }
+
+    // sanity check!
+    check_arr_vals(*arr_ptr, std::vector<double>({ 0, 1, 2,
+                                                   3, 4, 5}),
+                   "test_reduced_rank_subarray_");
+
+    CelloArray<double, 1> sub0 = arr_ptr->subarray(0);
+    CelloArray<double, 1> sub1 = arr_ptr->subarray(1);
+
+    check_arr_vals(sub0, std::vector<double>({ 0, 1, 2}),
+                   "test_reduced_rank_subarray_");
+    check_arr_vals(sub1, std::vector<double>({ 3, 4, 5}),
+                   "test_reduced_rank_subarray_");
+
+    sub0(2) = -543;
+    check_arr_vals(sub0, std::vector<double>({ 0, 1, -543}),
+                   "test_reduced_rank_subarray_");
+    check_arr_vals(*arr_ptr, std::vector<double>({ 0, 1, -543,
+                                                   3, 4, 5}),
+                   "test_reduced_rank_subarray_");
+
+    (*arr_ptr)(0,1) = 900;
+    check_arr_vals(sub0, std::vector<double>({ 0, 900, -543}),
+                   "test_reduced_rank_subarray_");
+    check_arr_vals(*arr_ptr, std::vector<double>({ 0, 900, -543,
+                                                   3, 4, 5}),
+                   "test_reduced_rank_subarray_");
+
+    sub1(0) = 543;
+    check_arr_vals(sub1, std::vector<double>({ 543, 4, 5}),
+                   "test_reduced_rank_subarray_");
+    check_arr_vals(*arr_ptr, std::vector<double>({  0, 900, -543,
+                                                  543,   4,    5}),
+                   "test_reduced_rank_subarray_");
+
+    (*arr_ptr)(1,2) = -1;
+    check_arr_vals(sub1, std::vector<double>({ 543, 4, -1}),
+                   "test_reduced_rank_subarray_");
+    check_arr_vals(*arr_ptr, std::vector<double>({  0, 900, -543,
+                                                  543,   4,   -1}),
+                   "test_reduced_rank_subarray_");
+  }
+
+  void run_tests(){
+    test_reduced_rank_subarray_<MemManagedArrayBuilder>();
+    test_reduced_rank_subarray_<PtrWrapArrayBuilder>();
+  }
+
+};
+
+//----------------------------------------------------------------------
+
 PARALLEL_MAIN_BEGIN
 {
   PARALLEL_INIT;
@@ -1154,6 +1264,9 @@ PARALLEL_MAIN_BEGIN
 
   IsAliasTests is_alias_tests;
   is_alias_tests.run_tests();
+
+  SubarrayTests subarray_tests;
+  subarray_tests.run_tests();
 
   unit_finalize();
 

@@ -3,11 +3,10 @@
 # runs VLCT cloud tests that explicitly check whether the implementation of the
 # dual energy formalism appropriately maintain asymmetry.
 
-
+import argparse
 import os.path
 import sys
 import shutil
-import subprocess
 
 import numpy as np
 import yt
@@ -81,9 +80,9 @@ def check_cloud_asym(fname, name, max_asym):
 def analyze_tests():
     r = []
     r += check_cloud_asym('hlld_cloud_0.0625/hlld_cloud_0.0625.block_list',
-                          'hlld_cloud', 5.5e-13)
+                          'hlld_cloud', 7.3e-13)
     r += check_cloud_asym('hllc_cloud_0.0625/hllc_cloud_0.0625.block_list',
-                          'hllc_cloud', 3.8e-13)
+                          'hllc_cloud', 4.6e-13)
     r += check_cloud_asym('hlle_cloud_0.0625/hlle_cloud_0.0625.block_list',
                           'hlle_cloud', 3.2e-13)
     n_passed = np.sum(r)
@@ -99,11 +98,13 @@ def cleanup():
             shutil.rmtree(dir_name)
 
 if __name__ == '__main__':
-    executable = os.environ.get('ENZOE_BIN', 'bin/enzo-e')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--launch_cmd', required=True,type=str)
+    args = parser.parse_args()
 
     with testing_context():
         # run the tests
-        tests_complete = run_tests(executable)
+        tests_complete = run_tests(args.launch_cmd)
 
         # analyze the tests
         tests_passed = analyze_tests()

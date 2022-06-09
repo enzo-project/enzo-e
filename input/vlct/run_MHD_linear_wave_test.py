@@ -12,6 +12,7 @@
 #   2.) Check that the L1-norm error is the same for left propagating and right
 #       propagating fast waves
 
+import argparse
 import os
 import os.path
 import shutil
@@ -181,7 +182,7 @@ def analyze_tests():
     r.append(err_compare(3.005870212811956e-08,  'alfven',  1, 32))
 
     r.append(err_compare(2.2373810027584788e-07, 'slow',    1, 16))
-    r.append(err_compare(4.437025228314115e-08, 'slow',    1, 32))
+    r.append(err_compare(4.437026706327692e-08,  'slow',    1, 32))
 
     r.append(err_compare(1.0021263485338544e-07, 'entropy', 1, 16))
     r.append(err_compare(2.9194839706868883e-08,  'entropy', 1, 32))
@@ -228,13 +229,14 @@ def cleanup():
             shutil.rmtree(dir_name)
 
 if __name__ == '__main__':
-
-    executable = os.environ.get('ENZOE_BIN', 'bin/enzo-e')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--launch_cmd', required=True,type=str)
+    args = parser.parse_args()
 
     with testing_context():
 
         # run the tests
-        tests_complete = run_tests(executable)
+        tests_complete = run_tests(args.launch_cmd)
 
         # analyze the tests
         tests_passed = analyze_tests()

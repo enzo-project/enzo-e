@@ -174,7 +174,6 @@ extern "C" {
 
 #include "enzo_IoEnzoBlock.hpp"
 
-#include "enzo_EnzoFieldArrayFactory.hpp"
 #include "enzo_EnzoEFltArrayMap.hpp"
 #include "enzo_EnzoPermutedCoordinates.hpp"
 #include "enzo_EnzoCenteredFieldRegistry.hpp"
@@ -201,7 +200,7 @@ extern "C" {
 #include "enzo_EnzoInitialTurbulence.hpp"
 #include "enzo_EnzoInitialIsolatedGalaxy.hpp"
 #include "enzo_EnzoInitialBurkertBodenheimer.hpp"
-#include "enzo_EnzoInitialMergeStarsTest.hpp"
+#include "enzo_EnzoInitialMergeSinksTest.hpp"
 
 #include "enzo_EnzoRefineShock.hpp"
 #include "enzo_EnzoRefineParticleMass.hpp"
@@ -215,16 +214,15 @@ extern "C" {
 #include "enzo_EnzoReconstructor.hpp"
 #include "enzo_EnzoReconstructorNN.hpp"
 #include "enzo_EnzoReconstructorPLM.hpp"
-#include "enzo_EnzoRiemann.hpp"
-#include "enzo_EnzoRiemannLUT.hpp"
-#include "enzo_EnzoRiemannUtils.hpp"
-#include "enzo_EnzoRiemannImpl.hpp"
-#include "enzo_EnzoRiemannHLL.hpp"
-#include "enzo_EnzoRiemannHLLC.hpp"
-#include "enzo_EnzoRiemannHLLD.hpp"
 #include "enzo_EnzoBfieldMethod.hpp"
 #include "enzo_EnzoBfieldMethodCT.hpp"
 #include "enzo_EnzoSourceInternalEnergy.hpp"
+
+// public header for the EnzoRiemann sub-library. This needs to be included
+// after the headers for:
+//     EnzoEFltArrayMap, EnzoCenteredFieldRegistry, & EnzoEquationOfState
+// but before the header for EnzoMethodMHDVlct
+#include "EnzoRiemann.hpp"
 
 #include "enzo_EnzoMethodComovingExpansion.hpp"
 #include "enzo_EnzoMethodCosmology.hpp"
@@ -242,7 +240,7 @@ extern "C" {
 #include "enzo_EnzoMethodStarMaker.hpp"
 #include "enzo_EnzoMethodStarMakerStochasticSF.hpp"
 #include "enzo_EnzoMethodMHDVlct.hpp"
-#include "enzo_EnzoMethodMergeStars.hpp"
+#include "enzo_EnzoMethodMergeSinks.hpp"
 
 #include "enzo_EnzoMatrixDiagonal.hpp"
 #include "enzo_EnzoMatrixIdentity.hpp"
