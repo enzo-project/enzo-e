@@ -33,30 +33,6 @@ class EnzoEFltArrayMap {
   /// @ingroup Enzo
   /// @brief [\ref Enzo] Stores instances of EFlt3DArray
 
-public:
-
-  // the following encapsulates the functionallity necessary for storing the
-  // EFlt3DArray in a buffer whose lifetime is managed by a shared pointer
-  // (this functionallity is separated into its own class to minimize conflicts
-  // with an existing PR)
-  template<typename T>
-  struct SharedBuffer_{
-
-    SharedBuffer_() = default;
-    SharedBuffer_(std::size_t len) noexcept
-      : arr_(std::shared_ptr<T>(new T[len](), std::default_delete<T[]>())),
-        length_(len)
-    { }
-
-    const T& operator[](std::size_t i) const noexcept { return arr_.get()[i]; }
-    T& operator[](std::size_t i) noexcept { return arr_.get()[i]; }
-    std::size_t size() const noexcept {return length_;}
-
-  private:
-    std::shared_ptr<T> arr_;
-    std::size_t length_;
-  };
-
 public: // interface
 
   EnzoEFltArrayMap(std::string name)

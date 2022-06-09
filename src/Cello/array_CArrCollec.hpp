@@ -9,6 +9,8 @@
 
 #include <array>
 #include <limits>
+#include <memory> // std::shared_ptr, std::default_delete
+#include <utility> // std::swap
 #include <vector>
 
 #ifndef ARRAY_C_ARR_COLLEC_HPP
@@ -50,16 +52,48 @@ namespace detail {
 //----------------------------------------------------------------------
 
   template<typename T>
-  class VecBackedCArrCollec_{
-    /// equivalent to an array of pointers
+  struct SharedBuffer_{
+
+    SharedBuffer_() = default;
+
+    SharedBuffer_(const std::vector<T> &v) noexcept
+      : arr_(std::shared_ptr<T>(new T[v.size()](), std::default_delete<T[]>())),
+        length_(v.size())
+    { for (std::size_t i = 0; i < length_; i++) { arr_.get()[i] = v[i]; } }
+
+    const T& operator[](std::size_t i) const noexcept { return arr_.get()[i]; }
+    T& operator[](std::size_t i) noexcept { return arr_.get()[i]; }
+    std::size_t size() const noexcept {return length_;}
+
+    void swap(SharedBuffer_<T>& other) noexcept
+    {
+      this->arr_.swap(other.arr_);
+      std::swap(this->length_, other.length_);
+    }
+
+  private:
+    std::shared_ptr<T> arr_;
+    std::size_t length_;
+  };
+
+//----------------------------------------------------------------------
+
+  template<typename T>
+  class ArrOfPtrsCArrCollec_{
+    /// equivalent to an array of pointers (where each pointer is a CelloArray)
+    /// - we track the arrays lifetime with a std::shared_ptr to makes copies
+    ///   cheaper. The disadvantage to this should be minimal since we don't
+    ///   allow the "array" to be directly mutated after construction (note:
+    ///   the "pointers" can't be mutated but the elements at the "pointer"
+    ///   addresses can be mutated)
 
   public:
 
-    VecBackedCArrCollec_() = default;
+    ArrOfPtrsCArrCollec_() = default;
 
-    VecBackedCArrCollec_(const std::vector<CelloArray<T,3>> &arrays) noexcept
+    ArrOfPtrsCArrCollec_(const std::vector<CelloArray<T,3>> &arrays) noexcept
       : arrays_(arrays)
-    { confirm_shared_shape_("VecBackedCArrCollec_",arrays); }
+    { confirm_shared_shape_("ArrOfPtrsCArrCollec_", arrays); }
 
     const CelloArray<T,3> operator[](std::size_t index) const noexcept
     { return arrays_[index]; }
@@ -69,16 +103,16 @@ namespace detail {
     constexpr bool contiguous_items() const {return false;}
 
     const CelloArray<T, 4> get_backing_array() const noexcept{
-      ERROR("VecBackedCArrCollec__::get_backing_array",
+      ERROR("ArrOfPtrsCArrCollec_::get_backing_array",
             "This is an invalid method call");
     }
 
-    friend void swap(VecBackedCArrCollec_<T>& a, VecBackedCArrCollec_<T>& b)
+    friend void swap(ArrOfPtrsCArrCollec_<T>& a, ArrOfPtrsCArrCollec_<T>& b)
       noexcept { a.arrays_.swap(b.arrays_); }
 
     // There might be some benefit to not directly constructing subarrays and
     // lazily evaluating them later
-    VecBackedCArrCollec_<T> subarray_collec(const CSlice &slc_z,
+    ArrOfPtrsCArrCollec_<T> subarray_collec(const CSlice &slc_z,
                                             const CSlice &slc_y,
                                             const CSlice &slc_x) const noexcept
     {
@@ -86,12 +120,12 @@ namespace detail {
       for (std::size_t i = 0; i < arrays_.size(); i++){
         temp.push_back(arrays_[i].subarray(slc_z, slc_y, slc_x));
       }
-      return VecBackedCArrCollec_<T>(temp);
+      return ArrOfPtrsCArrCollec_<T>(temp);
     }
 
   private:
     // ordered list of arrays
-    std::vector<CelloArray<T,3>> arrays_;
+    SharedBuffer_<CelloArray<T,3>> arrays_;
   };
 
 //----------------------------------------------------------------------
@@ -153,24 +187,24 @@ class CArrCollec{
   ///
   /// This is a hybrid data-type that abstracts 2 separate implementations for
   /// collections of CelloArrays. Under the hood, the arrays are either stored
-  /// in a single 4D Contiguous Array (see SingleAddressCArrCollec_) or a
-  /// vector of 3D arrays (see VecBackedCArrCollec_)
+  /// in a single 4D Contiguous Array (see SingleAddressCArrCollec_) or an
+  /// array of 3D CelloArrays (see ArrOfPtrsCArrCollec_)
   ///
   /// The implementation of this hybrid data-structure is fairly crude. If we
   /// decide that we want to support this hybrid data-type in the long-term,
   /// we probably want to consider using boost::variant/a backport of
   /// std::variant or take advantage of the fact that we can represent the
-  /// contents of a SingleAddressCArrCollec_ with a VecBackedCArrCollec_
+  /// contents of a SingleAddressCArrCollec_ with a ArrOfPtrsCArrCollec_
 
 private:
   // tags how the arrays are stored (whether they're stored in a single
-  // contiguous CelloArray or a vector of CelloArrays)
-  enum class Tag {CONTIG, VEC};
+  // contiguous CelloArray or stored like an array of pointers)
+  enum class Tag {CONTIG, ARR_OF_PTR};
   Tag tag_;
 
   union{
     detail::SingleAddressCArrCollec_<T> single_arr_;
-    detail::VecBackedCArrCollec_<T> vec_of_arr_;
+    detail::ArrOfPtrsCArrCollec_<T> arr_of_ptr_;
   };
 
 private: // helper methods:
@@ -180,10 +214,15 @@ private: // helper methods:
     if (currently_initialized) { dealloc_active_member_(); }
     tag_ = tag;
 
-    using namespace detail;
     switch (tag_){
-      case Tag::CONTIG: {new(&single_arr_) SingleAddressCArrCollec_<T>; break; }
-      case Tag::VEC:    {new(&vec_of_arr_) VecBackedCArrCollec_<T>;     break; }
+      case Tag::CONTIG: {
+        new(&single_arr_) detail::SingleAddressCArrCollec_<T>;
+        break;
+      }
+      case Tag::ARR_OF_PTR: {
+        new(&arr_of_ptr_) detail::ArrOfPtrsCArrCollec_<T>;
+        break;
+      }
     }
   }
 
@@ -191,8 +230,8 @@ private: // helper methods:
   // need to explicitly call destructor because we use placement new
   void dealloc_active_member_() noexcept{
     switch (tag_){
-      case Tag::CONTIG: { single_arr_.~SingleAddressCArrCollec_(); break; }
-      case Tag::VEC:    { vec_of_arr_.~VecBackedCArrCollec_(); break; }
+      case Tag::CONTIG:     { single_arr_.~SingleAddressCArrCollec_(); break; }
+      case Tag::ARR_OF_PTR: { arr_of_ptr_.~ArrOfPtrsCArrCollec_(); break; }
     }
   }
 
@@ -208,16 +247,16 @@ public: /// public interface
 
   /// construct from vector of arrays
   CArrCollec(const std::vector<CelloArray<T, 3>>& v) noexcept{
-    activate_member_(Tag::VEC, false);
-    vec_of_arr_ = detail::VecBackedCArrCollec_<T>(v);
+    activate_member_(Tag::ARR_OF_PTR, false);
+    arr_of_ptr_ = detail::ArrOfPtrsCArrCollec_<T>(v);
   }
 
   /// copy constructor
   CArrCollec(const CArrCollec& other) noexcept{
     activate_member_(other.tag_, false);
     switch (other.tag_){
-      case Tag::CONTIG: { single_arr_ = other.single_arr_; break; }
-      case Tag::VEC:    { vec_of_arr_ = other.vec_of_arr_; break; }
+      case Tag::CONTIG:     { single_arr_ = other.single_arr_; break; }
+      case Tag::ARR_OF_PTR: { arr_of_ptr_ = other.arr_of_ptr_; break; }
     }
   }
 
@@ -245,14 +284,14 @@ public: /// public interface
     if (&a == &b) { return; }
     if (a.tag_ == b.tag_){
       switch (a.tag_){
-        case Tag::CONTIG: { swap(a.single_arr_, b.single_arr_); break; }
-        case Tag::VEC:    { swap(a.vec_of_arr_, b.vec_of_arr_); break; }
+        case Tag::CONTIG:     { swap(a.single_arr_, b.single_arr_); break; }
+        case Tag::ARR_OF_PTR: { swap(a.arr_of_ptr_, b.arr_of_ptr_); break; }
       }
     } else if (a.tag_ == Tag::CONTIG){
       detail::SingleAddressCArrCollec_<T> temp_single_arr;
       swap(temp_single_arr, a.single_arr_);
-      a.activate_member_(Tag::VEC, true);
-      swap(a.vec_of_arr_, b.vec_of_arr_);
+      a.activate_member_(Tag::ARR_OF_PTR, true);
+      swap(a.arr_of_ptr_, b.arr_of_ptr_);
       b.activate_member_(Tag::CONTIG, true);
       swap(temp_single_arr, b.single_arr_);
     } else {
@@ -263,8 +302,8 @@ public: /// public interface
   /// Returns the number of arrays held in the collection
   std::size_t size() const noexcept {
     switch (tag_){
-      case Tag::CONTIG: { return single_arr_.size(); }
-      case Tag::VEC:    { return vec_of_arr_.size(); }
+      case Tag::CONTIG:     { return single_arr_.size(); }
+      case Tag::ARR_OF_PTR: { return arr_of_ptr_.size(); }
     }
     ERROR("CArrCollec::size", "problem with exhaustive switch-statement");
   }
@@ -276,8 +315,8 @@ public: /// public interface
             "Can't retrieve value at %zu when size() is %zu",
             i, n_elements, i < n_elements);
     switch (tag_){
-      case Tag::CONTIG: { return single_arr_[i]; }
-      case Tag::VEC:    { return vec_of_arr_[i]; }
+      case Tag::CONTIG:     { return single_arr_[i]; }
+      case Tag::ARR_OF_PTR: { return arr_of_ptr_[i]; }
     }
     ERROR("CArrCollec::operator[]", "problem with exhaustive switch-statement");
   }
@@ -286,8 +325,8 @@ public: /// public interface
   /// (Alternatively they can be stored as an array of pointers)
   bool contiguous_items() const noexcept {
     switch (tag_){
-      case Tag::CONTIG: { return single_arr_.contiguous_items(); }
-      case Tag::VEC:    { return vec_of_arr_.contiguous_items(); }
+      case Tag::CONTIG:     { return single_arr_.contiguous_items(); }
+      case Tag::ARR_OF_PTR: { return arr_of_ptr_.contiguous_items(); }
     }
     ERROR("CArrCollec::contiguous_items",
           "problem with exhaustive switch-statement");
@@ -303,8 +342,8 @@ public: /// public interface
   /// the `contiguous_items()` method returns `false`.
   const CelloArray<T,4> get_backing_array() const noexcept {
     switch (tag_){
-      case Tag::CONTIG: { return single_arr_.get_backing_array(); }
-      case Tag::VEC:    { return vec_of_arr_.get_backing_array(); }
+      case Tag::CONTIG:     { return single_arr_.get_backing_array(); }
+      case Tag::ARR_OF_PTR: { return arr_of_ptr_.get_backing_array(); }
     }
     ERROR("CArrCollec::get_backing_array",
           "problem with exhaustive switch-statement");
@@ -346,8 +385,8 @@ public: /// public interface
         out.single_arr_ = single_arr_.subarray_collec(slc_z,slc_y,slc_x);
         return out;
       }
-      case Tag::VEC:    {
-        out.vec_of_arr_ = vec_of_arr_.subarray_collec(slc_z,slc_y,slc_x);
+      case Tag::ARR_OF_PTR: {
+        out.arr_of_ptr_ = arr_of_ptr_.subarray_collec(slc_z,slc_y,slc_x);
         return out;
       }
     }
