@@ -178,6 +178,12 @@ public: // interface
       initial_grackle_test_minimum_metallicity(1.0E-4),
       initial_grackle_test_minimum_temperature(10.0),
       initial_grackle_test_reset_energies(0),
+      //EnzoInitialOneZoneFreefallTest
+      initial_one_zone_freefall_test_density(1.0),
+      initial_one_zone_freefall_test_minimum_energy(10.0),
+      initial_one_zone_freefall_test_maximum_energy(1000.0),
+      initial_one_zone_freefall_test_minimum_metallicity(1e-6),
+      initial_one_zone_freefall_test_maximum_metallicity(1e-2),
 #endif /* CONFIG_USE_GRACKLE */
       // EnzoInitialFeedbackTest
       initial_feedback_test_density(),
@@ -429,6 +435,7 @@ protected: // methods
   void read_initial_collapse_(Parameters *);
   void read_initial_cosmology_(Parameters *);
   void read_initial_grackle_(Parameters *);
+  void read_initial_one_zone_freefall_(Parameters *);
   void read_initial_hdf5_(Parameters *);
   void read_initial_music_(Parameters *);
   void read_initial_pm_(Parameters *);
@@ -551,6 +558,13 @@ public: // attributes
   double                     initial_grackle_test_minimum_metallicity;
   double                     initial_grackle_test_minimum_temperature;
   int                        initial_grackle_test_reset_energies;
+
+  // EnzoInitialOneZoneCollapseTest
+  double                     initial_one_zone_freefall_test_density;
+  double                     initial_one_zone_freefall_test_minimum_energy;
+  double                     initial_one_zone_freefall_test_maximum_energy;
+  double                     initial_one_zone_freefall_test_minimum_metallicity;
+  double                     initial_one_zone_freefall_test_maximum_metallicity;
 #endif /* CONFIG_USE_GRACKLE */
 
   /// EnzoInitialHdf5

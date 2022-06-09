@@ -144,6 +144,8 @@ Initial * EnzoProblem::create_initial_
 #ifdef CONFIG_USE_GRACKLE
   } else if (type == "grackle_test") {
     initial = new EnzoInitialGrackleTest(enzo_config);
+  } else if (type == "one_zone_freefall_test") {
+    initial = new EnzoInitialGrackleTest(enzo_config);
 #endif /* CONFIG_USE_GRACKLE */
   } else if (type == "feedback_test") {
     initial = new EnzoInitialFeedbackTest(enzo_config);

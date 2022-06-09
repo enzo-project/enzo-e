@@ -85,6 +85,12 @@ EnzoConfig::EnzoConfig() throw ()
   initial_grackle_test_minimum_metallicity(1.0E-4),
   initial_grackle_test_minimum_temperature(10.0),
   initial_grackle_test_reset_energies(0),
+  //EnzoInitialOneZoneFreefallTest
+  initial_one_zone_freefall_test_density(1.0),
+  initial_one_zone_freefall_test_minimum_energy(10.0),
+  initial_one_zone_freefall_test_maximum_energy(1000.0),
+  initial_one_zone_freefall_test_minimum_metallicity(1e-6),
+  initial_one_zone_freefall_test_maximum_metallicity(1e-2),
 #endif /* CONFIG_USE_GRACKLE */
   // EnzoInitialHdf5
   initial_hdf5_max_level(),
@@ -405,6 +411,12 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_grackle_test_minimum_metallicity;
   p | initial_grackle_test_maximum_metallicity;
   p | initial_grackle_test_reset_energies;
+
+  p | initial_one_zone_freefall_test_density;
+  p | initial_one_zone_freefall_test_minimum_energy;
+  p | initial_one_zone_freefall_test_maximum_energy;
+  p | initial_one_zone_freefall_test_minimum_metallicity;
+  p | initial_one_zone_freefall_test_maximum_metallicity;
 #endif /* CONFIG_USE_GRACKLE */
 
   p | initial_inclinedwave_alpha;
@@ -660,6 +672,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_collapse_(p);
   read_initial_cosmology_(p);
   read_initial_grackle_(p);
+  read_initial_one_zone_freefall_(p);
   read_initial_hdf5_(p);
   read_initial_music_(p);
   read_initial_pm_(p);
@@ -779,6 +792,23 @@ void EnzoConfig::read_initial_grackle_(Parameters * p)
     p->value_float("Initial:grackle_test:maximum_metallicity", 1.0);
   initial_grackle_test_reset_energies =
     p->value_integer("Initial:grackle_test:reset_energies",0);
+#endif /* CONFIG_USE_GRACKLE */
+}
+
+//----------------------------------------------------------------------
+void EnzoConfig::read_initial_one_zone_freefall_(Parameters * p)
+{
+#ifdef CONFIG_USE_GRACKLE
+  initial_one_zone_freefall_test_density = 
+    p->value_float("Initial:one_zone_freefall_test:density", 1.0);
+  initial_one_zone_freefall_test_minimum_energy = 
+    p->value_float("Initial:one_zone_freefall_test:minimum_energy", 10.0);
+  initial_one_zone_freefall_test_maximum_energy = 
+    p->value_float("Initial:one_zone_freefall_test:maximum_energy", 10.0);
+  initial_one_zone_freefall_test_minimum_metallicity = 
+    p->value_float("Initial:one_zone_freefall_test:minimum_metallicity", 1e-6);
+  initial_one_zone_freefall_test_maximum_metallicity = 
+    p->value_float("Initial:one_zone_freefall_test:maximum_metallicity", 1e-6);
 #endif /* CONFIG_USE_GRACKLE */
 }
 

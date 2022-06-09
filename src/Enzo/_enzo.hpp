@@ -187,6 +187,7 @@ extern "C" {
 #include "enzo_EnzoInitialCosmology.hpp"
 #include "enzo_EnzoInitialFeedbackTest.hpp"
 #include "enzo_EnzoInitialGrackleTest.hpp"
+#include "enzo_EnzoInitialOneZoneFreefallTest.hpp"
 #include "enzo_EnzoInitialHdf5.hpp"
 #include "enzo_EnzoInitialImplosion2.hpp"
 #include "enzo_EnzoInitialInclinedWave.hpp"

@@ -155,6 +155,7 @@ setup_test_parallel(PPM-8 MethodPPM/Ppm-8  input/PPM/method_ppm-8.in)
 
 # GRACKLE
 setup_test_serial(CoolingTest_Grackle Grackle/CoolingTest input/Grackle/cooling_test_grackle.in)
+#setup_test_serial(OneZoneFreefallTest_Grackle Grackle/OneZoneCollapseTest input/Grackle/one_zone_freefall_test.in)
 
 if (USE_PYTHON_BASED_TESTS)
   # VLCT

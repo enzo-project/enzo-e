@@ -236,7 +236,6 @@ void EnzoInitialGrackleTest::enforce_block
                                  );
   }
 
-  grackle_method->delete_grackle_fields(&grackle_fields_);
 
 
   block->initial_done();
