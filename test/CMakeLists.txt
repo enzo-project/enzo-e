@@ -152,6 +152,7 @@ setup_test_parallel(Performance-Initial-PNG  Performance/InitialPng   input/Hell
 # PPM
 setup_test_serial(PPM-1 MethodPPM/Ppm-1  input/PPM/method_ppm-1.in)
 setup_test_parallel(PPM-8 MethodPPM/Ppm-8  input/PPM/method_ppm-8.in)
+setup_test_serial(PPM-1_color MethodPPM/Ppm-1_color  input/PPM/method_ppm-1_color.in)
 
 # GRACKLE
 setup_test_serial(CoolingTest_Grackle Grackle/CoolingTest input/Grackle/cooling_test_grackle.in)
