@@ -21,10 +21,9 @@ public:
 
   // Constructor
   EnzoMethodSinkMaker
-  (double min_control_volume_cells,
-   double max_control_volume_cells,
-   double jeans_length_resolution_cells,
+  (double jeans_length_resolution_cells,
    double density_threshold,
+   bool   check_density_maximum,
    double max_mass_fraction,
    double min_sink_mass_solar);
 
@@ -64,12 +63,11 @@ protected: // methods
 
   // Returns true if the local Jeans length is not sufficiently resolved, i.e., if it is less than
   // jeans_length_resolution_cells_ multiplied by the maximum cell width.
-  // Sets jeans_length equal to the local Jeans length.
   // `const_G` is the value of the gravitational constant in code units.
-  // `i` is the 1D index of the cell
+  // `i` is the 1D index of the cell.
+  // Returns false otherwise.
   bool jeans_length_not_resolved_(Block * block, int i,
-				  double const_G,
-				  enzo_float* jeans_length) throw();
+				  double const_G) throw();
 
   // Returns true if the flow around the cell (with 3D indices `ix`, `iy`, `iz`) is converging
   // in all directions, and returns false otherwise.
@@ -78,27 +76,20 @@ protected: // methods
   // a_{ij} = 0.5*(dv_i/dx_j + dv_j/dx_i), then first checking its trace is negative
   // (i.e. the velocity divergence is negative), then if this is satisfied we check
   // if all the eigenvalues are negative.
+  // Returns false otherwise.
   bool flow_is_converging_(Block * block, int ix, int iy, int iz) throw();
 
   // Returns true if the density in the given cell (with 3D indices
-  // `ix`, `iy`, `iz`) is the maximum density within a spherical "control volume", and false
-  // otherwise.
-  // The radius of the control volume is the Jeans length, but bounded below by
-  // min_control_volume_radius_cells_ times the maximum cell width, and bounded above by
-  // max_control_volume_radius_cells_ times the minimum cell width.
-  bool density_is_local_maximum_(Block * block, enzo_float jeans_length,
+  // `ix`, `iy`, `iz`) is a local maximum, i.e. it is larger than the densities in all
+  // 26 neighboring cells.
+  // Returns false otherwise.
+  bool density_is_local_maximum_(Block * block,
 				 int ix, int iy, int iz) throw();
 
   /// Does various checks which need to be done at the first compute cycle
   void do_checks_(Block* block) throw();
 
 protected: // attributes
-
-  // The minimum radius of the control volume is this value multiplied by the maximum cell width
-  double min_control_volume_cells_;
-
-  // The maximum radius of the control volume is this value multiplied by the minimum cell width
-  double max_control_volume_cells_;
 
   // If the local Jeans length in a cell is less than this quantity multiplied by the maximum
   // cell width, then the cell is a candidate for forming a sink.
@@ -107,6 +98,10 @@ protected: // attributes
   // Density in a cell must be greater than density_threshold_ to be able to form a sink.
   // The density in a cell after sink formation will be no less than density_threshold_.
   double density_threshold_;
+
+  // Determines whether or not the "local density maximum" check is performed when deciding if
+  // a cell forms a sink particle.
+  bool check_density_maximum_;
 
   // Mass of newly-formed sink is bounded above by max_mass_fraction_ multiplied by the cell
   // density multiplied by the cell volume.

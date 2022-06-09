@@ -12,17 +12,15 @@
 //-------------------------------------------------------------------
 
 EnzoMethodSinkMaker::EnzoMethodSinkMaker
-(double min_control_volume_cells,
- double max_control_volume_cells,
- double jeans_length_resolution_cells,
+(double jeans_length_resolution_cells,
  double density_threshold,
+ bool   check_density_maximum,
  double max_mass_fraction,
  double min_sink_mass_solar)
   : Method(),
-    min_control_volume_cells_(min_control_volume_cells),
-    max_control_volume_cells_(max_control_volume_cells),
     jeans_length_resolution_cells_(jeans_length_resolution_cells),
     density_threshold_(density_threshold),
+    check_density_maximum_(check_density_maximum),
     max_mass_fraction_(max_mass_fraction),
     min_sink_mass_solar_(min_sink_mass_solar)
 {
@@ -39,26 +37,10 @@ EnzoMethodSinkMaker::EnzoMethodSinkMaker
 	 "length refinement condition.",
 	 enzo::config()->mesh_max_level == 0);
 
-  // Check that min_control_volume_cells_ is larger than 1 and
-  // max_control_volume_cells_ is less than the minimum ghost depth.
-  const int * ghost_depth = enzo::config()->field_ghost_depth;
-  const int min_ghost_depth = std::min(ghost_depth[0],
-				       std::min(ghost_depth[1],ghost_depth[2]));
-
-  ASSERT("EnzoMethodSinkMaker::EnzoMethodSinkMaker()",
-	 "Method:sink_maker:min_control_volume_cells must be at least 1.",
-	 (min_control_volume_cells_ >= 1));
-
-  ASSERT("EnzoMethodSinkMaker::EnzoMethodSinkMaker()",
-	 "Method:sink_maker:max_control_volume_cells must be no greater than the "
-	 "minimum ghost depth (4 by default).",
-	 (max_control_volume_cells_ <= min_ghost_depth));
-
   // Check the max_mass_fraction is between 0 and 1.
   ASSERT("EnzoMethodSinkMaker::EnzoMethodSinkMaker()",
 	 "Method:sink_maker:max_mass_fraction must be between 0 and 1 inclusive.",
 	  max_mass_fraction_ >= 0.0 && max_mass_fraction_ <= 1.0);
-
 
   // Check that the minimum sink mass is non-negative
   ASSERT("EnzoMethodSinkMaker::EnzoMethodSinkMaker()",
@@ -87,10 +69,11 @@ void EnzoMethodSinkMaker::pup (PUP::er &p)
   TRACEPUP;
 
   Method::pup(p);
-
-  p | min_control_volume_cells_;
-  p | max_control_volume_cells_;
   p | jeans_length_resolution_cells_;
+  p | min_sink_mass_solar_;
+  p | density_threshold_;
+  p | check_density_maximum_;
+  p | max_mass_fraction_;
   p | min_sink_mass_solar_;
 
   return;
@@ -217,14 +200,13 @@ void EnzoMethodSinkMaker::compute_ ( Block *block) throw()
 	if (sink_mass < minimum_sink_mass) continue;
 
 	// Check whether Jeans length is resolved.
-	enzo_float jeans_length;
-	if (!jeans_length_not_resolved_(block, cell_index, const_G, &jeans_length)) continue;
+	if (!jeans_length_not_resolved_(block, cell_index, const_G)) continue;
 
 	// Check whether flow is converging
 	if (!flow_is_converging_(block, ix, iy, iz)) continue;
 
-	// Check if this cell's density is the maximum density within the control volume
-	if (!density_is_local_maximum_(block,jeans_length,ix,iy,iz)) continue;
+	// If check_density_maximum_ is true, check if this cell's density is a local maximum
+	if (check_density_maximum_ && !density_is_local_maximum_(block,ix,iy,iz)) continue;
 
 	// If we are here, this cell satisfies all the conditions for forming a sink particle.
 
@@ -315,8 +297,7 @@ double EnzoMethodSinkMaker::timestep ( Block *block) const throw()
 //-------------------------------------------------------------------------------------------
 
 bool EnzoMethodSinkMaker::jeans_length_not_resolved_(Block * block, int i,
-						     double const_G,
-						     enzo_float* jeans_length) throw()
+						     double const_G) throw()
 {
   Field field = block->data()->field();
 
@@ -364,14 +345,14 @@ bool EnzoMethodSinkMaker::jeans_length_not_resolved_(Block * block, int i,
   const double c_s_2 =  gamma * (gamma - 1.0) * specific_ie_cell;
 
   // Now compute the Jeans length
-  *jeans_length = sqrt(cello::pi * c_s_2 / (const_G * density[i]));
+  const enzo_float jeans_length = sqrt(cello::pi * c_s_2 / (const_G * density[i]));
 
   // Get the maximum cell width
   double hx, hy, hz;
   block->cell_width(&hx, &hy, &hz);
   const double max_cell_width = std::max(hx,std::max(hy,hz));
 
-  return (*jeans_length < jeans_length_resolution_cells_ * max_cell_width);
+  return (jeans_length < jeans_length_resolution_cells_ * max_cell_width);
 }
 
 //-----------------------------------------------------------------------------------------
@@ -386,6 +367,14 @@ bool EnzoMethodSinkMaker::flow_is_converging_(Block * block,
   field.dimensions(0, &mx, &my, &mz);
   double hx, hy, hz;
   block->cell_width(&hx, &hy, &hz);
+  double xm, ym, zm;
+  block->lower(&xm,&ym,&zm);
+
+  bool print_cell_info =
+    (xm == 0.0) && (ym == 0.0) && (zm == 0.0) &&
+    (ix > 8) && (ix < 16) &&
+    (iy > 8) && (iy < 16) &&
+    (iz > 8) && (iz < 16);
 
   // Get pointers to velocity fields
   enzo_float * vx           = (enzo_float *) field.values("velocity_x");
@@ -454,35 +443,16 @@ bool EnzoMethodSinkMaker::flow_is_converging_(Block * block,
 
 //---------------------------------------------------------------------------------------
 
-bool EnzoMethodSinkMaker::density_is_local_maximum_(Block * block, enzo_float jeans_length,
+bool EnzoMethodSinkMaker::density_is_local_maximum_(Block * block,
 						    int ix, int iy, int iz) throw()
 {
 
-  // Get field data
+  // Get field dimensions
   Field field = block->data()->field();
   int mx, my, mz;
   field.dimensions (0, &mx, &my, &mz);
-  double hx, hy, hz;
-  block->cell_width(&hx, &hy, &hz);
   int gx,gy,gz;
   field.ghost_depth (0, &gx, &gy, &gz);
-
-  // Get maximum and minimum cell widths
-  const double min_cell_width = std::min(hx,std::min(hy,hz));
-  const double max_cell_width = std::max(hx,std::max(hy,hz));
-
-  // Compute the control volume radius
-  const double control_volume_radius =
-    std::min(max_control_volume_cells_* min_cell_width,
-	     std::max(jeans_length, min_control_volume_cells_ * max_cell_width));
-
-  // Get the "bounding indices" of the region containing the control volume
-  const int min_ind_x =  ceil(ix - control_volume_radius / hx);
-  const int min_ind_y =  ceil(iy - control_volume_radius / hy);
-  const int min_ind_z =  ceil(iz - control_volume_radius / hz);
-  const int max_ind_x = floor(ix + control_volume_radius / hx);
-  const int max_ind_y = floor(iy + control_volume_radius / hy);
-  const int max_ind_z = floor(iz + control_volume_radius / hz);
 
   // Index of the central cell
   const int central_cell_index = INDEX(ix,iy,iz,mx,my);
@@ -490,29 +460,20 @@ bool EnzoMethodSinkMaker::density_is_local_maximum_(Block * block, enzo_float je
   // Get pointer to density field
   enzo_float * density = (enzo_float *) field.values("density");
 
-  // Loop over cells contained within the "bounding indices".
-  // For each cell, check if it is within the control volume radius. If so, check if
-  // the density is greater than the density of the central cell.
-  // If it is, return false
-  for (int jz = min_ind_z; jz <= max_ind_z; jz++){
-    for (int jy = min_ind_y; jy <= max_ind_y; jy++){
-      for (int jx = min_ind_x; jx <= max_ind_x; jx++){
+  // Loop over neighboring cells.
+  // If any of them have a density larger than the central cell, return false
+  for (int jz = iz - 1; jz <= iz + 1; jz++){
+    for (int jy = iy - 1; jy <= iy + 1; jy++){
+      for (int jx = ix - 1; jx <= ix + 1; jx++){
 
 	const int j = INDEX(jx,jy,jz,mx,my);
 
-	const double distance2 =
-	  hx * hx * (jx - ix) * (jx - ix) +
-	  hy * hy * (jy - iy) * (jy - iy) +
-	  hz * hz * (jz - iz) * (jz - iz);
-
-	if ((distance2 <= control_volume_radius * control_volume_radius)
-	    && (density[j] > density[central_cell_index])) return false;
+	if (density[j] > density[central_cell_index])  return false;
       }
     }
   }
 
-  // If we get here then this cell must have largest density within the control volume,
-  // so return true.
+  // If we get here then this cell must be a local maximum.
   return true;
 
 }
@@ -562,32 +523,6 @@ void EnzoMethodSinkMaker::do_checks_(Block *block) throw()
 	 "Density threshold must be at least as large as the density "
 	 "floor set by the hydro method",
 	 density_threshold_ >= density_floor);
-
-  // The minimum control volume radius is min_control_volume_cells_ times the maximum
-  // cell width. The maximum control volume radius is max_control_volume_cells_ times
-  // the minimum cell width. To ensure that the maximum control volume radius is
-  // greater than or equal to the minimum control volume radius, we check that the ratio of the
-  // maximum cell width to the minimum cell width is less than or equal to the ratio of
-  // max_control_volume_cells_ to min_control_volume_cells_.
-  // Note that the ratio of max cell width to min cell width is the same at all
-  // refinement levels.
-
-  // Get the cell widths
-  double hx, hy, hz;
-  block->cell_width(&hx, &hy, &hz);
-  const double min_cell_width = std::min(hx,std::min(hy,hz));
-  const double max_cell_width = std::max(hx,std::max(hy,hz));
-
-  const double cell_width_ratio = max_cell_width / min_cell_width;
-  const double control_volume_ratio = max_control_volume_cells_ / min_control_volume_cells_;
-
-  ASSERT2("EnzoMethodSinkMaker",
-	  "Ratio of max cell width to min cell width must be less than or equal to the ratio "
-	  "of Method:sink_maker:max_control_volume_cells to "
-	  "Method:sink_maker:min_control_volume_cells. Currently, the former ratio "
-	  "is %g and the latter ratio is %g \n",
-	  cell_width_ratio, control_volume_ratio,
-	  cell_width_ratio <= control_volume_ratio);
 
   return;
 }
