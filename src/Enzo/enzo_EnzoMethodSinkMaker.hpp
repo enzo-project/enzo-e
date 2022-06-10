@@ -21,11 +21,13 @@ public:
 
   // Constructor
   EnzoMethodSinkMaker
-  (double jeans_length_resolution_cells,
-   double density_threshold,
-   bool   check_density_maximum,
-   double max_mass_fraction,
-   double min_sink_mass_solar);
+  (double   jeans_length_resolution_cells,
+   double   density_threshold,
+   bool     check_density_maximum,
+   double   max_mass_fraction,
+   double   min_sink_mass_solar,
+   double   max_offset_cell_fraction,
+   uint64_t offset_seed_shift);
 
   /// Destructor
   virtual ~EnzoMethodSinkMaker() throw() {};
@@ -112,6 +114,17 @@ protected: // attributes
   // density_threshold_ and max_mass_fraction_ is less than the minimum sink mass, no sink
   // particle is formed.
   double min_sink_mass_solar_;
+
+  // When a cell creates a sink particle, the x/y/z coordinate of its initial position will be
+  // the x/y/z coordinate of the center of the cell, plus a random value generated from a
+  // uniform distribution on the interval [-A,A], where A is equal to
+  // `max_offset_cell_fraction_` multiplied by the cell width along the x/y/z axis.
+  double max_offset_cell_fraction_;
+
+  // When computing the random offset for the initial position of a sink particle, we compute
+  // an unsigned 64 bit integer value from the cycle number, the block index, and the cell index,
+  // and then add on this value to give the seed for the random number generator.
+  uint64_t offset_seed_shift_;
 
 };
 

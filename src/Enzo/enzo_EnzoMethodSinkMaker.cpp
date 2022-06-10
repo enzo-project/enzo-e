@@ -6,23 +6,28 @@
 /// @brief      Implements a method for forming sink particles based on
 ///             the method described in Krumholz+ 2004 and Federrath+ 2010.
 
+#include <random>
 #include "cello.hpp"
 #include "enzo.hpp"
 
 //-------------------------------------------------------------------
 
 EnzoMethodSinkMaker::EnzoMethodSinkMaker
-(double jeans_length_resolution_cells,
- double density_threshold,
- bool   check_density_maximum,
- double max_mass_fraction,
- double min_sink_mass_solar)
+(double   jeans_length_resolution_cells,
+ double   density_threshold,
+ bool     check_density_maximum,
+ double   max_mass_fraction,
+ double   min_sink_mass_solar,
+ double   max_offset_cell_fraction,
+ uint64_t offset_seed_shift)
   : Method(),
     jeans_length_resolution_cells_(jeans_length_resolution_cells),
     density_threshold_(density_threshold),
     check_density_maximum_(check_density_maximum),
     max_mass_fraction_(max_mass_fraction),
-    min_sink_mass_solar_(min_sink_mass_solar)
+    min_sink_mass_solar_(min_sink_mass_solar),
+    max_offset_cell_fraction_(max_offset_cell_fraction),
+    offset_seed_shift_(offset_seed_shift)
 {
   // Check that we have 3 spatial dimensions.
   ASSERT("EnzoMethodSinkMaker::EnzoMethodSinkMaker()",
@@ -52,6 +57,12 @@ EnzoMethodSinkMaker::EnzoMethodSinkMaker
 	 "Method:sink_maker:jeans_length_resolution_cells must be non-negative.",
 	 jeans_length_resolution_cells_ >= 0);
 
+  // Check that max_offset_cell_fraction_ is between 0.0 and 0.1 (inclusive)
+  ASSERT("EnzoMethodSinkMaker::EnzoMethodSinkMaker()",
+	 "Method:sink_maker:max_offset_cell_fraction must be between 0.0 and "
+	 "0.1 (inclusive).",
+	 (max_offset_cell_fraction_ >= 0.0) && (max_offset_cell_fraction_ <= 0.1));
+
   cello::simulation()->refresh_set_name(ir_post_,name());
 
   Refresh * refresh = cello::refresh(ir_post_);
@@ -75,6 +86,8 @@ void EnzoMethodSinkMaker::pup (PUP::er &p)
   p | check_density_maximum_;
   p | max_mass_fraction_;
   p | min_sink_mass_solar_;
+  p | max_offset_cell_fraction_;
+  p | offset_seed_shift_;
 
   return;
 }
@@ -180,27 +193,50 @@ void EnzoMethodSinkMaker::compute_ ( Block *block) throw()
     cello::grav_constant * enzo::units()->mass() * enzo::units()->time() * enzo::units()->time()
     / (enzo::units()->length() * enzo::units()->length() * enzo::units()->length());
 
+  // Get global block index
+  // ix/y/z_block is the x/y/z index of the block
+  // nx/y/z_block is the number of blocks along the x/y/z axis
+  int ix_block, iy_block, iz_block, nx_block, ny_block, nz_block;
+  block->index_global(&ix_block, &iy_block, &iz_block,
+		      &nx_block, &ny_block, &nz_block);
+
+  const int n_blocks = nx_block * ny_block * nz_block;
+  const int global_block_index = INDEX(ix_block,iy_block,iz_block,nx_block,ny_block);
+
+  // Now get the total number of cells per block
+  const int n_cells_per_block = mx * my * mz;
+
+  // We want a unique ID for each cell for each cycle. This will be used to set sink particle
+  // IDs and will be used for the seeds for the random number generator which generates the
+  // initial particle positions.
+  const uint64_t global_cell_index_start =
+    (enzo::simulation()->cycle() * n_blocks + global_block_index) * n_cells_per_block;
+
+  // Will be used to generate the random offsets
+  std::uniform_real_distribution<double> distribution (0.0,1.0);
+  std::mt19937_64 generator;
+
   for (int iz=gz; iz<mz - gz; iz++){
     for (int iy=gy; iy<my - gy; iy++){
       for (int ix=gx; ix<mx - gx; ix++){
 
-	int cell_index = INDEX(ix,iy,iz,mx,my);
+	int block_cell_index = INDEX(ix,iy,iz,mx,my);
 
 	// Check if density is greater than density_threshold_
-	if (density[cell_index] <= density_threshold_) continue;
+	if (density[block_cell_index] <= density_threshold_) continue;
 
 	// Check if the mass of the potential sink particle is greater than the minimum sink
 	// mass
 	const enzo_float density_change =
-	  std::min(density[cell_index] - density_threshold_,
-		   max_mass_fraction_ * density[cell_index]);
+	  std::min(density[block_cell_index] - density_threshold_,
+		   max_mass_fraction_ * density[block_cell_index]);
 
 	const enzo_float sink_mass = density_change * cell_volume;
 
 	if (sink_mass < minimum_sink_mass) continue;
 
 	// Check whether Jeans length is resolved.
-	if (!jeans_length_not_resolved_(block, cell_index, const_G)) continue;
+	if (!jeans_length_not_resolved_(block, block_cell_index, const_G)) continue;
 
 	// Check whether flow is converging
 	if (!flow_is_converging_(block, ix, iy, iz)) continue;
@@ -210,9 +246,12 @@ void EnzoMethodSinkMaker::compute_ ( Block *block) throw()
 
 	// If we are here, this cell satisfies all the conditions for forming a sink particle.
 
+	// Compute global cell index
+	const uint64_t global_cell_index = global_cell_index_start + block_cell_index;
+
 	// Append to the vectors
-	cells_forming_sinks.push_back(cell_index);
-	new_densities.push_back(density[cell_index] - density_change);
+	cells_forming_sinks.push_back(block_cell_index);
+	new_densities.push_back(density[block_cell_index] - density_change);
 
 	// So. now create a sink particle
 	n_sinks_formed++;
@@ -229,40 +268,57 @@ void EnzoMethodSinkMaker::compute_ ( Block *block) throw()
 	pmass = (enzo_float *) particle.attribute_array(it, ia_m, ibatch);
 	pmass[ip_batch * dm] = sink_mass;
 
-	// Set particle position to be at centre of cell
+	// Get 3 seeds for the random number generator using the global cell index and
+	// offset_seed_shift_
+	uint64_t x_seed = offset_seed_shift_ + 3 * global_cell_index;
+	uint64_t y_seed = offset_seed_shift_ + 3 * global_cell_index + 1;
+	uint64_t z_seed = offset_seed_shift_ + 3 * global_cell_index + 2;
+
+	// x_offset is in range [-hx*max_offset_cell_fraction_,hx*max_offset_cell_fraction_]
+	generator.seed(x_seed);
+	const double x_offset =
+	  hx * max_offset_cell_fraction_ * (2.0 * distribution(generator) - 1.0);
+	// y_offset is in range [-hy*max_offset_cell_fraction_,hy*max_offset_cell_fraction_]
+	generator.seed(y_seed);
+	const double y_offset =
+	  hy * max_offset_cell_fraction_ * (2.0 * distribution(generator) - 1.0);
+	// z_offset is in range [-hz*max_offset_cell_fraction_,hz*max_offset_cell_fraction_]
+	generator.seed(z_seed);
+	const double z_offset =
+	  hz * max_offset_cell_fraction_ * (2.0 * distribution(generator) - 1.0);
+
+	// Set particle position to be at centre of cell plus the offset
 	px = (enzo_float *) particle.attribute_array(it, ia_x, ibatch);
 	py = (enzo_float *) particle.attribute_array(it, ia_y, ibatch);
 	pz = (enzo_float *) particle.attribute_array(it, ia_z, ibatch);
 
-	px[ip_batch * dp] = xm + (ix - gx + 0.5) * hz;
-	py[ip_batch * dp] = ym + (iy - gy + 0.5) * hy;
-	pz[ip_batch * dp] = zm + (iz - gz + 0.5) * hz;
+	px[ip_batch * dp] = xm + (ix - gx + 0.5) * hz + x_offset;
+	py[ip_batch * dp] = ym + (iy - gy + 0.5) * hy + y_offset;
+	pz[ip_batch * dp] = zm + (iz - gz + 0.5) * hz + z_offset;
 
 	// Set particle velocity equal to gas velocity in cell
 	pvx = (enzo_float *) particle.attribute_array(it, ia_vx, ibatch);
 	pvy = (enzo_float *) particle.attribute_array(it, ia_vy, ibatch);
 	pvz = (enzo_float *) particle.attribute_array(it, ia_vz, ibatch);
-	pvx[ip_batch * dv] = vx_gas[cell_index];
-	pvy[ip_batch * dv] = vy_gas[cell_index];
-	pvz[ip_batch * dv] = vz_gas[cell_index];
+	pvx[ip_batch * dv] = vx_gas[block_cell_index];
+	pvy[ip_batch * dv] = vy_gas[block_cell_index];
+	pvz[ip_batch * dv] = vz_gas[block_cell_index];
 
 	// Set creation time equal to current time
 	pcreation_time     =
 	  (enzo_float *) particle.attribute_array(it, ia_creation_time, ibatch);
 	pcreation_time[ip_batch * dcreation_time] = enzo::block(block)->time();
 
-	// Set ID.
-	// Copyied from EnzoMethodStarMakerStochasticSF
+	// Set ID to be the global cell index
 	pid = (int64_t * ) particle.attribute_array(it, ia_id, ibatch);
-	pid[ip_batch * did] =
-	  CkMyPe() + (ParticleData::id_counter[cello::index_static()]++) * CkNumPes();
+	pid[ip_batch * did] = global_cell_index;
 
 	// If we are tracking metals, set metal fraction of sink particle
 	if (metal_density){
 	  pmetal_fraction  =
 	    (enzo_float *) particle.attribute_array(it, ia_metal_fraction, ibatch);
 	  pmetal_fraction[ip_batch * dmetal_fraction] =
-	    metal_density[cell_index] / density[cell_index];
+	    metal_density[block_cell_index] / density[block_cell_index];
 	}
 
 	/* Specify that newly created particle is not a copy*/
@@ -277,11 +333,11 @@ void EnzoMethodSinkMaker::compute_ ( Block *block) throw()
 
   // Loop over the cells which formed sink particles and set new values for density fields.
   for (decltype(cells_forming_sinks.size()) i = 0; i < cells_forming_sinks.size(); i++){
-    int cell_index = cells_forming_sinks[i];
+    int ind = cells_forming_sinks[i];
     EnzoMethodStarMaker::rescale_densities(enzo::block(block),
-					   cell_index,
-					   new_densities[i] / density[cell_index]);
-    density[cell_index] = new_densities[i];
+					   ind,
+					   new_densities[i] / density[ind]);
+    density[ind] = new_densities[i];
   }
 
   return;
@@ -523,6 +579,5 @@ void EnzoMethodSinkMaker::do_checks_(Block *block) throw()
 	 "Density threshold must be at least as large as the density "
 	 "floor set by the hydro method",
 	 density_threshold_ >= density_floor);
-
   return;
 }

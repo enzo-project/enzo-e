@@ -397,6 +397,8 @@ public: // interface
       method_sink_maker_check_density_maximum(false),
       method_sink_maker_max_mass_fraction(0.0),
       method_sink_maker_min_sink_mass_solar(0.0),
+      method_sink_maker_max_offset_cell_fraction(0.0),
+      method_sink_maker_offset_seed_shift(0),
       // EnzoProlong
       prolong_enzo_type(),
       prolong_enzo_positive(true),
@@ -852,6 +854,8 @@ public: // attributes
   bool                       method_sink_maker_check_density_maximum;
   double                     method_sink_maker_max_mass_fraction;
   double                     method_sink_maker_min_sink_mass_solar;
+  double                     method_sink_maker_max_offset_cell_fraction;
+  uint64_t                   method_sink_maker_offset_seed_shift;
   
   std::string                prolong_enzo_type;
   bool                       prolong_enzo_positive;

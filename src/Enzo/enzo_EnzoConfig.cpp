@@ -294,6 +294,8 @@ EnzoConfig::EnzoConfig() throw ()
   method_sink_maker_check_density_maximum(false),
   method_sink_maker_max_mass_fraction(0.0),
   method_sink_maker_min_sink_mass_solar(0.0),
+  method_sink_maker_max_offset_cell_fraction(0.0),
+  method_sink_maker_offset_seed_shift(0),
   /// EnzoProlong
   prolong_enzo_type(),
   prolong_enzo_positive(true),
@@ -648,6 +650,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_sink_maker_check_density_maximum,
   p | method_sink_maker_max_mass_fraction,
   p | method_sink_maker_min_sink_mass_solar,
+  p | method_sink_maker_max_offset_cell_fraction,
+  p | method_sink_maker_offset_seed_shift,
 
   p | prolong_enzo_type;
   p | prolong_enzo_positive;
@@ -1719,7 +1723,13 @@ void EnzoConfig::read_method_sink_maker_(Parameters * p)
     ("Method:sink_maker:max_mass_fraction",0.25);
   method_sink_maker_min_sink_mass_solar = p->value_float
     ("Method:sink_maker:min_sink_mass_solar",0.0);
-
+  method_sink_maker_max_offset_cell_fraction = p->value_float
+    ("Method:sink_maker:max_offset_cell_fraction",0.0);
+  int method_sink_maker_offset_seed_shift_input = p->value_integer
+    ("Method:sink_maker:offset_seed_shift",0);
+  ASSERT("EnzoConfig::read()", "Method:sink_maker:offset_seed_shift must be >=0",
+	 method_sink_maker_offset_seed_shift_input >= 0);
+  method_sink_maker_offset_seed_shift = (uint64_t) method_sink_maker_offset_seed_shift_input;
 }
 
 //----------------------------------------------------------------------

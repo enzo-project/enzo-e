@@ -756,11 +756,15 @@ Method * EnzoProblem::create_method_
     }
   } else if (name == "sink_maker") {
 
-    method = new EnzoMethodSinkMaker(enzo_config->method_sink_maker_jeans_length_resolution_cells,
-				     enzo_config->method_sink_maker_density_threshold,
-				     enzo_config->method_sink_maker_check_density_maximum,
-				     enzo_config->method_sink_maker_max_mass_fraction,
-				     enzo_config->method_sink_maker_min_sink_mass_solar);
+    method = new EnzoMethodSinkMaker(
+			enzo_config->method_sink_maker_jeans_length_resolution_cells,
+			enzo_config->method_sink_maker_density_threshold,
+			enzo_config->method_sink_maker_check_density_maximum,
+			enzo_config->method_sink_maker_max_mass_fraction,
+			enzo_config->method_sink_maker_min_sink_mass_solar,
+			enzo_config->method_sink_maker_max_offset_cell_fraction,
+			enzo_config->method_sink_maker_offset_seed_shift
+				     );
   } else {
 
     // Fallback to Cello method's
