@@ -40,3 +40,5 @@ Output {
          type = "image";
      };
 }
+
+Stopping {cycle = 1000;}
