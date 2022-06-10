@@ -9,7 +9,7 @@
 
 #include "monitor.hpp"
 
-#include "auto_config.def"
+#include "../../auto_config.def"
 
 //----------------------------------------------------------------------
 Monitor Monitor::instance_[CONFIG_NODE_SIZE]; // singleton design pattern)
@@ -80,31 +80,28 @@ void Monitor::header () const
 
   // Parallel type defines
 
-  print ("Define","CELLO_ARCH          %s",CELLO_ARCH);
   print ("Define","CELLO_PREC          %s",CELLO_PREC);
 
   print ("Define","CC                  %s",CELLO_CC);
   print ("Define","CFLAGS              %s",CELLO_CFLAGS);
   print ("Define","CPPDEFINES          %s",CELLO_CPPDEFINES);
-  print ("Define","CPPPATH             %s",CELLO_CPPPATH);
   print ("Define","CXX                 %s",CELLO_CXX);
   print ("Define","CXXFLAGS            %s",CELLO_CXXFLAGS);
   print ("Define","FORTRANFLAGS        %s",CELLO_FORTRANFLAGS);
   print ("Define","FORTRAN             %s",CELLO_FORTRAN);
-  print ("Define","FORTRANLIBS         %s",CELLO_FORTRANLIBS);
-  print ("Define","FORTRANPATH         %s",CELLO_FORTRANPATH);
-  print ("Define","LIBPATH             %s",CELLO_LIBPATH);
-  print ("Define","LINKFLAGS           %s",CELLO_LINKFLAGS);
+  // print ("Define","FORTRANLIBS         %s",CELLO_FORTRANLIBS);
+  // print ("Define","LIBPATH             %s",CELLO_LIBPATH);
+  // print ("Define","LINKFLAGS           %s",CELLO_LINKFLAGS);
   print ("Define","BUILD HOST          %s",CELLO_HOST);
   print ("Define","BUILD DIR           %s",CELLO_DIR);
-  print ("Define","BUILD DATE (UTC)    %s",CELLO_DATE);
-  print ("Define","BUILD TIME (UTC)    %s",CELLO_TIME);
+  // print ("Define","BUILD DATE (UTC)    %s",CELLO_DATE);
+  // print ("Define","BUILD TIME (UTC)    %s",CELLO_TIME);
 #ifdef CONFIG_HAVE_VERSION_CONTROL
   print ("Define","CHANGESET           %s",CELLO_CHANGESET);
 #endif
   print ("Define","CHARM_PATH          %s",CHARM_PATH);
-  print ("Define","CHARM_VERSION       %d",CHARM_VERSION);
-  print ("Define","CHARM_BUILD         %s",CHARM_BUILD);
+  // print ("Define","CHARM_VERSION       %d",CHARM_VERSION);
+  // print ("Define","CHARM_BUILD         %s",CHARM_BUILD);
   print ("Define","CONFIG_NODE_SIZE    %d",CONFIG_NODE_SIZE);
 #ifdef CONFIG_SMP_MODE
   print ("Define","CONFIG_SMP_MODE     %s","Yes");
