@@ -75,7 +75,9 @@ endfunction()
 ############################### UNIT TESTS ####################################
 # The following tests are self-contained binary of individual components
 
+setup_test_unit(CArrCollec ArrayComponent/CArrCollec test_carr_collec)
 setup_test_unit(Array ArrayComponent/Array test_cello_array)
+setup_test_unit(StringIndRdOnlyMap ArrayComponent/StringIndRdOnlyMap test_string_ind_rd_only_map)
 # TODO(need help) Need to reintroduce following tests once dependency hell is resolved,
 # see commented unit tests in src/Cello/CMakeLists.txt
 #setup_test_unit(CelloType Cello/Type test_type)
