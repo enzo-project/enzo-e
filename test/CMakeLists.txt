@@ -172,6 +172,46 @@ if (USE_YT_BASED_TESTS)
   setup_test_parallel_python(merge_sinks_stationary_parallel merge_sinks/stationary/parallel "input/merge_sinks/run_merge_sinks_test.py" "--prec=${PREC_STRING}" "--ics_type=stationary")
   setup_test_serial_python(merge_sinks_drift_serial merge_sinks/drift/serial "input/merge_sinks/run_merge_sinks_test.py" "--prec=${PREC_STRING}" "--ics_type=drift")
   setup_test_parallel_python(merge_sinks_drift_parallel merge_sinks/drift/parallel "input/merge_sinks/run_merge_sinks_test.py" "--prec=${PREC_STRING}" "--ics_type=drift")
+
+endif()
+
+# Grackle tests
+#
+# because Grackle is a separate library, the user needs to specify the path
+# to the data directory where the grackle data files are installed. if this is
+# not specified, the Grackle tests are skipped
+
+if(NOT (DEFINED GRACKLE_INPUT_DATA_DIR))
+  set(GRACKLE_INPUT_DATA_DIR "")
+endif()
+
+if(USE_GRACKLE AND (GRACKLE_INPUT_DATA_DIR STREQUAL ""))
+  message(STATUS
+    "   IMPORTANT: No tests involving Grackle have been defined (even though Grackle is being used). To enable these tests, try `-DGRACKLE_INPUT_DATA_DIR=/path/to/grackle/data/dir`."
+  )
+elseif(USE_GRACKLE)
+  # (non-yt-based test)
+  setup_test_parallel_python(grackle_cooling_dt grackle
+    "input/Grackle/run_endtime_grackle_test.py"
+    "--grackle-data-file=${GRACKLE_INPUT_DATA_DIR}/CloudyData_UVB=HM2012_shielded.h5"
+    "--nominal-config-path=input/Grackle/method_grackle_cooling_dt.in"
+    # by using relative paths in the following 2 arguments, we effectively
+    # specify output files in the testing directory
+    "--generate-config-path=./temp_grackle_cooling_dt.in"
+    "--output-dump=./grackle_cooling_dt.log"
+  )
+
+  if (USE_YT_BASED_TESTS)
+    setup_test_parallel_python(grackle_general grackle
+      "input/Grackle/run_general_grackle_test.py"
+      "--prec=${PREC_STRING}"
+      "--grackle-data-file=${GRACKLE_INPUT_DATA_DIR}/CloudyData_UVB=HM2012_shielded.h5"
+      # by using relative paths in the following 2 arguments, we effectively
+      # specify output files in the testing directory
+      "--generate-config-path=./temp_grackle_general.in"
+      "--output-dump=./grackle_general_test.log"
+    )
+  endif()
 endif()
 
 # Convert markdown file to html file for more flexible viewing

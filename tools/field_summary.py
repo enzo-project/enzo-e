@@ -269,20 +269,39 @@ class ToleranceConfig:
         else:
             return str(dict((col,self[col]) for col in colnames))
 
-def _process_tol_args(arg_namespace):
-    # Process the tolerance arguments. They can be a string encoding an
-    # - int or float (this applies to all columns)
-    # - JSON object that assoicates tolerances with columns of the summary
-    #   table (columns without entries have a tolerance of 0)
+    @classmethod
+    def factory(cls, tol_val, tol_name, parse_from_str = False):
+        """
+        Constructs a ToleranceConfig instance based on `tol_val`.
 
-    def _process(tol_name):
-        try:
-            tmp = json.loads(getattr(arg_namespace, tol_name))
-        except json.JSONDecodeError:
-            tmp = None
+        Parameters
+        ----------
+        tol_val
+            This must be an int or float which describes the tolerance for all
+            columns. Alternatively this can be a dict that associates 
+            tolerances with columns of the summary table (columns without
+            entries have a tolerance of 0).
+        tol_name: str
+            Specifies the type of tolerance that is being processed. This is
+            only used for more descriptive error messages.
+        parse_from_str: bool
+            When True, tol_val is expected to be a string that directly encodes
+            the int or float value or a string that encodes a JSON object that
+            corresponds to the dict format described above.
+        """
+
+        if parse_from_str:
+            try:
+                tmp = json.loads(tol_val)
+            except json.JSONDecodeError:
+                tmp = None
+        elif isinstance(tol_val, cls):
+            return tol_val
+        else:
+            tmp = tol_val
 
         if isinstance(tmp, (float, int)):
-            return ToleranceConfig(fallback_tol = tmp, col_specific_vals = {})
+            return cls(fallback_tol = tmp, col_specific_vals = {})
 
         elif isinstance(tmp, dict):
             for col, val in tmp.items(): # check contents of dict
@@ -292,38 +311,55 @@ def _process_tol_args(arg_namespace):
                 elif not isinstance(val, (int,float)):
                     raise ValueError(f"{tol_name} for '{col}', {val}, isn't "
                                      "an int or float")
-            return ToleranceConfig(fallback_tol = 0., col_specific_vals = tmp)
+            return cls(fallback_tol = 0., col_specific_vals = tmp)
 
         else:
             raise ValueError(
-                f"{tol_name} option expects an int/float or a JSON object "
-                "that pairs summary table column-names with int/floats. \n"
-                f"Received: '{getattr(arg_namespace, tol_name)}'"
+                f"{tol_name} option expects an int/float or a dictionary "
+                "object that pairs summary table column-names with int/floats. "
+                f"\n Received: {tol_val!r}"
             )
-    return _process('atol'), _process('rtol')
 
+def compare_against_reference(snap_path, ref_summary_file_path,
+                              atol, rtol, report_path = None):
+    """
+    Computes summary statistics for fields from the snapshot at the path 
+    specified by snap_path and compares them against reference values
 
-def _main_cmp(args):
-    # Program to use by the cmp subcommand. Just construct the field summary
-    # table and compare against a reference
+    Parameters
+    ----------
+    snap_path: str
+        Path to the snapshot that is being tested.
+    ref_summary_path: str
+        Path to the csv file holding the reference summary statistics.
+    atol, rtol
+        Specifies the absolute and relative tolerances, respectively, for the 
+        comparison. These arguments are allowed to be int or floats (which 
+        apply for all summary statistics), dicts that provide tolerances for
+        particular summary statistics, or instances of ToleranceConfig.
+    report_path: str, optional
+        When specified, this gives a path where an output report is written 
+        describing the outcome of the comparison.
+    """
+    atol = ToleranceConfig.factory(atol, 'atol', parse_from_str = False)
+    rtol = ToleranceConfig.factory(rtol, 'rtol', parse_from_str = False)
+    
     print("Loading the reference table to identify the fields that are to be "
           "summarized")
-    ref_field_table = read_field_summary(args.ref)
-
-    atol,rtol = _process_tol_args(args)
+    ref_field_table = read_field_summary(ref_summary_file_path)
 
     field_names = ref_field_table['name'].tolist()
     print("Measuring the Field Summary Properties")
     cur_field_table, sim_props = measure_field_summary(
-        args.target_path, field_names = field_names
+        snap_path, field_names = field_names
     )
 
-    if args.report is None:
+    if report_path is None:
         report_creator = create_dummy_report
     else:
         report_creator = create_test_report
 
-    with report_creator(args.report, clobber = True) as tr:
+    with report_creator(report_path, clobber = True) as tr:
         print("Comparing field summary tables")
         test_rslt = test_equivalent_field_tables(cur_field_table,
                                                  ref_field_table,
@@ -334,6 +370,18 @@ def _main_cmp(args):
         else:
             print("Field summary tables are inconsistent")
     return test_rslt
+
+def _main_cmp(args):
+    # Program to use by the cmp subcommand. Just construct the field summary
+    # table and compare against a reference
+
+    atol = ToleranceConfig.factory(args.atol, 'atol', parse_from_str = True)
+    rtol = ToleranceConfig.factory(args.rtol, 'rtol', parse_from_str = True)
+
+    return compare_against_reference(snap_path = args.target_path,
+                                     ref_summary_file_path = args.ref,
+                                     atol = atol, rtol = rtol,
+                                     report_path = args.report)
 
 
 # define command line interface!

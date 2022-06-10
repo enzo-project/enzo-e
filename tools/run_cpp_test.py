@@ -26,8 +26,8 @@ parser.add_argument(
     help = "the C++ binary that is to be executed"
 )
 parser.add_argument(
-    "args_for_command", metavar = "ARGS", action = "store", nargs = argparse.REMAINDER,
-    default = [],
+    "args_for_command", metavar = "ARGS", action = "store",
+    nargs = argparse.REMAINDER, default = [],
     help = "the arguments to the C++ binary that are to be executed"
 )
 
@@ -95,26 +95,33 @@ def log_suggests_test_failure(log_path):
     else:
         return False
 
+def run_test_and_check_success(command, args_for_command = [],
+                               dump_path = None):
+    if dump_path is None:
+        delete_output = True
+        dump_path = tempfile.mktemp() # path for a temporary file
+    else:
+        delete_output = False
+
+    command_success = execute_command(command = command,
+                                      args = args_for_command,
+                                      output_dump = dump_path)
+    success = command_success and not log_suggests_test_failure(dump_path)
+
+    # cleanup the temporary file
+    if delete_output:
+        os.remove(dump_path)
+    return success
+
 if __name__ == '__main__':
     args = parser.parse_args()
 
-    if args.output_dump is None:
-        dump_path = tempfile.mktemp() # path for a temporary file
-    else:
+    test_passes = run_test_and_check_success(
+        command = args.command, args_for_command = args.args_for_command,
         dump_path = args.output_dump
+    )
 
-    success = execute_command(command = args.command,
-                              args = args.args_for_command,
-                              output_dump = dump_path)
-    if not success:
-        out = 1
-    elif log_suggests_test_failure(dump_path):
-        out = 1
+    if test_passes:
+        sys.exit(0)
     else:
-        out = 0
-
-    # cleanup the temporary file
-    if args.output_dump is None:
-        os.remove(dump_path)
-
-    sys.exit(out)
+        sys.exit(1)
