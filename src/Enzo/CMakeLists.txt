@@ -21,11 +21,19 @@ if (use_jemalloc)
   LIST(APPEND External_LIBS "jemalloc::jemalloc")
 endif()
 
+add_subdirectory(EnzoRiemann) # define the riemann library
+
 # Following the SCons build and first build an enzo library that is then turned into an enzo-e binary
 # (Note, the first attempt to directly build the binary resulted in failed vtable lookups in GrackleMethod and GrackleInputTest classes)
 add_library(enzo STATIC ${SRC_FILES})
 add_dependencies(enzo enzoCharmModule main_enzoCharmModule simulationCharmModule)
-target_link_libraries(enzo PRIVATE ${Cello_LIBS} ${External_LIBS})
+
+target_link_libraries(enzo
+  PUBLIC riemann # this is public so that dependents of the enzo library will
+                 # inherit the necessary include directories (only necessary
+                 # b/c the riemann library defines a charm++ module)
+  PRIVATE ${Cello_LIBS} ${External_LIBS}
+)
 target_include_directories (enzo PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/../Cello ${CMAKE_CURRENT_SOURCE_DIR}/../Cello ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${CHARM_INCLUDE_DIRS})
 target_link_options(enzo PRIVATE ${Cello_TARGET_LINK_OPTIONS})
 

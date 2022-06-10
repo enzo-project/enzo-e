@@ -38,6 +38,7 @@
 
 #include "pup_stl.h"
 
+#include "cello_defines.hpp"
 #include "cello_Sync.hpp"
 
 // #define DEBUG_CHECK
