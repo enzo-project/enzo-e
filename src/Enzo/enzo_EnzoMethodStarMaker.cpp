@@ -343,23 +343,7 @@ int EnzoMethodStarMaker::check_velocity_divergence(
     if (!(this->use_velocity_divergence_)){
       return 1.0;
     }
-/*
-    int result = 0;
 
-    if(vx){
-      result = (vx[index+dix] - vx[index-dix] < 0) ? 1 : 0;
-    }
-
-    if(vy && result){
-      result = (vy[index+diy] - vy[index-diy] < 0) ? 1 : 0;
-    }
-
-    if(vz && result){
-      result = (vz[index+diz] - vz[index-diz] < 0) ? 1 : 0;
-    }
-
-    return result;
-*/
    double div = 0.0;
    if (vx) div += (vx[index+dix] - vx[index-dix]) / 2.0; // in units of dx
    if (vy) div += (vy[index+diy] - vy[index-diy]) / 2.0; // in units of dy
@@ -387,7 +371,6 @@ int EnzoMethodStarMaker::check_cooling_time(const double &cooling_time,const dou
                          const double tunit, const double rhounit)
 {
   // Check whether cooling_time < dynamical_time
-  // NOTE: Must have "cooling_time" as a derived field
   if (!(this->use_cooling_time_)) {
     return 1;
   }

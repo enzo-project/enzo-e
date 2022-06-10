@@ -4,28 +4,15 @@
 /// @author     Will Hicks (whicks@ucsd.edu)
 /// @date
 /// @brief  Implements the star maker class using STARSS algorithm developed
-//          by Azton Wells (TODO: link paper) 
+//          by Azton Wells (TODO: link paper when it's published) 
 ///
 ///     Derived star maker class that actually makes stars. This is
 ///     adapted from the algorithm described in Hopkins et al. 
 ///     (2018, MNRAS, 480, 800)
-//
-//      Checks the following star formation criteria by default:
-//           1. overdensity > critical_overdensity
-//           2. div(V) < 0
-//           3. alpha < 0
-//           4. T < 10^4 K or t_cool < t_dynamical
-//           5. mass[i] > jeans mass
-//           6. f_H2_shielded > 0
 
 #include "cello.hpp"
 #include "enzo.hpp"
 #include <time.h>
-
-// TODO (JHW, 27 Feb 2020)
-// Copied from EnzoMethodStarMakerStochasticSF with no changes whatsoever.
-// Plan is to make this a separate class that inherits from the stochastic
-// algorithm.
 
 // #define DEBUG_SF_CRITERIA
 // #define DEBUG_SF_CRITERIA_EXTRA
@@ -233,8 +220,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 */
   if (use_altAlpha_) {
     // "potential_copy" field holds potential in proper coordinates,
-    //  need to convert back to comoving. Would probably be better to
-    //  just store "potential_copy" in comoving in EnzoMethodGravity
+    //  need to convert back to comoving. 
     if (cosmology) {
       enzo_float cosmo_a = 1.0;
       enzo_float cosmo_dadt = 0.0;
@@ -268,7 +254,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         
      
         // compute MMW -- TODO: Make EnzoComputeMeanMolecularWeight class and reference
-        // mu_field here
+        // mu_field here?
         if (primordial_chemistry == 0) mu = enzo_config->ppm_mol_weight;
         else {
           mu = d_el[i] + dHI[i] + dHII[i] + 0.25*(dHeI[i]+dHeII[i]+dHeIII[i]);
@@ -284,7 +270,6 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         mu = 1.0/mu;
     
 
-        // TODO: need to compute this better for Grackle fields (on to-do list)
         double rho_cgs = density[i] * enzo_units->density();
         double mean_particle_mass = mu * cello::mass_hydrogen;
         double ndens = rho_cgs / mean_particle_mass;
@@ -296,17 +281,18 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         // Apply the criteria for star formation
         //
         
-        // either use number density threshold or overdensity threshold
-        // defaults to number density if both density and overdensity are set to 1
-        if (this->use_density_threshold_) { 
-          if (! this->check_number_density_threshold(ndens) ) continue;
-        }
-        else if (this->use_overdensity_threshold_){
-          if (! this->check_overdensity_threshold(density[i]) ) continue;
-          //#ifdef DEBUG_SF_CRITERIA 
-          //  CkPrintf("MethodFeedbackSTARSS -- overdensity threshold passed! rho=%f\n",dmean);
-          //#endif
-         }
+        // check number density threshold
+        if (! this->check_number_density_threshold(ndens) ) continue;
+
+        // check overdensity threshold
+        // In cosmology, units are scaled such that mean(density) = 1,
+        // so density IS overdensity in these units        
+        if (! this->check_overdensity_threshold(density[i]) ) continue;
+
+        #ifdef DEBUG_SF_CRITERIA 
+           CkPrintf("MethodFeedbackSTARSS -- overdensity threshold passed! rho=%f\n",dmean);
+        #endif
+        
         // check velocity divergence < 0
         if (! this->check_velocity_divergence(velocity_x, velocity_y,
                                               velocity_z, i,
@@ -319,7 +305,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         // check that alpha < 1
         if (use_altAlpha_) {
           // NOTE: this requires the DEBUG_COPY_POTENTIAL flag to be set in EnzoMethodGravity
-          // TODO: Make copying potential an input parameter instead of debug flag?
+          // TODO: Make saving potential an input parameter instead of debug flag?
           if (! this->check_self_gravitating_new(total_energy[i], potential[i])) continue;
         }
 
@@ -329,6 +315,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
                                              lunit, vunit, rhounit,
                                              i, idx, idy, idz, dx, dy, dz)) continue;
         }
+
         #ifdef DEBUG_SF_CRITERIA_EXTRA
            CkPrintf("MethodStarMakerSTARSS -- alpha < 1 in cell %d\n", i);
         #endif 
@@ -355,6 +342,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         double f_shield = this->h2_self_shielding_factor(density,metallicity,
                      rhounit,lunit,i,idx,idy,idz,dx,dy,dz); 
         if (f_shield < 0) continue;
+
         // check that Z > Z_crit
         if (! check_metallicity(metallicity)) continue;
 
@@ -384,7 +372,6 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         // Probability has the last word
         // FIRE-2 uses p = 1 - exp (-MassShouldForm*dt / M_gas_particle) to convert a whole particle to star particle
         //  We convert a fixed portion of the baryon mass (or the calculated amount)
-        //TODO: Difference between dt and dtFixed???
        
         double p_form = 1.0 - std::exp(-bulk_SFR*dt*(tunit/cello::Myr_s)/
                 (this->maximum_star_fraction_*cell_mass*munit_solar));
@@ -423,10 +410,11 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         if (new_mass * munit_solar > max_massPerStar) { //
           // for large particles, split them into several 1e3-ish Msun particles 
           // that have slightly different birth times,
-          // spread over three dynamical times
+          // spread over three dynamical times. This is to prevent huge particles suddenly dumping a HUGE
+          // amount of ionizing radiation at once.
           // TODO: Enforce that if dt < 3 dynamical times, new star particles form in the next timestep
-          //       Can do this by creating the particle so we can still access it at the next timestep,
-          //       but not assigning it a mass until it's actually supposed to form
+          //       Can do this by creating the particle now so we can still access it at the next timestep,
+          //       but not assigning it any attributes until it's actually supposed to form
          
           n_newStars = std::floor(new_mass * munit_solar / mass_split);
           massPerStar = new_mass / n_newStars;
@@ -458,10 +446,6 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
           int io = ipp; // ipp*ps
           // pointer to mass array in block
           pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib);
-
-          // TODO: saving particle mass as density. May need to update this in the future
-          //       when PR #89 passes 
-          //pmass[io] = new_mass / cell_volume;
 
           pmass[io] = massPerStar;
           px = (enzo_float *) particle.attribute_array(it, ia_x, ib);
@@ -526,8 +510,10 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
           }
 
           // Remove mass from grid and rescale fraction fields
-          // TODO: Remove mass using CiC instead? Should do this if particle's initial position
-          //       isn't cell-centered
+          // TODO: If particle position is updated to CM instead of being cell-centered, will have to 
+          //       remove mass using CiC, which could complicate things because that CiC cloud could
+          //       leak into the ghost zones. Would have to use same refresh+accumulate machinery
+          //       as MethodFeedbackSTARSS to account for this.
           double scale = (1.0 - pmass[io] / cell_mass);
           density[i] *= scale;
           // rescale color fields too 
@@ -562,9 +548,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
     CkPrintf("MethodStarMakerSTARSS -- Number of particles formed: %d\n", count);
   }
 
-// TODO: Set max_number_of_new_particles parameter????? 
-
-/* TODO: Add this part in once Grid_MechStarsSeedSupernova.C is implemented
+/* TODO: Add this part in once Pop III SF/FB is implemented
  
     if (gridShouldFormStars && MechStarsSeedField && (nCreated == 0)){
         // set off a p3 supernova at at the last cell that could 

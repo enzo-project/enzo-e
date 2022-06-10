@@ -7,6 +7,7 @@ Method {
 }
 
 Output {
+     list = ["hdf5","de","star"];
      hdf5 {
           dir = ["Dir_COSMO_SF_FB_%04d","cycle"];
           particle_list += ["star"]; 
@@ -22,4 +23,20 @@ Output {
      hdf5 { dir = [ "Dir_COSMO_SF_FB_%04d", "cycle" ]; }
      dep  { dir = [ "Dir_COSMO_SF_FB_%04d", "cycle" ]; }
      check { dir = [ "Dir_COSMO_SF_FB_%04d-checkpoint", "count" ]; }
+
+     star {
+         colormap = [ 0.000000000000000, 0.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 1.000000000000000 ];
+         dir = [ "Dir_COSMO_SF_FB_%04d", "cycle" ];
+         image_ghost = false;
+         image_size = [ 1024, 1024 ];
+         image_type = "data";
+         name = [ "star-%02d.png", "count" ];
+         particle_list = [ "star" ];
+         schedule {
+             start = 0;
+             step = 100;
+             var = "cycle";
+         };
+         type = "image";
+     };
 }

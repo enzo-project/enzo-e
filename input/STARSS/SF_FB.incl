@@ -45,54 +45,47 @@ Field {
 
 Method {
      star_maker {
-       # run the stochastic star formation algorithm taken from star_maker_ssn in Enzo
-       flavor = "STARSS";              
-       overdensity_threshold = 512.0;   # in 1/cm^3
-       minimum_star_mass        = 150.0;
+       flavor = "STARSS"; # pick star formation method             
+
+       use_density_threshold    = false;  # check number density for SF
+       use_overdensity_threshold= false;    # check overdensity
+ 
+       use_velocity_divergence  = true;  # converging flow criterion
+       use_cooling_time         = false; # check that cooling_time < dynamical_time
+     
+       use_self_gravitating     = true;  # check that virial parameter < 1
+       use_altAlpha             = false; # replace virial parameter calculation with total_energy/potential
+                                         # requires DEBUG_COPY_POTENTIAL to be set in EnzoMethodGravity
+       use_h2_self_shielding    = false;
+       use_temperature_threshold= false;
+       use_critical_metallicity = false;
+       use_jeans_mass           = true;
+
+       min_level = 4; # minimum level for star formation
+       overdensity_threshold    = 512.0;
+       minimum_star_mass        = 500.0;
        maximum_star_mass        = 1000.0;
        number_density_threshold = 100.0;
-       temperature_threshold = 1e4;
-       critical_metallicity = 4.1e-8 / 0.012;
-       turn_off_probability = false;
-       min_level = 4;
-
-       use_altAlpha = false; # replace virial parameter calculation with total_energy/potential
-                             # requires DEBUG_COPY_POTENTIAL to be set in EnzoMethodGravity
-       use_density_threshold    = false  ;  # check number density for SF
-       use_overdensity_threshold= false;    # check overdensity 
-       use_velocity_divergence  = true ;  # converging flow criterion  
-       use_cooling_time       = false ; # check that cooling_time < dynamical_time
-       use_self_gravitating   = true; # check that alpha < 1 
-       use_h2_self_shielding  = false;
-       use_temperature_threshold = false;
-       use_critical_metallicity = false;
-       use_jeans_mass = true;
-       maximum_mass_fraction    = 0.2  ;   # maximum fraction of a cell that can be converted into stars
-                                           # can be redundant with number density threshold depending
-                                           # on rest of SF criteria and refinement criteria
-       efficiency               = 0.02 ;   # efficiency per free fall time
+       temperature_threshold    = 1e4;
+       critical_metallicity     = 4.1e-8 / 0.012;
+       turn_off_probability     = false;   # turn off probablistic part of SF for testing
+       maximum_mass_fraction    = 0.05;    # maximum fraction of a cell that can be converted into stars
      };
 
   feedback {
     flavor = "STARSS";
-    single_sn = 1;
-    unrestricted_sn = 1;
-    stellar_winds = 1;
-    gas_return_fraction = 0.0; # doesn't do anything
-    analytic_SNR_shell_mass = 1;
-    fade_SNR = 1;
-    NEvents = -1;
+    single_sn = 1;       # whether to have SNe at all
+    unrestricted_sn = 1; # Allow > 1 SN per particle in a timestep
+    stellar_winds = 1;   # whether to have stellar winds
+    analytic_SNR_shell_mass = 1; # calculate shell mass and subtract this from blast interior
+                                 # during feedback deposition
 
-     #distributed parameters
-     shift_cell_center = true;       # kick fb injection when close to grid boundary
-     time_first_sn     = 1.0;      # for testing - set time of first SN (in Myr) to not have to go through random number draws also triggers hard-coded progenitor mass and SN energy values (20 Msun star explosion)
-     #  ejecta_mass      = 10.0;     # solar masses - OLD PARAM - NOT USED
-     #  supernova_energy = 1.0;      # in 10^51 erg - OLD PARAM - NOT USED
-     ke_fraction      = 0.0;      # fraction of kinetic energy (otherwise thermal) - < 0 computes it self-consistently to attempt to fully resolve the SN
-     # ejecta_metal_fraction = 0.5;  # OLD PARAM - NOT USED
-     feedback_stencil      = 3;      # deposit feedback in a NxN CIC stencil centered on the particle - should work with any odd ineger, but not tested for anything other than 3
-     use_ionization_feedback = true;    # local (one zone) rad heating
+    fade_SNR = 1; # Allow coupling of FB out to the fading phase, where expansion of the SNR
+                  # is comparable to the local sound speed.
 
+    NEvents = -1; # Use this to manually set off SN events in ideal tests.
+                  # if -1, SN rates are calculated for the particles to determine when
+                  # they blow up
   };
 
   output {
