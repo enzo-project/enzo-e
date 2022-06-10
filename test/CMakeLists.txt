@@ -161,10 +161,6 @@ setup_test_serial(PPM-1 MethodPPM/Ppm-1  input/PPM/method_ppm-1.in)
 setup_test_parallel(PPM-8 MethodPPM/Ppm-8  input/PPM/method_ppm-8.in)
 setup_test_serial(PPM-1_color MethodPPM/Ppm-1_color  input/PPM/method_ppm-1_color.in)
 
-# GRACKLE
-setup_test_serial(CoolingTest_Grackle Grackle/CoolingTest input/Grackle/cooling_test_grackle.in)
-#setup_test_serial(OneZoneFreefallTest_Grackle Grackle/OneZoneCollapseTest input/Grackle/one_zone_freefall_test.in)
-
 if (USE_YT_BASED_TESTS)
   # VLCT
   setup_test_serial_python(vlct_dual_energy_cloud vlct "input/vlct/run_dual_energy_cloud_test.py")
