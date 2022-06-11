@@ -651,8 +651,9 @@ double OutputImage::mesh_color_(const Block * block, int level) const
     const int age = block->age(); 
     value = 1.0 / (0.01*age + 1.0);
   } else if (mesh_color_type_ == mesh_color_order) {
-    int is_i = cello::scalar_descr_int()->index(mesh_color_order_+":index");
-    int is_n = cello::scalar_descr_int()->index(mesh_color_order_+":count");
+    const ScalarDescr * scalar = cello::scalar_descr_long_long();
+    long long is_i = scalar->index (mesh_color_order_+":index");
+    long long is_n = scalar->index (mesh_color_order_+":count");
     ScalarData<long long> * scalar_data = ((Block *)block)->data()->scalar_data_long_long();
     long long index = *scalar_data->value(cello::scalar_descr_long_long(),is_i);
     long long count = *scalar_data->value(cello::scalar_descr_long_long(),is_n);
