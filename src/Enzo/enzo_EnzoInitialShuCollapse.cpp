@@ -72,11 +72,11 @@ void EnzoInitialShuCollapse::enforce_block
   double domain_width_z = dzp - dzm;
 
   ASSERT("EnzoInitialShuCollapse::EnzoInitialShuCollapse()",
-	 "Truncation radius must be less than half the domain width in all "
+	 "Truncation radius must no more than half the domain width in all "
 	 "dimensions.",
-	 (truncation_radius_ < 0.5 * domain_width_x) &&
-	 (truncation_radius_ < 0.5 * domain_width_y) &&
-	 (truncation_radius_ < 0.5 * domain_width_z));
+	 (truncation_radius_ <= 0.5 * domain_width_x) &&
+	 (truncation_radius_ <= 0.5 * domain_width_y) &&
+	 (truncation_radius_ <= 0.5 * domain_width_z));
 
   // Check that gamma is sufficiently close to unity
   const double gamma = enzo::config()->field_gamma;
@@ -111,21 +111,21 @@ void EnzoInitialShuCollapse::enforce_block
 	   "method is required.",
 	   enzo::problem()->method_exists("sink_maker"));
 
-  // Check if mhd_vlct method is being used
-  ASSERT("EnzoInitialShuCollapse",
-	 "If shu_collapse initializer is used, the mhd_vlct method is "
-	 "required.",
-	 enzo::problem()->method_exists("mhd_vlct"));
+  // // Check if mhd_vlct method is being used
+  // ASSERT("EnzoInitialShuCollapse",
+  // 	 "If shu_collapse initializer is used, the mhd_vlct method is "
+  // 	 "required.",
+  // 	 enzo::problem()->method_exists("mhd_vlct"));
 
-  // Check that mhd_choice parameter is set to "no_bfield"
-  ASSERT("EnzoInitialShuCollapse",
-	 "Method:mhd_vlct:mhd_choice must be set to no_bfield",
-	 enzo::config()->method_vlct_mhd_choice == "no_bfield");
+  // // Check that mhd_choice parameter is set to "no_bfield"
+  // ASSERT("EnzoInitialShuCollapse",
+  // 	 "Method:mhd_vlct:mhd_choice must be set to no_bfield",
+  // 	 enzo::config()->method_vlct_mhd_choice == "no_bfield");
 
-  // Check that riemann_solver parameter is set to "hllc"
-  ASSERT("EnzoInitialShuCollapse",
-	 "Method:mhd_vlct:mhd_choice must be set to hllc",
-	 enzo::config()->method_vlct_riemann_solver == "hllc");
+  // // Check that riemann_solver parameter is set to "hllc"
+  // ASSERT("EnzoInitialShuCollapse",
+  // 	 "Method:mhd_vlct:mhd_choice must be set to hllc",
+  // 	 enzo::config()->method_vlct_riemann_solver == "hllc");
 
   if (!block->is_leaf()) return;
   ASSERT("EnzoInitialShuCollapse",
