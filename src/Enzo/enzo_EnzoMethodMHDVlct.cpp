@@ -546,10 +546,11 @@ void EnzoMethodMHDVlct::post_init_checks_() const noexcept
 
   const Problem* problem = enzo::problem();
 
-  // problems would arise in cosmological simulations if the gravity method
-  // precedes the VL+CT method.
+  // problems would arise relating to particle-mesh deposition (relating to
+  // particle drift before deposition) and in cosmological simulations if the
+  // the VL+CT method were to precede the gravity method.
   ASSERT("EnzoMethodMHDVlct::post_init_checks_",
-         "this method can't precede the gravity method.",
+         "when the gravity method exists, it must precede this method.",
          problem->method_precedes("gravity", "mhd_vlct") |
          (!problem->method_exists("gravity")) );
 
