@@ -214,6 +214,23 @@ EnzoEFltArrayMap EnzoMethodMHDVlct::get_integration_map_
 
 //----------------------------------------------------------------------
 
+static EnzoEFltArrayMap get_accel_map_(Block* block) noexcept
+{
+  Field field = block->data()->field();
+  if (field.field_id("acceleration_x") < 0){
+    return EnzoEFltArrayMap();
+  }
+
+  str_vec_t field_list = {"acceleration_x", "acceleration_y", "acceleration_z"};
+  std::vector<CelloArray<enzo_float,3>> arrays
+    = {field.view<enzo_float>("acceleration_x"),
+       field.view<enzo_float>("acceleration_y"),
+       field.view<enzo_float>("acceleration_z")};
+  return EnzoEFltArrayMap("accel", field_list, arrays);
+}
+
+//----------------------------------------------------------------------
+
 EnzoVlctScratchSpace* EnzoMethodMHDVlct::get_scratch_ptr_
 (const std::array<int,3>& field_shape, const str_vec_t& passive_list) noexcept
 {
@@ -391,7 +408,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // components (these are nominally computed from gravity). This data is
     // used for the gravity source term calculation. An empty map indicates
     // that the gravity source term is not included.
-    const EnzoEFltArrayMap accel_map = EnzoEFltArrayMap();
+    const EnzoEFltArrayMap accel_map = get_accel_map_(block);
 
     // allocate constrained transport object
     if (bfield_method_ != nullptr) {

@@ -30,9 +30,9 @@ void EnzoSourceGravity::calculate_source
   const CelloArray<const enzo_float,3> velocity_z = prim_map.at("velocity_z");
 
   // load acceleration fields
-  const CelloArray<const enzo_float,3> accel_x = prim_map.at("acceleration_x");
-  const CelloArray<const enzo_float,3> accel_y = prim_map.at("acceleration_y");
-  const CelloArray<const enzo_float,3> accel_z = prim_map.at("acceleration_z");
+  const CelloArray<const enzo_float,3> accel_x = accel_map.at("acceleration_x");
+  const CelloArray<const enzo_float,3> accel_y = accel_map.at("acceleration_y");
+  const CelloArray<const enzo_float,3> accel_z = accel_map.at("acceleration_z");
 
   // load accumulation arrays (reminder: these correspond to the conserved
   // forms of the integration quantities)
