@@ -9,28 +9,21 @@
 /// All insertions occur in the constructor, and the properties of the
 /// contained arrays can't be mutated. This choice:
 ///   - facillitates enforcement that all contained arrays have a fixed shape
-///   - makes it easier to order the entries in an arbitrary order. This could
-///     lead to some optimizations in the Riemann Solver if the values are
+///   - makes it easier to order the entries in an arbitrary order. This
+///     facilitates optimizations in the Riemann Solver when the values are
 ///     initialized in the order expected by the Riemann Solver
+///   - facillitates some optimizations that make instances relatively cheap to
+///     copy.
 ///
 /// If necessary, a number of optimizations could be made to the implementation
 /// that might make key lookups faster. These optimizations could take
 /// advantage of the following factors:
-///    - Entries are never deleted and the contents won't be resized (if a hash
-///      table can be resized, then the hash codes must stay the same or be
-///      recomputed). These factors probably make a custom hash table using
-///      open-addressing superior to std::map or std::unordered_map.
 ///    - Assumptions about the max key size and the max capacity of the map.
 ///      For example, if the max key size never exceeds ~22 characters and
 ///      there are never more than ~128 entries, it would probably be optimal
 ///      to store the strings in-place (improving cache locallity).
-/// It would also be worth considering whether linear search is faster (since
-/// the arrays are small.
-///
-/// To achieve similar results, instead of storing individual EFlt3DArrays
-/// within vectors, one large instance of CelloArray<enzo_float,4> could be
-/// stored. While that may help compiler optimizations, it may be too
-/// restrictive.
+///    - It would also be worth considering whether linear search is faster
+///      (since the arrays are small)
 
 #ifndef ENZO_ENZO_EFLT_ARRAY_MAP_HPP
 #define ENZO_ENZO_EFLT_ARRAY_MAP_HPP
@@ -92,9 +85,8 @@ public: // interface
     { return at_(key); }
 
   /// Checks whether the container holds the specified key
-  bool contains(const std::string& key) const noexcept{
-    return (str_index_map_.find(key) != str_index_map_.cend());
-  }
+  bool contains(const std::string& key) const noexcept
+  { return str_index_map_.contains(key); }
 
   /// Similar to `at`, but a slice of the array ommitting staled values is
   /// returned by value
@@ -121,7 +113,8 @@ public: // interface
   /// @note
   /// The program will fail if this method is invoked and the map holds zero
   /// elements.
-  int array_shape(unsigned int dim) const noexcept;
+  int array_shape(unsigned int dim) const noexcept
+  { return arrays_.array_shape(dim); }
 
   /// Return a new map holding subsections of each array held by the map
   ///
@@ -149,18 +142,33 @@ public: // interface
 			  bool raise_err, bool allow_smaller_ref = false)
     const noexcept;
 
+  /// Indicates if the contained arrays are stored in a single 4D array
+  /// (Alternatively they can be stored as an array of pointers)
+  bool contiguous_arrays() const noexcept { return arrays_.contiguous_items(); }
+
+  /// Returns a shallow copy of the 4D array holding each contained array.
+  ///
+  /// The `n`th 3D subarray of `arrmap.get_backing_array()` is always a perfect
+  /// alias of `arrmap[n]` (for any non-negative `n` less than `arrmap.size()`)
+  ///
+  /// @note
+  /// The program will abort if this method is called on an object for which
+  /// the `contiguous_arrays()` method returns `false`.
+  CelloArray<enzo_float, 4> get_backing_array() noexcept
+  { return arrays_.get_backing_array(); }
+  CelloArray<const enzo_float, 4> get_backing_array() const noexcept
+  { return arrays_.get_backing_array(); }
+
 private: // helper methods
 
   /// This private constructor is used by subarray_map. It can skip some
   /// unnecessary work relating to initialization
   EnzoEFltArrayMap(std::string name,
-                   const std::map<std::string, unsigned int> &str_index_map,
-                   const std::vector<std::string> &ordered_keys,
-                   const std::vector<EFlt3DArray> &ordered_arrays)
+                   const StringIndRdOnlyMap& str_index_map,
+                   CArrCollec<enzo_float>&& arrays)
     : name_(name),
       str_index_map_(str_index_map),
-      keys_(ordered_keys),
-      arrays_(ordered_arrays)
+      arrays_(arrays)
   { validate_invariants_(); }
 
   void validate_invariants_() const noexcept;
@@ -174,13 +182,11 @@ private: // helper methods
 private: // attributes
   // name_ is to help with debugging!
   std::string name_;
-  
+
   // str_index_map_ maps the keys to the index
-  std::map<std::string, unsigned int> str_index_map_;
-  // keys_ is the ordered list of keys
-  std::vector<std::string> keys_;
-  // arrays_ is the ordered list of arrays_
-  std::vector<EFlt3DArray> arrays_;
+  StringIndRdOnlyMap str_index_map_;
+  // arrays_ is the ordered collection of arrays_
+  CArrCollec<enzo_float> arrays_;
 };
 
 #endif /* ENZO_ENZO_EFLT_ARRAY_MAP_HPP */
