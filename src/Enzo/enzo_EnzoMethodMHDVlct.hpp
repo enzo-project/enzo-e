@@ -121,6 +121,7 @@ public: // interface
       eos_(nullptr),
       half_dt_recon_(nullptr),
       full_dt_recon_(nullptr),
+      rsolver_name_(""),
       riemann_solver_(nullptr),
       integration_quan_updater_(nullptr),
       scratch_space_(nullptr),
@@ -312,6 +313,8 @@ protected: // attributes
   /// Pointer to the reconstructor used to reconstruct the fluid during the
   /// full time-step
   EnzoReconstructor *full_dt_recon_;
+  /// Name of the Riemann solver
+  std::string rsolver_name_;
   /// Pointer to the Riemann solver
   EnzoRiemann *riemann_solver_;
   /// Pointer to the integration quantity updater

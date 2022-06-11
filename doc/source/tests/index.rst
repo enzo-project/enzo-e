@@ -15,6 +15,7 @@ This testing section describes tests on enzo-e program
    collapse
    cosmology
    gravity
+   grackle
    heat
    helloworld
    hierarchy

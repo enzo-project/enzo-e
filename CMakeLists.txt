@@ -285,6 +285,12 @@ if (use_papi)
   endif()
 endif()
 
+option(USE_SIMD "Use OpenMP SIMD directives. Also enables value-unsafe floating-point optimizations which may already be enable on some compilers (like icc)." OFF)
+include("cmake/EnableOMPSIMD.cmake")
+if (USE_SIMD)
+  enableOMPSIMD()
+endif()
+
 # Include machine file second time (if used initially) to set additional options that may depend
 # on global (default) options, such as USE_DOUBLE_PREC
 if (__processedUserDefaults)
@@ -304,8 +310,9 @@ add_subdirectory(src/External)
 
 include(CTest)
 
-option(USE_PYTHON_BASED_TESTS "Includes tests that require Python and yt" ON)
-if (USE_PYTHON_BASED_TESTS)
+# including the CTest module defines the BUILD_TESTING option. Its initial value is ON
+option(USE_YT_BASED_TESTS "Includes tests that require yt" ON)
+if (BUILD_TESTING)
   find_package(Python3)
   if (Python3_FOUND)
     message(STATUS
@@ -314,19 +321,23 @@ if (USE_PYTHON_BASED_TESTS)
       "version, try setting `-DPython3_FIND_VIRTUALENV=ONLY` or "
       "`-DPython3_EXECUTABLE=/path/to/desired/python`."
       )
+  else()
+    message(FATAL_ERROR
+     "You asked to build the tests, which require a python3 installation, but no python "
+     "installation was found. You can either install a python distribution (recommended) or "
+     "disable all tests by setting `-DBUILD_TESTING=OFF`."
+     )
+  endif()
 
+  if (USE_YT_BASED_TESTS)
     # Ensure all required packages are present
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/PythonModuleCheck.cmake)
     required_python_modules_found("yt;libconf;h5py")
-  else()
-    message(FATAL_ERROR
-     "You asked to include Python/yt based tests, but no Python installation was found. "
-     "You can either disable those tests by setting `-DUSE_PYTHON_BASED_TESTS=OFF` or "
-     "install a Python distribution with yt (recommended)."
-     )
   endif()
+
+  add_subdirectory(test)
 endif()
-add_subdirectory(test)
+
 
 # extract compile defs from from Cello to populate config
 get_directory_property( CELLO_CPPDEFINES DIRECTORY src/Cello COMPILE_DEFINITIONS )

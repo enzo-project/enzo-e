@@ -13,7 +13,6 @@ commands:
             echo 'export HDF5_LIB=/usr/lib/x86_64-linux-gnu' >> $BASH_ENV
             echo 'export CHARM_ROOT=$HOME/local/charm-v$CHARM_VER' >> $BASH_ENV
             echo 'export Grackle_ROOT=$HOME/local' >> $BASH_ENV
-            echo 'export GRACKLE_INPUT_DATA_DIR=$HOME/grackle/grackle_data_files/input/' >> $BASH_ENV
             # tag the tip so we can go back to it
             git tag tip
 
@@ -130,9 +129,24 @@ commands:
             # convert boolean parameter to an env var storing 0 or 1
             SKIP_TEST=$(( 0 <<# parameters.skiptest >> + 1 <</ parameters.skiptest >> ))
             USE_DOUBLE=$(( 0 <<# parameters.usedouble >> + 1 <</ parameters.usedouble >> ))
+            USE_GRACKLE=$(( 0 <<# parameters.usegrackle >> + 1 <</ parameters.usegrackle >> ))
+
+            # this is used for tests involving Grackle
+            if [[ $USE_GRACKLE == 1 ]]; then
+              GRACKLE_INPUT_DATA_DIR="$HOME/grackle/grackle_data_files/input/"
+            else
+              GRACKLE_INPUT_DATA_DIR=""
+            fi
 
             if [ ! -f << parameters.skipfile >> ]; then
-              cmake -DEnzo-E_CONFIG=linux_gcc -GNinja -DUSE_DOUBLE_PREC=<< parameters.usedouble >> -DUSE_GRACKLE=<< parameters.usegrackle >> -Bbuild -DPARALLEL_LAUNCHER_NPROC_ARG="++local;+p" -DPython3_FIND_VIRTUALENV=ONLY
+              cmake -DEnzo-E_CONFIG=linux_gcc \
+                    -GNinja \
+                    -DUSE_DOUBLE_PREC=<< parameters.usedouble >> \
+                    -DUSE_GRACKLE=<< parameters.usegrackle >> \
+                    -DGRACKLE_INPUT_DATA_DIR="$GRACKLE_INPUT_DATA_DIR" \
+                    -Bbuild \
+                    -DPARALLEL_LAUNCHER_NPROC_ARG="++local;+p" \
+                    -DPython3_FIND_VIRTUALENV=ONLY
               cmake --build build -j 4
               source $HOME/venv/bin/activate
               if [[ $SKIP_TEST != 1 ]]; then

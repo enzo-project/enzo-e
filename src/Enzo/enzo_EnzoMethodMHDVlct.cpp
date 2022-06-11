@@ -66,8 +66,8 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   mhd_choice_ = parse_bfield_choice_(mhd_choice);
 
   riemann_solver_ = EnzoRiemann::construct_riemann
-    (rsolver, mhd_choice_ != bfield_choice::no_bfield,
-     eos_->uses_dual_energy_formalism());
+    ({rsolver, mhd_choice_ != bfield_choice::no_bfield,
+      eos_->uses_dual_energy_formalism()});
 
   // determine integration and primitive field list
   integration_field_list_ = riemann_solver_->integration_quantity_keys();
@@ -202,14 +202,31 @@ EnzoEFltArrayMap EnzoMethodMHDVlct::get_integration_map_
   str_vec_t field_list = (passive_list == nullptr) ? integration_field_list_ :
     concat_str_vec_(integration_field_list_, *passive_list);
 
-  EnzoFieldArrayFactory array_factory(block,0);
+  Field field = block->data()->field();
   std::vector<EFlt3DArray> arrays;
   arrays.reserve(field_list.size());
   for (const std::string& field_name : field_list){
-    arrays.push_back(array_factory.from_name(field_name));
+    arrays.push_back( field.view<enzo_float>(field_name) );
   }
 
   return EnzoEFltArrayMap("integration",field_list,arrays);
+}
+
+//----------------------------------------------------------------------
+
+static EnzoEFltArrayMap get_accel_map_(Block* block) noexcept
+{
+  Field field = block->data()->field();
+  if (field.field_id("acceleration_x") < 0){
+    return EnzoEFltArrayMap();
+  }
+
+  str_vec_t field_list = {"acceleration_x", "acceleration_y", "acceleration_z"};
+  std::vector<CelloArray<enzo_float,3>> arrays
+    = {field.view<enzo_float>("acceleration_x"),
+       field.view<enzo_float>("acceleration_y"),
+       field.view<enzo_float>("acceleration_z")};
+  return EnzoEFltArrayMap("accel", field_list, arrays);
 }
 
 //----------------------------------------------------------------------
@@ -391,7 +408,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // components (these are nominally computed from gravity). This data is
     // used for the gravity source term calculation. An empty map indicates
     // that the gravity source term is not included.
-    const EnzoEFltArrayMap accel_map = EnzoEFltArrayMap();
+    const EnzoEFltArrayMap accel_map = get_accel_map_(block);
 
     // allocate constrained transport object
     if (bfield_method_ != nullptr) {
@@ -666,8 +683,8 @@ double EnzoMethodMHDVlct::timestep ( Block * block ) throw()
 
   // Compute thermal pressure (this presently requires that "pressure" is a
   // permanent field)
-  EnzoFieldArrayFactory array_factory(block);
-  EFlt3DArray pressure = array_factory.from_name("pressure");
+  Field field = block->data()->field();
+  EFlt3DArray pressure = field.view<enzo_float>("pressure");
   eos_->pressure_from_integration(integration_map, pressure, 0);
 
   // Now load other necessary quantities
