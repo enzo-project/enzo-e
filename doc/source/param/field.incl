@@ -21,6 +21,11 @@
 
 :p:`gamma` :e:`specifies the ratio of specific heats for the ideal gas used by the PPM hydrodynamics solver.`
 
+.. warning::
+
+   This parameter is deprecated and will be removed in a future version.
+   Going forward, pass this value to ``Physics:fluid_props:eos:gamma``.
+
 
 ----
 

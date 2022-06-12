@@ -8,6 +8,7 @@ User Guide
    parameters-file
    parameters-example
    problem_method
+   problem_physics
    problem_initial
    data_field
    data_particle

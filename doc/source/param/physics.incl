@@ -1,3 +1,16 @@
+:Parameter:  :p:`Physics` : :p:`list`
+:Summary: :s:`List of physics-sets`
+:Type:    :t:`list` ( :t:`string` )
+:Default: :d:`[]`
+:Scope:     :c:`Cello`
+
+:e:`Specifies list of physics-sets, each of which has its own
+associated: Physics : <physics-set> : parameters. Any parameters
+associated with a physics-set subgroup that is not in this` `list`
+:e:`parameter are ignored. Allowed values include:`
+
+  * :t:`"cosmology"` :e:`specifies cosmological constants.`
+  * :t:`"fluid_props"` :e:`specifies parameters related to gas properties.`
 
 cosmology
 ---------
@@ -61,3 +74,124 @@ cosmology
 
 :e:`Omega matter for Z=0.`
 
+fluid_props
+-----------
+
+:p:`Physics:fluid_props` parameters are used to specify general fluid
+properties for the gas.  The majority of these parameters are further
+divided into the following 3 subgroups: ``dual_energy``, ``floors``,
+``eos``.
+
+:e:`An example configuration is described below:`
+
+:: 
+
+     Physics {
+        list = ["fluid_props"];
+        fluid_props {
+        
+           dual_energy { type = "disabled"; }
+
+           eos {
+              gamma = 1.4;
+           }
+
+           floors {
+              density  = 1e-10;
+              pressure = 1e-10;
+           }
+
+           mol_weight = 0.6;
+        }
+     }
+
+----
+
+:Parameter:  :p:`Physics` : :p:`fluid_props` : :p:`mol_weight`
+:Summary: :s:`Specifies the gas's nominal mean molecular weight`
+:Type:    :t:`float`
+:Default: :d:`0.6`
+:Scope:     :z:`Enzo`
+
+:e:`Specifies the gas's nominal mean molecular weight. This is used in
+operations like computing the temperature field. When the`
+``"grackle"`` :e:`method is in use, this parameter may not be used.`
+
+----
+
+dual_energy
+~~~~~~~~~~~
+
+:p:`Physics:fluid_props:dual_energy` parameters specify details about
+the dual-energy formalism (or the lack thereof). Compatibility details
+are provided on :ref:`using-methods` for different hydro-solvers and
+different formulations of the dual-energy formalism.
+
+.. note::
+
+   We should add a separate section to discuss the different approaches for
+   the dual energy formalism.
+
+----
+
+:Parameter:  :p:`Physics` : :p:`fluid_props` : :p:`dual_energy` : :p:`type`
+:Summary: :s:`specifies formulation of dual-energy formalism (if any)`
+:Type:    :t:`string`
+:Default: :d:`disabled`
+:Scope:     :z:`Enzo`
+
+:e:`Specifies the formulation of the dual-energy formalism that the
+simulation uses (if any). Valid choices include:`
+
+  * ``"disabled"`` :e:`The dual-energy formalism is not used. This is
+    the default option.`
+
+  * ``"bryan95"`` :e:`Enables the formulation of the dual-energy
+    formalism that is described in` `Bryan et al (1995)
+    <https://ui.adsabs.harvard.edu/abs/1995CoPhC..89..149B>`_
+
+  * ``"modern"`` :e:`Enables the formulation of the dual-energy
+    formalism that is described in` :ref:`GeneralDesignOverview-section`
+
+----
+
+:Parameter:  :p:`Physics` : :p:`fluid_props` : :p:`dual_energy` : :p:`eta`
+:Summary: :s:`eta parameter(s) for the dual-energy formalism`
+:Type:    :t:`list` ( :t:`float` )
+:Default: :d:`[]`
+:Scope:     :z:`Enzo`
+
+:e:`Specifies parameters used in the dual energy formalism. It expects a different number of parameters based on the value of` :p:`Physics:fluid_props:dual_energy:type`. :e:`The expectations are summarized below:`
+
+  * ``"disabled"``: :e:`This should always be an empty list.`
+  * ``"bryan95"``: :e:`The list should always contain two entries corresponding to` ``[eta_1, eta_2]``. :e:`An empty list (the default value) is treated as though it has the value` ``[0.001, 0.1]``.
+  * ``modern"``: :e:`The list should always one entry corresponding to` ``[eta]``. :e:`An empty list (the default value) is treated as though it has the value` ``[0.001]``.
+
+eos
+~~~
+
+:p:`Physics:fluid_props:dual_energy` parameters specify details about
+the (caloric) equation of state. At this time, this only supports an 
+ideal gas. But, in the future this will support alternative 
+equations of state (like an isothermal equation of state).
+
+.. note::
+
+   `PR #173 <https://github.com/enzo-project/enzo-e/pull/173>`_
+   introduces a discussion about how the adiabatic index is treated
+   when the ``"grackle"`` method is in use and the :p:`Method` :
+   :p:`grackle` : :p:`primordial_chemistry` parameter exceeds 1.  This
+   should link to that discussion after the other PR is merged.
+
+----
+
+:Parameter:  :p:`Physics` : :p:`fluid_props` : :p:`eos` : :p:`gamma`
+:Summary: :s:`Adiabatic exponent`
+:Type:    :t:`float`
+:Default: :d:`5.0 / 3.0`
+:Scope:     :z:`Enzo`
+
+:p:`gamma` :e:`specifies the ratio of specific heats for the ideal gas
+used by the hydrodynamics solvers. This is used in a number other
+places like the` ``"grackle"`` :e:`method, and various
+problem-initializers.`
