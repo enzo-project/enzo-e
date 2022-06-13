@@ -183,7 +183,7 @@ void EnzoInitialFeedbackTest::enforce_block
   int ia_vx = particle.attribute_index (it, "vx");
   int ia_vy = particle.attribute_index (it, "vy");
   int ia_vz = particle.attribute_index (it, "vz");
-  int ia_loc  = particle.attribute_index (it, "is_local");
+  int ia_cop  = particle.attribute_index (it, "is_copy");
   int ia_id   = particle.attribute_index (it, "id");
 
   int ia_to    = particle.has_attribute(it,"creation_time") ?
@@ -210,7 +210,7 @@ void EnzoInitialFeedbackTest::enforce_block
   enzo_float * pmetal = 0;
   enzo_float * plifetime = 0;
   enzo_float * pform     = 0;
-  int64_t * is_local = 0;
+  int64_t * is_copy = 0;
   int64_t * id = 0;
 
 
@@ -239,7 +239,7 @@ void EnzoInitialFeedbackTest::enforce_block
   pmetal      = (enzo_float *) particle.attribute_array(it, ia_metal, ib);
   plifetime  = (enzo_float *) particle.attribute_array(it, ia_l, ib);
   pform      = (enzo_float *) particle.attribute_array(it, ia_to, ib);
-  is_local   = (int64_t *) particle.attribute_array(it, ia_loc, ib);
+  is_copy   = (int64_t *) particle.attribute_array(it, ia_cop, ib);
 
   ipp = 0;
   for (int i = 0; i < this->num_particles; i++){
@@ -264,7 +264,7 @@ void EnzoInitialFeedbackTest::enforce_block
       plifetime[ipp] = 1.00E9* cello::yr_s / enzo_units->time();
       pform[ipp]     = 1.0E-10 * cello::yr_s / enzo_units->time(); // really just needs to be non-zero
 
-      is_local[ipp] = 1;
+      is_copy[ipp] = 1;
 
       ipp++;
     }
