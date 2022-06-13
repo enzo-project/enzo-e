@@ -141,20 +141,20 @@ Particle {
     list = ["star"];
 
     star {
-        attributes = [ "x", "double",
-                       "y", "double",
-                       "z", "double",
-                       "vx", "double",
-                       "vy", "double",
-                       "vz", "double",
-                       "ax", "double",
-                       "ay", "double",
-                       "az", "double",
-                       "mass", "double",
-                       "is_local", "double",
-                       "creation_time", "double",
-                       "lifetime", "double",
-                       "metal_fraction", "double" ];
+        attributes = [ "x", "default",
+                       "y", "default",
+                       "z", "default",
+                       "vx", "default",
+                       "vy", "default",
+                       "vz", "default",
+                       "ax", "default",
+                       "ay", "default",
+                       "az", "default",
+                       "mass", "default",
+                       "is_local", "default",
+                       "creation_time", "default",
+                       "lifetime", "default",
+                       "metal_fraction", "default" ];
         position = [ "x", "y", "z" ];
         velocity = [ "vx", "vy", "vz" ];
         group_list = ["is_gravitating"];
