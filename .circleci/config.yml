@@ -88,8 +88,8 @@ commands:
             pip install --upgrade setuptools
             pip install sphinx sphinx_rtd_theme breathe
 
-  build-and-test:
-    description: "Compile enzo-e and run tests."
+  compile-enzoe:
+    description: "Compile enzo-e."
     parameters:
       usedouble:
         type: boolean
@@ -102,9 +102,6 @@ commands:
       usegrackle:
         type: boolean
         default: true
-      skiptest:
-        type: boolean
-        default: false
     steps:
       - run:
           name: "Checkout target tag from enzo-e repository."
@@ -122,7 +119,6 @@ commands:
             source $HOME/venv/bin/activate
 
             # convert boolean parameter to an env var storing 0 or 1
-            SKIP_TEST=$(( 0 <<# parameters.skiptest >> + 1 <</ parameters.skiptest >> ))
             USE_DOUBLE=$(( 0 <<# parameters.usedouble >> + 1 <</ parameters.usedouble >> ))
             USE_GRACKLE=$(( 0 <<# parameters.usegrackle >> + 1 <</ parameters.usegrackle >> ))
 
@@ -143,6 +139,29 @@ commands:
                     -DPARALLEL_LAUNCHER_NPROC_ARG="++local;+p" \
                     -DPython3_FIND_VIRTUALENV=ONLY
               cmake --build build -j 4
+              source $HOME/venv/bin/activate
+            fi
+
+  run-ctests:
+    description: "Compile enzo-e and run tests."
+    parameters:
+      skipfile:
+        type: string
+        default: notafile
+      skiptest:
+        type: boolean
+        default: false
+    steps:
+      - run:
+          name: "Run the unit tests with ctest."
+          command: |
+            source $BASH_ENV
+            source $HOME/venv/bin/activate
+
+            # convert boolean parameter to an env var storing 0 or 1
+            SKIP_TEST=$(( 0 <<# parameters.skiptest >> + 1 <</ parameters.skiptest >> ))
+
+            if [ ! -f << parameters.skipfile >> ]; then
               source $HOME/venv/bin/activate
               if [[ $SKIP_TEST != 1 ]]; then
                 cd build
@@ -204,16 +223,19 @@ jobs:
             - install-grackle:
                 usedouble: << parameters.usedouble >>
 
-      - build-and-test:
+      - compile-enzoe:
           usedouble: << parameters.usedouble >>
           tag: tip
           skipfile: notafile
           usegrackle: << parameters.usegrackle >>
+
+      - run-ctests:
+          skipfile: notafile
           skiptest: << parameters.skiptest >>
 
   docs-build:
     docker:
-      - image: circleci/python:3.7.2
+      - image: cimg/python:3.10
 
     working_directory: ~/enzo-e
 
