@@ -90,10 +90,11 @@ public: // virtual methods
   }
 
   /// Return temperature units scaling factor (virtual)
-  virtual double temperature() const
+  double temperature() const
   {
-    return (cosmology_ == NULL) ?
-      Units::temperature() : cosmology_->temperature_units();
+    double dflt_out = (enzo_constants::mass_hydrogen*std::pow(velocity(),2) /
+                       enzo_constants::kboltz);
+    return (cosmology_ == NULL) ? dflt_out : cosmology_->temperature_units();
   }
   
   /// Return velocity units scaling factor (virtual)
