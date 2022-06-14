@@ -90,7 +90,7 @@ public: // virtual methods
   }
 
   /// Return temperature units scaling factor (virtual)
-  double temperature() const
+  virtual double temperature() const
   {
     double dflt_out = (enzo_constants::mass_hydrogen*std::pow(velocity(),2) /
                        enzo_constants::kboltz);
