@@ -29,7 +29,7 @@ EnzoMethodBackgroundAcceleration::EnzoMethodBackgroundAcceleration
    hx_(0), hy_(0), hz_(0)
 {
 
-  this->G_four_pi_ = 4.0 * cello::pi * cello::grav_constant;
+  this->G_four_pi_ = 4.0 * cello::pi * enzo_constants::grav_constant;
 
   FieldDescr * field_descr = cello::field_descr();
 
@@ -157,7 +157,7 @@ void EnzoMethodBackgroundAcceleration::PointMass(enzo_float * ax,
   // just need to define position of each cell
 
   double mass = enzo_config->method_background_acceleration_mass *
-                cello::mass_solar / enzo_units->mass();
+                enzo_constants::mass_solar / enzo_units->mass();
   double rcore = std::max(0.1*hx_,
                      enzo_config->method_background_acceleration_core_radius/enzo_units->length());
   double G = this->G_four_pi_ *
@@ -210,29 +210,29 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
                                                    throw() {
 
   double DM_mass     = enzo_config->method_background_acceleration_DM_mass *
-                         cello::mass_solar / enzo_units->mass();
+                         enzo_constants::mass_solar / enzo_units->mass();
   double DM_mass_radius = enzo_config->method_background_acceleration_DM_mass_radius *
-                          cello::kpc_cm / enzo_units->length();
+                          enzo_constants::kpc_cm / enzo_units->length();
   double DM_density  = enzo_config->method_background_acceleration_DM_density /
                          enzo_units->density();
   double stellar_r   = enzo_config->method_background_acceleration_stellar_scale_height_r *
-                         cello::kpc_cm / enzo_units->length();
+                         enzo_constants::kpc_cm / enzo_units->length();
   double stellar_z   = enzo_config->method_background_acceleration_stellar_scale_height_z *
-                         cello::kpc_cm / enzo_units->length();
+                         enzo_constants::kpc_cm / enzo_units->length();
   double stellar_mass = enzo_config->method_background_acceleration_stellar_mass *
-                        cello::mass_solar / enzo_units->mass();
+                        enzo_constants::mass_solar / enzo_units->mass();
   double bulge_mass   = enzo_config->method_background_acceleration_bulge_mass *
-                        cello::mass_solar / enzo_units->mass();
+                        enzo_constants::mass_solar / enzo_units->mass();
   double bulgeradius = enzo_config->method_background_acceleration_bulge_radius *
-                        cello::kpc_cm / enzo_units->length();
+                        enzo_constants::kpc_cm / enzo_units->length();
   const double * amom = enzo_config->method_background_acceleration_angular_momentum;
 
 //  double G = this->G_four_pi_ *
 //             enzo_units->density() * enzo_units->time() * enzo_units->time();
-  double G_code = cello::grav_constant * enzo_units->density() * enzo_units->time() * enzo_units->time();
+  double G_code = enzo_constants::grav_constant * enzo_units->density() * enzo_units->time() * enzo_units->time();
 
   double rcore = enzo_config->method_background_acceleration_core_radius *
-                 cello::kpc_cm / enzo_units->length();
+                 enzo_constants::kpc_cm / enzo_units->length();
 
   if (DM_mass > 0.0){
     double xtemp = DM_mass_radius / rcore;
