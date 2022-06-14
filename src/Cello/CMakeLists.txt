@@ -87,8 +87,11 @@ endfunction(addUnitTestBinary)
 #addUnitTestBinary(test_itindex "test_ItIndex.cpp" "")
 #addUnitTestBinary(test_scalar "test_Scalar.cpp" "")
 #addUnitTestBinary(test_enzo_units "test_EnzoUnits.cpp" "")
-addUnitTestBinary(test_carrcollec test_CArrCollec.cpp "array")
+addUnitTestBinary(test_carr_collec "test_CArrCollec.cpp" "array")
 addUnitTestBinary(test_cello_array "test_CelloArray.cpp" "array")
+addUnitTestBinary(
+  test_string_ind_rd_only_map "test_StringIndRdOnlyMap.cpp" "array"
+)
 #addUnitTestBinary(test_colormap "test_Colormap.cpp" "io")
 addUnitTestBinary(test_error "test_Error.cpp" "error")
 #addUnitTestBinary(test_field "test_Field.cpp" "")
