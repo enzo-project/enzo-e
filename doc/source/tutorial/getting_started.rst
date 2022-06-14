@@ -175,7 +175,7 @@ picked up, you can specify the search path by
 cf., the ``cmake`` example command just above.
 Note:
 
-* these package location are also picked up from the environment, i.e., an alternative option  is ``export <package_name>_ROOT=/PATH/TO/PACKAGE/INSTALL`` .
+* these package locations are also picked up from the environment, i.e., an alternative option  is ``export <package_name>_ROOT=/PATH/TO/PACKAGE/INSTALL`` .
 
 * to specify the path to a ``libpng`` install, use ``-DPNG_ROOT=/PATH/TO/LIBPNG`` instead of ``-DLIBPNG_ROOT=...``.
 
