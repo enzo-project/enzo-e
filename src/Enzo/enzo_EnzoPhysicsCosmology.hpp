@@ -193,7 +193,7 @@ public: // interface
   /// Return current length units scaling (requires set_current_time())
   double length_units() const
   {
-    return cello::Mpc_cm*comoving_box_size_/hubble_constant_now_/
+    return enzo_constants::Mpc_cm*comoving_box_size_/hubble_constant_now_/
       (1.0 + current_redshift_);
   }
 
