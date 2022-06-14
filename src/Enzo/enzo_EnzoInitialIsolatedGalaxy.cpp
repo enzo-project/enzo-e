@@ -57,12 +57,6 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
 (const EnzoConfig * config) throw()
 : Initial(config->initial_cycle, config->initial_time)
 {
-  if (this->stellar_disk_ || this->stellar_bulge_)
-    cello::particle_descr()->check_particle_attribute("star","mass");
-
-  if (this->live_dm_halo_)
-    cello::particle_descr()->check_particle_attribute("dark","mass");
-
   // read in parameter settings from config and
   // set corresponding member variables
   for(int i = 0; i < 3; i ++){
@@ -111,10 +105,14 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
   //           color fields as well, but maybe that is taken care of
   //           properly
   ParticleDescr * particle_descr = cello::particle_descr();
-  if (this->stellar_disk_ || this->stellar_bulge_)
-      particle_descr->groups()->add("star","is_gravitating"); // hack
-  if (this->live_dm_halo_)
-      particle_descr->groups()->add("dark","is_gravitating");
+  if (this->stellar_disk_ || this->stellar_bulge_) {
+    particle_descr->check_particle_attribute("star","mass");
+    particle_descr->groups()->add("star","is_gravitating"); // hack
+  }
+  if (this->live_dm_halo_) {
+    particle_descr->check_particle_attribute("dark","mass");
+    particle_descr->groups()->add("dark","is_gravitating");
+  }
 
   // Compute halo density / mass
   if ((this->gas_halo_density_ == 0.0) && this->gas_halo_mass_ > 0)
