@@ -11,9 +11,9 @@
 //----------------------------------------------------------------------
 
 void EnzoReconstructorNN::reconstruct_interface
-(EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
- EnzoEFltArrayMap &primr_map, int dim, EnzoEquationOfState *eos,
- int stale_depth, const str_vec_t& passive_list)
+(const EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
+ EnzoEFltArrayMap &primr_map, const int dim, const EnzoEquationOfState *eos,
+ const int stale_depth, const str_vec_t& passive_list)
 {
 
   // determine components of i unit vector
@@ -25,11 +25,12 @@ void EnzoReconstructorNN::reconstruct_interface
              &prim_map, &priml_map, &primr_map](const std::string &key)
     {
       // define wc_offset(k,j,i) -> wc(k,j,i+1)
-      EFlt3DArray wc = prim_map.get(key, stale_depth);
-      EFlt3DArray wc_offset = coord.left_edge_offset(wc, 0, 0, 1);
+      const CelloArray<const enzo_float,3> wc = prim_map.get(key, stale_depth);
+      const CelloArray<const enzo_float,3> wc_offset
+        = coord.left_edge_offset(wc, 0, 0, 1);
 
-      EFlt3DArray wl = priml_map.get(key, stale_depth);
-      EFlt3DArray wr = primr_map.get(key, stale_depth);
+      const EFlt3DArray wl = priml_map.get(key, stale_depth);
+      const EFlt3DArray wr = primr_map.get(key, stale_depth);
 
       // the following could be optimized
       for (int iz=0; iz<wc.shape(0)-i_z; iz++) {

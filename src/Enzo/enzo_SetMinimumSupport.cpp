@@ -14,7 +14,8 @@
 int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
 				 bool comoving_coordinates)
 {
-  if (NumberOfBaryonFields > 0) {
+  const int in = cello::index_static();
+  if (NumberOfBaryonFields[in] > 0) {
  
     /* Compute cosmology factors. */
  
@@ -34,8 +35,6 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
  
     /* Determine the size of the grids. */
  
-    const int in = cello::index_static();
-
     int dim, size = 1, i;
     for (dim = 0; dim < GridRank[in]; dim++)
       size *= GridDimension[dim];

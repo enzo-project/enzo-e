@@ -92,8 +92,16 @@ public: // virtual methods
   /// Return temperature units scaling factor (virtual)
   virtual double temperature() const
   {
-    return (cosmology_ == NULL) ?
-      Units::temperature() : cosmology_->temperature_units();
+    if (cosmology_ == NULL){
+      // The Units base-class can't compute the temperature code units for the
+      // non-cosmology case because it involves physical constants that are not
+      // defined in the Cello layer
+      double vel_units = velocity();
+      return (enzo_constants::mass_hydrogen * (vel_units * vel_units) /
+              enzo_constants::kboltz);
+    } else {
+      return cosmology_->temperature_units();
+    }
   }
   
   /// Return velocity units scaling factor (virtual)

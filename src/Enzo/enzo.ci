@@ -1,0 +1,228 @@
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     enzo.ci
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2011-03-24
+/// @brief    CHARM++ Enzo process group
+
+module enzo {
+
+  initnode void register_method_turbulence(void);
+  initnode void mutex_init();
+  initnode void mutex_init_bcg_iter();
+
+  readonly EnzoConfig g_enzo_config;
+  readonly int EnzoBlock::UseMinimumPressureSupport[CONFIG_NODE_SIZE];
+  readonly enzo_float EnzoBlock::MinimumPressureSupportParameter[CONFIG_NODE_SIZE];
+  readonly int EnzoBlock::MultiSpecies[CONFIG_NODE_SIZE];
+  readonly int EnzoBlock::PressureFree[CONFIG_NODE_SIZE];
+  readonly enzo_float EnzoBlock::Gamma[CONFIG_NODE_SIZE];
+  readonly enzo_float EnzoBlock::GravitationalConstant[CONFIG_NODE_SIZE];
+  readonly int EnzoBlock::ProblemType[CONFIG_NODE_SIZE];
+  readonly int EnzoBlock::PPMFlatteningParameter[CONFIG_NODE_SIZE];
+  readonly int EnzoBlock::PPMDiffusionParameter[CONFIG_NODE_SIZE];
+  readonly int EnzoBlock::PPMSteepeningParameter[CONFIG_NODE_SIZE];
+  readonly int EnzoBlock::DualEnergyFormalism[CONFIG_NODE_SIZE];
+  readonly enzo_float EnzoBlock::DualEnergyFormalismEta1[CONFIG_NODE_SIZE];
+  readonly enzo_float EnzoBlock::DualEnergyFormalismEta2[CONFIG_NODE_SIZE];
+  readonly enzo_float EnzoBlock::pressure_floor[CONFIG_NODE_SIZE];
+  readonly enzo_float EnzoBlock::density_floor[CONFIG_NODE_SIZE];
+  readonly enzo_float EnzoBlock::number_density_floor[CONFIG_NODE_SIZE];
+  readonly enzo_float EnzoBlock::temperature_floor[CONFIG_NODE_SIZE];
+  readonly enzo_float EnzoBlock::InitialRedshift[CONFIG_NODE_SIZE];
+  readonly enzo_float EnzoBlock::InitialTimeInCodeUnits[CONFIG_NODE_SIZE];
+  readonly enzo_float EnzoBlock::DomainLeftEdge [CONFIG_NODE_SIZE_3];
+  readonly enzo_float EnzoBlock::DomainRightEdge[CONFIG_NODE_SIZE_3];
+  readonly int EnzoBlock::GridRank[CONFIG_NODE_SIZE];
+  readonly int EnzoBlock::ghost_depth[CONFIG_NODE_SIZE_3];
+  readonly int EnzoBlock::NumberOfBaryonFields[CONFIG_NODE_SIZE];      // active baryon fields
+
+#ifdef CONFIG_USE_GRACKLE
+  PUPable EnzoInitialGrackleTest;
+  PUPable EnzoMethodGrackle;
+  PUPable EnzoComputeCoolingTime;
+#endif
+
+  PUPable EnzoBoundary;
+  PUPable EnzoConfig;
+  PUPable EnzoFactory;
+
+  PUPable EnzoInitialBCenter;
+  PUPable EnzoInitialCloud;
+  PUPable EnzoInitialCollapse;
+  PUPable EnzoInitialCosmology;
+  PUPable EnzoInitialHdf5;
+  PUPable EnzoInitialFeedbackTest;
+  PUPable EnzoInitialInclinedWave;
+  PUPable EnzoInitialImplosion2;
+  PUPable EnzoInitialMusic;
+  PUPable EnzoInitialPm;
+  PUPable EnzoInitialBurkertBodenheimer;
+  PUPable EnzoInitialPpmlTest;
+  PUPable EnzoInitialSedovArray2;
+  PUPable EnzoInitialSedovArray3;
+  PUPable EnzoInitialSedovRandom;
+  PUPable EnzoInitialShockTube;
+  PUPable EnzoInitialSoup;
+  PUPable EnzoInitialTurbulence;
+  PUPable EnzoInitialIsolatedGalaxy;
+  PUPable EnzoInitialMergeSinksTest;
+
+  PUPable IoEnzoBlock;
+
+  PUPable EnzoRefineShock;
+  PUPable EnzoRefineParticleMass;
+  PUPable EnzoRefineMass;
+
+  PUPable EnzoComputePressure;
+  PUPable EnzoComputeTemperature;
+  PUPable EnzoComputeAcceleration;
+  PUPable EnzoComputeCicInterp;
+
+  PUPable EnzoMatrixLaplace;
+  PUPable EnzoMatrixDiagonal;
+  PUPable EnzoMatrixIdentity;
+
+  PUPable EnzoMethodBackgroundAcceleration;
+  PUPable EnzoMethodFeedback;
+  PUPable EnzoMethodDistributedFeedback;
+
+  PUPable EnzoMethodComovingExpansion;
+  PUPable EnzoMethodCosmology;
+  PUPable EnzoMethodGravity;
+
+  PUPable EnzoMethodHeat;
+  PUPable EnzoMethodPmDeposit;
+  PUPable EnzoMethodPmUpdate;
+  PUPable EnzoMethodPpm;
+  PUPable EnzoMethodPpml;
+  PUPable EnzoMethodTurbulence;
+  PUPable EnzoMethodMHDVlct;
+  PUPable EnzoMethodMergeSinks;
+
+  PUPable EnzoEOSIdeal;
+  PUPable EnzoIntegrationQuanUpdate;
+  PUPable EnzoReconstructorNN;
+  // EnzoReconstructorPLMEnzoRKLim
+  PUPable EnzoReconstructorPLM<PLM_EnzoRKLimiter>;
+  // EnzoReconstructorPLMAthenaLim
+  PUPable EnzoReconstructorPLM<PLM_AthenaLimiter>;
+
+  PUPable EnzoMethodStarMaker;
+  PUPable EnzoMethodStarMakerStochasticSF;
+  PUPable EnzoBfieldMethodCT;
+
+  PUPable EnzoPhysicsCosmology;
+
+  PUPable EnzoProblem;
+  PUPable EnzoProlong;
+  PUPable EnzoProlongMC1;
+  PUPable EnzoProlongPoisson;
+
+  PUPable EnzoRestrict;
+
+  PUPable EnzoSolverCg;
+  PUPable EnzoSolverDd;
+  PUPable EnzoSolverDiagonal;
+  PUPable EnzoSolverBiCgStab;
+  PUPable EnzoSolverMg0;
+  PUPable EnzoSolverJacobi;
+
+  PUPable EnzoStopping;
+
+  PUPable EnzoUnits;
+
+  extern module mesh;
+
+  readonly CProxy_EnzoSimulation proxy_enzo_simulation;
+
+  group [migratable] EnzoSimulation : Simulation {
+
+    entry EnzoSimulation (const char filename[n], int n);
+
+    entry void r_startup_begun (CkReductionMsg *);
+
+#ifdef BYPASS_CHARM_MEM_LEAK
+    entry void p_get_msg_refine(Index index);
+#endif
+}
+
+  array[Index] EnzoBlock : Block {
+
+#ifdef BYPASS_CHARM_MEM_LEAK
+    entry EnzoBlock (process_type ip_source);
+    entry void p_set_msg_refine (MsgRefine * msg);
+#else
+    entry EnzoBlock (MsgRefine * msg);
+#endif
+    entry EnzoBlock();
+
+    // EnzoMethodTurbulence synchronization entry methods
+    entry void r_method_turbulence_end(CkReductionMsg *msg);
+
+    entry void p_initial_hdf5_recv(MsgInitial * msg_initial);
+
+    // EnzoMethodGravity synchronization entry methods
+    entry void p_method_gravity_continue();
+    entry void p_method_gravity_end();
+
+    // EnzoSolverCg synchronization entry methods
+
+    entry void p_solver_cg_matvec();
+
+    entry void r_solver_cg_loop_0a(CkReductionMsg *msg);
+    entry void r_solver_cg_loop_0b(CkReductionMsg *msg);
+    entry void r_solver_cg_shift_1(CkReductionMsg *msg);
+    entry void p_solver_cg_loop_2();
+    entry void r_solver_cg_loop_3(CkReductionMsg *msg);
+    entry void r_solver_cg_loop_5(CkReductionMsg *msg);
+
+    // EnzoSolverBiCGStab post-reduction entry methods
+
+    entry void r_solver_bicgstab_start_1(CkReductionMsg *msg);
+    entry void r_solver_bicgstab_start_3(CkReductionMsg *msg);
+    entry void r_solver_bicgstab_loop_5(CkReductionMsg *msg);
+    entry void r_solver_bicgstab_loop_11(CkReductionMsg *msg);
+    entry void r_solver_bicgstab_loop_13(CkReductionMsg *msg);
+    entry void r_solver_bicgstab_loop_15(CkReductionMsg *msg);
+
+    entry void p_solver_bicgstab_loop_2();
+    entry void p_solver_bicgstab_loop_3();
+    entry void p_solver_bicgstab_loop_8();
+    entry void p_solver_bicgstab_loop_9();
+
+    entry void p_dot_recv_parent(int n, long double dot[n],
+				 std::vector<int> isa,
+				 int i_function, int iter);
+    entry void p_dot_recv_children(int n, long double dot[n],
+				   std::vector<int> isa,
+				   int i_function);
+
+    // EnzoSolverDd
+
+    entry void p_solver_dd_restrict_recv(FieldMsg * msg);
+    entry void p_solver_dd_prolong_recv(FieldMsg * msg);
+    entry void p_solver_dd_solve_coarse();
+    entry void p_solver_dd_solve_domain();
+    entry void p_solver_dd_last_smooth();
+    entry void r_solver_dd_barrier(CkReductionMsg *msg);
+    entry void r_solver_dd_end(CkReductionMsg *msg);
+
+    // EnzoSolverJacobi
+
+    entry void p_solver_jacobi_continue();
+
+    // EnzoSolverMg0
+
+    entry void p_solver_mg0_restrict();
+    entry void p_solver_mg0_solve_coarse();
+    entry void p_solver_mg0_post_smooth();
+    entry void p_solver_mg0_last_smooth();
+    entry void r_solver_mg0_begin_solve(CkReductionMsg *msg);
+    entry void r_solver_mg0_barrier(CkReductionMsg* msg);
+    entry void p_solver_mg0_prolong_recv(FieldMsg * msg);
+    entry void p_solver_mg0_restrict_recv(FieldMsg * msg);
+
+  };
+
+};

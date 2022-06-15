@@ -66,10 +66,10 @@ void Main::exit_()
 
 //----------------------------------------------------------------------
 
-void Main::p_checkpoint(int count, std::string dir_name)
+void Main::p_checkpoint_output(int count, std::string dir_name)
 {
   
-  TRACE_MAIN("DEBUG MAIN p_checkpoint");
+  TRACE_MAIN("DEBUG MAIN p_checkpoint_output");
   
   count_checkpoint_++;
   if (count_checkpoint_ >= count) {
@@ -84,8 +84,40 @@ void Main::p_checkpoint(int count, std::string dir_name)
 
 #ifdef CHARM_ENZO
     CkPrintf ("Calling CkStartCheckpoint\n");
-    CkCallback callback(CkIndex_EnzoSimulation::r_write_checkpoint(),proxy_simulation);
-    CkStartCheckpoint (dir_checkpoint_,callback);
+    CkCallback callback(CkIndex_EnzoSimulation::r_write_checkpoint_output(),proxy_simulation);
+    CkStartCheckpoint (dir_checkpoint_,callback,false,1);
+    // "OLD" CHARM++ (version < 7.0.0) USE:
+    //CkStartCheckpoint (dir_checkpoint_,callback);
+#endif
+  }
+  // --------------------------------------------------
+}
+
+
+//----------------------------------------------------------------------
+
+void Main::p_checkpoint_method(int count, std::string dir_name)
+{
+  
+  TRACE_MAIN("DEBUG MAIN p_checkpoint_method");
+  
+  count_checkpoint_++;
+  if (count_checkpoint_ >= count) {
+    count_checkpoint_ = 0;
+    // Write parameter file
+
+#ifdef CHARM_ENZO
+    strncpy(dir_checkpoint_,dir_name.c_str(),255);
+    Simulation * simulation = cello::simulation();
+    simulation->set_checkpoint(dir_checkpoint_);
+#endif    
+
+#ifdef CHARM_ENZO
+    CkPrintf ("Calling CkStartCheckpoint\n");
+    CkCallback callback(CkIndex_EnzoSimulation::r_write_checkpoint_method(),proxy_simulation);
+    CkStartCheckpoint (dir_checkpoint_,callback,false,1);
+    // "OLD" CHARM++ (version < 7.0.0) USE:
+    //CkStartCheckpoint (dir_checkpoint_,callback);
 #endif
   }
   // --------------------------------------------------
@@ -153,7 +185,7 @@ void Main::p_stopping_enter()
 void Main::p_stopping_balance()
 {
 #ifdef CHARM_ENZO
-  cello::block_array().p_stopping_balance();
+  cello::block_array().p_stopping_load_balance();
 #endif
 }
 
@@ -253,12 +285,12 @@ void Main::p_adapt_end()
 
 //----------------------------------------------------------------------
 
-void Main::p_adapt_next()
+void Main::p_adapt_update()
 {
-  TRACE_MAIN("p_adapt_next");
+  TRACE_MAIN("p_adapt_update");
 #ifdef CHARM_ENZO
-  cello::block_array().p_adapt_next();
-#endif
+  cello::block_array().p_adapt_update();
+#endif  
 }
 
 //----------------------------------------------------------------------
@@ -278,16 +310,6 @@ void Main::p_adapt_exit()
   TRACE_MAIN("p_adapt_exit");
 #ifdef CHARM_ENZO
   cello::block_array().p_adapt_exit();
-#endif
-}
-
-//----------------------------------------------------------------------
-
-void Main::p_refresh_exit()
-{
-  TRACE_MAIN("p_refresh_exit");
-#ifdef CHARM_ENZO
-  cello::block_array().p_refresh_exit();
 #endif
 }
 

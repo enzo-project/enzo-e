@@ -13,7 +13,7 @@
 Hierarchy * Factory::create_hierarchy
 ( int refinement, int min_level, int max_level) const throw ()
 {
-  return new Hierarchy (this,refinement, min_level, max_level); 
+  return new Hierarchy (this,refinement, min_level, max_level);
 }
 
 //----------------------------------------------------------------------
@@ -28,7 +28,7 @@ void Factory::pup (PUP::er &p)
   PUP::able::pup(p);
 
   //  p | bound_arrays_;
-  
+
 }
 
 //----------------------------------------------------------------------
@@ -76,7 +76,7 @@ CProxy_Block Factory::new_block_proxy
 }
 
 //----------------------------------------------------------------------
-  
+
 void Factory::create_block_array
 (
  DataMsg * data_msg,
@@ -97,25 +97,31 @@ void Factory::create_block_array
   int num_face_level = 0;
   int * face_level = 0;
 
+#ifdef DEBUG_ADAPT
+  CkPrintf ("TRACE_FACTORY %s:%d\n",__FILE__,__LINE__); fflush(stdout);
+#endif
   for (int ix=0; ix<nbx; ix++) {
     for (int iy=0; iy<nby; iy++) {
       for (int iz=0; iz<nbz; iz++) {
 
 	Index index(ix,iy,iz);
 
-	MsgRefine * msg = new MsgRefine 
+	MsgRefine * msg = new MsgRefine
 	  (index,
 	   nx,ny,nz,
 	   num_field_data,
 	   count_adapt = 0,
 	   cycle,time,dt,
 	   refresh_same,
-	   num_face_level, face_level);
+	   num_face_level, face_level, nullptr);
 
 	msg->set_data_msg(data_msg);
+#ifdef BYPASS_CHARM_MEM_LEAK
 	cello::simulation()->set_msg_refine (index,msg);
 	proxy_block[index].insert (process_type(CkMyPe()));
-
+#else
+	proxy_block[index].insert (msg);
+#endif
 	// --------------------------------------------------
 
       }
@@ -161,33 +167,38 @@ void Factory::create_subblock_array
     int num_face_level = 0;
     int * face_level = 0;
 
-    for (int ix=0; ix<nbx; ix++) {
+#ifdef DEBUG_ADAPT  
+  CkPrintf ("TRACE_FACTORY %s:%d\n",__FILE__,__LINE__); fflush(stdout);
+#endif
+  for (int ix=0; ix<nbx; ix++) {
       for (int iy=0; iy<nby; iy++) {
 	for (int iz=0; iz<nbz; iz++) {
 
 	  int shift = -level;
-	  
+
 	  Index index(ix<<shift,iy<<shift,iz<<shift);
 
 	  index.set_level(level);
 
 	  TRACE3 ("inserting %d %d %d",ix,iy,iz);
-  
-	  MsgRefine * msg = new MsgRefine 
+
+	  MsgRefine * msg = new MsgRefine
 	    (index,
 	     nx,ny,nz,
 	     num_field_blocks,
 	     count_adapt = 0,
 	     cycle,time,dt,
 	     refresh_same,
-	     num_face_level, face_level);
+	     num_face_level, face_level, nullptr);
 
 	  msg->set_data_msg(data_msg);
 
-	  cello::simulation()->set_msg_refine (index,msg);
-
+#ifdef BYPASS_CHARM_MEM_LEAK
+          cello::simulation()->set_msg_refine (index,msg);
           block_array[index].insert (process_type(CkMyPe()));
-
+#else
+          block_array[index].insert (msg);
+#endif
 	  // --------------------------------------------------
 
 	}
@@ -208,7 +219,9 @@ void Factory::create_block
  int count_adapt,
  int cycle, double time, double dt,
  int narray, char * array, int refresh_type,
- int num_face_level, int * face_level,
+ int num_face_level,
+ int * face_level,
+ Adapt * adapt,
  Simulation * simulation
  ) const throw()
 {
@@ -217,25 +230,30 @@ void Factory::create_block
   TRACE2("Factory::create_block(num_field_data %d  count_adapt %d)",
 	 num_field_data,count_adapt);
 
-
   // --------------------------------------------------
   // ENTRY: #3 Factory::create_block() -> Block::Block()
   // ENTRY: level > 0 block array insert
   // --------------------------------------------------
 
-  MsgRefine * msg = new MsgRefine 
+#ifdef DEBUG_ADAPT  
+  CkPrintf ("TRACE_FACTORY %s:%d\n",__FILE__,__LINE__); fflush(stdout);
+#endif
+  MsgRefine * msg = new MsgRefine
     (index,
      nx,ny,nz,
      num_field_data,
      count_adapt,
      cycle,time,dt,
      refresh_type,
-     num_face_level, face_level);
+     num_face_level, face_level, adapt);
 
   msg->set_data_msg (data_msg);
 
+#ifdef BYPASS_CHARM_MEM_LEAK
   cello::simulation()->set_msg_refine (index,msg);
-
   block_array[index].insert (process_type(CkMyPe()));
+#else
+  block_array[index].insert (msg);
+#endif
 }
 

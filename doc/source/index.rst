@@ -113,16 +113,16 @@ presentation, and some sections are somewhat outdated.  This document,
 while currently still useful, is being phased out in favor of the
 above online content.
 
-   :download:`Using and Developing Enzo-E/Cello <http://client64-249.sdsc.edu/Tutorial/enzo-p-cello.pdf>`
+   :download:`Using and Developing Enzo-E/Cello <http://client64-71.sdsc.edu/Tutorial/enzo-p-cello.pdf>`
 
 Presentations given at the 2018 Enzo Days Workshop are also available
 below.  They are more up-to-date, but are also still rather large.
 
-   :download:`Enzo-E / Cello Status and What's New? <http://client64-249.sdsc.edu/Tutorial/1805-1-status.pdf>`
+   :download:`Enzo-E / Cello Status and What's New? <http://client64-71.sdsc.edu/Tutorial/1805-1-status.pdf>`
 
-   :download:`Introduction to Enzo-E <http://client64-249.sdsc.edu/Tutorial/1805-2-intro.pdf>`
+   :download:`Introduction to Enzo-E <http://client64-71.sdsc.edu/Tutorial/1805-2-intro.pdf>`
 	     
-   :download:`First Steps with Enzo-E <http://client64-249.sdsc.edu/Tutorial/1805-3-using.pdf>`
+   :download:`First Steps with Enzo-E <http://client64-71.sdsc.edu/Tutorial/1805-3-using.pdf>`
 
 Indices and tables
 ==================

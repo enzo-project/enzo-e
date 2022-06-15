@@ -23,16 +23,16 @@ EnzoMethodStarMaker::EnzoMethodStarMaker
 ()
   : Method()
 {
+  cello::particle_descr()->check_particle_attribute("star","mass");
 
   const EnzoConfig * enzo_config = enzo::config();
-
   // AJE: This was the old way this was done
   // Initialize default Refresh object
   // const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
   //                           enzo_sync_id_method_star_maker);
   // refresh(ir)->add_all_fields();
 
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
 
   Refresh * refresh = cello::refresh(ir_post_);
 
@@ -90,11 +90,7 @@ void EnzoMethodStarMaker::compute ( Block *block) throw()
   return;
 }
 
-// Required
-double EnzoMethodStarMaker::timestep ( Block *block) const throw()
-{
-  return std::numeric_limits<double>::max();
-}
+//----------------------------------------------------------------------
 
 void EnzoMethodStarMaker::rescale_densities(EnzoBlock * enzo_block,
                                             const int index,
@@ -228,9 +224,9 @@ int EnzoMethodStarMaker::check_self_gravitating(
 
   // constant for testing. TODO: change to variable
   const double gamma = 5.0 / 3.0;
-  cs2 = (gamma * cello::kboltz * temperature) / mean_particle_mass;
+  cs2 = (gamma * enzo_constants::kboltz * temperature) / mean_particle_mass;
 
-  alpha = (div_v_norm2 + cs2/dx2) / (8 * cello::pi * cello::grav_constant * rho_cgs);
+  alpha = (div_v_norm2 + cs2/dx2) / (8 * cello::pi * enzo_constants::grav_constant * rho_cgs);
   return (alpha < 1);
 
 }
@@ -273,9 +269,9 @@ int EnzoMethodStarMaker::check_jeans_mass(
     return 1;
 
   const double gamma = 5.0 / 3.0;
-  const double minimum_jeans_mass = 1000 * cello::mass_solar;
-  double cs2 = (gamma * cello::kboltz * temperature) / mean_particle_mass;
-  double m_jeans = (cello::pi/6) * pow(cs2, 1.5) / (pow(cello::grav_constant, 1.5) * sqrt(rho_cgs));
+  const double minimum_jeans_mass = 1000 * enzo_constants::mass_solar;
+  double cs2 = (gamma * enzo_constants::kboltz * temperature) / mean_particle_mass;
+  double m_jeans = (cello::pi/6) * pow(cs2, 1.5) / (pow(enzo_constants::grav_constant, 1.5) * sqrt(rho_cgs));
   double m_jcrit = MAX(minimum_jeans_mass, m_jeans);
   return (mass < m_jcrit);
 }

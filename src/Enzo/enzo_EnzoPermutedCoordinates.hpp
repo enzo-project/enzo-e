@@ -66,17 +66,21 @@ public: // interface
   ///     array.subarray(CSlice(2, array.shape(0)),
   ///                    CSlice(0, array.shape(1)),
   ///                    CSlice(1, array.shape(2)))
-  inline EFlt3DArray left_edge_offset(EFlt3DArray &array, int kstart,
-                                      int jstart, int istart) const
+  template<typename T>
+  inline CelloArray<T,3> left_edge_offset(const CelloArray<T,3> &array,
+                                          int kstart, int jstart, int istart)
+    const noexcept
   {
     return get_subarray(array, CSlice(kstart, nullptr), CSlice(jstart, nullptr),
-			CSlice(istart,nullptr));
+                        CSlice(istart,nullptr));
   }
 
   /// Returns the subarray of array for slices specified along the k-, j-,
   /// and i- axes using the i,j,k coordinate system represented by this instance
-  inline EFlt3DArray get_subarray(EFlt3DArray &array, CSlice k_slice,
-                                  CSlice j_slice, CSlice i_slice) const
+  template<typename T>
+  inline CelloArray<T,3> get_subarray(const CelloArray<T,3> &array,
+                                      CSlice k_slice, CSlice j_slice,
+                                      CSlice i_slice) const noexcept
   {
     CSlice slices[3];
     slices[2 - i_axis()] = i_slice;

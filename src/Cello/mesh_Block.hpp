@@ -2,26 +2,17 @@
 
 /// @file     mesh_Block.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
+/// @author   Stefan Arridge (stefan.arridge@gmail.com)
 /// @date     Fri Apr  2 14:09:42 PDT 2010
 /// @brief    [\ref Mesh] Declaration of the Block class
 
 #ifndef MESH_BLOCK_HPP
 #define MESH_BLOCK_HPP
 
-#ifdef CELLO_TRACE
-#define TRACE_ADAPT(MSG)			\
-  index_.print(MSG,-1,2,false,simulation());	\
-  TRACE1("this = %p",this);
-#else
-#define TRACE_ADAPT(MSG)			\
-  ;
-#endif
-
 class Data;
 class MsgRefresh;
 class MsgRefine;
 class MsgCoarsen;
-class Factory;
 class FieldFace;
 class Hierarchy;
 class ItFace;
@@ -46,26 +37,16 @@ class Block : public CBase_Block
 
 public: // interface
 
+#ifdef BYPASS_CHARM_MEM_LEAK
+  /// create a Block whose MsgRefine is on the creating process
+  Block ( process_type ip_source );
+  /// Initialize Block using MsgRefine returned by creating process
+  virtual void p_set_msg_refine(MsgRefine * msg);
+#else
   /// create a Block with the given block count, lower extent, block
   /// size, and number of field blocks
   Block ( MsgRefine * msg );
-
-  /// create a Block whose MsgRefine is on the creating process
-  Block ( process_type ip_source );
-
-  /// Initialize Block using MsgRefine returned by creating process
-  virtual void p_set_msg_refine(MsgRefine * msg);
-
-
-  // Initialize
-  void init (
-   Index index,
-   int nx, int ny, int nz,
-   int num_field_blocks,
-   int num_adapt_steps,
-   int cycle, double time, double dt,
-   int narray, char * array, int refresh_type,
-   int num_face_level, int * face_level);
+#endif
 
   /// Destructor
   virtual ~Block();
@@ -73,7 +54,7 @@ public: // interface
   /// Copy constructor
   Block(const Block & block)
   /// @param     block  Object being copied
-  {  copy_(block);  }
+  { copy_(block);  }
 
   /// Assignment operator
   Block & operator = (const Block & block)
@@ -152,17 +133,11 @@ public: // interface
   { return index_; }
 
   int face_level (const int if3[3]) const
-  { return face_level_curr_[IF3(if3)]; }
+  { return adapt_.face_level(if3,Adapt::LevelType::curr); }
 
   int face_level (int axis, int face) const
-  {
-    int if3[3];
-    cello::af_to_xyz(axis,face,if3);
-    return face_level_curr_[IF3(if3)];
-  }
+  { return adapt_.face_level(axis,face,Adapt::LevelType::curr); }
 
-  int face_level_next (const int if3[3]) const
-  { return face_level_next_[IF3(if3)]; }
 
   int child_face_level (const int ic3[3], const int if3[3]) const
   { return child_face_level_curr_[ICF3(ic3,if3)]; }
@@ -170,26 +145,24 @@ public: // interface
   int child_face_level_next (const int ic3[3], const int if3[3]) const
   { return child_face_level_next_[ICF3(ic3,if3)]; }
 
-  void set_face_level_curr (const int if3[3], int level)
-  { face_level_curr_[IF3(if3)] = level; }
-
-  void set_face_level_next (const int if3[3], int level)
-  { face_level_next_[IF3(if3)] = level; }
-
   void set_child_face_level_curr (const int ic3[3], const int if3[3], int level)
   { child_face_level_curr_[ICF3(ic3,if3)] = level;  }
 
   void set_child_face_level_next (const int ic3[3], const int if3[3], int level)
   { child_face_level_next_[ICF3(ic3,if3)] = level; }
 
+
+  /// Verify that new and old adapt neighbors match
+  void verify_neighbors();
+
   //----------------------------------------------------------------------
   // GENERAL
   //----------------------------------------------------------------------
 
-  Index neighbor_ (const int if3[3], Index * ind = 0) const;
-
   /// Return the name of the block
   std::string name () const throw();
+  /// Return the name of the block with the given index
+  std::string name(Index index) const throw();
 
   /// Return the size the Block array
   void size_array (int * nx, int * ny = 0, int * nz = 0) const throw();
@@ -207,16 +180,9 @@ public: // interface
   /// Return which block faces lie along a domain boundary
   void is_on_boundary (bool boundary[3][2]) const throw();
 
-  /// Return which faces are periodic
-  void periodicity (bool periodic[3]) const;
-
-  void update_levels_ ()
-  {
-    face_level_curr_ =       face_level_next_;
-    //    for (int i=0; i<face_level_next_.size(); i++) face_level_next_[i]=0;
-    child_face_level_curr_ = child_face_level_next_;
-    //    for (int i=0; i<child_face_level_next_.size(); i++) child_face_level_next_[i]=0;
-  }
+  /// Update local level bounds and refine/coarsen neighbor indices in
+  /// Adapt
+  void update_levels_ ();
 
   bool is_child_ (const Index & index) const
   {
@@ -229,8 +195,22 @@ public: // interface
   /// Initialize child face levels given own face levels
   void initialize_child_face_levels_();
 
+  // Initialize after refinement
+  void init_refine_ (
+   Index index,
+   int nx, int ny, int nz,
+   int num_field_blocks,
+   int num_adapt_steps,
+   int cycle, double time, double dt,
+   int narray, char * array, int refresh_type,
+   int num_face_level, int * face_level,
+   Adapt * adapt);
+
+  /// Initialize Adapt class for neighbor connectivity
+  void init_adapt_(Adapt * adapt_parent);
+
   /// Initialize arrays for refresh
-  void init_new_refresh_();
+  void init_refresh_();
 
   /// Return an iterator over faces
 
@@ -241,9 +221,10 @@ public: // interface
 
   /// Return an iterator over neighbors
 
-  ItNeighbor it_neighbor(int min_face_rank, Index index,
-			 int neighbor_type,
-			 int min_level = 0,
+  ItNeighbor it_neighbor(Index index,
+                         int min_face_rank = -1,
+			 int neighbor_type = neighbor_leaf,
+			 int min_level = INDEX_UNDEFINED_LEVEL,
 			 int root_level = 0) throw();
 
   //--------------------------------------------------
@@ -260,24 +241,34 @@ public: // interface
   // INITIAL
   //--------------------------------------------------
 
-  /// Enter initial phase
-  void initial_enter_();
   /// Initiate computing the sequence of Methods
-  void initial_begin_();
+  void initial_new_begin_(int level);
   /// Initiate computing the next Method in the sequence
-  void initial_next_();
-  /// Return after performing any Refresh operations
-  void initial_continue_();
-  /// Cleanup after all Methods have been applied
-  void initial_end_();
+  void r_initial_new_next(CkReductionMsg * msg)
+  { delete msg; initial_new_next_(); }
+  void initial_new_next_();
 
   void r_end_initialize(CkReductionMsg * msg)
-  {  initial_exit_();  delete msg;  }
+  {
+    initial_exit_();  delete msg;
+  }
+
   void initial_exit_();
   void p_initial_exit()
-  {      initial_exit_();  }
-  void r_initial_exit(CkReductionMsg * msg)
-  {      initial_exit_();  delete msg;  }
+  { initial_exit_(); }
+
+  void r_initial_new_continue(CkReductionMsg * msg)
+  { delete msg; initial_new_continue_(); }
+
+  /// Return after performing any Refresh operations
+  void initial_new_continue_();
+
+  /// Return the currently active Initial index
+  int index_initial() const throw()
+  { return index_initial_; }
+
+  /// Return the currently-active Initial object
+  Initial * initial () throw();
 
   //--------------------------------------------------
   // COMPUTE
@@ -340,6 +331,7 @@ public: // interface
 
 protected: // methods
 
+  Index neighbor_ (const int if3[3], Index * ind = 0) const;
   /// Enter control compute phase
   void compute_enter_();
   /// Initiate computing the sequence of Methods
@@ -356,8 +348,13 @@ protected: // methods
 public: // methods
 
   /// Prepare to call compute_next_() after computing (used to
-  /// synchronize between methods) Must be called at end of Method
+  /// synchronize between methods) Must be called at end of each
+  /// Method::compute()
   void compute_done();
+
+  /// Prepare to call next phase after initialization / adapt;
+  /// Must be called at end of each Initial::enforce_block()
+  void initial_done();
 
   /// Compute all derived fields in a block (default)
   ///   if field_list is provided, loops through that list and computes
@@ -374,17 +371,6 @@ protected:
   void output_begin_();
   void output_exit_();
 public:
-
-  //--------------------------------------------------
-  // NEW OUTPUT
-  //--------------------------------------------------
-
-  void new_output_begin_();
-  void new_output_write_block();
-
-  //--------------------------------------------------
-  // OLD OUTPUT
-  //--------------------------------------------------
 
   void p_output_enter()
   {      output_enter_();  }
@@ -427,16 +413,10 @@ public:
     performance_start_(perf_adapt_apply_sync);
   }
 
-  void p_adapt_next ()
+  void r_adapt_next(CkReductionMsg * msg)
   {
     performance_start_(perf_adapt_update);
-    adapt_next_();
-    performance_stop_(perf_adapt_update);
-    performance_start_(perf_adapt_update_sync);
-  }
-  void r_adapt_next (CkReductionMsg * msg)
-  {
-    performance_start_(perf_adapt_update);
+    adapt_changed_ = *((int * )msg->getData());
     delete msg;
     adapt_next_();
     performance_stop_(perf_adapt_update);
@@ -450,14 +430,6 @@ public:
     performance_stop_(perf_adapt_notify);
     performance_start_(perf_adapt_notify_sync);
   }
-  void r_adapt_called(CkReductionMsg * msg)
-  {
-    performance_start_(perf_adapt_notify);
-    delete msg;
-    adapt_called_();
-    performance_stop_(perf_adapt_notify);
-    performance_start_(perf_adapt_notify_sync);
-  }
 
   void p_adapt_end ()
   {
@@ -466,13 +438,9 @@ public:
     performance_stop_(perf_adapt_end);
     performance_start_(perf_adapt_end_sync);
   }
-  void r_adapt_end (CkReductionMsg * msg)
+  void p_adapt_update()
   {
-    performance_start_(perf_adapt_end);
-    delete msg;
-    adapt_end_();
-    performance_stop_(perf_adapt_end);
-    performance_start_(perf_adapt_end_sync);
+    adapt_update_();
   }
 
   void p_adapt_exit()
@@ -482,28 +450,27 @@ public:
     performance_stop_(perf_adapt_end);
     performance_start_(perf_adapt_end_sync);
   }
-  void r_adapt_exit(CkReductionMsg * msg)
-  {
-    performance_start_(perf_adapt_end);
-    delete msg;
-    adapt_exit_();
-    performance_stop_(perf_adapt_end);
-    performance_start_(perf_adapt_end_sync);
-  }
-
 
   /// Parent tells child to delete itself
   void p_adapt_delete();
-  void p_adapt_recv_level
-  (Index index_debug,
-   int ic3[3],
-   int if3[3],
-   int level_now, int level_new);
 
+  void p_adapt_recv_level (MsgAdapt *);
+  void adapt_check_messages_();
+  void adapt_recv_level();
+
+  void adapt_recv_level
+  (int adapt_step,
+   Index index_send,
+   int ic3[3],
+   std::vector<int> if3[3],
+   int level_now, int level_new,
+   int level_max, bool can_coarsen);
+  
   void p_adapt_recv_child (MsgCoarsen * msg);
 
-  void adapt_recv (const int of3[3], const int ic3[3],
-		   int level_face_new, int level_relative);
+  void adapt_recv (Index index_send, const int of3[3], const int ic3[3],
+		   int level_face_new, int level_relative,
+                   int level_max, bool can_coarsen);
 
   void adapt_send_level();
 
@@ -512,7 +479,9 @@ protected:
   void adapt_enter_();
   void adapt_begin_ ();
   void adapt_next_ ();
+  void adapt_barrier_();
   void adapt_end_ ();
+  void adapt_update_();
   void adapt_exit_();
   void adapt_coarsen_();
   void adapt_refine_();
@@ -534,7 +503,7 @@ public:
   void p_control_sync_count(int entry_point, int id, int count)
   {
     performance_start_(perf_control);
-    control_sync_count(entry_point,id, count);
+    control_sync_count(entry_point, id, count);
     performance_stop_(perf_control);
   }
 
@@ -552,75 +521,53 @@ public:
   //--------------------------------------------------
 
   /// Begin a refresh operation, optionally waiting then invoking callback
-  void new_refresh_start (int id_refresh, int callback);
+  void refresh_start (int id_refresh, int callback);
 
   /// Wait for a refresh operation to complete, then continue with the callback
-  void new_refresh_wait (int id_refresh, int callback);
+  void refresh_wait (int id_refresh, int callback);
 
   /// Check whether a refresh operation is finished, and invoke the associated
   /// callback if it is
-  void new_refresh_check_done (int id_refresh);
+  void refresh_check_done (int id_refresh);
 
   /// Receive a Refresh data message from an adjacent Block
-  void p_new_refresh_recv (MsgRefresh * msg);
+  void p_refresh_recv (MsgRefresh * msg);
 
-  int new_refresh_load_field_faces_ (Refresh & refresh);
+  int refresh_load_field_faces_ (Refresh & refresh);
+  
   /// Scatter particles in ghost zones to neighbors
-  int new_refresh_load_particle_faces_ (Refresh & refresh, const bool copy = false);
-  int new_refresh_delete_particle_copies_   (Refresh * refresh);
+  int refresh_load_particle_faces_ (Refresh & refresh, const bool copy = false);
 
-  int delete_particle_copies_ (int it);
+  /// Deletes all 'out-of-bounds' particles on the block, and for all the in-bounds
+  /// particles, sets the 'is_copy' attribute to false
+  int delete_non_local_particles_ (int it);
 
   /// Send flux data to neighbors
-  int new_refresh_load_flux_faces_ (Refresh & refresh);
+  int refresh_load_flux_faces_ (Refresh & refresh);
 
-  void new_refresh_load_field_face_
+  void refresh_load_field_face_
   (Refresh & refresh, int refresh_type, Index index, int if3[3], int ic3[3]);
   /// Send particles in list to corresponding indices
-  void new_particle_send_(Refresh & refresh, int nl,Index index_list[],
-			  ParticleData * particle_list[]);
-  void new_refresh_load_flux_face_
+  void particle_send_(Refresh & refresh, int nl,Index index_list[],
+                      ParticleData * particle_list[]);
+  void refresh_load_flux_face_
   (Refresh & refresh, int refresh_type, Index index, int if3[3], int ic3[3]);
 
-  void new_refresh_exit (Refresh & refresh);
-
-  /// Enter the refresh phase after synchronizing
-  void p_refresh_continue ()
-  {
-    refresh_continue();
-  }
-
-  void refresh_continue();
-
-  /// Exit the refresh phase after synchronizing
-  void p_refresh_exit ()
-  {
-    performance_start_(perf_refresh_exit);
-    refresh_exit_();
-    performance_stop_(perf_refresh_exit);
-    performance_start_(perf_refresh_exit_sync);
-  }
-  void r_refresh_exit (CkReductionMsg * msg)
-  {
-    performance_start_(perf_refresh_exit);
-    delete msg;
-    refresh_exit_();
-    performance_stop_(perf_refresh_exit);
-    performance_start_(perf_refresh_exit_sync);
-  }
-protected:
-  void refresh_exit_ ();
-  /// Pack field face data into arrays and send to neighbors
-public:
-
-  void p_refresh_store (MsgRefresh * msg);
+  void refresh_exit (Refresh & refresh);
 
   /// Get restricted data from child when it is deleted
   void p_refresh_child (int n, char a[],int ic3[3]);
 
+  void r_method_checkpoint_continue(CkReductionMsg * msg);
+
   void p_method_flux_correct_refresh();
   void r_method_flux_correct_sum_fields(CkReductionMsg * msg);
   void r_method_debug_sum_fields(CkReductionMsg * msg);
+
+  void p_method_output_next (MsgOutput * msg);
+  void p_method_output_write (MsgOutput * msg);
+  void r_method_output_continue(CkReductionMsg * msg);
+  void r_method_output_done(CkReductionMsg * msg);
 
 protected:
 
@@ -630,12 +577,32 @@ protected:
   void refresh_begin_();
 
   /// Pack field face data into arrays and send to neighbors
-  int refresh_load_field_faces_ (Refresh * refresh);
+  // int refresh_load_field_faces_ (Refresh * refresh);
+
+  /// Handle the special case of refresh on interpolated faces
+  /// requiring extra padding
+  int refresh_load_coarse_face_
+  (Refresh refresh,  int refresh_type,
+   Index index_neighbor, int if3[3],int ic3[3]);
+
+  /// Send padded array of fields to neighbor for interpolations whose
+  /// domains overlap multiple blocks
+  void refresh_coarse_send_
+  (Index index,
+   Field field, Refresh & refresh,
+   int iam3[3], int iap3[3],
+   int ifms3[3], int ifps3[3],
+   int ifmr3[3], int ifpr3[3],
+   std::string debug);
+
+  /// Apply prolongation operations on Block
+  void refresh_coarse_apply_(Refresh * refresh);
+
   /// Scatter particles in ghost zones to neighbors
   int refresh_load_particle_faces_ (Refresh * refresh);
 
-  void refresh_load_field_face_
-  (int refresh_type, Index index, int if3[3], int ic3[3]);
+  // void refresh_load_field_face_
+  // (int refresh_type, Index index, int if3[3], int ic3[3]);
   void refresh_load_particle_face_
   (int refresh_type, Index index, int if3[3], int ic3[3]);
 
@@ -651,7 +618,7 @@ protected:
   (Refresh * refresh,
    ParticleData * particle_array[],
    ParticleData * particle_list[],
-   Index index_list[], const bool copy = false);
+   Index index_list[]);
 
   /// Computes updates to positions (dpx[i],dpy[i],dpz[i]) for faces that
   /// cross periodic domain boundaries
@@ -664,7 +631,8 @@ protected:
   /// particle_array ParticleData elements
   void particle_scatter_neighbors_
   (int npa, ParticleData * particle_array[],
-   std::vector<int> & type_list, Particle particle_src, const bool copy = false);
+   std::vector<int> & type_list, Particle particle_src,
+   const bool copy = false);
 
   /// Scatter particles to appropriate partictle_list elements
   void particle_scatter_children_ (ParticleData * particle_list[],
@@ -680,7 +648,7 @@ protected:
 			    ParticleData * particle_array[],
 			    Index index_list[],
 			    Refresh * refresh,
-          const bool copy = false);
+                            const bool copy = false);
 
   //--------------------------------------------------
   // STOPPING
@@ -706,7 +674,12 @@ public:
   }
 
   /// Quiescence before load balancing
-  void p_stopping_balance();
+  void p_stopping_load_balance()
+  { stopping_load_balance_(); }
+  void r_stopping_load_balance(CkReductionMsg * msg)
+  { delete msg;
+    stopping_load_balance_();
+  }
 
   /// Exit the stopping phase
   void p_stopping_exit ()
@@ -727,6 +700,7 @@ protected:
   void stopping_enter_();
   void stopping_begin_();
   void stopping_balance_();
+  void stopping_load_balance_();
   void stopping_exit_();
 
 public:
@@ -766,9 +740,6 @@ protected:
   /// Check consistency between is_leaf_ and size of children_()
   void check_leaf_();
 
-  /// Check if Block should have been deleted
-  void check_delete_();
-
 public: // virtual functions
 
   /// Check if given 3D coordinates are within the block domain
@@ -803,35 +774,19 @@ public: // virtual functions
   /// Initialize Block
   virtual void initialize ();
 
-  // /// Return the rank of the Simulation
-  // int rank() const;
-
   //  int count_neighbors() const;
 
   void ResumeFromSync();
 
   FieldFace * create_face
-  (int if3[3], int ic3[3], bool lg3[3],
+  (int if3[3], int ic3[3], int g3[3],
    int refresh_type,
    Refresh * refresh,
    bool new_refresh) const;
 
   void print () const;
 
-  void debug_new_refresh(const char * file, int line)
-  {
-    CkPrintf ("DEBUG_NEW_REFRESH %s:%d\n",file,line);
-    const int n = new_refresh_sync_list_.size();
-    for (int i=0; i<n; i++) {
-      Sync & sync = new_refresh_sync_list_[i];
-      CkPrintf ("DEBUG_NEW_REFRESH   sync %p %d/%u\n",(void*)&sync,sync.value(),sync.stop());
-      CkPrintf ("DEBUG_NEW_REFRESH   state %s\n",
-                (sync.state()==RefreshState::INACTIVE) ? "INACTIVE" :
-                ((sync.state()==RefreshState::ACTIVE) ? "ACTIVE" : "READY"));
-      CkPrintf ("DEBUG_NEW_REFRESH   mesg %lu\n",new_refresh_msg_list_[i].size());
-    }
-    fflush(stdout);
-  }
+  const Adapt * adapt() const { return & adapt_; }
 
 protected: // functions
 
@@ -867,8 +822,6 @@ protected: // functions
 	     -1 <= if3[2] && if3[2] <= 1);
   }
 
-  void debug_faces_(const char * mesg);
-
   std::string id_ () const throw ()
   {
     char buffer[27];
@@ -892,7 +845,7 @@ protected: // functions
   void coarsen_face_level_update_ (Index index_child);
 
   /// Apply all initial conditions to this Block
-  void apply_initial_() throw();
+  void apply_initial_(MsgRefine * msg) throw();
 
   /// Determine which faces require boundary updates or communication
   void determine_boundary_
@@ -909,25 +862,6 @@ protected: // functions
   /// Update boundary conditions
   void update_boundary_ ();
 
-  /// Boundary is a boundary face
-  bool is_boundary_face_(int of3[3],
-			 bool boundary[3][2],
-			 bool periodic[3],
-			 bool update[3][2]) const
-  {
-
-    bool skip = false;
-    for (int axis=0; axis<3; axis++) {
-      if (of3[axis] != 0) {
-	int face=(of3[axis]+1)/2;
-	if ( (! periodic[axis]) &&
-	     update[axis][face] &&
-	     boundary[axis][face]) skip = true;
-      }
-    }
-    return skip;
-  }
-
   /// Set the current refresh object
   void set_refresh (Refresh * refresh)
   {
@@ -941,7 +875,7 @@ protected: // functions
 
   /// Return the synchronization object for the given Refresh object id
   Sync * sync_ (int id_refresh) throw()
-  { return &new_refresh_sync_list_[id_refresh]; }
+  { return &refresh_sync_list_[id_refresh]; }
 
 protected: // attributes
 
@@ -982,7 +916,9 @@ protected: // attributes
   /// Index of current initialization routine
   int index_initial_;
 
+  //--------------------------------------------------
   /// MESH REFINEMENT
+  //--------------------------------------------------
 
   /// list of child nodes
   std::vector<Index> children_;
@@ -994,11 +930,8 @@ protected: // attributes
   std::vector<int>  sync_count_;
   std::vector<int>  sync_max_;
 
-  /// current level of neighbors along each face
-  std::vector<int> face_level_curr_;
-
-  /// new level of neighbors along each face
-  std::vector<int> face_level_next_;
+  /// Adapt object
+  Adapt adapt_;
 
   /// current level of neighbors accumulated from children that can coarsen
   std::vector<int> child_face_level_curr_;
@@ -1012,14 +945,23 @@ protected: // attributes
   /// Number of adapt steps in the adapt phase
   int adapt_step_;
 
-  /// Current adapt value for the block
-  int adapt_;
+  /// Whether contribute() has been called in adapt. Used to
+  /// prevent multiple calls per step.
+  bool adapt_ready_;
+
+  /// Whether block has reached level consensus for the balancing step
+  bool adapt_balanced_;
+
+  /// Number of blocks that have refined or coarsened in this phase
+  int adapt_changed_;
+
+  /// Buffer for incoming MsgAdapt objects
+  std::vector < MsgAdapt * > adapt_msg_list_;
 
   /// whether Block has been coarsened and should be deleted
   bool coarsened_;
 
-  /// Whether Block is marked for deletion
-  bool delete_;
+  //--------------------------------------------------
 
   /// Whether Block is a leaf node during adapt phase (stored not
   /// computed to avoid race condition bug #30)
@@ -1027,9 +969,6 @@ protected: // attributes
 
   /// Age of the Block in cycles (for OutputImage)
   int age_;
-
-  /// Last face level received from given face
-  std::vector<int> face_level_last_;
 
   /// String for storing bit ID name
   mutable std::string name_;
@@ -1044,8 +983,8 @@ protected: // attributes
   /// (Not a pointer since must be one per Block for synchronization counters)
   std::vector<Refresh*> refresh_;
 
-  std::vector < Sync > new_refresh_sync_list_;
-  std::vector < std::vector <MsgRefresh * > > new_refresh_msg_list_;
+  std::vector < Sync > refresh_sync_list_;
+  std::vector < std::vector <MsgRefresh * > > refresh_msg_list_;
 
 };
 

@@ -10,8 +10,6 @@
 //----------------------------------------------------------------------
 
 Prolong::Prolong() throw ()
-  : monotonic_(false),
-    positive_(false)
 {
   TRACE("Prolong::Prolong");
 }

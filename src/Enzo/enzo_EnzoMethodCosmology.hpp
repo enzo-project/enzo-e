@@ -42,7 +42,7 @@ public: // virtual methods
   { return "cosmology"; }
 
   /// Compute maximum timestep for this method
-  virtual double timestep ( Block * block) const throw()
+  virtual double timestep ( Block * block) throw()
   { return std::numeric_limits<double>::max(); }
 
 private: // methods

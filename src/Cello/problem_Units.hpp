@@ -97,9 +97,13 @@ public: // virtual methods
   virtual double length() const
   { return length_; }
 
-  /// Return temperature units scaling factor (derived)
   virtual double temperature() const
-  { return (cello::mass_hydrogen)*std::pow(velocity(),2)/(cello::kboltz); }
+  {
+    // don't compute temperature units here since we need physical constants
+    // that are not defined in this layer
+    ERROR("Units::temperature",
+          "the base class doesn't support calculation of temperature units.");
+  }
 
   /// Return velocity units scaling factor (derived)
   virtual double velocity() const

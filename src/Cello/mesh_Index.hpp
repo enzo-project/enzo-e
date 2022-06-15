@@ -15,10 +15,10 @@ class NodeBits {
   // original order ATL crashed in Charm++ during load balancing
 
 public:
-  
-  unsigned  tree : INDEX_BITS_TREE; 
-  unsigned level : INDEX_BITS_LEVEL; 
+
+  unsigned level : INDEX_BITS_LEVEL;
   unsigned array : INDEX_BITS_ARRAY;
+  unsigned  tree : INDEX_BITS_TREE;
 
   // maximum INDEX_BITS_TREE levels / bits
   // L    T
@@ -40,7 +40,7 @@ class Index {
   // 96 bits total
   // Array index 10x3   30 1024
   // Tree  index 20x3   60 20 levels
-  // Level index  6x1   32 + sign for sub-root blocks      
+  // Level index  6x1   32 + sign for sub-root blocks
   //       [       |       |       |        )
   // a_[0] [AAAAAAAAAATTTTTTTTTTTTTTTTTTTTLL)
   // a_[1] [AAAAAAAAAATTTTTTTTTTTTTTTTTTTTLL)
@@ -53,55 +53,77 @@ public:
 
   Index();
 
-  Index(const Index & index);
-
-  Index(int ix, int iy, int iz);
-
-  Index & operator = (const Index & index);
+  Index(int iax, int iay, int iaz);
 
   bool operator == (const Index & index) const;
 
   bool operator != (const Index & index) const;
 
+  inline int operator [] (std::size_t i) const
+  { return v_[i]; }
+
   void clear () ;
-  
+
   Index index_parent (int min_level = 0) const;
 
-  Index index_child (const int ic3[3], int min_level=0) const
+  inline Index index_child (const int ic3[3], int min_level=0) const
   { return index_child(ic3[0],ic3[1],ic3[2],min_level); }
 
   Index index_child (int icx, int icy, int icz, int min_level = 0) const;
 
   /// Return the index for the given neighbor
-  Index index_neighbor (const int if3[3], const int n3[3]) const;
+  Index index_neighbor (const int if3[3], const int na3[3]) const;
 
   /// Return the index of the ancestor in the given level_ancestor <= level
   /// default is root level
   Index index_ancestor (int level_ancestor = 0, int min_level = 0) const;
 
+  /// Return offset of block in given level
+  void index_level (int i3[3], int level) const;
+  int index_level (int level,int axis) const;
+
   /// Whether the face is on the domain boundary
-  bool is_on_boundary 
+  bool is_on_boundary
   (int axis, int face, int narray) const;
 
   /// Whether the face is on the domain boundary
-  bool is_on_boundary (const int if3[3], const int n3[3]) const;
+  bool is_on_boundary (const int if3[3], const int na3[3]) const;
 
   /// Whether an index is in the same subtree relative to a given
   /// root level
   bool is_in_same_subtree (Index index, int min_level = 0, int root_level = 0);
-  
+
   /// Return whether this is the "root" node in the array of octrees
   /// (array (0 0 0), level 0)
   bool is_root() const;
 
-  /// Return the level of this node
+  /// Whether given `index` is a sibling (has the same parent as this Index)
+  bool is_sibling (Index index) const
+  {
+    const int level = this->level();
+    return (level >= 1 && index.level() >= 1) ?
+      (index_parent() == index.index_parent()) : false;
+  }
+  /// Whether given `index` is a "nibling" (child of a sibling of this Index)
+  bool is_nibling (Index index) const
+  {
+    const int level = this->level();
+    return (level >= 1 && index.level() >= 2) ?
+      (index_parent() == index.index_parent().index_parent()) : false;
+  }
+
+  /// Return the dimensionality of shared face (0 corner, 1 edge, 2
+  /// plane), or -1 if disjoint
+  int adjacency (Index index, int rank, const int p3[3]) const;
+
+  /// Return refinement level of the Index
   int level() const;
 
   /// Return the packed bit index for the given axis
   // unsigned value (int axis) const;
 
   /// Set the Index according to raw bit values
-  void set_values (const int v3[3])
+  inline void set_values (const int v3[3])
   {
     v_[0] = v3[0];
     v_[1] = v3[1];
@@ -109,7 +131,7 @@ public:
   }
 
   /// Return the packed bit index for the given axis
-  void values (int v3[3]) const
+  inline void values (int v3[3]) const
   { v3[0] = v_[0];
     v3[1] = v_[1];
     v3[2] = v_[2];
@@ -120,20 +142,33 @@ public:
   void set_level(int level);
 
   /// Return the indices of the level-0 node containing this node
-  void array (int * ix, int *iy, int *iz) const;
+  void array (int * iax, int *iay, int *iaz) const;
 
   /// Accumulate array part of an index
-  void set_array(int ix, int iy, int iz);
+  void set_array(int iax, int iay, int iaz);
 
   /// Return the packed tree bits for each axis
   void tree (int * bx = 0, int *by = 0, int *bz = 0,
              int level=INDEX_UNDEFINED_LEVEL) const;
-  
+
   /// child index of this node in parent
-  void child (int level, int * ix, int * iy, int * iz, int min_level = 0) const;
+  void child (int level, int * icx, int * icy, int * icz,
+              int min_level = 0) const;
 
   /// Set the child indicies of this node in the parent
-  void set_child(int level, int ix, int iy=0, int iz=0, int min_level = 0);
+  void set_child(int level, int icx, int icy=0, int icz=0,
+                 int min_level = 0);
+
+  /// Set this Index to be the given child of the index
+  inline void push_child(int icx, int icy=0, int icz=0,
+                  int min_level = 0)
+  {
+    const int level = this->level();
+    set_level (level+1);
+    set_child (level+1,icx,icy,icz,min_level);
+  }
+
+  void print (std::string msg, int level) const;
 
   void print (const char * msg,
 	      int max_level,
@@ -141,7 +176,6 @@ public:
 	      const int nb3[3],
 	      bool no_nl,
 	      void * simulation = 0) const;
-  
 
   void write (int ip,
 	      const char * msg,
@@ -153,12 +187,29 @@ public:
 
   /// Comparison operator required for Charm++ pup()
   friend bool operator < (const Index & x, const Index & y) {
-    if (x.v_[2] < y.v_[2]) return true;
-    if (x.v_[2] > y.v_[2]) return false;
-    if (x.v_[1] < y.v_[1]) return true;
-    if (x.v_[1] > y.v_[1]) return false;
-    return  (x.v_[0] < y.v_[0]);
+    Index a = x;
+    Index b = y;
+    a.clean_();
+    b.clean_();
+    if (a.v_[2] < b.v_[2]) return true;
+    if (a.v_[2] > b.v_[2]) return false;
+    if (a.v_[1] < b.v_[1]) return true;
+    if (a.v_[1] > b.v_[1]) return false;
+    return  (a.v_[0] < b.v_[0]);
   }
+
+  ///--------------------
+  /// PACKING / UNPACKING
+  ///--------------------
+
+  /// Return the number of bytes required to serialize the data object
+  int data_size () const;
+
+  /// Serialize the object into the provided empty memory buffer.
+  char * save_data (char * buffer) const;
+
+  /// Restore the object from the provided initialized memory buffer data.
+  char * load_data (char * buffer);
 
 private: // methods
 
@@ -168,13 +219,6 @@ private: // methods
 
   int num_bits_(int value) const;
 	
-  inline void copy_ (const Index & index)
-  {
-    v_[0] = index.v_[0];
-    v_[1] = index.v_[1];
-    v_[2] = index.v_[2];
-  }
-
   void print_ (FILE * fp,
 	       const char * msg,
 	       int max_level,
@@ -197,7 +241,6 @@ private: // attributes
 #ifndef TEST
 // public:
 //   void pup(PUP::er &p) {
-    
 //   }
 PUPbytes(NodeBits)
 #endif

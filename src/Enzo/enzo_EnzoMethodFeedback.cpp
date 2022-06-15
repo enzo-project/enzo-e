@@ -12,6 +12,8 @@ EnzoMethodFeedback::EnzoMethodFeedback
 ()
   : Method()
 {
+  cello::particle_descr()->check_particle_attribute("star","mass");
+
   FieldDescr * field_descr = cello::field_descr();
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
@@ -22,11 +24,11 @@ EnzoMethodFeedback::EnzoMethodFeedback
   //                           enzo_sync_id_method_feedback);
   // refresh(ir)->add_all_fields();
 
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
 
-  ejecta_mass_   = enzo_config->method_feedback_ejecta_mass * cello::mass_solar /
+  ejecta_mass_   = enzo_config->method_feedback_ejecta_mass * enzo_constants::mass_solar /
                       enzo_units->mass();
 
   ejecta_energy_ = enzo_config->method_feedback_supernova_energy * 1.0E51 /
@@ -209,7 +211,7 @@ void EnzoMethodFeedback::compute_ (Block * block) throw()
   return;
 }
 
-double EnzoMethodFeedback::timestep (Block * block) const throw()
+double EnzoMethodFeedback::timestep (Block * block) throw()
 {
   // In general this is not needed, but could imagine putting timestep
   // limiters in situations where, for example, one would want

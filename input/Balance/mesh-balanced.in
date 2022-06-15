@@ -108,7 +108,8 @@ Output {
 	image_type  = "mesh";
 	image_reduce_type = "max";
         field_list = ["density"];
-	image_block_size  = 5;
+        # 	image_block_size  = 5; # DEPRECIATED
+        image_size = [1025,1025];
         image_max = 6.000000000000000;
         image_min = 0.000000000000000;
         include "input/Schedule/schedule_cycle_10.incl"

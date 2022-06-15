@@ -12,6 +12,8 @@
 #   2.) Check that the L1-norm error is the same for left propagating and right
 #       propagating fast waves
 
+import argparse
+import os
 import os.path
 import shutil
 import sys
@@ -21,7 +23,7 @@ from functools import partial
 import numpy as np
 
 from testing_utils import \
-  CalcSimL1Norm, EnzoEWrapper, isclose, standard_analyze, prep_cur_dir
+  CalcSimL1Norm, EnzoEWrapper, isclose, standard_analyze, testing_context
 
 
 # this executes things in standalone mode
@@ -155,8 +157,7 @@ def identical_l1_error_linwave(nblocks, wave_name, res, l1_functor, template,
 
 def analyze_tests():
     # define the functor for evaluating the norm of the L1 error vector
-    l1_func = CalcSimL1Norm("tools/l1_error_norm.py",
-                            ["density","velocity_x","velocity_y","velocity_z",
+    l1_func = CalcSimL1Norm(["density","velocity_x","velocity_y","velocity_z",
                              "pressure","bfield_x","bfield_y","bfield_z"])
 
     # define the template for the directory holding the simulation data
@@ -181,7 +182,7 @@ def analyze_tests():
     r.append(err_compare(3.005870212811956e-08,  'alfven',  1, 32))
 
     r.append(err_compare(2.2373810027584788e-07, 'slow',    1, 16))
-    r.append(err_compare(4.437025228314115e-08, 'slow',    1, 32))
+    r.append(err_compare(4.437026706327692e-08,  'slow',    1, 32))
 
     r.append(err_compare(1.0021263485338544e-07, 'entropy', 1, 16))
     r.append(err_compare(2.9194839706868883e-08,  'entropy', 1, 32))
@@ -228,21 +229,20 @@ def cleanup():
             shutil.rmtree(dir_name)
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--launch_cmd', required=True,type=str)
+    args = parser.parse_args()
 
-    executable = 'bin/enzo-e'
+    with testing_context():
 
-    # this script can either be called from the base repository or from
-    # the subdirectory: input/vlct
-    prep_cur_dir(executable)
+        # run the tests
+        tests_complete = run_tests(args.launch_cmd)
 
-    # run the tests
-    tests_complete = run_tests(executable)
+        # analyze the tests
+        tests_passed = analyze_tests()
 
-    # analyze the tests
-    tests_passed = analyze_tests()
-
-    # cleanup the tests
-    cleanup()
+        # cleanup the tests
+        cleanup()
 
     if tests_passed:
         sys.exit(0)

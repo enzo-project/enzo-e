@@ -125,12 +125,10 @@ void EnzoInitialSoup::enforce_block
   double hya = (ypd-ymd) / array_[1];
   double hza = (zpd-zmd) / array_[2];
 
-  const int in = cello::index_static();
+  const enzo_float gamma = EnzoBlock::Gamma[cello::index_static()];
 
-  const double te_in = 
-    pressure_in_  / ((EnzoBlock::Gamma[in] - 1.0) * density_);
-  const double te_out= 
-    pressure_out_ / ((EnzoBlock::Gamma[in] - 1.0) * density_);
+  const double te_in = pressure_in_  / ((gamma - 1.0) * density_);
+  const double te_out= pressure_out_ / ((gamma - 1.0) * density_);
 
   // background
   for (int iz=0; iz<mz; iz++) {
@@ -206,5 +204,7 @@ void EnzoInitialSoup::enforce_block
       }
     }
   }
+
+  block->initial_done();
 
 }

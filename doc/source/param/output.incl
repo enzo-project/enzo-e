@@ -91,13 +91,13 @@
 :Default: :d:`1`
 :Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"data"`
-:Status:    **Broken: see bug** # 13_
-
-.. _13: http://client65-90.sdsc.edu/cello/bug/show_bug.cgi?id=13
+:Status:    **DEPRECIATED**
 
 :e:`This parameter allows for a strict subset of physical processors
 to output data, which is especially helpful for large process counts
-to reduce the load on parallel file systems.`
+to reduce the load on parallel file systems.` **This parameter is
+depreciated, since the "output" method is preferered for writing data
+output.**
 
 ----
 
@@ -107,15 +107,14 @@ to reduce the load on parallel file systems.`
 :Default: :d:`1`
 :Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"data"`
-:Status:    **Not implemented**
-
-.. _13: http://client65-90.sdsc.edu/cello/bug/show_bug.cgi?id=13
+:Status:    **DEPRECIATED**
 
 :e:`This parameter allows for processes to write sequentially to
 prevent too many processes overloading the file system.  A good
 starting point would be the number of processes in a shared memory
 node, in which case at most one process per node will be writing at
-any point in time.`
+any point in time.` **This parameter is depreciated, since the "output"
+method is preferered for writing data output.**
 
 ----
 
@@ -245,6 +244,7 @@ any point in time.`
 :Default: :d:`1`
 :Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
+:Status:    **DEPRECIATED**
 
 :e:`For images of meshes, this parameter defines how many pixels wide each finest-level block is in the image.  This parameter and the image_size parameter should not both be set.`
 

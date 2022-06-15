@@ -147,27 +147,26 @@ public: // interface
   /// For constrained transport, this includes both the face-centered and the
   /// cell-centered bfields (the face-centered bfield updates are handled
   /// completely internally). The velocity and bfield components stored in this
-  /// `cur_prim_map` map are used to compute the cell-centered E-field.
+  /// `cur_integration_map` map are used to compute the cell-centered E-field.
   ///
-  /// @param[in]  cur_prim_map Map containing the current values of the
-  ///     cell-centered integrable quantities (before they have been updated
+  /// @param[in]  cur_integration_map Map containing the current values of the
+  ///     cell-centered integration quantities (before they have been updated
   ///     over the current timestep). 
   /// @param[in]  xflux_map,yflux_map,zflux_map Maps containing the values of
   ///     the fluxes computed along the x, y, and z directions. The function
   ///     namely makes use of the various magnetic field fluxes
   /// @param[out] out_centered_bfield_map Map holding the arrays where the
   ///     updated values for each cell-centered magnetic field component should
-  ///     be stored. These arrays can be aliases of `cur_prim_map` (The
-  ///     arguments can even reference the same object).
+  ///     be stored. This can be an alias of `cur_integration_map`.
   /// @param[in]  dt The (partial) time-step over which to update the magnetic
   ///     fields.
   /// @param[in]  stale_depth indicates the current stale_depth for the
   ///     supplied quantities. This should nominally be the same as the stale
   ///     depth used to compute the fluxes and that is passed to
-  ///     EnzoIntegrableUpdate::update_quantities.
+  ///     EnzoIntegrationQuanUpdate::update_quantities.
   virtual void update_all_bfield_components
-  (EnzoEFltArrayMap &cur_prim_map, EnzoEFltArrayMap &xflux_map,
-   EnzoEFltArrayMap &yflux_map, EnzoEFltArrayMap &zflux_map,
+  (EnzoEFltArrayMap &cur_integration_map, const EnzoEFltArrayMap &xflux_map,
+   const EnzoEFltArrayMap &yflux_map, const EnzoEFltArrayMap &zflux_map,
    EnzoEFltArrayMap &out_centered_bfield_map, enzo_float dt, int stale_depth)
     noexcept=0;
 

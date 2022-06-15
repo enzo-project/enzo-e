@@ -298,6 +298,11 @@
       { cello::message                                                  \
         (stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7,A8); \
         cello::error(); } }
+#define ASSERT9(F,M,A1,A2,A3,A4,A5,A6,A7,A8,A9,A)                       \
+  {  if (!(A))                                                          \
+      { cello::message                                                  \
+        (stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7,A8,A9); \
+        cello::error(); } }
 
 
 namespace cello {
@@ -310,7 +315,7 @@ namespace cello {
    const char * message,
    ...);
 
-  void error();
+  [[ noreturn ]] void error();
 }
 
 #endif /* ERROR_ERROR_HPP */

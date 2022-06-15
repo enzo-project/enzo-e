@@ -25,7 +25,7 @@ Method {
          max_level = 4;
          min_level = -2;
          monitor_iter = 0;
-         res_tol = 0.01000000000000000;
+         res_tol = 0.1000000000000000;
          solve_type = "tree";
          type = "bicgstab";
      };
@@ -38,7 +38,7 @@ Method {
          monitor_iter = 1;
          post_smooth = "root_post";
          pre_smooth = "root_pre";
-         res_tol = 0.01000000000000000;
+         res_tol = 0.1000000000000000;
          solve_type = "level";
          type = "mg0";
      };
@@ -52,7 +52,7 @@ Method {
      root_coarse {
          iter_max = 100;
          monitor_iter = 1;
-         res_tol = 0.01000000000000000;
+         res_tol = 0.1000000000000000;
          solve_type = "block";
          type = "cg";
      };
