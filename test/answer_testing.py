@@ -13,9 +13,8 @@ from unittest import TestCase
 from yt.funcs import ensure_dir
 from yt.testing import assert_rel_equal
 
-# If GENERATE_TEST_RESULTS=1, just generate test results.
-generate_results = int(os.environ.get("GENERATE_TEST_RESULTS", 0)) == 1
-
+# If GENERATE_TEST_RESULTS="true", just generate test results.
+generate_results = os.environ.get("GENERATE_TEST_RESULTS", "false").lower() == "true"
 _results_dir = os.environ.get("TEST_RESULTS_DIR", "~/enzoe_test_results")
 test_results_dir = os.path.abspath(os.path.expanduser(_results_dir))
 if generate_results:
@@ -25,6 +24,7 @@ else:
         raise RuntimeError(
             f"Test results directory not found: {test_results_dir}.")
 
+# Set the path to charmrun
 _charm_path = os.environ.get("CHARM_PATH", "")
 if not _charm_path:
     raise RuntimeError(

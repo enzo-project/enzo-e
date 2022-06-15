@@ -13,6 +13,8 @@ commands:
             echo 'export HDF5_LIB=/usr/lib/x86_64-linux-gnu' >> $BASH_ENV
             echo 'export CHARM_ROOT=$HOME/local/charm-v$CHARM_VER' >> $BASH_ENV
             echo 'export Grackle_ROOT=$HOME/local' >> $BASH_ENV
+            echo 'export CHARM_PATH=$CHARM_ROOT/bin' >> $BASH_ENV
+            echo 'export TEST_RESULTS_DIR=$HOME/answer_test_results' >> $BASH_ENV
             # tag the tip so we can go back to it
             git tag tip
 
@@ -45,7 +47,7 @@ commands:
             pip install --upgrade pip
             pip install --upgrade wheel
             pip install --upgrade setuptools
-            pip install Cython numpy h5py matplotlib==3.3.3 libconf yt
+            pip install Cython numpy h5py matplotlib libconf yt pytest
 
   install-grackle:
     description: "Install grackle."
@@ -113,7 +115,7 @@ commands:
             fi
 
       - run:
-          name: "Compile enzo-e and run tests."
+          name: "Compile enzo-e."
           command: |
             source $BASH_ENV
             source $HOME/venv/bin/activate
@@ -121,6 +123,8 @@ commands:
             # convert boolean parameter to an env var storing 0 or 1
             USE_DOUBLE=$(( 0 <<# parameters.usedouble >> + 1 <</ parameters.usedouble >> ))
             USE_GRACKLE=$(( 0 <<# parameters.usegrackle >> + 1 <</ parameters.usegrackle >> ))
+            # remove build directory in case we've already compiled before
+            rm -rf build
 
             # this is used for tests involving Grackle
             if [[ $USE_GRACKLE == 1 ]]; then
@@ -143,7 +147,7 @@ commands:
             fi
 
   run-ctests:
-    description: "Compile enzo-e and run tests."
+    description: "Run the unit tests with ctest."
     parameters:
       skipfile:
         type: string
@@ -176,6 +180,26 @@ commands:
               fi
             fi
 
+  run-answer-tests:
+    description: "Run the answer tests with pytest."
+    parameters:
+      usedouble:
+        type: boolean
+        default: false
+      generate:
+        type: boolean
+        default: false
+    steps:
+      - run:
+          name: "Run answer tests."
+          command: |
+            source $BASH_ENV
+            source $HOME/venv/bin/activate
+
+            export USE_DOUBLE=<< parameters.usedouble >>
+            export GENERATE_TEST_RESULTS=<< parameters.generate >>
+            pytest -s test
+
   build-docs:
     description: "Test the docs build."
     steps:
@@ -187,7 +211,7 @@ commands:
             python -m sphinx -M html "." "_build" -W
 
 jobs:
-  test-suite:
+  ctest-suite:
     parameters:
       usedouble:
         type: boolean
@@ -197,7 +221,7 @@ jobs:
         type: boolean
 
     docker:
-      - image: cimg/python:3.7
+      - image: cimg/python:3.10
 
     working_directory: ~/enzo-e
 
@@ -233,6 +257,60 @@ jobs:
           skipfile: notafile
           skiptest: << parameters.skiptest >>
 
+  answer-test-suite:
+    parameters:
+      usedouble:
+        type: boolean
+      usegrackle:
+        type: boolean
+
+    docker:
+      - image: cimg/python:3.10
+
+    working_directory: ~/enzo-e
+
+    steps:
+      - checkout
+      - set-env
+
+      - restore_cache:
+          name: "Restore dependencies cache."
+          key: dependencies-v3
+
+      - install-dependencies
+
+      - save_cache:
+          name: "Save dependencies cache"
+          key: dependencies-v3
+          paths:
+            - ~/local
+
+      - when:
+          condition: << parameters.usegrackle >>
+          steps:
+            - install-grackle:
+                usedouble: << parameters.usedouble >>
+
+      - compile-enzoe:
+          usedouble: << parameters.usedouble >>
+          tag: tip
+          skipfile: notafile
+          usegrackle: << parameters.usegrackle >>
+
+      - run-answer-tests:
+          usedouble: << parameters.usedouble >>
+          generate: true
+
+      - compile-enzoe:
+          usedouble: << parameters.usedouble >>
+          tag: tip
+          skipfile: notafile
+          usegrackle: << parameters.usegrackle >>
+
+      - run-answer-tests:
+          usedouble: << parameters.usedouble >>
+          generate: false
+
   docs-build:
     docker:
       - image: cimg/python:3.10
@@ -247,19 +325,23 @@ jobs:
 workflows:
    tests:
      jobs:
-       - test-suite:
-           name: test-suite_single-prec
+       - ctest-suite:
+           name: ctest-suite_single-prec
            usedouble: false
            usegrackle: true
            skiptest: false
-       - test-suite:
-           name: test-suite_double-prec
+       - ctest-suite:
+           name: ctest-suite_double-prec
            usedouble: true
            usegrackle: true
            skiptest: false
        - docs-build
-       - test-suite:
+       - ctest-suite:
            name: build-no-grackle
            usedouble: true
            usegrackle: false
            skiptest: true
+       - answer-test-suite:
+           name: answer-tests_double
+           usedouble: true
+           usegrackle: true
