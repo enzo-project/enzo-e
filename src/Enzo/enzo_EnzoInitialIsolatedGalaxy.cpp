@@ -78,12 +78,12 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
                                    enzo_units->mass();
   this->gas_fraction_            = config->initial_IG_gas_fraction;
   this->disk_temperature_        = config->initial_IG_disk_temperature /
-                                   enzo_units->temperature();
+                                   enzo_units->kelvin_per_energy_units();
   this->disk_metal_fraction_     = config->initial_IG_disk_metal_fraction;
   this->gas_halo_mass_           = config->initial_IG_gas_halo_mass * enzo_constants::mass_solar /
                                    enzo_units->mass();
   this->gas_halo_temperature_    = config->initial_IG_gas_halo_temperature /
-                                   enzo_units->temperature();
+                                   enzo_units->kelvin_per_energy_units();
   this->gas_halo_metal_fraction_ = config->initial_IG_gas_halo_metal_fraction;
   this->gas_halo_density_        = config->initial_IG_gas_halo_density /
                                    enzo_units->density();

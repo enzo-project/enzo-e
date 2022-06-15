@@ -134,12 +134,8 @@ void EnzoMethodTurbulence::compute ( Block * block) throw()
   field.dimensions (0,&mx,&my,&mz);
   const int rank = ((mz == 1) ? ((my == 1) ? 1 : 2) : 3);
 
-  // the temperature field is in units of K. we need to convert it to units
-  // of specific energy (or velocity_units^2). Some people might refer to
-  // this as "temperature units".
   EnzoUnits* enzo_units = enzo::units();
-  enzo_float temp_to_energy_u =
-    cello::mass_hydrogen*std::pow(enzo_units->velocity(),2)/cello::kboltz;
+  const enzo_float kelvin_per_energy_u = enzo_units->kelvin_per_energy_units();
 
   if (block->is_leaf()) {
 
@@ -154,7 +150,7 @@ void EnzoMethodTurbulence::compute ( Block * block) throw()
 	    enzo_float v  = velocity[id][i];
 	    enzo_float v2 = v*v;
 	    enzo_float a  = driving[id][i];
-	    enzo_float ti = temp_to_energy_u / temperature[i];
+	    enzo_float ti = kelvin_per_energy_u  / temperature[i];
 
 	    g[index_turbulence_vad] +=   v*a*d;
 	    g[index_turbulence_aad] +=   a*a*d;
@@ -273,14 +269,9 @@ void EnzoMethodTurbulence::compute_resume
     double box_mass = domain_x * domain_y * domain_z * density_initial_;
 
 
-    // temperature_initial_ is in units of K. we need to convert it to
-    // units of specific energy or velocity_units^2. Some people might refer to
-    // this as "temperature units".
     EnzoUnits* enzo_units = enzo::units();
-    double temp_to_energy_u =
-      cello::mass_hydrogen*std::pow(enzo_units->velocity(),2)/cello::kboltz;
-
-    float v_rms = mach_number_ * sqrt(temperature_initial_ / temp_to_energy_u);
+    float v_rms = mach_number_ * sqrt(temperature_initial_ /
+                                      enzo_units->kelvin_per_energy_units());
 
     edot_ = 0.81/box_size*box_mass*v_rms*v_rms*v_rms;
 

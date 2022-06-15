@@ -120,7 +120,8 @@ void EnzoInitialBurkertBodenheimer::enforce_block
 
   const double gamma = EnzoBlock::Gamma[in];
   //const double energy = (1e-3*(enzo_constants::kboltz)*temperature_ / ((gamma - 1.0) * (1.0 * enzo_constants::mass_hydrogen)))/enzo_units->energy();
-  const double energy = (temperature_/enzo_units->temperature()) / ((gamma-1.0)) / enzo_config->ppm_mol_weight;
+  const double energy = ((temperature_/enzo_units->kelvin_per_energy_units())
+                         / ((gamma-1.0)) / enzo_config->ppm_mol_weight);
 
   // fixed for now about 1 / 10 solar
   const double inner_metal_fraction = 0.0010; // sub-solar
@@ -250,7 +251,7 @@ void EnzoInitialBurkertBodenheimer::enforce_block
 		  float m2mode = 1.0 + 0.1*cos(2.*phi);
 		  d[i] += density * m2mode;
 		}
-                t[i]  = temperature_ / enzo_units->temperature();
+                t[i]  = temperature_; // field has units of Kelvin
 
     if (metal) metal[i] = d[i]*inner_metal_fraction;
 
