@@ -34,7 +34,7 @@ stable_jeans_wave
 The basic setup for this test is to initialize a 1D stable Jeans wave
 in a 3D box that is inclined with respect all 3 Cartesian axes. Enzo-E
 writes the initial snapshot to disk, evolves the wave over a complete
-period, and writes then writes the final snapshot result to disk. Then
+period, and then writes the final snapshot result to disk. Then
 the python script computes the :math:`L_1` error norm computed by
 comparing values in the initial and final snapshots (the analytic
 solution expects them to be identical) and compares it with a
