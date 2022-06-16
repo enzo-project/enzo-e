@@ -247,7 +247,6 @@ EnzoConfig::EnzoConfig() throw ()
   method_background_acceleration_flavor(""),
   method_background_acceleration_mass(0.0),
   method_background_acceleration_DM_mass(0.0),
-  method_background_acceleration_DM_density(0.0),
   method_background_acceleration_bulge_mass(0.0),
   method_background_acceleration_core_radius(1.0E-10),
   method_background_acceleration_bulge_radius(1.0E-10),
@@ -574,7 +573,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_background_acceleration_flavor;
   p | method_background_acceleration_mass;
   p | method_background_acceleration_DM_mass;
-  p | method_background_acceleration_DM_density;
   p | method_background_acceleration_bulge_mass;
   p | method_background_acceleration_core_radius;
   p | method_background_acceleration_bulge_radius;
@@ -1469,9 +1467,6 @@ void EnzoConfig::read_method_background_acceleration_(Parameters * p)
 
   method_background_acceleration_DM_mass = p->value_float
    ("Method:background_acceleration:DM_mass",-1.0);
-
-  method_background_acceleration_DM_density = p->value_float
-   ("Method:background_acceleration:DM_density", -1.0);
 
   method_background_acceleration_bulge_mass = p->value_float
     ("Method:background_acceleration:bulge_mass", 0.0);
