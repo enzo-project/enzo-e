@@ -32,7 +32,7 @@ By default all tests will be run and the output is stored in the `test` director
 
 ``ctest`` will automatically tell you which tests passed and which tests failed. For a more verbose output of the test, you can call ``ctest`` with ``--output-on-failure``.
 
-If an integration test fails in start-up this implies that there is something wrong with how the test is set up either as an error in the SConscript file that calls the test or that the test has an undefined parameter. If a test fails while running this indicates that the feature being tested does not work.
+If an integration test fails in start-up this implies that there is something wrong with how the test is set up either as an error in the ``test/CMakeLists.txt`` file that calls the test or that the test has an undefined parameter. If a test fails while running this indicates that the feature being tested does not work.
 
 In order to see what happened during the test, you can look at the output directory of the test, which is located in a subdirectory (named after the test) in the ``test`` directory of the build directory, for example ``method_cosmology-1.in`` the test results are stored in ``test/MethodCosmology/Cosmology-8``. This directory also contains all outputs (image and data files).
 

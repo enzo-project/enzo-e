@@ -57,12 +57,6 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
 (const EnzoConfig * config) throw()
 : Initial(config->initial_cycle, config->initial_time)
 {
-  if (this->stellar_disk_ || this->stellar_bulge_)
-    cello::particle_descr()->check_particle_attribute("star","mass");
-
-  if (this->live_dm_halo_)
-    cello::particle_descr()->check_particle_attribute("dark","mass");
-
   // read in parameter settings from config and
   // set corresponding member variables
   for(int i = 0; i < 3; i ++){
@@ -76,24 +70,24 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
   // Store variables locally with code units for convenience
   //     this is not strictly necessary, but makes routine a little cleaner
 
-  this->scale_height_            = config->initial_IG_scale_height * cello::kpc_cm /
+  this->scale_height_            = config->initial_IG_scale_height * enzo_constants::kpc_cm /
                                    enzo_units->length();
-  this->scale_length_	           = config->initial_IG_scale_length * cello::kpc_cm /
+  this->scale_length_	           = config->initial_IG_scale_length * enzo_constants::kpc_cm /
                                    enzo_units->length();
-  this->disk_mass_               = config->initial_IG_disk_mass * cello::mass_solar /
+  this->disk_mass_               = config->initial_IG_disk_mass * enzo_constants::mass_solar /
                                    enzo_units->mass();
   this->gas_fraction_            = config->initial_IG_gas_fraction;
   this->disk_temperature_        = config->initial_IG_disk_temperature /
-                                   enzo_units->temperature();
+                                   enzo_units->kelvin_per_energy_units();
   this->disk_metal_fraction_     = config->initial_IG_disk_metal_fraction;
-  this->gas_halo_mass_           = config->initial_IG_gas_halo_mass * cello::mass_solar /
+  this->gas_halo_mass_           = config->initial_IG_gas_halo_mass * enzo_constants::mass_solar /
                                    enzo_units->mass();
   this->gas_halo_temperature_    = config->initial_IG_gas_halo_temperature /
-                                   enzo_units->temperature();
+                                   enzo_units->kelvin_per_energy_units();
   this->gas_halo_metal_fraction_ = config->initial_IG_gas_halo_metal_fraction;
   this->gas_halo_density_        = config->initial_IG_gas_halo_density /
                                    enzo_units->density();
-  this->gas_halo_radius_         = config->initial_IG_gas_halo_radius * cello::kpc_cm /
+  this->gas_halo_radius_         = config->initial_IG_gas_halo_radius * enzo_constants::kpc_cm /
                                    enzo_units->length();
 
   // on / off settings for IC
@@ -111,10 +105,14 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
   //           color fields as well, but maybe that is taken care of
   //           properly
   ParticleDescr * particle_descr = cello::particle_descr();
-  if (this->stellar_disk_ || this->stellar_bulge_)
-      particle_descr->groups()->add("star","is_gravitating"); // hack
-  if (this->live_dm_halo_)
-      particle_descr->groups()->add("dark","is_gravitating");
+  if (this->stellar_disk_ || this->stellar_bulge_) {
+    particle_descr->check_particle_attribute("star","mass");
+    particle_descr->groups()->add("star","is_gravitating"); // hack
+  }
+  if (this->live_dm_halo_) {
+    particle_descr->check_particle_attribute("dark","mass");
+    particle_descr->groups()->add("dark","is_gravitating");
+  }
 
   // Compute halo density / mass
   if ((this->gas_halo_density_ == 0.0) && this->gas_halo_mass_ > 0)
@@ -465,9 +463,9 @@ void EnzoInitialIsolatedGalaxy::InitializeExponentialGasDistribution(Block * blo
 
             double Mvir  = enzo_config->method_background_acceleration_DM_mass;
 
-            rcore = rcore * cello::kpc_cm;
-            rvir  = rvir  * cello::kpc_cm;
-            Mvir  = Mvir  * cello::mass_solar;
+            rcore = rcore * enzo_constants::kpc_cm;
+            rvir  = rvir  * enzo_constants::kpc_cm;
+            Mvir  = Mvir  * enzo_constants::mass_solar;
 
             double conc = rvir  / rcore;
             double   rx = r_cyl / rvir;
@@ -475,7 +473,7 @@ void EnzoInitialIsolatedGalaxy::InitializeExponentialGasDistribution(Block * blo
 
             vcirc = (std::log(1.0 + conc*rx) - (conc*rx)/(1.0+conc*rx))/
                       (std::log(1.0 + conc) - (conc / (1.0 + conc))) / rx;
-            vcirc = std::sqrt(vcirc * cello::grav_constant * Mvir / rvir);
+            vcirc = std::sqrt(vcirc * enzo_constants::grav_constant * Mvir / rvir);
 
           } else {
             vcirc = this->InterpolateVcircTable(r_cyl);
@@ -971,8 +969,8 @@ void EnzoInitialIsolatedGalaxy::ReadParticlesFromFile_(const int &nl,
        // assuming all stars are the same mass
        EnzoUnits * enzo_units = enzo::units();
 
-       const double mass_conv = cello::mass_solar / enzo_units->mass();
-       const double time_conv = cello::Myr_s / enzo_units->time();
+       const double mass_conv = enzo_constants::mass_solar / enzo_units->mass();
+       const double time_conv = enzo_constants::Myr_s / enzo_units->time();
 
        int stars_per_bin = floor((this->recent_SF_SFR * this->recent_SF_bin_size * 1.0E3)/
                     (particleIcMass[ipt][0] / mass_conv)); // SFR in Msun/yr, bins in Myr
@@ -1023,10 +1021,10 @@ void EnzoInitialIsolatedGalaxy::ReadParticlesFromFile(const int& nl,
          "ParticleFile not found", inFile.is_open());
 
   int i = 0;
-  double lu = cello::pc_cm;
-  double mu = cello::mass_solar / enzo_units->mass();
+  double lu = enzo_constants::pc_cm;
+  double mu = enzo_constants::mass_solar / enzo_units->mass();
   if (this->gas_fraction_ <= 0.2){
-    lu = cello::kpc_cm; // HACK AT THE MOMENT - use old units for MW-size galaxy
+    lu = enzo_constants::kpc_cm; // HACK AT THE MOMENT - use old units for MW-size galaxy
     mu = 1.0;
   }
 
@@ -1088,7 +1086,7 @@ void EnzoInitialIsolatedGalaxy::ReadInVcircData(void)
            "Too many lines in circular velocity file",
            i < this->VCIRC_TABLE_LENGTH);
 
-    this->vcirc_radius[i]   *= cello::kpc_cm;   // kpc  -> cm
+    this->vcirc_radius[i]   *= enzo_constants::kpc_cm;   // kpc  -> cm
     this->vcirc_velocity[i] *= 1.0E5; // km/s -> cm/s
     i++;
   }

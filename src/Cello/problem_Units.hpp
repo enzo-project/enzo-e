@@ -97,10 +97,6 @@ public: // virtual methods
   virtual double length() const
   { return length_; }
 
-  /// Return temperature units scaling factor (derived)
-  virtual double temperature() const
-  { return (cello::mass_hydrogen)*std::pow(velocity(),2)/(cello::kboltz); }
-
   /// Return velocity units scaling factor (derived)
   virtual double velocity() const
   { return length() / time(); }

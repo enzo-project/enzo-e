@@ -28,7 +28,7 @@ EnzoMethodFeedback::EnzoMethodFeedback
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
 
-  ejecta_mass_   = enzo_config->method_feedback_ejecta_mass * cello::mass_solar /
+  ejecta_mass_   = enzo_config->method_feedback_ejecta_mass * enzo_constants::mass_solar /
                       enzo_units->mass();
 
   ejecta_energy_ = enzo_config->method_feedback_supernova_energy * 1.0E51 /
