@@ -140,8 +140,10 @@ void EnzoInitialFeedbackTest::enforce_block
 
          for (int dim = 0; dim < 3; dim++) v3[dim][i] = 0.0;
 
-         ge[i] = enzo_config->initial_feedback_test_temperature / enzo_config->ppm_mol_weight / enzo_units->temperature() /
-                         (enzo_config->field_gamma - 1.0);
+         ge[i] = (enzo_config->initial_feedback_test_temperature /
+                  enzo_config->ppm_mol_weight /
+                  enzo_units->kelvin_per_energy_units() /
+                  (enzo_config->field_gamma - 1.0));
 
          for (int dim = 0; dim < 3; dim ++)
              te[i] = ge[i] + 0.5 * v3[dim][i] * v3[dim][i];

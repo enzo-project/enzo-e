@@ -307,8 +307,6 @@ std::string Param::value_to_string (int type)
     break;
   default:
     // if type_ is something different, just set the string to be "dummy".
-    // This is done because there is a bug with the "Particle:mass_is_mass"
-    // parameter whereby its type_ attribute is not set properly
     string_buffer = std::string("\"") + "dummy" + "\"";
     break;
   }  

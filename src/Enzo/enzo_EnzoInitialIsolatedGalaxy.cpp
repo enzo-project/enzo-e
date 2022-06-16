@@ -78,12 +78,12 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
                                    enzo_units->mass();
   this->gas_fraction_            = config->initial_IG_gas_fraction;
   this->disk_temperature_        = config->initial_IG_disk_temperature /
-                                   enzo_units->temperature();
+                                   enzo_units->kelvin_per_energy_units();
   this->disk_metal_fraction_     = config->initial_IG_disk_metal_fraction;
   this->gas_halo_mass_           = config->initial_IG_gas_halo_mass * enzo_constants::mass_solar /
                                    enzo_units->mass();
   this->gas_halo_temperature_    = config->initial_IG_gas_halo_temperature /
-                                   enzo_units->temperature();
+                                   enzo_units->kelvin_per_energy_units();
   this->gas_halo_metal_fraction_ = config->initial_IG_gas_halo_metal_fraction;
   this->gas_halo_density_        = config->initial_IG_gas_halo_density /
                                    enzo_units->density();
@@ -355,8 +355,6 @@ void EnzoInitialIsolatedGalaxy::InitializeExponentialGasDistribution(Block * blo
 
   // Get Fields
   enzo_float * d           = (enzo_float *) field.values ("density");
-  enzo_float * temperature = field.is_field("temperature") ?
-                             (enzo_float*) field.values("temperature") : NULL;
   enzo_float * p           = field.is_field("pressure") ?
                              (enzo_float *) field.values ("pressure") : NULL;
   enzo_float * a3[3]       = { (enzo_float *) field.values("acceleration_x"),
@@ -457,23 +455,17 @@ void EnzoInitialIsolatedGalaxy::InitializeExponentialGasDistribution(Block * blo
 
           double vcirc = 0.0;
           if (this->analytic_velocity_){
-//            double rhodm = enzo_config->method_background_acceleration_DM_density;
-            double rcore = enzo_config->method_background_acceleration_core_radius;
-            double rvir  = enzo_config->method_background_acceleration_DM_mass_radius;
+            double rcore_cgs = enzo_config->method_background_acceleration_core_radius * enzo_constants::kpc_cm;
+            double rvir_cgs = enzo_config->method_background_acceleration_DM_mass_radius * enzo_constants::kpc_cm;
+            double Mvir_cgs = enzo_config->method_background_acceleration_DM_mass * enzo_constants::mass_solar;
+            ASSERT1("Enzo::InitialIsolatedGalaxy", "DM halo mass (=%e g) must be positive and in units of solar masses", Mvir_cgs, (Mvir_cgs > 0));
 
-            double Mvir  = enzo_config->method_background_acceleration_DM_mass;
-
-            rcore = rcore * enzo_constants::kpc_cm;
-            rvir  = rvir  * enzo_constants::kpc_cm;
-            Mvir  = Mvir  * enzo_constants::mass_solar;
-
-            double conc = rvir  / rcore;
-            double   rx = r_cyl / rvir;
-
+            double conc = rvir_cgs  / rcore_cgs;
+            double   rx = r_cyl / rvir_cgs;
 
             vcirc = (std::log(1.0 + conc*rx) - (conc*rx)/(1.0+conc*rx))/
                       (std::log(1.0 + conc) - (conc / (1.0 + conc))) / rx;
-            vcirc = std::sqrt(vcirc * enzo_constants::grav_constant * Mvir / rvir);
+            vcirc = std::sqrt(vcirc * enzo_constants::grav_constant * Mvir_cgs / rvir_cgs);
 
           } else {
             vcirc = this->InterpolateVcircTable(r_cyl);
@@ -522,7 +514,6 @@ void EnzoInitialIsolatedGalaxy::InitializeGasFromParticles(Block * block){
   //
 
   EnzoUnits * enzo_units = enzo::units();
-  const EnzoConfig * enzo_config = enzo::config();
   Field field = block->data()->field();
 
   // Figure out which index corresponds to the gas particles
@@ -563,8 +554,6 @@ void EnzoInitialIsolatedGalaxy::InitializeGasFromParticles(Block * block){
   // now loop over all gas particles and deposit
   // Get Fields
   enzo_float * d = (enzo_float *) field.values ("density");
-  enzo_float * temperature = field.is_field("temperature") ?
-                   (enzo_float*) field.values("temperature") : NULL;
   enzo_float * p = field.is_field("pressure") ?
                    (enzo_float *) field.values ("pressure") : NULL;
   enzo_float * a3[3] = { (enzo_float *) field.values("acceleration_x"),
@@ -768,8 +757,6 @@ void EnzoInitialIsolatedGalaxy::InitializeParticles(Block * block,
   //
 
   if (this->ntypes_ == 0) return;
-
-  int rank = cello::rank();
 
   // Loop over all particle types and initialize
   for(int ipt = 0; ipt < ntypes_; ipt++){
