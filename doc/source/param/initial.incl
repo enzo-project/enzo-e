@@ -26,14 +26,14 @@
 :Default: :d:`false`
 :Scope:     :c:`Cello`
 
-:e:`Restart the simulation to continue a previous run from a saved checkpoint. If true, the restart directory must be specified using the ` ``restart_dir`` ` parameter.`
+:e:`Restart the simulation to continue a previous run from a saved checkpoint. If true, the restart directory must be specified using the "restart_dir" parameter.`
 
 ----
 
 :Parameter:  :p:`Initial` : :p:`restart_dir`
 :Summary: :s:`Directory containing restart files from a checkpoint created using the "check" method`
-:Type:    :t:`bool`
-:Default: :d:`false`
+:Type:    :t:`string`
+:Default: :d:`none`
 :Scope:     :c:`Cello`
 
 :e:`When restarting a simulation from a "check" checkpoint directory, this parameter must specify the path to that directory.`
