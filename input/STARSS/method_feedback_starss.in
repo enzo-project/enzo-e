@@ -53,15 +53,15 @@ Field {
             "velocity_y_deposit",
             "velocity_z_deposit"
            ];
-   list += ["density_deposit_copy",
-            "total_energy_deposit_copy",
-            "internal_energy_deposit_copy",
-            "metal_density_deposit_copy",
-            "velocity_x_deposit_copy",
-            "velocity_y_deposit_copy",
-            "velocity_z_deposit_copy"
+   list += ["density_deposit_accumulate",
+            "total_energy_deposit_accumulate",
+            "internal_energy_deposit_accumulate",
+            "metal_density_deposit_accumulate",
+            "velocity_x_deposit_accumulate",
+            "velocity_y_deposit_accumulate",
+            "velocity_z_deposit_accumulate"
            ];
-    list += ["SN_shell_density","SN_shell_density_copy"];
+    list += ["SN_shell_density","SN_shell_density_accumulate"];
 }
 
 

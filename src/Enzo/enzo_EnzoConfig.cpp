@@ -231,6 +231,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_analytic_SNR_shell_mass(0),
   method_feedback_fade_SNR(0),
   method_feedback_NEvents(0),
+  method_feedback_tiny_number(1e-20),
   // EnzoMethodStarMaker,
   method_star_maker_flavor(""),                              // star maker type to use
   method_star_maker_use_altAlpha(false),
@@ -591,6 +592,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_feedback_analytic_SNR_shell_mass;
   p | method_feedback_fade_SNR;
   p | method_feedback_NEvents;
+  p | method_feedback_tiny_number;
 
   p | method_star_maker_flavor;
   p | method_star_maker_use_altAlpha;
@@ -1525,6 +1527,9 @@ void EnzoConfig::read_method_feedback_(Parameters * p)
 
   method_feedback_NEvents = p->value_integer
     ("Method:feedback:NEvents",-1);
+
+  method_feedback_tiny_number = p->value_float
+    ("Method:feedback:tiny_number",1e-20);
 }
 
 //----------------------------------------------------------------------

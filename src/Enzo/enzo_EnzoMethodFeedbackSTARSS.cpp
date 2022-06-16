@@ -300,7 +300,6 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
   // initialize NEvents parameter (mainly for testing). Sets off 'NEvents' supernovae,
   // with at most one supernova per star particle per cycle.
   this->NEvents = enzo_config->method_feedback_NEvents;
-  this->tiny_number = 1e-20; 
   return;
 }
 
@@ -316,7 +315,6 @@ void EnzoMethodFeedbackSTARSS::pup (PUP::er &p)
   p | single_sn_;
   p | NEvents;
   p | ir_feedback_;
-  p | tiny_number;
 
   return;
 }
@@ -385,7 +383,7 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
   double rhounit = enzo_units->density();
 
   double maxEvacFraction = 0.75; // TODO: make this a parameter
-  double tiny_number = 1e-20; 
+  double tiny_number = enzo::config()->method_feedback_tiny_number;
 
   // multiply by this value to convert cell density (in code units)
   // to cell mass in Msun
@@ -529,6 +527,7 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
   enzo_float * d_shell_a   = (enzo_float *) field.values("SN_shell_density_accumulate");
 
   // initialize deposit fields as tiny_number -- if d_dep=0 you get NaNs in TransformComovingWithStar
+  double tiny_number = enzo_config-> method_feedback_tiny_number;
 
   for (int i=0; i<mx*my*mz; i++){
     d_dep[i] = tiny_number;    
@@ -737,6 +736,8 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   double Tunit = enzo_units->temperature();
   
   const EnzoConfig * enzo_config = enzo::config();
+  double tiny_number = enzo_config->method_feedback_tiny_number;
+
   bool AnalyticSNRShellMass = enzo_config->method_feedback_analytic_SNR_shell_mass;
 
   // Obtain grid sizes and ghost sizes

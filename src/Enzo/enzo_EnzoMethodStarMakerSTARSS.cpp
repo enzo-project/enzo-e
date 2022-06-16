@@ -326,10 +326,12 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 
         if (! this->check_temperature(temperature[i])) { // if T > Tcrit
            if (enzo_config->method_grackle_chemistry) continue; //no hot gas forming stars!
-           if (cooling_time){
-             if (! this->check_cooling_time(cooling_time[i], total_density, tunit, rhounit)) continue;
-           }
         }
+
+        if (cooling_time){
+           if (! this->check_cooling_time(cooling_time[i], total_density, tunit, rhounit)) continue;
+        }
+        
         // check that M > Mjeans
         if (! check_jeans_mass(temperature[i], mean_particle_mass, density[i], cell_mass,
                                munit,rhounit )) continue;
