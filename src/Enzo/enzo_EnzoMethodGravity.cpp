@@ -198,7 +198,6 @@ void EnzoMethodGravity::compute(Block * block) throw()
   if (DT_copy) for (int i=0; i<m; i++) DT_copy[i] = DT[i];
   if (D_copy) for (int i=0; i<m; i++) D_copy[i] = D[i];
 #endif	
-  
   solver->apply (A, block);
 }
 
