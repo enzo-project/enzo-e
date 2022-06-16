@@ -43,7 +43,6 @@ EnzoMethodGrackle::EnzoMethodGrackle
   /// Define Grackle's internal data structures
   time_grackle_data_initialized_ = ENZO_FLOAT_UNDEFINED;
   initialize_grackle_chemistry_data(time);
-  
 #endif /* CONFIG_USE_GRACKLE */
 }
 
