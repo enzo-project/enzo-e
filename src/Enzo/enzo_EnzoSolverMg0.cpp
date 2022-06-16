@@ -229,7 +229,6 @@ void EnzoSolverMg0::apply ( std::shared_ptr<Matrix> A, Block * block) throw()
   Sync * sync_prolong = psync_prolong(block);
 
   sync_prolong->set_stop(1 + 1); // self and parent
-  
   enter_solver_ (enzo_block);
 }
 
