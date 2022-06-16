@@ -26,7 +26,7 @@
 // splice these off to a different file (later)
 // TODO: Maybe create EnzoStarParticle class and add rate-calculating functions there?
 
-int EnzoMethodFeedbackSTARSS::determineSN(double age, int* nSNII, int* nSNIA,
+int EnzoMethodFeedbackSTARSS::determineSN(double age_Myr, int* nSNII, int* nSNIA,
                 double mass_Msun, double tunit, float dt){
 
     const EnzoConfig * enzo_config = enzo::config();
@@ -44,25 +44,25 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age, int* nSNII, int* nSNIA,
     if (enzo_config->method_feedback_single_sn && NEvents < 0)
     {
         /* age-dependent rates */
-        if (age < 3.401)
+        if (age_Myr < 3.401)
         {
             RII = 0.0;
             RIA = 0.0;
         }
-        if (3.401 <= age && age< 10.37)
+        if (3.401 <= age_Myr && age_Myr < 10.37)
         {
             RII = 5.408e-4;
             RIA = 0.0;
         }
-        if (10.37 <= age && age < 37.53)
+        if (10.37 <= age_Myr && age_Myr < 37.53)
         {
             RII = 2.516e-4;
             RIA = 0.0;
         }
-        if (37.53 <= age)
+        if (37.53 <= age_Myr)
         {
             RII = 0.0;
-            RIA = 5.3e-8+1.6e-5*exp(-0.5*pow((age-50.0)/10.0, 2));
+            RIA = 5.3e-8+1.6e-5*exp(-0.5*pow((age_Myr-50.0)/10.0, 2));
         }
         /* rates -> probabilities */
         if (RII > 0){
@@ -87,7 +87,7 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age, int* nSNII, int* nSNIA,
         }
         #ifdef DEBUG_FEEDBACK_STARSS_SN
           CkPrintf("MethodFeedbackSTARSS::determineSN() -- mass_Msun = %f; age = %f; RII = %f; RIA = %f\n",
-                    mass_Msun, age, RII, RIA);
+                    mass_Msun, age_Myr, RII, RIA);
         #endif
 
         if (RIA > 0){
@@ -113,53 +113,51 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age, int* nSNII, int* nSNIA,
         return 1;
 }
 
-int EnzoMethodFeedbackSTARSS::determineWinds(double age, double * eWinds, double * mWinds, double * zWinds,
+int EnzoMethodFeedbackSTARSS::determineWinds(double age_Myr, double * eWinds, double * mWinds, double * zWinds,
                       double mass_Msun, double metallicity_Zsun, double tunit, double dt) 
     {
     // age in Myr
 
     const EnzoConfig * enzo_config = enzo::config();
-    bool oldEnough = (age < 0.0001)?(false):(true);
-    double windE = 0,  windM = 0, windZ = 0.0;
+    bool oldEnough = (age_Myr < 0.0001)?(false):(true);
+    double windE = 0,  wind_mass_solar = 0, windZ = 0.0;
     double wind_factor = 0.0;
     double e_factor = 0.0;
 
     if (mass_Msun > 11 && oldEnough){
 
-        if (0.001 < age && age < 1.0){
+        if (0.001 < age_Myr && age_Myr < 1.0){
             wind_factor = 4.763 * std::min((0.01 + metallicity_Zsun), 1.0);
         }
-        if (1 <= age && age < 3.5){
+        if (1 <= age_Myr && age_Myr < 3.5){
             wind_factor = 4.763*std::min(0.01+metallicity_Zsun, 1.0)* 
-                pow(age, 1.45+0.08*std::min(log(metallicity_Zsun), 1.0));
+                pow(age_Myr, 1.45+0.08*std::min(log(metallicity_Zsun), 1.0));
         }
-        if (3.5 <= age && age < 100){
-            wind_factor = 29.4*pow(age/3.5, -3.25)+0.0042;
-        
+        if (3.5 <= age_Myr && age_Myr < 100){
+            wind_factor = 29.4*pow(age_Myr/3.5, -3.25)+0.0042;
         }
-        if (age < 100){
-            double d = powl(1+age/2.5, 1.4);
-            double a50 = powl(double(age)/10.0, 5.0);
+        if (age_Myr < 100){
+            double d = powl(1+age_Myr/2.5, 1.4);
+            double a50 = powl(double(age_Myr)/10.0, 5.0);
             e_factor = 5.94e4 / d + a50 +4.83;
-            
         }
-        if (100 <= age){
+        if (100 <= age_Myr){
             e_factor = 4.83;
-            wind_factor = 0.42*pow(age/1000, -1.1)/(19.81/log(age));
+            wind_factor = 0.42*pow(age_Myr/1000, -1.1)/(19.81/log(age_Myr));
         }
-        windM = mass_Msun * wind_factor; // Msun/Gyr
-        windM = windM*dt*tunit/(1e3 * cello::Myr_s); // Msun
+        wind_mass_solar = mass_Msun * wind_factor; // Msun/Gyr
+        wind_mass_solar = wind_mass_solar*dt*tunit/(1e3 * cello::Myr_s); // Msun
 
-        if (windM > mass_Msun){
+        if (wind_mass_solar > mass_Msun){
             CkPrintf("Winds too large Mw = %e, Mp = %e age=%f, Z = %e\n",
-                windM, mass_Msun, age, metallicity_Zsun);
-            windM = 0.125*mass_Msun; // limit loss to huge if necessary.
+                wind_mass_solar, mass_Msun, age_Myr, metallicity_Zsun);
+            wind_mass_solar = 0.125*mass_Msun; // limit loss to huge if necessary.
         }
-        windZ = std::max(cello::metallicity_solar, 0.016+0.0041*std::max(metallicity_Zsun, 1.65)+0.0118)*windM;
-        windE = e_factor * 1e12 * windM;
+        windZ = std::max(cello::metallicity_solar, 0.016+0.0041*std::max(metallicity_Zsun, 1.65)+0.0118)*wind_mass_solar;
+        windE = e_factor * 1e12 * wind_mass_solar;
 
 
-    *mWinds = windM;
+    *mWinds = wind_mass_solar;
     *zWinds = windZ;
     *eWinds = windE;
 
@@ -235,8 +233,8 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
   // required fields
   cello::define_field("density");
   cello::define_field("pressure");
-  cello::define_field("internal_energy");
   cello::define_field("total_energy");
+  cello::define_field("internal_energy");
   cello::define_field("velocity_x");
   cello::define_field("velocity_y");
   cello::define_field("velocity_z");
@@ -269,7 +267,7 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
  
   // I'm currently using a set of two initially empty fields for each field that SNe directly affect.
   // CIC deposition directly modifies the *_deposit fields (including ghost zones). The ghost zone
-  // values are then sent to the *deposit_copy fields during the refresh operation. Values are then
+  // values are then sent to the *deposit_accumulate fields during the refresh operation. Values are then
   // copied back to the original field. 
   
   ir_feedback_ = add_refresh_();
@@ -279,21 +277,21 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
   refresh_fb->set_accumulate(true);
 
   refresh_fb->add_field_src_dst
-    ("density_deposit","density_deposit_copy");
+    ("density_deposit","density_deposit_accumulate");
   refresh_fb->add_field_src_dst
-    ("velocity_x_deposit", "velocity_x_deposit_copy");
+    ("velocity_x_deposit", "velocity_x_deposit_accumulate");
   refresh_fb->add_field_src_dst
-    ("velocity_y_deposit", "velocity_y_deposit_copy");
+    ("velocity_y_deposit", "velocity_y_deposit_accumulate");
   refresh_fb->add_field_src_dst
-    ("velocity_z_deposit","velocity_z_deposit_copy");
+    ("velocity_z_deposit","velocity_z_deposit_accumulate");
   refresh_fb->add_field_src_dst
-    ("total_energy_deposit","total_energy_deposit_copy");
+    ("total_energy_deposit","total_energy_deposit_accumulate");
   refresh_fb->add_field_src_dst
-    ("internal_energy_deposit","internal_energy_deposit_copy");
+    ("internal_energy_deposit","internal_energy_deposit_accumulate");
   refresh_fb->add_field_src_dst
-    ("metal_density_deposit","metal_density_deposit_copy");
+    ("metal_density_deposit","metal_density_deposit_accumulate");
   refresh_fb->add_field_src_dst
-    ("SN_shell_density", "SN_shell_density_copy");
+    ("SN_shell_density", "SN_shell_density_accumulate");
  
   refresh_fb->set_callback(CkIndex_EnzoBlock::p_method_feedback_starss_end());
  
@@ -370,32 +368,32 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
   enzo_float * vy_dep = (enzo_float *) field.values("velocity_y_deposit");
   enzo_float * vz_dep = (enzo_float *) field.values("velocity_z_deposit");
 
-  enzo_float * d_dep_c  = (enzo_float *) field.values("density_deposit_copy");
-  enzo_float * te_dep_c = (enzo_float *) field.values("total_energy_deposit_copy");
-  enzo_float * ge_dep_c = (enzo_float *) field.values("internal_energy_deposit_copy");
-  enzo_float * mf_dep_c = (enzo_float *) field.values("metal_density_deposit_copy");
-  enzo_float * vx_dep_c = (enzo_float *) field.values("velocity_x_deposit_copy");
-  enzo_float * vy_dep_c = (enzo_float *) field.values("velocity_y_deposit_copy");
-  enzo_float * vz_dep_c = (enzo_float *) field.values("velocity_z_deposit_copy");
+  enzo_float * d_dep_a  = (enzo_float *) field.values("density_deposit_accumulate");
+  enzo_float * te_dep_a = (enzo_float *) field.values("total_energy_deposit_accumulate");
+  enzo_float * ge_dep_a = (enzo_float *) field.values("internal_energy_deposit_accumulate");
+  enzo_float * mf_dep_a = (enzo_float *) field.values("metal_density_deposit_accumulate");
+  enzo_float * vx_dep_a = (enzo_float *) field.values("velocity_x_deposit_accumulate");
+  enzo_float * vy_dep_a = (enzo_float *) field.values("velocity_y_deposit_accumulate");
+  enzo_float * vz_dep_a = (enzo_float *) field.values("velocity_z_deposit_accumulate");
 
   enzo_float * d_shell   = (enzo_float *) field.values("SN_shell_density");
-  enzo_float * d_shell_c = (enzo_float *) field.values("SN_shell_density_copy");
+  enzo_float * d_shell_a = (enzo_float *) field.values("SN_shell_density_accumulate");
 
   EnzoUnits * enzo_units = enzo::units();
   double cell_volume_code = hx*hy*hz;
-  double cell_volume = cell_volume_code * enzo_units->volume();
+  double cell_volume_cgs = cell_volume_code * enzo_units->volume();
   double rhounit = enzo_units->density();
 
   double maxEvacFraction = 0.75; // TODO: make this a parameter
   double tiny_number = 1e-20; 
 
-  double rho_to_m = rhounit*cell_volume / cello::mass_solar;
+  double rho_to_m = rhounit*cell_volume_cgs / cello::mass_solar;
 
   for (int iz=gz; iz<nz+gz; iz++){
     for (int iy=gy; iy<ny+gy; iy++){
       for (int ix=gx; ix<nx+gx; ix++){
         int i = INDEX(ix,iy,iz,mx,my);
-        if (te_dep_c[i] > 10*tiny_number) { // if any deposition
+        if (te_dep_a[i] > 10*tiny_number) { // if any deposition
 
           double d_old = d[i];
           
@@ -407,33 +405,33 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
           // to (1-maxEvacFraction) * density[i] and metal_density to (1-maxEvacFraction) * metal_density[i] if
           // either go negative.
 
-          if (d[i] + d_dep_c[i] < 0) {
+          if (d[i] + d_dep_a[i] < 0) {
             d[i] *= 1-maxEvacFraction;
           }
           else {
-            d[i] += d_dep_c[i];
+            d[i] += d_dep_a[i];
           }
 
-          if (mf[i] + mf_dep_c[i] < 0) {
+          if (mf[i] + mf_dep_a[i] < 0) {
             mf[i] *= 1-maxEvacFraction;
           }
           else {
-            mf[i] += mf_dep_c[i];
+            mf[i] += mf_dep_a[i];
           }
 
           double d_new = d[i];
-          double cell_mass = d_new*hx*hy*hz;
+          double inv_dens_new = 1.0/d_new;
 
           double M_scale_tot = d_new / d_old;
-          double M_scale_shell = d_shell_c[i]/d[i];
+          double M_scale_shell = d_shell_a[i]/d[i];
 
-          // Here, te_dep_c and ge_dep_c are carrying "energy density" (not specific energy)
-          // and vx_dep_c, vy_dep_c, and vy_dep_c are carrying velocity of the shell (not momentum density)
-          te[i] = te[i] / M_scale_tot + te_dep_c[i] * cell_volume_code/cell_mass; 
-          ge[i] = ge[i] / M_scale_tot + ge_dep_c[i] * cell_volume_code/cell_mass;
-          vx[i] += vx_dep_c[i] * M_scale_shell;
-          vy[i] += vy_dep_c[i] * M_scale_shell;
-          vz[i] += vz_dep_c[i] * M_scale_shell;
+          // Here, te_dep_a and ge_dep_a are carrying "energy density" (not specific energy)
+          // and vx_dep_a, vy_dep_a, and vy_dep_a are carrying velocity of the shell (not momentum density)
+          te[i] = te[i] / M_scale_tot + te_dep_a[i] * inv_dens_new; 
+          ge[i] = ge[i] / M_scale_tot + ge_dep_a[i] * inv_dens_new;
+          vx[i] += vx_dep_a[i] * M_scale_shell;
+          vy[i] += vy_dep_a[i] * M_scale_shell;
+          vz[i] += vz_dep_a[i] * M_scale_shell;
 
           // rescale color fields to account for new densities
           EnzoMethodStarMaker::rescale_densities(enzo_block, i, M_scale_tot);
@@ -462,8 +460,8 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
 
   //----------------------------------------------------
   // some constants here that might get moved to parameters or something else
-  const float SNII_ejecta_mass = 10.5;
-  const float SNIa_ejecta_mass = 1.4;
+  const float SNII_ejecta_mass_Msun = 10.5;
+  const float SNIa_ejecta_mass_Msun = 1.4;
   const float z_solar          = cello::metallicity_solar; //Solar metal fraction (0.012)
   //-----------------------------------------------------
 
@@ -517,16 +515,16 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
   enzo_float * vy_dep = (enzo_float *) field.values("velocity_y_deposit");
   enzo_float * vz_dep = (enzo_float *) field.values("velocity_z_deposit");
 
-  enzo_float * d_dep_c  = (enzo_float *) field.values("density_deposit_copy");
-  enzo_float * te_dep_c = (enzo_float *) field.values("total_energy_deposit_copy");
-  enzo_float * ge_dep_c = (enzo_float *) field.values("internal_energy_deposit_copy");
-  enzo_float * mf_dep_c = (enzo_float *) field.values("metal_density_deposit_copy");
-  enzo_float * vx_dep_c = (enzo_float *) field.values("velocity_x_deposit_copy");
-  enzo_float * vy_dep_c = (enzo_float *) field.values("velocity_y_deposit_copy");
-  enzo_float * vz_dep_c = (enzo_float *) field.values("velocity_z_deposit_copy");
+  enzo_float * d_dep_a  = (enzo_float *) field.values("density_deposit_accumulate");
+  enzo_float * te_dep_a = (enzo_float *) field.values("total_energy_deposit_accumulate");
+  enzo_float * ge_dep_a = (enzo_float *) field.values("internal_energy_deposit_accumulate");
+  enzo_float * mf_dep_a = (enzo_float *) field.values("metal_density_deposit_accumulate");
+  enzo_float * vx_dep_a = (enzo_float *) field.values("velocity_x_deposit_accumulate");
+  enzo_float * vy_dep_a = (enzo_float *) field.values("velocity_y_deposit_accumulate");
+  enzo_float * vz_dep_a = (enzo_float *) field.values("velocity_z_deposit_accumulate");
 
   enzo_float * d_shell   = (enzo_float *) field.values("SN_shell_density");
-  enzo_float * d_shell_c   = (enzo_float *) field.values("SN_shell_density_copy");
+  enzo_float * d_shell_a   = (enzo_float *) field.values("SN_shell_density_accumulate");
 
   // initialize deposit fields as tiny_number -- if d_dep=0 you get NaNs in TransformComovingWithStar
 
@@ -540,13 +538,13 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
     vz_dep[i] = tiny_number;
     d_shell[i] = tiny_number;
 
-    te_dep_c[i] = 0;
-    ge_dep_c[i] = 0;
-    mf_dep_c[i] = 0;
-    vx_dep_c[i] = 0;
-    vy_dep_c[i] = 0;
-    vz_dep_c[i] = 0;
-    d_shell_c[i] = 0;
+    te_dep_a[i] = 0;
+    ge_dep_a[i] = 0;
+    mf_dep_a[i] = 0;
+    vx_dep_a[i] = 0;
+    vy_dep_a[i] = 0;
+    vz_dep_a[i] = 0;
+    d_shell_a[i] = 0;
   }
 
   double cell_volume = hx*hy*hz;
@@ -643,8 +641,8 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
             /* set feedback properties based on number and types of SN */
             double energySN = (nSNII+nSNIa) * 1.0e51;
 
-            SNMassEjected = SNII_ejecta_mass * nSNII +
-                            SNIa_ejecta_mass * nSNIa; // AE: split this in two channels for yields
+            SNMassEjected = SNII_ejecta_mass_Msun * nSNII +
+                            SNIa_ejecta_mass_Msun * nSNIa; // AE: split this in two channels for yields
 
             const double starZ = pmetal[ipdmf] / z_solar;
 

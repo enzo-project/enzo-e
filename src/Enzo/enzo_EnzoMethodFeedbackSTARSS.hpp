@@ -50,10 +50,10 @@ public:
    // Compute the maximum timestep for this method
    virtual double timestep (Block * block) throw();
 
-   int determineSN (double age, int * nSNII, int * nSNIA,
+   int determineSN (double age_Myr, int * nSNII, int * nSNIA,
                     double mass_Msun, double tunit, float dt);
    
-   int determineWinds(double age, double * eWinds, double * mWinds, double * zWinds,
+   int determineWinds(double age_Myr, double * eWinds, double * mWinds, double * zWinds,
                       double mass_Msun, double metallicity_Zsun, double tunit, double dt); 
 
    // this can raise errors -- remove const throw() ???

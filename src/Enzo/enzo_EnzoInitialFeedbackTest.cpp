@@ -169,8 +169,6 @@ void EnzoInitialFeedbackTest::enforce_block
 
   // drop in a particle
 
-  if (enzo_block->level() < 0) return; // don't do particles below root grid
-
   ParticleDescr * particle_descr = cello::particle_descr();
   Particle particle              = block->data()->particle();
 
