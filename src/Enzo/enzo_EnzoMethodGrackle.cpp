@@ -49,7 +49,6 @@ EnzoMethodGrackle::EnzoMethodGrackle
 //----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_GRACKLE
- 
 void EnzoMethodGrackle::define_required_grackle_fields()
 {
   // Gather list of fields that MUST be defined for this method and
