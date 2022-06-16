@@ -278,7 +278,6 @@ void EnzoSolverMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
 
     enzo_block->contribute(2*sizeof(long double), &reduce,
 			   sum_long_double_2_type, callback);
-  
   } else {
 
     SOLVER_CONTROL(enzo_block,"min","max","2 calling begin_solve_2 (no shift)");
