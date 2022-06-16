@@ -27,7 +27,7 @@
 // TODO: Maybe create EnzoStarParticle class and add rate-calculating functions there?
 
 int EnzoMethodFeedbackSTARSS::determineSN(double age_Myr, int* nSNII, int* nSNIA,
-                double mass_Msun, double tunit, float dt){
+                double pmass_Msun, double tunit, float dt){
 
     const EnzoConfig * enzo_config = enzo::config();
     std::mt19937 mt(std::time(nullptr));
@@ -66,7 +66,7 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age_Myr, int* nSNII, int* nSNIA
         }
         /* rates -> probabilities */
         if (RII > 0){
-            PII = RII * mass_Msun / cello::Myr_s *tunit*dt;
+            PII = RII * pmass_Msun / cello::Myr_s *tunit*dt;
             double random = double(mt())/double(mt.max());
             if (PII > 1.0 && enzo_config->method_feedback_unrestricted_sn){
                 int round = (int)PII;
@@ -86,12 +86,12 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age_Myr, int* nSNII, int* nSNIA
             }
         }
         #ifdef DEBUG_FEEDBACK_STARSS_SN
-          CkPrintf("MethodFeedbackSTARSS::determineSN() -- mass_Msun = %f; age = %f; RII = %f; RIA = %f\n",
-                    mass_Msun, age_Myr, RII, RIA);
+          CkPrintf("MethodFeedbackSTARSS::determineSN() -- pmass_Msun = %f; age = %f; RII = %f; RIA = %f\n",
+                    pmass_Msun, age_Myr, RII, RIA);
         #endif
 
         if (RIA > 0){
-            PIA = RIA*mass_Msun / cello::Myr_s *tunit*dt;
+            PIA = RIA*pmass_Msun / cello::Myr_s *tunit*dt;
             float random = float(rand())/float(RAND_MAX);
 
             if (PIA > 1.0 && enzo_config->method_feedback_unrestricted_sn)
@@ -114,7 +114,7 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age_Myr, int* nSNII, int* nSNIA
 }
 
 int EnzoMethodFeedbackSTARSS::determineWinds(double age_Myr, double * eWinds, double * mWinds, double * zWinds,
-                      double mass_Msun, double metallicity_Zsun, double tunit, double dt) 
+                      double pmass_Msun, double metallicity_Zsun, double tunit, double dt) 
     {
     // age in Myr
 
@@ -124,7 +124,7 @@ int EnzoMethodFeedbackSTARSS::determineWinds(double age_Myr, double * eWinds, do
     double wind_factor = 0.0;
     double e_factor = 0.0;
 
-    if (mass_Msun > 11 && oldEnough){
+    if (pmass_Msun > 11 && oldEnough){
 
         if (0.001 < age_Myr && age_Myr < 1.0){
             wind_factor = 4.763 * std::min((0.01 + metallicity_Zsun), 1.0);
@@ -145,13 +145,13 @@ int EnzoMethodFeedbackSTARSS::determineWinds(double age_Myr, double * eWinds, do
             e_factor = 4.83;
             wind_factor = 0.42*pow(age_Myr/1000, -1.1)/(19.81/log(age_Myr));
         }
-        wind_mass_solar = mass_Msun * wind_factor; // Msun/Gyr
+        wind_mass_solar = pmass_Msun * wind_factor; // Msun/Gyr
         wind_mass_solar = wind_mass_solar*dt*tunit/(1e3 * cello::Myr_s); // Msun
 
-        if (wind_mass_solar > mass_Msun){
+        if (wind_mass_solar > pmass_Msun){
             CkPrintf("Winds too large Mw = %e, Mp = %e age=%f, Z = %e\n",
-                wind_mass_solar, mass_Msun, age_Myr, metallicity_Zsun);
-            wind_mass_solar = 0.125*mass_Msun; // limit loss to huge if necessary.
+                wind_mass_solar, pmass_Msun, age_Myr, metallicity_Zsun);
+            wind_mass_solar = 0.125*pmass_Msun; // limit loss to huge if necessary.
         }
         windZ = std::max(cello::metallicity_solar, 0.016+0.0041*std::max(metallicity_Zsun, 1.65)+0.0118)*wind_mass_solar;
         windE = e_factor * 1e12 * wind_mass_solar;
@@ -387,6 +387,8 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
   double maxEvacFraction = 0.75; // TODO: make this a parameter
   double tiny_number = 1e-20; 
 
+  // multiply by this value to convert cell density (in code units)
+  // to cell mass in Msun
   double rho_to_m = rhounit*cell_volume_cgs / cello::mass_solar;
 
   for (int iz=gz; iz<nz+gz; iz++){
@@ -609,13 +611,10 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
 
         // compute coordinates of central feedback cell
         // this must account for ghost zones
-        double xcell = (px[ipdp] - xm) / hx + gx - 0.5;
-        double ycell = (py[ipdp] - ym) / hy + gy - 0.5;
-        double zcell = (pz[ipdp] - zm) / hz + gz - 0.5;
 
-        int ix       = ((int) floor(xcell + 0.5));
-        int iy       = ((int) floor(ycell + 0.5));
-        int iz       = ((int) floor(zcell + 0.5));
+        int ix       = (int) floor((px[ipdp] - xm) / hx + gx);
+        int iy       = (int) floor((py[ipdp] - ym) / hy + gy);
+        int iz       = (int) floor((pz[ipdp] - zm) / hz + gz);
 
         int index = INDEX(ix,iy,iz,mx,my); // 1D cell index of star position
 
@@ -950,7 +949,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   double fz = std::min(2.0, pow(std::max(Z_Zsun,0.01),-0.14));
 
   // Cooling radius as in Hopkins, but as an average over cells
-  double CoolingRadius = 28.4 * pow(std::max(0.1, n_mean), -3.0 / 7.0) * pow(ejectaEnergy / 1.0e51, 2.0 / 7.0) * fz;
+  double CoolingRadius = 28.4 * pow(std::max(0.1, n_mean), -3.0 / 7.0) * pow(ejectaEnergy / 1.0e51, 2.0 / 7.0) * fz; // pc
   double coupledEnergy = ejectaEnergy;
   double cellwidth = hx*lunit / cello::pc_cm; // pc
   double dxRatio = cellwidth / CoolingRadius;

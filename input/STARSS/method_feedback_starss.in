@@ -184,7 +184,7 @@ Initial {
 }
 
 Output {
-    list = ["de","te","vx","vy","mesh","data" ];
+    list = ["data"];
      de {
          dir = [ "FEEDBACK_TEST_%04d", "cycle" ];
          field_list = [ "density" ];
@@ -275,8 +275,8 @@ Output {
         #   step refers to the interval if 'var' to output on
         schedule {
              var   = "cycle";
-             start = 0; #1;
-             step  = 1; #20; #            time in code units (Myr)
+             start = 1;
+             step  = 20; #            time in code units (Myr)
         }
     };
 
@@ -284,5 +284,5 @@ Output {
 }
 
 Stopping {
-    cycle = 1;
+    cycle = 401;
 }
