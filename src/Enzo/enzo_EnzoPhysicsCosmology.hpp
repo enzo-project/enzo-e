@@ -180,28 +180,95 @@ public: // interface
   void compute_expansion_factor
   (enzo_float *cosmo_a, enzo_float *cosmo_dadt, enzo_float time) const;
 
-  /// Return current mass units scaling (requires set_current_time())
+  /* Return density unit at current time / redshift in terms of `g / cm^3`
+     (requires set_current_time()).
+     
+     Density unit is defined so that the mean physical matter density of the universe is 1.
+     This can be written as:
+     
+     `rho_bar_m_0 * (1 + z)^3 / rho_unit = 1`
+     
+     Where `rho_bar_m_0` is the mean physical matter density at redshift 0, `z` is redshift,
+     and `rho_unit` is the density unit in `g / cm^3`.
+
+     We can then write this as:
+     
+     `rho_unit = `Omega_m_0 * rho_crit_0 * (1 + z)^3`,
+     
+     where `Omega_m_0` is a cosmological parameter which can be set in the input parameter file,
+     and `rho_crit_0` is defined as `3 * H_0^2 / (8 * pi * G)`, where `H_0` is the expansion rate
+     of the universe at redshift 0 (with dimensions of inverse time), and `G` is the
+     gravitational constant. `H_0` can be written as `H_0 / h * h`, where `h` is given the name
+     `hubble_constant_now_` in the code below. Putting this all together gives the following
+     expression:
+     
+     `rho_unit = (3 / 8 * pi) * (H_0 / h)^2 / G^2 * Omega_m_0 * h^2 * (1+z)^3`.
+
+     Note: the previous version of this function was equivalent to:
+     
+     `rho_unit = 1.8788e-29 * Omega_m_0 * h^2 * (1+z)^3`.
+
+     but (after plugging in values), this version is equivalent to:
+
+     `rho_unit = 1.8784710838431666e-29 * Omega_m_0 * h^2 * (1+z)^3`.
+
+     The reason for this inconsistency is unclear. It is possibly due to inconsistent values
+     for `G`.
+
+   */
+  double density_units() const
+  {
+    return (3.0 / (8.0 * cello::pi)) * enzo_constants::H0_over_h * enzo_constants::H0_over_h /
+      (enzo_constants::G * enzo_constants::G) * omega_matter_now_ *
+      hubble_constant_now_ * hubble_constant_now_ *
+      (1 + current_redshift_) * (1 + current_redshift_) * (1 + current_redshift_);
+  }
+  
+  /// Return current mass unit in terms of grams (requires set_current_time())
   double mass_units() const
   {
-    double density = 1.8788e-29*omega_matter_now_*
-      pow(hubble_constant_now_,2)*
-      pow(1 + current_redshift_,3);
-    double length = length_units();
-    return density * length * length * length;
+    return density_units() * length_units() * length_units() * length_units();
   }
-
-  /// Return current length units scaling (requires set_current_time())
+  
+  /// Return current length unit in terms of cm (requires set_current_time())
   double length_units() const
   {
     return enzo_constants::Mpc_cm*comoving_box_size_/hubble_constant_now_/
       (1.0 + current_redshift_);
   }
 
-  /// Return current time units (requires set_current_time())
+  /*
+    Return current time unit in terms of seconds (requires set_current_time())
+
+    Time unit is defined so that the following is true (note that `G * rho_bar_m_0` has dimensions
+    of inverse time squared):
+
+    `4 * pi * G * rho_bar_m_0 * (1 + z)^3 * time_unit^2 = 1`,
+
+    Where `G` is the gravitational constant.`rho_bar_m_0` is the mean physical matter density
+    at redshift 0, `z` is redshift, and `time_unit` is the density unit in seconds.
+    Defining the time unit in this way has the effect of simplifying Poisson's equation.
+
+    `rho_bar_m_0` can be written as `Omega_m_0 * rho_crit_0`, where `Omega_m_0` is a cosmological
+    parameter which can be set in the input parameter file,
+    and `rho_crit_0` is defined as `3 * H_0^2 / (8 * pi * G)`, where `H_0` is the expansion rate
+    of the universe at redshift 0 (with dimensions of inverse time). Plugging this all in gives:
+
+    `3 / 2 * Omega_m_0 * H_0^2 * time_unit^2 = 1`.
+
+    After some rearrangement, we get the following expression:
+
+    `time_unit = sqrt(2/3) * h / H0 / (h * sqrt(Omega_m_0 * (1 + z)^3))`/
+    
+  */
+
+  
   double time_units() const
   {
-    return 2.519445e17/sqrt(omega_matter_now_)/hubble_constant_now_/
-      pow(1.0 + initial_redshift_,1.5);
+    return sqrt(2/3) / (enzo_constants::H_0_over_h * hubble_constant_now_ *
+			sqrt(omega_matter_now_ *
+			     (1 + current_redshift_) * (1 + current_redshift_) *
+			     (1 + current_redshift_)));
   }
 
   double velocity_units() const
