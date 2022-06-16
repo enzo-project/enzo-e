@@ -8,12 +8,11 @@ from answer_testing import \
 
 # Set test tolerance based on compile precision
 use_double = os.environ.get("USE_DOUBLE", "false").lower() == "true"
+yt.mylog.info(f"{__file__}: {use_double=}")
 if use_double:
     decimals = 12
 else:
     decimals = 6
-
-yt.mylog.info(f"use_double is {use_double}")
 
 class TestHLLCCloud(EnzoETest):
     parameter_file = "vlct/dual_energy_cloud/hllc_cloud.in"
