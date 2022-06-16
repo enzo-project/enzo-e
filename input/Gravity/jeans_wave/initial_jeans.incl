@@ -1,7 +1,6 @@
 # Initial conditions for inclined stable Jeans Wave
 
    include "input/vlct/MHD_linear_wave/domain-lw.incl"
-   include "input/vlct/vl.incl"
 
    Adapt {
       max_level = 0;
@@ -9,7 +8,15 @@
 
    Method {
 
-      list = ["pm_deposit", "gravity", "mhd_vlct"];
+      list = ["pm_deposit", "gravity"];
+
+      pm_deposit {
+         # every cycle, this method tries to "drift" the density field forward
+         # (like it's a grid of particles) by alpha*timestep.
+
+         alpha = 0.0; # this test-problem encounters issues when this is
+                      # non-zero
+     }
 
       gravity {
          solver = "cg";
@@ -66,10 +73,12 @@
       alignment = 8;
       ghost_depth = 4;
       history = 1;
-      list += ["internal_energy", "acceleration_x", "acceleration_y", "acceleration_z",
-               "density_gas", "density_particle", "density_total",
-               "density_particle_accumulate", "potential", "potential_temp",
-               "potential_copy", "X", "B", "X_copy", "B_copy", "particle_mass"];
+      list = ["density", "velocity_x", "velocity_y", "velocity_z",
+              "total_energy", "pressure", "internal_energy",
+              "acceleration_x", "acceleration_y", "acceleration_z",
+              "density_gas", "density_particle", "density_total",
+              "density_particle_accumulate", "potential", "potential_temp",
+              "potential_copy", "X", "B", "X_copy", "B_copy", "particle_mass"];
      padding = 0;
    }
 
@@ -87,7 +96,13 @@
    }
 
    Stopping{
-      time = 1.0;
+      # the final stopping time is 2 * pi / omega, where is omega is angular
+      # frequecy. Omega is given by:
+      #    omega^2 = (2*pi/lambda)^2 * cs_0^2 * (1 - (lambda / lambda_J)^2)
+      # The final time is:
+      #     lambda / (cs_0 * sqrt(1 - (lambda / lambda_J)^2))
+      # in this setup: c_s = 1, lambda = 1, lambda_J = 2
+      time = 1.1547005383792517; # = 1.0 / sqrt(0.75)
    }
 
    Output {
@@ -100,7 +115,7 @@
          #dir = ["method_ppm-cg-1-jeansN16_%.4f","time"];
          schedule {
              var = "time";
-             list = [0.0, 1.0];
+             list = [0.0, 1.1547005383792517];
          }
       }
    }

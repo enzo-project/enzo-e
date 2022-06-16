@@ -1,4 +1,4 @@
-   include "input/Gravity/jeans_wave/initial_jeans_vlct.incl"
+   include "input/Gravity/jeans_wave/initial_jeans_ppm.incl"
 
    Mesh {
       root_rank = 3; # 3D
@@ -7,5 +7,5 @@
    }
 
    Output {
-      data { dir = ["method_vlct-cg-1-inclined-jeansN32_%.4f","time"]; }
+      data { dir = ["method_ppm-cg-1-inclined-jeansN32_%.4f","time"]; }
    }
