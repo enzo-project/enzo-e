@@ -159,7 +159,6 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
   if (block->is_leaf()) {
     if (cosmology) {
-  
       int gx,gy,gz;
       field.ghost_depth(0,&gx,&gy,&gz);
       gx=gy=gz=0;
