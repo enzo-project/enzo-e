@@ -10,6 +10,7 @@
 
 #include "cello.hpp"
 #include "enzo.hpp"
+#include <fstream>
 
 //----------------------------------------------------------------------
 
