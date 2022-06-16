@@ -338,7 +338,6 @@ int EnzoMethodStarMaker::check_velocity_divergence(
 
     ///  Apply the criteria that the divergence of the velocity
     ///  be negative, if so desired by user (use_velocity_divergence).
-    // assumes dx=dy=dz
 
     if (!(this->use_velocity_divergence_)){
       return 1.0;
@@ -349,9 +348,9 @@ int EnzoMethodStarMaker::check_velocity_divergence(
    if (vy) div += 0.5 * (vy[index+diy] - vy[index-diy]) / dy; // in units of dy
    if (vz) div += 0.5 * (vz[index+diz] - vz[index-diz]) / dz; // in units of dz
 
-  #ifdef DEBUG_SF
-    CkPrintf("MethodStarMaker -- velocity_divergence = %f\n",div); 
-  #endif
+   #ifdef DEBUG_SF
+     CkPrintf("MethodStarMaker -- velocity_divergence = %f\n",div); 
+   #endif
 
    return div < 0;
 }
