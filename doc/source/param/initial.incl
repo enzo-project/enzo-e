@@ -266,12 +266,12 @@ Initial:cloud:perturb_standard_deviation is positive.`
 inclined_wave
 -------------
 
-The :p:`inclined_wave` Initial subgroup is used to setup a HD or
-MHD wave at an angle inclined to the simulation domain for testing
+The :p:`inclined_wave` Initial subgroup is used to setup a HD, MHD,
+or Jeans wave at an angle inclined to the simulation domain for testing
 HD/MHD integrators. If applicable, magnetic fields fields are set
 to zero when a HD wave is initialized.
 
-The procedure to addopted from
+The initialization procedure was adopted from
 `Gardiner & Stone (2008) <http://adsabs.harvard.edu/abs/2008JCoPh.227.4123G>`_ .
 Specifically, a coordinate system "x0", "x1", "x2" is defined and the
 wave is initialized to travel along "x0". The transformation between
@@ -313,9 +313,16 @@ vector potential to ensure that they are divergence-free.
 :Default: :d:`alfven`
 :Scope:   :z:`Enzo`
 
+:e:`This value specifies the type of wave to initialize. We have
+provided more details about each option down below. Note, when using an MHD
+solver with a non-MHD wave, the mangetic fields are uniformly initialized
+to zero.`
+
+Hydro Waves
+~~~~~~~~~~~
 :e:`The values used to initialize hydrodynamical linear waves are taken from
 the columns of the matrix given in equation B3 of`
-`Stone et al. (2008) <http://adsabs.harvard.edu/abs/2008ApJS..178..137S>`_
+`Stone et al. (2008) <https://adsabs.harvard.edu/abs/2008ApJS..178..137S>`_
 :e:`. Valid hydrodynamical waves include:`
 
   * ``"sound"`` :e:`A linear sound wave.`
@@ -331,8 +338,10 @@ the columns of the matrix given in equation B3 of`
     perturbations in velocity component v2 (transverse to the direction of
     bulk motion).`
 
-:e:`Each of the valid MHD waves are described in`
-`Gardiner & Stone (2008) <http://adsabs.harvard.edu/abs/2008JCoPh.227.4123G>`_
+MHD Waves
+~~~~~~~~~
+:e:`Each of the valid MHD waves are described in` `Gardiner & Stone
+(2008) <https://adsabs.harvard.edu/abs/2008JCoPh.227.4123G>`__
 :e:`. Valid MHD wave types include:`
 
   * ``"alfven"`` :e:`A linear Alfven wave with perturbations to the
@@ -342,6 +351,41 @@ the columns of the matrix given in equation B3 of`
   * ``"mhd_entropy"`` :e:`A linear MHD entropy wave.`
   * ``"fast"`` :e:`A linear fast magnetosonic wave.`
   * ``"slow"`` :e:`A linear slow magnetosonic wave.`
+
+Jeans Wave
+~~~~~~~~~~
+
+:e:`To initialize a Jeans wave, set this parameter to` ``"jeans"``.
+:e:`We use equations consistent with what Athena and (earlier
+versions of) Athena++ use. In detail, we use:`
+
+.. math::
+   \rho     &= \rho_{\rm bkg}
+          \left( 1 + A \sin\left(\frac{2\pi}{\lambda} x_0 \right) \right) \\
+   \rho v_0 &= \rho_{\rm bkg} \frac{\sqrt{|\omega^2|}}{2\pi / \lambda} A
+          \begin{cases}
+                0                       & \omega^2 > 0 \\
+                \cos\left(\frac{2\pi}{\lambda} x_0 \right) & \omega^2 < 0 \\
+          \end{cases} \\
+   v_1      &= 0 \\
+   v_2      &= 0 \\
+   \rho E   &= \frac{P_{\rm bkg}}{\gamma - 1} + \gamma A \sin\left(\frac{2\pi}{\lambda} x_0\right) \\
+
+:e:`in which:`
+
+  * :math:`E` :e:`specifies the specific internal energy`
+  * :math:`\gamma` :e:`is the adiabatic index.`
+  * :math:`A` :e:`is the amplitude, specified by
+    Initial:inclined_wave:amplitude and` :math:`\lambda` :e:`is the
+    wavelength, specified by Initial:inclined_wave:lambda`
+  * :math:`\rho_{\rm bkg}=1` :e:`and` :math:`P_{\rm bkg}=1/\gamma`
+    :e:`in the appropriate code units`
+  * :math:`\omega^2=(2\pi c_{s,{\rm bkg}}/ \lambda)^2 (1 -
+    (\lambda/\lambda_J)^2)` :e:`is the dispersion relation. In this
+    equation,` :math:`c_{s,{\rm bkg}}^2=\gamma P_{\rm bkg}/\rho_{\rm
+    bkg}` :e:`and` :math:`\lambda_J = c_{s,{\rm bkg}} \sqrt{\pi / (G
+    \rho_{\rm bkg})}`. :e:`Note that the value of` :math:`G` :e:`is
+    directly set by Method:gravity:grav_const`.
 
 ----
 
@@ -372,9 +416,9 @@ polarized Alfven wave (for that case, amplitude is fixed at 0.1).`
 :Default: :d:`true`
 :Scope:   :z:`Enzo`
 
-:e:`This has no effect for the circularly polarized Alfven wave. This is
-ignored for linear HD entropy waves when Initial:inclined_wave:parallel_vel
-is specified.`
+:e:`Do not specify this parameter when initializing a circularly
+polarized Alfven wave or a Jeans wave. This is ignored for linear HD
+entropy waves when Initial:inclined_wave:parallel_vel is specified.`
 
 ----
 
@@ -384,8 +428,9 @@ is specified.`
 :Default: :d:`none`
 :Scope:   Enzo
 
-:e:`This can be used to specify a background velocity along v0 for
-HD linear waves.`
+:e:`This can be used to specify a background velocity along v0 for HD
+linear waves. At present, this parameter should only be specified for
+the hydrodynamic waves.`
 
 merge_sinks_test
 ----------------
