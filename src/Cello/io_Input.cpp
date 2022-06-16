@@ -52,8 +52,6 @@ void Input::pup (PUP::er &p)
 
   PUP::able::pup(p);
 
-  bool up = p.isUnpacking();
-
   WARNING("Input::pup","skipping file_");
   p | sync_;
   p | index_charm_;

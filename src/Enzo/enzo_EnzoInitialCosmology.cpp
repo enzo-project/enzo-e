@@ -26,7 +26,6 @@ EnzoInitialCosmology::EnzoInitialCosmology
 void EnzoInitialCosmology::enforce_block
 ( Block * block, const Hierarchy * hierarchy ) throw()
 {
-
   EnzoUnits * units = enzo::units();
 
   // "If temperature is left unset, set it assuming that T=550 K at z=200"
@@ -45,7 +44,7 @@ void EnzoInitialCosmology::enforce_block
   
   const double default_mu = 0.6;
 
-  const double internal_energy = temperature_/units->temperature()
+  const double internal_energy = temperature_/units->kelvin_per_energy_units()
     /default_mu/(gamma_-1.0);
 
   Field field = block->data()->field();
@@ -72,5 +71,6 @@ void EnzoInitialCosmology::enforce_block
     }
   }
 
+  block->initial_done();
   
 }

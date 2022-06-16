@@ -11,6 +11,8 @@
 class FieldMsg : public CMessage_FieldMsg {
 
 public: // attributes
+
+  int child_index() const { return ic3[0] + 2*(ic3[1] + 2*(ic3[2])); }
   
   /// Array length
   int n;

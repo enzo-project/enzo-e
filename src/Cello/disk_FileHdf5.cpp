@@ -80,7 +80,7 @@ void FileHdf5::file_open () throw()
 
   file_id_ = H5Fopen(file_name.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 #ifdef TRACE_DISK  
-  CkPrintf ("%d [%d] TRACE_DISK H5Fopen(%d)\n",CkMyPe(),__LINE__,file_id_);
+  CkPrintf ("%d [%d] TRACE_DISK H5Fopen(%s)\n",CkMyPe(),__LINE__,file_name.c_str());
   fflush(stdout);
 #endif  
 
@@ -155,7 +155,7 @@ void FileHdf5::file_close () throw()
   // Close the file
 
 #ifdef TRACE_DISK  
-  CkPrintf ("%d [%d] TRACE_DISK H5Fclose(%d)\n",CkMyPe(),__LINE__,file_id_);
+  CkPrintf ("%d [%d] TRACE_DISK H5Fclose(%s)\n",CkMyPe(),__LINE__,file_name.c_str());
   fflush(stdout);
 #endif  
   int retval = H5Fclose (file_id_);
@@ -194,11 +194,7 @@ void FileHdf5::data_open
   // Get the dataspace
 
   data_space_id_ = get_data_space_(data_id_, name);
-  hsize_t dim[10] = {0};
-  hsize_t maxdim[10] = {0};
 
-  int rank = H5Sget_simple_extent_dims(data_space_id_,dim,maxdim);
- 
   // set output extents
 
   get_extents_(data_space_id_,m1,m2,m3,m4);
@@ -390,6 +386,50 @@ void FileHdf5::data_close() throw()
     is_data_open_ = false;
   }
 }
+
+//----------------------------------------------------------------------
+
+void FileHdf5::file_read_scalar
+( void * buffer, std::string name,  int * type) throw()
+{
+  std::string file_name = path_ + "/" + name_;
+
+  // error check file open
+
+  ASSERT1("FileHdf5::file_read_meta",
+	  "Trying to read metadata from the unopened file %s",
+	  file_name.c_str(), is_file_open_);
+
+  hid_t meta_id = H5Aopen_name(file_id_, name.c_str());
+
+  // error check H5Aopen_name
+
+  ASSERT3("FileHdf5::file_read_meta",
+	  "H5Aopen_name() returned %ld opening %s in file %s",
+	  meta_id, name.c_str(),file_name.c_str(),
+	  (meta_id >= 0));
+
+  // set output type
+
+  int scalar_type = hdf5_to_scalar_(H5Aget_type (meta_id));
+
+  if (type) (*type) = scalar_type;
+
+  // Read the attribute
+
+#ifdef TRACE_DISK  
+  CkPrintf ("%d [%d] TRACE_DISK H5Aread()\n",CkMyPe(),__LINE__);
+  fflush(stdout);
+#endif  
+  int retval = 
+    H5Aread(meta_id, scalar_to_hdf5_(scalar_type), buffer);
+
+  // error check H5Aread
+
+  ASSERT1("FileHdf5::file_read_meta_","H5Aread() returned %d",
+	  retval,(retval>=0));
+}
+
 
 //----------------------------------------------------------------------
 
@@ -1154,9 +1194,7 @@ hid_t FileHdf5::space_create_(int m1, int m2, int m3, int m4,
   hid_t space_id = H5Screate_simple (rank, dims, 0);
 
   if (need_hyper) {
-
-    hid_t retval = H5Sselect_hyperslab
-      (space_id,H5S_SELECT_SET,start,0,count,0);
+    H5Sselect_hyperslab (space_id,H5S_SELECT_SET,start,0,count,0);
   }
 
   // error check H5Screate_simple
@@ -1219,6 +1257,11 @@ void FileHdf5::space_close_ (hid_t space_id) throw()
 
 hid_t FileHdf5::open_dataset_ (hid_t group, std::string name) throw()
 {
+  
+#ifdef TRACE_DISK
+  CkPrintf ("%d [%d] TRACE_DISK H5Dopen(%s)\n",CkMyPe(),__LINE__,name.c_str());
+  fflush(stdout);
+#endif  
   hid_t dataset_id = H5Dopen( group, name.c_str(), H5P_DEFAULT);
 
   // error check H5Dopen

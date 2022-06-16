@@ -11,7 +11,7 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+import sys, os, subprocess
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -26,7 +26,8 @@ import sys, os
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.intersphinx',
-              'sphinx.ext.todo',]
+              'sphinx.ext.todo',
+              'breathe',]
 todo_include_todos=True
 
 
@@ -272,3 +273,22 @@ html_context = {
         '_static/theme_overrides.css',  # overrides for wide tables in RTD theme
         ],
     }
+
+# -- Set Breathe parameters and Execute Doxygen -------------------------------
+
+def build_doxygen():
+    if os.getenv("SKIPDOXYGEN", "FALSE").lower() == "true":
+        # skip a rebuild
+        return None
+
+    try:
+        retcode = subprocess.call('cd ../../src; doxygen doxygen/Doxyfile-xml',
+                                  shell=True)
+        if retcode < 0:
+            sys.stderr.write("doxygen terminated by signal %s" % (-retcode))
+    except OSError as e:
+        sys.stderr.write("doxygen execution failed: %s" % e)
+
+build_doxygen() # always build doxygen docs (for local & rtd builds)
+breathe_projects = { "enzo-e": "../dox-xml/" }
+breathe_default_project = "enzo-e"

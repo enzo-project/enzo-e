@@ -8,31 +8,17 @@
 
 #include "mesh.hpp"
 
+// #define DEBUG_INDEX
+
 //----------------------------------------------------------------------
 
 Index::Index() { clear(); }
-
-//----------------------------------------------------------------------
-
-Index::Index(const Index & index) 
-{
-  copy_(index);
-}
-
 //----------------------------------------------------------------------
 
 Index::Index(int ix, int iy, int iz) 
 {
   clear();
   set_array(ix,iy,iz);
-}
-
-//----------------------------------------------------------------------
-
-Index & Index::operator = (const Index & index)
-{
-  copy_(index);
-  return *this;
 }
 
 //----------------------------------------------------------------------
@@ -110,6 +96,23 @@ Index Index::index_child (int icx, int icy, int icz, int min_level) const
   index.set_child (level+1,icx,icy,icz,min_level);
 
   return index;
+}
+
+//----------------------------------------------------------------------
+
+void Index::index_level (int i3[3], int level) const
+{
+  i3[0] = index_level(level,0);
+  i3[1] = index_level(level,1);
+  i3[2] = index_level(level,2);
+}
+
+//----------------------------------------------------------------------
+
+int Index::index_level (int level, int axis) const
+{
+  return (a_[axis].array << level)
+    +    (a_[axis].tree  >> (INDEX_BITS_TREE - level));
 }
 
 //----------------------------------------------------------------------
@@ -250,6 +253,62 @@ void Index::array (int * ix, int *iy, int *iz) const
 
 //----------------------------------------------------------------------
 
+int Index::adjacency (Index index, int rank, const int p3[3]) const
+{
+  const int L1 = level();
+  const int L2 = index.level();
+  const int LM = std::max(L1,L2);
+
+  int left1[3],left2[3];
+  index_level      (left1,LM);
+  index.index_level(left2,LM);
+  const int s1 = 1<<(LM-L1);
+  const int s2 = 1<<(LM-L2);
+
+  const size_t shift = (1<<LM);
+  const int ip3[3] = {p3[0]*shift,p3[1]*shift,p3[2]*shift};
+
+  int la3[3]={0},ra3[3]={0},lb3[3]={0},rb3[3]={0};
+  int a = false;
+  int ic = 0;
+  for (int axis=0; axis<rank; axis++) {
+    const int l1 = left1[axis];
+    const int l2 = left2[axis];
+    const int r1 = left1[axis]+s1;
+    const int r2 = left2[axis]+s2;
+
+    la3[axis]=l1;
+    ra3[axis]=r1;
+    lb3[axis]=l2;
+    rb3[axis]=r2;
+    const bool in1 = (l1 <= l2 && r2 <= r1);
+    const bool in2 = (l2 <= l1 && r1 <= r2);
+    const int in = (in1 || in2) ? 1 : 0;
+
+    int p = ip3[axis];
+    const bool it = (r1 == l2 || l1 == r2
+                     || (p && ((r1%p == l2) || (l1 == r2%p))));
+
+    const bool ie = (it + in == 0);
+
+    a = a || ie; // adjacent
+    ic += in;    // count
+  }
+#ifdef DEBUG_INDEX
+  CkPrintf ("DEBUG_INDEX [%d:%d) [%d:%d) [%d:%d) - [%d:%d) [%d:%d) [%d:%d)  (%d %d %d) : %d\n",
+            la3[0],ra3[0],
+            la3[1],ra3[1],
+            la3[2],ra3[2],
+            lb3[0],rb3[0],
+            lb3[1],rb3[1],
+            lb3[2],rb3[2],
+            ip3[0],ip3[1],ip3[2],(a ? -1 : ic));
+#endif
+  return (a ? -1 : ic);
+}
+
+//----------------------------------------------------------------------
+
 int Index::level () const
 {
   const unsigned nb = 1 << INDEX_BITS_LEVEL;
@@ -321,7 +380,6 @@ void Index::tree (int * bx, int * by, int *bz, int level) const
 void Index::set_child(int level, int ix, int iy, int iz, int min_level)
 {
   if (level > 0) {
-    ASSERT ("Index::set_child","level must be at least 1",level>0);
     unsigned shift = (INDEX_BITS_TREE - level);
     unsigned mask  = ~(1 << shift);
     a_[0].tree = (a_[0].tree & mask) | (ix<<shift);
@@ -335,6 +393,22 @@ void Index::set_child(int level, int ix, int iy, int iz, int min_level)
     a_[1].array = (a_[1].array & mask) | (iy<<shift);
     a_[2].array = (a_[2].array & mask) | (iz<<shift);
   }
+}
+
+//----------------------------------------------------------------------
+
+void Index::print (std::string msg,int level) const
+{
+  int ia3[3],it3[3],il3[3];
+  
+  array(ia3,ia3+1,ia3+2);
+  tree(it3,it3+1,it3+2);
+  index_level (il3,level);
+  int r = 1 << (level - this->level());
+  CkPrintf ("INDEX_PRINT %s L%d A %d %d %d tree %X %X %X  [%d %d %d] - [%d %d %d]\n",
+            msg.c_str(),this->level(),
+            ia3[0],ia3[1],ia3[2],it3[0],it3[1],it3[2],
+            il3[0],il3[1],il3[2],il3[0]+r,il3[1]+r,il3[2]+r);
 }
 
 //----------------------------------------------------------------------
@@ -423,6 +497,33 @@ std::string Index::bit_string(int max_level,int rank, const int nb3[3]) const
       
   }
   return bits;
+}
+
+// ----------------------------------------------------------------------
+
+int Index::data_size () const
+{
+  int size = 0;
+  SIZE_ARRAY_TYPE(size,int,v_,3);
+  return size;
+}
+
+// ----------------------------------------------------------------------
+
+char * Index::save_data (char * buffer) const
+{
+  char * pc = buffer;
+  SAVE_ARRAY_TYPE(pc,int,v_,3);
+  return pc;
+}
+
+// ----------------------------------------------------------------------
+
+char * Index::load_data (char * buffer)
+{
+  char * pc = buffer;
+  LOAD_ARRAY_TYPE(pc,int,v_,3);
+  return pc;
 }
 
 //======================================================================

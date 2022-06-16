@@ -2,6 +2,7 @@
 
 /// @file     problem_Refresh.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
+/// @author   Stefan Arridge (stefan.arridge@gmail.com)
 /// @date     2014-11-04 22:24:46
 /// @brief    [\ref Problem] Declaration of the Refresh class
 ///
@@ -9,6 +10,9 @@
 #ifndef PROBLEM_REFRESH_HPP
 #define PROBLEM_REFRESH_HPP
 
+class Box;
+class Prolong;
+class Restrict;
 class Refresh : public PUP::able {
 
   /// @class    Refresh
@@ -23,9 +27,8 @@ public: // interface
     field_list_src_(),
     field_list_dst_(),
     all_particles_(false),
-    all_particles_copy_(false),
     particle_list_(),
-    particle_list_copy_(),
+    particles_are_copied_(false),
     all_fluxes_(false),
     ghost_depth_(0),
     min_face_rank_(0),
@@ -37,7 +40,8 @@ public: // interface
     callback_(0) ,
     root_level_(0),
     id_refresh_(-1),
-    id_solver_(-1)
+    id_prolong_(0),
+    id_restrict_(0)
   {
   }
 
@@ -53,9 +57,8 @@ public: // interface
       field_list_src_(),
       field_list_dst_(),
       all_particles_(false),
-      all_particles_copy_(false),
       particle_list_(),
-      particle_list_copy_(),
+      particles_are_copied_(false),
       all_fluxes_(false),
       ghost_depth_(ghost_depth),
       min_face_rank_(min_face_rank),
@@ -67,7 +70,8 @@ public: // interface
       callback_(0),
       root_level_(0),
       id_refresh_(-1),
-      id_solver_(-1)
+      id_prolong_(0),
+      id_restrict_(0)
   {
   }
 
@@ -81,9 +85,8 @@ public: // interface
     field_list_src_(),
     field_list_dst_(),
     all_particles_(false),
-    all_particles_copy_(false),
     particle_list_(),
-    particle_list_copy_(),
+    particles_are_copied_(false),
     all_fluxes_(false),
     ghost_depth_(0),
     min_face_rank_(0),
@@ -95,7 +98,8 @@ public: // interface
     callback_(0),
     root_level_(0),
     id_refresh_(-1),
-    id_solver_(-1)
+    id_prolong_(-1),
+    id_restrict_(-1)
   {
   }
 
@@ -109,9 +113,8 @@ public: // interface
     p | field_list_src_;
     p | field_list_dst_;
     p | all_particles_;
-    p | all_particles_copy_;
     p | particle_list_;
-    p | particle_list_copy_;
+    p | particles_are_copied_;
     p | all_fluxes_;
     p | ghost_depth_;
     p | min_face_rank_;
@@ -123,7 +126,8 @@ public: // interface
     p | callback_;
     p | root_level_;
     p | id_refresh_;
-    p | id_solver_;
+    p | id_prolong_;
+    p | id_restrict_;
   }
 
   //--------------------------------------------------
@@ -181,55 +185,58 @@ public: // interface
   { return (all_fields_ || (field_list_src_.size() > 0)); }
 
   /// Return the list of source fields participating in the Refresh operation
-  std::vector<int> & field_list_src()
-  { return field_list_src_; }
+  std::vector<int> field_list_src() const;
 
   /// Return the list of destination fields participating in the
   /// Refresh operation
-  std::vector<int> & field_list_dst()
-  { return field_list_dst_; }
+  std::vector<int> field_list_dst() const;
 
   //--------------------------------------------------
   // PARTICLE METHODS
   //--------------------------------------------------
 
+  /// Add specified fields
+  void set_particle_list (std::vector<int> particle_list)
+  {
+    particle_list_ = particle_list;
+  }
+
   /// Add the given particle type to the list
-  void add_particle(int id_particle, bool copy = false) {
+  void add_particle(int id_particle) {
     all_particles_ = false;
     particle_list_.push_back(id_particle);
-    if (copy) particle_list_copy_.push_back(id_particle);
   }
 
   /// All particles types are refreshed
-  void add_all_particles(bool copy = false) {
+  void add_all_particles() {
     all_particles_ = true;
-    all_particles_copy_ = copy; // probably don't ever want to do this
+  }
+
+  /// Set the value for `particles_are_copied_` to be true
+  /// or false, which determines whether or not, for all
+  /// particle types participating in the refresh, all particles
+  /// are copied to all neighbouring blocks.
+  void set_particles_are_copied(bool particles_are_copied) {
+    particles_are_copied_ = particles_are_copied;
   }
 
   /// Return whether all particles are refreshed
   bool all_particles() const
   { return all_particles_; }
 
-  /// Return whether all particles are copied in refresh
-  bool all_particles_copy() const
-  { return all_particles_copy_; }
+  /// Return whether, for all particle types participating
+  /// in the refresh, all particles are copied to all
+  /// neighbouring blocks
+  bool particles_are_copied() const
+  { return particles_are_copied_; }
 
   /// Return whether any particles are refreshed
   bool any_particles() const
   { return (all_particles_ || (particle_list_.size() > 0)); }
 
-  /// Return whether any particles are copied in refresh
-  bool any_particles_copy() const
-  { return (all_particles_copy_ || (particle_list_copy_.size() > 0 )); }
-
   /// Return the list of particles participating in the Refresh operation
   std::vector<int> & particle_list() {
     return particle_list_;
-  }
-
-  /// Return the list of particles participating in the copy Refresh operation
-  std::vector<int> & particle_list_copy() {
-    return particle_list_copy_;
   }
 
   /// Add all data
@@ -274,11 +281,19 @@ public: // interface
   void set_root_level(int root_level)
   { root_level_ = root_level; }
 
+  /// Set minimum face rank
+  void set_min_face_rank (int min_face_rank)
+  { min_face_rank_ = min_face_rank; }
+  
   /// Return the current minimum rank (dimension) of faces to refresh
   /// e.g. 0: everything, 1: omit corners, 2: omit corners and edges
   int min_face_rank() const
   { return min_face_rank_; }
 
+  /// Set the ghost depth
+  void set_ghost_depth(int ghost_depth)
+  { ghost_depth_ = ghost_depth; }
+  
   /// Return the data field ghost depth
   int ghost_depth() const
   { return ghost_depth_; }
@@ -293,17 +308,23 @@ public: // interface
   /// Return whether to add neighbor face values to ghost zones or to
   /// copy them.  NOTE only accumulates if source field is different
   /// from destination field
-  bool accumulate() const
+  bool accumulate(int i_f) const
   {
-    return accumulate_;
+    return accumulate_ && (field_list_src_[i_f] != field_list_dst_[i_f]);
   }
 
+  //  bool accumulate() const
+  //  { return accumulate_; }
+  
   /// Set whether to add neighbor face values to ghost zones instead of
   /// copying them.
   void set_accumulate(bool accumulate)
   {
     accumulate_ = accumulate;
   }
+
+  // Boxes
+  void box_accumulate_adjust (Box * box, int if3[3], int g3[3]);
 
   //----------------
   // Synchronization
@@ -319,6 +340,9 @@ public: // interface
 
   int sync_exit() const
   { return 3*sync_id_+2; }
+
+  /// Return the sync object associated with this refresh object
+  Sync * sync( Block * block );
 
   void print() const
   {
@@ -345,6 +369,7 @@ public: // interface
     CkPrintf ("     accumulate: %d\n",accumulate_);
     CkPrintf ("     sync_type: %d\n",sync_type_);
     CkPrintf ("     sync_id: %d\n",sync_id_);
+    CkPrintf ("     id_refresh: %d\n",id_refresh_);
     CkPrintf ("     active: %d\n",active_);
     CkPrintf ("     callback: %d\n",callback_);
     CkPrintf ("     root_level: %d\n",root_level_);
@@ -386,22 +411,34 @@ public: // interface
     }
   }
 
-  /// Set the new refresh id in new_refresh_list_[]
+  /// Set the new refresh id in refresh_list_[]
   void set_id(int id_refresh)
   { id_refresh_ = id_refresh; }
 
-  /// return the new refresh id in new_refresh_list_[]
+  /// return the new refresh id in refresh_list_[]
   int id() const
   { return id_refresh_; }
 
-  /// Set the solver id in Problem::solver(id)
-  void set_solver_id(int id_solver)
-  { id_solver_ = id_solver; }
+  /// Return whether the prolongation requires padded coarse array
+  int coarse_padding(const Prolong * prolong) const;
 
-  /// return the solver id (-1 if not initialized)
-  int solver_id() const
-  { return id_solver_; }
+  /// Set the prolongation operator for refresh
+  void set_prolong (int id_prolong)
+  { id_prolong_ = id_prolong; }
+  
+  /// Return the prolongation operator for refresh
+  Prolong * prolong ();
+  /// Return the prolongation id
+  int index_prolong () const
+  { return id_prolong_; }
 
+  /// Set the restriction operator for refresh
+  void set_restrict (int id_restrict)
+  { id_restrict_ = id_restrict; }
+  
+  /// Return the restriction operator for refresh
+  Restrict * restrict ();
+  
   //--------------------------------------------------
 
   /// Return the number of bytes required to serialize the data object
@@ -437,15 +474,12 @@ private: // attributes
   /// Whether to refresh all particle types, ignoring particle_list_
   int all_particles_;
 
-  /// Whether to refresh all particle types and copy ALL particles to neighboring
-  /// grids, ignoring particle_list_copy_
-  int all_particles_copy_;
-
+  /// Whether or not, for all particle types participating in the refresh,
+  /// all particles are copied to all neighbouring blocks
+  bool particles_are_copied_;
+  
   /// Indicies of particles to include
   std::vector <int> particle_list_;
-
-  /// Indicies of particles to copy all to neighboring grids
-  std::vector <int> particle_list_copy_;
 
   /// Whether to refresh flux data
   int all_fluxes_;
@@ -478,11 +512,12 @@ private: // attributes
   /// Coarse level for neighbor_tree type
   int root_level_;
 
-  /// ID in new_refresh_list_[]
+  /// ID in refresh_list_[]
   int id_refresh_;
 
-  /// ID of calling Solver
-  int id_solver_;
+  /// ids of interpolation and restriction operators
+  int id_prolong_;
+  int id_restrict_;
 };
 
 #endif /* PROBLEM_REFRESH_HPP */

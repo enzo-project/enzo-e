@@ -12,6 +12,8 @@
 #
 # We should probably try small convergence tests like Athena++
 
+import argparse
+import os
 import os.path
 import sys
 import shutil
@@ -20,7 +22,7 @@ from functools import partial
 import numpy as np
 
 from testing_utils import \
-    prep_cur_dir, standard_analyze, EnzoEWrapper, CalcTableL1Norm
+    testing_context, standard_analyze, EnzoEWrapper, CalcTableL1Norm
 
 def run_tests(executable):
 
@@ -60,8 +62,7 @@ def analyze_shock(ref_val, axis, target_template, name_template,
 def analyze_tests():
     # define the functor for evaluating the norm of the L1 error vector
     ref_table = "input/vlct/MHD_shock_tube/rj2a_shock_tube_t0.2_res256.csv"
-    l1_func= CalcTableL1Norm("tools/l1_error_norm.py",
-                             ["density","velocity_x","velocity_y","velocity_z",
+    l1_func= CalcTableL1Norm(["density","velocity_x","velocity_y","velocity_z",
                               "pressure","bfield_x","bfield_y","bfield_z"],
                              default_ref_table = ref_table)
 
@@ -78,11 +79,11 @@ def analyze_tests():
     # use 1 block - if we use more than one block, it's unclear to me if it's
     # ok to have round-off errors)
 
-    r.append(err_compare(0.012524502240006011,"x"))
+    r.append(err_compare(0.012523489882320429, "x"))
     r.append(err_compare(0.0, "x", std_dev=True))
-    r.append(err_compare(0.012524502240005972,"y"))
+    r.append(err_compare(0.012523489882320308, "y"))
     r.append(err_compare(0.0, "y", std_dev=True))
-    r.append(err_compare(0.012524502240005921,"z"))
+    r.append(err_compare(0.012523489882320315, "z"))
     r.append(err_compare(0.0, "z", std_dev=True))
 
     n_passed = np.sum(r)
@@ -101,21 +102,20 @@ def cleanup():
             shutil.rmtree(dir_name)
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--launch_cmd', required=True,type=str)
+    args = parser.parse_args()
 
-    executable = 'bin/enzo-e'
+    with testing_context():
 
-    # this script can either be called from the base repository or from
-    # the subdirectory: input/vlct
-    prep_cur_dir(executable)
+        # run the tests
+        run_tests(args.launch_cmd)
 
-    # run the tests
-    run_tests(executable)
+        # analyze the tests
+        tests_passed = analyze_tests()
 
-    # analyze the tests
-    tests_passed = analyze_tests()
-
-    # cleanup the tests
-    cleanup()
+        # cleanup the tests
+        cleanup()
 
     if tests_passed:
         sys.exit(0)

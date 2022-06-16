@@ -70,8 +70,6 @@ void EnzoInitialGrackleTest::enforce_block
 
   gr_float * total_energy  = (gr_float *) field.values("total_energy");
 
-  gr_float * gamma         = (gr_float *) field.values("gamma");
-
   enzo_float * pressure    = field.is_field("pressure") ?
                (enzo_float*) field.values("pressure") : NULL;
   enzo_float * temperature = field.is_field("temperature") ?
@@ -124,7 +122,7 @@ void EnzoInitialGrackleTest::enforce_block
       for (int ix=0; ix<nx+gx; ix++) { // H Number Density
         int i = INDEX(ix,iy,iz,ngx,ngy);
 
-        grackle_fields_.density[i] = cello::mass_hydrogen *
+        grackle_fields_.density[i] = enzo_constants::mass_hydrogen *
                      pow(10.0, ((H_n_slope * (ix-gx)) + log10(enzo_config->initial_grackle_test_minimum_H_number_density)))/
                      grackle_chemistry->HydrogenFractionByMass / enzo_units->density();
 
@@ -189,22 +187,21 @@ void EnzoInitialGrackleTest::enforce_block
           mu = grackle_fields_.density[i] / mu;
         } // end primordial_chemistry > 0
 
-        grackle_fields_.internal_energy[i] = pow(10.0, ((temperature_slope * (iy-gy)) +
-                                      log10(enzo_config->initial_grackle_test_minimum_temperature)))/
-                             mu / enzo_units->temperature() / (enzo_config->field_gamma - 1.0);
+        grackle_fields_.internal_energy[i] =
+          (pow(10.0, ((temperature_slope * (iy-gy)) +
+           log10(enzo_config->initial_grackle_test_minimum_temperature)))/
+           mu / enzo_units->kelvin_per_energy_units() / (enzo_config->field_gamma - 1.0));
         total_energy[i]    = grackle_fields_.internal_energy[i];
-        gamma[i]           = enzo_config->field_gamma;
       }
     }
   }
 
   // Finally compute temperature and pressure if fields are tracked
   // for output
-  const int in = cello::index_static();
   int comoving_coordinates = enzo_config->physics_cosmology;
   if (pressure){
-    EnzoComputePressure compute_pressure (EnzoBlock::Gamma[in],
-                                          comoving_coordinates);
+    const enzo_float gamma = EnzoBlock::Gamma[cello::index_static()];
+    EnzoComputePressure compute_pressure (gamma,comoving_coordinates);
 
     // Note: using compute_ method to avoid re-generating grackle_fields
     //       struct. Otherwise, one could just do:
@@ -236,6 +233,9 @@ void EnzoInitialGrackleTest::enforce_block
   }
 
   EnzoMethodGrackle::delete_grackle_fields(&grackle_fields_);
+
+
+  block->initial_done();
 
   return;
 #endif /* CONFIG_USE_GRACKLE */

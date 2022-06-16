@@ -7,7 +7,7 @@
 /// @ingroup  Control
 ///
 ///    STOPPING
-///        
+///
 ///    Block::stopping()
 ///       update_boundary_()
 ///       compute dt
@@ -26,8 +26,7 @@
 #ifdef DEBUG_STOPPING
 #   define TRACE_STOPPING(A)					\
   CkPrintf ("%d %s:%d %s TRACE %s\n",					\
-	    CkMyPe(),__FILE__,__LINE__,name_.c_str(),A);		\
-  fflush(stdout);						
+	    CkMyPe(),__FILE__,__LINE__,name_.c_str(),A);
 #else
 #   define TRACE_STOPPING(A) ;
 #endif
@@ -191,9 +190,14 @@ void Block::stopping_balance_()
   if (do_balance) {
 
     if (index_.is_root())
-      cello::monitor()->print ("Balance","staring load balance step");
+      cello::monitor()->print ("Balance","starting load balance step");
+
+    CkCallback callback = CkCallback
+      (CkIndex_Block::r_stopping_load_balance(nullptr),
+       proxy_array());
     
-    control_sync_quiescence (CkIndex_Main::p_stopping_balance());
+    adapt_ready_ = true;
+    contribute(callback);
 
   } else {
 
@@ -205,10 +209,10 @@ void Block::stopping_balance_()
 
 //----------------------------------------------------------------------
 
-void Block::p_stopping_balance()
+void Block::stopping_load_balance_()
 {
   performance_start_(perf_stopping);
-  TRACE_STOPPING("Block::p_stopping_balance");
+  TRACE_STOPPING("load_balance begin");
   cello::simulation()->set_phase (phase_balance);
 
   // Monitor * monitor = simulation()->monitor();
@@ -220,7 +224,7 @@ void Block::p_stopping_balance()
   AtSync();
   performance_stop_(perf_stopping);
 }
- 
+
 //----------------------------------------------------------------------
 
 void Block::ResumeFromSync()
@@ -230,12 +234,9 @@ void Block::ResumeFromSync()
   // monitor->set_mode(monitor_mode_all);
   // if (index().is_root()) monitor->print ("Balance","END");
   // monitor->set_mode(mode_saved);
-  
-  TRACE_STOPPING("Block::balance_exit");
- 
-  if (index_.is_root()) {
-    thisProxy.doneInserting();
-  }
+
+  TRACE_STOPPING("load_balance exit");
+
   stopping_exit_();
 
 }
@@ -248,27 +249,35 @@ void Block::exit_()
   TRACE_STOPPING("Block::exit_");
   const int in = cello::index_static();
   if (index().is_root()) {
-    if (MsgRefresh::counter[in] != 0) {
-      CkPrintf ("%d Block::exit_() MsgRefresh::counter = %ld != 0\n",
-		CkMyPe(),MsgRefresh::counter[in]);
-    }
-    if (MsgRefine::counter[in] != 0) {
-      CkPrintf ("%d Block::exit_() MsgRefine::counter = %ld != 0\n",
-		CkMyPe(),MsgRefine::counter[in]);
-    }
-    if (MsgCoarsen::counter[in] != 0) {
-      CkPrintf ("%d Block::exit_() MsgCoarsen::counter = %ld != 0\n",
-		CkMyPe(),MsgCoarsen::counter[in]);
-    }
-    if (FieldFace::counter[in] != 0) {
-      CkPrintf ("%d Block::exit_() FieldFace::counter = %ld != 0\n",
-		CkMyPe(),FieldFace::counter[in]);
-    }
     if (DataMsg::counter[in] != 0) {
       CkPrintf ("%d Block::exit_() DataMsg::counter = %ld != 0\n",
 		CkMyPe(),DataMsg::counter[in]);
       CkPrintf ("%d Block::exit_() ParticleData::counter = %ld != 0\n",
 		CkMyPe(),ParticleData::counter[in]);
+    }
+    if (FieldFace::counter[in] != 0) {
+      CkPrintf ("%d Block::exit_() FieldFace::counter = %ld != 0\n",
+		CkMyPe(),FieldFace::counter[in]);
+    }
+    if (MsgCoarsen::counter[in] != 0) {
+      CkPrintf ("%d Block::exit_() MsgCoarsen::counter = %ld != 0\n",
+		CkMyPe(),MsgCoarsen::counter[in]);
+    }
+    if (MsgInitial::counter[in] != 0) {
+      CkPrintf ("%d Block::exit_() MsgInitial::counter = %ld != 0\n",
+		CkMyPe(),MsgInitial::counter[in]);
+    }
+    if (MsgOutput::counter[in] != 0) {
+      CkPrintf ("%d Block::exit_() MsgOutput::counter = %ld != 0\n",
+		CkMyPe(),MsgOutput::counter[in]);
+    }
+    if (MsgRefine::counter[in] != 0) {
+      CkPrintf ("%d Block::exit_() MsgRefine::counter = %ld != 0\n",
+		CkMyPe(),MsgRefine::counter[in]);
+    }
+    if (MsgRefresh::counter[in] != 0) {
+      CkPrintf ("%d Block::exit_() MsgRefresh::counter = %ld != 0\n",
+		CkMyPe(),MsgRefresh::counter[in]);
     }
   }
   if (index_.is_root()) {

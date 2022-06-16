@@ -165,11 +165,11 @@ namespace cello {
   {
     switch (precision) {
     case precision_single:
-      return std::numeric_limits<float>::digits;
+      return std::numeric_limits<float>::digits10;
     case precision_double:
-      return std::numeric_limits<double>::digits;
+      return std::numeric_limits<double>::digits10;
     case precision_quadruple:
-      return std::numeric_limits<long double>::digits;
+      return std::numeric_limits<long double>::digits10;
     default:
       return 0;
     }
@@ -237,35 +237,42 @@ namespace cello {
 
   CProxy_Block block_array()
   {
-    return cello::simulation()->hierarchy()->block_array();
+    return cello::hierarchy()->block_array();
   }
 
   //---------------------------------------------------------------------- 
 
   const Config * config()
   {
-    return simulation() ? simulation()->config() : NULL;
+    return simulation() ? simulation()->config() : nullptr;
   }
 
   //---------------------------------------------------------------------- 
 
   const Parameters * parameters()
   {
-    return simulation() ? simulation()->parameters() : NULL;
+    return simulation() ? simulation()->parameters() : nullptr;
   }
 
   //---------------------------------------------------------------------- 
 
   Problem * problem()
   {
-    return simulation() ? simulation()->problem() : NULL;
+    return simulation() ? simulation()->problem() : nullptr;
+  }
+
+  //---------------------------------------------------------------------- 
+
+  Boundary * boundary(int i)
+  {
+    return problem() ? problem()->boundary(i) : nullptr;
   }
 
   //---------------------------------------------------------------------- 
 
   Hierarchy * hierarchy()
   {
-    return simulation() ? simulation()->hierarchy() : NULL;
+    return simulation() ? simulation()->hierarchy() : nullptr;
   }
 
   //---------------------------------------------------------------------- 
@@ -286,6 +293,43 @@ namespace cello {
   Grouping * field_groups()
   { return field_descr()->groups(); }
     
+  //---------------------------------------------------------------------- 
+
+  int define_field (std::string field_name, int cx, int cy, int cz)
+  {
+    FieldDescr * field_descr = cello::field_descr();
+    Config   * config  = (Config *) cello::config();
+    if( ! field_descr->is_field( field_name )){
+      const int id_field = field_descr->insert_permanent( field_name );
+ 
+      field_descr->set_precision(id_field, config->field_precision);
+ 
+      if ( cx != 0 || cy != 0 || cz != 0 ) {
+        field_descr->set_centering(id_field, cx, cy, cz);
+      }
+    }
+    return field_descr->field_id(field_name);
+  }
+ 
+  //---------------------------------------------------------------------- 
+ 
+  int define_field_in_group
+  (std::string field_name, std::string group_name,
+   int cx, int cy, int cz)
+  {
+    int out = define_field (field_name,cx,cy,cz);
+    field_groups()->add(field_name,group_name);
+    return out;
+  }
+ 
+  //---------------------------------------------------------------------- 
+  void finalize_fields ()
+  {
+    FieldDescr * field_descr = cello::field_descr();
+    Config   * config  = (Config *) cello::config();
+    field_descr->reset_history(config->field_history);
+  }
+
   //---------------------------------------------------------------------- 
 
   Monitor * monitor()
@@ -315,28 +359,28 @@ namespace cello {
 
   Output * output(int index)
   {
-    return problem() ? problem()->output(index) : NULL;
+    return problem() ? problem()->output(index) : nullptr;
   }
 
   //---------------------------------------------------------------------- 
 
   Solver * solver(int index)
   {
-    return problem() ? problem()->solver(index) : NULL;
+    return problem() ? problem()->solver(index) : nullptr;
   }
 
   //---------------------------------------------------------------------- 
 
   Units * units()
   {
-    return problem() ? problem()->units() : NULL;
+    return problem() ? problem()->units() : nullptr;
   }
 
   //----------------------------------------------------------------------
 
   Refresh * refresh(int ir)
   {
-    return simulation() ? &simulation()->new_refresh_list(ir) : NULL;
+    return simulation() ? &simulation()->refresh_list(ir) : nullptr;
   }
 
   //----------------------------------------------------------------------
@@ -349,11 +393,12 @@ namespace cello {
   //----------------------------------------------------------------------
 
   int num_children()
-  {
-    int r = rank();
-    return (r==1) ? 2 : ( (r==2) ? 4 : 8 );
-  }
-  
+  { return 1 << rank(); }
+
+  //----------------------------------------------------------------------
+
+  int num_children(int r)
+  { return (1 << r); }
 
   //----------------------------------------------------------------------
 
@@ -369,5 +414,117 @@ namespace cello {
     return (1.0/pow(1.0*num_children(),1.0*level));
   }
   
+  //----------------------------------------------------------------------
 
+  std::string expand_name
+  (
+   const std::vector<std::string> * file_format,
+   int counter,
+   Block * block
+   )
+  {
+    if (file_format->size()==0) return "";
+  
+    const std::string & name = (*file_format)[0];
+  
+    const int MAX_BUFFER = 255;
+
+    char buffer[MAX_BUFFER+1];
+    char buffer_new[MAX_BUFFER+1];
+
+    // Error check no \% in file name
+
+    ASSERT1 ("cello::expand_name",
+             "File name %s cannot contain '\\%%'",
+             name.c_str(),
+             name.find("\\%") == std::string::npos);
+
+    // Error check variable count equals format conversion specifier count
+
+    std::string rest = name;
+    size_t count = 0;
+    size_t pos = 0;
+    size_t len;
+    while ((pos = rest.find("%")) != std::string::npos) {
+      count ++;
+      len = rest.size();
+      rest = rest.substr(pos+1,len-pos-1);
+    }
+
+    ASSERT3 ("cello::expand_name",
+             "The number of format conversion specifiers %lu "
+             "associated with file name %s "
+             "must equal the number of variables %lu",
+             count, name.c_str(),file_format->size()-1,
+             file_format->size()-1 == count);
+
+    // loop through file_format[] from the right and replace 
+    // format strings with variable values
+
+    std::string left  = name;
+    std::string middle = "";
+    std::string right = "";
+
+    for (size_t i=0; i<file_format->size()-1; i++) {
+
+      // visit variables from right to left
+      const std::string & arg = (*file_format)[file_format->size() - 1 - i];
+
+      size_t pos = left.rfind("%");
+      size_t len = left.size();
+
+      middle = left.substr(pos,len-pos);
+      left  = left.substr(0,pos);
+
+      strncpy (buffer, middle.c_str(),MAX_BUFFER);
+      if      (arg == "cycle") { sprintf (buffer_new,buffer, block->cycle()); }
+      else if (arg == "time")  { sprintf (buffer_new,buffer, block->time()); }
+      else if (arg == "count") { sprintf (buffer_new,buffer, counter); }
+      else if (arg == "proc")  { sprintf (buffer_new,buffer, CkMyPe()); }
+      else if (arg == "flipflop")  { sprintf (buffer_new,buffer, counter % 2); }
+      else 
+        {
+          ERROR3("cello::expand_name",
+                 "Unknown file variable #%d '%s' for file '%s'",
+                 int(i),arg.c_str(),name.c_str());
+        }
+
+      right = std::string(buffer_new) + right;
+
+    }
+
+    return left + right;
+  }
+
+  //----------------------------------------------------------------------
+
+  std::string directory
+  (
+   const std::vector<std::string> * path_format,
+   int counter,
+   Block * block
+   )
+  {
+    std::string dir = ".";
+    std::string name_dir = expand_name(path_format,counter, block);
+
+    // Create subdirectory if any
+    if (name_dir != "") {
+      dir = name_dir;
+      boost::filesystem::path directory(name_dir);
+      if (! boost::filesystem::is_directory(directory)) {
+
+        boost::filesystem::create_directory(directory);
+
+        ASSERT1 ("cello::directory()",
+                 "Error creating directory %s",
+                 name_dir.c_str(),
+                 boost::filesystem::is_directory(directory));
+      }
+    }
+
+    return dir;
+  }
+
+  //----------------------------------------------------------------------
 }

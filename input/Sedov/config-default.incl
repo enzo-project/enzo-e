@@ -12,7 +12,6 @@ Adapt {
 
 Field {
     ghost_depth = 4; # must be even for ProlongLinear
-    prolong = "linear";
     padding   = 0;
     alignment = 8;
 }
@@ -60,8 +59,8 @@ Method {
          name = ["sedov-mesh-%03d.png", "cycle"]; 
          type     = "image";
          image_type  = "mesh";
-	 image_block_size  = 5;
-#	image_size = [513,513];
+#	 image_block_size  = 5; # DEPRECIATED
+	image_size = [513,513];
 #	image_size = [1201,1201];
           colormap = [1.00, 1.00, 1.00,  
                      0.00, 1.00, 0.00, 

@@ -102,6 +102,8 @@ enum adapt_type {
 
 // Hierarchy and components
 
+#include "mesh_Adapt.hpp"
+#include "mesh_Box.hpp"
 #include "mesh_Index.hpp"
 
 #include "mesh_Block.hpp"

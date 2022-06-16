@@ -52,7 +52,10 @@ void EnzoInitialSedovArray3::enforce_block
 ( Block * block, const Hierarchy * hierarchy ) throw()
 
 {
-  if (!block->is_leaf()) return;
+  if (!block->is_leaf()) {
+    block->initial_done();
+    return;
+  }
   
   ASSERT("EnzoInitialSedovArray3",
 	 "Block does not exist",
@@ -91,12 +94,10 @@ void EnzoInitialSedovArray3::enforce_block
   const double sedov_radius = radius_relative_/array_[0];
   const double sedov_radius_2 = sedov_radius*sedov_radius;
 
-  const int in = cello::index_static();
+  const enzo_float gamma = EnzoBlock::Gamma[cello::index_static()];
 
-  const double sedov_te_in = 
-    pressure_in_  / ((EnzoBlock::Gamma[in] - 1.0) * density_);
-  const double sedov_te_out= 
-    pressure_out_ / ((EnzoBlock::Gamma[in] - 1.0) * density_);
+  const double sedov_te_in = pressure_in_  / ((gamma - 1.0) * density_);
+  const double sedov_te_out= pressure_out_ / ((gamma - 1.0) * density_);
 
   int gx,gy,gz;
   field.ghost_depth(0,&gx,&gy,&gz);
@@ -190,6 +191,6 @@ void EnzoInitialSedovArray3::enforce_block
       }
     }
   }
-  
+  block->initial_done();
 }
 

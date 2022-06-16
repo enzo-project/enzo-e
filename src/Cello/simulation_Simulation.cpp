@@ -56,9 +56,7 @@ Simulation::Simulation
   particle_descr_(NULL),
   sync_output_begin_(),
   sync_output_write_(),
-  sync_new_output_start_(),
-  sync_new_output_next_(),
-  new_refresh_list_(),
+  refresh_list_(),
   index_output_(-1),
   num_solver_iter_(),
   max_solver_iter_()
@@ -121,9 +119,7 @@ Simulation::Simulation()
   particle_descr_(NULL),
   sync_output_begin_(),
   sync_output_write_(),
-  sync_new_output_start_(),
-  sync_new_output_next_(),
-  new_refresh_list_(),
+  refresh_list_(),
   index_output_(-1),
   num_solver_iter_(),
   max_solver_iter_()
@@ -174,9 +170,7 @@ Simulation::Simulation (CkMigrateMessage *m)
     particle_descr_(NULL),
     sync_output_begin_(),
     sync_output_write_(),
-    sync_new_output_start_(),
-    sync_new_output_next_(),
-    new_refresh_list_(),
+    refresh_list_(),
     index_output_(-1),
     num_solver_iter_(),
     max_solver_iter_()
@@ -267,12 +261,6 @@ void Simulation::pup (PUP::er &p)
   if (up) sync_output_begin_.set_stop(0);
   if (up) sync_output_write_.set_stop(0);
 
-  p | sync_new_output_start_;
-  p | sync_new_output_next_;
-
-  if (up) sync_new_output_start_.set_stop(0);
-  if (up) sync_new_output_next_.set_stop(0);
-
 #ifdef CONFIG_USE_PROJECTIONS
   p | projections_tracing_;
   p | projections_schedule_on_;
@@ -281,17 +269,19 @@ void Simulation::pup (PUP::er &p)
 
   p | schedule_balance_;
 
-  p | new_refresh_list_;
-  p | new_refresh_name_;
+  p | refresh_list_;
+  p | refresh_name_;
 
   PUParray(p,dir_checkpoint_,256);
 
+#ifdef BYPASS_CHARM_MEM_LEAK
   ASSERT1("Simulation::pup()",
 	  "msg_refine_map_ is assumed to be empty but has size %lu",
 	  msg_refine_map_.size(),
 	  (msg_refine_map_.size() == 0));
-	  
+
   //  p | msg_refine_map_;
+#endif
   p | index_output_;
   p | num_solver_iter_;
   p | max_solver_iter_;
@@ -310,6 +300,8 @@ void Simulation::finalize() throw()
 }
 
 //----------------------------------------------------------------------
+
+#ifdef BYPASS_CHARM_MEM_LEAK
 
 void Simulation::p_get_msg_refine(Index index)
 {
@@ -356,6 +348,7 @@ MsgRefine * Simulation::get_msg_refine(Index index)
   return msg;
 }
 
+#endif
 //======================================================================
 
 void Simulation::initialize_simulation_() throw()
@@ -738,6 +731,17 @@ void Simulation::initialize_hierarchy_() throw()
 			   config_->mesh_root_blocks[1],
 			   config_->mesh_root_blocks[2]);
 
+  bool lp3[3] = { false, false, false };
+  int index_boundary = 0;
+  auto & root_blocks = config_->mesh_root_blocks;
+  Boundary * boundary;
+  while ( (boundary = cello::boundary(index_boundary++)) ) {
+    boundary->periodicity(lp3);
+  }
+  int p3[3] = {lp3[0] ? root_blocks[0] : 0,
+               lp3[1] ? root_blocks[1] : 0,
+               lp3[2] ? root_blocks[2] : 0 };
+  hierarchy_->set_periodicity (p3[0],p3[1],p3[2]);
 }
 
 //----------------------------------------------------------------------
@@ -834,8 +838,6 @@ void Simulation::data_insert_block(Block * block)
   }
   ++sync_output_begin_;
   ++sync_output_write_;
-  ++sync_new_output_start_;
-  ++sync_new_output_next_;
 }
 
 //----------------------------------------------------------------------
@@ -848,8 +850,6 @@ void Simulation::data_delete_block(Block * block)
   }
   --sync_output_begin_;
   --sync_output_write_;
-  --sync_new_output_start_;
-  --sync_new_output_next_;
 }
 
 //----------------------------------------------------------------------
@@ -911,7 +911,6 @@ void Simulation::monitor_performance()
   long long * counters_reduce = new long long [n];
 
   const int in = cello::index_static();
-
   
   int m=0;
   const int num_max = 4 + num_solver;

@@ -175,6 +175,19 @@ void setup_maps_(const std::map<std::string, enzo_float> &ref_map,
 
 //----------------------------------------------------------------------
 
+static inline void assign_uniform_value_(EFlt3DArray arr,
+                                         enzo_float val){
+  for (int iz=0; iz<arr.shape(0); iz++) {
+    for (int iy=0; iy<arr.shape(1); iy++) {
+      for (int ix=0; ix<arr.shape(2); ix++) {
+        arr(iz,iy,ix) = val;
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
 void EnzoInitialShockTube::enforce_block 
 ( Block * block, const Hierarchy  * hierarchy ) throw()
 {
@@ -197,7 +210,6 @@ void EnzoInitialShockTube::enforce_block
 
   Field field  = block->data()->field();
   EnzoPermutedCoordinates coord(aligned_ax_);
-  EnzoFieldArrayFactory array_factory(block);
 
   CSlice *l_slice = NULL;
   CSlice *r_slice = NULL;
@@ -216,34 +228,34 @@ void EnzoInitialShockTube::enforce_block
     enzo_float velocity_1 = cur_val_map->at("velocity_1") + trans_velocity;
     enzo_float velocity_2 = cur_val_map->at("velocity_2");
 
-    arr = array_factory.from_name("density");
+    arr = field.view<enzo_float>("density");
     initializer_helper_(*cur_slice, cur_val_map->at("density"), arr);
 
-    arr = array_factory.from_name(velocities[coord.i_axis()]);
+    arr = field.view<enzo_float>(velocities[coord.i_axis()]);
     initializer_helper_(*cur_slice, velocity_0, arr);
 
-    arr = array_factory.from_name(velocities[coord.j_axis()]);
+    arr = field.view<enzo_float>(velocities[coord.j_axis()]);
     initializer_helper_(*cur_slice, velocity_1, arr);
 
-    arr = array_factory.from_name(velocities[coord.k_axis()]);
+    arr = field.view<enzo_float>(velocities[coord.k_axis()]);
     initializer_helper_(*cur_slice, velocity_2, arr);
 
-    arr = array_factory.from_name(bfields[coord.j_axis()]);
+    arr = field.view<enzo_float>(bfields[coord.j_axis()]);
     initializer_helper_(*cur_slice, cur_val_map->at("bfield_1"), arr);
 
-    arr = array_factory.from_name(bfields[coord.k_axis()]);
+    arr = field.view<enzo_float>(bfields[coord.k_axis()]);
     initializer_helper_(*cur_slice, cur_val_map->at("bfield_2"), arr);
 
     // (optionally) compute the specific internal energy
     enzo_float eint = (cur_val_map->at("pressure") /
 		       ((gamma_ - 1.) * cur_val_map->at("density")));
     if (field.is_field("internal_energy")){
-      arr = array_factory.from_name("internal_energy");
+      arr = field.view<enzo_float>("internal_energy");
       initializer_helper_(*cur_slice, eint, arr);
     }
 
     // compute the specific total energy
-    arr = array_factory.from_name("total_energy");
+    arr = field.view<enzo_float>("total_energy");
 
     enzo_float etot, v2, b2;
     v2 = (velocity_0 * velocity_0 + velocity_1 * velocity_1 +
@@ -256,14 +268,16 @@ void EnzoInitialShockTube::enforce_block
     initializer_helper_(*cur_slice, etot, arr);
   }
 
-  EFlt3DArray align_b_arr = array_factory.from_name(bfields[coord.i_axis()]);
-  align_b_arr.subarray() = aligned_bfield_val;
+  EFlt3DArray align_b_arr = field.view<enzo_float>(bfields[coord.i_axis()]);
+  assign_uniform_value_(align_b_arr, aligned_bfield_val);
 
   delete l_slice;
   delete r_slice;
 
   // Compute the Cell-Centered B-fields
   EnzoInitialBCenter::initialize_bfield_center(block);
+
+  block->initial_done();
 }
 
 //----------------------------------------------------------------------
@@ -325,5 +339,5 @@ void EnzoInitialShockTube::initializer_helper_(CSlice &slice, enzo_float val,
   yslice = (aligned_ax_ == 1) ? slice : CSlice(0, arr.shape(1));
   zslice = (aligned_ax_ == 2) ? slice : CSlice(0, arr.shape(0));
 
-  arr.subarray(zslice, yslice, xslice) = val;
+  assign_uniform_value_(arr.subarray(zslice, yslice, xslice), val);
 }

@@ -12,6 +12,8 @@
 #   2.) Check that the L1-norm error is the same for left propagating and right
 #       propagating sound waves
 
+import argparse
+import os
 import os.path
 import shutil
 import sys
@@ -21,7 +23,7 @@ from functools import partial
 import numpy as np
 
 from testing_utils import \
-    CalcSimL1Norm, EnzoEWrapper, isclose, standard_analyze, prep_cur_dir
+    CalcSimL1Norm, EnzoEWrapper, isclose, standard_analyze, testing_context
 
 from run_MHD_linear_wave_test import \
     analyze_linwave, identical_l1_error_linwave
@@ -45,8 +47,7 @@ def run_tests(executable):
 
 def analyze_tests():
     # define the functor for evaluating the norm of the L1 error vector
-    l1_func = CalcSimL1Norm("tools/l1_error_norm.py",
-                            ["density","velocity_x","velocity_y","velocity_z",
+    l1_func = CalcSimL1Norm(["density","velocity_x","velocity_y","velocity_z",
                              "pressure",])
 
     # define the template for the directory holding the simulation data
@@ -114,21 +115,19 @@ def cleanup():
             shutil.rmtree(dir_name)
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--launch_cmd', required=True,type=str)
+    args = parser.parse_args()
 
-    executable = 'bin/enzo-e'
+    with testing_context():
+        # run the tests
+        tests_complete = run_tests(args.launch_cmd)
 
-    # this script can either be called from the base repository or from
-    # the subdirectory: input/vlct
-    prep_cur_dir(executable)
+        # analyze the tests
+        tests_passed = analyze_tests()
 
-    # run the tests
-    tests_complete = run_tests(executable)
-
-    # analyze the tests
-    tests_passed = analyze_tests()
-
-    # cleanup the tests
-    cleanup()
+        # cleanup the tests
+        cleanup()
 
     if tests_passed:
         sys.exit(0)

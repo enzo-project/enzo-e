@@ -10,6 +10,8 @@
 
 #include "enzo.hpp"
 
+// #define TRACE_BLOCK
+
 // #define DEBUG_ENZO_BLOCK
 
 //======================================================================
@@ -163,35 +165,33 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
 
 //----------------------------------------------------------------------
 
-EnzoBlock::EnzoBlock
-( MsgRefine * msg )
-  : CBase_EnzoBlock ( msg ),
-    dt(dt_),
-    redshift(0.0)
-{
-#ifdef DEBUG_ENZO_BLOCK
-  CkPrintf ("%d %p BEGIN TRACE_BLOCK EnzoBlock(msg)\n",CkMyPe(),this);
-  print();
+#ifdef BYPASS_CHARM_MEM_LEAK
+EnzoBlock::EnzoBlock( process_type ip_source)
+  : CBase_EnzoBlock ( ip_source ),
+#else
+    EnzoBlock::EnzoBlock ( MsgRefine * msg )
+    : CBase_EnzoBlock ( msg ),
 #endif
+  dt(dt_),
+  redshift(0.0)
+
+{
+#ifdef TRACE_BLOCK  
+CkPrintf ("%d %p TRACE_BLOCK %s EnzoBlock(ip)\n",
+          CkMyPe(),(void *)this,name(thisIndex).c_str());
+#endif
+
+#ifdef BYPASS_CHARM_MEM_LEAK
+#else
   initialize_enzo_();
   initialize();
-#ifdef DEBUG_ENZO_BLOCK
-  CkPrintf ("%d %p END TRACE_BLOCK EnzoBlock(msg)\n",CkMyPe(),this);
-  EnzoBlock::print();
+  Block::initialize();
 #endif
 }
 
 //----------------------------------------------------------------------
 
-EnzoBlock::EnzoBlock
-( process_type ip_source)
-  : CBase_EnzoBlock ( ip_source ),
-    dt(dt_),
-    redshift(0.0)
-{
-}
-
-//----------------------------------------------------------------------
+#ifdef BYPASS_CHARM_MEM_LEAK
 
 void EnzoBlock::p_set_msg_refine(MsgRefine * msg)
 {
@@ -200,6 +200,8 @@ void EnzoBlock::p_set_msg_refine(MsgRefine * msg)
   initialize();
   Block::initialize();
 }
+
+#endif
 
 //----------------------------------------------------------------------
 
@@ -220,10 +222,10 @@ void EnzoBlock::initialize_enzo_()
 
 EnzoBlock::~EnzoBlock()
 {
-#ifdef DEBUG_ENZO_BLOCK
-  CkPrintf ("%d %p TRACE_BLOCK ~EnzoBlock(...)\n",CkMyPe(),this);
-  print();
-#endif
+#ifdef TRACE_BLOCK  
+  CkPrintf ("%d %p TRACE_BLOCK %s ~EnzoBlock(...)\n",
+            CkMyPe(),(void *)this,name(thisIndex).c_str());
+#endif  
 }
 
 //----------------------------------------------------------------------
@@ -253,7 +255,6 @@ void EnzoBlock::pup(PUP::er &p)
   PUParray(p,CellWidth,MAX_DIMENSION);
 
   p | redshift;
-  TRACE ("END EnzoBlock::pup()");
 }
 
 //======================================================================

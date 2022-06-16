@@ -40,9 +40,6 @@ PARALLEL_MAIN_BEGIN
   unit_assert (units->mass() == 4.0);
   unit_assert (units->time() == 8.0);
 
-  enzo_float omega_baryon_now  =  0.04;
-  enzo_float omega_cdm_now     =  0.26;
-  
   cosmology->set_comoving_box_size ( 64.0);
   cosmology->set_omega_matter_now    ( 0.3);
   cosmology->set_omega_lambda_now    ( 0.7);

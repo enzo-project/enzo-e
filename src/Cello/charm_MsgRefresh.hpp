@@ -24,17 +24,19 @@ public: // interface
   virtual ~MsgRefresh();
 
   /// Copy constructor
-  MsgRefresh(const MsgRefresh & data_msg) throw()
+  MsgRefresh(const MsgRefresh & msg_refresh) throw()
   {
     ++counter[cello::index_static()]; 
   };
 
   /// Assignment operator
   MsgRefresh & operator= (const MsgRefresh & data_msg) throw()
-  { return *this; }
+  {
+    return *this;
+  }
 
   // Set the new refresh object id
-  void set_new_refresh_id(int id_refresh)
+  void set_refresh_id(int id_refresh)
   { id_refresh_ = id_refresh; }
 
   int id_refresh() const
@@ -46,6 +48,8 @@ public: // interface
   /// Update the Data with data stored in this message
   void update (Data * data);
 
+  void print(const char * message);
+  
 public: // static methods
 
   /// Pack data to serialize

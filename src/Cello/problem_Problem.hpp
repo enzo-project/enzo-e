@@ -69,13 +69,13 @@ public: // interface
       initial_list_(),
       physics_list_(),
       refine_list_(),
-      stopping_(NULL),
+      stopping_(nullptr),
       solver_list_(),
       method_list_(),
       output_list_(),
-      prolong_(NULL),
-      restrict_(NULL),
-      units_(NULL),
+      prolong_list_(),
+      restrict_list_(),
+      units_(nullptr),
       index_refine_(0),
       index_output_(0),
       index_boundary_(0)
@@ -87,7 +87,7 @@ public: // interface
   /// Return the boundary object
   Boundary * boundary(int i) const throw()
   { if (i==-1) i = index_boundary_;
-    return (0 <= i && i < (int)boundary_list_.size()) ? boundary_list_[i] : NULL; 
+    return (0 <= i && i < (int)boundary_list_.size()) ? boundary_list_[i] : nullptr; 
   }
 
   /// Return whether the problem is periodic
@@ -97,13 +97,13 @@ public: // interface
   /// Return the ith initialization object
   Initial *  initial(size_t i) const throw()
   {
-    return (i < initial_list_.size()) ? initial_list_[i] : NULL; 
+    return (i < initial_list_.size()) ? initial_list_[i] : nullptr; 
   }
 
   /// Return the ith physics object
   Physics * physics(size_t i) const throw()
   {
-    return (i < physics_list_.size()) ? physics_list_[i] : NULL; 
+    return (i < physics_list_.size()) ? physics_list_[i] : nullptr; 
   }
 
   /// Return the named physics object if present
@@ -113,45 +113,49 @@ public: // interface
   Refine *  refine(int i) const throw()
   {
     if (i == -1) i = index_refine_;
-    return (0 <= i && i < (int)refine_list_.size()) ? refine_list_[i] : NULL; 
+    return (0 <= i && i < (int)refine_list_.size()) ? refine_list_[i] : nullptr; 
   }
 
   /// Return the ith output object
   Output * output(int i) const throw()
   { 
     if (i == -1) i = index_output_;
-    return (0 <= i && i < (int)output_list_.size()) ? output_list_[i] : NULL; 
+    return (0 <= i && i < (int)output_list_.size()) ? output_list_[i] : nullptr; 
   }
 
   /// Return the ith solver object
   Solver * solver(size_t i) const throw()
-  { return (i < solver_list_.size()) ? solver_list_[i] : NULL; }
+  { return (i < solver_list_.size()) ? solver_list_[i] : nullptr; }
 
   int num_solvers () const throw()
   { return solver_list_.size(); }
   
   /// Return the ith method object
   Method * method(size_t i) const throw() 
-  { return (i < method_list_.size()) ? method_list_[i] : NULL; }
+  { return (i < method_list_.size()) ? method_list_[i] : nullptr; }
 
   /// Return the named method object if present
   Method * method (std::string name) const throw();
 
-  /// Return the prolong object
-  Prolong * prolong() const throw()  { return prolong_; }
+  // Return whether a method object with given name exists for this problem
+  bool method_exists(const std::string &name) const throw();
 
-  /// Return the restrict object
-  Restrict * restrict() const throw()  { return restrict_; }
+  // Returns true if method objects with both given names appear once (and
+  // only once) in the method list, and method called "name1" precedes the
+  // method called "name2". Returns false otherwise.
+  bool method_precedes(const std::string &name1, const std::string &name2) const
+      throw();
+  
+  /// Return the ith prolong object
+  Prolong * prolong(size_t i = 0) const throw()
+  { return (i < prolong_list_.size()) ? prolong_list_[i] : nullptr; }
+
+  /// Return the ith restrict object
+  Restrict * restrict(size_t i = 0) const throw()
+  { return (i < restrict_list_.size()) ? restrict_list_[i] : nullptr; }
 
   //--------------------------------------------------
-  // NEW OUTPUT
-  //--------------------------------------------------
-
-  /// Process the next output object if any, else proceed with simulation
-  void new_output_next(Simulation * simulation) throw();
-
-  //--------------------------------------------------
-  // OLD OUTPUT
+  // OUTPUT
   //--------------------------------------------------
 
   /// reset output index to 0
@@ -198,7 +202,8 @@ public: // interface
 			 const Factory * factory) throw();
 
   /// Initialize the method objects
-  void initialize_method(Config * config) throw();
+  void initialize_method(Config * config,
+			 const Factory * factory) throw();
 
   /// Initialize Solver objects
   void initialize_solver(Config * config) throw();
@@ -250,26 +255,29 @@ protected: // functions
 
   /// Create named refine object
   virtual Refine * create_refine_ 
-  (std::string type, 
+  (std::string type,
+   int index,
    Config * config, 
-   Parameters * parameters,
-   int index) throw ();
+   Parameters * parameters) throw ();
 
   /// Create named solver object
   virtual Solver *   create_solver_
-  (std::string type, 
-   Config * config, 
-   int index_solver) throw ();
+  (std::string type,
+   int index_solver,
+   Config * config) throw ();
 
   /// Create named method object
   virtual Method *   create_method_
-  (std::string type, 
-   Config * config, 
-   int index_method) throw ();
+  (std::string type,
+   int index_method,
+   Config * config,
+   const Factory * factory) throw ();
 
   /// Create named output object
   virtual Output *   create_output_  
-  (std::string type, int index, Config * config,
+  (std::string type,
+   int index,
+   Config * config,
    const Factory * ) throw ();
 
   /// Create named prolongation object
@@ -313,10 +321,10 @@ protected: // attributes
   std::vector<Output *> output_list_;
 
   /// Prolongation object
-  Prolong * prolong_;
+  std::vector<Prolong *> prolong_list_;
 
   /// Restriction object
-  Restrict * restrict_;
+  std::vector<Restrict *> restrict_list_;
 
   /// Units
   Units * units_;

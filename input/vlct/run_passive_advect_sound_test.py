@@ -12,6 +12,7 @@
 #       pi/2 radians out of phase with the rest of the quantities
 
 
+import argparse
 import os
 import os.path
 import shutil
@@ -20,12 +21,11 @@ import sys
 
 import numpy as np
 
-from testing_utils import EnzoEWrapper, CalcSimL1Norm, isclose, prep_cur_dir
+from testing_utils import EnzoEWrapper, CalcSimL1Norm, isclose, testing_context
 
 data_dir_template = "method_vlct-1-{:s}_passive_soundN16-{:.1f}"
 
-calc_l1_norm = CalcSimL1Norm("tools/l1_error_norm.py",
-                             ["density","velocity_x","velocity_y","velocity_z",
+calc_l1_norm = CalcSimL1Norm(["density","velocity_x","velocity_y","velocity_z",
                               "total_energy","bfield_x","bfield_y","bfield_z",
                               "red"])
 
@@ -89,21 +89,20 @@ def cleanup():
             shutil.rmtree(dir_name)
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--launch_cmd', required=True,type=str)
+    args = parser.parse_args()
 
-    executable = 'bin/enzo-e'
+    with testing_context():
 
-    # this script can either be called from the base repository or from
-    # the subdirectory: input/vlct
-    prep_cur_dir(executable)
+        # run the tests
+        run_tests(args.launch_cmd)
 
-    # run the tests
-    run_tests(executable)
+        # analyze the tests
+        tests_passed = analyze_tests()
 
-    # analyze the tests
-    tests_passed = analyze_tests()
-
-    # cleanup the tests
-    cleanup()
+        # cleanup the tests
+        cleanup()
 
     if tests_passed:
         sys.exit(0)

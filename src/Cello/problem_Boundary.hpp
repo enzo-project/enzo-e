@@ -8,6 +8,7 @@
 #ifndef PROBLEM_BOUNDARY_HPP
 #define PROBLEM_BOUNDARY_HPP
 
+class Mask;
 
 class Boundary : public PUP::able 
 {
