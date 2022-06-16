@@ -138,7 +138,6 @@ void EnzoMethodGravity::compute(Block * block) throw()
   field.ghost_depth(0,&gx,&gy,&gz);
 
   const int m = mx*my*mz;
-  
   enzo_float * B = (enzo_float*) field.values (ib);
 #ifdef DEBUG_COPY_B
   const int ib_copy = field.field_id ("B_copy");
