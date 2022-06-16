@@ -99,6 +99,16 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
     bfield_method_ = nullptr;
   }
 
+  // Check that the (cell-centered) ghost depth is large enough
+  // Face-centered ghost depth could in principle be 1 smaller
+  int gx,gy,gz;
+  field_descr->ghost_depth(field_descr->field_id("density"), &gx, &gy, &gz);
+  int min_gdepth_req = (half_dt_recon_->total_staling_rate() +
+                        full_dt_recon_->total_staling_rate());
+  ASSERT1("EnzoMethodMHDVlct::compute", "ghost depth must be at least %d.",
+	  min_gdepth_req, std::min(gx, std::min(gy, gz)) >= min_gdepth_req);
+
+  // initialize other attributes
   store_fluxes_for_corrections_ = store_fluxes_for_corrections;
   if (store_fluxes_for_corrections){
     ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
@@ -200,6 +210,23 @@ EnzoEFltArrayMap EnzoMethodMHDVlct::get_integration_map_
   }
 
   return EnzoEFltArrayMap("integration",field_list,arrays);
+}
+
+//----------------------------------------------------------------------
+
+static EnzoEFltArrayMap get_accel_map_(Block* block) noexcept
+{
+  Field field = block->data()->field();
+  if (field.field_id("acceleration_x") < 0){
+    return EnzoEFltArrayMap();
+  }
+
+  str_vec_t field_list = {"acceleration_x", "acceleration_y", "acceleration_z"};
+  std::vector<CelloArray<enzo_float,3>> arrays
+    = {field.view<enzo_float>("acceleration_x"),
+       field.view<enzo_float>("acceleration_y"),
+       field.view<enzo_float>("acceleration_z")};
+  return EnzoEFltArrayMap("accel", field_list, arrays);
 }
 
 //----------------------------------------------------------------------
@@ -326,31 +353,33 @@ static void allocate_FC_flux_buffer_(Block * block) throw()
 
 void EnzoMethodMHDVlct::compute ( Block * block) throw()
 {
+  if (block->cycle() == enzo::config()->initial_cycle) { post_init_checks_(); }
+
   if (store_fluxes_for_corrections_){ allocate_FC_flux_buffer_(block); }
 
   if (block->is_leaf()) {
-    // Check that the mesh size and ghost depths are appropriate
-    check_mesh_and_ghost_size_(block);
-
     // load the list of keys for the passively advected scalars
     const str_vec_t passive_list = *(lazy_passive_list_.get_list());
 
     // initialize map that holds arrays wrapping the Cello Fields holding each
     // of the integration quantities. Additionally, this also includes
     // temporary arrays used to hold the specific form of the passive scalar
-    EnzoEFltArrayMap integration_map = get_integration_map_(block,
-                                                            &passive_list);
+    //
+    // by the very end of EnzoMethodMHDVlct::compute, the arrays in this map
+    // will be updated with their new values
+    EnzoEFltArrayMap external_integration_map = get_integration_map_
+      (block, &passive_list);
 
     // get maps of arrays and stand-alone arrays that serve as scratch space.
     // (first, retrieve the pointer to the scratch space struct)
-    const std::array<int,3> shape = {integration_map.at("density").shape(0),
-                                     integration_map.at("density").shape(1),
-                                     integration_map.at("density").shape(2)};
+    const std::array<int,3> shape = {external_integration_map.array_shape(0),
+                                     external_integration_map.array_shape(1),
+                                     external_integration_map.array_shape(2)};
     EnzoVlctScratchSpace* const scratch = get_scratch_ptr_(shape, passive_list);
 
     // map used for storing integration values at the half time-step. This
-    // includes key,array pairs for each entry in integration_map (there should
-    // be no aliased fields shared between maps)
+    // includes key,array pairs for each entry in external_integration_map
+    // (there should be no aliased arrays shared between maps)
     EnzoEFltArrayMap temp_integration_map = scratch->temp_integration_map;
 
     // Map of arrays used to temporarily store the cell-centered primitive
@@ -375,6 +404,12 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // CT is used, it won't have space to store changes in the magnetic fields.
     EnzoEFltArrayMap dUcons_map = scratch->dUcons_map;
 
+    // initialize the map that wraps the fields holding the acceleration
+    // components (these are nominally computed from gravity). This data is
+    // used for the gravity source term calculation. An empty map indicates
+    // that the gravity source term is not included.
+    const EnzoEFltArrayMap accel_map = get_accel_map_(block);
+
     // allocate constrained transport object
     if (bfield_method_ != nullptr) {
       bfield_method_->register_target_block(block);
@@ -393,9 +428,9 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     for (int i=0;i<2;i++){
       double cur_dt = (i == 0) ? dt/2. : dt;
       EnzoEFltArrayMap& cur_integration_map =
-        (i == 0) ? integration_map      : temp_integration_map;
+        (i == 0) ? external_integration_map : temp_integration_map;
       EnzoEFltArrayMap& out_integration_map =
-        (i == 0) ? temp_integration_map :      integration_map;
+        (i == 0) ? temp_integration_map     : external_integration_map;
 
       EnzoReconstructor *reconstructor;
 
@@ -468,7 +503,9 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // increment the stale_depth
       stale_depth+=reconstructor->immediate_staling_rate();
 
-      // This is where source terms should be computed (added to dUcons_group)
+      // Compute the source terms (use them to update dUcons_group)
+      compute_source_terms_(cur_dt, i == 1, external_integration_map,
+                            primitive_map, accel_map, dUcons_map, stale_depth);
 
       // Update Bfields
       if (bfield_method_ != nullptr) {
@@ -487,8 +524,8 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // total energy (and if necessary the total energy can be synchronized
       // with the internal energy)
       integration_quan_updater_->update_quantities
-        (integration_map, dUcons_map, out_integration_map, eos_, stale_depth,
-         passive_list);
+        (external_integration_map, dUcons_map, out_integration_map, eos_,
+         stale_depth, passive_list);
 
       // increment stale_depth since the inner values have been updated
       // but the outer values have not
@@ -501,25 +538,37 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------
 
-void EnzoMethodMHDVlct::check_mesh_and_ghost_size_(Block *block) const noexcept
+void EnzoMethodMHDVlct::post_init_checks_() const noexcept
 {
-  Field field = block->data()->field();
+  ASSERT("EnzoMethodMHDVlct::post_init_checks_",
+         "This solver isn't currently compatible with cosmological sims",
+         enzo::cosmology() == nullptr);
 
-  // Check that the mesh size is appropriate
-  int nx,ny,nz;
-  field.size(&nx,&ny,&nz);
-  int gx,gy,gz;
-  field.ghost_depth(field.field_id("density"),&gx,&gy,&gz);
-  ASSERT("EnzoMethodMHDVlct::compute",
-	 "Active zones on each block must be >= ghost depth.",
-	 nx >= gx && ny >= gy && nz >= gz);
+  const Problem* problem = enzo::problem();
 
-  // Check that the (cell-centered) ghost depth is large enough
-  // Face-centered ghost could in principle be 1 smaller
-  int min_ghost_depth = (half_dt_recon_->total_staling_rate() +
-			 full_dt_recon_->total_staling_rate());
-  ASSERT1("EnzoMethodMHDVlct::compute", "ghost depth must be at least %d.",
-	  min_ghost_depth, std::min(nx, std::min(ny, nz)) >= min_ghost_depth);
+  // problems would arise relating to particle-mesh deposition (relating to
+  // particle drift before deposition) and in cosmological simulations if the
+  // the VL+CT method were to precede the gravity method.
+  ASSERT("EnzoMethodMHDVlct::post_init_checks_",
+         "when the gravity method exists, it must precede this method.",
+         problem->method_precedes("gravity", "mhd_vlct") |
+         (!problem->method_exists("gravity")) );
+
+  // the following checks address some problems I've encountered in the past
+  // (they probably need to be revisited when we add Bfield flux corrections)
+  bool fc_exists = problem->method_exists("flux_correct");
+  if (fc_exists & !problem->method_precedes("mhd_vlct", "flux_correct")) {
+    ERROR("EnzoMethodMHDVlct::post_init_checks_",
+          "this method can't precede the flux_correct method");
+  } else if (fc_exists & !store_fluxes_for_corrections_) {
+    ERROR("EnzoMethodMHDVlct::post_init_checks_",
+          "the flux_correct method exists, but this method isn't saving "
+          "fluxes to be used for corrections.");
+  } else if (store_fluxes_for_corrections_ & !fc_exists) {
+    ERROR("EnzoMethodMHDVlct::post_init_checks_",
+          "this method is saving fluxes for corrections, but the flux_correct "
+          "method doesn't exist");
+  }
 }
 
 //----------------------------------------------------------------------
@@ -577,6 +626,40 @@ void EnzoMethodMHDVlct::compute_flux_
   // Finally, have bfield_method record the upwind direction (for handling CT)
   if (bfield_method != nullptr){
     bfield_method->identify_upwind(flux_map, dim, cur_stale_depth);
+  }
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodMHDVlct::compute_source_terms_
+(const double cur_dt, const bool full_timestep,
+ const EnzoEFltArrayMap &orig_integration_map,
+ const EnzoEFltArrayMap &primitive_map,
+ const EnzoEFltArrayMap &accel_map,
+ EnzoEFltArrayMap &dUcons_map,  const int stale_depth) const noexcept
+{
+  // As we add more source terms, we may want to store them in a std::vector
+  // instead of manually invoking them
+
+  // add any source-terms that are used for partial and full timesteps
+  // (there aren't any right now...)
+
+  // add any source-terms that are only included for full-timestep
+  if (full_timestep & (accel_map.size() != 0)){
+    // include gravity source terms.
+    //
+    // The inclusion of these terms are not based on any external paper. Thus,
+    // we include the following bullets to explain our thought process:
+    // - to be safe, we will use the density & velocity values from the start
+    //   of the timestep to compute the source terms.
+    // - we should reconsider this choice if we later decide to include the
+    //   source term for both the partial & full timesteps.
+    // - to include the source term during the partial & full timesteps, we
+    //   would probably want to recompute the gravitational potential and
+    //   acceleration fields at the partial timestep
+    EnzoSourceGravity gravity_source;
+    gravity_source.calculate_source(cur_dt, orig_integration_map, dUcons_map,
+                                    accel_map, eos_, stale_depth);
   }
 }
 

@@ -169,6 +169,9 @@ if (USE_YT_BASED_TESTS)
   setup_test_serial_python(vlct_passive_advect_sound vlct "input/vlct/run_passive_advect_sound_test.py")
   setup_test_parallel_python(vlct_dual_energy_shock_tube vlct "input/vlct/run_dual_energy_shock_tube_test.py")
 
+  # Gravity (with VLCT)
+  setup_test_serial_python(gravity_vlct_stable_Jeans_wave gravity "input/Gravity/run_stable_jeans_wave_test.py")
+
   # merge_sinks
   setup_test_serial_python(merge_sinks_stationary_serial merge_sinks/stationary/serial "input/merge_sinks/run_merge_sinks_test.py" "--prec=${PREC_STRING}" "--ics_type=stationary")
   setup_test_parallel_python(merge_sinks_stationary_parallel merge_sinks/stationary/parallel "input/merge_sinks/run_merge_sinks_test.py" "--prec=${PREC_STRING}" "--ics_type=stationary")
