@@ -457,24 +457,24 @@ void EnzoInitialIsolatedGalaxy::InitializeExponentialGasDistribution(Block * blo
 
           double vcirc = 0.0;
           if (this->analytic_velocity_){
-            double rhodm = enzo_config->method_background_acceleration_DM_density; //g/cm3
-            double rcore = enzo_config->method_background_acceleration_core_radius * enzo_constants::kpc_cm;
-            double rvir  = enzo_config->method_background_acceleration_DM_mass_radius * enzo_constants::kpc_cm;
-            double Mvir  = enzo_config->method_background_acceleration_DM_mass * enzo_constants::mass_solar;
+            double rhodm_cgs = enzo_config->method_background_acceleration_DM_density; //g/cm3
+            double rcore_cgs = enzo_config->method_background_acceleration_core_radius * enzo_constants::kpc_cm;
+            double rvir_cgs = enzo_config->method_background_acceleration_DM_mass_radius * enzo_constants::kpc_cm;
+            double Mvir_cgs = enzo_config->method_background_acceleration_DM_mass * enzo_constants::mass_solar;
             // If Mass is negative, the halo mass is specified by 
             // the central density
-            if (Mvir < 0) {
-              double xtemp = rvir / rcore;
-              Mvir = 4.0 * cello::pi / 3.0 * (std::pow(rcore, 3) * rhodm) *
+            if (Mvir_cgs < 0) {
+              double xtemp = rvir_cgs / rcore_cgs;
+              Mvir_cgs = 4.0 * cello::pi / 3.0 * (std::pow(rcore_cgs, 3) * rhodm_cgs) *
                 3.0 * (std::log(1.0 + xtemp) - xtemp/(1.0+xtemp));
             }
 
-            double conc = rvir  / rcore;
-            double   rx = r_cyl / rvir;
+            double conc = rvir_cgs  / rcore_cgs;
+            double   rx = r_cyl / rvir_cgs;
 
             vcirc = (std::log(1.0 + conc*rx) - (conc*rx)/(1.0+conc*rx))/
                       (std::log(1.0 + conc) - (conc / (1.0 + conc))) / rx;
-            vcirc = std::sqrt(vcirc * enzo_constants::grav_constant * Mvir / rvir);
+            vcirc = std::sqrt(vcirc * enzo_constants::grav_constant * Mvir_cgs / rvir_cgs);
 
           } else {
             vcirc = this->InterpolateVcircTable(r_cyl);
