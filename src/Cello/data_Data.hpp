@@ -50,7 +50,8 @@ public: // interface
       scalar_data_int_(),
       scalar_data_long_long_(),
       scalar_data_sync_(),
-      scalar_data_void_()
+      scalar_data_void_(),
+      scalar_data_index_()
   {
     lower_[0] = 0.0;
     lower_[1] = 0.0;
@@ -86,6 +87,7 @@ public: // interface
     p | scalar_data_long_long_;
     p | scalar_data_sync_;
     //    p | scalar_data_void_;
+    p | scalar_data_index_;
     static bool warn[CONFIG_NODE_SIZE] = {false};
     const int in = cello::index_static();
     if (! warn[in]) {

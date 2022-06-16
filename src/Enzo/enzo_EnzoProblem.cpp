@@ -253,8 +253,8 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_burkertbodenheimer_densityprofile);
   } else if (type == "isolated_galaxy") {
     initial = new EnzoInitialIsolatedGalaxy (enzo_config);
-  } else if (type == "merge_stars_test") {
-    initial = new EnzoInitialMergeStarsTest (enzo_config);
+  } else if (type == "merge_sinks_test") {
+    initial = new EnzoInitialMergeSinksTest (enzo_config);
   }
   else {
     initial = Problem::create_initial_
@@ -713,10 +713,11 @@ Method * EnzoProblem::create_method_
        enzo_config->method_check_dir,
        enzo_config->method_check_monitor_iter);
 
-  } else if (name == "merge_stars") {
+  } else if (name == "merge_sinks") {
 
-    method = new EnzoMethodMergeStars
-      (enzo_config->method_merge_stars_merging_radius_cells);
+    method = new EnzoMethodMergeSinks
+      (enzo_config->method_merge_sinks_merging_radius_cells);
+
 
   } else {
 

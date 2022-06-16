@@ -228,11 +228,14 @@ public: // interface
   // FieldData
   //==================================================
 
-  /// Return size of fields on the data, assuming centered
+  /// Return size of fields on the data, assuming centered (this only includes
+  /// the active zone)
   void size(int * nx, int * ny = 0, int * nz = 0) const throw()
   { field_data_->size(nx,ny,nz); }
 
-  /// Return dimensions of fields on the data, assuming centered
+  /// Return dimensions of fields on the data, without assuming that it is
+  /// cell-centered. This always includes ghost zones (regardless of whether
+  /// they've been allocated).
   void dimensions(int id_field,int * mx, int * my = 0, int * mz = 0) const throw()
   { field_data_->dimensions(field_descr_,id_field, mx,my,mz); }
 
@@ -252,14 +255,66 @@ public: // interface
   const char * values (std::string name, int index_history=0) const throw ()
   { return field_data_->values(field_descr_,name,index_history); }
 
+  /// Return a CelloArray that acts as a view of the corresponding field
+  ///
+  /// If the field cannot be found the program will abort with an error.
+  ///
+  /// @tparam T the expected (floating-point) type for the field. If this does
+  ///     not match the actual type, the program will abort with an error.
+  /// @param id_field id specifying the field that is to be loaded
+  /// @param choice specifies if ghost zones should be included in the view.
+  /// @param history the history index for the specified field
+  ///
+  /// @returns view of the specified field.
+  template<class T>
+  CelloArray<T, 3> view(int id_field,
+                        ghost_choice choice = ghost_choice::include,
+                        int index_history=0) throw()
+  { return field_data_->view<T>(field_descr_,id_field,choice,index_history); }
+
+  template<class T>
+  CelloArray<T, 3> view(std::string name,
+                        ghost_choice choice = ghost_choice::include,
+                        int index_history=0) throw()
+  { return field_data_->view<T>(field_descr_,name,choice,index_history); }
+
+  template<class T>
+  CelloArray<const T, 3> view(int id_field,
+                              ghost_choice choice = ghost_choice::include,
+			      int index_history=0) const throw()
+  { return field_data_->view<T>(field_descr_,id_field,choice,index_history); }
+
+  template<class T>
+  CelloArray<const T, 3> view(std::string name,
+                              ghost_choice choice = ghost_choice::include,
+                              int index_history=0) const throw()
+  { return field_data_->view<T>(field_descr_,name,choice,index_history); }
+
   /// Return array for the corresponding coarse field
   char * coarse_values (int id_field) throw ()
   { return field_data_->coarse_values (field_descr_,id_field); }
 
   /// Return array for the corresponding coarse field
-  const char * coarse_values (const FieldDescr *, int id_field) const throw ()
+  const char * coarse_values (int id_field) const throw ()
   { return field_data_->coarse_values (field_descr_,id_field); }
-  
+
+  /// Return a CelloArray that acts as a view of the corresponding coarse field
+  ///
+  /// If the coarse field cannot be found the program will abort with an error.
+  ///
+  /// @tparam T the expected (floating-point) type for the field. If this does
+  ///     not match the actual type, the program will abort with an error.
+  /// @param id_field id specifying the field that is to be loaded
+  ///
+  /// @returns view of the specified coarse field.
+  template<class T>
+  CelloArray<T, 3> coarse_view(int id_field) throw()
+  { return field_data_->coarse_view<T>(field_descr_, id_field); }
+
+  template<class T>
+  CelloArray<const T, 3> coarse_view(int id_field) const throw()
+  { return field_data_->coarse_view<T>(field_descr_, id_field); }
+
   /// Return array for the corresponding field, which does not contain
   /// ghosts whether they're allocated or not
   char * unknowns (int id_field, int index_history=0) throw ()

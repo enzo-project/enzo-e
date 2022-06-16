@@ -43,11 +43,14 @@ public: // interface
 
   void pup(PUP::er &p) ;
 
-  /// Return dimensions of the given field in the block
+  /// Return dimensions of the given field in the block, without assuming that
+  /// it is cell-centered. This always includes ghost zones (regardless of
+  /// whether they've been allocated).
   void dimensions(const FieldDescr *, int id_field,
 		  int * mx, int * my = 0, int * mz = 0) const throw();
 
-  /// Return size of fields on the block, assuming centered
+  /// Return size of fields on the data, assuming centered (this only includes
+  /// the active zone)
   void size(int * nx, int * ny = 0, int * nz = 0) const throw();
 
   /// Return array for the corresponding field, which may or may not
@@ -66,6 +69,48 @@ public: // interface
 		       std::string name, int history=0) const throw ()
   { return values (field_descr,field_descr->field_id(name),history); }
 
+  /// Return a CelloArray that acts as a view of the corresponding field
+  ///
+  /// If the field cannot be found the program will abort with an error.
+  ///
+  /// @tparam T the expected (floating-point) type for the field. If this does
+  ///     not match the actual type, the program will abort with an error.
+  /// @param field_descr class that stores general field information
+  /// @param id_field id specifying the field that is to be loaded
+  /// @param choice specifies if ghost zones should be included in the view.
+  /// @param history the history index for the specified field
+  ///
+  /// @returns view of the specified field.
+  template<class T>
+  CelloArray<T, 3> view(const FieldDescr * field_descr, int id_field,
+                        ghost_choice choice = ghost_choice::include,
+                        int history=0) throw()
+  {
+    using noconst_T = typename std::remove_cv<T>::type;
+    return make_view_<noconst_T>(field_descr, id_field, choice, history, false);
+  }
+
+  template<class T>
+  CelloArray<T, 3> view(const FieldDescr * field_descr, std::string name,
+                        ghost_choice choice = ghost_choice::include,
+                        int history=0) throw()
+  { return view<T>(field_descr, field_descr->field_id(name), choice, history); }
+
+  template<class T>
+  CelloArray<const T, 3> view(const FieldDescr * field_descr, int id_field,
+                              ghost_choice choice = ghost_choice::include,
+                              int history=0) const throw()
+  {
+    return const_cast<FieldData*>(this)->view<T>(field_descr, id_field,
+                                                 choice, history);
+  }
+
+  template<class T>
+  CelloArray<const T, 3> view(const FieldDescr * field_descr, std::string name,
+                              ghost_choice choice = ghost_choice::include,
+                              int history=0) const throw()
+  { return view<T>(field_descr, field_descr->field_id(name), choice, history); }
+
   /// Return array for the corresponding coarse field
   char * coarse_values (const FieldDescr *,
 		 int id_field, int history=0) throw ();
@@ -79,7 +124,48 @@ public: // interface
   const char * coarse_values (const FieldDescr * field_descr,
 		       std::string name, int history=0) const throw ()
   { return coarse_values (field_descr,field_descr->field_id(name),history); }
-  
+
+  /// Return a CelloArray that acts as a view of the corresponding coarse field
+  ///
+  /// If the coarse field cannot be found the program will abort with an error.
+  ///
+  /// @tparam T the expected (floating-point) type for the field. If this does
+  ///     not match the actual type, the program will abort with an error.
+  /// @param field_descr class that stores general field information
+  /// @param id_field id specifying the field that is to be loaded
+  /// @param history the history index for the specified field
+  ///
+  /// @returns view of the specified coarse field.
+  template<class T>
+  CelloArray<T, 3> coarse_view(const FieldDescr * field_descr,
+                               int id_field, int history=0) throw()
+  {
+    using noconst_T = typename std::remove_cv<T>::type;
+    return make_view_<noconst_T>(field_descr, id_field, ghost_choice::include,
+                                 history, true);
+  }
+
+  template<class T>
+  CelloArray<T, 3> coarse_view(const FieldDescr * field_descr,
+                               std::string name, int history=0) throw()
+  {
+    return coarse_view<T>(field_descr, field_descr->field_id(name), history);
+  }
+
+  template<class T>
+  CelloArray<const T, 3> coarse_view(const FieldDescr * field_descr,
+                                     int id_field, int history=0) const throw()
+  {
+    return const_cast<FieldData*>(this)->coarse_view<T>(field_descr, id_field,
+                                                        history);
+  }
+
+  template<class T>
+  CelloArray<const T, 3> coarse_view(const FieldDescr * field_descr,
+				     std::string name,
+                                     int history=0) const throw()
+  { return coarse_view<T>(field_descr, field_descr->field_id(name), history); }
+
   /// Return array for the corresponding field, which does not contain
   /// ghosts whether they're allocated or not
   char * unknowns (const FieldDescr *,
@@ -283,6 +369,13 @@ private: // functions
    int nx, int ny, int nz,
    int gx, int gy ,int gz,
    int nxd,int nyd) const;
+
+
+  template<class T>
+  CelloArray<T, 3> make_view_
+  (const FieldDescr * field_descr,
+   int id_field, ghost_choice choice,
+   int index_history,  bool coarse) throw();
 
 private: // attributes
 

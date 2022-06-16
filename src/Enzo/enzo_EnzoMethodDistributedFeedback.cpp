@@ -301,7 +301,7 @@ EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
 ()
   : Method()
 {
-
+  cello::particle_descr()->check_particle_attribute("star","mass");
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
 
@@ -314,13 +314,10 @@ EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
 
-  ParticleDescr * particle_descr = cello::particle_descr();
-
   //
   // Refresh copies of all star particles on neighboring grids
   //
-  const int it = particle_descr->type_index("star");
-  refresh->add_particle(it);
+  refresh->add_particle(cello::particle_descr()->type_index("star"));
   refresh->set_particles_are_copied(true);
 
   FieldDescr * field_descr = cello::field_descr();

@@ -117,6 +117,7 @@ EnzoConfig::EnzoConfig() throw ()
   initial_inclinedwave_parallel_vel(std::numeric_limits<double>::min()),
   initial_inclinedwave_positive_vel(true),
   initial_inclinedwave_wave_type(""),
+  initial_merge_sinks_test_particle_data_filename(""),
   // EnzoInitialMusic
   initial_music_field_files(),
   initial_music_field_datasets(),
@@ -193,8 +194,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_IG_recent_SF_bin_size(5.0),
   initial_IG_recent_SF_SFR(2.0),
   initial_IG_recent_SF_seed(12345),
-  // EnzoInitialMergeStarsTest
-  initial_merge_stars_test_particle_data_filename(""),
   // EnzoMethodCheck
   method_check_num_files(1),
   method_check_ordering("order_morton"),
@@ -277,7 +276,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_vlct_dual_energy(false),
   method_vlct_dual_energy_eta(0.0),
   /// EnzoMethodMergeStars
-  method_merge_stars_merging_radius_cells(0.0),
+  method_merge_sinks_merging_radius_cells(0.0),
   /// EnzoProlong
   prolong_enzo_type(),
   prolong_enzo_positive(true),
@@ -534,7 +533,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_soup_pressure_out;
   p | initial_soup_density;
 
-  p | initial_merge_stars_test_particle_data_filename;
+  p | initial_merge_sinks_test_particle_data_filename;
 
   p | method_check_num_files;
   p | method_check_ordering;
@@ -611,7 +610,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_vlct_dual_energy;
   p | method_vlct_dual_energy_eta;
 
-  p | method_merge_stars_merging_radius_cells;
+  p | method_merge_sinks_merging_radius_cells;
 
   p | prolong_enzo_type;
   p | prolong_enzo_positive;
@@ -677,7 +676,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_hdf5_(p);
   read_initial_inclined_wave_(p);
   read_initial_isolated_galaxy_(p);
-  read_initial_merge_stars_test_(p);
+  read_initial_merge_sinks_test_(p);
   read_initial_music_(p);
   read_initial_pm_(p);
   read_initial_sedov_(p);
@@ -692,13 +691,14 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_grackle_(p);
   read_method_gravity_(p);
   read_method_heat_(p);
-  read_method_merge_stars_(p);
+  read_method_merge_sinks_(p);
   read_method_pm_deposit_(p);
   read_method_pm_update_(p);
   read_method_ppm_(p);
   read_method_star_maker_(p);
   read_method_turbulence_(p);
   read_method_vlct_(p);
+  
   read_physics_(p);
 
   read_prolong_enzo_(p);
@@ -1233,10 +1233,10 @@ void EnzoConfig::read_initial_feedback_test_(Parameters * p)
     ("Initial:feedback_test:metal_fraction", 0.01);
 }
 
-void EnzoConfig::read_initial_merge_stars_test_(Parameters * p)
+void EnzoConfig::read_initial_merge_sinks_test_(Parameters * p)
 {
-  initial_merge_stars_test_particle_data_filename= p->value_string
-    ("Initial:merge_stars_test:particle_data_filename","");
+  initial_merge_sinks_test_particle_data_filename= p->value_string
+    ("Initial:merge_sinks_test:particle_data_filename","");
 }
 
 void EnzoConfig::read_method_grackle_(Parameters * p)
@@ -1620,10 +1620,10 @@ void EnzoConfig::read_method_heat_(Parameters * p)
     ("Method:heat:alpha",1.0);
 }
 
-void EnzoConfig::read_method_merge_stars_(Parameters * p)
+void EnzoConfig::read_method_merge_sinks_(Parameters * p)
 {
-  method_merge_stars_merging_radius_cells = p->value_float
-    ("Method:merge_stars:merging_radius_cells",8.0);
+  method_merge_sinks_merging_radius_cells = p->value_float
+    ("Method:merge_sinks:merging_radius_cells",8.0);
 }
 
 //----------------------------------------------------------------------

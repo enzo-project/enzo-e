@@ -23,8 +23,9 @@
 #include "_problem.hpp"
 #include "_compute.hpp"
 #include "_control.hpp"
-#include "_data.hpp"
 #include "_mesh.hpp"
+#include "_array.hpp"
+#include "_data.hpp"
 #include "_simulation.hpp"
 
 #endif /* PROBLEM_HPP */

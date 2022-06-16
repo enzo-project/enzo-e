@@ -12,6 +12,7 @@
 #
 # We should probably try small convergence tests like Athena++
 
+import argparse
 import os
 import os.path
 import sys
@@ -78,11 +79,11 @@ def analyze_tests():
     # use 1 block - if we use more than one block, it's unclear to me if it's
     # ok to have round-off errors)
 
-    r.append(err_compare(0.012524502240006011,"x"))
+    r.append(err_compare(0.012523489882320429, "x"))
     r.append(err_compare(0.0, "x", std_dev=True))
-    r.append(err_compare(0.012524502240005972,"y"))
+    r.append(err_compare(0.012523489882320308, "y"))
     r.append(err_compare(0.0, "y", std_dev=True))
-    r.append(err_compare(0.012524502240005921,"z"))
+    r.append(err_compare(0.012523489882320315, "z"))
     r.append(err_compare(0.0, "z", std_dev=True))
 
     n_passed = np.sum(r)
@@ -101,13 +102,14 @@ def cleanup():
             shutil.rmtree(dir_name)
 
 if __name__ == '__main__':
-
-    executable = os.environ.get('ENZOE_BIN', 'bin/enzo-e')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--launch_cmd', required=True,type=str)
+    args = parser.parse_args()
 
     with testing_context():
 
         # run the tests
-        run_tests(executable)
+        run_tests(args.launch_cmd)
 
         # analyze the tests
         tests_passed = analyze_tests()

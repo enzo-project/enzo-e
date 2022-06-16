@@ -284,10 +284,10 @@ Adapt {
  Particle {
      dark {
          attributes = [ "x", "default", "y", "default", "z", "default", "vx", "default", "vy", "default", "vz", "default", "ax", "default", "ay", "default", "az", "default", "is_local", "default"];
-         constants = [ "mass", "default", 0.8666666666667000 ];
+         constants = [ "mass", "default", 0.8666666666667000/(32.0*32.0*32.0) ];
          position = [ "x", "y", "z" ];
          velocity = [ "vx", "vy", "vz" ];
-         group_list = ["has_mass"];
+         group_list = ["is_gravitating"];
      };
      list = [ "dark" ];
  }
@@ -308,5 +308,5 @@ Adapt {
  }
 
  Stopping {
-     cycle = 100;
+     redshift = -50.0;
  }

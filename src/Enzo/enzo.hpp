@@ -33,13 +33,13 @@
 #include "_parameters.hpp"
 #include "_performance.hpp"
 #include "_problem.hpp"
-#include "_data.hpp"
 #include "_mesh.hpp"
+#include "_array.hpp"
+#include "_data.hpp"
 #include "_simulation.hpp"
 #include "_disk.hpp"
 #include "_io.hpp"
 #include "_compute.hpp"
-#include "_array.hpp"
 
 //----------------------------------------------------------------------
 // Component class includes

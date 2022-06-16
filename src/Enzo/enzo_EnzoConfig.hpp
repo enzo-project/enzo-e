@@ -299,8 +299,16 @@ public: // interface
       method_check_ordering("order_morton"),
       method_check_dir(),
       method_check_monitor_iter(0),
-      // EnzoInitialMergeStarsTest
-      initial_merge_stars_test_particle_data_filename(""),
+      /// EnzoMethodFeedback
+      method_feedback_ejecta_mass(0.0),
+      method_feedback_supernova_energy(1.0),
+      method_feedback_ejecta_metal_fraction(0.0),
+      method_feedback_stencil(3),
+      method_feedback_radius(-1.0),
+      method_feedback_shift_cell_center(true),
+      method_feedback_ke_fraction(0.0),
+      method_feedback_use_ionization_feedback(false),
+      method_feedback_time_first_sn(-1.0), // in Myr
       // EnzoMethodHeat
       method_heat_alpha(0.0),
       // EnzoMethodHydro
@@ -312,16 +320,8 @@ public: // interface
       method_hydro_reconstruct_conservative(false),
       method_hydro_reconstruct_positive(false),
       method_hydro_riemann_solver(""),
-      /// EnzoMethodFeedback
-      method_feedback_ejecta_mass(0.0),
-      method_feedback_supernova_energy(1.0),
-      method_feedback_ejecta_metal_fraction(0.0),
-      method_feedback_stencil(3),
-      method_feedback_radius(-1.0),
-      method_feedback_shift_cell_center(true),
-      method_feedback_ke_fraction(0.0),
-      method_feedback_use_ionization_feedback(false),
-      method_feedback_time_first_sn(-1.0), // in Myr
+      // EnzoInitialMergeSinksTest
+      initial_merge_sinks_test_particle_data_filename(""),
       /// EnzoMethodStarMaker
       method_star_maker_flavor(""),
       method_star_maker_use_density_threshold(true),           // check above density threshold before SF
@@ -379,7 +379,7 @@ public: // interface
       method_vlct_dual_energy(false),
       method_vlct_dual_energy_eta(0.0),
       // EnzoMethodMergeStars
-      method_merge_stars_merging_radius_cells(0.0),
+      method_merge_sinks_merging_radius_cells(0.0),
       // EnzoProlong
       prolong_enzo_type(),
       prolong_enzo_positive(true),
@@ -440,6 +440,7 @@ protected: // methods
   void read_initial_hdf5_(Parameters *);
   void read_initial_inclined_wave_(Parameters *);
   void read_initial_isolated_galaxy_(Parameters *);
+  void read_initial_merge_sinks_test_(Parameters *);
   void read_initial_merge_stars_test_(Parameters *);
   void read_initial_music_(Parameters *);
   void read_initial_pm_(Parameters *);
@@ -448,21 +449,21 @@ protected: // methods
   void read_initial_shock_tube_(Parameters *);
   void read_initial_soup_(Parameters *);
   void read_initial_turbulence_(Parameters *);
-
+  
   void read_method_background_acceleration_(Parameters *);
   void read_method_check_(Parameters *);
   void read_method_feedback_(Parameters *);
   void read_method_grackle_(Parameters *);
   void read_method_gravity_(Parameters *);
   void read_method_heat_(Parameters *);
-  void read_method_merge_stars_(Parameters *);
+  void read_method_merge_sinks_(Parameters *);
   void read_method_pm_deposit_(Parameters *);
   void read_method_pm_update_(Parameters *);
   void read_method_ppm_(Parameters *);
   void read_method_star_maker_(Parameters *);
   void read_method_turbulence_(Parameters *);
   void read_method_vlct_(Parameters *);
-
+  
   void read_physics_(Parameters *);
 
   void read_prolong_enzo_(Parameters *);
@@ -701,8 +702,10 @@ public: // attributes
   std::vector<std::string>   method_check_dir;
   int                        method_check_monitor_iter;
 
+  std::string                method_check_gravity_particle_type;
+
   // EnzoInitialMergeStarsTest
-  std::string                initial_merge_stars_test_particle_data_filename;
+  std::string                initial_merge_sinks_test_particle_data_filename;
 
   /// EnzoMethodHeat
   double                     method_heat_alpha;
@@ -803,7 +806,7 @@ public: // attributes
   double                     method_vlct_dual_energy_eta;
 
   /// EnzoMethodMergeStars
-  double                     method_merge_stars_merging_radius_cells;
+  double                     method_merge_sinks_merging_radius_cells;
 
 
   std::string                prolong_enzo_type;

@@ -407,11 +407,9 @@ void setup_bfield(Block * block, VectorInit *a, MeshPos &pos,
 	 field.is_field("bfieldi_y") &&
 	 field.is_field("bfieldi_z"));
 
-
-  EnzoFieldArrayFactory array_factory(block);
-  EFlt3DArray bfieldi_x = array_factory.from_name("bfieldi_x");
-  EFlt3DArray bfieldi_y = array_factory.from_name("bfieldi_y");
-  EFlt3DArray bfieldi_z = array_factory.from_name("bfieldi_z");
+  EFlt3DArray bfieldi_x = field.view<enzo_float>("bfieldi_x");
+  EFlt3DArray bfieldi_y = field.view<enzo_float>("bfieldi_y");
+  EFlt3DArray bfieldi_z = field.view<enzo_float>("bfieldi_z");
 
   if (a == NULL){
     for (int iz=0; iz<mz+1; iz++){
@@ -473,25 +471,24 @@ void setup_eint_(Block *block)
   // because cell-centered bfields for CT are computed in terms of enzo_float,
   // this calculation is handled in terms of enzo_float
   // This operation could be split off and placed in a separate initializer
-  EnzoFieldArrayFactory array_factory(block);
   Field field = block->data()->field();
 
   EFlt3DArray density, etot, eint;
-  density = array_factory.from_name("density");
-  etot = array_factory.from_name("total_energy");
-  eint = array_factory.from_name("internal_energy");
+  density = field.view<enzo_float>("density");
+  etot = field.view<enzo_float>("total_energy");
+  eint = field.view<enzo_float>("internal_energy");
 
   EFlt3DArray velocity_x, velocity_y, velocity_z;
-  velocity_x = array_factory.from_name("velocity_x");
-  velocity_y = array_factory.from_name("velocity_y");
-  velocity_z = array_factory.from_name("velocity_z");
+  velocity_x = field.view<enzo_float>("velocity_x");
+  velocity_y = field.view<enzo_float>("velocity_y");
+  velocity_z = field.view<enzo_float>("velocity_z");
 
   const bool mhd = field.is_field("bfield_x");
   EFlt3DArray bfield_x, bfield_y, bfield_z;
   if (mhd){
-    bfield_x = array_factory.from_name("bfield_x");
-    bfield_y = array_factory.from_name("bfield_y");
-    bfield_z = array_factory.from_name("bfield_z");
+    bfield_x = field.view<enzo_float>("bfield_x");
+    bfield_y = field.view<enzo_float>("bfield_y");
+    bfield_z = field.view<enzo_float>("bfield_z");
   }
 
   for (int iz=0; iz<density.shape(0); iz++){
@@ -522,15 +519,13 @@ void setup_fluid(Block *block, ScalarInit *density_init,
 		 VectorInit *momentum_init,
 		 MeshPos &pos, int mx, int my, int mz, double gamma)
 {
-  EFlt3DArray density, specific_total_energy;
-  EnzoFieldArrayFactory array_factory(block);
-  density = array_factory.from_name("density");
-  specific_total_energy = array_factory.from_name("total_energy");
+  Field field = block->data()->field();
+  EFlt3DArray density = field.view<enzo_float>("density");
+  EFlt3DArray specific_total_energy = field.view<enzo_float>("total_energy");
 
-  EFlt3DArray velocity_x, velocity_y, velocity_z;
-  velocity_x = array_factory.from_name("velocity_x");
-  velocity_y = array_factory.from_name("velocity_y");
-  velocity_z = array_factory.from_name("velocity_z");
+  EFlt3DArray velocity_x = field.view<enzo_float>("velocity_x");
+  EFlt3DArray velocity_y = field.view<enzo_float>("velocity_y");
+  EFlt3DArray velocity_z = field.view<enzo_float>("velocity_z");
 
   for (int iz=0; iz<mz; iz++){
     for (int iy=0; iy<my; iy++){
@@ -552,7 +547,6 @@ void setup_fluid(Block *block, ScalarInit *density_init,
   }
 
   // If present, setup internal energy (to test dual energy formalism):
-  Field field = block->data()->field();
   if (field.is_field("internal_energy")) { setup_eint_(block); }
 }
 
@@ -566,26 +560,23 @@ void setup_circ_polarized_alfven(Block *block, ScalarInit *density_init,
   // this function directly sets pressure = 0.1 by hand
   // Gardiner & Stone (2008) explicitly as states that the truncation error of
   // B_perp**2/P is important
-  EFlt3DArray density, specific_total_energy;
-  EnzoFieldArrayFactory array_factory(block);
-  density = array_factory.from_name("density");
-  specific_total_energy = array_factory.from_name("total_energy");
-
-  EFlt3DArray velocity_x, velocity_y, velocity_z;
-  velocity_x = array_factory.from_name("velocity_x");
-  velocity_y = array_factory.from_name("velocity_y");
-  velocity_z = array_factory.from_name("velocity_z");
-
-  EFlt3DArray bfield_x, bfield_y, bfield_z;
-  bfield_x = array_factory.from_name("bfield_x");
-  bfield_y = array_factory.from_name("bfield_y");
-  bfield_z = array_factory.from_name("bfield_z");
-
   Field field = block->data()->field();
+
+  EFlt3DArray density = field.view<enzo_float>("density");
+  EFlt3DArray specific_total_energy = field.view<enzo_float>("total_energy");
+
+  EFlt3DArray velocity_x = field.view<enzo_float>("velocity_x");
+  EFlt3DArray velocity_y = field.view<enzo_float>("velocity_y");
+  EFlt3DArray velocity_z = field.view<enzo_float>("velocity_z");
+
+  EFlt3DArray bfield_x = field.view<enzo_float>("bfield_x");
+  EFlt3DArray bfield_y = field.view<enzo_float>("bfield_y");
+  EFlt3DArray bfield_z = field.view<enzo_float>("bfield_z");
+
   EFlt3DArray specific_internal_energy;
   const bool dual_energy = field.is_field("internal_energy");
   if (dual_energy){
-    specific_internal_energy = array_factory.from_name("internal_energy");
+    specific_internal_energy = field.view<enzo_float>("internal_energy");
   }
   
 

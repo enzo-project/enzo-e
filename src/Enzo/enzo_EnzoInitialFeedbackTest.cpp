@@ -22,6 +22,8 @@ EnzoInitialFeedbackTest::EnzoInitialFeedbackTest
   : Initial(config->initial_cycle, config->initial_time)
 {
 
+  cello::particle_descr()->check_particle_attribute("star","mass");
+
   if (config->initial_feedback_test_from_file){
     this->num_particles = nlines("initial_feedback_stars.in");
 
@@ -169,13 +171,13 @@ void EnzoInitialFeedbackTest::enforce_block
   int ia_loc  = particle.attribute_index (it, "is_local");
   int ia_id   = particle.attribute_index (it, "id");
 
-  int ia_to    = particle.is_attribute(it,"creation_time") ?
+  int ia_to    = particle.has_attribute(it,"creation_time") ?
                  particle.attribute_index(it,"creation_time") : -1;
 
-  int ia_l     = particle.is_attribute(it,"lifetime") ?
+  int ia_l     = particle.has_attribute(it,"lifetime") ?
                  particle.attribute_index(it,"lifetime") : -1;
 
-  int ia_metal = particle.is_attribute(it,"metal_fraction") ?
+  int ia_metal = particle.has_attribute(it,"metal_fraction") ?
                  particle.attribute_index(it,"metal_fraction") : -1;
 
   int ib  = 0; // batch counter

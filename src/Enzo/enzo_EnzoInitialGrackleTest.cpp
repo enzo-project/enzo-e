@@ -70,8 +70,6 @@ void EnzoInitialGrackleTest::enforce_block
 
   gr_float * total_energy  = (gr_float *) field.values("total_energy");
 
-  gr_float * gamma         = (gr_float *) field.values("gamma");
-
   enzo_float * pressure    = field.is_field("pressure") ?
                (enzo_float*) field.values("pressure") : NULL;
   enzo_float * temperature = field.is_field("temperature") ?
@@ -193,7 +191,6 @@ void EnzoInitialGrackleTest::enforce_block
                                       log10(enzo_config->initial_grackle_test_minimum_temperature)))/
                              mu / enzo_units->temperature() / (enzo_config->field_gamma - 1.0);
         total_energy[i]    = grackle_fields_.internal_energy[i];
-        gamma[i]           = enzo_config->field_gamma;
       }
     }
   }
