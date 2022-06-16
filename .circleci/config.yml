@@ -198,7 +198,7 @@ commands:
 
             export USE_DOUBLE=<< parameters.usedouble >>
             export GENERATE_TEST_RESULTS=<< parameters.generate >>
-            pytest -s test
+            pytest -s test/answer_tests
 
   build-docs:
     description: "Test the docs build."

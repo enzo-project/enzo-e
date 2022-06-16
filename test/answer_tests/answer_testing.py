@@ -38,7 +38,7 @@ if not os.path.exists(charmrun_path):
     raise RuntimeError(
         f"No charmrun executable found in {_charm_path}.")
 
-src_path = os.path.join(os.path.dirname(__file__), "..")
+src_path = os.path.join(os.path.dirname(__file__), "../..")
 enzo_path = os.path.join(src_path, "build/bin/enzo-e")
 yt.mylog.info(f"{__file__}: {enzo_path=}")
 if not os.path.exists(enzo_path):
