@@ -89,8 +89,19 @@ public: // virtual methods
       Units::length() : cosmology_->length_units();
   }
 
-  /// Return temperature units scaling factor (virtual)
-  virtual double temperature() const
+  /// Return velocity units scaling factor (virtual)
+  virtual double velocity() const
+  {
+    return (cosmology_ == NULL) ?
+      Units::velocity() : cosmology_->velocity_units();
+  }
+
+  /// Returns the scaling factor to be divided by temperature to convert from
+  /// units of Kelvin to units of specific internal energy
+  ///
+  /// The original Enzo refered to this quantity as "temperature units", but in
+  /// Enzo-E we primarily track temperature in units of Kelvin
+  double kelvin_per_energy_units() const
   {
     if (cosmology_ == NULL){
       // The Units base-class can't compute the temperature code units for the
@@ -100,15 +111,8 @@ public: // virtual methods
       return (enzo_constants::mass_hydrogen * (vel_units * vel_units) /
               enzo_constants::kboltz);
     } else {
-      return cosmology_->temperature_units();
+      return cosmology_->kelvin_per_energy_units();
     }
-  }
-  
-  /// Return velocity units scaling factor (virtual)
-  virtual double velocity() const
-  {
-    return (cosmology_ == NULL) ?
-      Units::velocity() : cosmology_->velocity_units();
   }
   
 private: // functions
