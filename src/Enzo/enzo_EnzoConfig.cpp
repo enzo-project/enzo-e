@@ -756,7 +756,7 @@ void EnzoConfig::read_initial_collapse_(Parameters * p)
   initial_collapse_particle_ratio =
     p->value_float("Initial:collapse:particle_ratio",0.0);
   initial_collapse_mass =
-    p->value_float("Initial:collapse:mass",cello::mass_solar);
+    p->value_float("Initial:collapse:mass",enzo_constants::mass_solar);
   initial_collapse_temperature =
     p->value_float("Initial:collapse:temperature",10.0);
 }
@@ -932,7 +932,7 @@ void EnzoConfig::read_initial_burkertbodenheimer_(Parameters * p)
   initial_burkertbodenheimer_particle_ratio =
     p->value_float("Initial:burkertbodenheimer:particle_ratio",0.0);
   initial_burkertbodenheimer_mass =
-    p->value_float("Initial:burkertbodenheimer:mass",cello::mass_solar);
+    p->value_float("Initial:burkertbodenheimer:mass",enzo_constants::mass_solar);
   initial_burkertbodenheimer_temperature =
     p->value_float("Initial:burkertbodenheimer:temperature",10.0);
   initial_burkertbodenheimer_densityprofile =
