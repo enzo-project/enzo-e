@@ -197,7 +197,7 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
 
         if (! this->check_velocity_divergence(velocity_x, velocity_y,
                                               velocity_z, i,
-                                              1, mx, mx*my)) continue;
+                                              1, mx, mx*my, dx, dy, dz)) continue;
         // Check whether mass in [min_mass, max_range] range and if specified, Jeans unstable
         if (! this->check_mass(mass)) continue;
 

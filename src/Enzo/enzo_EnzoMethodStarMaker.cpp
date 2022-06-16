@@ -334,7 +334,7 @@ int EnzoMethodStarMaker::check_jeans_mass(
 int EnzoMethodStarMaker::check_velocity_divergence(
                 enzo_float *vx, enzo_float *vy, enzo_float *vz,
                 const int &index, const int &dix, const int &diy,
-                const int &diz){
+                const int &diz, const double dx, const double dy, const double dz) {
 
     ///  Apply the criteria that the divergence of the velocity
     ///  be negative, if so desired by user (use_velocity_divergence).
@@ -345,9 +345,9 @@ int EnzoMethodStarMaker::check_velocity_divergence(
     }
 
    double div = 0.0;
-   if (vx) div += (vx[index+dix] - vx[index-dix]) / 2.0; // in units of dx
-   if (vy) div += (vy[index+diy] - vy[index-diy]) / 2.0; // in units of dy
-   if (vz) div += (vz[index+diz] - vz[index-diz]) / 2.0; // in units of dz
+   if (vx) div += 0.5 * (vx[index+dix] - vx[index-dix]) / dx; // in units of dx
+   if (vy) div += 0.5 * (vy[index+diy] - vy[index-diy]) / dy; // in units of dy
+   if (vz) div += 0.5 * (vz[index+diz] - vz[index-diz]) / dz; // in units of dz
 
   #ifdef DEBUG_SF
     CkPrintf("MethodStarMaker -- velocity_divergence = %f\n",div); 

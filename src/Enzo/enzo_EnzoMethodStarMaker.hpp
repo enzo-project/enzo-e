@@ -72,7 +72,9 @@ protected: // methods
   int check_velocity_divergence(
                 enzo_float *vx, enzo_float *vy, enzo_float *vz,
                 const int &index, const int &dix, const int &diy,
-                const int &diz);
+                const int &diz,
+                const double dx, const double dy, const double dz);
+
   int check_mass(const double &m);
 
   int check_self_gravitating(

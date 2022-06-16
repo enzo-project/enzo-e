@@ -296,7 +296,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         // check velocity divergence < 0
         if (! this->check_velocity_divergence(velocity_x, velocity_y,
                                               velocity_z, i,
-                                              idx, idy, idz)) continue;
+                                              idx, idy, idz, dx, dy, dz)) continue;
       
         #ifdef DEBUG_SF_CRITERIA_EXTRA
            CkPrintf("MethodStarMakerSTARSS -- div(v) < 0 in cell %d\n", i);
