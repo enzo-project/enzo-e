@@ -309,5 +309,5 @@ Adapt {
  }
 
  Stopping {
-     redshift = -50.0;
+     cycle = 100;
  }

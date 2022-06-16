@@ -19,7 +19,8 @@ void Main::enzo_finalize (Simulation * simulation)
 
   unit_class ("Enzo-E");
   unit_func  ("final time");
-  monitor->print ("Testing","actual   time:  %.15g",simulation->time());
+  monitor->print ("Testing","actual sim-time:  %.15g",
+                  simulation->time());
   monitor->print ("Testing","tolerance:      %g",time_tolerance);
   
   if (config->testing_time_final.size() > 0 &&
@@ -29,7 +30,7 @@ void Main::enzo_finalize (Simulation * simulation)
       double time_final=config->testing_time_final[i];
       double err_rel = cello::err_rel(simulation->time(),time_final);
       err_rel_min = std::min(err_rel_min,err_rel);
-      monitor->print ("Testing","expected time:  %.15g",time_final);
+      monitor->print ("Testing","expected sim-time:  %.15g",time_final);
       monitor->print ("Testing","relative error: %g",err_rel);
     }
     monitor->print ("Testing","minimum relative error: %g",err_rel_min);
