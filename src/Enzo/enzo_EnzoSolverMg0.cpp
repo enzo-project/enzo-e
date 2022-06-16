@@ -312,7 +312,6 @@ void EnzoSolverMg0::compute_shift_
 void EnzoBlock::r_solver_mg0_begin_solve(CkReductionMsg* msg)
 {
   performance_start_(perf_compute,__FILE__,__LINE__);
-  
   static_cast<EnzoSolverMg0*> (solver())->begin_solve(this,msg);
 
   performance_stop_(perf_compute,__FILE__,__LINE__);
