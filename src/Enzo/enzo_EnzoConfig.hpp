@@ -305,6 +305,13 @@ public: // interface
       initial_shu_collapse_instability_parameter(0.0),
       initial_shu_collapse_central_sink_exists(false),
       initial_shu_collapse_central_sink_mass(0.0),
+      // EnzoInitialBBTest
+      initial_bb_test_mean_density(0.0),
+      initial_bb_test_fluctuation_amplitude(0.0),
+      initial_bb_test_truncation_radius(0.0),
+      initial_bb_test_nominal_sound_speed(0.0),
+      initial_bb_test_angular_rotation_velocity(0.0),
+      initial_bb_test_external_density(0.0),
       // EnzoMethodCheckGravity
       method_check_gravity_particle_type(),
       // EnzoMethodHeat
@@ -471,6 +478,7 @@ protected: // methods
   void read_initial_merge_sinks_test_(Parameters *);
   void read_initial_accretion_test_(Parameters *);
   void read_initial_shu_collapse_(Parameters *);
+  void read_initial_bb_test_(Parameters *);
   
   void read_method_grackle_(Parameters *);
   void read_method_feedback_(Parameters *);
@@ -737,6 +745,16 @@ public: // attributes
   double                     initial_shu_collapse_instability_parameter;
   bool                       initial_shu_collapse_central_sink_exists;
   double                     initial_shu_collapse_central_sink_mass;
+
+  // EnzoInitialBBTest
+  double                     initial_bb_test_center[3];
+  double                     initial_bb_test_drift_velocity[3];
+  double                     initial_bb_test_mean_density;
+  double                     initial_bb_test_fluctuation_amplitude;
+  double                     initial_bb_test_truncation_radius;
+  double                     initial_bb_test_nominal_sound_speed;
+  double                     initial_bb_test_angular_rotation_velocity;
+  double                     initial_bb_test_external_density;
 
   /// EnzoMethodCheckGravity
   std::string                method_check_gravity_particle_type;

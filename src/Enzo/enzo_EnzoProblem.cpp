@@ -273,6 +273,17 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_shu_collapse_instability_parameter,
        enzo_config->initial_shu_collapse_central_sink_exists,
        enzo_config->initial_shu_collapse_central_sink_mass);
+  } else if (type == "bb_test") {
+    initial = new EnzoInitialBBTest
+      (cycle, time,
+       enzo_config->initial_bb_test_center,
+       enzo_config->initial_bb_test_drift_velocity,
+       enzo_config->initial_bb_test_mean_density,
+       enzo_config->initial_bb_test_fluctuation_amplitude,
+       enzo_config->initial_bb_test_truncation_radius,
+       enzo_config->initial_bb_test_nominal_sound_speed,
+       enzo_config->initial_bb_test_angular_rotation_velocity,
+       enzo_config->initial_bb_test_external_density);
   } else {
     initial = Problem::create_initial_
       (type,index,config,parameters);

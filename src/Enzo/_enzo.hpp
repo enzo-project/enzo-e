@@ -203,6 +203,7 @@ extern "C" {
 #include "enzo_EnzoInitialMergeSinksTest.hpp"
 #include "enzo_EnzoInitialAccretionTest.hpp"
 #include "enzo_EnzoInitialShuCollapse.hpp"
+#include "enzo_EnzoInitialBBTest.hpp"
 
 #include "enzo_EnzoRefineShock.hpp"
 #include "enzo_EnzoRefineParticleMass.hpp"

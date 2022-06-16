@@ -205,6 +205,13 @@ EnzoConfig::EnzoConfig() throw ()
   initial_shu_collapse_instability_parameter(0.0),
   initial_shu_collapse_central_sink_exists(false),
   initial_shu_collapse_central_sink_mass(0.0),
+  // EnzoInitialBBTest
+  initial_bb_test_mean_density(0.0),
+  initial_bb_test_fluctuation_amplitude(0.0),
+  initial_bb_test_truncation_radius(0.0),
+  initial_bb_test_nominal_sound_speed(0.0),
+  initial_bb_test_angular_rotation_velocity(0.0),
+  initial_bb_test_external_density(0.0),
   // EnzoMethodHeat
   method_heat_alpha(0.0),
   // EnzoMethodHydro
@@ -568,6 +575,15 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_shu_collapse_central_sink_exists;
   p | initial_shu_collapse_central_sink_mass;
 
+  PUParray(p,initial_bb_test_center,3);
+  PUParray(p,initial_bb_test_drift_velocity,3);
+  p | initial_bb_test_mean_density;
+  p | initial_bb_test_fluctuation_amplitude;
+  p | initial_bb_test_truncation_radius;
+  p | initial_bb_test_nominal_sound_speed;
+  p | initial_bb_test_angular_rotation_velocity;
+  p | initial_bb_test_external_density;
+
   p | method_heat_alpha;
 
   p | method_hydro_method;
@@ -727,6 +743,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_merge_sinks_test_(p);
   read_initial_accretion_test_(p);
   read_initial_shu_collapse_(p);
+  read_initial_bb_test_(p);
   
   read_method_grackle_(p);
   read_method_feedback_(p);
@@ -1334,6 +1351,37 @@ void EnzoConfig::read_initial_shu_collapse_(Parameters * p)
     ("Initial:shu_collapse:central_sink_mass",0.0);
 }
 
+void EnzoConfig::read_initial_bb_test_(Parameters * p)
+{
+  for (int axis=0; axis<3; axis++){
+    initial_bb_test_center[axis] = p->list_value_float
+      (axis, "Initial:bb_test:center", 0.0);
+  }
+
+  for (int axis=0; axis<3; axis++){
+    initial_bb_test_drift_velocity[axis] = p->list_value_float
+      (axis, "Initial:bb_test:drift_velocity", 0.0);
+  }
+
+  initial_bb_test_mean_density = p->value_float
+    ("Initial:bb_test:mean_density",1.0e-6);
+
+  initial_bb_test_fluctuation_amplitude = p->value_float
+    ("Initial:bb_test:fluctuation_amplitude",0.0);
+
+  initial_bb_test_truncation_radius = p->value_float
+    ("Initial:bb_test:truncation_radius",1.0);
+
+  initial_bb_test_nominal_sound_speed = p->value_float
+    ("Initial:bb_test:nominal_sound_speed",1.0);
+
+  initial_bb_test_angular_rotation_velocity = p->value_float
+    ("Initial:bb_test:angular_rotation_velocity",0.0);
+
+  initial_bb_test_external_density = p->value_float
+    ("Initial:bb_test:external_density",1.0e-6);
+}
+
 void EnzoConfig::read_method_grackle_(Parameters * p)
 
 {
@@ -1718,7 +1766,7 @@ void EnzoConfig::read_method_sink_maker_(Parameters * p)
   method_sink_maker_density_threshold = p->value_float
     ("Method:sink_maker:density_threshold",1.0e-6);
   method_sink_maker_check_density_maximum = p->value_logical
-    ("Method:sink_maker:check_density_maximum",false);
+    ("Method:sink_maker:check_density_maximum",true);
   method_sink_maker_max_mass_fraction = p->value_float
     ("Method:sink_maker:max_mass_fraction",0.25);
   method_sink_maker_min_sink_mass_solar = p->value_float
