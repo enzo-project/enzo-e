@@ -13,13 +13,15 @@ from unittest import TestCase
 from yt.funcs import ensure_dir
 from yt.testing import assert_rel_equal
 
+_base_file = os.path.basename(__file__)
+
 # If GENERATE_TEST_RESULTS="true", just generate test results.
 generate_results = os.environ.get("GENERATE_TEST_RESULTS", "false").lower() == "true"
-yt.mylog.info(f"{__file__}: {generate_results=}")
+yt.mylog.info(f"{_base_file}: {generate_results=}")
 
 _results_dir = os.environ.get("TEST_RESULTS_DIR", "~/enzoe_test_results")
 test_results_dir = os.path.abspath(os.path.expanduser(_results_dir))
-yt.mylog.info(f"{__file__}: {test_results_dir=}")
+yt.mylog.info(f"{_base_file}: {test_results_dir=}")
 if generate_results:
     ensure_dir(test_results_dir)
 else:
@@ -33,14 +35,14 @@ if not _charm_path:
     raise RuntimeError(
         f"Specify path to charm with CHARM_PATH environment variable.")
 charmrun_path = os.path.join(_charm_path, "charmrun")
-yt.mylog.info(f"{__file__}: {charmrun_path=}")
+yt.mylog.info(f"{_base_file}: {charmrun_path=}")
 if not os.path.exists(charmrun_path):
     raise RuntimeError(
         f"No charmrun executable found in {_charm_path}.")
 
-src_path = os.path.join(os.path.dirname(__file__), "../..")
+src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 enzo_path = os.path.join(src_path, "build/bin/enzo-e")
-yt.mylog.info(f"{__file__}: {enzo_path=}")
+yt.mylog.info(f"{_base_file}: {enzo_path=}")
 if not os.path.exists(enzo_path):
     raise RuntimeError(
         f"No enzo-e executable found in {enzo_path}.")
