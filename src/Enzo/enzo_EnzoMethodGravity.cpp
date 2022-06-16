@@ -188,7 +188,6 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
   const int ix = field.field_id ("potential");
   std::shared_ptr<Matrix> A (std::make_shared<EnzoMatrixLaplace>(order_));
-  
   solver->set_field_x(ix);
   solver->set_field_b(ib);
 #ifdef DEBUG_COPY_B
