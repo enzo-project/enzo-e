@@ -10,7 +10,6 @@ output-header
 
 Under construction
 
-
 output-stride-1
 ===============
 
@@ -27,7 +26,3 @@ output-stride-4
 Similar to above test but on four physical processors where ``stride_write = 4``
 
 
-output-data
-===========
-
-Output test of 2D implosion problem

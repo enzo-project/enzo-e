@@ -13,6 +13,7 @@ This testing section describes tests on enzo-e program
    checkpoint
    collapse
    cosmology
+   fluxcorrect
    gravity
    grackle
    heat
