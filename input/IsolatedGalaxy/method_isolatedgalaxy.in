@@ -127,6 +127,7 @@
 
 # Particle {
 #     list = [ "dark" , "stars"];
+#     mass_is_mass = true;
 #     dark {
 #         attributes = [ "x", "default",
 #                        "y", "default",
