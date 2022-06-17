@@ -429,7 +429,7 @@ void EnzoMethodGrackle::update_grackle_density_fields(
         }
 
        if (grackle_chemistry->metal_cooling == 1){
-          grackle_fields->metal_density[i] = grackle_fields->density[i] * metallicity_floor_ * cello::metallicity_solar;
+          grackle_fields->metal_density[i] = grackle_fields->density[i] * metallicity_floor_ * enzo_constants::metallicity_solar;
        }
 
       }
@@ -609,8 +609,8 @@ void EnzoMethodGrackle::enforce_metallicity_floor(EnzoBlock * enzo_block) throw(
     for (int iy=0; iy<ngy; iy++){
       for (int ix=0; ix<ngx; ix++){
         int i = INDEX(ix,iy,iz,ngx,ngy);
-        double Z = metal_density[i] / density[i] / cello::metallicity_solar;
-        if (Z < metallicity_floor_) metal_density[i] = density[i] * metallicity_floor_ * cello::metallicity_solar;
+        double Z = metal_density[i] / density[i] / enzo_constants::metallicity_solar;
+        if (Z < metallicity_floor_) metal_density[i] = density[i] * metallicity_floor_ * enzo_constants::metallicity_solar;
       }
     }
   }     
