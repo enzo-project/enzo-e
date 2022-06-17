@@ -84,7 +84,7 @@ accretion
 :Default:    :d:`""`
 :Scope:     :z:`Enzo`
 
-:e:`The flavor of accretion used, which can be either "threshold", "bondi_hoyle", or "flux". If this parameter is not set in the parameter file, or if some other string is provided, then the accretion method will be called but will do nothing.`
+:e:`The flavor of accretion used, which can be either "threshold", "bondi_hoyle", "flux", or "dummy". If this parameter is not set in the parameter file, or if some other string is provided, then Enzo-E will exit with an error message.`
 
 ----
 

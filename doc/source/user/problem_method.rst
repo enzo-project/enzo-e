@@ -660,9 +660,12 @@ In ``"bondi_hoyle"`` flavor accretion, the density change in each cell is calcul
 to the method described in Mark R. Krumholz et al 2004, ApJ, 611, 399. Furthermore, the
 density change is limited in the same way as in ``"threshold"`` accretion.
 
-In ``"flux"`` flavour accretion, the density change in each cell is calculated according to the
+In ``"flux"`` flavor accretion, the density change in each cell is calculated according to the
 method described in Andreas Bleuler & Romain Teyssier 2004, MNRAS, 445, 4015-4036.
 Furthermore, the density change is limited in the same way as in ``"threshold"`` accretion.
+
+In ``"dummy"`` flavor accretion, no accretion is done (essentially, the accretion rate is zero).
+This can be useful for testing purposes.
 
 This method can only be used if ``"merge_sinks"`` is also used, with ``"merge_sinks"`` preceding
 ``"accretion"``. In addition, this method requires the use of three spatial dimensions.
