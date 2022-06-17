@@ -351,7 +351,6 @@ public: // interface
       method_background_acceleration_flavor(""),
       method_background_acceleration_mass(0.0),
       method_background_acceleration_DM_mass(0.0),
-      method_background_acceleration_DM_density(0.0),
       method_background_acceleration_bulge_mass(0.0),
       method_background_acceleration_core_radius(0.0),
       method_background_acceleration_bulge_radius(0.0),
@@ -761,7 +760,6 @@ public: // attributes
   std::string                method_background_acceleration_flavor;
   double                     method_background_acceleration_mass;
   double                     method_background_acceleration_DM_mass;
-  double                     method_background_acceleration_DM_density;
   double                     method_background_acceleration_bulge_mass;
   double                     method_background_acceleration_core_radius;
   double                     method_background_acceleration_bulge_radius;

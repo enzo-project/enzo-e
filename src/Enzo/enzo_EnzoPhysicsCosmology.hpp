@@ -196,7 +196,7 @@ public: // interface
   /// Return current length units scaling (requires set_current_time())
   double length_units() const
   {
-    return cello::Mpc_cm*comoving_box_size_/hubble_constant_now_/
+    return enzo_constants::Mpc_cm*comoving_box_size_/hubble_constant_now_/
       (1.0 + current_redshift_);
   }
 
@@ -207,17 +207,21 @@ public: // interface
       pow(1.0 + initial_redshift_,1.5);
   }
 
-  /// Return current temperature units (requires set_current_time())
-  double temperature_units() const
-  {
-    return 1.81723e6*pow(comoving_box_size_,2.0)*omega_matter_now_*
-                      (1.0 + initial_redshift_);
-  }
-
   double velocity_units() const
   {
     return 1.22475e7*comoving_box_size_*sqrt(omega_matter_now_)*
                       sqrt(1.0 + initial_redshift_);
+  }
+
+  /// Returns the scaling factor to be divided by temperature to convert from
+  /// units of Kelvin to units of specific internal energy
+  ///
+  /// The original Enzo refered to this quantity as "temperature units", but in
+  /// Enzo-E we primarily track temperature in units of Kelvin
+  double kelvin_per_energy_units() const
+  {
+    return 1.81723e6*pow(comoving_box_size_,2.0)*omega_matter_now_*
+                      (1.0 + initial_redshift_);
   }
 
   void print () const
