@@ -30,12 +30,10 @@ PARALLEL_MAIN_BEGIN
   printf ("%4ld sizeof(FileHdf5)\n",sizeof(FileHdf5));
   printf ("%4ld sizeof(Hierarchy)\n",sizeof(Hierarchy));
   printf ("%4ld sizeof(Method)\n",sizeof(Method));
-  printf ("%4ld sizeof(Node)\n",sizeof(Node));
   printf ("%4ld sizeof(Parameters)\n",sizeof(Parameters));
   printf ("%4ld sizeof(Problem)\n",sizeof(Problem));
   printf ("%4ld sizeof(Simulation)\n",sizeof(Simulation));
   printf ("%4ld sizeof(Stopping)\n",sizeof(Stopping));
-  printf ("%4ld sizeof(Tree)\n",sizeof(Tree));
 
   //--------------------------------------------------
 
