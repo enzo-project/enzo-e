@@ -74,7 +74,7 @@ accretion
 :Default:    :d:`4.0`
 :Scope:     :z:`Enzo`
 
-:e:`The accretion radius (i.e., the radius of the spherical accretion zone) in units of the minimum cell width (i.e., the minimum across all 3 dimensions), at the highest refinement level. Its value must be less than one fewer than the minimum ghost depth  for "flux" accretion, and less than the minimum ghost depth for other flavors of accretion. The ghost depth is 4 (along all axes) by default.`
+:e:`The accretion radius (i.e., the radius of the spherical accretion zone) in units of the minimum cell width (i.e., if the cell width along all the x, y, and z-axes are hx, hy, and hz, then the minimum cell width is the minimum of hx, hy, and hz),, at the highest refinement level. Its value must be less than one fewer than the minimum ghost depth  for "flux" accretion, and less than the minimum ghost depth for other flavors of accretion. The ghost depth is 4 (along all axes) by default.`
 
 ----
 
