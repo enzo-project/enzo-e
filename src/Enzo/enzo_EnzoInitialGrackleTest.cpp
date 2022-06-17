@@ -66,7 +66,9 @@ void EnzoInitialGrackleTest::enforce_block
 
   grackle_field_data grackle_fields_;
 
-  EnzoMethodGrackle::setup_grackle_fields(enzo_block, & grackle_fields_);
+  const EnzoMethodGrackle * grackle_method = enzo::grackle_method();
+
+  grackle_method->setup_grackle_fields(enzo_block, & grackle_fields_);
 
   gr_float * total_energy  = (gr_float *) field.values("total_energy");
 
@@ -232,7 +234,6 @@ void EnzoInitialGrackleTest::enforce_block
                                  );
   }
 
-  EnzoMethodGrackle::delete_grackle_fields(&grackle_fields_);
 
 
   block->initial_done();

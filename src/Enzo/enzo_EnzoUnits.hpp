@@ -89,6 +89,13 @@ public: // virtual methods
       Units::length() : cosmology_->length_units();
   }
 
+  /// Return density units scaling factor (virtual)
+  virtual double density() const
+  {
+    return (cosmology_ == NULL) ?
+      Units::density() : cosmology_->density_units();
+  }
+
   /// Return velocity units scaling factor (virtual)
   virtual double velocity() const
   {
