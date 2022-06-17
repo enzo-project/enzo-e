@@ -280,7 +280,7 @@ EnzoConfig::EnzoConfig() throw ()
   /// EnzoMethodAccretionCompute
   method_accretion_accretion_radius_cells(0.0),
   method_accretion_flavor(""),
-  method_accretion_density_threshold(0.0),
+  method_accretion_physical_density_threshold_cgs(0.0),
   method_accretion_max_mass_fraction(0.0),
   /// EnzoProlong
   prolong_enzo_type(),
@@ -620,7 +620,7 @@ void EnzoConfig::pup (PUP::er &p)
   
   p | method_accretion_accretion_radius_cells;
   p | method_accretion_flavor;
-  p | method_accretion_density_threshold;
+  p | method_accretion_physical_density_threshold_cgs;
   p | method_accretion_max_mass_fraction;
 
   p | prolong_enzo_type;
@@ -1642,8 +1642,8 @@ void EnzoConfig::read_method_accretion_(Parameters * p)
     ("Method:accretion:accretion_radius_cells",4.0);
   method_accretion_flavor = p->value_string
     ("Method:accretion:flavor","");
-  method_accretion_density_threshold = p->value_float
-    ("Method:accretion:density_threshold",1.0e-6);
+  method_accretion_physical_density_threshold_cgs = p->value_float
+    ("Method:accretion:physical_density_threshold_cgs",1.0e-24);
   method_accretion_max_mass_fraction = p->value_float
     ("Method:accretion:max_mass_fraction",0.25);
 

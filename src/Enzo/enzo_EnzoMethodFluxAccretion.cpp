@@ -13,10 +13,10 @@
 
 EnzoMethodFluxAccretion::EnzoMethodFluxAccretion
 (double accretion_radius_cells,
- double density_threshold,
+ double physical_density_threshold_cgs,
  double max_mass_fraction)
   : EnzoMethodAccretion(accretion_radius_cells,
-			density_threshold,
+			physical_density_threshold_cgs,
 			max_mass_fraction)
 {
   // The number of cell widths within the accretion radius cannot be larger than
@@ -74,6 +74,11 @@ void EnzoMethodFluxAccretion::compute_(Block * block)
 
   if (num_particles > 0) {
 
+    // Get density threshold in code units for this cycle (value will change in
+    // cosmological simultions.
+    const double density_threshold =
+      physical_density_threshold_cgs_ / enzo::units()->density();
+
     // Get pointer to density field data
     Field field = block->data()->field();
     enzo_float * density = (enzo_float*) field.values("density");
@@ -98,7 +103,7 @@ void EnzoMethodFluxAccretion::compute_(Block * block)
 
 	// Create an EnzoFluxSinkParticle object
 	EnzoFluxSinkParticle sp =
-	  EnzoFluxSinkParticle(block,ib,ip,accretion_radius,density_threshold_);
+	  EnzoFluxSinkParticle(block,ib,ip,accretion_radius,density_threshold);
 
 	// Update properties of sink particle and set values for source fields
 	sp.compute(max_mass_fraction_);

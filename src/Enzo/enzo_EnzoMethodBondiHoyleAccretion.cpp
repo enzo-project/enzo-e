@@ -15,10 +15,10 @@
 
 EnzoMethodBondiHoyleAccretion::EnzoMethodBondiHoyleAccretion
 (double accretion_radius_cells,
- double density_threshold,
+ double physical_density_threshold_cgs,
  double max_mass_fraction)
   : EnzoMethodAccretion(accretion_radius_cells,
-			density_threshold,
+			physical_density_threshold_cgs,
 			max_mass_fraction)
 {
 
@@ -64,6 +64,11 @@ void EnzoMethodBondiHoyleAccretion::compute_(Block * block)
 
   if (num_particles > 0) {
 
+    // Get density threshold in code units for this cycle (value will change in
+    // cosmological simultions.
+    const double density_threshold =
+      physical_density_threshold_cgs_ / enzo::units()->density();
+
     // Get pointer to density field data
     Field field = block->data()->field();
     enzo_float * density = (enzo_float*) field.values("density");
@@ -96,7 +101,7 @@ void EnzoMethodBondiHoyleAccretion::compute_(Block * block)
 	  EnzoBondiHoyleSinkParticle(block,ib,ip,accretion_radius,const_G);
 
 	// Update properties of sink particle and set values for source fields
-	sp.compute(density_threshold_, max_mass_fraction_);
+	sp.compute(density_threshold, max_mass_fraction_);
 
 	// Write the sink particle data to the particle attribute array
 	sp.write_particle_data();

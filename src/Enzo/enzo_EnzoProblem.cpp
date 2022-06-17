@@ -722,25 +722,25 @@ Method * EnzoProblem::create_method_
     if (enzo_config->method_accretion_flavor == "threshold") {
       method = new EnzoMethodThresholdAccretion(
 		       enzo_config->method_accretion_accretion_radius_cells,
-		       enzo_config->method_accretion_density_threshold,
+		       enzo_config->method_accretion_physical_density_threshold_cgs,
 		       enzo_config->method_accretion_max_mass_fraction
 						);
     } else if (enzo_config->method_accretion_flavor == "bondi_hoyle") {
       method = new EnzoMethodBondiHoyleAccretion(
 		       enzo_config->method_accretion_accretion_radius_cells,
-		       enzo_config->method_accretion_density_threshold,
+		       enzo_config->method_accretion_physical_density_threshold_cgs,
 		       enzo_config->method_accretion_max_mass_fraction
 						 );
     } else if (enzo_config->method_accretion_flavor == "flux") {
       method = new EnzoMethodFluxAccretion(
 		       enzo_config->method_accretion_accretion_radius_cells,
-		       enzo_config->method_accretion_density_threshold,
+		       enzo_config->method_accretion_physical_density_threshold_cgs,
 		       enzo_config->method_accretion_max_mass_fraction
 						 );
     } else if (enzo_config->method_accretion_flavor == "dummy"){
       method = new EnzoMethodAccretion(
 		       enzo_config->method_accretion_accretion_radius_cells,
-		       enzo_config->method_accretion_density_threshold,
+		       enzo_config->method_accretion_physical_density_threshold_cgs,
 		       enzo_config->method_accretion_max_mass_fraction
 				       );
     } else {

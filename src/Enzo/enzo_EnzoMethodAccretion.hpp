@@ -25,7 +25,7 @@ public:
 
   // Constructor
   EnzoMethodAccretion(double accretion_radius_cells,
-		      double density_threshold,
+		      double physical_density_threshold_cgs,
 		      double max_mass_fraction);
 
   /// Destructor
@@ -72,19 +72,19 @@ protected:
   // The accretion radius relative to the cell width
   double accretion_radius_cells_;
 
-  // `density_threshold_` has a different interpretation
+  // `physical_density_threshold_cgs_` has a different interpretation
   // depending on the flavor of accretion used. In all
   // cases, it has to be at least as large as the
   // density floor imposed by the VL+CT method.
   //
-  // "density_threshold" accretion: for all cells in
+  // "physical_density_threshold_cgs" accretion: for all cells in
   // accretion zone, if the density in a cell is higher
-  // than density_threshold_, the density is reduced to
-  // max(density_threshold_,(1-max_mass_fraction_)*density_)
+  // than physical_density_threshold_cgs_, the density is reduced to
+  // max(physical_density_threshold_cgs_,(1-max_mass_fraction_)*density_)
 
   // For other accretion methods, it is the minimum value
   // that the gas density in any cell can take after accretion.
-  double density_threshold_;
+  double physical_density_threshold_cgs_;
 
   // The maximum fraction of mass that can be accreted from a cell
   // in one timestep

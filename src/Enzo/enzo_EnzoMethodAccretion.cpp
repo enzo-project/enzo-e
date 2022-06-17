@@ -14,11 +14,11 @@
 
 EnzoMethodAccretion::EnzoMethodAccretion
 (double accretion_radius_cells,
- double density_threshold,
+ double physical_density_threshold_cgs,
  double max_mass_fraction)
   : Method(),
     accretion_radius_cells_(accretion_radius_cells),
-    density_threshold_(density_threshold),
+    physical_density_threshold_cgs_(physical_density_threshold_cgs),
     max_mass_fraction_(max_mass_fraction),
     ir_accretion_(-1)
 {
@@ -103,7 +103,7 @@ void EnzoMethodAccretion::pup (PUP::er &p)
   Method::pup(p);
 
   p | accretion_radius_cells_;
-  p | density_threshold_;
+  p | physical_density_threshold_cgs_;
   p | max_mass_fraction_;
   p | ir_accretion_;
 
@@ -251,10 +251,23 @@ void EnzoMethodAccretion::do_checks_(const Block *block) throw()
       enzo::config()->method_vlct_density_floor :
       enzo::config()->ppm_density_floor ;
 
-    ASSERT("EnzoMethodAccretion",
-	   "Density threshold must be at least as large as the density "
-	   "floor set by the VL+CT method",
-	   density_threshold_ >= density_floor);
+    // Get density threshold in code units.
+    // In a cosmological simulation, the density unit is the mean matter density
+    // of the universe, which decreases with time, which means that the value of
+    // a fixed physical density quantity will increase with time. So if the density
+    // threshold is above the density floor at the start of the simulation, it is
+    // guaranteed to be abolve the density floor at all times.
+    const double density_threshold =
+      physical_density_threshold_cgs_ / enzo::units()->density();
+
+    ASSERT2("EnzoMethodAccretion",
+	    "Density threshold must be at least as large as the density "
+	    "floor set by the VL+CT method. At start of simulation, "
+	    "density threshold is %g and density floor is %g "
+	    "(code density units).",
+	    density_threshold,
+	    density_floor,
+	    density_threshold >= density_floor);
 
     // The accretion radius must be at least as large as half the
     // diagonal width of a cell, to ensure that at least one cell
