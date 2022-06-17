@@ -1,6 +1,6 @@
------------------------
-The Testing Environment
------------------------
+-------------------
+The ctest Framework
+-------------------
 
 The testing infrastructure in Enzo-e is comprised of unit tests (which test individual functions and functionality) and integration tests which test a more holistic portion of the codebase. In this documentation, we detail the layout of the testing infrastructure. All input files are located in the input directory and the tests themselves are defined in ``test/CMakeLists.txt``
 
