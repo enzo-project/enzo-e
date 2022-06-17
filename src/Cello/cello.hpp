@@ -586,6 +586,9 @@ namespace cello {
   // Solar mass in CGS
   const double mass_solar = 1.98841586e33;
 
+  // Solar metallicity
+  const double metallicity_solar = 0.012;
+
   // Hydrogen mass in CGS
   const double mass_hydrogen = 1.67262171e-24;
 
