@@ -120,6 +120,10 @@ setup_test_parallel(Bound-Outflow-3D BoundaryConditions/Outflow-3D  input/Bounda
 setup_test_serial(FluxCorrect-SMR-PPM MethodFluxCorrect/Inclined-Contact-SMR-Ppm input/FluxCorrect/inclined_contact_smr_ppm-${PREC_STRING}.in)
 setup_test_serial(FluxCorrect-SMR-VL MethodFluxCorrect/Inclined-Contact-VL input/FluxCorrect/inclined_contact_smr_vl-${PREC_STRING}.in)
 
+# Isolated galaxy
+setup_test_serial(GasDisk IsolatedGalaxy/GasDisk  input/IsolatedGalaxy/method_isolatedgalaxy.in)
+#setup_test_serial(GasDisk-Halo IsolatedGalaxy/GasDisk-Halo  input/IsolatedGalaxy/method_isolatedgalaxy-particles.in)
+
 # Gravity
 setup_test_serial(GravityCg-1 MethodGravity/GravityCg-1  input/Gravity/method_gravity_cg-1.in)
 setup_test_parallel(GravityCg-8 MethodGravity/GravityCg-8  input/Gravity/method_gravity_cg-8.in)
@@ -169,6 +173,9 @@ if (USE_YT_BASED_TESTS)
   setup_test_serial_python(vlct_HD_linear_wave vlct "input/vlct/run_HD_linear_wave_test.py")
   setup_test_serial_python(vlct_passive_advect_sound vlct "input/vlct/run_passive_advect_sound_test.py")
   setup_test_parallel_python(vlct_dual_energy_shock_tube vlct "input/vlct/run_dual_energy_shock_tube_test.py")
+
+  # Gravity (with VLCT)
+  setup_test_serial_python(gravity_vlct_stable_Jeans_wave gravity "input/Gravity/run_stable_jeans_wave_test.py")
 
   # merge_sinks
   setup_test_serial_python(merge_sinks_stationary_serial merge_sinks/stationary/serial "input/merge_sinks/run_merge_sinks_test.py" "--prec=${PREC_STRING}" "--ics_type=stationary")

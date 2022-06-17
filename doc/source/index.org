@@ -206,7 +206,7 @@
     of allocations and deallocations are also tracked.  This
     parameter only turns of tracking but not the overloading of
     new()[] and delete()[], which is controlled by the 
-    "memory" variable in the SConstruct file.
+    "memory" variable as a cmake option.
 
 *** TODO Mesh [0/12]
     int num_adapt;

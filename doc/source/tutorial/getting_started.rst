@@ -123,9 +123,7 @@ The Enzo-E executable is built within ``bin/``.
 Configuration options
 ---------------------
 
-Current ``cmake`` options follow the notation of the SCons options (potentially 
-subject to change), i.e., the following (default value at the end of the line)
-is available:
+Current ``cmake`` options are the following (default value at the end of the line):
 
 * ``USE_GRACKLE`` "Use Grackle Chemistry" ON
 * ``USE_DOUBLE_PREC`` "Use double precision. Turn off for single precision." ON
@@ -175,8 +173,11 @@ If packages (external libraries) are not found automatically or if the wrong one
 picked up, you can specify the search path by
 ``-D<package_name>_ROOT=/PATH/TO/PACKAGE/INSTALL``,
 cf., the ``cmake`` example command just above.
-Note, these package location are also picked up from the environment, i.e., an alternative
-option  is ``export <package_name>_ROOT=/PATH/TO/PACKAGE/INSTALL`` .
+Note:
+
+* these package locations are also picked up from the environment, i.e., an alternative option  is ``export <package_name>_ROOT=/PATH/TO/PACKAGE/INSTALL`` .
+
+* to specify the path to a ``libpng`` install, use ``-DPNG_ROOT=/PATH/TO/LIBPNG`` instead of ``-DLIBPNG_ROOT=...``.
 
 The last option is a machine specific configuration file (see below).
 
