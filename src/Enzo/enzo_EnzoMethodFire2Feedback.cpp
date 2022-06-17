@@ -66,7 +66,7 @@ int determineSN(float age, int* nSNII, int* nSNIA,
         if (RII > 0){
             srand(seed);
         // printf("Zcpl = %e", zCouple);
-            PII = RII * massmass_solar / cello::Myr_s *TimeUnits*dt;
+            PII = RII * massmass_solar / enzo_constants::Myr_s *TimeUnits*dt;
             // printf("PII =%f\n %f %e %f\n", PII, RII, massmass_solar, age);
             random = float(rand())/float(RAND_MAX);
             if (PII > 1.0 && enzo_config->method_feedback_fire2_unrestricted_SN){
@@ -147,7 +147,7 @@ int determineWinds(float age, float* eWinds, float* mWinds, float* zWinds,
       }
 
       wind_factor *= (enzo_config->method_feedback_fire2_gasreturnfraction *\
-                     0.001 * (dt * (TimeUnits / cello::Myr_s)); // 0.001 converts from Msun/Gyr to Msun/Myr
+                     0.001 * (dt * (TimeUnits / enzo_constants::Myr_s)); // 0.001 converts from Msun/Gyr to Msun/Myr
       wind_factor = 1.0 - exp(-wind_factor);
       wind_factor = std::min(1.0, wind_factor);
       wind_factor *= 1.4 * 0.291175;
@@ -390,7 +390,7 @@ void EnzoMethodFire2Feedback::compute_ (Block * block)
       int ipsn  = ip*dsn; // number of SNe coutner
 
       if (pmass[ipdm] > 0.0 && plifetime[ipdl] > 0.0){
-        const double age = (current_time - pcreation[ipdc]) * enzo_units->time() / cello::Myr_s;
+        const double age = (current_time - pcreation[ipdc]) * enzo_units->time() / enzo_constants::Myr_s;
         count++; // increment particles examined here
 
         // compute coordinates of central feedback cell
@@ -407,7 +407,7 @@ void EnzoMethodFire2Feedback::compute_ (Block * block)
 
         int index = INDEX(ix,iy,iz,mx,my); // 1D cell index of star position
 
-        //if(pmass[ipdm] * enzo_units->mass_units() / cello::mass_solar
+        //if(pmass[ipdm] * enzo_units->mass_units() / enzo_constants::mass_solar
         //       < enzo_config->method_star_maker_minimum_star_mass){
         //
         //}
@@ -421,7 +421,7 @@ void EnzoMethodFire2Feedback::compute_ (Block * block)
 
           /* Determine SN events from rates (currently taken from Hopkins 2018) */
 
-          determineSN(age, &nSNII, &nSNIa, pmass[ipdm] * enzo_units->mass_units() / cello::mass_solar,
+          determineSN(age, &nSNII, &nSNIa, pmass[ipdm] * enzo_units->mass_units() / enzo_constants::mass_solar,
                       enzo_units->time_units(), block->dt());
 
           numSN += nSNII + nSNIa;
@@ -469,7 +469,7 @@ void EnzoMethodFire2Feedback::compute_ (Block * block)
           const double starZ = pmetal[ipdmf] / z_solar;
 
           determineWinds(age, &windEnergy, &windMass, &windMetals,
-                         pmass[ipdm] * pmass[ipdm] * enzo_units->mass_units() / cello::mass_solar,
+                         pmass[ipdm] * pmass[ipdm] * enzo_units->mass_units() / enzo_constants::mass_solar,
                          starZ, enzo_units->time_units(), block->dt());
 
           /* Error messages go here */
@@ -484,7 +484,7 @@ void EnzoMethodFire2Feedback::compute_ (Block * block)
         } // if winds
 
         pmass[ipdm] -= std::max(0.0,
-                       (windMass + SNMassEjected) *enzo_units->mass_units()/cello::mass_solar);
+                       (windMass + SNMassEjected) *enzo_units->mass_units()/enzo_constants::mass_solar);
 
         //
 
@@ -641,7 +641,7 @@ double EnzoMethodFire2Feedback::timestep (Block * block) throw()
   double dtStar = std::numeric_limits<double>::max();
   if (block->level() >= sf_minimum_level_){
     const double pSNmax = 0.0005408 * enzo_config->method_star_maker_minimum_star_mass *
-                          block->dt() * enzo_units->time() / cello::Myr_s * 1.25;
+                          block->dt() * enzo_units->time() / enzo_constants::Myr_s * 1.25;
     if (pSNmax > 1.0) dtStar = dt * 1.0 / pSNmax;
   }
 

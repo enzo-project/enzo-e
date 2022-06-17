@@ -8,6 +8,24 @@ import traceback
 #
 # The interface is loosely modelled off of python's file API.
 
+class DummyReport:
+    """
+    Can be used in place of TestReport to print results to terminal (without
+    some of the unnecessary formatting
+    """
+    def write(self, msg, flush = False):
+        print(msg)
+        sys.stdout.flush()
+
+    def passing(self,msg):
+        print('pass: {}'.format(msg))
+
+    def fail(self, msg):
+        print('FAIL: {}'.format(msg))
+
+    def incomplete(self, msg):
+        print('incomplete: {}'.format(msg))
+
 class TestReport:
     """
     Respresents the report for the current test(s).
@@ -81,6 +99,13 @@ class TestReport:
 
     def is_complete(self):
         return self._complete
+
+@contextlib.contextmanager
+def create_dummy_report(*args, **kwargs):
+    try:
+        yield DummyReport()
+    finally:
+        pass
 
 @contextlib.contextmanager
 def create_test_report(test_file, clobber = True):

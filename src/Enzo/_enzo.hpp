@@ -158,6 +158,8 @@ extern "C" {
 
 #include "fortran_types.h" /* included so scons knowns to install fortran.h */
 
+#include "enzo_constants.hpp"
+
 #include "enzo_EnzoPhysicsCosmology.hpp"
 
 #include "enzo_EnzoUnits.hpp"
@@ -174,7 +176,6 @@ extern "C" {
 
 #include "enzo_IoEnzoBlock.hpp"
 
-#include "enzo_EnzoFieldArrayFactory.hpp"
 #include "enzo_EnzoEFltArrayMap.hpp"
 #include "enzo_EnzoPermutedCoordinates.hpp"
 #include "enzo_EnzoCenteredFieldRegistry.hpp"
@@ -216,19 +217,19 @@ extern "C" {
 #include "enzo_EnzoReconstructor.hpp"
 #include "enzo_EnzoReconstructorNN.hpp"
 #include "enzo_EnzoReconstructorPLM.hpp"
-#include "enzo_EnzoRiemann.hpp"
-#include "enzo_EnzoRiemannLUT.hpp"
-#include "enzo_EnzoRiemannUtils.hpp"
-#include "enzo_EnzoRiemannImpl.hpp"
-#include "enzo_EnzoRiemannHLL.hpp"
-#include "enzo_EnzoRiemannHLLC.hpp"
-#include "enzo_EnzoRiemannHLLD.hpp"
 #include "enzo_EnzoBfieldMethod.hpp"
 #include "enzo_EnzoBfieldMethodCT.hpp"
 #include "enzo_EnzoSourceInternalEnergy.hpp"
 #include "enzo_EnzoSinkParticle.hpp"
 #include "enzo_EnzoBondiHoyleSinkParticle.hpp"
 #include "enzo_EnzoFluxSinkParticle.hpp"
+#include "enzo_EnzoSourceGravity.hpp"
+
+// public header for the EnzoRiemann sub-library. This needs to be included
+// after the headers for:
+//     EnzoEFltArrayMap, EnzoCenteredFieldRegistry, & EnzoEquationOfState
+// but before the header for EnzoMethodMHDVlct
+#include "EnzoRiemann.hpp"
 
 #include "enzo_EnzoMethodComovingExpansion.hpp"
 #include "enzo_EnzoMethodCosmology.hpp"

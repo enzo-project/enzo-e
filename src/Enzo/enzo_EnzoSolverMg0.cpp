@@ -178,6 +178,8 @@ EnzoSolverMg0::EnzoSolverMg0
   refresh->add_field (ir_);
   refresh->add_field (ic_);
 
+  refresh->set_min_face_rank(2);
+  
   ScalarDescr * scalar_descr_int  = cello::scalar_descr_int();
   i_iter_  = scalar_descr_int ->new_value(name + ":iter");
 
@@ -927,6 +929,7 @@ FieldMsg * EnzoSolverMg0::pack_residual_(EnzoBlock * enzo_block) throw()
   refresh->set_prolong(index_prolong_);
   refresh->set_restrict(index_restrict_);
   refresh->add_field(ir_);
+  refresh->set_min_face_rank(2);
 
   // copy data from EnzoBlock to array via FieldFace
 
@@ -975,6 +978,7 @@ void EnzoSolverMg0::unpack_residual_
   refresh->set_prolong(index_prolong_);
   refresh->set_restrict(index_restrict_);
   refresh->add_field(ib_);
+  refresh->set_min_face_rank(2);
 
   // copy data from msg to this EnzoBlock
 
@@ -1010,7 +1014,7 @@ FieldMsg * EnzoSolverMg0::pack_correction_
   refresh->set_prolong(index_prolong_);
   refresh->set_restrict(index_restrict_);
   refresh->add_field(ix_);
-
+  refresh->set_min_face_rank(2);
   // copy data from EnzoBlock to array via FieldFace
 
   FieldFace * field_face = enzo_block->create_face
@@ -1056,6 +1060,7 @@ void EnzoSolverMg0::unpack_correction_
   refresh->set_prolong(index_prolong_);
   refresh->set_restrict(index_restrict_);
   refresh->add_field(ic_);
+  refresh->set_min_face_rank(2);
 
   // copy data from msg to this EnzoBlock
 

@@ -1,0 +1,24 @@
+# this file is used for a test where the cooling time is used to limit
+# the size of the timestep
+#
+# The automated test will also overwrite the entry in
+# Method:grackle:data_file parameter with a valid path
+
+include "input/Grackle/grackle.incl"
+
+Output { list = []; } # don't write any outputs
+
+Method {
+    list = [ "grackle" ]; # intentionally omit "null"
+    grackle {
+        courant = 0.40;
+        use_cooling_timestep = true;
+    }
+}
+
+Testing {
+    time_final  = [0.00201833123232718];
+    time_tolerance = 1.0e-4;
+}
+
+Stopping { cycle = 20; }

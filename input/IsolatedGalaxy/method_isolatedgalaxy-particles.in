@@ -102,8 +102,7 @@
 
       background_acceleration {
           flavor = "GalaxyModel";
-          DM_density     = 3.07199E-25 ;   # cgs - central density for 1E10 Msun NFW halo
-          DM_mass        = -1.0 ;# 1.0E10; # set < 0 to use density, > 0 uses this instead of density
+          DM_mass        = 1.0E10;   # mass interior to below radius (in Msun) -  (this particular value is virial mass)
           DM_mass_radius = 45.0;           # kpc virial radius (or radius within which above mass refers to)
           core_radius    = 3.0;            # kpc core radius
           bulge_mass     = 0.0;            # stellar bulge mass (Msun)
@@ -128,18 +127,19 @@
  Particle {
 #     list = [ "dark" , "stars"];
      list = [ "dark" ];
+     mass_is_mass = true;
      dark {
-         attributes = [ "x", "single",
-                        "y", "single",
-                        "z", "single",
-                        "vx", "single",
-                        "vy", "single",
-                        "vz", "single",
-                        "ax", "single",
-                        "ay", "single",
-                        "az", "single",
-			"mass", "single", 
-                        "is_local", "single"];
+         attributes = [ "x", "default",
+                        "y", "default",
+                        "z", "default",
+                        "vx", "default",
+                        "vy", "default",
+                        "vz", "default",
+                        "ax", "default",
+                        "ay", "default",
+                        "az", "default",
+			                  "mass", "default", 
+                        "is_local", "default"];
          position = [ "x", "y", "z" ];
          velocity = [ "vx", "vy", "vz" ];
          group_list = ["is_gravitating"];
@@ -149,17 +149,17 @@
      }
 
 #    stars {
-#         attributes = [ "x", "single",
-#                        "y", "single",
-#                        "z", "single",
-#                        "vx", "single",
-#                        "vy", "single",
-#                        "vz", "single",
-#                        "ax", "single",
-#                        "ay", "single",
-#                        "az", "single" ,
-			 "mass", "single",
-#                        "is_local", "single"];
+#         attributes = [ "x", "default",
+#                        "y", "default",
+#                        "z", "default",
+#                        "vx", "default",
+#                        "vy", "default",
+#                        "vz", "default",
+#                        "ax", "default",
+#                        "ay", "default",
+#                        "az", "default" ,
+#                        "mass", "default",
+#                        "is_local", "default"];
 #         position = [ "x", "y", "z" ];
 #         velocity = [ "vx", "vy", "vz" ];
 #         group_list = ["is_gravitating"];

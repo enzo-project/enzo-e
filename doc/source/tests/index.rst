@@ -14,17 +14,23 @@ This testing section describes tests on enzo-e program
    checkpoint
    collapse
    cosmology
+   fluxcorrect
+   grackle
    gravity
    heat
    helloworld
    hierarchy
    hydro
    initialmusic
+   isolatedgalaxy
    mergesinks
    methods
    output
+   parse
    particle
    performance
    ppm
    ppml
    sedov
+   vlct
+   others

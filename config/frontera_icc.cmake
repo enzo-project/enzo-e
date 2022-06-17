@@ -14,6 +14,12 @@ if(NOT __processedUserDefaults)
   set(CMAKE_Fortran_COMPILER ifort CACHE STRING "")
   set(CMAKE_Fortran_FLAGS "-nofor-main" CACHE STRING "Default Fortran flags")
 
+  # these flag(s) are currently only used when using openmp-simd optimizations
+  # (to specify available/prefered instruction sets).
+  # The Frontera User Guide recommends the following flag for their Cascade
+  # Lake (CLX) Compute Nodes
+  set(CONFIG_ARCH_FLAGS "-xCORE-AVX512")
+
   # Setting package paths (e.g., Grackle)
 
   # Mark done

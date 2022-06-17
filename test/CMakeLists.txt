@@ -6,32 +6,37 @@ function(setup_test_dir TESTDIR)
   file(CREATE_LINK ${PROJECT_SOURCE_DIR}/input ${PROJECT_BINARY_DIR}/test/${TESTDIR}/input SYMBOLIC)
 endfunction()
 
+set(CPP_TEST_RUNNER ${PROJECT_SOURCE_DIR}/tools/run_cpp_test.py)
+
 # Test wrapper function calling unit tests (separate binaries) directly
 function(setup_test_unit TESTNAME TESTDIR TESTBIN)
   setup_test_dir(${TESTDIR})
+  set(FULLTESTDIR ${PROJECT_BINARY_DIR}/test/${TESTDIR})
   add_test(
     NAME ${TESTNAME}
-    COMMAND ${TESTBIN}
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TESTDIR})
+    COMMAND ${Python3_EXECUTABLE} ${CPP_TEST_RUNNER} --output-dump ${FULLTESTDIR}/${TESTNAME}.log $<TARGET_FILE:${TESTBIN}>
+    WORKING_DIRECTORY ${FULLTESTDIR})
   set_tests_properties(${TESTNAME} PROPERTIES LABELS "serial;unit" )
 endfunction()
 
 # Test wrapper functions calling enzo-e directly
 function(setup_test_serial TESTNAME TESTDIR INFILE)
   setup_test_dir(${TESTDIR})
+  set(FULLTESTDIR ${PROJECT_BINARY_DIR}/test/${TESTDIR})
   add_test(
     NAME ${TESTNAME}
-    COMMAND enzo-e ${INFILE}
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TESTDIR})
+    COMMAND ${Python3_EXECUTABLE} ${CPP_TEST_RUNNER} --output-dump ${FULLTESTDIR}/${TESTNAME}.log $<TARGET_FILE:enzo-e> ${INFILE}
+    WORKING_DIRECTORY ${FULLTESTDIR})
   set_tests_properties(${TESTNAME} PROPERTIES LABELS "serial;enzo" )
 endfunction()
 
 function(setup_test_parallel TESTNAME TESTDIR INFILE)
   setup_test_dir(${TESTDIR})
+  set(FULLTESTDIR ${PROJECT_BINARY_DIR}/test/${TESTDIR})
   add_test(
     NAME ${TESTNAME}
-    COMMAND ${PARALLEL_LAUNCHER} ${PARALLEL_LAUNCHER_NPROC_ARG} ${PARALLEL_LAUNCHER_NPROC} ${PROJECT_BINARY_DIR}/bin/enzo-e ${INFILE}
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TESTDIR})
+    COMMAND ${Python3_EXECUTABLE} ${CPP_TEST_RUNNER} --output-dump ${FULLTESTDIR}/${TESTNAME}.log ${PARALLEL_LAUNCHER} ${PARALLEL_LAUNCHER_NPROC_ARG} ${PARALLEL_LAUNCHER_NPROC} $<TARGET_FILE:enzo-e> ${INFILE}
+    WORKING_DIRECTORY ${FULLTESTDIR})
   set_tests_properties(${TESTNAME} PROPERTIES LABELS "parallel;enzo" )
 endfunction()
 
@@ -70,7 +75,9 @@ endfunction()
 ############################### UNIT TESTS ####################################
 # The following tests are self-contained binary of individual components
 
+setup_test_unit(CArrCollec ArrayComponent/CArrCollec test_carr_collec)
 setup_test_unit(Array ArrayComponent/Array test_cello_array)
+setup_test_unit(StringIndRdOnlyMap ArrayComponent/StringIndRdOnlyMap test_string_ind_rd_only_map)
 # TODO(need help) Need to reintroduce following tests once dependency hell is resolved,
 # see commented unit tests in src/Cello/CMakeLists.txt
 #setup_test_unit(CelloType Cello/Type test_type)
@@ -113,6 +120,10 @@ setup_test_parallel(Bound-Outflow-3D BoundaryConditions/Outflow-3D  input/Bounda
 setup_test_serial(FluxCorrect-SMR-PPM MethodFluxCorrect/Inclined-Contact-SMR-Ppm input/FluxCorrect/inclined_contact_smr_ppm-${PREC_STRING}.in)
 setup_test_serial(FluxCorrect-SMR-VL MethodFluxCorrect/Inclined-Contact-VL input/FluxCorrect/inclined_contact_smr_vl-${PREC_STRING}.in)
 
+# Isolated galaxy
+setup_test_serial(GasDisk IsolatedGalaxy/GasDisk  input/IsolatedGalaxy/method_isolatedgalaxy.in)
+#setup_test_serial(GasDisk-Halo IsolatedGalaxy/GasDisk-Halo  input/IsolatedGalaxy/method_isolatedgalaxy-particles.in)
+
 # Gravity
 setup_test_serial(GravityCg-1 MethodGravity/GravityCg-1  input/Gravity/method_gravity_cg-1.in)
 setup_test_parallel(GravityCg-8 MethodGravity/GravityCg-8  input/Gravity/method_gravity_cg-8.in)
@@ -153,7 +164,7 @@ setup_test_parallel(Performance-Initial-PNG  Performance/InitialPng   input/Hell
 setup_test_serial(PPM-1 MethodPPM/Ppm-1  input/PPM/method_ppm-1.in)
 setup_test_parallel(PPM-8 MethodPPM/Ppm-8  input/PPM/method_ppm-8.in)
 
-if (USE_PYTHON_BASED_TESTS)
+if (USE_YT_BASED_TESTS)
   # VLCT
   setup_test_serial_python(vlct_dual_energy_cloud vlct "input/vlct/run_dual_energy_cloud_test.py")
   setup_test_serial_python(vlct_MHD_shock_tube vlct "input/vlct/run_MHD_shock_tube_test.py")
@@ -161,6 +172,9 @@ if (USE_PYTHON_BASED_TESTS)
   setup_test_serial_python(vlct_HD_linear_wave vlct "input/vlct/run_HD_linear_wave_test.py")
   setup_test_serial_python(vlct_passive_advect_sound vlct "input/vlct/run_passive_advect_sound_test.py")
   setup_test_parallel_python(vlct_dual_energy_shock_tube vlct "input/vlct/run_dual_energy_shock_tube_test.py")
+
+  # Gravity (with VLCT)
+  setup_test_serial_python(gravity_vlct_stable_Jeans_wave gravity "input/Gravity/run_stable_jeans_wave_test.py")
 
   # merge_sinks
   setup_test_serial_python(merge_sinks_stationary_serial merge_sinks/stationary/serial "input/merge_sinks/run_merge_sinks_test.py" "--prec=${PREC_STRING}" "--ics_type=stationary")
@@ -176,6 +190,45 @@ if (USE_PYTHON_BASED_TESTS)
   setup_test_serial_python(flux_accretion_serial accretion/flux/serial "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=flux")
   setup_test_parallel_python(flux_accretion_parallel accretion/flux/parallel "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=flux")
   
+endif()
+
+# Grackle tests
+#
+# because Grackle is a separate library, the user needs to specify the path
+# to the data directory where the grackle data files are installed. if this is
+# not specified, the Grackle tests are skipped
+
+if(NOT (DEFINED GRACKLE_INPUT_DATA_DIR))
+  set(GRACKLE_INPUT_DATA_DIR "")
+endif()
+
+if(USE_GRACKLE AND (GRACKLE_INPUT_DATA_DIR STREQUAL ""))
+  message(STATUS
+    "   IMPORTANT: No tests involving Grackle have been defined (even though Grackle is being used). To enable these tests, try `-DGRACKLE_INPUT_DATA_DIR=/path/to/grackle/data/dir`."
+  )
+elseif(USE_GRACKLE)
+  # (non-yt-based test)
+  setup_test_parallel_python(grackle_cooling_dt grackle
+    "input/Grackle/run_endtime_grackle_test.py"
+    "--grackle-data-file=${GRACKLE_INPUT_DATA_DIR}/CloudyData_UVB=HM2012_shielded.h5"
+    "--nominal-config-path=input/Grackle/method_grackle_cooling_dt.in"
+    # by using relative paths in the following 2 arguments, we effectively
+    # specify output files in the testing directory
+    "--generate-config-path=./temp_grackle_cooling_dt.in"
+    "--output-dump=./grackle_cooling_dt.log"
+  )
+
+  if (USE_YT_BASED_TESTS)
+    setup_test_parallel_python(grackle_general grackle
+      "input/Grackle/run_general_grackle_test.py"
+      "--prec=${PREC_STRING}"
+      "--grackle-data-file=${GRACKLE_INPUT_DATA_DIR}/CloudyData_UVB=HM2012_shielded.h5"
+      # by using relative paths in the following 2 arguments, we effectively
+      # specify output files in the testing directory
+      "--generate-config-path=./temp_grackle_general.in"
+      "--output-dump=./grackle_general_test.log"
+    )
+  endif()
 endif()
 
 # Convert markdown file to html file for more flexible viewing

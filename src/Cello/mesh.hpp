@@ -24,6 +24,7 @@
 #include "_compute.hpp"
 #include "_simulation.hpp"
 #include "_mesh.hpp"
+#include "_array.hpp"
 #include "_data.hpp" 
 
 //----------------------------------------------------------------------

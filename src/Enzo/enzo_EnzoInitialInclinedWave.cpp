@@ -66,9 +66,18 @@ public:
     matrix_[2][2] = std::cos(a);
   }
 
+  Rotation()
+  {
+    for (int j = 0; j<3; j++){
+      for (int i = 0; i<3; i++){
+        matrix_[j][i] = (j == i); // initialize identity matrix
+      }
+    }
+  }
+
   // rotates vector {v0, v1, v2} to {rot0, rot1, rot2}
   void rot(double v0, double v1, double v2,
-	   double &rot0, double &rot1, double &rot2)
+	   double &rot0, double &rot1, double &rot2) const noexcept
   {
     rot0 = matrix_[0][0]*v0 + matrix_[0][1]*v1 + matrix_[0][2]*v2;
     rot1 = matrix_[1][0]*v0 + matrix_[1][1]*v1 + matrix_[1][2]*v2;
@@ -77,7 +86,7 @@ public:
 
   // rotates vector {rot0, rot1, rot2} to {v0, v1, v2}
   void inv_rot(double rot0, double rot1, double rot2,
-	       double &v0, double &v1, double &v2)
+	       double &v0, double &v1, double &v2) const noexcept
   {
     v0 = matrix_[0][0]*rot0 + matrix_[1][0]*rot1 + matrix_[2][0]*rot2;
     v1 = matrix_[0][1]*rot0 + matrix_[1][1]*rot1 + matrix_[2][1]*rot2;
@@ -132,16 +141,19 @@ class LinearScalarInit : public ScalarInit{
 
 public:
   LinearScalarInit(double background, double eigenvalue,
-		   double amplitude, double lambda)
+		   double amplitude, double lambda,
+                   bool use_cosine = true)
     : background_(background),
       eigenvalue_(eigenvalue),
       amplitude_(amplitude),
-      lambda_(lambda)
+      lambda_(lambda),
+      use_cosine_(use_cosine)
   {}
 
   double operator() (double x0, double x1, double x2){
+    double tmp = x0*2.*cello::pi/lambda_;
     return (background_ + amplitude_ * eigenvalue_
-	    * std::cos(x0*2.*cello::pi/lambda_));
+	    * (use_cosine_*std::cos(tmp) + (1 - use_cosine_) * std::sin(tmp)));
   }
 
 protected:
@@ -153,6 +165,26 @@ protected:
   double amplitude_;
   // wavelength
   double lambda_;
+  // indicates whether cosine or sine is used
+  bool use_cosine_;
+};
+
+//----------------------------------------------------------------------
+
+template<class F>
+class WrapperScalarInit : public ScalarInit{
+
+public:
+  WrapperScalarInit(F functor)
+    : functor_(functor)
+  {}
+
+  double operator() (double x0, double x1, double x2){
+    return functor_(x0, x1, x2);
+  }
+
+protected:
+  F functor_;
 };
 
 //----------------------------------------------------------------------
@@ -201,20 +233,25 @@ class LinearVectorInit : public VectorInit {
 public:
   LinearVectorInit(double back0, double back1, double back2,
 		   double ev0, double ev1, double ev2,
-		   double amplitude, double lambda)
+		   double amplitude, double lambda,
+                   bool use_cosine = true)
     : VectorInit(),
       back0_(back0), back1_(back1), back2_(back2),
       ev0_(ev0), ev1_(ev1), ev2_(ev2),
       amplitude_(amplitude),
-      lambda_(lambda)
+      lambda_(lambda),
+      use_cosine_(use_cosine)
   {}
 
   void operator() (double x0, double x1, double x2,
 		   double &v0, double &v1, double &v2)
   {
-    v0 = (back0_ + amplitude_*ev0_*std::cos(x0*2.*cello::pi/lambda_));
-    v1 = (back1_ + amplitude_*ev1_*std::cos(x0*2.*cello::pi/lambda_));
-    v2 = (back2_ + amplitude_*ev2_*std::cos(x0*2.*cello::pi/lambda_));
+    double tmp = x0*2.*cello::pi/lambda_;
+    double trig_term = (use_cosine_ * std::cos(tmp) +
+                        (1 - use_cosine_) * std::sin(tmp));
+    v0 = back0_ + amplitude_*ev0_*trig_term;
+    v1 = back1_ + amplitude_*ev1_*trig_term;
+    v2 = back2_ + amplitude_*ev2_*trig_term;
   }
 
 protected:
@@ -226,6 +263,8 @@ protected:
   double amplitude_;
   // wavelength
   double lambda_;
+  // whether to use cosine or sine
+  bool use_cosine_;
 };
 
 //----------------------------------------------------------------------
@@ -241,8 +280,8 @@ public:
 
   ~RotatedVectorInit()
   {
-    delete inner_;
     delete rot_;
+    delete inner_;
   }
 
   void operator() (double x, double y, double z,
@@ -297,58 +336,45 @@ protected:
 
 //----------------------------------------------------------------------
 
-class CircAlfvenMomentumInit : public VectorInit {
+template<class F>
+class WrapperVectorInit : public VectorInit{
+
 public:
-  // The absence of ev_B0 is intentional
-  CircAlfvenMomentumInit(double p0,
-			 double lambda)
-    :VectorInit(),
-     p0_(p0),
-     lambda_(lambda)
+  WrapperVectorInit(F functor)
+    : functor_(functor)
   {}
 
   void operator() (double x0, double x1, double x2,
-		   double &v0, double &v1, double &v2)
-  {
-    v0 = p0_;
-    v1 = 0.1 * std::sin(2. * cello::pi * x0/ lambda_);
-    v2 = 0.1 * std::cos(2. * cello::pi * x0/ lambda_);
-  }
+                   double &v0, double &v1, double &v2)
+  { functor_(x0,x1,x2, v0,v1,v2); }
 
 protected:
-  // momentum along p0
-  double p0_;
-  // wavelength
-  double lambda_;
+  F functor_;
 };
 
 //----------------------------------------------------------------------
 
-class CircAlfvenVectorPotentialInit : public VectorInit {
-public:
-  // The absence of ev_B0 is intentional
-  CircAlfvenVectorPotentialInit(double lambda)
-    :VectorInit(),
-     lambda_(lambda)
-  {}
+template<class F>
+static WrapperVectorInit<F>* alloc_vector_init_wrapper_(F &functor)
+{ return new WrapperVectorInit<F>(functor); }
 
-  void operator() (double x0, double x1, double x2,
-		   double &v0, double &v1, double &v2)
-  {
-    v0 = (x2 * 0.1 * std::sin(2. * cello::pi * x0/ lambda_) -
-	  x1 * 0.1 * std::cos(2. * cello::pi * x0/ lambda_));
-    v1 = 0.0;
-    v2 = x1;
-  }
+//----------------------------------------------------------------------
 
-protected:
-  // wavelength
-  double lambda_;
-};
+HydroInitPack::HydroInitPack(ScalarInit* density_init,
+                             VectorInit* velocity_init,
+                             ScalarInit* pressure_init,
+                             InitializerForm initializer_form)
+  : density_init(density_init),
+    velocity_init(velocity_init),
+    pressure_init(pressure_init),
+    initializer_form(initializer_form)
+{}
 
 //----------------------------------------------------------------------
 
 class MeshPos {
+  // TODO: Remove this class. We can accomplish the same thing with the
+  //       Data::field_cells method
 
 public:
   MeshPos(Block *block)
@@ -407,11 +433,9 @@ void setup_bfield(Block * block, VectorInit *a, MeshPos &pos,
 	 field.is_field("bfieldi_y") &&
 	 field.is_field("bfieldi_z"));
 
-
-  EnzoFieldArrayFactory array_factory(block);
-  EFlt3DArray bfieldi_x = array_factory.from_name("bfieldi_x");
-  EFlt3DArray bfieldi_y = array_factory.from_name("bfieldi_y");
-  EFlt3DArray bfieldi_z = array_factory.from_name("bfieldi_z");
+  EFlt3DArray bfieldi_x = field.view<enzo_float>("bfieldi_x");
+  EFlt3DArray bfieldi_y = field.view<enzo_float>("bfieldi_y");
+  EFlt3DArray bfieldi_z = field.view<enzo_float>("bfieldi_z");
 
   if (a == NULL){
     for (int iz=0; iz<mz+1; iz++){
@@ -473,25 +497,24 @@ void setup_eint_(Block *block)
   // because cell-centered bfields for CT are computed in terms of enzo_float,
   // this calculation is handled in terms of enzo_float
   // This operation could be split off and placed in a separate initializer
-  EnzoFieldArrayFactory array_factory(block);
   Field field = block->data()->field();
 
   EFlt3DArray density, etot, eint;
-  density = array_factory.from_name("density");
-  etot = array_factory.from_name("total_energy");
-  eint = array_factory.from_name("internal_energy");
+  density = field.view<enzo_float>("density");
+  etot = field.view<enzo_float>("total_energy");
+  eint = field.view<enzo_float>("internal_energy");
 
   EFlt3DArray velocity_x, velocity_y, velocity_z;
-  velocity_x = array_factory.from_name("velocity_x");
-  velocity_y = array_factory.from_name("velocity_y");
-  velocity_z = array_factory.from_name("velocity_z");
+  velocity_x = field.view<enzo_float>("velocity_x");
+  velocity_y = field.view<enzo_float>("velocity_y");
+  velocity_z = field.view<enzo_float>("velocity_z");
 
   const bool mhd = field.is_field("bfield_x");
   EFlt3DArray bfield_x, bfield_y, bfield_z;
   if (mhd){
-    bfield_x = array_factory.from_name("bfield_x");
-    bfield_y = array_factory.from_name("bfield_y");
-    bfield_z = array_factory.from_name("bfield_z");
+    bfield_x = field.view<enzo_float>("bfield_x");
+    bfield_y = field.view<enzo_float>("bfield_y");
+    bfield_z = field.view<enzo_float>("bfield_z");
   }
 
   for (int iz=0; iz<density.shape(0); iz++){
@@ -517,108 +540,107 @@ void setup_eint_(Block *block)
 
 //----------------------------------------------------------------------
 
-void setup_fluid(Block *block, ScalarInit *density_init,
-		 ScalarInit *total_energy_density_init, 
-		 VectorInit *momentum_init,
-		 MeshPos &pos, int mx, int my, int mz, double gamma)
+static void setup_fluid_(Block *block, HydroInitPack hydro_init_pack,
+                         MeshPos &pos, int mx, int my, int mz, double gamma)
 {
-  EFlt3DArray density, specific_total_energy;
-  EnzoFieldArrayFactory array_factory(block);
-  density = array_factory.from_name("density");
-  specific_total_energy = array_factory.from_name("total_energy");
+  Field field = block->data()->field();
+  EFlt3DArray density = field.view<enzo_float>("density");
+  EFlt3DArray specific_total_energy = field.view<enzo_float>("total_energy");
 
-  EFlt3DArray velocity_x, velocity_y, velocity_z;
-  velocity_x = array_factory.from_name("velocity_x");
-  velocity_y = array_factory.from_name("velocity_y");
-  velocity_z = array_factory.from_name("velocity_z");
+  EFlt3DArray velocity_x = field.view<enzo_float>("velocity_x");
+  EFlt3DArray velocity_y = field.view<enzo_float>("velocity_y");
+  EFlt3DArray velocity_z = field.view<enzo_float>("velocity_z");
 
-  for (int iz=0; iz<mz; iz++){
-    for (int iy=0; iy<my; iy++){
-      for (int ix=0; ix<mx; ix++){
-	double x,y,z;
-	double rho, px, py, pz, etot_dens;
-	x = pos.x(iz,iy,ix); y = pos.y(iz,iy,ix); z = pos.z(iz,iy,ix);
-	rho = (*density_init)(x,y,z);
-	density(iz,iy,ix) = (enzo_float)rho;
-	(*momentum_init)(x, y, z, px, py, pz);
-	velocity_x(iz,iy,ix) = (enzo_float)(px/rho);
-	velocity_y(iz,iy,ix) = (enzo_float)(py/rho);
-	velocity_z(iz,iy,ix) = (enzo_float)(pz/rho);
+  ScalarInit* density_init = hydro_init_pack.density_init.get();
+  if (hydro_init_pack.initializer_form == InitializerForm::conserved){
 
-	etot_dens = (*total_energy_density_init)(x,y,z);
-	specific_total_energy(iz,iy,ix) = (enzo_float)(etot_dens/rho);
+    VectorInit* momentum_init = hydro_init_pack.velocity_init.get();
+    ScalarInit* total_energy_density_init = hydro_init_pack.pressure_init.get();
+
+    for (int iz=0; iz<mz; iz++){
+      for (int iy=0; iy<my; iy++){
+        for (int ix=0; ix<mx; ix++){
+          double x,y,z;
+          double rho, px, py, pz, etot_dens;
+          x = pos.x(iz,iy,ix); y = pos.y(iz,iy,ix); z = pos.z(iz,iy,ix);
+          rho = (*density_init)(x,y,z);
+          density(iz,iy,ix) = (enzo_float)rho;
+          (*momentum_init)(x, y, z, px, py, pz);
+          velocity_x(iz,iy,ix) = (enzo_float)(px/rho);
+          velocity_y(iz,iy,ix) = (enzo_float)(py/rho);
+          velocity_z(iz,iy,ix) = (enzo_float)(pz/rho);
+
+          etot_dens = (*total_energy_density_init)(x,y,z);
+          specific_total_energy(iz,iy,ix) = (enzo_float)(etot_dens/rho);
+        }
+      }
+    }
+
+    // If present, setup internal energy (to test dual energy formalism):
+    if (field.is_field("internal_energy")) { setup_eint_(block); }
+
+  } else { // hydro_init_pack.initializer_form == InitializerForm::primitive
+
+    VectorInit* velocity_init = hydro_init_pack.velocity_init.get();
+    ScalarInit* pressure_init = hydro_init_pack.pressure_init.get();
+
+    const bool dual_energy = field.is_field("internal_energy");
+    EFlt3DArray specific_internal_energy;
+    if (dual_energy){
+      specific_internal_energy = field.view<enzo_float>("internal_energy");
+    }
+
+    const bool mag = field.is_field("bfield_x");
+    using RdOnlyEFlt3DArray = CelloArray<const enzo_float, 3>;
+    const RdOnlyEFlt3DArray bfield_x = (mag) ?
+      RdOnlyEFlt3DArray(field.view<enzo_float>("bfield_x")) :
+      RdOnlyEFlt3DArray();
+    const RdOnlyEFlt3DArray bfield_y = (mag) ?
+      RdOnlyEFlt3DArray(field.view<enzo_float>("bfield_y")) :
+      RdOnlyEFlt3DArray();
+    const RdOnlyEFlt3DArray bfield_z = (mag) ?
+      RdOnlyEFlt3DArray(field.view<enzo_float>("bfield_z")) :
+      RdOnlyEFlt3DArray();
+
+    const double inv_gm1 = 1.0 / (gamma - 1.0);
+
+    for (int iz=0; iz<mz; iz++){
+      for (int iy=0; iy<my; iy++){
+        for (int ix=0; ix<mx; ix++){
+          double x = pos.x(iz,iy,ix);
+          double y = pos.y(iz,iy,ix);
+          double z = pos.z(iz,iy,ix);
+
+          double rho = (*density_init)(x,y,z);
+          density(iz,iy,ix) = (enzo_float)rho;
+
+          double vx, vy, vz;
+          (*velocity_init)(x, y, z, vx, vy, vz);
+          velocity_x(iz,iy,ix) = (enzo_float)(vx);
+          velocity_y(iz,iy,ix) = (enzo_float)(vy);
+          velocity_z(iz,iy,ix) = (enzo_float)(vz);
+
+          
+          double inv_rho = 1.0 / rho;
+          double eint = inv_gm1 * (*pressure_init)(x,y,z) * inv_rho;
+          if (dual_energy) {
+            specific_internal_energy(iz,iy,ix) = (enzo_float)eint;
+          }
+
+          double non_thermal_e = 0.5 * ((vx*vx) + (vy*vy) + (vz*vz));
+          if (mag){
+            double b2 = ((bfield_x(iz,iy,ix) * bfield_x(iz,iy,ix)) +
+                         (bfield_y(iz,iy,ix) * bfield_y(iz,iy,ix)) +
+                         (bfield_z(iz,iy,ix) * bfield_z(iz,iy,ix)));
+            non_thermal_e += 0.5 * b2 * inv_rho;
+          }
+          specific_total_energy(iz,iy,ix) = (enzo_float)(eint + non_thermal_e);
+          if (dual_energy) { specific_internal_energy(iz,iy,ix) = eint;}
+        }
       }
     }
   }
-
-  // If present, setup internal energy (to test dual energy formalism):
-  Field field = block->data()->field();
-  if (field.is_field("internal_energy")) { setup_eint_(block); }
 }
-
-//----------------------------------------------------------------------
-
-void setup_circ_polarized_alfven(Block *block, ScalarInit *density_init, 
-				 VectorInit *momentum_init,
-				 MeshPos &pos, int mx, int my, int mz,
-				 double gamma)
-{
-  // this function directly sets pressure = 0.1 by hand
-  // Gardiner & Stone (2008) explicitly as states that the truncation error of
-  // B_perp**2/P is important
-  EFlt3DArray density, specific_total_energy;
-  EnzoFieldArrayFactory array_factory(block);
-  density = array_factory.from_name("density");
-  specific_total_energy = array_factory.from_name("total_energy");
-
-  EFlt3DArray velocity_x, velocity_y, velocity_z;
-  velocity_x = array_factory.from_name("velocity_x");
-  velocity_y = array_factory.from_name("velocity_y");
-  velocity_z = array_factory.from_name("velocity_z");
-
-  EFlt3DArray bfield_x, bfield_y, bfield_z;
-  bfield_x = array_factory.from_name("bfield_x");
-  bfield_y = array_factory.from_name("bfield_y");
-  bfield_z = array_factory.from_name("bfield_z");
-
-  Field field = block->data()->field();
-  EFlt3DArray specific_internal_energy;
-  const bool dual_energy = field.is_field("internal_energy");
-  if (dual_energy){
-    specific_internal_energy = array_factory.from_name("internal_energy");
-  }
-  
-
-  for (int iz=0; iz<mz; iz++){
-    for (int iy=0; iy<my; iy++){
-      for (int ix=0; ix<mx; ix++){
-	double x,y,z;
-	double rho, px, py, pz;
-	x = pos.x(iz,iy,ix); y = pos.y(iz,iy,ix); z = pos.z(iz,iy,ix);
-	rho = (*density_init)(x,y,z);
-	density(iz,iy,ix) = (enzo_float)rho;
-	(*momentum_init)(x, y, z, px, py, pz);
-	velocity_x(iz,iy,ix) = (enzo_float)(px/rho);
-	velocity_y(iz,iy,ix) = (enzo_float)(py/rho);
-	velocity_z(iz,iy,ix) = (enzo_float)(pz/rho);
-
-	// Because of the truncation concerns we use the cell-centered values
-	enzo_float eint = (enzo_float)(0.1/(gamma - 1.)/rho);
-	enzo_float mag =
-	  0.5*(bfield_x(iz,iy,ix) * bfield_x(iz,iy,ix) +
-	       bfield_y(iz,iy,ix) * bfield_y(iz,iy,ix) +
-	       bfield_z(iz,iy,ix) * bfield_z(iz,iy,ix))/density(iz,iy,ix);
-	enzo_float kin = 0.5 * (velocity_x(iz,iy,ix) * velocity_x(iz,iy,ix) +
-				velocity_y(iz,iy,ix) * velocity_y(iz,iy,ix) +
-				velocity_z(iz,iy,ix) * velocity_z(iz,iy,ix));
-
-	specific_total_energy(iz,iy,ix) = eint + mag + kin;
-	if (dual_energy) { specific_internal_energy(iz,iy,ix) = eint;}
-      }
-    }
-  }
-}
-
 
 //----------------------------------------------------------------------
 
@@ -639,11 +661,12 @@ EnzoInitialInclinedWave::EnzoInitialInclinedWave
   std::vector<std::string> mhd_waves = mhd_waves_();
   std::vector<std::string> hd_waves  =  hd_waves_();
 
-  if (std::find(mhd_waves.begin(), mhd_waves.end(), wave_type_)
-      != mhd_waves.end()) {
-    // specified wave is an MHD wave, make sure parallel_vel_ isn't specified
+  bool is_MHD_wave = (std::find(mhd_waves.begin(), mhd_waves.end(), wave_type_)
+                      != mhd_waves.end());
+
+  if (is_MHD_wave | (wave_type_ == "jeans")){
     ASSERT1("EnzoInitialInclinedWave",
-	    "parallel_vel can't be specified for a wave_type: \"%s\"",
+	    "parallel_vel isn't currently supported for wave_type: \"%s\"",
 	    wave_type.c_str(), !specified_parallel_vel_());
   } else if (std::find(hd_waves.begin(), hd_waves.end(), wave_type_)
 	     == hd_waves.end()) {
@@ -656,8 +679,9 @@ EnzoInitialInclinedWave::EnzoInitialInclinedWave
       ss << "'" << mhd_waves[i] << "'";
     }
     for (std::vector<std::string>::size_type i = 0; i < hd_waves.size(); i++){
-      ss << "'" << mhd_waves[i] << "'";
+      ss << ", '" << hd_waves[i] << "'";
     }
+    ss << ", 'jeans'";
 
     std::string s = ss.str();
     ERROR1("EnzoInitialInclinedWave", "Invalid wave_type, must be %s",
@@ -688,15 +712,11 @@ std::vector<std::string> EnzoInitialInclinedWave::hd_waves_() const throw()
 //----------------------------------------------------------------------
 
 void EnzoInitialInclinedWave::enforce_block(Block * block,
-					  const Hierarchy * hierarchy) throw()
+                                            const Hierarchy * hierarchy) throw()
 {
   // Set up the test problem
   // Only currently works on unigrid and only currently supports hydro methods
   // and VLCT (PPML initial conditions are much more complicated)
-  
-  ScalarInit *density_init = nullptr;
-  ScalarInit *total_energy_density_init = nullptr;
-  VectorInit *momentum_init = nullptr;
   VectorInit *a_init = nullptr;
 
   Field field = block->data()->field();
@@ -704,64 +724,213 @@ void EnzoInitialInclinedWave::enforce_block(Block * block,
 
   std::vector<std::string> hd_waves = hd_waves_();
 
-  if (std::find(hd_waves.begin(), hd_waves.end(), wave_type_) !=
-      hd_waves.end()) {
-    prepare_HD_initializers_(&density_init, &total_energy_density_init,
-			     &momentum_init);
+  const bool is_root_block = block->index().is_root();
+
+  HydroInitPack hydro_inits;
+
+  if (wave_type_ == "jeans"){
+    // linear jeans wave
+    hydro_inits = prepare_jeans_initializers_(is_root_block);
+  } else if (std::find(hd_waves.begin(), hd_waves.end(), wave_type_) !=
+             hd_waves.end()) {
+    hydro_inits = prepare_HD_initializers_(is_root_block);
   } else {
     ASSERT("EnzoInitialInclinedWave::enforce_block",
 	   "A MHD wave requires fields to store magnetic field values.", mhd);
-    prepare_MHD_initializers_(&density_init, &total_energy_density_init,
-			      &momentum_init, &a_init);
+    hydro_inits = prepare_MHD_initializers_(&a_init);
   }
 
-  // load the dimensions and initialize object to compute positions
-  int mx,my,mz;
-  const int id = field.field_id ("density");
-  field.dimensions (id,&mx,&my,&mz);
-  MeshPos pos(block);
 
-  if (mhd) {
-    // Initialize bfields. If the wave is purely hydrodynamical, they will be
-    // all be set to 0.
-    setup_bfield(block, a_init, pos, mx, my, mz);
+  if (block->is_leaf()){
+    // load the dimensions and initialize object to compute positions
+    int mx,my,mz;
+    const int id = field.field_id ("density");
+    field.dimensions (id,&mx,&my,&mz);
+    MeshPos pos(block);
+
+    if (mhd) {
+      // Initialize bfields. If the wave is purely hydrodynamical, they will be
+      // all be set to 0.
+      setup_bfield(block, a_init, pos, mx, my, mz);
+    }
+
+    // it's important that this happens after setting up the magnetic fields
+    setup_fluid_(block, hydro_inits, pos, mx, my, mz, gamma_);
   }
 
-  if (wave_type_ != "circ_alfven"){
-    setup_fluid(block, density_init, total_energy_density_init, momentum_init,
-		pos, mx, my, mz, gamma_);
+  if (a_init != nullptr) { delete a_init; }
 
-  } else {
-    setup_circ_polarized_alfven(block, density_init, momentum_init,
-				pos, mx, my, mz, gamma_);
-  }
-
-  delete density_init;
-  delete momentum_init;
-  delete total_energy_density_init;
-  delete a_init;
-  
   block->initial_done();
 }
 
 //----------------------------------------------------------------------
 
-void EnzoInitialInclinedWave::prepare_MHD_initializers_
-(ScalarInit **density_init, ScalarInit **etot_dens_init,
- VectorInit **momentum_init, VectorInit **a_init)
+HydroInitPack EnzoInitialInclinedWave::prepare_jeans_initializers_
+(bool is_root_block) const noexcept
+{
+  ASSERT("EnzoInitialInclinedWave::prepare_jeans_initializers_",
+         "The gravity method must be used with the jeans wave.",
+         enzo::problem()->method_exists("gravity"));
+  ASSERT("EnzoInitialInclinedWave::prepare_jeans_initializers_",
+         "There currently isn't support for specifying a velocity with a "
+         "Jeans wave wave",
+         pos_vel_);
+
+  // this was originally based on the description in section 4.2 of Mullen,
+  // Hanawa, & Gammie (2021). Unfortunately, we encountered problems with
+  // implementing those equations (we have subsequently confirmed that the
+  // problem was a transcription error related to initializing pressure).
+  // The current implementation uses the same initial conditions as Athena and
+  // (earlier versions of) Athena++
+  double lambda = lambda_;
+  double wave_number = (2*cello::pi/lambda);
+
+  // compute the gravitational constant in code units
+  EnzoUnits* enzo_units = enzo::units();
+  const double G_code = enzo::config()->method_gravity_grav_const;
+
+  // background properties:
+  // -> density = 1.0
+  // -> all velocity components = 0
+  // -> pressure = 1/gamma
+  // This means cs_0^2 = 1
+
+  // lambda_J = sqrt(pi * cs_0^2 / (G_code * rho_bkg))
+  //   -> based on the initial conditions: cs_0^2 -> 1
+  //                                       rho_bkg -> 1
+  const double lambda_J_sq = cello::pi / G_code;
+
+  const bool stable_wave = lambda_J_sq >= (lambda * lambda);
+
+  // The dispersion relation is given by:
+  //   angular_freq ^ 2 = (wave_number*cs_0)^2 - 4 * pi * G_code;
+  //                    = wave_number^2 * cs_0^2 * (1 - (lambda / lambda_J)^2)
+  // -> lambda < lambda_J, the Jean waves is stable
+  // -> lambda > lambda_J, the Jeans wave is unstable
+  //
+  // to initialize the problem, we need: sqrt(|angular_freq^2| / wave_number^2)
+  // -> this is essentially just just the magnitude of the phase velocity
+  //    (recall: v_phase = angular_freq / wave_number)
+  // -> v_phase = sqrt(|cs_0^2 * (1 - (lambda / lambda_J)^2)|). Recall that
+  //    our choice of initial condtions give: cs_0^2 = 1
+
+  double v_phase = std::sqrt(std::fabs(1 - (lambda*lambda) / lambda_J_sq));
+  if (is_root_block) {
+    double angular_freq_sq =
+      wave_number*wave_number * (1.0 - (lambda*lambda)/ lambda_J_sq);
+    const char* adjective = (stable_wave) ? "stable" : "unstable";
+    cello::monitor()->print
+      ("Initial", ("Initializing %s Jeans wave: lambda = %e, lambda_J = %e, "
+                   "angular_freq^2 = %e"),
+       adjective, lambda_, std::sqrt(lambda_J_sq), angular_freq_sq);
+  }
+
+  // the modern version of Athena++ uses the following initializer. When the
+  // Jeans wave test was originally introduced to Athena++ (for use with their
+  // Multigrid gravity solver), the amplitude^2 term was not present. The
+  // amplitude^2 term also was not present in the C-version of Athena. The
+  // amplitude^2 term only got introduced to Athena++ in a commit related to
+  // introducing a FFT gravity solver.
+  //
+  //  double amplitude = amplitude_;
+  //  Rotation rot(alpha_, beta_);
+  //  auto functor = [=](double x, double y, double z) -> double
+  //    {
+  //      double x0, x1, x2;
+  //      rot.rot(x,y,z,x0,x1,x2);
+  //      double density_bkg = 1.0;
+  //      double tmp = x0*wave_number;
+  //      return density_bkg*(1.0 + amplitude * std::sin(tmp) +
+  //                          amplitude * amplitude * std::sin(x*wave_number));
+  //    };
+  //  ScalarInit* density_init = new WrapperScalarInit<decltype(functor)>
+  //    (functor);
+
+
+  // our choice of density initializer, is the same, but it omits the
+  // amplitude^2 term
+  double density_bkg = 1.0;
+  ScalarInit* density_init = new RotatedScalarInit
+    (alpha_, beta_, new LinearScalarInit(density_bkg, 1.0,
+                                         amplitude_, lambda_, false));
+
+
+  // coefficient for momentum component along axis 0
+  double mom0_coef = (stable_wave) ? 0.0 : density_bkg * v_phase;
+  VectorInit* momentum_init = new RotatedVectorInit
+    (alpha_, beta_, new LinearVectorInit(0.0, 0.0, 0.0,
+                                         mom0_coef, 0.0, 0.0,
+                                         amplitude_, lambda));
+
+  double p_bkg = 1.0 / gamma_;
+  double eint_dens_bkg = p_bkg / (gamma_ - 1.0);
+
+  ScalarInit* etotdens_init = new RotatedScalarInit
+    (alpha_, beta_, new LinearScalarInit(eint_dens_bkg, gamma_,
+                                         amplitude_, lambda_, false));
+                                         
+  return HydroInitPack(density_init, momentum_init, etotdens_init,
+                       InitializerForm::conserved);
+}
+
+//----------------------------------------------------------------------
+
+HydroInitPack EnzoInitialInclinedWave::prepare_MHD_initializers_
+(VectorInit **a_init) const noexcept
 {
   double lambda = lambda_;
 
   if (wave_type_ == "circ_alfven"){
-    *density_init = new LinearScalarInit(1.0,0.0,0.0,lambda);
-    *momentum_init = new RotatedVectorInit(alpha_,beta_,
-					   new CircAlfvenMomentumInit(0.0,
-								      lambda));
-    // we don't actually use etot for initializing
-    *etot_dens_init = new LinearScalarInit(0.66,0.0,0.0,lambda);
-    *a_init = new RotatedVectorInit(alpha_,beta_,
-				    new CircAlfvenVectorPotentialInit(lambda));
 
+    ASSERT("EnzoInitialInclinedWave::prepare_MHD_initializers_",
+           "There currently isn't support for initializing circularly "
+           "polarized Alfven wave with a negative velocity.",
+           pos_vel_);
+
+    // Construct vector potential initializer. This was defined such that
+    // B0 = 1.0, B1 = 0.1 * sin(2*pi*x0/lambda), B2 = 0.1 * cos(2*pi*x0/lambda)
+    auto a_func_ = [=](double x0, double x1, double x2,
+                       double &A0, double &A1, double &A2)
+      {
+        A0 = (x2 * 0.1 * std::sin(2. * cello::pi * x0/ lambda_) -
+              x1 * 0.1 * std::cos(2. * cello::pi * x0/ lambda_));
+        A1 = 0.0;
+        A2 = x1;
+      };
+    *a_init = new RotatedVectorInit(alpha_,beta_,
+                                    alloc_vector_init_wrapper_(a_func_));
+
+    // construct hydro initializers
+    //
+    // it's important that we define the hydro initializers in primitive form
+    // - doing so let's us force pressure to be 0.1 and then dynamically
+    //   compute the total energy based on the already initialized Bfield
+    //   values at the cell-centers
+    // - the alternative would be to compute the total energy using the
+    //   analytic formulas used to initialize the problem. To initialize the
+    //   cell-centered Bfield, we perform finite differences of the Vector
+    //   potential. With that in mind, rounding error may make the
+    //   cell-centered Bfield slightly different than what we expect. This
+    //   isn't ideal since Gardiner & Stone (2008) explicitly states that the
+    //   truncation error of B_perp**2/P is important
+
+    // density is 1.0 everywhere
+    ScalarInit* rho_init = new LinearScalarInit(1.0,0.0,0.0,lambda);
+    // pressure is 0.1 everywhere
+    ScalarInit* pressure_init = new LinearScalarInit(0.1,0.0,0.0,lambda);
+
+    auto vel_func_ = [=](double x0, double x1, double x2,
+                         double &vel_0, double &vel_1, double &vel_2)
+      {
+        vel_0 = 0.0;
+        vel_1 = 0.1 * std::sin(2. * cello::pi * x0/ lambda);
+        vel_2 = 0.1 * std::cos(2. * cello::pi * x0/ lambda);
+      };
+    VectorInit* velocity_init = new RotatedVectorInit
+      (alpha_,beta_, alloc_vector_init_wrapper_(vel_func_));
+
+    return HydroInitPack(rho_init, velocity_init, pressure_init,
+                         InitializerForm::primitive);
   } else {
     // wsign indicates direction of propogation.
     double wsign = 1.;
@@ -826,29 +995,25 @@ void EnzoInitialInclinedWave::prepare_MHD_initializers_
       b1_ev = 0;
       b2_ev = 0;
     }
-  
+ 
     double amplitude = amplitude_;
-    // Now allocate the actual Initializers
-    alloc_linear_HD_initializers_(density_back, density_ev, etot_back, etot_ev,
+
+    // construct vector potential initializer
+    *a_init = new RotatedVectorInit
+      (alpha_, beta_, new LinearVectorPotentialInit(b0_back, b1_back, b2_back,
+                                                    b1_ev, b2_ev, amplitude,
+                                                    lambda));
+    // construct the hydro initializers:
+    return build_linear_HD_inits_(density_back, density_ev, etot_back, etot_ev,
 				  mom0_back, mom1_back, mom2_back,
-				  mom0_ev, mom1_ev, mom2_ev,
-				  density_init, etot_dens_init, momentum_init);
-    *a_init = new RotatedVectorInit(alpha_, beta_,
-				    new LinearVectorPotentialInit(b0_back,
-								  b1_back,
-								  b2_back,
-								  b1_ev,
-								  b2_ev,
-								  amplitude,
-								  lambda));
+				  mom0_ev, mom1_ev, mom2_ev);
   }
 }
 
 //----------------------------------------------------------------------
 
-void EnzoInitialInclinedWave::prepare_HD_initializers_
-(ScalarInit **density_init, ScalarInit **etot_dens_init,
- VectorInit **momentum_init)
+HydroInitPack EnzoInitialInclinedWave::prepare_HD_initializers_
+(bool is_root_block) const noexcept
 {
 
   // wsign indicates direction of propogation.
@@ -931,48 +1096,45 @@ void EnzoInitialInclinedWave::prepare_HD_initializers_
     etot_ev = v2_back;
   }
 
-  //CkPrintf(("U = [rho, rho*vx, rho*vy, rho*vz, etot_dens]\n"
-  //	    "bkg:[%lf, %lf, %lf, %lf, %lf]\n"
-  //	    "ev: [%lf, %lf, %lf, %lf, %lf]\n"),
-  //	   density_back, mom0_back, mom1_back, mom2_back, etot_back,
-  //       density_ev, mom0_ev, mom1_ev, mom2_ev, etot_ev);
+  if (is_root_block) {
+    cello::monitor()->print("Initial", "Initializing \"%s\" hydro wave.",
+                            wave_type_.c_str());
+    cello::monitor()->print("Initial",
+                            "U = [rho, rho*v0, rho*v1, rho*v2, etot_dens]");
+    cello::monitor()->print("Initial", "bkg vals: [%lf, %lf, %lf, %lf, %lf]",
+                            density_back, mom0_back, mom1_back, mom2_back,
+                            etot_back);
+    cello::monitor()->print("Initial", "eigenvals: [%lf, %lf, %lf, %lf, %lf]",
+                            density_ev, mom0_ev, mom1_ev, mom2_ev, etot_ev);
+  }
 
   // Now allocate the actual Initializers
-  alloc_linear_HD_initializers_(density_back, density_ev, etot_back, etot_ev,
+  return build_linear_HD_inits_(density_back, density_ev, etot_back, etot_ev,
 				mom0_back, mom1_back, mom2_back,
-				mom0_ev, mom1_ev, mom2_ev,
-				density_init, etot_dens_init, momentum_init);
+				mom0_ev, mom1_ev, mom2_ev);
 }
 
 //----------------------------------------------------------------------
 
-void EnzoInitialInclinedWave::alloc_linear_HD_initializers_
+HydroInitPack EnzoInitialInclinedWave::build_linear_HD_inits_
 (double density_back, double density_ev,
  double etot_back, double etot_ev,
  double mom0_back, double mom1_back, double mom2_back,
- double mom0_ev, double mom1_ev, double mom2_ev,
- ScalarInit **density_init, ScalarInit **etot_dens_init,
- VectorInit **momentum_init)
+ double mom0_ev, double mom1_ev, double mom2_ev) const
 {
-  *density_init = new RotatedScalarInit(alpha_, beta_,
-					  new LinearScalarInit(density_back,
-							       density_ev,
-							       amplitude_,
-							       lambda_));
+  ScalarInit* density_init = new RotatedScalarInit
+    (alpha_, beta_, new LinearScalarInit(density_back, density_ev,
+                                         amplitude_, lambda_));
 
-  *etot_dens_init = new RotatedScalarInit(alpha_, beta_,
-					  new LinearScalarInit(etot_back,
-							       etot_ev,
-							       amplitude_,
-							       lambda_));
+  ScalarInit* etot_dens_init = new RotatedScalarInit
+    (alpha_, beta_, new LinearScalarInit(etot_back, etot_ev,
+                                         amplitude_, lambda_));
 
-  *momentum_init = new RotatedVectorInit(alpha_, beta_,
-					 new LinearVectorInit(mom0_back,
-							      mom1_back,
-							      mom2_back,
-							      mom0_ev,
-							      mom1_ev,
-							      mom2_ev,
-							      amplitude_,
-							      lambda_));
+  VectorInit* momentum_init = new RotatedVectorInit
+    (alpha_, beta_, new LinearVectorInit(mom0_back, mom1_back, mom2_back,
+					 mom0_ev, mom1_ev, mom2_ev,
+					 amplitude_, lambda_));
+
+  return HydroInitPack(density_init, momentum_init, etot_dens_init,
+                       InitializerForm::conserved);
 }

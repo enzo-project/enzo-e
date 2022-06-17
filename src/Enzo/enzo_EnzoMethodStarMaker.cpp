@@ -224,9 +224,9 @@ int EnzoMethodStarMaker::check_self_gravitating(
 
   // constant for testing. TODO: change to variable
   const double gamma = 5.0 / 3.0;
-  cs2 = (gamma * cello::kboltz * temperature) / mean_particle_mass;
+  cs2 = (gamma * enzo_constants::kboltz * temperature) / mean_particle_mass;
 
-  alpha = (div_v_norm2 + cs2/dx2) / (8 * cello::pi * cello::grav_constant * rho_cgs);
+  alpha = (div_v_norm2 + cs2/dx2) / (8 * cello::pi * enzo_constants::grav_constant * rho_cgs);
   return (alpha < 1);
 
 }
@@ -269,9 +269,9 @@ int EnzoMethodStarMaker::check_jeans_mass(
     return 1;
 
   const double gamma = 5.0 / 3.0;
-  const double minimum_jeans_mass = 1000 * cello::mass_solar;
-  double cs2 = (gamma * cello::kboltz * temperature) / mean_particle_mass;
-  double m_jeans = (cello::pi/6) * pow(cs2, 1.5) / (pow(cello::grav_constant, 1.5) * sqrt(rho_cgs));
+  const double minimum_jeans_mass = 1000 * enzo_constants::mass_solar;
+  double cs2 = (gamma * enzo_constants::kboltz * temperature) / mean_particle_mass;
+  double m_jeans = (cello::pi/6) * pow(cs2, 1.5) / (pow(enzo_constants::grav_constant, 1.5) * sqrt(rho_cgs));
   double m_jcrit = MAX(minimum_jeans_mass, m_jeans);
   return (mass < m_jcrit);
 }
