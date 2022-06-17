@@ -94,7 +94,7 @@ Method {
 
 accretion {
 	flavor = "threshold";
-	density_threshold = 1.0e-6;
+	physical_density_threshold_cgs = 1.0e-6;
 	}
 }
 
