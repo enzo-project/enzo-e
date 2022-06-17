@@ -43,6 +43,7 @@ Currently the Enzo-e testing infrastructure tests:
 
 .. toctree::
    accretion-cmake
+   array-cmake
    error-cmake
    memory-cmake
    monitor-cmake
