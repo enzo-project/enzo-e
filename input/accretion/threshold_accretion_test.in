@@ -52,6 +52,7 @@ Domain {
 
 Particle {
     list = ["sink"];
+    mass_is_mass = true;
     batch_size = 4096;
     sink {
 	 attributes = ["x", "default",
