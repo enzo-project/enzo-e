@@ -183,7 +183,7 @@ PARALLEL_MAIN_BEGIN
     unit_func ("no level jumps");
     unit_assert(jumps == false);
     unit_func ("converged");
-    unit_assert(converged == true); // @@@@@
+    unit_assert(converged == true);
     unit_func ("no temporal jumps");
     unit_assert(valid == true);
     unit_func ("pairs");
