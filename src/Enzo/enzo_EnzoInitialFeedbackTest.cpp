@@ -143,8 +143,8 @@ void EnzoInitialFeedbackTest::enforce_block
 
          for (int dim = 0; dim < 3; dim++) v3[dim][i] = 0.0;
 
-         ge[i] = enzo_config->initial_feedback_test_temperature / mol_weight / enzo_units->temperature() /
-                         (gamma - 1.0);
+         ge[i] = (enzo_config->initial_feedback_test_temperature / mol_weight /
+                  enzo_units->kelvin_per_energy_units() / (gamma - 1.0));
 
          for (int dim = 0; dim < 3; dim ++)
              te[i] = ge[i] + 0.5 * v3[dim][i] * v3[dim][i];
@@ -240,7 +240,7 @@ void EnzoInitialFeedbackTest::enforce_block
                                                                         CkNumPes(), CkMyPe() + (ParticleData::id_counter[cello::index_static()]) * CkNumPes());
 #endif
       id[ipp] = CkMyPe() + (ParticleData::id_counter[cello::index_static()]++) * CkNumPes();
-      pmass[ipp] = this->mass[i] * cello::mass_solar / enzo_units->mass();
+      pmass[ipp] = this->mass[i] * enzo_constants::mass_solar / enzo_units->mass();
       px[ipp]    = this->position[0][i];
       py[ipp]    = this->position[1][i];
       pz[ipp]    = this->position[2][i];
@@ -249,8 +249,8 @@ void EnzoInitialFeedbackTest::enforce_block
       pvz[ipp]   = 0.0;
 
       pmetal[ipp]    = 0.01;
-      plifetime[ipp] = 1.00E9* cello::yr_s / enzo_units->time();
-      pform[ipp]     = 1.0E-10 * cello::yr_s / enzo_units->time(); // really just needs to be non-zero
+      plifetime[ipp] = 1.00E9* enzo_constants::yr_s / enzo_units->time();
+      pform[ipp]     = 1.0E-10 * enzo_constants::yr_s / enzo_units->time(); // really just needs to be non-zero
 
       is_local[ipp] = 1;
 

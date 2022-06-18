@@ -22,6 +22,7 @@ charmrun
 config.log
 errors.org
 warnings.org
+doc/dox-xml
 
 # ignore directories used for building branches
 build-*/Cello/*

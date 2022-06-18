@@ -38,17 +38,19 @@ EnzoMethodGrackle::EnzoMethodGrackle
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
 
+  this->metallicity_floor_ = enzo::config()->method_grackle_metallicity_floor;
+
   /// Define Grackle's internal data structures
   time_grackle_data_initialized_ = ENZO_FLOAT_UNDEFINED;
   initialize_grackle_chemistry_data(time);
-
+  
 #endif /* CONFIG_USE_GRACKLE */
 }
 
 //----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_GRACKLE
-
+ 
 void EnzoMethodGrackle::define_required_grackle_fields()
 {
   // Gather list of fields that MUST be defined for this method and
@@ -97,7 +99,6 @@ void EnzoMethodGrackle::define_required_grackle_fields()
   // Primordial chemistry fields
 
   if (chemistry_level >= 1) {
-    cello::define_field_in_group ("density",       "color");
     cello::define_field_in_group ("HI_density",    "color");
     cello::define_field_in_group ("HII_density",   "color");
     cello::define_field_in_group ("HeI_density",   "color");
@@ -236,6 +237,20 @@ void EnzoMethodGrackle::setup_grackle_units (double current_time,
 
     EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
+    // Have to explicitly initialize current_time and current_redshift here because 
+    // this function is called in the constructor, and cosmology units are not initialized 
+    // until after Simulation::initialize() completes (see EnzoSimulation::r_startup_begun()). 
+
+    if (current_time == 0) {
+       current_time = cosmology->time_from_redshift(enzo::config()->physics_cosmology_initial_redshift);
+       cosmology->set_current_redshift(cosmology->redshift_from_time(current_time));
+    }
+
+    grackle_units->density_units  = cosmology->density_units(); 
+    grackle_units->length_units = cosmology->length_units();
+    grackle_units->time_units  = cosmology->time_units();
+    grackle_units->velocity_units = cosmology->velocity_units();
+
     cosmology->compute_expansion_factor(&cosmo_a, &cosmo_dt, current_time);
     grackle_units->a_units
          = 1.0 / (1.0 + enzo_config->physics_cosmology_initial_redshift);
@@ -263,7 +278,7 @@ void EnzoMethodGrackle::setup_grackle_fields
  // used at initialization, and is by default false.
  grackle_field_data * grackle_fields,
  int i_hist /*default 0 */
- ) throw()
+ ) const throw()
 {
 
   Field field = enzo_block->data()->field();
@@ -361,7 +376,7 @@ void EnzoMethodGrackle::setup_grackle_fields
 void EnzoMethodGrackle::update_grackle_density_fields(
                                EnzoBlock * enzo_block,
                                grackle_field_data * grackle_fields
-                               ) throw() {
+                               ) const throw() {
 
   // Intended for use at problem initialization. Scale species
   // density fields to be sensible mass fractions of the initial
@@ -383,6 +398,7 @@ void EnzoMethodGrackle::update_grackle_density_fields(
 
   double tiny_number = 1.0E-10;
 
+  const EnzoConfig * enzo_config = enzo::config();
   chemistry_data * grackle_chemistry =
     enzo::config()->method_grackle_chemistry;
 
@@ -411,6 +427,10 @@ void EnzoMethodGrackle::update_grackle_density_fields(
           grackle_fields->DII_density[i]   = grackle_fields->density[i] * tiny_number;
           grackle_fields->HDI_density[i]   = grackle_fields->density[i] * tiny_number;
         }
+
+       if (grackle_chemistry->metal_cooling == 1){
+          grackle_fields->metal_density[i] = grackle_fields->density[i] * metallicity_floor_ * enzo_constants::metallicity_solar;
+       }
 
       }
     }
@@ -461,6 +481,12 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
     ERROR("EnzoMethodGrackle::compute()",
     "Error in local_solve_chemistry.\n");
   }
+
+  if (metallicity_floor_ > 0.0)
+  {
+     enforce_metallicity_floor(enzo_block);
+  }
+
 
   /* Correct total energy for changes in internal energy */
   gr_float * v3[3];
@@ -560,6 +586,40 @@ double EnzoMethodGrackle::timestep ( Block * block ) throw()
 //----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_GRACKLE
+
+
+void EnzoMethodGrackle::enforce_metallicity_floor(EnzoBlock * enzo_block) throw()
+{
+  // MUST have metal_density field tracked
+  Field field = enzo_block->data()->field();
+  enzo_float * density = (enzo_float*) field.values("density");
+  enzo_float * metal_density  = (enzo_float*) field.values("metal_density");
+
+  int gx,gy,gz;
+  field.ghost_depth (0,&gx,&gy,&gz);
+
+  int nx,ny,nz;
+  field.size (&nx,&ny,&nz);
+
+  int ngx = nx + 2*gx;
+  int ngy = ny + 2*gy;
+  int ngz = nz + 2*gz;
+
+  for (int iz=0; iz<ngz; iz++){
+    for (int iy=0; iy<ngy; iy++){
+      for (int ix=0; ix<ngx; ix++){
+        int i = INDEX(ix,iy,iz,ngx,ngy);
+        double Z = metal_density[i] / density[i] / enzo_constants::metallicity_solar;
+        if (Z < metallicity_floor_) metal_density[i] = density[i] * metallicity_floor_ * enzo_constants::metallicity_solar;
+      }
+    }
+  }     
+  return;
+}
+#endif
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_GRACKLE
 void EnzoMethodGrackle::ResetEnergies ( EnzoBlock * enzo_block) throw()
 {
    const EnzoConfig * enzo_config = enzo::config();
@@ -637,9 +697,11 @@ void EnzoMethodGrackle::ResetEnergies ( EnzoBlock * enzo_block) throw()
 
          mu = density[i] / mu;
 
-         internal_energy[i] = pow(10.0, ((temperature_slope * (iy-gy)) +
-                              log10(enzo_config->initial_grackle_test_minimum_temperature)))/
-                              mu / enzo_units->temperature() / (nominal_gamma - 1.0);
+         internal_energy[i] =
+           (pow(10.0, ((temperature_slope * (iy-gy)) +
+                       log10(enzo_config->initial_grackle_test_minimum_temperature)))/
+            mu / enzo_units->kelvin_per_energy_units() /
+            (nominal_gamma - 1.0));
          total_energy[i] = internal_energy[i];
 
        }

@@ -158,6 +158,8 @@ extern "C" {
 
 #include "fortran_types.h" /* included so scons knowns to install fortran.h */
 
+#include "enzo_constants.hpp"
+
 #include "enzo_EnzoPhysicsCosmology.hpp"
 
 #include "enzo_EnzoDualEnergyConfig.hpp"
@@ -221,6 +223,7 @@ extern "C" {
 #include "enzo_EnzoBfieldMethod.hpp"
 #include "enzo_EnzoBfieldMethodCT.hpp"
 #include "enzo_EnzoSourceInternalEnergy.hpp"
+#include "enzo_EnzoSourceGravity.hpp"
 
 // public header for the EnzoRiemann sub-library. This needs to be included
 // after the headers for:

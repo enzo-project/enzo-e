@@ -107,7 +107,7 @@ void EnzoInitialCollapse::enforce_block
   // Initialize Fields
 
   const double gamma = enzo::fluid_props()->gamma();
-  const double energy = 1e-3*(cello::kboltz)*temperature_ / ((gamma - 1.0) * (1.0 * cello::mass_hydrogen));
+  const double energy = 1e-3*(enzo_constants::kboltz)*temperature_ / ((gamma - 1.0) * (1.0 * enzo_constants::mass_hydrogen));
   
   // ...compute ellipsoid density
 

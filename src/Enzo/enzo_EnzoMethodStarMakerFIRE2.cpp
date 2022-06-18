@@ -162,10 +162,10 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
 
         // need to compute this better for Grackle fields (on to-do list)
         double rho_cgs = density[i] * enzo_units->density();
-        double mean_particle_mass = nominal_mol_weight * cello::mass_hydrogen;
+        double mean_particle_mass = nominal_mol_weight * enzo_constants::mass_hydrogen;
         double ndens = rho_cgs / mean_particle_mass;
 
-        double mass  = density[i] *dx*dy*dz * enzo_units->mass() / cello::mass_solar;
+        double mass  = density[i] *dx*dy*dz * enzo_units->mass() / enzo_constants::mass_solar;
         double metallicity = (metal) ? metal[i]/density[i]/Zsolar : 0.0;
 
         //
@@ -183,7 +183,7 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
         // Check whether mass in [min_mass, max_range] range and if specified, Jeans unstable
         if (! this->check_mass(mass)) continue;
 
-        double tdyn = sqrt(3.0 * cello::pi / 32.0 / cello::grav_constant /
+        double tdyn = sqrt(3.0 * cello::pi / 32.0 / enzo_constants::grav_constant /
                       (density[i] * enzo_units->density()));
 
         //
@@ -250,7 +250,7 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
         pform     = (enzo_float *) particle.attribute_array(it, ia_to, ib);
 
         pform[io]     =  enzo_block->time();   // formation time
-        plifetime[io] =  10.0 * cello::Myr_s / enzo_units->time() ; // lifetime
+        plifetime[io] =  10.0 * enzo_constants::Myr_s / enzo_units->time() ; // lifetime
 
         if (metal){
           pmetal     = (enzo_float *) particle.attribute_array(it, ia_metal, ib);

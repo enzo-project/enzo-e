@@ -66,7 +66,9 @@ void EnzoInitialGrackleTest::enforce_block
 
   grackle_field_data grackle_fields_;
 
-  EnzoMethodGrackle::setup_grackle_fields(enzo_block, & grackle_fields_);
+  const EnzoMethodGrackle * grackle_method = enzo::grackle_method();
+
+  grackle_method->setup_grackle_fields(enzo_block, & grackle_fields_);
 
   gr_float * total_energy  = (gr_float *) field.values("total_energy");
 
@@ -122,7 +124,7 @@ void EnzoInitialGrackleTest::enforce_block
       for (int ix=0; ix<nx+gx; ix++) { // H Number Density
         int i = INDEX(ix,iy,iz,ngx,ngy);
 
-        grackle_fields_.density[i] = cello::mass_hydrogen *
+        grackle_fields_.density[i] = enzo_constants::mass_hydrogen *
                      pow(10.0, ((H_n_slope * (ix-gx)) + log10(enzo_config->initial_grackle_test_minimum_H_number_density)))/
                      grackle_chemistry->HydrogenFractionByMass / enzo_units->density();
 
@@ -188,9 +190,10 @@ void EnzoInitialGrackleTest::enforce_block
           mu = grackle_fields_.density[i] / mu;
         } // end primordial_chemistry > 0
 
-        grackle_fields_.internal_energy[i] = pow(10.0, ((temperature_slope * (iy-gy)) +
-                                      log10(enzo_config->initial_grackle_test_minimum_temperature)))/
-                             mu / enzo_units->temperature() / (nominal_gamma - 1.0);
+        grackle_fields_.internal_energy[i] =
+          (pow(10.0, ((temperature_slope * (iy-gy)) +
+           log10(enzo_config->initial_grackle_test_minimum_temperature)))/
+           mu / enzo_units->kelvin_per_energy_units() / (nominal_gamma - 1.0));
         total_energy[i]    = grackle_fields_.internal_energy[i];
       }
     }
@@ -229,7 +232,6 @@ void EnzoInitialGrackleTest::enforce_block
                                  );
   }
 
-  EnzoMethodGrackle::delete_grackle_fields(&grackle_fields_);
 
 
   block->initial_done();
