@@ -142,6 +142,11 @@ public: // interface
   }
 
   /// Assists with problem initialization
+  ///
+  /// Scales species density fields to be sensible mass fractions of the
+  /// initial density field. Problem types that require finer-tuned control
+  /// over individual species fields should adapt this function
+  /// in their initialization routines.
   void update_grackle_density_fields
   (EnzoBlock * enzo_block, grackle_field_data * grackle_fields = nullptr)
     const throw();
