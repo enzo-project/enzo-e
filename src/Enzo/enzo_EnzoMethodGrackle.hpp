@@ -81,7 +81,6 @@ public: // interface
     Method::pup(p);
 
     p | grackle_units_;
-
     double last_init_time = time_grackle_data_initialized_;
     p | last_init_time;
     if (p.isUnpacking()) {
@@ -129,24 +128,26 @@ public: // interface
   static void setup_grackle_units(const EnzoFieldAdaptor& fadaptor,
                                   code_units * grackle_units) throw();
 
-  static void setup_grackle_fields(const EnzoFieldAdaptor& fadaptor,
-                                   grackle_field_data * grackle_fields,
-                                   int stale_depth = 0,
-                                   bool omit_cell_width = false ) throw();
+  void setup_grackle_fields(const EnzoFieldAdaptor& fadaptor,
+                            grackle_field_data * grackle_fields,
+                            int stale_depth = 0,
+                            bool omit_cell_width = false) const throw();
 
-  static void setup_grackle_fields(EnzoBlock * enzo_block,
-                                   grackle_field_data * grackle_fields,
-                                   int i_hist = 0 ) throw()
+  void setup_grackle_fields(EnzoBlock * enzo_block,
+                            grackle_field_data * grackle_fields,
+                            int i_hist = 0 ) const throw()
   {
     setup_grackle_fields(EnzoFieldAdaptor((Block*) enzo_block, i_hist),
                          grackle_fields, 0, false);
   }
 
-  static void update_grackle_density_fields
-  (EnzoBlock * enzo_block,
-   grackle_field_data * grackle_fields = nullptr) throw();
+  /// Assists with problem initialization
+  void update_grackle_density_fields
+  (EnzoBlock * enzo_block, grackle_field_data * grackle_fields = nullptr)
+    const throw();
 
-  static void delete_grackle_fields(grackle_field_data * grackle_fields) throw() {
+  void delete_grackle_fields(grackle_field_data * grackle_fields) const throw()
+  {
       grackle_fields->density         = NULL;
       grackle_fields->internal_energy = NULL;
       grackle_fields->x_velocity      = NULL;
@@ -173,7 +174,9 @@ public: // interface
       delete [] grackle_fields->grid_end;       grackle_fields->grid_end        = NULL;
 
       return;
- }
+  }
+
+  void enforce_metallicity_floor(EnzoBlock * enzo_block) throw();
 
   void calculate_cooling_time(const EnzoFieldAdaptor& fadaptor, enzo_float* ct,
                               int stale_depth = 0,
@@ -208,7 +211,9 @@ public: // interface
 			    "local_calculate_temperature");
   }
 
+
 #endif
+
 
 protected: // methods
 
@@ -238,6 +243,8 @@ protected: // methods
   code_units grackle_units_;
   chemistry_data_storage grackle_rates_;
   double time_grackle_data_initialized_;
+  double metallicity_floor_;
+
 #endif
 
 };

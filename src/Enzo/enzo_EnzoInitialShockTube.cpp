@@ -282,7 +282,7 @@ void EnzoInitialShockTube::enforce_block
   // (the outcome of this test probably not particularly predictable...)
   if (enzo::config()->method_grackle_use_grackle){
 #ifdef CONFIG_USE_GRACKLE
-    EnzoMethodGrackle::update_grackle_density_fields((EnzoBlock*) block);
+    enzo::grackle_method()->update_grackle_density_fields((EnzoBlock*) block);
 #else
     ERROR("EnzoInitialShockTube::enforce_block()",
           "Can't set up for EnzoMethodGrackle since Enzo-E hasn't been "

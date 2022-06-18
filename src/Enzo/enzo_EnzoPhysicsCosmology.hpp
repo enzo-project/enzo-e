@@ -180,20 +180,23 @@ public: // interface
   void compute_expansion_factor
   (enzo_float *cosmo_a, enzo_float *cosmo_dadt, enzo_float time) const;
 
+  /// Return current density units scaling (requires set_current_time())
+  double density_units() const
+  {
+    return 1.8788e-29*omega_matter_now_*pow(hubble_constant_now_,2)*
+                      pow(1 + current_redshift_,3);
+  }
   /// Return current mass units scaling (requires set_current_time())
   double mass_units() const
   {
-    double density = 1.8788e-29*omega_matter_now_*
-      pow(hubble_constant_now_,2)*
-      pow(1 + current_redshift_,3);
     double length = length_units();
-    return density * length * length * length;
+    return density_units() * length * length * length;
   }
 
   /// Return current length units scaling (requires set_current_time())
   double length_units() const
   {
-    return cello::Mpc_cm*comoving_box_size_/hubble_constant_now_/
+    return enzo_constants::Mpc_cm*comoving_box_size_/hubble_constant_now_/
       (1.0 + current_redshift_);
   }
 
@@ -204,17 +207,21 @@ public: // interface
       pow(1.0 + initial_redshift_,1.5);
   }
 
-  /// Return current temperature units (requires set_current_time())
-  double temperature_units() const
-  {
-    return 1.81723e6*pow(comoving_box_size_,2.0)*omega_matter_now_*
-                      (1.0 + initial_redshift_);
-  }
-
   double velocity_units() const
   {
     return 1.22475e7*comoving_box_size_*sqrt(omega_matter_now_)*
                       sqrt(1.0 + initial_redshift_);
+  }
+
+  /// Returns the scaling factor to be divided by temperature to convert from
+  /// units of Kelvin to units of specific internal energy
+  ///
+  /// The original Enzo refered to this quantity as "temperature units", but in
+  /// Enzo-E we primarily track temperature in units of Kelvin
+  double kelvin_per_energy_units() const
+  {
+    return 1.81723e6*pow(comoving_box_size_,2.0)*omega_matter_now_*
+                      (1.0 + initial_redshift_);
   }
 
   void print () const

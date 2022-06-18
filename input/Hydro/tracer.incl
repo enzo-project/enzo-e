@@ -4,10 +4,10 @@ Particle {
 
    trace {
       attributes = ["id", "int64",
-		    "x", "single",
-                    "y", "single",
-		    "z", "single",
-                    "is_local", "single"];
+		              "x", "default",
+                    "y", "default",
+		              "z", "default",
+                    "is_local", "default"];
       position = ["x","y","z"];
    }
 }

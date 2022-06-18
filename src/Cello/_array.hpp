@@ -23,5 +23,7 @@
 //----------------------------------------------------------------------
 
 #include "array_CelloArray.hpp"
+#include "array_CArrCollec.hpp"
+#include "array_StringIndRdOnlyMap.hpp"
 
 #endif /* _ARRAY_HPP */

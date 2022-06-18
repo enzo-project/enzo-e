@@ -1,0 +1,14 @@
+include "input/Gravity/jeans_wave/initial_jeans.incl"
+
+   Method {
+
+      list = ["pm_deposit", "gravity", "ppm"];
+
+      ppm {
+         courant = 0.8;
+         diffusion = false;
+         dual_energy = false;
+         flattening = 0;
+         steepening = false;
+      }
+   }

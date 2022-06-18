@@ -1,0 +1,4 @@
+include "input/vlct/vl.incl"
+include "input/Gravity/jeans_wave/initial_jeans.incl"
+
+Method { list = ["pm_deposit", "gravity", "mhd_vlct"]; }

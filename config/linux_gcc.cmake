@@ -21,6 +21,8 @@ if(NOT __processedUserDefaults)
 
   # Setting package paths (e.g., Grackle)
 
+  set(Grackle_ROOT "/home/regan/data/SourceCodes/Grackle/GRACKLE_INSTALL" CACHE STRING "my grackle build")
+
   # Mark done
   set(__processedUserDefaults ON)
 
