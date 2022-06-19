@@ -13,11 +13,13 @@
    include "input/vlct/vlct_de.incl"
    include "input/vlct/dual_energy_shock_tube/initial_sod_shock_tube.incl"
 
-   Method {
-      mhd_vlct{
-         dual_energy = true;
-	 dual_energy_eta = 0.00769;
-      };
+   Physics {
+      fluid_props {
+         dual_energy {
+            type = "modern";
+            eta = [0.00769];
+         }
+      }
    }
 
    Domain {

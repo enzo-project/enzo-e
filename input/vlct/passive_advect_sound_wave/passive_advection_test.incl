@@ -19,7 +19,6 @@
 	      "red"];
 
       courant_=0.4;
-      gamma = 1.6666666666666667;
       
       ghost_depth = 3;
       padding = 0;
