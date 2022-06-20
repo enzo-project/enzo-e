@@ -1677,19 +1677,27 @@ void EnzoConfig::read_physics_(Parameters * p)
 
 namespace{
 
-  void check_valid_params_(const std::vector<std::string>& names,
-                           const std::vector<std::string>& valid_params,
-                           const std::string type)
+  /// parse a parameter that is allowed to be a float or a list of floats
+  ///
+  /// returns an empty vector if the parameter does not exist
+  std::vector<double> coerce_param_list_(Parameters * p,
+                                         const std::string& parameter)
   {
-    for (const std::string& name : names){
-      auto rslt = std::find(valid_params.cbegin(), valid_params.cend(), name);
-      if (rslt == valid_params.cend()){
-        ERROR2("expected_group_params_",
-               "\"Physics:fluid_props:dual_energy:%s\" is invalid when "
-               "\"Physics:fluid_props:dual_energy:type\" is \"%s\"",
-               name.c_str(), type.c_str());
+    std::vector<double> out;
+    if (p->type(parameter) == parameter_float) {
+      out.push_back(p->value_float(parameter));
+    } else if (p->type(parameter) == parameter_list) {
+      const int list_length = p->list_length(parameter);
+      for (int i = 0; i < list_length; i++){
+        out.push_back(p->list_value_float(i, parameter));
       }
+    } else if (p->param(parameter) != nullptr) {
+      ERROR1("coerce_param_list_",
+             "The \"%s\" parameter was specified with an invalid type. When "
+             "specified, it must be a float or list of floats",
+             parameter.c_str());
     }
+    return out;
   }
 
   //----------------------------------------------------------------------
@@ -1699,35 +1707,52 @@ namespace{
   {
     EnzoDualEnergyConfig out = EnzoDualEnergyConfig::build_disabled();
 
-    // fetch names of parameters in Physics:fluid_props:floors. If any of them
-    // exist, let's parse them
+    // fetch names of parameters in Physics:fluid_props:dual_energy
     p->group_set(0, "Physics");
     p->group_set(1, "fluid_props");
     p->group_set(2, "dual_energy");
     std::vector<std::string> names = p->leaf_parameter_names();
 
-    bool missing_de_config = names.size() == 0;
-    if (!missing_de_config){
-      Param* type_param = p->param("Physics:fluid_props:dual_energy:type");
-      if (std::find(names.begin(), names.end(), "type") == names.end()){
-        ERROR("parse_de_config_",
-              "Physics:fluid_props:dual_energy must have a \"type\" parameter");
-      }
-      std::string type = p->value_string
-        ("Physics:fluid_props:dual_energy:type", "");
+    const bool missing_de_config = names.size() == 0;
+    if (!missing_de_config){ // parse Physics:fluid_props:dual_energy
+      const std::string type = p->value_string
+        ("Physics:fluid_props:dual_energy:type", "disabled");
 
+      const std::string eta_paramname = "Physics:fluid_props:dual_energy:eta";
+      const bool eta_exists = p->param(eta_paramname) != nullptr;
+      const std::vector<double> eta_list = coerce_param_list_(p, eta_paramname);
+
+      // raise an error if parameters were specified if there are unexpected
+      // parameters. We are being a little extra careful here.
+      for (const std::string& name : names){
+        ASSERT1("parse_de_config_",
+                "Unexpected parameter: \"Physics:fluid_props:dual_energy:%s\"",
+                name.c_str(), (name == "type") | (name == "eta"));
+      }
+
+      // now actually construct the output object
       if (type == "disabled"){
-        check_valid_params_(names, {"type"}, type);
+        ASSERT1("parse_de_config_",
+                "when dual energy is disabled, \"%s\" can't be specified",
+                eta_paramname.c_str(), !eta_exists);
         out = EnzoDualEnergyConfig::build_disabled();
       } else if (type == "modern"){
-        check_valid_params_(names, {"type", "eta"}, type);
-        out = EnzoDualEnergyConfig::build_modern_formulation
-          (p->value_float("Physics:fluid_props:dual_energy:eta", 0.001));
+        ASSERT3("parse_de_config_",
+                "\"%s\" was used to specify %d values. When specified for the "
+                "\"%s\" dual energy formalism, it must provide 1 value.",
+                eta_paramname.c_str(), (int)names.size(), type.c_str(),
+                (eta_list.size() == 1) | !eta_exists);
+        double eta = eta_exists ? eta_list[0] : 0.001;
+        out = EnzoDualEnergyConfig::build_modern_formulation(eta);
       } else if (type == "bryan95"){
-        check_valid_params_(names, {"type", "eta_1", "eta_2"}, type);
-        out = EnzoDualEnergyConfig::build_bryan95_formulation
-          (p->value_float("Physics:fluid_props:dual_energy:eta_1", 0.001),
-           p->value_float("Physics:fluid_props:dual_energy:eta_2", 0.1));
+        ASSERT3("parse_de_config_",
+                "\"%s\" was used to specify %d value(s). When specified for "
+                "the \"%s\" dual energy formalism, it must provide 2 value.",
+                eta_paramname.c_str(), (int)names.size(), type.c_str(),
+                (eta_list.size() == 2) | !eta_exists);
+        double eta_1 = eta_exists ? eta_list[0] : 0.001;
+        double eta_2 = eta_exists ? eta_list[1] : 0.1;
+        out = EnzoDualEnergyConfig::build_bryan95_formulation(eta_1, eta_2);
       } else {
         ERROR1("parse_de_config_",
                "\"Physics:fluid_props:dual_energy:type\" is invalid: \"%s\"",
@@ -1735,6 +1760,8 @@ namespace{
       }
     }
 
+    // look for dual energy parameters specified within the hydro solver (for
+    // backwards compatibility)
     if (hydro_type != ""){
       std::string legacy_de_param = "Method:" + hydro_type + ":dual_energy";
       bool legacy_param_exists = p->param(legacy_de_param) != nullptr;
