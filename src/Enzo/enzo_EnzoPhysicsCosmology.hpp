@@ -238,23 +238,28 @@ public: // interface
   }
 
   /*
-    Return current time unit in terms of seconds (requires set_current_time())
+    Return time unit in terms of seconds (requires set_current_time())
 
-    Time unit is defined so that the following is true (note that `G * rho_bar_m_0` has dimensions
-    of inverse time squared):
+    Time unit is defined so that the following is true (which has the effect of simplifying
+    Poisson's equation):
 
-    `4 * pi * G * rho_bar_m_0 * (1 + z)^3 * time_unit^2 = 1`,
+    `4 * pi * G * rho_bar_m_com * time_unit^2 / a_unit^3 = 1`,
 
-    Where `G` is the gravitational constant.`rho_bar_m_0` is the mean physical matter density
-    at redshift 0, `z` is redshift, and `time_unit` is the density unit in seconds.
-    Defining the time unit in this way has the effect of simplifying Poisson's equation.
+    Where `G` is the gravitational constant.`rho_bar_m_com` is the mean comoving matter density
+    of the universe, `time_unit` is the time unit in seconds, and `a_unit` is the "unit 
+    cosmological scale factor". To understand where the factor of `a_unit^3` come from, see
+    Equations 8, 17, 18 of Greg L. Bryan et al 2014 ApJS 211 19, and note that Laplacian(`phi`) 
+    has dimensions of `time^(-2) * a^(2). 
+
+    In Enzo-E, `a_unit` is defined so that `a` is 1 at the initial redshift (`z_i`), so that:
+    `(1+z_i)^(-1) / a_unit = 1`, which means that `a_unit = 1 / (1 + z_i)`.
 
     `rho_bar_m_0` can be written as `Omega_m_0 * rho_crit_0`, where `Omega_m_0` is a cosmological
     parameter which can be set in the input parameter file,
     and `rho_crit_0` is defined as `3 * H_0^2 / (8 * pi * G)`, where `H_0` is the expansion rate
     of the universe at redshift 0 (with dimensions of inverse time). Plugging this all in gives:
 
-    `3 / 2 * Omega_m_0 * H_0^2 * time_unit^2 = 1`.
+    `3 / 2 * Omega_m_0 * H_0^2 * time_unit^2 * (1 + z_i)^3 = 1`.
 
     After some rearrangement, we get the following expression:
 
@@ -272,21 +277,13 @@ public: // interface
 			     (1 + initial_redshift_)));
   }
 
+  // Return velocity unit in cm/s
+  // Equation 17 of Greg L. Bryan et al 2014 ApJS 211 19, shows that the dimensions of velocity
+  // are `a` times `comoving length` over `time`.
+
   double velocity_units() const
   {
-    return 1.22475e7*comoving_box_size_*sqrt(omega_matter_now_)*
-                      sqrt(1.0 + initial_redshift_);
-  }
-
-  /// Returns the scaling factor to be divided by temperature to convert from
-  /// units of Kelvin to units of specific internal energy
-  ///
-  /// The original Enzo refered to this quantity as "temperature units", but in
-  /// Enzo-E we primarily track temperature in units of Kelvin
-  double kelvin_per_energy_units() const
-  {
-    return 1.81723e6*pow(comoving_box_size_,2.0)*omega_matter_now_*
-                      (1.0 + initial_redshift_);
+    return length_units() / (time_units() * sqrt(1.0 + initial_redshift_));
   }
 
   void print () const
