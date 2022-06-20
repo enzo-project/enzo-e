@@ -12,7 +12,6 @@
 # serve to show the default.
 
 import json, sys, os, subprocess
-import hashlib # built into python
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -277,52 +276,42 @@ html_context = {
 
 # -- Set Breathe parameters and Execute Doxygen -------------------------------
 
-def _dirtree_md5hash(dir_path):
-    # computes the md5hash of all files in a directory
-    def _tree_walk(dir_path): # needed since os.walk's order isn't deterministic
-        files, dirs = [], []
-        with os.scandir(dir_path) as it:
-            for entry in it:
-                if entry.is_file(follow_symlinks = False):
-                    files.append(entry.name)
-                elif entry.is_dir(follow_symlinks = False):
-                    dirs.append(entry.name)
-                else:
-                    raise RuntimeError(
-                        "{} isn't a file or dir".format(entry.path)
-                    )
-        dirs.sort()
-        files.sort()
-        yield dir_path, dirs, files
-        for dir in dirs:
-            yield from _tree_walk(os.path.join(dir_path,dir))
+def _dirtree_latest_mtime(dir_path):
+    """
+    Walk a directory and determine the most recent time at which a contained
+    file/directory was modified, created, deleted, removed, etc.
+    """
 
-    hash_md5 = hashlib.md5()
-    for root, _, files in _tree_walk(dir_path):
-        hash_md5 = hashlib.md5()
+    # it's important to check the mtime of every directory since they provide
+    # the only indication that files within that directory were deleted/moved
+
+    max_mtime = os.stat(dir_path).st_mtime # need to explicitly check root-dir
+
+    for root, dirs, files in os.walk(dir_path, followlinks = False):
+        for dir in dirs:
+            statinfo = os.stat(os.path.join(root, dir))
+            max_mtime = max(statinfo.st_mtime, max_mtime)
         for file in files:
-            with open(os.path.join(root,file), "rb") as f:
-                for chunk in iter(lambda: f.read(1048576), b""): # 1MiB chunks
-                    hash_md5.update(chunk)
-    return hash_md5.hexdigest()
+            statinfo = os.stat(os.path.join(root, file))
+            max_mtime = max(statinfo.st_mtime, max_mtime)
+    return int(max_mtime + 1) # gives posix timestamp in seconds (rounded up)
 
 def build_doxygen():
     if os.getenv("SKIPDOXYGEN", "FALSE").lower() == "true":
         # skip a rebuild
         return None
 
-    # load cached checksums (if they exist)
+    # load cached modification times (if they exist)
     try:
-        with open("../cached_checksums.json", "r") as f:
-            cached_hash = json.load(f)
+        with open("../cached_mtimes.json", "r") as f:
+            cached_mtimes = json.load(f)
     except FileNotFoundError:
-        cached_hash = {"src-hash" : None, "dox-hash" : None }
+        cached_mtimes = {"src" : None, "dox" : None }
 
-    src_hash = _dirtree_md5hash("../../src")
-    if os.path.isdir("../dox-xml"):
-        # if hash codes match the cached values skip doxygen
-        if ((cached_hash["src-hash"] == src_hash) and
-            (cached_hash["dox-hash"] == _dirtree_md5hash("../dox-xml"))):
+    src_mtime = _dirtree_latest_mtime("../../src")
+    if os.path.isdir("../dox-xml"): # skip doxygen if mtimes match cached vals
+        if ((cached_mtimes["src"] == src_mtime) and
+            (cached_mtimes["dox"] == _dirtree_latest_mtime("../dox-xml"))):
             return None
 
     try:
@@ -331,9 +320,9 @@ def build_doxygen():
         if retcode < 0:
             sys.stderr.write("doxygen terminated by signal %s" % (-retcode))
         else: # cache the md5 hash code for the future
-            with open("../cached_checksums.json", "w") as f:
-                json.dump({"src-hash" : src_hash,
-                           "dox-hash" : _dirtree_md5hash("../dox-xml")}, f)
+            with open("../cached_mtimes.json", "w") as f:
+                json.dump({"src" : src_mtime,
+                           "dox" : _dirtree_latest_mtime("../dox-xml")}, f)
     except OSError as e:
         sys.stderr.write("doxygen execution failed: %s" % e)
 
