@@ -219,6 +219,7 @@ extern "C" {
 #include "enzo_EnzoBfieldMethod.hpp"
 #include "enzo_EnzoBfieldMethodCT.hpp"
 #include "enzo_EnzoSourceInternalEnergy.hpp"
+#include "enzo_EnzoSourceGravity.hpp"
 
 // public header for the EnzoRiemann sub-library. This needs to be included
 // after the headers for:

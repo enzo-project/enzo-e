@@ -339,6 +339,7 @@ public: // interface
       method_grackle_chemistry(nullptr),
       method_grackle_use_cooling_timestep(false),
       method_grackle_radiation_redshift(-1.0),
+      method_grackle_metallicity_floor(0.0),
 #endif
       // EnzoMethodGravity
       method_gravity_grav_const(0.0),
@@ -350,7 +351,6 @@ public: // interface
       method_background_acceleration_flavor(""),
       method_background_acceleration_mass(0.0),
       method_background_acceleration_DM_mass(0.0),
-      method_background_acceleration_DM_density(0.0),
       method_background_acceleration_bulge_mass(0.0),
       method_background_acceleration_core_radius(0.0),
       method_background_acceleration_bulge_radius(0.0),
@@ -550,6 +550,7 @@ public: // attributes
   double                     initial_grackle_test_minimum_metallicity;
   double                     initial_grackle_test_minimum_temperature;
   int                        initial_grackle_test_reset_energies;
+
 #endif /* CONFIG_USE_GRACKLE */
 
   /// EnzoInitialHdf5
@@ -744,6 +745,7 @@ public: // attributes
   chemistry_data *           method_grackle_chemistry;
   bool                       method_grackle_use_cooling_timestep;
   double                     method_grackle_radiation_redshift;
+  double                     method_grackle_metallicity_floor;
 #endif /* CONFIG_USE_GRACKLE */
 
   /// EnzoMethodGravity
@@ -758,7 +760,6 @@ public: // attributes
   std::string                method_background_acceleration_flavor;
   double                     method_background_acceleration_mass;
   double                     method_background_acceleration_DM_mass;
-  double                     method_background_acceleration_DM_density;
   double                     method_background_acceleration_bulge_mass;
   double                     method_background_acceleration_core_radius;
   double                     method_background_acceleration_bulge_radius;

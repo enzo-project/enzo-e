@@ -139,7 +139,7 @@ Method {
 
 Particle {
     list = ["star"];
-
+    mass_is_mass = true;
     star {
         attributes = [ "x", "default",
                        "y", "default",
