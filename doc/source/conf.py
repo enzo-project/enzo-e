@@ -11,7 +11,8 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os, subprocess
+import json, sys, os, subprocess
+import hashlib # built into python
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -276,16 +277,63 @@ html_context = {
 
 # -- Set Breathe parameters and Execute Doxygen -------------------------------
 
+def _dirtree_md5hash(dir_path):
+    # computes the md5hash of all files in a directory
+    def _tree_walk(dir_path): # needed since os.walk's order isn't deterministic
+        files, dirs = [], []
+        with os.scandir(dir_path) as it:
+            for entry in it:
+                if entry.is_file(follow_symlinks = False):
+                    files.append(entry.name)
+                elif entry.is_dir(follow_symlinks = False):
+                    dirs.append(entry.name)
+                else:
+                    raise RuntimeError(
+                        "{} isn't a file or dir".format(entry.path)
+                    )
+        dirs.sort()
+        files.sort()
+        yield dir_path, dirs, files
+        for dir in dirs:
+            yield from _tree_walk(os.path.join(dir_path,dir))
+
+    hash_md5 = hashlib.md5()
+    for root, _, files in _tree_walk(dir_path):
+        hash_md5 = hashlib.md5()
+        for file in files:
+            with open(os.path.join(root,file), "rb") as f:
+                for chunk in iter(lambda: f.read(1048576), b""): # 1MiB chunks
+                    hash_md5.update(chunk)
+    return hash_md5.hexdigest()
+
 def build_doxygen():
     if os.getenv("SKIPDOXYGEN", "FALSE").lower() == "true":
         # skip a rebuild
         return None
+
+    # load cached checksums (if they exist)
+    try:
+        with open("../cached_checksums.json", "r") as f:
+            cached_hash = json.load(f)
+    except FileNotFoundError:
+        cached_hash = {"src-hash" : None, "dox-hash" : None }
+
+    src_hash = _dirtree_md5hash("../../src")
+    if os.path.isdir("../dox-xml"):
+        # if hash codes match the cached values skip doxygen
+        if ((cached_hash["src-hash"] == src_hash) and
+            (cached_hash["dox-hash"] == _dirtree_md5hash("../dox-xml"))):
+            return None
 
     try:
         retcode = subprocess.call('cd ../../src; doxygen doxygen/Doxyfile-xml',
                                   shell=True)
         if retcode < 0:
             sys.stderr.write("doxygen terminated by signal %s" % (-retcode))
+        else: # cache the md5 hash code for the future
+            with open("../cached_checksums.json", "w") as f:
+                json.dump({"src-hash" : src_hash,
+                           "dox-hash" : _dirtree_md5hash("../dox-xml")}, f)
     except OSError as e:
         sys.stderr.write("doxygen execution failed: %s" % e)
 
