@@ -29,26 +29,10 @@ parameters
      - Type
      - Default
      - Description
-   * - ``"density_floor"``
-     - `float`
-     - `1.0e-6`
-     - `Lower limit on density`
    * - ``"diffusion"``
      - `logical`
      - `false`
      - `PPM diffusion parameter`
-   * - ``"dual_energy"``
-     - `logical`
-     - `false`
-     - `Whether to use dual-energy formalism`
-   * - ``"dual_energy_eta_1"``
-     - `float`
-     - `0.001`
-     - `Dual energy parameter eta 1`
-   * - ``"dual_energy_eta_2"``
-     - `float`
-     - `0.1`
-     - `Dual energy parameter eta 2`
    * - ``"flattening"``
      - `integer`
      - `3`
@@ -57,14 +41,6 @@ parameters
      - `integer`
      - `100`
      - `Enzo's MinimumPressureSupportParameter`
-   * - ``"number_density_floor"``
-     - `float`
-     - `1.0e-6`
-     - `Lower limit on number density`
-   * - ``"pressure_floor"``
-     - `float`
-     - `1.0e-6`
-     - `Lower limit on pressure`
    * - ``"pressure_free"``
      - `logical`
      - `false`
@@ -73,18 +49,10 @@ parameters
      - `logical`
      - `false`
      - `PPM steepening parameter`
-   * - ``"temperature_floor"``
-     - `float`
-     - `1.0e-6`
-     - `Lower limit on temperature`
    * - ``"use_minimum_pressure_support"``
      - `logical`
      - `false`
      - `Minimum pressure support`
-   * - ``"mol_weight"``
-     - `float`
-     - `0.6`
-     - `Mean molecular mass`
 
 fields
 ------
@@ -133,6 +101,15 @@ fields
      - ``enzo_float``
      - [w]
      - computed from ``total_energy``
+
+``fluid_props`` compatability
+-----------------------------
+
+This method is also compatible with the ``"bryan95"`` dual-energy formalism.
+See :ref:`using-fluid_props-de` for additional details.
+
+This method currently ignores all of the floor parameters that are set in the ``physics:fluid_props:floors`` section of the parameter file.
+
 
 ``"ppml"``: MHD
 ===============
@@ -194,14 +171,6 @@ parameter) should be less than 0.5.
      - `string`
      - `none`
      - `Specifies handling of magnetic fields (or lack thereof)`
-   * - ``"density_floor"``
-     - `float`
-     - `none`
-     - `Lower limit on density (must exceed 0)`
-   * - ``"pressure_floor"``
-     - `logical`
-     - `none`
-     - `Lower limit on thermal pressure (must exceed 0)`
    * - ``"riemann_solver"``
      - `string`
      - `hlld`
@@ -219,14 +188,6 @@ parameter) should be less than 0.5.
      - `1.5`
      - `controls dissipation of the "plm"/"plm_enzo" reconstruction
        method.`
-   * - ``"dual_energy"``
-     - `logical`
-     - `false`
-     - `Whether to use dual-energy formalism`
-   * - ``"dual_energy_eta"``
-     - `float`
-     - `0.001`
-     - `Dual energy parameter eta`
 
 
 fields
@@ -304,50 +265,15 @@ initializer. For non-trivial configurations, we have provide the
 (face-centered and cell-centered) from expression(s) given in the
 parameter file for component(s) of the magnetic vector potential.
 
-.. _using-vlct-de:
+``fluid_props`` compatability
+-----------------------------
 
-dual-energy formalism
----------------------
+This method makes use of the ``density`` and ``pressure`` floor parameters that are set in the ``physics:fluid_props:floors`` section of the parameter file.
+See :ref:`using-fluid_props-floors` for more details about specifying these parameters.
+This method requires that both parameters are specified and that they have positive values.
 
-The implementation of the dual-energy more closely resembles the
-implementation employed in Enzo's Runge–Kutta integrator than the original
-conception used by Enzo's ppm integrator, (for a description of that
-implementation, see `Bryan et al (1995)
-<https://ui.adsabs.harvard.edu/abs/1995CoPhC..89..149B>`_ ). There are 3
-main differences from the original conception:
-
-  1. internal energy is always used to compute pressure. In the original
-     conception, pressure could be computed from ``total_energy`` or
-     ``internal_energy`` (the decision was independent of synchronization).
-  2. ``pressure`` and ``internal_energy`` are not separately reconstructed.
-     Instead, just the pressure is reconstructed. The ``internal_energy``
-     is computed at the left and right interfaces from the reconstructed
-     quantities.
-  3. Synchronization of the total and internal energies is a local
-     operation that doesn't require knowledge of cell neighbors. In the
-     original conception, knowledge of the immediate neighbors had been
-     required (each synchronization incremented the stale depth - 3 extra
-     ghost zones would have been required).
-
-For clarity, the conditions for synchronization are provided below. The
-specific ``internal_energy``, :math:`e`, is set to
-:math:`e'= E - (v^2 + B^2/\rho)/2` (where :math:`E` is the specific
-``total_energy``) when the following conditions are met:
-
-  * :math:`c_s'^2 > \eta v^2`, where :math:`c_s'^2=\gamma(\gamma - 1) e'`.
-  * :math:`c_s'^2 > \eta B^2/\rho` (this is always satisfied in hydro mode)
-  * :math:`e' > e /2`
-
-If the above condition is not met, then ``total_energy`` is set to
-:math:`e + (v^2 + B^2/\rho)/2` in MHD mode (in hydro mode, it's set to
-:math:`e + v^2/2`).
-    
-When ``"dual_energy_eta"``, is set to ``0``, :math:`e` is always set to
-``e'``. This is done to provide support for Grackle (in the future)
-without the dual-energy formalism.
-
-*Note: in the future, the behavior described in difference 2, may change
-to achieve better compatibility with Grackle.*
+This method is also compatible with the ``"modern"`` dual-energy formalism.
+See :ref:`using-fluid_props-de` for additional details.
 
 .. _using-vlct-reconstruction:
 

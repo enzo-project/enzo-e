@@ -342,7 +342,8 @@ subclass of ``EnzoEquationOfState`` is the ``EnzoEOSIdeal`` class
 which encapsulates the properties of an ideal, adiabatic gas. This
 class can optionally support use of the dual-energy formalism (For
 details about the currently expected implementation of the
-dual-energy formalism see :ref:`using-vlct-de` ).
+dual-energy formalism see the ``"modern"`` section of
+:ref:`using-fluid_props-de` ).
 
 The ``EnzoEquationOfState`` has the following interface:
 

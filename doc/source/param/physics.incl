@@ -123,14 +123,9 @@ dual_energy
 ~~~~~~~~~~~
 
 :p:`Physics:fluid_props:dual_energy` parameters specify details about
-the dual-energy formalism (or the lack thereof). Compatibility details
-are provided on :ref:`using-methods` for different hydro-solvers and
-different formulations of the dual-energy formalism.
-
-.. note::
-
-   We should add a separate section to discuss the different approaches for
-   the dual energy formalism.
+the dual-energy formalism (or the lack thereof). Significantly more
+detail about the different variants are provided in
+:ref:`using-fluid_props-de`.
 
 ----
 
@@ -195,3 +190,43 @@ equations of state (like an isothermal equation of state).
 used by the hydrodynamics solvers. This is used in a number other
 places like the` ``"grackle"`` :e:`method, and various
 problem-initializers.`
+
+floors
+~~~~~~
+
+:p:`Physics:fluid_props:floors` parameters specify the floors that
+should be applied to different fluid quantities. Valid parameter values
+must be positive. Different methods selectively apply these floors.
+For more details, see :ref:`using-fluid_props-floors`.
+
+----
+
+:Parameter:  :p:`Physics` : :p:`fluid_props` : :p:`floors` : :p:`density`
+:Summary: :s:`Lower limit on density field`
+:Type:   :t:`float`
+:Default: :d:`none`
+:Scope:     :z:`Enzo`
+
+:e:`Floor to be applied to the mass density field.`
+
+----
+
+:Parameter:  :p:`Physics` : :p:`fluid_props` : :p:`floors` : :p:`pressure`
+:Summary: :s:`Lower limit on thermal pressure`
+:Type:    :t:`float`
+:Default: :d:`none`
+:Scope:     :z:`Enzo`
+
+:e:`Thermal pressure floor.`
+
+----
+
+:Parameter:  :p:`Physics` : :p:`fluid_props` : :p:`floors` : :p:`temperature`
+:Summary: :s:`Lower limit on temperature`
+:Type:    :t:`float`
+:Default: :d:`none`
+:Scope:     :z:`Enzo`
+
+:e:`Temperature floor, which must exceed 0. Note that this is
+specified with units of Kelvin (since the ``"temperature"`` field is
+always measured in Kelvin in Enzo-E)`

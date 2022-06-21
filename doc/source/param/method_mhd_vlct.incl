@@ -112,8 +112,7 @@ parameters in :p:`Physics` : :p:`fluid_props` should be used instead.
 :Default: :d:`0.001`
 :Scope:     :z:`Enzo`
 
-:e:`Dual-energy formalism parameter. For more details, see`
-:ref:`using-vlct-de`
+:e:`Dual-energy formalism parameter.`
 
 ----
 
