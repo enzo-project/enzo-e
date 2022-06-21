@@ -3,7 +3,8 @@
 /// @file     enzo_EnzoInitialShuCollapse.hpp
 /// @author   Stefan Arridge (stefan.arridge@gmail.com)
 /// @date     7 June 2022
-/// @brief    Initializer for the Shu Collapse problem (Shu 1977)
+/// @brief    Initializer for the Shu Collapse problem as described
+///           in Federrath et al 2010, ApJ, 713, 269.
 
 #ifndef ENZO_ENZO_INITIAL_SHU_COLLAPSE_HPP
 #define ENZO_ENZO_INITIAL_SHU_COLLAPSE_HPP

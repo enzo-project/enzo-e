@@ -4,7 +4,8 @@
 /// @author     Stefan Arridge (stefan.arridge@gmail.com)
 /// @date       1 June 2022
 /// @brief      Implements a method for forming sink particles based on
-///             the method described in Krumholz+ 2004 and Federrath+ 2010.
+///             the method described in Krumholz et al 2004, ApJ, 611, 399 and
+///             Federrath et al 2010, ApJ, 713, 269.
 
 #include <random>
 #include "cello.hpp"

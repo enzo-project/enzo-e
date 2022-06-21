@@ -3,8 +3,8 @@
 /// @file     enzo_EnzoInitialShuCollapse.cpp
 /// @author   Stefan Arridge (stefan.arridge@gmail.com)
 /// @date     7 June 2022
-/// @brief    Initializer for the Shu Collapse problem (Shu 1977)
-///
+/// @brief    Initializer for the Shu Collapse problem as described
+///           in Federrath et al 2010, ApJ, 713, 269.
 
 #include "cello.hpp"
 #include "enzo.hpp"

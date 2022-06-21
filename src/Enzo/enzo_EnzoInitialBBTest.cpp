@@ -3,7 +3,8 @@
 /// @file     enzo_EnzoInitialBBTest.cpp
 /// @author   Stefan Arridge (stefan.arridge@gmail.com)
 /// @date     10 June 2022
-/// @brief    Initializer for the BB test problem
+/// @brief    Initializer for the "BB Test" problem as described
+///           in Federrath et al 2010, ApJ, 713, 269.
 
 #include "cello.hpp"
 #include "enzo.hpp"
