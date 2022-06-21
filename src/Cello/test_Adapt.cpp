@@ -187,7 +187,7 @@ PARALLEL_MAIN_BEGIN
     unit_func ("no temporal jumps");
     unit_assert(valid == true);
     unit_func ("pairs");
-    unit_assert(pairs == true); // @@@@@@@@@@
+    unit_assert(pairs == true);
     if (!pairs || !valid) {
       CkPrintf ("ERROR: C ");
       for (int i0=0; i0<n; i0++) CkPrintf (i0%2?"%1X ":"%1X",adapt[i0]->is_converged()?1:0);
