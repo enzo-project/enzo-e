@@ -233,7 +233,6 @@ EnzoConfig::EnzoConfig() throw ()
   method_grackle_chemistry(),
   method_grackle_use_cooling_timestep(false),
   method_grackle_radiation_redshift(-1.0),
-  method_grackle_metallicity_floor(0.0),
 #endif
   // EnzoMethodGravity
   method_gravity_grav_const(0.0),
@@ -614,7 +613,6 @@ void EnzoConfig::pup (PUP::er &p)
   if (method_grackle_use_grackle) {
     p  | method_grackle_use_cooling_timestep;
     p  | method_grackle_radiation_redshift;
-    p  | method_grackle_metallicity_floor;
     if (p.isUnpacking()) { method_grackle_chemistry = new chemistry_data; }
     p | *method_grackle_chemistry;
   } else {
@@ -1245,11 +1243,6 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
     method_grackle_radiation_redshift = p->value_float
       ("Method:grackle:radiation_redshift", -1.0);
 
-    // set a metallicity floor
-    method_grackle_metallicity_floor = p-> value_float
-      ("Method:grackle:metallicity_floor", 0.0);
-
-
     // Set Grackle parameters from parameter file
     method_grackle_chemistry->with_radiative_cooling = p->value_integer
       ("Method:grackle:with_radiative_cooling",
@@ -1793,18 +1786,21 @@ namespace{
   //----------------------------------------------------------------------
 
   EnzoFluidFloorConfig parse_fluid_floor_config_(Parameters * p,
-                                                 const std::string& hydro_type)
+                                                 const std::string& hydro_type,
+                                                 bool using_grackle)
   {
     // initialize default values (a value <= 0 means there is no floor)
     double density_floor = 0.0;
     double pressure_floor = 0.0;
     double temperature_floor = 0.0;
+    double metal_mass_frac_floor = 0.0;
 
     auto get_ptr_to_floor_var = [&](const std::string name)
       {
         if (name == "density") { return &density_floor; }
         if (name == "pressure") { return &pressure_floor; }
         if (name == "temperature") { return &temperature_floor; }
+        if (name == "metalicity") { return &metal_mass_frac_floor; }
         return (double*)nullptr;
       };
 
@@ -1822,24 +1818,31 @@ namespace{
         if (ptr == nullptr){
           ERROR1("EnzoConfig::read_physics_fluid_props_",
                  "no support for placing a floor on \"%s\"", name.c_str());
+        } else if (name == "metallicity") {
+          *ptr = (p->value_float(p->full_name(name)) *
+                  enzo_constants::metallicity_solar);
         } else {
           *ptr = p->value_float(p->full_name(name));
         } 
       }
     }
 
-    // now let's consider the legacy options (for the appropriate hydro solver).
-    // if there were no parameters in Physics:fluid_props:floors, let's parse
-    // them. Otherwise, let's raise an error
+    // now let's consider the legacy options (for the appropriate hydro solver
+    // and Grackle). if there were no parameters in Physics:fluid_props:floors,
+    // let's parse them. Otherwise, let's raise an error
     const std::vector<std::array<std::string,3>> legacy_params =
       {{"density", "ppm", "density_floor"},
        {"pressure", "ppm", "pressure_floor"},
        {"temperature", "ppm", "temperature_floor"},
        {"density", "mhd_vlct", "density_floor"},
-       {"pressure", "mhd_vlct", "pressure_floor"}};
+       {"pressure", "mhd_vlct", "pressure_floor"},
+       {"metallicity", "grackle", "metallicity_floor"}};
 
     for (const std::array<std::string,3>& triple : legacy_params){
-      if (hydro_type != triple[1]) {continue;}
+      if ((hydro_type != triple[1]) |
+          (("grackle" == triple[1]) & !using_grackle)) {
+        continue;
+      }
       std::string full_name = "Method:" + triple[1] + ":" + triple[2];
       if (p->param(full_name) == nullptr) {continue;}
       if (no_legacy){
@@ -1852,11 +1855,17 @@ namespace{
                  "\"%s\" is a deprecated parameter (it will be removed in the "
                  "future). Use \"Physics:fluid_props:floors:%s\" instead.",
                  full_name.c_str(), triple[0].c_str());
-        *(get_ptr_to_floor_var(triple[0])) = p->value_float(full_name);
+        if (triple[0] == "metallicity"){
+          *(get_ptr_to_floor_var(triple[0]))
+            = p->value_float(full_name) * enzo_constants::metallicity_solar;
+        } else {
+          *(get_ptr_to_floor_var(triple[0])) = p->value_float(full_name);
+        }
       }
     }
 
-    return {density_floor, pressure_floor, temperature_floor};
+    return {density_floor, pressure_floor, temperature_floor,
+            metal_mass_frac_floor};
   }
 }
 
@@ -1879,13 +1888,15 @@ void EnzoConfig::read_physics_fluid_props_(Parameters * p)
   } else if (has_vlct){
     hydro_type = "mhd_vlct";
   }
+  bool has_grackle = std::find(mlist.begin(), mlist.end(),
+                               "grackle") != mlist.end();
 
   // determine the dual energy formalism configuration
   physics_fluid_props_de_config = parse_de_config_(p, hydro_type);
 
   // determine the fluid floor configuration
   physics_fluid_props_fluid_floor_config =
-    parse_fluid_floor_config_(p, hydro_type);
+    parse_fluid_floor_config_(p, hydro_type, has_grackle);
 
   // determine adiabatic index (in the future, this logic will be revisited)
   {

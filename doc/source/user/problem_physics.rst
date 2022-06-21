@@ -174,8 +174,13 @@ The ``"fluid_props:floors"`` subsection is used for specifying the floors of dif
      - `float`
      - `-`
      - The floor to apply to the ``"temperature"`` field.
+   * - ``"metallicity"``
+     - `float`
+     - `-`
+     - This multiplied by the ``"density"`` field and ``enzo_constants::metallicity_solar`` gives the floor for the ``"metal_density"`` field.
 
 See :ref:`using-methods` for discussions of the floors that are actually used by a given method.
+Be mindful that unlike the other parameters, the ``"metallicity"`` doesn't directly specify the floor for a fluid field (the actual floor depends on other quantities).
 
 .. note::
 

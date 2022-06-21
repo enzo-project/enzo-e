@@ -25,20 +25,25 @@ public: // interface
   EnzoFluidFloorConfig()
     : density_(0.0),
       pressure_(0.0),
-      temperature_(0.0)
+      temperature_(0.0),
+      metal_mass_frac_(0.0)
   {}
 
   EnzoFluidFloorConfig(enzo_float density_floor,
                        enzo_float pressure_floor,
-                       enzo_float temperature_floor)
+                       enzo_float temperature_floor,
+                       enzo_float metal_mass_frac)
     : density_(density_floor),
       pressure_(pressure_floor),
-      temperature_(temperature_floor)
+      temperature_(temperature_floor),
+      metal_mass_frac_(metal_mass_frac)
   {}
 
   bool has_density_floor() const noexcept { return density_ > 0; }
   bool has_pressure_floor() const noexcept { return pressure_ > 0; }
   bool has_temperature_floor() const noexcept {return temperature_ > 0; }
+  bool has_metal_mass_frac_floor() const noexcept
+  { return metal_mass_frac_ > 0; }
 
   /// query the density floor. The program aborts if it is not set.
   enzo_float density() const noexcept
@@ -67,10 +72,20 @@ public: // interface
     return temperature_;
   }
 
+  /// query the metal mass fraction floor. The program aborts if it is not set.
+  enzo_float metal_mass_frac() const noexcept
+  {
+    ASSERT("EnzoFluidFloorConfig::metal_mass_frac",
+           "this instance does not hold a floor for the metal mass fraction",
+           has_metal_mass_frac_floor());
+    return metal_mass_frac_;
+  }
+
   void pup(PUP::er &p) {
     p|density_;
     p|pressure_;
     p|temperature_;
+    p|metal_mass_frac_;
   }
 
 private: // attributes
@@ -78,6 +93,7 @@ private: // attributes
   enzo_float density_;
   enzo_float pressure_;
   enzo_float temperature_;
+  enzo_float metal_mass_frac_;
 };
 
 #endif /* ENZO_ENZO_FLUID_FLOORS_HPP */

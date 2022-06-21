@@ -38,8 +38,6 @@ EnzoMethodGrackle::EnzoMethodGrackle
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
 
-  this->metallicity_floor_ = enzo::config()->method_grackle_metallicity_floor;
-
   /// Define Grackle's internal data structures
   time_grackle_data_initialized_ = ENZO_FLOAT_UNDEFINED;
   initialize_grackle_chemistry_data(time);
@@ -396,7 +394,12 @@ void EnzoMethodGrackle::update_grackle_density_fields(
   int ngy = ny + 2*gy;
   int ngz = nz + 2*gz;
 
-  double tiny_number = 1.0E-10;
+  const double tiny_number = 1.0E-10;
+
+  const EnzoFluidFloorConfig& fluid_floors
+    = enzo::fluid_props()->fluid_floor_config();
+  const enzo_float metal_factor = fluid_floors.has_metal_mass_frac_floor()
+    ? fluid_floors.metal_mass_frac() : (enzo_float)tiny_number;
 
   const EnzoConfig * enzo_config = enzo::config();
   chemistry_data * grackle_chemistry =
@@ -429,7 +432,7 @@ void EnzoMethodGrackle::update_grackle_density_fields(
         }
 
        if (grackle_chemistry->metal_cooling == 1){
-          grackle_fields->metal_density[i] = grackle_fields->density[i] * metallicity_floor_ * enzo_constants::metallicity_solar;
+          grackle_fields->metal_density[i] = grackle_fields->density[i] * metal_factor;
        }
 
       }
@@ -482,11 +485,8 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
     "Error in local_solve_chemistry.\n");
   }
 
-  if (metallicity_floor_ > 0.0)
-  {
-     enforce_metallicity_floor(enzo_block);
-  }
-
+  // enforce metallicity floor (if one was provided)
+  enforce_metallicity_floor(enzo_block);
 
   /* Correct total energy for changes in internal energy */
   gr_float * v3[3];
@@ -590,10 +590,23 @@ double EnzoMethodGrackle::timestep ( Block * block ) throw()
 
 void EnzoMethodGrackle::enforce_metallicity_floor(EnzoBlock * enzo_block) throw()
 {
+  const EnzoFluidFloorConfig& fluid_floors
+    = enzo::fluid_props()->fluid_floor_config();
+
+  if (!fluid_floors.has_metal_mass_frac_floor()){
+    return; // return early if the floor has not been defined
+  }
+
+  const enzo_float metal_mass_frac_floor = fluid_floors.metal_mass_frac();
+
   // MUST have metal_density field tracked
   Field field = enzo_block->data()->field();
   enzo_float * density = (enzo_float*) field.values("density");
   enzo_float * metal_density  = (enzo_float*) field.values("metal_density");
+  ASSERT("EnzoMethodGrackle::enforce_metallicity_floor",
+         ("Can't enforce metallicity floor when the \"metal_density\" field "
+          "doesn't exist"),
+         metal_density != nullptr);
 
   int gx,gy,gz;
   field.ghost_depth (0,&gx,&gy,&gz);
@@ -609,8 +622,8 @@ void EnzoMethodGrackle::enforce_metallicity_floor(EnzoBlock * enzo_block) throw(
     for (int iy=0; iy<ngy; iy++){
       for (int ix=0; ix<ngx; ix++){
         int i = INDEX(ix,iy,iz,ngx,ngy);
-        double Z = metal_density[i] / density[i] / enzo_constants::metallicity_solar;
-        if (Z < metallicity_floor_) metal_density[i] = density[i] * metallicity_floor_ * enzo_constants::metallicity_solar;
+        metal_density[i] = std::max(metal_density[i],
+                                    metal_mass_frac_floor * density[i]);
       }
     }
   }     

@@ -230,3 +230,14 @@ For more details, see :ref:`using-fluid_props-floors`.
 :e:`Temperature floor, which must exceed 0. Note that this is
 specified with units of Kelvin (since the ``"temperature"`` field is
 always measured in Kelvin in Enzo-E)`
+
+:Parameter:  :p:`Physics` : :p:`fluid_props` : :p:`floors` : :p:`metallicity`
+:Summary: :s:`Minimum metallicity in solar units`
+:Type:    :t:`float`
+:Default: :d:`0.0`
+:Scope:     :z:`Enzo`
+
+:e:`Minimum metallicity in solar units. This parameter is multiplied
+by the` ``enzo_constants::metallicity_solar`` :e:`constant and the
+local value of the` ``"density"`` :e:`field to give the local floor
+for the` ``"metal_density"`` :e:`field`
