@@ -191,8 +191,13 @@ void EnzoMethodSinkMaker::compute_ ( Block *block) throw()
 
   // Get gravitational constant in code units
   const double const_G =
-    enzo_constants::grav_constant * enzo::units()->mass() * enzo::units()->time() * enzo::units()->time()
-    / (enzo::units()->length() * enzo::units()->length() * enzo::units()->length());
+    enzo_constants::grav_constant * enzo::units()->density() *
+    enzo::units()->time() * enzo::units()->time();
+  
+  // Get density threshold in code units for this cycle (value will change in
+  // cosmological simultions.
+  const double density_threshold =
+    physical_density_threshold_cgs_ / enzo::units()->density();
 
   // Get global block index
   // ix/y/z_block is the x/y/z index of the block
@@ -223,13 +228,13 @@ void EnzoMethodSinkMaker::compute_ ( Block *block) throw()
 
 	int block_cell_index = INDEX(ix,iy,iz,mx,my);
 
-	// Check if density is greater than density_threshold_
-	if (density[block_cell_index] <= density_threshold_) continue;
+	// Check if density is greater than density threshold
+	if (density[block_cell_index] <= density_threshold) continue;
 
 	// Check if the mass of the potential sink particle is greater than the minimum sink
 	// mass
 	const enzo_float density_change =
-	  std::min(density[block_cell_index] - density_threshold_,
+	  std::min(density[block_cell_index] - density_threshold,
 		   max_mass_fraction_ * density[block_cell_index]);
 
 	const enzo_float sink_mass = density_change * cell_volume;
