@@ -14,3 +14,4 @@ compared.
 .. toctree::
    testing_environment
    new_test
+   existing_tests
