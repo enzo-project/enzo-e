@@ -16,12 +16,14 @@ EnzoInitialShuCollapse::EnzoInitialShuCollapse
  double truncation_radius,
  double nominal_sound_speed,
  double instability_parameter,
+ double external_density,
  bool central_sink_exists,
  double central_sink_mass) throw()
   :Initial(cycle, time),
    truncation_radius_(truncation_radius),
    nominal_sound_speed_(nominal_sound_speed),
    instability_parameter_(instability_parameter),
+   external_density_(external_density),
    central_sink_exists_(central_sink_exists),
    central_sink_mass_(central_sink_mass)
 {
@@ -48,6 +50,7 @@ void EnzoInitialShuCollapse::pup (PUP::er &p)
   p | truncation_radius_;
   p | nominal_sound_speed_;
   p | instability_parameter_;
+  p | external_density_;
   p | central_sink_exists_;
   p | central_sink_mass_;
 
@@ -72,11 +75,11 @@ void EnzoInitialShuCollapse::enforce_block
   double domain_width_z = dzp - dzm;
 
   ASSERT("EnzoInitialShuCollapse::EnzoInitialShuCollapse()",
-	 "Truncation radius must no more than half the domain width in all "
+	 "Truncation radius must no more than a quarter of the domain width in all "
 	 "dimensions.",
-	 (truncation_radius_ <= 0.5 * domain_width_x) &&
-	 (truncation_radius_ <= 0.5 * domain_width_y) &&
-	 (truncation_radius_ <= 0.5 * domain_width_z));
+	 (truncation_radius_ <= 0.25 * domain_width_x) &&
+	 (truncation_radius_ <= 0.25 * domain_width_y) &&
+	 (truncation_radius_ <= 0.25 * domain_width_z));
 
   // Check that gamma is sufficiently close to unity
   const double gamma = enzo::config()->field_gamma;
@@ -111,21 +114,21 @@ void EnzoInitialShuCollapse::enforce_block
 	   "method is required.",
 	   enzo::problem()->method_exists("sink_maker"));
 
-  // // Check if mhd_vlct method is being used
-  // ASSERT("EnzoInitialShuCollapse",
-  // 	 "If shu_collapse initializer is used, the mhd_vlct method is "
-  // 	 "required.",
-  // 	 enzo::problem()->method_exists("mhd_vlct"));
+  // Check if mhd_vlct method is being used
+  ASSERT("EnzoInitialShuCollapse",
+	 "If shu_collapse initializer is used, the mhd_vlct method is "
+	 "required.",
+	 enzo::problem()->method_exists("mhd_vlct"));
 
-  // // Check that mhd_choice parameter is set to "no_bfield"
-  // ASSERT("EnzoInitialShuCollapse",
-  // 	 "Method:mhd_vlct:mhd_choice must be set to no_bfield",
-  // 	 enzo::config()->method_vlct_mhd_choice == "no_bfield");
+  // Check that mhd_choice parameter is set to "no_bfield"
+  ASSERT("EnzoInitialShuCollapse",
+	 "Method:mhd_vlct:mhd_choice must be set to no_bfield",
+	 enzo::config()->method_vlct_mhd_choice == "no_bfield");
 
-  // // Check that riemann_solver parameter is set to "hllc"
-  // ASSERT("EnzoInitialShuCollapse",
-  // 	 "Method:mhd_vlct:mhd_choice must be set to hllc",
-  // 	 enzo::config()->method_vlct_riemann_solver == "hllc");
+  // Check that riemann_solver parameter is set to "hllc"
+  ASSERT("EnzoInitialShuCollapse",
+	 "Method:mhd_vlct:mhd_choice must be set to hllc",
+	 enzo::config()->method_vlct_riemann_solver == "hllc");
 
   if (!block->is_leaf()) return;
   ASSERT("EnzoInitialShuCollapse",
@@ -237,9 +240,8 @@ void EnzoInitialShuCollapse::enforce_block
   std::fill_n(specific_te,m,specific_ke + specific_ie);
 
   // Now to initialise the density field
-  const double const_G  =
-    cello::grav_constant * enzo::units()->mass() * enzo::units()->time() * enzo::units()->time() /
-    (enzo::units()->length() * enzo::units()->length() * enzo::units()->length());
+  const double const_G  = enzo_constants::grav_constant * enzo::units()->density() *
+    enzo::units()->time() * enzo::units()->time();
 
   const double density_profile_factor =
     instability_parameter_ * nominal_sound_speed_ * nominal_sound_speed_ /
@@ -262,7 +264,7 @@ void EnzoInitialShuCollapse::enforce_block
 	d[i] =
 	  (r2 < truncation_radius_ * truncation_radius_) ?
 	  density_profile_factor / r2 :
-	  density_profile_factor / (truncation_radius_ * truncation_radius_);
+	  external_density_;
       } //ix
     } //iy
   } //iz
@@ -273,8 +275,7 @@ void EnzoInitialShuCollapse::enforce_block
       block->check_position_in_block(center_[0],center_[1],center_[2]))
     {
 
-      ParticleDescr * particle_descr = cello::particle_descr();
-      Particle particle              = block->data()->particle();
+      Particle particle = block->data()->particle();
 
       // Attribute indices
       const int it   = particle.type_index("sink");

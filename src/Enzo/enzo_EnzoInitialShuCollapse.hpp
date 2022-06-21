@@ -24,6 +24,7 @@ public: // interface
    double truncation_radius,
    double nominal_sound_speed,
    double instability_parameter,
+   double external_density,
    bool central_sink_exists,
    double central_sink_mass) throw();
 
@@ -65,6 +66,9 @@ public: // interface
 
   /// Instability parameter as defined in Shu 1977
   double instability_parameter_;
+
+  /// Density outside of the truncation radius
+  double external_density_;
 
   /// Is there are sink particle initialised at the centre of collapse?
   bool central_sink_exists_;

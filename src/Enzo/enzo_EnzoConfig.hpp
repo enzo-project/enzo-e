@@ -303,6 +303,7 @@ public: // interface
       initial_shu_collapse_truncation_radius(0.0),
       initial_shu_collapse_nominal_sound_speed(0.0),
       initial_shu_collapse_instability_parameter(0.0),
+      initial_shu_collapse_external_density(0.0),
       initial_shu_collapse_central_sink_exists(false),
       initial_shu_collapse_central_sink_mass(0.0),
       // EnzoInitialBBTest
@@ -742,6 +743,7 @@ public: // attributes
   double                     initial_shu_collapse_truncation_radius;
   double                     initial_shu_collapse_nominal_sound_speed;
   double                     initial_shu_collapse_instability_parameter;
+  double                     initial_shu_collapse_external_density;
   bool                       initial_shu_collapse_central_sink_exists;
   double                     initial_shu_collapse_central_sink_mass;
 

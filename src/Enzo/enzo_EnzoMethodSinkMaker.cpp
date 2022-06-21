@@ -176,7 +176,7 @@ void EnzoMethodSinkMaker::compute_ ( Block *block) throw()
 
   // Get the minimum sink mass in code units
   const double minimum_sink_mass =
-    min_sink_mass_solar_ * cello::mass_solar / enzo::units()->mass();
+    min_sink_mass_solar_ * enzo_constants::mass_solar / enzo::units()->mass();
 
   // Keep track of the number of sinks formed.
   int n_sinks_formed = 0;
@@ -190,7 +190,7 @@ void EnzoMethodSinkMaker::compute_ ( Block *block) throw()
 
   // Get gravitational constant in code units
   const double const_G =
-    cello::grav_constant * enzo::units()->mass() * enzo::units()->time() * enzo::units()->time()
+    enzo_constants::grav_constant * enzo::units()->mass() * enzo::units()->time() * enzo::units()->time()
     / (enzo::units()->length() * enzo::units()->length() * enzo::units()->length());
 
   // Get global block index

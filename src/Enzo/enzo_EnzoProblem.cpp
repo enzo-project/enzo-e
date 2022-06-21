@@ -271,6 +271,7 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_shu_collapse_truncation_radius,
        enzo_config->initial_shu_collapse_nominal_sound_speed,
        enzo_config->initial_shu_collapse_instability_parameter,
+       enzo_config->initial_shu_collapse_external_density,
        enzo_config->initial_shu_collapse_central_sink_exists,
        enzo_config->initial_shu_collapse_central_sink_mass);
   } else if (type == "bb_test") {

@@ -203,6 +203,7 @@ EnzoConfig::EnzoConfig() throw ()
   initial_shu_collapse_truncation_radius(0.0),
   initial_shu_collapse_nominal_sound_speed(0.0),
   initial_shu_collapse_instability_parameter(0.0),
+  initial_shu_collapse_external_density(0.0),
   initial_shu_collapse_central_sink_exists(false),
   initial_shu_collapse_central_sink_mass(0.0),
   // EnzoInitialBBTest
@@ -571,6 +572,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_shu_collapse_truncation_radius;
   p | initial_shu_collapse_nominal_sound_speed;
   p | initial_shu_collapse_instability_parameter;
+  p | initial_shu_collapse_external_density;
   p | initial_shu_collapse_central_sink_exists;
   p | initial_shu_collapse_central_sink_mass;
 
@@ -1341,6 +1343,9 @@ void EnzoConfig::read_initial_shu_collapse_(Parameters * p)
 
   initial_shu_collapse_instability_parameter = p->value_float
     ("Initial:shu_collapse:instability_parameter",2.1);
+
+  initial_shu_collapse_external_density = p->value_float
+    ("Initial:shu_collapse:external_density",1.0e-6);
 
   initial_shu_collapse_central_sink_exists = p->value_logical
     ("Initial:shu_collapse:central_sink_exists",false);

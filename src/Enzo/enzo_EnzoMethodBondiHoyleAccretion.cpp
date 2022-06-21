@@ -76,7 +76,7 @@ void EnzoMethodBondiHoyleAccretion::compute_(Block * block)
 
     // Get gravitational constant in code units
     const double const_G =
-      cello::grav_constant * enzo::units()->mass() * enzo::units()->time() * enzo::units()->time()
+      enzo_constants::grav_constant * enzo::units()->mass() * enzo::units()->time() * enzo::units()->time()
       / (enzo::units()->length() * enzo::units()->length() * enzo::units()->length());
 
     // Also need the field dimensions
