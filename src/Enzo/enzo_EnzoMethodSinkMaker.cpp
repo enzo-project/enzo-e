@@ -14,7 +14,7 @@
 
 EnzoMethodSinkMaker::EnzoMethodSinkMaker
 (double   jeans_length_resolution_cells,
- double   density_threshold,
+ double   physical_density_threshold_cgs,
  bool     check_density_maximum,
  double   max_mass_fraction,
  double   min_sink_mass_solar,
@@ -22,7 +22,7 @@ EnzoMethodSinkMaker::EnzoMethodSinkMaker
  uint64_t offset_seed_shift)
   : Method(),
     jeans_length_resolution_cells_(jeans_length_resolution_cells),
-    density_threshold_(density_threshold),
+    physical_density_threshold_cgs_(physical_density_threshold_cgs),
     check_density_maximum_(check_density_maximum),
     max_mass_fraction_(max_mass_fraction),
     min_sink_mass_solar_(min_sink_mass_solar),
@@ -82,7 +82,7 @@ void EnzoMethodSinkMaker::pup (PUP::er &p)
   Method::pup(p);
   p | jeans_length_resolution_cells_;
   p | min_sink_mass_solar_;
-  p | density_threshold_;
+  p | physical_density_threshold_cgs_;
   p | check_density_maximum_;
   p | max_mass_fraction_;
   p | min_sink_mass_solar_;
@@ -569,15 +569,28 @@ void EnzoMethodSinkMaker::do_checks_(Block *block) throw()
 	 enzo::problem()->method_exists("mhd_vlct") ||
 	 enzo::problem()->method_exists("ppm"));
 
-  // Check if density threshold is at least as large as the density floor
-  // set by the hydro method.
+  // Get density floor set by the hydro method.
   const double density_floor = enzo::problem()->method_exists("mhd_vlct") ?
     enzo::config()->method_vlct_density_floor :
     enzo::config()->ppm_density_floor ;
 
-  ASSERT("EnzoMethodSinkMaker",
-	 "Density threshold must be at least as large as the density "
-	 "floor set by the hydro method",
-	 density_threshold_ >= density_floor);
+  // Get density threshold in code units.
+  const double density_threshold =
+    physical_density_threshold_cgs_ / enzo::units()->density();
+
+  // In a cosmological simulation, the density unit is the mean matter density
+  // of the universe, which decreases with time, which means that the value of
+  // a fixed physical density quantity will increase with time. So if the density
+  // threshold is above the density floor at the start of the simulation, it is
+  // guaranteed to be abolve the density floor at all times.
+  ASSERT2("EnzoMethodSinkMaker",
+	  "Density threshold must be at least as large as the density "
+	  "floor set by the VL+CT method. At start of simulation, "
+	  "density threshold is %g and density floor is %g "
+	  "(code density units).",
+	  density_threshold,
+	  density_floor,
+	  density_threshold >= density_floor);
+
   return;
 }

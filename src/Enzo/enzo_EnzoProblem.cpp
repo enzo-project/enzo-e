@@ -775,7 +775,7 @@ Method * EnzoProblem::create_method_
 
     method = new EnzoMethodSinkMaker(
 			enzo_config->method_sink_maker_jeans_length_resolution_cells,
-			enzo_config->method_sink_maker_density_threshold,
+			enzo_config->method_sink_maker_physical_density_threshold_cgs,
 			enzo_config->method_sink_maker_check_density_maximum,
 			enzo_config->method_sink_maker_max_mass_fraction,
 			enzo_config->method_sink_maker_min_sink_mass_solar,

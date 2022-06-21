@@ -22,7 +22,7 @@ public:
   // Constructor
   EnzoMethodSinkMaker
   (double   jeans_length_resolution_cells,
-   double   density_threshold,
+   double   physical_density_threshold_cgs,
    bool     check_density_maximum,
    double   max_mass_fraction,
    double   min_sink_mass_solar,
@@ -97,9 +97,10 @@ protected: // attributes
   // cell width, then the cell is a candidate for forming a sink.
   double jeans_length_resolution_cells_;
 
-  // Density in a cell must be greater than density_threshold_ to be able to form a sink.
-  // The density in a cell after sink formation will be no less than density_threshold_.
-  double density_threshold_;
+  // The physical density threshold for forming sink particles in cgs units.
+  // Density in a cell must be greater than the density threshold to be able to form a sink.
+  // The density in a cell after sink formation will be no less than the density threshold.
+  double physical_density_threshold_cgs_;
 
   // Determines whether or not the "local density maximum" check is performed when deciding if
   // a cell forms a sink particle.
