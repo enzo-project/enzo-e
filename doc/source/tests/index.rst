@@ -12,6 +12,6 @@ answer tests, where results from two versions of an ``enzo-e`` simulation are
 compared.
 
 .. toctree::
-   testing_environment
-   new_test
+   ctest_framework
+   ctest_new
    existing_tests
