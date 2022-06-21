@@ -107,9 +107,7 @@ Components of the new I/O approach include
         - ``IoReader::IoReader()``
      * ``IoWriter``
         - ``IoWriter::IoWriter()``
-     * ``Ordering``
-     * ``OrderingHilbert``
-     * ``OrderingRootBlocks``
+     * ``MethodOrderMorton``
 
 ----------
 Algorithms
@@ -202,11 +200,10 @@ Input algorithm
 
    @enduml
 
-// Begin reading restart data and create the mesh hierarchy of
-// EnzoBlocks. Replaces functionality of control_adapt.
-
 .. code-block:: C++
 
+    // Begin reading restart data and create the mesh hierarchy of
+    // EnzoBlocks. Replaces functionality of control_adapt.
     entry void main::r_restart_enter(std::string file_hierarchy)
     {
        // open hierarchy file

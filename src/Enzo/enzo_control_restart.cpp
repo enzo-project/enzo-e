@@ -103,7 +103,7 @@ void Block::restart_enter_()
 void Simulation::p_restart_enter (std::string name_dir)
 {
   TRACE_SIMULATION("p_restart_enter_",this);
-  // [ Called on root ip only ]
+  // [ Called on root process only ]
 
   restart_directory_ = name_dir;
 
@@ -172,7 +172,7 @@ void Simulation::r_restart_start (CkReductionMsg * msg)
 {
   TRACE_SIMULATION("EnzoSimulation::r_restart_start()",this);
   delete msg;
-  // [ Called on root ip only ]
+  // [ Called on root process only ]
 
   // Insert an IoEnzoReader element for each file
   const int max_level = cello::config()->mesh_max_level;
@@ -257,7 +257,7 @@ void IoEnzoReader::p_init_root
 
     // For each Block in the file, read the block data and create the
     // new Block
-    
+
     EnzoMsgCheck * msg_check = new EnzoMsgCheck;
 
     // Save msg_check for later if block is in a refined level
@@ -290,14 +290,6 @@ void IoEnzoReader::p_init_root
 #endif
       enzo::block_array()[index].p_restart_set_data(msg_check);
 
-    } else {
-
-      // // Block doesn't exist: create it and send its data
-      // enzo::factory()->create_block_check
-      //   ( msg_check, enzo::block_array(),index );
-
-      // // Also tell parent that it has children (surprise!)
-      // Index index_parent = index.index_parent(cello::config()->mesh_min_level);
     }
   }
 
@@ -349,7 +341,7 @@ void IoEnzoReader::block_ready_()
 
 void EnzoSimulation::p_restart_next_level()
 {
-  // [ Called on root ip only ]
+  // [ Called on root process only ]
   TRACE_SIMULATION("EnzoSimulation::p_restart_next_level()",this);
   TRACE_SYNC(sync_restart_next_,"sync_restart_next_ next()");
   if (sync_restart_next_.next()) {
@@ -392,14 +384,12 @@ void IoEnzoReader::p_create_level (int level)
 void EnzoBlock::p_restart_refine(int ic3[3],int io_reader)
 {
   TRACE_BLOCK("EnzoBlock::p_restart_refine()",this);
+  FieldData * field_data = data()->field_data();
+
   int nx,ny,nz;
-  data()->field_data()->size(&nx,&ny,&nz);
+  field_data->size(&nx,&ny,&nz);
 
   Index index_child = index_.index_child(ic3);
-
-  // // If child doesn't exist yet
-
-  // if ( ! is_child_(index_child) ) {
 
   // Create FieldFace for interpolating field data to child ic3[]
 
@@ -414,9 +404,9 @@ void EnzoBlock::p_restart_refine(int ic3[3],int io_reader)
   // Create data message object to send
   DataMsg * data_msg = new DataMsg;
 
-  // @@@ should be true but ~FieldFace() crashes
-  data_msg -> set_field_face (field_face,false);
-  data_msg -> set_field_data (data()->field_data(),false);
+  bool is_new;
+  data_msg -> set_field_face (field_face,is_new=true);
+  data_msg -> set_field_data (field_data,is_new=true);
 
   const Factory * factory = cello::simulation()->factory();
 
@@ -810,9 +800,6 @@ void IoEnzoReader::read_meta_
               "Unknown type_meta \"%s\"",
               type_meta.c_str());
     }
-    // Get object's ith metadata
-
-    io->meta_value(i,& buffer, &name, &type_scalar, &nx,&ny,&nz);
   }
 }
 //----------------------------------------------------------------------
