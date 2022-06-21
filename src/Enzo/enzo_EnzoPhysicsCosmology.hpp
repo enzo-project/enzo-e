@@ -182,30 +182,30 @@ public: // interface
 
   /* Return density unit at current time / redshift in terms of `g / cm^3`
      (requires set_current_time()).
-     
+
      Density unit is defined so that the mean physical matter density of the universe is 1.
      This can be written as:
-     
+
      `rho_bar_m_0 * (1 + z)^3 / rho_unit = 1`
-     
+
      Where `rho_bar_m_0` is the mean physical matter density at redshift 0, `z` is redshift,
      and `rho_unit` is the density unit in `g / cm^3`.
 
      We can then write this as:
-     
+
      `rho_unit = `Omega_m_0 * rho_crit_0 * (1 + z)^3`,
-     
+
      where `Omega_m_0` is a cosmological parameter which can be set in the input parameter file,
      and `rho_crit_0` is defined as `3 * H_0^2 / (8 * pi * G)`, where `H_0` is the expansion rate
      of the universe at redshift 0 (with dimensions of inverse time), and `G` is the
      gravitational constant. `H_0` can be written as `H_0 / h * h`, where `h` is given the name
      `hubble_constant_now_` in the code below. Putting this all together gives the following
      expression:
-     
+
      `rho_unit = (3 / 8 * pi) * (H_0 / h)^2 / G^2 * Omega_m_0 * h^2 * (1+z)^3`.
 
      Note: the previous version of this function was equivalent to:
-     
+
      `rho_unit = 1.8788e-29 * Omega_m_0 * h^2 * (1+z)^3`.
 
      but (after plugging in values), this version is equivalent to:
@@ -223,13 +223,13 @@ public: // interface
       hubble_constant_now_ * hubble_constant_now_ *
       (1 + current_redshift_) * (1 + current_redshift_) * (1 + current_redshift_);
   }
-  
+
   /// Return current mass unit in terms of grams (requires set_current_time())
   double mass_units() const
   {
     return density_units() * length_units() * length_units() * length_units();
   }
-  
+
   /// Return current length unit in terms of cm (requires set_current_time())
   double length_units() const
   {
@@ -249,7 +249,7 @@ public: // interface
     of the universe, `time_unit` is the time unit in seconds, and `a_unit` is the "unit 
     cosmological scale factor". To understand where the factor of `a_unit^3` come from, see
     Equations 8, 17, 18 of Greg L. Bryan et al 2014 ApJS 211 19, and note that Laplacian(`phi`) 
-    has dimensions of `time^(-2) * a^(2). 
+    has dimensions of `time^(-2) * a^(2).
 
     In Enzo-E, `a_unit` is defined so that `a` is 1 at the initial redshift (`z_i`), so that:
     `(1+z_i)^(-1) / a_unit = 1`, which means that `a_unit = 1 / (1 + z_i)`.
@@ -264,10 +264,10 @@ public: // interface
     After some rearrangement, we get the following expression:
 
     `time_unit = sqrt(2/3) * h / H0 / (h * sqrt(Omega_m_0 * (1 + z)^3))`/
-    
+
   */
 
-  
+
   double time_units() const
   {
     return sqrt(2/3) / (enzo_constants::H0_over_h * hubble_constant_now_ *
@@ -283,7 +283,7 @@ public: // interface
 
   double velocity_units() const
   {
-    return length_units() / (time_units() * sqrt(1.0 + initial_redshift_));
+    return length_units() / time_units() * (1 + initial_redshift_) / (1 + current_redshift_);
   }
 
   void print () const
