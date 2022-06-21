@@ -255,6 +255,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_grackle_chemistry(),
   method_grackle_use_cooling_timestep(false),
   method_grackle_radiation_redshift(-1.0),
+  method_grackle_metallicity_floor(0.0),
 #endif
   // EnzoMethodGravity
   method_gravity_grav_const(0.0),
@@ -435,6 +436,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_grackle_test_minimum_metallicity;
   p | initial_grackle_test_maximum_metallicity;
   p | initial_grackle_test_reset_energies;
+
 #endif /* CONFIG_USE_GRACKLE */
 
   p | initial_inclinedwave_alpha;
@@ -697,6 +699,7 @@ void EnzoConfig::pup (PUP::er &p)
   if (method_grackle_use_grackle) {
     p  | method_grackle_use_cooling_timestep;
     p  | method_grackle_radiation_redshift;
+    p  | method_grackle_metallicity_floor;
     if (p.isUnpacking()) { method_grackle_chemistry = new chemistry_data; }
     p | *method_grackle_chemistry;
   } else {
@@ -1418,6 +1421,11 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
     // for when not using cosmology - redshift of UVB
     method_grackle_radiation_redshift = p->value_float
       ("Method:grackle:radiation_redshift", -1.0);
+
+    // set a metallicity floor
+    method_grackle_metallicity_floor = p-> value_float
+      ("Method:grackle:metallicity_floor", 0.0);
+
 
     // Set Grackle parameters from parameter file
     method_grackle_chemistry->with_radiative_cooling = p->value_integer
