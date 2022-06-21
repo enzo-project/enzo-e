@@ -153,7 +153,10 @@ gravity
 :Default: :d:`6.67384e-8`
 :Scope:     :z:`Enzo`
 
-:e:`Gravitational constant used in place of G.  The default is G in cgs units.`
+:e:`Gravitational constant used in place of G.  The default is G in cgs units.
+For non-cosmological simulations, users must take care that this is set
+to a value consistent with the chosen units. In non-cosmological simulations,
+this parameter is ignored.`
 
 
 ----
