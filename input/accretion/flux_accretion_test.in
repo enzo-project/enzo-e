@@ -53,6 +53,7 @@ Domain {
 
 Particle {
     list = ["sink"];
+    mass_is_mass = true;
     batch_size = 4096;
     sink {
     	 attributes = [ "x", "default",
@@ -95,7 +96,7 @@ Method {
 
 accretion {
     	flavor = "flux";
-	density_threshold = 1.0e-6;
+	physical_density_threshold_cgs = 1.0e-6;
 	accretion_radius_cells = 3.0;
 	}
 }

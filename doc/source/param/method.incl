@@ -74,7 +74,7 @@ accretion
 :Default:    :d:`4.0`
 :Scope:     :z:`Enzo`
 
-:e:`The accretion radius (i.e., the radius of the spherical accretion zone) in units of the minimum cell width (i.e., the minimum across all 3 dimensions), at the highest refinement level. Its value must be less than one fewer than the minimum ghost depth  for "flux" accretion, and less than the minimum ghost depth for other flavors of accretion. The ghost depth is 4 (along all axes) by default.`
+:e:`The accretion radius (i.e., the radius of the spherical accretion zone) in units of the minimum cell width (i.e., if the cell width along all the x, y, and z-axes are hx, hy, and hz, then the minimum cell width is the minimum of hx, hy, and hz),, at the highest refinement level. Its value must be less than one fewer than the minimum ghost depth  for "flux" accretion, and less than the minimum ghost depth for other flavors of accretion. The ghost depth is 4 (along all axes) by default.`
 
 ----
 
@@ -84,17 +84,21 @@ accretion
 :Default:    :d:`""`
 :Scope:     :z:`Enzo`
 
-:e:`The flavor of accretion used, which can be either "threshold", "bondi_hoyle", or "flux". If this parameter is not set in the parameter file, or if some other string is provided, then the accretion method will be called but will do nothing.`
+:e:`The flavor of accretion used, which can be either "threshold", "bondi_hoyle", "flux", or "dummy". If this parameter is not set in the parameter file, or if some other string is provided, then Enzo-E will exit with an error message.`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`accretion` : :p:`density_threshold`
-:Summary:    :s:`The value of the accretion density threshold.`
+:Parameter:  :p:`Method` : :p:`accretion` : :p:`physical_density_threshold_cgs`
+:Summary:    :s:`The value of the accretion (physical) density threshold in cgs units.`
 :Type:       :t:`float`
-:Default:    :d:`1.0e-6`
+:Default:    :d:`1.0e-24`
 :Scope:     :z:`Enzo`
 
-:e:`The value of the density threshold. The density in each cell in the accretion zone cannot go below this value during the accretion process. The value of this parameter must be greater than or equal to the value of the density floor imposed by the hydro method.`
+:e:`The value of the (physical) density threshold in cgs units. The density in each cell in the accretion zone cannot go below this value during the accretion process. The value of this parameter in code density units must be greater than or equal to the value of the density floor imposed by the hydro method (either "ppm" or "mhd_vlct". In cosmological simulations, the density unit is the
+mean matter density of the universe which decreases with time, which means that the value of a density quantity expressed in these units will increase with time, while the density floor is fixed
+in comoving units. The consequence is that is is sufficient for the density threshold to be above
+the density floor at the start of the simulation to guarantee that it will be above the floor
+at all subsequent times.`
 
 ----
 

@@ -120,6 +120,10 @@ setup_test_parallel(Bound-Outflow-3D BoundaryConditions/Outflow-3D  input/Bounda
 setup_test_serial(FluxCorrect-SMR-PPM MethodFluxCorrect/Inclined-Contact-SMR-Ppm input/FluxCorrect/inclined_contact_smr_ppm-${PREC_STRING}.in)
 setup_test_serial(FluxCorrect-SMR-VL MethodFluxCorrect/Inclined-Contact-VL input/FluxCorrect/inclined_contact_smr_vl-${PREC_STRING}.in)
 
+# Isolated galaxy
+setup_test_serial(GasDisk IsolatedGalaxy/GasDisk  input/IsolatedGalaxy/method_isolatedgalaxy.in)
+#setup_test_serial(GasDisk-Halo IsolatedGalaxy/GasDisk-Halo  input/IsolatedGalaxy/method_isolatedgalaxy-particles.in)
+
 # Gravity
 setup_test_serial(GravityCg-1 MethodGravity/GravityCg-1  input/Gravity/method_gravity_cg-1.in)
 setup_test_parallel(GravityCg-8 MethodGravity/GravityCg-8  input/Gravity/method_gravity_cg-8.in)

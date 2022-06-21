@@ -168,6 +168,21 @@
        }
     }
 
+
+----
+
+:Parameter:  :p:`Particle` : :p:`mass_is_mass`
+:Summary: :s:`Flag for whether particle masses should be handled as a quantity with dimensions of mass.`
+:Type:    :t:`any` 
+:Default: :d:`none`
+:Scope:     :c:`Cello`
+
+This parameter is not used by Enzo-E, but is rather used by yt to indicate whether particle "mass" should be treated as a quantity with dimensions of mass. If this parameter is absent, then
+"mass" is treated as a quantity with dimensions of density, which has a value equal to the true mass divided by the root level cell volume. The value of this parameter is not used: yt only checks
+whether this parameter is present, however, it must have some value which can be read in by yt. It is recommended to set the velue to be "true".
+
+----
+
 -----------
 Performance
 -----------

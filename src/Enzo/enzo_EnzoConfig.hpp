@@ -396,7 +396,7 @@ public: // interface
       // EnzoMethodAccretion
       method_accretion_accretion_radius_cells(0.0),
       method_accretion_flavor(""),
-      method_accretion_density_threshold(0.0),
+      method_accretion_physical_density_threshold_cgs(0.0),
       method_accretion_max_mass_fraction(0.0),
       // EnzoMethodSinkMaker
       method_sink_maker_jeans_length_resolution_cells(0.0),
@@ -863,7 +863,7 @@ public: // attributes
   /// EnzoMethodAccretion
   double                     method_accretion_accretion_radius_cells;
   std::string                method_accretion_flavor;
-  double                     method_accretion_density_threshold;
+  double                     method_accretion_physical_density_threshold_cgs;
   double                     method_accretion_max_mass_fraction;
 
   /// EnzoMethodSinkMaker

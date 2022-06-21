@@ -651,7 +651,7 @@ chosen (specified by the ``"accretion:flavor"`` parameter), as well as the value
 of the "density threshold" (specified by ``"accretion:density_threshold"``) and the
 "maximum mass fraction" (specified by ``"accretion:max_mass_fraction"``).
 
-In ``"threshold"`` flavor accretion, the change in density of each cell zero if the current
+In ``"threshold"`` flavor accretion, the change in density of each cell is zero if the current
 density is below the density threshold. If the current density is above the density threshold,
 the change in density is the current density minus the density threshold, or the maximum mass
 fraction times the current density, whichever is smaller.
@@ -660,9 +660,12 @@ In ``"bondi_hoyle"`` flavor accretion, the density change in each cell is calcul
 to the method described in Mark R. Krumholz et al 2004, ApJ, 611, 399. Furthermore, the
 density change is limited in the same way as in ``"threshold"`` accretion.
 
-In ``"flux"`` flavour accretion, the density change in each cell is calculated according to the
+In ``"flux"`` flavor accretion, the density change in each cell is calculated according to the
 method described in Andreas Bleuler & Romain Teyssier 2004, MNRAS, 445, 4015-4036.
 Furthermore, the density change is limited in the same way as in ``"threshold"`` accretion.
+
+In ``"dummy"`` flavor accretion, no accretion is done (essentially, the accretion rate is zero).
+This can be useful for testing purposes.
 
 This method can only be used if ``"merge_sinks"`` is also used, with ``"merge_sinks"`` preceding
 ``"accretion"``. In addition, this method requires the use of three spatial dimensions.
@@ -692,14 +695,17 @@ parameters
      - `float`
      - `4.0`
      - `The accretion radius (i.e., the radius of the spherical accretion zone)
-       in units of the minimum cell width (i.e., the minimum across all 3 dimensions),
+       in units of the minimum cell width (i.e., if the cell width along all the x, y, and
+       z-axes are hx, hy, and hz, then the minimum cell width is the minimum of hx, hy, and hz),
        at the highest refinement level. Its value must be less than one fewer than the minimum
        ghost depth  for "flux" accretion, and less than the minimum ghost depth
        for other flavors of accretion. The ghost depth is 4 (along all axes) by default.`
    * - ``"flavor"``
      - `string`
      - ``""``
-     - `The flavor of accretion used, which can be either "threshold", "bondi_hoyle", or "flux". If this parameter is not set in the parameter file, or if some other string is provided, then the accretion method will be called but will do nothing.`
+     - `The flavor of accretion used, which can be either "threshold", "bondi_hoyle", or "flux".
+       If this parameter is not set in the parameter file, or if some other string is
+       provided, then the accretion method will be called but will do nothing.`
    * - ``"density_threshold"``
      - `float`
      - `1.0e-6`

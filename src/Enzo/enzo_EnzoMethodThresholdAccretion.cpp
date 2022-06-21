@@ -17,10 +17,10 @@
 
 EnzoMethodThresholdAccretion::EnzoMethodThresholdAccretion
 (double accretion_radius_cells,
- double density_threshold,
+ double physical_density_threshold_cgs,
  double max_mass_fraction)
   : EnzoMethodAccretion(accretion_radius_cells,
-			density_threshold,
+			physical_density_threshold_cgs,
 			max_mass_fraction)
 {
 
@@ -65,6 +65,11 @@ void EnzoMethodThresholdAccretion::compute_(Block * block)
   int it = particle.type_index("sink");
   int num_particles = particle.num_particles(it);
 
+  // Get density threshold in code units for this cycle (value will change in
+  // cosmological simultions.
+  const double density_threshold =
+    physical_density_threshold_cgs_ / enzo::units()->density();
+
   if (num_particles > 0) {
 
     // Get pointer to density field data
@@ -100,10 +105,10 @@ void EnzoMethodThresholdAccretion::compute_(Block * block)
 	      // Check if cell is in accretion zone
 	      if (sp.cell_in_accretion_zone(i, j, k)){
 		const int index = INDEX(i,j,k,mx,my);
-		if (density[index] > density_threshold_){
+		if (density[index] > density_threshold){
 
 		  const enzo_float density_change =
-		    std::min(density[index] - density_threshold_,
+		    std::min(density[index] - density_threshold,
 			     max_mass_fraction_ * density[index]);
 
 		  // Update sink particle data and source fields due to accretion
