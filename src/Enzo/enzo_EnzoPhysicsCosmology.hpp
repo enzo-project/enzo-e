@@ -279,7 +279,6 @@ public: // interface
   }
 
   /// Return velocity unit in cm/s
-
   double velocity_units() const
   {
     /* Equation 17 of Greg L. Bryan et al 2014 ApJS 211 19, shows that the dimensions of velocity
