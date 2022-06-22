@@ -1,8 +1,8 @@
 
-What Tests are Currently Included
-=================================
+Existing ctest Tests
+====================
 
-Currently the Enzo-e testing infrastructure tests:
+Currently, the Enzo-e ``ctest`` infrastructure includes:
 
 .. toctree::
    array-cmake
@@ -24,10 +24,10 @@ Currently the Enzo-e testing infrastructure tests:
    vlct-cmake
 
 
-What Tests are Available
-========================
+Existing Test Simulations
+=========================
 
-Currently the Enzo-e has the following tests in the input folder:
+Currently, Enzo-e has the following test simulations in the input folder:
 
 .. toctree::
    adapt
@@ -56,3 +56,10 @@ Currently the Enzo-e has the following tests in the input folder:
    sedov
    vlct
    others
+
+Existing Answer Tests
+=====================
+
+The answer test suite currently covers the following simulations:
+
+ * :ref:`vlct-dual_energy_cloud-hllc_cloud`
