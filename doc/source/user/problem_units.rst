@@ -6,10 +6,11 @@ In non-cosmological simulations, the user is free to specify length, time, and e
 or mass units (only one can be set).
 This is done by setting values for ``Units:length``, ``Units:time``, and
 either ``Units:density`` or ``Units:mass``, which correspond to the unit
-length / time / density / mass in cgs units. If running with gravity, the user must set a
-value for ``Method:gravity:grav_const`` which is consistent with their choice of units, that is
-, its value must be :math:`G_{cgs} * M * T^2 * L^{-3}`, or equivalently,
-:math:`G_{cgs} * D * T^2`, where :math:`M, D, T, L` are the mass, density, time, and length
+length / time / density / mass in cgs units. If running with gravity, and if the user wants to use
+the standard value for the gravitational constant, the user must set a
+value for ``Method:gravity:grav_const`` which is consistent with their choice of units; i.e.,
+, its value must be :math:`G_{cgs}\times M \times T^2 \times L^{-3}`, or equivalently,
+:math:`G_{cgs}\times D \times T^2`, where :math:`M, D, T, L` are the mass, density, time, and length
 units, and :math:`G_{cgs}` is the value of the gravitational constant in cgs units.
 
 In cosmological simulations, the code ignores any specified units and instead operates in a
