@@ -9,6 +9,7 @@ User Guide
    parameters-example
    problem_method
    problem_initial
+   problem_units
    data_field
    data_particle
 

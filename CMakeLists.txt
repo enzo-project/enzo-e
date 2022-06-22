@@ -109,6 +109,8 @@ else()
 endif()
 add_compile_definitions(SMALL_INTS)
 
+add_compile_definitions(CELLO_VERSION="${CMAKE_PROJECT_VERSION}")
+
 # Whether to bypass passing MsgRefine directly to Block constructor,
 # or request it from a separate entry method to bypass a Charm++
 # memory leak. This should only be set to 0 after (and if) the bug is
@@ -342,4 +344,4 @@ endif()
 # extract compile defs from from Cello to populate config
 get_directory_property( CELLO_CPPDEFINES DIRECTORY src/Cello COMPILE_DEFINITIONS )
 # now generate the the config
-configure_file(auto_config.def.in auto_config.def @ONLY)
+configure_file(auto_config.def.in auto_config.def ESCAPE_QUOTES @ONLY)
