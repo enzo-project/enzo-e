@@ -1,11 +1,15 @@
 .. _new-test:
 
-------------------------
-How to create a new test
-------------------------
+------------------------------
+How to create a new ctest test
+------------------------------
 
 Introduction
 ============
+
+This document provides instruction for creating tests for use with :ref:`ctest`. To make
+an answer test, where results of a simulation can be run and compared from two versions
+of ``enzo-e``, it is recommended to use :ref:`pytest`.
 
 When adding a new function to the enzo-e project there is a possibility that it may affect the rest of the code, for this reason new code must be able to pass all existing tests as well as tests built for the new code. This means that integration tests are required. These tests are designed to stress the system. When making a new test these steps must be followed:
 
