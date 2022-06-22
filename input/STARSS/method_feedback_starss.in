@@ -44,26 +44,6 @@ Field {
           "pressure", "temperature"];
   list += ["HI_density","HII_density","HeI_density","HeII_density","HeIII_density","e_density","metal_density"];
 }
-Field {
-   list += ["density_deposit",
-            "total_energy_deposit",
-            "internal_energy_deposit",
-            "metal_density_deposit",
-            "velocity_x_deposit",
-            "velocity_y_deposit",
-            "velocity_z_deposit"
-           ];
-   list += ["density_deposit_accumulate",
-            "total_energy_deposit_accumulate",
-            "internal_energy_deposit_accumulate",
-            "metal_density_deposit_accumulate",
-            "velocity_x_deposit_accumulate",
-            "velocity_y_deposit_accumulate",
-            "velocity_z_deposit_accumulate"
-           ];
-    list += ["SN_shell_density","SN_shell_density_accumulate"];
-}
-
 
 Group {
   list = ["color","derived","conserved","make_field_conservative"];

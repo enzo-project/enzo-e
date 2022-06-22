@@ -258,7 +258,17 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
   cello::define_field("velocity_z_deposit");
   cello::define_field("total_energy_deposit");
   cello::define_field("internal_energy_deposit");
-  cello::define_field("metal_density_deposit"); 
+  cello::define_field("metal_density_deposit");
+  cello::define_field("SN_shell_density"); 
+
+  cello::define_field("density_deposit_accumulate");
+  cello::define_field("velocity_x_deposit_accumulate");
+  cello::define_field("velocity_y_deposit_accumulate");
+  cello::define_field("velocity_z_deposit_accumulate");
+  cello::define_field("total_energy_deposit_accumulate");
+  cello::define_field("internal_energy_deposit_accumulate");
+  cello::define_field("metal_density_deposit_accumulate");
+  cello::define_field("SN_shell_density_accumulate");
 
   // Deposition across grid boundaries is handled using refresh with set_accumulate=true.
   // The set_accumulate flag tells Cello to include ghost zones in the refresh operation,
