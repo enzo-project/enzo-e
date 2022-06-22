@@ -595,6 +595,10 @@ and ``"creation_time"``. All these attributes must be of type ``"default"``, exc
 ``"is_copy"`` and ``"id"`` which must be of type ``"int64"``. Furthermore, ``"is_copy"``
 must be initialized to 0 for all particles.
 
+This method also requires that the number of root blocks across all axes is greater than
+2, i.e., that ``"Mesh:root_blocks" = [a,b,c]``, where ``a``, ``b``, and ``c`` are all
+greater than 2.
+
 This procedure cannot handle the case where particles originally
 from non-neighbouring blocks are put into the same FoF group. If this is
 found to occur, the program stops and prints an error message. This situation
