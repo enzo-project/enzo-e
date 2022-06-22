@@ -1185,7 +1185,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   double coupledMass = shellMass + ejectaMass;
  
   eKinetic = coupledMomenta * coupledMomenta / (2.0 *(coupledMass)) * cello::mass_solar * 1e10;
-  if (eKinetic > (nSNII+nSNIA) * 1e51 && !winds){
+  if (eKinetic > coupledEnergy && !winds){
 
     #ifdef DEBUG_FEEDBACK_STARSS
       CkPrintf("STARSS_FB: Rescaling high kinetic energy %e -> ", eKinetic);
@@ -1204,22 +1204,13 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
              eKinetic, d_mean * pow(lunit * hx, 3) / cello::mass_solar);
   #endif
 
-    if (eKinetic > 1e60 && winds)
+    if (eKinetic > 1e60)
     {
       #ifdef DEBUG_FEEDBACK_STARSS
-        CkPrintf("STARSS_FB: winds Ekinetic = %e Mass = %e\n",
-                  eKinetic, d_mean * pow(lunit * hx, 3) / cello::mass_solar);
+        CkPrintf("STARSS_FB: winds = %d, Ekinetic = %e Mass = %e\n",
+                  winds, eKinetic, d_mean * pow(lunit * hx, 3) / cello::mass_solar);
       #endif
-      ERROR("EnzoMethodFeedbackSTARSS::deposit_feedback()","winds Ekinetic > reasonability!\n");
-    }
-
-    if (eKinetic > 1e60 && !winds)
-    {
-      #ifdef DEBUG_FEEDBACK_STARSS
-        CkPrintf("STARSS_FB: Ekinetic = %e Mass = %e\n",
-                 eKinetic, d_mean * pow(lunit * hx, 3) / cello::mass_solar);
-      #endif
-      ERROR("EnzoMethodFeedbackSTARSS::deposit_feedback()","SNE Ekinetic > reasonability!\n");
+      ERROR("EnzoMethodFeedbackSTARSS::deposit_feedback()","Ekinetic > 1e60 erg!\n");
     }
 
     double coupledGasEnergy = std::max(ejectaEnergy - eKinetic, 0.0);
@@ -1240,7 +1231,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
       #endif
     }
 
-  double coupledMetals = 0.0, SNIAmetals = 0.0, SNIImetals = 0.0;//, P3metals = 0.0;
+  double coupledMetals = 0.0;//, SNIAmetals = 0.0, SNIImetals = 0.0, P3metals = 0.0;
   if (winds) coupledMetals = ejectaMetals; // winds only couple to metals
   if (AnalyticSNRShellMass && !winds) coupledMetals += shellMetals;
   
@@ -1253,7 +1244,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
     CkPrintf("STARSS_FB: Coupled Metals: %e %e %e\n", ejectaMetals, shellMetals, coupledMetals);
   #endif
 
-  if (!winds) coupledEnergy = std::min((nSNII + nSNIA) * 1e51, eKinetic);
+  if (!winds) coupledEnergy = std::min(coupledEnergy, eKinetic);
 
   // Subtract shell mass from the central cells
   double minusRho=0, minusZ=0, msubtracted=0;
