@@ -193,6 +193,9 @@ if (USE_YT_BASED_TESTS)
 
   # Shu Collapse
   setup_test_parallel_python(shu_collapse shu_collapse "input/shu_collapse/run_shu_collapse.py" "--prec=${PREC_STRING}")
+
+  # BB Test
+  setup_test_parallel_python(bb_test bb_test "input/bb_test/run_bb_test.py" "--prec=${PREC_STRING}")
   
 endif()
 

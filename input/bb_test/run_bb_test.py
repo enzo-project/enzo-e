@@ -1,6 +1,6 @@
 #!/bin/python
 
-# Running run_shu_collapse.py does the following:
+# Running run_bb_test.py does the following:
 
 # - Runs Enzo-E ising the parameter file specified by --param_file. This produces a set
 #   of directories which contain snapshots of the particle data at regular time intervals.
@@ -35,14 +35,13 @@ import yt
 
 from testing_utils import testing_context
 from images import make_images
-from radial_profiles import make_radial_profiles
 from mass_conservation import test_mc
 
 yt.mylog.setLevel(30) # set yt log level to "WARNING"
 
 def run_test(executable):
 
-    command = executable + ' ' + "input/shu_collapse/shu.in"
+    command = executable + ' ' + "input/bb_test/bb.in"
     subprocess.call(command,shell = True)
 
 def analyze_test(prec):
@@ -85,11 +84,7 @@ if __name__ == '__main__':
                     z_slice  = 0.0,
                     min_dens = 1.0e-18,
                     max_dens = 1.0e-14)
-
-        make_radial_profiles(center = [0.0,0.0,0.0],
-                             profile_times_years = [0.0,8.0e3,1.2e4,1.5e4,1.7e4],
-                             input_prefix = "Dir")
-
+        
         # analyze the test
         tests_passed = analyze_test(args.prec)
 
