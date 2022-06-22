@@ -5,10 +5,41 @@
 /// @date     2022-04-01
 /// @brief    [\ref Enzo] Declaration of the EnzoFieldAdaptor class
 ///
-/// Adaptor used to provide a common interface for accessing field-like arrays
-/// from the Field class and EnzoEFltArrayMap.
+/// The `EnzoFieldAdaptor` class is used to provide a common interface for
+/// accessing field-like arrays from the `Field` class and `EnzoEFltArrayMap`.
+/// We might be able to do away with this class once we make it easier to
+/// construct an `EnzoEFltArrayMap` instance from a `Field` instance.
 ///
-/// The unorthodox implementation, strategy was chosen to try to minimize the
+/// The primary motivation for this class is flexibility. Previously, reusable
+/// procedures for computing derived fluid quantities (e.g. EnzoComputePressure)
+/// accepted a `Block` instance as the primary argument and operated upon the
+/// associated data. While this approach works, it's somewhat limiting since
+/// `Block` objects carry a lot of unnecessary information. There are
+/// situations where we would like to be able to compute a quantity without
+/// needing the data to be directly associated with a `Block`.
+///
+/// Consider the following concrete example: the `EnzoMethodMHDVlct` Method is
+/// a predictor-corrector scheme that needs to compute the primitive quantities
+/// (including pressure) from arrays holding integration quantities at the 
+/// start of the timestep and predicted after a half timestep.
+///   - Integration quantities at the start of the timestep do directly map to
+///     fields of a `Block`. This means we could use technically use the old
+///     version of `EnzoComputePressure` at the start of a time-step (even
+///     though this would obfuscate the control-flow)
+///   - However, the integration quantities at the half-timestep do not
+///     directly map to the fields of a `Block`.
+///   - Technically, we could have forced everything to work by making use of
+///     the field-history functionallity (possibly with a minor tweak), but
+///     that opens a can of worms since other Methods' expectations about the
+///     number and meaning of different generations of fields are not well
+///     documented. It also would have increased memory usage, obfuscated the
+///     control-flow and might complicate the porting of the Method to GPUs.
+/// Additionally, the old procedures would always be incompatible with computing
+/// derived quantities from reconstructed fields (e.g. one might want to
+/// model a spatially varying adiabatic index in a self-consistent manner with
+/// Grackle)
+///
+/// The unorthodox implementation strategy was selected to try to minimize the
 /// cost of using this wrapper. A particular goal was to facillitate the
 /// `view` & `ptr_grackle` methods of `ArrayWrapper` & `BlockWrapper`
 /// to be inlined. (This would not be possible if the methods were implemented
