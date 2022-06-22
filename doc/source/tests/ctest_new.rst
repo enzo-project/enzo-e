@@ -18,6 +18,7 @@ When adding a new function to the enzo-e project there is a possibility that it 
 * Integrate the test into test infrastructure
 * Running your new test
 
+.. _new-test-simulation:
 
 Create Input Parameters for the New Test.
 =========================================
