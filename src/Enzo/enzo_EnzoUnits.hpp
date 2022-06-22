@@ -110,16 +110,12 @@ public: // virtual methods
   /// Enzo-E we primarily track temperature in units of Kelvin
   double kelvin_per_energy_units() const
   {
-    if (cosmology_ == NULL){
-      // The Units base-class can't compute the temperature code units for the
-      // non-cosmology case because it involves physical constants that are not
-      // defined in the Cello layer
-      double vel_units = velocity();
-      return (enzo_constants::mass_hydrogen * (vel_units * vel_units) /
-              enzo_constants::kboltz);
-    } else {
-      return cosmology_->kelvin_per_energy_units();
-    }
+    // The Units base-class can't compute the temperature code units for the
+    // non-cosmology case because it involves physical constants that are not
+    // defined in the Cello layer
+    double vel_units = velocity();
+    return (enzo_constants::mass_hydrogen * (vel_units * vel_units) /
+	    enzo_constants::kboltz);
   }
   
 private: // functions
