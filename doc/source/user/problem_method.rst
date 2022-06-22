@@ -710,13 +710,13 @@ parameters
      - `The flavor of accretion used, which can be either "threshold", "bondi_hoyle", or "flux".
        If this parameter is not set in the parameter file, or if some other string is
        provided, then the accretion method will be called but will do nothing.`
-   * - ``"density_threshold"``
+   * - ``"physical_density_threshold_cgs"``
      - `float`
-     - `1.0e-6`
-     - `The value of the density threshold. The density in each cell in the accretion zone
-       cannot go below this value during the accretion process. The value of this parameter
-       must be greater than or equal to the value of the density floor imposed by the hydro
-       method.`
+     - `1.0e-24`
+     - `The value of the physical density threshold in cgs units. The density in each cell in
+       the accretion zone cannot go below this value during the accretion process. The value of
+       the density threshold in code units must be greater than or equal to the value of the density
+       floor imposed by the hydro method.`
    * - ``"max_mass_fraction"``
      - `float`
      - `0.25`
