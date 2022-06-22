@@ -151,7 +151,8 @@ Particle {
      cg {
          iter_max = 1000;
          monitor_iter = 25;
-         res_tol = 1e-14;
+	 res_tol = 1e-6;
+         #res_tol = 1e-14;
          type = "cg";
      };
      list = [ "cg" ];

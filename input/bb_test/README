@@ -54,6 +54,8 @@ Arguments:
 
 Currently, the default parameters (set in `bb.in`) are set so that the test problem runs in
 a few minutes on 4 PEs. To get more meaningful results, it is advised to change `Mesh:root_size`
-to `[128,128,128]` (this will increase the resolution), and `Output:schedule:step` to `1.0e10`
-(this will increase the number of snapshots generated), and to run with more PEs. The user could
-try running with `Mesh:root_size = [256,256,256]`, but this seems to crash.
+to `[128,128,128]` (this will increase the resolution), `Output:schedule:step` to `1.0e10`
+(this will increase the number of snapshots generated), `Solver:cg:res_tol` to `1e-14` (this
+will increase the number of iterations used by the gravity solver), and to run with more PEs.
+The user could try running with `Mesh:root_size = [256,256,256]`, but this seems to crash.
+In addition, this test will only run with double floating-point precision.
