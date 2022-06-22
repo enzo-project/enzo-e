@@ -590,7 +590,7 @@ other})`. In these formulas:
   number density). In practice, these are computed from passively
   advected species fields.
 
-There are handful of locations within the ``"ppm"`` and
+There are a handful of locations within the ``"ppm"`` and
 ``"mhd_vlct"`` methods where this treatment is relevant:
 
 1. **Computing the timestep:** each hydro/mhd

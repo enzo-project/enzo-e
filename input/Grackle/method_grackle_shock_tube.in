@@ -14,7 +14,7 @@ include "input/vlct/dual_energy_shock_tube/initial_sod_shock_tube.incl"
    Units {
       density = 1.6726219E-24;  # m_H in grams
       time    = 3.15576E13;     # 1 Myr in seconds
-      length  = 3.086E16;       # 1 pc in cm - does not actually matter
+      length  = 3.086E16;       # 0.01 pc in cm - does not actually matter
    }
 
    Mesh {

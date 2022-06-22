@@ -410,7 +410,7 @@ This method computes the pressure from the integration quantities
 This wraps the ``EnzoComputePressure`` object whose default behavior
 is to use the Grackle-supplied routine for computing pressure when the
 simulation is configured to use ``EnzoMethodGrackle``. The
-``ignore_grackle`` parameter can be avoid using that routine (the
+``ignore_grackle`` parameter can be used to avoid using that routine (the
 parameter is meaningless if the Grackle routine would not otherwise
 get used). This parameter's primary purpose is to provide the option
 to suppress the effects of molecular hydrogen on the adiabatic index
