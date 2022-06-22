@@ -45,8 +45,8 @@ namespace enzo_constants {
   const double clight = 29979245800.0;
 
   // Gravitational constant in CGS
-  // Note: this value is ovewritten by Method:gravity:grav_constant in non-cosmological
-  // simulations.
+  // Note: in non-cosmological simulations, the Gravity solver uses the value specified by 
+  // Method:gravity:grav_constant
   const double grav_constant = 6.67384E-8;
 
   // year in seconds
