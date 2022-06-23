@@ -34,7 +34,6 @@
 #include "test.hpp"
 #include "enzo.hpp"
 #include "main.hpp"
-
 #include "charm_enzo.hpp"
 
 // The following needs to be included once and only once
@@ -79,9 +78,20 @@ PARALLEL_MAIN_BEGIN
   if (PARALLEL_ARGC > 2 && strcmp(PARALLEL_ARGV[2],"-dryrun")==0) {
     dryrun = true;
   } else if (PARALLEL_ARGC != 2) {
+    printf ("argc=%d\n",PARALLEL_ARGC);
+    for (int i=0; i<PARALLEL_ARGC; i++) {
+      printf ("  arg %d %s\n",i,PARALLEL_ARGV[i]);
+    }
+    std::string enzoefull = std::string(PARALLEL_ARGV[0]);
+    int start = enzoefull.rfind("/");
+    std::string enzoe=&PARALLEL_ARGV[0][start];
     // Print usage if wrong number of arguments
-    printf ("\nUsage: %s %s <parameter-file> [ +balancer <load-balancer> ]\n\n", 
-             PARALLEL_RUN,PARALLEL_ARGV[0]);
+    printf ("\nUsage: %s %s <parameter-file> [-dryrun]\n\n",         
+            enzoe.c_str());
+    printf ("        -dryrun     : write parameter file to parameters.[out|libconfig]\n");
+    printf ("         and exit immediately\n\n");
+    printf (" For Charm++ parameters (including load balancing), see the \"Running Charm++ Programs\"\n");
+    printf (" section of the Charm++ documentation at https://charm.readthedocs.io/en/latest/charm%2B%2B/manual.html\n");
     p_exit(1);
   }
 

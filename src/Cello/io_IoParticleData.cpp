@@ -48,8 +48,3 @@ void IoParticleData::meta_value
 }
 
 //----------------------------------------------------------------------
-
-void IoParticleData::save_to (void * v)
-{
-  INCOMPLETE("IoParticleData::save_to()");
-}
