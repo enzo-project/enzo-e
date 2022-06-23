@@ -24,6 +24,9 @@ when configuring your build.
 
 In order to run a test separately from the main ``ctest`` infrastructure write ``bin/enzo-e`` followed be the location of the test to be run in the main enzo directory. For example, ``bin/enzo-e input/Cosmology/method_cosmology-1.in`` runs the method_cosmology-1 test. Some tests are intended to run on multiple processors, for these tests the number of processors must be specified like so ``charmrun +p4 bin/enzo-e input/Cosmology/method_cosmology-8.in``, this runs the method_cosmology-8 test on four processors, a test designed to be run on multiple processors in parallel. If charmrun command is not in your path charmrun's path must also be included:  ``~/Charm/bin/charmrun +p4 bin/enzo-e input/Cosmology/method_cosmology-8.in``.
 
+In order to exclude the ``"shu_collapse"`` and ``"bb_test"`` tests (as is done when running
+the tests on CircleCI, execute the following command: ``ctest -E "(shu_collapse)|(bb_test)"``.
+
 
 How to Analyse the Test Results
 ===============================
@@ -39,11 +42,13 @@ In order to see what happened during the test, you can look at the output direct
 What Tests are Currently Included
 =================================
 
-Currently the Enzo-e testing infrastructure tests:
+Currently the Enzo-e testing infrastructure tests (``"bb_test"`` and ``"shu_collapse"`` are
+not currently included in the CircleCI workflow since they take a long time to run) :
 
 .. toctree::
    accretion-cmake
    array-cmake
+   bb_test-cmake
    error-cmake
    memory-cmake
    monitor-cmake
@@ -59,6 +64,7 @@ Currently the Enzo-e testing infrastructure tests:
    output-cmake
    particle-cmake
    ppm-cmake
+   shu_collapse-cmake
    vlct-cmake
 
 

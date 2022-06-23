@@ -65,7 +65,8 @@ public: // interface
   /// In practice the actual sound speed will be different
   double nominal_sound_speed_;
 
-  /// Instability parameter as defined in Shu 1977
+  /// Instability parameter - sphere is gravitationally unstable if this is greater than 2.0
+  /// Determines density profile.
   double instability_parameter_;
 
   /// Density outside of the truncation radius

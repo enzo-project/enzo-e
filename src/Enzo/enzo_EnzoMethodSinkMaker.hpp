@@ -111,10 +111,7 @@ protected: // attributes
   // density multiplied by the cell volume.
   double max_mass_fraction_;
 
-  // The minimum sink mass in terms of the solar mass.
-  // If a cell passes all the conditions for forming a sink, but the sink mass imposed by
-  // density_threshold_ and max_mass_fraction_ is less than the minimum sink mass, no sink
-  // particle is formed.
+  // The minimum mass of a newly-formed sink particle in solar mass units.
   double min_sink_mass_solar_;
 
   // When a cell creates a sink particle, the x/y/z coordinate of its initial position will be

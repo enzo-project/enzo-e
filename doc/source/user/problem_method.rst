@@ -652,7 +652,7 @@ The momentum change of gas is in the accretion zone due to the mass loss is acco
 for by changing the momentum of the sink particle, so that total momentum is
 conserved. The amount of mass removed is determined by which "flavor" of accretion is
 chosen (specified by the ``"accretion:flavor"`` parameter), as well as the values
-of the "density threshold" (specified by ``"accretion:density_threshold"``) and the
+of the "density threshold" (specified by ``"accretion:physical_density_threshold_cgs"``) and the
 "maximum mass fraction" (specified by ``"accretion:max_mass_fraction"``).
 
 In ``"threshold"`` flavor accretion, the change in density of each cell is zero if the current
@@ -723,3 +723,103 @@ parameters
      - `This parameter specifies the maximum fraction of mass which can be accreted from a cell
        in one timestep. This value of this parameter must be between 0 and 1.`
 
+
+``"sink_maker"``: sink maker
+==============================
+
+This method runs on blocks at the highest level of refinement, and forms sink particles in cells
+which satisy certain criteria.
+
+First, the gas density in the cell must be larger than the
+density threshold, which is specified by the ``"sink_maker:physical_density_threshold_cgs"``
+parameter. If so, the mass of the potential sink particle is
+:math:`V_{cell} \times \max(\rho - \rho_{thresh}, f_{max} \, \rho)`, where :math:`V_{cell}` is the
+cell volume, :math:`\rho` is the cell gas density, :math:`\rho_{thresh}` is the density
+threshold, and :math:`f_{max}` is the maximum fraction of the cell mass which can be turned
+into a sink particle in one timestep, which is specified by the
+``"sink_maker:maximum_mass_fraction"`` parameter. This mass must be greater
+than the minimum sink mass, which is specified by ``"sink_maker:min_sink_mass_solar"`` (in solar
+mass units).
+
+Next, the local Jeans length :math:`\lambda_J` is calculated, where
+:math:`\lambda_J = \frac{\pi c_s^2}{G \rho}`, where :math:`c_s` is the sound speed of the gas
+in the cell, and :math:`G` is the gravitational constant. It is then checked whether
+:math:`\lambda_J < N_J \times h_{max}`, where :math:`N_J` is specified by
+``"sink_maker:jeans_length_resolution_cells"``, and :math:`h_{max} = max(h_x, h_y, h_z)`, where
+:math:`h_x`, :math:`h_y`, and :math:`h_z` are the cell widths along the x-, y- and z-axes,
+respectively.
+
+The next check is that the flow is converging. This is done by computing the strain tensor,
+given by :math:`A_{ij} = \frac{1}{2} \, \left( \frac{dv_i}{dx_j} + \frac{dv_j}{dx_i} \right)`.
+Since this tensor / matrix is real and symmetric, it has three real eigenvalues, and the check
+is equivalent to checking that all three eigenvalues are negative.
+
+The final check is optional, i.e., it is only done if ``"sink_maker:check_density_maximum"``
+is "true", and a cell will pass this check if it is a local density maximum, that is, its
+density is larger than the density in all 26 neighboring cells.
+
+If a cell passes all the checks that are performed, a sink particle is created. Its position
+is the coordinates of the center of the cell, plus a small random offset. The maximum size
+of the random offset is controlled by ``"sink_maker:max_offset_cell_fraction"``.
+
+This method requires sink particles to have the following attributes: ``"mass"``, ``"x"``,
+``"y"``, ``"z"``, ``"vx"``, ``"vy"``, ``"vz"``, and ``"creation_time"``, which must all be
+of type ``"default"``; and ``"id"`` and ``"is_copy"``, which must be of type ``"int64"``.
+If sink particles have a ``"metal_fraction"`` attribute, there must be a
+``"metal_density"`` field.
+
+
+parameters
+----------
+
+.. list-table:: Method ``sink_maker`` parameters
+   :widths: 10 5 1 30
+   :header-rows: 1
+
+   * - Parameter
+     - Type
+     - Default
+     - Description
+   * - ``"jeans_length_resolution_cells"``
+     - `float`
+     - `4.0`
+     - `If the local Jeans length in a cell is less than this quantity multiplied by the maximum
+       cell width, then the cell is a candidate for forming a sink. The maximum cell width is
+       maximum value out of hx, hy, and hz, where hx, hy, and hz are the cell widths across the
+       x-, y- and z-axes, respectively.`
+   * - ``"physical_density_threshold_cgs"``
+     - `float`
+     - `1.0e-24`
+     - `The value of the physical density threshold in cgs units. The density in a cell must be
+       greater than the density threshold to be able to form a sink. The density in a cell after
+       sink formation will be no less than the density threshold. The value of
+       the density threshold in code units must be greater than or equal to the value of the
+       density floor imposed by the hydro method.`
+   * - ``"max_mass_fraction"``
+     - `float`
+     - `0.25`
+     - `The mass of a newly-formed sink is bounded above by this parameter multiplied by the cell
+       density multiplied by the cell volume. The value of this parameter must be between
+       0 and 1.`
+   * - ``"min_sink_mass_solar"``
+     - `float`
+     - `0.0`
+     - `The minimum mass of a newly-formed sink particle, in solar mass units.`
+   * - ``"check_density_maximum"``
+     - `logical`
+     - `true`
+     - `Determines whether a cell is required to be a local density maximum in order to form a
+       sink particle.`
+   * - ``"max_offset_cell_fraction"``
+     - `float`
+     - `0.0`
+     - `When a cell creates a sink particle, the x/y/z coordinate of its initial position will be
+       the x/y/z coordinate of the center of the cell, plus a random value generated from a
+       uniform distribution on the interval [-A,A], where A is equal to
+       this parameter multiplied by the cell width along the x/y/z axis.`
+   * - ``"offset_seed_shift"``
+     - `integer`
+     - `0`
+     - `When computing the random offset for the initial position of a sink particle, we compute
+       an unsigned 64 bit integer value from the cycle number, the block index, and the cell
+       index, and then add on this value to give the seed for the random number generator.`
