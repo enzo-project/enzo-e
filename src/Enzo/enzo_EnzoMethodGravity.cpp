@@ -170,6 +170,11 @@ void EnzoMethodGravity::compute(Block * block) throw()
 	for (int iy=gy; iy<my-gy; iy++) {
 	  for (int ix=gx; ix<mx-gx; ix++) {
 	    int i = ix + mx*(iy + my*iz);
+	    // In cosmological simulations, density units are defined such that `rho_bar_m` is
+	    // 1.0, and time units are defined such that `4 * pi * G * rho_bar_m` is 1.0, where
+	    // `G` is the gravitational constant, and `rho_bar_m` is the mean matter density
+	    // of the universe. These choices of units result in Poisson's equation having a
+	    // much simplified form.
 	    D[i]=-(D[i]-1.0);
 	    B[i]  = D[i];
 	  }

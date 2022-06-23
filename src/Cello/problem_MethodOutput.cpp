@@ -239,6 +239,9 @@ void MethodOutput::compute_continue(Block * block)
   // Get its block_trace object
   BlockTrace * block_trace = msg_output->block_trace();
 
+  // write the version number to file
+  cello::io::write_version_metadata(file);
+
   // write hierarchy meta-data to file
   file_write_hierarchy_(file);
 

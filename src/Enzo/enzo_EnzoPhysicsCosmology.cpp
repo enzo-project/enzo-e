@@ -80,10 +80,8 @@ void EnzoPhysicsCosmology::compute_expansion_factor
  
   /* Convert the time from code units to Time * H0 (c.f. CosmologyGetUnits). */
  
-  enzo_float time_units = 2.52e17/sqrt(omega_matter_now_)/hubble_constant_now_/
-                    pow(1 + initial_redshift_,enzo_float(1.5));
-
-  enzo_float time_hubble_0 = time * time_units * (hubble_constant_now_*3.24e-18);
+  enzo_float time_hubble_0 = time * enzo::units()->time() *
+    hubble_constant_now_ * enzo_constants::H0_over_h;
  
   /* 1) For a flat universe with omega_matter_now_ = 1, it's easy. */
  
