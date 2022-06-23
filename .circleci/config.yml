@@ -153,15 +153,15 @@ commands:
                 cd build
                 # Run all tests excluding VLCT, shu_collapse, and bb_test
                 ctest -E "(vlct)|(shu_collapse)|(bb_test)" --output-on-failure
-                # Run VLCT, shu_collapse, bb_test tests if using double prec (currently required)
+                # Run VLCT tests if using double prec (currently required)
+                # Don't run shu_collapse or bb_test since these take a long time to run
                 if [[ $USE_DOUBLE == 1 ]]; then
-                  ctest -R "(vlct)|(shu_collapse)|(bb_test)" --output-on-failure
+                  ctest -R vlct --output-on-failure
                 fi
 
                 ninja process_test_results
               fi
             fi
-          no_output_timeout: 60m
 
   build-docs:
     description: "Test the docs build."
