@@ -86,7 +86,7 @@ PARALLEL_MAIN_BEGIN
     int start = enzoefull.rfind("/");
     std::string enzoe=&PARALLEL_ARGV[0][start];
     // Print usage if wrong number of arguments
-    printf ("\nUsage: %s %s <parameter-file> [-dryrun]\n\n",         
+    printf ("\nUsage: charmrun %s <parameter-file> [-dryrun]\n\n",         
             enzoe.c_str());
     printf ("        -dryrun     : write parameter file to parameters.[out|libconfig]\n");
     printf ("         and exit immediately\n\n");
