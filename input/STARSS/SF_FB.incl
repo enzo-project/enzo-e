@@ -24,6 +24,11 @@ Particle {
     }
 }
 
+Field {
+    list += ["density_deposit", "velocity_x_deposit", "velocity_y_deposit", "velocity_z_deposit", "total_energy_deposit", "internal_energy_deposit", "metal_density_deposit", "SN_shell_density"];
+    list += ["density_deposit_accumulate", "velocity_x_deposit_accumulate", "velocity_y_deposit_accumulate", "velocity_z_deposit_accumulate", "total_energy_deposit_accumulate", "internal_energy_deposit_accumulate", "metal_density_deposit_accumulate", "SN_shell_density_accumulate"];
+}
+
 Method {
      star_maker {
        flavor = "STARSS"; # pick star formation method             

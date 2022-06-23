@@ -2,7 +2,7 @@ include "input/test_cosmo-dd-multispecies.in"
 include "input/STARSS/SF_FB.incl"
 
 Method { 
-    list = [ "star_maker","feedback", "pm_deposit", "gravity", "ppm", "grackle", "pm_update", "comoving_expansion"];
+    list = [ "star_maker", "feedback", "pm_deposit", "gravity", "ppm", "grackle", "pm_update", "comoving_expansion"];
     output { particle_list += ["star"];}
 }
 

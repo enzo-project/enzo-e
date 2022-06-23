@@ -80,7 +80,6 @@ protected:
   int sf_minimum_level_;
   int single_sn_;
   int NEvents;
-  double tiny_number; 
 
   // Refresh ID
   int ir_feedback_;

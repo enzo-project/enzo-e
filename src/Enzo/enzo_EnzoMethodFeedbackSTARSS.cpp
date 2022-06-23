@@ -191,7 +191,8 @@ void EnzoMethodFeedbackSTARSS::transformComovingWithStar(enzo_float * density,
   {
     // back to "lab" frame. Convert momentum density field back to velocity
     for (int ind = 0; ind<size; ind++) {
-      if (density[ind] <= 10*tiny_number) continue;
+      //if (density[ind] <= 10*1e-20) continue;
+      if (density[ind] == 0) continue;
       double mult = 1/density[ind];
       velocity_x[ind] = velocity_x[ind]*mult + up;
       velocity_y[ind] = velocity_y[ind]*mult + vp;
@@ -200,6 +201,7 @@ void EnzoMethodFeedbackSTARSS::transformComovingWithStar(enzo_float * density,
   }
 
 }
+
 
 double EnzoMethodFeedbackSTARSS::Window(double xd, double yd, double zd, double width) const throw()
 {
@@ -393,7 +395,6 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
   double rhounit = enzo_units->density();
 
   double maxEvacFraction = 0.75; // TODO: make this a parameter
-  double tiny_number = enzo::config()->method_feedback_tiny_number;
 
   // multiply by this value to convert cell density (in code units)
   // to cell mass in Msun
@@ -403,7 +404,7 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
     for (int iy=gy; iy<ny+gy; iy++){
       for (int ix=gx; ix<nx+gx; ix++){
         int i = INDEX(ix,iy,iz,mx,my);
-        if (te_dep_a[i] > 10*tiny_number) { // if any deposition
+        if (d_dep_a[i] != 0) { // if any deposition
 
           double d_old = d[i];
           
@@ -536,19 +537,17 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
   enzo_float * d_shell   = (enzo_float *) field.values("SN_shell_density");
   enzo_float * d_shell_a   = (enzo_float *) field.values("SN_shell_density_accumulate");
 
-  // initialize deposit fields as tiny_number -- if d_dep=0 you get NaNs in TransformComovingWithStar
-  double tiny_number = enzo_config-> method_feedback_tiny_number;
-
   for (int i=0; i<mx*my*mz; i++){
-    d_dep[i] = tiny_number;    
-    te_dep[i] = tiny_number;    
-    ge_dep[i] = tiny_number;
-    mf_dep[i] = tiny_number;
-    vx_dep[i] = tiny_number;
-    vy_dep[i] = tiny_number;
-    vz_dep[i] = tiny_number;
-    d_shell[i] = tiny_number;
+    d_dep [i] = 0;    
+    te_dep[i] = 0;   
+    ge_dep[i] = 0;
+    mf_dep[i] = 0;
+    vx_dep[i] = 0;
+    vy_dep[i] = 0;
+    vz_dep[i] = 0;
+    d_shell[i] = 0;
 
+    d_dep_a [i] = 0;
     te_dep_a[i] = 0;
     ge_dep_a[i] = 0;
     mf_dep_a[i] = 0;
@@ -746,7 +745,6 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   double Tunit = enzo_units->temperature();
   
   const EnzoConfig * enzo_config = enzo::config();
-  double tiny_number = enzo_config->method_feedback_tiny_number;
 
   bool AnalyticSNRShellMass = enzo_config->method_feedback_analytic_SNR_shell_mass;
 
@@ -1291,7 +1289,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
           minusRho    += -1*d_dep[flat];
           msubtracted += -1*d_dep[flat];
          
-          mf_dep[flat] -= std::min(window * remainZ, zpre - tiny_number); 
+          mf_dep[flat] -= std::min(window * remainZ, maxEvacFraction*zpre); 
 
           minusZ      += -1*mf_dep[flat];
           zsubtracted += -1*mf_dep[flat];

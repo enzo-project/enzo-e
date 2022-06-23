@@ -335,7 +335,6 @@ public: // interface
       method_feedback_analytic_SNR_shell_mass(0),
       method_feedback_fade_SNR(0),
       method_feedback_NEvents(0),
-      method_feedback_tiny_number(1e-20),
       /// EnzoMethodStarMaker
       method_star_maker_flavor(""),
       method_star_maker_use_density_threshold(false),           // check above density threshold before SF
@@ -765,7 +764,6 @@ public: // attributes
   int                       method_feedback_analytic_SNR_shell_mass;
   int                       method_feedback_fade_SNR;
   int                       method_feedback_NEvents;
-  double                    method_feedback_tiny_number;
   /// EnzoMethodStarMaker
 
   std::string               method_star_maker_flavor;
