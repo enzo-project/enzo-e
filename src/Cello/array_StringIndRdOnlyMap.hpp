@@ -74,7 +74,12 @@ public:
 
 public:
   /// Constructor
-  StringIndRdOnlyMap() = default;
+  StringIndRdOnlyMap()
+    : data_(nullptr),
+      num_keys_(0),
+      capacity_(0),
+      hash_()
+  {}
 
   /// Constructor
   inline StringIndRdOnlyMap(const std::vector<std::string> &keys) noexcept;

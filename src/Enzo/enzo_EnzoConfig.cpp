@@ -241,6 +241,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_grackle_chemistry(),
   method_grackle_use_cooling_timestep(false),
   method_grackle_radiation_redshift(-1.0),
+  method_grackle_metallicity_floor(0.0),
 #endif
   // EnzoMethodGravity
   method_gravity_grav_const(0.0),
@@ -252,7 +253,6 @@ EnzoConfig::EnzoConfig() throw ()
   method_background_acceleration_flavor(""),
   method_background_acceleration_mass(0.0),
   method_background_acceleration_DM_mass(0.0),
-  method_background_acceleration_DM_density(0.0),
   method_background_acceleration_bulge_mass(0.0),
   method_background_acceleration_core_radius(1.0E-10),
   method_background_acceleration_bulge_radius(1.0E-10),
@@ -409,6 +409,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_grackle_test_minimum_metallicity;
   p | initial_grackle_test_maximum_metallicity;
   p | initial_grackle_test_reset_energies;
+
 #endif /* CONFIG_USE_GRACKLE */
 
   p | initial_inclinedwave_alpha;
@@ -585,7 +586,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_background_acceleration_flavor;
   p | method_background_acceleration_mass;
   p | method_background_acceleration_DM_mass;
-  p | method_background_acceleration_DM_density;
   p | method_background_acceleration_bulge_mass;
   p | method_background_acceleration_core_radius;
   p | method_background_acceleration_bulge_radius;
@@ -640,6 +640,7 @@ void EnzoConfig::pup (PUP::er &p)
   if (method_grackle_use_grackle) {
     p  | method_grackle_use_cooling_timestep;
     p  | method_grackle_radiation_redshift;
+    p  | method_grackle_metallicity_floor;
     if (p.isUnpacking()) { method_grackle_chemistry = new chemistry_data; }
     p | *method_grackle_chemistry;
   } else {
@@ -1273,6 +1274,11 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
     method_grackle_radiation_redshift = p->value_float
       ("Method:grackle:radiation_redshift", -1.0);
 
+    // set a metallicity floor
+    method_grackle_metallicity_floor = p-> value_float
+      ("Method:grackle:metallicity_floor", 0.0);
+
+
     // Set Grackle parameters from parameter file
     method_grackle_chemistry->with_radiative_cooling = p->value_integer
       ("Method:grackle:with_radiative_cooling",
@@ -1487,9 +1493,6 @@ void EnzoConfig::read_method_background_acceleration_(Parameters * p)
 
   method_background_acceleration_DM_mass = p->value_float
    ("Method:background_acceleration:DM_mass",-1.0);
-
-  method_background_acceleration_DM_density = p->value_float
-   ("Method:background_acceleration:DM_density", -1.0);
 
   method_background_acceleration_bulge_mass = p->value_float
     ("Method:background_acceleration:bulge_mass", 0.0);

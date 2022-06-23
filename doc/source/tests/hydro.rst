@@ -22,6 +22,11 @@ test_implosion
 
 Runs a 2D implosion problem. Tests Initial:<field>:value. Test outputs density image file and mesh image file. 
 
+test_implosion-code
+===================
+
+Runs a 2D implosion problem. Tests Initial:code.
+
 test_kelvin_helmholtz
 =====================
 

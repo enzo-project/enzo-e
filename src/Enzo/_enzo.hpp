@@ -220,7 +220,9 @@ extern "C" {
 #include "enzo_EnzoReconstructorPLM.hpp"
 #include "enzo_EnzoBfieldMethod.hpp"
 #include "enzo_EnzoBfieldMethodCT.hpp"
+#include "enzo_EnzoSourceGravity.hpp"
 #include "enzo_EnzoSourceInternalEnergy.hpp"
+
 // public header for the EnzoRiemann sub-library. This needs to be included
 // after the headers for:
 //     EnzoEFltArrayMap, EnzoCenteredFieldRegistry, & EnzoEquationOfState

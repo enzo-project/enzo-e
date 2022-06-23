@@ -36,11 +36,35 @@ If an integration test fails in start-up this implies that there is something wr
 
 In order to see what happened during the test, you can look at the output directory of the test, which is located in a subdirectory (named after the test) in the ``test`` directory of the build directory, for example ``method_cosmology-1.in`` the test results are stored in ``test/MethodCosmology/Cosmology-8``. This directory also contains all outputs (image and data files).
 
-
 What Tests are Currently Included
 =================================
 
 Currently the Enzo-e testing infrastructure tests:
+
+.. toctree::
+   array-cmake
+   error-cmake
+   memory-cmake
+   monitor-cmake
+   adapt-cmake
+   boundary-cmake
+   fluxcorrect-cmake
+   grackle-cmake
+   gravity-cmake
+   heat-cmake
+   helloworld-cmake
+   initialmusic-cmake
+   mergesinks-cmake
+   output-cmake
+   particle-cmake
+   ppm-cmake
+   vlct-cmake
+
+
+What Tests are Available
+========================
+
+Currently the Enzo-e has the following tests in the input folder:
 
 .. toctree::
    adapt
@@ -50,20 +74,25 @@ Currently the Enzo-e testing infrastructure tests:
    collapse
    cosmology
    fluxcorrect
+   grackle
    gravity
    heat
    helloworld
    hierarchy
    hydro
    initialmusic
-   methods
+   isolatedgalaxy
    mergesinks
+   methods
    output
+   parse
    particle
    performance
    ppm
    ppml
    sedov
+   vlct
+   others
   
 How to Add Your Own Test
 ========================

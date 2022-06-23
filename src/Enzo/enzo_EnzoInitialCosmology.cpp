@@ -72,5 +72,28 @@ void EnzoInitialCosmology::enforce_block
   }
 
   block->initial_done();
-  
+
+#ifdef CONFIG_USE_GRACKLE
+  // initialize chemistry fields if doing multispecies 
+  if (enzo::config()->method_grackle_chemistry)
+  {
+    chemistry_data * grackle_chemistry =
+    enzo::config()->method_grackle_chemistry;
+
+    const EnzoMethodGrackle * grackle_method = enzo::grackle_method();
+ 
+    if ( (grackle_chemistry->primordial_chemistry > 0) || (grackle_chemistry->metal_cooling == 1))
+    {
+        EnzoBlock * enzo_block = enzo::block(block);
+        grackle_field_data grackle_fields_; 
+ 
+        //create data struct to be fed into grackle
+        grackle_method->setup_grackle_fields(enzo_block, & grackle_fields_);
+
+        //initialize density fields for various chemical species
+        grackle_method->update_grackle_density_fields(enzo_block, & grackle_fields_);
+    }
+  }
+#endif 
+
 }

@@ -153,12 +153,12 @@ protected: // methods
   /// returns the bfield_choice enum that matches the input string
   bfield_choice parse_bfield_choice_(std::string choice) const noexcept;
 
-  /// Checks that the mesh size is sufficiently large to handle the given ghost
-  /// depth and confirms that the ghost depth is consistent with the
-  /// requirements of the reconstructors
+  /// Completes a handful of sanity-checks that are to be performed after the
+  /// simulation is entirely initialized.
   ///
-  /// @param[in] block used to determine the current mesh size and ghost depth
-  void check_mesh_and_ghost_size_(Block *block) const noexcept;
+  /// This should only perform checks that can't occur in the constructor (e.g.
+  /// like querying the existence of another Method object).
+  void post_init_checks_() const noexcept;
 
   /// Constructs a map containing the field data for each integration quantity
   /// This includes all passively advected scalars (as densities) included in
@@ -182,7 +182,8 @@ protected: // methods
   ///
   /// This function should NOT be modified to directly compute any other source
   /// terms unless they similarly have dependence on dimensional quantites
-  /// computed in this function AND can be dimensionally split.
+  /// computed in this function AND can be dimensionally split. Other source
+  /// terms should be added to the `compute_source_terms_` method.
   ///
   /// @param[in]     dim Dimension along which to compute fluxes. Values of 0,
   ///     1, and 2 correspond to the x, y, and z directions, respectively.
@@ -225,6 +226,46 @@ protected: // methods
    const EFlt3DArray* const interface_velocity_arr_ptr,
    EnzoReconstructor &reconstructor, EnzoBfieldMethod *bfield_method,
    const int stale_depth, const str_vec_t& passive_list) const noexcept;
+
+  /// Computes source terms and accumulate the changes to the integration
+  /// quantities in `dUcons_map``dU_cons` accordingly.
+  ///
+  /// At this time, the source terms handled by this method are fairly limited,
+  /// but we expect them to grow over time. Note, that the `compute_flux_`
+  /// method computes a subset of source terms that can be dimensionally-split
+  /// and explicitly depend on relevant dimensional quantities computed by that
+  /// method. See the description of that method for more details.
+  ///
+  /// @param[in]     cur_dt The current timestep.
+  /// @param[in]     full_timestep Indicates whether this method is being
+  ///     called during the full timestep.
+  /// @param[in]     orig_integration_map Map of arrays holding integration
+  ///     quantities from the start of the current timestep (this argument
+  ///     should be unchanged when calling this method for the partial and then
+  ///     full timestep). This nominally includes passive scalars in conserved
+  ///     form.
+  /// @param[in]     primitive_map Map of arrays holding the current values of
+  ///     the primitives (this SHOULD change when calling this method for the
+  ///     partial and then full timestep). This nominally includes the
+  ///     specific passive scalars
+  /// @param[in]     accel_map Map that optionally holds arrays corresponding
+  ///     to thr components of the acceleration vector field. This should
+  ///     either hold no entries or 3 entries associated with the keys:
+  ///     `"acceleration_x"`, `"acceleration_y"`, and `"acceleration_z"`.
+  /// @param[in,out] dU_cons Map of arrays where the changes to the
+  ///     integration quantities are accumulated.
+  /// @param[in]     stale_depth indicates the current stale depth (before
+  ///     performing reconstruction)
+  ///
+  /// @note
+  /// The interface of this method will almost certainly need to be updated as
+  /// additional source terms get introduced.
+  void compute_source_terms_
+  (const double cur_dt, const bool full_timestep,
+   const EnzoEFltArrayMap &orig_integration_map,
+   const EnzoEFltArrayMap &primitive_map,
+   const EnzoEFltArrayMap &accel_map,
+   EnzoEFltArrayMap &dU_cons, const int stale_depth) const noexcept;
 
   /// Saves the fluxes (for a given dimension, `dim`), computed at the faces
   /// between the active and the ghost zones to `block->data()->flux_data()`

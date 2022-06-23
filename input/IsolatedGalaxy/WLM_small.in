@@ -133,7 +133,6 @@
       #    also can have background stellar bulge and / or stellar disk potential
       background_acceleration {
           flavor = "GalaxyModel";
-          DM_density     = -1.0   ;  # specify this OR mass - not both - mass_radius must be virial if this is used
           DM_mass        = 1.0E10;   # mass interior to below radius (in Msun) -  (this particular value is virial mass)
           DM_mass_radius = 45.0;     # radius (kpc) corresponding to above mass (this is virial)
           core_radius    = 3.0;      # r_c in kpc  (c = r_c / R_vir)

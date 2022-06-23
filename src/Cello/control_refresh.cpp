@@ -1263,7 +1263,7 @@ void Block::particle_scatter_neighbors_
        int it = *it_type;
        
        ASSERT1("Block::particle_scatter_neighbors_",
-	       "Trying to copy particle type %s, but it has no"
+	       "Trying to copy particle type %s, but it has no "
 	       "is_copy attribute",
 	       particle.type_name(it),
 	       particle.has_attribute(it,"is_copy"));

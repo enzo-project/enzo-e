@@ -99,6 +99,20 @@ If you do not need to use Grackle, you can simple disabling it by setting
 See the `Grackle documentation <https://grackle.readthedocs.io>`__ for installation
 instructions.
 
+7. Install yt
+-------------
+
+If you want to use yt to analyse Enzo-E output data, you must install the latest version of yt
+from source. This can be done with the following commands:
+
+.. code-block:: bash
+
+    git clone https://github.com/yt-project/yt.git
+    cd yt
+    pip install -e .
+
+
+
 Configuring/Building
 ====================
 
