@@ -96,6 +96,7 @@ void Monitor::header () const
   print ("Define","BUILD DIR           %s",CELLO_DIR);
   // print ("Define","BUILD DATE (UTC)    %s",CELLO_DATE);
   // print ("Define","BUILD TIME (UTC)    %s",CELLO_TIME);
+  print ("Define","CELLO_VERSION       %s", CELLO_VERSION);
 #ifdef CONFIG_HAVE_VERSION_CONTROL
   print ("Define","CHANGESET           %s",CELLO_CHANGESET);
 #endif

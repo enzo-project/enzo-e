@@ -10,6 +10,7 @@ User Guide
    problem_method
    problem_physics
    problem_initial
+   problem_units
    data_field
    data_particle
 

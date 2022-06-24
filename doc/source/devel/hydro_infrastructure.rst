@@ -9,8 +9,7 @@ the Enzo Layer that can be optionally used to implement other
 hydro/MHD methods. The infrastructure was used to implement other the
 VL + CT MHD solver.
 
-*Note: Currently, barotropic equations of state and compatibility with
-Grackle (for* ``primordial_chemistry > 0`` *) are not yet implemented
+*Note: Currently, barotropic equations of state are not yet implemented
 within the infrastucture. However they are mentioned throughout this
 guide and slots have been explicitly left open for them to be
 implemented within the framework.*
@@ -370,10 +369,6 @@ Returns whether the dual energy formalism is in use.
 Returns the ratio of the specific heats. This is only required to
 yield a reasonable value if the gas is not barotropic.
 
-*In the future, the interface will need to be revisited once Grackle
-is fully supported and it will be possible for gamma to vary
-spatially.*
-
 .. code-block:: c++
 
    enzo_float get_isothermal_sound_speed();
@@ -408,24 +403,26 @@ energy. If the equation of state is barotropic, this should do nothing.
 
    void pressure_from_integration(const EnzoEFltArrayMap &integration_map,
                                   const CelloArray<enzo_float, 3> &pressure,
-                                  int stale_depth);
+                                  int stale_depth,
+                                  bool ignore_grackle = false);
 
 This method computes the pressure from the integration quantities
 (stored in ``integration_map``) and stores the result in ``pressure``.
-
-*In principle this should wrap* ``EnzoComputePressure``, *but
-currently that is not the case. Some minor refactoring is needed to
-allow EnzoComputePressure to compute Pressure based on arrays
-specified in a* ``EnzoEFltArrayMap`` *object and we are holding off on
-this until we implement full support for Grackle. Currently, when the
-dual-energy_formalism is in use, pressure is simply computed from
-internal energy.*
+This wraps the ``EnzoComputePressure`` object whose default behavior
+is to use the Grackle-supplied routine for computing pressure when the
+simulation is configured to use ``EnzoMethodGrackle``. The
+``ignore_grackle`` parameter can be used to avoid using that routine (the
+parameter is meaningless if the Grackle routine would not otherwise
+get used). This parameter's primary purpose is to provide the option
+to suppress the effects of molecular hydrogen on the adiabatic index
+(when Grackle is configured with ``primordial_chemistry > 1``).
 
 .. code-block:: c++
 
    void primitive_from_integration
      (const EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &primitive_map,
-      int stale_depth, const std::vector<std::string> &passive_list);
+      int stale_depth, const std::vector<std::string> &passive_list,
+      bool ignore_grackle = false);
 
 This method is responsible for computing the primitive quantities (to
 be held in ``primitive_map``) from the integration quantities (stored
@@ -433,7 +430,7 @@ in ``integration_map``).  Non-passive scalar quantities appearing in
 both ``integration_map`` and ``primitive_map`` are simply deepcopied
 and passive scalar quantities are converted from conserved-form to
 specific form. For a non-barotropic EOS, this also computes pressure
-(by calling ``EnzoEquationOfState::pressure_from_integration``)
+(by calling ``EnzoEquationOfState::pressure_from_integration``).
 
 *In the future, it might be worth considering making this into a subclass
 of Cello's ``Physics`` class. If that is done, it may be advisable to
