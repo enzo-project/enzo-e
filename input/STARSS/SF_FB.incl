@@ -24,14 +24,11 @@ Particle {
     }
 }
 
-Field {
-    list += ["density_deposit", "velocity_x_deposit", "velocity_y_deposit", "velocity_z_deposit", "total_energy_deposit", "internal_energy_deposit", "metal_density_deposit", "SN_shell_density"];
-    list += ["density_deposit_accumulate", "velocity_x_deposit_accumulate", "velocity_y_deposit_accumulate", "velocity_z_deposit_accumulate", "total_energy_deposit_accumulate", "internal_energy_deposit_accumulate", "metal_density_deposit_accumulate", "SN_shell_density_accumulate"];
-}
-
 Method {
      star_maker {
        flavor = "STARSS"; # pick star formation method             
+
+       min_level = 4; # minimum level for star formation
 
        use_density_threshold    = false;  # check number density for SF
        use_overdensity_threshold= false;    # check overdensity
@@ -47,7 +44,6 @@ Method {
        use_critical_metallicity = false;
        use_jeans_mass           = true;
 
-       min_level = 4; # minimum level for star formation
        overdensity_threshold    = 512.0;
        minimum_star_mass        = 500.0;
        maximum_star_mass        = 1000.0;

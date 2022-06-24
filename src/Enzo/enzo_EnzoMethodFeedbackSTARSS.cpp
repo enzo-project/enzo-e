@@ -245,32 +245,32 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
   
   cello::define_field_in_group("metal_density","color");
 
+  // Initialize refresh object
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
   
   sf_minimum_level_ = enzo_config->method_star_maker_min_level;
   single_sn_        = enzo_config->method_feedback_single_sn;
-  // TODO: Make "deposit" fields temporary fields
 
-  // Initialize refresh object
-  cello::define_field("density_deposit");
-  cello::define_field("velocity_x_deposit");
-  cello::define_field("velocity_y_deposit");
-  cello::define_field("velocity_z_deposit");
-  cello::define_field("total_energy_deposit");
-  cello::define_field("internal_energy_deposit");
-  cello::define_field("metal_density_deposit");
-  cello::define_field("SN_shell_density"); 
+  // Initialize temporary fields
+  i_d_dep  = cello::field_descr()->insert_temporary();
+  i_te_dep = cello::field_descr()->insert_temporary();
+  i_ge_dep = cello::field_descr()->insert_temporary();
+  i_mf_dep = cello::field_descr()->insert_temporary();
+  i_vx_dep = cello::field_descr()->insert_temporary();
+  i_vy_dep = cello::field_descr()->insert_temporary();
+  i_vz_dep = cello::field_descr()->insert_temporary();
+  i_d_shell= cello::field_descr()->insert_temporary();
 
-  cello::define_field("density_deposit_accumulate");
-  cello::define_field("velocity_x_deposit_accumulate");
-  cello::define_field("velocity_y_deposit_accumulate");
-  cello::define_field("velocity_z_deposit_accumulate");
-  cello::define_field("total_energy_deposit_accumulate");
-  cello::define_field("internal_energy_deposit_accumulate");
-  cello::define_field("metal_density_deposit_accumulate");
-  cello::define_field("SN_shell_density_accumulate");
+  i_d_dep_a  = cello::field_descr()->insert_temporary();
+  i_te_dep_a = cello::field_descr()->insert_temporary();
+  i_ge_dep_a = cello::field_descr()->insert_temporary();
+  i_mf_dep_a = cello::field_descr()->insert_temporary();
+  i_vx_dep_a = cello::field_descr()->insert_temporary();
+  i_vy_dep_a = cello::field_descr()->insert_temporary();
+  i_vz_dep_a = cello::field_descr()->insert_temporary();
+  i_d_shell_a= cello::field_descr()->insert_temporary();
 
   // Deposition across grid boundaries is handled using refresh with set_accumulate=true.
   // The set_accumulate flag tells Cello to include ghost zones in the refresh operation,
@@ -289,21 +289,21 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
   refresh_fb->set_accumulate(true);
 
   refresh_fb->add_field_src_dst
-    ("density_deposit","density_deposit_accumulate");
+    (i_d_dep, i_d_dep_a);
   refresh_fb->add_field_src_dst
-    ("velocity_x_deposit", "velocity_x_deposit_accumulate");
+    (i_te_dep, i_te_dep_a);
   refresh_fb->add_field_src_dst
-    ("velocity_y_deposit", "velocity_y_deposit_accumulate");
+    (i_ge_dep, i_ge_dep_a);
   refresh_fb->add_field_src_dst
-    ("velocity_z_deposit","velocity_z_deposit_accumulate");
+    (i_mf_dep, i_mf_dep_a);
   refresh_fb->add_field_src_dst
-    ("total_energy_deposit","total_energy_deposit_accumulate");
+    (i_vx_dep, i_vx_dep_a);
   refresh_fb->add_field_src_dst
-    ("internal_energy_deposit","internal_energy_deposit_accumulate");
+    (i_vy_dep, i_vy_dep_a);
   refresh_fb->add_field_src_dst
-    ("metal_density_deposit","metal_density_deposit_accumulate");
+    (i_vz_dep, i_vz_dep_a);
   refresh_fb->add_field_src_dst
-    ("SN_shell_density", "SN_shell_density_accumulate");
+    (i_d_shell, i_d_shell_a);
  
   refresh_fb->set_callback(CkIndex_EnzoBlock::p_method_feedback_starss_end());
  
@@ -327,6 +327,24 @@ void EnzoMethodFeedbackSTARSS::pup (PUP::er &p)
   p | single_sn_;
   p | NEvents;
   p | ir_feedback_;
+
+  p | i_d_dep;
+  p | i_te_dep;
+  p | i_ge_dep;
+  p | i_mf_dep;
+  p | i_vx_dep;
+  p | i_vy_dep;
+  p | i_vz_dep;
+  p | i_d_shell;
+
+  p | i_d_dep_a;
+  p | i_te_dep_a;
+  p | i_ge_dep_a;
+  p | i_mf_dep_a;
+  p | i_vx_dep_a;
+  p | i_vy_dep_a;
+  p | i_vz_dep_a;
+  p | i_d_shell_a;
 
   return;
 }
@@ -370,24 +388,24 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
   enzo_float * vy = (enzo_float *) field.values("velocity_y");
   enzo_float * vz = (enzo_float *) field.values("velocity_z");
   
-  enzo_float * d_dep  = (enzo_float *) field.values("density_deposit");
-  enzo_float * te_dep = (enzo_float *) field.values("total_energy_deposit");
-  enzo_float * ge_dep = (enzo_float *) field.values("internal_energy_deposit");
-  enzo_float * mf_dep = (enzo_float *) field.values("metal_density_deposit");
-  enzo_float * vx_dep = (enzo_float *) field.values("velocity_x_deposit");
-  enzo_float * vy_dep = (enzo_float *) field.values("velocity_y_deposit");
-  enzo_float * vz_dep = (enzo_float *) field.values("velocity_z_deposit");
+  enzo_float * d_dep  = (enzo_float *) field.values(i_d_dep);
+  enzo_float * te_dep = (enzo_float *) field.values(i_te_dep);
+  enzo_float * ge_dep = (enzo_float *) field.values(i_ge_dep);
+  enzo_float * mf_dep = (enzo_float *) field.values(i_mf_dep);
+  enzo_float * vx_dep = (enzo_float *) field.values(i_vx_dep);
+  enzo_float * vy_dep = (enzo_float *) field.values(i_vy_dep);
+  enzo_float * vz_dep = (enzo_float *) field.values(i_vz_dep);
 
-  enzo_float * d_dep_a  = (enzo_float *) field.values("density_deposit_accumulate");
-  enzo_float * te_dep_a = (enzo_float *) field.values("total_energy_deposit_accumulate");
-  enzo_float * ge_dep_a = (enzo_float *) field.values("internal_energy_deposit_accumulate");
-  enzo_float * mf_dep_a = (enzo_float *) field.values("metal_density_deposit_accumulate");
-  enzo_float * vx_dep_a = (enzo_float *) field.values("velocity_x_deposit_accumulate");
-  enzo_float * vy_dep_a = (enzo_float *) field.values("velocity_y_deposit_accumulate");
-  enzo_float * vz_dep_a = (enzo_float *) field.values("velocity_z_deposit_accumulate");
+  enzo_float * d_dep_a  = (enzo_float *) field.values(i_d_dep_a);
+  enzo_float * te_dep_a = (enzo_float *) field.values(i_te_dep_a);
+  enzo_float * ge_dep_a = (enzo_float *) field.values(i_ge_dep_a);
+  enzo_float * mf_dep_a = (enzo_float *) field.values(i_mf_dep_a);
+  enzo_float * vx_dep_a = (enzo_float *) field.values(i_vx_dep_a);
+  enzo_float * vy_dep_a = (enzo_float *) field.values(i_vy_dep_a);
+  enzo_float * vz_dep_a = (enzo_float *) field.values(i_vz_dep_a);
 
-  enzo_float * d_shell   = (enzo_float *) field.values("SN_shell_density");
-  enzo_float * d_shell_a = (enzo_float *) field.values("SN_shell_density_accumulate");
+  enzo_float * d_shell   = (enzo_float *) field.values(i_d_shell);
+  enzo_float * d_shell_a = (enzo_float *) field.values(i_d_shell_a);
 
   EnzoUnits * enzo_units = enzo::units();
   double cell_volume_code = hx*hy*hz;
@@ -455,8 +473,10 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
     }
   }
 
+  deallocate_temporary_(enzo_block);
   return;
 }
+
 void EnzoBlock::p_method_feedback_starss_end() 
 {  
   EnzoMethodFeedbackSTARSS * method = static_cast<EnzoMethodFeedbackSTARSS*> (this->method());
@@ -518,24 +538,28 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
   int numSN = 0; // counter of SN events
   int count = 0; // counter of particles
 
-  enzo_float * d_dep  = (enzo_float *) field.values("density_deposit");
-  enzo_float * te_dep = (enzo_float *) field.values("total_energy_deposit");
-  enzo_float * ge_dep = (enzo_float *) field.values("internal_energy_deposit");
-  enzo_float * mf_dep = (enzo_float *) field.values("metal_density_deposit");
-  enzo_float * vx_dep = (enzo_float *) field.values("velocity_x_deposit");
-  enzo_float * vy_dep = (enzo_float *) field.values("velocity_y_deposit");
-  enzo_float * vz_dep = (enzo_float *) field.values("velocity_z_deposit");
+  allocate_temporary_(enzo_block);
 
-  enzo_float * d_dep_a  = (enzo_float *) field.values("density_deposit_accumulate");
-  enzo_float * te_dep_a = (enzo_float *) field.values("total_energy_deposit_accumulate");
-  enzo_float * ge_dep_a = (enzo_float *) field.values("internal_energy_deposit_accumulate");
-  enzo_float * mf_dep_a = (enzo_float *) field.values("metal_density_deposit_accumulate");
-  enzo_float * vx_dep_a = (enzo_float *) field.values("velocity_x_deposit_accumulate");
-  enzo_float * vy_dep_a = (enzo_float *) field.values("velocity_y_deposit_accumulate");
-  enzo_float * vz_dep_a = (enzo_float *) field.values("velocity_z_deposit_accumulate");
+  // initialize temporary fields as zero
+  enzo_float * d_dep  = (enzo_float *) field.values(i_d_dep);
+  enzo_float * te_dep = (enzo_float *) field.values(i_te_dep);
+  enzo_float * ge_dep = (enzo_float *) field.values(i_ge_dep);
+  enzo_float * mf_dep = (enzo_float *) field.values(i_mf_dep);
+  enzo_float * vx_dep = (enzo_float *) field.values(i_vx_dep);
+  enzo_float * vy_dep = (enzo_float *) field.values(i_vy_dep);
+  enzo_float * vz_dep = (enzo_float *) field.values(i_vz_dep);
 
-  enzo_float * d_shell   = (enzo_float *) field.values("SN_shell_density");
-  enzo_float * d_shell_a   = (enzo_float *) field.values("SN_shell_density_accumulate");
+  enzo_float * d_dep_a  = (enzo_float *) field.values(i_d_dep_a);
+  enzo_float * te_dep_a = (enzo_float *) field.values(i_te_dep_a);
+  enzo_float * ge_dep_a = (enzo_float *) field.values(i_ge_dep_a);
+  enzo_float * mf_dep_a = (enzo_float *) field.values(i_mf_dep_a);
+  enzo_float * vx_dep_a = (enzo_float *) field.values(i_vx_dep_a);
+  enzo_float * vy_dep_a = (enzo_float *) field.values(i_vy_dep_a);
+  enzo_float * vz_dep_a = (enzo_float *) field.values(i_vz_dep_a);
+
+  enzo_float * d_shell   = (enzo_float *) field.values(i_d_shell);
+  enzo_float * d_shell_a = (enzo_float *) field.values(i_d_shell_a);
+
 
   for (int i=0; i<mx*my*mz; i++){
     d_dep [i] = 0;    
@@ -811,15 +835,18 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
          (enzo_float *) field.values("HDI_density") : NULL;
 
   // "deposit" fields that hold running total for all exploding particles in this block
-  enzo_float *  d_dep_tot = (enzo_float *) field.values("density_deposit");
-  enzo_float * te_dep_tot = (enzo_float *) field.values("total_energy_deposit");
-  enzo_float * ge_dep_tot = (enzo_float *) field.values("internal_energy_deposit");
-  enzo_float * mf_dep_tot = (enzo_float *) field.values("metal_density_deposit");
-  enzo_float * vx_dep_tot = (enzo_float *) field.values("velocity_x_deposit");
-  enzo_float * vy_dep_tot = (enzo_float *) field.values("velocity_y_deposit");
-  enzo_float * vz_dep_tot = (enzo_float *) field.values("velocity_z_deposit");
+  enzo_float *  d_dep_tot = (enzo_float *) field.values(i_d_dep);
+  enzo_float * te_dep_tot = (enzo_float *) field.values(i_te_dep);
+  enzo_float * ge_dep_tot = (enzo_float *) field.values(i_ge_dep);
+  enzo_float * mf_dep_tot = (enzo_float *) field.values(i_mf_dep);
+  enzo_float * vx_dep_tot = (enzo_float *) field.values(i_vx_dep);
+  enzo_float * vy_dep_tot = (enzo_float *) field.values(i_vy_dep);
+  enzo_float * vz_dep_tot = (enzo_float *) field.values(i_vz_dep);
 
-  // allocate temporary deposit fields for this event 
+  // holds just shell densities (used for refresh+accumulate)
+  enzo_float * d_shell   = (enzo_float *) field.values(i_d_shell);
+
+  // allocate another set of temporary deposit fields for this event 
   enzo_float *  d_dep = new enzo_float[size]; 
   enzo_float * te_dep = new enzo_float[size];
   enzo_float * ge_dep = new enzo_float[size];
@@ -840,8 +867,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
     vz_dep[i] = 0;
   }
 
-  // holds just shell densities (used for refresh+accumulate)
-  enzo_float * d_shell   = (enzo_float *) field.values("SN_shell_density");
+
 
   const int index = INDEX(ix,iy,iz,mx,my);
 
