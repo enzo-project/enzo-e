@@ -10,6 +10,7 @@ This testing section describes tests on enzo-e program
    accretion
    adapt
    balance
+   bb_test
    boundary
    checkpoint
    collapse
@@ -32,5 +33,6 @@ This testing section describes tests on enzo-e program
    ppm
    ppml
    sedov
+   shu_collapse
    vlct
    others
