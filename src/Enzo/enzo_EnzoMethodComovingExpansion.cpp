@@ -190,11 +190,12 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
         pressure = pressure_now;
       }
 
+      int dual_energy_formalism = (int)enzo::uses_dual_energy_formalism();
       /* Call fortran routine to do the real work. */
 
       FORTRAN_NAME(expand_terms)
 	(
-	 &rank, &m, &EnzoBlock::DualEnergyFormalism[in], &Coefficient,
+	 &rank, &m, &dual_energy_formalism, &Coefficient,
 	 (int*) &HydroMethod, &EnzoBlock::Gamma[in],
 	 pressure,
 	 density_new, total_energy_new, internal_energy_new,
