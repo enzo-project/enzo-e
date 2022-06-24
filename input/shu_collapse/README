@@ -73,3 +73,6 @@ to `[128,128,128]` (this will increase the resolution), `Output:schedule:step` t
 will increase the number of iterations used by the gravity solver), and to run with more PEs.
 The user could try running with `Mesh:root_size = [256,256,256]`, but this seems to crash.
 In addition, this test will only run with double floating-point precision.
+
+"theory.ipynb" is a Jupyter notebook which shows the steps for solving the self-similar Shu
+Collapse problem, and outlines potential next steps to develop this test.
