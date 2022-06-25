@@ -4,7 +4,6 @@ User Guide
 
 .. toctree::
    :maxdepth: 1
-	   
    parameters-file
    parameters-example
    problem_method
@@ -12,4 +11,5 @@ User Guide
    problem_units
    data_field
    data_particle
+   checkpoint_restart
 

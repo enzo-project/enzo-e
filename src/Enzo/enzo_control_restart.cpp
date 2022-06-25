@@ -405,8 +405,8 @@ void EnzoBlock::p_restart_refine(int ic3[3],int io_reader)
   DataMsg * data_msg = new DataMsg;
 
   bool is_new;
-  data_msg -> set_field_face (field_face,is_new=true);
-  data_msg -> set_field_data (field_data,is_new=true);
+  data_msg -> set_field_face (field_face,is_new=false);
+  data_msg -> set_field_data (field_data,is_new=false);
 
   const Factory * factory = cello::simulation()->factory();
 
