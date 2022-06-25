@@ -32,7 +32,9 @@ Checkpoint
    }
 
 This example writes checkpoint dumps every 5 cycles, starting with the 5th
-cycle. See the input/Checkpoint/test_cosmo-checkpoint.in parameter
+cycle.
+
+See the ``input/Checkpoint/test_cosmo-checkpoint.in`` parameter
 file for a working example of writing checkpoint directories.
 
 =======
@@ -40,9 +42,9 @@ Restart
 =======
 
 To restart from a checkpoint directory, edit a copy of the original parameter
-file to add two parameters, `Initial:restart` and `Initial:restart_dir`.
+file to add two parameters, ``Initial:restart`` and ``Initial:restart_dir``.
 For example, to restart the problem in the previous "Checkpoint" section
-at cycle 50, one would add
+at cycle 50, one would add the following:
 
 .. code-block::
 
@@ -52,3 +54,15 @@ at cycle 50, one would add
       restart_dir = "Check-50";
    }
 
+Note that it's also possible to rerun with some parameters modified,
+for example different linear solver convergence criteria or different
+mesh refinement criteria. The main limitation is that the simulation
+data cannot change on restart: you cannot add new fields, new particle
+types or attributes, or change the number of root-level blocks or
+block sizes. You `can` restart with more (or fewer) processors, though
+the constraint that the number of processors must be at most the
+number of root-level blocks must still be satisfied.
+
+The parameter file ``input/Checkpoint/test_cosmo-restart.in`` is the
+"restart" counterpoint to the "checkpoint" example mentioned in the
+previous section.
