@@ -95,7 +95,7 @@ void EnzoMethodPmDeposit::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-namespace {
+namespace { // define local helper functions in anonymous namespace
 
   /// deposits mass from all gravitating particles onto density_particle_arr
   ///
