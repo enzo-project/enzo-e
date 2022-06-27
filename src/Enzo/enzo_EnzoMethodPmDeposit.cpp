@@ -434,7 +434,7 @@ namespace {
   /// @param[in, out] density_tot_arr The array where density gets accumulated
   /// @param[in]      field Contains the field data to use for accumulation
   /// @param[in]      dt Length of time to "drift" the density field before
-  ///     deposition.
+  ///     deposition divided by the scale factor at the deposition time
   /// @param[in]      hx_prop,hy_prop,hz_prop The width of cell along
   ///     each axis. These specify the proper lengths at the time that we
   ///     deposit the density (after any drift).
@@ -443,7 +443,7 @@ namespace {
   /// @param[in]      gx,gy,gz Specifies the number of cells in the ghost zone
   ///     for each dimensions
   void deposit_gas_(const CelloArray<enzo_float, 3>& density_tot_arr,
-                    Field& field, enzo_float dt,
+                    Field& field, enzo_float dt_div_cosmoa,
                     enzo_float hx_prop, enzo_float hy_prop, enzo_float hz_prop,
                     int mx, int my, int mz,
                     int gx, int gy, int gz){
@@ -489,7 +489,7 @@ namespace {
 
     FORTRAN_NAME(dep_grid_cic)(de, deposited_gas_density.data(), temp.data(),
                                vxf, vyf, vzf,
-                               &dt, rfield.data(), &rank,
+                               &dt_div_cosmoa, rfield.data(), &rank,
                                &hx_prop,&hy_prop,&hz_prop,
                                &mx,&my,&mz,
                                &gxi,&gyi,&gzi,
@@ -562,6 +562,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
       cosmology->compute_expansion_factor(&cosmo_a,&cosmo_dadt,
                                           block->time() + alpha_*block->dt());
     }
+    const double dt_div_cosmoa = alpha_ * block->dt() / cosmo_a;
 
     double hx,hy,hz;
     block->cell_width(&hx,&hy,&hz);
@@ -576,8 +577,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
       if (rank >= 2) inv_vol /= hy;
       if (rank >= 3) inv_vol /= hz;
 
-      const double dt_div_cosmoa = alpha_ * block->dt() / cosmo_a;
-
       deposit_particles_(density_particle_arr, block, dt_div_cosmoa, inv_vol,
                          mx, my, mz,
                          gx, gy, gz);
@@ -590,12 +589,18 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
     // add mass from gas
     {
-      double gas_dt = alpha_; // probably a typo
+      // Grid_DepositBaryons.C from enzo-dev overrides the drift time for the
+      // gas density to be zero when using the PPM and Zeus solvers.
+      //
+      // The way that the Gravity source terms are currently included with
+      // EnzoMethodPpm and EnzoMethodMHDVlct is currently very similar (in
+      // terms of temporal integration), so we also set this to zero.
+      const double gas_dt_div_cosmoa = 0.0;
 
       // The use of "proper" cell-widths was carried over for consistency with
       // earlier versions of the code. Based on Grid_DepositBaryons.C from
       // enzo-dev, it seems like this may not be correct.
-      deposit_gas_(density_tot_arr, field, gas_dt,
+      deposit_gas_(density_tot_arr, field, gas_dt_div_cosmoa,
                    hx*cosmo_a, hy*cosmo_a, hz*cosmo_a,
                    mx, my, mz,
                    gx, gy, gz);
