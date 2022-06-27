@@ -257,8 +257,6 @@ void EnzoInitialIsolatedGalaxy::enforce_block
          "Block does not exist",
          block != NULL);
 
-  EnzoBlock * enzo_block = enzo::block(block);
-
   Particle particle = block->data()->particle();
   InitializeParticles(block, &particle);
 
@@ -266,7 +264,7 @@ void EnzoInitialIsolatedGalaxy::enforce_block
 #ifdef CONFIG_USE_GRACKLE
    grackle_field_data grackle_fields_;
    const EnzoMethodGrackle * grackle_method = enzo::grackle_method();
-   grackle_method->setup_grackle_fields(enzo_block, &grackle_fields_);
+   grackle_method->setup_grackle_fields(block, &grackle_fields_);
 #endif
 
   if (this->use_gas_particles_){
@@ -277,7 +275,7 @@ void EnzoInitialIsolatedGalaxy::enforce_block
 
 
   // Update temperature field if it exists
-  Field field = enzo_block->data()->field();
+  Field field = block->data()->field();
   const EnzoConfig * enzo_config = enzo::config();
 
 #ifdef CONFIG_USE_GRACKLE
@@ -289,8 +287,7 @@ void EnzoInitialIsolatedGalaxy::enforce_block
 
     if (name == "grackle"){
 
-      grackle_method->update_grackle_density_fields(enzo_block,
-                                                     &grackle_fields_);
+      grackle_method->update_grackle_density_fields(block, &grackle_fields_);
     }
   }
 #endif
