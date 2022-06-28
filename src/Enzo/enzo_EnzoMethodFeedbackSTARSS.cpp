@@ -936,14 +936,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
      M_shell > 0 iff v_shell > v_gas 
   */ 
   double Z_mean=0, d_mean=0, n_mean=0, v_mean=0, mu_mean=0;
-  double mu=0;
-
-  chemistry_data * grackle_chemistry =
-    enzo::config()->method_grackle_chemistry;
-  int primordial_chemistry = 0;
-  if (grackle_chemistry) {
-    int primordial_chemistry = grackle_chemistry->primordial_chemistry;
-  }
+  double mu = enzo_config->ppm_mol_weight;
 
   for (int ix_ = ix-1; ix_ < ix+2; ix_++) {
     for (int iy_ = iy-1; iy_ < iy+2; iy_++) {
@@ -951,18 +944,22 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
         int ind = INDEX(ix_,iy_,iz_, mx,my);
         Z_mean += mf[ind] / d[ind];
         // TODO: make EnzoComputeMolecularWeight, and access mu_field here?
-        if (primordial_chemistry == 0) mu = enzo_config->ppm_mol_weight;
-        else {
-          mu = d_el[ind] + dHI[ind] + dHII[ind] + 0.25*(dHeI[ind]+dHeII[ind]+dHeIII[ind]);
 
-          if (primordial_chemistry > 1) {
-            mu += dHM[ind] + 0.5*(dH2I[ind]+dH2II[ind]);
+        #ifdef CONFIG_USE_GRACKLE
+          int primordial_chemistry = (enzo::config()->method_grackle_chemistry)->primordial_chemistry;
+          if (primordial_chemistry > 0) {
+            mu = d_el[ind] + dHI[ind] + dHII[ind] + 0.25*(dHeI[ind]+dHeII[ind]+dHeIII[ind]);
+
+            if (primordial_chemistry > 1) {
+              mu += dHM[ind] + 0.5*(dH2I[ind]+dH2II[ind]);
+            }
+            if (primordial_chemistry > 2) {
+              mu += 0.5*(dDI[ind] + dDII[ind]) + dHDI[ind]/3.0;
+            }
           }
-          if (primordial_chemistry > 2) {
-            mu += 0.5*(dDI[ind] + dDII[ind]) + dHDI[ind]/3.0;
-          }
-        }
-        mu /= d[ind]; 
+          mu /= d[ind]; 
+        #endif
+
         mu_mean += mu;
         d_mean += d[ind];
       } 

@@ -240,10 +240,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 
   compute_temperature.compute(enzo_block);
 
-  chemistry_data * grackle_chemistry =
-    enzo::config()->method_grackle_chemistry;
 
-  int primordial_chemistry = grackle_chemistry->primordial_chemistry;
   double mu = enzo_config->ppm_mol_weight;
   // iterate over all cells (not including ghost zones)
   for (int iz=gz; iz<nz+gz; iz++){
@@ -251,24 +248,24 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
       for (int ix=gx; ix<nx+gx; ix++){
 
         int i = INDEX(ix,iy,iz,mx,my);//ix + mx*(iy + my*iz);
-        
      
         // compute MMW -- TODO: Make EnzoComputeMeanMolecularWeight class and reference
         // mu_field here?
-        if (primordial_chemistry == 0) mu = enzo_config->ppm_mol_weight;
-        else {
-          mu = d_el[i] + dHI[i] + dHII[i] + 0.25*(dHeI[i]+dHeII[i]+dHeIII[i]);
+        #ifdef CONFIG_USE_GRACKLE
+          int primordial_chemistry = (enzo::config()->method_grackle_chemistry)->primordial_chemistry;
+          if (primordial_chemistry > 0) {
+            mu = d_el[i] + dHI[i] + dHII[i] + 0.25*(dHeI[i]+dHeII[i]+dHeIII[i]);
 
-          if (primordial_chemistry > 1) {
-            mu += dHM[i] + 0.5*(dH2I[i]+dH2II[i]);
+            if (primordial_chemistry > 1) {
+              mu += dHM[i] + 0.5*(dH2I[i]+dH2II[i]);
+            }
+            if (primordial_chemistry > 2) {
+              mu += 0.5*(dDI[i] + dDII[i]) + dHDI[i]/3.0;
+            }
           }
-          if (primordial_chemistry > 2) {
-            mu += 0.5*(dDI[i] + dDII[i]) + dHDI[i]/3.0;
-          }
-        }
-        mu /= density[i]; 
-        mu = 1.0/mu;
-    
+          mu /= density[i];
+          mu = 1.0/mu; 
+        #endif
 
         double rho_cgs = density[i] * enzo_units->density();
         double mean_particle_mass = mu * cello::mass_hydrogen;
@@ -324,11 +321,10 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         // In order to check cooling time, must have use_temperature_threshold=true;
         double total_density = density[i] + density_particle_accumulate[i];
 
-        if (! this->check_temperature(temperature[i])) { // if T > Tcrit
-           if (enzo_config->method_grackle_chemistry) continue; //no hot gas forming stars!
-        }
+        // if T > Tcrit
+        if (! this->check_temperature(temperature[i])) continue;
 
-        if (cooling_time){
+        if (cooling_time){ // if we are evolving a "cooling_time" field
            if (! this->check_cooling_time(cooling_time[i], total_density, tunit, rhounit)) continue;
         }
         
