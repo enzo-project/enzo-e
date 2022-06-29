@@ -655,8 +655,11 @@ its 'creation_time' attribute is set to be the minimum of the group, and its
 group are marked for deletion. The final step is for each block to delete
 all the remaining sink particles which are 'out-of-bounds' of the block.
 
-Star particles must have an attribute called ``"mass"`` if this method
-is used.
+This method requires sink particles to have the following attributes: ``"mass"``, ``"x"``,
+``"y"``, ``"z"``, ``"vx"``, ``"vy"``, ``"vz"``, ``"is_copy"``, ``"id"``, ``"lifetime"``,
+and ``"creation_time"``. All these attributes must be of type ``"default"``, except for
+``"is_copy"`` and ``"id"`` which must be of type ``"int64"``. Furthermore, ``"is_copy"``
+must be initialized to 0 for all particles.
 
 This procedure cannot handle the case where particles originally
 from non-neighbouring blocks are put into the same FoF group. If this is
@@ -669,7 +672,7 @@ will only work correctly if all blocks containing sink particles are of the
 same size, or equivalently, on the same refinement level.
 For this reason, there is a check in the constructor of EnzoMethodMergeSinks
 for whether ``"Adapt: max_level"`` is equal to zero. In future, we plan to
-implement an accretion method, which will require a refinement condition that
+implement a refinement condition that
 any block containing a sink particle needs to be on the highest level of
 refinement. In this case, the assumption that
 blocks containing sink particles are all on the same level of refinement
@@ -689,7 +692,7 @@ parameters
 .. list-table:: Method ``merge_sinks`` parameters
    :widths: 10 5 1 30
    :header-rows: 1
-   
+
    * - Parameter
      - Type
      - Default
@@ -701,5 +704,84 @@ parameters
        the minimum across all 3 dimensions), at the highest refinement
        level.`
 
-   
+
+``"accretion"``: accretion
+==============================
+
+For cells within a spherical accretion zone around a sink particle, mass is removed
+(i.e., the values of the density field are reduced) and added to the sink particle.
+The momentum change of gas is in the accretion zone due to the mass loss is accounted
+for by changing the momentum of the sink particle, so that total momentum is
+conserved. The amount of mass removed is determined by which "flavor" of accretion is
+chosen (specified by the ``"accretion:flavor"`` parameter), as well as the values
+of the "density threshold" (specified by ``"accretion:density_threshold"``) and the
+"maximum mass fraction" (specified by ``"accretion:max_mass_fraction"``).
+
+In ``"threshold"`` flavor accretion, the change in density of each cell is zero if the current
+density is below the density threshold. If the current density is above the density threshold,
+the change in density is the current density minus the density threshold, or the maximum mass
+fraction times the current density, whichever is smaller.
+
+In ``"bondi_hoyle"`` flavor accretion, the density change in each cell is calculated according
+to the method described in Mark R. Krumholz et al 2004, ApJ, 611, 399. Furthermore, the
+density change is limited in the same way as in ``"threshold"`` accretion.
+
+In ``"flux"`` flavor accretion, the density change in each cell is calculated according to the
+method described in Andreas Bleuler & Romain Teyssier 2004, MNRAS, 445, 4015-4036.
+Furthermore, the density change is limited in the same way as in ``"threshold"`` accretion.
+
+In ``"dummy"`` flavor accretion, no accretion is done (essentially, the accretion rate is zero).
+This can be useful for testing purposes.
+
+This method can only be used if ``"merge_sinks"`` is also used, with ``"merge_sinks"`` preceding
+``"accretion"``. In addition, this method requires the use of three spatial dimensions.
+
+This method requires the following fields (in addition to the fields required by the hydro
+method): ``"density_source"``, ``"density_source_accumulate"``, ``"mom_dens_x_source"``,
+``"mom_dens_x_source_accumulate"``, ``"mom_dens_y_source"``, ``"mom_dens_y_source_accumulate"``,
+``"mom_dens_z_source"``, and ``mom_dens_z_source_accumulate"``. In addition, if sink particles
+have a ``"metal_fraction"`` attribute, there must be a ``"metal_density"`` field.
+
+This method also requires sink particles to have the following attributes: ``"mass"``, ``"x"``,
+``"y"``, ``"z"``, ``"vx"``, ``"vy"``, ``"vz"``, and ``"accretion_rate"``, which must all be
+of type ``"default"``.
+
+parameters
+----------
+
+.. list-table:: Method ``accretion`` parameters
+   :widths: 10 5 1 30
+   :header-rows: 1
+
+   * - Parameter
+     - Type
+     - Default
+     - Description
+   * - ``"accretion_radius_cells"``
+     - `float`
+     - `4.0`
+     - `The accretion radius (i.e., the radius of the spherical accretion zone)
+       in units of the minimum cell width (i.e., if the cell width along all the x, y, and
+       z-axes are hx, hy, and hz, then the minimum cell width is the minimum of hx, hy, and hz),
+       at the highest refinement level. Its value must be less than one fewer than the minimum
+       ghost depth  for "flux" accretion, and less than the minimum ghost depth
+       for other flavors of accretion. The ghost depth is 4 (along all axes) by default.`
+   * - ``"flavor"``
+     - `string`
+     - ``""``
+     - `The flavor of accretion used, which can be either "threshold", "bondi_hoyle", or "flux".
+       If this parameter is not set in the parameter file, or if some other string is
+       provided, then the accretion method will be called but will do nothing.`
+   * - ``"physical_density_threshold_cgs"``
+     - `float`
+     - `1.0e-24`
+     - `The value of the physical density threshold in cgs units. The density in each cell in
+       the accretion zone cannot go below this value during the accretion process. The value of
+       the density threshold in code units must be greater than or equal to the value of the density
+       floor imposed by the hydro method.`
+   * - ``"max_mass_fraction"``
+     - `float`
+     - `0.25`
+     - `This parameter specifies the maximum fraction of mass which can be accreted from a cell
+       in one timestep. This value of this parameter must be between 0 and 1.`
 

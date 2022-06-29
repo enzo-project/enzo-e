@@ -1,0 +1,124 @@
+ Adapt {
+     max_level = 0;
+     min_level = 0;
+ }
+
+ Boundary {
+     type = "periodic";
+ }
+
+
+Domain {
+     lower = [ -2.00, -2.00, -2.00];
+     rank = 3;
+     upper = [ 2.00, 2.00, 2.00 ];
+ }
+
+ Field {
+     alignment = 8;
+     gamma = 1.6666667;
+     ghost_depth = 4;
+     courant = 0.3;
+     history = 1;
+     list = [ "density", "velocity_x", "velocity_y", "velocity_z",
+	      "acceleration_x","acceleration_y","acceleration_z",
+	      "total_energy", "pressure",
+	      "density_source","density_source_accumulate",
+	      "mom_dens_x_source","mom_dens_x_source_accumulate",
+	      "mom_dens_y_source","mom_dens_y_source_accumulate",
+	      "mom_dens_z_source","mom_dens_z_source_accumulate"];
+     padding = 0;
+     dual_energy = true;
+     diffusion = true;
+ }
+
+ Initial {
+     accretion_test {
+	sink_mass = 1.0;
+	sink_position = [-0.5,-0.5,-0.5];
+	sink_velocity = [1.0,1.0,0.0];
+	gas_density = 1.0;
+	gas_pressure = 1.0;
+	gas_radial_velocity = 0.1;
+     };
+    list = [ "accretion_test" ];
+ }
+
+ Mesh {
+     root_blocks = [ 4, 4, 4 ];
+     root_rank = 3;
+     root_size = [64, 64, 64];
+ }
+
+
+Particle {
+    list = ["sink"];
+    mass_is_mass = true;
+    batch_size = 4096;
+    sink {
+    	 attributes = [ "x", "default",
+                       "y", "default",
+                       "z", "default",
+                       "vx", "default",
+                       "vy", "default",
+                       "vz", "default",
+                       "ax", "default",
+                       "ay", "default",
+                       "az", "default",
+                       "mass", "default",
+		       "lifetime" , "default",
+		       "creation_time", "default",
+		       "accretion_rate", "default",
+		       "is_copy", "int64",
+		       "id" , "int64"];
+        position = [ "x", "y", "z" ];
+        velocity = [ "vx", "vy", "vz" ];
+        group_list = "is_gravitating";
+    }
+}
+
+Method {
+
+    list = ["mhd_vlct","pm_update","merge_sinks",
+    	    "accretion"];
+
+    mhd_vlct {
+      	    courant = 0.3;
+            mhd_choice = "no_bfield";
+      	    density_floor = 1.0e-6;
+	    pressure_floor = 1.0e-6;
+	    riemann_solver = "hllc";
+      };
+
+    pm_update {
+        max_dt = 1.0e-2;
+    };
+
+accretion {
+    	flavor = "flux";
+	physical_density_threshold_cgs = 1.0e-6;
+	accretion_radius_cells = 3.0;
+	}
+}
+
+Stopping {
+    time = 0.5;
+}
+
+Output {
+
+    data {
+        dir = [ "./Dir_%04d", "cycle" ];
+        field_list = ["density", "velocity_x", "velocity_y", "velocity_z"];
+	particle_list = ["sink"];
+        name = [ "data-%04d-%04d.h5", "cycle", "proc" ];
+        schedule {
+            step = 10;
+            var = "cycle";
+        };
+        type = "data";
+    };
+
+list = ["data"];
+
+}

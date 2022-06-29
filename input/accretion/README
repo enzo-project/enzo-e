@@ -1,0 +1,64 @@
+images.py defines a function called make_images, which takes as input the
+directories generated when Enzo-E runs the test problem, which contain snapshots
+of the particle data at regular time intervals. It then uses yt to read the data
+and then uses matplotlib to make scatter plots of the x and y coordinates of the
+particles, outputting a series of image files, with each image corresponding to
+a particular snapshot. These images are useful to check whether the initial
+conditions were set up correctly and if Enzo-E ran as expected.
+
+make_images can be imported by another script (as is done in
+run_accretion_test.py), or it can be executed by running images.py as a script,
+with command line arguments being passed to make_images.
+For more information, run "python images.py -h".
+
+mass_momentum_conservation.py defines the function test_mmc
+which has the following behaviour:
+- takes as the prefix for the names of the directories generated when Enzo-E runs
+  the accretion_test problem, which contain snapshots of the
+  particle data at regular time intervals, a name for the image file which will be
+  generated, and a value for the tolerance limit
+- uses yt to read the data and calculates the total mass, total x/y/z-momentum
+  and total number of particles in each snapshot. It then calculates the
+  conservation error for these quantities, and tests whether the absolute value
+  is less than the tolerance limit. If the absolute value of the error is larger
+  than the tolerance for any snapshot, then the test fails.
+- generates a figure with three panels, showing the mass conservation error,
+  momentum conservation error, and number of particles plotted against the number
+  of cycles (i.e. timesteps).  This figure is useful for checking if particles are
+  indeed merging (shown by decrease in particle number with time) and whether
+  mass and momentum are being properly conserved.
+
+test_mmc can be imported by another script (as is done in
+run_accretion_test.py), or it can be executed by running
+mass_momentum_conservation.py as a script, with command line
+arguments being passed to test_mass_mmc.
+For more information, run "python mass_momentum_conservation.py -h".
+
+accretion_test.in is an Enzo-E parameter files. Passing this file as an argument
+to Enzo-E will run the accretion test problem.
+
+Running run_accretion_test.py does the following:
+
+- Runs Enzo-E ising the parameter file specified by --param_file. This produces a set
+  of directories which contain snapshots of the particle data at regular time intervals.
+- Produces  a set of png images, which show scatter plots of the x and y coordinates
+  of particles read from the snapshot directories.
+- Analyzes snapshot data to test for mass and momentum conservation.
+  This generates a figure (mmc.png), which shows the mass and momentum conservation errors.
+  The test is considered to have passed if all the errors are less than some tolerance limit,
+  which is 1.0e-12 in the case of double precision, and 1.0e-4 for single precision.
+- Deletes the snapshot directories.
+
+Arguments:
+--launch_cmd: the command used to run Enzo-E.
+	      To run Enzo-E as a serial program, set this to `/path/to/bin/enzo-e`.
+	      To run Enzo-E as a parallel program, set this to (for example)
+	      `"/path/to/bin/charmrun +p4 ++local /path/to/bin/enzo-e"`
+
+--prec: Can be set to `single` or `double`, and should be the same as the precision
+	with which Enzo-E was compiled. Sets the error tolerance when testing
+	conservation of mass and momentum.
+
+--flavor: Can be set to `threshold`, `bondi_hoyle`, or `flux`. Determines which flavor
+	    of accretion is used when running the tests, which changes the parameter file
+	     that is used, as well as some of the arguments of `make_images`.

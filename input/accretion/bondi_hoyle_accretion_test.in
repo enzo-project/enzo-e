@@ -1,0 +1,125 @@
+ Adapt {
+     max_level = 0;
+     min_level = 0;
+ }
+
+ Boundary {
+     type = "periodic";
+ }
+
+
+Domain {
+     # domain dimensions are chosen so that the cell width is about the
+     # same as the Bondi-Hoyle radius
+     lower = [ -2e18, -2e18, -2e18];
+     rank = 3;
+     upper = [ 2e18, 2e18, 2e18];
+ }
+
+ Field {
+     alignment = 8;
+     gamma = 1.6666667;
+     ghost_depth = 4;
+     courant = 0.3;
+     history = 1;
+     list = [ "density", "velocity_x", "velocity_y", "velocity_z",
+	      "acceleration_x","acceleration_y","acceleration_z",
+	      "total_energy", "pressure",
+	      "density_source","density_source_accumulate",
+	      "mom_dens_x_source","mom_dens_x_source_accumulate",
+	      "mom_dens_y_source","mom_dens_y_source_accumulate",
+	      "mom_dens_z_source","mom_dens_z_source_accumulate"];
+     padding = 0;
+     dual_energy = false;
+     diffusion = true;
+ }
+
+ Initial {
+     accretion_test {
+	sink_mass = 2.0e33;
+	sink_position = [0.0,0.0,0.0];
+	sink_velocity = [1.0e2,1.0e2,1.0e2];
+	gas_density = 1.0e-24; 
+	gas_pressure = 1.3807e-15; #mu = 1.0, temperature = 10K
+     };
+    list = [ "accretion_test" ];
+ }
+
+ Mesh {
+     root_blocks = [ 4, 4, 4 ];
+     root_rank = 3;
+     root_size = [64,64,64];
+ }
+
+
+Particle {
+    list = ["sink"];
+    mass_is_mass = true;
+    batch_size = 4096;
+    sink {
+    	 attributes = [ "x", "default",
+                       "y", "default",
+                       "z", "default",
+                       "vx", "default",
+                       "vy", "default",
+                       "vz", "default",
+                       "ax", "default",
+                       "ay", "default",
+                       "az", "default",
+                       "mass", "default",
+		       "lifetime" , "default",
+		       "creation_time", "default",
+		       "accretion_rate", "default",
+		       "is_copy", "int64",
+		       "id" , "int64"];
+        position = [ "x", "y", "z" ];
+        velocity = [ "vx", "vy", "vz" ];
+        group_list = "is_gravitating";
+    }
+}
+
+Method {
+
+    list = ["mhd_vlct","pm_update","merge_sinks",
+    	    "accretion"];
+
+    mhd_vlct {
+      	    courant = 0.3;
+            mhd_choice = "no_bfield";
+      	    density_floor = 1.0e-30;
+	    pressure_floor = 1.0e-30;
+	    riemann_solver = "hllc";
+      };
+
+    pm_update {
+        max_dt = 1.0e10;
+    };
+
+accretion {
+    	flavor = "bondi_hoyle";
+	physical_density_threshold_cgs = 1.0e-30;
+	}
+}
+
+Stopping {
+# approximately the time for one cell's mass to be depleted.
+    time = 1.0e12;
+}
+
+Output {
+
+    data {
+        dir = [ "./Dir_%04d", "cycle" ];
+        field_list = ["density", "velocity_x", "velocity_y", "velocity_z"];
+	particle_list = ["sink"];
+        name = [ "data-%04d-%04d.h5", "cycle", "proc" ];
+        schedule {
+            step = 10;
+            var = "cycle";
+        };
+        type = "data";
+    };
+
+list = ["data"];
+
+}
