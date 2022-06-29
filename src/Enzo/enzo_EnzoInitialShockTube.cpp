@@ -277,6 +277,19 @@ void EnzoInitialShockTube::enforce_block
   // Compute the Cell-Centered B-fields
   EnzoInitialBCenter::initialize_bfield_center(block);
 
+  // initialize relevant Grackle density fields - this is only really useful
+  // for checking that the code doesn't crash with a hydro solver and Grackle
+  // (the outcome of this test probably not particularly predictable...)
+  if (enzo::config()->method_grackle_use_grackle){
+#ifdef CONFIG_USE_GRACKLE
+    enzo::grackle_method()->update_grackle_density_fields((EnzoBlock*) block);
+#else
+    ERROR("EnzoInitialShockTube::enforce_block()",
+          "Can't set up for EnzoMethodGrackle since Enzo-E hasn't been "
+          "compiled with Grackle");
+#endif
+  }
+
   block->initial_done();
 }
 

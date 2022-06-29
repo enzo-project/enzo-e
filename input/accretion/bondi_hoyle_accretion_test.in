@@ -97,7 +97,7 @@ Method {
 
 accretion {
     	flavor = "bondi_hoyle";
-	physical_density_threshold_cgs = 1.0e-24;
+	physical_density_threshold_cgs = 1.0e-30;
 	}
 }
 

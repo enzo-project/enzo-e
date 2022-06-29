@@ -216,6 +216,7 @@ void EnzoInitialGrackleTest::enforce_block
     //
     compute_pressure.compute_(enzo_block,
                               pressure,
+                              0,
                               NULL,
                               &grackle_fields_);
   }

@@ -1,0 +1,74 @@
+# this file is used to just simply check if Enzo-E can run a hydro solver with
+# Grackle without crashing (in the future, this should be replaced with a more
+# meaningful test problem)
+
+include "input/vlct/vlct_de.incl"
+include "input/vlct/dual_energy_shock_tube/initial_sod_shock_tube.incl"
+
+
+   Domain {
+      lower = [0.0, 0.0, 0.0];
+      upper = [1.0, 0.03125, 0.03125];
+   }
+
+   Units {
+      density = 1.6726219E-24;  # m_H in grams
+      time    = 3.15576E13;     # 1 Myr in seconds
+      length  = 3.086E16;       # 0.01 pc in cm - does not actually matter
+   }
+
+   Mesh {
+      root_rank = 3; # 3D
+      root_blocks = [1,1,1];
+      root_size = [128,4,4]; # number of cells per axis
+   }
+
+   Boundary {
+      list = ["two", "three","one"];
+      two{
+         type = "periodic";
+   	 axis = "y";
+      }
+      three{
+         type = "periodic";
+   	 axis = "z";
+      }
+      one{
+         type = "outflow";
+   	 axis = "x";
+      }
+   }
+
+   Output {
+     list = [];
+   }
+
+   Field {
+       gamma = 5./3.;
+   }
+
+      Method {
+      list = [ "mhd_vlct", "grackle"];
+
+      grackle {
+        courant = 0.40; # meaningless unless use_cooling_timestep = true;
+
+        data_file = "CloudyData_UVB=HM2012_shielded.h5";
+
+        with_radiative_cooling = 1;
+        primordial_chemistry   = 3;  # 1, 2, or 3
+        metal_cooling          = 1;  # 0 or 1 (off/on)
+        UVbackground           = 1;  # on or off
+        self_shielding_method  = 0;  # 0 - 3 (0 or 3 recommended)
+
+        HydrogenFractionByMass = 0.73;
+
+        # set this to true to limit the maximum timestep to the product of the
+        # minimum cooling/heating time and courant.
+        use_cooling_timestep = true; # default is false
+      }
+   }
+
+
+   Stopping { cycle = 200; }
+   
