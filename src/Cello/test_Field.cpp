@@ -9,8 +9,113 @@
 #include "test.hpp"
 
 #include "mesh.hpp"
+#include "array.hpp"
 #include "data.hpp"
 
+/// helper function that actually checks consistency between the view and the
+/// field data
+template<class T, class FieldT>
+bool check_view_props_(CelloArray<T,3> view, FieldT& field, int id,
+                       bool coarse, bool include_ghosts,
+                       int history = 0){
+  int nx, ny, nz;
+  T* ptr;
+
+  if (coarse){
+    ASSERT("check_view_props_",
+           "require history==0 and include_ghosts==true for coarse fields",
+           (history == 0) && include_ghosts);
+    ptr = reinterpret_cast<T*>(field.coarse_values(id));
+    field.coarse_dimensions(id, &nx, &ny, &nz);
+  } else {
+    field.dimensions(id, &nx, &ny, &nz);
+    if (include_ghosts & (!field.ghosts_allocated())){
+      ERROR("check_view_props_", "something's wrong ghosts must be allocated");
+    } else if (include_ghosts) {
+      ptr = reinterpret_cast<T*>(field.values(id, history));
+    } else {
+      ptr = reinterpret_cast<T*>(field.unknowns(id, history));
+      int gx, gy, gz;
+      field.ghost_depth(id, &gx, &gy, &gz);
+      if (nx > 1){ nx -= 2*gx; }
+      if (ny > 1){ ny -= 2*gy; }
+      if (nz > 1){ nz -= 2*gz; }
+    }
+  }
+
+  bool matching_shape = ((view.shape(0) == nz) &
+                         (view.shape(1) == ny) &
+                         (view.shape(2) == nx));
+  bool passed = (view.data() == ptr) & (ptr != nullptr) & matching_shape;
+  return passed;
+}
+
+/// Tests the basic properties of the views of a field.
+///
+/// This namely just checks the view's shape and the address of the first
+/// element. This function tries to exhaust many permutation of options to
+/// create a view.
+template<class T>
+void test_view_(Field& field, int id, std::string name = "",
+                bool coarse = false, int history = 0){
+
+  bool passed = true;
+
+  if (coarse){
+    ASSERT("test_view",
+           "require history==0 and name==\"\" for coarse fields",
+           (history == 0) && (name == ""));
+    { // first, handle non-const Field stuff
+      CelloArray<T, 3> view = field.coarse_view<T>(id);
+      passed &= check_view_props_(view, field, id, true, true, history);
+    }
+    { // now handle const Field stuff
+      const Field& const_field = field;
+      CelloArray<const T, 3> view = const_field.coarse_view<T>(id);
+      passed &= check_view_props_(view, const_field, id, true, true, history);
+    }
+
+  } else {
+
+    auto run_test = [&](ghost_choice gchoice, bool includes_ghost)
+      {
+        // first handle non-const Field stuff
+        // load from id
+        {
+          CelloArray<T, 3> view = field.view<T>(id, gchoice, history);
+          passed &= check_view_props_(view, field, id, false, includes_ghost,
+                                      history);
+        }
+        // load from field name (if it was provided)
+        if (name != ""){
+          CelloArray<T, 3> view = field.view<T>(name, gchoice, history);
+          passed &= check_view_props_(view, field, id, false, includes_ghost,
+                                      history);
+        }
+
+        // now, handle const Field
+        {
+          const Field& const_field = field;
+          CelloArray<const T, 3> view =
+            const_field.view<T>(id, gchoice, history);
+          passed &= check_view_props_(view, const_field, id, false,
+                                      includes_ghost, history);
+        }
+      };
+
+    // first, test ghost_choice::exclude
+    run_test(ghost_choice::exclude, false);
+
+    // now, test ghost_choice::permit
+    run_test(ghost_choice::permit, field.ghosts_allocated());
+
+    // finally, if ghost zones are allocated, check ghost_choice::include
+    if (field.ghosts_allocated()){
+      run_test(ghost_choice::include, true);
+    }
+  }
+  unit_assert(passed);
+}
 
 struct field_info_type {
   int field_density;
@@ -637,6 +742,46 @@ PARALLEL_MAIN_BEGIN
     unit_assert ((ct1[0] == 1.00));
     unit_assert ((ct2[0] == 2.00));
     unit_assert ((ct3[0] == 3.00));
+
+    // ---------------------------------------------------------------------
+    unit_func("view");
+
+    for (int i = 0; i < 2; i++){
+      for (int history_ind = 0; history_ind < 3; history_ind++){
+        field.reallocate_permanent(i == 0);
+
+        // permanent fields
+        test_view_<float>(field, i1, "f1", false, history_ind);
+        test_view_<double>(field, i2, "f2", false, history_ind);
+        test_view_<double>(field, i3, "f3", false, history_ind);
+        test_view_<double>(field, i4, "f4", false, history_ind);
+        test_view_<long double>(field, i5, "f5", false, history_ind);
+
+        // temporary fields
+        test_view_<float>(field, j1, "", false, history_ind);
+        test_view_<double>(field, j2, "", false, history_ind);
+        test_view_<long double>(field, j3, "j3", false, history_ind);
+
+      }
+    }
+
+    // ---------------------------------------------------------------------
+    unit_func("coarse_view");
+
+    for (int i = 0; i < 2; i++){
+      field.reallocate_permanent(i == 0);
+
+      // permanent fields
+      test_view_<float>(field, i1, "", true, 0);
+      test_view_<double>(field, i2, "", true, 0);
+      test_view_<double>(field, i3, "", true, 0);
+      test_view_<double>(field, i4, "", true, 0);
+      test_view_<long double>(field, i5, "", true, 0);
+
+      test_view_<float>(field, j1, "", false, 0);
+      test_view_<double>(field, j2, "", false, 0);
+      test_view_<long double>(field, j3, "", false, 0);
+    }
 
     //--------------------------------------------------
 

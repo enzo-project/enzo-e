@@ -43,4 +43,23 @@ namespace enzo {
     return static_cast<EnzoBlock*> (block);
   }
 
+  bool uses_dual_energy_formalism(bool default_ret /* false */)
+  {
+    // TODO(mabruzzo): this is meant to be a short-term solution. My immediate
+    // priority is to create a Physics object for storing EOS properties
+    // (including dual energy formalism parameters). This function will be
+    // modified or deleted at that time.
+
+    EnzoProblem* prob = problem();
+    if (prob->method("ppm")){
+      return config()->ppm_dual_energy;
+    } else if (prob->method("mhd_vlct")){
+      return config()->method_vlct_dual_energy;
+    } else if (prob->method("ppml")){
+      return false;
+    } else {
+      return default_ret;
+    }
+  }
+
 }

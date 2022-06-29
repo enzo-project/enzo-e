@@ -26,6 +26,35 @@ enum meta_type {
 };
 
 //----------------------------------------------------------------------
+// Global functions
+//----------------------------------------------------------------------
+
+/// Namespace for global constants and functions
+namespace cello {
+  namespace io {
+
+    /// Writes the version string to an output file
+    inline void write_version_metadata(File* file)
+    {
+      ASSERT("cello::write_version_metadata()", "File object must not be null",
+             file != nullptr);
+
+      // define a variable to ensure CELLO_VERSION is actually defined and that
+      // it is replaced with a string
+      const char* version_str = CELLO_VERSION;
+
+      // length intentionally excludes the terminating null character
+      // (note: this is the default behvaior of strlen).
+      int length = static_cast<int>(std::strlen(version_str));
+
+      ASSERT("cello::write_version_metadata()", // sanity check!
+             "version string must have at least 1 character", length > 0);
+      file->file_write_meta(version_str, "version", type_char, length);
+    }
+  }
+}
+
+//----------------------------------------------------------------------
 // Component class includes
 //----------------------------------------------------------------------
 

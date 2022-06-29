@@ -132,15 +132,7 @@ void EnzoMethodStarMaker::rescale_densities(EnzoBlock * enzo_block,
       cfield[index] *= density_ratio;
 
   }
-/*
-  for (int i=0; i<field.field_count(); i++) {
-    std::string name = field.field_name(i);
-    if (field.groups()->is_in(name,"color")) {
-      ((enzo_float *) field.values(name))[index] *= density_ratio;
-//      std::cout << i << ' ' << std::endl;
-    }
-  }
-*/
+
   return;
 }
 
@@ -266,9 +258,9 @@ int EnzoMethodStarMaker::check_self_gravitating(
 
   // constant for testing. TODO: change to variable
   const double gamma = 5.0 / 3.0;
-  cs2 = (gamma * cello::kboltz * temperature) / mean_particle_mass;
+  cs2 = (gamma * enzo_constants::kboltz * temperature) / mean_particle_mass;
 
-  alpha = (div_v_norm2 + cs2/dx2) / (8 * cello::pi * cello::grav_constant * density*rhounit);
+  alpha = (div_v_norm2 + cs2/dx2) / (8 * cello::pi * enzo_constants::grav_constant * density*rhounit);
   #ifdef DEBUG_SF
     CkPrintf("MethodStarMaker -- alpha = %f\n",alpha); 
   #endif
@@ -319,11 +311,12 @@ int EnzoMethodStarMaker::check_jeans_mass(
     return 1;
 
   const double gamma = 5.0 / 3.0;
-  const double minimum_jeans_mass = 1000 * cello::mass_solar;
-  double cs2 = (gamma * cello::kboltz * temperature) / mean_particle_mass;
+  const double minimum_jeans_mass = 1000 * enzo_constants::mass_solar;
+  double cs2 = (gamma * enzo_constants::kboltz * temperature) / mean_particle_mass;
 
   double m_jeans = (cello::pi/6) * pow(cs2, 1.5) / 
-                   (pow(cello::grav_constant, 1.5) * sqrt(density*rhounit));
+                   (pow(enzo_constants::grav_constant, 1.5) * sqrt(density*rhounit));
+
   double m_jcrit = MAX(minimum_jeans_mass, m_jeans);
   #ifdef DEBUG_SF
     CkPrintf("MethodStarMaker -- jeans_mass = %f\n",m_jeans); 
@@ -374,7 +367,7 @@ int EnzoMethodStarMaker::check_cooling_time(const double &cooling_time,const dou
     return 1;
   }
 
-  double dynamical_time = pow(3.0*cello::pi/32.0/cello::grav_constant/(total_density*rhounit),0.5); //s
+  double dynamical_time = pow(3.0*cello::pi/32.0/enzo_constants::grav_constant/(total_density*rhounit),0.5); //s
   #ifdef DEBUG_SF
     CkPrintf("MethodStarMaker -- cooling_time = %f, dynamical_time = %f\n",cooling_time*tunit, dynamical_time); 
   #endif

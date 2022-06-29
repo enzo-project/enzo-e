@@ -11,6 +11,8 @@
 #include <limits>
 #include <memory>
 
+#include "cello_defines.hpp"
+
 #ifndef ARRAY_CELLO_ARRAY_HPP
 #define ARRAY_CELLO_ARRAY_HPP
 
@@ -376,6 +378,7 @@ public: // interface
   typedef typename std::remove_const<T>::type nonconst_value_type;
 
   friend class CelloArray<const_value_type,D>;
+  friend class CelloArray<T,D+1>;
 
   /// Default constructor. Constructs an uninitialized CelloArray.
   CelloArray()
@@ -475,7 +478,7 @@ public: // interface
   /// @param args The indices for each dimension of the array. The number of
   ///     provided indices must match the number of array dimensions, D.
   template<typename... Args, REQUIRE_INT(Args)>
-  T& operator() (Args... args) const noexcept {
+  FORCE_INLINE T& operator() (Args... args) const noexcept {
     static_assert(D==sizeof...(args),
 		  "Number of indices don't match number of dimensions");
     CHECK_BOUNDND(shape_, args)
@@ -484,7 +487,8 @@ public: // interface
   }
 
   // Specialized implementation for 3D arrays (to reduce compile time)
-  T& operator() (const int k, const int j, const int i) const noexcept {
+  FORCE_INLINE T& operator() (const int k, const int j, const int i) const
+    noexcept {
     static_assert(D==3, "3 indices should only be specified for 3D arrays");
     CHECK_BOUND3D(shape_, k, j, i)
     CHECK_IF_FINITE(shared_data_.get()[offset_ + k*stride_[0] + j*stride_[1] + i])
@@ -502,6 +506,10 @@ public: // interface
   /// CelloArray<T,3> subarray(CSlice k_slice, CSlice j_slice, CSlice i_slice);
   template<typename... Args, REQUIRE_TYPE(Args,CSlice)>
   CelloArray<T,D> subarray(Args... args) const noexcept;
+
+  /// Return a subarray with one fewer dimensions
+  template<class = std::enable_if< D>=2 >>
+  CelloArray<T,D-1> subarray(int i) const noexcept;
 
   /// Returns the length of a given dimension
   ///
@@ -779,6 +787,31 @@ CelloArray<T,D> CelloArray<T,D>::subarray(Args... args) const noexcept{
   subarray.init_helper_(shared_data_,new_shape,new_offset);
   for (std::size_t dim=0; dim<D; dim++){
     subarray.stride_[dim] = stride_[dim];
+  }
+  return subarray;
+}
+
+//----------------------------------------------------------------------
+
+template<typename T, std::size_t D>
+template<class>
+CelloArray<T,D-1> CelloArray<T,D>::subarray(int i) const noexcept{
+  //ASSERT2("CelloArray::subarray",
+  //        "i value of %d must be >= 0 and < shape[0], where shape[0] = %d",
+  //        i, shape_[0], start < shape_[0]);
+  CHECK_BOUNDND(shape_, i); // checks i against shape_[0] when bounds checking
+                            // is enabled
+  CelloArray<T,D-1> subarray;
+  intp new_shape[D-1];
+  for (std::size_t dim=0; dim<(D-1); dim++){
+    new_shape[dim] = shape_[dim+1];
+  }
+
+  intp new_offset = offset_ + i * stride_[0];
+
+  subarray.init_helper_(shared_data_,new_shape,new_offset);
+  for (std::size_t dim=0; dim<(D-1); dim++){
+    subarray.stride_[dim] = stride_[dim+1];
   }
   return subarray;
 }

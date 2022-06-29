@@ -66,7 +66,7 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age_Myr, int* nSNII, int* nSNIA
         }
         /* rates -> probabilities */
         if (RII > 0){
-            PII = RII * pmass_Msun / cello::Myr_s *tunit*dt;
+            PII = RII * pmass_Msun / enzo_constants::Myr_s *tunit*dt;
             double random = double(mt())/double(mt.max());
             if (PII > 1.0 && enzo_config->method_feedback_unrestricted_sn){
                 int round = (int)PII;
@@ -91,7 +91,7 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age_Myr, int* nSNII, int* nSNIA
         #endif
 
         if (RIA > 0){
-            PIA = RIA*pmass_Msun / cello::Myr_s *tunit*dt;
+            PIA = RIA*pmass_Msun / enzo_constants::Myr_s *tunit*dt;
             float random = float(rand())/float(RAND_MAX);
 
             if (PIA > 1.0 && enzo_config->method_feedback_unrestricted_sn)
@@ -146,14 +146,14 @@ int EnzoMethodFeedbackSTARSS::determineWinds(double age_Myr, double * eWinds, do
             wind_factor = 0.42*pow(age_Myr/1000, -1.1)/(19.81/log(age_Myr));
         }
         wind_mass_solar = pmass_Msun * wind_factor; // Msun/Gyr
-        wind_mass_solar = wind_mass_solar*dt*tunit/(1e3 * cello::Myr_s); // Msun
+        wind_mass_solar = wind_mass_solar*dt*tunit/(1e3 * enzo_constants::Myr_s); // Msun
 
         if (wind_mass_solar > pmass_Msun){
             CkPrintf("Winds too large Mw = %e, Mp = %e age=%f, Z = %e\n",
                 wind_mass_solar, pmass_Msun, age_Myr, metallicity_Zsun);
             wind_mass_solar = 0.125*pmass_Msun; // limit loss to huge if necessary.
         }
-        windZ = std::max(cello::metallicity_solar, 0.016+0.0041*std::max(metallicity_Zsun, 1.65)+0.0118)*wind_mass_solar;
+        windZ = std::max(enzo_constants::metallicity_solar, 0.016+0.0041*std::max(metallicity_Zsun, 1.65)+0.0118)*wind_mass_solar;
         windE = e_factor * 1e12 * wind_mass_solar;
 
 
@@ -416,7 +416,7 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
 
   // multiply by this value to convert cell density (in code units)
   // to cell mass in Msun
-  double rho_to_m = rhounit*cell_volume_cgs / cello::mass_solar;
+  double rho_to_m = rhounit*cell_volume_cgs / enzo_constants::mass_solar;
 
   for (int iz=gz; iz<nz+gz; iz++){
     for (int iy=gy; iy<ny+gy; iy++){
@@ -493,7 +493,7 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
   // some constants here that might get moved to parameters or something else
   const float SNII_ejecta_mass_Msun = 10.5;
   const float SNIa_ejecta_mass_Msun = 1.4;
-  const float z_solar          = cello::metallicity_solar; //Solar metal fraction (0.012)
+  const float z_solar          = enzo_constants::metallicity_solar; //Solar metal fraction (0.012)
   //-----------------------------------------------------
 
   EnzoBlock * enzo_block = enzo::block(block);
@@ -635,10 +635,10 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
       int ipdmf = ip*dmf; // metallicity
       int ipsn  = ip*dsn; // number of SNe counter
 
-      double pmass_solar = pmass[ipdm] * munit/cello::mass_solar;
+      double pmass_solar = pmass[ipdm] * munit/enzo_constants::mass_solar;
 
       if (pmass[ipdm] > 0.0 && plifetime[ipdl] > 0.0){
-        const double age = (current_time - pcreation[ipdc]) * enzo_units->time() / cello::Myr_s;
+        const double age = (current_time - pcreation[ipdc]) * enzo_units->time() / enzo_constants::Myr_s;
         count++; // increment particles examined here
 
         // compute coordinates of central feedback cell
@@ -714,7 +714,7 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
 
         pmass[ipdm] -= std::max(0.0,
                        (windMass + SNMassEjected) /
-                       (munit/cello::mass_solar)); 
+                       (munit/enzo_constants::mass_solar)); 
 
 
       } // if mass and lifetime > 0
@@ -766,7 +766,6 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   double munit = enzo_units->mass();
   double tunit = enzo_units->time();
   double eunit = munit*vunit*vunit; // energy units (NOTE: not specific energy) 
-  double Tunit = enzo_units->temperature();
   
   const EnzoConfig * enzo_config = enzo::config();
 
@@ -793,7 +792,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   double cell_volume = cell_volume_code*enzo_units->volume();
 
   // conversion from code_density to mass in Msun
-  double rho_to_m = rhounit*cell_volume / cello::mass_solar;
+  double rho_to_m = rhounit*cell_volume / enzo_constants::mass_solar;
 
   enzo_float * d           = (enzo_float *) field.values("density");
   enzo_float * te          = (enzo_float *) field.values("total_energy");
@@ -967,10 +966,10 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   }
   
   v_mean *= vunit / 27; // cm/s
-  Z_mean *= 1/(27 * cello::metallicity_solar); // Zsun
+  Z_mean *= 1/(27 * enzo_constants::metallicity_solar); // Zsun
   mu_mean /= 27;
   d_mean *= rhounit/27; // g/cm^3
-  n_mean = d_mean / (cello::mass_hydrogen/mu_mean);
+  n_mean = d_mean / (enzo_constants::mass_hydrogen/mu_mean);
 
   #ifdef DEBUG_FEEDBACK_STARSS
     CkPrintf("STARSS_FB: Zmean = %e Dmean = %e (%e) mu_mean = %e ", Z_mean, d_mean, d_mean / rhounit, mu_mean);
@@ -983,7 +982,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   // Cooling radius as in Hopkins, but as an average over cells
   double CoolingRadius = 28.4 * pow(std::max(0.1, n_mean), -3.0 / 7.0) * pow(ejectaEnergy / 1.0e51, 2.0 / 7.0) * fz; // pc
   double coupledEnergy = ejectaEnergy;
-  double cellwidth = hx*lunit / cello::pc_cm; // pc
+  double cellwidth = hx*lunit / enzo_constants::pc_cm; // pc
   double dxRatio = cellwidth / CoolingRadius;
 
   /* 
@@ -993,11 +992,11 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 
  
   // if we resolve free expansion, all energy is thermally coupled
-  double p_free = sqrt(2*ejectaMass*cello::mass_solar*ejectaEnergy) / cello::mass_solar/1e5;
+  double p_free = sqrt(2*ejectaMass*enzo_constants::mass_solar*ejectaEnergy) / enzo_constants::mass_solar/1e5;
   double r_free = 2.75*pow(ejectaMass / 3 / n_mean, 1.0/3); // free expansion radius eq. 2
   
-  double t3_sedov = pow(std::max(r_free, std::max(cellwidth, r_free)) * cello::pc_cm / 
-                    (5.0 * cello::pc_cm * pow(ejectaEnergy / 1e51 / n_mean, 1.0 / 5.0)), 5./ 2.);
+  double t3_sedov = pow(std::max(r_free, std::max(cellwidth, r_free)) * enzo_constants::pc_cm / 
+                    (5.0 * enzo_constants::pc_cm * pow(ejectaEnergy / 1e51 / n_mean, 1.0 / 5.0)), 5./ 2.);
   
   double p_sedov = 2.21e4 * pow(ejectaEnergy / 1e51, 4. / 5.) * 
                    pow(n_mean, 1. / 5.) * pow(t3_sedov, 3. / 5.); // eq 16
@@ -1021,9 +1020,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
     pTerminal = 8.3619e5 * pow(ejectaEnergy/1e51, 13./14.) * pow(n_mean, -0.25);
   } 
 
-  //double T = 2 * ge[index]*mu_mean/3 * Tunit; // Tunit is mH/kboltz * vunit^2
- 
-  // compute the temperature
+  // compute the temperature (returns temperature in Kelvin)
   EnzoComputeTemperature compute_temperature
     (enzo_config->ppm_density_floor,
      enzo_config->ppm_temperature_floor,
@@ -1034,7 +1031,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 
   double T = temperature[index];
 
-  double cSound = sqrt(cello::kboltz*T/(mu_mean*cello::mass_hydrogen)) / 1e5; // km/s
+  double cSound = sqrt(enzo_constants::kboltz*T/(mu_mean*enzo_constants::mass_hydrogen)) / 1e5; // km/s
 
   // fading radius of a supernova, using gas energy of the host cell and ideal gas approximations
   double r_fade = std::max(66.0*pow(ejectaEnergy/1e51, 0.32)*pow(n_mean, -0.37)*pow(cSound/10, -2.0/5.0), 
@@ -1142,13 +1139,13 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
     } // endif no winds
 
     else { // if winds
-      coupledMomenta = sqrt(ejectaMass*cello::mass_solar * 0.5 * ejectaEnergy)/cello::mass_solar/1e5;
+      coupledMomenta = sqrt(ejectaMass*enzo_constants::mass_solar * 0.5 * ejectaEnergy)/enzo_constants::mass_solar/1e5;
     }
 
     #ifdef DEBUG_FEEDBACK_STARSS
       CkPrintf("STARSS_FB: Calculated p = %e (sq_fact = %e; p_f = %e; p_t = %e; mcell = %e; mcpl = %e)\n",
-         coupledMomenta, (d_mean * cell_volume/cello::mass_solar) / ejectaMass * 63, p_free, 
-         pTerminal, d_mean * cell_volume /cello::mass_solar, ejectaMass/27.0);  
+         coupledMomenta, (d_mean * cell_volume/enzo_constants::mass_solar) / ejectaMass * 63, p_free, 
+         pTerminal, d_mean * cell_volume /enzo_constants::mass_solar, ejectaMass/27.0);  
     #endif
 
   /*
@@ -1166,7 +1163,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   if (coupledEnergy > 0 && AnalyticSNRShellMass && !winds) 
   {
     if (dx_eff < 1)
-       shellMass = 4*cello::pi/3 * d_mean * pow(cw_eff*cello::pc_cm,3) / cello::mass_solar; 
+       shellMass = 4*cello::pi/3 * d_mean * pow(cw_eff*enzo_constants::pc_cm,3) / enzo_constants::mass_solar; 
 
     else if (dx_eff > 1) {
       if (Z_Zsun > 0.01)
@@ -1204,7 +1201,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   } // endif coupledEnergy >0 && AnalyticSNRShellMass && !winds
   
   double shellMetals = std::min(maxEvacFraction*centralMetals * rho_to_m, 
-                                Z_Zsun * cello::metallicity_solar * shellMass); //Msun
+                                Z_Zsun * enzo_constants::metallicity_solar * shellMass); //Msun
 
 #ifdef DEBUG_FEEDBACK_STARSS
   if (AnalyticSNRShellMass) {
@@ -1215,15 +1212,15 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 
   double coupledMass = shellMass + ejectaMass;
  
-  eKinetic = coupledMomenta * coupledMomenta / (2.0 *(coupledMass)) * cello::mass_solar * 1e10;
+  eKinetic = coupledMomenta * coupledMomenta / (2.0 *(coupledMass)) * enzo_constants::mass_solar * 1e10;
   if (eKinetic > coupledEnergy && !winds){
 
     #ifdef DEBUG_FEEDBACK_STARSS
       CkPrintf("STARSS_FB: Rescaling high kinetic energy %e -> ", eKinetic);
     #endif
 
-    coupledMomenta = sqrt(2.0 * (coupledMass*cello::mass_solar) * ejectaEnergy)/cello::mass_solar/1e5;
-    eKinetic = coupledMomenta * coupledMomenta / (2.0 *(coupledMass) * cello::mass_solar) * cello::mass_solar * 1e10;
+    coupledMomenta = sqrt(2.0 * (coupledMass*enzo_constants::mass_solar) * ejectaEnergy)/enzo_constants::mass_solar/1e5;
+    eKinetic = coupledMomenta * coupledMomenta / (2.0 *(coupledMass) * enzo_constants::mass_solar) * enzo_constants::mass_solar * 1e10;
 
     #ifdef DEBUG_FEEDBACK_STARSS        
       CkPrintf("STARSS_FB:  %e; new p = %e\n", eKinetic, coupledMomenta);
@@ -1232,14 +1229,14 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
     
   #ifdef DEBUG_FEEDBACK_STARSS
     CkPrintf("STARSS_FB: Ekinetic = %e Mass = %e\n",
-             eKinetic, d_mean * pow(lunit * hx, 3) / cello::mass_solar);
+             eKinetic, d_mean * pow(lunit * hx, 3) / enzo_constants::mass_solar);
   #endif
 
     if (eKinetic > 1e60)
     {
       #ifdef DEBUG_FEEDBACK_STARSS
         CkPrintf("STARSS_FB: winds = %d, Ekinetic = %e Mass = %e\n",
-                  winds, eKinetic, d_mean * pow(lunit * hx, 3) / cello::mass_solar);
+                  winds, eKinetic, d_mean * pow(lunit * hx, 3) / enzo_constants::mass_solar);
       #endif
       ERROR("EnzoMethodFeedbackSTARSS::deposit_feedback()","Ekinetic > 1e60 erg!\n");
     }
@@ -1344,14 +1341,14 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
     // If this is triggered, dont expect the terminal momenta relations to hold up.
 
     if (coupledMomenta*coupledMomenta / 
-        (2.0*coupledMass*cello::mass_solar)*cello::mass_solar * 1e10 > 1e51) {
-      coupledMomenta = std::min(coupledMomenta, sqrt(2.0 * (coupledMass*cello::mass_solar)
-                              * ejectaEnergy)/cello::mass_solar/1e5);
+        (2.0*coupledMass*enzo_constants::mass_solar)*enzo_constants::mass_solar * 1e10 > 1e51) {
+      coupledMomenta = std::min(coupledMomenta, sqrt(2.0 * (coupledMass*enzo_constants::mass_solar)
+                              * ejectaEnergy)/enzo_constants::mass_solar/1e5);
 
       #ifdef DEBUG_FEEDBACK_STARSS
         CkPrintf("STARSS_FB: rescaled momentum to %e (est KE = %e)\n", 
                   coupledMomenta, coupledMomenta*coupledMomenta / (2*coupledMass) 
-                * cello::mass_solar * 1e10);
+                * enzo_constants::mass_solar * 1e10);
       #endif
     }
   
@@ -1498,7 +1495,7 @@ double EnzoMethodFeedbackSTARSS::timestep (Block * block) throw()
   double dtStar = std::numeric_limits<double>::max();
   if (block->level() >= sf_minimum_level_){
     const double pSNmax = 0.0005408 * enzo_config->method_star_maker_minimum_star_mass *
-                          block->dt() * enzo_units->time() / cello::Myr_s * 1.25;
+                          block->dt() * enzo_units->time() / enzo_constants::Myr_s * 1.25;
     if (pSNmax > 1.0) dtStar = block->dt() * 1.0 / pSNmax;
   }
 

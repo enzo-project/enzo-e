@@ -210,7 +210,6 @@ void EnzoInitialShockTube::enforce_block
 
   Field field  = block->data()->field();
   EnzoPermutedCoordinates coord(aligned_ax_);
-  EnzoFieldArrayFactory array_factory(block);
 
   CSlice *l_slice = NULL;
   CSlice *r_slice = NULL;
@@ -229,34 +228,34 @@ void EnzoInitialShockTube::enforce_block
     enzo_float velocity_1 = cur_val_map->at("velocity_1") + trans_velocity;
     enzo_float velocity_2 = cur_val_map->at("velocity_2");
 
-    arr = array_factory.from_name("density");
+    arr = field.view<enzo_float>("density");
     initializer_helper_(*cur_slice, cur_val_map->at("density"), arr);
 
-    arr = array_factory.from_name(velocities[coord.i_axis()]);
+    arr = field.view<enzo_float>(velocities[coord.i_axis()]);
     initializer_helper_(*cur_slice, velocity_0, arr);
 
-    arr = array_factory.from_name(velocities[coord.j_axis()]);
+    arr = field.view<enzo_float>(velocities[coord.j_axis()]);
     initializer_helper_(*cur_slice, velocity_1, arr);
 
-    arr = array_factory.from_name(velocities[coord.k_axis()]);
+    arr = field.view<enzo_float>(velocities[coord.k_axis()]);
     initializer_helper_(*cur_slice, velocity_2, arr);
 
-    arr = array_factory.from_name(bfields[coord.j_axis()]);
+    arr = field.view<enzo_float>(bfields[coord.j_axis()]);
     initializer_helper_(*cur_slice, cur_val_map->at("bfield_1"), arr);
 
-    arr = array_factory.from_name(bfields[coord.k_axis()]);
+    arr = field.view<enzo_float>(bfields[coord.k_axis()]);
     initializer_helper_(*cur_slice, cur_val_map->at("bfield_2"), arr);
 
     // (optionally) compute the specific internal energy
     enzo_float eint = (cur_val_map->at("pressure") /
 		       ((gamma_ - 1.) * cur_val_map->at("density")));
     if (field.is_field("internal_energy")){
-      arr = array_factory.from_name("internal_energy");
+      arr = field.view<enzo_float>("internal_energy");
       initializer_helper_(*cur_slice, eint, arr);
     }
 
     // compute the specific total energy
-    arr = array_factory.from_name("total_energy");
+    arr = field.view<enzo_float>("total_energy");
 
     enzo_float etot, v2, b2;
     v2 = (velocity_0 * velocity_0 + velocity_1 * velocity_1 +
@@ -269,7 +268,7 @@ void EnzoInitialShockTube::enforce_block
     initializer_helper_(*cur_slice, etot, arr);
   }
 
-  EFlt3DArray align_b_arr = array_factory.from_name(bfields[coord.i_axis()]);
+  EFlt3DArray align_b_arr = field.view<enzo_float>(bfields[coord.i_axis()]);
   assign_uniform_value_(align_b_arr, aligned_bfield_val);
 
   delete l_slice;
@@ -277,6 +276,19 @@ void EnzoInitialShockTube::enforce_block
 
   // Compute the Cell-Centered B-fields
   EnzoInitialBCenter::initialize_bfield_center(block);
+
+  // initialize relevant Grackle density fields - this is only really useful
+  // for checking that the code doesn't crash with a hydro solver and Grackle
+  // (the outcome of this test probably not particularly predictable...)
+  if (enzo::config()->method_grackle_use_grackle){
+#ifdef CONFIG_USE_GRACKLE
+    enzo::grackle_method()->update_grackle_density_fields((EnzoBlock*) block);
+#else
+    ERROR("EnzoInitialShockTube::enforce_block()",
+          "Can't set up for EnzoMethodGrackle since Enzo-E hasn't been "
+          "compiled with Grackle");
+#endif
+  }
 
   block->initial_done();
 }

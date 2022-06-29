@@ -75,7 +75,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
   double vunit = enzo_units->velocity();
   double rhounit = enzo_units->density();
   double munit = enzo_units->mass();
-  double munit_solar = munit / cello::mass_solar;
+  double munit_solar = munit / enzo_constants::mass_solar;
   double eunit = vunit*vunit; // specific energy units
 
   Particle particle = enzo_block->data()->particle();
@@ -268,11 +268,11 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         #endif
 
         double rho_cgs = density[i] * enzo_units->density();
-        double mean_particle_mass = mu * cello::mass_hydrogen;
+        double mean_particle_mass = mu * enzo_constants::mass_hydrogen;
         double ndens = rho_cgs / mean_particle_mass;
 
         double cell_mass  = density[i] * cell_volume;
-        double metallicity = (metal) ? metal[i]/density[i]/cello::metallicity_solar : 0.0;
+        double metallicity = (metal) ? metal[i]/density[i]/enzo_constants::metallicity_solar : 0.0;
 
         //
         // Apply the criteria for star formation
@@ -351,13 +351,13 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         #endif 
         
         //free fall time in code units
-        double tff = sqrt(3*cello::pi/(32*cello::grav_constant*density[i]*rhounit))/tunit;        
+        double tff = sqrt(3*cello::pi/(32*enzo_constants::grav_constant*density[i]*rhounit))/tunit;        
        /* Determine Mass of new particle
                 WARNING: this removes the mass of the formed particle from the
                          host cell.  If your simulation has very small (>15 Msun) baryon mass
                          per cell, it will break your sims! - AIW
        */
-        double divisor = std::max(1.0, tff * tunit/cello::Myr_s);
+        double divisor = std::max(1.0, tff * tunit/enzo_constants::Myr_s);
         double maximum_star_mass = enzo_config->method_star_maker_maximum_star_mass;
         double minimum_star_mass = enzo_config->method_star_maker_minimum_star_mass;
          
@@ -371,7 +371,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         // FIRE-2 uses p = 1 - exp (-MassShouldForm*dt / M_gas_particle) to convert a whole particle to star particle
         //  We convert a fixed portion of the baryon mass (or the calculated amount)
        
-        double p_form = 1.0 - std::exp(-bulk_SFR*dt*(tunit/cello::Myr_s)/
+        double p_form = 1.0 - std::exp(-bulk_SFR*dt*(tunit/enzo_constants::Myr_s)/
                 (this->maximum_star_fraction_*cell_mass*munit_solar));
 
         if (enzo_config->method_star_maker_turn_off_probability) p_form = 1.0;
@@ -498,7 +498,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
           pform[io]     =  ctime;   // formation time
 
           //TODO: Need to have some way of calculating lifetime based on particle mass
-          plifetime[io] =  25.0 * cello::Myr_s / enzo_units->time() ; // lifetime (not accessed for STARSS FB)
+          plifetime[io] =  25.0 * enzo_constants::Myr_s / enzo_units->time() ; // lifetime (not accessed for STARSS FB)
 
           plevel[io] = enzo_block->level(); // formation level
 

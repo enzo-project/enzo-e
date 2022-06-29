@@ -1,0 +1,11 @@
+   include "input/Gravity/jeans_wave/initial_jeans_ppm.incl"
+
+   Mesh {
+      root_rank = 3; # 3D
+      root_blocks = [1,1,1];
+      root_size = [64,32,32]; # number of cells per axis
+   }
+
+   Output {
+      data { dir = ["method_ppm-cg-1-inclined-jeansN32_%.4f","time"]; }
+   }

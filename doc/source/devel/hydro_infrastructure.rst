@@ -9,8 +9,7 @@ the Enzo Layer that can be optionally used to implement other
 hydro/MHD methods. The infrastructure was used to implement other the
 VL + CT MHD solver.
 
-*Note: Currently, barotropic equations of state and compatibility with
-Grackle (for* ``primordial_chemistry > 0`` *) are not yet implemented
+*Note: Currently, barotropic equations of state are not yet implemented
 within the infrastucture. However they are mentioned throughout this
 guide and slots have been explicitly left open for them to be
 implemented within the framework.*
@@ -240,53 +239,12 @@ Instead, our toolkit largely operates on maps/dictionaries containing
 Use of ``EnzoEFltArrayMap``
 ---------------------------
 
-Overview
-~~~~~~~~
-The basic unit that get's operated on by these operation classes
-are instances of the ``EnzoEFltArrayMap`` class. As the name may
-suggest, these classes serve as a map/dictionary of instances of
+The basic unit that get's operated on by these operation classes are
+instances of the ``EnzoEFltArrayMap`` class. As the name may suggest,
+these classes serve as a map/dictionary of instances of
 ``EFlt3DArray`` (or equivalently, instances of
-``CelloArray<enzo_float,3>``).
-
-This class provides some atypical features that are useful for our
-applications:
-
-  * All values have the same shape.
-
-  * All key-value pairs must be specified at construction. After construction:
-
-      * key-value pairs can't be inserted/deleted.
-
-      * the ``EFlt3DArray`` associated a with a key can't be overwritten with a
-        different ``EFlt3DArray``
-
-      * Of course, the elements of the contained ``EFlt3DArray`` can still be
-        modified.
-
-  * The user specifies the ordering of the keys at construction (this
-    facillitates several future optimizations)
-
-Among other things, these features let this class act like a dynamically
-configurable "struct of arrays".
-
-Some other noteworthy features/properties of this class include:
-
-  * this class provides a ``subarray_map`` method, that returns a new
-    map of subarrays based on CSlice arguments
-
-  * invoking the copy constructor of ``EnzoEFltArrayMap`` effectively
-    produces shallow copies. (This is a natural consequnce of the
-    ``CelloArray``\'s pointer semantics. The same would be true for
-    standard library containers holding ``CelloArray``\s)
-
-  * A ``const EnzoEFltArrayMap`` is effectively read-only. While
-    element-access of ``EnzoEFltArrayMap`` yields a
-    ``CelloArray<enzo_float,3>``, element access of a ``const
-    EnzoEFltArrayMap`` yields a ``CelloArray<const enzo_float,3>``
-
-Specific Usage
-~~~~~~~~~~~~~~
-
+``CelloArray<enzo_float,3>``). For more details about how to use
+``EnzoEFltArrayMap``, see :ref:`EnzoEFltArrayMap-Description`
 
 In the context of this toolkit, the keys of an ``EnzoEFltArrayMap``
 are usually the names of a scalar quantity (like ``"density"``) or
@@ -410,10 +368,6 @@ Returns whether the dual energy formalism is in use.
 Returns the ratio of the specific heats. This is only required to
 yield a reasonable value if the gas is not barotropic.
 
-*In the future, the interface will need to be revisited once Grackle
-is fully supported and it will be possible for gamma to vary
-spatially.*
-
 .. code-block:: c++
 
    enzo_float get_isothermal_sound_speed();
@@ -448,24 +402,26 @@ energy. If the equation of state is barotropic, this should do nothing.
 
    void pressure_from_integration(const EnzoEFltArrayMap &integration_map,
                                   const CelloArray<enzo_float, 3> &pressure,
-                                  int stale_depth);
+                                  int stale_depth,
+                                  bool ignore_grackle = false);
 
 This method computes the pressure from the integration quantities
 (stored in ``integration_map``) and stores the result in ``pressure``.
-
-*In principle this should wrap* ``EnzoComputePressure``, *but
-currently that is not the case. Some minor refactoring is needed to
-allow EnzoComputePressure to compute Pressure based on arrays
-specified in a* ``EnzoEFltArrayMap`` *object and we are holding off on
-this until we implement full support for Grackle. Currently, when the
-dual-energy_formalism is in use, pressure is simply computed from
-internal energy.*
+This wraps the ``EnzoComputePressure`` object whose default behavior
+is to use the Grackle-supplied routine for computing pressure when the
+simulation is configured to use ``EnzoMethodGrackle``. The
+``ignore_grackle`` parameter can be used to avoid using that routine (the
+parameter is meaningless if the Grackle routine would not otherwise
+get used). This parameter's primary purpose is to provide the option
+to suppress the effects of molecular hydrogen on the adiabatic index
+(when Grackle is configured with ``primordial_chemistry > 1``).
 
 .. code-block:: c++
 
    void primitive_from_integration
      (const EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &primitive_map,
-      int stale_depth, const std::vector<std::string> &passive_list);
+      int stale_depth, const std::vector<std::string> &passive_list,
+      bool ignore_grackle = false);
 
 This method is responsible for computing the primitive quantities (to
 be held in ``primitive_map``) from the integration quantities (stored
@@ -473,7 +429,7 @@ in ``integration_map``).  Non-passive scalar quantities appearing in
 both ``integration_map`` and ``primitive_map`` are simply deepcopied
 and passive scalar quantities are converted from conserved-form to
 specific form. For a non-barotropic EOS, this also computes pressure
-(by calling ``EnzoEquationOfState::pressure_from_integration``)
+(by calling ``EnzoEquationOfState::pressure_from_integration``).
 
 *In the future, it might be worth considering making this into a subclass
 of Cello's ``Physics`` class. If that is done, it may be advisable to
@@ -600,10 +556,10 @@ the slope limiter at compile time.*
 Riemann Solver
 ==============
 
-The Riemann Solvers have been factored out to their own classes. All
-implementation of (approximate) Riemann solver algorithms are derived
-from the ``EnzoRiemann`` abstract base class.
+All implementations of (approximate) Riemann solver algorithms are
+derived from the ``EnzoRiemann`` abstract base class.
 
+    .. _Riemann-Usage-section:
 
 Usage Notes
 -----------
@@ -613,12 +569,26 @@ static factory method:
 
 .. code-block:: c++
 
-   EnzoRiemann* EnzoRiemann::construct_riemann(std::string solver, bool mhd,
-                                               bool internal_energy);
+   EnzoRiemann* EnzoRiemann::construct_riemann
+   (const EnzoRiemann::FactoryArgs& factory_args) noexcept;
 
-The factory method requires that we specify the name of the solver (via
-``solver``), whether magnetic fields are present (via ``mhd``), and whether
-the internal energy flux must be computed (via ``internal_energy``).
+The above signature looks a little intimidating. In reality, you could write
+something more like the following snippet
+
+.. code-block:: c++
+
+   EnzoRiemann* ptr = EnzoRiemann::construct_riemann({solver, mhd,
+                                                      internal_energy});
+
+in which
+  * ``solver`` is a ``std::string`` specifying the name of the solver
+  * ``mhd`` is a boolean specifying whether magnetic fields are present
+  * ``internal_energy`` is a boolean specifying if the internal energy flux
+    must be computed.
+
+This weird indirection only currently exists to accomodate ``charm++``\'s
+``pup`` functionality. Once Enzo-E transitions to its custom restart
+functionallity, we'll remove this indirection.
 
 An instance of ``EnzoRiemann`` specifies the expected non-passive keys
 (and key-order) that the ``flux_map`` argument should have when passed to its
@@ -678,175 +648,69 @@ Some additional notes:
     should have the same shape. If ``interface_velocity`` is specified, it
     should also have that shape.
 
+  * Calling the ``contiguous_arrays()`` instance method for ``prim_map_l``,
+    ``prim_map_r``, and ``flux_map`` must return ``true`` in each case (in
+    other words, each array in the array maps should be stored in
+    nearly-contiguous 4D arrays).
 
+Implementation Notes: Kernels
+-----------------------------
 
-Implementation Notes: ``EnzoRiemannImpl``
------------------------------------------
+At the time of writing, the calculations specific to each Riemann
+Solver are implemented as *kernels* (inspired by *Kokkos*). More
+precise requiements are detailed in :ref:`KernelReq-section`, but in
+short each kernel:
 
-Traditionally, in many hydro codes (including Enzo) there is a lot of code
-duplication between implementations of different types of Riemann Solvers
-(e.g. converting left/right primitives to left/right conserved quantities
-and computing left/right fluxes). To try to reduce some of this
-duplication without sacrificing speed, we have defined the
-``EnzoRiemannImpl<ImplFunctor>`` class template (which is a subclass of
-``EnzoRiemann``).
+  * defines a ``operator()(int iz, int iy, int ix) const`` method for
+    computing the flux at the specified cell-interface
 
-The class template factors out common code shared by many approximate
-Riemann Solvers (e.g. HLLE, HLLC, HLLD and possibly LLF & Roe solvers).
-The template argument, ``ImplFunctor``, is a functor that implements
-solver-specific calculations and is called at every cell-interface.
-Additionally, the functor also specifies a specialization of the
-template class ``EnzoRiemannLUT<InputLUT>`` that primarily
+  * specifies a specialization of the template class
+    ``EnzoRiemannLUT<InputLUT>``. This both indicates the expected
+    actively advected integration (and primitive) quantities **AND**
+    acts as a compile-time lookup table (that maps quantity names to
+    unique array indices). See :ref:`EnzoRiemannLUT-section` for
+    more details.
 
-  * Specifies the exact set of actively advected integration quantities
-    and primitive quantities that a given solver expects. Technically,
-    the primitives and any optional active integration quantities, like
-    ``"internal_energy"``, are not directly specified by the lookup table,
-    but ``EnzoRiemannImpl<ImplFunctor>`` accounts for this.
-  * Serves as a compile-time lookup table. It statically maps the names
-    of all of the components of the relevant actively advected
-    integration quantities to unique array indices.
+  * Specifies the expected equation of state, by specifying the expected
+    type of EOS Struct objects. See :ref:`EOSStructObject-section` for
+    more details about EOS Struct objects.
 
-As an aside, the key-ordering requirements for ``EnzoRiemann::solve``
-ensure that the order of arrays in ``EnzoEFltArrayMap``
-reflects the order of items in the lookup table. (Internally,
-``EnzoRiemannImpl`` permutes the order of vector-components in order
-to preserve symmetry).
+  * are configured by an instance of ``KernelConfig<EOSStructT>`` (see
+    :ref:`KernelConfig-section` for more details).
 
-See :ref:`EnzoRiemannLUT-section`
-for a more detailed description of ``EnzoRiemannLUT<InputLUT>`` and
-examples of how it is used.
+The ``EnzoRiemannImpl<Kernel>`` class template is used to wrap each
+kernel. This class template subclasses the ``EnzoRiemann`` abstract
+base class and is used to implement the interface described above,
+in :ref:`Riemann-Usage-section`, for each kernel (i.e. in other words,
+we use it to implement "type erasure"). In more detail,
+``EnzoRiemannImpl<Kernel>::integration_quantity_keys()`` and
+``EnzoRiemannImpl<Kernel>::primitive_quantity_keys()`` methods specify
+the fields (and field ordering) required by a given kernel.
 
-*Note: a more traditional inheritance-based approach that uses a
-virtual method to implement solver-specific code. Calling a virtual
-method in the main loop introduces overhead and prevents inlining.*
+The steps of ``EnzoRiemannImpl<Kernel>::solve`` are fairly
+straight-forward:
 
-``EnzoRiemannImpl`` Control flow
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  1. An instance of ``KernelConfig<Kernel::EOSStructT>`` is created.
 
-A brief overview of the ``EnzoRiemannImpl<ImplFunctor>::solve``
-control flow is provided below. Basically the function loops over all
-cell interfaces, along a given dimension, where the flux should be
-computed. At each location, the following sequence of operations are
-performed:
+  2. The ``Kernel`` is constructed and executed at each cell-interface
 
-  1. Retrieve the left and right primitives at the given location from
-     the input arrays and stores them in stack-allocated ``enzo_float``
-     arrays called ``wl`` and ``wr``. As mentioned above, the values are
-     organized according to the specialization of
-     ``EnzoRiemannLUT<InputLUT>`` provided by the ``ImplFunctor``
-     (hereafter, ``ImplFunctor::LUT``). *Note: for non-barotropic
-     equations of state* ``pressure`` *is stored at*
-     ``ImplFunctor::LUT::total_energy``.
-  2. The left and right pressure values are determined (they may have
-     been precomputed using a concrete subclass of
-     ``EnzoEquationOfState``). The values are stored in
-     local variables ``pressure_l`` and ``pressure_r``.
-  3. The conserved forms of the left and right reconstructed
-     integration quantities are computed and stored in the arrays
-     called ``Ul`` and ``Ur`` (organized by ``ImplFunctor::LUT``)
-     *Note: There may be some duplication of values between*
-     ``Ul`` *&* ``Ur`` *and* ``wl`` *&* ``Ur``.
-  4. The standard left and right integration quantity fluxes fluxes are
-     computed using the above quantities and stored in ``Fl`` and ``Fr``
-     (organized by ``ImplFunctor::LUT``)
-  5. These quantities are all passed to the static public
-     ``operator()`` method provided by ``ImplFunctor`` that returns the
-     array of interface fluxes in the array, ``fluxes``. (It also
-     computes the interface velocity)
-  6. The interface fluxes and interface velocity are then copied into the
-     output fields.
+  3. The fluxes for passively advected scalars are computed
+     (this step is completely independent of the choice of ``Kernel``).
 
-After computing the fluxes for all of the actively advected integration
-quantities at all locations, a helper method is invoked to compute the
-fluxes for the passively advected quantities.
-     
-*Note: Currently EnzoRiemannImpl has only been tested and known to
-work for 3D problems. Additionally, no solvers (or more specifically,
-wavespeed calculations) are currently implemented that explicitly
-support barotropic equations of state (however, all of the machinery
-is in place to support them).*
-
-*Note: It might make sense to move calculation of conserved quantities
-and fluxes into* ``ImplFunctor`` *. For some solvers, it may not be
-necessary to compute all of this information. The template functions
-that perform these operations have already been factored out into the*
-``enzo_riemann_impl`` *namespace - so the transition would be easy to
-accomplish.*
-
-ImplFunctor template argument
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This subsection provides a brief description of the ``ImplFunctor``
-template argument used to specialize ``EnzoRiemannImpl<ImplFunctor>``.
-The class is expected to:
-
-    * be default constructible
-
-    * publically define the ``LUT`` type, which should be a specialization
-      of the ``EnzoRiemannLUT<InputLUT>`` template class.
-      ``ImplFunctor::LUT`` should indicate which actively advected
-      integration quantities are expected by ``ImplFunctor`` and how they
-      are organized. For more details about how ``EnzoRiemannLUT<InputLUT>``
-      is used, see :ref:`EnzoRiemannLUT-section`
-           
-    * provide the const-qualified function call method, ``operator()``.
-
-The expected function signature of the ``operator()`` method is as follows:
-
-.. code-block:: c++
-
-   lutarray<ImplFunctor::LUT> ImplFunctor::operator()
-     (const lutarray<ImplFunctor::LUT> flux_l,
-      const lutarray<ImplFunctor::LUT> flux_r,
-      const lutarray<ImplFunctor::LUT> prim_l,
-      const lutarray<ImplFunctor::LUT> prim_r,
-      const lutarray<ImplFunctor::LUT> cons_l,
-      const lutarray<ImplFunctor::LUT> cons_r,
-      enzo_float pressure_l, enzo_float pressure_r, bool barotropic_eos,
-      enzo_float gamma, enzo_float isothermal_cs, enzo_float &vi_bar) const;
-
-This function is called at every cell-interface and returns an array
-holding the Riemann Flux at a given cell-interface. Note that
-``lutarray<ImplFunctor::LUT>`` is actually an alias for
-``std::array<enzo_float, ImplFunctor::LUT::num_entries>``. Each of these
-arrays hold values associated with the components of each relevant
-actively advected integration/primitive quantity and are organized
-according to ``ImplFunctor::LUT`` (again, see
-:ref:`EnzoRiemannLUT-section` for more details about the ``LUT`` type).
-
-``flux_l``/ ``flux_r`` and ``cons_l``/ ``cons_r`` store the left/right
-interface fluxes values and conserved quantities (they are passed
-respectively passed ``Fl``/ ``Fr`` and ``Ul``/ ``Ur``, respectively).
-``prim_l``/ ``prim_r`` store the left/right interface primitive
-values, and are passed ``wl``/ ``wr``. As mentioned before, for
-non-barotropic equations of state, ``prim_l``/ ``prim_r`` store
-pressure at ``ImplFunctor::LUT::total_energy``
-
-The left and right reconstructed pressure values are passed as
-``pressure_l`` and ``pressure_r``. ``barotropic_eos`` indicates
-whether the fluid's equation of state is barotropic. If ``true``,
-then ``isothermal_cs`` is expected to be non-zero and if ``false``,
-then ``gamma`` is expected to be positive.
-
-*Note: in the future, it would be worth experimenting with annotating the *
-``operator()`` *method of ``ImplFunctor`` classes with the compiler
-directive * ``__attribute__((always_inline))`` * to force inlining (this
-works on g++, icc and clang).*
 
     .. _EnzoRiemannLUT-section:
 
-EnzoAdvectionFieldLUT
-~~~~~~~~~~~~~~~~~~~~~
+EnzoRiemannLUT
+~~~~~~~~~~~~~~
 
-As described above in the :ref:`GeneralDesignOverview-section` of the
-General Design section, we sought to avoid the common approach of
+As described above in the :ref:`GeneralDesignOverview-section`\, we
+sought to avoid the common approach of
 hydro codes that map actively advected quantities indices with macros
 or globally defined unscoped enums. The ``EnzoRiemannLUT<InputLUT>``
 template class basically serves as a compromise between this traditional
 approach approach and using a hash table (which introduce unacceptable
 overhead) for organizing quantities in the main loop of
-``EnzoRiemannImpl<ImplFunctor>``. Alternatively it can be thought of as a
+``EnzoRiemannImpl<Kernel>``. Alternatively it can be thought of as a
 scoped version of the traditional approach.
 
 This is a template class that provides the following features at compile
@@ -893,12 +757,15 @@ included in the table. Their values are satisfy the following conditions:
     * All constants named for specific integration quantities have unique
       integer values in the interval ``[specific_start, num_entries)``
 
+    * Constants must be defined for all 3 components (or none of the
+      components) of a vector quantity (e.g. velocity or magnetic
+      fields).  Additionally, the ``k``\th component of a vector
+      quantity is expected to have a value that is 1 larger than that
+      of the ``j``\th component and 2 larger than the ``i``\th
+      component.
+
 The lookup table is always expected to include density and the 3 velocity
-components. Although it may not be strictly enforced (yet), the lookup
-table is also expected to include either all 3 components of a vector
-quantity or None of them. Additionally, the ``k``\th component of a vector
-quantity is expected to have a value that is 1 larger than that of the
-``j``\th component and 2 larger than the ``i``\th component.
+components.
 
 This template class also provides a handful of helpful static methods to
 programmatically probe the table's contents at runtime and validate that
@@ -974,6 +841,198 @@ density at a single location for an arbitrary lookup table:
    }
 
 
+.. _EOSStructObject-section:
+
+EOSStruct Objects
+~~~~~~~~~~~~~~~~~~
+
+These objects are supposed to be lightweight struct/classes that
+encapsulate an equation of state.  It's also important that these
+objects are cheap to copy. It's our intention to keep these
+independent of the other Riemann Solver tooling (particularly
+``EnzoRiemannLUT``).
+
+Our only concrete example at this time is ``EOSStructIdeal``. But
+this very much expresses the basic idea. The struct provides methods
+that just require density and pressure values to compute:
+
+  * specific internal energy
+  * internal energy density
+  * sound speed
+  * fast magnetosonic speed (this requires magnetic field values to
+    also be specified)
+
+In the future, we may need to slightly revisit the expected signature
+if/when we add support for an isothermal fluid.
+
+.. note::
+
+   At this time, ``EOSStructIdeal`` is completely independent of the
+   ``EnzoEOSIdeal`` subclass of ``EnzoEquationOfState``.
+
+   In the immediate future, there are plans to unify these
+   implementations (the ``EnzoEquationOfState`` machinery will be
+   refactored to make use of these ``EOSStruct`` objects). When that
+   comes to pass, we will flesh out this section in greater detail.
+
+
+    .. _KernelConfig-section:
+
+``KernelConfig<EOSStructT>``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``KernelConfig`` template class simply groups the configuration
+parameters for kernel (the alternative would be to require that the
+members of ``KernelConfig`` are listed as members for every class
+implementing a kernel).
+
+The relationship between this class and a kernel is modelled after the
+relationship between captured values and a lambda function. We made
+this class as lightweight as possible to encourage the compiler to
+make similar optimizations. The declaration of ``KernelConfig`` is
+reproduced below:
+
+.. literalinclude:: ../../../src/Enzo/EnzoRiemann/EnzoRiemannImpl.hpp
+   :language: c++
+   :start-after: SPHINX-SNIPPET-KERNELCONFIG-START-INCLUDE
+   :end-before: SPHINX-SNIPPET-KERNELCONFIG-END-INCLUDE
+
+.. note::
+   In the near-future, the above snippet will be replaced with nicer looking
+   documentation that will be auto-generated using doxygen and breathe
+   
+More details will be given below about internal energy calculations.
+
+    .. _KernelReq-section:
+
+Kernel Requirements
+~~~~~~~~~~~~~~~~~~~
+
+The basic skeleton for defining a kernel is defined below. For concreteness, we've assumed that this kernel uses the ``MHDLUT`` and an ideal EOS (but those could easily be changed).
+
+.. code-block:: c++
+
+   struct MyKernel
+   {
+
+   public: // typedefs
+     using LUT = EnzoRiemannLUT<MHDLUT>;
+     using EOSStructT = EOSStructIdeal;
+
+   public: // fields
+     const KernelConfig<EOSStructT> config;
+
+   public: // methods
+     FORCE_INLINE void operator()(const int iz,
+                                  const int iy,
+                                  const int ix) const noexcept
+     {
+       // compute the fluxes at (iz, iy, ix) & store result in config.flux_arr
+       //
+       // For concreteness:
+       //   - the left and right reconstructed density values (for the same
+       //     cell-interface) can be retrieved using:
+       //       config.prim_arr_l(LUT::density, iz, iy, ix)
+       //       config.prim_arr_r(LUT::density, iz, iy, ix)
+       //   - we want to write computed density flux to:
+       //       config.flux_arr(LUT::density, iz, iy, ix)
+       //
+       // It may be helpful to point out that:
+       //   when (config.dim == 0) -> this should computes on x-faces
+       //   when (config.dim == 1) -> this should computes on y-faces
+       //   when (config.dim == 2) -> this should computes on z-faces
+       //
+       // For more information, including how exactly indices map to spatial
+       // locations, check the docstrings for KernelConfig. In practice, it's
+       // sufficient to understand that (iz,iy,ix) refers to the same spatial
+       // location in ALL of the arrays.
+       //
+       // assuming it makes sense for the EOS (it's non-barotropic), this should
+       // also compute values needed for the dual energy formalism and store
+       // results in config.internal_energy_flux_arr(iz,iy,ix) &
+       // config.velocity_i_bar_arr(iz,iy,ix)
+
+     }
+   };
+
+There are a couple of things to note:
+
+- As explained in :ref:`KernelConfig-section`, when you access vector
+  quantities from ``config.prim_arr_l``, ``config.prim_arr_r``, or
+  ``config.flux_arr`` using ``LUT`` (e.g. ``LUT::velocity_i``,
+  ``LUT::velocity_j``, ``LUT::bfield_k``), the ``i``, ``j``, & ``k``
+  components **always** map to the ``x``, ``y``, & ``z`` components,
+  respectively.
+
+    - To be concrete: ``config.flux_arr(LUT::velocity_j, iz, iy, ix)``
+      always refers to the flux of the ``y`` velocity component.
+
+    - To try preserve symmetry, we often use ``config.dim`` to remap
+      the ``i``, ``j``, and ``k`` components (like what is done in
+      Athena++). The current convention is to include the following
+      code block at the start of ``operator()``:
+
+      .. code-block:: c++
+
+        const int external_velocity_i = config.dim + LUT::velocity_i;
+        const int external_velocity_j = ((config.dim+1)%3) + LUT::velocity_i;
+        const int external_velocity_k = ((config.dim+2)%3) + LUT::velocity_i;
+        const int external_bfield_i = config.dim + LUT::bfield_i;
+        const int external_bfield_j = ((config.dim+1)%3) + LUT::bfield_i;
+        const int external_bfield_k = ((config.dim+2)%3) + LUT::bfield_i;
+
+      and to use ``external_velocity_i``, ``external_velocity_j``,
+      ``external_velocity_k`` instead of ``LUT::velocity_i``,
+      ``LUT::velocity_j``, ``LUT::velocity_k`` when accessing values
+      from ``prim_arr_l``, ``prim_arr_r``, and ``flux_arr``.
+
+   - We have given some thought to trying to abstract this vector
+     permutation, but it unfortunately remains unclear how to do
+     this in a way that preserves performance across different
+     compilers, without requiring template specializations of
+     ``operator()`` for computing fluxes along different
+     dimensions.
+
+- It's also possible to make ``config`` a private field or to
+  introduce additional fields. However, if you do either of those
+  things, you will need to define a constructor that accepts
+  ``config`` as a single argument.
+
+- ``FORCE_INLINE`` is a macro that uses compiler-specific extensions to force
+  inlining of functions. Please use this sparingly outside, only in cases where
+  you see a noticable speedup (inlining everything can actually slow code down
+  from inflating the binary's size).
+
+
+Dual Energy Formalism Treatment
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The dual-energy formalism requires that a Riemann Solver computes fluxes for the internal energy, and a velocity component at the cell-interfaces.
+
+Computing these quantities doesn't change the Riemann Solver
+calculation (or the required reconstructed primitives), it just
+involves an extra calculation. To avoid unnecessary template code generation
+or introducing branching:
+
+- ``EnzoRiemannLUT`` generally does not include ``internal_energy`` as an
+  entry (there are other reasons why this is convenient)
+
+- Kernels **always** compute the necessary quantities for the dual-energy
+  formalism (assuming the EOS is compatible with the dual-energy formalism)
+
+Instead, ``EnzoRiemannImpl<Kernel>`` manages the dual-energy configuration:
+
+- ``EnzoRiemannImpl<Kernel>::solve`` will **ALWAYS** make sure that
+  ``config.internal_energy_flux_arr`` and
+  ``config.velocity_i_bar_arr`` are valid arrays. If arrays aren't
+  provided (i.e. the dual-energy formalism is not in use), scratch
+  data will be used for this explicit purpose.
+
+- ``EnzoRiemannImpl<Kernel>`` is responsible for including
+  ``"internal_energy"`` in the output of
+  ``integration_quantity_keys()``, based on how it's configured.
+
+
 Adding new quantites
 --------------------
 
@@ -982,7 +1041,7 @@ quantities (e.g. cosmic ray energy/flux), the table of cell-centered
 quantities (``FIELD_TABLE``) must be updated. See
 :ref:`Centered-Field-Registry` for more details.  To add support for
 computing fluxes for such quantities, modifications must be made to
-either ``EnzoRiemannImpl`` or the ``ImplFunctor`` of an existing
+either ``EnzoRiemannImpl`` or the ``Kernel`` of an existing
 solver. Alternatively, for certain quantities, a brand new solver
 may need to be introduced.
 
@@ -995,24 +1054,35 @@ Adding new solvers
 ------------------
 
 New Riemann Solvers can currently be added to the infrastructure by
-either subclasseding ``EnzoRiemann`` or defining a new specialization
-of ``EnzoRiemannImpl<ImplFunctor>``. In either case, the
+either subclassing ``EnzoRiemann`` or defining a new specialization
+of ``EnzoRiemannImpl<Kernel>``. In either case, the
 ``EnzoRiemann::construct_riemann`` factory method must be modified to
 return the new solver and :ref:`using-vlct-riemann-solver`
 should be updated.
 
 The additional steps for implementing a new Riemann solver by speciallizing
-``EnzoRiemannImpl<ImplFunctor>`` are as follows:
+``EnzoRiemannImpl<Kernel>`` are as follows:
 
-  1. Define a new ``ImplFunctor`` class (e.g. ``HLLDImpl``)
+  1. Define a new ``Kernel`` class (e.g. ``HLLDKernel``)
 
-  2. Add the new particlular specialization of ``EnzoRiemannImpl`` to
-     enzo.CI (e.g. add the line:
-     ``PUPable EnzoRiemannImpl<HLLDImpl>;``)
+  2. *(optional)* define an alias name for the specialization of
+     ``EnzoRiemannImpl`` that uses the new ``Kernel`` class
+     (e.g. ``using EnzoRiemannHLLD = EnzoRiemannImpl<HLLDKernel>;``).
 
-  3. *(optional)* define an alias name for the specialization of
-     ``EnzoRiemannImpl`` that uses the new ``ImplFunctor`` class
-     (e.g. ``using EnzoRiemannHLLD = EnzoRiemannImpl<HLLDImpl>;``).
+
+.. note::
+
+   Due to the template-heavy nature of our implementation, the
+   Riemann Solvers been separated from the rest of the Enzo-layer into
+   their own sub-library.
+
+   This choice was made because the convention in the Enzo-layer (at
+   least before we made this separation) is to effectively include
+   every header file in every source file. Since template code usually
+   needs to be written in header files, changes to the Riemann Solver
+   algorithms used to frequently trigger rebuilds of the entire
+   Enzo-layer. This separation has significantly sped up incremental
+   rebuilds during the development workflow for the Riemann Solvers.
 
 ===============================
 Updating integration quantities

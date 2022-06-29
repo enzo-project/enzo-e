@@ -180,44 +180,120 @@ public: // interface
   void compute_expansion_factor
   (enzo_float *cosmo_a, enzo_float *cosmo_dadt, enzo_float time) const;
 
-  /// Return current density units scaling (requires set_current_time())
+  /// Return density unit at current time / redshift in terms of `g / cm^3`
+  /// (requires set_current_time()).
   double density_units() const
   {
-    return 1.8788e-29*omega_matter_now_*pow(hubble_constant_now_,2)*
-                      pow(1 + current_redshift_,3);
-  }
-  /// Return current mass units scaling (requires set_current_time())
-  double mass_units() const
-  {
-    double length = length_units();
-    return density_units() * length * length * length;
+
+    /* Density unit is defined so that the mean physical matter density of the universe is 1.
+     This can be written as:
+
+     `rho_bar_m_0 * (1 + z)^3 / rho_unit = 1`
+
+     Where `rho_bar_m_0` is the mean physical matter density at redshift 0, `z` is redshift,
+     and `rho_unit` is the density unit in `g / cm^3`.
+
+     We can then write this as:
+
+     `rho_unit = `Omega_m_0 * rho_crit_0 * (1 + z)^3`,
+
+     where `Omega_m_0` is a cosmological parameter which can be set in the input parameter file,
+     and `rho_crit_0` is defined as `3 * H_0^2 / (8 * pi * G)`, where `H_0` is the expansion rate
+     of the universe at redshift 0 (with dimensions of inverse time), and `G` is the
+     gravitational constant. `H_0` can be written as `H_0 / h * h`, where `h` is given the name
+     `hubble_constant_now_` in the code below. Putting this all together gives the following
+     expression:
+
+     `rho_unit = (3 / 8 * pi) * (H_0 / h)^2 / G^2 * Omega_m_0 * h^2 * (1+z)^3`.
+
+     Note: the previous version of this function was equivalent to:
+
+     `rho_unit = 1.8788e-29 * Omega_m_0 * h^2 * (1+z)^3`.
+
+     but (after plugging in values), this version is equivalent to:
+
+     `rho_unit = 1.8784710838431666e-29 * Omega_m_0 * h^2 * (1+z)^3`.
+
+     The reason for this inconsistency is unclear. It is possibly due to inconsistent values
+     for `G`.
+
+   */
+
+    return (3.0 / (8.0 * cello::pi)) * enzo_constants::H0_over_h * enzo_constants::H0_over_h /
+      (enzo_constants::grav_constant * enzo_constants::grav_constant) * omega_matter_now_ *
+      hubble_constant_now_ * hubble_constant_now_ *
+      (1 + current_redshift_) * (1 + current_redshift_) * (1 + current_redshift_);
   }
 
-  /// Return current length units scaling (requires set_current_time())
+  /// Return current mass unit in terms of grams (requires set_current_time())
+  double mass_units() const
+  {
+    return density_units() * length_units() * length_units() * length_units();
+  }
+
+  /// Return current length unit in terms of cm (requires set_current_time())
   double length_units() const
   {
-    return cello::Mpc_cm*comoving_box_size_/hubble_constant_now_/
+    return enzo_constants::Mpc_cm * comoving_box_size_ / hubble_constant_now_ /
       (1.0 + current_redshift_);
   }
 
-  /// Return current time units (requires set_current_time())
+  /// Return time unit in terms of seconds (requires set_current_time())
   double time_units() const
   {
-    return 2.519445e17/sqrt(omega_matter_now_)/hubble_constant_now_/
-      pow(1.0 + initial_redshift_,1.5);
+
+    /* Time unit is defined so that the following is true (which has the effect of simplifying
+      Poisson's equation):
+
+      `4 * pi * G * rho_bar_m_com * time_unit^2 / a_unit^3 = 1`,
+
+      Where `G` is the gravitational constant.`rho_bar_m_com` is the mean comoving matter density
+      of the universe, `time_unit` is the time unit in seconds, and `a_unit` is the "unit 
+      cosmological scale factor". To understand where the factor of `a_unit^3` come from, see
+      Equations 8, 17, 18 of Greg L. Bryan et al 2014 ApJS 211 19, and note that Laplacian(`phi`) 
+      has dimensions of `time^(-2) * a^(2).
+
+      In Enzo-E, `a_unit` is defined so that `a` is 1 at the initial redshift (`z_i`), so that:
+      `(1+z_i)^(-1) / a_unit = 1`, which means that `a_unit = 1 / (1 + z_i)`.
+
+      `rho_bar_m_0` can be written as `Omega_m_0 * rho_crit_0`, where `Omega_m_0` is a 
+      cosmological parameter which can be set in the input parameter file,
+      and `rho_crit_0` is defined as `3 * H_0^2 / (8 * pi * G)`, where `H_0` is the expansion rate
+      of the universe at redshift 0 (with dimensions of inverse time). Plugging this all in gives:
+
+      `3 / 2 * Omega_m_0 * H_0^2 * time_unit^2 * (1 + z_i)^3 = 1`.
+
+      Equivalently, this is the "free-fall time" at `z = z_i`.
+
+      After some rearrangement, we get the following expression:
+
+      `time_unit = sqrt(2/3) * h / H0 / (h * sqrt(Omega_m_0 * (1 + z)^3))`/
+
+   */
+
+    return sqrt(2.0/3.0) / (enzo_constants::H0_over_h * hubble_constant_now_ *
+			    sqrt(omega_matter_now_ *
+				 (1 + initial_redshift_) *
+				 (1 + initial_redshift_) *
+				 (1 + initial_redshift_)));
   }
 
-  /// Return current temperature units (requires set_current_time())
-  double temperature_units() const
-  {
-    return 1.81723e6*pow(comoving_box_size_,2.0)*omega_matter_now_*
-                      (1.0 + initial_redshift_);
-  }
-
+  /// Return velocity unit in cm/s
   double velocity_units() const
   {
-    return 1.22475e7*comoving_box_size_*sqrt(omega_matter_now_)*
-                      sqrt(1.0 + initial_redshift_);
+    /* Equation 17 of Greg L. Bryan et al 2014 ApJS 211 19, shows that the dimensions of velocity
+       are `a` times `comoving length` over `time`.
+       As such, this expression is equivalent to:
+
+       `velocity_unit` = `a_unit` * `length_unit / ((1 + z) * `time_unit`)
+
+       where `z` is the current redshift, and `a_unit` is (1 + `z_i`), with `z_i` being the 
+       initial redshift.
+
+       The `1.0e7` term is the result of multiplying `Mpc_cm` by `H0_over_h`.
+    */
+    return 1.0e7 *  sqrt(3.0/2.0) * comoving_box_size_ * sqrt(omega_matter_now_) *
+      (1 + initial_redshift_);
   }
 
   void print () const

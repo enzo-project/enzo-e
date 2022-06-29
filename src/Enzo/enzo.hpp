@@ -34,12 +34,12 @@
 #include "_performance.hpp"
 #include "_problem.hpp"
 #include "_mesh.hpp"
+#include "_array.hpp"
 #include "_data.hpp"
 #include "_simulation.hpp"
 #include "_disk.hpp"
 #include "_io.hpp"
 #include "_compute.hpp"
-#include "_array.hpp"
 
 //----------------------------------------------------------------------
 // Component class includes
@@ -64,6 +64,12 @@ namespace enzo {
   const EnzoConfig * config();
   CProxy_EnzoBlock block_array();
   EnzoBlock * block ( Block * block);
+
+  /// Returns whether the dual energy formalism is in use.
+  ///
+  /// @param default_ret[in] The value to return if no hydro methods are used.
+  ///     The default value is false.
+  bool uses_dual_energy_formalism(bool default_ret = false);
 }
 
 extern CProxy_EnzoSimulation proxy_enzo_simulation;

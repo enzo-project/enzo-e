@@ -25,28 +25,11 @@ void EnzoEOSIdeal::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-// returns true if grackle is in use and if gamma can vary spatially
-bool grackle_variable_gamma_(){
-#ifdef CONFIG_USE_GRACKLE
-  if (enzo::config()->method_grackle_use_grackle){
-    if (enzo::config()->method_grackle_chemistry->primordial_chemistry > 1) {
-      return true;
-    }
-  }
-#endif
-  return false;
-}
-
-//----------------------------------------------------------------------
-
 void EnzoEOSIdeal::primitive_from_integration
 (const EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &primitive_map,
- const int stale_depth, const str_vec_t &passive_list) const
+ const int stale_depth, const str_vec_t &passive_list,
+ const bool ignore_grackle) const
 {
-  if (grackle_variable_gamma_()){
-    ERROR("EnzoEOSIdeal::primitive_from_integration",
-	  "Doesn't currently support spatial variations in gamma");
-  }
 
   const CelloArray<const enzo_float, 3> density = integration_map.at("density");
   const int mz = density.shape(0);
@@ -105,7 +88,7 @@ void EnzoEOSIdeal::primitive_from_integration
   }
 
   pressure_from_integration(integration_map, primitive_map.at("pressure"),
-                            stale_depth);
+                            stale_depth, ignore_grackle);
 }
 
 
@@ -114,77 +97,18 @@ void EnzoEOSIdeal::primitive_from_integration
 
 void EnzoEOSIdeal::pressure_from_integration
 (const EnzoEFltArrayMap &integration_map, const EFlt3DArray &pressure,
- const int stale_depth) const
+ const int stale_depth, const bool ignore_grackle) const
 {
 
-  // For now, we are not actually wrapping ComputePressure
-  // To use EnzoComputePressure, we need to do some minor refactoring of it to
-  // allow for optionally computing Pressure from arrays specified in a Mapping.
-  // This also requires making a modification to EnzoMethodGrackle's static
-  // setup_grackle_fields method to also allow for specification of
-  // relevant fields. Holding off on this for now
+  const bool mhd = (integration_map.contains("bfield_x") ||
+                    integration_map.contains("bfield_y") ||
+                    integration_map.contains("bfield_z"));
 
-  if (grackle_variable_gamma_()){
-    // we don't actually need to have grackle compute the pressure unless
-    // gamma is allowed to vary
-    ERROR("EnzoEOSIdeal::pressure_from_integration",
-	  "Not equipped to handle grackle and spatially variable gamma");
-  }
-
-  enzo_float gm1 = get_gamma() - 1.;
-
-  using RdOnlyEFlt3DArray = CelloArray<const enzo_float, 3>;
-  const RdOnlyEFlt3DArray density = integration_map.at("density");
-
-  if (this->uses_dual_energy_formalism()){
-
-    const RdOnlyEFlt3DArray eint = integration_map.at("internal_energy");
-
-    for (int iz=stale_depth; iz<(density.shape(0)-stale_depth); iz++) {
-      for (int iy=stale_depth; iy<(density.shape(1)-stale_depth); iy++) {
-	for (int ix=stale_depth; ix<(density.shape(2)-stale_depth); ix++) {
-	  pressure(iz,iy,ix) = gm1 * density(iz,iy,ix) * eint(iz,iy,ix);
-	}
-      }
-    }
-
-  } else { // not using dual energy formalism
-
-    const RdOnlyEFlt3DArray etot = integration_map.at("total_energy");
-    const RdOnlyEFlt3DArray vx = integration_map.at("velocity_x");
-    const RdOnlyEFlt3DArray vy = integration_map.at("velocity_y");
-    const RdOnlyEFlt3DArray vz = integration_map.at("velocity_z");
-
-    const bool mag = (integration_map.contains("bfield_x") ||
-		      integration_map.contains("bfield_y") ||
-		      integration_map.contains("bfield_z"));
-
-    const RdOnlyEFlt3DArray bx =
-      (mag) ? integration_map.at("bfield_x") : RdOnlyEFlt3DArray();
-    const RdOnlyEFlt3DArray by =
-      (mag) ? integration_map.at("bfield_y") : RdOnlyEFlt3DArray();
-    const RdOnlyEFlt3DArray bz =
-      (mag) ? integration_map.at("bfield_z") : RdOnlyEFlt3DArray();
-
-    for (int iz=stale_depth; iz<(density.shape(0)-stale_depth); iz++) {
-      for (int iy=stale_depth; iy<(density.shape(1)-stale_depth); iy++) {
-	for (int ix=stale_depth; ix<(density.shape(2)- stale_depth); ix++) {
-	  enzo_float v2 = (vx(iz,iy,ix) * vx(iz,iy,ix) +
-			   vy(iz,iy,ix) * vy(iz,iy,ix) +
-			   vz(iz,iy,ix) * vz(iz,iy,ix));
-          enzo_float temp = (etot(iz,iy,ix) - 0.5 * v2) * density(iz,iy,ix);
-          if (mag){
-            enzo_float b2 = (bx(iz,iy,ix) * bx(iz,iy,ix) +
-                             by(iz,iy,ix) * by(iz,iy,ix) +
-                             bz(iz,iy,ix) * bz(iz,iy,ix));
-            temp -= 0.5*b2;
-          }
-          pressure(iz,iy,ix) = gm1 * temp;
-	}
-      }
-    }
-
-  }
+  EnzoComputePressure::compute_pressure(EnzoFieldAdaptor(integration_map),
+                                        pressure, mhd,
+                                        this->uses_dual_energy_formalism(),
+                                        get_gamma(), stale_depth,
+                                        ignore_grackle);
 }
 
 //----------------------------------------------------------------------
@@ -194,10 +118,32 @@ void EnzoEOSIdeal::pressure_from_integration
 void EnzoEOSIdeal::apply_floor_to_energy_and_sync
 (EnzoEFltArrayMap &integration_map, const int stale_depth) const
 {
-  if (grackle_variable_gamma_()){
-    ERROR("EnzoEOSIdeal::apply_floor_to_energy_and_sync",
-	  "Not equipped to handle grackle and spatially variable gamma");
-  }
+
+  // This function's application of a floor isn't technically correct here for
+  // a variable gamma.
+  // - for (enzo::config()->method_grackle_chemistry->primordial_chemistry > 1)
+  //   Grackle adjusts the "nominal gamma value" (usually ~ 5/3) based on the
+  //   the relative abundance of molecular hydrogen & the specific internal
+  //   energy (since the number of degrees of freedom depend on temperature)
+  // - Grackle provides routines for calculating pressure and gamma given the
+  //   mass_dens, eint, mass_dens_primordials, and mass_dens_H2.
+  // - One could hypothetic invert the routine for pressure to acquire
+  //   eint(mass_dens, pressure, mass_dens_primordials, and mass_dens_H2),
+  //   but this is not presently available...
+  //
+  // The "correct" approach is to use the hypothetical eint function to compute
+  // the local value of the internal energy floor for each cell using the
+  // pressure_floor and the local values of mass_dens, mass_dens_primordials,
+  // and mass_dens_H2.
+  //
+  // Since we don't have this hypothetical routine, we instead estimate the
+  // local value of the internal energy floor for each cell using the pressure
+  // floor, the "nominal gamma value", and the local mass_dens value, according
+  // to eint = pressure / ((gamma - 1) * rho).
+  // - This somewhat overestimates the true value of gamma.
+  // - Thus, when you convert our eint_floor estimate back to pressure (with
+  //   the Grackle routine), you'll recover a value smaller than the pressure
+  //   floor.
 
   const bool idual = this->uses_dual_energy_formalism();
   const bool mag = (integration_map.contains("bfield_x") ||
@@ -234,7 +180,7 @@ void EnzoEOSIdeal::apply_floor_to_energy_and_sync
   // half_factor = 0 when eta = 0.
   const double half_factor = (eta != 0.) ? 0.5 : 0.;
 
-   for (int iz = stale_depth; iz < (density.shape(0) - stale_depth); iz++) {
+  for (int iz = stale_depth; iz < (density.shape(0) - stale_depth); iz++) {
     for (int iy = stale_depth; iy < (density.shape(1) - stale_depth); iy++) {
       for (int ix = stale_depth; ix < (density.shape(2) - stale_depth); ix++) {
 

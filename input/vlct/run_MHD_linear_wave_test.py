@@ -182,7 +182,7 @@ def analyze_tests():
     r.append(err_compare(3.005870212811956e-08,  'alfven',  1, 32))
 
     r.append(err_compare(2.2373810027584788e-07, 'slow',    1, 16))
-    r.append(err_compare(4.437025228314115e-08, 'slow',    1, 32))
+    r.append(err_compare(4.437026706327692e-08,  'slow',    1, 32))
 
     r.append(err_compare(1.0021263485338544e-07, 'entropy', 1, 16))
     r.append(err_compare(2.9194839706868883e-08,  'entropy', 1, 32))
