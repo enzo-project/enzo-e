@@ -12,10 +12,7 @@ Four tests of the enzo-e "merge sinks" method.
 
 - the stationary parallel test
     
-All the files necessary for running the tests can be found in input/merge_sinks,
-and the tests can be run by executing test/run_merge_sinks_tests.sh from the
-top-level directory of the repository.
-
+All the files necessary for running the tests can be found in input/merge_sinks.
 
 Each test involves setting up initial conditions with 1000 sink particles randomly
 distributed in a sphere, with velocities directed towards the centre of the sphere.
@@ -31,10 +28,9 @@ move with constant velocity until they are merged together.
 
 The python script input/merge_sinks/mass_momentum_conservation.py then tests if
 mass and momentum are conserved across all the output snapshots, to within some
-tolerance, which depends on the precision specified by the $CELLO_PREC environment
-variable (1.0e-4 for single precision, 1.0e-6 for double precision).
+tolerance, which depends on the floating-point precision with which Enzo-E was compiled
+(1.0e-4 for single precision, 1.0e-6 for double precision).
 If all quantities are indeed conserved, the test passes, if not, the test fails.
-See input/merge_sinks/README for further details on running the tests.
 
-These tests can be executed by running "ctest -R merge_sinks_*" in the build directory.
+These tests can be executed by running "ctest -R merge_sinks" in the build directory.
 See input/merge_sinks/README for further information on these tests.

@@ -204,6 +204,7 @@ extern "C" {
 #include "enzo_EnzoInitialIsolatedGalaxy.hpp"
 #include "enzo_EnzoInitialBurkertBodenheimer.hpp"
 #include "enzo_EnzoInitialMergeSinksTest.hpp"
+#include "enzo_EnzoInitialAccretionTest.hpp"
 
 #include "enzo_EnzoRefineShock.hpp"
 #include "enzo_EnzoRefineParticleMass.hpp"
@@ -220,6 +221,9 @@ extern "C" {
 #include "enzo_EnzoBfieldMethod.hpp"
 #include "enzo_EnzoBfieldMethodCT.hpp"
 #include "enzo_EnzoSourceInternalEnergy.hpp"
+#include "enzo_EnzoSinkParticle.hpp"
+#include "enzo_EnzoBondiHoyleSinkParticle.hpp"
+#include "enzo_EnzoFluxSinkParticle.hpp"
 #include "enzo_EnzoSourceGravity.hpp"
 
 // public header for the EnzoRiemann sub-library. This needs to be included
@@ -247,6 +251,10 @@ extern "C" {
 #include "enzo_EnzoMethodStarMakerSTARSS.hpp"
 #include "enzo_EnzoMethodMHDVlct.hpp"
 #include "enzo_EnzoMethodMergeSinks.hpp"
+#include "enzo_EnzoMethodAccretion.hpp"
+#include "enzo_EnzoMethodThresholdAccretion.hpp"
+#include "enzo_EnzoMethodBondiHoyleAccretion.hpp"
+#include "enzo_EnzoMethodFluxAccretion.hpp"
 
 #include "enzo_EnzoMatrixDiagonal.hpp"
 #include "enzo_EnzoMatrixIdentity.hpp"

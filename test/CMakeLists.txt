@@ -183,6 +183,14 @@ if (USE_YT_BASED_TESTS)
   setup_test_serial_python(merge_sinks_drift_serial merge_sinks/drift/serial "input/merge_sinks/run_merge_sinks_test.py" "--prec=${PREC_STRING}" "--ics_type=drift")
   setup_test_parallel_python(merge_sinks_drift_parallel merge_sinks/drift/parallel "input/merge_sinks/run_merge_sinks_test.py" "--prec=${PREC_STRING}" "--ics_type=drift")
 
+  # accretion
+  setup_test_serial_python(threshold_accretion_serial accretion/threshold/serial "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=threshold")
+  setup_test_parallel_python(threshold_accretion_parallel accretion/threshold/parallel "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=threshold")
+  setup_test_serial_python(bondi_hoyle_accretion_serial accretion/bondi_hoyle/serial "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=bondi_hoyle")
+  setup_test_parallel_python(bondi_hoyle_accretion_parallel accretion/bondi_hoyle/parallel "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=bondi_hoyle")
+  setup_test_serial_python(flux_accretion_serial accretion/flux/serial "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=flux")
+  setup_test_parallel_python(flux_accretion_parallel accretion/flux/parallel "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=flux")
+  
 endif()
 
 # Grackle tests

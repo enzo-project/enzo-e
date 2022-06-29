@@ -42,6 +42,7 @@ What Tests are Currently Included
 Currently the Enzo-e testing infrastructure tests:
 
 .. toctree::
+   accretion-cmake
    array-cmake
    error-cmake
    memory-cmake
@@ -67,6 +68,7 @@ What Tests are Available
 Currently the Enzo-e has the following tests in the input folder:
 
 .. toctree::
+   accretion
    adapt
    balance
    boundary

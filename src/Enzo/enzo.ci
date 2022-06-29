@@ -67,6 +67,7 @@ module enzo {
   PUPable EnzoInitialTurbulence;
   PUPable EnzoInitialIsolatedGalaxy;
   PUPable EnzoInitialMergeSinksTest;
+  PUPable EnzoInitialAccretionTest;
 
   PUPable IoEnzoBlock;
 
@@ -100,6 +101,10 @@ module enzo {
   PUPable EnzoMethodTurbulence;
   PUPable EnzoMethodMHDVlct;
   PUPable EnzoMethodMergeSinks;
+  PUPable EnzoMethodAccretion;
+  PUPable EnzoMethodThresholdAccretion;
+  PUPable EnzoMethodBondiHoyleAccretion;
+  PUPable EnzoMethodFluxAccretion;
 
   PUPable EnzoEOSIdeal;
   PUPable EnzoIntegrationQuanUpdate;
@@ -170,6 +175,9 @@ module enzo {
     // EnzoMethodGravity synchronization entry methods
     entry void p_method_gravity_continue();
     entry void p_method_gravity_end();
+
+    // EnzoMethodAccretion synchronization entry methods
+    entry void p_method_accretion_end();
 
     // EnzoSolverCg synchronization entry methods
 
