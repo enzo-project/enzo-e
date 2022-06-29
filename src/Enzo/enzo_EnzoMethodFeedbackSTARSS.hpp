@@ -63,7 +63,7 @@ public:
                           const enzo_float xp, const enzo_float yp, const enzo_float zp,
                           const int ix, const int iy, const int iz,
                           const int winds, const int nSNII, const int nSNIa,
-                          enzo_float starZ) const throw();
+                          const double starZ) const throw();
 
    void transformComovingWithStar(enzo_float * density,
                                   enzo_float * velocity_x, enzo_float * velocity_y, enzo_float * velocity_z,

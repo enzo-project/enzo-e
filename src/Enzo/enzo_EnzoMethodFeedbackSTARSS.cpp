@@ -750,7 +750,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
                                               const int ix, const int iy, const int iz,
                                               const int winds, const int nSNII,
                                               const int nSNIA,
-                                              enzo_float starZ)
+                                              const double starZ)
 
  const throw(){
   /*
