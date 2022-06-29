@@ -609,7 +609,7 @@ Method * EnzoProblem::create_method_
 
     method = new EnzoMethodGrackle
       (enzo_config->physics_cosmology_initial_redshift,
-       enzo_config->initial_time);
+       enzo::simulation()->time());
 
 #endif /* CONFIG_USE_GRACKLE */
 
