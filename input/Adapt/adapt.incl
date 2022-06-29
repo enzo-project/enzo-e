@@ -12,7 +12,7 @@ include "input/Adapt/adapt_slope.incl"
 
 Stopping { 
 	 cycle = 10000; 
-	 time = 0.25;
+	 time = 0.05;
 }
 
 Boundary { type = "periodic"; }
