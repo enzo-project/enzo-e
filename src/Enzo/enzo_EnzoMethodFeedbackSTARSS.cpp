@@ -712,6 +712,7 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
           } // if wind mass > 0
         } // if winds
 
+        // windMass and SNMassEjected are in units of Msun
         pmass[ipdm] -= std::max(0.0,
                        (windMass + SNMassEjected) /
                        (munit/enzo_constants::mass_solar)); 
@@ -982,8 +983,8 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   // Cooling radius as in Hopkins, but as an average over cells
   double CoolingRadius = 28.4 * pow(std::max(0.1, n_mean), -3.0 / 7.0) * pow(ejectaEnergy / 1.0e51, 2.0 / 7.0) * fz; // pc
   double coupledEnergy = ejectaEnergy;
-  double cellwidth = hx*lunit / enzo_constants::pc_cm; // pc
-  double dxRatio = cellwidth / CoolingRadius;
+  double cellwidth_pc = hx*lunit / enzo_constants::pc_cm; // pc
+  double dxRatio = cellwidth_pc / CoolingRadius;
 
   /* 
      We want to couple one of four phases: free expansion, Sedov-taylor, shell formation, or terminal
@@ -995,7 +996,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   double p_free = sqrt(2*ejectaMass*enzo_constants::mass_solar*ejectaEnergy) / enzo_constants::mass_solar/1e5;
   double r_free = 2.75*pow(ejectaMass / 3 / n_mean, 1.0/3); // free expansion radius eq. 2
   
-  double t3_sedov = pow(std::max(r_free, std::max(cellwidth, r_free)) * enzo_constants::pc_cm / 
+  double t3_sedov = pow(std::max(r_free, std::max(cellwidth_pc, r_free)) * enzo_constants::pc_cm / 
                     (5.0 * enzo_constants::pc_cm * pow(ejectaEnergy / 1e51 / n_mean, 1.0 / 5.0)), 5./ 2.);
   
   double p_sedov = 2.21e4 * pow(ejectaEnergy / 1e51, 4. / 5.) * 
@@ -1036,7 +1037,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   // fading radius of a supernova, using gas energy of the host cell and ideal gas approximations
   double r_fade = std::max(66.0*pow(ejectaEnergy/1e51, 0.32)*pow(n_mean, -0.37)*pow(cSound/10, -2.0/5.0), 
                            CoolingRadius * 1.5);
-  double fadeRatio = cellwidth/r_fade;
+  double fadeRatio = cellwidth_pc/r_fade;
 
   #ifdef DEBUG_FEEDBACK_STARSS
     CkPrintf("STARSS_FB: Fading: T = %e; Cs = %e; R_f = %e; fadeR = %f\n", T, cSound, r_fade, fadeRatio);
@@ -1045,7 +1046,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   double coupledMomenta = 0.0;
   double eKinetic = 0.0;
 
-  double cw_eff = cellwidth;
+  double cw_eff = cellwidth_pc;
 
   double dx_eff = cw_eff / CoolingRadius; // our resolution with respect to the cooling radius
   double fader = cw_eff / r_fade;
@@ -1072,7 +1073,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   #ifdef DEBUG_FEEDBACK_STARSS
     CkPrintf(
        "STARSS_FB: RADII: cell = %e, free = %e, shellform = %e, cooling = %e, fade = %e t_3=%e, R_m=%e\n",
-       cellwidth, r_free, r_shellform, CoolingRadius, r_fade, t3_sedov, r_merge);
+       cellwidth_pc, r_free, r_shellform, CoolingRadius, r_fade, t3_sedov, r_merge);
   #endif
 
   if (! winds)
