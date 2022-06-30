@@ -172,19 +172,6 @@ void EnzoSimulation::r_startup_begun (CkReductionMsg *msg)
   initialize_config_();
 
   initialize();
-
-  // Initialize Units::cosmology if needed
-
-  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology *)
-    problem()->physics("cosmology");
-  
-  if (cosmology) {
-    EnzoUnits * units = (EnzoUnits *) problem()->units();
-    units->set_cosmology(cosmology);
-
-    // Set current time to be initial time
-    cosmology->set_current_redshift(cosmology->initial_redshift());
-  }
   
 #ifdef TRACE_PARAMETERS
   CkPrintf ("%d END   r_startup_begun()\n",CkMyPe());

@@ -13,7 +13,7 @@
 
 // #define DEBUG_COPY_B
 // #define DEBUG_COPY_DENSITIES
-// #dfeine DEBUG_COPY_POTENTIAL
+// #define DEBUG_COPY_POTENTIAL
 // #define DEBUG_COPY_ACCELERATION
 
 #define NEW_TIMESTEP
@@ -79,7 +79,6 @@ EnzoMethodGravity::EnzoMethodGravity
   refresh->add_field("acceleration_x");
   refresh->add_field("acceleration_y");
   refresh->add_field("acceleration_z");
-
   // Accumulate is used when particles are deposited into density_total
 
   if (accumulate) {
@@ -123,7 +122,6 @@ void EnzoMethodGravity::compute(Block * block) throw()
   // Initialize the linear system
 
   Field field = block->data()->field();
-
   /// access problem-defining fields for eventual RHS and solution
   const int ib  = field.field_id ("B");
   const int id  = field.field_id("density");
@@ -140,7 +138,6 @@ void EnzoMethodGravity::compute(Block * block) throw()
   field.ghost_depth(0,&gx,&gy,&gz);
 
   const int m = mx*my*mz;
-
   enzo_float * B = (enzo_float*) field.values (ib);
 #ifdef DEBUG_COPY_B
   const int ib_copy = field.field_id ("B_copy");
@@ -162,7 +159,6 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
   if (block->is_leaf()) {
     if (cosmology) {
-
       int gx,gy,gz;
       field.ghost_depth(0,&gx,&gy,&gz);
       gx=gy=gz=0;
@@ -197,7 +193,6 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
   const int ix = field.field_id ("potential");
   std::shared_ptr<Matrix> A (std::make_shared<EnzoMatrixLaplace>(order_));
-
   solver->set_field_x(ix);
   solver->set_field_b(ib);
 #ifdef DEBUG_COPY_B
@@ -208,7 +203,6 @@ void EnzoMethodGravity::compute(Block * block) throw()
   if (DT_copy) for (int i=0; i<m; i++) DT_copy[i] = DT[i];
   if (D_copy) for (int i=0; i<m; i++) D_copy[i] = D[i];
 #endif	
-
   solver->apply (A, block);
 }
 

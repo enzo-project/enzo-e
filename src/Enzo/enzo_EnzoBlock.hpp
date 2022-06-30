@@ -260,6 +260,12 @@ public: /// entry methods
 
   //--------------------------------------------------
 
+  /// Synchronize for accumulate refresh before adding the
+  /// sink fields.
+  void p_method_accretion_end();
+
+  // ------------------------------------------------
+  
   /// EnzoSolverCg entry method: DOT ==> refresh P
   void r_solver_cg_loop_0a (CkReductionMsg * msg);
 
@@ -350,6 +356,9 @@ public: /// entry methods
   void solver_mg0_prolong_recv(FieldMsg * msg);
   void p_solver_mg0_restrict_recv(FieldMsg * msg);
 
+  // EnzoMethodFeedbackSTARSS
+
+  void p_method_feedback_starss_end();
 
   virtual void print() const {
     CkPrintf ("PRINT_ENZO_BLOCK name = %s\n",name().c_str());

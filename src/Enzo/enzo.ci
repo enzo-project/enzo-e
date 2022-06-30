@@ -39,16 +39,15 @@ module enzo {
   readonly int EnzoBlock::ghost_depth[CONFIG_NODE_SIZE_3];
   readonly int EnzoBlock::NumberOfBaryonFields[CONFIG_NODE_SIZE];      // active baryon fields
 
-#ifdef CONFIG_USE_GRACKLE
-  PUPable EnzoInitialGrackleTest;
-  PUPable EnzoMethodGrackle;
-  PUPable EnzoComputeCoolingTime;
-#endif
-
   PUPable EnzoBoundary;
   PUPable EnzoConfig;
   PUPable EnzoFactory;
 
+  // EnzoInitial
+#ifdef CONFIG_USE_GRACKLE
+  PUPable EnzoInitialGrackleTest;
+#endif
+  PUPable EnzoInitialAccretionTest;
   PUPable EnzoInitialBCenter;
   PUPable EnzoInitialBurkertBodenheimer;
   PUPable EnzoInitialCloud;
@@ -72,36 +71,50 @@ module enzo {
 
   PUPable IoEnzoBlock;
 
+  // EnzoRefine
   PUPable EnzoRefineShock;
   PUPable EnzoRefineParticleMass;
   PUPable EnzoRefineMass;
+
+  // EnzoCompute
+#ifdef CONFIG_USE_GRACKLE
+  PUPable EnzoComputeCoolingTime;
+#endif
 
   PUPable EnzoComputePressure;
   PUPable EnzoComputeTemperature;
   PUPable EnzoComputeAcceleration;
   PUPable EnzoComputeCicInterp;
 
+  // EnzoMatrix
   PUPable EnzoMatrixLaplace;
   PUPable EnzoMatrixDiagonal;
   PUPable EnzoMatrixIdentity;
 
+  // EnzoMethod
+#ifdef CONFIG_USE_GRACKLE
+  PUPable EnzoMethodGrackle;
+#endif
+  PUPable EnzoMethodAccretion;
   PUPable EnzoMethodBackgroundAcceleration;
+  PUPable EnzoMethodBondiHoyleAccretion;
   PUPable EnzoMethodCheck;
-  PUPable EnzoMethodFeedback;
-  PUPable EnzoMethodDistributedFeedback;
-
   PUPable EnzoMethodComovingExpansion;
   PUPable EnzoMethodCosmology;
+  PUPable EnzoMethodDistributedFeedback;
+  PUPable EnzoMethodFeedback;
+  PUPable EnzoMethodFeedbackSTARSS;
+  PUPable EnzoMethodFluxAccretion;
   PUPable EnzoMethodGravity;
-
   PUPable EnzoMethodHeat;
+  PUPable EnzoMethodMergeSinks;
+  PUPable EnzoMethodMHDVlct;
   PUPable EnzoMethodPmDeposit;
   PUPable EnzoMethodPmUpdate;
   PUPable EnzoMethodPpm;
   PUPable EnzoMethodPpml;
+  PUPable EnzoMethodThresholdAccretion;
   PUPable EnzoMethodTurbulence;
-  PUPable EnzoMethodMHDVlct;
-  PUPable EnzoMethodMergeSinks;
 
   PUPable EnzoEOSIdeal;
   PUPable EnzoIntegrationQuanUpdate;
@@ -113,7 +126,8 @@ module enzo {
 
   PUPable EnzoMethodStarMaker;
   PUPable EnzoMethodStarMakerStochasticSF;
-  
+  PUPable EnzoMethodStarMakerSTARSS;
+
   PUPable EnzoBfieldMethodCT;
 
   PUPable EnzoPhysicsCosmology;
@@ -180,7 +194,10 @@ module enzo {
     entry EnzoBlock (EnzoMsgCheck * msg);
 #endif
     entry EnzoBlock();
-
+ 
+    // EnzoMethodFeedbackSTARSS synchronization entry methods
+    entry void p_method_feedback_starss_end();
+  
     // EnzoMethodTurbulence synchronization entry methods
     entry void r_method_turbulence_end(CkReductionMsg *msg);
 
@@ -190,7 +207,10 @@ module enzo {
     entry void p_method_gravity_continue();
     entry void p_method_gravity_end();
 
-    entry void p_check_write_first(int num_files, std::string ordering, std::string name_dir);
+
+    // checkpoint
+    entry void p_check_write_first
+      (int num_files, std::string ordering, std::string name_dir);
     entry void p_check_write_next (int num_files, std::string ordering);
     entry void p_check_done();
 
@@ -198,6 +218,9 @@ module enzo {
     entry void p_restart_refine (int ic3[3], int io_reader);
     entry void p_restart_set_data(EnzoMsgCheck *);
     entry void p_restart_done();
+
+    // EnzoMethodAccretion synchronization entry methods
+    entry void p_method_accretion_end();
 
     // EnzoSolverCg synchronization entry methods
 

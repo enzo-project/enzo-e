@@ -10,8 +10,7 @@ Field {
 	   "e_density",
            "metal_density",
 	   "cooling_time",
-	   "temperature",
-	   "gamma"];
+	   "temperature"];
 }
 
 Group {
@@ -24,11 +23,7 @@ Group {
               "HeII_density",
               "HeIII_density",
               "e_density",
-              "metal_density",
-              "cooling_time",
-              "temperature",
-              "pressure",
-              "gamma" ];
+              "metal_density"];
     }
 
     derived {
@@ -51,8 +46,7 @@ Method {
 	                 "e_density",
                          "metal_density",
 	                 "cooling_time",
-	                 "temperature",
-	                 "gamma"]; 
+	                 "temperature"]; 
      } 
      grackle {
         courant = 0.50; # meaningless unless use_cooling_timestep = true;
@@ -78,7 +72,7 @@ Method {
 
 
 Output {
-     list = ["hdf5"];
+     list = ["hdf5","de"];
      hdf5 {
           dir = ["Dir_COSMO_MULTI_%04d","cycle"];
           field_list += ["HI_density",
@@ -89,20 +83,9 @@ Output {
 	                 "e_density",
                          "metal_density",
 	                 "cooling_time",
-	                 "temperature",
-	                 "gamma"];
+	                 "temperature"];
         }
      de   { dir = [ "Dir_COSMO_MULTI_%04d", "cycle" ]; }
-     depa { dir = [ "Dir_COSMO_MULTI_%04d", "cycle" ]; }
-     ax   { dir = [ "Dir_COSMO_MULTI_%04d", "cycle" ]; }
-     ay   { dir = [ "Dir_COSMO_MULTI_%04d", "cycle" ]; }
-     az   { dir = [ "Dir_COSMO_MULTI_%04d", "cycle" ]; }
-     dark { dir = [ "Dir_COSMO_MULTI_%04d", "cycle" ]; }
-     mesh { dir = [ "Dir_COSMO_MULTI_%04d", "cycle" ]; }
-     po   { dir = [ "Dir_COSMO_MULTI_%04d", "cycle" ]; }
-     hdf5 { dir = [ "Dir_COSMO_MULTI_%04d", "cycle" ]; }
-     dep  { dir = [ "Dir_COSMO_MULTI_%04d", "cycle" ]; }
-     check { dir = [ "Dir_COSMO_MULTI_%04d-checkpoint", "count" ]; }
 }
 
 Stopping {cycle = 160;}

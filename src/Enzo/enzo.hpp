@@ -57,15 +57,22 @@ class EnzoUnits;
 
 /// Namespace for Enzo global constants and accessor functions
 namespace enzo {
-  EnzoProblem *             problem();
-  EnzoSimulation *          simulation();
-  const EnzoFactory *       factory();
-  EnzoPhysicsCosmology *    cosmology();
-  const EnzoMethodGrackle * grackle_method();
-  EnzoUnits *               units();
+
   const EnzoConfig *        config();
+  const EnzoFactory *       factory();
+  const EnzoMethodGrackle * grackle_method();
   CProxy_EnzoBlock          block_array();
   EnzoBlock *               block ( Block * block);
+  EnzoPhysicsCosmology *    cosmology();
+  EnzoProblem *             problem();
+  EnzoSimulation *          simulation();
+  EnzoUnits *               units();
+
+  /// Returns whether the dual energy formalism is in use.
+  ///
+  /// @param default_ret[in] The value to return if no hydro methods are used.
+  ///     The default value is false.
+  bool uses_dual_energy_formalism(bool default_ret = false);
 }
 
 extern CProxy_EnzoSimulation proxy_enzo_simulation;

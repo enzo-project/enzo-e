@@ -58,8 +58,12 @@ protected: // methods
 
   bool particles_in_neighbouring_blocks_(EnzoBlock * enzo_block,
 					 enzo_float * particle_coordinates,
-					int ** group_lists,int * group_sizes,
-					int i);
+					 int ** group_lists,int * group_sizes,
+					 int i);
+
+  // Checks to be performed at initial cycle
+  void do_checks_(const Block* block) throw();
+
   
 protected: // attributes
 

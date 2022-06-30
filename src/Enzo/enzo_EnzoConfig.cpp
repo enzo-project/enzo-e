@@ -81,6 +81,12 @@ EnzoConfig::EnzoConfig() throw ()
   initial_collapse_temperature(0.0),
   // EnzoInitialFeedbackTest
   initial_feedback_test_density(),
+  initial_feedback_test_HI_density(),
+  initial_feedback_test_HII_density(),
+  initial_feedback_test_HeI_density(),
+  initial_feedback_test_HeII_density(),
+  initial_feedback_test_HeIII_density(),
+  initial_feedback_test_e_density(),
   initial_feedback_test_star_mass(),
   initial_feedback_test_temperature(),
   initial_feedback_test_from_file(),
@@ -117,7 +123,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_inclinedwave_parallel_vel(std::numeric_limits<double>::min()),
   initial_inclinedwave_positive_vel(true),
   initial_inclinedwave_wave_type(""),
-  initial_merge_sinks_test_particle_data_filename(""),
   // EnzoInitialMusic
   initial_music_field_files(),
   initial_music_field_datasets(),
@@ -172,33 +177,40 @@ EnzoConfig::EnzoConfig() throw ()
   initial_turbulence_pressure(0.0),
   initial_turbulence_temperature(0.0),
   // EnzoInitialIsolatedGalaxy
-  initial_IG_scale_length(0.0343218),       // Gas disk scale length in code units
-  initial_IG_scale_height(0.00343218),      // Gas disk scale height in code units
-  initial_IG_disk_mass(42.9661),            // Gas disk mass in code units
-  initial_IG_gas_fraction(0.2),             // Gas disk M_gas / M_star
-  initial_IG_disk_temperature(1e4),         // Gas disk temperature in K
-  initial_IG_disk_metal_fraction(1.0E-10),         // Gas disk metal fraction
-  initial_IG_gas_halo_mass(0.1),             // Gas halo total mass in code units
-  initial_IG_gas_halo_temperature(1e4),      // Gas halo initial temperature
-  initial_IG_gas_halo_metal_fraction(1.0E-10),      // Gas halo metal fraction
-  initial_IG_gas_halo_density(0.0),          // Gas halo uniform density (ignored if zero)
-  initial_IG_gas_halo_radius(1.0),           // Gas halo maximum radius in code units
-  initial_IG_use_gas_particles(false),      // Set up gas by depositing baryonic particles to grid
-  initial_IG_live_dm_halo(false),
-  initial_IG_stellar_disk(false),
-  initial_IG_stellar_bulge(false),
   initial_IG_analytic_velocity(false),
+  initial_IG_disk_mass(42.9661),            // Gas disk mass in code units
+  initial_IG_disk_metal_fraction(1.0E-10),         // Gas disk metal fraction
+  initial_IG_disk_temperature(1e4),         // Gas disk temperature in K
+  initial_IG_gas_fraction(0.2),             // Gas disk M_gas / M_star
+  initial_IG_gas_halo_density(0.0),          // Gas halo uniform density (ignored if zero)
+  initial_IG_gas_halo_mass(0.1),             // Gas halo total mass in code units
+  initial_IG_gas_halo_metal_fraction(1.0E-10),      // Gas halo metal fraction
+  initial_IG_gas_halo_radius(1.0),           // Gas halo maximum radius in code units
+  initial_IG_gas_halo_temperature(1e4),      // Gas halo initial temperature
   initial_IG_include_recent_SF(false),
-  initial_IG_recent_SF_start(-100.0),
-  initial_IG_recent_SF_end(0.0),
+  initial_IG_live_dm_halo(false),
   initial_IG_recent_SF_bin_size(5.0),
-  initial_IG_recent_SF_SFR(2.0),
+  initial_IG_recent_SF_end(0.0),
   initial_IG_recent_SF_seed(12345),
+  initial_IG_recent_SF_SFR(2.0),
+  initial_IG_recent_SF_start(-100.0),
+  initial_IG_scale_height(0.00343218),      // Gas disk scale height in code units
+  initial_IG_scale_length(0.0343218),       // Gas disk scale length in code units
+  initial_IG_stellar_bulge(false),
+  initial_IG_stellar_disk(false),
+  initial_IG_use_gas_particles(false),      // Set up gas by depositing baryonic particles to grid
   // EnzoMethodCheck
   method_check_num_files(1),
   method_check_ordering("order_morton"),
   method_check_dir(),
   method_check_monitor_iter(0),
+  // EnzoInitialMergeSinksTest
+  initial_merge_sinks_test_particle_data_filename(""),
+  // EnzoInitialAccretionTest
+  initial_accretion_test_sink_mass(0.0),
+  initial_accretion_test_gas_density(0.0),
+  initial_accretion_test_gas_pressure(0.0),
+  initial_accretion_test_gas_radial_velocity(0.0),
   // EnzoMethodHeat
   method_heat_alpha(0.0),
   // EnzoMethodHydro
@@ -211,6 +223,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_hydro_reconstruct_positive(0),
   method_hydro_riemann_solver(""),
   // EnzoMethodFeedback,
+  method_feedback_flavor(""),
   method_feedback_ejecta_mass(0.0),
   method_feedback_supernova_energy(1.0),
   method_feedback_ejecta_metal_fraction(0.0),
@@ -220,19 +233,37 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_ke_fraction(0.0),
   method_feedback_use_ionization_feedback(false),
   method_feedback_time_first_sn(-1), // in Myr
+  // EnzoMethodFeedbackSTARSS,
+  method_feedback_single_sn(0),
+  method_feedback_unrestricted_sn(0),
+  method_feedback_stellar_winds(0),
+  method_feedback_gas_return_fraction(0.0),
+  method_feedback_min_level(0),
+  method_feedback_analytic_SNR_shell_mass(0),
+  method_feedback_fade_SNR(0),
+  method_feedback_NEvents(0),
   // EnzoMethodStarMaker,
   method_star_maker_flavor(""),                              // star maker type to use
-  method_star_maker_use_density_threshold(true),           // check above density threshold before SF
-  method_star_maker_use_velocity_divergence(true),         // check for converging flow before SF
-  method_star_maker_use_dynamical_time(true),              // compute t_ff / t_dyn. Otherwise take as 1.0
+  method_star_maker_use_altAlpha(false),
+  method_star_maker_use_density_threshold(false),           // check above density threshold before SF
+  method_star_maker_use_velocity_divergence(false),         // check for converging flow before SF
+  method_star_maker_use_dynamical_time(false),              // compute t_ff / t_dyn. Otherwise take as 1.0
+  method_star_maker_use_cooling_time(false),                // check if t_cool < t_dyn
+  method_star_maker_use_overdensity_threshold(false),
+  method_star_maker_use_temperature_threshold(false),
   method_star_maker_use_self_gravitating(false),            //
   method_star_maker_use_h2_self_shielding(false),
   method_star_maker_use_jeans_mass(false),
   method_star_maker_number_density_threshold(0.0),         // Number density threshold in cgs
+  method_star_maker_overdensity_threshold(0.0),
+  method_star_maker_critical_metallicity(0.0),
+  method_star_maker_temperature_threshold(1.0E4),
   method_star_maker_maximum_mass_fraction(0.5),            // maximum cell mass fraction to convert to stars
   method_star_maker_efficiency(0.01),            // star maker efficiency per free fall time
   method_star_maker_minimum_star_mass(1.0E4),    // minimum star particle mass in solar masses
   method_star_maker_maximum_star_mass(1.0E4),    // maximum star particle mass in solar masses
+  method_star_maker_min_level(0), // minimum AMR level for star formation
+  method_star_maker_turn_off_probability(false),
   // EnzoMethodTurbulence
   method_turbulence_edot(0.0),
   method_turbulence_mach_number(0.0),
@@ -275,8 +306,13 @@ EnzoConfig::EnzoConfig() throw ()
   method_vlct_mhd_choice(""),
   method_vlct_dual_energy(false),
   method_vlct_dual_energy_eta(0.0),
-  /// EnzoMethodMergeStars
+  /// EnzoMethodMergeSinks
   method_merge_sinks_merging_radius_cells(0.0),
+  /// EnzoMethodAccretionCompute
+  method_accretion_accretion_radius_cells(0.0),
+  method_accretion_flavor(""),
+  method_accretion_physical_density_threshold_cgs(0.0),
+  method_accretion_max_mass_fraction(0.0),
   /// EnzoProlong
   prolong_enzo_type(),
   prolong_enzo_positive(true),
@@ -455,22 +491,22 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_hdf5_particle_types;
   p | initial_hdf5_particle_attributes;
 
-  p | initial_music_field_files;
-  p | initial_music_field_datasets;
-  p | initial_music_field_names;
   p | initial_music_field_coords;
-  p | initial_music_particle_files;
-  p | initial_music_particle_datasets;
-  p | initial_music_particle_coords;
-  p | initial_music_particle_types;
+  p | initial_music_field_datasets;
+  p | initial_music_field_files;
+  p | initial_music_field_names;
   p | initial_music_particle_attributes;
+  p | initial_music_particle_coords;
+  p | initial_music_particle_datasets;
+  p | initial_music_particle_files;
+  p | initial_music_particle_types;
+  p | initial_music_throttle_close_count;
+  p | initial_music_throttle_group_size;
   p | initial_music_throttle_internode;
   p | initial_music_throttle_intranode;
   p | initial_music_throttle_node_files;
-  p | initial_music_throttle_close_count;
-  p | initial_music_throttle_group_size;
-  p | initial_music_throttle_seconds_stagger;
   p | initial_music_throttle_seconds_delay;
+  p | initial_music_throttle_seconds_stagger;
 
   p | initial_pm_field;
   p | initial_pm_mpp;
@@ -478,45 +514,51 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | initial_burkertbodenheimer_rank;
   PUParray(p,initial_burkertbodenheimer_array,3);
-  p | initial_burkertbodenheimer_radius_relative;
-  p | initial_burkertbodenheimer_particle_ratio;
-  p | initial_burkertbodenheimer_mass;
-  p | initial_burkertbodenheimer_temperature;
   p | initial_burkertbodenheimer_densityprofile;
-  p | initial_burkertbodenheimer_rotating;
+  p | initial_burkertbodenheimer_mass;
   p | initial_burkertbodenheimer_outer_velocity;
+  p | initial_burkertbodenheimer_particle_ratio;
+  p | initial_burkertbodenheimer_radius_relative;
+  p | initial_burkertbodenheimer_rotating;
+  p | initial_burkertbodenheimer_temperature;
 
   PUParray(p, initial_feedback_test_position,3);
   p | initial_feedback_test_density;
+  p | initial_feedback_test_e_density;
+  p | initial_feedback_test_from_file;
+  p | initial_feedback_test_HeI_density;
+  p | initial_feedback_test_HeII_density;
+  p | initial_feedback_test_HeIII_density;
+  p | initial_feedback_test_HI_density;
+  p | initial_feedback_test_HII_density;
+  p | initial_feedback_test_metal_fraction;
   p | initial_feedback_test_star_mass;
   p | initial_feedback_test_temperature;
-  p | initial_feedback_test_from_file;
-  p | initial_feedback_test_metal_fraction;
 
   PUParray(p, initial_IG_center_position,3);
   PUParray(p, initial_IG_bfield,3);
-  p | initial_IG_scale_length;
-  p | initial_IG_scale_height;
-  p | initial_IG_disk_mass;
-  p | initial_IG_gas_fraction;
-  p | initial_IG_disk_temperature;
-  p | initial_IG_disk_metal_fraction;
-  p | initial_IG_gas_halo_mass;
-  p | initial_IG_gas_halo_temperature;
-  p | initial_IG_gas_halo_metal_fraction;
-  p | initial_IG_gas_halo_density;
-  p | initial_IG_gas_halo_radius;
-  p | initial_IG_use_gas_particles;
-  p | initial_IG_live_dm_halo;
-  p | initial_IG_stellar_disk;
-  p | initial_IG_stellar_bulge;
   p | initial_IG_analytic_velocity;
+  p | initial_IG_disk_mass;
+  p | initial_IG_disk_metal_fraction;
+  p | initial_IG_disk_temperature;
+  p | initial_IG_gas_fraction;
+  p | initial_IG_gas_halo_density;
+  p | initial_IG_gas_halo_mass;
+  p | initial_IG_gas_halo_metal_fraction;
+  p | initial_IG_gas_halo_radius;
+  p | initial_IG_gas_halo_temperature;
   p | initial_IG_include_recent_SF;
-  p | initial_IG_recent_SF_start;
-  p | initial_IG_recent_SF_end;
+  p | initial_IG_live_dm_halo;
   p | initial_IG_recent_SF_bin_size;
-  p | initial_IG_recent_SF_SFR;
+  p | initial_IG_recent_SF_end;
   p | initial_IG_recent_SF_seed;
+  p | initial_IG_recent_SF_SFR;
+  p | initial_IG_recent_SF_start;
+  p | initial_IG_scale_height;
+  p | initial_IG_scale_length;
+  p | initial_IG_stellar_bulge;
+  p | initial_IG_stellar_disk;
+  p | initial_IG_use_gas_particles;
 
   p | initial_shock_tube_setup_name;
   p | initial_shock_tube_aligned_ax;
@@ -541,6 +583,13 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_check_dir;
   p | method_check_monitor_iter;
 
+  PUParray(p,initial_accretion_test_sink_position,3);
+  PUParray(p,initial_accretion_test_sink_velocity,3);
+  p | initial_accretion_test_sink_mass;
+  p | initial_accretion_test_gas_density;
+  p | initial_accretion_test_gas_pressure;
+  p | initial_accretion_test_gas_radial_velocity;
+
   p | method_heat_alpha;
 
   p | method_hydro_method;
@@ -552,6 +601,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_hydro_reconstruct_positive;
   p | method_hydro_riemann_solver;
 
+  p | method_feedback_flavor;
   p | method_feedback_ejecta_mass;
   p | method_feedback_supernova_energy;
   p | method_feedback_ejecta_metal_fraction;
@@ -562,18 +612,37 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_feedback_use_ionization_feedback;
   p | method_feedback_time_first_sn;
 
+  p | method_feedback_single_sn;
+  p | method_feedback_unrestricted_sn;
+  p | method_feedback_stellar_winds;
+  p | method_feedback_gas_return_fraction;
+  p | method_feedback_min_level;
+  p | method_feedback_analytic_SNR_shell_mass;
+  p | method_feedback_fade_SNR;
+  p | method_feedback_NEvents;
+
   p | method_star_maker_flavor;
+  p | method_star_maker_use_altAlpha;
   p | method_star_maker_use_density_threshold;
+  p | method_star_maker_use_overdensity_threshold;
+  p | method_star_maker_use_temperature_threshold;
+  p | method_star_maker_use_critical_metallicity;
   p | method_star_maker_use_velocity_divergence;
   p | method_star_maker_use_dynamical_time;
+  p | method_star_maker_use_cooling_time;
   p | method_star_maker_use_self_gravitating;
   p | method_star_maker_use_h2_self_shielding;
   p | method_star_maker_use_jeans_mass;
   p | method_star_maker_number_density_threshold;
+  p | method_star_maker_overdensity_threshold;
+  p | method_star_maker_critical_metallicity;
+  p | method_star_maker_temperature_threshold;
   p | method_star_maker_maximum_mass_fraction;
   p | method_star_maker_efficiency;
   p | method_star_maker_minimum_star_mass;
   p | method_star_maker_maximum_star_mass;
+  p | method_star_maker_min_level;
+  p | method_star_maker_turn_off_probability;
 
   p | method_turbulence_edot;
 
@@ -611,6 +680,11 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_vlct_dual_energy_eta;
 
   p | method_merge_sinks_merging_radius_cells;
+  
+  p | method_accretion_accretion_radius_cells;
+  p | method_accretion_flavor;
+  p | method_accretion_physical_density_threshold_cgs;
+  p | method_accretion_max_mass_fraction;
 
   p | prolong_enzo_type;
   p | prolong_enzo_positive;
@@ -667,6 +741,8 @@ void EnzoConfig::read(Parameters * p) throw()
 
   read_field_(p);
 
+  // Initial [sorted]
+  read_initial_accretion_test_(p);
   read_initial_bcenter_(p);
   read_initial_burkertbodenheimer_(p);
   read_initial_cloud_(p);
@@ -685,7 +761,9 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_shock_tube_(p);
   read_initial_soup_(p);
   read_initial_turbulence_(p);
-  
+
+  // Method [sorted]
+  read_method_accretion_(p);
   read_method_background_acceleration_(p);
   read_method_check_(p);
   read_method_feedback_(p);
@@ -1221,6 +1299,24 @@ void EnzoConfig::read_initial_feedback_test_(Parameters * p)
   initial_feedback_test_density = p->value_float
     ("Initial:feedback_test:density", 1.0E-24);
 
+  initial_feedback_test_HI_density = p->value_float
+    ("Initial:feedback_test:HI_density", 1.0E-24);
+
+  initial_feedback_test_HII_density = p->value_float
+    ("Initial:feedback_test:HII_density", 1.0E-100);
+
+  initial_feedback_test_HeI_density = p->value_float
+    ("Initial:feedback_test:HeI_density", 1.0E-100);
+
+  initial_feedback_test_HeII_density = p->value_float
+    ("Initial:feedback_test:HeII_density", 1.0E-100);
+
+  initial_feedback_test_HeIII_density = p->value_float
+    ("Initial:feedback_test:HeIII_density", 1.0E-100);
+
+  initial_feedback_test_e_density = p->value_float
+    ("Initial:feedback_test:e_density", 1.0E-100);
+
   initial_feedback_test_star_mass = p->value_float
     ("Initial:feedback_test:star_mass", 1000.0);
 
@@ -1238,6 +1334,31 @@ void EnzoConfig::read_initial_merge_sinks_test_(Parameters * p)
 {
   initial_merge_sinks_test_particle_data_filename= p->value_string
     ("Initial:merge_sinks_test:particle_data_filename","");
+}
+
+void EnzoConfig::read_initial_accretion_test_(Parameters * p)
+{
+  for (int axis=0; axis<3; axis++){
+    initial_accretion_test_sink_position[axis] = p->list_value_float
+      (axis, "Initial:accretion_test:sink_position", 0.0);
+  }
+
+  for (int axis=0; axis<3; axis++){
+    initial_accretion_test_sink_velocity[axis] = p->list_value_float
+      (axis, "Initial:accretion_test:sink_velocity", 0.0);
+  }
+
+  initial_accretion_test_sink_mass = p->value_float
+    ("Initial:accretion_test:sink_mass",0.0);
+
+  initial_accretion_test_gas_density = p->value_float
+    ("Initial:accretion_test:gas_density",1.0e-6);
+
+  initial_accretion_test_gas_pressure = p->value_float
+    ("Initial:accretion_test:gas_pressure",1.0e-6);
+
+  initial_accretion_test_gas_radial_velocity = p->value_float
+    ("Initial:accretion_test:gas_radial_velocity",0.0);
 }
 
 void EnzoConfig::read_method_grackle_(Parameters * p)
@@ -1278,7 +1399,6 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
     method_grackle_metallicity_floor = p-> value_float
       ("Method:grackle:metallicity_floor", 0.0);
 
-
     // Set Grackle parameters from parameter file
     method_grackle_chemistry->with_radiative_cooling = p->value_integer
       ("Method:grackle:with_radiative_cooling",
@@ -1303,6 +1423,14 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
     method_grackle_chemistry->cmb_temperature_floor = p->value_integer
       ("Method:grackle:cmb_temperature_floor",
        method_grackle_chemistry->cmb_temperature_floor);
+
+    method_grackle_chemistry->h2_charge_exchange_rate = p->value_integer
+      ("Method:grackle:h2_charge_exchange_rate",
+       method_grackle_chemistry->h2_charge_exchange_rate);
+
+    method_grackle_chemistry->h2_h_cooling_rate = p->value_integer
+      ("Method:grackle:h2_h_cooling_rate",
+       method_grackle_chemistry->h2_h_cooling_rate);
 
     std::string grackle_data_file_ = p->value_string
       ("Method:grackle:data_file", "");
@@ -1412,6 +1540,9 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
 
 void EnzoConfig::read_method_feedback_(Parameters * p)
 {
+  method_feedback_flavor = p->value_string
+    ("Method:feedback:flavor","distributed");
+
   method_feedback_ejecta_mass = p->value_float
     ("Method:feedback:ejecta_mass",0.0);
 
@@ -1438,6 +1569,31 @@ void EnzoConfig::read_method_feedback_(Parameters * p)
 
   method_feedback_use_ionization_feedback = p->value_logical
     ("Method:feedback:use_ionization_feedback", false);
+
+  // MethodFeedbackSTARSS parameters
+  method_feedback_single_sn = p->value_integer
+    ("Method:feedback:single_sn",0);
+
+  method_feedback_unrestricted_sn = p->value_integer
+    ("Method:feedback:unrestricted_sn",0);
+
+  method_feedback_stellar_winds = p->value_integer
+    ("Method:feedback:stellar_winds",0);
+
+  method_feedback_gas_return_fraction = p->value_float
+    ("Method:feedback:gas_return_fraction",0.0);
+
+  method_feedback_min_level = p->value_integer
+    ("Method:feedback:min_level",0);
+
+  method_feedback_analytic_SNR_shell_mass = p->value_integer
+    ("Method:feedback:analytic_SNR_shell_mass",0);
+
+  method_feedback_fade_SNR = p->value_integer
+    ("Method:feedback:fade_SNR",0);
+
+  method_feedback_NEvents = p->value_integer
+    ("Method:feedback:NEvents",-1);
 }
 
 //----------------------------------------------------------------------
@@ -1448,14 +1604,23 @@ void EnzoConfig::read_method_star_maker_(Parameters * p)
   method_star_maker_flavor = p->value_string
     ("Method:star_maker:flavor","stochastic");
 
+  method_star_maker_use_altAlpha = p->value_logical
+    ("Method:star_maker:use_altAlpha",false);
+
   method_star_maker_use_density_threshold = p->value_logical
-    ("Method:star_maker:use_density_threshold",true);
+    ("Method:star_maker:use_density_threshold",false);
+
+  method_star_maker_use_overdensity_threshold = p->value_logical
+    ("Method:star_maker:use_overdensity_threshold",false);
 
   method_star_maker_use_velocity_divergence = p->value_logical
-    ("Method:star_maker:use_velocity_divergence",true);
+    ("Method:star_maker:use_velocity_divergence",false);
 
   method_star_maker_use_dynamical_time = p->value_logical
-    ("Method:star_maker:use_dynamical_time",true);
+    ("Method:star_maker:use_dynamical_time",false);
+
+  method_star_maker_use_cooling_time = p->value_logical
+    ("Method:star_maker:use_cooling_time",false);
 
   method_star_maker_use_self_gravitating = p->value_logical
     ("Method:star_maker:use_self_gravitating", false);
@@ -1466,8 +1631,23 @@ void EnzoConfig::read_method_star_maker_(Parameters * p)
   method_star_maker_use_jeans_mass = p->value_logical
     ("Method:star_maker:use_jeans_mass", false);
 
+  method_star_maker_use_temperature_threshold = p->value_logical
+    ("Method:star_maker:use_temperature_threshold",false);
+
+  method_star_maker_use_critical_metallicity = p->value_logical
+    ("Method:star_maker:use_critical_metallicity",false);
+
   method_star_maker_number_density_threshold = p->value_float
     ("Method:star_maker:number_density_threshold",0.0);
+
+  method_star_maker_overdensity_threshold = p->value_float
+    ("Method:star_maker:overdensity_threshold",0.0);
+
+  method_star_maker_temperature_threshold = p->value_float
+    ("Method:star_maker:temperature_threshold",1.0E4);
+
+  method_star_maker_critical_metallicity = p->value_float
+    ("Method:star_maker:critical_metallicity",0.0);
 
   method_star_maker_maximum_mass_fraction = p->value_float
     ("Method:star_maker:maximum_mass_fraction",0.5);
@@ -1480,6 +1660,12 @@ void EnzoConfig::read_method_star_maker_(Parameters * p)
 
   method_star_maker_maximum_star_mass = p->value_float
     ("Method:star_maker:maximum_star_mass",1.0E4);
+  
+  method_star_maker_min_level = p->value_integer
+    ("Method:star_maker:min_level",0);
+
+  method_star_maker_turn_off_probability = p->value_logical
+    ("Method:star_maker:turn_off_probability",false);
 }
 
 
@@ -1623,10 +1809,27 @@ void EnzoConfig::read_method_heat_(Parameters * p)
     ("Method:heat:alpha",1.0);
 }
 
+//----------------------------------------------------------------------
+
 void EnzoConfig::read_method_merge_sinks_(Parameters * p)
 {
   method_merge_sinks_merging_radius_cells = p->value_float
     ("Method:merge_sinks:merging_radius_cells",8.0);
+}
+
+//----------------------------------------------------------------------
+
+void EnzoConfig::read_method_accretion_(Parameters * p)
+{
+  method_accretion_accretion_radius_cells = p->value_float
+    ("Method:accretion:accretion_radius_cells",4.0);
+  method_accretion_flavor = p->value_string
+    ("Method:accretion:flavor","");
+  method_accretion_physical_density_threshold_cgs = p->value_float
+    ("Method:accretion:physical_density_threshold_cgs",1.0e-24);
+  method_accretion_max_mass_fraction = p->value_float
+    ("Method:accretion:max_mass_fraction",0.25);
+
 }
 
 //----------------------------------------------------------------------
