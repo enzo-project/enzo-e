@@ -268,11 +268,11 @@ intersphinx_mapping = {'http://docs.python.org/': None}
 # to solve the issue related to the tables not wrapping
 html_static_path = ['_static']
 
-# html_context = {
-#     'css_files': [
-#         '_static/theme_overrides.css',  # overrides for wide tables in RTD theme
-#         ],
-#     }
+html_context = {
+    'css_files': [
+        '_static/theme_overrides.css',  # overrides for wide tables in RTD theme
+        ],
+    }
 
 # -- Set Breathe parameters and Execute Doxygen -------------------------------
 
