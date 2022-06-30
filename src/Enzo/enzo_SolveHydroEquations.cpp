@@ -71,9 +71,6 @@ int EnzoBlock::SolveHydroEquations
 
   }
 
-  // No subgrids, so colindex is NULL
-  int *colindex         = NULL;
-
   /* Compute size (in enzo_floats) of the current grid. */
 
   int rank = cello::rank();
@@ -174,6 +171,7 @@ int EnzoBlock::SolveHydroEquations
   int *vindex    = p; p+=3*2;
   int *windex    = p; p+=3*2;
   int *geindex   = p; p+=3*2;
+  int *colindex  = p; p+=3*2*ncolor;
 
   // Offsets computed from the "standard" pointer to the start of each
   // flux data
@@ -196,7 +194,8 @@ int EnzoBlock::SolveHydroEquations
   long long min=std::numeric_limits<long long>::max();
   long long max=std::numeric_limits<long long>::lowest();
 #endif  
-  
+ 
+  index_color = 0; 
   for (int i_f=0; i_f<nf; i_f++) {
     int * flux_index = 0;
     const int index_field = flux_data->index_field(i_f);
@@ -208,6 +207,11 @@ int EnzoBlock::SolveHydroEquations
     if (field_name == "velocity_z")      flux_index = windex;
     if (field_name == "total_energy")    flux_index = Eindex;
     if (field_name == "internal_energy") flux_index = geindex;
+    
+    if (field.groups()->is_in(field_name,"color")) {
+      flux_index = colindex + 3*2*index_color;
+      index_color++;
+    }
 
     for (int axis=0; axis<rank; axis++) {
       leftface[axis] = l3[axis];

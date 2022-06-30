@@ -254,6 +254,9 @@ protected:
     return dir;
   }
 
+  /// write version metadata to disk
+  void write_version_metadata() { cello::io::write_version_metadata(file_); }
+
 private:
 
   /// "Loop" over writing the Hierarchy in the Simulation

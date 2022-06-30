@@ -101,6 +101,10 @@ public: // interface
   /// @param[in]  passive_list A list of keys for passive scalars. These keys
   ///     will be used to determine which quantities will be copied from the
   ///     integration_map to the primitive_map.
+  /// @param[in]  ignore_grackle indicates whether to ignore the Grackle
+  ///     routine for computing pressure, (only meaningful if grackle is
+  ///     used in other operations). This is primarily useful for ignoring
+  ///     the effects of molecular hydrogen on the adiabtic index.
   ///
   /// Non-passive scalar quantities appearing in both `integration_map` and
   /// `primitive_map` are simply deepcopied and passive scalar quantities are
@@ -112,7 +116,8 @@ public: // interface
   /// for this operation.
   virtual void primitive_from_integration
   (const EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &primitive_map,
-   const int stale_depth, const str_vec_t &passive_list) const =0;
+   const int stale_depth, const str_vec_t &passive_list,
+   const bool ignore_grackle = false) const =0;
 
   /// Computes thermal pressure from integration quantities
   /// 
@@ -122,13 +127,16 @@ public: // interface
   /// @param[out] pressure Array where the thermal pressure is to be stored
   /// @param[in]  stale_depth indicates the current stale_depth for the
   ///     supplied cell-centered quantities
+  /// @param[in]  ignore_grackle indicates whether to ignore the Grackle
+  ///     routine for computing pressure, (only meaningful if grackle is
+  ///     used in other operations). This is primarily useful for ignoring
+  ///     the effects of molecular hydrogen on the adiabtic index.
   ///
-  /// This nominally should wrap EnzoComputePressure. But at the time of
-  /// writing, it doesn't actually wrap EnzoComputePressure
+  /// This nominally wraps EnzoComputePressure.
   virtual void pressure_from_integration
   (const EnzoEFltArrayMap &integration_map,
    const CelloArray<enzo_float, 3> &pressure,
-   const int stale_depth) const = 0;
+   const int stale_depth, const bool ignore_grackle = false) const = 0;
 
   /// returns the density floor
   virtual enzo_float get_density_floor() const = 0;

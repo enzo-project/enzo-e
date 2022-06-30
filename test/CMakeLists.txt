@@ -163,6 +163,7 @@ setup_test_parallel(Performance-Initial-PNG  Performance/InitialPng   input/Hell
 # PPM
 setup_test_serial(PPM-1 MethodPPM/Ppm-1  input/PPM/method_ppm-1.in)
 setup_test_parallel(PPM-8 MethodPPM/Ppm-8  input/PPM/method_ppm-8.in)
+setup_test_serial(PPM-1_color MethodPPM/Ppm-1_color  input/PPM/method_ppm-1_color.in)
 
 if (USE_YT_BASED_TESTS)
   # VLCT
@@ -182,6 +183,14 @@ if (USE_YT_BASED_TESTS)
   setup_test_serial_python(merge_sinks_drift_serial merge_sinks/drift/serial "input/merge_sinks/run_merge_sinks_test.py" "--prec=${PREC_STRING}" "--ics_type=drift")
   setup_test_parallel_python(merge_sinks_drift_parallel merge_sinks/drift/parallel "input/merge_sinks/run_merge_sinks_test.py" "--prec=${PREC_STRING}" "--ics_type=drift")
 
+  # accretion
+  setup_test_serial_python(threshold_accretion_serial accretion/threshold/serial "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=threshold")
+  setup_test_parallel_python(threshold_accretion_parallel accretion/threshold/parallel "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=threshold")
+  setup_test_serial_python(bondi_hoyle_accretion_serial accretion/bondi_hoyle/serial "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=bondi_hoyle")
+  setup_test_parallel_python(bondi_hoyle_accretion_parallel accretion/bondi_hoyle/parallel "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=bondi_hoyle")
+  setup_test_serial_python(flux_accretion_serial accretion/flux/serial "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=flux")
+  setup_test_parallel_python(flux_accretion_parallel accretion/flux/parallel "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=flux")
+  
 endif()
 
 # Grackle tests

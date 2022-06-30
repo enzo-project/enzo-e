@@ -192,8 +192,13 @@ EnzoConfig::EnzoConfig() throw ()
   initial_IG_recent_SF_bin_size(5.0),
   initial_IG_recent_SF_SFR(2.0),
   initial_IG_recent_SF_seed(12345),  
-  // EnzoInitialMergeStarsTest
+  // EnzoInitialMergeSinksTest
   initial_merge_sinks_test_particle_data_filename(""),
+  // EnzoInitialAccretionTest
+  initial_accretion_test_sink_mass(0.0),
+  initial_accretion_test_gas_density(0.0),
+  initial_accretion_test_gas_pressure(0.0),
+  initial_accretion_test_gas_radial_velocity(0.0),
   // EnzoMethodHeat
   method_heat_alpha(0.0),
   // EnzoMethodHydro
@@ -236,6 +241,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_grackle_chemistry(),
   method_grackle_use_cooling_timestep(false),
   method_grackle_radiation_redshift(-1.0),
+  method_grackle_metallicity_floor(0.0),
 #endif
   // EnzoMethodGravity
   method_gravity_grav_const(0.0),
@@ -269,8 +275,13 @@ EnzoConfig::EnzoConfig() throw ()
   method_vlct_mhd_choice(""),
   method_vlct_dual_energy(false),
   method_vlct_dual_energy_eta(0.0),
-  /// EnzoMethodMergeStars
+  /// EnzoMethodMergeSinks
   method_merge_sinks_merging_radius_cells(0.0),
+  /// EnzoMethodAccretionCompute
+  method_accretion_accretion_radius_cells(0.0),
+  method_accretion_flavor(""),
+  method_accretion_physical_density_threshold_cgs(0.0),
+  method_accretion_max_mass_fraction(0.0),
   /// EnzoProlong
   prolong_enzo_type(),
   prolong_enzo_positive(true),
@@ -403,6 +414,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_grackle_test_minimum_metallicity;
   p | initial_grackle_test_maximum_metallicity;
   p | initial_grackle_test_reset_energies;
+
 #endif /* CONFIG_USE_GRACKLE */
 
   p | initial_inclinedwave_alpha;
@@ -528,6 +540,13 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | initial_merge_sinks_test_particle_data_filename;
 
+  PUParray(p,initial_accretion_test_sink_position,3);
+  PUParray(p,initial_accretion_test_sink_velocity,3);
+  p | initial_accretion_test_sink_mass;
+  p | initial_accretion_test_gas_density;
+  p | initial_accretion_test_gas_pressure;
+  p | initial_accretion_test_gas_radial_velocity;
+
   p | method_heat_alpha;
 
   p | method_hydro_method;
@@ -598,6 +617,11 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_vlct_dual_energy_eta;
 
   p | method_merge_sinks_merging_radius_cells;
+  
+  p | method_accretion_accretion_radius_cells;
+  p | method_accretion_flavor;
+  p | method_accretion_physical_density_threshold_cgs;
+  p | method_accretion_max_mass_fraction;
 
   p | prolong_enzo_type;
   p | prolong_enzo_positive;
@@ -627,6 +651,7 @@ void EnzoConfig::pup (PUP::er &p)
   if (method_grackle_use_grackle) {
     p  | method_grackle_use_cooling_timestep;
     p  | method_grackle_radiation_redshift;
+    p  | method_grackle_metallicity_floor;
     if (p.isUnpacking()) { method_grackle_chemistry = new chemistry_data; }
     p | *method_grackle_chemistry;
   } else {
@@ -671,6 +696,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_isolated_galaxy_(p);
   read_initial_feedback_test_(p);
   read_initial_merge_sinks_test_(p);
+  read_initial_accretion_test_(p);
   
   read_method_grackle_(p);
   read_method_feedback_(p);
@@ -684,6 +710,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_ppm_(p);
   read_method_turbulence_(p);
   read_method_merge_sinks_(p);
+  read_method_accretion_(p);
   
   read_physics_(p);
   
@@ -1223,6 +1250,31 @@ void EnzoConfig::read_initial_merge_sinks_test_(Parameters * p)
     ("Initial:merge_sinks_test:particle_data_filename","");
 }
 
+void EnzoConfig::read_initial_accretion_test_(Parameters * p)
+{
+  for (int axis=0; axis<3; axis++){
+    initial_accretion_test_sink_position[axis] = p->list_value_float
+      (axis, "Initial:accretion_test:sink_position", 0.0);
+  }
+
+  for (int axis=0; axis<3; axis++){
+    initial_accretion_test_sink_velocity[axis] = p->list_value_float
+      (axis, "Initial:accretion_test:sink_velocity", 0.0);
+  }
+
+  initial_accretion_test_sink_mass = p->value_float
+    ("Initial:accretion_test:sink_mass",0.0);
+
+  initial_accretion_test_gas_density = p->value_float
+    ("Initial:accretion_test:gas_density",1.0e-6);
+
+  initial_accretion_test_gas_pressure = p->value_float
+    ("Initial:accretion_test:gas_pressure",1.0e-6);
+
+  initial_accretion_test_gas_radial_velocity = p->value_float
+    ("Initial:accretion_test:gas_radial_velocity",0.0);
+}
+
 void EnzoConfig::read_method_grackle_(Parameters * p)
 
 {
@@ -1256,6 +1308,11 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
     // for when not using cosmology - redshift of UVB
     method_grackle_radiation_redshift = p->value_float
       ("Method:grackle:radiation_redshift", -1.0);
+
+    // set a metallicity floor
+    method_grackle_metallicity_floor = p-> value_float
+      ("Method:grackle:metallicity_floor", 0.0);
+
 
     // Set Grackle parameters from parameter file
     method_grackle_chemistry->with_radiative_cooling = p->value_integer
@@ -1572,10 +1629,27 @@ void EnzoConfig::read_method_heat_(Parameters * p)
     ("Method:heat:alpha",1.0);
 }
 
+//----------------------------------------------------------------------
+
 void EnzoConfig::read_method_merge_sinks_(Parameters * p)
 {
   method_merge_sinks_merging_radius_cells = p->value_float
     ("Method:merge_sinks:merging_radius_cells",8.0);
+}
+
+//----------------------------------------------------------------------
+
+void EnzoConfig::read_method_accretion_(Parameters * p)
+{
+  method_accretion_accretion_radius_cells = p->value_float
+    ("Method:accretion:accretion_radius_cells",4.0);
+  method_accretion_flavor = p->value_string
+    ("Method:accretion:flavor","");
+  method_accretion_physical_density_threshold_cgs = p->value_float
+    ("Method:accretion:physical_density_threshold_cgs",1.0e-24);
+  method_accretion_max_mass_fraction = p->value_float
+    ("Method:accretion:max_mass_fraction",0.25);
+
 }
 
 //----------------------------------------------------------------------

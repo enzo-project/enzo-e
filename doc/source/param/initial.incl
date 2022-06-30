@@ -43,6 +43,84 @@ value
 	       
 :e:`is read as "Set the density field equal to` :p:`sin ( x + y )` :e:`wherever` :p:`x - y < 0.0` :e:`, otherwise set to` :p:`1.0` :e:`".`
 
+accretion_test
+--------------
+
+The :p:`accretion_test` Initial subgroup is used to initialize an accretion test problem.
+In particular, it initializes a single sink particle with a given initial mass, position,
+and velocity, in a background medium with constant density and pressure, and (possibly) an
+initial velocity field with constant magnitude, directed towards the sink particle's initial
+position. Running this test problem requires the use of the "mhd_vlct", "pm_update",
+"merge_sinks", and "accretion" methods. One can then test the accretion method by checking
+whether mass and momentum are conserved in this problem.
+
+This initializer requires periodic boundary conditions, and three spatial dimensions.
+
+Note: sink particles must have a ``"mass"`` attribute if this initializer is
+used.
+
+:Parameter:  :p:`Initial` : :p:`accretion` : :p:`sink_mass`
+:Summary: :s:`The initial mass of the sink particle.`
+:Type:    :t:`float`
+:Default: :d:`0.0`
+:Scope:   Enzo
+
+:e:`The initial mass of the sink particle`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`accretion` : :p:`sink_position`
+:Summary: :s:`The initial position of the sink particle.`
+:Type:    :t:`list` ( :t:`float` )
+:Default: :d:`[0.0,0.0,0.0]`
+:Scope:   Enzo
+
+:e:`The initial (3D) position of the sink particle`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`accretion` : :p:`sink_velocity`
+:Summary: :s:`The initial velocity of the sink particle.`
+:Type:    :t:`list` ( :t:`float` )
+:Default: :d:`[0.0,0.0,0.0]`
+:Scope:   Enzo
+
+:e:`The initial (3D) velocity of the sink particle`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`accretion` : :p:`gas_density`
+:Summary: :s:`The initial uniform density of the gas.`
+:Type:    :t:`float`
+:Default: :d:`1.0e-6`
+:Scope:   Enzo
+
+:e:`The initial uniform density of the gas.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`accretion` : :p:`gas_pressure`
+:Summary: :s:`The initial uniform pressure of the gas.`
+:Type:    :t:`float`
+:Default: :d:`1.0e-6`
+:Scope:   Enzo
+
+:e:`The initial uniform pressure of the gas.`
+
+----
+
+
+:Parameter:  :p:`Initial` : :p:`accretion` : :p:`gas_radial_velocity`
+:Summary: :s:`The (inwards) radial velocity of the gas, with respect to the initial sink particle
+              position.`
+:Type:    :t:`float`
+:Default: :d:`0.0`
+:Scope:   Enzo
+
+:e:`The gas velocity in every cell with have magnitude equal to the value of this parameter, directed towards the initial sink particle position.`
+
+----
+
 cloud
 -----
 
@@ -442,6 +520,9 @@ other quantities) when running with the `"merge_sinks"` method. The data are
 assumed to be arranged into seven columns, corresponding to mass, the x,y,z
 coordinates and the x,y,z-components of velocity, respectively. Each row
 corresponds to one sink particle.
+
+Note: sink particles must have a ``"mass"`` attribute if this initializer is
+used.
 
 :Parameter:  :p:`Initial` : :p:`merge_sinks_test` : :p:`particle_data_filename`
 :Summary: :s:`Name of the file to read from.`

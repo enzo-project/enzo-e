@@ -47,7 +47,12 @@ commands:
             pip install --upgrade pip
             pip install --upgrade wheel
             pip install --upgrade setuptools
-            pip install Cython numpy h5py matplotlib libconf yt pytest
+            pip install Cython numpy h5py matplotlib libconf pytest
+
+            # Install yt from source
+            git clone https://github.com/yt-project/yt.git $HOME/yt
+            cd $HOME/yt
+            pip install -e .
 
   install-grackle:
     description: "Install grackle."
@@ -222,6 +227,8 @@ jobs:
 
     docker:
       - image: cimg/python:3.10
+
+    resource_class: large
 
     working_directory: ~/enzo-e
 
