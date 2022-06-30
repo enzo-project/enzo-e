@@ -29,10 +29,10 @@ public: // interface
       metal_mass_frac_(0.0)
   {}
 
-  EnzoFluidFloorConfig(enzo_float density_floor,
-                       enzo_float pressure_floor,
-                       enzo_float temperature_floor,
-                       enzo_float metal_mass_frac)
+  EnzoFluidFloorConfig(double density_floor,
+                       double pressure_floor,
+                       double temperature_floor,
+                       double metal_mass_frac)
     : density_(density_floor),
       pressure_(pressure_floor),
       temperature_(temperature_floor),
@@ -45,13 +45,25 @@ public: // interface
   bool has_metal_mass_frac_floor() const noexcept
   { return metal_mass_frac_ > 0; }
 
+  /// query the density floor. The value is always returned in double precision
+  ///
+  /// This is only present as a short-term solution. We should remove this
+  /// method in the near future.
+  double density_dbl_prec() const noexcept
+  {
+    ASSERT("EnzoFluidFloorConfig::density_prec",
+           "this instance does not hold a density floor",
+           has_density_floor());
+    return density_;
+  }
+
   /// query the density floor. The program aborts if it is not set.
   enzo_float density() const noexcept
   {
     ASSERT("EnzoFluidFloorConfig::density",
            "this instance does not hold a density floor",
            has_density_floor());
-    return density_;
+    return static_cast<enzo_float>(density_);
   }
 
   /// query the pressure floor. The program aborts if it is not set.
@@ -90,7 +102,7 @@ public: // interface
 
 private: // attributes
 
-  enzo_float density_;
+  double density_;
   enzo_float pressure_;
   enzo_float temperature_;
   enzo_float metal_mass_frac_;

@@ -246,8 +246,13 @@ void EnzoMethodAccretion::do_checks_(const Block *block) throw()
 	   enzo::problem()->method_exists("ppm"));
 
     // Check if density threshold is at least as large as the density floor
+    //
+    // The use of the density_dbl_prec() method is a short term hack to always
+    // return the density floor in double precision.
+    // TODO: refactor this method to use the density() method instead (which
+    // returns the floor in a precision of enzo_float)
     const double density_floor =
-      enzo::fluid_props()->fluid_floor_config().density();
+      enzo::fluid_props()->fluid_floor_config().density_dbl_prec();
 
     // Get density threshold in code units.
     // In a cosmological simulation, the density unit is the mean matter density
@@ -257,6 +262,13 @@ void EnzoMethodAccretion::do_checks_(const Block *block) throw()
     // guaranteed to be abolve the density floor at all times.
     const double density_threshold =
       physical_density_threshold_cgs_ / enzo::units()->density();
+
+    CkPrintf("physical_density_threshold_cgs_ = %.15e\n"
+             "density_units = %.15e\n"
+             "density_floor = %.15e\n",
+             physical_density_threshold_cgs_,
+             enzo::units()->density(),
+             density_floor);
 
     ASSERT2("EnzoMethodAccretion",
 	    "Density threshold must be at least as large as the density "
