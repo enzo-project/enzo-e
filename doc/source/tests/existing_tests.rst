@@ -6,6 +6,7 @@ Currently, the Enzo-e ``ctest`` infrastructure includes:
 
 .. toctree::
    accretion-cmake
+   bb_test-cmake
    array-cmake
    error-cmake
    memory-cmake
@@ -22,6 +23,7 @@ Currently, the Enzo-e ``ctest`` infrastructure includes:
    output-cmake
    particle-cmake
    ppm-cmake
+   shu_collapse-cmake
    vlct-cmake
 
 
@@ -34,6 +36,7 @@ Currently, Enzo-e has the following test simulations in the input folder:
    accretion
    adapt
    balance
+   bb_test
    boundary
    checkpoint
    collapse
@@ -56,6 +59,7 @@ Currently, Enzo-e has the following test simulations in the input folder:
    ppm
    ppml
    sedov
+   shu_collapse
    vlct
    others
 
