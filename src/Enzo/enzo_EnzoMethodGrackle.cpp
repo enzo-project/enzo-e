@@ -403,7 +403,8 @@ void EnzoMethodGrackle::update_grackle_density_fields(
 
   chemistry_data * grackle_chemistry =
     enzo::config()->method_grackle_chemistry;
-  double metallicity_floor_ = enzo::config()->method_grackle_metallicity_floor;
+  double metallicity_floor_ =
+    enzo::fluid_props()->fluid_floor_config().metal_mass_frac();
 
   for (int iz = 0; iz<ngz; iz++){
     for (int iy=0; iy<ngy; iy++){
