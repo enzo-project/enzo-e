@@ -231,7 +231,6 @@ void EnzoSolverMg0::apply ( std::shared_ptr<Matrix> A, Block * block) throw()
   Sync * sync_prolong = psync_prolong(block);
 
   sync_prolong->set_stop(1 + 1); // self and parent
-
   enter_solver_ (enzo_block);
 }
 
@@ -281,7 +280,6 @@ void EnzoSolverMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
 
     enzo_block->contribute(2*sizeof(long double), &reduce,
 			   sum_long_double_2_type, callback);
-
   } else {
 
     SOLVER_CONTROL(enzo_block,"min","max","2 calling begin_solve_2 (no shift)");
@@ -316,7 +314,6 @@ void EnzoSolverMg0::compute_shift_
 void EnzoBlock::r_solver_mg0_begin_solve(CkReductionMsg* msg)
 {
   performance_start_(perf_compute,__FILE__,__LINE__);
-
   static_cast<EnzoSolverMg0*> (solver())->begin_solve(this,msg);
 
   performance_stop_(perf_compute,__FILE__,__LINE__);

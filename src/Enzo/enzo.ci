@@ -87,6 +87,7 @@ module enzo {
   PUPable EnzoMethodBackgroundAcceleration;
   PUPable EnzoMethodFeedback;
   PUPable EnzoMethodDistributedFeedback;
+  PUPable EnzoMethodFeedbackSTARSS;
 
   PUPable EnzoMethodComovingExpansion;
   PUPable EnzoMethodCosmology;
@@ -115,6 +116,7 @@ module enzo {
 
   PUPable EnzoMethodStarMaker;
   PUPable EnzoMethodStarMakerStochasticSF;
+  PUPable EnzoMethodStarMakerSTARSS;
   PUPable EnzoBfieldMethodCT;
 
   PUPable EnzoPhysicsCosmology;
@@ -161,7 +163,10 @@ module enzo {
     entry EnzoBlock (MsgRefine * msg);
 #endif
     entry EnzoBlock();
-
+ 
+    // EnzoMethodFeedbackSTARSS synchronization entry methods
+    entry void p_method_feedback_starss_end();
+  
     // EnzoMethodTurbulence synchronization entry methods
     entry void r_method_turbulence_end(CkReductionMsg *msg);
 

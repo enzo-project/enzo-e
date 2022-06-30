@@ -69,7 +69,7 @@ c
 
 !     write(0,*) npositions, leftedge, dim1, dim2, dim3, cellsize
 
-      print*, 'cic_deposit.F mass(1)=',mass(1)
+c      print*, 'cic_deposit.F mass(1)=',mass(1)
       fact = 1._PKIND/cellsize
       refine = cellsize/cloudsize
       half = 0.5001_PKIND/refine
@@ -155,7 +155,7 @@ c
          do n=1, npositions
 c     
 c     Compute the position of the central cell
-c     
+c    
             xpos = min(max((posx(n) - leftedge(1))*fact, half),edge1)
             ypos = min(max((posy(n) - leftedge(2))*fact, half),edge2)
             zpos = min(max((posz(n) - leftedge(3))*fact, half),edge3)
@@ -175,7 +175,7 @@ c
 c     
 c     Interpolate from field into sumfield
 c
-C            print*, 'DEBUG_CIC',dx,dy,dz
+c            print*, 'DEBUG_CIC ',dx,dy,dz,i1,j1,k1,field(i1,j1,k1)
             field(i1  ,j1  ,k1  ) = field(i1  ,j1  ,k1  ) +
      &              mass(n)*     dx *     dy *    dz
             field(i1+1,j1  ,k1  ) = field(i1+1,j1  ,k1  ) +
@@ -195,7 +195,6 @@ C            print*, 'DEBUG_CIC',dx,dy,dz
 
 c     
          enddo
-      
       endif
 c
       return

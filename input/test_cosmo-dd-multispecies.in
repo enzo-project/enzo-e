@@ -72,7 +72,7 @@ Method {
 
 
 Output {
-     list = ["hdf5"];
+     list = ["hdf5","de"];
      hdf5 {
           dir = ["Dir_COSMO_MULTI_%04d","cycle"];
           field_list += ["HI_density",
@@ -86,16 +86,6 @@ Output {
 	                 "temperature"];
         }
      de   { dir = [ "Dir_COSMO_MULTI_%04d", "cycle" ]; }
-     depa { dir = [ "Dir_COSMO_MULTI_%04d", "cycle" ]; }
-     ax   { dir = [ "Dir_COSMO_MULTI_%04d", "cycle" ]; }
-     ay   { dir = [ "Dir_COSMO_MULTI_%04d", "cycle" ]; }
-     az   { dir = [ "Dir_COSMO_MULTI_%04d", "cycle" ]; }
-     dark { dir = [ "Dir_COSMO_MULTI_%04d", "cycle" ]; }
-     mesh { dir = [ "Dir_COSMO_MULTI_%04d", "cycle" ]; }
-     po   { dir = [ "Dir_COSMO_MULTI_%04d", "cycle" ]; }
-     hdf5 { dir = [ "Dir_COSMO_MULTI_%04d", "cycle" ]; }
-     dep  { dir = [ "Dir_COSMO_MULTI_%04d", "cycle" ]; }
-     check { dir = [ "Dir_COSMO_MULTI_%04d-checkpoint", "count" ]; }
 }
 
 Stopping {cycle = 160;}
