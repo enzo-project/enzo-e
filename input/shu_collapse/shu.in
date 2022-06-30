@@ -1,0 +1,159 @@
+ Adapt {
+     max_level = 0;
+     min_level = 0;
+ }
+
+ Boundary {
+     type = "periodic";
+ }
+
+
+Domain {
+     lower = [ -1.0e17, -1.0e17, -1.0e17];
+     rank = 3;
+     upper = [ 1.0e17, 1.0e17, 1.0e17 ];
+ }
+
+ Field {
+     alignment = 8;
+     gamma = 1.0000001;
+     ghost_depth = 4;
+     courant = 0.3;
+     history = 1;
+     list = [ "density", "velocity_x", "velocity_y", "velocity_z",
+	      "acceleration_x", "acceleration_y", "acceleration_z",
+	      "total_energy", "internal_energy","pressure", "density_gas",
+	      "density_particle",
+	      "density_total", "density_particle_accumulate",
+	      "potential", "potential_temp", "potential_copy",
+	      "X", "B", "X_copy", "B_copy" ,"particle_mass",
+	      "density_source","density_source_accumulate",
+	      "mom_dens_x_source","mom_dens_x_source_accumulate",
+	      "mom_dens_y_source","mom_dens_y_source_accumulate",
+	      "mom_dens_z_source","mom_dens_z_source_accumulate"];
+     padding = 0;
+     dual_energy = false;
+     diffusion = true;
+ }
+
+ Initial {
+     shu_collapse {
+       # parameters from Federrath (2010)
+	 center = [0.0,0.0,0.0];
+	 drift_velocity = [0.0,0.0,0.0];
+	 truncation_radius = 5.0e16;
+	 nominal_sound_speed = 1.66e4;
+	 instability_parameter = 29.3;
+	 external_density = 1.0e-20;
+	 central_sink_exists = false;
+     };
+     list = [ "shu_collapse" ];
+ }
+
+ Mesh {
+     root_blocks = [4,4,4];
+     root_rank = 3;
+     root_size = [32,32,32];
+     #root_size = [128,128,128];
+ }
+
+
+Particle {
+    list = ["sink"];
+    mass_is_mass = true;
+    sink {
+	 attributes = ["x", "default",
+		       "y", "default",
+		       "z", "default",
+                       "vx", "default",
+                       "vy", "default",
+                       "vz", "default",
+                       "ax", "default",
+                       "ay", "default",
+                       "az", "default",
+                       "mass", "default",
+		       "lifetime" , "default",
+		       "creation_time", "default",
+		       "accretion_rate", "default",
+		       "is_copy", "int64",
+		       "id" , "int64"];
+        position = [ "x", "y", "z" ];
+        velocity = [ "vx", "vy", "vz" ];
+        group_list = ["is_gravitating"];
+    }
+}
+
+
+ Method {
+      list = ["pm_deposit","gravity","mhd_vlct",
+              "sink_maker","pm_update","merge_sinks","accretion"];
+
+      pm_deposit {
+          alpha = 0.0;
+      };
+
+	gravity {
+          solver = "cg";
+      };
+
+      mhd_vlct {
+	    courant = 0.3;
+            mhd_choice = "no_bfield";
+	    density_floor = 1.0e-200;
+	    pressure_floor = 1.0e-200;
+	    riemann_solver = "hllc";
+      };
+
+     pm_update {
+         max_dt = 1e10;
+      };
+
+     # default parameter values for merge_sinks
+
+     sink_maker {
+     physical_density_threshold_cgs = 1.0e-24;
+     max_offset_cell_fraction = 0.1;
+     offset_seed_shift = 123;
+     };
+
+     accretion {
+	flavor = "threshold";
+	physical_density_threshold_cgs = 1.0e-24;
+	max_mass_fraction = 0.25;
+	accretion_radius_cells = 3.0;
+     };
+ }
+
+ Output {
+
+     data {
+         dir = [ "./Dir_%04d", "cycle" ];
+         field_list = [ "density","velocity_x","velocity_y","velocity_z"];
+	 particle_list = ["sink"];
+         name = [ "data-%04d-%04d.h5", "cycle", "proc" ];
+         schedule {
+             step = 1.0e11;
+	     #step = 1.0e10;
+             var = "time";
+         };
+         type = "data";
+     };
+
+     list = ["data"];
+
+ }
+
+ Solver {
+     cg {
+         iter_max = 1000;
+         monitor_iter = 25;
+	 res_tol = 1e-6;
+         #res_tol = 1e-14;
+         type = "cg";
+     };
+     list = [ "cg" ];
+ }
+
+ Stopping {
+	time = 1e12;
+ }

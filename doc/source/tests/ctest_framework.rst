@@ -26,6 +26,9 @@ when configuring your build.
 
 In order to run a test separately from the main ``ctest`` infrastructure write ``bin/enzo-e`` followed be the location of the test to be run in the main enzo directory. For example, ``bin/enzo-e input/Cosmology/method_cosmology-1.in`` runs the method_cosmology-1 test. Some tests are intended to run on multiple processors, for these tests the number of processors must be specified like so ``charmrun +p4 bin/enzo-e input/Cosmology/method_cosmology-8.in``, this runs the method_cosmology-8 test on four processors, a test designed to be run on multiple processors in parallel. If charmrun command is not in your path charmrun's path must also be included:  ``~/Charm/bin/charmrun +p4 bin/enzo-e input/Cosmology/method_cosmology-8.in``.
 
+In order to exclude the ``"shu_collapse"`` and ``"bb_test"`` tests (as is done when running
+the tests on CircleCI, execute the following command: ``ctest -E "(shu_collapse)|(bb_test)"``.
+
 
 How to Analyse the Test Results
 ===============================
@@ -37,3 +40,4 @@ By default all tests will be run and the output is stored in the `test` director
 If an integration test fails in start-up this implies that there is something wrong with how the test is set up either as an error in the ``test/CMakeLists.txt`` file that calls the test or that the test has an undefined parameter. If a test fails while running this indicates that the feature being tested does not work.
 
 In order to see what happened during the test, you can look at the output directory of the test, which is located in a subdirectory (named after the test) in the ``test`` directory of the build directory, for example ``method_cosmology-1.in`` the test results are stored in ``test/MethodCosmology/Cosmology-8``. This directory also contains all outputs (image and data files).
+

@@ -202,6 +202,8 @@ extern "C" {
 #include "enzo_EnzoInitialBurkertBodenheimer.hpp"
 #include "enzo_EnzoInitialMergeSinksTest.hpp"
 #include "enzo_EnzoInitialAccretionTest.hpp"
+#include "enzo_EnzoInitialShuCollapse.hpp"
+#include "enzo_EnzoInitialBBTest.hpp"
 
 #include "enzo_EnzoRefineShock.hpp"
 #include "enzo_EnzoRefineParticleMass.hpp"
@@ -258,6 +260,7 @@ extern "C" {
 #include "enzo_EnzoMethodPmUpdate.hpp"
 #include "enzo_EnzoMethodPpm.hpp"
 #include "enzo_EnzoMethodPpml.hpp"
+#include "enzo_EnzoMethodSinkMaker.hpp"
 #include "enzo_EnzoMethodStarMaker.hpp"
 #include "enzo_EnzoMethodStarMakerSTARSS.hpp"
 #include "enzo_EnzoMethodStarMakerStochasticSF.hpp"

@@ -48,6 +48,7 @@ module enzo {
   PUPable EnzoInitialGrackleTest;
 #endif
   PUPable EnzoInitialAccretionTest;
+  PUPable EnzoInitialBBTest;
   PUPable EnzoInitialBCenter;
   PUPable EnzoInitialBurkertBodenheimer;
   PUPable EnzoInitialCloud;
@@ -66,6 +67,7 @@ module enzo {
   PUPable EnzoInitialSedovArray3;
   PUPable EnzoInitialSedovRandom;
   PUPable EnzoInitialShockTube;
+  PUPable EnzoInitialShuCollapse;
   PUPable EnzoInitialSoup;
   PUPable EnzoInitialTurbulence;
 
@@ -113,6 +115,7 @@ module enzo {
   PUPable EnzoMethodPmUpdate;
   PUPable EnzoMethodPpm;
   PUPable EnzoMethodPpml;
+  PUPable EnzoMethodSinkMaker;
   PUPable EnzoMethodThresholdAccretion;
   PUPable EnzoMethodTurbulence;
 

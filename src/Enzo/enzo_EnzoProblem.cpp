@@ -264,6 +264,28 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_accretion_test_gas_density,
        enzo_config->initial_accretion_test_gas_pressure,
        enzo_config->initial_accretion_test_gas_radial_velocity);
+  } else if (type == "shu_collapse") {
+    initial = new EnzoInitialShuCollapse
+      (cycle, time,
+       enzo_config->initial_shu_collapse_center,
+       enzo_config->initial_shu_collapse_drift_velocity,
+       enzo_config->initial_shu_collapse_truncation_radius,
+       enzo_config->initial_shu_collapse_nominal_sound_speed,
+       enzo_config->initial_shu_collapse_instability_parameter,
+       enzo_config->initial_shu_collapse_external_density,
+       enzo_config->initial_shu_collapse_central_sink_exists,
+       enzo_config->initial_shu_collapse_central_sink_mass);
+  } else if (type == "bb_test") {
+    initial = new EnzoInitialBBTest
+      (cycle, time,
+       enzo_config->initial_bb_test_center,
+       enzo_config->initial_bb_test_drift_velocity,
+       enzo_config->initial_bb_test_mean_density,
+       enzo_config->initial_bb_test_fluctuation_amplitude,
+       enzo_config->initial_bb_test_truncation_radius,
+       enzo_config->initial_bb_test_nominal_sound_speed,
+       enzo_config->initial_bb_test_angular_rotation_velocity,
+       enzo_config->initial_bb_test_external_density);
   } else {
     initial = Problem::create_initial_
       (type,index,config,parameters);
@@ -772,6 +794,17 @@ Method * EnzoProblem::create_method_
 	     "\"threshold\", \"bondi_hoyle\", \"flux\", or \"dummy\"",
 	     enzo_config->method_accretion_flavor.c_str());
     }
+  } else if (name == "sink_maker") {
+
+    method = new EnzoMethodSinkMaker(
+			enzo_config->method_sink_maker_jeans_length_resolution_cells,
+			enzo_config->method_sink_maker_physical_density_threshold_cgs,
+			enzo_config->method_sink_maker_check_density_maximum,
+			enzo_config->method_sink_maker_max_mass_fraction,
+			enzo_config->method_sink_maker_min_sink_mass_solar,
+			enzo_config->method_sink_maker_max_offset_cell_fraction,
+			enzo_config->method_sink_maker_offset_seed_shift
+				     );
   } else {
 
     // Fallback to Cello method's

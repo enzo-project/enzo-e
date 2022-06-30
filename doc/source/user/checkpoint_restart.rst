@@ -37,6 +37,15 @@ cycle.
 See the ``input/Checkpoint/test_cosmo-checkpoint.in`` parameter
 file for a working example of writing checkpoint directories.
 
+
+.. note::
+   Currently, there is a restriction that the domain blocking must
+   be square (2D) or cubical (3D), have a power-of-two blocking along
+   the axes, and the ``Adapt:min_level`` parameter must
+   be set such that the coarsest (negative) level is a single block.
+   For example, if ``Mesh:root_blocks = [ 16, 16, 16]``, then
+   ``Adapt:min_level`` must be initialized to ``4`` ( :math:`= log_2 16` ).
+
 =======
 Restart
 =======
