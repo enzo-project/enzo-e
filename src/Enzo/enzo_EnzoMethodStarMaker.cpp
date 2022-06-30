@@ -321,7 +321,7 @@ int EnzoMethodStarMaker::check_jeans_mass(
   #ifdef DEBUG_SF
     CkPrintf("MethodStarMaker -- jeans_mass = %f\n",m_jeans); 
   #endif
-  return (mass*munit < m_jcrit);
+  return (mass*munit > m_jcrit);
 }
 
 int EnzoMethodStarMaker::check_velocity_divergence(
