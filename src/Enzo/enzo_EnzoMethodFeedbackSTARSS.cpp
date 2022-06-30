@@ -68,23 +68,25 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age_Myr, int* nSNII, int* nSNIA
         if (RII > 0){
             PII = RII * pmass_Msun / enzo_constants::Myr_s *tunit*dt;
             double random = double(mt())/double(mt.max());
-            if (PII > 1.0 && enzo_config->method_feedback_unrestricted_sn){
-                int round = (int)PII;
-                *nSNII = round;
-                PII -= round;
+            if (PII > 1.0){
+                if (enzo_config->method_feedback_unrestricted_sn) {
+                    int round = (int)PII;
+                    *nSNII = round;  // number of Type II SNe that will definitely go off
+                    PII -= round; // probability for setting off one more supernova
+                }
+                else {
+                  // Restrict particles to at most one supernova per timestep
+                  // if unrestricted_sn = false
+                  *nSNII = 1;
+                  PII = 0; // set probability for setting off another supernova to zero
+                }
             }
-            if (PII > 1.0 && !enzo_config->method_feedback_unrestricted_sn){
-                //if it wants to do > 1 SN per particle, but unrestricted_sn=false,
-                //only do 1 SN
-
-                PII = 1.0;
-                *nSNII = 0;
-            }
-            int psn = *nSNII;
+           
             if (random <= PII){
-                *nSNII = psn+1;
+                *nSNII += 1;
             }
         }
+
         #ifdef DEBUG_FEEDBACK_STARSS_SN
           CkPrintf("MethodFeedbackSTARSS::determineSN() -- pmass_Msun = %f; age = %f; RII = %f; RIA = %f\n",
                     pmass_Msun, age_Myr, RII, RIA);
@@ -94,17 +96,31 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age_Myr, int* nSNII, int* nSNIA
             PIA = RIA*pmass_Msun / enzo_constants::Myr_s *tunit*dt;
             float random = float(rand())/float(RAND_MAX);
 
-            if (PIA > 1.0 && enzo_config->method_feedback_unrestricted_sn)
+            if (PIA > 1.0)
             {
-                int round = int(PIA);
-                *nSNIA = round;
-                PIA -= round;
+                if (enzo_config->method_feedback_unrestricted_sn) {
+                    int round = int(PIA);
+                    *nSNIA = round; // number of Type Ia SNe that will definitely go off
+                    PIA -= round; // probability for setting off one more supernova
+                }
+                else {
+                    *nSNIA = 1;
+                    PIA = 0;
+                }
             }
-            int psn = *nSNIA;
+            
+            if (!enzo_config->method_feedback_unrestricted_sn && *nSNII > 0) {
+                // for unrestricted_sn = false, only set off a Type IA supernova
+                // if nSNII == 0
+                *nSNIA = 0;
+                PIA = 0;
+            }
 
-            if (random < PIA)
-                *nSNIA = psn+1;
+            if (random < PIA){
+                *nSNIA += 1;
+            }
         }
+
         #ifdef DEBUG_FEEDBACK_STARSS_SN
           CkPrintf("MethodFeedbackSTARSS::determineSN() -- PII = %f; PIA = %f\n", PII, PIA);
         #endif
