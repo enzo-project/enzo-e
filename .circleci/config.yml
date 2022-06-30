@@ -349,6 +349,10 @@ workflows:
            usegrackle: false
            skiptest: true
        - answer-test-suite:
+           name: answer-tests_single
+           usedouble: false
+           usegrackle: true
+       - answer-test-suite:
            name: answer-tests_double
            usedouble: true
            usegrackle: true
