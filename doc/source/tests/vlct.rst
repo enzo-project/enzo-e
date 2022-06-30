@@ -5,6 +5,7 @@ VLCT Tests
 
 Under construction
 
+.. _vlct-dual_energy_cloud-hllc_cloud:
 
 dual_energy_cloud
 =================

@@ -39,6 +39,8 @@ inline void operator|(PUP::er &p, chemistry_data &c){
  }
 
  p | c.cmb_temperature_floor;
+ p | c.h2_charge_exchange_rate;
+ p | c.h2_h_cooling_rate;
  p | c.Gamma;
  p | c.h2_on_dust;
  p | c.use_dust_density_field;
@@ -181,6 +183,12 @@ public: // interface
 #endif /* CONFIG_USE_GRACKLE */
       // EnzoInitialFeedbackTest
       initial_feedback_test_density(),
+      initial_feedback_test_HI_density(),
+      initial_feedback_test_HII_density(),
+      initial_feedback_test_HeI_density(),
+      initial_feedback_test_HeII_density(),
+      initial_feedback_test_HeIII_density(),
+      initial_feedback_test_e_density(),
       initial_feedback_test_star_mass(),
       initial_feedback_test_temperature(),
       initial_feedback_test_from_file(),
@@ -327,6 +335,7 @@ public: // interface
       method_hydro_reconstruct_positive(false),
       method_hydro_riemann_solver(""),
       /// EnzoMethodFeedback
+      method_feedback_flavor(""),
       method_feedback_ejecta_mass(0.0),
       method_feedback_supernova_energy(1.0),
       method_feedback_ejecta_metal_fraction(0.0),
@@ -336,19 +345,37 @@ public: // interface
       method_feedback_ke_fraction(0.0),
       method_feedback_use_ionization_feedback(false),
       method_feedback_time_first_sn(-1.0), // in Myr
+      /// EnzoMethodFeedbackSTARSS
+      method_feedback_single_sn(0),
+      method_feedback_unrestricted_sn(0),
+      method_feedback_stellar_winds(0),
+      method_feedback_gas_return_fraction(0.0),
+      method_feedback_min_level(0),
+      method_feedback_analytic_SNR_shell_mass(0),
+      method_feedback_fade_SNR(0),
+      method_feedback_NEvents(0),
       /// EnzoMethodStarMaker
       method_star_maker_flavor(""),
-      method_star_maker_use_density_threshold(true),           // check above density threshold before SF
-      method_star_maker_use_velocity_divergence(true),         // check for converging flow before SF
-      method_star_maker_use_dynamical_time(true),              //
+      method_star_maker_use_density_threshold(false),           // check above density threshold before SF
+      method_star_maker_use_velocity_divergence(false),         // check for converging flow before SF
+      method_star_maker_use_dynamical_time(false),              //
+      method_star_maker_use_altAlpha(false), // alternate virial parameter calculation
+      method_star_maker_use_cooling_time(false), 
       method_star_maker_use_self_gravitating(false),           //
       method_star_maker_use_h2_self_shielding(false),
       method_star_maker_use_jeans_mass(false),
+      method_star_maker_use_overdensity_threshold(false),
+      method_star_maker_use_critical_metallicity(false),
+      method_star_maker_use_temperature_threshold(false),
+      method_star_maker_critical_metallicity(0.0),
+      method_star_maker_temperature_threshold(1.0E4),
       method_star_maker_number_density_threshold(0.0),      // Number density threshold in cgs
       method_star_maker_maximum_mass_fraction(0.5),            // maximum cell mass fraction to convert to stars
       method_star_maker_efficiency(0.01),            // star maker efficiency
       method_star_maker_minimum_star_mass(1.0E4),    // minium star particle mass in solar masses
       method_star_maker_maximum_star_mass(1.0E4),    // maximum star particle mass in solar masses
+      method_star_maker_min_level(0), // minimum refinement level for star formation
+      method_star_maker_turn_off_probability(false),
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
@@ -697,6 +724,12 @@ public: // attributes
 
   double                     initial_feedback_test_position[3];
   double                     initial_feedback_test_density;
+  double                     initial_feedback_test_HI_density;
+  double                     initial_feedback_test_HII_density;
+  double                     initial_feedback_test_HeI_density;
+  double                     initial_feedback_test_HeII_density;
+  double                     initial_feedback_test_HeIII_density;
+  double                     initial_feedback_test_e_density;
   double                     initial_feedback_test_star_mass;
   double                     initial_feedback_test_temperature;
   bool                       initial_feedback_test_from_file;
@@ -777,6 +810,7 @@ public: // attributes
 
   /// EnzoMethodFeedback
 
+  std::string               method_feedback_flavor;
   double                    method_feedback_ejecta_mass;
   double                    method_feedback_supernova_energy;
   double                    method_feedback_ejecta_metal_fraction;
@@ -787,20 +821,40 @@ public: // attributes
   bool                      method_feedback_shift_cell_center;
   bool                      method_feedback_use_ionization_feedback;
 
+  /// EnzoMethodFeedbackSTARSS
+  
+  int                       method_feedback_single_sn;
+  int                       method_feedback_unrestricted_sn;
+  int                       method_feedback_stellar_winds;
+  double                    method_feedback_gas_return_fraction;
+  int                       method_feedback_min_level;
+  int                       method_feedback_analytic_SNR_shell_mass;
+  int                       method_feedback_fade_SNR;
+  int                       method_feedback_NEvents;
   /// EnzoMethodStarMaker
 
   std::string               method_star_maker_flavor;
+  bool                      method_star_maker_use_altAlpha;
   bool                      method_star_maker_use_density_threshold;
+  bool                      method_star_maker_use_overdensity_threshold;
+  bool                      method_star_maker_use_temperature_threshold;
+  bool                      method_star_maker_use_critical_metallicity;
   bool                      method_star_maker_use_velocity_divergence;
+  bool                      method_star_maker_use_cooling_time;
   bool                      method_star_maker_use_dynamical_time;
   bool                      method_star_maker_use_h2_self_shielding;
   bool                      method_star_maker_use_jeans_mass;
   bool                      method_star_maker_use_self_gravitating;
   double                    method_star_maker_number_density_threshold;
+  double                    method_star_maker_overdensity_threshold;
+  double                    method_star_maker_temperature_threshold;
+  double                    method_star_maker_critical_metallicity;
   double                    method_star_maker_maximum_mass_fraction;
   double                    method_star_maker_efficiency;
   double                    method_star_maker_minimum_star_mass;
   double                    method_star_maker_maximum_star_mass;
+  int                       method_star_maker_min_level;
+  bool                      method_star_maker_turn_off_probability;
 
   /// EnzoMethodTurbulence
   double                     method_turbulence_edot;

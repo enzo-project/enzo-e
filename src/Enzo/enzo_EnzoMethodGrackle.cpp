@@ -43,7 +43,6 @@ EnzoMethodGrackle::EnzoMethodGrackle
   /// Define Grackle's internal data structures
   time_grackle_data_initialized_ = ENZO_FLOAT_UNDEFINED;
   initialize_grackle_chemistry_data(time);
-  
 #endif /* CONFIG_USE_GRACKLE */
 }
 
@@ -238,16 +237,7 @@ void EnzoMethodGrackle::setup_grackle_units (double current_time,
     enzo_float cosmo_dt = 0.0;
 
     EnzoPhysicsCosmology * cosmology = enzo::cosmology();
-
-    // Have to explicitly initialize current_time and current_redshift here because 
-    // this function is called in the constructor, and cosmology units are not initialized 
-    // until after Simulation::initialize() completes (see EnzoSimulation::r_startup_begun()). 
-
-    if (current_time == 0) {
-       current_time = cosmology->time_from_redshift(enzo::config()->physics_cosmology_initial_redshift);
-       cosmology->set_current_redshift(cosmology->redshift_from_time(current_time));
-    }
-
+ 
     grackle_units->density_units  = cosmology->density_units(); 
     grackle_units->length_units = cosmology->length_units();
     grackle_units->time_units  = cosmology->time_units();
@@ -413,6 +403,7 @@ void EnzoMethodGrackle::update_grackle_density_fields(
   const EnzoConfig * enzo_config = enzo::config();
   chemistry_data * grackle_chemistry =
     enzo::config()->method_grackle_chemistry;
+  double metallicity_floor_ = enzo::config()->method_grackle_metallicity_floor;
 
   for (int iz = 0; iz<ngz; iz++){
     for (int iy=0; iy<ngy; iy++){
@@ -609,7 +600,6 @@ double EnzoMethodGrackle::timestep ( Block * block ) throw()
 //----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_GRACKLE
-
 
 void EnzoMethodGrackle::enforce_metallicity_floor(EnzoBlock * enzo_block) throw()
 {
