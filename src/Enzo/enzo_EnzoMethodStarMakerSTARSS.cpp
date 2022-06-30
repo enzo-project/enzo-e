@@ -160,8 +160,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 
   enzo_float * total_energy = (enzo_float *) field.values("total_energy");
   
-  enzo_float * potential    = field.is_field("potential_copy") ? 
-          (enzo_float *) field.values("potential_copy") : NULL;
+  enzo_float * potential    = (enzo_float *) field.values("potential");
 
   enzo_float * velocity_x = (rank >= 1) ?
     (enzo_float *)field.values("velocity_x") : NULL;
@@ -206,20 +205,9 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
   enzo_float * dHDI   = field.is_field("HDI_density") ? 
          (enzo_float *) field.values("HDI_density") : NULL;
 
-/*
-  bool use_altAlpha = this->use_altAlpha_;
-  #ifndef DEBUG_COPY_POTENTIAL
-    if (use_altAlpha) {
-      CkPrintf("MethodStarMaker -- WARNING: use_altAlpha = true, "
-               "      but DEBUG_COPY_POTENTIAL flag is not "
-               "      set in EnzoMethodGravity.\n"
-               "      Defaulting to use_altAlpha = false\n");
-      use_altAlpha = false;
-    }
-  #endif
-*/
+
   if (use_altAlpha_) {
-    // "potential_copy" field holds potential in proper coordinates,
+    // "potential" field holds potential in proper coordinates,
     //  need to convert back to comoving. 
     if (cosmology) {
       enzo_float cosmo_a = 1.0;
@@ -283,7 +271,13 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 
         // check overdensity threshold
         // In cosmology, units are scaled such that mean(density) = 1,
-        // so density IS overdensity in these units        
+        // so density IS overdensity in these units  
+        if (use_overdensity_threshold_) {
+          ASSERT("EnzoMethodStarMakerSTARSS::compute()",
+                 "parameter use_overdensity_threshold is only valid for cosmology!",
+                  cosmology);
+        }
+      
         if (! this->check_overdensity_threshold(density[i]) ) continue;
 
         #ifdef DEBUG_SF_CRITERIA 
@@ -301,8 +295,6 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 
         // check that alpha < 1
         if (use_altAlpha_) {
-          // NOTE: this requires the DEBUG_COPY_POTENTIAL flag to be set in EnzoMethodGravity
-          // TODO: Make saving potential an input parameter instead of debug flag?
           if (! this->check_self_gravitating_new(total_energy[i], potential[i])) continue;
         }
 
