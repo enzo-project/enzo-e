@@ -1,6 +1,10 @@
 include "input/test_cosmo-dd-multispecies.in"
 include "input/STARSS/SF_FB.incl"
 
+# This is a cosmology problem that is set up to use six-species chemistry, star formation, and feedback.
+# Since this is a very small problem (32^3 root grid), the first star particle won't form until around redshift 8.
+# To get to this point, it should take around 15-20 minutes on 8 processors.
+
 Method { 
     list = [ "star_maker", "feedback", "pm_deposit", "gravity", "ppm", "grackle", "pm_update", "comoving_expansion"];
     output { particle_list += ["star"];}
@@ -13,16 +17,7 @@ Output {
           particle_list += ["star"]; 
         }
      de   { dir = [ "Dir_COSMO_SF_FB_%04d", "cycle" ]; }
-     depa { dir = [ "Dir_COSMO_SF_FB_%04d", "cycle" ]; }
-     ax   { dir = [ "Dir_COSMO_SF_FB_%04d", "cycle" ]; }
-     ay   { dir = [ "Dir_COSMO_SF_FB_%04d", "cycle" ]; }
-     az   { dir = [ "Dir_COSMO_SF_FB_%04d", "cycle" ]; }
-     dark { dir = [ "Dir_COSMO_SF_FB_%04d", "cycle" ]; }
-     mesh { dir = [ "Dir_COSMO_SF_FB_%04d", "cycle" ]; }
-     po   { dir = [ "Dir_COSMO_SF_FB_%04d", "cycle" ]; }
      hdf5 { dir = [ "Dir_COSMO_SF_FB_%04d", "cycle" ]; }
-     dep  { dir = [ "Dir_COSMO_SF_FB_%04d", "cycle" ]; }
-     check { dir = [ "Dir_COSMO_SF_FB_%04d-checkpoint", "count" ]; }
 
      star {
          colormap = [ 0.000000000000000, 0.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 1.000000000000000 ];
