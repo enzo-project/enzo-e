@@ -304,6 +304,20 @@ public: // interface
       initial_accretion_test_gas_density(0.0),
       initial_accretion_test_gas_pressure(0.0),
       initial_accretion_test_gas_radial_velocity(0.0),
+      // EnzoInitialShuCollapse
+      initial_shu_collapse_truncation_radius(0.0),
+      initial_shu_collapse_nominal_sound_speed(0.0),
+      initial_shu_collapse_instability_parameter(0.0),
+      initial_shu_collapse_external_density(0.0),
+      initial_shu_collapse_central_sink_exists(false),
+      initial_shu_collapse_central_sink_mass(0.0),
+      // EnzoInitialBBTest
+      initial_bb_test_mean_density(0.0),
+      initial_bb_test_fluctuation_amplitude(0.0),
+      initial_bb_test_truncation_radius(0.0),
+      initial_bb_test_nominal_sound_speed(0.0),
+      initial_bb_test_angular_rotation_velocity(0.0),
+      initial_bb_test_external_density(0.0),
       // EnzoMethodCheckGravity
       method_check_gravity_particle_type(),
       // EnzoMethodHeat
@@ -399,11 +413,19 @@ public: // interface
       method_vlct_mhd_choice(""),
       // EnzoMethodMergeSinks
       method_merge_sinks_merging_radius_cells(0.0),
-      // EnzoMethodAccretionCompute
+      // EnzoMethodAccretion
       method_accretion_accretion_radius_cells(0.0),
       method_accretion_flavor(""),
       method_accretion_physical_density_threshold_cgs(0.0),
       method_accretion_max_mass_fraction(0.0),
+      // EnzoMethodSinkMaker
+      method_sink_maker_jeans_length_resolution_cells(0.0),
+      method_sink_maker_physical_density_threshold_cgs(0.0),
+      method_sink_maker_check_density_maximum(false),
+      method_sink_maker_max_mass_fraction(0.0),
+      method_sink_maker_min_sink_mass_solar(0.0),
+      method_sink_maker_max_offset_cell_fraction(0.0),
+      method_sink_maker_offset_seed_shift(0),
       // EnzoProlong
       prolong_enzo_type(),
       prolong_enzo_positive(true),
@@ -475,6 +497,8 @@ protected: // methods
   void read_initial_feedback_test_(Parameters *);
   void read_initial_merge_sinks_test_(Parameters *);
   void read_initial_accretion_test_(Parameters *);
+  void read_initial_shu_collapse_(Parameters *);
+  void read_initial_bb_test_(Parameters *);
   
   void read_method_grackle_(Parameters *);
   void read_method_feedback_(Parameters *);
@@ -489,6 +513,7 @@ protected: // methods
   void read_method_turbulence_(Parameters *);
   void read_method_merge_sinks_(Parameters *);
   void read_method_accretion_(Parameters *);
+  void read_method_sink_maker_(Parameters *);
   
   void read_physics_(Parameters *);
   void read_physics_fluid_props_(Parameters *);
@@ -737,6 +762,26 @@ public: // attributes
   double                     initial_accretion_test_gas_pressure;
   double                     initial_accretion_test_gas_radial_velocity;
 
+  // EnzoInitialShuCollapse
+  double                     initial_shu_collapse_center[3];
+  double                     initial_shu_collapse_drift_velocity[3];
+  double                     initial_shu_collapse_truncation_radius;
+  double                     initial_shu_collapse_nominal_sound_speed;
+  double                     initial_shu_collapse_instability_parameter;
+  double                     initial_shu_collapse_external_density;
+  bool                       initial_shu_collapse_central_sink_exists;
+  double                     initial_shu_collapse_central_sink_mass;
+
+  // EnzoInitialBBTest
+  double                     initial_bb_test_center[3];
+  double                     initial_bb_test_drift_velocity[3];
+  double                     initial_bb_test_mean_density;
+  double                     initial_bb_test_fluctuation_amplitude;
+  double                     initial_bb_test_truncation_radius;
+  double                     initial_bb_test_nominal_sound_speed;
+  double                     initial_bb_test_angular_rotation_velocity;
+  double                     initial_bb_test_external_density;
+
   /// EnzoMethodCheckGravity
   std::string                method_check_gravity_particle_type;
 
@@ -860,6 +905,15 @@ public: // attributes
   std::string                method_accretion_flavor;
   double                     method_accretion_physical_density_threshold_cgs;
   double                     method_accretion_max_mass_fraction;
+
+  /// EnzoMethodSinkMaker
+  double                     method_sink_maker_jeans_length_resolution_cells;
+  double                     method_sink_maker_physical_density_threshold_cgs;
+  bool                       method_sink_maker_check_density_maximum;
+  double                     method_sink_maker_max_mass_fraction;
+  double                     method_sink_maker_min_sink_mass_solar;
+  double                     method_sink_maker_max_offset_cell_fraction;
+  uint64_t                   method_sink_maker_offset_seed_shift;
   
   std::string                prolong_enzo_type;
   bool                       prolong_enzo_positive;

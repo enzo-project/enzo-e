@@ -762,6 +762,92 @@ ppm
 ---
 
 .. include:: method_ppm.incl
+
+
+sink_maker
+----------
+
+:Parameter:  :p:`Method` : :p:`sink_maker` : :p:`jeans_length_resolution_cells`
+:Summary:    :s:`Determines how many cell widths are required to resolve the local Jeans length for a cell not to form a sink.`
+:Type:       :t:`float`
+:Default:    :d:`4.0`
+:Scope:     :z:`Enzo`
+
+:e:`If the local Jeans length in a cell is less than this quantity multiplied by the maximum cell width, then the cell is a candidate for forming a sink. The maximum cell width is maximum value out of hx, hy, and hz, where hx, hy, and hz are the cell widths across the x-, y- and z-axes, respectively.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`sink_maker` : :p:`physical_density_threshold_cgs`
+:Summary:    :s:`The minimum physical density required for a cell to form a sink particle in cgs units.`
+:Type:       :t:`float`
+:Default:    :d:`1.0e-24`
+:Scope:     :z:`Enzo`
+
+:e:`The value of the physical density threshold in cgs units. The density in a cell must be
+greater than the density threshold to be able to form a sink. The density in a cell after
+sink formation will be no less than the density threshold. The value of
+the density threshold in code units must be greater than or equal to the value of the
+density floor imposed by the hydro method.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`sink_maker` : :p:`max_mass_fraction`
+:Summary:    :s:`The maximum fraction of a cell's gas mass which can be turned into a sink particle in one timestep.`
+:Type:       :t:`float`
+:Default:    :d:`0.25`
+:Scope:     :z:`Enzo`
+
+:e:`The mass of a newly-formed sink is bounded above by this parameter multiplied by the cell
+density multiplied by the cell volume. The value of this parameter must be between
+0 and 1.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`sink_maker` : :p:`min_sink_mass_solar`
+:Summary:    :s:`The minimum mass of a newly-formed sink particle, in solar mass units.`
+:Type:       :t:`float`
+:Default:    :d:`0.0`
+:Scope:     :z:`Enzo`
+
+:e:`The minimum mass of a newly-formed sink particle, in solar mass units. If there is not enough
+gas mass in a cell to form a sink with at least this mass, no sink is formed.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`sink_maker` : :p:`check_density_maximum`
+:Summary:    :s:`Determines whether a cell is required to be a local density maximum in order to form a sink particle.`
+:Type:       :t:`logical`
+:Default:    :d:`true`
+:Scope:     :z:`Enzo`
+
+:e:`If true, then a cell will only form a sink particle if its density is larger than the density in all 26 neighboring cells.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`sink_maker` : :p:`max_offset_cell_fraction`
+:Summary:    :s:`Controls the size of the random displacement of a sink particle's initial position relative to the center of the cell`
+:Type:       :t:`float`
+:Default:    :d:`0.0`
+:Scope:     :z:`Enzo`
+
+:e:`When a cell creates a sink particle, the x/y/z coordinate of its initial position will be
+the x/y/z coordinate of the center of the cell, plus a random value generated from a
+uniform distribution on the interval [-A,A], where A is equal to
+this parameter multiplied by the cell width along the x/y/z axis.`
+
+
+----
+
+:Parameter:  :p:`Method` : :p:`sink_maker` : :p:`offset_seed_shift`
+:Summary:    :s:`Seed used to generate the random displacement of a sink particle's initial position relative to the center of the cell`
+:Type:       :t:`integer`
+:Default:    :d:`0`
+:Scope:     :z:`Enzo`
+
+:e:`When computing the random offset for the initial position of a sink particle, we compute
+an unsigned 64 bit integer value from the cycle number, the block index, and the cell
+index, and then add on this value to give the seed for the random number generator.`
+
 	     
 turbulence
 ----------

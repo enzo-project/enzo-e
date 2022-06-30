@@ -1,0 +1,61 @@
+images.py defines a function called make_images, which
+takes as input the directories generated when Enzo-E runs the test
+problem, which contain snapshots of the particle data and field data
+at regular time intervals.
+It then uses yt make slice images of the density field, also showing the
+position of the sink particle. A series of image files are created, with
+each image corresponding to a particular snapshot. These images are useful
+to check whether the
+initial conditions were set up correctly and if Enzo-E ran as expected.
+
+make_images can be imported by another script (as is done in
+run_bb_test.py), or it can be executed by running this file
+as a script, with command line arguments being passed to make_images.
+For more information, run "python images.py -h".
+
+mass_conservation.py defines the function test_mc which has the following behaviour:
+- takes as arguments the prefix for the names of the directories generated
+  when Enzo-E runs the bb_test problem, which contain snapshots of
+  the field data particle data at regular time intervals, a name for the
+  file to which the plot will be saved, and a value for the tolerance limit.
+- uses yt to read the data and calculates the total mass in each snapshot. It then
+  calculates the mass conservation error, and tests whether
+  the absolute value is always less than the tolerance limit.
+  If the absolute value of the error is larger than the tolerance for any
+  snapshot, then the test fails.
+- generates a plot showing the total gas mass, total sink mass, and total mass against time
+
+test_mc can be imported by another script (as is done in
+run_bb_test.py), or it can be executed by running this file as a script,
+with command line arguments being passed to test_mmc.
+For more information, run "python mass_conservation.py -h".
+
+Running run_bb_test.py does the following:
+
+- Runs Enzo-E ising the parameter file specified by --param_file. This produces a set
+  of directories which contain snapshots of the particle data at regular time intervals.
+- Produces  a set of png images, which show scatter plots of the x and y coordinates
+  of particles read from the snapshot directories.
+- Analyzes snapshot data to test for mass and momentum conservation.
+  This generates a figure (mmc.png), which shows the mass and momentum conservation errors.
+  The test is considered to have passed if all the errors are less than some tolerance limit,
+  which is 1.0e-12 in the case of double precision, and 1.0e-4 for single precision.
+- Deletes the snapshot directories.
+
+Arguments:
+--launch_cmd: the command used to run Enzo-E.
+	      To run Enzo-E as a serial program, set this to `/path/to/bin/enzo-e`.
+	      To run Enzo-E as a parallel program, set this to (for example)
+	      `"/path/to/bin/charmrun +p4 ++local /path/to/bin/enzo-e"`
+
+--prec: Can be set to `single` or `double`, and should be the same as the precision
+	with which Enzo-E was compiled. Sets the error tolerance when testing
+	conservation of mass and momentum.
+
+Currently, the default parameters (set in `bb.in`) are set so that the test problem runs in
+a few minutes on 4 PEs. To get more meaningful results, it is advised to change `Mesh:root_size`
+to `[128,128,128]` (this will increase the resolution), `Output:schedule:step` to `1.0e10`
+(this will increase the number of snapshots generated), `Solver:cg:res_tol` to `1e-14` (this
+will increase the number of iterations used by the gravity solver), and to run with more PEs.
+The user could try running with `Mesh:root_size = [256,256,256]`, but this seems to crash.
+In addition, this test will only run with double floating-point precision.

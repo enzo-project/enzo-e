@@ -190,6 +190,12 @@ if (USE_YT_BASED_TESTS)
   setup_test_parallel_python(bondi_hoyle_accretion_parallel accretion/bondi_hoyle/parallel "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=bondi_hoyle")
   setup_test_serial_python(flux_accretion_serial accretion/flux/serial "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=flux")
   setup_test_parallel_python(flux_accretion_parallel accretion/flux/parallel "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=flux")
+
+  # Shu Collapse
+  setup_test_parallel_python(shu_collapse shu_collapse "input/shu_collapse/run_shu_collapse.py" "--prec=${PREC_STRING}")
+
+  # BB Test
+  setup_test_parallel_python(bb_test bb_test "input/bb_test/run_bb_test.py" "--prec=${PREC_STRING}")
   
 endif()
 

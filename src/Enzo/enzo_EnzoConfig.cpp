@@ -202,6 +202,20 @@ EnzoConfig::EnzoConfig() throw ()
   initial_accretion_test_gas_density(0.0),
   initial_accretion_test_gas_pressure(0.0),
   initial_accretion_test_gas_radial_velocity(0.0),
+  // EnzoInitialShuCollapse
+  initial_shu_collapse_truncation_radius(0.0),
+  initial_shu_collapse_nominal_sound_speed(0.0),
+  initial_shu_collapse_instability_parameter(0.0),
+  initial_shu_collapse_external_density(0.0),
+  initial_shu_collapse_central_sink_exists(false),
+  initial_shu_collapse_central_sink_mass(0.0),
+  // EnzoInitialBBTest
+  initial_bb_test_mean_density(0.0),
+  initial_bb_test_fluctuation_amplitude(0.0),
+  initial_bb_test_truncation_radius(0.0),
+  initial_bb_test_nominal_sound_speed(0.0),
+  initial_bb_test_angular_rotation_velocity(0.0),
+  initial_bb_test_external_density(0.0),
   // EnzoMethodHeat
   method_heat_alpha(0.0),
   // EnzoMethodHydro
@@ -294,11 +308,19 @@ EnzoConfig::EnzoConfig() throw ()
   method_vlct_mhd_choice(""),
   /// EnzoMethodMergeSinks
   method_merge_sinks_merging_radius_cells(0.0),
-  /// EnzoMethodAccretionCompute
+  /// EnzoMethodAccretion
   method_accretion_accretion_radius_cells(0.0),
   method_accretion_flavor(""),
   method_accretion_physical_density_threshold_cgs(0.0),
   method_accretion_max_mass_fraction(0.0),
+  /// EnzoMethodSinkMaker
+  method_sink_maker_jeans_length_resolution_cells(0.0),
+  method_sink_maker_physical_density_threshold_cgs(0.0),
+  method_sink_maker_check_density_maximum(false),
+  method_sink_maker_max_mass_fraction(0.0),
+  method_sink_maker_min_sink_mass_solar(0.0),
+  method_sink_maker_max_offset_cell_fraction(0.0),
+  method_sink_maker_offset_seed_shift(0),
   /// EnzoProlong
   prolong_enzo_type(),
   prolong_enzo_positive(true),
@@ -566,6 +588,24 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_accretion_test_gas_pressure;
   p | initial_accretion_test_gas_radial_velocity;
 
+  PUParray(p,initial_shu_collapse_center,3);
+  PUParray(p,initial_shu_collapse_drift_velocity,3);
+  p | initial_shu_collapse_truncation_radius;
+  p | initial_shu_collapse_nominal_sound_speed;
+  p | initial_shu_collapse_instability_parameter;
+  p | initial_shu_collapse_external_density;
+  p | initial_shu_collapse_central_sink_exists;
+  p | initial_shu_collapse_central_sink_mass;
+
+  PUParray(p,initial_bb_test_center,3);
+  PUParray(p,initial_bb_test_drift_velocity,3);
+  p | initial_bb_test_mean_density;
+  p | initial_bb_test_fluctuation_amplitude;
+  p | initial_bb_test_truncation_radius;
+  p | initial_bb_test_nominal_sound_speed;
+  p | initial_bb_test_angular_rotation_velocity;
+  p | initial_bb_test_external_density;
+
   p | method_heat_alpha;
 
   p | method_hydro_method;
@@ -658,6 +698,14 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_accretion_physical_density_threshold_cgs;
   p | method_accretion_max_mass_fraction;
 
+  p | method_sink_maker_jeans_length_resolution_cells,
+  p | method_sink_maker_physical_density_threshold_cgs,
+  p | method_sink_maker_check_density_maximum,
+  p | method_sink_maker_max_mass_fraction,
+  p | method_sink_maker_min_sink_mass_solar,
+  p | method_sink_maker_max_offset_cell_fraction,
+  p | method_sink_maker_offset_seed_shift,
+
   p | prolong_enzo_type;
   p | prolong_enzo_positive;
   p | prolong_enzo_use_linear;
@@ -731,6 +779,8 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_feedback_test_(p);
   read_initial_merge_sinks_test_(p);
   read_initial_accretion_test_(p);
+  read_initial_shu_collapse_(p);
+  read_initial_bb_test_(p);
 
   // it's important for read_physics_ to precede read_method_grackle_
   read_physics_(p);
@@ -748,6 +798,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_turbulence_(p);
   read_method_merge_sinks_(p);
   read_method_accretion_(p);
+  read_method_sink_maker_(p);
 
   read_prolong_enzo_(p);
   
@@ -1327,6 +1378,68 @@ void EnzoConfig::read_initial_accretion_test_(Parameters * p)
     ("Initial:accretion_test:gas_radial_velocity",0.0);
 }
 
+void EnzoConfig::read_initial_shu_collapse_(Parameters * p)
+{
+  for (int axis=0; axis<3; axis++){
+    initial_shu_collapse_center[axis] = p->list_value_float
+      (axis, "Initial:shu_collapse:center", 0.0);
+  }
+
+  for (int axis=0; axis<3; axis++){
+    initial_shu_collapse_drift_velocity[axis] = p->list_value_float
+      (axis, "Initial:shu_collapse:drift_velocity", 0.0);
+  }
+
+  initial_shu_collapse_truncation_radius = p->value_float
+    ("Initial:shu_collapse:truncation_radius",1.0);
+
+  initial_shu_collapse_nominal_sound_speed = p->value_float
+    ("Initial:shu_collapse:nominal_sound_speed",1.0);
+
+  initial_shu_collapse_instability_parameter = p->value_float
+    ("Initial:shu_collapse:instability_parameter",2.1);
+
+  initial_shu_collapse_external_density = p->value_float
+    ("Initial:shu_collapse:external_density",1.0e-6);
+
+  initial_shu_collapse_central_sink_exists = p->value_logical
+    ("Initial:shu_collapse:central_sink_exists",false);
+
+  initial_shu_collapse_central_sink_mass = p->value_float
+    ("Initial:shu_collapse:central_sink_mass",0.0);
+}
+
+void EnzoConfig::read_initial_bb_test_(Parameters * p)
+{
+  for (int axis=0; axis<3; axis++){
+    initial_bb_test_center[axis] = p->list_value_float
+      (axis, "Initial:bb_test:center", 0.0);
+  }
+
+  for (int axis=0; axis<3; axis++){
+    initial_bb_test_drift_velocity[axis] = p->list_value_float
+      (axis, "Initial:bb_test:drift_velocity", 0.0);
+  }
+
+  initial_bb_test_mean_density = p->value_float
+    ("Initial:bb_test:mean_density",1.0e-6);
+
+  initial_bb_test_fluctuation_amplitude = p->value_float
+    ("Initial:bb_test:fluctuation_amplitude",0.0);
+
+  initial_bb_test_truncation_radius = p->value_float
+    ("Initial:bb_test:truncation_radius",1.0);
+
+  initial_bb_test_nominal_sound_speed = p->value_float
+    ("Initial:bb_test:nominal_sound_speed",1.0);
+
+  initial_bb_test_angular_rotation_velocity = p->value_float
+    ("Initial:bb_test:angular_rotation_velocity",0.0);
+
+  initial_bb_test_external_density = p->value_float
+    ("Initial:bb_test:external_density",1.0e-6);
+}
+
 void EnzoConfig::read_method_grackle_(Parameters * p)
 
 {
@@ -1755,6 +1868,29 @@ void EnzoConfig::read_method_accretion_(Parameters * p)
   method_accretion_max_mass_fraction = p->value_float
     ("Method:accretion:max_mass_fraction",0.25);
 
+}
+
+//----------------------------------------------------------------------
+
+void EnzoConfig::read_method_sink_maker_(Parameters * p)
+{
+  method_sink_maker_jeans_length_resolution_cells = p->value_float
+    ("Method:sink_maker:jeans_length_resolution_cells",4.0);
+  method_sink_maker_physical_density_threshold_cgs = p->value_float
+    ("Method:sink_maker:physical_density_threshold_cgs",1.0e-24);
+  method_sink_maker_check_density_maximum = p->value_logical
+    ("Method:sink_maker:check_density_maximum",true);
+  method_sink_maker_max_mass_fraction = p->value_float
+    ("Method:sink_maker:max_mass_fraction",0.25);
+  method_sink_maker_min_sink_mass_solar = p->value_float
+    ("Method:sink_maker:min_sink_mass_solar",0.0);
+  method_sink_maker_max_offset_cell_fraction = p->value_float
+    ("Method:sink_maker:max_offset_cell_fraction",0.0);
+  int method_sink_maker_offset_seed_shift_input = p->value_integer
+    ("Method:sink_maker:offset_seed_shift",0);
+  ASSERT("EnzoConfig::read()", "Method:sink_maker:offset_seed_shift must be >=0",
+	 method_sink_maker_offset_seed_shift_input >= 0);
+  method_sink_maker_offset_seed_shift = (uint64_t) method_sink_maker_offset_seed_shift_input;
 }
 
 //----------------------------------------------------------------------

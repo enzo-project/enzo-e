@@ -47,7 +47,7 @@ EnzoMethodGrackle::EnzoMethodGrackle
 //----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_GRACKLE
-
+ 
 void EnzoMethodGrackle::define_required_grackle_fields()
 {
   // Gather list of fields that MUST be defined for this method and
@@ -401,6 +401,7 @@ void EnzoMethodGrackle::update_grackle_density_fields(
   const enzo_float metal_factor = fluid_floors.has_metal_mass_frac_floor()
     ? fluid_floors.metal_mass_frac() : (enzo_float)tiny_number;
 
+  const EnzoConfig * enzo_config = enzo::config();
   chemistry_data * grackle_chemistry =
     enzo::config()->method_grackle_chemistry;
   double metallicity_floor_ =

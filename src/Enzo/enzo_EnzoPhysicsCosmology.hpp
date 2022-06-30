@@ -204,7 +204,7 @@ public: // interface
      `hubble_constant_now_` in the code below. Putting this all together gives the following
      expression:
 
-     `rho_unit = (3 / 8 * pi) * (H_0 / h)^2 / G^2 * Omega_m_0 * h^2 * (1+z)^3`.
+     `rho_unit = (3 / 8 * pi) * (H_0 / h)^2 / G * Omega_m_0 * h^2 * (1+z)^3`.
 
      Note: the previous version of this function was equivalent to:
 
@@ -220,7 +220,7 @@ public: // interface
    */
 
     return (3.0 / (8.0 * cello::pi)) * enzo_constants::H0_over_h * enzo_constants::H0_over_h /
-      (enzo_constants::grav_constant * enzo_constants::grav_constant) * omega_matter_now_ *
+      enzo_constants::grav_constant * omega_matter_now_ *
       hubble_constant_now_ * hubble_constant_now_ *
       (1 + current_redshift_) * (1 + current_redshift_) * (1 + current_redshift_);
   }
@@ -293,7 +293,7 @@ public: // interface
        The `1.0e7` term is the result of multiplying `Mpc_cm` by `H0_over_h`.
     */
     return 1.0e7 *  sqrt(3.0/2.0) * comoving_box_size_ * sqrt(omega_matter_now_) *
-      (1 + initial_redshift_);
+      sqrt(1 + initial_redshift_);
   }
 
   void print () const
