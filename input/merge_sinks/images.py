@@ -37,7 +37,7 @@ def make_images(input_prefix,output_prefix):
         ax.set_xlabel("x")
         ax.set_ylabel("y")
         current_cycle = ds.parameters["current_cycle"]
-        filename = f"{output_prefix}_{current_cycle}.png"
+        filename = f"{output_prefix}_{current_cycle:03}.png"
         fig.savefig(filename)
         plt.close(fig)
 

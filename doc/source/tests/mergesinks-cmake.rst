@@ -12,10 +12,7 @@ Four tests of the enzo-e "merge sinks" method.
 
 - the stationary parallel test
     
-All the files necessary for running the tests can be found in input/merge_sinks,
-and the tests can be run by executing test/run_merge_sinks_tests.sh from the
-top-level directory of the repository.
-
+All the files necessary for running the tests can be found in input/merge_sinks.
 
 Each test involves setting up initial conditions with 1000 sink particles randomly
 distributed in a sphere, with velocities directed towards the centre of the sphere.

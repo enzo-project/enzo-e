@@ -40,6 +40,15 @@ EnzoMethodMergeSinks::EnzoMethodMergeSinks(double merging_radius_cells)
 	 "sink particles or neighbouring such a block is at highest refinement "
 	 "level", enzo_config->mesh_max_level == 0);
 
+  // Check that number of root blocks across all axes is greater than 2
+  ASSERT("EnzoMethodMergeSinks::EnzoMethodMergeSinks()",
+	 "EnzoMethodMergeSinks requires that number of root blocks across all axes "
+	 "is at least 2, i.e. that Mesh:root_blocks = [a,b,c], with a, b and c all "
+	 "greater than 2",
+	 (enzo_config->mesh_root_blocks[0] > 2) &&
+	 (enzo_config->mesh_root_blocks[1] > 2) &&
+	 (enzo_config->mesh_root_blocks[2] > 2));
+
   // Refresh copies all sink particles from neighbouring blocks
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);

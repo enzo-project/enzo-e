@@ -175,9 +175,10 @@ commands:
               source $HOME/venv/bin/activate
               if [[ $SKIP_TEST != 1 ]]; then
                 cd build
-                # Run all tests excluding VLCT
-                ctest -E vlct --output-on-failure
+                # Run all tests excluding VLCT, shu_collapse, and bb_test
+                ctest -E "(vlct)|(shu_collapse)|(bb_test)" --output-on-failure
                 # Run VLCT tests if using double prec (currently required)
+                # Don't run shu_collapse or bb_test since these take a long time to run
                 if [[ $USE_DOUBLE == 1 ]]; then
                   ctest -R vlct --output-on-failure
                 fi

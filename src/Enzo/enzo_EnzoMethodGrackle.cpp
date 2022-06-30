@@ -49,7 +49,7 @@ EnzoMethodGrackle::EnzoMethodGrackle
 //----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_GRACKLE
-
+ 
 void EnzoMethodGrackle::define_required_grackle_fields()
 {
   // Gather list of fields that MUST be defined for this method and
@@ -400,6 +400,7 @@ void EnzoMethodGrackle::update_grackle_density_fields(
 
   double tiny_number = 1.0E-10;
 
+  const EnzoConfig * enzo_config = enzo::config();
   chemistry_data * grackle_chemistry =
     enzo::config()->method_grackle_chemistry;
   double metallicity_floor_ = enzo::config()->method_grackle_metallicity_floor;
