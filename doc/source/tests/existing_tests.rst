@@ -5,6 +5,7 @@ Existing ctest Tests
 Currently, the Enzo-e ``ctest`` infrastructure includes:
 
 .. toctree::
+   accretion-cmake
    array-cmake
    error-cmake
    memory-cmake
@@ -30,6 +31,7 @@ Existing Test Simulations
 Currently, Enzo-e has the following test simulations in the input folder:
 
 .. toctree::
+   accretion
    adapt
    balance
    boundary
