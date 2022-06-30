@@ -52,6 +52,7 @@ commands:
             # Install yt from source
             git clone https://github.com/yt-project/yt.git $HOME/yt
             cd $HOME/yt
+            export MAX_BUILD_CORES=2
             pip install -e .
 
   install-grackle:
