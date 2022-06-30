@@ -175,8 +175,9 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
         if (! this->check_number_density_threshold(ndens)) continue;
         if (! this->check_self_gravitating( mean_particle_mass, rho_cgs, temperature[i],
                                             velocity_x, velocity_y, velocity_z,
-                                            enzo_units->length(), enzo_units->density(),
-                                            i, 1, my, my*mz, dx, dy, dz)) continue;
+                                            enzo_units->length(), enzo_units->velocity(),
+                                            enzo_units->density(),
+                                            i, 1, mx, mx*my, dx, dy, dz)) continue;
 
         // AJE: TO DO ---
         //      If Grackle is used, check for this and use the H2
@@ -188,13 +189,13 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
                                                            metallicity,
                                                            enzo_units->density(),
                                                            enzo_units->length(),
-                                                           i, 1, my, my*mz,
+                                                           i, 1, mx, mx*my,
                                                            dx, dy, dz);
         mass *= f_h2; // apply correction (f_h2 = 1 if not used)
 
         if (! this->check_velocity_divergence(velocity_x, velocity_y,
                                               velocity_z, i,
-                                              1, my, my*mz)) continue;
+                                              1, mx, mx*my, dx, dy, dz)) continue;
         // Check whether mass in [min_mass, max_range] range and if specified, Jeans unstable
         if (! this->check_mass(mass)) continue;
 

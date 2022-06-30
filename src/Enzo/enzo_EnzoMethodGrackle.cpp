@@ -41,7 +41,6 @@ EnzoMethodGrackle::EnzoMethodGrackle
   /// Define Grackle's internal data structures
   time_grackle_data_initialized_ = ENZO_FLOAT_UNDEFINED;
   initialize_grackle_chemistry_data(time);
-  
 #endif /* CONFIG_USE_GRACKLE */
 }
 
@@ -404,6 +403,7 @@ void EnzoMethodGrackle::update_grackle_density_fields(
 
   chemistry_data * grackle_chemistry =
     enzo::config()->method_grackle_chemistry;
+  double metallicity_floor_ = enzo::config()->method_grackle_metallicity_floor;
 
   for (int iz = 0; iz<ngz; iz++){
     for (int iy=0; iy<ngy; iy++){
@@ -601,7 +601,6 @@ double EnzoMethodGrackle::timestep ( Block * block ) throw()
 //----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_GRACKLE
-
 
 void EnzoMethodGrackle::enforce_metallicity_floor(Block * block) throw()
 {

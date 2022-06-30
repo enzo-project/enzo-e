@@ -254,11 +254,11 @@ void EnzoInitialBurkertBodenheimer::enforce_block
 
     if (metal) metal[i] = d[i]*inner_metal_fraction;
 
-		if(i == 20) {
-		  CkPrintf("Density = %e\n", d[i]);
-		  CkPrintf("Angular Velocity = %e rad/s", sqrt(vx[i]*vx[i] + vy[i]*vy[i] + vz[i]*vz[i])/radius / enzo_units->time());
+		//if(i == 20) {
+		  //CkPrintf("Density = %e\n", d[i]);
+		  //CkPrintf("Angular Velocity = %e rad/s", sqrt(vx[i]*vx[i] + vy[i]*vy[i] + vz[i]*vz[i])/radius / enzo_units->time());
 		  //CkExit(-99);
-		}
+		//}
 	      }
 	    }
 	  }
