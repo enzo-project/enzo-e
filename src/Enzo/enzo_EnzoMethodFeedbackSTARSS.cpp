@@ -248,6 +248,10 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
 
+  ASSERT("EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS",
+         "untested without dual-energy formalism",
+         enzo::uses_dual_energy_formalism(true)); // default to true if no hydro/mhd method
+
   // required fields
   cello::define_field("density");
   cello::define_field("pressure");
