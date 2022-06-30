@@ -254,8 +254,16 @@ Initial * EnzoProblem::create_initial_
     initial = new EnzoInitialIsolatedGalaxy (enzo_config);
   } else if (type == "merge_sinks_test") {
     initial = new EnzoInitialMergeSinksTest (enzo_config);
-  }
-  else {
+  } else if (type == "accretion_test") {
+    initial = new EnzoInitialAccretionTest
+      (cycle, time,
+       enzo_config->initial_accretion_test_sink_position,
+       enzo_config->initial_accretion_test_sink_velocity,
+       enzo_config->initial_accretion_test_sink_mass,
+       enzo_config->initial_accretion_test_gas_density,
+       enzo_config->initial_accretion_test_gas_pressure,
+       enzo_config->initial_accretion_test_gas_radial_velocity);
+  } else {
     initial = Problem::create_initial_
       (type,index,config,parameters);
   }
@@ -605,7 +613,7 @@ Method * EnzoProblem::create_method_
 
     method = new EnzoMethodGrackle
       (enzo_config->physics_cosmology_initial_redshift,
-       enzo_config->initial_time);
+       enzo::simulation()->time());
 
 #endif /* CONFIG_USE_GRACKLE */
 
@@ -696,8 +704,42 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "merge_sinks") {
 
-    method = new EnzoMethodMergeSinks(enzo_config->method_merge_sinks_merging_radius_cells);
+    method = new EnzoMethodMergeSinks(
+		    enzo_config->method_merge_sinks_merging_radius_cells
+				     );
 
+  } else if (name == "accretion") {
+
+    if (enzo_config->method_accretion_flavor == "threshold") {
+      method = new EnzoMethodThresholdAccretion(
+		       enzo_config->method_accretion_accretion_radius_cells,
+		       enzo_config->method_accretion_physical_density_threshold_cgs,
+		       enzo_config->method_accretion_max_mass_fraction
+						);
+    } else if (enzo_config->method_accretion_flavor == "bondi_hoyle") {
+      method = new EnzoMethodBondiHoyleAccretion(
+		       enzo_config->method_accretion_accretion_radius_cells,
+		       enzo_config->method_accretion_physical_density_threshold_cgs,
+		       enzo_config->method_accretion_max_mass_fraction
+						 );
+    } else if (enzo_config->method_accretion_flavor == "flux") {
+      method = new EnzoMethodFluxAccretion(
+		       enzo_config->method_accretion_accretion_radius_cells,
+		       enzo_config->method_accretion_physical_density_threshold_cgs,
+		       enzo_config->method_accretion_max_mass_fraction
+						 );
+    } else if (enzo_config->method_accretion_flavor == "dummy"){
+      method = new EnzoMethodAccretion(
+		       enzo_config->method_accretion_accretion_radius_cells,
+		       enzo_config->method_accretion_physical_density_threshold_cgs,
+		       enzo_config->method_accretion_max_mass_fraction
+				       );
+    } else {
+      ERROR1("EnzoProblem::create_method_",
+	    "\"accretion\" method has flavor \"%s\", which is not one of the possible options: "
+	     "\"threshold\", \"bondi_hoyle\", \"flux\", or \"dummy\"",
+	     enzo_config->method_accretion_flavor.c_str());
+    }
   } else {
 
     // Fallback to Cello method's

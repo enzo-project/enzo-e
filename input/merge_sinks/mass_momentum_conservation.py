@@ -65,7 +65,13 @@ def test_mmc(tolerance,input_prefix,output):
     py   = []
     pz   = []
     n_p  = []
-    
+
+    # Can't test conservation of quantities if there are less than 2 snapshots
+    # If this has happened, something has probably gone wrong in any case, so
+    # return False
+    if (len(yt.DatasetSeries(ds_pattern)) < 2):
+        return False
+
     for ds in yt.DatasetSeries(ds_pattern):
         box = ds.box(left_edge = -ds.domain_width/2.0,
                      right_edge = ds.domain_width/2.0)

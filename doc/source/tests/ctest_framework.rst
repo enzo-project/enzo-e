@@ -1,8 +1,10 @@
------------------------
-The Testing Environment
------------------------
+.. _ctest:
 
-The testing infrastructure in Enzo-e is comprised of unit tests (which test individual functions and functionality) and integration tests which test a more holistic portion of the codebase. In this documentation, we detail the layout of the testing infrastructure. All input files are located in the input directory and the tests themselves are defined in ``test/CMakeLists.txt``
+-------------------
+The ctest Framework
+-------------------
+
+The ``ctest`` infrastructure in Enzo-e is comprised of unit tests (which test individual functions and functionality) and integration tests which test a more holistic portion of the codebase. In this documentation, we detail the layout of the ctest infrastructure. All input files are located in the input directory and the tests themselves are defined in ``test/CMakeLists.txt``
 
 How to Run Tests
 ================
@@ -35,67 +37,3 @@ By default all tests will be run and the output is stored in the `test` director
 If an integration test fails in start-up this implies that there is something wrong with how the test is set up either as an error in the ``test/CMakeLists.txt`` file that calls the test or that the test has an undefined parameter. If a test fails while running this indicates that the feature being tested does not work.
 
 In order to see what happened during the test, you can look at the output directory of the test, which is located in a subdirectory (named after the test) in the ``test`` directory of the build directory, for example ``method_cosmology-1.in`` the test results are stored in ``test/MethodCosmology/Cosmology-8``. This directory also contains all outputs (image and data files).
-
-What Tests are Currently Included
-=================================
-
-Currently the Enzo-e testing infrastructure tests:
-
-.. toctree::
-   array-cmake
-   error-cmake
-   memory-cmake
-   monitor-cmake
-   adapt-cmake
-   boundary-cmake
-   fluxcorrect-cmake
-   grackle-cmake
-   gravity-cmake
-   heat-cmake
-   helloworld-cmake
-   initialmusic-cmake
-   mergesinks-cmake
-   output-cmake
-   particle-cmake
-   ppm-cmake
-   vlct-cmake
-
-
-What Tests are Available
-========================
-
-Currently the Enzo-e has the following tests in the input folder:
-
-.. toctree::
-   adapt
-   balance
-   boundary
-   checkpoint
-   collapse
-   cosmology
-   fluxcorrect
-   grackle
-   gravity
-   heat
-   helloworld
-   hierarchy
-   hydro
-   initialmusic
-   isolatedgalaxy
-   mergesinks
-   methods
-   output
-   parse
-   particle
-   performance
-   ppm
-   ppml
-   sedov
-   vlct
-   others
-  
-How to Add Your Own Test
-========================
-
-
-:ref:`new-test`.

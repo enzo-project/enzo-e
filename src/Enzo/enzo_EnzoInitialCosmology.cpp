@@ -19,6 +19,18 @@ EnzoInitialCosmology::EnzoInitialCosmology
     gamma_(gamma),
     temperature_(temperature)
 {
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
+  EnzoUnits * units = enzo::units();
+
+  // set units to cosmology
+  units->set_cosmology(cosmology);
+
+  // set initial redshift
+  double r0 = cosmology->initial_redshift();
+  cosmology->set_current_redshift(r0);
+
+  // set initial time based on redshift
+  enzo::simulation()->set_time(cosmology->time_from_redshift(r0));
 }
 
 //----------------------------------------------------------------------
@@ -35,12 +47,8 @@ void EnzoInitialCosmology::enforce_block
     temperature_ = 550.0 *
       pow((1.0 + cosmology->initial_redshift())/(1.0 + 200.00), 2.0);
   }
-
-  // Set initial time based on initial redshift
-  double r0 = cosmology->initial_redshift();
-  double t0 = cosmology->time_from_redshift(r0);
-  block->set_time(t0);
-  enzo::simulation()->set_time(t0);
+  
+  block->set_time(enzo::simulation()->time());
   
   const double default_mu = 0.6;
 

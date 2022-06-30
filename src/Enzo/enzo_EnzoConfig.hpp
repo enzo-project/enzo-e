@@ -289,8 +289,13 @@ public: // interface
       initial_IG_recent_SF_bin_size(5.0),
       initial_IG_recent_SF_SFR(2.0),
       initial_IG_recent_SF_seed(12345),
-      // EnzoInitialMergeStarsTest
+      // EnzoInitialMergeSinksTest
       initial_merge_sinks_test_particle_data_filename(""),
+      // EnzoInitialAccretionTest
+      initial_accretion_test_sink_mass(0.0),
+      initial_accretion_test_gas_density(0.0),
+      initial_accretion_test_gas_pressure(0.0),
+      initial_accretion_test_gas_radial_velocity(0.0),
       // EnzoMethodCheckGravity
       method_check_gravity_particle_type(),
       // EnzoMethodHeat
@@ -365,8 +370,13 @@ public: // interface
       method_vlct_full_dt_reconstruct_method(""),
       method_vlct_theta_limiter(0.0),
       method_vlct_mhd_choice(""),
-      // EnzoMethodMergeStars
+      // EnzoMethodMergeSinks
       method_merge_sinks_merging_radius_cells(0.0),
+      // EnzoMethodAccretionCompute
+      method_accretion_accretion_radius_cells(0.0),
+      method_accretion_flavor(""),
+      method_accretion_physical_density_threshold_cgs(0.0),
+      method_accretion_max_mass_fraction(0.0),
       // EnzoProlong
       prolong_enzo_type(),
       prolong_enzo_positive(true),
@@ -397,6 +407,8 @@ public: // interface
       initial_collapse_array[axis] = 0;
       initial_IG_center_position[axis] = 0.5;
       initial_IG_bfield[axis]         = 0.0;
+      initial_accretion_test_sink_position[axis] = 0.0;
+      initial_accretion_test_sink_velocity[axis] = 0.0;
       method_background_acceleration_center[axis] = 0.5;
       method_background_acceleration_angular_momentum[axis] = 0;
 
@@ -435,6 +447,7 @@ protected: // methods
   void read_initial_isolated_galaxy_(Parameters *);
   void read_initial_feedback_test_(Parameters *);
   void read_initial_merge_sinks_test_(Parameters *);
+  void read_initial_accretion_test_(Parameters *);
   
   void read_method_grackle_(Parameters *);
   void read_method_feedback_(Parameters *);
@@ -448,6 +461,7 @@ protected: // methods
   void read_method_ppm_(Parameters *);
   void read_method_turbulence_(Parameters *);
   void read_method_merge_sinks_(Parameters *);
+  void read_method_accretion_(Parameters *);
   
   void read_physics_(Parameters *);
   void read_physics_fluid_props_(Parameters *);
@@ -679,8 +693,16 @@ public: // attributes
   double                     initial_IG_recent_SF_SFR;
   int                        initial_IG_recent_SF_seed;
 
-  // EnzoInitialMergeStarsTest
+  // EnzoInitialMergeSinksTest
   std::string                initial_merge_sinks_test_particle_data_filename;
+
+  // EnzoInitialAccretionTest
+  double                     initial_accretion_test_sink_position[3];
+  double                     initial_accretion_test_sink_velocity[3];
+  double                     initial_accretion_test_sink_mass;
+  double                     initial_accretion_test_gas_density;
+  double                     initial_accretion_test_gas_pressure;
+  double                     initial_accretion_test_gas_radial_velocity;
 
   /// EnzoMethodCheckGravity
   std::string                method_check_gravity_particle_type;
@@ -776,10 +798,15 @@ public: // attributes
   double                     method_vlct_theta_limiter;
   std::string                method_vlct_mhd_choice;
 
-  /// EnzoMethodMergeStars
+  /// EnzoMethodMergeSinks
   double                     method_merge_sinks_merging_radius_cells;
 
-
+  /// EnzoMethodAccretion
+  double                     method_accretion_accretion_radius_cells;
+  std::string                method_accretion_flavor;
+  double                     method_accretion_physical_density_threshold_cgs;
+  double                     method_accretion_max_mass_fraction;
+  
   std::string                prolong_enzo_type;
   bool                       prolong_enzo_positive;
   bool                       prolong_enzo_use_linear;

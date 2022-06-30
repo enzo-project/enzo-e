@@ -57,8 +57,7 @@
               "metal_density",
               "cooling_time",  
               "temperature",
-              "pressure",
-              "gamma"
+              "pressure"
      ];
 
      padding = 0;
@@ -89,11 +88,7 @@
               "DII_density",
               "HDI_density",
               "e_density",
-              "metal_density",
-              "cooling_time",
-              "temperature",
-              "pressure",
-              "gamma" ];
+              "metal_density"];
     }
 
 # derived fields grouping enables Enzo-E to ensure
@@ -202,9 +197,7 @@
               "metal_density",
               "cooling_time",
               "temperature",
-              "pressure",
-              "gamma"
-               ];
+              "pressure"];
 
          dir   = ["GRACKLE_TEST_%03d","cycle"];
          name = [ "method_grackle-1-%03d-%03d.h5","cycle", "proc" ];

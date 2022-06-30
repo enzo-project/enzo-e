@@ -10,8 +10,7 @@ Field {
 	   "e_density",
            "metal_density",
 	   "cooling_time",
-	   "temperature",
-	   "gamma"];
+	   "temperature"];
 }
 
 Group {
@@ -24,11 +23,7 @@ Group {
               "HeII_density",
               "HeIII_density",
               "e_density",
-              "metal_density",
-              "cooling_time",
-              "temperature",
-              "pressure",
-              "gamma" ];
+              "metal_density"];
     }
 
     derived {
@@ -51,8 +46,7 @@ Method {
 	                 "e_density",
                          "metal_density",
 	                 "cooling_time",
-	                 "temperature",
-	                 "gamma"]; 
+	                 "temperature"]; 
      } 
      grackle {
         courant = 0.50; # meaningless unless use_cooling_timestep = true;
@@ -89,8 +83,7 @@ Output {
 	                 "e_density",
                          "metal_density",
 	                 "cooling_time",
-	                 "temperature",
-	                 "gamma"];
+	                 "temperature"];
         }
      de   { dir = [ "Dir_COSMO_MULTI_%04d", "cycle" ]; }
      depa { dir = [ "Dir_COSMO_MULTI_%04d", "cycle" ]; }
