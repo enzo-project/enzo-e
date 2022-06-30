@@ -242,14 +242,13 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_use_ionization_feedback(false),
   method_feedback_time_first_sn(-1), // in Myr
   // EnzoMethodFeedbackSTARSS,
-  method_feedback_single_sn(0),
-  method_feedback_unrestricted_sn(0),
-  method_feedback_stellar_winds(0),
-  method_feedback_gas_return_fraction(0.0),
+  method_feedback_supernovae(true),
+  method_feedback_unrestricted_sn(true),
+  method_feedback_stellar_winds(true),
   method_feedback_min_level(0),
-  method_feedback_analytic_SNR_shell_mass(0),
-  method_feedback_fade_SNR(0),
-  method_feedback_NEvents(0),
+  method_feedback_analytic_SNR_shell_mass(true),
+  method_feedback_fade_SNR(true),
+  method_feedback_NEvents(-1),
   // EnzoMethodStarMaker,
   method_star_maker_flavor(""),                              // star maker type to use
   method_star_maker_use_altAlpha(false),
@@ -266,10 +265,10 @@ EnzoConfig::EnzoConfig() throw ()
   method_star_maker_overdensity_threshold(0.0),
   method_star_maker_critical_metallicity(0.0),
   method_star_maker_temperature_threshold(1.0E4),
-  method_star_maker_maximum_mass_fraction(0.5),            // maximum cell mass fraction to convert to stars
+  method_star_maker_maximum_mass_fraction(0.05),            // maximum cell mass fraction to convert to stars
   method_star_maker_efficiency(0.01),            // star maker efficiency per free fall time
-  method_star_maker_minimum_star_mass(1.0E4),    // minimum star particle mass in solar masses
-  method_star_maker_maximum_star_mass(1.0E4),    // maximum star particle mass in solar masses
+  method_star_maker_minimum_star_mass(0.0),    // minimum star particle mass in solar masses
+  method_star_maker_maximum_star_mass(-1.0),    // maximum star particle mass in solar masses
   method_star_maker_min_level(0), // minimum AMR level for star formation
   method_star_maker_turn_off_probability(false),
   // EnzoMethodTurbulence
@@ -640,10 +639,9 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_feedback_use_ionization_feedback;
   p | method_feedback_time_first_sn;
 
-  p | method_feedback_single_sn;
+  p | method_feedback_supernovae;
   p | method_feedback_unrestricted_sn;
   p | method_feedback_stellar_winds;
-  p | method_feedback_gas_return_fraction;
   p | method_feedback_min_level;
   p | method_feedback_analytic_SNR_shell_mass;
   p | method_feedback_fade_SNR;
@@ -1663,26 +1661,23 @@ void EnzoConfig::read_method_feedback_(Parameters * p)
     ("Method:feedback:use_ionization_feedback", false);
 
   // MethodFeedbackSTARSS parameters
-  method_feedback_single_sn = p->value_integer
-    ("Method:feedback:single_sn",0);
+  method_feedback_supernovae = p->value_logical
+    ("Method:feedback:supernovae",true);
 
-  method_feedback_unrestricted_sn = p->value_integer
-    ("Method:feedback:unrestricted_sn",0);
+  method_feedback_unrestricted_sn = p->value_logical
+    ("Method:feedback:unrestricted_sn",true);
 
-  method_feedback_stellar_winds = p->value_integer
-    ("Method:feedback:stellar_winds",0);
-
-  method_feedback_gas_return_fraction = p->value_float
-    ("Method:feedback:gas_return_fraction",0.0);
+  method_feedback_stellar_winds = p->value_logical
+    ("Method:feedback:stellar_winds",true);
 
   method_feedback_min_level = p->value_integer
     ("Method:feedback:min_level",0);
 
-  method_feedback_analytic_SNR_shell_mass = p->value_integer
-    ("Method:feedback:analytic_SNR_shell_mass",0);
+  method_feedback_analytic_SNR_shell_mass = p->value_logical
+    ("Method:feedback:analytic_SNR_shell_mass",true);
 
-  method_feedback_fade_SNR = p->value_integer
-    ("Method:feedback:fade_SNR",0);
+  method_feedback_fade_SNR = p->value_logical
+    ("Method:feedback:fade_SNR",true);
 
   method_feedback_NEvents = p->value_integer
     ("Method:feedback:NEvents",-1);
@@ -1742,16 +1737,16 @@ void EnzoConfig::read_method_star_maker_(Parameters * p)
     ("Method:star_maker:critical_metallicity",0.0);
 
   method_star_maker_maximum_mass_fraction = p->value_float
-    ("Method:star_maker:maximum_mass_fraction",0.5);
+    ("Method:star_maker:maximum_mass_fraction",0.05);
 
   method_star_maker_efficiency = p->value_float
     ("Method:star_maker:efficiency",0.01);
 
   method_star_maker_minimum_star_mass = p->value_float
-    ("Method:star_maker:minimum_star_mass",1.0E4);
+    ("Method:star_maker:minimum_star_mass",0.0);
 
   method_star_maker_maximum_star_mass = p->value_float
-    ("Method:star_maker:maximum_star_mass",1.0E4);
+    ("Method:star_maker:maximum_star_mass",-1.0);
   
   method_star_maker_min_level = p->value_integer
     ("Method:star_maker:min_level",0);

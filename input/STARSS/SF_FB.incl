@@ -38,7 +38,6 @@ Method {
      
        use_self_gravitating     = true;  # check that virial parameter < 1
        use_altAlpha             = false; # replace virial parameter calculation with total_energy/potential
-                                         # requires DEBUG_COPY_POTENTIAL to be set in EnzoMethodGravity
        use_h2_self_shielding    = false;
        use_temperature_threshold= false;
        use_critical_metallicity = false;
@@ -56,14 +55,14 @@ Method {
 
   feedback {
     flavor = "STARSS";
-    single_sn = 1;       # whether to have SNe at all
-    unrestricted_sn = 1; # Allow > 1 SN per particle in a timestep
-    stellar_winds = 1;   # whether to have stellar winds
-    analytic_SNR_shell_mass = 1; # calculate shell mass and subtract this from blast interior
+    supernovae = true;       # whether to have SNe at all
+    unrestricted_sn = true; # Allow > 1 SN per particle in a timestep
+    stellar_winds = true;   # whether to have stellar winds
+    analytic_SNR_shell_mass = true; # calculate shell mass and subtract this from blast interior
                                  # during feedback deposition
 
-    fade_SNR = 1; # Allow coupling of FB out to the fading phase, where expansion of the SNR
-                  # is comparable to the local sound speed.
+    fade_SNR = true; # Allow coupling of FB out to the fading phase, where expansion of the SNR
+                     # is comparable to the local sound speed.
 
     NEvents = -1; # Use this to manually set off SN events in ideal tests.
                   # if -1, SN rates are calculated for the particles to determine when

@@ -75,11 +75,11 @@ Method {
 
   feedback {
     flavor = "STARSS";
-    single_sn = 1;
-    unrestricted_sn = 1;
-    stellar_winds = 1;
-    analytic_SNR_shell_mass = 1;
-    fade_SNR = 1;
+    supernovae = true;
+    unrestricted_sn = true;
+    stellar_winds = true;
+    analytic_SNR_shell_mass = true;
+    fade_SNR = true;
     NEvents = 1;
   };
 

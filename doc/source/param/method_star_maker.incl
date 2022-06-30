@@ -28,7 +28,7 @@
 :Default: :d:`false`
 :Scope:     :z:`Enzo`
 
-:e:`Set number density threshold for star formation. Requires "use_density_threshold"=true.`
+:e:`Set number density threshold for star formation in units of cm^-3. Requires "use_density_threshold"=true.`
 
 ----
 
@@ -38,7 +38,7 @@ Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_overdensity_threshold`
 :Default: :d:`false`
 :Scope:     :z:`Enzo`
 
-:e:`Flag to enable overdensity threshold for star formation.`
+:e:`Flag to enable overdensity threshold for star formation. Currently only valid for cosmology simulations.`
 
 ----
 
@@ -98,7 +98,7 @@ Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_self_gravitating`
 :Default: :d:`false`
 :Scope:     :z:`Enzo`
 
-:e:`Checks that alpha < 1, where alpha is the virial parameter calculated using the FIRE2 prescription.`
+:e:`Checks that alpha < 1, where alpha is the virial parameter calculated using the FIRE-2 prescription. See Appendix C of `Hopkins et al. (2018) <https://academic.oup.com/mnras/article/480/1/800/5046474>`_.`
 
 ----
 
@@ -108,7 +108,7 @@ Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_altAlpha`
 :Default: :d:`false`
 :Scope:     :z:`Enzo`
 
-:e:`Checks that alpha < 1, where alpha is the virial parameter calculated as "potential/total_energy". Currently only accessed by EnzoMethodStarMakerSTARSS. Requires DEBUG_COPY_POTENTIAL flag to be set in EnzoMethodGravity.cpp`
+:e:`Checks that alpha < 1, where alpha is the virial parameter calculated as "potential/total_energy". Currently only accessed by EnzoMethodStarMakerSTARSS.`
 
 ----
 
@@ -118,7 +118,7 @@ Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_h2_self_shielding`
 :Default: :d:`false`
 :Scope:     :z:`Enzo`
 
-:e:`Checks that f_shield < 0, f_shield is calculated using fits from Krumholz & Gnedin (2011).'
+:e:`Checks that f_shield < 0, where f_shield is the H2 self-shielded fraction calculated using fits from Krumholz & Gnedin (2011).'
 
 ----
 
@@ -128,7 +128,7 @@ Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_jeans_mass`
 :Default: :d:`false`
 :Scope:     :z:`Enzo`
 
-:e:`Checks that cell_mass > jeans_mass in a cell'
+:e:`Checks that cell_mass > max(jeans_mass, 1000 Msun) in a cell. '
 
 ----
 
@@ -145,7 +145,7 @@ Parameter:  :p:`Method` : :p:`star_maker` : :p:`critical_metallicity`
 Parameter:  :p:`Method` : :p:`star_maker` : :p:`maximum_mass_fraction`
 :Summary: :s:`Max fraction of gas in a cell that can be converted into a star particle per formation event.`
 :Type:   :t:`float`
-:Default: :d:`0.5`
+:Default: :d:`0.05`
 :Scope:     :z:`Enzo`
 
 :e:`Max fraction of gas in a cell that can be converted into a star particle per formation event.`
@@ -175,7 +175,7 @@ Parameter:  :p:`Method` : :p:`star_maker` : :p:`minimum_star_mass`
 Parameter:  :p:`Method` : :p:`star_maker` : :p:`maximum_star_mass`
 :Summary: :s:`Maximum star particle mass`
 :Type:   :t:`float`
-:Default: :d:`1e4`
+:Default: :d:`-1.0`
 :Scope:     :z:`Enzo`
 
 :e:`Set maximum star particle mass. For no limit, set "maximum_star_mass" < 0.`
@@ -185,7 +185,7 @@ Parameter:  :p:`Method` : :p:`star_maker` : :p:`maximum_star_mass`
 Parameter:  :p:`Method` : :p:`star_maker` : :p:`turn_off_probability`
 :Summary: :s:`Turn off probablistic elements of EnzoMethodStarMakerSTARSS.`
 :Type:   :t:`logical`
-:Default: :d:`fapse`
+:Default: :d:`false`
 :Scope:     :z:`Enzo`
 
 :e:`Turn off probablistic elements of EnzoMethodStarMakerSTARSS. Mostly meant for debugging.`

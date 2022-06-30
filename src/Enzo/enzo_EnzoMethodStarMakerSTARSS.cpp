@@ -15,7 +15,6 @@
 #include <time.h>
 
 // #define DEBUG_SF_CRITERIA
-// #define DEBUG_SF_CRITERIA_EXTRA
 // #define DEBUG_STORE_INITIAL_PROPERTIES
 //-------------------------------------------------------------------
 
@@ -133,7 +132,6 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
   enzo_float * pvx  = 0;
   enzo_float * pvy  = 0;
   enzo_float * pvz  = 0;
-   ///
   enzo_float * pmetal = 0;
   enzo_float * pform  = 0;
   enzo_float * plifetime = 0;
@@ -219,6 +217,12 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
     }
   }
 
+  if (use_overdensity_threshold_) {
+    ASSERT("EnzoMethodStarMakerSTARSS::compute()",
+           "parameter use_overdensity_threshold is only valid for cosmology!",
+            cosmology);
+  }
+
   // compute the temperature
   EnzoComputeTemperature compute_temperature
     (enzo_config->ppm_density_floor,
@@ -272,12 +276,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         // check overdensity threshold
         // In cosmology, units are scaled such that mean(density) = 1,
         // so density IS overdensity in these units  
-        if (use_overdensity_threshold_) {
-          ASSERT("EnzoMethodStarMakerSTARSS::compute()",
-                 "parameter use_overdensity_threshold is only valid for cosmology!",
-                  cosmology);
-        }
-      
+
         if (! this->check_overdensity_threshold(density[i]) ) continue;
 
         #ifdef DEBUG_SF_CRITERIA 
@@ -289,13 +288,13 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
                                               velocity_z, i,
                                               idx, idy, idz, dx, dy, dz)) continue;
       
-        #ifdef DEBUG_SF_CRITERIA_EXTRA
+        #ifdef DEBUG_SF_CRITERIA
            CkPrintf("MethodStarMakerSTARSS -- div(v) < 0 in cell %d\n", i);
         #endif 
 
         // check that alpha < 1
         if (use_altAlpha_) {
-          if (! this->check_self_gravitating_new(total_energy[i], potential[i])) continue;
+          if (! this->check_self_gravitating_alt(total_energy[i], potential[i])) continue;
         }
 
         else {
@@ -305,7 +304,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
                                              i, idx, idy, idz, dx, dy, dz)) continue;
         }
 
-        #ifdef DEBUG_SF_CRITERIA_EXTRA
+        #ifdef DEBUG_SF_CRITERIA
            CkPrintf("MethodStarMakerSTARSS -- alpha < 1 in cell %d\n", i);
         #endif 
 
@@ -324,7 +323,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         if (! check_jeans_mass(temperature[i], mean_particle_mass, density[i], cell_mass,
                                munit,rhounit )) continue;
 
-        #ifdef DEBUG_SF_CRITERIA_EXTRA
+        #ifdef DEBUG_SF_CRITERIA
            CkPrintf("MethodStarMakerSTARSS -- M > M_jeans in cell %d\n", i);
         #endif     
         
@@ -534,9 +533,11 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
     }
   } // end loop iz
 
-  if (count > 0){
-    CkPrintf("MethodStarMakerSTARSS -- Number of particles formed: %d\n", count);
-  }
+  #ifdef DEBUG_SF_CRITERIA
+    if (count > 0){
+      CkPrintf("MethodStarMakerSTARSS -- Number of particles formed: %d\n", count);
+    }
+  #endif
 
 /* TODO: Add this part in once Pop III SF/FB is implemented
  

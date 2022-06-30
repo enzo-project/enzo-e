@@ -212,7 +212,7 @@ int EnzoMethodStarMaker::check_overdensity_threshold(const double &rho)
 }
 
 
-int EnzoMethodStarMaker::check_self_gravitating_new(const double total_energy, const double potential)
+int EnzoMethodStarMaker::check_self_gravitating_alt(const double total_energy, const double potential)
 {
 
   if (!this->use_self_gravitating_)

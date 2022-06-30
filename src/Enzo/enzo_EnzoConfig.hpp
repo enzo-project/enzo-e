@@ -346,14 +346,13 @@ public: // interface
       method_feedback_use_ionization_feedback(false),
       method_feedback_time_first_sn(-1.0), // in Myr
       /// EnzoMethodFeedbackSTARSS
-      method_feedback_single_sn(0),
-      method_feedback_unrestricted_sn(0),
-      method_feedback_stellar_winds(0),
-      method_feedback_gas_return_fraction(0.0),
+      method_feedback_supernovae(true),
+      method_feedback_unrestricted_sn(true),
+      method_feedback_stellar_winds(true),
       method_feedback_min_level(0),
-      method_feedback_analytic_SNR_shell_mass(0),
-      method_feedback_fade_SNR(0),
-      method_feedback_NEvents(0),
+      method_feedback_analytic_SNR_shell_mass(true),
+      method_feedback_fade_SNR(true),
+      method_feedback_NEvents(-1),
       /// EnzoMethodStarMaker
       method_star_maker_flavor(""),
       method_star_maker_use_density_threshold(false),           // check above density threshold before SF
@@ -370,10 +369,10 @@ public: // interface
       method_star_maker_critical_metallicity(0.0),
       method_star_maker_temperature_threshold(1.0E4),
       method_star_maker_number_density_threshold(0.0),      // Number density threshold in cgs
-      method_star_maker_maximum_mass_fraction(0.5),            // maximum cell mass fraction to convert to stars
+      method_star_maker_maximum_mass_fraction(0.05),            // maximum cell mass fraction to convert to stars
       method_star_maker_efficiency(0.01),            // star maker efficiency
-      method_star_maker_minimum_star_mass(1.0E4),    // minium star particle mass in solar masses
-      method_star_maker_maximum_star_mass(1.0E4),    // maximum star particle mass in solar masses
+      method_star_maker_minimum_star_mass(0.0),    // minium star particle mass in solar masses
+      method_star_maker_maximum_star_mass(-1.0),    // maximum star particle mass in solar masses
       method_star_maker_min_level(0), // minimum refinement level for star formation
       method_star_maker_turn_off_probability(false),
       // EnzoMethodTurbulence
@@ -823,14 +822,14 @@ public: // attributes
 
   /// EnzoMethodFeedbackSTARSS
   
-  int                       method_feedback_single_sn;
-  int                       method_feedback_unrestricted_sn;
-  int                       method_feedback_stellar_winds;
-  double                    method_feedback_gas_return_fraction;
-  int                       method_feedback_min_level;
-  int                       method_feedback_analytic_SNR_shell_mass;
-  int                       method_feedback_fade_SNR;
-  int                       method_feedback_NEvents;
+  bool                       method_feedback_supernovae;
+  bool                       method_feedback_unrestricted_sn;
+  bool                       method_feedback_stellar_winds;
+  int                        method_feedback_min_level;
+  bool                       method_feedback_analytic_SNR_shell_mass;
+  bool                       method_feedback_fade_SNR;
+  int                        method_feedback_NEvents;
+ 
   /// EnzoMethodStarMaker
 
   std::string               method_star_maker_flavor;

@@ -41,7 +41,7 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age_Myr, int* nSNII, int* nSNIA
     *nSNII = 0;
     *nSNIA = 0;
     double RII=0, RIA=0, PII=0, PIA=0, random = 0;
-    if (enzo_config->method_feedback_single_sn && NEvents < 0)
+    if (enzo_config->method_feedback_supernovae && NEvents < 0)
     {
         /* age-dependent rates */
         if (age_Myr < 3.401)
@@ -271,7 +271,7 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
   refresh->add_all_fields();
   
   sf_minimum_level_ = enzo_config->method_star_maker_min_level;
-  single_sn_        = enzo_config->method_feedback_single_sn;
+  supernovae_        = enzo_config->method_feedback_supernovae;
 
   // Initialize temporary fields
   i_d_dep  = cello::field_descr()->insert_temporary();
@@ -344,7 +344,7 @@ void EnzoMethodFeedbackSTARSS::pup (PUP::er &p)
   Method::pup(p);
 
   p | sf_minimum_level_;
-  p | single_sn_;
+  p | supernovae_;
   p | NEvents;
   p | ir_feedback_;
 
@@ -673,7 +673,7 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
         int nSNII = 0, nSNIa = 0;
         double SNMassEjected = 0.0, SNMetalEjected = 0.0;
 
-        if (single_sn_){ 
+        if (supernovae_){ 
 
           /* Determine number of SN events from rates (currently taken from Hopkins 2018) */
 
