@@ -50,6 +50,12 @@ find_package(Charm REQUIRED)
 # Link executables with the charmc wrapper
 STRING(REGEX REPLACE "<CMAKE_CXX_COMPILER>" "${CHARM_COMPILER}"
        CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE}")
+# for book-keeping purposes create a library representing the external
+# Charm-library. We are going to make this an interface library (a header-only)
+# library since the charmc wrapper makes sure we link to the correct library
+add_library(CHARM_EXTERNAL INTERFACE)
+target_include_directories(CHARM_EXTERNAL INTERFACE ${CHARM_INCLUDE_DIRS})
+
 
 # Need to process Grackle here as both Cello and Enzo-E depend on it
 option(USE_GRACKLE "Use Grackle Chemistry" ON)

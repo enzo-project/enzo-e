@@ -8,7 +8,7 @@ file(GLOB SRC_FILES enzo*.cpp *F *enzo*hpp fortran.h fortran_types.h FofLib.cpp)
 # -> PPML_sub.F:(.text+0x5ebf): multiple definition of `qdd6_'; CMakeFiles/enzo-e.dir/PPML_QDD6.F.o:PPML_QDD6.F:(.text+0x0): first defined here
 list(FILTER SRC_FILES EXCLUDE REGEX "PPML_QDD6")
 
-set(Cello_LIBS "cello;charm;control;disk;error;data;io;memory;mesh;monitor;parameters;parallel;performance;problem;compute;simulation;test_Unit")
+set(Cello_LIBS "cello_component;charm_component;control;disk;error;data;io;memory;mesh;monitor;parameters;parallel;performance;problem;compute;simulation;test_Unit")
 
 set(External_LIBS "pngwriter;Boost::filesystem;PNG::PNG;HDF5_C")
 if (USE_GRACKLE)
