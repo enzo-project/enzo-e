@@ -60,4 +60,3 @@ Parameter:  :p:`Method` : :p:`feedback` : :p:`NEvents`
 
 :e:`If -1, will probabilistically model supernova. If "NEvents" > 0, will set off N-supernovae per particle, (1 per timestep for each particle). If NEvents = 0, no supernovae will go off. Mostly for testing purposes.`
 
-----
