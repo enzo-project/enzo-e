@@ -95,71 +95,46 @@ void EnzoMethodPmDeposit::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void EnzoMethodPmDeposit::compute ( Block * block) throw()
-{
+namespace { // define local helper functions in anonymous namespace
 
-   if (enzo::simulation()->cycle() == enzo::config()->initial_cycle) {
-    // Check if the gravity method is being used and that pm_deposit
-    // precedes the gravity method.
-    ASSERT("EnzoMethodPmDeposit",
-           "Error: pm_deposit method must precede gravity method.",
-           enzo::problem()->method_precedes("pm_deposit", "gravity"));
-  }
-
-  if (block->is_leaf()) {
-
+  /// deposits mass from all gravitating particles onto density_particle_arr
+  ///
+  /// @param[out] density_particle_arr The array where the deposited mass
+  ///     density is stored
+  /// @param[in]  Block Contains the particle data to use for accumulation
+  /// @param[in]  dt_div_cosmoa Length of time to "drift" the particles before
+  ///     before deposition divided by the scale factor (computed for the time
+  ///     after particles have been drifted)
+  /// @param[in]  inv_vol One divided by the volume of a cell. When
+  ///     `cello::rank()` is 2, this is really "inverse-area" and when it's 1,
+  ///     this is really "inverse-cell-width". In cosmological simulations this
+  ///     should be the comoving quantity.
+  /// @param[in]      mx,my,mz Specifies the number of cells along each
+  ///     dimension of an array (including ghost cells)
+  /// @param[in]      gx,gy,gz Specifies the number of cells in the ghost zone
+  ///     for each dimensions
+  void deposit_particles_(const CelloArray<enzo_float,3>& density_particle_arr,
+                          Block* block, double dt_div_cosmoa, double inv_vol,
+                          int mx, int my, int mz,
+                          int gx, int gy, int gz)
+  {
     Particle particle (block->data()->particle());
     Field    field    (block->data()->field());
 
     int rank = cello::rank();
-    enzo_float * de_t = (enzo_float *)
-      field.values("density_total");
-    enzo_float * de_p = (enzo_float *)
-      field.values("density_particle");
-    enzo_float * de_pa = (enzo_float *)
-      field.values("density_particle_accumulate");
 
-    int mx,my,mz;
-    field.dimensions(0,&mx,&my,&mz);
-    int nx,ny,nz;
-    field.size(&nx,&ny,&nz);
-    int gx,gy,gz;
-    field.ghost_depth(0,&gx,&gy,&gz);
+    // compute extent of the active zone
+    const int nx = mx - 2 * gx;
+    const int ny = (rank >=2) ? my - 2 * gy : 1;
+    const int nz = (rank >=3) ? mz - 2 * gz : 1;
 
-    // NOTE: density_total is now cleared in EnzoMethodGravity to
-    // instead of here to possible race conditions with refresh.  This
-    // means EnzoMethodPmDeposit ("pm_deposit") currently CANNOT be
-    // used without EnzoMethodGravity ("gravity")
+    enzo_float * de_p = density_particle_arr.data();
 
-    const int m = mx*my*mz;
-    std::fill_n(de_p,m,0.0);
-    std::fill_n(de_pa,m,0.0);
-
-    // Get block extents and cell widths
+    // Get block extents
     double xm,ym,zm;
     double xp,yp,zp;
-    double hx,hy,hz;
     block->lower(&xm,&ym,&zm);
     block->upper(&xp,&yp,&zp);
-    block->cell_width(&hx,&hy,&hz);
-
-    // To calculate densities from particles with "mass" attributes
-    // or constants, we need the inverse volume of cells in this block.
-    double inv_vol = 1.0;
-    if (rank >= 1) inv_vol /= hx;
-    if (rank >= 2) inv_vol /= hy;
-    if (rank >= 3) inv_vol /= hz;
-
-    // Get cosmological scale factors, if cosmology is turned on
-    enzo_float cosmo_a=1.0;
-    enzo_float cosmo_dadt=0.0;
-    EnzoPhysicsCosmology * cosmology = enzo::cosmology();
-    if (cosmology) {
-      cosmology->compute_expansion_factor(&cosmo_a,&cosmo_dadt,
-					  block->time() + alpha_*block->dt());
-    }
-
-    const double dt = alpha_ * block->dt() / cosmo_a;
 
     // Get the number of particle types in the "is_gravitating" group
     ParticleDescr * particle_descr = cello::particle_descr();
@@ -239,7 +214,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 #endif
 
 	  for (int ip=0; ip<np; ip++) {
-	    double x = xa[ip*dp] + vxa[ip*dv]*dt;
+	    double x = xa[ip*dp] + vxa[ip*dv]*dt_div_cosmoa;
 
 	    double tx = nx*(x - xm) / (xp - xm) - 0.5;
 
@@ -284,8 +259,8 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
 	  for (int ip=0; ip<np; ip++) {
 
-	    double x = xa[ip*dp] + vxa[ip*dv]*dt;
-	    double y = ya[ip*dp] + vya[ip*dv]*dt;
+	    double x = xa[ip*dp] + vxa[ip*dv]*dt_div_cosmoa;
+	    double y = ya[ip*dp] + vya[ip*dv]*dt_div_cosmoa;
 
 	    double tx = nx*(x - xm) / (xp - xm) - 0.5;
 	    double ty = ny*(y - ym) / (yp - ym) - 0.5;
@@ -358,9 +333,9 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
 	    // Copy batch particle velocities to temporary block field velocities
 
-	    double x = xa[ip*dp] + vxa[ip*dv]*dt;
-	    double y = ya[ip*dp] + vya[ip*dv]*dt;
-	    double z = za[ip*dp] + vza[ip*dv]*dt;
+	    double x = xa[ip*dp] + vxa[ip*dv]*dt_div_cosmoa;
+	    double y = ya[ip*dp] + vya[ip*dv]*dt_div_cosmoa;
+	    double z = za[ip*dp] + vza[ip*dv]*dt_div_cosmoa;
 
 	    double tx = nx*(x - xm) / (xp - xm) - 0.5;
 	    double ty = ny*(y - ym) / (yp - ym) - 0.5;
@@ -450,18 +425,58 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
     } // Loop over particle types in "is_gravitating" group
 
-    //--------------------------------------------------
-    // Add gas density
-    //--------------------------------------------------
+  }
+
+  //----------------------------------------------------------------------
+
+  /// deposits mas density from gas onto density_tot_arr
+  ///
+  /// @param[in, out] density_tot_arr The array where density gets accumulated
+  /// @param[in]      field Contains the field data to use for accumulation
+  /// @param[in]      dt Length of time to "drift" the density field before
+  ///     deposition divided by the scale factor at the deposition time
+  /// @param[in]      hx_prop,hy_prop,hz_prop The width of cell along
+  ///     each axis. These specify the proper lengths at the time that we
+  ///     deposit the density (after any drift).
+  /// @param[in]      mx,my,mz Specifies the number of cells along each
+  ///     dimension of an array (including ghost cells)
+  /// @param[in]      gx,gy,gz Specifies the number of cells in the ghost zone
+  ///     for each dimensions
+  void deposit_gas_(const CelloArray<enzo_float, 3>& density_tot_arr,
+                    Field& field, enzo_float dt_div_cosmoa,
+                    enzo_float hx_prop, enzo_float hy_prop, enzo_float hz_prop,
+                    int mx, int my, int mz,
+                    int gx, int gy, int gz){
+
+    int rank = cello::rank();
+    const int m = mx*my*mz;
+
+    // compute extent of the active zone
+    int nx = mx - 2 * gx;
+    int ny = (rank >=2) ? my - 2 * gy : 1;
+    int nz = (rank >=3) ? mz - 2 * gz : 1;
+
+    // retrieve primary fields needed for depositing gas density
     enzo_float * de = (enzo_float *) field.values("density");
+    enzo_float * vxf = (enzo_float *) field.values("velocity_x");
+    enzo_float * vyf = (enzo_float *) field.values("velocity_y");
+    enzo_float * vzf = (enzo_float *) field.values("velocity_z");
 
-    enzo_float * temp =   new enzo_float [4*m];
-    enzo_float * de_gas = new enzo_float [m];
-    enzo_float * rfield = new enzo_float [m];
+    // allocate and zero-initialize scratch arrays for missing velocity
+    // components.
+    std::vector<enzo_float> vel_scratch(m*(3 - rank), 0.0);
+    if (rank < 2) vyf = vel_scratch.data();
+    if (rank < 3) vzf = vel_scratch.data() + m;
 
-    std::fill_n(temp, 4*m, 0.0);
-    std::fill_n(de_gas, m, 0.0);
-    std::fill_n(rfield, m, 0.0);
+    // deposited_gas_density is a temporary array that just includes cells in
+    // the active zone
+    const CelloArray<enzo_float, 3> deposited_gas_density(nz,ny,nx);
+    // CelloArray sets elements to zero by default (making next line redundant)
+    std::fill_n(deposited_gas_density.data(), nx*ny*nz, 0.0);
+
+    // allocate temporary arrays
+    std::vector<enzo_float> temp(4*m, 0.0);
+    std::vector<enzo_float> rfield(m, 0.0);
 
     int gxi=gx;
     int gyi=gy;
@@ -472,66 +487,124 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     int i0 = 0;
     int i1 = 1;
 
-    /* Stefan: Not sure if these next four lines are correct.
-       I include the factors of cosmo_a for consistency with 
-       previous version. Also, not sure why dtf is
-       initialised with the value of alpha_.
-     */
+    FORTRAN_NAME(dep_grid_cic)(de, deposited_gas_density.data(), temp.data(),
+                               vxf, vyf, vzf,
+                               &dt_div_cosmoa, rfield.data(), &rank,
+                               &hx_prop,&hy_prop,&hz_prop,
+                               &mx,&my,&mz,
+                               &gxi,&gyi,&gzi,
+                               &nxi,&nyi,&nzi,
+                               &i0,&i0,&i0,
+                               &nx,&ny,&nz,
+                               &i1,&i1,&i1);
 
-    enzo_float hxf = hx * cosmo_a;
-    enzo_float hyf = hy * cosmo_a;
-    enzo_float hzf = hz * cosmo_a;
-    enzo_float dtf = alpha_;
+    // build a slice of density_tot that just includes the active zone
+    CelloArray<enzo_float,3> density_tot_az = density_tot_arr.subarray
+      (CSlice(gz, mz - gz), CSlice(gy, my - gy), CSlice(gx, mx - gx));
 
-    enzo_float * vxf = (enzo_float *) field.values("velocity_x");
-    enzo_float * vyf = (enzo_float *) field.values("velocity_y");
-    enzo_float * vzf = (enzo_float *) field.values("velocity_z");
-
-    enzo_float * vx = new enzo_float [m];
-    enzo_float * vy = new enzo_float [m];
-    enzo_float * vz = new enzo_float [m];
-
-    for (int i=0; i<m; i++) vx[i] = vxf[i];
-
-    if (rank >= 2) for (int i=0; i<m; i++) vy[i] = vyf[i];
-    else           for (int i=0; i<m; i++) vy[i] = 0.0;
-
-    if (rank >= 3) for (int i=0; i<m; i++) vz[i] = vzf[i];
-    else           for (int i=0; i<m; i++) vz[i] = 0.0;
-
-
-    FORTRAN_NAME(dep_grid_cic)(de,de_gas,temp,
-			       vx, vy, vz,
-			       &dtf, rfield, &rank,
-			       &hxf,&hyf,&hzf,
-			       &mx,&my,&mz,
-			       &gxi,&gyi,&gzi,
-			       &nxi,&nyi,&nzi,
-			       &i0,&i0,&i0,
-			       &nx,&ny,&nz,
-			       &i1,&i1,&i1);
-
-    for (int i=0; i<mx*my*mz; i++) {
-      de_t[i] = de_pa[i] = de_p[i];
-    }
-
-    for (int iz=gz; iz<mz-gz; iz++) {
-      for (int iy=gy; iy<my-gy; iy++) {
-	for (int ix=gx; ix<mx-gx; ix++) {
-	  int i = ix + mx*(iy + my*iz);
-	  int ig = (ix-gx) + nx*((iy-gy) + ny*(iz-gz));
-	  de_t[i] += de_gas[ig];
-	}
+    for (int iz=0; iz<nz; iz++) {
+      for (int iy=0; iy<ny; iy++) {
+        for (int ix=0; ix<nx; ix++) {
+          density_tot_az(iz,iy,ix) += deposited_gas_density(iz,iy,ix);
+        }
       }
     }
+  }
 
-    delete [] rfield;
-    delete [] temp;
-    delete [] vx;
-    delete [] vy;
-    delete [] vz;
+}
 
-    delete [] de_gas;
+//----------------------------------------------------------------------
+
+void EnzoMethodPmDeposit::compute ( Block * block) throw()
+{
+
+   if (enzo::simulation()->cycle() == enzo::config()->initial_cycle) {
+    // Check if the gravity method is being used and that pm_deposit
+    // precedes the gravity method.
+    ASSERT("EnzoMethodPmDeposit",
+           "Error: pm_deposit method must precede gravity method.",
+           enzo::problem()->method_precedes("pm_deposit", "gravity"));
+  }
+
+  if (block->is_leaf()) {
+
+    Field    field    (block->data()->field());
+
+    CelloArray<enzo_float,3> density_tot_arr =
+      field.view<enzo_float>("density_total");
+    CelloArray<enzo_float,3> density_particle_arr =
+      field.view<enzo_float>("density_particle");
+    CelloArray<enzo_float,3> density_particle_accum_arr =
+      field.view<enzo_float>("density_particle_accumulate");
+
+    int mx,my,mz;
+    field.dimensions(0,&mx,&my,&mz);
+    int gx,gy,gz;
+    field.ghost_depth(0,&gx,&gy,&gz);
+
+    const int m = mx*my*mz;
+    std::fill_n(density_tot_arr.data(), mx*my*mz, 0.0);
+
+    // NOTE 2022-06-24: previously, we filled density_particle_accum_arr with
+    // zeros at around this location and included the following note:
+    //     NOTE: density_total is now cleared in EnzoMethodGravity to
+    //     instead of here to possible race conditions with refresh.  This
+    //     means EnzoMethodPmDeposit ("pm_deposit") currently CANNOT be
+    //     used without EnzoMethodGravity ("gravity")
+    // This operation & comment didn't sense since we completely overwrite
+    // values of density_total & density_particle_accum_arr later in this method
+
+    // Get cosmological scale factors, if cosmology is turned on
+    enzo_float cosmo_a=1.0;
+    enzo_float cosmo_dadt=0.0;
+    EnzoPhysicsCosmology * cosmology = enzo::cosmology();
+    if (cosmology) {
+      cosmology->compute_expansion_factor(&cosmo_a,&cosmo_dadt,
+                                          block->time() + alpha_*block->dt());
+    }
+    const double dt_div_cosmoa = alpha_ * block->dt() / cosmo_a;
+
+    double hx,hy,hz;
+    block->cell_width(&hx,&hy,&hz);
+
+    // add mass from particles
+    {
+      int rank = cello::rank();
+      // To calculate densities from particles with "mass" attributes
+      // or constants, we need the inverse volume of cells in this block.
+      double inv_vol = 1.0;
+      if (rank >= 1) inv_vol /= hx;
+      if (rank >= 2) inv_vol /= hy;
+      if (rank >= 3) inv_vol /= hz;
+
+      deposit_particles_(density_particle_arr, block, dt_div_cosmoa, inv_vol,
+                         mx, my, mz,
+                         gx, gy, gz);
+
+      // update density_tot_arr
+      density_particle_arr.copy_to(density_tot_arr);
+      density_particle_arr.copy_to(density_particle_accum_arr);
+    }
+
+
+    // add mass from gas
+    {
+      // Grid_DepositBaryons.C from enzo-dev overrides the drift time for the
+      // gas density to be zero when using the PPM and Zeus solvers.
+      //
+      // The way that the Gravity source terms are currently included with
+      // EnzoMethodPpm and EnzoMethodMHDVlct is currently very similar (in
+      // terms of temporal integration), so we also set this to zero.
+      const double gas_dt_div_cosmoa = 0.0;
+
+      // The use of "proper" cell-widths was carried over for consistency with
+      // earlier versions of the code. Based on Grid_DepositBaryons.C from
+      // enzo-dev, it seems like this may not be correct.
+      deposit_gas_(density_tot_arr, field, gas_dt_div_cosmoa,
+                   hx*cosmo_a, hy*cosmo_a, hz*cosmo_a,
+                   mx, my, mz,
+                   gx, gy, gz);
+    }
   }
 
   block->compute_done();

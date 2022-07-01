@@ -10,14 +10,6 @@
 
       list = ["pm_deposit", "gravity"];
 
-      pm_deposit {
-         # every cycle, this method tries to "drift" the density field forward
-         # (like it's a grid of particles) by alpha*timestep.
-
-         alpha = 0.0; # this test-problem encounters issues when this is
-                      # non-zero
-     }
-
       gravity {
          solver = "cg";
          # choose mass units to adjust the value of the jeans wavelength is 0.5.
