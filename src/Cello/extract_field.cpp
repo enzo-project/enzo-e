@@ -32,7 +32,7 @@ Main::Main(CkArgMsg* m)
     }
     file_stream.close();
   } else {
-    CkPrintf ("\n\n  Usage: %s <directory>\n\n",m->argv[0]);
+    CkPrintf ("\n\n  Usage: %s <directory> <field_1> [ <field_2> ... ]\n\n",m->argv[0]);
     CkExit();
   }
 
