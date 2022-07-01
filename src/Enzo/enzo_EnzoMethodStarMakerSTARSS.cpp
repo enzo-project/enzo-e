@@ -15,7 +15,6 @@
 #include <time.h>
 
 // #define DEBUG_SF_CRITERIA
-// #define DEBUG_SF_CRITERIA_EXTRA
 // #define DEBUG_STORE_INITIAL_PROPERTIES
 //-------------------------------------------------------------------
 
@@ -133,7 +132,6 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
   enzo_float * pvx  = 0;
   enzo_float * pvy  = 0;
   enzo_float * pvz  = 0;
-   ///
   enzo_float * pmetal = 0;
   enzo_float * pform  = 0;
   enzo_float * plifetime = 0;
@@ -160,8 +158,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 
   enzo_float * total_energy = (enzo_float *) field.values("total_energy");
   
-  enzo_float * potential    = field.is_field("potential_copy") ? 
-          (enzo_float *) field.values("potential_copy") : NULL;
+  enzo_float * potential    = (enzo_float *) field.values("potential");
 
   enzo_float * velocity_x = (rank >= 1) ?
     (enzo_float *)field.values("velocity_x") : NULL;
@@ -206,20 +203,9 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
   enzo_float * dHDI   = field.is_field("HDI_density") ? 
          (enzo_float *) field.values("HDI_density") : NULL;
 
-/*
-  bool use_altAlpha = this->use_altAlpha_;
-  #ifndef DEBUG_COPY_POTENTIAL
-    if (use_altAlpha) {
-      CkPrintf("MethodStarMaker -- WARNING: use_altAlpha = true, "
-               "      but DEBUG_COPY_POTENTIAL flag is not "
-               "      set in EnzoMethodGravity.\n"
-               "      Defaulting to use_altAlpha = false\n");
-      use_altAlpha = false;
-    }
-  #endif
-*/
+
   if (use_altAlpha_) {
-    // "potential_copy" field holds potential in proper coordinates,
+    // "potential" field holds potential in proper coordinates,
     //  need to convert back to comoving. 
     if (cosmology) {
       enzo_float cosmo_a = 1.0;
@@ -229,6 +215,12 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
       cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*dt);
       for (int i=0; i<mx*my*mz; i++) potential[i] *= cosmo_a;
     }
+  }
+
+  if (use_overdensity_threshold_) {
+    ASSERT("EnzoMethodStarMakerSTARSS::compute()",
+           "parameter use_overdensity_threshold is only valid for cosmology!",
+            cosmology);
   }
 
   // compute the temperature
@@ -283,7 +275,8 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 
         // check overdensity threshold
         // In cosmology, units are scaled such that mean(density) = 1,
-        // so density IS overdensity in these units        
+        // so density IS overdensity in these units  
+
         if (! this->check_overdensity_threshold(density[i]) ) continue;
 
         #ifdef DEBUG_SF_CRITERIA 
@@ -295,15 +288,13 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
                                               velocity_z, i,
                                               idx, idy, idz, dx, dy, dz)) continue;
       
-        #ifdef DEBUG_SF_CRITERIA_EXTRA
+        #ifdef DEBUG_SF_CRITERIA
            CkPrintf("MethodStarMakerSTARSS -- div(v) < 0 in cell %d\n", i);
         #endif 
 
         // check that alpha < 1
         if (use_altAlpha_) {
-          // NOTE: this requires the DEBUG_COPY_POTENTIAL flag to be set in EnzoMethodGravity
-          // TODO: Make saving potential an input parameter instead of debug flag?
-          if (! this->check_self_gravitating_new(total_energy[i], potential[i])) continue;
+          if (! this->check_self_gravitating_alt(total_energy[i], potential[i])) continue;
         }
 
         else {
@@ -313,7 +304,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
                                              i, idx, idy, idz, dx, dy, dz)) continue;
         }
 
-        #ifdef DEBUG_SF_CRITERIA_EXTRA
+        #ifdef DEBUG_SF_CRITERIA
            CkPrintf("MethodStarMakerSTARSS -- alpha < 1 in cell %d\n", i);
         #endif 
 
@@ -332,7 +323,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         if (! check_jeans_mass(temperature[i], mean_particle_mass, density[i], cell_mass,
                                munit,rhounit )) continue;
 
-        #ifdef DEBUG_SF_CRITERIA_EXTRA
+        #ifdef DEBUG_SF_CRITERIA
            CkPrintf("MethodStarMakerSTARSS -- M > M_jeans in cell %d\n", i);
         #endif     
         
@@ -542,9 +533,11 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
     }
   } // end loop iz
 
-  if (count > 0){
-    CkPrintf("MethodStarMakerSTARSS -- Number of particles formed: %d\n", count);
-  }
+  #ifdef DEBUG_SF_CRITERIA
+    if (count > 0){
+      CkPrintf("MethodStarMakerSTARSS -- Number of particles formed: %d\n", count);
+    }
+  #endif
 
 /* TODO: Add this part in once Pop III SF/FB is implemented
  
