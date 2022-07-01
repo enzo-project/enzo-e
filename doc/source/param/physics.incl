@@ -170,13 +170,10 @@ the (caloric) equation of state. At this time, this only supports an
 ideal gas. But, in the future this will support alternative 
 equations of state (like an isothermal equation of state).
 
-.. note::
-
-   `PR #173 <https://github.com/enzo-project/enzo-e/pull/173>`_
-   introduces a discussion about how the adiabatic index is treated
-   when the ``"grackle"`` method is in use and the :p:`Method` :
-   :p:`grackle` : :p:`primordial_chemistry` parameter exceeds 1.  This
-   should link to that discussion after the other PR is merged.
+See :ref:`using-grackle-gamma-with-HD` for further discussion about
+how the equation of state is handled when
+``Method:grackle:primordial_chemistry > 1`` (under these conditions
+Grackle models a spatially varying adiabatic index).
 
 ----
 
@@ -230,6 +227,8 @@ For more details, see :ref:`using-fluid_props-floors`.
 :e:`Temperature floor, which must exceed 0. Note that this is
 specified with units of Kelvin (since the ``"temperature"`` field is
 always measured in Kelvin in Enzo-E)`
+
+----
 
 :Parameter:  :p:`Physics` : :p:`fluid_props` : :p:`floors` : :p:`metallicity`
 :Summary: :s:`Minimum metallicity in solar units`

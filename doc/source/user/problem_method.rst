@@ -475,6 +475,8 @@ A sample Method for implementing forward-euler to solve the heat equation.
 Calls methods provided by the external Grackle 3.0 chemistry and
 cooling library.
 
+.. _using-grackle-gamma-with-HD:
+
 Compatability with hydro/mhd solvers
 ------------------------------------
 
@@ -487,22 +489,22 @@ performing radiative cooling during the predictor step of the
 VL+CT solver*).
 
 Integration with hydro-solvers is self-consistent when
-``Field:Grackle:primordial_chemistry`` has values of ``0`` or ``1``.
+``Method:Grackle:primordial_chemistry`` has values of ``0`` or ``1``.
 However, the integration is somewhat inconsistent when the parameter
 exceeds ``1``. While users shouldn't be too concerned about this
 latter scenario unless they are simulating conditions where
 :math:`{\rm H}_2` makes up a significant fraction of the gas density,
 we describe the inconsistencies in greater detail below.
 
-When ``Field:Grackle:primordial_chemistry > 1``, the Grackle library
+When ``Method:Grackle:primordial_chemistry > 1``, the Grackle library
 explicitly models chemistry involving :math:`{\rm H}_2` and how it
 modifies the adiabtic index. Grackle's routines treat
 :math:`\gamma_0`, the "nominal adiabatic index" specified by
-``Field:gamma``, as the adiabatic index for all monatomic species
-(this should be ``5.0/3.0``). To that end, Grackle supplies functions
-that can effectively be represented as :math:`\gamma(e, n_{{\rm H}_2},
-n_{\rm other})` and :math:`p(\rho, e, n_{{\rm H}_2}, n_{\rm
-other})`. In these formulas:
+``Physics:fluid_props:eos:gamma``, as the adiabatic index for all
+monatomic species (this should be ``5.0/3.0``). To that end, Grackle
+supplies functions that can effectively be represented as
+:math:`\gamma(e, n_{{\rm H}_2}, n_{\rm other})` and :math:`p(\rho, e,
+n_{{\rm H}_2}, n_{\rm other})`. In these formulas:
 
 - :math:`p`, :math:`\rho` and :math:`e` correspond to the quantities
   held by the ``pressure``, ``density`` and ``internal_energy``
@@ -522,7 +524,8 @@ There are a handful of locations within the ``"ppm"`` and
 1. **Computing the timestep:** each hydro/mhd
    method uses the :math:`p(\rho, e, n_{{\rm H}_2}, n_{\rm other})`
    function for the pressure values. However, they both use
-   :math:`\gamma_0` in other places.
+   :math:`\gamma_0` in other places (such as the occurence of
+   adiabatic index in the sound speed formula).
 
 2. **Pre-reconstruction pressure calculation:** each hydro/mhd
    solver internally computes the pressure that is to be reconstructed

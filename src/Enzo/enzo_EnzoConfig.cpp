@@ -2132,7 +2132,7 @@ namespace{
         if (name == "density") { return &density_floor; }
         if (name == "pressure") { return &pressure_floor; }
         if (name == "temperature") { return &temperature_floor; }
-        if (name == "metalicity") { return &metal_mass_frac_floor; }
+        if (name == "metallicity") { return &metal_mass_frac_floor; }
         return (double*)nullptr;
       };
 

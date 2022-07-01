@@ -143,9 +143,10 @@ In the future, further EOS customization will be supported in this section
      - ``5.0/3.0``
      - Adiabatic index (a.k.a. the ratio of specific heats)
 
-.. note::
-
-  A separate PR will introduce documentation to the ``"grackle"`` method that details how the equation of state is handled when ``Method:grackle:primordial_chemistry > 1`` (under these conditions grackle models a spatially varying adiabatic index)
+See :ref:`using-grackle-gamma-with-HD` for further discussion about
+how the equation of state is handled when
+``Method:grackle:primordial_chemistry > 1`` (under these conditions
+Grackle models a spatially varying adiabatic index).
 
 .. _using-fluid_props-floors:
 

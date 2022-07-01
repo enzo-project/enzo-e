@@ -46,7 +46,7 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   const EnzoDualEnergyConfig& de_config = fluid_props->dual_energy_config();
   ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
          "selected formulation of dual energy formalism is incompatible",
-         de_config.is_disabled() | de_config.modern_formulation());
+         de_config.is_disabled() || de_config.modern_formulation());
   const EnzoFluidFloorConfig& fluid_floor_config
     = fluid_props->fluid_floor_config();
   ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
