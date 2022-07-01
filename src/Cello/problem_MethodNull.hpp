@@ -46,6 +46,8 @@ public: // interface
   void pup (PUP::er &p) 
   { TRACEPUP; Method::pup(p); p | dt_; }
   
+public: // virtual methods
+
   /// Apply the method to advance a block one timestep 
   virtual void compute( Block * block) throw();
 

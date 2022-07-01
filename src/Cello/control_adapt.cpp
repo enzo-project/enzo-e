@@ -646,6 +646,9 @@ void Block::adapt_check_messages_()
                       msg->level_max_,
                       msg->can_coarsen_);
   }
+  for (int i=0; i<adapt_msg_list_.size(); i++) {
+    delete adapt_msg_list_[i];
+  }
   adapt_msg_list_.clear();
 }
 
@@ -663,6 +666,7 @@ void Block::adapt_recv_level
 {
   bool changed = false;
   int level_min;
+  performance_start_(perf_adapt_update);
   for (int i=0; i<ofv[0].size(); i++) {
 
     int if3[3] = {ofv[0][i],ofv[1][i],ofv[2][i]};
@@ -689,7 +693,6 @@ void Block::adapt_recv_level
             "Index level %d and indicated level %d mismatch",
             index_send.level(),level_face_curr,
             level_face_curr == index_send.level());
-    performance_start_(perf_adapt_update);
 
     if (index_send.level() != level_face_curr) {
       PARALLEL_PRINTF

@@ -225,12 +225,6 @@ Physics
 
 .. include:: physics.incl
 
--------
-Restart
--------
-
-.. include:: restart.incl
-   
 --------
 schedule
 --------

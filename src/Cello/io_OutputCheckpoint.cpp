@@ -18,7 +18,7 @@ OutputCheckpoint::OutputCheckpoint
  int process_count
 ) throw ()
   : Output(index,factory),
-    restart_file_("")
+    checkpoint_file_("")
 {
 
   set_stride_write (process_count);
@@ -30,7 +30,7 @@ OutputCheckpoint::OutputCheckpoint
   TRACE2 ("config->output_dir[%d][0]=%s",
 	  index_,config->output_dir[index_][0].c_str());
 
-  restart_file_ = config->restart_file;
+  checkpoint_file_ = config->output_checkpoint_file;
 
 }
 
@@ -44,13 +44,13 @@ void OutputCheckpoint::pup (PUP::er &p)
 
   Output::pup(p);
 
-  p | restart_file_;
+  p | checkpoint_file_;
 
   Simulation * simulation = cello::simulation();
   const bool l_unpacking = p.isUnpacking();
   const bool l_restarting = simulation && simulation->phase()==phase_restart;
-  const bool l_restart_file = (restart_file_ != "");
-  if (l_unpacking && l_restarting && l_restart_file) {
+  const bool l_checkpoint_file = (checkpoint_file_ != "");
+  if (l_unpacking && l_restarting && l_checkpoint_file) {
     update_config_();
   }
 }
@@ -60,7 +60,7 @@ void OutputCheckpoint::pup (PUP::er &p)
 void OutputCheckpoint::update_config_()
 {
   Parameters p (cello::monitor());
-  p.read(restart_file_.c_str());
+  p.read(checkpoint_file_.c_str());
 
   Config * config = (Config *) cello::config();
 

@@ -134,6 +134,7 @@ int Refresh::data_size () const
   SIZE_VECTOR_TYPE(count,int,field_list_dst_);
 
   SIZE_SCALAR_TYPE(count,int,all_particles_);
+  SIZE_SCALAR_TYPE(count,bool,particles_are_copied_);
   SIZE_VECTOR_TYPE(count,int,particle_list_);
 
   SIZE_SCALAR_TYPE(count,int,all_fluxes_);
@@ -166,6 +167,7 @@ char * Refresh::save_data (char * buffer) const
   SAVE_VECTOR_TYPE(p,int,field_list_dst_);
 
   SAVE_SCALAR_TYPE(p,int,all_particles_);
+  SAVE_SCALAR_TYPE(p,bool,particles_are_copied_);
   SAVE_VECTOR_TYPE(p,int,particle_list_);
 
   SAVE_SCALAR_TYPE(p,int,all_fluxes_);
@@ -202,6 +204,7 @@ char * Refresh::load_data (char * buffer)
   LOAD_VECTOR_TYPE(p,int,field_list_dst_);
 
   LOAD_SCALAR_TYPE(p,int,all_particles_);
+  LOAD_SCALAR_TYPE(p,bool,particles_are_copied_);
   LOAD_VECTOR_TYPE(p,int,particle_list_);
 
   LOAD_SCALAR_TYPE(p,int,all_fluxes_);

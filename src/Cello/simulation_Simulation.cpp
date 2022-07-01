@@ -50,16 +50,24 @@ Simulation::Simulation
   scalar_descr_long_double_(NULL),
   scalar_descr_double_(NULL),
   scalar_descr_int_(NULL),
+  scalar_descr_long_long_(NULL),
   scalar_descr_sync_(NULL),
   scalar_descr_void_(NULL),
+  scalar_descr_index_(NULL),
   field_descr_(NULL),
   particle_descr_(NULL),
   sync_output_begin_(),
   sync_output_write_(),
+  sync_restart_created_(),
+  sync_restart_next_(),
   refresh_list_(),
   index_output_(-1),
   num_solver_iter_(),
-  max_solver_iter_()
+  max_solver_iter_(),
+  restart_directory_(),
+  restart_num_files_(),
+  restart_stream_file_list_()
+  
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
@@ -113,16 +121,23 @@ Simulation::Simulation()
   scalar_descr_long_double_(NULL),
   scalar_descr_double_(NULL),
   scalar_descr_int_(NULL),
+  scalar_descr_long_long_(NULL),
   scalar_descr_sync_(NULL),
   scalar_descr_void_(NULL),
+  scalar_descr_index_(NULL),
   field_descr_(NULL),
   particle_descr_(NULL),
   sync_output_begin_(),
   sync_output_write_(),
+  sync_restart_created_(),
+  sync_restart_next_(),
   refresh_list_(),
   index_output_(-1),
   num_solver_iter_(),
-  max_solver_iter_()
+  max_solver_iter_(),
+  restart_directory_(),
+  restart_num_files_(),
+  restart_stream_file_list_()
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
@@ -164,16 +179,24 @@ Simulation::Simulation (CkMigrateMessage *m)
     scalar_descr_long_double_(NULL),
     scalar_descr_double_(NULL),
     scalar_descr_int_(NULL),
+    scalar_descr_long_long_(NULL),
     scalar_descr_sync_(NULL),
     scalar_descr_void_(NULL),
+    scalar_descr_index_(NULL),
     field_descr_(NULL),
     particle_descr_(NULL),
     sync_output_begin_(),
     sync_output_write_(),
+    sync_restart_created_(),
+    sync_restart_next_(),
     refresh_list_(),
     index_output_(-1),
     num_solver_iter_(),
-    max_solver_iter_()
+    max_solver_iter_(),
+    restart_directory_(),
+    restart_num_files_(),
+    restart_stream_file_list_()
+
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
@@ -239,10 +262,14 @@ void Simulation::pup (PUP::er &p)
   p | *scalar_descr_double_;
   if (up) scalar_descr_int_ = new ScalarDescr;
   p | *scalar_descr_int_;
+  if (up) scalar_descr_long_long_ = new ScalarDescr;
+  p | *scalar_descr_long_long_;
   if (up) scalar_descr_sync_ = new ScalarDescr;
   p | *scalar_descr_sync_;
   if (up) scalar_descr_void_ = new ScalarDescr;
   p | *scalar_descr_void_;
+  if (up) scalar_descr_index_ = new ScalarDescr;
+  p | *scalar_descr_index_;
 
   if (up) field_descr_ = new FieldDescr;
   p | *field_descr_;
@@ -257,6 +284,8 @@ void Simulation::pup (PUP::er &p)
 
   p | sync_output_begin_;
   p | sync_output_write_;
+  p | sync_restart_created_;
+  p | sync_restart_next_;
 
   if (up) sync_output_begin_.set_stop(0);
   if (up) sync_output_write_.set_stop(0);
@@ -285,6 +314,9 @@ void Simulation::pup (PUP::er &p)
   p | index_output_;
   p | num_solver_iter_;
   p | max_solver_iter_;
+  p | restart_directory_;
+  p | restart_num_files_;
+
 }
 
 //----------------------------------------------------------------------
@@ -492,8 +524,10 @@ void Simulation::initialize_data_descr_() throw()
   scalar_descr_long_double_ = new ScalarDescr;
   scalar_descr_double_      = new ScalarDescr;
   scalar_descr_int_         = new ScalarDescr;
+  scalar_descr_long_long_   = new ScalarDescr;
   scalar_descr_sync_        = new ScalarDescr;
   scalar_descr_void_        = new ScalarDescr;
+  scalar_descr_index_       = new ScalarDescr;
 
   //--------------------------------------------------
   // parameter: Field : list
@@ -793,7 +827,7 @@ void Simulation::p_set_block_array(CProxy_Block block_array)
   if (CkMyPe() != 0) hierarchy_->set_block_array(block_array);
 }
 
-  //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 void Simulation::deallocate_() throw()
 {

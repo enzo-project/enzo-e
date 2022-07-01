@@ -39,21 +39,21 @@ public: // interface
   }
 
   /// Return the ith metadata item associated with the EnzoBlock object
-  void meta_value 
-  (int index, 
+  void meta_value
+  (int index,
    void ** buffer, std::string * name, int * type,
    int * nxd=0, int * nyd=0, int * nzd=0) throw();
 
   /// Return the ith data item associated with the EnzoBlock object
-  void data_value 
-  (int index, 
+  void data_value
+  (int index,
    void ** buffer, std::string * name, int * type,
    int * nxd=0, int * nyd=0, int * nzd=0) throw();
 
   virtual void set_block (Block * block) throw();
 
   /// PACKING / UNPACKING
-  
+
   /// Return the number of bytes required to serialize the data object
   virtual int data_size () const;
 
@@ -62,6 +62,9 @@ public: // interface
 
   /// Restore the object from the provided initialized memory buffer data.
   virtual char * load_data (char * buffer);
+
+  /// Copy the values to the object
+  virtual void save_to (void *); 
 
   virtual void print(const char * msg)
   {
@@ -78,7 +81,7 @@ public: // interface
               enzo_GridEndIndex_[0], enzo_GridEndIndex_[1], enzo_GridEndIndex_[2]);
     CkPrintf ("DEBUG_IO_ENZO_BLOCK enzo_CellWidth_      %g %g %g\n",
               enzo_CellWidth_[0], enzo_CellWidth_[1], enzo_CellWidth_[2]);
-    CkPrintf ("DEBUG_IO_ENZO_BLOCK eonz_redshift_       %g\n",
+    CkPrintf ("DEBUG_IO_ENZO_BLOCK enzo_redshift_       %g\n",
               enzo_redshift_);
 
     IoBlock::print(msg);

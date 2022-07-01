@@ -11,6 +11,8 @@ module enzo {
   initnode void mutex_init();
   initnode void mutex_init_bcg_iter();
 
+  readonly int EnzoMsgCheck::counter[CONFIG_NODE_SIZE];
+
   readonly EnzoConfig g_enzo_config;
   readonly int EnzoBlock::UseMinimumPressureSupport[CONFIG_NODE_SIZE];
   readonly enzo_float EnzoBlock::MinimumPressureSupportParameter[CONFIG_NODE_SIZE];
@@ -29,77 +31,85 @@ module enzo {
   readonly int EnzoBlock::ghost_depth[CONFIG_NODE_SIZE_3];
   readonly int EnzoBlock::NumberOfBaryonFields[CONFIG_NODE_SIZE];      // active baryon fields
 
-#ifdef CONFIG_USE_GRACKLE
-  PUPable EnzoInitialGrackleTest;
-  PUPable EnzoMethodGrackle;
-  PUPable EnzoComputeCoolingTime;
-#endif
-
   PUPable EnzoBoundary;
   PUPable EnzoConfig;
   PUPable EnzoFactory;
 
+  // EnzoInitial
+#ifdef CONFIG_USE_GRACKLE
+  PUPable EnzoInitialGrackleTest;
+#endif
+  PUPable EnzoInitialAccretionTest;
+  PUPable EnzoInitialBBTest;
   PUPable EnzoInitialBCenter;
+  PUPable EnzoInitialBurkertBodenheimer;
   PUPable EnzoInitialCloud;
   PUPable EnzoInitialCollapse;
   PUPable EnzoInitialCosmology;
-  PUPable EnzoInitialHdf5;
   PUPable EnzoInitialFeedbackTest;
-  PUPable EnzoInitialInclinedWave;
+  PUPable EnzoInitialHdf5;
   PUPable EnzoInitialImplosion2;
+  PUPable EnzoInitialInclinedWave;
+  PUPable EnzoInitialIsolatedGalaxy;
+  PUPable EnzoInitialMergeSinksTest;
   PUPable EnzoInitialMusic;
   PUPable EnzoInitialPm;
-  PUPable EnzoInitialBurkertBodenheimer;
   PUPable EnzoInitialPpmlTest;
   PUPable EnzoInitialSedovArray2;
   PUPable EnzoInitialSedovArray3;
   PUPable EnzoInitialSedovRandom;
   PUPable EnzoInitialShockTube;
+  PUPable EnzoInitialShuCollapse;
   PUPable EnzoInitialSoup;
   PUPable EnzoInitialTurbulence;
-  PUPable EnzoInitialIsolatedGalaxy;
-  PUPable EnzoInitialMergeSinksTest;
-  PUPable EnzoInitialAccretionTest;
-  PUPable EnzoInitialShuCollapse;
-  PUPable EnzoInitialBBTest;
 
   PUPable IoEnzoBlock;
 
+  // EnzoRefine
   PUPable EnzoRefineShock;
   PUPable EnzoRefineParticleMass;
   PUPable EnzoRefineMass;
+
+  // EnzoCompute
+#ifdef CONFIG_USE_GRACKLE
+  PUPable EnzoComputeCoolingTime;
+#endif
 
   PUPable EnzoComputePressure;
   PUPable EnzoComputeTemperature;
   PUPable EnzoComputeAcceleration;
   PUPable EnzoComputeCicInterp;
 
+  // EnzoMatrix
   PUPable EnzoMatrixLaplace;
   PUPable EnzoMatrixDiagonal;
   PUPable EnzoMatrixIdentity;
 
+  // EnzoMethod
+#ifdef CONFIG_USE_GRACKLE
+  PUPable EnzoMethodGrackle;
+#endif
+  PUPable EnzoMethodAccretion;
   PUPable EnzoMethodBackgroundAcceleration;
-  PUPable EnzoMethodFeedback;
-  PUPable EnzoMethodDistributedFeedback;
-  PUPable EnzoMethodFeedbackSTARSS;
-
+  PUPable EnzoMethodBondiHoyleAccretion;
+  PUPable EnzoMethodCheck;
   PUPable EnzoMethodComovingExpansion;
   PUPable EnzoMethodCosmology;
+  PUPable EnzoMethodDistributedFeedback;
+  PUPable EnzoMethodFeedback;
+  PUPable EnzoMethodFeedbackSTARSS;
+  PUPable EnzoMethodFluxAccretion;
   PUPable EnzoMethodGravity;
-
   PUPable EnzoMethodHeat;
+  PUPable EnzoMethodMergeSinks;
+  PUPable EnzoMethodMHDVlct;
   PUPable EnzoMethodPmDeposit;
   PUPable EnzoMethodPmUpdate;
   PUPable EnzoMethodPpm;
   PUPable EnzoMethodPpml;
-  PUPable EnzoMethodTurbulence;
-  PUPable EnzoMethodMHDVlct;
-  PUPable EnzoMethodMergeSinks;
-  PUPable EnzoMethodAccretion;
-  PUPable EnzoMethodThresholdAccretion;
-  PUPable EnzoMethodBondiHoyleAccretion;
-  PUPable EnzoMethodFluxAccretion;
   PUPable EnzoMethodSinkMaker;
+  PUPable EnzoMethodThresholdAccretion;
+  PUPable EnzoMethodTurbulence;
 
   PUPable EnzoEOSIdeal;
   PUPable EnzoIntegrationQuanUpdate;
@@ -112,6 +122,7 @@ module enzo {
   PUPable EnzoMethodStarMaker;
   PUPable EnzoMethodStarMakerStochasticSF;
   PUPable EnzoMethodStarMakerSTARSS;
+
   PUPable EnzoBfieldMethodCT;
 
   PUPable EnzoPhysicsCosmology;
@@ -135,9 +146,15 @@ module enzo {
 
   PUPable EnzoUnits;
 
+  message EnzoMsgCheck;
+
   extern module mesh;
 
   readonly CProxy_EnzoSimulation proxy_enzo_simulation;
+  readonly CProxy_IoEnzoReader   proxy_io_enzo_reader;
+  readonly CProxy_IoEnzoWriter   proxy_io_enzo_writer;
+
+  //----------------------------------------------------------------------
 
   group [migratable] EnzoSimulation : Simulation {
 
@@ -147,16 +164,30 @@ module enzo {
 
 #ifdef BYPASS_CHARM_MEM_LEAK
     entry void p_get_msg_refine(Index index);
+    entry void p_get_msg_check(Index index);
 #endif
+    // EnzoMethodCheck
+    entry void r_method_check_enter(CkReductionMsg *);
+    entry void p_check_done();
+    entry void p_set_io_writer(CProxy_IoEnzoWriter io_writer);
+
+    // enzo_control_restart
+    entry void p_set_io_reader(CProxy_IoEnzoReader io_reader);
+    entry void p_io_reader_created();
+    entry void p_restart_next_level();
+    entry void p_restart_level_created();
 }
 
+  //----------------------------------------------------------------------%
   array[Index] EnzoBlock : Block {
 
 #ifdef BYPASS_CHARM_MEM_LEAK
-    entry EnzoBlock (process_type ip_source);
-    entry void p_set_msg_refine (MsgRefine * msg);
+    entry EnzoBlock (process_type ip_source, MsgType msg_type);
+    entry void p_set_msg_refine (MsgRefine    * msg);
+    entry void p_set_msg_check  (EnzoMsgCheck * msg);
 #else
-    entry EnzoBlock (MsgRefine * msg);
+    entry EnzoBlock (MsgRefine    * msg);
+    entry EnzoBlock (EnzoMsgCheck * msg);
 #endif
     entry EnzoBlock();
  
@@ -171,6 +202,18 @@ module enzo {
     // EnzoMethodGravity synchronization entry methods
     entry void p_method_gravity_continue();
     entry void p_method_gravity_end();
+
+
+    // checkpoint
+    entry void p_check_write_first
+      (int num_files, std::string ordering, std::string name_dir);
+    entry void p_check_write_next (int num_files, std::string ordering);
+    entry void p_check_done();
+
+    // restart
+    entry void p_restart_refine (int ic3[3], int io_reader);
+    entry void p_restart_set_data(EnzoMsgCheck *);
+    entry void p_restart_done();
 
     // EnzoMethodAccretion synchronization entry methods
     entry void p_method_accretion_end();
@@ -233,5 +276,20 @@ module enzo {
     entry void p_solver_mg0_restrict_recv(FieldMsg * msg);
 
   };
+
+  array[1D] IoEnzoReader : IoReader {
+    entry IoEnzoReader();
+    entry void p_init_root(std::string, std::string, int level);
+    entry void p_create_level(int level);
+    entry void p_init_level(int level);
+    entry void p_block_created();
+    entry void p_block_ready();
+  };
+
+  array[1D] IoEnzoWriter : IoWriter {
+    entry IoEnzoWriter();
+    entry IoEnzoWriter (int num_files, std::string ordering, int monitor_iter);
+    entry void p_write(EnzoMsgCheck * );
+  }
 
 };

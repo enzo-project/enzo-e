@@ -118,7 +118,7 @@ void Factory::create_block_array
 	msg->set_data_msg(data_msg);
 #ifdef BYPASS_CHARM_MEM_LEAK
 	cello::simulation()->set_msg_refine (index,msg);
-	proxy_block[index].insert (process_type(CkMyPe()));
+	proxy_block[index].insert (process_type(CkMyPe()), MsgType::msg_refine);
 #else
 	proxy_block[index].insert (msg);
 #endif
@@ -195,7 +195,7 @@ void Factory::create_subblock_array
 
 #ifdef BYPASS_CHARM_MEM_LEAK
           cello::simulation()->set_msg_refine (index,msg);
-          block_array[index].insert (process_type(CkMyPe()));
+          block_array[index].insert (process_type(CkMyPe()),MsgType::msg_refine);
 #else
           block_array[index].insert (msg);
 #endif
@@ -222,7 +222,8 @@ void Factory::create_block
  int num_face_level,
  int * face_level,
  Adapt * adapt,
- Simulation * simulation
+ Simulation * simulation,
+ int io_reader
  ) const throw()
 {
 
@@ -245,13 +246,14 @@ void Factory::create_block
      count_adapt,
      cycle,time,dt,
      refresh_type,
-     num_face_level, face_level, adapt);
+     num_face_level, face_level, adapt,
+     io_reader);
 
   msg->set_data_msg (data_msg);
 
 #ifdef BYPASS_CHARM_MEM_LEAK
   cello::simulation()->set_msg_refine (index,msg);
-  block_array[index].insert (process_type(CkMyPe()));
+  block_array[index].insert (process_type(CkMyPe()),MsgType::msg_refine);
 #else
   block_array[index].insert (msg);
 #endif

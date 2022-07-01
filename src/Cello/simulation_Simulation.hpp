@@ -20,6 +20,8 @@ class Problem;
 class Schedule;
 
 #include <errno.h>
+#include <iostream>
+#include <fstream>
 #include "mesh.decl.h"
 #include "simulation.decl.h"
 class Simulation : public CBase_Simulation 
@@ -34,8 +36,9 @@ class Simulation : public CBase_Simulation
 
 public: // interface
 
-  /// Simulation constructor
+  friend class IoSimulation;
 
+  /// Simulation constructor
 
   Simulation
   ( const char *       parameter_file,
@@ -69,6 +72,7 @@ public: // interface
 
   /// Set MsgRefine * for a newly created Block
   void set_msg_refine (Index index, MsgRefine *);
+
   /// Return MsgRefine * for a newly created Block and remove from list
   MsgRefine * get_msg_refine (Index index);
 #endif
@@ -104,10 +108,14 @@ public: // interface
   { return scalar_descr_double_; }
   ScalarDescr * scalar_descr_int() throw()
   { return scalar_descr_int_; }
+  ScalarDescr * scalar_descr_long_long() throw()
+  { return scalar_descr_long_long_; }
   ScalarDescr * scalar_descr_sync() throw()
   { return scalar_descr_sync_; }
   ScalarDescr * scalar_descr_void() throw()
   { return scalar_descr_void_; }
+  ScalarDescr * scalar_descr_index() throw()
+  { return scalar_descr_index_; }
 
   /// Return the field descriptor
   FieldDescr * field_descr() const throw()
@@ -266,7 +274,6 @@ public: // virtual functions
 
   /// Continue on to Problem::output_wait() from checkpoint
   virtual void r_write_checkpoint_output();
-  virtual void r_write_checkpoint_method();
 
   /// Receive data from non-writing process, write to disk, close, and
   /// proceed with next output
@@ -275,8 +282,15 @@ public: // virtual functions
   //--------------------------------------------------
   // Compute
   //--------------------------------------------------
-  
+
   void compute ();
+
+  //--------------------------------------------------
+  // Restart
+  //--------------------------------------------------
+
+  void p_restart_enter(std::string dir);
+  void r_restart_start(CkReductionMsg *);
 
   //--------------------------------------------------
   // Monitor
@@ -441,6 +455,10 @@ protected: // functions
     }
   }
 
+  std::string file_create_dir_(std::vector<std::string> directory_format,
+                               bool & already_exists);
+  std::ifstream file_open_file_list_(std::string name_dir);
+
 protected: // attributes
 
 #if defined(CELLO_DEBUG) || defined(CELLO_VERBOSE)
@@ -514,13 +532,15 @@ protected: // attributes
   /// AMR hierarchy
   Hierarchy * hierarchy_;
 
-  /// Scalar descriptors
+  /// Scalar descriptors (yuck)
   ScalarDescr * scalar_descr_long_double_;
   ScalarDescr * scalar_descr_double_;
   ScalarDescr * scalar_descr_int_;
+  ScalarDescr * scalar_descr_long_long_;
   ScalarDescr * scalar_descr_sync_;
   ScalarDescr * scalar_descr_void_;
-  
+  ScalarDescr * scalar_descr_index_;
+
   /// Field descriptor
   FieldDescr * field_descr_;
 
@@ -530,6 +550,10 @@ protected: // attributes
   /// Output synchronization (depreciated)
   Sync sync_output_begin_;
   Sync sync_output_write_;
+
+  /// Restart synchronization
+  Sync sync_restart_created_;
+  Sync sync_restart_next_;
 
   /// Refresh phase lists
 
@@ -550,6 +574,11 @@ protected: // attributes
   std::vector<int> num_solver_iter_;
   /// Max of solver iterations over blocks for solver i
   std::vector<int> max_solver_iter_;
+
+  static int file_counter_;
+  std::string restart_directory_;
+  int         restart_num_files_;
+  std::ifstream restart_stream_file_list_;
 };
 
 #endif /* SIMULATION_SIMULATION_HPP */

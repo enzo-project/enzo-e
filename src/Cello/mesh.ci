@@ -38,24 +38,23 @@ module mesh {
   PUPable Config;
   PUPable Factory;
   PUPable Initial;
-  PUPable InitialFile;
   PUPable InitialTrace;
   PUPable InitialValue;
-  PUPable InputData;
   PUPable Io;
   PUPable IoBlock;
   PUPable IoFieldData;
   PUPable IoHierarchy;
   PUPable IoParticleData;
+  PUPable IoSimulation;
   PUPable ItIndexList;
   PUPable ItIndexRange;
   PUPable MaskExpr;
   PUPable MaskPng;
-  PUPable MethodCheckpoint;
   PUPable MethodCloseFiles;
   PUPable MethodDebug;
   PUPable MethodFluxCorrect;
   PUPable MethodNull;
+  PUPable MethodOrderMorton;
   PUPable MethodOutput;
   PUPable MethodRefresh;
   PUPable MethodTrace;
@@ -93,7 +92,7 @@ module mesh {
   array[Index] Block {
 
 #ifdef BYPASS_CHARM_MEM_LEAK
-    entry Block (process_type ip_source);
+    entry Block (process_type ip_source,  MsgType msg_type);
     entry void p_set_msg_refine(MsgRefine * msg);
 #else
     entry Block (MsgRefine * msg);
@@ -133,10 +132,13 @@ module mesh {
     entry void p_compute_exit();
     entry void r_compute_exit(CkReductionMsg *);
 
-    entry void r_method_checkpoint_continue(CkReductionMsg * msg);
-
     entry void p_method_flux_correct_refresh();
     entry void r_method_flux_correct_sum_fields(CkReductionMsg * msg);
+
+    entry void r_method_order_morton_continue(CkReductionMsg * msg);
+    entry void r_method_order_morton_complete(CkReductionMsg * msg);
+    entry void p_method_order_morton_weight(int ic3[3], int weight, Index index);
+    entry void p_method_order_morton_index(int index, int count);
 
     entry void p_method_output_next(MsgOutput *);
     entry void p_method_output_write(MsgOutput *);
@@ -186,6 +188,12 @@ module mesh {
     entry void p_adapt_recv_child (MsgCoarsen * msg);
 
     //--------------------------------------------------
+    // *** RESTART
+    //--------------------------------------------------
+
+    entry void r_restart_enter(CkReductionMsg *);
+
+    //--------------------------------------------------
     // *** REFRESH
     //--------------------------------------------------
 
@@ -196,5 +204,14 @@ module mesh {
 
   };
 
+  // Chare array for reading data files
+  array[1D] IoReader {
+     entry IoReader();
+  };
+
+  // Chare array for writing data files
+  array[1D] IoWriter {
+     entry IoWriter();
+  };
 }
 

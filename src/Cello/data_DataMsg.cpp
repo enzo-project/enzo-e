@@ -291,7 +291,6 @@ char * DataMsg::load_data (char * buffer)
   } else {
     particle_data_ = nullptr;
   }
-
   // load flux data
   if (n_fd > 0) {
     face_fluxes_list_.resize(n_fd);
@@ -329,7 +328,7 @@ char * DataMsg::load_data (char * buffer)
 
 //----------------------------------------------------------------------
 
-void DataMsg::update (Data * data, bool is_local)
+void DataMsg::update (Data * data, bool is_local, bool is_kept)
 {
   TRACE_DATA_MSG("update()");
   ParticleData * pd = particle_data_;
@@ -347,13 +346,13 @@ void DataMsg::update (Data * data, bool is_local)
     for (int it=0; it<particle.num_types(); it++) {
       count += particle.gather (it, 1, &pd);
     }
+    if (is_kept)
+      cello::simulation()->data_insert_particles(count);
 
-    cello::simulation()->data_insert_particles(count);
-    
   }
-  
+
   // Update fields
-  
+
   if (ff != nullptr && fa != nullptr) {
 
     Field field_dst = data->field();
@@ -448,6 +447,10 @@ void DataMsg::print (const char * message) const
             message,(void*)field_data_u_);
   CkPrintf ("%s DATA_MSG particle_data_ = %p\n",
             message,(void*)particle_data_);
+  if (particle_data_) {
+    CkPrintf ("%s DATA_MSG num-particles = %d\n",
+              message,particle_data_->num_particles(cello::particle_descr()));
+  }
   CkPrintf ("%s DATA_MSG particle_data_delete_ = %d\n",
             message,particle_data_delete_?1:0);
   CkPrintf ("%s DATA_MSG |face_fluxes_list_| = %lu\n",

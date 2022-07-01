@@ -80,26 +80,6 @@ void IoBlock::meta_value
     *nxd    = 3;
   }
 }
-
-//----------------------------------------------------------------------
-
-void IoBlock::field_array
-(void ** buffer, std::string * name, int * type,
- int * nxd, int * nyd, int * nzd,
- int * nx,  int * ny,  int * nz) throw()
-{
-}
-
-//----------------------------------------------------------------------
-
-void IoBlock::particle_array 
-(int it, int ib, int ia,
- void ** buffer, std::string * name, int * type,
- int * n, int * k) throw()
-{
-  printf ("IoBlock::particle_array\n");
-}
-
 //======================================================================
 
 int IoBlock::data_size () const
@@ -167,3 +147,20 @@ char * IoBlock::load_data (char * buffer)
 }
 
 //----------------------------------------------------------------------
+
+void IoBlock::save_to (void * v)
+{
+  Block * b = static_cast<Block *>(v);
+
+  for (int i=0; i<3; i++) {
+    b->index_[i] = index_[i];
+    // Block lower/upper computed from index
+    //    b->lower_[i] = lower_[i];
+    //    b->upper_[i] = upper_[i];
+    b->array_[i] = array_[i];
+  }
+  b->cycle_ = cycle_;
+  b->time_  = time_;
+  b->dt_    = dt_;
+}
+

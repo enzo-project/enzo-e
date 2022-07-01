@@ -206,8 +206,11 @@ public: // interface
   /// serializing multiple objects in one buffer.
   char * load_data (char * buffer);
 
-  /// Update the Data with the data stored in this DataMsg
-  void update (Data * data, bool is_local);
+  /// Update the Data with the data stored in this DataMsg. "is_local"
+  /// is true if the data in the source and destination are on the
+  /// same process. "is_kept" is true (default) when the particle
+  /// counts on the process should be updated.
+  void update (Data * data, bool is_local, bool is_kept = true);
 
   /// Debugging
   void print (const char * message) const;
@@ -216,6 +219,7 @@ protected: // attributes
 
   /// Field Face Data
   FieldFace * field_face_;
+
   /// Whether FieldFace data should be deleted in destructor
   bool field_face_delete_;
 

@@ -8,6 +8,8 @@
 #ifndef CHARM_MSG_REFINE_HPP
 #define CHARM_MSG_REFINE_HPP
 
+// #define DEBUG_MSG_REFINE
+
 #include "cello.hpp"
 
 class Adapt;
@@ -33,7 +35,8 @@ public: // interface
    int cycle, double time, double dt,
    int refresh_type,
    int num_face_level, int * face_level,
-   Adapt * adapt_parent) ;
+   Adapt * adapt_parent,
+   int io_reader = -1) ;
 
   virtual ~MsgRefine();
 
@@ -58,7 +61,7 @@ public: // interface
 
   /// Set the DataMsg object
   void set_data_msg (DataMsg * data_msg);
-  
+
   /// Update the Data with data stored in this message
   void update (Data * data);
 
@@ -94,6 +97,11 @@ protected: // attributes
   int * face_level_;     // attribute-10
   /// Mesh connectivity of parent block to update child's
   Adapt * adapt_parent_;        // attribute-11
+
+public:
+  /// If refining during a restart, the index of the io_reader
+  int restart_io_reader_;
+protected:
 
   /// Saved Charm++ buffers for deleting after unpack()
   void * buffer_;

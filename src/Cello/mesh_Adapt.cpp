@@ -102,9 +102,7 @@ void Adapt::coarsen_neighbor (Index index)
   if ( ! self_.index_.is_sibling(index)) {
     int n = num_neighbors();
     // delete all neighbors contained in index parent
-    // (note: use copy of neighbor list to avoid issues with looping
-    // over data-structure that is actively being modified)
-    auto neighbors = index_neighbors_();
+    auto neighbors = index_neighbors();
     for (int i=0; i<n; i++) {
       const Index index_sibling = neighbors[i];
       if (index.is_sibling(index_sibling)) {
@@ -155,6 +153,7 @@ void Adapt::refine (const Adapt & adapt_parent, int ic3[3])
   // Delete parent if it is a neighbor (e.g. periodic
   // b.c. with blocking == 1 along an axis
   delete_neighbor(index_parent);
+
 }
 
 //----------------------------------------------------------------------
@@ -335,13 +334,25 @@ void Adapt::get_neighbor_level_bounds
 
 //----------------------------------------------------------------------
 
-void Adapt::print(std::string message, Block * block) const
+
+std::vector<Index> Adapt::index_neighbors() const
+{
+  std::vector<Index> index_list;
+  const int n = num_neighbors();
+  index_list.resize(n);
+  for (int i=0; i<n; i++) index_list[i] = index(i);
+  return index_list;
+}
+
+//----------------------------------------------------------------------
+
+void Adapt::print(std::string message, const Block * block) const
 {
   char prefix[255];
   if (block) {
-    sprintf (prefix,"%d PRINT_ADAPT %s %s %p",CkMyPe(),block->name().c_str(),message.c_str(),(void*)this);
+    sprintf (prefix,"%d DEBUG_ADAPT %s %s %p",CkMyPe(),block->name().c_str(),message.c_str(),(void*)this);
   } else {
-    sprintf (prefix,"PRINT_ADAPT %s",message.c_str());
+    sprintf (prefix,"DEBUG_ADAPT %s",message.c_str());
   }
   CkPrintf ("DEBUG_ADAPT face_level curr: ");
   for (int i=0; i<face_level_[0].size(); i++) {
@@ -402,7 +413,7 @@ void Adapt::print(std::string message, Block * block) const
 
 //----------------------------------------------------------------------
 
-void Adapt::write(std::string root, Block * block, int cycle_start)
+void Adapt::write(std::string root, const Block * block, int cycle_start) const
 {
   const int cycle = cello::simulation()->cycle();
   if (cycle >= cycle_start) {
@@ -531,17 +542,4 @@ void Adapt::copy_ (const Adapt & adapt)
   self_ =          adapt.self_;
   neighbor_list_ = adapt.neighbor_list_;
 }
-
-//----------------------------------------------------------------------
-
-std::vector<Index> Adapt::index_neighbors_() const
-{
-  std::vector<Index> index_list;
-  const int n = num_neighbors();
-  index_list.resize(n);
-  for (int i=0; i<n; i++) index_list[i] = index(i);
-  return index_list;
-}
-
-
 

@@ -31,6 +31,7 @@ MsgRefine::MsgRefine()
     num_face_level_(0),
     face_level_(nullptr),
     adapt_parent_(nullptr),
+    restart_io_reader_(-1),
     buffer_(nullptr)
 {
   ++counter[cello::index_static()]; 
@@ -47,7 +48,8 @@ MsgRefine::MsgRefine
  int num_field_blocks, int num_adapt_steps,
  int cycle, double time, double dt, int refresh_type,
  int num_face_level, int * face_level,
- Adapt * adapt_parent
+ Adapt * adapt_parent,
+ int restart_io_reader
  ) 
   : CMessage_MsgRefine(),
     is_local_(true),
@@ -62,6 +64,7 @@ MsgRefine::MsgRefine
     num_face_level_(num_face_level),
     face_level_(new int[num_face_level]),
     adapt_parent_(adapt_parent),
+    restart_io_reader_(restart_io_reader),
     buffer_(nullptr)
 {
    ++counter[cello::index_static()]; 
@@ -153,6 +156,7 @@ void * MsgRefine::pack (MsgRefine * msg)
     size += msg->data_msg_->data_size(); // element-12
   }
 
+  size += sizeof(int);   // IoReader
   //--------------------------------------------------
   //  2. allocate buffer using CkAllocBuffer()
   //--------------------------------------------------
@@ -195,7 +199,8 @@ void * MsgRefine::pack (MsgRefine * msg)
 
   (*pi++) = msg->cycle_;  // attribute-07
   (*pi++) = msg->refresh_type_; // attribute-08
-
+  (*pi++) = msg->restart_io_reader_;
+  
   // Adapt class
   SAVE_OBJECT_PTR_TYPE(pc,Adapt,msg->adapt_parent_);
 
@@ -275,6 +280,7 @@ MsgRefine * MsgRefine::unpack(void * buffer)
   msg->num_adapt_steps_ = (*pi++);  // attribute-06
   msg->cycle_ = (*pi++);            // attribute-07
   msg->refresh_type_ = (*pi++);     // attribute-08
+  msg->restart_io_reader_ = (*pi++);
 
   // Adapt class
   LOAD_OBJECT_PTR_TYPE(pc,Adapt,msg->adapt_parent_);
@@ -384,6 +390,8 @@ void MsgRefine::print()
   CkPrintf ("int num_adapt_steps_ = %d\n",num_adapt_steps_);
   CkPrintf ("int cycle_ = %d\n",cycle_);
   CkPrintf ("int refresh_type_ = %d\n",refresh_type_);
+  if (restart_io_reader_ >= 0)
+    CkPrintf ("int restart_io_reader_ = %d\n",restart_io_reader_);
   CkPrintf ("int num_face_level_ = %d\n",num_face_level_);
   CkPrintf ("int * face_level_ = %p\n",(void*)face_level_);
   adapt_parent_->print("MsgRefine");

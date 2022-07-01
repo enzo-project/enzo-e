@@ -27,7 +27,9 @@ module simulation {
     entry void s_write (); // [SC6]
     entry void r_write (CkReductionMsg * msg); // [SC7]
     entry void r_write_checkpoint_output ();
-    entry void r_write_checkpoint_method ();
+
+    entry void r_restart_start(CkReductionMsg *);
+    entry void p_restart_enter(std::string dir);
 
     entry void p_output_write (int n, char buffer[n]); // [SC8]
     entry void r_output_barrier (CkReductionMsg * msg);
@@ -47,5 +49,7 @@ module simulation {
   group [migratable] MappingTree : CkArrayMap {
     entry MappingTree(int, int, int);
   };
-
+  group [migratable] MappingIo : CkArrayMap {
+    entry MappingIo(int);
+  };
 }

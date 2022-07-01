@@ -15,7 +15,8 @@ enum mesh_color_type {
   mesh_color_level,
   mesh_color_process,
   mesh_color_neighbor,
-  mesh_color_age
+  mesh_color_age,
+  mesh_color_order
 };
 
 class OutputImage : public Output {
@@ -41,6 +42,7 @@ public: // functions
 	      int         image_size[2],
 	      std::string image_reduce_type,
 	      std::string image_mesh_color,
+	      std::string image_mesh_order,
 	      std::string image_color_particle_attribute,
 	      double      image_lower[],
 	      double      image_upper[],
@@ -65,6 +67,7 @@ public: // functions
       image_mesh_(NULL),
       op_reduce_(reduce_unknown),
       mesh_color_type_(mesh_color_unknown),
+      mesh_color_order_(),
       color_particle_attribute_(""),
       axis_(axis_all),
       min_value_(std::numeric_limits<double>::max()),
@@ -133,7 +136,7 @@ public: // virtual functions
 private: // functions
 
   /// value associated with the given mesh level
-  double mesh_color_(int level, int age) const;
+  double mesh_color_(const Block *, int level ) const;
 
   bool type_is_mesh_ () const
   { return (image_type_ == "mesh" || image_type_ == "data+mesh"); }
@@ -189,8 +192,11 @@ private: // attributes
   /// Reduction operation
   reduce_type op_reduce_;
 
-  /// Color
+  /// Color type for mesh images
   int mesh_color_type_;
+
+  /// Block int Scalar for ordering when mesh_color_type_ = mesh_color_order
+  std::string mesh_color_order_;
 
   /// Particle attribute defining color (default -1: constant)
   std::string color_particle_attribute_;

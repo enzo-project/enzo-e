@@ -23,7 +23,7 @@
 
 
 #ifdef TRACE_CONTROL
-# define TRACE_BLOCK (name() == "B00_11")
+# define TRACE_BLOCK (cycle()>=104)
 # undef TRACE_CONTROL
 # define TRACE_CONTROL(A)                               \
   if (TRACE_BLOCK) {                                    \
@@ -54,9 +54,17 @@ void Block::initial_exit_()
 
 #ifdef TRACE_CONTRIBUTE  
   CkPrintf ("%s %s:%d DEBUG_CONTRIBUTE calling r_adapt_enter\n",
-	    name().c_str(),__FILE__,__LINE__); fflush(stdout);
-#endif  
-  control_sync_barrier (CkIndex_Block::r_adapt_enter(NULL));
+	    name().c_str(),__FILE__,__LINE__);
+  fflush(stdout);
+#endif
+
+  bool initial_restart = cello::config()->initial_restart;
+
+  if (initial_restart) {
+    control_sync_barrier (CkIndex_Block::r_restart_enter(NULL));
+  } else {
+    control_sync_barrier (CkIndex_Block::r_adapt_enter(NULL));
+  }
   performance_stop_(perf_initial);
 }
 
@@ -91,7 +99,8 @@ void Block::output_exit_()
 
 #ifdef TRACE_CONTRIBUTE  
   CkPrintf ("%s %s:%d DEBUG_CONTRIBUTE calling r_stopping_enter()\n",
-	    name().c_str(),__FILE__,__LINE__); fflush(stdout);
+	    name().c_str(),__FILE__,__LINE__);
+  fflush(stdout);
 #endif  
   control_sync_barrier (CkIndex_Block::r_stopping_enter(NULL));
 
@@ -118,7 +127,8 @@ void Block::stopping_exit_()
 
 #ifdef TRACE_CONTRIBUTE  
     CkPrintf ("%s %s:%d DEBUG_CONTRIBUTE calling r_exit()\n",
-	    name().c_str(),__FILE__,__LINE__); fflush(stdout);
+	    name().c_str(),__FILE__,__LINE__);
+  fflush(stdout);
 #endif  
     control_sync_barrier (CkIndex_Block::r_exit(NULL));
 
@@ -217,6 +227,7 @@ void Block::control_sync_neighbor(int entry_point, int id_sync,
 #ifdef DEBUG_REFRESH    
   CkPrintf ("%d DEBUG_REFRESH %s neighbor sync id %d\n",
 	    CkMyPe(), name().c_str(),id_sync);
+  fflush(stdout);
 #endif    
 
   int num_neighbors = 0;

@@ -78,14 +78,14 @@ void EnzoMethodGrackle::define_required_grackle_fields()
   if (rank>=3) cello::define_field ("velocity_z");
 
   // Get Grackle parameters defining fields to define
-  
+
   const int metal_cooling      = grackle_chemistry->metal_cooling;
   const int chemistry_level    = grackle_chemistry->primordial_chemistry;
   const int specific_heating   = grackle_chemistry->use_specific_heating_rate;
   const int volumetric_heating = grackle_chemistry->use_volumetric_heating_rate;
 
   // Metal cooling fields
-  
+
   if (metal_cooling > 0) {
     cello::define_field_in_group ("metal_density", "color");
   }
@@ -119,7 +119,7 @@ void EnzoMethodGrackle::define_required_grackle_fields()
 
   if (volumetric_heating) {
     cello::define_field("volumetric_heating_rate");
-  }    
+  }
 
 }
 #endif /* CONFIG_USE_GRACKLE */
@@ -233,8 +233,8 @@ void EnzoMethodGrackle::setup_grackle_units (double current_time,
     enzo_float cosmo_dt = 0.0;
 
     EnzoPhysicsCosmology * cosmology = enzo::cosmology();
- 
-    grackle_units->density_units  = cosmology->density_units(); 
+
+    grackle_units->density_units  = cosmology->density_units();
     grackle_units->length_units = cosmology->length_units();
     grackle_units->time_units  = cosmology->time_units();
     grackle_units->velocity_units = cosmology->velocity_units();
@@ -642,7 +642,7 @@ void EnzoMethodGrackle::enforce_metallicity_floor(Block * block) throw()
                                     metal_mass_frac_floor * density[i]);
       }
     }
-  }     
+  }
   return;
 }
 #endif

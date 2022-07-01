@@ -34,13 +34,13 @@ const char * phase_name[] = {
   "exit"
 };
 
-//----------------------------------------------------------------------
+// #define TRACE_BLOCK
 
+//======================================================================
 #ifdef BYPASS_CHARM_MEM_LEAK
-Block::Block ( process_type ip_source )
-#else
-Block::Block ( MsgRefine * msg )
-#endif
+//======================================================================
+
+Block::Block ( process_type ip_source, MsgType msg_type )
   : CBase_Block(),
     data_(NULL),
     child_data_(NULL),
@@ -70,40 +70,26 @@ Block::Block ( MsgRefine * msg )
     index_solver_(),
     refresh_()
 {
+#ifdef TRACE_BLOCK
+
+  CkPrintf ("%d TRACE_BLOCK %s Block::Block(ip)\n",  CkMyPe(),name(thisIndex).c_str());
+
+#endif
+
   performance_start_(perf_block);
 
   init_refresh_();
   usesAtSync = true;
 
   thisIndex.array(array_,array_+1,array_+2);
-#ifdef BYPASS_CHARM_MEM_LEAK
 
-  proxy_simulation[ip_source].p_get_msg_refine(thisIndex);
+  if (msg_type == MsgType::msg_refine) {
+    proxy_simulation[ip_source].p_get_msg_refine(thisIndex);
+  }
 
-#else
-
-  init_refine_ (msg->index_,
-	msg->nx_, msg->ny_, msg->nz_,
-	msg->num_field_blocks_,
-	msg->num_adapt_steps_,
-	msg->cycle_, msg->time_,  msg->dt_,
-	0, NULL, msg->refresh_type_,
-        msg->num_face_level_, msg->face_level_,
-        msg->adapt_);
-
-  init_adapt_(msg->adapt_parent_);
-
-  apply_initial_(msg);
-
-  performance_stop_(perf_block);
-
-  //  CkFreeMsg (msg);
-#endif
 }
 
 //----------------------------------------------------------------------
-
-#ifdef BYPASS_CHARM_MEM_LEAK
 
 void Block::p_set_msg_refine(MsgRefine * msg)
 {
@@ -123,9 +109,89 @@ void Block::p_set_msg_refine(MsgRefine * msg)
   apply_initial_(msg);
 
   performance_stop_(perf_block);
+#ifdef TRACE_BLOCK
+  {
+  CkPrintf ("%d %s index TRACE_BLOCK p_set_msg_refine(MsgRefine) done\n",
+            CkMyPe(),name(msg->index_).c_str());
+  }
+#endif
+
+#ifdef TRACE_REFINE
+  CkPrintf ("TRACE_REFINE %s\n",name().c_str());
+  fflush(stdout);
+#endif
+  delete msg;
 }
 
+//======================================================================
+#else /* not BYPASS_CHARM_MEM_LEAK */
+//======================================================================
+
+Block::Block ( MsgRefine * msg )
+  : CBase_Block(),
+    data_(NULL),
+    child_data_(NULL),
+    level_next_(0),
+    cycle_(0),
+    time_(0.0),
+    dt_(0.0),
+    stop_(false),
+    index_initial_(0),
+    children_(),
+    sync_coarsen_(),
+    sync_count_(),
+    sync_max_(),
+    adapt_(),
+    child_face_level_curr_(),
+    child_face_level_next_(),
+    count_coarsen_(0),
+    adapt_step_(0),
+    adapt_ready_(false),
+    adapt_balanced_(false),
+    adapt_changed_(0),
+    coarsened_(false),
+    is_leaf_(true),
+    age_(0),
+    name_(""),
+    index_method_(-1),
+    index_solver_(),
+    refresh_()
+{
+#ifdef TRACE_BLOCK
+
+  CkPrintf ("%d TRACE_BLOCK %s Block::Block(MsgRefine)\n",  CkMyPe(),name(thisIndex).c_str());
+
 #endif
+
+  performance_start_(perf_block);
+
+  init_refresh_();
+  usesAtSync = true;
+
+  thisIndex.array(array_,array_+1,array_+2);
+#ifdef TRACE_BLOCK
+  CkPrintf ("DEBUG_BLOCK Block(msg) face_level %p\n",
+            msg->face_level_);
+#endif
+  init_refine_ (msg->index_,
+	msg->nx_, msg->ny_, msg->nz_,
+	msg->num_field_blocks_,
+	msg->num_adapt_steps_,
+	msg->cycle_, msg->time_,  msg->dt_,
+	0, NULL, msg->refresh_type_,
+        msg->num_face_level_, msg->face_level_,
+        msg->adapt_parent_);
+
+  init_adapt_(msg->adapt_parent_);
+
+  apply_initial_(msg);
+  
+  performance_stop_(perf_block);
+
+}
+//======================================================================
+#endif /* BYPASS_CHARM_MEM_LEAK */
+//======================================================================
 
 //----------------------------------------------------------------------
 
@@ -259,8 +325,15 @@ void Block::init_refine_
 
 void Block::initialize()
 {
-  bool is_first_cycle = (cycle_ == cello::config()->initial_cycle);
-  if (! cello::config()->initial_new) {
+#ifdef TRACE_BLOCK
+  CkPrintf ("TRACE_BLOCK %s initialize()\n",name().c_str());
+  fflush(stdout);
+#endif
+
+  const bool is_first_cycle = (cycle_ == cello::config()->initial_cycle);
+  const bool initial_new    = cello::config()->initial_new;
+
+  if (! initial_new) {
     if (is_first_cycle && level() <= 0) {
       CkCallback callback (CkIndex_Block::r_end_initialize(NULL), thisProxy);
       contribute(0,0,CkReduction::concat,callback);
@@ -401,31 +474,32 @@ Solver * Block::solver () throw ()
 //----------------------------------------------------------------------
 
 void Block::print () const
-
 {
-  CkPrintf ("data_ = %p\n",(void*)data_);
-  CkPrintf ("child_data_ = %p\n",(void*)child_data_);
+  CkPrintf ("--------------------\n");
+  CkPrintf ("PRINT_BLOCK name_ = %s\n",name().c_str());
+  CkPrintf ("PRINT_BLOCK data_ = %p\n",(void*)data_);
+  CkPrintf ("PRINT_BLOCK child_data_ = %p\n",(void*)child_data_);
   int v3[3];index().values(v3);
-  CkPrintf ("index_ = %0x %0x %0x\n",v3[0],v3[1],v3[2]);
-  CkPrintf ("level_next_ = %d\n",level_next_);
-  CkPrintf ("cycle_ = %d\n",cycle_);
-  CkPrintf ("time_ = %f\n",time_);
-  CkPrintf ("dt_ = %f\n",dt_);
-  CkPrintf ("stop_ = %d\n",stop_);
-  CkPrintf ("index_initial_ = %d\n",index_initial_);
-  CkPrintf ("children_.size() = %lu\n",children_.size());
-  CkPrintf ("child_face_level_curr_.size() = %lu\n",child_face_level_curr_.size());
-  CkPrintf ("child_face_level_next_.size() = %lu\n",child_face_level_next_.size());
-  CkPrintf ("count_coarsen_ = %d\n",count_coarsen_);
-  CkPrintf ("adapt_step_ = %d\n",adapt_step_);
-  CkPrintf ("adapt_ready_ = %s\n",adapt_ready_?"true":"false");
-  CkPrintf ("adapt_balanced_ = %s\n",adapt_balanced_?"true":"false");
-  CkPrintf ("adapt_changed_ = %d\n",adapt_changed_);
-  CkPrintf ("coarsened_ = %d\n",coarsened_);
-  CkPrintf ("is_leaf_ = %d\n",is_leaf_);
-  CkPrintf ("age_ = %d\n",age_);
-  CkPrintf ("name_ = %s\n",name_.c_str());
-  CkPrintf ("index_method_ = %d\n",index_method_);
+  CkPrintf ("PRINT_BLOCK index_ = %0x %0x %0x\n",v3[0],v3[1],v3[2]);
+  CkPrintf ("PRINT_BLOCK level_next_ = %d\n",level_next_);
+  CkPrintf ("PRINT_BLOCK cycle_ = %d\n",cycle_);
+  CkPrintf ("PRINT_BLOCK time_ = %f\n",time_);
+  CkPrintf ("PRINT_BLOCK dt_ = %f\n",dt_);
+  CkPrintf ("PRINT_BLOCK stop_ = %d\n",stop_);
+  CkPrintf ("PRINT_BLOCK index_initial_ = %d\n",index_initial_);
+  CkPrintf ("PRINT_BLOCK children_.size() = %lu\n",children_.size());
+  CkPrintf ("PRINT_BLOCK child_face_level_curr_.size() = %lu\n",child_face_level_curr_.size());
+  CkPrintf ("PRINT_BLOCK child_face_level_next_.size() = %lu\n",child_face_level_next_.size());
+  CkPrintf ("PRINT_BLOCK count_coarsen_ = %d\n",count_coarsen_);
+  CkPrintf ("PRINT_BLOCK adapt_step_ = %d\n",adapt_step_);
+  CkPrintf ("PRINT_BLOCK adapt_ready_ = %s\n",adapt_ready_?"true":"false");
+  CkPrintf ("PRINT_BLOCK adapt_balanced_ = %s\n",adapt_balanced_?"true":"false");
+  CkPrintf ("PRINT_BLOCK adapt_changed_ = %d\n",adapt_changed_);
+  CkPrintf ("PRINT_BLOCK coarsened_ = %d\n",coarsened_);
+  CkPrintf ("PRINT_BLOCK is_leaf_ = %d\n",is_leaf_);
+  CkPrintf ("PRINT_BLOCK age_ = %d\n",age_);
+  CkPrintf ("PRINT_BLOCK index_method_ = %d\n",index_method_);
+  adapt_.print("Adapt",this);
   //  CkPrintf ("index_solver_ = %d\n",index_solver());
 }
 
@@ -483,15 +557,18 @@ void Block::compute_derived(const std::vector< std::string>& field_list
 
 void Block::apply_initial_(MsgRefine * msg) throw ()
 {
-  bool is_first_cycle =  (cycle_ == cello::config()->initial_cycle);
+#ifdef TRACE_BLOCK
+  CkPrintf ("TRACE_BLOCK %s apply_initial()\n",name().c_str());
+  fflush(stdout);
+#endif
+  const bool is_first_cycle = (cycle_ == cello::config()->initial_cycle);
+  const bool initial_new    = cello::config()->initial_new;
 
   if (! is_first_cycle) {
     msg->update(data());
-    delete msg;
   } else {
-    delete msg;
     TRACE("Block::apply_initial_()");
-    if (cello::config()->initial_new) {
+    if (initial_new) {
 
       initial_new_begin_(0);
 
@@ -726,6 +803,12 @@ void Block::init_adapt_(Adapt * adapt_parent)
     int ic3[3];
     index_.child(level,ic3,ic3+1,ic3+2);
     adapt_.refine(*adapt_parent,ic3);
+#ifdef DEBUG_ADAPT
+    CkPrintf ("DEBUG_ADAPT %s Block() level > 0\n",
+              name().c_str());
+    adapt_parent->print("init_adapt parent",this);
+    adapt_.print("init_adapt child after",this);
+#endif    
   }
 }
 

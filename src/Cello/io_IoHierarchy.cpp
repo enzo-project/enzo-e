@@ -57,20 +57,13 @@ void IoHierarchy::meta_value
 
 //----------------------------------------------------------------------
 
-void IoHierarchy::field_array
-(void ** buffer, std::string * name, int * type,
- int * nxd, int * nyd, int * nzd,
- int * nx,  int * ny,  int * nz) throw()
+void IoHierarchy::save_to (void * v)
 {
+  Hierarchy * h = static_cast<Hierarchy*> (v);
+
+  for (int i=0; i<3; i++) {
+    h->lower_[i] = lower_[i];
+    h->upper_[i] = upper_[i];
+  }
+  h->max_level_ = max_level_;
 }
-
-//----------------------------------------------------------------------
-
-void IoHierarchy::particle_array 
-(int it, int ib, int ia,
- void ** buffer, std::string * name, int * type,
- int * n, int * k) throw()
-{
-}
-
-//----------------------------------------------------------------------

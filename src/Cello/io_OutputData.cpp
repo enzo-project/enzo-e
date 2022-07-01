@@ -107,19 +107,18 @@ void OutputData::finalize () throw ()
 
 void OutputData::write_hierarchy ( const Hierarchy  * hierarchy ) throw()
 {
-#ifdef TRACE_OUTPUT
-    CkPrintf ("%d TRACE_OUTPUT OutputData::write_hierarchy()\n",CkMyPe());
-#endif
 
-  // although it's a little hacky, this seems like the best place to stick this
-  Output::write_version_metadata();
+  Simulation * simulation = cello::simulation();
+  IoSimulation io_simulation(simulation);
+  write_meta (&io_simulation);
 
   IoHierarchy io_hierarchy(hierarchy);
-
   write_meta (&io_hierarchy);
-
   Output::write_hierarchy(hierarchy);
-  
+
+  // although it's a little hacky, this seems like the best place to
+  // stick this
+  Output::write_version_metadata();
 }
 
 //----------------------------------------------------------------------

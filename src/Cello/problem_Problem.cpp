@@ -625,11 +625,7 @@ Initial * Problem::create_initial_
 
   Initial * initial = nullptr;
 
-  if (type == "file") {
-    initial = new InitialFile (parameters,
-			       config->initial_cycle,
-			       config->initial_time);;
-  } else if (type == "value") {
+  if (type == "value") {
     initial = new InitialValue(parameters,
 			       config->initial_cycle,
 			       config->initial_time);
@@ -919,11 +915,6 @@ Method * Problem::create_method_
        config->method_flux_correct_min_digits_fields[index_method],
        config->method_flux_correct_min_digits_values[index_method]);
 
-  } else if (name == "checkpoint") {
-
-    method = new MethodCheckpoint
-      ( config->method_path_name[index_method]);
-
   } else if (name == "output") {
 
     ASSERT("Problem::create_method_()",
@@ -948,6 +939,10 @@ Method * Problem::create_method_
         config->method_output_blocking[1][index_method],
         config->method_output_blocking[2][index_method]);
 
+  } else if (name == "order_morton") {
+
+    method = new MethodOrderMorton(config->mesh_min_level);
+
   } else if (name == "refresh") {
 
     method = new MethodRefresh
@@ -962,6 +957,7 @@ Method * Problem::create_method_
 
     method = new MethodDebug
       (config->num_fields,
+       config->num_particles,
        config->method_debug_print[index_method],
        config->method_debug_coarse[index_method],
        config->method_debug_ghost[index_method]);
@@ -1011,6 +1007,7 @@ Output * Problem::create_output_
                                   config->output_image_size[index][1] };
     std::string image_reduce_type = config->output_image_reduce_type[index];
     std::string image_mesh_color  = config->output_image_mesh_color[index];
+    std::string image_mesh_order  = config->output_image_mesh_order[index];
     std::string image_color_particle_attribute =
       config->output_image_color_particle_attribute[index];
     double      image_min = config->output_image_min[index];
@@ -1041,6 +1038,7 @@ Output * Problem::create_output_
 			      image_size,
 			      image_reduce_type,
 			      image_mesh_color,
+			      image_mesh_order,
 			      image_color_particle_attribute,
 			      image_lower, image_upper,
 			      image_face_rank,

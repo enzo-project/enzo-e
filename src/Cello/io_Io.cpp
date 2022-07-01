@@ -32,23 +32,6 @@ void Io::meta_value
   if (nzd) (*nzd) = 0;
 }
 
-//----------------------------------------------------------------------
-void Io::field_array 
-(void ** buffer, std::string * name, int * type,
- int * nxd, int * nyd, int * nzd,
- int * nx,  int * ny,  int * nz) throw()
-{
-}
-
-//----------------------------------------------------------------------
-
-void Io::particle_array 
-(int it, int ib, int ia,
- void ** buffer, std::string * name, int * type,
- int * n, int * k) throw()
-{
-}
-
 //======================================================================
 
 int Io::data_size () const

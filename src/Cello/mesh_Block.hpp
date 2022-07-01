@@ -39,7 +39,7 @@ public: // interface
 
 #ifdef BYPASS_CHARM_MEM_LEAK
   /// create a Block whose MsgRefine is on the creating process
-  Block ( process_type ip_source );
+  Block ( process_type ip_source, MsgType msg_type );
   /// Initialize Block using MsgRefine returned by creating process
   virtual void p_set_msg_refine(MsgRefine * msg);
 #else
@@ -241,9 +241,9 @@ public: // interface
   // INITIAL
   //--------------------------------------------------
 
-  /// Initiate computing the sequence of Methods
+  /// Initiate applying the sequence of Initial conditions
   void initial_new_begin_(int level);
-  /// Initiate computing the next Method in the sequence
+  /// Continue to the next Initial conditions object
   void r_initial_new_next(CkReductionMsg * msg)
   { delete msg; initial_new_next_(); }
   void initial_new_next_();
@@ -491,6 +491,24 @@ protected:
 public:
 
   //--------------------------------------------------
+  // RESTART
+  //--------------------------------------------------
+
+  void r_restart_enter(CkReductionMsg * msg)
+  {
+    //    performance_start_(perf_restart);
+    delete msg;
+    restart_enter_();
+    //    performance_stop_(perf_restart);
+    //    performance_start_(perf_restart_sync);
+  }
+
+protected:
+  void restart_enter_();
+
+public:
+
+  //--------------------------------------------------
   // CONTROL AND SYNCHRONIZATION
   //--------------------------------------------------
 
@@ -558,11 +576,14 @@ public:
   /// Get restricted data from child when it is deleted
   void p_refresh_child (int n, char a[],int ic3[3]);
 
-  void r_method_checkpoint_continue(CkReductionMsg * msg);
-
   void p_method_flux_correct_refresh();
   void r_method_flux_correct_sum_fields(CkReductionMsg * msg);
   void r_method_debug_sum_fields(CkReductionMsg * msg);
+
+  void r_method_order_morton_continue(CkReductionMsg * msg);
+  void r_method_order_morton_complete(CkReductionMsg * msg);
+  void p_method_order_morton_weight(int ic3[3], int weight, Index index);
+  void p_method_order_morton_index(int index, int count);
 
   void p_method_output_next (MsgOutput * msg);
   void p_method_output_write (MsgOutput * msg);
@@ -784,7 +805,7 @@ public: // virtual functions
    Refresh * refresh,
    bool new_refresh) const;
 
-  void print () const;
+  virtual void print () const;
 
   const Adapt * adapt() const { return & adapt_; }
 
@@ -910,7 +931,7 @@ protected: // attributes
 
   /// Current stopping criteria
   bool stop_;
-
+  
   //--------------------------------------------------
 
   /// Index of current initialization routine

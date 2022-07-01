@@ -5,6 +5,8 @@
 /// @date     2021-10-20
 /// @brief    [\ref Mesh] Declaration of the Adapt class
 
+// #define CHECK_ADAPT
+
 #ifndef MESH_ADAPT_HPP
 #define MESH_ADAPT_HPP
 
@@ -156,9 +158,7 @@ public: // interface
 
   //======================================================================
 
-  /// Set rank. No range checking, rank must be 1 <= rank <= 3. This
-  /// is only here so it can be called by test code outside of Cello,
-  /// otherwise it would just use cello::rank()
+  /// Set rank. No range checking, rank must be 1 <= rank <= 3
   inline void set_rank (int rank)
   {
     rank_ = rank;
@@ -167,6 +167,9 @@ public: // interface
 
   inline void set_valid (bool valid)
   { valid_ = valid; }
+
+  inline bool is_valid () const
+  { return valid_; }
 
   inline void set_periodicity (const int periodicity[3])
   {
@@ -196,12 +199,12 @@ public: // interface
   /// true if successful and false if neighbor already inserted
   bool insert_neighbor  (Index index, bool is_sibling);
 
+  /// Reset self and level bounds for next adapt phase
+  void reset_bounds();
+
   /// Delete the given neighbor from list of neighbors. Return true if
   /// successful and false if neighbor not found.
   bool delete_neighbor  (Index index);
-
-  /// Reset self and level bounds for next adapt phase
-  void reset_bounds();
 
   /// Replace the neighboring block with refined neighbors
   void refine_neighbor  (Index index);
@@ -252,6 +255,10 @@ public: // interface
   void get_neighbor_level_bounds
   (Index index, int * level_min, int * level_max, bool * can_coarsen) const;
 
+  /// Return vector of neighbor indices (used to get copy before
+  /// modifying list in loop)
+  std::vector<Index> index_neighbors() const;
+
   /// Return the minimum level for the given block
   inline int level_min() const {return self_.level_min_; }
   inline int level_max() const {return self_.level_max_; }
@@ -262,10 +269,10 @@ public: // interface
   inline Index index(int i) const { return neighbor_list_.at(i).index_; }
 
   /// Display Adapt attributes for debugging
-  void print(std::string message, Block * block = nullptr) const;
+  void print(std::string message, const Block * block = nullptr) const;
 
   /// Write block's neighbors to file for debugging
-  void write(std::string filename, Block * block, int cycle_start = 0);
+  void write(std::string filename, const Block * block, int cycle_start = 0) const;
 
   ///--------------------
   /// PACKING / UNPACKING
@@ -285,10 +292,6 @@ public: // interface
   bool is_neighbor (Index index, int * ip = 0) const;
 
 private: // methods
-
-  /// Return vector of neighbor indices (used to get copy before
-  /// modifying list in loop)
-  std::vector<Index> index_neighbors_() const;
 
   void copy_ (const Adapt & adapt);
 

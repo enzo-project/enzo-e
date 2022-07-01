@@ -48,37 +48,3 @@ void IoParticleData::meta_value
 }
 
 //----------------------------------------------------------------------
-
-void IoParticleData::field_array
-(void ** buffer, std::string * name, int * type,
- int * nxd, int * nyd, int * nzd,
- int * nx,  int * ny,  int * nz) throw()
-{
-}
-
-//----------------------------------------------------------------------
-
-void IoParticleData::particle_array
-(int it, int ib, int ia,
- void ** buffer, std::string * name, int * type,
- int * n, int * k) throw()
-{
-  Particle particle (cello::particle_descr(),particle_data_);
-
-  if (buffer) (*buffer) = (void * ) 
-   		particle.attribute_array(it,ia,ib);
-  if (name) {
-    char buffer [80];
-    sprintf (buffer,"particle %s %s %d",
-  	     particle.type_name(it).c_str(),
-	     particle.attribute_name(it,ia).c_str(),
-	     ib);
-    *name = buffer;
-  }
-
-  if (type) (*type) = particle.attribute_type(it,ia);
-
-  if (n) (*n) = particle.num_particles (it,ib);
-  if (k) (*k) = particle.stride(it,ia);
-}
-//----------------------------------------------------------------------

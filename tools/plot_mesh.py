@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import fileinput
 import matplotlib
 import matplotlib.pyplot as plt
@@ -43,11 +42,9 @@ def decode_block(block_name):
                 else:
                     index_array = 2*index_array + int(bit)
                 index_bit = index_bit + 1
-          
         lower[index_axis] = index_array + index_tree
         upper[index_axis] = lower[index_axis] + factor_tree
         index_axis = index_axis + 1
-
     return [level,lower, upper]
 
 fig = plt.figure()
@@ -105,9 +102,8 @@ ymin -= r
 xmax += r
 ymax += r
 
-plt.axes().set_aspect('equal','datalim')
-    
 plt.xlim([xmin,xmax])
 plt.ylim([ymin,ymax])
+#plt.axes().set_aspect('equal','datalim')
 plt.show()
 

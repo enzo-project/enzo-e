@@ -62,6 +62,9 @@ public:
   inline int operator [] (std::size_t i) const
   { return v_[i]; }
 
+  inline int & operator [] (std::size_t i)
+  { return v_[i]; }
+
   void clear () ;
 
   Index index_parent (int min_level = 0) const;
@@ -168,6 +171,11 @@ public:
     set_child (level+1,icx,icy,icz,min_level);
   }
 
+  /// Return the "next" Index in the hierarchy, given the
+  /// dimensionality, array size, and whether the corresponding block is a leaf or
+  /// not
+  Index next (int rank, const int na3[3], bool is_leaf, int min_level) const;
+  
   void print (std::string msg, int level) const;
 
   void print (const char * msg,

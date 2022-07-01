@@ -12,7 +12,7 @@
 int BlockTrace::data_size () const
 {
   int size = 0;
-  SIZE_SCALAR_TYPE(size,int,num_children_);
+  SIZE_SCALAR_TYPE(size,int,rank_);
   SIZE_SCALAR_TYPE(size,Index,index_home_);
   SIZE_SCALAR_TYPE(size,Index,index_root_);
   SIZE_ARRAY_TYPE(size,int,index_min_,3);
@@ -28,7 +28,7 @@ int BlockTrace::data_size () const
 char * BlockTrace::save_data (char * buffer) const
 {
   char * pc = buffer;
-  SAVE_SCALAR_TYPE(pc,int,num_children_);
+  SAVE_SCALAR_TYPE(pc,int,rank_);
   SAVE_SCALAR_TYPE(pc,Index,index_home_);
   SAVE_SCALAR_TYPE(pc,Index,index_root_);
   SAVE_ARRAY_TYPE(pc,int,index_min_,3);
@@ -49,7 +49,7 @@ char * BlockTrace::save_data (char * buffer) const
 char * BlockTrace::load_data (char * buffer)
 {
   char * pc = buffer;
-  LOAD_SCALAR_TYPE(pc,int,num_children_);
+  LOAD_SCALAR_TYPE(pc,int,rank_);
   LOAD_SCALAR_TYPE(pc,Index,index_home_);
   LOAD_SCALAR_TYPE(pc,Index,index_root_);
   LOAD_ARRAY_TYPE(pc,int,index_min_,3);

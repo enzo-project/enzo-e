@@ -296,6 +296,21 @@ public: // interface
   double units_scaling (const FieldDescr *, int id);
 
   //--------------------------------------------------
+
+  /// Return the number of bytes required to serialize the data object
+  int data_size (FieldDescr * field_descr) const;
+
+  /// Serialize the object into the provided empty memory buffer.
+  /// Returns the next open position in the buffer to simplify
+  /// serializing multiple objects in one buffer.
+  char * save_data (FieldDescr * field_descr, char * buffer) const;
+
+  /// Restore the object from the provided initialized memory buffer data.
+  /// Returns the next open position in the buffer to simplify
+  /// serializing multiple objects in one buffer.
+  char * load_data (FieldDescr * field_descr, char * buffer);
+
+  //--------------------------------------------------
 private: // functions
   //--------------------------------------------------
 

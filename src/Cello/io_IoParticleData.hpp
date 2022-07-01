@@ -45,9 +45,12 @@ public: // interface
     particle_data_ = particle_data;
   };
 
-#include "_io_Io_common.hpp"
+  /// Return the ith metadata item associated with the object
+  virtual void meta_value 
+  (int index, 
+   void ** buffer, std::string * name, int * type,
+   int * nxd=0, int * nyd=0, int * nzd=0) throw();
 
-  
 protected: // functions
 
   /// Current ParticleData

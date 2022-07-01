@@ -124,7 +124,6 @@ EnzoSolverCg::EnzoSolverCg
     refresh_loop_2->set_callback(CkIndex_EnzoBlock::p_solver_cg_loop_2());
 
   }
-
 }
 
 //----------------------------------------------------------------------

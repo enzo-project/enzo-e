@@ -24,8 +24,9 @@ IoEnzoBlock::IoEnzoBlock() throw ()
   meta_name_.push_back("enzo_GridEndIndex");
   meta_name_.push_back("enzo_CellWidth");
   meta_name_.push_back("enzo_redshift");
-  
 }
+
+//----------------------------------------------------------------------
 
 void IoEnzoBlock::set_block (Block * block) throw()
 {
@@ -178,6 +179,25 @@ char * IoEnzoBlock::load_data (char * buffer)
   LOAD_SCALAR_TYPE(pc,enzo_float,enzo_redshift_);
 
   return pc;
+}
+
+//----------------------------------------------------------------------
+
+void IoEnzoBlock::save_to (void * v)
+{
+  IoBlock::save_to(v);
+  
+  EnzoBlock * enzo_block = (EnzoBlock *)v;
+
+  enzo_block->dt = enzo_dt_;
+  for (int i=0; i<3; i++) {
+    enzo_block->GridLeftEdge[i] = enzo_GridLeftEdge_[i];;
+    enzo_block->GridDimension[i] = enzo_GridDimension_[i];;
+    enzo_block->GridStartIndex[i] = enzo_GridStartIndex_[i];;
+    enzo_block->GridEndIndex[i] = enzo_GridEndIndex_[i];;
+    enzo_block->CellWidth[i] = enzo_CellWidth_[i];;
+  }
+  enzo_block->redshift = enzo_redshift_;;
 }
 
 //----------------------------------------------------------------------

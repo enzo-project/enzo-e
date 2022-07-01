@@ -64,7 +64,8 @@ int EnzoBlock::NumberOfBaryonFields[CONFIG_NODE_SIZE];
 void EnzoBlock::initialize(const EnzoConfig * enzo_config)
 {
 #ifdef DEBUG_ENZO_BLOCK
-  CkPrintf ("%d DEBUG_ENZO_BLOCK EnzoBlock::initialize\n",CkMyPe());
+  CkPrintf ("%d DEBUG_ENZO_BLOCK [static] EnzoBlock::initialize()\n",
+            CkMyPe());
 #endif
   int gx = enzo_config->field_ghost_depth[0];
   int gy = enzo_config->field_ghost_depth[1];
@@ -109,9 +110,9 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
 
     PressureFree[in]              = enzo_config->ppm_pressure_free;
     UseMinimumPressureSupport[in] = enzo_config->ppm_use_minimum_pressure_support;
-    MinimumPressureSupportParameter[in] = 
+    MinimumPressureSupportParameter[in] =
       enzo_config->ppm_minimum_pressure_support_parameter;
-    
+
     PPMFlatteningParameter[in]    = enzo_config->ppm_flattening;
     PPMDiffusionParameter[in]     = enzo_config->ppm_diffusion;
     PPMSteepeningParameter[in]    = enzo_config->ppm_steepening;
@@ -146,73 +147,133 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
 
 //----------------------------------------------------------------------
 
+//======================================================================
 #ifdef BYPASS_CHARM_MEM_LEAK
-EnzoBlock::EnzoBlock( process_type ip_source)
-  : CBase_EnzoBlock ( ip_source ),
-#else
-    EnzoBlock::EnzoBlock ( MsgRefine * msg )
-    : CBase_EnzoBlock ( msg ),
-#endif
-  dt(dt_),
-  redshift(0.0)
+//======================================================================
+
+EnzoBlock::EnzoBlock( process_type ip_source,  MsgType msg_type)
+  : CBase_EnzoBlock (ip_source, msg_type),
+    redshift(0.0)
 
 {
-#ifdef TRACE_BLOCK  
-CkPrintf ("%d %p TRACE_BLOCK %s EnzoBlock(ip)\n",
-          CkMyPe(),(void *)this,name(thisIndex).c_str());
+#ifdef TRACE_BLOCK
+
+  CkPrintf ("%d %p TRACE_BLOCK %s EnzoBlock(ip) msg_type %d\n",
+            CkMyPe(),(void *)this,name(thisIndex).c_str(),int(msg_type));
 #endif
 
-#ifdef BYPASS_CHARM_MEM_LEAK
-#else
-  initialize_enzo_();
-  initialize();
-  Block::initialize();
-#endif
-}
-
-//----------------------------------------------------------------------
-
-#ifdef BYPASS_CHARM_MEM_LEAK
-
-void EnzoBlock::p_set_msg_refine(MsgRefine * msg)
-{
-  Block::p_set_msg_refine(msg);
-  initialize_enzo_();
-  initialize();
-  Block::initialize();
-}
-
-#endif
-
-//----------------------------------------------------------------------
-
-void EnzoBlock::initialize_enzo_()
-{
-  int v3[3];
-  thisIndex.values(v3);
-  for (int i=0; i<MAX_DIMENSION; i++) {
-    GridLeftEdge[i] = 0;
-    GridDimension[i] = 0;
-    GridStartIndex[i] = 0;
-    GridEndIndex[i] = 0;
-    CellWidth[i] = 0;
+  if (msg_type == MsgType::msg_check) {
+    proxy_enzo_simulation[ip_source].p_get_msg_check(thisIndex);
   }
 }
 
 //----------------------------------------------------------------------
 
+void EnzoBlock::p_set_msg_check(EnzoMsgCheck * msg)
+{
+  performance_start_(perf_block);
+
+  restart_set_data_(msg);
+  initialize();
+  Block::initialize();
+  performance_stop_(perf_block);
+}
+
+//----------------------------------------------------------------------
+
+void EnzoBlock::p_set_msg_refine(MsgRefine * msg)
+{
+#ifdef TRACE_BLOCK
+  CkPrintf ("%d %p :%d TRACE_BLOCK %s EnzoBlock p_set_msg_refine()\n",
+            CkMyPe(),(void *)this,__LINE__,name(thisIndex).c_str());
+  fflush(stdout);
+#endif
+  int io_reader = msg->restart_io_reader_;
+  Block::p_set_msg_refine(msg);
+  initialize();
+  Block::initialize();
+  // If refined block and restarting, notify file reader block is created
+  if (io_reader >= 0) {
+    proxy_io_enzo_reader[io_reader].p_block_created();
+  }
+}
+
+//======================================================================
+#else /* not BYPASS_CHARM_MEM_LEAK */
+//======================================================================
+
+EnzoBlock::EnzoBlock ( MsgRefine * msg )
+  : CBase_EnzoBlock ( msg ),
+    redshift(0.0)
+
+{
+#ifdef TRACE_BLOCK
+  CkPrintf ("%d %p TRACE_BLOCK %s EnzoBlock(msg)\n",
+            CkMyPe(),(void *)this,name(thisIndex).c_str());
+#endif
+
+  int io_reader = msg->restart_io_reader_;
+  initialize();
+  Block::initialize();
+  // If refined block and restarting, notify file reader block is created
+  if ((cello::config()->initial_restart) && (index_.level() > 0)) {
+    proxy_io_enzo_reader[io_reader].p_block_created();
+  }
+  delete msg;
+}
+
+//----------------------------------------------------------------------
+
+EnzoBlock::EnzoBlock ( EnzoMsgCheck * msg )
+  : CBase_EnzoBlock (),
+    redshift(0.0)
+{
+#ifdef TRACE_BLOCK
+  CkPrintf ("%d %p TRACE_BLOCK %s EnzoBlock(msg)\n",
+            CkMyPe(),(void *)this,name(thisIndex).c_str());
+#endif
+
+  init_refresh_();
+  // init_refine_ (msg->index_,
+  //       msg->nx_, msg->ny_, msg->nz_,
+  //       msg->num_field_blocks_,
+  //       msg->num_adapt_steps_,
+  //       msg->cycle_, msg->time_,  msg->dt_,
+  //       0, NULL, msg->refresh_type_,
+  //       msg->num_face_level_, msg->face_level_,
+  //       msg->adapt_parent_);
+
+  // init_adapt_(msg->adapt_parent_);
+
+  // apply_initial_(msg);
+
+  initialize();
+  Block::initialize();
+#ifdef TRACE_BLOCK
+  CkPrintf ("%d %p :%d TRACE_BLOCK %s EnzoBlock restart_set_data_\n",
+            CkMyPe(),(void *)this,__LINE__,name(thisIndex).c_str());
+  fflush(stdout);
+#endif
+  restart_set_data_(msg);
+  delete msg;
+}
+
+//======================================================================
+#endif
+//======================================================================
+
 EnzoBlock::~EnzoBlock()
 {
-#ifdef TRACE_BLOCK  
+#ifdef TRACE_BLOCK
   CkPrintf ("%d %p TRACE_BLOCK %s ~EnzoBlock(...)\n",
             CkMyPe(),(void *)this,name(thisIndex).c_str());
-#endif  
+#endif
 }
 
 //----------------------------------------------------------------------
 
 void EnzoBlock::pup(PUP::er &p)
-{ 
+{
 
   TRACEPUP;
   TRACE ("BEGIN EnzoBlock::pup()");
@@ -229,10 +290,10 @@ void EnzoBlock::pup(PUP::er &p)
     WARNING("EnzoBlock::pup()", "skipping SubgridFluxes (not used)");
   }
 
-  PUParray(p,GridLeftEdge,MAX_DIMENSION); 
-  PUParray(p,GridDimension,MAX_DIMENSION); 
-  PUParray(p,GridStartIndex,MAX_DIMENSION); 
-  PUParray(p,GridEndIndex,MAX_DIMENSION); 
+  PUParray(p,GridLeftEdge,MAX_DIMENSION);
+  PUParray(p,GridDimension,MAX_DIMENSION);
+  PUParray(p,GridStartIndex,MAX_DIMENSION);
+  PUParray(p,GridEndIndex,MAX_DIMENSION);
   PUParray(p,CellWidth,MAX_DIMENSION);
 
   p | redshift;
@@ -326,7 +387,7 @@ void EnzoBlock::write(FILE * fp) throw ()
   fprintf (fp,"EnzoBlock: GridLeftEdge %g %g %g\n",
 	   GridLeftEdge[0],GridLeftEdge[1],GridLeftEdge[2]);
 
-  fprintf (fp,"EnzoBlock: CellWidth %g %g %g\n", 
+  fprintf (fp,"EnzoBlock: CellWidth %g %g %g\n",
 	   CellWidth[0], CellWidth[1], CellWidth[2] );
 
   fprintf (fp,"EnzoBlock: ghost %d %d %d\n",

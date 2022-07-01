@@ -7,6 +7,11 @@ namespace enzo {
     return proxy_enzo_simulation.ckLocalBranch();
   }
 
+  const EnzoFactory * factory()
+  {
+    return (const EnzoFactory *) simulation()->factory();
+  }
+
   EnzoProblem * problem()
   {
     return (EnzoProblem *) simulation()->problem();

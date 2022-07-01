@@ -172,6 +172,31 @@ public: // functions
   /// Return the compression level
   int compress () throw () {return compress_level_; }
 
+  /// Allocate a buffer for reading in a dataset of the given
+  /// length and type
+  char * allocate_buffer (int n, int type_data)
+  {
+    char * data;
+    if (type_data == type_single) {
+      data = (char *)new float [n];
+    } else if (type_data == type_double) {
+      data = (char *)new double [n];
+    } else if (type_data == type_int8) {
+      data = (char *)new int8_t [n];
+    } else if (type_data == type_int16) {
+      data = (char *)new int16_t [n];
+    } else if (type_data == type_int32) {
+      data = (char *)new int32_t [n];
+    } else if (type_data == type_int64) {
+      data = (char *)new int64_t [n];
+    } else {
+      data = nullptr;
+      ERROR1 ("EnzoInitialHdf5::allocate_array_()",
+              "Unsupported data type %d",type_data);
+    }
+    return data;
+  }
+  
 protected: // functions
 
   virtual void write_meta_

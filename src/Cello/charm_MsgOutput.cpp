@@ -154,7 +154,6 @@ void * MsgOutput::pack (MsgOutput * msg)
 
   have_io = (msg->io_block_ != nullptr);
   SAVE_SCALAR_TYPE(pc,int,have_io);
-  
   if (have_io) {
     SAVE_OBJECT_TYPE(pc,*(msg->io_block_));
   }
@@ -213,21 +212,19 @@ MsgOutput * MsgOutput::unpack(void * buffer)
   LOAD_ARRAY_TYPE(pc,double,msg->block_upper_,3);
 
   LOAD_ARRAY_TYPE(pc,char,msg->tag_,TAG_LEN+1);
-  
+
   int have_io;
   LOAD_SCALAR_TYPE(pc,int,have_io);
   if (have_io) {
-
-    // create the correct IoBlock (IoBlock or IoEnzoBlock
+    // create the correct IoBlock (IoBlock or IoEnzoBlock)
     msg->io_block_ = msg->method_output_->factory()->create_io_block();
-
     LOAD_OBJECT_TYPE(pc,*(msg->io_block_));
   }
 
   // Save the input buffer for freeing later
 
   msg->buffer_ = buffer;
-  
+
   return msg;
 }
 
@@ -237,7 +234,8 @@ void MsgOutput::update (Data * data)
 {
   // return if no data to update
   if (data_msg_ == nullptr) return;
-  data_msg_->update(data,is_local_);
+  const bool is_kept = false;
+  data_msg_->update(data,is_local_,is_kept);
 
   if (!is_local_) {
     CkFreeMsg (buffer_);

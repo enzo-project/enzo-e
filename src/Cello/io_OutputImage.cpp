@@ -33,6 +33,7 @@ OutputImage::OutputImage(int index,
 			 int image_size[2],
 			 std::string image_reduce_type,
 			 std::string image_mesh_color,
+			 std::string image_mesh_order,
 			 std::string color_particle_attribute,
 			 double image_lower[],
 			 double image_upper[],
@@ -80,7 +81,10 @@ OutputImage::OutputImage(int index,
   if      (image_mesh_color=="level")   mesh_color_type_ = mesh_color_level;
   else if (image_mesh_color=="process") mesh_color_type_ = mesh_color_process;
   else if (image_mesh_color=="age")     mesh_color_type_ = mesh_color_age;
-  else {
+  else if (image_mesh_color=="order") {
+    mesh_color_type_  = mesh_color_order;
+    mesh_color_order_ = image_mesh_order;
+  } else {
     ERROR1 ("OutputImage::OutputImage()",
 	    "Unrecognized output_image_mesh_color %s",
 	    image_mesh_color.c_str());
@@ -183,6 +187,7 @@ void OutputImage::pup (PUP::er &p)
   }
   p | op_reduce_;
   p | mesh_color_type_;
+  p | mesh_color_order_;
   p | color_particle_attribute_;
   p | axis_;
   p | use_min_max_;
@@ -402,7 +407,7 @@ void OutputImage::write_block ( const Block *  block ) throw()
 
     // value for mesh
     double value = 0;
-    value = mesh_color_(level,block->age());
+    value = mesh_color_(block,block->level());
 
     if (face_rank_ >= 1) {
       reduce_box_filled_(image_mesh_,ixm,ixp,iym,iyp,value);
@@ -417,25 +422,25 @@ void OutputImage::write_block ( const Block *  block ) throw()
       {
 	int if3[3] = {-1,0,0};
 	int face_level = block->face_level(if3);
-	double face_color = mesh_color_(face_level,0);
+	double face_color = mesh_color_(block,face_level);
 	reduce_box_filled_(image_mesh_,ixm+1,ixm+2,ym-1,ym+1, face_color);
       }
       {
 	int if3[3] = {1,0,0};
 	int face_level = block->face_level(if3);
-	double face_color = mesh_color_(face_level,0);
+	double face_color = mesh_color_(block,face_level);
 	reduce_box_filled_(image_mesh_,ixp-2,ixp-1,ym-1,ym+1, face_color);
       }
       {
 	int if3[3] = {0,-1,0};
 	int face_level = block->face_level(if3);
-	double face_color = mesh_color_(face_level,0);
+	double face_color = mesh_color_(block,face_level);
 	reduce_box_filled_(image_mesh_,xm-1,xm+1,iym+1,iym+2, face_color);
       }
       {
 	int if3[3] = {0,1,0};
 	int face_level = block->face_level(if3);
-	double face_color = mesh_color_(face_level,0);
+	double face_color = mesh_color_(block,face_level);
 	reduce_box_filled_(image_mesh_,xm-1,xm+1,iyp-2,iyp-1, face_color);
       }
     }
@@ -443,25 +448,25 @@ void OutputImage::write_block ( const Block *  block ) throw()
       {
 	int if3[3] = {-1,-1,0};
 	int face_level = block->face_level(if3);
-	double face_color = mesh_color_(face_level,0);
+	double face_color = mesh_color_(block,face_level);
 	reduce_box_filled_(image_mesh_,ixm+1,ixm+2,iym+1,iym+2, face_color);
       }
       {
 	int if3[3] = {1,-1,0};
 	int face_level = block->face_level(if3);
-	double face_color = mesh_color_(face_level,0);
+	double face_color = mesh_color_(block,face_level);
 	reduce_box_filled_(image_mesh_,ixp-2,ixp-1,iym+1,iym+2, face_color);
       }
       {
 	int if3[3] = {-1,1,0};
 	int face_level = block->face_level(if3);
-	double face_color = mesh_color_(face_level,0);
+	double face_color = mesh_color_(block,face_level);
 	reduce_box_filled_(image_mesh_,ixm+1,ixm+2,iyp-2,iyp-1, face_color);
       }
       {
 	int if3[3] = {1,1,0};
 	int face_level = block->face_level(if3);
-	double face_color = mesh_color_(face_level,0);
+	double face_color = mesh_color_(block,face_level);
 	reduce_box_filled_(image_mesh_,ixp-2,ixp-1,iyp-2,iyp-1, face_color);
       }
     }
@@ -634,20 +639,38 @@ void OutputImage::cleanup_remote  (int * n, char ** buffer) throw()
 
 //======================================================================
 
-double OutputImage::mesh_color_(int level,int age) const
+double OutputImage::mesh_color_(const Block * block, int level) const
 {
+  double value = 0;
+  // Determine 0.0 <= value <= 1.0
   if (mesh_color_type_ == mesh_color_level) {
-    return (1.0+level);
+    value = 1.0*level/max_level_;
   } else if (mesh_color_type_ == mesh_color_process) {
-    return (1.0+CkMyPe())/(CkNumPes());
+    value = (CkMyPe())/(CkNumPes()-1.0);
   } else if (mesh_color_type_ == mesh_color_age) {
-    return 1.0 / (0.01*age + 1.0);
+    const int age = block->age(); 
+    value = 1.0 / (0.01*age + 1.0);
+  } else if (mesh_color_type_ == mesh_color_order) {
+    const ScalarDescr * scalar = cello::scalar_descr_long_long();
+    long long is_i = scalar->index (mesh_color_order_+":index");
+    long long is_n = scalar->index (mesh_color_order_+":count");
+    ScalarData<long long> * scalar_data = ((Block *)block)->data()->scalar_data_long_long();
+    long long index = *scalar_data->value(cello::scalar_descr_long_long(),is_i);
+    long long count = *scalar_data->value(cello::scalar_descr_long_long(),is_n);
+    value = (count) > 0 ? 1.0*index/count : 0;
   } else {
     ERROR1 ("OutputImage::mesh_color_()",
 	    "Unknown mesh_color_type_ %d",
 	    mesh_color_type_);
-    return 0;
   }
+  // Scale value by [min_value, max_value] if needed, else scale by [0
+  // : num_colors ]
+  if (use_min_max_) {
+    value = (max_value_-min_value_)*value + min_value_;
+  } else {
+    value *= (colormap_[0].size());
+  }
+  return value;
 }
 
 //----------------------------------------------------------------------

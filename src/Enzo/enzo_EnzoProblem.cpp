@@ -99,6 +99,7 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_hdf5_max_level,
        enzo_config->initial_hdf5_format,
        enzo_config->initial_hdf5_blocking,
+       enzo_config->initial_hdf5_monitor_iter,
        enzo_config->initial_hdf5_field_files,
        enzo_config->initial_hdf5_field_datasets,
        enzo_config->initial_hdf5_field_coords,
@@ -630,7 +631,7 @@ Method * EnzoProblem::create_method_
        config->method_courant[index_method]);
 
 #ifdef CONFIG_USE_GRACKLE
-    //--------------------------------------------------
+
   } else if (name == "grackle") {
 
     method = new EnzoMethodGrackle
@@ -674,7 +675,7 @@ Method * EnzoProblem::create_method_
 
     const int index_prolong = prolong_list_.size();
     prolong_list_.push_back(prolong);
-  
+
     method = new EnzoMethodGravity
       (
        enzo_config->solver_index.at(solver_name),
@@ -708,16 +709,16 @@ Method * EnzoProblem::create_method_
     }
 
     method = new EnzoMethodBackgroundAcceleration
-          (zero_acceleration);
+      (zero_acceleration);
 
   } else if (name == "star_maker") {
 
     // should generalize this to enable multiple maker types
     if (enzo_config->method_star_maker_flavor == "stochastic"){
       method = new EnzoMethodStarMakerStochasticSF();
-    } else if (enzo_config->method_star_maker_flavor == "STARSS" || 
+    } else if (enzo_config->method_star_maker_flavor == "STARSS" ||
                enzo_config->method_star_maker_flavor == "starss") {
-      method = new EnzoMethodStarMakerSTARSS(); 
+      method = new EnzoMethodStarMakerSTARSS();
     } else{ // does not do anything
       method = new EnzoMethodStarMaker();
     }
@@ -734,41 +735,53 @@ Method * EnzoProblem::create_method_
       method = new EnzoMethodFeedback();
     }
 
+  } else if (name == "check") {
+
+    // Method for checkpointing the simulation
+    method = new EnzoMethodCheck
+      (enzo_config->method_check_num_files,
+       enzo_config->method_check_ordering,
+       enzo_config->method_check_dir,
+       enzo_config->method_check_monitor_iter);
+
   } else if (name == "merge_sinks") {
 
-    method = new EnzoMethodMergeSinks(
-		    enzo_config->method_merge_sinks_merging_radius_cells
-				     );
+    method = new EnzoMethodMergeSinks
+      (enzo_config->method_merge_sinks_merging_radius_cells);
 
   } else if (name == "accretion") {
 
     if (enzo_config->method_accretion_flavor == "threshold") {
-      method = new EnzoMethodThresholdAccretion(
-		       enzo_config->method_accretion_accretion_radius_cells,
-		       enzo_config->method_accretion_physical_density_threshold_cgs,
-		       enzo_config->method_accretion_max_mass_fraction
-						);
+      method = new EnzoMethodThresholdAccretion
+        (
+         enzo_config->method_accretion_accretion_radius_cells,
+         enzo_config->method_accretion_physical_density_threshold_cgs,
+         enzo_config->method_accretion_max_mass_fraction
+         );
     } else if (enzo_config->method_accretion_flavor == "bondi_hoyle") {
-      method = new EnzoMethodBondiHoyleAccretion(
-		       enzo_config->method_accretion_accretion_radius_cells,
-		       enzo_config->method_accretion_physical_density_threshold_cgs,
-		       enzo_config->method_accretion_max_mass_fraction
-						 );
+      method = new EnzoMethodBondiHoyleAccretion
+        (
+         enzo_config->method_accretion_accretion_radius_cells,
+         enzo_config->method_accretion_physical_density_threshold_cgs,
+         enzo_config->method_accretion_max_mass_fraction
+         );
     } else if (enzo_config->method_accretion_flavor == "flux") {
-      method = new EnzoMethodFluxAccretion(
-		       enzo_config->method_accretion_accretion_radius_cells,
-		       enzo_config->method_accretion_physical_density_threshold_cgs,
-		       enzo_config->method_accretion_max_mass_fraction
-						 );
+      method = new EnzoMethodFluxAccretion
+        (
+         enzo_config->method_accretion_accretion_radius_cells,
+         enzo_config->method_accretion_physical_density_threshold_cgs,
+         enzo_config->method_accretion_max_mass_fraction
+         );
     } else if (enzo_config->method_accretion_flavor == "dummy"){
-      method = new EnzoMethodAccretion(
-		       enzo_config->method_accretion_accretion_radius_cells,
-		       enzo_config->method_accretion_physical_density_threshold_cgs,
-		       enzo_config->method_accretion_max_mass_fraction
-				       );
+      method = new EnzoMethodAccretion
+        (
+         enzo_config->method_accretion_accretion_radius_cells,
+         enzo_config->method_accretion_physical_density_threshold_cgs,
+         enzo_config->method_accretion_max_mass_fraction
+         );
     } else {
       ERROR1("EnzoProblem::create_method_",
-	    "\"accretion\" method has flavor \"%s\", which is not one of the possible options: "
+             "\"accretion\" method has flavor \"%s\", which is not one of the possible options: "
 	     "\"threshold\", \"bondi_hoyle\", \"flux\", or \"dummy\"",
 	     enzo_config->method_accretion_flavor.c_str());
     }

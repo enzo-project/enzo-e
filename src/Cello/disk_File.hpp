@@ -149,6 +149,7 @@ public: // virtual functions
   ( const void * buffer, std::string name, int type,
     int n1=1, int n2=0, int n3=0, int n4=0) throw() = 0;
 
+
 protected: // attributes
 
   /// Path to the file

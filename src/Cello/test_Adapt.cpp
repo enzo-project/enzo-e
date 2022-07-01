@@ -53,15 +53,13 @@ void print_levels (int n, Adapt ** adapt, int min_level, int max_level,
 PARALLEL_MAIN_BEGIN
 {
 
-  PARALLEL_INIT;
-
   unit_init(0,1);
 
   unit_class("Adapt");
 
-  const int num_runs = 100;
-  const int run_length = 52;
-  const int MAX_LEVEL = 100;
+  const int num_runs = 1;
+  const int run_length = 22;
+  const int MAX_LEVEL = 20;
 
   for (int run=0; run<num_runs; run++) {
 

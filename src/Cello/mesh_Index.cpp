@@ -397,6 +397,66 @@ void Index::set_child(int level, int ix, int iy, int iz, int min_level)
 
 //----------------------------------------------------------------------
 
+Index Index::next (int rank, const int na3[3], bool is_leaf, int min_level) const
+{
+  // make a copy
+  Index index_next = *this;
+
+  if (! is_leaf) {
+
+    index_next.push_child(0,0,0,min_level);
+
+  } else { // is_leaf
+    // find the first ancestor (including self) that has child[k]=0 for
+    // some k
+    int ia3[3], ic3[3] = {0,0,0};
+    int level=index_next.level();
+    index_next.array (ia3,ia3+1,ia3+2);
+    if (level>min_level) {
+      index_next.child (level,ic3,ic3+1,ic3+2,min_level);
+    }
+    bool last = (level==min_level) ||
+      (ic3[0] && (rank<2 || ic3[1]) && (rank<3 || ic3[2]));
+    while (level > min_level && last) {
+      index_next = index_next.index_parent(min_level);
+      level=index_next.level();
+      index_next.array (ia3,ia3+1,ia3+2);
+      ic3[0]=ic3[1]=ic3[2]=0;
+      if (level>min_level) {
+        index_next.child (level,ic3,ic3+1,ic3+2,min_level);
+      }
+      last = (level==min_level) ||
+        (ic3[0] && (rank<2 || ic3[1]) && (rank<3 || ic3[2]));
+    }
+    if (level==min_level && last) {
+      // if in root level and last, go to next octree root
+      // (wraps around to 0 if at end)
+      ia3[0] = (ia3[0]+1) % na3[0]; 
+      if (rank >= 2 && !ia3[0]) {
+        ia3[1] = (ia3[1]+1) % na3[1];
+        if (rank >= 3 && !ia3[1]) {
+          ia3[2] = (ia3[2]+1) % na3[2];
+        }
+      }
+      index_next.set_array(ia3[0],ia3[1],ia3[2]);
+    } else {
+      // ASSERT (! last) [since ((level == 0) || (! last)) and
+      // ((level != 0) || (! last)) ]
+      ic3[0] = (ic3[0]+1) % 2;
+      if (rank >= 2 && !ic3[0]) {
+        ic3[1] = (ic3[1]+1) % 2;
+        if (rank >= 3 && !ic3[1]) {
+          ic3[2] = (ic3[2]+1) % 2;
+        }
+      }
+      index_next.set_child(level,ic3[0],ic3[1],ic3[2],min_level);
+    }
+  }
+  return index_next;
+}
+
+//----------------------------------------------------------------------
+
 void Index::print (std::string msg,int level) const
 {
   int ia3[3],it3[3],il3[3];

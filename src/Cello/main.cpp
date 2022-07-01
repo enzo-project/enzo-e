@@ -96,36 +96,6 @@ void Main::p_checkpoint_output(int count, std::string dir_name)
 
 //----------------------------------------------------------------------
 
-void Main::p_checkpoint_method(int count, std::string dir_name)
-{
-  
-  TRACE_MAIN("DEBUG MAIN p_checkpoint_method");
-  
-  count_checkpoint_++;
-  if (count_checkpoint_ >= count) {
-    count_checkpoint_ = 0;
-    // Write parameter file
-
-#ifdef CHARM_ENZO
-    strncpy(dir_checkpoint_,dir_name.c_str(),255);
-    Simulation * simulation = cello::simulation();
-    simulation->set_checkpoint(dir_checkpoint_);
-#endif    
-
-#ifdef CHARM_ENZO
-    CkPrintf ("Calling CkStartCheckpoint\n");
-    CkCallback callback(CkIndex_EnzoSimulation::r_write_checkpoint_method(),proxy_simulation);
-    CkStartCheckpoint (dir_checkpoint_,callback,false,1);
-    // "OLD" CHARM++ (version < 7.0.0) USE:
-    //CkStartCheckpoint (dir_checkpoint_,callback);
-#endif
-  }
-  // --------------------------------------------------
-}
-
-
-//----------------------------------------------------------------------
-
 void Main::p_output_enter()
 {
 #ifdef CHARM_ENZO

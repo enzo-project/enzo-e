@@ -22,6 +22,7 @@ public: // interface
                   int max_level,
                   std::string                 format,
                   const int                   blocking[3],
+                  int                         monitor_iter,
                   std::vector < std::string > field_files,
                   std::vector < std::string > field_datasets,
                   std::vector < std::string > field_coords,
@@ -162,6 +163,10 @@ protected: // attributes
   /// blocks within a partition are read from a single root-level
   /// Block
   int         blocking_[3];
+
+  /// Parameter for controling monitoring of progress
+  int         monitor_iter_;
+
   vecstr_type field_files_;
   vecstr_type field_datasets_;
   vecstr_type field_coords_;

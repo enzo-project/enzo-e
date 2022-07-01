@@ -9,25 +9,32 @@
 #include "charm_simulation.hpp"
 #include "test.hpp"
 
-// #define DEBUG_METHOD_DEBUG
+// #define DEBUG_DEBUG
 //----------------------------------------------------------------------
 
 MethodDebug::MethodDebug
 (int num_fields,
+ int num_particles,
  bool l_print,
  bool l_coarse,
  bool l_ghost
- ) throw() 
+ ) throw()
   : Method (),
+    num_fields_(num_fields),
+    num_particles_(num_particles),
     field_sum_(),
     field_min_(),
     field_max_(),
     field_count_(),
+    particle_sum_(),
+    particle_min_(),
+    particle_max_(),
+    particle_count_(),
     l_print_(l_print),
     l_coarse_(l_coarse),
     l_ghost_(l_ghost)
 {
-  // Set up post-refresh to refresh all conserved fields in group_
+  // Set up post-refresh to refresh all fields
 
   cello::simulation()->refresh_set_name(ir_post_,name());
   cello::refresh(ir_post_)->add_all_fields();
@@ -36,34 +43,46 @@ MethodDebug::MethodDebug
   field_min_.resize(num_fields);
   field_max_.resize(num_fields);
   field_count_.resize(num_fields);
+
+  for (int i=0; i<3; i++) {
+    particle_sum_[i].resize(num_particles);
+    particle_min_[i].resize(num_particles);
+    particle_max_[i].resize(num_particles);
+    particle_count_[i].resize(num_particles);
+  }
 }
 
 //----------------------------------------------------------------------
 
 void MethodDebug::compute ( Block * block) throw()
 {
-  // accumulate local reductions for global 
-
-  Field field = block->data()->field();
-  int mx,my,mz;
-  int gx,gy,gz;
-  field.dimensions (0,&mx,&my,&mz);
-  field.ghost_depth (0,&gx,&gy,&gz);
-
-  const int nf = field.num_permanent();
-  long double * reduce = new long double [1+4*nf];
-  reduce[0] = nf;
-  for (int index_field=0; index_field<nf; index_field++) {
-    reduce[4*index_field+1] = std::numeric_limits<long double>::max();
-    reduce[4*index_field+2] = -std::numeric_limits<long double>::max();
-    reduce[4*index_field+3] = 0;
-    reduce[4*index_field+4] = 0;
+  const int num_reduce = 4*(num_fields_+3*num_particles_);
+  long double * reduce = new long double [1+num_reduce];
+  reduce[0] = num_reduce+1;
+  const int kmin=0;
+  const int kmax=1;
+  const int ksum=2;
+  const int knum=3;
+  for (int k=1; k<num_reduce; k+=4) {
+    reduce[k+kmin] = std::numeric_limits<long double>::max();
+    reduce[k+kmax] = -std::numeric_limits<long double>::max();
+    reduce[k+ksum] = 0;
+    reduce[k+knum] = 0;
   }
 
   if (block->is_leaf()) {
 
+    // accumulate local reductions for global
+
+    Field field = block->data()->field();
+    int mx,my,mz;
+    int gx,gy,gz;
+    field.dimensions (0,&mx,&my,&mz);
+    field.ghost_depth (0,&gx,&gy,&gz);
+
     const double rel_vol = cello::relative_cell_volume (block->level());
-    for (int index_field=0; index_field<nf; index_field++) {
+    int k=1;
+    for (int index_field=0; index_field<num_fields_; index_field++) {
 
       cello_float * values = (cello_float *) field.values(index_field);
 
@@ -71,80 +90,153 @@ void MethodDebug::compute ( Block * block) throw()
         for (int iy=gy; iy<my-gy; iy++) {
           for (int ix=gx; ix<mx-gx; ix++) {
             int i=ix + mx*(iy + my*iz);
-            reduce[4*index_field+1] = std::min(reduce[4*index_field+1],(long double)values[i]);
-            reduce[4*index_field+2] = std::max(reduce[4*index_field+2],(long double)values[i]);
-            reduce[4*index_field+3] += values[i];
-            ++reduce[4*index_field+4];
-          }    
-        }    
+            reduce[k+kmin] = std::min(reduce[k],(long double)(values[i]));
+            reduce[k+kmax] = std::max(reduce[k+1],(long double)(values[i]));
+            reduce[k+ksum] += values[i];
+            reduce[k+knum] += rel_vol;
+          }
+        }
       }
-      reduce[4*index_field+3] *= rel_vol;
+      k += 4;
+    }
+
+    // particles
+    Particle particle = block->data()->particle();
+    const int mb = particle.batch_size();
+    std::vector<double> position[3];
+    position[0].resize(mb); position[0].clear();
+    position[1].resize(mb); position[1].clear();
+    position[2].resize(mb); position[2].clear();
+    for (int it=0; it<num_particles_; it++) {
+      const int nb = particle.num_batches(it);
+      for (int ib=0; ib<nb; ib++) {
+        particle.position(it,ib,position[0].data(),position[1].data(),position[2].data());
+        const int np = particle.num_particles(it,ib);
+        for (int i=0; i<cello::rank(); i++) {
+          for (int ip=0; ip<np; ip++) {
+            double value = position[i][ip];
+            reduce[k+4*i+kmin] = std::min(reduce[k+4*i+0],(long double)(value));
+            reduce[k+4*i+kmax] = std::max(reduce[k+4*i+1],(long double)(value));
+            reduce[k+4*i+ksum] += value;
+            reduce[k+4*i+knum] += 1;
+          }
+        }
+      }
+      k += 4*3;
+    }
+
+    ASSERT2("MethodDebug::compute()",
+            "reduce array mismatch %d != %d",
+            k,num_reduce+1,(k == num_reduce+1));
+  }
+
+#ifdef DEBUG_DEBUG  
+  {
+    int id = 0;
+    Field field = block->data()->field();
+    for (int i_f=0; i_f<num_fields_; i_f++) {
+      std::string name = field.field_name(i_f).c_str();
+      cello::monitor()->print
+        ("Method", "Field %s %s min %Lg max %Lg sum %Lg cnt %Lg",
+         name.c_str(),block->name().c_str(),
+         reduce[id],reduce[id+1],reduce[id+2],reduce[id+3]);
+      id+=4;
+    }
+    Particle particle = block->data()->particle();
+    for (int it=0; it<num_particles_; it++) {
+      const std::string name = particle.type_name(it).c_str();
+      cello::monitor()->print
+        ("Method", "Particle %s %s num_particles %d",
+         name.c_str(),block->name().c_str(),particle.num_particles(it));
+      for (int i=0; i<3; i++) {
+        const char axis[3] = {'X','Y','Z'};
+        cello::monitor()->print
+          ("Method", "Particle %s %c %s min %Lg max %Lg sum %Lg cnt %Lg",
+           name.c_str(),axis[i],block->name().c_str(),
+           reduce[id],reduce[id+1],reduce[id+2],reduce[id+3]);
+        id+=4;
+      }
     }
   }
-#ifdef DEBUG_METHOD_DEBUG
-  CkPrintf ("DEBUG_METHOD_DEBUG nf = %d\n",nf);
-  for (int index_field=0; index_field<nf; index_field++) {
-    CkPrintf ("DEBUG_METHOD_DEBUG %s %s %g %g %g %g\n",block->name().c_str(),
-              field.field_name(index_field).c_str(),reduce[4*index_field+1],
-              reduce[4*index_field+2],reduce[4*index_field+3],reduce[4*index_field+1]);
-  }    
-#endif    
-
-  CkCallback callback (CkIndex_Block::r_method_debug_sum_fields(NULL), 
+#endif
+    CkCallback callback (CkIndex_Block::r_method_debug_sum_fields(NULL),
                        block->proxy_array());
 
   block->contribute
-    ((4*nf+1)*sizeof(long double), reduce, r_reduce_method_debug_type, callback);
+    ((1+num_reduce)*sizeof(long double), reduce,
+     r_reduce_method_debug_type, callback);
 
   delete [] reduce;
 }
 
 //----------------------------------------------------------------------
 
-void Block::Block::r_method_debug_sum_fields(CkReductionMsg * msg)
+void Block::r_method_debug_sum_fields(CkReductionMsg * msg)
 {
   static_cast<MethodDebug*>
-    (this->method())->compute_continue_sum_fields(this,msg);
+    (this->method())->compute_continue(this,msg);
 }
 
 //----------------------------------------------------------------------
 
-void MethodDebug::compute_continue_sum_fields
+void MethodDebug::compute_continue
 ( Block * block, CkReductionMsg * msg) throw()
 {
 
-  Field field = block->data()->field();
-  const int nf = field.num_permanent();
   long double * data = (long double *) msg->getData();
   int id = 1;
-  for (int index_field=0; index_field<nf; index_field++) {
-    field_min_[index_field] = data[id++];
-    field_max_[index_field] = data[id++];
-    field_sum_[index_field] = data[id++];
-    field_count_[index_field] = data[id++];
+  for (int index_field=0; index_field<num_fields_; index_field++) {
+    field_min_[index_field] = data[id];
+    field_max_[index_field] = data[id+1];
+    field_sum_[index_field] = data[id+2];
+    field_count_[index_field] = data[id+3];
+    id+=4;
   }
+  for (int it=0; it<num_particles_; it++) {
+    for (int i=0; i<3; i++) {
+      particle_min_[i][it] = data[id];
+      particle_max_[i][it] = data[id+1];
+      particle_sum_[i][it] = data[id+2];
+      particle_count_[i][it] = data[id+3];
+      id+=4;
+    }
+  }
+  const int num_reduce = 4*(num_fields_+3*num_particles_);
+  ASSERT2("MethodDebug::compute_continue()",
+          "reduce array mismatch %d != %d",
+          id,num_reduce+1,(id == num_reduce+1));
+
   delete msg;
 
+  Field field = block->data()->field();
+  Particle particle = block->data()->particle();
   if (block->index().is_root()) {
     int nx,ny,nz;
     cello::hierarchy()->root_size(&nx,&ny,&nz);
-    long int root_cells = nx*ny*nz;
-    for (int i_f=0; i_f<nf; i_f++) {
+    //    long int root_cells = nx*ny*nz;
+    for (int i_f=0; i_f<num_fields_; i_f++) {
+      std::string name = field.field_name(i_f).c_str();
       cello::monitor()->print
-        ("Method", "Field %s min %20.16Le",field.field_name(i_f).c_str(),
-         field_min_[i_f]);
-      cello::monitor()->print
-        ("Method", "Field %s max %20.16Le",field.field_name(i_f).c_str(),
-         field_max_[i_f]);
-      cello::monitor()->print
-        ("Method", "Field %s avg %20.16Le",field.field_name(i_f).c_str(),
-         field_sum_[i_f]/root_cells);
+        ("Method", "Field %s min %20.16Lg avg %20.16Lg max %20.16Lg",name.c_str(),
+         field_min_[i_f],field_sum_[i_f]/field_count_[i_f],field_max_[i_f]);
+    }
+    for (int it=0; it<num_particles_; it++) {
+      for (int i=0; i<3; i++) {
+        const char axis[3] = {'X','Y','Z'};
+        const std::string name = particle.type_name(it).c_str();
+        cello::monitor()->print
+          ("Method", "Particle %s %c min avg max %20.16Lg %20.16Lg %20.16Lg",
+           name.c_str(),axis[i],
+           particle_min_[i][it],
+           particle_sum_[i][it]/particle_count_[i][it],
+           particle_max_[i][it]);
+      }
     }
   }
 
   if (block->is_leaf()) {
 
-    for (int i_f=0; i_f<nf; i_f++) {
+    for (int i_f=0; i_f<num_fields_; i_f++) {
 
       int mx,my,mz;
       field.dimensions (i_f,&mx,&my,&mz);
@@ -172,7 +264,7 @@ void MethodDebug::compute_continue_sum_fields
       }
       // write coarse field if needed
       if (l_coarse_) {
-          
+
         if (l_print_) {
           // write coarse field
           char buffer[256];
@@ -194,7 +286,6 @@ void MethodDebug::compute_continue_sum_fields
           }
           fclose(fp);
         }
-        
       }
     }
   }

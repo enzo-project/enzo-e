@@ -83,6 +83,9 @@ void Config::pup (PUP::er &p)
   p | initial_cycle;
   p | initial_time;
 
+  p | initial_restart;
+  p | initial_restart_dir;
+
   p | initial_trace_name;
   p | initial_trace_field;
   p | initial_trace_mpp;
@@ -158,6 +161,7 @@ void Config::pup (PUP::er &p)
   p | output_image_log;
   p | output_image_abs;
   p | output_image_mesh_color;
+  p | output_image_mesh_order;
   p | output_image_color_particle_attribute;
   p | output_image_size;
   p | output_image_reduce_type;
@@ -175,6 +179,7 @@ void Config::pup (PUP::er &p)
   p | output_stride_wait;
   p | output_field_list;
   p | output_particle_list;
+  p | output_checkpoint_file;
   p | output_name;
   p | index_schedule;
   p | schedule_list;
@@ -212,10 +217,6 @@ void Config::pup (PUP::er &p)
   
   p | num_physics;
   p | physics_list;
-
-  // Restart
-
-  p | restart_file;
 
   // Solvers
   
@@ -270,7 +271,6 @@ void Config::read(Parameters * p) throw()
   read_particle_(p);
   read_performance_(p);
   read_physics_(p);
-  read_restart_(p);
   read_stopping_(p);
   read_testing_(p);
   read_units_(p);
@@ -662,6 +662,11 @@ void Config::read_initial_ (Parameters * p) throw()
 
   }
 
+  // Restart
+
+  initial_restart      = p->value_logical ("Initial:restart",false);
+  initial_restart_dir  = p->value_string  ("Initial:restart_dir","");
+
   // InitialTrace
   initial_trace_name = p->value_string ("Initial:trace:name","trace");
   initial_trace_field = p->value_string ("Initial:trace:field","");
@@ -669,8 +674,6 @@ void Config::read_initial_ (Parameters * p) throw()
   initial_trace_dx = p->list_value_integer (0,"Initial:trace:stride",1);
   initial_trace_dy = p->list_value_integer (1,"Initial:trace:stride",1);
   initial_trace_dz = p->list_value_integer (2,"Initial:trace:stride",1);
-
-  
 }
 
 //----------------------------------------------------------------------
@@ -935,7 +938,7 @@ void Config::read_method_ (Parameters * p) throw()
     }
     method_output_all_blocks[index_method] =
       p->value_logical(full_name+":all_blocks",true);
-    
+
     method_prolong[index_method] =
       p->value_string(full_name+":prolong","linear");
 
@@ -943,14 +946,14 @@ void Config::read_method_ (Parameters * p) throw()
     method_ghost_depth[index_method] =
       p->value_integer(full_name+":ghost_depth",0);
     method_min_face_rank[index_method] =
-      p->value_integer(full_name+"min_face_rank",0); // default 0 all faces
+      p->value_integer(full_name+":min_face_rank",0); // default 0 all faces
     method_all_fields[index_method] =
-      p->value_logical(full_name+"all_fields",false);
+      p->value_logical(full_name+":all_fields",false);
     method_all_particles[index_method] =
-      p->value_logical(full_name+"all_particles",false);
+      p->value_logical(full_name+":all_particles",false);
 
-  // Read specified timestep, if any (for MethodTrace)
-    method_timestep[index_method] = p->value_float  
+    // Read specified timestep, if any (for MethodTrace)
+    method_timestep[index_method] = p->value_float
       (full_name + ":timestep",std::numeric_limits<double>::max());
 
     method_trace_name[index_method] = p->value_string
@@ -989,9 +992,6 @@ void Config::read_output_ (Parameters * p) throw()
 
   num_output = p->list_length("list");
 
-  p->group_set(0,"Output");
-
-
   output_list.resize(num_output);
   output_type.resize(num_output);
   output_axis.resize(num_output);
@@ -1002,6 +1002,7 @@ void Config::read_output_ (Parameters * p) throw()
   output_image_log.resize(num_output);
   output_image_abs.resize(num_output);
   output_image_mesh_color.resize(num_output);
+  output_image_mesh_order.resize(num_output);
   output_image_color_particle_attribute.resize(num_output);
   output_image_size.resize(num_output);
   output_image_reduce_type.resize(num_output);
@@ -1127,6 +1128,8 @@ void Config::read_output_ (Parameters * p) throw()
 
       output_image_mesh_color[index_output] = 
 	p->value_string("image_mesh_color","level");
+      output_image_mesh_order[index_output] = 
+	p->value_string("image_mesh_order","none");
 
       output_image_color_particle_attribute[index_output] = 
 	p->value_string("image_color_particle_attribute","");
@@ -1456,13 +1459,6 @@ void Config::read_physics_ (Parameters * p) throw()
 
 //----------------------------------------------------------------------
 
-void Config::read_restart_ (Parameters * p) throw()
-{
-  restart_file = p->value_string("Restart:file","");
-}
-
-//----------------------------------------------------------------------
-
 void Config::read_solver_ (Parameters * p) throw()
 {
   //--------------------------------------------------
@@ -1545,10 +1541,23 @@ void Config::read_stopping_ (Parameters * p) throw()
     ( "Stopping:cycle" , std::numeric_limits<int>::max() );
   stopping_time  = p->value_float
     ( "Stopping:time" , std::numeric_limits<double>::max() );
-  stopping_seconds  = p->value_float
-    ( "Stopping:seconds" , std::numeric_limits<double>::max() );
-  stopping_interval = p->value_integer
-    ( "Stopping:interval" , 1);
+
+  stopping_seconds = std::numeric_limits<double>::max();
+
+  if (p->type("Stopping:seconds") != parameter_unknown) {
+    stopping_seconds  = p->value_float
+      ( "Stopping:seconds" , std::numeric_limits<double>::max() );
+  } else if (p->type("Stopping:minutes") != parameter_unknown) {
+    stopping_seconds  = p->value_float
+      ( "Stopping:minutes" , std::numeric_limits<double>::max() );
+    stopping_seconds *= 60;
+  } else if (p->type("Stopping:hours") != parameter_unknown) {
+    stopping_seconds  = p->value_float
+      ( "Stopping:hours" , std::numeric_limits<double>::max() );
+    stopping_seconds *= 3600;
+  }
+
+  stopping_interval = p->value_integer ( "Stopping:interval" , 1);
 }
 
 void Config::read_units_ (Parameters * p) throw()
@@ -1605,6 +1614,8 @@ int Config::read_schedule_(Parameters * p, const std::string group)
   if      (schedule_var[index] == "cycle")    var_is_int = true;
   else if (schedule_var[index] == "time")     var_is_int = false;
   else if (schedule_var[index] == "seconds")  var_is_int = false;
+  else if (schedule_var[index] == "minutes")  var_is_int = false;
+  else if (schedule_var[index] == "hours")    var_is_int = false;
   else {
     ERROR2 ("Config::read",
 	    "Schedule variable %s is not recognized for parameter group %s",

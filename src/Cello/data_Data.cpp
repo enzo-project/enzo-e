@@ -142,8 +142,10 @@ void Data::allocate () throw()
   scalar_data_long_double_.allocate(cello::scalar_descr_long_double());
   scalar_data_double_     .allocate(cello::scalar_descr_double());
   scalar_data_int_        .allocate(cello::scalar_descr_int());
+  scalar_data_long_long_  .allocate(cello::scalar_descr_long_long());
   scalar_data_sync_       .allocate(cello::scalar_descr_sync());
   scalar_data_void_       .allocate(cello::scalar_descr_void());
+  scalar_data_index_      .allocate(cello::scalar_descr_index());
   // allocate Block Field storage
   for (size_t i=0; i<field_data_.size(); i++) {
     field_data_[i]->set_history_(cello::field_descr());
