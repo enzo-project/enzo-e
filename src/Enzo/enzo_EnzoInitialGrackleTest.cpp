@@ -68,7 +68,7 @@ void EnzoInitialGrackleTest::enforce_block
 
   const EnzoMethodGrackle * grackle_method = enzo::grackle_method();
 
-  grackle_method->setup_grackle_fields(enzo_block, & grackle_fields_);
+  grackle_method->setup_grackle_fields(block, & grackle_fields_);
 
   gr_float * total_energy  = (gr_float *) field.values("total_energy");
 
@@ -160,7 +160,8 @@ void EnzoInitialGrackleTest::enforce_block
   }
 
   /* Set internal energy and temperature */
-  enzo_float mu = enzo_config->ppm_mol_weight;
+  enzo_float mu = enzo::fluid_props()->mol_weight();
+  const enzo_float nominal_gamma = enzo::fluid_props()->gamma();
 
   for (int iz=0; iz<nz+gz; iz++){ // Metallicity
     for (int iy=0; iy<ny+gy; iy++) { // Temperature
@@ -192,7 +193,7 @@ void EnzoInitialGrackleTest::enforce_block
         grackle_fields_.internal_energy[i] =
           (pow(10.0, ((temperature_slope * (iy-gy)) +
            log10(enzo_config->initial_grackle_test_minimum_temperature)))/
-           mu / enzo_units->kelvin_per_energy_units() / (enzo_config->field_gamma - 1.0));
+           mu / enzo_units->kelvin_per_energy_units() / (nominal_gamma - 1.0));
         total_energy[i]    = grackle_fields_.internal_energy[i];
       }
     }
@@ -202,7 +203,7 @@ void EnzoInitialGrackleTest::enforce_block
   // for output
   int comoving_coordinates = enzo_config->physics_cosmology;
   if (pressure){
-    const enzo_float gamma = EnzoBlock::Gamma[cello::index_static()];
+    const enzo_float gamma = enzo::fluid_props()->gamma();
     EnzoComputePressure compute_pressure (gamma,comoving_coordinates);
 
     // Note: using compute_ method to avoid re-generating grackle_fields
@@ -222,11 +223,8 @@ void EnzoInitialGrackleTest::enforce_block
   }
 
   if (temperature){
-    EnzoComputeTemperature compute_temperature
-      (enzo_config->ppm_density_floor,
-       enzo_config->ppm_temperature_floor,
-       enzo_config->ppm_mol_weight,
-       comoving_coordinates);
+    EnzoComputeTemperature compute_temperature(enzo::fluid_props(),
+                                               comoving_coordinates);
 
     compute_temperature.compute_(enzo_block,
                                  temperature,

@@ -116,12 +116,11 @@ void EnzoInitialBurkertBodenheimer::enforce_block
 
   // Initialize Fields
 
-  const int in = cello::index_static();
-
-  const double gamma = EnzoBlock::Gamma[in];
+  const double gamma = enzo::fluid_props()->gamma();
   //const double energy = (1e-3*(enzo_constants::kboltz)*temperature_ / ((gamma - 1.0) * (1.0 * enzo_constants::mass_hydrogen)))/enzo_units->energy();
+  const double mol_weight = (double)enzo::fluid_props()->mol_weight();
   const double energy = ((temperature_/enzo_units->kelvin_per_energy_units())
-                         / ((gamma-1.0)) / enzo_config->ppm_mol_weight);
+                         / ((gamma-1.0)) / mol_weight);
 
   // fixed for now about 1 / 10 solar
   const double inner_metal_fraction = 0.0010; // sub-solar

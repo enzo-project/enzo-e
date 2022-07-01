@@ -250,7 +250,7 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
 
   ASSERT("EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS",
          "untested without dual-energy formalism",
-         enzo::uses_dual_energy_formalism(true)); // default to true if no hydro/mhd method
+         ! enzo::fluid_props()->dual_energy_config().is_disabled());
 
   // required fields
   cello::define_field("density");
@@ -956,7 +956,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
      M_shell > 0 iff v_shell > v_gas 
   */ 
   double Z_mean=0, d_mean=0, n_mean=0, v_mean=0, mu_mean=0;
-  double mu = enzo_config->ppm_mol_weight;
+  double mu = static_cast<double>(enzo::fluid_props()->mol_weight());
 
   for (int ix_ = ix-1; ix_ < ix+2; ix_++) {
     for (int iy_ = iy-1; iy_ < iy+2; iy_++) {
@@ -1042,11 +1042,8 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   } 
 
   // compute the temperature (returns temperature in Kelvin)
-  EnzoComputeTemperature compute_temperature
-    (enzo_config->ppm_density_floor,
-     enzo_config->ppm_temperature_floor,
-     enzo_config->ppm_mol_weight,
-     enzo_config->physics_cosmology);
+  EnzoComputeTemperature compute_temperature(enzo::fluid_props(),
+                                             enzo_config->physics_cosmology);
 
   compute_temperature.compute(enzo_block);
 

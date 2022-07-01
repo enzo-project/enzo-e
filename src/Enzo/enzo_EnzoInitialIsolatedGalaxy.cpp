@@ -130,8 +130,8 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
   this->uniform_density_    = config->field_uniform_density / enzo_units->density();
   this->dual_energy_        = field_descr->is_field("internal_energy") &&
                               field_descr->is_field("total_energy");
-  this->gamma_              = config->field_gamma;
-  this->mu_                 = config->ppm_mol_weight;
+  this->gamma_              = enzo::fluid_props()->gamma();
+  this->mu_                 = enzo::fluid_props()->mol_weight();
 
   // read in data for initialization
   this->ntypes_            = 0;              // num of IC particle types
@@ -257,8 +257,6 @@ void EnzoInitialIsolatedGalaxy::enforce_block
          "Block does not exist",
          block != NULL);
 
-  EnzoBlock * enzo_block = enzo::block(block);
-
   Particle particle = block->data()->particle();
   InitializeParticles(block, &particle);
 
@@ -266,7 +264,7 @@ void EnzoInitialIsolatedGalaxy::enforce_block
 #ifdef CONFIG_USE_GRACKLE
    grackle_field_data grackle_fields_;
    const EnzoMethodGrackle * grackle_method = enzo::grackle_method();
-   grackle_method->setup_grackle_fields(enzo_block, &grackle_fields_);
+   grackle_method->setup_grackle_fields(block, &grackle_fields_);
 #endif
 
   if (this->use_gas_particles_){
@@ -277,7 +275,7 @@ void EnzoInitialIsolatedGalaxy::enforce_block
 
 
   // Update temperature field if it exists
-  Field field = enzo_block->data()->field();
+  Field field = block->data()->field();
   const EnzoConfig * enzo_config = enzo::config();
 
 #ifdef CONFIG_USE_GRACKLE
@@ -289,8 +287,7 @@ void EnzoInitialIsolatedGalaxy::enforce_block
 
     if (name == "grackle"){
 
-      grackle_method->update_grackle_density_fields(enzo_block,
-                                                     &grackle_fields_);
+      grackle_method->update_grackle_density_fields(block, &grackle_fields_);
     }
   }
 #endif
@@ -299,11 +296,8 @@ void EnzoInitialIsolatedGalaxy::enforce_block
                    (enzo_float*) field.values("temperature") : NULL;
 
   if (temperature) {
-    EnzoComputeTemperature compute_temperature
-      (enzo_config->ppm_density_floor,
-       enzo_config->ppm_temperature_floor,
-       enzo_config->ppm_mol_weight,
-       enzo_config->physics_cosmology);
+    EnzoComputeTemperature compute_temperature(enzo::fluid_props(),
+                                               enzo_config->physics_cosmology);
 
     compute_temperature.compute(block);
   }

@@ -162,6 +162,10 @@ extern "C" {
 
 #include "enzo_EnzoPhysicsCosmology.hpp"
 
+#include "enzo_EnzoDualEnergyConfig.hpp"
+#include "enzo_EnzoFluidFloorConfig.hpp"
+#include "enzo_EnzoPhysicsFluidProps.hpp"
+
 #include "enzo_EnzoUnits.hpp"
 
 #include "enzo_EnzoFactory.hpp"

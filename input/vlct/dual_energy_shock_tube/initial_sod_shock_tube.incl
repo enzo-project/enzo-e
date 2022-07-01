@@ -34,9 +34,10 @@
       };
    }
 
+   Physics { fluid_props { eos { gamma = 1.4; } } }
+
    Field {
       courant = 0.2;
-      gamma = 1.4;
    }
 
    Stopping{ time = 0.25; }

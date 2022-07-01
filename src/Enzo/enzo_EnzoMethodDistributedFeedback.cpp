@@ -320,14 +320,19 @@ EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
   refresh->add_particle(cello::particle_descr()->type_index("star"));
   refresh->set_particles_are_copied(true);
 
-  FieldDescr * field_descr = cello::field_descr();
-
-
-  dual_energy_         = field_descr->is_field("internal_energy") &&
-                         field_descr->is_field("total_energy");
-
-
-  // enzo_config->ppm_dual_energy;
+  const EnzoDualEnergyConfig& de_config
+    = enzo::fluid_props()->dual_energy_config();
+  if (de_config.bryan95_formulation()){
+    dual_energy_ = true;
+  } else if (de_config.is_disabled()){
+    dual_energy_ = false;
+  } else { // de_config.modern_formulation() == true
+    // I doubt this case has issues, but raise error to be safe
+    ERROR("EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback",
+          "this class is untested with this formulation of the dual energy "
+          "formalism");
+    dual_energy_ = true;
+  }
 
 
   // Fraction of total energy to deposit as kinetic rather than thermal energy
@@ -883,15 +888,21 @@ void EnzoMethodDistributedFeedback::add_ionization_feedback(
   const float alpha = 2.60E-13; // cm^3 / s
 
   // AE: possibly actually compute mu from species fields
-  double ndens = d[index] * enzo_units->density() / enzo_config->ppm_mol_weight / enzo_constants::mass_hydrogen;
+  const double mol_weight = (double)enzo::fluid_props()->mol_weight();
+
+  double ndens = (d[index] * enzo_units->density() / mol_weight
+                  / enzo_constants::mass_hydrogen);
 
   double stromgren_radius = std::pow( (3.0 * s49_tot * 1.0E49) /
                             (4.0 * cello::pi * alpha * ndens*ndens),1.0/3.0);
   double stromgren_volume = (4.0/3.0)*cello::pi*stromgren_radius*stromgren_radius*stromgren_radius;
   stromgren_volume        /= (enzo_units->length()*enzo_units->length()*enzo_units->length());
-  double ionized          = enzo_constants::kboltz * 1.0E4 / std::min(0.6,enzo_config->ppm_mol_weight) /
-                            enzo_constants::mass_hydrogen / (enzo_units->length()*enzo_units->length()) *
+  double ionized          = enzo_constants::kboltz * 1.0E4 /
+                            std::min(0.6,mol_weight) /
+                            enzo_constants::mass_hydrogen /
+                            (enzo_units->length()*enzo_units->length()) *
                             enzo_units->time() * enzo_units->time();
+                            
 
 
   if (stromgren_volume <= cell_volume){
@@ -1082,6 +1093,8 @@ void EnzoMethodDistributedFeedback::inject_feedback(
     ke_before[i] = 0.0; metal_local[i] = 0.0;
   }
 
+  const double mu_cell = (double)enzo::fluid_props()->mol_weight();
+
   if (ke_f < 0){
 
     // calculate variable kinetic energy fraction
@@ -1100,8 +1113,6 @@ void EnzoMethodDistributedFeedback::inject_feedback(
           int index = INDEX(i,j,k,mx,my);
 
           if ( (index < 0) || (index >= mx*my*mz)) continue;
-
-          double mu_cell  = enzo_config->ppm_mol_weight;
 
           avg_z += metal[index]; // need to divide by d_tot below
           avg_n += d[index] / mu_cell;

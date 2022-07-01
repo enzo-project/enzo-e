@@ -4,16 +4,6 @@ Enzo-E's PPM hydrodynamics method.
 
 ----
 
-:Parameter:  :p:`Method` : :p:`ppm` : :p:`density_floor`
-:Summary: :s:`Lower limit on density`
-:Type:   :t:`float`
-:Default: :d:`1.0e-6`
-:Scope:     :z:`Enzo`
-
-:e:`Density floor, which replaces Enzo's "tiny_number".`
-
-----
-
 :Parameter:  :p:`Method` : :p:`ppm` : :p:`diffusion`
 :Summary: :s:`PPM diffusion parameter`
 :Type:   :t:`logical`
@@ -21,6 +11,75 @@ Enzo-E's PPM hydrodynamics method.
 :Scope:     :z:`Enzo`
 
 :e:`PPM diffusion parameter.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`ppm` : :p:`flattening`
+:Summary: :s:`PPM flattening parameter`
+:Type:   :t:`integer`
+:Default: :d:`3`
+:Scope:     :z:`Enzo`
+
+:e:`PPM flattening parameter.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`ppm` : :p:`minimum_pressure_support_parameter`
+:Summary: :s:`Enzo's MinimumPressureSupportParameter`
+:Type:   :t:`integer`
+:Default: :d:`100`
+:Scope:     :z:`Enzo`
+
+:e:`Enzo's`  MinimumPressureSupportParameter :e:`parameter.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`ppm` : :p:`pressure_free`
+:Summary: :s:`Pressure-free flag`
+:Type:   :t:`logical`
+:Default: :d:`false`
+:Scope:     :z:`Enzo`
+
+:e:`Pressure-free flag.` 
+
+----
+
+:Parameter:  :p:`Method` : :p:`ppm` : :p:`steepening`
+:Summary: :s:`PPM steepening parameter`
+:Type:   :t:`logical`
+:Default: :d:`false`
+:Scope:     :z:`Enzo`
+
+:e:`PPM steepening parameter.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`ppm` : :p:`use_minimum_pressure_support`
+:Summary: :s:`Minimum pressure support`
+:Type:   :t:`logical`
+:Default: :d:`false`
+:Scope:     :z:`Enzo`
+
+:e:`Enzo's` UseMinimumPressureSupport :e:`parameter.`
+
+----
+
+Deprecated ppm parameters
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The following parameters have all been deprecated and will be removed
+in a future version of Enzo-E. Going forwards, the corresponding
+parameters in :p:`Physics` : :p:`fluid_props` should be used instead.
+
+----
+
+:Parameter:  :p:`Method` : :p:`ppm` : :p:`density_floor`
+:Summary: :s:`Lower limit on density`
+:Type:   :t:`float`
+:Default: :d:`1.0e-6`
+:Scope:     :z:`Enzo`
+
+:e:`Density floor, which replaces Enzo's "tiny_number".`
 
 ----
 
@@ -54,26 +113,6 @@ Enzo-E's PPM hydrodynamics method.
 
 ----
 
-:Parameter:  :p:`Method` : :p:`ppm` : :p:`flattening`
-:Summary: :s:`PPM flattening parameter`
-:Type:   :t:`integer`
-:Default: :d:`3`
-:Scope:     :z:`Enzo`
-
-:e:`PPM flattening parameter.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`ppm` : :p:`minimum_pressure_support_parameter`
-:Summary: :s:`Enzo's MinimumPressureSupportParameter`
-:Type:   :t:`integer`
-:Default: :d:`100`
-:Scope:     :z:`Enzo`
-
-:e:`Enzo's`  MinimumPressureSupportParameter :e:`parameter.`
-
-----
-
 :Parameter:  :p:`Method` : :p:`ppm` : :p:`mol_weight`
 :Summary: :s:`Enzo's Mu parameter`
 :Type:   :t:`float`
@@ -104,26 +143,6 @@ Enzo-E's PPM hydrodynamics method.
 
 ----
 
-:Parameter:  :p:`Method` : :p:`ppm` : :p:`pressure_free`
-:Summary: :s:`Pressure-free flag`
-:Type:   :t:`logical`
-:Default: :d:`false`
-:Scope:     :z:`Enzo`
-
-:e:`Pressure-free flag.` 
-
-----
-
-:Parameter:  :p:`Method` : :p:`ppm` : :p:`steepening`
-:Summary: :s:`PPM steepening parameter`
-:Type:   :t:`logical`
-:Default: :d:`false`
-:Scope:     :z:`Enzo`
-
-:e:`PPM steepening parameter.`
-
-----
-
 :Parameter:  :p:`Method` : :p:`ppm` : :p:`temperature_floor`
 :Summary: :s:`Lower limit on temperature`
 :Type:   :t:`float`
@@ -131,24 +150,3 @@ Enzo-E's PPM hydrodynamics method.
 :Scope:     :z:`Enzo`
 
 :e:`Temperature floor, which replaces Enzo's "tiny_number".`
-
-----
-
-:Parameter:  :p:`Method` : :p:`ppm` : :p:`use_minimum_pressure_support`
-:Summary: :s:`Minimum pressure support`
-:Type:   :t:`logical`
-:Default: :d:`false`
-:Scope:     :z:`Enzo`
-
-:e:`Enzo's` UseMinimumPressureSupport :e:`parameter.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`ppm` : :p:`mol_weight`
-:Summary: :s:`Mean molecular mass`
-:Type:   :t:`float`
-:Default: :d:`0.6`
-:Scope:     :z:`Enzo`
-
-:e:`Mean molecular mass used in computing temperature.`
-

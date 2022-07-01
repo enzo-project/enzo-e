@@ -89,7 +89,7 @@ void EnzoComputeTemperature::compute_(Block * block,
 
   Field field = enzo_block->data()->field();
 
-  const enzo_float gamma = EnzoBlock::Gamma[cello::index_static()];
+  const enzo_float gamma = enzo::fluid_props()->gamma();
 
   if (enzo::config()->method_grackle_use_grackle){
 

@@ -88,16 +88,16 @@ void EnzoInitialAccretionTest::enforce_block
 	 enzo::config()->method_vlct_riemann_solver == "hllc");
 
   // Check if the initial density and pressure are at least as large as the
-  // density and pressure floors set by mhd_vlct method
-  ASSERT("EnzoInitialAccretionTest",
-	 "Initial gas density must be at least as large as the density "
-	 "floor set by the ppm method",
-	 gas_density_ >= enzo::config()->method_vlct_density_floor);
+  // density and pressure floors
+  EnzoFluidFloorConfig floor_config = enzo::fluid_props()->fluid_floor_config();
 
   ASSERT("EnzoInitialAccretionTest",
-	 "Initial gas pressure must be at least as large as the pressure "
-	 "floor set by the ppm method",
-	 gas_pressure_ >= enzo::config()->method_vlct_pressure_floor);
+	 "Initial gas density must be at least as large as the density floor",
+	 gas_density_ >= floor_config.density());
+
+  ASSERT("EnzoInitialAccretionTest",
+	 "Initial gas pressure must be at least as large as the pressure floor",
+	 gas_pressure_ >= floor_config.pressure());
 
   // Check if we have periodic boundary conditions
   int px, py, pz;
@@ -203,7 +203,7 @@ void EnzoInitialAccretionTest::enforce_block
     }
   }
 
-  const enzo_float gamma = EnzoBlock::Gamma[cello::index_static()];
+  const enzo_float gamma = enzo::fluid_props()->gamma();
 
   // Set total energy
   const enzo_float te_value = gas_pressure_ / ((gamma - 1.0) * gas_density_) +

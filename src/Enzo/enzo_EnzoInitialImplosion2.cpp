@@ -66,7 +66,7 @@ void EnzoInitialImplosion2::enforce_block
   // WARNING("EnzoInitialImplosion2",
   // 		  "Assumes same ghost zone depth for all fields");
 
-  const enzo_float gamma = EnzoBlock::Gamma[cello::index_static()];
+  const enzo_float gamma = enzo::fluid_props()->gamma();
     
   int mx,my;
   field.dimensions(0,&mx,&my);

@@ -16,19 +16,11 @@ module enzo {
   readonly enzo_float EnzoBlock::MinimumPressureSupportParameter[CONFIG_NODE_SIZE];
   readonly int EnzoBlock::MultiSpecies[CONFIG_NODE_SIZE];
   readonly int EnzoBlock::PressureFree[CONFIG_NODE_SIZE];
-  readonly enzo_float EnzoBlock::Gamma[CONFIG_NODE_SIZE];
   readonly enzo_float EnzoBlock::GravitationalConstant[CONFIG_NODE_SIZE];
   readonly int EnzoBlock::ProblemType[CONFIG_NODE_SIZE];
   readonly int EnzoBlock::PPMFlatteningParameter[CONFIG_NODE_SIZE];
   readonly int EnzoBlock::PPMDiffusionParameter[CONFIG_NODE_SIZE];
   readonly int EnzoBlock::PPMSteepeningParameter[CONFIG_NODE_SIZE];
-  readonly int EnzoBlock::DualEnergyFormalism[CONFIG_NODE_SIZE];
-  readonly enzo_float EnzoBlock::DualEnergyFormalismEta1[CONFIG_NODE_SIZE];
-  readonly enzo_float EnzoBlock::DualEnergyFormalismEta2[CONFIG_NODE_SIZE];
-  readonly enzo_float EnzoBlock::pressure_floor[CONFIG_NODE_SIZE];
-  readonly enzo_float EnzoBlock::density_floor[CONFIG_NODE_SIZE];
-  readonly enzo_float EnzoBlock::number_density_floor[CONFIG_NODE_SIZE];
-  readonly enzo_float EnzoBlock::temperature_floor[CONFIG_NODE_SIZE];
   readonly enzo_float EnzoBlock::InitialRedshift[CONFIG_NODE_SIZE];
   readonly enzo_float EnzoBlock::InitialTimeInCodeUnits[CONFIG_NODE_SIZE];
   readonly enzo_float EnzoBlock::DomainLeftEdge [CONFIG_NODE_SIZE_3];
@@ -123,6 +115,7 @@ module enzo {
   PUPable EnzoBfieldMethodCT;
 
   PUPable EnzoPhysicsCosmology;
+  PUPable EnzoPhysicsFluidProps;
 
   PUPable EnzoProblem;
   PUPable EnzoProlong;

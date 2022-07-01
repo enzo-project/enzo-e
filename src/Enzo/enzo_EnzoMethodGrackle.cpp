@@ -38,8 +38,6 @@ EnzoMethodGrackle::EnzoMethodGrackle
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
 
-  this->metallicity_floor_ = enzo::config()->method_grackle_metallicity_floor;
-
   /// Define Grackle's internal data structures
   time_grackle_data_initialized_ = ENZO_FLOAT_UNDEFINED;
   initialize_grackle_chemistry_data(time);
@@ -141,14 +139,12 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
 
 #else /* CONFIG_USE_GRACKLE */
 
-    EnzoBlock * enzo_block = enzo::block(block);
-
     // Start timer
     Simulation * simulation = cello::simulation();
     if (simulation)
       simulation->performance()->start_region(perf_grackle,__FILE__,__LINE__);
 
-    this->compute_(enzo_block);
+    this->compute_(block);
 
     if (simulation)
       simulation->performance()->stop_region(perf_grackle,__FILE__,__LINE__);
@@ -368,7 +364,7 @@ void EnzoMethodGrackle::setup_grackle_fields
 #ifdef CONFIG_USE_GRACKLE
 
 void EnzoMethodGrackle::update_grackle_density_fields(
-                               EnzoBlock * enzo_block,
+                               Block * block,
                                grackle_field_data * grackle_fields
                                ) const throw() {
 
@@ -382,11 +378,11 @@ void EnzoMethodGrackle::update_grackle_density_fields(
   bool cleanup_grackle_fields = false;
   if (grackle_fields == nullptr){
     grackle_fields = &tmp_grackle_fields;
-    setup_grackle_fields(enzo_block, grackle_fields);
+    setup_grackle_fields(block, grackle_fields);
     cleanup_grackle_fields = true;
   }
 
-  Field field = enzo_block->data()->field();
+  Field field = block->data()->field();
 
   int gx,gy,gz;
   field.ghost_depth (0,&gx,&gy,&gz);
@@ -398,12 +394,18 @@ void EnzoMethodGrackle::update_grackle_density_fields(
   int ngy = ny + 2*gy;
   int ngz = nz + 2*gz;
 
-  double tiny_number = 1.0E-10;
+  const double tiny_number = 1.0E-10;
+
+  const EnzoFluidFloorConfig& fluid_floors
+    = enzo::fluid_props()->fluid_floor_config();
+  const enzo_float metal_factor = fluid_floors.has_metal_mass_frac_floor()
+    ? fluid_floors.metal_mass_frac() : (enzo_float)tiny_number;
 
   const EnzoConfig * enzo_config = enzo::config();
   chemistry_data * grackle_chemistry =
     enzo::config()->method_grackle_chemistry;
-  double metallicity_floor_ = enzo::config()->method_grackle_metallicity_floor;
+  double metallicity_floor_ =
+    enzo::fluid_props()->fluid_floor_config().metal_mass_frac();
 
   for (int iz = 0; iz<ngz; iz++){
     for (int iy=0; iy<ngy; iy++){
@@ -432,7 +434,7 @@ void EnzoMethodGrackle::update_grackle_density_fields(
         }
 
        if (grackle_chemistry->metal_cooling == 1){
-          grackle_fields->metal_density[i] = grackle_fields->density[i] * metallicity_floor_ * enzo_constants::metallicity_solar;
+          grackle_fields->metal_density[i] = grackle_fields->density[i] * metal_factor;
        }
 
       }
@@ -452,11 +454,21 @@ void EnzoMethodGrackle::update_grackle_density_fields(
 
 #ifdef CONFIG_USE_GRACKLE
 
-void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
+void EnzoMethodGrackle::compute_ ( Block * block) throw()
 {
   const EnzoConfig * enzo_config = enzo::config();
+  if (block->cycle() == enzo_config->initial_cycle) {
+    bool nohydro = ( (enzo::problem()->method("ppm") == nullptr) |
+                     (enzo::problem()->method("mhd_vlct") == nullptr) |
+                     (enzo::problem()->method("ppml") == nullptr) );
 
-  Field field = enzo_block->data()->field();
+    ASSERT("EnzoMethodGrackle::compute_",
+           "The current implementation requires the dual-energy formalism to "
+           "be in use, when EnzoMethodGrackle is used with a (M)HD-solver",
+           nohydro | !enzo::fluid_props()->dual_energy_config().is_disabled());
+  }
+
+  Field field = block->data()->field();
 
   int gx,gy,gz;
   field.ghost_depth (0,&gx,&gy,&gz);
@@ -473,12 +485,7 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
   /* Set code units for use in grackle */
   grackle_field_data grackle_fields;
 
-  ASSERT("EnzoMethodGrackle::compute_",
-         "The implementation currently requires that the dual-energy-formalism"
-         "is in use",
-         enzo::uses_dual_energy_formalism(true));
-
-  EnzoFieldAdaptor fadaptor((Block*) enzo_block, 0);
+  EnzoFieldAdaptor fadaptor(block, 0);
 
   setup_grackle_units(fadaptor, &this->grackle_units_);
   setup_grackle_fields(fadaptor, &grackle_fields);
@@ -487,7 +494,7 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
     enzo::config()->method_grackle_chemistry;
 
   // Solve chemistry
-  double dt = enzo_block->dt;
+  double dt = block->dt();
   if (local_solve_chemistry(grackle_chemistry, &grackle_rates_,
 			    &grackle_units_, &grackle_fields, dt)
       == ENZO_FAIL) {
@@ -495,11 +502,8 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
     "Error in local_solve_chemistry.\n");
   }
 
-  if (metallicity_floor_ > 0.0)
-  {
-     enforce_metallicity_floor(enzo_block);
-  }
-
+  // enforce metallicity floor (if one was provided)
+  enforce_metallicity_floor(block);
 
   /* Correct total energy for changes in internal energy */
   gr_float * v3[3];
@@ -529,7 +533,7 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
 
   // For testing purposes - reset internal energies with changes in mu
   if (enzo_config->initial_grackle_test_reset_energies){
-    this->ResetEnergies(enzo_block);
+    this->ResetEnergies(block);
   }
 
   delete_grackle_fields(&grackle_fields);
@@ -548,8 +552,7 @@ double EnzoMethodGrackle::timestep ( Block * block ) throw()
 
 #ifdef CONFIG_USE_GRACKLE
   if (config->method_grackle_use_cooling_timestep){
-    EnzoBlock * enzo_block = enzo::block(block);
-    Field field = enzo_block->data()->field();
+    Field field = block->data()->field();
 
     enzo_float * cooling_time = field.is_field("cooling_time") ?
                         (enzo_float *) field.values("cooling_time") : NULL;
@@ -601,12 +604,25 @@ double EnzoMethodGrackle::timestep ( Block * block ) throw()
 
 #ifdef CONFIG_USE_GRACKLE
 
-void EnzoMethodGrackle::enforce_metallicity_floor(EnzoBlock * enzo_block) throw()
+void EnzoMethodGrackle::enforce_metallicity_floor(Block * block) throw()
 {
+  const EnzoFluidFloorConfig& fluid_floors
+    = enzo::fluid_props()->fluid_floor_config();
+
+  if (!fluid_floors.has_metal_mass_frac_floor()){
+    return; // return early if the floor has not been defined
+  }
+
+  const enzo_float metal_mass_frac_floor = fluid_floors.metal_mass_frac();
+
   // MUST have metal_density field tracked
-  Field field = enzo_block->data()->field();
+  Field field = block->data()->field();
   enzo_float * density = (enzo_float*) field.values("density");
   enzo_float * metal_density  = (enzo_float*) field.values("metal_density");
+  ASSERT("EnzoMethodGrackle::enforce_metallicity_floor",
+         ("Can't enforce metallicity floor when the \"metal_density\" field "
+          "doesn't exist"),
+         metal_density != nullptr);
 
   int gx,gy,gz;
   field.ghost_depth (0,&gx,&gy,&gz);
@@ -622,8 +638,8 @@ void EnzoMethodGrackle::enforce_metallicity_floor(EnzoBlock * enzo_block) throw(
     for (int iy=0; iy<ngy; iy++){
       for (int ix=0; ix<ngx; ix++){
         int i = INDEX(ix,iy,iz,ngx,ngy);
-        double Z = metal_density[i] / density[i] / enzo_constants::metallicity_solar;
-        if (Z < metallicity_floor_) metal_density[i] = density[i] * metallicity_floor_ * enzo_constants::metallicity_solar;
+        metal_density[i] = std::max(metal_density[i],
+                                    metal_mass_frac_floor * density[i]);
       }
     }
   }     
@@ -633,7 +649,7 @@ void EnzoMethodGrackle::enforce_metallicity_floor(EnzoBlock * enzo_block) throw(
 //----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_GRACKLE
-void EnzoMethodGrackle::ResetEnergies ( EnzoBlock * enzo_block) throw()
+void EnzoMethodGrackle::ResetEnergies ( Block * block) throw()
 {
    const EnzoConfig * enzo_config = enzo::config();
    EnzoUnits * enzo_units = enzo::units();
@@ -645,7 +661,7 @@ void EnzoMethodGrackle::ResetEnergies ( EnzoBlock * enzo_block) throw()
    if (grackle_chemistry->primordial_chemistry < 1)
      return;
 
-   Field field = enzo_block->data()->field();
+   Field field = block->data()->field();
 
    enzo_float * density     = (enzo_float*) field.values("density");
    enzo_float * internal_energy = (enzo_float*) field.values("internal_energy");
@@ -675,9 +691,9 @@ void EnzoMethodGrackle::ResetEnergies ( EnzoBlock * enzo_block) throw()
 
    // Cell widths
    double xm,ym,zm;
-   enzo_block->data()->lower(&xm,&ym,&zm);
+   block->data()->lower(&xm,&ym,&zm);
    double xp,yp,zp;
-   enzo_block->data()->upper(&xp,&yp,&zp);
+   block->data()->upper(&xp,&yp,&zp);
 
    // Ghost depths
    int gx,gy,gz;
@@ -689,6 +705,8 @@ void EnzoMethodGrackle::ResetEnergies ( EnzoBlock * enzo_block) throw()
    double temperature_slope = log10
      (enzo_config->initial_grackle_test_maximum_temperature/
       enzo_config->initial_grackle_test_minimum_temperature) / double(ny);
+
+   const enzo_float nominal_gamma = enzo::fluid_props()->gamma();
 
    for (int iz=gz; iz<nz+gz; iz++){ // Metallicity
      for (int iy=gy; iy<ny+gy; iy++) { // Temperature
@@ -712,7 +730,7 @@ void EnzoMethodGrackle::ResetEnergies ( EnzoBlock * enzo_block) throw()
            (pow(10.0, ((temperature_slope * (iy-gy)) +
                        log10(enzo_config->initial_grackle_test_minimum_temperature)))/
             mu / enzo_units->kelvin_per_energy_units() /
-            (enzo_config->field_gamma - 1.0));
+            (nominal_gamma - 1.0));
          total_energy[i] = internal_energy[i];
 
        }

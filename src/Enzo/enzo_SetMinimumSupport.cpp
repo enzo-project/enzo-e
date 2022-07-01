@@ -49,16 +49,31 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
     enzo_float * velocity_z      = (enzo_float*) field.values("velocity_z");
 
     /* Set minimum GE. */
- 
+
+    const enzo_float gamma = enzo::fluid_props()->gamma();
     MinimumSupportEnergyCoefficient =
-      GravitationalConstant[in]/(4.0*cello::pi) / (cello::pi * (Gamma[in]*(Gamma[in]-1.0))) *
+      GravitationalConstant[in]/(4.0*cello::pi) / (cello::pi * (gamma*(gamma-1.0))) *
       CosmoFactor * MinimumPressureSupportParameter[in] *
       CellWidth[0] * CellWidth[0];
- 
- 
+
     /* PPM: set GE. */
- 
-    if (DualEnergyFormalism[in] == TRUE) {
+    
+    const EnzoDualEnergyConfig& de_config
+        = enzo::fluid_props()->dual_energy_config();
+    bool uses_dual_energy_formalism;
+    if (de_config.bryan95_formulation()){
+      uses_dual_energy_formalism = true;
+    } else if (de_config.is_disabled()){
+      uses_dual_energy_formalism = false;
+    } else { // de_config.modern_formulation() == true
+      // it's unlikely that there would be issues, but raise error to be safe
+      ERROR("EnzoBlock::SetMinimumSupport",
+            "the method is untested with this formulation of the dual "
+            "energy formalism");
+      uses_dual_energy_formalism = true;
+    }
+
+    if (uses_dual_energy_formalism) {
       for (i = 0; i < size; i++)
 	internal_energy[i] = MAX(internal_energy[i],
 				 MinimumSupportEnergyCoefficient*density[i]);

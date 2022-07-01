@@ -224,16 +224,13 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
   }
 
   // compute the temperature
-  EnzoComputeTemperature compute_temperature
-    (enzo_config->ppm_density_floor,
-     enzo_config->ppm_temperature_floor,
-     enzo_config->ppm_mol_weight,
-     enzo_config->physics_cosmology);
+  EnzoComputeTemperature compute_temperature(enzo::fluid_props(),
+                                             enzo_config->physics_cosmology);
 
   compute_temperature.compute(enzo_block);
 
 
-  double mu = enzo_config->ppm_mol_weight;
+  double mu = static_cast<double>(enzo::fluid_props()->mol_weight());
   // iterate over all cells (not including ghost zones)
   for (int iz=gz; iz<nz+gz; iz++){
     for (int iy=gy; iy<ny+gy; iy++){
