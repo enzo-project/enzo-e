@@ -85,7 +85,7 @@ protected: // methods
     const int &index, const int &dix, const int &diy, const int &diz,
     const double dx, const double dy, const double dz);
 
-  int check_self_gravitating_new(const double total_energy, const double potential);
+  int check_self_gravitating_alt(const double total_energy, const double potential);
   double h2_self_shielding_factor(
     enzo_float *rho, const double metallicity,
     const double dunit, const double lunit,
