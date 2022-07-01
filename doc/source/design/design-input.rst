@@ -29,18 +29,19 @@ This scalable I/O approach has been implemented for
 checkpoint/restart, and will be adapted for use with data dumps in the
 near future.
 
------------------------------
-Outline of implementation
------------------------------
+========
+Approach
+========
 
-The implementation includes modifications to how blocks are mapped
-to files, what data are written to the files, and how file I/O is
+The approach used includes determining a block ordering to aid mapping
+blocks to files, what data are written to the files, and how file I/O is
 parallelized.
 
+--------
 Ordering
 --------
 
-The approach involves a generalization of the existing
+The approach involves a generalization of the previous
 ``MethodOutput`` method, but enables load-balancing of data between
 disk files through the use of block `orderings` to define how blocks
 are mapped to files. Currently, the ordering used in ``MethodOutput``,
@@ -50,6 +51,7 @@ updated implementation factors out this ordering into an ``Ordering``
 class, provides a Morton space-filling curve ordering, and allows
 enables defining other orderings, such as Hilbert curves
 
+------------
 File content
 ------------
 
@@ -62,6 +64,7 @@ the parameter file. This allows for "tweaking" of parameters on
 restart, for example to adjust refinement criteria or solver
 convergence criteria.
 
+------------
 Control flow
 ------------
 
@@ -100,45 +103,117 @@ Components of the new I/O approach include
         - ``IoWriter::IoWriter()``
      * ``MethodOrderMorton``
 
-----------
-Algorithms
-----------
-
+------------------
 Output: checkpoint
 ------------------
 
 .. image:: io-output.png
            :width: 800
 
+--------------
 Input: restart
 --------------
 
-The UML sequence diagram below shows how the Simulation group,
+The UML sequence diagram below shows how the ``Simulation`` group,
 IoReader chare array, and Block chare array interoperate to read data
 from a checkpoint directory. Time runs vertically starting from the top,
 and the three Charm++ group/arrays are arranged into three columns.
+Code for restart is found in the ``enzo_control_restart.cpp`` file.
 
 .. image:: io-read.png
 
 startup
 -------
 
-In the "startup" section.
+Restart begins in the "startup" phase, with the unique root block for
+the (0,0,0) octree in the array-of-octrees calling the ``Simulation``
+entry method ``p_restart_enter()``.
 
-Level 0
+The ``p_restart_enter()`` entry method reads the number of
+restart files from the top-level `file-list`
+file, initializes synchronization counters, and creates the
+``IoEnzoReader`` chare array, one element for each file.
+
+The ``IoEnzoReader`` constructors calld the ``p_io_reader_created()``
+entry method in the root ``Simulation`` object to notify it that
+they've been created.
+
+``p_io_reader_created`` counts the number of calls, and after it
+has received the last ``IoEnzoReader`` notification, it distributes the
+``proxy_io_enzo_reader`` array proxy to all other ``Simulation`` objects by
+calling ``p_set_io_reader()``.
+
+``p_set_io_reader()`` stores the incoming proxy, then calls the
+``r_restart_start()`` barrier across ``Simulation`` objects, which is
+used to guarantee that all proxy elements will have been initialized
+before any are accessed in subsequent phases.
+
+level 0
 -------
 
-In the level-0 or root-level section,
+In the level-0 (root-level) phase, the root ``Simulation`` object
+reads the file names from the `file-list` file, and calls the
+``p_init_root()`` entry method in all ``IoEnzoReader`` objects,
+sending the checkpoint directory and file names.
 
-Level k
+The ``p_init_root()`` entry method opens the `block-data` (HDF5) file
+and reads global attributes. It also opens and reads tho `block-list`
+(text) file, reading in the list of blocks and organizing them by mesh
+refinement level. It reads in each block data, saving data in blocks
+levels greater than 0, and sending data to level-0 blocks. Note
+level-0 blocks exist at the beginning of restart, but no blocks in
+levels higher than 0 do.  Data are packed and sent to blocks in levels
+<= 0 using the ``EnzoBlock::p_restart_set_data()`` entry method.
+
+The ``EnzoBlock::p_restart_set_data()`` method unpacks the data
+into the Block, then notifies the associated ``IoEnzoReader`` file
+object that data has been received using the ``p_block_ready`` entry
+method.
+
+``IoEnzoReader::p_block_ready()`` counts the number of block-reday
+acknowledgements, and after the last one calls
+``Simulation::p_restart_next_level()`` to process the next refinement
+level blocks.
+
+level k
 -------
 
-In the level-k section,
+The level-k phase for k=1 to L is more complicated than level-0
+because the level k > 0 blocks must be created first.
+
+Assuming blocks up through level k-1 have been created, the
+root ``Simulation`` object calls ``IoEnzoReader::p_create_level(k)``
+for each ``IoEnzoReader``.
+
+In ``p_create_level()``, synchronization counters are initialized for
+counting the k-level blocks, and then each block in the list of level-k
+blocks is processed. To reuse code from the adapt phase, level-k blocks
+are created by refining the `parent` block, via a
+``p_restart_refine()`` entry method.
+
+In ``p_restart_refine()``, the parent level k-1 block creates a new
+child block, inserts the new block in its own child list, and
+recategorizes as a non-leaf.
+
+In the ``EnzoBlock`` constructor, the newly created block checks if
+it's in a restart phase, and if so sends an acknowledgement to the
+associated ``IoEnzoReader`` object using the ``p_block_created()`` entry
+method.
+
+In ``p_block_created`` the ``IoEnzoReader`` object counts the number
+of acknowledgements from newly-created level-k blocks, and after it
+receives the last one it calls ``p_restart_level_created()`` on
+the root-level ``Simulation`` object. After this, the rest of
+the level-k phase mirrors that of the level-0 phase.
 
 cleanup
 -------
 
-In the cleanup section,
+In the cleanup section, after all blocks up to the maximum level have
+been created and initialized, the ``p_restart_next_level()`` entry
+method calls the Charm++ call ``doneInserting()`` on the block chare
+array, then calls ``p_restart_done()`` on all the blocks, which
+completes the restart phase.
 
 -------
 Classes

@@ -14,7 +14,7 @@ turn on restart, and where the checkpoint files are located.
 Checkpoint
 ==========
 
-.. code-block::
+.. code-block:: python
 
    Method {
      ...
@@ -55,7 +55,7 @@ file to add two parameters, ``Initial:restart`` and ``Initial:restart_dir``.
 For example, to restart the problem in the previous "Checkpoint" section
 at cycle 50, one would add the following:
 
-.. code-block::
+.. code-block:: python
 
    Initial {
 
