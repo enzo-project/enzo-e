@@ -96,11 +96,8 @@ void EnzoMethodTurbulence::compute ( Block * block) throw()
 
   const EnzoConfig * enzo_config = enzo::config();
 
-  EnzoComputeTemperature compute_temperature
-    (enzo_config->ppm_density_floor,
-     enzo_config->ppm_temperature_floor,
-     enzo_config->ppm_mol_weight,
-     comoving_coordinates_);
+  EnzoComputeTemperature compute_temperature(enzo::fluid_props(),
+                                             comoving_coordinates_);
 
   compute_temperature.compute(enzo_block);
 

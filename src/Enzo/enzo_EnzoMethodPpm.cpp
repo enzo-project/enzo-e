@@ -40,6 +40,13 @@ EnzoMethodPpm::EnzoMethodPpm (bool store_fluxes_for_corrections)
     store_fluxes_for_corrections_(store_fluxes_for_corrections)
 {
 
+  // check compatability with EnzoPhysicsFluidProps
+  EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
+  const EnzoDualEnergyConfig& de_config = fluid_props->dual_energy_config();
+  ASSERT("EnzoMethodPpm::EnzoMethodPpm",
+         "selected formulation of dual energy formalism is incompatible",
+         de_config.is_disabled() || de_config.bryan95_formulation());
+
   const int rank = cello::rank();
 
   cello::define_field("density");
@@ -138,7 +145,7 @@ void EnzoMethodPpm::compute ( Block * block) throw()
     //
     // // restore energy consistency if dual energy formalism used
     //
-    // if (enzo::config()->ppm_dual_energy) {
+    // if (enzo::fluid_props()->dual_energy_config().bryan95_formulation()) {
     //   int mx,my,mz;
     //   field.dimensions(0,&mx,&my,&mz);
     //   const int m = mx*my*mz;
@@ -225,9 +232,9 @@ double EnzoMethodPpm::timestep ( Block * block ) throw()
   /* Compute the pressure. */
 
   const int in = cello::index_static();
+  enzo_float gamma = enzo::fluid_props()->gamma();
 
-  EnzoComputePressure compute_pressure
-    (EnzoBlock::Gamma[in],comoving_coordinates_);
+  EnzoComputePressure compute_pressure(gamma, comoving_coordinates_);
   compute_pressure.compute(enzo_block);
 
   Field field = enzo_block->data()->field();
@@ -258,7 +265,7 @@ double EnzoMethodPpm::timestep ( Block * block ) throw()
 			&enzo_block->CellWidth[0],
 			&enzo_block->CellWidth[1],
 			&enzo_block->CellWidth[2],
-			&EnzoBlock::Gamma[in], &EnzoBlock::PressureFree[in], &cosmo_a,
+			&gamma, &EnzoBlock::PressureFree[in], &cosmo_a,
 			density, pressure,
 			velocity_x,
 			velocity_y,

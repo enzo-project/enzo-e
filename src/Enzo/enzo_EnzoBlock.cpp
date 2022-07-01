@@ -26,7 +26,6 @@ int EnzoBlock::MultiSpecies[CONFIG_NODE_SIZE];
 // Physics
 
 int EnzoBlock::PressureFree[CONFIG_NODE_SIZE];
-enzo_float EnzoBlock::Gamma[CONFIG_NODE_SIZE];
 enzo_float EnzoBlock::GravitationalConstant[CONFIG_NODE_SIZE];
 
 // Problem-specific
@@ -40,15 +39,6 @@ int EnzoBlock::PPMDiffusionParameter[CONFIG_NODE_SIZE];
 int EnzoBlock::PPMSteepeningParameter[CONFIG_NODE_SIZE];
 
 // Numerics
-
-int EnzoBlock::DualEnergyFormalism[CONFIG_NODE_SIZE];
-enzo_float EnzoBlock::DualEnergyFormalismEta1[CONFIG_NODE_SIZE];
-enzo_float EnzoBlock::DualEnergyFormalismEta2[CONFIG_NODE_SIZE];
-
-enzo_float EnzoBlock::pressure_floor[CONFIG_NODE_SIZE];
-enzo_float EnzoBlock::density_floor[CONFIG_NODE_SIZE];
-enzo_float EnzoBlock::number_density_floor[CONFIG_NODE_SIZE];
-enzo_float EnzoBlock::temperature_floor[CONFIG_NODE_SIZE];
 
 enzo_float EnzoBlock::InitialRedshift[CONFIG_NODE_SIZE];
 enzo_float EnzoBlock::InitialTimeInCodeUnits[CONFIG_NODE_SIZE];
@@ -102,8 +92,6 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
       ghost_depth[in*3+i] = 0;
     }
 
-    Gamma[in]               = enzo_config->field_gamma;
-
     GridRank[in]            = enzo_config->mesh_root_rank;
 
     // Chemistry parameters
@@ -128,13 +116,6 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
     PPMFlatteningParameter[in]    = enzo_config->ppm_flattening;
     PPMDiffusionParameter[in]     = enzo_config->ppm_diffusion;
     PPMSteepeningParameter[in]    = enzo_config->ppm_steepening;
-    pressure_floor[in]            = enzo_config->ppm_pressure_floor;
-    density_floor[in]             = enzo_config->ppm_density_floor;
-    temperature_floor[in]         = enzo_config->ppm_temperature_floor;
-    number_density_floor[in]      = enzo_config->ppm_number_density_floor;
-    DualEnergyFormalism[in]       = enzo_config->ppm_dual_energy;
-    DualEnergyFormalismEta1[in]   = enzo_config->ppm_dual_energy_eta_1;
-    DualEnergyFormalismEta2[in]   = enzo_config->ppm_dual_energy_eta_2;
 
     ghost_depth[in*3+0] = gx;
     ghost_depth[in*3+1] = gy;
@@ -338,8 +319,8 @@ void EnzoBlock::write(FILE * fp) throw ()
 
   fprintf (fp,"EnzoBlock: PressureFree %d\n",
 	   PressureFree[in]);
-  fprintf (fp,"EnzoBlock: Gamma %g\n",
-	   Gamma[in]);
+  //fprintf (fp,"EnzoBlock: Gamma %g\n",
+  //	   Gamma[in]);
   fprintf (fp,"EnzoBlock: GravitationalConstant %g\n",
 	   GravitationalConstant[in]);
 
@@ -359,6 +340,7 @@ void EnzoBlock::write(FILE * fp) throw ()
 
   // Numerics
 
+  /*
   fprintf (fp,"EnzoBlock: DualEnergyFormalism %d\n",
 	   DualEnergyFormalism[in]);
   fprintf (fp,"EnzoBlock: DualEnergyFormalismEta1 %g\n",
@@ -373,6 +355,7 @@ void EnzoBlock::write(FILE * fp) throw ()
 	   number_density_floor[in]);
   fprintf (fp,"EnzoBlock: temperature_floor %g\n",
 	   temperature_floor[in]);
+  */
 
   fprintf (fp,"EnzoBlock: InitialRedshift %g\n",
 	   InitialRedshift[in]);

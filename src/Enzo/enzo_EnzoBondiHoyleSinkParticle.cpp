@@ -181,23 +181,21 @@ void EnzoBondiHoyleSinkParticle::set_c_s_inf_2_() throw()
   const enzo_float * vz          = (enzo_float*) field.values("velocity_z");
   const enzo_float * specific_te = (enzo_float*) field.values("total_energy");
 
-  // Not sure if this is the best way to do this
-  // EnzoConfig has three different "dual energy" attributes.
-  // One of them is `method_hydro_dual_energy` but it seems that EnzoMethodHydro is not
-  // actually used.
-  // Assume that if either of the other two are true, there an "specific internal energy" field.
-  bool dual_energy =
-    enzo::config()->ppm_dual_energy ||  enzo::config()->method_vlct_dual_energy;
+  EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
+
+  // Check if dual-energy formalism is in use. If so, then this needs to use
+  // then the simulation evolves a "specific internal energy" field.
+  const bool dual_energy = ! fluid_props->dual_energy_config().is_disabled();
   const enzo_float * specific_ie_field
     = dual_energy ? (enzo_float*) field.values("internal_energy") : nullptr;
 
   // Get pointers to magnetic field values if they exist.
   enzo_float * bx =
-    field.is_field("bfield_x") ? (enzo_float*) field.values("b_field_x") : nullptr;
+    field.is_field("bfield_x") ? (enzo_float*) field.values("bfield_x") : nullptr;
   enzo_float * by =
-    field.is_field("bfield_y") ? (enzo_float*) field.values("b_field_y") : nullptr;
+    field.is_field("bfield_y") ? (enzo_float*) field.values("bfield_y") : nullptr;
   enzo_float * bz =
-    field.is_field("bfield_z") ? (enzo_float*) field.values("b_field_z") : nullptr;
+    field.is_field("bfield_z") ? (enzo_float*) field.values("bfield_z") : nullptr;
 
   // Copy host_cell_1d_index_ into a new const int called `i` for make code less verbose
   const int i = host_cell_1d_index_;
@@ -213,7 +211,7 @@ void EnzoBondiHoyleSinkParticle::set_c_s_inf_2_() throw()
 	 0.5 * ( vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i] );
 
   // Now compute and return the square of the sound speed
-  const double gamma = enzo::config()->field_gamma;
+  const double gamma = fluid_props->gamma();
   c_s_inf_2_ =  gamma * (gamma - 1.0) * specific_ie_cell;
 
   return;

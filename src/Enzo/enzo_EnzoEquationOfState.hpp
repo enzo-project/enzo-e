@@ -49,16 +49,6 @@ public: // interface
   ~EnzoEquationOfState()
   { }
 
-  /// Checks the validity of floor values for the EquationOfState
-  static void check_floor(enzo_float floor){
-    // if density = 0, NaNs will arise when converting momentum to velocity
-    // if pressure = 0, then sound speed will be equal to 0 (possibly causing
-    // time-step calculation problems)
-    ASSERT("EnzoEquationOfState::check_floor",
-	   "The density and pressure floors must be greater than 0",
-	   floor > 0);
-  }
-
   /// Applies primitive floor. This function has been factored out to allow for
   /// more easily debugging cases when the floor is unnecesarily applied.
   inline static enzo_float apply_floor(const enzo_float value,

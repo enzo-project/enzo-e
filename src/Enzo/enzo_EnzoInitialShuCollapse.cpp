@@ -82,7 +82,7 @@ void EnzoInitialShuCollapse::enforce_block
 	 (truncation_radius_ <= 0.25 * domain_width_z));
 
   // Check that gamma is sufficiently close to unity
-  const double gamma = enzo::config()->field_gamma;
+  const double gamma = enzo::fluid_props()->gamma();
   ASSERT("EnzoInitialShuCollapse",
 	 "The adiabatic index (Field:gamma) must be between 1 and 1.000001.",
 	 gamma > 1.0 && gamma < 1.000001);

@@ -137,7 +137,10 @@ void EnzoInitialFeedbackTest::enforce_block
   int ngx = nx + 2*gx;
   int ngy = ny + 2*gy;
   int ngz = nz + 2*gz;
- 
+
+  const enzo_float gamma = enzo::fluid_props()->gamma();
+  const enzo_float mol_weight = enzo::fluid_props()->mol_weight();
+
   for (int iz = 0; iz < ngz; iz++){
     for (int iy = 0; iy < ngy; iy++){
       for (int ix = 0; ix < ngx; ix++){
@@ -156,10 +159,8 @@ void EnzoInitialFeedbackTest::enforce_block
 
          for (int dim = 0; dim < 3; dim++) v3[dim][i] = 0.0;
 
-         ge[i] = (enzo_config->initial_feedback_test_temperature /
-                  enzo_config->ppm_mol_weight /
-                  enzo_units->kelvin_per_energy_units() /
-                  (enzo_config->field_gamma - 1.0));
+         ge[i] = (enzo_config->initial_feedback_test_temperature / mol_weight /
+                  enzo_units->kelvin_per_energy_units() / (gamma - 1.0));
 
          for (int dim = 0; dim < 3; dim ++)
              te[i] = ge[i] + 0.5 * v3[dim][i] * v3[dim][i];

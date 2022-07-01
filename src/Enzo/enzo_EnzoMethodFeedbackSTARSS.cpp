@@ -19,7 +19,7 @@
 
 //#ifdef NOTDEFINED // for now... since not done coding
 
-#define DEBUG_FEEDBACK_STARSS
+//#define DEBUG_FEEDBACK_STARSS
 //#define DEBUG_FEEDBACK_STARSS_SN
 
 // =============================================================================
@@ -41,7 +41,7 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age_Myr, int* nSNII, int* nSNIA
     *nSNII = 0;
     *nSNIA = 0;
     double RII=0, RIA=0, PII=0, PIA=0, random = 0;
-    if (enzo_config->method_feedback_single_sn && NEvents < 0)
+    if (enzo_config->method_feedback_supernovae && NEvents < 0)
     {
         /* age-dependent rates */
         if (age_Myr < 3.401)
@@ -250,7 +250,7 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
 
   ASSERT("EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS",
          "untested without dual-energy formalism",
-         enzo::uses_dual_energy_formalism(true)); // default to true if no hydro/mhd method
+         ! enzo::fluid_props()->dual_energy_config().is_disabled());
 
   // required fields
   cello::define_field("density");
@@ -271,7 +271,7 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
   refresh->add_all_fields();
   
   sf_minimum_level_ = enzo_config->method_star_maker_min_level;
-  single_sn_        = enzo_config->method_feedback_single_sn;
+  supernovae_        = enzo_config->method_feedback_supernovae;
 
   // Initialize temporary fields
   i_d_dep  = cello::field_descr()->insert_temporary();
@@ -344,7 +344,7 @@ void EnzoMethodFeedbackSTARSS::pup (PUP::er &p)
   Method::pup(p);
 
   p | sf_minimum_level_;
-  p | single_sn_;
+  p | supernovae_;
   p | NEvents;
   p | ir_feedback_;
 
@@ -673,7 +673,7 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
         int nSNII = 0, nSNIa = 0;
         double SNMassEjected = 0.0, SNMetalEjected = 0.0;
 
-        if (single_sn_){ 
+        if (supernovae_){ 
 
           /* Determine number of SN events from rates (currently taken from Hopkins 2018) */
 
@@ -956,7 +956,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
      M_shell > 0 iff v_shell > v_gas 
   */ 
   double Z_mean=0, d_mean=0, n_mean=0, v_mean=0, mu_mean=0;
-  double mu = enzo_config->ppm_mol_weight;
+  double mu = static_cast<double>(enzo::fluid_props()->mol_weight());
 
   for (int ix_ = ix-1; ix_ < ix+2; ix_++) {
     for (int iy_ = iy-1; iy_ < iy+2; iy_++) {
@@ -1042,11 +1042,8 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   } 
 
   // compute the temperature (returns temperature in Kelvin)
-  EnzoComputeTemperature compute_temperature
-    (enzo_config->ppm_density_floor,
-     enzo_config->ppm_temperature_floor,
-     enzo_config->ppm_mol_weight,
-     enzo_config->physics_cosmology);
+  EnzoComputeTemperature compute_temperature(enzo::fluid_props(),
+                                             enzo_config->physics_cosmology);
 
   compute_temperature.compute(enzo_block);
 

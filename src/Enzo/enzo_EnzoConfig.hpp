@@ -117,20 +117,11 @@ public: // interface
     : Config (m),
       adapt_mass_type(),
       ppm_diffusion(0),
-      ppm_dual_energy(false),
-      ppm_dual_energy_eta_1(0.0),
-      ppm_dual_energy_eta_2(0.0),
       ppm_flattening(0),
       ppm_minimum_pressure_support_parameter(0),
-      ppm_number_density_floor(0.0),
-      ppm_density_floor(0.0),
-      ppm_pressure_floor(0.0),
       ppm_pressure_free(false),
-      ppm_temperature_floor(0.0),
       ppm_steepening(false),
       ppm_use_minimum_pressure_support(false),
-      ppm_mol_weight(0.0),
-      field_gamma(0.0),
       field_uniform_density(1.0),
       // Cosmology
       physics_cosmology(false),
@@ -143,6 +134,12 @@ public: // interface
       physics_cosmology_max_expansion_rate(0.0),
       physics_cosmology_initial_redshift(0.0),
       physics_cosmology_final_redshift(0.0),
+      // FluidProps
+      physics_fluid_props_de_config(),
+      physics_fluid_props_fluid_floor_config(),
+      physics_fluid_props_gamma(0.0),
+      physics_fluid_props_mol_weight(0.0),
+      // Gravity
       physics_gravity(false),
 
       //--------------------
@@ -365,14 +362,13 @@ public: // interface
       method_hydro_riemann_solver(""),
 
       /// EnzoMethodFeedbackSTARSS
-      method_feedback_single_sn(0),
-      method_feedback_unrestricted_sn(0),
-      method_feedback_stellar_winds(0),
-      method_feedback_gas_return_fraction(0.0),
+      method_feedback_supernovae(true),
+      method_feedback_unrestricted_sn(true),
+      method_feedback_stellar_winds(true),
       method_feedback_min_level(0),
-      method_feedback_analytic_SNR_shell_mass(0),
-      method_feedback_fade_SNR(0),
-      method_feedback_NEvents(0),
+      method_feedback_analytic_SNR_shell_mass(true),
+      method_feedback_fade_SNR(true),
+      method_feedback_NEvents(-1),
 
       /// EnzoMethodStarMaker
       method_star_maker_flavor(""),
@@ -390,10 +386,10 @@ public: // interface
       method_star_maker_critical_metallicity(0.0),
       method_star_maker_temperature_threshold(1.0E4),
       method_star_maker_number_density_threshold(0.0),      // Number density threshold in cgs
-      method_star_maker_maximum_mass_fraction(0.5),            // maximum cell mass fraction to convert to stars
+      method_star_maker_maximum_mass_fraction(0.05),            // maximum cell mass fraction to convert to stars
       method_star_maker_efficiency(0.01),            // star maker efficiency
-      method_star_maker_minimum_star_mass(1.0E4),    // minium star particle mass in solar masses
-      method_star_maker_maximum_star_mass(1.0E4),    // maximum star particle mass in solar masses
+      method_star_maker_minimum_star_mass(0.0),    // minium star particle mass in solar masses
+      method_star_maker_maximum_star_mass(-1.0),    // maximum star particle mass in solar masses
       method_star_maker_min_level(0), // minimum refinement level for star formation
       method_star_maker_turn_off_probability(false),
       // EnzoMethodTurbulence
@@ -405,7 +401,6 @@ public: // interface
       method_grackle_chemistry(nullptr),
       method_grackle_use_cooling_timestep(false),
       method_grackle_radiation_redshift(-1.0),
-      method_grackle_metallicity_floor(0.0),
 #endif
       // EnzoMethodGravity
       method_gravity_grav_const(0.0),
@@ -434,11 +429,7 @@ public: // interface
       method_vlct_half_dt_reconstruct_method(""),
       method_vlct_full_dt_reconstruct_method(""),
       method_vlct_theta_limiter(0.0),
-      method_vlct_density_floor(0.0),
-      method_vlct_pressure_floor(0.0),
       method_vlct_mhd_choice(""),
-      method_vlct_dual_energy(false),
-      method_vlct_dual_energy_eta(0.0),
       // EnzoMethodMergeSinks
       method_merge_sinks_merging_radius_cells(0.0),
       // EnzoMethodAccretion
@@ -551,6 +542,7 @@ protected: // methods
   void read_method_vlct_(Parameters *);
   
   void read_physics_(Parameters *);
+  void read_physics_fluid_props_(Parameters *);
 
   void read_prolong_enzo_(Parameters *);
 
@@ -570,21 +562,12 @@ public: // attributes
   /// EnzoMethodPpm
 
   bool                       ppm_diffusion;
-  bool                       ppm_dual_energy;
-  double                     ppm_dual_energy_eta_1;
-  double                     ppm_dual_energy_eta_2;
   int                        ppm_flattening;
   int                        ppm_minimum_pressure_support_parameter;
-  double                     ppm_number_density_floor;
-  double                     ppm_density_floor;
-  double                     ppm_pressure_floor;
   bool                       ppm_pressure_free;
-  double                     ppm_temperature_floor;
   bool                       ppm_steepening;
   bool                       ppm_use_minimum_pressure_support;
-  double                     ppm_mol_weight;
 
-  double                     field_gamma;
   double                     field_uniform_density;
 
   /// Cosmology
@@ -598,6 +581,12 @@ public: // attributes
   double                     physics_cosmology_max_expansion_rate;
   double                     physics_cosmology_initial_redshift;
   double                     physics_cosmology_final_redshift;
+
+  /// FluidProps
+  EnzoDualEnergyConfig       physics_fluid_props_de_config;
+  EnzoFluidFloorConfig       physics_fluid_props_fluid_floor_config;
+  double                     physics_fluid_props_gamma;
+  double                     physics_fluid_props_mol_weight;
 
   /// Gravity
   bool                       physics_gravity;
@@ -861,14 +850,14 @@ public: // attributes
 
   /// EnzoMethodFeedbackSTARSS
   
-  int                       method_feedback_single_sn;
-  int                       method_feedback_unrestricted_sn;
-  int                       method_feedback_stellar_winds;
-  double                    method_feedback_gas_return_fraction;
-  int                       method_feedback_min_level;
-  int                       method_feedback_analytic_SNR_shell_mass;
-  int                       method_feedback_fade_SNR;
-  int                       method_feedback_NEvents;
+  bool                       method_feedback_supernovae;
+  bool                       method_feedback_unrestricted_sn;
+  bool                       method_feedback_stellar_winds;
+  int                        method_feedback_min_level;
+  bool                       method_feedback_analytic_SNR_shell_mass;
+  bool                       method_feedback_fade_SNR;
+  int                        method_feedback_NEvents;
+ 
   /// EnzoMethodStarMaker
 
   std::string               method_star_maker_flavor;
@@ -904,7 +893,6 @@ public: // attributes
   chemistry_data *           method_grackle_chemistry;
   bool                       method_grackle_use_cooling_timestep;
   double                     method_grackle_radiation_redshift;
-  double                     method_grackle_metallicity_floor;
 #endif /* CONFIG_USE_GRACKLE */
 
   /// EnzoMethodGravity
@@ -944,13 +932,7 @@ public: // attributes
   std::string                method_vlct_half_dt_reconstruct_method;
   std::string                method_vlct_full_dt_reconstruct_method;
   double                     method_vlct_theta_limiter;
-  double                     method_vlct_density_floor;
-  double                     method_vlct_pressure_floor;
   std::string                method_vlct_mhd_choice;
-  bool                       method_vlct_dual_energy;
-  // unlike ppm, only use a single eta value. It should have a default value
-  // closer to method_ppm_dual_energy_eta1
-  double                     method_vlct_dual_energy_eta;
 
   /// EnzoMethodMergeSinks
   double                     method_merge_sinks_merging_radius_cells;

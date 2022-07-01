@@ -194,6 +194,7 @@ void Problem::initialize_physics(Config * config,
     physics_list_.push_back( physics );
   }
 
+  initialize_physics_coda_(config, parameters);
 }
 
 //----------------------------------------------------------------------

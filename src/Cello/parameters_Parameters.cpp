@@ -875,7 +875,36 @@ void Parameters::group_clear() throw ()
 
 //----------------------------------------------------------------------
 
-std::string Parameters::full_name(std::string parameter) throw()
+std::vector<std::string> Parameters::leaf_parameter_names() const throw()
+{
+  std::vector<std::string> out;
+  std::string prefix = full_name("");
+  std::size_t prefix_size = prefix.size();
+
+  for (auto it_param =  parameter_map_.lower_bound(prefix);
+       it_param != parameter_map_.end();
+       ++it_param) {
+
+    // If the current key doesn't share the prefix, abort the search
+    if (((it_param->first).compare(0, prefix_size, prefix) != 0) ||
+	((it_param->first).size() <= prefix_size) ) {
+      break;
+    }
+    std::string suffix = (it_param->first).substr(prefix_size,
+						  std::string::npos);
+    if (suffix.find(':') != std::string::npos){
+      // this isn't a leaf parameter
+      continue;
+    } else {
+      out.push_back(suffix);
+    }
+  }
+  return out;
+}
+
+//----------------------------------------------------------------------
+
+std::string Parameters::full_name(std::string parameter) const throw()
 {
   int n = current_group_.size();
   std::string full_name = "";

@@ -10,14 +10,6 @@
 
       list = ["pm_deposit", "gravity"];
 
-      pm_deposit {
-         # every cycle, this method tries to "drift" the density field forward
-         # (like it's a grid of particles) by alpha*timestep.
-
-         alpha = 0.0; # this test-problem encounters issues when this is
-                      # non-zero
-     }
-
       gravity {
          solver = "cg";
          # choose mass units to adjust the value of the jeans wavelength is 0.5.
@@ -68,7 +60,6 @@
    }
 
    Field {
-      gamma = 1.6666666666666667;
    
       alignment = 8;
       ghost_depth = 4;
@@ -105,12 +96,19 @@
       time = 1.1547005383792517; # = 1.0 / sqrt(0.75)
    }
 
+   Group {
+      list = ["derived"];
+      derived {
+         field_list = ["pressure"];
+      }
+   }
+
    Output {
       list = ["data"];
       data {
          type = "data";
 	 field_list = ["density", "velocity_x", "velocity_y", "velocity_z",
-                       "total_energy"];
+                       "total_energy", "pressure"];
          name = ["data-%03d.h5", "proc"];
          #dir = ["method_ppm-cg-1-jeansN16_%.4f","time"];
          schedule {

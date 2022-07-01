@@ -84,7 +84,7 @@ void EnzoComputePressure::compute_(Block * block,
 
   EnzoFieldAdaptor f_adaptor(block, i_hist_);
 
-  bool dual_energy = enzo::uses_dual_energy_formalism();
+  bool dual_energy = !enzo::fluid_props()->dual_energy_config().is_disabled();
   bool mhd = field.is_field("bfield_x");
 
   EnzoComputePressure::compute_pressure(f_adaptor, p_arr, mhd, dual_energy,

@@ -74,7 +74,7 @@ void EnzoInitialBBTest::enforce_block
 	 (truncation_radius_ <= 0.25 * domain_width_z));
 
   // Check that gamma is sufficiently close to unity
-  const double gamma = enzo::config()->field_gamma;
+  const double gamma = enzo::fluid_props()->gamma();
   ASSERT("EnzoInitialBBTest",
 	 "The adiabatic index (Field:gamma) must be between 1 and 1.000001.",
 	 gamma > 1.0 && gamma < 1.000001);
@@ -105,13 +105,15 @@ void EnzoInitialBBTest::enforce_block
 	 "Method:mhd_vlct:mhd_choice must be set to hllc",
 	 enzo::config()->method_vlct_riemann_solver == "hllc");
 
-  // Check that (1 - fluctuation_amplitude_) * mean_density is larger than density floor
-  // imposed by VL+CT method
+  // Check that (1 - fluctuation_amplitude_) * mean_density is larger
+  // than density floor
+  //
+  // TODO: remove the use of density_dbl_prec. This is a temporary workaround
   ASSERT("EnzoInitialAccretionTest",
 	 "Initial gas density must be at least as large as the density "
 	 "floor set by the ppm method",
 	 (1.0 - fluctuation_amplitude_) * mean_density_ >=
-	 enzo::config()->method_vlct_density_floor);
+         enzo::fluid_props()->fluid_floor_config().density_dbl_prec());
 
   // Check if sink_maker method is being used
   ASSERT("EnzoInitialBBTest",

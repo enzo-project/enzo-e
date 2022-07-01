@@ -374,23 +374,21 @@ bool EnzoMethodSinkMaker::jeans_length_not_resolved_(Block * block, int i,
   enzo_float * vz           = (enzo_float *) field.values("velocity_z");
   enzo_float * specific_te  = (enzo_float *) field.values("total_energy");
 
-  // Not sure if this is the best way to do this
-  // EnzoConfig has three different "dual energy" attributes.
-  // One of them is `method_hydro_dual_energy` but it seems that EnzoMethodHydro is not
-  // actually used.
-  // Assume that if either of the other two are true, there an "specific internal energy" field.
-  bool dual_energy =
-    enzo::config()->ppm_dual_energy ||  enzo::config()->method_vlct_dual_energy;
+  // Check if dual-energy formalism is in use. If so, then this needs to use
+  // then the simulation evolves a "specific internal energy" field.
+  const bool dual_energy =
+    ! enzo::fluid_props()->dual_energy_config().is_disabled();
+
   const enzo_float * specific_ie_field
     = dual_energy ? (enzo_float*) field.values("internal_energy") : nullptr;
 
   // Get pointers to magnetic field values if they exist.
   enzo_float * bx =
-    field.is_field("bfield_x") ? (enzo_float*) field.values("b_field_x") : nullptr;
+    field.is_field("bfield_x") ? (enzo_float*) field.values("bfield_x") : nullptr;
   enzo_float * by =
-    field.is_field("bfield_y") ? (enzo_float*) field.values("b_field_y") : nullptr;
+    field.is_field("bfield_y") ? (enzo_float*) field.values("bfield_y") : nullptr;
   enzo_float * bz =
-    field.is_field("bfield_z") ? (enzo_float*) field.values("b_field_z") : nullptr;
+    field.is_field("bfield_z") ? (enzo_float*) field.values("bfield_z") : nullptr;
 
   // Get the specific internal energy
   enzo_float specific_ie_cell;
@@ -403,7 +401,7 @@ bool EnzoMethodSinkMaker::jeans_length_not_resolved_(Block * block, int i,
 	 0.5 * ( vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i] );
 
   // Now compute the square of the sound speed
-  const double gamma = enzo::config()->field_gamma;
+  const double gamma = enzo::fluid_props()->gamma();
   const double c_s_2 =  gamma * (gamma - 1.0) * specific_ie_cell;
 
   // Now compute the Jeans length
@@ -576,9 +574,10 @@ void EnzoMethodSinkMaker::do_checks_(Block *block) throw()
 	 enzo::problem()->method_exists("ppm"));
 
   // Get density floor set by the hydro method.
-  const double density_floor = enzo::problem()->method_exists("mhd_vlct") ?
-    enzo::config()->method_vlct_density_floor :
-    enzo::config()->ppm_density_floor ;
+  //
+  // TODO: remove the use of density_dbl_prec. This is a temporary workaround
+  const double density_floor =
+    enzo::fluid_props()->fluid_floor_config().density_dbl_prec();
 
   // Get density threshold in code units.
   const double density_threshold =
@@ -588,7 +587,7 @@ void EnzoMethodSinkMaker::do_checks_(Block *block) throw()
   // of the universe, which decreases with time, which means that the value of
   // a fixed physical density quantity will increase with time. So if the density
   // threshold is above the density floor at the start of the simulation, it is
-  // guaranteed to be abolve the density floor at all times.
+  // guaranteed to be above the density floor at all times.
   ASSERT2("EnzoMethodSinkMaker",
 	  "Density threshold must be at least as large as the density "
 	  "floor set by the VL+CT method. At start of simulation, "

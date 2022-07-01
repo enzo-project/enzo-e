@@ -182,7 +182,7 @@ Initial * EnzoProblem::create_initial_
   } else if (type == "cosmology") {
     initial = new EnzoInitialCosmology
       (cycle,time,
-       enzo_config->field_gamma,
+       enzo::fluid_props()->gamma(),
        enzo_config->initial_cosmology_temperature
        );
   } else if (type == "inclined_wave") {
@@ -190,7 +190,7 @@ Initial * EnzoProblem::create_initial_
       (cycle, time,
        enzo_config->initial_inclinedwave_alpha,
        enzo_config->initial_inclinedwave_beta,
-       enzo_config->field_gamma,
+       enzo::fluid_props()->gamma(),
        enzo_config->initial_inclinedwave_amplitude,
        enzo_config->initial_inclinedwave_lambda,
        enzo_config->initial_inclinedwave_parallel_vel,
@@ -202,7 +202,7 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_turbulence_density,
        enzo_config->initial_turbulence_pressure,
        enzo_config->initial_turbulence_temperature,
-       enzo_config->field_gamma);
+       enzo::fluid_props()->gamma());
   } else if (type == "pm") {
     std::string param_str = "Initial:" + config->initial_list[index] + ":mask";
     initial = new EnzoInitialPm
@@ -215,7 +215,7 @@ Initial * EnzoProblem::create_initial_
     initial = new EnzoInitialPpmlTest (cycle,time,enzo_config);
   } else if (type == "shock_tube") {
     initial = new EnzoInitialShockTube
-      (enzo_config->field_gamma,
+      (enzo::fluid_props()->gamma(),
        cycle, time,
        enzo_config->initial_shock_tube_setup_name,
        enzo_config->initial_shock_tube_aligned_ax,
@@ -329,7 +329,7 @@ Refine * EnzoProblem::create_refine_
        config->adapt_max_coarsen[index],
        config->adapt_min_refine2[index],
        config->adapt_max_coarsen2[index],
-       enzo_config->field_gamma,
+       enzo::fluid_props()->gamma(),
        enzo_config->physics_cosmology,
        config->adapt_max_level[index],
        config->adapt_include_ghosts[index],
@@ -534,16 +534,12 @@ Compute * EnzoProblem::create_compute
 
   if (name == "temperature") {
 
-    compute = new EnzoComputeTemperature(
-                        enzo_config->ppm_density_floor,
-                        enzo_config->ppm_temperature_floor,
-                        enzo_config->ppm_mol_weight,
-                        enzo_config->physics_cosmology);
-
+    compute = new EnzoComputeTemperature(enzo::fluid_props(),
+                                         enzo_config->physics_cosmology);
 
   } else if (name == "pressure"){
 
-    compute = new EnzoComputePressure(enzo_config->field_gamma,
+    compute = new EnzoComputePressure(enzo::fluid_props()->gamma(),
                                       enzo_config->physics_cosmology);
 
 #ifdef CONFIG_USE_GRACKLE
@@ -596,7 +592,7 @@ Method * EnzoProblem::create_method_
 
     method = new EnzoMethodHydro
       (enzo_config->method_hydro_method,
-       enzo_config->field_gamma,
+       enzo::fluid_props()->gamma(),
        enzo_config->physics_gravity,
        enzo_config->physics_cosmology,
        enzo_config->method_hydro_dual_energy,
@@ -695,13 +691,8 @@ Method * EnzoProblem::create_method_
       (enzo_config->method_vlct_riemann_solver,
        enzo_config->method_vlct_half_dt_reconstruct_method,
        enzo_config->method_vlct_full_dt_reconstruct_method,
-       enzo_config->field_gamma,
        enzo_config->method_vlct_theta_limiter,
-       enzo_config->method_vlct_density_floor,
-       enzo_config->method_vlct_pressure_floor,
        enzo_config->method_vlct_mhd_choice,
-       enzo_config->method_vlct_dual_energy,
-       enzo_config->method_vlct_dual_energy_eta,
        store_fluxes_for_corrections);
 
   } else if (name == "background_acceleration") {
@@ -861,10 +852,9 @@ Physics * EnzoProblem::create_physics_
 {
 
   Physics * physics = NULL;
+  const EnzoConfig * enzo_config = enzo::config();
 
   if (type == "cosmology") {
-
-    const EnzoConfig * enzo_config = enzo::config();
 
     physics = new EnzoPhysicsCosmology
       (
@@ -879,6 +869,16 @@ Physics * EnzoProblem::create_physics_
        enzo_config->physics_cosmology_final_redshift
        );
 
+  } else if (type == "fluid_props") {
+
+    physics = new EnzoPhysicsFluidProps
+      (
+       enzo_config->physics_fluid_props_de_config,
+       enzo_config->physics_fluid_props_fluid_floor_config,
+       enzo_config->physics_fluid_props_gamma,
+       enzo_config->physics_fluid_props_mol_weight
+       );
+
   } else {
 
     physics = Problem::create_physics_
@@ -887,6 +887,30 @@ Physics * EnzoProblem::create_physics_
 
   return physics;
 
+}
+
+//----------------------------------------------------------------------
+
+void EnzoProblem::initialize_physics_coda_(Config * config,
+                                           Parameters * parameters) throw()
+{
+  // if EnzoPhysicsFluidProps doesn't already exist, initialize it
+  if (physics("fluid_props") == nullptr){
+    physics_list_.push_back(create_physics_("fluid_props",
+                                            physics_list_.size(),
+                                            config, parameters));
+  }
+
+  // in the future, we might want to move the following snippet from
+  // EnzoSimulation::r_startup_begun to this function:
+  //   EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology *)
+  //     problem()->physics("cosmology");
+  //  if (cosmology) {
+  //    EnzoUnits * units = (EnzoUnits *) problem()->units();
+  //    units->set_cosmology(cosmology);
+  //  }
+  // Doing this could resolve some issues encountered in EnzoMethodGrackle more
+  // elegantly that the existing work-around
 }
 
 //----------------------------------------------------------------------

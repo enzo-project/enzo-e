@@ -123,7 +123,7 @@ protected: // methods
 protected:
 
   int sf_minimum_level_;
-  int single_sn_;
+  int supernovae_;
   int NEvents;
 
   // Refresh ID

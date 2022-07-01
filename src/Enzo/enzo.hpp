@@ -58,9 +58,16 @@ class EnzoUnits;
 /// Namespace for Enzo global constants and accessor functions
 namespace enzo {
 
+
   const EnzoConfig *        config();
   const EnzoFactory *       factory();
+  EnzoProblem *             problem();
+  EnzoSimulation *          simulation();
+  EnzoPhysicsCosmology *    cosmology();
+  EnzoPhysicsFluidProps *   fluid_props();
+
   const EnzoMethodGrackle * grackle_method();
+
   CProxy_EnzoBlock          block_array();
   EnzoBlock *               block ( Block * block);
   EnzoPhysicsCosmology *    cosmology();
@@ -73,6 +80,7 @@ namespace enzo {
   /// @param default_ret[in] The value to return if no hydro methods are used.
   ///     The default value is false.
   bool uses_dual_energy_formalism(bool default_ret = false);
+
 }
 
 extern CProxy_EnzoSimulation proxy_enzo_simulation;

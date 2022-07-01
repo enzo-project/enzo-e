@@ -133,11 +133,11 @@ public: // interface
                             int stale_depth = 0,
                             bool omit_cell_width = false) const throw();
 
-  void setup_grackle_fields(EnzoBlock * enzo_block,
+  void setup_grackle_fields(Block * block,
                             grackle_field_data * grackle_fields,
                             int i_hist = 0 ) const throw()
   {
-    setup_grackle_fields(EnzoFieldAdaptor((Block*) enzo_block, i_hist),
+    setup_grackle_fields(EnzoFieldAdaptor(block, i_hist),
                          grackle_fields, 0, false);
   }
 
@@ -148,7 +148,7 @@ public: // interface
   /// over individual species fields should adapt this function
   /// in their initialization routines.
   void update_grackle_density_fields
-  (EnzoBlock * enzo_block, grackle_field_data * grackle_fields = nullptr)
+  (Block * block, grackle_field_data * grackle_fields = nullptr)
     const throw();
 
   void delete_grackle_fields(grackle_field_data * grackle_fields) const throw()
@@ -181,7 +181,7 @@ public: // interface
       return;
   }
 
-  void enforce_metallicity_floor(EnzoBlock * enzo_block) throw();
+  void enforce_metallicity_floor(Block * block) throw();
 
   void calculate_cooling_time(const EnzoFieldAdaptor& fadaptor, enzo_float* ct,
                               int stale_depth = 0,
@@ -239,16 +239,15 @@ protected: // methods
 protected: // methods
 
 #ifdef CONFIG_USE_GRACKLE
-  void compute_( EnzoBlock * enzo_block) throw();
+  void compute_( Block * block) throw();
 
-  void ResetEnergies ( EnzoBlock * enzo_block) throw();
+  void ResetEnergies ( Block * block) throw();
 
 // protected: // attributes
 
   code_units grackle_units_;
   chemistry_data_storage grackle_rates_;
   double time_grackle_data_initialized_;
-  double metallicity_floor_;
 
 #endif
 

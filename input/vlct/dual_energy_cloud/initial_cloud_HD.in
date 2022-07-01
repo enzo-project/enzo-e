@@ -185,18 +185,17 @@ Units {
 # COMPUTATION
 #======================================================================
 
- Method {
-     mhd_vlct{
-        theta_limiter = 1.5;
-
-        # density floor
-        density_floor = 1.e-15;
-
-        # pressure floor
-        pressure_floor = 1.e-30;
-     };
-
+ Physics {
+     fluid_props {
+         floors {
+             density = 1.e-15;
+             pressure = 1.0e-30;
+         }
+     }
  }
+
+ Method { mhd_vlct { theta_limiter = 1.5; } }
+
 #======================================================================
 # OUTPUT
 #======================================================================
