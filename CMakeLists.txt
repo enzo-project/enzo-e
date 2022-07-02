@@ -17,8 +17,7 @@ if (DEFINED Enzo-E_CONFIG)
 endif()
 
 #Define project and languages
-# TODO set proper version before merge
-project(Enzo-E VERSION 0.9.0 LANGUAGES C CXX Fortran)
+project(Enzo-E VERSION 1.0.0 LANGUAGES C CXX Fortran)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
