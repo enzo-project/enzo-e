@@ -15,6 +15,8 @@ commands:
             echo 'export Grackle_ROOT=$HOME/local' >> $BASH_ENV
             echo 'export CHARM_PATH=$CHARM_ROOT/bin' >> $BASH_ENV
             echo 'export TEST_RESULTS_DIR=$HOME/answer_test_results' >> $BASH_ENV
+            # get tags from the main repository (for the current gold standard)
+            git fetch --tags https://github.com/enzo-project/enzo-e
             # tag the tip so we can go back to it
             git tag tip
 
