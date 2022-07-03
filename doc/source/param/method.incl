@@ -111,6 +111,11 @@ at all subsequent times.`
 
 :e:`This parameter specifies the maximum fraction of mass which can be accreted from a cell in one timestep. This value of this parameter must be between 0 and 1.`
 
+feedback
+--------
+
+.. include:: method_feedback.incl
+
 flux_correct
 ------------
 
@@ -257,6 +262,17 @@ timestep is independent of how the acceleration vectors are oriented relative
 to the mesh.`
 
 
+
+heat
+----
+
+:Parameter:  :p:`Method` : :p:`heat` : :p:`alpha`
+:Summary:    :s:`Parameter for the forward euler heat equation solver`
+:Type:       :t:`float`
+:Default:    :d:`1.0`
+:Scope:     :z:`Enzo`
+
+:e:`Thermal diffusivity parameter for the heat equation.`
 
 grackle
 -------
@@ -696,27 +712,6 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Todo: :o:`write`
 :Status:  **Not accessed**
 
-star_maker
-----------
-
-..include:: method_star_maker.incl
-
-feedback
---------
-
-..include:: method_feedback.incl
-
-heat
-----
-
-:Parameter:  :p:`Method` : :p:`heat` : :p:`alpha`
-:Summary:    :s:`Parameter for the forward euler heat equation solver`
-:Type:       :t:`float`
-:Default:    :d:`1.0`
-:Scope:     :z:`Enzo`
-
-:e:`Thermal diffusivity parameter for the heat equation.`
-
 merge_sinks
 -----------
 
@@ -847,6 +842,11 @@ this parameter multiplied by the cell width along the x/y/z axis.`
 :e:`When computing the random offset for the initial position of a sink particle, we compute
 an unsigned 64 bit integer value from the cycle number, the block index, and the cell
 index, and then add on this value to give the seed for the random number generator.`
+
+star_maker
+----------
+
+.. include:: method_star_maker.incl
 
 	     
 turbulence
