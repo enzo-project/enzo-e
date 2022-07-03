@@ -26,8 +26,8 @@ specified. Valid choices include:`
 future. For more details see`
 :ref:`vlct_overview`
 
-:e:`For debugging purposes, there is technically one last choice,
-``"unsafe_constant_uniform"``. :e:`This is NOT meant for science runs.
+:e:`For debugging purposes, there is technically one last choice,`
+``"unsafe_constant_uniform".`` :e:`This is NOT meant for science runs.
 When this option is selected, the magnetic field is treated as a
 cell-centered conserved quantity and the magnetic fluxes computed in
 the Riemann solver are directly added to to the magnetic fields
