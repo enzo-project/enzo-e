@@ -44,7 +44,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Enzo-E / Cello'
-copyright = u'2019, James Bordner'
+copyright = u'2022, Enzo Development Community'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -125,7 +125,17 @@ html_theme_path = ["."]
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-#html_static_path = ['_static']
+html_static_path = ['_static']
+
+html_css_files = {
+   'theme_overrides.css',  # overrides for wide tables in RTD theme
+    #                        taken from
+    #                        https://github.com/readthedocs/sphinx_rtd_theme/issues/117
+    #                        to solve the issue related to the tables
+    #                        not wrapping
+   'roles.css'
+}
+
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -184,7 +194,7 @@ htmlhelp_basename = 'Enzo-ECellodoc'
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('index', 'Enzo-ECello.tex', u'Enzo-E / Cello Documentation',
-   u'James Bordner', 'manual'),
+   u'Enzo Development Community', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -217,7 +227,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'enzo-ecello', u'Enzo-E / Cello Documentation',
-     [u'James Bordner'], 1)
+     [u'Enzo Development Community'], 1)
 ]
 
 
@@ -225,9 +235,9 @@ man_pages = [
 
 # Bibliographic Dublin Core info.
 epub_title = u'Enzo-E / Cello'
-epub_author = u'James Bordner'
-epub_publisher = u'James Bordner'
-epub_copyright = u'2019, James Bordner'
+epub_author = u'Enzo Development Community'
+epub_publisher = u'Enzo Development Community'
+epub_copyright = u'2022, Enzo Development Community'
 
 # The language of the text. It defaults to the language option
 # or en if the language is not set.
@@ -262,16 +272,6 @@ epub_copyright = u'2019, James Bordner'
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'http://docs.python.org/': None}
-
-# taken from https://github.com/readthedocs/sphinx_rtd_theme/issues/117
-# to solve the issue related to the tables not wrapping
-html_static_path = ['_static']
-
-html_context = {
-    'css_files': [
-        '_static/theme_overrides.css',  # overrides for wide tables in RTD theme
-        ],
-    }
 
 # -- Set Breathe parameters and Execute Doxygen -------------------------------
 
