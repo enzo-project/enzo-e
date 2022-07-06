@@ -1,0 +1,85 @@
+ics.py a function called make_ics, generates a text file (called particles.dat
+by default) with particle data which can be used to initialise the merge_sinks test
+problem in Enzo-E. More specifically, it creates sink particles with constant
+masses, with random positions uniformly distributed in a sphere, and initial
+velocities all of the same magnitude with directions directed towards the centre
+of the sphere, plus an additional (optional) constant drift velocity.
+
+make_ics can be imported by another script (as is done in run_merge_sinks_test.py),
+or it can be executed by running ics.py as a script, with command line arguments
+being passed to make_ics. For more information, run "python ics.py -h".
+
+images.py defines a function called make_images, which takes as input the
+directories generated when Enzo-E runs the test problem, which contain snapshots
+of the particle data at regular time intervals. It then uses yt to read the data
+and then uses matplotlib to make scatter plots of the x and y coordinates of the
+particles, outputting a series of image files, with each image corresponding to
+a particular snapshot. These images are useful to check whether the initial
+conditions were set up correctly and if Enzo-E ran as expected.
+
+make_images can be imported by another script (as is done in
+run_merge_sinks_test.py), or it can be executed by running images.py as a script,
+with command line arguments being passed to make_images.
+For more information, run "python images.py -h".
+
+mass_momentum_conservation.py defines the function test_mmc
+which has the following behaviour:
+- takes as the prefix for the names of the directories generated when Enzo-E runs
+  the merge_sinks_test problem, which contain snapshots of the
+  particle data at regular time intervals, a name for the image file which will be
+  generated, and a value for the tolerance limit
+- uses yt to read the data and calculates the total mass, total x/y/z-momentum
+  and total number of particles in each snapshot. It then calculates the
+  conservation error for these quantities, and tests whether the absolute value
+  is less than the tolerance limit. If the absolute value of the error is larger
+  than the tolerance for any snapshot, then the test fails.
+- generates a figure with three panels, showing the mass conservation error,
+  momentum conservation error, and number of particles plotted against the number
+  of cycles (i.e. timesteps).  This figure is useful for checking if particles are
+  indeed merging (shown by decrease in particle number with time) and whether
+  mass and momentum are being properly conserved.
+
+test_mmc can be imported by another script (as is done in
+run_merge_sinks_test.py), or it can be executed by running
+mass_momentum_conservation.py as a script, with command line
+arguments being passed to test_mass_mmc.
+For more information, run "python mass_momentum_conservation.py -h".
+
+merge_sinks_test.in is an Enzo-E parameter files. Passing this file as an argument
+to Enzo-E will run the merge_sinks test problem.
+
+Running run_merge_sinks_test.py does the following:
+
+- Generates the initial conditions file called particles.dat
+- Runs Enzo-E taking merge_sinks_test.in as a parameter file, and using
+  particles.dat to make the initial conditions. This produces a set of directories
+  which contain snapshots of the particle data at regular time intervals.
+- Produces  a set of png images, which show scatter plots of the x and y coordinates
+  of particles read from the snapshot directories.
+- Analyzes snapshot data to test for mass and momentum conservation.
+  This generates a figure (mmc.png), which shows the mass conservation error,
+  the momentum conservation error, and the number of particles plotted against
+  the number of cycles (i.e., timesteps). The test is considered to have passed
+  if all the errors are less than some tolerance limit, which is 1.0e-6 in the
+  case of double precision, and 1.0e-4 for single precision.
+- Deletes particles.dat and the snapshot directories.
+
+run_merge_sinks_test.py takes the following arguments:
+
+- "--launch_cmd" which is the command used to run Enzo-E.
+
+To run Enzo-E as a serial program, set --launch_cmd to /path/to/bin/enzo-e
+  To run Enzo-E as a parallel program, set --launch_cmd to
+  "/path/to/bin/charmrun +p 4 ++local /path/to/bin/enzo-e"
+
+- "--prec" which should be set to  "single" or "double" depending
+  on whether Enzo-E was compiled with single- or double- precision. This affects
+  the error tolerance used when testing for mass and momentum conservation, with
+  the tolerance being higher in the single-precision case.
+
+- "--ics_type" which can be either "stationary" or "drift". The "stationary" option
+  sets up a sphere of particles in the middle of the domain, with the particles
+  having an infall velocity but no additional drift velocity. The "drift" option
+  sets up the sphere of particles in the middle of a block, with the particles
+  having an infall velocity in addition to a uniform drift velocity.
+  

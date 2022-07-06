@@ -52,6 +52,10 @@ public: // virtual functions
   /// Close the file
   virtual void file_close () throw() = 0;
   
+  /// Read scalar metadata item associated with the file
+  virtual void file_read_scalar
+  ( void * buffer, std::string name,  int * s_type) throw() = 0;
+
   /// Read a metadata item associated with the file
   virtual void file_read_meta
   ( void * buffer, std::string name,  int * s_type,
@@ -144,6 +148,7 @@ public: // virtual functions
   virtual void group_write_meta
   ( const void * buffer, std::string name, int type,
     int n1=1, int n2=0, int n3=0, int n4=0) throw() = 0;
+
 
 protected: // attributes
 

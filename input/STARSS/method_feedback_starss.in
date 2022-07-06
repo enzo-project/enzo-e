@@ -1,0 +1,236 @@
+#
+#
+#  Very simple feedback test problem
+#
+#     Drops a star particle of desired mass
+#     into a unigrid, uniform domain. Commented-out
+#     Adapt blocks below can be used to add in AMR
+#     (static, nested grids or adaptive).
+#
+
+Adapt {
+  list = []; 
+  mask {
+    type = "mask";
+    value = [1.0, y<=0.5, 0.0];
+  }
+     max_level = 0;
+ }
+
+Boundary {
+  type = "periodic";
+}
+
+Domain {
+    lower = [ 0.0, 0.0, 0.0];
+    upper = [ 1.0, 1.0, 1.0];
+}
+
+Mesh {
+  root_blocks = [4,4,4];
+  root_rank   = 3;
+  root_size   = [64,64,64]; # given length units, res = 1024 pc / 64 = 16 pc
+
+
+}
+
+Field {
+  alignment   = 8;
+  gamma       = 1.40;
+  ghost_depth = 4;
+
+  list = ["density", "internal_energy", "total_energy",
+          "velocity_x", "velocity_y", "velocity_z",
+          "pressure", "temperature"];
+  list += ["HI_density","HII_density","HeI_density","HeII_density","HeIII_density","e_density","metal_density"];
+}
+
+Group {
+  list = ["color","derived","conserved","make_field_conservative"];
+  
+  color {
+    field_list = ["metal_density"];
+    field_list += ["HI_density","HII_density","HeI_density","HeII_density","HeIII_density","e_density"];
+  }
+  derived {
+    field_list = ["temperature","pressure"];
+  }
+  conserved {
+    field_list = ["density", "HI_density", "HII_density", "HeI_density", "HeII_density", "HeIII_density", "e_density", "metal_density"];
+  }
+  make_field_conservative {
+    field_list = ["velocity_x","velocity_y","velocity_z","total_energy","internal_energy"];
+  }
+
+}
+
+Method {
+  list = ["ppm", "grackle", "feedback"];
+
+  null {
+    dt = 10.0; # force a minimum dt - code units
+  };
+
+  flux_correct {enable=false;}
+
+  feedback {
+    flavor = "STARSS";
+    supernovae = true;
+    unrestricted_sn = true;
+    stellar_winds = true;
+    analytic_SNR_shell_mass = true;
+    fade_SNR = true;
+    NEvents = 1;
+  };
+
+  ppm {
+        diffusion = true;
+        riemann_solver = "two_shock";
+        dual_energy = true;
+        flattening = 3;
+        steepening = true;
+        mol_weight = 1.2;
+        courant = 0.04;
+        density_floor = 1.0E-20;
+        number_density_floor = 1.0E-20;
+        pressure_floor = 1.0E-20;
+        temperature_floor = 1.0E-20;
+      };
+
+  grackle {
+    data_file = "input/CloudyData_UVB=HM2012.h5";
+    with_radiative_cooling = 1;
+    metal_cooling = 1;
+    primordial_chemistry = 1;
+    UVbackground = 0;
+  } ;
+}
+
+Particle {
+    list = ["star"];
+
+    star {
+        attributes = [ "x", "double",
+                       "y", "double",
+                       "z", "double",
+                       "vx", "double",
+                       "vy", "double",
+                       "vz", "double",
+                       "ax", "double",
+                       "ay", "double",
+                       "az", "double",
+                       "mass", "double",
+                       "creation_time", "double",
+                       "lifetime", "double",
+                       "number_of_sn", "int64",
+                       "metal_fraction", "double",
+                       "is_copy", "int64", 
+                       "id", "int64"];
+        position = [ "x", "y", "z" ];
+        velocity = [ "vx", "vy", "vz" ];
+        group_list = ["is_gravitating"];
+    }
+}
+Units {
+    length = 64.0 * 10.0 *3.0866E18; # middle number = cell resolution in pc 
+    time   = 3.15576E13; # 1 Myr
+    density = 1.2E-24;
+  }
+
+Initial {
+
+  list = ["feedback_test"]; # name of IC problem
+
+  feedback_test {
+    density    = 4.0*1.2E-24; 
+    HI_density    = 0.7   * 4.0*1.2E-24;
+    HII_density   = 1e-10 * 4.0*1.2E-24;
+    HeI_density   = 0.3   * 4.0*1.2E-24;
+    HeII_density  = 1e-10 * 4.0*1.2E-24;
+    HeIII_density = 1e-10 * 4.0*1.2E-24;
+    e_density     = 1e-10 * 4.0*1.2E-24;           # uniform mass density for ICs
+    metal_fraction = 1e-2*0.012;
+
+    position = [0.5,0.5,0.5]; # unigrid corner (or one block)
+
+    temperature = 100.0;              # in K
+                                      #   particles are still local to each block and are kicked away from
+                                      #   boundaries if NxN feedback zone crosses a block boundary
+    star_mass  = 1000.0;                # particle mass in Msun
+  }
+
+}
+
+Output {
+    list = ["de","te","vx"];
+     de {
+         dir = [ "FEEDBACK_TEST_%04d", "cycle" ];
+         field_list = [ "density" ];
+         image_ghost = false;
+         image_size = [ 512, 512 ];
+         image_type = "data";
+         name = [ "de-%04d.png", "cycle" ];
+         schedule {
+             start = 0; #1;
+             step = 1;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     te {
+         dir = [ "FEEDBACK_TEST_%04d", "cycle" ];
+         field_list = [ "total_energy" ];
+         image_ghost = false;
+         image_size = [ 512, 512 ];
+         image_type = "data";
+         name = [ "te-%04d.png", "cycle" ];
+         schedule {
+             start = 0; #1;
+             step = 1;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     vx {
+         dir = [ "FEEDBACK_TEST_%04d", "cycle" ];
+         field_list = [ "velocity_x" ];
+         image_ghost = false;
+         image_size = [ 512, 512 ];
+         image_type = "data";
+         name = [ "vx-%04d.png", "cycle" ];
+         schedule {
+             start = 0; #1;
+             step = 1;
+             var = "cycle";
+         };
+         type = "image";
+     };
+
+    data {
+        field_list = [ "density" , "metal_density","velocity_x","velocity_y","velocity_z",
+                       "pressure", "temperature","total_energy","internal_energy"];
+
+        field_list += ["HI_density","HII_density","HeI_density","HeII_density","HeIII_density","e_density"];
+
+
+        particle_list = ["star"];
+
+        dir   = ["FEEDBACK_TEST_%04d","cycle"];
+        name = [ "feedback-test-data-%04d-%03d.h5", "cycle", "proc" ];
+        type = "data";
+
+        # schedule the output based on 'var' and 'step'
+        #   step refers to the interval if 'var' to output on
+        schedule {
+             var   = "cycle";
+             start = 0;
+             step  = 1; #            time in code units (Myr)
+        }
+    };
+
+
+}
+
+Stopping {
+    cycle = 401;
+}

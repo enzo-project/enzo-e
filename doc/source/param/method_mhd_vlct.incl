@@ -26,8 +26,8 @@ specified. Valid choices include:`
 future. For more details see`
 :ref:`vlct_overview`
 
-:e:`For debugging purposes, there is technically one last choice,
-``"unsafe_constant_uniform"``. :e:`This is NOT meant for science runs.
+:e:`For debugging purposes, there is technically one last choice,`
+``"unsafe_constant_uniform".`` :e:`This is NOT meant for science runs.
 When this option is selected, the magnetic field is treated as a
 cell-centered conserved quantity and the magnetic fluxes computed in
 the Riemann solver are directly added to to the magnetic fields
@@ -36,28 +36,6 @@ fields). Outside of very specific cases, this will NOT enforce the
 divergence-free constrain of the magnetic fields to grow. To use this
 option, you need to explicitly comment out an error in`
 ``"enzo_EnzoMethodMHDVlct.cpp"``.
-
-----
-
-:Parameter:  :p:`Method` : :p:`mhd_vlct` : :p:`density_floor`
-:Summary: :s:`Lower limit on density`
-:Type:   :t:`float`
-:Default: :d:`none`
-:Scope:     :z:`Enzo`
-
-:e:`Density floor, which must exceed 0. This is applied during
-reconstruction and quantity updates.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`mhd_vlct` : :p:`pressure_floor`
-:Summary: :s:`Lower limit on thermal pressure`
-:Type:   :t:`float`
-:Default: :d:`none`
-:Scope:     :z:`Enzo`
-
-:e:`Thermal pressure floor, which must exceed 0. This is applied during
-reconstruction and quantity updates.`
 
 ----
 
@@ -110,6 +88,14 @@ algorithm.  For more details, see` :ref:`using-vlct-reconstruction`
 
 ----
 
+Deprecated mhd_vlct parameters
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The following parameters have all been deprecated and will be removed
+in a future version of Enzo-E. Going forwards, the corresponding
+parameters in :p:`Physics` : :p:`fluid_props` should be used instead.
+
+----
+
 :Parameter:  :p:`Method` : :p:`mhd_vlct` : :p:`dual_energy`
 :Summary: :s:`Whether to use dual-energy formalism`
 :Type:   :t:`logical`
@@ -126,5 +112,26 @@ algorithm.  For more details, see` :ref:`using-vlct-reconstruction`
 :Default: :d:`0.001`
 :Scope:     :z:`Enzo`
 
-:e:`Dual-energy formalism parameter. For more details, see`
-:ref:`using-vlct-de`
+:e:`Dual-energy formalism parameter.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`mhd_vlct` : :p:`density_floor`
+:Summary: :s:`Lower limit on density`
+:Type:   :t:`float`
+:Default: :d:`none`
+:Scope:     :z:`Enzo`
+
+:e:`Density floor, which must exceed 0. This is applied during
+reconstruction and quantity updates.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`mhd_vlct` : :p:`pressure_floor`
+:Summary: :s:`Lower limit on thermal pressure`
+:Type:   :t:`float`
+:Default: :d:`none`
+:Scope:     :z:`Enzo`
+
+:e:`Thermal pressure floor, which must exceed 0. This is applied during
+reconstruction and quantity updates.`

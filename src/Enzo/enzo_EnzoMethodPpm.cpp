@@ -22,35 +22,53 @@
 
 #define COPY_FIELD(BLOCK,FIELD,FIELD_COPY)                              \
   {                                                                     \
-    Field field = BLOCK->data()->field();				\
-    enzo_float * f = (enzo_float *) field.values(FIELD);            \
-    enzo_float * f_copy = (enzo_float *) field.values(FIELD_COPY);  \
-    int mx,my,mz;                                                       \
-    field.dimensions(0,&mx,&my,&mz);                                    \
-    for (int i=0; i<mx*my*mz; i++) f_copy[i]=f[i];              \
+    Field field = BLOCK->data()->field();                               \
+    enzo_float * f = (enzo_float *) field.values(FIELD);                \
+    enzo_float * f_copy = (enzo_float *) field.values(FIELD_COPY);      \
+    if (f_copy) {                                                       \
+      int mx,my,mz;                                                     \
+      field.dimensions(0,&mx,&my,&mz);                                  \
+      for (int i=0; i<mx*my*mz; i++) f_copy[i]=f[i];                    \
+    }                                                                   \
   }
 
 //----------------------------------------------------------------------
 
-EnzoMethodPpm::EnzoMethodPpm ()
+EnzoMethodPpm::EnzoMethodPpm (bool store_fluxes_for_corrections)
   : Method(),
-    comoving_coordinates_(enzo::config()->physics_cosmology)
+    comoving_coordinates_(enzo::config()->physics_cosmology),
+    store_fluxes_for_corrections_(store_fluxes_for_corrections)
 {
+
+  // check compatability with EnzoPhysicsFluidProps
+  EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
+  const EnzoDualEnergyConfig& de_config = fluid_props->dual_energy_config();
+  ASSERT("EnzoMethodPpm::EnzoMethodPpm",
+         "selected formulation of dual energy formalism is incompatible",
+         de_config.is_disabled() || de_config.bryan95_formulation());
 
   const int rank = cello::rank();
 
-  this->required_fields_ = std::vector<std::string> {"density","total_energy",
-                                         "internal_energy","pressure"};
-
-  if (rank >= 0) this->required_fields_.insert(this->required_fields_.end(),{"velocity_x","acceleration_x"});
-  if (rank >= 1) this->required_fields_.insert(this->required_fields_.end(),{"velocity_y","acceleration_y"});
-  if (rank >= 2) this->required_fields_.insert(this->required_fields_.end(),{"velocity_z","acceleration_z"});
-
-  this->define_fields();
+  cello::define_field("density");
+  cello::define_field("total_energy");
+  cello::define_field("internal_energy");
+  cello::define_field("pressure");
+  if (rank >= 1) {
+      cello::define_field("velocity_x");
+      cello::define_field("acceleration_x");
+  }
+  if (rank >= 2) {
+      cello::define_field("velocity_y");
+      cello::define_field("acceleration_y");
+  }
+  if (rank >= 3) {
+      cello::define_field("velocity_z");
+      cello::define_field("acceleration_z");
+  }
 
   // Initialize default Refresh object
 
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_field("density");
   refresh->add_field("velocity_x");
@@ -62,8 +80,6 @@ EnzoMethodPpm::EnzoMethodPpm ()
   refresh->add_field("acceleration_x");
   refresh->add_field("acceleration_y");
   refresh->add_field("acceleration_z");
-
-  FieldDescr * field_descr = cello::field_descr();
 
   // add all color fields to refresh
   refresh->add_all_fields("color");
@@ -82,6 +98,7 @@ void EnzoMethodPpm::pup (PUP::er &p)
   Method::pup(p);
 
   p | comoving_coordinates_;
+  p | store_fluxes_for_corrections_;
 }
 
 //----------------------------------------------------------------------
@@ -89,7 +106,6 @@ void EnzoMethodPpm::pup (PUP::er &p)
 void EnzoMethodPpm::compute ( Block * block) throw()
 {
   TRACE_PPM("BEGIN compute()");
-
 #ifdef COPY_FIELDS_TO_OUTPUT
   const int rank = cello::rank();
   COPY_FIELD(block,"density","density_in");
@@ -104,19 +120,22 @@ void EnzoMethodPpm::compute ( Block * block) throw()
   if (rank >= 3) COPY_FIELD(block,"acceleration_z","acceleration_z_in");
 #endif
 
-  Field field = block->data()->field();
+  int single_flux_array = enzo::config()->method_flux_correct_single_array;
+  if (store_fluxes_for_corrections_){
+    Field field = block->data()->field();
 
-  auto field_names = field.groups()->group_list("conserved");
-  const int nf = field_names.size();
-  std::vector<int> field_list;
-  field_list.resize(nf);
-  for (int i=0; i<nf; i++) {
-    field_list[i] = field.field_id(field_names[i]);
+    auto field_names = field.groups()->group_list("conserved");
+    const int nf = field_names.size();
+    std::vector<int> field_list;
+    field_list.resize(nf);
+    for (int i=0; i<nf; i++) {
+      field_list[i] = field.field_id(field_names[i]);
+    }
+
+    int nx,ny,nz;
+    field.size(&nx,&ny,&nz);
+    block->data()->flux_data()->allocate(nx,ny,nz,field_list,single_flux_array);
   }
-
-  int nx,ny,nz;
-  field.size(&nx,&ny,&nz);
-  block->data()->flux_data()->allocate (nx,ny,nz,field_list);
 
   if (block->is_leaf()) {
 
@@ -126,7 +145,7 @@ void EnzoMethodPpm::compute ( Block * block) throw()
     //
     // // restore energy consistency if dual energy formalism used
     //
-    // if (enzo::config()->ppm_dual_energy) {
+    // if (enzo::fluid_props()->dual_energy_config().bryan95_formulation()) {
     //   int mx,my,mz;
     //   field.dimensions(0,&mx,&my,&mz);
     //   const int m = mx*my*mz;
@@ -159,8 +178,8 @@ void EnzoMethodPpm::compute ( Block * block) throw()
 
     TRACE_PPM ("BEGIN SolveHydroEquations");
 
-    enzo_block->SolveHydroEquations
-      ( block->time(), block->dt(), comoving_coordinates_ );
+    enzo_block->SolveHydroEquations 
+      ( block->time(), block->dt(), comoving_coordinates_, single_flux_array );
 
     TRACE_PPM ("END SolveHydroEquations");
 
@@ -186,7 +205,7 @@ void EnzoMethodPpm::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodPpm::timestep ( Block * block ) const throw()
+double EnzoMethodPpm::timestep ( Block * block ) throw()
 {
 
   TRACE_PPM("timestep()");
@@ -213,9 +232,9 @@ double EnzoMethodPpm::timestep ( Block * block ) const throw()
   /* Compute the pressure. */
 
   const int in = cello::index_static();
+  enzo_float gamma = enzo::fluid_props()->gamma();
 
-  EnzoComputePressure compute_pressure
-    (EnzoBlock::Gamma[in],comoving_coordinates_);
+  EnzoComputePressure compute_pressure(gamma, comoving_coordinates_);
   compute_pressure.compute(enzo_block);
 
   Field field = enzo_block->data()->field();
@@ -246,7 +265,7 @@ double EnzoMethodPpm::timestep ( Block * block ) const throw()
 			&enzo_block->CellWidth[0],
 			&enzo_block->CellWidth[1],
 			&enzo_block->CellWidth[2],
-			&EnzoBlock::Gamma[in], &EnzoBlock::PressureFree[in], &cosmo_a,
+			&gamma, &EnzoBlock::PressureFree[in], &cosmo_a,
 			density, pressure,
 			velocity_x,
 			velocity_y,

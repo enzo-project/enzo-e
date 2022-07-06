@@ -1,0 +1,7 @@
+# File:    schedule_time_0.01.incl
+
+schedule {
+    var  = "time";
+    step = 0.01;
+}
+

@@ -18,6 +18,28 @@
 
 :e:`Initial time in code units.`
 
+----
+
+:Parameter:  :p:`Initial` : :p:`restart`
+:Summary: :s:`Set to true to restart from a checkpoint directory created by the "check" method`
+:Type:    :t:`bool`
+:Default: :d:`false`
+:Scope:     :c:`Cello`
+
+:e:`Restart the simulation to continue a previous run from a saved checkpoint. If true, the restart directory must be specified using the "restart_dir" parameter.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`restart_dir`
+:Summary: :s:`Directory containing restart files from a checkpoint created using the "check" method`
+:Type:    :t:`string`
+:Default: :d:`none`
+:Scope:     :c:`Cello`
+
+:e:`When restarting a simulation from a "check" checkpoint directory, this parameter must specify the path to that directory.`
+
+----
+
 value
 -----
 
@@ -42,6 +64,213 @@ value
      
 	       
 :e:`is read as "Set the density field equal to` :p:`sin ( x + y )` :e:`wherever` :p:`x - y < 0.0` :e:`, otherwise set to` :p:`1.0` :e:`".`
+
+accretion_test
+--------------
+
+The :p:`accretion_test` Initial subgroup is used to initialize an accretion test problem.
+In particular, it initializes a single sink particle with a given initial mass, position,
+and velocity, in a background medium with constant density and pressure, and (possibly) an
+initial velocity field with constant magnitude, directed towards the sink particle's initial
+position. Running this test problem requires the use of the "mhd_vlct", "pm_update",
+"merge_sinks", and "accretion" methods. One can then test the accretion method by checking
+whether mass and momentum are conserved in this problem.
+
+This initializer requires periodic boundary conditions, and three spatial dimensions.
+
+Note: sink particles must have a ``"mass"`` attribute if this initializer is
+used.
+
+:Parameter:  :p:`Initial` : :p:`accretion` : :p:`sink_mass`
+:Summary: :s:`The initial mass of the sink particle.`
+:Type:    :t:`float`
+:Default: :d:`0.0`
+:Scope:   Enzo
+
+:e:`The initial mass of the sink particle`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`accretion` : :p:`sink_position`
+:Summary: :s:`The initial position of the sink particle.`
+:Type:    :t:`list` ( :t:`float` )
+:Default: :d:`[0.0,0.0,0.0]`
+:Scope:   Enzo
+
+:e:`The initial (3D) position of the sink particle`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`accretion` : :p:`sink_velocity`
+:Summary: :s:`The initial velocity of the sink particle.`
+:Type:    :t:`list` ( :t:`float` )
+:Default: :d:`[0.0,0.0,0.0]`
+:Scope:   Enzo
+
+:e:`The initial (3D) velocity of the sink particle`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`accretion` : :p:`gas_density`
+:Summary: :s:`The initial uniform density of the gas.`
+:Type:    :t:`float`
+:Default: :d:`1.0e-6`
+:Scope:   Enzo
+
+:e:`The initial uniform density of the gas.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`accretion` : :p:`gas_pressure`
+:Summary: :s:`The initial uniform pressure of the gas.`
+:Type:    :t:`float`
+:Default: :d:`1.0e-6`
+:Scope:   Enzo
+
+:e:`The initial uniform pressure of the gas.`
+
+----
+
+
+:Parameter:  :p:`Initial` : :p:`accretion` : :p:`gas_radial_velocity`
+:Summary: :s:`The (inwards) radial velocity of the gas, with respect to the initial sink particle
+              position.`
+:Type:    :t:`float`
+:Default: :d:`0.0`
+:Scope:   Enzo
+
+:e:`The gas velocity in every cell with have magnitude equal to the value of this parameter, directed towards the initial sink particle position.`
+
+----
+
+
+bb_test
+-------
+
+The :p:`bb_test` Initial subgroup is used to initialize a "BB Test" problem, as
+described in Federrath et al 2010, ApJ, 713, 269.
+In particular, it initializes an isothermal sphere of gas with, with the gas having a constant
+(small) "external density" outside of the truncation radius. Within the truncation radius, the gas
+density has the following form:
+
+:math:`\rho(\phi) = \rho_0 (1 + A \cos(2 \phi)),`
+
+where :math:`\rho` is the gas density, :math:`\phi` is the azimuthal angle in the spherical polar
+coordinate system, :math:`\rho_0` is the mean density and :math:`A` is the (small) fluctuation amplitude. The
+gas rotates around the z-axis as a solid-body, with an optional additional uniform
+"drift velocity".
+
+Running this test problem requires the use of the ``"pm_deposit"``, ``"gravity"``, ``"mhd_vlct"``,
+``"sink_maker"``, and ``"pm_update"`` methods.
+
+This initializer requires periodic boundary conditions, three spatial dimensions, and that
+the gas adiabatic index (``"Field:gamma"``) is between 1.0 and 1.000001.
+
+The following fields are required, and must be specified in the input parameter file:
+``"density"``, ``"density_total"``, ``"density_particle"``, ``"density_particle_accumulate"``,
+``"density_gas"``, ``"particle_mass"``, ``"potential"``, ``"potential_temp"``,
+``"potential_copy"``, ``"total_energy"``, ``"pressure"``, ``"acceleration_x"``,
+``"acceleration_y"``, ``"acceleration_z"``, ``"velocity_x"``, ``"velocity_y"``, ``"velocity_z"``,
+``"X"``, ``"X_copy"``, ``"B"``, ``"B_copy"``, ``"density_source"``,
+``"density_source_accumulate"``, ``"mom_dens_x_source"``, ``"mom_dens_x_source_accumulate"``,
+``"mom_dens_y_source"``, ``"mom_dens_y_source_accumulate"``, ``"mom_dens_z_source"``,
+and ``"mom_dens_z_source_accumulate"``.
+
+Sink particles must have the following attributes: ``"mass"``, ``"x"``, ``"y"``, ``"z"``,
+``"vx"``, ``"vy"``, ``"vz"``, and ``"is_copy"``. These must all be of type ``"default"``,
+except for ``"is_copy"``, which should be of type ``"int64"``.
+
+Sink particles must be in the ``"is_gravitating"`` particle group.
+
+:Parameter:  :p:`Initial` : :p:`bb_test` : :p:`center`
+:Summary: :s:`The coordinates of the center of the sphere.`
+:Type:    :t:`list` (:t:`float`)
+:Default: :d:`[0.0,0.0,0.0]`
+:Scope:   Enzo
+
+:e:`The coordinates of the center of the sphere.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`bb_test` : :p:`drift_velocity`
+:Summary: :s:`The initial additional uniform velocity of the gas.`
+:Type:    :t:`list` (:t:`float`)
+:Default: :d:`[0.0,0.0,0.0]`
+:Scope:   Enzo
+
+:e:`The initial additional uniform velocity of the gas. Inside the truncation radius,
+the initial gas velocity will be determined by solid body rotation, plus this additional
+velocity. Outside the truncation radius, the gas velocity is just this velocity.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`bb_test` : :p:`truncation_radius`
+:Summary: :s:`The truncation radius of the sphere.`
+:Type:    :t:`float`
+:Default: :d:`1.0`
+:Scope:   Enzo
+
+:e:`The truncation radius of the isothermal sphere. Within this radius, the gas density is
+determined by the azimuthal angle; outside of this radius, it is equal to "external_density".`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`bb_test` : :p:`nominal_sound_speed`
+:Summary: :s:`The nominal uniform sound speed of the gas.`
+:Type:    :t:`float`
+:Default: :d:`1.0`
+:Scope:   Enzo
+
+:e:`Nominal uniform sound speed of the gas used to initialise the total specific energy. In practice the actual sound speed will be different since the adiabatic index is not exactly 1.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`bb_test` : :p:`fluctuation_amplitude`
+:Summary: :s:`The amplitude of the density fluctuation which determines the initial gas density.`
+:Type:    :t:`float`
+:Default: :d:`0.0`
+:Scope:   Enzo
+
+Within the truncation radius, the gas density has the following form:
+
+:math:`\rho(\phi) = \rho_0 (1 + A \cos(2 \phi)),`
+
+where :math:`\rho` is the gas density, :math:`\phi` is the azimuthal angle in the spherical polar
+coordinate system, :math:`\rho_0` is the mean density and :math:`A` is the fluctuation amplitude.
+
+----
+
+:Parameter:  :p:`Initial` : :p:`bb_test` : :p:`external_density`
+:Summary: :s:`The gas density outside of the truncation radius.`
+:Type:    :t:`float`
+:Default: :d:`1.0e-6`
+:Scope:   Enzo
+
+:e:`The gas density outside of the truncation radius. Should be set to something much smaller
+than the mean gas density inside the truncation radius.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`bb_test` : :p:`mean_density`
+:Summary: :s:`The mean gas density inside the truncation radius.`
+:Type:    :t:`float`
+:Default: :d:`1.0e-6`
+:Scope:   Enzo
+
+:e:`The mean gas density inside the truncation radius.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`bb_test` : :p:`angular_rotation_velocity`
+:Summary: :s:`The angular rotation velocity of gas inside the truncation radius in radians per second.`
+:Type:    :t:`float`
+:Default: :d:`0.0`
+:Scope:   Enzo
+
+:e:`Inside the truncation radius, the gas rotates as a solid body around the z-axis. This parameter determines the angular rotation velocity in units of radians per second.`
+
+----
+
 
 cloud
 -----
@@ -266,12 +495,12 @@ Initial:cloud:perturb_standard_deviation is positive.`
 inclined_wave
 -------------
 
-The :p:`inclined_wave` Initial subgroup is used to setup a HD or
-MHD wave at an angle inclined to the simulation domain for testing
+The :p:`inclined_wave` Initial subgroup is used to setup a HD, MHD,
+or Jeans wave at an angle inclined to the simulation domain for testing
 HD/MHD integrators. If applicable, magnetic fields fields are set
 to zero when a HD wave is initialized.
 
-The procedure to addopted from
+The initialization procedure was adopted from
 `Gardiner & Stone (2008) <http://adsabs.harvard.edu/abs/2008JCoPh.227.4123G>`_ .
 Specifically, a coordinate system "x0", "x1", "x2" is defined and the
 wave is initialized to travel along "x0". The transformation between
@@ -313,9 +542,16 @@ vector potential to ensure that they are divergence-free.
 :Default: :d:`alfven`
 :Scope:   :z:`Enzo`
 
+:e:`This value specifies the type of wave to initialize. We have
+provided more details about each option down below. Note, when using an MHD
+solver with a non-MHD wave, the mangetic fields are uniformly initialized
+to zero.`
+
+Hydro Waves
+~~~~~~~~~~~
 :e:`The values used to initialize hydrodynamical linear waves are taken from
 the columns of the matrix given in equation B3 of`
-`Stone et al. (2008) <http://adsabs.harvard.edu/abs/2008ApJS..178..137S>`_
+`Stone et al. (2008) <https://adsabs.harvard.edu/abs/2008ApJS..178..137S>`_
 :e:`. Valid hydrodynamical waves include:`
 
   * ``"sound"`` :e:`A linear sound wave.`
@@ -331,8 +567,10 @@ the columns of the matrix given in equation B3 of`
     perturbations in velocity component v2 (transverse to the direction of
     bulk motion).`
 
-:e:`Each of the valid MHD waves are described in`
-`Gardiner & Stone (2008) <http://adsabs.harvard.edu/abs/2008JCoPh.227.4123G>`_
+MHD Waves
+~~~~~~~~~
+:e:`Each of the valid MHD waves are described in` `Gardiner & Stone
+(2008) <https://adsabs.harvard.edu/abs/2008JCoPh.227.4123G>`__
 :e:`. Valid MHD wave types include:`
 
   * ``"alfven"`` :e:`A linear Alfven wave with perturbations to the
@@ -342,6 +580,41 @@ the columns of the matrix given in equation B3 of`
   * ``"mhd_entropy"`` :e:`A linear MHD entropy wave.`
   * ``"fast"`` :e:`A linear fast magnetosonic wave.`
   * ``"slow"`` :e:`A linear slow magnetosonic wave.`
+
+Jeans Wave
+~~~~~~~~~~
+
+:e:`To initialize a Jeans wave, set this parameter to` ``"jeans"``.
+:e:`We use equations consistent with what Athena and (earlier
+versions of) Athena++ use. In detail, we use:`
+
+.. math::
+   \rho     &= \rho_{\rm bkg}
+          \left( 1 + A \sin\left(\frac{2\pi}{\lambda} x_0 \right) \right) \\
+   \rho v_0 &= \rho_{\rm bkg} \frac{\sqrt{|\omega^2|}}{2\pi / \lambda} A
+          \begin{cases}
+                0                       & \omega^2 > 0 \\
+                \cos\left(\frac{2\pi}{\lambda} x_0 \right) & \omega^2 < 0 \\
+          \end{cases} \\
+   v_1      &= 0 \\
+   v_2      &= 0 \\
+   \rho E   &= \frac{P_{\rm bkg}}{\gamma - 1} + \gamma A \sin\left(\frac{2\pi}{\lambda} x_0\right) \\
+
+:e:`in which:`
+
+  * :math:`E` :e:`specifies the specific internal energy`
+  * :math:`\gamma` :e:`is the adiabatic index.`
+  * :math:`A` :e:`is the amplitude, specified by
+    Initial:inclined_wave:amplitude and` :math:`\lambda` :e:`is the
+    wavelength, specified by Initial:inclined_wave:lambda`
+  * :math:`\rho_{\rm bkg}=1` :e:`and` :math:`P_{\rm bkg}=1/\gamma`
+    :e:`in the appropriate code units`
+  * :math:`\omega^2=(2\pi c_{s,{\rm bkg}}/ \lambda)^2 (1 -
+    (\lambda/\lambda_J)^2)` :e:`is the dispersion relation. In this
+    equation,` :math:`c_{s,{\rm bkg}}^2=\gamma P_{\rm bkg}/\rho_{\rm
+    bkg}` :e:`and` :math:`\lambda_J = c_{s,{\rm bkg}} \sqrt{\pi / (G
+    \rho_{\rm bkg})}`. :e:`Note that the value of` :math:`G` :e:`is
+    directly set by Method:gravity:grav_const`.
 
 ----
 
@@ -372,9 +645,9 @@ polarized Alfven wave (for that case, amplitude is fixed at 0.1).`
 :Default: :d:`true`
 :Scope:   :z:`Enzo`
 
-:e:`This has no effect for the circularly polarized Alfven wave. This is
-ignored for linear HD entropy waves when Initial:inclined_wave:parallel_vel
-is specified.`
+:e:`Do not specify this parameter when initializing a circularly
+polarized Alfven wave or a Jeans wave. This is ignored for linear HD
+entropy waves when Initial:inclined_wave:parallel_vel is specified.`
 
 ----
 
@@ -384,8 +657,32 @@ is specified.`
 :Default: :d:`none`
 :Scope:   Enzo
 
-:e:`This can be used to specify a background velocity along v0 for
-HD linear waves.`
+:e:`This can be used to specify a background velocity along v0 for HD
+linear waves. At present, this parameter should only be specified for
+the hydrodynamic waves.`
+
+merge_sinks_test
+----------------
+
+The :p:`merge_sinks_test` Initial subgroup is used to read and initialise
+particle data from a text file. It is designed to be run with a small number of
+particles, in order to check conservation of mass and momentum (and potentially
+other quantities) when running with the `"merge_sinks"` method. The data are
+assumed to be arranged into seven columns, corresponding to mass, the x,y,z
+coordinates and the x,y,z-components of velocity, respectively. Each row
+corresponds to one sink particle.
+
+Note: sink particles must have a ``"mass"`` attribute if this initializer is
+used.
+
+:Parameter:  :p:`Initial` : :p:`merge_sinks_test` : :p:`particle_data_filename`
+:Summary: :s:`Name of the file to read from.`
+:Type:    :t:`string`
+:Default: :d:`none`
+:Scope:   :z:`Enzo`
+
+:e:`Must point to a valid text file, with data arranged in seven columns seperated by blank space`
+
 
 music
 -----
@@ -615,6 +912,126 @@ the discontinuity. Basically the left and right states are swapped AND
 all components of the magnetic field and velocity (including
 contributions from axis_velocity and transverse_velocity) are
 multiplied by -1.`
+
+shu_collapse
+------------
+
+The :p:`shu_collapse` Initial subgroup is used to initialize a Shu Collapse problem, as
+described in Federrath et al 2010, ApJ, 713, 269.
+In particular, it initializes a gravitationally unstable isothermal sphere of gas with an
+inverse-square density profile, with an optional uniform "drift velocity", and an optional sink
+particle at the center of the domain.
+
+Running this test problem requires the use of the ``"pm_deposit"``, ``"gravity"``, ``"mhd_vlct"``,
+``"sink_maker"``, and ``"pm_update"`` methods.
+
+This initializer requires periodic boundary conditions, three spatial dimensions, and that
+the gas adiabatic index (``"Field:gamma"``) is between 1.0 and 1.000001.
+
+The following fields are required, and must be specified in the input parameter file:
+``"density"``, ``"density_total"``, ``"density_particle"``, ``"density_particle_accumulate"``,
+``"density_gas"``, ``"particle_mass"``, ``"potential"``, ``"potential_temp"``,
+``"potential_copy"``, ``"total_energy"``, ``"pressure"``, ``"acceleration_x"``,
+``"acceleration_y"``, ``"acceleration_z"``, ``"velocity_x"``, ``"velocity_y"``, ``"velocity_z"``,
+``"X"``, ``"X_copy"``, ``"B"``, ``"B_copy"``, ``"density_source"``,
+``"density_source_accumulate"``, ``"mom_dens_x_source"``, ``"mom_dens_x_source_accumulate"``,
+``"mom_dens_y_source"``, ``"mom_dens_y_source_accumulate"``, ``"mom_dens_z_source"``,
+and ``"mom_dens_z_source_accumulate"``.
+
+Sink particles must have the following attributes: ``"mass"``, ``"x"``, ``"y"``, ``"z"``,
+``"vx"``, ``"vy"``, ``"vz"``, and ``"is_copy"``. These must all be of type ``"default"``,
+except for ``"is_copy"``, which should be of type ``"int64"``.
+
+Sink particles must be in the ``"is_gravitating"`` particle group.
+
+:Parameter:  :p:`Initial` : :p:`shu_collapse` : :p:`center`
+:Summary: :s:`The coordinates of the center of the collapse.`
+:Type:    :t:`list` (:t:`float`)
+:Default: :d:`[0.0,0.0,0.0]`
+:Scope:   Enzo
+
+:e:`The coordinates of the center of the sphere.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`shu_collapse` : :p:`drift_velocity`
+:Summary: :s:`The initial uniform velocity of the gas.`
+:Type:    :t:`list` (:t:`float`)
+:Default: :d:`[0.0,0.0,0.0]`
+:Scope:   Enzo
+
+:e:`The initial uniform velocity of the gas.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`shu_collapse` : :p:`truncation_radius`
+:Summary: :s:`The truncation radius of the isothermal sphere.`
+:Type:    :t:`float`
+:Default: :d:`1.0`
+:Scope:   Enzo
+
+:e:`The truncation radius of the isothermal sphere. Within this radius, the gas has an inverse
+square density profile; outside of this radius, the gas density is determined by
+"external_density". Value must be at most a quarter of the domain width.`.
+
+----
+
+:Parameter:  :p:`Initial` : :p:`shu_collapse` : :p:`nominal_sound_speed`
+:Summary: :s:`The nominal uniform sound speed of the gas.`
+:Type:    :t:`float`
+:Default: :d:`1.0`
+:Scope:   Enzo
+
+:e:`Nominal uniform sound speed of the gas used to initialise the total specific energy. In practice the actual sound speed will be different since the adiabatic index is not exactly 1.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`shu_collapse` : :p:`instability_parameter`
+:Summary: :s:`The instability parameter which determines the gas density profile.`
+:Type:    :t:`float`
+:Default: :d:`2.1`
+:Scope:   Enzo
+
+Instability parameter - sphere is gravitationally unstable if this is greater than 2.0.
+Determines density profile according to :math:`\rho(r) = \frac{A c_s^2}{4 \pi G r^2}`,
+where :math:`rho` is the gas density, `r` is the distance from the center of the sphere,
+:math:`A` is the instability parameter, :math:`c_s` is the nominal sound speed, and :math:`G`
+is the gravitational constant.
+
+----
+
+:Parameter:  :p:`Initial` : :p:`shu_collapse` : :p:`external_density`
+:Summary: :s:`The gas density outside of the truncation radius.`
+:Type:    :t:`float`
+:Default: :d:`1.0e-6`
+:Scope:   Enzo
+
+:e:`The gas density outside of the truncation radius. Should be set to something much smaller
+than the gas density just inside the truncation radius.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`shu_collapse` : :p:`central_sink_exists`
+:Summary: :s:`Controls whether a sink particle is placed at the center in the initial conditions.`
+:Type:    :t:`logical`
+:Default: :d:`false`
+:Scope:   Enzo
+
+:e:`If true, a sink particle is initialised with position at the center of the sphere, and
+velocity equal to "drift_velocity". Its mass is determined by "central_sink_mass".`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`shu_collapse` : :p:`central_sink_mass`
+:Summary: :s:`The mass of the central sink particle, if it exists.`
+:Type:    :t:`float`
+:Default: :d:`0.0`
+:Scope:   Enzo
+
+:e:`If "central_sink_exists" is true, this determines the mass of the central sink particle. If
+false, this parameter is ignored.`
+
+----
 
 turbulence
 ----------

@@ -19,6 +19,18 @@ EnzoInitialCosmology::EnzoInitialCosmology
     gamma_(gamma),
     temperature_(temperature)
 {
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
+  EnzoUnits * units = enzo::units();
+
+  // set units to cosmology
+  units->set_cosmology(cosmology);
+
+  // set initial redshift
+  double r0 = cosmology->initial_redshift();
+  cosmology->set_current_redshift(r0);
+
+  // set initial time based on redshift
+  enzo::simulation()->set_time(cosmology->time_from_redshift(r0));
 }
 
 //----------------------------------------------------------------------
@@ -26,7 +38,6 @@ EnzoInitialCosmology::EnzoInitialCosmology
 void EnzoInitialCosmology::enforce_block
 ( Block * block, const Hierarchy * hierarchy ) throw()
 {
-
   EnzoUnits * units = enzo::units();
 
   // "If temperature is left unset, set it assuming that T=550 K at z=200"
@@ -36,16 +47,12 @@ void EnzoInitialCosmology::enforce_block
     temperature_ = 550.0 *
       pow((1.0 + cosmology->initial_redshift())/(1.0 + 200.00), 2.0);
   }
-
-  // Set initial time based on initial redshift
-  double r0 = cosmology->initial_redshift();
-  double t0 = cosmology->time_from_redshift(r0);
-  block->set_time(t0);
-  enzo::simulation()->set_time(t0);
+  
+  block->set_time(enzo::simulation()->time());
   
   const double default_mu = 0.6;
 
-  const double internal_energy = temperature_/units->temperature()
+  const double internal_energy = temperature_/units->kelvin_per_energy_units()
     /default_mu/(gamma_-1.0);
 
   Field field = block->data()->field();
@@ -72,5 +79,28 @@ void EnzoInitialCosmology::enforce_block
     }
   }
 
-  
+  block->initial_done();
+
+#ifdef CONFIG_USE_GRACKLE
+  // initialize chemistry fields if doing multispecies 
+  if (enzo::config()->method_grackle_chemistry)
+  {
+    chemistry_data * grackle_chemistry =
+    enzo::config()->method_grackle_chemistry;
+
+    const EnzoMethodGrackle * grackle_method = enzo::grackle_method();
+ 
+    if ( (grackle_chemistry->primordial_chemistry > 0) || (grackle_chemistry->metal_cooling == 1))
+    {
+        grackle_field_data grackle_fields_; 
+ 
+        //create data struct to be fed into grackle
+        grackle_method->setup_grackle_fields(block, & grackle_fields_);
+
+        //initialize density fields for various chemical species
+        grackle_method->update_grackle_density_fields(block, & grackle_fields_);
+    }
+  }
+#endif 
+
 }

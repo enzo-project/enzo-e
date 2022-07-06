@@ -806,7 +806,7 @@ void Parameters::list_evaluate_logical
 
 std::string Parameters::group(int i) const throw()
 {
-  return (i < current_group_.size()) ? current_group_[i] : "";
+  return (i < (int) current_group_.size()) ? current_group_[i] : "";
 }
 
 //----------------------------------------------------------------------
@@ -822,7 +822,7 @@ int Parameters::group_count() const throw()
 {
   // Find the parameter node for the current list of groups
   ParamNode * param_node = parameter_tree_;
-  for (int i=0; i<current_group_.size(); i++) {
+  for (size_t i=0; i<current_group_.size(); i++) {
     if (param_node->subnode(current_group_[i]) != 0) {
       param_node = param_node->subnode(current_group_[i]);
     }
@@ -835,9 +835,7 @@ int Parameters::group_count() const throw()
 
 void Parameters::group_push(std::string str) throw()
 {
-  int n = current_group_.size();
-  current_group_.resize(n + 1);
-  current_group_[n] = str;
+  current_group_.push_back(str);
 }
 
 //----------------------------------------------------------------------
@@ -872,12 +870,41 @@ void Parameters::group_set(int index, std::string group) throw()
 
 void Parameters::group_clear() throw ()
 {
-  current_group_.resize(0);
+  current_group_.clear();
 }
 
 //----------------------------------------------------------------------
 
-std::string Parameters::full_name(std::string parameter) throw()
+std::vector<std::string> Parameters::leaf_parameter_names() const throw()
+{
+  std::vector<std::string> out;
+  std::string prefix = full_name("");
+  std::size_t prefix_size = prefix.size();
+
+  for (auto it_param =  parameter_map_.lower_bound(prefix);
+       it_param != parameter_map_.end();
+       ++it_param) {
+
+    // If the current key doesn't share the prefix, abort the search
+    if (((it_param->first).compare(0, prefix_size, prefix) != 0) ||
+	((it_param->first).size() <= prefix_size) ) {
+      break;
+    }
+    std::string suffix = (it_param->first).substr(prefix_size,
+						  std::string::npos);
+    if (suffix.find(':') != std::string::npos){
+      // this isn't a leaf parameter
+      continue;
+    } else {
+      out.push_back(suffix);
+    }
+  }
+  return out;
+}
+
+//----------------------------------------------------------------------
+
+std::string Parameters::full_name(std::string parameter) const throw()
 {
   int n = current_group_.size();
   std::string full_name = "";

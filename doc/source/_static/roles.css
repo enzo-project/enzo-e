@@ -1,0 +1,36 @@
+
+/*
+  Styles implementing markup in roles.incl used mainly in param files 
+*/
+.p{
+  font-family: "Courier";
+  font-weight: bold; 
+  color: #000066;
+}
+.g{
+  font-weight: bold;
+  font-style: italic;
+  color: #660099;
+}
+.s{
+  font-style: italic;
+/*  color: #006600; */
+}
+.t{
+  color: #660000;
+  font-family: courier;
+  font-weight: bold;
+}
+.d{
+  font-weight: bold;
+  font-family: courier;
+   color: #006600; 
+}
+.e{
+/*  font-style: italic; */
+/*  color: #006600; */
+}
+.o{
+  font-weight: bold;
+  color: #ff0000;
+}

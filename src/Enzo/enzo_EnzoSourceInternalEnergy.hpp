@@ -59,15 +59,16 @@ public:
   ///     the x, y, and z directions, respectively.
   /// @param[in]  dt The time time-step overwhich to apply the source term
   /// @param[in]  prim_map Map holding the values of the cell-centered
-  ///     primitives from the start of the timestep (but after the
+  ///     primitives from the start of the (partial) timestep (but after the
   ///     synchronization of the internal energy with the total energy).
+  ///     The cell-centered pressure is loaded from this.
   /// @param[out] dUcons_map Map of arrays where the net changes to the
-  ///     integrable quantities and passively advected quantites are
+  ///     integration quantities (including passively advected scalars) are
   ///     accumulated. The internal energy density source term is simply added
   ///     to the array associated with the "internal_energy" key. The source
   ///     term for internal energy density is computed instead of specific
   ///     internal energy because this map accumulates the net change to the
-  ///     conserved form of the integrable/passive quantities.
+  ///     conserved form of the integration/passive quantities.
   /// @param[in]  interface_velocity Array storing the values of the interface
   ///     velocity along dimension `dim` is stored (it should be computed by
   ///     the Riemann Solver). This should have the same dimensions as the
@@ -78,11 +79,13 @@ public:
   ///     supplied cell-centered quantities. The update using the
   ///     reconstructor's delayed_staling_rate should be applied at some
   ///     time after this function call.
-  void calculate_source(int dim, double dt, enzo_float cell_width,
-                        EnzoEFltArrayMap &prim_map,
+  void calculate_source(const int dim, const double dt,
+			const enzo_float cell_width,
+                        const EnzoEFltArrayMap &prim_map,
                         EnzoEFltArrayMap &dUcons_map,
-                        EFlt3DArray &interface_velocity,
-                        EnzoEquationOfState *eos, int stale_depth)
+                        const CelloArray<const enzo_float,3> &interface_velocity,
+                        const EnzoEquationOfState *eos,
+			const int stale_depth)
     const throw();
 };
 

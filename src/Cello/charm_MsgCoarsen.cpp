@@ -21,7 +21,8 @@ MsgCoarsen::MsgCoarsen()
     data_msg_(NULL),
     buffer_(NULL),
     num_face_level_(0),
-    face_level_(NULL)
+    face_level_(NULL),
+    adapt_child_(nullptr)
 {
   ic3_[0] = ic3_[1] = ic3_[2] = -1;
   ++counter[cello::index_static()]; 
@@ -29,13 +30,18 @@ MsgCoarsen::MsgCoarsen()
 
 //----------------------------------------------------------------------
 
-MsgCoarsen::MsgCoarsen(int num_face_level, std::vector<int> & face_level, int ic3[3])
+MsgCoarsen::MsgCoarsen
+(int num_face_level,
+ std::vector<int> & face_level,
+ int ic3[3],
+ Adapt * adapt_child)
   : CMessage_MsgCoarsen(),
     is_local_(true),
     data_msg_(NULL),
     buffer_(NULL),
     num_face_level_(num_face_level),
-    face_level_(new int[num_face_level])
+    face_level_(new int[num_face_level]),
+    adapt_child_(adapt_child)
 {
 
   ++counter[cello::index_static()]; 
@@ -84,7 +90,6 @@ void * MsgCoarsen::pack (MsgCoarsen * msg)
 
   // have_data
   size += sizeof(int); 
-
   int have_data = (msg->data_msg_ != NULL);
   if (have_data) {
     size += msg->data_msg_->data_size();
@@ -98,6 +103,9 @@ void * MsgCoarsen::pack (MsgCoarsen * msg)
 
   // ic3_[]
   size += 3*sizeof(int);
+
+  // Adapt class
+  SIZE_OBJECT_PTR_TYPE(size,Adapt,msg->adapt_child_);
 
   //--------------------------------------------------
   //  2. allocate buffer using CkAllocBuffer()
@@ -116,11 +124,9 @@ void * MsgCoarsen::pack (MsgCoarsen * msg)
 
   pc = buffer;
 
-  have_data = (msg->data_msg_ != NULL);
-
   // have_data
+  have_data = (msg->data_msg_ != NULL);
   (*pi++) = have_data; 
-
   if (have_data) {
     // data_msg_
     pc = msg->data_msg_->save_data(pc);   
@@ -138,6 +144,9 @@ void * MsgCoarsen::pack (MsgCoarsen * msg)
   (*pi++) = msg->ic3_[0];
   (*pi++) = msg->ic3_[1];
   (*pi++) = msg->ic3_[2];
+
+  // Adapt class
+  SAVE_OBJECT_PTR_TYPE(pc,Adapt,msg->adapt_child_);
 
   ASSERT2("MsgRefresh::pack()",
 	  "buffer size mismatch %ld allocated %d packed",
@@ -204,6 +213,9 @@ MsgCoarsen * MsgCoarsen::unpack(void * buffer)
   msg->ic3_[1] = (*pi++);
   msg->ic3_[2] = (*pi++);
 
+  // Adapt class
+  LOAD_OBJECT_PTR_TYPE(pc,Adapt,msg->adapt_child_);
+
   // 3. Save the input buffer for freeing later
 
   msg->buffer_ = buffer;
@@ -218,7 +230,6 @@ void MsgCoarsen::update (Data * data)
 
   if (data_msg_ == NULL) return;
 
-  Simulation * simulation  = cello::simulation();
   FieldDescr * field_descr = cello::field_descr();
  
   Field field_dst = data->field();
@@ -256,7 +267,6 @@ void MsgCoarsen::update (Data * data)
 
     } else { // ! is_local_
 
-
       // Invert face since incoming not outgoing
 
       ff->invert_face();
@@ -267,7 +277,7 @@ void MsgCoarsen::update (Data * data)
   }
 
   if (!is_local_) {
-      CkFreeMsg (buffer_);
-      buffer_ = nullptr;
+    CkFreeMsg (buffer_);
+    buffer_ = nullptr;
   }
 }

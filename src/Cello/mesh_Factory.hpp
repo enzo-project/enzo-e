@@ -90,8 +90,11 @@ public: // interface
    int count_adapt,
    int cycle, double time, double dt,
    int narray, char * array, int refresh_type,
-   int num_face_level, int * face_level,
-   Simulation * simulation = 0
+   int num_face_level,
+   int * face_level,
+   Adapt * adapt,
+   Simulation * simulation = 0,
+   int io_reader = -1
    ) const throw();
 
 // NEW CODE: See 161206 notes: implementing data objects bound with

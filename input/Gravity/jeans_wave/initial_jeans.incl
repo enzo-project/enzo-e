@@ -1,0 +1,119 @@
+# Initial conditions for inclined stable Jeans Wave
+
+   include "input/vlct/MHD_linear_wave/domain-lw.incl"
+
+   Adapt {
+      max_level = 0;
+   }
+
+   Method {
+
+      list = ["pm_deposit", "gravity"];
+
+      gravity {
+         solver = "cg";
+         # choose mass units to adjust the value of the jeans wavelength is 0.5.
+         # The formula for Jeans wavelength is (in code units):
+         #      lambda_J = sqrt( pi * cs^2 / (G * rho)),
+         # where G is the gravitational constant. The way we set up the problem,
+         # rho and cs^2 are always equal to 1 in our code units.
+         #
+         # If we just adjust code mass, then our formula becomes:
+         #      lambda_J = sqrt(pi / G)
+         #      G = pi / lambda_J^2
+         # let's pick lambda_J = 2.0
+         grav_const = 0.25 * pi;
+      }
+   }
+
+   Initial{
+      list = ["inclined_wave"];
+
+      inclined_wave{
+         # For coordinates x0, x1, x2 - a wave is initialized along x0
+	 # To transform x, y, z to x0, x1, x2:
+	 #    1. Rotate x-y axis about the z-axis by angle -beta (rotate
+	 #       clockwise). The rotated y-axis is now the x1-axis
+	 #    2. Rotate the z-axis and the rotated x axis about the x1-axis
+	 #       by angle -alpha (rotate clock-wise).
+         alpha = 0.7297276562269663; # sin(alpha) = 2/3
+	 beta  = 1.1071487177940904; # sin(beta) =  2/sqrt(5)
+
+         lambda = 1.; #wavelength
+
+         # amplitude of the linear wave (has no effect on circularly
+	 # polarized alfven wave)
+	 amplitude = 1.e-6;
+
+	 # set the sign of the wave speed. default is true
+	 # (doesn't accomplish anything for circularly polarized Alfven waves
+         # or Jeans waves)
+	 positive_vel = true;
+
+         # the dispersion relationship is given by
+         #     omega^2 = (2*pi/lambda)^2 * cs_0^2 * (1 - (lambda / lambda_J)^2)
+         #     lambda_J = sqrt(pi * cs_0^2 / (G * rho_0))
+         # see the notes preceeding Method:gravity:grav_const for details about
+         # adjusting these parameters
+         wave_type = "jeans";
+      }
+   }
+
+   Field {
+   
+      alignment = 8;
+      ghost_depth = 4;
+      history = 1;
+      list = ["density", "velocity_x", "velocity_y", "velocity_z",
+              "total_energy", "pressure", "internal_energy",
+              "acceleration_x", "acceleration_y", "acceleration_z",
+              "density_gas", "density_particle", "density_total",
+              "density_particle_accumulate", "potential", "potential_temp",
+              "potential_copy", "X", "B", "X_copy", "B_copy", "particle_mass"];
+     padding = 0;
+   }
+
+   
+
+   Solver {
+      list = ["cg"];
+      cg {
+         type = "cg";
+         iter_max = 1000;
+         res_tol  = 1e-14;
+         monitor_iter = 25;
+         solve_type = "block";
+      }
+   }
+
+   Stopping{
+      # the final stopping time is 2 * pi / omega, where is omega is angular
+      # frequecy. Omega is given by:
+      #    omega^2 = (2*pi/lambda)^2 * cs_0^2 * (1 - (lambda / lambda_J)^2)
+      # The final time is:
+      #     lambda / (cs_0 * sqrt(1 - (lambda / lambda_J)^2))
+      # in this setup: c_s = 1, lambda = 1, lambda_J = 2
+      time = 1.1547005383792517; # = 1.0 / sqrt(0.75)
+   }
+
+   Group {
+      list = ["derived"];
+      derived {
+         field_list = ["pressure"];
+      }
+   }
+
+   Output {
+      list = ["data"];
+      data {
+         type = "data";
+	 field_list = ["density", "velocity_x", "velocity_y", "velocity_z",
+                       "total_energy", "pressure"];
+         name = ["data-%03d.h5", "proc"];
+         #dir = ["method_ppm-cg-1-jeansN16_%.4f","time"];
+         schedule {
+             var = "time";
+             list = [0.0, 1.1547005383792517];
+         }
+      }
+   }

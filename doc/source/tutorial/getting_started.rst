@@ -10,15 +10,14 @@ covers downloading the source code, porting the code to new platforms,
 configuring and compiling the code, and running a sample test problem.
 
 Other pages are available for helping to get started on specific
-architectures, including the "Comet" supercomputer at San Diego
-Supercomputing Center (SDSC), and the NSF Petascale supercomputer "Blue
-Waters" at the National Center for Supercomputing Applications (NCSA).
+architectures, including the "Frontera" supercomputer at TACC and the
+"Pleiades" supercomputer at NASA.
 
 .. toctree::
    :maxdepth: 1
 	   
-   getting_started_comet
-   getting_started_blue_waters
+   getting_started_pleiades
+   getting_started_frontera
 
 Downloading
 ===========
@@ -32,25 +31,34 @@ repository `Enzo-E / Cello github repository
 
 
 Before compiling ``Enzo-E / Cello``, you may also need to download
-and install 1.``Charm++``, 2.``HDF5``, 3.``libpng``, 3.``libboost``, and 4.``scons``:
+and install 1.``CMake``, 2.``Charm++``, 3.``HDF5``, 4.``libpng``, 5.``libboost``, and (optionally) 6.``Grackle``:
 
-1. Install ``Charm++``
+1. Install ``CMake``
+--------------------
+
+Most systems nowaways have ``CMake`` already installed.
+If not, you can get the binary distribution from the
+`CMake <https://cmake.org/download/>`_ website.
+
+
+2. Install ``Charm++``
 ----------------------
 
-``Charm++`` can be `downloaded here <https://charm.cs.illinois.edu/software>`_.
+First, we install the latest `Charm++`, which now also uses `cmake` as default
+build system (as example we use the pure MPI backend).
 
-To build Charm++ on a Mac, try this:
+..  code-block:: bash
 
-   ``./build charm++ netlrts-darwin-x86_64 -j4 --with-production``
+  git clone https://github.com/UIUC-PPL/charm.git
+  cd charm
+  git checkout v7.0.0
+  # Note, the directory name can be anything
+  mkdir build-mpi
+  cd build-mpi
+  cmake -DNETWORK=mpi -DSMP=OFF ..
+  make
 
-If you're running Linux, try building Charm++ using this:
-
-   ``./build charm++ netlrts-linux-x86_64   -j4  --with-production``
-
-Charm++ also provides a helpful interactive script ``smart-build.pl`` that can
-be used to configure and install ``Charm++`` on numerous other platforms.
-
-2. Install ``HDF5``
+3. Install ``HDF5``
 -------------------
 
 "`HDF5 <https://www.hdfgroup.org/HDF5/>`_ is a "data model, library, and
@@ -62,7 +70,7 @@ through your operating system distribution, otherwise it can be
 downloaded from the `HDF5 <https://www.hdfgroup.org/HDF5/>`_ website.
 Enzo-E / Cello currently uses the "serial" (non-MPI) version of HDF5.
 
-3. Install ``libpng``
+4. Install ``libpng``
 ---------------------
 
 "`libpng <https://www.libpng.org/pub/png/libpng.html>`_ is the official
@@ -73,7 +81,7 @@ available through your operating system distribution, otherwise it can
 be downloaded from the `libpng
 <https://www.libpng.org/pub/png/libpng.html>`_ website.
 
-4. Install ``libboost-dev``
+5. Install ``libboost-dev``
 ---------------------------
 
 "`Boost <https://www.boost.org/>`_ provides free peer-reviewed portable C++ source libraries."
@@ -82,184 +90,145 @@ If ``libboost-dev`` is not already installed on your machine, it may be
 available through your operating system distribution, otherwise it can
 be downloaded from the `libboost <https://www.boost.org/>`_ website.
 
-5. Install ``scons``
---------------------
-
-"`SCons <https://www.scons.org/>`_" is a "software construction tool" that is
-used to build ``Enzo-E / Cello`` using scripts written in ``python``.
-
-``scons`` can be install via ``pip`` or if you are using Anaconda or Miniconda
-through ``conda``. It may also be pre-packed for installation for your operating system
-distribution. Building ``Enzo-E / Cello`` requires a version of ``scons`` built
-for Python 3. See `Installing SCons
-<https://scons.org/doc/production/HTML/scons-user/ch01s02.html>`_ for
-installation details.
-
 6. Install Grackle
 ------------------
 
 By default Enzo-E requires the Grackle chemistry and cooling library.
-If you do not need to use Grackle, you can change the line
-``use_grackle = 1`` in the ``SConstruct`` file to ``use_grackle = 0``.
+If you do not need to use Grackle, you can simple disabling it by setting
+``-DUSE_GRACKLE=OFF`` when you configure Enzo-E.
 See the `Grackle documentation <https://grackle.readthedocs.io>`__ for installation
 instructions.
 
-Configuring
-===========
+7. Install yt
+-------------
 
-There are currently two configuration settings that must be set before
-building Enzo-E and Cello: ``CELLO_ARCH`` to specify the computer platform,
-and ``CELLO_PREC`` to specify the floating-point precision.  Additionally,
-some configurations require ``CHARM_HOME`` to be specified.
+If you want to use yt to analyse Enzo-E output data, you must install the latest version of yt
+from source. This can be done with the following commands:
 
-Other optional settings are available as well.  These are initialized
-in the top-level SConstruct file under the "USER CONFIGURATION"
-heading.  Please consult the SConstruct file itself for documentation on
-these optional settings.
+.. code-block:: bash
 
-1. Specify machine
-------------------
+    git clone https://github.com/yt-project/yt.git
+    cd yt
+    pip install -e .
 
-Before compiling Enzo-E / Cello, you first have to define which set of
-available machine-dependent configuration settings to use via the
-``CELLO_ARCH`` environment variable.  Some examples include the
-following:
 
-   ==================================  ========================================================
-   ==================================  ========================================================
-   ``export CELLO_ARCH=linux_gnu``     *compile for a generic GNU Linux system*
-   ``export CELLO_ARCH=ncsa_bw``       *compile for NCSA's Blue Waters Petascale Platform*
-   ``export CELLO_ARCH=comet_gnu``     *compile for SDSC's Comet cluster using GNU compilers*
-   ==================================  ========================================================
 
-Note that some machines, including Blue Waters and Comet, will
-additionally require certain modules to be loaded, including compilers
-and HDF5.  See the corresponding getting started pages :ref:`Comet` or
-:ref:`Blue_Waters` for architecture-specific details.
+Configuring/Building
+====================
 
-See the porting_ section below for how to add your own architecture to
-the list, or how to modify the settings for these machines.
+For a basic configuration on a linux system with GNU compiler stack the following
+command should work out of the box. If not please report.
+Also see following subsection for more configuration options.
 
-2. Specify precision
---------------------
+..  code-block:: bash
 
-Enzo-E must be compiled either using single-precision or
-double-precision.  To specify the precision to use in Enzo-E, set the
-``CELLO_PREC`` environment variable:
+  # Again, the directory name can be anything
+  mkdir build-mpi
+  cd build-mpi
+  cmake -DCHARM_ROOT=/PATH/TO/charm/build-mpi -DEnzo-E_CONFIG=linux_gcc -DUSE_GRACKLE=OFF ..
+  make
 
-  ===================================  ======================
-  ===================================  ======================
-  ``export CELLO_PREC=single``         *32-bit Enzo field data*
-  ``export CELLO_PREC=double``         *64-bit Enzo field data*
-  ===================================  ======================
+Note, if ``ninja`` is installed, the ``ninja`` build system can be used for faster build times
+by adding ``-GNinja`` (before the ``..``) to the ``cmake`` command and calling ``ninja``
+afterwards instead of ``make``.
 
-3. Specify Charm++ directory
-----------------------------
+The Enzo-E executable is built within ``bin/``. 
 
-The location of the Charm++ installation directory should be specified
-using the ``CHARM_HOME`` environment variable.
-
-  ============================================  =============================
-  ============================================  =============================
-  ``export CHARM_HOME=$HOME/Charm/charm.6.10``  Set directory of Charm++ used
-  ============================================  =============================
-
-4. Specify Grackle directory
-----------------------------
-
-At compile time, Enzo-E will try to automatically find your Grackle installation.
-If compilation fails because ``grackle.h`` cannot be included, it is possible
-that the directory was incorrectly identified. You can specify
-Grackle's installation directory with the ``GRACKLE_HOME`` environment variable:
-
-  =================================== =====================================
-  =================================== =====================================
-  ``export GRACKLE_HOME=$HOME/local`` Set directory of Grackle installation
-  =================================== =====================================
-
-Porting
-=======
-
-.. _porting:
-
-If Cello does not support your desired hardware platform, you will
-have to provide settings so that the build system knows what compilers
-to use, plus any optimization settings, library paths, etc.  This is
-done by creating a new machine configuration file in the ``config/``
-subdirectory, and editing the top-level ``SConstruct`` file to read
-your new machine configuration file.
-
-1. Create config file
+Configuration options
 ---------------------
 
-Machine configuration files are found in the ``config/`` subdirectory.
-To create a new one for your machine, try copying an existing one
-and editing it.  Configuration variables include the following:
+Current ``cmake`` options are the following (default value at the end of the line):
 
-  =====================  ======================================================================
-  =====================  ======================================================================
-  ``is_arch_valid``      This must be set to 1
-  ``flags_arch``         Compiler flags, such as optimization settings or warning levels
-  ``flags_link_charm``   Link flags, such as optimization settings
-  ``cc``                 The C compiler to use
-  ``f90``                The Fortran compiler to use
-  ``flags_prec_single``  Fortran flags for using single-precision by default
-  ``flags_prec_double``  Fortran flags for using double-precision by default
-  ``libpath_fortran``    Path for any Fortran libraries required when linking with C++
-  ``libs_fortran``       Fortran libraries required when linking with C++
-  ``charm_path``         Path to the ``Charm++`` installation directory
-  ``papi_inc``           Path to PAPI performance library include files (OPTIONAL)
-  ``papi_path``          Path to PAPI performance library library files (OPTIONAL)
-  ``hdf5_inc``           Path for HDF5 include files
-  ``hdf5_lib``           Path for HDF5 library files
-  ``png_path``           Path to the ``libpng`` library
-  ``grackle_path``       Path to the Grackle chemistry and cooling library (OPTIONAL)
-  =====================  ======================================================================
+* ``USE_GRACKLE`` "Use Grackle Chemistry" ON
+* ``USE_DOUBLE_PREC`` "Use double precision. Turn off for single precision." ON
+* ``new_output`` "Temporary setting for using new Output implementation" OFF
+* ``node_size`` "Maximum number of procesess per shared-memory node (can be larger than needed)" 64
+* ``trace`` "Print out detailed messages with the TRACE() series of statements" OFF
+* ``verbose`` "Trace main phases" OFF
+* ``trace_charm`` "Print out messages with the TRACE_CHARM() and TRACEPUP() series of statements" OFF
+* ``debug`` "Whether to enable displaying messages with the DEBUG() series of
+  statements. Also writes messages to out.debug.<P> where P is the
+  (physical) process rank. Still requires the \"DEBUG\" group to be
+  enabled in Monitor (that is Monitor::is_active(\"DEBUG\") must be true for any output) OFF
+* ``debug_field`` "" OFF
+* ``debug_field_face`` "" OFF
+* ``check`` "Do extra run-time checking.  Useful for debugging, but can potentially slow     calculations down" OFF
+* ``debug_verbose`` "Print periodically all field values.  See src/Field/field_FieldBlock.cpp" OFF
+* ``memory`` "Track dynamic memory statistics.  Can be useful, but can cause problems on some systems that also override new [] () / delete [] ()" OFF
+* ``balance`` "Enable charm++ dynamic load balancing" ON`
+* ``balancer_included`` "Charm++ load balancer included" "CommonLBs"
+* ``balancer_default`` "Charm++ load balancer to use by default" "TreeLB"
+* ``use_gprof`` "Compile with -pg to use gprof for performance profiling" OFF
+* ``use_performance`` "Use Cello Performance class for collecting performance
+  data (currently requires global reductions, and may not be fully
+  functional) (basic time data on root processor is still output)" ON
+* ``use_projections`` "Compile the CHARM++ version for use with the Projections performance tool." OFF
+* ``use_jemalloc`` "Use the jemalloc library for memory allocation" OFF
+* ``smp`` "Use Charm++ in SMP mode." OFF
+* ``use_papi`` "Use the PAPI performance API" OFF
+* ``PARALLEL_LAUNCHER`` "Launcher to use for parallel tests" `charmrun`
+* ``PARALLEL_LAUNCHER_NPROC_ARG`` "Argument to set number of processing elements for parallel launcher" ``+p`` (for use with ``charmrun``)
+* ``PARALLEL_LAUNCHER_NPROC`` "Number of processors to run parallel unit tests" 4
 
+All variables can be set either on the commad line by ``-D<variable>=<value>`` or
+in a machine config, see below.
+For example, a configure line may look like
 
-2. Edit ``SConstruct``
-----------------------
+..  code-block:: bash
 
-To incorporate your new machine configuration file into the ``Enzo-E /
-Cello`` build system, insert a new line to the following list in the
-``SConstruct`` file in the top-level ``Enzo-E / Cello`` directory.
-(Specific names in the ``SConstruct`` file and those in the list
-fragment below may differ due to the file being updated.)
+  cmake -DCHARM_ROOT=$(pwd)/../../charm/build-gcc-mpi-proj -DEnzo-E_CONFIG=msu_hpcc_gcc -DGrackle_ROOT=${HOME}/src/grackle/build-gcc -Duse_projections=ON -Duse_jemalloc=ON -Dbalance=ON  ..
 
-  ::   
+To see all available (and selected) options you can also run ``ccmake .`` in the
+build directory (after running ``cmake`` in first place), or use the ``ccmake`` GUI 
+directly to interactively configure Enzo-E by calling ``ccmake ..`` in an empty build
+directory.
 
-     if   (arch == "gordon_gnu"):   from gordon_gnu   import *
-     elif (arch == "gordon_intel"): from gordon_intel import *
-     elif (arch == "gordon_pgi"):   from gordon_pgi   import *
-     elif (arch == "comet_gnu"):    from comet_gnu    import *
-     elif (arch == "linux_gnu"):    from linux_gnu    import *
-     ...
+If packages (external libraries) are not found automatically or if the wrong one was
+picked up, you can specify the search path by
+``-D<package_name>_ROOT=/PATH/TO/PACKAGE/INSTALL``,
+cf., the ``cmake`` example command just above.
+Note:
 
-Building
-========
+* these package locations are also picked up from the environment, i.e., an alternative option  is ``export <package_name>_ROOT=/PATH/TO/PACKAGE/INSTALL`` .
 
-After configuring Cello for your computer, the Cello framework and Enzo-E
-application can be compiled using "make", which in turn calls the included
-``./build.sh`` script.  By default, the build system will use all available
-cores.  To specify the number of cores to compile Cello, either set the ``proc``
-variable in ``./build.sh`` or set the environment variable ``CELLO_BUILD_NCORE``
-to the desired value.  Other options are available for generating useful
-`https://orgmode.org/ <org-mode>`_ files, generating doxygen documentation,
-running regression tests, and running code analysis tools.
+* to specify the path to a ``libpng`` install, use ``-DPNG_ROOT=/PATH/TO/LIBPNG`` instead of ``-DLIBPNG_ROOT=...``.
 
-        ==================  ===============================================================
-        ==================  ===============================================================
-	``make``            *Compile Enzo-E as* ``./bin/enzo-e``
-	``make clean``      *Remove object and test files*
-	``make reset``      *Clear any settings from an incomplete build*
-	``make doc``        *Generate doxygen documentation from source in* ``src-html`` *(requires* ``doxygen`` *)*
-        ``make test``       *Run regression tests*
-	``make diff``       *Generate org-mode* ``'diff.org'`` *file from* ``'hg diff'`` *output*
-	``make log``        *Generate org-mode* ``'log.org'`` *file from* ``'hg log'`` *output*
-	``make gdb``        *Generate org-mode* ``'gdb.org'`` *from gdb* ``'where'`` *output in* ``gdb.out``
-        ``make cccc``       *Compute code quality metrics in* ``src/.cccc/cccc.html``
-	``make coverity``   *Compile Enzo-E / Cello using the Coverity static analysis tool*
-        ==================  ===============================================================
+The last option is a machine specific configuration file (see below).
+
+In addition, the general `cmake` option to set basic optimization flags via
+``CMAKE_BUILD_TYPE`` with values of
+
+* ``Release`` (typically ``-O3``),
+* ``RelWithDebInfo`` (typically ``-O2 -g``), and
+* ``Debug`` (typically ``-O0 -g``)
+
+are available.
+
+Machine files
+-------------
+
+Finally, for convenience we provide the option to set default value for your own
+machine/setup, see the ``*.cmake`` files in the ``config`` directory.
+
+You can specify compilers and option in there that will be used a default when
+``cmake`` is called with ``-DEnzo-E_CONFG=my_config_name`` where ``my_config_name`` requires
+a corresponding ``config/my_config_name.cmake`` to exist.
+The alternative directory for the machine configuration files is a ``.enzo-e`` directory
+in your home directory.
+If a file with the same name exists in your ``${HOME}/.enzo-e`` directory and in the ``config``
+directory only the first one will be used.
+*Note*, all command line parameter take precedence over the default options.
+In other words, if ``USE_DOUBLE_PREC`` is ``ON`` in the machine file (or even automatically
+through the global default), the running
+``cmake -DEnzo-E_CONFIG=my_config_name -DUSE_DOUBLE_PREC=OFF ..`` will result in a single
+precision version of Enzo-E.
+
+Options in the machine file can also include the paths to external libraries and
+can be set via a "cached string", i.e., via
+
+..  code-block:: cmake
+
+  set(CHARM_ROOT "/home/user/Charm/charm/build-mpi" CACHE STRING "my charm build")
 
 Running
 =======

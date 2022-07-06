@@ -15,6 +15,30 @@
 class ScalarInit;
 class VectorInit;
 
+enum class InitializerForm{ conserved, primitive };
+
+struct HydroInitPack{
+
+  HydroInitPack() = default;
+
+  HydroInitPack(ScalarInit* density_init, VectorInit* velocity_init,
+                ScalarInit* pressure_init, InitializerForm initializer_form);
+
+  /// initializer for density
+  std::shared_ptr<ScalarInit> density_init;
+  /// initializer for momentum or velocity
+  std::shared_ptr<VectorInit> velocity_init;
+  /// initializer for pressure or total energy density
+  std::shared_ptr<ScalarInit> pressure_init;
+
+  /// specifies the exact quantities that the initializers correspond to:
+  ///   - when equal to InitializerForm::primitive, velocity_init and
+  ///     pressure_init hold initializers for velocity and thermal pressure
+  ///   - when equal to InitializerForm::conserved, velocity_init and
+  ///     pressure_init hold initializers for momentum and total energy density
+  InitializerForm initializer_form;
+};
+
 // class for rotating axes. Will be (slightly) extended and reused for
 // implementing cosmic rays
 class Rotation;
@@ -75,26 +99,21 @@ public: // virtual methods
 
 private: // functions
 
+  /// prepares initializers for inclined linear jeans wave
+  HydroInitPack prepare_jeans_initializers_(bool is_root_block) const noexcept;
+
   /// prepares initializers for inclined HD waves
-  void prepare_HD_initializers_(ScalarInit **density_init,
-				ScalarInit **etot_dens_init,
-				VectorInit **momentum_init);
+  HydroInitPack prepare_HD_initializers_(bool is_root_block) const noexcept;
 
   /// prepares initializers for inclined MHD waves
-  void prepare_MHD_initializers_(ScalarInit **density_init,
-				 ScalarInit **etot_dens_init, 
-				 VectorInit **momentum_init,
-				 VectorInit **a_init);
+  HydroInitPack prepare_MHD_initializers_(VectorInit **a_init) const noexcept;
 
   /// handles the allocation of initializer of HD quantities for linear waves
-  void alloc_linear_HD_initializers_(double density_back, double density_ev,
-				     double etot_back, double etot_ev,
-				     double mom0_back, double mom1_back,
-				     double mom2_back, double mom0_ev,
-				     double mom1_ev, double mom2_ev,
-				     ScalarInit **density_init,
-				     ScalarInit **etot_dens_init,
-				     VectorInit **momentum_init);
+  HydroInitPack build_linear_HD_inits_(double density_back, double density_ev,
+                                       double etot_back, double etot_ev,
+                                       double mom0_back, double mom1_back,
+                                       double mom2_back, double mom0_ev,
+                                       double mom1_ev, double mom2_ev) const;
 
   /// Return a vector of known magnetohydrodynamical waves
   std::vector<std::string> mhd_waves_() const throw();

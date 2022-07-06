@@ -1,0 +1,92 @@
+include "input/test_cosmo-dd-fc0.in"
+
+
+Field {
+   list += ["HI_density",
+	   "HII_density",
+	   "HeI_density",
+	   "HeII_density",
+	   "HeIII_density",
+	   "e_density",
+           "metal_density",
+	   "cooling_time",
+	   "temperature"];
+}
+
+Group {
+    list = ["color", "derived"];
+    color {
+       field_list = [
+              "HI_density",
+              "HII_density",
+              "HeI_density",
+              "HeII_density",
+              "HeIII_density",
+              "e_density",
+              "metal_density"];
+    }
+
+    derived {
+	field_list = ["temperature",
+		      "pressure",
+		      "cooling_time"];
+    }
+
+}
+
+Method {
+     list = [ "pm_deposit", "gravity", "ppm", "grackle", "pm_update", "comoving_expansion" ];
+    
+     output {
+        field_list += ["HI_density",
+	                 "HII_density",
+	                 "HeI_density",
+	                 "HeII_density",
+	                 "HeIII_density",
+	                 "e_density",
+                         "metal_density",
+	                 "cooling_time",
+	                 "temperature"]; 
+     } 
+     grackle {
+        courant = 0.50; # meaningless unless use_cooling_timestep = true;
+
+        data_file = "input/CloudyData_UVB=HM2012.h5";
+
+        with_radiative_cooling  = 1;
+        primordial_chemistry    = 1;  # 1, 2, or 3
+        metal_cooling           = 1;  # 0 or 1 (off/on)
+        UVbackground            = 1;  # on or off
+        metallicity_floor = 1e-6; # metallicity floor in solar units
+        cmb_temperature_floor   = 1;
+
+        self_shielding_method = 0;  # see pg. 23-24 of https://grackle.readthedocs.io/_/downloads/en/latest/pdf/
+
+        HydrogenFractionByMass = 0.73;
+
+        # set this to true to limit the maximum timestep to the product of the
+        # minimum cooling/heating time and courant.
+        use_cooling_timestep = false; # default is false
+     }
+}
+
+
+Output {
+     list = ["hdf5","de"];
+     hdf5 {
+          dir = ["Dir_COSMO_MULTI_%04d","cycle"];
+          field_list += ["HI_density",
+	                 "HII_density",
+	                 "HeI_density",
+	                 "HeII_density",
+	                 "HeIII_density",
+	                 "e_density",
+                         "metal_density",
+	                 "cooling_time",
+	                 "temperature"];
+        }
+     de   { dir = [ "Dir_COSMO_MULTI_%04d", "cycle" ]; }
+}
+
+Stopping {cycle = 160;}
+

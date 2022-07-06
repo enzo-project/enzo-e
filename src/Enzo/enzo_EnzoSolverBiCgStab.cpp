@@ -33,6 +33,9 @@
 #include "charm_simulation.hpp"
 #include "enzo.hpp"
 
+// #define DEBUG_COPY_X0
+// #define DEBUG_COPY_R
+
 static CmiNodeLock bcg_iter_node_lock;
 ///----------------------------------------------------------------------
 void mutex_init_bcg_iter()
@@ -41,121 +44,132 @@ void mutex_init_bcg_iter()
 }
 
 
-// #define DEBUG_NEW_REFRESH
-
-#ifdef DEBUG_NEW_REFRESH
-#   define TRACE_NEW_REFRESH(BLOCK,MSG) \
-  CkPrintf ("TRACE_NEW_REFRESH %s %s\n",BLOCK->name().c_str(),MSG); \
-  fflush(stdout);
-#else
-#   define TRACE_NEW_REFRESH(BLOCK,MSG) /* ... */
-#endif
-
 // #define TRACE_SOLVER_BCG
 
 // #define DEBUG_CALLBACK
 
 // #define TRACE_DOT
-#define TRACE_DOT_CYCLE 0
+
+// #define TRACE_CYCLE
+// #define CYCLE_START 94
+// #define CYCLE_END   94
+
+// #define ITER_START 0
+// #define ITER_END   10
+// #define CYCLE_EXIT 95
 
 // #define TRACE_BCG
 
+// #define COPY_FIELD
 // #define DEBUG_FIELD
 // #define DEBUG_REDUCE
-// #define DEBUG_GHOST
 // #define DEBUG_SCALAR
 
 // #define DEBUG_WRITE
 // #define DEBUG_READ
 
+#ifdef COPY_FIELD
+#  undef COPY_FIELD
+#   define COPY_FIELD(BLOCK,MSG,ID,COPY)                               \
+  {                                                                    \
+    Field field = block->data()->field();                              \
+    enzo_float* X      = (enzo_float*) field.values(ID);               \
+    enzo_float* X_bcg  = (enzo_float*) field.values(COPY);             \
+    if (X_bcg) for (int i=0; i<m_; i++)  X_bcg[i] = X[i];              \
+    long double sum_a=0.0,sum_abs=0.0;                                 \
+    for (int iz=gz_; iz<mz_-gz_; iz++) {                               \
+      for (int iy=gy_; iy<my_-gy_; iy++) {                             \
+        for (int ix=gx_; ix<mx_-gx_; ix++) {                           \
+          int i=ix+mx_*(iy+my_*iz);                                    \
+          sum_a+=X[i];                                                 \
+          sum_abs+=std::abs(X[i]);                                     \
+        }                                                              \
+      }                                                                \
+    }                                                                  \
+    TRACE_FIELD(BLOCK,MSG,ID,COPY);                                    \
+  }
+#else
+#   define COPY_FIELD(BLOCK,MSG,ID,COPY) /* ... */   
+#endif
+
 #define S(index) scalar_(block,is_##index##_)
 
 #ifdef DEBUG_SCALAR
 #   define TRACE_SCALAR(BLOCK,NAME,SCALAR)				\
-  CkPrintf ("%s:%d %s TRACE_SCALAR %s = %Lg\n",				\
-	    __FILE__,__LINE__,BLOCK->name().c_str(),NAME,SCALAR);       \
-    fflush(stdout);
+  if (CYCLE_START <= BLOCK->cycle() &&                            \
+      BLOCK->cycle() < CYCLE_END) {                               \
+    CkPrintf ("%s:%d %s TRACE_SCALAR %s = %Lg\n",                       \
+              __FILE__,__LINE__,BLOCK->name().c_str(),NAME,SCALAR);     \
+    fflush(stdout);                                                     \
+  }
 #else
 #   define TRACE_SCALAR(BLOCK,NAME,SCALAR) /* ... */
 #endif
 
-#ifdef DEBUG_GHOST
-#   define TRACE_GHOST(BLOCK,ID,NAME)					\
-  {									\
-    Field field = BLOCK->data()->field();				\
-    enzo_float* X      = (enzo_float*) field.values(ID);		\
-    double sum_a[4],sum_aa[4],sum_abs[4];				\
-    for (int i=0; i<4; i++) sum_a[i] = 0.0;				\
-    for (int i=0; i<4; i++) sum_aa[i] = 0.0;				\
-    for (int i=0; i<4; i++) sum_abs[i] = 0.0;				\
-    int ig = 1;								\
-    int ix,iy,iz;							\
-    int iz0 = gz_;							\
-    int iz1 = gz_-ig;							\
-    for (int iy=gy_; iy<my_-gy_; iy++) {				\
-      for (int ix=gx_; ix<mx_-gx_; ix++) {				\
-	int i0=ix+mx_*(iy+my_*iz0);					\
-	int i1=ix+mx_*(iy+my_*iz1);					\
-	enzo_float v0 = X[i0];						\
-	enzo_float v1 = X[i1];						\
-	sum_a[ig-1]   += (v0-v1);					\
-	sum_aa[ig-1]  += (v0-v1)*(v0-v1);				\
-	sum_abs[ig-1] += std::abs(v0-v1);				\
-      }									\
-    }									\
-    iz0 = mz_-gz_-1;							\
-    iz1 = mz_-gz_-1+ig;							\
-    for (int iy=gy_; iy<my_-gy_; iy++) {				\
-      for (int ix=gx_; ix<mx_-gx_; ix++) {				\
-	int i0=ix+mx_*(iy+my_*iz0);					\
-	int i1=ix+mx_*(iy+my_*iz1);					\
-	enzo_float v0 = X[i0];						\
-	enzo_float v1 = X[i1];						\
-	sum_a[ig-1]   += (v0-v1);					\
-	sum_aa[ig-1]  += (v0-v1)*(v0-v1);				\
-	sum_abs[ig-1] += std::abs(v0-v1);				\
-      }									\
-    }									\
-    CkPrintf ("%s:%d %s TRACE_GHOST %s layer %d sum(A) sum(A*A) sum(abs(A)) " \
-	      " %Lg %Lg %Lg\n"						\
-	      ,__FILE__,__LINE__,BLOCK->name().c_str(),NAME,ig,sum_a[0],sum_aa[0],sum_abs[0]); \
-    fflush(stdout); \
-  }
-#else
-#   define TRACE_GHOST(BLOCK,ID,NAME) /* ... */
-#endif
-
-
+#undef TRACE_FIELD  
 #ifdef DEBUG_FIELD
-#   define COPY_FIELD(BLOCK,ID,COPY)					\
-  {									\
-    Field field = block->data()->field();				\
-    enzo_float* X      = (enzo_float*) field.values(ID);		\
-    enzo_float* X_bcg  = (enzo_float*) field.values(COPY);		\
-    if (X_bcg) for (int i=0; i<m_; i++)  X_bcg[i] = X[i];		\
-    long double sum_a=0.0,sum_abs=0.0;					\
-    for (int iz=gz_; iz<mz_-gz_; iz++) {				\
-      for (int iy=gy_; iy<my_-gy_; iy++) {				\
-	for (int ix=gx_; ix<mx_-gx_; ix++) {				\
-	  int i=ix+mx_*(iy+my_*iz);					\
-	  sum_a+=X[i];							\
-	  sum_abs+=std::abs(X[i]);					\
-	}								\
-      }									\
-    }									\
-    CkPrintf ("%s:%d %s %s COPY_FIELD %d %s shift %Lg %Lg\n"		\
-	      ,__FILE__,__LINE__,BLOCK->name().c_str(),name().c_str(),ID,COPY,sum_a, sum_abs); \
-    fflush(stdout);                                                     \
-    TRACE_GHOST(BLOCK,ID,COPY);						\
-  }
+#   define TRACE_FIELD(BLOCK,MSG,ID,NAME)                               \
+  const int iter = (s_iter_(block));                                    \
+  if (ITER_START <= iter && iter < ITER_END) {                          \
+  if (CYCLE_START <= BLOCK->cycle() &&                                  \
+      BLOCK->cycle() < CYCLE_END) {                                     \
+  Field field = BLOCK->data()->field();                                 \
+  enzo_float* X = (enzo_float*) field.values(ID);                       \
+  double sum_f=0.0,sum_g=0.0;                                           \
+  double min_f=1e100,min_g=1e100;                                       \
+  double max_f=-1e100,max_g=-1e00;                                      \
+  double sum_af=0.0,sum_ag=0.0;                                         \
+  double min_af=1e100,min_ag=1e100;                                     \
+  double max_af=-1e100,max_ag=-1e00;                                    \
+  int ix,iy,iz,count_f=0,count_g=0;                                     \
+  for (int iz=0; iz<mz_; iz++) {                                        \
+    for (int iy=0; iy<my_; iy++) {                                      \
+      for (int ix=0; ix<mx_; ix++) {                                    \
+        int i=ix+mx_*(iy+my_*iz);                                       \
+        enzo_float x = X[i];                                            \
+        enzo_float ax = std::abs(X[i]);                                 \
+        if (((gx_ <= ix && ix <mx_-gx_) &&                              \
+             (gy_ <= iy && iy <my_-gy_) &&                              \
+             (gz_ <= iz && iz <mz_-gz_))) {                             \
+          sum_f += x;                                                   \
+          min_f = std::min(min_f,x);                                    \
+          max_f = std::max(max_f,x);                                    \
+          sum_af += ax;                                                 \
+          min_af = std::min(min_af,ax);                                 \
+          max_af = std::max(max_af,ax);                                 \
+          count_f ++;                                                   \
+        } else {                                                        \
+          sum_g += x;                                                   \
+          min_g = std::min(min_g,x);                                    \
+          max_g = std::max(max_g,x);                                    \
+          sum_ag += ax;                                                 \
+          min_ag = std::min(min_ag,ax);                                 \
+          max_ag = std::max(max_ag,ax);                                 \
+          count_g ++;                                                   \
+        }                                                               \
+      }                                                                 \
+    }                                                                   \
+  }                                                                     \
+  CkPrintf ("%d TRACE_FIELD %s %s %s iter %d values %d [%g %g %g] ghosts %d [%g %g %g]\n", \
+            CkMyPe(),BLOCK->name().c_str(),MSG,NAME,iter,               \
+            count_f,min_f,sum_f/count_f,max_f,                          \
+            count_g,min_g,sum_g/count_g,max_g);                         \
+  CkPrintf ("%d TRACE_FIELD %s %s |%s| iter %d values %d [%g %g %g] ghosts %d [%g %g %g]\n", \
+            CkMyPe(),BLOCK->name().c_str(),MSG,NAME,iter,               \
+            count_f,min_af,sum_af/count_f,max_af,                     \
+            count_g,min_ag,sum_ag/count_g,max_ag);                    \
+  }                                                                     \
+  }                                                                   
 #else
-#   define COPY_FIELD(BLOCK,ID,COPY) /* ... */
+#   define TRACE_FIELD(BLOCK,MSG,ID,NAME) /* ... */
 #endif
+
 
 #ifdef TRACE_BCG
 #  undef TRACE_BCG
 #  define TRACE_BCG(BLOCK,SOLVER,msg)					\
-  if (BLOCK->cycle() >= TRACE_DOT_CYCLE) {				\
+  if (CYCLE_START <= BLOCK->cycle() &&                            \
+      BLOCK->cycle() <= CYCLE_END) {                              \
     CkPrintf ("%d %s %s:%d TRACE_BCG %s %s level %d\n",			\
 	      CkMyPe(), (BLOCK!=NULL) ? BLOCK->name().c_str():"no block", \
 	      __FILE__,__LINE__,					\
@@ -170,7 +184,8 @@ void mutex_init_bcg_iter()
 #ifdef TRACE_DOT
 #   undef TRACE_DOT
 #  define TRACE_DOT(BLOCK,msg,ifunction)				\
-  if (BLOCK->cycle() >= TRACE_DOT_CYCLE) {				\
+  if (CYCLE_START <= BLOCK->cycle() &&                            \
+      BLOCK->cycle() <= CYCLE_END) {                              \
     CkPrintf ("%d %s %s:%d TRACE_DOT %s %d\n",				\
 	      CkMyPe(), (BLOCK!=NULL) ? BLOCK->name().c_str():"no block", \
 	      __FILE__,__LINE__,					\
@@ -188,6 +203,8 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
  std::string field_x, std::string field_b,
  int monitor_iter, int restart_cycle,
  int solve_type,
+ int index_prolong,
+ int index_restrict,
  int min_level, int max_level,
  int iter_max, double res_tol,
  int index_precon,
@@ -199,6 +216,8 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
 	   monitor_iter,
 	   restart_cycle,
 	   solve_type,
+           index_prolong,
+           index_restrict,
 	   min_level,
 	   max_level),
     A_(nullptr),
@@ -214,6 +233,13 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
     ir_loop_9_(-1)
 {
 
+  // RESET restart_cycle TO 1 UNTIL CONVERGENCE
+  if (restart_cycle_ != 1) {
+    restart_cycle_ = 1;
+    WARNING("EnzoSolverBiCgStab::EnzoSolverBiCgStab()",
+            "BYPASSING CONVERGENCE BUG: RESETTING restart_cycle_ = 1");
+  }
+  
   //  if (solve_type == solve_tree) {
   ScalarDescr * scalar_descr_quad = cello::scalar_descr_long_double();
 
@@ -336,8 +362,12 @@ void EnzoSolverBiCgStab::pup(PUP::er& p) {
 void EnzoSolverBiCgStab::apply
 ( std::shared_ptr<Matrix> A, Block * block) throw()
 {
-
   TRACE_BCG(block,this,"apply");
+
+#ifdef TRACE_CYCLE  
+  if (block->cycle() >= CYCLE_EXIT)
+    CkExit();
+#endif  
   
   Solver::begin_(block);
   
@@ -350,7 +380,7 @@ void EnzoSolverBiCgStab::apply
   if ((solve_type_ == solve_tree) &&
       (is_unrefined || block->level() < coarse_level_)) {
     // do nothing if we're doing tree solves but root block is not refined
-    Solver::end_(block);
+    this->end(enzo_block,return_bypass);
     
   } else {
 
@@ -404,7 +434,7 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* block) throw() {
   enzo_float* Q   = (enzo_float*) field.values(iq_);
   enzo_float* U   = (enzo_float*) field.values(iu_);
 
-  COPY_FIELD(block,ib_,"B0_bcg");
+  COPY_FIELD(block,"compute_",ib_,"B0_bcg");
   for (int i=0; i<m_; i++) {
     X[i] = R[i] = R0[i] = P[i] = 0.0;
     Y[i] = V[i] = Q[i] =  U[i] = 0.0;
@@ -433,6 +463,12 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* block) throw() {
       for (int i=0; i<m_; i++) X[i] = X_copy[i];
 
       A_->residual (ir_, ib_, ix_, block);
+#ifdef DEBUG_COPY_R
+  const int ir_copy = field.field_id ("R_copy");
+  enzo_float * R_copy = (enzo_float*) field.values (ir_copy);
+  enzo_float * R = (enzo_float*) field.values (ir_);
+  if (R_copy) for (int i=0; i<m_; i++) R_copy[i] = R[i];
+#endif  
       
     }
   }
@@ -647,6 +683,14 @@ void EnzoSolverBiCgStab::loop_0a(EnzoBlock* block,
 
   delete msg;
 
+#ifdef DEBUG_COPY_X0
+  Field field = block->data()->field();
+  const int ix0_copy = field.field_id ("X0_copy");
+  enzo_float * X0_copy = (enzo_float*) field.values (ix0_copy);
+  enzo_float * X =       (enzo_float*) field.values (ix_);
+  if (X0_copy) for (int i=0; i<m_; i++) X0_copy[i] = X[i];
+#endif  
+
   TRACE_SCALAR(block,"beta_n",S(beta_n));
   TRACE_SCALAR(block,"bnorm_",S(bnorm));
   TRACE_SCALAR(block,"r0s_",S(r0s));
@@ -853,8 +897,6 @@ void EnzoSolverBiCgStab::loop_2(EnzoBlock* block) throw() {
     fclose(fp);
 #endif    
     
-    
-
     precon->set_field_x(iy_);
     precon->set_field_b(ip_);
     precon->apply(A_,block);
@@ -870,8 +912,8 @@ void EnzoSolverBiCgStab::loop_2(EnzoBlock* block) throw() {
     loop_25(block);
 
   }
-  COPY_FIELD(block,ip_,"P0_bcg");
-  COPY_FIELD(block,iy_,"Y0_bcg");
+  COPY_FIELD(block,"loop_2",ip_,"P0_bcg");
+  COPY_FIELD(block,"loop_2",iy_,"Y0_bcg");
 }
 
 //----------------------------------------------------------------------
@@ -893,16 +935,11 @@ void EnzoSolverBiCgStab::loop_25 (EnzoBlock * block) throw() {
   
   TRACE_BCG(block,this,"loop_25");
 
+  Refresh * refresh = cello::refresh(ir_loop_3_);
 
-  TRACE_NEW_REFRESH(block,"EnzoSolverBiCgStab::loop_25");
-  cello::refresh(ir_loop_3_)->set_active(is_finest_(block));
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("DEBUG_NEW_REFRESH %s is_active %d %d\n",
-	    block->name().c_str(),
-	    is_finest_(block),cello::refresh(ir_loop_3_)->is_active());
-    fflush(stdout);
-#endif  
-  block->new_refresh_start
+  refresh->set_active(is_finest_(block));
+
+  block->refresh_start
     (ir_loop_3_, CkIndex_EnzoBlock::p_solver_bicgstab_loop_3());
 }
 
@@ -931,8 +968,8 @@ void EnzoSolverBiCgStab::loop_4(EnzoBlock* block) throw() {
 
   /// V = MATVEC(A,Y)
 
-  COPY_FIELD(block,iy_,"Y1_bcg");
-  COPY_FIELD(block,ip_,"P1_bcg");
+  COPY_FIELD(block,"loop_4",iy_,"Y1_bcg");
+  COPY_FIELD(block,"loop_4",iv_,"V1_bcg");
   
   if (is_finest_(block)) {
 
@@ -942,7 +979,7 @@ void EnzoSolverBiCgStab::loop_4(EnzoBlock* block) throw() {
 
   }
 
-  COPY_FIELD(block,iv_,"V1_bcg");
+  COPY_FIELD(block,"loop_4",iv_,"V1_bcg");
   /// compute local contributions to vr0_ = DOT(V, R0)
   
   std::vector<long double> reduce;
@@ -1051,7 +1088,7 @@ void EnzoSolverBiCgStab::loop_6(EnzoBlock* block,
   TRACE_SCALAR(block,"ys",ys);
   TRACE_SCALAR(block,"vs",vs);
 
-  COPY_FIELD(block,iv_,"V1_bcg");
+  COPY_FIELD(block,"loop_6",iv_,"V1_bcg");
 
   Field field = block->data()->field();
 
@@ -1071,8 +1108,8 @@ void EnzoSolverBiCgStab::loop_6(EnzoBlock* block,
 	Y[i] -= y_shift;
 	V[i] -= v_shift;
       }
-      COPY_FIELD(block,iy_,"Y_shift");
-      COPY_FIELD(block,iv_,"V_shift");
+      COPY_FIELD(block,"loop_6",iy_,"Y_shift");
+      COPY_FIELD(block,"loop_6",iv_,"V_shift");
 
     }
 
@@ -1096,7 +1133,7 @@ void EnzoSolverBiCgStab::loop_6(EnzoBlock* block,
     /// LINE 08: Q = R - alpha * V
     /// LINE 09: X = X + alpha * Y
     
-    COPY_FIELD(block,ir_,"R1_bcg");
+    COPY_FIELD(block,"loop_6",ir_,"R1_bcg");
     enzo_float alpha = S(alpha);
     
     for (int i=0; i<m_; i++) {
@@ -1104,10 +1141,10 @@ void EnzoSolverBiCgStab::loop_6(EnzoBlock* block,
       X[i] = X[i] + alpha*Y[i];
     }
   }
-  COPY_FIELD(block,iq_,"Q");
-  COPY_FIELD(block,ir_,"R");
-  COPY_FIELD(block,iv_,"V");
-  COPY_FIELD(block,ix_,"X");
+  COPY_FIELD(block,"loop_6",iq_,"Q");
+  COPY_FIELD(block,"loop_6",ir_,"R");
+  COPY_FIELD(block,"loop_6",iv_,"V");
+  COPY_FIELD(block,"loop_6",ix_,"X");
 
   /// refresh Q with callback to p_solver_bicgstab_loop_7 to handle re-entry
 
@@ -1199,16 +1236,11 @@ void EnzoSolverBiCgStab::loop_85 (EnzoBlock * block) throw() {
   
   TRACE_BCG(block,this,"loop_85");
 
+  Refresh * refresh = cello::refresh(ir_loop_9_);
 
-  TRACE_NEW_REFRESH(block,"EnzoSolverBiCgStab::loop_85");
-  cello::refresh(ir_loop_9_)->set_active(is_finest_(block));
+  refresh->set_active(is_finest_(block));
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("DEBUG_NEW_REFRESH %s is_active %d\n",block->name().c_str(),
-	    cello::refresh(ir_loop_9_)->is_active());
-  fflush(stdout);
-#endif  
-  block->new_refresh_start
+  block->refresh_start
     (ir_loop_9_, CkIndex_EnzoBlock::p_solver_bicgstab_loop_9());
 }
 
@@ -1235,8 +1267,8 @@ void EnzoSolverBiCgStab::loop_10(EnzoBlock* block) throw() {
 
   Field field = block->data()->field();
 
-  COPY_FIELD(block,iq_,"Q2_bcg");
-  COPY_FIELD(block,iy_,"Y2_bcg");
+  COPY_FIELD(block,"loop_10",iq_,"Q2_bcg");
+  COPY_FIELD(block,"loop_10",iy_,"Y2_bcg");
 
   if (is_finest_(block)) {
 
@@ -1246,7 +1278,7 @@ void EnzoSolverBiCgStab::loop_10(EnzoBlock* block) throw() {
 
   }
 
-  COPY_FIELD(block,iu_,"U");
+  COPY_FIELD(block,"loop_10",iu_,"U");
 
   std::vector<long double> reduce;
   reduce.resize(5+1);
@@ -1403,7 +1435,7 @@ void EnzoSolverBiCgStab::loop_12(EnzoBlock* block,
   S(omega) = S(omega_n) / S(omega_d);
 
   /// check for breakdown in BiCgStab
-  
+
   if ( S(omega_n) == 0.0 ) {
     WARNING1 ("EnzoSolverBiCgStab::loop12()",
 	      "Solver error: %s omega_n == 0",
@@ -1412,7 +1444,7 @@ void EnzoSolverBiCgStab::loop_12(EnzoBlock* block,
   }
   if ( S(omega_d) == 0.0 ) {
     WARNING1 ("EnzoSolverBiCgStab::loop12()",
-	     "Solver error: %s omega_d1 == 0",
+	     "Solver error: %s omega_d == 0",
 	      block->name().c_str());
     this->end(block, return_error);
   }
@@ -1574,6 +1606,7 @@ void EnzoSolverBiCgStab::loop_14(EnzoBlock* block,
     (CkIndex_EnzoBlock::r_solver_bicgstab_loop_15(NULL), 
      block->proxy_array());
 
+  
 #ifdef DEBUG_CALLBACK    
     CkPrintf ("DEBUG_CALLBACK %s:%d %d\n",
 	      __FILE__,__LINE__,CkIndex_EnzoBlock::r_solver_bicgstab_loop_15(NULL));
@@ -1845,61 +1878,38 @@ void EnzoSolverBiCgStab::dot_done_(EnzoBlock * block,
 void EnzoSolverBiCgStab::new_register_refresh_()
 {
   Refresh * refresh_post = cello::refresh(ir_post_);
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
   
   if (solve_type_ == solve_tree)
     refresh_post->set_root_level (coarse_level_);
 
   refresh_post->add_field (ix_);
-  refresh_post->add_field (ir_);
-  refresh_post->add_field (ir0_);
-  refresh_post->add_field (ip_);
-  refresh_post->add_field (iy_);
-  refresh_post->add_field (iv_);
-  refresh_post->add_field (iq_);
-  refresh_post->add_field (iu_);
 
   //--------------------------------------------------
 
-  ir_loop_3_ = add_new_refresh_();
-  cello::simulation()->new_refresh_set_name(ir_post_,name()+":loop_3");
+  ir_loop_3_ = add_refresh_();
+  cello::simulation()->refresh_set_name(ir_post_,name()+":loop_3");
 
   Refresh * refresh_loop_3 = cello::refresh(ir_loop_3_);
   
   if (solve_type_ == solve_tree)
     refresh_loop_3->set_root_level (coarse_level_);
 
-  refresh_loop_3->add_field (ix_);
-
-  refresh_loop_3->add_field (ir_);
-  refresh_loop_3->add_field (ir0_);
-  refresh_loop_3->add_field (ip_);
   refresh_loop_3->add_field (iy_);
-  refresh_loop_3->add_field (iv_);
-  refresh_loop_3->add_field (iq_);
-  refresh_loop_3->add_field (iu_);
 
   refresh_loop_3->set_callback(CkIndex_EnzoBlock::p_solver_bicgstab_loop_3());
   
   //--------------------------------------------------
 
-  ir_loop_9_ = add_new_refresh_();
-  cello::simulation()->new_refresh_set_name(ir_post_,name()+":loop_9");
+  ir_loop_9_ = add_refresh_();
+  cello::simulation()->refresh_set_name(ir_post_,name()+":loop_9");
 
   Refresh * refresh_loop_9 = cello::refresh(ir_loop_9_);
   
   if (solve_type_ == solve_tree)
     refresh_loop_9->set_root_level (coarse_level_);
 
-  refresh_loop_9->add_field (ix_);
-
-  refresh_loop_9->add_field (ir_);
-  refresh_loop_9->add_field (ir0_);
-  refresh_loop_9->add_field (ip_);
   refresh_loop_9->add_field (iy_);
-  refresh_loop_9->add_field (iv_);
-  refresh_loop_9->add_field (iq_);
-  refresh_loop_9->add_field (iu_);
   
   refresh_loop_9->set_callback(CkIndex_EnzoBlock::p_solver_bicgstab_loop_9());
 

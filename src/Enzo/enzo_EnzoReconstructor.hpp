@@ -22,16 +22,15 @@ public: // interface
   /// Factory method for constructing EnzoReconstructor
   /// (The signature of this method may need to be modified)
   ///
-  /// @param[in] active_reconstructed_quantities A vector listing the
-  ///     names of quantities (they should be listed in FIELD_TABLE) that are
-  ///     to be reconstructed. This should omit the names of passively
-  ///     advected scalars.
+  /// @param[in] active_primitive_keys A vector listing the names for each
+  ///     primitive quantity that are to be reconstructed. This should omit the
+  ///     names of the passively advected scalars.
   /// @param[in] name The name of the Riemann solver to use. Valid names
   ///     include "nn" and "plm"
   /// @param[in] theta_limiter An argument that is optionally used to tune
   ///     certain types of limiters
   static EnzoReconstructor* construct_reconstructor
-    (const std::vector<std::string> &active_reconstructed_quantities,
+    (const std::vector<std::string> &active_primitive_keys,
      std::string name, enzo_float theta_limiter);
 
   /// Create a new EnzoReconstructor
@@ -61,9 +60,10 @@ public: // interface
   /// Reconstructs the interface values
   ///
   /// @param[in]  prim_map Map holding the data for the cell-centered
-  ///     reconstructable primitives. This is expected to have keys for all
-  ///     of the active reconstructed quantities registered with the factory
-  ///     method (plus all of the keys listed in `passive lists`)
+  ///     primitives that are to be reconstructed. This is expected to have
+  ///     a key-array pair for each entry in the list passed as the
+  ///     ``active_primitive_keys`` argument of the factory method
+  ///     (plus all of the keys listed in `passive lists`)
   /// @param[out] priml_map,primr_map Holds existing arrays where the
   ///     left/right reconstructed, face-centered primitives are written.
   ///     These must supply the same keys that are expected for prim_map.
@@ -76,17 +76,10 @@ public: // interface
   /// @param[in]  stale_depth indicates the current stale_depth for the
   ///     supplied cell-centered quantities
   /// @param[in]  passive_list A list of keys for passive scalars.
-  ///
-  /// @note It's alright for arrays in `priml_map` and `primr_map` to have the
-  /// shapes of cell-centered arrays (i.e. the same shape as arrays in
-  /// `prim_map`). In this case, the function effectively treats such arrays as
-  /// if their `subarray` method were invoked, where `CSlice(0,-1)` is
-  /// specified for the `dim` axis and `CSlice(nullptr,nullptr)` is specified
-  /// for other axes.
   virtual void reconstruct_interface
-  (EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
-   EnzoEFltArrayMap &primr_map, int dim, EnzoEquationOfState *eos,
-   int stale_depth, const str_vec_t& passive_list)=0;
+  (const EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
+   EnzoEFltArrayMap &primr_map, const int dim, const EnzoEquationOfState *eos,
+   const int stale_depth, const str_vec_t& passive_list)=0;
 
   /// The rate amount by which the stale_depth increases after the current
   /// reconstructor is used to update the fluid over a (partial or full)
@@ -125,8 +118,8 @@ public: // interface
   { return total_staling_rate() - immediate_staling_rate(); }
 
 protected:
-  /// list of the key names for all components of (non-passively advected
-  /// quantities) that are to be reconstructed.
+  /// list of the key names for all components of (non-passively advected)
+  /// primitives that are to be reconstructed.
   std::vector<std::string> active_key_names_;
 };
 

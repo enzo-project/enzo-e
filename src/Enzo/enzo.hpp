@@ -34,12 +34,12 @@
 #include "_performance.hpp"
 #include "_problem.hpp"
 #include "_mesh.hpp"
+#include "_array.hpp"
 #include "_data.hpp"
 #include "_simulation.hpp"
 #include "_disk.hpp"
 #include "_io.hpp"
 #include "_compute.hpp"
-#include "_array.hpp"
 
 //----------------------------------------------------------------------
 // Component class includes
@@ -49,6 +49,7 @@
 
 class CProxy_EnzoBlock;
 class EnzoConfig;
+class EnzoFactory;
 class EnzoPhysicsCosmology;
 class EnzoProblem;
 class EnzoSimulation;
@@ -56,17 +57,35 @@ class EnzoUnits;
 
 /// Namespace for Enzo global constants and accessor functions
 namespace enzo {
-  EnzoProblem * problem();
-  EnzoSimulation * simulation();
-  EnzoPhysicsCosmology * cosmology();
+
+
+  const EnzoConfig *        config();
+  const EnzoFactory *       factory();
+  EnzoProblem *             problem();
+  EnzoSimulation *          simulation();
+  EnzoPhysicsCosmology *    cosmology();
+  EnzoPhysicsFluidProps *   fluid_props();
+
   const EnzoMethodGrackle * grackle_method();
-  EnzoUnits * units();
-  const EnzoConfig * config();
-  CProxy_EnzoBlock block_array();
-  EnzoBlock * block ( Block * block);
+
+  CProxy_EnzoBlock          block_array();
+  EnzoBlock *               block ( Block * block);
+  EnzoPhysicsCosmology *    cosmology();
+  EnzoProblem *             problem();
+  EnzoSimulation *          simulation();
+  EnzoUnits *               units();
+
+  /// Returns whether the dual energy formalism is in use.
+  ///
+  /// @param default_ret[in] The value to return if no hydro methods are used.
+  ///     The default value is false.
+  bool uses_dual_energy_formalism(bool default_ret = false);
+
 }
 
 extern CProxy_EnzoSimulation proxy_enzo_simulation;
+extern CProxy_IoEnzoWriter proxy_io_enzo_writer;
+extern CProxy_IoEnzoReader proxy_io_enzo_reader;
 extern void mutex_init();
 extern void mutex_init_bcg_iter();
 #endif /* ENZO_HPP */

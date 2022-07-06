@@ -229,7 +229,7 @@ Performance::start_region(int id_region, std::string file, int line) throw()
   if (region_in_charm_[index_region_current_]) {
     stop_region(index_region_current_);
   }
-  
+
   int index_region = id_region;
 
   index_region_current_ = index_region;

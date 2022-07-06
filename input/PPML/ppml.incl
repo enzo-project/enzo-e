@@ -52,7 +52,6 @@
       }
 
    }
- include "input/flux_correct.incl"
 
    Initial {
 
@@ -103,14 +102,14 @@
 
    Testing
    {
-      time_final  = [0.00294580065398299,
-                     0.00294612924335524 ];
+      time_final  = [0.0029466382402461,    # single-precision
+                     0.00294612924335524 ]; # double-precision
       time_tolerance = 1.0e-4;
    }
 
    Output {
 
-      list = ["d_x","d_y","d_z","dump"];
+      list = ["d_x","d_y","d_z"];
 
       dump {
         field_list = ["density"];

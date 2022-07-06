@@ -10,14 +10,82 @@
 
 //----------------------------------------------------------------------
 
-const EFlt3DArray& EnzoEFltArrayMap::at(const std::string& key) const noexcept
+EnzoEFltArrayMap::EnzoEFltArrayMap(std::string name,
+                                   const std::vector<std::string> &keys,
+                                   const std::array<int,3>& shape)
+  : name_(name),
+    str_index_map_(keys),
+    arrays_(keys.size(), shape)
+{ }
+
+//----------------------------------------------------------------------
+
+EnzoEFltArrayMap::EnzoEFltArrayMap(std::string name,
+                                   const std::vector<std::string> &keys,
+                                   const std::vector<EFlt3DArray> &arrays)
+  : name_(name),
+    str_index_map_(keys),
+    arrays_(arrays)
 {
-  auto result = map_.find(key);
-  if (result == map_.cend()){
-    ERROR1("EnzoEFltArrayMap::at", "map doesn't contain the key: \"%s\"",
-           key.c_str());
+  ASSERT2("EnzoEFltArrayMap::EnzoEFltArrayMap",
+          "keys and arrays have lengths %zu and %zu. They should be the same",
+          (std::size_t)keys.size(), (std::size_t)arrays.size(),
+          keys.size() == arrays.size());
+}
+
+//----------------------------------------------------------------------
+
+bool EnzoEFltArrayMap::validate_key_order(const std::vector<std::string> &ref,
+					  bool raise_err,
+                                          bool allow_smaller_ref) const noexcept
+{
+
+  std::string name_string =
+      (name_ == "") ? "" : (std::string(", \"") + name_ + std::string("\","));
+
+  for (std::size_t i =0; i < std::min(ref.size(),str_index_map_.size()); i++){
+    const std::string k = str_index_map_.key(i);
+    bool equal = ref[i] == k;
+    if (!equal && raise_err){
+      print_summary();
+      ERROR4("EnzoEFltArrayMap::validate_key_order",
+	     ("keys of ArrayMap%s don't match expectations. At index %d, the "
+	      "key is \"%s\" when it's expected to be \"%s\"\n"),
+	     name_string.c_str(), (int)i, k.c_str(), ref[i].c_str());
+    } else if (!equal){
+      return false;
+    }
   }
-  return result->second;
+
+  if ((!allow_smaller_ref) && (ref.size() != str_index_map_.size())){
+    if (raise_err){
+      print_summary();
+      ERROR3("EnzoEFltArrayMap::validate_key_order",
+	     "ArrayMap%s doesn't have the expected number of keys. It has %d "
+	     "keys. It's expected to have %d",
+             name_string.c_str(), (int)ref.size(), (int)str_index_map_.size());
+    } else {
+      return false;
+    }
+  }
+  return true;
+}
+
+//----------------------------------------------------------------------
+
+CelloArray<enzo_float, 3> EnzoEFltArrayMap::at_(const std::string& key)
+  const noexcept
+{ return arrays_[str_index_map_.at(key)]; }
+
+//----------------------------------------------------------------------
+
+CelloArray<enzo_float, 3> EnzoEFltArrayMap::at_(const std::size_t index)
+  const noexcept
+{
+  ASSERT("EnzoEFltArrayMap::at_",
+         "index must be less than or equal to the length of the ArrayMap.",
+         index < size());
+  return arrays_[index];
 }
 
 //----------------------------------------------------------------------
@@ -34,17 +102,13 @@ EFlt3DArray exclude_stale_cells_(const EFlt3DArray &arr, int stale_depth)
 }
 
 
-EFlt3DArray EnzoEFltArrayMap::get(const std::string& key,
-                                  int stale_depth) const noexcept
+CelloArray<enzo_float, 3> EnzoEFltArrayMap::get_(const std::string& key,
+                                                 int stale_depth) const noexcept
 {
-  ASSERT("EnzoEFltArrayMap::get", "stale_depth must be >= 0",
+  ASSERT("EnzoEFltArrayMap::get_", "stale_depth must be >= 0",
          stale_depth >= 0);
-  const EFlt3DArray& arr = this->at(key);
-  if (stale_depth > 0){
-    return exclude_stale_cells_(arr,stale_depth);
-  } else {
-    return arr;
-  }
+  CelloArray<enzo_float, 3> arr = this->at_(key);
+  return (stale_depth > 0) ? exclude_stale_cells_(arr,stale_depth) : arr;
 }
 
 //----------------------------------------------------------------------
@@ -61,29 +125,57 @@ void EnzoEFltArrayMap::print_summary() const noexcept
     return;
   }
 
-
   if (name_ == ""){
-    CkPrintf("Nameless Array Map\n");
+    CkPrintf("Nameless Array Map");
   } else {
-    CkPrintf("\"%s\" Array Map\n", name_.c_str());
+    CkPrintf("\"%s\" Array Map", name_.c_str());
   }
 
-  int i = 0;
-  CkPrintf("{");
+  CkPrintf(": entry_shape = (%d, %d, %d)\n{",
+           array_shape(0), array_shape(1), array_shape(2));
 
-  for ( const auto &pair : map_ ) {
+  for ( std::size_t i = 0; i < my_size; i++){
     if (i != 0){
       CkPrintf(",\n ");
     }
-    CkPrintf("\"%s\" : EFlt3DArray(%p, %d, %d, %d), owners: %ld",
-             pair.first.c_str(),
-             (void*)pair.second.shared_data_.get(),
-             (int)pair.second.shape(0),
-             (int)pair.second.shape(1),
-             (int)pair.second.shape(2),
-             pair.second.shared_data_.use_count());
-    i++;
+
+    EFlt3DArray array = arrays_[i];
+    std::string key = str_index_map_.key(i);
+    CkPrintf("\"%s\" : EFlt3DArray(%p)", key.c_str(), (void*)array.data());
   }
   CkPrintf("}\n");
   fflush(stdout);
+}
+
+//----------------------------------------------------------------------
+
+EnzoEFltArrayMap EnzoEFltArrayMap::subarray_map(const CSlice &slc_z,
+                                                const CSlice &slc_y,
+                                                const CSlice &slc_x,
+                                                const std::string& name)
+{
+  return EnzoEFltArrayMap(name, str_index_map_,
+                          arrays_.subarray_collec(slc_z, slc_y, slc_x));
+}
+
+const EnzoEFltArrayMap EnzoEFltArrayMap::subarray_map
+(const CSlice &slc_z, const CSlice &slc_y, const CSlice &slc_x,
+ const std::string& name) const
+{
+  return EnzoEFltArrayMap(name, str_index_map_,
+                          arrays_.subarray_collec(slc_z, slc_y, slc_x));
+}
+
+//----------------------------------------------------------------------
+
+void EnzoEFltArrayMap::validate_invariants_() const noexcept
+{
+  // several invariants are alread enforced:
+  // - StringIndRdOnlyMap implicitly enforces that there aren't any duplicate
+  //   keys, and that a unique key is associated with each integer index from 0
+  //   through (str_index_map_.size() - 1)
+  // - CArrCollec enforces that all arrays have the same shape
+  ASSERT("EnzoEFltArrayMap::validate_invariants_",
+         "str_index_map_ and arrays_ don't have the same length",
+         arrays_.size() == str_index_map_.size());
 }

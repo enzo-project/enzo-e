@@ -1,4 +1,4 @@
-include "RT.incl"
+include "input/RadiativeTransfer/RT.incl"
 
 Boundary {
    list = ["photon_density","flux_x"];

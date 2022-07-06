@@ -34,7 +34,7 @@ Mesh {
 }
 
 Method {
-    list = ["gravity", "ppm"]; 
+    list = ["pm_deposit", "gravity", "ppm"]; 
 
     gravity {
        solver = "cg";    	    
@@ -56,7 +56,7 @@ Solver {
       type = "cg";
        iter_max = 500;
        res_tol  = 1e-3;
-       monitor_iter = 0;
+       monitor_iter = 10;
    }      
 }
 
@@ -75,7 +75,6 @@ Field {
            "B"];
 
    ghost_depth = 4;
-   prolong = "linear";
 }
 
 Initial {

@@ -1,0 +1,107 @@
+ Adapt {
+     max_level = 0;
+     min_level = 0;
+ }
+
+ Boundary {
+     type = "periodic";
+ }
+
+
+Domain {
+     lower = [ -2.0, -2.0, -2.0];
+     rank = 3;
+     upper = [ 2.0, 2.0, 2.0 ];
+ }
+
+ Field {
+     alignment = 8;
+     gamma = 1.0000001;
+     ghost_depth = 4;
+     courant = 0.3;
+     history = 1;
+     list = [ "density", "velocity_x", "velocity_y", "velocity_z", "acceleration_x", "acceleration_y", "acceleration_z", "total_energy", "internal_energy", "pressure", "density_total", "density_particle", "density_particle_accumulate", "potential", "density_gas", "X", "B", "X_copy", "B_copy", "potential_copy","diagonal" ];
+     padding = 0;
+     dual_energy = true;
+     diffusion = true;
+ }
+
+ Initial {
+     merge_sinks_test {
+     	 particle_data_filename = "particles.dat";
+     };
+     list = [ "merge_sinks_test" ];
+ }
+
+ Mesh {
+     root_blocks = [ 4, 4, 4 ];
+     root_rank = 3;
+     root_size = [64, 64, 64];
+ }
+
+
+Particle {
+    list = ["sink"];
+    mass_is_mass = true;
+    batch_size = 4096;
+    sink {
+        attributes = [ "x", "default",
+                       "y", "default",
+                       "z", "default",
+                       "vx", "default",
+                       "vy", "default",
+                       "vz", "default",
+                       "ax", "default",
+                       "ay", "default",
+                       "az", "default",
+                       "mass", "default",
+		       "lifetime" , "default",
+		       "creation_time", "default",
+		       "metal_fraction", "default",
+		       "is_copy", "int64",
+		       "id" , "int64"];
+        position = [ "x", "y", "z" ];
+        velocity = [ "vx", "vy", "vz" ];
+        group_list = "is_gravitating";
+    }
+}
+
+Method {
+
+    list = ["pm_update","merge_sinks"];		
+    pm_update {
+        max_dt = 1.0e-2;
+    };
+
+    merge_sinks {
+
+    merging_radius_cells = 0.1;
+     
+    };
+
+}
+
+
+Stopping {
+    time = 1.0;
+}
+
+Output {
+   
+    data {
+    
+        dir = [ "./Dir_%04d", "cycle" ];
+        field_list = [ "acceleration_x", "acceleration_y", "acceleration_z",
+	 	      	"density_total", "potential" ];
+	particle_list = ["sink"];
+        name = [ "data-%04d-%04d.h5", "cycle", "proc" ];
+        schedule {
+            step = 10;
+            var = "cycle";
+        };
+        type = "data";
+    };
+    
+    list = ["data"];
+     
+}

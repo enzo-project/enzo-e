@@ -137,6 +137,7 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
     (enzo_float *) field.values("metal_density") : NULL;
 
   const double Zsolar = 0.02;  // TODO: Update to more accurate value
+  const double nominal_mol_weight = (double)enzo::fluid_props()->mol_weight();
 
   // Idea for multi-metal species - group these using 'group'
   // class in IC parameter file and in SF / Feedback routines simply
@@ -144,11 +145,8 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
   // fields to assign particle chemical tags and deposit yields
 
   // compute the temperature (we need it here)
-  EnzoComputeTemperature compute_temperature
-    (enzo_config->ppm_density_floor,
-     enzo_config->ppm_temperature_floor,
-     enzo_config->ppm_mol_weight,
-     enzo_config->physics_cosmology);
+  EnzoComputeTemperature compute_temperature(enzo::fluid_props(),
+                                             enzo_config->physics_cosmology);
 
   compute_temperature.compute(enzo_block);
 
@@ -165,10 +163,10 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
 
         // need to compute this better for Grackle fields (on to-do list)
         double rho_cgs = density[i] * enzo_units->density();
-        double mean_particle_mass = enzo_config->ppm_mol_weight * cello::mass_hydrogen;
+        double mean_particle_mass = nominal_mol_weight * enzo_constants::mass_hydrogen;
         double ndens = rho_cgs / mean_particle_mass;
 
-        double mass  = density[i] *dx*dy*dz * enzo_units->mass() / cello::mass_solar;
+        double mass  = density[i] *dx*dy*dz * enzo_units->mass() / enzo_constants::mass_solar;
         double metallicity = (metal) ? metal[i]/density[i]/Zsolar : 0.0;
 
         //
@@ -177,8 +175,9 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
         if (! this->check_number_density_threshold(ndens)) continue;
         if (! this->check_self_gravitating( mean_particle_mass, rho_cgs, temperature[i],
                                             velocity_x, velocity_y, velocity_z,
-                                            enzo_units->length(), enzo_units->density(),
-                                            i, 1, my, my*mz, dx, dy, dz)) continue;
+                                            enzo_units->length(), enzo_units->velocity(),
+                                            enzo_units->density(),
+                                            i, 1, mx, mx*my, dx, dy, dz)) continue;
 
         // AJE: TO DO ---
         //      If Grackle is used, check for this and use the H2
@@ -190,17 +189,17 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
                                                            metallicity,
                                                            enzo_units->density(),
                                                            enzo_units->length(),
-                                                           i, 1, my, my*mz,
+                                                           i, 1, mx, mx*my,
                                                            dx, dy, dz);
         mass *= f_h2; // apply correction (f_h2 = 1 if not used)
 
         if (! this->check_velocity_divergence(velocity_x, velocity_y,
                                               velocity_z, i,
-                                              1, my, my*mz)) continue;
+                                              1, mx, mx*my, dx, dy, dz)) continue;
         // Check whether mass in [min_mass, max_range] range and if specified, Jeans unstable
         if (! this->check_mass(mass)) continue;
 
-        double tdyn = sqrt(3.0 * cello::pi / 32.0 / cello::grav_constant /
+        double tdyn = sqrt(3.0 * cello::pi / 32.0 / enzo_constants::grav_constant /
                       (density[i] * enzo_units->density()));
 
         //
@@ -287,7 +286,7 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
         pform     = (enzo_float *) particle.attribute_array(it, ia_to, ib);
 
         pform[io]     =  enzo_block->time();   // formation time
-        plifetime[io] =  tdyn;  // 10.0 * cello::Myr_s / enzo_units->time() ; // lifetime
+        plifetime[io] =  tdyn;  // 10.0 * enzo_constants::Myr_s / enzo_units->time() ; // lifetime
 
         if (metal){
           pmetal     = (enzo_float *) particle.attribute_array(it, ia_metal, ib);

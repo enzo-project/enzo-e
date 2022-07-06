@@ -19,9 +19,9 @@ class Performance;
 class Problem;
 class Schedule;
 
-// #define DEBUG_NEW_REFRESH
-
 #include <errno.h>
+#include <iostream>
+#include <fstream>
 #include "mesh.decl.h"
 #include "simulation.decl.h"
 class Simulation : public CBase_Simulation 
@@ -36,8 +36,9 @@ class Simulation : public CBase_Simulation
 
 public: // interface
 
-  /// Simulation constructor
+  friend class IoSimulation;
 
+  /// Simulation constructor
 
   Simulation
   ( const char *       parameter_file,
@@ -65,13 +66,16 @@ public: // interface
   // BLOCK INITIALIZATION WITH MsgRefine
   //----------------------------------------------------------------------
 
+#ifdef BYPASS_CHARM_MEM_LEAK
   /// Request by newly created Block to get its MsgRefine object
   virtual void p_get_msg_refine(Index index);
 
   /// Set MsgRefine * for a newly created Block
   void set_msg_refine (Index index, MsgRefine *);
+
   /// Return MsgRefine * for a newly created Block and remove from list
   MsgRefine * get_msg_refine (Index index);
+#endif
 
   //----------------------------------------------------------------------
   // ACCESSOR FUNCTIONS
@@ -104,10 +108,14 @@ public: // interface
   { return scalar_descr_double_; }
   ScalarDescr * scalar_descr_int() throw()
   { return scalar_descr_int_; }
+  ScalarDescr * scalar_descr_long_long() throw()
+  { return scalar_descr_long_long_; }
   ScalarDescr * scalar_descr_sync() throw()
   { return scalar_descr_sync_; }
   ScalarDescr * scalar_descr_void() throw()
   { return scalar_descr_void_; }
+  ScalarDescr * scalar_descr_index() throw()
+  { return scalar_descr_index_; }
 
   /// Return the field descriptor
   FieldDescr * field_descr() const throw()
@@ -233,22 +241,13 @@ public: // virtual functions
   /// Wait for all Hierarchy to be initialized before creating any Blocks
   void r_initialize_block_array(CkReductionMsg * msg);
 
-  /// Wait for all local patches to be created before calling run
-  void r_initialize_hierarchy(CkReductionMsg * msg);
-
   /// Send Config and Parameters from ip==0 to all other processes
 
   void send_config();
   void r_recv_config(CkReductionMsg * msg);
 
   //--------------------------------------------------
-  // NEW OUTPUT
-  //--------------------------------------------------
-
-  void new_output_start ();
-
-  //--------------------------------------------------
-  // OLD OUTPUT
+  // OUTPUT
   //--------------------------------------------------
 
   /// Call output on Problem list of Output objects
@@ -274,7 +273,7 @@ public: // virtual functions
   void r_write(CkReductionMsg * msg);
 
   /// Continue on to Problem::output_wait() from checkpoint
-  virtual void r_write_checkpoint();
+  virtual void r_write_checkpoint_output();
 
   /// Receive data from non-writing process, write to disk, close, and
   /// proceed with next output
@@ -283,8 +282,15 @@ public: // virtual functions
   //--------------------------------------------------
   // Compute
   //--------------------------------------------------
-  
+
   void compute ();
+
+  //--------------------------------------------------
+  // Restart
+  //--------------------------------------------------
+
+  void p_restart_enter(std::string dir);
+  void r_restart_start(CkReductionMsg *);
 
   //--------------------------------------------------
   // Monitor
@@ -366,40 +372,34 @@ public: // virtual functions
   /// refresh_register
   int new_register_refresh (const Refresh & refresh)
   {
-    const int id_refresh = new_refresh_list_.size();
+    const int id_refresh = refresh_list_.size();
     ASSERT("Simulation::new_register_refresh()",
 	   "id_refresh must be >= 0",
 	   (id_refresh >= 0));
-    new_refresh_list_.push_back(refresh);
-    new_refresh_list_[id_refresh].set_id(id_refresh);
-#ifdef DEBUG_NEW_REFRESH  
-    CkPrintf ("DEBUG_NEW_REFRESH register id %d\n",id_refresh);
-#endif    
+    refresh_list_.push_back(refresh);
+    refresh_list_[id_refresh].set_id(id_refresh);
     return id_refresh;
   }
-  void new_refresh_set_name (int id, std::string name)
+  void refresh_set_name (int id, std::string name)
   {
-    if (id >= int(new_refresh_name_.size()))
-      new_refresh_name_.resize(id+1);
-    new_refresh_name_[id] = name;
-#ifdef DEBUG_NEW_REFRESH  
-    CkPrintf ("DEBUG_NEW_REFRESH register name %d %s\n",id,name.c_str());
-#endif    
+    if (id >= int(refresh_name_.size()))
+      refresh_name_.resize(id+1);
+    refresh_name_[id] = name;
   }
   
-  std::string new_refresh_name (int id) const
+  std::string refresh_name (int id) const
   {
-    return (0 <= id && id < int(new_refresh_name_.size())) ?
-      new_refresh_name_[id] : "UNKNOWN";
+    return (0 <= id && id < int(refresh_name_.size())) ?
+      refresh_name_[id] : "UNKNOWN";
   }
 
   /// Return the given refresh object
-  Refresh & new_refresh_list (int id_refresh)
-  { return new_refresh_list_[id_refresh]; }
+  Refresh & refresh_list (int id_refresh)
+  { return refresh_list_[id_refresh]; }
 
   /// Return the number of refresh objects registered
-  int new_refresh_count() const
-  { return new_refresh_list_.size(); }
+  int refresh_count() const
+  { return refresh_list_.size(); }
 
 protected: // functions
 
@@ -454,6 +454,10 @@ protected: // functions
       }
     }
   }
+
+  std::string file_create_dir_(std::vector<std::string> directory_format,
+                               bool & already_exists);
+  std::ifstream file_open_file_list_(std::string name_dir);
 
 protected: // attributes
 
@@ -528,13 +532,15 @@ protected: // attributes
   /// AMR hierarchy
   Hierarchy * hierarchy_;
 
-  /// Scalar descriptors
+  /// Scalar descriptors (yuck)
   ScalarDescr * scalar_descr_long_double_;
   ScalarDescr * scalar_descr_double_;
   ScalarDescr * scalar_descr_int_;
+  ScalarDescr * scalar_descr_long_long_;
   ScalarDescr * scalar_descr_sync_;
   ScalarDescr * scalar_descr_void_;
-  
+  ScalarDescr * scalar_descr_index_;
+
   /// Field descriptor
   FieldDescr * field_descr_;
 
@@ -545,18 +551,21 @@ protected: // attributes
   Sync sync_output_begin_;
   Sync sync_output_write_;
 
-  Sync sync_new_output_start_;
-  Sync sync_new_output_next_;
+  /// Restart synchronization
+  Sync sync_restart_created_;
+  Sync sync_restart_next_;
 
   /// Refresh phase lists
 
-  std::vector < Refresh >     new_refresh_list_;
-  std::vector < std::string > new_refresh_name_;
+  std::vector < Refresh >     refresh_list_;
+  std::vector < std::string > refresh_name_;
 
   /// Saved latest checkpoint directory for creating symlink
   char dir_checkpoint_[256];
 
+#ifdef BYPASS_CHARM_MEM_LEAK
   std::map<Index,MsgRefine *> msg_refine_map_;
+#endif
 
   /// Currently active output object
   int index_output_;
@@ -565,6 +574,11 @@ protected: // attributes
   std::vector<int> num_solver_iter_;
   /// Max of solver iterations over blocks for solver i
   std::vector<int> max_solver_iter_;
+
+  static int file_counter_;
+  std::string restart_directory_;
+  int         restart_num_files_;
+  std::ifstream restart_stream_file_list_;
 };
 
 #endif /* SIMULATION_SIMULATION_HPP */

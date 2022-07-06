@@ -1,0 +1,62 @@
+:p: `Method:feedback` parameters.
+
+----
+
+Parameter:  :p:`Method` : :p:`feedback` : :p:`supernovae`
+:Summary: :s:`Whether to turn on supernova feedback in EnzoMethodFeedbackSTARSS`
+:Type:   :t:`logical`
+:Default: :d:`true`
+:Scope:     :z:`Enzo`
+
+:e:`Whether to turn on supernova feedback in EnzoMethodFeedbackSTARSS`
+
+----
+
+Parameter:  :p:`Method` : :p:`feedback` : :p:`unrestricted_sn`
+:Summary: :s:`Whether to turn on supernova feedback in EnzoMethodFeedbackSTARSS`
+:Type:   :t:`logical`
+:Default: :d:`true`
+:Scope:     :z:`Enzo`
+
+:e:`Allow for > 1 supernova event per star particle in a timestep.`
+
+----
+
+Parameter:  :p:`Method` : :p:`feedback` : :p:`stellar_winds`
+:Summary: :s:`Whether to turn on stellar winds in EnzoMethodFeedbackSTARSS`
+:Type:   :t:`logical`
+:Default: :d:`true`
+:Scope:     :z:`Enzo`
+
+:e:`Whether to turn on stellar wind feedback in EnzoMethodFeedbackSTARSS`
+
+----
+
+Parameter:  :p:`Method` : :p:`feedback` : :p:`analytic_SNR_shell_mass`
+:Summary: :s:`Calculates supernova remnant shell mass via analytic formulae`
+:Type:   :t:`logical`
+:Default: :d:`true`
+:Scope:     :z:`Enzo`
+
+:e:`Calculates supernova remnant shell mass via analytic formulae`
+
+----
+
+Parameter:  :p:`Method` : :p:`feedback` : :p:`fade_SNR`
+:Summary: :s:`Allow coupling to fading phase of SNe in EnzoMethodFeedbackSTARSS`
+:Type:   :t:`logical`
+:Default: :d:`true`
+:Scope:     :z:`Enzo`
+
+:e:`Allow coupling to fading phase of SNe in EnzoMethodFeedbackSTARSS if cell width is greater than fading radius.`
+
+----
+
+Parameter:  :p:`Method` : :p:`feedback` : :p:`NEvents`
+:Summary: :s:`Manually set off supernovae in test problems`
+:Type:   :t:`integer`
+:Default: :d:`-1`
+:Scope:     :z:`Enzo`
+
+:e:`If -1, will probabilistically model supernova. If "NEvents" > 0, will set off N-supernovae per particle, (1 per timestep for each particle). If NEvents = 0, no supernovae will go off. Mostly for testing purposes.`
+

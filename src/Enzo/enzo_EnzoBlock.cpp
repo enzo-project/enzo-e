@@ -10,6 +10,8 @@
 
 #include "enzo.hpp"
 
+// #define TRACE_BLOCK
+
 // #define DEBUG_ENZO_BLOCK
 
 //======================================================================
@@ -24,7 +26,6 @@ int EnzoBlock::MultiSpecies[CONFIG_NODE_SIZE];
 // Physics
 
 int EnzoBlock::PressureFree[CONFIG_NODE_SIZE];
-enzo_float EnzoBlock::Gamma[CONFIG_NODE_SIZE];
 enzo_float EnzoBlock::GravitationalConstant[CONFIG_NODE_SIZE];
 
 // Problem-specific
@@ -38,15 +39,6 @@ int EnzoBlock::PPMDiffusionParameter[CONFIG_NODE_SIZE];
 int EnzoBlock::PPMSteepeningParameter[CONFIG_NODE_SIZE];
 
 // Numerics
-
-int EnzoBlock::DualEnergyFormalism[CONFIG_NODE_SIZE];
-enzo_float EnzoBlock::DualEnergyFormalismEta1[CONFIG_NODE_SIZE];
-enzo_float EnzoBlock::DualEnergyFormalismEta2[CONFIG_NODE_SIZE];
-
-enzo_float EnzoBlock::pressure_floor[CONFIG_NODE_SIZE];
-enzo_float EnzoBlock::density_floor[CONFIG_NODE_SIZE];
-enzo_float EnzoBlock::number_density_floor[CONFIG_NODE_SIZE];
-enzo_float EnzoBlock::temperature_floor[CONFIG_NODE_SIZE];
 
 enzo_float EnzoBlock::InitialRedshift[CONFIG_NODE_SIZE];
 enzo_float EnzoBlock::InitialTimeInCodeUnits[CONFIG_NODE_SIZE];
@@ -72,7 +64,8 @@ int EnzoBlock::NumberOfBaryonFields[CONFIG_NODE_SIZE];
 void EnzoBlock::initialize(const EnzoConfig * enzo_config)
 {
 #ifdef DEBUG_ENZO_BLOCK
-  CkPrintf ("%d DEBUG_ENZO_BLOCK EnzoBlock::initialize\n",CkMyPe());
+  CkPrintf ("%d DEBUG_ENZO_BLOCK [static] EnzoBlock::initialize()\n",
+            CkMyPe());
 #endif
   int gx = enzo_config->field_ghost_depth[0];
   int gy = enzo_config->field_ghost_depth[1];
@@ -99,8 +92,6 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
       ghost_depth[in*3+i] = 0;
     }
 
-    Gamma[in]               = enzo_config->field_gamma;
-
     GridRank[in]            = enzo_config->mesh_root_rank;
 
     // Chemistry parameters
@@ -119,19 +110,12 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
 
     PressureFree[in]              = enzo_config->ppm_pressure_free;
     UseMinimumPressureSupport[in] = enzo_config->ppm_use_minimum_pressure_support;
-    MinimumPressureSupportParameter[in] = 
+    MinimumPressureSupportParameter[in] =
       enzo_config->ppm_minimum_pressure_support_parameter;
-    
+
     PPMFlatteningParameter[in]    = enzo_config->ppm_flattening;
     PPMDiffusionParameter[in]     = enzo_config->ppm_diffusion;
     PPMSteepeningParameter[in]    = enzo_config->ppm_steepening;
-    pressure_floor[in]            = enzo_config->ppm_pressure_floor;
-    density_floor[in]             = enzo_config->ppm_density_floor;
-    temperature_floor[in]         = enzo_config->ppm_temperature_floor;
-    number_density_floor[in]      = enzo_config->ppm_number_density_floor;
-    DualEnergyFormalism[in]       = enzo_config->ppm_dual_energy;
-    DualEnergyFormalismEta1[in]   = enzo_config->ppm_dual_energy_eta_1;
-    DualEnergyFormalismEta2[in]   = enzo_config->ppm_dual_energy_eta_2;
 
     ghost_depth[in*3+0] = gx;
     ghost_depth[in*3+1] = gy;
@@ -163,73 +147,133 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
 
 //----------------------------------------------------------------------
 
-EnzoBlock::EnzoBlock
-( MsgRefine * msg )
-  : CBase_EnzoBlock ( msg ),
-    dt(dt_),
+//======================================================================
+#ifdef BYPASS_CHARM_MEM_LEAK
+//======================================================================
+
+EnzoBlock::EnzoBlock( process_type ip_source,  MsgType msg_type)
+  : CBase_EnzoBlock (ip_source, msg_type),
     redshift(0.0)
+
 {
-#ifdef DEBUG_ENZO_BLOCK
-  CkPrintf ("%d %p BEGIN TRACE_BLOCK EnzoBlock(msg)\n",CkMyPe(),this);
-  print();
+#ifdef TRACE_BLOCK
+
+  CkPrintf ("%d %p TRACE_BLOCK %s EnzoBlock(ip) msg_type %d\n",
+            CkMyPe(),(void *)this,name(thisIndex).c_str(),int(msg_type));
 #endif
-  initialize_enzo_();
-  initialize();
-#ifdef DEBUG_ENZO_BLOCK
-  CkPrintf ("%d %p END TRACE_BLOCK EnzoBlock(msg)\n",CkMyPe(),this);
-  EnzoBlock::print();
-#endif
+
+  if (msg_type == MsgType::msg_check) {
+    proxy_enzo_simulation[ip_source].p_get_msg_check(thisIndex);
+  }
 }
 
 //----------------------------------------------------------------------
 
-EnzoBlock::EnzoBlock
-( process_type ip_source)
-  : CBase_EnzoBlock ( ip_source ),
-    dt(dt_),
-    redshift(0.0)
+void EnzoBlock::p_set_msg_check(EnzoMsgCheck * msg)
 {
+  performance_start_(perf_block);
+
+  restart_set_data_(msg);
+  initialize();
+  Block::initialize();
+  performance_stop_(perf_block);
 }
 
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_set_msg_refine(MsgRefine * msg)
 {
+#ifdef TRACE_BLOCK
+  CkPrintf ("%d %p :%d TRACE_BLOCK %s EnzoBlock p_set_msg_refine()\n",
+            CkMyPe(),(void *)this,__LINE__,name(thisIndex).c_str());
+  fflush(stdout);
+#endif
+  int io_reader = msg->restart_io_reader_;
   Block::p_set_msg_refine(msg);
-  initialize_enzo_();
   initialize();
   Block::initialize();
-}
-
-//----------------------------------------------------------------------
-
-void EnzoBlock::initialize_enzo_()
-{
-  int v3[3];
-  thisIndex.values(v3);
-  for (int i=0; i<MAX_DIMENSION; i++) {
-    GridLeftEdge[i] = 0;
-    GridDimension[i] = 0;
-    GridStartIndex[i] = 0;
-    GridEndIndex[i] = 0;
-    CellWidth[i] = 0;
+  // If refined block and restarting, notify file reader block is created
+  if (io_reader >= 0) {
+    proxy_io_enzo_reader[io_reader].p_block_created();
   }
 }
 
+//======================================================================
+#else /* not BYPASS_CHARM_MEM_LEAK */
+//======================================================================
+
+EnzoBlock::EnzoBlock ( MsgRefine * msg )
+  : CBase_EnzoBlock ( msg ),
+    redshift(0.0)
+
+{
+#ifdef TRACE_BLOCK
+  CkPrintf ("%d %p TRACE_BLOCK %s EnzoBlock(msg)\n",
+            CkMyPe(),(void *)this,name(thisIndex).c_str());
+#endif
+
+  int io_reader = msg->restart_io_reader_;
+  initialize();
+  Block::initialize();
+  // If refined block and restarting, notify file reader block is created
+  if ((cello::config()->initial_restart) && (index_.level() > 0)) {
+    proxy_io_enzo_reader[io_reader].p_block_created();
+  }
+  delete msg;
+}
+
 //----------------------------------------------------------------------
+
+EnzoBlock::EnzoBlock ( EnzoMsgCheck * msg )
+  : CBase_EnzoBlock (),
+    redshift(0.0)
+{
+#ifdef TRACE_BLOCK
+  CkPrintf ("%d %p TRACE_BLOCK %s EnzoBlock(msg)\n",
+            CkMyPe(),(void *)this,name(thisIndex).c_str());
+#endif
+
+  init_refresh_();
+  // init_refine_ (msg->index_,
+  //       msg->nx_, msg->ny_, msg->nz_,
+  //       msg->num_field_blocks_,
+  //       msg->num_adapt_steps_,
+  //       msg->cycle_, msg->time_,  msg->dt_,
+  //       0, NULL, msg->refresh_type_,
+  //       msg->num_face_level_, msg->face_level_,
+  //       msg->adapt_parent_);
+
+  // init_adapt_(msg->adapt_parent_);
+
+  // apply_initial_(msg);
+
+  initialize();
+  Block::initialize();
+#ifdef TRACE_BLOCK
+  CkPrintf ("%d %p :%d TRACE_BLOCK %s EnzoBlock restart_set_data_\n",
+            CkMyPe(),(void *)this,__LINE__,name(thisIndex).c_str());
+  fflush(stdout);
+#endif
+  restart_set_data_(msg);
+  delete msg;
+}
+
+//======================================================================
+#endif
+//======================================================================
 
 EnzoBlock::~EnzoBlock()
 {
-#ifdef DEBUG_ENZO_BLOCK
-  CkPrintf ("%d %p TRACE_BLOCK ~EnzoBlock(...)\n",CkMyPe(),this);
-  print();
+#ifdef TRACE_BLOCK
+  CkPrintf ("%d %p TRACE_BLOCK %s ~EnzoBlock(...)\n",
+            CkMyPe(),(void *)this,name(thisIndex).c_str());
 #endif
 }
 
 //----------------------------------------------------------------------
 
 void EnzoBlock::pup(PUP::er &p)
-{ 
+{
 
   TRACEPUP;
   TRACE ("BEGIN EnzoBlock::pup()");
@@ -246,14 +290,13 @@ void EnzoBlock::pup(PUP::er &p)
     WARNING("EnzoBlock::pup()", "skipping SubgridFluxes (not used)");
   }
 
-  PUParray(p,GridLeftEdge,MAX_DIMENSION); 
-  PUParray(p,GridDimension,MAX_DIMENSION); 
-  PUParray(p,GridStartIndex,MAX_DIMENSION); 
-  PUParray(p,GridEndIndex,MAX_DIMENSION); 
+  PUParray(p,GridLeftEdge,MAX_DIMENSION);
+  PUParray(p,GridDimension,MAX_DIMENSION);
+  PUParray(p,GridStartIndex,MAX_DIMENSION);
+  PUParray(p,GridEndIndex,MAX_DIMENSION);
   PUParray(p,CellWidth,MAX_DIMENSION);
 
   p | redshift;
-  TRACE ("END EnzoBlock::pup()");
 }
 
 //======================================================================
@@ -276,8 +319,8 @@ void EnzoBlock::write(FILE * fp) throw ()
 
   fprintf (fp,"EnzoBlock: PressureFree %d\n",
 	   PressureFree[in]);
-  fprintf (fp,"EnzoBlock: Gamma %g\n",
-	   Gamma[in]);
+  //fprintf (fp,"EnzoBlock: Gamma %g\n",
+  //	   Gamma[in]);
   fprintf (fp,"EnzoBlock: GravitationalConstant %g\n",
 	   GravitationalConstant[in]);
 
@@ -297,6 +340,7 @@ void EnzoBlock::write(FILE * fp) throw ()
 
   // Numerics
 
+  /*
   fprintf (fp,"EnzoBlock: DualEnergyFormalism %d\n",
 	   DualEnergyFormalism[in]);
   fprintf (fp,"EnzoBlock: DualEnergyFormalismEta1 %g\n",
@@ -311,6 +355,7 @@ void EnzoBlock::write(FILE * fp) throw ()
 	   number_density_floor[in]);
   fprintf (fp,"EnzoBlock: temperature_floor %g\n",
 	   temperature_floor[in]);
+  */
 
   fprintf (fp,"EnzoBlock: InitialRedshift %g\n",
 	   InitialRedshift[in]);
@@ -342,7 +387,7 @@ void EnzoBlock::write(FILE * fp) throw ()
   fprintf (fp,"EnzoBlock: GridLeftEdge %g %g %g\n",
 	   GridLeftEdge[0],GridLeftEdge[1],GridLeftEdge[2]);
 
-  fprintf (fp,"EnzoBlock: CellWidth %g %g %g\n", 
+  fprintf (fp,"EnzoBlock: CellWidth %g %g %g\n",
 	   CellWidth[0], CellWidth[1], CellWidth[2] );
 
   fprintf (fp,"EnzoBlock: ghost %d %d %d\n",

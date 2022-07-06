@@ -149,8 +149,10 @@ public:
   ///     When true, the function effectively returns a vector containing all
   ///     registered fields. Otherwise, the returned vector containing the
   ///     names of all quantities listed in FIELD_TABLE.
+  /// @param exclude_non_active_advection Determines whether quantities that
+  ///     are bit actively advected should be excluded from the list
   static std::vector<std::string> get_registered_quantities
-  (bool enumerate_components);
+  (const bool enumerate_components, const bool exclude_non_active_advection = false);
 
   /// provides the quantity properties listed in FIELD_TABLE (if present)
   ///
@@ -162,16 +164,31 @@ public:
                                   bool* actively_advected = 0) noexcept;
 
   /// Determine the actively advected quantity associated with the given name
-  /// If there is not an associated quantity, `""` is returned.
+  /// If there is not an associated quantity, ``""`` is returned.
   ///
   /// There are 2 ways that a name can be associated with a quantity
-  ///   1. They can exactly match the name of the quantity.
-  ///   2. For VECTOR quantities, they can be composed of the quantity name
-  ///      followed by a 2 character suffix. If ijk_suffix is true, then the
-  ///      suffixes are {'_i', '_j', '_k'}. Otherwise they are
-  ///      {'_x', '_y', '_z'}.
+  ///   1. For SCALAR quantities, the name should exactly match the
+  ///      quantity's name.
+  ///   2. For VECTOR quantities, the name should be composed of the quantity
+  ///      name followed by a 2 character suffix that specifies a component of
+  ///      the vector. The ``ijk_suffix`` argument specifies valid suffixes.
+  ///
+  /// @param[in]  name The name that will be checked
+  /// @param[in]  ijk_suffix When true, the suffixes checked for vector
+  ///     quantities are `{'_i', '_j', '_k'}`. Otherwise, the checked suffixes
+  ///     are `{'_x', '_y', '_z'}`.
+  /// @param[out] vec_component_rslt An optional pointer to a single character.
+  ///     When this is not NULL, the method uses that location to specify
+  ///     the detected vector suffix for ``name`` (when ``name`` corresponds to
+  ///     a VECTOR quantity). Expected outputs include `'i'`, `'j'`, and `'k'`
+  ///     or `'x'`, `'y'`, and `'z'` (depending on ``ijk_suffix``). When no
+  ///     suffix is detected or ``name`` doesn't correspond to a known actively
+  ///     advected VECTOR quantity, this method will write a null character,
+  ///     '\0', to that location.
   static std::string get_actively_advected_quantity_name
-  (std::string name, bool ijk_suffix) noexcept;
+  (const std::string& name, bool ijk_suffix, char* vec_component_rslt=0)
+    noexcept;
+
 
 private: // attributes
 

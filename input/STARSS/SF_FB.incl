@@ -1,0 +1,77 @@
+Particle {
+    list += ["star"];
+    star {
+        attributes = [ "x", "default",
+                       "y", "default",
+                       "z", "default",
+                       "vx", "default",
+                       "vy", "default",
+                       "vz", "default",
+                       "ax", "default",
+                       "ay", "default",
+                       "az", "default",
+                       "mass", "default",
+                       "creation_time", "default",
+                       "creation_level", "default",
+                       "lifetime", "default",
+                       "metal_fraction", "default",
+                       "is_copy", "int64",
+                       "number_of_sn", "int64",
+                       "id", "int64" ];
+        position = [ "x", "y", "z" ];
+        velocity = [ "vx", "vy", "vz" ];
+        group_list = ["is_gravitating"];
+    }
+}
+
+Method {
+     star_maker {
+       flavor = "STARSS"; # pick star formation method             
+
+       min_level = 4; # minimum level for star formation
+
+       use_density_threshold    = false;  # check number density for SF
+       use_overdensity_threshold= false;    # check overdensity
+ 
+       use_velocity_divergence  = true;  # converging flow criterion
+       use_cooling_time         = false; # check that cooling_time < dynamical_time
+     
+       use_self_gravitating     = true;  # check that virial parameter < 1
+       use_altAlpha             = false; # replace virial parameter calculation with total_energy/potential
+       use_h2_self_shielding    = false;
+       use_temperature_threshold= false;
+       use_critical_metallicity = false;
+       use_jeans_mass           = true;
+
+       overdensity_threshold    = 512.0;
+       minimum_star_mass        = 500.0;
+       maximum_star_mass        = 1000.0;
+       number_density_threshold = 100.0;
+       temperature_threshold    = 1e4;
+       critical_metallicity     = 4.1e-8 / 0.012;
+       turn_off_probability     = false;   # turn off probablistic part of SF for testing
+       maximum_mass_fraction    = 0.05;    # maximum fraction of a cell that can be converted into stars
+     };
+
+  feedback {
+    flavor = "STARSS";
+    supernovae = true;       # whether to have SNe at all
+    unrestricted_sn = true; # Allow > 1 SN per particle in a timestep
+    stellar_winds = true;   # whether to have stellar winds
+    analytic_SNR_shell_mass = true; # calculate shell mass and subtract this from blast interior
+                                 # during feedback deposition
+
+    fade_SNR = true; # Allow coupling of FB out to the fading phase, where expansion of the SNR
+                     # is comparable to the local sound speed.
+
+    NEvents = -1; # Use this to manually set off SN events in ideal tests.
+                  # if -1, SN rates are calculated for the particles to determine when
+                  # they blow up
+  };
+
+  output {
+    particle_list += ["star"];
+  }
+
+
+}

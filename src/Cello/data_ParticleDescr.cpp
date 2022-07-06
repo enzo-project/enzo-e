@@ -242,7 +242,7 @@ int ParticleDescr::attribute_index (int it, std::string attribute_name) const
 
   static int count[CONFIG_NODE_SIZE] = {0};
 
-  if (index == -1 && count[cello::index_static()]++ < 10 ) {
+  if (index == -1 && count[cello::index_static()]++ < 1 ) {
     WARNING2("ParticleDescr::attribute_index()",
 	     "Trying to access unknown attribute %s in particle type \"%s\"",
 	     attribute_name.c_str(),type_name(it).c_str());
@@ -253,21 +253,17 @@ int ParticleDescr::attribute_index (int it, std::string attribute_name) const
 
 //----------------------------------------------------------------------
 
-bool ParticleDescr::is_attribute(int it, std::string attribute_name) const
+bool ParticleDescr::has_attribute(int it, std::string attribute_name) const
 {
-  ASSERT1("ParticleDescr::is_attribute",
+  ASSERT1("ParticleDescr::has_attribute",
           "Trying to access unknown particle type %d",
-          it,
-          (0 <= it && it < num_types()));
-
+          it, (0 <= it && it < num_types()));
+    
   auto iter=attribute_index_[it].find(attribute_name);
 
-  int index = (iter != attribute_index_[it].end()) ? iter->second : -1;
-
-  static int count[CONFIG_NODE_SIZE] = {0};
-
-  return !((index == -1) && (count[cello::index_static()]++ < 10));
+  return iter != attribute_index_[it].end();
 }
+
 //----------------------------------------------------------------------
 
 std::string ParticleDescr::attribute_name (int it, int ia) const
@@ -320,6 +316,21 @@ void ParticleDescr::set_velocity (int it, int ix, int iy, int iz)
   attribute_velocity_[it][2] = iz;
 }
 
+//----------------------------------------------------------------------
+
+void ParticleDescr::check_particle_attribute(const std::string& type,
+					     const std::string& attribute){
+
+  ASSERT1("ParticleDescr::check_particle_attribute",
+	  "Error: This problem requires %s particle_type.",
+	  type.c_str(), type_exists(type));
+
+  int it = type_index(type);
+  ASSERT2("ParticleDescr::check_particle_attribute",
+	  "Error: This problem requires %s particles to have an "
+	  "attribute called %s.",
+	  type.c_str(), attribute.c_str(),has_attribute(it,attribute));
+}
 //----------------------------------------------------------------------
 // Constants
 //----------------------------------------------------------------------
@@ -411,16 +422,14 @@ int ParticleDescr::constant_offset (int it, int ic) const
 
 bool ParticleDescr::has_constant(int it, std::string constant_name) const
 {
-  ASSERT1("ParticleDescr::constant_index",
+  ASSERT1("ParticleDescr::has_constant",
           "Trying to access unknown particle type %d",
-          it,
-          (0 <= it && it < num_types()));
+          it, (0 <= it && it < num_types()));
 
   auto iter=constant_index_[it].find(constant_name);
 
-  bool check = (iter != constant_index_[it].end()) ? true : false;
-
-  return check;
+  return iter != constant_index_[it].end();
+  
 }
 
 

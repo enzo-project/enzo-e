@@ -16,28 +16,25 @@ EnzoMethodComovingExpansion::EnzoMethodComovingExpansion
   : Method(),
     comoving_coordinates_(comoving_coordinates)
 {
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
 
   const int rank = cello::rank();
 
-  // Declare required fields
-  this->required_fields_ = std::vector<std::string>
-                        {"density","total_energy","internal_energy","pressure"};
-
-  if (rank >= 1) this->required_fields_.push_back("velocity_x");
-  if (rank >= 2) this->required_fields_.push_back("velocity_y");
-  if (rank >= 3) this->required_fields_.push_back("velocity_z");
-
-  // define required fields if they do not exist
-  this->define_fields();
+  cello::define_field ("density");
+  cello::define_field ("total_energy");
+  cello::define_field ("internal_energy");
+  cello::define_field ("pressure");
+  if (rank >= 1) cello::define_field ("velocity_x");
+  if (rank >= 2) cello::define_field ("velocity_y");
+  if (rank >= 3) cello::define_field ("velocity_z");
 
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_field("density");
   refresh->add_field("total_energy");
   refresh->add_field("internal_energy");
-  if (rank >= 1) refresh->add_field("velocity_x");
-  if (rank >= 2) refresh->add_field("velocity_y");
-  if (rank >= 3) refresh->add_field("velocity_z");
+  refresh->add_field("velocity_x");
+  refresh->add_field("velocity_y");
+  refresh->add_field("velocity_z");
 
   if ( ! comoving_coordinates_ ) {
     WARNING
@@ -116,6 +113,7 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
       /* If we can, compute the pressure at the mid-point.
       	 We can, because we will always have an old baryon field now. */
       const int in = cello::index_static();
+      enzo_float gamma = enzo::fluid_props()->gamma();
 
       // hard-code hydromethod for PPM for now
       int HydroMethod = 0;
@@ -166,16 +164,14 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
 
       // Compute the pressure *now*
       enzo_float * pressure_now     = (enzo_float *) field.values("pressure");
-      EnzoComputePressure compute_pressure (EnzoBlock::Gamma[in],
-                                            comoving_coordinates_);
+      EnzoComputePressure compute_pressure (gamma, comoving_coordinates_);
       compute_pressure.compute(block, pressure_now);
 
       // If history is present, compute time-centered pressure
       enzo_float * pressure = NULL;
 
       if (has_history) {
-        EnzoComputePressure compute_pressure_old (EnzoBlock::Gamma[in],
-                                                 comoving_coordinates_);
+        EnzoComputePressure compute_pressure_old (gamma, comoving_coordinates_);
         compute_pressure_old.set_history(i_old);
 
         pressure = new enzo_float[m];
@@ -193,12 +189,14 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
         pressure = pressure_now;
       }
 
+      int idual = static_cast<int>
+        (! enzo::fluid_props()->dual_energy_config().is_disabled());
       /* Call fortran routine to do the real work. */
 
       FORTRAN_NAME(expand_terms)
 	(
-	 &rank, &m, &EnzoBlock::DualEnergyFormalism[in], &Coefficient,
-	 (int*) &HydroMethod, &EnzoBlock::Gamma[in],
+	 &rank, &m, &idual, &Coefficient,
+	 (int*) &HydroMethod, &gamma,
 	 pressure,
 	 density_new, total_energy_new, internal_energy_new,
 	 velocity_x_new, velocity_y_new, velocity_z_new,
@@ -218,7 +216,7 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodComovingExpansion::timestep( Block * block ) const throw()
+double EnzoMethodComovingExpansion::timestep( Block * block ) throw()
 {
 
   enzo_float dtExpansion = ENZO_HUGE_VAL;

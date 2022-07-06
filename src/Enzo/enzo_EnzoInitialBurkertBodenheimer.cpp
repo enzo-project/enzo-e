@@ -37,7 +37,10 @@ void EnzoInitialBurkertBodenheimer::enforce_block
 
 {
 
-  if (!block->is_leaf()) return;
+  if (!block->is_leaf()) {
+    block->initial_done();
+    return;
+  }
 
   Timer timer;
   timer.start();
@@ -113,11 +116,11 @@ void EnzoInitialBurkertBodenheimer::enforce_block
 
   // Initialize Fields
 
-  const int in = cello::index_static();
-
-  const double gamma = EnzoBlock::Gamma[in];
-  //const double energy = (1e-3*(cello::kboltz)*temperature_ / ((gamma - 1.0) * (1.0 * cello::mass_hydrogen)))/enzo_units->energy();
-  const double energy = (temperature_/enzo_units->temperature()) / ((gamma-1.0)) / enzo_config->ppm_mol_weight;
+  const double gamma = enzo::fluid_props()->gamma();
+  //const double energy = (1e-3*(enzo_constants::kboltz)*temperature_ / ((gamma - 1.0) * (1.0 * enzo_constants::mass_hydrogen)))/enzo_units->energy();
+  const double mol_weight = (double)enzo::fluid_props()->mol_weight();
+  const double energy = ((temperature_/enzo_units->kelvin_per_energy_units())
+                         / ((gamma-1.0)) / mol_weight);
 
   // fixed for now about 1 / 10 solar
   const double inner_metal_fraction = 0.0010; // sub-solar
@@ -133,7 +136,7 @@ void EnzoInitialBurkertBodenheimer::enforce_block
   const double rz2i = 1.0/(rz*rz);
 
   // This is the density at the trucation radius
-  const double density = (mass_*cello::mass_solar/enzo_units->mass()) / (4.0/3.0*(cello::pi)*rx*ry*rz);
+  const double density = (mass_*enzo_constants::mass_solar/enzo_units->mass()) / (4.0/3.0*(cello::pi)*rx*ry*rz);
 
 
   // velocity at termination radius (if provided)
@@ -145,7 +148,7 @@ void EnzoInitialBurkertBodenheimer::enforce_block
   CkPrintf("%s: mass = %e\n", __FUNCTION__, mass_);
   CkPrintf("%s: rx = %e\n", __FUNCTION__, rx);
   CkPrintf("%s: calculated mass (assuming uniform density) = %e\n",
-	 __FUNCTION__, (density*(4.0/3.0*(cello::pi)*rx*ry*rz))* (enzo_units->mass())/(cello::mass_solar));
+	 __FUNCTION__, (density*(4.0/3.0*(cello::pi)*rx*ry*rz))* (enzo_units->mass())/(enzo_constants::mass_solar));
 */
   //exit(-99);
 
@@ -247,15 +250,15 @@ void EnzoInitialBurkertBodenheimer::enforce_block
 		  float m2mode = 1.0 + 0.1*cos(2.*phi);
 		  d[i] += density * m2mode;
 		}
-                t[i]  = temperature_ / enzo_units->temperature();
+                t[i]  = temperature_; // field has units of Kelvin
 
     if (metal) metal[i] = d[i]*inner_metal_fraction;
 
-		if(i == 20) {
-		  CkPrintf("Density = %e\n", d[i]);
-		  CkPrintf("Angular Velocity = %e rad/s", sqrt(vx[i]*vx[i] + vy[i]*vy[i] + vz[i]*vz[i])/radius / enzo_units->time());
+		//if(i == 20) {
+		  //CkPrintf("Density = %e\n", d[i]);
+		  //CkPrintf("Angular Velocity = %e rad/s", sqrt(vx[i]*vx[i] + vy[i]*vy[i] + vz[i]*vz[i])/radius / enzo_units->time());
 		  //CkExit(-99);
-		}
+		//}
 	      }
 	    }
 	  }
@@ -281,6 +284,7 @@ void EnzoInitialBurkertBodenheimer::enforce_block
 
   Particle particle = block->data()->particle();
 
+  block->initial_done();
 }
 
 /************************************************************************/

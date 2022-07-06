@@ -1,3 +1,16 @@
+:Parameter:  :p:`Physics` : :p:`list`
+:Summary: :s:`List of physics-sets`
+:Type:    :t:`list` ( :t:`string` )
+:Default: :d:`[]`
+:Scope:     :c:`Cello`
+
+:e:`Specifies list of physics-sets, each of which has its own
+associated: Physics : <physics-set> : parameters. Any parameters
+associated with a physics-set subgroup that is not in this` `list`
+:e:`parameter are ignored. Allowed values include:`
+
+  * :t:`"cosmology"` :e:`specifies cosmological constants.`
+  * :t:`"fluid_props"` :e:`specifies parameters related to gas properties.`
 
 cosmology
 ---------
@@ -61,3 +74,169 @@ cosmology
 
 :e:`Omega matter for Z=0.`
 
+fluid_props
+-----------
+
+:p:`Physics:fluid_props` parameters are used to specify general fluid
+properties for the gas.  The majority of these parameters are further
+divided into the following 3 subgroups: ``dual_energy``, ``floors``,
+``eos``.
+
+:e:`An example configuration is described below:`
+
+:: 
+
+     Physics {
+        list = ["fluid_props"];
+        fluid_props {
+        
+           dual_energy { type = "disabled"; }
+
+           eos {
+              gamma = 1.4;
+           }
+
+           floors {
+              density  = 1e-10;
+              pressure = 1e-10;
+           }
+
+           mol_weight = 0.6;
+        }
+     }
+
+----
+
+:Parameter:  :p:`Physics` : :p:`fluid_props` : :p:`mol_weight`
+:Summary: :s:`Specifies the gas's nominal mean molecular weight`
+:Type:    :t:`float`
+:Default: :d:`0.6`
+:Scope:     :z:`Enzo`
+
+:e:`Specifies the gas's nominal mean molecular weight. This is used in
+operations like computing the temperature field. When the`
+``"grackle"`` :e:`method is in use, this parameter may not be used.`
+
+----
+
+dual_energy
+~~~~~~~~~~~
+
+:p:`Physics:fluid_props:dual_energy` parameters specify details about
+the dual-energy formalism (or the lack thereof). Significantly more
+detail about the different variants are provided in
+:ref:`using-fluid_props-de`.
+
+----
+
+:Parameter:  :p:`Physics` : :p:`fluid_props` : :p:`dual_energy` : :p:`type`
+:Summary: :s:`specifies formulation of dual-energy formalism (if any)`
+:Type:    :t:`string`
+:Default: :d:`disabled`
+:Scope:     :z:`Enzo`
+
+:e:`Specifies the formulation of the dual-energy formalism that the
+simulation uses (if any). Valid choices include:`
+
+  * ``"disabled"`` :e:`The dual-energy formalism is not used. This is
+    the default option.`
+
+  * ``"bryan95"`` :e:`Enables the formulation of the dual-energy
+    formalism that is described in` `Bryan et al (1995)
+    <https://ui.adsabs.harvard.edu/abs/1995CoPhC..89..149B>`_
+
+  * ``"modern"`` :e:`Enables the formulation of the dual-energy
+    formalism that is described in` :ref:`GeneralDesignOverview-section`
+
+----
+
+:Parameter:  :p:`Physics` : :p:`fluid_props` : :p:`dual_energy` : :p:`eta`
+:Summary: :s:`eta parameter(s) for the dual-energy formalism`
+:Type:    :t:`list` ( :t:`float` )
+:Default: :d:`[]`
+:Scope:     :z:`Enzo`
+
+:e:`Specifies parameters used in the dual energy formalism. It expects a different number of parameters based on the value of` :p:`Physics:fluid_props:dual_energy:type`. :e:`The expectations are summarized below:`
+
+  * ``"disabled"``: :e:`This should always be an empty list.`
+  * ``"bryan95"``: :e:`The list should always contain two entries corresponding to` ``[eta_1, eta_2]``. :e:`An empty list (the default value) is treated as though it has the value` ``[0.001, 0.1]``.
+  * ``modern"``: :e:`The list should always one entry corresponding to` ``[eta]``. :e:`An empty list (the default value) is treated as though it has the value` ``[0.001]``.
+
+eos
+~~~
+
+:p:`Physics:fluid_props:dual_energy` parameters specify details about
+the (caloric) equation of state. At this time, this only supports an 
+ideal gas. But, in the future this will support alternative 
+equations of state (like an isothermal equation of state).
+
+See :ref:`using-grackle-gamma-with-HD` for further discussion about
+how the equation of state is handled when
+``Method:grackle:primordial_chemistry > 1`` (under these conditions
+Grackle models a spatially varying adiabatic index).
+
+----
+
+:Parameter:  :p:`Physics` : :p:`fluid_props` : :p:`eos` : :p:`gamma`
+:Summary: :s:`Adiabatic exponent`
+:Type:    :t:`float`
+:Default: :d:`5.0 / 3.0`
+:Scope:     :z:`Enzo`
+
+:p:`gamma` :e:`specifies the ratio of specific heats for the ideal gas
+used by the hydrodynamics solvers. This is used in a number other
+places like the` ``"grackle"`` :e:`method, and various
+problem-initializers.`
+
+floors
+~~~~~~
+
+:p:`Physics:fluid_props:floors` parameters specify the floors that
+should be applied to different fluid quantities. Valid parameter values
+must be positive. Different methods selectively apply these floors.
+For more details, see :ref:`using-fluid_props-floors`.
+
+----
+
+:Parameter:  :p:`Physics` : :p:`fluid_props` : :p:`floors` : :p:`density`
+:Summary: :s:`Lower limit on density field`
+:Type:   :t:`float`
+:Default: :d:`none`
+:Scope:     :z:`Enzo`
+
+:e:`Floor to be applied to the mass density field.`
+
+----
+
+:Parameter:  :p:`Physics` : :p:`fluid_props` : :p:`floors` : :p:`pressure`
+:Summary: :s:`Lower limit on thermal pressure`
+:Type:    :t:`float`
+:Default: :d:`none`
+:Scope:     :z:`Enzo`
+
+:e:`Thermal pressure floor.`
+
+----
+
+:Parameter:  :p:`Physics` : :p:`fluid_props` : :p:`floors` : :p:`temperature`
+:Summary: :s:`Lower limit on temperature`
+:Type:    :t:`float`
+:Default: :d:`none`
+:Scope:     :z:`Enzo`
+
+:e:`Temperature floor, which must exceed 0. Note that this is
+specified with units of Kelvin (since the ``"temperature"`` field is
+always measured in Kelvin in Enzo-E)`
+
+----
+
+:Parameter:  :p:`Physics` : :p:`fluid_props` : :p:`floors` : :p:`metallicity`
+:Summary: :s:`Minimum metallicity in solar units`
+:Type:    :t:`float`
+:Default: :d:`0.0`
+:Scope:     :z:`Enzo`
+
+:e:`Minimum metallicity in solar units. This parameter is multiplied
+by the` ``enzo_constants::metallicity_solar`` :e:`constant and the
+local value of the` ``"density"`` :e:`field to give the local floor
+for the` ``"metal_density"`` :e:`field`

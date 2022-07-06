@@ -11,6 +11,15 @@ simulation.  They can be declared in the parameter file using Cello's
 such as "implosion_2d" for the "Implosion test", or "sedov_array_3d" for
 a 3D array of Sedov blast waves.
 
+``"accretion_test"``
+   Initialize a sink particle with some mass, position, and velocity, in
+   a background medium of constant density and pressure, possibly with a
+   velocity directed towards the initial position of the sink particle.
+
+``"bb_test"``
+   Initialize a "BB Test" problem, following the setup described in
+   Federrath et al 2010, ApJ, 713, 269.
+
 ``"cloud"``
    Initialize a spherical cloud embedded in a hot wind.
 
@@ -30,7 +39,11 @@ a 3D array of Sedov blast waves.
 ``"inclined_wave``
    Initialize an inclined wave test problem. (Primarily used for
    testing the VL+CT MHD solver).
-  
+
+``"merge_sinks_test"``
+   Initialise sink particles with masses, positions, and velocities read
+   from a text file specified in the parameter file.
+
 ``"pm"``
    Initialize ``"dark"`` matter particles in either a regular uniform
    array with one particle per cell, or randomly following the ``"density"``
@@ -62,6 +75,10 @@ a 3D array of Sedov blast waves.
 ``"shock_tube"``
    Initialize an axis-aligned shock tube test problem (Primarily used for
    testing the VL+CT MHD solver).
+
+``"shu_collapse"``
+   Initialize a Shu Collapse problem, following the setup described in
+   Federrath et al 2010, ApJ, 713, 269.
 
 ``"soup"``
    

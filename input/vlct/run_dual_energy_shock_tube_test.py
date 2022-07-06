@@ -21,16 +21,14 @@
 # - This script expects to be called from the root level of the repository
 #   OR at the same level where its defined
 
-
+import argparse
 import os
 import os.path
 import sys
 import numpy as np
 import shutil
-import subprocess
-import math
 
-from testing_utils import prep_cur_dir, EnzoEWrapper, CalcTableL1Norm
+from testing_utils import testing_context, EnzoEWrapper, CalcTableL1Norm
 from run_MHD_shock_tube_test import analyze_shock
 
 def run_tests(executable):
@@ -50,8 +48,7 @@ def analyze_tests():
                       'sod_shock_tube_t0.25_res128.csv')
     verbose_l1_calc = False # Print out command line call
     verbose_analyze = False # Print out summaries of passed tests
-    l1_functor = CalcTableL1Norm("tools/l1_error_norm.py",
-                                 default_ref_table = ref_table_path,
+    l1_functor = CalcTableL1Norm(default_ref_table = ref_table_path,
                                  verbose = verbose_l1_calc)
     kwargs = dict(
         target_template = 'method_vlct-1-sod_{}_de_M10_0.25/',
@@ -96,47 +93,20 @@ def cleanup():
             shutil.rmtree(dir_name)
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--launch_cmd', required=True,type=str)
+    args = parser.parse_args()
 
-    if len(sys.argv) == 1:
-        nproc = 1
-    elif len(sys.argv) == 2:
-        try:
-            nproc = int(sys.argv[1])
-        except:
-            raise ValueError(
-                "{} can take an optional positive integer ".format(sys.argv[0])
-                + "argument for specifying the use of multiple processes")
-    else:
-        raise ValueError(
-            "{} can take up to 1 argument to specify the ".format(sys.argv[0])
-            + "number of processes. {:d} arguments ".format(len(sys.argv)-1)
-            + "were provided")
+    with testing_context():
 
-    if nproc <= 0:
-        raise ValueError("number of processes must be a positive integer")
-    elif nproc == 1:
-        executable = 'bin/enzo-e'
-    else:
-        charm_args = os.environ.get('CHARM_ARGS')
-        if charm_args is None:
-            executable_template = 'charmrun +p{:d} bin/enzo-e'
-        else:
-            executable_template \
-                = ' '.join(['charmrun', charm_args, '+p{:d}', 'bin/enzo-e'])
-        executable = executable_template.format(nproc)
+        # run the tests
+        run_tests(args.launch_cmd)
 
-    # this script can either be called from the base repository or from
-    # the subdirectory: input/vlct
-    prep_cur_dir('bin/enzo-e')
+        # analyze the tests
+        tests_passed = analyze_tests()
 
-    # run the tests
-    run_tests(executable)
-
-    # analyze the tests
-    tests_passed = analyze_tests()
-
-    # cleanup the tests
-    cleanup()
+        # cleanup the tests
+        cleanup()
 
     if tests_passed:
         sys.exit(0)

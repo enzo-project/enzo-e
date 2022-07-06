@@ -301,7 +301,7 @@ EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
 ()
   : Method()
 {
-
+  cello::particle_descr()->check_particle_attribute("star","mass");
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
 
@@ -310,28 +310,29 @@ EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
   // const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
   //                           enzo_sync_id_method_feedback);
   // refresh(ir)->add_all_fields();
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
-
-  ParticleDescr * particle_descr = cello::particle_descr();
 
   //
   // Refresh copies of all star particles on neighboring grids
   //
-  const int it = particle_descr->type_index("star");
-  const bool copy = true;
-  // copy all neighboring particles of this type (default false)
-  refresh->add_particle(it, copy);
+  refresh->add_particle(cello::particle_descr()->type_index("star"));
+  refresh->set_particles_are_copied(true);
 
-  FieldDescr * field_descr = cello::field_descr();
-
-
-  dual_energy_         = field_descr->is_field("internal_energy") &&
-                         field_descr->is_field("total_energy");
-
-
-  // enzo_config->ppm_dual_energy;
+  const EnzoDualEnergyConfig& de_config
+    = enzo::fluid_props()->dual_energy_config();
+  if (de_config.bryan95_formulation()){
+    dual_energy_ = true;
+  } else if (de_config.is_disabled()){
+    dual_energy_ = false;
+  } else { // de_config.modern_formulation() == true
+    // I doubt this case has issues, but raise error to be safe
+    ERROR("EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback",
+          "this class is untested with this formulation of the dual energy "
+          "formalism");
+    dual_energy_ = true;
+  }
 
 
   // Fraction of total energy to deposit as kinetic rather than thermal energy
@@ -526,7 +527,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
         double star_age = 0.0;
         unsigned long long int rand_int;
 
-        const double time_last_sn = 37.7 * cello::Myr_s / enzo_units->time();
+        const double time_last_sn = 37.7 * enzo_constants::Myr_s / enzo_units->time();
 
         if ( (plifetime[ipdl] <= 0.0) ||
              ( (current_time - pcreation[ipdc]) < time_last_sn ) ) {
@@ -621,7 +622,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
               progenitor_mass = 20.0;
             }
 
-            delay_time   *=  cello::yr_s / enzo_units->time(); // code units
+            delay_time   *=  enzo_constants::yr_s / enzo_units->time(); // code units
             star_age = current_time - pcreation[ipdc]; // code units
             if ((delay_time > star_age) && (delay_time < star_age + enzo_block->dt  )) {
             // AJE: I"m a little confused as to why the above check in original code
@@ -661,7 +662,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
             } // end check star_age
 
 //          Behavior not yet possible in Enzo-E
-//            if ( star_age < delay_time + 0.1 * cello::Myr_s / enzo_units->time()){
+//            if ( star_age < delay_time + 0.1 * enzo_constants::Myr_s / enzo_units->time()){
 //              // change type to must refine
 //            } else {
 //              change back to star
@@ -685,21 +686,21 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
      //           used to compute these rates with starburst 99.  Reduce to account
      //           for the size of the star particle
         wind_mass = wind_mass * enzo_config->method_star_maker_minimum_star_mass * 1.0E-6;
-        wind_mass = wind_mass / cello::yr_s; // in Msun / s
+        wind_mass = wind_mass / enzo_constants::yr_s; // in Msun / s
         wind_mass = (wind_mass * enzo_units->time()) * enzo_block->dt; // Msun this timestep
 
-        double tsoon7      = soonest_explosion * enzo_units->time() / (1.0E7 * cello::yr_s);
+        double tsoon7      = soonest_explosion * enzo_units->time() / (1.0E7 * enzo_constants::yr_s);
         double wind_energy = 0.0;
         if (time_first_sn_ > 0){
           // --- for testing ---
-          wind_energy = 1.0E48 / (8.0 * cello::mass_solar); // non zero erg
+          wind_energy = 1.0E48 / (8.0 * enzo_constants::mass_solar); // non zero erg
         } else{
           wind_energy = s99_wind_energy(td7, tsoon7); // in cm^2/s^2 (i.e. per unit mass in cgs)
         }
-        wind_energy        = wind_energy * wind_mass * cello::mass_solar; // now total E in erg
+        wind_energy        = wind_energy * wind_mass * enzo_constants::mass_solar; // now total E in erg
 
         star_age = current_time - pcreation[ipdc]; // code units
-        td7 = star_age * enzo_units->time() / cello::yr_s / 1.0E7; // time in 10^7 yr
+        td7 = star_age * enzo_units->time() / enzo_constants::yr_s / 1.0E7; // time in 10^7 yr
         double sn_mass = 0.0, sn_energy = 0.0, sn_metal_fraction = 0.0;
         if (explosion_flag > 0){
           if (time_first_sn_ > 0){ // hack here ! for testing
@@ -720,10 +721,10 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
         double m_eject = wind_mass + sn_mass;          // total mass in Msun
         double energy  = wind_energy + sn_energy;      // total energy in erg
 
-        if (m_eject*cello::mass_solar / enzo_units->mass() > pmass[ipdm]){
+        if (m_eject*enzo_constants::mass_solar / enzo_units->mass() > pmass[ipdm]){
           CkPrintf("WARNING: S99 Distributed Feedback is loosing too much mass\n");
           CkPrintf("setting particle mass to zero, but continuing anyway\n");
-          CkPrintf(" %g %g %g %g \n",pmass[ipdm],m_eject*cello::mass_solar/enzo_units->mass(),
+          CkPrintf(" %g %g %g %g \n",pmass[ipdm],m_eject*enzo_constants::mass_solar/enzo_units->mass(),
                                      wind_mass, sn_mass);
           CkPrintf(" %i %i \n",will_explode, explosion_flag);
         } // mass will be removed elsewhere
@@ -752,7 +753,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
                               metal_fraction,
                               pvx[ipdv], pvy[ipdv], pvz[ipdv]);
         // remove mass - error checking on the std::max is handled above with warning
-        pmass[ipdm] = std::max( 0.0, pmass[ipdm] - m_eject*cello::mass_solar/enzo_units->mass());
+        pmass[ipdm] = std::max( 0.0, pmass[ipdm] - m_eject*enzo_constants::mass_solar/enzo_units->mass());
 /*
         this->inject_feedback(block, xpos, ypos, zpos,
                               enzo_config->method_feedback_ejecta_mass,
@@ -774,7 +775,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
 #ifdef DEBUG_FEEDBACK
     CkPrintf("DistributedFeedback (%s) ------------1------------ Number of local / total particles : %i %i\n",enzo_block->name().c_str(),particle.num_local_particles(it), particle.num_particles(it));
 #endif
-    int delete_count = enzo_block->delete_particle_copies_(it);
+    int delete_count = enzo_block->delete_non_local_particles_(it);
     cello::simulation()->data_delete_particles(delete_count);
 #ifdef DEBUG_FEEDBACK
     CkPrintf("DistributedFeedback (%s) ------------2------------ Number of local / total particles : %i %i\n",enzo_block->name().c_str(),particle.num_local_particles(it), particle.num_particles(it));
@@ -887,15 +888,21 @@ void EnzoMethodDistributedFeedback::add_ionization_feedback(
   const float alpha = 2.60E-13; // cm^3 / s
 
   // AE: possibly actually compute mu from species fields
-  double ndens = d[index] * enzo_units->density() / enzo_config->ppm_mol_weight / cello::mass_hydrogen;
+  const double mol_weight = (double)enzo::fluid_props()->mol_weight();
+
+  double ndens = (d[index] * enzo_units->density() / mol_weight
+                  / enzo_constants::mass_hydrogen);
 
   double stromgren_radius = std::pow( (3.0 * s49_tot * 1.0E49) /
                             (4.0 * cello::pi * alpha * ndens*ndens),1.0/3.0);
   double stromgren_volume = (4.0/3.0)*cello::pi*stromgren_radius*stromgren_radius*stromgren_radius;
   stromgren_volume        /= (enzo_units->length()*enzo_units->length()*enzo_units->length());
-  double ionized          = cello::kboltz * 1.0E4 / std::min(0.6,enzo_config->ppm_mol_weight) /
-                            cello::mass_hydrogen / (enzo_units->length()*enzo_units->length()) *
+  double ionized          = enzo_constants::kboltz * 1.0E4 /
+                            std::min(0.6,mol_weight) /
+                            enzo_constants::mass_hydrogen /
+                            (enzo_units->length()*enzo_units->length()) *
                             enzo_units->time() * enzo_units->time();
+                            
 
 
   if (stromgren_volume <= cell_volume){
@@ -903,7 +910,7 @@ void EnzoMethodDistributedFeedback::add_ionization_feedback(
   }
 
 #ifdef DEBUG_FEEDBACK
-  CkPrintf("DistributedFeedback (%s): This cell should be getting ionized with radius = %g (pc). volume ratio = %g. will_explode = %i ge = %g ionized = %g\n", enzo_block->name().c_str(), stromgren_radius / cello::pc_cm, stromgren_volume * inv_volume, will_explode, ge[index], ionized);
+  CkPrintf("DistributedFeedback (%s): This cell should be getting ionized with radius = %g (pc). volume ratio = %g. will_explode = %i ge = %g ionized = %g\n", enzo_block->name().c_str(), stromgren_radius / enzo_constants::pc_cm, stromgren_volume * inv_volume, will_explode, ge[index], ionized);
 #endif
 
 
@@ -999,7 +1006,7 @@ void EnzoMethodDistributedFeedback::inject_feedback(
   CkPrintf("Injecting feedback in %i cells at mass (Msun) %g and energy (E51) %g\n",number_of_feedback_cells_, m_eject, E_51);
 #endif
   double energy_per_cell = E_51 * 1.0E51 / energy_units;
-  double mass_per_cell   = m_eject * cello::mass_solar / enzo_units->mass();
+  double mass_per_cell   = m_eject * enzo_constants::mass_solar / enzo_units->mass();
 
   mass_per_cell /= ((double) number_of_feedback_cells_);
   energy_per_cell /= ((double) number_of_feedback_cells_);
@@ -1086,6 +1093,8 @@ void EnzoMethodDistributedFeedback::inject_feedback(
     ke_before[i] = 0.0; metal_local[i] = 0.0;
   }
 
+  const double mu_cell = (double)enzo::fluid_props()->mol_weight();
+
   if (ke_f < 0){
 
     // calculate variable kinetic energy fraction
@@ -1105,8 +1114,6 @@ void EnzoMethodDistributedFeedback::inject_feedback(
 
           if ( (index < 0) || (index >= mx*my*mz)) continue;
 
-          double mu_cell  = enzo_config->ppm_mol_weight;
-
           avg_z += metal[index]; // need to divide by d_tot below
           avg_n += d[index] / mu_cell;
           avg_d += d[index];
@@ -1117,7 +1124,7 @@ void EnzoMethodDistributedFeedback::inject_feedback(
     double inv_ncell = 1.0 / ((double) number_of_feedback_cells_);
     const double z_solar = 0.02;   // as assumed for these equations
     avg_z =  (avg_z / avg_d) / z_solar; // mass-weighted metallicity
-    avg_n *= inv_ncell * enzo_units->density() / cello::mass_hydrogen; // in cgs
+    avg_n *= inv_ncell * enzo_units->density() / enzo_constants::mass_hydrogen; // in cgs
     avg_d *= inv_ncell * enzo_units->density(); // in cgs
 
 
@@ -1135,7 +1142,7 @@ void EnzoMethodDistributedFeedback::inject_feedback(
       R_PDS = 18.50 * pow(E_51,2.0/7.0 ) * pow(avg_z,-1.0/7.0 ) * pow(avg_n,-3.0/7.0);
     } // end metallicity check
 
-    double     R_resolve = hx*enzo_units->length() / cello::pc_cm;
+    double     R_resolve = hx*enzo_units->length() / enzo_constants::pc_cm;
     const double  n_resolve = 4.5; // number of cells needed to resolve R
 
     if (R_PDS > n_resolve * R_resolve){
@@ -1143,7 +1150,7 @@ void EnzoMethodDistributedFeedback::inject_feedback(
 
     } else {
 
-      ke_f = 3.97133E-6 * (avg_d / cello::mass_hydrogen) *
+      ke_f = 3.97133E-6 * (avg_d / enzo_constants::mass_hydrogen) *
                    (1.0 / (R_resolve * R_resolve)) *
                    pow(R_PDS,7) * ( 1.0 / (t_PDS*t_PDS)) *
                    (1.0 / E_51);
@@ -1534,7 +1541,7 @@ void EnzoMethodDistributedFeedback::compute_coefficients(
   return;
 }
 
-double EnzoMethodDistributedFeedback::timestep (Block * block) const throw()
+double EnzoMethodDistributedFeedback::timestep (Block * block) throw()
 {
   // In general this is not needed, but could imagine putting timestep
   // limiters in situations where, for example, one would want
@@ -1542,6 +1549,6 @@ double EnzoMethodDistributedFeedback::timestep (Block * block) const throw()
   // important things happen throughout the star's lifetime.
   EnzoUnits * enzo_units = enzo::units();
 
-//  return 1000.0 * cello::yr_s / enzo_units->time();
+//  return 1000.0 * enzo_constants::yr_s / enzo_units->time();
   return std::numeric_limits<double>::max();
 }

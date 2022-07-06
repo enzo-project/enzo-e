@@ -11,7 +11,7 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+import json, sys, os, subprocess
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -26,9 +26,9 @@ import sys, os
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.intersphinx',
-              'sphinx.ext.todo',]
+              'sphinx.ext.todo',
+              'breathe',]
 todo_include_todos=True
-
 
 # Add any paths that contain templates here, relative to this directory.
 # templates_path = ['_templates']
@@ -44,7 +44,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Enzo-E / Cello'
-copyright = u'2019, James Bordner'
+copyright = u'2022, Enzo Development Community'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -125,7 +125,17 @@ html_theme_path = ["."]
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-#html_static_path = ['_static']
+html_static_path = ['_static']
+
+html_css_files = {
+   'theme_overrides.css',  # overrides for wide tables in RTD theme
+    #                        taken from
+    #                        https://github.com/readthedocs/sphinx_rtd_theme/issues/117
+    #                        to solve the issue related to the tables
+    #                        not wrapping
+   'roles.css'
+}
+
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -184,7 +194,7 @@ htmlhelp_basename = 'Enzo-ECellodoc'
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('index', 'Enzo-ECello.tex', u'Enzo-E / Cello Documentation',
-   u'James Bordner', 'manual'),
+   u'Enzo Development Community', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -217,7 +227,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'enzo-ecello', u'Enzo-E / Cello Documentation',
-     [u'James Bordner'], 1)
+     [u'Enzo Development Community'], 1)
 ]
 
 
@@ -225,9 +235,9 @@ man_pages = [
 
 # Bibliographic Dublin Core info.
 epub_title = u'Enzo-E / Cello'
-epub_author = u'James Bordner'
-epub_publisher = u'James Bordner'
-epub_copyright = u'2019, James Bordner'
+epub_author = u'Enzo Development Community'
+epub_publisher = u'Enzo Development Community'
+epub_copyright = u'2022, Enzo Development Community'
 
 # The language of the text. It defaults to the language option
 # or en if the language is not set.
@@ -263,12 +273,58 @@ epub_copyright = u'2019, James Bordner'
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'http://docs.python.org/': None}
 
-# taken from https://github.com/readthedocs/sphinx_rtd_theme/issues/117
-# to solve the issue related to the tables not wrapping
-html_static_path = ['_static']
+# -- Set Breathe parameters and Execute Doxygen -------------------------------
 
-html_context = {
-    'css_files': [
-        '_static/theme_overrides.css',  # overrides for wide tables in RTD theme
-        ],
-    }
+def _dirtree_latest_mtime(dir_path):
+    """
+    Walk a directory and determine the most recent time at which a contained
+    file/directory was modified, created, deleted, removed, etc.
+    """
+
+    # it's important to check the mtime of every directory since they provide
+    # the only indication that files within that directory were deleted/moved
+
+    max_mtime = os.stat(dir_path).st_mtime # need to explicitly check root-dir
+
+    for root, dirs, files in os.walk(dir_path, followlinks = False):
+        for dir in dirs:
+            statinfo = os.stat(os.path.join(root, dir))
+            max_mtime = max(statinfo.st_mtime, max_mtime)
+        for file in files:
+            statinfo = os.stat(os.path.join(root, file))
+            max_mtime = max(statinfo.st_mtime, max_mtime)
+    return int(max_mtime + 1) # gives posix timestamp in seconds (rounded up)
+
+def build_doxygen():
+    if os.getenv("SKIPDOXYGEN", "FALSE").lower() == "true":
+        # skip a rebuild
+        return None
+
+    # load cached modification times (if they exist)
+    try:
+        with open("../cached_mtimes.json", "r") as f:
+            cached_mtimes = json.load(f)
+    except FileNotFoundError:
+        cached_mtimes = {"src" : None, "dox" : None }
+
+    src_mtime = _dirtree_latest_mtime("../../src")
+    if os.path.isdir("../dox-xml"): # skip doxygen if mtimes match cached vals
+        if ((cached_mtimes["src"] == src_mtime) and
+            (cached_mtimes["dox"] == _dirtree_latest_mtime("../dox-xml"))):
+            return None
+
+    try:
+        retcode = subprocess.call('cd ../../src; doxygen doxygen/Doxyfile-xml',
+                                  shell=True)
+        if retcode < 0:
+            sys.stderr.write("doxygen terminated by signal %s" % (-retcode))
+        else: # cache the md5 hash code for the future
+            with open("../cached_mtimes.json", "w") as f:
+                json.dump({"src" : src_mtime,
+                           "dox" : _dirtree_latest_mtime("../dox-xml")}, f)
+    except OSError as e:
+        sys.stderr.write("doxygen execution failed: %s" % e)
+
+build_doxygen() # always build doxygen docs (for local & rtd builds)
+breathe_projects = { "enzo-e": "../dox-xml/" }
+breathe_default_project = "enzo-e"

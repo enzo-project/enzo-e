@@ -11,7 +11,7 @@
      alignment = 8;
      gamma = 1.40;
      ghost_depth = 4;
-     list = [ "photon_density", "flux_x", "flux_y", "flux_z"];
+     list = [ "photon_density", "flux_x", "flux_y", "flux_z" ];
      padding = 0;
  }
 
@@ -50,13 +50,13 @@ Adapt {
 
 
  Method {
-     list = [ "radiation_transport" ];
+     list = [ "ramses_rt" ];
      radiation_transport {
          N_groups = 1;
          min_freq = 0.0;
          max_freq = 0.0;
          flux_function = "GLF";
-         clight = 29979245800.0;
+         clight_frac = 1.0;
      }
  }
 

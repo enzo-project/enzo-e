@@ -1,0 +1,217 @@
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     mesh.ci
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2011-05-09
+/// @brief    CHARM++ Mesh process group
+
+module mesh {
+
+  initnode void register_reduce_performance(void);
+  initnode void register_reduce_method_debug(void);
+  initnode void register_sum_long_double(void);
+  initnode void register_sum_long_double_2(void);
+  initnode void register_sum_long_double_3(void);
+  initnode void register_sum_long_double_n(void);
+
+  initnode void mutex_init_hierarchy();
+  initnode void mutex_init_initial_value();
+  initnode void mutex_init_field_face();
+
+  readonly int MsgCoarsen::counter[CONFIG_NODE_SIZE];
+  readonly int MsgAdapt::counter[CONFIG_NODE_SIZE];
+  readonly int MsgInitial::counter[CONFIG_NODE_SIZE];
+  readonly int MsgOutput::counter[CONFIG_NODE_SIZE];
+  readonly int MsgRefine::counter[CONFIG_NODE_SIZE];
+  readonly int MsgRefresh::counter[CONFIG_NODE_SIZE];
+  readonly int DataMsg::counter[CONFIG_NODE_SIZE];
+  readonly int FieldFace::counter[CONFIG_NODE_SIZE];
+  readonly int ParticleData::counter[CONFIG_NODE_SIZE];
+  readonly int InitialTrace::id0_[CONFIG_NODE_SIZE];
+  readonly double Method::courant_global;
+  readonly Config g_config;
+  readonly Parameters g_parameters;
+
+  PUPable BoundaryPeriodic;
+  PUPable BoundaryValue;
+  PUPable ColormapRGB;
+  PUPable Config;
+  PUPable Factory;
+  PUPable Initial;
+  PUPable InitialTrace;
+  PUPable InitialValue;
+  PUPable Io;
+  PUPable IoBlock;
+  PUPable IoFieldData;
+  PUPable IoHierarchy;
+  PUPable IoParticleData;
+  PUPable IoSimulation;
+  PUPable ItIndexList;
+  PUPable ItIndexRange;
+  PUPable MaskExpr;
+  PUPable MaskPng;
+  PUPable MethodCloseFiles;
+  PUPable MethodDebug;
+  PUPable MethodFluxCorrect;
+  PUPable MethodNull;
+  PUPable MethodOrderMorton;
+  PUPable MethodOutput;
+  PUPable MethodRefresh;
+  PUPable MethodTrace;
+  PUPable OutputCheckpoint;
+  PUPable OutputData;
+  PUPable OutputImage;
+  PUPable Physics;
+  PUPable Problem;
+  PUPable ProlongInject;
+  PUPable ProlongLinear;
+  PUPable Refine;
+  PUPable RefineDensity;
+  PUPable RefineMask;
+  PUPable RefineParticleCount;
+  PUPable RefineShear;
+  PUPable RefineSlope;
+  PUPable Refresh;
+  PUPable RestrictLinear;
+  PUPable ScheduleInterval;
+  PUPable ScheduleList;
+  PUPable SolverNull;
+  PUPable Stopping;
+  PUPable Units;
+
+  message FieldMsg {
+    char a[];
+  };
+  message MsgAdapt;
+  message MsgCoarsen;
+  message MsgInitial;
+  message MsgOutput;
+  message MsgRefine;
+  message MsgRefresh;
+
+  array[Index] Block {
+
+#ifdef BYPASS_CHARM_MEM_LEAK
+    entry Block (process_type ip_source,  MsgType msg_type);
+    entry void p_set_msg_refine(MsgRefine * msg);
+#else
+    entry Block (MsgRefine * msg);
+#endif
+    entry Block();
+
+    //--------------------------------------------------
+    // *** INITIAL ***
+    //--------------------------------------------------
+
+    entry void p_initial_exit();
+    entry void r_end_initialize(CkReductionMsg *);
+    entry void r_initial_new_next(CkReductionMsg *);
+    entry void r_initial_new_continue(CkReductionMsg *);
+
+    //--------------------------------------------------
+    // *** OUTPUT ***
+    //--------------------------------------------------
+
+    entry void p_output_enter();
+    entry void r_output_enter(CkReductionMsg *);
+    entry void p_output_end();
+    entry void p_output_exit();
+    entry void r_output_exit(CkReductionMsg *);
+
+    entry void p_output_write (int index_output, int step);
+
+    //--------------------------------------------------
+    // *** COMPUTE ***
+    //--------------------------------------------------
+
+    entry void p_compute_enter();
+
+    entry void p_compute_continue();
+    entry void r_compute_continue(CkReductionMsg *);
+
+    entry void p_compute_exit();
+    entry void r_compute_exit(CkReductionMsg *);
+
+    entry void p_method_flux_correct_refresh();
+    entry void r_method_flux_correct_sum_fields(CkReductionMsg * msg);
+
+    entry void r_method_order_morton_continue(CkReductionMsg * msg);
+    entry void r_method_order_morton_complete(CkReductionMsg * msg);
+    entry void p_method_order_morton_weight(int ic3[3], int weight, Index index);
+    entry void p_method_order_morton_index(int index, int count);
+
+    entry void p_method_output_next(MsgOutput *);
+    entry void p_method_output_write(MsgOutput *);
+    entry void r_method_output_continue(CkReductionMsg * msg);
+    entry void r_method_output_done(CkReductionMsg * msg);
+
+    entry void r_method_debug_sum_fields(CkReductionMsg * msg);
+
+    //--------------------------------------------------
+    // *** STOPPING ***
+    //--------------------------------------------------
+
+    entry void r_stopping_compute_timestep (CkReductionMsg * msg);
+
+    entry void p_stopping_enter();
+    entry void r_stopping_enter(CkReductionMsg *);
+ 
+    entry void p_stopping_load_balance();
+    entry void r_stopping_load_balance(CkReductionMsg *);
+
+    entry void p_stopping_exit();
+    entry void r_stopping_exit(CkReductionMsg *);
+
+    entry void p_exit();
+    entry void r_exit(CkReductionMsg *);
+
+    //--------------------------------------------------
+    // *** CONTROL ***
+    //--------------------------------------------------
+
+    entry void p_control_sync_count 
+      ( int entry_point, int id, int count);
+
+    //--------------------------------------------------
+    // *** ADAPT ***
+    //--------------------------------------------------
+
+    entry void p_adapt_enter();
+    entry void r_adapt_enter(CkReductionMsg *);
+    entry void p_adapt_end();
+    entry void p_adapt_update();
+    entry void r_adapt_next(CkReductionMsg *);
+    entry void p_adapt_called();
+    entry void p_adapt_exit();
+    entry void p_adapt_delete();
+    entry void p_adapt_recv_level (MsgAdapt *);
+    entry void p_adapt_recv_child (MsgCoarsen * msg);
+
+    //--------------------------------------------------
+    // *** RESTART
+    //--------------------------------------------------
+
+    entry void r_restart_enter(CkReductionMsg *);
+
+    //--------------------------------------------------
+    // *** REFRESH
+    //--------------------------------------------------
+
+    entry void p_refresh_recv (MsgRefresh * msg);
+
+    entry void p_refresh_child
+      (int n, char a[n], int ic3[3]);
+
+  };
+
+  // Chare array for reading data files
+  array[1D] IoReader {
+     entry IoReader();
+  };
+
+  // Chare array for writing data files
+  array[1D] IoWriter {
+     entry IoWriter();
+  };
+}
+

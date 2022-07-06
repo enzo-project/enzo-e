@@ -16,26 +16,27 @@ MethodFluxCorrect::MethodFluxCorrect
  const std::vector<std::string>& min_digits_fields,
  const std::vector<double>& min_digits_vals) throw() 
   : Method (),
+    ir_pre_(-1),
     group_(group),
     enable_(enable),
     min_digits_map_(),
     field_sum_(),
     field_sum_0_(),
-    ir_pre_(-1),
     scratch_()
 {
   // Set up post-refresh to refresh all conserved fields in group_
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
   Grouping * groups = cello::field_groups();
   const int nf=groups->size(group_);
   for (int i_f=0; i_f<nf; i_f++) {
     cello::refresh(ir_post_)->add_field(groups->item(group_,i_f));
   }
 
-  //  ir_pre_ = add_new_refresh_(neighbor_flux);
-  ir_pre_ = add_new_refresh_(neighbor_leaf);
+  //  neighbor_flux causes synchronization errors; using neighbor_leaf:
+  //  ir_pre_ = add_refresh_(neighbor_flux);
+  ir_pre_ = add_refresh_(neighbor_leaf);
   Refresh * refresh_pre = cello::refresh(ir_pre_);
-  cello::simulation()->new_refresh_set_name(ir_pre_,name()+"_fluxes");
+  cello::simulation()->refresh_set_name(ir_pre_,name()+"_fluxes");
   refresh_pre->set_callback(CkIndex_Block::p_method_flux_correct_refresh());
   refresh_pre->add_all_fluxes();
   // Also ensure conserved fields are themselves refreshed
@@ -72,14 +73,14 @@ void MethodFluxCorrect::compute ( Block * block) throw()
 {
   cello::refresh(ir_pre_)->set_active(block->is_leaf());
 
-  block->new_refresh_start
+  block->refresh_start
     (ir_pre_, CkIndex_Block::p_method_flux_correct_refresh());
 
 }
 
 //----------------------------------------------------------------------
 
-void Block::Block::p_method_flux_correct_refresh()
+void Block::p_method_flux_correct_refresh()
 {
   static_cast<MethodFluxCorrect*>
     (this->method())->compute_continue_refresh(this);
@@ -98,7 +99,6 @@ void MethodFluxCorrect::compute_continue_refresh( Block * block ) throw()
   int gx,gy,gz;
   field.dimensions (0,&mx,&my,&mz);
   field.ghost_depth (0,&gx,&gy,&gz);
-
 
   cello_float * values;
 
@@ -164,7 +164,7 @@ void MethodFluxCorrect::compute_continue_refresh( Block * block ) throw()
 
 //----------------------------------------------------------------------
 
-void Block::Block::r_method_flux_correct_sum_fields(CkReductionMsg * msg)
+void Block::r_method_flux_correct_sum_fields(CkReductionMsg * msg)
 {
   static_cast<MethodFluxCorrect*>
     (this->method())->compute_continue_sum_fields(this,msg);
@@ -189,7 +189,6 @@ void MethodFluxCorrect::compute_continue_sum_fields
   
   if (block->index().is_root()) {
 
-    const int index_density = field.field_id("density");
     // for each conserved field
     for (int i_f=0; i_f<nf; i_f++) {
 
@@ -419,7 +418,6 @@ void MethodFluxCorrect::flux_correct_(Block * block)
         }
       }
     }
-
     int i_f_density = -1; // will be used to store i_f for density
     for (int i_f=0; i_f<nf; i_f++) {
       const int index_field = flux_data->index_field(i_f);

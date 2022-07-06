@@ -30,10 +30,6 @@ void Block::compute_enter_ ()
 
 void Block::compute_begin_ ()
 {
-#ifdef DEBUG_COMPUTE
-  if (cycle() >= CYCLE)
-    CkPrintf ("%d %s DEBUG_COMPUTE Block::compute_begin_()\n", CkMyPe(),name().c_str());
-#endif
 
   cello::simulation()->set_phase(phase_compute);
 
@@ -59,11 +55,11 @@ void Block::compute_next_ ()
 #endif
 
     int ir_post = method->refresh_id_post();
-    
+
     cello::refresh(ir_post)->set_active (is_leaf());
-    
-    new_refresh_start (ir_post,CkIndex_Block::p_compute_continue());
-    
+
+    refresh_start (ir_post,CkIndex_Block::p_compute_continue());
+
   } else {
 
     compute_end_();
@@ -75,7 +71,6 @@ void Block::compute_next_ ()
 
 void Block::compute_continue_ ()
 {
-  //  this->debug_new_refresh(__FILE__,__LINE__);
   performance_start_(perf_compute,__FILE__,__LINE__);
 #ifdef DEBUG_COMPUTE
   if (cycle() >= CYCLE)
@@ -93,7 +88,6 @@ void Block::compute_continue_ ()
     (schedule->write_this_cycle(cycle_,time_));
 
   if (is_scheduled) {
-
     TRACE2 ("Block::compute_continue() method = %d %p\n",
 	    index_method_,method); fflush(stdout);
 
@@ -145,6 +139,9 @@ void Block::compute_end_ ()
 
   // Push back fields if saving old ones
   data()->field().save_history(time_);
+
+  // delete fluxes
+  data()->flux_data()->deallocate();
 
   // Update block cycle and time
   set_cycle (cycle_ + 1);

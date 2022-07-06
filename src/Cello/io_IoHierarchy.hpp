@@ -31,7 +31,6 @@ public: // interface
   virtual ~IoHierarchy () throw()
   {}
 
-
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -42,20 +41,26 @@ public: // interface
 
     Io::pup(p);
 
-    WARNING ("IoHierarchy::pup","skipping hierarchy_");
-    //    if (p.isUnpacking()) hierarchy_ = new Hierarchy;
-    //    p | *hierarchy_;
+    PUParray(p,lower_,3);
+    PUParray(p,upper_,3);
+    p | max_level_;
   }
 
-#include "_io_Io_common.hpp"
 
-  
-private: // functions
+  /// Return the ith metadata item associated with the object
+  virtual void meta_value 
+  (int index, 
+   void ** buffer, std::string * name, int * type,
+   int * nxd=0, int * nyd=0, int * nzd=0) throw();
 
-  Hierarchy * hierarchy_;
+  /// Copy the values to the object
+  virtual void save_to (void *); 
 
 private: // attributes
 
+  double lower_[3];
+  double upper_[3];
+  int max_level_;
 
 };
 

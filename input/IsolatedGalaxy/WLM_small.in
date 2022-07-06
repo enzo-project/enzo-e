@@ -97,7 +97,7 @@
               "star_maker"];
 
       star_maker {
-                  type = "stochastic";
+                  flavor = "stochastic";
                   use_density_threshold    = true;
                   use_velocity_divergence  = false;
                   use_dynamical_time       = false;
@@ -132,8 +132,7 @@
       # values for the background NFW potential
       #    also can have background stellar bulge and / or stellar disk potential
       background_acceleration {
-          type = "GalaxyModel";
-          DM_density     = -1.0   ;  # specify this OR mass - not both - mass_radius must be virial if this is used
+          flavor = "GalaxyModel";
           DM_mass        = 1.0E10;   # mass interior to below radius (in Msun) -  (this particular value is virial mass)
           DM_mass_radius = 45.0;     # radius (kpc) corresponding to above mass (this is virial)
           core_radius    = 3.0;      # r_c in kpc  (c = r_c / R_vir)
@@ -160,38 +159,38 @@ Solver {
 
  Particle {
      list = ["star"];
-
+     mass_is_mass = true;
 #     Turn this on if using live DM
 #     dark {
-#         attributes = [ "x", "single",
-#                        "y", "single",
-#                        "z", "single",
-#                        "vx", "single",
-#                        "vy", "single",
-#                        "vz", "single",
-#                        "ax", "single",
-#                        "ay", "single",
-#                        "az", "single" ,
-#                        "is_local", "single"];
+#         attributes = [ "x", "default",
+#                        "y", "default",
+#                        "z", "default",
+#                        "vx", "default",
+#                        "vy", "default",
+#                        "vz", "default",
+#                        "ax", "default",
+#                        "ay", "default",
+#                        "az", "default" ,
+#                        "mass", "default",
+#                        "is_local", "default"];
 #         position = [ "x", "y", "z" ];
 #         velocity = [ "vx", "vy", "vz" ];
-#         groups = ["has_mass"];
-#         constants = [ "mass", "single", .8382456140 ];
+#         group_list = ["is_gravitating"];
 #
 #     }
 
     star {
-         attributes = [ "x", "double",
-                        "y", "double",
-                        "z", "double",
-                        "vx", "double",
-                        "vy", "double",
-                        "vz", "double",
-                        "ax", "double",
-                        "ay", "double",
-                        "az", "double",
-                        "mass", "double",
-                        "is_local","double"];
+         attributes = [ "x", "default",
+                        "y", "default",
+                        "z", "default",
+                        "vx", "default",
+                        "vy", "default",
+                        "vz", "default",
+                        "ax", "default",
+                        "ay", "default",
+                        "az", "default",
+                        "mass", "default",
+                        "is_local","default"];
          position = [ "x", "y", "z" ];
          velocity = [ "vx", "vy", "vz" ];
 #
@@ -201,7 +200,7 @@ Solver {
 #                   IC routine to get star particles registered
 #                   in this group
 #
-         groups = ["has_mass"];
+         group_list = ["is_gravitating"];
       }
   }
 

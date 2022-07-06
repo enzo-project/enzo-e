@@ -303,7 +303,11 @@ std::string Param::value_to_string (int type)
     string_buffer = value_logical_ ? "true" : "false";
     break;
   case parameter_unknown:
-    string_buffer = "UNKNOWN";
+    string_buffer = std::string("\"") + "UNKNOWN" + "\"";
+    break;
+  default:
+    // if type_ is something different, just set the string to be "dummy".
+    string_buffer = std::string("\"") + "dummy" + "\"";
     break;
   }  
   return string_buffer;

@@ -24,10 +24,13 @@
 #include "_compute.hpp"
 #include "_simulation.hpp"
 #include "_mesh.hpp"
+#include "_array.hpp"
 #include "_data.hpp" 
 
 //----------------------------------------------------------------------
 extern void mutex_init_hierarchy();
+extern void mutex_init_initial_value();
+extern void mutex_init_field_face();
 //----------------------------------------------------------------------
 
 #endif /* MESH_HPP */

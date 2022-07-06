@@ -18,10 +18,16 @@ EnzoMethodPpml::EnzoMethodPpml()
     comoving_coordinates_(enzo::config()->physics_cosmology)
 {
   // Initialize the default Refresh object
-  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,name());
 
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
+
+  // check compatability with EnzoPhysicsFluidProps
+  EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
+  const EnzoDualEnergyConfig& de_config = fluid_props->dual_energy_config();
+  ASSERT("EnzoMethodPpml::EnzoMethodPpml",
+         "incompatible with dual energy formalism", de_config.is_disabled());
 }
 
 //----------------------------------------------------------------------
@@ -53,7 +59,7 @@ void EnzoMethodPpml::compute ( Block * block ) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodPpml::timestep (Block * block) const throw()
+double EnzoMethodPpml::timestep (Block * block) throw()
 {
  
   EnzoBlock * enzo_block = enzo::block(block);
@@ -92,9 +98,8 @@ double EnzoMethodPpml::timestep (Block * block) const throw()
   //  float afloat = float(a);
  
   /* 1) Compute Courant condition for baryons. */
- 
   const int in = cello::index_static();
-  
+
   if (EnzoBlock::NumberOfBaryonFields[in] > 0) {
  
     /* Find fields: density, total energy, velocity1-3. */

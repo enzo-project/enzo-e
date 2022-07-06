@@ -24,6 +24,8 @@
 #include "simulation.hpp"
 
 CProxy_EnzoSimulation proxy_enzo_simulation;
+CProxy_IoEnzoWriter   proxy_io_enzo_writer;
+CProxy_IoEnzoReader   proxy_io_enzo_reader;
 
 //----------------------------------------------------------------------
 
@@ -31,7 +33,11 @@ EnzoSimulation::EnzoSimulation
 (
  const char         parameter_file[],
  int                n)
-  : CBase_EnzoSimulation(parameter_file, n)
+  : CBase_EnzoSimulation(parameter_file, n),
+    check_num_files_(0),
+    check_ordering_(""),
+    check_directory_(),
+    restart_level_(0)
 {
 #ifdef CHECK_MEMORY
   mtrace();
@@ -40,16 +46,17 @@ EnzoSimulation::EnzoSimulation
 #ifdef DEBUG_ENZO_SIMULATION
   CkPrintf ("%d DEBUG_ENZO_SIMULATION EnzoSimulation()\n",CkMyPe());
   fflush(stdout);
-#endif  
+#endif
 
   // Synchronize to ensure all EnzoSimulation objects exist before
   // reading parameters
 
   CkCallback callback (CkIndex_EnzoSimulation::r_startup_begun(NULL),
                        thisProxy);
-#ifdef TRACE_CONTRIBUTE  
+#ifdef TRACE_CONTRIBUTE
   CkPrintf ("%s:%d DEBUG_CONTRIBUTE\n",__FILE__,__LINE__); fflush(stdout);
-#endif  
+#endif
+
   contribute(callback);
 
 }
@@ -74,20 +81,74 @@ void EnzoSimulation::pup (PUP::er &p)
 
   TRACEPUP;
 
+  p | sync_check_writer_created_;
+  p | sync_check_done_;
+  p | check_num_files_;
+  p | check_ordering_;
+  p | check_directory_;
+  p | restart_level_;
+
   if (p.isUnpacking()) {
     EnzoBlock::initialize(enzo::config());
   }
 }
 
 //----------------------------------------------------------------------
+#ifdef BYPASS_CHARM_MEM_LEAK
 
 void EnzoSimulation::p_get_msg_refine(Index index)
 {
   MsgRefine * msg = get_msg_refine(index);
 
-  CProxy_EnzoBlock enzo_block_array = (CProxy_EnzoBlock)hierarchy_->block_array();
-  enzo_block_array[index].p_set_msg_refine(msg);
+  enzo::block_array()[index].p_set_msg_refine(msg);
 }
+
+void EnzoSimulation::p_get_msg_check(Index index)
+{
+  EnzoMsgCheck * msg = get_msg_check(index);
+#ifdef DEBUG_MSG_CHECK  
+  CkPrintf ("%d DEBUG_MSG_CHECK sending %p\n",CkMyPe(),msg);
+#endif
+  enzo::block_array()[index].p_set_msg_check(msg);
+}
+
+//----------------------------------------------------------------------
+
+void EnzoSimulation::set_msg_check(Index index, EnzoMsgCheck * msg)
+{
+  if (msg_check_map_[index] != NULL) {
+   
+    int v3[3];
+    index.values(v3);
+    ASSERT3 ("EnzoSimulation::p_set_msg_check",
+	    "index %08x %08x %08x is already in the msg_check mapping",
+	    v3[0],v3[1],v3[2],
+	    (msg == NULL));
+  }
+  msg_check_map_[index] = msg;
+}
+
+//----------------------------------------------------------------------
+
+EnzoMsgCheck * EnzoSimulation::get_msg_check(Index index)
+{
+  int v3[3];
+  index.values(v3);
+  EnzoMsgCheck * msg = msg_check_map_[index];
+  if (msg == NULL) {
+    int v3[3];
+    index.values(v3);
+    
+    ASSERT3 ("EnzoSimulation::get_msg_check",
+	    "index %08x %08x %08x is not in the msg_check mapping",
+	    v3[0],v3[1],v3[2],
+	    (msg != NULL));
+  }
+  msg_check_map_.erase(index);
+  return msg;
+}
+
+#endif
 
 //----------------------------------------------------------------------
 
@@ -111,19 +172,6 @@ void EnzoSimulation::r_startup_begun (CkReductionMsg *msg)
   initialize_config_();
 
   initialize();
-
-  // Initialize Units::cosmology if needed
-
-  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology *)
-    problem()->physics("cosmology");
-  
-  if (cosmology) {
-    EnzoUnits * units = (EnzoUnits *) problem()->units();
-    units->set_cosmology(cosmology);
-
-    // Set current time to be initial time
-    cosmology->set_current_redshift(cosmology->initial_redshift());
-  }
   
 #ifdef TRACE_PARAMETERS
   CkPrintf ("%d END   r_startup_begun()\n",CkMyPe());

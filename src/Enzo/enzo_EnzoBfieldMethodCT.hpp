@@ -70,8 +70,8 @@ public: // interface
 
   /// Updates all components of the face-centered and the cell-centered bfields
   ///
-  /// @param[in]  cur_prim_map Map containing the current values of the
-  ///     cell-centered integrable quantities (before they have been updated
+  /// @param[in]  cur_integration_map Map containing the current values of the
+  ///     cell-centered integration quantities (before they have been updated
   ///     over the current timestep). Specifically, the velocity and bfield
   ///     components stored in this mapping are used to compute the
   ///     cell-centered E-field.
@@ -80,18 +80,17 @@ public: // interface
   ///     namely makes use of the various magnetic field fluxes
   /// @param[out] out_centered_bfield_map Map holding the arrays where the
   ///     updated values for each cell-centered magnetic field component should
-  ///     be stored. These arrays can be aliases of `cur_prim_map` (The
-  ///     arguments can even reference the same object).
+  ///     be stored. This can be an alias of `cur_integration_map`.
   /// @param[in]  dt The (partial) time-step over which to update the magnetic
   ///     fields.
   /// @param[in]  stale_depth indicates the current stale_depth for the
   ///     supplied quantities. This should nominally be the same as the stale
   ///     depth used to compute the fluxes and that is passed to
-  ///     EnzoIntegrableUpdate::update_quantities.
-  void update_all_bfield_components(EnzoEFltArrayMap &cur_prim_map,
-                                    EnzoEFltArrayMap &xflux_map,
-                                    EnzoEFltArrayMap &yflux_map,
-                                    EnzoEFltArrayMap &zflux_map,
+  ///     EnzoIntegrationQuanUpdate::update_quantities.
+  void update_all_bfield_components(EnzoEFltArrayMap &cur_integration_map,
+                                    const EnzoEFltArrayMap &xflux_map,
+                                    const EnzoEFltArrayMap &yflux_map,
+                                    const EnzoEFltArrayMap &zflux_map,
                                     EnzoEFltArrayMap &out_centered_bfield_map,
                                     enzo_float dt, int stale_depth) noexcept;
 
@@ -111,9 +110,9 @@ public: // interface
   ///     supplied quantities.
   ///
   /// @note this function is called in `update_all_bfield_components`
-  static void compute_center_bfield(int dim, EFlt3DArray &bfieldc_comp,
-				    EFlt3DArray &bfieldi_comp,
-                                    int stale_depth = 0);
+  static void compute_center_bfield
+  (int dim, const CelloArray<enzo_float,3> &bfieldc_comp,
+   const CelloArray<const enzo_float,3> &bfieldi_comp, int stale_depth = 0);
 
 protected: // methods
 
@@ -133,14 +132,14 @@ protected: // methods
   ///     Values of 0, 1 and 2 correspond to the x, y and z directions.
   /// @param[out] center_efield The array where the computed cell-centered
   ///     values of the E-field are written.
-  /// @param[in]  prim_map Map containing the current values of the
-  ///     cell-centered integrable quantities. Specifically, the velocity and
+  /// @param[in]  integration_map Map containing the current values of the
+  ///     cell-centered integration quantities. Specifically, the velocity and
   ///     bfield entries are used to compute the cell-centered E-field.
   /// @param[in]  stale_depth the stale depth at the time of this function call
   ///
   /// @note this function is called in `compute_all_edge_efields`
   static void compute_center_efield(int dim, EFlt3DArray &center_efield,
-                                    const EnzoEFltArrayMap &prim_map,
+                                    const EnzoEFltArrayMap &integration_map,
                                     int stale_depth = 0);
 
   /// Computes component i of the edge-centered E-field that sits on the faces
@@ -172,18 +171,19 @@ protected: // methods
   /// @param[in]  stale_depth the stale depth at the time of this function call
   ///
   /// @note this function is called in compute_all_edge_efields
-  void static compute_edge_efield (int dim, EFlt3DArray &center_efield,
-				   EFlt3DArray &edge_efield,
-                                   EnzoEFltArrayMap &jflux_map,
-                                   EnzoEFltArrayMap &kflux_map,
-				   std::array<EFlt3DArray,3> &weight_l,
-				   int stale_depth);
+  void static compute_edge_efield
+  (int dim, const CelloArray<const enzo_float, 3> &center_efield,
+   const CelloArray<enzo_float, 3> &edge_efield,
+   const EnzoEFltArrayMap &jflux_map,
+   const EnzoEFltArrayMap &kflux_map,
+   const std::array< CelloArray<const enzo_float, 3>, 3> &weight_l,
+   int stale_depth);
 
   /// Compute the all of the edge-centered electric fields using the current
-  /// fluxes and current cell-centered integrable quantities .
+  /// fluxes and current cell-centered integration quantities .
   ///
-  /// @param[in]  cur_prim_map Map containing the current values of the
-  ///     cell-centered integrable quantities (before they have been updated
+  /// @param[in]  cur_integration_map Map containing the current values of the
+  ///     cell-centered integration quantities (before they have been updated
   ///     over the current timestep). Specifically, the velocity and bfield
   ///     components stored in this mapping are used to compute the
   ///     cell-centered E-field.
@@ -208,10 +208,11 @@ protected: // methods
   ///     the weighting scheme used by Athena++ at a later date).
   /// @param[in] stale_depth the stale depth at the time of this function call
   static void compute_all_edge_efields
-  (EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &xflux_map,
-   EnzoEFltArrayMap &yflux_map, EnzoEFltArrayMap &zflux_map,
+  (const EnzoEFltArrayMap &integration_map, const EnzoEFltArrayMap &xflux_map,
+   const EnzoEFltArrayMap &yflux_map, const EnzoEFltArrayMap &zflux_map,
    EFlt3DArray &center_efield, std::array<EFlt3DArray,3> &edge_efield_l,
-   std::array<EFlt3DArray,3> &weight_l, int stale_depth);
+   const std::array< CelloArray<const enzo_float, 3>, 3> &weight_l,
+   int stale_depth);
 
   /// Updates the face-centered B-field component along the ith dimension using
   /// the jth and kth components of the edge-centered E-field
@@ -241,11 +242,12 @@ protected: // methods
   /// @param[in] dt The time time-step over which to apply the fluxes
   /// @param[in] stale_depth indicates the current stale_depth for the supplied
   ///     quantities
-  static void update_bfield(const enzo_float* &cell_widths, int dim,
-                            const std::array<EFlt3DArray,3> &efield_l,
-                            EFlt3DArray &cur_interface_bfield,
-                            EFlt3DArray &out_interface_bfield,
-			    enzo_float dt, int stale_depth);
+  static void update_bfield
+  (const enzo_float* &cell_widths, int dim,
+   const std::array<CelloArray<const enzo_float, 3>, 3> &efield_l,
+   const CelloArray<enzo_float, 3> &cur_interface_bfield,
+   const CelloArray<enzo_float, 3> &out_interface_bfield,
+   enzo_float dt, int stale_depth);
 
 protected: // attributes
 

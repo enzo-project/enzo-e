@@ -53,7 +53,7 @@ public: // interface
   { return "ramses_rt"; }
 
   /// Compute maximum timestep for this method
-  virtual double timestep ( Block * block ) const throw();
+  virtual double timestep ( Block * block ) throw();
 
 
   //--------- CONTROL FLOW --------

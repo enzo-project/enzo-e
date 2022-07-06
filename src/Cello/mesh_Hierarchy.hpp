@@ -42,8 +42,8 @@ public: // interface
       root_size_[axis] = 0;
       lower_[axis] = 0.0;
       upper_[axis] = 0.0;
-      blocking_[axis] = 0.0;
-      periodicity_[axis] = false;
+      blocking_[axis] = 0;
+      periodicity_[axis] = 0;
     }
   }
   
@@ -101,12 +101,30 @@ public: // interface
   }
 
   /// Return the periodicity of the boundary conditions for domain axes
-  void get_periodicity (int * px, int * py=0, int * pz=0)
+  void get_periodicity (int * px, int * py=0, int * pz=0) const throw()
   {
     if (px) (*px) = periodicity_[0];
     if (py) (*py) = periodicity_[1];
     if (pz) (*pz) = periodicity_[2];
   }
+
+  /// Sets the elements of `npi` to be the periodic image of position `x` that
+  /// is nearest to position `y`
+  ///
+  /// If the domain is not periodic along a given axis `i`, then `npi[i] = x[i]`
+  ///
+  /// Each argument is expected to be an array of length `cello::rank()`
+  void get_nearest_periodic_image(const double * x, const double *y,
+				                          double * npi) const throw();
+
+  /// For a position `x`, this sets `folded_x` to the periodic image of `x` 
+  /// which is in the domain.
+  ///
+  /// If the domain is not periodic along a given axis `i`, 
+  /// then `folded_x[i] = x[i]`
+  ///
+  /// Both arguments are expected to be an array of length `cello::rank()`.
+  void get_folded_position(const double * x, double * folded_x) const throw();
 
   //----------------------------------------------------------------------
 
@@ -247,11 +265,11 @@ protected: // attributes
   /// Upper extent of the hierarchy
   double upper_[3];
 
-  /// How the Forest is distributed into Blocks
+  /// How the array-of-octrees is distributed into Blocks
   int blocking_[3];
 
   /// Periodicity of boundary conditions on faces
-  bool periodicity_[3];
+  int periodicity_[3];
 
 public: // static attributes
 

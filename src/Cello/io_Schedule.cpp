@@ -32,13 +32,15 @@ Schedule * Schedule::create
  std::vector<double> list)
 {
 
-  const bool var_cycle = (var == "cycle");
-  const bool var_time  = (var == "time");
-  const bool var_seconds  = (var == "seconds");
+  const bool var_cycle   = (var == "cycle");
+  const bool var_time    = (var == "time");
+  const bool var_seconds = (var == "seconds");
+  const bool var_minutes = (var == "minutes");
+  const bool var_hours   = (var == "hours");
 
   const bool type_interval = (type == "interval");
   const bool type_list     = (type == "list");
-    
+
   Schedule * schedule = 0;
 
   if (type_interval) {
@@ -48,14 +50,25 @@ Schedule * Schedule::create
     if (var_cycle) {
 
       ((ScheduleInterval * )schedule)->set_cycle_interval(start,step,stop);
-      
+
     } else if (var_time) {
 
       ((ScheduleInterval * )schedule)->set_time_interval(start,step,stop);
 
     } else if (var_seconds) {
 
-      ((ScheduleInterval * )schedule)->set_seconds_interval(start,step,stop);
+      ((ScheduleInterval * )schedule)->
+        set_seconds_interval(start,step,stop);
+
+    } else if (var_minutes) {
+
+      ((ScheduleInterval * )schedule)->
+        set_seconds_interval(60.0*start,60.0*step,60.0*stop);
+
+    } else if (var_hours) {
+
+      ((ScheduleInterval * )schedule)->
+        set_seconds_interval(3600.0*start,3600.0*step,3600.0*stop);
 
     }
 
@@ -82,6 +95,18 @@ Schedule * Schedule::create
 
       ((ScheduleList * )schedule)->set_seconds_list(list);
 
+    } else if (var_minutes) {
+
+      for (int i=0; i<list.size(); i++) list[i] *= 60.0;
+
+      ((ScheduleList * )schedule)->set_seconds_list(list);
+
+    } else if (var_hours) {
+
+      for (int i=0; i<list.size(); i++) list[i] *= 3600.0;
+
+      ((ScheduleList * )schedule)->set_seconds_list(list);
+
     }
 
   }
@@ -92,7 +117,8 @@ Schedule * Schedule::create
 
   if (var_cycle) schedule->set_type(schedule_type_cycle);
   if (var_time)  schedule->set_type(schedule_type_time);
-  if (var_seconds)  schedule->set_type(schedule_type_seconds);
+  if (var_seconds || var_minutes || var_hours)
+    schedule->set_type(schedule_type_seconds);
 
   return schedule;
 

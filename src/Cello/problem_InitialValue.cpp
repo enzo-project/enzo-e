@@ -11,6 +11,13 @@
 
 //----------------------------------------------------------------------
 
+#define CONFIG_SMP_MODE
+static CmiNodeLock initial_value_node_lock;
+void mutex_init_initial_value()
+{  initial_value_node_lock = CmiCreateLock(); }
+
+//----------------------------------------------------------------------
+
 InitialValue::InitialValue
 (Parameters * parameters,
  int cycle, double time) throw()
@@ -48,6 +55,9 @@ void InitialValue::pup (PUP::er &p)
 void InitialValue::enforce_block ( Block * block,
 				   const Hierarchy  * hierarchy ) throw()
 {
+#ifdef CONFIG_SMP_MODE
+  CmiLock(initial_value_node_lock);
+#endif  
   // make sure values_ is initialized
   initialize_values_();
 
@@ -132,7 +142,7 @@ void InitialValue::enforce_block ( Block * block,
 
 	// Following convention of earlier version: initializing values in a
 	// temporary array of doubles. Then the values are copied into the
-	// field and casted to the appropriate value.
+	// field and cast to the appropriate type.
 
 	// The cast to double * in the following line is redundant
 	values_[index_field]->evaluate((double *)val_array, t,
@@ -141,6 +151,7 @@ void InitialValue::enforce_block ( Block * block,
 				       ndz,ndz,z);
 
 	copy_values_(field_data,val_array,index_field,ndx,ndy,ndz);
+        
       } else if (block->index().is_root()) {
 	WARNING1("InitialValue::enforce_block",  
 		 "Uninitialized field %s",
@@ -160,6 +171,12 @@ void InitialValue::enforce_block ( Block * block,
     delete [] yf;
     delete [] zf;
   }
+
+#ifdef CONFIG_SMP_MODE
+  CmiUnlock(initial_value_node_lock);
+#endif
+
+  block->initial_done();
 }
 
 //======================================================================

@@ -5,6 +5,8 @@
 /// @date
 /// @brief    [\ref Enzo] Initialization routine for Feedback test problem
 
+#include <fstream>
+
 #include "cello.hpp"
 #include "enzo.hpp"
 
@@ -19,6 +21,8 @@ EnzoInitialFeedbackTest::EnzoInitialFeedbackTest
 (const EnzoConfig * config) throw ()
   : Initial(config->initial_cycle, config->initial_time)
 {
+
+  cello::particle_descr()->check_particle_attribute("star","mass");
 
   if (config->initial_feedback_test_from_file){
     this->num_particles = nlines("initial_feedback_stars.in");
@@ -73,13 +77,18 @@ void EnzoInitialFeedbackTest::pup (PUP::er &p)
   return;
 }
 
+//----------------------------------------------------------------------
+
 void EnzoInitialFeedbackTest::enforce_block
 ( Block * block, const Hierarchy * hierarchy) throw()
 {
 
   ASSERT("EnzoInitialFeedbackTest","Block does not exist", block != NULL);
 
-  if( !(block->is_leaf())) return;
+  if( !(block->is_leaf())) {
+    block->initial_done();
+    return;
+  }
 
   EnzoBlock * enzo_block = enzo::block(block);
   const EnzoConfig * enzo_config = enzo::config();
@@ -129,25 +138,28 @@ void EnzoInitialFeedbackTest::enforce_block
   int ngy = ny + 2*gy;
   int ngz = nz + 2*gz;
 
+  const enzo_float gamma = enzo::fluid_props()->gamma();
+  const enzo_float mol_weight = enzo::fluid_props()->mol_weight();
+
   for (int iz = 0; iz < ngz; iz++){
     for (int iy = 0; iy < ngy; iy++){
       for (int ix = 0; ix < ngx; ix++){
 
          int i = INDEX(ix,iy,iz,ngx,ngy);
 
-         d[i]  = enzo_config->initial_feedback_test_density / enzo_units->density();
+         // values are specified in CGS in the parameter file
+         d[i]  = enzo_config->initial_feedback_test_density / enzo_units->density(); 
          d_HI[i]  = enzo_config->initial_feedback_test_HI_density / enzo_units->density();
          d_HII[i]  = enzo_config->initial_feedback_test_HII_density / enzo_units->density();
          d_HeI[i]  = enzo_config->initial_feedback_test_HeI_density / enzo_units->density();
          d_HeII[i]  = enzo_config->initial_feedback_test_HeII_density / enzo_units->density();
          d_HeIII[i]  = enzo_config->initial_feedback_test_HeIII_density / enzo_units->density();
          d_electron[i]  = enzo_config->initial_feedback_test_e_density / enzo_units->density();
-         temperature[i] = enzo_config->initial_feedback_test_temperature / enzo_units->temperature();
 
          for (int dim = 0; dim < 3; dim++) v3[dim][i] = 0.0;
 
-         ge[i] = enzo_config->initial_feedback_test_temperature / enzo_config->ppm_mol_weight / enzo_units->temperature() /
-                         (enzo_config->field_gamma - 1.0);
+         ge[i] = (enzo_config->initial_feedback_test_temperature / mol_weight /
+                  enzo_units->kelvin_per_energy_units() / (gamma - 1.0));
 
          for (int dim = 0; dim < 3; dim ++)
              te[i] = ge[i] + 0.5 * v3[dim][i] * v3[dim][i];
@@ -159,8 +171,6 @@ void EnzoInitialFeedbackTest::enforce_block
   }
 
   // drop in a particle
-
-  if (enzo_block->level() < 0) return; // don't do particles below root grid
 
   ParticleDescr * particle_descr = cello::particle_descr();
   Particle particle              = block->data()->particle();
@@ -174,16 +184,16 @@ void EnzoInitialFeedbackTest::enforce_block
   int ia_vx = particle.attribute_index (it, "vx");
   int ia_vy = particle.attribute_index (it, "vy");
   int ia_vz = particle.attribute_index (it, "vz");
-  int ia_loc  = particle.attribute_index (it, "is_local");
+  int ia_cop  = particle.attribute_index (it, "is_copy");
   int ia_id   = particle.attribute_index (it, "id");
 
-  int ia_to    = particle.is_attribute(it,"creation_time") ?
+  int ia_to    = particle.has_attribute(it,"creation_time") ?
                  particle.attribute_index(it,"creation_time") : -1;
 
-  int ia_l     = particle.is_attribute(it,"lifetime") ?
+  int ia_l     = particle.has_attribute(it,"lifetime") ?
                  particle.attribute_index(it,"lifetime") : -1;
 
-  int ia_metal = particle.is_attribute(it,"metal_fraction") ?
+  int ia_metal = particle.has_attribute(it,"metal_fraction") ?
                  particle.attribute_index(it,"metal_fraction") : -1;
 
   int ib  = 0; // batch counter
@@ -201,7 +211,7 @@ void EnzoInitialFeedbackTest::enforce_block
   enzo_float * pmetal = 0;
   enzo_float * plifetime = 0;
   enzo_float * pform     = 0;
-  int64_t * is_local = 0;
+  int64_t * is_copy = 0;
   int64_t * id = 0;
 
 
@@ -230,7 +240,7 @@ void EnzoInitialFeedbackTest::enforce_block
   pmetal      = (enzo_float *) particle.attribute_array(it, ia_metal, ib);
   plifetime  = (enzo_float *) particle.attribute_array(it, ia_l, ib);
   pform      = (enzo_float *) particle.attribute_array(it, ia_to, ib);
-  is_local   = (int64_t *) particle.attribute_array(it, ia_loc, ib);
+  is_copy   = (int64_t *) particle.attribute_array(it, ia_cop, ib);
 
   ipp = 0;
   for (int i = 0; i < this->num_particles; i++){
@@ -243,7 +253,7 @@ void EnzoInitialFeedbackTest::enforce_block
                                                                         CkNumPes(), CkMyPe() + (ParticleData::id_counter[cello::index_static()]) * CkNumPes());
 #endif
       id[ipp] = CkMyPe() + (ParticleData::id_counter[cello::index_static()]++) * CkNumPes();
-      pmass[ipp] = this->mass[i] * cello::mass_solar / enzo_units->mass();
+      pmass[ipp] = this->mass[i] * enzo_constants::mass_solar / enzo_units->mass();
       px[ipp]    = this->position[0][i];
       py[ipp]    = this->position[1][i];
       pz[ipp]    = this->position[2][i];
@@ -252,17 +262,16 @@ void EnzoInitialFeedbackTest::enforce_block
       pvz[ipp]   = 0.0;
 
       pmetal[ipp]    = 0.01;
-      plifetime[ipp] = 1.00E9* cello::yr_s / enzo_units->time();
-      pform[ipp]     = 1.0E-10 * cello::yr_s / enzo_units->time(); // really just needs to be non-zero
+      plifetime[ipp] = 1.00E9* enzo_constants::yr_s / enzo_units->time();
+      pform[ipp]     = 1.0E-10 * enzo_constants::yr_s / enzo_units->time(); // really just needs to be non-zero
 
-      is_local[ipp] = 1;
+      is_copy[ipp] = 1;
 
       ipp++;
     }
   }
 
-
-
+  block->initial_done();
 
   return;
 }

@@ -36,7 +36,10 @@ void EnzoInitialCollapse::enforce_block
 
 {
 
-  if (!block->is_leaf()) return;
+  if (!block->is_leaf()) {
+    block->initial_done();
+    return;
+  }
 
   Timer timer;
   timer.start();
@@ -103,10 +106,8 @@ void EnzoInitialCollapse::enforce_block
 
   // Initialize Fields
 
-  const int in = cello::index_static();
-
-  const double gamma = EnzoBlock::Gamma[in];
-  const double energy = 1e-3*(cello::kboltz)*temperature_ / ((gamma - 1.0) * (1.0 * cello::mass_hydrogen));
+  const double gamma = enzo::fluid_props()->gamma();
+  const double energy = 1e-3*(enzo_constants::kboltz)*temperature_ / ((gamma - 1.0) * (1.0 * enzo_constants::mass_hydrogen));
   
   // ...compute ellipsoid density
 
@@ -199,5 +200,6 @@ void EnzoInitialCollapse::enforce_block
 
   Particle particle = block->data()->particle();
   
+  block->initial_done();
 }
 

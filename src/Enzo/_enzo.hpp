@@ -86,10 +86,8 @@ enum enzo_sync_id {
   enzo_sync_id_solver_bicgstab_precon_2,
   enzo_sync_id_solver_bicgstab_loop_25,
   enzo_sync_id_solver_bicgstab_loop_85,
-  enzo_sync_id_solver_cg,
-  enzo_sync_id_solver_cg_loop_0a,
-  enzo_sync_id_solver_cg_loop_0b,
-  enzo_sync_id_solver_cg_loop_2a,
+  enzo_sync_id_solver_cg_matvec,
+  enzo_sync_id_solver_cg_loop_2,
   enzo_sync_id_solver_dd,
   enzo_sync_id_solver_dd_coarse,
   enzo_sync_id_solver_dd_domain,
@@ -118,7 +116,8 @@ enum return_enum {
   return_unknown,
   return_converged,
   return_diverged,
-  return_error
+  return_error,
+  return_bypass
 };
 
 //----------------------------------------------------------------------
@@ -160,7 +159,13 @@ extern "C" {
 
 #include "fortran_types.h" /* included so scons knowns to install fortran.h */
 
+#include "enzo_constants.hpp"
+
 #include "enzo_EnzoPhysicsCosmology.hpp"
+
+#include "enzo_EnzoDualEnergyConfig.hpp"
+#include "enzo_EnzoFluidFloorConfig.hpp"
+#include "enzo_EnzoPhysicsFluidProps.hpp"
 
 #include "enzo_EnzoUnits.hpp"
 
@@ -175,11 +180,8 @@ extern "C" {
 #include "enzo_EnzoBlock.hpp"
 
 #include "enzo_IoEnzoBlock.hpp"
-
-#include "enzo_EnzoFieldArrayFactory.hpp"
-#include "enzo_EnzoEFltArrayMap.hpp"
-#include "enzo_EnzoPermutedCoordinates.hpp"
-#include "enzo_EnzoCenteredFieldRegistry.hpp"
+#include "enzo_IoEnzoReader.hpp"
+#include "enzo_IoEnzoWriter.hpp"
 
 #include "enzo_EnzoBoundary.hpp"
 
@@ -189,8 +191,9 @@ extern "C" {
 #include "enzo_EnzoInitialCosmology.hpp"
 #include "enzo_EnzoInitialFeedbackTest.hpp"
 #include "enzo_EnzoInitialGrackleTest.hpp"
-#include "enzo_EnzoInitialInclinedWave.hpp"
+#include "enzo_EnzoInitialHdf5.hpp"
 #include "enzo_EnzoInitialImplosion2.hpp"
+#include "enzo_EnzoInitialInclinedWave.hpp"
 #include "enzo_EnzoInitialMusic.hpp"
 #include "enzo_EnzoInitialPm.hpp"
 #include "enzo_EnzoInitialPpmlTest.hpp"
@@ -202,52 +205,80 @@ extern "C" {
 #include "enzo_EnzoInitialTurbulence.hpp"
 #include "enzo_EnzoInitialIsolatedGalaxy.hpp"
 #include "enzo_EnzoInitialBurkertBodenheimer.hpp"
+#include "enzo_EnzoInitialMergeSinksTest.hpp"
+#include "enzo_EnzoInitialAccretionTest.hpp"
+#include "enzo_EnzoInitialShuCollapse.hpp"
+#include "enzo_EnzoInitialBBTest.hpp"
 
 #include "enzo_EnzoRefineShock.hpp"
 #include "enzo_EnzoRefineParticleMass.hpp"
 #include "enzo_EnzoRefineMass.hpp"
 
-#include "enzo_EnzoMethodBackgroundAcceleration.hpp"
-#include "enzo_EnzoLazyPassiveScalarFieldList.hpp"
+// [order dependencies:]
+#include "enzo_EnzoSinkParticle.hpp"
+#include "enzo_EnzoBondiHoyleSinkParticle.hpp"
+#include "enzo_EnzoFluxSinkParticle.hpp"
+
+// [order dependencies:]
+#include "enzo_EnzoEFltArrayMap.hpp"
 #include "enzo_EnzoEquationOfState.hpp"
 #include "enzo_EnzoEOSIdeal.hpp"
-#include "enzo_EnzoIntegrableUpdate.hpp"
+
+#include "enzo_EnzoCenteredFieldRegistry.hpp"
+#include "enzo_EnzoFieldAdaptor.hpp"
+#include "enzo_EnzoIntegrationQuanUpdate.hpp"
+#include "enzo_EnzoLazyPassiveScalarFieldList.hpp"
+#include "enzo_EnzoPermutedCoordinates.hpp"
 #include "enzo_EnzoReconstructor.hpp"
 #include "enzo_EnzoReconstructorNN.hpp"
 #include "enzo_EnzoReconstructorPLM.hpp"
-#include "enzo_EnzoRiemann.hpp"
-#include "enzo_EnzoRiemannLUT.hpp"
-#include "enzo_EnzoRiemannUtils.hpp"
-#include "enzo_EnzoRiemannImpl.hpp"
-#include "enzo_EnzoRiemannHLL.hpp"
-#include "enzo_EnzoRiemannHLLC.hpp"
-#include "enzo_EnzoRiemannHLLD.hpp"
-#include "enzo_EnzoBfieldMethod.hpp"
-#include "enzo_EnzoBfieldMethodCT.hpp"
+#include "enzo_EnzoSourceGravity.hpp"
 #include "enzo_EnzoSourceInternalEnergy.hpp"
 
-#include "enzo_EnzoMethodCheckGravity.hpp"
+// public header for the EnzoRiemann sub-library. This needs to be included
+// after the headers for:
+//     EnzoEFltArrayMap, EnzoCenteredFieldRegistry, & EnzoEquationOfState
+// but before the header for EnzoMethodMHDVlct EnzoBfieldMethod and EnzoBfieldMethodCT
+#include "EnzoRiemann.hpp"
+
+// [order dependencies:]
+#include "enzo_EnzoBfieldMethod.hpp"
+#include "enzo_EnzoBfieldMethodCT.hpp"
+
+#include "enzo_EnzoMethodAccretion.hpp"
+#include "enzo_EnzoMethodBackgroundAcceleration.hpp"
+#include "enzo_EnzoMethodBondiHoyleAccretion.hpp"
+#include "enzo_EnzoMethodCheck.hpp"
 #include "enzo_EnzoMethodComovingExpansion.hpp"
 #include "enzo_EnzoMethodCosmology.hpp"
-#include "enzo_EnzoMethodFeedback.hpp"
 #include "enzo_EnzoMethodDistributedFeedback.hpp"
+#include "enzo_EnzoMethodFeedback.hpp"
+#include "enzo_EnzoMethodFeedbackSTARSS.hpp"
+#include "enzo_EnzoMethodFluxAccretion.hpp"
 #include "enzo_EnzoMethodGrackle.hpp"
 #include "enzo_EnzoMethodGravity.hpp"
 #include "enzo_EnzoMethodHeat.hpp"
 #include "enzo_EnzoMethodHydro.hpp"
+#include "enzo_EnzoMethodMergeSinks.hpp"
+#include "enzo_EnzoMethodMHDVlct.hpp"
 #include "enzo_EnzoMethodPmDeposit.hpp"
 #include "enzo_EnzoMethodPmUpdate.hpp"
 #include "enzo_EnzoMethodPpm.hpp"
 #include "enzo_EnzoMethodPpml.hpp"
-#include "enzo_EnzoMethodTurbulence.hpp"
+#include "enzo_EnzoMethodSinkMaker.hpp"
 #include "enzo_EnzoMethodStarMaker.hpp"
+#include "enzo_EnzoMethodStarMakerSTARSS.hpp"
 #include "enzo_EnzoMethodStarMakerStochasticSF.hpp"
 #include "enzo_EnzoMethodMHDVlct.hpp"
 #include "enzo_EnzoMethodRamsesRT.hpp"
+#include "enzo_EnzoMethodThresholdAccretion.hpp"
+#include "enzo_EnzoMethodTurbulence.hpp"
 
 #include "enzo_EnzoMatrixDiagonal.hpp"
 #include "enzo_EnzoMatrixIdentity.hpp"
 #include "enzo_EnzoMatrixLaplace.hpp"
+
+#include "enzo_EnzoMsgCheck.hpp"
 
 #include "enzo_EnzoComputeAcceleration.hpp"
 #include "enzo_EnzoComputeCicInterp.hpp"

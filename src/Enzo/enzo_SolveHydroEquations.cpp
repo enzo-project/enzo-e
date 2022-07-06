@@ -11,13 +11,16 @@
 
 // #define IE_ERROR_FIELD
 // #define DEBUG_PPM
+#define EXIT_ON_ERROR
+// #define DEBUG_FLUX
 //----------------------------------------------------------------------
 
 int EnzoBlock::SolveHydroEquations
 (
  enzo_float time,
  enzo_float dt,
- bool comoving_coordinates
+ bool comoving_coordinates,
+ bool single_flux_array
  )
 {
   /* initialize */
@@ -68,9 +71,6 @@ int EnzoBlock::SolveHydroEquations
 
   }
 
-  // No subgrids, so colindex is NULL
-  //int *colindex         = NULL;
-
   /* Compute size (in enzo_floats) of the current grid. */
 
   int rank = cello::rank();
@@ -117,6 +117,13 @@ int EnzoBlock::SolveHydroEquations
   /* Determine if Gamma should be a scalar or a field. */
 
   const int in = cello::index_static();
+  const EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
+  enzo_float gamma = fluid_props->gamma();
+
+  enzo_float dual_eta1, dual_eta2;
+  const bool idual_ = fluid_props->dual_energy_config().bryan95_formulation
+    (&dual_eta1, &dual_eta2);
+  int idual = (int) idual_;
 
   /* Set minimum support. */
 
@@ -154,6 +161,7 @@ int EnzoBlock::SolveHydroEquations
      understand. */
 
   size = NumberOfSubgrids*3*(18+2*ncolor) + 1;
+
   int * array = new int[size];
   for (int i=0; i<size; i++) array[i] = 0;
 
@@ -177,20 +185,26 @@ int EnzoBlock::SolveHydroEquations
 
   FluxData * flux_data = data()->flux_data();
 
-  const int nx = mx - 2*gx;
-  const int ny = my - 2*gy;
-  const int nz = mz - 2*gz;
+  enzo_float * flux_array = (single_flux_array) ?
+    flux_data->flux_array() : temp;
 
-  enzo_float * standard = temp;
+  if (flux_array == nullptr) flux_array = temp; // required if flux_correction not used
 
+  //  enzo_float * flux_array = temp;
+  
   // int l3[3] = {gx,gy,gz};
   // int u3[3] = {mx-gx,my-gy,mz-gz};
   int l3[3] = {gx,gy,gz};
   int u3[3] = {mx-gx-1,my-gy-1,mz-gz-1};
   const int nf = flux_data->num_fields();
 
-  index_color = 0;
-  for (int i_f=0; i_f <nf; i_f++) {
+#ifdef DEBUG_FLUX
+  long long min=std::numeric_limits<long long>::max();
+  long long max=std::numeric_limits<long long>::lowest();
+#endif  
+ 
+  index_color = 0; 
+  for (int i_f=0; i_f<nf; i_f++) {
     int * flux_index = 0;
     const int index_field = flux_data->index_field(i_f);
     const std::string field_name = field.field_name(index_field);
@@ -201,6 +215,7 @@ int EnzoBlock::SolveHydroEquations
     if (field_name == "velocity_z")      flux_index = windex;
     if (field_name == "total_energy")    flux_index = Eindex;
     if (field_name == "internal_energy") flux_index = geindex;
+    
     if (field.groups()->is_in(field_name,"color")) {
       flux_index = colindex + 3*2*index_color;
       index_color++;
@@ -218,12 +233,20 @@ int EnzoBlock::SolveHydroEquations
       jend[axis] = u3[axis_j];
       for (int face=0; face<2; face++) {
         FaceFluxes * ff_b = flux_data->block_fluxes(axis,face,i_f);
-        int dx,dy,dz;
         flux_index[axis*2+face] =
-          ((enzo_float *)ff_b->flux_array(&dx,&dy,&dz).data()) - standard;
+          ff_b->flux_array() - flux_array;
+#ifdef DEBUG_FLUX        
+        min = std::min(min,(long long)flux_index[axis*2+face]);
+        max = std::max(max,(long long)flux_index[axis*2+face]);
+#endif        
       }
     }
   }
+
+#ifdef DEBUG_FLUX
+  CkPrintf ("DEBUG_FLUX %s %lld %lld\n",this->name().c_str(),min,max);
+#endif
+  
 
   //==================================================
   //    enzo_float *standard = SubgridFluxes[0]->LeftFluxes[0][0];
@@ -280,7 +303,7 @@ int EnzoBlock::SolveHydroEquations
      acceleration_x,
      acceleration_y,
      acceleration_z,
-     &Gamma[in], &dt, &cycle_,
+     &gamma, &dt, &cycle_,
      CellWidthTemp[0], CellWidthTemp[1], CellWidthTemp[2],
      &rank, &GridDimension[0], &GridDimension[1],
      &GridDimension[2], GridStartIndex, GridEndIndex,
@@ -288,20 +311,21 @@ int EnzoBlock::SolveHydroEquations
      &PressureFree[in],
      &iconsrec, &iposrec,
      &PPMDiffusionParameter[in], &PPMSteepeningParameter[in],
-     &DualEnergyFormalism[in], &DualEnergyFormalismEta1[in],
-     &DualEnergyFormalismEta2[in],
+     &idual, &dual_eta1, &dual_eta2,
      &NumberOfSubgrids, leftface, rightface,
      istart, iend, jstart, jend,
-     standard, dindex, Eindex, uindex, vindex, windex,
+     flux_array, dindex, Eindex, uindex, vindex, windex,
      geindex, temp,
      &ncolor, colorpt, coloff, colindex,
      &error, ie_error_x,ie_error_y,ie_error_z,&num_ie_error
      );
 
-  if (error != 0) {
-    char buffer[256];
-    snprintf (buffer,255,"Error %d in call to ppm_de block %s",error,name().c_str());
-  }
+#ifdef EXIT_ON_ERROR  
+  ASSERT2 ("EnzoBlock::SolveHydroEquations",
+           "Error %d in call to ppm_de block %s",error,name().c_str(),
+           (error == 0));
+#endif  
+
 
 #ifdef IE_ERROR_FIELD
   if (num_ie_error > 0) {

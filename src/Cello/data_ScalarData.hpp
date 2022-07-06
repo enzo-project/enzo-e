@@ -26,13 +26,13 @@ public: // interface
   }
 
   /// Return the specified scalar value
-  T * value (ScalarDescr * scalar_descr, int index)
+  T * value (const ScalarDescr * scalar_descr, int index)
   { if (index >= int(value_.size())) allocate(scalar_descr);
-    return (index >= 0) ? & value_[index] : NULL;
+    return (index >= 0) ? & value_[scalar_descr->offset(index)] : NULL;
   }
 
   /// Allocate scalars
-  void allocate(ScalarDescr * scalar_descr)
+  void allocate(const ScalarDescr * scalar_descr)
   { value_.resize(scalar_descr->size()); }
   
 private: // attributes

@@ -36,39 +36,26 @@ PARALLEL_MAIN_BEGIN
   unit_assert(sync_1.stop() == 5);
   
   unit_func("next");
-  unit_assert(sync_1.next() == false);
+  unit_assert( ! sync_1.next());
   unit_assert(sync_1.value() == 1);
-  unit_assert(sync_1.is_done() == false);
-  unit_assert(sync_1.next() == false);
+  unit_assert( ! sync_1.is_done());
+  unit_assert( ! sync_1.next());
   unit_assert(sync_1.value() == 2);
-  unit_assert(sync_1.is_done() == false);
-  unit_assert(sync_1.next() == false);
+  unit_assert( ! sync_1.is_done());
+  unit_assert( ! sync_1.next());
   unit_assert(sync_1.value() == 3);
-  unit_assert(sync_1.is_done() == false);
-  unit_assert(sync_1.next() == false);
+  unit_assert( ! sync_1.is_done());
+  unit_assert( ! sync_1.next());
   unit_assert(sync_1.value() == 4);
-  unit_assert(sync_1.is_done() == false);
-  unit_assert(sync_1.next() == true);
+  unit_assert( ! sync_1.is_done());
+  unit_assert(sync_1.next());
   unit_assert(sync_1.value() == 0);
-  unit_assert(sync_1.is_done() == true);
+  unit_assert(sync_1.is_done());
 
   sync_1.reset();
-  unit_assert(sync_1.is_done() == false);
+  unit_assert( ! sync_1.is_done());
   unit_assert(sync_1.value() == 0);
   unit_assert(sync_1.stop() == 0);
-  
-  //   Sync (int index_stop = 0) throw()
-  //  inline bool next () throw()
-  //  inline bool is_done () const throw()
-  //  inline void set_stop (int stop) throw ()
-  //  inline void inc_stop (int increment) throw ()
-  //  inline int value () const
-  //  inline int stop () const throw ()
-  //  inline void reset () throw () 
-  //  inline int operator -- () 
-  //  inline int operator ++ () 
-  //  inline int operator -= (int count) 
-  //  inline int operator += (int count) 
 
   unit_finalize();
 

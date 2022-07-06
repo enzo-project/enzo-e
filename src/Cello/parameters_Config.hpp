@@ -48,7 +48,6 @@ public: // interface
     boundary_field_list(),
     num_fields(0),
     field_list(),
-    field_index(),
     field_alignment(0),
     field_padding(0),
     field_history(0),
@@ -57,9 +56,12 @@ public: // interface
     field_restrict(""),
     field_group_list(),
     num_initial(0),
+    initial_new(false),
     initial_list(),
     initial_cycle(0),
     initial_time(0.0),
+    initial_restart(false),
+    initial_restart_dir(""),
     initial_trace_name(""),
     initial_trace_field(""),
     initial_trace_mpp(0.0),
@@ -77,16 +79,32 @@ public: // interface
     method_courant_global(1.0),
     method_list(),
     method_schedule_index(),
+    method_file_name(),
+    method_path_name(),
     method_close_files_seconds_stagger(),
     method_close_files_seconds_delay(),
     method_close_files_group_size(),
     method_courant(),
+    method_debug_print(),
+    method_debug_coarse(),
+    method_debug_ghost(),
     method_flux_correct_group(),
     method_flux_correct_enable(),
     method_flux_correct_min_digits_fields(),
     method_flux_correct_min_digits_values(),
+    method_flux_correct_single_array(true),
+    method_field_list(),
+    method_particle_list(),
+    method_output_blocking(),
+    method_output_all_blocks(),
+    method_prolong(),
+    method_ghost_depth(),
+    method_min_face_rank(),
+    method_all_fields(),
+    method_all_particles(),
     method_timestep(),
     method_trace_name(),
+    method_type(),
   // MethodNull
     method_null_dt(0.0),
     monitor_debug(false),
@@ -95,7 +113,6 @@ public: // interface
     output_list(),
     output_type(),
     output_axis(),
-    output_image_block_size(),
     output_image_lower(),
     output_image_upper(),
     output_colormap(),
@@ -103,6 +120,7 @@ public: // interface
     output_image_log(),
     output_image_abs(),
     output_image_mesh_color(),
+    output_image_mesh_order(),
     output_image_color_particle_attribute(),
     output_image_size(),
     output_image_reduce_type(),
@@ -120,7 +138,7 @@ public: // interface
     output_field_list(),
     output_particle_list(),
     output_name(),
-    index_schedule_(0),
+    index_schedule(0),
     schedule_list(),
     schedule_type(),
     schedule_var(),
@@ -145,7 +163,6 @@ public: // interface
     performance_off_schedule_index(-1),
     num_physics(0),
     physics_list(),
-    restart_file(""),
     num_solvers(),
     solver_list(),
     solver_index(),
@@ -206,7 +223,6 @@ public: // interface
       boundary_field_list(),
       num_fields(0),
       field_list(),
-      field_index(),
       field_alignment(0),
       field_padding(0),
       field_history(0),
@@ -215,9 +231,12 @@ public: // interface
       field_restrict(""),
       field_group_list(),
       num_initial(0),
+      initial_new(false),
       initial_list(),
       initial_cycle(0),
       initial_time(0.0),
+      initial_restart(false),
+      initial_restart_dir(""),
       initial_trace_name(""),
       initial_trace_field(""),
       initial_trace_mpp(0.0),
@@ -235,16 +254,32 @@ public: // interface
       method_courant_global(1.0),
       method_list(),
       method_schedule_index(),
+      method_file_name(),
+      method_path_name(),
       method_close_files_seconds_stagger(),
       method_close_files_seconds_delay(),
       method_close_files_group_size(),
       method_courant(),
+      method_debug_print(),
+      method_debug_coarse(),
+      method_debug_ghost(),
       method_flux_correct_group(),
       method_flux_correct_enable(),
       method_flux_correct_min_digits_fields(),
       method_flux_correct_min_digits_values(),
+      method_flux_correct_single_array(true),
+      method_field_list(),
+      method_particle_list(),
+      method_output_blocking(),
+      method_output_all_blocks(),
+      method_prolong(),
+      method_ghost_depth(),
+      method_min_face_rank(),
+      method_all_fields(),
+      method_all_particles(),
       method_timestep(),
       method_trace_name(),
+      method_type(),
       method_null_dt(0.0),
       monitor_debug(false),
       monitor_verbose(false),
@@ -252,7 +287,6 @@ public: // interface
       output_list(),
       output_type(),
       output_axis(),
-      output_image_block_size(),
       output_image_lower(),
       output_image_upper(),
       output_colormap(),
@@ -260,6 +294,7 @@ public: // interface
       output_image_log(),
       output_image_abs(),
       output_image_mesh_color(),
+      output_image_mesh_order(),
       output_image_color_particle_attribute(),
       output_image_size(),
       output_image_reduce_type(),
@@ -277,7 +312,7 @@ public: // interface
       output_field_list(),
       output_particle_list(),
       output_name(),
-      index_schedule_(-1),
+      index_schedule(-1),
       schedule_list(),
       schedule_type(),
       schedule_var(),
@@ -302,7 +337,6 @@ public: // interface
       performance_off_schedule_index(-1),
       num_physics(0),
       physics_list(),
-      restart_file(""),
       num_solvers(),
       solver_list(),
       solver_index(),
@@ -393,7 +427,6 @@ public: // attributes
 
   int                        num_fields;
   std::vector<std::string>   field_list;
-  std::map<std::string,int>  field_index;
   int                        field_alignment;
   std::vector<int>           field_centering [3];
   int                        field_ghost_depth[3];
@@ -407,10 +440,16 @@ public: // attributes
   // Initial
 
   int                        num_initial;
+  bool                       initial_new;
   std::vector<std::string>   initial_list;
   int                        initial_cycle;
   double                     initial_time;
 
+  /// restart
+  bool                       initial_restart;
+  std::string                initial_restart_dir;
+
+  // InitialTrace
   std::string                initial_trace_name;
   std::string                initial_trace_field;
   double                     initial_trace_mpp;
@@ -438,17 +477,39 @@ public: // attributes
   int                        num_method;
   double                     method_courant_global;
   std::vector<std::string>   method_list;
+
   std::vector<int>           method_schedule_index;
+
+  std::vector< std::vector< std::string > > method_file_name;
+  std::vector< std::vector< std::string > > method_path_name;
+
   std::vector<double>        method_close_files_seconds_stagger;
   std::vector<double>        method_close_files_seconds_delay;
   std::vector<int>           method_close_files_group_size;
   std::vector<double>        method_courant;
+  std::vector<bool>          method_debug_print;
+  std::vector<bool>          method_debug_coarse;
+  std::vector<bool>          method_debug_ghost;
+
   std::vector<std::string>   method_flux_correct_group;
   std::vector<bool>          method_flux_correct_enable;
   std::vector<std::vector<std::string>> method_flux_correct_min_digits_fields;
   std::vector<std::vector<double>> method_flux_correct_min_digits_values;
+  bool                       method_flux_correct_single_array;
+
+  std::vector< std::vector< std::string > > method_field_list;
+  std::vector< std::vector< std::string > > method_particle_list;
+  std::vector< int >         method_output_blocking[3];
+  std::vector< bool >        method_output_all_blocks;
+  std::vector<std::string>   method_prolong;
+  std::vector<int>           method_ghost_depth;
+  std::vector<int>           method_min_face_rank;
+  std::vector<int>           method_all_fields;
+  std::vector<int>           method_all_particles;
+
   std::vector<double>        method_timestep;
   std::vector<std::string>   method_trace_name;
+  std::vector<std::string>   method_type;
   double                     method_null_dt;
 
 
@@ -463,7 +524,6 @@ public: // attributes
   std::vector <std::string>   output_list;
   std::vector < std::string > output_type;
   std::vector < std::string > output_axis;
-  std::vector < int >         output_image_block_size;
   std::vector < std::vector <double> > output_image_lower;
   std::vector < std::vector <double> > output_image_upper;
   std::vector < std::vector <double> > output_colormap;
@@ -471,6 +531,7 @@ public: // attributes
   std::vector < char >        output_image_log;
   std::vector < char >        output_image_abs;
   std::vector < std::string > output_image_mesh_color;
+  std::vector < std::string > output_image_mesh_order;
   std::vector < std::string > output_image_color_particle_attribute;
   std::vector < std::vector <int> > output_image_size;
   std::vector < std::string>  output_image_reduce_type;
@@ -489,13 +550,14 @@ public: // attributes
   std::vector < std::vector <std::string> >  output_field_list;
   std::vector < std::vector <std::string> > output_particle_list;
   std::vector < std::vector <std::string> >  output_name;
-  int                        index_schedule_;
+  std::string                 output_checkpoint_file;
+  int                         index_schedule;
   std::vector< std::vector<double> > schedule_list;
-  std::vector< std::string > schedule_type;
-  std::vector< std::string > schedule_var;
-  std::vector< double >      schedule_start;
-  std::vector< double >      schedule_stop;
-  std::vector< double >      schedule_step;
+  std::vector< std::string >  schedule_type;
+  std::vector< std::string >  schedule_var;
+  std::vector< double >       schedule_start;
+  std::vector< double >       schedule_stop;
+  std::vector< double >       schedule_step;
 
   // Particles
 
@@ -528,10 +590,6 @@ public: // attributes
   
   int                        num_physics;  // number of physics objects
   std::vector<std::string>   physics_list;
-
-  // Restart
-
-  std::string                restart_file;
 
   // Solvers
 
@@ -587,7 +645,6 @@ protected: // functions
   void read_particle_    ( Parameters * ) throw();
   void read_performance_ ( Parameters * ) throw();
   void read_physics_     ( Parameters * ) throw();
-  void read_restart_     ( Parameters * ) throw();
   void read_solver_      ( Parameters * ) throw();
   void read_stopping_    ( Parameters * ) throw();
   void read_testing_     ( Parameters * ) throw();

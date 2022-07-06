@@ -29,26 +29,10 @@ parameters
      - Type
      - Default
      - Description
-   * - ``"density_floor"``
-     - `float`
-     - `1.0e-6`
-     - `Lower limit on density`
    * - ``"diffusion"``
      - `logical`
      - `false`
      - `PPM diffusion parameter`
-   * - ``"dual_energy"``
-     - `logical`
-     - `false`
-     - `Whether to use dual-energy formalism`
-   * - ``"dual_energy_eta_1"``
-     - `float`
-     - `0.001`
-     - `Dual energy parameter eta 1`
-   * - ``"dual_energy_eta_2"``
-     - `float`
-     - `0.1`
-     - `Dual energy parameter eta 2`
    * - ``"flattening"``
      - `integer`
      - `3`
@@ -57,14 +41,6 @@ parameters
      - `integer`
      - `100`
      - `Enzo's MinimumPressureSupportParameter`
-   * - ``"number_density_floor"``
-     - `float`
-     - `1.0e-6`
-     - `Lower limit on number density`
-   * - ``"pressure_floor"``
-     - `float`
-     - `1.0e-6`
-     - `Lower limit on pressure`
    * - ``"pressure_free"``
      - `logical`
      - `false`
@@ -73,18 +49,10 @@ parameters
      - `logical`
      - `false`
      - `PPM steepening parameter`
-   * - ``"temperature_floor"``
-     - `float`
-     - `1.0e-6`
-     - `Lower limit on temperature`
    * - ``"use_minimum_pressure_support"``
      - `logical`
      - `false`
      - `Minimum pressure support`
-   * - ``"mol_weight"``
-     - `float`
-     - `0.6`
-     - `Mean molecular mass`
 
 fields
 ------
@@ -133,6 +101,15 @@ fields
      - ``enzo_float``
      - [w]
      - computed from ``total_energy``
+
+``fluid_props`` compatability
+-----------------------------
+
+This method is also compatible with the ``"bryan95"`` dual-energy formalism.
+See :ref:`using-fluid_props-de` for additional details.
+
+This method currently ignores all of the floor parameters that are set in the ``physics:fluid_props:floors`` section of the parameter file.
+
 
 ``"ppml"``: MHD
 ===============
@@ -194,14 +171,6 @@ parameter) should be less than 0.5.
      - `string`
      - `none`
      - `Specifies handling of magnetic fields (or lack thereof)`
-   * - ``"density_floor"``
-     - `float`
-     - `none`
-     - `Lower limit on density (must exceed 0)`
-   * - ``"pressure_floor"``
-     - `logical`
-     - `none`
-     - `Lower limit on thermal pressure (must exceed 0)`
    * - ``"riemann_solver"``
      - `string`
      - `hlld`
@@ -219,14 +188,6 @@ parameter) should be less than 0.5.
      - `1.5`
      - `controls dissipation of the "plm"/"plm_enzo" reconstruction
        method.`
-   * - ``"dual_energy"``
-     - `logical`
-     - `false`
-     - `Whether to use dual-energy formalism`
-   * - ``"dual_energy_eta"``
-     - `float`
-     - `0.001`
-     - `Dual energy parameter eta`
 
 
 fields
@@ -304,50 +265,15 @@ initializer. For non-trivial configurations, we have provide the
 (face-centered and cell-centered) from expression(s) given in the
 parameter file for component(s) of the magnetic vector potential.
 
-.. _using-vlct-de:
+``fluid_props`` compatability
+-----------------------------
 
-dual-energy formalism
----------------------
+This method makes use of the ``density`` and ``pressure`` floor parameters that are set in the ``physics:fluid_props:floors`` section of the parameter file.
+See :ref:`using-fluid_props-floors` for more details about specifying these parameters.
+This method requires that both parameters are specified and that they have positive values.
 
-The implementation of the dual-energy more closely resembles the
-implementation employed in Enzo's Runge–Kutta integrator than the original
-conception used by Enzo's ppm integrator, (for a description of that
-implementation, see `Bryan et al (1995)
-<https://ui.adsabs.harvard.edu/abs/1995CoPhC..89..149B>`_ ). There are 3
-main differences from the original conception:
-
-  1. internal energy is always used to compute pressure. In the original
-     conception, pressure could be computed from ``total_energy`` or
-     ``internal_energy`` (the decision was independent of synchronization).
-  2. ``pressure`` and ``internal_energy`` are not separately reconstructed.
-     Instead, just the pressure is reconstructed. The ``internal_energy``
-     is computed at the left and right interfaces from the reconstructed
-     quantities.
-  3. Synchronization of the total and internal energies is a local
-     operation that doesn't require knowledge of cell neighbors. In the
-     original conception, knowledge of the immediate neighbors had been
-     required (each synchronization incremented the stale depth - 3 extra
-     ghost zones would have been required).
-
-For clarity, the conditions for synchronization are provided below. The
-specific ``internal_energy``, :math:`e`, is set to
-:math:`e'= E - (v^2 + B^2/\rho)/2` (where :math:`E` is the specific
-``total_energy``) when the following conditions are met:
-
-  * :math:`c_s'^2 > \eta v^2`, where :math:`c_s'^2=\gamma(\gamma - 1) e'`.
-  * :math:`c_s'^2 > \eta B^2/\rho` (this is always satisfied in hydro mode)
-  * :math:`e' > e /2`
-
-If the above condition is not met, then ``total_energy`` is set to
-:math:`e + (v^2 + B^2/\rho)/2` in MHD mode (in hydro mode, it's set to
-:math:`e + v^2/2`).
-    
-When ``"dual_energy_eta"``, is set to ``0``, :math:`e` is always set to
-``e'``. This is done to provide support for Grackle (in the future)
-without the dual-energy formalism.
-
-*Note: in the future, the behavior described in difference 2, may change
-to achieve better compatibility with Grackle.*
+This method is also compatible with the ``"modern"`` dual-energy formalism.
+See :ref:`using-fluid_props-de` for additional details.
 
 .. _using-vlct-reconstruction:
 
@@ -518,12 +444,25 @@ fields
 
 particles
 ---------
+
+For a given particle type to be deposited to the total density field,
+it must be part of the ``"is_gravitating"`` group, and must have either
+an attribute called ``"mass"``, or a constant called ``"mass"``, but
+not both.
+
+If ``"mass"`` is an attribute, we loop through the mass attribute array
+to get the mass of each particle; and if ``"mass"`` is a constant with a
+value specified in the input parameter file, the mass of each particle is
+equal to this value. In either case, the value of the divided by the cell
+volume to get a density quantity, which is deposited on to the grid via
+a CIC interpolation scheme.
    
 ``"pm_update"``: particle-mesh
 ==============================
 
 Particle-mesh ("PM") method component to update particle positions
-given acceleration fields
+given acceleration fields. Only particle types in the ``"is_gravitating"``
+group are updated.
    
 ``"heat"``: heat equation
 =========================
@@ -535,6 +474,75 @@ A sample Method for implementing forward-euler to solve the heat equation.
 
 Calls methods provided by the external Grackle 3.0 chemistry and
 cooling library.
+
+.. _using-grackle-gamma-with-HD:
+
+Compatability with hydro/mhd solvers
+------------------------------------
+
+The ``"grackle"`` method is compatible with both the ``"ppm"`` and the
+``"mhd_vlct"`` methods. The convention is to list the hydro method
+before ``"grackle"`` in the ``Field:list`` parameter.  This
+configuration performs advection and radiative cooling in an
+operator-split manner (*Note: there isn't currently support for
+performing radiative cooling during the predictor step of the
+VL+CT solver*).
+
+Integration with hydro-solvers is self-consistent when
+``Method:Grackle:primordial_chemistry`` has values of ``0`` or ``1``.
+However, the integration is somewhat inconsistent when the parameter
+exceeds ``1``. While users shouldn't be too concerned about this
+latter scenario unless they are simulating conditions where
+:math:`{\rm H}_2` makes up a significant fraction of the gas density,
+we describe the inconsistencies in greater detail below.
+
+When ``Method:Grackle:primordial_chemistry > 1``, the Grackle library
+explicitly models chemistry involving :math:`{\rm H}_2` and how it
+modifies the adiabtic index. Grackle's routines treat
+:math:`\gamma_0`, the "nominal adiabatic index" specified by
+``Physics:fluid_props:eos:gamma``, as the adiabatic index for all
+monatomic species (this should be ``5.0/3.0``). To that end, Grackle
+supplies functions that can effectively be represented as
+:math:`\gamma(e, n_{{\rm H}_2}, n_{\rm other})` and :math:`p(\rho, e,
+n_{{\rm H}_2}, n_{\rm other})`. In these formulas:
+
+- :math:`p`, :math:`\rho` and :math:`e` correspond to the quantities
+  held by the ``pressure``, ``density`` and ``internal_energy``
+  fields.  *(Note: the* :math:`\gamma` *function's dependence on*
+  :math:`e` *accounts for the dependence of* :math:`\gamma_{{\rm
+  H}_2}` *on temperature)*
+
+- :math:`n_{{\rm H}_2}` specifies the number density of
+  :math:`{\rm H}_2`. :math:`n_{\rm other}` specifies a selection of
+  the other primordial species (that roughly approximate the total
+  number density). In practice, these are computed from passively
+  advected species fields.
+
+There are a handful of locations within the ``"ppm"`` and
+``"mhd_vlct"`` methods where this treatment is relevant:
+
+1. **Computing the timestep:** each hydro/mhd
+   method uses the :math:`p(\rho, e, n_{{\rm H}_2}, n_{\rm other})`
+   function for the pressure values. However, they both use
+   :math:`\gamma_0` in other places (such as the occurence of
+   adiabatic index in the sound speed formula).
+
+2. **Pre-reconstruction pressure calculation:** each hydro/mhd
+   solver internally computes the pressure that is to be reconstructed
+   with :math:`p=(\gamma_0 - 1)e\rho`.
+
+3. **Riemann Solver:** in each hydro/mhd solver, the Riemann Solver
+   completely ignore the grackle supplied functions.
+
+4. **VL+CT Energy floor and DE synchronization:** the internal energy
+   floor is computed from the pressure floor using: :math:`e_{\rm
+   floor} = \frac{p_{\rm floor}}{(\gamma_0 - 1)\rho}` (thus,
+   :math:`p_{\rm floor}` may exceed :math:`p(\rho, e_{\rm floor},
+   \ldots)`). Additionally, synchronizing the internal energy with
+   total energy relies on :math:`\gamma_0`.
+
+5. **PPM reconstruction:** uses :math:`\gamma_0`.
+
    
 ``"comoving_expansion"``: comoving expansion
 ============================================
@@ -556,6 +564,257 @@ acceleration fields.
 ``"trace"``: tracer particles
 =============================
 
-Moves tracer particles given the velocity field.    
-   
+Moves tracer particles given the velocity field.
 
+
+``"merge_sinks"``: merge sinks
+==============================
+
+Merges together sink particles which are separated by less than a given
+"merging radius". This is done by copying all sink particles to / from
+all neighbouring blocks. A Friend-of-Friends algorithm is used to
+partition particles into groups, where all particles within a given group
+are separated by less than a merging radius. If a group has more than one
+particle, one of the particles has its properties changed: its position
+becomes that of the centre-of-mass of the group, and it takes the total
+mass, momentum and mass fraction of the whole group.
+In addition, its 'lifetime' attribute is set to be the maximum of the group,
+its 'creation_time' attribute is set to be the minimum of the group, and its
+'id' attribute is set to the minimum of the group. Other particles in the
+group are marked for deletion. The final step is for each block to delete
+all the remaining sink particles which are 'out-of-bounds' of the block.
+
+This method requires sink particles to have the following attributes: ``"mass"``, ``"x"``,
+``"y"``, ``"z"``, ``"vx"``, ``"vy"``, ``"vz"``, ``"is_copy"``, ``"id"``, ``"lifetime"``,
+and ``"creation_time"``. All these attributes must be of type ``"default"``, except for
+``"is_copy"`` and ``"id"`` which must be of type ``"int64"``. Furthermore, ``"is_copy"``
+must be initialized to 0 for all particles.
+
+This method also requires that the number of root blocks across all axes is greater than
+2, i.e., that ``"Mesh:root_blocks" = [a,b,c]``, where ``a``, ``b``, and ``c`` are all
+greater than 2.
+
+This procedure cannot handle the case where particles originally
+from non-neighbouring blocks are put into the same FoF group. If this is
+found to occur, the program stops and prints an error message. This situation
+is unlikely to happen, unless the merging radius is too large relative
+to the block size.
+
+Currently this will only run in unigrid mode. This is because this method
+will only work correctly if all blocks containing sink particles are of the
+same size, or equivalently, on the same refinement level.
+For this reason, there is a check in the constructor of EnzoMethodMergeSinks
+for whether ``"Adapt: max_level"`` is equal to zero. In future, we plan to
+implement a refinement condition that
+any block containing a sink particle needs to be on the highest level of
+refinement. In this case, the assumption that
+blocks containing sink particles are all on the same level of refinement
+would be valid.
+
+WARNING: there is currently a memory leak issue when running with this method
+which can cause Enzo-E to crash in mysterious ways. If this problem is
+encountered, it is advised to increase the batch size parameter
+(``"Particle:batch_size"``) by a factor of a few
+before attempting to run again. To be completely safe, the user can set a
+batch size larger than the total number of sink particles in the whole
+simulation, which should be feasible for small test problems.
+
+parameters
+----------
+
+.. list-table:: Method ``merge_sinks`` parameters
+   :widths: 10 5 1 30
+   :header-rows: 1
+
+   * - Parameter
+     - Type
+     - Default
+     - Description
+   * - ``"merging_radius_cells"``
+     - `float`
+     - `8.0`
+     - `The merging radius in units of the minimum cell width (i.e.,
+       the minimum across all 3 dimensions), at the highest refinement
+       level.`
+
+
+``"accretion"``: accretion
+==============================
+
+For cells within a spherical accretion zone around a sink particle, mass is removed
+(i.e., the values of the density field are reduced) and added to the sink particle.
+The momentum change of gas is in the accretion zone due to the mass loss is accounted
+for by changing the momentum of the sink particle, so that total momentum is
+conserved. The amount of mass removed is determined by which "flavor" of accretion is
+chosen (specified by the ``"accretion:flavor"`` parameter), as well as the values
+of the "density threshold" (specified by ``"accretion:physical_density_threshold_cgs"``) and the
+"maximum mass fraction" (specified by ``"accretion:max_mass_fraction"``).
+
+In ``"threshold"`` flavor accretion, the change in density of each cell is zero if the current
+density is below the density threshold. If the current density is above the density threshold,
+the change in density is the current density minus the density threshold, or the maximum mass
+fraction times the current density, whichever is smaller.
+
+In ``"bondi_hoyle"`` flavor accretion, the density change in each cell is calculated according
+to the method described in Mark R. Krumholz et al 2004, ApJ, 611, 399. Furthermore, the
+density change is limited in the same way as in ``"threshold"`` accretion.
+
+In ``"flux"`` flavor accretion, the density change in each cell is calculated according to the
+method described in Andreas Bleuler & Romain Teyssier 2004, MNRAS, 445, 4015-4036.
+Furthermore, the density change is limited in the same way as in ``"threshold"`` accretion.
+
+In ``"dummy"`` flavor accretion, no accretion is done (essentially, the accretion rate is zero).
+This can be useful for testing purposes.
+
+This method can only be used if ``"merge_sinks"`` is also used, with ``"merge_sinks"`` preceding
+``"accretion"``. In addition, this method requires the use of three spatial dimensions.
+
+This method requires the following fields (in addition to the fields required by the hydro
+method): ``"density_source"``, ``"density_source_accumulate"``, ``"mom_dens_x_source"``,
+``"mom_dens_x_source_accumulate"``, ``"mom_dens_y_source"``, ``"mom_dens_y_source_accumulate"``,
+``"mom_dens_z_source"``, and ``mom_dens_z_source_accumulate"``. In addition, if sink particles
+have a ``"metal_fraction"`` attribute, there must be a ``"metal_density"`` field.
+
+This method also requires sink particles to have the following attributes: ``"mass"``, ``"x"``,
+``"y"``, ``"z"``, ``"vx"``, ``"vy"``, ``"vz"``, and ``"accretion_rate"``, which must all be
+of type ``"default"``.
+
+parameters
+----------
+
+.. list-table:: Method ``accretion`` parameters
+   :widths: 10 5 1 30
+   :header-rows: 1
+
+   * - Parameter
+     - Type
+     - Default
+     - Description
+   * - ``"accretion_radius_cells"``
+     - `float`
+     - `4.0`
+     - `The accretion radius (i.e., the radius of the spherical accretion zone)
+       in units of the minimum cell width (i.e., if the cell width along all the x, y, and
+       z-axes are hx, hy, and hz, then the minimum cell width is the minimum of hx, hy, and hz),
+       at the highest refinement level. Its value must be less than one fewer than the minimum
+       ghost depth  for "flux" accretion, and less than the minimum ghost depth
+       for other flavors of accretion. The ghost depth is 4 (along all axes) by default.`
+   * - ``"flavor"``
+     - `string`
+     - ``""``
+     - `The flavor of accretion used, which can be either "threshold", "bondi_hoyle", or "flux".
+       If this parameter is not set in the parameter file, or if some other string is
+       provided, then the accretion method will be called but will do nothing.`
+   * - ``"physical_density_threshold_cgs"``
+     - `float`
+     - `1.0e-24`
+     - `The value of the physical density threshold in cgs units. The density in each cell in
+       the accretion zone cannot go below this value during the accretion process. The value of
+       the density threshold in code units must be greater than or equal to the value of the density
+       floor imposed by the hydro method.`
+   * - ``"max_mass_fraction"``
+     - `float`
+     - `0.25`
+     - `This parameter specifies the maximum fraction of mass which can be accreted from a cell
+       in one timestep. This value of this parameter must be between 0 and 1.`
+
+
+``"sink_maker"``: sink maker
+==============================
+
+This method runs on blocks at the highest level of refinement, and forms sink particles in cells
+which satisy certain criteria.
+
+First, the gas density in the cell must be larger than the
+density threshold, which is specified by the ``"sink_maker:physical_density_threshold_cgs"``
+parameter. If so, the mass of the potential sink particle is
+:math:`V_{cell} \times \max(\rho - \rho_{thresh}, f_{max} \, \rho)`, where :math:`V_{cell}` is the
+cell volume, :math:`\rho` is the cell gas density, :math:`\rho_{thresh}` is the density
+threshold, and :math:`f_{max}` is the maximum fraction of the cell mass which can be turned
+into a sink particle in one timestep, which is specified by the
+``"sink_maker:maximum_mass_fraction"`` parameter. This mass must be greater
+than the minimum sink mass, which is specified by ``"sink_maker:min_sink_mass_solar"`` (in solar
+mass units).
+
+Next, the local Jeans length :math:`\lambda_J` is calculated, where
+:math:`\lambda_J = \frac{\pi c_s^2}{G \rho}`, where :math:`c_s` is the sound speed of the gas
+in the cell, and :math:`G` is the gravitational constant. It is then checked whether
+:math:`\lambda_J < N_J \times h_{max}`, where :math:`N_J` is specified by
+``"sink_maker:jeans_length_resolution_cells"``, and :math:`h_{max} = max(h_x, h_y, h_z)`, where
+:math:`h_x`, :math:`h_y`, and :math:`h_z` are the cell widths along the x-, y- and z-axes,
+respectively.
+
+The next check is that the flow is converging. This is done by computing the strain tensor,
+given by :math:`A_{ij} = \frac{1}{2} \, \left( \frac{dv_i}{dx_j} + \frac{dv_j}{dx_i} \right)`.
+Since this tensor / matrix is real and symmetric, it has three real eigenvalues, and the check
+is equivalent to checking that all three eigenvalues are negative.
+
+The final check is optional, i.e., it is only done if ``"sink_maker:check_density_maximum"``
+is "true", and a cell will pass this check if it is a local density maximum, that is, its
+density is larger than the density in all 26 neighboring cells.
+
+If a cell passes all the checks that are performed, a sink particle is created. Its position
+is the coordinates of the center of the cell, plus a small random offset. The maximum size
+of the random offset is controlled by ``"sink_maker:max_offset_cell_fraction"``.
+
+This method requires sink particles to have the following attributes: ``"mass"``, ``"x"``,
+``"y"``, ``"z"``, ``"vx"``, ``"vy"``, ``"vz"``, and ``"creation_time"``, which must all be
+of type ``"default"``; and ``"id"`` and ``"is_copy"``, which must be of type ``"int64"``.
+If sink particles have a ``"metal_fraction"`` attribute, there must be a
+``"metal_density"`` field.
+
+
+parameters
+----------
+
+.. list-table:: Method ``sink_maker`` parameters
+   :widths: 10 5 1 30
+   :header-rows: 1
+
+   * - Parameter
+     - Type
+     - Default
+     - Description
+   * - ``"jeans_length_resolution_cells"``
+     - `float`
+     - `4.0`
+     - `If the local Jeans length in a cell is less than this quantity multiplied by the maximum
+       cell width, then the cell is a candidate for forming a sink. The maximum cell width is
+       maximum value out of hx, hy, and hz, where hx, hy, and hz are the cell widths across the
+       x-, y- and z-axes, respectively.`
+   * - ``"physical_density_threshold_cgs"``
+     - `float`
+     - `1.0e-24`
+     - `The value of the physical density threshold in cgs units. The density in a cell must be
+       greater than the density threshold to be able to form a sink. The density in a cell after
+       sink formation will be no less than the density threshold. The value of
+       the density threshold in code units must be greater than or equal to the value of the
+       density floor imposed by the hydro method.`
+   * - ``"max_mass_fraction"``
+     - `float`
+     - `0.25`
+     - `The mass of a newly-formed sink is bounded above by this parameter multiplied by the cell
+       density multiplied by the cell volume. The value of this parameter must be between
+       0 and 1.`
+   * - ``"min_sink_mass_solar"``
+     - `float`
+     - `0.0`
+     - `The minimum mass of a newly-formed sink particle, in solar mass units.`
+   * - ``"check_density_maximum"``
+     - `logical`
+     - `true`
+     - `Determines whether a cell is required to be a local density maximum in order to form a
+       sink particle.`
+   * - ``"max_offset_cell_fraction"``
+     - `float`
+     - `0.0`
+     - `When a cell creates a sink particle, the x/y/z coordinate of its initial position will be
+       the x/y/z coordinate of the center of the cell, plus a random value generated from a
+       uniform distribution on the interval [-A,A], where A is equal to
+       this parameter multiplied by the cell width along the x/y/z axis.`
+   * - ``"offset_seed_shift"``
+     - `integer`
+     - `0`
+     - `When computing the random offset for the initial position of a sink particle, we compute
+       an unsigned 64 bit integer value from the cycle number, the block index, and the cell
+       index, and then add on this value to give the seed for the random number generator.`

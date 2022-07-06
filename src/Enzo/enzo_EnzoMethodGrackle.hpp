@@ -81,7 +81,6 @@ public: // interface
     Method::pup(p);
 
     p | grackle_units_;
-
     double last_init_time = time_grackle_data_initialized_;
     p | last_init_time;
     if (p.isUnpacking()) {
@@ -107,98 +106,119 @@ public: // interface
   { return "grackle"; }
 
   /// Compute maximum timestep for this method
-  virtual double timestep ( Block * block) const throw();
+  virtual double timestep ( Block * block) throw();
 
 #ifdef CONFIG_USE_GRACKLE
 
-  static void define_required_grackle_fields();
+  void define_required_grackle_fields();
 
   void initialize_grackle_chemistry_data(double current_time,
                                          bool preinitialized_units = false);
 
+  /// sets up grackle units
+  ///
+  /// @param[in]  current_time The current time. A negative value can be passed
+  ///     if the current value is not known or convenient to get. In that case,
+  ///     the program will abort if the current time is needed (i.e. because
+  ///     this is a cosmological simulation)
+  /// @param[out] grackle_units The object pointed to by this pointer is set up
   static void setup_grackle_units (double current_time,
                                    code_units * grackle_units) throw();
 
-  static void setup_grackle_units(EnzoBlock * enzo_block,
-                                  code_units * grackle_units,
-                                  int i_hist = 0 ) throw()
+  static void setup_grackle_units(const EnzoFieldAdaptor& fadaptor,
+                                  code_units * grackle_units) throw();
+
+  void setup_grackle_fields(const EnzoFieldAdaptor& fadaptor,
+                            grackle_field_data * grackle_fields,
+                            int stale_depth = 0,
+                            bool omit_cell_width = false) const throw();
+
+  void setup_grackle_fields(Block * block,
+                            grackle_field_data * grackle_fields,
+                            int i_hist = 0 ) const throw()
   {
-    double compute_time;
-    if (i_hist == 0) {
-      compute_time = enzo_block->time();
-    } else {
-      compute_time = enzo_block->data()->field().history_time(i_hist);
-    }
-    setup_grackle_units(compute_time, grackle_units);
+    setup_grackle_fields(EnzoFieldAdaptor(block, i_hist),
+                         grackle_fields, 0, false);
   }
 
-  static void setup_grackle_fields(EnzoBlock * enzo_block,
-                                   grackle_field_data * grackle_fields,
-                                   int i_hist = 0 ) throw();
+  /// Assists with problem initialization
+  ///
+  /// Scales species density fields to be sensible mass fractions of the
+  /// initial density field. Problem types that require finer-tuned control
+  /// over individual species fields should adapt this function
+  /// in their initialization routines.
+  void update_grackle_density_fields
+  (Block * block, grackle_field_data * grackle_fields = nullptr)
+    const throw();
 
-  static void update_grackle_density_fields(EnzoBlock * enzo_block,
-                                   grackle_field_data * grackle_fields) throw();
+  void delete_grackle_fields(grackle_field_data * grackle_fields) const throw()
+  {
+      grackle_fields->density         = NULL;
+      grackle_fields->internal_energy = NULL;
+      grackle_fields->x_velocity      = NULL;
+      grackle_fields->y_velocity      = NULL;
+      grackle_fields->z_velocity      = NULL;
+      grackle_fields->HI_density      = NULL;
+      grackle_fields->HII_density     = NULL;
+      grackle_fields->HeI_density     = NULL;
+      grackle_fields->HeII_density    = NULL;
+      grackle_fields->HeIII_density   = NULL;
+      grackle_fields->e_density       = NULL;
+      grackle_fields->HM_density      = NULL;
+      grackle_fields->H2I_density     = NULL;
+      grackle_fields->H2II_density    = NULL;
+      grackle_fields->DI_density      = NULL;
+      grackle_fields->DII_density     = NULL;
+      grackle_fields->HDI_density     = NULL;
+      grackle_fields->metal_density   = NULL;
+      grackle_fields->volumetric_heating_rate = NULL;
+      grackle_fields->specific_heating_rate   = NULL;
 
-  static void delete_grackle_fields(grackle_field_data * grackle_fields_) throw() {
-      grackle_fields_->density         = NULL;
-      grackle_fields_->internal_energy = NULL;
-      grackle_fields_->x_velocity      = NULL;
-      grackle_fields_->y_velocity      = NULL;
-      grackle_fields_->z_velocity      = NULL;
-      grackle_fields_->HI_density      = NULL;
-      grackle_fields_->HII_density     = NULL;
-      grackle_fields_->HeI_density     = NULL;
-      grackle_fields_->HeII_density    = NULL;
-      grackle_fields_->HeIII_density   = NULL;
-      grackle_fields_->e_density       = NULL;
-      grackle_fields_->HM_density      = NULL;
-      grackle_fields_->H2I_density     = NULL;
-      grackle_fields_->H2II_density    = NULL;
-      grackle_fields_->DI_density      = NULL;
-      grackle_fields_->DII_density     = NULL;
-      grackle_fields_->HDI_density     = NULL;
-      grackle_fields_->metal_density   = NULL;
-      grackle_fields_->volumetric_heating_rate = NULL;
-      grackle_fields_->specific_heating_rate   = NULL;
-
-      delete [] grackle_fields_->grid_dimension; grackle_fields_->grid_dimension = NULL;
-      delete [] grackle_fields_->grid_start;     grackle_fields_->grid_start      = NULL;
-      delete [] grackle_fields_->grid_end;       grackle_fields_->grid_end        = NULL;
+      delete [] grackle_fields->grid_dimension; grackle_fields->grid_dimension = NULL;
+      delete [] grackle_fields->grid_start;     grackle_fields->grid_start      = NULL;
+      delete [] grackle_fields->grid_end;       grackle_fields->grid_end        = NULL;
 
       return;
- }
+  }
 
-  void calculate_cooling_time(Block * block, enzo_float* ct,
-			      code_units* grackle_units = NULL,
-			      grackle_field_data* grackle_fields = NULL,
-			      int i_hist = 0) const throw()
+  void enforce_metallicity_floor(Block * block) throw();
+
+  void calculate_cooling_time(const EnzoFieldAdaptor& fadaptor, enzo_float* ct,
+                              int stale_depth = 0,
+			      code_units* grackle_units = nullptr,
+			      grackle_field_data* grackle_fields = nullptr)
+    const throw()
   {
-    compute_local_property_(block, ct, grackle_units, grackle_fields, i_hist,
-			    &local_calculate_cooling_time,
+    compute_local_property_(fadaptor, ct, stale_depth, grackle_units,
+                            grackle_fields, &local_calculate_cooling_time,
 			    "local_calculate_cooling_time");
   }
 
-  void calculate_pressure(Block * block, enzo_float* pressure,
-			  code_units* grackle_units = NULL,
-			  grackle_field_data* grackle_fields = NULL,
-			  int i_hist = 0) const throw()
+  void calculate_pressure(const EnzoFieldAdaptor& fadaptor,
+                          enzo_float* pressure, int stale_depth = 0,
+			  code_units* grackle_units = nullptr,
+			  grackle_field_data* grackle_fields = nullptr)
+    const throw()
   {
-    compute_local_property_(block, pressure, grackle_units, grackle_fields,
-			    i_hist, &local_calculate_pressure,
+    compute_local_property_(fadaptor, pressure, stale_depth, grackle_units,
+                            grackle_fields, &local_calculate_pressure,
 			    "local_calculate_pressure");
   }
 
-  void calculate_temperature(Block * block, enzo_float* temperature,
-			     code_units* grackle_units = NULL,
-			     grackle_field_data* grackle_fields = NULL,
-			     int i_hist = 0) const throw()
+  void calculate_temperature(const EnzoFieldAdaptor& fadaptor,
+                             enzo_float* temperature, int stale_depth = 0,
+			     code_units* grackle_units = nullptr,
+			     grackle_field_data* grackle_fields = nullptr)
+    const throw()
   {
-    compute_local_property_(block, temperature, grackle_units, grackle_fields,
-			    i_hist, &local_calculate_temperature,
+    compute_local_property_(fadaptor, temperature, stale_depth, grackle_units,
+                            grackle_fields, &local_calculate_temperature,
 			    "local_calculate_temperature");
   }
 
+
 #endif
+
 
 protected: // methods
 
@@ -207,9 +227,10 @@ protected: // methods
 #ifdef CONFIG_USE_GRACKLE
 
   // when grackle_units is NULL, new values are temporarily allocated
-  void compute_local_property_(Block * block, enzo_float* values,
+  void compute_local_property_(const EnzoFieldAdaptor& fadaptor,
+                               enzo_float* values, int stale_depth,
 			       code_units* grackle_units,
-			       grackle_field_data* grackle_fields, int i_hist,
+			       grackle_field_data* grackle_fields,
 			       grackle_local_property_func func,
 			       std::string func_name) const throw();
 
@@ -218,9 +239,9 @@ protected: // methods
 protected: // methods
 
 #ifdef CONFIG_USE_GRACKLE
-  void compute_( EnzoBlock * enzo_block) throw();
+  void compute_( Block * block) throw();
 
-  void ResetEnergies ( EnzoBlock * enzo_block) throw();
+  void ResetEnergies ( Block * block) throw();
 
 // protected: // attributes
 

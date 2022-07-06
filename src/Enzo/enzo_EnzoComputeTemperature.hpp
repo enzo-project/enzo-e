@@ -18,11 +18,29 @@ class EnzoComputeTemperature : public Compute {
 public: // interface
 
   /// Create a new EnzoComputeTemperature object
+  ///
+  /// @todo consider removing this constructor (it's never used)
   EnzoComputeTemperature
   (double density_floor,
    double temperature_floor,
    double mol_weight,
    bool comoving_coordinates);
+
+  /// Create a new EnzoComputeTemperature object
+  EnzoComputeTemperature(const EnzoPhysicsFluidProps* fluid_props,
+                         bool comoving_coordinates)
+    : EnzoComputeTemperature(0.0, 0.0, 0.0, comoving_coordinates)
+  {
+    ASSERT("EnzoComputeTemperature::EnzoComputeTemperature",
+           "does not accept a nullptr", fluid_props != nullptr);
+    const EnzoFluidFloorConfig& floor_conf = fluid_props->fluid_floor_config();
+
+    density_floor_ = floor_conf.has_density_floor() ?
+      (double)floor_conf.density() : 0.0;
+    temperature_floor_ = floor_conf.has_temperature_floor() ?
+      (double)floor_conf.temperature() : 0.0;
+    mol_weight_ = (double)fluid_props->mol_weight();
+  }
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoComputeTemperature);
@@ -40,6 +58,8 @@ public: // interface
   void pup (PUP::er &p);
 
   /// Perform the computation on the block
+  ///
+  /// This recomputes the "pressure" field and overwrites the values
   virtual void compute( Block * block) throw();
 
   virtual void compute( Block * block, enzo_float * t) throw();
