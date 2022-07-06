@@ -1815,7 +1815,7 @@ void EnzoConfig::read_method_ramses_rt_(Parameters * p)
   method_ramses_rt_bin_upper.resize(method_ramses_rt_N_groups);
   // make default bins equally spaced between 1 eV and 101 eV
   double bin_width = 100.0 / method_ramses_rt_N_groups;
-  for (int i=0; i<1; i++) {
+  for (int i=0; i<method_ramses_rt_N_groups; i++) {
     method_ramses_rt_bin_lower[i] = p->list_value_float
       (i,"Method:ramses_rt:bin_lower", 1.0 + bin_width*i);
 

@@ -53,7 +53,6 @@ Field {
   list += ["metal_density"];
   list += ["HI_density","HII_density","HeI_density","HeII_density","HeIII_density","e_density"];
   list += ["RT_heating_rate","RT_HI_ionization_rate","RT_HeI_ionization_rate","RT_HeII_ionization_rate"];
-  #list += ["photon_density_0","flux_x_0","flux_y_0","flux_z_0"]; 
 }
 
 Group {
@@ -152,7 +151,7 @@ Initial {
 }
 
 Output {
-     list = [ "N", "Fx", "Fy", "Fz", "e", "HI", "HII", "mesh", "hdf5"  ];
+     list = [ "N", "Fx", "Fy", "Fz", "e", "HI", "HII", "hdf5" ];
      N {
          dir = ["HII_REGION-%04d","cycle"];
          field_list = [ "photon_density" ];

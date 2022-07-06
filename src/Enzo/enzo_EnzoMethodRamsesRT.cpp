@@ -9,8 +9,10 @@
 
 #include "enzo.hpp"
 
+// TODO: Make these parameters instead of macros
 //#define DEBUG_TURN_OFF_ATTENUATION
 //#define DEBUG_TURN_OFF_CHEMISTRY
+//#define DEBUG_TURN_OFF_INJECTION
 
 //#define DEBUG_PRINT_GROUP_PARAMETERS
 //#define DEBUG_RECOMBINATION
@@ -59,7 +61,6 @@ EnzoMethodRamsesRT ::EnzoMethodRamsesRT(const int N_groups, const double clight)
     cello::define_field("P22");
   }
 
-
   for (int i=0; i<N_groups_; i++) {
     std::string istring = std::to_string(i); 
     cello::define_field("photon_density_" + istring);
@@ -68,6 +69,19 @@ EnzoMethodRamsesRT ::EnzoMethodRamsesRT(const int N_groups, const double clight)
     if (rank >= 3) cello::define_field("flux_z_" + istring);   
   }
 
+  // define other fields
+  //TODO: Add the rest once > 6 species is accounted for here
+  //if (chemistry_level >= 1) {
+    cello::define_field_in_group ("HI_density",    "color");
+    cello::define_field_in_group ("HII_density",   "color");
+    cello::define_field_in_group ("HeI_density",   "color");
+    cello::define_field_in_group ("HeII_density",  "color");
+    cello::define_field_in_group ("HeIII_density", "color");
+    cello::define_field_in_group ("e_density",     "color");
+ // }
+
+    cello::define_field("temperature"); // needed for recombination rates
+  
   // Initialize default Refresh object
 
   cello::simulation()->refresh_set_name(ir_post_,name());
@@ -330,14 +344,14 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_fl
   //so you need to capture `this` in order for the compiler to know which function
   //to point to
   
-  if (freq_lower == 0.0) freq_lower = 1; //planck function undefined at zero
+  if (freq_lower == 0.0) freq_lower = 1.0; //planck function undefined at zero
                                          //1 Hz is a very small frequency compared to ~1e16 Hz
                             
              
   // Get temperature of star
   double T = enzo_config -> method_ramses_rt_temperature_blackbody;
   if (T < 0.0) { 
-    double T = get_star_temperature(pmass*munit);
+    T = get_star_temperature(pmass*munit);
   }
                                          
   double N_integrated = integrate_simpson(freq_lower,freq_upper,n, 
@@ -396,8 +410,8 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_fl
   }
   
   #ifdef DEBUG_INJECTION
-    CkPrintf("MethodRamsesRT::get_radiation_blackbody -- N[i] = %1.2e cm^-3, T = %1.2e K, Ndot = %1.2e photons/s \n", 
-                     N[i]/(lunit*lunit*lunit), T, luminosity/tunit);
+    CkPrintf("MethodRamsesRT::get_radiation_blackbody -- [freq_lower, freq_upper] = [%1.2e, %1.2e], N[i] = %1.2e cm^-3, T = %1.2e K, Ndot = %1.2e photons/s \n", 
+                     freq_lower, freq_upper, N[i]/(lunit*lunit*lunit), T, luminosity/tunit);
   #endif
 
 }
@@ -479,6 +493,8 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
   double freq_lower = E_lower * enzo_constants::erg_eV / enzo_constants::hplanck;
   double freq_upper = E_upper * enzo_constants::erg_eV / enzo_constants::hplanck;
   double clight = enzo_config->method_ramses_rt_clight_frac * enzo_constants::clight;
+
+  // which type of radiation spectrum to use
   std::string radiation_spectrum = enzo_config->method_ramses_rt_radiation_spectrum; 
   for (int ib=0; ib<nb; ib++){
     enzo_float *px=0, *py=0, *pz=0;
@@ -1327,12 +1343,13 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
       #endif
         if (Nnew[i] < 1e-16) Nnew[i] = 1e-16 / Nunit;
 
+      #ifndef DEBUG_TURN_OFF_CHEMISTRY
         // update photon density due to recombinations
         // Grackle does recombination chemistry, but doesn't
         // do anything about the radiation that comes out of recombination
         // TODO: Only do this if not using on-the-spot approximation
         recombination_photons(enzo_block, Nnew, T, i, E_lower, E_upper);
-             
+      #endif
 
       }
     }   
@@ -1371,10 +1388,13 @@ void EnzoMethodRamsesRT::call_inject_photons(EnzoBlock * enzo_block) throw()
   
   const int N_groups = enzo_config->method_ramses_rt_N_groups;
   const int N_species = 3; //TODO: update for > 6 species
+
+  enzo_block->method_ramses_rt_igroup = 0;
   for (int i=0; i<N_groups; i++) {
     this->inject_photons(enzo_block);
     enzo_block->method_ramses_rt_igroup += 1;
   }
+
   // do global reduction of sigE, sigN, and eps over star particles
   // then do refresh -> solve_transport_eqn()
 
@@ -1584,12 +1604,15 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
 
   EnzoBlock * enzo_block = enzo::block(block);
 
+
   // compute the temperature
   EnzoComputeTemperature compute_temperature(enzo::fluid_props(),
                                              enzo_config->physics_cosmology);
 
   compute_temperature.compute(enzo_block);
 
+#ifndef DEBUG_TURN_OFF_INJECTION
+// TODO: this overwrites initialization with value parameter. Should find better way of doing this
   if (block->cycle() == 0)
   {
     EnzoUnits * enzo_units = enzo::units();
@@ -1603,7 +1626,7 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
       enzo_float * Fz_i = (enzo_float *) field.values("flux_z_" + istring);
       for (int j=0; j<m; j++)
       {
-        // initialize fields to zero 
+        // initialize fields to a small number (hard zeros give NaNs in solving transport eqn) 
         // TODO: write a problem initializer so that we don't have to do this 
         N_i [j] = 1e-16 / Nunit;
         Fx_i[j] = 1e-16 / Funit;
@@ -1612,6 +1635,7 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
       }    
     }
   }
+#endif
 
   // reset "mL" sums to zero
   // TODO: only do this once every N cycles, where N is a parameter
@@ -1629,7 +1653,12 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
    
   
 
+#ifndef DEBUG_TURN_OFF_INJECTION
   //start photon injection step
   //This function will start the transport step after a refresh
   this->call_inject_photons(enzo_block);
+#else
+  enzo_block->p_method_ramses_rt_solve_transport_eqn();
+  //this->call_solve_transport_eqn(enzo_block);
+#endif
 }

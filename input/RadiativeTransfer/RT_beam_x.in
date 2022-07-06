@@ -4,7 +4,7 @@ Boundary {
    list = ["photon_density","flux_x"];
    photon_density {
      type = "inflow";
-     field_list = "photon_density";
+     field_list = "photon_density_0";
      value = [1.0,
                   x <= 0.0 &&
                   0.495 < y && y < 0.505 &&
@@ -14,7 +14,7 @@ Boundary {
 
   flux_x {
      type = "inflow";
-     field_list = "flux_x";
+     field_list = "flux_x_0";
      value = [1.0*29979245800.0,
                   x <= 0.0 &&
                   0.495 < y && y < 0.505 &&
@@ -24,10 +24,10 @@ Boundary {
 }
 Initial{
    value {
-     photon_density = 1e-16; 
-     flux_x         = 1e-16;
-     flux_y         = 1e-16;
-     flux_z         = 1e-16;
+     photon_density_0 = 1e-16; 
+     flux_x_0         = 1e-16;
+     flux_y_0         = 1e-16;
+     flux_z_0         = 1e-16;
    }
 }
 

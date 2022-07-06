@@ -83,6 +83,7 @@ void EnzoMethodGrackle::define_required_grackle_fields()
   const int chemistry_level    = grackle_chemistry->primordial_chemistry;
   const int specific_heating   = grackle_chemistry->use_specific_heating_rate;
   const int volumetric_heating = grackle_chemistry->use_volumetric_heating_rate;
+  const int radiative_transfer = grackle_chemistry->use_radiative_transfer;
 
   // Metal cooling fields
 
@@ -109,8 +110,15 @@ void EnzoMethodGrackle::define_required_grackle_fields()
 
   if (chemistry_level >= 3) {
     cello::define_field_in_group ("DI_density",  "color");
-    cello::define_field_in_group ("DII_density", "color" );
+    cello::define_field_in_group ("DII_density", "color");
     cello::define_field_in_group ("HDI_density", "color");
+  }
+
+  if (radiative_transfer) {
+    cello::define_field("RT_heating_rate");
+    cello::define_field("RT_HI_ionization_rate");
+    cello::define_field("RT_HeI_ionization_rate");
+    cello::define_field("RT_HeII_ionization_rate");
   }
 
   if (specific_heating) {

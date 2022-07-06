@@ -1,20 +1,20 @@
-include "RT.incl"
+include "input/RadiativeTransfer/RT.incl"
 
 Initial{
    value {
-     photon_density = [ 1.0, 
-                            0.45 < x && x <  0.55 && 
+     photon_density_0 = [ 1.0, 
+                            0.05 < x && x <  0.15 && 
                             0.45 < y && y <  0.55 &&
                             0.45 < z && z <  0.55,     
                       1e-16];
-     flux_x         = [ 1.0*29979245800.0,
-                            0.45 < x && x <  0.55 && 
+     flux_x_0         = [ 1.0*29979245800.0,
+                            0.05 < x && x <  0.15 && 
                             0.45 < y && y <  0.55 &&
                             0.45 < z && z <  0.55,
                         1e-16 ]; 
 
-     flux_y         = 1e-16;
-     flux_z         = 1e-16;
+     flux_y_0         = 1e-16;
+     flux_z_0         = 1e-16;
    }
 }
 

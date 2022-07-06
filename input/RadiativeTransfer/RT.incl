@@ -11,7 +11,8 @@
      alignment = 8;
      gamma = 1.40;
      ghost_depth = 4;
-     list = [ "photon_density", "flux_x", "flux_y", "flux_z" ];
+     list  = [ "photon_density", "flux_x", "flux_y", "flux_z" ];
+     list += [ "photon_density_0", "flux_x_0", "flux_y_0", "flux_z_0" ];
      padding = 0;
  }
 
@@ -30,18 +31,18 @@
      #                      (z - 0.5)*(z - 0.5) <  0.050 ,
      #                    0.0 ];
      
-     photon_density = [ 1.0, x < 0.50, 1e-16];
-     flux_x         = [ 1.0*29979245800.0, x < 0.50, 1e-16];
-     flux_y         = 1e-16;
-     flux_z         = 1e-16;
+     photon_density_0 = [ 1.0, x < 0.50, 1e-16];
+     flux_x_0         = [ 1.0*29979245800.0, x < 0.50, 1e-16];
+     flux_y_0         = 1e-16;
+     flux_z_0         = 1e-16;
   
      }
  }
 
  Mesh {
-     root_blocks = [ 16, 16, 16 ];
+     root_blocks = [ 4, 4, 4 ];
      root_rank = 3;
-     root_size = [ 256, 256, 256 ];
+     root_size = [ 64, 64, 64 ];
  }
 
 Adapt {
@@ -52,9 +53,10 @@ Adapt {
  Method {
      list = [ "ramses_rt" ];
      radiation_transport {
+         radiation_spectrum = "none";
          N_groups = 1;
-         min_freq = 0.0;
-         max_freq = 0.0;
+         bin_lower = [13.5];
+         bin_upper = [13.7];
          flux_function = "GLF";
          clight_frac = 1.0;
      }
