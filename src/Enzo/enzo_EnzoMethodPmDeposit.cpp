@@ -557,8 +557,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     int gx,gy,gz;
     field.ghost_depth(0,&gx,&gy,&gz);
 
-    const int m = mx*my*mz;
-    std::fill_n(density_tot_arr.data(), mx*my*mz, 0.0);
+    std::fill_n(density_particle_arr.data(), mx*my*mz, 0.0);
 
     // NOTE 2022-06-24: previously, we filled density_particle_accum_arr with
     // zeros at around this location and included the following note:
