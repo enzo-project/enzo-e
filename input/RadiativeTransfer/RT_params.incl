@@ -10,8 +10,9 @@ Method {
   
   ramses_rt {
     clight_frac = 1e-2;
-    radiation_spectrum = "flat";
+    radiation_spectrum = "custom";
     Nphotons_per_sec = 5e48;
+    Nphotons_per_sec_list = [5e48];
     N_groups = 1;
     bin_lower = [13.5];
     bin_upper = [13.7];
@@ -40,6 +41,18 @@ Output {
      Fx {
          field_list = [ "flux_x" ];
          name = [ "RT_Fx-%06d.png", "cycle" ];
+         image_size = [512,512];
+         image_log = false;
+         schedule {
+             step = 20;
+             var = "cycle";
+         };
+         type = "image";
+         include "/home1/07320/whick002/enzo-e_RT/input/Colormap/colormap_rainbow.incl";
+     }
+     Fy {
+         field_list = [ "flux_y" ];
+         name = [ "RT_Fy-%06d.png", "cycle" ];
          image_size = [512,512];
          image_log = false;
          schedule {

@@ -98,7 +98,7 @@ protected: // methods
 
   double get_star_temperature(double M) throw();
 
-  void get_radiation_flat(EnzoBlock * enzo_block, enzo_float * N, int i, double energy,
+  void get_radiation_custom(EnzoBlock * enzo_block, enzo_float * N, int i, double energy,
              double pmass, double dt, double inv_vol) throw();
 
   void get_radiation_blackbody(EnzoBlock * enzo_block, enzo_float * N, int i, double pmass, 

@@ -10,11 +10,12 @@ Initial {
 Method {
   ramses_rt {
     radiation_spectrum = "custom";
-    N_groups = 3;
-    bin_lower = [13.6 , 24.59, 54.42];
-    bin_upper = [24.49, 54.42, 100.0];
-    Nphotons_per_sec_list = [2.235e48, 2.47e48, 0.295e48];
-    temperature_blackbody = 1e5;
+    N_groups = 10;
+    bin_lower = [];
+    bin_upper = [];
+    #temperature_blackbody = 1e4;
+    #bin_lower = [13.5, 13.7];
+    #bin_upper = [13.7, 24.4];
   }
 
 }

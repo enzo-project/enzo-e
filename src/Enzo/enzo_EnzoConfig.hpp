@@ -401,7 +401,8 @@ public: // interface
       method_ramses_rt_clight_frac(1.0), // fraction of speed of light value to use
       method_ramses_rt_radiation_spectrum("blackbody"), // Type of radiation spectrum to use for star particles 
       method_ramses_rt_temperature_blackbody(-1.0), // requires radiation_spectrum="blackbody"
-      method_ramses_rt_Nphotons_per_sec(0.0), // mainly for testing. requires radiation_spectrum="flat"
+      method_ramses_rt_Nphotons_per_sec(0.0), // specify emission rate from sources
+      method_ramses_rt_Nphotons_per_sec_list(), // supply list of emission rates for all groups (radiation_spectrum="custom") 
       method_ramses_rt_bin_lower(),
       method_ramses_rt_bin_upper(),
       // EnzoMethodTurbulence
@@ -909,6 +910,7 @@ public: // attributes
   std::string               method_ramses_rt_radiation_spectrum;
   double                    method_ramses_rt_temperature_blackbody; 
   double                    method_ramses_rt_Nphotons_per_sec;
+  std::vector<double>       method_ramses_rt_Nphotons_per_sec_list;
   std::vector<double>       method_ramses_rt_bin_lower;
   std::vector<double>       method_ramses_rt_bin_upper;
 

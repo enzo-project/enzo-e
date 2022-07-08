@@ -260,8 +260,9 @@ EnzoConfig::EnzoConfig() throw ()
   method_ramses_rt_flux_function("GLF"), // which flux function to use
   method_ramses_rt_clight_frac(1.0), // reduced speed of light value to use
   method_ramses_rt_radiation_spectrum("blackbody"), // Type of radiation spectrum to use for star particles
-  method_ramses_rt_temperature_blackbody(-1.0),
-  method_ramses_rt_Nphotons_per_sec(0.0), // mainly for testing. requires radiation_spectrum="flat"
+  method_ramses_rt_temperature_blackbody(0.0),
+  method_ramses_rt_Nphotons_per_sec(0.0), // Set emmision rate for star particles
+  method_ramses_rt_Nphotons_per_sec_list(), // supply list of emission rates for all groups 
   method_ramses_rt_bin_lower(),
   method_ramses_rt_bin_upper(),
   // EnzoMethodStarMaker,
@@ -692,6 +693,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_ramses_rt_radiation_spectrum;
   p | method_ramses_rt_temperature_blackbody;
   p | method_ramses_rt_Nphotons_per_sec;
+  p | method_ramses_rt_Nphotons_per_sec_list;
+
   p | method_ramses_rt_bin_lower;
   p | method_ramses_rt_bin_upper;
 
@@ -1806,16 +1809,23 @@ void EnzoConfig::read_method_ramses_rt_(Parameters * p)
     ("Method:ramses_rt:radiation_spectrum","blackbody");
 
   method_ramses_rt_temperature_blackbody = p->value_float
-    ("Method:ramses_rt:temperature_blackbody",-1.0);
+    ("Method:ramses_rt:temperature_blackbody",0.0);
 
   method_ramses_rt_Nphotons_per_sec = p->value_float
-    ("Method:ramses_rt:Nphotons_per_sec",1.0);
+    ("Method:ramses_rt:Nphotons_per_sec",0.0);
 
+  method_ramses_rt_Nphotons_per_sec_list.resize(method_ramses_rt_N_groups);
   method_ramses_rt_bin_lower.resize(method_ramses_rt_N_groups);
   method_ramses_rt_bin_upper.resize(method_ramses_rt_N_groups);
-  // make default bins equally spaced between 1 eV and 101 eV
+
+  // make default energy bins equally spaced between 1 eV and 101 eV
   double bin_width = 100.0 / method_ramses_rt_N_groups;
   for (int i=0; i<method_ramses_rt_N_groups; i++) {
+    // default emission rate (if this is being used) is flat spectrum
+    method_ramses_rt_Nphotons_per_sec_list[i] = p->list_value_float
+      (i, "Method:ramses_rt:Nphotons_per_sec_list", 
+       method_ramses_rt_Nphotons_per_sec);
+
     method_ramses_rt_bin_lower[i] = p->list_value_float
       (i,"Method:ramses_rt:bin_lower", 1.0 + bin_width*i);
 

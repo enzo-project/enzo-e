@@ -6,12 +6,13 @@ Method {
 }
 
 Output {
-     list = ["hdf5","de","star","N","Fx"];
-     hdf5 { dir = [ "Dir_COSMO_SF_FB_RT_%06d","cycle"]; schedule {step = 1000;} }
-     de   { dir = [ "Dir_COSMO_SF_FB_RT_%06d", "cycle" ]; schedule {step = 1000;}}
-     star { dir = [ "Dir_COSMO_SF_FB_RT_%06d", "cycle" ]; schedule {step = 1000;}}
-     N    { dir = [ "Dir_COSMO_SF_FB_RT_%06d", "cycle" ]; schedule {step = 1000;}}
-     Fx   { dir = [ "Dir_COSMO_SF_FB_RT_%06d", "cycle" ]; schedule {step = 1000;}}
+     list = ["hdf5","de","star","N","Fx","Fy"];
+     hdf5 { dir = [ "Dir_COSMO_SF_FB_RT_%06d","cycle"]; schedule {step = 200;} }
+     de   { dir = [ "Dir_COSMO_SF_FB_RT_%06d", "cycle" ]; schedule {step = 200;}}
+     star { dir = [ "Dir_COSMO_SF_FB_RT_%06d", "cycle" ]; schedule {step = 200;}}
+     N    { dir = [ "Dir_COSMO_SF_FB_RT_%06d", "cycle" ]; schedule {step = 200;}}
+     Fx   { dir = [ "Dir_COSMO_SF_FB_RT_%06d", "cycle" ]; schedule {step = 200;}}
+     Fy   { dir = [ "Dir_COSMO_SF_FB_RT_%06d", "cycle" ]; schedule {step = 200;}}
 }
 
 
