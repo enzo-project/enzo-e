@@ -2216,8 +2216,8 @@ namespace{
        {"metallicity", "grackle", "metallicity_floor"}};
 
     for (const std::array<std::string,3>& triple : legacy_params){
-      if ((hydro_type != triple[1]) |
-          (("grackle" == triple[1]) & !using_grackle)) {
+      if ( (("grackle" != triple[1]) && (hydro_type != triple[1])) ||
+           (("grackle" == triple[1]) && (!using_grackle)) ) {
         continue;
       }
       std::string full_name = "Method:" + triple[1] + ":" + triple[2];
