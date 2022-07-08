@@ -1,4 +1,4 @@
-include "input/method_turbulence3d.incl"
+include "input/Hydro/method_turbulence3d.incl"
 
 Field {
    list += [
@@ -43,7 +43,6 @@ Method {
          apply_forcing = true;
          apply_injection_rate = true;
          cooling_term = -1;
-         
      }
 }
 Mesh {

@@ -21,7 +21,8 @@
 
 #include "enzo.hpp"
 
-#define DEBUG_FIELDS
+// #define DEBUG_FIELDS
+
 #ifdef DEBUG_FIELDS
 #   define CHECK_FIELD(VALUES,NAME)             \
   ASSERT1("CHECK_FIELD",                        \
