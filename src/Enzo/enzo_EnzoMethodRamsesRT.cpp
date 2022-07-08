@@ -175,15 +175,28 @@ void EnzoMethodRamsesRT ::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void EnzoMethodRamsesRT::compute ( Block * block) throw()
+void EnzoMethodRamsesRT::compute ( Block * block ) throw()
 {
 
-  if (block->is_leaf()) {
+  // need to execute this method on ALL blocks (even non-leaves) because
+  // there is a global reduction at the end of call_inject_photons().
+  // Charm requires all members of the chare array to participate in 
+  // global reductions. If I call compute_done here for non-leaf blocks,
+  // they will still participate in the global sum, but they will also 
+  // execute the callback function following the contribute() call.
+  // This means they will end up calling compute_done() twice. Not good.
+  compute_ (block);
 
+/*
+  if (block->is_leaf()) {
     compute_ (block);
   }
 
-  //block->compute_done();
+  else {
+    block->compute_done();
+  }
+*/
+  return;
 }
 
 //----------------------------------------------------------------------
@@ -1355,8 +1368,6 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
     }   
   } 
   
-
-
   // now copy values over  
   for (int iz=gz; iz<mz-gz; iz++) {
     for (int iy=gy; iy<my-gy; iy++) {
@@ -1447,6 +1458,14 @@ void EnzoBlock::p_method_ramses_rt_set_global_averages(CkReductionMsg * msg)
 
 void EnzoMethodRamsesRT::set_global_averages(EnzoBlock * enzo_block, CkReductionMsg * msg) throw()
 {
+  // contribute does global reduction over ALL blocks by default (not just leaves)
+  // call compute_done here for non leaves so that we don't waste time 
+  // pushing these blocks through solve_transport_eqn().
+  if (! enzo_block->is_leaf()) {
+    enzo_block->compute_done(); 
+    return;  
+  }
+
   double * temp = (double *)msg->getData(); // pointer to vector containing numerator/denominators
                                             // of eqs. (B6)-(B8)
 
@@ -1456,8 +1475,16 @@ void EnzoMethodRamsesRT::set_global_averages(EnzoBlock * enzo_block, CkReduction
 
   Scalar<double> scalar = enzo_block->data()->scalar_double();
 
-  int index = 0;
-  double mult = 1.0/temp[index]; // temp[0] holds the denominator -> sum(m*L)
+  int index = 0; // temp[0] holds the denominator -> sum(m*L)
+  if (temp[index] == 0) { 
+    // if no sources of radiation in the entire domain, no need to refresh.
+    // Just go to transport step 
+    // eqs. B6-B8 would give us 0/0 in this case anyway
+    enzo_block->p_method_ramses_rt_solve_transport_eqn();
+    return;
+  }
+
+  double mult = 1.0/temp[index];
 
   for (int i=0; i<N_groups; i++) {
     index = 1 + i;
@@ -1530,8 +1557,11 @@ void EnzoBlock::p_method_ramses_rt_solve_transport_eqn()
   // sum group fields and end compute()
   // TODO: Make tracking integrated group fields optional?
    
-  method->sum_group_fields(this); 
-  this->compute_done(); 
+  method->sum_group_fields(this);
+    //std::cout << this->is_leaf() << std::endl;
+
+  compute_done();
+  return; 
 }
 
 //-----------------------------------------
@@ -1611,6 +1641,10 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
 
   compute_temperature.compute(enzo_block);
 
+  Scalar<double> scalar = block->data()->scalar_double();
+
+  int N_species_ = 3; //only three ionizable species (HI, HeI, HeII)
+
 #ifndef DEBUG_TURN_OFF_INJECTION
 // TODO: this overwrites initialization with value parameter. Should find better way of doing this
   if (block->cycle() == 0)
@@ -1632,16 +1666,22 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
         Fx_i[j] = 1e-16 / Funit;
         Fy_i[j] = 1e-16 / Funit;
         Fz_i[j] = 1e-16 / Funit; 
-      }    
+      }
+     
+      // initialize global mean group cross-sections/energies
+      *(scalar.value( scalar.index( eps_string(i) ))) = 0.0;
+      for (int j=0; j<N_species_; j++) 
+      {
+       *(scalar.value( scalar.index( sigN_string(i,j) ))) = 0.0;
+       *(scalar.value( scalar.index( sigE_string(i,j) ))) = 0.0;
+      }   
     }
   }
 #endif
 
   // reset "mL" sums to zero
   // TODO: only do this once every N cycles, where N is a parameter
-  Scalar<double> scalar = block->data()->scalar_double();
   
-  int N_species_ = 3; //only three ionizable species (HI, HeI, HeII)
   for (int i=0; i<N_groups_; i++) {
     *(scalar.value( scalar.index( eps_string(i) + "mL" ))) = 0.0;
     for (int j=0; j<N_species_; j++) {
@@ -1652,7 +1692,6 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
   *(scalar.value( scalar.index("mL") )) = 0.0;
    
   
-
 #ifndef DEBUG_TURN_OFF_INJECTION
   //start photon injection step
   //This function will start the transport step after a refresh

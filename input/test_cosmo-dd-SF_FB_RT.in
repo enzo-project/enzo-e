@@ -1,0 +1,20 @@
+include "input/test_cosmo-dd-SF_FB.in"
+include "input/RadiativeTransfer/RT_params.incl"
+
+Method {
+    list = [ "star_maker", "feedback", "ramses_rt", "pm_deposit", "gravity", "ppm", "grackle", "pm_update", "comoving_expansion"];
+}
+
+Output {
+     list = ["hdf5","de","star","N","Fx"];
+     hdf5 { dir = [ "Dir_COSMO_SF_FB_RT_%06d","cycle"]; schedule {step = 1000;} }
+     de   { dir = [ "Dir_COSMO_SF_FB_RT_%06d", "cycle" ]; schedule {step = 1000;}}
+     star { dir = [ "Dir_COSMO_SF_FB_RT_%06d", "cycle" ]; schedule {step = 1000;}}
+     N    { dir = [ "Dir_COSMO_SF_FB_RT_%06d", "cycle" ]; schedule {step = 1000;}}
+     Fx   { dir = [ "Dir_COSMO_SF_FB_RT_%06d", "cycle" ]; schedule {step = 1000;}}
+}
+
+
+Stopping {
+      cycle = 20000;
+}
