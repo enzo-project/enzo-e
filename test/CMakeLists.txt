@@ -115,8 +115,12 @@ if (use_papi)
   setup_test_unit(Performance-Papi PerformanceComponent/Papi test_papi)
 endif()
 
+setup_test_unit(EnzoUnits UnitsComponent/EnzoUnits test_enzo_units)
+
 # TODO: sort the following test by component
+setup_test_unit(Assorted-class_size Assorted/class_size test_class_size)
 setup_test_unit(Assorted-Data Assorted/Data test_data)
+setup_test_unit(Assorted-ItFace Assorted/ItFace test_it_face)
 setup_test_unit(Assorted-ItChild Assorted/ItChild test_it_child)
 setup_test_unit(Assorted-BlockTrace Assorted/BlockTrace test_block_trace)
 setup_test_unit(Assorted-Sync Assorted/Sync test_sync)
@@ -131,20 +135,15 @@ setup_test_unit(Assorted-Mask Assorted/Mask test_mask)
 setup_test_unit(Assorted-Value Assorted/Value test_value)
 setup_test_unit(Assorted-Box Assorted/Box test_box)
 
-# TODO: resolve issues making the adapt test fail
-#setup_test_unit(Assorted-Adapt Assorted/Adapt test_adapt)
-
 # TODO we need to fix the following tests (see commented units tests in
 # src/Cello/CMakeLists.txt)
 #
-# the following tests are broken (an API change is not reflected in the tests)
-#setup_test_unit(Assorted-ItFace Assorted/ItFace test_it_face)
-#setup_test_unit(Assorted-Index Assorted/Index test_index)
+# the test runs, but one of the checks fails.
+#setup_test_unit(Assorted-Adapt Assorted/Adapt test_adapt)
 #
-# the following 2 tests depend on files from the enzo-layer. We may want to
-# define these tests in that layer
-#setup_test_unit(Assorted-class_size Assorted/class_size test_class_size)
-#setup_test_unit(EnzoUnits UnitsComponent/EnzoUnits test_enzo_units)
+# the following test is broken (an API change is not reflected in the tests)
+#setup_test_unit(Assorted-Index Assorted/Index test_index)
+
 
 #setup_test_unit( Component/ test_)
 
