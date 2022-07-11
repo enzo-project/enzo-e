@@ -123,7 +123,12 @@ setup_test_unit(Assorted-Sync Assorted/Sync test_sync)
 setup_test_unit(Assorted-Face Assorted/Face test_face)
 setup_test_unit(Assorted-FaceFluxes Assorted/FaceFluxes test_face_fluxes)
 setup_test_unit(Assorted-FluxData Assorted/FluxData test_flux_data)
+setup_test_unit(
+  Assorted-ProlongLinear Assorted/ProlongLinear test_prolong_linear
+)
 setup_test_unit(Assorted-Refresh Assorted/Refresh test_refresh)
+setup_test_unit(Assorted-Mask Assorted/Mask test_mask)
+setup_test_unit(Assorted-Value Assorted/Value test_value)
 setup_test_unit(Assorted-Box Assorted/Box test_box)
 
 # TODO: resolve issues making the adapt test fail
@@ -132,21 +137,13 @@ setup_test_unit(Assorted-Box Assorted/Box test_box)
 # TODO we need to fix the following tests (see commented units tests in
 # src/Cello/CMakeLists.txt)
 #
-# the following test seems to be broken
+# the following tests are broken (an API change is not reflected in the tests)
 #setup_test_unit(Assorted-ItFace Assorted/ItFace test_it_face)
-#
-# this seems to be a simple linking issue
-#setup_test_unit(Assorted-class_size Assorted/class_size test_class_size)
-#
-# these are probably more complicated linking issues:
 #setup_test_unit(Assorted-Index Assorted/Index test_index)
-#setup_test_unit(
-#  Assorted-ProlongLinear Assorted/ProlongLinear test_prolong_linear
-#)
-#setup_test_unit(Assorted-Mask Assorted/Mask test_mask)
-#setup_test_unit(Assorted-Value Assorted/Value test_value)
 #
-# I haven't tried fiddling with the following test:
+# the following 2 tests depend on files from the enzo-layer. We may want to
+# define these tests in that layer
+#setup_test_unit(Assorted-class_size Assorted/class_size test_class_size)
 #setup_test_unit(EnzoUnits UnitsComponent/EnzoUnits test_enzo_units)
 
 #setup_test_unit( Component/ test_)
