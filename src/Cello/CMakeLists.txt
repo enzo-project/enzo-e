@@ -227,47 +227,60 @@ target_link_libraries(simulation
          parallel disk problem mesh array data parameters io compute
 )
 
-#target_link_libraries(simulation problem HDF5_C)
+
 addCelloLib(test_Unit "")
 target_link_libraries(test_Unit PRIVATE cello_component error parallel monitor)
 
 #===============================================
 # Defining Cello-Component Targets step 3 (of 3)
 #===============================================
-# define "main-targets" that are used to drive test programs. The different
-# targets include different subsets of chare declarations
+# define "main-targets" that define the necessary function to drive unit tests
+# (each unit test needs to be linked against one of these targets). Hereafter,
+# we refer to these targets as "tester"
+#
+# The different tester targets all define the main chare, but include different
+# subsets of chare declarations
 #
 # TODO: we can DEFINITELY avoid adding some charm module dependencies to
 # these targets
 
-set(_MAIN_LIBS "parallel;cello_component;monitor")
+function(makeTester TARGET SRC)
+  # construct a target that is linked into unit tests
+  add_library(${TARGET} STATIC ${SRC})
+  target_link_libraries(${TARGET}
+    PUBLIC parallel cello_component monitor
+    PRIVATE Boost::filesystem
+    INTERFACE test_Unit # the source file compiled in this target doesn't
+                        # directly depend on this, but all tests depend on this
+  )
+  setupCelloLibHelper(${TARGET})
+
+endfunction(makeTester)
 
 # this does not contain any chare declarations
-add_library(main_default_tester "main.cpp")
-target_link_libraries(main_default_tester PUBLIC ${_MAIN_LIBS})
-setupCelloLibHelper(main_default_tester)
+makeTester(tester_default "main.cpp")
+
 
 # this includes the chare declarations for the Mesh chares
-add_library(main_mesh_tester "main_mesh.cpp")
-target_link_libraries(main_mesh_tester PUBLIC ${_MAIN_LIBS}
+makeTester(tester_mesh "main_mesh.cpp")
+target_link_libraries(tester_mesh
   PRIVATE simulation # once we stop providing dummy implementations of methods
                      # for Block and Simulation in main.cpp, we can drop this
                      # dependency
 )
-setupCelloLibHelper(main_mesh_tester)
+
 
 # this includes the declarations for the mesh and simulation chares
-add_library(main_simulation_tester "main_simulation.cpp")
-target_link_libraries(main_simulation_tester PUBLIC ${_MAIN_LIBS}
+makeTester(tester_simulation "main_simulation.cpp")
+target_link_libraries(tester_simulation
   PRIVATE simulation # once we stop providing dummy implementations of methods
                      # for Block and Simulation in main.cpp, we can drop this
                      # dependency
 )
-setupCelloLibHelper(main_simulation_tester)
 
 # NOTE: main_enzo.cpp includes declarations for the mesh and simulation chares
 # as well as chares from the Enzo-layer. This is only touched in the Enzo layer
-
+# and is used to drive the actual simulation
 
 # TODO: Consider making a target called something like CELLO_COMBINED that
 # could be used in the enzo-layer (rather than linking against every
@@ -277,104 +290,88 @@ setupCelloLibHelper(main_simulation_tester)
 # Define Unit-Test Binaries
 #==========================
 
-function(addUnitTestBinary BINNAME SRCS LIBS TESTER)
+function(addUnitTestBinary BINNAME SRCS LIB TESTER)
   # Arguments:
   #   BINNAME:   Name of the test binary to build
   #   SRCS:      Source files
-  #   LIBS:      Extra libraries required
-  #   TESTER:    Tester target: "default", "mesh", or "simulation"
-
-  STRING(TOLOWER "${TESTER}" tester_lower)
+  #   LIB:       Library required
+  #   TESTER:    Tester target library (usually, this is tester_default,
+  #              tester_mesh, OR tester_simulation)
 
   add_executable(${BINNAME} ${SRCS})
-  target_link_libraries(${BINNAME} PUBLIC ${LIBS} test_Unit)
-  if(tester_lower STREQUAL "default")
-    target_link_libraries(${BINNAME} PUBLIC main_default_tester)
-  elseif(tester_lower STREQUAL "mesh")
-    target_link_libraries(${BINNAME} PUBLIC main_mesh_tester)
-  elseif(tester_lower STREQUAL "simulation")
-    target_link_libraries(${BINNAME} PUBLIC main_simulation_tester)
-  else()
-    message(FATAL_ERROR
-      "Unrecognized tester passed to addUnitTestBinary: \"${tester_lower}\"."
-      "Valid choices include: \"default\", \"mesh\", \"simulation\""
-    )
-  endif()
+  target_link_libraries(${BINNAME} PUBLIC ${LIB} ${TESTER})
   target_link_options(${BINNAME} PRIVATE ${Cello_TARGET_LINK_OPTIONS})
-
 endfunction(addUnitTestBinary)
 
+
+
 # tests of the array component
-addUnitTestBinary(test_carr_collec "test_CArrCollec.cpp" array "default")
-addUnitTestBinary(test_cello_array "test_CelloArray.cpp" array "default")
+addUnitTestBinary(test_carr_collec "test_CArrCollec.cpp" array tester_default)
+addUnitTestBinary(test_cello_array "test_CelloArray.cpp" array tester_default)
 addUnitTestBinary(
-  test_string_ind_rd_only_map "test_StringIndRdOnlyMap.cpp" array "default"
+  test_string_ind_rd_only_map "test_StringIndRdOnlyMap.cpp" array tester_default
 )
 
 # tests of the cello-component
-addUnitTestBinary(test_type "test_Type.cpp" cello_component "default")
+addUnitTestBinary(test_type "test_Type.cpp" cello_component tester_default)
 
 # tests of the disk component
-addUnitTestBinary(test_file_hdf5 "test_CArrCollec.cpp" disk "default")
+addUnitTestBinary(test_file_hdf5 "test_CArrCollec.cpp" disk tester_default)
 
 # tests of the error component
-addUnitTestBinary(test_error "test_Error.cpp" error "default")
+addUnitTestBinary(test_error "test_Error.cpp" error tester_default)
 
 # tests of the data component
-addUnitTestBinary(test_particle "test_Particle.cpp" data "default")
-addUnitTestBinary(test_scalar "test_Scalar.cpp" data "default")
-addUnitTestBinary(test_field_data "test_FieldData.cpp" data "default")
-addUnitTestBinary(test_field_descr "test_FieldDescr.cpp" data "default")
-addUnitTestBinary(test_field "test_Field.cpp" data "default")
-addUnitTestBinary(test_field_face "test_FieldFace.cpp" data "simulation")
-addUnitTestBinary(test_grouping "test_Grouping.cpp" data "default")
-addUnitTestBinary(test_itindex "test_ItIndex.cpp" data "simulation")
+addUnitTestBinary(test_particle "test_Particle.cpp" data tester_default)
+addUnitTestBinary(test_scalar "test_Scalar.cpp" data tester_default)
+addUnitTestBinary(test_field_data "test_FieldData.cpp" data tester_default)
+addUnitTestBinary(test_field_descr "test_FieldDescr.cpp" data tester_default)
+addUnitTestBinary(test_field "test_Field.cpp" data tester_default)
+addUnitTestBinary(test_field_face "test_FieldFace.cpp" data tester_simulation)
+addUnitTestBinary(test_grouping "test_Grouping.cpp" data tester_default)
+addUnitTestBinary(test_itindex "test_ItIndex.cpp" data tester_simulation)
 
 # tests of the io component
-addUnitTestBinary(test_colormap "test_Colormap.cpp" io "simulation")
-addUnitTestBinary(test_schedule "test_Schedule.cpp" io "simulation")
+addUnitTestBinary(test_colormap "test_Colormap.cpp" io tester_simulation)
+addUnitTestBinary(test_schedule "test_Schedule.cpp" io tester_simulation)
 
 # assorted tests - we should probably divide this up by component
-addUnitTestBinary(test_data "test_Data.cpp" mesh "mesh")
-addUnitTestBinary(test_it_face "test_ItFace.cpp" mesh "mesh")
-addUnitTestBinary(test_it_child "test_ItChild.cpp" mesh "mesh")
-addUnitTestBinary(test_block_trace "test_BlockTrace.cpp" mesh "mesh")
-addUnitTestBinary(test_sync "test_Sync.cpp" mesh "mesh")
-addUnitTestBinary(test_face "test_Face.cpp" mesh "mesh")
-addUnitTestBinary(test_face_fluxes "test_FaceFluxes.cpp" mesh "mesh")
-addUnitTestBinary(test_flux_data "test_FluxData.cpp" mesh "mesh")
-addUnitTestBinary(test_prolong_linear "test_ProlongLinear.cpp" mesh "mesh")
-addUnitTestBinary(test_refresh "test_Refresh.cpp" mesh "mesh")
-addUnitTestBinary(test_mask "test_Mask.cpp" mesh "mesh")
-addUnitTestBinary(test_value "test_Value.cpp" mesh "mesh")
-addUnitTestBinary(test_box "test_Box.cpp" mesh "mesh")
-addUnitTestBinary(test_adapt "test_Adapt.cpp" mesh "mesh")
+addUnitTestBinary(test_data "test_Data.cpp" mesh tester_mesh)
+addUnitTestBinary(test_it_face "test_ItFace.cpp" mesh tester_mesh)
+addUnitTestBinary(test_it_child "test_ItChild.cpp" mesh tester_mesh)
+addUnitTestBinary(test_block_trace "test_BlockTrace.cpp" mesh tester_mesh)
+addUnitTestBinary(test_sync "test_Sync.cpp" mesh tester_mesh)
+addUnitTestBinary(test_face "test_Face.cpp" mesh tester_mesh)
+addUnitTestBinary(test_face_fluxes "test_FaceFluxes.cpp" mesh tester_mesh)
+addUnitTestBinary(test_flux_data "test_FluxData.cpp" mesh tester_mesh)
+addUnitTestBinary(test_prolong_linear "test_ProlongLinear.cpp" mesh tester_mesh)
+addUnitTestBinary(test_refresh "test_Refresh.cpp" mesh tester_mesh)
+addUnitTestBinary(test_mask "test_Mask.cpp" mesh tester_mesh)
+addUnitTestBinary(test_value "test_Value.cpp" mesh tester_mesh)
+addUnitTestBinary(test_box "test_Box.cpp" mesh tester_mesh)
+addUnitTestBinary(test_adapt "test_Adapt.cpp" mesh tester_mesh)
 
 # test of the memory component
-addUnitTestBinary(test_memory "test_Memory.cpp" memory "default")
+addUnitTestBinary(test_memory "test_Memory.cpp" memory tester_default)
 
 # test of the monitor component
-addUnitTestBinary(test_monitor "test_Monitor.cpp" monitor "default")
+addUnitTestBinary(test_monitor "test_Monitor.cpp" monitor tester_default)
 
 # tests of the parameters component
-addUnitTestBinary(test_parameters "test_Parameters.cpp" parameters "default")
-addUnitTestBinary(test_parse "test_Parse.cpp" parameters "default")
+addUnitTestBinary(
+  test_parameters "test_Parameters.cpp" parameters tester_default
+)
+addUnitTestBinary(test_parse "test_Parse.cpp" parameters tester_default)
 
 # tests of the performance component
-addUnitTestBinary(test_performance "test_Performance.cpp" performance "default")
-addUnitTestBinary(test_timer "test_Timer.cpp" performance "default")
+addUnitTestBinary(
+  test_performance "test_Performance.cpp" performance tester_default
+)
+addUnitTestBinary(test_timer "test_Timer.cpp" performance tester_default)
 if (use_papi)
-  addUnitTestBinary(test_papi "test_Papi.cpp" performance "default")
+  addUnitTestBinary(test_papi "test_Papi.cpp" performance tester_default)
 endif()
 
-# The following unit tests all require attention:
-#------------------------------------------------
+# the following test is broken (an API change is not reflected in the test)
+#addUnitTestBinary(test_index "test_Index.cpp" mesh tester_mesh)
 
-# the following tests are broken (an API change is not reflected in the test)
-#addUnitTestBinary(test_index "test_Index.cpp" mesh "mesh")
-
-# the following test requires enzo.hpp and (enzo the chares) to be compiled
-# -> we should probably define them in the enzo-layer
-#
-#addUnitTestBinary(test_enzo_units "${CMAKE_CURRENT_SOURCE_DIR}/../Enzo/test_EnzoUnits.cpp" mesh "mesh")
-#addUnitTestBinary(test_class_size "test_class_size.cpp" mesh "mesh")
