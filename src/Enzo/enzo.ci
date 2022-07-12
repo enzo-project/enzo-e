@@ -101,6 +101,7 @@ module enzo {
   PUPable EnzoMethodFluxAccretion;
   PUPable EnzoMethodGravity;
   PUPable EnzoMethodHeat;
+  PUPable EnzoMethodInferenceArray;
   PUPable EnzoMethodMergeSinks;
   PUPable EnzoMethodMHDVlct;
   PUPable EnzoMethodPmDeposit;

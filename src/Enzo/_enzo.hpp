@@ -258,6 +258,7 @@ extern "C" {
 #include "enzo_EnzoMethodGravity.hpp"
 #include "enzo_EnzoMethodHeat.hpp"
 #include "enzo_EnzoMethodHydro.hpp"
+#include "enzo_EnzoMethodInferenceArray.hpp"
 #include "enzo_EnzoMethodMergeSinks.hpp"
 #include "enzo_EnzoMethodMHDVlct.hpp"
 #include "enzo_EnzoMethodPmDeposit.hpp"

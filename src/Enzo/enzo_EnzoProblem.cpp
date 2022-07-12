@@ -640,6 +640,15 @@ Method * EnzoProblem::create_method_
 
 #endif /* CONFIG_USE_GRACKLE */
 
+  } else if (name == "inference_array") {
+
+    CkPrintf ("Creating EnzoMethodInferenceArray\n");
+    method = new EnzoMethodInferenceArray
+      (enzo_config->method_inference_array_level,
+       enzo_config->method_inference_array_size,
+       enzo_config->method_inference_array_ghost_depth,
+       enzo_config->method_inference_array_field_group);
+
   } else if (name == "turbulence") {
 
     method = new EnzoMethodTurbulence

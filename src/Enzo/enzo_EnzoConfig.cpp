@@ -252,6 +252,11 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_analytic_SNR_shell_mass(true),
   method_feedback_fade_SNR(true),
   method_feedback_NEvents(-1),
+  // EnzoMethodInferenceArray
+  method_inference_array_level(0),
+  method_inference_array_size(0),
+  method_inference_array_ghost_depth(0),
+  method_inference_array_field_group(),
   // EnzoMethodStarMaker,
   method_star_maker_flavor(""),                              // star maker type to use
   method_star_maker_use_altAlpha(false),
@@ -647,7 +652,12 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_feedback_fade_SNR;
   p | method_feedback_NEvents;
 
-  p | method_star_maker_flavor;
+  p | method_inference_array_level;
+  p | method_inference_array_size;
+  p | method_inference_array_ghost_depth;
+  p | method_inference_array_field_group;
+
+    p | method_star_maker_flavor;
   p | method_star_maker_use_altAlpha;
   p | method_star_maker_use_density_threshold;
   p | method_star_maker_use_overdensity_threshold;
@@ -805,6 +815,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_grackle_(p);
   read_method_gravity_(p);
   read_method_heat_(p);
+  read_method_inference_array_(p);
   read_method_merge_sinks_(p);
   read_method_pm_deposit_(p);
   read_method_pm_update_(p);
@@ -1886,6 +1897,20 @@ void EnzoConfig::read_method_heat_(Parameters * p)
 {
   method_heat_alpha = p->value_float
     ("Method:heat:alpha",1.0);
+}
+
+//----------------------------------------------------------------------
+
+void EnzoConfig::read_method_inference_array_(Parameters* p)
+{
+  method_inference_array_level = p->value_integer
+    ("Method:inference_array:level");
+  method_inference_array_size = p->value_integer
+    ("Method:inference_array:array_size");
+  method_inference_array_ghost_depth = p->value_integer
+    ("Method:inference_array:ghost_depth");
+  method_inference_array_field_group = p->value_string
+    ("Method:inference_array:field_group");
 }
 
 //----------------------------------------------------------------------
