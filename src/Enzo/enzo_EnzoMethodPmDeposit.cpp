@@ -468,44 +468,59 @@ namespace { // define local helper functions in anonymous namespace
     if (rank < 2) vyf = vel_scratch.data();
     if (rank < 3) vzf = vel_scratch.data() + m;
 
-    // deposited_gas_density is a temporary array that just includes cells in
-    // the active zone
-    const CelloArray<enzo_float, 3> deposited_gas_density(nz,ny,nx);
-    // CelloArray sets elements to zero by default (making next line redundant)
-    std::fill_n(deposited_gas_density.data(), nx*ny*nz, 0.0);
+    // allocate memory for storing the deposited gas density. The treatment of
+    // this array is a little odd:
+    //    - After calling dep_grid_cic, we treat this memory as though just
+    //      enough space has been allocated for holding data in the active
+    //      zone (as though it holds just nz*ny*nx entries). Note: this is
+    //      mainly known from earlier implemenations of this code.
+    //    - It seems as though this array MUST have an allocation for extra
+    //      array allocations. If we allocate just nz*ny*nx entries, then
+    //      dep_grid_cic ends up writing to invalid memory locations. Earlier
+    //      versions of the code allocate mz*my*mx entries which seems
+    //      sufficient.
+    std::vector<enzo_float> deposited_gas_density(m, 0.0);
 
     // allocate temporary arrays
-    std::vector<enzo_float> temp(4*m, 0.0);
-    std::vector<enzo_float> rfield(m, 0.0);
+    std::vector<enzo_float> temp(4*m, 0.0); // scratch space
+    std::vector<enzo_float> rfield(m, 0.0); // legacy argument relevant for
+                                            // patch-based AMR
 
-    int gxi=gx;
-    int gyi=gy;
-    int gzi=gz;
-    int nxi=mx-gx-1;
-    int nyi=my-gy-1;
-    int nzi=mz-gz-1;
-    int i0 = 0;
-    int i1 = 1;
+    // specify the indices corresponding to the start and end (inclusive) of
+    // the source fields (namely de, vxf, vyf, vzf)
+    int src_starti_x=gx;
+    int src_starti_y=gy;
+    int src_starti_z=gz;
+    int src_endi_x=mx-gx-1;
+    int src_endi_y=my-gy-1;
+    int src_endi_z=mz-gz-1;
+
+    // dummy args
+    int offset_val = 0;
+    int refine_factor = 1;
 
     FORTRAN_NAME(dep_grid_cic)(de, deposited_gas_density.data(), temp.data(),
                                vxf, vyf, vzf,
                                &dt_div_cosmoa, rfield.data(), &rank,
                                &hx_prop,&hy_prop,&hz_prop,
                                &mx,&my,&mz,
-                               &gxi,&gyi,&gzi,
-                               &nxi,&nyi,&nzi,
-                               &i0,&i0,&i0,
+                               &src_starti_x, &src_starti_y, &src_starti_z,
+                               &src_endi_x, &src_endi_y, &src_endi_z,
+                               &offset_val, &offset_val, &offset_val,
                                &nx,&ny,&nz,
-                               &i1,&i1,&i1);
+                               &refine_factor, &refine_factor, &refine_factor);
 
-    // build a slice of density_tot that just includes the active zone
-    CelloArray<enzo_float,3> density_tot_az = density_tot_arr.subarray
+    // construct a subarray density_tot that just includes the active zone
+    CelloArray<enzo_float,3> density_tot_active_zone = density_tot_arr.subarray
       (CSlice(gz, mz - gz), CSlice(gy, my - gy), CSlice(gx, mx - gx));
 
     for (int iz=0; iz<nz; iz++) {
       for (int iy=0; iy<ny; iy++) {
         for (int ix=0; ix<nx; ix++) {
-          density_tot_az(iz,iy,ix) += deposited_gas_density(iz,iy,ix);
+          // treat deposited_gas_density like it's a contiguous 3D array with a
+          // shape of (nz, ny, nx) that extends over the active zone
+          int i_gas = ix + nx*(iy + ny*iz);
+          density_tot_active_zone(iz,iy,ix) += deposited_gas_density[i_gas];
         }
       }
     }
@@ -542,8 +557,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     int gx,gy,gz;
     field.ghost_depth(0,&gx,&gy,&gz);
 
-    const int m = mx*my*mz;
-    std::fill_n(density_tot_arr.data(), mx*my*mz, 0.0);
+    std::fill_n(density_particle_arr.data(), mx*my*mz, 0.0);
 
     // NOTE 2022-06-24: previously, we filled density_particle_accum_arr with
     // zeros at around this location and included the following note:

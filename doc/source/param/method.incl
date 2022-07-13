@@ -111,6 +111,11 @@ at all subsequent times.`
 
 :e:`This parameter specifies the maximum fraction of mass which can be accreted from a cell in one timestep. This value of this parameter must be between 0 and 1.`
 
+feedback
+--------
+
+.. include:: method_feedback.incl
+
 flux_correct
 ------------
 
@@ -180,83 +185,6 @@ assigned a single float (that is not in a list). In this case, the
 value is assumed to be the expected minimum number of digits conserved
 by the` ``"density"`` :e:`field.` *(Support for this type of parameter
 may be removed in the future)*
-
-gravity
--------
-
-:Parameter:  :p:`Method` : :p:`gravity` : :p:`solver`
-:Summary: :s:`Name of the linear solver to use`
-:Type:    :t:`string`
-:Default: :d:`"unknown"`
-:Scope:     :z:`Enzo`
-
-:e:`Identifier for the linear solver to use, which must be included in the "Solver:list" parameter.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity` : :p:`grav_const`
-:Summary: :s:`Gravitational constant`
-:Type:    :t:`float`
-:Default: :d:`6.67384e-8`
-:Scope:     :z:`Enzo`
-
-Gravitational constant used in place of G.  The default is G in cgs units.
-For non-cosmological simulations, if the user wants to use
-the standard value for the gravitational constant, the user must set a
-value which is consistent with their choice of units; i.e.,
-its value must be :math:`G_{cgs}\times M \times T^2 \times L^{-3}`, or equivalently,
-:math:`G_{cgs}\times D \times T^2`, where :math:`M, D, T, L` are the mass, density, time,
-and length units, and :math:`G_{cgs}` is the value of the gravitational constant in cgs units.
-
-In cosmological simulations, this parameter is ignored.
-
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity` : :p:`order`
-:Summary: :s:`Order of accuracy discretization to use for the discrete Laplacian`
-:Type:    :t:`integer`
-:Default: :d:`4`
-:Scope:     :z:`Enzo`
-
-:e:`Second, fourth, and sixth order discretizations of the Laplacian
-are available; valid values are 2, 4, or 6.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity` : :p:`accumulate`
-:Summary: :s:`Whether to add one layer of ghost zones when refreshing particle density`
-:Type:    :t:`logical`
-:Default: :d:`true`
-:Scope:     :z:`Enzo`
-
-:e:`This should be true for all runs with particles, since particle
-mass deposited in the "density_particle" field may bleed into the
-first layer of ghost zones.  This parameter ensures that that mass
-will be included in "density_total".`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity` : :p:`dt_max`
-:Summary: :s:`The maximum timestep returned by EnzoMethodGravity::timestep`
-:Type:    :t:`float`
-:Default: :d:`1.0e10`
-:Scope:     :z:`Enzo`
-
-:e:`The timestep returned by EnzoMethodGravity::timestep (when called on a
-block) is calculated as follows. First, the geometric mean of the cell-widths
-in all dimensions is found, which we call the "mean cell width". Next, the
-quantity "epsilon" is calculated, as the mean cell width divided by the square
-of dt_max. Then, the maximum acceleration magnitude across all cells in the
-block is found, which we call "a_mag_max". We then calculate the
-mean cell width divided by the sum of a_mag_max and epsilon. The timestep is
-then the square root of this quantity. This means that if all the accelerations
-are zero (such as at the first time step), the timestep is equal to dt_max.
-Defining the timestep in this way also means that the value of the
-timestep is independent of how the acceleration vectors are oriented relative
-to the mesh.`
-
-
 
 grackle
 -------
@@ -696,15 +624,81 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Todo: :o:`write`
 :Status:  **Not accessed**
 
-star_maker
-----------
+gravity
+-------
 
-..include:: method_star_maker.incl
+:Parameter:  :p:`Method` : :p:`gravity` : :p:`solver`
+:Summary: :s:`Name of the linear solver to use`
+:Type:    :t:`string`
+:Default: :d:`"unknown"`
+:Scope:     :z:`Enzo`
 
-feedback
---------
+:e:`Identifier for the linear solver to use, which must be included in the "Solver:list" parameter.`
 
-..include:: method_feedback.incl
+----
+
+:Parameter:  :p:`Method` : :p:`gravity` : :p:`grav_const`
+:Summary: :s:`Gravitational constant`
+:Type:    :t:`float`
+:Default: :d:`6.67384e-8`
+:Scope:     :z:`Enzo`
+
+Gravitational constant used in place of G.  The default is G in cgs units.
+For non-cosmological simulations, if the user wants to use
+the standard value for the gravitational constant, the user must set a
+value which is consistent with their choice of units; i.e.,
+its value must be :math:`G_{cgs}\times M \times T^2 \times L^{-3}`, or equivalently,
+:math:`G_{cgs}\times D \times T^2`, where :math:`M, D, T, L` are the mass, density, time,
+and length units, and :math:`G_{cgs}` is the value of the gravitational constant in cgs units.
+
+In cosmological simulations, this parameter is ignored.
+
+
+----
+
+:Parameter:  :p:`Method` : :p:`gravity` : :p:`order`
+:Summary: :s:`Order of accuracy discretization to use for the discrete Laplacian`
+:Type:    :t:`integer`
+:Default: :d:`4`
+:Scope:     :z:`Enzo`
+
+:e:`Second, fourth, and sixth order discretizations of the Laplacian
+are available; valid values are 2, 4, or 6.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`gravity` : :p:`accumulate`
+:Summary: :s:`Whether to add one layer of ghost zones when refreshing particle density`
+:Type:    :t:`logical`
+:Default: :d:`true`
+:Scope:     :z:`Enzo`
+
+:e:`This should be true for all runs with particles, since particle
+mass deposited in the "density_particle" field may bleed into the
+first layer of ghost zones.  This parameter ensures that that mass
+will be included in "density_total".`
+
+----
+
+:Parameter:  :p:`Method` : :p:`gravity` : :p:`dt_max`
+:Summary: :s:`The maximum timestep returned by EnzoMethodGravity::timestep`
+:Type:    :t:`float`
+:Default: :d:`1.0e10`
+:Scope:     :z:`Enzo`
+
+:e:`The timestep returned by EnzoMethodGravity::timestep (when called on a
+block) is calculated as follows. First, the geometric mean of the cell-widths
+in all dimensions is found, which we call the "mean cell width". Next, the
+quantity "epsilon" is calculated, as the mean cell width divided by the square
+of dt_max. Then, the maximum acceleration magnitude across all cells in the
+block is found, which we call "a_mag_max". We then calculate the
+mean cell width divided by the sum of a_mag_max and epsilon. The timestep is
+then the square root of this quantity. This means that if all the accelerations
+are zero (such as at the first time step), the timestep is equal to dt_max.
+Defining the timestep in this way also means that the value of the
+timestep is independent of how the acceleration vectors are oriented relative
+to the mesh.`
+
 
 heat
 ----
@@ -847,6 +841,11 @@ this parameter multiplied by the cell width along the x/y/z axis.`
 :e:`When computing the random offset for the initial position of a sink particle, we compute
 an unsigned 64 bit integer value from the cycle number, the block index, and the cell
 index, and then add on this value to give the seed for the random number generator.`
+
+star_maker
+----------
+
+.. include:: method_star_maker.incl
 
 	     
 turbulence
