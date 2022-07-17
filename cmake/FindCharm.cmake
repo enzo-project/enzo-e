@@ -185,6 +185,19 @@ if(CHARM_COMPILER)
     include(CheckSymbolExists)
     CHECK_SYMBOL_EXISTS(CMK_SMP "${CHARM_INCLUDE_DIR}/conv-mach-opt.h"
                         CHARM_SMP)
+
+    if ("${CHARM_SMP}" STREQUAL "")
+      # newer versions of charm++ don't store CMK_SMP in conv-mach-opt.h. Check
+      # other location
+      CHECK_INCLUDE_FILES("${CHARM_INCLUDE_DIR}/conv-autoconfig.h"
+                          HAVE_CHARM_CONV_AUTOCONFIG)
+      if (HAVE_CHARM_CONV_AUTOCONFIG)
+        unset(CHARM_SMP CACHE)
+        CHECK_SYMBOL_EXISTS(CMK_SMP "${CHARM_INCLUDE_DIR}/conv-autoconfig.h"
+                            CHARM_SMP)
+      endif()
+    endif()
+
     if (CHARM_SMP)
       message(STATUS "Charm++ built in SMP mode")
     else()
