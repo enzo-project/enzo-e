@@ -296,6 +296,9 @@ void IoEnzoReader::p_init_root
   // close the HDF5 file
   file_close_block_list_();
 
+  // self + 1
+  ++ sync_blocks_;
+  block_ready_();
 }
 
 //----------------------------------------------------------------------
