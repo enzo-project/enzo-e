@@ -136,7 +136,11 @@ IoEnzoReader::IoEnzoReader()
     stream_block_list_(),
     file_(nullptr),
     sync_blocks_(),
-    io_msg_check_()
+    io_msg_check_(),
+    level_(0),
+    block_name_list_(),
+    block_level_list_(),
+    blocks_in_level_()
 {
   
   proxy_enzo_simulation.p_io_reader_created();
@@ -211,35 +215,32 @@ void IoEnzoReader::p_init_root
   // Read global attributes
   file_read_hierarchy_();
 
-  std::vector<std::string> block_name_list;
-  std::vector<int>         block_level_list;
-  std::vector<int> blocks_in_level;
-  blocks_in_level.resize(max_level+1);
-  {
-    std::string block_name;
-    int block_level;
-    // Read list of blocks and associated refinement levels
-    while (read_block_list_(block_name,block_level)) {
+  blocks_in_level_.resize(max_level+1);
 
-      // save block name and level
-      block_name_list.push_back(block_name);
-      block_level_list.push_back(block_level);
+  std::string block_name;
+  int block_level;
+  // Read list of blocks and associated refinement levels
+  while (read_block_list_(block_name,block_level)) {
 
-      if (block_level <= 0) {
-        // count root-level blocks for synchronization
-        // (including negative level blocks)
-        ++ sync_blocks_;
-        TRACE_SYNC(sync_blocks_,"sync_blocks_ inc_stop(1)");
-      } else {
-        // count blocks per refined level for array allocation below
-        ++blocks_in_level[block_level];
-      }
+    // save block name and level
+    block_name_list_.push_back(block_name);
+    block_level_list_.push_back(block_level);
+
+    if (block_level <= 0) {
+      // count root-level blocks for synchronization
+      // (including negative level blocks)
+      ++ sync_blocks_;
+      TRACE_SYNC(sync_blocks_,"sync_blocks_ inc_stop(1)");
+    } else {
+      // count blocks per refined level for array allocation below
+      ++blocks_in_level_[block_level];
     }
   }
+
   // Allocate io_msg_check_ array
   io_msg_check_.resize(max_level+1);
   for (int level=1; level<=max_level; level++) {
-    io_msg_check_[level].resize(blocks_in_level[level]);
+    io_msg_check_[level].resize(blocks_in_level_[level]);
   }
 
   // initialize vector of array offsets into io_msg_check_ for each level
@@ -248,11 +249,11 @@ void IoEnzoReader::p_init_root
   std::fill(level_index.begin(), level_index.end(), 0);
 
   // Save block's meta-data and initialize root-level blocks
-  for (int i=0; i<block_name_list.size(); i++) {
+  for (int i=0; i<block_name_list_.size(); i++) {
 
     // Increment block counter so know when to alert pe=0 when done
-    const int block_level = block_level_list[i];
-    std::string block_name = block_name_list[i];
+    const int block_level = block_level_list_[i];
+    std::string block_name = block_name_list_[i];
     int i_level = level_index[std::max(block_level,0)]++;
 
     // For each Block in the file, read the block data and create the
@@ -296,6 +297,9 @@ void IoEnzoReader::p_init_root
   // close the HDF5 file
   file_close_block_list_();
 
+  // self + 1
+  ++ sync_blocks_;
+  block_ready_();
 }
 
 //----------------------------------------------------------------------
@@ -361,6 +365,7 @@ void EnzoSimulation::p_restart_next_level()
 
 void IoEnzoReader::p_create_level (int level)
 {
+  level_ = level;
   TRACE_READER("p_create_level()",this);
   const int num_blocks_level = io_msg_check_[level].size();
   sync_blocks_.reset();
@@ -644,9 +649,9 @@ void IoEnzoReader::file_read_block_
     field_face -> set_face (0,0,0);
     field_face -> set_ghost(true,true,true);
     field_face -> set_refresh(refresh,true);
-
-    data_msg -> set_field_face (field_face,false);
-    data_msg -> set_field_data (data->field_data(),false);
+    bool is_new;
+    data_msg -> set_field_face (field_face,        is_new=true);
+    data_msg -> set_field_data (data->field_data(),is_new=true);
   }
   for (int i_f=0; i_f<num_fields; i_f++) {
 
@@ -756,6 +761,7 @@ void IoEnzoReader::file_read_block_
                 "Unsupported particle type_data %d",
                 type_data);
       }
+      delete [] buffer;
     }
   }
   file_->group_close();
