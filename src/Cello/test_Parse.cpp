@@ -15,15 +15,21 @@ PARALLEL_MAIN_BEGIN
   PARALLEL_INIT;
   unit_init (0, 1);
   unit_class("Parameters");
-  for (int i=1; i<PARALLEL_ARGC; i++) {
-    const char * filename = PARALLEL_ARGV[i];
-    unit_func("parse");
-    FILE * fp = fopen (filename,"r");
-    cello_parameters_read(filename,fp);
-    unit_assert(true);
+  if (PARALLEL_ARGC < 2){
+    CkPrintf("ERROR: This test expects a parameter file to be passed as a "
+             "command line argument. None were provided.\n");
+    unit_assert(false);
+  } else {
+    for (int i=1; i<PARALLEL_ARGC; i++) {
+      const char * filename = PARALLEL_ARGV[i];
+      unit_func("parse");
+      FILE * fp = fopen (filename,"r");
+      cello_parameters_read(filename,fp);
+      unit_assert(true);
+    }
+    cello_parameters_print();
   }
-    
-  cello_parameters_print();
+
   unit_finalize();
   exit_();
 }

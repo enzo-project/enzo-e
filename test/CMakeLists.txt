@@ -78,23 +78,73 @@ endfunction()
 setup_test_unit(CArrCollec ArrayComponent/CArrCollec test_carr_collec)
 setup_test_unit(Array ArrayComponent/Array test_cello_array)
 setup_test_unit(StringIndRdOnlyMap ArrayComponent/StringIndRdOnlyMap test_string_ind_rd_only_map)
-# TODO(need help) Need to reintroduce following tests once dependency hell is resolved,
-# see commented unit tests in src/Cello/CMakeLists.txt
-#setup_test_unit(CelloType Cello/Type test_type)
-#setup_test_unit(Data-Field DataComponent/Field test_field)
-#setup_test_unit(Data-Field-Data DataComponent/FieldData test_field_data)
-#setup_test_unit(Data-Field-Descr DataComponent/FieldDescr test_field_descr)
-#setup_test_unit(Data-Field-Face DataComponent/FieldFace test_field_face)
-#setup_test_unit(Data-Grouping DataComponent/Grouping test_grouping)
-#setup_test_unit(Data-ItIndex DataComponent/ItIndex test_itindex)
-#setup_test_unit(Data-Particle DataComponentParticle/ test_particle)
-#setup_test_unit(Data-Scalar DataComponent/Scalar test_scalar)
-#setup_test_unit(EnzoUnits UnitsComponent/EnzoUnits test_enzo_units)
+
+setup_test_unit(CelloType Cello/Type test_type)
+
+setup_test_unit(FileHDF5 DiskComponent/FileHDF5 test_file_hdf5)
+
 setup_test_unit(Error ErrorComponent/Error test_error)
-#setup_test_unit(Schedule IOComponent/Schedule test_schedule)
-#setup_test_unit(Colormap IOComponent/Colormap test_colormap)
+
+setup_test_unit(Colormap IOComponent/Colormap test_colormap)
+setup_test_unit(Schedule IOComponent/Schedule test_schedule)
+
+setup_test_unit(Data-Particle DataComponent/Particle test_particle)
+setup_test_unit(Data-Scalar DataComponent/Scalar test_scalar)
+setup_test_unit(Data-Field-Data DataComponent/FieldData test_field_data)
+setup_test_unit(Data-Field-Descr DataComponent/FieldDescr test_field_descr)
+setup_test_unit(Data-Field DataComponent/Field test_field)
+setup_test_unit(Data-Field-Face DataComponent/FieldFace test_field_face)
+setup_test_unit(Data-Grouping DataComponent/Grouping test_grouping)
+setup_test_unit(Data-ItIndex DataComponent/ItIndex test_itindex)
+
 setup_test_unit(Memory MemoryComponent/Memory test_memory)
+
 setup_test_unit(Monitor MonitorComponent/Monitor test_monitor)
+
+setup_test_unit(
+  Parameters-Parameters ParametersComponent/Parameters test_parameters
+)
+# we need to pass an argument to the following test (a path to a config file)
+#setup_test_unit(Parameters-Parse ParametersComponent/Parse test_parse)
+
+setup_test_unit(
+  Performance-Performance PerformanceComponent/Performance test_performance
+)
+setup_test_unit(Performance-Timer PerformanceComponent/Timer test_timer)
+if (use_papi)
+  setup_test_unit(Performance-Papi PerformanceComponent/Papi test_papi)
+endif()
+
+setup_test_unit(EnzoUnits UnitsComponent/EnzoUnits test_enzo_units)
+
+# TODO: sort the following test by component
+setup_test_unit(Assorted-class_size Assorted/class_size test_class_size)
+setup_test_unit(Assorted-Data Assorted/Data test_data)
+setup_test_unit(Assorted-ItFace Assorted/ItFace test_it_face)
+setup_test_unit(Assorted-ItChild Assorted/ItChild test_it_child)
+setup_test_unit(Assorted-BlockTrace Assorted/BlockTrace test_block_trace)
+setup_test_unit(Assorted-Sync Assorted/Sync test_sync)
+setup_test_unit(Assorted-Face Assorted/Face test_face)
+setup_test_unit(Assorted-FaceFluxes Assorted/FaceFluxes test_face_fluxes)
+setup_test_unit(Assorted-FluxData Assorted/FluxData test_flux_data)
+setup_test_unit(
+  Assorted-ProlongLinear Assorted/ProlongLinear test_prolong_linear
+)
+setup_test_unit(Assorted-Refresh Assorted/Refresh test_refresh)
+setup_test_unit(Assorted-Mask Assorted/Mask test_mask)
+setup_test_unit(Assorted-Value Assorted/Value test_value)
+setup_test_unit(Assorted-Box Assorted/Box test_box)
+
+# TODO we need to fix the following tests (see commented units tests in
+# src/Cello/CMakeLists.txt)
+#
+# the test runs, but one of the checks fails.
+#setup_test_unit(Assorted-Adapt Assorted/Adapt test_adapt)
+#
+# the following test is broken (an API change is not reflected in the tests)
+#setup_test_unit(Assorted-Index Assorted/Index test_index)
+
+
 #setup_test_unit( Component/ test_)
 
 ############################### ENZO-E TESTS ##################################
