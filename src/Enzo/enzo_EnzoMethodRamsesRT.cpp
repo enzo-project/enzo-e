@@ -18,7 +18,7 @@
 //#define DEBUG_RECOMBINATION
 //#define DEBUG_ALPHA
 //#define DEBUG_RATES
-#define DEBUG_INJECTION
+//#define DEBUG_INJECTION
 //#define DEBUG_TRANSPORT
 //#define DEBUG_ATTENUATION
 
@@ -28,14 +28,8 @@ EnzoMethodRamsesRT ::EnzoMethodRamsesRT(const int N_groups, const double clight)
   : Method()
     , N_groups_(N_groups)
     , clight_(clight)
-    , eps_()
-    , sigN_()
-    , sigE_()
-    , gfracN_()
-    , gfracF_()
     , ir_injection_(-1)
     , ir_transport_(-1)
-    //, igroup_()
 {
 
   const int rank = cello::rank();
@@ -134,20 +128,18 @@ EnzoMethodRamsesRT ::EnzoMethodRamsesRT(const int N_groups, const double clight)
   
   int N_species_ = 3; //only three ionizable species (HI, HeI, HeII)
   for (int i=0; i<N_groups_; i++) {
-    eps_ .push_back( scalar_descr->new_value( eps_string(i) ));
-    scalar_descr->new_value( eps_string(i) + "mL" );
+    scalar_descr->new_value( eps_string(i) );
+    scalar_descr->new_value(  mL_string(i) );
+    scalar_descr->new_value( eps_string(i) + mL_string(i) );
 
     for (int j=0; j<N_species_; j++) {
-      std::string jstring = std::to_string(j);
-      sigN_.push_back( scalar_descr->new_value( sigN_string(i,j) ));
-      sigE_.push_back( scalar_descr->new_value( sigE_string(i,j) ));
+      scalar_descr->new_value( sigN_string(i,j) );
+      scalar_descr->new_value( sigE_string(i,j) );
 
-      scalar_descr->new_value( sigN_string(i,j) + "mL" );
-      scalar_descr->new_value( sigE_string(i,j) + "mL" );
+      scalar_descr->new_value( sigN_string(i,j) + mL_string(i) );
+      scalar_descr->new_value( sigE_string(i,j) + mL_string(i) );
     }
   }
-  
-  scalar_descr->new_value("mL");
 }
 
 //----------------------------------------------------------------------
@@ -163,14 +155,8 @@ void EnzoMethodRamsesRT ::pup (PUP::er &p)
 
   p | N_groups_;
   p | clight_;
-  p | eps_;
-  p | sigN_;
-  p | sigE_;
-  p | gfracN_;
-  p | gfracF_;
   p | ir_injection_;
   p | ir_transport_;
-  //p | igroup_;
 }
 
 //----------------------------------------------------------------------
@@ -309,7 +295,8 @@ void EnzoMethodRamsesRT::get_radiation_custom(EnzoBlock * enzo_block, enzo_float
   Scalar<double> scalar = enzo_block->data()->scalar_double();
  
   int igroup = enzo_block->method_ramses_rt_igroup;
-  double luminosity = enzo_config->method_ramses_rt_Nphotons_per_sec_list[igroup] * enzo_units->time(); 
+  double luminosity = enzo_config->method_ramses_rt_Nphotons_per_sec_list[igroup] * enzo_units->time();
+  double mL = pmass*luminosity; 
 
   // TODO: This loop only goes through primordial ionizable species. Update once support for
   //       > 6 species is added
@@ -321,14 +308,14 @@ void EnzoMethodRamsesRT::get_radiation_custom(EnzoBlock * enzo_block, enzo_float
     #endif
  
     // put into code units 
-    sigma_j /= lunit*lunit;
-    energy  *= enzo_constants::erg_eV / eunit;
-    *(scalar.value( scalar.index(sigN_string(igroup, j) + "mL" ))) += sigma_j * pmass*luminosity;
-    *(scalar.value( scalar.index(sigE_string(igroup, j) + "mL" ))) += sigma_j * pmass*luminosity;
-    *(scalar.value( scalar.index( eps_string(igroup   ) + "mL" ))) += energy  * pmass*luminosity;
-
-    *(scalar.value( scalar.index("mL") )) += pmass*luminosity;
+    *(scalar.value( scalar.index(sigN_string(igroup, j) + mL_string(igroup) ))) += sigma_j/(lunit*lunit) * mL;
+    *(scalar.value( scalar.index(sigE_string(igroup, j) + mL_string(igroup) ))) += sigma_j/(lunit*lunit) * mL;
   }
+
+  *(scalar.value( scalar.index(mL_string(igroup)) )) += mL;
+  *(scalar.value( scalar.index( eps_string(igroup   ) + mL_string(igroup) ))) += energy*enzo_constants::erg_eV/eunit * mL;
+
+  
   N[i] = luminosity * inv_vol * dt; // code units
   #ifdef DEBUG_INJECTION
     CkPrintf("MethodRamsesRT::get_radiation_custom -- N[i] = %1.2e cm^-3; Ndot = %1.2e photons/s \n", N[i] / (lunit*lunit*lunit), luminosity / enzo_units->time());
@@ -351,6 +338,7 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_fl
   double munit = enzo_units->mass();
   double eunit = munit * lunit*lunit / (tunit*tunit);
 
+  int igroup = enzo_block->method_ramses_rt_igroup;
   int n = 10; // number of partitions for simpson's method
               // TODO: Make this a parameter??
 
@@ -384,7 +372,8 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_fl
 
   //----------
 
-  double luminosity = N_integrated * cell_volume*lunit*lunit*lunit/dt; // photons per code_timestep 
+  double luminosity = N_integrated * cell_volume*lunit*lunit*lunit/dt; // photons per code_timestep
+  double mL = pmass*luminosity; // code units 
 
   std::vector<std::string> chemistry_fields = {"HI_density", 
                                                "HeI_density", "HeII_density"};
@@ -396,37 +385,35 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_fl
   Scalar<double> scalar = enzo_block->data()->scalar_double(); 
  
   //eq. B3 ----> eps = int(E_nu dnu) / int(N_nu dnu)
-  *(scalar.value( scalar.index( eps_string(enzo_block->method_ramses_rt_igroup) + "mL" ) ))
+  *(scalar.value( scalar.index( eps_string(igroup) + mL_string(igroup) ) ))
                                     +=
-                E_integrated / N_integrated / eunit * pmass*luminosity;
+                E_integrated / N_integrated / eunit * mL;
 
   for (int j=0; j<chemistry_fields.size(); j++) {
 
     // eq. B4 ----> sigmaN = int(sigma_nuj * N_nu dnu)/int(N_nu dnu)
-    *(scalar.value( scalar.index(sigN_string(enzo_block->method_ramses_rt_igroup, j) + "mL" ) )) 
+    *(scalar.value( scalar.index(sigN_string(igroup, j) + mL_string(igroup) ) )) 
                                     +=
            integrate_simpson(freq_lower,freq_upper,n, 
                 [this,j](double nu, double b, double c, int d){
                   return sigma_vernier(enzo_constants::hplanck*nu / enzo_constants::erg_eV, j)
                                 *planck_function(nu,b,c,d);
                 },
-                T,clight,planck_case_N) / N_integrated / (lunit*lunit) * pmass*luminosity;
+                T,clight,planck_case_N) / N_integrated / (lunit*lunit) * mL;
 
     // eq. B5 ----> sigmaE = int(sigma_nuj * E_nu dnu)/int(E_nu dnu)
-    *(scalar.value( scalar.index(sigE_string(enzo_block->method_ramses_rt_igroup, j) + "mL") ))
+    *(scalar.value( scalar.index(sigE_string(igroup, j) + mL_string(igroup)) ))
                                     +=
            integrate_simpson(freq_lower,freq_upper,n, 
                 [this,j](double nu, double b, double c, int d){
                   return sigma_vernier(enzo_constants::hplanck*nu / enzo_constants::erg_eV, j)
                                 *planck_function(nu,b,c,d);
                 },
-                T,clight,planck_case_E) / E_integrated / (lunit*lunit) * pmass*luminosity;
-
-
-    *(scalar.value( scalar.index("mL") )) += pmass*luminosity;
-
+                T,clight,planck_case_E) / E_integrated / (lunit*lunit) * mL;
   }
-  
+ 
+  *(scalar.value( scalar.index(mL_string(igroup)) )) += mL;
+
   #ifdef DEBUG_INJECTION
     CkPrintf("MethodRamsesRT::get_radiation_blackbody -- [freq_lower, freq_upper] = [%1.2e, %1.2e], N[i] = %1.2e cm^-3, T = %1.2e K, Ndot = %1.2e photons/s \n", 
                      freq_lower, freq_upper, N[i]/(lunit*lunit*lunit), T, luminosity/tunit);
@@ -856,6 +843,10 @@ void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo
   // ionization -- first term of eq. A21 -- sum_i(sigmaN*clight*Ni), where i iterates over frequency groups
   // ionization rates should be in code_time^-1
   // heating rates should be in erg s^-1 cm^-3 
+  // TODO: Rates are zero if mean energy in a bin is less than the ionization threshold.
+  //       There could be cases where E_mean < E_thresh, but E_upper > E_thresh. 
+  //       Need to account for this by integrating over that part of the spectrum.
+  //       i.e. scale N_i by some fraction
 
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
@@ -926,7 +917,8 @@ void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo
             double sigmaN = *(scalar.value( scalar.index( sigN_string(igroup,j) ))) * lunit*lunit; // cm^2 
             double sigmaE = *(scalar.value( scalar.index( sigE_string(igroup,j) ))) * lunit*lunit; // cm^2
             double eps    = *(scalar.value( scalar.index(  eps_string(igroup  ) ))) * eunit; // erg 
- 
+
+            // TODO: Add toggle for whether to include recombination radiation 
             double N_i = (photon_densities[igroup])[i] * Nunit; // cm^-3
             double n_j = (chemistry_fields[j])[i] * rhounit / masses[j]; //number density of species j
            
@@ -938,7 +930,7 @@ void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo
 
 #ifdef DEBUG_RATES 
             std::cout << "i = " << i << "; heating_rate = " << heating_rate << "; n_j = " << n_j << 
-            "; N_i = " << N_i << "; eps = " << eps << "; Ediff = " << (eps*sigmaE - Eion[j]*sigmaN) <<  std::endl;
+            "; N_i = " << N_i << "; eps = " << eps/enzo_constants::erg_eV << "; Eion[j] = " << Eion[j]/enzo_constants::erg_eV << "; Ediff = " << (eps*sigmaE - Eion[j]*sigmaN) <<  std::endl;
 #endif          
           }
           (ionization_rate_fields[j])[i] = ionization_rate * tunit; //update fields with new value, put ionization rates in 1/time_units
@@ -1095,6 +1087,7 @@ void EnzoMethodRamsesRT::recombination_photons (EnzoBlock * enzo_block, enzo_flo
   //enzo_float * density = (enzo_float *) field.values("density");
   enzo_float * e_density = (enzo_float *) field.values("e_density");
 
+  // TODO: Update this to implement > 6 species
   std::vector<std::string> chemistry_fields = {"HI_density", 
                                                "HeI_density", "HeII_density"};
   double mH  = enzo_constants::mass_hydrogen / munit; // code units
@@ -1207,6 +1200,7 @@ void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * 
   
   //enzo_float * density = (enzo_float *) field.values("density");
 
+  // TODO: Update to account for > 6 species
   std::vector<std::string> chemistry_fields = {"HI_density", 
                                                "HeI_density", "HeII_density"};
   double mH = enzo_constants::mass_hydrogen / munit;
@@ -1223,7 +1217,6 @@ void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * 
     double n_j = density_j[i] / masses[j];     
     double sigN_ij = *(scalar.value( scalar.index( sigN_string(igroup, j) )));
     d_dt += n_j * clight*sigN_ij; // code_time^-1
-    //std::cout << density_j[i] << ' ' <<  masses[j] << ' ' << clight << ' ' << sigN_ij << std::endl;
   }
  
 #ifdef DEBUG_ATTENUATION
@@ -1407,38 +1400,44 @@ void EnzoMethodRamsesRT::call_inject_photons(EnzoBlock * enzo_block) throw()
   const int N_species = 3; //TODO: update for > 6 species
 
   if (enzo_block->is_leaf()) { // only inject photons for leaf blocks
-    enzo_block->method_ramses_rt_igroup = 0;
     for (int i=0; i<N_groups; i++) {
+      enzo_block->method_ramses_rt_igroup = i;
       this->inject_photons(enzo_block);
-      enzo_block->method_ramses_rt_igroup += 1;
     }
   }
 
   // do global reduction of sigE, sigN, and eps over star particles
   // then do refresh -> solve_transport_eqn()
 
-  // flattened array of sigN, epsN, and eps "mL" variables
-  std::vector<double> temp(1+N_groups+2*N_groups*N_species);
+  // flattened array of sigN, sigE, and eps "mL" variables
+  // N_groups number of mL_i, eps_i variables
+  // N_groups*N_species number of sigN and sigE variables
+  //
+  // Gives 2*N_groups+2*N_groups*N_species as the total number of variables
+  std::vector<double> temp(2*N_groups+2*N_groups*N_species);
 
   // fill temp with ScalarData values
   Scalar<double> scalar = enzo_block->data()->scalar_double();
 
   int index = 0;
-  temp[index] = *(scalar.value( scalar.index("mL") ));
   for (int i=0; i<N_groups; i++) {
-    index = 1 + i;
-    temp[index] = *(scalar.value( scalar.index( eps_string(i) + "mL" )));
+    index = i;
+    temp[index] = *(scalar.value( scalar.index(mL_string(i)) ));
+  }
+  for (int i=0; i<N_groups; i++) {
+    index = N_groups + i;
+    temp[index] = *(scalar.value( scalar.index( eps_string(i) + mL_string(i) )));
   }
   for (int i=0; i<N_groups; i++) {
     for (int j=0; j<N_species; j++) {
-      index = 1 + N_groups + i*N_species + j;
-      temp[index] = *(scalar.value( scalar.index( sigN_string(i,j) + "mL" )));
+      index = 2*N_groups + i*N_species + j;
+      temp[index] = *(scalar.value( scalar.index( sigN_string(i,j) + mL_string(i) )));
     }
   }
   for (int i=0; i<N_groups; i++) {
     for (int j=0; j<N_species; j++) {
-      index = 1 + N_groups + N_groups*N_species + i*N_species + j;
-      temp[index] = *(scalar.value( scalar.index( sigE_string(i,j) + "mL" )));
+      index = 2*N_groups + N_groups*N_species + i*N_species + j;
+      temp[index] = *(scalar.value( scalar.index( sigE_string(i,j) + mL_string(i) )));
     }
   }
 
@@ -1476,6 +1475,8 @@ void EnzoMethodRamsesRT::set_global_averages(EnzoBlock * enzo_block, CkReduction
 
   double * temp = (double *)msg->getData(); // pointer to vector containing numerator/denominators
                                             // of eqs. (B6)-(B8)
+                                            // temp[0:N_groups] hold the denominators -> sum(m*L_i)
+                                            // temp[N_groups:] hold the numerators -> sum(<eps/sigN/sigE>_ij * m*L_i)
 
   const EnzoConfig * enzo_config = enzo::config();
   const int N_groups = enzo_config->method_ramses_rt_N_groups;
@@ -1483,26 +1484,27 @@ void EnzoMethodRamsesRT::set_global_averages(EnzoBlock * enzo_block, CkReduction
 
   Scalar<double> scalar = enzo_block->data()->scalar_double();
 
-  int index = 0; // temp[0] holds the denominator -> sum(m*L)
-  if (temp[index] == 0) { 
+ // if (temp[index] == 0) { 
     // if no sources of radiation in the entire domain, no need to refresh.
     // Just go to transport step 
     // eqs. B6-B8 would give us 0/0 in this case anyway
-    enzo_block->p_method_ramses_rt_solve_transport_eqn();
-    return;
-  }
+ //   enzo_block->p_method_ramses_rt_solve_transport_eqn();
+  //  return;
+ // }
 
-  double mult = 1.0/temp[index];
-
+  int index=0;
+  double mult = 0.0;
   for (int i=0; i<N_groups; i++) {
-    index = 1 + i;
+    mult = (temp[i] == 0) ? 0.0 : 1.0/temp[i];
+    index = N_groups + i;
     // eq. B6 --> sum(eps*m*L) / sum(m*L)
     *(scalar.value( scalar.index( eps_string(i) ))) = mult*temp[index];
   }
 
   for (int i=0; i<N_groups; i++) {
     for (int j=0; j<N_species; j++) {
-      index = 1 + N_groups + i*N_species + j;
+      mult = (temp[i] == 0) ? 0.0 : 1.0/temp[i];
+      index = 2*N_groups + i*N_species + j;
       // eq. B7 --> sum(sigN*m*L) / sum(m*L)
       *(scalar.value( scalar.index( sigN_string(i,j) ))) = mult*temp[index];
     }
@@ -1510,7 +1512,8 @@ void EnzoMethodRamsesRT::set_global_averages(EnzoBlock * enzo_block, CkReduction
 
   for (int i=0; i<N_groups; i++) {
     for (int j=0; j<N_species; j++) {
-      index = 1 + N_groups + N_groups*N_species + i*N_species + j;
+      mult = (temp[i] == 0) ? 0.0 : 1.0/temp[i];
+      index = 2*N_groups + N_groups*N_species + i*N_species + j;
       // eq. B8 --> sum(sigE*m*L) / sum(m*L)
       *(scalar.value( scalar.index( sigE_string(i,j) ))) = mult*temp[index];
     }
@@ -1540,9 +1543,8 @@ void EnzoMethodRamsesRT::call_solve_transport_eqn(EnzoBlock * enzo_block) throw(
   enzo_block->method_ramses_rt_igroup = 0;
   // loop through groups and solve transport equation for each group
   for (int i=0; i<enzo_config->method_ramses_rt_N_groups;i++) {
+    enzo_block->method_ramses_rt_igroup = i;
     this->solve_transport_eqn(enzo_block);
-
-    enzo_block->method_ramses_rt_igroup += 1;
   }
 
 #ifndef DEBUG_TURN_OFF_CHEMISTRY
@@ -1690,13 +1692,13 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
   // TODO: only do this once every N cycles, where N is a parameter
   
   for (int i=0; i<N_groups_; i++) {
-    *(scalar.value( scalar.index( eps_string(i) + "mL" ))) = 0.0;
+    *(scalar.value( scalar.index( eps_string(i) + mL_string(i) ))) = 0.0;
+    *(scalar.value( scalar.index( mL_string(i) ) )) = 0.0;
     for (int j=0; j<N_species_; j++) {
-      *(scalar.value( scalar.index( sigN_string(i,j) + "mL" ))) = 0.0;
-      *(scalar.value( scalar.index( sigE_string(i,j) + "mL" ))) = 0.0;
+      *(scalar.value( scalar.index( sigN_string(i,j) + mL_string(i) ))) = 0.0;
+      *(scalar.value( scalar.index( sigE_string(i,j) + mL_string(i) ))) = 0.0;
     }
   }
-  *(scalar.value( scalar.index("mL") )) = 0.0;
    
   
 #ifndef DEBUG_TURN_OFF_INJECTION

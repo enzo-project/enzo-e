@@ -33,11 +33,6 @@ public: // interface
     : Method (m)
     , N_groups_(0)
     , clight_(0.0)
-    , eps_()
-    , sigN_() 
-    , sigE_()
-    , gfracN_()
-    , gfracF_()
     , ir_injection_(-1)
     , ir_transport_(-1)
    // , igroup_()
@@ -93,6 +88,8 @@ protected: // methods
     {return "sigE_" + std::to_string(i) + std::to_string(j);}
   const std::string eps_string (int i) throw()
     {return "eps_"  + std::to_string(i);}
+  const std::string mL_string  (int i) throw()
+    {return "mL_" + std::to_string(i);}
 
   //--------- INJECTION STEP -------
 
@@ -162,8 +159,6 @@ protected: // methods
 protected: // attributes
   int N_groups_;
   double clight_;
-  std::vector<double> eps_, sigN_, sigE_;
-  std::vector<double> gfracN_, gfracF_;
 
   // Refresh id's
   int ir_injection_, ir_transport_;
