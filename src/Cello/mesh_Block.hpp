@@ -126,7 +126,7 @@ public: // interface
 
   /// Return whether this Block is a leaf in the octree array
   bool is_leaf() const
-  { return is_leaf_ && ! (index_.level() < 0); }
+  { return is_leaf_; }
 
   /// Index of the Block
   const Index & index() const
