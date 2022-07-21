@@ -8,15 +8,15 @@ c     See LICENSE_PPML file for license and copyright information
 
       Integer nx,ny,nz,i,j,k
       ENZO_REAL gamma
-      ENZO_REAL dn(nx,ny,nz)  	 
-      ENZO_REAL vx(nx,ny,nz),vy(nx,ny,nz),vz(nx,ny,nz)  	 
-      ENZO_REAL bx(nx,ny,nz),by(nx,ny,nz),bz(nx,ny,nz)  	 
+      ENZO_REAL dn(nx,ny,nz)
+      ENZO_REAL vx(nx,ny,nz),vy(nx,ny,nz),vz(nx,ny,nz)
+      ENZO_REAL bx(nx,ny,nz),by(nx,ny,nz),bz(nx,ny,nz)
       ENZO_REAL pn(nx,ny,nz)
-      ENZO_REAL qu1(nx,ny,nz)  	 
-      ENZO_REAL qu2(nx,ny,nz),qu3(nx,ny,nz),qu4(nx,ny,nz)  	 
-      ENZO_REAL qu5(nx,ny,nz),qu6(nx,ny,nz),qu7(nx,ny,nz)  	 
+      ENZO_REAL qu1(nx,ny,nz)
+      ENZO_REAL qu2(nx,ny,nz),qu3(nx,ny,nz),qu4(nx,ny,nz)
+      ENZO_REAL qu5(nx,ny,nz),qu6(nx,ny,nz),qu7(nx,ny,nz)
       ENZO_REAL qu8(nx,ny,nz)
-	  
+
       Do k=1,nz
          Do j=1,ny
             Do i=1,nx
@@ -27,13 +27,12 @@ c     See LICENSE_PPML file for license and copyright information
                QU5(i,j,k)=bx(i,j,k)
                QU6(i,j,k)=by(i,j,k)
                QU7(i,j,k)=bz(i,j,k)
-               QU8(i,j,k)=pn(i,j,k)/(gamma-1.)+dn(i,j,k)*
-     &              +(vx(i,j,k)**2+vy(i,j,k)**2+vz(i,j,k)**2)/2.		 
-     &              +(bx(i,j,k)**2+by(i,j,k)**2+vz(i,j,k)**2)/2.		 
+               QU8(i,j,k)=pn(i,j,k)+dn(i,j,k)*
+     &              +(vx(i,j,k)**2+vy(i,j,k)**2+vz(i,j,k)**2)/2.
+     &              +(bx(i,j,k)**2+by(i,j,k)**2+vz(i,j,k)**2)/2.
             Enddo
-         Enddo	
+         Enddo
       Enddo
 
-	  
       RETURN
       END

@@ -3,120 +3,120 @@ c     PPML MHD solver for Ideal Gas (PPML_IG)
 
 #include "fortran.h"
 
-/* #define INCLUDE_GRAVITY */  /* INCOMPLETE */
-      
+      /* #define INCLUDE_GRAVITY */  /* INCOMPLETE */
+
       Subroutine PPML_IG(dn,vx,vy,vz,bx,by,bz,pn,
-     &                   dnrx,vxrx,vyrx,vzrx,bxrx,byrx,bzrx,pnrx, 
-     &                   dnry,vxry,vyry,vzry,bxry,byry,bzry,pnry, 
-     &                   dnrz,vxrz,vyrz,vzrz,bxrz,byrz,bzrz,pnrz,
+     &     dnrx,vxrx,vyrx,vzrx,bxrx,byrx,bzrx,pnrx,
+     &     dnry,vxry,vyry,vzry,bxry,byry,bzry,pnry,
+     &     dnrz,vxrz,vyrz,vzrz,bxrz,byrz,bzrz,pnrz,
 #ifdef INCLUDE_GRAVITY
-     &                   gravity,      
-     &                   gx,gy,gz,     
+     &     gravity,
+     &     gx,gy,gz,
 #endif
-     &                   b0,                       !new
-     &                   gamma,        !new
-     &                   dt, dx,dy,dz,
-     &                   nx, ny, nz,
-     &                   GridStartIndex, GridEndIndex,
-     &                   nsubgrids, lface, rface,
-     &                   fistart, fiend, fjstart, fjend,
-     &                   array, dnindex,
-     &                   vxindex, vyindex, vzindex,
-     &                   bxindex, byindex, bzindex, 
-     &                   pindex,
-     &                   f1,f2,f3,f4,f5,f6,f7,f8,
-     &                   g1,g2,g3,g4,g5,g6,g7,g8,
-     &                   h1,h2,h3,h4,h5,h6,h7,h8,
-     &                   ex,ey,ez,
-     &                   qu1,qu2,qu3,qu4,qu5,qu6,qu7,qu8)
+     &     b0,                  !new
+     &     gamma,               !new
+     &     dt, dx,dy,dz,
+     &     nx, ny, nz,
+     &     GridStartIndex, GridEndIndex,
+     &     nsubgrids, lface, rface,
+     &     fistart, fiend, fjstart, fjend,
+     &     array, dnindex,
+     &     vxindex, vyindex, vzindex,
+     &     bxindex, byindex, bzindex,
+     &     pindex,
+     &     f1,f2,f3,f4,f5,f6,f7,f8,
+     &     g1,g2,g3,g4,g5,g6,g7,g8,
+     &     h1,h2,h3,h4,h5,h6,h7,h8,
+     &     ex,ey,ez,
+     &     qu1,qu2,qu3,qu4,qu5,qu6,qu7,qu8)
 
       Implicit NONE
 
 c     i1,j1,k1                                - initial point of grid
 c     i2,j2,k2                                - last point of grid
-c     ighost,jghost,kghost                    - number of ghost zones	 
+c     ighost,jghost,kghost                    - number of ghost zones
 c     dn,vx,vy,vz,bx,by,bz,pn                 - centered primitive variables
 c     dnrx,vxrx,vyrx,vzrx,bxrx,byrx,bzrx,pnrx - x-right primitive variables
 c     dnry,vxry,vyry,vzry,bxry,byry,bzry,pnry - y-right primitive variables
-c     dnrz,vxrz,vyrz,vzrz,bxrz,byrz,bzrz,pnrz - z-right primitive variables 
+c     dnrz,vxrz,vyrz,vzrz,bxrz,byrz,bzrz,pnrz - z-right primitive variables
 c     f1,f2,f3,f4,f5,f6,f7,f8                 - x-fluxes
 c     g1,g2,g3,g4,g5,g6,g7,g8                 - y-fluxes
-c     h1,h2,h3,h4,h5,h6,h7,h8                 - z-fluxes 
+c     h1,h2,h3,h4,h5,h6,h7,h8                 - z-fluxes
 c     gravity                                 - yes/no
 c     gx,gy,gz                                - components of gravitation
 c     b0                                      - components of uniform magnetic field
 #ifdef INCLUDE_GRAVITY
       integer gravity
-#endif      
+#endif
       Integer nx,ny,nz,ighost,jghost,kghost,nsubgrids
-      Integer nxb,nxe,nyb,nye,nzb,nze 
+      Integer nxb,nxe,nyb,nye,nzb,nze
       Integer i1,j1,k1,i2,j2,k2,CycleNumber
       Integer nxp,nyp,nzp,i,j,k,m,n,idim,offset
       Integer GridStartIndex(3), GridEndIndex(3)
       Integer m1,m2,m3
-	  
+
       integer fistart(nsubgrids*3), fiend(nsubgrids*3),
-     &        fjstart(nsubgrids*3), fjend(nsubgrids*3), 
-     &        lface(nsubgrids*3)  , rface(nsubgrids*3)
+     &     fjstart(nsubgrids*3), fjend(nsubgrids*3),
+     &     lface(nsubgrids*3)  , rface(nsubgrids*3)
       integer dnindex(nsubgrids*6), vxindex(nsubgrids*6),
-     &        vyindex(nsubgrids*6), vzindex(nsubgrids*6),
-     &        bxindex(nsubgrids*6), byindex(nsubgrids*6),
-     &        bzindex(nsubgrids*6), pindex(nsubgrids*6)
-	 
-      ENZO_REAL array(1)	 
-	  
-      ENZO_REAL dn(nx,ny,nz),pn(nx,ny,nz)  	 
-      ENZO_REAL vx(nx,ny,nz),vy(nx,ny,nz),vz(nx,ny,nz)  	 
-      ENZO_REAL bx(nx,ny,nz),by(nx,ny,nz),bz(nx,ny,nz)  	 
+     &     vyindex(nsubgrids*6), vzindex(nsubgrids*6),
+     &     bxindex(nsubgrids*6), byindex(nsubgrids*6),
+     &     bzindex(nsubgrids*6), pindex(nsubgrids*6)
 
-      ENZO_REAL dnrx(nx,ny,nz),pnrx(nx,ny,nz)  	 
-      ENZO_REAL vxrx(nx,ny,nz),vyrx(nx,ny,nz),vzrx(nx,ny,nz)  	 
-      ENZO_REAL bxrx(nx,ny,nz),byrx(nx,ny,nz),bzrx(nx,ny,nz)  	 
+      ENZO_REAL array(1)
 
-      ENZO_REAL dnry(nx,ny,nz),pnry(nx,ny,nz)  	 
-      ENZO_REAL vxry(nx,ny,nz),vyry(nx,ny,nz),vzry(nx,ny,nz)  	 
-      ENZO_REAL bxry(nx,ny,nz),byry(nx,ny,nz),bzry(nx,ny,nz)  	 
+      ENZO_REAL dn(nx,ny,nz),pn(nx,ny,nz)
+      ENZO_REAL vx(nx,ny,nz),vy(nx,ny,nz),vz(nx,ny,nz)
+      ENZO_REAL bx(nx,ny,nz),by(nx,ny,nz),bz(nx,ny,nz)
 
-      ENZO_REAL dnrz(nx,ny,nz),pnrz(nx,ny,nz)  	 
-      ENZO_REAL vxrz(nx,ny,nz),vyrz(nx,ny,nz),vzrz(nx,ny,nz)  	 
-      ENZO_REAL bxrz(nx,ny,nz),byrz(nx,ny,nz),bzrz(nx,ny,nz)  	 
+      ENZO_REAL dnrx(nx,ny,nz),pnrx(nx,ny,nz)
+      ENZO_REAL vxrx(nx,ny,nz),vyrx(nx,ny,nz),vzrx(nx,ny,nz)
+      ENZO_REAL bxrx(nx,ny,nz),byrx(nx,ny,nz),bzrx(nx,ny,nz)
 
-      ENZO_REAL f1(nx,ny,nz)  	 
-      ENZO_REAL f2(nx,ny,nz),f3(nx,ny,nz),f4(nx,ny,nz)  	 
-      ENZO_REAL f5(nx,ny,nz),f6(nx,ny,nz),f7(nx,ny,nz)  	 
-      ENZO_REAL f8(nx,ny,nz)  	 
+      ENZO_REAL dnry(nx,ny,nz),pnry(nx,ny,nz)
+      ENZO_REAL vxry(nx,ny,nz),vyry(nx,ny,nz),vzry(nx,ny,nz)
+      ENZO_REAL bxry(nx,ny,nz),byry(nx,ny,nz),bzry(nx,ny,nz)
 
-      ENZO_REAL g1(nx,ny,nz)  	 
-      ENZO_REAL g2(nx,ny,nz),g3(nx,ny,nz),g4(nx,ny,nz)  	 
-      ENZO_REAL g5(nx,ny,nz),g6(nx,ny,nz),g7(nx,ny,nz)  	 
-      ENZO_REAL g8(nx,ny,nz)  	 
+      ENZO_REAL dnrz(nx,ny,nz),pnrz(nx,ny,nz)
+      ENZO_REAL vxrz(nx,ny,nz),vyrz(nx,ny,nz),vzrz(nx,ny,nz)
+      ENZO_REAL bxrz(nx,ny,nz),byrz(nx,ny,nz),bzrz(nx,ny,nz)
 
-      ENZO_REAL h1(nx,ny,nz)  	 
-      ENZO_REAL h2(nx,ny,nz),h3(nx,ny,nz),h4(nx,ny,nz)  	 
-      ENZO_REAL h5(nx,ny,nz),h6(nx,ny,nz),h7(nx,ny,nz)  	 
-      ENZO_REAL h8(nx,ny,nz)  	 
+      ENZO_REAL f1(nx,ny,nz)
+      ENZO_REAL f2(nx,ny,nz),f3(nx,ny,nz),f4(nx,ny,nz)
+      ENZO_REAL f5(nx,ny,nz),f6(nx,ny,nz),f7(nx,ny,nz)
+      ENZO_REAL f8(nx,ny,nz)
 
-      ENZO_REAL ex(nx,ny,nz),ey(nx,ny,nz),ez(nx,ny,nz)  	 
-	 
-      ENZO_REAL qu1(nx,ny,nz)  	 
-      ENZO_REAL qu2(nx,ny,nz),qu3(nx,ny,nz),qu4(nx,ny,nz)  	 
-      ENZO_REAL qu5(nx,ny,nz),qu6(nx,ny,nz),qu7(nx,ny,nz)  
-      ENZO_REAL qu8(nx,ny,nz)  	 
+      ENZO_REAL g1(nx,ny,nz)
+      ENZO_REAL g2(nx,ny,nz),g3(nx,ny,nz),g4(nx,ny,nz)
+      ENZO_REAL g5(nx,ny,nz),g6(nx,ny,nz),g7(nx,ny,nz)
+      ENZO_REAL g8(nx,ny,nz)
 
-#ifdef INCLUDE_GRAVITY      
-      ENZO_REAL gx(nx,ny,nz),gy(nx,ny,nz),gz(nx,ny,nz)  	 
-      ENZO_REAL sx(nx,7),sy(ny,7),sz(nz,7) !AK 8?
-#endif      
+      ENZO_REAL h1(nx,ny,nz)
+      ENZO_REAL h2(nx,ny,nz),h3(nx,ny,nz),h4(nx,ny,nz)
+      ENZO_REAL h5(nx,ny,nz),h6(nx,ny,nz),h7(nx,ny,nz)
+      ENZO_REAL h8(nx,ny,nz)
+
+      ENZO_REAL ex(nx,ny,nz),ey(nx,ny,nz),ez(nx,ny,nz)
+
+      ENZO_REAL qu1(nx,ny,nz)
+      ENZO_REAL qu2(nx,ny,nz),qu3(nx,ny,nz),qu4(nx,ny,nz)
+      ENZO_REAL qu5(nx,ny,nz),qu6(nx,ny,nz),qu7(nx,ny,nz)
+      ENZO_REAL qu8(nx,ny,nz)
+
+#ifdef INCLUDE_GRAVITY
+      ENZO_REAL gx(nx,ny,nz),gy(nx,ny,nz),gz(nx,ny,nz)
+      ENZO_REAL sx(nx,8),sy(ny,8),sz(nz,8) !AK 8?
+#endif
       ENZO_REAL pn1, pn2
       ENZO_REAL b0(3)
       ENZO_REAL bpx(nx,3),bpy(ny,3),bpz(nz,3)
-	  
+
       ENZO_REAL Qp1(nx,8),Qr1(nx,8)
       ENZO_REAL Qdy1(nx,8),Qdz1(nx,8)
       ENZO_REAL Qlx1(nx,8),Qrx1(nx,8),Qvl1(nx,8),Qvr1(nx,8)
       ENZO_REAL Qrp1(nx,8),Fm1(nx,8)
       ENZO_REAL dx1(nx),dx2(nx)
-	  
+
       ENZO_REAL Qp2(ny,8),Qr2(ny,8)
       ENZO_REAL Qdx2(ny,8),Qdz2(ny,8)
       ENZO_REAL Qlx2(ny,8),Qrx2(ny,8),Qvl2(ny,8),Qvr2(ny,8)
@@ -132,27 +132,27 @@ c     b0                                      - components of uniform magnetic f
       ENZO_REAL df(nx,ny),vf(nx,ny),uf(nx,ny),wf(nx,ny)
       ENZO_REAL bf(nx,ny),tf(nx,ny),pf(nx,ny),rf(nx,ny)
       ENZO_REAL dg(ny,nz),vg(ny,nz),ug(ny,nz),wg(ny,nz)
-      ENZO_REAL bg(ny,nz),tg(ny,nz),pg(ny,nz),rg(ny,nz)	  
+      ENZO_REAL bg(ny,nz),tg(ny,nz),pg(ny,nz),rg(ny,nz)
       ENZO_REAL dh(nz,nx),vh(nz,nx),uh(nz,nx),wh(nz,nx)
-      ENZO_REAL bh(nz,nx),th(nz,nx),ph(nz,nx),rh(nz,nx)	  
-	  
+      ENZO_REAL bh(nz,nx),th(nz,nx),ph(nz,nx),rh(nz,nx)
+
       ENZO_REAL vax,vay,vaz,cga,cgs
       ENZO_REAL dn1,dn2,vx1,vx2,vy1,vy2,vz1,vz2
       ENZO_REAL bx1,bx2,by1,by2,bz1,bz2
 
       ENZO_REAL epsk,v2k,exc,dexy,dexy1,dexy2,exi1,exi2,exk1,exk2
-      ENZO_REAL Vleer,dsc,dx,dy,dz,dt 
-	  
+      ENZO_REAL Vleer,dsc,dx,dy,dz,dt
+
       ENZO_REAL qh(8),qh5,qh6,qh7
 
       ENZO_REAL gamma
-c
-c check-it
-c
-        if (nx.le.0) then
-C           ERROR_MESSAGE
-        endif
-	  
+c     
+c     check-it
+c     
+      if (nx.le.0) then
+C     ERROR_MESSAGE
+      endif
+
       i1=GridStartIndex(1)+1
       j1=GridStartIndex(2)+1
       k1=GridStartIndex(3)+1
@@ -164,85 +164,85 @@ C           ERROR_MESSAGE
       ighost=GridStartIndex(1)
       jghost=GridStartIndex(2)
       kghost=GridStartIndex(3)
-!SU      kghost=GridEndIndex(3)	  
+!     SU      kghost=GridEndIndex(3)
 
-        if (i1.eq.0) then
-C           ERROR_MESSAGE
-        endif
+      if (i1.eq.0) then
+C     ERROR_MESSAGE
+      endif
 
-	  
-!      ighost=3
-!      jghost=3
-!      kghost=3 	  
-	  
-!	  i1=4
-!	  j1=4
-!	  k1=4
-	 
-!	  i2=Nx-3
-!	  j2=Ny-3
-!	  k2=Nz-3
 
-	 
-      nxb=i1-ighost 
-      nxe=i2+ighost 
+!     ighost=3
+!     jghost=3
+!     kghost=3
 
-      nyb=j1-jghost 
-      nye=j2+jghost 
+!     i1=4
+!     j1=4
+!     k1=4
 
-      nzb=k1-kghost 
-      nze=k2+kghost 
+!     i2=Nx-3
+!     j2=Ny-3
+!     k2=Nz-3
 
-      nxp=nxe-nxb+1 	  
-      nyp=nye-nyb+1 	  
-      nzp=nze-nzb+1 	  
+
+      nxb=i1-ighost
+      nxe=i2+ighost
+
+      nyb=j1-jghost
+      nye=j2+jghost
+
+      nzb=k1-kghost
+      nze=k2+kghost
+
+      nxp=nxe-nxb+1
+      nyp=nye-nyb+1
+      nzp=nze-nzb+1
 
 c-------------------------------------------------------
-c
+c     
 c     Calculation of flux in x - direction
-c	  
-c--------------------------------------------------------       
+c     
+c--------------------------------------------------------
 
       Do k=nzb+1,nze-1
          Do j=nyb+1,nye-1
 
             Do i=nxb,nxe
 
-               Qp1(i,1)=dn(i,j,k)	 
-               Qp1(i,2)=vx(i,j,k)	 
-               Qp1(i,3)=vy(i,j,k)	 
-               Qp1(i,4)=vz(i,j,k)	 
-               Qp1(i,5)=bx(i,j,k)	 
-               Qp1(i,6)=by(i,j,k)	 
-               Qp1(i,7)=bz(i,j,k)	 
-               Qp1(i,8)=pn(i,j,k)	 
+               Qp1(i,1)=dn(i,j,k)
+               Qp1(i,2)=vx(i,j,k)
+               Qp1(i,3)=vy(i,j,k)
+               Qp1(i,4)=vz(i,j,k)
+               Qp1(i,5)=bx(i,j,k)
+               Qp1(i,6)=by(i,j,k)
+               Qp1(i,7)=bz(i,j,k)
+               Qp1(i,8)=pn(i,j,k)
 
-               Qr1(i,1)=dnrx(i,j,k)	 
-               Qr1(i,2)=vxrx(i,j,k)	 
-               Qr1(i,3)=vyrx(i,j,k)	 
-               Qr1(i,4)=vzrx(i,j,k)	 
-               Qr1(i,5)=bxrx(i,j,k)	 
-               Qr1(i,6)=byrx(i,j,k)	 
-               Qr1(i,7)=bzrx(i,j,k)	
-               Qr1(i,8)=pnrx(i,j,k)	 
+               Qr1(i,1)=dnrx(i,j,k)
+               Qr1(i,2)=vxrx(i,j,k)
+               Qr1(i,3)=vyrx(i,j,k)
+               Qr1(i,4)=vzrx(i,j,k)
+               Qr1(i,5)=bxrx(i,j,k)
+               Qr1(i,6)=byrx(i,j,k)
+               Qr1(i,7)=bzrx(i,j,k)
+               Qr1(i,8)=pnrx(i,j,k)
 
-            Qdy1(i,1)=VLeer(dn(i,j+1,k)-dn(i,j,k),dn(i,j,k)-dn(i,j-1,k))
-            Qdy1(i,2)=VLeer(vx(i,j+1,k)-vx(i,j,k),vx(i,j,k)-vx(i,j-1,k))
-            Qdy1(i,3)=VLeer(vy(i,j+1,k)-vy(i,j,k),vy(i,j,k)-vy(i,j-1,k))
-            Qdy1(i,4)=VLeer(vz(i,j+1,k)-vz(i,j,k),vz(i,j,k)-vz(i,j-1,k))
-            Qdy1(i,5)=VLeer(bx(i,j+1,k)-bx(i,j,k),bx(i,j,k)-bx(i,j-1,k))
-            Qdy1(i,6)=VLeer(by(i,j+1,k)-by(i,j,k),by(i,j,k)-by(i,j-1,k))
-            Qdy1(i,7)=VLeer(bz(i,j+1,k)-bz(i,j,k),bz(i,j,k)-bz(i,j-1,k))
-            Qdy1(i,8)=VLeer(pn(i,j+1,k)-pn(i,j,k),pn(i,j,k)-pn(i,j-1,k))
+               Qdy1(i,1)=VLeer(dn(i,j+1,k)-dn(i,j,k),dn(i,j,k)-dn(i,j-1,k))
+               Qdy1(i,2)=VLeer(vx(i,j+1,k)-vx(i,j,k),vx(i,j,k)-vx(i,j-1,k))
+               Qdy1(i,3)=VLeer(vy(i,j+1,k)-vy(i,j,k),vy(i,j,k)-vy(i,j-1,k))
+               Qdy1(i,4)=VLeer(vz(i,j+1,k)-vz(i,j,k),vz(i,j,k)-vz(i,j-1,k))
+               Qdy1(i,5)=VLeer(bx(i,j+1,k)-bx(i,j,k),bx(i,j,k)-bx(i,j-1,k))
+               Qdy1(i,6)=VLeer(by(i,j+1,k)-by(i,j,k),by(i,j,k)-by(i,j-1,k))
+               Qdy1(i,7)=VLeer(bz(i,j+1,k)-bz(i,j,k),bz(i,j,k)-bz(i,j-1,k))
+               Qdy1(i,8)=VLeer(pn(i,j+1,k)-pn(i,j,k),pn(i,j,k)-pn(i,j-1,k))
 
-            Qdz1(i,1)=VLeer(dn(i,j,k+1)-dn(i,j,k),dn(i,j,k)-dn(i,j,k-1))
-            Qdz1(i,2)=VLeer(vx(i,j,k+1)-vx(i,j,k),vx(i,j,k)-vx(i,j,k-1))
-            Qdz1(i,3)=VLeer(vy(i,j,k+1)-vy(i,j,k),vy(i,j,k)-vy(i,j,k-1))
-            Qdz1(i,4)=VLeer(vz(i,j,k+1)-vz(i,j,k),vz(i,j,k)-vz(i,j,k-1))
-            Qdz1(i,5)=VLeer(bx(i,j,k+1)-bx(i,j,k),bx(i,j,k)-bx(i,j,k-1))
-            Qdz1(i,6)=VLeer(by(i,j,k+1)-by(i,j,k),by(i,j,k)-by(i,j,k-1))
-            Qdz1(i,7)=VLeer(bz(i,j,k+1)-bz(i,j,k),bz(i,j,k)-bz(i,j,k-1))
-            Qdz1(i,8)=VLeer(pn(i,j,k+1)-pn(i,j,k),pn(i,j,k)-pn(i,j,k-1))
+               Qdz1(i,1)=VLeer(dn(i,j,k+1)-dn(i,j,k),dn(i,j,k)-dn(i,j,k-1))
+               Qdz1(i,2)=VLeer(vx(i,j,k+1)-vx(i,j,k),vx(i,j,k)-vx(i,j,k-1))
+               Qdz1(i,3)=VLeer(vy(i,j,k+1)-vy(i,j,k),vy(i,j,k)-vy(i,j,k-1))
+               Qdz1(i,4)=VLeer(vz(i,j,k+1)-vz(i,j,k),vz(i,j,k)-vz(i,j,k-1))
+               Qdz1(i,5)=VLeer(bx(i,j,k+1)-bx(i,j,k),bx(i,j,k)-bx(i,j,k-1))
+               Qdz1(i,6)=VLeer(by(i,j,k+1)-by(i,j,k),by(i,j,k)-by(i,j,k-1))
+               Qdz1(i,7)=VLeer(bz(i,j,k+1)-bz(i,j,k),bz(i,j,k)-bz(i,j,k-1))
+               Qdz1(i,8)=VLeer(pn(i,j,k+1)-pn(i,j,k),pn(i,j,k)-pn(i,j,k-1))
 
 #ifdef INCLUDE_GRAVITY
                Sx(i,1)=0.
@@ -258,22 +258,23 @@ c--------------------------------------------------------
                Sx(i,5)=0.
                Sx(i,6)=0.
                Sx(i,7)=0.
-#endif               
+               Sx(i,8)=0.
+#endif
                Bpx(i,1)=b0(1)
                Bpx(i,2)=b0(2)
                Bpx(i,3)=b0(3)
-               
-            Enddo 
+
+            Enddo
 
             Do i=nxb,nxe
 
                dx1(i)=0.
                dx2(i)=0.
 
-            Enddo	
-			
+            Enddo
+
             Do i=nxb+2,nxe-2
- 
+
                vax=0.5*(vx(i+2,j,k)+vx(i+1,j,k))
                vay=0.5*(vx(i,j,k)+vx(i-1,j,k))
 
@@ -294,12 +295,12 @@ c--------------------------------------------------------
                dsc=0.5*(vz(i-1,j,k+1)+vz(i,j,k+1))
                cgs=0.5*(vz(i-1,j,k-1)+vz(i,j,k-1))
 
-               dx1(i)=vax-vay+vaz-cga+dsc-cgs			
-		
+               dx1(i)=vax-vay+vaz-cga+dsc-cgs
+
             Enddo
 
             Call Monot_ig(1,nxp,gamma,Dx1,Dx2,Bpx,qp1,qr1,qlx1,qrx1)
-		
+
             Do i=nxb+1,nxe
                Qlx1(i,5)=Qr1(i-1,5)
                Qrx1(i,5)=Qr1(i,5)
@@ -316,7 +317,7 @@ c--------------------------------------------------------
                vy2=vy1
                vz1=Qp1(i,4)
                vz2=vz1
-			 
+
                bx1=Qp1(i,5)
                bx2=bx1
                by1=Qp1(i,6)
@@ -332,14 +333,14 @@ c--------------------------------------------------------
                      do m1=i-1,i+1
 
                         dn1=min(dn1,dn(m1,m2,m3))
-                        dn2=max(dn2,dn(m1,m2,m3))   
-                        
+                        dn2=max(dn2,dn(m1,m2,m3))
+
                         vx1=min(vx1,vx(m1,m2,m3))
                         vx2=max(vx2,vx(m1,m2,m3))
-                        
-                        vy1=min(vy1,vy(m1,m2,m3))   
+
+                        vy1=min(vy1,vy(m1,m2,m3))
                         vy2=max(vy2,vy(m1,m2,m3))
-                        
+
                         vz1=min(vz1,vz(m1,m2,m3))
                         vz2=max(vz2,vz(m1,m2,m3))
 
@@ -354,23 +355,23 @@ c--------------------------------------------------------
 
                         pn1=min(pn1,pn(m1,m2,m3))
                         pn2=max(pn2,pn(m1,m2,m3))
-                        
-                     Enddo 
-                  Enddo 
-               Enddo 
+
+                     Enddo
+                  Enddo
+               Enddo
 
                qlx1(i,1)=max(dn1,min(dn2,qlx1(i,1)))
                qrx1(i,1)=max(dn1,min(dn2,qrx1(i,1)))
-		
+
                qlx1(i,2)=max(vx1,min(vx2,qlx1(i,2)))
                qrx1(i,2)=max(vx1,min(vx2,qrx1(i,2)))
-		 
+
                qlx1(i,3)=max(vy1,min(vy2,qlx1(i,3)))
                qrx1(i,3)=max(vy1,min(vy2,qrx1(i,3)))
 
                qlx1(i,4)=max(vz1,min(vz2,qlx1(i,4)))
                qrx1(i,4)=max(vz1,min(vz2,qrx1(i,4)))
-			
+
                qlx1(i,6)=max(by1,min(by2,qlx1(i,6)))
                qrx1(i,6)=max(by1,min(by2,qrx1(i,6)))
 
@@ -379,9 +380,9 @@ c--------------------------------------------------------
 
                qlx1(i,8)=max(pn1,min(pn2,qlx1(i,8)))
                qrx1(i,8)=max(pn1,min(pn2,qrx1(i,8)))
-			
+
             Enddo
-		
+
             CALL QDD6_ig(nxp,Qrx1,Qlx1,Qvr1,Qvl1,Qp1)
 
             Do i=nxb,nxe
@@ -389,81 +390,81 @@ c--------------------------------------------------------
                Qvr1(i,5)=Qrx1(i,5)
             Enddo
 
-#ifdef INCLUDE_GRAVITY            
-      CALL POTOKx_ig(nxp,gamma,Dx,Dt,Bpx,Qvl1,Qvr1,Qp1,Qdy1,Qdz1,Qrp1,sx,Fm1)
+#ifdef INCLUDE_GRAVITY
+            CALL POTOKx_ig(nxp,gamma,Dx,Dt,Bpx,Qvl1,Qvr1,Qp1,Qdy1,Qdz1,Sx,Qrp1,Fm1)
 #else
-      CALL POTOKx_ig(nxp,gamma,Dx,Dt,Bpx,Qvl1,Qvr1,Qp1,Qdy1,Qdz1,Qrp1,fm1)
+            CALL POTOKx_ig(nxp,gamma,Dx,Dt,Bpx,Qvl1,Qvr1,Qp1,Qdy1,Qdz1,Qrp1,fm1)
 #endif
             Do i=i1-1,i2
 
-               dnrx(i,j,k)=Qrp1(i,1)		
-               vxrx(i,j,k)=Qrp1(i,2)		
-               vyrx(i,j,k)=Qrp1(i,3)		
-               vzrx(i,j,k)=Qrp1(i,4)		
-               byrx(i,j,k)=Qrp1(i,6)		
+               dnrx(i,j,k)=Qrp1(i,1)
+               vxrx(i,j,k)=Qrp1(i,2)
+               vyrx(i,j,k)=Qrp1(i,3)
+               vzrx(i,j,k)=Qrp1(i,4)
+               byrx(i,j,k)=Qrp1(i,6)
                bzrx(i,j,k)=Qrp1(i,7)
-               pnrx(i,j,k)=Qrp1(i,8)		
+               pnrx(i,j,k)=Qrp1(i,8)
 
-               F1(i,j,k)=fm1(i,1)			
-               F2(i,j,k)=fm1(i,2)			
-               F3(i,j,k)=fm1(i,3)			
-               F4(i,j,k)=fm1(i,4)			
-               F5(i,j,k)=fm1(i,5)			
-               F6(i,j,k)=fm1(i,6)			
+               F1(i,j,k)=fm1(i,1)
+               F2(i,j,k)=fm1(i,2)
+               F3(i,j,k)=fm1(i,3)
+               F4(i,j,k)=fm1(i,4)
+               F5(i,j,k)=fm1(i,5)
+               F6(i,j,k)=fm1(i,6)
                F7(i,j,k)=fm1(i,7)
                F8(i,j,k)=fm1(i,8)
 
-            Enddo			
-            
+            Enddo
+
          Enddo
       Enddo
-	 
-c-------------------------------------------------------	  
-c
+
+c-------------------------------------------------------
+c     
 c     Calculation of flux in y - direction
-c	  
-c--------------------------------------------------------       
+c     
+c--------------------------------------------------------
 
       Do k=nzb+1,nze-1
          Do i=nxb+1,nxe-1
 
             Do j=nyb,nye
 
-               Qp2(j,1)=dn(i,j,k)	 
-               Qp2(j,2)=vx(i,j,k)	 
-               Qp2(j,3)=vy(i,j,k)	 
-               Qp2(j,4)=vz(i,j,k)	 
-               Qp2(j,5)=bx(i,j,k)	 
-               Qp2(j,6)=by(i,j,k)	 
-               Qp2(j,7)=bz(i,j,k)	 
-               Qp2(j,8)=pn(i,j,k)	 
+               Qp2(j,1)=dn(i,j,k)
+               Qp2(j,2)=vx(i,j,k)
+               Qp2(j,3)=vy(i,j,k)
+               Qp2(j,4)=vz(i,j,k)
+               Qp2(j,5)=bx(i,j,k)
+               Qp2(j,6)=by(i,j,k)
+               Qp2(j,7)=bz(i,j,k)
+               Qp2(j,8)=pn(i,j,k)
 
-               Qr2(j,1)=dnry(i,j,k)	 
-               Qr2(j,2)=vxry(i,j,k)	 
-               Qr2(j,3)=vyry(i,j,k)	 
-               Qr2(j,4)=vzry(i,j,k)	 
-               Qr2(j,5)=bxry(i,j,k)	 
-               Qr2(j,6)=byry(i,j,k)	 
-               Qr2(j,7)=bzry(i,j,k)	
-               Qr2(j,8)=pnry(i,j,k)	 
+               Qr2(j,1)=dnry(i,j,k)
+               Qr2(j,2)=vxry(i,j,k)
+               Qr2(j,3)=vyry(i,j,k)
+               Qr2(j,4)=vzry(i,j,k)
+               Qr2(j,5)=bxry(i,j,k)
+               Qr2(j,6)=byry(i,j,k)
+               Qr2(j,7)=bzry(i,j,k)
+               Qr2(j,8)=pnry(i,j,k)
 
-            Qdx2(j,1)=VLeer(dn(i+1,j,k)-dn(i,j,k),dn(i,j,k)-dn(i-1,j,k))
-            Qdx2(j,2)=VLeer(vx(i+1,j,k)-vx(i,j,k),vx(i,j,k)-vx(i-1,j,k))
-            Qdx2(j,3)=VLeer(vy(i+1,j,k)-vy(i,j,k),vy(i,j,k)-vy(i-1,j,k))
-            Qdx2(j,4)=VLeer(vz(i+1,j,k)-vz(i,j,k),vz(i,j,k)-vz(i-1,j,k))
-            Qdx2(j,5)=VLeer(bx(i+1,j,k)-bx(i,j,k),bx(i,j,k)-bx(i-1,j,k))
-            Qdx2(j,6)=VLeer(by(i+1,j,k)-by(i,j,k),by(i,j,k)-by(i-1,j,k))
-            Qdx2(j,7)=VLeer(bz(i+1,j,k)-bz(i,j,k),bz(i,j,k)-bz(i-1,j,k))
-            Qdx2(j,8)=VLeer(pn(i+1,j,k)-pn(i,j,k),pn(i,j,k)-pn(i-1,j,k))
+               Qdx2(j,1)=VLeer(dn(i+1,j,k)-dn(i,j,k),dn(i,j,k)-dn(i-1,j,k))
+               Qdx2(j,2)=VLeer(vx(i+1,j,k)-vx(i,j,k),vx(i,j,k)-vx(i-1,j,k))
+               Qdx2(j,3)=VLeer(vy(i+1,j,k)-vy(i,j,k),vy(i,j,k)-vy(i-1,j,k))
+               Qdx2(j,4)=VLeer(vz(i+1,j,k)-vz(i,j,k),vz(i,j,k)-vz(i-1,j,k))
+               Qdx2(j,5)=VLeer(bx(i+1,j,k)-bx(i,j,k),bx(i,j,k)-bx(i-1,j,k))
+               Qdx2(j,6)=VLeer(by(i+1,j,k)-by(i,j,k),by(i,j,k)-by(i-1,j,k))
+               Qdx2(j,7)=VLeer(bz(i+1,j,k)-bz(i,j,k),bz(i,j,k)-bz(i-1,j,k))
+               Qdx2(j,8)=VLeer(pn(i+1,j,k)-pn(i,j,k),pn(i,j,k)-pn(i-1,j,k))
 
-            Qdz2(j,1)=VLeer(dn(i,j,k+1)-dn(i,j,k),dn(i,j,k)-dn(i,j,k-1))
-            Qdz2(j,2)=VLeer(vx(i,j,k+1)-vx(i,j,k),vx(i,j,k)-vx(i,j,k-1))
-            Qdz2(j,3)=VLeer(vy(i,j,k+1)-vy(i,j,k),vy(i,j,k)-vy(i,j,k-1))
-            Qdz2(j,4)=VLeer(vz(i,j,k+1)-vz(i,j,k),vz(i,j,k)-vz(i,j,k-1))
-            Qdz2(j,5)=VLeer(bx(i,j,k+1)-bx(i,j,k),bx(i,j,k)-bx(i,j,k-1))
-            Qdz2(j,6)=VLeer(by(i,j,k+1)-by(i,j,k),by(i,j,k)-by(i,j,k-1))
-            Qdz2(j,7)=VLeer(bz(i,j,k+1)-bz(i,j,k),bz(i,j,k)-bz(i,j,k-1))
-            Qdz2(j,8)=VLeer(pn(i,j,k+1)-pn(i,j,k),pn(i,j,k)-pn(i,j,k-1))
+               Qdz2(j,1)=VLeer(dn(i,j,k+1)-dn(i,j,k),dn(i,j,k)-dn(i,j,k-1))
+               Qdz2(j,2)=VLeer(vx(i,j,k+1)-vx(i,j,k),vx(i,j,k)-vx(i,j,k-1))
+               Qdz2(j,3)=VLeer(vy(i,j,k+1)-vy(i,j,k),vy(i,j,k)-vy(i,j,k-1))
+               Qdz2(j,4)=VLeer(vz(i,j,k+1)-vz(i,j,k),vz(i,j,k)-vz(i,j,k-1))
+               Qdz2(j,5)=VLeer(bx(i,j,k+1)-bx(i,j,k),bx(i,j,k)-bx(i,j,k-1))
+               Qdz2(j,6)=VLeer(by(i,j,k+1)-by(i,j,k),by(i,j,k)-by(i,j,k-1))
+               Qdz2(j,7)=VLeer(bz(i,j,k+1)-bz(i,j,k),bz(i,j,k)-bz(i,j,k-1))
+               Qdz2(j,8)=VLeer(pn(i,j,k+1)-pn(i,j,k),pn(i,j,k)-pn(i,j,k-1))
 
 #ifdef INCLUDE_GRAVITY
                Sy(j,1)=0.
@@ -479,21 +480,22 @@ c--------------------------------------------------------
                Sy(j,5)=0.
                Sy(j,6)=0.
                Sy(j,7)=0.
+               Sy(j,8)=0.
 #endif
-               
+
                Bpy(j,1)=b0(1)
                Bpy(j,2)=b0(2)
                Bpy(j,3)=b0(3)
 
-            Enddo 
+            Enddo
 
             Do j=nyb,nye
-    		
+
                dy1(j)=0.
                dy2(j)=0.
 
-            Enddo	
-		
+            Enddo
+
             Do j=nyb+2,nye-2
 
                vax=0.5*(vy(i,j+2,k)+vy(i,j+1,k))
@@ -522,7 +524,7 @@ c--------------------------------------------------------
             Enddo
 
             Call Monot_ig(2,nyp,gamma,Dy1,Dy2,Bpy,qp2,qr2,qlx2,qrx2)
-		
+
             Do j=nyb+1,nye
                Qlx2(j,6)=Qr2(j-1,6)
                Qrx2(j,6)=Qr2(j,6)
@@ -539,7 +541,7 @@ c--------------------------------------------------------
                vy2=vy1
                vz1=Qp2(j,4)
                vz2=vz1
-			 
+
                bx1=Qp2(j,5)
                bx2=bx1
                by1=Qp2(j,6)
@@ -549,51 +551,51 @@ c--------------------------------------------------------
 
                pn1=Qp2(j,8)
                pn2=pn1
-			 
-               do m3=k-1,k+1 
-                  do m2=j-1,j+1 
-                     do m1=i-1,i+1 
 
-                        dn1=min(dn1,dn(m1,m2,m3))   
-                        dn2=max(dn2,dn(m1,m2,m3))   
+               do m3=k-1,k+1
+                  do m2=j-1,j+1
+                     do m1=i-1,i+1
 
-                        vx1=min(vx1,vx(m1,m2,m3))   
-                        vx2=max(vx2,vx(m1,m2,m3))   
+                        dn1=min(dn1,dn(m1,m2,m3))
+                        dn2=max(dn2,dn(m1,m2,m3))
 
-                        vy1=min(vy1,vy(m1,m2,m3))   
-                        vy2=max(vy2,vy(m1,m2,m3))   
+                        vx1=min(vx1,vx(m1,m2,m3))
+                        vx2=max(vx2,vx(m1,m2,m3))
 
-                        vz1=min(vz1,vz(m1,m2,m3))   
-                        vz2=max(vz2,vz(m1,m2,m3))   
+                        vy1=min(vy1,vy(m1,m2,m3))
+                        vy2=max(vy2,vy(m1,m2,m3))
 
-                        bx1=min(bx1,bx(m1,m2,m3))   
-                        bx2=max(bx2,bx(m1,m2,m3))   
+                        vz1=min(vz1,vz(m1,m2,m3))
+                        vz2=max(vz2,vz(m1,m2,m3))
 
-                        by1=min(by1,by(m1,m2,m3))   
-                        by2=max(by2,by(m1,m2,m3))   
+                        bx1=min(bx1,bx(m1,m2,m3))
+                        bx2=max(bx2,bx(m1,m2,m3))
 
-                        bz1=min(bz1,bz(m1,m2,m3))   
-                        bz2=max(bz2,bz(m1,m2,m3))   
+                        by1=min(by1,by(m1,m2,m3))
+                        by2=max(by2,by(m1,m2,m3))
 
-                        pn1=min(pn1,pn(m1,m2,m3))   
+                        bz1=min(bz1,bz(m1,m2,m3))
+                        bz2=max(bz2,bz(m1,m2,m3))
+
+                        pn1=min(pn1,pn(m1,m2,m3))
                         pn2=max(pn2,pn(m1,m2,m3))
-				
-                     Enddo 
-                  Enddo 
-               Enddo 
+
+                     Enddo
+                  Enddo
+               Enddo
 
                qlx2(j,1)=max(dn1,min(dn2,qlx2(j,1)))
                qrx2(j,1)=max(dn1,min(dn2,qrx2(j,1)))
-               
+
                qlx2(j,2)=max(vx1,min(vx2,qlx2(j,2)))
                qrx2(j,2)=max(vx1,min(vx2,qrx2(j,2)))
-		 
+
                qlx2(j,3)=max(vy1,min(vy2,qlx2(j,3)))
                qrx2(j,3)=max(vy1,min(vy2,qrx2(j,3)))
 
                qlx2(j,4)=max(vz1,min(vz2,qlx2(j,4)))
                qrx2(j,4)=max(vz1,min(vz2,qrx2(j,4)))
-			
+
                qlx2(j,5)=max(bx1,min(bx2,qlx2(j,5)))
                qrx2(j,5)=max(bx1,min(bx2,qrx2(j,5)))
 
@@ -602,93 +604,93 @@ c--------------------------------------------------------
 
                qlx2(j,8)=max(pn1,min(pn2,qlx2(j,8)))
                qrx2(j,8)=max(pn1,min(pn2,qrx2(j,8)))
-			
+
             Enddo
-		
+
             CALL QDD6_ig(nyp,Qrx2,Qlx2,Qvr2,Qvl2,Qp2)
 
             Do j=nyb,nye
                Qvl2(j,6)=Qlx2(j,6)
                Qvr2(j,6)=Qrx2(j,6)
             Enddo
-			
-#ifdef INCLUDE_GRAVITY            
-      CALL POTOKy_ig(nyp,gamma,Dx,Dt,Bpy,Qvl2,Qvr2,Qp2,Qdx2,Qdz2,Qrp2,Fm2) 
+
+#ifdef INCLUDE_GRAVITY
+            CALL POTOKy_ig(nyp,gamma,Dx,Dt,Bpy,Qvl2,Qvr2,Qp2,Qdx2,Qdz2,Sy,Qrp2,Fm2)
 #else
-      CALL POTOKy_ig(nyp,gamma,Dx,Dt,Bpy,Qvl2,Qvr2,Qp2,Qdx2,Qdz2,Qrp2,Fm2)
+            CALL POTOKy_ig(nyp,gamma,Dx,Dt,Bpy,Qvl2,Qvr2,Qp2,Qdx2,Qdz2,Qrp2,Fm2)
 #endif
-			
+
 
             Do j=j1-1,j2
 
-               dnry(i,j,k)=Qrp2(j,1)		
-               vxry(i,j,k)=Qrp2(j,2)		
-               vyry(i,j,k)=Qrp2(j,3)		
-               vzry(i,j,k)=Qrp2(j,4)		
-               bxry(i,j,k)=Qrp2(j,5)		
+               dnry(i,j,k)=Qrp2(j,1)
+               vxry(i,j,k)=Qrp2(j,2)
+               vyry(i,j,k)=Qrp2(j,3)
+               vzry(i,j,k)=Qrp2(j,4)
+               bxry(i,j,k)=Qrp2(j,5)
                bzry(i,j,k)=Qrp2(j,7)
-               pnry(i,j,k)=Qrp2(j,8)		
+               pnry(i,j,k)=Qrp2(j,8)
 
-               G1(i,j,k)=Fm2(j,1)			
-               G2(i,j,k)=Fm2(j,2)			
-               G3(i,j,k)=Fm2(j,3)			
-               G4(i,j,k)=Fm2(j,4)			
-               G5(i,j,k)=Fm2(j,5)			
-               G6(i,j,k)=Fm2(j,6)			
+               G1(i,j,k)=Fm2(j,1)
+               G2(i,j,k)=Fm2(j,2)
+               G3(i,j,k)=Fm2(j,3)
+               G4(i,j,k)=Fm2(j,4)
+               G5(i,j,k)=Fm2(j,5)
+               G6(i,j,k)=Fm2(j,6)
                G7(i,j,k)=Fm2(j,7)
                G8(i,j,k)=Fm2(j,8)
 
-            Enddo				
+            Enddo
 
-	 Enddo
+         Enddo
       Enddo
 
-c-------------------------------------------------------	  
-c
+c-------------------------------------------------------
+c     
 c     Calculation of flux in z - direction
-c	  
-c--------------------------------------------------------    
+c     
+c--------------------------------------------------------
 
       Do j=nyb+1,nye-1
          Do i=nxb+1,nxe-1
 
             Do k=nzb,nze
 
-               Qp3(k,1)=dn(i,j,k)	 
-               Qp3(k,2)=vx(i,j,k)	 
-               Qp3(k,3)=vy(i,j,k)	 
-               Qp3(k,4)=vz(i,j,k)	 
-               Qp3(k,5)=bx(i,j,k)	 
-               Qp3(k,6)=by(i,j,k)	 
-               Qp3(k,7)=bz(i,j,k)	 
-               Qp3(k,8)=pn(i,j,k)	 
+               Qp3(k,1)=dn(i,j,k)
+               Qp3(k,2)=vx(i,j,k)
+               Qp3(k,3)=vy(i,j,k)
+               Qp3(k,4)=vz(i,j,k)
+               Qp3(k,5)=bx(i,j,k)
+               Qp3(k,6)=by(i,j,k)
+               Qp3(k,7)=bz(i,j,k)
+               Qp3(k,8)=pn(i,j,k)
 
-               Qr3(k,1)=dnrz(i,j,k)	 
-               Qr3(k,2)=vxrz(i,j,k)	 
-               Qr3(k,3)=vyrz(i,j,k)	 
-               Qr3(k,4)=vzrz(i,j,k)	 
-               Qr3(k,5)=bxrz(i,j,k)	 
-               Qr3(k,6)=byrz(i,j,k)	 
-               Qr3(k,7)=bzrz(i,j,k)	
+               Qr3(k,1)=dnrz(i,j,k)
+               Qr3(k,2)=vxrz(i,j,k)
+               Qr3(k,3)=vyrz(i,j,k)
+               Qr3(k,4)=vzrz(i,j,k)
+               Qr3(k,5)=bxrz(i,j,k)
+               Qr3(k,6)=byrz(i,j,k)
+               Qr3(k,7)=bzrz(i,j,k)
                Qr3(k,8)=pnrz(i,j,k)
 
-            Qdx3(k,1)=VLeer(dn(i+1,j,k)-dn(i,j,k),dn(i,j,k)-dn(i-1,j,k))
-            Qdx3(k,2)=VLeer(vx(i+1,j,k)-vx(i,j,k),vx(i,j,k)-vx(i-1,j,k))
-            Qdx3(k,3)=VLeer(vy(i+1,j,k)-vy(i,j,k),vy(i,j,k)-vy(i-1,j,k))
-            Qdx3(k,4)=VLeer(vz(i+1,j,k)-vz(i,j,k),vz(i,j,k)-vz(i-1,j,k))
-            Qdx3(k,5)=VLeer(bx(i+1,j,k)-bx(i,j,k),bx(i,j,k)-bx(i-1,j,k))
-            Qdx3(k,6)=VLeer(by(i+1,j,k)-by(i,j,k),by(i,j,k)-by(i-1,j,k))
-            Qdx3(k,7)=VLeer(bz(i+1,j,k)-bz(i,j,k),bz(i,j,k)-bz(i-1,j,k))
-            Qdx3(k,8)=VLeer(pn(i+1,j,k)-pn(i,j,k),pn(i,j,k)-pn(i-1,j,k))
+               Qdx3(k,1)=VLeer(dn(i+1,j,k)-dn(i,j,k),dn(i,j,k)-dn(i-1,j,k))
+               Qdx3(k,2)=VLeer(vx(i+1,j,k)-vx(i,j,k),vx(i,j,k)-vx(i-1,j,k))
+               Qdx3(k,3)=VLeer(vy(i+1,j,k)-vy(i,j,k),vy(i,j,k)-vy(i-1,j,k))
+               Qdx3(k,4)=VLeer(vz(i+1,j,k)-vz(i,j,k),vz(i,j,k)-vz(i-1,j,k))
+               Qdx3(k,5)=VLeer(bx(i+1,j,k)-bx(i,j,k),bx(i,j,k)-bx(i-1,j,k))
+               Qdx3(k,6)=VLeer(by(i+1,j,k)-by(i,j,k),by(i,j,k)-by(i-1,j,k))
+               Qdx3(k,7)=VLeer(bz(i+1,j,k)-bz(i,j,k),bz(i,j,k)-bz(i-1,j,k))
+               Qdx3(k,8)=VLeer(pn(i+1,j,k)-pn(i,j,k),pn(i,j,k)-pn(i-1,j,k))
 
-            Qdy3(k,1)=VLeer(dn(i,j+1,k)-dn(i,j,k),dn(i,j,k)-dn(i,j-1,k))
-            Qdy3(k,2)=VLeer(vx(i,j+1,k)-vx(i,j,k),vx(i,j,k)-vx(i,j-1,k))
-            Qdy3(k,3)=VLeer(vy(i,j+1,k)-vy(i,j,k),vy(i,j,k)-vy(i,j-1,k))
-            Qdy3(k,4)=VLeer(vz(i,j+1,k)-vz(i,j,k),vz(i,j,k)-vz(i,j-1,k))
-            Qdy3(k,5)=VLeer(bx(i,j+1,k)-bx(i,j,k),bx(i,j,k)-bx(i,j-1,k))
-            Qdy3(k,6)=VLeer(by(i,j+1,k)-by(i,j,k),by(i,j,k)-by(i,j-1,k))
-            Qdy3(k,7)=VLeer(bz(i,j+1,k)-bz(i,j,k),bz(i,j,k)-bz(i,j-1,k))
-            Qdy3(k,8)=VLeer(pn(i,j+1,k)-pn(i,j,k),pn(i,j,k)-pn(i,j-1,k))
+               Qdy3(k,1)=VLeer(dn(i,j+1,k)-dn(i,j,k),dn(i,j,k)-dn(i,j-1,k))
+               Qdy3(k,2)=VLeer(vx(i,j+1,k)-vx(i,j,k),vx(i,j,k)-vx(i,j-1,k))
+               Qdy3(k,3)=VLeer(vy(i,j+1,k)-vy(i,j,k),vy(i,j,k)-vy(i,j-1,k))
+               Qdy3(k,4)=VLeer(vz(i,j+1,k)-vz(i,j,k),vz(i,j,k)-vz(i,j-1,k))
+               Qdy3(k,5)=VLeer(bx(i,j+1,k)-bx(i,j,k),bx(i,j,k)-bx(i,j-1,k))
+               Qdy3(k,6)=VLeer(by(i,j+1,k)-by(i,j,k),by(i,j,k)-by(i,j-1,k))
+               Qdy3(k,7)=VLeer(bz(i,j+1,k)-bz(i,j,k),bz(i,j,k)-bz(i,j-1,k))
+               Qdy3(k,8)=VLeer(pn(i,j+1,k)-pn(i,j,k),pn(i,j,k)-pn(i,j-1,k))
 
 #ifdef INCLUDE_GRAVITY
                Sz(k,1)=0.
@@ -704,21 +706,22 @@ c--------------------------------------------------------
                Sz(k,5)=0.
                Sz(k,6)=0.
                Sz(k,7)=0.
+               Sz(k,8)=0.
 #endif
-            
+
                Bpz(k,1)=b0(1)
                Bpz(k,2)=b0(2)
                Bpz(k,3)=b0(3)
 
-            Enddo 
+            Enddo
 
             Do k=nzb,nze
-    		
+
                dz1(k)=0.
                dz2(k)=0.
 
-            Enddo	
-		
+            Enddo
+
             Do k=nzb+2,nze-2
 
                vax=0.5*(vz(i,j,k+2)+vz(i,j,k+1))
@@ -743,11 +746,11 @@ c--------------------------------------------------------
 
                dz1(k)=vax-vay+vaz-cga+dsc-cgs
 
-		 
+
             Enddo
 
             Call Monot_ig(3,nzp,gamma,Dz1,Dz2,Bpz,Qp3,Qr3,qlx3,qrx3)
-		
+
             Do k=nzb+1,nze
                Qlx3(k,7)=Qr3(k-1,7)
                Qrx3(k,7)=Qr3(k,7)
@@ -764,7 +767,7 @@ c--------------------------------------------------------
                vy2=vy1
                vz1=Qp3(k,4)
                vz2=vz1
-			 
+
                bx1=Qp3(k,5)
                bx2=bx1
                by1=Qp3(k,6)
@@ -774,106 +777,106 @@ c--------------------------------------------------------
 
                pn1=Qp3(k,8)
                pn2=pn1
-			 
-               do m3=k-1,k+1 
-                  do m2=j-1,j+1 
-                     do m1=i-1,i+1 
 
-                        dn1=min(dn1,dn(m1,m2,m3))   
-                        dn2=max(dn2,dn(m1,m2,m3))   
+               do m3=k-1,k+1
+                  do m2=j-1,j+1
+                     do m1=i-1,i+1
 
-                        vx1=min(vx1,vx(m1,m2,m3))   
-                        vx2=max(vx2,vx(m1,m2,m3))   
+                        dn1=min(dn1,dn(m1,m2,m3))
+                        dn2=max(dn2,dn(m1,m2,m3))
 
-                        vy1=min(vy1,vy(m1,m2,m3))   
-                        vy2=max(vy2,vy(m1,m2,m3))   
+                        vx1=min(vx1,vx(m1,m2,m3))
+                        vx2=max(vx2,vx(m1,m2,m3))
 
-                        vz1=min(vz1,vz(m1,m2,m3))   
-                        vz2=max(vz2,vz(m1,m2,m3))   
+                        vy1=min(vy1,vy(m1,m2,m3))
+                        vy2=max(vy2,vy(m1,m2,m3))
 
-                        bx1=min(bx1,bx(m1,m2,m3))   
-                        bx2=max(bx2,bx(m1,m2,m3))   
+                        vz1=min(vz1,vz(m1,m2,m3))
+                        vz2=max(vz2,vz(m1,m2,m3))
 
-                        by1=min(by1,by(m1,m2,m3))   
-                        by2=max(by2,by(m1,m2,m3))   
+                        bx1=min(bx1,bx(m1,m2,m3))
+                        bx2=max(bx2,bx(m1,m2,m3))
 
-                        bz1=min(bz1,bz(m1,m2,m3))   
-                        bz2=max(bz2,bz(m1,m2,m3))   
+                        by1=min(by1,by(m1,m2,m3))
+                        by2=max(by2,by(m1,m2,m3))
 
-                        pn1=min(pn1,pn(m1,m2,m3))   
+                        bz1=min(bz1,bz(m1,m2,m3))
+                        bz2=max(bz2,bz(m1,m2,m3))
+
+                        pn1=min(pn1,pn(m1,m2,m3))
                         pn2=max(pn2,pn(m1,m2,m3))
-				
-                     Enddo 
-                  Enddo 
-               Enddo 
+
+                     Enddo
+                  Enddo
+               Enddo
 
                qlx3(k,1)=max(dn1,min(dn2,qlx3(k,1)))
                qrx3(k,1)=max(dn1,min(dn2,qrx3(k,1)))
-               
+
                qlx3(k,2)=max(vx1,min(vx2,qlx3(k,2)))
                qrx3(k,2)=max(vx1,min(vx2,qrx3(k,2)))
-		 
+
                qlx3(k,3)=max(vy1,min(vy2,qlx3(k,3)))
                qrx3(k,3)=max(vy1,min(vy2,qrx3(k,3)))
 
                qlx3(k,4)=max(vz1,min(vz2,qlx3(k,4)))
                qrx3(k,4)=max(vz1,min(vz2,qrx3(k,4)))
-			
+
                qlx3(k,5)=max(bx1,min(bx2,qlx3(k,5)))
                qrx3(k,5)=max(bx1,min(bx2,qrx3(k,5)))
 
                qlx3(k,6)=max(by1,min(by2,qlx3(k,6)))
                qrx3(k,6)=max(by1,min(by2,qrx3(k,6)))
 
-!bug			qlx3(k,7)=max(bz1,min(bz2,qlx3(k,7)))
-!bug			qrx3(k,7)=max(bz1,min(bz2,qrx3(k,7)))
+!     bug           qlx3(k,7)=max(bz1,min(bz2,qlx3(k,7)))
+!     bug           qrx3(k,7)=max(bz1,min(bz2,qrx3(k,7)))
 
                qlx3(k,8)=max(pn1,min(pn2,qlx3(k,8)))
                qrx3(k,8)=max(pn1,min(pn2,qrx3(k,8)))
 
             Enddo
-		
+
             CALL QDD6_ig(nzp,Qrx3,Qlx3,Qvr3,Qvl3,Qp3)
 
             Do k=nzb,nze
                Qvl3(k,7)=Qlx3(k,7)
                Qvr3(k,7)=Qrx3(k,7)
             Enddo
-			
-#ifdef INCLUDE_GRAVITY            
-      CALL POTOKz_ig(nzp,gamma,Dx,Dt,Bpz,Qvl3,Qvr3,Qp3,Qdx3,Qdy3,Qrp3,Fm3) 
+
+#ifdef INCLUDE_GRAVITY
+            CALL POTOKz_ig(nzp,gamma,Dx,Dt,Bpz,Qvl3,Qvr3,Qp3,Qdx3,Qdy3,Sz,Qrp3,Fm3)
 #else
-      CALL POTOKz_ig(nzp,gamma,Dx,Dt,Bpz,Qvl3,Qvr3,Qp3,Qdx3,Qdy3,Qrp3,Fm3) 
+            CALL POTOKz_ig(nzp,gamma,Dx,Dt,Bpz,Qvl3,Qvr3,Qp3,Qdx3,Qdy3,Qrp3,Fm3)
 #endif
 
             Do k=k1-1,k2
 
-               dnrz(i,j,k)=Qrp3(k,1)	
-               vxrz(i,j,k)=Qrp3(k,2)	
-               vyrz(i,j,k)=Qrp3(k,3)	
-               vzrz(i,j,k)=Qrp3(k,4)	
-               bxrz(i,j,k)=Qrp3(k,5)	
-               byrz(i,j,k)=Qrp3(k,6)	
-               pnrz(i,j,k)=Qrp3(k,8)	
+               dnrz(i,j,k)=Qrp3(k,1)
+               vxrz(i,j,k)=Qrp3(k,2)
+               vyrz(i,j,k)=Qrp3(k,3)
+               vzrz(i,j,k)=Qrp3(k,4)
+               bxrz(i,j,k)=Qrp3(k,5)
+               byrz(i,j,k)=Qrp3(k,6)
+               pnrz(i,j,k)=Qrp3(k,8)
 
-               H1(i,j,k)=Fm3(k,1)	
-               H2(i,j,k)=Fm3(k,2)	
-               H3(i,j,k)=Fm3(k,3)	
-               H4(i,j,k)=Fm3(k,4)			
-               H5(i,j,k)=Fm3(k,5)	
-               H6(i,j,k)=Fm3(k,6)	
+               H1(i,j,k)=Fm3(k,1)
+               H2(i,j,k)=Fm3(k,2)
+               H3(i,j,k)=Fm3(k,3)
+               H4(i,j,k)=Fm3(k,4)
+               H5(i,j,k)=Fm3(k,5)
+               H6(i,j,k)=Fm3(k,6)
                H7(i,j,k)=Fm3(k,7)
                H8(i,j,k)=Fm3(k,8)
 
-            Enddo				
-			
-	 Enddo
-      Enddo   
+            Enddo
 
-!---------------------------------------------------------------	 
-!
-!     Gardiner&Stone CT 
-!
+         Enddo
+      Enddo
+
+!---------------------------------------------------------------
+!     
+!     Gardiner&Stone CT
+!     
 !-----------------------------------------------------------------
 
       epsk=1.0e-12
@@ -883,7 +886,7 @@ c--------------------------------------------------------
             DO I=i1,i2
 
                v2k=0.5*(vz(i,j,k)+vz(i,j,k+1))
-	  
+
                if(abs(v2k).gt.epsk)then
 
                   if(v2k.gt.0.)then
@@ -893,7 +896,7 @@ c--------------------------------------------------------
 
                      dexy=-g7(i,j,k)-exc
 
-                  else 
+                  else
 
                      exc=-(vy(i,j,k+1)*(bz(i,j,k+1)+b0(3))-
      &                    vz(i,j,k+1)*(by(i,j,k+1)+b0(2)))
@@ -907,23 +910,23 @@ c--------------------------------------------------------
                   exc=-(vy(i,j,k)*(bz(i,j,k)+b0(3))-vz(i,j,k)*
      &                 (by(i,j,k)+b0(2)))
 
-		  dexy1=-g7(i,j,k)-exc
+                  dexy1=-g7(i,j,k)-exc
 
                   exc=-(vy(i,j,k+1)*(bz(i,j,k+1)+b0(3))-
      &                 vz(i,j,k+1)*(by(i,j,k+1)+b0(2)))
 
-		  dexy2=-g7(i,j,k+1)-exc
+                  dexy2=-g7(i,j,k+1)-exc
 
-	  	  dexy=0.5*(dexy1+dexy2)
+                  dexy=0.5*(dexy1+dexy2)
 
-               endif	 
+               endif
 
-               exi1=h6(i,j,k)+dexy  
+               exi1=h6(i,j,k)+dexy
 
 
 
                v2k=0.5*(vz(i,j+1,k)+vz(i,j+1,k+1))
-	  
+
                if(abs(v2k).gt.epsk)then
 
                   if(v2k.gt.0.)then
@@ -932,8 +935,8 @@ c--------------------------------------------------------
      &                    vz(i,j+1,k)*(by(i,j+1,k)+b0(2)))
                      dexy=-g7(i,j,k)-exc
 
-                  else   
-		
+                  else
+
 
                      exc=-(vy(i,j+1,k+1)*(bz(i,j+1,k+1)+b0(3))-
      &                    vz(i,j+1,k+1)*(by(i,j+1,k+1)+b0(2)))
@@ -943,24 +946,24 @@ c--------------------------------------------------------
                else
 
                   exc=-(vy(i,j+1,k)*(bz(i,j+1,k)+b0(3))-vz(i,j+1,k)*
-     &                 (by(i,j+1,k)+b0(2)))         
-		  dexy1=-g7(i,j,k)-exc
+     &                 (by(i,j+1,k)+b0(2)))
+                  dexy1=-g7(i,j,k)-exc
 
                   exc=-(vy(i,j+1,k+1)*(bz(i,j+1,k+1)+b0(3))-
      &                 vz(i,j+1,k+1)*(by(i,j+1,k+1)+b0(2)))
-		  dexy2=-g7(i,j,k+1)-exc
+                  dexy2=-g7(i,j,k+1)-exc
 
-	  	  dexy=0.5*(dexy1+dexy2)
+                  dexy=0.5*(dexy1+dexy2)
 
-               endif	 
+               endif
 
-               exi2=h6(i,j+1,k)+dexy  
+               exi2=h6(i,j+1,k)+dexy
 
 
 
 
                v2k=0.5*(vy(i,j,k)+vy(i,j+1,k))
-	  
+
                if(abs(v2k).gt.epsk)then
 
                   if(v2k.gt.0.)then
@@ -969,7 +972,7 @@ c--------------------------------------------------------
      &                    (by(i,j,k)+b0(2)))
                      dexy=h6(i,j,k)-exc
 
-                  else 
+                  else
 
                      exc=-(vy(i,j+1,k)*(bz(i,j+1,k)+b0(3))-
      &                    vz(i,j+1,k)*(by(i,j+1,k)+b0(2)))
@@ -981,31 +984,31 @@ c--------------------------------------------------------
 
                   exc=-(vy(i,j,k)*(bz(i,j,k)+b0(3))-
      &                 vz(i,j,k)*(by(i,j,k)+b0(2)))
-		  dexy1=h6(i,j,k)-exc
+                  dexy1=h6(i,j,k)-exc
 
                   exc=-(vy(i,j+1,k)*(bz(i,j+1,k)+b0(3))-
      &                 vz(i,j+1,k)*(by(i,j+1,k)+b0(2)))
-		  dexy2=h6(i,j+1,k)-exc
+                  dexy2=h6(i,j+1,k)-exc
 
-	  	  dexy=0.5*(dexy1+dexy2)
+                  dexy=0.5*(dexy1+dexy2)
 
-               endif	 
+               endif
 
                exk1=-g7(i,j,k)+dexy
 
 
 
                v2k=0.5*(vy(i,j,k+1)+vy(i,j+1,k+1))
-	  
+
                if(abs(v2k).gt.epsk)then
-	   
+
                   if(v2k.gt.0.)then
 
                      exc=-(vy(i,j,k+1)*(bz(i,j,k+1)+b0(3))-
      &                    vz(i,j,k+1)*(by(i,j,k+1)+b0(2)))
-                     
+
                      dexy=h6(i,j,k)-exc
-      
+
                   else
 
                      exc=-(vy(i,j+1,k+1)*(bz(i,j+1,k+1)+b0(3))-
@@ -1021,19 +1024,19 @@ c--------------------------------------------------------
                   exc=-(vy(i,j,k+1)*(bz(i,j,k+1)+b0(3))-
      &                 vz(i,j,k+1)*(by(i,j,k+1)+b0(2)))
 
-		  dexy1=h6(i,j,k)-exc
+                  dexy1=h6(i,j,k)-exc
 
                   exc=-(vy(i,j+1,k+1)*(bz(i,j+1,k+1)+b0(3))-
      &                 vz(i,j+1,k+1)*(by(i,j+1,k+1)+b0(2)))
 
-		  dexy2=h6(i,j+1,k)-exc
+                  dexy2=h6(i,j+1,k)-exc
 
-	  	  dexy=0.5*(dexy1+dexy2)
+                  dexy=0.5*(dexy1+dexy2)
 
 
-               endif	 
+               endif
 
-               exk2=-g7(i,j,k+1)+dexy  
+               exk2=-g7(i,j,k+1)+dexy
 
                ex(I,J,K)=0.25*(exi1+exi2+exk1+exk2)
 
@@ -1047,7 +1050,7 @@ c--------------------------------------------------------
 
 
                v2k=0.5*(vx(i,j,k)+vx(i+1,j,k))
-	  
+
                if(abs(v2k).gt.epsk)then
 
                   if(v2k.gt.0.)then
@@ -1057,7 +1060,7 @@ c--------------------------------------------------------
                      dexy=-h5(i,j,k)-exc
 
                   else
-	    
+
                      exc=-(vz(i+1,j,k)*(bx(i+1,j,k)+b0(1))-
      &                    vx(i+1,j,k)*(bz(i+1,j,k)+b0(3)))
 
@@ -1071,34 +1074,34 @@ c--------------------------------------------------------
                   exc=-(vz(i,j,k)*(bx(i,j,k)+b0(1))-
      &                 vx(i,j,k)*(bz(i,j,k)+b0(3)))
 
-		  dexy1=-h5(i,j,k)-exc
+                  dexy1=-h5(i,j,k)-exc
 
                   exc=-(vz(i+1,j,k)*(bx(i+1,j,k)+b0(1))-
      &                 vx(i+1,j,k)*(bz(i+1,j,k)+b0(3)))
 
-		  dexy2=-h5(i+1,j,k)-exc
+                  dexy2=-h5(i+1,j,k)-exc
 
-	  	  dexy=0.5*(dexy1+dexy2)
+                  dexy=0.5*(dexy1+dexy2)
 
                endif
 
-               exi1=f7(i,j,k)+dexy  
+               exi1=f7(i,j,k)+dexy
 
 
 
 
                v2k=0.5*(vx(i,j,k+1)+vx(i+1,j,k+1))
-	  
+
                if(abs(v2k).gt.epsk)then
-	   
+
                   if(v2k.gt.0.)then
 
                      exc=-(vz(i,j,k+1)*(bx(i,j,k+1)+b0(1))-
      &                    vx(i,j,k+1)*(bz(i,j,k+1)+b0(3)))
 
                      dexy=-h5(i,j,k)-exc
- 
-                  else 
+
+                  else
 
                      exc=-(vz(i+1,j,k+1)*(bx(i+1,j,k+1)+b0(1))-
      &                    vx(i+1,j,k+1)*(bz(i+1,j,k+1)+b0(3)))
@@ -1112,32 +1115,32 @@ c--------------------------------------------------------
                   exc=-(vz(i,j,k+1)*(bx(i,j,k+1)+b0(1))-
      &                 vx(i,j,k+1)*(bz(i,j,k+1)+b0(3)))
 
-		  dexy1=-h5(i,j,k)-exc
+                  dexy1=-h5(i,j,k)-exc
 
                   exc=-(vz(i+1,j,k+1)*(bx(i+1,j,k+1)+b0(1))-
      &                 vx(i+1,j,k+1)*(bz(i+1,j,k+1)+b0(3)))
 
-		  dexy2=-h5(i+1,j,k)-exc
+                  dexy2=-h5(i+1,j,k)-exc
 
-	  	  dexy=0.5*(dexy1+dexy2)
+                  dexy=0.5*(dexy1+dexy2)
 
-               endif	 
+               endif
 
-               exi2=f7(i,j,k+1)+dexy  
+               exi2=f7(i,j,k+1)+dexy
 
 
 
 
 
                v2k=0.5*(vz(i,j,k)+vz(i,j,k+1))
-	  
+
                if(abs(v2k).gt.epsk)then
 
                   if(v2k.gt.0.)then
-	  
+
                      exc=-(vz(i,j,k)*(bx(i,j,k)+b0(1))-
      &                    vx(i,j,k)*(bz(i,j,k)+b0(3)))
-                     
+
                      dexy=f7(i,j,k)-exc
 
                   else
@@ -1154,24 +1157,24 @@ c--------------------------------------------------------
                   exc=-(vz(i,j,k)*(bx(i,j,k)+b0(1))-
      &                 vx(i,j,k)*(bz(i,j,k)+b0(3)))
 
-		  dexy1=f7(i,j,k)-exc
+                  dexy1=f7(i,j,k)-exc
 
                   exc=-(vz(i,j,k+1)*(bx(i,j,k+1)+b0(1))-
      &                 vx(i,j,k+1)*(bz(i,j,k+1)+b0(3)))
 
-		  dexy2=f7(i,j,k+1)-exc
+                  dexy2=f7(i,j,k+1)-exc
 
-	  	  dexy=0.5*(dexy1+dexy2)
+                  dexy=0.5*(dexy1+dexy2)
 
-               endif	 
+               endif
 
-               exk1=-h5(i,j,k)+dexy  
+               exk1=-h5(i,j,k)+dexy
 
 
 
 
                v2k=0.5*(vz(i+1,j,k)+vz(i+1,j,k+1))
-	  
+
                if(abs(v2k).gt.epsk)then
 
                   if(v2k.gt.0.)then
@@ -1195,18 +1198,18 @@ c--------------------------------------------------------
                   exc=-(vz(i+1,j,k)*(bx(i+1,j,k)+b0(1))-
      &                 vx(i+1,j,k)*(bz(i+1,j,k)+b0(3)))
 
-		  dexy1=f7(i,j,k)-exc
+                  dexy1=f7(i,j,k)-exc
 
                   exc=-(vz(i+1,j,k+1)*(bx(i+1,j,k+1)+b0(1))-
      &                 vx(i+1,j,k+1)*(bz(i+1,j,k+1)+b0(3)))
 
-		  dexy2=f7(i,j,k+1)-exc
+                  dexy2=f7(i,j,k+1)-exc
 
-	  	  dexy=0.5*(dexy1+dexy2)
+                  dexy=0.5*(dexy1+dexy2)
 
-               endif	 
+               endif
 
-               exk2=-h5(i+1,j,k)+dexy  
+               exk2=-h5(i+1,j,k)+dexy
 
 
                ey(I,J,K)=0.25*(exi1+exi2+exk1+exk2)
@@ -1215,14 +1218,14 @@ c--------------------------------------------------------
          ENDDO
       ENDDO
 
-	  
-	  
+
+
       DO K=k1,k2
          DO J=j1-1,j2
             DO I=i1-1,i2
 
                v2k=0.5*(vy(i,j,k)+vy(i,j+1,k))
-	  
+
                if(abs(v2k).gt.epsk)then
 
                   if(v2k.gt.0.)then
@@ -1240,30 +1243,30 @@ c--------------------------------------------------------
                      dexy=-f6(i,j+1,k)-exc
 
                   endif
-                  
+
                else
 
                   exc=-(vx(i,j,k)*(by(i,j,k)+b0(2))-
      &                 vy(i,j,k)*(bx(i,j,k)+b0(1)))
 
-		  dexy1=-f6(i,j,k)-exc
+                  dexy1=-f6(i,j,k)-exc
 
                   exc=-(vx(i,j+1,k)*(by(i,j+1,k)+b0(2))-
      &                 vy(i,j+1,k)*(bx(i,j+1,k)+b0(1)))
 
-		  dexy2=-f6(i,j+1,k)-exc
+                  dexy2=-f6(i,j+1,k)-exc
 
-	  	  dexy=0.5*(dexy1+dexy2)
+                  dexy=0.5*(dexy1+dexy2)
 
-               endif	 
+               endif
 
-               exi1=g5(i,j,k)+dexy  
+               exi1=g5(i,j,k)+dexy
 
-		 
+
 
 
                v2k=0.5*(vy(i+1,j,k)+vy(i+1,j+1,k))
-	  
+
                if(abs(v2k).gt.epsk)then
 
                   if(v2k.gt.0.)then
@@ -1273,7 +1276,7 @@ c--------------------------------------------------------
 
                      dexy=-f6(i,j,k)-exc
 
-                  else   
+                  else
 
                      exc=-(vx(i+1,j+1,k)*(by(i+1,j+1,k)+b0(2))-
      &                    vy(i+1,j+1,k)*(bx(i+1,j+1,k)+b0(1)))
@@ -1287,24 +1290,24 @@ c--------------------------------------------------------
                   exc=-(vx(i+1,j,k)*(by(i+1,j,k)+b0(2))-
      &                 vy(i+1,j,k)*(bx(i+1,j,k)+b0(1)))
 
-		  dexy1=-f6(i,j,k)-exc
+                  dexy1=-f6(i,j,k)-exc
 
                   exc=-(vx(i+1,j+1,k)*(by(i+1,j+1,k)+b0(2))-
      &                 vy(i+1,j+1,k)*(bx(i+1,j+1,k)+b0(1)))
 
-		  dexy2=-f6(i,j+1,k)-exc
+                  dexy2=-f6(i,j+1,k)-exc
 
-	  	  dexy=0.5*(dexy1+dexy2)
+                  dexy=0.5*(dexy1+dexy2)
 
-               endif	 
+               endif
 
-               exi2=g5(i+1,j,k)+dexy 
+               exi2=g5(i+1,j,k)+dexy
 
 
-		 
-		 
+
+
                v2k=0.5*(vx(i,j,k)+vx(i+1,j,k))
-	  
+
                if(abs(v2k).gt.epsk)then
 
                   if(v2k.gt.0.)then
@@ -1321,29 +1324,29 @@ c--------------------------------------------------------
 
                      dexy=g5(i+1,j,k)-exc
 
-                  endif	
+                  endif
 
                else
 
                   exc=-(vx(i,j,k)*(by(i,j,k)+b0(2))-
      &                 vy(i,j,k)*(bx(i,j,k)+b0(1)))
 
-		  dexy1=g5(i,j,k)-exc
+                  dexy1=g5(i,j,k)-exc
 
                   exc=-(vx(i+1,j,k)*(by(i+1,j,k)+b0(2))-
      &                 vy(i+1,j,k)*(bx(i+1,j,k)+b0(1)))
 
-		  dexy2=g5(i+1,j,k)-exc
+                  dexy2=g5(i+1,j,k)-exc
 
-	  	  dexy=0.5*(dexy1+dexy2)
+                  dexy=0.5*(dexy1+dexy2)
 
-               endif	 
+               endif
 
-               exk1=-f6(i,j,k)+dexy 
+               exk1=-f6(i,j,k)+dexy
 
-		
+
                v2k=0.5*(vx(i,j+1,k)+vx(i+1,j+1,k))
-	  
+
                if(abs(v2k).gt.epsk)then
 
                   if(v2k.gt.0.)then
@@ -1360,25 +1363,25 @@ c--------------------------------------------------------
 
                      dexy=g5(i+1,j,k)-exc
 
-                  endif	  
-	 
+                  endif
+
                else
 
                   exc=-(vx(i,j+1,k)*(by(i,j+1,k)+b0(2))-
      &                 vy(i,j+1,k)*(bx(i,j+1,k)+b0(1)))
 
-		  dexy1=g5(i,j,k)-exc
+                  dexy1=g5(i,j,k)-exc
 
                   exc=-(vx(i+1,j+1,k)*(by(i+1,j+1,k)+b0(2))-
      &                 vy(i+1,j+1,k)*(bx(i+1,j+1,k)+b0(1)))
 
-		  dexy2=g5(i+1,j,k)-exc
-		  
-	  	  dexy=0.5*(dexy1+dexy2)
+                  dexy2=g5(i+1,j,k)-exc
 
-               endif	 
+                  dexy=0.5*(dexy1+dexy2)
 
-               exk2=-f6(i,j+1,k)+dexy  
+               endif
+
+               exk2=-f6(i,j+1,k)+dexy
 
                ez(I,J,K)=0.25*(exi1+exi2+exk1+exk2)
 
@@ -1387,21 +1390,21 @@ c--------------------------------------------------------
       ENDDO
 
 c-------------------------------------------------------------------
-c	  
+c     
 c     Evolution of all variables
-c
+c     
 c-------------------------------------------------------------------
 
       Do k=k1,k2
          Do j=j1,j2
             Do i=i1-1,i2
 
-!bug            bxr(i,j,k)=bxr(I,J,K)-Dt/Dx*
+!     bug            bxr(i,j,k)=bxr(I,J,K)-Dt/Dx*
                bxrx(i,j,k)=bxrx(I,J,K)-Dt/Dx*
      &              (ez(I,J,K  )-ez(I,J-1,K)+
-     &               ey(I,J,K-1)-ey(I,J,  K))
+     &              ey(I,J,K-1)-ey(I,J,  K))
 
-	    Enddo
+            Enddo
          Enddo
       Enddo
 
@@ -1409,12 +1412,12 @@ c-------------------------------------------------------------------
          Do j=j1-1,j2
             Do i=i1,i2
 
-!bug            byr(i,j,k)=byr(I,J,K)-Dt/Dx*
+!     bug            byr(i,j,k)=byr(I,J,K)-Dt/Dx*
                byry(i,j,k)=byry(I,J,K)-Dt/Dy*
      &              (ex(I,  J,K)-ex(I,J,K-1)+
-     &               ez(I-1,J,K)-ez(I,J,K))
+     &              ez(I-1,J,K)-ez(I,J,K))
 
-	    Enddo
+            Enddo
          Enddo
       Enddo
 
@@ -1422,63 +1425,63 @@ c-------------------------------------------------------------------
          Do j=j1,j2
             Do i=i1,i2
 
-!bug            bzr(i,j,k)=bzr(I,J,K)-Dt/Dx*
+!     bug            bzr(i,j,k)=bzr(I,J,K)-Dt/Dx*
                bzrz(i,j,k)=bzrz(I,J,K)-Dt/Dz*
      &              (ex(I,J-1,K)-ex(I,  J,K)+
-     &               ey(I,J,  K)-ey(I-1,J,K))
+     &              ey(I,J,  K)-ey(I-1,J,K))
 
-	    Enddo
+            Enddo
          Enddo
       Enddo
-	  
 
 
-c	    open(10,file='res.dat',access='append')
-c        write(10,*) i1,i2,j1,j2,k1,k2
-c        do i=i1,i2
-c          j=(j1+j2)/2 
-c          k=(k1+k2)/2 
-c          print*,i,f1(i,j,k)
-c          write(10,*) i,f1(i,j,k)
-c        enddo
-c        close(10)
+
+c     open(10,file='res.dat',access='append')
+c     write(10,*) i1,i2,j1,j2,k1,k2
+c     do i=i1,i2
+c     j=(j1+j2)/2
+c     k=(k1+k2)/2
+c     print*,i,f1(i,j,k)
+c     write(10,*) i,f1(i,j,k)
+c     enddo
+c     close(10)
 
       Call Conserv_ig(gamma,nxp,nyp,nzp,dn,vx,vy,vz,bx,by,bz,pn,
-     &             qu1,qu2,qu3,qu4,qu5,qu6,qu7,qu8) 	  
+     &     qu1,qu2,qu3,qu4,qu5,qu6,qu7,qu8)
 
       Do k=k1,k2
          Do j=j1,j2
             Do i=i1,i2
-		
+
                QH(1)=QU1(I,J,K)-Dt/Dx*(F1(I,J,K)-F1(I-1,J,K)
-     &	  +G1(I,J,K)-G1(I,J-1,K)+H1(I,J,K)-H1(I,J,K-1))
+     &              +G1(I,J,K)-G1(I,J-1,K)+H1(I,J,K)-H1(I,J,K-1))
 
                QH(2)=QU2(I,J,K)-Dt/Dx*(F2(I,J,K)-F2(I-1,J,K)
-     &	  +G2(I,J,K)-G2(I,J-1,K)+H2(I,J,K)-H2(I,J,K-1))
+     &              +G2(I,J,K)-G2(I,J-1,K)+H2(I,J,K)-H2(I,J,K-1))
 
                QH(3)=QU3(I,J,K)-Dt/Dx*(F3(I,J,K)-F3(I-1,J,K)
-     &	  +G3(I,J,K)-G3(I,J-1,K)+H3(I,J,K)-H3(I,J,K-1))
+     &              +G3(I,J,K)-G3(I,J-1,K)+H3(I,J,K)-H3(I,J,K-1))
 
                QH(4)=QU4(I,J,K)-Dt/Dx*(F4(I,J,K)-F4(I-1,J,K)
-     &	  +G4(I,J,K)-G4(I,J-1,K)+H4(I,J,K)-H4(I,J,K-1))
+     &              +G4(I,J,K)-G4(I,J-1,K)+H4(I,J,K)-H4(I,J,K-1))
 
                QH(5)=QU5(I,J,K)-Dt/Dx*(F5(I,J,K)-F5(I-1,J,K)
-     &	  +G5(I,J,K)-G5(I,J-1,K)+H5(I,J,K)-H5(I,J,K-1))
+     &              +G5(I,J,K)-G5(I,J-1,K)+H5(I,J,K)-H5(I,J,K-1))
 
                QH(6)=QU6(I,J,K)-Dt/Dx*(F6(I,J,K)-F6(I-1,J,K)
-     &	  +G6(I,J,K)-G6(I,J-1,K)+H6(I,J,K)-H6(I,J,K-1))
+     &              +G6(I,J,K)-G6(I,J-1,K)+H6(I,J,K)-H6(I,J,K-1))
 
                QH(7)=QU7(I,J,K)-Dt/Dx*(F7(I,J,K)-F7(I-1,J,K)
-     &	  +G7(I,J,K)-G7(I,J-1,K)+H7(I,J,K)-H7(I,J,K-1))
+     &              +G7(I,J,K)-G7(I,J-1,K)+H7(I,J,K)-H7(I,J,K-1))
 
                QH(8)=QU8(I,J,K)-Dt/Dx*(F8(I,J,K)-F8(I-1,J,K)
-     &	  +G8(I,J,K)-G8(I,J-1,K)+H8(I,J,K)-H8(I,J,K-1))
+     &              +G8(I,J,K)-G8(I,J-1,K)+H8(I,J,K)-H8(I,J,K-1))
 
-               qh(5)=0.5*(bxrx(i,j,k)+bxrx(i-1,j,k))  
-               qh(6)=0.5*(byry(i,j,k)+byry(i,j-1,k))  
-               qh(7)=0.5*(bzrz(i,j,k)+bzrz(i,j,k-1)) 
+               qh(5)=0.5*(bxrx(i,j,k)+bxrx(i-1,j,k))
+               qh(6)=0.5*(byry(i,j,k)+byry(i,j-1,k))
+               qh(7)=0.5*(bzrz(i,j,k)+bzrz(i,j,k-1))
 
-#ifdef INCLUDE_GRAVITY               
+#ifdef INCLUDE_GRAVITY
                if (gravity .eq. 1) then
                   QH(2)=QH(2)+DT*(QU1(I,J,K)+QH(1))/2.*GX(I,J,K)
                   QH(3)=QH(3)+DT*(QU1(I,J,K)+QH(1))/2.*GY(I,J,K)
@@ -1497,30 +1500,30 @@ c        close(10)
             Enddo
          Enddo
       Enddo
-  
-      Call Primitiv_ig(gamma,nxp,nyp,nzp,qu1,qu2,qu3,qu4,qu5,qu6,qu7,qu8,
-     &              dn,vx,vy,vz,bx,by,bz,pn) 	  
 
-	 
-c
-c  Check this slice against the list of subgrids 
+      Call Primitiv_ig(gamma,nxp,nyp,nzp,qu1,qu2,qu3,qu4,qu5,qu6,qu7,qu8,
+     &     dn,vx,vy,vz,bx,by,bz,pn)
+
+
+c     
+c     Check this slice against the list of subgrids
 c     (all subgrid quantities are zero based)
-c
+c     
       Do k=k1,k2
          do n=0, nsubgrids-1
             Do j=j1,j2
                Do i=i1,i2
-		  df(i,j)=f1(i,j,k)
-		  vf(i,j)=f2(i,j,k)
-		  uf(i,j)=f3(i,j,k)
-		  wf(i,j)=f4(i,j,k)
-		  bf(i,j)=f5(i,j,k)
-		  tf(i,j)=f6(i,j,k)
-		  pf(i,j)=f7(i,j,k)
-		  rf(i,j)=f8(i,j,k)
+                  df(i,j)=f1(i,j,k)
+                  vf(i,j)=f2(i,j,k)
+                  uf(i,j)=f3(i,j,k)
+                  wf(i,j)=f4(i,j,k)
+                  bf(i,j)=f5(i,j,k)
+                  tf(i,j)=f6(i,j,k)
+                  pf(i,j)=f7(i,j,k)
+                  rf(i,j)=f8(i,j,k)
                enddo
-            enddo	
-            if (k .ge. fjstart(n*3+1)+1 .and. k .le. fjend(n*3+1)+1) 
+            enddo
+            if (k .ge. fjstart(n*3+1)+1 .and. k .le. fjend(n*3+1)+1)
      &           then
                idim = fiend(n*3+1) - fistart(n*3+1) + 1
                do j=fistart(n*3+1)+1, fiend(n*3+1)+1
@@ -1550,17 +1553,17 @@ c
          do n=0, nsubgrids-1
             Do j=j1,j2
                Do k=k1,k2
-		  dg(j,k)=g1(i,j,k)
-		  vg(j,k)=g2(i,j,k)
-		  ug(j,k)=g3(i,j,k)
-		  wg(j,k)=g4(i,j,k)
-		  bg(j,k)=g5(i,j,k)
-		  tg(j,k)=g6(i,j,k)
-		  pg(j,k)=g7(i,j,k)
-		  rg(j,k)=g8(i,j,k)
+                  dg(j,k)=g1(i,j,k)
+                  vg(j,k)=g2(i,j,k)
+                  ug(j,k)=g3(i,j,k)
+                  wg(j,k)=g4(i,j,k)
+                  bg(j,k)=g5(i,j,k)
+                  tg(j,k)=g6(i,j,k)
+                  pg(j,k)=g7(i,j,k)
+                  rg(j,k)=g8(i,j,k)
                enddo
-            enddo	
-            if (i .ge. fistart(n*3+2)+1 .and. i .le. fiend(n*3+2)+1) 
+            enddo
+            if (i .ge. fistart(n*3+2)+1 .and. i .le. fiend(n*3+2)+1)
      &           then
                idim = fiend(n*3+2) - fistart(n*3+2) + 1
                do k=fjstart(n*3+2)+1, fjend(n*3+2)+1
@@ -1585,22 +1588,22 @@ c
             endif
          enddo
       enddo
-	  
+
       Do j=j1,j2
          do n=0, nsubgrids-1
             Do i=i1,i2
                Do k=k1,k2
-		  dh(k,i)=h1(i,j,k)
-		  vh(k,i)=h2(i,j,k)
-		  uh(k,i)=h3(i,j,k)
-		  wh(k,i)=h4(i,j,k)
-		  bh(k,i)=h5(i,j,k)
-		  th(k,i)=h6(i,j,k)
-		  ph(k,i)=h7(i,j,k)
-		  rh(k,i)=h8(i,j,k)
+                  dh(k,i)=h1(i,j,k)
+                  vh(k,i)=h2(i,j,k)
+                  uh(k,i)=h3(i,j,k)
+                  wh(k,i)=h4(i,j,k)
+                  bh(k,i)=h5(i,j,k)
+                  th(k,i)=h6(i,j,k)
+                  ph(k,i)=h7(i,j,k)
+                  rh(k,i)=h8(i,j,k)
                enddo
-            enddo	        
-            if (j .ge. fjstart(n*3+3)+1 .and. j .le. fjend(n*3+3)+1) 
+            enddo
+            if (j .ge. fjstart(n*3+3)+1 .and. j .le. fjend(n*3+3)+1)
      &           then
                idim = fiend(n*3+3) - fistart(n*3+3) + 1
                do i=fistart(n*3+3)+1, fiend(n*3+3)+1
@@ -1623,8 +1626,8 @@ c
                   array(bzindex(n*6+6)+offset) = rh(rface(n*3+3)+2, i)
                enddo
             endif
-         enddo	  
-      enddo	  
-	  
+         enddo
+      enddo
+
       Return
-      End 
+      End

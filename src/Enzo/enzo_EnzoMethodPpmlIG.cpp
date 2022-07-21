@@ -188,7 +188,7 @@ double EnzoMethodPpmlIG::timestep (Block * block) throw()
     // const int in = cello::index_static();
     // EnzoComputePressure compute_pressure (EnzoBlock::Gamma[in], false);
     // compute_pressure.compute(enzo_block, pr);
-    
+
     FORTRAN_NAME(calc_dt_ppml_ig)
       (enzo_block->GridDimension,
        enzo_block->GridDimension+1,

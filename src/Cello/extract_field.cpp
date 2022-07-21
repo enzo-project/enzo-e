@@ -84,44 +84,50 @@ Main::Main(CkArgMsg* m)
           std::string group_name = "/" + name_block;
           hdf5_in.group_chdir(group_name);
           hdf5_in.group_open();
-          int array[3];
-          hdf5_in.group_read_meta(array,"array",&type_scalar,&tx,&ty,&tz);
-          int m4[4];
 
-          // Open input dataset
-          hdf5_in.data_open (dataset_name, &type_data,
-                             m4,m4+1,m4+2,m4+3);
-          int n4[4] = {1,1,1,1},o4[4] = {0,0,0,0};
-          n4[0] = m4[0];
-          n4[1] = m4[1];
-          n4[2] = m4[2];
-          const int gx=(m4[0]-nx)/2;
-          const int gy=(m4[1]-ny)/2;
-          const int gz=(m4[2]-nz)/2;
-          const int ox=array[0]*nx;
-          const int oy=array[1]*ny;
-          const int oz=array[2]*nz;
-          hdf5_in. data_slice
-            (m4[0],m4[1],m4[2],m4[3],
-             n4[0],n4[1],n4[2],n4[3],
-             o4[0],o4[1],o4[2],o4[3]);
+          int is_leaf;
+          hdf5_in.group_read_meta(&is_leaf,"is_leaf",&type_scalar,&tx,&ty,&tz);
 
-          hdf5_in.mem_create (m4[0],m4[1],m4[2],m4[0],m4[1],m4[2],0,0,0);
-          cello_float * field_in = new cello_float [m4[0]*m4[1]*m4[2]];
-          CkPrintf ("   reading %s%s block %s\n",
-                    path.c_str(),file_block_data.c_str(),
-                    name_block.c_str());
-          hdf5_in.data_read (field_in);
-          for (int iz=0; iz<nz; iz++) {
-            for (int iy=0; iy<ny; iy++) {
-              for (int ix=0; ix<nx; ix++) {
-                const int i_in = (ix+gx) + m4[0]*((iy+gy) + m4[1]*(iz+gz));
-                const int i_out = (ix+ox) + mox*((iy+oy) + moy*(iz+oz));
-                field_out[i_out] = field_in[i_in];
+          if (is_leaf) {
+            int array[3];
+            hdf5_in.group_read_meta(array,"array",&type_scalar,&tx,&ty,&tz);
+            int m4[4];
+
+            // Open input dataset
+            hdf5_in.data_open (dataset_name, &type_data,
+                               m4,m4+1,m4+2,m4+3);
+            int n4[4] = {1,1,1,1},o4[4] = {0,0,0,0};
+            n4[0] = m4[0];
+            n4[1] = m4[1];
+            n4[2] = m4[2];
+            const int gx=(m4[0]-nx)/2;
+            const int gy=(m4[1]-ny)/2;
+            const int gz=(m4[2]-nz)/2;
+            const int ox=array[0]*nx;
+            const int oy=array[1]*ny;
+            const int oz=array[2]*nz;
+            hdf5_in. data_slice
+              (m4[0],m4[1],m4[2],m4[3],
+               n4[0],n4[1],n4[2],n4[3],
+               o4[0],o4[1],o4[2],o4[3]);
+
+            hdf5_in.mem_create (m4[0],m4[1],m4[2],m4[0],m4[1],m4[2],0,0,0);
+            cello_float * field_in = new cello_float [m4[0]*m4[1]*m4[2]];
+            CkPrintf ("   reading %s%s block %s\n",
+                      path.c_str(),file_block_data.c_str(),
+                      name_block.c_str());
+            hdf5_in.data_read (field_in);
+            for (int iz=0; iz<nz; iz++) {
+              for (int iy=0; iy<ny; iy++) {
+                for (int ix=0; ix<nx; ix++) {
+                  const int i_in = (ix+gx) + m4[0]*((iy+gy) + m4[1]*(iz+gz));
+                  const int i_out = (ix+ox) + mox*((iy+oy) + moy*(iz+oz));
+                  field_out[i_out] = field_in[i_in];
+                }
               }
             }
-          }
-          hdf5_in.data_close();
+            hdf5_in.data_close();
+          } // is_leaf
         }
         hdf5_in.group_close();
       }

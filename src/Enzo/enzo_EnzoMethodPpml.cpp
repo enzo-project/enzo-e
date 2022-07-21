@@ -40,7 +40,6 @@ void EnzoMethodPpml::pup (PUP::er &p)
 
 void EnzoMethodPpml::compute ( Block * block ) throw()
 {
-
   if (block->is_leaf()) {
 
     EnzoBlock * enzo_block = enzo::block(block);

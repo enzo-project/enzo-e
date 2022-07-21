@@ -63,7 +63,7 @@ Block::Block ( process_type ip_source, MsgType msg_type )
     adapt_balanced_(false),
     adapt_changed_(0),
     coarsened_(false),
-    is_leaf_(true),
+    is_leaf_((thisIndex.level() >= 0)),
     age_(0),
     name_(""),
     index_method_(-1),
@@ -150,13 +150,14 @@ Block::Block ( MsgRefine * msg )
     adapt_balanced_(false),
     adapt_changed_(0),
     coarsened_(false),
-    is_leaf_(true),
+    is_leaf_((thisIndex.level() >= 0)),
     age_(0),
     name_(""),
     index_method_(-1),
     index_solver_(),
     refresh_()
 {
+
 #ifdef TRACE_BLOCK
 
   CkPrintf ("%d TRACE_BLOCK %s Block::Block(MsgRefine)\n",  CkMyPe(),name(thisIndex).c_str());
@@ -692,7 +693,7 @@ Block::Block ()
     adapt_balanced_(false),
     adapt_changed_(0),
     coarsened_(false),
-    is_leaf_(true),
+    is_leaf_((thisIndex.level() >= 0)),
     age_(0),
     name_(""),
     index_method_(-1),
@@ -729,7 +730,7 @@ Block::Block (CkMigrateMessage *m)
     adapt_balanced_(false),
     adapt_changed_(0),
     coarsened_(false),
-    is_leaf_(true),
+    is_leaf_((thisIndex.level() >= 0)),
     age_(0),
     name_(""),
     index_method_(-1),
