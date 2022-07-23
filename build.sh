@@ -16,7 +16,7 @@
 arch=$CELLO_ARCH
 prec=$CELLO_PREC
 
-scons=./scons.py
+scons=`which scons`
 
 # initialize time
 
