@@ -85,9 +85,9 @@ void Main::p_checkpoint_output(int count, std::string dir_name)
 #ifdef CHARM_ENZO
     CkPrintf ("Calling CkStartCheckpoint\n");
     CkCallback callback(CkIndex_EnzoSimulation::r_write_checkpoint_output(),proxy_simulation);
-    CkStartCheckpoint (dir_checkpoint_,callback,false,1);
+    //    CkStartCheckpoint (dir_checkpoint_,callback,false,1);
     // "OLD" CHARM++ (version < 7.0.0) USE:
-    //CkStartCheckpoint (dir_checkpoint_,callback);
+    CkStartCheckpoint (dir_checkpoint_,callback);
 #endif
   }
   // --------------------------------------------------

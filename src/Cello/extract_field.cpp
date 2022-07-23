@@ -80,7 +80,7 @@ Main::Main(CkArgMsg* m)
         int level;
         block_stream >> name_block;
         block_stream >> level;
-        if (name_block.size() > 0) {
+        if (name_block.size() > 0 && level == 0) {
           std::string group_name = "/" + name_block;
           hdf5_in.group_chdir(group_name);
           hdf5_in.group_open();

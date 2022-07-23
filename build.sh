@@ -16,7 +16,7 @@
 arch=$CELLO_ARCH
 prec=$CELLO_PREC
 
-scons=`which scons`
+scons=./scons.py
 
 # initialize time
 
@@ -28,7 +28,7 @@ log="log.build"
 
 # Set to zero to use all avaiable cores.  To override, set to a non-zero value
 # or use CELLO_BUILD_NCORE environment variable
-proc=8
+proc=4
 if [[ ! -z ${CELLO_BUILD_NCORE} ]]; then
     proc=${CELLO_BUILD_NCORE}
 ### JB: changing default to 8 to avoid using all cores on shared HPC's
