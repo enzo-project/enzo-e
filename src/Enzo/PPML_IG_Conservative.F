@@ -27,9 +27,9 @@ c     See LICENSE_PPML file for license and copyright information
                QU5(i,j,k)=bx(i,j,k)
                QU6(i,j,k)=by(i,j,k)
                QU7(i,j,k)=bz(i,j,k)
-               QU8(i,j,k)=pn(i,j,k)+dn(i,j,k)*
+               QU8(i,j,k)=pn(i,j,k)/(gamma-1.)+dn(i,j,k)*
      &              +(vx(i,j,k)**2+vy(i,j,k)**2+vz(i,j,k)**2)/2.
-     &              +(bx(i,j,k)**2+by(i,j,k)**2+vz(i,j,k)**2)/2.
+     &              +(bx(i,j,k)**2+by(i,j,k)**2+bz(i,j,k)**2)/2.
             Enddo
          Enddo
       Enddo

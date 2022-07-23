@@ -84,13 +84,12 @@ void EnzoMethodPpmlIG::pup (PUP::er &p)
 void EnzoMethodPpmlIG::compute ( Block * block ) throw()
 {
 
-  if (!block->is_leaf()) return;
+  if (block->is_leaf()) {
+    EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+    enzo_block->SolveMHDEquationsIG ( block->dt(), gamma_, b0_ );
+  }
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
-  enzo_block->SolveMHDEquationsIG ( block->dt(), gamma_, b0_ );
-
-  enzo_block->compute_done();
-
+  block->compute_done();
 }
 
 //----------------------------------------------------------------------
