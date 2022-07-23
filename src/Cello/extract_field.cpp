@@ -88,7 +88,7 @@ Main::Main(CkArgMsg* m)
           int is_leaf;
           hdf5_in.group_read_meta(&is_leaf,"is_leaf",&type_scalar,&tx,&ty,&tz);
 
-          if (is_leaf) {
+          if (is_leaf && level >= 0) {
             int array[3];
             hdf5_in.group_read_meta(array,"array",&type_scalar,&tx,&ty,&tz);
             int m4[4];
