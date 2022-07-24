@@ -6,52 +6,86 @@ function(setup_test_dir TESTDIR)
   file(CREATE_LINK ${PROJECT_SOURCE_DIR}/input ${PROJECT_BINARY_DIR}/test/${TESTDIR}/input SYMBOLIC)
 endfunction()
 
+# Functions for setting up C++-based tests
+#-----------------------------------------
+# these tests rely upon the testing machinery defined in Cello.
+# - These tests effectively just execute C++ binaries (they're either dedicated
+#   unit tests or the Enzo-E binary)
+# - At the moment, the exit codes of these tests don't always report the
+#   correct exit code. Therefore, a lightweight python script is used to
+#   actually execute the binary, parse the results from stdout, and then
+#   provide the correct exit code. This python script has the following path:
 set(CPP_TEST_RUNNER ${PROJECT_SOURCE_DIR}/tools/run_cpp_test.py)
 
-# Test wrapper function calling unit tests (separate binaries) directly
+# Function that sets up a unit test (each unit test is organized into a
+# separate C++ binary)
 function(setup_test_unit TESTNAME TESTDIR TESTBIN)
   setup_test_dir(${TESTDIR})
   set(FULLTESTDIR ${PROJECT_BINARY_DIR}/test/${TESTDIR})
   add_test(
     NAME ${TESTNAME}
-    COMMAND ${Python3_EXECUTABLE} ${CPP_TEST_RUNNER} --output-dump ${FULLTESTDIR}/${TESTNAME}.log $<TARGET_FILE:${TESTBIN}>
+    COMMAND python3 ${CPP_TEST_RUNNER} --output-dump ${FULLTESTDIR}/${TESTNAME}.log $<TARGET_FILE:${TESTBIN}>
     WORKING_DIRECTORY ${FULLTESTDIR})
   set_tests_properties(${TESTNAME} PROPERTIES LABELS "serial;unit" )
 endfunction()
 
-# Test wrapper functions calling enzo-e directly
+# Function that sets up a test that directly calls Enzo-E using a single
+# compute unit. These tests pass or fail based on whether they run to
+# completion and whether expectations about the stopping time or cycle
+# (expressed in the parameter file) are satisfied
 function(setup_test_serial TESTNAME TESTDIR INFILE)
   setup_test_dir(${TESTDIR})
   set(FULLTESTDIR ${PROJECT_BINARY_DIR}/test/${TESTDIR})
   add_test(
     NAME ${TESTNAME}
-    COMMAND ${Python3_EXECUTABLE} ${CPP_TEST_RUNNER} --output-dump ${FULLTESTDIR}/${TESTNAME}.log $<TARGET_FILE:enzo-e> ${INFILE}
+    COMMAND python3 ${CPP_TEST_RUNNER} --output-dump ${FULLTESTDIR}/${TESTNAME}.log $<TARGET_FILE:enzo-e> ${INFILE}
     WORKING_DIRECTORY ${FULLTESTDIR})
   set_tests_properties(${TESTNAME} PROPERTIES LABELS "serial;enzo" )
 endfunction()
 
+# Just like setup_test_serial except that Enzo-E is executed with multiple
+# compute units
 function(setup_test_parallel TESTNAME TESTDIR INFILE)
   setup_test_dir(${TESTDIR})
   set(FULLTESTDIR ${PROJECT_BINARY_DIR}/test/${TESTDIR})
   add_test(
     NAME ${TESTNAME}
-    COMMAND ${Python3_EXECUTABLE} ${CPP_TEST_RUNNER} --output-dump ${FULLTESTDIR}/${TESTNAME}.log ${PARALLEL_LAUNCHER} ${PARALLEL_LAUNCHER_NPROC_ARG} ${PARALLEL_LAUNCHER_NPROC} $<TARGET_FILE:enzo-e> ${INFILE}
+    COMMAND python3 ${CPP_TEST_RUNNER} --output-dump ${FULLTESTDIR}/${TESTNAME}.log ${PARALLEL_LAUNCHER} ${PARALLEL_LAUNCHER_NPROC_ARG} ${PARALLEL_LAUNCHER_NPROC} $<TARGET_FILE:enzo-e> ${INFILE}
     WORKING_DIRECTORY ${FULLTESTDIR})
   set_tests_properties(${TESTNAME} PROPERTIES LABELS "parallel;enzo" )
 endfunction()
 
-# Serial (single compute element) test wrapper functions calling a script (e.g., to include output analysis)
-# All optional argment (i.e., the ones not being named) are automatically passed to the command being called.
+# Functions setting up YT_BASED_TESTS
+# -----------------------------------
+# - these tests execute a python script that both executes the enzo-e binary
+#   and then performs analysis on the outputs
+
+# these tests all require that python has yt, libconf, and h5py installed.
+# - We express this requirement in a "fixture" called YT_DEPEND
+# - all tests that require the YT_DEPEND fixture will only be run if the
+#   has_yt_dependencies test passes. Otherwise, they get skipped.
+
+# a test for whether the python interpreter has necessary dependencies
+add_test(NAME python_has_yt_and_other_modules
+  COMMAND python3 -c "import yt; import libconf; import h5py")
+set_tests_properties(python_has_yt_and_other_modules
+  PROPERTIES FIXTURES_SETUP YT_DEPEND)
+
+# Serial (single compute element) test wrapper functions calling a script (e.g.
+# to include output analysis). All optional argment (i.e. the ones not being
+# named) are automatically passed to the command being called.
 function(setup_test_serial_python TESTNAME TESTDIR TESTSCRIPT)
   setup_test_dir(${TESTDIR})
   add_test(
     NAME ${TESTNAME}
-    COMMAND ${Python3_EXECUTABLE} ${TESTSCRIPT} --launch_cmd=${PROJECT_BINARY_DIR}/bin/enzo-e ${ARGN}
+    COMMAND python3 ${TESTSCRIPT} --launch_cmd=${PROJECT_BINARY_DIR}/bin/enzo-e ${ARGN}
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TESTDIR})
-  set_tests_properties(${TESTNAME} PROPERTIES LABELS "serial;enzo;regression" )
+  set_tests_properties(${TESTNAME} PROPERTIES LABELS "serial;enzo;regression"
+    FIXTURES_REQUIRED YT_DEPEND)
 endfunction()
 
-# Parallel (using multiple compute elements) test wrapper functions calling a script (e.g., to include output analysis)
+# Parallel (using multiple compute elements) test wrapper functions calling a
+# script (e.g., to include output analysis)
 # All optional argment (i.e., the ones not being named) are automatically passed to the command being called.
 function(setup_test_parallel_python TESTNAME TESTDIR TESTSCRIPT)
   # construct a list of the various parts of the launch_cmd argument (this is
@@ -67,9 +101,10 @@ function(setup_test_parallel_python TESTNAME TESTDIR TESTSCRIPT)
   setup_test_dir(${TESTDIR})
   add_test(
     NAME ${TESTNAME}
-    COMMAND ${Python3_EXECUTABLE} ${TESTSCRIPT} --launch_cmd ${LAUNCH_CMD} ${ARGN}
+    COMMAND python3 ${TESTSCRIPT} --launch_cmd ${LAUNCH_CMD} ${ARGN}
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TESTDIR})
-  set_tests_properties(${TESTNAME} PROPERTIES LABELS "parallel;enzo;regression" )
+  set_tests_properties(${TESTNAME} PROPERTIES LABELS "parallel;enzo;regression"
+    FIXTURES_REQUIRED YT_DEPEND)
 endfunction()
 
 ############################### UNIT TESTS ####################################
@@ -215,39 +250,39 @@ setup_test_serial(PPM-1 MethodPPM/Ppm-1  input/PPM/method_ppm-1.in)
 setup_test_parallel(PPM-8 MethodPPM/Ppm-8  input/PPM/method_ppm-8.in)
 setup_test_serial(PPM-1_color MethodPPM/Ppm-1_color  input/PPM/method_ppm-1_color.in)
 
-if (USE_YT_BASED_TESTS)
-  # VLCT
-  setup_test_serial_python(vlct_dual_energy_cloud vlct "input/vlct/run_dual_energy_cloud_test.py")
-  setup_test_serial_python(vlct_MHD_shock_tube vlct "input/vlct/run_MHD_shock_tube_test.py")
-  setup_test_serial_python(vlct_MHD_linear_wave vlct "input/vlct/run_MHD_linear_wave_test.py")
-  setup_test_serial_python(vlct_HD_linear_wave vlct "input/vlct/run_HD_linear_wave_test.py")
-  setup_test_serial_python(vlct_passive_advect_sound vlct "input/vlct/run_passive_advect_sound_test.py")
-  setup_test_parallel_python(vlct_dual_energy_shock_tube vlct "input/vlct/run_dual_energy_shock_tube_test.py")
 
-  # Gravity (with VLCT)
-  setup_test_serial_python(gravity_vlct_stable_Jeans_wave gravity "input/Gravity/run_stable_jeans_wave_test.py")
+# define yt-based tests
 
-  # merge_sinks
-  setup_test_serial_python(merge_sinks_stationary_serial merge_sinks/stationary/serial "input/merge_sinks/run_merge_sinks_test.py" "--prec=${PREC_STRING}" "--ics_type=stationary")
-  setup_test_parallel_python(merge_sinks_stationary_parallel merge_sinks/stationary/parallel "input/merge_sinks/run_merge_sinks_test.py" "--prec=${PREC_STRING}" "--ics_type=stationary")
-  setup_test_serial_python(merge_sinks_drift_serial merge_sinks/drift/serial "input/merge_sinks/run_merge_sinks_test.py" "--prec=${PREC_STRING}" "--ics_type=drift")
-  setup_test_parallel_python(merge_sinks_drift_parallel merge_sinks/drift/parallel "input/merge_sinks/run_merge_sinks_test.py" "--prec=${PREC_STRING}" "--ics_type=drift")
+# VLCT
+setup_test_serial_python(vlct_dual_energy_cloud vlct "input/vlct/run_dual_energy_cloud_test.py")
+setup_test_serial_python(vlct_MHD_shock_tube vlct "input/vlct/run_MHD_shock_tube_test.py")
+setup_test_serial_python(vlct_MHD_linear_wave vlct "input/vlct/run_MHD_linear_wave_test.py")
+setup_test_serial_python(vlct_HD_linear_wave vlct "input/vlct/run_HD_linear_wave_test.py")
+setup_test_serial_python(vlct_passive_advect_sound vlct "input/vlct/run_passive_advect_sound_test.py")
+setup_test_parallel_python(vlct_dual_energy_shock_tube vlct "input/vlct/run_dual_energy_shock_tube_test.py")
 
-  # accretion
-  setup_test_serial_python(threshold_accretion_serial accretion/threshold/serial "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=threshold")
-  setup_test_parallel_python(threshold_accretion_parallel accretion/threshold/parallel "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=threshold")
-  setup_test_serial_python(bondi_hoyle_accretion_serial accretion/bondi_hoyle/serial "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=bondi_hoyle")
-  setup_test_parallel_python(bondi_hoyle_accretion_parallel accretion/bondi_hoyle/parallel "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=bondi_hoyle")
-  setup_test_serial_python(flux_accretion_serial accretion/flux/serial "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=flux")
-  setup_test_parallel_python(flux_accretion_parallel accretion/flux/parallel "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=flux")
+# Gravity (with VLCT)
+setup_test_serial_python(gravity_vlct_stable_Jeans_wave gravity "input/Gravity/run_stable_jeans_wave_test.py")
 
-  # Shu Collapse
-  setup_test_parallel_python(shu_collapse shu_collapse "input/shu_collapse/run_shu_collapse.py" "--prec=${PREC_STRING}")
+# merge_sinks
+setup_test_serial_python(merge_sinks_stationary_serial merge_sinks/stationary/serial "input/merge_sinks/run_merge_sinks_test.py" "--prec=${PREC_STRING}" "--ics_type=stationary")
+setup_test_parallel_python(merge_sinks_stationary_parallel merge_sinks/stationary/parallel "input/merge_sinks/run_merge_sinks_test.py" "--prec=${PREC_STRING}" "--ics_type=stationary")
+setup_test_serial_python(merge_sinks_drift_serial merge_sinks/drift/serial "input/merge_sinks/run_merge_sinks_test.py" "--prec=${PREC_STRING}" "--ics_type=drift")
+setup_test_parallel_python(merge_sinks_drift_parallel merge_sinks/drift/parallel "input/merge_sinks/run_merge_sinks_test.py" "--prec=${PREC_STRING}" "--ics_type=drift")
 
-  # BB Test
-  setup_test_parallel_python(bb_test bb_test "input/bb_test/run_bb_test.py" "--prec=${PREC_STRING}")
-  
-endif()
+# accretion
+setup_test_serial_python(threshold_accretion_serial accretion/threshold/serial "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=threshold")
+setup_test_parallel_python(threshold_accretion_parallel accretion/threshold/parallel "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=threshold")
+setup_test_serial_python(bondi_hoyle_accretion_serial accretion/bondi_hoyle/serial "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=bondi_hoyle")
+setup_test_parallel_python(bondi_hoyle_accretion_parallel accretion/bondi_hoyle/parallel "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=bondi_hoyle")
+setup_test_serial_python(flux_accretion_serial accretion/flux/serial "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=flux")
+setup_test_parallel_python(flux_accretion_parallel accretion/flux/parallel "input/accretion/run_accretion_test.py" "--prec=${PREC_STRING}" "--flavor=flux")
+
+# Shu Collapse
+setup_test_parallel_python(shu_collapse shu_collapse "input/shu_collapse/run_shu_collapse.py" "--prec=${PREC_STRING}")
+
+# BB Test
+setup_test_parallel_python(bb_test bb_test "input/bb_test/run_bb_test.py" "--prec=${PREC_STRING}")
 
 # Grackle tests
 #
@@ -275,17 +310,15 @@ elseif(USE_GRACKLE)
     "--output-dump=./grackle_cooling_dt.log"
   )
 
-  if (USE_YT_BASED_TESTS)
-    setup_test_parallel_python(grackle_general grackle
-      "input/Grackle/run_general_grackle_test.py"
-      "--prec=${PREC_STRING}"
-      "--grackle-data-file=${GRACKLE_INPUT_DATA_DIR}/CloudyData_UVB=HM2012_shielded.h5"
-      # by using relative paths in the following 2 arguments, we effectively
-      # specify output files in the testing directory
-      "--generate-config-path=./temp_grackle_general.in"
-      "--output-dump=./grackle_general_test.log"
-    )
-  endif()
+  setup_test_parallel_python(grackle_general grackle
+    "input/Grackle/run_general_grackle_test.py"
+    "--prec=${PREC_STRING}"
+    "--grackle-data-file=${GRACKLE_INPUT_DATA_DIR}/CloudyData_UVB=HM2012_shielded.h5"
+    # by using relative paths in the following 2 arguments, we effectively
+    # specify output files in the testing directory
+    "--generate-config-path=./temp_grackle_general.in"
+    "--output-dump=./grackle_general_test.log"
+  )
 endif()
 
 # Convert markdown file to html file for more flexible viewing
