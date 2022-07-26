@@ -12,6 +12,7 @@
 // TODO: Make these parameters instead of macros
 //#define DEBUG_TURN_OFF_ATTENUATION
 //#define DEBUG_TURN_OFF_CHEMISTRY
+//#define DEBUG_TURN_OFF_RECOMBINATION
 //#define DEBUG_TURN_OFF_INJECTION
 
 //#define DEBUG_PRINT_GROUP_PARAMETERS
@@ -1105,7 +1106,7 @@ void EnzoMethodRamsesRT::recombination_photons (EnzoBlock * enzo_block, enzo_flo
     double alpha_B = get_alpha(T[i], j, 'B') / alpha_units;
 
     double n_j = density_j[i]/masses[j];
-    double n_e = e_density[i]/mEl;
+    double n_e = e_density[i]/mH; // electrons have same mass as protons in code units
     dN_dt += b*(alpha_A-alpha_B) * n_j*n_e;
 #ifdef DEBUG_RECOMBINATION
     CkPrintf("MethodRamsesRT::recombination_photons -- j=%d; alpha_A = %1.3e; alpha_B = %1.3e; n_j = %1.3e; n_e = %1.3e; b_boolean = %d\n", j, alpha_A, alpha_B, n_j, n_e, b);
@@ -1152,8 +1153,6 @@ void EnzoMethodRamsesRT::recombination_chemistry (EnzoBlock * enzo_block) throw(
   double rhounit = enzo_units->density();
   double alpha_units = enzo_units->volume() / enzo_units->time();
 
-  double mH_mEl = enzo_constants::mass_hydrogen / enzo_constants::mass_electron;
- 
   for (int iz=gz; iz<mz-gz; iz++) {
     for (int iy=gy; iy<my-gy; iy++) {
       for (int ix=gx; ix<mx-gx; ix++) {
@@ -1162,17 +1161,19 @@ void EnzoMethodRamsesRT::recombination_chemistry (EnzoBlock * enzo_block) throw(
         double alphaA_HII   = get_alpha(temperature[i],0,'A')/alpha_units;
         double alphaA_HeII  = get_alpha(temperature[i],1,'A')/alpha_units;
         double alphaA_HeIII = get_alpha(temperature[i],2,'A')/alpha_units;
+
+        double n_e = e_density[i] / enzo_constants::mass_hydrogen;
   
                      
         // eq. 28
-        HII_density  [i] -= HII_density[i]*alphaA_HII*e_density[i]*mH_mEl * dt;
+        HII_density  [i] -= HII_density[i]*alphaA_HII*n_e * dt;
 
         //eq. 29
         HeII_density [i] += (HeIII_density[i]*alphaA_HeIII - HeII_density[i]*alphaA_HeII) 
-                                  *e_density[i]*4*mH_mEl * dt;
+                                  *n_e * dt;
 
         //eq. 30
-        HeIII_density[i] -= HeIII_density[i]*alphaA_HeIII*e_density[i]*4*mH_mEl * dt;
+        HeIII_density[i] -= HeIII_density[i]*alphaA_HeIII*n_e * dt;
       }
     }
   } 
@@ -1355,7 +1356,7 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
       #endif
         if (Nnew[i] < 1e-16) Nnew[i] = 1e-16 / Nunit;
 
-      #ifndef DEBUG_TURN_OFF_CHEMISTRY
+      #ifndef DEBUG_TURN_OFF_RECOMBINATION
         // update photon density due to recombinations
         // Grackle does recombination chemistry, but doesn't
         // do anything about the radiation that comes out of recombination
