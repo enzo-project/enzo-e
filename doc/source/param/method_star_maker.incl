@@ -1,4 +1,4 @@
-:p: `Method:star_maker` parameters.
+:p:`Method:star_maker` parameters.
 
 ----
 
@@ -32,7 +32,7 @@
 
 ----
 
-Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_overdensity_threshold`
+:Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_overdensity_threshold`
 :Summary: :s:`Use overdensity threshold`
 :Type:   :t:`logical`
 :Default: :d:`false`
@@ -52,7 +52,7 @@ Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_overdensity_threshold`
 
 ----
 
-Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_velocity_divergence`
+:Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_velocity_divergence`
 :Summary: :s:`Use converging flow criterion for star formation`
 :Type:   :t:`logical`
 :Default: :d:`false`
@@ -62,7 +62,7 @@ Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_velocity_divergence`
 
 ----
 
-Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_cooling_time`
+:Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_cooling_time`
 :Summary: :s:`Check if cooling_time < dynamical_time for star formation`
 :Type:   :t:`logical`
 :Default: :d:`false`
@@ -72,7 +72,7 @@ Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_cooling_time`
 
 ----
 
-Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_temperature_threshold`
+:Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_temperature_threshold`
 :Summary: :s:`Use temperature threshold for star formation`
 :Type:   :t:`logical`
 :Default: :d:`false`
@@ -82,7 +82,7 @@ Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_temperature_threshold`
 
 ----
 
-Parameter:  :p:`Method` : :p:`star_maker` : :p:`temperature_threshold`
+:Parameter:  :p:`Method` : :p:`star_maker` : :p:`temperature_threshold`
 :Summary: :s:`Temperature threshold for star formation`
 :Type:   :t:`float`
 :Default: :d:`1e4`
@@ -92,17 +92,17 @@ Parameter:  :p:`Method` : :p:`star_maker` : :p:`temperature_threshold`
 
 ----
 
-Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_self_gravitating`
+:Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_self_gravitating`
 :Summary: :s:`Use FIRE2 virial parameter criterion for star formation`
 :Type:   :t:`logical`
 :Default: :d:`false`
 :Scope:     :z:`Enzo`
 
-:e:`Checks that alpha < 1, where alpha is the virial parameter calculated using the FIRE-2 prescription. See Appendix C of `Hopkins et al. (2018) <https://academic.oup.com/mnras/article/480/1/800/5046474>`_.`
+:e:`Checks that alpha < 1, where alpha is the virial parameter calculated using the FIRE-2 prescription. See Appendix C of` `Hopkins et al. (2018) <https://academic.oup.com/mnras/article/480/1/800/5046474>`_.
 
 ----
 
-Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_altAlpha`
+:Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_altAlpha`
 :Summary: :s:`Use alternate virial parameter criterion for star formation`
 :Type:   :t:`logical`
 :Default: :d:`false`
@@ -112,27 +112,27 @@ Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_altAlpha`
 
 ----
 
-Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_h2_self_shielding`
+:Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_h2_self_shielding`
 :Summary: :s:`Use H2 self-shielding criterion for star formation`
 :Type:   :t:`logical`
 :Default: :d:`false`
 :Scope:     :z:`Enzo`
 
-:e:`Checks that f_shield < 0, where f_shield is the H2 self-shielded fraction calculated using fits from Krumholz & Gnedin (2011).'
+:e:`Checks that f_shield < 0, where f_shield is the H2 self-shielded fraction calculated using fits from Krumholz & Gnedin (2011).`
 
 ----
 
-Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_jeans_mass`
+:Parameter:  :p:`Method` : :p:`star_maker` : :p:`use_jeans_mass`
 :Summary: :s:`Use Jeans mass criterion for star formation`
 :Type:   :t:`logical`
 :Default: :d:`false`
 :Scope:     :z:`Enzo`
 
-:e:`Checks that cell_mass > max(jeans_mass, 1000 Msun) in a cell. '
+:e:`Checks that cell_mass > max(jeans_mass, 1000 Msun) in a cell.`
 
 ----
 
-Parameter:  :p:`Method` : :p:`star_maker` : :p:`critical_metallicity`
+:Parameter:  :p:`Method` : :p:`star_maker` : :p:`critical_metallicity`
 :Summary: :s:`Metallicity threshold for star formation`
 :Type:   :t:`float`
 :Default: :d:`0.0`
@@ -142,7 +142,7 @@ Parameter:  :p:`Method` : :p:`star_maker` : :p:`critical_metallicity`
 
 ----
 
-Parameter:  :p:`Method` : :p:`star_maker` : :p:`maximum_mass_fraction`
+:Parameter:  :p:`Method` : :p:`star_maker` : :p:`maximum_mass_fraction`
 :Summary: :s:`Max fraction of gas in a cell that can be converted into a star particle per formation event.`
 :Type:   :t:`float`
 :Default: :d:`0.05`
@@ -152,7 +152,7 @@ Parameter:  :p:`Method` : :p:`star_maker` : :p:`maximum_mass_fraction`
 
 ----
 
-Parameter:  :p:`Method` : :p:`star_maker` : :p:`min_level`
+:Parameter:  :p:`Method` : :p:`star_maker` : :p:`min_level`
 :Summary: :s:`Minimum AMR level required for star formation.`
 :Type:   :t:`integer`
 :Default: :d:`0`
@@ -162,7 +162,7 @@ Parameter:  :p:`Method` : :p:`star_maker` : :p:`min_level`
 
 ----
 
-Parameter:  :p:`Method` : :p:`star_maker` : :p:`minimum_star_mass`
+:Parameter:  :p:`Method` : :p:`star_maker` : :p:`minimum_star_mass`
 :Summary: :s:`Minimum star particle mass`
 :Type:   :t:`float`
 :Default: :d:`0.0`
@@ -172,7 +172,7 @@ Parameter:  :p:`Method` : :p:`star_maker` : :p:`minimum_star_mass`
 
 ----
 
-Parameter:  :p:`Method` : :p:`star_maker` : :p:`maximum_star_mass`
+:Parameter:  :p:`Method` : :p:`star_maker` : :p:`maximum_star_mass`
 :Summary: :s:`Maximum star particle mass`
 :Type:   :t:`float`
 :Default: :d:`-1.0`
@@ -182,7 +182,7 @@ Parameter:  :p:`Method` : :p:`star_maker` : :p:`maximum_star_mass`
 
 ----
 
-Parameter:  :p:`Method` : :p:`star_maker` : :p:`turn_off_probability`
+:Parameter:  :p:`Method` : :p:`star_maker` : :p:`turn_off_probability`
 :Summary: :s:`Turn off probablistic elements of EnzoMethodStarMakerSTARSS.`
 :Type:   :t:`logical`
 :Default: :d:`false`

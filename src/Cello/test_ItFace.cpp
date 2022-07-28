@@ -31,7 +31,7 @@ PARALLEL_MAIN_BEGIN
   
   // -------- 1D --------
 
-  bool periodic[3] = {true,true,true};
+  int periodic[3] = {1,1,1};
   int n3[3] = { 4, 4, 4 };
   Index index;
   count = 0;

@@ -15,6 +15,8 @@ commands:
             echo 'export Grackle_ROOT=$HOME/local' >> $BASH_ENV
             echo 'export CHARM_PATH=$CHARM_ROOT/bin' >> $BASH_ENV
             echo 'export TEST_RESULTS_DIR=$HOME/answer_test_results' >> $BASH_ENV
+            # get tags from the main repository (for the current gold standard)
+            git fetch --tags https://github.com/enzo-project/enzo-e
             # tag the tip so we can go back to it
             git tag tip
 
@@ -177,10 +179,21 @@ commands:
                 cd build
                 # Run all tests excluding VLCT, shu_collapse, and bb_test
                 ctest -E "(vlct)|(shu_collapse)|(bb_test)" --output-on-failure
-                # Run VLCT tests if using double prec (currently required)
-                # Don't run shu_collapse or bb_test since these take a long time to run
-                if [[ $USE_DOUBLE == 1 ]]; then
+                # Don't run shu_collapse or bb_test since these take a long
+                # time to run
+
+                # Only run VLCT tests if using double prec (test answers aren't
+                # currently defined for single prec). To check precision:
+                # - query value from CMakeCache.txt
+                # - make the value lower case
+                # - compare against CMake's named boolean constants
+                USE_DOUBLE=`grep USE_DOUBLE_PREC CMakeCache.txt | cut -d = -f 2 | tr [A-Z] [a-z]`
+                if [[ "${USE_DOUBLE}" =~ ^(1|on|yes|true|y)$ ]]; then
                   ctest -R vlct --output-on-failure
+                elif ! [[ "${USE_DOUBLE}" =~ ^(0|off|no|false|n|ignore|notfound)$ ]]; then
+                  echo "ERROR while checking precision of enzo_float"
+                  echo "USE_DOUBLE has unexpected value: ${USE_DOUBLE}"
+                  exit 1
                 fi
 
                 ninja process_test_results

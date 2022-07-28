@@ -29,6 +29,7 @@ public: // interface
     p | name_dir_;
     p | name_file_;
     p | max_level_;
+    p | level_;
     //    p | stream_block_list_;
     //    p | file_;
     p | sync_blocks_;
@@ -93,6 +94,17 @@ private: // attributes
   /// List of blocks in the file by level (negative blocks included in
   /// level 0
   std::vector< std::vector<EnzoMsgCheck *> > io_msg_check_;
+
+  /// Current level
+  int level_;
+  /// List of block names in the file
+  std::vector<std::string> block_name_list_;
+
+  /// List of levels for the in block_name_list_
+  std::vector<int>         block_level_list_;
+
+  /// Count of blocks in each level_
+  std::vector<int> blocks_in_level_;
 };
 
 #endif /* ENZO_IO_ENZO_READER_HPP */

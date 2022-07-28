@@ -14,6 +14,24 @@
 
 //----------------------------------------------------------------------
 
+#if defined(CHARM_SIMULATION) || defined(CHARM_MESH)
+// crude hack to provide dummy implementations of restart-related functions
+// that are normally defined in enzo_control_restart.cpp.
+//
+// This is currently necessary for defining certain classes of test problems
+// without including the entire enzo-layer in the binary
+
+#include "simulation.hpp"
+void Block::restart_enter_()
+{ ERROR("Block::restart_enter", "invalid call"); }
+void Simulation::p_restart_enter (std::string name_dir)
+{ ERROR("Simulation::p_restart_enter", "invalid call"); }
+void Simulation::r_restart_start (CkReductionMsg * msg)
+{ ERROR("Simulation::p_restart_start", "invalid call"); }
+#endif
+
+//----------------------------------------------------------------------
+
 CProxy_Main proxy_main;
 
 // #define DEBUG_MAIN

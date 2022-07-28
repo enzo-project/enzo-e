@@ -176,20 +176,50 @@ if(AMPI_C_COMPILER AND AMPI_CXX_COMPILER)
   message(STATUS "Charm++ built with AMPI")
 endif()
 
-if(CHARM_COMPILER)
-  include(CheckIncludeFiles)
-  CHECK_INCLUDE_FILES("${CHARM_INCLUDE_DIR}/conv-mach-opt.h"
-                      HAVE_CHARM_CONV_MACH_OPT)
 
-  if (HAVE_CHARM_CONV_MACH_OPT)
-    include(CheckSymbolExists)
-    CHECK_SYMBOL_EXISTS(CMK_SMP "${CHARM_INCLUDE_DIR}/conv-mach-opt.h"
-                        CHARM_SMP)
-    if (CHARM_SMP)
-      message(STATUS "Charm++ built in SMP mode")
-    else()
-      message(STATUS "Charm++ built in non-SMP mode")
+include(CheckIncludeFiles)
+include(CheckCXXSourceCompiles)
+
+if(CHARM_COMPILER AND NOT DEFINED CHARM_SMP)
+  # Check whether Charm++ was built in SMP mode. Restructuring of Charm++ (that
+  # seems to have occured around the release of charm++ 7.0) makes this test
+  # somewhat non-trivial
+  #
+  # - in earlier versions, the CMK_SMP macro is only defined in the
+  #   "conv-mach-opt.h" header if charm++ was built in SMP mode (we could use
+  #   CHECK_SYMBOL_EXISTS to query if it was defined) Note: when the macro
+  #   is defined, it has a value of 1.
+  # - in modern versions, the CMK_SMP macro is ALWAYS defined in the
+  #   "conv-autoconfig.h" header. When built in SMP mode, it has a value of 1.
+  #   Otherwise, it has a value of 0.
+
+  # construct the include statements for the test program
+  set(CHARM_SMP_INCLUDE_STATEMENTS "")
+  foreach(header in ITEMS "conv-mach-opt.h" "conv-autoconfig.h")
+    CHECK_INCLUDE_FILES("${CHARM_INCLUDE_DIR}/${header}"
+                        HAVE_CHARM_SMP_HEADER)
+    if (HAVE_CHARM_SMP_HEADER)
+      string(APPEND CHARM_SMP_INCLUDE_STATEMENTS
+             "#include \"${CHARM_INCLUDE_DIR}/${header}\"\n")
     endif()
+    unset(HAVE_CHARM_SMP_HEADER CACHE)
+  endforeach()
+
+  # run the test program to determine whether SMP mode is used
+  CHECK_CXX_SOURCE_COMPILES("
+    ${CHARM_SMP_INCLUDE_STATEMENTS}
+
+    #ifdef CMK_SMP
+    #if CMK_SMP > 0
+    int main(void) { return 0; }
+    #endif
+    #endif
+    " CHARM_SMP)
+
+  if (CHARM_SMP)
+    message(STATUS "Charm++ built in SMP mode")
+  else()
+    message(STATUS "Charm++ built in non-SMP mode")
   endif()
 
 endif()

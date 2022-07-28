@@ -19,19 +19,11 @@ architectures, including the "Frontera" supercomputer at TACC and the
    getting_started_pleiades
    getting_started_frontera
 
-Downloading
-===========
+Dependency Installation
+=======================
 
-``Enzo-E / Cello`` is currently hosted on github.com (previously bitbucket.com)in beta-testing.  To obtain the latest
-version of the source code, you may clone it from the
-repository `Enzo-E / Cello github repository
-<https://github.com/enzo-project/enzo-e.git>`_:
-
-   ``git clone https://github.com/enzo-project/enzo-e.git``
-
-
-Before compiling ``Enzo-E / Cello``, you may also need to download
-and install 1.``CMake``, 2.``Charm++``, 3.``HDF5``, 4.``libpng``, 5.``libboost``, and (optionally) 6.``Grackle``:
+Before compiling ``Enzo-E / Cello``, you may need to download
+and install 1. ``CMake``, 2. ``Charm++``, 3. ``HDF5``, 4. ``libpng``, 5. ``libboost``, and (optionally) 6. ``Grackle``:
 
 1. Install ``CMake``
 --------------------
@@ -44,19 +36,49 @@ If not, you can get the binary distribution from the
 2. Install ``Charm++``
 ----------------------
 
-First, we install the latest `Charm++`, which now also uses `cmake` as default
-build system (as example we use the pure MPI backend).
+We generally recommend that you download `Charm++`, from the GitHub repository and then retrieve the latest version (7.0.0) known to build `Enzo-E/Cello`.
+This is demonstrated by the following command:
 
 ..  code-block:: bash
 
   git clone https://github.com/UIUC-PPL/charm.git
   cd charm
   git checkout v7.0.0
-  # Note, the directory name can be anything
-  mkdir build-mpi
+
+Alternatively, if you don't have `git` installed, you can also download the appropriate release version of the code from the main `website <http://www.charmplusplus.org/>`_ or from the `Release page on GitHub <https://github.com/UIUC-PPL/charm/releases>`_.
+
+`Charm++` can be configured to use different "backends" for handling communication, which include:
+  * ``mpi``: our recommended default choice for distributed machines.
+    Under this configuration, communication occurs via calls to MPI commands (this obviously requires an MPI installation).
+  * ``netlrts``: our recommended choice for development/testing on a local machine (this can make debugging far simpler).
+    Under this configuration, communication occurs via standard networking protocols (that all modern computers are equipped with).
+    This is generally slower than other options.
+
+`Charm++` uses `cmake` as the default build system.
+To build `Charm++` start from directory holding all downloaded files.
+
+Invoke the following command to build with the `mpi` backend:
+
+..  code-block:: bash
+
+  mkdir build-mpi # this directory name is arbitrary
   cd build-mpi
   cmake -DNETWORK=mpi -DSMP=OFF ..
-  make
+  make # you can specify make -j4 to compile with 4 threads
+
+The following commands to build with the `netlrts` backend:
+
+..  code-block:: bash
+
+  mkdir build-netlrts # this directory name is arbitrary
+  cd build-netlrts
+  cmake -DNETWORK=netlrts -DSMP=OFF ..
+  make # you can specify make -j4 to compile with 4 threads
+
+
+As an aside `Charm++` can also be configured to directly use a machine's low-level communication primitives (that ``MPI`` implementations wrap).
+It can be complicated to compile with these backends, so additional details are provided on an architechture-specific basis.
+
 
 3. Install ``HDF5``
 -------------------
@@ -90,20 +112,20 @@ If ``libboost-dev`` is not already installed on your machine, it may be
 available through your operating system distribution, otherwise it can
 be downloaded from the `libboost <https://www.boost.org/>`_ website.
 
-6. Install Grackle
-------------------
+6. Install Grackle  (Optional)
+------------------------------
 
-By default Enzo-E requires the Grackle chemistry and cooling library.
+By default, Enzo-E requires the Grackle chemistry and cooling library.
 If you do not need to use Grackle, you can simple disabling it by setting
 ``-DUSE_GRACKLE=OFF`` when you configure Enzo-E.
 See the `Grackle documentation <https://grackle.readthedocs.io>`__ for installation
 instructions.
 
-7. Install yt
--------------
+7. Install yt (Optional)
+------------------------
 
-If you want to use yt to analyse Enzo-E output data, you must install the latest version of yt
-from source. This can be done with the following commands:
+If you want to use the yt python package to analyse Enzo-E output data, you should install the latest version from source.
+This can be done with the following commands:
 
 .. code-block:: bash
 
@@ -111,28 +133,38 @@ from source. This can be done with the following commands:
     cd yt
     pip install -e .
 
-
+This is **NOT** a requirement for building and running Enzo-E, but it is used in some tests.
 
 Configuring/Building
 ====================
 
-For a basic configuration on a linux system with GNU compiler stack the following
-command should work out of the box. If not please report.
-Also see following subsection for more configuration options.
+``Enzo-E / Cello`` is currently hosted on github.com (previously bitbucket.com).
+To obtain the latest version of the source code, you may clone it from the repository `Enzo-E / Cello github repository <https://github.com/enzo-project/enzo-e.git>`_:
+
+.. code-block:: bash
+
+    git clone https://github.com/enzo-project/enzo-e.git
+
+For a basic configuration on a linux system with the GNU compiler stack, the following command should work out of the box.
+If not, please report any problems.
+See the following subsection for more configuration options.
 
 ..  code-block:: bash
 
-  # Again, the directory name can be anything
-  mkdir build-mpi
-  cd build-mpi
-  cmake -DCHARM_ROOT=/PATH/TO/charm/build-mpi -DEnzo-E_CONFIG=linux_gcc -DUSE_GRACKLE=OFF ..
-  make
+  mkdir my-first-build # Again, the directory name can be anything
+  cd my-first-build
+  # replace <PATH/TO/charm/build-dir> with the path to the directory created
+  # when you built charm++ (either build-mpi or build-netlrts if you've been
+  # following along)
+  cmake -DCHARM_ROOT=<PATH/TO/charm/build-dir> \
+        -DEnzo-E_CONFIG=linux_gcc -DUSE_GRACKLE=OFF ..
+  make -j4 # -j4 tells make to execute up to 4 commands in parallel
 
-Note, if ``ninja`` is installed, the ``ninja`` build system can be used for faster build times
-by adding ``-GNinja`` (before the ``..``) to the ``cmake`` command and calling ``ninja``
-afterwards instead of ``make``.
 
-The Enzo-E executable is built within ``bin/``. 
+Note, if ``ninja`` is installed, the ``ninja`` build system can be used for faster build times.
+This is done by adding ``-GNinja`` to the ``cmake`` command (before the ``..``) and calling ``ninja`` afterwards instead of ``make``.
+
+The Enzo-E executable is built within ``bin/``.
 
 Configuration options
 ---------------------
@@ -152,7 +184,7 @@ Current ``cmake`` options are the following (default value at the end of the lin
   enabled in Monitor (that is Monitor::is_active(\"DEBUG\") must be true for any output) OFF
 * ``debug_field`` "" OFF
 * ``debug_field_face`` "" OFF
-* ``check`` "Do extra run-time checking.  Useful for debugging, but can potentially slow     calculations down" OFF
+* ``check`` "Do extra run-time checking.  Useful for debugging, but can potentially slow calculations down" OFF
 * ``debug_verbose`` "Print periodically all field values.  See src/Field/field_FieldBlock.cpp" OFF
 * ``memory`` "Track dynamic memory statistics.  Can be useful, but can cause problems on some systems that also override new [] () / delete [] ()" OFF
 * ``balance`` "Enable charm++ dynamic load balancing" ON`
@@ -203,6 +235,8 @@ In addition, the general `cmake` option to set basic optimization flags via
 * ``Debug`` (typically ``-O0 -g``)
 
 are available.
+
+
 
 Machine files
 -------------
@@ -257,8 +291,7 @@ If errors like
     Permission denied (publickey,gssapi-keyex,gssapi-with-mic,password,hostbased).
     Charmrun> Error 255 returned from remote shell (localhost:0)
 
-are displayed a node local run (i.e., no "remote" connections even to the local host)
-could be used instead by add ``++local`` to ``charmrun``, e.g.:
+are displayed, a node local run (i.e., no "remote" connections even to the local host) could be used instead by add ``++local`` to ``charmrun``, e.g.:
 
      ``~/Charm/bin/charmrun ++local +p4 bin/enzo-e input/HelloWorld/Hi.in``
 
@@ -268,7 +301,7 @@ If you receive an error like
 
     Charmrun> Timeout waiting for node-program to connect
 
-trying running ``./bin/enzo-e`` without ``charmrun`` as crashes due to, e.g.,
+try running ``./bin/enzo-e`` without ``charmrun`` as crashes due to, e.g.,
 libraries not being found may not be displaying.
 
 If all goes well, Enzo-E will run the Hello World problem.  Below are
@@ -321,8 +354,7 @@ Time = 0.10
 If you look at the ``Hi.in`` parameter file contents, you will notice that there are some ``"include"`` directives that include other files.  When Enzo-E / Cello runs, it will generate a ``"parameters.out"`` file, which is the input file but with the included files inlined.  This ``"parameters.out"`` file is itself a valid Enzo-E / Cello parameter file (though you may wish to rename it before using it as a parameter file to avoid it being overwritten.)
 
 If you encounter any problems in getting Enzo-E to compile or run,
-please contact the Enzo-E / Cello community at cello-l@ucsd.edu, and
-someone will be happy to help resolve the problems.
+please contact the Enzo-E / Cello community at cello-l@ucsd.edu or the `users' mailing list <https://groups.google.com/g/enzo-e-users>`_ and someone will be happy to help resolve the problems.
 
 ----
 
