@@ -11,7 +11,7 @@
 
 // TODO: Make these parameters instead of macros
 //#define DEBUG_TURN_OFF_ATTENUATION
-//#define DEBUG_TURN_OFF_CHEMISTRY
+//#define DEBUG_TURN_OFF_RATE_CALCULATIONS
 //#define DEBUG_TURN_OFF_RECOMBINATION
 //#define DEBUG_TURN_OFF_INJECTION
 
@@ -95,11 +95,6 @@ EnzoMethodRamsesRT ::EnzoMethodRamsesRT(const int N_groups, const double clight)
     if (rank >= 3) refresh->add_field("flux_z_" + istring);   
   }
 
-  //TODO: Add specific fields rather than refreshing everything here
-  //      need to add chemistry fields and maybe ionization/heating rates
-  //
-  
-  refresh->add_all_fields();
   // Initialize Refresh object for after injection step 
   ir_injection_ = add_refresh_();
 
@@ -843,7 +838,7 @@ void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo
   // parameters. 
   // ionization -- first term of eq. A21 -- sum_i(sigmaN*clight*Ni), where i iterates over frequency groups
   // ionization rates should be in code_time^-1
-  // heating rates should be in erg s^-1 cm^-3 
+  // heating rates should be in erg s^-1 cm^-3 / nHI 
   // TODO: Rates are zero if mean energy in a bin is less than the ionization threshold.
   //       There could be cases where E_mean < E_thresh, but E_upper > E_thresh. 
   //       Need to account for this by integrating over that part of the spectrum.
@@ -903,47 +898,41 @@ void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo
   }
 
   // loop through cells
-  for (int iz=gz; iz<mz-gz; iz++) {
-    for (int iy=gy; iy<my-gy; iy++) {
-      for (int ix=gx; ix<mx-gx; ix++) {
-        int i = INDEX(ix,iy,iz,mx,my); //index of current cell
-        double nHI = HI_density[i] * rhounit / mH; 
-        double heating_rate = 0.0; 
-        for (int j=0; j<3; j++) { //loop over species
-          //double beta = get_beta(temperature[i], j);
-          //double ionization_rate = beta * e_density[i] * rhounit / mEl; // beta*n_e in s^-1
-          double ionization_rate = 0.0;
-          for (int igroup=0; igroup<enzo_config->method_ramses_rt_N_groups; igroup++) { //loop over groups
+  for (int i=0; i<mx*my*mz; i++) {
+    double nHI = HI_density[i] * rhounit / mH; 
+    double heating_rate = 0.0; 
+    for (int j=0; j<3; j++) { //loop over species
+      //double beta = get_beta(temperature[i], j);
+      //double ionization_rate = beta * e_density[i] * rhounit / mEl; // beta*n_e in s^-1
+      double ionization_rate = 0.0;
+      for (int igroup=0; igroup<enzo_config->method_ramses_rt_N_groups; igroup++) { //loop over groups
+        double sigmaN = *(scalar.value( scalar.index( sigN_string(igroup,j) ))) * lunit*lunit; // cm^2 
+        double sigmaE = *(scalar.value( scalar.index( sigE_string(igroup,j) ))) * lunit*lunit; // cm^2
+        double eps    = *(scalar.value( scalar.index(  eps_string(igroup  ) ))) * eunit; // erg 
 
-            double sigmaN = *(scalar.value( scalar.index( sigN_string(igroup,j) ))) * lunit*lunit; // cm^2 
-            double sigmaE = *(scalar.value( scalar.index( sigE_string(igroup,j) ))) * lunit*lunit; // cm^2
-            double eps    = *(scalar.value( scalar.index(  eps_string(igroup  ) ))) * eunit; // erg 
-
-            // TODO: Add toggle for whether to include recombination radiation 
-            double N_i = (photon_densities[igroup])[i] * Nunit; // cm^-3
-            double n_j = (chemistry_fields[j])[i] * rhounit / masses[j]; //number density of species j
+        // TODO: Add toggle for whether to include recombination radiation 
+        double N_i = (photon_densities[igroup])[i] * Nunit; // cm^-3
+        double n_j = (chemistry_fields[j])[i] * rhounit / masses[j]; //number density of species j
            
-            double ediff = eps*sigmaE - Eion[j]*sigmaN;
+        double ediff = eps*sigmaE - Eion[j]*sigmaN;
             
-            // NOTE: clight is passed into this function in cgs
-            ionization_rate += std::max( sigmaN*clight*N_i, 0.0 ); 
-            heating_rate    += std::max( n_j*clight*N_i*ediff, 0.0 ); // Equation A16
+        // NOTE: clight is passed into this function in cgs
+        ionization_rate += std::max( sigmaN*clight*N_i, 0.0 ); 
+        heating_rate    += std::max( n_j*clight*N_i*ediff, 0.0 ); // Equation A16
 
-#ifdef DEBUG_RATES 
-            std::cout << "i = " << i << "; heating_rate = " << heating_rate << "; n_j = " << n_j << 
-            "; N_i = " << N_i << "; eps = " << eps/enzo_constants::erg_eV << "; Eion[j] = " << Eion[j]/enzo_constants::erg_eV << "; Ediff = " << (eps*sigmaE - Eion[j]*sigmaN) <<  std::endl;
-#endif          
-          }
-          (ionization_rate_fields[j])[i] = ionization_rate * tunit; //update fields with new value, put ionization rates in 1/time_units
-        }
-        
-        RT_heating_rate[i] = heating_rate / nHI; // * eunit/volunit/tunit; //put into code units
-#ifdef DEBUG_RATES
-        std::cout << "RT_heating_rate[i] = " << RT_heating_rate[i] << " erg/cm^3/s; RT_HI_ionization_rate[i] = " << (ionization_rate_fields[0])[i] / tunit << " s^-1" << std::endl;
-#endif 
+    #ifdef DEBUG_RATES 
+        std::cout << "i = " << i << "; heating_rate = " << heating_rate << "; n_j = " << n_j << 
+        "; N_i = " << N_i << "; eps = " << eps/enzo_constants::erg_eV << "; Eion[j] = " << Eion[j]/enzo_constants::erg_eV << "; Ediff = " << (eps*sigmaE - Eion[j]*sigmaN) <<  std::endl;
+    #endif          
       }
+      (ionization_rate_fields[j])[i] = ionization_rate * tunit; //update fields with new value, put ionization rates in 1/time_units
     }
-  } 
+        
+  RT_heating_rate[i] = heating_rate / nHI; // * eunit/volunit/tunit; //put into code units
+#ifdef DEBUG_RATES
+  std::cout << "RT_heating_rate[i] = " << RT_heating_rate[i] << " erg/cm^3/s; RT_HI_ionization_rate[i] = " << (ionization_rate_fields[0])[i] / tunit << " s^-1" << std::endl;
+#endif 
+}
 
  
 }
@@ -1083,7 +1072,7 @@ void EnzoMethodRamsesRT::recombination_photons (EnzoBlock * enzo_block, enzo_flo
   EnzoUnits * enzo_units = enzo::units();
   double munit = enzo_units->mass();
 
-  if (!field.is_field("density")) return;
+  if (! field.is_field("density")) return;
   
   //enzo_float * density = (enzo_float *) field.values("density");
   enzo_float * e_density = (enzo_float *) field.values("e_density");
@@ -1126,6 +1115,7 @@ void EnzoMethodRamsesRT::recombination_chemistry (EnzoBlock * enzo_block) throw(
   // update density fields to account for recombination (2nd half of eqs. 28-30).
   // this does a sum over all groups
   // Grackle handles collisional ionization and photoionization (have to feed it photoionization rates though)
+  // Need to refresh chemistry fields after if using this
   Field field = enzo_block->data()->field();
   int mx,my,mz;  
   field.dimensions(0,&mx, &my, &mz); //field dimensions, including ghost zones
@@ -1197,7 +1187,7 @@ void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * 
   Field field = enzo_block->data()->field();
   int igroup = enzo_block->method_ramses_rt_igroup;
 
-  if (!field.is_field("density")) return;
+  if (! field.is_field("density")) return;
   
   //enzo_float * density = (enzo_float *) field.values("density");
 
@@ -1219,7 +1209,11 @@ void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * 
     double sigN_ij = *(scalar.value( scalar.index( sigN_string(igroup, j) )));
     d_dt += n_j * clight*sigN_ij; // code_time^-1
   }
- 
+
+// TODO: Either decrease timestep if d_dt*dt > 1, or raise an error here
+//       Could also apply duct-tape solution of setting N = std::min(N-d_dt*N*dt, tiny_number).
+//       Shouldn't run into any problems with the physics, since there is an absolute minimum for photon
+//       density anyway (zero). 
 #ifdef DEBUG_ATTENUATION
   // NOTE d_dt * dt > 1 must be true. If this is happening, it is likely that your timestep is too large.
   //                                  This can be fixed by either increasing resolution, decreasing global timestep,
@@ -1320,7 +1314,7 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
   }
 
 
-  //calculate the pressure tensor
+  //calculate the radiation pressure tensor
   get_pressure_tensor(enzo_block, N, Fx, Fy, Fz, clight);
 
   for (int iz=gz; iz<mz-gz; iz++) {
@@ -1469,6 +1463,7 @@ void EnzoMethodRamsesRT::set_global_averages(EnzoBlock * enzo_block, CkReduction
   // contribute does global reduction over ALL blocks by default (not just leaves)
   // call compute_done here for non leaves so that we don't waste time 
   // pushing these blocks through solve_transport_eqn().
+  
   if (! enzo_block->is_leaf()) {
     enzo_block->compute_done(); 
     return;  
@@ -1548,7 +1543,7 @@ void EnzoMethodRamsesRT::call_solve_transport_eqn(EnzoBlock * enzo_block) throw(
     this->solve_transport_eqn(enzo_block);
   }
 
-#ifndef DEBUG_TURN_OFF_CHEMISTRY
+#ifndef DEBUG_TURN_OFF_RATE_CALCULATIONS
   // update chemistry fields to account for recombinations (Grackle already does this)
   // recombination_chemistry(enzo_block);
 
@@ -1650,7 +1645,7 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
                                              enzo_config->physics_cosmology);
 
   compute_temperature.compute(enzo_block);
-
+  
   Scalar<double> scalar = block->data()->scalar_double();
 
   int N_species_ = 3; //only three ionizable species (HI, HeI, HeII)
