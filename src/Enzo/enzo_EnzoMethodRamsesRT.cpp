@@ -12,7 +12,6 @@
 // TODO: Make these parameters instead of macros
 //#define DEBUG_TURN_OFF_ATTENUATION
 //#define DEBUG_TURN_OFF_RATE_CALCULATIONS
-//#define DEBUG_TURN_OFF_RECOMBINATION
 //#define DEBUG_TURN_OFF_INJECTION
 
 //#define DEBUG_PRINT_GROUP_PARAMETERS
@@ -902,15 +901,12 @@ void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo
     double nHI = HI_density[i] * rhounit / mH; 
     double heating_rate = 0.0; 
     for (int j=0; j<3; j++) { //loop over species
-      //double beta = get_beta(temperature[i], j);
-      //double ionization_rate = beta * e_density[i] * rhounit / mEl; // beta*n_e in s^-1
       double ionization_rate = 0.0;
       for (int igroup=0; igroup<enzo_config->method_ramses_rt_N_groups; igroup++) { //loop over groups
         double sigmaN = *(scalar.value( scalar.index( sigN_string(igroup,j) ))) * lunit*lunit; // cm^2 
         double sigmaE = *(scalar.value( scalar.index( sigE_string(igroup,j) ))) * lunit*lunit; // cm^2
         double eps    = *(scalar.value( scalar.index(  eps_string(igroup  ) ))) * eunit; // erg 
 
-        // TODO: Add toggle for whether to include recombination radiation 
         double N_i = (photon_densities[igroup])[i] * Nunit; // cm^-3
         double n_j = (chemistry_fields[j])[i] * rhounit / masses[j]; //number density of species j
            
@@ -1074,7 +1070,6 @@ void EnzoMethodRamsesRT::recombination_photons (EnzoBlock * enzo_block, enzo_flo
 
   if (! field.is_field("density")) return;
   
-  //enzo_float * density = (enzo_float *) field.values("density");
   enzo_float * e_density = (enzo_float *) field.values("e_density");
 
   // TODO: Update this to implement > 6 species
@@ -1103,7 +1098,7 @@ void EnzoMethodRamsesRT::recombination_photons (EnzoBlock * enzo_block, enzo_flo
   }
 
 #ifdef DEBUG_RECOMBINATION
-  CkPrintf("MethodRamsesRT::recombination_photons -- dN_dt[i] = %1.3e", dN_dt);
+  CkPrintf("MethodRamsesRT::recombination_photons -- dN_dt[i] = %1.3e; dt = %1.3e\n", dN_dt, enzo_block->dt);
 #endif 
   N [i] += dN_dt * enzo_block->dt;
 }
@@ -1183,6 +1178,7 @@ void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * 
   double tunit = enzo_units->time();  
   double rhounit = enzo_units->density();
   double munit = enzo_units->mass();
+  
 
   Field field = enzo_block->data()->field();
   int igroup = enzo_block->method_ramses_rt_igroup;
@@ -1224,7 +1220,10 @@ void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * 
  // }
 #endif 
  
-  N [i] -= d_dt*N [i] * dt;
+  //N [i] -= d_dt*N [i] * dt;
+  //Ensure that photon density never drops below zero
+  N[i] = std::max( (1 - d_dt*dt)*N[i], 1e-16*enzo_units->volume() ); 
+
   Fx[i] -= d_dt*Fx[i] * dt;
   Fy[i] -= d_dt*Fy[i] * dt;
   Fz[i] -= d_dt*Fz[i] * dt; 
@@ -1338,7 +1337,7 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
         // can occasionally end up in situations where
         // N[i] is slightly negative due to roundoff error.
         // Make it a small positive number instead 
-        if (Nnew[i] < 1e-16) Nnew[i] = 1e-16 / Nunit;
+        if (Nnew[i] < 1e-16 / Nunit) Nnew[i] = 1e-16 / Nunit;
 
       #ifdef DEBUG_TRANSPORT
         std::cout << "i = " << i << "; Nnew[i] = " << Nnew[i] << "; N_update = " << N_update << "; Fx_update = " << Fx_update << "; hx = " << hx << "; dt = " << dt << std::endl;
@@ -1348,15 +1347,14 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
         // add interactions with matter 
         add_attenuation(enzo_block, Nnew, Fxnew, Fynew, Fznew, clight, i); 
       #endif
-        if (Nnew[i] < 1e-16) Nnew[i] = 1e-16 / Nunit;
+        if (Nnew[i] < 1e-16 / Nunit) Nnew[i] = 1e-16 / Nunit;
 
-      #ifndef DEBUG_TURN_OFF_RECOMBINATION
-        // update photon density due to recombinations
-        // Grackle does recombination chemistry, but doesn't
-        // do anything about the radiation that comes out of recombination
-        // TODO: Only do this if not using on-the-spot approximation
-        recombination_photons(enzo_block, Nnew, T, i, E_lower, E_upper);
-      #endif
+        if (enzo_config->method_ramses_rt_recombination_radiation) {
+          // update photon density due to recombinations
+          // Grackle does recombination chemistry, but doesn't
+          // do anything about the radiation that comes out of recombination
+          recombination_photons(enzo_block, Nnew, T, i, E_lower, E_upper);
+        }
 
       }
     }   
@@ -1441,6 +1439,10 @@ void EnzoMethodRamsesRT::call_inject_photons(EnzoBlock * enzo_block) throw()
 
   enzo_block->contribute(temp, CkReduction::sum_double, callback);
 
+ //TODO: Add option here to set cross sections for every block equal to sigma_vernier. This is needed
+ //      for tests with inflow boundary conditions that don't have any radiating particles. 
+ //      Currently, if there aren't any radiating particles, all of the group mean opacities are zero.
+
   //TODO: Only do global reduction once every N cycles. If not one of these cycles, just do refresh intead
   //else {       
   //  cello::refresh(ir_injection_)->set_active(enzo_block->is_leaf()); 
@@ -1479,14 +1481,6 @@ void EnzoMethodRamsesRT::set_global_averages(EnzoBlock * enzo_block, CkReduction
   const int N_species = 3; //TODO: update for > 6 species
 
   Scalar<double> scalar = enzo_block->data()->scalar_double();
-
- // if (temp[index] == 0) { 
-    // if no sources of radiation in the entire domain, no need to refresh.
-    // Just go to transport step 
-    // eqs. B6-B8 would give us 0/0 in this case anyway
- //   enzo_block->p_method_ramses_rt_solve_transport_eqn();
-  //  return;
- // }
 
   int index=0;
   double mult = 0.0;
@@ -1547,7 +1541,8 @@ void EnzoMethodRamsesRT::call_solve_transport_eqn(EnzoBlock * enzo_block) throw(
   // update chemistry fields to account for recombinations (Grackle already does this)
   // recombination_chemistry(enzo_block);
 
-  // Calculate photoheating and photoionization rate
+  // Calculate photoheating and photoionization rates.
+  // Sums over frequency groups
   //TODO: Make photoionization/heating/chemistry optional 
   get_photoionization_and_heating_rates(enzo_block, clight);
 #endif
