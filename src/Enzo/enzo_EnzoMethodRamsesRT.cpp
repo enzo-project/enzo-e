@@ -1044,10 +1044,13 @@ int EnzoMethodRamsesRT::get_b_boolean (double E_lower, double E_upper, int speci
   switch (species) { // species after recombination
     case 0: // HI
       if ( (E_lower <= 13.6 ) && (13.6  < E_upper)) return 1;
+      else break;
     case 1: // HeI
       if ( (E_lower <= 24.59) && (24.59 < E_upper)) return 1;
+      else break;
     case 2: // HeII
       if ( (E_lower <= 54.42) && (54.42 < E_upper)) return 1;
+      else break; 
   }
   
   // if energy not in this group, return 0
@@ -1083,9 +1086,10 @@ void EnzoMethodRamsesRT::recombination_photons (EnzoBlock * enzo_block, enzo_flo
   double dN_dt = 0.0;
   double alpha_units = enzo_units->volume() / enzo_units->time();
   for (int j=0; j<chemistry_fields.size(); j++) {  
-    enzo_float * density_j = (enzo_float *) field.values(chemistry_fields[j]);     
+    enzo_float * density_j = (enzo_float *) field.values(chemistry_fields[j]);
+     
     int b = get_b_boolean(E_lower, E_upper, j);
-  
+
     double alpha_A = get_alpha(T[i], j, 'A') / alpha_units;
     double alpha_B = get_alpha(T[i], j, 'B') / alpha_units;
 
@@ -1098,7 +1102,7 @@ void EnzoMethodRamsesRT::recombination_photons (EnzoBlock * enzo_block, enzo_flo
   }
 
 #ifdef DEBUG_RECOMBINATION
-  CkPrintf("MethodRamsesRT::recombination_photons -- dN_dt[i] = %1.3e; dt = %1.3e\n", dN_dt, enzo_block->dt);
+  CkPrintf("MethodRamsesRT::recombination_photons -- [E_lower, E_upper] = [%.2f, %.2f]; dN_dt[i] = %1.3e; dt = %1.3e\n", E_lower, E_upper, dN_dt, enzo_block->dt);
 #endif 
   N [i] += dN_dt * enzo_block->dt;
 }
