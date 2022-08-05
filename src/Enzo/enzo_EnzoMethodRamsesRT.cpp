@@ -11,8 +11,7 @@
 
 // TODO: Make these parameters instead of macros
 //#define DEBUG_TURN_OFF_ATTENUATION
-//#define DEBUG_TURN_OFF_RATE_CALCULATIONS
-//#define DEBUG_TURN_OFF_INJECTION
+//#define DEBUG_TURN_OFF_RATE_CALCULATION
 
 //#define DEBUG_PRINT_GROUP_PARAMETERS
 //#define DEBUG_RECOMBINATION
@@ -1403,50 +1402,76 @@ void EnzoMethodRamsesRT::call_inject_photons(EnzoBlock * enzo_block) throw()
     }
   }
 
-  // do global reduction of sigE, sigN, and eps over star particles
-  // then do refresh -> solve_transport_eqn()
-
-  // flattened array of sigN, sigE, and eps "mL" variables
-  // N_groups number of mL_i, eps_i variables
-  // N_groups*N_species number of sigN and sigE variables
-  //
-  // Gives 2*N_groups+2*N_groups*N_species as the total number of variables
-  std::vector<double> temp(2*N_groups+2*N_groups*N_species);
-
-  // fill temp with ScalarData values
+  // TODO: Package these up into separate functions for cleanliness
   Scalar<double> scalar = enzo_block->data()->scalar_double();
+  if (enzo_config->method_ramses_rt_average_global_quantities) {
+    // do global reduction of sigE, sigN, and eps over star particles
+    // then do refresh -> solve_transport_eqn()
 
-  int index = 0;
-  for (int i=0; i<N_groups; i++) {
-    index = i;
-    temp[index] = *(scalar.value( scalar.index(mL_string(i)) ));
-  }
-  for (int i=0; i<N_groups; i++) {
-    index = N_groups + i;
-    temp[index] = *(scalar.value( scalar.index( eps_string(i) + mL_string(i) )));
-  }
-  for (int i=0; i<N_groups; i++) {
-    for (int j=0; j<N_species; j++) {
-      index = 2*N_groups + i*N_species + j;
-      temp[index] = *(scalar.value( scalar.index( sigN_string(i,j) + mL_string(i) )));
+    // flattened array of sigN, sigE, and eps "mL" variables
+    // N_groups number of mL_i, eps_i variables
+    // N_groups*N_species number of sigN and sigE variables
+    //
+    // Gives 2*N_groups+2*N_groups*N_species as the total number of variables
+    std::vector<double> temp(2*N_groups+2*N_groups*N_species);
+
+    // fill temp with ScalarData "mL" quantities
+    int index = 0;
+    for (int i=0; i<N_groups; i++) {
+      index = i;
+      temp[index] = *(scalar.value( scalar.index(mL_string(i)) ));
     }
-  }
-  for (int i=0; i<N_groups; i++) {
-    for (int j=0; j<N_species; j++) {
-      index = 2*N_groups + N_groups*N_species + i*N_species + j;
-      temp[index] = *(scalar.value( scalar.index( sigE_string(i,j) + mL_string(i) )));
+    for (int i=0; i<N_groups; i++) {
+      index = N_groups + i;
+      temp[index] = *(scalar.value( scalar.index( eps_string(i) + mL_string(i) )));
     }
+    for (int i=0; i<N_groups; i++) {
+      for (int j=0; j<N_species; j++) {
+        index = 2*N_groups + i*N_species + j;
+        temp[index] = *(scalar.value( scalar.index( sigN_string(i,j) + mL_string(i) )));
+      }
+    }
+    for (int i=0; i<N_groups; i++) {
+      for (int j=0; j<N_species; j++) {
+        index = 2*N_groups + N_groups*N_species + i*N_species + j;
+        temp[index] = *(scalar.value( scalar.index( sigE_string(i,j) + mL_string(i) )));
+      }
+    }
+
+    CkCallback callback (CkIndex_EnzoBlock::p_method_ramses_rt_set_global_averages(NULL),
+             enzo_block->proxy_array());
+
+    enzo_block->contribute(temp, CkReduction::sum_double, callback);
   }
 
-  CkCallback callback (CkIndex_EnzoBlock::p_method_ramses_rt_set_global_averages(NULL),
-           enzo_block->proxy_array());
+  else { // just set sigmaN = sigmaE = sigma_vernier, and eps = mean(energy)
 
-  enzo_block->contribute(temp, CkReduction::sum_double, callback);
+    if (! enzo_block->is_leaf() ) {
+      enzo_block->compute_done();
+      return;
+    }
+    EnzoUnits * enzo_units = enzo::units();
+    double lunit = enzo_units->length();
+    double tunit = enzo_units->time();
+    double munit = enzo_units->mass();
+    double eunit = munit * lunit*lunit / (tunit*tunit);
+    for (int i=0; i<N_groups; i++) {
+      enzo_block->method_ramses_rt_igroup = i;
+      double E_lower = (enzo_config->method_ramses_rt_bin_lower)[i];
+      double E_upper = (enzo_config->method_ramses_rt_bin_upper)[i];
+      double energy = 0.5 * (E_lower + E_upper); // eV
 
- //TODO: Add option here to set cross sections for every block equal to sigma_vernier. This is needed
- //      for tests with inflow boundary conditions that don't have any radiating particles. 
- //      Currently, if there aren't any radiating particles, all of the group mean opacities are zero.
-
+      *(scalar.value( scalar.index( eps_string(i) ))) = energy*enzo_constants::erg_eV/eunit; // code_energy
+      for (int j=0; j<N_species; j++) {
+       double sigma_j = sigma_vernier(energy,j); // cm^2
+       *(scalar.value( scalar.index( sigN_string(i,j) ))) = sigma_j/(lunit*lunit);
+       *(scalar.value( scalar.index( sigE_string(i,j) ))) = sigma_j/(lunit*lunit);
+      }   
+    }
+    cello::refresh(ir_injection_)->set_active(enzo_block->is_leaf()); 
+    enzo_block->refresh_start(ir_injection_, CkIndex_EnzoBlock::p_method_ramses_rt_solve_transport_eqn());   
+  }
+  
   //TODO: Only do global reduction once every N cycles. If not one of these cycles, just do refresh intead
   //else {       
   //  cello::refresh(ir_injection_)->set_active(enzo_block->is_leaf()); 
@@ -1512,17 +1537,6 @@ void EnzoMethodRamsesRT::set_global_averages(EnzoBlock * enzo_block, CkReduction
       *(scalar.value( scalar.index( sigE_string(i,j) ))) = mult*temp[index];
     }
   }
-
-#ifdef DEBUG_PRINT_GROUP_PARAMETERS
-  for (int i=0; i<N_groups; i++) {
-    for (int j=0; j<N_species; j++) {
-      CkPrintf("[i,j] = [%d,%d]; sigN = %1.2e; sigE = %1.2e; eps = %1.2e\n",i,j,
-               *(scalar.value( scalar.index( sigN_string(i,j) ))),
-               *(scalar.value( scalar.index( sigE_string(i,j) ))),
-               *(scalar.value( scalar.index(  eps_string(i)   ))) );
-    }
-  }
-#endif 
   
   cello::refresh(ir_injection_)->set_active(enzo_block->is_leaf());
   enzo_block->refresh_start(ir_injection_, CkIndex_EnzoBlock::p_method_ramses_rt_solve_transport_eqn());
@@ -1647,7 +1661,8 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
   
   Scalar<double> scalar = block->data()->scalar_double();
 
-  int N_species_ = 3; //only three ionizable species (HI, HeI, HeII)
+  int N_groups = enzo_config->method_ramses_rt_N_groups;
+  int N_species = 3; //only three ionizable species (HI, HeI, HeII)
 
 #ifndef DEBUG_TURN_OFF_INJECTION
 // TODO: this overwrites initialization with value parameter. Should find better way of doing this
@@ -1656,7 +1671,7 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
     EnzoUnits * enzo_units = enzo::units();
     double Nunit = 1.0 / enzo_units->volume();
     double Funit = enzo_units->velocity() * Nunit;    
-    for (int i=0; i<enzo_config->method_ramses_rt_N_groups; i++) {
+    for (int i=0; i<N_groups; i++) {
       std::string istring = std::to_string(i);
       enzo_float *  N_i = (enzo_float *) field.values("photon_density_" + istring);
       enzo_float * Fx_i = (enzo_float *) field.values("flux_x_" + istring);
@@ -1674,7 +1689,7 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
      
       // initialize global mean group cross-sections/energies
       *(scalar.value( scalar.index( eps_string(i) ))) = 0.0;
-      for (int j=0; j<N_species_; j++) 
+      for (int j=0; j<N_species; j++) 
       {
        *(scalar.value( scalar.index( sigN_string(i,j) ))) = 0.0;
        *(scalar.value( scalar.index( sigE_string(i,j) ))) = 0.0;
@@ -1686,22 +1701,30 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
   // reset "mL" sums to zero
   // TODO: only do this once every N cycles, where N is a parameter
   
-  for (int i=0; i<N_groups_; i++) {
+  for (int i=0; i<N_groups; i++) {
     *(scalar.value( scalar.index( eps_string(i) + mL_string(i) ))) = 0.0;
     *(scalar.value( scalar.index( mL_string(i) ) )) = 0.0;
-    for (int j=0; j<N_species_; j++) {
+    for (int j=0; j<N_species; j++) {
       *(scalar.value( scalar.index( sigN_string(i,j) + mL_string(i) ))) = 0.0;
       *(scalar.value( scalar.index( sigE_string(i,j) + mL_string(i) ))) = 0.0;
     }
   }
    
   
-#ifndef DEBUG_TURN_OFF_INJECTION
   //start photon injection step
   //This function will start the transport step after a refresh
   this->call_inject_photons(enzo_block);
-#else
-  enzo_block->p_method_ramses_rt_solve_transport_eqn();
-  //this->call_solve_transport_eqn(enzo_block);
-#endif
+
+#ifdef DEBUG_PRINT_GROUP_PARAMETERS
+  for (int i=0; i<N_groups; i++) {
+    for (int j=0; j<N_species; j++) {
+      CkPrintf("[i,j] = [%d,%d]; sigN = %1.2e; sigE = %1.2e; eps = %1.2e\n",i,j,
+               *(scalar.value( scalar.index( sigN_string(i,j) ))),
+               *(scalar.value( scalar.index( sigE_string(i,j) ))),
+               *(scalar.value( scalar.index(  eps_string(i)   ))) );
+    }
+  }
+#endif 
+
+
 }

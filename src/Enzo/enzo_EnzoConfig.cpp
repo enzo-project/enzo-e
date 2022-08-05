@@ -263,7 +263,8 @@ EnzoConfig::EnzoConfig() throw ()
   method_ramses_rt_temperature_blackbody(0.0),
   method_ramses_rt_Nphotons_per_sec(0.0), // Set emmision rate for star particles
   method_ramses_rt_Nphotons_per_sec_list(), // supply list of emission rates for all groups
-  method_ramses_rt_recombination_radiation(false), 
+  method_ramses_rt_recombination_radiation(false),
+  method_ramses_rt_average_global_quantities(false),
   method_ramses_rt_bin_lower(),
   method_ramses_rt_bin_upper(),
   // EnzoMethodStarMaker,
@@ -696,6 +697,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_ramses_rt_Nphotons_per_sec;
   p | method_ramses_rt_Nphotons_per_sec_list;
   p | method_ramses_rt_recombination_radiation;
+  p | method_ramses_rt_average_global_quantities;
   p | method_ramses_rt_bin_lower;
   p | method_ramses_rt_bin_upper;
 
@@ -831,7 +833,6 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_background_acceleration_(p);
   read_method_check_(p);
   read_method_feedback_(p);
-  read_method_ramses_rt_(p);
   read_method_grackle_(p);
   read_method_gravity_(p);
   read_method_heat_(p);
@@ -839,6 +840,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_pm_deposit_(p);
   read_method_pm_update_(p);
   read_method_ppm_(p);
+  read_method_ramses_rt_(p);
   read_method_sink_maker_(p);
   read_method_star_maker_(p);
   read_method_turbulence_(p);
@@ -1649,7 +1651,7 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
        method_grackle_chemistry->UVbackground_redshift_drop);
 
     method_grackle_chemistry->use_radiative_transfer = p->value_integer
-      ("Method:grackle:use_radiative_transfer", method_ramses_rt);
+      ("Method:grackle:use_radiative_transfer", 0);
 
   }
 #endif /* CONFIG_USE_GRACKLE */
@@ -1817,6 +1819,9 @@ void EnzoConfig::read_method_ramses_rt_(Parameters * p)
 
   method_ramses_rt_recombination_radiation = p->value_logical
     ("Method:ramses_rt:recombination_radiation",false);
+  
+  method_ramses_rt_average_global_quantities = p->value_logical
+    ("Method:ramses_rt:average_global_quantities",false);
 
   method_ramses_rt_Nphotons_per_sec_list.resize(method_ramses_rt_N_groups);
   method_ramses_rt_bin_lower.resize(method_ramses_rt_N_groups);
