@@ -464,7 +464,7 @@ void EnzoMethodTurbulenceOU::compute_shift
 
   Field field = enzo_block->data()->field();
   const bool include_ppml_divb = (field.values("bfieldx") != nullptr);
-  if (include_ppml_divb) {
+  if (include_ppml_divb && enzo_block->is_leaf()) {
     enzo_float * bfield[3] =
       { (enzo_float *) field.values("bfieldx"),
         (enzo_float *) field.values("bfieldy"),
