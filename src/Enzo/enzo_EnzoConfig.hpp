@@ -371,8 +371,9 @@ public: // interface
       method_feedback_NEvents(-1),
       /// EnzoMethodInferenceArray
       method_inference_array_level(0),
-      method_inference_array_size(0),
-      method_inference_array_ghost_depth(0),
+      method_inference_array_dims(),
+      method_inference_array_size(),
+      method_inference_array_ghost_depth(),
       method_inference_array_field_group(),
       /// EnzoMethodStarMaker
       method_star_maker_flavor(""),
@@ -863,8 +864,9 @@ public: // attributes
 
   /// EnzoMethodInferenceArray
   int                        method_inference_array_level;
-  int                        method_inference_array_size;
-  int                        method_inference_array_ghost_depth;
+  int                        method_inference_array_dims[3];
+  int                        method_inference_array_size[3];
+  int                        method_inference_array_ghost_depth[3];
   std::string                method_inference_array_field_group;
 
   /// EnzoMethodStarMaker

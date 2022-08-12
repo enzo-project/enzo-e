@@ -645,6 +645,8 @@ Method * EnzoProblem::create_method_
     CkPrintf ("Creating EnzoMethodInferenceArray\n");
     method = new EnzoMethodInferenceArray
       (enzo_config->method_inference_array_level,
+       enzo_config->mesh_root_size,
+       enzo_config->method_inference_array_dims,
        enzo_config->method_inference_array_size,
        enzo_config->method_inference_array_ghost_depth,
        enzo_config->method_inference_array_field_group);

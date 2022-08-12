@@ -225,6 +225,12 @@ public: /// entry methods
   /// Synchronize for refresh
   void p_method_gravity_end();
 
+  // EnzoMethodInferenceArray
+  
+  void p_method_level_array_request_data(int,int,int,Index);
+  void p_method_level_array_send_data(int,int,int);
+  void p_method_level_array_done(int,int,int);
+
   //--------------------------------------------------
   /// Checkpoint
   //--------------------------------------------------

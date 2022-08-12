@@ -181,6 +181,7 @@ extern "C" {
 #include "enzo_IoEnzoBlock.hpp"
 #include "enzo_IoEnzoReader.hpp"
 #include "enzo_IoEnzoWriter.hpp"
+#include "enzo_EnzoLevelArray.hpp"
 
 #include "enzo_EnzoBoundary.hpp"
 

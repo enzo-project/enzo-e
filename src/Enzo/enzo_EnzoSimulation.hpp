@@ -11,6 +11,7 @@
 
 class CProxy_IoEnzoReader;
 class CProxy_IoEnzoWriter;
+class CProxy_EnzoLevelArray;
 
 #include "charm++.h"
 #include "enzo.decl.h"
@@ -58,8 +59,9 @@ public: // functions
   /// EnzoMethodCheck
   void r_method_check_enter (CkReductionMsg *);
   void p_check_done();
-  void p_set_io_reader(CProxy_IoEnzoReader io_reader);
-  void p_set_io_writer(CProxy_IoEnzoWriter io_writer);
+  void p_set_io_reader(CProxy_IoEnzoReader proxy);
+  void p_set_io_writer(CProxy_IoEnzoWriter proxy);
+  void p_set_level_array(CProxy_EnzoLevelArray proxy);
   void set_sync_check_writer(int count)
   { sync_check_writer_created_.set_stop(count); }
   void p_io_reader_created();

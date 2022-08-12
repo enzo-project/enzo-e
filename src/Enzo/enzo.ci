@@ -154,6 +154,7 @@ module enzo {
   readonly CProxy_EnzoSimulation proxy_enzo_simulation;
   readonly CProxy_IoEnzoReader   proxy_io_enzo_reader;
   readonly CProxy_IoEnzoWriter   proxy_io_enzo_writer;
+  readonly CProxy_EnzoLevelArray proxy_level_array;
 
   //----------------------------------------------------------------------
 
@@ -170,14 +171,16 @@ module enzo {
     // EnzoMethodCheck
     entry void r_method_check_enter(CkReductionMsg *);
     entry void p_check_done();
-    entry void p_set_io_writer(CProxy_IoEnzoWriter io_writer);
+    entry void p_set_io_writer(CProxy_IoEnzoWriter proxy);
 
     // enzo_control_restart
-    entry void p_set_io_reader(CProxy_IoEnzoReader io_reader);
+    entry void p_set_io_reader(CProxy_IoEnzoReader proxy);
     entry void p_io_reader_created();
     entry void p_restart_next_level();
     entry void p_restart_level_created();
-}
+    // enzo_level_array
+    entry void p_set_level_array(CProxy_EnzoLevelArray proxy);
+  };
 
   //----------------------------------------------------------------------%
   array[Index] EnzoBlock : Block {
@@ -204,6 +207,11 @@ module enzo {
     entry void p_method_gravity_continue();
     entry void p_method_gravity_end();
 
+    // EnzoMethodInferenceArray
+
+    entry void p_method_level_array_request_data(int,int,int,Index);
+    entry void p_method_level_array_send_data(int,int,int);
+    entry void p_method_level_array_done(int,int,int);
 
     // checkpoint
     entry void p_check_write_first
@@ -275,7 +283,6 @@ module enzo {
     entry void r_solver_mg0_barrier(CkReductionMsg* msg);
     entry void p_solver_mg0_prolong_recv(FieldMsg * msg);
     entry void p_solver_mg0_restrict_recv(FieldMsg * msg);
-
   };
 
   array[1D] IoEnzoReader : IoReader {
@@ -291,6 +298,9 @@ module enzo {
     entry IoEnzoWriter();
     entry IoEnzoWriter (int num_files, std::string ordering, int monitor_iter);
     entry void p_write(EnzoMsgCheck * );
-  }
+  };
 
+  array[3D] EnzoLevelArray {
+    entry EnzoLevelArray();
+  };
 };

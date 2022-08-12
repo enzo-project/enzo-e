@@ -254,8 +254,9 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_NEvents(-1),
   // EnzoMethodInferenceArray
   method_inference_array_level(0),
-  method_inference_array_size(0),
-  method_inference_array_ghost_depth(0),
+  method_inference_array_dims(),
+  method_inference_array_size(),
+  method_inference_array_ghost_depth(),
   method_inference_array_field_group(),
   // EnzoMethodStarMaker,
   method_star_maker_flavor(""),                              // star maker type to use
@@ -653,8 +654,9 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_feedback_NEvents;
 
   p | method_inference_array_level;
-  p | method_inference_array_size;
-  p | method_inference_array_ghost_depth;
+  PUParray(p,method_inference_array_dims,3);
+  PUParray(p,method_inference_array_size,3);
+  PUParray(p,method_inference_array_ghost_depth,3);
   p | method_inference_array_field_group;
 
     p | method_star_maker_flavor;
@@ -1903,14 +1905,50 @@ void EnzoConfig::read_method_heat_(Parameters * p)
 
 void EnzoConfig::read_method_inference_array_(Parameters* p)
 {
-  method_inference_array_level = p->value_integer
-    ("Method:inference_array:level");
-  method_inference_array_size = p->value_integer
-    ("Method:inference_array:array_size");
-  method_inference_array_ghost_depth = p->value_integer
-    ("Method:inference_array:ghost_depth");
-  method_inference_array_field_group = p->value_string
-    ("Method:inference_array:field_group");
+  p->group_set(0,"Method");
+  p->group_push("inference_array");
+
+  method_inference_array_level = p->value_integer ("level");
+
+  const int rank = p->value_integer("Mesh:root_rank",0);
+
+  if (p->type("array_dims") == parameter_list) {
+    const int nad = p->list_length("array_dims");
+    ASSERT2("EnzoConfig::read_method_inference_array_()",
+            "%s length must be 1 <= n <= %d",
+            p->full_name("array_dims"),rank,
+            1 <= nad && nad <= rank);
+    for (int i=0; i<rank; i++) {
+      method_inference_array_dims[i] = p->list_value_integer
+        (std::min(nad-1,rank),"array_dims");
+    }
+  }
+
+  if (p->type("array_size") == parameter_list) {
+    const int nas = p->list_length("array_size");
+    ASSERT2("EnzoConfig::read_method_inference_array_()",
+            "%s length must be 1 <= n <= %d",
+            p->full_name("array_size"),rank,
+            1 <= nas && nas <= rank);
+    for (int i=0; i<rank; i++) {
+      method_inference_array_size[i] = p->list_value_integer
+        (std::min(nas-1,rank),"array_size");
+    }
+  }
+  
+  if (p->type("array_ghost_depth") == parameter_list) {
+    const int nag = p->list_length("array_ghost_depth");
+    ASSERT2("EnzoConfig::read_method_inference_array_()",
+            "%s length must be 1 <= n <= %d",
+            p->full_name("array_ghost_depth"),rank,
+            1 <= nag && nag <= rank);
+    for (int i=0; i<rank; i++) {
+      method_inference_array_ghost_depth[i] = p->list_value_integer
+        (std::min(nag-1,rank),"array_ghost_depth");
+    }
+  }
+
+  method_inference_array_field_group = p->value_string  ("field_group");
 }
 
 //----------------------------------------------------------------------
