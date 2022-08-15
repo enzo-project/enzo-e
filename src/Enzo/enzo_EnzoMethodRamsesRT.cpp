@@ -63,7 +63,7 @@ EnzoMethodRamsesRT ::EnzoMethodRamsesRT(const int N_groups, const double clight)
   }
 
   // define other fields
-  //TODO: Add the rest once > 6 species is accounted for here
+  //TODO: Add the rest once/if photochemistry and attenuation for > 6 species is accounted for here
   //if (chemistry_level >= 1) {
     cello::define_field_in_group ("HI_density",    "color");
     cello::define_field_in_group ("HII_density",   "color");
@@ -210,11 +210,6 @@ double EnzoMethodRamsesRT::integrate_simpson(double a, double b,
                     int n, // Number of intervals
                     std::function<double(double,double,double,int)> f, double v1, double v2, int v3) throw()
 {
-    //TODO (?): The elegant thing to do here would be to somehow let the parameter f be a 
-    //          variadic function, and take va_list as a parameter instead of (v1,v2,v3,...). 
-    //          If I'm only using this to integrate planck functions though, I probably don't need to 
-    //          waste time making this as general as possible
-              
     // solve 1D integral using composite simpson's rule
     double h = (b - a) / n;
 
@@ -512,8 +507,6 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
       int ipdp = ip*dp;
       int ipdm = ip*dm;
 
-      //TODO: Add check for whether star particle is still active (has it blown up yet?)
-        
       // get corresponding grid position
       double x_part = (px[ipdp] - xm) / hx;
       double y_part = (py[ipdp] - ym) / hy;
@@ -526,15 +519,15 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
 
       // now get index of this cell
       int i = INDEX(ix,iy,iz,mx,my);
-      
+
       // deposit photons
-       
+
       // This function will take in particle mass as a parameter, and will fit
       // and integrate over the SED to get the total injection rate. The current
       // implementation in RAMSES assumes that SED of gas stays constant.
       // How do I keep track of the gas SED if different mass stars radiate differently?
-      
-     //TODO: Enforce that photon density stellar spectrum is the minimum value
+
+     //TODO: Enforce that photon density calculated from stellar spectrum is the minimum value
       //      for cells that contain stars. Necessary because after the transport step,
       //      N[cell with star] can drop to zero after the transport step, which is 
       //      unphysical.
@@ -1074,7 +1067,6 @@ void EnzoMethodRamsesRT::recombination_photons (EnzoBlock * enzo_block, enzo_flo
   
   enzo_float * e_density = (enzo_float *) field.values("e_density");
 
-  // TODO: Update this to implement > 6 species
   std::vector<std::string> chemistry_fields = {"HI_density", 
                                                "HeI_density", "HeII_density"};
   double mH  = enzo_constants::mass_hydrogen / munit; // code units
@@ -1173,8 +1165,6 @@ void EnzoMethodRamsesRT::recombination_chemistry (EnzoBlock * enzo_block) throw(
 void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * N, 
                      enzo_float * Fx, enzo_float * Fy, enzo_float * Fz, double clight, int i) throw()
 {
-  // TODO: Need to also update photon density field and to account for recombinations (2nd half of eq. 25)
-  //       Right now, this only accounts for attenuation (first half)
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
   double dt = enzo_block->dt;
@@ -1187,10 +1177,7 @@ void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * 
   int igroup = enzo_block->method_ramses_rt_igroup;
 
   if (! field.is_field("density")) return;
-  
-  //enzo_float * density = (enzo_float *) field.values("density");
-
-  // TODO: Update to account for > 6 species
+ 
   std::vector<std::string> chemistry_fields = {"HI_density", 
                                                "HeI_density", "HeII_density"};
   double mH = enzo_constants::mass_hydrogen / munit;
@@ -1209,24 +1196,21 @@ void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * 
     d_dt += n_j * clight*sigN_ij; // code_time^-1
   }
 
-// TODO: Either decrease timestep if d_dt*dt > 1, or raise an error here
-//       Could also apply duct-tape solution of setting N = std::min(N-d_dt*N*dt, tiny_number).
-//       Shouldn't run into any problems with the physics, since there is an absolute minimum for photon
-//       density anyway (zero). 
 #ifdef DEBUG_ATTENUATION
-  // NOTE d_dt * dt > 1 must be true. If this is happening, it is likely that your timestep is too large.
+  // NOTE d_dt * dt < 1 must be true. If this is happening, it is likely that your timestep is too large.
   //                                  This can be fixed by either increasing resolution, decreasing global timestep,
   //                                  or subcycling RT.
-  //if (d_dt * dt > 1) {
+  if (d_dt * dt > 1) {
   //  CkPrintf("MethodRamsesRT::add_attenuation() -- WARNING: d_dt*dt = %f (> 1)\n", d_dt*dt);
     CkPrintf("i=%d; d_dt=%e; N[i] = %e; Fx[i] = %e; dt = %e\n",i, d_dt, N[i], Fx[i], dt);
- // }
+  }
 #endif 
  
-  //N [i] -= d_dt*N [i] * dt;
-  //Ensure that photon density never drops below zero
-  N[i] = std::max( (1 - d_dt*dt)*N[i], 1e-16*enzo_units->volume() ); 
-
+  // Need to make sure that photon density never drops below zero. 
+  // Rescale d_dt if d_dt*dt > 1. 
+  d_dt /= std::max(1.0, d_dt*dt);  
+  
+  N [i] -= d_dt*N [i] * dt;
   Fx[i] -= d_dt*Fx[i] * dt;
   Fy[i] -= d_dt*Fy[i] * dt;
   Fz[i] -= d_dt*Fz[i] * dt; 
@@ -1291,16 +1275,9 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
   double hy = (yp-ym)/(my-2*gy);
   double hz = (zp-zm)/(mz-2*gz);
 
-  // Adjust values for cosmological expansion here? 
-  // if (cosmology) {
-  // }
-
   // if 2D, gz = 0 by default (I think) and mz = 1, so the outermost loop
   // would just be for (int iz=0, iz<1, iz++)
 
-
-
-  //if (true) get_group_attributes(); // if (enzo_block->cycle % attribute_cycle_step == 0)
   double lunit = enzo_units->length();
   double tunit = enzo_units->time();
   double Nunit = 1/enzo_units->volume();
@@ -1350,6 +1327,7 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
         // add interactions with matter 
         add_attenuation(enzo_block, Nnew, Fxnew, Fynew, Fznew, clight, i); 
       #endif
+
         if (Nnew[i] < 1e-16 / Nunit) Nnew[i] = 1e-16 / Nunit;
 
         if (enzo_config->method_ramses_rt_recombination_radiation) {
@@ -1372,9 +1350,12 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
         Fx[i] = Fxnew[i];
         Fy[i] = Fynew[i];
         Fz[i] = Fznew[i];
-   
-       // if (N [i] < 1e-16) N [i] = 1e-16;
-
+  
+        if ( isnan(N[i]) ) {
+          ERROR("EnzoMethodRamsesRT::solve_transport_eqn()", 
+                "N[i] is NaN! This is most likely due to a timestep that is too large.\n"
+                 "Try setting Method:ramses_rt:courant to a smaller value.");
+        }
       }
     }
   } 
@@ -1393,7 +1374,7 @@ void EnzoMethodRamsesRT::call_inject_photons(EnzoBlock * enzo_block) throw()
   enzo_block->method_ramses_rt_igroup = 0;
   
   const int N_groups = enzo_config->method_ramses_rt_N_groups;
-  const int N_species = 3; //TODO: update for > 6 species
+  const int N_species = 3; 
 
   if (enzo_block->is_leaf()) { // only inject photons for leaf blocks
     for (int i=0; i<N_groups; i++) {
@@ -1507,7 +1488,7 @@ void EnzoMethodRamsesRT::set_global_averages(EnzoBlock * enzo_block, CkReduction
 
   const EnzoConfig * enzo_config = enzo::config();
   const int N_groups = enzo_config->method_ramses_rt_N_groups;
-  const int N_species = 3; //TODO: update for > 6 species
+  const int N_species = 3; 
 
   Scalar<double> scalar = enzo_block->data()->scalar_double();
 
@@ -1631,16 +1612,7 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
   const EnzoConfig * enzo_config = enzo::config();
  
   // TODO: lump the rest of the radiation that doesn't fall into these bins into one "other" group
-  // and evolve that one too.
-  //
-  //
-  // QUESTION: How do I get N_nu from the SED?
-  // 
-  //
-  // LOOK AT DAN REYNOLDS' BRANCH OF ENZO-BW TO SEE HOW THIS IS IMPLEMENTED
-  // See ComputeRadiationIntegrals() function and EnforceRadiationBounds()?
-  //
-  //
+  // and evolve that one too?
 
   Field field = block->data()->field();
   int mx,my,mz;  
@@ -1679,8 +1651,6 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
       enzo_float * Fz_i = (enzo_float *) field.values("flux_z_" + istring);
       for (int j=0; j<m; j++)
       {
-        // initialize fields to a small number (hard zeros give NaNs in solving transport eqn) 
-        // TODO: write a problem initializer so that we don't have to do this 
         N_i [j] = 1e-16 / Nunit;
         Fx_i[j] = 1e-16 / Funit;
         Fy_i[j] = 1e-16 / Funit;
