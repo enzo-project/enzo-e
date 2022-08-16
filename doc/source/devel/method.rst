@@ -66,16 +66,19 @@ Be mindful, that the following snippet doesn't actually exist anywhere in the co
 
   }
   
-Gotchas
-=======
-The previous section should have made it clear that a given ``Method`` instance may have it's ``timestep`` and ``compute`` method to one or more ``Block`` per cycle.
-Consequently, problems if you mutate the attributes of ``Method`` object based on data from a ``Block``.
+Pitfalls
+========
+The previous section should have made it clear that a given ``Method`` instance generally has its ``timestep`` and ``compute`` method invoked on one or more ``Block`` per cycle.
+Consequently, problems can arise if you mutate the attributes of a ``Method`` instance based on data from a given ``Block`` instance.
 
 A good rule-of-thumb for new developers is that you should generally avoid mutating attributes ``Method`` object outside of the constructor.
-Instead you should consider using one of the specialized data interfaces.
-This includes field data (managed by ``Field``), particle data (managed by ``Particle``), or scalar data (managed by ``Scalar``).
-The advantage of doing this is that the associated data will be appropriately migrated if a ``Block`` migrates between PEs.
-In certain cases you can also add an attribute to ``EnzoBlock``, but that's generally discouraged (the ``Scalar`` interface is usually a better choice).
+If you need to associate data with a given ``Block``, you should consider using one of the specialized data interfaces that exist for:
 
-Naturally, this isn't a hard-and-fast rule.
-There are times where you may need to violate it (e.g. to facillitate optimizations).
+  * field data (managed by ``Field``)
+  * particle data (managed by ``Particle``)
+  * scalar data (managed by ``Scalar``)
+
+An advantage of using these interfaces is that the associated data will be appropriately migrated if a ``Block`` migrates between PEs.
+In certain cases one might alternatively add an attribute to ``EnzoBlock``, but that's generally discouraged if it can be avoided (the ``Scalar`` interface is usually a better choice).
+
+As an aside, there may be times where it makes sense to violate this guideline (e.g. to facillitate optimizations).
