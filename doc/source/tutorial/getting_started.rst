@@ -292,7 +292,7 @@ If errors like
     Permission denied (publickey,gssapi-keyex,gssapi-with-mic,password,hostbased).
     Charmrun> Error 255 returned from remote shell (localhost:0)
 
-are displayed, a node local run (i.e., no "remote" connections even to the local host) could be used instead by add ``++local`` to ``charmrun``, e.g.:
+are displayed, a node local run (i.e., no "remote" connections even to the local host) could be used instead by adding ``++local`` to ``charmrun``, e.g.:
 
      ``~/Charm/bin/charmrun ++local +p4 bin/enzo-e input/HelloWorld/Hi.in``
 
