@@ -293,7 +293,7 @@ void EnzoMethodRamsesRT::get_radiation_custom(EnzoBlock * enzo_block, enzo_float
     double sigma_j = sigma_vernier(energy,j); // cm^2
 
     #ifdef DEBUG_INJECTION
-      CkPrintf("MethodRamsesRT::get_radiation_custom -- j = %d; energy = %f eV; sigma_j = %1.2e cm^2 \n", j, energy, sigma_j);
+      CkPrintf("MethodRamsesRT::get_radiation_custom -- j = %d; energy = %f eV; sigma_j = %1.2e cm^2; mL = %1.2e \n", j, energy, sigma_j, mL);
     #endif
  
     // put into code units 
@@ -305,7 +305,7 @@ void EnzoMethodRamsesRT::get_radiation_custom(EnzoBlock * enzo_block, enzo_float
   *(scalar.value( scalar.index( eps_string(igroup   ) + mL_string(igroup) ))) += energy*enzo_constants::erg_eV/eunit * mL;
 
   
-  N[i] = luminosity * inv_vol * dt; // code units
+  N[i] += luminosity * inv_vol * dt; // code units
   #ifdef DEBUG_INJECTION
     CkPrintf("MethodRamsesRT::get_radiation_custom -- N[i] = %1.2e cm^-3; Ndot = %1.2e photons/s \n", N[i] / (lunit*lunit*lunit), luminosity / enzo_units->time());
   #endif
@@ -357,7 +357,7 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_fl
                  T,clight,planck_case_E);
 
   // update photon density 
-  N[i] = f_esc * N_integrated * lunit*lunit*lunit;
+  N[i] += f_esc * N_integrated * lunit*lunit*lunit;
 
   //----------
 
@@ -1201,9 +1201,9 @@ void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * 
   //                                  This can be fixed by either increasing resolution, decreasing global timestep,
   //                                  or subcycling RT.
   if (d_dt * dt > 1) {
-  //  CkPrintf("MethodRamsesRT::add_attenuation() -- WARNING: d_dt*dt = %f (> 1)\n", d_dt*dt);
-    CkPrintf("i=%d; d_dt=%e; N[i] = %e; Fx[i] = %e; dt = %e\n",i, d_dt, N[i], Fx[i], dt);
+    CkPrintf("MethodRamsesRT::add_attenuation() -- WARNING: d_dt*dt = %f (> 1)\n", d_dt*dt);
   }
+    CkPrintf("i=%d; d_dt=%e; N[i] = %e; Fx[i] = %e; dt = %e\n",i, d_dt, N[i], Fx[i], dt);
 #endif 
  
   // Need to make sure that photon density never drops below zero. 
@@ -1354,7 +1354,7 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
         if ( isnan(N[i]) ) {
           ERROR("EnzoMethodRamsesRT::solve_transport_eqn()", 
                 "N[i] is NaN! This is most likely due to a timestep that is too large.\n"
-                 "Try setting Method:ramses_rt:courant to a smaller value.");
+                 "Try setting Method:ramses_rt:courant to a smaller value.\n");
         }
       }
     }
