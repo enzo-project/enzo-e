@@ -187,8 +187,6 @@ float Memory::efficiency ( std::string group_name )
 {
 #ifdef CONFIG_USE_MEMORY
   int index_group = this->index_group(group_name);
-  printf ("bytes_limit_[%d] = %ld\n",index_group,bytes_limit_[index_group]);
-  printf ("bytes_curr_[%d] = %ld\n",index_group,bytes_curr_[index_group]);
   if (bytes_limit_[index_group] != 0) {
     return (float) bytes_curr_[index_group] / bytes_limit_[index_group];
   } else {

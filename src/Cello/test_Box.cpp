@@ -43,7 +43,7 @@ PARALLEL_MAIN_BEGIN
     CkPrintf ("im3 %d %d %d ip3 %d %d %d\n",
               im3[0],im3[1],im3[2],
               ip3[0],ip3[1],ip3[2]);
-    exit_();
+    //exit_();
   }
   { 
     Box * box000_l0 = new Box (2,n,g4);

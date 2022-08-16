@@ -50,6 +50,12 @@ find_package(Charm REQUIRED)
 # Link executables with the charmc wrapper
 STRING(REGEX REPLACE "<CMAKE_CXX_COMPILER>" "${CHARM_COMPILER}"
        CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE}")
+# for book-keeping purposes create a library representing the external
+# Charm-library. We are going to make this an interface library (a header-only)
+# library since the charmc wrapper makes sure we link to the correct library
+add_library(CHARM_EXTERNAL INTERFACE)
+target_include_directories(CHARM_EXTERNAL INTERFACE ${CHARM_INCLUDE_DIRS})
+
 
 # Need to process Grackle here as both Cello and Enzo-E depend on it
 option(USE_GRACKLE "Use Grackle Chemistry" ON)
@@ -309,36 +315,14 @@ add_subdirectory(src/Cello)
 add_subdirectory(src/Enzo)
 add_subdirectory(src/External)
 
+
 include(CTest)
 
-# including the CTest module defines the BUILD_TESTING option. Its initial value is ON
-option(USE_YT_BASED_TESTS "Includes tests that require yt" ON)
+# include(CTest) implicitly initializes BUILD_TESTING to ON if it was not
+# previously initialized (e.g. from the command line)
 if (BUILD_TESTING)
-  find_package(Python3)
-  if (Python3_FOUND)
-    message(STATUS
-      "   IMPORTANT: Make sure this is the Python version you want "
-      "to use. If not, e.g., because you want to use a conda or virtualenv based "
-      "version, try setting `-DPython3_FIND_VIRTUALENV=ONLY` or "
-      "`-DPython3_EXECUTABLE=/path/to/desired/python`."
-      )
-  else()
-    message(FATAL_ERROR
-     "You asked to build the tests, which require a python3 installation, but no python "
-     "installation was found. You can either install a python distribution (recommended) or "
-     "disable all tests by setting `-DBUILD_TESTING=OFF`."
-     )
-  endif()
-
-  if (USE_YT_BASED_TESTS)
-    # Ensure all required packages are present
-    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/PythonModuleCheck.cmake)
-    required_python_modules_found("yt;libconf;h5py")
-  endif()
-
   add_subdirectory(test)
 endif()
-
 
 # extract compile defs from from Cello to populate config
 get_directory_property( CELLO_CPPDEFINES DIRECTORY src/Cello COMPILE_DEFINITIONS )
