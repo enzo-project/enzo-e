@@ -201,7 +201,9 @@ double EnzoMethodRamsesRT::timestep ( Block * block ) throw()
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
 
-  return h_min / (3*enzo_config->method_ramses_rt_clight_frac*enzo_constants::clight / enzo_units->velocity());
+  double courant = enzo_config->method_ramses_rt_courant;
+  double clight_frac = enzo_config->method_ramses_rt_clight_frac;
+  return courant * h_min / (clight_frac*enzo_constants::clight / enzo_units->velocity());
 }
 
 //-----------------------------------------------------------------------
@@ -269,7 +271,7 @@ double EnzoMethodRamsesRT::get_star_temperature(double M) throw()
 }
 
 void EnzoMethodRamsesRT::get_radiation_custom(EnzoBlock * enzo_block, enzo_float * N, int i, double energy,
-           double pmass, double dt, double inv_vol) throw()
+           double pmass, double plum, double dt, double inv_vol) throw()
 {
   // 
   // energy is passed in with units of eV
@@ -284,11 +286,15 @@ void EnzoMethodRamsesRT::get_radiation_custom(EnzoBlock * enzo_block, enzo_float
   Scalar<double> scalar = enzo_block->data()->scalar_double();
  
   int igroup = enzo_block->method_ramses_rt_igroup;
-  double luminosity = enzo_config->method_ramses_rt_Nphotons_per_sec_list[igroup] * enzo_units->time();
-  double mL = pmass*luminosity; 
 
-  // TODO: This loop only goes through primordial ionizable species. Update once support for
-  //       > 6 species is added
+  if (enzo_config->method_ramses_rt_Nphotons_per_sec > 0.0) {
+    // set particle luminosity = some fraction * total photon production rate
+    plum = enzo_config->method_ramses_rt_SED[igroup] * enzo_config->method_ramses_rt_Nphotons_per_sec
+                                                   * enzo_units->time();
+  }                                                 
+  double mL = pmass*plum; 
+  
+  // loop through ionizable species
   for (int j=0; j<3; j++) {
     double sigma_j = sigma_vernier(energy,j); // cm^2
 
@@ -303,11 +309,10 @@ void EnzoMethodRamsesRT::get_radiation_custom(EnzoBlock * enzo_block, enzo_float
 
   *(scalar.value( scalar.index(mL_string(igroup)) )) += mL;
   *(scalar.value( scalar.index( eps_string(igroup   ) + mL_string(igroup) ))) += energy*enzo_constants::erg_eV/eunit * mL;
-
   
-  N[i] += luminosity * inv_vol * dt; // code units
+  N[i] += plum * inv_vol * dt; // code units
   #ifdef DEBUG_INJECTION
-    CkPrintf("MethodRamsesRT::get_radiation_custom -- N[i] = %1.2e cm^-3; Ndot = %1.2e photons/s \n", N[i] / (lunit*lunit*lunit), luminosity / enzo_units->time());
+    CkPrintf("MethodRamsesRT::get_radiation_custom -- N[i] = %1.2e cm^-3; Ndot = %1.2e photons/s \n", N[i] / (lunit*lunit*lunit), plum / enzo_units->time());
   #endif
 
 }
@@ -468,13 +473,14 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
   if (particle.num_particles(it) == 0) return;
 
   const int ia_m = particle.attribute_index (it, "mass");
-
+  const int ia_L = particle.attribute_index (it, "luminosity");
   const int ia_x = (rank >= 1) ? particle.attribute_index (it, "x") : -1;
   const int ia_y = (rank >= 2) ? particle.attribute_index (it, "y") : -1;
   const int ia_z = (rank >= 3) ? particle.attribute_index (it, "z") : -1;
 
   const int dm = particle.stride(it, ia_m);
   const int dp = particle.stride(it, ia_x);
+  const int dL = particle.stride(it, ia_L);
 
   const int nb = particle.num_batches(it);
 
@@ -492,9 +498,10 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
   std::string radiation_spectrum = enzo_config->method_ramses_rt_radiation_spectrum; 
   for (int ib=0; ib<nb; ib++){
     enzo_float *px=0, *py=0, *pz=0;
-    enzo_float *pmass=0;
+    enzo_float *pmass=0, *plum=0;
    
     pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib);
+    plum  = (enzo_float *) particle.attribute_array(it, ia_L, ib);
 
     px = (enzo_float *) particle.attribute_array(it, ia_x, ib);
     py = (enzo_float *) particle.attribute_array(it, ia_y, ib);
@@ -506,6 +513,7 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
     for (int ip=0; ip<np; ip++) {
       int ipdp = ip*dp;
       int ipdm = ip*dm;
+      int ipdL = ip*dL;
 
       // get corresponding grid position
       double x_part = (px[ipdp] - xm) / hx;
@@ -536,7 +544,7 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
                                 dt, cell_volume);
       }
       else if (radiation_spectrum == "custom") {
-        get_radiation_custom(enzo_block, N, i, E_mean, pmass[ipdm], dt, 1/cell_volume);
+        get_radiation_custom(enzo_block, N, i, E_mean, pmass[ipdm], plum[ipdL], dt, 1/cell_volume);
       }
       
       //TODO: Only call get_cross_section here every N cycles, where N is an input parameter.
@@ -855,7 +863,6 @@ void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo
   enzo_float * HI_density    = (enzo_float *) field.values("HI_density");
   enzo_float * HeI_density   = (enzo_float *) field.values("HeI_density");
   enzo_float * HeII_density  = (enzo_float *) field.values("HeII_density");
-  enzo_float * temperature   = (enzo_float *) field.values("temperature");
   
   enzo_float * RT_HI_ionization_rate   = (enzo_float *) field.values("RT_HI_ionization_rate");
   enzo_float * RT_HeI_ionization_rate  = (enzo_float *) field.values("RT_HeI_ionization_rate");

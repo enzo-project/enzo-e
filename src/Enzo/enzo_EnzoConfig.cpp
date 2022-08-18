@@ -262,7 +262,8 @@ EnzoConfig::EnzoConfig() throw ()
   method_ramses_rt_radiation_spectrum("blackbody"), // Type of radiation spectrum to use for star particles
   method_ramses_rt_temperature_blackbody(0.0),
   method_ramses_rt_Nphotons_per_sec(0.0), // Set emmision rate for star particles
-  method_ramses_rt_Nphotons_per_sec_list(), // supply list of emission rates for all groups
+  method_ramses_rt_SED(), // supply list of emission rate fraction for all groups
+  method_ramses_rt_courant(0.3),
   method_ramses_rt_recombination_radiation(false),
   method_ramses_rt_average_global_quantities(false),
   method_ramses_rt_bin_lower(),
@@ -695,7 +696,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_ramses_rt_radiation_spectrum;
   p | method_ramses_rt_temperature_blackbody;
   p | method_ramses_rt_Nphotons_per_sec;
-  p | method_ramses_rt_Nphotons_per_sec_list;
+  p | method_ramses_rt_SED;
+  p | method_ramses_rt_courant;
   p | method_ramses_rt_recombination_radiation;
   p | method_ramses_rt_average_global_quantities;
   p | method_ramses_rt_bin_lower;
@@ -1823,17 +1825,19 @@ void EnzoConfig::read_method_ramses_rt_(Parameters * p)
   method_ramses_rt_average_global_quantities = p->value_logical
     ("Method:ramses_rt:average_global_quantities",false);
 
-  method_ramses_rt_Nphotons_per_sec_list.resize(method_ramses_rt_N_groups);
+  method_ramses_rt_courant = p->value_float
+    ("Method:ramses_rt:courant", 0.3);
+
+  method_ramses_rt_SED.resize(method_ramses_rt_N_groups);
   method_ramses_rt_bin_lower.resize(method_ramses_rt_N_groups);
   method_ramses_rt_bin_upper.resize(method_ramses_rt_N_groups);
 
   // make default energy bins equally spaced between 1 eV and 101 eV
   double bin_width = 100.0 / method_ramses_rt_N_groups;
   for (int i=0; i<method_ramses_rt_N_groups; i++) {
-    // default emission rate (if this is being used) is flat spectrum
-    method_ramses_rt_Nphotons_per_sec_list[i] = p->list_value_float
-      (i, "Method:ramses_rt:Nphotons_per_sec_list", 
-       method_ramses_rt_Nphotons_per_sec);
+    // default SED (if this is being used) is flat spectrum
+    method_ramses_rt_SED[i] = p->list_value_float
+      (i, "Method:ramses_rt:SED", method_ramses_rt_Nphotons_per_sec/method_ramses_rt_N_groups);
 
     method_ramses_rt_bin_lower[i] = p->list_value_float
       (i,"Method:ramses_rt:bin_lower", 1.0 + bin_width*i);
