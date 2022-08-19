@@ -375,6 +375,8 @@ public: // interface
       method_inference_array_size(),
       method_inference_array_ghost_depth(),
       method_inference_array_field_group(),
+      method_inference_array_num_adapt(0),
+      method_inference_array_adapt_index(-1),
       /// EnzoMethodStarMaker
       method_star_maker_flavor(""),
       method_star_maker_use_density_threshold(false),           // check above density threshold before SF
@@ -868,6 +870,8 @@ public: // attributes
   int                        method_inference_array_size[3];
   int                        method_inference_array_ghost_depth[3];
   std::string                method_inference_array_field_group;
+  int                        method_inference_array_num_adapt;
+  int                        method_inference_array_adapt_index;
 
   /// EnzoMethodStarMaker
   std::string               method_star_maker_flavor;

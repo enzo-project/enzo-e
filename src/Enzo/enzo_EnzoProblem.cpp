@@ -315,6 +315,7 @@ Refine * EnzoProblem::create_refine_
 (
  std::string        type,
  int                index,
+ std::string        param_str,
  Config *           config,
  Parameters *       parameters
  ) throw ()
@@ -358,7 +359,8 @@ Refine * EnzoProblem::create_refine_
        config->adapt_level_exponent[index] );
 
   } else {
-    return Problem::create_refine_(type,index,config,parameters);
+    return Problem::create_refine_
+      (type, index, param_str, config,parameters);
   }
 }
 
@@ -642,7 +644,6 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "inference_array") {
 
-    CkPrintf ("Creating EnzoMethodInferenceArray\n");
     method = new EnzoMethodInferenceArray
       (enzo_config->method_inference_array_level,
        enzo_config->mesh_root_size,

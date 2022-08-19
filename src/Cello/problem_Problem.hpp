@@ -69,6 +69,7 @@ public: // interface
       initial_list_(),
       physics_list_(),
       refine_list_(),
+      adapt_refine_list_(),
       stopping_(nullptr),
       solver_list_(),
       method_list_(),
@@ -76,7 +77,7 @@ public: // interface
       prolong_list_(),
       restrict_list_(),
       units_(nullptr),
-      index_refine_(0),
+      index_adapt_refine_(0),
       index_output_(0),
       index_boundary_(0)
   {}
@@ -112,8 +113,14 @@ public: // interface
   /// Return the ith refine object
   Refine *  refine(int i) const throw()
   {
-    if (i == -1) i = index_refine_;
     return (0 <= i && i < (int)refine_list_.size()) ? refine_list_[i] : nullptr; 
+  }
+
+  /// Return the ith refine object used for mesh refinement criteria
+  Refine * adapt_refine(int i) const throw()
+  {
+    if (i == -1) i = index_adapt_refine_;
+    return (0 <= i && i < (int)adapt_refine_list_.size()) ? refine_list_[adapt_refine_list_[i]] : nullptr; 
   }
 
   /// Return the ith output object
@@ -257,6 +264,7 @@ protected: // functions
   virtual Refine * create_refine_ 
   (std::string type,
    int index,
+   std::string param_str,
    Config * config, 
    Parameters * parameters) throw ();
 
@@ -313,6 +321,9 @@ protected: // attributes
   /// Refinement criteria objects
   std::vector<Refine *> refine_list_;
 
+  /// Indices of refinement criteria objects for Adapt phase
+  std::vector<int> adapt_refine_list_;
+
   /// Stopping criteria
   Stopping * stopping_;
 
@@ -335,7 +346,7 @@ protected: // attributes
   Units * units_;
   
   /// Index of currently active Refine object
-  int index_refine_;
+  int index_adapt_refine_;
 
   /// Index of currently active Output object
   int index_output_;

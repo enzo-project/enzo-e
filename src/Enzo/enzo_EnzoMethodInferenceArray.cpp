@@ -206,10 +206,16 @@ void EnzoMethodInferenceArray::intersecting_root_blocks_
   CkPrintf ("DEBUG_LEVEL_ARRAY array ghost ga3 %d %d %d\n",ga3[0],ga3[1],ga3[2]);
   CkPrintf ("DEBUG_LEVEL_ARRAY array index ia3 %d %d %d\n",ia3[0],ia3[1],ia3[2]);
   CkPrintf ("DEBUG_LEVEL_ARRAY block dims nb3 %d %d %d\n",nb3[0],nb3[1],nb3[2]);
-  
-  // for (int i=0; i<cello::rank(); i++) {
-  //   ibm3[i] = (ia3[i]+1
-  // CkPrintf ("DEBUG_LEVEL_ARRAY block cells mb3 %d %d %d\n",mb3[0],mb3[1],mb3[2]);
+
+  int lfactor = 1; for (int i=0; i<level; i++) lfactor*=2;
+  int ma3[3],mb3[3];
+  for (int i=0; i<cello::rank(); i++) {
+    ma3[i] = n3[i]/na3[i]; // number of root-level cells per inference array
+    mb3[i] = n3[i]/nb3[i]; // size of root-level blocks
+    //    ia3_lower[i] = std::floor(float((ib3[i]*mb3[i]-ga3[i]-ma3[i])/ma3[i]))+1;
+    ib3_lower[i] = std::floor(float((ia3[i]*ma3[i]-ga3[i]))/mb3[i]);
+    ib3_upper[i] = std::ceil (float((ia3[i]*ma3[i]+ga3[i]+ma3[i]-1)/mb3[i]))+1;
+  }
 
   CkPrintf ("DEBUG_LEVEL_ARRAY block lower index ib3_lower %d %d %d\n",ib3_lower[0],ib3_lower[1],ib3_lower[2]);
   CkPrintf ("DEBUG_LEVEL_ARRAY block upper index ib3_upper %d %d %d\n",ib3_upper[0],ib3_upper[1],ib3_upper[2]);

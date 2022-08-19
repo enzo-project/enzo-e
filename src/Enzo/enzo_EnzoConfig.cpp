@@ -258,6 +258,8 @@ EnzoConfig::EnzoConfig() throw ()
   method_inference_array_size(),
   method_inference_array_ghost_depth(),
   method_inference_array_field_group(),
+  method_inference_array_num_adapt(0),
+  method_inference_array_adapt_index(-1),
   // EnzoMethodStarMaker,
   method_star_maker_flavor(""),                              // star maker type to use
   method_star_maker_use_altAlpha(false),
@@ -658,6 +660,8 @@ void EnzoConfig::pup (PUP::er &p)
   PUParray(p,method_inference_array_size,3);
   PUParray(p,method_inference_array_ghost_depth,3);
   p | method_inference_array_field_group;
+  p | method_inference_array_num_adapt;
+  p | method_inference_array_adapt_index;
 
     p | method_star_maker_flavor;
   p | method_star_maker_use_altAlpha;
@@ -841,19 +845,22 @@ void EnzoConfig::read(Parameters * p) throw()
 
 void EnzoConfig::read_adapt_(Parameters *p)
 {
+  const int new_size = adapt_index_ + num_adapt;
 
-  adapt_mass_type.resize(num_adapt);
+  adapt_mass_type.resize(new_size);
 
   for (int ia=0; ia<num_adapt; ia++) {
 
-    std::string prefix = "Adapt:" + adapt_list[ia] + ":";
-    adapt_mass_type[ia] = p->value_string(prefix+"mass_type","unknown");
+    const int index_refine = adapt_index_ + ia;
+    std::string prefix = "Adapt:" + adapt_list[index_refine] + ":";
+
+    adapt_mass_type[index_refine] = p->value_string(prefix+"mass_type","unknown");
     ASSERT2("EnzoConfig::read()",
 	    "Unknown mass_type %s for parameter %s",
-	    adapt_mass_type[ia].c_str(),(prefix+"mass_type").c_str(),
-	    (adapt_type[ia] != "mass" ||
-	     (adapt_mass_type[ia]=="dark" ||
-	      adapt_mass_type[ia]=="baryon")));
+	    adapt_mass_type[index_refine].c_str(),(prefix+"mass_type").c_str(),
+	    (adapt_type[index_refine] != "mass" ||
+	     (adapt_mass_type[index_refine]=="dark" ||
+	      adapt_mass_type[index_refine]=="baryon")));
   }
 }
 
@@ -1947,8 +1954,24 @@ void EnzoConfig::read_method_inference_array_(Parameters* p)
         (std::min(nag-1,rank),"array_ghost_depth");
     }
   }
-
   method_inference_array_field_group = p->value_string  ("field_group");
+
+  // save starting index of "refinement" criteria to be used for
+  // triggering inference array allocation
+  method_inference_array_num_adapt = p->list_length("criteria_list");
+  method_inference_array_adapt_index = adapt_list.size();
+
+  const int new_size = method_inference_array_adapt_index
+    +                  method_inference_array_num_adapt;
+
+  resize_adapt_vectors_(new_size);
+
+  for (int ic=0; ic<method_inference_array_num_adapt; ic++) {
+    std::string criterion = p->list_value_string (ic,"criteria_list","unknown");
+    const int index_refine = ic + method_inference_array_adapt_index;
+    std::string prefix=std::string("Method:inference_array:")+criterion+":";
+    read_criterion_(p,index_refine,prefix);
+  }
 }
 
 //----------------------------------------------------------------------

@@ -283,8 +283,8 @@ int Block::adapt_compute_desired_level_(int level_maximum)
   Problem * problem = cello::problem();
   Refine * refine;
 
-  int index_refine = 0;
-  while ((refine = problem->refine(index_refine++))) {
+  int index_refine = cello::config()->adapt_index_;
+  while ((refine = problem->adapt_refine(index_refine++))) {
 
     Schedule * schedule = refine->schedule();
 

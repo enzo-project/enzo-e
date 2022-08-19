@@ -25,8 +25,10 @@ public: // interface
   : PUP::able(),
     num_adapt(0),
     adapt_list(),
+    adapt_index_(),
     adapt_interval(0),
     adapt_min_face_rank(0),
+    adapt_schedule_index(),
     adapt_type(),
     adapt_field_list(),
     adapt_min_refine(),
@@ -37,7 +39,6 @@ public: // interface
     adapt_level_exponent(),
     adapt_include_ghosts(),
     adapt_output(),
-    adapt_schedule_index(),
     balance_schedule_index(0),
     num_boundary(0),
     boundary_list(),
@@ -200,8 +201,10 @@ public: // interface
     : PUP::able(m),
       num_adapt(0),
       adapt_list(),
+      adapt_index_(),
       adapt_interval(0),
       adapt_min_face_rank(0),
+      adapt_schedule_index(),
       adapt_type(),
       adapt_field_list(),
       adapt_min_refine(),
@@ -212,7 +215,6 @@ public: // interface
       adapt_level_exponent(),
       adapt_include_ghosts(),
       adapt_output(),
-      adapt_schedule_index(),
       balance_schedule_index(-1),
       num_boundary(0),
       boundary_list(),
@@ -388,8 +390,11 @@ public: // attributes
 
   int                        num_adapt;
   std::vector <std::string>  adapt_list;
-  int                        adapt_interval;
+  // non-parameter storing global index for first refinement criterion
+  int                        adapt_index_;
   int                        adapt_min_face_rank;
+  std::vector <int>          adapt_schedule_index;
+  int                        adapt_interval;
   std::vector <std::string>  adapt_type;
   std::vector 
   < std::vector<std::string> > adapt_field_list;
@@ -401,7 +406,6 @@ public: // attributes
   std::vector <double>       adapt_level_exponent;
   std::vector <char>         adapt_include_ghosts;
   std::vector <std::string>  adapt_output;
-  std::vector <int>          adapt_schedule_index;
   
   // Balance (dynamic load balancing)
 
@@ -649,6 +653,9 @@ protected: // functions
   void read_stopping_    ( Parameters * ) throw();
   void read_testing_     ( Parameters * ) throw();
   void read_units_       ( Parameters * ) throw();
+  void resize_adapt_vectors_ (int new_size) throw();
+  void read_criterion_
+  (Parameters *, int index, std::string prefix) throw();
 
   int read_schedule_( Parameters * ,
 		      const std::string group   );
