@@ -203,7 +203,7 @@ double EnzoMethodRamsesRT::timestep ( Block * block ) throw()
 
   double courant = enzo_config->method_ramses_rt_courant;
   double clight_frac = enzo_config->method_ramses_rt_clight_frac;
-  return courant * h_min / (clight_frac*enzo_constants::clight / enzo_units->velocity());
+  return courant * h_min / (3.0 * clight_frac*enzo_constants::clight / enzo_units->velocity());
 }
 
 //-----------------------------------------------------------------------
@@ -1059,10 +1059,11 @@ int EnzoMethodRamsesRT::get_b_boolean (double E_lower, double E_upper, int speci
 //---------------------------------
 
 
-void EnzoMethodRamsesRT::recombination_photons (EnzoBlock * enzo_block, enzo_float * N, 
+void EnzoMethodRamsesRT::recombination_photons (EnzoBlock * enzo_block, enzo_float * N, enzo_float * Nnew, 
                                                 enzo_float * T, int i, double E_lower, double E_upper) throw()
 {
-  // update photon_density to account for recombination (2nd half of eq 25).
+  // update photon_density to account for recombination
+  // 2nd half of eq 25, using backwards-in-time quantities for all variables.
   // this is called once for each group.
 
   Field field = enzo_block->data()->field();
@@ -1102,7 +1103,7 @@ void EnzoMethodRamsesRT::recombination_photons (EnzoBlock * enzo_block, enzo_flo
 #ifdef DEBUG_RECOMBINATION
   CkPrintf("MethodRamsesRT::recombination_photons -- [E_lower, E_upper] = [%.2f, %.2f]; dN_dt[i] = %1.3e; dt = %1.3e\n", E_lower, E_upper, dN_dt, enzo_block->dt);
 #endif 
-  N [i] += dN_dt * enzo_block->dt;
+  Nnew[i] += dN_dt * enzo_block->dt;
 }
 
 //---------------------------------
@@ -1170,8 +1171,13 @@ void EnzoMethodRamsesRT::recombination_chemistry (EnzoBlock * enzo_block) throw(
 //---------------------------------
 
 void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * N, 
-                     enzo_float * Fx, enzo_float * Fy, enzo_float * Fz, double clight, int i) throw()
+                     enzo_float * Fx,    enzo_float * Fy,    enzo_float * Fz,
+                     enzo_float * Nnew, 
+                     enzo_float * Fxnew, enzo_float * Fynew, enzo_float * Fznew,
+                     double clight, int i) throw()
 {
+  // Attenuate radiation
+  // first half of eq. 25 and eq. 26, using backwards-in-time values for all variables
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
   double dt = enzo_block->dt;
@@ -1216,12 +1222,11 @@ void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * 
   // Need to make sure that photon density never drops below zero. 
   // Rescale d_dt if d_dt*dt > 1. 
   d_dt /= std::max(1.0, d_dt*dt);  
-  
-  N [i] -= d_dt*N [i] * dt;
-  Fx[i] -= d_dt*Fx[i] * dt;
-  Fy[i] -= d_dt*Fy[i] * dt;
-  Fz[i] -= d_dt*Fz[i] * dt; 
-  
+
+  Nnew [i] -= d_dt*N [i] * dt;  
+  Fxnew[i] -= d_dt*Fx[i] * dt;
+  Fynew[i] -= d_dt*Fy[i] * dt;
+  Fznew[i] -= d_dt*Fz[i] * dt;
 }
 
 //----------------------
@@ -1314,13 +1319,13 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
                              i, idx, idy, idz ); 
 
         // get updated fluxes
-
         Fxnew[i] += Fx_update;
         Fynew[i] += Fy_update;
         Fznew[i] += Fz_update;
          
         // now get updated photon densities
         Nnew[i] += N_update;
+
         // can occasionally end up in situations where
         // N[i] is slightly negative due to roundoff error.
         // Make it a small positive number instead 
@@ -1332,7 +1337,8 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
 
       #ifndef DEBUG_TURN_OFF_ATTENUATION 
         // add interactions with matter 
-        add_attenuation(enzo_block, Nnew, Fxnew, Fynew, Fznew, clight, i); 
+        // uses backwards-in-time values for N and F
+        add_attenuation(enzo_block, N, Fx, Fy, Fz, Nnew, Fxnew, Fynew, Fznew, clight, i);
       #endif
 
         if (Nnew[i] < 1e-16 / Nunit) Nnew[i] = 1e-16 / Nunit;
@@ -1341,7 +1347,8 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
           // update photon density due to recombinations
           // Grackle does recombination chemistry, but doesn't
           // do anything about the radiation that comes out of recombination
-          recombination_photons(enzo_block, Nnew, T, i, E_lower, E_upper);
+
+          recombination_photons(enzo_block, N, Nnew, T, i, E_lower, E_upper);
         }
 
       }
@@ -1617,10 +1624,7 @@ void EnzoMethodRamsesRT::sum_group_fields(EnzoBlock * enzo_block) throw()
 void EnzoMethodRamsesRT::compute_ (Block * block) throw()
 {
   const EnzoConfig * enzo_config = enzo::config();
- 
-  // TODO: lump the rest of the radiation that doesn't fall into these bins into one "other" group
-  // and evolve that one too?
-
+  
   Field field = block->data()->field();
   int mx,my,mz;  
   field.dimensions(0,&mx, &my, &mz); //field dimensions, including ghost zones

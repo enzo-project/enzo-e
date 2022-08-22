@@ -405,7 +405,7 @@ public: // interface
       method_ramses_rt_SED(), // supply list of emission rates for all groups (radiation_spectrum="custom")
       method_ramses_rt_recombination_radiation(false),
       method_ramses_rt_average_global_quantities(false), 
-      method_ramses_rt_courant(0.3),
+      method_ramses_rt_courant(0.5),
       method_ramses_rt_bin_lower(),
       method_ramses_rt_bin_upper(),
       // EnzoMethodTurbulence

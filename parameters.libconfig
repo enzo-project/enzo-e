@@ -1,0 +1,84 @@
+ Boundary : {
+     type = "outflow";
+ }
+
+ Domain : {
+     lower = ( 0.000000000000000, 0.000000000000000, 0.000000000000000 );
+     upper = ( 1.000000000000000, 1.000000000000000, 1.000000000000000 );
+ }
+
+ Field : {
+     alignment = 8;
+     gamma = 1.400000000000000;
+     ghost_depth = 4;
+     list = ( "density", "internal_energy", "total_energy", "metal_density", "velocity_x", "velocity_y", "velocity_z", "pressure", "temperature" );
+ }
+
+ Group : {
+     color : {
+         field_list = ( "metal_density" );
+     };
+     derived : {
+         field_list = ( "temperature", "pressure" );
+     };
+     list = ( "color", "derived" );
+ }
+
+ Initial : {
+     feedback_test : {
+         density = 1.200000000000000e-24;
+         position = ( 0.4250000000000000, 0.4250000000000000, 0.5000000000000000 );
+         star_mass = 1000.000000000000;
+         temperature = 100.0000000000000;
+     };
+     list = ( "feedback_test" );
+ }
+
+ Mesh : {
+     root_blocks = ( 2, 2, 2 );
+     root_rank = 3;
+     root_size = ( 64, 64, 64 );
+ }
+
+ Method : {
+     list = ( "starnet" );
+ }
+
+ Output : {
+     data : {
+         dir = ( "FEEDBACK_TEST_%04d", "count" );
+         field_list = ( "density", "metal_density", "pressure", "temperature" );
+         name = ( "feedback-test-data-%04d-%03d.h5", "count", "proc" );
+         particle_list = ( "star" );
+         schedule : {
+             step = 0.2500000000000000;
+             var = "time";
+         };
+         type = "data";
+     };
+     list = (  );
+ }
+
+ Particle : {
+     list = ( "star" );
+     mass_is_mass = true;
+     star : {
+         attributes = ( "x", "default", "y", "default", "z", "default", "vx", "default", "vy", "default", "vz", "default", "ax", "default", "ay", "default", "az", "default", "mass", "default", "is_local", "default", "creation_time", "default", "lifetime", "default", "metal_fraction", "default" );
+         group_list = ( "is_gravitating" );
+         position = ( "x", "y", "z" );
+         velocity = ( "vx", "vy", "vz" );
+     };
+ }
+
+ Stopping : {
+     cycle = 100000;
+     interval = 1;
+     seconds = 3600.000000000000;
+     time = 100.0000000000000;
+ }
+
+ Units : {
+     length = 3.159600000000000e+21;
+     mass = 1.989100000000000e+36;
+     time = 31557600000000.00;
+ }

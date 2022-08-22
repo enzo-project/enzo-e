@@ -263,7 +263,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_ramses_rt_temperature_blackbody(0.0),
   method_ramses_rt_Nphotons_per_sec(0.0), // Set emmision rate for star particles
   method_ramses_rt_SED(), // supply list of emission rate fraction for all groups
-  method_ramses_rt_courant(0.3),
+  method_ramses_rt_courant(0.5),
   method_ramses_rt_recombination_radiation(false),
   method_ramses_rt_average_global_quantities(false),
   method_ramses_rt_bin_lower(),
@@ -1826,7 +1826,7 @@ void EnzoConfig::read_method_ramses_rt_(Parameters * p)
     ("Method:ramses_rt:average_global_quantities",false);
 
   method_ramses_rt_courant = p->value_float
-    ("Method:ramses_rt:courant", 0.3);
+    ("Method:ramses_rt:courant", 0.5);
 
   method_ramses_rt_SED.resize(method_ramses_rt_N_groups);
   method_ramses_rt_bin_lower.resize(method_ramses_rt_N_groups);
