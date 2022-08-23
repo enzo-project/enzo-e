@@ -144,9 +144,7 @@ int EnzoBlock::SolveHydroEquations
 
   if (density_floor > 0.0) {
     for (int i=0; i<mx*my*mz; i++) {
-       if (density[i] < density_floor) {
-         density[i] = density_floor;
-       }
+      density[i] = std::max(density[i], density_floor);
     }
   }
 
