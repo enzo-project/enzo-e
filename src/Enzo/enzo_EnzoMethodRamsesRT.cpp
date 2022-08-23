@@ -287,13 +287,17 @@ void EnzoMethodRamsesRT::get_radiation_custom(EnzoBlock * enzo_block, enzo_float
  
   int igroup = enzo_block->method_ramses_rt_igroup;
 
+  // if Nphotons_per_sec parameter is set, give all particles the same luminosity,
+  // otherwise just use whatever value is stored in the `luminosity` attribute
   if (enzo_config->method_ramses_rt_Nphotons_per_sec > 0.0) {
-    // set particle luminosity = some fraction * total photon production rate
-    plum = enzo_config->method_ramses_rt_SED[igroup] * enzo_config->method_ramses_rt_Nphotons_per_sec
-                                                   * enzo_units->time();
-  }                                                 
-  double mL = pmass*plum; 
-  
+    plum = enzo_config->method_ramses_rt_Nphotons_per_sec * enzo_units->time();
+  }
+
+  // only add fraction of radiation into this group according to SED                                           
+  double plum_i = plum * enzo_config->method_ramses_rt_SED[igroup];
+
+  double mL = pmass*plum_i; 
+ 
   // loop through ionizable species
   for (int j=0; j<3; j++) {
     double sigma_j = sigma_vernier(energy,j); // cm^2
@@ -309,10 +313,10 @@ void EnzoMethodRamsesRT::get_radiation_custom(EnzoBlock * enzo_block, enzo_float
 
   *(scalar.value( scalar.index(mL_string(igroup)) )) += mL;
   *(scalar.value( scalar.index( eps_string(igroup   ) + mL_string(igroup) ))) += energy*enzo_constants::erg_eV/eunit * mL;
-  
-  N[i] += plum * inv_vol * dt; // code units
+ 
+  N[i] += plum_i * inv_vol * dt; // code units
   #ifdef DEBUG_INJECTION
-    CkPrintf("MethodRamsesRT::get_radiation_custom -- N[i] = %1.2e cm^-3; Ndot = %1.2e photons/s \n", N[i] / (lunit*lunit*lunit), plum / enzo_units->time());
+    CkPrintf("MethodRamsesRT::get_radiation_custom -- N[i] = %1.2e cm^-3; Ndot = %1.2e photons/s \n", N[i] / (lunit*lunit*lunit), plum_i / enzo_units->time());
   #endif
 
 }
@@ -529,21 +533,24 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
       int i = INDEX(ix,iy,iz,mx,my);
 
       // deposit photons
-
-      // This function will take in particle mass as a parameter, and will fit
-      // and integrate over the SED to get the total injection rate. The current
-      // implementation in RAMSES assumes that SED of gas stays constant.
-      // How do I keep track of the gas SED if different mass stars radiate differently?
-
      //TODO: Enforce that photon density calculated from stellar spectrum is the minimum value
       //      for cells that contain stars. Necessary because after the transport step,
-      //      N[cell with star] can drop to zero after the transport step, which is 
+      //      N[cell with star] will decrease after the transport step, which is 
       //      unphysical.
+
+
       if (radiation_spectrum == "blackbody") {
+        // This function will take in particle mass as a parameter, and will fit
+        // and integrate over the SED to get the total injection rate. The current
+        // implementation in RAMSES assumes that SED of gas stays constant.
         get_radiation_blackbody(enzo_block, N, i, pmass[ipdm], freq_lower, freq_upper, clight, f_esc,
                                 dt, cell_volume);
       }
       else if (radiation_spectrum == "custom") {
+        // This function samples a user-defined SED to get the injection rate into each group.
+        // Uses the `luminosity` particle attribute to calculate the photon injection rate.
+        // If `Nphotons_per_sec` is set to something > 0, all particles will be given the same 
+        // luminosity specified by that parameter.
         get_radiation_custom(enzo_block, N, i, E_mean, pmass[ipdm], plum[ipdL], dt, 1/cell_volume);
       }
       
@@ -912,7 +919,7 @@ void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo
         double ediff = eps*sigmaE - Eion[j]*sigmaN;
             
         // NOTE: clight is passed into this function in cgs
-        ionization_rate += std::max( sigmaN*clight*N_i, 0.0 ); 
+        ionization_rate += std::max( sigmaN*clight*N_i, 0.0 );
         heating_rate    += std::max( n_j*clight*N_i*ediff, 0.0 ); // Equation A16
 
     #ifdef DEBUG_RATES 
