@@ -67,6 +67,7 @@ Existing Answer Tests
 
 The answer test suite currently covers the following simulations:
 
+* :ref:`cosmo-dd-multispecies-short`
 * :ref:`vlct-dual_energy_cloud-hllc_cloud`
 
 .. toctree::
