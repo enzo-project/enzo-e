@@ -1398,6 +1398,14 @@ void EnzoMethodRamsesRT::call_inject_photons(EnzoBlock * enzo_block) throw()
   }
 
   // TODO: Package these up into separate functions for cleanliness
+  
+  // set group mean cross sections and energies
+  //
+  // "vernier_average" -- calculates cross section from sigma_vernier() function,
+  //    then averages that value over all star particles in the simulation, weighted by 
+  //    mass * luminosity
+  //  "vernier_average" -- just sets cross sections equal to values from sigma_vernier()
+  //  "custom" -- sets cross sections to user-specified values in the parameter file
   Scalar<double> scalar = enzo_block->data()->scalar_double();
   if (enzo_config->method_ramses_rt_cross_section_calculator == "vernier_average") {
     // do global reduction of sigE, sigN, and eps over star particles
