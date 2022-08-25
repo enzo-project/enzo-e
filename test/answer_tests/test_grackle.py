@@ -63,3 +63,26 @@ class TestGrackleGeneral(EnzoETest):
                 for i in range(num_rslts):
                     data[f'{field[1]}:{rslt_names[i]}'] = rslts[i]
         return data
+
+@uses_grackle
+class TestGrackleCoolingDt(EnzoETest):
+    parameter_file = "Grackle/method_grackle_cooling_dt.in"
+    max_runtime = 30
+    ncpus = 4
+
+    @ytdataset_test(assert_array_rel_equal, decimals=decimals)
+    def test_grackle_cooling_dt(self):
+        """
+        Compares the current time at cycle 20.
+
+        This was adapted from an earlier test that just compared the completion
+        time of the test. The functionallity to just check completion times did
+        not exist while adding this test, so we need to read in a full output.
+
+        It may be worth introducing this functionallity in the future (it could
+        be acheived by simply parsing the logs). Alternatively, it might be
+        worth reworking this test.
+        """
+        ds = yt.load(
+            "GrackleCoolingDt-cycle20/GrackleCoolingDt-cycle20.block_list")
+        return {'current_time' : ds.current_time}

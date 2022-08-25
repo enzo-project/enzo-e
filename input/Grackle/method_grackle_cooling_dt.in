@@ -1,12 +1,23 @@
 # this file is used for a test where the cooling time is used to limit
 # the size of the timestep
 #
-# The automated test will also overwrite the entry in
-# Method:grackle:data_file parameter with a valid path
+# To run this simulation outside of the answer testing framework, you should
+# copy the data file, specified by method:grackle:data_file to the root of the
+# repository and execute the simulation from there.
 
 include "input/Grackle/grackle.incl"
 
-Output { list = []; } # don't write any outputs
+Output {
+    data {
+        # we don't really care about the data written by this 
+        field_list = [ "temperature" ];
+        dir = ["GrackleCoolingDt-cycle%d", "cycle"];
+        schedule {
+            var = "cycle";
+            list = [20];
+        }
+    }
+}
 
 Method {
     list = [ "grackle" ]; # intentionally omit "null"
@@ -16,9 +27,11 @@ Method {
     }
 }
 
-Testing {
-    time_final  = [0.00201833123232718];
-    time_tolerance = 1.0e-4;
-}
-
 Stopping { cycle = 20; }
+
+# Left over from older version of the test where we relied on Enzo-E to
+# directly specify whether the test succeeded
+# Testing {
+#    time_final  = [0.00201833123232718];
+#    time_tolerance = 1.0e-4;
+# }
