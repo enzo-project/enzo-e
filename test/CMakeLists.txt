@@ -309,16 +309,6 @@ elseif(USE_GRACKLE)
     "--generate-config-path=./temp_grackle_cooling_dt.in"
     "--output-dump=./grackle_cooling_dt.log"
   )
-
-  setup_test_parallel_python(grackle_general grackle
-    "input/Grackle/run_general_grackle_test.py"
-    "--prec=${PREC_STRING}"
-    "--grackle-data-file=${GRACKLE_INPUT_DATA_DIR}/CloudyData_UVB=HM2012_shielded.h5"
-    # by using relative paths in the following 2 arguments, we effectively
-    # specify output files in the testing directory
-    "--generate-config-path=./temp_grackle_general.in"
-    "--output-dump=./grackle_general_test.log"
-  )
 endif()
 
 # Convert markdown file to html file for more flexible viewing
