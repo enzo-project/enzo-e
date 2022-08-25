@@ -265,7 +265,9 @@ EnzoConfig::EnzoConfig() throw ()
   method_ramses_rt_SED(), // supply list of emission rate fraction for all groups
   method_ramses_rt_courant(0.5),
   method_ramses_rt_recombination_radiation(false),
-  method_ramses_rt_average_global_quantities(false),
+  method_ramses_rt_cross_section_calculator("vernier_average"),
+  method_ramses_rt_sigmaN(),
+  method_ramses_rt_sigmaE(),
   method_ramses_rt_bin_lower(),
   method_ramses_rt_bin_upper(),
   // EnzoMethodStarMaker,
@@ -699,7 +701,9 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_ramses_rt_SED;
   p | method_ramses_rt_courant;
   p | method_ramses_rt_recombination_radiation;
-  p | method_ramses_rt_average_global_quantities;
+  p | method_ramses_rt_cross_section_calculator;
+  p | method_ramses_rt_sigmaN;
+  p | method_ramses_rt_sigmaE;
   p | method_ramses_rt_bin_lower;
   p | method_ramses_rt_bin_upper;
 
@@ -1822,28 +1826,41 @@ void EnzoConfig::read_method_ramses_rt_(Parameters * p)
   method_ramses_rt_recombination_radiation = p->value_logical
     ("Method:ramses_rt:recombination_radiation",false);
   
-  method_ramses_rt_average_global_quantities = p->value_logical
-    ("Method:ramses_rt:average_global_quantities",false);
-
   method_ramses_rt_courant = p->value_float
     ("Method:ramses_rt:courant", 0.5);
+
+  method_ramses_rt_cross_section_calculator = p->value_string
+    ("Method:ramses_rt:cross_section_calculator","vernier_average");
 
   method_ramses_rt_SED.resize(method_ramses_rt_N_groups);
   method_ramses_rt_bin_lower.resize(method_ramses_rt_N_groups);
   method_ramses_rt_bin_upper.resize(method_ramses_rt_N_groups);
+  
+  int N_species = 3; // number of ionizable species for RT (HI, HeI, HeII)
+  method_ramses_rt_sigmaN.resize(method_ramses_rt_N_groups * N_species);
+  method_ramses_rt_sigmaE.resize(method_ramses_rt_N_groups * N_species);
 
   // make default energy bins equally spaced between 1 eV and 101 eV
   double bin_width = 100.0 / method_ramses_rt_N_groups;
   for (int i=0; i<method_ramses_rt_N_groups; i++) {
     // default SED (if this is being used) is flat spectrum
     method_ramses_rt_SED[i] = p->list_value_float
-      (i, "Method:ramses_rt:SED", method_ramses_rt_Nphotons_per_sec/method_ramses_rt_N_groups);
+      (i,"Method:ramses_rt:SED", method_ramses_rt_Nphotons_per_sec/method_ramses_rt_N_groups);
 
     method_ramses_rt_bin_lower[i] = p->list_value_float
       (i,"Method:ramses_rt:bin_lower", 1.0 + bin_width*i);
 
     method_ramses_rt_bin_upper[i] = p->list_value_float
       (i,"Method:ramses_rt:bin_upper", 1.0 + bin_width*(i+1));
+
+    for (int j=0; j<N_species; j++) {
+      int sig_index = i*N_species + j;
+      method_ramses_rt_sigmaN[sig_index] = p->list_value_float
+        (sig_index,"Method:ramses_rt:sigmaN", 0.0);
+
+      method_ramses_rt_sigmaE[sig_index] = p->list_value_float
+        (sig_index,"Method:ramses_rt:sigmaE", 0.0);
+    }
   }
 }
 

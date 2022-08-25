@@ -1399,7 +1399,7 @@ void EnzoMethodRamsesRT::call_inject_photons(EnzoBlock * enzo_block) throw()
 
   // TODO: Package these up into separate functions for cleanliness
   Scalar<double> scalar = enzo_block->data()->scalar_double();
-  if (enzo_config->method_ramses_rt_average_global_quantities) {
+  if (enzo_config->method_ramses_rt_cross_section_calculator == "vernier_average") {
     // do global reduction of sigE, sigN, and eps over star particles
     // then do refresh -> solve_transport_eqn()
 
@@ -1439,7 +1439,7 @@ void EnzoMethodRamsesRT::call_inject_photons(EnzoBlock * enzo_block) throw()
     enzo_block->contribute(temp, CkReduction::sum_double, callback);
   }
 
-  else { // just set sigmaN = sigmaE = sigma_vernier, and eps = mean(energy)
+  else { // just set sigmaN = sigmaE = either sigma_vernier or custom value, and eps = mean(energy)
 
     if (! enzo_block->is_leaf() ) {
       enzo_block->compute_done();
@@ -1455,13 +1455,29 @@ void EnzoMethodRamsesRT::call_inject_photons(EnzoBlock * enzo_block) throw()
       double E_lower = (enzo_config->method_ramses_rt_bin_lower)[i];
       double E_upper = (enzo_config->method_ramses_rt_bin_upper)[i];
       double energy = 0.5 * (E_lower + E_upper); // eV
-
       *(scalar.value( scalar.index( eps_string(i) ))) = energy*enzo_constants::erg_eV/eunit; // code_energy
-      for (int j=0; j<N_species; j++) {
-       double sigma_j = sigma_vernier(energy,j); // cm^2
-       *(scalar.value( scalar.index( sigN_string(i,j) ))) = sigma_j/(lunit*lunit);
-       *(scalar.value( scalar.index( sigE_string(i,j) ))) = sigma_j/(lunit*lunit);
-      }   
+      
+      if (enzo_config->method_ramses_rt_cross_section_calculator == "vernier") {
+        // set sigmaN = sigmaE = sigma_vernier
+        for (int j=0; j<N_species; j++) {
+          double sigma_j = sigma_vernier(energy,j); // cm^2
+          *(scalar.value( scalar.index( sigN_string(i,j) ))) = sigma_j/(lunit*lunit);
+          *(scalar.value( scalar.index( sigE_string(i,j) ))) = sigma_j/(lunit*lunit);
+        }
+      }
+
+      else if (enzo_config->method_ramses_rt_cross_section_calculator == "custom") {
+        // set sigmaN = sigmaE = custom values
+        for (int j=0; j<N_species; j++) {
+          int sig_index = i*N_species + j;
+          double sigmaN_ij = enzo_config->method_ramses_rt_sigmaN[sig_index]; // cm^2
+          double sigmaE_ij = enzo_config->method_ramses_rt_sigmaE[sig_index];
+          *(scalar.value( scalar.index( sigN_string(i,j) ))) = sigmaN_ij/(lunit*lunit);
+          *(scalar.value( scalar.index( sigE_string(i,j) ))) = sigmaE_ij/(lunit*lunit);
+        }
+      }
+ 
+   
     }
     cello::refresh(ir_injection_)->set_active(enzo_block->is_leaf()); 
     enzo_block->refresh_start(ir_injection_, CkIndex_EnzoBlock::p_method_ramses_rt_solve_transport_eqn());   

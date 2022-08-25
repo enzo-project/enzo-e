@@ -404,7 +404,9 @@ public: // interface
       method_ramses_rt_Nphotons_per_sec(0.0), // specify emission rate from sources
       method_ramses_rt_SED(), // supply list of emission rates for all groups (radiation_spectrum="custom")
       method_ramses_rt_recombination_radiation(false),
-      method_ramses_rt_average_global_quantities(false), 
+      method_ramses_rt_cross_section_calculator("vernier_average"), // what type of cross section calculator to use ("vernier", "vernier_average", "custom")
+      method_ramses_rt_sigmaN(), // user-defined cross sections (requires cross_section_calculator = "custom")
+      method_ramses_rt_sigmaE(), 
       method_ramses_rt_courant(0.5),
       method_ramses_rt_bin_lower(),
       method_ramses_rt_bin_upper(),
@@ -916,7 +918,9 @@ public: // attributes
   std::vector<double>       method_ramses_rt_SED;
   double                    method_ramses_rt_courant;
   bool                      method_ramses_rt_recombination_radiation;
-  bool                      method_ramses_rt_average_global_quantities;
+  std::string               method_ramses_rt_cross_section_calculator;
+  std::vector<double>       method_ramses_rt_sigmaN;
+  std::vector<double>       method_ramses_rt_sigmaE;
   std::vector<double>       method_ramses_rt_bin_lower;
   std::vector<double>       method_ramses_rt_bin_upper;
 
