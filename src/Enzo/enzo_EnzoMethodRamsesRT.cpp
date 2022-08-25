@@ -373,12 +373,6 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_fl
   double luminosity = N_integrated * cell_volume*lunit*lunit*lunit/dt; // photons per code_timestep
   double mL = pmass*luminosity; // code units 
 
-  std::vector<std::string> chemistry_fields = {"HI_density", 
-                                               "HeI_density", "HeII_density"};
-  std::vector<double> masses = {enzo_constants::mass_hydrogen,
-                      4*enzo_constants::mass_hydrogen, 4*enzo_constants::mass_hydrogen};
-
-
   //----------Calculate photon group attributes--------
   Scalar<double> scalar = enzo_block->data()->scalar_double(); 
  
@@ -387,7 +381,7 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_fl
                                     +=
                 E_integrated / N_integrated / eunit * mL;
 
-  for (int j=0; j<chemistry_fields.size(); j++) {
+  for (int j=0; j<3; j++) { // loop over ionizable species
 
     // eq. B4 ----> sigmaN = int(sigma_nuj * N_nu dnu)/int(N_nu dnu)
     *(scalar.value( scalar.index(sigN_string(igroup, j) + mL_string(igroup) ) )) 
@@ -895,8 +889,6 @@ void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo
   double mEl = enzo_constants::mass_electron;
   std::vector<double> masses = {mH,4*mH,4*mH};
 
-  double mH_mEl = mH/enzo_constants::mass_electron;
-
   std::vector<enzo_float*> photon_densities = {};
   for (int igroup=0; igroup<enzo_config->method_ramses_rt_N_groups; igroup++) { 
     photon_densities.push_back( (enzo_float *) field.values("photon_density_" + std::to_string(igroup))) ;
@@ -1228,7 +1220,7 @@ void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * 
  
   // Need to make sure that photon density never drops below zero. 
   // Rescale d_dt if d_dt*dt > 1. 
-  d_dt /= std::max(1.0, d_dt*dt);  
+  //d_dt /= std::max(1.0, d_dt*dt);  
 
   Nnew [i] -= d_dt*N [i] * dt;  
   Fxnew[i] -= d_dt*Fx[i] * dt;
@@ -1396,7 +1388,8 @@ void EnzoMethodRamsesRT::call_inject_photons(EnzoBlock * enzo_block) throw()
   
   const int N_groups = enzo_config->method_ramses_rt_N_groups;
   const int N_species = 3; 
-
+  //TODO: make igroup a parameter of all of these functions instead
+  //      of storing it as an attribute of EnzoBlock
   if (enzo_block->is_leaf()) { // only inject photons for leaf blocks
     for (int i=0; i<N_groups; i++) {
       enzo_block->method_ramses_rt_igroup = i;
@@ -1654,11 +1647,11 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
   int N_groups = enzo_config->method_ramses_rt_N_groups;
   int N_species = 3; //only three ionizable species (HI, HeI, HeII)
 
+  EnzoUnits * enzo_units = enzo::units();
 #ifndef DEBUG_TURN_OFF_INJECTION
 // TODO: this overwrites initialization with value parameter. Should find better way of doing this
   if (block->cycle() == 0)
   {
-    EnzoUnits * enzo_units = enzo::units();
     double Nunit = 1.0 / enzo_units->volume();
     double Funit = enzo_units->velocity() * Nunit;    
     for (int i=0; i<N_groups; i++) {
@@ -1704,12 +1697,14 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
   this->call_inject_photons(enzo_block);
 
 #ifdef DEBUG_PRINT_GROUP_PARAMETERS
+  double sig_unit = enzo_units->length()*enzo_units->length();
+  double eps_unit = enzo_units->mass() * sig_unit / (enzo_units->time()*enzo_units->time());
   for (int i=0; i<N_groups; i++) {
     for (int j=0; j<N_species; j++) {
-      CkPrintf("[i,j] = [%d,%d]; sigN = %1.2e; sigE = %1.2e; eps = %1.2e\n",i,j,
-               *(scalar.value( scalar.index( sigN_string(i,j) ))),
-               *(scalar.value( scalar.index( sigE_string(i,j) ))),
-               *(scalar.value( scalar.index(  eps_string(i)   ))) );
+      CkPrintf("[i,j] = [%d,%d]; sigN = %1.2e cm^2; sigE = %1.2e cm^2; eps = %1.2e eV\n",i,j,
+               *(scalar.value( scalar.index( sigN_string(i,j) ))) * sig_unit,
+               *(scalar.value( scalar.index( sigE_string(i,j) ))) * sig_unit,
+               *(scalar.value( scalar.index(  eps_string(i)   ))) * eps_unit / enzo_constants::erg_eV);
     }
   }
 #endif 
