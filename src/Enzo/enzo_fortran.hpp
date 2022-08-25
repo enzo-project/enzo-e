@@ -85,7 +85,7 @@ extern "C" void FORTRAN_NAME(ppm_de)
    int uindex[], int vindex[], int windex[],
    int geindex[], enzo_float *temp,
    int *ncolor, enzo_float *colorpt, int *coloff,
-   int colindex[], int *error,
+   int colindex[], enzo_float *pressure_floor, enzo_float *density_floor, int *error,
    int *ie_error_x,
    int *ie_error_y,
    int *ie_error_z,

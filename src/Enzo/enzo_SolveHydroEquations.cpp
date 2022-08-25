@@ -135,6 +135,22 @@ int EnzoBlock::SolveHydroEquations
 	    "Grid::SetMinimumSupport() returned ENZO_FAIL");
     }
   }
+
+  /* Set density floor. */
+  const EnzoFluidFloorConfig& fluid_floor_config
+               = fluid_props->fluid_floor_config();
+  enzo_float density_floor = fluid_floor_config.has_density_floor() ?
+                 fluid_floor_config.density() : 0.0;
+
+  if (density_floor > 0.0) {
+    for (int i=0; i<mx*my*mz; i++) {
+      density[i] = std::max(density[i], density_floor);
+    }
+  }
+
+  enzo_float pressure_floor = fluid_floor_config.has_pressure_floor() ?
+                 fluid_floor_config.pressure() : 0.0;
+
   /* allocate space for fluxes */
 
   int NumberOfSubgrids = 1;
@@ -315,7 +331,7 @@ int EnzoBlock::SolveHydroEquations
      istart, iend, jstart, jend,
      flux_array, dindex, Eindex, uindex, vindex, windex,
      geindex, temp,
-     &ncolor, colorpt, coloff, colindex,
+     &ncolor, colorpt, coloff, colindex, &pressure_floor, &density_floor,
      &error, ie_error_x,ie_error_y,ie_error_z,&num_ie_error
      );
 

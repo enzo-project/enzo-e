@@ -16,7 +16,8 @@ c
      &     fistart, fiend, fjstart, fjend,
      &     array, dindex, eindex,
      &     uindex, vindex, windex, geindex, tmp,
-     &     ncolor, colorpt, coloff, colindex, error,
+     &     ncolor, colorpt, coloff, colindex,
+     &     pmin, dmin, error,
      &     ie_error_x,ie_error_y,ie_error_z,num_ie_error)
 c     
 c  PERFORMS PPM (DIRECT EULERIAN) UPDATE FOR ONE TIMESTEP (WRAPPER)
@@ -98,7 +99,7 @@ c
      &     v(in,jn,kn), w(in,jn,kn),ge(in,jn,jn),
      &     gr_xacc(in,jn,kn), gr_yacc(in,jn,kn), gr_zacc(in,jn,kn),
      &        dx(in),dy(jn),dz(kn)
-      ENZO_REAL dt, eta1, eta2, gamma, pmin
+      ENZO_REAL dt, eta1, eta2, gamma, pmin, dmin
       ENZO_REAL array(1), colorpt(1)
 c
 c  Parameters
@@ -146,10 +147,6 @@ c
       k1 = 1
       k2 = kn
 c
-c  Set minimum pressure (better if it were a parameter)
-c
-      pmin = tiny
-c
 c  Loop over directions, using a Strang-type splitting
 c
       ixyz = mod(nhy,rank)
@@ -173,7 +170,7 @@ c$DOACROSS LOCAL(k)
               call xeuler_sweep(k, d, e, u, v, w, ge, in, jn, kn,
      &             gravity, gr_xacc, idual, eta1, eta2,
      &             is, ie, js, je, ks, ke,
-     &             gamma, pmin, dt, dx, dy, dz,
+     &             gamma, pmin, dmin, dt, dx, dy, dz,
      &             idiff, iflatten, isteepen,
      &             iconsrec, iposrec,
      &             ipresfree,  nsubgrids, lface, rface,
@@ -210,7 +207,7 @@ c$DOACROSS LOCAL(i)
               call yeuler_sweep(i, d, e, u, v, w, ge, in, jn, kn,
      &             gravity, gr_yacc, idual, eta1, eta2,
      &             is, ie, js, je, ks, ke,
-     &             gamma, pmin, dt, dx, dy, dz,
+     &             gamma, pmin, dmin, dt, dx, dy, dz,
      &             idiff, iflatten, isteepen,
      &             iconsrec, iposrec,
      &             ipresfree,
@@ -249,7 +246,7 @@ c$DOACROSS LOCAL(j)
               call zeuler_sweep(j, d, e, u, v, w, ge, in, jn, kn,
      &             gravity, gr_zacc, idual, eta1, eta2,
      &             is, ie, js, je, ks, ke,
-     &             gamma, pmin, dt, dx, dy, dz,
+     &             gamma, pmin, dmin, dt, dx, dy, dz,
      &             idiff, iflatten, isteepen,
      &             iconsrec, iposrec,
      &             ipresfree,
