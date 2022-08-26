@@ -31,9 +31,15 @@ class TestCosmoDDMultiSpecies(EnzoETest):
         ds = yt.load("Dir_COSMO_MULTI_0115/Dir_COSMO_MULTI_0115.block_list")
         ad = ds.all_data()
 
-        wfield = ("gas", "mass")
-        data = {
-            field[1]: ad.quantities.weighted_standard_deviation(field, wfield)
-            for field in filter(lambda f: f[0] == 'enzoe', ds.field_list)}
-        data['current_time'] = ds.current_time
+        fluid_wfield = ("gas", "mass")
+        particle_wfield = ("all", "particle_mass")
+        data = {'current_time' : ds.current_time}
+        for field in ds.field_list:
+            if field[0] == 'enzoe':
+                key, wfield = f'fluid-{field[1]}', fluid_wfield
+            elif field[0] == 'all':
+                key, wfield = f'particle-{field[1]}', particle_wfield
+            else:
+                continue
+            data[key] = ad.quantities.weighted_standard_deviation(field, wfield)
         return data
