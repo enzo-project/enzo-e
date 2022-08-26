@@ -31,11 +31,9 @@ class TestCosmoDDMultiSpecies(EnzoETest):
         ds = yt.load("Dir_COSMO_MULTI_0115/Dir_COSMO_MULTI_0115.block_list")
         ad = ds.all_data()
 
-        # TODO: refactor this code so that we compare standard deviations
-        # - at the time of writing this, there seems to be a bug with invoking
-        #   ad.quantities_standard_deviation on a simulation with AMR...
-        #wfield = ("gas", "mass")
-        #data = {
-        #    field[1]: ad.quantities.weighted_standard_deviation(field, wfield)
-        #    for field in ds.field_list}
-        return {'current_time' : ds.current_time}
+        wfield = ("gas", "mass")
+        data = {
+            field[1]: ad.quantities.weighted_standard_deviation(field, wfield)
+            for field in filter(lambda f: f[0] == 'enzoe', ds.field_list)}
+        data['current_time'] = ds.current_time
+        return data
