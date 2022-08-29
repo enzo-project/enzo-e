@@ -599,7 +599,7 @@ double EnzoMethodRamsesRT::flux_function (double U_l, double U_lplus1,
 					   throw()
 {
   // returns face-flux of a cell at index idx
-  // TODO: Add HLL flux function
+  // TODO: Add HLL flux function. Ramses-RT reads hll eigenvalues from a file (see rt_flux_module.f90)
   const EnzoConfig * enzo_config = enzo::config();
   if (type == "GLF") {
     return 0.5*(  Q_l+Q_lplus1 - clight*(U_lplus1-U_l) ); 
@@ -662,6 +662,9 @@ void EnzoMethodRamsesRT::get_pressure_tensor (EnzoBlock * enzo_block,
   // need information about their neighbors, and there's no 
   // guarantee that a neighboring block will have updated
   // its pressure tensor by the time this block starts
+  //
+  // Note that we're actually storing c^P, since that's the actual
+  // value that's being converted to a flux 
 
   for (int iz=gz-1; iz<mz-gz+1; iz++) { 
    for (int iy=gy-1; iy<my-gy+1; iy++) {
@@ -670,15 +673,19 @@ void EnzoMethodRamsesRT::get_pressure_tensor (EnzoBlock * enzo_block,
       double chi, n[3]; 
       get_reduced_variables( &chi, &n, i, clight, 
                             N, Fx, Fy, Fz);
-      P00[i] = N[i] * ( 0.5*(1.0-chi) + 0.5*(3.0*chi - 1)*n[0]*n[0] );
-      P10[i] = N[i] * 0.5*(3.0*chi - 1)*n[1]*n[0];
-      P01[i] = N[i] * 0.5*(3.0*chi - 1)*n[0]*n[1];
-      P11[i] = N[i] * ( 0.5*(1.0-chi) + 0.5*(3.0*chi - 1)*n[1]*n[1] );
-      P02[i] = N[i] * 0.5*(3.0*chi - 1)*n[0]*n[2];
-      P12[i] = N[i] * 0.5*(3.0*chi - 1)*n[1]*n[2];
-      P20[i] = N[i] * 0.5*(3.0*chi - 1)*n[2]*n[0];
-      P21[i] = N[i] * 0.5*(3.0*chi - 1)*n[2]*n[1];
-      P22[i] = N[i] * ( 0.5*(1.0-chi) + 0.5*(3.0*chi - 1)*n[2]*n[2] );
+      double iterm = 0.5*(1.0-chi);   // identity term
+      double oterm = 0.5*(3.0*chi-1); // outer product term
+      double cc = clight * clight;
+
+      P00[i] = cc * N[i] * (oterm *n[0]*n[0] + iterm );
+      P10[i] = cc * N[i] *  oterm *n[1]*n[0];
+      P01[i] = cc * N[i] *  oterm *n[0]*n[1];
+      P11[i] = cc * N[i] * (oterm *n[1]*n[1] + iterm );
+      P02[i] = cc * N[i] *  oterm *n[0]*n[2];
+      P12[i] = cc * N[i] *  oterm *n[1]*n[2];
+      P20[i] = cc * N[i] *  oterm *n[2]*n[0];
+      P21[i] = cc * N[i] *  oterm *n[2]*n[1];
+      P22[i] = cc * N[i] * (oterm *n[2]*n[2] + iterm );
     }
    }
   }
@@ -704,34 +711,34 @@ void EnzoMethodRamsesRT::get_U_update (EnzoBlock * enzo_block, double * N_update
   enzo_float * P20 = (enzo_float *) field.values("P20");
   enzo_float * P21 = (enzo_float *) field.values("P21"); 
   enzo_float * P22 = (enzo_float *) field.values("P22");  
-
+  
   // if rank >= 1
   *N_update += dt/hx * deltaQ_faces( N[i],  N[i+idx],  N[i-idx],
                                    Fx[i], Fx[i+idx], Fx[i-idx], clight );
     
   *Fx_update += dt/hx * deltaQ_faces(Fx[i], Fx[i+idx], Fx[i-idx],
-                                   clight*clight*P00[i],
-                                   clight*clight*P00[i+idx],
-                                   clight*clight*P00[i-idx], clight );
+                                   P00[i],
+                                   P00[i+idx],
+                                   P00[i-idx], clight );
 
   // if rank >= 2
   *N_update += dt/hy * deltaQ_faces( N[i],  N[i+idy],  N[i-idy],
                                    Fy[i], Fy[i+idy], Fy[i-idy], clight ); 
     
   *Fx_update += dt/hy * deltaQ_faces(Fx[i], Fx[i+idy], Fx[i-idy],
-                                   clight*clight*P10[i],
-                                   clight*clight*P10[i+idy],
-                                   clight*clight*P10[i-idy], clight );
+                                   P10[i],
+                                   P10[i+idy],
+                                   P10[i-idy], clight );
 
   *Fy_update += dt/hx * deltaQ_faces(Fy[i], Fy[i+idx], Fy[i-idx],
-                                   clight*clight*P01[i],
-                                   clight*clight*P01[i+idx],
-                                   clight*clight*P01[i-idx], clight );
+                                   P01[i],
+                                   P01[i+idx],
+                                   P01[i-idx], clight );
 
   *Fy_update += dt/hy * deltaQ_faces(Fy[i], Fy[i+idy], Fy[i-idy],
-                                   clight*clight*P11[i],
-                                   clight*clight*P11[i+idy],
-                                   clight*clight*P11[i-idy], clight );
+                                   P11[i],
+                                   P11[i+idy],
+                                   P11[i-idy], clight );
 
 
    // if rank >= 3
@@ -739,29 +746,29 @@ void EnzoMethodRamsesRT::get_U_update (EnzoBlock * enzo_block, double * N_update
                                    Fz[i], Fz[i+idz], Fz[i-idz], clight );
 
   *Fx_update += dt/hz * deltaQ_faces(Fx[i], Fx[i+idz], Fx[i-idz],
-                                   clight*clight*P20[i],
-                                   clight*clight*P20[i+idz],
-                                   clight*clight*P20[i-idz], clight );
+                                   P20[i],
+                                   P20[i+idz],
+                                   P20[i-idz], clight );
 
   *Fy_update += dt/hz * deltaQ_faces(Fy[i], Fy[i+idz], Fy[i-idz],
-                                   clight*clight*P21[i],
-                                   clight*clight*P21[i+idz],
-                                   clight*clight*P21[i-idz], clight);
+                                   P21[i],
+                                   P21[i+idz],
+                                   P21[i-idz], clight);
 
   *Fz_update += dt/hx * deltaQ_faces(Fz[i], Fz[i+idx], Fz[i-idx],
-                                   clight*clight*P02[i],
-                                   clight*clight*P02[i+idx],
-                                   clight*clight*P02[i-idx], clight);
+                                   P02[i],
+                                   P02[i+idx],
+                                   P02[i-idx], clight);
 
   *Fz_update += dt/hy * deltaQ_faces(Fz[i], Fz[i+idy], Fz[i-idy],
-                                   clight*clight*P12[i],
-                                   clight*clight*P12[i+idy],
-                                   clight*clight*P12[i-idy], clight);
+                                   P12[i],
+                                   P12[i+idy],
+                                   P12[i-idy], clight);
 
   *Fz_update += dt/hz * deltaQ_faces(Fz[i], Fz[i+idz], Fz[i-idz],
-                                   clight*clight*P22[i],
-                                   clight*clight*P22[i+idz],
-                                   clight*clight*P22[i-idz], clight);
+                                   P22[i],
+                                   P22[i+idz],
+                                   P22[i-idz], clight);
 
 
 }
@@ -860,7 +867,6 @@ void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo
   enzo_block->lower(&xm,&ym,&zm);
   enzo_block->upper(&xp,&yp,&zp);
 
-  enzo_float * e_density     = (enzo_float *) field.values("e_density");
   enzo_float * HI_density    = (enzo_float *) field.values("HI_density");
   enzo_float * HeI_density   = (enzo_float *) field.values("HeI_density");
   enzo_float * HeII_density  = (enzo_float *) field.values("HeII_density");
@@ -886,7 +892,6 @@ void EnzoMethodRamsesRT::get_photoionization_and_heating_rates (EnzoBlock * enzo
 
   std::vector<double> Eion = {13.6*enzo_constants::erg_eV, 24.59*enzo_constants::erg_eV, 54.42*enzo_constants::erg_eV};
   double mH = enzo_constants::mass_hydrogen;
-  double mEl = enzo_constants::mass_electron;
   std::vector<double> masses = {mH,4*mH,4*mH};
 
   std::vector<enzo_float*> photon_densities = {};
@@ -1077,7 +1082,6 @@ void EnzoMethodRamsesRT::recombination_photons (EnzoBlock * enzo_block, enzo_flo
   std::vector<std::string> chemistry_fields = {"HI_density", 
                                                "HeI_density", "HeII_density"};
   double mH  = enzo_constants::mass_hydrogen / munit; // code units
-  double mEl = enzo_constants::mass_electron / munit;
 
   std::vector<double> masses = {mH,4*mH, 4*mH};
 
@@ -1226,6 +1230,14 @@ void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * 
   Fxnew[i] -= d_dt*Fx[i] * dt;
   Fynew[i] -= d_dt*Fy[i] * dt;
   Fznew[i] -= d_dt*Fz[i] * dt;
+
+/*
+  double mult = 1.0 / (1+d_dt*dt);
+  Nnew [i] *= mult;
+  Fxnew[i] *= mult;
+  Fynew[i] *= mult;
+  Fznew[i] *= mult;
+*/
 }
 
 //----------------------
