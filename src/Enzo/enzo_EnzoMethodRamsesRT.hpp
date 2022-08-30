@@ -134,10 +134,7 @@ protected: // methods
 
   //---------- THERMOCHEMISTRY STEP ------------
   // Interaction with matter is completely local, so don't need a refresh before this step
-  void add_attenuation ( EnzoBlock * enzo_block, 
-              enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz,
-              enzo_float * Nnew, enzo_float * Fxnew, enzo_float * Fynew, enzo_float * Fznew, 
-              double clight, int i) throw(); 
+  void D_add_attenuation ( EnzoBlock * enzo_block, double * D, double clight, int i) throw(); 
 
   double get_beta (double T, int species) throw();
 
@@ -145,7 +142,7 @@ protected: // methods
 
   int get_b_boolean (double E_lower, double E_upper, int species) throw();
 
-  void recombination_photons (EnzoBlock * enzo_block, enzo_float * N, enzo_float * Nnew, 
+  void C_add_recombination (EnzoBlock * enzo_block, double * C, 
                               enzo_float * T, int i, double E_lower, double E_upper) throw();
 
   void recombination_chemistry (EnzoBlock * enzo_block) throw();

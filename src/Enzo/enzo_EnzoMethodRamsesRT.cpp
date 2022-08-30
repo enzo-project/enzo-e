@@ -10,6 +10,7 @@
 #include "enzo.hpp"
 
 // TODO: Make these parameters instead of macros
+//#define DEBUG_TURN_OFF_INJECTION
 //#define DEBUG_TURN_OFF_ATTENUATION
 //#define DEBUG_TURN_OFF_RATE_CALCULATION
 
@@ -1063,7 +1064,7 @@ int EnzoMethodRamsesRT::get_b_boolean (double E_lower, double E_upper, int speci
 //---------------------------------
 
 
-void EnzoMethodRamsesRT::recombination_photons (EnzoBlock * enzo_block, enzo_float * N, enzo_float * Nnew, 
+void EnzoMethodRamsesRT::C_add_recombination (EnzoBlock * enzo_block, double * C,
                                                 enzo_float * T, int i, double E_lower, double E_upper) throw()
 {
   // update photon_density to account for recombination
@@ -1085,7 +1086,6 @@ void EnzoMethodRamsesRT::recombination_photons (EnzoBlock * enzo_block, enzo_flo
 
   std::vector<double> masses = {mH,4*mH, 4*mH};
 
-  double dN_dt = 0.0;
   double alpha_units = enzo_units->volume() / enzo_units->time();
   for (int j=0; j<chemistry_fields.size(); j++) {  
     enzo_float * density_j = (enzo_float *) field.values(chemistry_fields[j]);
@@ -1097,16 +1097,15 @@ void EnzoMethodRamsesRT::recombination_photons (EnzoBlock * enzo_block, enzo_flo
 
     double n_j = density_j[i]/masses[j];
     double n_e = e_density[i]/mH; // electrons have same mass as protons in code units
-    dN_dt += b*(alpha_A-alpha_B) * n_j*n_e;
+    *C += b*(alpha_A-alpha_B) * n_j*n_e;
 #ifdef DEBUG_RECOMBINATION
-    CkPrintf("MethodRamsesRT::recombination_photons -- j=%d; alpha_A = %1.3e; alpha_B = %1.3e; n_j = %1.3e; n_e = %1.3e; b_boolean = %d\n", j, alpha_A, alpha_B, n_j, n_e, b);
+    CkPrintf("MethodRamsesRT::C_add_recombination -- j=%d; alpha_A = %1.3e; alpha_B = %1.3e; n_j = %1.3e; n_e = %1.3e; b_boolean = %d\n", j, alpha_A, alpha_B, n_j, n_e, b);
 #endif
   }
 
 #ifdef DEBUG_RECOMBINATION
-  CkPrintf("MethodRamsesRT::recombination_photons -- [E_lower, E_upper] = [%.2f, %.2f]; dN_dt[i] = %1.3e; dt = %1.3e\n", E_lower, E_upper, dN_dt, enzo_block->dt);
+  CkPrintf("MethodRamsesRT::C_add_recombination -- [E_lower, E_upper] = [%.2f, %.2f]; dN_dt[i] = %1.3e; dt = %1.3e\n", E_lower, E_upper, *C, enzo_block->dt);
 #endif 
-  Nnew[i] += dN_dt * enzo_block->dt;
 }
 
 //---------------------------------
@@ -1173,11 +1172,8 @@ void EnzoMethodRamsesRT::recombination_chemistry (EnzoBlock * enzo_block) throw(
 
 //---------------------------------
 
-void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * N, 
-                     enzo_float * Fx,    enzo_float * Fy,    enzo_float * Fz,
-                     enzo_float * Nnew, 
-                     enzo_float * Fxnew, enzo_float * Fynew, enzo_float * Fznew,
-                     double clight, int i) throw()
+void EnzoMethodRamsesRT::D_add_attenuation ( EnzoBlock * enzo_block, double * D, 
+                                             double clight, int i) throw()
 {
   // Attenuate radiation
   // first half of eq. 25 and eq. 26, using backwards-in-time values for all variables
@@ -1204,12 +1200,11 @@ void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * 
   //same spectral shape.
 
   Scalar<double> scalar = enzo_block->data()->scalar_double();
-  double d_dt = 0.0;
   for (int j=0; j<chemistry_fields.size(); j++) {  
     enzo_float * density_j = (enzo_float *) field.values(chemistry_fields[j]);
     double n_j = density_j[i] / masses[j];     
     double sigN_ij = *(scalar.value( scalar.index( sigN_string(igroup, j) )));
-    d_dt += n_j * clight*sigN_ij; // code_time^-1
+    *D += n_j * clight*sigN_ij; // code_time^-1
   }
 
 #ifdef DEBUG_ATTENUATION
@@ -1217,27 +1212,11 @@ void EnzoMethodRamsesRT::add_attenuation ( EnzoBlock * enzo_block, enzo_float * 
   //                                  This can be fixed by either increasing resolution, decreasing global timestep,
   //                                  or subcycling RT.
   if (d_dt * dt > 1) {
-    CkPrintf("MethodRamsesRT::add_attenuation() -- WARNING: d_dt*dt = %f (> 1)\n", d_dt*dt);
+    CkPrintf("MethodRamsesRT::D_add_attenuation() -- WARNING: d_dt*dt = %f (> 1)\n", d_dt*dt);
   }
     CkPrintf("i=%d; d_dt=%e; N[i] = %e; Fx[i] = %e; dt = %e\n",i, d_dt, N[i], Fx[i], dt);
 #endif 
  
-  // Need to make sure that photon density never drops below zero. 
-  // Rescale d_dt if d_dt*dt > 1. 
-  //d_dt /= std::max(1.0, d_dt*dt);  
-
-  Nnew [i] -= d_dt*N [i] * dt;  
-  Fxnew[i] -= d_dt*Fx[i] * dt;
-  Fynew[i] -= d_dt*Fy[i] * dt;
-  Fznew[i] -= d_dt*Fz[i] * dt;
-
-/*
-  double mult = 1.0 / (1+d_dt*dt);
-  Nnew [i] *= mult;
-  Fxnew[i] *= mult;
-  Fynew[i] *= mult;
-  Fznew[i] *= mult;
-*/
 }
 
 //----------------------
@@ -1346,10 +1325,12 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
         std::cout << "i = " << i << "; Nnew[i] = " << Nnew[i] << "; N_update = " << N_update << "; Fx_update = " << Fx_update << "; hx = " << hx << "; dt = " << dt << std::endl;
       #endif
 
+      double C = 0.0; // photon creation term
+      double D = 0.0; // photon destruction term
       #ifndef DEBUG_TURN_OFF_ATTENUATION 
         // add interactions with matter 
         // uses backwards-in-time values for N and F
-        add_attenuation(enzo_block, N, Fx, Fy, Fz, Nnew, Fxnew, Fynew, Fznew, clight, i);
+        D_add_attenuation(enzo_block, &D, clight, i);
       #endif
 
         if (Nnew[i] < 1e-16 / Nunit) Nnew[i] = 1e-16 / Nunit;
@@ -1359,9 +1340,15 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
           // Grackle does recombination chemistry, but doesn't
           // do anything about the radiation that comes out of recombination
 
-          recombination_photons(enzo_block, N, Nnew, T, i, E_lower, E_upper);
+          C_add_recombination(enzo_block, &C, T, i, E_lower, E_upper);
         }
-
+      
+        // update radiation fields due to thermochemistry (see appendix A)
+        double mult = 1.0/(1+dt*D);
+        Nnew [i] = (Nnew [i] + dt*C) * mult;
+        Fxnew[i] = Fxnew[i] * mult;
+        Fynew[i] = Fynew[i] * mult;
+        Fznew[i] = Fznew[i] * mult;
       }
     }   
   } 
