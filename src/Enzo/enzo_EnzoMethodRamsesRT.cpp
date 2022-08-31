@@ -10,10 +10,12 @@
 #include "enzo.hpp"
 
 // TODO: Make these parameters instead of macros
-//#define DEBUG_TURN_OFF_INJECTION
+//#define VALUE_INITIALIZATION
+//#define DEBUG_TURN_OFF_COMPUTE_TEMPERATURE
 //#define DEBUG_TURN_OFF_ATTENUATION
-//#define DEBUG_TURN_OFF_RATE_CALCULATION
+//#define DEBUG_TURN_OFF_RATE_CALCULATIONS
 
+//#define DEBUG_PRINT_REDUCED_VARIABLES
 //#define DEBUG_PRINT_GROUP_PARAMETERS
 //#define DEBUG_RECOMBINATION
 //#define DEBUG_ALPHA
@@ -74,6 +76,7 @@ EnzoMethodRamsesRT ::EnzoMethodRamsesRT(const int N_groups, const double clight)
     cello::define_field_in_group ("e_density",     "color");
  // }
 
+    cello::define_field("pressure");
     cello::define_field("temperature"); // needed for recombination rates
   
   // Initialize default Refresh object
@@ -627,12 +630,16 @@ double EnzoMethodRamsesRT::deltaQ_faces (double U_l, double U_lplus1, double U_l
 void EnzoMethodRamsesRT::get_reduced_variables (double * chi, double (*n)[3], int i, double clight,
                                enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz) throw()
 {
-        double Fnorm = sqrt(Fx[i]*Fx[i] + Fy[i]*Fy[i] + Fz[i]*Fz[i]);
-        double f = Fnorm / (clight*N[i]); // reduced flux
-        *chi = (3 + 4*f*f) / (5 + 2*sqrt(4-3*f*f));
-        (*n)[0] = Fx[i]/Fnorm;
-        (*n)[1] = Fy[i]/Fnorm; 
-        (*n)[2] = Fz[i]/Fnorm;
+  double Fnorm = sqrt(Fx[i]*Fx[i] + Fy[i]*Fy[i] + Fz[i]*Fz[i]);
+  double f = Fnorm / (clight*N[i]); // reduced flux
+  *chi = (3 + 4*f*f) / (5 + 2*sqrt(4-3*f*f));
+  (*n)[0] = Fx[i]/Fnorm;
+  (*n)[1] = Fy[i]/Fnorm; 
+  (*n)[2] = Fz[i]/Fnorm;
+
+  #ifdef DEBUG_PRINT_REDUCED_VARIABLES
+    CkPrintf("N = %1.2e; f = %1.2e; chi = %1.2e; n=[%1.2e,%1.2e,%1.2e]\n", N, f, *chi, (*n)[0], (*n)[1], (*n)[2]); 
+  #endif
 }
 
 void EnzoMethodRamsesRT::get_pressure_tensor (EnzoBlock * enzo_block, 
@@ -1214,7 +1221,7 @@ void EnzoMethodRamsesRT::D_add_attenuation ( EnzoBlock * enzo_block, double * D,
   if (d_dt * dt > 1) {
     CkPrintf("MethodRamsesRT::D_add_attenuation() -- WARNING: d_dt*dt = %f (> 1)\n", d_dt*dt);
   }
-    CkPrintf("i=%d; d_dt=%e; N[i] = %e; Fx[i] = %e; dt = %e\n",i, d_dt, N[i], Fx[i], dt);
+    CkPrintf("i=%d; D=%e; N[i] = %e; Fx[i] = %e; dt = %e\n",i, *D, N[i], Fx[i], dt);
 #endif 
  
 }
@@ -1316,10 +1323,7 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
         // now get updated photon densities
         Nnew[i] += N_update;
 
-        // can occasionally end up in situations where
-        // N[i] is slightly negative due to roundoff error.
-        // Make it a small positive number instead 
-        if (Nnew[i] < 1e-16 / Nunit) Nnew[i] = 1e-16 / Nunit;
+
 
       #ifdef DEBUG_TRANSPORT
         std::cout << "i = " << i << "; Nnew[i] = " << Nnew[i] << "; N_update = " << N_update << "; Fx_update = " << Fx_update << "; hx = " << hx << "; dt = " << dt << std::endl;
@@ -1333,8 +1337,6 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
         D_add_attenuation(enzo_block, &D, clight, i);
       #endif
 
-        if (Nnew[i] < 1e-16 / Nunit) Nnew[i] = 1e-16 / Nunit;
-
         if (enzo_config->method_ramses_rt_recombination_radiation) {
           // update photon density due to recombinations
           // Grackle does recombination chemistry, but doesn't
@@ -1345,7 +1347,7 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
       
         // update radiation fields due to thermochemistry (see appendix A)
         double mult = 1.0/(1+dt*D);
-        Nnew [i] = (Nnew [i] + dt*C) * mult;
+        Nnew [i] = std::max((Nnew [i] + dt*C) * mult, 1e-16/Nunit);
         Fxnew[i] = Fxnew[i] * mult;
         Fynew[i] = Fynew[i] * mult;
         Fznew[i] = Fznew[i] * mult;
@@ -1365,8 +1367,7 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
   
         if ( isnan(N[i]) ) {
           ERROR("EnzoMethodRamsesRT::solve_transport_eqn()", 
-                "N[i] is NaN! This is most likely due to a timestep that is too large.\n"
-                 "Try setting Method:ramses_rt:courant to a smaller value.\n");
+                "N[i] is NaN!\n");
         }
       }
     }
@@ -1659,19 +1660,20 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
   EnzoBlock * enzo_block = enzo::block(block);
 
 
+#ifndef DEBUG_TURN_OFF_COMPUTE_TEMPERATURE
   // compute the temperature
   EnzoComputeTemperature compute_temperature(enzo::fluid_props(),
                                              enzo_config->physics_cosmology);
 
   compute_temperature.compute(enzo_block);
-  
+#endif
   Scalar<double> scalar = block->data()->scalar_double();
 
   int N_groups = enzo_config->method_ramses_rt_N_groups;
   int N_species = 3; //only three ionizable species (HI, HeI, HeII)
 
   EnzoUnits * enzo_units = enzo::units();
-#ifndef DEBUG_TURN_OFF_INJECTION
+#ifndef VALUE_INITIALIZATION
 // TODO: this overwrites initialization with value parameter. Should find better way of doing this
   if (block->cycle() == 0)
   {
