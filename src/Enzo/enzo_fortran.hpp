@@ -62,7 +62,9 @@ extern "C" void FORTRAN_NAME(cello_init_turbulence_ou)
    double * kmax,
    double * mach,
    int * read_sol,
-   double * sol_weight);
+   double * sol_weight,
+   double * weight_norm
+   );
 
 extern "C" int FORTRAN_NAME(cello_turbou_state_size)
   (int * n_buffer_real, int * n_buffer_int);
@@ -113,6 +115,16 @@ extern "C" void FORTRAN_NAME(turbforceupdate)
    double * field_momentum_x,
    double * field_momentum_y,
    double * field_momentum_z,
+   int * have_faces,
+   double * field_momentum_xx,
+   double * field_momentum_xy,
+   double * field_momentum_xz,
+   double * field_momentum_yx,
+   double * field_momentum_yy,
+   double * field_momentum_yz,
+   double * field_momentum_zx,
+   double * field_momentum_zy,
+   double * field_momentum_zz,
    double * field_energy,
    double * resid_density,
    double * resid_momentum_x,

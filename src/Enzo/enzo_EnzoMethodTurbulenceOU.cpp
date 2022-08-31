@@ -124,6 +124,7 @@ EnzoMethodTurbulenceOU::EnzoMethodTurbulenceOU
   int iapply_injection_rate = apply_injection_rate_ ? 1 : 0;
   int iread_sol = read_sol_ ? 1 : 0;
 
+  double weight_norm = 0;
   FORTRAN_NAME(cello_init_turbulence_ou)
     (&is_root,
      &rank,
@@ -136,7 +137,14 @@ EnzoMethodTurbulenceOU::EnzoMethodTurbulenceOU
      &kfa_,
      &mach_,
      &iread_sol,
-     &sol_weight_);
+     &sol_weight_,
+     &weight_norm);
+    static bool first_call = true;
+    if (first_call && CkMyPe() == 0) {
+      CkPrintf ("WeightNorm = %24.18g\n",weight_norm);
+      first_call = false;
+    }
+
 }
 
 //----------------------------------------------------------------------
@@ -291,8 +299,7 @@ void EnzoMethodTurbulenceOU::compute ( Block * block) throw()
        &gamma_,
        &injection_rate_,
        &olap_,
-       r_gv
-       );
+       r_gv);
 
     EnzoMethodTurbulenceOU::iupdate_phases_ = 0;
 
@@ -596,8 +603,8 @@ void EnzoMethodTurbulenceOU::compute_update
   CHECK_FIELD(resid_energy_total,"resid_energy_total");
   CHECK_FIELD(field_temperature,"temperature");
 
-  const bool include_ppml_divb = (field.values("bfieldx") != nullptr);
-  if (include_ppml_divb && enzo_block->index().is_root()) {
+  const bool using_ppml = (field.values("bfieldx") != nullptr);
+  if (using_ppml && enzo_block->index().is_root()) {
     Monitor * monitor = cello::monitor();
     monitor->print ("Method","<|div(b)|>  %.17Lg",
 		    r_avld0[2]/8.0/r_avld0[3]);
@@ -634,6 +641,34 @@ void EnzoMethodTurbulenceOU::compute_update
         field_momentum_y[i] *= density;
         field_momentum_z[i] *= density;
         field_energy_total[i] *= density;
+      }
+    }
+  }
+  // Update off-centered velocities (as momenta) if they exist
+  double * field_px[3] = {nullptr, nullptr, nullptr};
+  double * field_py[3] = {nullptr, nullptr, nullptr};
+  double * field_pz[3] = {nullptr, nullptr, nullptr};
+  if (using_ppml) {
+    field_px[0] = (double *)field.values("velox_rx");
+    field_px[1] = (double *)field.values("velox_ry");
+    field_px[2] = (double *)field.values("velox_rz");
+    field_py[0] = (double *)field.values("veloy_rx");
+    field_py[1] = (double *)field.values("veloy_ry");
+    field_py[2] = (double *)field.values("veloy_rz");
+    field_pz[0] = (double *)field.values("veloz_rx");
+    field_pz[1] = (double *)field.values("veloz_ry");
+    field_pz[2] = (double *)field.values("veloz_rz");
+    for (int iz=0; iz<mz; iz++) {
+      for (int iy=0; iy<my; iy++) {
+        for (int ix=0; ix<mx; ix++) {
+          int i=ix+mx*(iy+my*iz);
+          double density = field_density[i];
+          for (int k=0; k<3; k++) {
+            field_px[k][i] *= density;
+            field_py[k][i] *= density;
+            field_pz[k][i] *= density;
+          }
+        }
       }
     }
   }
@@ -675,6 +710,7 @@ void EnzoMethodTurbulenceOU::compute_update
   FIELD_STATS("work_3 update start",field_work_3,mx,my,mz,gx,gy,gz);
   // index of first non-ghost value
 
+  int have_faces = using_ppml ? 1 : 0;
   FORTRAN_NAME(turbforceupdate)
     (&mx, &my, &mz,
      &nx, &ny, &nz,
@@ -682,6 +718,16 @@ void EnzoMethodTurbulenceOU::compute_update
      field_momentum_x+i0,
      field_momentum_y+i0,
      field_momentum_z+i0,
+     &have_faces,
+     field_px[0]+i0,
+     field_py[0]+i0,
+     field_pz[0]+i0,
+     field_px[1]+i0,
+     field_py[1]+i0,
+     field_pz[1]+i0,
+     field_px[2]+i0,
+     field_py[2]+i0,
+     field_pz[2]+i0,
      field_energy_total+i0,
      resid_density+i0,
      resid_momentum_x+i0,
@@ -728,6 +774,22 @@ void EnzoMethodTurbulenceOU::compute_update
         field_acceleration_y[i+i0] = turbAcc[1+4*i];
         field_acceleration_z[i+i0] = turbAcc[2+4*i];
         field_energy[i+i0] = turbAcc[3+4*i];
+      }
+    }
+  }
+
+  if (using_ppml) {
+    for (int iz=0; iz<mz; iz++) {
+      for (int iy=0; iy<my; iy++) {
+        for (int ix=0; ix<mx; ix++) {
+          int i=ix+mx*(iy+my*iz);
+          double density_inverse = 1.0/field_density[i];
+          for (int k=0; k<3; k++) {
+            field_px[k][i] *= density_inverse;
+            field_py[k][i] *= density_inverse;
+            field_pz[k][i] *= density_inverse;
+          }
+        }
       }
     }
   }

@@ -88,6 +88,7 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
     enzo_float *bfieldx    = (enzo_float *) field.values ("bfieldx");
     enzo_float *bfieldy    = (enzo_float *) field.values ("bfieldy");
     enzo_float *bfieldz    = (enzo_float *) field.values ("bfieldz");
+
     enzo_float *dens_rx    = (enzo_float *) field.values ("dens_rx");
     enzo_float *velox_rx   = (enzo_float *) field.values ("velox_rx");
     enzo_float *veloy_rx   = (enzo_float *) field.values ("veloy_rx");

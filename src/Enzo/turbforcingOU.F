@@ -14,7 +14,8 @@ C     **********************************************************************
      &     cello_kfa,
      &     cello_mach,
      &     cello_read_sol,
-     &     cello_sol_weight)
+     &     cello_sol_weight,
+     &     cello_weight_norm)
 
       implicit none
       include 'turbforcingOU.h'
@@ -31,6 +32,7 @@ C
       real*8 :: cello_mach
       integer :: cello_read_sol
       real*8 :: cello_sol_weight
+      real*8 :: cello_weight_norm
       integer :: modes_input
 C
       real*8 :: Mach, gamma, P0, rho0, c_s, Edot
@@ -109,6 +111,9 @@ C
       endif
 
       WeightNorm = WeightNorm * 2.d0 / sqrt(dble(NModes))
+
+      ! copy out WeightNorm
+      cello_weight_norm = WeightNorm
 
       N = 0
       do ikx = 0, ikmax(1)
@@ -398,7 +403,6 @@ c***********************************************************************
       real*8 :: rho, time, dt, dumx, acc(3), da(3), kr, de
       logical :: update_sol, apply_injection_rate
       real*8 :: timeUpdate
-
       if(cello_apply_forcing .eq. 0) return
       apply_injection_rate = (cello_apply_injection_rate .ne. 0)
 
@@ -545,6 +549,16 @@ C======================================================================
      &     field_momentum_x,
      &     field_momentum_y,
      &     field_momentum_z,
+     &     have_faces,
+     &     field_momentum_xx,
+     &     field_momentum_yx,
+     &     field_momentum_zx,
+     &     field_momentum_xy,
+     &     field_momentum_yy,
+     &     field_momentum_zy,
+     &     field_momentum_xz,
+     &     field_momentum_yz,
+     &     field_momentum_zz,
      &     field_energy,
      &     resid_density,
      &     resid_momentum_x,
@@ -572,6 +586,16 @@ C======================================================================
       real*8 :: field_momentum_x(mx,my,mz)
       real*8 :: field_momentum_y(mx,my,mz)
       real*8 :: field_momentum_z(mx,my,mz)
+      integer :: have_faces
+      real*8 :: field_momentum_xx(mx,my,mz)
+      real*8 :: field_momentum_xy(mx,my,mz)
+      real*8 :: field_momentum_xz(mx,my,mz)
+      real*8 :: field_momentum_yx(mx,my,mz)
+      real*8 :: field_momentum_yy(mx,my,mz)
+      real*8 :: field_momentum_yz(mx,my,mz)
+      real*8 :: field_momentum_zx(mx,my,mz)
+      real*8 :: field_momentum_zy(mx,my,mz)
+      real*8 :: field_momentum_zz(mx,my,mz)
       real*8 :: field_energy(mx,my,mz)
       integer :: cello_apply_injection_rate
       integer :: cello_cooling_term
@@ -663,7 +687,6 @@ C     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
             enddo
          enddo
       enddo
-
       if(update_sol) then
          field_density = field_density + resid_density
          field_momentum_x = field_momentum_x + resid_momentum_x
@@ -672,6 +695,54 @@ C     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
             field_momentum_z = field_momentum_z + resid_momentum_z
          endif
          field_energy = field_energy + resid_energy
+
+         if (have_faces.eq.1) then
+            do k=1,nk
+               do j=1,nj
+                  do i=1,ni-1
+                     field_momentum_xx(i,j,k) = field_momentum_xx(i,j,k) +
+     &                    0.5*(resid_momentum_x(i,j,k)
+     &                    +    resid_momentum_x(i+1,j,k))
+                     field_momentum_yx(i,j,k) = field_momentum_yx(i,j,k) +
+     &                    0.5*(resid_momentum_y(i,j,k)
+     &                    +    resid_momentum_y(i+1,j,k))
+                     field_momentum_zx(i,j,k) = field_momentum_zx(i,j,k) +
+     &                    0.5*(resid_momentum_z(i,j,k)
+     &                    +    resid_momentum_z(i+1,j,k))
+                  end do
+               end do
+            end do
+            do k=1,nk
+               do j=1,nj-1
+                  do i=1,ni
+                     field_momentum_xy(i,j,k) = field_momentum_xy(i,j,k) +
+     &                    0.5*(resid_momentum_x(i,j,k)
+     &                    +    resid_momentum_x(i,j+1,k))
+                     field_momentum_yy(i,j,k) = field_momentum_yy(i,j,k) +
+     &                    0.5*(resid_momentum_y(i,j,k)
+     &                    +    resid_momentum_y(i,j+1,k))
+                     field_momentum_zy(i,j,k) = field_momentum_zy(i,j,k) +
+     &                    0.5*(resid_momentum_z(i,j,k)
+     &                    +    resid_momentum_z(i,j+1,k))
+                  end do
+               end do
+            end do
+            do k=1,nk-1
+               do j=1,nj
+                  do i=1,ni
+                     field_momentum_xz(i,j,k) = field_momentum_xz(i,j,k) +
+     &                    0.5*(resid_momentum_x(i,j,k)
+     &                    +    resid_momentum_x(i,j,k+1))
+                     field_momentum_yz(i,j,k) = field_momentum_yz(i,j,k) +
+     &                    0.5*(resid_momentum_y(i,j,k)
+     &                    +    resid_momentum_y(i,j,k+1))
+                     field_momentum_zz(i,j,k) = field_momentum_zz(i,j,k) +
+     &                    0.5*(resid_momentum_z(i,j,k)
+     &                    +    resid_momentum_z(i,j,k+1))
+                  end do
+               end do
+            end do
+         end if
       endif
 
       contains
