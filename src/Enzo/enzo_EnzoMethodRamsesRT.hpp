@@ -71,7 +71,7 @@ public: // interface
 
   void call_solve_transport_eqn(EnzoBlock * enzo_block) throw();
 
-  void sum_group_fields (EnzoBlock * enzo_block) throw();
+  void RT_fields_to_code_units (EnzoBlock * enzo_block) throw();
 
   void set_global_averages (EnzoBlock * enzo_block, CkReductionMsg * msg) throw();
 
