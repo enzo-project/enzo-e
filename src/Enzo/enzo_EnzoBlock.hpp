@@ -228,8 +228,11 @@ public: /// entry methods
   void r_method_turbulence_end(CkReductionMsg *msg);
   void r_method_turbulence_mhd_ig_end(CkReductionMsg *msg);
   void r_method_turbulence_mhd_it_end(CkReductionMsg *msg);
+
+  /// EnzoTurbulenceOU
   void r_method_turbulence_ou_shift(CkReductionMsg *msg);
   void r_method_turbulence_ou_update(CkReductionMsg *msg);
+  void r_method_turbulence_ou_end(CkReductionMsg *msg);
 
   void p_initial_hdf5_recv(MsgInitial * msg_initial);
 

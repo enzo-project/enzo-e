@@ -22,7 +22,7 @@ public: // interface
   (double density_floor,
    double temperature_floor,
    double mol_weight,
-   bool comoving_coordinates);
+   bool comoving_coordinates = false);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoComputeTemperature);

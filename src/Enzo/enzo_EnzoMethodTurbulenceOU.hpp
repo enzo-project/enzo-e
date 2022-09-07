@@ -62,11 +62,14 @@ public: // interface
 
   void compute_shift(EnzoBlock *, CkReductionMsg *msg);
   void compute_update(EnzoBlock *, CkReductionMsg *msg);
+  void compute_reduce(EnzoBlock *, CkReductionMsg * msg);
 
   virtual std::string name () throw () 
   { return "turbulence_ou"; }
 
 private: // methods
+
+  void compute_reductions_ (EnzoBlock * enzo_block);
 
 private: // attributes
 

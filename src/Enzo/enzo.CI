@@ -201,8 +201,10 @@ module enzo {
 
     entry void r_method_turbulence_end(CkReductionMsg *msg);
     entry void r_method_turbulence_mhd_it_end(CkReductionMsg *msg);
+
     entry void r_method_turbulence_ou_shift(CkReductionMsg *msg);
     entry void r_method_turbulence_ou_update(CkReductionMsg *msg);
+    entry void r_method_turbulence_ou_end(CkReductionMsg *msg);
 
     entry void p_initial_hdf5_recv(MsgInitial * msg_initial);
 
