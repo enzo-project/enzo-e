@@ -274,9 +274,14 @@ double EnzoMethodRamsesRT::get_star_temperature(double M) throw()
   return pow( L/(4*cello::pi*R*R*enzo_constants::sigma_SF), 0.25);
 }
 
-void EnzoMethodRamsesRT::get_radiation_custom(EnzoBlock * enzo_block, enzo_float * N, int i, double energy,
-           double pmass, double plum, double dt, double inv_vol) throw()
+// ----------------------
+
+void EnzoMethodRamsesRT::get_radiation_custom(EnzoBlock * enzo_block, enzo_float * N, 
+           double energy, double pmass, double plum, 
+           double dt, double inv_vol, int ix, int iy, int iz, int mx, int my) throw()
 {
+  int i = INDEX(ix, iy, iz, mx, my);
+
   const EnzoConfig * enzo_config = enzo::config();
 
   Scalar<double> scalar = enzo_block->data()->scalar_double();
@@ -295,6 +300,7 @@ void EnzoMethodRamsesRT::get_radiation_custom(EnzoBlock * enzo_block, enzo_float
   double mL = pmass*plum_i; 
  
   // loop through ionizable species
+
   for (int j=0; j<3; j++) {
     double sigma_j = sigma_vernier(energy,j); // cm^2
 
@@ -308,8 +314,21 @@ void EnzoMethodRamsesRT::get_radiation_custom(EnzoBlock * enzo_block, enzo_float
 
   *(scalar.value( scalar.index(mL_string(igroup)) )) += mL;
   *(scalar.value( scalar.index( eps_string(igroup   ) + mL_string(igroup) ))) += energy*enzo_constants::erg_eV * mL;
- 
-  N[i] += plum_i * inv_vol * dt; // cgs
+
+  double dN = plum_i * inv_vol * dt; 
+  N[i] += dN; // cgs
+/*  
+  // spread radiation out over 27 cells
+  // TODO: replace with CIC deposit
+  for (int ix_ = ix-1; ix_ <= ix+1; ix_++) {
+    for (int iy_ = iy-1; iy_ <= iy+1; iy_++) {
+      for (int iz_ = iz-1; iz_ <= iz+1; iz_++) {
+        N[INDEX(ix_,iy_,iz_,mx,my)] += dN / 27.0; 
+      }
+    }
+  }
+*/
+
   #ifdef DEBUG_INJECTION
     CkPrintf("MethodRamsesRT::get_radiation_custom -- N[i] = %1.2e cm^-3; Ndot = %1.2e photons/s \n", N[i], plum_i);
   #endif
@@ -318,10 +337,12 @@ void EnzoMethodRamsesRT::get_radiation_custom(EnzoBlock * enzo_block, enzo_float
 
 // -------
 
-void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_float * N, int i, double pmass, 
-                   double freq_lower, double freq_upper, double clight, double f_esc, 
-                   double dt, double cell_volume) throw()
+void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_float * N, 
+                   double pmass, double freq_lower, double freq_upper, double clight, double f_esc, 
+                   double dt, double cell_volume, int ix, int iy, int iz, int mx, int my) throw()
 {
+  int i = INDEX(ix,iy,iz,mx,my);
+
   // Does all calculations in CGS
   const EnzoConfig * enzo_config = enzo::config();
 
@@ -527,8 +548,8 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
         // This function will take in particle mass as a parameter, and will fit
         // and integrate over the SED to get the total injection rate. The current
         // implementation in RAMSES assumes that SED of gas stays constant.
-        get_radiation_blackbody(enzo_block, N, i, pmass_cgs, freq_lower, freq_upper, clight, f_esc,
-                                dt, cell_volume);
+        get_radiation_blackbody(enzo_block, N, pmass_cgs, freq_lower, freq_upper, clight, f_esc,
+                                dt, cell_volume, ix, iy, iz, mx, my);
       }
       else if (radiation_spectrum == "custom") {
         // This function samples a user-defined SED to get the injection rate into each group.
@@ -536,7 +557,8 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
         // If `Nphotons_per_sec` is set to something > 0, all particles will be given the same 
         // luminosity specified by that parameter
         double plum_cgs = plum[ipdL] / enzo_units->time();
-        get_radiation_custom(enzo_block, N, i, E_mean, pmass_cgs, plum_cgs, dt, 1/cell_volume);
+        get_radiation_custom(enzo_block, N, E_mean, pmass_cgs, plum_cgs, 
+                             dt, 1/cell_volume, ix, iy, iz, mx, my);
       }
       
       //TODO: Only call get_cross_section here every N cycles, where N is an input parameter.
@@ -582,18 +604,49 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
 
 //---------------------------------------------------------------------
 
+double EnzoMethodRamsesRT::compute_hll_eigenvalues (double f, double theta, double * lmin, double * lmax) throw() 
+{
+  double lf = f*100;
+  double lt = theta/cello::pi * 100;
+
+  int i = std::min(int(lf),99);
+  int j = std::min(int(lt),99);
+
+  double dd1 = lf - i;
+  double dd2 = lt - j;
+  double de1 = 1 - dd1; 
+  double de2 = 1 - dd2;
+
+  const EnzoInitialRamsesRT * RT_init = enzo::RT_init();
+  
+  *lmin = 0.0;
+  *lmin += de1*de2*RT_init->hll_table_lambda_min(i  ,j  );
+  *lmin += dd1*de2*RT_init->hll_table_lambda_min(i+1,j  );
+  *lmin += de1*dd2*RT_init->hll_table_lambda_min(i  ,j+1);
+  *lmin += dd1*dd2*RT_init->hll_table_lambda_min(i+1,j+1);
+
+  *lmax = 0.0;
+  *lmax += de1*de2*RT_init->hll_table_lambda_max(i  ,j  );
+  *lmax += dd1*de2*RT_init->hll_table_lambda_max(i+1,j  );
+  *lmax += de1*dd2*RT_init->hll_table_lambda_max(i  ,j+1);
+  *lmax += dd1*dd2*RT_init->hll_table_lambda_max(i+1,j+1);
+}
+
 //----------------------------------------------------------------------
 
 double EnzoMethodRamsesRT::flux_function (double U_l, double U_lplus1,
-					   double Q_l, double Q_lplus1,double clight,  
-					   std::string type) 
-					   throw()
+					    double Q_l, double Q_lplus1, double clight,
+                                            double lmin, double lmax,  
+					    std::string type) throw()
 {
   // returns face-flux of a cell at index idx
   // TODO: Add HLL flux function. Ramses-RT reads hll eigenvalues from a file (see rt_flux_module.f90)
-  const EnzoConfig * enzo_config = enzo::config();
   if (type == "GLF") {
     return 0.5*(  Q_l+Q_lplus1 - clight*(U_lplus1-U_l) ); 
+  }
+
+  else if (type == "HLL") {
+    return (lmax*Q_l - lmin*Q_lplus1 + lmax*lmin*(U_lplus1-U_l)) / (lmax - lmin);
   }
 
   else {
@@ -605,11 +658,13 @@ double EnzoMethodRamsesRT::flux_function (double U_l, double U_lplus1,
 
 double EnzoMethodRamsesRT::deltaQ_faces (double U_l, double U_lplus1, double U_lminus1,
                                                   double Q_l, double Q_lplus1, double Q_lminus1,
-                                                  double clight) throw()
+                                                  double clight, double lmin, double lmax, 
+                                                  std::string flux_type) throw()
 {
   // calls flux_function(), and calculates Q_{i-1/2} - Q_{i+1/2}
   
-  return flux_function(U_lminus1, U_l, Q_lminus1, Q_l, clight, "GLF") - flux_function(U_l, U_lplus1, Q_l, Q_lplus1,clight, "GLF"); 
+  return flux_function(U_lminus1, U_l     , Q_lminus1, Q_l     , clight, lmin, lmax, flux_type) - 
+         flux_function(U_l      , U_lplus1, Q_l      , Q_lplus1, clight, lmin, lmax, flux_type); 
 }
 
 
@@ -625,7 +680,7 @@ void EnzoMethodRamsesRT::get_reduced_variables (double * chi, double (*n)[3], in
   (*n)[2] = Fz[i]/Fnorm;
 
   #ifdef DEBUG_PRINT_REDUCED_VARIABLES
-    CkPrintf("N = %1.2e; f = %1.2e; chi = %1.2e; n=[%1.2e,%1.2e,%1.2e]\n", N, f, *chi, (*n)[0], (*n)[1], (*n)[2]); 
+    CkPrintf("N = %1.2e; Fx = %1.2e; Fy = %1.2e; Fz = %1.2e; f = %1.2e; chi = %1.2e; n=[%1.2e,%1.2e,%1.2e]\n", N[i], Fx[i], Fy[i], Fz[i], f, *chi, (*n)[0], (*n)[1], (*n)[2]); 
   #endif
 }
 
@@ -705,66 +760,86 @@ void EnzoMethodRamsesRT::get_U_update (EnzoBlock * enzo_block, double * N_update
   enzo_float * P12 = (enzo_float *) field.values("P12");
   enzo_float * P20 = (enzo_float *) field.values("P20");
   enzo_float * P21 = (enzo_float *) field.values("P21"); 
-  enzo_float * P22 = (enzo_float *) field.values("P22");  
+  enzo_float * P22 = (enzo_float *) field.values("P22"); 
+
+  // if using HLL flux function, compute eigenvalues here
+  std::string flux_type = enzo::config()->method_ramses_rt_flux_function;
+
+  // HLL min and max eigenvalues
+  // +/- clight corresponds to GLF flux function
+  double lmin_x = -clight, lmin_y = -clight, lmin_z = -clight;
+  double lmax_x =  clight, lmax_y =  clight, lmax_z =  clight;
+
+  if (flux_type == "HLL") {
+    double Fnorm = sqrt(Fx[i]*Fx[i] + Fy[i]*Fy[i] + Fz[i]*Fz[i]);
+    double f = Fnorm / (N[i]*clight);
+
+    double theta_x = acos(Fx[i] / Fnorm);
+    double theta_y = acos(Fy[i] / Fnorm);
+    double theta_z = acos(Fz[i] / Fnorm);
+
+    compute_hll_eigenvalues(f, theta_x, &lmin_x, &lmax_x);
+    compute_hll_eigenvalues(f, theta_y, &lmin_y, &lmax_y);
+    compute_hll_eigenvalues(f, theta_z, &lmin_z, &lmax_z); 
+  } 
   
   // if rank >= 1
   *N_update += dt/hx * deltaQ_faces( N[i],  N[i+idx],  N[i-idx],
-                                   Fx[i], Fx[i+idx], Fx[i-idx], clight );
+                                   Fx[i], Fx[i+idx], Fx[i-idx], clight, lmin_x, lmax_x, flux_type );
     
   *Fx_update += dt/hx * deltaQ_faces(Fx[i], Fx[i+idx], Fx[i-idx],
                                    P00[i],
                                    P00[i+idx],
-                                   P00[i-idx], clight );
+                                   P00[i-idx], clight, lmin_x, lmax_x, flux_type );
 
   // if rank >= 2
   *N_update += dt/hy * deltaQ_faces( N[i],  N[i+idy],  N[i-idy],
-                                   Fy[i], Fy[i+idy], Fy[i-idy], clight ); 
-    
+                                   Fy[i], Fy[i+idy], Fy[i-idy], clight, lmin_y, lmax_y, flux_type );
+
   *Fx_update += dt/hy * deltaQ_faces(Fx[i], Fx[i+idy], Fx[i-idy],
                                    P10[i],
                                    P10[i+idy],
-                                   P10[i-idy], clight );
+                                   P10[i-idy], clight, lmin_y, lmax_y, flux_type );
 
   *Fy_update += dt/hx * deltaQ_faces(Fy[i], Fy[i+idx], Fy[i-idx],
                                    P01[i],
                                    P01[i+idx],
-                                   P01[i-idx], clight );
+                                   P01[i-idx], clight, lmin_x, lmax_x, flux_type );
 
   *Fy_update += dt/hy * deltaQ_faces(Fy[i], Fy[i+idy], Fy[i-idy],
                                    P11[i],
                                    P11[i+idy],
-                                   P11[i-idy], clight );
+                                   P11[i-idy], clight, lmin_y, lmax_y, flux_type );
 
 
    // if rank >= 3
   *N_update += dt/hz * deltaQ_faces( N[i],  N[i+idz],  N[i-idz],
-                                   Fz[i], Fz[i+idz], Fz[i-idz], clight );
+                                   Fz[i], Fz[i+idz], Fz[i-idz], clight, lmin_z, lmax_z, flux_type );
 
   *Fx_update += dt/hz * deltaQ_faces(Fx[i], Fx[i+idz], Fx[i-idz],
                                    P20[i],
                                    P20[i+idz],
-                                   P20[i-idz], clight );
+                                   P20[i-idz], clight, lmin_z, lmax_z, flux_type );
 
   *Fy_update += dt/hz * deltaQ_faces(Fy[i], Fy[i+idz], Fy[i-idz],
                                    P21[i],
                                    P21[i+idz],
-                                   P21[i-idz], clight);
+                                   P21[i-idz], clight, lmin_z, lmax_z, flux_type);
 
   *Fz_update += dt/hx * deltaQ_faces(Fz[i], Fz[i+idx], Fz[i-idx],
                                    P02[i],
                                    P02[i+idx],
-                                   P02[i-idx], clight);
+                                   P02[i-idx], clight, lmin_x, lmax_x, flux_type);
 
   *Fz_update += dt/hy * deltaQ_faces(Fz[i], Fz[i+idy], Fz[i-idy],
                                    P12[i],
                                    P12[i+idy],
-                                   P12[i-idy], clight);
+                                   P12[i-idy], clight, lmin_y, lmax_y, flux_type);
 
   *Fz_update += dt/hz * deltaQ_faces(Fz[i], Fz[i+idz], Fz[i-idz],
                                    P22[i],
                                    P22[i+idz],
-                                   P22[i-idz], clight);
-
+                                   P22[i-idz], clight, lmin_z, lmax_z, flux_type);
 
 }
 
@@ -1173,7 +1248,6 @@ void EnzoMethodRamsesRT::D_add_attenuation ( EnzoBlock * enzo_block, double * D,
   const EnzoConfig * enzo_config = enzo::config();
 
   EnzoUnits * enzo_units = enzo::units();
-  double dt = enzo_block->dt * enzo_units->time();
   double rhounit = enzo_units->density();
 
   Field field = enzo_block->data()->field();
@@ -1195,18 +1269,16 @@ void EnzoMethodRamsesRT::D_add_attenuation ( EnzoBlock * enzo_block, double * D,
     enzo_float * density_j = (enzo_float *) field.values(chemistry_fields[j]);
     double n_j = density_j[i]*rhounit / masses[j];     
     double sigN_ij = *(scalar.value( scalar.index( sigN_string(igroup, j) )));
-
+    
     *D += n_j * clight*sigN_ij; // s^-1
+
+    #ifdef DEBUG_ATTENUATION
+      CkPrintf("[i,j]=[%d,%d]; sigN_ij=%1.2e; n_j=%1.2e; clight=%1.2e\n", igroup, j, sigN_ij, n_j, clight);
+    #endif
   }
 
 #ifdef DEBUG_ATTENUATION
-  // NOTE d_dt * dt < 1 must be true. If this is happening, it is likely that your timestep is too large.
-  //                                  This can be fixed by either increasing resolution, decreasing global timestep,
-  //                                  or subcycling RT.
-  if (d_dt * dt > 1) {
-    CkPrintf("MethodRamsesRT::D_add_attenuation() -- WARNING: d_dt*dt = %f (> 1)\n", d_dt*dt);
-  }
-    CkPrintf("i=%d; D=%e; N[i] = %e; Fx[i] = %e; dt = %e\n",i, *D, N[i], Fx[i], dt);
+    CkPrintf("i=%d; D=%e s^-1; dt = %e\n",i, *D, enzo_block->dt*enzo_units->time());
 #endif 
  
 }
@@ -1307,13 +1379,12 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
         Nnew[i] += N_update;
 
 
-
       #ifdef DEBUG_TRANSPORT
         std::cout << "i = " << i << "; Nnew[i] = " << Nnew[i] << "; N_update = " << N_update << "; Fx_update = " << Fx_update << "; hx = " << hx << "; dt = " << dt << std::endl;
       #endif
 
-      double C = 0.0; // photon creation term
-      double D = 0.0; // photon destruction term
+        double C = 0.0; // photon creation term
+        double D = 0.0; // photon destruction term
       #ifndef DEBUG_TURN_OFF_ATTENUATION 
         // add interactions with matter 
         D_add_attenuation(enzo_block, &D, clight, i);
@@ -1333,7 +1404,7 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
         Fynew[i] = Fynew[i] * mult;
         Fznew[i] = Fznew[i] * mult;
       }
-    }   
+    } 
   } 
   
   // now copy values over  
@@ -1664,10 +1735,9 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
   double Nunit = 1.0 / enzo_units->volume();
   double Funit = enzo_units->velocity() * Nunit;   
 #ifndef VALUE_INITIALIZATION
-// TODO: this overwrites initialization with value parameter. Should find better way of doing this
+// TODO: this overwrites initialization with value parameter. Move this to EnzoInitialRamsesRT. Should find better way of doing this
   if (block->cycle() == 0)
   {
- 
     for (int i=0; i<N_groups; i++) {
       std::string istring = std::to_string(i);
       enzo_float *  N_i = (enzo_float *) field.values("photon_density_" + istring);
@@ -1709,6 +1779,7 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
   // e.g. photon density of 1 cm^-3 is equivalent to 1e63 kpc^-3, while 
   //      a cross section of 1e-18 cm^2 is equivalent to 1e-60 kpc^2.
   // Doing everything in cgs should help us avoid mixing huge numbers with tiny numbers
+
   for (int i=0; i<N_groups; i++) {
     std::string istring = std::to_string(i);
     enzo_float *  N_i = (enzo_float *) field.values("photon_density_" + istring);
@@ -1717,10 +1788,13 @@ void EnzoMethodRamsesRT::compute_ (Block * block) throw()
     enzo_float * Fz_i = (enzo_float *) field.values("flux_z_" + istring);
     for (int j=0; j<m; j++)
     {
+      // TODO: For some reason, new value doesn't get stored here when using
+      //       inflow boundary conditions during the first cycle (i.e. it's as if we're multiplying by 1,
+      //       even though `Nunit` and `Funit` are VERY far from 1). What's up with that???
       N_i [j] *= Nunit;
       Fx_i[j] *= Funit;
       Fy_i[j] *= Funit;
-      Fz_i[j] *= Funit; 
+      Fz_i[j] *= Funit;
     }
   }
  

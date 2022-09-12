@@ -36,9 +36,22 @@ namespace enzo {
     return (EnzoPhysicsFluidProps *) out;
   }
 
+  const EnzoInitialRamsesRT * RT_init()
+  {
+    std::vector<std::string> initial_list = enzo::config()->initial_list;
+    for (int i=0; i < initial_list.size(); i++) {
+      if (initial_list[i] == "ramses_rt") { 
+        return (const EnzoInitialRamsesRT *) problem()->initial(i); 
+      }
+    }
+    // return NULL if not initializing RT arrays
+    return NULL;
+  }
+
   const EnzoMethodGrackle * grackle_method()
   {
     if (!enzo::config()->method_grackle_use_grackle) {return NULL;}
+    
     return (const EnzoMethodGrackle *) problem()->method("grackle");
   }
 

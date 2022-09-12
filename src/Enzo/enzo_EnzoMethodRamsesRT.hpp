@@ -95,12 +95,13 @@ protected: // methods
 
   double get_star_temperature(double M) throw();
 
-  void get_radiation_custom(EnzoBlock * enzo_block, enzo_float * N, int i, double energy,
-             double pmass, double plum, double dt, double inv_vol) throw();
+  void get_radiation_custom(EnzoBlock * enzo_block, enzo_float * N, 
+             double energy, double pmass, double plum, 
+             double dt, double inv_vol, int ix, int iy, int iz, int mx, int my) throw();
 
-  void get_radiation_blackbody(EnzoBlock * enzo_block, enzo_float * N, int i, double pmass, 
+  void get_radiation_blackbody(EnzoBlock * enzo_block, enzo_float * N, double pmass, 
              double freq_lower, double freq_upper, double clight, double f_esc, 
-             double dt, double cell_volume) throw();
+             double dt, double cell_volume, int ix, int iy, int iz, int mx, int my) throw();
 
   void inject_photons(EnzoBlock * enzo_block) throw();
 
@@ -110,11 +111,13 @@ protected: // methods
 
   double flux_function (double U_l, double U_lplus1,
                         double Q_l, double Q_lplus1,
-                        double clight, std::string type) throw();
+                        double clight, double lmin, double lmax, std::string type) throw();
+
+  double compute_hll_eigenvalues(double f, double theta, double * lmin, double * lmax) throw();
 
   double deltaQ_faces (double U_l, double U_lplus1, double U_lminus1, 
                        double Q_l, double Q_lplus1, double Q_lminus1,
-                       double clight) throw();
+                       double clight, double lmin, double lmax, std::string flux_type) throw();
 
   void get_reduced_variables (double * chi_idx, double (*n_idx)[3], int i, double clight,
                               enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz) 

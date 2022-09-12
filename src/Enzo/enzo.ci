@@ -55,6 +55,7 @@ module enzo {
   PUPable EnzoInitialMusic;
   PUPable EnzoInitialPm;
   PUPable EnzoInitialPpmlTest;
+  PUPable EnzoInitialRamsesRT;
   PUPable EnzoInitialSedovArray2;
   PUPable EnzoInitialSedovArray3;
   PUPable EnzoInitialSedovRandom;

@@ -258,10 +258,11 @@ EnzoConfig::EnzoConfig() throw ()
   method_ramses_rt_min_freq(0.0), // lower bound of freq. bins
   method_ramses_rt_max_freq(0.0), // upper bound of freq. bins
   method_ramses_rt_flux_function("GLF"), // which flux function to use
+  method_ramses_rt_hll_file("hll_evals.list"),
   method_ramses_rt_clight_frac(1.0), // reduced speed of light value to use
   method_ramses_rt_radiation_spectrum("blackbody"), // Type of radiation spectrum to use for star particles
   method_ramses_rt_temperature_blackbody(0.0),
-  method_ramses_rt_Nphotons_per_sec(0.0), // Set emmision rate for star particles
+  method_ramses_rt_Nphotons_per_sec(0.0), // Set emission rate for star particles
   method_ramses_rt_SED(), // supply list of emission rate fraction for all groups
   method_ramses_rt_courant(0.5),
   method_ramses_rt_recombination_radiation(false),
@@ -694,6 +695,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_ramses_rt_min_freq;
   p | method_ramses_rt_max_freq;
   p | method_ramses_rt_flux_function;
+  p | method_ramses_rt_hll_file;
   p | method_ramses_rt_clight_frac;
   p | method_ramses_rt_radiation_spectrum;
   p | method_ramses_rt_temperature_blackbody;
@@ -823,6 +825,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_merge_sinks_test_(p);
   read_initial_music_(p);
   read_initial_pm_(p);
+  read_initial_ramses_rt_(p);
   read_initial_sedov_(p);
   read_initial_sedov_random_(p);
   read_initial_shock_tube_(p);
@@ -1118,6 +1121,11 @@ void EnzoConfig::read_initial_inclined_wave_(Parameters * p)
     ("Initial:inclined_wave:wave_type","alfven");
 }
 
+//----------------------------------------------------------------------
+void EnzoConfig::read_initial_ramses_rt_(Parameters * p)
+{
+
+}
 //----------------------------------------------------------------------
 
 void EnzoConfig::read_initial_sedov_(Parameters * p)
@@ -1810,6 +1818,9 @@ void EnzoConfig::read_method_ramses_rt_(Parameters * p)
 
   method_ramses_rt_flux_function = p->value_string
     ("Method:ramses_rt:flux_function","GLF");
+
+  method_ramses_rt_hll_file = p->value_string
+    ("Method:ramses_rt:hll_file","hll_evals.list");
 
   method_ramses_rt_clight_frac = p->value_float
     ("Method:ramses_rt:clight_frac",1.0);

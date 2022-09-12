@@ -397,7 +397,8 @@ public: // interface
       method_ramses_rt_N_groups(1), // # of frequency bins
       method_ramses_rt_min_freq(0.0), // lower bound of freq. bins
       method_ramses_rt_max_freq(0.0), // upper bound of freq. bins
-      method_ramses_rt_flux_function(""), // which flux function to use
+      method_ramses_rt_flux_function("GLF"), // which flux function to use
+      method_ramses_rt_hll_file("hll_evals.list"), // path to hll eigenvalue table
       method_ramses_rt_clight_frac(1.0), // fraction of speed of light value to use
       method_ramses_rt_radiation_spectrum("blackbody"), // Type of radiation spectrum to use for star particles 
       method_ramses_rt_temperature_blackbody(-1.0), // requires radiation_spectrum="blackbody"
@@ -533,6 +534,7 @@ protected: // methods
   void read_initial_merge_sinks_test_(Parameters *);
   void read_initial_music_(Parameters *);
   void read_initial_pm_(Parameters *);
+  void read_initial_ramses_rt_(Parameters *);
   void read_initial_sedov_(Parameters *);
   void read_initial_sedov_random_(Parameters *);
   void read_initial_shock_tube_(Parameters *);
@@ -911,6 +913,7 @@ public: // attributes
   double                    method_ramses_rt_min_freq;
   double                    method_ramses_rt_max_freq;
   std::string               method_ramses_rt_flux_function;
+  std::string               method_ramses_rt_hll_file;
   double                    method_ramses_rt_clight_frac;
   std::string               method_ramses_rt_radiation_spectrum;
   double                    method_ramses_rt_temperature_blackbody; 
