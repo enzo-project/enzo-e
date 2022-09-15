@@ -73,7 +73,7 @@ Main::Main(CkArgMsg* m)
       const int nz = root_size[2]/blocking[2];
       hdf5_in.group_close();
       if (field_out == nullptr) {
-        field_out = new cello_float [mox*moy*moz];
+        field_out = new cello_float [(long long)mox*moy*moz];
       }
       while (block_stream.peek() != EOF) {
         std::string name_block;
@@ -120,13 +120,14 @@ Main::Main(CkArgMsg* m)
             for (int iz=0; iz<nz; iz++) {
               for (int iy=0; iy<ny; iy++) {
                 for (int ix=0; ix<nx; ix++) {
-                  const int i_in = (ix+gx) + m4[0]*((iy+gy) + m4[1]*(iz+gz));
-                  const int i_out = (ix+ox) + mox*((iy+oy) + moy*(iz+oz));
+                  const long long i_in = (long long)(ix+gx) + m4[0]*((iy+gy) + m4[1]*(iz+gz));
+                  const long long i_out = (long long)(ix+ox) + mox*((iy+oy) + moy*(iz+oz));
                   field_out[i_out] = field_in[i_in];
                 }
               }
             }
             hdf5_in.data_close();
+	    delete [] field_in;
           } // is_leaf
         }
         hdf5_in.group_close();
