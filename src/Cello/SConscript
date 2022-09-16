@@ -234,7 +234,7 @@ objs_test = env.Object(sources_test)
 objs_tools = env.Object(sources_tools)
 
 extract_field     = env.Program ('extract_field.cpp',
-                                 LIBS=[libs_disk,  libs_test])
+                                 LIBS=[libs_disk,  libs_test, libs_memory])
 test_FileHdf5     = env.Program ('test_FileHdf5.cpp',
                                  LIBS=[libs_disk,  libs_test])
 test_error        = env.Program ('test_Error.cpp',
