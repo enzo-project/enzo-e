@@ -10,7 +10,7 @@
 #include "test.hpp"
 
 // #define DEBUG_DEBUG
-#define CHECK_FOR_NANS
+// #define CHECK_FOR_NANS
 //----------------------------------------------------------------------
 
 MethodDebug::MethodDebug

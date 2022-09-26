@@ -203,6 +203,8 @@ EnzoConfig::EnzoConfig() throw ()
   method_check_monitor_iter(0),
   // EnzoMethodHeat
   method_heat_alpha(0.0),
+  // EnzoMethodPpml
+  method_ppml_dt_weight(),
   // EnzoMethodPpmlIg
   method_ppml_b0(),
   // EnzoMethodHydro
@@ -563,6 +565,7 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | method_heat_alpha;
 
+  p | method_ppml_dt_weight;
   PUParray(p,method_ppml_b0,3);
   p | method_turbulence_edot;
   p | method_hydro_method;
@@ -1722,6 +1725,10 @@ void EnzoConfig::read_method_ppm_(Parameters * p)
 
 void EnzoConfig::read_method_ppml_(Parameters * p)
 {
+  // EnzoMethodPpml
+  method_ppml_dt_weight = p->value_float ("Method:ppml:dt_weight",1.0);
+
+  // EnzoMethodPpmlIg
   method_ppml_b0[0] = p->list_value_float (0,"Method:ppml_ig:b0",1.0);
   method_ppml_b0[1] = p->list_value_float (1,"Method:ppml_ig:b0",1.0);
   method_ppml_b0[2] = p->list_value_float (2,"Method:ppml_ig:b0",1.0);

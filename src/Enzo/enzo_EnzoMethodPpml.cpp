@@ -13,9 +13,10 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodPpml::EnzoMethodPpml() 
+EnzoMethodPpml::EnzoMethodPpml(double dt_weight) 
   : Method(),
-    comoving_coordinates_(enzo::config()->physics_cosmology)
+    comoving_coordinates_(enzo::config()->physics_cosmology),
+    dt_weight_(dt_weight)
 {
   // Initialize the default Refresh object
   cello::simulation()->refresh_set_name(ir_post_,name());
@@ -34,6 +35,7 @@ void EnzoMethodPpml::pup (PUP::er &p)
 
   Method::pup(p);
   p | comoving_coordinates_;
+  p | dt_weight_;
 }
 
 //----------------------------------------------------------------------
@@ -43,7 +45,8 @@ void EnzoMethodPpml::compute ( Block * block ) throw()
   if (block->is_leaf()) {
 
     EnzoBlock * enzo_block = enzo::block(block);
-    enzo_block->SolveMHDEquations ( block->dt() );
+    double dt = dt_weight_ * block->dt();
+    enzo_block->SolveMHDEquations ( dt );
 
   }
 

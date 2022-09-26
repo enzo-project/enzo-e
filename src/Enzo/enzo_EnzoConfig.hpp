@@ -304,6 +304,8 @@ public: // interface
       initial_merge_stars_test_particle_data_filename(""),
       // EnzoMethodHeat
       method_heat_alpha(0.0),
+      // EnzoMethodPpml
+      method_ppml_dt_weight(1.0),
       // EnzoMethodPpmlIg
       method_ppml_b0(),
       // EnzoMethodHydro
@@ -726,6 +728,9 @@ public: // attributes
 
   /// EnzoMethodHeat
   double                     method_heat_alpha;
+
+  /// EnzoMethodPpml
+  double                     method_ppml_dt_weight;
 
   /// EnzoMethodPpmlIg
   double                     method_ppml_b0[3];

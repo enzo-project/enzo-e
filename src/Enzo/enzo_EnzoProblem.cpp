@@ -593,7 +593,7 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "ppml" || name == "ppml_it") {
 
-    method = new EnzoMethodPpml;
+    method = new EnzoMethodPpml(enzo_config->method_ppml_dt_weight);
 
   } else if (name == "ppml_ig") {
 
