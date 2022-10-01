@@ -831,10 +831,10 @@ void EnzoMethodTurbulenceOU::compute_reductions_(EnzoBlock * enzo_block)
     (enzo_float *) field.values("velocity_x"),
     (enzo_float *) field.values("velocity_y"),
     (enzo_float *) field.values("velocity_z") };
-  enzo_float * driving[3] = {
-    (enzo_float *) field.values("driving_x"),
-    (enzo_float *) field.values("driving_y"),
-    (enzo_float *) field.values("driving_z") };
+  enzo_float * acceleration[3] = {
+    (enzo_float *) field.values("acceleration_x"),
+    (enzo_float *) field.values("acceleration_y"),
+    (enzo_float *) field.values("acceleration_z") };
   enzo_float * temperature = (enzo_float *) field.values("temperature");
 
   int nx,ny,nz;
@@ -868,7 +868,7 @@ void EnzoMethodTurbulenceOU::compute_reductions_(EnzoBlock * enzo_block)
 	  for (int id=0; id<rank; id++) {
 	    enzo_float v  = velocity[id][i];
 	    enzo_float v2 = v*v;
-	    enzo_float a  = driving[id][i];
+	    enzo_float a  = acceleration[id][i];
 	    enzo_float ti = 1.0 / temperature[i];
 
 	    g[index_turbulence_vad] +=   v*a*d;
@@ -880,9 +880,9 @@ void EnzoMethodTurbulenceOU::compute_reductions_(EnzoBlock * enzo_block)
 	  }
 	  g[index_turbulence_dd]  +=   d*d;
 	  g[index_turbulence_d]   +=   d;
-	  g[index_turbulence_dax] +=  d*driving[0][i];
-	  g[index_turbulence_day] +=  (rank >= 2) ? d*driving[1][i] : 0.0;
-	  g[index_turbulence_daz] +=  (rank >= 3) ? d*driving[2][i] : 0.0;
+	  g[index_turbulence_dax] +=  d*acceleration[0][i];
+	  g[index_turbulence_day] +=  (rank >= 2) ? d*acceleration[1][i] : 0.0;
+	  g[index_turbulence_daz] +=  (rank >= 3) ? d*acceleration[2][i] : 0.0;
 	  g[index_turbulence_dvx] +=  d*velocity[0][i];
 	  g[index_turbulence_dvy] +=  (rank >= 2) ? d*velocity[1][i] : 0.0;
 	  g[index_turbulence_dvz] +=  (rank >= 3) ? d*velocity[2][i] : 0.0;
