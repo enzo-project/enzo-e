@@ -98,19 +98,28 @@ EnzoMethodTurbulenceOU::EnzoMethodTurbulenceOU
   cello::define_field("acceleration_y");
   cello::define_field("acceleration_z");
   cello::define_field("energy");
-   
+
   //  refresh->add_all_fields();
-  //  refresh->add_field ("density");
+
+  refresh->add_field ("acceleration_x");
+  refresh->add_field ("acceleration_y");
+  refresh->add_field ("acceleration_z");
+  refresh->add_field ("bfieldx");
+  refresh->add_field ("bfieldx_rx");
+  refresh->add_field ("bfieldx_ry");
+  refresh->add_field ("bfieldx_rz");
+  refresh->add_field ("bfieldy");
+  refresh->add_field ("bfieldy_rx");
+  refresh->add_field ("bfieldy_ry");
+  refresh->add_field ("bfieldy_rz");
+  refresh->add_field ("bfieldz");
+  refresh->add_field ("bfieldz_rx");
+  refresh->add_field ("bfieldz_ry");
+  refresh->add_field ("bfieldz_rz");
   refresh->add_field ("density");
   refresh->add_field ("velocity_x");
   refresh->add_field ("velocity_y");
   refresh->add_field ("velocity_z");
-  refresh->add_field ("resid_velocity_x");
-  refresh->add_field ("resid_velocity_y");
-  refresh->add_field ("resid_velocity_z");
-  refresh->add_field ("acceleration_x");
-  refresh->add_field ("acceleration_y");
-  refresh->add_field ("acceleration_z");
 
   // Call fortran initializer
 
@@ -139,11 +148,11 @@ EnzoMethodTurbulenceOU::EnzoMethodTurbulenceOU
      &iread_sol,
      &sol_weight_,
      &weight_norm);
-    static bool first_call = true;
-    if (first_call && CkMyPe() == 0) {
-      CkPrintf ("WeightNorm = %24.18g\n",weight_norm);
-      first_call = false;
-    }
+  static bool first_call = true;
+  if (first_call && CkMyPe() == 0) {
+    CkPrintf ("WeightNorm = %24.18g\n",weight_norm);
+    first_call = false;
+  }
 
 }
 
