@@ -75,8 +75,10 @@ public: // interface
 
   void set_global_averages (EnzoBlock * enzo_block, CkReductionMsg * msg) throw();
 
-protected: // methods
+  void add_accumulate_fields(EnzoBlock * enzo_block) throw();
 
+protected: // methods
+ 
   double integrate_simpson(double a, double b, int n, 
                std::function<double(double,double,double,int)> f,double v1,double v2,int v3) throw();
 
@@ -91,20 +93,59 @@ protected: // methods
   const std::string mL_string  (int i) throw()
     {return "mL_" + std::to_string(i);}
 
+   void allocate_temporary_(EnzoBlock * enzo_block, int N_groups)
+   {
+     Field field = enzo_block->data()->field();
+     for (int i=0; i<N_groups; i++) {
+       std::string istring = std::to_string(i);
+       field.allocate_temporary("photon_density_"+istring+"deposit");
+       field.allocate_temporary("photon_density_"+istring+"accumulate");
+     }
+     field.allocate_temporary("P00");
+     field.allocate_temporary("P10");
+     field.allocate_temporary("P01");
+     field.allocate_temporary("P11");
+     field.allocate_temporary("P02");
+     field.allocate_temporary("P12");
+     field.allocate_temporary("P20");
+     field.allocate_temporary("P21");
+     field.allocate_temporary("P22");
+   }
+
+   void deallocate_temporary_(EnzoBlock * enzo_block, int N_groups)
+   {
+     Field field = enzo_block->data()->field();
+     for (int i=0; i<N_groups; i++) {
+       std::string istring = std::to_string(i);
+       field.deallocate_temporary("photon_density_"+istring+"_deposit");
+       field.deallocate_temporary("photon_density_"+istring+"_accumulate");
+     }
+     field.deallocate_temporary("P00");
+     field.deallocate_temporary("P10");
+     field.deallocate_temporary("P01");
+     field.deallocate_temporary("P11");
+     field.deallocate_temporary("P02");
+     field.deallocate_temporary("P12");
+     field.deallocate_temporary("P20");
+     field.deallocate_temporary("P21");
+     field.deallocate_temporary("P22");
+   }
+
+
+
   //--------- INJECTION STEP -------
 
   double get_star_temperature(double M) throw();
 
-  double get_radiation_custom(EnzoBlock * enzo_block, enzo_float * N, 
+  double get_radiation_custom(EnzoBlock * enzo_block,
              double energy, double pmass, double plum, 
              double dt, double inv_vol, int i) throw();
 
-  double get_radiation_blackbody(EnzoBlock * enzo_block, enzo_float * N, double pmass, 
+  double get_radiation_blackbody(EnzoBlock * enzo_block, double pmass, 
              double freq_lower, double freq_upper, double clight, 
              double dt, double cell_volume, int i) throw();
 
   void inject_photons(EnzoBlock * enzo_block) throw();
-
 
   //--------- TRANSPORT STEP --------
 
@@ -136,6 +177,8 @@ protected: // methods
   void solve_transport_eqn (EnzoBlock * enzo_block) throw();
 
   //---------- THERMOCHEMISTRY STEP ------------
+
+
   // Interaction with matter is completely local, so don't need a refresh before this step
   void D_add_attenuation ( EnzoBlock * enzo_block, double * D, double clight, int i) throw(); 
 
