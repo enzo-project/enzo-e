@@ -95,13 +95,13 @@ protected: // methods
 
   double get_star_temperature(double M) throw();
 
-  void get_radiation_custom(EnzoBlock * enzo_block, enzo_float * N, 
+  double get_radiation_custom(EnzoBlock * enzo_block, enzo_float * N, 
              double energy, double pmass, double plum, 
-             double dt, double inv_vol, int ix, int iy, int iz, int mx, int my) throw();
+             double dt, double inv_vol, int i) throw();
 
-  void get_radiation_blackbody(EnzoBlock * enzo_block, enzo_float * N, double pmass, 
-             double freq_lower, double freq_upper, double clight, double f_esc, 
-             double dt, double cell_volume, int ix, int iy, int iz, int mx, int my) throw();
+  double get_radiation_blackbody(EnzoBlock * enzo_block, enzo_float * N, double pmass, 
+             double freq_lower, double freq_upper, double clight, 
+             double dt, double cell_volume, int i) throw();
 
   void inject_photons(EnzoBlock * enzo_block) throw();
 

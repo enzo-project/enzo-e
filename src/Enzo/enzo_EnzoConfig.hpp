@@ -205,6 +205,7 @@ public: // interface
       initial_feedback_test_metal_fraction(),
       initial_feedback_test_star_mass(),
       initial_feedback_test_temperature(),
+      initial_feedback_test_luminosity(),
 #ifdef CONFIG_USE_GRACKLE
       // EnzoGrackleTest
       initial_grackle_test_maximum_H_number_density(1000.0),
@@ -761,6 +762,7 @@ public: // attributes
   /// EnzoInitialFeedbackTest
 
   double                     initial_feedback_test_position[3];
+  double                     initial_feedback_test_luminosity;
   double                     initial_feedback_test_density;
   double                     initial_feedback_test_HI_density;
   double                     initial_feedback_test_HII_density;

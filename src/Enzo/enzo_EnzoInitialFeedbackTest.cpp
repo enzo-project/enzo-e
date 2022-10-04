@@ -49,6 +49,7 @@ EnzoInitialFeedbackTest::EnzoInitialFeedbackTest
   } else {
     this->num_particles = 1;
     this->mass.resize(this->num_particles);
+    this->luminosity.resize(this->num_particles);
 
     for (int dim = 0; dim < 3; dim++){
       this->position[dim].resize(this->num_particles);
@@ -56,6 +57,7 @@ EnzoInitialFeedbackTest::EnzoInitialFeedbackTest
       this->position[dim][0] = config->initial_feedback_test_position[dim];
     }
     this->mass[0] = config->initial_feedback_test_star_mass;
+    this->luminosity[0] = config->initial_feedback_test_luminosity;
   }
 
   return;

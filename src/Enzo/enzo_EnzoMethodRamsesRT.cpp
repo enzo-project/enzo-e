@@ -276,12 +276,10 @@ double EnzoMethodRamsesRT::get_star_temperature(double M) throw()
 
 // ----------------------
 
-void EnzoMethodRamsesRT::get_radiation_custom(EnzoBlock * enzo_block, enzo_float * N, 
+double EnzoMethodRamsesRT::get_radiation_custom(EnzoBlock * enzo_block, enzo_float * N, 
            double energy, double pmass, double plum, 
-           double dt, double inv_vol, int ix, int iy, int iz, int mx, int my) throw()
+           double dt, double inv_vol, int i) throw()
 {
-  int i = INDEX(ix, iy, iz, mx, my);
-
   const EnzoConfig * enzo_config = enzo::config();
 
   Scalar<double> scalar = enzo_block->data()->scalar_double();
@@ -289,7 +287,7 @@ void EnzoMethodRamsesRT::get_radiation_custom(EnzoBlock * enzo_block, enzo_float
   int igroup = enzo_block->method_ramses_rt_igroup;
 
   // if Nphotons_per_sec parameter is set, give all particles the same luminosity,
-  // otherwise just use whatever value is stored in the `luminosity` attribute
+  // otherwise just use whatever value was passed into this function ('luminosity' attribute)
   if (enzo_config->method_ramses_rt_Nphotons_per_sec > 0.0) {
     plum = enzo_config->method_ramses_rt_Nphotons_per_sec;
   }
@@ -315,34 +313,19 @@ void EnzoMethodRamsesRT::get_radiation_custom(EnzoBlock * enzo_block, enzo_float
   *(scalar.value( scalar.index(mL_string(igroup)) )) += mL;
   *(scalar.value( scalar.index( eps_string(igroup   ) + mL_string(igroup) ))) += energy*enzo_constants::erg_eV * mL;
 
-  double dN = plum_i * inv_vol * dt; 
-  N[i] += dN; // cgs
-/*  
-  // spread radiation out over 27 cells
-  // TODO: replace with CIC deposit
-  for (int ix_ = ix-1; ix_ <= ix+1; ix_++) {
-    for (int iy_ = iy-1; iy_ <= iy+1; iy_++) {
-      for (int iz_ = iz-1; iz_ <= iz+1; iz_++) {
-        N[INDEX(ix_,iy_,iz_,mx,my)] += dN / 27.0; 
-      }
-    }
-  }
-*/
-
   #ifdef DEBUG_INJECTION
     CkPrintf("MethodRamsesRT::get_radiation_custom -- N[i] = %1.2e cm^-3; Ndot = %1.2e photons/s \n", N[i], plum_i);
   #endif
 
+  return  plum_i * inv_vol * dt; 
 }
 
 // -------
 
-void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_float * N, 
-                   double pmass, double freq_lower, double freq_upper, double clight, double f_esc, 
-                   double dt, double cell_volume, int ix, int iy, int iz, int mx, int my) throw()
+double EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_float * N, 
+                   double pmass, double freq_lower, double freq_upper, double clight, 
+                   double dt, double cell_volume, int i) throw()
 {
-  int i = INDEX(ix,iy,iz,mx,my);
-
   // Does all calculations in CGS
   const EnzoConfig * enzo_config = enzo::config();
 
@@ -375,8 +358,7 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_fl
                  [this](double a, double b, double c, int d) {return planck_function(a,b,c,d);},
                  T,clight,planck_case_E);
 
-  // update photon density 
-  N[i] += f_esc * N_integrated;
+
 
   //----------
 
@@ -417,10 +399,12 @@ void EnzoMethodRamsesRT::get_radiation_blackbody(EnzoBlock * enzo_block, enzo_fl
   *(scalar.value( scalar.index(mL_string(igroup)) )) += mL;
 
   #ifdef DEBUG_INJECTION
-    CkPrintf("MethodRamsesRT::get_radiation_blackbody -- [freq_lower, freq_upper] = [%1.2e, %1.2e], N[i] = %1.2e cm^-3, T = %1.2e K, Ndot = %1.2e photons/s \n", 
-                     freq_lower, freq_upper, N[i], T, luminosity);
+    CkPrintf("MethodRamsesRT::get_radiation_blackbody -- [freq_lower, freq_upper] = [%1.2e, %1.2e], N_integrated = %1.2e cm^-3, T = %1.2e K, Ndot = %1.2e photons/s \n", 
+                     freq_lower, freq_upper, N_integrated, T, luminosity);
   #endif
 
+  // return photon density update 
+  return N_integrated; 
 }
 
 // ----
@@ -523,15 +507,14 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
       int ipdm = ip*dm;
       int ipdL = ip*dL;
 
-      // get corresponding grid position
-      double x_part = (px[ipdp] - xm) / hx;
-      double y_part = (py[ipdp] - ym) / hy;
-      double z_part = (pz[ipdp] - zm) / hz;
+      double xp = px[ipdp];
+      double yp = py[ipdp];
+      double zp = pz[ipdp];
 
       // get 3D grid index for particle - account for ghost zones!!
-      int ix = ((int) std::floor(x_part))  + gx;
-      int iy = ((int) std::floor(y_part))  + gy;
-      int iz = ((int) std::floor(z_part))  + gz;
+      double ix = (int) std::floor((xp - xm) / hx) + gx;
+      double iy = (int) std::floor((yp - ym) / hy) + gy;
+      double iz = (int) std::floor((zp - zm) / hz) + gz;
 
       // now get index of this cell
       int i = INDEX(ix,iy,iz,mx,my);
@@ -544,12 +527,13 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
 
       double pmass_cgs = pmass[ipdm]*enzo_units->mass();
 
+      double dN;
       if (radiation_spectrum == "blackbody") {
         // This function will take in particle mass as a parameter, and will fit
         // and integrate over the SED to get the total injection rate. The current
         // implementation in RAMSES assumes that SED of gas stays constant.
-        get_radiation_blackbody(enzo_block, N, pmass_cgs, freq_lower, freq_upper, clight, f_esc,
-                                dt, cell_volume, ix, iy, iz, mx, my);
+        dN = get_radiation_blackbody(enzo_block, N, pmass_cgs, freq_lower, freq_upper, clight,
+                                     dt, cell_volume, i);
       }
       else if (radiation_spectrum == "custom") {
         // This function samples a user-defined SED to get the injection rate into each group.
@@ -557,45 +541,37 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
         // If `Nphotons_per_sec` is set to something > 0, all particles will be given the same 
         // luminosity specified by that parameter
         double plum_cgs = plum[ipdL] / enzo_units->time();
-        get_radiation_custom(enzo_block, N, E_mean, pmass_cgs, plum_cgs, 
-                             dt, 1/cell_volume, ix, iy, iz, mx, my);
+        dN = get_radiation_custom(enzo_block, N, E_mean, pmass_cgs, plum_cgs, 
+                                  dt, 1/cell_volume, i);
       }
-      
-      //TODO: Only call get_cross_section here every N cycles, where N is an input parameter.
-      //      Also only call if igroup=0 so that it only gets called once
-      //
      
-      //TODO: Add flux to more than one cell. Will have to use refresh+accumulate to handle edge cases
+      dN *= f_esc;
+    
+      // CIC deposit with cloud radius of 1 cell width
+      double wx, wy, wz;
+      //double wsum = 0;
+      for (int ix_ = ix-1; ix_ <= ix+1; ix_++) {
 
-      /*
-      // initialize fluxes within a radius of one cell
-      for (int k_=iz-1; k_<=iz+1;k_++) {
-        for (int j_=iy-1; j_<=iy+1;j_++) {
-          for (int i_=ix-1; i_<=ix+1;i_++) {
-            int index = INDEX(i_,j_,k_,mx,my);
-            if (index == i) continue;
-            double distsqr = (i_-ix)*(i_-ix)*hx*hx + (j_-iy)*(i_-iy)*hy*hy + (k_-iz)*(k_-iz)*hz*hz;
-                        
-            N[index]  = N[i]/27;//distsqr;
-            
-            Fx[index] = (i_-ix); //i_-ix is either +- 1, so this gives direction of flux
-            Fy[index] = (j_-iy);
-            Fz[index] = (k_-iz);
-          
-            // normalize fluxes 
-            double Ftot = Fx[index]*Fx[index] + Fy[index]*Fy[index] + Fz[index]*Fz[index];                      
-            Fx[index] *= clight*N[index]/Ftot; 
-            Fy[index] *= clight*N[index]/Ftot;
-            Fz[index] *= clight*N[index]/Ftot; 
-         }
+        double xcell = xm + (ix_+0.5 - gx)*hx;
+        wx  = std::max(1.0 - std::abs(xp - xcell) / hx, 0.0);
+
+        for (int iy_ = iy-1; iy_ <= iy+1; iy_++) {
+
+          double ycell = ym + (iy_+0.5 - gy)*hy;
+          wy = std::max(1.0 - std::abs(yp - ycell) / hy, 0.0);
+
+          for (int iz_ = iz-1; iz_ <= iz+1; iz_++) {
+            // cell positions
+            double zcell = zm + (iz_+0.5 - gz)*hz;
+            wz = std::max(1.0 - std::abs(zp - zcell) / hz, 0.0);
+
+            //wsum += wx*wy*wz;
+            N[INDEX(ix_,iy_,iz_,mx,my)] += wx*wy*wz*dN; 
+          }
         }
       }
-      */
-//      N[i] += f_esc * injection_rate * dt * inv_vol; // photons/s * timestep / volume
-
- 
-      // I don't have to directly alter the fluxes here because that naturally gets
-      // taken care of during the transport step 
+  
+      //CkPrintf("%f\n",wsum);
       
     } // end loop over particles
   }  // end loop over batches
@@ -1448,7 +1424,6 @@ void EnzoMethodRamsesRT::call_inject_photons(EnzoBlock * enzo_block) throw()
       this->inject_photons(enzo_block);
     }
   }
-
   // TODO: Package these up into separate functions for cleanliness
   
   // set group mean cross sections and energies

@@ -88,6 +88,7 @@ EnzoConfig::EnzoConfig() throw ()
   initial_feedback_test_temperature(),
   initial_feedback_test_from_file(),
   initial_feedback_test_metal_fraction(0.01),
+  initial_feedback_test_luminosity(),
   // EnzoInitialGrackleTest
 #ifdef CONFIG_USE_GRACKLE
   initial_grackle_test_maximum_H_number_density(1000.0),
@@ -552,6 +553,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_burkertbodenheimer_temperature;
 
   PUParray(p, initial_feedback_test_position,3);
+  p | initial_feedback_test_luminosity;
   p | initial_feedback_test_density;
   p | initial_feedback_test_e_density;
   p | initial_feedback_test_from_file;
@@ -1375,6 +1377,9 @@ void EnzoConfig::read_initial_feedback_test_(Parameters * p)
     initial_feedback_test_position[axis] = p->list_value_float
       (axis, "Initial:feedback_test:position", 0.5);
   }
+  initial_feedback_test_luminosity = p->value_float
+    ("Initial:feedback_test:luminosity", 0.0);
+
   initial_feedback_test_density = p->value_float
     ("Initial:feedback_test:density", 1.0E-24);
 
