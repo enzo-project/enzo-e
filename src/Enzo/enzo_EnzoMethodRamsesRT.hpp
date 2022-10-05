@@ -75,8 +75,6 @@ public: // interface
 
   void set_global_averages (EnzoBlock * enzo_block, CkReductionMsg * msg) throw();
 
-  void add_accumulate_fields(EnzoBlock * enzo_block) throw();
-
 protected: // methods
  
   double integrate_simpson(double a, double b, int n, 
@@ -98,9 +96,9 @@ protected: // methods
      Field field = enzo_block->data()->field();
      for (int i=0; i<N_groups; i++) {
        std::string istring = std::to_string(i);
-       field.allocate_temporary("photon_density_"+istring+"deposit");
-       field.allocate_temporary("photon_density_"+istring+"accumulate");
+//       field.allocate_temporary("photon_density_"+istring+"_deposit");
      }
+/*
      field.allocate_temporary("P00");
      field.allocate_temporary("P10");
      field.allocate_temporary("P01");
@@ -110,6 +108,7 @@ protected: // methods
      field.allocate_temporary("P20");
      field.allocate_temporary("P21");
      field.allocate_temporary("P22");
+*/
    }
 
    void deallocate_temporary_(EnzoBlock * enzo_block, int N_groups)
@@ -117,9 +116,9 @@ protected: // methods
      Field field = enzo_block->data()->field();
      for (int i=0; i<N_groups; i++) {
        std::string istring = std::to_string(i);
-       field.deallocate_temporary("photon_density_"+istring+"_deposit");
-       field.deallocate_temporary("photon_density_"+istring+"_accumulate");
+//       field.deallocate_temporary("photon_density_"+istring+"_deposit");
      }
+/*
      field.deallocate_temporary("P00");
      field.deallocate_temporary("P10");
      field.deallocate_temporary("P01");
@@ -129,6 +128,7 @@ protected: // methods
      field.deallocate_temporary("P20");
      field.deallocate_temporary("P21");
      field.deallocate_temporary("P22");
+*/
    }
 
 
