@@ -11,7 +11,7 @@
 #include "problem.hpp"
 
 // #define TRACE_SUMS
-
+// #define TRACE_PROLONG
 //----------------------------------------------------------------------
 
 ProlongLinear::ProlongLinear() throw()

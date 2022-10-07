@@ -160,6 +160,8 @@ extern "C" {
 
 #include "enzo_constants.hpp"
 
+#include "enzo_Index3.hpp"
+
 #include "enzo_EnzoPhysicsCosmology.hpp"
 
 #include "enzo_EnzoDualEnergyConfig.hpp"
@@ -259,7 +261,7 @@ extern "C" {
 #include "enzo_EnzoMethodGravity.hpp"
 #include "enzo_EnzoMethodHeat.hpp"
 #include "enzo_EnzoMethodHydro.hpp"
-#include "enzo_EnzoMethodInferenceArray.hpp"
+#include "enzo_EnzoMethodInference.hpp"
 #include "enzo_EnzoMethodMergeSinks.hpp"
 #include "enzo_EnzoMethodMHDVlct.hpp"
 #include "enzo_EnzoMethodPmDeposit.hpp"
@@ -278,6 +280,7 @@ extern "C" {
 #include "enzo_EnzoMatrixLaplace.hpp"
 
 #include "enzo_EnzoMsgCheck.hpp"
+#include "enzo_EnzoMsgInferCreate.hpp"
 
 #include "enzo_EnzoComputeAcceleration.hpp"
 #include "enzo_EnzoComputeCicInterp.hpp"

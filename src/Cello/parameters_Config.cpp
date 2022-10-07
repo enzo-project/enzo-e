@@ -28,7 +28,7 @@ void Config::pup (PUP::er &p)
 
   p | num_adapt;
   p | adapt_list;
-  p | adapt_index_;
+  p | adapt_index;
   p | adapt_interval;
   p | adapt_min_face_rank;
   p | adapt_schedule_index;
@@ -295,10 +295,10 @@ void Config::read_adapt_ (Parameters * p) throw()
   num_adapt = p->list_length("Adapt:list");
 
   // store index of first refinement criteria
-  adapt_index_ = adapt_list.size();
+  adapt_index = adapt_list.size();
 
   // reserve num_adapt more
-  const int new_size = adapt_index_ + num_adapt;
+  const int new_size = adapt_index + num_adapt;
 
   resize_adapt_vectors_(new_size);
 
@@ -306,7 +306,7 @@ void Config::read_adapt_ (Parameters * p) throw()
 
   for (int ia=0; ia<num_adapt; ia++) {
 
-    const int index_refine = ia + adapt_index_;
+    const int index_refine = ia + adapt_index;
 
     adapt_list[index_refine] = p->list_value_string (ia,"Adapt:list","unknown");
 

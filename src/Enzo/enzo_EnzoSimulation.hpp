@@ -14,7 +14,7 @@ class CProxy_IoEnzoWriter;
 class CProxy_EnzoLevelArray;
 
 #include "charm++.h"
-#include "enzo.decl.h"
+#include "charm_enzo.hpp"
 
 
 class EnzoSimulation : public CBase_EnzoSimulation

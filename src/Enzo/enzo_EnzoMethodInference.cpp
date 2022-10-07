@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoMethodInferenceArray.cpp
+/// @file     enzo_EnzoMethodInference.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2022-07-12
-/// @brief    Implements the EnzoMethodInferenceArray class
+/// @brief    Implements the EnzoMethodInference class
 
 #include "cello.hpp"
 
@@ -11,39 +11,50 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodInferenceArray::EnzoMethodInferenceArray
-(int level,
- const int root_size[3],
+EnzoMethodInference::EnzoMethodInference
+(int level_base,
+ int level_array,
+ int level_infer,
  const int array_dims[3],
  const int array_size[3],
- const int array_ghosts[3],
- std::string field_group)
+ std::string field_group,
+ int index_refine,
+ int num_refine)
   : Method(),
-    level_(level),
-    array_dims_(),
-    array_size_(),
-    array_ghosts_(),
+    level_base_(level_base),
+    level_array_(level_array),
+    level_infer_(level_infer),
+    m3_level_(),
+    m3_infer_(),
     field_group_(field_group),
     is_sync_child_(-1),
-    is_sync_parent_(-1)
+    is_sync_parent_(-1),
+    index_refine_(index_refine),
+    num_refine_(num_refine)
 {
   for (int i=0; i<3; i++) {
-    array_dims_[i]   = array_dims[i];
-    array_size_[i]   = array_size[i];
-    array_ghosts_[i] = array_ghosts[i];
+    m3_level_[i] = array_dims[i];
+    m3_infer_[i] = array_size[i];
   }
 
-  // Compute ratio of cell sizes in level 0 to level "level_"
-  int lfactor = 1;
-  for (int i=0; i<level_; i++) lfactor*=2;
+  // Verify level_array and array_dims match
+  int n3[3] = {
+    cello::config()->mesh_root_blocks[0],
+    cello::config()->mesh_root_blocks[1],
+    cello::config()->mesh_root_blocks[2] };
 
-  // Consistency check: root_size must be array_dims*array_size/(2^level_)
+  for (int axis=0; axis<cello::rank(); axis++) {
+    ASSERT2("EnzoMethodInference()",
+            "level-array level %d mismatch with level array size %d",
+            level_array,m3_level_[axis],pow(2,level_array)*n3[axis]==m3_level_[axis]);
+  }
 
-  for (int i=0; i<cello::rank(); i++) {
-  ASSERT5("EnzoMethodInferenceArray()",
-         "axis-%d parameters mismatch: Root dims [%d] != (array dims [%d]* array size [%d]) / 2^(level [%d])",
-          i,root_size[i], array_dims_[i], array_size[i], level_,
-          (root_size[i]*lfactor == (array_dims_[i]*array_size[i])));
+  for (int axis=0; axis<cello::rank(); axis++) {
+    ASSERT3("EnzoMethodInference()",
+            "level-infer / level-array levels %d %d "
+            "mismatch with inference array size %d",
+            level_infer,level_array,m3_infer_[axis],
+            pow(2,(level_infer-level_array))==m3_infer_[axis]);
   }
 
   cello::define_field ("density");
@@ -57,23 +68,30 @@ EnzoMethodInferenceArray::EnzoMethodInferenceArray
   // Create Level Arary
   if (CkMyPe() == 0) {
 
-    CProxy_MappingArray array_map = CProxy_MappingArray::ckNew
-      (array_dims_[0],array_dims_[1],array_dims_[2]);
+    //    CProxy_MappingArray array_map = CProxy_MappingArray::ckNew
+    //      (m3_level_[0],m3_level_[1],m3_level_[2]);
 
-    CkArrayOptions opts(array_dims_[0],array_dims_[1],array_dims_[2]);
-    opts.setMap(array_map);
+    //    CkArrayOptions opts(m3_level_[0],m3_level_[1],m3_level_[2]);
+    //    opts.setMap(array_map);
 
-    proxy_level_array = CProxy_EnzoLevelArray::ckNew(opts);
+    CkPrintf ("Calling EnzoLevelArray::ckNew()\n");
+    //    proxy_level_array = CProxy_EnzoLevelArray::ckNew(opts);
+    proxy_level_array = CProxy_EnzoLevelArray::ckNew();
+    CkPrintf ("Done\n");
 
     proxy_enzo_simulation.p_set_level_array(proxy_level_array);
+    Index3 index0(0,0,0);
+    CkPrintf ("Inserting...\n");
+    proxy_level_array[index0].insert();
+    proxy_level_array.doneInserting();
 
   }
   // Create and initialize Block synchronization counters
   ScalarDescr * scalar_descr_sync = cello::scalar_descr_sync();
   is_sync_child_ = scalar_descr_sync->new_value
-    ("method_inference_array_sync_child");
+    ("method_inference_sync_child");
   is_sync_parent_ = scalar_descr_sync->new_value
-    ("method_inference_array_sync_parent");
+    ("method_inference_sync_parent");
 }
 
 //----------------------------------------------------------------------
@@ -84,10 +102,10 @@ void EnzoSimulation::p_set_level_array (CProxy_EnzoLevelArray proxy)
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::p_method_level_array_request_data(int ix,int iy,int iz,Index index)
+void EnzoBlock::p_method_inference_request_data(int ix,int iy,int iz,Index index)
 {
-  EnzoMethodInferenceArray * method =
-    static_cast<EnzoMethodInferenceArray*> (this->method());
+  EnzoMethodInference * method =
+    static_cast<EnzoMethodInference*> (this->method());
   if (is_leaf()) {
     // Pack and send data to inference array (ix,iy,iz)
   } else {
@@ -97,10 +115,10 @@ void EnzoBlock::p_method_level_array_request_data(int ix,int iy,int iz,Index ind
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::p_method_level_array_send_data(int ix,int iy,int iz)
+void EnzoBlock::p_method_inference_send_data(int ix,int iy,int iz)
 {
-  EnzoMethodInferenceArray * method =
-    static_cast<EnzoMethodInferenceArray*> (this->method());
+  EnzoMethodInference * method =
+    static_cast<EnzoMethodInference*> (this->method());
 
   bool have_all_data = false;
   
@@ -126,14 +144,14 @@ void EnzoBlock::p_method_level_array_send_data(int ix,int iy,int iz)
 
 //----------------------------------------------------------------------
 
-void EnzoBlock:: p_method_level_array_done(int ix,int iy,int iz)
+void EnzoBlock:: p_method_inference_done(int ix,int iy,int iz)
 {
-  EnzoMethodInferenceArray * method =
-    static_cast<EnzoMethodInferenceArray*> (this->method());
+  EnzoMethodInference * method =
+    static_cast<EnzoMethodInference*> (this->method());
 
   // for each Block overlapping this array
-  //    call p_method_level_array_done() on overlapping children
-  //    increment Block sync_level_arrays
+  //    call p_method_inference_done() on overlapping children
+  //    increment Block sync_inferences
   //    (initialized with #overlapping inference arrays)
   //    (including non-leaf)
   //    if (sync) compute_done()
@@ -141,7 +159,7 @@ void EnzoBlock:: p_method_level_array_done(int ix,int iy,int iz)
 
 //----------------------------------------------------------------------
 
-void EnzoMethodInferenceArray::pup (PUP::er &p)
+void EnzoMethodInference::pup (PUP::er &p)
 {
 
   // NOTE: change this function whenever attributes change
@@ -150,45 +168,82 @@ void EnzoMethodInferenceArray::pup (PUP::er &p)
 
   Method::pup(p);
 
-  p | level_;
-  PUParray(p,array_dims_,3);
-  PUParray(p,array_size_,3);
-  PUParray(p,array_ghosts_,3);
+  p | level_base_;
+  PUParray(p,m3_level_,3);
+  PUParray(p,m3_infer_,3);
   p | field_group_;
 }
 
 //----------------------------------------------------------------------
 
-void EnzoMethodInferenceArray::compute ( Block * block) throw()
+void EnzoMethodInference::compute ( Block * block) throw()
 {
-  if (block->level() == 0) {
-    int n3[3];
-    cello::hierarchy()->root_size(n3,n3+1,n3+2);
-    int na3[3] = {array_dims_[0],  array_dims_[1],  array_dims_[2]};
-    int ga3[3] = {array_ghosts_[0],array_ghosts_[1],array_ghosts_[2]};
-    int ib3[3];
-    int nb3[3];
-    cello::hierarchy()->root_blocks(nb3,nb3+1,nb3+2);
-    block->index().array(ib3,ib3+1,ib3+2);
+  const int level = block->level();
 
-    WARNING("EnzoMethodInferenceArray::compute()",
-            "Assuming block ghost depth = 0");
+  // Negative levels are not involved in EnzoMethodInference
+  if (block->level() < 0) {
+    block->compute_done();
+    return;
+  }
 
-    int ia3_lower[3] = {0,0,0};
-    int ia3_upper[3] = {1,1,1};
-    intersecting_level_arrays_
-      (ia3_lower,ia3_upper, ib3,n3, level_,na3,ga3, nb3);
+  if (block->is_leaf()) {
+
+    //    EnzoMsgInferCreate * msg = new EnzoMsgInferCreate;
+
+    // Apply inference array creation criteria
+    std::vector<bool> mask;
+    int count = apply_criteria_(block,mask);
+
+    forward_create_array_(block,count,mask);
+    // if (block->level() > level_base_) {
+    // }
+    // int n3[3];
+    // cello::hierarchy()->root_size(n3,n3+1,n3+2);
+    // int na3[3] = {m3_level_[0],  m3_level_[1],  m3_level_[2]};
+    // int ib3[3];
+    // int nb3[3];
+    // cello::hierarchy()->root_blocks(nb3,nb3+1,nb3+2);
+    // block->index().array(ib3,ib3+1,ib3+2);
+
+    // int ia3_lower[3] = {0,0,0};
+    // int ia3_upper[3] = {1,1,1};
+    // intersecting_level_arrays_
+    //   (ia3_lower,ia3_upper, ib3,n3, level_base_,na3, nb3);
   }
 
   // (temporary: compute_done() not called until inference completed)
   block->compute_done();
 }
 
+//----------------------------------------------------------------------
+
+int EnzoMethodInference::apply_criteria_
+(Block * block, std::vector<bool> & mask)
+{
+  // Apply criteria whether to create the inference array under
+  // any cells. Return mask of inference arrays to create and
+  // the total count
+  int count = 0;
+  int mask_size = 0;
+  if (block->level() >= level_base_) {
+    // TEMPORARY: create all underlying inference arrays
+    mask_size = int(pow(2,block->level() - level_array_));
+    count += mask_size;
+  }
+  CkPrintf ("TRACE_INFER apply_criteria %s result %d size %d\n",
+            block->name().c_str(),count,mask_size);
+  return count;
+}
+
+void EnzoMethodInference::forward_create_array_
+(Block * block, int count, const std::vector<bool> & mask)
+{
+  CkPrintf ("TRACE_INFER %s forward_create_array_()\n",block->name().c_str());
+}
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 //======================================================================
 
-/* readonly */ int array_size[3];
-
-void EnzoMethodInferenceArray::intersecting_root_blocks_
+void EnzoMethodInference::intersecting_root_blocks_
 (
  int ib3_lower[3], // OUTPUT lower-indicies of intersecting root-blocks
  int ib3_upper[3],  // OUTPUT upper-indicies of intersecting root-blocks
@@ -196,25 +251,22 @@ void EnzoMethodInferenceArray::intersecting_root_blocks_
  const int n3[3],  // Input: size of root grid
  const int level,  // Input: level of level array
  const int na3[3], // Input: dimensions of level array (elements)
- const int ga3[3], // Input: ghost depth of inference arrays
  const int nb3[3] // Input: dimensions of root-level mesh
  ) const
 {
   CkPrintf ("DEBUG_LEVEL_ARRAY root grid size  %d %d %d\n",n3[0],n3[1],n3[2]);
   CkPrintf ("DEBUG_LEVEL_ARRAY level array level %d\n",level);
   CkPrintf ("DEBUG_LEVEL_ARRAY array dims na3 %d %d %d\n",na3[0],na3[1],na3[2]);
-  CkPrintf ("DEBUG_LEVEL_ARRAY array ghost ga3 %d %d %d\n",ga3[0],ga3[1],ga3[2]);
   CkPrintf ("DEBUG_LEVEL_ARRAY array index ia3 %d %d %d\n",ia3[0],ia3[1],ia3[2]);
   CkPrintf ("DEBUG_LEVEL_ARRAY block dims nb3 %d %d %d\n",nb3[0],nb3[1],nb3[2]);
 
-  int lfactor = 1; for (int i=0; i<level; i++) lfactor*=2;
   int ma3[3],mb3[3];
   for (int i=0; i<cello::rank(); i++) {
     ma3[i] = n3[i]/na3[i]; // number of root-level cells per inference array
     mb3[i] = n3[i]/nb3[i]; // size of root-level blocks
-    //    ia3_lower[i] = std::floor(float((ib3[i]*mb3[i]-ga3[i]-ma3[i])/ma3[i]))+1;
-    ib3_lower[i] = std::floor(float((ia3[i]*ma3[i]-ga3[i]))/mb3[i]);
-    ib3_upper[i] = std::ceil (float((ia3[i]*ma3[i]+ga3[i]+ma3[i]-1)/mb3[i]))+1;
+    //    ia3_lower[i] = std::floor(float((ib3[i]*mb3[i]-ma3[i])/ma3[i]))+1;
+    ib3_lower[i] = std::floor(float((ia3[i]*ma3[i]))/mb3[i]);
+    ib3_upper[i] = std::ceil (float((ia3[i]*ma3[i]+ma3[i]-1)/mb3[i]))+1;
   }
 
   CkPrintf ("DEBUG_LEVEL_ARRAY block lower index ib3_lower %d %d %d\n",ib3_lower[0],ib3_lower[1],ib3_lower[2]);
@@ -223,7 +275,7 @@ void EnzoMethodInferenceArray::intersecting_root_blocks_
 
 //----------------------------------------------------------------------
 
-void EnzoMethodInferenceArray::intersecting_level_arrays_
+void EnzoMethodInference::intersecting_level_arrays_
 (
  int ia3_lower[3], // OUTPUT lower-indicies of intersecting level arrays
  int ia3_upper[3], // OUTPUT upper-indicies of intersecting level arrays
@@ -231,19 +283,17 @@ void EnzoMethodInferenceArray::intersecting_level_arrays_
  const int n3[3],  // Input: size of root grid
  const int level,  // Input: level of level array
  const int na3[3], // Input: dimensions of level array (elements)
- const int ga3[3],  // Input: ghost depth of inference arrays
  const int nb3[3] // Input: dimensions of root-level mesh
  ) const
 {
   // compute level factor
-  int lfactor = 1; for (int i=0; i<level; i++) lfactor*=2;
   int ma3[3],mb3[3];
   for (int i=0; i<cello::rank(); i++) {
     ma3[i] = n3[i]/na3[i]; // number of root-level cells per inference array
     mb3[i] = n3[i]/nb3[i]; // size of root-level blocks
-    //    ia3_lower[i] = std::floor(float((ib3[i]*mb3[i]-ga3[i]-ma3[i])/ma3[i]))+1;
-    ia3_lower[i] = std::floor(float((ib3[i]*mb3[i]-ga3[i]))/ma3[i]);
-    ia3_upper[i] = std::ceil (float((ib3[i]*mb3[i]+ga3[i]+mb3[i]-1)/ma3[i]))+1;
+    //    ia3_lower[i] = std::floor(float((ib3[i]*mb3[i]-ma3[i])/ma3[i]))+1;
+    ia3_lower[i] = std::floor(float((ib3[i]*mb3[i]))/ma3[i]);
+    ia3_upper[i] = std::ceil (float((ib3[i]*mb3[i]+mb3[i]-1)/ma3[i]))+1;
   }
   CkPrintf ("DEBUG_LEVEL_ARRAY root grid size  %d %d %d\n",n3[0],n3[1],n3[2]);
   CkPrintf ("DEBUG_LEVEL_ARRAY level array level %d\n",level);
@@ -252,7 +302,6 @@ void EnzoMethodInferenceArray::intersecting_level_arrays_
   CkPrintf ("DEBUG_LEVEL_ARRAY block index ib3 %d %d %d\n",ib3[0],ib3[1],ib3[2]);
   CkPrintf ("DEBUG_LEVEL_ARRAY array size  ma3 %d %d %d\n",na3[0],na3[1],na3[2]);
   CkPrintf ("DEBUG_LEVEL_ARRAY array dims  na3 %d %d %d\n",na3[0],na3[1],na3[2]);
-  CkPrintf ("DEBUG_LEVEL_ARRAY array ghost ga3 %d %d %d\n",ga3[0],ga3[1],ga3[2]);
 
   CkPrintf ("DEBUG_LEVEL_ARRAY array lower index ia3_lower %d %d %d\n",ia3_lower[0],ia3_lower[1],ia3_lower[2]);
   CkPrintf ("DEBUG_LEVEL_ARRAY array upper index ia3_upper %d %d %d\n",ia3_upper[0],ia3_upper[1],ia3_upper[2]);

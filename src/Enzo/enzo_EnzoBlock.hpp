@@ -12,7 +12,7 @@
 
 // #define TRACE_BLOCK
 
-#include "enzo.decl.h"
+#include "charm_enzo.hpp"
 
 class EnzoBlock : public CBase_EnzoBlock
 
@@ -225,11 +225,11 @@ public: /// entry methods
   /// Synchronize for refresh
   void p_method_gravity_end();
 
-  // EnzoMethodInferenceArray
+  // EnzoMethodInference
   
-  void p_method_level_array_request_data(int,int,int,Index);
-  void p_method_level_array_send_data(int,int,int);
-  void p_method_level_array_done(int,int,int);
+  void p_method_inference_request_data(int,int,int,Index);
+  void p_method_inference_send_data(int,int,int);
+  void p_method_inference_done(int,int,int);
 
   //--------------------------------------------------
   /// Checkpoint

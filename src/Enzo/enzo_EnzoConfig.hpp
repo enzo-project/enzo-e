@@ -369,14 +369,15 @@ public: // interface
       method_feedback_analytic_SNR_shell_mass(true),
       method_feedback_fade_SNR(true),
       method_feedback_NEvents(-1),
-      /// EnzoMethodInferenceArray
-      method_inference_array_level(0),
+      /// EnzoMethodInference
+      method_inference_level_base(0),
+      method_inference_level_array(0),
+      method_inference_level_infer(0),
       method_inference_array_dims(),
       method_inference_array_size(),
-      method_inference_array_ghost_depth(),
-      method_inference_array_field_group(),
-      method_inference_array_num_adapt(0),
-      method_inference_array_adapt_index(-1),
+      method_inference_field_group(),
+      method_inference_num_adapt(0),
+      method_inference_adapt_index(-1),
       /// EnzoMethodStarMaker
       method_star_maker_flavor(""),
       method_star_maker_use_density_threshold(false),           // check above density threshold before SF
@@ -539,7 +540,7 @@ protected: // methods
   void read_method_grackle_(Parameters *);
   void read_method_gravity_(Parameters *);
   void read_method_heat_(Parameters *);
-  void read_method_inference_array_(Parameters *);
+  void read_method_inference_(Parameters *);
   void read_method_merge_sinks_(Parameters *);
   void read_method_pm_deposit_(Parameters *);
   void read_method_pm_update_(Parameters *);
@@ -864,14 +865,15 @@ public: // attributes
   bool                       method_feedback_fade_SNR;
   int                        method_feedback_NEvents;
 
-  /// EnzoMethodInferenceArray
-  int                        method_inference_array_level;
+  /// EnzoMethodInference
+  int                        method_inference_level_base;
+  int                        method_inference_level_array;
+  int                        method_inference_level_infer;
   int                        method_inference_array_dims[3];
   int                        method_inference_array_size[3];
-  int                        method_inference_array_ghost_depth[3];
-  std::string                method_inference_array_field_group;
-  int                        method_inference_array_num_adapt;
-  int                        method_inference_array_adapt_index;
+  std::string                method_inference_field_group;
+  int                        method_inference_num_adapt;
+  int                        method_inference_adapt_index;
 
   /// EnzoMethodStarMaker
   std::string               method_star_maker_flavor;

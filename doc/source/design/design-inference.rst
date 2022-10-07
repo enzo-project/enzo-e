@@ -19,7 +19,7 @@ Approach
 Design
 ======
 
-.. image:: inference-array.png
+.. image:: level-array.png
            :width: 800
 
 The purpose of the EnzoMethodInferenceArray method is to create arrays
@@ -105,6 +105,42 @@ update their root block ancestor (that is, all leaf blocks send their
 "create inference array" result, whether false or true). The root
 block will update a volume-based counter with each receive, and all
 root blocks will in turn synchronize with the root process.
+
+.. code-block:: C++
+
+   EnzoMethodInference::compute(Block * block)
+   {
+     // Negative level blocks can exit immediately
+     if (block->level() < 0) block->compute_done();
+
+     // Leaf blocks apply criteria and forward to base level
+     if (block->is_leaf()) {
+       bool create_array = apply_criteria_(block);
+       // Result is generated on base level blocks
+       send_create_array_(block,create_array);
+     }
+   }
+
+   void send_create_array_(Block * block, bool create_array)
+   {
+     if (block->level() > level_base_) {
+       // If level > base level, forward to parent
+       block_proxy[index_parent]->p_method_inference_send_create_array(create_array);
+     } else if (block->level() == level_base_) {
+       // If level == base level, notify level arrays
+       level_array_mask[*] = false;
+       for (cell in cell_create_list) {
+           // first determine level arrays to create using mask...
+           for (inference array overlapping cell) {
+             level_array_mask[infrence_array] = true;
+           }
+       }
+       for (level_array) {
+         // ...then create level arrays
+         level_array_proxy[level_array] = CkNew();
+       }
+     }
+   }
 
 Phase 2. Create level arrays
 ============================

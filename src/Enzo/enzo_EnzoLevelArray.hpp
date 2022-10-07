@@ -19,7 +19,10 @@ public: // interface
   /// Constructors
   EnzoLevelArray()
   {
-    CkPrintf ("TRACE EnzoLevelArray %d %d %d\n",thisIndex.x,thisIndex.y,thisIndex.z);
+    int a3[3];
+    thisIndex.values(a3);
+    CkPrintf ("TRACE EnzoLevelArray %d %d %d\n",
+              a3[0],a3[1],a3[2]);
   }
   
   /// CHARM++ migration constructor

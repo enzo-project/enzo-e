@@ -12,6 +12,7 @@ module enzo {
   initnode void mutex_init_bcg_iter();
 
   readonly int EnzoMsgCheck::counter[CONFIG_NODE_SIZE];
+  readonly int EnzoMsgInferCreate::counter[CONFIG_NODE_SIZE];
 
   readonly EnzoConfig g_enzo_config;
   readonly int EnzoBlock::UseMinimumPressureSupport[CONFIG_NODE_SIZE];
@@ -101,7 +102,7 @@ module enzo {
   PUPable EnzoMethodFluxAccretion;
   PUPable EnzoMethodGravity;
   PUPable EnzoMethodHeat;
-  PUPable EnzoMethodInferenceArray;
+  PUPable EnzoMethodInference;
   PUPable EnzoMethodMergeSinks;
   PUPable EnzoMethodMHDVlct;
   PUPable EnzoMethodPmDeposit;
@@ -148,6 +149,7 @@ module enzo {
   PUPable EnzoUnits;
 
   message EnzoMsgCheck;
+  message EnzoMsgInferCreate;
 
   extern module mesh;
 
@@ -207,11 +209,11 @@ module enzo {
     entry void p_method_gravity_continue();
     entry void p_method_gravity_end();
 
-    // EnzoMethodInferenceArray
+    // EnzoMethodInference
 
-    entry void p_method_level_array_request_data(int,int,int,Index);
-    entry void p_method_level_array_send_data(int,int,int);
-    entry void p_method_level_array_done(int,int,int);
+    entry void p_method_inference_request_data(int,int,int,Index);
+    entry void p_method_inference_send_data(int,int,int);
+    entry void p_method_inference_done(int,int,int);
 
     // checkpoint
     entry void p_check_write_first
@@ -300,7 +302,7 @@ module enzo {
     entry void p_write(EnzoMsgCheck * );
   };
 
-  array[3D] EnzoLevelArray {
+  array[Index3] EnzoLevelArray {
     entry EnzoLevelArray();
   };
 };

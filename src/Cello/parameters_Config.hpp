@@ -25,7 +25,7 @@ public: // interface
   : PUP::able(),
     num_adapt(0),
     adapt_list(),
-    adapt_index_(),
+    adapt_index(),
     adapt_interval(0),
     adapt_min_face_rank(0),
     adapt_schedule_index(),
@@ -201,7 +201,7 @@ public: // interface
     : PUP::able(m),
       num_adapt(0),
       adapt_list(),
-      adapt_index_(),
+      adapt_index(),
       adapt_interval(0),
       adapt_min_face_rank(0),
       adapt_schedule_index(),
@@ -391,7 +391,7 @@ public: // attributes
   int                        num_adapt;
   std::vector <std::string>  adapt_list;
   // non-parameter storing global index for first refinement criterion
-  int                        adapt_index_;
+  int                        adapt_index;
   int                        adapt_min_face_rank;
   std::vector <int>          adapt_schedule_index;
   int                        adapt_interval;

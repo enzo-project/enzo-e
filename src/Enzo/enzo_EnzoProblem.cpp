@@ -642,15 +642,17 @@ Method * EnzoProblem::create_method_
 
 #endif /* CONFIG_USE_GRACKLE */
 
-  } else if (name == "inference_array") {
+  } else if (name == "inference") {
 
-    method = new EnzoMethodInferenceArray
-      (enzo_config->method_inference_array_level,
-       enzo_config->mesh_root_size,
+    method = new EnzoMethodInference
+      (enzo_config->method_inference_level_base,
+       enzo_config->method_inference_level_array,
+       enzo_config->method_inference_level_infer,
        enzo_config->method_inference_array_dims,
        enzo_config->method_inference_array_size,
-       enzo_config->method_inference_array_ghost_depth,
-       enzo_config->method_inference_array_field_group);
+       enzo_config->method_inference_field_group,
+       enzo_config->method_inference_adapt_index,
+       enzo_config->method_inference_num_adapt);
 
   } else if (name == "turbulence") {
 

@@ -206,7 +206,7 @@ void Problem::initialize_refine(Config * config,
 {
   for (int index_adapt=0; index_adapt<config->num_adapt; index_adapt++) {
 
-    const int index_refine = index_adapt + config->adapt_index_;
+    const int index_refine = index_adapt + config->adapt_index;
     
     std::string name = config->adapt_type[index_refine];
 
