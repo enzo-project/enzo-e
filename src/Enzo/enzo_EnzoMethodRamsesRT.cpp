@@ -589,7 +589,8 @@ void EnzoMethodRamsesRT::inject_photons ( EnzoBlock * enzo_block ) throw()
 
 //---------------------------------------------------------------------
 
-double EnzoMethodRamsesRT::compute_hll_eigenvalues (double f, double theta, double * lmin, double * lmax) throw() 
+double EnzoMethodRamsesRT::compute_hll_eigenvalues (double f, double theta, double * lmin, double * lmax, 
+                                                    double clight) throw() 
 {
   double lf = f*100;
   double lt = theta/cello::pi * 100;
@@ -609,7 +610,7 @@ double EnzoMethodRamsesRT::compute_hll_eigenvalues (double f, double theta, doub
   *lmin += dd1*de2*RT_init->hll_table_lambda_min(i+1,j  );
   *lmin += de1*dd2*RT_init->hll_table_lambda_min(i  ,j+1);
   *lmin += dd1*dd2*RT_init->hll_table_lambda_min(i+1,j+1);
-
+ 
   *lmax = 0.0;
   *lmax += de1*de2*RT_init->hll_table_lambda_max(i  ,j  );
   *lmax += dd1*de2*RT_init->hll_table_lambda_max(i+1,j  );
@@ -625,13 +626,12 @@ double EnzoMethodRamsesRT::flux_function (double U_l, double U_lplus1,
 					    std::string type) throw()
 {
   // returns face-flux of a cell at index idx
-  // TODO: Add HLL flux function. Ramses-RT reads hll eigenvalues from a file (see rt_flux_module.f90)
   if (type == "GLF") {
     return 0.5*(  Q_l+Q_lplus1 - clight*(U_lplus1-U_l) ); 
   }
 
   else if (type == "HLL") {
-    return (lmax*Q_l - lmin*Q_lplus1 + lmax*lmin*(U_lplus1-U_l)) / (lmax - lmin);
+    return (lmax*Q_l - lmin*Q_lplus1 + lmax*lmin*clight*(U_lplus1-U_l)) / (lmax - lmin);
   }
 
   else {
@@ -658,14 +658,14 @@ void EnzoMethodRamsesRT::get_reduced_variables (double * chi, double (*n)[3], in
                                enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz) throw()
 {
   double Fnorm = sqrt(Fx[i]*Fx[i] + Fy[i]*Fy[i] + Fz[i]*Fz[i]);
-  double f = Fnorm / (clight*N[i]); // reduced flux
-  *chi = (3 + 4*f*f) / (5 + 2*sqrt(4-3*f*f));
+  double f = std::min(Fnorm / (clight*N[i]), 1.0); // reduced flux ( 0 < f < 1)
+  *chi = (3 + 4*f*f) / (5 + 2*sqrt(4-3*f*f)); // isotropy measure (1/3 < chi < 1)
   (*n)[0] = Fx[i]/Fnorm;
   (*n)[1] = Fy[i]/Fnorm; 
   (*n)[2] = Fz[i]/Fnorm;
 
   #ifdef DEBUG_PRINT_REDUCED_VARIABLES
-    CkPrintf("N = %1.2e; Fx = %1.2e; Fy = %1.2e; Fz = %1.2e; f = %1.2e; chi = %1.2e; n=[%1.2e,%1.2e,%1.2e]\n", N[i], Fx[i], Fy[i], Fz[i], f, *chi, (*n)[0], (*n)[1], (*n)[2]); 
+    CkPrintf("i = %d; N = %1.2e; Fx = %1.2e; Fy = %1.2e; Fz = %1.2e; f = %1.2e; chi = %1.2e; n=[%1.2e,%1.2e,%1.2e]\n", i, N[i], Fx[i], Fy[i], Fz[i], f, *chi, (*n)[0], (*n)[1], (*n)[2]); 
   #endif
 }
 
@@ -757,15 +757,15 @@ void EnzoMethodRamsesRT::get_U_update (EnzoBlock * enzo_block, double * N_update
 
   if (flux_type == "HLL") {
     double Fnorm = sqrt(Fx[i]*Fx[i] + Fy[i]*Fy[i] + Fz[i]*Fz[i]);
-    double f = Fnorm / (N[i]*clight);
+    double f = std::min(Fnorm / (N[i]*clight), 1.0);
 
-    double theta_x = acos(Fx[i] / Fnorm);
-    double theta_y = acos(Fy[i] / Fnorm);
-    double theta_z = acos(Fz[i] / Fnorm);
+    double theta_x = acos(std::min(Fx[i] / Fnorm, -1.0));
+    double theta_y = acos(std::min(Fy[i] / Fnorm, -1.0));
+    double theta_z = acos(std::min(Fz[i] / Fnorm, -1.0));
 
-    compute_hll_eigenvalues(f, theta_x, &lmin_x, &lmax_x);
-    compute_hll_eigenvalues(f, theta_y, &lmin_y, &lmax_y);
-    compute_hll_eigenvalues(f, theta_z, &lmin_z, &lmax_z); 
+    compute_hll_eigenvalues(f, theta_x, &lmin_x, &lmax_x, clight);
+    compute_hll_eigenvalues(f, theta_y, &lmin_y, &lmax_y, clight);
+    compute_hll_eigenvalues(f, theta_z, &lmin_z, &lmax_z, clight);
   } 
   
   // if rank >= 1
@@ -784,12 +784,12 @@ void EnzoMethodRamsesRT::get_U_update (EnzoBlock * enzo_block, double * N_update
   *Fx_update += dt/hy * deltaQ_faces(Fx[i], Fx[i+idy], Fx[i-idy],
                                    P10[i],
                                    P10[i+idy],
-                                   P10[i-idy], clight, lmin_y, lmax_y, flux_type );
+                                   P10[i-idy], clight, lmin_x, lmax_x, flux_type );
 
   *Fy_update += dt/hx * deltaQ_faces(Fy[i], Fy[i+idx], Fy[i-idx],
                                    P01[i],
                                    P01[i+idx],
-                                   P01[i-idx], clight, lmin_x, lmax_x, flux_type );
+                                   P01[i-idx], clight, lmin_y, lmax_y, flux_type );
 
   *Fy_update += dt/hy * deltaQ_faces(Fy[i], Fy[i+idy], Fy[i-idy],
                                    P11[i],
@@ -804,22 +804,22 @@ void EnzoMethodRamsesRT::get_U_update (EnzoBlock * enzo_block, double * N_update
   *Fx_update += dt/hz * deltaQ_faces(Fx[i], Fx[i+idz], Fx[i-idz],
                                    P20[i],
                                    P20[i+idz],
-                                   P20[i-idz], clight, lmin_z, lmax_z, flux_type );
+                                   P20[i-idz], clight, lmin_x, lmax_x, flux_type );
 
   *Fy_update += dt/hz * deltaQ_faces(Fy[i], Fy[i+idz], Fy[i-idz],
                                    P21[i],
                                    P21[i+idz],
-                                   P21[i-idz], clight, lmin_z, lmax_z, flux_type);
+                                   P21[i-idz], clight, lmin_y, lmax_y, flux_type);
 
   *Fz_update += dt/hx * deltaQ_faces(Fz[i], Fz[i+idx], Fz[i-idx],
                                    P02[i],
                                    P02[i+idx],
-                                   P02[i-idx], clight, lmin_x, lmax_x, flux_type);
+                                   P02[i-idx], clight, lmin_z, lmax_z, flux_type);
 
   *Fz_update += dt/hy * deltaQ_faces(Fz[i], Fz[i+idy], Fz[i-idy],
                                    P12[i],
                                    P12[i+idy],
-                                   P12[i-idy], clight, lmin_y, lmax_y, flux_type);
+                                   P12[i-idy], clight, lmin_z, lmax_z, flux_type);
 
   *Fz_update += dt/hz * deltaQ_faces(Fz[i], Fz[i+idz], Fz[i-idz],
                                    P22[i],
@@ -1361,7 +1361,7 @@ void EnzoMethodRamsesRT::solve_transport_eqn ( EnzoBlock * enzo_block ) throw()
         Fznew[i] += Fz_update;
          
         // now get updated photon densities
-        Nnew[i] += N_update;
+        Nnew[i] = std::max(Nnew[i] + N_update, 1e-16);
 
 
       #ifdef DEBUG_TRANSPORT

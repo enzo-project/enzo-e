@@ -154,7 +154,7 @@ protected: // methods
                         double Q_l, double Q_lplus1,
                         double clight, double lmin, double lmax, std::string type) throw();
 
-  double compute_hll_eigenvalues(double f, double theta, double * lmin, double * lmax) throw();
+  double compute_hll_eigenvalues(double f, double theta, double * lmin, double * lmax, double clight) throw();
 
   double deltaQ_faces (double U_l, double U_lplus1, double U_lminus1, 
                        double Q_l, double Q_lplus1, double Q_lminus1,

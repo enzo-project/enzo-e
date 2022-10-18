@@ -52,12 +52,8 @@ public: // interface
   double hll_table_col4       (int i, int j) const throw() { return hll_table_col4_[100*i+j]; }
 
 private:
-  void read_hll_eigenvalues(std::string hll_file) throw();  
-/*
-  int hll_table_f_[100][100], hll_table_theta_[100][100];
-  double hll_table_lambda_min_[100][100], hll_table_lambda_max_[100][100];
-  double hll_table_col3_[100][100], hll_table_col4_[100][100]; // not sure what these columns are
-*/
+  void read_hll_eigenvalues(std::string hll_file) throw(); 
+ 
   std::vector<int> hll_table_f_, hll_table_theta_;
   std::vector<double> hll_table_lambda_min_, hll_table_lambda_max_;
   std::vector<double> hll_table_col3_, hll_table_col4_; // not sure what these columns are
