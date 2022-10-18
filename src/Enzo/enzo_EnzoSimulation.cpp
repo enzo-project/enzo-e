@@ -84,6 +84,7 @@ void EnzoSimulation::pup (PUP::er &p)
 
   p | sync_check_writer_created_;
   p | sync_check_done_;
+  p | sync_infer_count_;
   p | check_num_files_;
   p | check_ordering_;
   p | check_directory_;

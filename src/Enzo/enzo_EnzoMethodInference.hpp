@@ -40,6 +40,7 @@ public: // interface
       field_group_(),
       is_sync_child_(-1),
       is_sync_parent_(-1),
+      is_mask_(-1),
       index_refine_(-1),
       num_refine_(0)
   { }
@@ -58,6 +59,7 @@ public: // interface
       field_group_(),
       is_sync_child_(-1),
       is_sync_parent_(-1),
+      is_mask_(-1),
       index_refine_(-1),
       num_refine_(0)
   { }
@@ -71,17 +73,27 @@ public: // interface
   virtual std::string name () throw () 
   { return "inference"; }
 
+public: // methods
+
+  void merge_masks (Block * block, int count, int n, char *mask, int ic3[3]);
+
+  void count_arrays (Block * block, int count);
+
 protected: // methods
 
   /// Apply criteria to determine which if any overlapping inference
   /// arrays need to be created. Return number of inference arrays
   /// to create
-  int apply_criteria_(Block * block, std::vector<bool> & mask);
+  int apply_criteria_(Block * block, int * n, char ** mask);
+
+  /// Create the specified elements in the inference array chare array
+  void create_level_arrays_
+  (Block * block, int count, int n, char * mask);
 
   /// Process inference array creation criteria results, sending
   ///results where needed so that inference arrays are created
   void forward_create_array_
-  (Block * block, int count, const std::vector<bool> & mask);
+  (Block * block, int count, int n, char * mask);
 
   void compute_ (Block * block, enzo_float * Unew ) throw();
 
@@ -96,12 +108,15 @@ protected: // methods
    const int na3[3], const int nb3[3]) const;
 
   /// Return the Block's synchronization counter for child blocks (plus self)
-  Sync & s_sync_child_(EnzoBlock * block)
+  Sync & sync_child_(Block * block)
   { return *block->data()->scalar_sync().value(is_sync_child_); }
 
   /// Return the Block's synchronization counter for parent block (plus self)
-  Sync & s_sync_parent_(EnzoBlock * block)
+  Sync & sync_parent_(Block * block)
   { return *block->data()->scalar_sync().value(is_sync_parent_); }
+
+  char ** scalar_mask_(Block * block)
+  { return (char **)block->data()->scalar_void().value(is_mask_); }
 
 protected: // attributes
 
@@ -126,11 +141,14 @@ protected: // attributes
   /// array
   std::string field_group_;
 
-  /// Block counter for child synchronization
+  /// Block counter index for child synchronization
   int is_sync_child_;
 
-  /// Block counter for parent synchronization
+  /// Block counter index for parent synchronization
   int is_sync_parent_;
+
+  /// Block Scalar mask index for creating inference arrays
+  int is_mask_;
 
   /// Index for the first "refinement" criterion
   int index_refine_;

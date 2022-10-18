@@ -66,6 +66,10 @@ public: // functions
   { sync_check_writer_created_.set_stop(count); }
   void p_io_reader_created();
 
+  /// EnzoMethodInference
+  /// Count inference arrays to create
+  void p_infer_count_arrays(int count);
+
   /// Read in and initialize the next refinement level from a checkpoint;
   /// or exit if done
   void p_restart_next_level();
@@ -91,6 +95,7 @@ private: // attributes
   /// Checkpoint synchronization
   Sync                     sync_check_writer_created_;
   Sync                     sync_check_done_;
+  Sync                     sync_infer_count_;
   int                      check_num_files_;
   std::string              check_ordering_;
   std::vector<std::string> check_directory_;

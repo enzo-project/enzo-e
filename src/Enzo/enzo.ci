@@ -175,6 +175,9 @@ module enzo {
     entry void p_check_done();
     entry void p_set_io_writer(CProxy_IoEnzoWriter proxy);
 
+    // EnzoMethodInfer
+    entry void p_infer_count_arrays(int count);
+
     // enzo_control_restart
     entry void p_set_io_reader(CProxy_IoEnzoReader proxy);
     entry void p_io_reader_created();
@@ -211,6 +214,11 @@ module enzo {
 
     // EnzoMethodInference
 
+    entry void p_method_infer_merge_masks
+      (int count, int n, char mask[n], int ic3[3]);
+    entry void p_method_infer_count_arrays (int count);
+
+    /// OLD
     entry void p_method_inference_request_data(int,int,int,Index);
     entry void p_method_inference_send_data(int,int,int);
     entry void p_method_inference_done(int,int,int);

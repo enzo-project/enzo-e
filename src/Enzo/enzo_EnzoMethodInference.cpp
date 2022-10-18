@@ -6,8 +6,22 @@
 /// @brief    Implements the EnzoMethodInference class
 
 #include "cello.hpp"
-
 #include "enzo.hpp"
+
+#define TRACE_INFER
+
+#ifdef TRACE_INFER
+#  define TRACE_INFER_BLOCK(B,MSG) \
+  CkPrintf ("TRACE_INFER_BLOCK %s %s\n", \
+            B->name().c_str(),std::string(MSG).c_str());
+#  define TRACE_INFER_SIMULATION(MSG) \
+  CkPrintf ("TRACE_INFER_SIMULATION %d %s\n",   \
+            CkMyPe(),std::string(MSG).c_str());
+#else
+#  define TRACE_INFER_BLOCK(B,MSG) /* ... */
+#  define TRACE_INFER_SIMULATION(SIM,MSG) /* ... */
+#endif
+
 
 //----------------------------------------------------------------------
 
@@ -29,6 +43,7 @@ EnzoMethodInference::EnzoMethodInference
     field_group_(field_group),
     is_sync_child_(-1),
     is_sync_parent_(-1),
+    is_mask_(-1),
     index_refine_(index_refine),
     num_refine_(num_refine)
 {
@@ -38,23 +53,29 @@ EnzoMethodInference::EnzoMethodInference
   }
 
   // Verify level_array and array_dims match
-  int n3[3] = {
+  int nd3[3] = {
     cello::config()->mesh_root_blocks[0],
     cello::config()->mesh_root_blocks[1],
     cello::config()->mesh_root_blocks[2] };
+  int md3[3] = {
+    cello::config()->mesh_root_size[0],
+    cello::config()->mesh_root_size[1],
+    cello::config()->mesh_root_size[2] };
 
+  
   for (int axis=0; axis<cello::rank(); axis++) {
     ASSERT2("EnzoMethodInference()",
             "level-array level %d mismatch with level array size %d",
-            level_array,m3_level_[axis],pow(2,level_array)*n3[axis]==m3_level_[axis]);
+            level_array,m3_level_[axis],pow(2,level_array)*nd3[axis]==m3_level_[axis]);
   }
 
   for (int axis=0; axis<cello::rank(); axis++) {
-    ASSERT3("EnzoMethodInference()",
-            "level-infer / level-array levels %d %d "
+    int nb = md3[axis]/nd3[axis]; // compute block size along axis
+    ASSERT5("EnzoMethodInference()",
+            "2**(%d - %d)*(%d/%d) "
             "mismatch with inference array size %d",
-            level_infer,level_array,m3_infer_[axis],
-            pow(2,(level_infer-level_array))==m3_infer_[axis]);
+            level_infer,level_array,md3[axis],nd3[axis],m3_infer_[axis],
+            pow(2,(level_infer-level_array))*nb==m3_infer_[axis]);
   }
 
   cello::define_field ("density");
@@ -88,10 +109,13 @@ EnzoMethodInference::EnzoMethodInference
   }
   // Create and initialize Block synchronization counters
   ScalarDescr * scalar_descr_sync = cello::scalar_descr_sync();
+  ScalarDescr * scalar_descr_void = cello::scalar_descr_void();
   is_sync_child_ = scalar_descr_sync->new_value
     ("method_inference_sync_child");
   is_sync_parent_ = scalar_descr_sync->new_value
     ("method_inference_sync_parent");
+  is_mask_ = scalar_descr_void->new_value
+    ("method_inference_mask");
 }
 
 //----------------------------------------------------------------------
@@ -144,7 +168,7 @@ void EnzoBlock::p_method_inference_send_data(int ix,int iy,int iz)
 
 //----------------------------------------------------------------------
 
-void EnzoBlock:: p_method_inference_done(int ix,int iy,int iz)
+void EnzoBlock::p_method_inference_done(int ix,int iy,int iz)
 {
   EnzoMethodInference * method =
     static_cast<EnzoMethodInference*> (this->method());
@@ -178,10 +202,18 @@ void EnzoMethodInference::pup (PUP::er &p)
 
 void EnzoMethodInference::compute ( Block * block) throw()
 {
+  TRACE_INFER_BLOCK(block,"compute()");
   const int level = block->level();
+
+  // Inialize block scalars
+  const int nc = cello::num_children();
+  sync_child_ (block).set_stop(nc+1);
+  sync_parent_(block).set_stop(1+1);
+  *scalar_mask_(block) = nullptr;
 
   // Negative levels are not involved in EnzoMethodInference
   if (block->level() < 0) {
+    TRACE_INFER_BLOCK(block,"compute_done()");
     block->compute_done();
     return;
   }
@@ -191,58 +223,148 @@ void EnzoMethodInference::compute ( Block * block) throw()
     //    EnzoMsgInferCreate * msg = new EnzoMsgInferCreate;
 
     // Apply inference array creation criteria
-    std::vector<bool> mask;
-    int count = apply_criteria_(block,mask);
+    int n = 0;
+    char * mask = nullptr;
+    int count = apply_criteria_(block,&n, &mask);
 
-    forward_create_array_(block,count,mask);
-    // if (block->level() > level_base_) {
-    // }
-    // int n3[3];
-    // cello::hierarchy()->root_size(n3,n3+1,n3+2);
-    // int na3[3] = {m3_level_[0],  m3_level_[1],  m3_level_[2]};
-    // int ib3[3];
-    // int nb3[3];
-    // cello::hierarchy()->root_blocks(nb3,nb3+1,nb3+2);
-    // block->index().array(ib3,ib3+1,ib3+2);
-
-    // int ia3_lower[3] = {0,0,0};
-    // int ia3_upper[3] = {1,1,1};
-    // intersecting_level_arrays_
-    //   (ia3_lower,ia3_upper, ib3,n3, level_base_,na3, nb3);
+    forward_create_array_(block,count,n,mask);
   }
 
   // (temporary: compute_done() not called until inference completed)
+  TRACE_INFER_BLOCK(block,"compute_done()");
   block->compute_done();
 }
 
 //----------------------------------------------------------------------
 
 int EnzoMethodInference::apply_criteria_
-(Block * block, std::vector<bool> & mask)
+(Block * block, int * n, char ** mask)
 {
+  TRACE_INFER_BLOCK(block,"apply_criteria()");
   // Apply criteria whether to create the inference array under
   // any cells. Return mask of inference arrays to create and
   // the total count
   int count = 0;
   int mask_size = 0;
   if (block->level() >= level_base_) {
+    TRACE_INFER_BLOCK(block,"apply_criteria() TRUE");
     // TEMPORARY: create all underlying inference arrays
-    mask_size = int(pow(2,block->level() - level_array_));
+    const int nc = cello::num_children();
+    mask_size = int(pow(nc,(level_array_ - block->level())));
+    mask_size = std::max(mask_size,1);
+    *n = mask_size;
+    *mask = new char[mask_size];
+    std::fill_n(*mask,*n,1);
     count += mask_size;
   }
-  CkPrintf ("TRACE_INFER apply_criteria %s result %d size %d\n",
-            block->name().c_str(),count,mask_size);
   return count;
 }
 
+//----------------------------------------------------------------------
+
 void EnzoMethodInference::forward_create_array_
-(Block * block, int count, const std::vector<bool> & mask)
+(Block * block, int count, int n, char * mask)
 {
-  CkPrintf ("TRACE_INFER %s forward_create_array_()\n",block->name().c_str());
+  // Called by (all) leaf blocks
+  ASSERT ("EnzoMethodInference::forward_create_array_",
+          "Block %s is not a leaf",
+          block->is_leaf());
+
+  char buffer[80];
+  sprintf (buffer,"forward_create_array_(): leaf %d count %d",
+           block->is_leaf()?1:0,count);
+  TRACE_INFER_BLOCK(block,buffer);
+
+  int level = block->level();
+
+  // Create level arrays if this is the base level
+  if (level == level_base_) {
+    create_level_arrays_(block,count,n,mask);
+  }
+
+  // Forward count and mask to parent to merge
+
+  if (level == 0) {
+    // Root level: synchronize in root simulation object
+    proxy_enzo_simulation[0].p_infer_count_arrays(count);
+  } else { // level > 0
+    int ic3[3] = {0,0,0};
+    Index index_parent = block->index().index_parent();
+    block->index().child(level,ic3,ic3+1,ic3+2);
+    if (level > level_base_) {
+      enzo::block_array()[index_parent].
+        p_method_infer_merge_masks (count,n,mask,ic3);
+      // Count level arrays by beginning reduction to root Simulation
+    } else { // 0 < level <= level_bask
+      // Forward count to root to count
+      enzo::block_array()[index_parent].
+        p_method_infer_count_arrays (count);
+    }
+  }
 }
+
+//----------------------------------------------------------------------
+
+void EnzoSimulation::p_infer_count_arrays(int count)
+{
+  char buffer[80];
+  sprintf(buffer,"p_infer_count_arrays %d",count);
+  
+  TRACE_INFER_SIMULATION(buffer);
+}
+
+//----------------------------------------------------------------------
+void EnzoBlock::p_method_infer_merge_masks
+(int count, int n, char *mask, int ic3[3])
+{
+  TRACE_INFER_BLOCK(this,"p_method_infer_merge_masks");
+
+  EnzoMethodInference * method =
+    static_cast<EnzoMethodInference*> (this->method());
+  CkPrintf ("Method = %p\n",(void *)method);
+  method->merge_masks(this,count,n,mask,ic3);
+}
+
+void EnzoMethodInference::merge_masks
+(Block * block, int count, int n, char *mask, int ic3[3])
+{
+  char buffer[80];
+  sprintf (buffer,"merge_masks() count %d n %d\n",count,n);
+  TRACE_INFER_BLOCK (block,buffer);
+  if (sync_child_(block).next()) {
+    TRACE_INFER_BLOCK (block,"Sync release");
+  }
+}
+
+
+//----------------------------------------------------------------------
+
+void EnzoBlock::p_method_infer_count_arrays (int count)
+{
+  TRACE_INFER_BLOCK(this,"p_method_infer_count_arrays");
+
+  EnzoMethodInference * method =
+    static_cast<EnzoMethodInference*> (this->method());
+
+  method->count_arrays(this,count);
+}
+
+void EnzoMethodInference::count_arrays (Block * block, int count)
+{
+  char buffer[80];
+  sprintf (buffer,"count_arrays() count %d\n",count);
+  TRACE_INFER_BLOCK (block,buffer);
+}
+
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 //======================================================================
 
+void EnzoMethodInference::create_level_arrays_
+(Block * block, int count, int n, char * mask)
+{
+  TRACE_INFER_BLOCK(block,"create_level_arrays_()");
+}
+//----------------------------------------------------------------------
 void EnzoMethodInference::intersecting_root_blocks_
 (
  int ib3_lower[3], // OUTPUT lower-indicies of intersecting root-blocks

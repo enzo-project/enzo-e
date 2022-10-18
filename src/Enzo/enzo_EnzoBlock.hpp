@@ -226,7 +226,14 @@ public: /// entry methods
   void p_method_gravity_end();
 
   // EnzoMethodInference
-  
+
+  /// Merge inference array creation masks from children
+  void p_method_infer_merge_masks
+  (int count, int n, char * mask, int ic3[3]);
+  /// Count inference arrays
+  void p_method_infer_count_arrays (int count);
+
+  // OLD
   void p_method_inference_request_data(int,int,int,Index);
   void p_method_inference_send_data(int,int,int);
   void p_method_inference_done(int,int,int);
