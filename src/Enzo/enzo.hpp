@@ -66,7 +66,7 @@ namespace enzo {
   EnzoPhysicsCosmology *    cosmology();
   EnzoPhysicsFluidProps *   fluid_props();
 
-  const EnzoInitialRamsesRT * RT_init();
+  const EnzoInitialM1Closure * RT_init();
   const EnzoMethodGrackle * grackle_method();
 
   CProxy_EnzoBlock          block_array();

@@ -1,16 +1,16 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoInitialRamsesRT.cpp
+/// @file     enzo_EnzoInitialM1Closure.cpp
 /// @author   William Hicks (whicks@ucsd.edu)
 /// @date     Tue September 6 2022
-/// @brief    [\ref Enzo] EnzoMethodRamsesRT initializer
+/// @brief    [\ref Enzo] EnzoMethodM1Closure initializer
 
 #include "cello.hpp"
 #include "enzo.hpp"
 
 //----------------------------------------------------------------------
 
-EnzoInitialRamsesRT::EnzoInitialRamsesRT
+EnzoInitialM1Closure::EnzoInitialM1Closure
 (const EnzoConfig * enzo_config) throw ()
   : Initial(enzo_config->initial_cycle, enzo_config->initial_time)
 {
@@ -19,7 +19,7 @@ EnzoInitialRamsesRT::EnzoInitialRamsesRT
 
 //----------------------------------------------------------------------
 
-void EnzoInitialRamsesRT::pup (PUP::er &p)
+void EnzoInitialM1Closure::pup (PUP::er &p)
 {
   // NOTE: update whenever attributes change
 
@@ -37,14 +37,14 @@ void EnzoInitialRamsesRT::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void EnzoInitialRamsesRT::enforce_block
+void EnzoInitialM1Closure::enforce_block
 (Block * block, const Hierarchy  * hierarchy) throw()
 {
   block->initial_done();
 
   const EnzoConfig * enzo_config = enzo::config();
-  if (enzo_config->method_ramses_rt_flux_function == "HLL") {
-    read_hll_eigenvalues(enzo_config->method_ramses_rt_hll_file);
+  if (enzo_config->method_M1_closure_flux_function == "HLL") {
+    read_hll_eigenvalues(enzo_config->method_M1_closure_hll_file);
   }
 
   return;
@@ -52,12 +52,12 @@ void EnzoInitialRamsesRT::enforce_block
 
 //---------------------------------------------------------------------
 
-void EnzoInitialRamsesRT::read_hll_eigenvalues(std::string hll_file) throw()
+void EnzoInitialM1Closure::read_hll_eigenvalues(std::string hll_file) throw()
 {
     std::fstream inFile;
     inFile.open(hll_file, std::ios::in);
 
-    ASSERT("EnzoInitialRamsesRT::read_hll_eigenvalues()", "hll_file failed to open!",
+    ASSERT("EnzoInitialM1Closure::read_hll_eigenvalues()", "hll_file failed to open!",
            inFile.is_open());
 
     // store table in vectors

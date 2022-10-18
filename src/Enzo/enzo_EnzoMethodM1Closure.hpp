@@ -1,35 +1,35 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoMethodRamsesRT.hpp
+/// @file     enzo_EnzoMethodM1ClosureRT.hpp
 /// @author   William Hicks (whicks@ucsd.edu) 
 /// @date     Mon Aug  16 16:14:38 PDT 2021
-/// @brief    [\ref Enzo] Declaration of EnzoMethodRamsesRT
+/// @brief    [\ref Enzo] Declaration of EnzoMethodM1Closure
 ///           Radiative transfer using M1 closure method as implemented
-///           in the RAMSES-RT code
+///           in the RAMSES-RT code (https://ui.adsabs.harvard.edu/abs/2013MNRAS.436.2188R/abstract)
 
-#ifndef ENZO_ENZO_METHOD_RAMSES_RT
-#define ENZO_ENZO_METHOD_RAMSES_RT
+#ifndef ENZO_ENZO_METHOD_M1_CLOSURE
+#define ENZO_ENZO_METHOD_M1_CLOSURE
 
-class EnzoMethodRamsesRT : public Method {
+class EnzoMethodM1Closure : public Method {
 
-  /// @class    EnzoMethodRamsesRT 
+  /// @class    EnzoMethodM1Closure
   /// @ingroup  Enzo
   ///
-  /// @brief    [\ref Enzo] Declaration of EnzoMethodRamsesRT
+  /// @brief    [\ref Enzo] Declaration of EnzoMethodM1Closure
   ///           Radiative transfer using M1 closure method as implemented
   ///           in the RAMSES-RT code
 
 public: // interface
 
-  /// Create a new EnzoMethodRamsesRT object
+  /// Create a new EnzoMethodM1Closure object
 
-  EnzoMethodRamsesRT(const int N_groups, const double clight);
+  EnzoMethodM1Closure(const int N_groups, const double clight);
 
   /// Charm++ PUP::able declarations
-  PUPable_decl(EnzoMethodRamsesRT );
+  PUPable_decl(EnzoMethodM1Closure );
   
   /// Charm++ PUP::able migration constructor
-  EnzoMethodRamsesRT  (CkMigrateMessage *m)
+  EnzoMethodM1Closure (CkMigrateMessage *m)
     : Method (m)
     , N_groups_(0)
     , clight_(0.0)
@@ -45,7 +45,7 @@ public: // interface
   virtual void compute( Block * block) throw();
 
   virtual std::string name () throw () 
-  { return "ramses_rt"; }
+  { return "M1_closure"; }
 
   /// Compute maximum timestep for this method
   virtual double timestep ( Block * block ) throw();
@@ -208,4 +208,4 @@ protected: // attributes
   int ir_injection_, ir_transport_;
 };
 
-#endif /* ENZO_ENZO_METHOD_RAMSES_RT_HPP */
+#endif /* ENZO_ENZO_METHOD_M1_CLOSURE_HPP */

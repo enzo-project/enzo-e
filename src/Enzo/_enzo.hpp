@@ -197,7 +197,7 @@ extern "C" {
 #include "enzo_EnzoInitialMusic.hpp"
 #include "enzo_EnzoInitialPm.hpp"
 #include "enzo_EnzoInitialPpmlTest.hpp"
-#include "enzo_EnzoInitialRamsesRT.hpp"
+#include "enzo_EnzoInitialM1Closure.hpp"
 #include "enzo_EnzoInitialSedovArray2.hpp"
 #include "enzo_EnzoInitialSedovArray3.hpp"
 #include "enzo_EnzoInitialSedovRandom.hpp"
@@ -271,7 +271,7 @@ extern "C" {
 #include "enzo_EnzoMethodStarMakerSTARSS.hpp"
 #include "enzo_EnzoMethodStarMakerStochasticSF.hpp"
 #include "enzo_EnzoMethodMHDVlct.hpp"
-#include "enzo_EnzoMethodRamsesRT.hpp"
+#include "enzo_EnzoMethodM1Closure.hpp"
 #include "enzo_EnzoMethodThresholdAccretion.hpp"
 #include "enzo_EnzoMethodTurbulence.hpp"
 

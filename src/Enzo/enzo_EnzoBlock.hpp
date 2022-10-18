@@ -349,9 +349,9 @@ public: /// entry methods
   // EnzoMethodFeedbackSTARSS
   void p_method_feedback_starss_end();
 
-  //EnzoMethodRamsesRT
-  void p_method_ramses_rt_solve_transport_eqn();
-  void p_method_ramses_rt_set_global_averages(CkReductionMsg * msg);
+  //EnzoMethodM1Closure
+  void p_method_M1_closure_solve_transport_eqn();
+  void p_method_M1_closure_set_global_averages(CkReductionMsg * msg);
 
   virtual void print() const {
     CkPrintf ("PRINT_ENZO_BLOCK name = %s\n",name().c_str());
@@ -390,8 +390,8 @@ public: // attributes (YIKES!)
   /// Cosmological redshift for the current cycle
   enzo_float redshift;
 
-  /// frequency group iterator for EnzoMethodRamsesRT
-  int method_ramses_rt_igroup;
+  /// frequency group iterator for EnzoMethodM1Closure
+  int method_M1_closure_igroup;
 
   /// starting pos (active problem space)
   enzo_float GridLeftEdge[MAX_DIMENSION];

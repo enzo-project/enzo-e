@@ -1,37 +1,37 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoInitialRamsesRT.hpp
+/// @file     enzo_EnzoInitialM1Closure.hpp
 /// @author   William Hicks (whicks@ucsd.edu)
 /// @date     06 September 2022
-/// @brief    [\ref Enzo] Initialization routine for EnzoMethodRamsesRT.
+/// @brief    [\ref Enzo] Initialization routine for EnzoMethodM1Closure.
 //                        This is needed to compute and store large-ish tables relevant
-//                        to EnzoMethodRamsesRT that shouldn't be stored as attributes
+//                        to EnzoMethodM1Closure that shouldn't be stored as attributes
 //                        of the EnzoBlock class (e.g. Reading in HLL eigenvalue tables and cross sections
 //                          for a variety of different stellar masses).
 //
-//                        These things can't be stored as attributes of EnzoMethodRamsesRT
+//                        These things can't be stored as attributes of EnzoMethodM1Closure
 //                        because attributes of the derived class get sliced away after
 //                        the refresh steps.      
 
-#ifndef ENZO_ENZO_INITIAL_RAMSES_RT_HPP
-#define ENZO_ENZO_INITIAL_RAMSES_RT_HPP
+#ifndef ENZO_ENZO_INITIAL_M1_CLOSURE_HPP
+#define ENZO_ENZO_INITIAL_M1_CLOSURE_HPP
 
-class EnzoInitialRamsesRT : public Initial {
+class EnzoInitialM1Closure : public Initial {
 
-  /// @class    EnzoInitialRamsesRT
+  /// @class    EnzoInitialM1Closure
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Initialization routine for Ramses RT
 
 public: // interface
 
   /// CHARM++ constructor
-  EnzoInitialRamsesRT(const EnzoConfig * enzo_config) throw();
+  EnzoInitialM1Closure(const EnzoConfig * enzo_config) throw();
 
   /// CHARM++ PUP::able declaration
-  PUPable_decl(EnzoInitialRamsesRT);
+  PUPable_decl(EnzoInitialM1Closure);
 
   /// CHARM++ migration constructor
-  EnzoInitialRamsesRT(CkMigrateMessage *m)
+  EnzoInitialM1Closure(CkMigrateMessage *m)
      : Initial (m)
   {  }
 
@@ -60,4 +60,4 @@ private:
 
 };
 
-#endif /* ENZO_ENZO_INITIAL_RAMSES_RT_HPP */
+#endif /* ENZO_ENZO_INITIAL_M1Closure_HPP */

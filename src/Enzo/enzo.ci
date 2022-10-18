@@ -55,7 +55,7 @@ module enzo {
   PUPable EnzoInitialMusic;
   PUPable EnzoInitialPm;
   PUPable EnzoInitialPpmlTest;
-  PUPable EnzoInitialRamsesRT;
+  PUPable EnzoInitialM1Closure;
   PUPable EnzoInitialSedovArray2;
   PUPable EnzoInitialSedovArray3;
   PUPable EnzoInitialSedovRandom;
@@ -99,7 +99,7 @@ module enzo {
   PUPable EnzoMethodDistributedFeedback;
   PUPable EnzoMethodFeedback;
   PUPable EnzoMethodFeedbackSTARSS;
-  PUPable EnzoMethodRamsesRT;
+  PUPable EnzoMethodM1Closure;
   PUPable EnzoMethodFluxAccretion;
   PUPable EnzoMethodGravity;
   PUPable EnzoMethodHeat;
@@ -196,9 +196,9 @@ module enzo {
     // EnzoMethodFeedbackSTARSS synchronization entry methods
     entry void p_method_feedback_starss_end();
  
-    // EnzoMethodRamsesRT synchronization entry methods
-    entry void p_method_ramses_rt_solve_transport_eqn();
-    entry void p_method_ramses_rt_set_global_averages(CkReductionMsg *msg);  
+    // EnzoMethodM1Closure synchronization entry methods
+    entry void p_method_M1_closure_solve_transport_eqn();
+    entry void p_method_M1_closure_set_global_averages(CkReductionMsg *msg);  
  
     // EnzoMethodTurbulence synchronization entry methods
     entry void r_method_turbulence_end(CkReductionMsg *msg);

@@ -36,12 +36,12 @@ namespace enzo {
     return (EnzoPhysicsFluidProps *) out;
   }
 
-  const EnzoInitialRamsesRT * RT_init()
+  const EnzoInitialM1Closure * RT_init()
   {
     std::vector<std::string> initial_list = enzo::config()->initial_list;
     for (int i=0; i < initial_list.size(); i++) {
-      if (initial_list[i] == "ramses_rt") { 
-        return (const EnzoInitialRamsesRT *) problem()->initial(i); 
+      if (initial_list[i] == "M1_closure") { 
+        return (const EnzoInitialM1Closure *) problem()->initial(i); 
       }
     }
     // return NULL if not initializing RT arrays
