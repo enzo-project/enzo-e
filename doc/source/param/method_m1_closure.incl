@@ -70,8 +70,7 @@ See Section 4 of `Rosdahl et al. (2013) <https://ui.adsabs.harvard.edu/abs/2013M
 
 :e:`Specifies which group-mean photoionization cross section to use. Options include:`
 
-  * ``"vernier"`` :e:`Calculates the group-mean cross section using fits from `Vernier et al. (1996) <https://ui.adsabs.harvard.edu/abs/1996ApJ...465..487V/abstract>`.
-  The midpoint energy is used for each group (e.g. energy = 0.5 * (E_lower + E_upper)). `
+  * ``"vernier"`` :e:`Calculates the group-mean cross section using fits from `Vernier et al. (1996) <https://ui.adsabs.harvard.edu/abs/1996ApJ...465..487V/abstract>`. The midpoint energy is used for each group (e.g. energy = 0.5 * (E_lower + E_upper)). `
 
   * ``"vernier_average"`` :e:`Same as `"vernier"`, with the added step of averaging the cross section over all star particles in the simulation, weighted by mass * luminosity.`
  
