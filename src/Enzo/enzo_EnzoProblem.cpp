@@ -148,7 +148,7 @@ Initial * EnzoProblem::create_initial_
 #endif /* CONFIG_USE_GRACKLE */
   } else if (type == "feedback_test") {
     initial = new EnzoInitialFeedbackTest(enzo_config);
-  } else if (type == "M1_closure") { 
+  } else if (type == "m1_closure") { 
     initial = new EnzoInitialM1Closure(enzo_config);
   } else if (type == "vlct_bfield") {
     initial = new EnzoInitialBCenter(parameters, cycle, time,
@@ -737,11 +737,11 @@ Method * EnzoProblem::create_method_
       method = new EnzoMethodFeedback();
     }
 
-  } else if (name == "M1_closure") {
+  } else if (name == "m1_closure") {
 
     method = new EnzoMethodM1Closure(
-                 enzo_config->method_M1_closure_N_groups,
-                 enzo_config->method_M1_closure_clight_frac);
+                 enzo_config->method_m1_closure_N_groups,
+                 enzo_config->method_m1_closure_clight_frac);
 
   } else if (name == "check") {
 

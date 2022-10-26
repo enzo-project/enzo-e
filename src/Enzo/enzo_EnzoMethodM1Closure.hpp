@@ -45,7 +45,7 @@ public: // interface
   virtual void compute( Block * block) throw();
 
   virtual std::string name () throw () 
-  { return "M1_closure"; }
+  { return "m1_closure"; }
 
   /// Compute maximum timestep for this method
   virtual double timestep ( Block * block ) throw();

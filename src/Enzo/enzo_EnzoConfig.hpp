@@ -394,24 +394,22 @@ public: // interface
       method_star_maker_min_level(0), // minimum refinement level for star formation
       method_star_maker_turn_off_probability(false),
       // EnzoMethodM1Closure
-      method_M1_closure(false),
-      method_M1_closure_N_groups(1), // # of frequency bins
-      method_M1_closure_min_freq(0.0), // lower bound of freq. bins
-      method_M1_closure_max_freq(0.0), // upper bound of freq. bins
-      method_M1_closure_flux_function("GLF"), // which flux function to use
-      method_M1_closure_hll_file("hll_evals.list"), // path to hll eigenvalue table
-      method_M1_closure_clight_frac(1.0), // fraction of speed of light value to use
-      method_M1_closure_radiation_spectrum("blackbody"), // Type of radiation spectrum to use for star particles 
-      method_M1_closure_temperature_blackbody(-1.0), // requires radiation_spectrum="blackbody"
-      method_M1_closure_Nphotons_per_sec(0.0), // specify emission rate from sources
-      method_M1_closure_SED(), // supply list of emission rates for all groups (radiation_spectrum="custom")
-      method_M1_closure_recombination_radiation(false),
-      method_M1_closure_cross_section_calculator("vernier_average"), // what type of cross section calculator to use ("vernier", "vernier_average", "custom")
-      method_M1_closure_sigmaN(), // user-defined cross sections (requires cross_section_calculator = "custom")
-      method_M1_closure_sigmaE(), 
-      method_M1_closure_courant(0.5),
-      method_M1_closure_bin_lower(),
-      method_M1_closure_bin_upper(),
+      method_m1_closure(false),
+      method_m1_closure_N_groups(1), // # of frequency bins
+      method_m1_closure_flux_function("GLF"), // which flux function to use
+      method_m1_closure_hll_file("hll_evals.list"), // path to hll eigenvalue table
+      method_m1_closure_clight_frac(1.0), // fraction of speed of light value to use
+      method_m1_closure_radiation_spectrum("blackbody"), // Type of radiation spectrum to use for star particles 
+      method_m1_closure_temperature_blackbody(-1.0), // requires radiation_spectrum="blackbody"
+      method_m1_closure_Nphotons_per_sec(0.0), // specify emission rate from sources
+      method_m1_closure_SED(), // supply list of emission rates for all groups (radiation_spectrum="custom")
+      method_m1_closure_recombination_radiation(false),
+      method_m1_closure_cross_section_calculator("vernier_average"), // what type of cross section calculator to use ("vernier", "vernier_average", "custom")
+      method_m1_closure_sigmaN(), // user-defined cross sections (requires cross_section_calculator = "custom")
+      method_m1_closure_sigmaE(), 
+      method_m1_closure_courant(0.5),
+      method_m1_closure_bin_lower(),
+      method_m1_closure_bin_upper(),
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
@@ -535,7 +533,7 @@ protected: // methods
   void read_initial_merge_sinks_test_(Parameters *);
   void read_initial_music_(Parameters *);
   void read_initial_pm_(Parameters *);
-  void read_initial_M1_closure_(Parameters *);
+  void read_initial_m1_closure_(Parameters *);
   void read_initial_sedov_(Parameters *);
   void read_initial_sedov_random_(Parameters *);
   void read_initial_shock_tube_(Parameters *);
@@ -559,7 +557,7 @@ protected: // methods
   void read_method_ppm_(Parameters *);
   void read_method_sink_maker_(Parameters *);
   void read_method_star_maker_(Parameters *);
-  void read_method_M1_closure_(Parameters *);
+  void read_method_m1_closure_(Parameters *);
   void read_method_turbulence_(Parameters *);
   void read_method_vlct_(Parameters *);
   
@@ -910,24 +908,22 @@ public: // attributes
 
   /// EnzoMethodM1Closure
   
-  bool                      method_M1_closure; 
-  int                       method_M1_closure_N_groups;
-  double                    method_M1_closure_min_freq;
-  double                    method_M1_closure_max_freq;
-  std::string               method_M1_closure_flux_function;
-  std::string               method_M1_closure_hll_file;
-  double                    method_M1_closure_clight_frac;
-  std::string               method_M1_closure_radiation_spectrum;
-  double                    method_M1_closure_temperature_blackbody; 
-  double                    method_M1_closure_Nphotons_per_sec;
-  std::vector<double>       method_M1_closure_SED;
-  double                    method_M1_closure_courant;
-  bool                      method_M1_closure_recombination_radiation;
-  std::string               method_M1_closure_cross_section_calculator;
-  std::vector<double>       method_M1_closure_sigmaN;
-  std::vector<double>       method_M1_closure_sigmaE;
-  std::vector<double>       method_M1_closure_bin_lower;
-  std::vector<double>       method_M1_closure_bin_upper;
+  bool                      method_m1_closure; 
+  int                       method_m1_closure_N_groups;
+  std::string               method_m1_closure_flux_function;
+  std::string               method_m1_closure_hll_file;
+  double                    method_m1_closure_clight_frac;
+  std::string               method_m1_closure_radiation_spectrum;
+  double                    method_m1_closure_temperature_blackbody; 
+  double                    method_m1_closure_Nphotons_per_sec;
+  std::vector<double>       method_m1_closure_SED;
+  double                    method_m1_closure_courant;
+  bool                      method_m1_closure_recombination_radiation;
+  std::string               method_m1_closure_cross_section_calculator;
+  std::vector<double>       method_m1_closure_sigmaN;
+  std::vector<double>       method_m1_closure_sigmaE;
+  std::vector<double>       method_m1_closure_bin_lower;
+  std::vector<double>       method_m1_closure_bin_upper;
 
   /// EnzoMethodTurbulence
   double                     method_turbulence_edot;

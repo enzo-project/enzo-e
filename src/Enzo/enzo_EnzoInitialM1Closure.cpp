@@ -43,8 +43,8 @@ void EnzoInitialM1Closure::enforce_block
   block->initial_done();
 
   const EnzoConfig * enzo_config = enzo::config();
-  if (enzo_config->method_M1_closure_flux_function == "HLL") {
-    read_hll_eigenvalues(enzo_config->method_M1_closure_hll_file);
+  if (enzo_config->method_m1_closure_flux_function == "HLL") {
+    read_hll_eigenvalues(enzo_config->method_m1_closure_hll_file);
   }
 
   return;

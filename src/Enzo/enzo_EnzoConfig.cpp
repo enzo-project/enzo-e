@@ -254,24 +254,22 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_fade_SNR(true),
   method_feedback_NEvents(-1),
   // EnzoMethodM1Closure
-  method_M1_closure(false),
-  method_M1_closure_N_groups(1), // # of frequency bins
-  method_M1_closure_min_freq(0.0), // lower bound of freq. bins
-  method_M1_closure_max_freq(0.0), // upper bound of freq. bins
-  method_M1_closure_flux_function("GLF"), // which flux function to use
-  method_M1_closure_hll_file("hll_evals.list"),
-  method_M1_closure_clight_frac(1.0), // reduced speed of light value to use
-  method_M1_closure_radiation_spectrum("blackbody"), // Type of radiation spectrum to use for star particles
-  method_M1_closure_temperature_blackbody(0.0),
-  method_M1_closure_Nphotons_per_sec(0.0), // Set emission rate for star particles
-  method_M1_closure_SED(), // supply list of emission rate fraction for all groups
-  method_M1_closure_courant(0.5),
-  method_M1_closure_recombination_radiation(false),
-  method_M1_closure_cross_section_calculator("vernier_average"),
-  method_M1_closure_sigmaN(),
-  method_M1_closure_sigmaE(),
-  method_M1_closure_bin_lower(),
-  method_M1_closure_bin_upper(),
+  method_m1_closure(false),
+  method_m1_closure_N_groups(1), // # of frequency bins
+  method_m1_closure_flux_function("GLF"), // which flux function to use
+  method_m1_closure_hll_file("hll_evals.list"),
+  method_m1_closure_clight_frac(1.0), // reduced speed of light value to use
+  method_m1_closure_radiation_spectrum("blackbody"), // Type of radiation spectrum to use for star particles
+  method_m1_closure_temperature_blackbody(0.0),
+  method_m1_closure_Nphotons_per_sec(0.0), // Set emission rate for star particles
+  method_m1_closure_SED(), // supply list of emission rate fraction for all groups
+  method_m1_closure_courant(0.5),
+  method_m1_closure_recombination_radiation(false),
+  method_m1_closure_cross_section_calculator("vernier_average"),
+  method_m1_closure_sigmaN(),
+  method_m1_closure_sigmaE(),
+  method_m1_closure_bin_lower(),
+  method_m1_closure_bin_upper(),
   // EnzoMethodStarMaker,
   method_star_maker_flavor(""),                              // star maker type to use
   method_star_maker_use_altAlpha(false),
@@ -692,24 +690,22 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_star_maker_min_level;
   p | method_star_maker_turn_off_probability;
 
-  p | method_M1_closure;
-  p | method_M1_closure_N_groups;
-  p | method_M1_closure_min_freq;
-  p | method_M1_closure_max_freq;
-  p | method_M1_closure_flux_function;
-  p | method_M1_closure_hll_file;
-  p | method_M1_closure_clight_frac;
-  p | method_M1_closure_radiation_spectrum;
-  p | method_M1_closure_temperature_blackbody;
-  p | method_M1_closure_Nphotons_per_sec;
-  p | method_M1_closure_SED;
-  p | method_M1_closure_courant;
-  p | method_M1_closure_recombination_radiation;
-  p | method_M1_closure_cross_section_calculator;
-  p | method_M1_closure_sigmaN;
-  p | method_M1_closure_sigmaE;
-  p | method_M1_closure_bin_lower;
-  p | method_M1_closure_bin_upper;
+  p | method_m1_closure;
+  p | method_m1_closure_N_groups;
+  p | method_m1_closure_flux_function;
+  p | method_m1_closure_hll_file;
+  p | method_m1_closure_clight_frac;
+  p | method_m1_closure_radiation_spectrum;
+  p | method_m1_closure_temperature_blackbody;
+  p | method_m1_closure_Nphotons_per_sec;
+  p | method_m1_closure_SED;
+  p | method_m1_closure_courant;
+  p | method_m1_closure_recombination_radiation;
+  p | method_m1_closure_cross_section_calculator;
+  p | method_m1_closure_sigmaN;
+  p | method_m1_closure_sigmaE;
+  p | method_m1_closure_bin_lower;
+  p | method_m1_closure_bin_upper;
 
   p | method_turbulence_edot;
 
@@ -827,7 +823,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_merge_sinks_test_(p);
   read_initial_music_(p);
   read_initial_pm_(p);
-  read_initial_M1_closure_(p);
+  read_initial_m1_closure_(p);
   read_initial_sedov_(p);
   read_initial_sedov_random_(p);
   read_initial_shock_tube_(p);
@@ -851,7 +847,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_pm_deposit_(p);
   read_method_pm_update_(p);
   read_method_ppm_(p);
-  read_method_M1_closure_(p);
+  read_method_m1_closure_(p);
   read_method_sink_maker_(p);
   read_method_star_maker_(p);
   read_method_turbulence_(p);
@@ -1124,7 +1120,7 @@ void EnzoConfig::read_initial_inclined_wave_(Parameters * p)
 }
 
 //----------------------------------------------------------------------
-void EnzoConfig::read_initial_M1_closure_(Parameters * p)
+void EnzoConfig::read_initial_m1_closure_(Parameters * p)
 {
 
 }
@@ -1806,76 +1802,70 @@ void EnzoConfig::read_method_star_maker_(Parameters * p)
 
 //----------------------------------------------------------------------
 
-void EnzoConfig::read_method_M1_closure_(Parameters * p)
+void EnzoConfig::read_method_m1_closure_(Parameters * p)
 {
   for (size_t i=0; i<method_list.size(); i++) {
-    if (method_list[i] == "M1_closure") method_M1_closure=true;
+    if (method_list[i] == "m1_closure") method_m1_closure=true;
   }
 
-  method_M1_closure_N_groups = p->value_integer
-    ("Method:M1_closure:N_groups",1);
+  method_m1_closure_N_groups = p->value_integer
+    ("Method:m1_closure:N_groups",1);
 
-  method_M1_closure_min_freq = p->value_float
-    ("Method:M1_closure:min_freq",0.0);
+  method_m1_closure_flux_function = p->value_string
+    ("Method:m1_closure:flux_function","GLF");
 
-  method_M1_closure_max_freq = p->value_float
-    ("Method:M1_closure:max_freq",0.0);
+  method_m1_closure_hll_file = p->value_string
+    ("Method:m1_closure:hll_file","hll_evals.list");
 
-  method_M1_closure_flux_function = p->value_string
-    ("Method:M1_closure:flux_function","GLF");
+  method_m1_closure_clight_frac = p->value_float
+    ("Method:m1_closure:clight_frac",1.0);
 
-  method_M1_closure_hll_file = p->value_string
-    ("Method:M1_closure:hll_file","hll_evals.list");
+  method_m1_closure_radiation_spectrum = p->value_string
+    ("Method:m1_closure:radiation_spectrum","blackbody");
 
-  method_M1_closure_clight_frac = p->value_float
-    ("Method:M1_closure:clight_frac",1.0);
+  method_m1_closure_temperature_blackbody = p->value_float
+    ("Method:m1_closure:temperature_blackbody",0.0);
 
-  method_M1_closure_radiation_spectrum = p->value_string
-    ("Method:M1_closure:radiation_spectrum","blackbody");
+  method_m1_closure_Nphotons_per_sec = p->value_float
+    ("Method:m1_closure:Nphotons_per_sec",0.0);
 
-  method_M1_closure_temperature_blackbody = p->value_float
-    ("Method:M1_closure:temperature_blackbody",0.0);
-
-  method_M1_closure_Nphotons_per_sec = p->value_float
-    ("Method:M1_closure:Nphotons_per_sec",0.0);
-
-  method_M1_closure_recombination_radiation = p->value_logical
-    ("Method:M1_closure:recombination_radiation",false);
+  method_m1_closure_recombination_radiation = p->value_logical
+    ("Method:m1_closure:recombination_radiation",false);
   
-  method_M1_closure_courant = p->value_float
-    ("Method:M1_closure:courant", 0.5);
+  method_m1_closure_courant = p->value_float
+    ("Method:m1_closure:courant", 0.5);
 
-  method_M1_closure_cross_section_calculator = p->value_string
-    ("Method:M1_closure:cross_section_calculator","vernier_average");
+  method_m1_closure_cross_section_calculator = p->value_string
+    ("Method:m1_closure:cross_section_calculator","vernier_average");
 
-  method_M1_closure_SED.resize(method_M1_closure_N_groups);
-  method_M1_closure_bin_lower.resize(method_M1_closure_N_groups);
-  method_M1_closure_bin_upper.resize(method_M1_closure_N_groups);
+  method_m1_closure_SED.resize(method_m1_closure_N_groups);
+  method_m1_closure_bin_lower.resize(method_m1_closure_N_groups);
+  method_m1_closure_bin_upper.resize(method_m1_closure_N_groups);
   
   int N_species = 3; // number of ionizable species for RT (HI, HeI, HeII)
-  method_M1_closure_sigmaN.resize(method_M1_closure_N_groups * N_species);
-  method_M1_closure_sigmaE.resize(method_M1_closure_N_groups * N_species);
+  method_m1_closure_sigmaN.resize(method_m1_closure_N_groups * N_species);
+  method_m1_closure_sigmaE.resize(method_m1_closure_N_groups * N_species);
 
   // make default energy bins equally spaced between 1 eV and 101 eV
-  double bin_width = 100.0 / method_M1_closure_N_groups;
-  for (int i=0; i<method_M1_closure_N_groups; i++) {
+  double bin_width = 100.0 / method_m1_closure_N_groups;
+  for (int i=0; i<method_m1_closure_N_groups; i++) {
     // default SED (if this is being used) is flat spectrum
-    method_M1_closure_SED[i] = p->list_value_float
-      (i,"Method:M1_closure:SED", method_M1_closure_Nphotons_per_sec/method_M1_closure_N_groups);
+    method_m1_closure_SED[i] = p->list_value_float
+      (i,"Method:m1_closure:SED", method_m1_closure_Nphotons_per_sec/method_m1_closure_N_groups);
 
-    method_M1_closure_bin_lower[i] = p->list_value_float
-      (i,"Method:M1_closure:bin_lower", 1.0 + bin_width*i);
+    method_m1_closure_bin_lower[i] = p->list_value_float
+      (i,"Method:m1_closure:bin_lower", 1.0 + bin_width*i);
 
-    method_M1_closure_bin_upper[i] = p->list_value_float
-      (i,"Method:M1_closure:bin_upper", 1.0 + bin_width*(i+1));
+    method_m1_closure_bin_upper[i] = p->list_value_float
+      (i,"Method:m1_closure:bin_upper", 1.0 + bin_width*(i+1));
 
     for (int j=0; j<N_species; j++) {
       int sig_index = i*N_species + j;
-      method_M1_closure_sigmaN[sig_index] = p->list_value_float
-        (sig_index,"Method:M1_closure:sigmaN", 0.0);
+      method_m1_closure_sigmaN[sig_index] = p->list_value_float
+        (sig_index,"Method:m1_closure:sigmaN", 0.0);
 
-      method_M1_closure_sigmaE[sig_index] = p->list_value_float
-        (sig_index,"Method:M1_closure:sigmaE", 0.0);
+      method_m1_closure_sigmaE[sig_index] = p->list_value_float
+        (sig_index,"Method:m1_closure:sigmaE", 0.0);
     }
   }
 }
