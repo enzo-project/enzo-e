@@ -520,9 +520,9 @@ void EnzoMethodTurbulenceOU::compute_shift
     field.size(&nx,&ny,&nz);
     field.ghost_depth(0,&gx,&gy,&gz);
     field.dimensions(0,&mx,&my,&mz);
-    int dx = 1;
-    int dy = mx;
-    int dz = mx*my;
+    const int dx = 1;
+    const int dy = mx;
+    const int dz = mx*my;
     r_avld1[3] = 0.0;
     r_avld1[4] = 0.0;
     for (int iz=0; iz<nz; iz++) {
@@ -835,80 +835,136 @@ void EnzoMethodTurbulenceOU::compute_reductions_(EnzoBlock * enzo_block)
 
   compute_temperature.compute(enzo_block);
 
-  enzo_float *  density = (enzo_float *) field.values("density");
-  enzo_float *  velocity[3] = {
-    (enzo_float *) field.values("velocity_x"),
-    (enzo_float *) field.values("velocity_y"),
-    (enzo_float *) field.values("velocity_z") };
-  enzo_float * acceleration[3] = {
-    (enzo_float *) field.values("acceleration_x"),
-    (enzo_float *) field.values("acceleration_y"),
-    (enzo_float *) field.values("acceleration_z") };
-  enzo_float * temperature = (enzo_float *) field.values("temperature");
+  enzo_float * d  = (enzo_float *) field.values("density");
+  enzo_float * vx = (enzo_float *) field.values("velox");
+  enzo_float * vy = (enzo_float *) field.values("veloy");
+  enzo_float * vz = (enzo_float *) field.values("veloz");
+  enzo_float * ax = (enzo_float *) field.values("acceleration_x");
+  enzo_float * ay = (enzo_float *) field.values("acceleration_y");
+  enzo_float * az = (enzo_float *) field.values("acceleration_z");
+  enzo_float * t  = (enzo_float *) field.values("temperature");
+  enzo_float * bx = (enzo_float *) field.values("bfieldx");
+  enzo_float * by = (enzo_float *) field.values("bfieldy");
+  enzo_float * bz = (enzo_float *) field.values("bfieldz");
+  enzo_float * e  = (enzo_float *) field.values("energy"); // turbAcc(4)
+  enzo_float * p  = (enzo_float *) field.values("pressure");
 
   int nx,ny,nz;
-  field.size(&nx,&ny,&nz);
   int gx,gy,gz;
+  field.size(&nx,&ny,&nz);
   field.ghost_depth(0,&gx,&gy,&gz);
-  int ndx = nx + 2*gx;
-  int ndy = ny + 2*gy;
+  const int mx = nx + 2*gx;
+  const int my = ny + 2*gy;
+  const int mz = nz + 2*gz;
+  const int dx = 1;
+  const int dy = mx;
+  const int dz = mx*my;
 
-  const int n = max_turbulence_array;
-  double g[n];
+  // Allocate zero field if rank < 3 to remove if's from loops
+  const int rank = cello::rank();
+  enzo_float * zero = rank <3 ? new enzo_float[mx*my*mz] : nullptr;
+  if (rank < 2) {
+    vy = zero;
+    ay = zero;
+    by = zero;
+  }
+  if (rank < 3) {
+    vz = zero;
+    az = zero;
+    bz = zero;
+  }
 
-  for (int i=0; i<max_turbulence_array-2; i++) g[i] = 0.0;
+  // Allocate and initialize reduction array
+  const int n = 30;
+  long double g[n+1];
+  std::fill_n(g,n+1,0.0);
+  g[0] = n;
 
-  g[index_turbulence_mind] = std::numeric_limits<double>::max();
-  g[index_turbulence_maxd] = - std::numeric_limits<double>::max();
-
-  int mx,my,mz;
-  field.dimensions (0,&mx,&my,&mz);
-  const int rank = ((mz == 1) ? ((my == 1) ? 1 : 2) : 3);
-
+  const double c2 = 29979245800.0 * 29979245800.0;
   if (enzo_block->is_leaf()) {
+
+    double xm,ym,zm;
+    double xp,yp,zp;
+    enzo_block->lower(&xm,&ym,&zm);
+    enzo_block->upper(&xp,&yp,&zp);
+    double hx,hy,hz;
+    field.cell_width (xm,xp,&hx, ym,yp,&hy, zm,zp,&hz);
+    double hxi=1.0/hx;
+    double hyi=(cello::rank() >= 2) ? 1.0/hy : 0.0;
+    double hzi=(cello::rank() >= 3) ? 1.0/hz : 0.0;
 
     for (int iz=0; iz<nz; iz++) {
       for (int iy=0; iy<ny; iy++) {
 	for (int ix=0; ix<nx; ix++) {
 
-	  int i = (ix+gx) + ndx*((iy+gy) + ndy*(iz+gz));
+	  int i = (ix+gx) + mx*((iy+gy) + my*(iz+gz));
 
-	  enzo_float d  = density[i];
-	  for (int id=0; id<rank; id++) {
-	    enzo_float v  = velocity[id][i];
-	    enzo_float v2 = v*v;
-	    enzo_float a  = acceleration[id][i];
-	    enzo_float ti = 1.0 / temperature[i];
-
-	    g[index_turbulence_vad] +=   v*a*d;
-	    g[index_turbulence_aad] +=   a*a*d;
-	    g[index_turbulence_vvdot] += v2*d*ti;
-	    g[index_turbulence_vvot] +=  v2*ti;
-	    g[index_turbulence_vvd] +=   v2*d;
-	    g[index_turbulence_vv] +=    v2;
-	  }
-	  g[index_turbulence_dd]  +=   d*d;
-	  g[index_turbulence_d]   +=   d;
-	  g[index_turbulence_dax] +=  d*acceleration[0][i];
-	  g[index_turbulence_day] +=  (rank >= 2) ? d*acceleration[1][i] : 0.0;
-	  g[index_turbulence_daz] +=  (rank >= 3) ? d*acceleration[2][i] : 0.0;
-	  g[index_turbulence_dvx] +=  d*velocity[0][i];
-	  g[index_turbulence_dvy] +=  (rank >= 2) ? d*velocity[1][i] : 0.0;
-	  g[index_turbulence_dvz] +=  (rank >= 3) ? d*velocity[2][i] : 0.0;
-	  g[index_turbulence_dlnd] += d*log(d);
-	  g[index_turbulence_zones] += 1;
-	  g[index_turbulence_mind] =
-	    std::min(g[index_turbulence_mind], (double) d);
-	  g[index_turbulence_maxd] =
-	    std::max(g[index_turbulence_maxd], (double) d);
+          g[ 1] += d[i];
+          g[ 2] += log(d[i]);
+          g[ 3] += d[i]*d[i];
+          g[ 4] += d[i]*log(d[i]);
+          g[ 5] += vx[i];
+          g[ 6] += vy[i];
+          g[ 7] += vz[i];
+          const double v2 = vx[i]*vx[i] + vy[i]*vy[i] + vz[i]*vz[i];
+          g[ 8] += d[i]*v2;
+          g[ 9] += v2;
+          const double di = 1.0/d[i];
+          g[10] += vx[i]*di;
+          g[11] += vy[i]*di;
+          g[12] += vz[i]*di;
+          // compute partial derivatives
+          const double dvxdx = 0.5*(vx[i+dx] - vx[i-dx])*hxi;
+          const double dvxdy = 0.5*(vx[i+dy] - vx[i-dy])*hyi;
+          const double dvxdz = 0.5*(vx[i+dz] - vx[i-dz])*hzi;
+          const double dvydx = 0.5*(vy[i+dx] - vy[i-dx])*hxi;
+          const double dvydy = 0.5*(vy[i+dy] - vy[i-dy])*hyi;
+          const double dvydz = 0.5*(vy[i+dz] - vy[i-dz])*hzi;
+          const double dvzdx = 0.5*(vz[i+dx] - vz[i-dx])*hxi;
+          const double dvzdy = 0.5*(vz[i+dy] - vz[i-dy])*hyi;
+          const double dvzdz = 0.5*(vz[i+dz] - vz[i-dz])*hzi;
+          // compute div velocity
+          const double vdiv = (dvxdx + dvydy + dvzdz);
+          g[13] += vdiv;
+          g[14] += vdiv*vdiv;
+          // compute velocity curl components
+          const double cvx = dvzdy - dvydz;
+          const double cvy = dvxdz - dvzdx;
+          const double cvz = dvydx - dvxdy;
+          g[15] += cvx*cvx+cvy*cvy+cvz*cvz;
+          // g[16] += p[i];
+          // g[17] += p[i]/d[i]
+          g[18] += bx[i];
+          g[19] += by[i];
+          g[20] += bz[i];
+          const double b2 = bx[i]*bx[i] + by[i]*by[i] + bz[i]*bz[i];
+          g[21] += b2;
+          g[22] += b2*di;
+          // compute bfield curl components
+          const double dbxdx = 0.5*(bx[i+dx] - bx[i-dx])*hxi;
+          const double dbydy = 0.5*(by[i+dy] - by[i-dy])*hyi;
+          const double dbzdz = 0.5*(bz[i+dz] - bz[i-dz])*hzi;
+          g[23] += abs(dbxdx) + abs(dbydy) + abs(dbzdz);
+          // or is it g[23] += abs(dbxdx+dbydy+dbzdz) ?
+          g[24] += e[i];
+          g[25] += v2/c2;
+          g[26] += p[i]*vdiv;
+          g[27] += p[i]*vdiv*vdiv;
+          g[28] += hx*hy*hz;
+          g[29] += dbxdx + dbydy + dbzdz;
 	}
       }
     }
+    // Scale by volume
+    const double v = hx*hy*hz;
+    for (int i=1; i<=30; i++) g[i] *= v;
   }
+
+  delete [] zero;
 
   CkCallback callback (CkIndex_EnzoBlock::r_method_turbulence_ou_end(NULL),
 		       enzo_block->proxy_array());
-  enzo_block->contribute(n*sizeof(double),g,r_method_turbulence_type,callback);
+  enzo_block->contribute((n+1)*sizeof(long double),g,sum_long_double_n_type,callback);
 }
 
 //----------------------------------------------------------------------
@@ -925,7 +981,7 @@ void EnzoBlock::r_method_turbulence_ou_end(CkReductionMsg * msg)
 void EnzoMethodTurbulenceOU::compute_reduce
 (EnzoBlock * enzo_block,CkReductionMsg * msg)
 {
-  double * g = (double *)msg->getData();
+  long double * g = (long double *)msg->getData();
 
   Data * data = enzo_block->data();
   Field field = data->field();
@@ -946,118 +1002,42 @@ void EnzoMethodTurbulenceOU::compute_reduce
   double xdp,ydp,zdp;
   data->upper(&xdp,&ydp,&zdp);
 
-  // compute edot (TurbulenceSimulationInitialize.C)
-
-  // If RandomForcingEdot (i.e. the energy injection rate) is not set
-  // in the parameter file, get it from [MacLow1999] formula.  Note:
-  // the formula is calibrated for generic forcing fields; coefficient
-  // 0.81 can potentially be inappropriate for a purely solenoidal
-  // forcing; also our Gamma is not quite 1.0.
-
-  // if (edot_ < 0.0) {
-  //   // Only compute if needed at the beginning--could/should be in
-  //   // EnzoInitialTurbulence
-  //   double domain_x =               (xdp - xdm);
-  //   double domain_y = (rank >= 2) ? (ydp - ydm) : 1.0;
-  //   double domain_z = (rank >= 3) ? (zdp - zdm) : 1.0;
-  //   double box_size = domain_x;
-  //   double box_mass = domain_x * domain_y * domain_z * density_initial_;
-
-  //   float v_rms = mach_number_ * sqrt(temperature_initial_);
-
-  //   edot_ = 0.81/box_size*box_mass*v_rms*v_rms*v_rms;
-
-  //   // Approximate correction to the MacLow's factor (see eqs (7) - (8))
-  //   // for **this PPM implementation**. Seems to be OK for 64^3, 128^3
-  //   // and 256^3 Mach=3,6,10 simulations of **solenoidally** driven
-  //   // turbulence. */
-
-  //   //
-  //   // (7) $\dot{E}_{\textsf{\scriptsize{kin}}} \simeq - \eta_{\nu} m
-  //   //      \tilde{k} v^{3}_{\textsf{\scriptsize{rms}}}$
-  //   //
-  //   //
-  //   // (8) $\dot{E}_{\textsf{\scriptsize{kin}}} = - \eta_{e} m^{-1/2}
-  //   //      \tilde{k} E^{3/2}_{\textsf{\scriptsize{kin}}}$
-  //   //
-
-  //   edot_  *= 0.8;
-
-  // }
-
-  // // compute norm (ComputeRandomForcingNormalization.C)
-
-  // double norm = 0.0;
-
-  // if (edot_ != 0.0) {
-
-  //   // Original code in ComputeRandomForcingNormalization.C:
-  //   //
-  //   //   float gv0 = GlobVal[0];
-  //   //   if (gv0 < 1e-30 && gv0 > -1e-30 && MetaData->TopGridRank == 3) {ERROR_MESSAGE}
-  //   //      else    *norm = 1.25*dt*RandomForcingEdot*numberOfGridZones/gv0;
-  //   //  //  small push at the start, when gv0==0 due to zero initial velocities
-  //   //   if (gv0 < 1e-30 && gv0 > -1e-30 && MetaData->TopGridRank == 2) *norm = 0.0001;
-  //   //     else    *norm = 1.25*dt*RandomForcingEdot*numberOfGridZones/gv0;
-
-
-  //   double vad = g[index_turbulence_vad];
-
-  //   const bool small_g0 = std::abs(vad) < 1e-30;
-
-  //   norm = small_g0 ? 0.0001 : 1.25*dt*edot_*n/vad;
-
-  //     // OLD COMPUTATION:
-  //     //
-  //     //      norm = ( sqrt(g[0]*g[0] + 2.0*n*g[1]*dt*edot_) - g[0] ) / g[1];
-  // }
-
-  // ASSUMES CONSTANT TIME STEP
-
-  // double dt0 = dt;
-  // norm = (dt/dt0)*norm;
-
   if (enzo_block->index().is_root()) {
 
-    Monitor * monitor = cello::monitor();
-
-    monitor->print ("Method","sum v*a*d    " "%.17g", g[index_turbulence_vad]);
-    monitor->print ("Method","sum a*a*d    " "%.17g",g[index_turbulence_aad]);
-    monitor->print ("Method","sum v*v*d/t  " "%.17g",g[index_turbulence_vvdot]);
-    monitor->print ("Method","sum v*v/t    " "%.17g",g[index_turbulence_vvot]);
-    monitor->print ("Method","sum v*v*d    " "%.17g",g[index_turbulence_vvd]);
-    monitor->print ("Method","sum v*v      " "%.17g",g[index_turbulence_vv]);
-    monitor->print ("Method","sum d*d      " "%.17g",g[index_turbulence_dd]);
-
-    monitor->print ("Method","sum d*ax     " "%.17g",g[index_turbulence_dax]);
-    monitor->print ("Method","sum d*ay     " "%.17g",g[index_turbulence_day]);
-    monitor->print ("Method","sum d*az     " "%.17g",g[index_turbulence_daz]);
-
-    monitor->print ("Method","sum d*vx     " "%.17g",g[index_turbulence_dvx]);
-    monitor->print ("Method","sum d*vy     " "%.17g",g[index_turbulence_dvy]);
-    monitor->print ("Method","sum d*vz     " "%.17g",g[index_turbulence_dvz]);
-
-    monitor->print ("Method","sum d*ln(d)  " "%.17g",g[index_turbulence_dlnd]);
-    monitor->print ("Method","sum zones    " "%.17g",g[index_turbulence_zones]);
-
-    monitor->print ("Method","min d        " "%.17g",g[index_turbulence_mind]);
-    monitor->print ("Method","max d        " "%.17g",g[index_turbulence_maxd]);
-    monitor->print ("Method","sum d        " "%.17g",g[index_turbulence_d]);
-    //    monitor->print ("Method","norm         " "%.17g",norm);
-
-    monitor->print ("Method","kinetic energy          " "%.17g",
-		    0.50*g[index_turbulence_vvd]/n);
-    monitor->print ("Method","mass weighted rms Mach  " "%.17g",
-		    sqrt(g[index_turbulence_vvdot]/n));
-    monitor->print ("Method","volume weighed rms Mach " "%.17g",
-		    sqrt(g[index_turbulence_vvot]/n));
-    monitor->print ("Method","rms Velocity            " "%.17g",
-		    sqrt(g[index_turbulence_vv]/n));
-    monitor->print ("Method","Density variance        " "%.17g",
-		    sqrt(g[index_turbulence_dd]/n));
-    monitor->print ("Method","min/max Density         " "%.17g",
-		    g[index_turbulence_mind] /
-		    g[index_turbulence_maxd]);
+    Monitor * m = cello::monitor();
+#define FMT "%.17Lg"
+#define NAME "Turbulence"
+    
+    int i=1;
+    m->print (NAME,"stat %02d rho " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d log(rho) " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d rho^2 " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d rho*log(rho) " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d rho*u " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d rho*v " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d rho*w " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d rho*(u^2 + v^2 + w^2) " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d u^2 + v^2 + w^2 " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d u " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d v " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d w " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d div u " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d (div u)^2 " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d Omega^2 " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d p " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d p/rho " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d Bx " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d By " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d Bz " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d Bx^2 + By^2 + Bz^2 " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d (Bx^2 + By^2 + Bz^2)/rho " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d |div b| " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d E_turb " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d (u^2 + v^2 + w^2)/c^2 " FMT, i,sqrt(g[i])); i++;
+    m->print (NAME,"stat %02d p*(div u) " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d (p*(div u))^2 " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d total volume " FMT, i,g[i]); i++;
+    m->print (NAME,"stat %02d div b " FMT, i,g[i]); i++;
   }
   enzo_block->compute_done();
 }
