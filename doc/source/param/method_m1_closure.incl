@@ -86,12 +86,12 @@ See Section 4 of `Rosdahl et al. (2013) <https://ui.adsabs.harvard.edu/abs/2013M
 
 :e:`Specifies which flux function to use for converting cell-centered fluxes to face-centered fluxes in the transport step. For the following functions, :math:`\mathcal{F}` and :math:`\mathcal{U}` are vectors of unknowns defined such that :math:`\frac{\partial \mathcal{U}}{\partial t} + \nabla \mathcal{F}\left(\mathcal{U}\right).``
 
-  * ``"GLF"`` :e:`Global Lax-Friedrich flux function --` :math:`\mathcal{F}_{i+1/2}=\frac{1}{2}\left(\mathcal{F}_i+\mathcal{F}_{i+1}\right) + \frac{c}{2}\left(\mathcal{U}_{i+1}+\mathcal{U}_i\right)``
+  * ``"GLF"`` :math:`\mathcal{F}_{i+1/2}=\frac{1}{2}\left(\mathcal{F}_i+\mathcal{F}_{i+1}\right) + \frac{c}{2}\left(\mathcal{U}_{i+1}+\mathcal{U}_i\right)``
 
-  * ``"HLL"`` :e:`Harten-Lax-can Leer flux function --` :math:`\mathcal{F}_{i+1/2}=\frac{\lambda^+\mathcal{F}_i-\lambda^-\mathcal{F}_{i+1} + \lambda^+\lambda^-\left(\mathcal{U}_{i+1}+\mathcal{U}_i\right)}{\lambda^+-\lambda^-}`, where :math:`\lambda^+` and :math:`\lambda^-` are eigenvalues of the Jacobian :math:`\frac{\partial \mathcal{F}}{\partial \mathcal{U}}` . :e:`Requires path to eigenvalue text file using the :p:`hll_file` parameter.`
+  * ``"HLL"`` :math:`\mathcal{F}_{i+1/2}=\frac{\lambda^+\mathcal{F}_i-\lambda^-\mathcal{F}_{i+1} + \lambda^+\lambda^-\left(\mathcal{U}_{i+1}+\mathcal{U}_i\right)}{\lambda^+-\lambda^-}`, where :math:`\lambda^+` and :math:`\lambda^-` are eigenvalues of the Jacobian :math:`\frac{\partial \mathcal{F}}{\partial \mathcal{U}}` . :e:`Requires path to eigenvalue text file using the :p:`hll_file` parameter.
     
- :e:` Broadly speaking, "GLF" is more diffusive than "HLL", but is better at handling radiation from isotropic sources. On the other hand, "HLL" is better for simulating beams of radiation and shadows. 
- See `Rosdahl et al. (2013) <https://ui.adsabs.harvard.edu/abs/2013MNRAS.436.2188R/abstract>` for a more detailed comparison.`  
+ Broadly speaking, "GLF" is more diffusive than "HLL", but is better at handling radiation from isotropic sources. On the other hand, "HLL" is better for simulating beams of radiation and shadows. 
+ See` `Rosdahl et al. (2013) <https://ui.adsabs.harvard.edu/abs/2013MNRAS.436.2188R/abstract>` for a more detailed comparison.  
 
 ----
 
