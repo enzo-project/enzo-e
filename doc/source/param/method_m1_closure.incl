@@ -70,11 +70,11 @@ See Section 4 of `Rosdahl et al. (2013) <https://ui.adsabs.harvard.edu/abs/2013M
 
 :e:`Specifies which group-mean photoionization cross section to use. Options include:`
 
-  * ``"vernier"`` :e:`Calculates the group-mean cross section using fits from `Vernier et al. (1996) <https://ui.adsabs.harvard.edu/abs/1996ApJ...465..487V/abstract>`. The midpoint energy is used for each group (e.g. energy = 0.5 * (E_lower + E_upper)). `
+  * ``"vernier"`` :e:`Calculates the group-mean cross section using fits from `Vernier et al. (1996) <https://ui.adsabs.harvard.edu/abs/1996ApJ...465..487V/abstract>`. The midpoint energy is used for each group (e.g. energy = 0.5 * (E_lower + E_upper)).`
 
   * ``"vernier_average"`` :e:`Same as `"vernier"`, with the added step of averaging the cross section over all star particles in the simulation, weighted by mass * luminosity.`
  
-  * ``"custom"`` :e:`Specify cross sections explicitly in the parameter file using the :p:`sigmaN` and :p:`sigmaE` parameters. `
+  * ``"custom"`` :e:`Specify cross sections explicitly in the parameter file using the :p:`sigmaN` and :p:`sigmaE` parameters.`
    
 ----
 
@@ -111,7 +111,7 @@ See Section 4 of `Rosdahl et al. (2013) <https://ui.adsabs.harvard.edu/abs/2013M
 :Default: :d:`0.0`
 :Scope:     :c:`Enzo`
 
-:e:`If :p:`Nphotons_per_sec` > 0.0, all star particles will be given the emission rate specified using this parameter. Otherwise, the `"luminosity"` particle attribute will be checked unless :p:`radiation_spectrum`==`"blackbody"`. `
+:e:`If :p:`Nphotons_per_sec` > 0.0, all star particles will be given the emission rate specified using this parameter. Otherwise, the `"luminosity"` particle attribute will be checked unless :p:`radiation_spectrum` == `"blackbody"`.`
    
 ----
 
@@ -125,7 +125,7 @@ See Section 4 of `Rosdahl et al. (2013) <https://ui.adsabs.harvard.edu/abs/2013M
 
   * ``"blackbody"`` :e:`Calculates emission rate into each radiation group by integrating over a Planck function`
  
-  * ``"custom"`` :e:`Specify SED explicitly in the parameter file using the :p:`SED` parameter. `
+  * ``"custom"`` :e:`Specify SED explicitly in the parameter file using the :p:`SED` parameter`
    
 ----
 
@@ -176,6 +176,6 @@ For example, if :p:`SED` = [0.1, 0.6, 0.3], the emitted radiation will be split 
 :Default: :d:`0.0`
 :Scope:     :c:`Enzo`
 
-:e:`User-specified blackbody temperature for radiating point sources. Requires :p:`radiation_spectrum`==`"blackbody"`. `
+:e:`User-specified blackbody temperature for radiating point sources. Requires :p:`radiation_spectrum`==`"blackbody"`.`
    
 ----
