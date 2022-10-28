@@ -401,6 +401,9 @@ public: // virtual functions
   int refresh_count() const
   { return refresh_list_.size(); }
 
+  int num_blocks_level (int level) {
+    return num_blocks_level_[level];
+  }
 protected: // functions
 
   /// Initialize the Config object
@@ -579,6 +582,8 @@ protected: // attributes
   std::string restart_directory_;
   int         restart_num_files_;
   std::ifstream restart_stream_file_list_;
+
+  std::vector<int> num_blocks_level_;
 };
 
 #endif /* SIMULATION_SIMULATION_HPP */

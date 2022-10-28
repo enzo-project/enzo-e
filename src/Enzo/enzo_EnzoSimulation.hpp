@@ -64,6 +64,8 @@ public: // functions
   void p_set_level_array(CProxy_EnzoLevelArray proxy);
   void set_sync_check_writer(int count)
   { sync_check_writer_created_.set_stop(count); }
+  void set_sync_infer_count(int count)
+  { sync_infer_count_.set_stop(count); }
   void p_io_reader_created();
 
   /// EnzoMethodInference

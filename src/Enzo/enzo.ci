@@ -215,13 +215,10 @@ module enzo {
     // EnzoMethodInference
 
     entry void p_method_infer_merge_masks
-      (int count, int n, char mask[n], int ic3[3]);
+      (int n, char mask[n], int ic3[3]);
     entry void p_method_infer_count_arrays (int count);
-
-    /// OLD
-    entry void p_method_inference_request_data(int,int,int,Index);
-    entry void p_method_inference_send_data(int,int,int);
-    entry void p_method_inference_done(int,int,int);
+    entry void p_method_infer_create_arrays();
+    entry void p_method_infer_exit();
 
     // checkpoint
     entry void p_check_write_first
