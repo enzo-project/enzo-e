@@ -40,13 +40,37 @@ void EnzoInitialM1Closure::pup (PUP::er &p)
 void EnzoInitialM1Closure::enforce_block
 (Block * block, const Hierarchy  * hierarchy) throw()
 {
-  block->initial_done();
+   Field field = block->data()->field();
+   int mx,my,mz;  
+   field.dimensions(0,&mx, &my, &mz); //field dimensions, including ghost zones
+  
+   const EnzoConfig * enzo_config = enzo::config();
+         EnzoUnits * enzo_units = enzo::units();
 
-  const EnzoConfig * enzo_config = enzo::config();
+   double inverse_Nunit = enzo_units->volume();
+   double inverse_Funit = inverse_Nunit / enzo_units->velocity();
+
+   for (int i=0; i<enzo_config->method_m1_closure_N_groups; i++) {
+    std::string istring = std::to_string(i);
+    enzo_float *  N_i = (enzo_float *) field.values("photon_density_" + istring);
+    enzo_float * Fx_i = (enzo_float *) field.values("flux_x_" + istring);
+    enzo_float * Fy_i = (enzo_float *) field.values("flux_y_" + istring);
+    enzo_float * Fz_i = (enzo_float *) field.values("flux_z_" + istring);
+    for (int j=0; j<mx*my*mz; j++)
+    {
+      N_i [j] = 1e-16 * inverse_Nunit;
+      Fx_i[j] = 1e-16 * inverse_Funit;
+      Fy_i[j] = 1e-16 * inverse_Funit;
+      Fz_i[j] = 1e-16 * inverse_Funit; 
+    }
+  }
+
   if (enzo_config->method_m1_closure_flux_function == "HLL") {
     read_hll_eigenvalues(enzo_config->method_m1_closure_hll_file);
   }
 
+  block->initial_done();
+  
   return;
 }
 

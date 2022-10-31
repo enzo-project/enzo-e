@@ -579,8 +579,6 @@ void EnzoMethodM1Closure::inject_photons ( EnzoBlock * enzo_block ) throw()
           }
         }
       }
- 
-      //CkPrintf("%f\n",wsum);
       
     } // end loop over particles
   }  // end loop over batches
@@ -1434,8 +1432,6 @@ void EnzoMethodM1Closure::call_inject_photons(EnzoBlock * enzo_block) throw()
     }
   }
  
-  // TODO: Package these up into separate functions for cleanliness
-  
   // set group mean cross sections and energies
   //
   // "vernier_average" -- calculates cross section from sigma_vernier() function,
@@ -1444,6 +1440,16 @@ void EnzoMethodM1Closure::call_inject_photons(EnzoBlock * enzo_block) throw()
   //  "vernier_average" -- just sets cross sections equal to values from sigma_vernier()
   //  "custom" -- sets cross sections to user-specified values in the parameter file
   Scalar<double> scalar = enzo_block->data()->scalar_double();
+
+  for (int i=0; i<N_groups; i++) {
+    *(scalar.value( scalar.index( eps_string(i) ))) = 0.0;
+    for (int j=0; j<N_species; j++) 
+    {
+     *(scalar.value( scalar.index( sigN_string(i,j) ))) = 0.0;
+     *(scalar.value( scalar.index( sigE_string(i,j) ))) = 0.0;
+    }
+  }  
+    
   if (enzo_config->method_m1_closure_cross_section_calculator == "vernier_average") {
     // do global reduction of sigE, sigN, and eps over star particles
     // then do refresh -> solve_transport_eqn()
@@ -1731,35 +1737,6 @@ void EnzoMethodM1Closure::compute_ (Block * block) throw()
   double Nunit = 1.0 / enzo_units->volume();
   double Funit = enzo_units->velocity() * Nunit;
   
-#ifndef VALUE_INITIALIZATION
-// TODO: this overwrites initialization with value parameter. Move this to EnzoInitialM1Closure.
-  if (block->cycle() == 0)
-  {
-    for (int i=0; i<N_groups; i++) {
-      std::string istring = std::to_string(i);
-      enzo_float *  N_i = (enzo_float *) field.values("photon_density_" + istring);
-      enzo_float * Fx_i = (enzo_float *) field.values("flux_x_" + istring);
-      enzo_float * Fy_i = (enzo_float *) field.values("flux_y_" + istring);
-      enzo_float * Fz_i = (enzo_float *) field.values("flux_z_" + istring);
-      for (int j=0; j<m; j++)
-      {
-        N_i [j] = 1e-16 / Nunit;
-        Fx_i[j] = 1e-16 / Funit;
-        Fy_i[j] = 1e-16 / Funit;
-        Fz_i[j] = 1e-16 / Funit; 
-      }
-      // initialize global mean group cross-sections/energies
-
-      *(scalar.value( scalar.index( eps_string(i) ))) = 0.0;
-      for (int j=0; j<N_species; j++) 
-      {
-       *(scalar.value( scalar.index( sigN_string(i,j) ))) = 0.0;
-       *(scalar.value( scalar.index( sigE_string(i,j) ))) = 0.0;
-      }   
-    }
-  }
-#endif
-
   // reset "mL" sums to zero
   // TODO: only do this once every N cycles, where N is a parameter
   for (int i=0; i<N_groups; i++) {
