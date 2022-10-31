@@ -390,9 +390,6 @@ public: // attributes (YIKES!)
   /// Cosmological redshift for the current cycle
   enzo_float redshift;
 
-  /// frequency group iterator for EnzoMethodM1Closure
-  int method_m1_closure_igroup;
-
   /// starting pos (active problem space)
   enzo_float GridLeftEdge[MAX_DIMENSION];
   /// total dimensions of all grids

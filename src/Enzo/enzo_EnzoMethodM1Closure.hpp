@@ -139,13 +139,13 @@ protected: // methods
 
   double get_radiation_custom(EnzoBlock * enzo_block,
              double energy, double pmass, double plum, 
-             double dt, double inv_vol, int i) throw();
+             double dt, double inv_vol, int i, int igroup) throw();
 
   double get_radiation_blackbody(EnzoBlock * enzo_block, double pmass, 
              double freq_lower, double freq_upper, double clight, 
-             double dt, double cell_volume, int i) throw();
+             double dt, double cell_volume, int i, int igroup) throw();
 
-  void inject_photons(EnzoBlock * enzo_block) throw();
+  void inject_photons(EnzoBlock * enzo_block, int igroup) throw();
 
   //--------- TRANSPORT STEP --------
 
@@ -174,24 +174,20 @@ protected: // methods
                        double hx, double hy, double hz, double dt, double clight, 
                        int i, int idx, int idy, int idz) throw();
 
-  void solve_transport_eqn (EnzoBlock * enzo_block) throw();
+  void solve_transport_eqn (EnzoBlock * enzo_block, int igroup) throw();
 
   //---------- THERMOCHEMISTRY STEP ------------
 
 
   // Interaction with matter is completely local, so don't need a refresh before this step
-  void D_add_attenuation ( EnzoBlock * enzo_block, double * D, double clight, int i) throw(); 
-
-  double get_beta (double T, int species) throw();
+  void D_add_attenuation ( EnzoBlock * enzo_block, double * D, double clight, int i, int igroup) throw(); 
 
   double get_alpha (double T, int species, char rec_case) throw();
 
   int get_b_boolean (double E_lower, double E_upper, int species) throw();
 
   void C_add_recombination (EnzoBlock * enzo_block, double * C, 
-                              enzo_float * T, int i, double E_lower, double E_upper) throw();
-
-  void recombination_chemistry (EnzoBlock * enzo_block) throw();
+                              enzo_float * T, int i, int igroup, double E_lower, double E_uppe) throw();
 
   double sigma_vernier (double energy, int type) throw();
 
