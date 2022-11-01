@@ -739,9 +739,7 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "m1_closure") {
 
-    method = new EnzoMethodM1Closure(
-                 enzo_config->method_m1_closure_N_groups,
-                 enzo_config->method_m1_closure_clight_frac);
+    method = new EnzoMethodM1Closure(enzo_config->method_m1_closure_N_groups);
 
   } else if (name == "check") {
 

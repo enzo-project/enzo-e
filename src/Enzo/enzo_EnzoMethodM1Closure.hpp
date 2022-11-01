@@ -23,7 +23,7 @@ public: // interface
 
   /// Create a new EnzoMethodM1Closure object
 
-  EnzoMethodM1Closure(const int N_groups, const double clight);
+  EnzoMethodM1Closure(const int N_groups);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodM1Closure );
@@ -32,10 +32,8 @@ public: // interface
   EnzoMethodM1Closure (CkMigrateMessage *m)
     : Method (m)
     , N_groups_(0)
-    , clight_(0.0)
     , ir_injection_(-1)
     , ir_transport_(-1)
-   // , igroup_()
   { }
 
   /// CHARM++ Pack / Unpack function

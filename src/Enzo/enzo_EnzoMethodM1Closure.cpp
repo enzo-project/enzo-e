@@ -9,26 +9,18 @@
 
 #include "enzo.hpp"
 
-// TODO: Make these parameters instead of macros
-//#define DEBUG_TURN_OFF_COMPUTE_TEMPERATURE
-//#define DEBUG_TURN_OFF_ATTENUATION
-//#define DEBUG_TURN_OFF_RATE_CALCULATIONS
-
 //#define DEBUG_PRINT_REDUCED_VARIABLES
 //#define DEBUG_PRINT_GROUP_PARAMETERS
 //#define DEBUG_RECOMBINATION
-//#define DEBUG_ALPHA
-//#define DEBUG_RATES
 //#define DEBUG_INJECTION
 //#define DEBUG_TRANSPORT
 //#define DEBUG_ATTENUATION
 
 //----------------------------------------------------------------------
 
-EnzoMethodM1Closure ::EnzoMethodM1Closure(const int N_groups, const double clight)
+EnzoMethodM1Closure ::EnzoMethodM1Closure(const int N_groups)
   : Method()
-    , N_groups_(N_groups)
-    , clight_(clight)
+    , N_groups_(0)
     , ir_injection_(-1)
     , ir_transport_(-1)
 {
@@ -953,18 +945,11 @@ void EnzoMethodM1Closure::get_photoionization_and_heating_rates (EnzoBlock * enz
         ionization_rate += sigmaN*clight*N_i;
         heating_rate    += std::max( n_j*clight*N_i*ediff, 0.0 ); // Equation A16
 
-    #ifdef DEBUG_RATES 
-        std::cout << "i = " << i << "; heating_rate = " << heating_rate << "; n_j = " << n_j << 
-        "; N_i = " << N_i << "; eps = " << eps/enzo_constants::erg_eV << "; Eion[j] = " << Eion[j]/enzo_constants::erg_eV << "; Ediff = " << (eps*sigmaE - Eion[j]*sigmaN) <<  std::endl;
-    #endif          
       }
       (ionization_rate_fields[j])[i] = ionization_rate * tunit; //update fields with new value, put ionization rates in 1/time_units
     }
         
   RT_heating_rate[i] = heating_rate / nHI; // units of erg/s/cm^3/nHI
-#ifdef DEBUG_RATES
-  std::cout << "RT_heating_rate[i] = " << RT_heating_rate[i] << " erg/cm^3/s; RT_HI_ionization_rate[i] = " << (ionization_rate_fields[0])[i] / tunit << " s^-1" << std::endl;
-#endif 
 }
 
  
@@ -1033,9 +1018,6 @@ double EnzoMethodM1Closure::get_alpha (double T, int species, char rec_case) thr
       break;
 
   } 
-#ifdef DEBUG_ALPHA
-  std::cout << "a = " << a << "; lamdba = " << lambda << "; T = " << T << std::endl;
-#endif 
   return a * pow(lambda,b) * pow( 1+pow(lambda/lambda_0,c), -d); 
 }
 
@@ -1235,6 +1217,8 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
   //calculate the radiation pressure tensor
   get_pressure_tensor(enzo_block, N, Fx, Fy, Fz, clight);
 
+  double Nmin = enzo_config->method_m1_closure_min_photon_density;
+
   for (int iz=gz; iz<mz-gz; iz++) {
     for (int iy=gy; iy<my-gy; iy++) {
       for (int ix=gx; ix<mx-gx; ix++) {
@@ -1251,19 +1235,22 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
         Fznew[i] += Fz_update;
          
         // now get updated photon densities
-        Nnew[i] = std::max(Nnew[i] + N_update, 1e-16);
+        Nnew[i] = std::max(Nnew[i] + N_update, Nmin);
 
 
       #ifdef DEBUG_TRANSPORT
-        std::cout << "i = " << i << "; Nnew[i] = " << Nnew[i] << "; N_update = " << N_update << "; Fx_update = " << Fx_update << "; hx = " << hx << "; dt = " << dt << std::endl;
+        CkPrintf("i = %d; N_update = %f; Fx_update = %f; hx = %f; dt = %f \n", i, N_update, Fx_update, hx, dt);
       #endif
+
+
+        // add interactions with matter 
 
         double C = 0.0; // photon creation term
         double D = 0.0; // photon destruction term
-      #ifndef DEBUG_TURN_OFF_ATTENUATION 
-        // add interactions with matter 
-        D_add_attenuation(enzo_block, &D, clight, i, igroup);
-      #endif
+
+        if (enzo_config->method_m1_closure_attenuation) {
+          D_add_attenuation(enzo_block, &D, clight, i, igroup);
+        }
 
         if (enzo_config->method_m1_closure_recombination_radiation) {
           // update photon density due to recombinations
@@ -1274,7 +1261,7 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
       
         // update radiation fields due to thermochemistry (see appendix A)
         double mult = 1.0/(1+dt*D);
-        Nnew [i] = std::max((Nnew [i] + dt*C) * mult, 1e-16);
+        Nnew [i] = std::max((Nnew [i] + dt*C) * mult, Nmin);
         Fxnew[i] = Fxnew[i] * mult;
         Fynew[i] = Fynew[i] * mult;
         Fznew[i] = Fznew[i] * mult;
@@ -1500,15 +1487,11 @@ void EnzoMethodM1Closure::call_solve_transport_eqn(EnzoBlock * enzo_block) throw
     this->solve_transport_eqn(enzo_block, igroup);
   }
 
-#ifndef DEBUG_TURN_OFF_RATE_CALCULATIONS
-  // update chemistry fields to account for recombinations (Grackle already does this)
-  // recombination_chemistry(enzo_block);
-
-  // Calculate photoheating and photoionization rates.
-  // Sums over frequency groups
-  //TODO: Make photoionization/heating/chemistry optional 
-  get_photoionization_and_heating_rates(enzo_block, clight);
-#endif
+  if (enzo_config->method_m1_closure_thermochemistry) {
+    // Calculate photoheating and photoionization rates.
+    // Sums over frequency groups
+    get_photoionization_and_heating_rates(enzo_block, clight);
+  }
 
   // deallocate temporary fields (don't need them anymore after transport)
   deallocate_temporary_(enzo_block, N_groups);
@@ -1602,14 +1585,13 @@ void EnzoMethodM1Closure::compute_ (Block * block) throw()
 
   EnzoBlock * enzo_block = enzo::block(block);
 
+  if (enzo_config->method_m1_closure_thermochemistry) {
+    // compute the temperature
+    EnzoComputeTemperature compute_temperature(enzo::fluid_props(),
+                                               enzo_config->physics_cosmology);
 
-#ifndef DEBUG_TURN_OFF_COMPUTE_TEMPERATURE
-  // compute the temperature
-  EnzoComputeTemperature compute_temperature(enzo::fluid_props(),
-                                             enzo_config->physics_cosmology);
-
-  compute_temperature.compute(enzo_block);
-#endif
+    compute_temperature.compute(enzo_block);
+  }
 
   Scalar<double> scalar = block->data()->scalar_double();
 
@@ -1677,6 +1659,5 @@ void EnzoMethodM1Closure::compute_ (Block * block) throw()
     }
   }
 #endif 
-
 
 }

@@ -105,6 +105,16 @@ See Section 4 of `Rosdahl et al. (2013) <https://ui.adsabs.harvard.edu/abs/2013M
    
 ----
 
+:Parameter:  :p:`Method` : :p:`m1_closure` : :p:`min_photon_density`
+:Summary: :s:`Minimum photon density in CGS units`
+:Type:    :t:`float`
+:Default: :d:`1e-16`
+:Scope:     :c:`Enzo`
+
+:e:`Minimum photon density in units of :math:`\mathrm{cm}^{-3}`. For technical reasons, this must be > 0.`
+ 
+----
+
 :Parameter:  :p:`Method` : :p:`m1_closure` : :p:`Nphotons_per_sec`
 :Summary: :s:`User-specified emission rate for star particles in photons/second`
 :Type:    :t:`float`
@@ -126,6 +136,26 @@ See Section 4 of `Rosdahl et al. (2013) <https://ui.adsabs.harvard.edu/abs/2013M
   * ``"blackbody"`` :e:`Calculates emission rate into each radiation group by integrating over a Planck function`
  
   * ``"custom"`` :e:`Specify SED explicitly in the parameter file using the :p:`SED` parameter`
+   
+----
+
+:Parameter:  :p:`Method` : :p:`m1_closure` : :p:`attenuation`
+:Summary: :s:`Whether to attenuate radiation`
+:Type:    :t:`bool`
+:Default: :d:`"true"`
+:Scope:     :c:`Enzo`
+
+:e:`Whether to include attenuation in the radiative transport equation. Requires color fields to be defined for six-species chemistry (HI, HII, HeI, HeII, HeIII, and :math:e^-`.)` If no density fields are defined, the attenuation calculation will be skipped by default.
+   
+----
+
+:Parameter:  :p:`Method` : :p:`m1_closure` : :p:`thermochemistry`
+:Summary: :s:`Whether to include thermochemistry`
+:Type:    :t:`bool`
+:Default: :d:`"true"`
+:Scope:     :c:`Enzo`
+
+:e:`Whether to include thermochemistry. If :p:`thermochemistry` == true, photoionization and heating rates are calculated and stored in the following fields: `"RT_HI_ionization_rate"`, `"RT_HeI_ionization_rate"`, `"RT_HeII_ionization_rate"`, and `"RT_heating_rate"`. The actual updates to species fields and the solving of the energy equation are handled by Grackle. As such, this method must be run in tandem with Grackle with :p:`Method:grackle:with_radiative_transfer` = 1. `    
    
 ----
 

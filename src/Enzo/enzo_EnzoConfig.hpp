@@ -403,6 +403,9 @@ public: // interface
       method_m1_closure_temperature_blackbody(-1.0), // requires radiation_spectrum="blackbody"
       method_m1_closure_Nphotons_per_sec(0.0), // specify emission rate from sources
       method_m1_closure_SED(), // supply list of emission rates for all groups (radiation_spectrum="custom")
+      method_m1_closure_min_photon_density(1e-16),
+      method_m1_closure_attenuation(true),
+      method_m1_closure_thermochemistry(true),
       method_m1_closure_recombination_radiation(false),
       method_m1_closure_cross_section_calculator("vernier_average"), // what type of cross section calculator to use ("vernier", "vernier_average", "custom")
       method_m1_closure_sigmaN(), // user-defined cross sections (requires cross_section_calculator = "custom")
@@ -918,6 +921,9 @@ public: // attributes
   double                    method_m1_closure_Nphotons_per_sec;
   std::vector<double>       method_m1_closure_SED;
   double                    method_m1_closure_courant;
+  double                    method_m1_closure_min_photon_density;
+  bool                      method_m1_closure_attenuation;
+  bool                      method_m1_closure_thermochemistry;
   bool                      method_m1_closure_recombination_radiation;
   std::string               method_m1_closure_cross_section_calculator;
   std::vector<double>       method_m1_closure_sigmaN;

@@ -264,6 +264,9 @@ EnzoConfig::EnzoConfig() throw ()
   method_m1_closure_Nphotons_per_sec(0.0), // Set emission rate for star particles
   method_m1_closure_SED(), // supply list of emission rate fraction for all groups
   method_m1_closure_courant(0.5),
+  method_m1_closure_min_photon_density(1e-16),
+  method_m1_closure_attenuation(true),
+  method_m1_closure_thermochemistry(true),
   method_m1_closure_recombination_radiation(false),
   method_m1_closure_cross_section_calculator("vernier_average"),
   method_m1_closure_sigmaN(),
@@ -700,6 +703,9 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_m1_closure_Nphotons_per_sec;
   p | method_m1_closure_SED;
   p | method_m1_closure_courant;
+  p | method_m1_closure_min_photon_density;
+  p | method_m1_closure_attenuation;
+  p | method_m1_closure_thermochemistry;
   p | method_m1_closure_recombination_radiation;
   p | method_m1_closure_cross_section_calculator;
   p | method_m1_closure_sigmaN;
@@ -1828,6 +1834,15 @@ void EnzoConfig::read_method_m1_closure_(Parameters * p)
 
   method_m1_closure_Nphotons_per_sec = p->value_float
     ("Method:m1_closure:Nphotons_per_sec",0.0);
+
+  method_m1_closure_min_photon_density = p->value_float
+    ("Method:m1_closure:min_photon_density",1e-16);
+
+  method_m1_closure_attenuation = p->value_logical
+    ("Method:m1_closure:attenuation", true);
+
+  method_m1_closure_thermochemistry = p->value_logical
+    ("Method:m1_closure:thermochemistry", true);
 
   method_m1_closure_recombination_radiation = p->value_logical
     ("Method:m1_closure:recombination_radiation",false);
