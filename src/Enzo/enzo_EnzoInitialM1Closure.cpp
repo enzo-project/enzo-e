@@ -49,6 +49,7 @@ void EnzoInitialM1Closure::enforce_block
 
    double inverse_Nunit = enzo_units->volume();
    double inverse_Funit = inverse_Nunit / enzo_units->velocity();
+   double Nmin = enzo_config->method_m1_closure_min_photon_density;
 
    for (int i=0; i<enzo_config->method_m1_closure_N_groups; i++) {
     std::string istring = std::to_string(i);
@@ -58,7 +59,7 @@ void EnzoInitialM1Closure::enforce_block
     enzo_float * Fz_i = (enzo_float *) field.values("flux_z_" + istring);
     for (int j=0; j<mx*my*mz; j++)
     {
-      N_i [j] = 1e-16 * inverse_Nunit;
+      N_i [j] = Nmin  * inverse_Nunit;
       Fx_i[j] = 1e-16 * inverse_Funit;
       Fy_i[j] = 1e-16 * inverse_Funit;
       Fz_i[j] = 1e-16 * inverse_Funit; 
