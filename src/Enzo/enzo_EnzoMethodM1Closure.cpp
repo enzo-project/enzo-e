@@ -263,14 +263,14 @@ double EnzoMethodM1Closure::get_star_temperature(double M) throw()
   else if (M/enzo_constants::mass_solar < 55  ) L =  1.4*pow(M/enzo_constants::mass_solar,3.5);
   else L = 32000*(M/enzo_constants::mass_solar);
 
-  // mass-radius relations (need to find more accurate version for large masses?)
+  // mass-radius relations (not valid for particles representing stellar populations)
   if (M/enzo_constants::mass_solar < 1) R = pow(M/enzo_constants::mass_solar, 0.8);
   else R = pow(M/enzo_constants::mass_solar, 0.57);
   
-  L *= enzo_constants::luminosity_solar;
-  R *= enzo_constants::radius_solar;
+  L *= 3.839e33; // solar luminosity in erg/s
+  R *= 6.957e10; // solar radius in cm
 
-  return pow( L/(4*cello::pi*R*R*enzo_constants::sigma_SF), 0.25);
+  return pow( L/(4*cello::pi*R*R*5.670e-7), 0.25);
 }
 
 // ----------------------

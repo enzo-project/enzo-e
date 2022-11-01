@@ -29,15 +29,6 @@ namespace enzo_constants {
   // Solar metallicity
   const double metallicity_solar = 0.012;
 
-  // Solar Luminosity in CGS
-  const double luminosity_solar = 3.839e33; // erg/s
-
-  // Solar radius in CGS
-  const double radius_solar = 6.957e10;
-
-  // Stefan-Boltzmann constant in CGS
-  const double sigma_SF = 5.670e-7;
-
   // Hydrogen mass in CGS
   const double mass_hydrogen = 1.67262171e-24;
 
