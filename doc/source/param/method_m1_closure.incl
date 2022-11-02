@@ -1,5 +1,5 @@
 :p:`Method:m1_closure` :e:`parameters are used to initialize parameters for
-Enzo-E's multigroup M1 Closure radiative transfer solver. The M1 Closure solver is implemented following the Ramses-RT implementation ( `Rosdahl et al. 2013 <https://ui.adsabs.harvard.edu/abs/2013MNRAS.436.2188R/abstract>`_ ). ` 
+Enzo-E's multigroup M1 Closure radiative transfer solver. The M1 Closure solver is implemented following the Ramses-RT implementation (` `Rosdahl et al. 2013 <https://ui.adsabs.harvard.edu/abs/2013MNRAS.436.2188R/abstract>`_ ). 
 
 :e:`The evolved field variables are` `"photon_density_i"`, `"flux_x_i"`, `"flux_y_i"`, :e:`and` `"flux_z_i"`, :e:`where photon densities and fluxes are in units of` :math:`[L]^{-3}` :e:`and` :math:`[L]^2[T]^{-1}`, :e:`respectively, and` :math:`i` :e:`denotes the group number. 
 A set of fields must be defined for each group.`
