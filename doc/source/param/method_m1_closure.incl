@@ -206,6 +206,6 @@ For example, if` :p:`SED` = [0.1, 0.6, 0.3], the emitted radiation will be split
 :Default: :d:`0.0`
 :Scope:     :c:`Enzo`
 
-:e:`User-specified blackbody temperature for radiating point sources. Requires` :p:`radiation_spectrum`==`"blackbody"`.
+:e:`User-specified blackbody temperature for radiating point sources. Requires` :p:`radiation_spectrum`==`"blackbody"` .
    
 ----
