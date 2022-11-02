@@ -145,7 +145,7 @@ See Section 4 of `Rosdahl et al. (2013) <https://ui.adsabs.harvard.edu/abs/2013M
 :Default: :d:`"true"`
 :Scope:     :c:`Enzo`
 
-:e:`Whether to include attenuation in the radiative transport equation. Requires color fields to be defined for six-species chemistry (HI, HII, HeI, HeII, HeIII, and` :math:e^-`.) If no density fields are defined, the attenuation calculation will be skipped by default.
+:e:`Whether to include attenuation in the radiative transport equation. Requires color fields to be defined for six-species chemistry (HI, HII, HeI, HeII, HeIII, and` :math:`e^-`.) If no density fields are defined, the attenuation calculation will be skipped by default.
    
 ----
 
