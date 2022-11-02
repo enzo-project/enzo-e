@@ -1,10 +1,13 @@
-:p:`Method:m1_closure` parameters are used to initialize parameters for
-Enzo-E's multigroup M1 Closure radiative transfer solver. The M1 Closure solver is implemented following the Ramses-RT implementation (` `Rosdahl et al. 2013 <https://ui.adsabs.harvard.edu/abs/2013MNRAS.436.2188R/abstract>`_)).
-:e:The evolved field variables are `"photon_density_i"`, `"flux_x_i"`, `"flux_y_i"`, and `"flux_z_i"`, where photon densities and fluxes are in units of :math:`[L]^{-3}` and :math:`[L]^2[T]^{-1}`, respectively, and :math:`i` denotes the group number. 
-A set of fields must be defined for each group. 
-For example, a simulation that evolves three groups must define twelve fields: `"photon_density_0"`, `"flux_x_0"`, `"flux_y_0"`, `"flux_z_1"`, `"photon_density_1"`, `"flux_x_1"`, `"flux_y_1"`, `"flux_z_1"`, `"photon_density_2"`, `"flux_x_2"`, `"flux_y_2"`, and `"flux_z_2"`.
-This method solves the transport equation separately for each group, taking into account gas attenuation and, optionally, recombination radiation. Interactions with matter is implemented only for six-species chemistry (i.e. :p:`Method:grackle:primordial_chemistry` = 1), following H, He, :math:`e^-`, and ions. 
-Photionization and heating rates are calculated and stored in the following fields: `"RT_HI_ionization_rate"`, `"RT_HeI_ionization_rate"`, `"RT_HeII_ionization_rate"`, and `"RT_heating_rate"`.
+:p:`Method:m1_closure` :e:`parameters are used to initialize parameters for
+Enzo-E's multigroup M1 Closure radiative transfer solver. The M1 Closure solver is implemented following the Ramses-RT implementation ( `Rosdahl et al. 2013 <https://ui.adsabs.harvard.edu/abs/2013MNRAS.436.2188R/abstract>`_ ). ` 
+
+:e:`The evolved field variables are` `"photon_density_i"`, `"flux_x_i"`, `"flux_y_i"`, :e:`and` `"flux_z_i"`, :e:`where photon densities and fluxes are in units of` :math:`[L]^{-3}` :e:`and` :math:`[L]^2[T]^{-1}`, :e:`respectively, and` :math:`i` :e:`denotes the group number. 
+A set of fields must be defined for each group.`
+ 
+:e:`For example, a simulation that evolves three groups must define twelve fields:` `"photon_density_0"`, `"flux_x_0"`, `"flux_y_0"`, `"flux_z_1"`, `"photon_density_1"`, `"flux_x_1"`, `"flux_y_1"`, `"flux_z_1"`, `"photon_density_2"`, `"flux_x_2"`, `"flux_y_2"`, :e:`and` `"flux_z_2"`. `
+
+:e:`This method solves the transport equation separately for each group, taking into account gas attenuation and, optionally, recombination radiation. Interactions with matter is implemented only for six-species chemistry (i.e.` :p:`Method:grackle:primordial_chemistry` :e:` = 1), following H, He,` :math:`e^-`, :e:`and ions. 
+Photionization and heating rates are calculated and stored in the following fields: `"RT_HI_ionization_rate"`, `"RT_HeI_ionization_rate"`, `"RT_HeII_ionization_rate"`, and `"RT_heating_rate"`.`
 
 ----
 
@@ -14,7 +17,7 @@ Photionization and heating rates are calculated and stored in the following fiel
 :Default: :d:`1`
 :Scope:     :c:`Enzo`
 
-:e:`This parameter specifies the number of energy groups to use for radiative transfer. The transport equation will be solved separately for each group. :p:`N_groups` must be >= 1.`
+:e:`This parameter specifies the number of energy groups to use for radiative transfer. The transport equation will be solved separately for each group.` :p:`N_groups` must be >= 1.
    
 ----
 
@@ -142,7 +145,7 @@ See Section 4 of `Rosdahl et al. (2013) <https://ui.adsabs.harvard.edu/abs/2013M
 :Parameter:  :p:`Method` : :p:`m1_closure` : :p:`attenuation`
 :Summary: :s:`Whether to attenuate radiation`
 :Type:    :t:`bool`
-:Default: :d:`"true"`
+:Default: :d:`true`
 :Scope:     :c:`Enzo`
 
 :e:`Whether to include attenuation in the radiative transport equation. Requires color fields to be defined for six-species chemistry (HI, HII, HeI, HeII, HeIII, and` :math:`e^-`.) If no density fields are defined, the attenuation calculation will be skipped by default.
@@ -152,7 +155,7 @@ See Section 4 of `Rosdahl et al. (2013) <https://ui.adsabs.harvard.edu/abs/2013M
 :Parameter:  :p:`Method` : :p:`m1_closure` : :p:`thermochemistry`
 :Summary: :s:`Whether to include thermochemistry`
 :Type:    :t:`bool`
-:Default: :d:`"true"`
+:Default: :d:`true`
 :Scope:     :c:`Enzo`
 
 :e:`Whether to include thermochemistry. If` :p:`thermochemistry` == true, photoionization and heating rates are calculated and stored in the following fields: `"RT_HI_ionization_rate"`, `"RT_HeI_ionization_rate"`, `"RT_HeII_ionization_rate"`, and `"RT_heating_rate"`. The actual updates to species fields and the solving of the energy equation are handled by Grackle. As such, this method must be run in tandem with Grackle using :p:`Method:grackle:with_radiative_transfer` = 1.    
