@@ -103,6 +103,4 @@ void EnzoInitialM1Closure::read_hll_eigenvalues(std::string hll_file) throw()
                     this->hll_table_lambda_max_[i]) i++;
 
     inFile.close();
-
-
 }

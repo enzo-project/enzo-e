@@ -20,7 +20,7 @@
 
 EnzoMethodM1Closure ::EnzoMethodM1Closure(const int N_groups)
   : Method()
-    , N_groups_(0)
+    , N_groups_(N_groups)
     , ir_injection_(-1)
     , ir_transport_(-1)
 {
@@ -581,13 +581,12 @@ double EnzoMethodM1Closure::compute_hll_eigenvalues (double f, double theta, dou
   double de2 = 1 - dd2;
 
   const EnzoInitialM1Closure * RT_init = enzo::RT_init();
-  
   *lmin = 0.0;
   *lmin += de1*de2*RT_init->hll_table_lambda_min(i  ,j  );
   *lmin += dd1*de2*RT_init->hll_table_lambda_min(i+1,j  );
   *lmin += de1*dd2*RT_init->hll_table_lambda_min(i  ,j+1);
   *lmin += dd1*dd2*RT_init->hll_table_lambda_min(i+1,j+1);
- 
+
   *lmax = 0.0;
   *lmax += de1*de2*RT_init->hll_table_lambda_max(i  ,j  );
   *lmax += dd1*de2*RT_init->hll_table_lambda_max(i+1,j  );
@@ -729,8 +728,8 @@ void EnzoMethodM1Closure::get_U_update (EnzoBlock * enzo_block, double * N_updat
 
   // HLL min and max eigenvalues
   // +/- clight corresponds to GLF flux function
-  double lmin_x = -clight, lmin_y = -clight, lmin_z = -clight;
-  double lmax_x =  clight, lmax_y =  clight, lmax_z =  clight;
+  double lmin_x = -1.0, lmin_y = -1.0, lmin_z = -1.0;
+  double lmax_x =  1.0, lmax_y =  1.0, lmax_z =  1.0;
 
   if (flux_type == "HLL") {
     double Fnorm = sqrt(Fx[i]*Fx[i] + Fy[i]*Fy[i] + Fz[i]*Fz[i]);
@@ -761,12 +760,12 @@ void EnzoMethodM1Closure::get_U_update (EnzoBlock * enzo_block, double * N_updat
   *Fx_update += dt/hy * deltaQ_faces(Fx[i], Fx[i+idy], Fx[i-idy],
                                    P10[i],
                                    P10[i+idy],
-                                   P10[i-idy], clight, lmin_x, lmax_x, flux_type );
+                                   P10[i-idy], clight, lmin_y, lmax_y, flux_type );
 
   *Fy_update += dt/hx * deltaQ_faces(Fy[i], Fy[i+idx], Fy[i-idx],
                                    P01[i],
                                    P01[i+idx],
-                                   P01[i-idx], clight, lmin_y, lmax_y, flux_type );
+                                   P01[i-idx], clight, lmin_x, lmax_x, flux_type );
 
   *Fy_update += dt/hy * deltaQ_faces(Fy[i], Fy[i+idy], Fy[i-idy],
                                    P11[i],
@@ -781,22 +780,22 @@ void EnzoMethodM1Closure::get_U_update (EnzoBlock * enzo_block, double * N_updat
   *Fx_update += dt/hz * deltaQ_faces(Fx[i], Fx[i+idz], Fx[i-idz],
                                    P20[i],
                                    P20[i+idz],
-                                   P20[i-idz], clight, lmin_x, lmax_x, flux_type );
+                                   P20[i-idz], clight, lmin_z, lmax_z, flux_type );
 
   *Fy_update += dt/hz * deltaQ_faces(Fy[i], Fy[i+idz], Fy[i-idz],
                                    P21[i],
                                    P21[i+idz],
-                                   P21[i-idz], clight, lmin_y, lmax_y, flux_type);
+                                   P21[i-idz], clight, lmin_z, lmax_z, flux_type);
 
   *Fz_update += dt/hx * deltaQ_faces(Fz[i], Fz[i+idx], Fz[i-idx],
                                    P02[i],
                                    P02[i+idx],
-                                   P02[i-idx], clight, lmin_z, lmax_z, flux_type);
+                                   P02[i-idx], clight, lmin_x, lmax_x, flux_type);
 
   *Fz_update += dt/hy * deltaQ_faces(Fz[i], Fz[i+idy], Fz[i-idy],
                                    P12[i],
                                    P12[i+idy],
-                                   P12[i-idy], clight, lmin_z, lmax_z, flux_type);
+                                   P12[i-idy], clight, lmin_y, lmax_y, flux_type);
 
   *Fz_update += dt/hz * deltaQ_faces(Fz[i], Fz[i+idz], Fz[i-idz],
                                    P22[i],
@@ -1176,7 +1175,7 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
   // energy bounds for this group (leave in eV)
   double E_lower = enzo_config->method_m1_closure_bin_lower[igroup]; 
   double E_upper = enzo_config->method_m1_closure_bin_upper[igroup]; 
-
+  
   std::string istring = std::to_string(igroup);
   enzo_float * N  = (enzo_float *) field.values("photon_density_" + istring);
   enzo_float * Fx = (enzo_float *) field.values("flux_x_" + istring);
@@ -1186,6 +1185,7 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
   enzo_float * T = (enzo_float *) field.values("temperature");
 
   const int m = mx*my*mz;
+
   // extra copy of fields needed to store
   // the evolved values until the end
   enzo_float * Nnew  = new enzo_float[m]; 
@@ -1216,7 +1216,7 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
 
   //calculate the radiation pressure tensor
   get_pressure_tensor(enzo_block, N, Fx, Fy, Fz, clight);
-
+  
   double Nmin = enzo_config->method_m1_closure_min_photon_density;
 
   for (int iz=gz; iz<mz-gz; iz++) {
@@ -1228,7 +1228,7 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
         get_U_update( enzo_block, &N_update, &Fx_update, &Fy_update, &Fz_update,
                              N, Fx, Fy, Fz, hx, hy, hz, dt, clight,
                              i, idx, idy, idz ); 
-
+        
         // get updated fluxes
         Fxnew[i] += Fx_update;
         Fynew[i] += Fy_update;
@@ -1258,7 +1258,7 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
           // do anything about the radiation that comes out of recombination
           C_add_recombination(enzo_block, &C, T, i, igroup, E_lower, E_upper);
         }
-      
+        
         // update radiation fields due to thermochemistry (see appendix A)
         double mult = 1.0/(1+dt*D);
         Nnew [i] = std::max((Nnew [i] + dt*C) * mult, Nmin);
@@ -1615,7 +1615,6 @@ void EnzoMethodM1Closure::compute_ (Block * block) throw()
       *(scalar.value( scalar.index( sigE_string(i,j) + mL_string(i) ))) = 0.0;
     }
   }
-   
   // convert RT fields into cgs units. This is done to avoid roundoff errors.
   // e.g. photon density of 1 cm^-3 is equivalent to 1e63 kpc^-3, while 
   //      a cross section of 1e-18 cm^2 is equivalent to 1e-60 kpc^2.
@@ -1629,7 +1628,6 @@ void EnzoMethodM1Closure::compute_ (Block * block) throw()
     enzo_float * Fz_i = (enzo_float *) field.values("flux_z_" + istring);
 
     enzo_float * N_i_d = (enzo_float *) field.values("photon_density_" + istring + "_deposit");
-
     for (int j=0; j<m; j++)
     {
       // TODO: For some reason, new value doesn't get stored here when using
@@ -1644,7 +1642,6 @@ void EnzoMethodM1Closure::compute_ (Block * block) throw()
       N_i_d[j] = 0.0;
     }
   }
- 
   //start photon injection step
   //This function will start the transport step after a refresh
   this->call_inject_photons(enzo_block);

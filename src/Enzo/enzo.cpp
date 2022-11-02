@@ -40,7 +40,7 @@ namespace enzo {
   {
     std::vector<std::string> initial_list = enzo::config()->initial_list;
     for (int i=0; i < initial_list.size(); i++) {
-      if (initial_list[i] == "M1_closure") { 
+      if (initial_list[i] == "m1_closure") { 
         return (const EnzoInitialM1Closure *) problem()->initial(i); 
       }
     }

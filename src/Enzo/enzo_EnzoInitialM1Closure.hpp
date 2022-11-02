@@ -56,7 +56,7 @@ private:
  
   std::vector<int> hll_table_f_, hll_table_theta_;
   std::vector<double> hll_table_lambda_min_, hll_table_lambda_max_;
-  std::vector<double> hll_table_col3_, hll_table_col4_; // not sure what these columns are
+  std::vector<double> hll_table_col3_, hll_table_col4_;
 
 };
 
