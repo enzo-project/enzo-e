@@ -33,7 +33,6 @@ public: // interface
     : Method (m)
     , N_groups_(0)
     , ir_injection_(-1)
-    , ir_transport_(-1)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -89,48 +88,7 @@ protected: // methods
   const std::string mL_string  (int i) throw()
     {return "mL_" + std::to_string(i);}
 
-   void allocate_temporary_(EnzoBlock * enzo_block, int N_groups)
-   {
-     Field field = enzo_block->data()->field();
-     for (int i=0; i<N_groups; i++) {
-       std::string istring = std::to_string(i);
-//       field.allocate_temporary("photon_density_"+istring+"_deposit");
-     }
-/*
-     field.allocate_temporary("P00");
-     field.allocate_temporary("P10");
-     field.allocate_temporary("P01");
-     field.allocate_temporary("P11");
-     field.allocate_temporary("P02");
-     field.allocate_temporary("P12");
-     field.allocate_temporary("P20");
-     field.allocate_temporary("P21");
-     field.allocate_temporary("P22");
-*/
-   }
-
-   void deallocate_temporary_(EnzoBlock * enzo_block, int N_groups)
-   {
-     Field field = enzo_block->data()->field();
-     for (int i=0; i<N_groups; i++) {
-       std::string istring = std::to_string(i);
-//       field.deallocate_temporary("photon_density_"+istring+"_deposit");
-     }
-/*
-     field.deallocate_temporary("P00");
-     field.deallocate_temporary("P10");
-     field.deallocate_temporary("P01");
-     field.deallocate_temporary("P11");
-     field.deallocate_temporary("P02");
-     field.deallocate_temporary("P12");
-     field.deallocate_temporary("P20");
-     field.deallocate_temporary("P21");
-     field.deallocate_temporary("P22");
-*/
-   }
-
-
-
+  
   //--------- INJECTION STEP -------
 
   double get_star_temperature(double M) throw();
@@ -196,10 +154,9 @@ protected: // methods
 
 protected: // attributes
   int N_groups_;
-  double clight_;
 
   // Refresh id's
-  int ir_injection_, ir_transport_;
+  int ir_injection_;
 };
 
 #endif /* ENZO_ENZO_METHOD_M1_CLOSURE_HPP */

@@ -22,7 +22,6 @@ EnzoMethodM1Closure ::EnzoMethodM1Closure(const int N_groups)
   : Method()
     , N_groups_(N_groups)
     , ir_injection_(-1)
-    , ir_transport_(-1)
 {
 
   const int rank = cello::rank();
@@ -31,30 +30,12 @@ EnzoMethodM1Closure ::EnzoMethodM1Closure(const int N_groups)
 
   if (rank >= 1) {
     cello::define_field("flux_x");
-    //cello::field_descr()->insert_temporary("P00"); // elements of the pressure tensor.
-    cello::define_field("P00");
   }                                         
   if (rank >= 2) {
     cello::define_field("flux_y");
-//    cello::field_descr()->insert_temporary("P10");
-//    cello::field_descr()->insert_temporary("P01");
-//    cello::field_descr()->insert_temporary("P11");
-    cello::define_field("P10");
-    cello::define_field("P01");
-    cello::define_field("P11");
   }
   if (rank >= 3) {
     cello::define_field("flux_z");
-//    cello::field_descr()->insert_temporary("P02");
-//    cello::field_descr()->insert_temporary("P12");
-//    cello::field_descr()->insert_temporary("P20");
-//    cello::field_descr()->insert_temporary("P21");
-//    cello::field_descr()->insert_temporary("P22");
-    cello::define_field("P02");
-    cello::define_field("P12");
-    cello::define_field("P20");
-    cello::define_field("P21");
-    cello::define_field("P22");
   }
 
   for (int i=0; i<N_groups_; i++) {
@@ -63,25 +44,42 @@ EnzoMethodM1Closure ::EnzoMethodM1Closure(const int N_groups)
     if (rank >= 1) cello::define_field("flux_x_" + istring);
     if (rank >= 2) cello::define_field("flux_y_" + istring);
     if (rank >= 3) cello::define_field("flux_z_" + istring);
-
-    // temporary fields for refresh+accumulate
-    //cello::field_descr()->insert_temporary("photon_density_" + istring + "_deposit");  
-    cello::define_field("photon_density_" + istring + "_deposit"); 
   }
 
-  // define other fields
-    cello::define_field_in_group ("HI_density",    "color");
-    cello::define_field_in_group ("HII_density",   "color");
-    cello::define_field_in_group ("HeI_density",   "color");
-    cello::define_field_in_group ("HeII_density",  "color");
-    cello::define_field_in_group ("HeIII_density", "color");
-    cello::define_field_in_group ("e_density",     "color");
+  // define other fields accessed by this method
+  cello::define_field_in_group ("HI_density",    "color");
+  cello::define_field_in_group ("HII_density",   "color");
+  cello::define_field_in_group ("HeI_density",   "color");
+  cello::define_field_in_group ("HeII_density",  "color");
+  cello::define_field_in_group ("HeIII_density", "color");
+  cello::define_field_in_group ("e_density",     "color");
 
-    cello::define_field("pressure");
-    cello::define_field("temperature"); // needed for recombination rates
-  
+  cello::define_field("pressure");
+  cello::define_field("temperature"); // needed for recombination rates
+
+  if (rank >= 1) {
+    cello::define_field("P00"); // elements of the radiation pressure tensor.
+  }
+  if (rank >= 2) {
+    cello::define_field("P10");
+    cello::define_field("P01");
+    cello::define_field("P11");
+  }
+  if (rank >= 3) {
+    cello::define_field("P02");
+    cello::define_field("P12");
+    cello::define_field("P20");
+    cello::define_field("P21");
+    cello::define_field("P22");
+  }
+
+  // fields for refresh+accumulate
+  for (int i=0; i<N_groups_; i++) {
+    std::string istring = std::to_string(i);
+    cello::define_field("photon_density_" + istring + "_deposit");
+  } 
+
   // Initialize default Refresh object
-
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_field("photon_density");
@@ -98,35 +96,8 @@ EnzoMethodM1Closure ::EnzoMethodM1Closure(const int N_groups)
     if (rank >= 3) refresh->add_field("flux_z_" + istring);  
   }
 
-  // Initialize Refresh object for after injection step 
-  ir_injection_ = add_refresh_();
-
-  cello::simulation()->refresh_set_name(ir_injection_, name()+":injection");
-  Refresh * refresh_injection = cello::refresh(ir_injection_);
-
-  refresh_injection->set_accumulate(true);
-
-  refresh_injection->add_field("photon_density");
-
-  if (rank >= 1) refresh_injection->add_field("flux_x");
-  if (rank >= 2) refresh_injection->add_field("flux_y");
-  if (rank >= 3) refresh_injection->add_field("flux_z");
-  
-  for (int i=0; i<N_groups_; i++) {
-    std::string istring = std::to_string(i); 
-    refresh_injection->add_field("photon_density_" + istring);
-    if (rank >= 1) refresh_injection->add_field("flux_x_" + istring);
-    if (rank >= 2) refresh_injection->add_field("flux_y_" + istring);
-    if (rank >= 3) refresh_injection->add_field("flux_z_" + istring);
-
-    refresh_injection->add_field_src_dst
-       ("photon_density_"+istring+"_deposit", "photon_density_"+istring); 
-  }
- 
-  refresh_injection->set_callback(CkIndex_EnzoBlock::p_method_m1_closure_solve_transport_eqn()); 
-  
-  // store frequency group attributes as ScalarData variables
-  // variables with suffix "mL" store the numerators/denominator
+  // Store frequency group attributes as ScalarData variables.
+  // Variables with suffix "mL" store the numerators/denominator
   // of eqs. (B6)-(B8). 
   // mL = mass_star * luminosity_star 
   ScalarDescr * scalar_descr = cello::scalar_descr_double();
@@ -145,8 +116,30 @@ EnzoMethodM1Closure ::EnzoMethodM1Closure(const int N_groups)
       scalar_descr->new_value( sigE_string(i,j) + mL_string(i) );
     }
   }
-}
 
+  // Initialize Refresh object for after injection step 
+  ir_injection_ = add_refresh_();
+
+  cello::simulation()->refresh_set_name(ir_injection_, name()+":injection");
+  Refresh * refresh_injection = cello::refresh(ir_injection_);
+
+  refresh_injection->set_accumulate(true);
+
+  // don't need to add fluxes to injection refresh 
+  // because only the photon_density fields are updated there
+  refresh_injection->add_field("photon_density");
+
+  for (int i=0; i<N_groups_; i++) {
+    std::string istring = std::to_string(i); 
+    refresh_injection->add_field("photon_density_" + istring);
+
+    refresh_injection->add_field_src_dst
+       ("photon_density_"+istring+"_deposit", "photon_density_"+istring); 
+  }
+ 
+  refresh_injection->set_callback(CkIndex_EnzoBlock::p_method_m1_closure_solve_transport_eqn()); 
+}
+  
 //----------------------------------------------------------------------
 
 void EnzoMethodM1Closure ::pup (PUP::er &p)
@@ -159,9 +152,7 @@ void EnzoMethodM1Closure ::pup (PUP::er &p)
   Method::pup(p);
 
   p | N_groups_;
-  p | clight_;
   p | ir_injection_;
-  p | ir_transport_;
 }
 
 //----------------------------------------------------------------------
@@ -676,7 +667,6 @@ void EnzoMethodM1Closure::get_pressure_tensor (EnzoBlock * enzo_block,
   //
   // Note that we're actually storing c^P, since that's the actual
   // value that's being converted to a flux 
-
   for (int iz=gz-1; iz<mz-gz+1; iz++) { 
    for (int iy=gy-1; iy<my-gy+1; iy++) {
     for (int ix=gx-1; ix<mx-gx+1; ix++) {
@@ -687,7 +677,6 @@ void EnzoMethodM1Closure::get_pressure_tensor (EnzoBlock * enzo_block,
       double iterm = 0.5*(1.0-chi);   // identity term
       double oterm = 0.5*(3.0*chi-1); // outer product term
       double cc = clight * clight;
-
       P00[i] = cc * N[i] * (oterm *n[0]*n[0] + iterm );
       P10[i] = cc * N[i] *  oterm *n[1]*n[0];
       P01[i] = cc * N[i] *  oterm *n[0]*n[1];
@@ -1369,7 +1358,6 @@ void EnzoMethodM1Closure::call_inject_photons(EnzoBlock * enzo_block) throw()
   else { // just set sigmaN = sigmaE = either sigma_vernier or custom value, and eps = mean(energy)
 
     if (! enzo_block->is_leaf() ) {
-      deallocate_temporary_(enzo_block, N_groups);
       enzo_block->compute_done();
       return;
     }
@@ -1401,6 +1389,7 @@ void EnzoMethodM1Closure::call_inject_photons(EnzoBlock * enzo_block) throw()
       }
  
     }
+
     cello::refresh(ir_injection_)->set_active(enzo_block->is_leaf()); 
     enzo_block->refresh_start(ir_injection_, CkIndex_EnzoBlock::p_method_m1_closure_solve_transport_eqn());   
   }
@@ -1432,7 +1421,6 @@ void EnzoMethodM1Closure::set_global_averages(EnzoBlock * enzo_block, CkReductio
   const int N_groups = enzo_config->method_m1_closure_N_groups;
   const int N_species = 3;  
   if (! enzo_block->is_leaf()) {
-    deallocate_temporary_(enzo_block, N_groups);
     enzo_block->compute_done(); 
     return;  
   }
@@ -1493,8 +1481,7 @@ void EnzoMethodM1Closure::call_solve_transport_eqn(EnzoBlock * enzo_block) throw
     get_photoionization_and_heating_rates(enzo_block, clight);
   }
 
-  // deallocate temporary fields (don't need them anymore after transport)
-  deallocate_temporary_(enzo_block, N_groups);
+
 }
 
 //-------------------------------
@@ -1509,7 +1496,6 @@ void EnzoBlock::p_method_m1_closure_solve_transport_eqn()
   // sum group fields, convert RT fields back to code units, 
   // and end compute()
   method->RT_fields_to_code_units(this);  
-
   compute_done();
   return; 
 }
@@ -1546,7 +1532,8 @@ void EnzoMethodM1Closure::RT_fields_to_code_units(EnzoBlock * enzo_block) throw(
     Fz[j] = 0.0; 
   }
 
-  for (int i=0; i < enzo_config->method_m1_closure_N_groups; i++) {
+  int N_groups = enzo_config->method_m1_closure_N_groups;
+  for (int i=0; i < N_groups; i++) {
     std::string istring = std::to_string(i);
     enzo_float *  N_i = (enzo_float *) field.values("photon_density_" + istring);
     enzo_float * Fx_i = (enzo_float *) field.values("flux_x_" + istring);
@@ -1585,6 +1572,9 @@ void EnzoMethodM1Closure::compute_ (Block * block) throw()
 
   EnzoBlock * enzo_block = enzo::block(block);
 
+  int N_groups = enzo_config->method_m1_closure_N_groups;
+  int N_species = 3; //only three ionizable species (HI, HeI, HeII)
+
   if (enzo_config->method_m1_closure_thermochemistry) {
     // compute the temperature
     EnzoComputeTemperature compute_temperature(enzo::fluid_props(),
@@ -1594,12 +1584,6 @@ void EnzoMethodM1Closure::compute_ (Block * block) throw()
   }
 
   Scalar<double> scalar = block->data()->scalar_double();
-
-  int N_groups = enzo_config->method_m1_closure_N_groups;
-  int N_species = 3; //only three ionizable species (HI, HeI, HeII)
-
-  // allocate temporary fields
-  allocate_temporary_(enzo_block, N_groups);
 
   EnzoUnits * enzo_units = enzo::units();
   double Nunit = 1.0 / enzo_units->volume();
@@ -1628,6 +1612,7 @@ void EnzoMethodM1Closure::compute_ (Block * block) throw()
     enzo_float * Fz_i = (enzo_float *) field.values("flux_z_" + istring);
 
     enzo_float * N_i_d = (enzo_float *) field.values("photon_density_" + istring + "_deposit");
+
     for (int j=0; j<m; j++)
     {
       // TODO: For some reason, new value doesn't get stored here when using
@@ -1642,6 +1627,7 @@ void EnzoMethodM1Closure::compute_ (Block * block) throw()
       N_i_d[j] = 0.0;
     }
   }
+
   //start photon injection step
   //This function will start the transport step after a refresh
   this->call_inject_photons(enzo_block);
