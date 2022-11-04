@@ -1,13 +1,5 @@
 :p:`Method:m1_closure` parameters are used to initialize parameters for
-Enzo-E's multigroup M1 Closure radiative transfer solver. The M1 Closure solver is implemented following the Ramses-RT implementation ( `Rosdahl et al. 2013 <https://ui.adsabs.harvard.edu/abs/2013MNRAS.436.2188R/abstract>`_ ). 
-
-:e:`The evolved field variables are` `"photon_density_i"`, `"flux_x_i"`, `"flux_y_i"`, :e:`and` `"flux_z_i"`, :e:`where photon densities and fluxes are in units of` :math:`[L]^{-3}` :e:`and` :math:`[L]^2[T]^{-1}`, :e:`respectively, and` :math:`i` :e:`denotes the group number. 
-A set of fields must be defined for each group.`
- 
-:e:`For example, a simulation that evolves three groups must define twelve fields:` `"photon_density_0"`, `"flux_x_0"`, `"flux_y_0"`, `"flux_z_1"`, `"photon_density_1"`, `"flux_x_1"`, `"flux_y_1"`, `"flux_z_1"`, `"photon_density_2"`, `"flux_x_2"`, `"flux_y_2"`, :e:`and` `"flux_z_2"`. `
-
-:e:`This method solves the transport equation separately for each group, taking into account gas attenuation and, optionally, recombination radiation. Interactions with matter is implemented only for six-species chemistry (i.e.` :p:`Method:grackle:primordial_chemistry` :e:` = 1), following H, He,` :math:`e^-`, :e:`and ions. 
-Photionization and heating rates are calculated and stored in the following fields: `"RT_HI_ionization_rate"`, `"RT_HeI_ionization_rate"`, `"RT_HeII_ionization_rate"`, and `"RT_heating_rate"`.`
+Enzo-E's multigroup M1 Closure radiative transfer solver. 
 
 ----
 
