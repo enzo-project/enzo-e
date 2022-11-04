@@ -474,16 +474,15 @@ Note that only these nine fields are required, regardless of the number of radia
 Photionization and heating rates are calculated and stored in the following fields: 
 ``"RT_HI_ionization_rate"``, ``"RT_HeI_ionization_rate"``, ``"RT_HeII_ionization_rate"``, and ``"RT_heating_rate"``.
 
-Caveats and Limitations
------------------------
+.. note:: 
 
-* Additional terms in the radiative transfer equation corresponding to cosmological expansion are not yet implemented.
+   Additional terms in the radiative transfer equation corresponding to cosmological expansion are not yet implemented.
 
-* The radiation timescale is set by the courant condition :math:`(\Delta t)\leq/frac{\Delta x}{3 c_r}`. 
-  For :math:`c_r=c`, this will result in a timestep that is **very** small. Subcycling of radiative transfer
-  with respect to hydrodynamics will be implemented soon!
+   The radiation timescale is set by the courant condition :math:`(\Delta t)\leq\frac{\Delta x}{3 c_r}`. 
+   For :math:`c_r=c`, this will result in a timestep that is **very** small. Subcycling of radiative transfer
+   with respect to hydrodynamics will be implemented soon!
 
-* Photochemistry is only supported for six-species: HI, HII, HeI, HeII, HeIII, and :math:e^-.
+   Photochemistry is only supported for six-species: HI, HII, HeI, HeII, HeIII, and :math:e^-.
 
 
 ``"pm_deposit"``: particle-mesh
