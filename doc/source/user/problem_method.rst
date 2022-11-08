@@ -452,6 +452,21 @@ speed in the medium.  For densities typical for the interstellar medium
 the reionization of the intergalactic medium, however, the true value of speed of light must be taken in order for reionization to occur at the correct time. 
 See Section 4 of `Rosdahl et al. (2013) <https://ui.adsabs.harvard.edu/abs/2013MNRAS.436.2188R/abstract>`_ for a more detailed discussion.
 
+This method **must** be used in tandem with the ``"m1_closure"`` initializer by appending ``"m1_closure"`` to 
+``Initial:list``.
+
+.. note:: 
+
+   Additional term in the radiative transfer equation corresponding to cosmological redshift not yet included. As such, redshifting of radiation into and out of groups can not be simulated.
+
+   The radiation timescale is set by the courant condition :math:`\Delta t\leq\frac{\Delta x}{3 c_r}`. 
+   For :math:`c_r=c`, this will result in a timestep that is **very** small. Subcycling of radiative transfer
+   with respect to hydrodynamics will be implemented soon!
+
+   Photochemistry is only supported for six-species: HI, HII, HeI, HeII, HeIII, and :math:`e^-`.
+
+   The `"HLL"` flux function does not work correctly at the moment. For now, users should specify `m1_closure:flux_function="GLF"`.
+
 Required Fields 
 ---------------
 
@@ -473,17 +488,6 @@ Note that only these nine fields are required, regardless of the number of radia
 
 Photionization and heating rates are calculated and stored in the following fields: 
 ``"RT_HI_ionization_rate"``, ``"RT_HeI_ionization_rate"``, ``"RT_HeII_ionization_rate"``, and ``"RT_heating_rate"``.
-
-.. note:: 
-
-   Additional terms in the radiative transfer equation corresponding to cosmological expansion are not yet implemented.
-
-   The radiation timescale is set by the courant condition :math:`\Delta t\leq\frac{\Delta x}{3 c_r}`. 
-   For :math:`c_r=c`, this will result in a timestep that is **very** small. Subcycling of radiative transfer
-   with respect to hydrodynamics will be implemented soon!
-
-   Photochemistry is only supported for six-species: HI, HII, HeI, HeII, HeIII, and :math:`e^-`.
-
 
 ``"pm_deposit"``: particle-mesh
 ===============================

@@ -12,6 +12,9 @@
      gamma = 1.400000000000000;
      ghost_depth = 4;
      list = [ "density", "internal_energy", "total_energy", "velocity_x", "velocity_y", "velocity_z", "pressure", "temperature", "photon_density", "flux_x", "flux_y", "flux_z", "metal_density", "HI_density", "HII_density", "HeI_density", "HeII_density", "HeIII_density", "e_density", "RT_heating_rate", "RT_HI_ionization_rate", "RT_HeI_ionization_rate", "RT_HeII_ionization_rate" ];
+     list += ["photon_density_0", "flux_x_0", "flux_y_0", "flux_z_0"];
+     list += ["photon_density_1", "flux_x_1", "flux_y_1", "flux_z_1"];
+     list += ["photon_density_2", "flux_x_2", "flux_y_2", "flux_z_2"];
  }
 
  Group {
@@ -36,8 +39,9 @@
          position = [ 0.5000000000000000, 0.5000000000000000, 0.5000000000000000 ];
          star_mass = 100.0000000000000;
          temperature = 100.0000000000000;
+         luminosity = 5e48;
      };
-     list = [ "feedback_test" ];
+     list = [ "feedback_test", "m1_closure" ];
  }
 
  Mesh {
@@ -50,7 +54,7 @@
      grackle {
          CaseBRecombination = 1;
          UVbackground = 0;
-         data_file = "fuck";
+         data_file = ".";
          metal_cooling = 0;
          primordial_chemistry = 1;
          self_shielding_method = 0;
@@ -58,18 +62,19 @@
          use_radiative_transfer = 1;
          with_radiative_cooling = 1;
      };
-     list = [ "ramses_rt", "grackle" ];
-     ramses_rt {
+     list = [ "m1_closure", "grackle" ];
+     m1_closure {
          N_groups = 3;
          Nphotons_per_sec = 5.000000000000000e+48;
-         Nphotons_per_sec_list = [ 2.235000000000000e+48, 2.470000000000000e+48, 2.950000000000000e+47 ];
+         SED = [ 0.477, 0.494, 0.059 ];
          bin_lower = [ 13.60000000000000, 24.59000000000000, 54.42000000000000 ];
          bin_upper = [ 24.59000000000000, 54.42000000000000, 100.0000000000000 ];
-         clight_frac = 0.001000000000000000;
+         clight_frac = 1e-2;
          radiation_spectrum = "custom";
-         temperature_blackbody = 100000.0000000000;
          recombination_radiation = false;
-         average_global_quantities = true;
+         cross_section_calculator = "custom";
+         sigmaN = [3e-18   ,0.0,0.0, 5.69e-19,0.0,0.0, 7.89e-20,0.0,0.0];
+         sigmaE = [2.78e-18,0.0,0.0, 5.04e-19,0.0,0.0, 7.46e-20,0.0,0.0];
      };
  }
 
@@ -152,8 +157,8 @@
          image_type = "data";
          name = [ "RT_N-%06d.png", "cycle" ];
          schedule {
-             start = 100;
-             step = 1000;
+             start = 1;
+             step = 100;
              var = "cycle";
          };
          type = "image";
@@ -187,8 +192,8 @@
          field_list = [ "photon_density", "flux_x", "flux_y", "flux_z", "density", "HI_density", "HII_density", "HeI_density", "HeII_density", "HeIII_density", "e_density", "temperature", "pressure", "internal_energy", "total_energy", "RT_heating_rate", "RT_HI_ionization_rate", "RT_HeI_ionization_rate", "RT_HeII_ionization_rate", "photon_density_0", "photon_density_1", "photon_density_2" ];
          name = [ "data-%03d-%02d.h5", "count", "proc" ];
          schedule {
-             start = 100;
-             step = 1000;
+             start = 1;
+             step = 100;
              var = "cycle";
          };
          type = "data";
@@ -214,7 +219,7 @@
  Particle {
      list = [ "star" ];
      star {
-         attributes = [ "x", "double", "y", "double", "z", "double", "vx", "double", "vy", "double", "vz", "double", "ax", "double", "ay", "double", "az", "double", "id", "double", "mass", "double", "is_copy", "int64", "creation_time", "double", "lifetime", "double", "metal_fraction", "double" ];
+         attributes = [ "x", "double", "y", "double", "z", "double", "vx", "double", "vy", "double", "vz", "double", "ax", "double", "ay", "double", "az", "double", "id", "double", "mass", "double", "is_copy", "int64", "creation_time", "double", "lifetime", "double", "metal_fraction", "double", "luminosity", "double" ];
          groups = [ "is_gravitating" ];
          mass_is_mass = true;
          position = [ "x", "y", "z" ];
@@ -229,6 +234,6 @@
 
  Units {
      density = 1.674000000000000e-24;
-     length = 4.073520000000000e+22;
+     length = 4.073520000000000e+22; #13.2 kpc
      time = 31540000000000.00;
  }

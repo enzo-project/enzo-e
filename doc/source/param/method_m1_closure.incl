@@ -39,11 +39,7 @@ Enzo-E's multigroup M1 Closure radiative transfer solver.
 :Default: :d:`1.0`
 :Scope:     :c:`Enzo`
 
-:e:`Speed of light fraction to use for radiative transfer. The speed of light for the radiative transfer calculation will be set to clight_frac*C, where C is the true speed of light. 
-Some care must be taken when choosing a value for a reduced speed-of-light (RSOL). The general rule of thumb is that the RSOL approximation is valid in dense gas, where the typical I-front 
-speed is << :code:`clight_frac*C`. For densities typical for the interstellar medium :math:`\left(10^{-2}\,\,\mathrm{cm}^{-3} - 10^{1}\,\,\mathrm{cm}^{-3}\right)`, fractions as low as :math:`10^{-2}\,\,\mathrm{cm}^{-3}` are valid. For simulations that seek to resolve
-the reionization of the intergalactic medium, however, the true value of speed of light must be taken in order for reionization to occur at the correct time. 
-See Section 4 of `Rosdahl et al. (2013) <https://ui.adsabs.harvard.edu/abs/2013MNRAS.436.2188R/abstract>`_ for a more detailed discussion.`
+:e:`Speed of light fraction to use for radiative transfer.`
    
 ----
 
@@ -53,7 +49,7 @@ See Section 4 of `Rosdahl et al. (2013) <https://ui.adsabs.harvard.edu/abs/2013M
 :Default: :d:`0.5`
 :Scope:     :c:`Enzo`
 
-:e:`The radiation timestep is calculated as :code:`dt = courant * dx/(3*clight_frac*C).` `
+:e:`The radiation timestep is calculated as dt = courant * dx/(3*clight_frac*C). `
    
 ----
 
