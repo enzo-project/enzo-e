@@ -465,8 +465,6 @@ This method **must** be used in tandem with the ``"m1_closure"`` initializer by 
 
    Photochemistry is only supported for six-species: HI, HII, HeI, HeII, HeIII, and :math:`e^-`.
 
-   The `"HLL"` flux function does not work correctly at the moment. For now, users should specify `m1_closure:flux_function="GLF"`.
-
 Required Fields 
 ---------------
 
