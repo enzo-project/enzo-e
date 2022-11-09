@@ -164,10 +164,11 @@ void EnzoMethodM1Closure::compute ( Block * block ) throw()
   // there is a global reduction at the end of call_inject_photons().
   // Charm requires all members of the chare array to participate in 
   // global reductions. If I call compute_done here for non-leaf blocks,
-  // they will still participate in the global sum, but they will also 
-  // execute the callback function following the contribute() call.
-  // This means they will end up calling compute_done() twice which results
-  // in skipped cycles. Not good.
+  // they will still participate in the global sum at the end of inject_photons(), 
+  // but they will also execute the callback function following the contribute() call.
+  // This means the non-leaves would end up calling compute_done() twice which results
+  // in skipped cycles
+ 
   compute_ (block);
 
   return;
@@ -1178,9 +1179,6 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
   enzo_float * Fynew = new enzo_float[m];
   enzo_float * Fznew = new enzo_float[m];
 
-  // if 2D, gz = 0 by default (I think) and mz = 1, so the outermost loop
-  // would just be for (int iz=0, iz<1, iz++)
-
   double lunit = enzo_units->length();
   double tunit = enzo_units->time();
   double Nunit = 1.0 / enzo_units->volume();
@@ -1189,8 +1187,9 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
   double hx = (xp-xm)/(mx-2*gx);
   double hy = (yp-ym)/(my-2*gy);
   double hz = (zp-zm)/(mz-2*gz);
-  double clight = enzo_config->method_m1_closure_clight_frac*enzo_constants::clight * tunit/lunit;
-
+  double clight_cgs = enzo_config->method_m1_closure_clight_frac*enzo_constants::clight; 
+  double clight_code = clight_cgs * tunit/lunit;
+  
   for (int i=0; i<m; i++)
   {
     Nnew [i] = N [i];
@@ -1201,7 +1200,7 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
 
 
   //calculate the radiation pressure tensor
-  get_pressure_tensor(enzo_block, N, Fx, Fy, Fz, clight);
+  get_pressure_tensor(enzo_block, N, Fx, Fy, Fz, clight_code);
   
   double Nmin = enzo_config->method_m1_closure_min_photon_density / Nunit;
 
@@ -1212,7 +1211,7 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
         double N_update=0, Fx_update=0, Fy_update=0, Fz_update=0;
       
         get_U_update( enzo_block, &N_update, &Fx_update, &Fy_update, &Fz_update,
-                             N, Fx, Fy, Fz, hx, hy, hz, dt, clight,
+                             N, Fx, Fy, Fz, hx, hy, hz, dt, clight_code,
                              i, idx, idy, idz ); 
         
         // get updated fluxes
@@ -1235,7 +1234,7 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
         double D = 0.0; // photon destruction term
 
         if (enzo_config->method_m1_closure_attenuation) {
-          D_add_attenuation(enzo_block, &D, clight, i, igroup);
+          D_add_attenuation(enzo_block, &D, clight_cgs, i, igroup);
         }
 
         if (enzo_config->method_m1_closure_recombination_radiation) {
@@ -1572,10 +1571,6 @@ void EnzoMethodM1Closure::compute_ (Block * block) throw()
 
   Scalar<double> scalar = block->data()->scalar_double();
 
-  EnzoUnits * enzo_units = enzo::units();
-  double Nunit = 1.0 / enzo_units->volume();
-  double Funit = enzo_units->velocity() * Nunit;
-  
   // reset "mL" sums to zero
   // TODO: only do this once every N cycles, where N is a parameter
   for (int i=0; i<N_groups; i++) {

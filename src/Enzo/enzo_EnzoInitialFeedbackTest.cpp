@@ -143,7 +143,7 @@ void EnzoInitialFeedbackTest::enforce_block
 
   const enzo_float gamma = enzo::fluid_props()->gamma();
   const enzo_float mol_weight = enzo::fluid_props()->mol_weight();
-
+/*
   for (int iz = 0; iz < ngz; iz++){
     for (int iy = 0; iy < ngy; iy++){
       for (int ix = 0; ix < ngx; ix++){
@@ -172,7 +172,7 @@ void EnzoInitialFeedbackTest::enforce_block
       }
     }
   }
-
+*/
   // drop in a particle
 
   ParticleDescr * particle_descr = cello::particle_descr();
