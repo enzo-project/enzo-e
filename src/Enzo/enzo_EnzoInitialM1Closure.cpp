@@ -62,7 +62,7 @@ void EnzoInitialM1Closure::enforce_block
       N_i [j] = Nmin  * inverse_Nunit;
       Fx_i[j] = 1e-16 * inverse_Funit;
       Fy_i[j] = 1e-16 * inverse_Funit;
-      Fz_i[j] = 1e-16 * inverse_Funit; 
+      Fz_i[j] = 1e-16 * inverse_Funit;
     }
   }
 

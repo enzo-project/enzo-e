@@ -402,8 +402,9 @@ void EnzoMethodM1Closure::inject_photons ( EnzoBlock * enzo_block, int igroup ) 
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
   double munit = enzo_units->mass();
+  double Nunit = 1.0 / enzo_units->volume();
 
-  double f_esc = 1.0; // enzo_config->method_radiation_injection_escape_fraction;
+  double f_esc = 1.0;
 
   Field field = enzo_block->data()->field();
   int mx,my,mz;  
@@ -496,11 +497,6 @@ void EnzoMethodM1Closure::inject_photons ( EnzoBlock * enzo_block, int igroup ) 
       int i = INDEX(ix,iy,iz,mx,my);
 
       // deposit photons
-     //TODO: Enforce that photon density calculated from stellar spectrum is the minimum value
-      //      for cells that contain stars. Necessary because after the transport step,
-      //      N[cell with star] will decrease after the transport step, which is 
-      //      unphysical.
-
       double pmass_cgs = pmass[ipdm]*enzo_units->mass();
 
       double dN;
@@ -521,11 +517,10 @@ void EnzoMethodM1Closure::inject_photons ( EnzoBlock * enzo_block, int igroup ) 
                                   dt, 1/cell_volume, i, igroup);
       }
      
-      dN *= f_esc;
+      dN *= f_esc / Nunit; // put back into code units
     
       // CIC deposit with cloud radius of 1 cell width
       double wx, wy, wz;
-      //double wsum = 0;
       for (int ix_ = ix-1; ix_ <= ix+1; ix_++) {
 
         double xcell = xm + (ix_+0.5 - gx)*hx;
@@ -541,7 +536,6 @@ void EnzoMethodM1Closure::inject_photons ( EnzoBlock * enzo_block, int igroup ) 
             double zcell = zm + (iz_+0.5 - gz)*hz;
             wz = std::max(1.0 - std::abs(zp - zcell) / hz, 0.0);
 
-            //wsum += wx*wy*wz;
             int i_ = INDEX(ix_,iy_,iz_,mx,my);
             double dN_cic = wx*wy*wz*dN;
             N[i_] += dN_cic;
@@ -873,6 +867,7 @@ void EnzoMethodM1Closure::get_photoionization_and_heating_rates (EnzoBlock * enz
 
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
+  double Nunit = 1.0 / enzo_units->volume();
 
   Field field = enzo_block->data()->field();
   Scalar<double> scalar = enzo_block->data()->scalar_double(); 
@@ -925,7 +920,7 @@ void EnzoMethodM1Closure::get_photoionization_and_heating_rates (EnzoBlock * enz
         double sigmaE = *(scalar.value( scalar.index( sigE_string(igroup,j) ))); // cm^2
         double eps    = *(scalar.value( scalar.index(  eps_string(igroup  ) ))); // erg 
 
-        double N_i = (photon_densities[igroup])[i]; // cm^-3
+        double N_i = (photon_densities[igroup])[i] * Nunit; // cm^-3
         double n_j = (chemistry_fields[j])[i] * rhounit / masses[j]; //number density of species j
            
         double ediff = eps*sigmaE - Eion[j]*sigmaN;
@@ -938,8 +933,7 @@ void EnzoMethodM1Closure::get_photoionization_and_heating_rates (EnzoBlock * enz
     }
         
   RT_heating_rate[i] = heating_rate / nHI; // units of erg/s/cm^3/nHI
-}
-
+  }
  
 }
 
@@ -1055,7 +1049,8 @@ void EnzoMethodM1Closure::C_add_recombination (EnzoBlock * enzo_block, double * 
 
   EnzoUnits * enzo_units = enzo::units();
   double rhounit = enzo_units->density();
-  
+  double Cunit = enzo_units->time() / enzo_units->volume();  
+
   enzo_float * e_density = (enzo_float *) field.values("e_density");
 
   std::vector<std::string> chemistry_fields = {"HI_density", 
@@ -1075,7 +1070,7 @@ void EnzoMethodM1Closure::C_add_recombination (EnzoBlock * enzo_block, double * 
     double n_j = density_j[i]*rhounit/masses[j];
     double n_e = e_density[i]*rhounit/mH; // electrons have same mass as protons in code units
 
-    *C += b*(alpha_A-alpha_B) * n_j*n_e;
+    *C += b*(alpha_A-alpha_B) * n_j*n_e / Cunit;
 
 #ifdef DEBUG_RECOMBINATION
     CkPrintf("MethodM1Closure::C_add_recombination -- j=%d; alpha_A = %1.3e; alpha_B = %1.3e; n_j = %1.3e; n_e = %1.3e; b_boolean = %d\n", j, alpha_A, alpha_B, n_j, n_e, b);
@@ -1098,6 +1093,7 @@ void EnzoMethodM1Closure::D_add_attenuation ( EnzoBlock * enzo_block, double * D
 
   EnzoUnits * enzo_units = enzo::units();
   double rhounit = enzo_units->density();
+  double tunit = enzo_units->time();
 
   Field field = enzo_block->data()->field();
 
@@ -1118,7 +1114,7 @@ void EnzoMethodM1Closure::D_add_attenuation ( EnzoBlock * enzo_block, double * D
     double n_j = density_j[i]*rhounit / masses[j];     
     double sigN_ij = *(scalar.value( scalar.index( sigN_string(igroup, j) )));
     
-    *D += n_j * clight*sigN_ij; // s^-1
+    *D += n_j * clight*sigN_ij * tunit; // code_time^-1
 
     #ifdef DEBUG_ATTENUATION
       CkPrintf("[i,j]=[%d,%d]; sigN_ij=%1.2e; n_j=%1.2e; clight=%1.2e\n", igroup, j, sigN_ij, n_j, clight);
@@ -1126,7 +1122,7 @@ void EnzoMethodM1Closure::D_add_attenuation ( EnzoBlock * enzo_block, double * D
   }
 
 #ifdef DEBUG_ATTENUATION
-    CkPrintf("i=%d; D=%e s^-1; dt = %e\n",i, *D, enzo_block->dt*enzo_units->time());
+    CkPrintf("i=%d; D=%e s^-1; dt = %e\n",i, *D / tunit, enzo_block->dt*enzo_units->time());
 #endif 
  
 }
@@ -1187,16 +1183,17 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
 
   double lunit = enzo_units->length();
   double tunit = enzo_units->time();
+  double Nunit = 1.0 / enzo_units->volume();
 
-  double dt = enzo_block->dt    * tunit;
-  double hx = (xp-xm)/(mx-2*gx) * lunit;
-  double hy = (yp-ym)/(my-2*gy) * lunit;
-  double hz = (zp-zm)/(mz-2*gz) * lunit;
-  double clight = enzo_config->method_m1_closure_clight_frac*enzo_constants::clight; // cgs
+  double dt = enzo_block->dt;
+  double hx = (xp-xm)/(mx-2*gx);
+  double hy = (yp-ym)/(my-2*gy);
+  double hz = (zp-zm)/(mz-2*gz);
+  double clight = enzo_config->method_m1_closure_clight_frac*enzo_constants::clight * tunit/lunit;
 
   for (int i=0; i<m; i++)
   {
-    Nnew [i] = N [i]; // all cgs
+    Nnew [i] = N [i];
     Fxnew[i] = Fx[i];
     Fynew[i] = Fy[i];
     Fznew[i] = Fz[i];
@@ -1206,7 +1203,7 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
   //calculate the radiation pressure tensor
   get_pressure_tensor(enzo_block, N, Fx, Fy, Fz, clight);
   
-  double Nmin = enzo_config->method_m1_closure_min_photon_density;
+  double Nmin = enzo_config->method_m1_closure_min_photon_density / Nunit;
 
   for (int iz=gz; iz<mz-gz; iz++) {
     for (int iy=gy; iy<my-gy; iy++) {
@@ -1263,7 +1260,7 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
     for (int iy=gy; iy<my-gy; iy++) {
       for (int ix=gx; ix<mx-gx; ix++) {
         int i = INDEX(ix,iy,iz,mx,my); //index of current cell
-        N [i] = Nnew [i]; // all cgs
+        N [i] = Nnew [i];
         Fx[i] = Fxnew[i];
         Fy[i] = Fynew[i];
         Fz[i] = Fznew[i];
@@ -1468,6 +1465,8 @@ void EnzoMethodM1Closure::set_global_averages(EnzoBlock * enzo_block, CkReductio
 void EnzoMethodM1Closure::call_solve_transport_eqn(EnzoBlock * enzo_block) throw()
 {
   const EnzoConfig * enzo_config = enzo::config();
+  EnzoUnits * enzo_units = enzo::units();
+
   int N_groups = enzo_config->method_m1_closure_N_groups;
   double clight = enzo_config->method_m1_closure_clight_frac * enzo_constants::clight;
   // loop through groups and solve transport equation for each group
@@ -1493,19 +1492,16 @@ void EnzoBlock::p_method_m1_closure_solve_transport_eqn()
   // solve transport eqn for each group
   method->call_solve_transport_eqn(this);
 
-  // sum group fields, convert RT fields back to code units, 
-  // and end compute()
-  method->RT_fields_to_code_units(this);  
+  // sum group fields
+  method->sum_group_fields(this);  
   compute_done();
   return; 
 }
 
 //-----------------------------------------
-void EnzoMethodM1Closure::RT_fields_to_code_units(EnzoBlock * enzo_block) throw()
+void EnzoMethodM1Closure::sum_group_fields(EnzoBlock * enzo_block) throw()
 {
-  // this function does two things:
-  //   (1) converts RT fields from cgs to code units
-  //   (2) sums group fields together and stores them in integrated fields
+  // this function does two things sums group fields together and stores them in integrated fields
   Field field = enzo_block->data()->field();
   int mx,my,mz;  
   field.dimensions(0,&mx, &my, &mz); //field dimensions, including ghost zones
@@ -1516,9 +1512,6 @@ void EnzoMethodM1Closure::RT_fields_to_code_units(EnzoBlock * enzo_block) throw(
   const EnzoConfig * enzo_config = enzo::config();
         EnzoUnits  * enzo_units  = enzo::units();
   
-  double inverse_Nunit = enzo_units->volume();
-  double inverse_Funit = inverse_Nunit / enzo_units->velocity();
-
   enzo_float * N  = (enzo_float *) field.values("photon_density");
   enzo_float * Fx = (enzo_float *) field.values("flux_x");
   enzo_float * Fy = (enzo_float *) field.values("flux_y");
@@ -1541,12 +1534,6 @@ void EnzoMethodM1Closure::RT_fields_to_code_units(EnzoBlock * enzo_block) throw(
     enzo_float * Fz_i = (enzo_float *) field.values("flux_z_" + istring);
     for (int j=0; j<m; j++)
     {
-      // put back into code units
-      N_i [j] *= inverse_Nunit;
-      Fx_i[j] *= inverse_Funit;
-      Fy_i[j] *= inverse_Funit;
-      Fz_i[j] *= inverse_Funit;
-
       N [j] +=  N_i[j];
       Fx[j] += Fx_i[j];
       Fy[j] += Fy_i[j];
@@ -1615,14 +1602,6 @@ void EnzoMethodM1Closure::compute_ (Block * block) throw()
 
     for (int j=0; j<m; j++)
     {
-      // TODO: For some reason, new value doesn't get stored here when using
-      //       inflow boundary conditions during the first cycle (i.e. it's as if we're multiplying by 1,
-      //       even though `Nunit` and `Funit` are VERY far from 1). What's up with that???
-      N_i [j] *= Nunit;
-      Fx_i[j] *= Funit;
-      Fy_i[j] *= Funit;
-      Fz_i[j] *= Funit;
-
       // initialize temporary fields to zero
       N_i_d[j] = 0.0;
     }
