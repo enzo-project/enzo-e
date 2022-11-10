@@ -603,6 +603,8 @@ double EnzoMethodM1Closure::flux_function (double U_l, double U_lplus1,
   }
 }
 
+//--------------------------------------------------------------------------
+
 double EnzoMethodM1Closure::deltaQ_faces (double U_l, double U_lplus1, double U_lminus1,
                                                   double Q_l, double Q_lplus1, double Q_lminus1,
                                                   double clight, double lmin, double lmax, 
@@ -614,7 +616,7 @@ double EnzoMethodM1Closure::deltaQ_faces (double U_l, double U_lplus1, double U_
          flux_function(U_l      , U_lplus1, Q_l      , Q_lplus1, clight, lmin, lmax, flux_type); 
 }
 
-
+//--------------------------------------------------------------------------
 
 void EnzoMethodM1Closure::get_reduced_variables (double * chi, double (*n)[3], int i, double clight,
                                enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz) throw()
@@ -630,6 +632,8 @@ void EnzoMethodM1Closure::get_reduced_variables (double * chi, double (*n)[3], i
     CkPrintf("i = %d; N = %1.2e; Fx = %1.2e; Fy = %1.2e; Fz = %1.2e; f = %1.2e; chi = %1.2e; n=[%1.2e,%1.2e,%1.2e]\n", i, N[i], Fx[i], Fy[i], Fz[i], f, *chi, (*n)[0], (*n)[1], (*n)[2]); 
   #endif
 }
+
+//--------------------------------------------------------------------------
 
 void EnzoMethodM1Closure::get_pressure_tensor (EnzoBlock * enzo_block, 
                        enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz, double clight) 
@@ -686,6 +690,9 @@ void EnzoMethodM1Closure::get_pressure_tensor (EnzoBlock * enzo_block,
   }
 
 }
+
+//--------------------------------------------------------------------------
+
 
 void EnzoMethodM1Closure::get_U_update (EnzoBlock * enzo_block, double * N_update, 
                        double * Fx_update, double * Fy_update, double * Fz_update, 
@@ -789,6 +796,7 @@ void EnzoMethodM1Closure::get_U_update (EnzoBlock * enzo_block, double * N_updat
 }
 
 //----------------------------------
+
 double EnzoMethodM1Closure::sigma_vernier (double energy, int type) throw()
 {
   // copy FindCrossSection.C from Enzo
@@ -1005,18 +1013,11 @@ double EnzoMethodM1Closure::get_alpha (double T, int species, char rec_case) thr
 }
 
 //---------------------------------
+
 int EnzoMethodM1Closure::get_b_boolean (double E_lower, double E_upper, int species) throw()
 {
   // boolean 1 or 0 which specifies whether or not photon from given recombination
   // lies within given energy range
- 
-  // QUESTION: What do I do if case A recombination is in the group, but case B is not???
-  //           What energy do I use for case B recombination??
- 
-  // On-the-spot approximation assumes all recombination photons get absorbed immediately
-  //     -> b = 0
-  //
-  // Case B recombination energies are just the ionization energies
 
   switch (species) { // species after recombination
     case 0: // HI
@@ -1035,7 +1036,6 @@ int EnzoMethodM1Closure::get_b_boolean (double E_lower, double E_upper, int spec
 }
 
 //---------------------------------
-
 
 void EnzoMethodM1Closure::C_add_recombination (EnzoBlock * enzo_block, double * C,
                                                 enzo_float * T, int i, int igroup,
@@ -1089,7 +1089,6 @@ void EnzoMethodM1Closure::D_add_attenuation ( EnzoBlock * enzo_block, double * D
                                              double clight, int i, int igroup) throw()
 {
   // Attenuate radiation
-  // first half of eq. 25 and eq. 26, using backwards-in-time values for all variables
   const EnzoConfig * enzo_config = enzo::config();
 
   EnzoUnits * enzo_units = enzo::units();
@@ -1105,10 +1104,6 @@ void EnzoMethodM1Closure::D_add_attenuation ( EnzoBlock * enzo_block, double * D
   double mH = enzo_constants::mass_hydrogen;
   std::vector<double> masses = {mH,4*mH, 4*mH};
  
-  //it's okay to use the same cross section for both attenuation (affects N) and 
-  //radiation pressure (affects F) because F and N have approximately the 
-  //same spectral shape.
-
   Scalar<double> scalar = enzo_block->data()->scalar_double();
   for (int j=0; j<chemistry_fields.size(); j++) {  
     enzo_float * density_j = (enzo_float *) field.values(chemistry_fields[j]);
@@ -1278,8 +1273,8 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
   delete [] Fznew;
 }
 
-
 //----------------------------------------------------------------------
+
 void EnzoMethodM1Closure::call_inject_photons(EnzoBlock * enzo_block) throw()
 {
   const EnzoConfig * enzo_config = enzo::config();
@@ -1320,6 +1315,7 @@ void EnzoMethodM1Closure::call_inject_photons(EnzoBlock * enzo_block) throw()
     // N_groups*N_species number of sigN and sigE variables
     //
     // Gives 2*N_groups+2*N_groups*N_species as the total number of variables
+
     std::vector<double> temp(2*N_groups+2*N_groups*N_species);
 
     // fill temp with ScalarData "mL" quantities
@@ -1479,7 +1475,6 @@ void EnzoMethodM1Closure::call_solve_transport_eqn(EnzoBlock * enzo_block) throw
     get_photoionization_and_heating_rates(enzo_block, clight);
   }
 
-
 }
 
 //-------------------------------
@@ -1498,6 +1493,7 @@ void EnzoBlock::p_method_m1_closure_solve_transport_eqn()
 }
 
 //-----------------------------------------
+
 void EnzoMethodM1Closure::sum_group_fields(EnzoBlock * enzo_block) throw()
 {
   // this function does two things sums group fields together and stores them in integrated fields
@@ -1541,15 +1537,14 @@ void EnzoMethodM1Closure::sum_group_fields(EnzoBlock * enzo_block) throw()
   }
 }
 
-
 //======================================================================
 
 void EnzoMethodM1Closure::compute_ (Block * block) throw()
 {
   const EnzoConfig * enzo_config = enzo::config();
-  
+
   Field field = block->data()->field();
-  int mx,my,mz;  
+  int mx,my,mz;
   field.dimensions(0,&mx, &my, &mz); //field dimensions, including ghost zones
   int gx,gy,gz;
   field.ghost_depth(0,&gx, &gy, &gz);
@@ -1582,7 +1577,7 @@ void EnzoMethodM1Closure::compute_ (Block * block) throw()
     }
   }
   // convert RT fields into cgs units. This is done to avoid roundoff errors.
-  // e.g. photon density of 1 cm^-3 is equivalent to 1e63 kpc^-3, while 
+  // e.g. photon density of 1 cm^-3 is equivalent to 1e63 kpc^-3, while
   //      a cross section of 1e-18 cm^2 is equivalent to 1e-60 kpc^2.
   // Doing everything in cgs should help us avoid mixing huge numbers with tiny numbers
 
@@ -1615,6 +1610,6 @@ void EnzoMethodM1Closure::compute_ (Block * block) throw()
                *(scalar.value( scalar.index(  eps_string(i)   ))) / enzo_constants::erg_eV);
     }
   }
-#endif 
+#endif
 
 }

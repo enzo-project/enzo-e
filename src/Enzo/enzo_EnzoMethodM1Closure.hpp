@@ -49,18 +49,10 @@ public: // interface
 
 
   //--------- CONTROL FLOW --------
-  //compute_ -> call_inject_photons -> inject_photons ->
+  //  compute_ -> call_inject_photons -> inject_photons ->
   //  refresh -> call_solve_transport_eqn -> 
-  //  solve_transport_eqn, recombination_chemistry, get_photoionization_and_heating_rates 
-  //  (rates passed into Grackle in EnzoMethodGrackle)
-  //  solve_transport_eqn -> add_attenuation
-  //
-  //inject_photons -> get_star_temperature, get_radiation_blackbody
-  //                  get_radiation_blackbody -> integrate_simpson(planck_function)
-  //
-  //recombination_chemistry -> get_alpha 
-  //
-  //get_photoionization_and_heating_rates -> get_beta                
+  //  solve_transport_eqn, C_add_recombination, D_add_attenuation, 
+  //    get_photoionization_and_heating_rates 
 
 
   // calls inject_photons(), then does a refresh
@@ -148,6 +140,8 @@ protected: // methods
   double sigma_vernier (double energy, int type) throw();
 
   void get_photoionization_and_heating_rates (EnzoBlock * enzo_block, double clight) throw();
+
+  //--------------------------
 
   void compute_ (Block * block) throw();
 
