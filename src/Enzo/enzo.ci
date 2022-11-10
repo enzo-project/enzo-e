@@ -176,7 +176,8 @@ module enzo {
     entry void p_set_io_writer(CProxy_IoEnzoWriter proxy);
 
     // EnzoMethodInfer
-    entry void p_infer_count_arrays(int count);
+    entry void p_infer_set_array_count(int count);
+    entry void p_infer_array_created();
 
     // enzo_control_restart
     entry void p_set_io_reader(CProxy_IoEnzoReader proxy);
@@ -217,7 +218,7 @@ module enzo {
     entry void p_method_infer_merge_masks
       (int n, char mask[n], int ic3[3]);
     entry void p_method_infer_count_arrays (int count);
-    entry void p_method_infer_create_arrays();
+    entry void p_method_infer_request_data (int il3[3]);
     entry void p_method_infer_exit();
 
     // checkpoint
@@ -308,6 +309,10 @@ module enzo {
   };
 
   array[Index3] EnzoLevelArray {
-    entry EnzoLevelArray();
+    entry EnzoLevelArray(std::string,
+                         int level_base, int level_array, int level_infer,
+                         int nax, int nay, int naz);
+    entry void p_request_data ();
+    entry void p_transfer_data (Index, int nf, enzo_float field_data[nf] );
   };
 };

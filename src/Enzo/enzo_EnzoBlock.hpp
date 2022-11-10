@@ -231,8 +231,8 @@ public: /// entry methods
   void p_method_infer_merge_masks (int n, char * mask, int ic3[3]);
   /// Count inference arrays
   void p_method_infer_count_arrays (int count);
-  /// Create inference arrays
-  void p_method_infer_create_arrays ();
+  /// Request from inference array for field data
+  void p_method_infer_request_data (int il3[3]);
   /// Exit EnzoMethodInference
   void p_method_infer_exit();
 

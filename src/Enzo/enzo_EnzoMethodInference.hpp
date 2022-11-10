@@ -27,8 +27,8 @@ public: // interface
    const int array_dims[3],
    const int array_size[3],
    std::string field_group,
-   int index_refine,
-   int num_refine);
+   int index_criteria,
+   int num_criteria);
 
   EnzoMethodInference()
     : Method(),
@@ -41,8 +41,8 @@ public: // interface
       is_sync_child_(-1),
       is_sync_parent_(-1),
       is_mask_(-1),
-      index_refine_(-1),
-      num_refine_(0)
+      index_criteria_(-1),
+      num_criteria_(0)
   { }
 
   /// Charm++ PUP::able declarations
@@ -60,8 +60,8 @@ public: // interface
       is_sync_child_(-1),
       is_sync_parent_(-1),
       is_mask_(-1),
-      index_refine_(-1),
-      num_refine_(0)
+      index_criteria_(-1),
+      num_criteria_(0)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -78,21 +78,29 @@ public: // methods
   void merge_masks (Block * block, int n, char *mask, int ic3[3]);
 
   void count_arrays (Block * block, int count);
-  void create_arrays (Block * block);
+  // void create_arrays (Block * block);
+
+  /// Return the field group defining fields in the inference arrays
+  std::string field_group () const
+  { return field_group_; }
+
+  /// Request from inference array index ia3[3] for data from given
+  /// block
+  void request_data (Block * block, int ia3[3]);
 
 protected: // methods
 
   /// Apply criteria to determine which if any overlapping inference
-  /// arrays need to be created. Return number of inference arrays
-  /// to create, and allocate and initialize inference mask
-  int apply_criteria_(Block * block);
+  /// arrays need to be created, and create an associated inference
+  /// array mask
+  void apply_criteria_(Block * block);
 
   /// Allocate the inference array mask for the given block if not already
   /// allocated, and return the mask array length
   int mask_allocate_(Block * block);
   /// Get the mask size for blocks in the given level, and return
   /// the mask array length
-  int mask_dims_(int level,int *mx=nullptr, int *my=nullptr, int *mz=nullptr) const;
+  std::tuple<int,int,int> mask_dims_(int level) const;
 
   /// Create the level arrays according to the Block's level array mask,
   /// and return the number of level arrays created
@@ -102,21 +110,20 @@ protected: // methods
   ///results where needed so that inference arrays are created
   void forward_create_array_ (Block * block, int count);
 
+  /// Merge level array masks of children into this block
+  void merge_masks_1to1_ (char * mask, char * mask_in, int level);
+  void merge_masks_2to1_ (char * mask, char * mask_in, int level, int ic3[3]);
+
+  /// Count inference arrays to create given block array mask
+  int count_arrays_ (Block * block) const;
+
   void compute_ (Block * block, enzo_float * Unew ) throw();
 
-  void intersecting_root_blocks_
-  (int ib3_lower[3], int ib3_upper[3], const int ia3[3],
-   const int n3[3], int level,
-   const int na3[3], const int nb3[3]) const;
+  bool block_intersects_array_(Index index, int ia3[3]);
 
   /// Return the dimensionality of the level array
   void level_array_dims_(int *mx, int *my, int *mz);
  
-  void intersecting_level_arrays_
-  (int ia3_lower[3], int ia3_upper[3], const int ib3[3],
-   const int n3[3], int level,
-   const int na3[3], const int nb3[3]) const;
-
   /// Return the Block's synchronization counter for child blocks (plus self)
   Sync & sync_child_(Block * block)
   { return *block->data()->scalar_sync().value(is_sync_child_); }
@@ -135,7 +142,8 @@ protected: // methods
   void print_mask_(Block * block) const
   {
     int mx,my,mz;
-    int n = mask_dims_(block->level(),&mx,&my,&mz);
+    std::tie(mx,my,mz) = mask_dims_(block->level());
+    int n = mx*my*mz;
     const char * mask = *scalar_mask_(block);
     for (int iy=my-1; iy>=0; iy--) {
       CkPrintf ("MASK %s ",block->name().c_str());
@@ -183,10 +191,10 @@ protected: // attributes
   /// Block Scalar mask index for creating inference arrays
   int is_mask_;
 
-  /// Index for the first "refinement" criterion
-  int index_refine_;
+  /// Index for the first criterion (implemented as refinement criterion RefineFoo)
+  int index_criteria_;
   /// Number of refinement criteria
-  int num_refine_;
+  int num_criteria_;
 };
 
 #endif /* ENZO_ENZO_METHOD_INFERENCE_HPP */

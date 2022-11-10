@@ -62,15 +62,20 @@ public: // functions
   void p_set_io_reader(CProxy_IoEnzoReader proxy);
   void p_set_io_writer(CProxy_IoEnzoWriter proxy);
   void p_set_level_array(CProxy_EnzoLevelArray proxy);
+
   void set_sync_check_writer(int count)
   { sync_check_writer_created_.set_stop(count); }
   void set_sync_infer_count(int count)
   { sync_infer_count_.set_stop(count); }
+  void set_sync_infer_create(int count)
+  { sync_infer_create_.set_stop(count); }
   void p_io_reader_created();
 
   /// EnzoMethodInference
-  /// Count inference arrays to create
-  void p_infer_count_arrays(int count);
+  /// Set count of inference arrays to be created
+  void p_infer_set_array_count(int count);
+  /// Decrement inference array counter
+  void p_infer_array_created();
 
   /// Read in and initialize the next refinement level from a checkpoint;
   /// or exit if done
@@ -87,6 +92,7 @@ public: // virtual functions
 
 private: // functions
 
+  void infer_check_create_();
 
 private: // virtual functions
 
@@ -97,7 +103,12 @@ private: // attributes
   /// Checkpoint synchronization
   Sync                     sync_check_writer_created_;
   Sync                     sync_check_done_;
+  /// Count root-level blocks before continuing in EnzoMethodInference
   Sync                     sync_infer_count_;
+  /// Count inference arrays created
+  Sync                     sync_infer_create_;
+  /// Total number of inference arrays to create
+  int                      infer_count_arrays_;
   int                      check_num_files_;
   std::string              check_ordering_;
   std::vector<std::string> check_directory_;

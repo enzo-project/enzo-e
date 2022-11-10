@@ -66,7 +66,7 @@ public: // interface
 
   /// Set domain upper extent
   void set_upper(double x, double y, double z) throw ();
-  
+
   /// Set root-level grid size
   void set_root_size(int nx, int ny, int nz) throw ();
 
@@ -204,14 +204,14 @@ public: // interface
   {  return num_zones_total_;  }
 
   CProxy_Block new_block_proxy (bool allocate_data) throw();
-  
+
   void create_block_array (bool allocate_data) throw();
 
   void create_subblock_array (bool allocate_data) throw();
 
-
   /// Return the number of root-level Blocks along each rank
-  void root_blocks (int * nbx, int * nby=0, int * nbz=0) const throw();
+  /// in the given level (default level is root)
+  void root_blocks (int * nbx, int * nby=0, int * nbz=0, int level=0) const throw();
 
   /// Return the factory object associated with the Hierarchy
   const Factory * factory () const throw()
