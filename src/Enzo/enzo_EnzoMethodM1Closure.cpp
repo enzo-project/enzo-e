@@ -403,7 +403,7 @@ void EnzoMethodM1Closure::inject_photons ( EnzoBlock * enzo_block, int igroup ) 
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
   double munit = enzo_units->mass();
-  double Nunit = 1.0 / enzo_units->volume();
+  double Nunit = enzo_units->photon_number_density();
 
   double f_esc = 1.0;
 
@@ -876,7 +876,7 @@ void EnzoMethodM1Closure::get_photoionization_and_heating_rates (EnzoBlock * enz
 
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
-  double Nunit = 1.0 / enzo_units->volume();
+  double Nunit = enzo_units->photon_number_density();
 
   Field field = enzo_block->data()->field();
   Scalar<double> scalar = enzo_block->data()->scalar_double(); 
@@ -1050,7 +1050,7 @@ void EnzoMethodM1Closure::C_add_recombination (EnzoBlock * enzo_block, double * 
 
   EnzoUnits * enzo_units = enzo::units();
   double rhounit = enzo_units->density();
-  double Cunit = enzo_units->time() / enzo_units->volume();  
+  double Cunit = enzo_units->photon_number_density() / enzo_units->time(); 
 
   enzo_float * e_density = (enzo_float *) field.values("e_density");
 
@@ -1176,7 +1176,7 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
 
   double lunit = enzo_units->length();
   double tunit = enzo_units->time();
-  double Nunit = 1.0 / enzo_units->volume();
+  double Nunit = enzo_units->photon_number_density();
 
   double dt = enzo_block->dt;
   double hx = (xp-xm)/(mx-2*gx);
