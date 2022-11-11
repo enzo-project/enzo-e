@@ -49,7 +49,7 @@ Enzo-E's multigroup M1 Closure radiative transfer solver.
 :Default: :d:`0.5`
 :Scope:     :c:`Enzo`
 
-:e:`The radiation timestep is calculated as dt = courant * dx/(3*clight_frac*C). `
+:e:`The radiation timestep is calculated as dt = courant * dx/(3*clight_frac*C).`
    
 ----
 
