@@ -165,6 +165,9 @@ setup_test_serial(PPM-1 MethodPPM/Ppm-1  input/PPM/method_ppm-1.in)
 setup_test_parallel(PPM-8 MethodPPM/Ppm-8  input/PPM/method_ppm-8.in)
 setup_test_serial(PPM-1_color MethodPPM/Ppm-1_color  input/PPM/method_ppm-1_color.in)
 
+# M1 Closure RT
+setup_test_parallel(M1Closure RadiativeTransfer/M1Closure input/RadiativeTransfer/method_m1_closure.in)
+
 if (USE_YT_BASED_TESTS)
   # VLCT
   setup_test_serial_python(vlct_dual_energy_cloud vlct "input/vlct/run_dual_energy_cloud_test.py")

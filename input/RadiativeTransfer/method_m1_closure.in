@@ -63,7 +63,7 @@
  }
 
  Output {
-     list = [ "N", "Fx", "Fy", "Fz", "hdf5" ];
+     list = [ "N", "Fx", "Fy", "Fz" ];
      Fx {
          dir = [ "method_M1-%06d", "cycle" ];
          field_list = [ "flux_x" ];
@@ -143,7 +143,7 @@
  }
 
  Stopping {
-     cycle = 200;
+     cycle = 100;
  }
 
  Units {
