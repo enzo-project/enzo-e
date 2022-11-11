@@ -11,7 +11,7 @@
 //
 //                        These things can't be stored as attributes of EnzoMethodM1Closure
 //                        because attributes of the derived class get sliced away after
-//                        the refresh steps.      
+//                        refresh.      
 
 #ifndef ENZO_ENZO_INITIAL_M1_CLOSURE_HPP
 #define ENZO_ENZO_INITIAL_M1_CLOSURE_HPP
