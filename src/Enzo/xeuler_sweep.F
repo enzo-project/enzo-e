@@ -8,7 +8,7 @@ c
       subroutine xeuler_sweep (k, d, e, u, v, w, ge, in, jn, kn,
      &     gravity, gr_acc, idual, eta1, eta2,
      &     is, ie, js, je, ks, ke, 
-     &     gamma, pmin, dt, dx, dy, dz,
+     &     gamma, pmin, dmin, dt, dx, dy, dz,
      &     idiff, iflatten, isteepen,
      &     iconsrec, iposrec,
      &     ipresfree,
@@ -63,6 +63,7 @@ c    is,js,ks - field active zone start index
 c    isteepen - steepening flag (0 = off)
 c    k        - current slice position in direction 3
 c    pmin   - minimum pressure
+c    dmin   - minimum density
 c    u      - x-velocity field
 c    v      - y-velocity field
 c    w      - z-velocity field
@@ -132,15 +133,12 @@ c-----------------------------------------------------------------------
 c
 c  argument declarations
 c
-      ENZO_REAL SmallRho
-      parameter (SmallRho = 1e-30)
-      
       integer gravity, idiff, idual, iflatten, isteepen, ipresfree,
      &        in, jn, kn, is, ie, js, je, ks, ke, k, nsubgrids,
      &     ncolor, coloff(ncolor)
       integer  iconsrec, iposrec
 
-      ENZO_REAL dt, eta1, eta2, gamma, pmin
+      ENZO_REAL dt, eta1, eta2, gamma, pmin, dmin
       ENZO_REAL d(in,jn,kn), e(in,jn,kn), u(in,jn,kn), v(in,jn,kn), 
      &        w(in,jn,kn),ge(in,jn,kn), gr_acc(in,jn,kn),
      &        dx(in),dy(jn),dz(kn)
@@ -327,7 +325,7 @@ c
      &     in, jn, is, ie, j1, j2, dt, 
      &     gamma, idiff, gravity, idual, eta1, eta2,
      &     df, ef, uf, vf, wf, gef, ges,
-     &     ncolor, colslice, colf, SmallRho,ierror)
+     &     ncolor, colslice, colf, dmin, ierror)
 c     
 c  If necessary, recompute the pressure to correctly set ge and e
 c

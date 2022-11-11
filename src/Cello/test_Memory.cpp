@@ -97,18 +97,22 @@ PARALLEL_MAIN_BEGIN
   timer.start();
   const int num_alloc = 10000;
   const int size_alloc = 1000;
+  double inhibit__optimize=0.0;
   for (int j=0; j<num_alloc; j++) {
     memory->set_active(true);
     f1 = new double[size_alloc];
+    f1[size_alloc-1] = 1.0;
     memory->set_active(false);
     new_count++;
     memory->set_active(true);
+    inhibit__optimize += f1[size_alloc-1];
     delete [] f1;
     memory->set_active(false);
     del_count++;
   }
   timer.stop();
   PARALLEL_PRINTF ("new/delete  per sec = %g\n",num_alloc/timer.value());
+  CkPrintf ("inhibit__optimize %g\n",inhibit__optimize);
 
   timer.clear();
 
@@ -191,11 +195,15 @@ PARALLEL_MAIN_BEGIN
 
   memory->set_active(true);
   char * temp_0 = new char [10000];
+  temp_0[0] = 'a';
+  temp_0[10000-1] = 'z';
+  
   memory->set_active(false);
 
   new_count++;
   unit_assert (fabs(memory->efficiency() - 0.01) < 1e-7);
   memory->set_active(true);
+  CkPrintf ("inhibit__optimize %c %c\n",temp_0[0],temp_0[10000-1]);
   delete [] temp_0;
   memory->set_active(false);
   del_count++;
@@ -208,6 +216,10 @@ PARALLEL_MAIN_BEGIN
   unit_assert (fabs(memory->efficiency("Test_1") - 0.1) < 1e-7);
 
   memory->set_active(true);
+  temp_1[0] = 'a';
+  temp_1[1000-1] = 'z';
+  CkPrintf ("inhibit__optimize %c %c\n",temp_1[0],temp_1[1000-1]);
+
   delete [] temp_1;
   memory->set_active(false);
   del_count++;
@@ -221,10 +233,11 @@ PARALLEL_MAIN_BEGIN
   // num_new()
   unit_func ("num_new()");
   unit_assert(memory->num_new() == new_count);
-
+  CkPrintf ("inhibit optimize %d %d\n",memory->num_new(), new_count);
   // num_delete()
   unit_func ("num_delete()");
   unit_assert(memory->num_delete() == del_count);
+  CkPrintf ("inhibit optimize %d %d\n",memory->num_delete(), del_count);
 
   memory->print();
 #else /* CONFIG_USE_MEMORY */
