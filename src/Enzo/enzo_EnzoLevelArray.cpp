@@ -20,9 +20,14 @@ EnzoLevelArray::EnzoLevelArray
     nax_(nax),
     nay_(nay),
     naz_(naz),
+    nix_(),
+    niy_(),
+    niz_(),
     field_group_(field_group),
+    num_fields_(cello::field_groups()->size(field_group_)),
     field_values_(),
-    volume_ratio_(0.0)
+    volume_ratio_(0.0),
+    spheres_()
 {
   CkPrintf ("TRACE EnzoLevelArray() %d %d %d  %d %d %d\n",
             thisIndex[0],thisIndex[1],thisIndex[2],nax,nay,naz);
@@ -47,12 +52,12 @@ EnzoLevelArray::EnzoLevelArray
     cello::config()->mesh_root_size[2] };
   int nb3[3]= { md3[0]/nd3[0], md3[1]/nd3[1], md3[2]/nd3[2]};
 
-  const int na3[3] = {r*nb3[0],r*nb3[1],r*nb3[2] };
-  CkPrintf ("DEBUG_INFER infer_array size %d %d %d\n",na3[0],na3[1],na3[2]);
-  const int ng = cello::field_groups()->size(field_group);
-  field_values_.resize(ng);
-  for (int i=0; i<ng; i++) {
-    field_values_[i].resize(na3[0]*na3[1]*na3[2]);
+  nix_ = r*nb3[0];
+  niy_ = r*nb3[1];
+  niz_ = r*nb3[2];
+  field_values_.resize(num_fields_);
+  for (int i=0; i<num_fields_; i++) {
+    field_values_[i].resize(nix_*niy_*niz_);
   }
   proxy_enzo_simulation[0].p_infer_array_created();
 }

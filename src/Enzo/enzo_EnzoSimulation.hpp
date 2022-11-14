@@ -65,10 +65,14 @@ public: // functions
 
   void set_sync_check_writer(int count)
   { sync_check_writer_created_.set_stop(count); }
+
   void set_sync_infer_count(int count)
   { sync_infer_count_.set_stop(count); }
   void set_sync_infer_create(int count)
   { sync_infer_create_.set_stop(count); }
+  void set_sync_infer_done(int count)
+  { sync_infer_done_.set_stop(count); }
+
   void p_io_reader_created();
 
   /// EnzoMethodInference
@@ -76,6 +80,8 @@ public: // functions
   void p_infer_set_array_count(int count);
   /// Decrement inference array counter
   void p_infer_array_created();
+  /// Synchronize after inference has been applied
+  void p_infer_done();
 
   /// Read in and initialize the next refinement level from a checkpoint;
   /// or exit if done
@@ -107,6 +113,8 @@ private: // attributes
   Sync                     sync_infer_count_;
   /// Count inference arrays created
   Sync                     sync_infer_create_;
+  /// Count inference arrays that are done with inference
+  Sync                     sync_infer_done_;
   /// Total number of inference arrays to create
   int                      infer_count_arrays_;
   int                      check_num_files_;

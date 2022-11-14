@@ -1929,7 +1929,7 @@ void EnzoConfig::read_method_inference_(Parameters* p)
     const int nad = p->list_length("array_dims");
     ASSERT2("EnzoConfig::read_method_inference_()",
             "%s length must be 1 <= n <= %d",
-            p->full_name("array_dims"),rank,
+            p->full_name("array_dims").c_str(),rank,
             1 <= nad && nad <= rank);
     for (int i=0; i<rank; i++) {
       method_inference_array_dims[i] = p->list_value_integer
@@ -1941,7 +1941,7 @@ void EnzoConfig::read_method_inference_(Parameters* p)
     const int nas = p->list_length("array_size");
     ASSERT2("EnzoConfig::read_method_inference_()",
             "%s length must be 1 <= n <= %d",
-            p->full_name("array_size"),rank,
+            p->full_name("array_size").c_str(),rank,
             1 <= nas && nas <= rank);
     for (int i=0; i<rank; i++) {
       method_inference_array_size[i] = p->list_value_integer

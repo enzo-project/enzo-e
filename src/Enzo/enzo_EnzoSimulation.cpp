@@ -87,6 +87,7 @@ void EnzoSimulation::pup (PUP::er &p)
   p | sync_check_done_;
   p | sync_infer_count_;
   p | sync_infer_create_;
+  p | sync_infer_done_;
   p | infer_count_arrays_;
   p | check_num_files_;
   p | check_ordering_;

@@ -33,17 +33,32 @@ public: // interface
     p | nax_;
     p | nay_;
     p | naz_;
+    p | nix_;
+    p | niy_;
+    p | niz_;
     p | field_group_;
+    p | num_fields_;
     p | field_values_;
     p | volume_ratio_;
+    p | spheres_;
   }
 
+  virtual ~EnzoLevelArray()
+  {
+    CkPrintf ("~EnzoLevelArray() %d %d %d\n",
+              thisIndex[0],thisIndex[1],thisIndex[2]);
+    fflush(stdout);
+  }
+  
   /// Send data request to containing EnzoBlock in level_base
   void p_request_data ();
 
   /// Accept requested data from blocks
   void p_transfer_data (Index, int nf, enzo_float * field_data_list );
 
+  /// Apply the inference method on the arrays, synchronizing
+  /// with EnzoSimulation[0] afterwards
+  void apply_inference();
 
 protected: // functions
 
@@ -53,12 +68,14 @@ protected: // functions
   (Block * block, int im3[3], int ip3[3], int array_size[3]) const;
 
   void coarsen_
-  (enzo_float * ac, int mcx, int mcy, int mcz,
-   enzo_float * af, int mfx, int mfy, int mfz);
+  (enzo_float * ac, int mcx, int mcy, int mcz, int ncx, int ncy, int ncz,
+   const enzo_float * af, int mfx, int mfy, int mfz, int nfx, int nfy, int nfz);
 
   void interpolate_
-  (enzo_float * ac, int mcx, int mcy, int mcz,
-   enzo_float * af, int mfx, int mfy, int mfz);
+  (enzo_float * af,
+   int mfx, int mfy, int mfz, int nfx, int nfy, int nfz, int efx, int efy, int efz,
+   const enzo_float * ac,
+   int mcx, int mcy, int mcz, int ncx, int ncy, int ncz, int ecx, int ecy, int ecz);
 
 private: // attributes
 
@@ -77,14 +94,23 @@ private: // attributes
   /// Dimensions of this array
   int nax_, nay_, naz_;
 
+  /// Dimensions of the inference arrays
+  int nix_, niy_, niz_;
+
   /// Field group defining fields stored in level arrays
   std::string field_group_;
+
+  /// Number of fields in the field_group_
+  int num_fields_;
 
   /// Arrays of fields
   std::vector< std::vector < enzo_float > > field_values_;
 
-  /// Variable for keeping track of volomue of incoming data
+  /// Variable for keeping track of volume of incoming data
   float volume_ratio_;
+
+  /// List of spheres
+  std::vector<ObjectSphere> spheres_;
 };
 
 #endif /* ENZO_IO_ENZO_LEVEL_ARRAY_HPP */

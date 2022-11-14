@@ -178,6 +178,7 @@ module enzo {
     // EnzoMethodInfer
     entry void p_infer_set_array_count(int count);
     entry void p_infer_array_created();
+    entry void p_infer_done();
 
     // enzo_control_restart
     entry void p_set_io_reader(CProxy_IoEnzoReader proxy);

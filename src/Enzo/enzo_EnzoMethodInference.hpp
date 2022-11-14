@@ -38,6 +38,7 @@ public: // interface
       m3_level_(),
       m3_infer_(),
       field_group_(),
+      num_fields_(0),
       is_sync_child_(-1),
       is_sync_parent_(-1),
       is_mask_(-1),
@@ -57,6 +58,7 @@ public: // interface
       m3_level_(),
       m3_infer_(),
       field_group_(),
+      num_fields_(0),
       is_sync_child_(-1),
       is_sync_parent_(-1),
       is_mask_(-1),
@@ -102,7 +104,15 @@ protected: // methods
   /// the mask array length
   std::tuple<int,int,int> mask_dims_(int level) const;
 
-  /// Create the level arrays according to the Block's level array mask,
+  /// Compute offsets ox,oy,oz and sizes nx,ny,nz into field
+  /// data, taking into account one ghost zone layer, field
+  /// ghost zone depth, restriction count, block size relative
+  /// to inference array, etc.
+  std::tuple<int,int,int, int,int,int>
+  get_block_portion_
+  (Index index, int index_field, int ia3[3]);
+
+/// Create the level arrays according to the Block's level array mask,
   /// and return the number of level arrays created
   void create_level_arrays_ (Block * block);
 
@@ -181,6 +191,9 @@ protected: // attributes
   /// Field group defining which fields to include in the inference
   /// array
   std::string field_group_;
+
+  /// Number of fields in the field group
+  int num_fields_;
 
   /// Block counter index for child synchronization
   int is_sync_child_;

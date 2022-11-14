@@ -6,6 +6,17 @@ Inference Array Design
 
 .. toctree::
 
+
+.. image:: lowres.png
+           :width: 346
+           :alt: Image showing the (y-axis) acceleration field in a small relatively low-resolution cosmology application.
+
+.. image:: array.png
+           :width: 346
+
+.. image:: infer.png
+           :width: 346
+
 ============
 Requirements
 ============
