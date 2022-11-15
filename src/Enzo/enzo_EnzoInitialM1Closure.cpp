@@ -47,8 +47,8 @@ void EnzoInitialM1Closure::enforce_block
    const EnzoConfig * enzo_config = enzo::config();
          EnzoUnits * enzo_units = enzo::units();
 
-   double inverse_Nunit = enzo_units->volume();
-   double inverse_Funit = inverse_Nunit / enzo_units->velocity();
+   double inverse_Nunit = 1.0 / enzo_units->photon_number_density();
+   double inverse_Funit = inverse_Nunit * enzo_units->time()/enzo_units->length();
    double Nmin = enzo_config->method_m1_closure_min_photon_density;
 
    for (int i=0; i<enzo_config->method_m1_closure_N_groups; i++) {
