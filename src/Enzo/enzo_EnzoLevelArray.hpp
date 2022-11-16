@@ -25,31 +25,11 @@ public: // interface
   EnzoLevelArray(CkMigrateMessage *m) : CBase_EnzoLevelArray(m) {}
 
   /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p) 
-  { TRACEPUP;
-    p | level_base_;
-    p | level_array_;
-    p | level_infer_;
-    p | nax_;
-    p | nay_;
-    p | naz_;
-    p | nix_;
-    p | niy_;
-    p | niz_;
-    p | field_group_;
-    p | num_fields_;
-    p | field_values_;
-    p | volume_ratio_;
-    p | spheres_;
-  }
+  /// See PUPbytes below
 
-  virtual ~EnzoLevelArray()
-  {
-    CkPrintf ("~EnzoLevelArray() %d %d %d\n",
-              thisIndex[0],thisIndex[1],thisIndex[2]);
-    fflush(stdout);
-  }
-  
+  /// Destructor
+  virtual ~EnzoLevelArray();
+
   /// Send data request to containing EnzoBlock in level_base
   void p_request_data ();
 
@@ -68,10 +48,18 @@ protected: // functions
   (Block * block, int im3[3], int ip3[3], int array_size[3]) const;
 
   void coarsen_
-  (enzo_float * ac, int mcx, int mcy, int mcz, int ncx, int ncy, int ncz,
-   const enzo_float * af, int mfx, int mfy, int mfz, int nfx, int nfy, int nfz);
+  (enzo_float * ac,
+   int mcx, int mcy, int mcz, int ncx, int ncy, int ncz, int ecx, int ecy, int ecz,
+   const enzo_float * af,
+   int mfx, int mfy, int mfz, int nfx, int nfy, int nfz, int efx, int efy, int efz);
 
   void interpolate_
+  (enzo_float * af,
+   int mfx, int mfy, int mfz, int nfx, int nfy, int nfz, int efx, int efy, int efz,
+   const enzo_float * ac,
+   int mcx, int mcy, int mcz, int ncx, int ncy, int ncz, int ecx, int ecy, int ecz);
+
+  void copy_
   (enzo_float * af,
    int mfx, int mfy, int mfz, int nfx, int nfy, int nfz, int efx, int efy, int efz,
    const enzo_float * ac,
@@ -112,6 +100,6 @@ private: // attributes
   /// List of spheres
   std::vector<ObjectSphere> spheres_;
 };
-
+PUPbytes(EnzoLevelArray);
 #endif /* ENZO_IO_ENZO_LEVEL_ARRAY_HPP */
 

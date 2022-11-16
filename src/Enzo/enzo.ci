@@ -67,9 +67,9 @@ module enzo {
   PUPable IoEnzoBlock;
 
   // EnzoRefine
-  PUPable EnzoRefineShock;
-  PUPable EnzoRefineParticleMass;
   PUPable EnzoRefineMass;
+  PUPable EnzoRefineParticleMass;
+  PUPable EnzoRefineShock;
 
   // EnzoCompute
 #ifdef CONFIG_USE_GRACKLE

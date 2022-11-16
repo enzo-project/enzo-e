@@ -75,8 +75,8 @@ public:
   { state_ = state; }
 
   inline void print(std::string message) const {
-    CkPrintf ("DEBUG_SYNC %s %d/%d done %d\n",
-              message.c_str(),index_curr_,index_stop_,is_done_?1:0);
+    CkPrintf ("DEBUG_SYNC %p %s %d/%d done %d\n",
+              (void *)this,message.c_str(),index_curr_,index_stop_,is_done_?1:0);
   }
 
 private: // methods

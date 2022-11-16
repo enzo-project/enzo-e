@@ -42,6 +42,7 @@ public: // interface
       is_sync_child_(-1),
       is_sync_parent_(-1),
       is_mask_(-1),
+      is_count_(-1),
       index_criteria_(-1),
       num_criteria_(0)
   { }
@@ -62,6 +63,7 @@ public: // interface
       is_sync_child_(-1),
       is_sync_parent_(-1),
       is_mask_(-1),
+      is_count_(-1),
       index_criteria_(-1),
       num_criteria_(0)
   { }
@@ -99,10 +101,15 @@ protected: // methods
 
   /// Allocate the inference array mask for the given block if not already
   /// allocated, and return the mask array length
-  int mask_allocate_(Block * block);
+  int mask_allocate_(Block * block, int mx, int my, int mz);
   /// Get the mask size for blocks in the given level, and return
   /// the mask array length
   std::tuple<int,int,int> mask_dims_(int level) const;
+
+  /// Compute local overdensity, tagging mask array accordingly
+  void compute_overdensity_
+  (Block * block, char * mask, int mx, int my, int mz,
+   float threshold);
 
   /// Compute offsets ox,oy,oz and sizes nx,ny,nz into field
   /// data, taking into account one ghost zone layer, field
@@ -147,6 +154,10 @@ protected: // methods
   { return (char **)block->data()->scalar_void().value(is_mask_); }
   const char ** scalar_mask_(Block * block) const
   { return (const char **)block->data()->scalar_void().value(is_mask_); }
+
+  /// Return count of overlapping inference arrays in a block
+  int & scalar_count_(Block * block)
+  { return *block->data()->scalar_int().value(is_count_); }
 
   /// Print the char scalar array mask
   void print_mask_(Block * block) const
@@ -204,10 +215,16 @@ protected: // attributes
   /// Block Scalar mask index for creating inference arrays
   int is_mask_;
 
+  /// Block Scalar count of overlapping inference arrays
+  int is_count_;
+
   /// Index for the first criterion (implemented as refinement criterion RefineFoo)
   int index_criteria_;
   /// Number of refinement criteria
   int num_criteria_;
+
+  /// Local density threshold for creating inference array
+  enzo_float density_threshold_;
 };
 
 #endif /* ENZO_ENZO_METHOD_INFERENCE_HPP */

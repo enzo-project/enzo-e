@@ -14,7 +14,8 @@ EnzoLevelArray::EnzoLevelArray
 (std::string field_group,
  int level_base, int level_array, int level_infer,
  int nax, int nay, int naz)
-  : level_base_(level_base),
+  : CBase_EnzoLevelArray(),
+    level_base_(level_base),
     level_array_(level_array),
     level_infer_(level_infer),
     nax_(nax),
@@ -61,3 +62,9 @@ EnzoLevelArray::EnzoLevelArray
   }
   proxy_enzo_simulation[0].p_infer_array_created();
 }
+
+//----------------------------------------------------------------------
+
+EnzoLevelArray::~EnzoLevelArray()
+{ }
+

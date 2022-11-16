@@ -19,8 +19,6 @@ public:
   inline int & operator [] (std::size_t i)
   { return v_[i]; }
 
-  void clear () ;
-
   /// Set the Index3 according to raw bit values
   inline void set_values (int ix, int iy, int iz)
   {
@@ -37,15 +35,13 @@ public:
   }
   /// Comparison operator required for Charm++ pup()
   friend bool operator < (const Index3 & x, const Index3 & y) {
-    Index3 a = x;
-    Index3 b = y;
-    a.clean_();
-    b.clean_();
-    if (a.v_[2] < b.v_[2]) return true;
-    if (a.v_[2] > b.v_[2]) return false;
-    if (a.v_[1] < b.v_[1]) return true;
-    if (a.v_[1] > b.v_[1]) return false;
-    return  (a.v_[0] < b.v_[0]);
+    if (x.v_[2] < y.v_[2]) return true;
+    if (x.v_[2] > y.v_[2]) return false;
+    // else x.v_[2] == y.v_[2]
+    if (x.v_[1] < y.v_[1]) return true;
+    if (x.v_[1] > y.v_[1]) return false;
+    // else x.v_[1] == y.v_[1]
+    return  (x.v_[0] < y.v_[0]);
   }
 
   ///--------------------
@@ -63,11 +59,6 @@ public:
 
 private: // methods
 
-  /// Clear tree bits that are associated with levels higher than
-  /// the actual level
-  void clean_ ();
-
-
 private: // attributes
 
    int v_[3];
@@ -75,16 +66,7 @@ private: // attributes
 
 #ifndef TEST
   PUPbytes(Index3)
-#endif
 
-#ifndef TEST
-// public:
-//   void pup(PUP::er &p) {
-//   }
-#endif
-
-//----------------------------------------------------------------------
-#ifndef TEST
   class CkArrayIndexIndex3 : public CkArrayIndex {
     Index3 * index_;
   public:
