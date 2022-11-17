@@ -312,7 +312,7 @@ def find_common_fields(ds1, ds2, verbose, fields = None):
     else:
         has_field = lambda field: field[1] in ds2
     for field in coerced_fields:
-        if has_field:
+        if has_field(field):
             shared_fields.append(field)
         else:
             missing_fields.append(field)
