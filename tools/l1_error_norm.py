@@ -233,20 +233,56 @@ def norm_L1_error(ds, ds2, comparison_fields, Nx=None, Ny=None, Nz=None,
                                  sum_axis)
     return np.sqrt(np.sum(np.square(err_vector),axis=0))
 
+def _coerced_field_search(ds, fields):
+    """
+    Returns the 2-tuple forms of fields that are in ds and the names of fields
+    (in whatever format they were specified) that can't be found
+    """
+    assert isinstance(ds, yt.data_objects.static_output.Dataset)
+
+    # come up with the order of field-types that we consider when attempting to
+    # coerce a string to a 2-tuple. We prefer the frontend field-type so we
+    # minimize unit conversions (in reality, it probably doesn't matter much)
+    if 'enzoe' in ds.fluid_types:
+        ftypes = ('enzoe', 'index', 'gas')
+    elif 'enzop' in ds.fluid_types: # for older yt versions (drop in future)
+        ftypes = ('enzop', 'index', 'gas')
+    else:
+        raise RuntimeError("unrecognized frontend")
+
+    found_fields, missing_fields = [], []
+    for field in fields:
+        if not isinstance(field, tuple): # need to coerce string to 2-tuple
+            for ftype in ftypes:
+                if (ftype, field) in ds.derived_field_list:
+                    found_fields.append((ftype, field))
+                    break
+            else: # only executed if we didn't break out of prior for-loop
+                missing_fields.append(field)
+        else:
+            assert len(field) == 2
+            if field in derived_field_list:
+                found_fields.append(field)
+            else:
+                missing_fields.append(field)
+    return found_fields, missing_fields
+
 _DEFAULT_COMMON_FIELDS \
     = ["density", "total_energy", "velocity_x", "velocity_y", "velocity_z",
        "bfield_x", "bfield_y", "bfield_z"]
 
 def find_common_fields(ds1, ds2, verbose, fields = None):
     """
-    Returns a list of fields common to ds1 and ds2
+    Returns a list of fields common to ds1 and ds2. This coerces single-string
+    field names into 2-tuples (that are suitable for yt-datasets).
 
     Parameters
     ----------
     ds1, ds2 : `yt.data_objects.static_output.Dataset` or `dict` of `ndarray`
         These represent the different datasets. Field names are obtained for 
         the former type by accessing the `derived_field_list` attribute. For
-        the latter type, they are obtained by calling the `keys` method.
+        the latter type, they are obtained by calling the `keys` method. At
+        least one of these should be yt dataset.
     verbose : `bool`
         If True, prints the list of common fields
     fields : `list` of strings or `None` (optional)
@@ -255,34 +291,40 @@ def find_common_fields(ds1, ds2, verbose, fields = None):
         this selectively returns the subset of common fields from the 
         `_DEFAULT_COMMON_FIELDS`.
     """
-    if isinstance(ds1,yt.data_objects.static_output.Dataset):
-        field_list1 = [elem[1] for elem in ds1.derived_field_list]
-    else:
-        field_list1 = ds1.keys()
 
-    if isinstance(ds2,yt.data_objects.static_output.Dataset):
-        field_list2 = [elem[1] for elem in ds2.derived_field_list]
-    else:
-        field_list2 = ds2.keys()
+    if not isinstance(ds1, yt.data_objects.static_output.Dataset):
+        if isinstance(ds2, yt.data_objects.static_output.Dataset):
+            return find_common_fields(ds2, ds1, verbose, fields)
+        else:
+            raise ValueError("either ds1 or ds2 must be a yt-dataset")
 
+    user_specified_fields = fields is not None
     if fields is None:
-        intersect = []
-        for elem in _DEFAULT_COMMON_FIELDS:
-            if elem in field_list1 and elem in field_list2:
-                intersect.append(elem)
-        #if len(intersect) == 0:
-        #    intersect = [elem for elem in field_list1 if elem in field_list2]
-    else:
-        # check that both datasets have all of the user-specified fields
-        for field in fields:
-            if (field not in field_list1) or (field not in field_list2):
-                raise ValueError("Both datasets do not have the field "
-                                 +"\"{:s}\".".format(field))
-        intersect = fields
+        fields = _DEFAULT_COMMON_FIELDS
 
-    if verbose:
-        print("field_list: {:}".format(str(intersect)))
-    return intersect
+    # at this point, ds1 is always always a yt-dataset. Coerce the fields
+    coerced_fields, missing_fields = _coerced_field_search(ds1, fields)
+
+    # determine which of the coerced fields are also in ds2
+    shared_fields = []
+    if isinstance(ds2, yt.data_objects.static_output.Dataset):
+        has_field = lambda field: field in ds2.derived_field_list
+    else:
+        has_field = lambda field: field[1] in ds2
+    for field in coerced_fields:
+        if has_field:
+            shared_fields.append(field)
+        else:
+            missing_fields.append(field)
+
+    # now check if missing fields are problematic
+    # note: missing fields might include strings and 2-tuples
+    if user_specified_fields and (len(missing_fields) > 0):
+        raise ValueError("At least 1 dataset doesn't have the "
+                         f"{missing_field[0]!r} field")
+    elif verbose:
+        print("field_list: {:}".format(str(shared_fields)))
+    return shared_fields
 
 
 # Functions used to compute the L1Error Norm between a simulation and 1D
