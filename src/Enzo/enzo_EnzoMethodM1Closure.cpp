@@ -259,7 +259,7 @@ double EnzoMethodM1Closure::get_star_temperature(double M) throw()
   if (M/enzo_constants::mass_solar < 1) R = pow(M/enzo_constants::mass_solar, 0.8);
   else R = pow(M/enzo_constants::mass_solar, 0.57);
   
-  L *= 3.839e33; // solar luminosity in erg/s
+  L *= enzo_constants::luminosity_solar; // solar luminosity in erg/s
   R *= 6.957e10; // solar radius in cm
 
   return pow( L/(4*cello::pi*R*R*5.670e-7), 0.25);
@@ -275,10 +275,11 @@ double EnzoMethodM1Closure::get_radiation_custom(EnzoBlock * enzo_block,
 
   Scalar<double> scalar = enzo_block->data()->scalar_double();
 
-  // if Nphotons_per_sec parameter is set, give all particles the same luminosity,
+  // if either particle_luminosity parameter is set, give all particles the same luminosity,
   // otherwise just use whatever value was passed into this function ('luminosity' attribute)
-  if (enzo_config->method_m1_closure_Nphotons_per_sec > 0.0) {
-    plum = enzo_config->method_m1_closure_Nphotons_per_sec;
+
+  if (enzo_config->method_m1_closure_particle_luminosity >= 0.0) {
+    plum = enzo_config->method_m1_closure_particle_luminosity;
   }
 
   // only add fraction of radiation into this group according to SED                                           
@@ -455,9 +456,9 @@ void EnzoMethodM1Closure::inject_photons ( EnzoBlock * enzo_block, int igroup ) 
   const int nb = particle.num_batches(it);
 
   // bin energies in eV
-  double E_lower = (enzo_config->method_m1_closure_bin_lower)[igroup];
-  double E_upper = (enzo_config->method_m1_closure_bin_upper)[igroup];
-  double E_mean = 0.5*(E_upper + E_lower); 
+  double E_lower = (enzo_config->method_m1_closure_energy_lower)[igroup];
+  double E_upper = (enzo_config->method_m1_closure_energy_upper)[igroup];
+  double E_mean = (enzo_config->method_m1_closure_energy_mean)[igroup];
 
   // convert energies to frequency in Hz
   double freq_lower = E_lower * enzo_constants::erg_eV / enzo_constants::hplanck;
@@ -1154,8 +1155,8 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
   const int idz = mx*my; 
 
   // energy bounds for this group (leave in eV)
-  double E_lower = enzo_config->method_m1_closure_bin_lower[igroup]; 
-  double E_upper = enzo_config->method_m1_closure_bin_upper[igroup]; 
+  double E_lower = enzo_config->method_m1_closure_energy_lower[igroup]; 
+  double E_upper = enzo_config->method_m1_closure_energy_upper[igroup]; 
   
   std::string istring = std::to_string(igroup);
   enzo_float * N  = (enzo_float *) field.values("photon_density_" + istring);
@@ -1355,9 +1356,9 @@ void EnzoMethodM1Closure::call_inject_photons(EnzoBlock * enzo_block) throw()
     }
 
     for (int i=0; i<N_groups; i++) {
-      double E_lower = (enzo_config->method_m1_closure_bin_lower)[i];
-      double E_upper = (enzo_config->method_m1_closure_bin_upper)[i];
-      double energy = 0.5 * (E_lower + E_upper); // eV
+      double E_lower = (enzo_config->method_m1_closure_energy_lower)[i];
+      double E_upper = (enzo_config->method_m1_closure_energy_upper)[i];
+      double energy = (enzo_config->method_m1_closure_energy_mean)[i]; // eV
       *(scalar.value( scalar.index( eps_string(i) ))) = energy*enzo_constants::erg_eV; // erg
       
       if (enzo_config->method_m1_closure_cross_section_calculator == "vernier") {
@@ -1562,6 +1563,20 @@ void EnzoMethodM1Closure::compute_ (Block * block) throw()
                                                enzo_config->physics_cosmology);
 
     compute_temperature.compute(enzo_block);
+
+
+  // make isothermal
+/*
+  const enzo_float gamma = enzo::fluid_props()->gamma();
+  const enzo_float mol_weight = enzo::fluid_props()->mol_weight();
+enzo_float * ge = (enzo_float *) field.values("internal_energy");
+enzo_float * te = (enzo_float *) field.values("total_energy");
+    for (int i=0; i<m; i++) {
+          ge[i] = (enzo_config->initial_feedback_test_temperature / mol_weight /
+                  enzo::units()->kelvin_per_energy_units() / (gamma - 1.0)); 
+          te[i]=ge[i];    
+    }
+*/
   }
 
   Scalar<double> scalar = block->data()->scalar_double();

@@ -401,7 +401,7 @@ public: // interface
       method_m1_closure_clight_frac(1.0), // fraction of speed of light value to use
       method_m1_closure_radiation_spectrum("blackbody"), // Type of radiation spectrum to use for star particles 
       method_m1_closure_temperature_blackbody(-1.0), // requires radiation_spectrum="blackbody"
-      method_m1_closure_Nphotons_per_sec(0.0), // specify emission rate from sources
+      method_m1_closure_particle_luminosity(-1.0), // specify emission rate from sources
       method_m1_closure_SED(), // supply list of emission rates for all groups (radiation_spectrum="custom")
       method_m1_closure_min_photon_density(1e-16),
       method_m1_closure_attenuation(true),
@@ -411,8 +411,9 @@ public: // interface
       method_m1_closure_sigmaN(), // user-defined cross sections (requires cross_section_calculator = "custom")
       method_m1_closure_sigmaE(), 
       method_m1_closure_courant(0.5),
-      method_m1_closure_bin_lower(),
-      method_m1_closure_bin_upper(),
+      method_m1_closure_energy_lower(),
+      method_m1_closure_energy_upper(),
+      method_m1_closure_energy_mean(), // mean energy for bin
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
@@ -918,7 +919,7 @@ public: // attributes
   double                    method_m1_closure_clight_frac;
   std::string               method_m1_closure_radiation_spectrum;
   double                    method_m1_closure_temperature_blackbody; 
-  double                    method_m1_closure_Nphotons_per_sec;
+  double                    method_m1_closure_particle_luminosity;
   std::vector<double>       method_m1_closure_SED;
   double                    method_m1_closure_courant;
   double                    method_m1_closure_min_photon_density;
@@ -928,8 +929,9 @@ public: // attributes
   std::string               method_m1_closure_cross_section_calculator;
   std::vector<double>       method_m1_closure_sigmaN;
   std::vector<double>       method_m1_closure_sigmaE;
-  std::vector<double>       method_m1_closure_bin_lower;
-  std::vector<double>       method_m1_closure_bin_upper;
+  std::vector<double>       method_m1_closure_energy_lower;
+  std::vector<double>       method_m1_closure_energy_upper;
+  std::vector<double>       method_m1_closure_energy_mean;
 
   /// EnzoMethodTurbulence
   double                     method_turbulence_edot;

@@ -261,7 +261,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_m1_closure_clight_frac(1.0), // reduced speed of light value to use
   method_m1_closure_radiation_spectrum("blackbody"), // Type of radiation spectrum to use for star particles
   method_m1_closure_temperature_blackbody(0.0),
-  method_m1_closure_Nphotons_per_sec(0.0), // Set emission rate for star particles
+  method_m1_closure_particle_luminosity(-1.0), // Set emission rate for star particles
   method_m1_closure_SED(), // supply list of emission rate fraction for all groups
   method_m1_closure_courant(0.5),
   method_m1_closure_min_photon_density(1e-16),
@@ -271,8 +271,9 @@ EnzoConfig::EnzoConfig() throw ()
   method_m1_closure_cross_section_calculator("vernier_average"),
   method_m1_closure_sigmaN(),
   method_m1_closure_sigmaE(),
-  method_m1_closure_bin_lower(),
-  method_m1_closure_bin_upper(),
+  method_m1_closure_energy_lower(),
+  method_m1_closure_energy_upper(),
+  method_m1_closure_energy_mean(),
   // EnzoMethodStarMaker,
   method_star_maker_flavor(""),                              // star maker type to use
   method_star_maker_use_altAlpha(false),
@@ -700,7 +701,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_m1_closure_clight_frac;
   p | method_m1_closure_radiation_spectrum;
   p | method_m1_closure_temperature_blackbody;
-  p | method_m1_closure_Nphotons_per_sec;
+  p | method_m1_closure_particle_luminosity;
   p | method_m1_closure_SED;
   p | method_m1_closure_courant;
   p | method_m1_closure_min_photon_density;
@@ -710,8 +711,9 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_m1_closure_cross_section_calculator;
   p | method_m1_closure_sigmaN;
   p | method_m1_closure_sigmaE;
-  p | method_m1_closure_bin_lower;
-  p | method_m1_closure_bin_upper;
+  p | method_m1_closure_energy_lower;
+  p | method_m1_closure_energy_upper;
+  p | method_m1_closure_energy_mean;
 
   p | method_turbulence_edot;
 
@@ -1832,8 +1834,8 @@ void EnzoConfig::read_method_m1_closure_(Parameters * p)
   method_m1_closure_temperature_blackbody = p->value_float
     ("Method:m1_closure:temperature_blackbody",0.0);
 
-  method_m1_closure_Nphotons_per_sec = p->value_float
-    ("Method:m1_closure:Nphotons_per_sec",0.0);
+  method_m1_closure_particle_luminosity = p->value_float
+    ("Method:m1_closure:particle_luminosity",-1.0);
 
   method_m1_closure_min_photon_density = p->value_float
     ("Method:m1_closure:min_photon_density",1e-16);
@@ -1854,8 +1856,9 @@ void EnzoConfig::read_method_m1_closure_(Parameters * p)
     ("Method:m1_closure:cross_section_calculator","vernier_average");
 
   method_m1_closure_SED.resize(method_m1_closure_N_groups);
-  method_m1_closure_bin_lower.resize(method_m1_closure_N_groups);
-  method_m1_closure_bin_upper.resize(method_m1_closure_N_groups);
+  method_m1_closure_energy_lower.resize(method_m1_closure_N_groups);
+  method_m1_closure_energy_upper.resize(method_m1_closure_N_groups);
+  method_m1_closure_energy_mean.resize(method_m1_closure_N_groups);
   
   int N_species = 3; // number of ionizable species for RT (HI, HeI, HeII)
   method_m1_closure_sigmaN.resize(method_m1_closure_N_groups * N_species);
@@ -1866,13 +1869,17 @@ void EnzoConfig::read_method_m1_closure_(Parameters * p)
   for (int i=0; i<method_m1_closure_N_groups; i++) {
     // default SED (if this is being used) is flat spectrum
     method_m1_closure_SED[i] = p->list_value_float
-      (i,"Method:m1_closure:SED", method_m1_closure_Nphotons_per_sec/method_m1_closure_N_groups);
+      (i,"Method:m1_closure:SED", method_m1_closure_particle_luminosity/method_m1_closure_N_groups);
 
-    method_m1_closure_bin_lower[i] = p->list_value_float
-      (i,"Method:m1_closure:bin_lower", 1.0 + bin_width*i);
+    method_m1_closure_energy_lower[i] = p->list_value_float
+      (i,"Method:m1_closure:energy_lower", 1.0 + bin_width*i);
 
-    method_m1_closure_bin_upper[i] = p->list_value_float
-      (i,"Method:m1_closure:bin_upper", 1.0 + bin_width*(i+1));
+    method_m1_closure_energy_upper[i] = p->list_value_float
+      (i,"Method:m1_closure:energy_upper", 1.0 + bin_width*(i+1));
+
+    method_m1_closure_energy_mean[i] = p->list_value_float
+      (i,"Method:m1_closure:energy_mean", 
+         0.5*(method_m1_closure_energy_lower[i] + method_m1_closure_energy_upper[i]));
 
     for (int j=0; j<N_species; j++) {
       int sig_index = i*N_species + j;

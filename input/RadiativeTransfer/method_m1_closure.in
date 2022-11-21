@@ -49,8 +49,8 @@
          N_groups = 2;
          Nphotons_per_sec = 5.000000000000000e+48;
          SED = [ 0.6, 0.4 ];
-         bin_lower = [ 13.60000000000000, 24.5900000000000 ];
-         bin_upper = [ 24.59000000000000, 54.4200000000000 ];
+         energy_lower = [ 13.60000000000000, 24.5900000000000 ];
+         energy_upper = [ 24.59000000000000, 54.4200000000000 ];
          clight_frac = 1e-2;
          radiation_spectrum = "custom";
          recombination_radiation = false;

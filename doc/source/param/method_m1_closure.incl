@@ -13,7 +13,7 @@ Enzo-E's multigroup M1 Closure radiative transfer solver.
    
 ----
 
-:Parameter:  :p:`Method` : :p:`m1_closure` : :p:`bin_lower`
+:Parameter:  :p:`Method` : :p:`m1_closure` : :p:`energy_lower`
 :Summary: :s:`Lower bin edges of groups in eV`
 :Type:    :t:`list` ( :t:`float` )
 :Default: :d:`range(1.0, 100.0, 100.0/N_groups)`
@@ -23,7 +23,7 @@ Enzo-E's multigroup M1 Closure radiative transfer solver.
    
 ----
 
-:Parameter:  :p:`Method` : :p:`m1_closure` : :p:`bin_upper`
+:Parameter:  :p:`Method` : :p:`m1_closure` : :p:`energy_upper`
 :Summary: :s:`Upper bin edges of groups in eV`
 :Type:    :t:`list` ( :t:`float` )
 :Default: :d:`range(100.0/N_groups, 100.0 + 100.0/N_groups, 100.0/N_groups)`
@@ -33,6 +33,15 @@ Enzo-E's multigroup M1 Closure radiative transfer solver.
    
 ----
 
+:Parameter:  :p:`Method` : :p:`m1_closure` : :p:`energy_mean`
+:Summary: :s:`Group mean energy in eV`
+:Type:    :t:`list` ( :t:`float` )
+:Default: :d:`0.5 * (energy_lower[i] + energy_upper[i])`
+:Scope:     :c:`Enzo`
+
+:e:`This parameter specifies the group mean energies in eV.`
+
+----
 :Parameter:  :p:`Method` : :p:`m1_closure` : :p:`clight_frac`
 :Summary: :s:`Speed-of-light fraction`
 :Type:    :t:`float`
@@ -106,13 +115,13 @@ Enzo-E's multigroup M1 Closure radiative transfer solver.
  
 ----
 
-:Parameter:  :p:`Method` : :p:`m1_closure` : :p:`Nphotons_per_sec`
+:Parameter:  :p:`Method` : :p:`m1_closure` : :p:`particle_luminosity`
 :Summary: :s:`User-specified emission rate for star particles in photons/second`
 :Type:    :t:`float`
-:Default: :d:`0.0`
+:Default: :d:`-1.0`
 :Scope:     :c:`Enzo`
 
-:e:`If` :p:`Nphotons_per_sec` > 0.0, all star particles will be given the emission rate specified using this parameter. Otherwise, the `"luminosity"` particle attribute will be checked unless ``radiation_spectrum == "blackbody"`` .
+:e:`If` :p:`particle_luminosity` >= 0.0, all star particles will be given the emission rate specified using this parameter. Otherwise, the `"luminosity"` particle attribute will be checked unless ``radiation_spectrum == "blackbody"`` .
    
 ----
 

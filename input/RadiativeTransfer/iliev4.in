@@ -146,8 +146,8 @@ Boundary {
      m1_closure {
          N_groups = 3;
          SED = [ 0.477, 0.494, 0.059 ];
-         bin_lower = [ 13.60, 24.59,  54.42 ];
-         bin_upper = [ 24.59, 54.42, 100.00 ];
+         energy_lower = [ 13.60, 24.59,  54.42 ];
+         energy_upper = [ 24.59, 54.42, 100.00 ];
          clight_frac = 1.0;
          courant = 1.0;
          flux_function = "GLF";
