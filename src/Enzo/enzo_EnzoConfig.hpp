@@ -378,6 +378,7 @@ public: // interface
       method_inference_field_group(),
       method_inference_num_adapt(0),
       method_inference_adapt_index(-1),
+      method_inference_overdensity_threshold(0),
       /// EnzoMethodStarMaker
       method_star_maker_flavor(""),
       method_star_maker_use_density_threshold(false),           // check above density threshold before SF
@@ -874,6 +875,7 @@ public: // attributes
   std::string                method_inference_field_group;
   int                        method_inference_num_adapt;
   int                        method_inference_adapt_index;
+  float                      method_inference_overdensity_threshold;
 
   /// EnzoMethodStarMaker
   std::string               method_star_maker_flavor;

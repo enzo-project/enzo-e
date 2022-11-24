@@ -25,7 +25,7 @@ public: // interface
   EnzoLevelArray(CkMigrateMessage *m) : CBase_EnzoLevelArray(m) {}
 
   /// CHARM++ Pack / Unpack function
-  /// See PUPbytes below
+  void pup (PUP::er &);
 
   /// Destructor
   virtual ~EnzoLevelArray();
@@ -42,16 +42,14 @@ public: // interface
 
 protected: // functions
 
+  /// Return the index of the Block in level_base_ level
+  // (unique and guaranteed to exist)
+  Index get_block_index_();
+
   /// Return the index limits of octree root blocks intersecting this
   /// level array
   void intersecting_root_blocks_
   (Block * block, int im3[3], int ip3[3], int array_size[3]) const;
-
-  void coarsen_
-  (enzo_float * ac,
-   int mcx, int mcy, int mcz, int ncx, int ncy, int ncz, int ecx, int ecy, int ecz,
-   const enzo_float * af,
-   int mfx, int mfy, int mfz, int nfx, int nfy, int nfz, int efx, int efy, int efz);
 
   void interpolate_
   (enzo_float * af,

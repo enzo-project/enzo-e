@@ -261,6 +261,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_inference_field_group(),
   method_inference_num_adapt(0),
   method_inference_adapt_index(-1),
+  method_inference_overdensity_threshold(0),
   // EnzoMethodStarMaker,
   method_star_maker_flavor(""),                              // star maker type to use
   method_star_maker_use_altAlpha(false),
@@ -664,8 +665,9 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_inference_field_group;
   p | method_inference_num_adapt;
   p | method_inference_adapt_index;
+  p | method_inference_overdensity_threshold;
 
-    p | method_star_maker_flavor;
+  p | method_star_maker_flavor;
   p | method_star_maker_use_altAlpha;
   p | method_star_maker_use_density_threshold;
   p | method_star_maker_use_overdensity_threshold;
@@ -1948,7 +1950,7 @@ void EnzoConfig::read_method_inference_(Parameters* p)
         (std::min(nas-1,rank),"array_size");
     }
   }
-  
+
   method_inference_field_group = p->value_string  ("field_group");
 
   // save starting index of "refinement" criteria to be used for
@@ -1967,6 +1969,9 @@ void EnzoConfig::read_method_inference_(Parameters* p)
     std::string prefix=std::string("Method:inference:")+criterion+":";
     read_criterion_(p,index_refine,prefix);
   }
+
+  method_inference_overdensity_threshold = p->value_float
+    ("Method:inference:overdensity_threshold",0.0);
 }
 
 //----------------------------------------------------------------------

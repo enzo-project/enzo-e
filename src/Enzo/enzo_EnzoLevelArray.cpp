@@ -65,6 +65,31 @@ EnzoLevelArray::EnzoLevelArray
 
 //----------------------------------------------------------------------
 
+void EnzoLevelArray::pup (PUP::er &p)
+{
+
+  TRACEPUP;
+
+  CBase_EnzoLevelArray::pup(p);
+
+  p | level_array_;
+  p | level_base_;
+  p | level_infer_;
+  p | nax_;
+  p | nay_;
+  p | naz_;
+  p | nix_;
+  p | niy_;
+  p | niz_;
+  p | field_group_;
+  p | num_fields_;
+  p | field_values_;
+  p | volume_ratio_;
+  p | spheres_;
+}
+
+//----------------------------------------------------------------------
+
 EnzoLevelArray::~EnzoLevelArray()
 { }
 

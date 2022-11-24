@@ -652,7 +652,8 @@ Method * EnzoProblem::create_method_
        enzo_config->method_inference_array_size,
        enzo_config->method_inference_field_group,
        enzo_config->method_inference_adapt_index,
-       enzo_config->method_inference_num_adapt);
+       enzo_config->method_inference_num_adapt,
+       enzo_config->method_inference_overdensity_threshold);
 
   } else if (name == "turbulence") {
 

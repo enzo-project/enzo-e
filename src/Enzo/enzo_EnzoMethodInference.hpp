@@ -28,7 +28,8 @@ public: // interface
    const int array_size[3],
    std::string field_group,
    int index_criteria,
-   int num_criteria);
+   int num_criteria,
+   float overdensity_threshold);
 
   EnzoMethodInference()
     : Method(),
@@ -44,7 +45,8 @@ public: // interface
       is_mask_(-1),
       is_count_(-1),
       index_criteria_(-1),
-      num_criteria_(0)
+      num_criteria_(0),
+      overdensity_threshold_(0)
   { }
 
   /// Charm++ PUP::able declarations
@@ -65,7 +67,8 @@ public: // interface
       is_mask_(-1),
       is_count_(-1),
       index_criteria_(-1),
-      num_criteria_(0)
+      num_criteria_(0),
+      overdensity_threshold_(0)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -100,16 +103,16 @@ protected: // methods
   void apply_criteria_(Block * block);
 
   /// Allocate the inference array mask for the given block if not already
-  /// allocated, and return the mask array length
-  int mask_allocate_(Block * block, int mx, int my, int mz);
+  /// allocated
+  void mask_allocate_(Block * block, int nx, int ny, int nz);
+
   /// Get the mask size for blocks in the given level, and return
   /// the mask array length
   std::tuple<int,int,int> mask_dims_(int level) const;
 
   /// Compute local overdensity, tagging mask array accordingly
   void compute_overdensity_
-  (Block * block, char * mask, int mx, int my, int mz,
-   float threshold);
+  (Block * block, char * mask, int nx, int ny, int nz);
 
   /// Compute offsets ox,oy,oz and sizes nx,ny,nz into field
   /// data, taking into account one ghost zone layer, field
@@ -159,27 +162,12 @@ protected: // methods
   int & scalar_count_(Block * block)
   { return *block->data()->scalar_int().value(is_count_); }
 
-  /// Print the char scalar array mask
-  void print_mask_(Block * block) const
-  {
-    int mx,my,mz;
-    std::tie(mx,my,mz) = mask_dims_(block->level());
-    int n = mx*my*mz;
-    const char * mask = *scalar_mask_(block);
-    for (int iy=my-1; iy>=0; iy--) {
-      CkPrintf ("MASK %s ",block->name().c_str());
-      for (int ix=0; ix<mx; ix++) {
-        int c=0;
-        for (int iz=0; iz<mz; iz++) {
-          int i=ix+mx*(iy+my*iz);
-          c+= (mask[i])?1:0;
-        }
-        CkPrintf ("%1d",c);
-      }
-      CkPrintf ("\n");
-    }
-  }
-  
+  void coarsen_
+  (enzo_float * ac,
+   int mcx, int mcy, int mcz, int ncx, int ncy, int ncz, int ecx, int ecy, int ecz,
+   const enzo_float * af,
+   int mfx, int mfy, int mfz, int nfx, int nfy, int nfz, int efx, int efy, int efz);
+
 protected: // attributes
 
   /// Base level of blocks interacting with the level array
@@ -223,8 +211,9 @@ protected: // attributes
   /// Number of refinement criteria
   int num_criteria_;
 
-  /// Local density threshold for creating inference array
-  enzo_float density_threshold_;
+  /// Local overdensity threshold for creating inference array
+  enzo_float overdensity_threshold_;
+
 };
 
 #endif /* ENZO_ENZO_METHOD_INFERENCE_HPP */
