@@ -253,13 +253,14 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_analytic_SNR_shell_mass(true),
   method_feedback_fade_SNR(true),
   method_feedback_NEvents(-1),
+  method_feedback_radiation(true),
   // EnzoMethodM1Closure
   method_m1_closure(false),
   method_m1_closure_N_groups(1), // # of frequency bins
   method_m1_closure_flux_function("GLF"), // which flux function to use
   method_m1_closure_hll_file("hll_evals.list"),
   method_m1_closure_clight_frac(1.0), // reduced speed of light value to use
-  method_m1_closure_radiation_spectrum("blackbody"), // Type of radiation spectrum to use for star particles
+  method_m1_closure_radiation_spectrum("custom"), // Type of radiation spectrum to use for star particles
   method_m1_closure_temperature_blackbody(0.0),
   method_m1_closure_particle_luminosity(-1.0), // Set emission rate for star particles
   method_m1_closure_SED(), // supply list of emission rate fraction for all groups
@@ -268,7 +269,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_m1_closure_attenuation(true),
   method_m1_closure_thermochemistry(true),
   method_m1_closure_recombination_radiation(false),
-  method_m1_closure_cross_section_calculator("vernier_average"),
+  method_m1_closure_cross_section_calculator("vernier"),
   method_m1_closure_sigmaN(),
   method_m1_closure_sigmaE(),
   method_m1_closure_energy_lower(),
@@ -670,6 +671,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_feedback_analytic_SNR_shell_mass;
   p | method_feedback_fade_SNR;
   p | method_feedback_NEvents;
+  p | method_feedback_radiation;
 
   p | method_star_maker_flavor;
   p | method_star_maker_use_altAlpha;
@@ -1735,6 +1737,9 @@ void EnzoConfig::read_method_feedback_(Parameters * p)
 
   method_feedback_NEvents = p->value_integer
     ("Method:feedback:NEvents",-1);
+
+  method_feedback_radiation = p->value_logical
+    ("Method:feedback:radiation", true);
 }
 
 //----------------------------------------------------------------------
@@ -1829,7 +1834,7 @@ void EnzoConfig::read_method_m1_closure_(Parameters * p)
     ("Method:m1_closure:clight_frac",1.0);
 
   method_m1_closure_radiation_spectrum = p->value_string
-    ("Method:m1_closure:radiation_spectrum","blackbody");
+    ("Method:m1_closure:radiation_spectrum","custom");
 
   method_m1_closure_temperature_blackbody = p->value_float
     ("Method:m1_closure:temperature_blackbody",0.0);
@@ -1853,7 +1858,7 @@ void EnzoConfig::read_method_m1_closure_(Parameters * p)
     ("Method:m1_closure:courant", 0.5);
 
   method_m1_closure_cross_section_calculator = p->value_string
-    ("Method:m1_closure:cross_section_calculator","vernier_average");
+    ("Method:m1_closure:cross_section_calculator","vernier");
 
   method_m1_closure_SED.resize(method_m1_closure_N_groups);
   method_m1_closure_energy_lower.resize(method_m1_closure_N_groups);
@@ -1869,7 +1874,7 @@ void EnzoConfig::read_method_m1_closure_(Parameters * p)
   for (int i=0; i<method_m1_closure_N_groups; i++) {
     // default SED (if this is being used) is flat spectrum
     method_m1_closure_SED[i] = p->list_value_float
-      (i,"Method:m1_closure:SED", method_m1_closure_particle_luminosity/method_m1_closure_N_groups);
+      (i,"Method:m1_closure:SED", 1.0/method_m1_closure_N_groups);
 
     method_m1_closure_energy_lower[i] = p->list_value_float
       (i,"Method:m1_closure:energy_lower", 1.0 + bin_width*i);

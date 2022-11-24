@@ -346,7 +346,15 @@ public: // interface
       method_feedback_supernova_energy(1.0),
       method_feedback_time_first_sn(-1.0), // in Myr
       method_feedback_use_ionization_feedback(false),
-
+      /// EnzoMethodFeedbackSTARSS
+      method_feedback_supernovae(true),
+      method_feedback_unrestricted_sn(true),
+      method_feedback_stellar_winds(true),
+      method_feedback_radiation(true),
+      method_feedback_min_level(0),
+      method_feedback_analytic_SNR_shell_mass(true),
+      method_feedback_fade_SNR(true),
+      method_feedback_NEvents(-1),
       // EnzoMethodCheckGravity
       method_check_gravity_particle_type(),
 
@@ -361,15 +369,6 @@ public: // interface
       method_hydro_reconstruct_conservative(false),
       method_hydro_reconstruct_positive(false),
       method_hydro_riemann_solver(""),
-
-      /// EnzoMethodFeedbackSTARSS
-      method_feedback_supernovae(true),
-      method_feedback_unrestricted_sn(true),
-      method_feedback_stellar_winds(true),
-      method_feedback_min_level(0),
-      method_feedback_analytic_SNR_shell_mass(true),
-      method_feedback_fade_SNR(true),
-      method_feedback_NEvents(-1),
 
       /// EnzoMethodStarMaker
       method_star_maker_flavor(""),
@@ -399,7 +398,7 @@ public: // interface
       method_m1_closure_flux_function("GLF"), // which flux function to use
       method_m1_closure_hll_file("hll_evals.list"), // path to hll eigenvalue table
       method_m1_closure_clight_frac(1.0), // fraction of speed of light value to use
-      method_m1_closure_radiation_spectrum("blackbody"), // Type of radiation spectrum to use for star particles 
+      method_m1_closure_radiation_spectrum("custom"), // Type of radiation spectrum to use for star particles 
       method_m1_closure_temperature_blackbody(-1.0), // requires radiation_spectrum="blackbody"
       method_m1_closure_particle_luminosity(-1.0), // specify emission rate from sources
       method_m1_closure_SED(), // supply list of emission rates for all groups (radiation_spectrum="custom")
@@ -407,7 +406,7 @@ public: // interface
       method_m1_closure_attenuation(true),
       method_m1_closure_thermochemistry(true),
       method_m1_closure_recombination_radiation(false),
-      method_m1_closure_cross_section_calculator("vernier_average"), // what type of cross section calculator to use ("vernier", "vernier_average", "custom")
+      method_m1_closure_cross_section_calculator("vernier"), // what type of cross section calculator to use ("vernier", "vernier_average", "custom")
       method_m1_closure_sigmaN(), // user-defined cross sections (requires cross_section_calculator = "custom")
       method_m1_closure_sigmaE(), 
       method_m1_closure_courant(0.5),
@@ -879,6 +878,7 @@ public: // attributes
   bool                       method_feedback_supernovae;
   bool                       method_feedback_unrestricted_sn;
   bool                       method_feedback_stellar_winds;
+  bool                       method_feedback_radiation;
   int                        method_feedback_min_level;
   bool                       method_feedback_analytic_SNR_shell_mass;
   bool                       method_feedback_fade_SNR;

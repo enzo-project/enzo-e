@@ -457,7 +457,7 @@ This method **must** be used in tandem with the ``"m1_closure"`` initializer by 
 
 .. note:: 
 
-   Additional term in the radiative transfer equation corresponding to cosmological redshift not yet included. As such, redshifting of radiation into and out of groups can not be simulated.
+   Additional term in the radiative transfer equation corresponding to cosmological redshift not yet included. As such, redshifting of radiation into and out of groups is not captured.
 
    The radiation timescale is set by the courant condition :math:`\Delta t\leq\frac{\Delta x}{3 c_r}`. 
    For :math:`c_r=c`, this will result in a timestep that is **very** small. Subcycling of radiative transfer
@@ -481,7 +481,7 @@ For example, a simulation that evolves three groups must define these fifteen fi
 Nine additional fields must be defined corresponding to the elements of the 3D radiation pressure tensor:
 ``"P00"``, ``"P01"``, ``"P02"``, 
 ``"P10"``, ``"P11"``, ``"P12"``, 
-``"P00"``, ``"P21"``, ``"P22"`` 
+``"P20"``, ``"P21"``, ``"P22"`` 
 Note that only these nine fields are required, regardless of the number of radiation groups specified.
 
 Photionization and heating rates are calculated and stored in the following fields: 

@@ -127,11 +127,9 @@ EnzoMethodM1Closure ::EnzoMethodM1Closure(const int N_groups)
 
   // don't need to add fluxes to injection refresh 
   // because only the photon_density fields are updated there
-  refresh_injection->add_field("photon_density");
 
   for (int i=0; i<N_groups_; i++) {
     std::string istring = std::to_string(i); 
-    refresh_injection->add_field("photon_density_" + istring);
 
     refresh_injection->add_field_src_dst
        ("photon_density_"+istring+"_deposit", "photon_density_"+istring); 
@@ -168,7 +166,7 @@ void EnzoMethodM1Closure::compute ( Block * block ) throw()
   // but they will also execute the callback function following the contribute() call.
   // This means the non-leaves would end up calling compute_done() twice which results
   // in skipped cycles
- 
+  
   compute_ (block);
 
   return;
@@ -279,11 +277,11 @@ double EnzoMethodM1Closure::get_radiation_custom(EnzoBlock * enzo_block,
   // otherwise just use whatever value was passed into this function ('luminosity' attribute)
 
   if (enzo_config->method_m1_closure_particle_luminosity >= 0.0) {
-    plum = enzo_config->method_m1_closure_particle_luminosity;
+    plum = enzo_config->method_m1_closure_particle_luminosity; // erg/s
   }
 
-  // only add fraction of radiation into this group according to SED                                           
-  double plum_i = plum * enzo_config->method_m1_closure_SED[igroup];
+  // only add energy fraction of radiation into this group according to SED                                           
+  double plum_i = plum * enzo_config->method_m1_closure_SED[igroup] / (energy * enzo_constants::erg_eV); // converted to photons/s
 
   double mL = pmass*plum_i; 
  
@@ -404,6 +402,8 @@ void EnzoMethodM1Closure::inject_photons ( EnzoBlock * enzo_block, int igroup ) 
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
   double munit = enzo_units->mass();
+  double lunit = enzo_units->length();
+  double tunit = enzo_units->time();
   double Nunit = enzo_units->photon_number_density();
 
   double f_esc = 1.0;
@@ -429,7 +429,7 @@ void EnzoMethodM1Closure::inject_photons ( EnzoBlock * enzo_block, int igroup ) 
 
   double cell_volume = hx*hy*hz * enzo_units->volume(); 
 
-  double dt = enzo_block->dt * enzo_units->time();
+  double dt = enzo_block->dt * tunit;
 
   // get relevant field variables
   enzo_float * N          = (enzo_float *) field.values(
@@ -512,9 +512,9 @@ void EnzoMethodM1Closure::inject_photons ( EnzoBlock * enzo_block, int igroup ) 
       else if (radiation_spectrum == "custom") {
         // This function samples a user-defined SED to get the injection rate into each group.
         // Uses the `luminosity` particle attribute to calculate the photon injection rate.
-        // If `Nphotons_per_sec` is set to something > 0, all particles will be given the same 
+        // If `particle_luminosity` is set to something > 0, all particles will be given the same 
         // luminosity specified by that parameter
-        double plum_cgs = plum[ipdL] / enzo_units->time();
+        double plum_cgs = plum[ipdL] * munit * lunit * lunit/ (tunit * tunit * tunit);
         dN = get_radiation_custom(enzo_block, E_mean, pmass_cgs, plum_cgs, 
                                   dt, 1/cell_volume, i, igroup);
       }
@@ -842,17 +842,30 @@ double EnzoMethodM1Closure::sigma_vernier (double energy, int type) throw()
     ya = 32.88;
     P = 2.963;
     yw = y0 = y1 = 0.0;
-    break;      
+    break;
+  
+    // Lyman-Werner
+  case 3:
+    e_th = 11.18;
+    e_max = 13.6;
+    sigma0 = 3.71;
+    break; 
   }
 
   // return 0 if below ionization threshold
   if (energy < e_th) return 0.0;
 
-  double x, y, fy;
-  x = energy/e0 - y0;
-  y = sqrt(x*x + y1*y1);
-  fy = ((x-1.0)*(x-1.0) + yw*yw) * pow(y, 0.5*P-5.5) * 
-    pow((1.0 + sqrt(y/ya)), -P);
+  double fy;
+  if (type != 3) {
+    double x, y;
+    x = energy/e0 - y0;
+    y = sqrt(x*x + y1*y1);
+    fy = ((x-1.0)*(x-1.0) + yw*yw) * pow(y, 0.5*P-5.5) * 
+      pow((1.0 + sqrt(y/ya)), -P);
+  }
+  else {
+    fy = 1.0;
+  }
 
   sigma = sigma0 * fy * 1e-18;
 
@@ -1563,20 +1576,6 @@ void EnzoMethodM1Closure::compute_ (Block * block) throw()
                                                enzo_config->physics_cosmology);
 
     compute_temperature.compute(enzo_block);
-
-
-  // make isothermal
-/*
-  const enzo_float gamma = enzo::fluid_props()->gamma();
-  const enzo_float mol_weight = enzo::fluid_props()->mol_weight();
-enzo_float * ge = (enzo_float *) field.values("internal_energy");
-enzo_float * te = (enzo_float *) field.values("total_energy");
-    for (int i=0; i<m; i++) {
-          ge[i] = (enzo_config->initial_feedback_test_temperature / mol_weight /
-                  enzo::units()->kelvin_per_energy_units() / (gamma - 1.0)); 
-          te[i]=ge[i];    
-    }
-*/
   }
 
   Scalar<double> scalar = block->data()->scalar_double();
@@ -1591,24 +1590,15 @@ enzo_float * te = (enzo_float *) field.values("total_energy");
       *(scalar.value( scalar.index( sigE_string(i,j) + mL_string(i) ))) = 0.0;
     }
   }
-  // convert RT fields into cgs units. This is done to avoid roundoff errors.
-  // e.g. photon density of 1 cm^-3 is equivalent to 1e63 kpc^-3, while
-  //      a cross section of 1e-18 cm^2 is equivalent to 1e-60 kpc^2.
-  // Doing everything in cgs should help us avoid mixing huge numbers with tiny numbers
 
+
+  // initialize deposition fields to zero
   for (int i=0; i<N_groups; i++) {
     std::string istring = std::to_string(i);
-    enzo_float *  N_i = (enzo_float *) field.values("photon_density_" + istring);
-    enzo_float * Fx_i = (enzo_float *) field.values("flux_x_" + istring);
-    enzo_float * Fy_i = (enzo_float *) field.values("flux_y_" + istring);
-    enzo_float * Fz_i = (enzo_float *) field.values("flux_z_" + istring);
-
     enzo_float * N_i_d = (enzo_float *) field.values("photon_density_" + istring + "_deposit");
-
     for (int j=0; j<m; j++)
     {
-      // initialize temporary fields to zero
-      N_i_d[j] = 0.0;
+      N_i_d[j] = 0.0; 
     }
   }
 

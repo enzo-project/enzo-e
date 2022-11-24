@@ -65,14 +65,14 @@ Enzo-E's multigroup M1 Closure radiative transfer solver.
 :Parameter:  :p:`Method` : :p:`m1_closure` : :p:`cross_section_calculator`
 :Summary: :s:`Choose calculator for group-mean cross-sections`
 :Type:    :t:`string`
-:Default: :d:`"vernier_average"`
+:Default: :d:`"vernier"`
 :Scope:     :c:`Enzo`
 
 :e:`Specifies which group-mean photoionization cross section to use. Options include:`
 
   * ``"vernier"`` :e:`Calculates the group-mean cross section using fits from `Vernier et al. (1996) <https://ui.adsabs.harvard.edu/abs/1996ApJ...465..487V/abstract>`. The midpoint energy is used for each group (e.g. :code:`energy = 0.5 * (E_lower + E_upper)` ).`
 
-  * ``"vernier_average"`` :e:`Same as `"vernier"`, with the added step of averaging the cross section over all star particles in the simulation, weighted by mass * luminosity.`
+  * ``"vernier_average"`` :e:`Same as `"vernier"`, with the added step of averaging the cross section over all star particles in the simulation, weighted by mass * luminosity, where luminosity in this case is converted to units of photons/s.`
  
   * ``"custom"`` :e:`Specify cross sections explicitly in the parameter file using the` :p:`sigmaN` and :p:`sigmaE` parameters.`
    
@@ -116,7 +116,7 @@ Enzo-E's multigroup M1 Closure radiative transfer solver.
 ----
 
 :Parameter:  :p:`Method` : :p:`m1_closure` : :p:`particle_luminosity`
-:Summary: :s:`User-specified emission rate for star particles in photons/second`
+:Summary: :s:`User-specified luminosity for star particles in erg/s`
 :Type:    :t:`float`
 :Default: :d:`-1.0`
 :Scope:     :c:`Enzo`
@@ -128,7 +128,7 @@ Enzo-E's multigroup M1 Closure radiative transfer solver.
 :Parameter:  :p:`Method` : :p:`m1_closure` : :p:`radiation_spectrum`
 :Summary: :s:`Type of radiation spectrum for star particle`
 :Type:    :t:`string`
-:Default: :d:`"blackbody"`
+:Default: :d:`"custom"`
 :Scope:     :c:`Enzo`
 
 :e:`Options include:`
@@ -172,31 +172,32 @@ Enzo-E's multigroup M1 Closure radiative transfer solver.
 :Parameter:  :p:`Method` : :p:`m1_closure` : :p:`SED`
 :Summary: :s:`User-specified SED for radiating point sources`
 :Type:    :t:`list` ( :t:`float` )
-:Default: :d:`Flat spectrum, where each group is given an emission rate of` :p:`Nphotons_per_sec`/:p:`N_groups`
+:Default: :d:`Flat spectrum, where each group is given an emission rate of` 1.0/:p:`N_groups`
 :Scope:     :c:`Enzo`
 
-:e:`User-specified SED for radiating point sources. This is a list, where each entry corresponds to the fraction of emitted photons to inject into each group.
+:e:`User-specified SED for radiating point sources. This is a list, where each entry corresponds to an energy fraction to inject into each group every timestep.
 For example, if` :p:`SED` = [0.1, 0.6, 0.3], the emitted radiation will be split into three groups such that L1 = 0.1*L, L2 = 0.6*L, and L = 0.3*L, where L is the total luminosity of the particle.
    
 ----
 
 :Parameter:  :p:`Method` : :p:`m1_closure` : :p:`sigmaE`
-:Summary: :s:`User-specified group-mean cross sections, averaged by energy`
+:Summary: :s:`User-specified group-mean cross sections in cm^2, averaged by energy`
 :Type:    :t:`list` ( :t:`float` )
 :Default: :d:`0.0`
 :Scope:     :c:`Enzo`
 
-:e:`User-specified group-mean cross sections, averaged by energy. Requires` :p:cross_section_calculator = `"custom"`. If this parameter is set, :p:`sigmaN` must also be set.
+:e:`User-specified group-mean cross sections, averaged by energy. Requires` :p:cross_section_calculator = `"custom"`. If this parameter is set, :p:`sigmaN` must also be set. This list has length Ngroups*3, where the number 3 represents the number of ionizable species (HI, HeI, and HeII). For example, a simulation could use three radiation groups with :p:`energy_mean`=[21.62, 30.0, 60.0]. In this case, setting :p:`sigmaE`=[1.78e-18,0.0,0.0, 7.03e-19,5.36e-18,0.0, 9.19e-20,1.37e-18,1.22e-18] would produce the same cross sections as the fits from  `Vernier et al. (1996) <https://ui.adsabs.harvard.edu/abs/1996ApJ...465..487V/abstract>_`.
    
 ----
 
 :Parameter:  :p:`Method` : :p:`m1_closure` : :p:`sigmaN`
-:Summary: :s:`User-specified group-mean cross sections, averaged by photon density`
+:Summary: :s:`User-specified group-mean cross sections in cm^2, averaged by photon density`
 :Type:    :t:`list` ( :t:`float` )
 :Default: :d:`0.0`
 :Scope:     :c:`Enzo`
 
-:e:`User-specified group-mean cross sections, averaged by energy. Requires` :p:cross_section_calculator = `"custom"`. If this parameter is set, :p:`sigmaE` must also be set.
+:e:`User-specified group-mean cross sections, averaged by photon number. Requires` :p:cross_section_calculator = `"custom"`. If this parameter is set, :p:`sigmaE` must also be set. This list has length Ngroups*3, where the number 3 represents the number of ionizable species (HI, HeI, and HeII). For example, a simulation could use three radiation groups with :p:`energy_mean`=[21.62, 30.0, 60.0]. In this case, setting :p:`sigmaE`=[1.78e-18,0.0,0.0, 7.03e-19,5.36e-18,0.0, 9.19e-20,1.37e-18,1.22e-18] would produce the same cross sections as the fits from  `Vernier et al. (1996) <https://ui.adsabs.harvard.edu/abs/1996ApJ...465..487V/abstract>_`.
+
    
 ----
 
