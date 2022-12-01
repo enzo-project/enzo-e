@@ -28,10 +28,8 @@ void Config::pup (PUP::er &p)
 
   p | num_adapt;
   p | adapt_list;
-  p | adapt_index;
   p | adapt_interval;
   p | adapt_min_face_rank;
-  p | adapt_schedule_index;
   p | adapt_type;
   p | adapt_field_list;
   p | adapt_min_refine;
@@ -42,6 +40,7 @@ void Config::pup (PUP::er &p)
   p | adapt_level_exponent;
   p | adapt_include_ghosts;
   p | adapt_output;
+  p | adapt_schedule_index;
   
   // Balance
 
@@ -294,123 +293,91 @@ void Config::read_adapt_ (Parameters * p) throw()
 
   num_adapt = p->list_length("Adapt:list");
 
-  // store index of first refinement criteria
-  adapt_index = adapt_list.size();
-
-  // reserve num_adapt more
-  const int new_size = adapt_index + num_adapt;
-
-  resize_adapt_vectors_(new_size);
+  adapt_list           .resize(num_adapt);
+  adapt_type           .resize(num_adapt);
+  adapt_field_list     .resize(num_adapt);
+  adapt_min_refine     .resize(num_adapt);
+  adapt_max_coarsen    .resize(num_adapt);
+  adapt_min_refine2    .resize(num_adapt);
+  adapt_max_coarsen2   .resize(num_adapt);
+  adapt_max_level      .resize(num_adapt);
+  adapt_level_exponent .resize(num_adapt);
+  adapt_include_ghosts .resize(num_adapt);
+  adapt_output         .resize(num_adapt);
+  adapt_schedule_index .resize(num_adapt);
 
   adapt_min_face_rank = p->value_integer("Adapt:min_face_rank",0);
 
   for (int ia=0; ia<num_adapt; ia++) {
 
-    const int index_refine = ia + adapt_index;
+    adapt_list[ia] = p->list_value_string (ia,"Adapt:list","unknown");
 
-    adapt_list[index_refine] = p->list_value_string (ia,"Adapt:list","unknown");
+    std::string prefix = "Adapt:" + adapt_list[ia] + ":";
 
-    std::string prefix = "Adapt:" + adapt_list[index_refine] + ":";
+    adapt_type[ia] = p->value_string(prefix+"type","unknown");
 
-    read_criterion_(p,index_refine,prefix);
+    std::string param_str = prefix + "field_list";
 
-  }
-}
+    int type = p->type(param_str);
 
-//----------------------------------------------------------------------
-
-void Config::read_criterion_
-  (Parameters * p,
-   int index_refine,
-   std::string prefix) throw()
-{
-  adapt_type[index_refine] = p->value_string(prefix+"type","unknown");
-
-  std::string param_str = prefix + "field_list";
-  int type = p->type(param_str);
-
-  if (type == parameter_list) {
-    const int n = p->list_length(param_str);
-    adapt_field_list[index_refine].resize(n);
-    for (int index=0; index<n; index++) {
-      adapt_field_list[index_refine][index] = p->value(index,param_str,"none");
+    if (type == parameter_list) {
+      const int n = p->list_length(param_str);
+      adapt_field_list[ia].resize(n);
+      for (int index=0; index<n; index++) {
+	adapt_field_list[ia][index] = p->value(index,param_str,"none");
+      }
+    } else if (type == parameter_string) {
+      adapt_field_list[ia].resize(1);
+      adapt_field_list[ia][0] = p->value_string (param_str,"none");
+    } else if (type != parameter_unknown) {
+      ERROR2 ("Config::read()", "Incorrect parameter type %d for %s",
+	      type,param_str.c_str());
     }
-  } else if (type == parameter_string) {
-    adapt_field_list[index_refine].resize(1);
-    adapt_field_list[index_refine][0] = p->value_string (param_str,"none");
-  } else if (type != parameter_unknown) {
-    ERROR2 ("Config::read()", "Incorrect parameter type %d for %s",
-            type,param_str.c_str());
+
+    //--------------------------------------------------
+
+    if (p->type(prefix + "min_refine") == parameter_list) {
+
+      adapt_min_refine[ia]  = p->list_value_float (0,prefix + "min_refine",0.3);
+      adapt_max_coarsen[ia] = p->list_value_float (0,prefix + "max_coarsen",
+						  0.5*adapt_min_refine[ia]);
+
+      adapt_min_refine2[ia]  = p->list_value_float (0,prefix + "min_refine",0.3);
+      adapt_max_coarsen2[ia] = p->list_value_float (1,prefix + "max_coarsen",
+						   0.5*adapt_min_refine2[ia]);
+    } else {
+
+      adapt_min_refine[ia]  = p->value (prefix + "min_refine",0.3);
+      adapt_max_coarsen[ia] = p->value (prefix + "max_coarsen",
+				       0.5*adapt_min_refine[ia]);
+
+    }
+
+    adapt_max_level[ia] = p->value (prefix + "max_level",
+				    std::numeric_limits<int>::max());
+
+    adapt_level_exponent[ia] = p->value (prefix + "level_exponent",0.0);
+
+    adapt_output[ia] = p->value_string (prefix + "output","");
+
+    adapt_include_ghosts[ia] = p->value_logical (prefix + "include_ghosts",
+						 false);
+    const bool adapt_scheduled = 
+      (p->type(prefix+"schedule:var") != parameter_unknown);
+
+    if (adapt_scheduled) {
+      p->group_set(0,"Adapt");
+      p->group_push(adapt_list[ia]);
+      p->group_push("schedule");
+      adapt_schedule_index[ia] = read_schedule_(p, prefix);
+      p->group_pop();
+      p->group_pop();
+    } else {
+      adapt_schedule_index[ia] = -1;
+    }
+
+    
   }
-
-  //--------------------------------------------------
-
-  if (p->type(prefix + "min_refine") == parameter_list) {
-
-    adapt_min_refine[index_refine]  = p->list_value_float
-      (0,prefix + "min_refine",0.3);
-    adapt_max_coarsen[index_refine] = p->list_value_float
-      (0,prefix + "max_coarsen",
-       0.5*adapt_min_refine[index_refine]);
-
-    adapt_min_refine2[index_refine]  = p->list_value_float
-      (0,prefix + "min_refine",0.3);
-    adapt_max_coarsen2[index_refine] = p->list_value_float
-      (1,prefix + "max_coarsen",
-       0.5*adapt_min_refine2[index_refine]);
-
-  } else {
-
-    adapt_min_refine[index_refine]  = p->value (prefix + "min_refine",0.3);
-    adapt_max_coarsen[index_refine] = p->value
-      (prefix + "max_coarsen",
-       0.5*adapt_min_refine[index_refine]);
-
-  }
-
-  adapt_max_level[index_refine] = p->value
-    (prefix + "max_level",std::numeric_limits<int>::max());
-
-  adapt_level_exponent[index_refine] = p->value
-    (prefix + "level_exponent",0.0);
-
-  adapt_output[index_refine] = p->value_string (prefix + "output","");
-
-  adapt_include_ghosts[index_refine] = p->value_logical
-    (prefix + "include_ghosts", false);
-
-  const bool adapt_scheduled =
-    (p->type(prefix+"schedule:var") != parameter_unknown);
-
-  if (adapt_scheduled) {
-    p->group_set(0,"Adapt");
-    p->group_push(adapt_list[index_refine]);
-    p->group_push("schedule");
-    adapt_schedule_index[index_refine] = read_schedule_(p, prefix);
-    p->group_pop();
-    p->group_pop();
-  } else {
-    adapt_schedule_index[index_refine] = -1;
-  }
-}
-
-//----------------------------------------------------------------------
-
-void Config::resize_adapt_vectors_ (int new_size) throw()
-{
-  adapt_list           .resize(new_size);
-  adapt_schedule_index .resize(new_size);
-
-  adapt_type           .resize(new_size);
-  adapt_field_list     .resize(new_size);
-  adapt_min_refine     .resize(new_size);
-  adapt_max_coarsen    .resize(new_size);
-  adapt_min_refine2    .resize(new_size);
-  adapt_max_coarsen2   .resize(new_size);
-  adapt_max_level      .resize(new_size);
-  adapt_level_exponent .resize(new_size);
-  adapt_include_ghosts .resize(new_size);
-  adapt_output         .resize(new_size);
 }
 
 //----------------------------------------------------------------------

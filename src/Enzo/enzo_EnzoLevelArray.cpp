@@ -30,9 +30,6 @@ EnzoLevelArray::EnzoLevelArray
     volume_ratio_(0.0),
     spheres_()
 {
-  CkPrintf ("TRACE EnzoLevelArray() %d %d %d  %d %d %d\n",
-            thisIndex[0],thisIndex[1],thisIndex[2],nax,nay,naz);
-  fflush(stdout);
   ASSERT2("EnzoLevelArray::EnzoLevelArray()",
           "level_base %d must be between 0 and level_array %d",
           level_base_,level_array_,

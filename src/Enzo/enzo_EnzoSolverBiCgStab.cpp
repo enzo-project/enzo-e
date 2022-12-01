@@ -1634,7 +1634,7 @@ void EnzoSolverBiCgStab::end (EnzoBlock* block, int retval) throw () {
   TRACE_BCG(block,this,"end");
 
   deallocate_temporary_(block);
-  
+
   Solver::end_(block);
 }
 

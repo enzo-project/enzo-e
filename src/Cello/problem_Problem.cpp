@@ -15,7 +15,6 @@ Problem::Problem() throw()
     initial_list_(),
     physics_list_(),
     refine_list_(),
-    adapt_refine_list_(),
     stopping_(nullptr),
     solver_list_(),
     method_list_(),
@@ -23,7 +22,7 @@ Problem::Problem() throw()
     prolong_list_(),
     restrict_list_(),
     units_(nullptr),
-    index_adapt_refine_(0),
+    index_refine_(0),
     index_output_(0),
     index_boundary_(0)
 {
@@ -82,7 +81,6 @@ void Problem::pup (PUP::er &p)
     p | refine_list_[i]; // PUP::able
   }
 
-  p | adapt_refine_list_;
   p | stopping_;
 
   p | units_;
@@ -129,7 +127,7 @@ void Problem::pup (PUP::er &p)
     p | restrict_list_[i]; // PUP::able
   }
   
-  p | index_adapt_refine_;
+  p | index_refine_;
   p | index_output_;
   p | index_boundary_;
 }
@@ -204,24 +202,16 @@ void Problem::initialize_physics(Config * config,
 void Problem::initialize_refine(Config * config,
 				Parameters * parameters) throw()
 {
-  for (int index_adapt=0; index_adapt<config->num_adapt; index_adapt++) {
+  for (int index=0; index<config->num_adapt; index++) {
 
-    const int index_refine = index_adapt + config->adapt_index;
-    
-    std::string name = config->adapt_type[index_refine];
+    std::string name = config->adapt_type[index];
 
-    adapt_refine_list_.push_back(index_refine);
-
-    Refine * refine = create_refine_
-      (name,index_refine,
-       "Adapt:" + config->adapt_list[index_refine] + ":value",
-       config,parameters);
-
-    refine_list_.push_back( refine );
+    Refine * refine = create_refine_ 
+      (name,index,config,parameters);
 
     if (refine) {
-
-      int index_schedule = config->adapt_schedule_index[index_refine];
+      refine_list_.push_back( refine );
+      int index_schedule = config->adapt_schedule_index[index];
 
       if (index_schedule >= 0) {
 	refine->set_schedule
@@ -657,7 +647,6 @@ Refine * Problem::create_refine_
 (
  std::string        type,
  int                index,
- std::string        param_str,
  Config *           config,
  Parameters *       parameters
  ) throw ()
@@ -692,6 +681,8 @@ Refine * Problem::create_refine_
        config->adapt_output[index]);
 
   } else if (type == "mask") {
+
+    std::string param_str = "Adapt:" + config->adapt_list[index] + ":value";
 
     return new RefineMask 
       (parameters,

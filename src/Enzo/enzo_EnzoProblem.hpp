@@ -69,7 +69,6 @@ private: // functions
   virtual Refine * create_refine_ 
   (std::string type,
    int         index,
-   std::string param_str,
    Config * config, 
    Parameters * parameters) throw ();
 

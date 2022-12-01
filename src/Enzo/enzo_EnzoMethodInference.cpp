@@ -17,8 +17,6 @@ EnzoMethodInference::EnzoMethodInference
  const int m3_level[3],
  const int m3_infer[3],
  std::string field_group,
- int index_criteria,
- int num_criteria,
  float overdensity_threshold)
   : Method(),
     level_base_(level_base),
@@ -32,8 +30,6 @@ EnzoMethodInference::EnzoMethodInference
     is_sync_parent_(-1),
     is_mask_(-1),
     is_count_(-1),
-    index_criteria_(index_criteria),
-    num_criteria_(num_criteria),
     overdensity_threshold_(overdensity_threshold)
 {
   for (int i=0; i<3; i++) {
@@ -153,8 +149,6 @@ void EnzoMethodInference::pup (PUP::er &p)
   p | is_sync_child_;
   p | is_sync_parent_;
   p | is_mask_;
-  p | index_criteria_;
-  p | num_criteria_;
 }
 
 //----------------------------------------------------------------------
@@ -375,7 +369,7 @@ void EnzoMethodInference::merge_masks
 
     // allocate this block's mask if not allocated yet
     int nx,ny,nz;
-    std::tie(nx,ny,nz) = mask_dims_(block->level());
+    std::tie(nx,ny,nz) = mask_dims_(level);
     mask_allocate_(block,nx,ny,nz);
     char * mask = *scalar_mask_(block);
 
@@ -386,7 +380,7 @@ void EnzoMethodInference::merge_masks
 
     } else { // (level >= level_array)
 
-      // or logical-or if blocks smaller than arrays
+      // or logical-or masks if blocks smaller than arrays
       merge_masks_1to1_ (mask, mask_in, level);
     }
   }
@@ -412,7 +406,7 @@ void EnzoMethodInference::merge_masks_2to1_
   const int ncy = std::max(ny/2,1);
   const int ncz = std::max(nz/2,1);
 
-  // copy child's mask into my mask corner
+  // copy child's mask into appropriate mask corner
   for (int icz=0; icz<ncz; icz++) {
     int iz = ic3[2]*ncz+icz;
     for (int icy=0; icy<ncy; icy++) {
@@ -442,7 +436,7 @@ void EnzoMethodInference::merge_masks_1to1_
   for (int iz=0; iz<nz; iz++) {
     for (int iy=0; iy<ny; iy++) {
       for (int ix=0; ix<nx; ix++) {
-        int i = ix  + nx*(iy  + ny*iz);
+        int i = ix + nx*(iy + ny*iz);
         // merge mask values
         mask[i] = std::max(mask[i],mask_in[i]);
       }
@@ -457,17 +451,18 @@ void EnzoSimulation::p_infer_set_array_count(int count)
   // Update global count of inference arrays
   infer_count_arrays_ += count;
 
-  // After receiving all expected counts,
+  // After receiving all expected counts from level-0 blocks...
   if (sync_infer_count_.next()) {
 
     // initialize synchronization counters,
+    // (+1 self-sync in case no inference arrays)
     sync_infer_create_.set_stop(infer_count_arrays_ + 1);
     sync_infer_done_.set_stop(infer_count_arrays_);
 
     // clear counter for next call,
     infer_count_arrays_ = 0;
 
-    // and contiune with check_create()
+    // +1 self-sync call to check_create()
     infer_check_create_();
   }
 }
@@ -484,13 +479,13 @@ void EnzoSimulation::p_infer_array_created()
 //----------------------------------------------------------------------
 void EnzoSimulation::infer_check_create_()
 {
-  // If all inference arrays are created
+  // Wait for all level array chares to be created...
   if (sync_infer_create_.next()) {
 
-    // Check if count is actually 0 (only self-call)
+    // If no inference arrays (just +1 call)
     if (sync_infer_create_.stop() == 1) {
 
-      // so no inference arrays created: exit!
+      // then exit
       enzo::block_array().p_method_infer_exit();
 
     } else {
@@ -510,9 +505,14 @@ void EnzoSimulation::infer_check_create_()
 
 void EnzoLevelArray::p_request_data()
 {
+  // Get the index of the (unique) block in level_array_ that overlaps
+  // this element
   Index index_block = get_block_index_();
 
   const int il3[3] = {thisIndex[0],thisIndex[1],thisIndex[2]};
+
+  // Send request for data to block (which may forward the request to
+  // its children until leaf blocks reached)
   enzo::block_array()[index_block].p_method_infer_request_data(il3);
 }
 
@@ -522,8 +522,7 @@ Index EnzoLevelArray::get_block_index_()
 {
   Index index;
 
-  // Get "array" part of "array-of-octrees" Block index
-
+  // Get "array" part of "array-of-octrees" block index
   int iax = thisIndex[0] >> level_array_;
   int iay = thisIndex[1] >> level_array_;
   int iaz = thisIndex[2] >> level_array_;
@@ -531,7 +530,6 @@ Index EnzoLevelArray::get_block_index_()
   index.set_array(iax,iay,iaz);
 
   // get "octree" part of "array-of-octrees" block index
-
   for (int level=1; level<=level_base_; level++) {
     int tree_shift = (level_array_ - level);
     int ic3[3] = {
@@ -541,6 +539,8 @@ Index EnzoLevelArray::get_block_index_()
     index.push_child(ic3[0],ic3[1],ic3[2]);
   }
 
+  // return the Block index corresponding to this EnzoLevelArray
+  // element
   return index;
 }
 
@@ -561,10 +561,22 @@ void EnzoMethodInference::request_data (Block * block, int ia3[3])
 {
 
   Index index_block = block->index();
+  const int level = block->level();
 
   if (block->is_leaf()) {
 
     Field field = block->data()->field();
+
+    // determine refinement factors (rx,ry,rz) based on rank
+    const int rank = cello::rank();
+    const int rx = (rank >= 1) ? 2 : 1;
+    const int ry = (rank >= 2) ? 2 : 1;
+    const int rz = (rank >= 3) ? 2 : 1;
+
+    // determine "extra" zones required based on rank
+    const int ex = (rank >= 1) ? 1 : 0;
+    const int ey = (rank >= 2) ? 1 : 0;
+    const int ez = (rank >= 3) ? 1 : 0;
 
     // Verify field_group is not empty
     ASSERT1 ("EnzoMethodInference::request_data()",
@@ -572,7 +584,7 @@ void EnzoMethodInference::request_data (Block * block, int ia3[3])
              field_group_.c_str(),
              (num_fields_ > 0));
 
-    // Declare and initialize values to send to level array
+    // Serialize data to send to requesting level array element
 
     // Compute field portion offsets and sizes for /all/ fields
     // (stored in arrays to avoid multiple calls to
@@ -590,8 +602,12 @@ void EnzoMethodInference::request_data (Block * block, int ia3[3])
     std::vector<int> ny(n);
     std::vector<int> nz(n);
 
-    // compute buffer size nb
+    // array portion sizes
+    std::vector<int> nxa(n);
+    std::vector<int> nya(n);
+    std::vector<int> nza(n);
 
+    // compute buffer size nb
     int nb = 0;
     for (int i=0; i<n; i++) {
 
@@ -603,9 +619,17 @@ void EnzoMethodInference::request_data (Block * block, int ia3[3])
       std::tie(ox[i],oy[i],oz[i],nx[i],ny[i],nz[i]) =
         get_block_portion_(index_block, index_field, ia3);
 
-      // Reserve storage for field value portion, plus n[xyz] ( + 3 )
-
-      nb += 3 + nx[i]*ny[i]*nz[i];
+      nxa[i] = nx[i];
+      nya[i] = ny[i];
+      nza[i] = nz[i];
+      for (int l=level; l>level_infer_; l--) {
+        nxa[i] = (nxa[i]-2*ex)/rx+2*ex;
+        nya[i] = (nya[i]-2*ey)/ry+2*ey;
+        nza[i] = (nza[i]-2*ez)/rz+2*ez;
+      }
+      // Reserve storage for array size n[xyz] (3) plus field value portion
+      // taking into account size after any restrictions
+      nb += 3 + nxa[i]*nya[i]*nza[i];
     }
 
     // allocate buffer
@@ -614,19 +638,14 @@ void EnzoMethodInference::request_data (Block * block, int ia3[3])
 
     // copy field portions
 
-    const int level = block->level();
-
     if (level > level_infer_) {
 
       int i_b = 0;
 
-      const int rank = cello::rank();
-      const int rx = (rank >= 1) ? 2 : 1;
-      const int ry = (rank >= 2) ? 2 : 1;
-      const int rz = (rank >= 3) ? 2 : 1;
-
+      // for each field in the field group
       for (int i=0; i<n; i++) {
 
+        // Get the field index and valuesfield_name
         const std::string field_name =
           cello::field_groups() -> item(field_group_,i);
 
@@ -634,15 +653,12 @@ void EnzoMethodInference::request_data (Block * block, int ia3[3])
 
         const int index_field = field.field_id (field_name);
 
+        // Find the dimension of the field (may vary between fields
+        // depending on centering)
         int mx,my,mz;
         int gx,gy,gz;
         field.dimensions (index_field,&mx,&my,&mz);
-        cello::field_descr()->ghost_depth(index_field,&gx,&gy,&gz);
-
-        // determine "extra" zones
-        int ex = (rank >= 1) ? 1 : 0;
-        int ey = (rank >= 2) ? 1 : 0;
-        int ez = (rank >= 3) ? 1 : 0;
+        field.ghost_depth(index_field,&gx,&gy,&gz);
 
         // determine offset into field
         const int ofx = ox[i];
@@ -651,13 +667,15 @@ void EnzoMethodInference::request_data (Block * block, int ia3[3])
         const int of = ofx + mx*(ofy + my*ofz);
 
         // pointer to field portion to restrict
-        enzo_float * a_f = field_values + of;
+        enzo_float * a_f = nullptr;
         enzo_float * a_c = nullptr;
         int ncx,ncy,ncz;
         int nfx,nfy,nfz;
 
+        // Apply linear restriction level - level_infer_ times
         for (int l=level; l>level_infer_; l--) {
 
+          // restrict level l to l-1
           const bool is_first = (l == level);
           const bool is_last  = (l == level_infer_ + 1);
 
@@ -767,7 +785,7 @@ void EnzoMethodInference::request_data (Block * block, int ia3[3])
 void EnzoLevelArray::p_transfer_data
 (Index index, int nb, enzo_float * buffer_values )
 {
-  // // Loop through fields
+  // Loop through fields
   int i_b = 0;
   const int level = index.level();
   const int rank = cello::rank();
@@ -871,7 +889,8 @@ void EnzoLevelArray::p_transfer_data
           i_b,nb,
           (i_b == nb));
 
-  // Check if this is the last block portion expected by tracking volumes
+  // Check if this is the last incoming block portion expected by
+  // tracking volumes
 
   int level_volume = std::max(0,index.level() - level_array_);
   float volume_portion = pow(1.0/cello::num_children(),level_volume);
@@ -883,6 +902,7 @@ void EnzoLevelArray::p_transfer_data
            (0.0 <= volume_ratio_) && (volume_ratio_ <= 1.0));
 
   if (volume_ratio_ == 1.0) {
+    // reset volume counter for next call
     volume_ratio_ = 0.0;
     // When done, call inference (note safe to compare float with constant
     // since guaranteed no roundoff error)
@@ -895,6 +915,9 @@ void EnzoLevelArray::p_transfer_data
 void EnzoLevelArray::apply_inference()
 {
   // Apply inference method
+
+  CkPrintf ("EnzoLevelArray apply_inference() %d %d %d\n",
+            thisIndex[0],thisIndex[1],thisIndex[2]);
 
   // ...
 
@@ -987,31 +1010,63 @@ EnzoMethodInference::get_block_portion_
 
 void EnzoMethodInference::coarsen_
 (enzo_float * a_c,
- int mcx, int mcy, int mcz, int ncx, int ncy, int ncz, int ecx, int ecy, int ecz,
+ int mcx, int mcy, int mcz,
+ int ncx, int ncy, int ncz,
+ int ecx, int ecy, int ecz,
  const enzo_float * a_f,
- int mfx, int mfy, int mfz, int nfx, int nfy, int nfz, int efx, int efy, int efz)
+ int mfx, int mfy, int mfz,
+ int nfx, int nfy, int nfz,
+ int efx, int efy, int efz)
 {
+  // initialize index offsets, d[0]=0, d[1] = dx, d[2]=dy, d[3]=dx+dy,
+  // etc.
   const int dx = 1;
-  const int dy = mcx;
-  const int dz = mcx*mcy;
-  const int d000 = 0;
-  const int d001 = dx;
-  const int d010 = dy;
-  const int d011 = dx+dy;
-  const int d100 = dz;
-  const int d101 = dx+dz;
-  const int d110 = dx+dy;
-  const int d111 = dx+dy+dz;
-  if (cello::rank() == 1) {
-  } else if (cello::rank() == 2) {
-  } else if (cello::rank() == 3) {
+  const int dy = mfx;
+  const int dz = mfx*mfy;
+  int d[8];
+  for (int iz=0; iz<2; iz++) {
+    for (int iy=0; iy<2; iy++) {
+      for (int ix=0; ix<2; ix++) {
+        const int i=ix+2*(iy+2*iz);
+        d[i] = ix*dx + iy*dy + iz*dz;
+      }
+    }
+  }
+
+  // Compute restriction based on problem rank
+  const int rank = cello::rank();
+  if (rank == 1) {
+    for (int icx=0; icx<mcx; icx++) {
+      int i_f=icx*2;
+      int i_c=icx;
+      a_c[i_c] = 0.5*(a_f[i_f+d[0]] +
+                      a_f[i_f+d[1]]);
+    }
+  } else if (rank == 2) {
+    for (int icy=0; icy<mcy; icy++) {
+      for (int icx=0; icx<mcx; icx++) {
+        int i_f=icx*2 + mfx*(icy*2);
+        int i_c=icx   + mcx*(icy  );
+        a_c[i_c] = 0.25*(a_f[i_f+d[0]] +
+                         a_f[i_f+d[1]] +
+                         a_f[i_f+d[2]] +
+                         a_f[i_f+d[3]]);
+      }
+    }
+  } else if (rank == 3) {
     for (int icz=0; icz<mcz; icz++) {
       for (int icy=0; icy<mcy; icy++) {
         for (int icx=0; icx<mcx; icx++) {
           int i_f=icx*2 + mfx*(icy*2 + mfy*icz*2);
           int i_c=icx   + mcx*(icy   + mcy*icz);
-          a_c[i_c] = 0.125*(a_f[i_f+d000] + a_f[i_f+d001] + a_f[i_f+d010] + a_f[i_f+d011] +
-                            a_f[i_f+d100] + a_f[i_f+d101] + a_f[i_f+d110] + a_f[i_f+d111]);
+          a_c[i_c] = 0.125*(a_f[i_f+d[0]] +
+                            a_f[i_f+d[1]] +
+                            a_f[i_f+d[2]] +
+                            a_f[i_f+d[3]] +
+                            a_f[i_f+d[4]] +
+                            a_f[i_f+d[5]] +
+                            a_f[i_f+d[6]] +
+                            a_f[i_f+d[7]]);
         }
       }
     }
@@ -1022,21 +1077,28 @@ void EnzoMethodInference::coarsen_
 
 void EnzoLevelArray::interpolate_
 (enzo_float * a_f,
- int mfx, int mfy, int mfz, int nfx,int nfy, int nfz, int efx, int efy, int efz,
+ int mfx, int mfy, int mfz,
+ int nfx, int nfy, int nfz,
+ int efx, int efy, int efz,
  const enzo_float * a_c,
- int mcx, int mcy, int mcz, int ncx,int ncy, int ncz, int ecx, int ecy, int ecz)
+ int mcx, int mcy, int mcz,
+ int ncx, int ncy, int ncz,
+ int ecx, int ecy, int ecz)
 {
+  // initialize index offsets, d[0]=0, d[1] = dx, d[2]=dy, d[3]=dx+dy,
+  // etc.
   const int dx = 1;
   const int dy = mcx;
   const int dz = mcx*mcy;
-  const int d000 = 0;
-  const int d001 = dx;
-  const int d010 = dy;
-  const int d011 = dx+dy;
-  const int d100 = dz;
-  const int d101 = dx+dz;
-  const int d110 = dx+dy;
-  const int d111 = dx+dy+dz;
+  int d[8];
+  for (int iz=0; iz<2; iz++) {
+    for (int iy=0; iy<2; iy++) {
+      for (int ix=0; ix<2; ix++) {
+        const int i=ix+2*(iy+2*iz);
+        d[i] = ix*dx + iy*dy + iz*dz;
+      }
+    }
+  }
 
   const enzo_float w[2] = { 0.75, 0.25 };
 
@@ -1048,8 +1110,8 @@ void EnzoLevelArray::interpolate_
       auto wx1 = 1.0-wx0;
       auto i_f = ifx;
       auto i_c = icx;
-      a_f[i_f] = 0.5*(wx0*a_c[i_c+d000] +
-                      wx1*a_c[i_c+d001]);
+      a_f[i_f] = (wx0*a_c[i_c+d[0]] +
+                  wx1*a_c[i_c+d[1]]);
     }
   } else if (cello::rank() == 2) {
     for (auto ify=0; ify<nfy; ify++) {
@@ -1064,10 +1126,10 @@ void EnzoLevelArray::interpolate_
         auto wx1 = 1.0-wx0;
         auto i_f = ifx + mfx*ify;
         auto i_c = icx + mcx*icy;
-        a_f[i_f] = 0.25*(wy0*wx0*a_c[i_c+d000] +
-                         wy0*wx1*a_c[i_c+d001] +
-                         wy1*wx0*a_c[i_c+d010] +
-                         wy1*wx1*a_c[i_c+d011]);
+        a_f[i_f] = (wy0*wx0*a_c[i_c+d[0]] +
+                    wy0*wx1*a_c[i_c+d[1]] +
+                    wy1*wx0*a_c[i_c+d[2]] +
+                    wy1*wx1*a_c[i_c+d[3]]);
       }
     }
   } else if (cello::rank() == 3) {
@@ -1088,14 +1150,14 @@ void EnzoLevelArray::interpolate_
           auto wx1 = 1.0-wx0;
           auto i_f = ifx + mfx*(ify + mfy*ifz);
           auto i_c = icx + mcx*(icy + mcy*icz);
-          a_f[i_f] = 0.125*(wz0*wy0*wx0*a_c[i_c+d000] +
-                            wz0*wy0*wx1*a_c[i_c+d001] +
-                            wz0*wy1*wx0*a_c[i_c+d010] +
-                            wz0*wy1*wx1*a_c[i_c+d011] +
-                            wz1*wy0*wx0*a_c[i_c+d100] +
-                            wz1*wy0*wx1*a_c[i_c+d101] +
-                            wz1*wy1*wx0*a_c[i_c+d110] +
-                            wz1*wy1*wx1*a_c[i_c+d111]);
+          a_f[i_f] = (wz0*wy0*wx0*a_c[i_c+d[0]] +
+                      wz0*wy0*wx1*a_c[i_c+d[1]] +
+                      wz0*wy1*wx0*a_c[i_c+d[2]] +
+                      wz0*wy1*wx1*a_c[i_c+d[3]] +
+                      wz1*wy0*wx0*a_c[i_c+d[4]] +
+                      wz1*wy0*wx1*a_c[i_c+d[5]] +
+                      wz1*wy1*wx0*a_c[i_c+d[6]] +
+                      wz1*wy1*wx1*a_c[i_c+d[7]]);
         }
       }
     }
@@ -1195,19 +1257,21 @@ void EnzoBlock::p_method_infer_exit()
 
 void EnzoMethodInference::create_level_arrays_ (Block * block)
 {
+  const int level = block->level();
+  
   ASSERT2 ("EnzoMethodInference::create_level_arrays_",
            "Block %s not in expected refinement level %d",
-           block->name().c_str(),block->level(),
-           block->level() == level_base_);
+           block->name().c_str(),level,
+           level == level_base_);
   int mx,my,mz;
-  std::tie(mx,my,mz) = mask_dims_(block->level());
+  std::tie(mx,my,mz) = mask_dims_(level);
   int m = mx*my*mz;
   char * mask = *scalar_mask_(block);
   int nax,nay,naz;
   level_array_dims_(&nax,&nay,&naz);
   if (mask != nullptr) {
     int i3[3];
-    block->index().index_level (i3, block->level());
+    block->index().index_level (i3, level);
     for (int kz=0; kz<mz; kz++) {
       for (int ky=0; ky<my; ky++) {
         for (int kx=0; kx<mx; kx++) {

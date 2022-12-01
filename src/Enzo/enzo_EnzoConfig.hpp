@@ -376,8 +376,6 @@ public: // interface
       method_inference_array_dims(),
       method_inference_array_size(),
       method_inference_field_group(),
-      method_inference_num_adapt(0),
-      method_inference_adapt_index(-1),
       method_inference_overdensity_threshold(0),
       /// EnzoMethodStarMaker
       method_star_maker_flavor(""),
@@ -873,8 +871,6 @@ public: // attributes
   int                        method_inference_array_dims[3];
   int                        method_inference_array_size[3];
   std::string                method_inference_field_group;
-  int                        method_inference_num_adapt;
-  int                        method_inference_adapt_index;
   float                      method_inference_overdensity_threshold;
 
   /// EnzoMethodStarMaker

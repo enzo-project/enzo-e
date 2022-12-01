@@ -190,9 +190,9 @@ void Hierarchy::root_blocks
   if (nbx) (*nbx) = blocking_[0];
   if (nby) (*nby) = blocking_[1];
   if (nbz) (*nbz) = blocking_[2];
-  const int r = std::pow(2,level);
-  const int rank = cello::rank();
   if (level > 0) {
+    const int r = std::pow(2,level);
+    const int rank = cello::rank();
     if (nbx && rank >= 1) (*nbx) *= r;
     if (nby && rank >= 2) (*nby) *= r;
     if (nbz && rank >= 3) (*nbz) *= r;

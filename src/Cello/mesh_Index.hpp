@@ -244,8 +244,7 @@ private: // attributes
 
 #ifndef TEST
   PUPbytes(Index)
-
-  //  PUPbytes(NodeBits)
+  PUPbytes(NodeBits)
 
   class CkArrayIndexIndex:public CkArrayIndex {
     Index * index_;

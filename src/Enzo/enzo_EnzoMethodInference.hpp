@@ -27,8 +27,6 @@ public: // interface
    const int array_dims[3],
    const int array_size[3],
    std::string field_group,
-   int index_criteria,
-   int num_criteria,
    float overdensity_threshold);
 
   EnzoMethodInference()
@@ -44,8 +42,6 @@ public: // interface
       is_sync_parent_(-1),
       is_mask_(-1),
       is_count_(-1),
-      index_criteria_(-1),
-      num_criteria_(0),
       overdensity_threshold_(0)
   { }
 
@@ -66,8 +62,6 @@ public: // interface
       is_sync_parent_(-1),
       is_mask_(-1),
       is_count_(-1),
-      index_criteria_(-1),
-      num_criteria_(0),
       overdensity_threshold_(0)
   { }
 
@@ -205,11 +199,6 @@ protected: // attributes
 
   /// Block Scalar count of overlapping inference arrays
   int is_count_;
-
-  /// Index for the first criterion (implemented as refinement criterion RefineFoo)
-  int index_criteria_;
-  /// Number of refinement criteria
-  int num_criteria_;
 
   /// Local overdensity threshold for creating inference array
   enzo_float overdensity_threshold_;
