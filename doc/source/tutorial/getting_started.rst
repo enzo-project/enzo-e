@@ -169,40 +169,124 @@ The Enzo-E executable is built within ``bin/``.
 Configuration options
 ---------------------
 
-Current ``cmake`` options are the following (default value at the end of the line):
+Current ``cmake`` options are listed in the following tables:
 
-* ``USE_GRACKLE`` "Use Grackle Chemistry" ON
-* ``USE_DOUBLE_PREC`` "Use double precision. Turn off for single precision." ON
-* ``new_output`` "Temporary setting for using new Output implementation" OFF
-* ``node_size`` "Maximum number of procesess per shared-memory node (can be larger than needed)" 64
-* ``trace`` "Print out detailed messages with the TRACE() series of statements" OFF
-* ``verbose`` "Trace main phases" OFF
-* ``trace_charm`` "Print out messages with the TRACE_CHARM() and TRACEPUP() series of statements" OFF
-* ``debug`` "Whether to enable displaying messages with the DEBUG() series of
-  statements. Also writes messages to out.debug.<P> where P is the
-  (physical) process rank. Still requires the \"DEBUG\" group to be
-  enabled in Monitor (that is Monitor::is_active(\"DEBUG\") must be true for any output) OFF
-* ``debug_field`` "" OFF
-* ``debug_field_face`` "" OFF
-* ``check`` "Do extra run-time checking.  Useful for debugging, but can potentially slow calculations down" OFF
-* ``debug_verbose`` "Print periodically all field values.  See src/Field/field_FieldBlock.cpp" OFF
-* ``memory`` "Track dynamic memory statistics.  Can be useful, but can cause problems on some systems that also override new [] () / delete [] ()" OFF
-* ``balance`` "Enable charm++ dynamic load balancing" ON`
-* ``balancer_included`` "Charm++ load balancer included" "CommonLBs"
-* ``balancer_default`` "Charm++ load balancer to use by default" "TreeLB"
-* ``use_gprof`` "Compile with -pg to use gprof for performance profiling" OFF
-* ``use_performance`` "Use Cello Performance class for collecting performance
-  data (currently requires global reductions, and may not be fully
-  functional) (basic time data on root processor is still output)" ON
-* ``use_projections`` "Compile the CHARM++ version for use with the Projections performance tool." OFF
-* ``use_jemalloc`` "Use the jemalloc library for memory allocation" OFF
-* ``smp`` "Use Charm++ in SMP mode." OFF
-* ``use_papi`` "Use the PAPI performance API" OFF
-* ``PARALLEL_LAUNCHER`` "Launcher to use for parallel tests" `charmrun`
-* ``PARALLEL_LAUNCHER_NPROC_ARG`` "Argument to set number of processing elements for parallel launcher" ``+p`` (for use with ``charmrun``)
-* ``PARALLEL_LAUNCHER_NPROC`` "Number of processors to run parallel unit tests" 4
+.. list-table:: General Configuration
+   :widths: 10 30 5
+   :header-rows: 1
 
-All variables can be set either on the commad line by ``-D<variable>=<value>`` or
+   * - Name
+     - Description
+     - Default
+   * - ``USE_DOUBLE_PREC``
+     - Use double precision. Turn off for single precision.
+     - ON
+   * - ``new_output``
+     - Temporary setting for using new Output implementation
+     - OFF
+   * - ``node_size``
+     - Maximum number of procesess per shared-memory node (can be larger than needed)
+     - 64
+   * - ``smp``
+     - Use Charm++ in SMP mode.
+     - OFF
+   * - ``balance``
+     - Enable charm++ dynamic load balancing
+     - ON
+   * - ``balancer_included``
+     - Charm++ load balancer included
+     - "CommonLBs"
+   * - ``balancer_default``
+     - Charm++ load balancer to use by default
+     - "TreeLB"
+
+.. list-table:: External Dependencies
+   :widths: 10 30 5
+   :header-rows: 1
+
+   * - Name
+     - Description
+     - Default
+   * - ``USE_GRACKLE``
+     - Use Grackle Chemistry
+     - ON
+   * - ``use_jemalloc``
+     - Use the jemalloc library for memory allocation
+     - OFF
+   * - ``use_papi``
+     - Use the PAPI performance API
+     - OFF
+
+.. list-table:: Profile-Related Configuration
+   :widths: 10 30 5
+   :header-rows: 1
+
+   * - Name
+     - Description
+     - Default
+   * - ``use_gprof``
+     - Compile with -pg to use gprof for performance profiling
+     - OFF
+   * - ``use_performance``
+     - Use Cello Performance class for collecting performance data (currently requires global reductions, and may not be fully functional) (basic time data on root processor is still output)
+     - ON
+   * - ``use_projections``
+     - Compile the CHARM++ version for use with the Projections performance tool.
+     - OFF
+   * - ``memory``
+     - Track dynamic memory statistics.  Can be useful, but can cause problems on some systems that also override ``new [] ()`` / ``delete [] ()``
+     - OFF
+
+.. list-table:: Test-Related Configuration
+   :widths: 10 30 5
+   :header-rows: 1
+
+   * - Name
+     - Description
+     - Default
+   * - ``PARALLEL_LAUNCHER``
+     - Launcher to use for parallel tests
+     - charmrun
+   * - ``PARALLEL_LAUNCHER_NPROC_ARG``
+     - Argument to set number of processing elements for parallel launcher (for use with ``charmrun``)
+     - +p
+   * - ``PARALLEL_LAUNCHER_NPROC``
+     - Number of processors to run parallel unit tests
+     - 4
+       
+.. list-table:: Debug Options
+   :widths: 10 30 5
+   :header-rows: 1
+
+   * - Name
+     - Description
+     - Default
+   * - ``trace``
+     - Print out detailed messages with the TRACE() series of statements
+     - OFF
+   * - ``verbose``
+     - Trace main phases
+     - OFF
+   * - ``trace_charm``
+     - Print out messages with the TRACE_CHARM() and TRACEPUP() series of statements
+     - OFF
+   * - ``debug``
+     - Whether to enable displaying messages with the DEBUG() series of statements. Also writes messages to out.debug.<P> where P is the (physical) process rank. Still requires the "DEBUG" group to be enabled in ``Monitor`` (that is ``Monitor::is_active("DEBUG")`` must be true for any output)
+     - OFF
+   * - ``debug_field``
+     -
+     - OFF
+   * - ``debug_field_face``
+     -
+     - OFF
+   * - ``check``
+     - Do extra run-time checking.  Useful for debugging, but can potentially slow calculations down
+     - OFF
+   * - ``debug_verbose``
+     - Print periodically all field values.  See ``src/Field/field_FieldBlock.cpp``
+     - OFF
+
+All variables can be set either on the command line by ``-D<variable>=<value>`` or
 in a machine config, see below.
 For example, a configure line may look like
 
