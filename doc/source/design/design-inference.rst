@@ -1,5 +1,7 @@
 .. include:: ../roles.incl
 
+.. _Inference Design:
+
 **********************
 Inference Array Design
 **********************

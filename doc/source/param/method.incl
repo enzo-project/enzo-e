@@ -711,6 +711,12 @@ heat
 
 :e:`Thermal diffusivity parameter for the heat equation.`
 
+inference
+---------
+
+.. include:: method_infer.incl
+
+
 merge_sinks
 -----------
 
