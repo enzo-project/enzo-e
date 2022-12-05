@@ -46,7 +46,7 @@ Design` section for details on its capabilities and usage.
 :Default: :d:`0`
 :Scope:     :z:`Enzo`
 
-:p:`level_array` :e:`defines the level at blocks are the same size (but not the same resolution) as inference arrays. The array level must be at least as large as the "base" level (` :p:`level_array >= level_base` :e:`)`.
+:p:`level_array` :e:`defines the level at which blocks are the same size (but not the same resolution) as inference arrays. The array level must be at least as large as the "base" level (` :p:`level_array >= level_base` :e:`)`.
 
 ----
 
@@ -66,7 +66,7 @@ Design` section for details on its capabilities and usage.
 :Default: :d:`0`
 :Scope:     :z:`Enzo`
 
-:e:`Refinement level defining the level at which block resolution matches the resolution of the inference arrays. Must be at least as large as` :p:`level_array`.
+:e:`Refinement level defining the level at which block resolution matches the resolution of the inference arrays. Must be at least as large as the "array" level` :e:`(` :p:`level_infer >= level_array` :e:`)`.
 
 ----
 
