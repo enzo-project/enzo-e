@@ -169,7 +169,13 @@ The Enzo-E executable is built within ``bin/``.
 Configuration options
 ---------------------
 
-Current ``cmake`` options are listed in the following tables:
+Current ``cmake`` options are listed in the following subsubsections.
+Skip ahead to :ref:`how_to_specify_the_configuration` for details about how to specify the configuration.
+
+General Configuration
+^^^^^^^^^^^^^^^^^^^^^
+
+These options are related to Enzo-E's general configuration.
 
 .. list-table:: General Configuration
    :widths: 10 30 5
@@ -188,7 +194,7 @@ Current ``cmake`` options are listed in the following tables:
      - Maximum number of procesess per shared-memory node (can be larger than needed)
      - 64
    * - ``smp``
-     - Use Charm++ in SMP mode.
+     - Use Charm++ in SMP mode (Charm++ must have been compiled to support SMP mode).
      - OFF
    * - ``balance``
      - Enable charm++ dynamic load balancing
@@ -199,6 +205,13 @@ Current ``cmake`` options are listed in the following tables:
    * - ``balancer_default``
      - Charm++ load balancer to use by default
      - "TreeLB"
+
+Configuring Dependencies
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+The parameters in the following table control whether ``Enzo-E / Cello`` should make use of certain external dependencies.
+These options all assume that ``cmake`` is succesfully able to find the location of these dependencies.
+In some cases, you may need to provide additional hints about the location of the dependencies (see :ref:`how_to_specify_the_configuration` for more details)
 
 .. list-table:: External Dependencies
    :widths: 10 30 5
@@ -217,6 +230,10 @@ Current ``cmake`` options are listed in the following tables:
      - Use the PAPI performance API
      - OFF
 
+Profiling Options
+^^^^^^^^^^^^^^^^^
+These options control compilation choices that can be used to facillitate profiling in ``Enzo-E / Cello``
+
 .. list-table:: Profile-Related Configuration
    :widths: 10 30 5
    :header-rows: 1
@@ -224,6 +241,9 @@ Current ``cmake`` options are listed in the following tables:
    * - Name
      - Description
      - Default
+   * - ``memory``
+     - Track dynamic memory statistics.  Can be useful, but can cause problems on some systems that also override ``new [] ()`` / ``delete [] ()``
+     - OFF
    * - ``use_gprof``
      - Compile with -pg to use gprof for performance profiling
      - OFF
@@ -233,11 +253,13 @@ Current ``cmake`` options are listed in the following tables:
    * - ``use_projections``
      - Compile the CHARM++ version for use with the Projections performance tool.
      - OFF
-   * - ``memory``
-     - Track dynamic memory statistics.  Can be useful, but can cause problems on some systems that also override ``new [] ()`` / ``delete [] ()``
-     - OFF
 
-.. list-table:: Test-Related Configuration
+Testing Options
+^^^^^^^^^^^^^^^
+
+These options configure properties of parallel automated tests.
+
+.. list-table:: Testing-Related Configuration
    :widths: 10 30 5
    :header-rows: 1
 
@@ -253,6 +275,11 @@ Current ``cmake`` options are listed in the following tables:
    * - ``PARALLEL_LAUNCHER_NPROC``
      - Number of processors to run parallel unit tests
      - 4
+
+Debugging Options
+^^^^^^^^^^^^^^^^^
+
+The following options are useful for debugging.
        
 .. list-table:: Debug Options
    :widths: 10 30 5
@@ -261,14 +288,8 @@ Current ``cmake`` options are listed in the following tables:
    * - Name
      - Description
      - Default
-   * - ``trace``
-     - Print out detailed messages with the TRACE() series of statements
-     - OFF
-   * - ``verbose``
-     - Trace main phases
-     - OFF
-   * - ``trace_charm``
-     - Print out messages with the TRACE_CHARM() and TRACEPUP() series of statements
+   * - ``check``
+     - Do extra run-time checking.  Useful for debugging, but can potentially slow calculations down
      - OFF
    * - ``debug``
      - Whether to enable displaying messages with the DEBUG() series of statements. Also writes messages to out.debug.<P> where P is the (physical) process rank. Still requires the "DEBUG" group to be enabled in ``Monitor`` (that is ``Monitor::is_active("DEBUG")`` must be true for any output)
@@ -279,12 +300,24 @@ Current ``cmake`` options are listed in the following tables:
    * - ``debug_field_face``
      -
      - OFF
-   * - ``check``
-     - Do extra run-time checking.  Useful for debugging, but can potentially slow calculations down
-     - OFF
+
    * - ``debug_verbose``
      - Print periodically all field values.  See ``src/Field/field_FieldBlock.cpp``
      - OFF
+   * - ``trace``
+     - Print out detailed messages with the TRACE() series of statements
+     - OFF
+   * - ``trace_charm``
+     - Print out messages with the TRACE_CHARM() and TRACEPUP() series of statements
+     - OFF
+   * - ``verbose``
+     - Trace main phases
+     - OFF
+
+.. _how_to_specify_the_configuration:
+
+Specifying Configuration Options
+--------------------------------
 
 All variables can be set either on the command line by ``-D<variable>=<value>`` or
 in a machine config, see below.
@@ -311,14 +344,13 @@ Note:
 
 The last option is a machine specific configuration file (see below).
 
-In addition, the general `cmake` option to set basic optimization flags via
-``CMAKE_BUILD_TYPE`` with values of
+In addition, the general `cmake` option is available to set basic optimization flags via ``CMAKE_BUILD_TYPE`` with values of:
 
-* ``Release`` (typically ``-O3``),
-* ``RelWithDebInfo`` (typically ``-O2 -g``), and
+* ``Release`` (typically ``-O3``)
+* ``RelWithDebInfo`` (typically ``-O2 -g``)
 * ``Debug`` (typically ``-O0 -g``)
 
-are available.
+The first choice is generally fastest, while the second is a sensible choice during development (the compiler performs most optimizations and includes debugging information in the executable)
 
 
 
