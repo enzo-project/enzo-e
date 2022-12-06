@@ -230,6 +230,30 @@ In some cases, you may need to provide additional hints about the location of th
      - Use the PAPI performance API
      - OFF
 
+Floating-Point Optimization Options
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Generally, ``Enzo-E / Cello`` will not be compiled with value-unsafe floating point optimizations unless they are explicitly enabled.
+This default behavior was chosen to support automated tests that check symmetry preservation in certain components of the code (mostly related to hydro/MHD).
+While this feature is not essential for all applications, it is very useful when debugging new features.
+
+Note that the Intel compilers deviate from this behavior. By default, they enable more aggressive floating point optimizations by default (consequently the tests checking symmetry may fail). This is a large part of the reason that the Intel compilers have a reputation for producing faster code (in practice, this is not always the case).
+
+.. list-table:: Floating point optimizations
+   :widths: 10 30 5
+   :header-rows: 1
+
+   * - Name
+     - Description
+     - Default
+   * - ``OPTIMIZE_FP``
+     - Enable value-unsafe floating point optimizations (for some compilers, this enables ``-ffast-math``).
+     - OFF
+   * - ``USE_SIMD``
+     - Enables compiler support for OpenMP SIMD directives (for ``gcc``, ``icc``, and ``clang`` compilers this will NOT enable other OpenMP directives and should not link the openmp runtime library). Enabling this requires that ``OPTIMIZE_FP=ON``.
+     - OFF
+
+
 Profiling Options
 ^^^^^^^^^^^^^^^^^
 These options control compilation choices that can be used to facillitate profiling in ``Enzo-E / Cello``
