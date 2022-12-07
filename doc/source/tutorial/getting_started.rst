@@ -376,6 +376,7 @@ In addition, the general `cmake` option is available to set basic optimization f
 
 The first choice is generally fastest, while the second is a sensible choice during development (the compiler performs most optimizations and includes debugging information in the executable)
 
+Note that setting ``-DOPTIMIZE_FP=ON`` will modify each of these build types to include value-unsafe floating point optimizations.
 
 
 Machine files
