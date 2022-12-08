@@ -38,8 +38,7 @@ Parameter:  :p:`Method` : :p:`feedback` : :p:`radiation`
 :Default: :d:`true`
 :Scope:     :z:`Enzo`
 
-:e:`Whether to turn on ionizing radiation in EnzoMethodFeedbackSTARSS. If true, updates the "luminosity"
-    attribute of "star" particles using piecewise rates taken from Appendix A of` `Hopkins et al. (2018) <https://academic.oup.com/mnras/article/480/1/800/5046474>`_.
+:e:`Whether to turn on ionizing radiation in EnzoMethodFeedbackSTARSS. If true, updates the "luminosity" attribute of "star" particles using piecewise rates taken from Appendix A of` `Hopkins et al. (2018) <https://academic.oup.com/mnras/article/480/1/800/5046474>`_.
 
 ----
 
