@@ -169,6 +169,36 @@ Enzo-E's multigroup M1 Closure radiative transfer solver.
    
 ----
 
+:Parameter:  :p:`Method` : :p:`m1_closure` : :p:`lyman_werner_background`
+:Summary: :s:`Whether to include a Lyman-Werner background`
+:Type:    :t:`bool`
+:Default: :d:`"false"`
+:Scope:     :c:`Enzo`
+
+:e:`Whether to include an H2-photodissociating Lyman-Werner background. Requires radiation group 0 to be defined corresponding to energies in the Lyman-Werner band (11.18-13.6 eV). A constant intensity can be specified using the :p:`LWB_J21` parameter. If :p:`LWB_J21` is not set, the intensity will be calculated using the redshift-dependent polynomial fit defined in Equation 16 of` `Wise et al. (2012) <https://academic.oup.com/mnras/article/427/1/311/1029262>`_.
+
+----
+
+:Parameter:  :p:`Method` : :p:`m1_closure` : :p:`LWB_J21`
+:Summary: :s:`Intensity of the LW background in units of 1e-21 erg s^-1 cm^-2 Hz^-1 sr^-1`
+:Type:    :t:`float`
+:Default: :d:`-1.0`
+:Scope:     :c:`Enzo`
+
+:e:`Intensity of the LW background in units of 1e-21 erg s^-1 cm^-2 Hz^-1 sr^-1.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`m1_closure` : :p:`H2_photodissociation`
+:Summary: :s:`Whether to include H2 photodissociation from LW radiation`
+:Type:    :t:`bool`
+:Default: :d:`"false"`
+:Scope:     :c:`Enzo`
+
+:e:`Whether to include an H2 photodissociation from Lyman-Werner radiation. If true, H2 photodissication rates are calculated and stored in a field called "RT_H2_dissociation_rate". Requires radiation group 0 to be defined corresponding to energies in the Lyman-Werner band (11.18-13.6 eV).`
+
+----
+
 :Parameter:  :p:`Method` : :p:`m1_closure` : :p:`SED`
 :Summary: :s:`User-specified SED for radiating point sources`
 :Type:    :t:`list` ( :t:`float` )
@@ -186,7 +216,7 @@ For example, if` :p:`SED` = [0.1, 0.6, 0.3], the emitted radiation will be split
 :Default: :d:`0.0`
 :Scope:     :c:`Enzo`
 
-:e:`User-specified group-mean cross sections, averaged by energy. Requires` :p:cross_section_calculator = `"custom"`. If this parameter is set, :p:`sigmaN` must also be set. This list has length Ngroups*3, where the number 3 represents the number of ionizable species (HI, HeI, and HeII). For example, a simulation could use three radiation groups with :p:`energy_mean`=[21.62, 30.0, 60.0]. In this case, setting :p:`sigmaE`=[1.78e-18,0.0,0.0, 7.03e-19,5.36e-18,0.0, 9.19e-20,1.37e-18,1.22e-18] would produce the same cross sections as the fits from  `Vernier et al. (1996) <https://ui.adsabs.harvard.edu/abs/1996ApJ...465..487V/abstract>_`.
+:e:`User-specified group-mean cross sections, averaged by energy. Requires` :p:cross_section_calculator = `"custom"`. If this parameter is set, :p:`sigmaN` must also be set. This list has length Ngroups*3 (Ngroups*4 if :p:H2_photodissociation`=true), where the number 3 (or 4) represents the number of chemical species (HI, HeI, HeII, and optionally H2I). For example, a simulation could use three radiation groups with :p:`energy_mean`=[21.62, 30.0, 60.0]. In this case, setting :p:`sigmaE`=[1.78e-18,0.0,0.0, 7.03e-19,5.36e-18,0.0, 9.19e-20,1.37e-18,1.22e-18] would produce the same cross sections as the fits from  `Vernier et al. (1996) <https://ui.adsabs.harvard.edu/abs/1996ApJ...465..487V/abstract>_`.
    
 ----
 
@@ -196,7 +226,7 @@ For example, if` :p:`SED` = [0.1, 0.6, 0.3], the emitted radiation will be split
 :Default: :d:`0.0`
 :Scope:     :c:`Enzo`
 
-:e:`User-specified group-mean cross sections, averaged by photon number. Requires` :p:cross_section_calculator = `"custom"`. If this parameter is set, :p:`sigmaE` must also be set. This list has length Ngroups*3, where the number 3 represents the number of ionizable species (HI, HeI, and HeII). For example, a simulation could use three radiation groups with :p:`energy_mean`=[21.62, 30.0, 60.0]. In this case, setting :p:`sigmaE`=[1.78e-18,0.0,0.0, 7.03e-19,5.36e-18,0.0, 9.19e-20,1.37e-18,1.22e-18] would produce the same cross sections as the fits from  `Vernier et al. (1996) <https://ui.adsabs.harvard.edu/abs/1996ApJ...465..487V/abstract>_`.
+:e:`User-specified group-mean cross sections, averaged by photon number. Requires` :p:cross_section_calculator = `"custom"`. If this parameter is set, :p:`sigmaE` must also be set. This list has length Ngroups*3 (Ngroups*4 if :p:`H2_photodissociation`=true), where the number 3 (or 4) represents the number of chemical species (HI, HeI, HeII, and optionally H2I). For example, a simulation could use three radiation groups with :p:`energy_mean`=[21.62, 30.0, 60.0]. In this case, setting :p:`sigmaE`=[1.78e-18,0.0,0.0, 7.03e-19,5.36e-18,0.0, 9.19e-20,1.37e-18,1.22e-18] would produce the same cross sections as the fits from  `Vernier et al. (1996) <https://ui.adsabs.harvard.edu/abs/1996ApJ...465..487V/abstract>_`.
 
    
 ----

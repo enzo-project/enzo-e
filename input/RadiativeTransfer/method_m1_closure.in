@@ -32,7 +32,7 @@
          position = [ 0.5000000000000000, 0.5000000000000000, 0.5000000000000000 ];
          star_mass = 100.0000000000000;
          temperature = 100.0000000000000;
-         luminosity = 5e48;
+         luminosity = 1e36;
      };
      list = [ "feedback_test", "m1_closure" ];
  }
@@ -47,7 +47,7 @@
      list = [ "m1_closure" ];
      m1_closure {
          N_groups = 2;
-         Nphotons_per_sec = 5.000000000000000e+48;
+         particle_luminosity = 1e36;
          SED = [ 0.6, 0.4 ];
          energy_lower = [ 13.60000000000000, 24.5900000000000 ];
          energy_upper = [ 24.59000000000000, 54.4200000000000 ];

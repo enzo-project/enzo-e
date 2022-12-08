@@ -967,7 +967,7 @@ void EnzoMethodM1Closure::get_photoionization_and_heating_rates (EnzoBlock * enz
     enzo_float * RT_H2_photodissociation_rate = (enzo_float *) field.values("RT_H2_dissociation_rate");
     for (int i=0; i<mx*my*mz; i++) {
       double N = (photon_densities[0])[i] * Nunit; // LW-group assumed to be group 0
-      double sigmaN = sigma_vernier(); // cm^2 
+      double sigmaN = *(scalar.value( scalar.index( sigN_string(0,3) ))); // cm^2 
       RT_H2_photodissociation_rate[i] = sigmaN*clight*N * tunit;   
     }
   }
