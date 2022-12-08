@@ -42,6 +42,7 @@ Enzo-E's multigroup M1 Closure radiative transfer solver.
 :e:`This parameter specifies the group mean energies in eV.`
 
 ----
+
 :Parameter:  :p:`Method` : :p:`m1_closure` : :p:`clight_frac`
 :Summary: :s:`Speed-of-light fraction`
 :Type:    :t:`float`

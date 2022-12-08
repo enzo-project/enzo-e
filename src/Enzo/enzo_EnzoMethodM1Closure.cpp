@@ -103,7 +103,9 @@ EnzoMethodM1Closure ::EnzoMethodM1Closure(const int N_groups)
   ScalarDescr * scalar_descr = cello::scalar_descr_double();
  
   // only three ionizable species (HI, HeI, HeII)
-  int N_species_ = 3; 
+  // photodissociation cross sections for H2 are added
+  // if method_m1_closure_H2_photodissociation = true
+  int N_species_ = 3 + enzo::config()->method_m1_closure_H2_photodissociation; 
   for (int i=0; i<N_groups_; i++) {
     scalar_descr->new_value( eps_string(i) );
     scalar_descr->new_value(  mL_string(i) );
@@ -287,7 +289,7 @@ double EnzoMethodM1Closure::get_radiation_custom(EnzoBlock * enzo_block,
   double mL = pmass*plum_i; 
  
   // loop through ionizable species
-  int N_species = 3;
+  int N_species = 3 + enzo_config->method_m1_closure_H2_photodissociation;
   
   for (int j=0; j<N_species; j++) {
     double sigma_j = sigma_vernier(energy,j); // cm^2   
@@ -359,7 +361,7 @@ double EnzoMethodM1Closure::get_radiation_blackbody(EnzoBlock * enzo_block,
                                     +=
                 E_integrated / N_integrated * mL;
 
-  int N_species = 3;
+  int N_species = 3 + enzo_config->method_m1_closure_H2_photodissociation;
   for (int j=0; j<N_species; j++) { // loop over ionizable species
 
     // eq. B4 ----> sigmaN = int(sigma_nuj * N_nu dnu)/int(N_nu dnu)
