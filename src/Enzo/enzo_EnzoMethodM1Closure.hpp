@@ -124,6 +124,8 @@ protected: // methods
 
   void solve_transport_eqn (EnzoBlock * enzo_block, int igroup) throw();
 
+  void add_LWB (EnzoBlock * enzo_block, double J21);
+
   //---------- THERMOCHEMISTRY STEP ------------
 
 

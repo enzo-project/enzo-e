@@ -406,6 +406,9 @@ public: // interface
       method_m1_closure_attenuation(true),
       method_m1_closure_thermochemistry(true),
       method_m1_closure_recombination_radiation(false),
+      method_m1_closure_H2_photodissociation(false),
+      method_m1_closure_lyman_werner_background(false),
+      method_m1_closure_LWB_J21(-1.0),
       method_m1_closure_cross_section_calculator("vernier"), // what type of cross section calculator to use ("vernier", "vernier_average", "custom")
       method_m1_closure_sigmaN(), // user-defined cross sections (requires cross_section_calculator = "custom")
       method_m1_closure_sigmaE(), 
@@ -926,6 +929,9 @@ public: // attributes
   bool                      method_m1_closure_attenuation;
   bool                      method_m1_closure_thermochemistry;
   bool                      method_m1_closure_recombination_radiation;
+  bool                      method_m1_closure_H2_photodissociation;
+  bool                      method_m1_closure_lyman_werner_background;
+  double                    method_m1_closure_LWB_J21;
   std::string               method_m1_closure_cross_section_calculator;
   std::vector<double>       method_m1_closure_sigmaN;
   std::vector<double>       method_m1_closure_sigmaE;

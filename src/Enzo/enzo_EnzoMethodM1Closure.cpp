@@ -101,8 +101,9 @@ EnzoMethodM1Closure ::EnzoMethodM1Closure(const int N_groups)
   // of eqs. (B6)-(B8). 
   // mL = mass_star * luminosity_star 
   ScalarDescr * scalar_descr = cello::scalar_descr_double();
-  
-  int N_species_ = 3; //only three ionizable species (HI, HeI, HeII)
+ 
+  // only three ionizable species (HI, HeI, HeII)
+  int N_species_ = 3; 
   for (int i=0; i<N_groups_; i++) {
     scalar_descr->new_value( eps_string(i) );
     scalar_descr->new_value(  mL_string(i) );
@@ -286,9 +287,10 @@ double EnzoMethodM1Closure::get_radiation_custom(EnzoBlock * enzo_block,
   double mL = pmass*plum_i; 
  
   // loop through ionizable species
-
-  for (int j=0; j<3; j++) {
-    double sigma_j = sigma_vernier(energy,j); // cm^2
+  int N_species = 3;
+  
+  for (int j=0; j<N_species; j++) {
+    double sigma_j = sigma_vernier(energy,j); // cm^2   
 
     #ifdef DEBUG_INJECTION
       CkPrintf("MethodM1Closure::get_radiation_custom -- j = %d; energy = %f eV; sigma_j = %1.2e cm^2; mL = %1.2e \n", j, energy, sigma_j, mL);
@@ -357,7 +359,8 @@ double EnzoMethodM1Closure::get_radiation_blackbody(EnzoBlock * enzo_block,
                                     +=
                 E_integrated / N_integrated * mL;
 
-  for (int j=0; j<3; j++) { // loop over ionizable species
+  int N_species = 3;
+  for (int j=0; j<N_species; j++) { // loop over ionizable species
 
     // eq. B4 ----> sigmaN = int(sigma_nuj * N_nu dnu)/int(N_nu dnu)
     *(scalar.value( scalar.index(sigN_string(igroup, j) + mL_string(igroup) ) )) 
@@ -844,16 +847,16 @@ double EnzoMethodM1Closure::sigma_vernier (double energy, int type) throw()
     yw = y0 = y1 = 0.0;
     break;
   
-    // Lyman-Werner
+    // H2I (Lyman-Werner band)
   case 3:
     e_th = 11.18;
-    e_max = 13.6;
+    e_max = 13.60;
     sigma0 = 3.71;
     break; 
   }
 
-  // return 0 if below ionization threshold
-  if (energy < e_th) return 0.0;
+  // return 0 if below ionization threshold or above max energy
+  if ((energy < e_th) || (energy > e_max)) return 0.0;
 
   double fy;
   if (type != 3) {
@@ -932,11 +935,12 @@ void EnzoMethodM1Closure::get_photoionization_and_heating_rates (EnzoBlock * enz
     photon_densities.push_back( (enzo_float *) field.values("photon_density_" + std::to_string(igroup))) ;
   }
 
+  int N_species = 3; // HI, HeI, HeII
   // loop through cells
   for (int i=0; i<mx*my*mz; i++) {
-    double nHI = HI_density[i] * rhounit / mH; // cgs 
+    double nHI = std::max(HI_density[i] * rhounit / mH, 1e-20); // cgs 
     double heating_rate = 0.0; 
-    for (int j=0; j<3; j++) { //loop over species
+    for (int j=0; j<N_species; j++) { //loop over species
       double ionization_rate = 0.0;
       for (int igroup=0; igroup<enzo_config->method_m1_closure_N_groups; igroup++) { //loop over groups
         double sigmaN = *(scalar.value( scalar.index( sigN_string(igroup,j) ))); // cm^2 
@@ -956,6 +960,16 @@ void EnzoMethodM1Closure::get_photoionization_and_heating_rates (EnzoBlock * enz
     }
         
   RT_heating_rate[i] = heating_rate / nHI; // units of erg/s/cm^3/nHI
+  }
+
+  // H2 photodissociation from LW radiation
+  if (enzo_config->method_m1_closure_H2_photodissociation) {
+    enzo_float * RT_H2_photodissociation_rate = (enzo_float *) field.values("RT_H2_dissociation_rate");
+    for (int i=0; i<mx*my*mz; i++) {
+      double N = (photon_densities[0])[i] * Nunit; // LW-group assumed to be group 0
+      double sigmaN = sigma_vernier(); // cm^2 
+      RT_H2_photodissociation_rate[i] = sigmaN*clight*N * tunit;   
+    }
   }
  
 }
@@ -1115,9 +1129,17 @@ void EnzoMethodM1Closure::D_add_attenuation ( EnzoBlock * enzo_block, double * D
  
   std::vector<std::string> chemistry_fields = {"HI_density", 
                                                "HeI_density", "HeII_density"};
+
   double mH = enzo_constants::mass_hydrogen;
   std::vector<double> masses = {mH,4*mH, 4*mH};
  
+/*
+  if (enzo_config->method_m1_closure_H2_photodissociation) {
+    chemistry_fields.push_back("H2I_density");
+    masses.push_back(2*mH);
+  }
+*/
+
   Scalar<double> scalar = enzo_block->data()->scalar_double();
   for (int j=0; j<chemistry_fields.size(); j++) {  
     enzo_float * density_j = (enzo_float *) field.values(chemistry_fields[j]);
@@ -1289,14 +1311,77 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
 
 //----------------------------------------------------------------------
 
+void EnzoMethodM1Closure::add_LWB(EnzoBlock * enzo_block, double J21) 
+{
+
+  // Adds cosmological Lyman-Werner background. If J21 > 0, LWB intensity will be 
+  // constant with a value specified by J21. 
+  // Otherwise, J21 will be calculated using the redshift-dependent polynomial fit from 
+  // Wise et al. (2012)
+  // The LW radiation field is assumed to be group 0
+  const EnzoConfig * enzo_config = enzo::config();
+  double energy = enzo_config->method_m1_closure_energy_mean[0];
+  ASSERT("EnzoMEthodM1Closure::add_LWB", 
+         "Adding LWB, but photon group 0 is not in the lyman-werner band",
+         (11.18 < energy) && (energy < 13.60));
+ 
+  Field field = enzo_block->data()->field();
+  int mx,my,mz;  
+  field.dimensions(0,&mx, &my, &mz); //field dimensions, including ghost zones
+
+  double hx, hy, hz;
+  enzo_block->cell_width(&hx,&hy,&hz);
+
+  EnzoUnits * enzo_units = enzo::units();
+  double lunit = enzo_units->length();
+  double tunit = enzo_units->time();
+  double Nunit = enzo_units->photon_number_density();
+    
+  double JLW;
+  if (J21 >= 0.0) {
+    JLW = J21 * 1e-21;
+  }
+
+  else {
+    ASSERT("EnzoMethodM1Closure::add_LWB", 
+           "Must be running a cosmology simulation to use a time-dependent Lyman-Werner background", 
+           enzo::cosmology());
+
+    double A = -2.567;
+    double B = 0.4562;
+    double C = -0.02680;
+    double D = 5.882e-4;
+    double E = -5.056e-6;
+
+    double z = enzo_block->redshift;
+    double log_J21 = A + B*z + C*z*z + D*z*z*z + E*z*z*z*z;
+    JLW = pow(10, log_J21) * 1e-21; // erg s^-1 cm^-2 Hz^-1 sr^-1
+  }
+
+  enzo_float * N = (enzo_float *) field.values("photon_density_0");
+  double dN = JLW * 4*cello::pi/enzo_constants::hplanck/(hx*lunit)
+                  * enzo_block->dt*tunit / Nunit; // code_photon_density units
+
+  for (int i=0; i<mx*my*mz; i++) {
+    N[i] += dN;
+  }
+}
+
+//----------------------------------------------------------------------
+
 void EnzoMethodM1Closure::call_inject_photons(EnzoBlock * enzo_block) throw()
 {
   const EnzoConfig * enzo_config = enzo::config();
   
   const int N_groups = enzo_config->method_m1_closure_N_groups;
-  const int N_species = 3; 
+  const int N_species = 3 + enzo_config->method_m1_closure_H2_photodissociation; 
   
   if (enzo_block->is_leaf()) { // only inject photons for leaf blocks
+
+    if (enzo_config->method_m1_closure_lyman_werner_background) {
+      add_LWB(enzo_block, enzo_config->method_m1_closure_LWB_J21);
+    }
+
     for (int igroup=0; igroup<N_groups; igroup++) {
       this->inject_photons(enzo_block, igroup);
     }
@@ -1425,7 +1510,8 @@ void EnzoMethodM1Closure::set_global_averages(EnzoBlock * enzo_block, CkReductio
 
   const EnzoConfig * enzo_config = enzo::config();
   const int N_groups = enzo_config->method_m1_closure_N_groups;
-  const int N_species = 3;  
+  const int N_species = 3 + enzo_config->method_m1_closure_H2_photodissociation;
+  
   if (! enzo_block->is_leaf()) {
     enzo_block->compute_done(); 
     return;  
@@ -1478,6 +1564,7 @@ void EnzoMethodM1Closure::call_solve_transport_eqn(EnzoBlock * enzo_block) throw
 
   int N_groups = enzo_config->method_m1_closure_N_groups;
   double clight = enzo_config->method_m1_closure_clight_frac * enzo_constants::clight;
+
   // loop through groups and solve transport equation for each group
   for (int igroup=0; igroup<N_groups; igroup++) {
     this->solve_transport_eqn(enzo_block, igroup);
@@ -1568,7 +1655,7 @@ void EnzoMethodM1Closure::compute_ (Block * block) throw()
   EnzoBlock * enzo_block = enzo::block(block);
 
   int N_groups = enzo_config->method_m1_closure_N_groups;
-  int N_species = 3; //only three ionizable species (HI, HeI, HeII)
+  int N_species = 3 + enzo_config->method_m1_closure_H2_photodissociation;
 
   if (enzo_config->method_m1_closure_thermochemistry) {
     // compute the temperature

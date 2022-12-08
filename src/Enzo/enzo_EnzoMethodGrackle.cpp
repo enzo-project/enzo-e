@@ -119,6 +119,7 @@ void EnzoMethodGrackle::define_required_grackle_fields()
     cello::define_field("RT_HI_ionization_rate");
     cello::define_field("RT_HeI_ionization_rate");
     cello::define_field("RT_HeII_ionization_rate");
+    cello::define_field("RT_H2_dissociation_rate");
   }
 
   if (specific_heating) {
@@ -360,7 +361,7 @@ void EnzoMethodGrackle::setup_grackle_fields
   grackle_fields->RT_HI_ionization_rate   = fadaptor.ptr_for_grackle("RT_HI_ionization_rate");
   grackle_fields->RT_HeI_ionization_rate  = fadaptor.ptr_for_grackle("RT_HeI_ionization_rate");
   grackle_fields->RT_HeII_ionization_rate = fadaptor.ptr_for_grackle("RT_HeII_ionization_rate");
-  grackle_fields->RT_H2_dissociation_rate = NULL;
+  grackle_fields->RT_H2_dissociation_rate = fadaptor.ptr_for_grackle("RT_H2_dissociation_rate");
 
   /* Leave these as NULL for now and save for future development */
   gr_float * volumetric_heating_rate = NULL;
