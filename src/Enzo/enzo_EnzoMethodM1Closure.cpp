@@ -1356,6 +1356,9 @@ void EnzoMethodM1Closure::add_LWB(EnzoBlock * enzo_block, double J21)
     double E = -5.056e-6;
 
     double z = enzo_block->redshift;
+    if (z > 30) { // function valid for z < 30 (not many Pop III stars at z > 30)
+      return;
+    }
     double log_J21 = A + B*z + C*z*z + D*z*z*z + E*z*z*z*z;
     JLW = pow(10, log_J21) * 1e-21; // erg s^-1 cm^-2 Hz^-1 sr^-1
   }
