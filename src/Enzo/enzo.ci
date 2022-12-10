@@ -107,6 +107,7 @@ module enzo {
   PUPable EnzoMethodPmUpdate;
   PUPable EnzoMethodPpm;
   PUPable EnzoMethodPpml;
+  PUPable EnzoMethodBalance;
   PUPable EnzoMethodSinkMaker;
   PUPable EnzoMethodThresholdAccretion;
   PUPable EnzoMethodTurbulence;
@@ -166,6 +167,11 @@ module enzo {
     entry void p_get_msg_refine(Index index);
     entry void p_get_msg_check(Index index);
 #endif
+
+    //EnzoMethodBalance
+    entry void r_method_balance_count(CkReductionMsg * msg);
+    entry void p_method_balance_check();
+
     // EnzoMethodCheck
     entry void r_method_check_enter(CkReductionMsg *);
     entry void p_check_done();
@@ -199,7 +205,11 @@ module enzo {
 
     entry void p_initial_hdf5_recv(MsgInitial * msg_initial);
 
-    // EnzoMethodGravity synchronization entry methods
+    // EnzoMethodBalance
+    entry void p_method_balance_migrate();
+    entry void p_method_balance_done();
+
+  // EnzoMethodGravity synchronization entry methods
     entry void p_method_gravity_continue();
     entry void p_method_gravity_end();
 

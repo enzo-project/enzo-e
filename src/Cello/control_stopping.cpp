@@ -50,7 +50,7 @@ void Block::stopping_begin_()
 
   simulation->set_phase(phase_stopping);
 
-  int stopping_interval = simulation->config()->stopping_interval;
+  int stopping_interval = cello::config()->stopping_interval;
 
   bool stopping_reduce = stopping_interval ? 
     ((cycle_ % stopping_interval) == 0) : false;
@@ -189,22 +189,29 @@ void Block::stopping_balance_()
 
   if (do_balance) {
 
-    if (index_.is_root())
-      cello::monitor()->print ("Balance","starting load balance step");
+    const std::string balance_type = cello::config()->balance_type;
+
+    if (balance_type == "cello") {
+
+      // See EnzoMethodBalance
+
+    } else if (balance_type == "charm") {
+
+      // Charm++-controlled load balancing
+      if (index_.is_root())
+        cello::monitor()->print ("Balance","starting load balance step");
+    }
 
     CkCallback callback = CkCallback
       (CkIndex_Block::r_stopping_load_balance(nullptr),
        proxy_array());
-    
     adapt_ready_ = true;
     contribute(callback);
-
   } else {
 
     stopping_exit_();
 
   }
-
 }
 
 //----------------------------------------------------------------------
