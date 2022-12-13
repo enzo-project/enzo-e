@@ -42,6 +42,10 @@ void EnzoMethodBalance::compute ( Block * block) throw()
 #ifdef TRACE_BALANCE
   CkPrintf ("TRACE_SELF_BALANCE %s\n",block->name().c_str());
 #endif
+  // Output that we're calling the load balancer
+  Monitor * monitor = cello::monitor();
+  if (block->index().is_root())
+    monitor->print("Method", "Calling Cello load-balancer");
 
   ScalarDescr * sd = cello::scalar_descr_long_long();
   const int is_count = sd->index("order_morton:count");  
@@ -116,6 +120,7 @@ void EnzoSimulation::p_method_balance_check()
 #ifdef TRACE_BALANCE
     CkPrintf ("TRACE_MIGRATE done_migrating\n");
 #endif
+    enzo::block_array().doneInserting();
     enzo::block_array().p_method_balance_done();
   }
 }
@@ -128,7 +133,7 @@ void EnzoBlock::p_method_balance_done()
 void EnzoMethodBalance::done(EnzoBlock * enzo_block)
 {
 #ifdef TRACE_BALANCE
-  CkPrintf ("EnzoMethodBalance::done() %s\n",enzo_block->name().c_str());
+  CkPrintf ("TRACE_BALANCE done() %s process %d\n",enzo_block->name().c_str(),CkMyPe());
 #endif
   enzo_block->set_ip_next(-1);
   enzo_block->compute_done();
