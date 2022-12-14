@@ -12,7 +12,7 @@ Design` section for details on its capabilities and usage.
 :Default: :d:`none`
 :Scope:     :z:`Enzo`
 
-:e:`Defines the dimensionality of the inference arrays.` *This is used as a check only.* :e:`Dimensionality is determined by the combination of` :p:`level_array`, :p:`level_infer`, :e:`and block field resolution. E.g. if bx is the block size along the x-axis, then the inference array dimensionality along the x-direction is bx*2` :sup:`(level_infer - level_array)`.
+:e:`Defines the dimensionality of the inference arrays.` *This is used as a check only.* :e:`Dimensionality is a function of` :p:`level_array`, :p:`level_infer`, :e:`and block field resolution. E.g. if bx is the block size along the x-axis, then the inference array dimensionality along the x-direction is bx*2` :sup:`(level_infer - level_array)`.
 
 ----
 
@@ -24,7 +24,7 @@ Design` section for details on its capabilities and usage.
 :Default: :d:`none`
 :Scope:     :z:`Enzo`
 
-:e:`Specifies how many inference array regions there potentially are across each axis of the domain.` *This is used as a check only*. :e:`The number of inference arrays along each dimension is given by` :p:`level_array` :e:`and the blocking of the array-of-octrees. E.g. if rx is the number of root-level blocks along the x-axis, then rx*2` :sup:`level_array` :e:`is the array size along the x-axis.`
+:e:`Specifies how many inference array regions there potentially are across each axis of the domain.` *This is used as a check only*. :e:`The number of inference arrays along each dimension is a function of` :p:`level_array` :e:`and the blocking of the array-of-octrees. E.g. if rx is the number of root-level blocks along the x-axis, then rx*2` :sup:`level_array` :e:`is the array size along the x-axis.`
 
 ----
 
@@ -36,7 +36,7 @@ Design` section for details on its capabilities and usage.
 :Default: :d:`none`
 :Scope:     :z:`Enzo`
 
-:e:`The field group that defines which fields are required by the inference arrays. In the` :p:`EnzoMethodInference`, :e:`Method, this defines the fields that are transferred (which may include interpolation or coarsening) from leaf-blocks to the inference arrays.`.
+:e:`This parameter specifies the field group that defines which fields are required by the inference arrays. In the` :p:`EnzoMethodInference`, :e:`Method, this defines the fields that are transferred (which may include interpolation or coarsening) from leaf-blocks to the inference arrays.`.
 
 ----
 

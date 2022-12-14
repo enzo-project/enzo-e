@@ -17,7 +17,7 @@
    participant "B4" as b4
    end box
 
-   == evaluate ==
+   == 1. evaluate ==
 
    b2 -> b2 : apply_criteria()
    b3 -> b3
@@ -34,7 +34,7 @@
 
    root -> root : set_array_sync()
 
-   == allocate ==
+   == 2. allocate ==
 
    b2 -> a0 : p_create_level_array()
    activate a0 #DarkSalmon
@@ -47,7 +47,7 @@
    hnote over root : sync-level-arrays
    root -> root : doneInserting()
 
-   == populate ==
+   == 3. populate ==
 
    a0 -> b2 : p_req_data()
    b2 -> b3
@@ -65,12 +65,12 @@
    b3  ->   a2
    b4  ->   a2
 
-   == apply inference ==
+   == 4. apply inference ==
 
    a0 -> a0 : apply_inference()
    a2 -> a2
 
-  == update blocks ==
+  == 5. update blocks ==
 
    a0 -> b2 : p_update()
    b2 -> b3
