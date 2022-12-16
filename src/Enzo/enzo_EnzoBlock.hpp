@@ -233,6 +233,8 @@ public: /// entry methods
   void p_method_infer_count_arrays (int count);
   /// Request from inference array for field data
   void p_method_infer_request_data (int il3[3]);
+  /// Update blocks with inference results
+  void p_method_infer_update(int n, char * buffer, int il3[3]);
   /// Exit EnzoMethodInference
   void p_method_infer_exit();
 

@@ -505,7 +505,7 @@ void EnzoSimulation::infer_check_create_()
 
 void EnzoLevelArray::p_request_data()
 {
-  // Get the index of the (unique) block in level_array_ that overlaps
+  // Get the index of the (unique) block in level_base_ that overlaps
   // this element
   Index index_block = get_block_index_();
 
@@ -901,7 +901,7 @@ void EnzoLevelArray::p_transfer_data
            volume_ratio_,
            (0.0 <= volume_ratio_) && (volume_ratio_ <= 1.0));
 
-  if (volume_ratio_ == 1.0) {
+  if (volume_ratio_ >= 1.0) {
     // reset volume counter for next call
     volume_ratio_ = 0.0;
     // When done, call inference (note safe to compare float with constant
@@ -916,25 +916,127 @@ void EnzoLevelArray::apply_inference()
 {
   // Apply inference method
 
-  CkPrintf ("EnzoLevelArray apply_inference() %d %d %d\n",
+  CkPrintf ("TRACE_INFER EnzoLevelArray apply_inference() %d %d %d\n",
             thisIndex[0],thisIndex[1],thisIndex[2]);
 
-  // ...
+  //==================================================
+  //
+  // ADD DEEP LEARNING INFERENCE HERE
+  //
+  //==================================================
 
-  // Synchronize when done
-  proxy_enzo_simulation[0].p_infer_done();
+  // Update blocks with inference results
+
+  //    get domain extents
+  double dm[3],dp[3];
+  cello::hierarchy()->lower(dm,dm+1,dm+2);
+  cello::hierarchy()->upper(dp,dp+1,dp+2);
+
+  //    find center of inference array
+  double center[3] = {
+    dm[0]+(dp[0]-dm[0])*(0.5+1.0*thisIndex[0]/nax_),
+    dm[1]+(dp[1]-dm[1])*(0.5+1.0*thisIndex[1]/nay_),
+    dm[2]+(dp[2]-dm[2])*(0.5+1.0*thisIndex[2]/naz_)};
+
+  //    put a sphere there and add it to a list sphere_list
+  double radius = 0.1*(dp[0]-dm[0])/nax_;
+  ObjectSphere sphere(center,radius);
+  std::vector<ObjectSphere> sphere_list;
+  sphere_list.push_back(sphere);
+
+  //    pack sphere list into a buffer to send to blocks
+
+  //    allocate buffer
+  int n = 0;
+  SIZE_VECTOR_TYPE(n,ObjectSphere,sphere_list);
+  //    initialize buffer
+  char * buffer = new char [n];
+  char *pc = buffer;
+  SAVE_VECTOR_TYPE(pc,ObjectSphere,sphere_list);
+
+  //    Send data to leaf blocks via base-level block
+  Index index_block = get_block_index_();
+  const int il3[3] = {thisIndex[0],thisIndex[1],thisIndex[2]};
+  enzo::block_array()[index_block].p_method_infer_update(n,buffer,il3);
 }
 
 //----------------------------------------------------------------------
 
+void EnzoBlock::p_method_infer_update(int n, char * buffer, int il3[3])
+{
+  EnzoMethodInference * method =
+    static_cast<EnzoMethodInference*> (this->method());
+
+  // Return control back to EnzoMethodInference
+  method->update(this,n, buffer, il3);
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodInference::update ( Block * block, int n, char * buffer, int il3[3])
+{
+  // Unpack buffer into sphere_list
+
+  std::vector<ObjectSphere> sphere_list;
+  char *pc = buffer;
+  LOAD_VECTOR_TYPE(pc,ObjectSphere,sphere_list);
+
+  Index index_block = block->index();
+  const int level = block->level();
+
+  if (block->is_leaf()) {
+
+    // if leaf block, we're done, tell level array element
+    Index3 index3(il3[0],il3[1],il3[2]);
+
+    proxy_level_array[index3].p_done (index_block);
+
+  } else {
+
+    // else if non-leaf block, forward data to intersecting child blocks
+    ItChild it_child(cello::rank());
+    int ic3[3];
+    while (it_child.next(ic3)) {
+      Index index_child = index_block.index_child(ic3);
+      if (block_intersects_array_(index_child,il3)) {
+        enzo::block_array()[index_child].p_method_infer_update(n,buffer,il3);
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
+void EnzoLevelArray::p_done(Index index)
+{
+  // add volume of block to volume counter
+  int level_volume = std::max(0,index.level() - level_array_);
+  float volume_portion = pow(1.0/cello::num_children(),level_volume);
+  volume_ratio_ += volume_portion;
+
+  ASSERT1 ("EnzoLevelArray::p_done()",
+           "volume_ratio_ %g not between 0.0 and 1.0 as expected",
+           volume_ratio_,
+           (0.0 <= volume_ratio_) && (volume_ratio_ <= 1.0));
+
+  if (volume_ratio_ >= 1.0) {
+    // reset volume counter for next call
+    volume_ratio_ = 0.0;
+    // tell root Simulation object this level array is done
+    proxy_enzo_simulation[0].p_infer_done();
+  }
+}
+//----------------------------------------------------------------------
+
 void EnzoSimulation::p_infer_done()
 {
+  // count level arrays that are done
   if (sync_infer_done_.next()) {
-
+    // when all are done, reset sync counters,
     sync_infer_done_.reset();
+    // ... delete chare array,
     proxy_level_array.ckDestroy();
-
-    // Have EnzoBlock elements exit
+    // ... and exit method
     enzo::block_array().p_method_infer_exit();
   }
 }

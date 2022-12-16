@@ -49,7 +49,11 @@ public: // interface
 public: // virtual methods
 
   virtual void draw() { }
-  virtual void print() = 0;
+  virtual void print(std::string) = 0;
+
+  virtual int data_size () const = 0;
+  virtual char * save_data (char * buffer) const = 0;
+  virtual char * load_data (char * buffer) = 0;
 
 private: // functions
 

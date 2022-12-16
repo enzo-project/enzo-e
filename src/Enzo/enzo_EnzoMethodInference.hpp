@@ -89,6 +89,8 @@ public: // methods
   /// block
   void request_data (Block * block, int ia3[3]);
 
+  void update (Block *, int n, char * buffer, int ia3[3]);
+
 protected: // methods
 
   /// Apply criteria to determine which if any overlapping inference

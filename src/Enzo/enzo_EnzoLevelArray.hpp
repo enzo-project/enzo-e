@@ -36,6 +36,9 @@ public: // interface
   /// Accept requested data from blocks
   void p_transfer_data (Index, int nf, enzo_float * field_data_list );
 
+  /// Exit EnzoMethodInference
+  void p_done(Index);
+
   /// Apply the inference method on the arrays, synchronizing
   /// with EnzoSimulation[0] afterwards
   void apply_inference();
@@ -98,6 +101,6 @@ private: // attributes
   /// List of spheres
   std::vector<ObjectSphere> spheres_;
 };
-PUPbytes(EnzoLevelArray);
+
 #endif /* ENZO_IO_ENZO_LEVEL_ARRAY_HPP */
 

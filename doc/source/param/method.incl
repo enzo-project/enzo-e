@@ -711,6 +711,8 @@ heat
 
 :e:`Thermal diffusivity parameter for the heat equation.`
 
+.. _Inference Parameters:
+
 inference
 ---------
 

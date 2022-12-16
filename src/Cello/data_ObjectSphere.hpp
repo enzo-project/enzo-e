@@ -17,7 +17,17 @@ class ObjectSphere : public Object {
 public: // interface
 
   /// Constructor
+  ObjectSphere(double center[3], double radius) throw()
+    : Object(),
+      radius_(radius)
+  {
+    center_[0] = center[0];
+    center_[1] = center[1];
+    center_[2] = center[2];
+  };
+
   ObjectSphere() throw()
+    : Object()
   { };
 
   /// Charm++ PUP::able declarations
@@ -29,18 +39,6 @@ public: // interface
       radius_(0)
   { }
 
-  /// Copy constructor
-  ObjectSphere(const ObjectSphere & ObjectSphere) throw()
-  { };
-
-  /// Assignment operator
-  ObjectSphere & operator= (const ObjectSphere & ObjectSphere) throw()
-  { };
-
-  /// Destructor
-  virtual ~ObjectSphere() throw()
-  { };
-
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   {
@@ -51,12 +49,66 @@ public: // interface
     p | radius_;
   }
 
+  ///--------------------
+  /// PACKING / UNPACKING
+  ///--------------------
+  
+  /// Return the number of bytes required to serialize the data object
+  int data_size () const
+  {
+    //--------------------------------------------------
+    //  1. determine buffer size (must be consistent with #3)
+    //--------------------------------------------------
 
+    int size = 0;
+
+    SIZE_ARRAY_TYPE(size,double,center_,3);
+    SIZE_SCALAR_TYPE(size,double,radius_);
+
+    return size;
+  }
+
+  //----------------------------------------------------------------------
+
+  /// Serialize the object into the provided empty memory buffer.
+  /// Returns the next open position in the buffer to simplify
+  /// serializing multiple objects in one buffer.
+  char * save_data (char * buffer) const
+  {
+    char * pc = buffer;
+
+    SAVE_ARRAY_TYPE(pc,double,center_,3);
+    SAVE_SCALAR_TYPE(pc,double,radius_);
+
+    ASSERT2 ("ObjectSphere::save_data()",
+             "Expecting buffer size %d actual size %d",
+             data_size(),(pc-buffer),
+             (data_size() == (pc-buffer)));
+
+    return pc;
+  }
+
+  //----------------------------------------------------------------------
+
+  /// Restore the object from the provided initialized memory buffer data.
+  /// Returns the next open position in the buffer to simplify
+  /// serializing multiple objects in one buffer.
+  char * load_data (char * buffer)
+  {
+    char * pc = buffer;
+
+    LOAD_ARRAY_TYPE(pc,double,center_,3);
+    LOAD_SCALAR_TYPE(pc,double,radius_);
+
+    return pc;
+  }
 
 public: // virtual methods
 
   virtual void draw() { CkPrintf ("ObjectSphere::draw()\n"); }
-  virtual void print() { CkPrintf ("ObjectSphere::print()\n"); }
+  virtual void print(std::string msg) {
+    CkPrintf ("ObjectSphere::print() %s center %g %g %g radius %g\n",
+              msg.c_str(), center_[0],center_[1],center_[2],radius_); }
 
 private: // functions
 

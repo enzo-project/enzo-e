@@ -220,6 +220,7 @@ module enzo {
       (int n, char mask[n], int ic3[3]);
     entry void p_method_infer_count_arrays (int count);
     entry void p_method_infer_request_data (int il3[3]);
+    entry void p_method_infer_update (int n, char buffer[n], int il3[3]);
     entry void p_method_infer_exit();
 
     // checkpoint
@@ -315,5 +316,6 @@ module enzo {
                          int nax, int nay, int naz);
     entry void p_request_data ();
     entry void p_transfer_data (Index, int nf, enzo_float field_data[nf] );
+    entry void p_done(Index);
   };
 };

@@ -3,7 +3,6 @@
 deep-learning model for star formation. See the :ref:`Inference
 Design` section for details on its capabilities and usage.
 
-
 ----
 
 :Parameter:  :p:`Method` : :p:`inference` : :p:`array_dims`
