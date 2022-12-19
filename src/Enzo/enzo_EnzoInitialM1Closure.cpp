@@ -26,13 +26,7 @@ void EnzoInitialM1Closure::pup (PUP::er &p)
   TRACEPUP;
 
   Initial::pup(p);
-/*
-  p | hll_table_f_;
-  p | hll_table_lambda_min_;
-  p | hll_table_lambda_max_;
-  p | hll_table_col3_;
-  p | hll_table_col4_;
-*/
+
 }
 
 //----------------------------------------------------------------------
@@ -64,6 +58,11 @@ void EnzoInitialM1Closure::enforce_block
       Fy_i[j] = 1e-16 * inverse_Funit;
       Fz_i[j] = 1e-16 * inverse_Funit;
     }
+  }
+
+  Scalar<double> scalar = block->data()->scalar_double();
+  if (enzo_config->method_m1_closure_lyman_werner_background) {
+    *(scalar.value(scalar.index("N_LWB"))) = 0.0;
   }
 
   if (enzo_config->method_m1_closure_flux_function == "HLL") {

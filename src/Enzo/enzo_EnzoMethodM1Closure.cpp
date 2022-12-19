@@ -120,6 +120,11 @@ EnzoMethodM1Closure ::EnzoMethodM1Closure(const int N_groups)
     }
   }
 
+  // ScalarData variable for storing uniform LWB photon density
+  if (enzo::config()->method_m1_closure_lyman_werner_background) {
+    scalar_descr->new_value("N_LWB");
+  }
+ 
   // Initialize Refresh object for after injection step 
   ir_injection_ = add_refresh_();
 
@@ -888,10 +893,7 @@ void EnzoMethodM1Closure::get_photoionization_and_heating_rates (EnzoBlock * enz
   // ionization -- first term of eq. A21 -- sum_i(sigmaN*clight*Ni), where i iterates over frequency groups
   // ionization rates should be in code_time^-1
   // heating rates should be in erg s^-1 cm^-3 / nHI 
-  // TODO: Rates are zero if mean energy in a bin is less than the ionization threshold.
-  //       There could be cases where E_mean < E_thresh, but E_upper > E_thresh. 
-  //       Need to account for this by integrating over that part of the spectrum.
-  //       i.e. scale N_i by some fraction
+  // NOTE: Rates are zero if mean energy in a bin is less than the ionization threshold.
 
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
@@ -970,7 +972,7 @@ void EnzoMethodM1Closure::get_photoionization_and_heating_rates (EnzoBlock * enz
     for (int i=0; i<mx*my*mz; i++) {
       double N = (photon_densities[0])[i] * Nunit; // LW-group assumed to be group 0
       double sigmaN = *(scalar.value( scalar.index( sigN_string(0,3) ))); // cm^2 
-      RT_H2_photodissociation_rate[i] = sigmaN*clight*N * tunit;   
+      RT_H2_photodissociation_rate[i] = sigmaN*clight*N * tunit;
     }
   }
  
@@ -1364,12 +1366,23 @@ void EnzoMethodM1Closure::add_LWB(EnzoBlock * enzo_block, double J21)
   }
 
   enzo_float * N = (enzo_float *) field.values("photon_density_0");
-  double dN = JLW * 4*cello::pi/enzo_constants::hplanck/(hx*lunit)
-                  * enzo_block->dt*tunit / Nunit; // code_photon_density units
 
+  double energy_cgs = energy * enzo_constants::erg_eV;
+  double dnu = (enzo_config->method_m1_closure_energy_upper[0] - 
+                enzo_config->method_m1_closure_energy_lower[0]) * 
+                enzo_constants::erg_eV / enzo_constants::hplanck; // frequency in Hz
+
+  double Nbackground = 4*cello::pi * JLW/(energy_cgs*enzo_constants::clight) * dnu / Nunit;
+
+  Scalar<double> scalar = enzo_block->data()->scalar_double();
+  
   for (int i=0; i<mx*my*mz; i++) {
-    N[i] += dN;
+    // subtract the background from the previous timestep and add the new
+    N[i] += Nbackground - *(scalar.value(scalar.index("N_LWB")));
   }
+
+  *(scalar.value( scalar.index("N_LWB") )) = Nbackground;
+
 }
 
 //----------------------------------------------------------------------
