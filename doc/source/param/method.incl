@@ -50,8 +50,13 @@ list is applied in the order specified.  Possible methods include:`
         }
      }
 
+:e:`There are a subset of parameters that can be specified for all
+parameters.  For example, a` :ref:`schedule_param` :e:`subgroup can
+be defined for any method object (to dictate when the method is
+executed).`
+
 :e:`For more detailed documentation on Methods, see` :ref:`using-methods`
-   
+
 ----
 
 :Parameter:  :p:`Method` : :p:`courant`
@@ -61,7 +66,7 @@ list is applied in the order specified.  Possible methods include:`
 :Scope:     :c:`Cello`
 
 :e:`The global Courant safety factor is a multiplication factor for
-the time step applied on top of any Field or Particle specific Courant
+the time step applied on top of any method-specific Courant
 safety factors.`
 
 accretion
@@ -193,62 +198,34 @@ grackle
 simulations. It is a generalized and trimmed down version of the
 chemistry network of the Enzo simulation code."
 
-Most of the descriptions of the parameters come from the `Grackle documentation <http://grackle.readthedocs.org/en/grackle-1.0/index.html>`_; for the
-most up-to-date description of Grackle parameters, see the `Grackle parameters <http://grackle.readthedocs.org/en/grackle-1.0/Parameters.html#id1>`_ section of the website.
+While most of the parameters come directly from Grackle, there are a few notable exceptions:
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`density_units`
-
-:Summary: :s:`Units for the density field`
-:Type:    :t:`float`
-:Default: :d:`1.67e-24  (1 m_H/cc)`
-:Scope:     :z:`Enzo`
-
-:e:`Units of density for the Grackle chemistry and cooling solver library.`
-
-
-----
-
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`length_units`
-
-:Summary: :s:`Units for distance`
-:Type:    :t:`float`
-:Default: :d:`3.086e21 (1 kpc)`
-:Scope:     :z:`Enzo`
-
-:e:`Units of length for the Grackle chemistry and cooling solver library.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`time_units`
-
-:Summary: :s:`Units for time`
-:Type:    :t:`float`
-:Default: :d:`3.15569e13 (1 Myr)`
-:Scope:     :z:`Enzo`
-
-:e:`Units of time for the Grackle chemistry and cooling solver library.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`a_units`
-:Summary: :s:`Units for the cosmological expansion factor`
+:Parameter:  :p:`Method` : :p:`grackle` : :p:`courant`
+:Summary: :s:`Courant safety factor`
 :Type:    :t:`float`
 :Default: :d:`1.0`
-:Scope:     :z:`Enzo`
+:Scope:     :c:`Enzo`
 
-:e:`Units of the cosmological expansion factor for the Grackle chemistry and cooling solver library.`
+:e:`The method-specific courant safety factor. This is meaningless unless` :p:`Method` : :p:`grackle` : :p:`use_cooling_timestep` :e:`has been set to` ``true``.
+:e:`In that case, the timestep associated with the Grackle method is this value mutliplied by the minimum timestep.`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`gamma`
-:Summary: :s:`The ratio of specific heats for an ideal gas`
-:Type:    :t:`float`
-:Default: :d:`5/3`
-:Scope:     :z:`Enzo`
+:Parameter:  :p:`Method` : :p:`grackle` : :p:`use_cooling_timestep`
+:Summary: :s:`Whether to limit the timestep by the minimum cooling time`
+:Type:    :t:`logical`
+:Default: :d:`false`
+:Scope:     :c:`Enzo`
 
-:e:`The ratio of specific heats for an ideal gas. A direct calculation for the molecular component is used if` :p:`primordial_chemistry` :e:`> 1.`
+:e:`By default, usage of Grackle does not limit the timestep.
+When this parameter is set to` ``true``, :e:`the timestep is limited by the product of the minimum cooling time and the courant safety factor.`
+
+----
+
+Most of the remaining parameters come from the `Grackle documentation <http://grackle.readthedocs.org/en/grackle-1.0/index.html>`_; for the
+most up-to-date description of Grackle parameters, see the `Grackle parameters <http://grackle.readthedocs.org/en/grackle-1.0/Parameters.html#id1>`_ section of the website.
 
 ----
 
