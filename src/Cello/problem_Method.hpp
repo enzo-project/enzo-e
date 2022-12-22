@@ -77,6 +77,7 @@ public: // virtual functions
   /// Set schedule
   void set_schedule (Schedule * schedule) throw();
 
+  /// Query the associated courant factor
   double courant() const throw ()
   { return courant_; }
 
