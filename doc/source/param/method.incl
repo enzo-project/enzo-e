@@ -206,7 +206,7 @@ While most of the parameters come directly from Grackle, there are a few notable
 :Summary: :s:`Courant safety factor`
 :Type:    :t:`float`
 :Default: :d:`1.0`
-:Scope:     :c:`Enzo`
+:Scope:     :z:`Enzo`
 
 :e:`The method-specific courant safety factor. This is meaningless unless` :p:`Method` : :p:`grackle` : :p:`use_cooling_timestep` :e:`has been set to` ``true``.
 :e:`In that case, the timestep associated with the Grackle method is this value mutliplied by the minimum timestep.`
@@ -217,7 +217,7 @@ While most of the parameters come directly from Grackle, there are a few notable
 :Summary: :s:`Whether to limit the timestep by the minimum cooling time`
 :Type:    :t:`logical`
 :Default: :d:`false`
-:Scope:     :c:`Enzo`
+:Scope:     :z:`Enzo`
 
 :e:`By default, usage of Grackle does not limit the timestep.
 When this parameter is set to` ``true``, :e:`the timestep is limited by the product of the minimum cooling time and the courant safety factor.`

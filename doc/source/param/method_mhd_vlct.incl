@@ -43,7 +43,7 @@ option, you need to explicitly comment out an error in`
 :Summary: :s:`Courant safety factor`
 :Type:    :t:`float`
 :Default: :d:`1.0`
-:Scope:     :c:`Enzo`
+:Scope:     :z:`Enzo`
 
 :e:`The method-specific courant safety factor. The method's minimum timestep is the minimum value of the following expression (which is computed for all cells):`
 
