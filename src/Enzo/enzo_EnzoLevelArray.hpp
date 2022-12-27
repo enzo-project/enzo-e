@@ -43,6 +43,25 @@ public: // interface
   /// with EnzoSimulation[0] afterwards
   void apply_inference();
 
+  /// Return the coordinates of the lower point of the inference array
+  void lower (double lower[3])
+  {
+    lower[0] = 1.0*thisIndex[0]/nax_;
+    lower[1] = 1.0*thisIndex[1]/nay_;
+    lower[2] = 1.0*thisIndex[2]/naz_;
+  }
+
+  /// Return the coordinates of the lower point of the inference array
+  void upper (double upper[3])
+  {
+    upper[0] = 1.0*(thisIndex[0]+1)/nax_;
+    upper[1] = 1.0*(thisIndex[1]+1)/nay_;
+    upper[2] = 1.0*(thisIndex[2]+1)/naz_;
+  }
+
+  /// Return the coordinates of the lower point of the inference array
+
+
 protected: // functions
 
   /// Return the index of the Block in level_base_ level

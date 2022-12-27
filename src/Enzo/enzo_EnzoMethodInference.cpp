@@ -8,6 +8,9 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
+// Used to write inference array bounds and "bubble" coordinates for plotting
+// #define TRACE_INFER
+
 //----------------------------------------------------------------------
 
 EnzoMethodInference::EnzoMethodInference
@@ -914,10 +917,9 @@ void EnzoLevelArray::p_transfer_data
 
 void EnzoLevelArray::apply_inference()
 {
-  // Apply inference method
-
-  CkPrintf ("TRACE_INFER EnzoLevelArray apply_inference() %d %d %d\n",
-            thisIndex[0],thisIndex[1],thisIndex[2]);
+  double lower[3],upper[3];
+  this->lower(lower);
+  this->upper(upper);
 
   //==================================================
   //
@@ -927,22 +929,25 @@ void EnzoLevelArray::apply_inference()
 
   // Update blocks with inference results
 
-  //    get domain extents
-  double dm[3],dp[3];
-  cello::hierarchy()->lower(dm,dm+1,dm+2);
-  cello::hierarchy()->upper(dp,dp+1,dp+2);
-
   //    find center of inference array
   double center[3] = {
-    dm[0]+(dp[0]-dm[0])*(0.5+1.0*thisIndex[0]/nax_),
-    dm[1]+(dp[1]-dm[1])*(0.5+1.0*thisIndex[1]/nay_),
-    dm[2]+(dp[2]-dm[2])*(0.5+1.0*thisIndex[2]/naz_)};
+    0.5*(lower[0]+upper[0]),
+    0.5*(lower[1]+upper[1]),
+    0.5*(lower[2]+upper[2])};
 
   //    put a sphere there and add it to a list sphere_list
-  double radius = 0.1*(dp[0]-dm[0])/nax_;
+  double radius = 0.1*(upper[0]-lower[0]);
   ObjectSphere sphere(center,radius);
   std::vector<ObjectSphere> sphere_list;
   sphere_list.push_back(sphere);
+
+#ifdef TRACE_INFER
+  for (auto sphere : sphere_list) {
+    char buffer[80];
+    sprintf (buffer,"TRACE_INFER %d",cello::simulation()->cycle());
+    sphere.print(buffer);
+  }
+#endif
 
   //    pack sphere list into a buffer to send to blocks
 
@@ -958,6 +963,16 @@ void EnzoLevelArray::apply_inference()
   Index index_block = get_block_index_();
   const int il3[3] = {thisIndex[0],thisIndex[1],thisIndex[2]};
   enzo::block_array()[index_block].p_method_infer_update(n,buffer,il3);
+
+#ifdef TRACE_INFER
+
+  CkPrintf ("TRACE_INFER rectangle %d %g %g %g %g %g %g\n",
+            cello::simulation()->cycle(),
+            lower[0],lower[1],lower[2],
+            upper[0],upper[1],upper[2]);
+
+#endif
+  
 }
 
 //----------------------------------------------------------------------
@@ -1360,11 +1375,12 @@ void EnzoBlock::p_method_infer_exit()
 void EnzoMethodInference::create_level_arrays_ (Block * block)
 {
   const int level = block->level();
-  
+
   ASSERT2 ("EnzoMethodInference::create_level_arrays_",
            "Block %s not in expected refinement level %d",
            block->name().c_str(),level,
            level == level_base_);
+
   int mx,my,mz;
   std::tie(mx,my,mz) = mask_dims_(level);
   int m = mx*my*mz;

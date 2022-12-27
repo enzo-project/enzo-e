@@ -90,7 +90,7 @@ levels, and the center yellow column represents the root-node
 Simulation object, used for synchronization and counting.
 
 .. image:: level-array-1.png
-           :width: 400
+           :width: 600
 
 In the "Evaluate" phase, Blocks apply local criteria to determine
 where to create inference arrays.  Control enters the method at the
@@ -145,7 +145,7 @@ Phase 2. Allocate
 =================
 
 .. image:: level-array-2.png
-           :width: 400
+           :width: 600
 
 The count of number of inference arrays to create, determined in the
 previous phase, is used to determine when all level array elements
@@ -165,7 +165,7 @@ Phase 3. Populate
 =================
 
 .. image:: level-array-3.png
-           :width: 400
+           :width: 600
 
 After the level array chare array is created, the root Simulation
 object calls ``p_request_data()`` on all elements of the array. Each
@@ -186,7 +186,7 @@ Phase 4. Apply inference
 ========================
 
 .. image:: level-array-4.png
-           :width: 400
+           :width: 600
 
 Level array elements keep track of incoming data, counting the relative volume of
 incoming data until the relative volume reaches 1.0. After the last piece of data
@@ -200,7 +200,7 @@ Phase 5. Update blocks
 ======================
 
 .. image:: level-array-5.png
-           :width: 400
+           :width: 600
 
 After all DL inference methods have completed, level array elements
 forward the results to the intersecting leaf blocks. This is done
