@@ -158,7 +158,6 @@ void EnzoMethodInference::pup (PUP::er &p)
 
 void EnzoMethodInference::compute ( Block * block) throw()
 {
-
   // Initalize block scalars: sync counters and mask array
 
   delete [] *scalar_mask_(block);
@@ -720,6 +719,7 @@ void EnzoMethodInference::request_data (Block * block, int ia3[3])
 
         }
       }
+
     } else {
 
       // copy fields data
@@ -965,14 +965,11 @@ void EnzoLevelArray::apply_inference()
   enzo::block_array()[index_block].p_method_infer_update(n,buffer,il3);
 
 #ifdef TRACE_INFER
-
   CkPrintf ("TRACE_INFER rectangle %d %g %g %g %g %g %g\n",
             cello::simulation()->cycle(),
             lower[0],lower[1],lower[2],
             upper[0],upper[1],upper[2]);
-
 #endif
-  
 }
 
 //----------------------------------------------------------------------
@@ -1422,7 +1419,7 @@ bool EnzoMethodInference::block_intersects_array_(Index index, int ia3[3])
   int ib3[3];
   index.index_level(ib3,level_array_);
   // get upper-index
-  const int r = pow(2,(level_array_ - index.level()));
+  const float r = pow(2,(level_array_ - index.level()));
   int lx = (ib3[0] <= ia3[0] && ia3[0] < ib3[0]+r);
   int ly = (ib3[1] <= ia3[1] && ia3[1] < ib3[1]+r);
   int lz = (ib3[2] <= ia3[2] && ia3[2] < ib3[2]+r);
