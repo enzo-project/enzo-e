@@ -280,7 +280,6 @@ extern "C" {
 #include "enzo_EnzoMatrixLaplace.hpp"
 
 #include "enzo_EnzoMsgCheck.hpp"
-#include "enzo_EnzoMsgInferCreate.hpp"
 
 #include "enzo_EnzoComputeAcceleration.hpp"
 #include "enzo_EnzoComputeCicInterp.hpp"

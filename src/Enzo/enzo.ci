@@ -12,7 +12,6 @@ module enzo {
   initnode void mutex_init_bcg_iter();
 
   readonly int EnzoMsgCheck::counter[CONFIG_NODE_SIZE];
-  readonly int EnzoMsgInferCreate::counter[CONFIG_NODE_SIZE];
 
   readonly EnzoConfig g_enzo_config;
   readonly int EnzoBlock::UseMinimumPressureSupport[CONFIG_NODE_SIZE];
@@ -149,7 +148,6 @@ module enzo {
   PUPable EnzoUnits;
 
   message EnzoMsgCheck;
-  message EnzoMsgInferCreate;
 
   extern module mesh;
 
