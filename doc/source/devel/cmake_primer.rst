@@ -14,7 +14,7 @@ As an aside, when searching for online CMake documentation and guides, you shoul
 History of Enzo-E's build system
 ================================
 
-Historically, Enzo-E made use of the `SCons <https://scons.org/>`_ build system. Howver, inn 2022 Enzo-E migrated to the CMake build system.
+Historically, Enzo-E made use of the `SCons <https://scons.org/>`_ build system. Howver, in 2022 Enzo-E migrated to the CMake build system.
 
 While there are a number of viable build systems, there has been a general convergence among C++ developers towards using CMake (this is evidenced by large projects like Boost and Charm++).
 Given the very large userbase of CMake, bugs are found and fixed relatively quickly.
@@ -33,7 +33,7 @@ How Does a CMake Build Work?
 For people mostly familar with build systems like makefiles, CMake may seem a little unintuitive.
 It may be insightful to walk through some commands step-by-step that would be used in a fresh Enzo-E build.
 
-1. Unlike some other build systems, CMake, specializes in out-of-source builds (see :ref:`out-of-source_builds` for some additional details/benefits).
+1. Unlike some other build systems, CMake specializes in out-of-source builds (see :ref:`out-of-source_builds` for some additional details/benefits).
    In other words, for a given build CMake only creates/modifies a file in some user-specified directory "build-directory."
    Consequently, the first step in initiating a fresh build is to create this "build-directory" and change the terminal's working directory to your newly created directory.
    Most tutorials suggest that you create a directory called ``build`` in the root directory of the repository. In reality this directory's name is arbitrary and you can pretty much put it wherever you want.
@@ -65,7 +65,7 @@ It may be insightful to walk through some commands step-by-step that would be us
 
   make -j4 # -j4 tells make to execute up to 4 commands in parallel
 
-.. [#f1] Technically, the CMake's configuration step may include compilation of some short C-programs.
+.. [#f1] Technically, CMake's configuration step may include compilation of some short C-programs.
          This is almost always done in service of testing feature availability of a compiler/platform or testing something about the configuration of a dependency.
          Files that contribute to the main executable/libraries/tests aren't compiled during this stage.
 
@@ -74,7 +74,7 @@ It may be insightful to walk through some commands step-by-step that would be us
 How are CMake Projects Configured?
 ==================================
 
-CMake makes use of an interpretted scripting language that is typically found in ``CMakeLists.txt`` text files that are distributed in different directories throughout the project's repository.
+CMake makes use of an interpreted scripting language that is typically found in ``CMakeLists.txt`` text files that are distributed in different directories throughout the project's repository.
 The primary ``CMakeLists.txt`` file is found in Enzo-E's root directory.
 
 The scripting language supports many features that include variables, arrays, functions/macros, loops, importing from other files, etc.
@@ -100,7 +100,7 @@ Examples of such properties include:
   * include directories (via ``target_include_directories``)
   * dependencies on other libraries (via ``target_link_libraries`` -- and yes, this does indeed apply to static libraries)
 
-These properties are defined typically defined with different "scopes" (``INTERFACE``, ``PUBLIC``, or ``PRIVATE``).
+These properties are typically defined with different "scopes" (``INTERFACE``, ``PUBLIC``, or ``PRIVATE``).
 The scope determines if a property affects the target and/or its dependent(s).
 When scopes are defined correctly, dependency management becomes straight-forward.
 
@@ -113,7 +113,7 @@ Note, the usage of Charm++ introduces some additional complexity to this project
 
 .. note:
 
-   At this time, the conventions for organizing Cello/Enzo-E's header files intrdouce a lot of transitive dependencies.
+   At this time, the conventions for organizing Cello/Enzo-E's header files introduce a lot of transitive dependencies.
    Going forward, we may wish to revisit this.
    
 
