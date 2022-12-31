@@ -1,4 +1,4 @@
 # File:    colormap_rainbow.incl
 
- colormap = [ "black", "blue", "cyan", "green", "yellow", "red" ];
+ colormap = [ "black", "blue", "cyan", "lime", "yellow", "red" ];
 

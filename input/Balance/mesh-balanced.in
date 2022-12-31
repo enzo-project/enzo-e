@@ -104,7 +104,7 @@ Output {
         image_min = 0.000000000000000;
         include "input/Schedule/schedule_cycle_10.incl"
         colormap = ["white", "yellow", "cyan", "magenta",
-                    "red", "green", "blue" ];
+                    "red", "lime", "blue" ];
         name = ["mesh-balanced-mesh.%03d.png","cycle"];
       }
 }

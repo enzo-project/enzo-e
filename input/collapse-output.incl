@@ -95,7 +95,7 @@
          type = "data";
      };
      mesh {
-        colormap = [ "black", "blue", "cyan", "green", "yellow", "red" ];
+        colormap = [ "black", "blue", "cyan", "lime", "yellow", "red" ];
          image_max = 6.0;
          image_size = [ 512, 512 ];
          image_type = "mesh";

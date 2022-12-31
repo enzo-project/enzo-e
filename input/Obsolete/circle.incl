@@ -74,7 +74,7 @@ include "input/domain-2d-01.incl"
          type     = "image";
          include "input/schedule_cycle_10.incl"
         colormap = ["navy",
-                    "green",
+                    "lime",
                     "yellow",
                     "red"];
       }

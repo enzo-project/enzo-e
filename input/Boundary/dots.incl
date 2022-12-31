@@ -72,7 +72,7 @@
          field_list = ["density"];
          type     = "image";
          include "input/Schedule/schedule_cycle_10.incl"
-        colormap = ["blue", "green", "yellow", "red";
+        colormap = ["blue", "lime", "yellow", "red";
       }
    }
    Boundary { type = "reflecting"; }

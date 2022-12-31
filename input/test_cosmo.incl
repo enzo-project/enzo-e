@@ -222,7 +222,7 @@ Adapt {
          type = "image";
      };
      mesh {
-         colormap = [ "black", "blue", "cyan", "green", "yellow", "red" ];
+         colormap = [ "black", "blue", "cyan", "lime", "yellow", "red" ];
          dir = [ "COSMO_CG_%04d", "cycle" ];
          image_reduce_type = "max";
          image_size = [ 513, 513 ];

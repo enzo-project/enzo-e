@@ -137,7 +137,7 @@ Mesh { root_rank = 3; }
          type = "image";
      }
      mesh {
-         colormap = [ "black", "blue", "cyan", "green", "yellow", "red" ];
+         colormap = [ "black", "blue", "cyan", "lime", "yellow", "red" ];
          image_min = 0.0;
          image_max = 6.0;
          image_reduce_type = "max";
@@ -148,7 +148,7 @@ Mesh { root_rank = 3; }
          type = "image";
      }
      refine_shock {
-         colormap = ["green",   # green coarsen,
+         colormap = ["lime",   # green coarsen,
                      "black",   # black same
                      "red"];    # red refine
          image_size = [ 1024, 1024 ];
@@ -158,7 +158,7 @@ Mesh { root_rank = 3; }
          type = "image";
      }
      refine_shear {
-         colormap = ["green",   # green coarsen,
+         colormap = ["lime",   # green coarsen,
                      "black",   # black same
                      "red"];    # red refine
 

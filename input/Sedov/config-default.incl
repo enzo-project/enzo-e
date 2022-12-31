@@ -62,7 +62,7 @@ Method {
 #	 image_block_size  = 5; # DEPRECIATED
 	image_size = [513,513];
 #	image_size = [1201,1201];
-          colormap = ["white", "green", "red", "blue"];
+          colormap = ["white", "lime", "red", "blue"];
        include "config-output-schedule.incl"
       };
 
