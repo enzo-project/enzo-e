@@ -43,6 +43,15 @@ public: // interface
 public: // virtual functions
 
   /// Apply the method to advance a block one timestep
+  ///
+  /// The `Block::compute_done()` method MUST be invoked on all `block`s passed
+  /// to this member function by the end of the control flow that this function
+  /// launches.
+  /// - In simple cases, that should be done just before this function returns.
+  /// - The placement will varies in more complex cases. For example, if this
+  ///   function invokes a single reduction, the call to
+  ///   `Block::compute_done()` should be performed after completing the
+  ///   reduction (e.g. in the `compute_resume` member function)
   virtual void compute ( Block * block) throw() = 0;
 
   /// Return the name of this Method
