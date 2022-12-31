@@ -16,7 +16,7 @@ EnzoConfig g_enzo_config;
 
 EnzoConfig::EnzoConfig() throw ()
   :
-  adapt_mass_type(0),
+  adapt_mass_type(),
   ppm_diffusion(false),
   ppm_flattening(0),
   ppm_minimum_pressure_support_parameter(0),
@@ -252,6 +252,14 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_analytic_SNR_shell_mass(true),
   method_feedback_fade_SNR(true),
   method_feedback_NEvents(-1),
+  // EnzoMethodInference
+  method_inference_level_base(0),
+  method_inference_level_array(0),
+  method_inference_level_infer(0),
+  method_inference_array_dims(),
+  method_inference_array_size(),
+  method_inference_field_group(),
+  method_inference_overdensity_threshold(0),
   // EnzoMethodStarMaker,
   method_star_maker_flavor(""),                              // star maker type to use
   method_star_maker_use_altAlpha(false),
@@ -647,6 +655,14 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_feedback_fade_SNR;
   p | method_feedback_NEvents;
 
+  p | method_inference_level_base;
+  p | method_inference_level_array;
+  p | method_inference_level_infer;
+  PUParray(p,method_inference_array_dims,3);
+  PUParray(p,method_inference_array_size,3);
+  p | method_inference_field_group;
+  p | method_inference_overdensity_threshold;
+
   p | method_star_maker_flavor;
   p | method_star_maker_use_altAlpha;
   p | method_star_maker_use_density_threshold;
@@ -805,6 +821,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_grackle_(p);
   read_method_gravity_(p);
   read_method_heat_(p);
+  read_method_inference_(p);
   read_method_merge_sinks_(p);
   read_method_pm_deposit_(p);
   read_method_pm_update_(p);
@@ -1886,6 +1903,49 @@ void EnzoConfig::read_method_heat_(Parameters * p)
 {
   method_heat_alpha = p->value_float
     ("Method:heat:alpha",1.0);
+}
+
+//----------------------------------------------------------------------
+
+void EnzoConfig::read_method_inference_(Parameters* p)
+{
+  p->group_set(0,"Method");
+  p->group_push("inference");
+
+  method_inference_level_base = p->value_integer ("level_base");
+  method_inference_level_array = p->value_integer ("level_array");
+  method_inference_level_infer = p->value_integer ("level_infer");
+
+  const int rank = p->value_integer("Mesh:root_rank",0);
+
+  if (p->type("array_dims") == parameter_list) {
+    const int nad = p->list_length("array_dims");
+    ASSERT2("EnzoConfig::read_method_inference_()",
+            "%s length must be 1 <= n <= %d",
+            p->full_name("array_dims").c_str(),rank,
+            1 <= nad && nad <= rank);
+    for (int i=0; i<rank; i++) {
+      method_inference_array_dims[i] = p->list_value_integer
+        (std::min(nad-1,rank),"array_dims");
+    }
+  }
+
+  if (p->type("array_size") == parameter_list) {
+    const int nas = p->list_length("array_size");
+    ASSERT2("EnzoConfig::read_method_inference_()",
+            "%s length must be 1 <= n <= %d",
+            p->full_name("array_size").c_str(),rank,
+            1 <= nas && nas <= rank);
+    for (int i=0; i<rank; i++) {
+      method_inference_array_size[i] = p->list_value_integer
+        (std::min(nas-1,rank),"array_size");
+    }
+  }
+
+  method_inference_field_group = p->value_string  ("field_group");
+
+  method_inference_overdensity_threshold = p->value_float
+    ("Method:inference:overdensity_threshold",0.0);
 }
 
 //----------------------------------------------------------------------

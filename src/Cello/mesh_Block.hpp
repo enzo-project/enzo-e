@@ -164,7 +164,7 @@ public: // interface
   /// Return the name of the block with the given index
   std::string name(Index index) const throw();
 
-  /// Return the size the Block array
+  /// Return the size of the Block array
   void size_array (int * nx, int * ny = 0, int * nz = 0) const throw();
 
   /// Compute the lower extent of the Block in the domain

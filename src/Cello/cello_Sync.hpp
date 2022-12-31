@@ -52,7 +52,7 @@ public:
 
   /// Reset the counter to 0
   void reset () throw () ;
-  
+
   /// Decrement the stopping value by one
   inline int operator -- () 
   { --index_stop_; return index_stop_; }
@@ -74,6 +74,11 @@ public:
   inline void set_state (RefreshState state)
   { state_ = state; }
 
+  inline void print(std::string message) const {
+    CkPrintf ("DEBUG_SYNC %p %s %d/%d done %d\n",
+              (void *)this,message.c_str(),index_curr_,index_stop_,is_done_?1:0);
+  }
+
 private: // methods
 
   /// Increment counter
@@ -81,11 +86,11 @@ private: // methods
 
   /// Check whether stop reached
   void check_done_() throw ();
-  
+
 private: // attributes
 
   int is_done_;
-  
+
   /// Last value of the parallel sync index
   int index_stop_;
 

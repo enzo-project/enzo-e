@@ -1,0 +1,81 @@
+:p:`Method:inference` parameters are used to initialize Enzo-E's
+:c:`EnzoMethodInference` method, which is used to interface with a
+deep-learning model for star formation. See the :ref:`Inference
+Design` section for details on its capabilities and usage.
+
+----
+
+:Parameter:  :p:`Method` : :p:`inference` : :p:`array_dims`
+:Summary: :s:`Specify the dimensionality of the inference arrays`
+:Type:   :t:`list` ( :t:`integer` )
+:Default: :d:`none`
+:Scope:     :z:`Enzo`
+
+:e:`Defines the dimensionality of the inference arrays.` *This is used as a check only.* :e:`Dimensionality is a function of` :p:`level_array`, :p:`level_infer`, :e:`and block field resolution. E.g. if bx is the block size along the x-axis, then the inference array dimensionality along the x-direction is bx*2` :sup:`(level_infer - level_array)`.
+
+----
+
+..      array_size
+
+:Parameter:  :p:`Method` : :p:`inference` : :p:`array_size`
+:Summary: :s:`Specify the number of inference arrays spanning the domain`
+:Type:   :t:`list` ( :t:`integer` )
+:Default: :d:`none`
+:Scope:     :z:`Enzo`
+
+:e:`Specifies how many inference array regions there potentially are across each axis of the domain.` *This is used as a check only*. :e:`The number of inference arrays along each dimension is a function of` :p:`level_array` :e:`and the blocking of the array-of-octrees. E.g. if rx is the number of root-level blocks along the x-axis, then rx*2` :sup:`level_array` :e:`is the array size along the x-axis.`
+
+----
+
+..      field_group
+
+:Parameter:  :p:`Method` : :p:`inference` : :p:`field_group`
+:Summary: :s:`The field group used to define which fields are transferred to the inference arrays`
+:Type:   :t:`list` ( :t:`string` )
+:Default: :d:`none`
+:Scope:     :z:`Enzo`
+
+:e:`This parameter specifies the field group that defines which fields are required by the inference arrays. In the` :p:`EnzoMethodInference`, :e:`Method, this defines the fields that are transferred (which may include interpolation or coarsening) from leaf-blocks to the inference arrays.`.
+
+----
+
+:Parameter:  :p:`Method` : :p:`inference` : :p:`level_array`
+:Summary: :s:`Specify the "array" level for the inference method`
+:Type:   :t:`integer`
+:Default: :d:`0`
+:Scope:     :z:`Enzo`
+
+:p:`level_array` :e:`defines the level at which blocks are the same size (but not the same resolution) as inference arrays. The array level must be at least as large as the "base" level (` :p:`level_array >= level_base` :e:`)`.
+
+----
+
+:Parameter:  :p:`Method` : :p:`inference` : :p:`level_base`
+:Summary: :s:`Specify the "base" level for the inference method`
+:Type:   :t:`integer`
+:Default: :d:`0`
+:Scope:     :z:`Enzo`
+
+:e:`Refinement level defining the coarsest level at which a block can trigger the creation of an inference array. In this case, all inference arrays created are guaranteed to intersect with blocks that are in` *at least* :e:`level` :p:`level_base`.
+
+----
+
+:Parameter:  :p:`Method` : :p:`inference` : :p:`level_infer`
+:Summary: :s:`Specify the resolution level for the inference method`
+:Type:   :t:`integer`
+:Default: :d:`0`
+:Scope:     :z:`Enzo`
+
+:e:`Refinement level defining the level at which block resolution matches the resolution of the inference arrays. Must be at least as large as the "array" level` :e:`(` :p:`level_infer >= level_array` :e:`)`.
+
+----
+
+:Parameter:  :p:`Method` : :p:`inference` : :p:`overdensity_threshold`
+:Summary: :s:`Specify the threshold of (local) overdensity to trigger creating an inference array`
+:Type:   :t:`float`
+:Default: :d:`0.0`
+:Scope:     :z:`Enzo`
+
+:e:`This threshold is used in part to define where ineference arrays are created. The local average density is computed, and if the density at any point is greater than the average times the threshold, an inference array will be created under that point.`
+
+
+

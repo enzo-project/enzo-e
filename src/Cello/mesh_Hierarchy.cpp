@@ -184,11 +184,19 @@ void Hierarchy::upper(double * x, double * y, double * z) const throw ()
 
 //----------------------------------------------------------------------
 
-void Hierarchy::root_blocks (int * nbx, int * nby, int * nbz) const throw()
+void Hierarchy::root_blocks
+(int * nbx, int * nby, int * nbz,int level) const throw()
 {
   if (nbx) (*nbx) = blocking_[0];
   if (nby) (*nby) = blocking_[1];
   if (nbz) (*nbz) = blocking_[2];
+  if (level > 0) {
+    const int r = std::pow(2,level);
+    const int rank = cello::rank();
+    if (nbx && rank >= 1) (*nbx) *= r;
+    if (nby && rank >= 2) (*nby) *= r;
+    if (nbz && rank >= 3) (*nbz) *= r;
+  }
 }
 
 //----------------------------------------------------------------------

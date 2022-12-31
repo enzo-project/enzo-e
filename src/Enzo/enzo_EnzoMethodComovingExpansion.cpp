@@ -8,7 +8,7 @@
 #include "cello.hpp"
 #include "charm_simulation.hpp"
 #include "enzo.hpp"
-#include "enzo.decl.h"
+#include "charm_enzo.hpp"
 //----------------------------------------------------------------------
 
 EnzoMethodComovingExpansion::EnzoMethodComovingExpansion
