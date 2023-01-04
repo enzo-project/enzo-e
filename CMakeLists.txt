@@ -79,6 +79,20 @@ if (USE_GRACKLE)
   endif()
 endif()
 
+option(USE_TORCH "Use LibTorch" OFF)
+if (USE_TORCH)
+  find_package(Torch)
+  if (Torch_FOUND)
+    add_compile_definitions(CONFIG_USE_TORCH)
+    set(CHARM_PREPROC_DEFS ${CHARM_PREPROC_DEFS} "-DCONFIG_USE_TORCH ")
+  else()
+    message(FATAL_ERROR
+      "Configured to use libtorch but libtorch library not found.\n"
+      "Either disable libtorch (e.g., `-DUSE_TORCH=OFF`) or provide path "
+      "(e.g., `-DTorch_ROOT=/PATH/TO/LIBTORCH/INSTALL/DIRECTORY`).")
+  endif()
+endif()
+
 find_package(Boost REQUIRED COMPONENTS filesystem)
 # Fix linking error to
 # /opt/apps/gcc/8.3.0/bin/ld: main.cpp:(.text+0x679e): undefined reference to `boost::system::generic_category()'

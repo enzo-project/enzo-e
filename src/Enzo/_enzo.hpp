@@ -152,6 +152,9 @@ extern "C" {
 }
 #endif
 
+#ifdef CONFIG_USE_TORCH
+  #include <torch/script.h>
+#endif
 //----------------------------------------------------------------------
 
 #include "fortran.h" /* included so scons knowns to install fortran.h */
