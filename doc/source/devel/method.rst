@@ -89,7 +89,7 @@ Standard properties tracked in base class
 
 All ``Method`` classes provide some standardized properties that are managed through the base class.
 
-In some of the following cases, we will talk about how the parameter get's specified for a hypothetical method called ``"my_method"`` (in this hypothetical scenario, subclass's implementation of :cpp:func:`~Method::name` would return ``"my_method"``).
+In some of the following cases, we will talk about how the parameter gets specified for a hypothetical method called ``"my_method"`` (in this hypothetical scenario, subclass's implementation of :cpp:func:`~Method::name` would return ``"my_method"``).
 
 Courant Number
 ~~~~~~~~~~~~~~
