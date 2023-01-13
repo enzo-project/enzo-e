@@ -1039,6 +1039,7 @@ void EnzoLevelArray::apply_inference()
     //       "pstar+pnostar != 1.0", pstar+pnostar == 1.0);
 
     if (pstar > pnostar) {
+      CkPrintf("EnzoMethodInference::S1 classifier passed! Calling S2 now...\n");
       
       // load stage-2 model (incepunet)
       const std::string stage2_checkpoint = "/home1/07320/whick002/StarNetRuntime/model_checkpoints/incepunet.jtpt";
