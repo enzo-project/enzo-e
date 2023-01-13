@@ -19,6 +19,11 @@ find_path(Torch_INCLUDE_DIR
   PATHS ${Torch_ROOT}/include
 )
 
+find_path(Torch_API_INCLUDE_DIR
+  NAMES torch/all.h
+  PATHS ${Torch_ROOT}/include/torch/csrc/api/include
+)
+
 # Grackle by default builds both dynamic and static libs.
 # We'll use the static one.
 find_library(Torch_LIBRARY
@@ -40,7 +45,7 @@ find_package_handle_standard_args(Torch
 
 if(Torch_FOUND)
   set(Torch_LIBRARIES ${Torch_LIBRARY})
-  set(Torch_INCLUDE_DIRS ${Torch_INCLUDE_DIR})
+  set(Torch_INCLUDE_DIRS ${Torch_INCLUDE_DIR} ${Torch_API_INCLUDE_DIR})
 endif()
 
 # Add a target so that we can add torch (and `include` folders) via `target_link_libraries()` directly
@@ -48,7 +53,7 @@ if(Torch_FOUND AND NOT TARGET Torch::Torch)
   add_library(Torch::Torch UNKNOWN IMPORTED)
   set_target_properties(Torch::Torch PROPERTIES
     IMPORTED_LOCATION "${Torch_LIBRARY}"
-    INTERFACE_INCLUDE_DIRECTORIES "${Torch_INCLUDE_DIR}"
+    INTERFACE_INCLUDE_DIRECTORIES "${Torch_INCLUDE_DIRS}"
     INTERFACE_LINK_LIBRARIES "${Torch_LIBRARY}"
   )
 endif()

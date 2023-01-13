@@ -154,6 +154,7 @@ extern "C" {
 
 #ifdef CONFIG_USE_TORCH
   #include <torch/script.h>
+//  #include <torch/csrc/api/include/torch/all.h>
 #endif
 //----------------------------------------------------------------------
 
