@@ -424,10 +424,6 @@ void EnzoMethodM1Closure::inject_photons ( EnzoBlock * enzo_block, int igroup ) 
   int gx,gy,gz;
   field.ghost_depth(0,&gx, &gy, &gz);
   
-  int idx = 1;
-  int idy = mx;
-  int idz = mx*my;
- 
   const int rank = ((mz == 1) ? ((my == 1) ? 1 : 2) : 3);
  
   double xm,ym,zm;
