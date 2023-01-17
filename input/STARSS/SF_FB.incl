@@ -21,7 +21,6 @@ Particle {
         position = [ "x", "y", "z" ];
         velocity = [ "vx", "vy", "vz" ];
         group_list = ["is_gravitating"];
-        mass_is_mass = true;
     }
 }
 
