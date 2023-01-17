@@ -412,7 +412,6 @@ public: // interface
       method_m1_closure_cross_section_calculator("vernier"), // what type of cross section calculator to use ("vernier", "vernier_average", "custom")
       method_m1_closure_sigmaN(), // user-defined cross sections (requires cross_section_calculator = "custom")
       method_m1_closure_sigmaE(), 
-      method_m1_closure_courant(0.5),
       method_m1_closure_energy_lower(),
       method_m1_closure_energy_upper(),
       method_m1_closure_energy_mean(), // mean energy for bin
