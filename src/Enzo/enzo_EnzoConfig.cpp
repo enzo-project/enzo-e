@@ -707,7 +707,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_m1_closure_temperature_blackbody;
   p | method_m1_closure_particle_luminosity;
   p | method_m1_closure_SED;
-  p | method_m1_closure_courant;
   p | method_m1_closure_min_photon_density;
   p | method_m1_closure_attenuation;
   p | method_m1_closure_thermochemistry;
