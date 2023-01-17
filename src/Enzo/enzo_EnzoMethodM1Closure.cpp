@@ -1462,9 +1462,7 @@ void EnzoMethodM1Closure::call_inject_photons(EnzoBlock * enzo_block) throw()
              enzo_block->proxy_array());
 
     enzo_block->contribute(temp, CkReduction::sum_double, callback);
-  }
-
-  else { // just set sigmaN = sigmaE = either sigma_vernier or custom value, and eps = mean(energy)
+  } else { // just set sigmaN = sigmaE = either sigma_vernier or custom value, and eps = mean(energy)
 
     if (! enzo_block->is_leaf() ) {
       enzo_block->compute_done();
