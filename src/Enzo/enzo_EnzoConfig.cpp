@@ -1869,8 +1869,6 @@ void EnzoConfig::read_method_m1_closure_(Parameters * p)
   method_m1_closure_LWB_J21 = p->value_float
     ("Method:m1_closure:LWB_J21", -1.0);
   
-  method_m1_closure_courant = p->value_float
-    ("Method:m1_closure:courant", 0.5);
 
   method_m1_closure_cross_section_calculator = p->value_string
     ("Method:m1_closure:cross_section_calculator","vernier");
