@@ -533,20 +533,20 @@ void EnzoMethodM1Closure::inject_photons ( EnzoBlock * enzo_block, int igroup ) 
     
       // CIC deposit with cloud radius of 1 cell width
       double wx, wy, wz;
-      for (int ix_ = ix-1; ix_ <= ix+1; ix_++) {
+      for (int iz_ = iz-1; iz_ <= iz+1; iz_++) {
 
-        double xcell = xm + (ix_+0.5 - gx)*hx;
-        wx  = std::max(1.0 - std::abs(xp - xcell) / hx, 0.0);
+        double zcell = zm + (iz_+0.5 - gz)*hz;
+        wz = std::max(1.0 - std::abs(zp - zcell) / hz, 0.0);
 
         for (int iy_ = iy-1; iy_ <= iy+1; iy_++) {
 
           double ycell = ym + (iy_+0.5 - gy)*hy;
           wy = std::max(1.0 - std::abs(yp - ycell) / hy, 0.0);
 
-          for (int iz_ = iz-1; iz_ <= iz+1; iz_++) {
+          for (int ix_ = ix-1; ix_ <= ix+1; ix_++) {
             // cell positions
-            double zcell = zm + (iz_+0.5 - gz)*hz;
-            wz = std::max(1.0 - std::abs(zp - zcell) / hz, 0.0);
+            double xcell = xm + (ix_+0.5 - gx)*hx;
+            wx  = std::max(1.0 - std::abs(xp - xcell) / hx, 0.0);
 
             int i_ = INDEX(ix_,iy_,iz_,mx,my);
             double dN_cic = wx*wy*wz*dN;
