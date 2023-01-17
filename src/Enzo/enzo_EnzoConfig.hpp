@@ -923,7 +923,6 @@ public: // attributes
   double                    method_m1_closure_temperature_blackbody; 
   double                    method_m1_closure_particle_luminosity;
   std::vector<double>       method_m1_closure_SED;
-  double                    method_m1_closure_courant;
   double                    method_m1_closure_min_photon_density;
   bool                      method_m1_closure_attenuation;
   bool                      method_m1_closure_thermochemistry;
