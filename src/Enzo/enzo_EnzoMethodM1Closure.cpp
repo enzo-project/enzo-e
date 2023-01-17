@@ -202,7 +202,7 @@ double EnzoMethodM1Closure::timestep ( Block * block ) throw()
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
 
-  double courant = enzo_config->method_m1_closure_courant;
+  double courant = this->courant();
   double clight_frac = enzo_config->method_m1_closure_clight_frac;
   return courant * h_min / (3.0 * clight_frac*enzo_constants::clight / enzo_units->velocity());
 }
