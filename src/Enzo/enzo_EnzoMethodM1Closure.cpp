@@ -546,8 +546,11 @@ void EnzoMethodM1Closure::inject_photons ( EnzoBlock * enzo_block, int igroup ) 
 
             int i_ = INDEX(ix_,iy_,iz_,mx,my);
             double dN_cic = wx*wy*wz*dN;
+            N_deposit[i_] += dN_cic;
+            // recall that the refresh machinery uses exchanged boundary data
+            // from the field held by N_deposit to DIRECTLY update the field
+            // held by N (i.e. so we may as well update the rest of N now)
             N[i_] += dN_cic;
-            N_deposit[i_] += dN_cic; 
           }
         }
       }
@@ -1088,7 +1091,7 @@ void EnzoMethodM1Closure::C_add_recombination (EnzoBlock * enzo_block, double * 
 
   std::vector<double> masses = {mH,4*mH, 4*mH};
 
-  for (int j=0; j<chemistry_fields.size(); j++) {  
+  for (std::size_t j=0; j<chemistry_fields.size(); j++) {  
     enzo_float * density_j = (enzo_float *) field.values(chemistry_fields[j]);
      
     int b = get_b_boolean(E_lower, E_upper, j);
@@ -1117,7 +1120,6 @@ void EnzoMethodM1Closure::D_add_attenuation ( EnzoBlock * enzo_block, double * D
                                              double clight, int i, int igroup) throw()
 {
   // Attenuate radiation
-  const EnzoConfig * enzo_config = enzo::config();
 
   EnzoUnits * enzo_units = enzo::units();
   double rhounit = enzo_units->density();
@@ -1141,7 +1143,7 @@ void EnzoMethodM1Closure::D_add_attenuation ( EnzoBlock * enzo_block, double * D
 */
 
   Scalar<double> scalar = enzo_block->data()->scalar_double();
-  for (int j=0; j<chemistry_fields.size(); j++) {  
+  for (std::size_t j=0; j<chemistry_fields.size(); j++) {  
     enzo_float * density_j = (enzo_float *) field.values(chemistry_fields[j]);
     double n_j = density_j[i]*rhounit / masses[j];     
     double sigN_ij = *(scalar.value( scalar.index( sigN_string(igroup, j) )));
@@ -1177,7 +1179,6 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
   int gx,gy,gz;
   field.ghost_depth(0,&gx, &gy, &gz);
    
-  const int rank = ((mz == 1) ? ((my == 1) ? 1 : 2) : 3);
  
   double xm,ym,zm;
   double xp,yp,zp;
@@ -1333,8 +1334,6 @@ void EnzoMethodM1Closure::add_LWB(EnzoBlock * enzo_block, double J21)
   enzo_block->cell_width(&hx,&hy,&hz);
 
   EnzoUnits * enzo_units = enzo::units();
-  double lunit = enzo_units->length();
-  double tunit = enzo_units->time();
   double Nunit = enzo_units->photon_number_density();
     
   double JLW;
@@ -1406,7 +1405,7 @@ void EnzoMethodM1Closure::call_inject_photons(EnzoBlock * enzo_block) throw()
   // "vernier_average" -- calculates cross section from sigma_vernier() function,
   //    then averages that value over all star particles in the simulation, weighted by 
   //    mass * luminosity
-  //  "vernier_average" -- just sets cross sections equal to values from sigma_vernier()
+  //  "vernier" -- just sets cross sections equal to values from sigma_vernier()
   //  "custom" -- sets cross sections to user-specified values in the parameter file
   Scalar<double> scalar = enzo_block->data()->scalar_double();
 
@@ -1478,9 +1477,7 @@ void EnzoMethodM1Closure::call_inject_photons(EnzoBlock * enzo_block) throw()
           *(scalar.value( scalar.index( sigN_string(i,j) ))) = sigma_j;
           *(scalar.value( scalar.index( sigE_string(i,j) ))) = sigma_j;
         }
-      }
-
-      else if (enzo_config->method_m1_closure_cross_section_calculator == "custom") {
+      } else if (enzo_config->method_m1_closure_cross_section_calculator == "custom") {
         // set sigmaN = sigmaE = custom values
         for (int j=0; j<N_species; j++) {
           int sig_index = i*N_species + j;

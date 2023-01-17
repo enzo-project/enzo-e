@@ -55,44 +55,99 @@ public: // interface
   //    get_photoionization_and_heating_rates 
 
 
-  // calls inject_photons(), then does a refresh
+ /// calls inject_photons(), sets the groups' mean cross sections & energies,
+  /// then launches a refresh
+  ///
+  /// @note
+  /// When the cross section calculation method is "vernier_average", this
+  /// actually initiates a global reduction for computing the groups' mean
+  /// cross sections & energies. The callback executed following the reduction
+  /// subsequently initiates the callback.
   void call_inject_photons(EnzoBlock * enzo_block) throw();
 
+  /// solves the transport equation & photoheating and photoionization rates
+  ///
+  /// This is invoked by the entry method right after the refresh-step and
+  /// drives the rest of the calculation
   void call_solve_transport_eqn(EnzoBlock * enzo_block) throw();
 
+  /// updates each cell in the integrated fields (e.g. "photon_density",
+  /// "flux_x", "flux_y", "flux_z") with the sum of the values from each of the
+  /// group fields.
   void sum_group_fields (EnzoBlock * enzo_block) throw();
 
+  /// this is called after the reduction required by the "vernier_average"
+  /// calculation method (related to computing the average photon energy,
+  /// recombination cross-sections, and energy cross-sections for each photon
+  /// group)
+  ///
+  /// the photon-injection refresh starts after this method completes. This
+  /// method is not invoked by the other approach for computing cross sections
+  /// & energies
   void set_global_averages (EnzoBlock * enzo_block, CkReductionMsg * msg) throw();
 
 protected: // methods
  
+  /// numerically integrate f from a to b with Simpson's rule
+  ///
+  /// @param a,b bounds of the integral
+  /// @param n the number of subintervals to use (must be positive)
+  /// @param f the function to be integrated
+  /// @param v1,v2,v3 the trailing arguments that are passed to f
   double integrate_simpson(double a, double b, int n, 
                std::function<double(double,double,double,int)> f,double v1,double v2,int v3) throw();
 
+  /// compute the planck function.
+  ///
+  /// @param nu frequency
+  /// @param T temperature
+  /// @param clight the speed of light
+  /// @param dependent_variable denotes the numerator. When this is 0, the
+  ///     numerator is 1. When this is 1, it's appropriate for photon density,
+  ///     When this is 2, it's appropriate for energy density
   double planck_function(double nu, double T, double clight, int dependent_variable) throw();
 
+  /// gives the name of the ScalarData that holds the "average" photoionization
+  /// cross-section of photon group i, appropriate for gas species j
   const std::string sigN_string(int i, int j) throw()
     {return "sigN_" + std::to_string(i) + std::to_string(j);}
+  
+  /// gives the name of the ScalarData that holds the "average" energy
+  /// cross-section of photon group i, appropriate for gas species j
   const std::string sigE_string(int i, int j) throw()
     {return "sigE_" + std::to_string(i) + std::to_string(j);}
+
+  /// gives the name of the ScalarData that holds the "average" energy of
+  /// photons in photon group i
   const std::string eps_string (int i) throw()
     {return "eps_"  + std::to_string(i);}
+
+  /// gives the name of the ScalarData that total mass*luminosity emitted by
+  /// star particles (the luminosity is for photon group i)
   const std::string mL_string  (int i) throw()
     {return "mL_" + std::to_string(i);}
 
   
   //--------- INJECTION STEP -------
 
+  /// get stellar temperature for a given stellar mass
   double get_star_temperature(double M) throw();
 
+  /// computes the number-density of photons (in a give group) emitted by a
+  /// star-particle of mass `pmass` and luminosity `plum` based on the
+  /// user-specified stellar SED
   double get_radiation_custom(EnzoBlock * enzo_block,
              double energy, double pmass, double plum, 
              double dt, double inv_vol, int i, int igroup) throw();
 
+  /// computes the number-density of photons (in a give group) that emitted by
+  /// a star-particle of mass `pmass` (assuming a black-body spectrum)
   double get_radiation_blackbody(EnzoBlock * enzo_block, double pmass, 
              double freq_lower, double freq_upper, double clight, 
              double dt, double cell_volume, int i, int igroup) throw();
 
+  /// computes the number density of star particles and deposits them on the
+  /// grid
   void inject_photons(EnzoBlock * enzo_block, int igroup) throw();
 
   //--------- TRANSPORT STEP --------
@@ -127,20 +182,26 @@ protected: // methods
   void add_LWB (EnzoBlock * enzo_block, double J21);
 
   //---------- THERMOCHEMISTRY STEP ------------
-
-
   // Interaction with matter is completely local, so don't need a refresh before this step
+
+  /// computes the photon-loss term from attenuation by local gas
   void D_add_attenuation ( EnzoBlock * enzo_block, double * D, double clight, int i, int igroup) throw(); 
 
+  /// helper function used in C_add_recombination
   double get_alpha (double T, int species, char rec_case) throw();
 
+  /// helper function used in C_add_recombination
   int get_b_boolean (double E_lower, double E_upper, int species) throw();
 
+  /// computes the photon-creation term from recombination in local gas
   void C_add_recombination (EnzoBlock * enzo_block, double * C, 
                               enzo_float * T, int i, int igroup, double E_lower, double E_uppe) throw();
 
+  /// Computes the photoionization cross-section of particles in a given gas
+  /// species (specified by type) and for photons of energy E
   double sigma_vernier (double energy, int type) throw();
 
+  /// Calculates photoionization and heating rates in each cell
   void get_photoionization_and_heating_rates (EnzoBlock * enzo_block, double clight) throw();
 
   //--------------------------

@@ -1,3 +1,8 @@
+# Problem: RT test of I-front trapping in a dense clump and the formation of a shadow
+# Author: William Hicks (whicks@ucsd.edu)
+
+# This setup is adapted from "Test 3", described in Iliev et al. 2006
+
  Boundary {
      Fx0 {
          field_list = "flux_x_0";
