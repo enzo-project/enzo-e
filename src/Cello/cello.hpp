@@ -32,6 +32,8 @@
 #include <set>
 #include <stdexcept>
 #include <string>
+#include <type_traits> // std::remove_cv
+#include <typeinfo> // std::type_info
 #include <vector>
 
 #include <charm++.h>
@@ -650,6 +652,13 @@ namespace cello {
   int is_precision_supported (precision_type);
   extern const char * precision_name[7];
 
+  /// converts a precision_enum to type_enum
+  ///
+  /// at present, this is a trivial operation. This primarily exists to make
+  /// the developer's intention clear
+  inline int convert_enum_precision_to_type(precision_type precision)
+  { return precision; }
+
   inline void hex_string(char str[], int length)
   {
     //hexadecimal characters
@@ -782,7 +791,29 @@ namespace cello {
   (const std::vector <std::string> * path_name,
    int counter, int cycle, double time, bool & already_exists);
 
-  
+  //----------------------------------------------------------------------
+
+  /// helper function of get_type_enum
+  int get_type_enum_(const std::type_info &tinfo,
+                     bool unknown_on_fail = false) noexcept;
+
+  /// returns the type_enum associated with the template type argument ``T``
+  ///
+  /// this automatically sheds ``const`` or ``volatile`` qualifiers from ``T``
+  ///
+  /// @param unknown_on_fail When ``true``, the this returns ``type_unknown``
+  ///     when ``T`` isn't recognized. Otherwise, the program aborts with an
+  ///     error. Default is ``false``.
+  ///
+  /// @note
+  /// This will not return type_default
+  template <class T>
+  int get_type_enum(bool unknown_on_fail = false) noexcept{
+    using nonconst_T = typename std::remove_cv<T>::type;
+    return get_type_enum_(typeid(nonconst_T));
+  }
+
+  //----------------------------------------------------------------------
 }
 
 #endif /* CELLO_HPP */
