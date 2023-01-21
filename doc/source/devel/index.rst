@@ -17,3 +17,4 @@ refinement criteria, etc.
    method
    array
    hydro_infrastructure
+   debugging
