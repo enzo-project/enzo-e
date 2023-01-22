@@ -3,7 +3,7 @@
 /// @file     enzo_EnzoMethodBalance.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Thu Apr  1 16:14:38 PDT 2010
-/// @brief    [\ref Enzo] Implementation of Enzo PPM hydro method
+/// @brief    [\ref Enzo] Declaration of the the EnzoMethodBalance class
 
 #ifndef ENZO_ENZO_METHOD_BALANCE_HPP
 #define ENZO_ENZO_METHOD_BALANCE_HPP
