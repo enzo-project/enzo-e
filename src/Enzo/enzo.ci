@@ -209,7 +209,7 @@ module enzo {
     entry void p_method_balance_migrate();
     entry void p_method_balance_done();
 
-  // EnzoMethodGravity synchronization entry methods
+    // EnzoMethodGravity synchronization entry methods
     entry void p_method_gravity_continue();
     entry void p_method_gravity_end();
 
