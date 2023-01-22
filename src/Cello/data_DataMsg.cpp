@@ -486,5 +486,4 @@ void DataMsg::print (const char * message, FILE * fp_in) const
             message,ifmr3_cf_[0],ifmr3_cf_[1],ifmr3_cf_[2]);
   fprintf (fp,"%s DATA_MSG coarse ifpr3_cf_   = %d %d %d\n",
             message,ifpr3_cf_[0],ifpr3_cf_[1],ifpr3_cf_[2]);
-  const int ip = CkMyPe();
 }

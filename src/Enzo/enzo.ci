@@ -184,7 +184,7 @@ module enzo {
     entry void p_restart_level_created();
 }
 
-  //----------------------------------------------------------------------%
+  //----------------------------------------------------------------------
   array[Index] EnzoBlock : Block {
 
 #ifdef BYPASS_CHARM_MEM_LEAK
@@ -231,7 +231,6 @@ module enzo {
     // EnzoSolverCg synchronization entry methods
 
     entry void p_solver_cg_matvec();
-
     entry void r_solver_cg_loop_0a(CkReductionMsg *msg);
     entry void r_solver_cg_loop_0b(CkReductionMsg *msg);
     entry void r_solver_cg_shift_1(CkReductionMsg *msg);

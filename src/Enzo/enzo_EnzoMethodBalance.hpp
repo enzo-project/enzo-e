@@ -2,8 +2,8 @@
 
 /// @file     enzo_EnzoMethodBalance.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
-/// @date     Thu Apr  1 16:14:38 PDT 2010
-/// @brief    [\ref Enzo] Declaration of the the EnzoMethodBalance class
+/// @date     <2022-12-12 Mon>
+/// @brief    [\ref Enzo] Declaration for the EnzoMethodBalance class
 
 #ifndef ENZO_ENZO_METHOD_BALANCE_HPP
 #define ENZO_ENZO_METHOD_BALANCE_HPP

@@ -2,7 +2,7 @@
 
 /// @file     enzo_EnzoMethodBalance.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Fri Apr  2 17:05:23 PDT 2010
+/// @date     <2022-12-09 Fri>
 /// @brief    Implements the EnzoMethodBalance class
 
 #include "cello.hpp"
