@@ -8,7 +8,7 @@
    :Default: :d:`[]`
    :Scope:     :c:`Cello`
 
-   :e:`All fields must be explicitly listed in the` :p:`list` :e:`parameter.  Field names depend on the Method(s) used; e.g., PPM uses` :t:`"density"`,  :t:`"velocity_x"`, :t:`"velocity_y"`, :t:`"total_energy"`, :e:`and`  :t:`"internal_energy"`.
+   :e:`All fields must be explicitly listed in the` :par:param:`~Field:list` :e:`parameter.  Field names depend on the Method(s) used; e.g., PPM uses` :t:`"density"`,  :t:`"velocity_x"`, :t:`"velocity_y"`, :t:`"total_energy"`, :e:`and`  :t:`"internal_energy"`.
 
 
 ----
@@ -19,14 +19,13 @@
    :Type:    :par:typefmt:`float`
    :Default: :d:`5.0 / 3.0`
    :Scope:     :z:`Enzo`
-   :Todo:  :o:`perhaps move this to a different group, e.g. Physics`
 
-   :p:`gamma` :e:`specifies the ratio of specific heats for the ideal gas used by the PPM hydrodynamics solver.`
+   :par:param:`~Field:gamma` :e:`specifies the ratio of specific heats for the ideal gas used by the hydrodynamics solvers.`
 
    .. warning::
 
       This parameter is deprecated and will be removed in a future version.
-      Going forward, pass this value to ``Physics:fluid_props:eos:gamma``.
+      Going forward, pass this value to :par:param:`Physics:fluid_props:eos:gamma`.
 
 
 ----

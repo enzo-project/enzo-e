@@ -97,7 +97,7 @@ Deprecated mhd_vlct parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The following parameters have all been deprecated and will be removed
 in a future version of Enzo-E. Going forwards, the corresponding
-parameters in :p:`Physics` : :p:`fluid_props` should be used instead.
+parameters in :par:paramfmt:`Physics:fluid_props` should be used instead.
 
 ----
 

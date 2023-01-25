@@ -182,8 +182,8 @@ equations of state (like an isothermal equation of state).
 
 See :ref:`using-grackle-gamma-with-HD` for further discussion about
 how the equation of state is handled when
-``Method:grackle:primordial_chemistry > 1`` (under these conditions
-Grackle models a spatially varying adiabatic index).
+:par:param:`Method:grackle:primordial_chemistry` exceeds ``1`` (under
+these conditions Grackle models a spatially varying adiabatic index).
 
 ----
 
