@@ -20,7 +20,7 @@ methods that concrete classes override are shown below:
    This page is very incomplete. Among other things, we have not discussed
    ``pup`` routines.
 
-=======
+========
 Overview
 ========
 
