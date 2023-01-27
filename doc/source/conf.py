@@ -98,13 +98,6 @@ html_show_sphinx = False
 # a list of builtin themes.
 html_theme = 'sphinx_rtd_theme'
 
-# Enable HTML5 writer support
-#
-# this was added at the suggestion of
-# https://github.com/readthedocs/sphinx_rtd_theme/issues/979
-# while trying to resolve some formatting issues on remote builds
-html_experimental_html5_writer = True
-
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
