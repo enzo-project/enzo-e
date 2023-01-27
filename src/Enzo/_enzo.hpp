@@ -209,9 +209,9 @@ extern "C" {
 #include "initial/EnzoInitialShuCollapse.hpp"
 #include "initial/EnzoInitialBBTest.hpp"
 
-#include "enzo_EnzoRefineShock.hpp"
-#include "enzo_EnzoRefineParticleMass.hpp"
-#include "enzo_EnzoRefineMass.hpp"
+#include "amr/EnzoRefineShock.hpp"
+#include "amr/EnzoRefineParticleMass.hpp"
+#include "amr/EnzoRefineMass.hpp"
 
 // [order dependencies:]
 #include "enzo_EnzoSinkParticle.hpp"
@@ -295,9 +295,9 @@ extern "C" {
 
 #include "enzo_EnzoStopping.hpp"
 
-#include "enzo_EnzoProlong.hpp"
-#include "enzo_EnzoProlongMC1.hpp"
-#include "enzo_EnzoProlongPoisson.hpp"
-#include "enzo_EnzoRestrict.hpp"
+#include "amr/EnzoProlong.hpp"
+#include "amr/EnzoProlongMC1.hpp"
+#include "amr/EnzoProlongPoisson.hpp"
+#include "amr/EnzoRestrict.hpp"
 
 #endif /* ENZO_PRIVATE_HPP */
