@@ -67,6 +67,10 @@ When defining a new parameter in the reference section, you should use the follo
 
    This snippet will be rendered as the following (cross-referencing to this output has been disabled):
 
+   ..
+      Note that below we are passing the ``:noindex:`` option to the directive
+      in order to disable the cross-referencing.
+
    .. par:parameter:: Method:heat:alpha
       :noindex:
 
@@ -76,10 +80,6 @@ When defining a new parameter in the reference section, you should use the follo
       :Scope:      :z:`Enzo`
 
       :e:`Thermal diffusivity parameter for the heat equation.`
-
-   .. rubric:: Additional Notes
-
-   This directive also accepts the ``:noindex:`` option, but you shouldn't worry about that (it's only used for writing this example).
 
    .. note:: Other potential benefits of :rst:dir:`par:parameter`
 
