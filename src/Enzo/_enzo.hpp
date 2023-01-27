@@ -256,7 +256,7 @@ extern "C" {
 #include "enzo_EnzoMethodFeedbackSTARSS.hpp"
 #include "enzo_EnzoMethodFluxAccretion.hpp"
 #include "enzo_EnzoMethodGrackle.hpp"
-#include "enzo_EnzoMethodGravity.hpp"
+#include "gravity/EnzoMethodGravity.hpp"
 #include "enzo_EnzoMethodHeat.hpp"
 #include "enzo_EnzoMethodMergeSinks.hpp"
 #include "enzo_EnzoMethodPmDeposit.hpp"
@@ -272,9 +272,9 @@ extern "C" {
 #include "hydro-mhd/EnzoMethodPpm.hpp"
 #include "hydro-mhd/EnzoMethodPpml.hpp"
 
-#include "enzo_EnzoMatrixDiagonal.hpp"
-#include "enzo_EnzoMatrixIdentity.hpp"
-#include "enzo_EnzoMatrixLaplace.hpp"
+#include "gravity/EnzoMatrixDiagonal.hpp"
+#include "gravity/EnzoMatrixIdentity.hpp"
+#include "gravity/EnzoMatrixLaplace.hpp"
 
 #include "enzo_EnzoMsgCheck.hpp"
 
@@ -286,12 +286,12 @@ extern "C" {
   #include "enzo_EnzoComputeCoolingTime.hpp"
 #endif
 
-#include "enzo_EnzoSolverBiCgStab.hpp"
-#include "enzo_EnzoSolverCg.hpp"
-#include "enzo_EnzoSolverDd.hpp"
-#include "enzo_EnzoSolverDiagonal.hpp"
-#include "enzo_EnzoSolverJacobi.hpp"
-#include "enzo_EnzoSolverMg0.hpp"
+#include "gravity/EnzoSolverBiCgStab.hpp"
+#include "gravity/EnzoSolverCg.hpp"
+#include "gravity/EnzoSolverDd.hpp"
+#include "gravity/EnzoSolverDiagonal.hpp"
+#include "gravity/EnzoSolverJacobi.hpp"
+#include "gravity/EnzoSolverMg0.hpp"
 
 #include "enzo_EnzoStopping.hpp"
 

@@ -46,6 +46,8 @@ target_include_directories(enzo
 )
 target_link_options(enzo PRIVATE ${Cello_TARGET_LINK_OPTIONS})
 
+# add source files from various subdirectories to the enzo target
+add_subdirectory(gravity)
 add_subdirectory(hydro-mhd) # add files in hydro-mhd to enzo
 add_subdirectory(initial) # add files in initial to enzo
 
