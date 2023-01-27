@@ -47,6 +47,7 @@ target_include_directories(enzo
 target_link_options(enzo PRIVATE ${Cello_TARGET_LINK_OPTIONS})
 
 add_subdirectory(hydro-mhd) # add files in hydro-mhd to enzo
+add_subdirectory(initial) # add files in initial to enzo
 
 # this includes a lot of the machinery for driving the simulation (it's
 # directly analogous to the "tester" targets in the Cello directory)
