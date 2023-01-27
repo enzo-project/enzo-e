@@ -246,7 +246,7 @@ extern "C" {
 #include "hydro-mhd/EnzoBfieldMethodCT.hpp"
 
 #include "feedback-particle/EnzoMethodAccretion.hpp"
-#include "enzo_EnzoMethodBackgroundAcceleration.hpp"
+#include "gravity/EnzoMethodBackgroundAcceleration.hpp"
 #include "feedback-particle/EnzoMethodBondiHoyleAccretion.hpp"
 #include "enzo_EnzoMethodCheck.hpp"
 #include "cosmology/EnzoMethodComovingExpansion.hpp"
@@ -278,7 +278,7 @@ extern "C" {
 
 #include "enzo_EnzoMsgCheck.hpp"
 
-#include "enzo_EnzoComputeAcceleration.hpp"
+#include "gravity/EnzoComputeAcceleration.hpp"
 #include "enzo_EnzoComputeCicInterp.hpp"
 #include "enzo_EnzoComputePressure.hpp"
 #include "enzo_EnzoComputeTemperature.hpp"
