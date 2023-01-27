@@ -12,7 +12,7 @@ class Io;
 class IoBlock;
 class IoFieldData;
 class IoParticleData;
-class FileHdf5;
+class File;
 
 class MethodOutput : public Method
 {
@@ -84,11 +84,11 @@ protected: // functions
 
   int is_writer_ (Index index);
 
-  FileHdf5 * file_open_(Block * block, int a3[3]);
-  void file_write_hierarchy_(FileHdf5 * file);
-  void file_write_block_(FileHdf5 * , Block * , MsgOutput *);
+  File * file_open_(Block * block, int a3[3]);
+  void file_write_hierarchy_(File * file);
+  void file_write_block_(File * , Block * , MsgOutput *);
   int file_count_(Block * block);
-  void write_meta_ ( FileHdf5 * file, Io * io, std::string type_meta );
+  void write_meta_ ( File * file, Io * io, std::string type_meta );
   DataMsg * create_data_msg_ (Block * block);
 
 protected: // attributes

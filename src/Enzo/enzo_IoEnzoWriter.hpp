@@ -51,11 +51,11 @@ public: // entry methods
 
 protected: // functions
 
-  FileHdf5 * file_open_(std::string name_dir, std::string name_file);
+  File * file_open_(std::string name_dir, std::string name_file);
   std::ofstream create_block_list_(std::string name_dir, std::string name_file);
   void file_write_hierarchy_();
   void file_write_block_(EnzoMsgCheck * msg_check);
-  void write_meta_ ( FileHdf5 * file, Io * io, std::string type_meta );
+  void write_meta_ ( File * file, Io * io, std::string type_meta );
 
   void write_block_list_(std::string block_name, int level);
   void close_block_list_();
@@ -72,7 +72,7 @@ protected: // attributes
 
   std::ofstream stream_block_list_;
 
-  FileHdf5 * file_;
+  File * file_;
 
   /// How often to output write status wrt block indices in first
   /// file; 0 for no output

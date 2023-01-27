@@ -729,7 +729,7 @@ void IoEnzoReader::file_read_block_
         int64_t * buffer_int64;
       };
 
-      buffer = file_->allocate_buffer(np,type_data);
+      buffer = File::allocate_buffer(np,type_data);
 
       int nx=m4[0];
       int ny=m4[1];
@@ -784,7 +784,7 @@ void IoEnzoReader::copy_buffer_to_particle_attribute_
 //----------------------------------------------------------------------
 
 void IoEnzoReader::read_meta_
-( FileHdf5 * file, Io * io, std::string type_meta )
+( File * file, Io * io, std::string type_meta )
 {
   for (size_t i=0; i<io->meta_count(); i++) {
 
@@ -822,7 +822,7 @@ void IoEnzoReader::file_open_block_list_
 {
   // Create File
   file_name = file_name + ".h5";
-  file_ = new FileHdf5 (path_name, file_name);
+  file_ = File::construct_FileHdf5 (path_name, file_name);
   file_->file_open();
 }
 

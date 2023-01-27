@@ -12,7 +12,8 @@
 // System includes
 //----------------------------------------------------------------------
 
-#include <hdf5.h>
+// we explicitly avoid including <hdf5.h> here (including that header here
+// forces it to be visible to all other dependent components)
 
 #include <string>
 
@@ -21,6 +22,12 @@
 //----------------------------------------------------------------------
 
 #include "disk_File.hpp"
-#include "disk_FileHdf5.hpp"
+
+// we explicitly avoid including "disk_FileHdf5.hpp" here and instead include
+// in "disk_FileHdf5.cpp".
+// -> Including that header here would force us to also include <hdf5.h> here &
+//    make them both visible to all other dependent components
+// -> if we decide to change this, then HDF5_C needs to be labelled as a public
+//    linked library in CMakeLists.txt 
 
 #endif /* _DISK_HPP */

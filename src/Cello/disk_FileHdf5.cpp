@@ -9,14 +9,13 @@
 
 #include "disk.hpp"
 
+// the following must be explicitly included since it's not in disk.hpp
+#include "disk_FileHdf5.hpp"
+
 // #define TRACE_DISK
 
 #define MAX_DATA_RANK 4
 #define MAX_ATTR_RANK 4
-
-//----------------------------------------------------------------------
-
-std::map<const std::string,FileHdf5 *> FileHdf5::file_list;
 
 //----------------------------------------------------------------------
  

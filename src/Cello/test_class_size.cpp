@@ -27,7 +27,9 @@ PARALLEL_MAIN_BEGIN
   printf ("%4ld sizeof(FieldData)\n",sizeof(FieldData));
   printf ("%4ld sizeof(FieldDescr)\n",sizeof(FieldDescr));
   printf ("%4ld sizeof(FieldFace)\n",sizeof(FieldFace));
-  printf ("%4ld sizeof(FileHdf5)\n",sizeof(FileHdf5));
+  // the precise size of FileHdf5 is hidden (otherwise, lots of unrelated
+  // components would have a transitive dependence of hdf5)
+  //printf ("%4ld sizeof(FileHdf5)\n",sizeof(FileHdf5));
   printf ("%4ld sizeof(Hierarchy)\n",sizeof(Hierarchy));
   printf ("%4ld sizeof(Method)\n",sizeof(Method));
   printf ("%4ld sizeof(Parameters)\n",sizeof(Parameters));

@@ -67,7 +67,7 @@ protected: // functions
 
   std::ifstream stream_open_blocks_(std::string name_dir, std::string name_file);
   void file_read_hierarchy_();
-  void read_meta_ ( FileHdf5 * file, Io * io, std::string type_meta );
+  void read_meta_ ( File * file, Io * io, std::string type_meta );
   void file_read_dataset_
   (char * buffer, int type_data,
    int nx, int ny, int nz,
@@ -87,7 +87,7 @@ private: // attributes
   int max_level_;
   std::ifstream stream_block_list_;
 
-  FileHdf5 * file_;
+  File * file_;
 
   Sync sync_blocks_;
 

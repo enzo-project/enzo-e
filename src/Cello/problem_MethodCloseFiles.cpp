@@ -43,8 +43,8 @@ void MethodCloseFiles::compute( Block * block) throw()
   if (is_first_cycle) {
     throttle_stagger_();
     CmiLock(MethodCloseFiles::node_lock);
-    for (auto it=FileHdf5::file_list.begin();
-         it!=FileHdf5::file_list.end(); ++it) {
+    for (auto it=File::file_list.begin();
+         it!=File::file_list.end(); ++it) {
 #ifdef DEBUG_THROTTLE
       CkPrintf ("%d %g DEBUG_THROTTLE closed %s\n",
                 CkMyPe(),cello::simulation()->timer(),it->first.c_str());
@@ -53,7 +53,7 @@ void MethodCloseFiles::compute( Block * block) throw()
       it->second->file_close();
       delete it->second;
       throttle_delay_();
-      FileHdf5::file_list.erase(it);
+      File::file_list.erase(it);
     }
     CmiUnlock(MethodCloseFiles::node_lock);
   }

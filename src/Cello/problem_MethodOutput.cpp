@@ -209,7 +209,7 @@ void MethodOutput::compute_continue(Block * block)
 
   BlockTrace bt (cello::rank(),index_min,index_max);
 
-  FileHdf5 * file = file_open_(block,a3);
+  File * file = file_open_(block,a3);
 
   // Open *.block_list file and save FILE pointer
   const int count   = file_count_(block);
@@ -262,7 +262,7 @@ void MethodOutput::compute_continue(Block * block)
 
   } else {
     // Close file
-    FileHdf5 * file = msg_output->file();
+    File * file = msg_output->file();
     file->file_close();
     delete file;
 
@@ -347,7 +347,7 @@ void MethodOutput::write(Block * block, MsgOutput * msg_output_in )
 // traversal (if any)
 {
   // Write the block data
-  FileHdf5 * file = msg_output_in->file();
+  File * file = msg_output_in->file();
   file_write_block_(file,block,msg_output_in);
 
   // Copy incoming message
@@ -363,7 +363,7 @@ void MethodOutput::write(Block * block, MsgOutput * msg_output_in )
   if (index_next == index_home) {
     // done
     // Close file
-    FileHdf5 * file = msg_output->file();
+    File * file = msg_output->file();
     file->file_close();
     delete file;
 
@@ -413,7 +413,7 @@ int MethodOutput::is_writer_ (Index index)
 }
 
 //----------------------------------------------------------------------
-FileHdf5 * MethodOutput::file_open_(Block * block, int a3[3])
+File * MethodOutput::file_open_(Block * block, int a3[3])
 {
   // Generate file path
   ScalarData<int> * scalar_int = block->data()->scalar_data_int();
@@ -434,7 +434,7 @@ FileHdf5 * MethodOutput::file_open_(Block * block, int a3[3])
   }
 
   // Create File
-  FileHdf5 * file = new FileHdf5 (path_name, file_name);
+  File * file = File::construct_FileHdf5 (path_name, file_name);
   file->file_create();
 
   // Change directory for file_list and block_list files
@@ -445,7 +445,7 @@ FileHdf5 * MethodOutput::file_open_(Block * block, int a3[3])
 
 //----------------------------------------------------------------------
 
-void MethodOutput::file_write_hierarchy_(FileHdf5 * file)
+void MethodOutput::file_write_hierarchy_(File * file)
 {
   IoHierarchy io_hierarchy = (cello::hierarchy());
   for (size_t i=0; i<io_hierarchy.meta_count(); i++) {
@@ -466,7 +466,7 @@ void MethodOutput::file_write_hierarchy_(FileHdf5 * file)
 //----------------------------------------------------------------------
 
 void MethodOutput::file_write_block_
-(FileHdf5 * file, Block * block, MsgOutput * msg_output)
+(File * file, Block * block, MsgOutput * msg_output)
 {
   const bool is_local = (msg_output == nullptr);
 
@@ -645,7 +645,7 @@ void MethodOutput::file_write_block_
 
 //----------------------------------------------------------------------
 
-void MethodOutput::write_meta_ ( FileHdf5 * file, Io * io, std::string type_meta )
+void MethodOutput::write_meta_ ( File * file, Io * io, std::string type_meta )
 {
   for (size_t i=0; i<io->meta_count(); i++) {
 

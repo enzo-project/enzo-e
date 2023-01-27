@@ -8,6 +8,8 @@
 #ifndef DISK_FILE_HDF5_HPP
 #define DISK_FILE_HDF5_HPP
 
+#include <hdf5.h>
+
 class FileHdf5 : public File {
 
   /// @class    FileHdf5
@@ -154,7 +156,7 @@ public: // virtual functions
   virtual void group_close () throw();
   
   /// Read a metadata item associated with the opened group
-  void group_read_meta
+  virtual void group_read_meta
   ( void * buffer, std::string name,  int * s_type,
     int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
   
@@ -164,38 +166,11 @@ public: // virtual functions
     int n1=1, int n2=0, int n3=0, int n4=0) throw()
   { write_meta_ ( group_id_, buffer, name, type, n1,n2,n3,n4); }
 
-public: // functions
-
   /// Set the compression level
-  void set_compress (int level) throw ();
+  virtual void set_compress (int level) throw ();
 
   /// Return the compression level
-  int compress () throw () {return compress_level_; }
-
-  /// Allocate a buffer for reading in a dataset of the given
-  /// length and type
-  char * allocate_buffer (int n, int type_data)
-  {
-    char * data;
-    if (type_data == type_single) {
-      data = (char *)new float [n];
-    } else if (type_data == type_double) {
-      data = (char *)new double [n];
-    } else if (type_data == type_int8) {
-      data = (char *)new int8_t [n];
-    } else if (type_data == type_int16) {
-      data = (char *)new int16_t [n];
-    } else if (type_data == type_int32) {
-      data = (char *)new int32_t [n];
-    } else if (type_data == type_int64) {
-      data = (char *)new int64_t [n];
-    } else {
-      data = nullptr;
-      ERROR1 ("EnzoInitialHdf5::allocate_array_()",
-              "Unsupported data type %d",type_data);
-    }
-    return data;
-  }
+  virtual int compress () throw () {return compress_level_; }
   
 protected: // functions
 

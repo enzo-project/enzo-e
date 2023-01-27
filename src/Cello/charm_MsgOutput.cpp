@@ -40,7 +40,7 @@ MsgOutput::MsgOutput
 (
  BlockTrace block_trace,
  MethodOutput * method_output,
- FileHdf5 * file) 
+ File * file) 
   : CMessage_MsgOutput(),
     is_local_(true),
     index_send_(),
@@ -128,7 +128,7 @@ void * MsgOutput::pack (MsgOutput * msg)
     char * pc;
     int  * pi;
     MethodOutput ** pm;
-    FileHdf5 ** pf;
+    File ** pf;
   };
 
   pc = buffer;
@@ -187,7 +187,7 @@ MsgOutput * MsgOutput::unpack(void * buffer)
     char   * pc;
     int    * pi;
     MethodOutput ** pm;
-    FileHdf5 ** pf;
+    File ** pf;
   };
 
   pc = (char *) buffer;

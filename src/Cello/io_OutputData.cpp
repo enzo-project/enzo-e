@@ -77,7 +77,7 @@ void OutputData::open () throw()
     ("Output","writing data file %s",
      (dir + "/" + file_name).c_str());
 
-  file_ = new FileHdf5 (dir,file_name);
+  file_ = File::construct_FileHdf5 (dir,file_name);
 
   file_->file_create();
 }

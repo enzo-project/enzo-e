@@ -18,6 +18,9 @@ class File {
 
 public: // interface
 
+  /// factory method for constructing a FileHdf5 instance
+  static File* construct_FileHdf5(std::string path, std::string name) throw();
+
   /// Create a file with the given path and filename
   File (std::string path, std::string name) throw()
     : path_(path),
@@ -149,6 +152,47 @@ public: // virtual functions
   ( const void * buffer, std::string name, int type,
     int n1=1, int n2=0, int n3=0, int n4=0) throw() = 0;
 
+  // Miscellaneous
+
+  /// Set the compression level
+  virtual void set_compress (int level) throw () = 0;
+
+  /// Return the compression level
+  virtual int compress () throw () = 0;
+
+public: // static methods
+
+  /// Allocate a buffer for reading in a dataset of the given length and type
+  ///
+  /// @note
+  /// it may make sense to define this at a higher level
+  static char * allocate_buffer (int n, int type_data)
+  {
+    char * data;
+    if (type_data == type_single) {
+      data = (char *)new float [n];
+    } else if (type_data == type_double) {
+      data = (char *)new double [n];
+    } else if (type_data == type_int8) {
+      data = (char *)new int8_t [n];
+    } else if (type_data == type_int16) {
+      data = (char *)new int16_t [n];
+    } else if (type_data == type_int32) {
+      data = (char *)new int32_t [n];
+    } else if (type_data == type_int64) {
+      data = (char *)new int64_t [n];
+    } else {
+      data = nullptr;
+      ERROR1 ("File::allocate_buffer()",
+              "Unsupported data type %d",type_data);
+    }
+    return data;
+  }
+
+public: // static attributes
+
+  /// Nodal list of files opened
+  static std::map<const std::string, File*> file_list;
 
 protected: // attributes
 

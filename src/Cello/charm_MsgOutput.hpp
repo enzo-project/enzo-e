@@ -14,7 +14,7 @@ class Block;
 class BlockTrace;
 class Data;
 class DataMsg;
-class FileHdf5;
+class File;
 class Index;
 class IoBlock;
 class Factory;
@@ -31,7 +31,7 @@ public: // interface
 
   MsgOutput (BlockTrace block_trace,
              MethodOutput * method_output,
-             FileHdf5 * file) ;
+             File * file) ;
 
   virtual ~MsgOutput();
 
@@ -63,7 +63,7 @@ public: // interface
   Index index_send();
 
   /// Return the FileHdf5 pointer (ONLY USABLE ON WRITER)
-  FileHdf5 * file() { return file_; }
+  File * file() { return file_; }
 
   /// Set the sending index
   void set_index_send (Index index);
@@ -128,7 +128,7 @@ protected: // attributes
   MethodOutput * method_output_;
 
   /// Saved pointer to FileHdf5 object (on writing Block only!)
-  FileHdf5 * file_;
+  File * file_;
 
   /// Associated Block data to output if any
   DataMsg * data_msg_;

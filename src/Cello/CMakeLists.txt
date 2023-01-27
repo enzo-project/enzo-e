@@ -157,8 +157,12 @@ target_link_libraries(data
 
 
 addCelloLib(disk "")
-# with minimal refactoring, we could make HDF5_C a privately linked library
-target_link_libraries(disk PUBLIC error HDF5_C)
+target_link_libraries(disk
+  PUBLIC error
+  PRIVATE HDF5_C # the hdf5 header is not exposed in any public headers. Thus
+                 # it won't be a transitive dependency for targets that depend
+                 # on disk
+)
 
 
 addCelloLib(error "")
@@ -316,7 +320,7 @@ addUnitTestBinary(
 addUnitTestBinary(test_type "test_Type.cpp" cello_component tester_default)
 
 # tests of the disk component
-addUnitTestBinary(test_file_hdf5 "test_CArrCollec.cpp" disk tester_default)
+addUnitTestBinary(test_file_hdf5 "test_FileHdf5.cpp" disk tester_default)
 
 # tests of the error component
 addUnitTestBinary(test_error "test_Error.cpp" error tester_default)

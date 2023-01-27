@@ -389,11 +389,11 @@ std::string Simulation::file_create_dir_
 }
 
 //----------------------------------------------------------------------
-FileHdf5 * IoEnzoWriter::file_open_
+File * IoEnzoWriter::file_open_
 (std::string path_name, std::string file_name)
 {
   // Create File
-  FileHdf5 * file = new FileHdf5 (path_name, file_name);
+  File * file = File::construct_FileHdf5 (path_name, file_name);
   file->file_create();
 
   return file;
@@ -663,7 +663,7 @@ DataMsg * EnzoBlock::create_data_msg_ ()
 //----------------------------------------------------------------------
 
 void IoEnzoWriter::write_meta_
-( FileHdf5 * file, Io * io, std::string type_meta )
+( File * file, Io * io, std::string type_meta )
 {
   for (size_t i=0; i<io->meta_count(); i++) {
 

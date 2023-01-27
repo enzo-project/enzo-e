@@ -135,7 +135,7 @@ void EnzoInitialHdf5::enforce_block
 
     // Open the file
 
-    FileHdf5 * file = new FileHdf5 ("./",field_files_[index]);
+    File * file = File::construct_FileHdf5 ("./",field_files_[index]);
     file->file_open();
 
     // Double-check cosmology parameters if CHECK_COSMO_PARAMS is true
@@ -204,7 +204,7 @@ void EnzoInitialHdf5::enforce_block
 
   for (size_t index=0; index<particle_files_.size(); index++) {
 
-    FileHdf5 * file = new FileHdf5 ("./",particle_files_[index]);
+    File * file = File::construct_FileHdf5 ("./",particle_files_[index]);
     file->file_open();
 
     // Double-check cosmology parameters if CHECK_COSMO_PARAMS is true
