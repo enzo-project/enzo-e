@@ -225,24 +225,25 @@ extern "C" {
 
 #include "enzo_EnzoCenteredFieldRegistry.hpp"
 #include "enzo_EnzoFieldAdaptor.hpp"
-#include "enzo_EnzoIntegrationQuanUpdate.hpp"
-#include "enzo_EnzoLazyPassiveScalarFieldList.hpp"
-#include "enzo_EnzoPermutedCoordinates.hpp"
-#include "enzo_EnzoReconstructor.hpp"
-#include "enzo_EnzoReconstructorNN.hpp"
-#include "enzo_EnzoReconstructorPLM.hpp"
-#include "enzo_EnzoSourceGravity.hpp"
-#include "enzo_EnzoSourceInternalEnergy.hpp"
+#include "hydro-mhd/EnzoIntegrationQuanUpdate.hpp"
+#include "hydro-mhd/EnzoLazyPassiveScalarFieldList.hpp"
+#include "hydro-mhd/EnzoPermutedCoordinates.hpp"
+#include "hydro-mhd/EnzoSourceGravity.hpp"
+#include "hydro-mhd/EnzoSourceInternalEnergy.hpp"
+
+#include "hydro-mhd/EnzoReconstructor.hpp"
+#include "hydro-mhd/EnzoReconstructorNN.hpp"
+#include "hydro-mhd/EnzoReconstructorPLM.hpp"
 
 // public header for the EnzoRiemann sub-library. This needs to be included
 // after the headers for:
 //     EnzoEFltArrayMap, EnzoCenteredFieldRegistry, & EnzoEquationOfState
 // but before the header for EnzoMethodMHDVlct EnzoBfieldMethod and EnzoBfieldMethodCT
-#include "EnzoRiemann.hpp"
+#include "EnzoRiemann/EnzoRiemann.hpp"
 
 // [order dependencies:]
-#include "enzo_EnzoBfieldMethod.hpp"
-#include "enzo_EnzoBfieldMethodCT.hpp"
+#include "hydro-mhd/EnzoBfieldMethod.hpp"
+#include "hydro-mhd/EnzoBfieldMethodCT.hpp"
 
 #include "enzo_EnzoMethodAccretion.hpp"
 #include "enzo_EnzoMethodBackgroundAcceleration.hpp"
@@ -257,19 +258,19 @@ extern "C" {
 #include "enzo_EnzoMethodGrackle.hpp"
 #include "enzo_EnzoMethodGravity.hpp"
 #include "enzo_EnzoMethodHeat.hpp"
-#include "enzo_EnzoMethodHydro.hpp"
 #include "enzo_EnzoMethodMergeSinks.hpp"
-#include "enzo_EnzoMethodMHDVlct.hpp"
 #include "enzo_EnzoMethodPmDeposit.hpp"
 #include "enzo_EnzoMethodPmUpdate.hpp"
-#include "enzo_EnzoMethodPpm.hpp"
-#include "enzo_EnzoMethodPpml.hpp"
 #include "enzo_EnzoMethodSinkMaker.hpp"
 #include "enzo_EnzoMethodStarMaker.hpp"
 #include "enzo_EnzoMethodStarMakerSTARSS.hpp"
 #include "enzo_EnzoMethodStarMakerStochasticSF.hpp"
 #include "enzo_EnzoMethodThresholdAccretion.hpp"
 #include "enzo_EnzoMethodTurbulence.hpp"
+#include "hydro-mhd/EnzoMethodHydro.hpp"
+#include "hydro-mhd/EnzoMethodMHDVlct.hpp"
+#include "hydro-mhd/EnzoMethodPpm.hpp"
+#include "hydro-mhd/EnzoMethodPpml.hpp"
 
 #include "enzo_EnzoMatrixDiagonal.hpp"
 #include "enzo_EnzoMatrixIdentity.hpp"

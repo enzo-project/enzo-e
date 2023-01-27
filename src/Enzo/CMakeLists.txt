@@ -2,11 +2,16 @@
 include(charm)
 addCharmModule( "enzo" )
 
-file(GLOB SRC_FILES enzo*.cpp *F *enzo*hpp fortran.h fortran_types.h FofLib.cpp)
-
-# TODO(pgrete) Check if that file can be removed for good. It also not being used in the SCons build.
-# -> PPML_sub.F:(.text+0x5ebf): multiple definition of `qdd6_'; CMakeFiles/enzo-e.dir/PPML_QDD6.F.o:PPML_QDD6.F:(.text+0x0): first defined here
-list(FILTER SRC_FILES EXCLUDE REGEX "PPML_QDD6")
+# Get the list of source files
+# - we do this using GLOB patterns. This approach is not recommended by the
+#   authors of CMake (their recommendation is to explicitly list all files that
+#   must be installed).
+# - Some of the disadvantages of this approach are mitigated by inclusion of
+#   the CONFIGURE_DEPENDS flag.
+# - See the CMake Primer section of the developer documentation for more details
+file(GLOB SRC_FILES CONFIGURE_DEPENDS
+  enzo*.cpp *F *enzo*hpp fortran.h fortran_types.h FofLib.cpp
+)
 
 set(Cello_LIBS "cello_component;charm_component;control;disk;error;data;io;memory;mesh;monitor;parameters;parallel;performance;problem;compute;simulation;test_Unit")
 
@@ -41,6 +46,7 @@ target_include_directories(enzo
 )
 target_link_options(enzo PRIVATE ${Cello_TARGET_LINK_OPTIONS})
 
+add_subdirectory(hydro-mhd) # add files in hydro-mhd to enzo
 
 # this includes a lot of the machinery for driving the simulation (it's
 # directly analogous to the "tester" targets in the Cello directory)
