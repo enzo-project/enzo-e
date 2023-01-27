@@ -1,6 +1,6 @@
 # See LICENSE_CELLO file for license and copyright information
 
-# adds source files related to Hydro/MHD integrators to the enzo target
+# STEP 1: adds source files related to Hydro/MHD integrators to the enzo target
 #
 # in the future, we may want to slightly refactor the files in this
 # subdirectory so that they can be compiled into their own subtarget (there's
@@ -23,3 +23,6 @@ file(GLOB LOCAL_SRC_FILES CONFIGURE_DEPENDS
 list(FILTER LOCAL_SRC_FILES EXCLUDE REGEX "PPML_QDD6")
 
 target_sources(enzo PRIVATE ${LOCAL_SRC_FILES})
+
+# STEP 2: define the riemann library
+add_subdirectory(riemann)

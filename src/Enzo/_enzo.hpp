@@ -239,7 +239,7 @@ extern "C" {
 // after the headers for:
 //     EnzoEFltArrayMap, EnzoCenteredFieldRegistry, & EnzoEquationOfState
 // but before the header for EnzoMethodMHDVlct EnzoBfieldMethod and EnzoBfieldMethodCT
-#include "EnzoRiemann/EnzoRiemann.hpp"
+#include "hydro-mhd/riemann/EnzoRiemann.hpp"
 
 // [order dependencies:]
 #include "hydro-mhd/EnzoBfieldMethod.hpp"

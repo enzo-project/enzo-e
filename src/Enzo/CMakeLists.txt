@@ -29,8 +29,6 @@ endif()
 #=======================
 # Define Library Targets
 #=======================
-add_subdirectory(EnzoRiemann) # define the riemann library
-
 
 # build an enzo library that is then turned into an enzo-e binary
 add_library(enzo STATIC ${SRC_FILES})
@@ -51,8 +49,10 @@ add_subdirectory(amr)
 add_subdirectory(cosmology)
 add_subdirectory(feedback-particle)
 add_subdirectory(gravity)
-add_subdirectory(hydro-mhd) # add files in hydro-mhd to enzo
 add_subdirectory(initial) # add files in initial to enzo
+
+# add files in hydro-mhd to enzo target and define the riemann library
+add_subdirectory(hydro-mhd)
 
 # this includes a lot of the machinery for driving the simulation (it's
 # directly analogous to the "tester" targets in the Cello directory)
