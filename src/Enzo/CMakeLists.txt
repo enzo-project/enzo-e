@@ -10,7 +10,7 @@ addCharmModule( "enzo" )
 #   the CONFIGURE_DEPENDS flag.
 # - See the CMake Primer section of the developer documentation for more details
 file(GLOB SRC_FILES CONFIGURE_DEPENDS
-  enzo*.cpp *F *enzo*hpp fortran.h fortran_types.h FofLib.cpp
+  enzo*.cpp *F *enzo*hpp fortran.h fortran_types.h
 )
 
 set(Cello_LIBS "cello_component;charm_component;control;disk;error;data;io;memory;mesh;monitor;parameters;parallel;performance;problem;compute;simulation;test_Unit")
@@ -48,6 +48,7 @@ target_link_options(enzo PRIVATE ${Cello_TARGET_LINK_OPTIONS})
 
 # add source files from various subdirectories to the enzo target
 add_subdirectory(amr)
+add_subdirectory(feedback-particle)
 add_subdirectory(gravity)
 add_subdirectory(hydro-mhd) # add files in hydro-mhd to enzo
 add_subdirectory(initial) # add files in initial to enzo
