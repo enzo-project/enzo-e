@@ -160,7 +160,7 @@ extern "C" {
 
 #include "enzo_constants.hpp"
 
-#include "enzo_EnzoPhysicsCosmology.hpp"
+#include "cosmology/EnzoPhysicsCosmology.hpp"
 
 #include "enzo_EnzoDualEnergyConfig.hpp"
 #include "enzo_EnzoFluidFloorConfig.hpp"
@@ -249,8 +249,8 @@ extern "C" {
 #include "enzo_EnzoMethodBackgroundAcceleration.hpp"
 #include "feedback-particle/EnzoMethodBondiHoyleAccretion.hpp"
 #include "enzo_EnzoMethodCheck.hpp"
-#include "enzo_EnzoMethodComovingExpansion.hpp"
-#include "enzo_EnzoMethodCosmology.hpp"
+#include "cosmology/EnzoMethodComovingExpansion.hpp"
+#include "cosmology/EnzoMethodCosmology.hpp"
 #include "feedback-particle/EnzoMethodDistributedFeedback.hpp"
 #include "feedback-particle/EnzoMethodFeedback.hpp"
 #include "feedback-particle/EnzoMethodFeedbackSTARSS.hpp"
