@@ -162,9 +162,9 @@ extern "C" {
 
 #include "cosmology/EnzoPhysicsCosmology.hpp"
 
-#include "enzo_EnzoDualEnergyConfig.hpp"
-#include "enzo_EnzoFluidFloorConfig.hpp"
-#include "enzo_EnzoPhysicsFluidProps.hpp"
+#include "fluid-props/EnzoDualEnergyConfig.hpp"
+#include "fluid-props/EnzoFluidFloorConfig.hpp"
+#include "fluid-props/EnzoPhysicsFluidProps.hpp"
 
 #include "enzo_EnzoUnits.hpp"
 
@@ -220,8 +220,8 @@ extern "C" {
 
 // [order dependencies:]
 #include "enzo_EnzoEFltArrayMap.hpp"
-#include "enzo_EnzoEquationOfState.hpp"
-#include "enzo_EnzoEOSIdeal.hpp"
+#include "fluid-props/EnzoEquationOfState.hpp"
+#include "fluid-props/EnzoEOSIdeal.hpp"
 
 #include "enzo_EnzoCenteredFieldRegistry.hpp"
 #include "enzo_EnzoFieldAdaptor.hpp"

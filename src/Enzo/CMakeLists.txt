@@ -48,6 +48,7 @@ target_link_options(enzo PRIVATE ${Cello_TARGET_LINK_OPTIONS})
 add_subdirectory(amr)
 add_subdirectory(cosmology)
 add_subdirectory(feedback-particle)
+add_subdirectory(fluid-props)
 add_subdirectory(gravity)
 add_subdirectory(initial) # add files in initial to enzo
 
