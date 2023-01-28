@@ -166,23 +166,23 @@ extern "C" {
 #include "fluid-props/EnzoFluidFloorConfig.hpp"
 #include "fluid-props/EnzoPhysicsFluidProps.hpp"
 
-#include "enzo_EnzoUnits.hpp"
+#include "enzo-core/EnzoUnits.hpp"
 
-#include "enzo_EnzoFactory.hpp"
+#include "enzo-core/EnzoFactory.hpp"
 
-#include "enzo_EnzoSimulation.hpp"
+#include "enzo-core/EnzoSimulation.hpp"
 
-#include "enzo_EnzoProblem.hpp"
+#include "enzo-core/EnzoProblem.hpp"
 
-#include "enzo_EnzoConfig.hpp"
+#include "enzo-core/EnzoConfig.hpp"
 
-#include "enzo_EnzoBlock.hpp"
+#include "enzo-core/EnzoBlock.hpp"
 
-#include "enzo_IoEnzoBlock.hpp"
-#include "enzo_IoEnzoReader.hpp"
-#include "enzo_IoEnzoWriter.hpp"
+#include "enzo-core/IoEnzoBlock.hpp"
+#include "enzo-core/IoEnzoReader.hpp"
+#include "enzo-core/IoEnzoWriter.hpp"
 
-#include "enzo_EnzoBoundary.hpp"
+#include "enzo-core/EnzoBoundary.hpp"
 
 #include "initial/EnzoInitialBCenter.hpp"
 #include "initial/EnzoInitialCloud.hpp"
@@ -214,17 +214,17 @@ extern "C" {
 #include "amr/EnzoRefineMass.hpp"
 
 // [order dependencies:]
-#include "feedback-particle/EnzoSinkParticle.hpp"
-#include "feedback-particle/EnzoBondiHoyleSinkParticle.hpp"
-#include "feedback-particle/EnzoFluxSinkParticle.hpp"
+#include "particle/EnzoSinkParticle.hpp"
+#include "particle/EnzoBondiHoyleSinkParticle.hpp"
+#include "particle/EnzoFluxSinkParticle.hpp"
 
 // [order dependencies:]
-#include "enzo_EnzoEFltArrayMap.hpp"
+#include "utils/EnzoEFltArrayMap.hpp"
 #include "fluid-props/EnzoEquationOfState.hpp"
 #include "fluid-props/EnzoEOSIdeal.hpp"
 
-#include "enzo_EnzoCenteredFieldRegistry.hpp"
-#include "enzo_EnzoFieldAdaptor.hpp"
+#include "utils/EnzoCenteredFieldRegistry.hpp"
+#include "utils/EnzoFieldAdaptor.hpp"
 #include "hydro-mhd/EnzoIntegrationQuanUpdate.hpp"
 #include "hydro-mhd/EnzoLazyPassiveScalarFieldList.hpp"
 #include "hydro-mhd/EnzoPermutedCoordinates.hpp"
@@ -245,28 +245,28 @@ extern "C" {
 #include "hydro-mhd/EnzoBfieldMethod.hpp"
 #include "hydro-mhd/EnzoBfieldMethodCT.hpp"
 
-#include "feedback-particle/EnzoMethodAccretion.hpp"
+#include "particle/EnzoMethodAccretion.hpp"
 #include "gravity/EnzoMethodBackgroundAcceleration.hpp"
-#include "feedback-particle/EnzoMethodBondiHoyleAccretion.hpp"
-#include "enzo_EnzoMethodCheck.hpp"
+#include "particle/EnzoMethodBondiHoyleAccretion.hpp"
+#include "enzo-core/EnzoMethodCheck.hpp"
 #include "cosmology/EnzoMethodComovingExpansion.hpp"
 #include "cosmology/EnzoMethodCosmology.hpp"
-#include "feedback-particle/EnzoMethodDistributedFeedback.hpp"
-#include "feedback-particle/EnzoMethodFeedback.hpp"
-#include "feedback-particle/EnzoMethodFeedbackSTARSS.hpp"
-#include "feedback-particle/EnzoMethodFluxAccretion.hpp"
-#include "enzo_EnzoMethodGrackle.hpp"
+#include "particle/EnzoMethodDistributedFeedback.hpp"
+#include "particle/EnzoMethodFeedback.hpp"
+#include "particle/EnzoMethodFeedbackSTARSS.hpp"
+#include "particle/EnzoMethodFluxAccretion.hpp"
+#include "assorted/EnzoMethodGrackle.hpp"
 #include "gravity/EnzoMethodGravity.hpp"
-#include "enzo_EnzoMethodHeat.hpp"
-#include "feedback-particle/EnzoMethodMergeSinks.hpp"
-#include "enzo_EnzoMethodPmDeposit.hpp"
-#include "enzo_EnzoMethodPmUpdate.hpp"
-#include "feedback-particle/EnzoMethodSinkMaker.hpp"
-#include "feedback-particle/EnzoMethodStarMaker.hpp"
-#include "feedback-particle/EnzoMethodStarMakerSTARSS.hpp"
-#include "feedback-particle/EnzoMethodStarMakerStochasticSF.hpp"
-#include "feedback-particle/EnzoMethodThresholdAccretion.hpp"
-#include "enzo_EnzoMethodTurbulence.hpp"
+#include "assorted/EnzoMethodHeat.hpp"
+#include "particle/EnzoMethodMergeSinks.hpp"
+#include "gravity/EnzoMethodPmDeposit.hpp"
+#include "particle/EnzoMethodPmUpdate.hpp"
+#include "particle/EnzoMethodSinkMaker.hpp"
+#include "particle/EnzoMethodStarMaker.hpp"
+#include "particle/EnzoMethodStarMakerSTARSS.hpp"
+#include "particle/EnzoMethodStarMakerStochasticSF.hpp"
+#include "particle/EnzoMethodThresholdAccretion.hpp"
+#include "assorted/EnzoMethodTurbulence.hpp"
 #include "hydro-mhd/EnzoMethodHydro.hpp"
 #include "hydro-mhd/EnzoMethodMHDVlct.hpp"
 #include "hydro-mhd/EnzoMethodPpm.hpp"
@@ -276,14 +276,14 @@ extern "C" {
 #include "gravity/EnzoMatrixIdentity.hpp"
 #include "gravity/EnzoMatrixLaplace.hpp"
 
-#include "enzo_EnzoMsgCheck.hpp"
+#include "enzo-core/EnzoMsgCheck.hpp"
 
 #include "gravity/EnzoComputeAcceleration.hpp"
-#include "enzo_EnzoComputeCicInterp.hpp"
-#include "enzo_EnzoComputePressure.hpp"
-#include "enzo_EnzoComputeTemperature.hpp"
+#include "utils/EnzoComputeCicInterp.hpp"
+#include "fluid-props/EnzoComputePressure.hpp"
+#include "fluid-props/EnzoComputeTemperature.hpp"
 #ifdef CONFIG_USE_GRACKLE
-  #include "enzo_EnzoComputeCoolingTime.hpp"
+  #include "assorted/EnzoComputeCoolingTime.hpp"
 #endif
 
 #include "gravity/EnzoSolverBiCgStab.hpp"
@@ -293,7 +293,7 @@ extern "C" {
 #include "gravity/EnzoSolverJacobi.hpp"
 #include "gravity/EnzoSolverMg0.hpp"
 
-#include "enzo_EnzoStopping.hpp"
+#include "enzo-core/EnzoStopping.hpp"
 
 #include "amr/EnzoProlong.hpp"
 #include "amr/EnzoProlongMC1.hpp"

@@ -1,6 +1,6 @@
 # See LICENSE_CELLO file for license and copyright information
 
-# add source files related to problem-initialization to the enzo target
+# add utility source files (used in multiple other components) to enzo target
 
 # Get the list of source files in this directory
 # - we do this using GLOB patterns. This approach is not recommended by the

@@ -1,6 +1,6 @@
 # See LICENSE_CELLO file for license and copyright information
 
-# add source files related to problem-initialization to the enzo target
+# add uncategorized source files to the enzo target
 
 # Get the list of source files in this directory
 # - we do this using GLOB patterns. This approach is not recommended by the
@@ -10,7 +10,7 @@
 #   the CONFIGURE_DEPENDS flag.
 # - See the CMake Primer section of the developer documentation for more details
 file(GLOB LOCAL_SRC_FILES CONFIGURE_DEPENDS
-  *.cpp *.hpp *F
+  *.cpp *.hpp
 )
 
 target_sources(enzo PRIVATE ${LOCAL_SRC_FILES})
