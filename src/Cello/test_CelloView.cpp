@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_CelloArray.cpp
+/// @file     test_CelloView.cpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     2020-06-09
 /// @brief    Test program for the CelloView class template
