@@ -23,7 +23,7 @@
 //----------------------------------------------------------------------
 
 #include "view_CelloArray.hpp"
-#include "view_CArrCollec.hpp"
+#include "view_ViewCollec.hpp"
 #include "view_StringIndRdOnlyMap.hpp"
 
 #endif /* _VIEW_HPP */

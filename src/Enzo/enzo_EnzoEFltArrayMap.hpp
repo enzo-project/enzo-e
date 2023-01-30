@@ -165,7 +165,7 @@ private: // helper methods
   /// unnecessary work relating to initialization
   EnzoEFltArrayMap(std::string name,
                    const StringIndRdOnlyMap& str_index_map,
-                   CArrCollec<enzo_float>&& arrays)
+                   ViewCollec<enzo_float>&& arrays)
     : name_(name),
       str_index_map_(str_index_map),
       arrays_(arrays)
@@ -186,7 +186,7 @@ private: // attributes
   // str_index_map_ maps the keys to the index
   StringIndRdOnlyMap str_index_map_;
   // arrays_ is the ordered collection of arrays_
-  CArrCollec<enzo_float> arrays_;
+  ViewCollec<enzo_float> arrays_;
 };
 
 #endif /* ENZO_ENZO_EFLT_ARRAY_MAP_HPP */

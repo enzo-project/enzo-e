@@ -174,7 +174,7 @@ void EnzoEFltArrayMap::validate_invariants_() const noexcept
   // - StringIndRdOnlyMap implicitly enforces that there aren't any duplicate
   //   keys, and that a unique key is associated with each integer index from 0
   //   through (str_index_map_.size() - 1)
-  // - CArrCollec enforces that all arrays have the same shape
+  // - ViewCollec enforces that all arrays have the same shape
   ASSERT("EnzoEFltArrayMap::validate_invariants_",
          "str_index_map_ and arrays_ don't have the same length",
          arrays_.size() == str_index_map_.size());

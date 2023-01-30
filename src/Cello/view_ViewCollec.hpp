@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     view_CArrCollec.hpp
+/// @file     view_ViewCollec.hpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Fri Nov 26 2021
-/// @brief    Declaration and implementation of the CArrCollec class template
+/// @brief    Declaration and implementation of the ViewCollec class template
 //
 // This class is primarily intended to be used to help implement the ArrayMap
 
@@ -79,7 +79,7 @@ namespace detail {
 //----------------------------------------------------------------------
 
   template<typename T>
-  class ArrOfPtrsCArrCollec_{
+  class ArrOfPtrsViewCollec_{
     /// equivalent to an array of pointers (where each pointer is a CelloArray)
     /// - we track the arrays lifetime with a std::shared_ptr to makes copies
     ///   cheaper. The disadvantage to this should be minimal since we don't
@@ -89,11 +89,11 @@ namespace detail {
 
   public:
 
-    ArrOfPtrsCArrCollec_() = default;
+    ArrOfPtrsViewCollec_() = default;
 
-    ArrOfPtrsCArrCollec_(const std::vector<CelloArray<T,3>> &arrays) noexcept
+    ArrOfPtrsViewCollec_(const std::vector<CelloArray<T,3>> &arrays) noexcept
       : arrays_(arrays)
-    { confirm_shared_shape_("ArrOfPtrsCArrCollec_", arrays); }
+    { confirm_shared_shape_("ArrOfPtrsViewCollec_", arrays); }
 
     const CelloArray<T,3> operator[](std::size_t index) const noexcept
     { return arrays_[index]; }
@@ -103,16 +103,16 @@ namespace detail {
     constexpr bool contiguous_items() const {return false;}
 
     const CelloArray<T, 4> get_backing_array() const noexcept{
-      ERROR("ArrOfPtrsCArrCollec_::get_backing_array",
+      ERROR("ArrOfPtrsViewCollec_::get_backing_array",
             "This is an invalid method call");
     }
 
-    friend void swap(ArrOfPtrsCArrCollec_<T>& a, ArrOfPtrsCArrCollec_<T>& b)
+    friend void swap(ArrOfPtrsViewCollec_<T>& a, ArrOfPtrsViewCollec_<T>& b)
       noexcept { a.arrays_.swap(b.arrays_); }
 
     // There might be some benefit to not directly constructing subarrays and
     // lazily evaluating them later
-    ArrOfPtrsCArrCollec_<T> subarray_collec(const CSlice &slc_z,
+    ArrOfPtrsViewCollec_<T> subarray_collec(const CSlice &slc_z,
                                             const CSlice &slc_y,
                                             const CSlice &slc_x) const noexcept
     {
@@ -120,7 +120,7 @@ namespace detail {
       for (std::size_t i = 0; i < arrays_.size(); i++){
         temp.push_back(arrays_[i].subarray(slc_z, slc_y, slc_x));
       }
-      return ArrOfPtrsCArrCollec_<T>(temp);
+      return ArrOfPtrsViewCollec_<T>(temp);
     }
 
   private:
@@ -131,14 +131,14 @@ namespace detail {
 //----------------------------------------------------------------------
 
   template<typename T>
-  class SingleAddressCArrCollec_{
+  class SingleAddressViewCollec_{
     /// Implements an ordered collection of arrays with a single 4D CelloArray.
     /// (the location of all of the contents are specified by a single address)
 
   public:
-    SingleAddressCArrCollec_() = default;
+    SingleAddressViewCollec_() = default;
 
-    SingleAddressCArrCollec_(const std::size_t n_arrays,
+    SingleAddressViewCollec_(const std::size_t n_arrays,
                              const std::array<int,3>& shape) noexcept
       : backing_array_(int_coerce_(n_arrays), shape[0], shape[1], shape[2])
     { }
@@ -154,16 +154,16 @@ namespace detail {
     const CelloArray<T, 4> get_backing_array() const noexcept
     { return backing_array_; }
 
-    friend void swap(SingleAddressCArrCollec_<T>& a,
-                     SingleAddressCArrCollec_<T>& b) noexcept
+    friend void swap(SingleAddressViewCollec_<T>& a,
+                     SingleAddressViewCollec_<T>& b) noexcept
     { swap(a.backing_array_, b.backing_array_); }
 
-    SingleAddressCArrCollec_<T> subarray_collec(const CSlice &slc_z,
+    SingleAddressViewCollec_<T> subarray_collec(const CSlice &slc_z,
                                                 const CSlice &slc_y,
                                                 const CSlice &slc_x) const
       noexcept
     {
-      SingleAddressCArrCollec_<T> out;
+      SingleAddressViewCollec_<T> out;
       out.backing_array_ = backing_array_.subarray(CSlice(0, nullptr),
                                                    slc_z, slc_y, slc_x);
       return out;
@@ -176,8 +176,8 @@ namespace detail {
 }
 
 template<typename T>
-class CArrCollec{
-  /// @class    CArrCollec
+class ViewCollec{
+  /// @class    ViewCollec
   /// @ingroup  View
   /// @brief    [\ref View] represents a collection of CelloArrays of a
   ///           constant shape. While elements of these arrays can be mutated,
@@ -187,14 +187,14 @@ class CArrCollec{
   ///
   /// This is a hybrid data-type that abstracts 2 separate implementations for
   /// collections of CelloArrays. Under the hood, the arrays are either stored
-  /// in a single 4D Contiguous Array (see SingleAddressCArrCollec_) or an
-  /// array of 3D CelloArrays (see ArrOfPtrsCArrCollec_)
+  /// in a single 4D Contiguous Array (see SingleAddressViewCollec_) or an
+  /// array of 3D CelloArrays (see ArrOfPtrsViewCollec_)
   ///
   /// The implementation of this hybrid data-structure is fairly crude. If we
   /// decide that we want to support this hybrid data-type in the long-term,
   /// we probably want to consider using boost::variant/a backport of
   /// std::variant or take advantage of the fact that we can represent the
-  /// contents of a SingleAddressCArrCollec_ with a ArrOfPtrsCArrCollec_
+  /// contents of a SingleAddressViewCollec_ with a ArrOfPtrsViewCollec_
 
 private:
   // tags how the arrays are stored (whether they're stored in a single
@@ -203,8 +203,8 @@ private:
   Tag tag_;
 
   union{
-    detail::SingleAddressCArrCollec_<T> single_arr_;
-    detail::ArrOfPtrsCArrCollec_<T> arr_of_ptr_;
+    detail::SingleAddressViewCollec_<T> single_arr_;
+    detail::ArrOfPtrsViewCollec_<T> arr_of_ptr_;
   };
 
 private: // helper methods:
@@ -216,11 +216,11 @@ private: // helper methods:
 
     switch (tag_){
       case Tag::CONTIG: {
-        new(&single_arr_) detail::SingleAddressCArrCollec_<T>;
+        new(&single_arr_) detail::SingleAddressViewCollec_<T>;
         break;
       }
       case Tag::ARR_OF_PTR: {
-        new(&arr_of_ptr_) detail::ArrOfPtrsCArrCollec_<T>;
+        new(&arr_of_ptr_) detail::ArrOfPtrsViewCollec_<T>;
         break;
       }
     }
@@ -230,29 +230,29 @@ private: // helper methods:
   // need to explicitly call destructor because we use placement new
   void dealloc_active_member_() noexcept{
     switch (tag_){
-      case Tag::CONTIG:     { single_arr_.~SingleAddressCArrCollec_(); break; }
-      case Tag::ARR_OF_PTR: { arr_of_ptr_.~ArrOfPtrsCArrCollec_(); break; }
+      case Tag::CONTIG:     { single_arr_.~SingleAddressViewCollec_(); break; }
+      case Tag::ARR_OF_PTR: { arr_of_ptr_.~ArrOfPtrsViewCollec_(); break; }
     }
   }
 
 public: /// public interface
   /// default constructor
-  CArrCollec() noexcept { activate_member_(Tag::CONTIG, false); }
+  ViewCollec() noexcept { activate_member_(Tag::CONTIG, false); }
 
   /// construct a container of arrays without wrapping existing arrays
-  CArrCollec(std::size_t n_arrays, const std::array<int,3>& shape) noexcept {
+  ViewCollec(std::size_t n_arrays, const std::array<int,3>& shape) noexcept {
     activate_member_(Tag::CONTIG, false);
-    single_arr_ = detail::SingleAddressCArrCollec_<T>(n_arrays, shape);
+    single_arr_ = detail::SingleAddressViewCollec_<T>(n_arrays, shape);
   }
 
   /// construct from vector of arrays
-  CArrCollec(const std::vector<CelloArray<T, 3>>& v) noexcept{
+  ViewCollec(const std::vector<CelloArray<T, 3>>& v) noexcept{
     activate_member_(Tag::ARR_OF_PTR, false);
-    arr_of_ptr_ = detail::ArrOfPtrsCArrCollec_<T>(v);
+    arr_of_ptr_ = detail::ArrOfPtrsViewCollec_<T>(v);
   }
 
   /// copy constructor
-  CArrCollec(const CArrCollec& other) noexcept{
+  ViewCollec(const ViewCollec& other) noexcept{
     activate_member_(other.tag_, false);
     switch (other.tag_){
       case Tag::CONTIG:     { single_arr_ = other.single_arr_; break; }
@@ -261,26 +261,26 @@ public: /// public interface
   }
 
   /// copy assignment
-  CArrCollec& operator=(const CArrCollec &other) noexcept {
-    CArrCollec tmp(other);
+  ViewCollec& operator=(const ViewCollec &other) noexcept {
+    ViewCollec tmp(other);
     swap(*this,tmp);
     return *this;
   }
 
   /// move constructor
-  CArrCollec (CArrCollec&& other) noexcept : CArrCollec(){ swap(*this,other); }
+  ViewCollec (ViewCollec&& other) noexcept : ViewCollec(){ swap(*this,other); }
 
   /// move assignment
-  CArrCollec& operator=(CArrCollec&& other) noexcept {
+  ViewCollec& operator=(ViewCollec&& other) noexcept {
     swap(*this, other);
     return *this;
   }
 
   /// Destructor
-  ~CArrCollec(){dealloc_active_member_();}
+  ~ViewCollec(){dealloc_active_member_();}
 
   /// swaps the contents of `a` with `b`
-  friend void swap(CArrCollec<T>& a, CArrCollec<T>& b) noexcept{
+  friend void swap(ViewCollec<T>& a, ViewCollec<T>& b) noexcept{
     if (&a == &b) { return; }
     if (a.tag_ == b.tag_){
       switch (a.tag_){
@@ -288,7 +288,7 @@ public: /// public interface
         case Tag::ARR_OF_PTR: { swap(a.arr_of_ptr_, b.arr_of_ptr_); break; }
       }
     } else if (a.tag_ == Tag::CONTIG){
-      detail::SingleAddressCArrCollec_<T> temp_single_arr;
+      detail::SingleAddressViewCollec_<T> temp_single_arr;
       swap(temp_single_arr, a.single_arr_);
       a.activate_member_(Tag::ARR_OF_PTR, true);
       swap(a.arr_of_ptr_, b.arr_of_ptr_);
@@ -305,20 +305,20 @@ public: /// public interface
       case Tag::CONTIG:     { return single_arr_.size(); }
       case Tag::ARR_OF_PTR: { return arr_of_ptr_.size(); }
     }
-    ERROR("CArrCollec::size", "problem with exhaustive switch-statement");
+    ERROR("ViewCollec::size", "problem with exhaustive switch-statement");
   }
 
   /// Returns a shallow copy of the specified array
   const CelloArray<T,3> operator[](std::size_t i) const noexcept {
     std::size_t n_elements = size();
-    ASSERT2("CArrCollec::operator[]",
+    ASSERT2("ViewCollec::operator[]",
             "Can't retrieve value at %zu when size() is %zu",
             i, n_elements, i < n_elements);
     switch (tag_){
       case Tag::CONTIG:     { return single_arr_[i]; }
       case Tag::ARR_OF_PTR: { return arr_of_ptr_[i]; }
     }
-    ERROR("CArrCollec::operator[]", "problem with exhaustive switch-statement");
+    ERROR("ViewCollec::operator[]", "problem with exhaustive switch-statement");
   }
 
   /// Indicates if the contained arrays are stored in a single 4D array
@@ -328,7 +328,7 @@ public: /// public interface
       case Tag::CONTIG:     { return single_arr_.contiguous_items(); }
       case Tag::ARR_OF_PTR: { return arr_of_ptr_.contiguous_items(); }
     }
-    ERROR("CArrCollec::contiguous_items",
+    ERROR("ViewCollec::contiguous_items",
           "problem with exhaustive switch-statement");
   }
 
@@ -345,7 +345,7 @@ public: /// public interface
       case Tag::CONTIG:     { return single_arr_.get_backing_array(); }
       case Tag::ARR_OF_PTR: { return arr_of_ptr_.get_backing_array(); }
     }
-    ERROR("CArrCollec::get_backing_array",
+    ERROR("ViewCollec::get_backing_array",
           "problem with exhaustive switch-statement");
   }
 
@@ -360,9 +360,9 @@ public: /// public interface
   int array_shape(unsigned int dim) const noexcept
   {
     if (size() == 0) {
-      ERROR("CArrCollec::array_shape", "Invalid when size() == 0");
+      ERROR("ViewCollec::array_shape", "Invalid when size() == 0");
     } else if (dim > 3) {
-      ERROR("CArrCollec::array_shape", "invalid dimension");
+      ERROR("ViewCollec::array_shape", "invalid dimension");
     }
     return (*this)[0].shape(dim); // could be optimized based on tag
   }
@@ -371,13 +371,13 @@ public: /// public interface
   ///
   /// @param slc_z, slc_y, slc_x Instance of CSlice that specify that are
   ///    passed to the `subarray` method of each contained array.
-  CArrCollec<T> subarray_collec(const CSlice &slc_z,
+  ViewCollec<T> subarray_collec(const CSlice &slc_z,
                                 const CSlice &slc_y,
                                 const CSlice &slc_x) const noexcept
   {
 
     // initialize out and activate the union member matching this->tag_.
-    CArrCollec<T> out;
+    ViewCollec<T> out;
     out.activate_member_(tag_, true);
 
     switch (tag_){
@@ -390,7 +390,7 @@ public: /// public interface
         return out;
       }
     }
-    ERROR("CArrCollec::subarray_collec_",
+    ERROR("ViewCollec::subarray_collec_",
           "problem with exhaustive switch-statement");
   }
 
