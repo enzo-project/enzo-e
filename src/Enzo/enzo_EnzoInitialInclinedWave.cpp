@@ -455,9 +455,9 @@ void setup_bfield(Block * block, VectorInit *a, MeshPos &pos,
   // allocate corner-centered arrays for the magnetic vector potentials
   // Ax, Ay, and Az are always cell-centered along the x, y, and z dimensions,
   // respectively
-  CelloArray<double,3> Ax(mz+1,my+1,mx);
-  CelloArray<double,3> Ay(mz+1,my,mx+1);
-  CelloArray<double,3> Az(mz,my+1,mx+1);
+  CelloView<double,3> Ax(mz+1,my+1,mx);
+  CelloView<double,3> Ay(mz+1,my,mx+1);
+  CelloView<double,3> Az(mz,my+1,mx+1);
 
   // Compute the Magnetic Vector potential at all points on the grid
   for (int iz=0; iz<mz+1; iz++){
@@ -591,7 +591,7 @@ static void setup_fluid_(Block *block, HydroInitPack hydro_init_pack,
     }
 
     const bool mag = field.is_field("bfield_x");
-    using RdOnlyEFlt3DArray = CelloArray<const enzo_float, 3>;
+    using RdOnlyEFlt3DArray = CelloView<const enzo_float, 3>;
     const RdOnlyEFlt3DArray bfield_x = (mag) ?
       RdOnlyEFlt3DArray(field.view<enzo_float>("bfield_x")) :
       RdOnlyEFlt3DArray();

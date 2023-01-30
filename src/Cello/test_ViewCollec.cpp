@@ -18,7 +18,7 @@
 namespace {
 
   template<typename T>
-  void assign_range_3Darray(const CelloArray<T,3>& arr, T start, T step) {
+  void assign_range_3Darray(const CelloView<T,3>& arr, T start, T step) {
     int count = 0;
 
     const int mz = arr.shape(0);
@@ -37,8 +37,8 @@ namespace {
   }
 
   template<typename T>
-  CelloArray<T,3> range_3Darray(int mz, int my, int mx, T start, T step) {
-    CelloArray<T,3> out(mz,my,mx);
+  CelloView<T,3> range_3Darray(int mz, int my, int mx, T start, T step) {
+    CelloView<T,3> out(mz,my,mx);
     assign_range_3Darray(out, start, step);
     return out;
   }
@@ -75,9 +75,9 @@ namespace {
       if (single_array_){
         return ViewCollec<T>(n_arrays, shape);
       } else {
-        std::vector<CelloArray<T,3>> vec_of_arrays;
+        std::vector<CelloView<T,3>> vec_of_arrays;
         for (std::size_t i = 0; i < n_arrays; i++){
-          vec_of_arrays.push_back(CelloArray<T,3>(shape[0],shape[1],shape[2]));
+          vec_of_arrays.push_back(CelloView<T,3>(shape[0],shape[1],shape[2]));
         }
         return ViewCollec<T>(vec_of_arrays);
       }
@@ -88,7 +88,7 @@ namespace {
   };
 
   template<typename T>
-  void assert_allequal3D(const CelloArray<T,3>& a, const CelloArray<T,3>& b) {
+  void assert_allequal3D(const CelloView<T,3>& a, const CelloView<T,3>& b) {
     ASSERT("assert_allequal3D",
            "The arrays don't have the same shape",
            (a.shape(0) == b.shape(0)) &&
@@ -142,7 +142,7 @@ namespace {
     }
 
     if (expect_contiguous){
-        CelloArray<T,4> backing_arr = collec.get_backing_array();
+        CelloView<T,4> backing_arr = collec.get_backing_array();
         ASSERT(test_name, "Unexpected backing_array() shape.",
                (backing_arr.shape(0) == n_arrays) &
                (backing_arr.shape(1) == shape[0]) &
@@ -191,7 +191,7 @@ private:
   template<typename F>
   ViewCollec<double>* test_helper_
   (const char* f_name, ViewCollec<double>& collec, F& check_array_elem_values,
-   const std::vector<CelloArray<double,3>>& alias_vec) const noexcept
+   const std::vector<CelloView<double,3>>& alias_vec) const noexcept
   {
     std::size_t n_arrays = collec.size();
     std::array<int,3> shape{collec.array_shape(0),
@@ -207,8 +207,8 @@ private:
           return true;
         } else if (alias_vec.size() != n_arrays){
           ERROR(f_name,
-                "Ill-posed test, alias_vec should either hold no CelloArrays "
-                "or as many CelloArrays as collec");
+                "Ill-posed test, alias_vec should either hold no CelloViews "
+                "or as many CelloViews as collec");
         }
 
         for (std::size_t i = 0; i < n_arrays; i++){
@@ -248,8 +248,8 @@ private:
     ViewCollec<double>* collec_ptr = nullptr; // initialize for later use
 
     // initialize the reference values
-    CelloArray<double, 3> ref0 = range_3Darray(5, 4, 3,  1.0, 1.0);
-    CelloArray<double, 3> ref1 = range_3Darray(5, 4, 3, -1.0,-1.0);
+    CelloView<double, 3> ref0 = range_3Darray(5, 4, 3,  1.0, 1.0);
+    CelloView<double, 3> ref1 = range_3Darray(5, 4, 3, -1.0,-1.0);
     auto check_array_elem_values = [&ref0, &ref1](ViewCollec<double>& collec)
       {
         assert_allequal3D(collec[0], ref0);
@@ -259,7 +259,7 @@ private:
 
     {
       // define the vector of arrays that will be wrapped
-      std::vector<CelloArray<double, 3>> vec{ref0.deepcopy(), ref1.deepcopy()};
+      std::vector<CelloView<double, 3>> vec{ref0.deepcopy(), ref1.deepcopy()};
 
       // initialize the collection
       ViewCollec<double> temp_collec(vec);
@@ -291,8 +291,8 @@ private:
     ViewCollec<double>* collec_ptr = nullptr; // initialize for later use
 
     // initialize the reference values
-    CelloArray<double, 3> ref0 = range_3Darray(5, 4, 3,  1.0, 1.0);
-    CelloArray<double, 3> ref1 = range_3Darray(5, 4, 3, -1.0,-1.0);
+    CelloView<double, 3> ref0 = range_3Darray(5, 4, 3,  1.0, 1.0);
+    CelloView<double, 3> ref1 = range_3Darray(5, 4, 3, -1.0,-1.0);
     auto check_array_elem_values = [&ref0, &ref1](ViewCollec<double>& collec)
       {
         assert_allequal3D(collec[0], ref0);

@@ -233,7 +233,7 @@ static EnzoEFltArrayMap get_accel_map_(Block* block) noexcept
   }
 
   str_vec_t field_list = {"acceleration_x", "acceleration_y", "acceleration_z"};
-  std::vector<CelloArray<enzo_float,3>> arrays
+  std::vector<CelloView<enzo_float,3>> arrays
     = {field.view<enzo_float>("acceleration_x"),
        field.view<enzo_float>("acceleration_y"),
        field.view<enzo_float>("acceleration_z")};
@@ -280,7 +280,7 @@ void EnzoMethodMHDVlct::save_fluxes_for_corrections_
     const std::string field_name = field.field_name(index_field);
 
     // note the field_name is the same as the key
-    CelloArray<const enzo_float, 3> flux_arr = flux_map.at(field_name);
+    CelloView<const enzo_float, 3> flux_arr = flux_map.at(field_name);
 
     FaceFluxes * left_ff = flux_data->block_fluxes(dim,0,i_f);
     FaceFluxes * right_ff = flux_data->block_fluxes(dim,1,i_f);

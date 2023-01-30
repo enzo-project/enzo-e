@@ -23,6 +23,10 @@
 //----------------------------------------------------------------------
 
 #include "view_CelloArray.hpp"
+
+template<typename T, std::size_t D>
+using CelloView = CelloArray<T, D>;
+
 #include "view_ViewCollec.hpp"
 #include "view_StringIndRdOnlyMap.hpp"
 

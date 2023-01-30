@@ -29,7 +29,7 @@ namespace detail {
 
   template<typename T>
   inline void confirm_shared_shape_(const char* func_name,
-                                    const std::vector<CelloArray<T,3>> &arrays){
+                                    const std::vector<CelloView<T,3>> &arrays){
     if (arrays.size() > 0){
       int ref_mz = arrays[0].shape(0);
       int ref_my = arrays[0].shape(1);
@@ -80,7 +80,7 @@ namespace detail {
 
   template<typename T>
   class ArrOfPtrsViewCollec_{
-    /// equivalent to an array of pointers (where each pointer is a CelloArray)
+    /// equivalent to an array of pointers (where each pointer is a CelloView)
     /// - we track the arrays lifetime with a std::shared_ptr to makes copies
     ///   cheaper. The disadvantage to this should be minimal since we don't
     ///   allow the "array" to be directly mutated after construction (note:
@@ -91,18 +91,18 @@ namespace detail {
 
     ArrOfPtrsViewCollec_() = default;
 
-    ArrOfPtrsViewCollec_(const std::vector<CelloArray<T,3>> &arrays) noexcept
+    ArrOfPtrsViewCollec_(const std::vector<CelloView<T,3>> &arrays) noexcept
       : arrays_(arrays)
     { confirm_shared_shape_("ArrOfPtrsViewCollec_", arrays); }
 
-    const CelloArray<T,3> operator[](std::size_t index) const noexcept
+    const CelloView<T,3> operator[](std::size_t index) const noexcept
     { return arrays_[index]; }
 
     std::size_t size() const noexcept { return arrays_.size(); }
 
     constexpr bool contiguous_items() const {return false;}
 
-    const CelloArray<T, 4> get_backing_array() const noexcept{
+    const CelloView<T, 4> get_backing_array() const noexcept{
       ERROR("ArrOfPtrsViewCollec_::get_backing_array",
             "This is an invalid method call");
     }
@@ -116,7 +116,7 @@ namespace detail {
                                             const CSlice &slc_y,
                                             const CSlice &slc_x) const noexcept
     {
-      std::vector<CelloArray<T,3>> temp;
+      std::vector<CelloView<T,3>> temp;
       for (std::size_t i = 0; i < arrays_.size(); i++){
         temp.push_back(arrays_[i].subarray(slc_z, slc_y, slc_x));
       }
@@ -125,14 +125,14 @@ namespace detail {
 
   private:
     // ordered list of arrays
-    SharedBuffer_<CelloArray<T,3>> arrays_;
+    SharedBuffer_<CelloView<T,3>> arrays_;
   };
 
 //----------------------------------------------------------------------
 
   template<typename T>
   class SingleAddressViewCollec_{
-    /// Implements an ordered collection of arrays with a single 4D CelloArray.
+    /// Implements an ordered collection of arrays with a single 4D CelloView.
     /// (the location of all of the contents are specified by a single address)
 
   public:
@@ -143,7 +143,7 @@ namespace detail {
       : backing_array_(int_coerce_(n_arrays), shape[0], shape[1], shape[2])
     { }
   
-    const CelloArray<T,3> operator[](std::size_t index) const noexcept
+    const CelloView<T,3> operator[](std::size_t index) const noexcept
     { return backing_array_.subarray(int_coerce_(index)); }
 
     std::size_t size() const noexcept
@@ -151,7 +151,7 @@ namespace detail {
 
     constexpr bool contiguous_items() const {return true;}
 
-    const CelloArray<T, 4> get_backing_array() const noexcept
+    const CelloView<T, 4> get_backing_array() const noexcept
     { return backing_array_; }
 
     friend void swap(SingleAddressViewCollec_<T>& a,
@@ -171,7 +171,7 @@ namespace detail {
 
   private:
     /// this holds the individual array elements
-    CelloArray<T, 4> backing_array_;
+    CelloView<T, 4> backing_array_;
   };
 }
 
@@ -179,16 +179,16 @@ template<typename T>
 class ViewCollec{
   /// @class    ViewCollec
   /// @ingroup  View
-  /// @brief    [\ref View] represents a collection of CelloArrays of a
+  /// @brief    [\ref View] represents a collection of CelloViews of a
   ///           constant shape. While elements of these arrays can be mutated,
   ///           the arrays themselves can't be overwritten
   ///
   /// This primarily exists to help implement an ArrayMap
   ///
   /// This is a hybrid data-type that abstracts 2 separate implementations for
-  /// collections of CelloArrays. Under the hood, the arrays are either stored
+  /// collections of CelloViews. Under the hood, the arrays are either stored
   /// in a single 4D Contiguous Array (see SingleAddressViewCollec_) or an
-  /// array of 3D CelloArrays (see ArrOfPtrsViewCollec_)
+  /// array of 3D CelloViews (see ArrOfPtrsViewCollec_)
   ///
   /// The implementation of this hybrid data-structure is fairly crude. If we
   /// decide that we want to support this hybrid data-type in the long-term,
@@ -198,7 +198,7 @@ class ViewCollec{
 
 private:
   // tags how the arrays are stored (whether they're stored in a single
-  // contiguous CelloArray or stored like an array of pointers)
+  // contiguous CelloView or stored like an array of pointers)
   enum class Tag {CONTIG, ARR_OF_PTR};
   Tag tag_;
 
@@ -246,7 +246,7 @@ public: /// public interface
   }
 
   /// construct from vector of arrays
-  ViewCollec(const std::vector<CelloArray<T, 3>>& v) noexcept{
+  ViewCollec(const std::vector<CelloView<T, 3>>& v) noexcept{
     activate_member_(Tag::ARR_OF_PTR, false);
     arr_of_ptr_ = detail::ArrOfPtrsViewCollec_<T>(v);
   }
@@ -309,7 +309,7 @@ public: /// public interface
   }
 
   /// Returns a shallow copy of the specified array
-  const CelloArray<T,3> operator[](std::size_t i) const noexcept {
+  const CelloView<T,3> operator[](std::size_t i) const noexcept {
     std::size_t n_elements = size();
     ASSERT2("ViewCollec::operator[]",
             "Can't retrieve value at %zu when size() is %zu",
@@ -340,7 +340,7 @@ public: /// public interface
   /// @note
   /// The program will abort if this method is called on an object for which
   /// the `contiguous_items()` method returns `false`.
-  const CelloArray<T,4> get_backing_array() const noexcept {
+  const CelloView<T,4> get_backing_array() const noexcept {
     switch (tag_){
       case Tag::CONTIG:     { return single_arr_.get_backing_array(); }
       case Tag::ARR_OF_PTR: { return arr_of_ptr_.get_backing_array(); }

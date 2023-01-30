@@ -64,7 +64,7 @@ namespace enzo_field_adaptor_detail {
 
     ArrayMapWrapper(const EnzoEFltArrayMap& array_map);
 
-    inline CelloArray<const enzo_float, 3> view(const std::string& name)
+    inline CelloView<const enzo_float, 3> view(const std::string& name)
       const noexcept
     { return array_map_[name]; }
     
@@ -95,7 +95,7 @@ namespace enzo_field_adaptor_detail {
   public:
     BlockWrapper(Block* block, int index_history);
 
-    inline CelloArray<const enzo_float, 3> view(const std::string& name)
+    inline CelloView<const enzo_float, 3> view(const std::string& name)
       const noexcept
     {
       return field_.view<enzo_float>(name,ghost_choice::include,index_history_);
@@ -224,7 +224,7 @@ public:
 
   /// Returns whether arr has the same strides as the wrapped fields
   inline bool consistent_with_field_strides
-  (const CelloArray<const enzo_float, 3>& arr) const noexcept
+  (const CelloView<const enzo_float, 3>& arr) const noexcept
   {
     std::array<int,3> ref_strides = (holds_block_) ?
       reinterpret_cast<BlockWrapper*>(wrapper_)->field_strides() :
@@ -235,12 +235,12 @@ public:
              (ref_strides[2] == arr.stride(2)) );
   }
 
-  /// Return a CelloArray that acts as a view of the corresponding field
+  /// Return a CelloView that acts as a view of the corresponding field
   ///
   /// When a Field is being wrapped, the ghost zones are always excluded
   /// (if we want to make this configurable in the future, the choice should be
   /// passed to the appropriate constructor)
-  inline CelloArray<const enzo_float, 3> view(const std::string& name)
+  inline CelloView<const enzo_float, 3> view(const std::string& name)
     const noexcept
   {
     if (holds_block_){

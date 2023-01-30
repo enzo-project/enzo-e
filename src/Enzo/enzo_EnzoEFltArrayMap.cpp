@@ -73,13 +73,13 @@ bool EnzoEFltArrayMap::validate_key_order(const std::vector<std::string> &ref,
 
 //----------------------------------------------------------------------
 
-CelloArray<enzo_float, 3> EnzoEFltArrayMap::at_(const std::string& key)
+CelloView<enzo_float, 3> EnzoEFltArrayMap::at_(const std::string& key)
   const noexcept
 { return arrays_[str_index_map_.at(key)]; }
 
 //----------------------------------------------------------------------
 
-CelloArray<enzo_float, 3> EnzoEFltArrayMap::at_(const std::size_t index)
+CelloView<enzo_float, 3> EnzoEFltArrayMap::at_(const std::size_t index)
   const noexcept
 {
   ASSERT("EnzoEFltArrayMap::at_",
@@ -102,12 +102,12 @@ EFlt3DArray exclude_stale_cells_(const EFlt3DArray &arr, int stale_depth)
 }
 
 
-CelloArray<enzo_float, 3> EnzoEFltArrayMap::get_(const std::string& key,
+CelloView<enzo_float, 3> EnzoEFltArrayMap::get_(const std::string& key,
                                                  int stale_depth) const noexcept
 {
   ASSERT("EnzoEFltArrayMap::get_", "stale_depth must be >= 0",
          stale_depth >= 0);
-  CelloArray<enzo_float, 3> arr = this->at_(key);
+  CelloView<enzo_float, 3> arr = this->at_(key);
   return (stale_depth > 0) ? exclude_stale_cells_(arr,stale_depth) : arr;
 }
 
