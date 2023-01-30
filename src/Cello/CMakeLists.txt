@@ -363,7 +363,7 @@ if (use_papi)
 endif()
 
 # tests of the view component
-addUnitTestBinary(test_carr_collec "test_CArrCollec.cpp" view tester_default)
+addUnitTestBinary(test_view_collec "test_ViewCollec.cpp" view tester_default)
 addUnitTestBinary(test_cello_array "test_CelloArray.cpp" view tester_default)
 addUnitTestBinary(
   test_string_ind_rd_only_map "test_StringIndRdOnlyMap.cpp" view tester_default
