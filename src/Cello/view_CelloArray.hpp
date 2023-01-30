@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     array_CelloArray.hpp
+/// @file     view_CelloArray.hpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Thurs May 30 2019
 /// @brief    Declaration and implementation of the CelloArray class template
@@ -13,8 +13,8 @@
 
 #include "cello_defines.hpp"
 
-#ifndef ARRAY_CELLO_ARRAY_HPP
-#define ARRAY_CELLO_ARRAY_HPP
+#ifndef VIEW_CELLO_ARRAY_HPP
+#define VIEW_CELLO_ARRAY_HPP
 
 //----------------------------------------------------------------------
 
@@ -59,8 +59,8 @@ typedef std::conditional<sizeof(int) >= sizeof(std::ptrdiff_t),
 class CSlice
 {
   /// @class    CSlice
-  /// @ingroup  Array
-  /// @brief    [\ref Array] represents a slice along a single axis of a
+  /// @ingroup  View
+  /// @brief    [\ref View] represents a slice along a single axis of a
   ///           CelloArray
 
 public:
@@ -357,8 +357,8 @@ template<typename T, std::size_t D>
 class CelloArray
 {
   /// @class    CelloArray
-  /// @ingroup  Array
-  /// @brief    [\ref Array] class template that encapsulates a
+  /// @ingroup  View
+  /// @brief    [\ref View] class template that encapsulates a
   ///           multidimensional numeric array with a fixed number of
   ///           dimensions.
   ///
@@ -908,4 +908,4 @@ void CelloArray<T,D>::assert_all_entries_finite_() const noexcept
   }
 }
 
-#endif /* ARRAY_CELLO_ARRAY_HPP */
+#endif /* VIEW_CELLO_ARRAY_HPP */

@@ -9,7 +9,7 @@
 #include "test.hpp"
 
 #include "mesh.hpp"
-#include "array.hpp"
+#include "view.hpp"
 #include "data.hpp"
 
 /// helper function that actually checks consistency between the view and the

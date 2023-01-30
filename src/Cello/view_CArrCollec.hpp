@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     array_CArrCollec.hpp
+/// @file     view_CArrCollec.hpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Fri Nov 26 2021
-/// @brief    Declaration and implementation of the CelloArray class template
+/// @brief    Declaration and implementation of the CArrCollec class template
 //
 // This class is primarily intended to be used to help implement the ArrayMap
 
@@ -13,8 +13,8 @@
 #include <utility> // std::swap
 #include <vector>
 
-#ifndef ARRAY_C_ARR_COLLEC_HPP
-#define ARRAY_C_ARR_COLLEC_HPP
+#ifndef VIEW_C_ARR_COLLEC_HPP
+#define VIEW_C_ARR_COLLEC_HPP
 
 namespace detail {
 
@@ -178,8 +178,8 @@ namespace detail {
 template<typename T>
 class CArrCollec{
   /// @class    CArrCollec
-  /// @ingroup  Array
-  /// @brief    [\ref Array] represents a collection of CelloArrays of a
+  /// @ingroup  View
+  /// @brief    [\ref View] represents a collection of CelloArrays of a
   ///           constant shape. While elements of these arrays can be mutated,
   ///           the arrays themselves can't be overwritten
   ///
@@ -396,4 +396,4 @@ public: /// public interface
 
 };
 
-#endif /* ARRAY_C_ARR_COLLEC_HPP */
+#endif /* VIEW_C_ARR_COLLEC_HPP */
