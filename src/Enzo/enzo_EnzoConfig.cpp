@@ -264,7 +264,6 @@ EnzoConfig::EnzoConfig() throw ()
   method_m1_closure_temperature_blackbody(0.0),
   method_m1_closure_particle_luminosity(-1.0), // Set emission rate for star particles
   method_m1_closure_SED(), // supply list of emission rate fraction for all groups
-  method_m1_closure_courant(0.5),
   method_m1_closure_min_photon_density(1e-16),
   method_m1_closure_attenuation(true),
   method_m1_closure_thermochemistry(true),
@@ -708,7 +707,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_m1_closure_temperature_blackbody;
   p | method_m1_closure_particle_luminosity;
   p | method_m1_closure_SED;
-  p | method_m1_closure_courant;
   p | method_m1_closure_min_photon_density;
   p | method_m1_closure_attenuation;
   p | method_m1_closure_thermochemistry;
@@ -1863,8 +1861,6 @@ void EnzoConfig::read_method_m1_closure_(Parameters * p)
   method_m1_closure_LWB_J21 = p->value_float
     ("Method:m1_closure:LWB_J21", -1.0);
   
-  method_m1_closure_courant = p->value_float
-    ("Method:m1_closure:courant", 0.5);
 
   method_m1_closure_cross_section_calculator = p->value_string
     ("Method:m1_closure:cross_section_calculator","vernier");

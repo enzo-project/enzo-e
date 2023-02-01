@@ -236,7 +236,6 @@ int EnzoBlock::SolveHydroEquations
       flux_index = colindex + 3*2*index_color;
       index_color++;
     }
-    
     for (int axis=0; axis<rank; axis++) {
       leftface[axis] = l3[axis];
       rightface[axis] = u3[axis];

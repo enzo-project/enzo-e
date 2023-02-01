@@ -1,3 +1,6 @@
+# Problem: RT in vacuum with radiation sourced from a star particle
+# Author: William Hicks (whicks@ucsd.edu)
+
  Boundary {
      type = "outflow";
  }

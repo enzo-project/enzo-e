@@ -1,3 +1,7 @@
+# Problem: A hydrostatic cosmology RT test
+# Author: William Hicks (whicks@ucsd.edu)
+
+# This setup is adapted from "Test 4", described in Iliev et al. 2006
 #NOTE - This problem requires cosmological ICs in order to run. 
 #       Contact William Hicks (whicks@ucsd.edu) for these. 
 Boundary {
