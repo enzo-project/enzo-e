@@ -839,7 +839,6 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_merge_sinks_test_(p);
   read_initial_music_(p);
   read_initial_pm_(p);
-  read_initial_m1_closure_(p);
   read_initial_sedov_(p);
   read_initial_sedov_random_(p);
   read_initial_shock_tube_(p);
@@ -1135,11 +1134,6 @@ void EnzoConfig::read_initial_inclined_wave_(Parameters * p)
     ("Initial:inclined_wave:wave_type","alfven");
 }
 
-//----------------------------------------------------------------------
-void EnzoConfig::read_initial_m1_closure_(Parameters * p)
-{
-
-}
 //----------------------------------------------------------------------
 
 void EnzoConfig::read_initial_sedov_(Parameters * p)

@@ -470,7 +470,8 @@ Required Fields
 
 The evolved fields are ``"photon_density_i"``, ``"flux_x_i"``, ``"flux_y_i"``, and ``"flux_z_i"``, 
 where photon densities and fluxes are in units of :math:`[L]^{-3}` :e:`and` :math:`[L]^2[T]^{-1}`, 
-respectively, and :math:`i` denotes the group number. A set of fields must be defined for each group.
+respectively, and :math:`i` denotes the group number. A set of fields must be defined for each group, and
+fluxes must be defined in the x, y, and z directions regardless of the dimensionality of the simulation.
 For technical reasons, an additional field called ``"photon_density_i_deposit"`` must be defined for each group.
 
 For example, a simulation that evolves three groups must define these fifteen fields: 

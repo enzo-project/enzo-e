@@ -3,12 +3,10 @@
 # Second to set dependent options (e.g., also depending on defaults set in the main CMakeLists.txt)
 if(NOT __processedUserDefaults)
 
-  message(STATUS "Loading machine configuration for linux icc.\n"
-    "This configuration has been tested (2021-11-13) using the intel compilers\n"
-    "downloaded as part of the Intel oneAPI HPC Toolkit (the particular toolkit\n"
-    "was from January 2021).\n"
+  message(STATUS "Loading machine configuration for the SDSC Expanse supercomputer.\n"
+    "This configuration has been tested using intel compilers\n"
     "For this build, Charm++ was configured as follows:\n"
-    "$ cmake -DNETWORK=netlrts -DSMP=OFF -DCMAKE_CXX_COMPILER=icpc -DCMAKE_C_COMPILER=icc -DCMAKE_Fortran_COMPILER=ifort ..\n")
+    "$ cmake -DNETWORK=mpi-linux-x86_64 -DSMP=OFF -DCMAKE_CXX_COMPILER=icpc -DCMAKE_C_COMPILER=icc -DCMAKE_Fortran_COMPILER=ifort ..\n")
 
   # first, set the compilers and mandatory flags
   set(CMAKE_CXX_COMPILER charmc CACHE STRING "")

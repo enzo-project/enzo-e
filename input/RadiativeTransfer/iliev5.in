@@ -41,9 +41,9 @@
  }
 
  Mesh {
-     root_blocks = [ 4, 4, 4 ];
+     root_blocks = [ 8, 8, 8 ];
      root_rank = 3;
-     root_size = [ 64, 64, 64 ];
+     root_size = [ 256, 256, 256 ];
  }
 
  Method {
@@ -277,6 +277,6 @@
 
  Units {
      density = 1.674000000000000e-24;
-     length = 9.257000000000000e+22;
+     length = 9.257000000000000e+22; # 30 kpc
      time = 31540000000000.00;
  }

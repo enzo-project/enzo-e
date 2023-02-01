@@ -1137,13 +1137,6 @@ void EnzoMethodM1Closure::D_add_attenuation ( EnzoBlock * enzo_block, double * D
   double mH = enzo_constants::mass_hydrogen;
   std::vector<double> masses = {mH,4*mH, 4*mH};
  
-/*
-  if (enzo_config->method_m1_closure_H2_photodissociation) {
-    chemistry_fields.push_back("H2I_density");
-    masses.push_back(2*mH);
-  }
-*/
-
   Scalar<double> scalar = enzo_block->data()->scalar_double();
   for (int j=0; j<chemistry_fields.size(); j++) {  
     enzo_float * density_j = (enzo_float *) field.values(chemistry_fields[j]);
