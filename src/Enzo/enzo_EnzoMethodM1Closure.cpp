@@ -427,7 +427,7 @@ void EnzoMethodM1Closure::inject_photons ( EnzoBlock * enzo_block, int igroup ) 
   double tunit = enzo_units->time();
   double Nunit = enzo_units->photon_number_density();
 
-  double f_esc = 1.0;
+  double f_esc = enzo_config->method_m1_closure_photon_escape_fraction;
 
   Field field = enzo_block->data()->field();
   int mx,my,mz;  

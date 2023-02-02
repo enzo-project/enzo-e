@@ -53,10 +53,19 @@ Enzo-E's multigroup M1 Closure radiative transfer solver.
    
 ----
 
+:Parameter:  :p:`Method` : :p:`m1_closure` : :p:`photon_escape_fraction`
+:Summary: :s:`Escape fraction of photons from gas around star particles`
+:Type:    :t:`float`
+:Default: :d:`1.0`
+:Scope:     :c:`Enzo`
+
+:e:`Calculated photon densities for star particle radiation are multiplied by this value before being deposited onto the mesh.`
+   
+----
 :Parameter:  :p:`Method` : :p:`m1_closure` : :p:`courant`
 :Summary: :s:`Courant number for radiative transfer`
 :Type:    :t:`float`
-:Default: :d:`0.5`
+:Default: :d:`1.0`
 :Scope:     :c:`Enzo`
 
 :e:`The radiation timestep is calculated as dt = courant * dx/(3*clight_frac*C).`

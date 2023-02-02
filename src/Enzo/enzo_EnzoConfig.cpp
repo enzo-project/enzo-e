@@ -260,6 +260,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_m1_closure_flux_function("GLF"), // which flux function to use
   method_m1_closure_hll_file("hll_evals.list"),
   method_m1_closure_clight_frac(1.0), // reduced speed of light value to use
+  method_m1_closure_photon_escape_fraction(1.0),
   method_m1_closure_radiation_spectrum("custom"), // Type of radiation spectrum to use for star particles
   method_m1_closure_temperature_blackbody(0.0),
   method_m1_closure_particle_luminosity(-1.0), // Set emission rate for star particles
@@ -703,6 +704,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_m1_closure_flux_function;
   p | method_m1_closure_hll_file;
   p | method_m1_closure_clight_frac;
+  p | method_m1_closure_photon_escape_fraction;
   p | method_m1_closure_radiation_spectrum;
   p | method_m1_closure_temperature_blackbody;
   p | method_m1_closure_particle_luminosity;
@@ -1831,6 +1833,9 @@ void EnzoConfig::read_method_m1_closure_(Parameters * p)
   method_m1_closure_clight_frac = p->value_float
     ("Method:m1_closure:clight_frac",1.0);
 
+  method_m1_closure_photon_escape_fraction = p->value_float
+    ("Method:m1_closure:photon_escape_fraction",1.0);
+
   method_m1_closure_radiation_spectrum = p->value_string
     ("Method:m1_closure:radiation_spectrum","custom");
 
@@ -1860,7 +1865,6 @@ void EnzoConfig::read_method_m1_closure_(Parameters * p)
 
   method_m1_closure_LWB_J21 = p->value_float
     ("Method:m1_closure:LWB_J21", -1.0);
-  
 
   method_m1_closure_cross_section_calculator = p->value_string
     ("Method:m1_closure:cross_section_calculator","vernier");

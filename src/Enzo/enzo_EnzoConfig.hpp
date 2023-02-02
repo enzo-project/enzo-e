@@ -398,6 +398,7 @@ public: // interface
       method_m1_closure_flux_function("GLF"), // which flux function to use
       method_m1_closure_hll_file("hll_evals.list"), // path to hll eigenvalue table
       method_m1_closure_clight_frac(1.0), // fraction of speed of light value to use
+      method_m1_closure_photon_escape_fraction(1.0),
       method_m1_closure_radiation_spectrum("custom"), // Type of radiation spectrum to use for star particles 
       method_m1_closure_temperature_blackbody(-1.0), // requires radiation_spectrum="blackbody"
       method_m1_closure_particle_luminosity(-1.0), // specify emission rate from sources
@@ -918,6 +919,7 @@ public: // attributes
   std::string               method_m1_closure_flux_function;
   std::string               method_m1_closure_hll_file;
   double                    method_m1_closure_clight_frac;
+  double                    method_m1_closure_photon_escape_fraction;
   std::string               method_m1_closure_radiation_spectrum;
   double                    method_m1_closure_temperature_blackbody; 
   double                    method_m1_closure_particle_luminosity;
