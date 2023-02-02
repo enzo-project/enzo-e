@@ -197,7 +197,6 @@ extern "C" {
 #include "enzo_EnzoInitialMusic.hpp"
 #include "enzo_EnzoInitialPm.hpp"
 #include "enzo_EnzoInitialPpmlTest.hpp"
-#include "enzo_EnzoInitialM1Closure.hpp"
 #include "enzo_EnzoInitialSedovArray2.hpp"
 #include "enzo_EnzoInitialSedovArray3.hpp"
 #include "enzo_EnzoInitialSedovRandom.hpp"

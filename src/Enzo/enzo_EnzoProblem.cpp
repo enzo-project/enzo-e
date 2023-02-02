@@ -148,8 +148,6 @@ Initial * EnzoProblem::create_initial_
 #endif /* CONFIG_USE_GRACKLE */
   } else if (type == "feedback_test") {
     initial = new EnzoInitialFeedbackTest(enzo_config);
-  } else if (type == "m1_closure") { 
-    initial = new EnzoInitialM1Closure(enzo_config);
   } else if (type == "vlct_bfield") {
     initial = new EnzoInitialBCenter(parameters, cycle, time,
 				     enzo_config->initial_bcenter_update_etot);

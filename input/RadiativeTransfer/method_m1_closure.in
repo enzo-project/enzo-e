@@ -37,7 +37,7 @@
          temperature = 100.0000000000000;
          luminosity = 1e36;
      };
-     list = [ "feedback_test", "m1_closure" ];
+     list = [ "feedback_test" ];
  }
 
  Mesh {

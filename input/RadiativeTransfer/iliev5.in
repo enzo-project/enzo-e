@@ -42,7 +42,7 @@
          star_mass = 100.0000000000000;
          temperature = 100.0000000000000;
      };
-     list = [ "feedback_test", "m1_closure" ];
+     list = [ "feedback_test" ];
  }
 
  Mesh {

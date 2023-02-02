@@ -142,10 +142,21 @@ EnzoMethodM1Closure ::EnzoMethodM1Closure(const int N_groups)
     refresh_injection->add_field_src_dst
        ("photon_density_"+istring+"_deposit", "photon_density_"+istring); 
   }
- 
+
+  // read in data tables
+  M1_tables = new M1Tables();
+
   refresh_injection->set_callback(CkIndex_EnzoBlock::p_method_m1_closure_solve_transport_eqn()); 
 }
-  
+
+M1Tables::M1Tables ()
+{
+  // Read in any data tables relevant to the M1 closure method
+  const EnzoConfig * enzo_config = enzo::config();
+  if (enzo_config->method_m1_closure_flux_function == "HLL") {
+    read_hll_eigenvalues(enzo_config->method_m1_closure_hll_file);
+  } 
+}
 //----------------------------------------------------------------------
 
 void EnzoMethodM1Closure ::pup (PUP::er &p)
@@ -562,6 +573,35 @@ void EnzoMethodM1Closure::inject_photons ( EnzoBlock * enzo_block, int igroup ) 
 
 //---------------------------------------------------------------------
 
+void M1Tables::read_hll_eigenvalues(std::string hll_file) throw()
+{
+    std::fstream inFile;
+    inFile.open(hll_file, std::ios::in);
+
+    ASSERT("M1Tables::read_hll_eigenvalues()", "hll_file failed to open!",
+           inFile.is_open());
+
+    // store table in vectors
+    int line_count = 10201; // 101*101
+    
+    hll_table_f_.resize(line_count);
+    hll_table_theta_.resize(line_count);
+    hll_table_lambda_min_.resize(line_count);
+    hll_table_lambda_max_.resize(line_count);
+    hll_table_col3_.resize(line_count);
+    hll_table_col4_.resize(line_count);
+
+    int i = 0;
+    while(inFile >> this->hll_table_f_[i] >> this->hll_table_theta_[i] >> 
+                    this->hll_table_lambda_min_[i] >> 
+                    this->hll_table_col3_[i] >> this->hll_table_col4_[i] >> 
+                    this->hll_table_lambda_max_[i]) i++;
+
+    inFile.close();
+}
+
+
+
 double EnzoMethodM1Closure::compute_hll_eigenvalues (double f, double theta, double * lmin, double * lmax, 
                                                     double clight) throw() 
 {
@@ -576,18 +616,17 @@ double EnzoMethodM1Closure::compute_hll_eigenvalues (double f, double theta, dou
   double de1 = 1 - dd1; 
   double de2 = 1 - dd2;
 
-  const EnzoInitialM1Closure * RT_init = enzo::RT_init();
   *lmin = 0.0;
-  *lmin += de1*de2*RT_init->hll_table_lambda_min(i  ,j  );
-  *lmin += dd1*de2*RT_init->hll_table_lambda_min(i+1,j  );
-  *lmin += de1*dd2*RT_init->hll_table_lambda_min(i  ,j+1);
-  *lmin += dd1*dd2*RT_init->hll_table_lambda_min(i+1,j+1);
+  *lmin += de1*de2*M1_tables->hll_table_lambda_min(i  ,j  );
+  *lmin += dd1*de2*M1_tables->hll_table_lambda_min(i+1,j  );
+  *lmin += de1*dd2*M1_tables->hll_table_lambda_min(i  ,j+1);
+  *lmin += dd1*dd2*M1_tables->hll_table_lambda_min(i+1,j+1);
 
   *lmax = 0.0;
-  *lmax += de1*de2*RT_init->hll_table_lambda_max(i  ,j  );
-  *lmax += dd1*de2*RT_init->hll_table_lambda_max(i+1,j  );
-  *lmax += de1*dd2*RT_init->hll_table_lambda_max(i  ,j+1);
-  *lmax += dd1*dd2*RT_init->hll_table_lambda_max(i+1,j+1);
+  *lmax += de1*de2*M1_tables->hll_table_lambda_max(i  ,j  );
+  *lmax += dd1*de2*M1_tables->hll_table_lambda_max(i+1,j  );
+  *lmax += de1*dd2*M1_tables->hll_table_lambda_max(i  ,j+1);
+  *lmax += dd1*dd2*M1_tables->hll_table_lambda_max(i+1,j+1);
 }
 
 //----------------------------------------------------------------------
@@ -632,7 +671,7 @@ void EnzoMethodM1Closure::get_reduced_variables (double * chi, double (*n)[3], i
                                enzo_float * N, enzo_float * Fx, enzo_float * Fy, enzo_float * Fz) throw()
 {
   double Fnorm = sqrt(Fx[i]*Fx[i] + Fy[i]*Fy[i] + Fz[i]*Fz[i]);
-  double f = std::min(Fnorm / (clight*N[i]), 1.0); // reduced flux ( 0 < f < 1)
+  double f = N[i] > 0 ? std::min(Fnorm / (clight*N[i] ), 1.0) : 0.0; // reduced flux ( 0 < f < 1)
   *chi = (3 + 4*f*f) / (5 + 2*sqrt(4-3*f*f)); // isotropy measure (1/3 < chi < 1)
   (*n)[0] = Fx[i]/Fnorm;
   (*n)[1] = Fy[i]/Fnorm; 
@@ -1364,9 +1403,12 @@ void EnzoMethodM1Closure::add_LWB(EnzoBlock * enzo_block, double J21)
 
   Scalar<double> scalar = enzo_block->data()->scalar_double();
   
+  bool is_first_cycle = (enzo_block->cycle() == enzo_config->initial_cycle);
+  double Nbackground_previous = is_first_cycle ? 0.0 : *(scalar.value(scalar.index("N_LWB")));
+ 
   for (int i=0; i<mx*my*mz; i++) {
     // subtract the background from the previous timestep and add the new
-    N[i] += Nbackground - *(scalar.value(scalar.index("N_LWB")));
+    N[i] += Nbackground - Nbackground_previous;
   }
 
   *(scalar.value( scalar.index("N_LWB") )) = Nbackground;
@@ -1679,7 +1721,6 @@ void EnzoMethodM1Closure::compute_ (Block * block) throw()
       *(scalar.value( scalar.index( sigE_string(i,j) + mL_string(i) ))) = 0.0;
     }
   }
-
 
   // initialize deposition fields to zero
   for (int i=0; i<N_groups; i++) {

@@ -10,6 +10,32 @@
 #ifndef ENZO_ENZO_METHOD_M1_CLOSURE
 #define ENZO_ENZO_METHOD_M1_CLOSURE
 
+class M1Tables {
+
+// The M1Tables class contains methods for reading and accessing data tables
+//   relevant to EnzoMethodM1Closure
+
+public:
+  M1Tables();
+
+  int hll_table_f     (int i, int j) const throw() { return hll_table_f_[100*i+j]; }
+  int hll_table_theta (int i, int j) const throw() { return hll_table_theta_[100*i+j]; }
+
+  double hll_table_lambda_min (int i, int j) const throw() { return hll_table_lambda_min_[100*i+j]; }
+  double hll_table_lambda_max (int i, int j) const throw() { return hll_table_lambda_max_[100*i+j]; }
+  double hll_table_col3       (int i, int j) const throw() { return hll_table_col3_[100*i+j]; }
+  double hll_table_col4       (int i, int j) const throw() { return hll_table_col4_[100*i+j]; }
+
+private:
+  void read_hll_eigenvalues(std::string hll_file) throw(); 
+ 
+  std::vector<int> hll_table_f_, hll_table_theta_;
+  std::vector<double> hll_table_lambda_min_, hll_table_lambda_max_;
+  std::vector<double> hll_table_col3_, hll_table_col4_;
+};
+
+//-----------------------------------------------
+
 class EnzoMethodM1Closure : public Method {
 
   /// @class    EnzoMethodM1Closure
@@ -214,6 +240,10 @@ protected: // attributes
 
   // Refresh id's
   int ir_injection_;
+
+  // Tables relevant to M1 closure method
+  M1Tables * M1_tables;
 };
+
 
 #endif /* ENZO_ENZO_METHOD_M1_CLOSURE_HPP */
