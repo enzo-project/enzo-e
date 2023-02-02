@@ -186,7 +186,67 @@ void EnzoMethodM1Closure::compute ( Block * block ) throw()
   // This means the non-leaves would end up calling compute_done() twice which results
   // in skipped cycles
   
-  compute_ (block);
+  const EnzoConfig * enzo_config = enzo::config();
+
+  Field field = block->data()->field();
+  int mx,my,mz;
+  field.dimensions(0,&mx, &my, &mz); //field dimensions, including ghost zones
+  int gx,gy,gz;
+  field.ghost_depth(0,&gx, &gy, &gz);
+
+  const int m = mx*my*mz;
+
+  EnzoBlock * enzo_block = enzo::block(block);
+
+  int N_groups = enzo_config->method_m1_closure_N_groups;
+  int N_species = 3 + enzo_config->method_m1_closure_H2_photodissociation;
+
+  if (enzo_config->method_m1_closure_thermochemistry) {
+    // compute the temperature
+    EnzoComputeTemperature compute_temperature(enzo::fluid_props(),
+                                               enzo_config->physics_cosmology);
+
+    compute_temperature.compute(enzo_block);
+  }
+
+  Scalar<double> scalar = block->data()->scalar_double();
+
+  // reset "mL" sums to zero
+  // TODO: only do this once every N cycles, where N is a parameter
+  for (int i=0; i<N_groups; i++) {
+    *(scalar.value( scalar.index( eps_string(i) + mL_string(i) ))) = 0.0;
+    *(scalar.value( scalar.index( mL_string(i) ) )) = 0.0;
+    for (int j=0; j<N_species; j++) {
+      *(scalar.value( scalar.index( sigN_string(i,j) + mL_string(i) ))) = 0.0;
+      *(scalar.value( scalar.index( sigE_string(i,j) + mL_string(i) ))) = 0.0;
+    }
+  }
+
+  // initialize deposition fields to zero
+  for (int i=0; i<N_groups; i++) {
+    std::string istring = std::to_string(i);
+    enzo_float * N_i_d = (enzo_float *) field.values("photon_density_" + istring + "_deposit");
+    for (int j=0; j<m; j++)
+    {
+      N_i_d[j] = 0.0; 
+    }
+  }
+
+  //start photon injection step
+  //This function will start the transport step after a refresh
+  this->call_inject_photons(enzo_block);
+
+#ifdef DEBUG_PRINT_GROUP_PARAMETERS
+  for (int i=0; i<N_groups; i++) {
+    for (int j=0; j<N_species; j++) {
+      CkPrintf("[i,j] = [%d,%d]; sigN = %1.2e cm^2; sigE = %1.2e cm^2; eps = %1.2e eV\n",i,j,
+               *(scalar.value( scalar.index( sigN_string(i,j) ))),
+               *(scalar.value( scalar.index( sigE_string(i,j) ))),
+               *(scalar.value( scalar.index(  eps_string(i)   ))) / enzo_constants::erg_eV);
+    }
+  }
+#endif
+
 
   return;
 }
@@ -286,7 +346,7 @@ double EnzoMethodM1Closure::get_star_temperature(double M) throw()
 
 double EnzoMethodM1Closure::get_radiation_custom(EnzoBlock * enzo_block, 
            double energy, double pmass, double plum, 
-           double dt, double inv_vol, int i, int igroup) throw()
+           double dt, double inv_vol, int igroup) throw()
 {
   const EnzoConfig * enzo_config = enzo::config();
 
@@ -332,7 +392,7 @@ double EnzoMethodM1Closure::get_radiation_custom(EnzoBlock * enzo_block,
 
 double EnzoMethodM1Closure::get_radiation_blackbody(EnzoBlock * enzo_block,  
                    double pmass, double freq_lower, double freq_upper, double clight, 
-                   double dt, double cell_volume, int i, int igroup) throw()
+                   double dt, double cell_volume, int igroup) throw()
 {
   // Does all calculations in CGS
   const EnzoConfig * enzo_config = enzo::config();
@@ -524,7 +584,7 @@ void EnzoMethodM1Closure::inject_photons ( EnzoBlock * enzo_block, int igroup ) 
         // and integrate over the SED to get the total injection rate. The current
         // implementation in RAMSES assumes that SED of gas stays constant.
         dN = get_radiation_blackbody(enzo_block, pmass_cgs, freq_lower, freq_upper, clight,
-                                     dt, cell_volume, i, igroup);
+                                     dt, cell_volume, igroup);
       }
       else if (radiation_spectrum == "custom") {
         // This function samples a user-defined SED to get the injection rate into each group.
@@ -533,7 +593,7 @@ void EnzoMethodM1Closure::inject_photons ( EnzoBlock * enzo_block, int igroup ) 
         // luminosity specified by that parameter
         double plum_cgs = plum[ipdL] * munit * lunit * lunit/ (tunit * tunit * tunit);
         dN = get_radiation_custom(enzo_block, E_mean, pmass_cgs, plum_cgs, 
-                                  dt, 1/cell_volume, i, igroup);
+                                  dt, 1/cell_volume, igroup);
       }
      
       dN *= f_esc / Nunit; // put back into code units
@@ -602,7 +662,7 @@ void M1Tables::read_hll_eigenvalues(std::string hll_file) throw()
 
 
 
-double EnzoMethodM1Closure::compute_hll_eigenvalues (double f, double theta, double * lmin, double * lmax, 
+void EnzoMethodM1Closure::compute_hll_eigenvalues (double f, double theta, double * lmin, double * lmax, 
                                                     double clight) throw() 
 {
   double lf = f*100;
@@ -673,9 +733,11 @@ void EnzoMethodM1Closure::get_reduced_variables (double * chi, double (*n)[3], i
   double Fnorm = sqrt(Fx[i]*Fx[i] + Fy[i]*Fy[i] + Fz[i]*Fz[i]);
   double f = N[i] > 0 ? std::min(Fnorm / (clight*N[i] ), 1.0) : 0.0; // reduced flux ( 0 < f < 1)
   *chi = (3 + 4*f*f) / (5 + 2*sqrt(4-3*f*f)); // isotropy measure (1/3 < chi < 1)
-  (*n)[0] = Fx[i]/Fnorm;
-  (*n)[1] = Fy[i]/Fnorm; 
-  (*n)[2] = Fz[i]/Fnorm;
+  if (Fnorm > 0.0) {
+    (*n)[0] = Fx[i]/Fnorm;
+    (*n)[1] = Fy[i]/Fnorm; 
+    (*n)[2] = Fz[i]/Fnorm;
+  }
 
   #ifdef DEBUG_PRINT_REDUCED_VARIABLES
     CkPrintf("i = %d; N = %1.2e; Fx = %1.2e; Fy = %1.2e; Fz = %1.2e; f = %1.2e; chi = %1.2e; n=[%1.2e,%1.2e,%1.2e]\n", i, N[i], Fx[i], Fy[i], Fz[i], f, *chi, (*n)[0], (*n)[1], (*n)[2]); 
@@ -719,7 +781,8 @@ void EnzoMethodM1Closure::get_pressure_tensor (EnzoBlock * enzo_block,
    for (int iy=gy-1; iy<my-gy+1; iy++) {
     for (int ix=gx-1; ix<mx-gx+1; ix++) {
       int i = INDEX(ix,iy,iz,mx,my); //index of current cell
-      double chi, n[3]; 
+      double chi;
+      double n[3] = {0.0, 0.0, 0.0}; 
       get_reduced_variables( &chi, &n, i, clight, 
                             N, Fx, Fy, Fz);
       double iterm = 0.5*(1.0-chi);   // identity term
@@ -1107,7 +1170,7 @@ int EnzoMethodM1Closure::get_b_boolean (double E_lower, double E_upper, int spec
 
 //---------------------------------
 
-void EnzoMethodM1Closure::C_add_recombination (EnzoBlock * enzo_block, double * C,
+double EnzoMethodM1Closure::C_add_recombination (EnzoBlock * enzo_block,
                                                 enzo_float * T, int i, int igroup,
                                                 double E_lower, double E_upper) throw()
 {
@@ -1130,6 +1193,7 @@ void EnzoMethodM1Closure::C_add_recombination (EnzoBlock * enzo_block, double * 
 
   std::vector<double> masses = {mH,4*mH, 4*mH};
 
+  double C = 0.0;
   for (std::size_t j=0; j<chemistry_fields.size(); j++) {  
     enzo_float * density_j = (enzo_float *) field.values(chemistry_fields[j]);
      
@@ -1141,7 +1205,7 @@ void EnzoMethodM1Closure::C_add_recombination (EnzoBlock * enzo_block, double * 
     double n_j = density_j[i]*rhounit/masses[j];
     double n_e = e_density[i]*rhounit/mH; // electrons have same mass as protons in code units
 
-    *C += b*(alpha_A-alpha_B) * n_j*n_e / Cunit;
+    C += b*(alpha_A-alpha_B) * n_j*n_e / Cunit;
 
 #ifdef DEBUG_RECOMBINATION
     CkPrintf("MethodM1Closure::C_add_recombination -- j=%d; alpha_A = %1.3e; alpha_B = %1.3e; n_j = %1.3e; n_e = %1.3e; b_boolean = %d\n", j, alpha_A, alpha_B, n_j, n_e, b);
@@ -1149,13 +1213,15 @@ void EnzoMethodM1Closure::C_add_recombination (EnzoBlock * enzo_block, double * 
   }
 
 #ifdef DEBUG_RECOMBINATION
-  CkPrintf("MethodM1Closure::C_add_recombination -- [E_lower, E_upper] = [%.2f, %.2f]; dN_dt[i] = %1.3e; dt = %1.3e\n", E_lower, E_upper, *C, enzo_block->dt);
+  CkPrintf("MethodM1Closure::C_add_recombination -- [E_lower, E_upper] = [%.2f, %.2f]; dN_dt[i] = %1.3e; dt = %1.3e\n", E_lower, E_upper, C, enzo_block->dt);
 #endif 
+
+  return C;
 }
 
 //---------------------------------
 
-void EnzoMethodM1Closure::D_add_attenuation ( EnzoBlock * enzo_block, double * D, 
+double EnzoMethodM1Closure::D_add_attenuation ( EnzoBlock * enzo_block, 
                                              double clight, int i, int igroup) throw()
 {
   // Attenuate radiation
@@ -1175,12 +1241,13 @@ void EnzoMethodM1Closure::D_add_attenuation ( EnzoBlock * enzo_block, double * D
   std::vector<double> masses = {mH,4*mH, 4*mH};
  
   Scalar<double> scalar = enzo_block->data()->scalar_double();
+  double D = 0.0;
   for (std::size_t j=0; j<chemistry_fields.size(); j++) {  
     enzo_float * density_j = (enzo_float *) field.values(chemistry_fields[j]);
     double n_j = density_j[i]*rhounit / masses[j];     
     double sigN_ij = *(scalar.value( scalar.index( sigN_string(igroup, j) )));
     
-    *D += n_j * clight*sigN_ij * tunit; // code_time^-1
+    D += n_j * clight*sigN_ij * tunit; // code_time^-1
 
     #ifdef DEBUG_ATTENUATION
       CkPrintf("[i,j]=[%d,%d]; sigN_ij=%1.2e; n_j=%1.2e; clight=%1.2e\n", igroup, j, sigN_ij, n_j, clight);
@@ -1190,7 +1257,7 @@ void EnzoMethodM1Closure::D_add_attenuation ( EnzoBlock * enzo_block, double * D
 #ifdef DEBUG_ATTENUATION
     CkPrintf("i=%d; D=%e s^-1; dt = %e\n",i, *D / tunit, enzo_block->dt*enzo_units->time());
 #endif 
- 
+  return D; 
 }
 
 //----------------------
@@ -1298,14 +1365,14 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
         double D = 0.0; // photon destruction term
 
         if (enzo_config->method_m1_closure_attenuation) {
-          D_add_attenuation(enzo_block, &D, clight_cgs, i, igroup);
+          D = D_add_attenuation(enzo_block, clight_cgs, i, igroup);
         }
 
         if (enzo_config->method_m1_closure_recombination_radiation) {
           // update photon density due to recombinations
           // Grackle does recombination chemistry, but doesn't
           // do anything about the radiation that comes out of recombination
-          C_add_recombination(enzo_block, &C, T, i, igroup, E_lower, E_upper);
+          C = C_add_recombination(enzo_block, T, i, igroup, E_lower, E_upper);
         }
         
         // update radiation fields due to thermochemistry (see appendix A)
@@ -1529,11 +1596,6 @@ void EnzoMethodM1Closure::call_inject_photons(EnzoBlock * enzo_block) throw()
     enzo_block->refresh_start(ir_injection_, CkIndex_EnzoBlock::p_method_m1_closure_solve_transport_eqn());   
   }
   
-  //TODO: Only do global reduction once every N cycles. If not one of these cycles, just do refresh intead
-  //else {       
-  //  cello::refresh(ir_injection_)->set_active(enzo_block->is_leaf()); 
-  //  enzo_block->refresh_start(ir_injection_, CkIndex_EnzoBlock::p_method_m1_closure_solve_transport_eqn());
-  //}
 }
 
 //-----------------------------------
@@ -1680,71 +1742,4 @@ void EnzoMethodM1Closure::sum_group_fields(EnzoBlock * enzo_block) throw()
       Fz[j] += Fz_i[j];
     }    
   }
-}
-
-//======================================================================
-
-void EnzoMethodM1Closure::compute_ (Block * block) throw()
-{
-  const EnzoConfig * enzo_config = enzo::config();
-
-  Field field = block->data()->field();
-  int mx,my,mz;
-  field.dimensions(0,&mx, &my, &mz); //field dimensions, including ghost zones
-  int gx,gy,gz;
-  field.ghost_depth(0,&gx, &gy, &gz);
-
-  const int m = mx*my*mz;
-
-  EnzoBlock * enzo_block = enzo::block(block);
-
-  int N_groups = enzo_config->method_m1_closure_N_groups;
-  int N_species = 3 + enzo_config->method_m1_closure_H2_photodissociation;
-
-  if (enzo_config->method_m1_closure_thermochemistry) {
-    // compute the temperature
-    EnzoComputeTemperature compute_temperature(enzo::fluid_props(),
-                                               enzo_config->physics_cosmology);
-
-    compute_temperature.compute(enzo_block);
-  }
-
-  Scalar<double> scalar = block->data()->scalar_double();
-
-  // reset "mL" sums to zero
-  // TODO: only do this once every N cycles, where N is a parameter
-  for (int i=0; i<N_groups; i++) {
-    *(scalar.value( scalar.index( eps_string(i) + mL_string(i) ))) = 0.0;
-    *(scalar.value( scalar.index( mL_string(i) ) )) = 0.0;
-    for (int j=0; j<N_species; j++) {
-      *(scalar.value( scalar.index( sigN_string(i,j) + mL_string(i) ))) = 0.0;
-      *(scalar.value( scalar.index( sigE_string(i,j) + mL_string(i) ))) = 0.0;
-    }
-  }
-
-  // initialize deposition fields to zero
-  for (int i=0; i<N_groups; i++) {
-    std::string istring = std::to_string(i);
-    enzo_float * N_i_d = (enzo_float *) field.values("photon_density_" + istring + "_deposit");
-    for (int j=0; j<m; j++)
-    {
-      N_i_d[j] = 0.0; 
-    }
-  }
-
-  //start photon injection step
-  //This function will start the transport step after a refresh
-  this->call_inject_photons(enzo_block);
-
-#ifdef DEBUG_PRINT_GROUP_PARAMETERS
-  for (int i=0; i<N_groups; i++) {
-    for (int j=0; j<N_species; j++) {
-      CkPrintf("[i,j] = [%d,%d]; sigN = %1.2e cm^2; sigE = %1.2e cm^2; eps = %1.2e eV\n",i,j,
-               *(scalar.value( scalar.index( sigN_string(i,j) ))),
-               *(scalar.value( scalar.index( sigE_string(i,j) ))),
-               *(scalar.value( scalar.index(  eps_string(i)   ))) / enzo_constants::erg_eV);
-    }
-  }
-#endif
-
 }

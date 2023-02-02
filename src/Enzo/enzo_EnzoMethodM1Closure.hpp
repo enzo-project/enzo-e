@@ -164,13 +164,13 @@ protected: // methods
   /// user-specified stellar SED
   double get_radiation_custom(EnzoBlock * enzo_block,
              double energy, double pmass, double plum, 
-             double dt, double inv_vol, int i, int igroup) throw();
+             double dt, double inv_vol, int igroup) throw();
 
   /// computes the number-density of photons (in a give group) that emitted by
   /// a star-particle of mass `pmass` (assuming a black-body spectrum)
   double get_radiation_blackbody(EnzoBlock * enzo_block, double pmass, 
              double freq_lower, double freq_upper, double clight, 
-             double dt, double cell_volume, int i, int igroup) throw();
+             double dt, double cell_volume, int igroup) throw();
 
   /// computes the number density of star particles and deposits them on the
   /// grid
@@ -183,7 +183,7 @@ protected: // methods
                         double Q_l, double Q_lplus1,
                         double clight, double lmin, double lmax, std::string type) throw();
 
-  double compute_hll_eigenvalues(double f, double theta, double * lmin, double * lmax, double clight) throw();
+  void compute_hll_eigenvalues(double f, double theta, double * lmin, double * lmax, double clight) throw();
 
   double deltaQ_faces (double U_l, double U_lplus1, double U_lminus1, 
                        double Q_l, double Q_lplus1, double Q_lminus1,
@@ -211,7 +211,7 @@ protected: // methods
   // Interaction with matter is completely local, so don't need a refresh before this step
 
   /// computes the photon-loss term from attenuation by local gas
-  void D_add_attenuation ( EnzoBlock * enzo_block, double * D, double clight, int i, int igroup) throw(); 
+  double D_add_attenuation ( EnzoBlock * enzo_block, double clight, int i, int igroup) throw(); 
 
   /// helper function used in C_add_recombination
   double get_alpha (double T, int species, char rec_case) throw();
@@ -220,7 +220,7 @@ protected: // methods
   int get_b_boolean (double E_lower, double E_upper, int species) throw();
 
   /// computes the photon-creation term from recombination in local gas
-  void C_add_recombination (EnzoBlock * enzo_block, double * C, 
+  double C_add_recombination (EnzoBlock * enzo_block, 
                               enzo_float * T, int i, int igroup, double E_lower, double E_uppe) throw();
 
   /// Computes the photoionization cross-section of particles in a given gas
@@ -229,11 +229,6 @@ protected: // methods
 
   /// Calculates photoionization and heating rates in each cell
   void get_photoionization_and_heating_rates (EnzoBlock * enzo_block, double clight) throw();
-
-  //--------------------------
-
-  void compute_ (Block * block) throw();
-
 
 protected: // attributes
   int N_groups_;
