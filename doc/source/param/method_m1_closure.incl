@@ -62,6 +62,7 @@ Enzo-E's multigroup M1 Closure radiative transfer solver.
 :e:`Calculated photon densities for star particle radiation are multiplied by this value before being deposited onto the mesh.`
    
 ----
+
 :Parameter:  :p:`Method` : :p:`m1_closure` : :p:`courant`
 :Summary: :s:`Courant number for radiative transfer`
 :Type:    :t:`float`
