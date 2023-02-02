@@ -1179,7 +1179,7 @@ double EnzoMethodM1Closure::C_add_recombination (EnzoBlock * enzo_block,
   // this is called once for each group.
 
   Field field = enzo_block->data()->field();
-  if (! field.is_field("density")) return;
+  if (! field.is_field("density")) return 0.0;
 
   EnzoUnits * enzo_units = enzo::units();
   double rhounit = enzo_units->density();
@@ -1232,7 +1232,7 @@ double EnzoMethodM1Closure::D_add_attenuation ( EnzoBlock * enzo_block,
 
   Field field = enzo_block->data()->field();
 
-  if (! field.is_field("density")) return;
+  if (! field.is_field("density")) return 0.0;
  
   std::vector<std::string> chemistry_fields = {"HI_density", 
                                                "HeI_density", "HeII_density"};
