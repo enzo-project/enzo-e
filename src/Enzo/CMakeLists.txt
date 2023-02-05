@@ -40,11 +40,11 @@ endif()
 #=======================
 # Define Library Targets
 #=======================
+# forward declare the enzo library that is then turned into an enzo-e binary
+add_library(enzo STATIC ${SRC_FILES})
+
 add_subdirectory(EnzoRiemann) # define the riemann library
 
-
-# build an enzo library that is then turned into an enzo-e binary
-add_library(enzo STATIC ${SRC_FILES})
 # dependencies are only PUBLIC because of the way that all headers are
 # transitively included in all targets. If they weren't public, the include
 # directories would not be properly inherited
