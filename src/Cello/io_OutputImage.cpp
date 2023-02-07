@@ -704,147 +704,65 @@ void OutputImage::image_write_ () throw()
           "this method was called on a non-writer block");
   }
 
+  // fetch the pointer to the data that will be plotted
+  double* data = nullptr;
+  std::vector<double> buf(0);
+
+  if (type_is_mesh_() && type_is_data_()){
+
+    const int m  = image_size_[0]*image_size_[1];
+
+    // wasteful to allocate memory on the heap, but it's probably fine
+    buf.resize(static_cast<std::size_t>(m));
+
+    for (int i=0; i<m; i++) buf[i] = (image_data_[i] + 0.2*image_mesh_[i])/1.2;
+    data = buf.data();
+
+  } else if (type_is_data_()){
+    data = image_data_;
+  } else if (type_is_mesh_()) {
+    data = image_mesh_;
+  } else {
+    ERROR ("OutputImage::image_write_", "image_type is neither mesh nor data");
+  }
+
+  // Determine how the values get transformed (when mapping to colors)
+  pngio::ImgTransform transform = pngio::ImgTransform::none;
+  if (image_log_) {
+    transform = pngio::ImgTransform::log;
+  } else if (image_abs_) {
+    transform = pngio::ImgTransform::abs;
+  }
+
+  // prepare the min_max argument
+  std::array<double, 2>* min_max_arg = nullptr;
+  std::array<double, 2> min_max_buf_;
+  if (use_min_max_){
+    min_max_buf_[0] = min_value_;
+    min_max_buf_[1] = max_value_;
+    min_max_arg = &min_max_buf_;
+  }
+
   // determine the output path
   std::string file_name = expand_name_ (&file_name_,&file_args_);
 
+  // Out of caution, we store dir_name in a variable to avoid hypothetical
+  // lifetime issues during calls to c_str()
   std::string dir_name = directory();
-
-  // it's important to store full_path in a variable. If it were a temporary,
-  // we could encounter lifetime issues during calls to c_str()
-  std::string full_path = dir_name + "/" + file_name;
 
   // change the permission bits of the output directory so that it is:
   //   - readable/writable/executable by the owner
   //   - readable/executable by all others
-  // Note: we ALWAYS changed permission bits of the output directory BEFORE
-  // actually creating a file (even though we constructed an instance of
-  // pngwriter, earlier, it didn't actually create files on disk until later)
   if (chmod (dir_name.c_str(),0755) == -1) {
     ERROR2 ("OutputImage::image_write()",
             "chmod() return errno %d: error '%s'",
             errno,strerror(errno));
   };
 
-  // now create the instance of the PNG writer
-  TRACE_MEMORY("new png",image_size_[0]*image_size_[1]);
-  pngwriter* png = new pngwriter(image_size_[0], image_size_[1], 0,
-                                 full_path.c_str());
-
-  // Transfer data from in-memory buffer to the png-writer
-  // =====================================================
-
-  // simplified variable names
-
-  int mx = image_size_[0];
-  int my = image_size_[1];
-  int m  = mx*my;
-
-  double min = std::numeric_limits<double>::max();
-  double max = -std::numeric_limits<double>::max();
-
-  // Compute min and max
-
-  if (use_min_max_) {
-
-    min = MIN(min,min_value_);
-    max = MAX(max,max_value_);
-
-  } else {
-
-    if (image_log_) {
-      for (int i=0; i<m; i++) {
-        min = MIN(min,log(fabs(data_(i))));
-        max = MAX(max,log(fabs(data_(i))));
-      }
-    } else if (image_abs_) {
-      for (int i=0; i<m; i++) {
-        min = MIN(min,fabs(data_(i)));
-        max = MAX(max,fabs(data_(i)));
-      }
-    } else { 
-      for (int i=0; i<m; i++) {
-        min = MIN(min,data_(i));
-        max = MAX(max,data_(i));
-      }
-    }
-  }
-
-  size_t n = colormap_[0].size();
-
-  // loop over pixels (ix,iy)
-
-  for (int ix = 0; ix<mx; ix++) {
-
-    for (int iy = 0; iy<my; iy++) {
-
-      int i = ix + mx*iy;
-
-      double value = data_(i);
-
-      if (image_abs_) value = fabs(value);
-      if (image_log_) value = log(fabs(value));
-
-      double r=0.0,g=0.0,b=0.0;
-
-      if (value < min) value = min;
-      if (value > max) value = max;
-
-
-      if (min <= value && value <= max) {
-
-	// map v to lower colormap index
-	size_t k =  (n - 1)*(value - min) / (max-min);
-
-	// prevent k == colormap_[0].size()-1, which happens if value == max
-
-	if (k > n - 2) k = n-2;
-
-	// linear interpolate colormap values
-	double lo = min +  k   *(max-min)/(n-1);
-	double hi = min + (k+1)*(max-min)/(n-1);
-
-	double ratio = (value - lo) / (hi-lo);
-
-	r = (1-ratio)*colormap_[0][k] + ratio*colormap_[0][k+1];
-	g = (1-ratio)*colormap_[1][k] + ratio*colormap_[1][k+1];
-	b = (1-ratio)*colormap_[2][k] + ratio*colormap_[2][k+1];
-
-	png->plot      (ix+1, iy+1, r,g,b);
-
-      } else {
-
-	// red if out of bounds
-	png->plot(ix+1, iy+1, 1.0, 0.0, 0.0);
-
-      }
-
-      // Plot pixel
-    }
-  }
-
-
-  // close up the png file (the output data gets written to disk all at once)
-  png->close();
-  TRACE_MEMORY("delete png",image_size_[0]*image_size_[1]);
-  delete png;
-
-}
-
-//----------------------------------------------------------------------
-
-double OutputImage::data_(int index) const
-{
-  if (type_is_mesh_() && type_is_data_())
-    return (image_data_[index] + 0.2*image_mesh_[index])/1.2;
-  else if (type_is_data_())
-    return image_data_[index];
-  else  if (type_is_mesh_())
-    return image_mesh_[index];
-  else {
-    ERROR ("OutputImage::data_()",
-	   "image_type is neither mesh nor data");
-    return 0.0;
-  }
+  pngio::write(dir_name + "/" + file_name, data, 
+               image_size_[0], // = width
+               image_size_[1], // = height
+               colormap_, transform, min_max_arg);
 }
 
 //----------------------------------------------------------------------

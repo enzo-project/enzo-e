@@ -112,7 +112,10 @@ public: // virtual functions
   ///
   /// @note
   /// In general, writing a PNG file in chunks is non-trivial since the file
-  /// organizes data in full scanlines.
+  /// organizes data in full scanlines. Moreover, the fact that we need to know
+  /// the minimum and maximum values that we want to map to colors before we
+  /// write anything to disk significantly limits the contexts where it would
+  /// be useful to write the file in chunks
   virtual void open () throw()
   { /* EMPTY */ }
 
@@ -184,8 +187,6 @@ private: // functions
 		   double value, reduce_type reduce, double alpha=1.0);
   void reduce_box_filled_(double * data, int ixm, int ixp, int iym, int iyp, 
 		    double value, double alpha=1.0);
-
-  double data_(int i) const ;
 
 private: // attributes
 

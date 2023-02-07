@@ -174,8 +174,8 @@ target_link_libraries(error
 
 addCelloLib(io "")
 target_link_libraries(io
-  PUBLIC Boost::filesystem pngwriter # with minimal refactoring, we could make
-                                     # these into private dependencies
+  PUBLIC Boost::filesystem # with minimal refactoring, we could make
+                           # this into a private dependency
   PUBLIC cello_component charm_component parallel monitor performance error
          parameters disk problem compute mesh array data simulation
 )
