@@ -10,7 +10,7 @@ list(FILTER SRC_FILES EXCLUDE REGEX "PPML_QDD6")
 
 set(Cello_LIBS "cello_component;charm_component;control;disk;error;data;io;memory;mesh;monitor;parameters;parallel;performance;problem;compute;simulation;test_Unit")
 
-set(External_LIBS "pngwriter;Boost::filesystem;PNG::PNG;HDF5_C")
+set(External_LIBS "Boost::filesystem;HDF5_C")
 if (USE_GRACKLE)
   LIST(APPEND External_LIBS "Grackle::Grackle")
 endif()

@@ -158,7 +158,11 @@ target_link_libraries(data
 
 addCelloLib(disk "")
 # with minimal refactoring, we could make HDF5_C a privately linked library
-target_link_libraries(disk PUBLIC error HDF5_C)
+target_link_libraries(disk
+  PUBLIC HDF5_C
+  PRIVATE pngwriter
+  PUBLIC error
+)
 
 
 addCelloLib(error "")
