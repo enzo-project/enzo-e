@@ -52,7 +52,6 @@ OutputImage::OutputImage(int index,
   use_min_max_(use_min_max),
   min_value_(min_value),
   max_value_(max_value),
-  png_(NULL),
   image_type_(image_type),
   face_rank_(face_rank),
   image_log_(image_log),
@@ -138,12 +137,9 @@ OutputImage::OutputImage(int index,
 
 OutputImage::~OutputImage() throw ()
 {
-  TRACE_MEMORY("delete png_",image_size_[0]*image_size_[1]);
   TRACE_MEMORY("delete image_data_",image_size_[0]*image_size_[1]*sizeof(double));
   TRACE_MEMORY("delete image_mesh_",image_size_[0]*image_size_[1]*sizeof(double));
 
-  delete png_;
-  png_ = NULL;
   delete [] image_data_;
   image_data_ = NULL;
   delete [] image_mesh_;
@@ -195,9 +191,6 @@ void OutputImage::pup (PUP::er &p)
   p | max_value_;
   PUParray(p,image_size_,2);
 
-  WARNING("OutputImage::pup","skipping png");
-  // p | *png_;
-  if (p.isUnpacking()) png_ = NULL;
   p | image_type_;
   p | face_rank_;
   p | image_log_;
@@ -228,35 +221,10 @@ void OutputImage::init () throw()
 
 //----------------------------------------------------------------------
 
-void OutputImage::open () throw()
-{
-  // Open file if writing a single block
-
-  if (is_writer()) {
-
-    std::string file_name = expand_name_ (&file_name_,&file_args_);
-
-    std::string dir_name = directory();
-
-    // Create png object
-    Monitor::instance()->print ("Output","writing image file %s",
-				(dir_name + "/" + file_name).c_str());
-    png_create_(dir_name + "/" + file_name);
-    if (chmod (dir_name.c_str(),0755) == -1) {
-      ERROR2 ("OutputImage::open()",
-	      "chmod() return errno %d: error '%s'",
-	      errno,strerror(errno));
-    };
-  }
-}
-
-//----------------------------------------------------------------------
-
 void OutputImage::close () throw()
 {
   if (is_writer()) image_write_();
   image_close_();
-  png_close_();
 }
 
 //----------------------------------------------------------------------
@@ -690,30 +658,6 @@ bool OutputImage::is_active_ (const Block * block) const
 
 //----------------------------------------------------------------------
 
-void OutputImage::png_create_ (std::string filename) throw()
-{
-  if (is_writer()) {
-    const char * file_name = strdup(filename.c_str());
-    TRACE_MEMORY("new png_",image_size_[0]*image_size_[1]);
-    png_ = new pngwriter(image_size_[0], image_size_[1],0,file_name);
-    free ((void *)file_name);
-  }
-}
-
-//----------------------------------------------------------------------
-
-void OutputImage::png_close_ () throw()
-{
-  if (is_writer()) {
-    png_->close();
-    TRACE_MEMORY("delete png_",image_size_[0]*image_size_[1]);
-    delete png_;
-    png_ = 0;
-  }
-}
-
-//----------------------------------------------------------------------
-
 void OutputImage::image_create_ () throw()
 {
   ASSERT("OutputImage::image_create_",
@@ -754,6 +698,41 @@ void OutputImage::image_create_ () throw()
 
 void OutputImage::image_write_ () throw()
 {
+
+  if (!is_writer()){
+    ERROR("OutputImage::image_write_()",
+          "this method was called on a non-writer block");
+  }
+
+  // determine the output path
+  std::string file_name = expand_name_ (&file_name_,&file_args_);
+
+  std::string dir_name = directory();
+
+  // it's important to store full_path in a variable. If it were a temporary,
+  // we could encounter lifetime issues during calls to c_str()
+  std::string full_path = dir_name + "/" + file_name;
+
+  // change the permission bits of the output directory so that it is:
+  //   - readable/writable/executable by the owner
+  //   - readable/executable by all others
+  // Note: we ALWAYS changed permission bits of the output directory BEFORE
+  // actually creating a file (even though we constructed an instance of
+  // pngwriter, earlier, it didn't actually create files on disk until later)
+  if (chmod (dir_name.c_str(),0755) == -1) {
+    ERROR2 ("OutputImage::image_write()",
+            "chmod() return errno %d: error '%s'",
+            errno,strerror(errno));
+  };
+
+  // now create the instance of the PNG writer
+  TRACE_MEMORY("new png",image_size_[0]*image_size_[1]);
+  pngwriter* png = new pngwriter(image_size_[0], image_size_[1], 0,
+                                 full_path.c_str());
+
+  // Transfer data from in-memory buffer to the png-writer
+  // =====================================================
+
   // simplified variable names
 
   int mx = image_size_[0];
@@ -830,18 +809,24 @@ void OutputImage::image_write_ () throw()
 	g = (1-ratio)*colormap_[1][k] + ratio*colormap_[1][k+1];
 	b = (1-ratio)*colormap_[2][k] + ratio*colormap_[2][k+1];
 
-	png_->plot      (ix+1, iy+1, r,g,b);
+	png->plot      (ix+1, iy+1, r,g,b);
 
       } else {
 
 	// red if out of bounds
-	png_->plot(ix+1, iy+1, 1.0, 0.0, 0.0);
+	png->plot(ix+1, iy+1, 1.0, 0.0, 0.0);
 
       }
 
       // Plot pixel
     }
   }
+
+
+  // close up the png file (the output data gets written to disk all at once)
+  png->close();
+  TRACE_MEMORY("delete png",image_size_[0]*image_size_[1]);
+  delete png;
 
 }
 
