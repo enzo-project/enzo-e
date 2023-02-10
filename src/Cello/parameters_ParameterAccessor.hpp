@@ -25,7 +25,7 @@ class ParameterAccessor {
   ///        (e.g. deprecating a parameter), exceptions need to be made. Thus,
   ///        an "escape-hatch" is provided to directly access the wrapped
   ///        Parameters object.
-  ///     2. providing an explicit/transparent way to alias the root-path's
+  ///     2. providing an explicit way to signal that  root-path's
   ///        name. This can be useful when multiple instances of the same class
   ///        (e.g. a Method class), but each instance has different
   ///        configurations.
@@ -46,9 +46,18 @@ class ParameterAccessor {
 public:
 
   /// construct a new ParameterAccessor object
-  ParameterAccessor(Parameters &p, const std::string& root_parameter_path);
+  ParameterAccessor(Parameters &p, const std::string& root_parameter_path)
+    : wrapped_p_(p),
+      root_parameter_path_(root_parameter_path)
+  {
+    ASSERT("ParameterAccessor::ParameterAccessor",
+           "root_parameter_path must not have a trailing colon",
+           root_parameter_path.back() != ':');
+  }
 
   // default implementations of copy and move constructors
+  // (maybe we should delete these/make the private to prevent users from
+  // storing them)
   ParameterAccessor(const ParameterAccessor&) = default;
   ParameterAccessor(ParameterAccessor&&) = default;
 
@@ -58,77 +67,100 @@ public:
   ParameterAccessor& operator=(const ParameterAccessor&) = delete;
   ParameterAccessor& operator=(ParameterAccessor&&) = delete;
 
+  /// query the root parameter path
   const std::string& get_root_parpath() const noexcept
-  {return root_parameter_path;}
+  {return root_parameter_path_;}
 
-  void set_temporary_alias_root_path(const std::string& path);
+  int value (std::string s, int deflt) noexcept
+  { return value_integer(s,deflt); }
+  double value (std::string s, double deflt) noexcept
+  { return value_float(s,deflt); }
+  bool value (std::string s, bool deflt) noexcept
+  { return value_logical(s, deflt); }
+  std::string value (std::string s, std::string deflt) noexcept
+  { return value_string(s, deflt); }
 
-
-  int value (std::string s, int deflt) noexcept;
-  double value (std::string s, double deflt) noexcept;
-  bool value (std::string s, bool deflt) throw();
-  std::string value (std::string s, std::string deflt) throw();
-
-  int value (int i,std::string s, int deflt) throw()
+  int value (int i,std::string s, int deflt) noexcept
   { return list_value_integer(i,s,deflt); }
-  double value (int i,std::string s, double deflt) throw()
+  double value (int i,std::string s, double deflt) noexcept
   { return list_value_float(i,s,deflt); }
-  bool value (int i,std::string s, bool deflt) throw()
+  bool value (int i,std::string s, bool deflt) noexcept
   { return list_value_logical(i,s,deflt); }
-  std::string value (int i,std::string s, const char * deflt) throw()
+  std::string value (int i,std::string s, const char * deflt) noexcept
   { return list_value_string(i,s,deflt); }
-  std::string value (int i,std::string s, std::string deflt) throw()
+  std::string value (int i,std::string s, std::string deflt) noexcept
   { return list_value_string(i,s,deflt); }
 
+  /// Return the type of the given parameter
+  parameter_type type(std::string param) noexcept;
+
+  /// Return the Param pointer for the specified parameter
+  Param * param (std::string parameter);
 
   /// Return the integer-valued parameter
-  int value_integer (std::string , int deflt = 0) throw();
+  int value_integer (std::string s, int deflt = 0) noexcept;
   /// Return the floating-point valued parameter
-  double value_float (std::string, double deflt = 0.0) throw();
+  double value_float (std::string s, double deflt = 0.0) noexcept;
   /// Return the logical-valued parameter
-  bool value_logical (std::string , bool deflt = false) throw();
+  bool value_logical (std::string s, bool deflt = false) noexcept;
   /// Return the string-valued parameter
-  std::string value_string ( std::string , std::string deflt = "") throw();
-
-
+  std::string value_string ( std::string s, std::string deflt = "") noexcept;
 
   /// Return the length of the list parameter
   int list_length (std::string parameter);
   /// Access an integer list element
-  int list_value_integer (int , std::string , int deflt = 0) throw();
+  int list_value_integer (int i, std::string s, int deflt = 0) noexcept;
   /// Access a floating point list element
-  double list_value_float (int , std::string , double deflt = 0.0) throw();
+  double list_value_float (int i, std::string s, double deflt = 0.0) noexcept;
   /// Access a logical list element
-  bool list_value_logical (int ,std::string , bool deflt = false) throw();
+  bool list_value_logical (int i, std::string s, bool deflt = false) noexcept;
   /// Access a string list element
-  std::string list_value_string (int,std::string, std::string d= "") throw();
-  
+  std::string list_value_string (int, std::string, std::string d="") noexcept;
+
+  /// Return the full name of the parameter (including the root parameter path)
+  std::string full_name(const std::string& parameter) const noexcept
+  { return root_parameter_path_ + ":" + parameter; }
 
   /// Only use in case of emergencies
-  Parameters& wrapped_Parameters_ref() noexcept { return wrapped_p; }
+  Parameters& wrapped_Parameters_ref() noexcept { return wrapped_p_; }
+
+  /// Returns a vector holding the names of all leaf parameters that share the
+  /// root parameter path encapsulated by this object
+  std::vector<std::string> leaf_parameter_names() const noexcept
+  { return wrapped_p_.leaf_parameter_names(root_parameter_path_); }
 
 private:
 
+  std::vector<std::string> pop_wrapped_p_groups_()
+  {
+    const int n = wrapped_p_.group_depth();
+    std::vector<std::string> grps(n);
+    for (int i = 0; i < n; i++) { grps[i] = wrapped_p_.group(i); }
+    wrapped_p_.group_clear();
+    return grps;
+  }
+
+  void restore_wrapped_p_groups_(const std::vector<std::string>& groups)
+  {
+    wrapped_p_.group_clear();
+    for (const std::string& grp : groups) { wrapped_p_.group_push(grp); }
+  }
+
+private: // attributes
   /// the wrapped Parameters object
   ///
   /// the Parameters object is implicitly assumed to outlive the instance
   /// holding this reference
-  Parameters &wrapped_p;
+  Parameters &wrapped_p_;
 
   /// The associated root parameter path.
   ///
-  /// This will never have a trailing colon or be empty.
+  /// This will never have a trailing colon.
   ///
   /// An invariant of this class is that this will NOT change. If we're ever
   /// tempted to allow this attribute to change, we should prefer creation of a
   /// new ParameterAccessor instance (since they are light)
-  const std::string root_parameter_path;
-
-  /// This is a user-configurable attribute that serves as an alias in their
-  /// specified paths for the root_parameter_path.
-  ///
-  /// An empty string means that it's unset. This never has a trailing colon
-  std::string alias_root_path;
+  const std::string root_parameter_path_;
 };
 
 #endif /* PARAMETERS_PARAMETER_ACCESSOR_HPP */
