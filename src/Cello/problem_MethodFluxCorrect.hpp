@@ -18,6 +18,9 @@ class MethodFluxCorrect : public Method
 
 public: // interface
 
+  /// factory method
+  static MethodFluxCorrect* from_parameters(ParameterAccessor p);
+
   /// Create a new MethodFluxCorrect
   MethodFluxCorrect
   (const std::string group, bool enable,

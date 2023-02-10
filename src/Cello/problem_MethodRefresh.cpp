@@ -11,6 +11,34 @@
 
 //----------------------------------------------------------------------
 
+MethodRefresh* MethodRefresh::from_parameters(ParameterAccessor p)
+{
+  // Read the field list
+  int n_fields = p.list_length("field_list");
+  std::vector<std::string> field_list(n_fields);
+  for (int i=0; i<n_fields; i++) {
+    field_list[i] = p.list_value_string(i, "field_list");
+  }
+
+  // Read the particle list
+  int n_particles = p.list_length("particle_list");
+  std::vector<std::string> particle_list(n_particles);
+  for (int i=0; i<n_particles; i++) {
+    particle_list[i] = p.list_value_string(i,"particle_list");
+  }
+
+  int ghost_depth = p.value_integer("ghost_depth", 0);
+  int min_face_rank = p.value_integer
+    ("Method:refresh:min_face_rank",0); // default 0 all faces
+  bool all_fields = p.value_logical("all_fields", false);
+  bool all_particles = p.value_logical("all_particles", false);
+
+  return new MethodRefresh(field_list, particle_list, ghost_depth,
+                           min_face_rank, all_fields, all_particles);
+}
+
+//----------------------------------------------------------------------
+
 MethodRefresh::MethodRefresh
 (std::vector< std::string > field_list,
  std::vector< std::string > particle_list,

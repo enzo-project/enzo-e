@@ -11,6 +11,43 @@
 
 //----------------------------------------------------------------------
 
+MethodFluxCorrect* MethodFluxCorrect::from_parameters(ParameterAccessor p)
+{
+  std::vector<std::string> min_digits_fields;
+  std::vector<double> min_digits_values;
+
+  std::string min_digits_name = "min_digits";
+  if (p.type(min_digits_name) == parameter_float){
+    // backwards compatibility
+    min_digits_fields = {"density"};
+    min_digits_values = {p.value_float(min_digits_name, 0.0)};
+  } else if (p.type(min_digits_name) == parameter_list){
+    // load pairs of fields and min_digits
+    const int list_length = p.list_length(min_digits_name);
+
+    std::string root_name = p.get_root_parpath();
+    ASSERT2("MethodFluxCorrect::from_parameters",
+            "The list assigned to %s:%s must have a non-negative, even length",
+            root_name.c_str(), min_digits_name.c_str(),
+            (list_length >= 0) && (list_length % 2 == 0));
+
+    for (int i =0; i < list_length; i+=2){
+      min_digits_fields.push_back(p.list_value_string(i, min_digits_name));
+      min_digits_values.push_back(p.list_value_float(i+1,min_digits_name,0.0));
+    }
+  } else if (p.param(min_digits_name) != nullptr){
+    ERROR1("MethodRefresh::from_parameters", "%s has an invalid type",
+           min_digits_name.c_str());
+  }
+
+  return new MethodFluxCorrect(p.value_string("group","conserved"),
+                               p.value_logical("enable",true),
+                               min_digits_fields,
+                               min_digits_values);
+}
+
+//----------------------------------------------------------------------
+
 MethodFluxCorrect::MethodFluxCorrect
 (std::string group, bool enable,
  const std::vector<std::string>& min_digits_fields,

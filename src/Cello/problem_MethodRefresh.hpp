@@ -18,6 +18,9 @@ class MethodRefresh : public Method
 
 public: // interface
 
+  /// factory method
+  static MethodRefresh* from_parameters(ParameterAccessor p);
+
   /// Create a new MethodRefresh
   MethodRefresh
   (std::vector< std::string > field_list,

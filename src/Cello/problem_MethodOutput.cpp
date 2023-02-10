@@ -12,6 +12,54 @@
 // #define TRACE_OUTPUT
 
 // #define BYPASS_BLOCK_TRACE
+
+MethodOutput* MethodOutput::from_parameters(const Factory * factory,
+                                            ParameterAccessor &p)
+{
+  using str_vec_t = std::vector<std::string>;
+
+  // TODO: add a method to ParameterAccessor to encapsulate the following
+  auto read_strlist = [&p](std::string p_name) {
+    int len = p.list_length(p_name);
+    str_vec_t out(len);
+    for (int i=0; i<len; i++) { out[i] = p.list_value_string(i, p_name, ""); }
+    return out;
+  };
+
+  auto read_path_param = [&p, &read_strlist](std::string p_name) -> str_vec_t {
+    const std::string root_path = p.get_root_parpath();
+    if (p.type(p_name) == parameter_string) {
+      return { p.value_string(p_name,"") };
+    } else if (p.type(p_name) == parameter_list) {
+      str_vec_t out = read_strlist(p_name);
+      if (out.size() == 0){
+        ERROR2("MethodOutput::from_parameters", "%s:%s is empty",
+               root_path.c_str(), p_name.c_str());
+      }
+      return out;
+    } else {
+      ERROR2("MethodOutput::from_parameters",
+             "%s:%s must be a string or a list of strings",
+             root_path.c_str(), p_name.c_str());
+    }
+  };
+
+  return new MethodOutput
+    (factory,
+     read_path_param("file_name"),
+     read_path_param("path_name"),
+     read_strlist("field_list"),
+     read_strlist("particle_list"),
+     p.value_integer("ghost_depth",0),
+     p.value_integer("min_face_rank",0), // default 0 all faces
+     p.value_logical("all_fields", false),
+     p.value_logical("all_particles", false),
+     p.value_logical("all_blocks", true),
+     p.list_value_integer(0,"blocking",1),
+     p.list_value_integer(1,"blocking",1),
+     p.list_value_integer(2,"blocking",1));
+}
+
 //----------------------------------------------------------------------
 
 MethodOutput::MethodOutput
