@@ -113,12 +113,6 @@ public: // interface
    const CelloArray<enzo_float, 3> &pressure,
    const int stale_depth, const bool ignore_grackle = false) const = 0;
 
-  /// returns the density floor
-  virtual enzo_float get_density_floor() const = 0;
-
-  /// returns the thermal pressure floor
-  virtual enzo_float get_pressure_floor() const = 0;
-
   /// applies the pressure floor to the specific total energy field. If using
   /// the dual-energy formalism, it is also applied to the internal energy
   /// and it synchronize the internal energy and total energy fields. If the

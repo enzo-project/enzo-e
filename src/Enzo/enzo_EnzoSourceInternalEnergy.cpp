@@ -69,7 +69,8 @@ void EnzoSourceInternalEnergy::calculate_source
     (vel, full_ax, full_ax, CSlice(1, nullptr));
 
   // in the original flux_hll.F the floor was set to tiny (a small number)
-  enzo_float p_floor = eos->get_pressure_floor();
+  const enzo_float p_floor =
+    enzo::fluid_props()->fluid_floor_config().pressure();
 
   enzo_float gm1 = eos->get_gamma() - 1.;
 

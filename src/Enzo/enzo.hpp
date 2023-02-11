@@ -45,36 +45,37 @@
 // Component class includes
 //----------------------------------------------------------------------
 
-#include "_enzo.hpp"
-
 class CProxy_EnzoBlock;
+class EnzoBlock;
 class EnzoConfig;
 class EnzoFactory;
-class EnzoPhysicsCosmology;
 class EnzoProblem;
 class EnzoSimulation;
 class EnzoUnits;
 
-/// Namespace for Enzo global constants and accessor functions
+class EnzoPhysicsCosmology;
+class EnzoPhysicsFluidProps;
+class EnzoMethodGrackle;
+
+/// Namespace for Enzo global accessor functions
 namespace enzo {
 
-
+  CProxy_EnzoBlock          block_array();
+  EnzoBlock *               block ( Block * block);
   const EnzoConfig *        config();
   const EnzoFactory *       factory();
   EnzoProblem *             problem();
   EnzoSimulation *          simulation();
+  EnzoUnits *               units();
+
   EnzoPhysicsCosmology *    cosmology();
   EnzoPhysicsFluidProps *   fluid_props();
-
   const EnzoMethodGrackle * grackle_method();
-
-  CProxy_EnzoBlock          block_array();
-  EnzoBlock *               block ( Block * block);
-  EnzoPhysicsCosmology *    cosmology();
-  EnzoProblem *             problem();
-  EnzoSimulation *          simulation();
-  EnzoUnits *               units();
 }
+
+// this include statement must follow the above function declarations, so that
+// they can be used within header files
+#include "_enzo.hpp"
 
 extern CProxy_EnzoSimulation proxy_enzo_simulation;
 extern CProxy_IoEnzoWriter proxy_io_enzo_writer;

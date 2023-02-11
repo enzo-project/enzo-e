@@ -189,8 +189,9 @@ void EnzoIntegrationQuanUpdate::update_quantities
   update_passive_scalars_(initial_integration_map, dUcons_map,
                           out_integration_map, stale_depth, passive_list);
 
-  // For now, not having density floor affect momentum or total energy density
-  enzo_float density_floor = eos->get_density_floor();
+  // For now, density floor doesn't affect momentum or total energy density
+  const enzo_float density_floor =
+    enzo::fluid_props()->fluid_floor_config().density();
 
   const std::vector<EFlt3DArray> cur_prim = load_integration_quan_
     (initial_integration_map, stale_depth);

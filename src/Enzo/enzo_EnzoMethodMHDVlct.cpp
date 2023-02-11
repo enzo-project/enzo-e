@@ -57,10 +57,7 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   // Initialize equation of state (check the validity of quantity floors)
   enzo_float de_eta = 0.0;
   bool dual_energy_formalism = de_config.modern_formulation(&de_eta);
-  enzo_float density_floor = fluid_floor_config.density();
-  enzo_float pressure_floor = fluid_floor_config.pressure();
-  eos_ = new EnzoEOSIdeal(fluid_props->gamma(), density_floor, pressure_floor,
-			  dual_energy_formalism, de_eta);
+  eos_ = new EnzoEOSIdeal(fluid_props->gamma(), dual_energy_formalism, de_eta);
 
 #ifdef CONFIG_USE_GRACKLE
   if (enzo::config()->method_grackle_use_grackle){
@@ -601,7 +598,7 @@ void EnzoMethodMHDVlct::compute_flux_
 
   // First, reconstruct the left and right interface values
   reconstructor.reconstruct_interface(primitive_map, priml_map, primr_map,
-				      dim, eos_, stale_depth, passive_list);
+				      dim, stale_depth, passive_list);
 
   // We temporarily increment the stale_depth for the rest of this calculation
   // here. We can't fully increment otherwise it will screw up the

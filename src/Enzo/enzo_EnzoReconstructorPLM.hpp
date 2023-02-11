@@ -165,8 +165,8 @@ public: // interface
 
   void reconstruct_interface
   (const EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
-   EnzoEFltArrayMap &primr_map, const int dim, const EnzoEquationOfState *eos,
-   const int stale_depth, const str_vec_t& passive_list);
+   EnzoEFltArrayMap &primr_map, const int dim, const int stale_depth,
+   const str_vec_t& passive_list);
 
   int total_staling_rate()
   { return 2; }
@@ -184,8 +184,8 @@ private:
 template <class Limiter>
 void EnzoReconstructorPLM<Limiter>::reconstruct_interface
 (const EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
- EnzoEFltArrayMap &primr_map, const int dim, const EnzoEquationOfState *eos,
- const int stale_depth, const str_vec_t& passive_list)
+ EnzoEFltArrayMap &primr_map, const int dim,  const int stale_depth,
+ const str_vec_t& passive_list)
 {
   EnzoPermutedCoordinates coord(dim);
   Limiter limiter_func = Limiter();
@@ -253,10 +253,10 @@ void EnzoReconstructorPLM<Limiter>::reconstruct_interface
     enzo_float prim_floor = 0;
     bool use_floor = false;
     if (key == "density"){
-      prim_floor = eos->get_density_floor();
+      prim_floor = enzo::fluid_props()->fluid_floor_config().density();
       use_floor=true;
     } else if (key == "pressure"){
-      prim_floor = eos->get_pressure_floor();
+      prim_floor = enzo::fluid_props()->fluid_floor_config().pressure();
       use_floor=true;
     }
     fn(key, use_floor, prim_floor);

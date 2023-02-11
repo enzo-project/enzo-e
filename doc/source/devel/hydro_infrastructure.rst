@@ -378,18 +378,6 @@ reasonable value for barotropic equations of state.
 
 .. code-block:: c++
 
-   enzo_float get_density_floor();
-
-Returns the density floor.
-
-.. code-block:: c++
-
-   enzo_float get_pressure_floor();
-
-Returns the thermal pressure floor.
-
-.. code-block:: c++
-
    apply_floor_to_energy_and_sync(EnzoEFltArrayMap &integration_map,
                                   int stale_depth);
 
@@ -481,8 +469,8 @@ The main interface function provided by this class is:
 
     void reconstruct_interface
       (const EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
-       EnzoEFltArrayMap &primr_map, int dim, EnzoEquationOfState *eos,
-       int stale_depth, const std::vector<std::string>& passive_list);
+       EnzoEFltArrayMap &primr_map, int dim, int stale_depth,
+       const std::vector<std::string>& passive_list);
 
 This function takes the cell-centered primtive quantities (specified
 by the contents of ``prim_map``) and computes the left and right

@@ -17,8 +17,6 @@ void EnzoEOSIdeal::pup (PUP::er &p)
   // NOTE: change this function whenever attributes change
   PUP::able::pup(p);
   p|gamma_;
-  p|density_floor_;
-  p|pressure_floor_;
   p|dual_energy_formalism_;
   p|dual_energy_formalism_eta_;
 }
@@ -170,7 +168,8 @@ void EnzoEOSIdeal::apply_floor_to_energy_and_sync
     RdOnlyEFlt3DArray(integration_map.at("bfield_z")) : RdOnlyEFlt3DArray();
 
   float ggm1 = get_gamma()*(get_gamma() - 1.);
-  enzo_float pressure_floor = get_pressure_floor();
+  enzo_float pressure_floor =
+    enzo::fluid_props()->fluid_floor_config().pressure();
   enzo_float inv_gm1 = 1./(get_gamma()-1.);
 
   // a requirement for an element of the internal energy field, cur_eint,
