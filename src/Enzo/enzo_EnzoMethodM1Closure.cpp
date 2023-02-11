@@ -595,7 +595,6 @@ void EnzoMethodM1Closure::inject_photons ( EnzoBlock * enzo_block, int igroup ) 
         dN = get_radiation_custom(enzo_block, E_mean, pmass_cgs, plum_cgs, 
                                   dt, 1/cell_volume, igroup);
       }
-     
       dN *= f_esc / Nunit; // put back into code units
     
       // CIC deposit with cloud radius of 1 cell width
@@ -1255,7 +1254,7 @@ double EnzoMethodM1Closure::D_add_attenuation ( EnzoBlock * enzo_block,
   }
 
 #ifdef DEBUG_ATTENUATION
-    CkPrintf("i=%d; D=%e s^-1; dt = %e\n",i, *D / tunit, enzo_block->dt*enzo_units->time());
+    CkPrintf("i=%d; D=%e s^-1; dt = %e\n",i, D / tunit, enzo_block->dt*enzo_units->time());
 #endif 
   return D; 
 }
@@ -1278,7 +1277,6 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
   int gx,gy,gz;
   field.ghost_depth(0,&gx, &gy, &gz);
    
- 
   double xm,ym,zm;
   double xp,yp,zp;
   enzo_block->lower(&xm,&ym,&zm);
@@ -1349,13 +1347,13 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
         Fxnew[i] += Fx_update;
         Fynew[i] += Fy_update;
         Fznew[i] += Fz_update;
-         
+
         // now get updated photon densities
         Nnew[i] = std::max(Nnew[i] + N_update, Nmin);
 
 
       #ifdef DEBUG_TRANSPORT
-        CkPrintf("i = %d; N_update = %f; Fx_update = %f; hx = %f; dt = %f \n", i, N_update, Fx_update, hx, dt);
+        CkPrintf("i = %d; N_update = %f; Fx_update = %f; Nnew[i] = %f; hx = %f; dt = %f \n", i, N_update, Fx_update, Nnew[i], hx, dt);
       #endif
 
 

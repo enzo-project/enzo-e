@@ -32,10 +32,10 @@
          HeI_density = 0.0;
          density = 0.0;
          e_density = 0.0;
-         position = [ 0.45000000000000000, 0.5000000000000000, 0.5000000000000000 ];
+         position = [ 0.40000000000000000, 0.40000000000000000, 0.40000000000000000 ];
          star_mass = 100.0000000000000;
          temperature = 100.0000000000000;
-         luminosity = 1e36;
+         luminosity = 1e10;
      };
 
      value {
@@ -60,7 +60,7 @@
  }
 
  Mesh {
-     root_blocks = [ 4, 4, 4 ];
+     root_blocks = [ 2, 2, 2 ];
      root_rank = 3;
      root_size = [ 64, 64, 64 ];
  }
@@ -69,7 +69,7 @@
      list = [ "m1_closure" ];
      m1_closure {
          N_groups = 2;
-         particle_luminosity = 1e36;
+         particle_luminosity = 1e10;
          SED = [ 0.6, 0.4 ];
          energy_lower = [ 13.60000000000000, 24.5900000000000 ];
          energy_upper = [ 24.59000000000000, 54.4200000000000 ];
@@ -81,6 +81,7 @@
          cross_section_calculator = "custom";
          sigmaN = [0.0,0.0,0.0, 0.0,0.0,0.0];
          sigmaE = [0.0,0.0,0.0, 0.0,0.0,0.0];
+         min_photon_density = 0.0;
      };
  }
 
@@ -168,8 +169,8 @@
      cycle = 100;
  }
 
- Units {
-     density = 1.674000000000000e-24;
-     length = 4.073520000000000e+22 / 4.0; #3.3 kpc
-     time = 31540000000000.00;
- }
+# Units {
+#     density = 1.674000000000000e-24;
+#     length = 4.073520000000000e+22 / 4.0; #3.3 kpc
+#     time = 31540000000000.00;
+# }

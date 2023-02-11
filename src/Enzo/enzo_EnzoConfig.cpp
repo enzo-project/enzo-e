@@ -265,7 +265,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_m1_closure_temperature_blackbody(0.0),
   method_m1_closure_particle_luminosity(-1.0), // Set emission rate for star particles
   method_m1_closure_SED(), // supply list of emission rate fraction for all groups
-  method_m1_closure_min_photon_density(1e-16),
+  method_m1_closure_min_photon_density(0.0),
   method_m1_closure_attenuation(true),
   method_m1_closure_thermochemistry(true),
   method_m1_closure_recombination_radiation(false),
@@ -1846,7 +1846,7 @@ void EnzoConfig::read_method_m1_closure_(Parameters * p)
     ("Method:m1_closure:particle_luminosity",-1.0);
 
   method_m1_closure_min_photon_density = p->value_float
-    ("Method:m1_closure:min_photon_density",1e-16);
+    ("Method:m1_closure:min_photon_density",0.0);
 
   method_m1_closure_attenuation = p->value_logical
     ("Method:m1_closure:attenuation", true);
