@@ -112,7 +112,7 @@ Enzo-E's multigroup M1 Closure radiative transfer solver.
 :Default: :d:`"hll_evals.list"`
 :Scope:     :c:`Enzo`
 
-:e:`Path to text file containing table of eigenvalues`
+:e:`Path to text file containing table of eigenvalues. A table with eiganvalues calculated ub` `Gonzalez, Audut, & Huynh (2007) <https://www.aanda.org/articles/aa/abs/2007/11/aa5486-06/aa5486-06.html>`_ is provided in the ``input/RadiativeTransfer`` directory.
    
 ----
 
