@@ -119,10 +119,10 @@ Enzo-E's multigroup M1 Closure radiative transfer solver.
 :Parameter:  :p:`Method` : :p:`m1_closure` : :p:`min_photon_density`
 :Summary: :s:`Minimum photon density in CGS units`
 :Type:    :t:`float`
-:Default: :d:`1e-16`
+:Default: :d:`0.0`
 :Scope:     :c:`Enzo`
 
-:e:`Minimum photon density in units of` :math:`\mathrm{cm}^{-3}`. For technical reasons, this must be > 0.
+:e:`Minimum photon density in units of` :math:`\mathrm{cm}^{-3}`.
  
 ----
 
