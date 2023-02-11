@@ -74,13 +74,6 @@ namespace enzo {
   EnzoProblem *             problem();
   EnzoSimulation *          simulation();
   EnzoUnits *               units();
-
-  /// Returns whether the dual energy formalism is in use.
-  ///
-  /// @param default_ret[in] The value to return if no hydro methods are used.
-  ///     The default value is false.
-  bool uses_dual_energy_formalism(bool default_ret = false);
-
 }
 
 extern CProxy_EnzoSimulation proxy_enzo_simulation;
