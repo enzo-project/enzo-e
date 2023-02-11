@@ -166,7 +166,7 @@
  }
 
  Stopping {
-     cycle = 100;
+     cycle = 20;
  }
 
 # Units {
