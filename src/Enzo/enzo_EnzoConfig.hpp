@@ -38,54 +38,62 @@ inline void operator|(PUP::er &p, chemistry_data &c){
     c.grackle_data_file = NULL;
   }
 
-  // [sorted]
-  p | c.bremsstrahlung_cooling_rates;
-  p | c.CaseBRecombination;
-  p | c.cie_cooling;
-  p | c.cloudy_electron_fraction_factor;
   p | c.cmb_temperature_floor;
-  p | c.collisional_excitation_rates;
-  p | c.collisional_ionisation_rates;
-  p | c.Compton_xray_heating;
-  p | c.DeuteriumToHydrogenRatio;
-  p | c.DustTemperatureEnd;
-  p | c.DustTemperatureStart;
   p | c.Gamma;
+  p | c.h2_on_dust;
+  p | c.use_dust_density_field;
+  p | c.dust_recombination_cooling;
+  p | c.photoelectric_heating;
+  p | c.photoelectric_heating_rate;
+  p | c.use_isrf_field;
+  p | c.interstellar_radiation_field;
+  p | c.use_volumetric_heating_rate;
+  p | c.use_specific_heating_rate;
+  p | c.three_body_rate;
+  p | c.cie_cooling;
+  p | c.h2_optical_depth_approximation;
+  p | c.ih2co;
+  p | c.ipiht;
+  p | c.HydrogenFractionByMass;
+  p | c.DeuteriumToHydrogenRatio;
+  p | c.SolarMetalFractionByMass;
+  p | c.local_dust_to_gas_ratio;
+  p | c.NumberOfTemperatureBins;
+  p | c.CaseBRecombination;
+  p | c.TemperatureStart;
+  p | c.TemperatureEnd;
+  p | c.NumberOfDustTemperatureBins;
+  p | c.DustTemperatureStart;
+  p | c.DustTemperatureEnd;
+  p | c.Compton_xray_heating;
+  p | c.LWbackground_sawtooth_suppression;
+  p | c.LWbackground_intensity;
+  p | c.UVbackground_redshift_on;
+  p | c.UVbackground_redshift_off;
+  p | c.UVbackground_redshift_fullon;
+  p | c.UVbackground_redshift_drop;
+  p | c.cloudy_electron_fraction_factor;
+  p | c.use_radiative_transfer;
+  p | c.radiative_transfer_coupled_rate_solver;
+  p | c.radiative_transfer_intermediate_step;
+  p | c.radiative_transfer_hydrogen_only;
+  p | c.self_shielding_method;
+  p | c.H2_self_shielding;
+  p | c.H2_custom_shielding;
   p | c.h2_charge_exchange_rate;
   p | c.h2_dust_rate;
   p | c.h2_h_cooling_rate;
-  p | c.h2_on_dust;
-  p | c.h2_optical_depth_approximation;
-  p | c.H2_self_shielding;
-  p | c.HydrogenFractionByMass;
-  p | c.ih2co;
-  p | c.interstellar_radiation_field;
-  p | c.ipiht;
-  p | c.local_dust_to_gas_ratio;
-  p | c.LWbackground_intensity;
-  p | c.LWbackground_sawtooth_suppression;
-  p | c.NumberOfDustTemperatureBins;
-  p | c.NumberOfTemperatureBins;
-  p | c.photoelectric_heating;
-  p | c.photoelectric_heating_rate;
-  p | c.radiative_transfer_coupled_rate_solver;
-  p | c.radiative_transfer_hydrogen_only;
-  p | c.radiative_transfer_intermediate_step;
+  p | c.collisional_excitation_rates;
+  p | c.collisional_ionisation_rates;
   p | c.recombination_cooling_rates;
-  p | c.self_shielding_method;
-  p | c.SolarMetalFractionByMass;
-  p | c.TemperatureEnd;
-  p | c.TemperatureStart;
-  p | c.three_body_rate;
-  p | c.use_dust_density_field;
-  p | c.use_isrf_field;
-  p | c.use_radiative_transfer;
-  p | c.use_specific_heating_rate;
-  p | c.use_volumetric_heating_rate;
-  p | c.UVbackground_redshift_drop;
-  p | c.UVbackground_redshift_fullon;
-  p | c.UVbackground_redshift_off;
-  p | c.UVbackground_redshift_on;
+  p | c.bremsstrahlung_cooling_rates;
+  p | c.max_iterations;
+  p | c.exit_after_iterations_exceeded;
+
+# ifdef CONFIG_SMP_MODE
+  // Corresponds to -D_OPENMP in Grackle
+  p | omp_nthreads;
+# endif
 }
 #endif
 
