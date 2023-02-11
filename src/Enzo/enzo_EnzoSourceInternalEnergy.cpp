@@ -80,7 +80,7 @@ void EnzoSourceInternalEnergy::calculate_source
 	// the following just applies std::max (in a macro-enabled debug mode
 	// it will raise errors when the floor is actually needed)
         // It's probably redudant to apply the floor here
-	p = EnzoEquationOfState::apply_floor(p, p_floor);
+	p = enzo_utils::apply_floor(p, p_floor);
 	deint_dens_center(iz,iy,ix) -= dtdx*p*(vr(iz,iy,ix) - vl(iz,iy,ix));
       }
     }

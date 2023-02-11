@@ -213,15 +213,14 @@ void EnzoEOSIdeal::apply_floor_to_energy_and_sync
 	       (eint_1 > half_factor*cur_eint) ){
 	    cur_eint = eint_1;
 	  }
-	  cur_eint = EnzoEquationOfState::apply_floor(cur_eint, eint_floor);
+	  cur_eint = enzo_utils::apply_floor(cur_eint, eint_floor);
 
 	  eint(iz,iy,ix) = cur_eint;
 	  etot(iz,iy,ix) = cur_eint + non_thermal_e;
 	} else {
 
 	  enzo_float etot_floor = eint_floor + non_thermal_e;
-	  etot(iz,iy,ix) = EnzoEquationOfState::apply_floor(etot(iz,iy,ix),
-							    etot_floor);
+	  etot(iz,iy,ix) = enzo_utils::apply_floor(etot(iz,iy,ix), etot_floor);
 	}
       }
     }

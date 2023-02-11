@@ -160,6 +160,7 @@ extern "C" {
 #include "fortran_types.h" /* included so scons knowns to install fortran.h */
 
 #include "enzo_constants.hpp"
+#include "enzo_utils.hpp"
 
 #include "enzo_EnzoPhysicsCosmology.hpp"
 

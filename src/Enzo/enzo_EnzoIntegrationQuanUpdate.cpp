@@ -214,7 +214,7 @@ void EnzoIntegrationQuanUpdate::update_quantities
 
 	// possibly place a floor on the updated density.
 	enzo_float new_rho = out_prim[density_index_](iz,iy,ix);
-	new_rho = EnzoEquationOfState::apply_floor(new_rho, density_floor);
+	new_rho = enzo_utils::apply_floor(new_rho, density_floor);
 	out_prim[density_index_](iz,iy,ix) = new_rho;
 
 	// update the specific integration primitives

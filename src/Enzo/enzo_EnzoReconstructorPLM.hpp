@@ -234,10 +234,8 @@ void EnzoReconstructorPLM<Limiter>::reconstruct_interface
             enzo_float left_val, right_val;
 
             if (use_floor) {
-              right_val = EnzoEquationOfState::apply_floor(val - half_dv,
-                                                           prim_floor);
-              left_val  = EnzoEquationOfState::apply_floor(val + half_dv,
-                                                           prim_floor);
+              right_val = enzo_utils::apply_floor(val - half_dv, prim_floor);
+              left_val  = enzo_utils::apply_floor(val + half_dv, prim_floor);
             } else {
               right_val = val - half_dv;
               left_val  = val + half_dv;
