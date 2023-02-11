@@ -144,9 +144,6 @@ public: // interface
   /// barotropic EOS
   virtual enzo_float get_isothermal_sound_speed() const = 0;
 
-  /// returns true if the dual energy formalism is being used
-  virtual bool uses_dual_energy_formalism() const = 0;
-
 };
 
 #endif /* ENZO_ENZO_EQUATIONOFSTATE_HPP */

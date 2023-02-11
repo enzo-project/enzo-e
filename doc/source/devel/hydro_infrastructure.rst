@@ -358,12 +358,6 @@ support barotropic equations of state.*
 
 .. code-block:: c++
 
-   bool uses_dual_energy_formalism();
-
-Returns whether the dual energy formalism is in use.
-
-.. code-block:: c++
-
    enzo_float get_gamma();
 
 Returns the ratio of the specific heats. This is only required to

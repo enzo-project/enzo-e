@@ -55,9 +55,7 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
          fluid_floor_config.has_pressure_floor());
 
   // Initialize equation of state (check the validity of quantity floors)
-  enzo_float de_eta = 0.0;
-  bool dual_energy_formalism = de_config.modern_formulation(&de_eta);
-  eos_ = new EnzoEOSIdeal(fluid_props->gamma(), dual_energy_formalism, de_eta);
+  eos_ = new EnzoEOSIdeal(fluid_props->gamma());
 
 #ifdef CONFIG_USE_GRACKLE
   if (enzo::config()->method_grackle_use_grackle){
@@ -66,7 +64,7 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
     ASSERT("EnzoMethodMHDVlct::determine_quantities_",
            ("Grackle cannot currently be used alongside this integrator "
             "unless the dual-energy formalism is in use"),
-           eos_->uses_dual_energy_formalism());
+           de_config.any_enabled());
   }
 #endif /* CONFIG_USE_GRACKLE */
 
@@ -75,7 +73,7 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
 
   riemann_solver_ = EnzoRiemann::construct_riemann
     ({rsolver, mhd_choice_ != bfield_choice::no_bfield,
-      eos_->uses_dual_energy_formalism()});
+      de_config.any_enabled()});
 
   // determine integration and primitive field list
   integration_field_list_ = riemann_solver_->integration_quantity_keys();
@@ -246,7 +244,7 @@ EnzoVlctScratchSpace* EnzoMethodMHDVlct::get_scratch_ptr_
     scratch_space_ = new EnzoVlctScratchSpace
       (field_shape, integration_field_list_, primitive_field_list_,
        integration_quan_updater_->integration_keys(), passive_list,
-       eos_->uses_dual_energy_formalism());
+       enzo::fluid_props()->dual_energy_config().any_enabled());
   }
   return scratch_space_;
 }
@@ -480,11 +478,12 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
         EnzoEFltArrayMap pr_map = primr_map.subarray_map(z_slc, y_slc, x_slc);
 
         EFlt3DArray *interface_vel_arr_ptr, sliced_interface_vel_arr;
-        if (eos_->uses_dual_energy_formalism()){
-          // trim scratch-array for storing interface velocity values (computed
-          // by the Riemann Solver). This is used in the calculation of the
-          // internal energy source term). As with priml_map and primr_map, the
-          // array is bigger than necessary so it can be reused for each dim
+        if (enzo::fluid_props()->dual_energy_config().any_enabled()){
+          // when using dual energy formalism, trim the trim scratch-array for
+          // storing interface velocity values (computed by the Riemann Solver).
+          // This is used in the calculation of the internal energy source
+          // term). As with priml_map and primr_map, the array is bigger than
+          // necessary so it can be reused for each axis
           sliced_interface_vel_arr =
             scratch->interface_vel_arr.subarray(z_slc, y_slc, x_slc);
           interface_vel_arr_ptr = &sliced_interface_vel_arr;
@@ -629,7 +628,7 @@ void EnzoMethodMHDVlct::compute_flux_
 
   // if using dual energy formalism, compute the component of the internal
   // energy source term for this dim (and update dUcons_map).
-  if (eos_->uses_dual_energy_formalism()){
+  if (enzo::fluid_props()->dual_energy_config().any_enabled()){
     EnzoSourceInternalEnergy eint_src;
     eint_src.calculate_source(dim, cur_dt, cell_width, primitive_map,
                               dUcons_map, *interface_velocity_arr_ptr, eos_,
@@ -688,7 +687,7 @@ double EnzoMethodMHDVlct::timestep ( Block * block ) throw()
   EnzoEFltArrayMap integration_map = get_integration_map_
     (block, (lazy_passive_list_.get_list()).get());
 
-  if (eos_->uses_dual_energy_formalism()){
+  if (enzo::fluid_props()->dual_energy_config().any_enabled()){
     // synchronize eint and etot.
     // This is only strictly necessary after problem initialization and when
     // there is an inflow boundary condition

@@ -19,9 +19,11 @@ void EnzoSourceInternalEnergy::calculate_source
 {
   // SANITY CHECKS:
   ASSERT("EnzoSourceInternalEnergy::calculate_source",
-	 ("This function should not be called if the dual energy formalism "
-	  "is not in use."),
-	 eos-> uses_dual_energy_formalism());
+	 ("This function should only be called if the \"modern formulation\" "
+          "of the dual energy formalism is in use."),
+	 enzo::fluid_props()->dual_energy_config().modern_formulation());
+  // I think this probably also works with the bryan95 formulation, but we
+  // should perform a more careful check of this
   ASSERT("EnzoSourceInternalEnergy::calculate_source",
 	 "The EOS can't be barotropic and use the dual energy formalism.",
 	 !(eos->is_barotropic()) );

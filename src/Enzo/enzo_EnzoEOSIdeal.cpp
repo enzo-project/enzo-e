@@ -17,8 +17,6 @@ void EnzoEOSIdeal::pup (PUP::er &p)
   // NOTE: change this function whenever attributes change
   PUP::able::pup(p);
   p|gamma_;
-  p|dual_energy_formalism_;
-  p|dual_energy_formalism_eta_;
 }
 
 //----------------------------------------------------------------------
@@ -102,11 +100,11 @@ void EnzoEOSIdeal::pressure_from_integration
                     integration_map.contains("bfield_y") ||
                     integration_map.contains("bfield_z"));
 
+  const bool idual = enzo::fluid_props()->dual_energy_config().any_enabled();
+
   EnzoComputePressure::compute_pressure(EnzoFieldAdaptor(integration_map),
-                                        pressure, mhd,
-                                        this->uses_dual_energy_formalism(),
-                                        get_gamma(), stale_depth,
-                                        ignore_grackle);
+                                        pressure, mhd, idual, get_gamma(),
+                                        stale_depth, ignore_grackle);
 }
 
 //----------------------------------------------------------------------
@@ -143,12 +141,28 @@ void EnzoEOSIdeal::apply_floor_to_energy_and_sync
   //   the Grackle routine), you'll recover a value smaller than the pressure
   //   floor.
 
-  const bool idual = this->uses_dual_energy_formalism();
+  const EnzoDualEnergyConfig& de_config
+    = enzo::fluid_props()->dual_energy_config();
+
+  const bool idual = de_config.any_enabled();
+
+  if (idual && !de_config.modern_formulation()){
+    ERROR("EnzoEOSIdeal::apply_floor_to_energy_and_sync",
+          "The current implementation only works when the dual energy "
+          "formalism is disabled or uses the \"modern formulation\"");
+  }
+
+  // retrieve the value of eta (if applicable)
+  enzo_float tmp_eta = 0.0; // temporary variable
+  de_config.modern_formulation(&tmp_eta);
+  const double eta = tmp_eta;
+
   const bool mag = (integration_map.contains("bfield_x") ||
                     integration_map.contains("bfield_y") ||
                     integration_map.contains("bfield_z"));
-  // in hydro_rk, eta was set equal to eta1 (it didn't use eta2 at all)
-  const double eta = dual_energy_formalism_eta_;
+
+  // historical context (in case we need to look back at the original code):
+  // In enzo-dev's hydro_rk, eta was set equal to eta1 (it didn't ever use eta2)
 
   const EFlt3DArray etot = integration_map.at("total_energy");
   const EFlt3DArray eint =

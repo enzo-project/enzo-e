@@ -19,12 +19,9 @@ class EnzoEOSIdeal : public EnzoEquationOfState
 public: // interface
   
   /// Create a new EnzoEOSIdeal object
-  EnzoEOSIdeal(double gamma, bool dual_energy_formalism,
-	       double dual_energy_formalism_eta) throw()
+  EnzoEOSIdeal(double gamma) throw()
     : EnzoEquationOfState(),
-      gamma_(gamma),
-      dual_energy_formalism_(dual_energy_formalism),
-      dual_energy_formalism_eta_(dual_energy_formalism_eta)
+      gamma_(gamma)
   { }
 
   /// Delete EnzoEOSIdeal object
@@ -37,9 +34,7 @@ public: // interface
   /// CHARM++ migration constructor for PUP::able
   EnzoEOSIdeal (CkMigrateMessage *m)
     : EnzoEquationOfState(m),
-      gamma_(0.),
-      dual_energy_formalism_(false),
-      dual_energy_formalism_eta_(0.)
+      gamma_(0.)
   {  }
 
   /// CHARM++ Pack / Unpack function
@@ -64,13 +59,8 @@ public: // interface
 
   enzo_float get_isothermal_sound_speed() const { return 0;}
 
-  // In the future, this won't be hardcoded to false
-  bool uses_dual_energy_formalism() const { return dual_energy_formalism_; };
-
 protected: // attributes
   enzo_float gamma_; // adiabatic index
-  bool dual_energy_formalism_;
-  double dual_energy_formalism_eta_;
 };
 
 #endif /* ENZO_ENZO_EOS_IDEAL_HPP */
