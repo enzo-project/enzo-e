@@ -98,6 +98,7 @@ module enzo {
   PUPable EnzoMethodDistributedFeedback;
   PUPable EnzoMethodFeedback;
   PUPable EnzoMethodFeedbackSTARSS;
+  PUPable EnzoMethodM1Closure;
   PUPable EnzoMethodFluxAccretion;
   PUPable EnzoMethodGravity;
   PUPable EnzoMethodHeat;
@@ -193,7 +194,11 @@ module enzo {
  
     // EnzoMethodFeedbackSTARSS synchronization entry methods
     entry void p_method_feedback_starss_end();
-  
+ 
+    // EnzoMethodM1Closure synchronization entry methods
+    entry void p_method_m1_closure_solve_transport_eqn();
+    entry void p_method_m1_closure_set_global_averages(CkReductionMsg *msg);  
+ 
     // EnzoMethodTurbulence synchronization entry methods
     entry void r_method_turbulence_end(CkReductionMsg *msg);
 
@@ -202,7 +207,6 @@ module enzo {
     // EnzoMethodGravity synchronization entry methods
     entry void p_method_gravity_continue();
     entry void p_method_gravity_end();
-
 
     // checkpoint
     entry void p_check_write_first

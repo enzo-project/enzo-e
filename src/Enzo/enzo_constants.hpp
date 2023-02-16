@@ -20,8 +20,14 @@ namespace enzo_constants {
   // Boltzman constant in CGS
   const double kboltz = 1.3806504e-16;
 
+  // Planck function in CGS
+  const double hplanck = 6.626196e-27;
+
   // Solar mass in CGS
   const double mass_solar = 1.98841586e33;
+
+  // Solar luminosity in erg/s
+  const double luminosity_solar = 3.839e33;
 
   // Solar metallicity
   const double metallicity_solar = 0.012;

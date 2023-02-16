@@ -347,8 +347,11 @@ public: /// entry methods
   void p_solver_mg0_restrict_recv(FieldMsg * msg);
 
   // EnzoMethodFeedbackSTARSS
-
   void p_method_feedback_starss_end();
+
+  //EnzoMethodM1Closure
+  void p_method_m1_closure_solve_transport_eqn();
+  void p_method_m1_closure_set_global_averages(CkReductionMsg * msg);
 
   virtual void print() const {
     CkPrintf ("PRINT_ENZO_BLOCK name = %s\n",name().c_str());

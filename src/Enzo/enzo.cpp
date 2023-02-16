@@ -39,6 +39,7 @@ namespace enzo {
   const EnzoMethodGrackle * grackle_method()
   {
     if (!enzo::config()->method_grackle_use_grackle) {return NULL;}
+    
     return (const EnzoMethodGrackle *) problem()->method("grackle");
   }
 
