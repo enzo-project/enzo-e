@@ -52,9 +52,9 @@ void EnzoMethodBalance::compute ( Block * block) throw()
   const int is_index = sd->index("order_morton:index");  
   Scalar<long long> scalar(cello::scalar_descr_long_long(),
                      block->data()->scalar_data_long_long());
-  int count = *scalar.value(is_count);
-  int index = *scalar.value(is_index);
-  int ip_next = CkNumPes()*index/count;
+  long long count = *scalar.value(is_count);
+  long long index = *scalar.value(is_index);
+  long long ip_next = CkNumPes()*index/count;
   block->set_ip_next(ip_next);
 #ifdef TRACE_BALANCE
   CkPrintf ("self_balance %d %d %d %d\n", count, index,ip_next,CkMyPe());
