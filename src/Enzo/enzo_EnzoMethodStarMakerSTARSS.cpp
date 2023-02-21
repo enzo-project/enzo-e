@@ -260,7 +260,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         double mean_particle_mass = mu * enzo_constants::mass_hydrogen;
         double ndens = rho_cgs / mean_particle_mass;
 
-        double cell_mass  = density[i] * cell_volume;
+        double cell_mass  = density[i] * cell_volume; // code units
         double metallicity = (metal) ? metal[i]/density[i]/enzo_constants::metallicity_solar : 0.0;
 
         //
