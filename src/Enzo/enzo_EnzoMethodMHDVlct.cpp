@@ -536,7 +536,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // total energy (and if necessary the total energy can be synchronized
       // with the internal energy)
       integration_quan_updater_->update_quantities
-        (external_integration_map, dUcons_map, out_integration_map, eos_,
+        (external_integration_map, dUcons_map, out_integration_map,
          stale_depth, passive_list);
 
       // increment stale_depth since the inner values have been updated

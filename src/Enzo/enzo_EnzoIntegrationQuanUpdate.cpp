@@ -181,8 +181,7 @@ EnzoIntegrationQuanUpdate::load_integration_quan_(const EnzoEFltArrayMap &map,
 void EnzoIntegrationQuanUpdate::update_quantities
 (EnzoEFltArrayMap &initial_integration_map, const EnzoEFltArrayMap &dUcons_map,
  EnzoEFltArrayMap &out_integration_map,
- EnzoEquationOfState *eos, const int stale_depth,
- const str_vec_t &passive_list) const
+ const int stale_depth, const str_vec_t &passive_list) const
 {
 
   // Update passive scalars, it doesn't currently support renormalizing to 1

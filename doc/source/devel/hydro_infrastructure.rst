@@ -1125,7 +1125,7 @@ integration quantities from the start of the timestep (specificed by
       const EnzoEFltArrayMap &dUcons_map,
       EnzoEFltArrayMap &out_integration_map,
       EnzoEFltArrayMap &out_conserved_passive_scalar,
-      EnzoEquationOfState *eos, int stale_depth,
+      int stale_depth,
       const std::vector<std::string> &passive_list) const;
 
 The fields included in ``dUcons_map`` should include contributions
