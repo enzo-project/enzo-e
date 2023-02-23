@@ -334,6 +334,9 @@ array in the primitive map).
 Equation Of State
 =================
 
+.. note::
+   This is about to be removed
+
 All of the operations related to the equation of state are handled by
 subclasses of the abstract base class, ``EnzoEquationOfState``. The
 class has a number of responsibilities. Currently the only concrete
@@ -369,39 +372,6 @@ yield a reasonable value if the gas is not barotropic.
 
 Returns the isothermal sound speed. This is only required to yield a
 reasonable value for barotropic equations of state.
-
-.. code-block:: c++
-
-   void pressure_from_integration(const EnzoEFltArrayMap &integration_map,
-                                  const CelloArray<enzo_float, 3> &pressure,
-                                  int stale_depth,
-                                  bool ignore_grackle = false);
-
-This method computes the pressure from the integration quantities
-(stored in ``integration_map``) and stores the result in ``pressure``.
-This wraps the ``EnzoComputePressure`` object whose default behavior
-is to use the Grackle-supplied routine for computing pressure when the
-simulation is configured to use ``EnzoMethodGrackle``. The
-``ignore_grackle`` parameter can be used to avoid using that routine (the
-parameter is meaningless if the Grackle routine would not otherwise
-get used). This parameter's primary purpose is to provide the option
-to suppress the effects of molecular hydrogen on the adiabatic index
-(when Grackle is configured with ``primordial_chemistry > 1``).
-
-.. code-block:: c++
-
-   void primitive_from_integration
-     (const EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &primitive_map,
-      int stale_depth, const std::vector<std::string> &passive_list,
-      bool ignore_grackle = false);
-
-This method is responsible for computing the primitive quantities (to
-be held in ``primitive_map``) from the integration quantities (stored
-in ``integration_map``).  Non-passive scalar quantities appearing in
-both ``integration_map`` and ``primitive_map`` are simply deepcopied
-and passive scalar quantities are converted from conserved-form to
-specific form. For a non-barotropic EOS, this also computes pressure
-(by calling ``EnzoEquationOfState::pressure_from_integration``).
 
 *In the future, it might be worth considering making this into a subclass
 of Cello's ``Physics`` class. If that is done, it may be advisable to

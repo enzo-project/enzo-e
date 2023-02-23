@@ -40,16 +40,6 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
-  void primitive_from_integration
-  (const EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &primitive_map,
-   const int stale_depth, const str_vec_t &passive_list,
-   const bool ignore_grackle) const;
-
-  void pressure_from_integration
-  (const EnzoEFltArrayMap &integration_map,
-   const CelloArray<enzo_float, 3> &pressure,
-   const int stale_depth, const bool ignore_grackle) const;
-
   bool is_barotropic() const { return false; }
 
   enzo_float get_gamma() const { return gamma_;}

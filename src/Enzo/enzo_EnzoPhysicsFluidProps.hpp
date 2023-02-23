@@ -69,6 +69,58 @@ public: // interface
   // the following methods are mostly just methods of this class because it
   // isn't obvious where else to put them
 
+  /// Converts integration quantities to primitives
+  ///
+  /// @param[in]  integration_map Map holding integration quantities that are
+  ///     to be converted. Passive scalars in this map are expected to be in
+  ///     conserved form (they are densities).
+  /// @param[out] primitive_map Map holding arrays where the computed
+  ///     primitive data is to be stored. Passive scalars in this map are
+  ///     expected to be in specific form (they are mass fractions).
+  /// @param[in]  stale_depth indicates the current stale_depth for the
+  ///     supplied cell-centered quantities
+  /// @param[in]  passive_list A list of keys for passive scalars. These keys
+  ///     will be used to determine which quantities will be copied from the
+  ///     integration_map to the primitive_map.
+  /// @param[in]  ignore_grackle indicates whether to ignore the Grackle
+  ///     routine for computing pressure, (only meaningful if grackle is
+  ///     used in other operations). This is primarily useful for ignoring
+  ///     the effects of molecular hydrogen on the adiabtic index.
+  ///
+  /// Non-passive scalar quantities appearing in both `integration_map` and
+  /// `primitive_map` are simply deepcopied and passive scalar quantities are
+  /// converted from conserved-form to specific form. For a non-barotropic EOS,
+  /// this also computes pressure.
+  ///
+  /// @note
+  /// It's unclear if this really belongs as a method of EnzoPhysicsFluidProps
+  virtual void primitive_from_integration
+  (const EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &primitive_map,
+   const int stale_depth, const str_vec_t &passive_list,
+   const bool ignore_grackle = false) const;
+
+  /// Computes thermal pressure from integration quantities
+  /// 
+  /// @param[in]  integration_map Map holding integration quantities that are
+  ///     used to compute the pressure. This should include all necessary
+  ///     passively advected quantities in conserved form.
+  /// @param[out] pressure Array where the thermal pressure is to be stored
+  /// @param[in]  stale_depth indicates the current stale_depth for the
+  ///     supplied cell-centered quantities
+  /// @param[in]  ignore_grackle indicates whether to ignore the Grackle
+  ///     routine for computing pressure, (only meaningful if grackle is
+  ///     used in other operations). This is primarily useful for ignoring
+  ///     the effects of molecular hydrogen on the adiabtic index.
+  ///
+  /// This nominally wraps EnzoComputePressure.
+  ///
+  /// @note
+  /// It's unclear if this really belongs as a method of EnzoPhysicsFluidProps
+  virtual void pressure_from_integration
+  (const EnzoEFltArrayMap &integration_map,
+   const CelloArray<enzo_float, 3> &pressure,
+   const int stale_depth, const bool ignore_grackle = false) const;
+
   /// applies the pressure floor to the specific total energy field. If using
   /// the dual-energy formalism, it is also applied to the internal energy
   /// and it synchronize the internal energy and total energy fields. If the

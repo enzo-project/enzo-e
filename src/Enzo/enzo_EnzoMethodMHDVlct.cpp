@@ -421,6 +421,8 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       bfield_method_->register_target_block(block);
     }
 
+    EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
+
     const enzo_float* const cell_widths = enzo::block(block)->CellWidth;
 
     double dt = block->dt();
@@ -460,9 +462,10 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       //   routine. This is only meaningful when grackle models molecular
       //   hydrogen (which modifes the adiabtic index)
       const bool ignore_grackle = true;
-      eos_->primitive_from_integration(cur_integration_map, primitive_map,
-                                       stale_depth, passive_list,
-                                       ignore_grackle);
+      fluid_props->primitive_from_integration(cur_integration_map,
+                                              primitive_map,
+                                              stale_depth, passive_list,
+                                              ignore_grackle);
 
       // Compute flux along each dimension
       EnzoEFltArrayMap *flux_maps[3] = {&xflux_map, &yflux_map, &zflux_map};
@@ -478,7 +481,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
         EnzoEFltArrayMap pr_map = primr_map.subarray_map(z_slc, y_slc, x_slc);
 
         EFlt3DArray *interface_vel_arr_ptr, sliced_interface_vel_arr;
-        if (enzo::fluid_props()->dual_energy_config().any_enabled()){
+        if (fluid_props->dual_energy_config().any_enabled()){
           // when using dual energy formalism, trim the trim scratch-array for
           // storing interface velocity values (computed by the Riemann Solver).
           // This is used in the calculation of the internal energy source
@@ -700,7 +703,7 @@ double EnzoMethodMHDVlct::timestep ( Block * block ) throw()
   // permanent field)
   Field field = block->data()->field();
   EFlt3DArray pressure = field.view<enzo_float>("pressure");
-  eos_->pressure_from_integration(integration_map, pressure, 0);
+  fluid_props->pressure_from_integration(integration_map, pressure, 0);
 
   // Now load other necessary quantities
   const enzo_float gamma = eos_->get_gamma();
