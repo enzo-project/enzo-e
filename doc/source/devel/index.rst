@@ -17,4 +17,5 @@ refinement criteria, etc.
    method
    array
    hydro_infrastructure
+   eos-fluidprops
    writing-docs
