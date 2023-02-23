@@ -372,17 +372,6 @@ reasonable value for barotropic equations of state.
 
 .. code-block:: c++
 
-   apply_floor_to_energy_and_sync(EnzoEFltArrayMap &integration_map,
-                                  int stale_depth);
-
-This method applies the applies the pressure floor to the total_energy
-array specified in ``integration_map``. If using the dual-energy formalism
-the floor is also applied to the internal energy (also specified in 
-``integration_map``) and synchronizes the internal energy with the total
-energy. If the equation of state is barotropic, this should do nothing.
-
-.. code-block:: c++
-
    void pressure_from_integration(const EnzoEFltArrayMap &integration_map,
                                   const CelloArray<enzo_float, 3> &pressure,
                                   int stale_depth,
