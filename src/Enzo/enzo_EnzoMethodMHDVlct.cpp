@@ -687,11 +687,13 @@ double EnzoMethodMHDVlct::timestep ( Block * block ) throw()
   EnzoEFltArrayMap integration_map = get_integration_map_
     (block, (lazy_passive_list_.get_list()).get());
 
-  if (enzo::fluid_props()->dual_energy_config().any_enabled()){
+  EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
+
+  if (fluid_props->dual_energy_config().any_enabled()){
     // synchronize eint and etot.
     // This is only strictly necessary after problem initialization and when
     // there is an inflow boundary condition
-    eos_->apply_floor_to_energy_and_sync(integration_map, 0);
+    fluid_props->apply_floor_to_energy_and_sync(integration_map, 0);
   }
 
   // Compute thermal pressure (this presently requires that "pressure" is a

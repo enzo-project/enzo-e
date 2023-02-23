@@ -50,9 +50,6 @@ public: // interface
    const CelloArray<enzo_float, 3> &pressure,
    const int stale_depth, const bool ignore_grackle) const;
 
-  void apply_floor_to_energy_and_sync(EnzoEFltArrayMap &integration_map,
-                                      const int stale_depth) const;
-
   bool is_barotropic() const { return false; }
 
   enzo_float get_gamma() const { return gamma_;}

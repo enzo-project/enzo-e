@@ -113,26 +113,6 @@ public: // interface
    const CelloArray<enzo_float, 3> &pressure,
    const int stale_depth, const bool ignore_grackle = false) const = 0;
 
-  /// applies the pressure floor to the specific total energy field. If using
-  /// the dual-energy formalism, it is also applied to the internal energy
-  /// and it synchronize the internal energy and total energy fields. If the
-  /// EOS is barotropic, this does nothing.
-  ///
-  /// @param[in,out] integration_map Map holding integration quantities that
-  ///     will be used to apply the floor. It must also include a
-  ///     "total_energy" entry (unless the EOS is barotropic) upon which the
-  ///     floor is applied.
-  /// @param[in]     stale_depth indicates the current stale_depth for the
-  ///     supplied cell-centered quantities
-  ///
-  /// Unlike the initial conception of the dual-energy formalism (or the
-  /// version used in Enzo's ppm integrator) this assumes that synchronization
-  /// is a local operation that doesn't require data about neighboring cells
-  /// (similar to the implementation of the dual energy formalsim in Enzo's
-  /// Runge Kutta and MHD with Constrained Transport solvers).
-  virtual void apply_floor_to_energy_and_sync(EnzoEFltArrayMap &integration_map,
-                                              const int stale_depth) const = 0;
-
   /// returns whether the equation of state is barotropic
   virtual bool is_barotropic() const = 0;
 

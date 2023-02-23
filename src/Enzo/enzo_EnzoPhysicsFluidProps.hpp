@@ -66,6 +66,32 @@ public: // interface
   enzo_float mol_weight() const noexcept
   { return mol_weight_; }
 
+  // the following methods are mostly just methods of this class because it
+  // isn't obvious where else to put them
+
+  /// applies the pressure floor to the specific total energy field. If using
+  /// the dual-energy formalism, it is also applied to the internal energy
+  /// and it synchronize the internal energy and total energy fields. If the
+  /// EOS is barotropic, this does nothing.
+  ///
+  /// @param[in,out] integration_map Map holding integration quantities that
+  ///     will be used to apply the floor. It must also include a
+  ///     "total_energy" entry (unless the EOS is barotropic) upon which the
+  ///     floor is applied.
+  /// @param[in]     stale_depth indicates the current stale_depth for the
+  ///     supplied cell-centered quantities
+  ///
+  /// Unlike the initial conception of the dual-energy formalism (or the
+  /// version used in Enzo's ppm integrator) this assumes that synchronization
+  /// is a local operation that doesn't require data about neighboring cells
+  /// (similar to the implementation of the dual energy formalsim in Enzo's
+  /// Runge Kutta and MHD with Constrained Transport solvers).
+  ///
+  /// @note
+  /// It's unclear if this really belongs as a method of EnzoPhysicsFluidProps
+  void apply_floor_to_energy_and_sync(EnzoEFltArrayMap &integration_map,
+                                      const int stale_depth) const;
+
 public: // virtual methods
   virtual std::string type() const { return "fluid_props"; }
 

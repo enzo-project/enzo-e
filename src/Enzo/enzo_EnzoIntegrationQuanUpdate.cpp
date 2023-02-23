@@ -231,7 +231,9 @@ void EnzoIntegrationQuanUpdate::update_quantities
 
   // apply floor to energy and sync the internal energy with total energy
   // (the latter only occurs if the dual energy formalism is in use)
-  eos->apply_floor_to_energy_and_sync(out_integration_map, stale_depth + 1);
+  EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
+  fluid_props->apply_floor_to_energy_and_sync(out_integration_map,
+                                              stale_depth + 1);
 }
 
 //----------------------------------------------------------------------
