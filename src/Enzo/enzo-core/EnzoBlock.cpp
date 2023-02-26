@@ -247,3 +247,98 @@ void EnzoBlock::initialize () throw()
   TRACE ("Exit  EnzoBlock::initialize()\n");
 }
 
+bool EnzoBlock::spawn_child_blocks(){
+  int level = index_.level();
+  if (level >= 0) {
+    
+    if (level + 1 <= enzo::simulation()->config()->refined_regions_lower.size()) {
+
+      std::vector<int> lower = enzo::simulation()->config()->refined_regions_lower.at(level);
+      std::vector<int> upper = enzo::simulation()->config()->refined_regions_upper.at(level);
+
+      int ix, iy, iz, nx, ny, nz;
+      index_global(&ix, &iy, &iz, &nx, &ny, &nz);
+
+      if (lower.at(0) <= ix && ix < upper.at(0)) {
+        if (lower.at(1) <= iy && iy < upper.at(1)) {
+          if (lower.at(2) <= iz && iz < upper.at(2)) {
+            return true;
+          }
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
+void EnzoBlock::create_child_blocks(){
+  bool spawn_children = spawn_child_blocks();
+  if (spawn_children) {instantiate_children();}
+}
+
+void EnzoBlock::instantiate_children() {
+  child_face_level_curr_.resize(cello::num_children()*27);
+
+  int count_adapt;
+  int    cycle = 0;
+  double time  = 0.0;
+  double dt    = 0.0;
+
+  int ix, iy, iz, nx, ny, nz;
+  index_global(&ix, &iy, &iz, &nx, &ny, &nz);
+  nx = nx << 1; // number of mesh points on next level is double that for current level.
+  ny = ny << 1;
+  nz = nz << 1;
+
+  int num_field_blocks = 1;
+
+  const int rank = cello::rank();
+  ItChild it_child(rank);
+  int ic3[3];
+  while (it_child.next(ic3)) {
+    Index index_child = index_.index_child(ic3);
+    DataMsg * data_msg = NULL;
+
+    MsgRefine * msg = new MsgRefine
+      (index_child,
+      nx,ny,nz,
+      num_field_blocks,
+      adapt_step_,
+      cycle_,time_,dt_,
+      refresh_fine,
+      27, 
+      &child_face_level_curr_.data()[27*IC3(ic3)], 
+      &adapt_);
+
+    msg->set_data_msg(data_msg);
+    #ifdef BYPASS_CHARM_MEM_LEAK
+      enzo::simulation()->set_msg_refine (index_child, msg);
+      thisProxy[index_child].insert (process_type(CkMyPe()), MsgType::msg_refine);
+    #else
+      thisProxy[index_child].insert (msg);
+    #endif
+
+    children_.push_back(index_child);
+  }
+
+
+  // Update neighbors blocks with new face levels
+  ItNeighbor it_neighbor = this->it_neighbor(index_);
+  int of3[3];
+  while (it_neighbor.next(of3)) {
+    Index index_neighbor = it_neighbor.index();
+    int if3[3] = {-of3[0], -of3[1], -of3[2]};
+    thisProxy[index_neighbor].p_refine_neighbor(index_, if3);
+  }
+
+
+  adapt_.set_valid(false);
+  is_leaf_ = false;
+}
+
+
+void EnzoBlock::p_refine_neighbor(Index index_neighbor, int if3[3]) {
+  adapt_.set_face_level(if3, Adapt::LevelType::curr, 1);
+  adapt_.refine_neighbor(index_neighbor);
+}

@@ -748,6 +748,8 @@ void Simulation::initialize_hierarchy_() throw()
                lp3[1] ? root_blocks[1] : 0,
                lp3[2] ? root_blocks[2] : 0 };
   hierarchy_->set_periodicity (p3[0],p3[1],p3[2]);
+  hierarchy_->set_refined_regions_lower(config_->refined_regions_lower);
+  hierarchy_->set_refined_regions_upper(config_->refined_regions_upper);
 }
 
 //----------------------------------------------------------------------

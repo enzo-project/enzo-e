@@ -65,7 +65,8 @@ Block::Block ( process_type ip_source, MsgType msg_type )
     name_(""),
     index_method_(-1),
     index_solver_(),
-    refresh_()
+    refresh_(),
+    index_(thisIndex)
 {
 #ifdef TRACE_BLOCK
 
@@ -102,6 +103,9 @@ void Block::p_set_msg_refine(MsgRefine * msg)
   apply_initial_(msg);
 
   performance_stop_(perf_block);
+
+  create_child_blocks();
+
 #ifdef TRACE_BLOCK
   {
   CkPrintf ("%d %s index TRACE_BLOCK p_set_msg_refine(MsgRefine) done\n",
@@ -889,6 +893,30 @@ void Block::index_global
       if (nz) (*nz) <<= 1;
     }
   }
+}
+
+//----------------------------------------------------------------------
+
+Index Block::index_from_global(int ix, int iy, int iz, 
+                               int nx, int ny, int nz,
+                               int ax, int ay, int az)
+{
+  int min_level = - static_cast<int>(log2(ax));
+  int level = static_cast<int>(log2(1.0 * nx / ax));
+  return index_from_global(ix, iy, iz,level, min_level);
+}
+
+Index Block::index_from_global(int ix, int iy, int iz, int level, int min_level)
+{
+  Index index;
+  index.set_array(ix >> level, iy >> level, iz >> level);
+  index.set_level(level);
+  for (int i = 0; i < level - min_level; i++) {
+    int l = level - i;
+    index.set_child(l, (ix >> i) & 1, (iy >> i) & 1, (iz >> i) & 1, min_level);
+  }
+
+  return index;
 }
 
 //----------------------------------------------------------------------

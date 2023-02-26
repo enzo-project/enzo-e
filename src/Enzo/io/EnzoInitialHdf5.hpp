@@ -8,6 +8,152 @@
 #ifndef ENZO_ENZO_INITIAL_HDF5_HPP
 #define ENZO_ENZO_INITIAL_HDF5_HPP
 
+
+
+class DataLoader {
+
+  /// @class    DataLoader
+  /// @ingroup  Enzo
+  /// @brief    [\ref Enzo] Helper class used by EnzoInitialHdf5 to
+  ///           load initial data from HDF5 files.
+
+  public: // interface
+
+    // Constructor
+    DataLoader(Block* block, std::string format);
+
+    // Open the given dataset in the given HDF5 file.
+    virtual void open_file(std::string filename, std::string dataset, std::string coordinates);
+
+    // Close any file which may be opened.
+    void close_file() {
+      file->data_close();
+      file->file_close();
+    }
+
+    // Load data from an opened file into the block with the given
+    // block index.
+    void load(int * block_index, Index index_block);
+
+    // Copy data to a local or remote block.
+    virtual void copy_data_local(char * data) {}
+    virtual void copy_data_remote(Index index_block, char * data) {}
+
+  protected: // methods
+
+    void delete_array_(char ** array, int type_data);
+    char * allocate_array_(int n, int type_data);
+    void read_dataset_(char ** data, Index index_block, int block_index[3]);
+    void check_cosmology_(File * file) const;
+
+    // Attributes
+    Block * block;
+    FileHdf5 * file;
+    int type_data;
+    double lower_block[3], upper_block[3];
+    int nx, ny, nz, IX, IY, IZ;
+    double h4[4];
+    int m4[4], n4[4];
+    std::string coords, format_;
+};
+
+
+
+class FieldLoader : public DataLoader {
+
+  /// @class    FieldLoader
+  /// @ingroup  Enzo
+  /// @brief    [\ref Enzo] Helper class used to
+  ///           load initial field data from HDF5 files.
+
+  public: // interface
+
+    // FieldLoader Constructor
+    FieldLoader(Block* block, std::string format) : DataLoader(block, format) {
+      Field field = block->data()->field();
+      field.ghost_depth(0,&gx,&gy,&gz);
+      field.dimensions (0,&mx,&my,&mz);
+    }
+
+    // Open the given field dataset in the given HDF5 file.
+    void open_file(std::string filename, 
+                   std::string field_name,
+                   std::string field_coords,
+                   std::string field_dataset) {
+      DataLoader::open_file(filename, field_dataset, field_coords);
+      name = field_name;
+    }
+
+    // Load field data from received MsgInitial message.
+    void read_msg(MsgInitial * msg_initial, char ** data);
+    virtual void copy_data_local(char * data);
+    virtual void copy_data_remote(Index index_block, char * data);
+
+  private: // methods
+
+    void copy_dataset_to_field_(char * data);
+
+    template <class T>
+    void copy_field_data_to_array_(enzo_float * array, T * data) const;
+
+    // Attributes
+    int mx, my, mz, gx, gy, gz;
+    std::string name;
+};
+
+
+
+class ParticleLoader : public DataLoader {
+
+  /// @class    ParticleLoader
+  /// @ingroup  Enzo
+  /// @brief    [\ref Enzo] Helper class used to
+  ///           load initial particle data from HDF5 files.
+
+  public:
+
+    // ParticleLoader Constructor
+    ParticleLoader(Block* block, 
+                   bool particle_displacements,
+                   std::string format
+                   ) : DataLoader(block, format) {
+      l_particle_displacements_ = particle_displacements;
+    }
+
+    // Open the given particle dataset in the given HDF5 file.
+    void open_file(std::string filename,
+                  std::string particle_type,
+                  std::string particle_attribute,
+                  std::string particle_coords,
+                  std::string particle_dataset) {
+      DataLoader::open_file(filename, particle_dataset, particle_coords);
+      type = particle_type;
+      attribute = particle_attribute;
+    }
+
+    // Load particle data from received MsgInitial message.
+    void read_msg(MsgInitial * msg_initial, char ** data);
+
+    virtual void copy_data_local(char * data);
+    virtual void copy_data_remote(Index index_block, char * data);
+
+  private: // methods
+
+    void copy_dataset_to_particle_(char * data);
+
+    template <class T, class S>
+    void copy_particle_data_to_array_(T * array, S * data, Particle particle, int it, int ia, int np);
+
+    template <class T>
+    void update_particle_displacements_(T * array, Particle particle, int it, int ia, double lower, double h, int axis);
+
+    // Attributes
+    std::string type, attribute;
+    bool l_particle_displacements_;
+};
+
+
+
 class EnzoInitialHdf5 : public Initial {
 
   /// @class    EnzoInitialHdf5
@@ -27,11 +173,13 @@ public: // interface
                   std::vector < std::string > field_datasets,
                   std::vector < std::string > field_coords,
                   std::vector < std::string > field_names,
+                  std::vector < int >         field_levels,
                   std::vector < std::string > particle_files,
                   std::vector < std::string > particle_datasets,
                   std::vector < std::string > particle_coords,
                   std::vector < std::string > particle_types,
-                  std::vector < std::string > particle_attributes
+                  std::vector < std::string > particle_attributes,
+                  std::vector < int >         particle_levels
                   ) throw();
 
   /// Constructor
@@ -61,23 +209,11 @@ public: // interface
 
   void recv_data (Block * block, MsgInitial * msg_initial);
 
-  void copy_dataset_to_field_
-  (Block * block,
-   std::string field_name, int type_data,
-   char * data,
-   int mx, int my, int mz,
-   int nx, int ny, int nz,
-   int gx, int gy, int gz,
-   int n4[4], int IX, int IY);
+  // Get the range of a reader block with index `reader_index` at level `level`.
+  void get_reader_range(Index reader_index, int lower[3], int upper[3], int level) throw();
 
-  void copy_dataset_to_particle_
-  (Block * block,
-   std::string particle_type,
-   std::string particle_attribute,
-   int type_data,
-   char * data,
-   int nx, int ny, int nz,
-   double h4[4], int IX, int IY, int IZ);
+  // Use the provided DataLoader to load data onto blocks at the specified level.
+  void load_data(int & count_messages, Block * block, int level, int min_level, DataLoader & loader);
 
 protected: // functions
  
@@ -89,64 +225,10 @@ protected: // functions
     return scalar_data->value(scalar_descr,i_sync_msg_);
   }
 
-  char * allocate_array_ (int n, int type_data)
-  {
-    char * data;
-    if (type_data == type_single) {
-      data = (char *)new float [n];
-    } else if (type_data == type_double) {
-      data = (char *)new double [n];
-    } else {
-      data = nullptr;
-      ERROR1 ("EnzoInitialHdf5::allocate_array_()",
-              "Unsupported data type %d",type_data);
-    }
-    return data;
-  }
-  void delete_array_ (char ** array, int type_data)
-  {
-    if (type_data == type_single) {
-      delete [] (float*)(*array);
-    } else if (type_data == type_double) {
-      delete [] (double*)(*array);
-    } else {
-      ERROR1 ("EnzoInitialHdf5::delete_array_()",
-              "Unsupported data type %d",type_data);
-    }
-    (*array) = nullptr;
-  }
   int is_reader_ (Index index);
   /// return lower and upper ranges of root blocks overlapping the
   /// given region in the domain
   void root_block_range_ (Index index, int array_lower[3], int array_upper[3]);
-
-  void read_dataset_
-  (File * file, char ** data, Index index, int type_data,
-   double lower_block[3], double upper_block[3],
-   int block_index[3],
-   std::string axis_map,
-   int nx, int ny, int nz,
-   int m4[4], int n4[4], double h4[4],
-   int *IX, int *IY, int *IZ);
-
-  template <class T>
-  void copy_field_data_to_array_
-  (enzo_float * array, T * data,
-   int mx,int my,int mz,int nx,int ny,int nz,int gx,int gy,int gz,int n4[4],
-   int IX, int IY) const;
-
-  template <class T, class S>
-  void copy_particle_data_to_array_
-  (T * array, S * data,
-   Particle particle, int it, int ia, int np);
-
-  template <class T>
-  void update_particle_displacements_
-  ( T * array, int nx, int ny, int nz,
-    Particle particle, int it, int ia,
-    double lower, double h, int axis); 
-
-  void check_cosmology_(File * file) const;
   
 protected: // attributes
 
@@ -171,12 +253,14 @@ protected: // attributes
   vecstr_type field_datasets_;
   vecstr_type field_coords_;
   vecstr_type field_names_;
+  std::vector < int > field_levels_;
 
   vecstr_type particle_files_;
   vecstr_type particle_datasets_;
   vecstr_type particle_coords_;
   vecstr_type particle_types_;
   vecstr_type particle_attributes_;
+  std::vector < int > particle_levels_;
   bool l_particle_displacements_;
   std::string particle_position_names_[3];
 

@@ -534,11 +534,13 @@ public: // attributes
   std::vector < std::string > initial_hdf5_field_datasets;
   std::vector < std::string > initial_hdf5_field_names;
   std::vector < std::string > initial_hdf5_field_coords;
+  std::vector < int >         initial_hdf5_field_levels;
   std::vector < std::string > initial_hdf5_particle_files;
   std::vector < std::string > initial_hdf5_particle_datasets;
   std::vector < std::string > initial_hdf5_particle_coords;
   std::vector < std::string > initial_hdf5_particle_types;
   std::vector < std::string > initial_hdf5_particle_attributes;
+  std::vector < int >         initial_hdf5_particle_levels;
 
   /// EnzoInitialMusic
 
