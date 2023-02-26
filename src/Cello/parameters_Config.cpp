@@ -777,6 +777,45 @@ void Config::read_mesh_ (Parameters * p) throw()
 		      ax, ay, az);
     }  
   }
+
+  refined_regions_lower = std::vector< std::vector<int> >();
+  refined_regions_upper = std::vector< std::vector<int> >();
+
+  int level = 1;
+  bool continue_reading = true;
+  std::string prefix = "Mesh:level_";
+  std::string suffix = "_lower";
+  std::string name;
+
+  while (continue_reading) {
+    name = prefix + std::to_string(level) + suffix;
+    if (p->list_value_integer(0, name, -1) != -1) {
+      std::vector<int> lower(3);
+      lower[0] = p->list_value_integer(0, name, -1);
+      lower[1] = p->list_value_integer(1, name, -1);
+      lower[2] = p->list_value_integer(2, name, -1);
+      refined_regions_lower.push_back(lower);
+    }
+    else {continue_reading = false;}
+    level++;
+  }
+
+  level = 1;
+  continue_reading = true;
+  suffix = "_upper";
+
+  while (continue_reading) {
+    name = prefix + std::to_string(level) + suffix;
+    if (p->list_value_integer(0, name, -1) != -1) {
+      std::vector<int> upper(3);
+      upper[0] = p->list_value_integer(0, name, -1);
+      upper[1] = p->list_value_integer(1, name, -1);
+      upper[2] = p->list_value_integer(2, name, -1);
+      refined_regions_upper.push_back(upper);
+    }
+    else {continue_reading = false;}
+    level++;
+  }
 }
 
 //----------------------------------------------------------------------

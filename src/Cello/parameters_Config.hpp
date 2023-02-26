@@ -474,6 +474,8 @@ public: // attributes
   int                        mesh_min_level;
   int                        mesh_max_level;
   int                        mesh_max_initial_level;
+  std::vector< std::vector<int> > refined_regions_lower;
+  std::vector< std::vector<int> > refined_regions_upper;
 
   // Method
 
