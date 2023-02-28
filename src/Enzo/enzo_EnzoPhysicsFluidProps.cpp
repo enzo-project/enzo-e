@@ -16,7 +16,9 @@ void EnzoPhysicsFluidProps::primitive_from_integration
  const bool ignore_grackle) const
 {
 
-  // this currently assumes a barotropic eos
+  ASSERT("EnzoPhysicsFluidProps::primitive_from_integration",
+         "the current implementation assumes a non-barotropic eos",
+         !this->has_barotropic_eos());
 
   // load shape ahead of time and declare them const for optimization purposes
   const int mz = integration_map.array_shape(0);
@@ -135,6 +137,9 @@ void EnzoPhysicsFluidProps::apply_floor_to_energy_and_sync
   // - Thus, when you convert our eint_floor estimate back to pressure (with
   //   the Grackle routine), you'll recover a value smaller than the pressure
   //   floor.
+
+  // this method does nothing for a barotropic eos
+  if (this->has_barotropic_eos()) { return; }
 
   const EnzoDualEnergyConfig& de_config = this->dual_energy_config();
 

@@ -16,12 +16,12 @@
 void EnzoSourceGravity::calculate_source
 (const double dt, const EnzoEFltArrayMap &prim_map,
  EnzoEFltArrayMap &dUcons_map, const EnzoEFltArrayMap &accel_map,
- const EnzoEquationOfState *eos, const int stale_depth) const noexcept
+ const int stale_depth) const noexcept
 {
   // SANITY CHECK:
   ASSERT("EnzoSourceInternalEnergy::calculate_source",
 	 "Barotropic equations of state are not currently supported.",
-	 !(eos->is_barotropic()) );
+	 !(enzo::fluid_props()->has_barotropic_eos()) );
 
   // load primitives
   const CelloArray<const enzo_float,3> density = prim_map.at("density");

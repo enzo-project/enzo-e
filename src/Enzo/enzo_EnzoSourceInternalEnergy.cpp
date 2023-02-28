@@ -14,19 +14,19 @@ void EnzoSourceInternalEnergy::calculate_source
 (const int dim, const double dt, const enzo_float cell_width,
  const EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &dUcons_map,
  const CelloArray<const enzo_float,3> &interface_velocity,
- const EnzoEquationOfState *eos,
  const int stale_depth) const throw()
 {
   // SANITY CHECKS:
+  const EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
   ASSERT("EnzoSourceInternalEnergy::calculate_source",
 	 ("This function should only be called if the \"modern formulation\" "
           "of the dual energy formalism is in use."),
-	 enzo::fluid_props()->dual_energy_config().modern_formulation());
+	 fluid_props->dual_energy_config().modern_formulation());
   // I think this probably also works with the bryan95 formulation, but we
   // should perform a more careful check of this
   ASSERT("EnzoSourceInternalEnergy::calculate_source",
-	 "The EOS can't be barotropic and use the dual energy formalism.",
-	 !(eos->is_barotropic()) );
+	 "The EOS can't be barotropic when using the dual energy formalism.",
+	 !(fluid_props->has_barotropic_eos()) );
 
   const enzo_float dtdx = dt/cell_width;
 
@@ -73,8 +73,6 @@ void EnzoSourceInternalEnergy::calculate_source
   // in the original flux_hll.F the floor was set to tiny (a small number)
   const enzo_float p_floor =
     enzo::fluid_props()->fluid_floor_config().pressure();
-
-  enzo_float gm1 = eos->get_gamma() - 1.;
 
   for (int iz=0; iz<pressure_center.shape(0); iz++) {
     for (int iy=0; iy<pressure_center.shape(1); iy++) {

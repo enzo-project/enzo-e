@@ -63,6 +63,10 @@ public: // interface
   enzo_float gamma() const noexcept
   { return gamma_; }
 
+  /// in the future, it might make sense to move this method to the EOS itself
+  bool has_barotropic_eos() const noexcept
+  { return false; }
+
   enzo_float mol_weight() const noexcept
   { return mol_weight_; }
 

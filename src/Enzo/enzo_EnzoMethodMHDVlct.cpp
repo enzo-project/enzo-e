@@ -634,7 +634,7 @@ void EnzoMethodMHDVlct::compute_flux_
   if (enzo::fluid_props()->dual_energy_config().any_enabled()){
     EnzoSourceInternalEnergy eint_src;
     eint_src.calculate_source(dim, cur_dt, cell_width, primitive_map,
-                              dUcons_map, *interface_velocity_arr_ptr, eos_,
+                              dUcons_map, *interface_velocity_arr_ptr,
                               cur_stale_depth);
   }
 
@@ -674,7 +674,7 @@ void EnzoMethodMHDVlct::compute_source_terms_
     //   acceleration fields at the partial timestep
     EnzoSourceGravity gravity_source;
     gravity_source.calculate_source(cur_dt, orig_integration_map, dUcons_map,
-                                    accel_map, eos_, stale_depth);
+                                    accel_map, stale_depth);
   }
 }
 
