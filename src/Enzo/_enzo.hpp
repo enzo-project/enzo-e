@@ -245,6 +245,8 @@ extern "C" {
 #include "enzo_EnzoBfieldMethod.hpp"
 #include "enzo_EnzoBfieldMethodCT.hpp"
 
+#include "enzo_GrackleChemistryData.hpp"
+
 #include "enzo_EnzoMethodAccretion.hpp"
 #include "enzo_EnzoMethodBackgroundAcceleration.hpp"
 #include "enzo_EnzoMethodBondiHoyleAccretion.hpp"
