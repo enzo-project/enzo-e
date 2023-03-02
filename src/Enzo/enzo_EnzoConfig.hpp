@@ -385,6 +385,8 @@ public: // interface
       method_inference_array_size(),
       method_inference_field_group(),
       method_inference_overdensity_threshold(0),
+      method_inference_starnet_S1(true),
+      method_inference_starnet_S2(true),
       /// EnzoMethodStarMaker
       method_star_maker_flavor(""),
       method_star_maker_use_density_threshold(false),           // check above density threshold before SF
@@ -880,6 +882,8 @@ public: // attributes
   int                        method_inference_array_size[3];
   std::string                method_inference_field_group;
   float                      method_inference_overdensity_threshold;
+  bool                       method_inference_starnet_S1;
+  bool                       method_inference_starnet_S2;
 
   /// EnzoMethodStarMaker
   std::string               method_star_maker_flavor;

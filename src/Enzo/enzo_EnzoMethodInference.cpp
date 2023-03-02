@@ -927,7 +927,10 @@ void EnzoLevelArray::apply_inference()
   //
   //==================================================
 
+  const EnzoConfig * enzo_config = enzo::config();
+
 // if inference_method == "starnet"
+// TUTORIAL: https://github.com/prabhuomkar/pytorch-cpp/blob/master/tutorials/basics/pytorch_basics/main.cpp
   #ifdef CONFIG_USE_TORCH
     // StarFind:
     // ----------------------
@@ -959,17 +962,20 @@ void EnzoLevelArray::apply_inference()
     enzo_float * density       = field_values_[0].data();
     enzo_float * metal_density = field_values_[5].data();
 
-    const double hx = (upper[0] - lower[0]) / nix_;
-    const double hy = (upper[1] - lower[1]) / niy_;
-    const double hz = (upper[2] - lower[2]) / niz_;
+    int nx,ny,nz;
+    cello::hierarchy()->root_size(&nx,&ny,&nz);
+
+    const double hx = pow(2.0, -1.0 * enzo_config->method_inference_level_infer) / nx; //(upper[0] - lower[0]) / nix_;
+    const double hy = pow(2.0, -1.0 * enzo_config->method_inference_level_infer) / ny; //(upper[1] - lower[1]) / niy_;
+    const double hz = pow(2.0, -1.0 * enzo_config->method_inference_level_infer) / nz; //(upper[2] - lower[2]) / niz_;
 
     for (int iz=0; iz<niz_; iz++){
       for (int iy=0; iy<niy_; iy++){
         for (int ix=0; ix<nix_; ix++){
           int i = INDEX(ix,iy,iz,nix_,niy_);
-          velocity_divergence[i]  = 0.5/hx * (vx[i+idx] - vx[i-idx]);
-          velocity_divergence[i] += 0.5/hy * (vy[i+idy] - vy[i-idy]);
-          velocity_divergence[i] += 0.5/hz * (vz[i+idz] - vz[i-idz]);
+          velocity_divergence[i]  = 0.5 * (vx[i+idx] - vx[i-idx]); // / hx;
+          velocity_divergence[i] += 0.5 * (vy[i+idy] - vy[i-idy]); // / hy;
+          velocity_divergence[i] += 0.5 * (vz[i+idz] - vz[i-idz]); // / hz;
 
           metallicity[i] = metal_density[i] / density[i];
         } // ix
@@ -985,11 +991,12 @@ void EnzoLevelArray::apply_inference()
  
     // means and stds from StarNetRuntime/resources/Scaling_64x160.torch
     std::vector <double> means = {3.395644060629469e-27/rhounit, 1.5020361582642288e-30/rhounit, 
-                -793.0158410664843/vunit*lunit, 
+                -793.0158410664843/vunit, 
                 2.656904298376402e-07/Zunit, 96878457078.45897/(vunit*vunit)};
     std::vector <double> stds  = {4.858201188227477e-26/rhounit, 7.886306542228033e-29/rhounit, 
-                8358.282154906454/vunit*lunit,
+                8358.282154906454/vunit,
                 6.23778749095905e-13/Zunit, 531795315558.7779/(vunit*vunit)};
+
 
     int i_f_ = 0; 
     for (int i_f=0; i_f < num_fields_; i_f++) {
@@ -1007,7 +1014,10 @@ void EnzoLevelArray::apply_inference()
         for (int iy=0; iy<niy_; iy++){
           for (int ix=0; ix<nix_; ix++){
             int i = INDEX(ix,iy,iz,nix_,niy_);
-            field_data.index({0,i_f_,ix,iy,iz}) = (array[i] - means[i_f_])/stds[i_f_];
+//            field_data.index({0,i_f_,ix,iy,iz}) = (array[i] - means[i_f_])/stds[i_f_];
+            field_data[0][i_f_][ix][iy][iz] = (array[i] - means[i_f_])/stds[i_f_];
+
+            //CkPrintf("%d %f %f\n", i_f_, (array[i] - means[i_f_])/stds[i_f_], field_data.index({0,i_f_,ix,iy,iz}).item<double>());
           } // ix
         } // iy
       } // iz
@@ -1017,52 +1027,58 @@ void EnzoLevelArray::apply_inference()
     //std::cout << field_data << std::endl;
     delete [] velocity_divergence;
 
-    // see step 4 of https://pytorch.org/tutorials/advanced/cpp_export.html 
     std::vector<torch::jit::IValue> sample; 
     sample.push_back(field_data);
-   
-    at::Tensor prediction_s1 = stage1.forward(sample).toTensor(); //(pstar, pnostar)
-    
-    double num_0 = std::exp(prediction_s1.index({0,0}).item<double>());
-    double num_1 = std::exp(prediction_s1.index({0,1}).item<double>());
-    double pnostar = num_0 / (num_0 + num_1);
-    double pstar   = num_1 / (num_0 + num_1);
- 
-    CkPrintf("EnzoMethodInference::S1 prediction = (%f, %f), (pnostar, pstar) = (%f, %f); pnostar + pstar = %f\n", prediction_s1.index({0,0}).item<double>(), prediction_s1.index({0,1}).item<double>(), pnostar, pstar, pstar+pnostar);
 
-    if (isnan(pstar)) {
-      pstar = 0.0;
-      pnostar = 1.0;
-    }
+    // if skipping stage 1 classifier, all inference blocks
+    // are treated as potential star-forming blocks 
+    // and will be fed into the stage 2 inception network
+    bool star_in_block = true;
+    if (enzo_config->method_inference_starnet_S1) {
+      // see step 4 of https://pytorch.org/tutorials/advanced/cpp_export.html 
+      at::Tensor prediction_s1 = stage1.forward(sample).toTensor(); //(pstar, pnostar)
+    
+      double num_0 = std::exp(prediction_s1.index({0,0}).item<double>());
+      double num_1 = std::exp(prediction_s1.index({0,1}).item<double>());
+      double pnostar = num_0 / (num_0 + num_1);
+      double pstar   = num_1 / (num_0 + num_1);
+ 
+      CkPrintf("EnzoMethodInference::S1 prediction = (%f, %f), (pnostar, pstar) = (%f, %f); pnostar + pstar = %f\n", prediction_s1.index({0,0}).item<double>(), prediction_s1.index({0,1}).item<double>(), pnostar, pstar, pstar+pnostar);
 
     //ASSERT("EnzoMethodInference::apply_inference()",
     //       "pstar+pnostar != 1.0", pstar+pnostar == 1.0);
+        
+    star_in_block = (pstar > pnostar);
+    }
 
-    if (pstar > pnostar) {
-      CkPrintf("EnzoMethodInference::S1 classifier passed! Calling S2 now...\n");
+    if (star_in_block && enzo_config->method_inference_starnet_S2) {
+
+      CkPrintf("EnzoMethodInference::Calling S2 inception U-net...\n");
       
       // load stage-2 model (incepunet)
       const std::string stage2_checkpoint = "/home1/07320/whick002/StarNetRuntime/model_checkpoints/incepunet.jtpt";
+      
       // Deserialize the ScriptModule from a file using torch::jit::load().
-
       torch::jit::script::Module stage2 = torch::jit::load(stage2_checkpoint); // shape = {1,2,nx,ny,nz}
      
       at::Tensor prediction_s2 = stage2.forward(sample).toTensor();
 
       bool * mask = new bool[nix_*niy_*niz_]; // boolean array containing indices of Pop III SF 
-      double pstar_i, pnostar_i;
-      for (int iz=0; iz<niz_; iz++){
+      double pstar_i, pnostar_i, num_0_i, num_1_i;
+      // replace nix_, niy_, niz_ with 64
+      for (int iz=0; iz<nix_; iz++){
        for (int iy=0; iy<niy_; iy++){
-         for (int ix=0; ix<nix_; ix++){
+         for (int ix=0; ix<niz_; ix++){
            int i = INDEX(ix,iy,iz,nix_,niy_);
-           num_0 = std::exp(prediction_s2.index({0,0,ix,iy,iz}).item<double>());
-           num_1 = std::exp(prediction_s2.index({0,1,ix,iy,iz}).item<double>());
+           num_0_i = std::exp(prediction_s2.index({0,0,ix,iy,iz}).item<double>());
+           num_1_i = std::exp(prediction_s2.index({0,1,ix,iy,iz}).item<double>());
 
-           pnostar_i = num_0 / (num_0 + num_1);
-           pstar_i   = num_1 / (num_0 + num_1);
+           pnostar_i = num_0_i / (num_0_i + num_1_i);
+           pstar_i   = num_1_i / (num_0_i + num_1_i);
+
            if (pstar_i > pnostar_i) {
              mask[i] = true;
-             CkPrintf("EnzoMethodInference::Starfind predicts Pop III star formation at (x, y, z) = (%d,%d,%d); index = %d\n", lower[0]+ix*hx, lower[1]+iy*hy, lower[2]+iz*hz, i);
+             CkPrintf("EnzoMethodInference::Starfind predicts Pop III star formation at (x, y, z) = (%d,%d,%d); index = %d (%d, %d, %d); nix_ = %d; niy_ = %d; niz_ = %d; hx = %f; up = %f low = %f\n", lower[0]+(ix+0.5*hx), (lower[1]+0.5)+iy*hy, lower[2]+(iz+0.5)*hz, i, ix, iy, iz, nix_, niy_, niz_, hx, upper[0], lower[0]);
            } 
            else mask[i] = false;
          } // ix

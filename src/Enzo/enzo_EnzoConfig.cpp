@@ -260,6 +260,8 @@ EnzoConfig::EnzoConfig() throw ()
   method_inference_array_size(),
   method_inference_field_group(),
   method_inference_overdensity_threshold(0),
+  method_inference_starnet_S1(true),
+  method_inference_starnet_S2(true),
   // EnzoMethodStarMaker,
   method_star_maker_flavor(""),                              // star maker type to use
   method_star_maker_use_altAlpha(false),
@@ -662,6 +664,8 @@ void EnzoConfig::pup (PUP::er &p)
   PUParray(p,method_inference_array_size,3);
   p | method_inference_field_group;
   p | method_inference_overdensity_threshold;
+  p | method_inference_starnet_S1;
+  p | method_inference_starnet_S2;
 
   p | method_star_maker_flavor;
   p | method_star_maker_use_altAlpha;
@@ -1946,6 +1950,12 @@ void EnzoConfig::read_method_inference_(Parameters* p)
 
   method_inference_overdensity_threshold = p->value_float
     ("Method:inference:overdensity_threshold",0.0);
+
+  method_inference_starnet_S1 = p->value_logical
+    ("Method:inference:starnet_S1",true);
+
+  method_inference_starnet_S2 = p->value_logical
+    ("Method:inference:starnet_S2",true);
 }
 
 //----------------------------------------------------------------------
