@@ -48,7 +48,8 @@ class EnzoMethodGrackle : public Method {
 public: // interface
 
   /// Create a new EnzoMethodGrackle object
-  EnzoMethodGrackle(
+  EnzoMethodGrackle(GrackleChemistryData my_chemistry,
+                    bool use_cooling_timestep,
                     const double physics_cosmology_initial_redshift,
                     const double time);
 
@@ -62,9 +63,11 @@ public: // interface
   EnzoMethodGrackle (CkMigrateMessage *m)
     : Method (m)
 #ifdef CONFIG_USE_GRACKLE
+      , my_chemistry_()
       , grackle_units_()
       , grackle_rates_()
       , time_grackle_data_initialized_(ENZO_FLOAT_UNDEFINED)
+      , use_cooling_timestep_(false)
 #endif
     {  }
 
@@ -79,10 +82,11 @@ public: // interface
     TRACEPUP;
 
     Method::pup(p);
-
+    p | my_chemistry_;
     p | grackle_units_;
     double last_init_time = time_grackle_data_initialized_;
     p | last_init_time;
+    p | use_cooling_timestep_;
     if (p.isUnpacking()) {
       ASSERT("EnzoMethodGrackle::pup",
              "grackle_chemistry_data must have previously been initialized",
@@ -107,6 +111,17 @@ public: // interface
 
   /// Compute maximum timestep for this method
   virtual double timestep ( Block * block) throw();
+
+  /// returns the stored instance of GrackleChemistryData, if the simulation is
+  /// configured to actually use grackle
+  const GrackleChemistryData* try_get_chemistry() const throw() {
+#ifndef CONFIG_USE_GRACKLE
+    return nullptr;
+#else
+    return (my_chemistry_.get<int>("use_grackle") == 1) ?
+      &my_chemistry_ : nullptr;
+#endif
+  }
 
 #ifdef CONFIG_USE_GRACKLE
 
@@ -243,11 +258,16 @@ protected: // methods
 
   void ResetEnergies ( Block * block) throw();
 
-// protected: // attributes
+#endif
 
+protected: // attributes
+#ifdef CONFIG_USE_GRACKLE
+
+  GrackleChemistryData my_chemistry_;
   code_units grackle_units_;
   chemistry_data_storage grackle_rates_;
   double time_grackle_data_initialized_;
+  bool use_cooling_timestep_;
 
 #endif
 

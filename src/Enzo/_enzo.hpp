@@ -167,6 +167,8 @@ extern "C" {
 #include "enzo_EnzoFluidFloorConfig.hpp"
 #include "enzo_EnzoPhysicsFluidProps.hpp"
 
+#include "enzo_GrackleChemistryData.hpp"
+
 #include "enzo_EnzoUnits.hpp"
 
 #include "enzo_EnzoFactory.hpp"
@@ -244,8 +246,6 @@ extern "C" {
 // [order dependencies:]
 #include "enzo_EnzoBfieldMethod.hpp"
 #include "enzo_EnzoBfieldMethodCT.hpp"
-
-#include "enzo_GrackleChemistryData.hpp"
 
 #include "enzo_EnzoMethodAccretion.hpp"
 #include "enzo_EnzoMethodBackgroundAcceleration.hpp"

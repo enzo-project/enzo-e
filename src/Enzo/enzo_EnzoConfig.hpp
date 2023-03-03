@@ -14,89 +14,6 @@
 
 class Parameters;
 
-#ifdef CONFIG_USE_GRACKLE
-// Operator to allow Grackle's chemistry data to PUP
-inline void operator|(PUP::er &p, chemistry_data &c){
-  // all values are single ints, floats, or doubles with the
-  // exception of grackle_data_file
-  p | c.use_grackle;
-  p | c.with_radiative_cooling;
-  p | c.primordial_chemistry;
-  p | c.dust_chemistry;
-  p | c.metal_cooling;
-  p | c.UVbackground;
-
-  bool skip_strlen = (p.isUnpacking() || c.grackle_data_file == NULL);
-  int length = (skip_strlen) ? 0 : strlen(c.grackle_data_file);
-  p | length;
-  if (length > 0){
-    if (p.isUnpacking()){
-      c.grackle_data_file=new char[length+1];
-    }
-    PUParray(p, c.grackle_data_file,length+1);
-  } else {
-    c.grackle_data_file = NULL;
-  }
-
-  p | c.cmb_temperature_floor;
-  p | c.Gamma;
-  p | c.h2_on_dust;
-  p | c.use_dust_density_field;
-  p | c.dust_recombination_cooling;
-  p | c.photoelectric_heating;
-  p | c.photoelectric_heating_rate;
-  p | c.use_isrf_field;
-  p | c.interstellar_radiation_field;
-  p | c.use_volumetric_heating_rate;
-  p | c.use_specific_heating_rate;
-  p | c.three_body_rate;
-  p | c.cie_cooling;
-  p | c.h2_optical_depth_approximation;
-  p | c.ih2co;
-  p | c.ipiht;
-  p | c.HydrogenFractionByMass;
-  p | c.DeuteriumToHydrogenRatio;
-  p | c.SolarMetalFractionByMass;
-  p | c.local_dust_to_gas_ratio;
-  p | c.NumberOfTemperatureBins;
-  p | c.CaseBRecombination;
-  p | c.TemperatureStart;
-  p | c.TemperatureEnd;
-  p | c.NumberOfDustTemperatureBins;
-  p | c.DustTemperatureStart;
-  p | c.DustTemperatureEnd;
-  p | c.Compton_xray_heating;
-  p | c.LWbackground_sawtooth_suppression;
-  p | c.LWbackground_intensity;
-  p | c.UVbackground_redshift_on;
-  p | c.UVbackground_redshift_off;
-  p | c.UVbackground_redshift_fullon;
-  p | c.UVbackground_redshift_drop;
-  p | c.cloudy_electron_fraction_factor;
-  p | c.use_radiative_transfer;
-  p | c.radiative_transfer_coupled_rate_solver;
-  p | c.radiative_transfer_intermediate_step;
-  p | c.radiative_transfer_hydrogen_only;
-  p | c.self_shielding_method;
-  p | c.H2_self_shielding;
-  p | c.H2_custom_shielding;
-  p | c.h2_charge_exchange_rate;
-  p | c.h2_dust_rate;
-  p | c.h2_h_cooling_rate;
-  p | c.collisional_excitation_rates;
-  p | c.collisional_ionisation_rates;
-  p | c.recombination_cooling_rates;
-  p | c.bremsstrahlung_cooling_rates;
-  p | c.max_iterations;
-  p | c.exit_after_iterations_exceeded;
-
-# ifdef CONFIG_SMP_MODE
-  // Corresponds to -D_OPENMP in Grackle
-  p | omp_nthreads;
-# endif
-}
-#endif
-
 class EnzoConfig : public Config {
 
   /// @class    EnzoConfig
@@ -214,7 +131,6 @@ public: // interface
       initial_feedback_test_star_mass(),
       initial_feedback_test_temperature(),
       initial_feedback_test_luminosity(),
-#ifdef CONFIG_USE_GRACKLE
       // EnzoGrackleTest
       initial_grackle_test_maximum_H_number_density(1000.0),
       initial_grackle_test_maximum_metallicity(1.0),
@@ -223,7 +139,6 @@ public: // interface
       initial_grackle_test_minimum_metallicity(1.0E-4),
       initial_grackle_test_minimum_temperature(10.0),
       initial_grackle_test_reset_energies(0),
-#endif /* CONFIG_USE_GRACKLE */
       // EnzoInitialHdf5
       initial_hdf5_blocking(),
       initial_hdf5_field_coords(),
@@ -429,11 +344,9 @@ public: // interface
       method_turbulence_mach_number(0.0),
       // EnzoMethodGrackle
       method_grackle_use_grackle(false),
-#ifdef CONFIG_USE_GRACKLE
-      method_grackle_chemistry(nullptr),
+      method_grackle_chemistry(),
       method_grackle_use_cooling_timestep(false),
       method_grackle_radiation_redshift(-1.0),
-#endif
       // EnzoMethodGravity
       method_gravity_grav_const(0.0),
       method_gravity_solver(""),
@@ -668,7 +581,6 @@ public: // attributes
   double                     initial_collapse_temperature;
 
   /// EnzoGrackleTest
-#ifdef CONFIG_USE_GRACKLE
   double                     initial_grackle_test_maximum_H_number_density;
   double                     initial_grackle_test_maximum_metallicity;
   double                     initial_grackle_test_maximum_temperature;
@@ -676,8 +588,6 @@ public: // attributes
   double                     initial_grackle_test_minimum_metallicity;
   double                     initial_grackle_test_minimum_temperature;
   int                        initial_grackle_test_reset_energies;
-
-#endif /* CONFIG_USE_GRACKLE */
 
   /// EnzoInitialHdf5
 
@@ -952,11 +862,9 @@ public: // attributes
 
   /// EnzoMethodGrackle
   bool                       method_grackle_use_grackle;
-#ifdef CONFIG_USE_GRACKLE
-  chemistry_data *           method_grackle_chemistry;
+  GrackleChemistryData       method_grackle_chemistry;
   bool                       method_grackle_use_cooling_timestep;
   double                     method_grackle_radiation_redshift;
-#endif /* CONFIG_USE_GRACKLE */
 
   /// EnzoMethodGravity
   double                     method_gravity_grav_const;

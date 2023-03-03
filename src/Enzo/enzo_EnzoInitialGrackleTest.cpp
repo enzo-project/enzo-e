@@ -116,8 +116,21 @@ void EnzoInitialGrackleTest::enforce_block
 
   double tiny_number = 1e-10;
 
-  chemistry_data * grackle_chemistry =
-    enzo::config()->method_grackle_chemistry;
+  // load some information about how grackle is configured
+  const GrackleChemistryData * grackle_chem = enzo::grackle_chemistry();
+  ASSERT("EnzoInitialGrackleTest",
+         "the simulation must be configured to use grackle",
+         grackle_chem != nullptr);
+  const int primordial_chemistry
+    = grackle_chem->get<int>("primordial_chemistry");
+
+  // load some constants from the Grackle configuration
+  const double HydrogenFractionByMass
+    = grackle_chem->get<double>("HydrogenFractionByMass");
+  const double SolarMetalFractionByMass
+    = grackle_chem->get<double>("SolarMetalFractionByMass");
+  const double DeuteriumToHydrogenRatio
+    = grackle_chem->get<double>("DeuteriumToHydrogenRatio");
 
   for (int iz=0; iz<nz+gz; iz++){ // Metallicity
     for (int iy=0; iy<ny+gy; iy++) { // Temperature
@@ -126,31 +139,31 @@ void EnzoInitialGrackleTest::enforce_block
 
         grackle_fields_.density[i] = enzo_constants::mass_hydrogen *
                      pow(10.0, ((H_n_slope * (ix-gx)) + log10(enzo_config->initial_grackle_test_minimum_H_number_density)))/
-                     grackle_chemistry->HydrogenFractionByMass / enzo_units->density();
+                     HydrogenFractionByMass / enzo_units->density();
 
         // solar metallicity
         grackle_fields_.metal_density[i] = pow(10.0,((metallicity_slope * (iz-gz)) +
                                           log10(enzo_config->initial_grackle_test_minimum_metallicity))) *
-                                          grackle_chemistry->SolarMetalFractionByMass * grackle_fields_.density[i];
+                                          SolarMetalFractionByMass * grackle_fields_.density[i];
         grackle_fields_.x_velocity[i] = 0.0;
         grackle_fields_.y_velocity[i] = 0.0;
         grackle_fields_.z_velocity[i] = 0.0;
 
-        if (grackle_chemistry->primordial_chemistry > 0){
-            grackle_fields_.HI_density[i]    = grackle_fields_.density[i] * grackle_chemistry->HydrogenFractionByMass;
+        if (primordial_chemistry > 0){
+            grackle_fields_.HI_density[i]    = grackle_fields_.density[i] * HydrogenFractionByMass;
             grackle_fields_.HII_density[i]   = grackle_fields_.density[i] * tiny_number;
-            grackle_fields_.HeI_density[i]   = grackle_fields_.density[i] * (1.0 - grackle_chemistry->HydrogenFractionByMass);
+            grackle_fields_.HeI_density[i]   = grackle_fields_.density[i] * (1.0 - HydrogenFractionByMass);
             grackle_fields_.HeII_density[i]  = grackle_fields_.density[i] * tiny_number;
             grackle_fields_.HeIII_density[i] = grackle_fields_.density[i] * tiny_number;
             grackle_fields_.e_density[i]     = grackle_fields_.density[i] * tiny_number;
         }
-        if (grackle_chemistry->primordial_chemistry > 1){
+        if (primordial_chemistry > 1){
           grackle_fields_.HM_density[i]    = grackle_fields_.density[i] * tiny_number;
           grackle_fields_.H2I_density[i]   = grackle_fields_.density[i] * tiny_number;
           grackle_fields_.H2II_density[i]  = grackle_fields_.density[i] * tiny_number;
         }
-        if (grackle_chemistry->primordial_chemistry > 2){
-            grackle_fields_.DI_density[i]    = grackle_fields_.density[i] * grackle_chemistry->DeuteriumToHydrogenRatio;
+        if (primordial_chemistry > 2){
+            grackle_fields_.DI_density[i]    = grackle_fields_.density[i] * DeuteriumToHydrogenRatio;
             grackle_fields_.DII_density[i]   = grackle_fields_.density[i] * tiny_number;
             grackle_fields_.HDI_density[i]   = grackle_fields_.density[i] * tiny_number;
         }
@@ -169,7 +182,7 @@ void EnzoInitialGrackleTest::enforce_block
         int i = INDEX(ix,iy,iz,ngx,ngy);
 
         /* calculate mu if following species */
-        if (grackle_chemistry->primordial_chemistry > 0){
+        if (primordial_chemistry > 0){
 
           mu = grackle_fields_.e_density[i] + grackle_fields_.HI_density[i] +
                       grackle_fields_.HII_density[i] +
@@ -177,12 +190,12 @@ void EnzoInitialGrackleTest::enforce_block
                        grackle_fields_.HeII_density[i] +
                        grackle_fields_.HeIII_density[i])*0.25;
 
-          if (grackle_chemistry->primordial_chemistry > 1){
+          if (primordial_chemistry > 1){
 
             mu += grackle_fields_.HM_density[i] + (grackle_fields_.H2I_density[i] +
                    grackle_fields_.H2II_density[i])*0.5;
           }
-          if (grackle_chemistry->primordial_chemistry > 2){
+          if (primordial_chemistry > 2){
             mu += (grackle_fields_.DI_density[i] + grackle_fields_.DII_density[i])*0.5 +
                    grackle_fields_.HDI_density[i]/3.0;
           }

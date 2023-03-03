@@ -229,32 +229,37 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 
   compute_temperature.compute(enzo_block);
 
+  const GrackleChemistryData * grackle_chem = enzo::grackle_chemistry();
+  const int primordial_chemistry = (grackle_chem == nullptr) ?
+    0 : grackle_chem->get<int>("primordial_chemistry");
 
-  double mu = static_cast<double>(enzo::fluid_props()->mol_weight());
+  const double dflt_mu = static_cast<double>(enzo::fluid_props()->mol_weight());
   // iterate over all cells (not including ghost zones)
   for (int iz=gz; iz<nz+gz; iz++){
     for (int iy=gy; iy<ny+gy; iy++){
       for (int ix=gx; ix<nx+gx; ix++){
 
         int i = INDEX(ix,iy,iz,mx,my);//ix + mx*(iy + my*iz);
-     
+
+        double mu;
         // compute MMW -- TODO: Make EnzoComputeMeanMolecularWeight class and reference
         // mu_field here?
-        #ifdef CONFIG_USE_GRACKLE
-          int primordial_chemistry = (enzo::config()->method_grackle_chemistry)->primordial_chemistry;
-          if (primordial_chemistry > 0) {
-            mu = d_el[i] + dHI[i] + dHII[i] + 0.25*(dHeI[i]+dHeII[i]+dHeIII[i]);
+        if (primordial_chemistry > 0) {
+          mu = d_el[i] + dHI[i] + dHII[i] + 0.25*(dHeI[i]+dHeII[i]+dHeIII[i]);
 
-            if (primordial_chemistry > 1) {
-              mu += dHM[i] + 0.5*(dH2I[i]+dH2II[i]);
-            }
-            if (primordial_chemistry > 2) {
-              mu += 0.5*(dDI[i] + dDII[i]) + dHDI[i]/3.0;
-            }
+          if (primordial_chemistry > 1) {
+            mu += dHM[i] + 0.5*(dH2I[i]+dH2II[i]);
+          }
+          if (primordial_chemistry > 2) {
+            mu += 0.5*(dDI[i] + dDII[i]) + dHDI[i]/3.0;
           }
           mu /= density[i];
-          mu = 1.0/mu; 
-        #endif
+        } else {
+          mu = dflt_mu;
+          // in an older version, mu = dflt_mu/d[ind], but I think that was a
+          // typo
+        }
+        mu = 1.0/mu;
 
         double rho_cgs = density[i] * enzo_units->density();
         double mean_particle_mass = mu * enzo_constants::mass_hydrogen;
