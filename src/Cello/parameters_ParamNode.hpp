@@ -82,22 +82,6 @@ public: // interface
   int size()
   {return subnodes_.size(); }
 
-  /// Return the ith subgroup
-  std::string subgroup (int group_index)
-  {
-    if (0 <= group_index && group_index < size()) {
-      int i = 0;
-      for (auto it_param =  subnodes_.begin();
-	   it_param != subnodes_.end();
-	   ++it_param,i++) {
-	if (group_index == i) {
-	  return it_param->first;
-	}
-      }
-    }
-    return "";
-  };
-
   /// Return the given subnode, returning 0 if it doesn't exist
   ParamNode * subnode(std::string subgroup)
   {
