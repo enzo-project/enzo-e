@@ -189,7 +189,7 @@ void EnzoInitialHdf5::load_data(int & count_messages,
     for (int ay = lower[1]; ay < upper[1]; ay++) {
       for (int az = lower[2]; az < upper[2]; az++) {
         int block_index[3] = {ax, ay, az};
-        for (int i = 0; i < 3; i++) block_index[i] -= region_lower[i];
+        for (int i = 0; i < 3; i++) block_index[i] -= (region_lower[i] << 1);
         Index index_block = block->index_from_global(ax, ay, az, level, min_level);
         loader.load(block_index, index_block);
       }
@@ -211,9 +211,9 @@ void EnzoInitialHdf5::get_reader_range(Index reader_index, int lower[3], int upp
 
   // Compute the range of the specfied reader block at the given level.
   for (int i=0; i < 3; i++)
-    lower[i] = std::max(root_range_lower[i] << level, region_lower[i]);
+    lower[i] = std::max(root_range_lower[i] << level, region_lower[i] << 1);
   for (int i=0; i < 3; i++)
-    upper[i] = std::min(root_range_upper[i] << level, region_upper[i]);
+    upper[i] = std::min(root_range_upper[i] << level, region_upper[i] << 1);
 }
 
 //----------------------------------------------------------------------
@@ -350,11 +350,11 @@ void DataLoader::load(int* block_index, Index index_block) {
 void DataLoader::read_dataset_(char ** data, Index index_block, int block_index[3])
 {
   // Get the grid size at level_
-  Hierarchy * hierarchy = cello::simulation()->hierarchy();
-  double lower_domain[3];
-  double upper_domain[3];
-  hierarchy->lower(lower_domain, lower_domain+1, lower_domain+2);
-  hierarchy->upper(upper_domain, upper_domain+1, upper_domain+2);
+  // Hierarchy * hierarchy = cello::simulation()->hierarchy();
+  // double lower_domain[3];
+  // double upper_domain[3];
+  // hierarchy->lower(lower_domain, lower_domain+1, lower_domain+2);
+  // hierarchy->upper(upper_domain, upper_domain+1, upper_domain+2);
 
   // Read the domain dimensions
   IX = coords.find ("x");
@@ -376,9 +376,9 @@ void DataLoader::read_dataset_(char ** data, Index index_block, int block_index[
 
   // compute cell widths
   h4[0] = h4[1] = h4[2] = h4[3] = 1.0;
-  h4[IX] = (upper_block[0] - lower_block[0]) / nx;
-  h4[IY] = (upper_block[1] - lower_block[1]) / ny;
-  h4[IZ] = (upper_block[2] - lower_block[2]) / nz;
+  h4[IX] = (upper_block[0] - lower_block[0]) / (nx << index_block.level());
+  h4[IY] = (upper_block[1] - lower_block[1]) / (ny << index_block.level());
+  h4[IZ] = (upper_block[2] - lower_block[2]) / (nz << index_block.level());
 
   // determine offsets
   int o4[4] = {0,0,0,0};
