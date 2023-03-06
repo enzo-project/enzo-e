@@ -53,38 +53,25 @@ public: // interface
 
     p | name_;
 
-    // pup std::map<std::string,ParamNode*> subnodes_ using arrays
+    // pup std::map<std::string,ParamNode*> subnodes_
     
-    int n;
-    if (p.isPacking()) {
-      n = 0;
-      for(auto it=subnodes_.begin(); it != subnodes_.end(); it++) {
-	++n;
-      }
-      p | n;
-      for(auto it=subnodes_.begin(); it != subnodes_.end(); it++) {
-	std::string name = it->first;
-	int l = name.size();
-	char * array = new char[l];
-	strncpy(array,name.c_str(),l);
-	p | l;
-	delete [] array;
-	p | *it->second;
+    int n = this->size();
+    p | n;
+    if (!p.isUnpacking()) {
+      for (std::pair<const std::string, ParamNode*>& key_val : subnodes_) {
+        std::string name = key_val.first;
+        p | name;
+        ParamNode* subnode = key_val.second;
+        p | *subnode;
       }
     } else {
-      p | n;
       for (int i=0; i<n; i++) {
-	std::string name;
-	ParamNode * node;
-	int l;
-	p | l;
-	char * array = new char[l];
-	name = array;
-	delete [] array;
-	node = new ParamNode(name);
-	p | *node;
-	subnodes_[name] = node;
-      }	
+        std::string name;
+        p | name;
+	ParamNode * subnode = new ParamNode(name);
+        p | *subnode;
+        subnodes_[name] = subnode;
+      }
     }
   }
 
