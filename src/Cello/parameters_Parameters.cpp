@@ -1055,7 +1055,16 @@ int Parameters::readline_
 Param * Parameters::param (std::string parameter, int index)
 {
   if (index == -1) {
-    return parameter_map_[parameter_name_(parameter)];
+    std::string full_name = parameter_name_(parameter);
+    // this branch was previously equivalent to:
+    //     return parameter_map_[full_name];
+    // however, when full_name wasn't a key within parameter_map_, that
+    // implicity inserted the key-value pair (full_name, nullptr) within
+    // parameter_map_
+    //
+    // The modern implementation avoids mutating parameter_map_
+    auto search = parameter_map_.find(full_name);
+    return (search != parameter_map_.end()) ? search->second : nullptr;
   } else {
     Param * list = this->param(parameter);
     Param * param = NULL;
