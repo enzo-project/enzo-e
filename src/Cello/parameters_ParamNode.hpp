@@ -79,11 +79,10 @@ public: // interface
   std::string name() const {return name_;};
 
   /// Return the number of subgroups
-  int size()
-  {return subnodes_.size(); }
+  int size() const { return subnodes_.size(); }
 
   /// Return the given subnode, returning 0 if it doesn't exist
-  ParamNode * subnode(std::string subgroup)
+  const ParamNode * subnode(std::string subgroup) const
   {
     auto search = subnodes_.find(subgroup);
     return (search != subnodes_.end()) ? search->second : nullptr;
