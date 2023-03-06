@@ -24,30 +24,22 @@ public: // interface
   {};
 
   //----------------------------------------------------------------------
-  // Big Three
+  // Big Five
   //----------------------------------------------------------------------
 
   /// Destructor
   ~ParamNode() throw()
   {
-    for (auto it_param =  subnodes_.begin();
-	 it_param != subnodes_.end();
-	 ++it_param) {
-      delete it_param->second;
+    for (std::pair<const std::string, ParamNode*>& key_val : subnodes_) {
+      delete key_val.second;
     }
   };
 
-private: // No copy or assign
-
-  /// Copy constructor
-  ParamNode(const ParamNode & param_node) throw()
-  {  }
-
-  /// Assignment operator
-  ParamNode & operator= (const ParamNode & param_node) throw()
-  {
-    return *this;
-  }
+  // No copy/move constructors or assignment operators:
+  ParamNode(const ParamNode&) = delete;
+  ParamNode(ParamNode&&) = delete;
+  ParamNode & operator= (const ParamNode &) = delete;
+  ParamNode & operator= (const ParamNode &&) = delete;
 
 public: // interface
 
@@ -120,7 +112,8 @@ public: // interface
   /// Return the given subnode, returning 0 if it doesn't exist
   ParamNode * subnode(std::string subgroup)
   {
-    return subnodes_[subgroup];
+    auto search = subnodes_.find(subgroup);
+    return (search != subnodes_.end()) ? search->second : nullptr;
   }
 
   /// Return the given subgroup, creating a new one if it doesn't exist
