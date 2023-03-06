@@ -35,11 +35,13 @@ public: // interface
     }
   };
 
-  // No copy/move constructors or assignment operators:
+  // No copy constructor or copy assignment:
   ParamNode(const ParamNode&) = delete;
-  ParamNode(ParamNode&&) = delete;
   ParamNode & operator= (const ParamNode &) = delete;
-  ParamNode & operator= (const ParamNode &&) = delete;
+
+  // force the compiler to generate move constructor and move assignment
+  ParamNode(ParamNode&&) = default;
+  ParamNode & operator= (ParamNode &&) = default;
 
 public: // interface
 
