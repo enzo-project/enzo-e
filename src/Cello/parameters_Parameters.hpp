@@ -278,7 +278,7 @@ private: // attributes
   std::map<std::string, Param *>  parameter_map_;
 
   /// Parameters represented as a tree with groups as internal nodes
-  ParamNode                     * parameter_tree_;
+  ParamNode parameter_tree_;
 
   /// Monitor object for parameters
   Monitor * monitor_; 

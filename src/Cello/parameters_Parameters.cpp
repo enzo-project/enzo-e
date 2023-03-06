@@ -19,7 +19,7 @@ Parameters::Parameters(Monitor * monitor)
   throw()
   : current_group_(),
     parameter_map_(),
-    parameter_tree_(new ParamNode("Cello")),
+    parameter_tree_("Cello"),
     monitor_(monitor),
     lmonitor_(true)
 {
@@ -53,8 +53,7 @@ Parameters::~Parameters()
             (it_param->first).c_str(), (it_param->second != nullptr));
     delete it_param->second;
   }
-#endif  
-  delete parameter_tree_;
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -812,7 +811,7 @@ int Parameters::group_depth() const throw()
 int Parameters::group_count() const throw()
 {
   // Find the parameter node for the current list of groups
-  ParamNode * param_node = parameter_tree_;
+  const ParamNode * param_node = &parameter_tree_;
   for (size_t i=0; i<current_group_.size(); i++) {
     if (param_node->subnode(current_group_[i]) != 0) {
       param_node = param_node->subnode(current_group_[i]);
@@ -1162,7 +1161,7 @@ void Parameters::new_param_
 
   int num_groups = extract_groups_(full_parameter,groups);
 
-  ParamNode * param_node = parameter_tree_;
+  ParamNode * param_node = &parameter_tree_;
   for (int i=0; i<num_groups; i++) {
     param_node = param_node->new_subnode(groups[i]);
   }
