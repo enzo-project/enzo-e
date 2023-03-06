@@ -91,9 +91,6 @@ public: // interface
   virtual void create_child_blocks();
   void instantiate_children();
 
-  /// Update face levels for indicated neighbor.
-  void p_refine_neighbor(Index index_neighbor, int if3[3]);
-
   //----------------------------------------------------------------------
   // Original Enzo functions
   //----------------------------------------------------------------------

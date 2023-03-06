@@ -175,7 +175,12 @@ public: // interface
 
   /// Return the index of this Block in global coordinates for its level
   void index_global
-  ( int *ix, int *iy, int *iz,  int *nx, int *ny, int *nz ) const;
+  ( Index index, int *ix, int *iy, int *iz,  int *nx, int *ny, int *nz ) const;
+
+  void index_global
+  ( int *ix, int *iy, int *iz,  int *nx, int *ny, int *nz ) const {
+    index_global(index_, ix, iy, iz, nx, ny, nz);
+  };
 
   /// Return the index for the block corresponding to the given global coordinates.
   Index index_from_global(int ix, int iy, int iz, 
@@ -185,6 +190,10 @@ public: // interface
 
   /// Create child blocks during initialization
   virtual void create_child_blocks() {};
+
+  /// Return boolean indicating if the indicated block should refine
+  /// during the initialization phase.
+  bool refine_during_initialization(Index index);
 
   /// Return which block faces lie along a domain boundary
   void is_on_boundary (bool boundary[3][2]) const throw();

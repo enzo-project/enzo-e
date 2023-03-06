@@ -251,14 +251,13 @@ bool EnzoBlock::spawn_child_blocks(){
   int level = index_.level();
   if (level >= 0) {
     
-    if (level + 1 <= enzo::simulation()->config()->refined_regions_lower.size()) {
+    if (level + 1 <= enzo::config()->refined_regions_lower.size()) {
 
-      std::vector<int> lower = enzo::simulation()->config()->refined_regions_lower.at(level);
-      std::vector<int> upper = enzo::simulation()->config()->refined_regions_upper.at(level);
+      std::vector<int> lower = enzo::config()->refined_regions_lower.at(level);
+      std::vector<int> upper = enzo::config()->refined_regions_upper.at(level);
 
       int ix, iy, iz, nx, ny, nz;
       index_global(&ix, &iy, &iz, &nx, &ny, &nz);
-
       if (lower.at(0) <= ix && ix < upper.at(0)) {
         if (lower.at(1) <= iy && iy < upper.at(1)) {
           if (lower.at(2) <= iz && iz < upper.at(2)) {
@@ -284,14 +283,10 @@ void EnzoBlock::instantiate_children() {
   int    cycle = 0;
   double time  = 0.0;
   double dt    = 0.0;
+  int num_field_blocks = 1;
 
   int ix, iy, iz, nx, ny, nz;
   index_global(&ix, &iy, &iz, &nx, &ny, &nz);
-  nx = nx << 1; // number of mesh points on next level is double that for current level.
-  ny = ny << 1;
-  nz = nz << 1;
-
-  int num_field_blocks = 1;
 
   const int rank = cello::rank();
   ItChild it_child(rank);
@@ -322,23 +317,6 @@ void EnzoBlock::instantiate_children() {
     children_.push_back(index_child);
   }
 
-
-  // Update neighbors blocks with new face levels
-  ItNeighbor it_neighbor = this->it_neighbor(index_);
-  int of3[3];
-  while (it_neighbor.next(of3)) {
-    Index index_neighbor = it_neighbor.index();
-    int if3[3] = {-of3[0], -of3[1], -of3[2]};
-    thisProxy[index_neighbor].p_refine_neighbor(index_, if3);
-  }
-
-
   adapt_.set_valid(false);
   is_leaf_ = false;
-}
-
-
-void EnzoBlock::p_refine_neighbor(Index index_neighbor, int if3[3]) {
-  adapt_.set_face_level(if3, Adapt::LevelType::curr, 1);
-  adapt_.refine_neighbor(index_neighbor);
 }

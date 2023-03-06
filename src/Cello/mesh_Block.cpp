@@ -188,6 +188,18 @@ void Block::init_refine_
 
     adapt_.reset_face_level (Adapt::LevelType::curr);
 
+    // Compute and set the face levels of
+    int if3[3], na3[3], face_levels[27] = {};
+    size_array(na3,na3+1,na3+2);
+    ItFace it_face = this->it_face(cello::config()->adapt_min_face_rank, index_);
+    while (it_face.next(if3)) {
+      Index neighbor_index = index_.index_neighbor(if3, na3);
+      bool refine = refine_during_initialization(neighbor_index);
+      // TODO: This assumes we only refine to level 1 during initialization.
+      face_levels[IF3(if3)] = refine ? 1 : 0;
+    }
+    adapt_.copy_face_level(Adapt::LevelType::curr, face_levels);
+
   } else {
 
     child_face_level_curr_.resize(cello::num_children()*num_face_level);
@@ -716,6 +728,21 @@ void Block::init_adapt_(Adapt * adapt_parent)
         }
       }
     }
+
+    // replace neighbor blocks with their child blocks if they refine
+    // during the initialization phase.
+    int max_initial_level = cello::config()->mesh_max_initial_level;
+    for (int level_i=0; level_i < max_initial_level; level_i++){
+      std::vector<Index> neighbors = adapt_.index_neighbors();
+      for (int i=0; i<(int) neighbors.size(); i++){
+        Index neighbor_index = neighbors.at(i);
+        if (neighbor_index.level() == level_i){
+          if (refine_during_initialization(neighbor_index))
+            adapt_.refine_neighbor(neighbor_index);
+        }
+      }
+    }
+  
   } else if (level > 0) {
     // else if a refined Block, initialize adapt from its incoming
     // parent block
@@ -861,16 +888,13 @@ void Block::cell_width
 //----------------------------------------------------------------------
 
 void Block::index_global
-( int *ix, int *iy, int *iz,
+( Index index,
+  int *ix, int *iy, int *iz,
   int *nx, int *ny, int *nz ) const
 {
-
-  index_array(ix,iy,iz);
+  const int level = index.level();
+  index.array(ix,iy,iz);
   size_array (nx,ny,nz);
-
-  Index index = this->index();
-
-  const int level = this->level();
 
   if (level < 0 ) {
     for (int i=level; i<0; i++) {
@@ -1167,3 +1191,41 @@ bool Block::check_position_in_block
   return result;
 }
 
+//----------------------------------------------------------------------
+
+bool Block::refine_during_initialization(Index index){
+  int level = index.level();
+  if (level >= 0) {
+    
+    if (level + 1 <= (int) cello::config()->refined_regions_lower.size()) {
+
+      std::vector<int> lower = cello::config()->refined_regions_lower.at(level);
+      std::vector<int> upper = cello::config()->refined_regions_upper.at(level);
+
+      int ix, iy, iz, nx, ny, nz;
+      index_global(index, &ix, &iy, &iz, &nx, &ny, &nz);
+
+      if (lower.at(0) <= ix && ix < upper.at(0)) {
+        if (lower.at(1) <= iy && iy < upper.at(1)) {
+          if (lower.at(2) <= iz && iz < upper.at(2)) {
+            return true;
+          }
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
+// int Block::initial_refinement_level(Index index) {
+//   int count = 0;
+
+//   for (int l=0; l<=cello::config()->mesh_max_initial_level; i++) {
+//     if refine_during_initialization(index, l) {
+//       count++;
+//     } else {break;}
+//   }
+
+//   return count;
+// }
