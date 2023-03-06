@@ -38,6 +38,8 @@ Hierarchy::Hierarchy
   refinement_(refinement),
   min_level_(min_level),
   max_level_(max_level),
+  refined_regions_lower_(),
+  refined_regions_upper_(),
   num_blocks_(0),
   num_blocks_level_(),
   num_particles_(0),
@@ -81,6 +83,8 @@ void Hierarchy::pup (PUP::er &p)
   p | refinement_;
   p | min_level_;
   p | max_level_;
+  p | refined_regions_lower_;
+  p | refined_regions_upper_;
 
   p | num_blocks_;
   p | num_blocks_level_;

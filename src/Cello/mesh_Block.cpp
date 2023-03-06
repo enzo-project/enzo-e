@@ -1217,15 +1217,3 @@ bool Block::refine_during_initialization(Index index){
 
   return false;
 }
-
-// int Block::initial_refinement_level(Index index) {
-//   int count = 0;
-
-//   for (int l=0; l<=cello::config()->mesh_max_initial_level; i++) {
-//     if refine_during_initialization(index, l) {
-//       count++;
-//     } else {break;}
-//   }
-
-//   return count;
-// }

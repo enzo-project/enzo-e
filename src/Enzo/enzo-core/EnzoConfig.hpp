@@ -137,6 +137,7 @@ public: // interface
       // EnzoInitialHdf5
       initial_hdf5_blocking(),
       initial_hdf5_field_coords(),
+      initial_hdf5_field_levels(),
       initial_hdf5_field_datasets(),
       initial_hdf5_field_files(),
       initial_hdf5_field_names(),
@@ -144,6 +145,7 @@ public: // interface
       initial_hdf5_max_level(),
       initial_hdf5_monitor_iter(),
       initial_hdf5_particle_attributes(),
+      initial_hdf5_particle_levels(),
       initial_hdf5_particle_coords(),
       initial_hdf5_particle_datasets(),
       initial_hdf5_particle_files(),

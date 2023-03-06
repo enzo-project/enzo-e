@@ -29,6 +29,8 @@ public: // interface
     refinement_(0),
     min_level_(0),
     max_level_(0),
+    refined_regions_lower_(),
+    refined_regions_upper_(),
     num_blocks_(0),
     num_blocks_level_(),
     block_vec_(),
