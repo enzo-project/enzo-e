@@ -31,13 +31,8 @@ Parameters::Parameters(Monitor * monitor)
 Parameters::Parameters(const char * file_name,
 		       Monitor * monitor) 
   throw()
-  : current_group_(),
-    parameter_map_(),
-    parameter_tree_(new ParamNode("Cello")),
-    monitor_(monitor),
-    lmonitor_(true)
+  : Parameters(monitor)
 {
-  if (! monitor_) lmonitor_ = false;
   read(file_name);
 }
 
