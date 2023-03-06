@@ -29,12 +29,12 @@ public: // interface
   Parameters(const char * file_name, 
 	     Monitor * monitor = 0) throw();
 
-  /// Copy constructor
-  Parameters(const Parameters & parameters) throw();
-
-  /// Assignment operator
-
-  Parameters & operator= (const Parameters & parameters) throw();
+  // At this time, we explicitly delete the copy/move constructor/assignment
+  // methods (it may make sense to define some of these in the future)
+  Parameters(const Parameters &) = delete;
+  Parameters(Parameters&&) = delete;
+  Parameters & operator= (const Parameters & ) = delete;
+  Parameters & operator= (Parameters&& ) = delete;
 
   /// Delete a Parameters object (singleton design pattern)
   ~Parameters();
