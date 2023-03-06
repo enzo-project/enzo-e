@@ -106,11 +106,13 @@ EnzoConfig::EnzoConfig() throw ()
   initial_hdf5_field_datasets(),
   initial_hdf5_field_names(),
   initial_hdf5_field_coords(),
+  initial_hdf5_field_levels(),
   initial_hdf5_particle_files(),
   initial_hdf5_particle_datasets(),
   initial_hdf5_particle_coords(),
   initial_hdf5_particle_types(),
   initial_hdf5_particle_attributes(),
+  initial_hdf5_particle_levels(),
   // EnzoInitialInclinedWave
   initial_inclinedwave_alpha(0.0),
   initial_inclinedwave_beta(0.0),
@@ -503,11 +505,13 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_hdf5_field_datasets;
   p | initial_hdf5_field_names;
   p | initial_hdf5_field_coords;
+  p | initial_hdf5_field_levels;
   p | initial_hdf5_particle_files;
   p | initial_hdf5_particle_datasets;
   p | initial_hdf5_particle_coords;
   p | initial_hdf5_particle_types;
   p | initial_hdf5_particle_attributes;
+  p | initial_hdf5_particle_levels;
 
   p | initial_music_field_coords;
   p | initial_music_field_datasets;

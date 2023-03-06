@@ -108,6 +108,8 @@ void Config::pup (PUP::er &p)
   p | mesh_min_level;
   p | mesh_max_level;
   p | mesh_max_initial_level;
+  p | refined_regions_lower;
+  p | refined_regions_upper;
 
   // Method
 
