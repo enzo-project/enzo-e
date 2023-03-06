@@ -64,6 +64,7 @@ void Parameters::pup (PUP::er &p)
 
   p | current_group_;
 
+  // pup parameter_map_:
   int n = 0;
   if (!p.isUnpacking()) {
     // Figure out size
@@ -95,6 +96,13 @@ void Parameters::pup (PUP::er &p)
       parameter_map_[name] = param;
     }
   }
+
+  // previously we didn't pup parameter_tree_. That was probably because
+  // ParamNode::pup had bugs (they should be fixed now)
+  p | parameter_tree_;
+
+  // this method assumes that the monitor_ and lmonitor_ methods are already
+  // correctly initialized
 }
 
 //----------------------------------------------------------------------
