@@ -33,8 +33,15 @@ def _get_decimals(field_name):
 @uses_grackle
 class TestGrackleGeneral(EnzoETest):
     parameter_file = "Grackle/method_grackle_general.in"
-    max_runtime = 60
-    ncpus = 4
+    # Note on 3/7/23: once we finish refactoring the way that grackle
+    # parameters are parsed and PUPped within Enzo-E (to make use of grackle's
+    # new dynamic-api), we should declare a new gold standard git-tag and use
+    # parallelism in this test. Currently, if we try to run an older version of
+    # Enzo-E in parallel that is linked against a newer version of Grackle the
+    # PUP routines won't properly communicate Grackle parameters between the
+    # different PEs
+    max_runtime = 240
+    ncpus = 1
 
     @ytdataset_test(assert_array_rel_equal, decimals = _get_decimals)
     def test_grackle_general(self):
@@ -67,8 +74,15 @@ class TestGrackleGeneral(EnzoETest):
 @uses_grackle
 class TestGrackleCoolingDt(EnzoETest):
     parameter_file = "Grackle/method_grackle_cooling_dt.in"
-    max_runtime = 30
-    ncpus = 4
+    # Note on 3/7/23: once we finish refactoring the way that grackle
+    # parameters are parsed and PUPped within Enzo-E (to make use of grackle's
+    # new dynamic-api), we should declare a new gold standard git-tag and use
+    # parallelism in this test. Currently, if we try to run an older version of
+    # Enzo-E in parallel that is linked against a newer version of Grackle the
+    # PUP routines won't properly communicate Grackle parameters between the
+    # different PEs
+    max_runtime = 120
+    ncpus = 1
 
     @ytdataset_test(assert_array_rel_equal, decimals=decimals)
     def test_grackle_cooling_dt(self):

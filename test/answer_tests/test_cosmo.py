@@ -23,8 +23,15 @@ else:
 @uses_grackle
 class TestCosmoDDMultiSpecies(EnzoETest):
     parameter_file = "Cosmology/test_cosmo-dd-multispecies-short.in"
-    max_runtime = 75
-    ncpus = 4
+    # Note on 3/7/23: once we finish refactoring the way that grackle
+    # parameters are parsed and PUPped within Enzo-E (to make use of grackle's
+    # new dynamic-api), we should declare a new gold standard git-tag and use
+    # parallelism in this test. Currently, if we try to run an older version of
+    # Enzo-E in parallel that is linked against a newer version of Grackle the
+    # PUP routines won't properly communicate Grackle parameters between the
+    # different PEs
+    max_runtime = 300
+    ncpus = 1
 
     @ytdataset_test(assert_array_rel_equal, decimals=decimals)
     def test_cosmo_dd_multispecies(self):
