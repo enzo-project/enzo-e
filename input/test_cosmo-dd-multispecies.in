@@ -34,6 +34,15 @@ Group {
 
 }
 
+Physics {
+  list += ["fluid_props"];
+  fluid_props {
+    floors {
+      metallicity = 1e-6;
+    }
+  }
+}
+
 Method {
      list = [ "pm_deposit", "gravity", "ppm", "grackle", "pm_update", "comoving_expansion" ];
     

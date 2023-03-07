@@ -420,8 +420,6 @@ enum class MsgType { msg_refine, msg_check };
     (POINTER) += n;                                     \
   }
 
-//--------------------------------------------------
-
 #define SIZE_VECTOR_TYPE(COUNT,TYPE,VECTOR)                     \
   {                                                             \
     (COUNT) += sizeof(int);                                     \
@@ -444,6 +442,7 @@ enum class MsgType { msg_refine, msg_check };
     memcpy((TYPE*)(VECTOR).data(),POINTER,size*sizeof(TYPE));	\
     (POINTER) += size*sizeof(TYPE);                             \
   }
+
 
 //--------------------------------------------------
 

@@ -250,6 +250,8 @@ setup_test_serial(PPM-1 MethodPPM/Ppm-1  input/PPM/method_ppm-1.in)
 setup_test_parallel(PPM-8 MethodPPM/Ppm-8  input/PPM/method_ppm-8.in)
 setup_test_serial(PPM-1_color MethodPPM/Ppm-1_color  input/PPM/method_ppm-1_color.in)
 
+# M1 Closure RT
+setup_test_parallel(M1Closure RadiativeTransfer/M1Closure input/RadiativeTransfer/method_m1_closure.in)
 
 # define yt-based tests
 
