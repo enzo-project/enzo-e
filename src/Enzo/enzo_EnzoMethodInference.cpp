@@ -958,26 +958,39 @@ void EnzoLevelArray::apply_inference()
     enzo_float * vz = field_values_[4].data();
 
     // create metallicity derived field
-    enzo_float * metallicity = new enzo_float[nix_*niy_*niz_];
-    enzo_float * density       = field_values_[0].data();
-    enzo_float * metal_density = field_values_[5].data();
+    //enzo_float * metallicity = new enzo_float[nix_*niy_*niz_];
+    //enzo_float * density       = field_values_[0].data();
+    //enzo_float * metal_density = field_values_[5].data();
 
     int nx,ny,nz;
     cello::hierarchy()->root_size(&nx,&ny,&nz);
 
-    const double hx = pow(2.0, -1.0 * enzo_config->method_inference_level_infer) / nx; //(upper[0] - lower[0]) / nix_;
-    const double hy = pow(2.0, -1.0 * enzo_config->method_inference_level_infer) / ny; //(upper[1] - lower[1]) / niy_;
-    const double hz = pow(2.0, -1.0 * enzo_config->method_inference_level_infer) / nz; //(upper[2] - lower[2]) / niz_;
+    const double hx = (upper[0] - lower[0]) / nix_;
+    const double hy = (upper[1] - lower[1]) / niy_;
+    const double hz = (upper[2] - lower[2]) / niz_;
 
     for (int iz=0; iz<niz_; iz++){
       for (int iy=0; iy<niy_; iy++){
         for (int ix=0; ix<nix_; ix++){
           int i = INDEX(ix,iy,iz,nix_,niy_);
-          velocity_divergence[i]  = 0.5 * (vx[i+idx] - vx[i-idx]); // / hx;
-          velocity_divergence[i] += 0.5 * (vy[i+idy] - vy[i-idy]); // / hy;
-          velocity_divergence[i] += 0.5 * (vz[i+idz] - vz[i-idz]); // / hz;
 
-          metallicity[i] = metal_density[i] / density[i];
+          double divVx=0.0, divVy=0.0, divVz=0.0;
+
+          if (ix == 0)         divVx = vx[i+idx]-vx[i];
+          else if (ix == nix_) divVx = vx[i]-vx[i-idx];
+          else                 divVx = 0.5 * (vx[i+idx] - vx[i-idx]);
+
+          if (iy == 0)         divVy = vy[i+idy]-vy[i];
+          else if (iy == niy_) divVy = vy[i]-vy[i-idy];
+          else                 divVy = 0.5 * (vy[i+idy] - vy[i-idy]);
+
+          if (iz == 0)         divVz = vz[i+idz]-vz[i];
+          else if (iz == niz_) divVz = vz[i]-vz[i-idz];
+          else                 divVz = 0.5 * (vz[i+idz] - vz[i-idz]);
+
+          velocity_divergence[i] = divVx + divVy + divVz;
+
+     //     metallicity[i] = metal_density[i] / density[i];
         } // ix
       } // iy
     } // iz
@@ -990,22 +1003,23 @@ void EnzoLevelArray::apply_inference()
     double Zunit = enzo_constants::metallicity_solar;
  
     // means and stds from StarNetRuntime/resources/Scaling_64x160.torch
+    // All values are in CGS units except for total_energy
+
     std::vector <double> means = {3.395644060629469e-27/rhounit, 1.5020361582642288e-30/rhounit, 
                 -793.0158410664843/vunit, 
-                2.656904298376402e-07/Zunit, 96878457078.45897/(vunit*vunit)};
+                2.656904298376402e-07, 96878457078.45897/(vunit*vunit)};
     std::vector <double> stds  = {4.858201188227477e-26/rhounit, 7.886306542228033e-29/rhounit, 
                 8358.282154906454/vunit,
-                6.23778749095905e-13/Zunit, 531795315558.7779/(vunit*vunit)};
-
+                6.23778749095905e-13, 531795315558.7779/(vunit*vunit)};
 
     int i_f_ = 0; 
     for (int i_f=0; i_f < num_fields_; i_f++) {
       enzo_float * array;
       if (i_f == 2) {
         array = velocity_divergence; // vx, vy, and vz are all included in this, so skip i=2-4
-        i_f = 4;
-      } else if (i_f == 4) { // metal_density
-          array = metallicity;
+        i_f = 4; // metal_density
+   //   } else if (i_f == 5) { // metal_density
+   //       array = metallicity;
       } else {
           array = field_values_[i_f].data();
       }
@@ -1013,11 +1027,9 @@ void EnzoLevelArray::apply_inference()
       for (int iz=0; iz<niz_; iz++){
         for (int iy=0; iy<niy_; iy++){
           for (int ix=0; ix<nix_; ix++){
-            int i = INDEX(ix,iy,iz,nix_,niy_);
-//            field_data.index({0,i_f_,ix,iy,iz}) = (array[i] - means[i_f_])/stds[i_f_];
+            //int i = INDEX(ix,iy,iz,nix_,niy_);
+            int i = ix + nix_*(iy + niy_*iz);
             field_data[0][i_f_][ix][iy][iz] = (array[i] - means[i_f_])/stds[i_f_];
-
-            //CkPrintf("%d %f %f\n", i_f_, (array[i] - means[i_f_])/stds[i_f_], field_data.index({0,i_f_,ix,iy,iz}).item<double>());
           } // ix
         } // iy
       } // iz
@@ -1026,6 +1038,7 @@ void EnzoLevelArray::apply_inference()
 
     //std::cout << field_data << std::endl;
     delete [] velocity_divergence;
+  //  delete [] metallicity;
 
     std::vector<torch::jit::IValue> sample; 
     sample.push_back(field_data);
@@ -1060,25 +1073,29 @@ void EnzoLevelArray::apply_inference()
       
       // Deserialize the ScriptModule from a file using torch::jit::load().
       torch::jit::script::Module stage2 = torch::jit::load(stage2_checkpoint); // shape = {1,2,nx,ny,nz}
-     
+
       at::Tensor prediction_s2 = stage2.forward(sample).toTensor();
 
-      bool * mask = new bool[nix_*niy_*niz_]; // boolean array containing indices of Pop III SF 
+      bool * mask = new bool[nix_*niy_*niz_]; // boolean array containing indices of Pop III SF
+      for (int i=0; i<nix_*niy_*niz_; i++) mask[i] = false;
+
+      int N_edge = 4; // number of edge layers to ignore
       double pstar_i, pnostar_i, num_0_i, num_1_i;
-      // replace nix_, niy_, niz_ with 64
-      for (int iz=0; iz<nix_; iz++){
-       for (int iy=0; iy<niy_; iy++){
-         for (int ix=0; ix<niz_; ix++){
+      for (int iz=N_edge; iz<niz_ - N_edge; iz++){
+       for (int iy=N_edge; iy<niy_ - N_edge; iy++){
+         for (int ix=N_edge; ix<nix_ - N_edge; ix++){
            int i = INDEX(ix,iy,iz,nix_,niy_);
+
            num_0_i = std::exp(prediction_s2.index({0,0,ix,iy,iz}).item<double>());
            num_1_i = std::exp(prediction_s2.index({0,1,ix,iy,iz}).item<double>());
-
            pnostar_i = num_0_i / (num_0_i + num_1_i);
            pstar_i   = num_1_i / (num_0_i + num_1_i);
 
            if (pstar_i > pnostar_i) {
+
              mask[i] = true;
-             CkPrintf("EnzoMethodInference::Starfind predicts Pop III star formation at (x, y, z) = (%d,%d,%d); index = %d (%d, %d, %d); nix_ = %d; niy_ = %d; niz_ = %d; hx = %f; up = %f low = %f\n", lower[0]+(ix+0.5*hx), (lower[1]+0.5)+iy*hy, lower[2]+(iz+0.5)*hz, i, ix, iy, iz, nix_, niy_, niz_, hx, upper[0], lower[0]);
+
+            CkPrintf("EnzoMethodInference::Starfind predicts Pop III star formation at (x, y, z) = (%f,%f,%f); index = %d (%d,%d,%d); lower = (%f,%f,%f); upper = (%f,%f,%f)\n", lower[0]+(ix+0.5)*hx, lower[1]+(iy+0.5)*hy, lower[2]+(iz+0.5)*hz, i, ix, iy, iz, lower[0], lower[1], lower[2], upper[0], upper[1], upper[2]);
            } 
            else mask[i] = false;
          } // ix
