@@ -905,7 +905,6 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   enzo_float CloudParticleVectorX[] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0,  0, 0,  0,  0,  0,  0, 1, 1,  1, 1,  1,  1,  1,  1, 1};
   enzo_float CloudParticleVectorY[] = { 1,  1,  1,  0,  0, -1, -1, -1,  0, 1, 1,  1, 0,  0, -1, -1, -1, 1, 1,  1, 0,  0, -1, -1, -1, 0};
   enzo_float CloudParticleVectorZ[] = { 1,  0, -1,  1, -1,  1,  0, -1,  0, 1, 0, -1, 1, -1,  1,  0, -1, 1, 0, -1, 1, -1,  1,  0, -1, 0};
-  enzo_float weightsVector[nCouple];
 
   enzo_float CloudParticlePositionX[nCouple];
   enzo_float CloudParticlePositionY[nCouple];
@@ -914,32 +913,20 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   for (int cpInd = 0; cpInd < nCouple; cpInd++)
   {
       double norm = sqrt(CloudParticleVectorX[cpInd] * CloudParticleVectorX[cpInd] +
-                        CloudParticleVectorY[cpInd] * CloudParticleVectorY[cpInd] +
-                        CloudParticleVectorZ[cpInd] * CloudParticleVectorZ[cpInd]);
+                         CloudParticleVectorY[cpInd] * CloudParticleVectorY[cpInd] +
+                         CloudParticleVectorZ[cpInd] * CloudParticleVectorZ[cpInd]);
       double inv_norm = 1.0 / norm;
       double xbaMag = A * A * norm * norm;
-      // get position 
-      CloudParticlePositionX[cpInd] = xp + CloudParticleVectorX[cpInd]*inv_norm * A;
-      CloudParticlePositionY[cpInd] = yp + CloudParticleVectorY[cpInd]*inv_norm * A;
-      CloudParticlePositionZ[cpInd] = zp + CloudParticleVectorZ[cpInd]*inv_norm * A;
-      weightsVector[cpInd] = 1.0; 
-      /* turn the vectors back into unit-vectors */
+
+      /* turn the vectors into unit-vectors */
       CloudParticleVectorZ[cpInd] *= inv_norm;
       CloudParticleVectorY[cpInd] *= inv_norm;
       CloudParticleVectorX[cpInd] *= inv_norm;
-  }
-  float weightsSum = 0.0;
-  for (int wind = 0; wind < nCouple; wind++)
-  {
-      weightsSum += weightsVector[wind];
-  }
-  for (int wind = 0; wind < nCouple; wind++)
-  {
-      weightsVector[wind] /= weightsSum;
-      if (weightsVector[wind] == 0 || isnan(weightsVector[wind]))
-      {
-          ERROR("EnzoMethodFeedbackSTARSS::deposit_feedback()","NaN weight Vector!")
-      }
+      // get position 
+      CloudParticlePositionX[cpInd] = xp + CloudParticleVectorX[cpInd] * A;
+      CloudParticlePositionY[cpInd] = yp + CloudParticleVectorY[cpInd] * A;
+      CloudParticlePositionZ[cpInd] = zp + CloudParticleVectorZ[cpInd] * A;
+
   }
 
      /* 
